@@ -6,10 +6,6 @@
 #define __ProcHistory_h
 
 #include "Pulsar/Archive.h"
-#include "Pulsar/Integration.h"
-#include "Pulsar/Profile.h"
-
-#include "environ.h"
 
 namespace Pulsar {
   
@@ -57,13 +53,15 @@ namespace Pulsar {
       int nchan;
       double chanbw;
       int par_corr;
+      int fa_corr;
       int rm_corr;
       int dedisp;
       string sc_mthd;
       string cal_mthd;
       string cal_file;
       string rfi_mthd;
-      
+      Signal::Scale scale;
+
       //Destructor
       ~row ();
       

@@ -20,12 +20,7 @@ Pulsar::ProcHistory::ProcHistory ()
 Pulsar::ProcHistory::ProcHistory (const ProcHistory& extension)
   : Extension ("ProcHistory")
 {
-  rows = extension.rows;
-  command_str = extension.command_str;
-  the_cal_mthd = extension.the_cal_mthd;
-  the_sc_mthd = extension.the_sc_mthd;
-  the_cal_file = extension.the_cal_file;
-  the_rfi_mthd = extension.the_rfi_mthd;
+  operator = (extension);
 }
 
 const Pulsar::ProcHistory& 
@@ -141,6 +136,8 @@ void Pulsar::ProcHistory::row::init ()
   nchan    = 0;
   chanbw   = 0.0;
   par_corr = 0;
+  fa_corr  = 0;
   rm_corr  = 0;
   dedisp   = 0;
+  scale    = Signal::FluxDensity;
 }
