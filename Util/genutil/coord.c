@@ -211,9 +211,11 @@ int telescope_coords (char telescope, float* latitude,
 {
   float latd=-999, longd=-999, elev=-1e9;
   
+  if (telescope < 10) // if the char is < 10 then it was probably an int 
+     telescope = '0' + telescope;
+
   switch (telescope) {
 
-  case 2:
   case '2':
     /* ATCA Narrabri */
     latd = -30.31;
@@ -221,7 +223,6 @@ int telescope_coords (char telescope, float* latitude,
     elev = 217.0;
     break;
 
-  case 3:
   case '3':
     /* Arecibo */
     latd = 18.345;
@@ -229,7 +230,6 @@ int telescope_coords (char telescope, float* latitude,
     elev = 496.0;
     break;
 
-  case 4:
   case '4':
     /* Hobart */
     latd = 42.805;
@@ -237,14 +237,12 @@ int telescope_coords (char telescope, float* latitude,
     elev = 26.0;
     break;
     
-  case 5:
   case '5':
     /* Urumqi */
     latd = 43.47;
     longd = 87.1778;
     elev = 2029.3;
 
-  case 6:
   case '6':
     /* Tidbinbilla */
     latd = -35.4;
@@ -252,10 +250,8 @@ int telescope_coords (char telescope, float* latitude,
     elev = 670.0;
     break;
 
-  case 0:
   case '0': 
     fprintf(stderr, "telescope_coords: 0 -- assuming Parkes!\n");
-  case 7:
   case '7':
     /* Parkes */
     latd = -33.0;
