@@ -91,6 +91,8 @@ void Pulsar::FITSArchive::load_Receiver (fitsfile* fptr)
   if (verbose)
     cerr << "FITSArchive::load_Receiver reading feed track mode" << endl;
 
+  ext->mode = Receiver::Feed;
+
   fits_read_key (fptr, TSTRING, "FD_MODE", tempstr.get(), comment, &status);
   if (status != 0) {
     if (verbose)
@@ -105,7 +107,7 @@ void Pulsar::FITSArchive::load_Receiver (fitsfile* fptr)
       ext->mode = Receiver::Celestial;
     else if (strncasecmp(tempstr.get(),"GPA",3) == 0)
       ext->mode = Receiver::Galactic;
-    else
+    else if (verbose)
       cerr << "FITSArchive::load_Receiver unknown FD_MODE=" 
            << tempstr.get() << endl;
   }
