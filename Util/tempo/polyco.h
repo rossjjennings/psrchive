@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/polyco.h,v $
-   $Revision: 1.12 $
-   $Date: 2002/03/27 14:16:43 $
-   $Author: straten $ */
+   $Revision: 1.13 $
+   $Date: 2002/04/16 05:52:58 $
+   $Author: ahotan $ */
 
 #ifndef __POLY_H
 #define __POLY_H
@@ -37,7 +37,7 @@ class polynomial {
   double log_rms_resid;
   Phase ref_phase;
   double f0;
-  int telescope;
+  char telescope;
   double freq;
   bool binary;           // these parameters exist only for binaries
   double binph;
@@ -71,7 +71,7 @@ public:
   double accel             (const MJD &t) const // apparrent accel (m s^-2)
   { return chirp(t)/frequency(t)*2.9979e8; }    // toward observer
   bool   is_tempov11       () const {return (tempov11);};
-  int    get_telescope     () const {return (telescope);};
+  char   get_telescope     () const {return (telescope);};
   double get_freq          () const {return (freq);};
   MJD    get_reftime       () const {return (reftime);};
   double get_nspan         () const {return (nspan_mins);};
@@ -181,7 +181,7 @@ class polyco {
     { return best(t, psr).accel(t); };
 
   // bool   is_tempov11   () const { return pollys.front().is_tempov11(); };
-  int    get_telescope () const { return pollys.front().get_telescope(); };
+  char   get_telescope () const { return pollys.front().get_telescope(); };
   double get_freq      () const { return pollys.front().get_freq(); };
   MJD    get_reftime   () const { return pollys.front().get_reftime(); };
   double get_nspan     () const { return pollys.front().get_nspan(); };

@@ -25,7 +25,7 @@ void polynomial::init(){
   doppler_shift = 0;
   log_rms_resid = 0;
   f0 = 0;
-  telescope = 0;
+  telescope = '\0';
   nspan_mins = 0.0;
   freq = 0;
   binph = 0;
@@ -207,7 +207,7 @@ int polynomial::load(string* instr)
     cerr << "polynomial::load Phase=" << ref_phase << endl;
 
   int ncoeftmp=0;
-  scanned = sscanf (line.c_str(), "%lf %d %lf %d %lf %lf %lf\n",
+  scanned = sscanf (line.c_str(), "%lf %c %lf %d %lf %lf %lf\n",
   	    &f0, &telescope, &nspan_mins, &ncoeftmp, &freq, &binph, &binfreq);
   if (scanned < 5) {
     fprintf (stderr, "polynomial::load(string*) error stage 2 parsing '%s'\n",
@@ -277,12 +277,12 @@ int polynomial::unload (string* outstr) const
     if (polyco::verbose)
       cerr << "polynomial::unload binary" << endl;
 
-    bytes += sprintf(numstr, "%20s%18.12lf%5d%5.0lf%5d%10.3f%7.4f%9.4f\n", 
+    bytes += sprintf(numstr, "%20s%18.12lf    %c%5.0lf%5d%10.3f%7.4f%9.4f\n", 
 	    ref_phase.strprint(6).c_str(), f0, telescope, nspan_mins, 
 	    coefs.size(), freq, binph, binfreq);
   }
   else 
-    bytes += sprintf(numstr, "%20s%18.12lf%5d%5.0lf%5d%10.3f\n", 
+    bytes += sprintf(numstr, "%20s%18.12lf    %c%5.0lf%5d%10.3f\n", 
 	    ref_phase.strprint(6).c_str(), f0, telescope, nspan_mins, 
 	    coefs.size(), freq);
 
