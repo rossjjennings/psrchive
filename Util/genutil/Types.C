@@ -166,7 +166,7 @@ int Signal::get_ipol (State state, Component poln)
   return -1;
 }
 
-const string Signal::state_string (State state)
+const char* Signal::state_string (State state)
 {
   switch (state)  {
   case Nyquist:
@@ -188,7 +188,7 @@ const string Signal::state_string (State state)
   }
 }
 
-const string Signal::State2string (State state)
+const char* Signal::State2string (State state)
 {
   switch (state)  {
   case Nyquist:
@@ -210,7 +210,7 @@ const string Signal::State2string (State state)
   }
 }
 
-const string Signal::source_string(Source source){
+const char* Signal::source_string(Source source){
   switch( source ){
   case Unknown:
     return "Unknown";
