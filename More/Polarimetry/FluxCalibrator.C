@@ -230,9 +230,9 @@ namespace Pulsar {
     {
       switch (iclass) {
       case 0:
-	return "Calibrator Flux (Jy)";
+	return "Calibrator (Jy)";
       case 1:
-	return "System Temperature (Jy)";
+	return "System (Jy)";
       default:
 	return "";
       }
