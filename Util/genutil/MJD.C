@@ -299,7 +299,11 @@ MJD::MJD(float128 mjd) {
   double ndays = 0.0, fracdays = 0.0, seconds = 0.0, fracseconds = 0.0;
 
   /* Stuart's ieee.C function */
-  cnvrt_long_double ((u_char*) &mjd, &ndays, &fracdays);
+  if (cnvrt_long_double ((u_char*) &mjd, &ndays, &fracdays) < 0)  {
+    fprintf (stderr, "MJD::MJD(float128 mjd) error cnvrt_long_double\n");
+    throw (string("MJD conversion"));
+  }
+
   seconds = fracdays * 86400;
   fracseconds = fmod (seconds, 1.0);
   seconds -= fracseconds;
