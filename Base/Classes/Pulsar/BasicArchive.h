@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/BasicArchive.h,v $
-   $Revision: 1.7 $
-   $Date: 2002/04/20 10:35:27 $
-   $Author: straten $ */
+   $Revision: 1.8 $
+   $Date: 2002/04/23 09:08:46 $
+   $Author: pulsar $ */
 
 #include "Archive.h"
   
@@ -36,7 +36,7 @@ namespace Pulsar {
     MJD         endmjd;
 
     //! The type of feed used
-    Feed::Type  feedtype;
+    Feed::Type feedtype;
 
     //! The polarisation state of the data (XXYY, IQUV, etc.)
     Poln::State polstate;
