@@ -1,5 +1,5 @@
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include <iostream>
@@ -9,6 +9,8 @@
 
 #include "fftm.h"
 #include "model_profile.h"
+
+using namespace std;
 
 #define SQR(x) ((x)*(x))
 
