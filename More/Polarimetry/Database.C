@@ -523,21 +523,20 @@ void Pulsar::Database::load (const string& dbase_filename)
     cerr << "Pulsar::Database::load setting path = "
 	 << path << endl;
 
-  int useful = 0;
+  unsigned count = 0;
 
   if (!old_style)
-    scanned = fscanf (fptr, "Pulsar::Database # of entries = %d\n", &useful);
+    fscanf (fptr, "Pulsar::Database # of entries = %d\n", &count);
   else
-    scanned = fscanf (fptr, "Pulsar::Calibration::Database # of entries = %d\n", &useful);
+    fscanf (fptr, "Pulsar::Calibration::Database # of entries = %d\n", &count);
 
   if (verbose)
-    cerr << "Pulsar::Database::load resizing for "
-	 << useful << " entries" << endl;
+    cerr << "Pulsar::Database::loading " << count << " entries" << endl;
 
   entries.resize (0);
   Entry entry;
 
-  for (unsigned ie=0; ie<entries.size(); ie++) try {
+  for (unsigned ie=0; ie<count; ie++) try {
 
     if (!fgets (temp, 4096, fptr))
       throw Error (FailedCall, "Pulsar::Database::load", "fgets");
@@ -553,6 +552,9 @@ void Pulsar::Database::load (const string& dbase_filename)
     cerr << "Pulsar::Database::load discarding entry:\n\t" 
          << error.get_message() << endl;
   }
+
+  if (verbose)
+    cerr << "Pulsar::Database::loaded " << entries.size() << " entries" <<endl;
 
   fclose (fptr);
 }
@@ -831,7 +833,7 @@ Pulsar::Database::generatePolnCalibrator (Archive* arch, Calibrator::Type m)
   }
   catch (Error& error) {
     if (m == Pulsar::Calibrator::Hybrid) {
-      error << "Hybrid Calibrator requires raw PolnCal observation";
+      error << "\n\tHybrid Calibrator requires raw PolnCal observation";
       throw error += "Pulsar::Database::generatePolnCalibrator";
     }
   }
@@ -847,7 +849,7 @@ Pulsar::Database::generatePolnCalibrator (Archive* arch, Calibrator::Type m)
   }
   catch (Error& error) {
     if (entry.obsType == Signal::Unknown) {
-      error << "Neither raw nor processed calibrator archives found";
+      error << "\n\tneither raw nor processed calibrator archives found";
       throw error += "Pulsar::Database::generatePolnCalibrator";
     }
   }
