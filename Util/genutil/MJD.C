@@ -446,6 +446,17 @@ double MJD::LST (float longitude) const
   return lst;
 }
 
+double MJD::LST (double longitude) const
+{
+  double passed_MJD = this->in_days();
+  double gmst = F772C(sla_gmst)(&passed_MJD);
+  double lst = gmst/M_PI*180.0/15.0 + longitude/360.0*24.0;
+  while (lst<0.0) lst+=24.0;
+  while (lst>=24.0) lst-=24.0;
+  return lst;
+}
+
+
 int MJD::UTC (utc_t* utc, double* fsec) const
 {
   struct tm  greg;

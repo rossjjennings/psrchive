@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/MJD.h,v $
-   $Revision: 1.16 $
-   $Date: 2001/08/05 12:03:36 $
-   $Author: straten $ */
+   $Revision: 1.17 $
+   $Date: 2002/06/21 07:03:13 $
+   $Author: cwest $ */
 
 #ifndef __MJD_H
 #define __MJD_H
@@ -128,6 +128,7 @@ class MJD {
 
   // return LST in hours (longitude given in degrees)
   double LST (float longitude) const;
+  double LST (double longitude) const;
 
   string printdays (unsigned precision) const;
 
