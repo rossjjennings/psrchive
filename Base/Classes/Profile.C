@@ -606,7 +606,8 @@ float find_phase (int nbin, float* amps, bool max, float duty_cycle)
   int boxwidth = (int) (.5 * duty_cycle * nbin);
   if (boxwidth >= nbin/2 || boxwidth <= 0)
     throw Error (InvalidParam, "Pulsar::Profile::find_[min|max]_phase",
-		 " invalid duty_cycle=%f\n", duty_cycle);
+		 " invalid duty_cycle=%f.  This yielded a boxwidth of int(.5 * %f * %f) = %d.  Compare nbin/2 = %d\n",
+		 duty_cycle, duty_cycle,float(nbin),boxwidth,nbin/2);
 
   double sum = 0.0;
   for (j=-boxwidth;j<=boxwidth;j++)
