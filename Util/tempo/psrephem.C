@@ -247,7 +247,7 @@ string psrephem::par_lookup (const char* name, int use_cwd)
 
   if (use_cwd) {
     vector <string> exts = extensions ();
-    for (int iext=0; iext < exts.size(); iext++) {
+    for (unsigned iext=0; iext < exts.size(); iext++) {
       /* Look for jname.ext in current directory */
       filename = cwd + psr_name + exts[iext];
       if (stat (filename.c_str(), &finfo) == 0) {
@@ -438,8 +438,7 @@ int psrephem::unload (FILE* fptr) const
   size_t size = out.length();
   size_t bout = fwrite (out.c_str(), 1, size, fptr);
   if (bout < size)  {
-    fprintf (stderr, "psrephem::unload(FILE*) ERROR fprintf only %lu/%lu",
-        bout, size);
+    cerr << "psrephem::unload(FILE*) ERROR fprintf " << bout << "/" << size;
     perror ("");
     return -1;
   }
