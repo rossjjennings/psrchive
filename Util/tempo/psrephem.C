@@ -428,6 +428,8 @@ polyco psrephem::mkpolyco (MJD m1, MJD m2, double nspan, int ncoeff,
   fflush (fptr);
   pclose (fptr);
   remove ("tz.in");
+  remove ("tz.tmp");
+  remove ("tempo.lis");
   remove (PSREPHEM_OUT);
 
   polyco poly;
@@ -438,44 +440,3 @@ polyco psrephem::mkpolyco (MJD m1, MJD m2, double nspan, int ncoeff,
   return poly;
 }
 
-#if 0
-
-// save this stuff for reference
-if (status == 0) break;
-
-fprintf (stderr, "polyco::polyco - failed: %d\n", retries);
-if (status == -1)
-  perror ("polyco::errno");
-else {
-  fprintf (stderr, "polyco::status = %d ", status);
-  if (status == 127)
-    fprintf (stderr, 
-	     "(indicating that the shell could not be executed).\n");
-  else
-    fprintf (stderr,  "(a return value of %d from polyco)\n",
-	     WEXITSTATUS(status));
-}
-fprintf (stderr, "polyco::cmdline: %s\n", syscom);
-fprintf (stderr, "polyco::stdout:\n");
-system ("cat /tmp/polyco.stdout");
-retries --;
-
-if (retries == 0) return -1;
-
-if ((errno == EWOULDBLOCK) || (errno == EAGAIN)) {
-  sleep (5);
-}
-}
-}
-
-  if (rmeph) remove (ephfile.c_str());
-  remove ("polyco.dat");
-  remove ("dates.tmp");
-  remove ("tz.in");
-  remove ("tz.tmp");
-  remove ("tztot.dat");
-  remove ("tempo.lis");
-  return 0;
-}
-
-#endif
