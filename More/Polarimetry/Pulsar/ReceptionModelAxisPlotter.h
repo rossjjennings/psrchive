@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ReceptionModelAxisPlotter.h,v $
-   $Revision: 1.1 $
-   $Date: 2004/11/22 20:45:59 $
+   $Revision: 1.2 $
+   $Date: 2004/12/03 14:30:54 $
    $Author: straten $ */
 
 #ifndef __Calibration_ReceptionModelAxisPlotter_H
@@ -11,6 +11,8 @@
 #include "Calibration/ReceptionModelPlotter.h"
 #include "MEAL/Axis.h"
 #include "Pauli.h"
+
+#include <cpgplot.h>
 
 namespace Calibration {
 
