@@ -14,15 +14,15 @@ include_HEADERS = Cartesian.h Angle.h MJD.h CommandParser.h		\
 libgenutilpp_la_SOURCES = CommandParser.C PlotEvent.C util_plus.C	\
 	PlotState.C datum.C smarthist.C datumcond.C kstest.C Ready.C	\
 	PrimeFactoriser.C WindowArray.C StringTokenizer.C		\
-	RealTimer.C Printable.C Header.C sky_coord.C			\
+	RealTimer.C Printable.C Header.C sky_coord.C sla_sky_coord.C	\
 	thread_utils.C GetPK.C completion.C Cartesian.C Angle.C MJD.C	\
-	PlotManager.C PlotVolume.C DataManager.C			\
+	sla_MJD.C PlotManager.C PlotVolume.C DataManager.C		\
 	DataSet.C Poincare.C DataVector.C Plugin.C shell.C		\
-	coord_parse.c coord.c psr2ar.c
+	coord_parse.c coord.c sla_coord.c psr2ar.c
 
 # needs a new home: obsjoin.[hC]
 
-bin_PROGRAMS = timeconvert getMJD tranScan bshead search_summary xserve_summary
+bin_PROGRAMS = getMJD tranScan bshead search_summary xserve_summary
 
 # broken: loopy.C
 

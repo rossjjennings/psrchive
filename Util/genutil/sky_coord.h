@@ -1,13 +1,13 @@
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/sky_coord.h,v $
-   $Revision: 1.6 $
-   $Date: 2004/02/26 06:57:11 $
+   $Revision: 1.7 $
+   $Date: 2004/12/01 22:59:13 $
    $Author: straten $ */
 
 #ifndef __SKY_COORD_H
 #define __SKY_COORD_H
 
 
-#include "angle.h"
+#include "Angle.h"
 
 // Class for sky coordinates. Inherits AnglePair, where members
 // angle1 and angle2 are J2000.0 right ascension and declination
