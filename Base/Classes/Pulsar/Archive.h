@@ -1,24 +1,24 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Archive.h,v $
-   $Revision: 1.132 $
-   $Date: 2005/01/31 22:51:49 $
-   $Author: ahotan $ */
+   $Revision: 1.133 $
+   $Date: 2005/02/24 11:55:25 $
+   $Author: straten $ */
 
 /*! \mainpage 
  
-  \section intro Introduction
+  \section Introduction
  
-  The Pulsar Data Archival and Analysis Library implements a set of
-  base classes (in C++) that may be used in the storage, manipulation,
-  and analysis of the observational data used in pulsar experiments.
+  The PSRCHIVE Library implements a set of base classes (in C++) that 
+  may be used in the storage, manipulation, and analysis of the 
+  observational data commonly used in pulsar experiments.
   The base classes implement a minimal set of general, flexible
   routines.
  
   \section profiles Pulse Profiles
  
   The basic quantity observed in most pulsar experiments is the pulse
-  profile, a one-dimensional array of some measured quantity as a
+  profile: a one-dimensional array of some measured quantity as a
   function of pulse phase.  This is represented by the Pulsar::Profile
   class.  The Pulsar::Integration class contains a two-dimensional
   array of Pulsar::Profile objects, each integrated over the same time
@@ -32,7 +32,7 @@
   \section minimal Minimal Interface
 
   The Pulsar::Profile class implements a minimal set of operations
-  required to manipulate a pulsar profiles in the phase domain.  These
+  required to manipulate a pulsar profile in the phase domain.  These
   include, but are not limited to:
   <UL>
   <LI> operator += - adds offset to each bin of the profile </LI>
@@ -96,71 +96,21 @@
   Most observatories and research groups use unique file formats and
   associate different pieces of information with their observations.
   The derived classes must therefore implement the storage and
-  modification of this auxilliary information.  For this reason, most
-  of the Pulsar::Archive methods are declared virtual, and may be
-  over-ridden as in the following example:
-
-  <pre>
-  class B : public Pulsar::Archive {
-    public:
-      void append (Pulsar::Archive* aptr);
-  };
-
-  void B::append (Pulsar::Archive* aptr)
-  {
-    // call the function implemented by Pulsar::Archive
-    Pulsar::archive::append (aptr);
-
-    // dynamic_cast returns a pointer only if aptr points to an instance of B
-    B* bptr = dynamic_cast<B*>(aptr);
-
-    // test if *aptr is a B
-    if (!bptr)
-      return;
-
-    // do B-specific things
-  }
-  </pre>
+  modification of this auxilliary information.  This is done using
+  the Archive::Extension classes.
 
   In general, applications need not know anything about the specific
   archive file format with which they are dealing.  New Pulsar::Archive
   instances may be created and loaded from file by calling the static
-  Pulsar::Archive::load factory.  For instance:
-
-  <pre>
-  Pulsar::Archive* archive = Pulsar::Archive::load (filename);
-  </pre>
+  Pulsar::Archive::load factory.
 
   \subsection plugin File Format Plugins
 
   Classes that inherit Pulsar::Archive and implement the I/O routines
   for a specific archive file format are loaded as plugins.  Plugins
-  are registered for use in applications by inheriting the
-  Pulsar::Archive::Advocate template base class.  The Advocate class
-  specifies three pure virtual methods that must be implemented by a
-  sub-class of the Archive-derived class named "Agent".  For example:
-
-  <pre>
-  class ArchiveFormat : public Pulsar::Archive {
-
-    [...]
-
-    class Agent : public Pulsar::Archive::Advocate<ArchiveFormat>  {
-
-      //! Advocate the use of the derived class to interpret filename
-      virtual bool advocate (const char* filename);
-      
-      //! Return the name of the derived class
-      virtual string get_name () { return "ArchiveFormat"; }
-
-      //! Return a description of the derived class
-      virtual string get_description () { return "Version 0.1"; }
-
-    };
-
-  };
-
-  </pre>
+  are registered for use in applications by inheriting the Advocate 
+  template base class and defining the pure virtual methods of the 
+  Agent base class.
 
  */
 
@@ -234,7 +184,7 @@ namespace Pulsar {
     //@{
 
     //! Factory returns a null-constructed instance of the named class
-    static Archive* new_Archive (const string class_name);
+    static Archive* new_Archive (const string& class_name);
 
     //! Factory returns a new instance loaded from filename
     static Archive* load (const string& name);
@@ -581,9 +531,6 @@ namespace Pulsar {
     //! Call bscrunch with the appropriate value
     void bscrunch_to_nbin (unsigned new_nbin);
 
-    //! Halve the bins
-    void halvebins (unsigned nhalve);
-
     //! Call fscrunch with the appropriate value
     void fscrunch_to_nchan (unsigned new_nchan);
 
@@ -706,7 +653,7 @@ namespace Pulsar {
     //! Return the revision number of the Archive base class definition
     /*! This string is automatically generated by CVS.  Do not edit. */
     static string get_revision ()
-    { return get_revision("$Revision: 1.132 $"); }
+    { return get_revision("$Revision: 1.133 $"); }
 
     //! Report on the status of the plugins
     static void agent_report ();
@@ -763,6 +710,9 @@ namespace Pulsar {
     friend class PeriastronOrder;
     friend class BinLngPeriOrder;
     friend class BinLngAscOrder;   
+
+    //! Parses the revision number out of the CVS Revision string
+    static string get_revision (const char* revision);
  
     // //////////////////////////////////////////////////////////////////
     //
@@ -874,8 +824,10 @@ namespace Pulsar {
     //! Set all values to null
     void init ();
 
-    //! Pure virtual base class of Archive::Advocate template base class
-    /*! This class is inherited through the Archive::Advocate template. */
+#ifndef SWIG
+
+    //! Pure virtual base class of Advocate template base class
+    /*! This class is inherited through the Advocate template. */
     class Agent : public Reference::Able {
 
     public:
@@ -946,18 +898,7 @@ namespace Pulsar {
     //! Classes derived from Archive are registered for use via an Advocate
     /*! This abstract template base class must be inherited in order
       to register plugins for use with the Archive::load factory.  The
-      following abstract methods of the Agent base class must be defined:
-
-      //! Advocate the use of the derived class to interpret filename
-      virtual bool advocate (const char* filename) = 0;
-      
-      //! Return the name of the derived class
-      virtual string get_name () = 0;
-
-      //! Return a description of the derived class
-      virtual string get_description () = 0;
-
-    */
+      pure virtual methods of the Agent base class must be defined.  */
     template<class Type>
     class Advocate : public Agent {
 
@@ -972,7 +913,7 @@ namespace Pulsar {
       //! Return the revision number of the Archive base class definition
       /*! This string is automatically generated by CVS.  Do not edit. */
       string get_revision () 
-      { return Archive::get_revision ("$Revision: 1.132 $"); }
+      { return Archive::get_revision ("$Revision: 1.133 $"); }
 
       // ensure that the Advocate is linked into static binaries
       static void ensure_linkage () { entry.get(); }
@@ -984,8 +925,7 @@ namespace Pulsar {
 
     };
 
-    //! Parses the revision number out of the CVS Revision string
-    static string get_revision (const char* revision);
+#endif
 
   };
 
