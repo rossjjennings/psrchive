@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/Attic/Calibrator.h,v $
-   $Revision: 1.1 $
-   $Date: 2003/02/13 14:06:22 $
-   $Author: straten $ */
+   $Revision: 1.2 $
+   $Date: 2003/02/18 10:51:10 $
+   $Author: pulsar $ */
 
 #ifndef __Calibrator_H
 #define __Calibrator_H
@@ -25,8 +25,8 @@ namespace Pulsar {
     static bool verbose;
 
     //! Null constructor
-    Calibrator ();
-
+    Calibrator () {}
+    
     //! Destructor
     virtual ~Calibrator ();
 
