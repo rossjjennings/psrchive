@@ -9,7 +9,12 @@ void usage ()
 {
   cout <<
     "A program for displaying Pulsar::Integration Extension info\n"
-    "e.g. vap -c \"DM NAME TDMP\" f9509*ar\n"
+    "Options:\n"
+    "\n"
+    " -a       Display all available parameters\n"
+    " -c PARMS Specify a list of parameters\n"
+    "          e.g. vip -c \"LST PARA\" f9509*ar\n"
+    "\n"
     "-------------------------------------------------\n"
     "                    PARAMETERS                   \n"
     "-------------------------------------------------\n"
@@ -40,16 +45,17 @@ int main (int argc, char *argv[]) try {
   }
   
   bool verbose = false;
+  bool all = false;
 
   vector <string> keys;
 
   int gotc;
-  while ((gotc = getopt (argc, argv, "hc:qvV")) != -1)
+  while ((gotc = getopt (argc, argv, "ac:hvV")) != -1)
     switch (gotc) {
 
-    case 'h':
-      usage ();
-      return -1;
+    case 'a':
+      all = true;
+      break;
 
     case 'c': {
       char whitespace[5] = " \n\t";
@@ -60,6 +66,10 @@ int main (int argc, char *argv[]) try {
       }
       break;
     }
+
+    case 'h':
+      usage ();
+      return -1;
 
     case 'v':
       verbose = true;
@@ -119,7 +129,7 @@ int main (int argc, char *argv[]) try {
 	
 	const Pulsar::Pointing* pointing = subint->get<Pulsar::Pointing>();
 
-	if( !strcasecmp (keys[j].c_str(), "lst") ) {
+	if ((all && pointing) || !strcasecmp (keys[j].c_str(), "lst")) {
 	  if (!pointing)
 	    s += "N/A\t\t";
 	  else
@@ -127,7 +137,7 @@ int main (int argc, char *argv[]) try {
 			      pointing->get_local_sidereal_time()/3600);
 	}
 	
-	else if( !strcasecmp (keys[j].c_str(), "ra") ) {
+	else if ((all && pointing) || !strcasecmp (keys[j].c_str(), "ra")) {
 	  if (!pointing)
 	    s += "N/A\t\t";
 	  else
@@ -135,7 +145,7 @@ int main (int argc, char *argv[]) try {
 			      pointing->get_right_ascension().getDegrees());
 	}
 	
-	else if( !strcasecmp (keys[j].c_str(), "dec") ) {
+	else if ((all && pointing) || !strcasecmp (keys[j].c_str(), "dec")) {
 	  if (!pointing)
 	    s += "N/A\t\t";
 	  else
@@ -143,7 +153,7 @@ int main (int argc, char *argv[]) try {
 			      pointing->get_declination().getDegrees());
 	}
 	
-	else if( !strcasecmp (keys[j].c_str(), "glat") ) {
+	else if ((all && pointing) || !strcasecmp (keys[j].c_str(), "glat")) {
 	  if (!pointing)
 	    s += "N/A\t\t";
 	  else
@@ -151,7 +161,7 @@ int main (int argc, char *argv[]) try {
 			      pointing->get_galactic_latitude().getDegrees());
 	}
 	
-	else if( !strcasecmp (keys[j].c_str(), "glong") ) {
+	else if ((all && pointing) || !strcasecmp (keys[j].c_str(), "glong")) {
 	  if (!pointing)
 	    s += "N/A\t\t";
 	  else
@@ -159,7 +169,7 @@ int main (int argc, char *argv[]) try {
 			      pointing->get_galactic_longitude().getDegrees());
 	}
 	
-	else if( !strcasecmp (keys[j].c_str(), "fda") ) {
+	else if ((all && pointing) || !strcasecmp (keys[j].c_str(), "fda")) {
 	  if (!pointing)
 	    s += "N/A\t\t";
 	  else
@@ -167,7 +177,7 @@ int main (int argc, char *argv[]) try {
 			      pointing->get_feed_angle().getDegrees());
 	}
 	
-	else if( !strcasecmp (keys[j].c_str(), "posa") ) {
+	else if ((all && pointing) || !strcasecmp (keys[j].c_str(), "posa")) {
 	  if (!pointing)
 	    s += "N/A\t\t";
 	  else
@@ -175,7 +185,7 @@ int main (int argc, char *argv[]) try {
 			      pointing->get_position_angle().getDegrees());
 	}
 	
-	else if( !strcasecmp (keys[j].c_str(), "para") ) {
+	else if ((all && pointing) || !strcasecmp (keys[j].c_str(), "para")) {
 	  if (!pointing)
 	    s += "N/A\t\t";
 	  else
@@ -183,7 +193,7 @@ int main (int argc, char *argv[]) try {
 			      pointing->get_parallactic_angle().getDegrees());
 	}
 	
-	else if( !strcasecmp (keys[j].c_str(), "az") ) {
+	else if ((all && pointing) || !strcasecmp (keys[j].c_str(), "az")) {
 	  if (!pointing)
 	    s += "N/A\t\t";
 	  else
@@ -191,7 +201,7 @@ int main (int argc, char *argv[]) try {
 			      pointing->get_telescope_azimuth().getDegrees());
 	}
 	
-	else if( !strcasecmp (keys[j].c_str(), "zen") ) {
+	else if ((all && pointing) || !strcasecmp (keys[j].c_str(), "zen")) {
 	  if (!pointing)
 	    s += "N/A\t\t";
 	  else
