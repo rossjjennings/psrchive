@@ -1,13 +1,11 @@
-#include "Stokes.h"
+#include "Pauli.h"
 
 int main ()
 {
   Jones<float> jones;
   Stokes<float> in;
 
-  in = jones;
-
-  Stokes<float> out = jones * in * herm(jones);
+  Stokes<float> out = transform (in, jones);
 
   return 0;
 }

@@ -1,15 +1,15 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Pauli.h,v $
-   $Revision: 1.14 $
-   $Date: 2004/04/27 06:51:51 $
+   $Revision: 1.15 $
+   $Date: 2004/07/03 07:21:30 $
    $Author: straten $ */
 
 #ifndef __Pauli_H
 #define __Pauli_H
 
 #include "Jones.h"
-#include "Quaternion.h"
+#include "Stokes.h"
 #include "Basis.h"
 
 #include <vector>
@@ -53,6 +53,25 @@ const Jones<T> convert (const Quaternion<T,Unitary>& q)
 		   -q.s3+ci(q.s2), q.s0-ci(q.s1));
 }
 
+// convert complex Stokes parameters to Jones matrix
+template<typename T>
+const Jones<T> convert (const Stokes< complex<T> >& stokes)
+{
+  Quaternion<complex<T>,Hermitian> q;
+  q.set_scalar (stokes.get_scalar());
+  q.set_vector (Pauli::basis.get_out(stokes.get_vector()));
+  return convert (q);
+}
+
+// convert Stokes parameters to Jones matrix
+template<typename T>
+const Jones<T> convert (const Stokes<T>& stokes)
+{
+  Quaternion<T,Hermitian> q (stokes.get_scalar(),
+                             Pauli::basis.get_out(stokes.get_vector()));
+  return convert (q);
+}
+
 // convert coherency vector to Jones matrix
 template<typename T>
 const Jones<T> convert (const vector<T>& c)
@@ -85,6 +104,49 @@ const Quaternion<complex<T>, Unitary> unitary (const Jones<T>& j)
       T(-0.5) * ci (j.j00 - j.j11),
       T(-0.5) * ci (j.j01 + j.j10),
       T(0.5) *     (j.j01 - j.j10) );
+}
+
+// convert a Hermitian Jones matrix to Stokes parameters
+template<typename T>
+const Stokes<T> coherency (const Jones<T>& j)
+{
+  Quaternion<complex<T>,Hermitian> h = convert (j);
+  return coherency (h);
+}
+
+// convert a complex Hermitian Quaternion to Stokes parameters
+template<typename T>
+const Stokes<T> coherency (const Quaternion<complex<T>,Hermitian>& q)
+{
+    Quaternion<T,Hermitian> realpart (real(q));
+    Quaternion<T,Hermitian> imaginary (imag(q));
+    T nr = norm(realpart);
+    T ni = norm(imaginary);
+    if (ni > 1e-5 * nr)
+#if THROW
+      throw Error (InvalidParam,
+                   "Stokes::operator = Quaternion<complex<U>,Hermitian>",
+                   "non-zero imaginary component");
+#else
+      cerr << "Stokes::operator = Quaternion<complex<U>,Hermitian> "
+              "non-zero imaginary component\n"
+              "   norm(imag(q))=" << ni << " norm=" << nr << endl;
+#endif
+    return coherency (realpart);
+}
+
+// convert a Hermitian Quaternion to Stokes parameters
+template<typename T>
+const Stokes<T> coherency (const Quaternion<T,Hermitian>& q)
+{ 
+  return Stokes<T>( q.get_scalar(), Pauli::basis.get_in(q.get_vector()) );
+}
+
+// transform the Stokes parameters by the given Jones matrix
+template<typename T, typename U>
+const Stokes<T> transform (const Stokes<T>& input, const Jones<U>& jones)
+{
+  return coherency (jones * convert(input) * herm(jones));
 }
 
 // convert Jones matrix to Hermitian and Unitary Quaternion
@@ -127,6 +189,5 @@ const Jones<T> operator * (const Quaternion<T,A>& q, const Quaternion<U,B>& u)
 {
   return convert(q) * convert(u);
 }
-
 
 #endif

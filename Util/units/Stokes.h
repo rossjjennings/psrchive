@@ -1,14 +1,14 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Stokes.h,v $
-   $Revision: 1.12 $
-   $Date: 2004/06/17 09:52:56 $
-   $Author: hknight $ */
+   $Revision: 1.13 $
+   $Date: 2004/07/03 07:21:31 $
+   $Author: straten $ */
 
 #ifndef __Stokes_H
 #define __Stokes_H
 
-#include "Pauli.h"
+#include "Quaternion.h"
 #include "random.h"
 #include "Error.h"
 
@@ -32,47 +32,6 @@ class Stokes : public Quaternion<T, Hermitian>
     Quaternion<T,Hermitian>::s2 = s.Quaternion<U,Hermitian>::s2;
     Quaternion<T,Hermitian>::s3 = s.Quaternion<U,Hermitian>::s3;
   }
-
-  template <typename U>
-    Stokes (const Quaternion<U,Hermitian>& q) 
-    { operator = (q); }
-
-  template <typename U>
-    Stokes (const Quaternion<complex<U>,Hermitian>& bq)
-    { operator = (bq); }
-
-  template <typename U>
-    Stokes (const Jones<U>& j)
-    { operator = (j); }
-
-  template <typename U>
-    Stokes& operator = (const Quaternion<U,Hermitian>& q)
-  { set_scalar (q.get_scalar());
-    set_vector (Pauli::basis.get_in(q.get_vector()));
-    return *this; }
-
-  Stokes& operator = (const Quaternion<complex<T>,Hermitian>& q)
-  { 
-    Quaternion<T,Hermitian>::operator = (real(q));
-    Quaternion<T,Hermitian> imaginary (imag(q));
-    T nr = norm(*this);
-    T ni = norm(imaginary);
-    if (ni > 1e-5 * nr)
-#if THROW
-      throw Error (InvalidParam, 
-		   "Stokes::operator = Quaternion<complex<U>,Hermitian>",
-		   "non-zero imaginary component");
-#else
-      cerr << "Stokes::operator = Quaternion<complex<U>,Hermitian> "
-              "non-zero imaginary component\n"
-              "   norm(imag(q))=" << ni << " norm=" << nr << endl;
-#endif
-    return *this;
-  }
-
-  template <typename U>
-    Stokes& operator = (const Jones<U>& j)
-  { return operator = ( convert(j) ); }
 
   T abs_vect () const { return sqrt (Quaternion<T,Hermitian>::s1*Quaternion<T,Hermitian>::s1 + Quaternion<T,Hermitian>::s2*Quaternion<T,Hermitian>::s2 + Quaternion<T,Hermitian>::s3*Quaternion<T,Hermitian>::s3); }
 
@@ -111,25 +70,6 @@ template <class T, class U>
 void random_vector (Stokes<T>& val, U scale)
 {
   random_value (val, scale);
-}
-
-// convert Stokes parameters to Jones matrix
-template<typename T>
-const Jones<T> convert (const Stokes<T>& stokes)
-{
-  Quaternion<T,Hermitian> q (stokes.get_scalar(),
-                             Pauli::basis.get_out(stokes.get_vector()));
-  return convert (q);
-}
-
-// convert Stokes parameters to Jones matrix
-template<typename T>
-const Jones<T> convert (const Stokes< complex<T> >& stokes)
-{
-  Quaternion<complex<T>,Hermitian> q;
-  q.set_scalar (stokes.get_scalar());
-  q.set_vector (Pauli::basis.get_out(stokes.get_vector()));
-  return convert (q);
 }
 
 #endif
