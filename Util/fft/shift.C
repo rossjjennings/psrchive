@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+
 #include "psrfft.h"
 
 /* Routine to shift an array                                       */
@@ -16,7 +17,7 @@ int fft_shift(int npts, float * arr, double shift){
   double shiftrad;
 
   if(npts<=1){
-    fprintf(stderr, "fft_shift error - cannot fourier transform an array of %d points\n", npts);
+    fprintf(stderr, "fft_shift error - invalid npts:%d\n",npts);
     return(-1);
   }  
 
