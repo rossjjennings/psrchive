@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/EstimatePlotter.h,v $
-   $Revision: 1.2 $
-   $Date: 2003/05/09 00:27:15 $
-   $Author: hknight $ */
+   $Revision: 1.3 $
+   $Date: 2003/05/14 16:33:42 $
+   $Author: straten $ */
 
 #ifndef __EstimatePlotter_h
 #define __EstimatePlotter_h
@@ -103,7 +103,7 @@ void EstimatePlotter::add_plot (const vector< Estimate<T> >& data)
     if (yval > y_max)
       y_max = yval;
 
-    x[ipt] = xscale * double(ipt);
+    x[ipt] = x_min + xscale * double(ipt);
     y[ipt] = data[ipt].val;
   }
 }

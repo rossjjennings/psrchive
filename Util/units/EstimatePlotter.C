@@ -20,6 +20,12 @@ void EstimatePlotter::plot ()
     plot (index);
 }
 
+void EstimatePlotter::set_xrange (float xmin, float xmax)
+{
+  x_min = xmin;
+  x_max = xmax;
+}
+
 void EstimatePlotter::plot (unsigned index)
 {
   if (index >= xval.size())
