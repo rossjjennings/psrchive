@@ -16,7 +16,7 @@ ephtest.LDFLAGS := $(LDFLAGS) -leph -lgenutil $(F77LIBS) -lm
 
 LDFLAGS += -leph -lpolyco $(LTIMES) -lgenutil $(F77LIBS) -lm
 
-ephtex.LDFLAGS := $(LDFLAGS) -lpsrinfo -leph
+ephtex.LDFLAGS := $(LDFLAGS) -lpsrinfo -leph $(LF77)
 
 include $(LOCAL_ROOT)/include/Makefile.extended
 
