@@ -39,10 +39,6 @@ void usage()
   cout << "  -p               Polarisation scrunch to total intensity"        << endl;
   cout << "  -I               Transform to Invariant Interval"                << endl;
   cout << "  -S               Transform to Stokes parameters"                 << endl;
-  cout << "  -L               Set feed basis to Linear"                       << endl;
-  cout << "  -C               Set feed basis to Circular"                     << endl;
-  cout << "  -B               Flip the sideband sense"                        << endl;
-  cout << "  -E ephfile       Install a new ephemeris and update model"       << endl;
   cout << "  -x \"start end\"   Extract subints in this inclusive range"      << endl;
   cout << endl;
   cout << "The following options take integer arguments"                      << endl;
@@ -63,6 +59,13 @@ void usage()
   cout << "  -s               Smear with this duty cycle"                     << endl;
   cout << "  -r               Rotate profiles by this many turns"             << endl;
   cout << "  -w               Reset profile weights to this value"            << endl;
+  cout << endl;
+  cout << "The following options override archive paramaters"                 << endl;
+  cout << "  -L               Set feed basis to Linear"                       << endl;
+  cout << "  -C               Set feed basis to Circular"                     << endl;
+  cout << "  -E ephfile       Install a new ephemeris and update model"       << endl;
+  cout << "  -B               Flip the sideband sense"                        << endl;
+  cout << "  -o centre_freq   Change the frequency labels"                    << endl;
   cout << endl;
   cout << "See http://astronomy.swin.edu.au/pulsar/software/manuals/pam.html" << endl;
   return;
@@ -136,6 +139,9 @@ int main (int argc, char *argv[]) {
   int subint_extract_start = -1;
   int subint_extract_end = -1;
 
+  bool new_cfreq = false;
+  float new_fr = 0.0;
+
   Reference::To<Pulsar::IntegrationOrder> myio = 0;
 
   int c = 0;
@@ -155,7 +161,7 @@ int main (int argc, char *argv[]) {
       {0, 0, 0, 0}
     };
     
-    c = getopt_long(argc, argv, "hvVima:e:E:TFpIt:f:b:d:s:r:u:w:D:SBLCx:",
+    c = getopt_long(argc, argv, "hvVima:e:E:TFpIt:f:b:d:o:s:r:u:w:D:SBLCx:",
 		    long_options, &options_index);
     
     if (c == -1)
@@ -174,7 +180,7 @@ int main (int argc, char *argv[]) {
       Pulsar::Archive::set_verbosity(3);
       break;
     case 'i':
-      cout << "$Id: pam.C,v 1.31 2004/03/03 23:36:40 ahotan Exp $" << endl;
+      cout << "$Id: pam.C,v 1.32 2004/03/10 00:04:18 ahotan Exp $" << endl;
       return 0;
     case 'm':
       save = true;
@@ -221,6 +227,15 @@ int main (int argc, char *argv[]) {
 	return -1;
       }
       command += " -f ";
+      command += optarg;
+      break;
+    case 'o':
+      new_cfreq = true;
+      if (sscanf(optarg, "%f", &new_fr) != 1) {
+	cout << "That is not a valid centre frequency" << endl;
+	return -1;
+      }
+      command += " -o ";
       command += optarg;
       break;
     case 't':
@@ -436,6 +451,22 @@ int main (int argc, char *argv[]) {
       if (circ) {
 	arch->set_basis(Signal::Circular);
 	cout << "Feed basis set to Circular" << endl;
+      }
+
+      if (new_cfreq) {
+	float nc = arch->get_nchan();
+	float bw = arch->get_bandwidth();
+        float cw = bw / nc;
+
+	float fr = new_fr - (bw / 2.0) + (cw / 2.0);
+	
+	for (unsigned i = 0; i < arch->get_nsubint(); i++) {
+	  for (unsigned j = 0; j < arch->get_nchan(); j++) {
+	    arch->get_Integration(i)->set_frequency(j,(fr + (j*cw)));
+	  }
+	}
+	
+	arch->set_centre_frequency(new_fr);
       }
 
       if (new_eph) {
