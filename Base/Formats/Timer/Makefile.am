@@ -39,11 +39,10 @@ endif
 DSO_NAME := Pulsar/TimerArchive.so
 SUBINCDIR := Pulsar
 
-DSO_SRCS := BasebandArchive.C TimerArchive.C \
-	TimerArchive_load.C TimerArchive_unload.C \
+DSO_SRCS := BasebandArchive.C TimerArchive.C TimerArchive_Receiver.C \
+	TimerArchive_load.C TimerArchive_unload.C TimerArchive_extensions.C \
 	TimerIntegration.C TimerIntegration_load.C TimerIntegration_unload.C \
-	TimerProfile_load.C TimerProfile_unload.C \
-	TimerAgent.C
+	TimerProfile_load.C TimerProfile_unload.C TimerAgent.C
 
 LIB_SRCS += $(DSO_SRCS)
 
