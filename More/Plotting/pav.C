@@ -6,6 +6,7 @@
 #include "Integration.h"
 #include "Profile.h"
 #include "Error.h"
+#include "RealTimer.h"
 
 #include "dirutil.h"
 #include "string_utils.h"
@@ -35,6 +36,7 @@ void usage ()
     " -T        Tscrunch all Integrations \n"
     " -v        Verbose output \n"
     " -V        Very verbose output \n"
+    " -w        time things \n"
     " -x nx     plot nx profiles across screen \n"
     " -y ny     ploy ny profiles down screen\n"
        << endl;
@@ -50,11 +52,12 @@ int main (int argc, char** argv)
   bool verbose = false;
   bool display = false;
   bool greyfreq = false;
+  bool stopwatch = false;
 
   char* metafile = NULL;
 
   int c = 0;
-  const char* args = "ab:cd:DGe:E:f:FHm:M:pSt:TvVx:y:";
+  const char* args = "ab:cd:DGe:E:f:FHm:M:pSt:TvVwx:y:";
   while ((c = getopt(argc, argv, args)) != -1)
     switch (c) {
 
@@ -101,7 +104,7 @@ int main (int argc, char** argv)
       metafile = optarg;
       break;
     case 'p':
-      pscrunch = 0;
+      pscrunch = 1;
       break;
     case 'S':
       // dynamic spectra
@@ -118,6 +121,9 @@ int main (int argc, char** argv)
       Pulsar::Profile::verbose = true;
     case 'v':
       verbose = true;
+      break;
+    case 'w':
+      stopwatch = true;
       break;
     case 'x':
       // x panel
@@ -149,22 +155,52 @@ int main (int argc, char** argv)
 
   Pulsar::Error::handle_signals ();
 
+  RealTimer clock;
+
   for (unsigned ifile=0; ifile < filenames.size(); ifile++) try {
 
     archive = Pulsar::Archive::factory (filenames[ifile]);
 
-    if (bscrunch > 0)
+    if (bscrunch > 0) {
+      if (stopwatch)
+	clock.start();
       archive -> bscrunch (bscrunch);
+      if (stopwatch) {
+	clock.stop();
+	cerr << "bscrunch took " << clock << endl;
+      }
+    }
 
-    if (fscrunch >= 0)
+    if (fscrunch >= 0) {
+      if (stopwatch)
+	clock.start();
       archive -> fscrunch (fscrunch);
+      if (stopwatch) {
+	clock.stop();
+	cerr << "fscrunch took " << clock << endl;
+      }
+    }
 
-    if (tscrunch >= 0)
+    if (tscrunch >= 0) {
+      if (stopwatch)
+	clock.start();
       archive -> tscrunch (tscrunch);
+      if (stopwatch) {
+	clock.stop();
+	cerr << "tscrunch took " << clock << endl;
+      }
+    }
 
-    if (pscrunch > 0)
+    if (pscrunch > 0) {
+      if (stopwatch)
+	clock.start();
       archive -> pscrunch ();
-    
+      if (stopwatch) {
+	clock.stop();
+	cerr << "pscrunch took " << clock.elapsedString () << endl;
+      }
+    }
+
     if (display) 
       archive -> get_Profile(0,0,0) -> display();
     
