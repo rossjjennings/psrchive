@@ -31,6 +31,7 @@ void Pulsar::Archive::copy (const Archive& archive,
   for (unsigned isub=0; isub<nsub; isub++) {
     const Integration* subint = archive.get_Integration( selected[isub] );
     get_Integration(isub) -> copy (*(subint));
+    get_Integration(isub) -> archive = this;
   }
   
   if (archive.ephemeris)
