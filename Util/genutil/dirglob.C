@@ -29,7 +29,7 @@ void dirglob (vector<string>* filenames, const char* text)
   glob_t rglob;
 
   int ret = glob (text, GLOB_NOSORT, NULL, &rglob);
-  if (ret != 0)  {
+  if (ret != 0 && ret != GLOB_NOMATCH)  {
     string error ("dirglob: error calling glob");
     cerr << error << endl;
     throw (error);
