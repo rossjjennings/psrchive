@@ -1,8 +1,7 @@
-#include <math.h>
-#include <assert.h>
-
 #include <iostream>
 #include <string>
+
+#include <math.h>
 
 #include "Profile.h"
 #include "Physical.h"
@@ -64,7 +63,8 @@ void Pulsar::Profile::resize (int _nbin)
     return;
 
   amps = new float [nbin];
-  assert (amps != 0);
+  if (!amps)
+    throw Error (BadAlloc, "Profile::resize");
 }
 
 /////////////////////////////////////////////////////////////////////////////
