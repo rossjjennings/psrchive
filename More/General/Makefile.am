@@ -23,13 +23,13 @@ nobase_include_HEADERS = \
 	Pulsar/Integration.h             Pulsar/Transposer.h \
 	Pulsar/IntegrationManager.h      Pulsar/Utilities.h \
 	Pulsar/PhaseWeight.h             Pulsar/getopt.h \
-	Pulsar/PhaseWeightFunction.h     Pulsar/model_profile.h \
+	Pulsar/PhaseWeightFunction.h     model_profile.h \
 	Pulsar/Plotter.h
 
 libpsrchive_la_SOURCES = \
 	AdaptiveSNR.C                 Integration_new_PolnProfile.C  \
 	Agent.C                       Integration_remove_baseline.C  \
-	                Integration_resize.C  \
+	Integration_resize.C  \
 	Archive.C                     Integration_toas.C  \
 	Archive_append.C              Integration_total.C  \  \
 	Archive_convert_state.C       Integration_transform.C  \
@@ -82,7 +82,7 @@ SUBDIRS                 = Calibration Extension psrfits timer
 
 libpsrchive_la_LIBADD   = Calibration/libCalibration.la \
 			Extension/libExtension.la \
-			psrfits/libpsrfits.la
+			psrfits/libpsrfits.la \
 			timer/libtimer.la
 
 # ######################################################################
@@ -130,8 +130,14 @@ test_Difference_SOURCES		= test_Difference.C
 #
 if HAVE_PGPLOT
 
-libpsrchive_la_SOURCES += ArchiveProcessor.C Plotter.C CalibratorPlotter.C
-	ReceptionCalibratorPlotter.C
+libpsrchive_la_SOURCES += ArchiveProcessor.C Plotter.C CalibratorPlotter.C  \
+	ReceptionCalibratorPlotter.C  \
+	Plotter_Mercator.C             Plotter_phase_subints.C  \
+	Plotter_baseline_spectrum.C    Plotter_plot.C  \
+	Plotter_calibrator_spectrum.C  Plotter_set_colour_map.C  \
+	Plotter_draw_transitions.C     Plotter_simple_ds.C  \
+	Plotter_phase_fourier.C        Plotter_spherical.C  \
+	Plotter_phase_frequency.C
 
 bin_PROGRAMS += pacv pcvar paz pav pas psrwt psrsh pcm pvt \
 	binphs_test toatool SimTiming pcm_chooser test_zps \
@@ -155,7 +161,25 @@ test_gtd_SOURCES		= test_gtd.C
 test_zps_SOURCES		= test_zps.C
 toatool_SOURCES			= toatool.C
 
-pcm_LDADD = -lpthread
+SimTiming_LDADD			= $(LDADD) @PGPLOT_LIBS@
+binphs_test_LDADD		= $(LDADD) @PGPLOT_LIBS@
+pacv_LDADD			= $(LDADD) @PGPLOT_LIBS@
+pas_LDADD			= $(LDADD) @PGPLOT_LIBS@
+pav_LDADD			= $(LDADD) @PGPLOT_LIBS@
+paz_LDADD			= $(LDADD) @PGPLOT_LIBS@
+pcm_LDADD			= $(LDADD) @PGPLOT_LIBS@ -lpthread
+pcm_chooser_LDADD		= $(LDADD) @PGPLOT_LIBS@
+pcvar_LDADD			= $(LDADD) @PGPLOT_LIBS@
+psrband_LDADD			= $(LDADD) @PGPLOT_LIBS@
+psrsh_LDADD			= $(LDADD) @PGPLOT_LIBS@
+psrwt_LDADD			= $(LDADD) @PGPLOT_LIBS@
+pvt_LDADD			= $(LDADD) @PGPLOT_LIBS@
+rmfit_LDADD			= $(LDADD) @PGPLOT_LIBS@
+test_gtd_LDADD			= $(LDADD) @PGPLOT_LIBS@
+test_zps_LDADD			= $(LDADD) @PGPLOT_LIBS@
+toatool_LDADD			= $(LDADD) @PGPLOT_LIBS@
+
+# future
 # psrsh_LDADD = -lreadline -ltermcap
 
 endif
@@ -199,7 +223,7 @@ export:
 INCLUDES = -I$(top_srcdir)/utils/include -I$(top_srcdir)/astro/include \
         -ICalibration -IExtension -Itimer -Ipsrfits @PGPLOT_CFLAGS@
 
-LDADD = libpsrchive.la timer/libtimer.la psrfits/libpsrfits.la \
-	$(top_srcdir)/astro/libpsrastro.la \
-        $(top_srcdir)/utils/libpsrutils.la @FFT_LIBS@ @CFITSIO_LIBS@
+LDADD = libpsrchive.la $(top_srcdir)/astro/libpsrastro.la \
+        $(top_srcdir)/utils/libpsrutils.la \
+	@FFT_LIBS@ @CFITSIO_LIBS@ @SLA_LIBS@
 
