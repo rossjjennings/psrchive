@@ -2,6 +2,8 @@
 #include "Error.h"
 #include "fftm.h"
 
+#include <memory>
+
 void Pulsar::Profile::convolve (const Profile* profile)
 {
   convolve (profile, -1);
