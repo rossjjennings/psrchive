@@ -66,7 +66,7 @@ int main(int argc, char *argv[]) {
     cerr << "# of channels: " << fitsarch -> get_nchan() << endl;
     cerr << "# of bins: " << fitsarch -> get_nbin() << endl;
     
-    fitsarch -> unload("data.fits");
+    fitsarch ->Archive::unload("data.fits");
     cerr << "Unloaded FITS Archive." << endl;
   }
   catch (Error& error) {

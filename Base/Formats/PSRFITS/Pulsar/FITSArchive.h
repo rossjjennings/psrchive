@@ -1,29 +1,33 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/PSRFITS/Pulsar/FITSArchive.h,v $
-   $Revision: 1.14 $
-   $Date: 2003/09/25 01:10:58 $
-   $Author: ahotan $ */
+   $Revision: 1.15 $
+   $Date: 2003/10/08 14:34:53 $
+   $Author: straten $ */
+
+#ifndef __Pulsar_FITSArchive_h
+#define __Pulsar_FITSArchive_h
 
 #include <fitsio.h>
 
 #define PSRFITS 1
 #include "Pulsar/BasicArchive.h"
-#include "Pulsar/FITSHdrExtension.h"
-#include "Pulsar/ProcHistory.h"
-#include "Pulsar/DigitiserStatistics.h"
-#include "Pulsar/CalInfoExtension.h"
-#include "Pulsar/ObsExtension.h"
-#include "Pulsar/ITRFExtension.h"
-#include "Pulsar/FrontendExtension.h"
-#include "Pulsar/BackendExtension.h"
-#include "Pulsar/Passband.h"
-#include "Pulsar/PolnCalibratorExtension.h"
 
 #include "MJD.h"
 
 namespace Pulsar {
 
+  class FITSHdrExtension;
+  class ObsExtension;
+  class BackendExtension;
+  class FrontendExtension;
+  class ITRFExtension;
+  class CalInfoExtension;
+  class ProcHistory;
+  class Passband;
+  class DigitiserStatistics;
+  class PolnCalibratorExtension;
+ 
   //! Loads and unloads Pulsar FITS archives
 
   /*!  This class definition provides an example of how to use the
@@ -74,120 +78,117 @@ namespace Pulsar {
     //! Return a new select_copy-constructed FITSArchive instance
     Archive* extract (const vector<unsigned>& subints) const;
 
-    //! Return the number of extensions available
-    unsigned get_nextension () const;
-    
-    //! Add an Extension to the Archive instance
-    void add_extension (Pulsar::Archive::Extension *extension);
-    
     //! Add a new row to the history, reflecting the current state
     void update_history ();
     
-    //! Return a pointer to the specified extension
-    const Extension* get_extension (unsigned iextension) const;
+    //! Unload FITSHdrExtension to the current HDU of the specified FITS file
+    static void unload (fitsfile* fptr, const FITSHdrExtension* ext);
     
-    //! Return a pointer to the specified extension
-    Extension* get_extension (unsigned iextension);
+    //! Unload ObsExtension to the current HDU of the specified FITS file
+    static void unload (fitsfile* fptr, const ObsExtension* ext);
+    
+    //! Unload FrontendExtension to the current HDU of the specified FITS file
+    static void unload (fitsfile* fptr, const FrontendExtension* ext);
 
-    //! Set the dispersion measure (in \f${\rm pc cm}^{-3}\f$)
-    void set_dispersion_measure (double dm);
+    //! Unload BackendExtension to the current HDU of the specified FITS file
+    static void unload (fitsfile* fptr, const BackendExtension* ext);
+
+    //! Unload ITRFExtension to the current HDU of the specified FITS file
+    static void unload (fitsfile* fptr, const ITRFExtension* ext);
+
+    //! Unload CalInfoExtension to the current HDU of the specified FITS file
+    static void unload (fitsfile* fptr, const CalInfoExtension* ext);
     
-    //! Get the dispersion measure (in \f${\rm pc cm}^{-3}\f$)
-    double get_dispersion_measure () const;
+    //! Unload ProcHistory to the HISTORY HDU
+    static void unload (fitsfile* fptr, const ProcHistory* ext);
+    
+    //! Unload Passband to the BANDPASS HDU
+    static void unload (fitsfile* fptr, const Passband* ext);
+    
+    //! Unload DigitiserStatistics to the DIG_STAT HDU
+    static void unload (fitsfile* fptr, const DigitiserStatistics* ext);
+    
+    //! Unload PolnCalibratorExtension to the FEEDPAR HDU
+    static void unload (fitsfile* fptr, const PolnCalibratorExtension* ext);
+    
     
   protected:
-
+    
     friend class Archive::Advocate<FITSArchive>;
-
+    
     //! This class registers the FITSArchive plugin class for use
     class Agent : public Archive::Advocate<FITSArchive> {
-
-      public:
-
-        //! Default constructor (necessary even when empty)
-        Agent () {}
-
-        //! Advocate the use of TimerArchive to interpret filename
-        bool advocate (const char* filename);
-
-        //! Return the name of the TimerArchive plugin
-        string get_name () { return "FITSArchive"; }
-    
-        //! Return description of this plugin
-        string get_description ();
-
+      
+    public:
+      
+      //! Default constructor (necessary even when empty)
+      Agent () {}
+      
+      //! Advocate the use of TimerArchive to interpret filename
+      bool advocate (const char* filename);
+      
+      //! Return the name of the TimerArchive plugin
+      string get_name () { return "FITSArchive"; }
+      
+      //! Return description of this plugin
+      string get_description ();
+      
     };
     
     //! Load the FITS header information from filename
     virtual void load_header (const char* filename);
-
+    
     //! Load the specified Integration from filename, returning new instance
     virtual Integration*
     load_Integration (const char* filename, unsigned subint);
-
+    
     //! Unload the FITSArchive (header and Integration data) to filename
     virtual void unload_file (const char* filename) const;
-
+    
     // //////////////////////////////////////////////////////////////////////
     
     // Archive Extensions used by FITSArchive
     
-    vector< Reference::To<Extension> > ev;
-    
-    // Useful names for simplicity of code
-    ObsExtension*         obs_ext;
-    FITSHdrExtension*     hdr_ext;
-    ITRFExtension*        itrf_ext;
-    CalInfoExtension*     cal_ext;
-    FrontendExtension*    fe_ext;
-    BackendExtension*     be_ext;
-    ProcHistory*          history;
-    DigitiserStatistics*  dstats;
-    Passband*             bandpass;
-
     // Channel bandwidth
-
     double chanbw;
     
     // Instrumental peculiarities
-    
     bool scale_cross_products;
     
-    // Extension I/O routines
+    // Reference epoch
+    MJD reference_epoch;
 
-    void load_hist (fitsfile*);
-    void unload_hist (fitsfile*) const;
-    void load_hist_row (fitsfile*, int);
-    void unload_hist_row (fitsfile*, int) const;
+    // Extension I/O routines
+    void load_ProcHistory (fitsfile*);
+    void load_DigitiserStatistics (fitsfile*);
+    void load_Passband (fitsfile*);
+    void load_PolnCalibratorExtension (fitsfile*);
     
-    void load_digistat (fitsfile*);
-    void unload_digistat (fitsfile*) const;
-    void load_digistat_row (fitsfile*, int);
-    void unload_digistat_row (fitsfile*, int) const;
-    
-    void load_passband (fitsfile*, int);
-    void unload_passband (fitsfile*, int) const;
-    
-    void load_pce (fitsfile*);
-    void unload_pce (fitsfile*, Pulsar::PolnCalibratorExtension*) const;
+    void load_ITRFExtension (fitsfile*);
+    void load_CalInfoExtension (fitsfile*);
+
+    //! Delete the HDU with the specified name
+    void delete_hdu (fitsfile* fptr, char* hdu_name) const;
 
     // //////////////////////////////////////////////////////////////////////
 
     // Necessary global definitions for FITS file I/O
     
-    //! Standard string length defined in fitsio.h
-    char card[FLEN_CARD];    
-
     // Helper function to write an integration to a file
     void unload_integration (int, const Integration*, fitsfile*) const;
-  
-  private:
 
+    //! Unload Integration data to the SUBINT HDU of the specified FITS file
+    void unload_integrations (fitsfile*) const;
+
+    
+   
+  private:
+    
     int truthval (bool) const;
     void init ();
 
   };
- 
 
 }
 
+#endif
