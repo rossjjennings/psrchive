@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Registry.h,v $
-   $Revision: 1.1 $
-   $Date: 2004/11/22 21:46:43 $
+   $Revision: 1.2 $
+   $Date: 2004/11/23 17:12:24 $
    $Author: straten $ */
 
 #ifndef __Registry_h
@@ -10,8 +10,6 @@
 
 #include <vector>
 #include <iostream>
-
-#include "psr_cpp.h"
 
 namespace Registry {
 
@@ -37,9 +35,9 @@ namespace Registry {
     void register_child (Parent* _instance) 
     {
       if (List<Parent>::verbose)
-        cerr << "Registry::Entry<Parent>::register_child"
+        std::cerr << "Registry::Entry<Parent>::register_child"
 	  " instance=" << _instance << " registry=" << &Parent::registry <<
-	  " registry.size=" << Parent::registry.size() + 1 << endl;
+	  " registry.size=" << Parent::registry.size() + 1 << std::endl;
 
       instance = _instance;
       Parent::registry.add (this);
@@ -106,7 +104,7 @@ namespace Registry {
     void add (Entry<Parent>* entry) { entries.push_back (entry); }
 
     //! The vector of registry entries
-    vector< Entry<Parent>* > entries;
+    std::vector< Entry<Parent>* > entries;
   };
 
 

@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Agent.h,v $
-   $Revision: 1.3 $
-   $Date: 2004/11/22 19:26:03 $
+   $Revision: 1.4 $
+   $Date: 2004/11/23 17:12:24 $
    $Author: straten $ */
 
 #ifndef __MEAL_Agent_H
@@ -24,7 +24,7 @@ namespace MEAL {
     virtual ~Agent () { }
 
     //! Return the name of the derived class
-    virtual string get_name () = 0;
+    virtual std::string get_name () = 0;
 
     //! Return a null-constructed instance of the derived class
     virtual Function* new_Function () = 0;
@@ -56,7 +56,7 @@ namespace MEAL {
     Advocate () { entry.get(); instance = new Type; }
 
     //! Return the name of the derived class
-    string get_name () { return instance->get_name(); }
+    std::string get_name () { return instance->get_name(); }
 
     //! Return a new instance of the Function derived class
     Function* new_Function () { return new Type; }
