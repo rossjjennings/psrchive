@@ -38,7 +38,8 @@ void usage ()
     " -V        Very verbose output \n"
     " -w        time things \n"
     " -x nx     plot nx profiles across screen \n"
-    " -y ny     ploy ny profiles down screen\n"
+    " -y ny     plot ny profiles down screen\n"
+    " -R        Display SNR information\n"
        << endl;
 }
 
@@ -51,13 +52,14 @@ int main (int argc, char** argv)
 
   bool verbose = false;
   bool display = false;
+  bool textinfo = false;
   bool greyfreq = false;
   bool stopwatch = false;
 
   char* metafile = NULL;
 
   int c = 0;
-  const char* args = "ab:cd:DGe:E:f:FHm:M:pSt:TvVwx:y:";
+  const char* args = "ab:cd:DGe:E:f:FHm:M:pSt:TvVwx:y:R";
   while ((c = getopt(argc, argv, args)) != -1)
     switch (c) {
 
@@ -130,6 +132,9 @@ int main (int argc, char** argv)
       break;
     case 'y':
       // y panel
+      break;
+    case 'R':
+      textinfo = true;
       break;
     default:
       cerr << "invalid param '" << c << "'" << endl;
@@ -229,6 +234,24 @@ int main (int argc, char** argv)
       Pulsar::plot_greyscale (archive -> get_Integration (0), tempstr);
     }
     
+    if (textinfo) {
+      archive -> pscrunch();
+      archive -> tscrunch();
+      archive -> fscrunch();
+
+      double tempsnr, duration = 0.0;
+      tempsnr = archive -> get_Profile(0,0,0) -> snr();
+      duration = archive -> get_Integration(0) -> get_duration();
+
+      tempsnr = tempsnr / sqrt(duration);
+
+      cout << "SNR= " << tempsnr
+	   << " CTR_FREQ= " << archive -> get_centre_frequency()
+	   << " StartMJD= " << archive -> get_Integration(0) -> get_start_time()
+	   << " BW= " << archive -> get_Integration(0) -> get_bandwidth()
+	   << endl;
+    }
+
     delete archive; archive = 0;
   }
   catch (Pulsar::Error& error) {
