@@ -18,8 +18,8 @@ LIB_F_SRCS = ffft.f fftfit.f brent.f fccf.f cprof.f shiftbyfft.f \
 
 LIB_SRCS   = ${LIB_C_SRCS} ${LIB_F_SRCS}
 
-LDFLAGS   += -larchive -lpolyco -ldialog -lgenutil -ltimes \
-             -lpsrinfo -leph -lsla -lpsrfft -lfftw -lm $(LIBNSL) \
+LDFLAGS   += -larchive -lpolyco -ldialog -ltimes \
+             -lpsrinfo -leph -lsla -lpsrfft -lgenutil -lfftw -lm $(LIBNSL) \
 	     -lcpgplot $(LPGPLOT) 
 
 PROGRAMS = align.C amps.C chanprep.C  \
