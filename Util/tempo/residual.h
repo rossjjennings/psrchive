@@ -36,5 +36,7 @@ class residual {
 
 float y_ordinate (const residual& r);
 float x_ordinate (const residual& r);
+float y_error (const residual& r);
+float x_error (const residual& r);
 
 #endif
