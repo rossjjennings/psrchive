@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Estimate.h,v $
-   $Revision: 1.26 $
-   $Date: 2004/12/15 06:51:36 $
+   $Revision: 1.27 $
+   $Date: 2004/12/15 07:33:41 $
    $Author: straten $ */
 
 #ifndef __Estimate_h
@@ -230,7 +230,7 @@ class MeanRadian
  public:
 
   //! Default constructor
-  MeanRadian ();
+  MeanRadian () { }
 
   //! Copy constructor
   MeanRadian (const MeanRadian& mean)
