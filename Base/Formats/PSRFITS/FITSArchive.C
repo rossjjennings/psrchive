@@ -14,6 +14,11 @@
 #include "Pulsar/Passband.h"
 #include "Pulsar/PolnCalibratorExtension.h"
 #include "Pulsar/CalibratorStokes.h"
+#include "Pulsar/IntegrationOrder.h"
+#include "Pulsar/PeriastronOrder.h"
+#include "Pulsar/BinaryPhaseOrder.h"
+#include "Pulsar/BinLngAscOrder.h"
+#include "Pulsar/BinLngPeriOrder.h"
 
 #include "FITSError.h"
 #include "genutil.h"
@@ -670,8 +675,6 @@ void Pulsar::FITSArchive::load_header (const char* filename)
     }
     status = 0;
   }
-  
-
 
   // Read the start UT date
 
@@ -804,10 +807,28 @@ void Pulsar::FITSArchive::load_header (const char* filename)
       cerr << "FITSArchive::load_header there are " << numrows << " subints"
 	   << endl;
     
+    char* tempstr = new char[32];
+    fits_read_key (fptr, TSTRING, "INT_TYPE", tempstr, comment, &status);
+    
+    if ((status == 0) && (strcmp(tempstr,"TIME") != 0)) {
+      if (strcmp(tempstr,"BINPHSPERI") == 0)
+	add_extension(new Pulsar::PeriastronOrder());
+      else if (strcmp(tempstr,"BINPHSASC") == 0)
+	add_extension(new Pulsar::BinaryPhaseOrder());
+      else if (strcmp(tempstr,"BINLNGPERI") == 0)
+	add_extension(new Pulsar::BinLngPeriOrder());
+      else if (strcmp(tempstr,"BINLNGASC") == 0)
+	add_extension(new Pulsar::BinLngAscOrder());
+      else
+	throw Error(InvalidParam, "FITSArchive::load_header",
+		    "unknown ordering extension encountered");
+      
+      get<Pulsar::IntegrationOrder>()->resize(get_nsubint());
+    }
   }
-
+  
   status = 0;
-
+  
   // Finished with the file for now
   fits_close_file (fptr, &status);
   
@@ -1021,7 +1042,6 @@ Pulsar::FITSArchive::load_Integration (const char* filename, unsigned isubint)
     if (verbose)
       cerr << "Pulsar::FITSArchive::load_Integration set_epoch " 
 	   << newmjd << endl;
-
   }
 
   // Set the duration of the integration
@@ -1035,6 +1055,22 @@ Pulsar::FITSArchive::load_Integration (const char* filename, unsigned isubint)
 		 &duration, &initflag, &status);
   
   integ->set_duration (duration);
+  
+  if (get<Pulsar::IntegrationOrder>()) {
+    colnum = 0;
+    fits_get_colnum (sfptr, CASEINSEN, "INDEXVAL", &colnum, &status);
+    
+    double value = 0.0;
+
+    fits_read_col (sfptr, TDOUBLE, colnum, row, 1, 1, &nulldouble,
+		   &value, &initflag, &status);
+    
+    if (status != 0)
+      throw FITSError (status, "FITSArchive::load_Integration", 
+		       "fits_read_col INDEXVAL");
+    
+    get<Pulsar::IntegrationOrder>()->set_Index(row,value);
+  }
   
   // Load other useful info
 
@@ -1231,8 +1267,6 @@ void Pulsar::FITSArchive::unload_file (const char* filename) const
   if (!filename)
     throw Error (InvalidParam, "FITSArchive::unload_file", 
                  "filename unspecified");
-
-
 try {
 
   if (verbose)
@@ -1258,8 +1292,6 @@ try {
   string clobbername = "!";
   clobbername += filename;
 
-#if 1
- 
   /* the following three commands:
 
      fits_create_file
@@ -1295,20 +1327,6 @@ try {
   if (status)
     throw FITSError (status, "FITSArchive::unload_file",
 		     "fits_moveabs_hdu");
-
-#else
-
-  if (verbose)
-    cerr << "FITSArchive::unload_file call fits_create_template "
-      "(" << clobbername << ", " << template_file << ")" << endl;
-
-  fits_create_template (&fptr, clobbername.c_str(), template_file, &status);
-  if (status)
-    throw FITSError (status, "FITSArchive::unload_file",
-		     "fits_create_template (%s, %s)", 
-		     clobbername.c_str(), template_file);
-
-#endif
 
 
   // do not return comments in fits_read_key
@@ -1553,6 +1571,21 @@ void Pulsar::FITSArchive::unload_integration (int row,
 {
   int status = 0;
 
+  bool has_alt_order = false;
+  Pulsar::Archive::Extension* ext = 0;
+  Pulsar::IntegrationOrder* order = 0;
+  
+  for (unsigned i = 0; i < extension.size(); i++) {
+    ext   = extension[i].get();
+    order = dynamic_cast<Pulsar::IntegrationOrder*>(ext);
+    if (order) {
+      has_alt_order = true;
+      if (verbose)
+	cerr << "FITSArchive::unload_integration using " << order->get_name()
+	     << endl;
+    }
+  }
+
   // Set the subint number
   
   int colnum = 0;
@@ -1569,7 +1602,7 @@ void Pulsar::FITSArchive::unload_integration (int row,
 		     "fits_write_col ISUBINT");
   
   // Set the start time of the integration
-
+    
   colnum = 0;
   fits_get_colnum (thefptr, CASEINSEN, "OFFS_SUB", &colnum, &status);
   
@@ -1579,16 +1612,16 @@ void Pulsar::FITSArchive::unload_integration (int row,
 
   double time = 0.0;
   time = (integ->get_epoch () - reference_epoch).in_seconds();
-
+  
   fits_write_col (thefptr, TDOUBLE, colnum, row, 1, 1, &time, &status);
-
+  
   if (status != 0)
     throw FITSError (status, "FITSArchive:unload_integration",
 		     "fits_write_col OFFS_SUB");
   
   if (verbose)
     cerr << "FITSArchive::unload_integration OFFS_SUB set" << endl;
-
+  
   // Set the duration of the integration
   
   colnum = 0;
@@ -1597,14 +1630,29 @@ void Pulsar::FITSArchive::unload_integration (int row,
   if (status != 0)
     throw FITSError (status, "FITSArchive:unload_integration",
 		     "fits_get_colnum TSUBINT");
-
-  double duration = integ->get_duration();
   
+  double duration = integ->get_duration();  
   fits_write_col (thefptr, TDOUBLE, colnum, row, 1, 1, &duration, &status);
   
   if (status != 0)
     throw FITSError (status, "FITSArchive:unload_integration",
 		     "fits_write_col TSUBINT");
+  
+  if (verbose)
+    cerr << "FITSArchive::unload_integration TSUBINT set" << endl;
+  
+  // Write out the index values, if applicable
+  if (has_alt_order) {
+    colnum = 0;
+    fits_get_colnum (thefptr, CASEINSEN, "INDEXVAL", &colnum, &status);
+
+    if (status != 0)
+      throw FITSError (status, "FITSArchive:unload_integration",
+		       "fits_get_colnum INDEXVAL");
+    
+    double value = order->get_Index(row);
+    fits_write_col (thefptr, TDOUBLE, colnum, row, 1, 1, &value, &status);
+  }
 
   // Write other useful info
   

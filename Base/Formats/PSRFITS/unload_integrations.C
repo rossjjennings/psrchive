@@ -1,9 +1,11 @@
 #include "Pulsar/FITSArchive.h"
+#include "Pulsar/IntegrationOrder.h"
 #include "FITSError.h"
 
 void Pulsar::FITSArchive::unload_integrations (fitsfile* ffptr) const
 {
   int status = 0;
+  char* comment = 0;
 
   // Move to the SUBINT Binary Table
   
@@ -38,6 +40,45 @@ void Pulsar::FITSArchive::unload_integrations (fitsfile* ffptr) const
     throw FITSError (status, "FITSArchive::unload_integrations", 
 		     "error clearing old subints");
 
+  // Update the header information
+  
+  bool   has_alt_order = false;
+  string order_name    = "unknown";
+  string order_unit    = "unknown";
+  Pulsar::Archive::Extension* ext = 0;
+  Pulsar::IntegrationOrder* order = 0;
+
+  for (unsigned i = 0; i < extension.size(); i++) {
+    ext = extension[i].get();
+    order = dynamic_cast<Pulsar::IntegrationOrder*>(ext);
+    if (order) {
+      has_alt_order = true;
+      order_name = order->get_name();
+      order_unit = order->get_Unit();
+    }
+  }
+
+  if (has_alt_order) {
+    fits_update_key (ffptr, TSTRING, "INT_TYPE", 
+		     const_cast<char*>(order_name.c_str()),
+		     comment, &status);
+    
+    fits_update_key (ffptr, TSTRING, "INT_UNIT", 
+		     const_cast<char*>(order_unit.c_str()),
+		     comment, &status);
+  }
+  else {
+    char* useful = new char[64];
+    sprintf(useful, "%s", "TIME");
+    fits_update_key (ffptr, TSTRING, "INT_TYPE", useful,
+		     comment, &status);
+    
+    sprintf(useful, "%s", "SEC");
+    fits_update_key (ffptr, TSTRING, "INT_UNIT", useful,
+		     comment, &status);
+    delete[] useful;
+  }
+  
   // Set the sizes of the columns which may have changed
   
   int colnum = 0;

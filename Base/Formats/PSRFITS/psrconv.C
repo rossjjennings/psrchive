@@ -7,6 +7,7 @@
 
 #include "Pulsar/Archive.h"
 #include "Pulsar/FITSArchive.h"
+#include "Pulsar/TimerArchive.h"
 #include "Error.h"
 
 void usage() {
@@ -52,22 +53,31 @@ int main(int argc, char *argv[]) {
   try {
     
     arch = Pulsar::Archive::load(argv[optind]);
-    cerr << "Loaded. " << argv[optind] << endl;
+    cerr << "Loaded " << argv[optind] << endl;
     
     fitsarch = new Pulsar::FITSArchive(*arch);
-    cerr << "Created FITS archive." << endl;
+    cerr << "Conversion complete." << endl;
     
-    cerr << "FITS Archive stats:" << endl;
-    cerr << "Source: " << fitsarch -> get_source() << endl;
-    cerr << "Frequency: " << fitsarch -> get_centre_frequency() << endl;
-    cerr << "Bandwidth: " << fitsarch -> get_bandwidth() << endl;
-    cerr << "# of subints: " << fitsarch -> get_nsubint() << endl;
-    cerr << "# of polns: " << fitsarch -> get_npol() << endl;
-    cerr << "# of channels: " << fitsarch -> get_nchan() << endl;
-    cerr << "# of bins: " << fitsarch -> get_nbin() << endl;
+    if (verbose) {
+      cerr << "Source: " << fitsarch -> get_source() << endl;
+      cerr << "Frequency: " << fitsarch -> get_centre_frequency() << endl;
+      cerr << "Bandwidth: " << fitsarch -> get_bandwidth() << endl;
+      cerr << "# of subints: " << fitsarch -> get_nsubint() << endl;
+      cerr << "# of polns: " << fitsarch -> get_npol() << endl;
+      cerr << "# of channels: " << fitsarch -> get_nchan() << endl;
+      cerr << "# of bins: " << fitsarch -> get_nbin() << endl;
+    }
+
+    string newname = arch->get_filename();
+    int index = newname.find_last_of(".",newname.size());
+
+    if (arch->type_is_cal())
+      newname.replace(index, 3, ".cf");
+    else
+      newname.replace(index, 3, ".rf");
     
-    fitsarch ->Archive::unload("data.fits");
-    cerr << "Unloaded FITS Archive." << endl;
+    cerr << "Unloading " << newname << endl;
+    fitsarch ->Archive::unload(newname.c_str());
   }
   catch (Error& error) {
     cerr << error << endl;
