@@ -10,17 +10,13 @@ void Pulsar::TimerIntegration::init()
   Mini::init (mini);
 
   npol = nchan = nbin = 0;
-  centrefreq = bw = dm = 0.0;
-
-  state = Signal::Intensity;
-  type = Signal::Linear;
 }
 
 void Pulsar::TimerIntegration::resize (unsigned _npol,
 				       unsigned _nchan,
 				       unsigned _nbin)
 {
-  if (verbose == 3)
+  if (verbose)
     cerr << "TimerIntegration::resize (npol=" << _npol 
 	 << ", nchan=" << _nchan << ", nbin=" << _nbin << ")" << endl;
 
@@ -38,7 +34,7 @@ void Pulsar::TimerIntegration::resize (unsigned _npol,
 
 Pulsar::TimerIntegration::~TimerIntegration ()
 {
-  if (verbose == 3)
+  if (verbose)
     cerr << "TimerIntegration destructor" << endl;
 }
 
@@ -46,7 +42,7 @@ Pulsar::TimerIntegration::~TimerIntegration ()
 Pulsar::TimerIntegration::TimerIntegration (const TimerIntegration& t_subint,
 					    int _npol, int _nchan)
 {
-  if (verbose == 3)
+  if (verbose)
     cerr << "TimerIntegration construct copy TimerIntegration" << endl;
 
   init();
@@ -57,7 +53,7 @@ Pulsar::TimerIntegration::TimerIntegration (const TimerIntegration& t_subint,
 Pulsar::TimerIntegration::TimerIntegration (const Integration& subint,
 					    int _npol, int _nchan)
 {
-  if (verbose == 3)
+  if (verbose)
     cerr << "TimerIntegration construct copy Integration" << endl;
 
   init();
@@ -67,7 +63,7 @@ Pulsar::TimerIntegration::TimerIntegration (const Integration& subint,
 void Pulsar::TimerIntegration::copy (const Integration& subint,
 				     int _npol, int _nchan)
 {
-  if (verbose == 3)
+  if (verbose)
     cerr << "TimerIntegration::copy" << endl;
 
   if (this == &subint)
@@ -81,7 +77,7 @@ void Pulsar::TimerIntegration::copy (const Integration& subint,
   if (!t_subint)
     return;
 
-  if (verbose == 3)
+  if (verbose)
     cerr << "TimerIntegration::copy another TimerIntegration" << endl;
 
   wts = t_subint->wts;
@@ -126,12 +122,3 @@ void Pulsar::TimerIntegration::set_folding_period (double seconds)
   mini.pfold = seconds;
 }
 
-void Pulsar::TimerIntegration::set_state (Signal::State _state)
-{
-  state = _state;
-
-  for (unsigned ipol=0; ipol<get_npol(); ipol++)
-    for (unsigned ichan=0; ichan<get_nchan(); ichan++)
-      get_Profile(ipol, ichan)
-	-> set_state (Signal::get_Component (type, state, ipol));
-}

@@ -49,7 +49,7 @@ void Pulsar::TimerIntegration::load (FILE* fptr, int extra, bool big_endian)
 
   if (extra) {
 
-    if (verbose == 3)
+    if (verbose)
       cerr << "TimerIntegration::load in the new style" << endl;
 
     if ( fread (&(wts[0]),nchan*sizeof(float),1,fptr) != 1 )
@@ -77,7 +77,7 @@ void Pulsar::TimerIntegration::load (FILE* fptr, int extra, bool big_endian)
 	N_FromLittleEndian (nchan, &(bpass[i][0]));
     }
     /* new style */
-    if (verbose == 3) cerr << "TimerIntegration::load loading profiles\n";
+    if (verbose) cerr << "TimerIntegration::load loading profiles\n";
     // Read the array of profiles
     for(i=0; i<npol;i++)
       for(j=0; j<nchan;j++) 
@@ -85,7 +85,7 @@ void Pulsar::TimerIntegration::load (FILE* fptr, int extra, bool big_endian)
 
   } 
   else {
-    if (verbose == 3)
+    if (verbose)
       cerr << "TimerIntegration::load in the old style." << endl;
 
     // No weights available.
@@ -96,12 +96,18 @@ void Pulsar::TimerIntegration::load (FILE* fptr, int extra, bool big_endian)
 	bpass[i][j] = 1.0;
       }
 
+    Signal::Basis basis = get_basis();
+    Signal::State state = get_state();
+
+    double centrefreq = get_centre_frequency();
+    double bw = get_bandwidth();
+
     for(i=0; i<npol; i++)
       for(j=0; j<nchan; j++) {
 	// already set during resize in TimerArchive::subint_load
         // profiles[i][j]->nbin = nbin;
         profiles[i][j]->set_weight (1.0);
-        profiles[i][j]->set_state (Signal::get_Component (type, state, i));
+        profiles[i][j]->set_state (Signal::get_Component (basis, state, i));
 	double cfreq = centrefreq-(bw/2.0)+(j+0.5)*bw/nchan;
         profiles[i][j]->set_centre_frequency (cfreq);
       }
@@ -141,7 +147,7 @@ void Pulsar::TimerIntegration::load (FILE* fptr, int extra, bool big_endian)
       N_FromLittleEndian (npts, packed);
     }
 
-    if (verbose == 3) 
+    if (verbose) 
       fprintf (stderr, "TimerIntegration::load scale:%f offset:%f\n",
 			  scale, offset);
 

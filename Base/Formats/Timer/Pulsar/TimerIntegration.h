@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/Timer/Pulsar/TimerIntegration.h,v $
-   $Revision: 1.2 $
-   $Date: 2003/04/19 20:27:00 $
+   $Revision: 1.3 $
+   $Date: 2004/07/16 07:56:46 $
    $Author: straten $ */
 
 /*
@@ -70,35 +70,10 @@ namespace Pulsar {
     //! Set the total time integrated (in seconds)
     virtual void set_duration (double seconds);
         
-   //! Get the centre frequency (in MHz)
-    virtual double get_centre_frequency() const { return centrefreq; }
-    //! Set the centre frequency (in MHz)
-    virtual void set_centre_frequency (double MHz) { centrefreq = MHz; }
-    
-    //! Get the bandwidth (in MHz)
-    virtual double get_bandwidth() const { return bw; }
-    //! Set the bandwidth (in MHz)
-    virtual void set_bandwidth (double MHz) { bw = MHz; }
-
-    //! Get the dispersion measure (in \f${\rm pc cm}^{-3}\f$)
-    virtual double get_dispersion_measure () const { return dm; }
-    //! Set the dispersion measure (in \f${\rm pc cm}^{-3}\f$)
-    virtual void set_dispersion_measure (double pc_cm3) { dm = pc_cm3; }
-    
     //! Get the folding period (in seconds)
     virtual double get_folding_period () const;
     //! Set the folding period (in seconds)
     virtual void set_folding_period (double seconds);
-
-    //! Get the feed configuration of the receiver
-    virtual Signal::Basis get_basis () const { return type; }
-    //! Set the feed configuration of the receiver
-    virtual void set_basis (Signal::Basis _type) { type = _type; }
-
-    //! Get the polarimetric state of the profiles
-    virtual Signal::State get_state () const { return state; }
-    //! Set the polarimetric state of the profiles
-    virtual void set_state (Signal::State _state);
 
     //! load the subint from file
     void load (FILE * fptr, int wts_and_bpass, bool big_endian=true);
@@ -121,21 +96,6 @@ namespace Pulsar {
     
     //! number of bins
     unsigned nbin;
-
-    //! centre frequency (in MHz)
-    double centrefreq;
-
-    //! bandwidth (in MHz)
-    double bw;
-
-    //! dispersion measure (in \f${\rm pc cm}^{-3}\f$)
-    double dm;
-
-    //! polarimetric state of profiles
-    Signal::State state;
-
-    //! receiver feed type
-    Signal::Basis type;
 
     //! weight of each channel/poln
     vector<float> wts;
