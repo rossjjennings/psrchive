@@ -16,12 +16,15 @@ int main (int argc, char *argv[]) {
   
   bool verbose = false;
   bool display = false;
-  bool write = true;
+  bool write = false;
   
   vector<string> archives;
   
   bool manual_zap = false;
   vector<int> chans_to_zap;
+
+  bool zap_subints = false;
+  vector<unsigned> subs_to_zap;
 
   bool edge_zap = false;
   float percent = 0.0;
@@ -39,7 +42,7 @@ int main (int argc, char *argv[]) {
   char* key = NULL;
   char whitespace[5] = " \n\t";
   
-  while ((gotc = getopt(argc, argv, "hvVDxe:z:Z:dE:")) != -1) {
+  while ((gotc = getopt(argc, argv, "hvVDme:z:Z:dE:s:")) != -1) {
     switch (gotc) {
     case 'h':
       cout << "A program for zapping RFI in Pulsar::Archives"               << endl;
@@ -47,12 +50,13 @@ int main (int argc, char *argv[]) {
       cout << "  -v               Verbose mode"                             << endl;
       cout << "  -V               Very verbose mode"                        << endl;
       cout << "  -D               Display results"                          << endl;
-      cout << "  -x               Test only, leaves files unchanged"        << endl;
+      cout << "  -m               Modify the original files on disk"        << endl;
       cout << "  -e               Unload to new files using this extension" << endl;
-      cout << "  -z \"chanlist\"    Zap these particular channels"          << endl;
+      cout << "  -z \"list\"        Zap these particular channels"          << endl;
       cout << "  -Z \"a b\"         Zap chans between a and b"              << endl;
-      cout << "  -E percent       Zap band edges"                           << endl; 
-      cout << "  -d               Simple mean offset rejection"             << endl;
+      cout << "  -E percent       Zap band edges"                           << endl;
+      cout << "  -s \"list\"        Zap these sub-integrations"             << endl;
+      cout << "  -d               Simple mean offset spike rejection"       << endl;
       return (-1);
       break;
     case 'v':
@@ -65,8 +69,8 @@ int main (int argc, char *argv[]) {
     case 'D':
       display = true;
       break;
-    case 'x':
-      write = false;
+    case 'm':
+      write = true;
       break;
     case 'z':
       key = strtok (optarg, whitespace);
@@ -77,9 +81,9 @@ int main (int argc, char *argv[]) {
 	}
 	key = strtok (NULL, whitespace);
       }
-      cerr << chans_to_zap.size() << endl;
       break;
     case 'e':
+      write = true;
       ext = optarg;
       break;
     case 'Z':
@@ -101,6 +105,17 @@ int main (int argc, char *argv[]) {
       if (percent <= 0.0 || percent >= 100.0) {
 	cerr << "Invalid parameter to option -e" << endl;
         return (-1);
+      }
+      break;
+    case 's':
+      key = strtok (optarg, whitespace);
+      zap_subints = true;
+      while (key) {
+	if (sscanf(key, "%d", &placeholder) == 1) {
+	  subs_to_zap.push_back(placeholder);
+	  cerr << placeholder << endl;
+	}
+	key = strtok (NULL, whitespace);
       }
       break;
     default:
@@ -141,6 +156,28 @@ int main (int argc, char *argv[]) {
       cout << "Loaded archive: " << archives[i] << endl;
       
       int nchan = arch->get_nchan();
+
+      if (zap_subints) {
+
+	Reference::To<Pulsar::Archive> new_arch;
+
+	vector<unsigned> subs_to_keep;
+	bool ignore;
+	
+	for (unsigned i = 0; i < arch->get_nsubint(); i++) {
+	  ignore = false;
+	  for (unsigned j = 0; j < subs_to_zap.size(); j++)
+	    if (subs_to_zap[j] == i)
+	      ignore = true;
+	  
+	  if (!ignore) {
+	    subs_to_keep.push_back(i);
+	    cerr << "Keeping " << i << endl;
+	  }
+	}
+	new_arch = arch->extract(subs_to_keep);
+	arch = new_arch->clone();
+      }
       
       if (simple) {
 	cout << "Using simple mean offset zapper" << endl;
@@ -178,10 +215,6 @@ int main (int argc, char *argv[]) {
 	  mask[i] = 1.0;
 	}
 	zapper->zap_specific(arch, mask);
-      }
-      else {
-	cout << "No zapping scheme specified!" << endl;
-	return (-1);
       }
       
       if (display)
