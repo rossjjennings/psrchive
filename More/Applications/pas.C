@@ -81,7 +81,7 @@ int main (int argc, char** argv)
       return 0;
 
     case 'i':
-      cout << "$Id: pas.C,v 1.16 2004/11/04 10:39:51 rmanches Exp $" << endl;
+      cout << "$Id: pas.C,v 1.17 2004/11/05 02:13:38 ahotan Exp $" << endl;
       return 0;
 
     case 'r':
@@ -125,9 +125,6 @@ int main (int argc, char** argv)
     usage();
     exit(-1);
   } 
-
-
-  Error::handle_signals ();
 
   //open new standard profile
   Reference::To<Pulsar::Archive> stdarch = Pulsar::Archive::load(stdname[0]);
