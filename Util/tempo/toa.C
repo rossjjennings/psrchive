@@ -250,6 +250,35 @@ int Tempo::toa::Princeton_unload (FILE* outstream) const
 
 // ////////////////////////////////////////////////////////////////////////
 //
+// Tempo2_load,unload - load/unload TOA in the Tempo2 format
+// 
+//
+// ////////////////////////////////////////////////////////////////////////
+
+int Tempo::toa::Tempo2_unload (char* outstring) const
+{
+  // output the basic line
+  string fname,flags; 
+  
+  fname = auxinfo.substr(0,auxinfo.find(" "));
+  if (auxinfo.find(" ")!=string::npos) flags = auxinfo.substr(auxinfo.find(" "));
+  sprintf (outstring,"%s %8.3f %s %6.2f %c %s",fname.c_str(),frequency,arrival.printdays(13).c_str(),error,telescope,flags.c_str());
+
+  return 0;
+}
+
+int Tempo::toa::Tempo2_unload (FILE* outstream) const
+{
+  sizebuf (128);
+  Tempo2_unload (buffer);
+  fprintf (outstream, "%s\n", buffer);
+
+  return 0;
+}
+
+
+// ////////////////////////////////////////////////////////////////////////
+//
 // Psrclock_load,unload - unload TOA in the Psrclock Format
 // 
 // ////////////////////////////////////////////////////////////////////////
@@ -453,7 +482,7 @@ int Tempo::toa::unload (FILE* outstream, Format fmt) const
 {
   if (fmt == Unspecified)
     fmt = format;
-
+  
   switch (fmt) {
   case Comment:
     if (verbose) cerr << "Unloading Comment Format" << endl;
@@ -470,6 +499,9 @@ int Tempo::toa::unload (FILE* outstream, Format fmt) const
   case Psrclock:
     if (verbose) cerr << "Unloading Psrclock Format" << endl;
     return Psrclock_unload (outstream);
+  case Tempo2:
+    if (verbose) cerr << "Unloading Tempo2 Format" << endl;
+    return Tempo2_unload (outstream);
   default:
     cerr << "Tempo::toa::unload undefined format" << endl;
     return -1;
@@ -497,6 +529,9 @@ int Tempo::toa::unload (char* outstring, Format fmt) const
   case Psrclock:
     if (verbose) cerr << "Unloading Psrclock Format" << endl;
     return Psrclock_unload (outstring);
+  case Tempo2:
+    if (verbose) cerr << "Unloading Tempo2 Format" << endl;
+    return Tempo2_unload (outstring);
   default:
     cerr << "Tempo::toa::unload undefined format" << endl;
     return -1;
@@ -522,6 +557,8 @@ int Tempo::toa::Tempo_unload (FILE* outstream) const
     return Parkes_unload (outstream);
   case Princeton:
     return Princeton_unload (outstream);
+  case Tempo2:
+    return Tempo2_unload (outstream);
   default:
     if (verbose) 
       cerr << "Tempo::toa::Tempo_unload undefined format" << endl;
@@ -542,6 +579,8 @@ int Tempo::toa::Tempo_unload (char* outstring) const
     return Parkes_unload (outstring);
   case Princeton:
     return Princeton_unload (outstring);
+  case Tempo2:
+    return Tempo2_unload (outstring);
   default:
     if (verbose) 
       cerr << "Tempo::toa::Tempo_unload undefined format" << endl;
@@ -596,6 +635,7 @@ int Tempo::toa::load (FILE* instream, vector<toa>* toas)
 int Tempo::toa::unload(const char* filename, const vector<toa>& toas, Format fmt)
 {
   FILE * fp;
+
   if((fp = fopen(filename, "w"))==NULL){
     cerr << "Tempo::toa::unload - error opening file " << filename << endl;
     return -1;
