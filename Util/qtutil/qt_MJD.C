@@ -18,7 +18,7 @@ void qt_MJD::value_Entered_CB ()
 {
   MJD newval;
   if (newval.Construct (value.text().ascii()) < 0) {
-    if (verbose)
+    if (MJD::verbose)
       cerr << "qt_MJD:: invalid mjd:" << value.text() << endl;
     newval = valset;
   }

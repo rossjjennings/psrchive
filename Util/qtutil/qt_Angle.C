@@ -30,7 +30,7 @@ void qt_Angle::value_Entered_CB ()
     retval = newval.setDMS (value.text().ascii());
 
   if (retval < 0) {
-    if (verbose)
+    if (Angle::verbose)
       cerr << "gtk_Angle:: invalid angle:" << value.text() << endl;
     newval = valset;
   }
