@@ -64,9 +64,6 @@ void Pulsar::FluxCalibrator::add_observation (const Archive* archive)
     throw Error (InvalidParam, "Pulsar::FluxCalibrator::add_observation",
                  "invalid Pulsar::Archive pointer");
 
-  // done as a first step to clean up archive on exit
-  Reference::To<const Archive> arch = archive;
-
   if ( archive->get_type() != Signal::FluxCalOn &&
        archive->get_type() != Signal::FluxCalOff )
 
@@ -87,19 +84,19 @@ void Pulsar::FluxCalibrator::add_observation (const Archive* archive)
 
   if (!calibrator) {
 
-    calibrator = archive->clone();
+    calibrator = archive;
 
     mean_ratio_on.resize (nchan);
     mean_ratio_off.resize (nchan);
 
   }
   else if (calibrator->get_type() != Signal::FluxCalOn &&
-                 arch->get_type() == Signal::FluxCalOn)  {
+              archive->get_type() == Signal::FluxCalOn)  {
 
     // Keep the FPTM naming convention in which the
     // Pulsar::FluxCalibrator is named for the first on-source
     // observation
-    calibrator = archive->clone();
+    calibrator = archive;
     rename_calibrator = true;
 
   }
@@ -110,17 +107,14 @@ void Pulsar::FluxCalibrator::add_observation (const Archive* archive)
       cerr << "Pulsar::FluxCalibrator::add_observation clone total intensity"
            << endl;
 
-    Pulsar::Archive* clone = arch->clone();
+    Pulsar::Archive* clone = archive->clone();
     clone->convert_state (Signal::Intensity);
 
-    /* If there was no other Reference::To the input Archive*, 
-       it will be deleted in the following step */
-
-    arch = clone;
+    archive = clone;
 
   }
 
-  const Pulsar::Integration* integration = arch->get_Integration(0);
+  const Pulsar::Integration* integration = archive->get_Integration(0);
 
   vector<vector<Estimate<double> > > cal_hi;
   vector<vector<Estimate<double> > > cal_lo;
@@ -138,9 +132,9 @@ void Pulsar::FluxCalibrator::add_observation (const Archive* archive)
 
     // Take the ratio of the total intensity
     Estimate<double> ratio = cal_hi[0][ichan]/cal_lo[0][ichan] - unity ;
-    if (arch->get_type() == Signal::FluxCalOn)
+    if (archive->get_type() == Signal::FluxCalOn)
       mean_ratio_on[ichan] += ratio;
-    else if (arch->get_type() == Signal::FluxCalOff)
+    else if (archive->get_type() == Signal::FluxCalOff)
       mean_ratio_off[ichan] += ratio;
       
   }
