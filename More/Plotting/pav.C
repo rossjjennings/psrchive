@@ -1,5 +1,5 @@
 //
-// $Id: pav.C,v 1.86 2004/09/09 00:57:05 hknight Exp $
+// $Id: pav.C,v 1.87 2004/09/09 01:00:50 hknight Exp $
 //
 // The Pulsar Archive Viewer
 //
@@ -318,7 +318,7 @@ int main (int argc, char** argv)
       plotter.set_subint( atoi (optarg) );
       break;
     case 'i':
-      cout << "$Id: pav.C,v 1.86 2004/09/09 00:57:05 hknight Exp $" << endl;
+      cout << "$Id: pav.C,v 1.87 2004/09/09 01:00:50 hknight Exp $" << endl;
       return 0;
 
     case 'j':
@@ -1027,7 +1027,7 @@ int main (int argc, char** argv)
 
   }
   catch (Error& error) {
-    cerr << error << endl;
+    cerr << "Caught Error on file '" << filenames[ifile] << "': " << error << endl;
   }
   catch (string& error) {
     cerr << error << endl;
