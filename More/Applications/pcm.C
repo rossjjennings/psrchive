@@ -1,3 +1,9 @@
+//-*-C++-*-
+
+/* $Source: /cvsroot/psrchive/psrchive/More/Applications/pcm.C,v $
+   $Revision: 1.4 $
+   $Date: 2003/10/13 13:57:53 $
+   $Author: straten $ */
 
 /*! \file pcm.C 
     \brief (Pulsar) Polarimetric Calibration Modelling (Package)
@@ -105,7 +111,7 @@ void range_select (Pulsar::ReceptionCalibrator& model,
 
 void plot_constraints (Pulsar::ReceptionCalibratorPlotter& plotter,
 		       unsigned nchan, unsigned nstate, unsigned nplot,
-		       unsigned only_chan = 0)
+		       unsigned start_state, unsigned only_chan=0)
 {
   unsigned incr = nchan/nplot;
   if (!incr)
@@ -131,8 +137,11 @@ void plot_constraints (Pulsar::ReceptionCalibratorPlotter& plotter,
     
     cerr << "pcm: nstate=" << nstate << endl;
     for (unsigned istate=0; istate<nstate; istate++) {
-      cerr << "ichan=" << ichan << " istate=" << istate+1 << endl;
-      plotter.plot_constraints (ichan, istate+1);
+
+      unsigned plot_state = istate+start_state;
+
+      cerr << "ichan=" << ichan << " istate=" << plot_state << endl;
+      plotter.plot_constraints (ichan, plot_state);
 
       if (istate+1 < nstate)
 	cpgpage();
@@ -153,7 +162,7 @@ void plot_constraints (Pulsar::ReceptionCalibratorPlotter& plotter,
 
 
 int main (int argc, char *argv[]) 
-{
+try {
   Error::verbose = false;
 
   // name of file containing list of Archive filenames
@@ -400,7 +409,8 @@ int main (int argc, char *argv[])
 
     cerr << "pcm: plotting pulsar constraints" << endl;
     plot_constraints (plotter, model.get_nchan(),
-		      model.get_nstate_pulsar(), 12);
+		      model.get_nstate_pulsar(), 12, 
+		      model.get_nstate()-model.get_nstate_pulsar());
 
 
   }
@@ -420,7 +430,7 @@ int main (int argc, char *argv[])
   Reference::To<Pulsar::Archive> solution = model.get_solution (archive_class);
 
   cerr << "psc: unloading solution to " << solution->get_filename() << endl;
-  solution->unload();
+  solution->unload( "pcm.fits" );
 
   if (display) {
 
@@ -440,7 +450,8 @@ int main (int argc, char *argv[])
 
     cerr << "pcm: plotting pulsar constraints with model" << endl;
     plot_constraints (plotter, model.get_nchan(),
-		      model.get_nstate_pulsar(), 12);
+		      model.get_nstate_pulsar(), 12,
+		      model.get_nstate()-model.get_nstate_pulsar());
 
   }
 
@@ -516,4 +527,10 @@ int main (int argc, char *argv[])
     cpgend ();
   }
 
+  return 0;
 }
+catch (Error& error) {
+  cerr << "pcm: error" << error << endl;
+  return -1;
+}
+
