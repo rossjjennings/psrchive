@@ -156,12 +156,14 @@ static bool have_lock = false;
 
 static void open_lockfile ()
 {
-  if (lock_fd < 0)
-    lock_fd = open (Tempo::get_lockfile().c_str(), O_RDWR | O_CREAT);
+  string filename = Tempo::get_lockfile();
+  const char* fname = filename.c_str();
 
   if (lock_fd < 0)
-    throw Error (FailedSys, "Tempo::open_lockfile", "failed open(%s)",
-		 Tempo::get_lockfile().c_str());
+    lock_fd = open (fname, O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
+
+  if (lock_fd < 0)
+    throw Error (FailedSys, "Tempo::open_lockfile", "failed open(%s)", fname);
 }
 
 // run tempo with the given arguments
