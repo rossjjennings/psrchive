@@ -261,7 +261,7 @@ int toa::Rhythm_unload (char* outstring) const
 
   // output the time stamp
   if (calculated == -1)
-    time (&calculated);
+    time ((time_t*)&calculated);
 
   int out = (int)strftime (outstring+1, 24, "%Y/%m/%d-%H:%M:%S",
 			   gmtime (&calculated));
