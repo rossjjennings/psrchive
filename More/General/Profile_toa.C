@@ -25,7 +25,7 @@ Tempo::toa Pulsar::Profile::tdt (const Profile& std,
 
   retval.set_frequency (centrefreq);
   retval.set_arrival   (mjd + shift * period);
-  retval.set_error     (error * period);
+  retval.set_error     (error * period * 1e3);
 
   retval.set_telescope (nsite);
   retval.set_auxilliary_text(arguments);
@@ -167,8 +167,16 @@ double Pulsar::Profile::TimeShift (const Profile& std,
   // The error in phase units
   error = float(2.0 * sqrt((D - height)/E));
 
-  // The shift in phase units
-  return F;
+  // The shift in phase units, wrapped to be between 0.0 and 1.0
+  if (F < 0.0) {
+    return (F + 1.0);
+  }
+  else if (F > 1.0) {
+    return (F - 1.0);
+  }
+  else {
+    return F;
+  }
 }
 
 double Pulsar::Profile::shift (const Profile& std, float& ephase,
