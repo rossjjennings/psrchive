@@ -15,9 +15,28 @@ void Pulsar::Archive::unload (const char* filename)
 
   if (filename)
     unload_to_filename = filename;
-
+  
   if (verbose)
     cerr << "Pulsar::Archive::unload (" << unload_to_filename << ")" << endl;
+
+  // The following section is probably not necessary as consisnency checks are
+  // performed when an ephemeris is installed using Archive::set_ephemeris(). 
+  // It is included as a backup, should something unexpected happen.
+  
+  if (ephemeris) {
+    if (get_source() != ephemeris->psrname()) {
+      cout << "Archive::unload Informative Notice:\n" 
+	   << "   Source name will be updated to match archive ephemeris"
+	   << endl;
+      set_source(ephemeris->psrname());
+    }
+    if (get_dispersion_measure() != ephemeris->get_dm()) {
+      cout << "Archive::unload Informative Notice:\n" 
+	   << "   Dispersion measure will be updated to match archive ephemeris"
+	   << endl;
+      set_dispersion_measure(ephemeris->get_dm());
+    }
+  }
 
   // create the temporary filename
   string temp_filename = unload_to_filename + ".XXXXXXXX";
