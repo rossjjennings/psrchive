@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Jones.h,v $
-   $Revision: 1.9 $
-   $Date: 2003/09/03 13:46:48 $
+   $Revision: 1.10 $
+   $Date: 2003/12/28 12:52:08 $
    $Author: straten $ */
 
 #ifndef __Jones_H
@@ -41,6 +41,10 @@ public:
 
   //! Set this instance equal to a scalar
   Jones& operator = (T scalar)
+    { j11=scalar; j12=0; j21=0; j22=scalar; return *this; }
+
+  //! Set this instance equal to a complex scalar
+  Jones& operator = (complex<T> scalar)
     { j11=scalar; j12=0; j21=0; j22=scalar; return *this; }
 
   //! Set this instance equal to another Jones<U> instance
