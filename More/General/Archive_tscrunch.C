@@ -133,7 +133,7 @@ void Pulsar::Archive::tscrunch (unsigned nscrunch)
     MJD mjd;
     double duration = 0.0;
     int count = 0;
-    
+
     for (unsigned iadd=0; iadd < nscrunch; iadd++) {
       
       count++;
@@ -142,11 +142,15 @@ void Pulsar::Archive::tscrunch (unsigned nscrunch)
       
       duration += cur->get_duration();
       mjd      += cur->get_epoch();
-      
-      for (unsigned iext = 0; iext < result->get_nextension(); iext++) {
-	Integration::Extension* ext = result->get_extension(iext);
-	ext->integrate (cur);
-      }
+
+      if (iadd == 0)
+        // transfer the Extensions from the start Integration to the result
+        for (unsigned iext = 0; iext < cur->get_nextension(); iext++)
+          result->add_extension( cur->get_extension(iext) );
+      else
+        // integrate the Extensions into the result
+        for (unsigned iext = 0; iext < result->get_nextension(); iext++)
+	  result->get_extension(iext)->integrate (cur);
 
     }
 
