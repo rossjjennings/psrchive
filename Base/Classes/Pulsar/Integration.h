@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Integration.h,v $
-   $Revision: 1.32 $
-   $Date: 2003/02/10 19:39:28 $
+   $Revision: 1.33 $
+   $Date: 2003/02/13 16:40:06 $
    $Author: straten $ */
 
 /*
@@ -25,6 +25,7 @@ namespace Tempo {
 }
 
 template<typename T> class Stokes;
+template<typename T> class Jones;
 template<typename T> class Estimate;
 
 namespace Pulsar {
@@ -82,6 +83,12 @@ namespace Pulsar {
 
     //! Transform from Stokes (I,Q,U,V) to the polarimetric invariant interval
     virtual void invint ();
+
+    //! Perform the congruence transformation on each polarimetric profile
+    void transform (const Jones<float>& response);
+
+    //! Perform frequency response on each polarimetric profile
+    void transform (const vector< Jones<float> >& response);
 
     //! Rotate all profiles in phase to remove dispersion delays between chans
     virtual void dedisperse (double frequency = 0.0);
