@@ -1,13 +1,20 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Estimate.h,v $
-   $Revision: 1.2 $
-   $Date: 2003/02/10 19:20:42 $
+   $Revision: 1.3 $
+   $Date: 2003/02/12 13:57:39 $
    $Author: straten $ */
 
 #ifndef __Estimate_H
 #define __Estimate_H
 
+#include "operators.h"
+
+//! Estimates have a value, \f$ x \f$, and a variance, \f$ \sigma_x^2 \f$
+/*!
+  Where \f$ y = f (x_1, x_2, ... x_n) \f$, then
+  \f$ \sigma_y^2 = \sum_{i=1}^n ({\delta f \over \delta x_i })^2\sigma_i^2 \f$
+*/
 template <typename T>
 class Estimate
 {
@@ -24,6 +31,26 @@ class Estimate
   //! Assignment operator
   Estimate & operator= (const Estimate& d)
   { val=d.val; var=d.var; return *this; }
+
+  Estimate & operator+= (const Estimate& d)
+  { val += d.val; var += d.var; return *this; }
+
+  Estimate & operator-= (const Estimate& d)
+  { val -= d.val; var += d.var; return *this; }
+
+  //! Multiply two estimates
+  /*! Where \f$ r=x*y \f$, \f$ \sigma_r = y^2\sigma_x + x^2\sigma_y */
+  Estimate & operator*= (const Estimate& d)
+  { T v=val; val*=d.val; var=v*v*d.var+d.val*d.val*var; return *this; }
+
+  //! Divide two estimates
+  Estimate & operator/= (const Estimate& d)
+  { return operator *= (d.inverse()); }
+
+  //! Invert an estimate
+  /*! Where \f$ r=1/x \f$, \f$ \sigma_r = r^2\sigma_x/x^2 = sigma_x/x^4 */
+  const Estimate inverse () const
+  { T v=1.0/val; return Estimate (v,var*v*v*v*v); }
 
 };
 
