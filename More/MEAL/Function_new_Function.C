@@ -13,6 +13,8 @@ static MEAL::Advocate<MEAL::Gaussian> gaussian;
 typedef MEAL::SumRule<MEAL::Scalar> ScalarSum;
 static MEAL::Advocate<ScalarSum> scalar_sum;
 
+using namespace std;
+
 //! Construct a new model instance from a string
 MEAL::Function* MEAL::Function::new_Function (const std::string& text)
 {
