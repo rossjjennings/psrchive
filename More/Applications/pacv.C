@@ -10,6 +10,7 @@
 #include "Pulsar/PolarCalibratorPlotter.h"
 
 #include "Pulsar/Archive.h"
+#include "Pulsar/Plotter.h"
 
 #include "string_utils.h"
 #include "dirutil.h"
@@ -95,6 +96,7 @@ int main (int argc, char** argv)
   Reference::To<Pulsar::CalibratorPlotter> plotter;
 
   Pulsar::FluxCalibrator fluxcal;
+  Pulsar::Plotter archplot;
 
   for (unsigned ifile=0; ifile<filenames.size(); ifile++) {  try {
 
@@ -112,6 +114,11 @@ int main (int argc, char** argv)
     }
 
     if (verbose)
+      cerr << "pacv: Plotting Uncalibrated Spectrum" << endl;
+    cpgpage ();
+    archplot.calibrator_spectrum (archive);
+
+    if (verbose)
       cerr << "pacv: Constructing PolnCalibrator" << endl;
 
     if (single_axis) {
@@ -123,14 +130,23 @@ int main (int argc, char** argv)
       plotter = new Pulsar::PolarCalibratorPlotter;
     }
 
-    calibrator -> build();
+    
+    if (verbose)
+      cerr << "pacv: Calibrating Archive" << endl;
+
+    calibrator -> calibrate (archive);
 
     if (verbose)
       cerr << "pacv: Plotting PolnCalibrator" << endl;
 
+    cpgpage ();
     plotter->plot (calibrator);
 
+    if (verbose)
+      cerr << "pacv: Plotting Calibrated Spectrum" << endl;
     cpgpage ();
+    archplot.calibrator_spectrum (archive);
+
 
   } catch (Error& error) {
     cerr << "pacv: Error loading " << filenames[ifile] << error << endl;
