@@ -96,7 +96,7 @@ void Pulsar::PolnCalibrator::build (unsigned nchan)
   \retval cal_lo the mean levels of the calibrator lo state
 */
 void 
-Pulsar::PolnCalibrator::get_levels (unsigned isubint, unsigned nchan, 
+Pulsar::PolnCalibrator::get_levels (unsigned isubint, unsigned request_nchan, 
 				    vector<vector<Estimate<double> > >& cal_hi,
 				    vector<vector<Estimate<double> > >& cal_lo)
   const
@@ -105,12 +105,22 @@ Pulsar::PolnCalibrator::get_levels (unsigned isubint, unsigned nchan,
     cerr << "Pulsar::PolnCalibrator::get_levels call Integration::cal_levels"
 	 << endl;
 
-  calibrator->get_Integration(isubint)->cal_levels (cal_hi, cal_lo);
+  const Integration* integration = calibrator->get_Integration(isubint);
 
-  unsigned npol = cal_hi.size();
+  integration->cal_levels (cal_hi, cal_lo);
+
+  unsigned nchan = integration->get_nchan();
+  unsigned npol = integration->get_npol();
+
   unsigned ipol = 0;
+  
+  for (unsigned ichan=0; ichan<nchan; ichan++)
+    if (integration->get_weight (ichan) == 0)
+      for (ipol=0; ipol<npol; ipol++)
+	cal_hi[ipol][ichan] = cal_lo[ipol][ichan] = 0.0;
 
   if (smooth_bandpass)  {
+
     unsigned window = unsigned (calibrator->get_nchan() * median_smoothing);
 
     if (verbose)
@@ -125,9 +135,10 @@ Pulsar::PolnCalibrator::get_levels (unsigned isubint, unsigned nchan,
       fft::median_smooth (cal_lo[ipol], window);
       fft::median_smooth (cal_hi[ipol], window);
     }
+
   }
 
-  if (calibrator->get_nchan() == nchan)
+  if (calibrator->get_nchan() == request_nchan)
     return;
 
   // make hi and lo the right size of cal_hi and cal_lo
@@ -135,10 +146,10 @@ Pulsar::PolnCalibrator::get_levels (unsigned isubint, unsigned nchan,
   vector<vector<Estimate<double> > > lo (npol);
  
   for (ipol=0; ipol < npol; ipol++) {
-    lo[ipol].resize (nchan);
+    lo[ipol].resize (request_nchan);
     fft::interpolate (lo[ipol], cal_lo[ipol]);
     
-    hi[ipol].resize (nchan);
+    hi[ipol].resize (request_nchan);
     fft::interpolate (hi[ipol], cal_hi[ipol]);
   }
 

@@ -9,6 +9,7 @@
 #include "Pulsar/PolarCalibrator.h"
 #include "Pulsar/PolarCalibratorPlotter.h"
 
+#include "Pulsar/Integration.h"
 #include "Pulsar/Archive.h"
 #include "Pulsar/Plotter.h"
 
@@ -24,7 +25,11 @@
 void usage ()
 {
   cerr << "pacv - Pulsar Archive Calibrator Viewer\n"
-    "usage: pacv [-q] file1 [file2 ...]" << endl;
+    "usage: pacv [options] file1 [file2 ...]\n"
+    "where:\n"
+    " -c ICHAN   mark ICHAN as bad\n"
+    " -f         treat all archives as members of a fluxcal observation\n"
+    " -q         use the single-axis model" << endl;
 }
 
 int main (int argc, char** argv) 
@@ -41,11 +46,13 @@ int main (int argc, char** argv)
   // filename of filenames
   char* metafile = NULL;
 
+  // vector of bad channels
+  vector<unsigned> zapchan;
+
   // verbosity flag
   bool verbose = false;
-
   char c;
-  while ((c = getopt(argc, argv, "hfMqvV")) != -1)  {
+  while ((c = getopt(argc, argv, "c:hfMqvV")) != -1)  {
 
     switch (c)  {
 
@@ -53,6 +60,16 @@ int main (int argc, char** argv)
       usage();
       return 0;
 
+    case 'c': {
+      unsigned ichan = 0;
+      if (sscanf (optarg, "%u", &ichan) != 1) {
+	cerr << "pacv: Error parsing " << optarg << " as a channel" << endl;
+	return -1;
+      }
+      zapchan.push_back(ichan);
+      break;
+    }
+      
     case 'f':
       flux_cal = true;
       break;
@@ -107,6 +124,16 @@ int main (int argc, char** argv)
       cerr << "pacv: Loading " << filenames[ifile] << endl;
 
     archive = Pulsar::Archive::load( filenames[ifile] );
+
+    for (unsigned ichan=0; ichan<zapchan.size(); ichan++) {
+      if (verbose)
+	cerr << "pacv: Zapping channel " << zapchan[ichan] << endl;
+
+      for (unsigned isub=0; isub<archive->get_nsubint(); isub++)
+	archive->get_Integration(isub)->set_weight (zapchan[ichan], 0.0);
+
+    }
+
 
     if (flux_cal) {
       if (verbose)
