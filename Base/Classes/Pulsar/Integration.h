@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Integration.h,v $
-   $Revision: 1.54 $
-   $Date: 2003/12/23 03:18:31 $
+   $Revision: 1.55 $
+   $Date: 2003/12/24 01:18:37 $
    $Author: ahotan $ */
 
 /*
@@ -232,11 +232,11 @@ namespace Pulsar {
     //! Set the polarimetric state of the profiles
     virtual void set_state (Signal::State _state) = 0;
  
-    //! Get  flux
-    virtual float flux (int _poln=0);
-     
+    //! Get flux
+    float flux (int _poln = 0, float dc = 0.15);
+    
     //! Get polarized flux
-    virtual float get_poln_flux (int _type = 0);
+    float get_poln_flux (int _type = 0);
  
      // //////////////////////////////////////////////////////////////////
     //
