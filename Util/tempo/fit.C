@@ -26,7 +26,7 @@ bool Tempo::verbose = false;
 MJD  Tempo::unspecified;
 
 void Tempo::fit (const psrParams& model, vector<toa>& toas,
-		 psrParams* postfit, bool track)
+		 psrParams* postfit, bool track, DataPoint::State min_state)
 {
   char* tempo_tim = "arrival.tim";
   char* tempo_par = "arrival.par";
@@ -51,15 +51,16 @@ void Tempo::fit (const psrParams& model, vector<toa>& toas,
 
   for (iarr=0; iarr < toas.size(); iarr++)  {
 
-    if (!toas[iarr].is_selected())
+    if (toas[iarr].state < min_state)
       continue;
 
+    if (track && !toas[iarr].resid.valid) {
+      cerr << "Tempo::fit invalid residual for toa #" << unloaded + 1
+	   << " ... tracking disabled" << endl;
+      track = false;
+    }
+
     if (track)  {
-      if (!toas[iarr].resid.valid) {
-	cerr << "Tempo::fit invalid residual for toa #" << unloaded + 1
-	     << " ... tracking disabled" << endl;
-	track = false;
-      }
       
       if (unloaded == 0)
 	sumphase = toas[iarr].resid.turns;
@@ -84,9 +85,9 @@ void Tempo::fit (const psrParams& model, vector<toa>& toas,
       if (sumout > 0.5) fprintf  (fptr, "PHASE +%f\n", sumout);
       if (sumout < -0.5) fprintf (fptr, "PHASE %f\n", sumout);
       
-      toas[iarr].Tempo_unload (fptr);
-      unloaded ++;
     }
+    toas[iarr].Tempo_unload (fptr);
+    unloaded ++;
   }
 
   fclose (fptr); 
@@ -126,7 +127,7 @@ void Tempo::fit (const psrParams& model, vector<toa>& toas,
 
   for (iarr=0; iarr < toas.size(); iarr++)  {
 
-    if (!toas[iarr].is_selected())
+    if (toas[iarr].state < min_state)
       continue;
 
     if (unloaded == 0)
