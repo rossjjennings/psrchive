@@ -4,6 +4,7 @@
 #include "psrephem.h"
 #include "orbital.h"
 #include "f772c.h"
+#include "Estimate.h"
 
 #define sqr(x) (x*x)
 #define cube(x) (x*x*x)
@@ -110,16 +111,15 @@ int psrephem::mass_function (double& mf, double& mf_err) const
   if (parmStatus[EPH_A1] < 1 || parmStatus[EPH_PB] < 1)
     return -1;
 
-  double x     = value_double [EPH_A1];
-  double x_err = error_double [EPH_A1];
+  Estimate<double> x (value_double [EPH_A1], sqr(error_double [EPH_A1]));
+  Estimate<double> pb (value_double [EPH_PB], sqr(error_double [EPH_PB]));
 
-  double pb = value_double [EPH_PB];
-  double pb_err = error_double [EPH_PB];
+  Estimate<double> n = 2.0 * M_PI / (pb * 86400.0);
 
-  double n = 2.0 * M_PI / (pb * 86400.0);
+  Estimate<double> mass_function = sqr(n) * cube(x) / T_sol;
 
-  mf = sqr(n) * cube(x) / T_sol;
-  mf_err = mf * sqrt( 9.0*sqr(x_err/x) + 4.0*sqr(pb_err/pb) );
+  mf = mass_function.val;
+  mf_err = sqrt(mass_function.var);
 
   return 0;
 }
@@ -336,14 +336,13 @@ int psrephem::P_dot (double& p_dot, double& p_dot_err) const
   if (parmStatus[EPH_F] < 1 || parmStatus[EPH_F1] < 1)
     return -1;
 
-  double rf = value_double [EPH_F];
-  double rf_err = error_double [EPH_F];
+  Estimate<double> rf (value_double [EPH_F], sqr(error_double [EPH_F]));
+  Estimate<double> rf_dot (value_double [EPH_F1], sqr(error_double [EPH_F1]));
+    
+  Estimate<double> pdot = - rf_dot / (rf*rf);
 
-  double rf_dot = value_double [EPH_F1];
-  double rf_dot_err = error_double [EPH_F1];
-
-  p_dot = - rf_dot / sqr(rf);
-  p_dot_err = p_dot * sqrt(sqr(2*rf_err/rf) + sqr(rf_dot_err/rf_dot));
+  p_dot = pdot.val;
+  p_dot_err = sqrt(pdot.var);
 
   return 0;
 }
@@ -361,23 +360,16 @@ int psrephem::P_ddot (double& p_ddot, double& p_ddot_err) const
       || parmStatus[EPH_F2] < 1)
     return -1;
 
-  double rf = value_double [EPH_F];
-  double rf_err = error_double [EPH_F];
+  Estimate<double> rf (value_double [EPH_F], sqr(error_double [EPH_F]));
 
-  double rf_dot = value_double [EPH_F1];
-  double rf_dot_err = error_double [EPH_F1];
+  Estimate<double> rf_dot (value_double [EPH_F1], sqr(error_double [EPH_F1]));
 
-  double rf_ddot = value_double [EPH_F2];
-  double rf_ddot_err = error_double [EPH_F2];
+  Estimate<double> rf_ddot (value_double [EPH_F2], sqr(error_double [EPH_F2]));
 
-  double t1 = 2.0 * sqr(rf_dot) / cube(rf);
-  double t1_err = t1 * sqrt(sqr(2*rf_dot_err/rf_dot) + sqr(3*rf_err/rf));
+  Estimate<double> t = (2.0 * sqr(rf_dot)/rf - rf_ddot) / (rf*rf);
 
-  double t2 = rf_ddot / sqr(rf);
-  double t2_err = t2 * sqrt(sqr(rf_ddot_err/rf_ddot)+sqr(2*rf_dot_err/rf_dot));
-
-  p_ddot = t1 - t2;
-  p_ddot_err = p_ddot * sqrt(sqr(t1_err/t1) + sqr(t2_err/t2));
+  p_ddot = t.val;
+  p_ddot_err = sqrt(t.var);
 
   return 0;
 }
@@ -658,6 +650,64 @@ int psrephem::GR_omega_dot_m2 (double& m2, double& m2_err) const
   m2_err = m2 * sqrt ( sqr (2.0/3.0 * mt_err/mt) +
 		       sqr (1.0/3.0 * mf_err/mf) +
 		       sqr (si_err/si) );
+
+  return 0;
+}
+
+// ////////////////////////////////////////////////////////////////////////
+//
+// returns the general relativistic prediction of the rate of precession 
+// of the pulsar's spin axis due to spin-orbit coupling
+//
+// See wrt89
+// 
+// ////////////////////////////////////////////////////////////////////////
+int psrephem::GR_Omega_p (double& Omega_p) const
+{
+  if (parmStatus[EPH_PB] < 1)
+    return -1;
+  double pb = value_double [EPH_PB] * day;
+
+  if (parmStatus[EPH_M2] < 1 )
+    return -1;
+  double m2 = value_double [EPH_M2];
+
+  if (parmStatus[EPH_E] < 1 )
+    return -1;
+  double ecc = value_double [EPH_E];
+
+  double mp, mp_err;
+  if (m1 (mp, mp_err) < 0)
+    return -1;
+
+#ifdef _DEBUG
+  cerr << "psrephem::GR_Omega_p checking values for 1913+16" << endl;
+  pb = 27907;
+  ecc = 0.6171;
+  m2 = 1.442;
+  mp = 1.386;
+#endif
+
+  double w = 2.0 * M_PI / pb;
+
+  // Equation 1 in Weisberg, Romani, and Taylor 1989. ApJ 347, 1030
+  Omega_p = 0.5 * pow(T_sol, 2.0/3.0) * pow (w, 5.0/3.0) / (1-ecc*ecc)
+    * m2 * (4.0*mp + 3.0*m2) * pow (mp+m2, -4.0/3.0);
+
+  // Or, this will give the same answer:
+  // Equation 4 in Barker and O'Connell 1975. ApJ 199, L25
+
+  double mu = mp*m2/(mp+m2);
+  Omega_p = 1.5 * pow(T_sol, 2.0/3.0) * pow (w, 5.0/3.0) / (1-ecc*ecc)
+    * (m2 + mu/3.0) * pow (mp+m2, -1.0/3.0);
+
+  // convert to degrees per year
+  Omega_p *= 180.0/M_PI * year;
+
+#ifdef _DEBUG
+  cerr << "psrephem::GR_Omega_p (1913+16) = " << Omega_p << " deg/yr. "
+    "(should be ~1.21 deg/yr)" << endl;
+#endif
 
   return 0;
 }
