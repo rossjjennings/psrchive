@@ -1,6 +1,6 @@
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/Timer/timer.h,v $
-   $Revision: 1.2 $
-   $Date: 1999/11/02 09:58:23 $
+   $Revision: 1.3 $
+   $Date: 1999/11/18 05:22:34 $
    $Author: straten $ */
 
 /* include file for the main timer structure                            */
@@ -52,6 +52,7 @@
 #define CALFILE_STRLEN 24
 #define SCALFILE_STRLEN 24
 #define SOFTWARE_STRLEN 128
+#define BACKEND_STRLEN 8
 #define TLABEL_STRLEN 8
 /* 
 responsibilities
@@ -69,7 +70,7 @@ corresponds to a sub_int. It is only at the archiver stage
 that we get several dumps becoming a sub_int.
 
 */
-
+#include "environ.h"
 #include "band.h"
 
 struct timer {
@@ -163,11 +164,18 @@ struct timer {
 
   char  software[SOFTWARE_STRLEN];   /* info on software that produced archive     */
 
-/* NB! SPACE IS ALWAYS THE LAST THING */
-  char space[204]; 
-};
+  char   backend [BACKEND_STRLEN];   /* 8-byte code checked for recognized backend */
+  uint32 be_data_size;               /* if backend is recognized, this value is
+					interpreted by archive::load as the number
+					of bytes to skip immediately following the
+					end of the timer header.  It is in this
+					space that derived classes of archive should
+					put additional information.
+				     DEFINE recognized backend codes in timer++.C */
 
-/* a function to set most of these things to NULL values. */
-void timer_init (struct timer * hdr);
+#define TIMER_SPACE 188
+  /* NB! SPACE IS ALWAYS THE LAST THING */
+  char space[TIMER_SPACE];
+};
 
 #endif

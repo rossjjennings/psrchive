@@ -1,6 +1,6 @@
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/Timer/timer++.h,v $
-   $Revision: 1.2 $
-   $Date: 1999/11/02 09:58:22 $
+   $Revision: 1.3 $
+   $Date: 1999/11/18 05:22:34 $
    $Author: straten $ */
 
 #ifndef __TIMER_PLUSPLUS_H
@@ -20,6 +20,22 @@
 #include "psrnamespace.h"
 
 NAMESPACE (Timer)
+
+     static int  nbackends;
+     static char backends[][BACKEND_STRLEN+1];
+
+     // returns the size of the additional backend information, or 0 if none
+     NMSPCF unsigned long backend_data_size(const struct timer& hdr);
+
+     // returns index of code in 'backends' or -1 if not recognized
+     NMSPCF int backend_recognized (const char* backend);
+
+     // sets the name of the backend in 'hdr' to 'backend'
+     // returns 0 if successful, -1 otherwise
+     NMSPCF int set_backend (struct timer* hdr, const char* backend);
+
+     // returns a string containing the backend code, or "un-recognized" if so
+     NMSPCF string get_backend (const struct timer& hdr);
 
   // may be used to receive soft error messages
   static string reason;
@@ -46,6 +62,9 @@ NAMESPACE (Timer)
   // set max_freq_sep if you wish to alter the action of this function
   NMSPCF bool mixable (const timer& hdr1, const timer& arch2,
 		       double max_freq_sep = 0.10 /* 100kHz */);
+
+  // a function to set most of timer struct to NULL values.
+  NMSPCF void init (struct timer * hdr);
 
 END_NAMESPACE
 
