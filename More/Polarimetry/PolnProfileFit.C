@@ -11,6 +11,7 @@
 #include "Calibration/Complex2Constant.h"
 #include "Calibration/CoherencyMeasurementSet.h"
 
+#include "RealTimer.h"
 #include "fftm.h"
 
 #ifdef _DEBUG
@@ -182,6 +183,9 @@ void Pulsar::PolnProfileFit::fit (const PolnProfile* observation)
 
   model->delete_data ();
 
+  RealTimer clock;
+  clock.start();
+
   // initialize the measurement sets
   for (unsigned ibin=1; ibin<nbin; ibin++) {
 
@@ -210,7 +214,14 @@ void Pulsar::PolnProfileFit::fit (const PolnProfile* observation)
 
   }
 
+  clock.stop();
+  cerr << "add_data toook " << clock << endl;
+
+  clock.start();
   model->solve_work ();
+  clock.stop();
+
+  cerr << "solve toook " << clock << endl;
 
 }
 
