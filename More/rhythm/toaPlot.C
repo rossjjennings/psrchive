@@ -511,17 +511,26 @@ void toaPlot::autobin (int nbins)
   cpgsci(11);
   cpgsch(2.0);
 
+  float rms, wted_sum_sq, sum_wts, sum_sq;
+  sum_sq = 0.0;
+  sum_wts = 0.0;
+  wted_sum_sq = 0.0;
+
   // reweight and draw if valid data
   for (int i = 0; i < nbins; i++){
     if (bincount[i] != 0.0) {
       xvals[i] /= bincount[i];
       yvals[i] /= bincount[i];
       binerrors[i] = sqrt(1.0 / bincount[i]);
+      wted_sum_sq += pow(yvals[i],2.0)/pow(binerrors[i],2.0);
+      sum_wts += 1.0/(binerrors[i]*binerrors[i]);
       cpgpt1  (xvals[i],yvals[i],17);
       cpgerr1 (6,xvals[i],yvals[i],binerrors[i],1.0);
     }
   }
+  rms = sqrt(wted_sum_sq/sum_wts);
 
+  cout << "Weighted RMS residual for autobin is " << rms << " us " << endl; 
   cpgsci(1);
   cpgsch(1.0);
   endDrawing();
