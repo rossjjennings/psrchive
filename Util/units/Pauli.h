@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Pauli.h,v $
-   $Revision: 1.12 $
-   $Date: 2004/04/23 13:27:20 $
+   $Revision: 1.13 $
+   $Date: 2004/04/26 18:51:31 $
    $Author: straten $ */
 
 #ifndef __Pauli_H
@@ -70,10 +70,10 @@ template<typename T>
 const Quaternion<complex<T>, Hermitian> convert (const Jones<T>& j)
 {
   return Quaternion<complex<T>, Hermitian>
-    ( T(0.5) * (j.j11 + j.j22),
-      T(0.5) * (j.j11 - j.j22),
-      T(0.5) * (j.j12 + j.j21),
-      T(0.5) * ci (j.j12 - j.j21) );
+    ( T(0.5) * (j.j00 + j.j11),
+      T(0.5) * (j.j00 - j.j11),
+      T(0.5) * (j.j01 + j.j10),
+      T(0.5) * ci (j.j01 - j.j10) );
 }
 
 // convert Jones matrix to Unitary Biquaternion
@@ -81,10 +81,10 @@ template<typename T>
 const Quaternion<complex<T>, Unitary> unitary (const Jones<T>& j)
 {
   return Quaternion<complex<T>, Unitary>
-    ( T(0.5) *     (j.j11 + j.j22),
-      T(-0.5) * ci (j.j11 - j.j22),
-      T(-0.5) * ci (j.j12 + j.j21),
-      T(0.5) *     (j.j12 - j.j21) );
+    ( T(0.5) *     (j.j00 + j.j11),
+      T(-0.5) * ci (j.j00 - j.j11),
+      T(-0.5) * ci (j.j01 + j.j10),
+      T(0.5) *     (j.j01 - j.j10) );
 }
 
 // convert Jones matrix to Hermitian and Unitary Quaternion

@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Jones.h,v $
-   $Revision: 1.10 $
-   $Date: 2003/12/28 12:52:08 $
+   $Revision: 1.11 $
+   $Date: 2004/04/26 18:51:30 $
    $Author: straten $ */
 
 #ifndef __Jones_H
@@ -17,15 +17,15 @@
 template<typename T> class Jones {
   
 public:
-  complex<T> j11,j12,j21,j22;
+  complex<T> j00,j01,j10,j11;
 
   //! Null constructor
   Jones () {  }
 
   //! Construct from complex<T>
-  Jones (complex<T> j11_, complex<T> j12_,
-	 complex<T> j21_, complex<T> j22_)
-    { j11=j11_; j12=j12_; j21=j21_; j22=j22_; }
+  Jones (complex<T> j00_, complex<T> j01_,
+	 complex<T> j10_, complex<T> j11_)
+    { j00=j00_; j01=j01_; j10=j10_; j11=j11_; }
 
   //! Construct from another Jones<T> matrix
   Jones (const Jones& s)
@@ -37,62 +37,62 @@ public:
 
   //! Set this instance equal to another Jones<T> instance
   Jones& operator = (const Jones& s)
-    { j11=s.j11; j12=s.j12; j21=s.j21; j22=s.j22; return *this; }
+    { j00=s.j00; j01=s.j01; j10=s.j10; j11=s.j11; return *this; }
 
   //! Set this instance equal to a scalar
   Jones& operator = (T scalar)
-    { j11=scalar; j12=0; j21=0; j22=scalar; return *this; }
+    { j00=scalar; j01=0; j10=0; j11=scalar; return *this; }
 
   //! Set this instance equal to a complex scalar
   Jones& operator = (complex<T> scalar)
-    { j11=scalar; j12=0; j21=0; j22=scalar; return *this; }
+    { j00=scalar; j01=0; j10=0; j11=scalar; return *this; }
 
   //! Set this instance equal to another Jones<U> instance
   template<typename U> Jones& operator = (const Jones<U>& s)
-    { j11=complex<T>(s.j11.real(), s.j11.imag()); 
-      j12=complex<T>(s.j12.real(), s.j12.imag());
-      j21=complex<T>(s.j21.real(), s.j21.imag()); 
-      j22=complex<T>(s.j22.real(), s.j22.imag()); return *this; }
+    { j00=complex<T>(s.j00.real(), s.j00.imag()); 
+      j01=complex<T>(s.j01.real(), s.j01.imag());
+      j10=complex<T>(s.j10.real(), s.j10.imag()); 
+      j11=complex<T>(s.j11.real(), s.j11.imag()); return *this; }
 
   //! Add another Jones<T> instance to this one
   Jones& operator += (const Jones& s)
-    { j11+=s.j11; j12+=s.j12; j21+=s.j21; j22+=s.j22; return *this; }
+    { j00+=s.j00; j01+=s.j01; j10+=s.j10; j11+=s.j11; return *this; }
 
   //! Subract another Jones<T> instance from this one
   Jones& operator -= (const Jones& s)
-    { j11-=s.j11; j12-=s.j12; j21-=s.j21; j22-=s.j22; return *this; }
+    { j00-=s.j00; j01-=s.j01; j10-=s.j10; j11-=s.j11; return *this; }
 
   //! Multiply another Jones<T> instance into this one (this=this*j)
   Jones& operator *= (const Jones& j);
 
   //! Multiply this instance by complex<U>
   template<typename U> Jones& operator *= (const complex<U>& au)
-    { complex<T>a(au); j11*=a; j12*=a; j21*=a; j22*=a; return *this; }
+    { complex<T>a(au); j00*=a; j01*=a; j10*=a; j11*=a; return *this; }
 
   //! Divide this instance by complex<U>
   template<typename U> Jones& operator /= (const complex<U>& au)
-    { complex<T>a(1.0); a/=au; j11*=a; j12*=a; j21*=a; j22*=a; return *this; }
+    { complex<T>a(T(1.0)); a/=au; j00*=a; j01*=a; j10*=a; j11*=a; return *this; }
 
   //! Multiply this instance by T
   Jones& operator *= (T a)
-    { j11*=a; j12*=a; j21*=a; j22*=a; return *this; }
+    { j00*=a; j01*=a; j10*=a; j11*=a; return *this; }
 
   //! Divide this instance by T
   Jones& operator /= (T a)
-    { T d=1.0/a; j11*=d; j12*=d; j21*=d; j22*=d; return *this; }
+    { T d=1.0/a; j00*=d; j01*=d; j10*=d; j11*=d; return *this; }
 
   //! Equality
   bool operator == (const Jones& b) const
   { return 
-      j11 == b.j11  &&  j12 == b.j12 && 
-      j21 == b.j21  &&  j22 == b.j22;
+      j00 == b.j00  &&  j01 == b.j01 && 
+      j10 == b.j10  &&  j11 == b.j11;
   }
 
   //! Equality
   bool operator == (const complex<T>& scalar) const
   { complex<T> zero;
-    return j11 == scalar  &&  j12 == zero && 
-           j21 == zero  &&  j22 == scalar;
+    return j00 == scalar  &&  j01 == zero && 
+           j10 == zero  &&  j11 == scalar;
   }
 
   //! Inequality
@@ -137,23 +137,23 @@ public:
 
   //! Negation operator returns negative of instance
   const friend Jones operator - (Jones s)
-    { s.j11=-s.j11; s.j12=-s.j12; s.j21=-s.j21; s.j22=-s.j22; return s; }
+    { s.j00=-s.j00; s.j01=-s.j01; s.j10=-s.j10; s.j11=-s.j11; return s; }
 
   //! Returns reference to the value of the matrix at j(ir,ic)
   complex<T>& j (unsigned ir, unsigned ic)
-  { complex<T>* val = &j11; return val[ir*2+ic]; }
+  { complex<T>* val = &j00; return val[ir*2+ic]; }
   
   //! Returns const reference to the value of the matrix at j(ir,ic)
   const complex<T>& j (unsigned ir, unsigned ic) const
-    { const complex<T>* val = &j11; return val[ir*2+ic]; }
+    { const complex<T>* val = &j00; return val[ir*2+ic]; }
 
   //! Alternative access to elements
   complex<T>&  operator [] (unsigned n)
-  { complex<T>* val = &j11; return val[n]; }
+  { complex<T>* val = &j00; return val[n]; }
 
   //! Alternative access to elements 
   const complex<T>& operator [] (unsigned n) const
-  { const complex<T>* val = &j11; return val[n]; }
+  { const complex<T>* val = &j00; return val[n]; }
 
   //! The identity matrix
   static const Jones& identity();
@@ -177,10 +177,10 @@ template<typename T>
 Jones<T>& Jones<T>::operator *= (const Jones<T>& j)
 {
   complex<T> temp;
-  temp = j11 * j.j11 + j12 * j.j21;
-  j12  = j11 * j.j12 + j12 * j.j22; j11=temp;
-  temp = j21 * j.j11 + j22 * j.j21;
-  j22  = j21 * j.j12 + j22 * j.j22; j21=temp;
+  temp = j00 * j.j00 + j01 * j.j10;
+  j01  = j00 * j.j01 + j01 * j.j11; j00=temp;
+  temp = j10 * j.j00 + j11 * j.j10;
+  j11  = j10 * j.j01 + j11 * j.j11; j10=temp;
   return *this; 
 }
 
@@ -189,40 +189,40 @@ template<typename T>
 Jones<T> inv (const Jones<T>& j)
 {
   complex<T> d(1.0); d/=det(j);
-  return Jones<T>(d*j.j22, -d*j.j12,
-		  -d*j.j21, d*j.j11);
+  return Jones<T>(d*j.j11, -d*j.j01,
+		  -d*j.j10, d*j.j00);
 }
 
 //! Returns the complex conjugate
 template<typename T>
 Jones<T> conj (const Jones<T>& j)
 {
-  return Jones<T>(std::conj(j.j11), std::conj(j.j12),
-		  std::conj(j.j21), std::conj(j.j22));
+  return Jones<T>(std::conj(j.j00), std::conj(j.j01),
+		  std::conj(j.j10), std::conj(j.j11));
 }
 
 //! Returns the Hermitian transpose (transpose of complex conjugate)
 template<typename T> 
 Jones<T> herm (const Jones<T>& j)
 {
-  return Jones<T>(std::conj(j.j11), std::conj(j.j21),
-		  std::conj(j.j12), std::conj(j.j22));
+  return Jones<T>(std::conj(j.j00), std::conj(j.j10),
+		  std::conj(j.j01), std::conj(j.j11));
 }
 
 //! Returns the determinant
 template<typename T>
-complex<T> det (const Jones<T>& j) { return j.j11*j.j22 - j.j12*j.j21; }
+complex<T> det (const Jones<T>& j) { return j.j00*j.j11 - j.j01*j.j10; }
 
 //! Returns the trace
 template<typename T>
-complex<T> trace (const Jones<T>& j) { return j.j11 + j.j22; }
+complex<T> trace (const Jones<T>& j) { return j.j00 + j.j11; }
 
 //! Returns the variance (square of the Frobenius norm)
 template<typename T>
 T norm (const Jones<T>& j)
 { return
-    norm(j.j11) + norm(j.j12) + 
-    norm(j.j21) + norm(j.j22);
+    norm(j.j00) + norm(j.j01) + 
+    norm(j.j10) + norm(j.j11);
 }
 
 template<typename T>
@@ -235,7 +235,7 @@ T fabs (const Jones<T>& j)
 template<typename T>
 ostream& operator<< (ostream& ostr, const Jones<T>& j)
 {
-  return ostr << "[" << j.j11 << j.j12 << j.j21 << j.j22 << "]";
+  return ostr << "[" << j.j00 << j.j01 << j.j10 << j.j11 << "]";
 }
 
 #endif  /* not __Jones_H defined */
