@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Estimate.h,v $
-   $Revision: 1.1 $
-   $Date: 2003/02/10 14:46:26 $
+   $Revision: 1.2 $
+   $Date: 2003/02/10 19:20:42 $
    $Author: straten $ */
 
 #ifndef __Estimate_H
@@ -13,17 +13,17 @@ class Estimate
 {
  public:
   T val;
-  T sigsq;
+  T var;
 
   //! Construct from a value and its estimated error, \f$ \sigma^2 \f$
-  Estimate (T _val=0, T _sigsq=0) { val=_val; sigsq=_sigsq; }
+  Estimate (T _val=0, T _var=0) { val=_val; var=_var; }
 
   //! Construct from another Estimate
-  Estimate (const Estimate& d) { val=d.val; sigsq=d.sigsq; }
+  Estimate (const Estimate& d) { val=d.val; var=d.var; }
 
   //! Assignment operator
   Estimate & operator= (const Estimate& d)
-  { val=d.val; sigsq=d.sigsq; return *this; }
+  { val=d.val; var=d.var; return *this; }
 
 };
 
