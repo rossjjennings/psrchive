@@ -36,12 +36,6 @@ Pulsar::Archive::~Archive ()
 { 
   if (verbose)
     cerr << "Archive::destructor" << endl;
-
-#if FIXED
-  for (unsigned isub=0; isub<subints.size(); isub++)
-    if (subints[isub])
-      delete subints[isub];
-#endif
 }
 
 void Pulsar::Archive::copy (const Archive& archive)

@@ -60,10 +60,10 @@ Pulsar::IntegrationManager::get_Integration (unsigned subint) const
   return thiz->get_Integration (subint);
 }
 
-void Pulsar::IntegrationManager::append (const vector<Integration*>& more)
+void Pulsar::IntegrationManager::append (const IntegrationManager* more)
 {
-  for (unsigned isub=0; isub<more.size(); isub++)
-    subints.push_back ( new_Integration (more[isub]) );
+  for (unsigned isub=0; isub<more->subints.size(); isub++)
+    subints.push_back ( new_Integration (more->subints[isub]) );
 
   set_nsubint (subints.size());
 }  

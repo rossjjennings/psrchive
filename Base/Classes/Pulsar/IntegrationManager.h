@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/IntegrationManager.h,v $
-   $Revision: 1.1 $
-   $Date: 2003/01/06 22:36:08 $
+   $Revision: 1.2 $
+   $Date: 2003/01/12 12:12:55 $
    $Author: straten $ */
 
 #ifndef __Pulsar_IntegrationManager_h
@@ -63,7 +63,7 @@ namespace Pulsar {
     virtual void resize (unsigned nsubint, bool instances=true);
 
     //! Append new_Integration copies of Integration objects to self
-    void append (const vector<Integration*>& more_subints);
+    void append (const IntegrationManager* more_subints);
 
   private:
 

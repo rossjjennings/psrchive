@@ -48,9 +48,7 @@ void Pulsar::Archive::append (const Archive* arch)
 
   unsigned old_nsubint = get_nsubint();
 
-#if FIXED
-  append (arch->subints);
-#endif
+  IntegrationManager::append (arch);
 
   // if observation is not a pulsar, no further checks required
   if (get_type() != Signal::Pulsar) {
