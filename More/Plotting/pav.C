@@ -1,5 +1,5 @@
 //
-// $Id: pav.C,v 1.34 2003/04/29 11:31:53 pulsar Exp $
+// $Id: pav.C,v 1.35 2003/04/29 13:29:43 straten Exp $
 //
 // The Pulsar Archive Viewer
 //
@@ -44,11 +44,12 @@ void usage ()
     " -g        Position angle across a profile\n"
     " -G        Greyscale of profiles in frequency and phase\n"
     //    " -H        Print ASCII of Integration 0, poln 0, chan 0 \n"
-    " -l        Do not plot labels outside of plotting area \n"
+    " -l        Do not plot labels outside of plotting area\n"
     " -M meta   meta names a file containing the list of files\n"
     " -p        add polarisations together \n"
     " -P        select polarization\n"
     " -q        Plot a position angle frequency spectrum colour map\n"
+    " -Q        Position angle frequency spectrum for on-pulse region\n"
     " -r phase  rotate the profiles by phase (in turns)\n"
     " -R        Display SNR information\n"
     " -s        SNR frequency spectrum plot\n"
@@ -63,16 +64,6 @@ void usage ()
     " -Y        Display all integrations in a time vs phase plot\n"
     " -z x1,x2  start and end phase \n"
     " -Z        Smear a profile by convolving with a hat function\n"
-    " -C        Centre the profile\n"
-    " -Y        Display all integrations in a time vs phase plot\n"
-    " -A        Plot instrumental phase across the band\n"
-    " -s        SNR frequency spectrum plot\n"
-    " -g        Position angle across a profile\n"
-    " -B        Off-pulse bandpass\n"
-    " -X        Plot cal amplitude and phase vs frequency channel\n"
-    " -W        Change colour scheme to suite white background\n"
-    " -q bin    Plot a position angle frequency spectrum for this bin\n"
-    " -Q        Position angle frequency spectrum for on-pulse region\n"
        << endl;
 }
 
@@ -175,7 +166,7 @@ int main (int argc, char** argv)
       return 0;
 
     case 'i':
-      cout << "$Id: pav.C,v 1.34 2003/04/29 11:31:53 pulsar Exp $" << endl;
+      cout << "$Id: pav.C,v 1.35 2003/04/29 13:29:43 straten Exp $" << endl;
       return 0;
 
     case 'l':
