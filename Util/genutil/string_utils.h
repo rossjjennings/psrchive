@@ -1,7 +1,7 @@
 //-*-C++-*-
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Attic/string_utils.h,v $
-   $Revision: 1.15 $
-   $Date: 2002/10/29 04:53:50 $
+   $Revision: 1.16 $
+   $Date: 2002/10/30 07:49:14 $
    $Author: hknight $ */
 
 #ifndef __STRING_UTILS_H
@@ -9,8 +9,10 @@
 
 #include <sys/types.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 #include <iostream>
+#include <iomanip>
 #include <strstream>
 #include <string>
 #include <vector>
@@ -100,52 +102,61 @@ string stringdelimit(const vector<string>& words, char delimiter);
 // useful for taking lists of files on the command line
 vector<string> cstrarray2vec(const char **vals, int nelem);
 
-/* BEWARE: THESE ARE KNOWN MEMORY LEAKERS: */
-
 template<class T>
 string form_string(T input){
   ostrstream ost;
   ost << input << ends;
-  return ost.str();
+  string ss = ost.str();
+  delete ost.str();
+  return ss;
 }
 
 template<class T>
 string form_string(T input, int precision){
   ostrstream ost;
-  ost << setprecision( precision );
-  ost << input << ends;
-  
+  ost << setprecision( precision ) << input << ends;
   string ss = ost.str();
-  int bla = 0;
-  if( bla==1 )
-    cout << ss;
+  delete ost.str();
   return ss;
 }
 
+/* Doesn't work for pointers!  (Stupid linux compiler) */
 template<class T>
 T convert_string(string ss){
   ostrstream ost;
   ost << ss << ends;
+
   istrstream ist(ost.str());
   
   T outie;
-  ist >> outie; 
+  ist >> outie;
+
+  delete ost.str();
+
   return outie;
 }
 
+/* Doesn't work for pointers!  (Stupid linux compiler) */
 template<class T>
 T convert_string(string ss, int precision){
-  ostrstream ost;
-  ost << ss << ends;
-  istrstream ist(ost.str());
-  ist.setprecision( precision );
   
+  ostrstream ost;
+  ost << setiosflags(ios::fixed) << setprecision( precision ) << ss << ends;
+
+  istrstream ist(ost.str());
+  ist >> setiosflags(ios::fixed) >> setiosflags(ios::showpoint) >> setprecision( precision );
+
   T outie;
-  ist >> outie; 
+  ist >> setw( precision ) >> outie; 
+  
+  delete ost.str();
   return outie;
 }
 
-/* these use stdio- if you don't like the MEMORY LEAKING istrstreams */
+string bool2string(bool mybool);
+void* string2ptr(string ss);
+
+/* these use stdio- which doesn't use costly dynamic memory allocations */
 string make_string(int input);
 string make_string(unsigned input);
 string make_string(long input);

@@ -104,6 +104,19 @@ cstrarray2vec(const char **vals, int nelem)
   return v;
 }
 
+
+string bool2string(bool mybool){
+  if(mybool)
+    return "true";
+  return "false";
+}
+
+void* string2ptr(string ss){
+  void* ptr;
+  sscanf(ss.c_str(),"%p",ptr);
+  return ptr;
+}
+
 string make_string(int input){
   char dummy[50];
   sprintf(dummy,"%d",input);
