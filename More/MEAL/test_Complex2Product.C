@@ -4,7 +4,7 @@
 
 using namespace std;
 
-//! Template class provides public access to MEAL::get_evaluation_changed
+// Template class provides public access to MEAL::get_evaluation_changed
 template <class T>
 class Test : public T
 {

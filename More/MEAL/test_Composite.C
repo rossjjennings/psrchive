@@ -6,7 +6,7 @@ using namespace std;
 
 using namespace MEAL;
 
-//! Tests the mapping function of the Composite class
+// Tests the mapping function of the Composite class
 class CompositeTest: public Composite {
 
 public:

@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/ReferenceTo.h,v $
-   $Revision: 1.1 $
-   $Date: 2004/11/22 09:31:49 $
+   $Revision: 1.2 $
+   $Date: 2004/11/23 12:14:35 $
    $Author: straten $ */
 
 #ifndef __ReferenceTo_h
@@ -14,6 +14,7 @@
 
 namespace Reference {
 
+  //! A smart pointer that gets invalidated when its target is destroyed
   template<class Type, bool active = true> class To {
 
   public:

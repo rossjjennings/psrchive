@@ -121,7 +121,6 @@ const string Error::get_message() const
   return message;
 }
 
-//! Convenience output operator in global namespace
 ostream& operator<< (ostream& ostr, const Error& error)
 {
   error.report (ostr);

@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/ScalarArgument.h,v $
-   $Revision: 1.3 $
-   $Date: 2004/11/22 19:26:04 $
+   $Revision: 1.4 $
+   $Date: 2004/11/23 12:14:35 $
    $Author: straten $ */
 
 #ifndef __ScalarArgument_H
@@ -14,7 +14,7 @@
 
 namespace MEAL {
 
-  //! Represents a constant scalar value
+  //! Represents a scalar argument
   class ScalarArgument : public Scalar,public Univariate,public NoParameters {
 
   public:

@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Estimate.h,v $
-   $Revision: 1.24 $
-   $Date: 2004/10/26 12:37:07 $
+   $Revision: 1.25 $
+   $Date: 2004/11/23 12:14:35 $
    $Author: straten $ */
 
 #ifndef __Estimate_h
@@ -97,7 +97,7 @@ class Estimate
   { return val > d.val; }
 
   //! Inversion operator
-  /*! Where \f$ r=1/x \f$, \f$ \sigma_r = r^2\sigma_x/x^2 = sigma_x/x^4 */
+  /*! Where \f$ r=1/x \f$, \f$ \sigma_r=r^2\sigma_x/x^2 = \sigma_x/x^4 \f$ */
   const Estimate inverse () const
   { T v=1.0/val; return Estimate (v,var*v*v*v*v); }
 
@@ -220,6 +220,9 @@ std::ostream& operator<< (std::ostream& ostr, const MeanEstimate<T,U>& mean)
   return ostr << mean.get_Estimate();
 }
 
+//! Calculates the mean of a value in radians
+/*! This class stores the mean value of the sine and cosine of each angle
+    added to the mean, and returns the inverse tangent of their ratio. */
 template <typename T, typename U>
 class MeanRadian
 {

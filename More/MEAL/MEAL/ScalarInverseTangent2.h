@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/ScalarInverseTangent2.h,v $
-   $Revision: 1.3 $
-   $Date: 2004/11/22 19:26:04 $
+   $Revision: 1.4 $
+   $Date: 2004/11/23 12:14:35 $
    $Author: straten $ */
 
 #ifndef __MEAL_ScalarInverseTangent2_H
@@ -12,7 +12,7 @@
 
 namespace MEAL {
 
-  //! The tangent of a Scalar function
+  //! The inverse tangent of the ratio of two Scalar functions
   class ScalarInverseTangent2 : public BinaryScalar
   {
 

@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/ScalarInverseHypTangent.h,v $
-   $Revision: 1.3 $
-   $Date: 2004/11/22 19:26:04 $
+   $Revision: 1.4 $
+   $Date: 2004/11/23 12:14:35 $
    $Author: straten $ */
 
 #ifndef __MEAL_ScalarInverseHypTangent_H
@@ -12,7 +12,7 @@
 
 namespace MEAL {
 
-  //! The hyperbolic tangent of a Scalar function
+  //! The inverse hyperbolic tangent of a Scalar function
   class ScalarInverseHypTangent : public UnaryScalar
   {
 

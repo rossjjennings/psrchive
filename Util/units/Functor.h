@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Functor.h,v $
-   $Revision: 1.1 $
-   $Date: 2004/11/22 09:31:49 $
+   $Revision: 1.2 $
+   $Date: 2004/11/23 12:14:35 $
    $Author: straten $ */
 
 #ifndef __Swinburne_Functor_h
@@ -10,7 +10,7 @@
 
 #include "Reference.h"
 
-//! an empty type used to allow one template name
+// an empty type used to allow one template name
 struct __functor_empty {};
 
 //! Implements an adaptable function object in compliance with the STL
