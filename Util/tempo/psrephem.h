@@ -1,3 +1,10 @@
+//-*-C++-*-
+
+/* $Source: /cvsroot/psrchive/psrchive/Util/tempo/psrephem.h,v $
+   $Revision: 1.5 $
+   $Date: 2001/01/04 14:04:30 $
+   $Author: straten $ */
+
 #ifndef __PSREPHEM_H
 #define __PSREPHEM_H
 
@@ -5,9 +12,8 @@
 
 #include <vector>
 #include <string>
-#include "psr_cpp.h"
 
-#define PSREPHEM_TMP_FNAME ".psrephem_XXXXXX"
+#include "MJD.h"
 
 class psrephem 
 {
@@ -17,7 +23,6 @@ class psrephem
  public:
 
   // this string needs to be long enough to hold the above-defined MACRO
-  static char tmp_fname[25];
   static vector<string> extensions();
 
   int*    parmStatus;
@@ -40,19 +45,22 @@ class psrephem
   psrephem& operator = (const psrephem &);
 
   int create (const char* psr_name, int use_cwd);
-  int load (const char* filename);
+  int load   (const char* filename);
   int unload (const char* filename) const;
 
-  int load (FILE* instream, size_t bytes);
+  int load   (FILE* instream, size_t bytes);
   int unload (FILE* outstream) const;
 
-  int load (string* str);
+  int load   (string* str);
   int unload (string* str) const;
 
   void   nofit();
   void   fitall();
+
+  void   set_epoch (const MJD& new_epoch, bool binary = false);
+
   double p() const;
-  double p_err();
+  double p_err() const;
 
   // return some values
   string psrname() const;
@@ -78,6 +86,8 @@ class psrephem
 
   // static char ephemstr [EPH_NUM_KEYS][EPH_STR_LEN];
 };
+
+ostream& operator<< (ostream& ostr, const psrephem& eph);
 
 #endif
 
