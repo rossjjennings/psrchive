@@ -47,7 +47,6 @@ double Pulsar::Profile::GaussianShift (const Profile& std, float& ephase,
   int bfall = 0;
 
   ptr->find_peak_edges(brise, bfall);
-  cerr << brise << ", " << bfall << endl;
 
   if (brise > bfall) {
     brise = brise - get_nbin();
@@ -128,7 +127,7 @@ double Pulsar::Profile::GaussianShift (const Profile& std, float& ephase,
       model = gm;
     }
     
-    return gm.get_centre();
+    return gm.get_centre() / double(ptr->get_nbin());
     
   }
   catch (Error& error) {
