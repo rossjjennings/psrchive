@@ -244,15 +244,6 @@ void Pulsar::Archive::fold (unsigned nfold)
   set_nbin (get_Integration(0)->get_nbin());
 }
 
-void Pulsar::Archive::deparallactify()
-{
-
-}
-
-void Pulsar::Archive::parallactify()
-{
-
-}
 
 void Pulsar::Archive::invint ()
 {

@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Archive.h,v $
-   $Revision: 1.71 $
-   $Date: 2003/04/29 11:32:32 $
-   $Author: pulsar $ */
+   $Revision: 1.72 $
+   $Date: 2003/05/02 11:26:19 $
+   $Author: straten $ */
 
 /*! \mainpage 
  
@@ -447,6 +447,9 @@ namespace Pulsar {
 
     //! Un-correct receiver feed angle orientation
     virtual void parallactify();
+
+    //! Correct or un-correct parallactic angle rotation
+    virtual void parallactic (bool correct);
 
     //! Convert polarimetric data to the specified state
     virtual void convert_state (Signal::State state);
