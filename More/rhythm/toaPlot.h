@@ -74,10 +74,6 @@ class toaPlot: public QPgplot {
   // Interactivity buffers
   unsigned clicks;
   
-  int   tempint;
-  float distance;
-  float min;
-
   float x1;
   float x2;
   float y1;

@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/rhythm/rhythm.h,v $
-   $Revision: 1.16 $
-   $Date: 2003/04/22 04:26:49 $
+   $Revision: 1.17 $
+   $Date: 2003/04/22 07:58:10 $
    $Author: ahotan $ */
 
 // //////////////////////////////////////////////////////////////////////////
@@ -21,6 +21,8 @@
 #include <qlistbox.h>
 #include <qhbox.h>
 #include <qvbox.h>
+#include <qlabel.h>
+#include <qpixmap.h>
 #include <qbuttongroup.h>
 #include <qradiobutton.h>
 
@@ -110,7 +112,10 @@ class Rhythm : public QMainWindow
   toaPlot::AxisQuantity xq;
   toaPlot::AxisQuantity yq;
 
+  QVBox* leftpanel;
+  QHBox* bottompanel;
   QVBox* controls;
+  QLabel* header;
   QButtonGroup* modechanger;
   QRadioButton* zoom;
   QRadioButton* sel;

@@ -44,8 +44,8 @@ void Rhythm::menubarConstruct ()
   tempo->setItemEnabled (saveParmsID, false);
 
   tempo->insertSeparator();
-  // automatic fitting starts out enabled
-  autofitID = tempo->insertItem( "Disable &Auto Fit",
+  // automatic fitting starts out disabled
+  autofitID = tempo->insertItem( "Enable &Auto Fit",
 				 this, SLOT( toglauto() ));
 
   // ///////////////////////////////////////////////////////////////////////
@@ -134,8 +134,8 @@ void Rhythm::toglauto()
 void Rhythm::about()
 {
   QMessageBox::about (NULL, "Rhythm",
-		      "Future replacement of psrclock?\n"
-		      "A graphical user interface to TEMPO.");
+		      "A graphical user interface to TEMPO.\n\n"
+		      "   Written by: W. van Straten & A. Hotan   \n");
 }
 
 void Rhythm::aboutQt()

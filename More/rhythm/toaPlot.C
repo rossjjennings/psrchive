@@ -27,10 +27,6 @@ toaPlot::toaPlot (QWidget *parent, const char *name )
   task = 1;
   clicks = 0;
   
-  tempint = 0;
-  distance = 0.0;
-  min = 0.0;
-
   requestEvent(mode);
 }
 
@@ -126,17 +122,25 @@ void toaPlot::handleEvent (float x, float y, char ch)
 	//Do Nothing
       }
       else if (task == 2) {
+
 	if (data.empty()) 
 	  break;
-	min = sqrt(pow(fabs(x-float(data[0].x)),2.0) + pow(fabs(y-float(data[0].y)),2.0));
+
+	int tempint = data[0].id;
+	float distance = 0.0;
+
+	float min = sqrt(pow(x-float(data[0].x),2.0) + pow(y-float(data[0].y),2.0));
+
 	for (unsigned i = 1; i < data.size(); i++) {
-	  distance = sqrt(pow(fabs(x-float(data[i].x)),2.0) + pow(fabs(y-float(data[i].y)),2.0));
+	  distance = sqrt(pow(x-float(data[i].x),2.0) + pow(y-float(data[i].y),2.0));
 	  if (distance < min) {
 	    min = distance;
 	    tempint = data[i].id;
 	  }
 	}
+	cerr << "Single Selecting: " << tempint << endl;
 	emit selected(tempint);
+	handleEvent(0,0,'~');
       }
       break;
     case 4:
@@ -179,7 +183,7 @@ void toaPlot::handleEvent (float x, float y, char ch)
 	  } 
 	  for (unsigned i = 0; i < data.size(); i++) {
 	    if ((data[i].x > x1) && (data[i].x < x2))
-	      emit selected(int(i)); 
+	      emit selected(data[i].id); 
 	  }
 	  break;
 	}
@@ -224,7 +228,7 @@ void toaPlot::handleEvent (float x, float y, char ch)
 	  } 
 	  for (unsigned i = 0; i < data.size(); i++) {
 	    if ((data[i].y > y1) && (data[i].y < y2))
-	      emit selected(int(i)); 
+	      emit selected(data[i].id);
 	  }
 	  break;
 	}
@@ -289,7 +293,7 @@ void toaPlot::handleEvent (float x, float y, char ch)
 	  } 
 	  for (unsigned i = 0; i < data.size(); i++) {
 	    if ((data[i].y > y1) && (data[i].y < y2) && (data[i].x > x1) && (data[i].x < x2))
-	      emit selected(int(i)); 
+	      emit selected(data[i].id); 
 	  }
 	  mode = 0;
 	  handleEvent(0,0,'~');

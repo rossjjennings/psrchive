@@ -90,7 +90,16 @@ Rhythm::Rhythm (QWidget* parent, int argc, char** argv) :
   
   // Build the cursor control panel
 
-  controls = new QVBox(container);
+  leftpanel = new QVBox(container);
+
+  QPixmap* pretty_pic = new QPixmap("/home/office/ahotan/crabshrug_rox.jpg");
+  header = new QLabel(leftpanel);
+  header->setFrameStyle( QFrame::Panel | QFrame::Sunken );
+  header->setPixmap(*pretty_pic);
+
+  bottompanel = new QHBox(leftpanel);
+
+  controls = new QVBox(bottompanel);
   
   modechanger = new QButtonGroup(3, Qt::Vertical, "Mode", controls);
   modechanger -> setRadioButtonExclusive(true);
@@ -133,7 +142,7 @@ Rhythm::Rhythm (QWidget* parent, int argc, char** argv) :
   
   // Instantiate the Axis selection panels
 
-  chooser = new AxisSelector(container);
+  chooser = new AxisSelector(bottompanel);
 
   QObject::connect(chooser, SIGNAL(YChange(toaPlot::AxisQuantity)),
 		   this, SLOT(YChange(toaPlot::AxisQuantity)));
@@ -146,7 +155,7 @@ Rhythm::Rhythm (QWidget* parent, int argc, char** argv) :
   toa_text = new QListBox(container, "TOA_INFO");
   toa_text -> setSelectionMode(QListBox::Multi);
   
-  toa_text -> setMinimumSize(400,400);
+  toa_text -> setMinimumSize(500,400);
 
   QObject::connect(toa_text, SIGNAL(selectionChanged()),
 		   this, SLOT(reselect()));
@@ -409,13 +418,16 @@ void Rhythm::goplot ()
 
   for (unsigned i = 0; i < toas.size(); i++) {
     if (toas[i].state != Tempo::toa::Deleted) {
+
       wrapper tempw;
+
       tempw.x = tempx[i];
       tempw.y = tempy[i];
       tempw.e = yerrs[i];
+      tempw.id = i;
       if (toas[i].state == Tempo::toa::Selected)
 	tempw.ci = 2;
-      tempw.id = i;
+
       useme.push_back(tempw);
     }
   }
@@ -534,29 +546,30 @@ void Rhythm::deleteselection ()
     if (toas[i].state == Tempo::toa::Selected)
       toas[i].state = Tempo::toa::Deleted;
   }
+
   goplot ();
+  plot_window->autoscale();
 }
 
 void Rhythm::undeleteall ()
 {
   for (unsigned i = 0; i < toas.size(); i++) {
-    if (toas[i].state == Tempo::toa::Deleted)
+    if (toas[i].state == Tempo::toa::Deleted) {
       toas[i].state = Tempo::toa::Normal;
+      toa_text -> setSelected (i, false);
+    }
   }
   goplot ();
+  plot_window->autoscale();
 }
 
 
 void Rhythm::clearselection ()
 {
   for (unsigned i = 0; i < toas.size(); i++) {
-    if (i >= int(toas.size()))
-      return;
-    if (i < 0)
-      return;
     
     if (toas[i].state == Tempo::toa::Deleted)
-      return;
+      continue;
     
     toas[i].state = Tempo::toa::Normal;
     toa_text -> setSelected (i, false);
