@@ -7,15 +7,6 @@
 extern "C" double F772C(sla_galeq)(double *, double *, double *, double *);
 extern "C" double F772C(sla_eqgal)(double *, double *, double *, double *);
 
-sky_coord & sky_coord::operator= (const sky_coord & co)
-{
-  if (this != &co) {
-    angle1 = co.angle1;
-    angle2 = co.angle2;
-  }
-  return *this;
-}
-
 // ra and dec given in milliseconds of an hour
 // JRa and JDec are stored in radians
 const sky_coord& sky_coord::setJRaDecMS(long int ra, long int dec)
@@ -43,7 +34,7 @@ sky_coord::setGalactic(AnglePair &gal)
 }
 
 AnglePair
-sky_coord::getGalactic()
+sky_coord::getGalactic() const
 {
   double l, b;
   double ra, dec;
