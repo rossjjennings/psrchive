@@ -11,9 +11,6 @@ void Pulsar::Archive::Agent::plugin_load ()
     Registry::Plugin::verbose = true;
   }
 
-  if (!plugins)
-    plugins = new Registry::Plugin;
- 
   if (plugin_path.length() != 0)  {
     if (verbose)
       cerr << "Pulsar::Archive::Agent::plugin_load plugin_path="
@@ -55,7 +52,7 @@ void Pulsar::Archive::Agent::plugin_load ()
 
 void Pulsar::Archive::Agent::plugin_report ()
 {
-  if (!plugins || plugins.ok.size() == 0)
+  if (plugins.ok.size() == 0)
     cerr << "Archive::Agent::report No successfully loaded plugins." << endl;
   else
     cerr << "Archive::Agent::report Successfully loaded plugins:" << endl;
