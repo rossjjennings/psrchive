@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/rhythm/rhythm.h,v $
-   $Revision: 1.46 $
-   $Date: 2005/03/08 00:19:28 $
+   $Revision: 1.47 $
+   $Date: 2005/04/01 04:49:22 $
    $Author: ahotan $ */
 
 // //////////////////////////////////////////////////////////////////////////
@@ -32,6 +32,8 @@
 #include <qprogressdialog.h>
 #include <qfiledialog.h>
 #include <qcheckbox.h>
+#include <qlistview.h>
+#include <qtabwidget.h>
 
 #include "psrephem.h"
 #include "ephio.h"
@@ -138,16 +140,23 @@ class Rhythm : public QMainWindow
  protected:
 
   QApplication* myapp;
+  QTabWidget*   tabs;
 
   RhythmOptions opts;
   
   // The array of toas
   std::vector<Tempo::toa> toas;
+
+  // A parallel vector of QListViewItem pointers
+  bool show_list;
+  std::vector<QListViewItem*> ltoas;
+  QListView* lister;
+
   // The file from which they were read
   string toa_filename;
   
   void load_toas (const char* fname);
-  void add_toas (const char* fname);
+  void add_toas  (std::vector<Tempo::toa>);
   void save_toas (const char* fname);
   
   void update_mode ();
@@ -251,7 +260,6 @@ class Rhythm : public QMainWindow
 
   // File menu callbacks
   void load_toas ();
-  void add_toas ();
   void close_toas ();
   int  prompt_save_toas ();
   void save_toas ();

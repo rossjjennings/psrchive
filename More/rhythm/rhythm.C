@@ -105,9 +105,25 @@ Rhythm::Rhythm (QApplication* master, QWidget* parent, int argc, char** argv) :
   if (vverbose)
     cerr << "Rhythm:: creating toaPlotter" << endl;
   
+  // Create a tab widget to hold different displays
+  tabs = new QTabWidget(container);
+
   // Instantiate the plotting window
 
-  plot_window = new toaPlot(container);
+  plot_window = new toaPlot(tabs);
+  tabs->addTab(plot_window, "Plot");
+
+  show_list = true;
+
+  if (show_list) {
+    lister = new QListView(tabs);
+    tabs->addTab(lister, "List");
+
+    lister->setSelectionMode(QListView::Extended);
+    lister->addColumn("Arrival Time", 130);
+    lister->addColumn("Frequency", 100);
+    lister->addColumn("Information", 175);
+  }
 
   QObject::connect(plot_window, SIGNAL(ineednewdata()),
 		   this, SLOT(request_update()));
@@ -224,7 +240,7 @@ Rhythm::Rhythm (QApplication* master, QWidget* parent, int argc, char** argv) :
     cerr << "Rhythm:: call command_line_parse" << endl;
 
   command_line_parse (argc, argv);
-  
+
   // Find standard profiles
   
   char temp[128];
@@ -257,77 +273,49 @@ void Rhythm::load_toas (const char* fname)
 {
   QString str;
 
-  if (verbose)
-    cerr << "Loading TOAs from '" << fname << "'";
+  std::vector<Tempo::toa> input;
   
-  Tempo::toa::load (fname, &toas);
+  Tempo::toa::load (fname, &input);
   
-  if (toas.size() <= 0) {
+  if (input.size() <= 0) {
     str = "No TOAs found in file";
     footer->setText(str);
     return;
   }
 
-  char num[8];
-  sprintf(num, "%d", toas.size());
-  
-  str = "Loaded ";
-  str += num;
-  str += " TOA's";
-  
-  footer->setText(str);
+  bool first_load = false;
 
-  tempo->setItemEnabled (fitID, true);
-  tempo->setItemEnabled (fitSelID, true);
-  tempo->setItemEnabled (strideFitID, true);
+  if (toas.empty())
+    first_load = true;
 
-  toa_filename = fname;
-  
-  if (toas[0].get_format() == Tempo::toa::Command) {
-    char junk[80];
-    int  themode = 0;
-    sscanf((toas[0].get_auxilliary_text()).c_str(), "%s %d", junk, &themode);
-    if (strcmp(junk, "MODE") == 0)
-      if (themode == 1)
-	toglweights();
-  }
+  add_toas(input);
 
-  update_mode();
-
-  for (unsigned i = 0; i < toas.size(); i++) {
-
-    if (toas[i].get_format() == Tempo::toa::Command) {
-      toas[i].ci = 4;
-      toas[i].di = 4;
+  if (first_load) {
+    
+    if (toas[0].get_format() == Tempo::toa::Command) {
+      char junk[80];
+      int  themode = 0;
+      sscanf((toas[0].get_auxilliary_text()).c_str(), 
+	     "%s %d", junk, &themode);
+      if (strcmp(junk, "MODE") == 0)
+	if (themode == 1)
+	  toglweights();
     }
+    
+    update_mode();
+    
+    tempo->setItemEnabled (fitID, true);
+    tempo->setItemEnabled (fitSelID, true);
+    tempo->setItemEnabled (strideFitID, true);
+    
+    toa_filename = fname;
   }
-  
-  toas_modified = false;
-
-  if (autofit)
-    fit ();
 }
 
-void Rhythm::add_toas (const char* fname)
+void Rhythm::add_toas (std::vector<Tempo::toa> new_toas)
 {
   QString str;
 
-  if (verbose)
-    cerr << "Adding in TOAs from '" << fname << "'";
-  
-  std::vector<Tempo::toa> new_toas;
-  
-  Tempo::toa::load (fname, &new_toas);
-  
-  if (new_toas.size() <= 0) {
-    str = "No TOAs found in file";
-    footer->setText(str);
-    return;
-  }
-
-  if (verbose)
-    cout << "...loaded " << new_toas.size() << " new TOA's" << endl;
-  
   for (unsigned i = 0; i < new_toas.size(); i++)
     toas.push_back(new_toas[i]);
 
@@ -340,21 +328,38 @@ void Rhythm::add_toas (const char* fname)
   
   footer->setText(str);
   
-  if (verbose)
-    cout << " done." << endl;
-  
-  tempo->setItemEnabled (fitID, true);
-  tempo->setItemEnabled (fitSelID, true);
-  tempo->setItemEnabled (strideFitID, true);
-
-  toa_filename = "newfile.tim";
+  char* useful = new char[4096];
+  MJD thetime;
   
   for (unsigned i = 0; i < toas.size(); i++) {
-
+    
     if (toas[i].get_format() == Tempo::toa::Command) {
       toas[i].ci = 4;
       toas[i].di = 4;
+      sscanf((toas[i].get_auxilliary_text()).c_str(), "%s", useful);
+      if (strcmp(useful, "JUMP") == 0) {
+	MJD prev;
+	MJD next;
+	if (i == 0)
+	  prev = next = toas[1].get_arrival();
+	else if (i == toas.size()-1)
+	  prev = next = toas[toas.size()-2].get_arrival();
+	else {
+	  prev = toas[i-1].get_arrival();
+	  next = toas[i+1].get_arrival();
+	}
+	toas[i].set_arrival((prev+next)/2.0);
+	cerr << "Jump detected at " 
+	     << toas[i].get_arrival().printdays(9) << endl;
+      }
     }
+    
+    thetime = toas[i].get_arrival();
+    sprintf(useful, "%f", toas[i].get_frequency());
+    ltoas.push_back(new QListViewItem(lister,
+				      thetime.printdays(9).c_str(), 
+				      useful,
+				      toas[i].get_auxilliary_text().c_str()));
   }
   
   toas_modified = true;
@@ -966,7 +971,7 @@ std::vector<double> Rhythm::give_me_data (toaPlot::AxisQuantity q)
 	  break;
 	
 	if (toas[i].get_format() == Tempo::toa::Command ||
-	    toas[i].get_format() == Tempo::toa::Deleted) {
+	    toas[i].get_state()  == Tempo::toa::Deleted) {
 	  continue;
 	}
 	
@@ -1455,6 +1460,7 @@ void Rhythm::deselect (int pt)
     return;
   
   toas[pt].set_state(Tempo::toa::Normal);
+  lister->setSelected(ltoas[pt], false);
 }
 
 void Rhythm::deselect (std::vector<int> pts)
@@ -1491,6 +1497,7 @@ void Rhythm::select (int pt)
     return;
   
   toas[pt].set_state(Tempo::toa::Selected);
+  lister->setSelected(ltoas[pt], true);
 }
 
 void Rhythm::select (std::vector<int> pts)
@@ -1675,6 +1682,7 @@ void Rhythm::clearselection ()
       continue;
     
     toas[i].set_state(Tempo::toa::Normal);
+    lister->setSelected(ltoas[i], false);
   }
   progress.setProgress( toas.size() );
   
