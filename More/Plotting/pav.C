@@ -1,5 +1,5 @@
 //
-// $Id: pav.C,v 1.21 2003/01/23 07:39:20 cwest Exp $
+// $Id: pav.C,v 1.22 2003/02/05 05:37:33 pulsar Exp $
 //
 // The Pulsar Archive Viewer
 //
@@ -35,7 +35,7 @@ void usage ()
     //    " -a        Calculate TOAs of every profile \n"
     " -b scr    Bscrunch scr phase bins together \n"
     " -c map    Choose a different colour map \n"
-    //    " -d dm     Dedisperse data at a new dm \n"
+    " -d dm     Dedisperse data to a new DM \n"
     " -D        Plot Integration 0, poln 0, chan 0 \n"
     " -G        Greyscale of profiles in frequency and phase\n"
     //    " -E f.eph  install new ephemeris given in file 'f.eph' \n"
@@ -43,7 +43,6 @@ void usage ()
     " -f scr    Fscrunch scr frequency channels together \n"
     " -F        Fscrunch all frequency channels \n"
     //    " -H        Print ASCII of Integration 0, poln 0, chan 0 \n"
-    //    " -m macro  Process data using steps in macro \n"
     " -M meta   meta names a file containing the list of files\n"
     " -p        add polarisations together \n"
     " -r phase  rotate the profiles by phase (in turns)\n"
@@ -53,8 +52,7 @@ void usage ()
     " -v        Verbose output \n"
     " -V        Very verbose output \n"
     " -w        time things \n"
-    //    " -x nx     plot nx profiles across screen \n"
-    //    " -y ny     plot ny profiles down screen\n"
+    " -z x1,x2  start and end phase \n"
     " -R        Display SNR information\n"
     " -Z        Smear a profile by convolving with a hat function\n"
     " -C        Centre the profile\n"
@@ -72,9 +70,11 @@ int main (int argc, char** argv)
   unsigned poln = 0;
 
   double phase = 0;
+  double new_dm = 0.0;
 
   bool verbose = false;
   bool display = false;
+  bool dedisperse = false;
   bool manchester = false;
   bool textinfo = false;
   bool greyfreq = false;
@@ -103,7 +103,8 @@ int main (int argc, char** argv)
       colour_map = (Pulsar::Plotter::ColourMap) atoi(optarg);
       break;
     case 'd':
-      // parse dm
+      new_dm = atof(optarg);
+      dedisperse = true;
       break;
     case 'D':
       display = true;
@@ -127,7 +128,7 @@ int main (int argc, char** argv)
       usage ();
       return 0;
     case 'i':
-      cout << "$Id: pav.C,v 1.21 2003/01/23 07:39:20 cwest Exp $" << endl;
+      cout << "$Id: pav.C,v 1.22 2003/02/05 05:37:33 pulsar Exp $" << endl;
       return 0;
     case 'm':
       // macro file
@@ -243,6 +244,16 @@ int main (int argc, char** argv)
 
     archive = Pulsar::Archive::load (filenames[ifile]);
 
+    if (dedisperse) {
+      if (stopwatch)
+	clock.start();
+      archive -> dedisperse(new_dm, archive -> get_centre_frequency());
+      if (stopwatch) {
+	clock.stop();
+	cerr << "dedispersion toook " << clock << endl;
+      }
+    }
+    
     if (bscrunch > 0) {
       if (stopwatch)
 	clock.start();
@@ -326,8 +337,12 @@ int main (int argc, char** argv)
       cpgpage();
       if (manchester)
 	plotter.Manchester (archive);
-      else
-	archive -> display(0,0,0,phase);
+      else {
+	plotter.set_subint(0);
+	plotter.set_pol(0);
+	plotter.set_chan(0);
+	plotter.singleProfile (archive);
+      }
     }
     
     if (greyfreq)
