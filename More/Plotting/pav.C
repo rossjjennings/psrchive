@@ -1,5 +1,5 @@
 //
-// $Id: pav.C,v 1.48 2003/07/26 10:15:35 ahotan Exp $
+// $Id: pav.C,v 1.49 2003/08/12 15:38:37 straten Exp $
 //
 // The Pulsar Archive Viewer
 //
@@ -206,7 +206,7 @@ int main (int argc, char** argv)
       plotter.set_subint( atoi (optarg) );
       break;
     case 'i':
-      cout << "$Id: pav.C,v 1.48 2003/07/26 10:15:35 ahotan Exp $" << endl;
+      cout << "$Id: pav.C,v 1.49 2003/08/12 15:38:37 straten Exp $" << endl;
       return 0;
 
     case 'l':
@@ -263,9 +263,7 @@ int main (int argc, char** argv)
       verbose = true;
       break;
     case 'V':
-      Pulsar::Archive::verbose = true;
-      Pulsar::Integration::verbose = true;
-      Pulsar::Profile::verbose = true;
+      Pulsar::Archive::set_verbosity (3);
       break;
 
     case 'w':

@@ -6,8 +6,10 @@ static Registry::Plugin plugins;
 
 void Pulsar::Archive::Agent::plugin_load ()
 {
-  if (verbose)
+  if (verbose) {
     cerr << "Pulsar::Archive::Agent::plugin_load" << endl;
+    Registry::Plugin::verbose = true;
+  }
 
   char* env = getenv ("PSRCHIVE_PLUGINS");
   if (env)

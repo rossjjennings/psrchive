@@ -19,10 +19,14 @@ void Pulsar::Archive::Agent::report ()
 
   cerr << endl;
 
+  if (verbose)
+    cerr << "Archive::Agent::report registry=" << &registry << endl;
+
   if (registry.size() == 0)
     cerr << "Archive::Agent::report No Agents registered." << endl;
   else
-    cerr << "Archive::Agent::report Registered Agents:" << endl;
+    cerr << "Archive::Agent::report " << registry.size() 
+	 << " Registered Agents:" << endl;
 
   for (unsigned agent=0; agent<registry.size(); agent++)
     cerr << " " << registry[agent]->get_name() << "\t" 
