@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ReceptionCalibrator.h,v $
-   $Revision: 1.2 $
-   $Date: 2003/04/05 11:12:14 $
+   $Revision: 1.3 $
+   $Date: 2003/04/07 10:02:02 $
    $Author: straten $ */
 
 #ifndef __ReceptionCalibrator_H
@@ -10,7 +10,6 @@
 
 #include "Calibrator.h"
 #include "Calibration/ReceptionModel.h"
-#include "ReceptionSet.h"
 
 namespace Pulsar {
 
