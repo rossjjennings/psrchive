@@ -58,12 +58,15 @@ DSO_LDFLAGS := $(LDFLAGS) -lpsrchive_Extension -larchive $(LTIMES)
 # ############################################################################
 
 PROGRAMS = calinfo.C align.C amps.C chanprep.C crstd.C \
-	mel.C newname.C oneprof.C plotsub.C tadd.C modhead.C \
-	plot_gry_diff.C freduce.C cleanarch.C fixhdr.C crm.C  \
-	crh.C psrhead.C fakedat.C plk.C stokes_plt.C \
-	headsum.C treduce.C mel2.C invint.C \
-	tcombine2.C ratio.C fixprf.C xformprof.C archive_test.C \
-	h1_studies.C arch3d.C tcombine4.C
+	mel.C newname.C tadd.C modhead.C cleanarch.C fixhdr.C crm.C  \
+	crh.C psrhead.C fakedat.C headsum.C mel2.C invint.C \
+	tcombine2.C fixprf.C xformprof.C archive_test.C \
+	arch3d.C tcombine4.C
+
+ifeq ($(has_PGPLOT),yes)
+PROGRAMS += oneprof.C plotsub.C plot_gry_diff.C freduce.C plk.C stokes_plt.C \
+	treduce.C ratio.C h1_studies.C
+endif
 
 TESTS = timer_size.c baseband_header_size.C
 
