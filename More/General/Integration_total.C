@@ -7,9 +7,10 @@
 //
 /*!
   This method is primarily designed for use by the Integration::find_*
-  methods.  Integration::fscrunch is called with weighted_cfreq ==
-  false so that the phase of the total profile will always relate to
-  the centre frequency of the Integration.
+  methods.  After calling fscrunch, the resulting Profile may have a 
+  different centre frequency than that of the Integration.  Therefore,
+  the Profile is dedispersed to match the phase referenced at the frequency
+  returned by Integration::get_centre_frequency.
 */
 Pulsar::Integration* Pulsar::Integration::total () const
 {
@@ -28,8 +29,9 @@ Pulsar::Integration* Pulsar::Integration::total () const
 
   try {
     copy = clone (npol_keep);
-    copy->fscrunch (0, false);
     copy->pscrunch ();
+    copy->fscrunch ();
+    copy->dedisperse( get_centre_frequency() );
   }
   catch (Error& err) {
     throw err += "Integration::total";
