@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Profile.h,v $
-   $Revision: 1.3 $
-   $Date: 2002/04/10 08:26:13 $
+   $Revision: 1.4 $
+   $Date: 2002/04/11 07:00:51 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Profile_h
@@ -16,11 +16,22 @@ namespace Pulsar {
   //! The basic observed quantity; the pulse profile.
   /*! The Pulsar::Profile class implements a useful, yet minimal, set
     of functionality required to store, manipulate, and analyse pulsar
-    profiles. */
-
+    profiles.  Note that:
+    <UL>
+    <LI> All methods that change the size of a Profile are protected.
+    <LI> The Integration class is declared as a friend.
+    </UL>
+    This arrangement protects the size of each Profile object from
+    becoming unsynchronized with the Integration in which it is
+    contained.  The data in each Profile may still be manipulated through
+    public methods.  This liberty may be removed in the near future.
+  */
   class Profile {
 
   public:
+
+    //! The Integration class may call protected methods
+    friend class Integration;
 
     //! flag controls the amount output to stderr by Profile methods
     static bool verbose;
@@ -43,23 +54,11 @@ namespace Pulsar {
     //! rotates the profile by phase (in turns)
     virtual void rotate (double phase);
 
-    //! integrate neighbouring phase bins in profile
-    virtual void bscrunch (int nscrunch);
-
-    //! integrate neighbouring sections of the profile
-    virtual void fold (int nfold);
-
     //! set all amplitudes to zero
     virtual void zero();
   
     //! calculate the signed sqrt of the absolute value of each bin 
     virtual void square_root();
-
-    //! resize the data area
-    virtual void resize (int nbin);
-
-    //! calls bscrunch with the appropriate argument
-    void halvebins (int nhalve);
 
     //! returns the bin number with the maximum amplitude
     int bin_max() const;
@@ -127,22 +126,38 @@ namespace Pulsar {
     //! get the centre frequency (in MHz)
     double get_centre_frequency () { return centrefreq; }
     //! set the centre frequency (in MHz)
-    void set_centre_frequency (double cfreq) { centrefreq = cfreq; }
+    virtual void set_centre_frequency (double cfreq) { centrefreq = cfreq; }
 
     //! get the weight of the profile
     float get_weight () { return weight; }
     //! set the weight of the profile
-    void set_weight (float wt) { weight = wt; }
+    virtual void set_weight (float wt) { weight = wt; }
 
-    //! set the amplitudes array equal to the contents of the vector
+    //! set the amplitudes array equal to the contents of the data array
     template <typename T>
-    void set_amps (const vector<T>& data);
+    void set_amps (const T* data);
 
-    //! set the state of the polarization measurement
-    virtual void set_Poln (Poln::Measure _state) { state = _state; }
+    //! get the state of the polarization measurement
+    Poln::Measure get_state () { return state; }
 
   protected:
 
+    //! integrate neighbouring phase bins in profile
+    virtual void bscrunch (int nscrunch);
+
+    //! integrate neighbouring sections of the profile
+    virtual void fold (int nfold);
+
+    //! resize the data area
+    virtual void resize (int nbin);
+
+    //! set the state of the polarization measurement
+    virtual void set_state (Poln::Measure _state) { state = _state; }
+
+    //! calls bscrunch with the appropriate argument
+    void halvebins (int nhalve);
+
+  private:
     //! fractional phase window used to find rise and fall of CAL
     static float cal_transition_window;
     static float default_duty_cycle;
@@ -162,10 +177,13 @@ namespace Pulsar {
 
 }
 
+/*! 
+  \param data pointer to the data elements to be copied.
+  \pre data must point to at least get_nbin() elements
+*/
 template <typename T>
-void Pulsar::Profile::set_amps (const vector<T>& data)
+void Pulsar::Profile::set_amps (const T* data)
 {
-  resize (data.size());
   for (int ibin=0; ibin<nbin; ibin++)
     amps[ibin] = static_cast<float>( data[ibin] );
 }
