@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/tempo++.h,v $
-   $Revision: 1.8 $
-   $Date: 2001/02/24 08:34:27 $
-   $Author: straten $ */
+   $Revision: 1.9 $
+   $Date: 2001/05/24 01:46:17 $
+   $Author: pulsar $ */
 
 #ifndef __TEMPO_PP_H
 #define __TEMPO_PP_H
@@ -77,15 +77,15 @@ namespace Tempo {
 	    DataPoint::State min_state = DataPoint::Normal);
   
   // returns a polyco valid over the range in MJD specified by m1 and m2
-  polyco predict (const psrephem& eph,
+  polyco get_polyco (const psrephem& eph,
 		  const MJD& m1=unspecified, const MJD& m2=unspecified, 
 		  double nspan=960, int ncoeff=12, int maxha=8, 
 		  int tel=7, double centrefreq=1400.0);
   
-  void predict (polyco* poly, const psrephem& eph,
-		const MJD& m1=unspecified, const MJD& m2=unspecified, 
-		double nspan=960, int ncoeff=12, int maxha=8, 
-		int tel=7, double centrefreq=1400.0);
+  void set_polyco (polyco& poly, const psrephem& eph,
+		  const MJD& m1=unspecified, const MJD& m2=unspecified, 
+		  double nspan=960, int ncoeff=12, int maxha=8, 
+		  int tel=7, double centrefreq=1400.0);
   
   polyco span (const polyco& first_poly, const polyco& second_poly,
 	       const psrephem& pephem);
