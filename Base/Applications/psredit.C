@@ -1,5 +1,5 @@
 #include "Pulsar/ArchiveTUI.h"
-#include "Pulsar/Archive.h"
+#include "Pulsar/ReceiverTUI.h"
 
 #include "dirutil.h"
 #include "string_utils.h"
@@ -37,8 +37,13 @@ int main (int argc, char** argv) try {
 
   vector <string> commands;
 
+  Pulsar::ArchiveTUI tui;
+
+  Pulsar::ReceiverTUI receiver_tui;
+  tui.import( "rcvr", &receiver_tui );
+
   int gotc;
-  while ((gotc = getopt (argc, argv, "c:hvV")) != -1)
+  while ((gotc = getopt (argc, argv, "c:hHvV")) != -1)
     switch (gotc) {
 
     case 'c': {
@@ -55,7 +60,11 @@ int main (int argc, char** argv) try {
 
     case 'h':
       usage ();
-      return -1;
+      return 0;
+
+    case 'H':
+      cerr << "psredit: parameter listing not yet implemented" << endl;
+      return 0;
 
     case 'v':
       verbose = true;
@@ -76,8 +85,6 @@ int main (int argc, char** argv) try {
   vector<string> filenames;
   for (int ai=optind; ai<argc; ai++)
     dirglob (&filenames, argv[ai]);
-
-  Pulsar::ArchiveTUI tui;
 
   for (unsigned ifile = 0; ifile < filenames.size(); ifile++) try {
 
