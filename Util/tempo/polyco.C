@@ -4,6 +4,7 @@
 #include <sys/stat.h>
 #include <sys/wait.h>
 #include <errno.h>
+#include "stdrio.h"
 #include "poly.h"
 
 void polynomial::init(){
@@ -140,7 +141,7 @@ int polynomial::load(istream &istr){
 
 // This should be converted to use stringstreams
 // when we move to solaris CC 5.0
-size_t polynomial::size_in_bytes() {
+size_t polynomial::size_in_bytes() const {
 return(0);
 }
 
@@ -403,25 +404,8 @@ int polyco::load(istream &istr){
   return(npollys);
 }
 
-int polyco::load(FILE *fp, int nbytes){
-  // this is truly a terrible way, but solaris
-  // does not yet support stringstreams
-  char * polychar = new char[nbytes];
-  if (fread(polychar,nbytes,1,fp)!=1){
-    fprintf(stderr,"polyco::load: cannot read %d bytes\n", nbytes);
-    return(-1);
-  }
-  FILE *fout;
-  if((fout=fopen("polyco.dat.tmp", "w")) == NULL){
-    fprintf(stderr, "polyco::load error: could not open file polyco.dat.tmp\n");
-    return(-1.0);
-  }
-  if(fwrite(polychar,nbytes,1,fout)!=1){
-    fprintf(stderr, "polyco::load error: could not write file polyco.dat.tmp\n");
-    return(-1.0);
-  }
-  ifstream file("polyco.dat.tmp");
-  delete [] polychar;
+int polyco::load(FILE *fp){
+  ifstream file(FD(fp));
   return(this->load(file));
 }
 
@@ -444,28 +428,28 @@ int polyco::unload(ostream &ostr){
   return(0);
 }
 
-int polyco::unload(FILE *fp, int nbytes){
-  // this is truly a terrible way, but solaris
-  // does not yet support stringstreams
-  ofstream file("polyco.dat.tmp");
-  if(unload(file)!=0) return(-1);
-  FILE *fin;
-  if((fin=fopen("polyco.dat.tmp", "r"))==NULL){
-    fprintf(stderr, "polyco::unload: cannot open file polyco.dat.tmp\n");
-    return(-1);
-  }
-  char * polychar = new char[nbytes];
-  if(fread(polychar, nbytes, 1, fin)!=1){
-    fprintf(stderr, "polyco::unload: cannot read file polyco.dat.tmp\n");
-    return(-1);
-  }
-
-  if (fwrite(polychar,nbytes,1,fp)!=1){
-    fprintf(stderr,"polyco::unload: cannot write %d bytes\n", nbytes);
-    return(-1);
-  }
-  return(0);
+int polyco::unload(FILE *fp){
+  ofstream file(FD(fp));
+  return(this->unload(file));
 }
+
+int polyco::print(char * chpolly) const{
+  // Terrible terrible terrible
+  // use stringstreams
+  this->unload("polyco.dat.tmp");
+  FILE * fp;
+  if((fp=fopen("polyco.dat.tmp", "r"))==NULL){
+    fprintf(stderr, "polyco::print error - could not open file\n");
+    return(-1);
+  }
+  if(fread(chpolly, this->size_in_bytes(), 1, fp)!=1){
+    fprintf(stderr, "polyco::print error reading file\n");
+    return(-1);
+  }
+  fclose(fp);
+  remove("polyco.dat.tmp");
+  return(0);
+} 
 
 void polyco::prettyprint(){
   for(int i=0; i<pollys.size(); ++i) 
@@ -484,6 +468,7 @@ polynomial polyco::nearest_polly(const MJD &t) const {
     }
     ipolly++;
   }
+  fprintf(stderr, "polyco::nearest_polly error - could not find polynomial for MJD %s\n", t.printall());
   string failed = "no polynomial";
   throw(failed);
 }  
@@ -500,6 +485,7 @@ polynomial polyco::nearest_polly(string in_psrname,const MJD &t) const {
     }
     ipolly++;
   }
+  fprintf(stderr, "polyco::nearest_polly error - could not find polynomial for MJD %s\n", t.printall());
   string failed = "no polynomial";
   throw(failed);
 }  
@@ -560,7 +546,7 @@ double polyco::frequency(string in_psrname, const MJD& t) const {
   return(nearest_polly.frequency(t));
 }
 
-size_t polyco::size_in_bytes(){
+size_t polyco::size_in_bytes() const{
   // this is truly a terrible way, but solaris
   // does not yet support stringstreams
   struct stat filestat;
@@ -575,9 +561,13 @@ size_t polyco::size_in_bytes(){
     return(0);
   }
   remove(s.c_str());
+
   return(filestat.st_size);
 
 //   for(int i=0; i<pollys.size(); ++i) 
 //     size += pollys[i].size_in_bytes();
   //  return(size);
 }
+
+
+
