@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/Predict.h,v $
-   $Revision: 1.1 $
-   $Date: 2004/04/20 14:37:57 $
+   $Revision: 1.2 $
+   $Date: 2004/04/29 11:44:04 $
    $Author: straten $ */
 
 #ifndef __Tempo_Predict_h
@@ -38,7 +38,7 @@ namespace Tempo {
 
     //! Set the number of coefficients per polynomial ephemeris
     /*! Corresponds to NCOEFF in tz.in */
-    void set_ncoeff (unsigned ncoeff);
+    void set_ncoef (unsigned ncoef);
 
     //! Set the pulsar parameters
     void set_parameters (const psrephem& parameters);
@@ -67,7 +67,7 @@ namespace Tempo {
     unsigned nspan;
 
     //! The number of coefficients per polynomial ephemeris
-    unsigned ncoeff;
+    unsigned ncoef;
 
     //! The pulsar parameters
     psrephem parameters;
