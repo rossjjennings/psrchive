@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Integration.h,v $
-   $Revision: 1.37 $
-   $Date: 2003/04/09 06:47:29 $
-   $Author: pulsar $ */
+   $Revision: 1.38 $
+   $Date: 2003/04/19 20:24:10 $
+   $Author: straten $ */
 
 /*
   
@@ -101,16 +101,9 @@ namespace Pulsar {
     void psr_levels (vector< Stokes<float> >& hi,
 		     vector< Stokes<float> >& lo) const;
 
-    //! Adds to a vector of tempo++ toa objects
-    void toas (const Integration& std_subint,
-	       int nsite, const char* fname, unsigned subint,
-	       vector<Tempo::toa>& toas, unsigned nsubchan,
-	       int mode=0, bool wt=false);
-
-    //! Returns a toa from weighted-average over sub-channels
-    Tempo::toa toa (const Integration& std_subint,
-		    int nsite, const char* fname, unsigned subint,
-		    unsigned nsubchan, int mode, bool wt);
+    //! Return a vector of tempo++ toa objects
+    void toas (vector<Tempo::toa>& toas, const Integration& std_subint,
+	       char nsite, bool discard_bad = false) const;
 
     //! Remove the baseline from all profiles
     virtual void remove_baseline (float phase = -1.0);
@@ -154,10 +147,16 @@ namespace Pulsar {
     /*! This attribute may be set only through Integration::resize */
     virtual unsigned get_nbin () const = 0;
  
-    //! Get the MJD at the beginning of the integration
-    virtual MJD get_mid_time() const = 0;
-    //! Set the MJD at the beginning of the integration
-    virtual void set_mid_time (const MJD& mjd) = 0;
+    //! Get the epoch of the rising edge of bin zero
+    /*! When not dealing with single-pulse data, the epoch of the
+      observation should be referenced near the middle of the
+      integration. */
+    virtual MJD get_epoch () const = 0;
+    //! Set the epoch of the rising edge of bin zero
+    /*! When not dealing with single-pulse data, the epoch of the
+      observation should be referenced near the middle of the
+      integration. */
+    virtual void set_epoch (const MJD& mjd) = 0;
 
     //! Get the total time integrated (in seconds)
     virtual double get_duration() const =0;
@@ -179,9 +178,13 @@ namespace Pulsar {
     //! Set the dispersion measure (in \f${\rm pc cm}^{-3}\f$)
     virtual void set_dispersion_measure (double pc_cm3) = 0;
     
-    //! Get the folding period (in seconds)
+    //! Get the folding or topocentric pulsar period (in seconds)
+    /*! The topocentric period of the pulsar at the epoch defined by
+      get_mid_time. */
     virtual double get_folding_period() const = 0;
-    //! Set the folding period (in seconds)
+    //! Set the folding or topocentric pulsar period (in seconds)
+    /*! The topocentric period of the pulsar at the epoch defined by
+      get_mid_time. */
     virtual void set_folding_period (double seconds) = 0;
 
     //! Get the feed configuration of the receiver
