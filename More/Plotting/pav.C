@@ -1,5 +1,5 @@
 //
-// $Id: pav.C,v 1.31 2003/03/07 00:18:31 ahotan Exp $
+// $Id: pav.C,v 1.32 2003/03/18 14:11:32 straten Exp $
 //
 // The Pulsar Archive Viewer
 //
@@ -41,7 +41,7 @@ void usage ()
     " -d dm     Dedisperse data to a new DM \n"
     " -D        Plot Integration 0, poln 0, chan 0 \n"
     //    " -E f.eph  install new ephemeris given in file 'f.eph' \n"
-    //    " -e xx     Output data to new file with ext xx \n"
+    " -e        -D with abscissa equal to time in milliseconds \n"
     " -f scr    Fscrunch scr frequency channels together \n"
     " -F        Fscrunch all frequency channels \n"
     " -g        Position angle across a profile\n"
@@ -101,6 +101,7 @@ int main (int argc, char** argv)
   bool stopwatch = false;
   bool hat = false;
   bool centre = false;
+  bool periodplot = false;
   bool timeplot = false;
   bool calplot = false;
   bool snrplot = false;
@@ -116,20 +117,31 @@ int main (int argc, char** argv)
   Pulsar::Plotter::ColourMap colour_map = Pulsar::Plotter::Heat;
   
   int c = 0;
-  const char* args = "ab:c:d:DGe:E:f:FhiHm:M:pP:r:St:TvVwWx:y:RZCYz:AsgXBq:Q";
+  const char* args = "ab:c:d:DGeE:f:FhiHm:M:pP:r:St:TvVwWx:y:RZCYz:AsgXBq:Q";
   while ((c = getopt(argc, argv, args)) != -1)
     switch (c) {
       
     case 'a':
       Pulsar::Archive::Agent::report ();
       return 0;
-
+    case 'A':
+      calplot = true;
+      break;
+ 
     case 'b':
       bscrunch = atoi (optarg);
       break;
+    case 'B':
+      bandpass = true;
+      break;
+
     case 'c':
       colour_map = (Pulsar::Plotter::ColourMap) atoi(optarg);
       break;
+    case 'C':
+      centre = true;
+      break;
+
     case 'd':
       new_dm = atof(optarg);
       dedisperse = true;
@@ -137,85 +149,112 @@ int main (int argc, char** argv)
     case 'D':
       display = true;
       break;
-    case 'G':
-      greyfreq = true;
-      break;
+
     case 'e':
-      // parse ext
+      display = true;
+      periodplot = true;
       break;
     case 'E':
       // parse eph file
       break;
+
     case 'f':
       fscrunch = atoi (optarg);
       break;
     case 'F':
       fscrunch = 0;
       break;
+
+    case 'g':
+      PA = true;
+      break;
+    case 'G':
+      greyfreq = true;
+      break;
+
     case 'h':
       usage ();
       return 0;
+
     case 'i':
-      cout << "$Id: pav.C,v 1.31 2003/03/07 00:18:31 ahotan Exp $" << endl;
+      cout << "$Id: pav.C,v 1.32 2003/03/18 14:11:32 straten Exp $" << endl;
       return 0;
+
     case 'm':
       // macro file
       break;
     case 'M':
       metafile = optarg;
       break;
+
     case 'p':
       pscrunch = 1;
       break;
     case 'P':
       poln = atoi (optarg);
       break;
+
+    case 'q':
+      sscanf(optarg, "%f", &the_phase);
+      pa_spectrum = true;
+      break;
+    case 'Q':
+      pa_scatter = true;
+      break;
+
     case 'r':
       phase = atof (optarg);
       plotter.set_phase (phase);
+      break;
+    case 'R':
+      textinfo = true;
+      break;
+
+   case 's':
+      snrplot = true;
       break;
     case 'S':
       display = true;
       manchester = true;
       break;
+
     case 't':
       tscrunch = atoi (optarg);
       break;
     case 'T':
       tscrunch = 0;
       break;
+
+    case 'v':
+      verbose = true;
+      break;
     case 'V':
       Pulsar::Archive::verbose = true;
       Pulsar::Integration::verbose = true;
       Pulsar::Profile::verbose = true;
       break;
-    case 'v':
-      verbose = true;
-      break;
+
     case 'w':
       stopwatch = true;
       break;
     case 'W':
       plotter.set_white_background ();
       break;
+
     case 'x':
       // x panel
       break;
+    case 'X':
+      calinfo = true;
+      break;
+
     case 'y':
       // y panel
-      break;
-    case 'R':
-      textinfo = true;
-      break;
-    case 'Z':
-      hat = true;
-      break;
-    case 'C':
-      centre = true;
       break;
     case 'Y':
       timeplot = true;
       break;
+
     case 'z': {
       char* separator = ",";
       char* val1 = strtok (optarg, separator);
@@ -228,28 +267,10 @@ int main (int argc, char** argv)
       zoomed = true;
       break;
     }
-    case 'A':
-      calplot = true;
+    case 'Z':
+      hat = true;
       break;
-    case 's':
-      snrplot = true;
-      break;
-    case 'g':
-      PA = true;
-      break;
-    case 'X':
-      calinfo = true;
-      break;
-    case 'B':
-      bandpass = true;
-      break;
-    case 'q':
-      sscanf(optarg, "%f", &the_phase);
-      pa_spectrum = true;
-      break;
-    case 'Q':
-      pa_scatter = true;
-      break;
+
       
     default:
       cerr << "invalid param '" << c << "'" << endl;
@@ -459,6 +480,8 @@ int main (int argc, char** argv)
       cpgpage();
       if (manchester)
 	plotter.Manchester (archive);
+      else if (periodplot)
+	plotter.single_period (archive);
       else {
 	plotter.set_subint(0);
 	plotter.set_pol(poln);
