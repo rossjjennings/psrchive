@@ -426,15 +426,13 @@ void Pulsar::FITSArchive::load_header (const char* filename)
     status = 0;
   }
   else {
-    if (strcmp(tempstr,"LIN") == 0 || strcmp(tempstr,"LINEAR") == 0)
+    if (strncasecmp(tempstr,"LIN",3) == 0)
       set_basis ( Signal::Linear );
-    else if (strcmp(tempstr,"CIRC") == 0 || strcmp(tempstr,"CIRCULAR") == 0)
+    else if (strncasecmp(tempstr,"CIRC",4) == 0)
       set_basis ( Signal::Circular );
     else
-      if (verbose) {
-	cerr << "FITSArchive::load_header Unknown FD_POLN: " 
-	     << tempstr << endl;
-      }
+      throw Error (InvalidParam, "FITSArchive::load_header",
+	           "unknown FD_POLN: %s", tempstr);
   }
   
   // Read angle of X-probe wrt platform zero
@@ -1906,7 +1904,11 @@ bool Pulsar::FITSArchive::Agent::advocate (const char* filename)
   int status = 0;
   char error[FLEN_ERRMSG];
 
+  if (verbose)
+    cerr << "Pulsar::FITSArchive::Agent::advocate test " << filename << endl;
+
   fits_open_file(&test_fptr, filename, READONLY, &status);
+
   if (status != 0) {
 
     if (Archive::verbose) {
@@ -1916,9 +1918,12 @@ bool Pulsar::FITSArchive::Agent::advocate (const char* filename)
 
     return false;
   }
+
   else {
+
     fits_close_file(test_fptr, &status);
     return true;
+
   }
 }
 
