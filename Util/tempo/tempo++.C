@@ -2,7 +2,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#ifndef __FreeBSD__
+#if defined(__FreeBSD__) || defined(__MACH__)
+#include <sys/wait.h>
+#else
 #include <wait.h>
 #endif
 
