@@ -21,7 +21,10 @@ int frcfft1dp(int npts, float *data);
 int bccfft1dp(int npts, float *data);
 int bcrfft1dp(int npts, float *dest);
 
+/* Sort into DC, 0, r[1], i[1], ... r[npts/2-1], i[npts/2-1], Nyq, 0 */
 int rfftw_sort(int npts, float *src, float *dest);
+/* Sort into DC, Nyq, r[1], i[1], ... r[npts/2-1], i[npts/2-1] */
+int rfftw_resort(int npts, float *src, float *dest);
 
 void cross_correlate(float *data1, float *data2, float *res, int n);
 
