@@ -473,7 +473,7 @@ void Pulsar::ReceptionCalibrator::add_observation (const Archive* data)
     }
     catch (Error& error) {
       cerr << "Pulsar::ReceptionCalibrator::add_observation ichan="
-	   << ichan << " error" << error << endl;
+	   << ichan << " error" << error.get_message() << endl;
     }
 
   }
@@ -532,14 +532,16 @@ Pulsar::ReceptionCalibrator::add_data
 
   }
   catch (Error& error) {
-    cerr << "Pulsar::ReceptionCalibrator::add_data discarding ichan=" << ichan 
-	 << " ibin=" << ibin << endl;
+    cerr << "Pulsar::ReceptionCalibrator::add_data ichan=" << ichan 
+	 << " ibin=" << ibin << " error\n\t" << error.get_message() << endl;
   }
 }
 
-//! Add the specified ArtificialCalibrator observation to the set of constraints
-void Pulsar::ReceptionCalibrator::add_calibrator (const ArtificialCalibrator* p)
-{
+//! Add the ArtificialCalibrator observation to the set of constraints
+void 
+Pulsar::ReceptionCalibrator::add_calibrator (const ArtificialCalibrator* p)
+try {
+
   check_ready ("Pulsar::ReceptionCalibrator::add_calibrator");
 
   if (verbose)
@@ -710,8 +712,8 @@ void Pulsar::ReceptionCalibrator::add_calibrator (const ArtificialCalibrator* p)
 
       }
       catch (Error& error) {
-        cerr << "Pulsar::ReceptionCalibrator::add_calibrator"
-                " error adding ichan=" << ichan << error << endl;
+        cerr << "Pulsar::ReceptionCalibrator::add_calibrator ichan="
+             << ichan << " error\n" << error.get_message() << endl;
       }
 
       Jones< Estimate<double> > correct;
@@ -783,13 +785,15 @@ void Pulsar::ReceptionCalibrator::add_calibrator (const ArtificialCalibrator* p)
 
 
 }
-
+catch (Error& error) {
+  throw error += "Pulsar::ReceptionCalibrator::add_calibrator";
+}
 
 //! Calibrate the polarization of the given archive
 void Pulsar::ReceptionCalibrator::precalibrate (Archive* data)
 {
-  verbose = true;
-  cerr << "Pulsar::ReceptionCalibrator::precalibrate" << endl;
+  if (verbose)
+    cerr << "Pulsar::ReceptionCalibrator::precalibrate" << endl;
 
   string reason;
   if (!calibrator->calibrator_match (data, reason))
@@ -817,8 +821,8 @@ void Pulsar::ReceptionCalibrator::precalibrate (Archive* data)
       if (!model[ichan]->valid) {
 
 	if (verbose)
-	  cerr << "Pulsar::ReceptionCalibrator::calibrate zero weight ichan=" 
-	       << ichan << endl;
+	  cerr << "Pulsar::ReceptionCalibrator::precalibrate ichan=" << ichan 
+	       << " zero weight" << endl;
 
 	integration->set_weight (ichan, 0.0);
 
@@ -843,27 +847,32 @@ void Pulsar::ReceptionCalibrator::precalibrate (Archive* data)
         signal_path = equation->get_transformation ();
         break;
       default:
-	throw Error (InvalidParam, "Pulsar::ReceptionCalibrator::calibrate",
+	throw Error (InvalidParam, "Pulsar::ReceptionCalibrator::precalibrate",
 		     "unknown Archive type for " + data->get_filename() );
       }
 
+      response[ichan] = Jones<float>::identity();
 
-      if (!signal_path) {
-        response[ichan] = Jones<float>::identity();
+      if (!signal_path)
         continue;
+
+      try {
+	model[ichan]->time.set_value( integration->get_epoch() );
+	response[ichan] = signal_path->evaluate();
       }
-
-      model[ichan]->time.set_value( integration->get_epoch() );
-
-      response[ichan] = signal_path->evaluate();
+      catch (Error& error) {
+        cerr << "Pulsar::ReceptionCalibrator::precalibrate ichan=" << ichan
+             << " error evaluating response" << endl;
+	continue;
+      }
 
       if ( norm(det( response[ichan] )) < 1e-9 ) {
-        cerr << "Pulsar::ReceptionCalibrator::precalibrate ichan=" << ichan <<
-                " faulty response" << endl;
-         response[ichan] = Jones<float>::identity();
+        cerr << "Pulsar::ReceptionCalibrator::precalibrate ichan=" << ichan
+             << " faulty response" << endl;
+	response[ichan] = Jones<float>::identity();
       }
       else
-         response[ichan] = inv( response[ichan] );
+	response[ichan] = inv( response[ichan] );
 
     }
 
