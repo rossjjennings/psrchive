@@ -1,5 +1,5 @@
 //
-// $Id: pav.C,v 1.62 2003/12/02 04:03:48 ahotan Exp $
+// $Id: pav.C,v 1.63 2003/12/30 01:24:10 ahotan Exp $
 //
 // The Pulsar Archive Viewer
 //
@@ -11,10 +11,6 @@
 #include <unistd.h>
 #include <cpgplot.h>
 
-#if 0
-#include "cpg_fns.h"
-#endif
-
 #include "Reference.h"
 
 #include "Pulsar/getopt.h"
@@ -23,6 +19,9 @@
 #include "Pulsar/Profile.h"
 #include "Pulsar/Plotter.h"
 #include "Pulsar/Passband.h"
+
+#include "Pulsar/BinaryPhaseOrder.h"
+#include "Pulsar/PeriastronOrder.h"
 
 #include "Error.h"
 #include "RealTimer.h"
@@ -38,57 +37,61 @@ void usage ()
     "\n"
     "Preprocessing options:\n"
     " -b scr    Bscrunch scr phase bins together\n"
-    " -C        Centre the profile before plotting\n"
-    " -d        Dedisperse before plotting\n"
+    " -C        Centre the profiles on phase zero\n"
+    " -d        Dedisperse all channels\n"
     " -f scr    Fscrunch scr frequency channels together\n"
     " -F        Fscrunch all frequency channels\n"
     " -t src    Tscrunch scr Integrations together\n"
     " -T        Tscrunch all Integrations\n"
-    " -p        Add polarisations together\n"
+    " -p        Add all polarisations together\n"
     " -Z        Smear profiles before plotting\n"
     "\n"
-    "Selection options:\n"
-    " -K dev    Choose a plot device\n"
-    " -c map    Choose a colour map\n"
-    " -M meta   Read a meta-file containing the list of filenames\n"
-    " -s std    Select a standard profile\n"
+    "Integration re-ordering options:\n"
+    " --convert_periphs\n"
+    " --convert_binphs\n"
+    "\n"
+    "Selection & configuration options:\n"
+    " -K dev    Manually specify a plot device\n"
+    " -c map    Select a colour map for PGIMAG style plots\n"
+    " -M meta   Read a meta-file containing the files to use\n"
+    " -s std    Select a standard profile (where applicable)\n"
     " -H chan   Select which frequency channel to display\n"
     " -P pol    Select which polarization to display\n"
-    " -I subint Select which subint to display\n"
+    " -I subint Select which sub-integration to display\n"
     " -W        Change colour scheme to suite white background\n"
     " -z x1,x2  Zoom to this pulse phase range\n"
     " -k f1,f2  Zoom to this frequency range\n"
+    " -l        Do not display labels outside of plotting area\n"
     " -N x,y    Divide the window into x by y panels\n"
     "\n"
     "Plotting options:\n"
     " -A        Plot instrumental phase across the band\n"
+    " -J        Display a simple phase scrunched frequency spectrum\n"
+    " -E        Display a baseline only frequency spectrum\n"
     " -B        Display off-pulse bandpass & channel weights\n"
-    " -D        Plot selected profile (chan 0, poln 0, subint 0 by default)\n"
-    " -E        Display baseline spectrum\n"
-    " -e        like -D with abscissa equal to time in milliseconds \n"
-    " -g        Display position angle profile\n"
-    " -G        Plot frequency against pulse phase\n"
-    " -l        Do not display labels outside of plotting area\n"
+    " -Q        Plot position angle frequency spectrum of on-pulse region\n"
+    " -D        Plot a single profile (chan 0, poln 0, subint 0 by default)\n"
+    " -e        Same as -D except with abscissa equal to time\n"
+    " -g        Display position angle as a function of phase\n"
+    " -G        Plot an image of amplitude against frequency & phase\n"
     " -m        Plot Poincare vector in spherical coordinates\n"
     " -O p.a.   Rotate position angle (orientation) by p.a. degrees\n"
-    " -q        Plot a position angle frequency spectrum colour map\n"
-    " -Q        Position angle frequency spectrum for on-pulse region\n"
-    " -r phase  rotate the profiles by phase (in turns)\n"
+    " -q        Plot an image of amplitude against p.a. & frequency\n"
+    " -r phase  Rotate all profiles by phase (in turns)\n"
     " -n        Plot S/N against frequency\n"
     " -S        Plot Stokes parameters in the Manchester style\n"
     " -X        Plot cal amplitude and phase vs frequency channel\n"
-    " -Y        Display all subints (time vs pulse phase)\n"
+    " -Y        Plot sub-integrations against pulse phase\n"
     " -L        Find the width of the pulse profile\n"
-    " -j        Plot a simple dynamic spectrum\n"
-    " -J        Plot a phase scrunched amplitude spectrum\n"
-    " -u        Morphological difference with the standard profile\n"
+    " -j        Display a simple dynamic spectrum image\n"
+    " -u        Display morphological difference (requires a standard)\n"
     "\n"
     "Archive::Extension options (file format specific):\n"
-    " -o        Plot the original passband\n"
+    " -o        Plot the original bandpass\n"
     "\n"
     "Utility options:\n"
     " -a        Print available plugin information\n"
-    " -h        Display this help page \n"
+    " -h        Display this useful help page \n"
     " -i        Show revision information\n"
     " -v        Verbose output \n"
     " -V        Very verbose output \n"
@@ -138,7 +141,7 @@ int main (int argc, char** argv)
   bool hat = false;
   bool centre = false;
   bool periodplot = false;
-  bool timeplot = false;
+  bool subint_plot = false;
   bool calplot = false;
   bool snrplot = false;
   bool PA = false;
@@ -152,6 +155,8 @@ int main (int argc, char** argv)
   bool psas = false;
   bool std_given = false;
   bool mdiff = false;
+  bool cpo = false;
+  bool cbo = false;
 
   Reference::To<Pulsar::Archive> std_arch;
   Reference::To<Pulsar::Profile> std_prof;
@@ -164,11 +169,27 @@ int main (int argc, char** argv)
   Pulsar::Plotter::ColourMap colour_map = Pulsar::Plotter::Heat;
   
   int c = 0;
-  const char* args = "AaBb:Cc:DdEeFf:GgH:hI:iJjK:k:LlM:mN:nO:oP:pQq:r:Ss:Tt:uVvwWXx:Yy:Zz:";
-
-  while ((c = getopt(argc, argv, args)) != -1)
+  
+  const char* args = 
+    "AaBb:Cc:DdEeFf:GgH:hI:iJjK:k:LlM:mN:nO:oP:pQq:r:Ss:Tt:uVvwWXx:Yy:Zz:";
+  
+  while (1) {
+    
+    static struct option long_options[] = {
+      {"convert_periphs", 0, 0, 200},
+      {"convert_binphs", 0, 0, 201},
+      {0, 0, 0, 0}
+    };
+    
+    int options_index = 0;
+    
+    c = getopt_long(argc, argv, args,
+		    long_options, &options_index);
+    
+    if (c == -1) 
+      break;
+    
     switch (c) {
-      
     case 'a':
       Pulsar::Archive::agent_report ();
       return 0;
@@ -236,7 +257,7 @@ int main (int argc, char** argv)
       plotter.set_subint( atoi (optarg) );
       break;
     case 'i':
-      cout << "$Id: pav.C,v 1.62 2003/12/02 04:03:48 ahotan Exp $" << endl;
+      cout << "$Id: pav.C,v 1.63 2003/12/30 01:24:10 ahotan Exp $" << endl;
       return 0;
 
     case 'j':
@@ -327,7 +348,8 @@ int main (int argc, char** argv)
       
     case 'u':
       if (!std_given)
-	cout << "For -u to be useful you must also specify a standard profile" << endl;
+	cout << "For -u to be useful you must also specify a standard profile"
+	     << endl;
       else
 	mdiff = true;
       break;
@@ -358,7 +380,7 @@ int main (int argc, char** argv)
       break;
 
     case 'Y':
-      timeplot = true;
+      subint_plot = true;
       break;
 
     case 'z': {
@@ -405,10 +427,18 @@ int main (int argc, char** argv)
       hat = true;
       break;
 
+    case 200:
+      cpo = true;
+      break;
+      
+    case 201:
+      cbo = true;
+      break;
       
     default:
       return -1; 
     }
+  }
   
   vector <string> filenames;
   
@@ -445,6 +475,18 @@ int main (int argc, char** argv)
   for (unsigned ifile=0; ifile < filenames.size(); ifile++) try {
 
     archive = Pulsar::Archive::load (filenames[ifile]);
+
+    if (cbo) {
+      Pulsar::IntegrationOrder* myio = new Pulsar::BinaryPhaseOrder();
+      archive->add_extension(myio); 
+      myio->organise(archive);
+    }
+    
+    if (cpo) {
+      Pulsar::IntegrationOrder* myio = new Pulsar::PeriastronOrder();
+      archive->add_extension(myio);
+      myio->organise(archive);
+    }
 
     if (dedisperse) {
       if (stopwatch)
@@ -605,7 +647,8 @@ int main (int argc, char** argv)
 	cpgsch(2.0);
 	
 	char useful[256];
-	sprintf(useful, "Pulse FWHM = %.3lf ms", fabs(falledge-riseedge));
+	sprintf(useful, "Pulse FWHM = %.3f ms", 
+		float(fabs(falledge-riseedge)));
 	
 	cpgmtxt("B", 4, 0.5, 0.5, useful);
 	cpgsch(1.0);
@@ -628,9 +671,9 @@ int main (int argc, char** argv)
       plotter.instrument_phase(archive, !zoomed);
     }
     
-    if (timeplot) {
+    if (subint_plot) {
       cpg_next();
-      plotter.phase_time (archive);
+      plotter.phase_subints (archive);
     }
     
     if (hat) {
