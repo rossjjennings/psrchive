@@ -12,8 +12,8 @@ class qt_double : public qt_value
   qt_double (bool error=false, QWidget *parent=NULL, const char *name=NULL);
 
   // error given in days
-  int setdouble (double d_val, double error=0.0);
-  int getdouble (double* d_val, double* error);
+  void   setDouble (double d_val = 0.0);
+  double getDouble () const { return valset; };
 
  protected:
   double  valset;

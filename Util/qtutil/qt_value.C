@@ -7,6 +7,9 @@ int qt_value::err_max_len = 12;
 int qt_value::default_val_precision = 10;
 int qt_value::default_err_precision = 3;
 
+char qt_value::str_data [80];
+bool qt_value::verbose = false;
+
 qt_value::qt_value (bool with_error, QWidget *parent, const char *name) :
   QHBox     (parent, name),
   value     (this),
@@ -34,4 +37,32 @@ qt_value::qt_value (bool with_error, QWidget *parent, const char *name) :
     error.hide();
     plusminus.hide();
   }
+  else
+    connect (&error, SIGNAL(returnPressed()), this, SLOT(error_Entered_CB()));
+
+  setError ();
+}
+
+void qt_value::setError (double err)
+{
+  if (!has_error)
+    return;
+
+  sprintf (str_data, "%.*le", err_precision, err);
+  error.setText (str_data);
+
+  errset = err;
+}
+
+void qt_value::error_Entered_CB ()
+{
+  double newval;
+
+  if (sscanf (error.text().ascii(), "%lf", &newval) != 1) {
+    if (verbose)
+      cerr << "qt_value:: invalid value '" << error.text() << "'" << endl;
+    // restore the old value
+    newval = errset;
+  }
+  setError (newval);
 }
