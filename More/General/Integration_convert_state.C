@@ -13,6 +13,11 @@
 void Pulsar::Integration::convert_state (Signal::State state)
 { try {
 
+  if (verbose)
+    cerr << "Pulsar::Integration::convert_state current=" 
+         << Signal::state_string (get_state()) << " request="
+         << Signal::state_string (state) << endl;
+
   if (get_state() == state)
     return;
 
