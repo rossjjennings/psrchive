@@ -1,5 +1,5 @@
 //
-// $Id: pav.C,v 1.29 2003/02/26 05:36:44 ahotan Exp $
+// $Id: pav.C,v 1.30 2003/03/06 16:28:00 straten Exp $
 //
 // The Pulsar Archive Viewer
 //
@@ -33,37 +33,38 @@ void usage ()
     " -h        This help page \n"
     " -i        Revision information\n"
     //    " -a        Calculate TOAs of every profile \n"
+    " -A        Plot instrumental phase across the band\n"
     " -b scr    Bscrunch scr phase bins together \n"
+    " -B        Off-pulse bandpass\n"
     " -c map    Choose a different colour map \n"
+    " -C        Centre the profile\n"
     " -d dm     Dedisperse data to a new DM \n"
     " -D        Plot Integration 0, poln 0, chan 0 \n"
-    " -G        Greyscale of profiles in frequency and phase\n"
     //    " -E f.eph  install new ephemeris given in file 'f.eph' \n"
     //    " -e xx     Output data to new file with ext xx \n"
     " -f scr    Fscrunch scr frequency channels together \n"
     " -F        Fscrunch all frequency channels \n"
+    " -g        Position angle across a profile\n"
+    " -G        Greyscale of profiles in frequency and phase\n"
     //    " -H        Print ASCII of Integration 0, poln 0, chan 0 \n"
     " -M meta   meta names a file containing the list of files\n"
     " -p        add polarisations together \n"
+    " -P        select polarization\n"
+    " -q        Plot a position angle frequency spectrum colour map\n"
     " -r phase  rotate the profiles by phase (in turns)\n"
+    " -R        Display SNR information\n"
+    " -s        SNR frequency spectrum plot\n"
     " -S        plot Stokes parameters in the Manchester style\n"
     " -t src    Tscrunch scr Integrations together \n"
     " -T        Tscrunch all Integrations \n"
     " -v        Verbose output \n"
     " -V        Very verbose output \n"
     " -w        time things \n"
-    " -z x1,x2  start and end phase \n"
-    " -R        Display SNR information\n"
-    " -Z        Smear a profile by convolving with a hat function\n"
-    " -C        Centre the profile\n"
-    " -Y        Display all integrations in a time vs phase plot\n"
-    " -A        Plot instrumental phase across the band\n"
-    " -s        SNR frequency spectrum plot\n"
-    " -g        Position angle across a profile\n"
-    " -B        Off-pulse bandpass\n"
-    " -X        Plot cal amplitude and phase vs frequency channel\n"
     " -W        Change colour scheme to suite white background\n"
-    " -q        Plot a position angle frequency spectrum colour map\n"
+    " -X        Plot cal amplitude and phase vs frequency channel\n"
+    " -Y        Display all integrations in a time vs phase plot\n"
+    " -z x1,x2  start and end phase \n"
+    " -Z        Smear a profile by convolving with a hat function\n"
        << endl;
 }
 
@@ -109,8 +110,9 @@ int main (int argc, char** argv)
     switch (c) {
       
     case 'a':
-      // toas
-      break;
+      Pulsar::Archive::Agent::report ();
+      return 0;
+
     case 'b':
       bscrunch = atoi (optarg);
       break;
@@ -143,7 +145,7 @@ int main (int argc, char** argv)
       usage ();
       return 0;
     case 'i':
-      cout << "$Id: pav.C,v 1.29 2003/02/26 05:36:44 ahotan Exp $" << endl;
+      cout << "$Id: pav.C,v 1.30 2003/03/06 16:28:00 straten Exp $" << endl;
       return 0;
     case 'm':
       // macro file
