@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ReceptionCalibrator.h,v $
-   $Revision: 1.56 $
-   $Date: 2004/01/06 19:03:57 $
-   $Author: straten $ */
+   $Revision: 1.57 $
+   $Date: 2004/01/07 02:06:16 $
+   $Author: hknight $ */
 
 #ifndef __Pulsar_ReceptionCalibrator_H
 #define __Pulsar_ReceptionCalibrator_H
@@ -163,6 +163,7 @@ namespace Pulsar {
   public:
     
     friend class ReceptionCalibratorPlotter;
+
     
     //! Construct with optional first pulsar archive
     ReceptionCalibrator (Calibrator::Type model,
@@ -288,7 +289,8 @@ namespace Pulsar {
 
 
     //! Calibrator parameter communication
-    friend class CalInfo : public Calibrator::Info {
+    class CalInfo : public Calibrator::Info {
+      //friend class CalInfo : public Calibrator::Info {
       
     public:
       
@@ -319,6 +321,8 @@ namespace Pulsar {
       Reference::To<const ReceptionCalibrator> calibrator;
       
     };
+
+    friend class CalInfo;
 
   private:
     //! Flag set after the solve method has been called
