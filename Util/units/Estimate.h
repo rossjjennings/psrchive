@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Estimate.h,v $
-   $Revision: 1.11 $
-   $Date: 2003/04/26 06:45:46 $
+   $Revision: 1.12 $
+   $Date: 2003/04/27 10:43:43 $
    $Author: straten $ */
 
 #ifndef __Estimate_h
@@ -144,7 +144,7 @@ class MeanEstimate
   //! The value, normalized by its variance
   T norm_val;
   //! The inverse of its variance
-  T inv_var;
+  U inv_var;
 
   //! Construct from a value and its estimated error, \f$ \sigma^2 \f$
   MeanEstimate (T _val=0, U _var=0) { norm_val=_val; inv_var=_var; }
