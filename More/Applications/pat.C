@@ -1,10 +1,10 @@
 #include <string.h>
-#include <unistd.h>
 #include <libgen.h>
 #include "dirutil.h"
 
 #include "cpgplot.h"
 
+#include "Pulsar/getopt.h"
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
 #include "Pulsar/Plotter.h"
@@ -46,7 +46,7 @@ int main (int argc, char *argv[]) {
       Pulsar::Archive::set_verbosity(1);
       break;
     case 'i':
-      cout << "$Id: pat.C,v 1.12 2003/09/30 08:33:18 ahotan Exp $" << endl;
+      cout << "$Id: pat.C,v 1.13 2003/12/02 04:03:48 ahotan Exp $" << endl;
       return 0;
     case 's':
       std_given = true;

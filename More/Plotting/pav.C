@@ -1,5 +1,5 @@
 //
-// $Id: pav.C,v 1.61 2003/10/27 17:49:01 ahotan Exp $
+// $Id: pav.C,v 1.62 2003/12/02 04:03:48 ahotan Exp $
 //
 // The Pulsar Archive Viewer
 //
@@ -16,11 +16,14 @@
 #endif
 
 #include "Reference.h"
+
+#include "Pulsar/getopt.h"
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
 #include "Pulsar/Profile.h"
 #include "Pulsar/Plotter.h"
 #include "Pulsar/Passband.h"
+
 #include "Error.h"
 #include "RealTimer.h"
 
@@ -233,7 +236,7 @@ int main (int argc, char** argv)
       plotter.set_subint( atoi (optarg) );
       break;
     case 'i':
-      cout << "$Id: pav.C,v 1.61 2003/10/27 17:49:01 ahotan Exp $" << endl;
+      cout << "$Id: pav.C,v 1.62 2003/12/02 04:03:48 ahotan Exp $" << endl;
       return 0;
 
     case 'j':

@@ -3,13 +3,15 @@
 #include <libgen.h>
 #include "dirutil.h"
 
-#include "Integration.h"
-#include "Error.h"
-#include "BasicIntegration.h"
-#include "Calibration.h"
-#include "PolnCalibrator.h"
-#include "FluxCalibrator.h"
+#include "Pulsar/getopt.h"
+#include "Pulsar/Integration.h"
+#include "Pulsar/BasicIntegration.h"
+#include "Pulsar/Calibration.h"
+#include "Pulsar/PolnCalibrator.h"
+#include "Pulsar/FluxCalibrator.h"
 #include "Calibration/Model.h"
+
+#include "Error.h"
 
 // Extensions this program understands
 
@@ -101,7 +103,7 @@ int main (int argc, char *argv[]) {
       Pulsar::Archive::set_verbosity(1);
       break;
     case 'i':
-      cout << "$Id: pac.C,v 1.31 2003/10/29 12:22:07 ahotan Exp $" << endl;
+      cout << "$Id: pac.C,v 1.32 2003/12/02 04:03:48 ahotan Exp $" << endl;
       return 0;
     case 'p':
       cals_are_here = optarg;

@@ -1,14 +1,15 @@
 #include <string.h>
-#include <unistd.h>
 #include <libgen.h>
 #include "dirutil.h"
 
 #include "cpgplot.h"
 
+#include "Pulsar/getopt.h"
 #include "Pulsar/Integration.h"
 #include "Pulsar/Plotter.h"
-#include "Error.h"
 #include "Pulsar/RFIMitigation.h"
+
+#include "Error.h"
 
 // A simple command line tool for zapping RFI
 
@@ -92,7 +93,7 @@ int main (int argc, char *argv[]) {
       Pulsar::Archive::set_verbosity(1);
       break;
     case 'i':
-      cout << "$Id: paz.C,v 1.16 2003/12/01 11:30:10 rmanches Exp $" << endl;
+      cout << "$Id: paz.C,v 1.17 2003/12/02 04:03:48 ahotan Exp $" << endl;
       return 0;
     case 'D':
       display = true;
