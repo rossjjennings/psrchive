@@ -1,7 +1,7 @@
 //-*-C++-*-
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Attic/string_utils.h,v $
-   $Revision: 1.19 $
-   $Date: 2003/05/02 00:52:35 $
+   $Revision: 1.20 $
+   $Date: 2003/05/02 09:27:06 $
    $Author: hknight $ */
 
 #ifndef __STRING_UTILS_H
@@ -107,7 +107,7 @@ string stringprintf(char *fmt ...);
 
 // Stuff to delimit a vector of strings and the reverse
 vector<string> 
-   stringdecimate(const string& wordstr, const string& delimiters);
+   stringdecimate(const string& wordstr, string delimiters);
 string stringdelimit(const vector<string>& words, char delimiter);
 
 // Stuff to turn an array of char *'s into a vector of strings

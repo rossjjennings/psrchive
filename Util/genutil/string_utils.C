@@ -69,7 +69,7 @@ bool retrieve_cstring(FILE* fptr,string ignore,char* answer){
 // * stringdelimit -- does the opposite of the above
 
 vector<string>
-stringdecimate(const string& wordstr, const string& delimiters)
+stringdecimate(const string& wordstr, string delimiters)
 {
   string::size_type pos, end;
   vector <string> words;
