@@ -427,7 +427,7 @@ void toa::guess_instrument ()
   if (filename.empty())
     return;
 
-  char* beg = strrchr (filename.data(), '/');
+  const char* beg = strrchr (filename.data(), '/');
   if (beg)
     beg ++;
   else
