@@ -409,16 +409,16 @@ TTYPE12 = 'TEL_AZ  '           / [deg] Telescope azimuth at subint centre
 TFORM12 = '1E      '           / Float 
 TTYPE13 = 'TEL_ZEN '           / [deg] Telescope zenith angle at subint centre
 TFORM13 = '1E      '           / Float
-TTYPE16 = 'DAT_FREQ'           / [MHz] Centre frequency for each channel
-TFORM16 = 'E       '           / NCH_FILE floats
-TTYPE17 = 'DAT_WTS '           / Weights for each channel
-TFORM17 = 'E       '           / NCH_FILE floats
-TTYPE18 = 'DAT_OFFS'           / Data offset for each channel
-TFORM18 = 'E       '           / NCH_FILE*NPOL floats
-TTYPE19 = 'DAT_SCL '           / Data scale factor for each channel
-TFORM19 = 'E       '           / NCH_FILE*NPOL floats
-TTYPE20 = 'DATA    '           / Subint data table
-TDIM20  = (*,*,*)              / Dimensions of data table = (NBIN,NCH_FILE,NPOL)
-TUNIT20 = 'Jy      '           / Units of subint data
-TFORM20 = 'I       '           / NBIN*NCH_FILE*NPOL integers
+TTYPE14 = 'DAT_FREQ'           / [MHz] Centre frequency for each channel
+TFORM14 = 'E       '           / NCH_FILE floats
+TTYPE15 = 'DAT_WTS '           / Weights for each channel
+TFORM15 = 'E       '           / NCH_FILE floats
+TTYPE16 = 'DAT_OFFS'           / Data offset for each channel
+TFORM16 = 'E       '           / NCH_FILE*NPOL floats
+TTYPE17 = 'DAT_SCL '           / Data scale factor for each channel
+TFORM17 = 'E       '           / NCH_FILE*NPOL floats
+TTYPE18 = 'DATA    '           / Subint data table
+TDIM18  = (*,*,*)              / Dimensions of data table = (NBIN,NCH_FILE,NPOL)
+TUNIT18 = 'Jy      '           / Units of subint data
+TFORM18 = 'I       '           / NBIN*NCH_FILE*NPOL integers
 END
