@@ -69,9 +69,19 @@ int main (int argc, char** argv)
 
   for (unsigned ifile=0; ifile<filenames.size(); ifile++) {  try {
 
+    if (verbose)
+      cerr << "pacv: Loading " << filenames[ifile] << endl;
+
     archive = Pulsar::Archive::load( filenames[ifile] );
 
+    if (verbose)
+      cerr << "pacv: Constructing SingleAxisCalibrator" << endl;
+
     calibrator = new Pulsar::SingleAxisCalibrator (archive);
+    calibrator -> build();
+
+    if (verbose)
+      cerr << "pacv: Plotting SingleAxisCalibrator" << endl;
 
     Pulsar::plot (calibrator);
 
