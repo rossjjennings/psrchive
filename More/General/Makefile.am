@@ -209,8 +209,6 @@ export:
 	doxygen
 	rm -rf $(EXPORT)
 	mv doc/html $(EXPORT)
-	cp documentation/build/autotools.* $(EXPORT)
-	cp documentation/build/*.html $(EXPORT)
 	chmod -R a+r $(EXPORT)
 	chmod a+x $(EXPORT)
 
