@@ -7,7 +7,8 @@ include_HEADERS = fftm.h psrfft.h spectra.h interpolate.h median_smooth.h \
 libpsrfft_la_SOURCES = spectra.c psrfft.c noise.c running_median.c	 \
 	local_medians.c optimize_fft.c fft_shift.c fftm.C correl.c	 \
 	cdetect.c rfftw_sort.c cross_detect.c stokes_detect.c		 \
-	fccf.f ffft.f differentiate.C fftfit.f fftconv.f brent.f cprof.f
+	fccf.f ffft.f differentiate.C fftfit.f fftconv.f brent.f cprof.f \
+	cross_detect.ic stokes_detect.ic
 
 bin_PROGRAMS = test_optimize
 
