@@ -60,7 +60,7 @@ void Pulsar::ReceptionCalibrator::initial_observation (const Archive* data)
       "  Pulse phase will vary as a function of frequency channel" << endl;
 
 
-  uncalibrated = data;
+  uncalibrated = data->clone();
 
   parallactic.set_source_coordinates( uncalibrated->get_coordinates() );
 
@@ -71,21 +71,11 @@ void Pulsar::ReceptionCalibrator::initial_observation (const Archive* data)
   unsigned nchan = uncalibrated->get_nchan();
 
   equation.resize (nchan);
-  calibrator.resize (nchan);
   receiver.resize (nchan);
-
-  Stokes<double> cal_state (1,0,1,0);
 
   for (unsigned ichan=0; ichan<nchan; ichan++) {
 
-    calibrator[ichan].set_stokes (cal_state);
-    for (unsigned istokes=0; istokes<4; istokes++)
-      calibrator[ichan].set_infit (istokes, false);
-    
     equation[ichan] = new Calibration::SAtPEquation;
-
-    // add the calibrator state before the parallactic angle transformation
-    equation[ichan]->get_model()->add_state( &(calibrator[ichan]) );
     equation[ichan]->get_model()->add_transformation( &parallactic );
 
   }
@@ -145,12 +135,10 @@ void Pulsar::ReceptionCalibrator::init_estimate (SourceEstimate& estimate)
 //! Get the total number of input polarization states
 unsigned Pulsar::ReceptionCalibrator::get_nstate () const
 {
-  unsigned nstate = pulsar.size();
+  if (equation.size() == 0)
+    return 0;
 
-  if (PolnCalibrator_path)
-    nstate += 1;
-
-  return nstate;
+  return equation[0]->get_model()->get_nstate ();
 }
 
 unsigned Pulsar::ReceptionCalibrator::get_nchan () const
@@ -291,6 +279,8 @@ void Pulsar::ReceptionCalibrator::add_PolnCalibrator (const PolnCalibrator* p)
     Stokes<double> cal_state (1,0,1,0);
 
     calibrator_state_index = equation[0]->get_model()->get_nstate ();
+
+cerr << "Cal state index" << calibrator_state_index << endl;
 
     PolnCalibrator_path = equation[0]->get_nbackend();
 
@@ -443,6 +433,7 @@ void Pulsar::ReceptionCalibrator::calibrate (Archive* data)
 
 void Pulsar::ReceptionCalibrator::solve ()
 {
+  if (!is_initialized)
   check_ready ("Pulsar::ReceptionCalibrator::solve");
 
   bool degenerate_rotV = false;
@@ -475,8 +466,10 @@ void Pulsar::ReceptionCalibrator::solve ()
 
     cerr << "Pulsar::ReceptionCalibrator::solve ichan=" << ichan << endl;
 
-    if (ncoef)
+    if (ncoef) {
+      equation[ichan]->set_backend (0);
       equation[ichan]->set_ncoef (ncoef);
+    }
 
     if (degenerate_rotV) {
       equation[ichan]->get_receiver()->set_param (6, 0.0);
