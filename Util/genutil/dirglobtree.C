@@ -8,11 +8,19 @@
 void dirglobtree (vector<string>* filenames, 
 		  const string& root, const string& pattern)
 {
+  vector<string> patterns (1, pattern);
+  dirglobtree (filenames, root, patterns);
+}
+
+void dirglobtree (vector<string>* filenames, 
+		  const string& root, const vector<string>& patterns)
+{
   string path = root;
   if (path.length())
     path += "/";
 
-  dirglob (filenames, path + pattern);
+  for (unsigned ip=0; ip<patterns.size(); ip++)
+    dirglob (filenames, path + patterns[ip]);
 
   string current = root;
   if (!root.length())
@@ -32,7 +40,7 @@ void dirglobtree (vector<string>* filenames,
     string name (entry->d_name);
     string next = path + name;
     if (name != "." && name != ".." && file_is_directory (next.c_str()))
-      dirglobtree (filenames, next, pattern);
+      dirglobtree (filenames, next, patterns);
   }
 
   closedir (dird);
