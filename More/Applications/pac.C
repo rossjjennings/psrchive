@@ -92,8 +92,6 @@ int main (int argc, char *argv[]) {
       return 0;
     case 'v':
       verbose = true;
-      Pulsar::Calibration::verbose = true;
-      Pulsar::Calibrator::verbose = true;
       break;
     case 'V':
       verbose = true;
@@ -103,7 +101,7 @@ int main (int argc, char *argv[]) {
       Pulsar::Archive::set_verbosity(1);
       break;
     case 'i':
-      cout << "$Id: pac.C,v 1.38 2003/12/06 17:38:53 straten Exp $" << endl;
+      cout << "$Id: pac.C,v 1.39 2004/04/03 08:29:42 straten Exp $" << endl;
       return 0;
     case 'p':
       cals_are_here = optarg;
@@ -347,7 +345,7 @@ int main (int argc, char *argv[]) {
 	 is flux calibrated, it will undo the flux calibration step.
 	 Therefore, the flux cal should take place after the poln cal */
 
-      if (do_fluxcal) {
+      if (do_fluxcal) try {
 
 	Pulsar::FluxCalibrator* fcal_engine = 0;
 	fcal_engine = dbase->generateFluxCalibrator(arch);
@@ -364,13 +362,24 @@ int main (int argc, char *argv[]) {
 	
 	cout << "Mean Tsys = " << fcal_engine->meanTsys() << endl;
       }
+      catch (Error& error)  {
+        cerr << "pac: Could not perform flux calibration\n\t"
+             << error.get_message() << endl;
+      }
 
-      // find first of "." turns ./cal/poo.cfb info .unload_ext 
+      // find first of "." turns ./cal/poo.cfb info .unload_ext WvS
+      //
       // int index = archives[i].find_first_of(".", 0);
+
       int index = archives[i].find_last_of(".",archives[i].length());
 
-      string newname = opath;
-      newname += archives[i].substr(0, index);
+      // starting the output filename with the cwd causes a mess when 
+      // full path names to input files are used.  WvS
+      //  
+      // string newname = opath;
+
+      string newname = archives[i].substr(0, index);
+
       newname += ".";
       newname += unload_ext;
 
