@@ -69,6 +69,7 @@ int main (int argc, char** argv)
 
   cerr << "Writing ephemeris to PSRFITS file: " << temp << endl;
 
+  remove (temp.c_str());
   fits_create_file (&fptr, templated.c_str(), &status);
     if (status != 0) {
     fits_get_errstatus (status, err);
