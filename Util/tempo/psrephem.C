@@ -346,6 +346,16 @@ string psrephem::par_lookup (const char* name, int use_cwd)
 	     << " from PARDIR:" << tempo_pardir << endl;
       return filename;
     }
+    if (verbose)
+      fprintf(stderr,"psrephem::par_lookup using TEMPO .eph = '%s'\n",
+	      tempo_pardir);
+    filename = tempo_pardir + psr_name + ".eph";
+    if (stat (filename.c_str(), &finfo) == 0) {
+      if (verbose)
+	cerr << "psrephem:: Using " << filename 
+	     << " from PARDIR:" << tempo_pardir << endl;
+      return filename;
+    }
   }
   
   /* Create name.eph in local directory */ 
