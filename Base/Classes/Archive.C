@@ -37,6 +37,24 @@ Pulsar::Archive::~Archive ()
 }
 
 
+void Pulsar::Archive::refresh()
+{
+  if (verbose)
+    cerr << "Pulsar::Archive::refresh" << endl;
+
+  IntegrationManager::resize(0);
+
+  load_header (__load_filename.c_str());
+}
+
+void Pulsar::Archive::update()
+{
+  if (verbose)
+    cerr << "Pulsar::Archive::update" << endl;
+
+  load_header (__load_filename.c_str());
+}
+
 
 //! Return a pointer to the Profile
 /*!
@@ -55,6 +73,18 @@ const Pulsar::Profile*
 Pulsar::Archive::get_Profile (unsigned sub, unsigned pol, unsigned chan) const
 {
   return get_Integration (sub) -> get_Profile (pol, chan);
+}
+
+Pulsar::Integration* Pulsar::Archive::load_Integration (unsigned isubint)
+{
+  if (verbose)
+    cerr << "Pulsar::Archive::load_Integration" << endl;
+
+  if (!__load_filename.length())
+    throw Error (InvalidState, "Pulsar::Archive::load_Integration",
+                 "internal error: instance not loaded from file");
+
+  return load_Integration (__load_filename.c_str(), isubint);
 }
 
 /*!  

@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Archive.h,v $
-   $Revision: 1.58 $
-   $Date: 2003/03/06 16:20:26 $
+   $Revision: 1.59 $
+   $Date: 2003/03/07 16:00:01 $
    $Author: straten $ */
 
 /*! \mainpage 
@@ -285,7 +285,7 @@ namespace Pulsar {
     static Archive* load (const char* filename);
 
     //! Convenience interface to Archive::load (const char*)
-    static Archive* load (const string& name) { return load (name.c_str()); }
+    static Archive* load (const string& name);
 
     //! Write the archive to filename
     void unload (const char* filename = 0);

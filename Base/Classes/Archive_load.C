@@ -6,6 +6,10 @@
    an Archive::Agent.
 
    \param filename path to the file containing a pulsar archive
+
+   Note: the definition of this static member function is contained in a 
+   source code file separate from all other archive methods so that it will
+   be linked into executables only when called directly.
 */
 Pulsar::Archive* Pulsar::Archive::load (const char* filename)
 {
@@ -56,35 +60,8 @@ Pulsar::Archive* Pulsar::Archive::load (const char* filename)
 	       "'%s' not a recognized file format", filename);
 }
 
-void Pulsar::Archive::refresh()
-{
-  if (verbose)
-    cerr << "Pulsar::Archive::refresh" << endl;
-
-  IntegrationManager::resize(0);
-
-  load_header (__load_filename.c_str());
+Pulsar::Archive* Pulsar::Archive::load (const string& filename)
+{ 
+  return load (filename.c_str());
 }
-
-void Pulsar::Archive::update()
-{
-  if (verbose)
-    cerr << "Pulsar::Archive::update" << endl;
-
-  load_header (__load_filename.c_str());
-}
-
-
-Pulsar::Integration* Pulsar::Archive::load_Integration (unsigned isubint)
-{
-  if (verbose)
-    cerr << "Pulsar::Archive::load_Integration" << endl;
-
-  if (!__load_filename.length())
-    throw Error (InvalidState, "Pulsar::Archive::load_Integration",
-		 "internal error: instance not loaded from file");
-
-  return load_Integration (__load_filename.c_str(), isubint);
-}
-
 
