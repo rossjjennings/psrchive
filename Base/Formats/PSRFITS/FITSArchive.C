@@ -500,21 +500,21 @@ void Pulsar::FITSArchive::load_header (const char* filename)
     throw FITSError (status, "FITSArchive::load_header", 
 		     "fits_read_key OBSTYPE");
   
-  if (strcmp (tempstr1, "PSR") == 0) {
+  if (strcmp(tempstr1, "PSR") == 0 || strcmp(tempstr1, "LEVPSR") == 0) {
     set_type ( Signal::Pulsar );
     if (verbose)
       cerr << "FITSArchive::load_header using Signal::Pulsar" << endl;
   }
-  else if (strcmp (tempstr1, "CAL") == 0) {
+  else if (strcmp(tempstr1, "CAL") == 0 || strcmp(tempstr1, "LEVCAL") == 0) {
     
-    if (get_source().substr(0,4) == "HYDRA" || 
-	get_source().substr(0,4) == "VIRGO") {
+    if (get_source() == "HYDRA_ON"  || 
+	get_source() == "VIRGO_ON") {
       set_type ( Signal::FluxCalOn );
       if (verbose)
 	cerr << "FITSArchive::load_header using Signal::FluxCalOn" << endl;
     }
-    else if (get_source().substr(0,8) == "HYDRA_OFF" ||
-	     get_source().substr(0,8) == "VIRGO_OFF") {
+    else if (get_source() == "HYDRA_OFF" ||
+	     get_source() == "VIRGO_OFF") {
       set_type ( Signal::FluxCalOff );
       if (verbose)
 	cerr << "FITSArchive::load_header using Signal::FluxCalOff" << endl;
