@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Integration.h,v $
-   $Revision: 1.7 $
-   $Date: 2002/04/12 00:10:45 $
+   $Revision: 1.8 $
+   $Date: 2002/04/12 02:05:45 $
    $Author: straten $ */
 
 /*
@@ -47,14 +47,11 @@ namespace Pulsar {
     //! Null constructor simply intializes defaults
     Integration ();
 
-    //! Copy constructor
-    Integration (const Integration& copy, int npol=0, int nband=0);
-
     //! Destructor deletes data area
     virtual ~Integration ();
 
     //! Return pointer to copy of self
-    virtual Integration* clone ();
+    virtual Integration* clone (int npol=0, int nband=0) const;
 
     //! Resizes the dimensions of the data area
     virtual void resize (int npol, int nband, int nbin);
@@ -148,7 +145,7 @@ namespace Pulsar {
     virtual void V_rotation (const vector<Angle> & phases);
 
     //! Returns a pointer to a Profile
-    Profile* get_profile (int ipol, int iband);
+    Profile* get_Profile (int ipol, int iband);
 
     //! Returns a pointer to the vector of Profile objects for poln
     vector<Profile *>& operator[] (Poln::Measure poln);

@@ -1,3 +1,5 @@
+#include <assert.h>
+
 #include "Integration.h"
 #include "Profile.h"
 
@@ -51,3 +53,41 @@ Pulsar::Profile* Pulsar::Integration::new_Profile ()
   return new Profile;
 }
 
+Pulsar::Integration* Pulsar::Integration::clone (int _npol, int _nband) const
+{
+  if (_npol == 0)
+    _npol = npol;
+
+  if (_nband == 0)
+    _nband = nband;
+
+  Integration* ptr = new Integration;
+
+  ptr->set_start_time (start_time);
+  ptr->set_duration (duration);
+  ptr->set_centre_frequency (centrefreq);
+  ptr->set_bandwidth (bw);
+  ptr->set_dispersion_measure (dm);
+  ptr->set_folding_period (pfold);
+
+  ptr->resize(_npol, _nband, nbin);
+
+  for (int ipol=0; ipol<_npol; ipol++)
+    for (int iband=0; iband<_nband; iband++) {
+
+      Profile* copy = ptr->profiles[ipol][iband];
+      Profile* from = profiles[ipol][iband];
+
+      // sanity checks
+      assert (copy && from);
+      assert (copy->get_nbin() == from->get_nbin());
+
+      copy->set_amps( from->get_amps() );
+      copy->set_weight ( from->get_weight() );
+      copy->set_centre_frequency ( from->get_centre_frequency() );
+      copy->set_state ( from->get_state() );
+
+    }
+
+  return ptr;
+}

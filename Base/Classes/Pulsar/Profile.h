@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Profile.h,v $
-   $Revision: 1.6 $
-   $Date: 2002/04/11 15:11:31 $
+   $Revision: 1.7 $
+   $Date: 2002/04/12 02:05:45 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Profile_h
@@ -123,25 +123,31 @@ namespace Pulsar {
 			   double period, int nsite, const char* fname, 
 			   int isubint, int isubband, int ipol);
 
+    //! get the number of bins
+    /*! This attribute may be set only through Profile::resize */
+    int get_nbin () const { return nbin; }
+
     //! returns a pointer to the start of the array of amplitudes
-    float* get_amps ();
-
-    //! get the centre frequency (in MHz)
-    double get_centre_frequency () { return centrefreq; }
-    //! set the centre frequency (in MHz)
-    virtual void set_centre_frequency (double cfreq) { centrefreq = cfreq; }
-
-    //! get the weight of the profile
-    float get_weight () { return weight; }
-    //! set the weight of the profile
-    virtual void set_weight (float wt) { weight = wt; }
-
+    const float* get_amps () const { return amps; }
+    float* get_amps () { return amps; }
     //! set the amplitudes array equal to the contents of the data array
     template <typename T>
     void set_amps (const T* data);
 
+    //! get the centre frequency (in MHz)
+    double get_centre_frequency () const { return centrefreq; }
+    //! set the centre frequency (in MHz)
+    virtual void set_centre_frequency (double cfreq) { centrefreq = cfreq; }
+
+    //! get the weight of the profile
+    float get_weight () const { return weight; }
+    //! set the weight of the profile
+    virtual void set_weight (float wt) { weight = wt; }
+
     //! get the state of the polarization measurement
-    Poln::Measure get_state () { return state; }
+    Poln::Measure get_state () const { return state; }
+    //! set the state of the polarization measurement
+    virtual void set_state (Poln::Measure _state) { state = _state; }
 
   protected:
 
@@ -153,9 +159,6 @@ namespace Pulsar {
 
     //! resize the data area
     virtual void resize (int nbin);
-
-    //! set the state of the polarization measurement
-    virtual void set_state (Poln::Measure _state) { state = _state; }
 
     //! calls bscrunch with the appropriate argument
     void halvebins (int nhalve);
