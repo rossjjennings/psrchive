@@ -6,7 +6,7 @@ NONMODULE := ephio.h ephio_def.c
 INCLUDES := psrephem.h ephio.h ephio_func.h
 
 LIBRARY  := libeph.a
-LIB_SRCS := ephio_c.c ephio_def.c ephio.f rnd8.f \
+LIB_SRCS := ephio_c.c ephio_def.c ephio.f \
 	psrephem.C set_epoch.C tex.C derived.C
 
 PROGRAMS := keys2c.c keys2fort.c eph2upd.f ephaux.C ephepo.C ephtex.C
@@ -16,8 +16,6 @@ keys2c.LDFLAGS := $(LDFLAGS) $(F77LIBS) -lm
 keys2fort.LDFLAGS := $(LDFLAGS) $(F77LIBS) -lm
 
 LDFLAGS += -leph $(LTIMES) -lgenutil++ -lgenutil $(LSLA)
-
-ephtex.LDFLAGS  := $(LDFLAGS) -lpsrinfo -leph -lgenutil $(LSLA)
 
 # ######################################################################
 # PSRFITS specific code
