@@ -1,14 +1,16 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Vector.h,v $
-   $Revision: 1.4 $
-   $Date: 2003/06/18 14:50:19 $
-   $Author: redwards $ */
+   $Revision: 1.5 $
+   $Date: 2003/08/19 16:42:23 $
+   $Author: straten $ */
 
 #ifndef __Vector_H
 #define __Vector_H
 
 #include <iostream>
+#include <complex>
+
 #include "psr_cpp.h"
 
 //! Vector
@@ -134,6 +136,7 @@ T normsq(const Vector<complex<T>, N> &v)
     sum += norm(v[i]);
   return sum;
 }
+
 //! simpler version for scalar types
 template <typename T, unsigned N>
 T normsq(const Vector<T, N> &v)
@@ -144,6 +147,7 @@ T normsq(const Vector<T, N> &v)
     sum += v[i]*v[i];
   return sum;
 }
+
 //! and the norm itself; note, won't work for complex
 template <typename T, unsigned N>
 T norm(const Vector<T, N> &v)

@@ -1,7 +1,7 @@
 
 #include <stdio.h>
 #include <string.h>
-#include "angle.h"
+#include "sky_coord.h"
 #include "coord.h"
 #include "f772c.h"
 
@@ -27,24 +27,22 @@ Angle oldAngularSeparation(const AnglePair& a1, const AnglePair& a2)
 
 int main ()
 {
-  AnglePair coordinates;
+  sky_coord coordinates;
 
-  double l, b;
-  float  lst, latitude;
-  float  az, zen, para;
   char coordstr [80];
 
   strcpy (coordstr, "04:37:15.747849-47:15:08.23371");
 
   coordinates.setHMSDMS (coordstr);
-  galactic (coordinates.angle1.getradians(), 
-	    coordinates.angle2.getradians(), &l, &b);
+  AnglePair galactic = coordinates.getGalactic();
+  double l = galactic.angle1.getradians();
+  double b = coordinates.angle2.getradians();
 
   printf ("COORDSTR: %s\n", coordstr);
   printf ("(RA DEC) (%s)  l:%g   b:%g\n", coordinates.getHMSDMS().c_str(),
 	  l*(180/M_PI), b*(180/M_PI));
 
-  double step = 0.2;
+  double step = 0.3;
   double start = - 2.2*M_PI;
   double end = 2.2*M_PI;
 
