@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/ScalarMath.h,v $
-   $Revision: 1.5 $
-   $Date: 2005/02/09 14:09:32 $
+   $Revision: 1.6 $
+   $Date: 2005/02/09 14:13:41 $
    $Author: straten $ */
 
 #ifndef __ScalarMath_H
@@ -81,6 +81,12 @@ namespace MEAL {
     //! Return true if the expression evaluation of a is less than that of b
     friend bool operator > (const ScalarMath& a, const ScalarMath& b);
 
+    //! Comparison operator
+    friend bool operator <= (const ScalarMath&, const ScalarMath&);
+
+    //! Comparison operator
+    friend bool operator >= (const ScalarMath&, const ScalarMath&);
+
     //! Return a ScalarMath instance representing x^y
     friend const ScalarMath pow (const ScalarMath& x, const ScalarMath& y);
 
@@ -128,22 +134,6 @@ namespace MEAL {
 
     //! Access the expression
     Scalar* get_expression () { return expression; }
-
-    //! Comparison operator
-    friend bool operator <= (const ScalarMath&, const ScalarMath&);
-
-    //! Comparison operator
-    friend bool operator < (const ScalarMath&, const ScalarMath&);
-
-    //! Comparison operator
-    friend bool operator >= (const ScalarMath&, const ScalarMath&);
-
-    //! Comparison operator
-    friend bool operator > (const ScalarMath&, const ScalarMath&);
-
-    //! Comparison operator
-    friend bool operator == (const ScalarMath&, const ScalarMath&);
-
 
   protected:
 
