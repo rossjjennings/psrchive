@@ -11,14 +11,20 @@ double dispersion_delay (double dm, double reference_freq, double freq);
 //
 /*!
   Rotate the profiles in each band in order to remove the dispersion delay.
-  \param pfold the period (in seconds) at which the pulsar signal was folded.
-  \param dm the dispersion measure in \f$ {\rm pc cm}^3 \f$
   \param frequency the frequency (in MHz) to which the delay is referenced
+  \pre the period (in seconds) at which the pulsar signal was folded must
+       have been previously set using Integration::set_folding_period.
+  \pre the dispersion measure (in \f${\rm pc cm}^3\f$ must have been
+       previously set using Integration::set_dispersion_measure.
 */
-void Pulsar::Integration::dedisperse
-( double pfold, double dm, double frequency )
+void Pulsar::Integration::dedisperse (double frequency)
 {
-  if (frequency == -1.0)
+  if (dm == 0)
+    return;
+  if (pfold == 0)
+    return;
+
+  if (frequency == 0.0)
     frequency = weighted_frequency ();
 
   if (verbose)
@@ -91,7 +97,8 @@ double Pulsar::Integration::weighted_frequency
   return result;
 }
 
-/*! If the frequency is lower than the reference frequency, then the delay
+/*! 
+  If the frequency is lower than the reference frequency, then the delay
   is positive.
   \return dispersion delay in seconds
   \param dm the dispersion measure in \f$ {\rm pc cm}^3 \f$

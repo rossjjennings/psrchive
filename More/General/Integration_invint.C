@@ -32,13 +32,13 @@ bool Pulsar::Integration::invint_square = false;
 void Pulsar::Integration::invint ()
 {
   // space to calculate the result
-  vector<float> invariant (get_nbin());
+  vector<float> invariant (nbin);
   // Stokes 4-vector
   Stokes stokes;
 
-  for (int iband=0; iband<get_nband(); ++iband) {
+  for (int iband=0; iband<nband; ++iband) {
 
-    for (int ibin=0; ibin<get_nbin(); ++ibin) {
+    for (int ibin=0; ibin<nbin; ++ibin) {
       // get the Stokes 4-vector
       get_Stokes (stokes, iband, ibin);
       // calculate \det\rho
@@ -62,6 +62,6 @@ void Pulsar::Integration::invint ()
     
   } // for each channel
 
-  resize (1, get_nband());
+  resize (1, nband, nbin);
   state = Poln::Invariant;
 }

@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Integration.h,v $
-   $Revision: 1.6 $
-   $Date: 2002/04/11 15:11:31 $
+   $Revision: 1.7 $
+   $Date: 2002/04/12 00:10:45 $
    $Author: straten $ */
 
 /*
@@ -47,6 +47,9 @@ namespace Pulsar {
     //! Null constructor simply intializes defaults
     Integration ();
 
+    //! Copy constructor
+    Integration (const Integration& copy, int npol=0, int nband=0);
+
     //! Destructor deletes data area
     virtual ~Integration ();
 
@@ -54,7 +57,7 @@ namespace Pulsar {
     virtual Integration* clone ();
 
     //! Resizes the dimensions of the data area
-    virtual void resize (int npol=0, int nband=0, int nbin=0);
+    virtual void resize (int npol, int nband, int nbin);
 
     //! Call Profile::fold on every profile
     virtual void fold (int nfold);
@@ -63,7 +66,7 @@ namespace Pulsar {
     virtual void bscrunch (int nscrunch);
 
     //! Integrate profiles from neighbouring bands
-    virtual void fscrunch (double dispersion_measure = 0.0, int nscrunch = 0);
+    virtual void fscrunch (int nscrunch = 0);
 
     //! Integrate profiles from two polarizations into one total intensity
     virtual void pscrunch ();
@@ -72,7 +75,7 @@ namespace Pulsar {
     virtual void invint ();
 
     //! Rotate all profiles to remove dispersion delays between bands
-    virtual void dedisperse (double pfold, double dm, double frequency = 0.0);
+    virtual void dedisperse (double frequency = 0.0);
 
     //! Returns a single Stokes 4-vector for the given band and phase bin
     void get_Stokes (Stokes& S, int iband, int ibin) const;
@@ -81,10 +84,12 @@ namespace Pulsar {
     void get_Stokes (vector<Stokes>& S, int iother,
 		     Dimension::Axis abscissa = Dimension::Phase ) const;
 
-    //! Find the transitions between hi and low states in a pulsed CAL
-    void find_cal_transitions (int& hightolow, int& lowtohigh,
-			       int& buffer) const;
-    
+    //! Find the transitions between high and low states in total intensity
+    void find_transitions (int& hi2lo, int& lo2hi, int& buffer) const;
+
+    //! Find the bins in which the total intensity exceeds a threshold
+    void find_peak_edges (int& rise, int& fall) const;
+
     //! Return the mean and variance of the mean in every profile baseline
     void baseline_levels (vector<vector<double> > & mean,
 			  vector<vector<double> > & varmean) const;
@@ -148,29 +153,6 @@ namespace Pulsar {
     //! Returns a pointer to the vector of Profile objects for poln
     vector<Profile *>& operator[] (Poln::Measure poln);
 
-    //! Get the centre frequency (in MHz)
-    double get_centre_frequency() const { return centrefreq; }
-    //! Set the centre frequency (in MHz)
-    virtual void set_centre_frequency (double MHz) { centrefreq = MHz; }
-    
-    //! Get the bandwidth (in MHz)
-    double get_bandwidth() const { return bw; }
-    //! Set the bandwidth (in MHz)
-    virtual void set_bandwidth (double MHz) { bw = MHz; }
-
-    //! Get the total time integrated (in seconds)
-    double get_duration() const { return duration; }
-    //! Set the total time integrated (in seconds)
-    virtual void set_duration (double seconds) { duration = seconds; }
-
-    //! Get the MJD at the beginning of the integration
-    MJD get_start_time() const { return start_time; }
-    //! Set the MJD at the beginning of the integration
-    virtual void set_start_time (const MJD& mjd) { start_time = mjd; }
-
-    //! Get the MJD at the end of the integration (convenience interface)
-    MJD get_end_time () const { return start_time + duration; }
-
     //! Get the number of bands
     /*! This attribute may be set only through Integration::resize */
     int get_nband () const { return nband; }
@@ -183,6 +165,39 @@ namespace Pulsar {
     /*! This attribute may be set only through Integration::resize */
     int get_nbin () const { return nbin; }
  
+    //! Get the MJD at the beginning of the integration
+    MJD get_start_time() const { return start_time; }
+    //! Set the MJD at the beginning of the integration
+    virtual void set_start_time (const MJD& mjd) { start_time = mjd; }
+
+    //! Get the total time integrated (in seconds)
+    double get_duration() const { return duration; }
+    //! Set the total time integrated (in seconds)
+    virtual void set_duration (double seconds) { duration = seconds; }
+
+    //! Get the MJD at the end of the integration (convenience interface)
+    MJD get_end_time () const { return start_time + duration; }
+
+    //! Get the centre frequency (in MHz)
+    double get_centre_frequency() const { return centrefreq; }
+    //! Set the centre frequency (in MHz)
+    virtual void set_centre_frequency (double MHz) { centrefreq = MHz; }
+    
+    //! Get the bandwidth (in MHz)
+    double get_bandwidth() const { return bw; }
+    //! Set the bandwidth (in MHz)
+    virtual void set_bandwidth (double MHz) { bw = MHz; }
+
+    //! Get the dispersion measure (in \f${\rm pc cm}^{-3}\f$)
+    double get_dispersion_measure () const { return dm; }
+    //! Set the dispersion measure (in \f${\rm pc cm}^{-3}\f$)
+    virtual void set_dispersion_measure (double pc_cm3) { dm = pc_cm3; }
+    
+    //! Get the folding period (in seconds)
+    double get_folding_period() const { return pfold; }
+    //! Set the folding period (in seconds)
+    virtual void set_folding_period (double seconds) { pfold = seconds; }
+
   protected:
 
     //! number of polarization measurments
@@ -205,6 +220,12 @@ namespace Pulsar {
 
     //! bandwidth (in MHz)
     double bw;
+
+    //! folding period (in seconds)
+    double pfold;
+
+    //! dispersion measure (in \f${\rm pc cm}^{-3}\f$)
+    double dm;
 
     //! polarimetric state of profiles
     Poln::State state;
