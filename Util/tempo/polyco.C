@@ -424,8 +424,8 @@ double polyco::phase(const MJD& t, float obs_freq) const
   strcpy (tempo_cfg, tempo_dir);
   strcat (tempo_cfg, "/tempo.cfg");
 
-  FILE *fcfgptr;
-  if ((fcfgptr = fopen (tempo_cfg, "r")) == NULL) {
+  FILE *cfgfptr;
+  if ((cfgfptr = fopen (tempo_cfg, "r")) == NULL) {
     fprintf (stderr, "polyco::phase - could not open tempo config file %s\n",
              tempo_cfg);
     return -1;
@@ -434,15 +434,19 @@ double polyco::phase(const MJD& t, float obs_freq) const
 
   char *tempo_par = new char[FILENAME_MAX];
   assert (tempo_par != NULL);
-  fscanf (fcfgptr, "CLKDIR %*s\n");
-  fscanf (fcfgptr, "PARDIR %s\n", tempo_par); 
-  fclose (fcfgptr);
+
+  const int ALINE_MAX = 80;
+  char aline[ALINE_MAX];
+  fgets(aline, ALINE_MAX, cfgfptr);
+  while (sscanf(aline, "PARDIR %s", tempo_par) != 1) 
+    fgets(aline, ALINE_MAX, cfgfptr);
+  fclose(cfgfptr);
 
   assert (pollys[0] != NULL);
   strncat (tempo_par, pollys[0]->pulsar (), 9);
   strcat (tempo_par, ".par"); 
-  FILE *fparptr;
-  if ((fparptr = fopen (tempo_par, "r")) == NULL) {
+  FILE *parfptr;
+  if ((parfptr = fopen (tempo_par, "r")) == NULL) {
     fprintf (stderr, "polyco::phase - could not open tempo par file %s\n", 
              tempo_par);
     return -1;
@@ -450,21 +454,10 @@ double polyco::phase(const MJD& t, float obs_freq) const
   delete [] tempo_par;
 
   char tzrfrq_str[30];
-  fscanf (fparptr, "EPHEM %*s\n");
-  fscanf (fparptr, "CLK %*s\n");
-  fscanf (fparptr, "PSR %*s\n");
-  fscanf (fparptr, "RA %*s\n");
-  fscanf (fparptr, "DEC %*s\n");
-  fscanf (fparptr, "F0 %*s\n");
-  fscanf (fparptr, "F1 %*s\n");
-  fscanf (fparptr, "PEPOCH %*s\n");
-  fscanf (fparptr, "DM %*s\n");
-  fscanf (fparptr, "PMRA %*s\n");
-  fscanf (fparptr, "PMDEC %*s\n");
-  fscanf (fparptr, "PX %*s\n");
-  fscanf (fparptr, "TZRMJD %*s\n");
-  fscanf (fparptr, "TZRFRQ %s\n", tzrfrq_str);
-  fclose (fparptr);
+  fgets(aline, ALINE_MAX, parfptr);
+  while (sscanf(aline, "TZRFRQ %s", tzrfrq_str) != 1) 
+    fgets(aline, ALINE_MAX, parfptr);
+  fclose(parfptr);
 
   /* For some strange reason, exponentials are represented by 'D' in the
    *   tzpar files. 
@@ -472,8 +465,7 @@ double polyco::phase(const MJD& t, float obs_freq) const
   char *dptr;
   if ((dptr = strchr(tzrfrq_str, 'D')) != NULL)
     *dptr = 'E';
-
-  sscanf (tzrfrq_str, "%f", &tzrfrq);
+  sscanf(tzrfrq_str, "%f", &tzrfrq); 
 
   return (this->phase (t, obs_freq, tzrfrq));
 }
