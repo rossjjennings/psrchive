@@ -92,11 +92,11 @@ void Pulsar::CorrectionsCalibrator::calibrate (Archive* archive)
 
   }
 
-  // notice that the above loop combines the correction
   if (must_correct_feed)
     receiver->set_feed_corrected (true);
 
-  receiver->set_platform_corrected (true);
+  if (must_correct_platform)
+    receiver->set_platform_corrected (true);
 
 }
 
