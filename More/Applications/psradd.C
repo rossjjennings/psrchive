@@ -3,6 +3,7 @@
 #include <unistd.h>
 
 #include "Pulsar/Archive.h"
+#include "Pulsar/Profile.h"
 #include "tempo++.h"
 #include "Error.h"
 
@@ -10,7 +11,7 @@
 #include "dirutil.h"
 #include "string_utils.h"
 
-static const char* psradd_args = "b:Ce:f:FG:hiI:M:p:PstT:vV";
+static const char* psradd_args = "b:Ce:f:FG:hiI:M:p:PsS:tT:vV";
 
 void usage () {
   cout <<
@@ -36,9 +37,10 @@ void usage () {
     " -e ext      Extension added to output filenames (default .it)\n"
     " -G sec      Tscrunch+unload when time between archives > 'sec' seconds\n"
     " -I sec      Tscrunch+unload when archive contains 'sec' seconds\n"
+    " -S sec      Tscrunch+unload when archive has this S/N\n"
     "\n"
     "Note:\n"
-    " AUTO ADD options, '-I' and '-G', are incompatible with '-S' and '-f'\n\n"
+    " AUTO ADD options, -I, -S and -G, are incompatible with -s and -f\n\n"
     "See http://astronomy.swin.edu.au/pulsar/software/manuals/pam.html"
        << endl;
 }
@@ -68,6 +70,8 @@ int main (int argc, char **argv)
   // auto_add features:
   // maximum amount of data (in seconds) to integrate into one archive
   float integrate = 0.0;
+  // maximum signal to noise to integrate into one archive
+  float max_ston = 0.0;
   // maximum interval (in seconds) across which integration should occur
   float interval = 0.0;
 
@@ -95,7 +99,7 @@ int main (int argc, char **argv)
       return 0;
       
     case 'i':
-      cout << "$Id: psradd.C,v 1.11 2003/11/24 07:39:25 ahotan Exp $" << endl;
+      cout << "$Id: psradd.C,v 1.12 2003/12/22 05:51:35 ahotan Exp $" << endl;
       return 0;
       
     case 'b':
@@ -131,6 +135,14 @@ int main (int argc, char **argv)
       auto_add = true;
       break;
 
+    case 'S':
+      if (sscanf (optarg, "%f", &max_ston) != 1) {
+	cerr << "psradd error parsing '"<< optarg <<"' as max S/N\n";
+	return -1;
+      }
+      auto_add = true;
+      break;
+      
     case 'M':
       metafile = optarg;
       break;
@@ -268,7 +280,7 @@ int main (int argc, char **argv)
       
       // ///////////////////////////////////////////////////////////////
       //
-      // auto_add -g: check the gap between the end of total
+      // auto_add -G: check the gap between the end of total
       // and the start of archive
       
       double gap = (archive->start_time() - total->end_time()).in_seconds();
@@ -308,7 +320,7 @@ int main (int argc, char **argv)
 
       // ///////////////////////////////////////////////////////////////
       //
-      // auto_add -i: check that amount of data integrated in total
+      // auto_add -I: check that amount of data integrated in total
       // is less than the limit
       
       double integration = total->integration_length();
@@ -321,6 +333,23 @@ int main (int argc, char **argv)
 	reset_total_next_load = true;
     }
 
+    if (max_ston != 0.0)  {
+
+      // ///////////////////////////////////////////////////////////////
+      //
+      // auto_add -S: check that S/N of the integrated data is less
+      // than the limit
+      
+      float ston = total->total()->get_Profile(0,0,0)->snr();
+      
+      if (verbose)
+	cerr << "psradd: Auto add - S/N = " << ston
+	     << " seconds" << endl;
+      
+      if (ston > max_ston)
+	reset_total_next_load = true;
+    }
+    
     if (tscrunch_total) {
 
       if (verbose) cerr << "psradd: tscrunch total" << endl;

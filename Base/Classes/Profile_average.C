@@ -63,7 +63,8 @@ const Pulsar::Profile& Pulsar::Profile::average (const Profile& profile,
   individual profiles involved.
 */
 
-Pulsar::Profile* Pulsar::Profile::morphological_difference (const Profile& profile)
+Pulsar::Profile* Pulsar::Profile::morphological_difference (const Profile& profile,
+							    bool scale_by_bins)
 {
   if (get_nbin() != profile.get_nbin())
     throw Error (InvalidRange, "Pulsar::Profile::morphological_difference",
@@ -84,21 +85,41 @@ Pulsar::Profile* Pulsar::Profile::morphological_difference (const Profile& profi
 
   minphs = temp2->find_min_phase(0.6);
   *temp2 -= (temp2->mean(minphs));
-  
-  float maxphs = 0.0;
-  maxphs = temp1->find_max_phase();
-  float max = temp1->mean(maxphs);
 
-  float ratio = temp1->sum() / temp2->sum();
+  if (!scale_by_bins) { 
+    float ratio = 100.0 / temp1->sum();
+    *temp1 *= ratio;
+    ratio = 100.0 / temp2->sum();
+    *temp2 *= ratio;
+    
+    float* amps1 = temp1->get_amps();
+    float* amps2 = temp2->get_amps();
+    
+    for (unsigned i = 0; i < temp1->get_nbin(); i++) {
+      amps1[i] = amps1[i] - amps2[i];
+    }
+  }
+  else {
+    float ratio = temp1->sum() / temp2->sum();
+    *temp2 *= ratio;
   
-  *temp2 *= ratio;
-  
-  float* amps1 = temp1->get_amps();
-  float* amps2 = temp2->get_amps();
+    float* amps1 = temp1->get_amps();
+    float* amps2 = temp2->get_amps();
+    float temp = 0.0;
+    
+    int rise = 0;
+    int fall = 0;
 
-  for (unsigned i = 0; i < temp1->get_nbin(); i++) {
-    amps1[i] = amps1[i] - amps2[i];
-    amps1[i] /= max;
+    temp1->find_peak_edges(rise, fall);
+    
+    for (int i = 0; i < int(temp1->get_nbin()); i++) {
+      temp = amps1[i];
+      amps1[i] = amps1[i] - amps2[i];
+      if ( i > rise && i < fall )
+	amps1[i] /= temp;
+      else
+	amps1[i] = 0.0;
+    }
   }
 
   return temp1;
