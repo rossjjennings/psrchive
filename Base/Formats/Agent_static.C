@@ -12,6 +12,7 @@ Registry::List<Pulsar::Archive::Agent> Pulsar::Archive::Agent::registry;
 
 #include "Pulsar/TimerArchive.h"
 #include "Pulsar/BasebandArchive.h"
+#include "Pulsar/EPNArchive.h"
 
 #ifdef HAVE_CFITSIO
 #include "Pulsar/FITSArchive.h"
@@ -21,6 +22,7 @@ void Pulsar::Archive::Agent::static_load () {
 
   Archive::Advocate<TimerArchive>::ensure_linkage();
   Archive::Advocate<BasebandArchive>::ensure_linkage();
+  Archive::Advocate<EPNArchive>::ensure_linkage();
 
 #ifdef HAVE_CFITSIO
   Archive::Advocate<Pulsar::FITSArchive>::ensure_linkage();

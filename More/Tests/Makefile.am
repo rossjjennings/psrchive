@@ -212,7 +212,7 @@ export:
 #
 
 INCLUDES = -I$(top_srcdir)/utils/include -I$(top_srcdir)/astro/include \
-        -ICalibration -IExtension -Itimer -Ipsrfits @PGPLOT_CFLAGS@
+        -ICalibration -IExtension -Itimer -Iepn -Ipsrfits @PGPLOT_CFLAGS@
 
 LDADD = libpsrchive.la $(top_srcdir)/astro/libpsrastro.la \
         $(top_srcdir)/utils/libpsrutils.la \
