@@ -269,7 +269,7 @@ void Pulsar::ReceptionCalibrator::load_calibrators ()
     }
     catch (Error& error) {
       cerr << "Pulsar::ReceptionCalibrator::load_calibrators ERROR" 
-	   << error << endl;
+	   << endl << error.warning() << endl;
     }
 
   }
@@ -554,6 +554,12 @@ try {
 		 "Pulsar::ReceptionCalibrator::add_calibrator",
 		 "Archive='" + cal->get_filename() + "' "
 		 "invalid state=" + State2string(cal->get_state()));
+
+  if ( cal->get_type() != Signal::FluxCalOn && 
+       cal->get_type() != Signal::PolnCal )
+    throw Error (InvalidParam,
+                 "Pulsar::ReceptionCalibrator::add_calibrator",
+                 "invalid source=" + Source2string(cal->get_type()));
 
   string reason;
   if (!calibrator->calibrator_match (cal, reason))
@@ -853,8 +859,10 @@ void Pulsar::ReceptionCalibrator::precalibrate (Archive* data)
 
       response[ichan] = Jones<float>::identity();
 
-      if (!signal_path)
+      if (!signal_path) {
+        integration->set_weight (ichan, 0.0);
         continue;
+      }
 
       try {
 	model[ichan]->time.set_value( integration->get_epoch() );
@@ -862,14 +870,19 @@ void Pulsar::ReceptionCalibrator::precalibrate (Archive* data)
       }
       catch (Error& error) {
         cerr << "Pulsar::ReceptionCalibrator::precalibrate ichan=" << ichan
-             << " error evaluating response" << endl;
+             << endl << error.warning () << endl;
+        integration->set_weight (ichan, 0.0);
+        response[ichan] = Jones<float>::identity();
 	continue;
       }
 
       if ( norm(det( response[ichan] )) < 1e-9 ) {
-        cerr << "Pulsar::ReceptionCalibrator::precalibrate ichan=" << ichan
-             << " faulty response" << endl;
-	response[ichan] = Jones<float>::identity();
+        if (verbose)
+          cerr << "Pulsar::ReceptionCalibrator::precalibrate ichan=" << ichan
+               << " faulty response" << endl;
+        integration->set_weight (ichan, 0.0);
+        response[ichan] = Jones<float>::identity();
+	continue;
       }
       else
 	response[ichan] = inv( response[ichan] );
@@ -955,7 +968,7 @@ void Pulsar::ReceptionCalibrator::solve (int only_ichan)
   }
   catch (Error& error) {
     cerr << "Pulsar::ReceptionCalibrator::solve failure ichan=" << ichan
-         << error << endl;
+         << endl << error.warning() << endl;
     model[ichan]->valid = false;
   }
 
@@ -1035,7 +1048,7 @@ void Pulsar::SourceEstimate::update_source ()
   }
   catch (Error& error) {
     cerr << "Pulsar::SourceEstimate::update_source error ichan=" << ichan
-         << error << endl;
+         << endl << error.warning() << endl;
     valid[ichan] = false;
   }
 }
