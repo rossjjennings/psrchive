@@ -1,14 +1,16 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/EstimatePlotter.h,v $
-   $Revision: 1.6 $
-   $Date: 2003/10/08 13:32:18 $
+   $Revision: 1.7 $
+   $Date: 2003/10/16 13:38:50 $
    $Author: straten $ */
 
 #ifndef __EstimatePlotter_h
 #define __EstimatePlotter_h
 
 #include "Estimate.h"
+#include "Error.h"
+
 #include <vector>
 
 #include "psr_cpp.h"
@@ -38,6 +40,18 @@ class EstimatePlotter {
   //! Set the PGPLOT standard graph marker
   void set_graph_marker (int symbol);
 
+  //! Set flag to plot data in separate viewports
+  void separate_viewports (bool scaled = true, bool vertical = true);
+
+  //! Set the viewport to plot the specified member of the current data set
+  void set_viewport (unsigned index);
+
+  //! Set the world coordinates of the viewport with some buffer space
+  void set_world (float x1, float x2, float y1, float y2);
+
+  //! Set the viewport to that when separate_viewports was called
+  void restore_viewport ();
+
   //! Add a vector of Estimates to the current data set
   template<class T> void add_plot (const vector< Estimate<T> >& data);
 
@@ -50,8 +64,14 @@ class EstimatePlotter {
   //! Plot the specified member of the current data set
   void plot (unsigned index);
 
-  //! Plot the current data set
+  //! Plot the current data set in one window
   void plot ();
+
+  void minmax (bool& xrange_set, float& xmin, float& xmax,
+	       bool& yrange_set, float& ymin, float& ymax,
+	       const vector<float>& x,
+	       const vector<float>& y,
+	       const vector<float>& yerr);
 
  protected:
 
@@ -68,7 +88,8 @@ class EstimatePlotter {
   float y_min, y_max;
 
   //! range set
-  bool range_set;
+  bool xrange_set;
+  bool yrange_set;
 
   //! The minimum error in plot
   float minimum_error;
@@ -83,6 +104,19 @@ class EstimatePlotter {
   vector< vector<float> > yval;
   vector< vector<float> > yerr;
   
+ private:
+
+  vector<float> data_xmin;
+  vector<float> data_xmax;
+  vector<float> data_ymin;
+  vector<float> data_ymax;
+
+  float vp_x1, vp_x2, vp_y1, vp_y2;
+
+  bool viewports_set;
+  bool viewports_vertical;
+  bool viewports_scaled;
+
 };
 
 template<class T> 
@@ -104,52 +138,19 @@ void EstimatePlotter::add_plot (const vector< Estimate<T> >& data)
   yval.push_back ( vector<float>(npt) );
   yerr.push_back ( vector<float>(npt) );
 
-  vector<float>& errors = yerr.back();
-  for (ipt=0; ipt<npt; ipt++)
-    errors[ipt] = sqrt (data[ipt].var);
-
-  if (!range_set) {
-    x_min = xrange_min;
-    x_max = xrange_max;
-  }
-  else {
-    if (xrange_min < x_min)
-      x_min = xrange_min;
-    
-    if (xrange_max < x_max)
-      x_max = xrange_max;
-  }
-
   vector<float>& x = xval.back();
   vector<float>& y = yval.back();
+  vector<float>& ye = yerr.back();
 
   double xscale = double(xrange_max - xrange_min) / double(npt-1);
 
   for (ipt=0; ipt<npt; ipt++) {
-
-    if (minimum_error >= 0.0 && errors[ipt] <= minimum_error)
-      continue;
-
-    if (maximum_error >= 0.0 && errors[ipt] >= maximum_error)
-      continue;
-
-    if (!range_set) {
-      y_min = data[ipt].val - errors[ipt];
-      y_max = data[ipt].val + errors[ipt];
-      range_set = true;
-    }
-    else {
-      float yval = data[ipt].val - errors[ipt];
-      if (yval < y_min)
-	y_min = yval;
-      yval = data[ipt].val + errors[ipt];
-      if (yval > y_max)
-	y_max = yval;
-    }
-
+    ye[ipt] = sqrt (data[ipt].var);
     x[ipt] = xrange_min + xscale * double(ipt);
     y[ipt] = data[ipt].val;
   }
+
+  minmax (xrange_set, x_min, x_max, yrange_set, y_min, y_max, x, y, ye);
 }
 
 template<class Xt, class Yt> 
@@ -168,38 +169,17 @@ void EstimatePlotter::add_plot (const vector<Xt>& xdata,
   yval.push_back ( vector<float>(npt) );
   yerr.push_back ( vector<float>(npt) );
 
-  vector<float>& errors = yerr.back();
-  for (ipt=0; ipt<npt; ipt++)
-    errors[ipt] = sqrt (ydata[ipt].var);
-
-  if (!range_set) {
-    y_min = ydata[0].val - errors[0];
-    y_max = ydata[0].val + errors[0];
-    x_min = xdata[0];
-    x_max = xdata[0];
-    range_set = true;
-  }
-
   vector<float>& x = xval.back();
   vector<float>& y = yval.back();
+  vector<float>& ye = yerr.back();
 
   for (ipt=0; ipt<npt; ipt++) {
-    float yval = ydata[ipt].val - errors[ipt];
-    if (yval < y_min)
-      y_min = yval;
-    yval = ydata[ipt].val + errors[ipt];
-    if (yval > y_max)
-      y_max = yval;
-
-    float xval = xdata[ipt];
-    if (xval < x_min)
-      x_min = xval;
-    if (xval > x_max)
-      x_max = xval;
-
-    x[ipt] = xval;
+    ye[ipt] = sqrt (ydata[ipt].var);
+    x[ipt] = xdata[ipt];
     y[ipt] = ydata[ipt].val;
   }
+
+  minmax (xrange_set, x_min, x_max, yrange_set, y_min, y_max, x, y, ye);
 }
 
 #endif
