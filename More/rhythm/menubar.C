@@ -52,6 +52,9 @@ void Rhythm::menubarConstruct ()
   // automatic fitting starts out disabled
   autofitID = tempo->insertItem( "Enable &Auto Fit",
 				 this, SLOT( toglauto() ));
+  // weights disabled by default, state changes when TOAs are read in
+  weightsID = tempo->insertItem( "Enable &Weights",
+				this, SLOT( toglweights() ));
   tempo->insertSeparator();
   autofitID = tempo->insertItem( "Tempo System Call",
 				 this, SLOT( temposys() ));
@@ -138,6 +141,30 @@ void Rhythm::setDataPath()
                                        "Please enter the path to your archives:");
   if (!temp.isEmpty())
     dataPath = temp.ascii();
+}
+
+void Rhythm::toglweights()
+{
+  QString text;
+  if (weights)
+    text = "Enable";
+  else
+    text = "Disable";
+  text += " &Weights";
+
+  tempo->changeItem ( weightsID, text );
+  weights = !weights;
+
+  if (verbose) {
+    cerr << "Rhythm: Weighted Fitting ";
+    if (weights)
+      cerr << "enabled.\n";
+    else
+      cerr << "disabled.\n";
+    cerr << endl;
+  }
+
+  update_mode();
 }
 
 void Rhythm::toglauto()

@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/rhythm/rhythm.h,v $
-   $Revision: 1.30 $
-   $Date: 2003/07/07 08:31:34 $
+   $Revision: 1.31 $
+   $Date: 2003/07/30 04:54:06 $
    $Author: ahotan $ */
 
 // //////////////////////////////////////////////////////////////////////////
@@ -139,6 +139,8 @@ class Rhythm : public QMainWindow
   void add_toas (const char* fname);
   void save_toas (const char* fname);
 
+  void update_mode ();
+
   // /////////////////////////////////////////////////////////////////////////
   // Main Plotting Window(s)
   toaPlot* plot_window;
@@ -193,9 +195,11 @@ class Rhythm : public QMainWindow
   int fitID;              // ID of the 'Fit' menu item
   int fitSelID;           // ID of the 'Fit Selected' menu item
   int autofitID;          // ID of the 'Autofit' menu item
+  int weightsID;           // ID of the 'Weights' menu item
   int saveParmsID;
 
   bool autofit;           // fit whenever TOAs or TEMPO Parameters are loaded
+  bool weights;           // use TEMPO mode 1
   bool ignore_one_eph;    // ignore the newParams signal from qt_editeph ONCE
   bool toas_modified;     // the toas have been modified since loaded
 
@@ -233,6 +237,7 @@ class Rhythm : public QMainWindow
   void fit_selected();
   void togledit();
   void toglauto();
+  void toglweights();
   void temposys();
 
   // Options->Verbosity menu callback

@@ -85,6 +85,7 @@ Rhythm::Rhythm (QApplication* master, QWidget* parent, int argc, char** argv) :
   dataPath = ".";
 
   autofit = false;
+  weights = false;
   ignore_one_eph = false;
   
   Error::verbose = true;
@@ -235,15 +236,23 @@ Rhythm::Rhythm (QApplication* master, QWidget* parent, int argc, char** argv) :
 
 void Rhythm::load_toas (const char* fname)
 {
+  QString str;
+
   if (verbose)
     cerr << "Loading TOAs from '" << fname << "'";
   
   Tempo::toa::load (fname, &toas);
   
+  if (toas.size() <= 0) {
+    str = "No TOAs found in file";
+    footer->setText(str);
+    return;
+  }
+
   char num[8];
   sprintf(num, "%d", toas.size());
   
-  QString str = "Loaded ";
+  str = "Loaded ";
   str += num;
   str += " TOA's";
   
@@ -255,6 +264,17 @@ void Rhythm::load_toas (const char* fname)
   toa_filename = fname;
   
   toa_text -> clear();
+  
+  if (toas[0].get_format() == Tempo::toa::Command) {
+    char junk[80];
+    int  themode = 0;
+    sscanf((toas[0].get_auxilliary_text()).c_str(), "%s %d", junk, &themode);
+    if (strcmp(junk, "MODE") == 0)
+      if (themode == 1)
+	toglweights();
+  }
+
+  update_mode();
 
   char useful[256];
 
@@ -276,6 +296,8 @@ void Rhythm::load_toas (const char* fname)
 
 void Rhythm::add_toas (const char* fname)
 {
+  QString str;
+
   if (verbose)
     cerr << "Adding in TOAs from '" << fname << "'";
   
@@ -283,6 +305,12 @@ void Rhythm::add_toas (const char* fname)
   
   Tempo::toa::load (fname, &new_toas);
   
+  if (new_toas.size() <= 0) {
+    str = "No TOAs found in file";
+    footer->setText(str);
+    return;
+  }
+
   if (verbose)
     cout << "...loaded " << new_toas.size() << " new TOA's" << endl;
   
@@ -292,7 +320,7 @@ void Rhythm::add_toas (const char* fname)
   char num[8];
   sprintf(num, "%d", toas.size());
   
-  QString str = "Added ";
+  str = "Added ";
   str += num;
   str += " TOA's";
   
@@ -366,6 +394,23 @@ void Rhythm::close_toas ()
   goplot();
 }
 
+void Rhythm::update_mode ()
+{
+  if (toas.size() == 0)
+    return;
+  
+  if (toas[0].get_format() == Tempo::toa::Command)
+    if ((toas[0].get_auxilliary_text()).find("MODE",0) != string::npos)
+      toas.erase(toas.begin());
+  
+  if (weights) {
+    Tempo::toa mode_card(Tempo::toa::Command);
+    mode_card.set_auxilliary_text("MODE 1");
+    vector<Tempo::toa>::iterator it1 = toas.begin();
+    toas.insert(it1, 1, mode_card);
+  }
+}
+
 void Rhythm::show_me ()
 {
   int index = toa_text->currentItem();
@@ -429,6 +474,8 @@ void Rhythm::fit()
     return;
   }
 
+  update_mode();
+
   psrephem eph;
   fitpopup -> get_psrephem (eph);
 
@@ -441,9 +488,7 @@ void Rhythm::fit()
   plot_window->autoscale();
 
   toa_text -> clear();
-
   char useful[256];
-
   for (unsigned i = 0; i < toas.size(); i++) {
     toas[i].unload(useful);
     toa_text -> insertItem(useful);
@@ -480,7 +525,7 @@ void Rhythm::fit (const psrephem& eph, bool load_new)
     
     char temp[128];
     
-    FILE* fptr = popen("tail -1 tempo.lis", "r");
+    FILE* fptr = popen("tail -4 tempo.lis | grep residual", "r");
     fgets(temp, 1024, fptr);
     pclose(fptr);
     
@@ -528,9 +573,7 @@ void Rhythm::fit_selected()
   plot_window->autoscale();
 
   toa_text -> clear();
-  
   char useful[256];
-
   for (unsigned i = 0; i < toas.size(); i++) {
     toas[i].unload(useful);
     toa_text -> insertItem(useful);
@@ -547,6 +590,8 @@ void Rhythm::fit_selected (const psrephem& eph, bool load_new)
       return;
     }
     
+    update_mode();
+
     unsigned tally = 0;
     
     for (unsigned i = 0; i < toas.size(); i++) {
@@ -1058,86 +1103,29 @@ void Rhythm::goplot ()
   
   for (unsigned i = 0; i < toas.size(); i++) {
     
-    if (toas[i].get_state() != Tempo::toa::Deleted) {
-      
-      wrapper tempw;
-      
-      if (toas[i].get_format() == Tempo::toa::Command) {
-	
-	if (i == 0) {
-	  tempw.x = tempx[1];
-	  tempw.y = tempy[1];
-	  tempw.ex = 0.0;
-	  tempw.ey = 0.0;
-	  
-	  tempw.dot = toas[i].di;
-	  tempw.id = 0;
-	  
-	  if (toas[i].get_state() == Tempo::toa::Selected)
-	    tempw.ci = 2;
-	  else
-	    tempw.ci = toas[i].ci;
-
-	  useme.push_back(tempw);
-	}
-	else if (i == toas.size() - 1) {
-	  
-	  int ind = toas.size() - 2;
-	  
-	  tempw.x = tempx[ind];
-	  tempw.y = tempy[ind];
-	  tempw.ex = 0.0;
-	  tempw.ey = 0.0;
-	  
-	  tempw.dot = toas[i].di;
-	  tempw.id = toas.size() - 1;
-	  
-	  if (toas[i].get_state() == Tempo::toa::Selected)
-	    tempw.ci = 2;
-	  else
-	    tempw.ci = toas[i].ci;
-
-	  useme.push_back(tempw);
-	}
-	else {
-	  
-	  tempw.x = (tempx[i-1] + tempx[i+1]) / 2.0;
-	  tempw.y = (tempy[i-1] + tempy[i+1]) / 2.0;
-	  tempw.ex = 0.0;
-	  tempw.ey = 0.0;
-
-	  tempw.id = i;
-
-	  if (toas[i].get_state() == Tempo::toa::Selected)
-	    tempw.ci = 2;
-	  else
-	    tempw.ci = toas[i].ci;
-	  
-	  tempw.dot = toas[i].di;
-	  
-	  useme.push_back(tempw);
-	}
-      }
-      else {
-
-	tempw.x = tempx[i];
-	tempw.y = tempy[i];
-	tempw.ex = xerrs[i];
-	tempw.ey = yerrs[i];
-	tempw.id = i;
-	
-	tempw.dot = toas[i].di;
-	
-	if (toas[i].get_state() == Tempo::toa::Selected)
-	  tempw.ci = 2;
-	else
-	  tempw.ci = toas[i].ci;
-	
-	useme.push_back(tempw);
-      }
-    }
+    if (toas[i].get_state() == Tempo::toa::Deleted)
+      continue;
+    
+    if (toas[i].get_format() == Tempo::toa::Command)
+      continue;
+    
+    wrapper tempw;
+    
+    tempw.x = tempx[i];
+    tempw.y = tempy[i];
+    tempw.ex = xerrs[i];
+    tempw.ey = yerrs[i];
+    tempw.id = i;
+    
+    tempw.dot = toas[i].di;
+    
+    if (toas[i].get_state() == Tempo::toa::Selected)
+      tempw.ci = 2;
+    else
+      tempw.ci = toas[i].ci;
+    
+    useme.push_back(tempw);
   }
-  
   plot_window->setPoints(xq, yq, useme);
 }
 
