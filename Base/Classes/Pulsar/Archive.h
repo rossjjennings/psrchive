@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Archive.h,v $
-   $Revision: 1.63 $
-   $Date: 2003/03/08 11:00:47 $
+   $Revision: 1.64 $
+   $Date: 2003/04/07 08:25:15 $
    $Author: straten $ */
 
 /*! \mainpage 
@@ -227,7 +227,7 @@ namespace Pulsar {
       virtual Archive* new_Archive () = 0;
 
       //! Return the name of the plugins directory
-      static string plugin_path ();
+      static string plugin_path (const char* environment_variable = "CVSHOME");
 
       //! Report to cerr on the status of the Registry and plugins
       static void report ();
