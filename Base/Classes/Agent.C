@@ -1,5 +1,5 @@
 #include "Pulsar/BasicArchive.h"
-#include "Pulsar/plugins.h"
+#include "plugins.h"
 
 Registry::List<Pulsar::Archive::Agent> Pulsar::Archive::Agent::registry;
 
