@@ -145,6 +145,14 @@ unsigned Pulsar::ReceptionCalibrator::get_nstate () const
   return pulsar.size();
 }
 
+//! Get the number of frequency channels
+unsigned Pulsar::ReceptionCalibrator::get_nchan () const
+{
+  return equation.size();
+} 
+
+
+
 //! Add the specified pulsar observation to the set of constraints
 void Pulsar::ReceptionCalibrator::add_observation (const Archive* data)
 {
