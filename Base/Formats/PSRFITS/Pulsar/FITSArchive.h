@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/PSRFITS/Pulsar/FITSArchive.h,v $
-   $Revision: 1.22 $
-   $Date: 2004/07/12 11:31:04 $
+   $Revision: 1.23 $
+   $Date: 2004/07/12 12:24:23 $
    $Author: straten $ */
 
 #ifndef __Pulsar_FITSArchive_h
@@ -142,7 +142,7 @@ namespace Pulsar {
       bool advocate (const char* filename);
       
       //! Return the name of the FITSArchive plugin
-      string get_name () { return "FITSArchive"; }
+      string get_name () { return "PSRFITS"; }
       
       //! Return description of this plugin
       string get_description ();
