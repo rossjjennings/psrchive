@@ -8,7 +8,12 @@
 #include "Pulsar/Profile.h"
 #include "Error.h"
 
-// A command line tool for modifying archives
+// Extensions this program understands
+
+#include "Pulsar/FITSHistory.h"
+
+
+// PAM: A command line tool for modifying archives
 
 int main (int argc, char *argv[]) {
   
@@ -41,6 +46,8 @@ int main (int argc, char *argv[]) {
   double rphase = 0.0;
 
   bool pscr = false;
+
+  string command = "pam";
 
   int gotc = 0;
   
@@ -82,12 +89,15 @@ int main (int argc, char *argv[]) {
       break;
     case 'T':
       tscr = true;
+      command += " -T";
       break;
     case 'F':
       fscr = true;
+      command += " -F";
       break;
     case 'p':
       pscr = true;
+      command += " -p";
       break;
     case 'f':
       fscr = true;
@@ -95,6 +105,8 @@ int main (int argc, char *argv[]) {
 	cout << "That is not a valid fscrunch factor." << endl;
 	return -1;
       }
+      command += " -f ";
+      command += optarg;
       break;
     case 't':
       tscr = true;
@@ -102,6 +114,8 @@ int main (int argc, char *argv[]) {
 	cout << "That is not a valid tscrunch factor." << endl;
 	return -1;
       }
+      command += " -t ";
+      command += optarg;
       break;
     case 'b':
       bscr = true;
@@ -113,6 +127,8 @@ int main (int argc, char *argv[]) {
 	cout << "That is not a valid bscrunch factor." << endl;
 	return -1;
       }
+      command += " -b ";
+      command += optarg;
       break;
     case 'd':
       dedisperse = true;
@@ -120,6 +136,8 @@ int main (int argc, char *argv[]) {
 	cout << "That is not a valid dispersion measure." << endl;
 	return -1;
       }
+      command += " -d ";
+      command += optarg;
       break;
     case 's':
       smear = true;
@@ -127,6 +145,8 @@ int main (int argc, char *argv[]) {
 	cout << "That is not a valid smearing duty cycle." << endl;
 	return -1;
       }
+      command += " -s ";
+      command += optarg;
       break;
     case 'r':
       rotate = true;
@@ -138,6 +158,8 @@ int main (int argc, char *argv[]) {
 	cout << "That is not a valid rotation phase." << endl;
 	return -1;
       }
+      command += " -r ";
+      command += optarg;
       break;
     case 'w':
       reset_weights = true;
@@ -145,6 +167,8 @@ int main (int argc, char *argv[]) {
 	cout << "That is not a valid weight." << endl;
 	return -1;
       }
+      command += " -w ";
+      command += optarg;
       break;
     default:
       cout << "Unrecognised option." << endl;
@@ -252,6 +276,32 @@ int main (int argc, char *argv[]) {
 	  int index = the_old.find_last_of(".",the_old.length());
 	  string primary = the_old.substr(0, index);
 	  string the_new = primary + "." + ext;
+
+	  // See if the archive contains a history that should be updated:
+	  
+	  Pulsar::FITSHistory* ext = 0;
+	  for (unsigned i = 0; i < arch->get_nextension(); i++) {
+	    Pulsar::Archive::Extension* extension;
+	    extension = (Pulsar::Archive::Extension*)arch->get_extension (i);
+	    ext = dynamic_cast<Pulsar::FITSHistory*> (extension);
+	    if (ext) {
+	      break;
+	    }
+	  }
+	  if (ext) {
+	    
+	    ext->add_blank_row();
+	    if (command.length() > 80) {
+	      cout << "WARNING: FITSHistory command string truncated to 80 chars" << endl;
+	      sprintf((ext->get_last()->proc_cmd), "%s", command.substr(0, 80).c_str());
+	    }
+	    else {
+	      sprintf((ext->get_last()->proc_cmd), "%s", command.c_str());
+	      
+	      // gettimeofday, etc	      
+	      //ext->get_last()->date_pro
+	    }
+	  }
 	  arch->unload(the_new);
 	  cout << "New file " << the_new << " written to disk" << endl;
 	}
