@@ -139,6 +139,10 @@ int Timer::load (FILE* fptr, struct timer* hdr, bool big_endian)
   if (hdr->calibrated == 1)
     hdr->calibrated = FLUX_CALIBRATED & POLN_CALIBRATED;
 
+  // this is an old value that was used to initialize the RM
+  if (hdr->rotm == -100000)
+    hdr->rotm = 0.0;
+
   return 0;
 }
 
@@ -329,7 +333,7 @@ void Timer::init (struct timer * hdr)
   hdr->nfreq=1;
   hdr->nspan=0;
   hdr->ncoeff=0;
-  hdr->rotm=-100000.0; /* catalogue */
+  hdr->rotm=0.0; /* catalogue */
   hdr->pnterr=-100000.0;
   hdr->ibeam=0;
   strcpy(hdr->tape_label," ");	 	
