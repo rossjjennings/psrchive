@@ -226,15 +226,18 @@ void polyco::unload (fitsfile* fptr, int back) const
     rows = 0;
   }
 
-  int colnum = 0;
   int npoly = pollys.size();
-  fits_get_colnum (fptr, CASEINSEN, "NPBLK", &colnum, &status);
-  fits_write_col (fptr, TINT, colnum, rows, 1, npoly, &npoly, &status);
-  if (status != 0)
-    throw FITSError (status, "polyco::unload", "fits_write_col NPBLK");
 
-  for (int ipol=0; ipol<npoly; ipol++)
+  for (int ipol=0; ipol<npoly; ipol++) {
     pollys[ipol].unload (fptr, rows+ipol);
+    
+    int colnum = 0;
+    fits_get_colnum (fptr, CASEINSEN, "NPBLK", &colnum, &status);
+    cerr << "YIKES" << endl;
+    fits_write_col (fptr, TINT, colnum, rows+ipol, 1, 1, &npoly, &status);
+    if (status != 0)
+      throw FITSError (status, "polyco::unload", "fits_write_col NPBLK");
+  }
 }
 
 
