@@ -40,9 +40,11 @@ void Pulsar::FITSArchive::load_Passband (fitsfile* fptr)
   int npol = 0;
   fits_read_key (fptr, TINT, "BP_NPOL", &npol, comment, &status);
   if (status != 0) {
-    cerr << FITSError (status, "FITSArchive::load_Passband", 
-		       "fits_read_key BP_NPOL").warning() << endl;
-    cerr << "FITSArchive::load_Passband assuming BP_NPOL = 2" << endl;
+    if(verbose) {
+      cerr << FITSError (status, "FITSArchive::load_Passband", 
+			 "fits_read_key BP_NPOL").warning() << endl;
+      cerr << "FITSArchive::load_Passband assuming BP_NPOL = 2" << endl;
+    }
     npol = 2;
     status = 0;
   }
