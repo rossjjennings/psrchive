@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Integration.h,v $
-   $Revision: 1.43 $
-   $Date: 2003/07/26 10:02:52 $
+   $Revision: 1.44 $
+   $Date: 2003/08/26 05:31:23 $
    $Author: sord $ */
 
 /*
@@ -240,7 +240,10 @@ namespace Pulsar {
     //  Note that this is dangerous and only intended for use with instruments
     //  whose band is split into adjoining segments (like cpsr2)
     void fappend (Pulsar::Integration* integ, bool ignore_time_mismatch = false);
-
+    
+    //! Get polarized flux
+    virtual float get_poln_flux (Integration* data, int _type = 0);
+ 
     //! Transform from Stokes (I,Q,U,V) to the polarimetric invariant interval
     virtual void invint ();
 

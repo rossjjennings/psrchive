@@ -315,6 +315,13 @@ void Pulsar::Archive::invint ()
   set_state(Signal::Invariant);
 }
 
+float Pulsar::Archive::get_poln_flux (int _type) {
+  
+  return (get_Integration(0) -> get_poln_flux (get_Integration(0),_type));
+  
+}
+
+
 /*!
   If phase is not specified, this method calls
   Archive::find_min_phase to find the phase at which the mean in a

@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Archive.h,v $
-   $Revision: 1.81 $
-   $Date: 2003/08/19 16:29:27 $
-   $Author: straten $ */
+   $Revision: 1.82 $
+   $Date: 2003/08/26 05:31:23 $
+   $Author: sord $ */
 
 /*! \mainpage 
  
@@ -509,6 +509,9 @@ namespace Pulsar {
 
     //! Transform Stokes I,Q,U,V into the polarimetric invariant interval
     virtual void invint ();
+ 
+    //! Return polarization flux in first integration, 0 == total, 1 == linear, 2==circular 
+    virtual float get_poln_flux (int _type);
   
     //! Remove the baseline from all profiles
     virtual void remove_baseline (float phase = -1.0);
