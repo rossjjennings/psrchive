@@ -1,4 +1,4 @@
-#include "FourSpaceTest.h"
+#include "MatrixTest.h"
 #include "Jones.h"
 
 template <class T>
@@ -16,13 +16,13 @@ int main ()
 {
   unsigned loops = RAND_MAX/1000;
 
-  FourSpaceTest <Jones<float>, Jones<double>, complex<float> > test;
+  MatrixTest <Jones<float>, Jones<double>, complex<float> > test;
 
   try {
     cerr << "Testing " << loops << " Jones matrix variations" << endl;
     test.runtest (loops);
   }
-  catch (Error& error) {
+  catch (string& error) {
     cerr << error << endl;
     return -1;
   }
