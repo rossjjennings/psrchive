@@ -1,4 +1,6 @@
 #include <iostream>
+#include <string>
+
 #include <fitsio.h>
 
 #include "FITSError.h"
@@ -11,15 +13,21 @@ void parse_template (const char* template_file, bool verbose = true);
 int main (int argc, char** argv) try {
 
   unsigned nloops = 100;
-  
-  char* template_file = "psrheader.fits";
 
-  cerr << "Parsing " << template_file << endl;
-  parse_template (template_file);
+  string filename;
+
+  char* srcdir = getenv ("srcdir");
+  if (srcdir)
+    filename = string(srcdir) + "/";
+  
+  filename += "psrheader.fits";
+
+  cerr << "Parsing " << filename << endl;
+  parse_template (filename.c_str());
 
   cerr << "Creating " << nloops << " files from template" << endl;
   for (unsigned iloop=0; iloop<nloops; iloop++)
-    test_template (template_file, false);
+    test_template (filename.c_str(), false);
 
   cerr << "Test passed" << endl;
   return 0;
