@@ -1,5 +1,5 @@
 //
-// $Id: pav.C,v 1.22 2003/02/05 05:37:33 pulsar Exp $
+// $Id: pav.C,v 1.23 2003/02/08 00:46:17 pulsar Exp $
 //
 // The Pulsar Archive Viewer
 //
@@ -57,6 +57,9 @@ void usage ()
     " -Z        Smear a profile by convolving with a hat function\n"
     " -C        Centre the profile\n"
     " -Y        Display all integrations in a time vs phase plot\n"
+    " -A        Position angle spectrum plot\n"
+    " -s        SNR frequency spectrum plot\n"
+    " -g        Plot a position angle profile\n"
        << endl;
 }
 
@@ -73,6 +76,7 @@ int main (int argc, char** argv)
   double new_dm = 0.0;
 
   bool verbose = false;
+  bool zoomed = false;
   bool display = false;
   bool dedisperse = false;
   bool manchester = false;
@@ -82,17 +86,20 @@ int main (int argc, char** argv)
   bool hat = false;
   bool centre = false;
   bool timeplot = false;
+  bool calplot = false;
+  bool snrplot = false;
+  bool PA = false;
 
   char* metafile = NULL;
-
+  
   Pulsar::Plotter plotter;
   Pulsar::Plotter::ColourMap colour_map = Pulsar::Plotter::Heat;
-
+  
   int c = 0;
-  const char* args = "ab:c:d:DGe:E:f:FhiHm:M:pP:r:St:TvVwWx:y:RZCYz:";
+  const char* args = "ab:c:d:DGe:E:f:FhiHm:M:pP:r:St:TvVwWx:y:RZCYz:Asg";
   while ((c = getopt(argc, argv, args)) != -1)
     switch (c) {
-
+      
     case 'a':
       // toas
       break;
@@ -128,7 +135,7 @@ int main (int argc, char** argv)
       usage ();
       return 0;
     case 'i':
-      cout << "$Id: pav.C,v 1.22 2003/02/05 05:37:33 pulsar Exp $" << endl;
+      cout << "$Id: pav.C,v 1.23 2003/02/08 00:46:17 pulsar Exp $" << endl;
       return 0;
     case 'm':
       // macro file
@@ -160,6 +167,7 @@ int main (int argc, char** argv)
       Pulsar::Archive::verbose = true;
       Pulsar::Integration::verbose = true;
       Pulsar::Profile::verbose = true;
+      break;
     case 'v':
       verbose = true;
       break;
@@ -187,7 +195,7 @@ int main (int argc, char** argv)
     case 'Y':
       timeplot = true;
       break;
-    case 'z':  {
+    case 'z': {
       char* separator = ",";
       char* val1 = strtok (optarg, separator);
       char* val2 = strtok (NULL, separator);
@@ -196,15 +204,25 @@ int main (int argc, char** argv)
         return -1;
       }
       plotter.set_zoom (atof(val1), atof(val2));
+      zoomed = true;
       break;
     }
-
+    case 'A':
+      calplot = true;
+      break;
+    case 's':
+      snrplot = true;
+      break;
+    case 'g':
+      PA = true;
+      break;
+      
     default:
       cerr << "invalid param '" << c << "'" << endl;
     }
-
+  
   vector <string> filenames;
-
+  
   if (metafile)
     stringfload (&filenames, metafile);
   else 
@@ -216,7 +234,7 @@ int main (int argc, char** argv)
     return 0;
   }
 
-  if (display || greyfreq ) {
+  if (display || greyfreq) {
 
     cpgbeg (0, "?", 0, 0);
     cpgask(1);
@@ -297,7 +315,37 @@ int main (int argc, char** argv)
     if (centre) {
       archive -> centre();
     }
+    
+    if (PA) {
+      cpgbeg (0, "?", 0, 0);
+      cpgask(1);
+      cpgsvp (0.1, 0.9, 0.1, 0.9);
+      cpgeras();
+      plotter.pa_profile(archive);
+      cpgend();
+      exit(0);
+    }
 
+    if (snrplot) {
+      cpgbeg (0, "?", 0, 0);
+      cpgask(1);
+      cpgsvp (0.1, 0.9, 0.1, 0.9);
+      cpgeras();
+      plotter.snrSpectrum(archive);
+      cpgend();
+      exit(0);
+    }  
+    
+    if (calplot) {
+      cpgbeg (0, "?", 0, 0);
+      cpgask(1);
+      cpgsvp (0.1, 0.9, 0.1, 0.9);
+      cpgeras();
+      plotter.pa_freq(archive, !zoomed);
+      cpgend();
+      exit(0);
+    }
+    
     if (timeplot) {
       cpgbeg (0, "?", 0, 0);
       cpgask(1);
@@ -339,7 +387,7 @@ int main (int argc, char** argv)
 	plotter.Manchester (archive);
       else {
 	plotter.set_subint(0);
-	plotter.set_pol(0);
+	plotter.set_pol(poln);
 	plotter.set_chan(0);
 	plotter.singleProfile (archive);
       }
