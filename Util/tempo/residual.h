@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/residual.h,v $
-   $Revision: 1.10 $
-   $Date: 2001/11/22 21:25:56 $
+   $Revision: 1.11 $
+   $Date: 2002/01/04 20:35:45 $
    $Author: straten $ */
 
 #ifndef __RESIDUAL_H
@@ -51,5 +51,8 @@ namespace Tempo {
   };
 
 }
+
+// given MJD returns UTC day-of-year as year.fracyear
+double UTCdoy (double mjd);
 
 #endif

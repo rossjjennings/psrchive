@@ -67,10 +67,15 @@ int Tempo::residual::load (int r2flun, char* filename,
 
 double Tempo::residual::dayofyear () const
 {
-  return fmod (mjd, 365.25);
+  return fmod(UTCdoy(mjd), 1) * 365.25;
 }
 
 double Tempo::residual::utcyear () const
+{
+  return UTCdoy (mjd);
+}
+
+double UTCdoy (double mjd)
 {
   MJD mjd1 (mjd);
   utc_t utc;
