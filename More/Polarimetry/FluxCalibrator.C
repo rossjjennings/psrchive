@@ -170,6 +170,15 @@ void Pulsar::FluxCalibrator::calculate (vector<Estimate<double> >& on,
   
 }
 
+void Pulsar::FluxCalibrator::calibrate (Integration* subint)
+{
+  unsigned npol = subint->get_npol();
+  unsigned nchan = subint->get_nchan();
+
+  for (unsigned ichan=0; ichan<nchan; ichan++)
+    for (unsigned ipol=0; ipol<npol; ipol++)
+      *(subint->get_Profile (ipol, ichan)) *= cal_flux[ichan];
+}
 
 //! Given the observing frequency in MHz, returns the flux of Hydra in mJy
 double Pulsar::FluxCalibrator::hydra_flux_mJy (double cfreq)
