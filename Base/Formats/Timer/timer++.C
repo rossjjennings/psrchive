@@ -64,11 +64,14 @@ int Timer::load (FILE* fptr, struct timer* hdr, bool big_endian)
     }
     return -1;
   }
+  if (verbose) cerr << "Timer::load convert endian" << endl;
+
   if (big_endian)
     timer_fromBigEndian (hdr);
   else
     timer_fromLittleEndian (hdr);
 
+  if (verbose) cerr << "Timer::load correct header" << endl;
   // correct an endian mistake made in initial baseband header version
   float version = hdr->version + hdr->minorversion/10.0;
   if (version >= 8.0 && version < 8.3) {
@@ -142,31 +145,37 @@ bool Timer::mixable (const timer& hdr1, const timer& hdr2, double max_freq_sep)
     reason = "Archives arise from different pulsars";
     return false;
   }
+  if (hdr1.banda.correlator_mode != hdr2.banda.correlator_mode) {
+    reason = "Archives have different correlator modes";
+    return false;
+  }
+  if (hdr1.wtscheme != hdr2.wtscheme) {
+    reason = "Archives have different weight schemes";
+    return false;
+  }
   if (hdr1.nbin != hdr2.nbin) {
     reason = "Archives have different numbers of bins";
     return false;
   }
+
+  return cal_mixable (hdr1, hdr2, max_freq_sep);
+}
+
+bool Timer::cal_mixable (const timer& hdr1, const timer& hdr2, double maxfsep)
+{
   if (hdr1.nsub_band != hdr2.nsub_band) {
     reason = "Archives have different numbers of subbands";
     return false;
   }
-  if (fabs (hdr1.banda.centrefreq - hdr2.banda.centrefreq) > max_freq_sep) {
-    reason = "Archives have too different center frequencies\n";
-    return false;
-  }
-  if (hdr1.banda.correlator_mode != hdr2.banda.correlator_mode) {
-    reason = "Archives have different correlator modes\n";
+  if (fabs (hdr1.banda.centrefreq - hdr2.banda.centrefreq) > maxfsep) {
+    reason = "Archives have too different center frequencies";
     return false;
   }
   if (hdr1.banda.bw != hdr2.banda.bw) {
-    reason = "Archives have different bandwidths\n";
+    reason = "Archives have different bandwidths";
     return false;
   }
-  if (hdr1.wtscheme != hdr2.wtscheme) {
-    reason = "Archives have different weight schemes\n";
-    return false;
-  }
-
+  
   // none of the above restrictions apply
   return true;
 }
@@ -259,5 +268,7 @@ void Timer::init (struct timer * hdr)
   hdr->corrected=0;
   hdr->calibrated=0;				
   hdr->obstype=-1;
+  hdr->version=-1;
+  hdr->minorversion=-1;
 }
 
