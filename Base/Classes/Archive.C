@@ -634,12 +634,6 @@ MJD Pulsar::Archive::end_time() const
   return get_Integration(get_nsubint()-1) -> get_end_time();
 }
 
-/*!
-  \retval lat latitude in degrees
-  \retval lon longitude in degrees
-  \retval ele elevation in metres
-*/
-
 double Pulsar::Archive::integration_length() const
 {
   double total = 0.0;
@@ -660,6 +654,11 @@ bool Pulsar::Archive::type_is_cal () const
     get_type() == Signal::FluxCalOff;
 }
 
+/*!
+  \retval lat latitude in degrees
+  \retval lon longitude in degrees
+  \retval ele elevation in metres
+*/
 void Pulsar::Archive::telescope_coordinates (float* lat, float* lon, 
 					     float* ele) const
 {
