@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/PSRFITS/Pulsar/FITSArchive.h,v $
-   $Revision: 1.13 $
-   $Date: 2003/09/24 05:40:39 $
+   $Revision: 1.14 $
+   $Date: 2003/09/25 01:10:58 $
    $Author: ahotan $ */
 
 #include <fitsio.h>
@@ -18,6 +18,8 @@
 #include "Pulsar/FrontendExtension.h"
 #include "Pulsar/BackendExtension.h"
 #include "Pulsar/Passband.h"
+#include "Pulsar/PolnCalibratorExtension.h"
+
 #include "MJD.h"
 
 namespace Pulsar {
@@ -166,6 +168,9 @@ namespace Pulsar {
     void load_passband (fitsfile*, int);
     void unload_passband (fitsfile*, int) const;
     
+    void load_pce (fitsfile*);
+    void unload_pce (fitsfile*, Pulsar::PolnCalibratorExtension*) const;
+
     // //////////////////////////////////////////////////////////////////////
 
     // Necessary global definitions for FITS file I/O

@@ -967,6 +967,10 @@ void Pulsar::FITSArchive::load_header (const char* filename)
 
   load_passband(fptr, be_ext->nrcvr);
 
+  // Load the calibration model description, if any
+  
+  load_pce(fptr);
+  
   // Load the NSITE code from the polyco
 
   int colnum = 0;
@@ -1756,6 +1760,15 @@ try {
   unload_digistat(myfptr);
   
   unload_passband(myfptr, be_ext->nrcvr);
+
+  // Unload the PolnCalibratorExtension, if present
+  
+  Pulsar::PolnCalibratorExtension* const pce = 
+    const_cast<Pulsar::PolnCalibratorExtension*>(get<Pulsar::PolnCalibratorExtension>());
+  
+  if (pce) {
+    unload_pce(myfptr, pce);
+  }
   
   // Now write the actual integrations to file
 
