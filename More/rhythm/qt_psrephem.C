@@ -15,7 +15,7 @@
 // organizes qt_psrParameter objects in a VBox
 //
 // //////////////////////////////////////////////////////////////////////////
-bool qt_psrephem::verbose = true;
+bool qt_psrephem::verbose = false;
 
 qt_psrephem::qt_psrephem (const psrephem& eph,
 			    QWidget* parent, const char* name) :

@@ -15,7 +15,7 @@
 //
 // //////////////////////////////////////////////////////////////////////////
 
-bool  psrParams::verbose = true;
+bool  psrParams::verbose = false;
 
 void psrParams::get_psrephem (psrephem& eph)
 {
