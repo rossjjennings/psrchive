@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PolarCalibrator.h,v $
-   $Revision: 1.6 $
-   $Date: 2003/09/11 21:15:41 $
+   $Revision: 1.7 $
+   $Date: 2003/09/12 14:58:07 $
    $Author: straten $ */
 
 #ifndef __PolarCalibrator_H
@@ -25,7 +25,26 @@ namespace Pulsar {
     ~PolarCalibrator ();
 
     //! Return the PolarAxisCalibrator information
-    Info* get_Info () const;
+    Calibrator::Info* get_Info () const;
+
+    //! Communicates Polar Model parameters
+    class Info : public PolnCalibrator::Info {
+
+    public:
+
+      //! Constructor
+      Info (const PolnCalibrator* calibrator);
+      
+      //! Return the number of parameter classes
+      unsigned get_nclass () const;
+
+      //! Return the name of the specified class
+      const char* get_name (unsigned iclass);
+      
+      //! Return the number of parameters in the specified class
+      unsigned get_nparam (unsigned iclass);
+
+    };
 
   protected:
 

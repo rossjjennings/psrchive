@@ -32,52 +32,44 @@ Pulsar::SingleAxisCalibrator::solve (const vector<Estimate<double> >& hi,
   return model.release();
 }
 
-//! SingleAxisCalibrator parameter communication
-class SingleAxisCalibratorInfo : public Pulsar::Calibrator::Info {
 
-public:
-  //! Constructor
-  SingleAxisCalibratorInfo (const Pulsar::SingleAxisCalibrator* cal) 
-  { calibrator = cal; }
 
-  //! Return the number of parameter classes
-  unsigned get_nclass () const { return 3; }
 
-  //! Return the name of the specified class
-  const char* get_name (unsigned iclass)
-  {
-    switch (iclass) {
-    case 0:
-      return "Gain (C\\d0\\u)";
-    case 1:
-      return "Diff. Gain";
-    case 2:
-      return "Diff. Phase";
-    default:
-      return "";
-    }
+Pulsar::SingleAxisCalibrator::Info::Info (const PolnCalibrator* cal) 
+  : PolnCalibrator::Info (cal)
+{
+}
+
+//! Return the number of parameter classes
+unsigned Pulsar::SingleAxisCalibrator::Info::get_nclass () const
+{
+  return 3; 
+}
+
+//! Return the name of the specified class
+const char* Pulsar::SingleAxisCalibrator::Info::get_name (unsigned iclass)
+{
+  switch (iclass) {
+  case 0:
+    return "Gain (C\\d0\\u)";
+  case 1:
+    return "Diff. Gain";
+  case 2:
+    return "Diff. Phase";
+  default:
+    return "";
   }
+} 
   
-  //! Return the number of parameters in the specified class
-  unsigned get_nparam (unsigned iclass)
-  {
+//! Return the number of parameters in the specified class
+unsigned Pulsar::SingleAxisCalibrator::Info::get_nparam (unsigned iclass)
+{
+  if (iclass < 3)
     return 1;
-  }
-  
-  //! Return the estimate of the specified parameter
-  Estimate<float> get_param (unsigned ichan, unsigned iclass,
-			     unsigned iparam)
-  {
-    return calibrator->get_Transformation(ichan)->get_Estimate(iclass);
-  }
-  
-protected:
-
-  Reference::To<const Pulsar::SingleAxisCalibrator> calibrator;
-
-};
+  return 0;
+}
 
 Pulsar::Calibrator::Info* Pulsar::SingleAxisCalibrator::get_Info () const
 {
-  return new SingleAxisCalibratorInfo (this);
+  return new SingleAxisCalibrator::Info (this);
 }

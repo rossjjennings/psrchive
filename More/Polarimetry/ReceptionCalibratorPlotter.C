@@ -111,7 +111,7 @@ void Pulsar::ReceptionCalibratorPlotter::plot_constraints (unsigned ichan)
 
 void Pulsar::ReceptionCalibratorPlotter::plot_cal_constraints (unsigned ichan)
 {
-  plot_constraints (ichan, calibrator->calibrator.source_index);
+  plot_constraints (ichan, calibrator->calibrator_estimate.source_index);
 }
 
 void Pulsar::ReceptionCalibratorPlotter::plot_constraints (unsigned ichan,
@@ -298,7 +298,7 @@ void Pulsar::ReceptionCalibratorPlotter::plot_model (unsigned ichan,
 
 void Pulsar::ReceptionCalibratorPlotter::plot_phase_constraints ()
 {
-  unsigned nbin = calibrator->uncalibrated->get_nbin();
+  unsigned nbin = calibrator->calibrator->get_nbin();
 
   unsigned nstate = calibrator->pulsar.size();
 
@@ -350,7 +350,7 @@ void Pulsar::ReceptionCalibratorPlotter::plotcal ()
 
   for (idim=0; idim<ndim; idim++) {
     for (ipt=0; ipt<npt; ipt++)
-      data[ipt] = calibrator->calibrator.source[ipt].get_Estimate(idim);
+      data[ipt] = calibrator->calibrator_estimate.source[ipt].get_Estimate(idim);
 
     plotter.add_plot (data);
   }

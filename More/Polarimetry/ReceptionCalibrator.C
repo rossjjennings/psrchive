@@ -143,13 +143,13 @@ void Pulsar::ReceptionCalibrator::initial_observation (const Archive* data)
     cerr << "Pulsar::ReceptionCalibrator WARNING archive not dedispersed\n"
       "  Pulse phase will vary as a function of frequency channel" << endl;
 
-  uncalibrated = data->clone();
+  calibrator = data->clone();
 
   float latitude = 0, longitude = 0;
-  uncalibrated->telescope_coordinates (&latitude, &longitude);
-  sky_coord coordinates = uncalibrated->get_coordinates();
+  calibrator->telescope_coordinates (&latitude, &longitude);
+  sky_coord coordinates = calibrator->get_coordinates();
 
-  unsigned nchan = uncalibrated->get_nchan();
+  unsigned nchan = calibrator->get_nchan();
 
   model.resize (nchan);
 
@@ -162,7 +162,7 @@ void Pulsar::ReceptionCalibrator::initial_observation (const Archive* data)
 
   }
 
-  if (calibrator.source.size() == 0 && calibrator_filenames.size())
+  if (calibrator_estimate.source.size() == 0 && calibrator_filenames.size())
     load_calibrators ();
 
   // initialize any previously added states
@@ -227,14 +227,14 @@ void Pulsar::ReceptionCalibrator::add_state (unsigned phase_bin)
 
   pulsar.push_back( SourceEstimate (phase_bin) );
 
-  if (uncalibrated)
+  if (calibrator)
     init_estimate( pulsar.back() );
 }
 
 void Pulsar::ReceptionCalibrator::init_estimate (SourceEstimate& estimate)
 {
-  unsigned nchan = uncalibrated->get_nchan ();
-  unsigned nbin = uncalibrated->get_nbin ();
+  unsigned nchan = calibrator->get_nchan ();
+  unsigned nbin = calibrator->get_nbin ();
 
   if (estimate.phase_bin >= nbin)
     throw Error (InvalidRange, "Pulsar::ReceptionCalibrator::init_estimate",
@@ -279,7 +279,7 @@ unsigned Pulsar::ReceptionCalibrator::get_nchan () const
 //! Add the specified pulsar observation to the set of constraints
 void Pulsar::ReceptionCalibrator::add_calibrator (const Archive* data)
 {
-  if (!uncalibrated)
+  if (!calibrator)
     throw Error (InvalidState, "Pulsar::ReceptionCalibrator::add_calibrator",
 		 "No Archive containing pulsar data has yet been added");
 
@@ -308,7 +308,7 @@ void Pulsar::ReceptionCalibrator::add_calibrator (const Archive* data)
 		 "unknown StandardModel type");
 
 
-  polncal->set_nchan( uncalibrated->get_nchan() );
+  polncal->set_nchan( calibrator->get_nchan() );
 
   add_Calibrator (polncal);
 
@@ -324,14 +324,14 @@ void Pulsar::ReceptionCalibrator::add_observation (const Archive* data)
     return;
   }
 
-  if (!uncalibrated)
+  if (!calibrator)
     initial_observation (data);
 
   string reason;
-  if (!uncalibrated->mixable (data, reason))
+  if (!calibrator->mixable (data, reason))
     throw Error (InvalidParam, "Pulsar::ReceptionCalibrator",
 		 "'" + data->get_filename() + "' does not match "
-		 "'" + uncalibrated->get_filename() + reason);
+		 "'" + calibrator->get_filename() + reason);
 
   unsigned nsub = data->get_nsubint ();
   unsigned nchan = data->get_nchan ();
@@ -473,35 +473,35 @@ void Pulsar::ReceptionCalibrator::add_Calibrator (const ArtificialCalibrator* p)
 		 "invalid state=" + State2string(cal->get_state()));
 
   string reason;
-  if (!uncalibrated->calibrator_match (cal, reason))
+  if (!calibrator->calibrator_match (cal, reason))
     throw Error (InvalidParam,
 		 "Pulsar::ReceptionCalibrator::add_Calibrator",
 		 "'" + cal->get_filename() + "' does not match "
-		 "'" + uncalibrated->get_filename() + reason);
+		 "'" + calibrator->get_filename() + reason);
 
-  unsigned nchan = uncalibrated->get_nchan ();
+  unsigned nchan = calibrator->get_nchan ();
   unsigned nsub = cal->get_nsubint();
   unsigned npol = cal->get_npol();
   
   assert (npol == 4);
 
-  if (calibrator.source.size() == 0) {
+  if (calibrator_estimate.source.size() == 0) {
 
     // add the calibrator states to the equations
-    init_estimate (calibrator);
+    init_estimate (calibrator_estimate);
 
     // set the initial guess and fit flags
     Stokes<double> cal_state (1,0,.5,0);
 
     for (unsigned ichan=0; ichan<nchan; ichan++) {
       
-      calibrator.source[ichan].set_stokes ( cal_state );
+      calibrator_estimate.source[ichan].set_stokes ( cal_state );
 
       for (unsigned istokes=0; istokes<4; istokes++)
-	calibrator.source[ichan].set_infit (istokes, false);
+	calibrator_estimate.source[ichan].set_infit (istokes, false);
 
       // Stokes U may vary
-      calibrator.source[ichan].set_infit (2, true);
+      calibrator_estimate.source[ichan].set_infit (2, true);
 
     }
 
@@ -545,7 +545,7 @@ void Pulsar::ReceptionCalibrator::add_Calibrator (const ArtificialCalibrator* p)
 
       try {
         // convert to MeasuredState format
-        Calibration::MeasuredState state (stokes, calibrator.source_index);
+        Calibration::MeasuredState state (stokes, calibrator_estimate.source_index);
 
 	Calibration::Abscissa* abscissa = model[ichan]->time.new_Value(epoch);
 	Calibration::Measurements measurements ( abscissa );
@@ -566,7 +566,7 @@ void Pulsar::ReceptionCalibrator::add_Calibrator (const ArtificialCalibrator* p)
       stokes = correct * stokes * herm(correct);
 
       // add the observed
-      calibrator.source[ichan].mean += stokes;
+      calibrator_estimate.source[ichan].mean += stokes;
 
     }
   }
@@ -626,27 +626,12 @@ void Pulsar::ReceptionCalibrator::add_FluxCalibrator (const FluxCalibrator* f)
 void Pulsar::ReceptionCalibrator::precalibrate (Archive* data)
 {
   cerr << "Pulsar::ReceptionCalibrator::precalibrate" << endl;
-  calibrate (data, false);
-}
-
-//! Calibrate the polarization of the given archive
-void Pulsar::ReceptionCalibrator::calibrate (Archive* data)
-{
-  cerr << "Pulsar::ReceptionCalibrator::calibrate" << endl;
-  calibrate (data, true);
-}
-
-//! Calibrate the polarization of the given archive
-void Pulsar::ReceptionCalibrator::calibrate (Archive* data, bool solve_first)
-{
-  if (!is_fit && solve_first)
-    solve ();
 
   string reason;
-  if (!uncalibrated->calibrator_match (data, reason))
+  if (!calibrator->calibrator_match (data, reason))
     throw Error (InvalidParam, "Pulsar::ReceptionCalibrator::calibrate",
 		 "'" + data->get_filename() + "' does not match "
-		 "'" + uncalibrated->get_filename() + "'" + reason);
+		 "'" + calibrator->get_filename() + "'" + reason);
 
 
   unsigned nsub = data->get_nsubint ();
@@ -715,6 +700,19 @@ void Pulsar::ReceptionCalibrator::calibrate (Archive* data, bool solve_first)
   // data->set_flux_calibrated (true);
 }
 
+//! Calibrate the polarization of the given archive
+void Pulsar::ReceptionCalibrator::calculate_transformation ()
+{
+  unsigned nchan = model.size();
+
+  transformation.resize( nchan );
+
+  for (unsigned ichan=0; ichan<nchan; ichan++)
+    if (model[ichan]->valid)
+      transformation[ichan] = model[ichan]->instrument;
+    else
+      transformation[ichan] = 0;
+}
 
 bool Pulsar::ReceptionCalibrator::get_solved () const
 {
@@ -726,7 +724,7 @@ void Pulsar::ReceptionCalibrator::solve (int only_ichan)
   if (!is_initialized)
   check_ready ("Pulsar::ReceptionCalibrator::solve");
 
-  if (calibrator.source.size() == 0)
+  if (calibrator_estimate.source.size() == 0)
     throw Error (InvalidState, "Pulsar::ReceptionCalibrator::solve",
 		 "Without an ArtificialCalibrator observation, "
 		 "there remains a degeneracy along the Stokes V axis");
@@ -781,7 +779,7 @@ void Pulsar::ReceptionCalibrator::initialize ()
     "  Parallactic angle ranges from " << PA_min <<
     " to " << PA_max << " degrees" << endl;
 
-  calibrator.update_source();
+  calibrator_estimate.update_source();
   
   for (unsigned istate=0; istate<pulsar.size(); istate++)
     pulsar[istate].update_source ();
@@ -802,7 +800,7 @@ void Pulsar::ReceptionCalibrator::check_ready (const char* method, bool unc)
     throw Error (InvalidState, method,
 		 "Model has been initialized. Cannot add data.");
 
-  if (unc && !uncalibrated)
+  if (unc && !calibrator)
     throw Error (InvalidState, method,
 		 "Initial observation required.");
 }

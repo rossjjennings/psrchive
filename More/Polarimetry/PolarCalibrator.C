@@ -37,64 +37,47 @@ Pulsar::PolarCalibrator::solve (const vector<Estimate<double> >& hi,
 }
 
 
-//! PolarCalibrator parameter communication
-class PolarCalibratorInfo : public Pulsar::Calibrator::Info {
+Pulsar::PolarCalibrator::Info::Info (const PolnCalibrator* cal) 
+  : PolnCalibrator::Info (cal)
+{
+}
 
-public:
-  //! Constructor
-  PolarCalibratorInfo (const Pulsar::PolarCalibrator* cal) 
-  { calibrator = cal; }
+//! Return the number of parameter classes
+unsigned Pulsar::PolarCalibrator::Info::get_nclass () const
+{
+  return 3; 
+}
 
-  //! Return the number of parameter classes
-  unsigned get_nclass () const { return 3; }
-
-  //! Return the name of the specified class
-  const char* get_name (unsigned iclass)
-  {
-    switch (iclass) {
-    case 0:
-      return "Gain (C\\d0\\u)";
-    case 1:
-      return "Boost, sinh\\(2128)\\.m\\b\\u \\(0832)";
-    case 2:
-      return "Rotation";
-    default:
-      return "";
-    }
+//! Return the name of the specified class
+const char* Pulsar::PolarCalibrator::Info::get_name (unsigned iclass)
+{
+  switch (iclass) {
+  case 0:
+    return "Gain (C\\d0\\u)";
+  case 1:
+    return "Boost, sinh\\(2128)\\.m\\b\\u \\(0832)";
+  case 2:
+    return "Rotation";
+  default:
+    return "";
   }
+}
   
-  //! Return the number of parameters in the specified class
-  unsigned get_nparam (unsigned iclass)
-  {
-    switch (iclass) {
-    case 0:
-      return 1;
-    case 1:
-    case 2:
-      return 3;
-    default:
-      return 0;
-    }
+//! Return the number of parameters in the specified class
+unsigned Pulsar::PolarCalibrator::Info::get_nparam (unsigned iclass)
+{
+  switch (iclass) {
+  case 0:
+    return 1;
+  case 1:
+  case 2:
+    return 3;
+  default:
+    return 0;
   }
-  
-  //! Return the estimate of the specified parameter
-  Estimate<float> get_param (unsigned ichan, unsigned iclass,
-			     unsigned iparam)
-  {
-    unsigned offset = 0;
-    for (unsigned jclass=1; jclass<=iclass; jclass++)
-      offset += get_nparam (jclass-1);
-
-    return calibrator->get_Transformation(ichan)->get_Estimate(iparam+offset);
-  }
-  
-protected:
-
-  Reference::To<const Pulsar::PolarCalibrator> calibrator;
-
-};
+}
 
 Pulsar::Calibrator::Info* Pulsar::PolarCalibrator::get_Info () const
 {
-  return new PolarCalibratorInfo (this);
+  return new PolarCalibrator::Info (this);
 }

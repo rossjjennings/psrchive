@@ -1,14 +1,14 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ReceptionCalibrator.h,v $
-   $Revision: 1.38 $
-   $Date: 2003/09/11 21:15:41 $
+   $Revision: 1.39 $
+   $Date: 2003/09/12 14:58:07 $
    $Author: straten $ */
 
 #ifndef __ReceptionCalibrator_H
 #define __ReceptionCalibrator_H
 
-#include "Calibrator.h"
+#include "Pulsar/PolnCalibrator.h"
 
 // Reception Model and its management
 #include "Calibration/ReceptionModel.h"
@@ -115,7 +115,7 @@ namespace Pulsar {
     constraints, which are provided in through the add_observation,
     add_ArtificialCalibrator, and add_FluxCalibrator methods.
   */
-  class ReceptionCalibrator : public Calibrator {
+  class ReceptionCalibrator : public PolnCalibrator {
     
   public:
     
@@ -158,17 +158,14 @@ namespace Pulsar {
     //! Get the status of the model
     bool get_solved () const;
     
-    //! Calibrate the polarization of the given archive
-    virtual void calibrate (Archive* archive);
-    
     //! Pre-calibrate the polarization of the given archive
     virtual void precalibrate (Archive* archive);
     
   protected:
     
-    //! Calibrate the polarization of the given archive
-    void calibrate (Archive* archive, bool solve_first);
-    
+    //! Initialize the PolnCalibration::transformation attribute
+    virtual void calculate_transformation ();
+
     //! The calibration model as a function of frequency
     vector< Reference::To<StandardModel> > model;
 
@@ -176,7 +173,7 @@ namespace Pulsar {
     StandardModel::Model model_type;
 
     //! Uncalibrated estimate of calibrator polarization
-    SourceEstimate calibrator;
+    SourceEstimate calibrator_estimate;
     
     //! Uncalibrated estimate of pulsar polarization as a function of phase
     vector<SourceEstimate> pulsar;
@@ -184,9 +181,6 @@ namespace Pulsar {
     //! The calibrators to be loaded during initial_observation
     vector<string> calibrator_filenames;
     
-    //! Uncalibrated best estimate of the average pulse profile
-    Reference::To<const Archive> uncalibrated;
-
     //! Epoch of the first observation
     MJD start_epoch;
 
