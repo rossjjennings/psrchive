@@ -26,6 +26,13 @@ void Pulsar::Calibrator::calibrate (Integration* integration,
   integration->transform (response);
 }
 
+//! Provide access to Integration::transform
+void Pulsar::Calibrator::calibrate (Integration* integration,
+				    const Jones<float>& response)
+{
+  integration->transform (response);
+}
+
 //! Return a string containing the file information
 string Pulsar::Calibrator::get_filenames () const
 {

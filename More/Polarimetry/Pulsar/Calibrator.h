@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/Attic/Calibrator.h,v $
-   $Revision: 1.16 $
-   $Date: 2004/04/05 12:41:21 $
+   $Revision: 1.17 $
+   $Date: 2004/07/03 07:34:31 $
    $Author: straten $ */
 
 #ifndef __Calibrator_H
@@ -31,6 +31,8 @@ namespace Pulsar {
     enum Type {
       //! Flux calibrator
       Flux,
+      //! Instrumental corrections
+      Corrections,
       //! Gain, differential gain and differential phase
       SingleAxis,
       //! Gain, 3-D boost, and two rotations (van Straten 2002)
@@ -135,6 +137,10 @@ namespace Pulsar {
     //! Provide access to Integration::transform
     virtual void calibrate (Integration* integration,
 			    const vector< Jones<float> >& response);
+
+    //! Provide access to Integration::transform
+    virtual void calibrate (Integration* integration,
+			    const Jones<float>& response);
 
     //! Reference to the Pulsar::Archive from which this instance was created
     Reference::To<const Archive> calibrator;
