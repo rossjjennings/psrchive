@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Archive.h,v $
-   $Revision: 1.88 $
-   $Date: 2003/11/27 04:58:48 $
-   $Author: ahotan $ */
+   $Revision: 1.89 $
+   $Date: 2003/11/27 20:16:40 $
+   $Author: straten $ */
 
 /*! \mainpage 
  
@@ -581,7 +581,7 @@ namespace Pulsar {
     virtual void remove_baseline (float phase = -1.0);
 
     //! Install the given ephemeris and call update_model
-    virtual void set_ephemeris (const psrephem& ephemeris);
+    virtual void set_ephemeris (const psrephem& ephemeris, bool update = true);
 
     //! Return a copy of the current archive ephemeris
     const psrephem get_ephemeris();

@@ -418,34 +418,36 @@ void Pulsar::Archive::defaraday (double rotation_measure, double rm_iono)
   set_iono_rm_corrected(true);
 }
 
-void Pulsar::Archive::set_ephemeris (const psrephem& new_ephemeris)
+/*! \param new_ephemeris the ephemeris to be installed
+    \param update create a new polyco for the new ephemeris
+ */
+void Pulsar::Archive::set_ephemeris (const psrephem& new_ephemeris, bool update)
 {
   ephemeris = new psrephem (new_ephemeris);
 
   if (get_source() != ephemeris->psrname()) {
-    if (ephemeris->psrname() != "CAL" && ephemeris->psrname() != "cal" &&
-	ephemeris->psrname() != "Cal" && ephemeris->psrname() != "JCAL" &&
-	ephemeris->psrname() != "jcal") {
-      string temp1 = get_source();
-      string temp2 = ephemeris->psrname();
-      if (temp1.length() > temp2.length()) {
-	if (temp1.substr(1,temp1.length()) != temp2) {
-	  cout << "Archive::set_ephemeris Informative Notice:\n" 
-	       << "   Source name will be updated to match new ephemeris\n"
-	       << "   New name: " << temp2 << endl;
-	  set_source(temp2);
-	}
-      }
-      else {
-	if (temp2.substr(1,temp2.length()) != temp1) {
-	  cerr << "Archive::set_ephemeris Informative Notice:\n" 
-	       << "   Source name will be updated to match new ephemeris\n"
-	       << "   New name: " << temp2 << endl;
-	  set_source(temp2);
-	}
-      }
+
+    // a CAL observation shouldn't have an ephemeris
+    // no need for the removed test
+
+    string temp1 = get_source();
+    string temp2 = ephemeris->psrname();
+
+    bool change = false;
+
+    if (temp1.length() > temp2.length())
+      change = temp1.substr(1,temp1.length()) != temp2;
+    else   
+      change = temp2.substr(1,temp2.length()) != temp1;
+
+    if (change) {
+      cerr << "Archive::set_ephemeris Informative Notice:\n" 
+           << "   Source name will be updated to match new ephemeris\n"
+           << "   New name: " << temp2 << endl;
+      set_source(temp2);
     }
   }
+
   if (get_dispersion_measure() != ephemeris->get_dm()) {
     cerr << "Archive::set_ephemeris Informative Notice:\n" 
 	 << "   Dispersion measure will be updated to match new ephemeris\n"
@@ -453,8 +455,9 @@ void Pulsar::Archive::set_ephemeris (const psrephem& new_ephemeris)
 	 << "   New DM = " << ephemeris->get_dm() << endl;
     set_dispersion_measure(ephemeris->get_dm());
   }
-  
-  update_model ();
+
+  if (update)
+    update_model ();
 }
 
 const psrephem Pulsar::Archive::get_ephemeris ()
@@ -475,6 +478,9 @@ void Pulsar::Archive::set_model (const polyco& new_model)
   Reference::To<polyco> oldmodel = model;
 
   model = new polyco (new_model);
+
+  if (verbose)
+    cerr << "Pulsar::Archive::set_model model set" << endl;
 
   if ( oldmodel && oldmodel->pollys.size() ) {
 
