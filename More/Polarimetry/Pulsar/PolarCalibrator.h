@@ -1,20 +1,20 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PolarCalibrator.h,v $
-   $Revision: 1.11 $
-   $Date: 2004/07/03 07:34:54 $
+   $Revision: 1.12 $
+   $Date: 2004/07/12 09:29:16 $
    $Author: straten $ */
 
 #ifndef __PolarCalibrator_H
 #define __PolarCalibrator_H
 
-#include "Pulsar/ArtificialCalibrator.h"
+#include "Pulsar/ReferenceCalibrator.h"
 #include "Calibration/Polar.h"
 
 namespace Pulsar {
 
   //! Uses PolarModel to represent the system response
-  class PolarCalibrator : public ArtificialCalibrator {
+  class PolarCalibrator : public ReferenceCalibrator {
     
   public:
 
@@ -26,9 +26,6 @@ namespace Pulsar {
 
     //! Return Calibrator::Polar
     Type get_type () const;
-
-    //! Return the PolarAxisCalibrator information
-    Calibrator::Info* get_Info () const;
 
     //! Communicates Polar Model parameters
     class Info : public PolnCalibrator::Info {
@@ -52,11 +49,14 @@ namespace Pulsar {
 
     };
 
+    //! Return the PolarAxisCalibrator information
+    Info* get_Info () const;
+
   protected:
 
     // ///////////////////////////////////////////////////////////////////
     //
-    // Pulsar::ArtificialCalibrator implementation
+    // Pulsar::ReferenceCalibrator implementation
     //
     // ///////////////////////////////////////////////////////////////////
 

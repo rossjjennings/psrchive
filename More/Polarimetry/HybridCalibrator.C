@@ -1,5 +1,5 @@
 #include "Pulsar/HybridCalibrator.h"
-#include "Pulsar/ArtificialCalibrator.h"
+#include "Pulsar/ReferenceCalibrator.h"
 #include "Pulsar/CalibratorStokes.h"
 
 #include "Calibration/SingleAxis.h"
@@ -27,8 +27,8 @@ void Pulsar::HybridCalibrator::set_reference_input (CalibratorStokes* reference)
   reference_input = reference;
 }
 
-//! Set the ArtificialCalibrator data from which to derive a SingleAxis
-void Pulsar::HybridCalibrator::set_reference_observation (ArtificialCalibrator* observation)
+//! Set the ReferenceCalibrator data from which to derive a SingleAxis
+void Pulsar::HybridCalibrator::set_reference_observation (ReferenceCalibrator* observation)
 {
   reference_observation = observation;
 
@@ -61,7 +61,7 @@ void Pulsar::HybridCalibrator::calculate_transformation ()
   if (!reference_observation)
     throw Error (InvalidState,
 		 "Pulsar::HybridCalibrator::calculate_transformation",
-		 "no reference observation ArtificialCalibrator");
+		 "no reference observation ReferenceCalibrator");
 
   unsigned nchan = precalibrator->get_transformation_nchan();
 

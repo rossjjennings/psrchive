@@ -1,0 +1,297 @@
+#include "Pulsar/ReferenceCalibrator.h"
+#include "Pulsar/Archive.h"
+#include "Pulsar/Integration.h"
+#include "Pulsar/Receiver.h"
+
+#include "Pauli.h"
+#include "Error.h"
+
+#include "interpolate.h"
+#include "smooth.h"
+
+bool Pulsar::ReferenceCalibrator::smooth_bandpass = false;
+
+
+Pulsar::ReferenceCalibrator::~ReferenceCalibrator ()
+{
+  // destructors must be defined in .C file so that the Reference::To
+  // desctructor can delete forward declared objects
+}
+
+Pulsar::ReferenceCalibrator::ReferenceCalibrator (const Archive* arch)
+{
+  if (!arch)
+    throw Error (InvalidState, "Pulsar::ReferenceCalibrator", "no Archive");
+
+  if (verbose)
+    cerr << "Pulsar::ReferenceCalibrator" << endl;
+
+  if ( !arch->type_is_cal() )
+    throw Error (InvalidParam, "Pulsar::ReferenceCalibrator",
+		 "Pulsar::Archive='" + arch->get_filename() + "' not a Cal");
+  
+  // Here the decision is made about full stokes or dual band observations.
+  Signal::State state = arch->get_state();
+
+  bool fullStokes = state == Signal::Stokes || state == Signal::Coherence;
+
+  bool calibratable = fullStokes || state == Signal::PPQQ;
+
+  if (!calibratable)
+    throw Error (InvalidParam, "Pulsar::ReferenceCalibrator", 
+		 "Pulsar::Archive='" + arch->get_filename() + "'\n\t"
+		 "invalid state=" + State2string(state));
+
+  Archive* clone = arch->clone();
+
+  if (fullStokes && state != Signal::Coherence)
+    clone->convert_state (Signal::Coherence);
+
+  calibrator = clone;
+
+  requested_nchan = clone->get_nchan();
+
+  filenames.push_back( arch->get_filename() );
+
+  receiver = clone->get<Receiver>();
+  if (receiver) {
+    Stokes<double> cal = receiver->get_reference_source ();
+    if (verbose)
+      cerr << "Pulsar::ReferenceCalibrator reference source " << cal << endl;
+    set_reference_source (cal);
+  }
+
+}
+
+//! Set the Stokes parameters of the reference source
+void Pulsar::ReferenceCalibrator::set_reference_source
+ (const Stokes< Estimate<double> >& stokes)
+{
+  reference_source = stokes;
+  source_set = true;
+}
+
+//! Get the Stokes parameters of the reference source
+Stokes< Estimate<double> >
+Pulsar::ReferenceCalibrator::get_reference_source () const
+{
+  if (source_set)
+    return reference_source;
+
+  return Stokes< Estimate<double> > (1.0, 0.0, 1.0, 0.0);
+}
+
+//! Set the number of frequency channels in the response array
+void Pulsar::ReferenceCalibrator::set_nchan (unsigned nchan)
+{
+  if (requested_nchan == nchan)
+    return;
+
+  requested_nchan = nchan;
+
+  // ensure that the transformation matrix is re-computed
+  transformation.resize (0);
+
+  PolnCalibrator::set_nchan (nchan);
+}
+
+/*!
+  \param isubint the calibrator Integration from which to derive levels
+  \param nchan the desired frequency resolution
+  \retval cal_hi the mean levels of the calibrator hi state
+  \retval cal_lo the mean levels of the calibrator lo state
+*/
+void Pulsar::ReferenceCalibrator::get_levels
+(const Integration* integration, unsigned request_nchan,
+ vector<vector<Estimate<double> > >& cal_hi,
+ vector<vector<Estimate<double> > >& cal_lo)
+{
+  if (!integration)
+    throw Error (InvalidState,
+                 "Pulsar::ReferenceCalibrator::get_levels",
+                 "no calibrator Integration");
+
+  if (verbose)
+    cerr << "Pulsar::ReferenceCalibrator::get_levels Integration "
+         << " required nchan=" << request_nchan << endl;
+
+  integration->cal_levels (cal_hi, cal_lo);
+
+  unsigned nchan = integration->get_nchan();
+  unsigned npol = integration->get_npol();
+
+  unsigned ipol = 0;
+
+  for (unsigned ichan=0; ichan<nchan; ichan++)
+    if (integration->get_weight (ichan) == 0)  {
+      for (ipol=0; ipol<npol; ipol++)
+	cal_hi[ipol][ichan] = cal_lo[ipol][ichan] = 0.0;
+    }
+
+  if (smooth_bandpass)  {
+
+    unsigned window = unsigned (integration->get_nchan() * median_smoothing);
+
+    if (verbose)
+      cerr << "Pulsar::ReferenceCalibrator::get_levels median window = "
+	   << window << " channels" << endl;
+
+    // even a 3-window sort can zap a single channel birdie
+    if (window < 3)
+      window = 3;
+
+    for (ipol=0; ipol < npol; ipol++) {
+      fft::median_smooth (cal_lo[ipol], window);
+      fft::median_smooth (cal_hi[ipol], window);
+    }
+
+  }
+
+  if (integration->get_nchan() == request_nchan)
+    return;
+
+  // make hi and lo the right size of cal_hi and cal_lo
+  vector<vector<Estimate<double> > > hi (npol);
+  vector<vector<Estimate<double> > > lo (npol);
+ 
+  for (ipol=0; ipol < npol; ipol++) {
+    lo[ipol].resize (request_nchan);
+    fft::interpolate (lo[ipol], cal_lo[ipol]);
+    
+    hi[ipol].resize (request_nchan);
+    fft::interpolate (hi[ipol], cal_hi[ipol]);
+  }
+
+  cal_lo = lo;
+  cal_hi = hi;
+
+}
+
+/*! This method takes care of averaging the calibrator levels from multiple
+  sub-integrations */
+void Pulsar::ReferenceCalibrator::get_levels
+(const Archive* archive, unsigned request_nchan,
+ vector<vector<Estimate<double> > >& cal_hi,
+ vector<vector<Estimate<double> > >& cal_lo)
+{
+  if (!archive)
+    throw Error (InvalidState,
+		 "Pulsar::ReferenceCalibrator::get_levels",
+		 "no calibrator Archive");
+
+  unsigned nsub = archive->get_nsubint();
+  unsigned npol = archive->get_npol();
+  unsigned nchan = archive->get_nchan();
+
+  if (verbose)
+    cerr << "Pulsar::ReferenceCalibrator::get_levels nsub=" << nsub 
+	 << " npol=" << npol << " nchan=" << nchan << endl;
+
+  nchan = request_nchan;
+
+  // the mean calibrator hi and lo levels from the PolnCal archive
+  vector<vector<MeanEstimate<double> > > total_hi;
+  vector<vector<MeanEstimate<double> > > total_lo;
+
+  for (unsigned isub=0; isub<nsub; isub++) {
+
+    const Integration* integration = archive->get_Integration(isub);
+
+    get_levels (integration, nchan, cal_hi, cal_lo);
+
+    if (nsub > 1) {
+      if (isub == 0) {
+	total_hi.resize (cal_hi.size());
+	total_lo.resize (cal_lo.size());
+	for (unsigned ipol=0; ipol<npol; ipol++) {
+	  total_hi[ipol].resize (nchan);
+	  total_lo[ipol].resize (nchan);
+	}
+      }
+      for (unsigned ipol=0; ipol<npol; ipol++) {
+	for (unsigned ichan=0; ichan<nchan; ichan++) {
+	  total_hi[ipol][ichan] += cal_hi[ipol][ichan];
+	  total_lo[ipol][ichan] += cal_lo[ipol][ichan];
+	}
+      }
+    }
+
+  }
+
+  if (nsub > 1) {
+    for (unsigned ipol=0; ipol<npol; ipol++) {
+      for (unsigned ichan=0; ichan<nchan; ichan++) {
+	cal_hi[ipol][ichan] = total_hi[ipol][ichan].get_Estimate();
+	cal_lo[ipol][ichan] = total_lo[ipol][ichan].get_Estimate();
+      }
+    }
+  }
+}
+
+void Pulsar::ReferenceCalibrator::get_levels 
+(unsigned nchan,
+ vector<vector<Estimate<double> > >& cal_hi,
+ vector<vector<Estimate<double> > >& cal_lo) const
+{
+  get_levels (calibrator, nchan, cal_hi, cal_lo);
+}
+
+
+void Pulsar::ReferenceCalibrator::calculate_transformation ()
+{
+  // the calibrator hi and lo levels from the PolnCal archive
+  vector<vector<Estimate<double> > > cal_hi;
+  vector<vector<Estimate<double> > > cal_lo;
+
+  get_levels (calibrator, requested_nchan, cal_hi, cal_lo);
+
+  unsigned npol = calibrator->get_npol();
+  unsigned nchan = requested_nchan;
+
+  if (verbose) cerr << "Pulsar::ReferenceCalibrator::calculate_transformation"
+                       " npol=" << npol << " nchan=" << nchan << endl;
+
+  baseline.resize (nchan);
+
+  transformation.resize (nchan);
+
+  // coherency products in a single channel
+  vector<Estimate<double> > source (npol);
+  vector<Estimate<double> > sky (npol);
+
+  for (unsigned ichan=0; ichan<nchan; ++ichan) {
+
+    if (verbose)
+      cerr << "Pulsar::ReferenceCalibrator::calculate_transformation"
+	" ichan=" << ichan << endl;
+
+    for (unsigned ipol=0; ipol<npol; ++ipol) {
+      source[ipol] = cal_hi[ipol][ichan] - cal_lo[ipol][ichan];
+      sky[ipol] = cal_lo[ipol][ichan];
+    }
+
+    Estimate<double> cal_AA = source[0];
+    Estimate<double> cal_BB = source[1];
+
+    if (cal_AA.val <= 0 || cal_BB.val <= 0) {
+      if (verbose)
+	cerr << "Pulsar::ReferenceCalibrator::calculate_transformation"
+	  " ichan=" << ichan << " bad levels" << endl;
+      baseline[ichan] = 0;
+      transformation[ichan] = 0;
+      continue;
+    }
+
+    // baseline intensity, normalized by cal flux, C
+    baseline[ichan] = sky[0]/cal_AA + sky[1]/cal_BB;
+
+    // store the transformation appropriate for inverting the system response
+    transformation[ichan] = solve (source, sky);
+
+  }
+
+  if (verbose)
+    cerr << "Pulsar::ReferenceCalibrator::calculate_transformation exit"
+	 << endl;
+}
+

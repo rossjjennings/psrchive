@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/HybridCalibrator.h,v $
-   $Revision: 1.1 $
-   $Date: 2003/12/05 20:21:04 $
+   $Revision: 1.2 $
+   $Date: 2004/07/12 09:29:16 $
    $Author: straten $ */
 
 #ifndef __HybridCalibrator_H
@@ -12,7 +12,7 @@
 
 namespace Pulsar {
 
-  class ArtificialCalibrator;
+  class ReferenceCalibrator;
   class CalibratorStokes;
 
   //! Uses a SingleAxisModel to supplement another system response
@@ -32,8 +32,8 @@ namespace Pulsar {
     //! Set the Stokes parameters of the reference signal
     void set_reference_input (CalibratorStokes* reference);
 
-    //! Set the ArtificialCalibrator data from which to derive a SingleAxis
-    void set_reference_observation (ArtificialCalibrator* observation);
+    //! Set the ReferenceCalibrator data from which to derive a SingleAxis
+    void set_reference_observation (ReferenceCalibrator* observation);
     
     //! Set the PolnCalibrator to be supplemented
     void set_precalibrator (PolnCalibrator* calibrator);
@@ -47,7 +47,7 @@ namespace Pulsar {
     Reference::To<CalibratorStokes> reference_input;
 
     //! The Stokes parameters of the observed reference signal
-    Reference::To<ArtificialCalibrator> reference_observation;
+    Reference::To<ReferenceCalibrator> reference_observation;
 
     //! The PolnCalibrator to be supplemented
     Reference::To<PolnCalibrator> precalibrator;

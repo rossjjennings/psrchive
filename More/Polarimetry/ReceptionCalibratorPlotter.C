@@ -22,7 +22,7 @@ Pulsar::ReceptionCalibratorPlotter::~ReceptionCalibratorPlotter ()
 void Pulsar::ReceptionCalibratorPlotter::plot_cal_constraints (unsigned ichan)
 {
   plot_constraints (ichan, calibrator->calibrator_estimate.input_index,
-		    calibrator->model[ichan]->ArtificialCalibrator_path);
+		    calibrator->model[ichan]->ReferenceCalibrator_path);
 }
 
 void Pulsar::ReceptionCalibratorPlotter::plot_psr_constraints (unsigned ichan,

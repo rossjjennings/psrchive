@@ -3,7 +3,7 @@
 
 //! Construct from an single PolnCal Pulsar::Archive
 Pulsar::PolarCalibrator::PolarCalibrator (const Archive* archive) 
-  : ArtificialCalibrator (archive)
+  : ReferenceCalibrator (archive)
 {
 }
 
@@ -13,26 +13,31 @@ Pulsar::PolarCalibrator::~PolarCalibrator ()
 
 //! Return the system response as determined by the Polar Transformation
 ::Calibration::Complex2*
-Pulsar::PolarCalibrator::solve (const vector<Estimate<double> >& hi,
-				const vector<Estimate<double> >& lo)
+Pulsar::PolarCalibrator::solve (const vector<Estimate<double> >& source,
+				const vector<Estimate<double> >& sky)
 {
-  if ( hi.size() != 4 || lo.size() != 4 )
+  if ( source.size() != 4 || sky.size() != 4 )
     throw Error (InvalidParam, "Pulsar::PolarCalibrator::solve",
-		 "hi.size=%d or lo.size=%d != 4", hi.size(), lo.size());
+		 "source.size=%d or sky.size=%d != 4", 
+		 source.size(), sky.size());
+
+  if (source_set)
+    throw Error (InvalidState, "Pulsar::PolarCalibrator::solve",
+		 "arbitrary reference source not yet implemented");
 
   if (verbose)
     cerr << "Pulsar::PolarCalibrator::solve" << endl;
 
   // Convert the coherency vectors into Stokes parameters.  
-  Stokes< Estimate<double> > stokes_hi = coherency( convert (hi) );
-  Stokes< Estimate<double> > stokes_lo = coherency( convert (lo) );
+  Stokes< Estimate<double> > stokes_source = coherency( convert (source) );
+  Stokes< Estimate<double> > stokes_sky = coherency( convert (sky) );
 
-  stokes_hi *= 2.0;
-  stokes_lo *= 2.0;
+  stokes_source *= 2.0;
+  stokes_sky *= 2.0;
 
   Reference::To<Calibration::Polar> polar = new Calibration::Polar;
 
-  polar->solve (stokes_hi, stokes_lo);
+  polar->solve (stokes_source, stokes_sky);
 
   return polar.release();
 }
@@ -88,7 +93,8 @@ float Pulsar::PolarCalibrator::Info::get_scale (unsigned iclass) const
 }
 
 
-Pulsar::Calibrator::Info* Pulsar::PolarCalibrator::get_Info () const
+Pulsar::PolarCalibrator::Info*
+Pulsar::PolarCalibrator::get_Info () const
 {
   return new PolarCalibrator::Info (this);
 }
