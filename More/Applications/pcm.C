@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pcm.C,v $
-   $Revision: 1.11 $
-   $Date: 2003/12/02 04:13:01 $
-   $Author: ahotan $ */
+   $Revision: 1.12 $
+   $Date: 2003/12/02 14:29:59 $
+   $Author: straten $ */
 
 /*! \file pcm.C 
     \brief (Pulsar) Polarimetric Calibration Modelling (Package)
@@ -35,6 +35,7 @@
 
 #include <iostream>
 #include <algorithm>
+#include <unistd.h>
 
 static string Britton = "Britton";
 static string Hamaker = "Hamaker";
@@ -150,12 +151,12 @@ void plot_constraints (Pulsar::ReceptionCalibratorPlotter& plotter,
     else
       cpgsvp (.25,.75,.15,.95);
 
-    cerr << "pcm: nstate=" << nstate << endl;
+    // cerr << "pcm: nstate=" << nstate << endl;
     for (unsigned istate=0; istate<nstate; istate++) {
 
       unsigned plot_state = istate+start_state;
 
-      cerr << "ichan=" << ichan << " istate=" << plot_state << endl;
+      // cerr << "ichan=" << ichan << " istate=" << plot_state << endl;
       plotter.plot_constraints (ichan, plot_state);
 
       if (istate+1 < nstate)
@@ -309,8 +310,8 @@ int main (int argc, char *argv[]) try {
 
     case 'V':
       verbose = true;
-      Calibration::ReceptionModel::verbose = true;
       Pulsar::ReceptionCalibrator::verbose = true;
+      Pulsar::ReceptionCalibratorPlotter::verbose = true;
       Pulsar::Archive::verbose = true;
       break;
 
@@ -366,10 +367,8 @@ int main (int argc, char *argv[]) try {
   // add the calibrators (to be loaded on first call to add_observation
   vector<string> cal_filenames;
 
-  if (calfile) {
+  if (calfile)
     stringfload (&cal_filenames, calfile);
-    model.set_calibrators (cal_filenames);
-  }
 
   Reference::To<Pulsar::Archive> archive;
 
@@ -383,12 +382,17 @@ int main (int argc, char *argv[]) try {
 
     MJD mid = 0.5 * (end + start);
 
-    cerr << "pcm: Constructing Calibration::Database" << endl;
+    cerr << "pcm: constructing Calibration::Database from\n" 
+            "     " << dbfile << endl;
+
     Pulsar::Calibration::Database dbase (dbfile);
 
-    cerr << "pcm: Finding FluxCalOn observations within " << hours
-	 << " of midtime=" << mid << "\n(start=" << start
-	 << " and end=" << end << ")" << endl;
+    char buffer[256];
+
+    cerr << "pcm: searching for calibrator observations within " << hours
+	 << " hours of midtime" << endl;
+    cerr << "pcm: midtime = "
+         << mid.datestr (buffer, 256, "%Y-%m-%d-%H:%M:00") << endl;
 
     double minutes = 0.5 * hours * 60.0;
 
@@ -396,14 +400,29 @@ int main (int argc, char *argv[]) try {
     oncals = dbase.all_matching (archive, mid, Signal::FluxCalOn, minutes);
   
     if (oncals.size() == 0)
-      cerr << "pcm: No FluxCalOn observations found" << endl;
+      cerr << "pcm: no FluxCalOn observations found" << endl;
 
     for (unsigned i = 0; i < oncals.size(); i++) {
-      cerr << "pcm: Adding " << oncals[i].filename << endl;
-      cal_filenames.push_back (oncals[i].filename);
+      string filename = dbase.get_filename( oncals[i] );
+      cerr << "pcm: adding " << oncals[i].filename << endl;
+      cal_filenames.push_back (filename);
+    }
+
+    oncals = dbase.all_matching (archive, mid, Signal::PolnCal, minutes);
+
+    if (oncals.size() == 0)
+      cerr << "pcm: no PolnCal observations found" << endl;
+
+    for (unsigned i = 0; i < oncals.size(); i++) {
+      string filename = dbase.get_filename( oncals[i] );
+      cerr << "pcm: adding " << oncals[i].filename << endl;
+      cal_filenames.push_back (filename);
     }
 
   }
+
+  cerr << "pcm: set calibrators" << endl;
+  model.set_calibrators (cal_filenames);
   
   Reference::To<Pulsar::Archive> total;
   
