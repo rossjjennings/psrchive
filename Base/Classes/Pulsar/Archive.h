@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Archive.h,v $
-   $Revision: 1.85 $
-   $Date: 2003/09/12 18:20:31 $
+   $Revision: 1.86 $
+   $Date: 2003/10/02 07:29:36 $
    $Author: straten $ */
 
 /*! \mainpage 
@@ -693,37 +693,37 @@ namespace Pulsar {
 
     //! Inter-channel dispersion delay has been removed
     virtual bool get_dedispersed () const = 0;
-    //! Set the status of the parallactic angle flag
+    //! Set the value to be returned by get_dedispersed
     virtual void set_dedispersed (bool done = true) = 0;
 
     //! Data has been corrected for ISM faraday rotation
     virtual bool get_ism_rm_corrected () const = 0;
-    //! Set the status of the ISM RM flag
+    //! Set the value to be returned by get_ism_rm_corrected
     virtual void set_ism_rm_corrected (bool done = true) = 0;
 
     //! Data has been corrected for ionospheric faraday rotation
     virtual bool get_iono_rm_corrected () const = 0;
-    //! Set the status of the ionospheric RM flag
+    //! Set the value to be returned by get_iono_rm_corrected
     virtual void set_iono_rm_corrected (bool done = true) = 0;
 
     //! Data has been corrected for parallactic angle errors
     virtual bool get_parallactic_corrected () const = 0;
-    //! Set the status of the parallactic angle flag
+    //! Set the value to be returned by get_parallactic_corrected
     virtual void set_parallactic_corrected (bool done = true) = 0;
 
     //! Data has been corrected for feed angle errors
     virtual bool get_feedangle_corrected () const = 0;
-    //! Set the status of the feed angle flag
+    //! Set the value to be returned by get_feedangle_corrected
     virtual void set_feedangle_corrected (bool done = true) = 0;
 
     //! Data has been calibrated for polarimetric response of instrument
     virtual bool get_poln_calibrated () const = 0;
-    //! Set the status of the polarimetric instrumental response flag
+    //! Set the value to be returned by get_poln_calibrated
     virtual void set_poln_calibrated (bool done = true) = 0;
 
     //! Data has been flux calibrated
     virtual bool get_flux_calibrated () const = 0;
-    //! Set the status of the flux calibrated flag
+    //! Set the value to be returned by get_flux_calibrated
     virtual void set_flux_calibrated (bool done = true) = 0;
 
 
@@ -770,7 +770,7 @@ namespace Pulsar {
     void init_Integration (Integration* subint);
 
     //! Provide Integration::resize access to Archive-derived classes
-    void resize (Integration* integration);
+    void resize_Integration (Integration* integration);
 
     //! Apply the current model to the Integration
     void apply_model (const polyco& old, Integration* subint);
