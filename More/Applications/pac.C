@@ -63,8 +63,6 @@ int main (int argc, char *argv[]) {
   Pulsar::Calibration::Database::ModelTypes m;
   m = Pulsar::Calibration::Database::SingleAxis;
   
-  Error::verbose = true;
-
   string cals_are_here = "./";
   string unload_ext = "calib";
   vector<string> exts;

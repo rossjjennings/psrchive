@@ -59,11 +59,9 @@ int main (int argc, char *argv[]) {
       break;
     case 'v':
       verbose = true;
-      Error::verbose = true;
       break;
     case 'V':
       verbose = true;
-      Error::verbose = true;
       Pulsar::Archive::set_verbosity(1);
       break;
     case 'm':

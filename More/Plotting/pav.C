@@ -1,5 +1,5 @@
 //
-// $Id: pav.C,v 1.40 2003/05/19 05:08:35 ahotan Exp $
+// $Id: pav.C,v 1.41 2003/05/21 01:14:45 ahotan Exp $
 //
 // The Pulsar Archive Viewer
 //
@@ -181,7 +181,7 @@ int main (int argc, char** argv)
       return 0;
 
     case 'i':
-      cout << "$Id: pav.C,v 1.40 2003/05/19 05:08:35 ahotan Exp $" << endl;
+      cout << "$Id: pav.C,v 1.41 2003/05/21 01:14:45 ahotan Exp $" << endl;
       return 0;
 
     case 'l':
@@ -232,10 +232,8 @@ int main (int argc, char** argv)
 
     case 'v':
       verbose = true;
-      Error::verbose = true;
       break;
     case 'V':
-      Error::verbose = true;
       Pulsar::Archive::verbose = true;
       Pulsar::Integration::verbose = true;
       Pulsar::Profile::verbose = true;

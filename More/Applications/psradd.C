@@ -153,7 +153,6 @@ int main (int argc, char **argv)
       Pulsar::Archive::set_verbosity (3);
       vverbose = true;
     case 'v':
-      Error::verbose = true;
       verbose = true;
       break;
 
