@@ -64,7 +64,7 @@ int main (int argc, char *argv[]) {
   bool test_bandwidth = true;
   bool test_obstype = true;
   
-  Pulsar::CalibratorType m = Pulsar::SingleAxis;
+  Pulsar::Calibrator::Type m = Pulsar::Calibrator::SingleAxis;
   
   string cals_are_here = "./";
   string unload_ext = "calib";
@@ -158,11 +158,11 @@ int main (int argc, char *argv[]) {
       command += "-S ";
       break;
     case 's':
-      m = Pulsar::SingleAxis;
+      m = Pulsar::Calibrator::SingleAxis;
       command += "-s ";
       break;
     case 'q':
-      m = Pulsar::Polar;
+      m = Pulsar::Calibrator::Polar;
       command += "-q ";
       break;
 
@@ -320,15 +320,7 @@ int main (int argc, char *argv[]) {
       
       // See if the archive contains a history that should be updated:
       
-      Pulsar::ProcHistory* fitsext = 0;
-      for (unsigned i = 0; i < arch->get_nextension(); i++) {
-	Pulsar::Archive::Extension* extension;
-	extension = (Pulsar::Archive::Extension*)arch->get_extension (i);
-	fitsext = dynamic_cast<Pulsar::ProcHistory*> (extension);
-	if (fitsext) {
-	  break;
-	}
-      }
+      Pulsar::ProcHistory* fitsext = arch->get<Pulsar::ProcHistory>();
       
       if (fitsext) {
 	
@@ -337,11 +329,11 @@ int main (int argc, char *argv[]) {
 	}
 	
 	if (do_polncal) {
-	  if (m == Pulsar::SingleAxis)
+	  if (m == Pulsar::Calibrator::SingleAxis)
 	    fitsext->set_cal_mthd("SingleAxis");
 	  if (do_selfcal)
 	    fitsext->set_cal_mthd("SelfCAL");
-	  if (m == Pulsar::Polar)
+	  if (m == Pulsar::Calibrator::Polar)
 	    fitsext->set_cal_mthd("Polar");
 	  fitsext->set_cal_file(pcal_file);
 	}

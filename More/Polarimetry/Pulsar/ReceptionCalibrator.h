@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ReceptionCalibrator.h,v $
-   $Revision: 1.39 $
-   $Date: 2003/09/12 14:58:07 $
+   $Revision: 1.40 $
+   $Date: 2003/09/12 18:24:14 $
    $Author: straten $ */
 
 #ifndef __ReceptionCalibrator_H
@@ -61,11 +61,8 @@ namespace Pulsar {
     
     friend class ReceptionCalibrator;
 
-    //! The available representations of the instrumental response
-    enum Model { Hamaker, Britton };
-
     //! Construct
-    StandardModel (Model model = Hamaker);
+    StandardModel (Calibrator::Type model = Calibrator::Hamaker);
 
     //! Update the relevant estimate
     void update ();
@@ -102,7 +99,7 @@ namespace Pulsar {
 
   protected:
     //! The model specified on construction
-    Model model;
+    Calibrator::Type model;
 
     //! validity flag
     bool valid;
@@ -122,7 +119,7 @@ namespace Pulsar {
     friend class ReceptionCalibratorPlotter;
     
     //! Construct with optional first pulsar archive
-    ReceptionCalibrator (StandardModel::Model model,
+    ReceptionCalibrator (Calibrator::Type model,
 			 const Archive* archive = 0);
     
     //! Add the specified pulse phase bin to the set of state constraints
@@ -161,6 +158,9 @@ namespace Pulsar {
     //! Pre-calibrate the polarization of the given archive
     virtual void precalibrate (Archive* archive);
     
+    //! Return the Calibrator information
+    Calibrator::Info* get_Info () const;
+
   protected:
     
     //! Initialize the PolnCalibration::transformation attribute
@@ -170,7 +170,7 @@ namespace Pulsar {
     vector< Reference::To<StandardModel> > model;
 
     //! The model specified on construction
-    StandardModel::Model model_type;
+    Calibrator::Type model_type;
 
     //! Uncalibrated estimate of calibrator polarization
     SourceEstimate calibrator_estimate;

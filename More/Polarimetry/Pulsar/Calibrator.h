@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/Attic/Calibrator.h,v $
-   $Revision: 1.7 $
-   $Date: 2003/09/11 21:15:40 $
+   $Revision: 1.8 $
+   $Date: 2003/09/12 18:24:14 $
    $Author: straten $ */
 
 #ifndef __Calibrator_H
@@ -27,6 +27,18 @@ namespace Pulsar {
     
   public:
 
+    //! Types of Models supported
+    enum Type {
+      //! Gain, differential gain and differential phase
+      SingleAxis,
+      //! Gain, 3-D boost, and two rotations (van Straten 2002)
+      Polar,
+      //! Polar decomposition (Hamaker 2000)
+      Hamaker,
+      //! Phenomenological decomposition, (Britton 2000)
+      Britton
+    };
+
     //! Verbosity flag
     static bool verbose;
 
@@ -46,7 +58,7 @@ namespace Pulsar {
     virtual unsigned get_nchan () const = 0;
 
     //! Return a const reference to the calibrator archive
-    const Archive* get_Archive () const { return calibrator; }
+    const Archive* get_Archive () const;
 
     //! Filenames of Pulsar::Archives from which instance was created
     vector<string> filenames;

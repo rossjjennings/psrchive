@@ -24,3 +24,9 @@ void Pulsar::Calibrator::calibrate (Integration* integration,
 {
   integration->transform (response);
 }
+
+//! Return a const reference to the calibrator archive
+const Pulsar::Archive* Pulsar::Calibrator::get_Archive () const
+{
+  return calibrator; 
+}

@@ -1,15 +1,15 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/PolnCalibratorExtension.h,v $
-   $Revision: 1.2 $
-   $Date: 2003/09/12 14:24:48 $
+   $Revision: 1.3 $
+   $Date: 2003/09/12 18:24:15 $
    $Author: straten $ */
 
 #ifndef __PolnCalibratorExtension_h
 #define __PolnCalibratorExtension_h
 
 #include "Calibration/Transformation.h"
-#include "Pulsar/Calibration.h"
+#include "Pulsar/Calibrator.h"
 #include "Pulsar/Archive.h"
 
 namespace Pulsar {

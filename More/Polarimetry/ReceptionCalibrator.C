@@ -16,7 +16,7 @@
 
 /*! The Archive passed to this constructor will be used to supply the first
   guess for each pulse phase bin used to constrain the fit. */
-Pulsar::ReceptionCalibrator::ReceptionCalibrator (StandardModel::Model type,
+Pulsar::ReceptionCalibrator::ReceptionCalibrator (Calibrator::Type type,
 						  const Archive* archive)
 {
   model_type = type;
@@ -37,7 +37,7 @@ void Pulsar::ReceptionCalibrator::set_calibrators (const vector<string>& names)
 
 
 
-Pulsar::StandardModel::StandardModel (Model _model)
+Pulsar::StandardModel::StandardModel (Calibrator::Type _model)
 {
   // ////////////////////////////////////////////////////////////////////
   //
@@ -49,14 +49,14 @@ Pulsar::StandardModel::StandardModel (Model _model)
 
   switch (model) {
 
-  case Hamaker:
+  case Calibrator::Hamaker:
     if (ReceptionCalibrator::verbose)
       cerr << "Pulsar::StandardModel Hamaker" << endl;
     polar = new Calibration::PolarEstimate;
     instrument = polar;
     break;
 
-  case Britton:
+  case Calibrator::Britton:
     if (ReceptionCalibrator::verbose)
       cerr << "Pulsar::StandardModel Britton" << endl;
     physical = new Calibration::InstrumentEstimate;
@@ -102,12 +102,15 @@ Pulsar::StandardModel::StandardModel (Model _model)
 void Pulsar::StandardModel::update ()
 {
   switch (model) {
-  case Hamaker:
+  case Calibrator::Hamaker:
     polar -> update ();
     break;
-  case Britton:
+  case Calibrator::Britton:
     physical -> update();
     break;
+  default:
+    throw Error (InvalidState, "Pulsar::StandardModel::update",
+		 "unknown model");
   }
 }
 
@@ -285,7 +288,7 @@ void Pulsar::ReceptionCalibrator::add_calibrator (const Archive* data)
 
   Reference::To<ArtificialCalibrator> polncal;
 
-  if (model_type == StandardModel::Hamaker) {
+  if (model_type == Calibrator::Hamaker) {
 
     if (verbose)
       cerr << "Pulsar::ReceptionCalibrator::add_calibrator"
@@ -294,7 +297,7 @@ void Pulsar::ReceptionCalibrator::add_calibrator (const Archive* data)
     polncal = new PolarCalibrator (data);
     
   }
-  else if (model_type == StandardModel::Britton) {
+  else if (model_type == Calibrator::Britton) {
 
     if (verbose)
       cerr << "Pulsar::ReceptionCalibrator::add_calibrator"
@@ -508,11 +511,11 @@ void Pulsar::ReceptionCalibrator::add_Calibrator (const ArtificialCalibrator* p)
   }
 
   const PolarCalibrator* polcal = 0;
-  if (model_type == StandardModel::Hamaker)
+  if (model_type == Calibrator::Hamaker)
     polcal = dynamic_cast<const PolarCalibrator*>(p);
 
   const SingleAxisCalibrator* sacal = 0;
-  if (model_type == StandardModel::Britton)
+  if (model_type == Calibrator::Britton)
     sacal = dynamic_cast<const SingleAxisCalibrator*>(p);
 
   vector<vector<Estimate<double> > > cal_hi;
