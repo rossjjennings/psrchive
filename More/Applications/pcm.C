@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pcm.C,v $
-   $Revision: 1.25 $
-   $Date: 2004/07/12 09:28:04 $
+   $Revision: 1.26 $
+   $Date: 2004/07/16 07:31:19 $
    $Author: straten $ */
 
 /*! \file pcm.C 
@@ -506,7 +506,7 @@ int main (int argc, char *argv[]) try {
 
   if (binfile) try {
     autobin = Pulsar::Archive::load (binfile);
-    autobin->dedisperse (0.0, autobin->get_centre_frequency());
+    autobin->dedisperse ();
     autobin->fscrunch ();
     autobin->tscrunch ();
     autobin->convert_state (Signal::Stokes);
@@ -548,7 +548,7 @@ int main (int argc, char *argv[]) try {
 	  cerr << "pcm: dedispersing and removing baseline from pulsar data"
                << endl;
 	
-        archive->dedisperse (0.0, archive->get_centre_frequency());
+        archive->dedisperse ();
 	archive->convert_state (Signal::Stokes);
         archive->remove_baseline ();
       }

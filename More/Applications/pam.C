@@ -191,7 +191,7 @@ int main (int argc, char *argv[]) {
       Pulsar::Archive::set_verbosity(3);
       break;
     case 'i':
-      cout << "$Id: pam.C,v 1.37 2004/07/14 08:09:03 straten Exp $" << endl;
+      cout << "$Id: pam.C,v 1.38 2004/07/16 07:31:19 straten Exp $" << endl;
       return 0;
     case 'm':
       save = true;
@@ -490,7 +490,7 @@ int main (int argc, char *argv[]) {
 	
 	for (unsigned i = 0; i < arch->get_nsubint(); i++) {
 	  for (unsigned j = 0; j < arch->get_nchan(); j++) {
-	    arch->get_Integration(i)->set_frequency(j,(fr + (j*cw)));
+	    arch->get_Integration(i)->set_centre_frequency(j,(fr + (j*cw)));
 	  }
 	}
 	
@@ -512,10 +512,10 @@ int main (int argc, char *argv[]) {
 	  vector<float> labels;
 	  labels.resize(arch->get_nchan());
 	  for (unsigned j = 0; j < arch->get_nchan(); j++) {
-	    labels[j] = arch->get_Integration(i)->get_frequency(j);
+	    labels[j] = arch->get_Integration(i)->get_centre_frequency(j);
 	  }
 	  for (unsigned j = 0; j < arch->get_nchan(); j++) {
-	    arch->get_Integration(i)->set_frequency(j,labels[labels.size()-1-j]);
+	    arch->get_Integration(i)->set_centre_frequency(j,labels[labels.size()-1-j]);
 	  }
 	}
 	arch->set_bandwidth(-1.0 * arch->get_bandwidth());
@@ -533,9 +533,6 @@ int main (int argc, char *argv[]) {
       }
       
       if (newdm) {
-	for (unsigned isub=0; isub < arch->get_nsubint(); isub++)
-	  arch->get_Integration(isub)->set_dispersion_measure (dm);
-	
 	arch->set_dispersion_measure(dm);
 	if (verbose)
 	  cout << "Archive dispersion measure set to " << dm << endl;
@@ -548,7 +545,8 @@ int main (int argc, char *argv[]) {
       }
 
       if (defaraday) {
-	arch->defaraday(rm);
+	arch->set_rotation_measure (rm);
+	arch->defaraday();
 	if (verbose)
 	  cout << "Archive corrected for a RM of " << rm << endl;
       }
