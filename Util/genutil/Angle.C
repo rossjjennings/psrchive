@@ -348,3 +348,11 @@ int operator != (const AnglePair &a1, const AnglePair &a2){
   else
       return (0);  
 }
+
+// redwards : trig functions. Not members since we are accustomed to
+// calling normal functions for these
+double sin(const Angle& a) { return sin(a.getRadians());}
+double cos(const Angle& a) { return cos(a.getRadians());}
+double tan(const Angle& a) { return tan(a.getRadians());}
+Angle arctan(double g) { return Angle(atan(g));}
+Angle arctan(double y, double x) { return Angle(atan2(y,x));}

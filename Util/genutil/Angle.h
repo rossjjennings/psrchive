@@ -1,7 +1,7 @@
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Angle.h,v $
-   $Revision: 1.4 $
-   $Date: 2000/02/02 03:59:15 $
-   $Author: straten $ */
+   $Revision: 1.5 $
+   $Date: 2000/08/21 01:19:56 $
+   $Author: redwards $ */
 
 // redwards 17 Mar 99 -- Time for a definitive C++ suite of
 // angle and sky coordinate functions
@@ -55,6 +55,14 @@ class Angle
 
   double getradians() const
     { return radians; };
+
+  // Argh some capitalization consistency would be nice.... redwards.
+  void setRadians(double rad)
+    { radians = rad; };
+  double getRadians() const
+    { return radians; };
+  
+
 
   Angle & operator= (const Angle & a);
   Angle & operator= (const double & val);
@@ -123,6 +131,18 @@ class AnglePair
 
   friend ostream& operator<< (ostream&, const AnglePair&);
 };
+
+
+// redwards : trig functions
+double sin(const Angle&);
+double cos(const Angle&);
+double tan(const Angle&);
+// Unfortunately can't overload atan as only the return type differs
+// from the standard library function
+Angle arctan(double);
+Angle arctan(double y, double x); // returns atan y/x
+
+
 
 
 
