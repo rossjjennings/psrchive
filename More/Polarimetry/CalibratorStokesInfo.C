@@ -5,7 +5,7 @@
 Pulsar::CalibratorStokesInfo::CalibratorStokesInfo (const CalibratorStokes* cs)
 {
   calibrator_stokes = cs;
-  together = true;
+  together = false;
 }
     
 //! Return the number of parameter classes
@@ -16,7 +16,7 @@ unsigned Pulsar::CalibratorStokesInfo::get_nclass () const
   else
     return 3;
 }
-    
+
 //! Return the name of the specified class
 const char* Pulsar::CalibratorStokesInfo::get_name (unsigned iclass) const
 {
@@ -46,6 +46,9 @@ Estimate<float>
 Pulsar::CalibratorStokesInfo::get_param (unsigned ichan, unsigned iclass,
 					 unsigned iparam) const
 {
+  if (!calibrator_stokes->get_valid (ichan))
+    return 0.0;
+
   unsigned index = 0;
 
   if (together)
