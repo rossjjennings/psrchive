@@ -17,10 +17,15 @@ unsigned Pulsar::CalibratorStokesInfo::get_nclass () const
     return 3;
 }
 
+float Pulsar::CalibratorStokesInfo::get_scale  (unsigned iclass) const
+{
+  return 100.0;
+}
+
 //! Return the name of the specified class
 const char* Pulsar::CalibratorStokesInfo::get_name (unsigned iclass) const
 {
-  static char label [64] = "\\fiC\\fn\\dk\\u (\\fiC\\fn\\d0\\u)";
+  static char label [64] = "\\fiC\\fn\\dk\\u (\%\\fiC\\fn\\d0\\u)";
   static char* replace = strchr (label, 'k');
 
   if (together)

@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/CalibratorStokesInfo.h,v $
-   $Revision: 1.1 $
-   $Date: 2003/11/04 15:03:03 $
+   $Revision: 1.2 $
+   $Date: 2003/12/22 14:03:13 $
    $Author: straten $ */
 
 #ifndef __Pulsar_CalibratorStokesInfo_H
@@ -27,6 +27,9 @@ namespace Pulsar {
     
     //! Return the name of the specified class
     const char* get_name (unsigned iclass) const;
+
+    //! Return the name of the specified class
+    float get_scale (unsigned iclass) const;
     
     //! Return the number of parameters in the specified class
     unsigned get_nparam (unsigned iclass) const;
