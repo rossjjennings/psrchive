@@ -1,11 +1,77 @@
 #include "Archive.h"
 #include "Integration.h"
+#include "Error.h"
 
 bool Pulsar::Archive::verbose = false;
 
 void Pulsar::Archive::init ()
 {
+  if (verbose)
+    cerr << "Pulsar::Archive::init" << endl;
 
+  model_updated = false;
+}
+
+Pulsar::Archive::Archive () 
+{ 
+  if (verbose)
+    cerr << "Pulsar::Archive::null constructor" << endl;
+
+  init(); 
+}
+
+Pulsar::Archive::~Archive () 
+{ 
+  if (verbose)
+    cerr << "Pulsar::Archive::destructor" << endl;
+
+  for (unsigned isub=0; isub<subints.size(); isub++)
+    delete subints[isub];
+}
+
+void Pulsar::Archive::resize (int nsubint, int npol, int nchan, int nbin)
+{
+  if (verbose)
+    cerr << "Pulsar::Archive::resize nsub=" << nsubint << " npol=" << npol
+	 << " nchan=" << nchan << " nbin=" << nbin << endl;
+
+  int isub, nsub = (int) subints.size();
+
+  for (isub=nsubint; isub<nsub; isub++)
+    delete subints[isub];
+
+  subints.resize (nsubint);
+
+  for (isub=nsub; isub<nsubint; isub++)
+    subints[isub] = new_Integration ();
+
+  for (isub=0; isub<nsubint; isub++)
+    subints[isub] -> resize (npol, nchan, nbin);
+
+  if (verbose)
+    cerr << "Pulsar::Archive::resize calling book-keeping functions" << endl;
+
+  set_nsubint (nsubint);
+  set_npol (npol);
+  set_nchan (nchan);
+  set_nbin (nbin);
+
+  if (verbose)
+    cerr << "Pulsar::Archive::resize exit" << endl;
+}
+
+/*!  
+  By over-riding this funciton, inherited types may re-define the type
+  of Integration to which the elements of the subints vector point.
+*/
+Pulsar::Integration* Pulsar::Archive::new_Integration ()
+{
+  Integration* integration = new Integration;
+
+  if (!integration)
+    throw Error (BadAlloc, "Integration::new_Integration");
+
+  return integration;
 }
 
 /*!
@@ -66,7 +132,13 @@ void Pulsar::Archive::dedisperse (double dm, double frequency)
 
 void Pulsar::Archive::fold (int nfold)
 {
+  if (subints.size() == 0)
+    return;
 
+  for (unsigned isub=0; isub < subints.size(); isub++)
+    subints[isub] -> fold (nfold);
+
+  set_nbin (subints[0]->get_nbin());
 }
 
 void Pulsar::Archive::toas (const Archive& standard,
@@ -135,57 +207,19 @@ void Pulsar::Archive::snr_weight ()
 
 }
 
-void Pulsar::Archive::destroy ()
-{
 
+MJD Pulsar::Archive::start_time() const
+{
+  if (subints.size() < 1)
+    throw Error (InvalidState, "Archive::start_time", "no subints");
+
+  return subints[0] -> get_start_time();
 }
 
-void Pulsar::Archive::resize (int nsubint, int nchan, int npol, int nbin)
+MJD Pulsar::Archive::end_time() const
 {
+  if (subints.size() < 1)
+    throw Error (InvalidState, "Archive::end_time", "no subints");
 
+  return subints[0] -> get_end_time();
 }
-
-void Pulsar::Archive::iq_xy()
-{
-
-}
-
-void Pulsar::Archive::xy_iq()
-{
-
-}
-
-void Pulsar::Archive::iv_rl()
-{
-
-}
-
-void Pulsar::Archive::rl_iv()
-{
-
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
