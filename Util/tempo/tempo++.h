@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/tempo++.h,v $
-   $Revision: 1.9 $
-   $Date: 2001/05/24 01:46:17 $
-   $Author: pulsar $ */
+   $Revision: 1.10 $
+   $Date: 2001/11/08 04:10:25 $
+   $Author: cwest $ */
 
 #ifndef __TEMPO_PP_H
 #define __TEMPO_PP_H
@@ -82,10 +82,20 @@ namespace Tempo {
 		  double nspan=960, int ncoeff=12, int maxha=8, 
 		  int tel=7, double centrefreq=1400.0);
   
+  polyco get_polyco (const psrephem& eph,
+		     const MJD& m1, const MJD& m2, 
+		     double nspan, int ncoeff, int maxha, 
+		     char tel, double centrefreq);
+
   void set_polyco (polyco& poly, const psrephem& eph,
 		  const MJD& m1=unspecified, const MJD& m2=unspecified, 
 		  double nspan=960, int ncoeff=12, int maxha=8, 
 		  int tel=7, double centrefreq=1400.0);
+  
+  void set_polyco (polyco& poly, const psrephem& eph,
+		   const MJD& m1, const MJD& m2, 
+		   double nspan, int ncoeff, int maxha, 
+		   char tel, double centrefreq);
   
   polyco span (const polyco& first_poly, const polyco& second_poly,
 	       const psrephem& pephem);
