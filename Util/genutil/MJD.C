@@ -1,7 +1,10 @@
 /* $Log: MJD.C,v $
-/* Revision 1.1  1998/08/03 06:45:23  mbritton
-/* Initial revision
+/* Revision 1.2  1998/08/24 16:16:21  straten
+/* new MJD constructor (from long double)
 /*
+ * Revision 1.1.1.1  1998/08/03 06:45:23  mbritton
+ * start
+ *
  * Revision 1.7  1996/12/03 05:37:43  mtoscano
  * *** empty log message ***
  *
@@ -136,6 +139,35 @@ int MJD::println (FILE *stream) {
   fprintf(stream, "%s\n", printall());
   return(0);
 }
+
+
+MJD::MJD(long double mjd) {
+  unsigned long intdays = (unsigned long) mjd;
+printf ("Integer Days in MJD %lu\n", intdays);
+
+  long double back_again = (long double) intdays;
+  if (back_again > mjd) {
+    back_again  -= 1.0;
+  }
+  double ndays = (double) back_again;
+printf ("Truncated Days in MJD %lf\n", ndays);
+
+  /* calculated number of seconds left */
+  mjd = (mjd - back_again) * 86400;
+  unsigned long intseconds = (unsigned long) mjd;
+printf ("Integer Seconds in MJD %lu\n", intseconds);
+  back_again = (long double) intseconds;
+  if (back_again > mjd) {
+    back_again  -= 1.0;
+  }
+  double seconds = (double) back_again;
+printf ("Truncated Seconds in MJD %lf\n", seconds);
+
+  double fracseconds = (double) (mjd - back_again);
+
+  *this = MJD (ndays,seconds,fracseconds);
+}
+
 
 MJD::MJD(double dd, double ss, double fs){
   int sec_to_add, days_to_add;
