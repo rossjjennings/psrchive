@@ -9,7 +9,7 @@ int main ()
   basis1.set_basis (0.25*M_PI, 0.25*M_PI);
 
   Basis<double> basis2;
-  basis2.set_basis (Signal::Circular);
+  basis2.set_basis (Basis<double>::Circular);
 
   for (unsigned i=0; i<3; i++)  {
     double dot = basis1.get_basis_vector(i) * basis2.get_basis_vector(i);
@@ -19,7 +19,7 @@ int main ()
     }
   }
 
-  cerr << "Signal::Circular basis has expected orientation=ellipticity=pi/4"
+  cerr << "Basis<double>::Circular basis has expected orientation=ellipticity=pi/4"
        << endl;
 
   return 0;
