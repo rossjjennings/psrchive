@@ -22,11 +22,11 @@ nobase_include_HEADERS = \
 	Pulsar/InstrumentInfo.h          Pulsar/SystemCalibrator.h \
 	Pulsar/Integration.h             Pulsar/Transposer.h \
 	Pulsar/IntegrationManager.h      Pulsar/Utilities.h \
-	Pulsar/PhaseWeight.h             Pulsar/getopt.h \
+	Pulsar/PhaseWeight.h             \
 	Pulsar/PhaseWeightFunction.h     model_profile.h \
 	Pulsar/Plotter.h
 
-libpsrchive_la_SOURCES = plugins.csh Physical.h \
+libpsrchive_la_SOURCES = plugins.csh getopt.h Physical.h \
 	AdaptiveSNR.C                 Integration_new_PolnProfile.C  \
 	Agent.C                       Integration_remove_baseline.C  \
 	Agent_static.C                Integration_resize.C  \
