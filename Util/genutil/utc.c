@@ -1,10 +1,13 @@
 
 /*
-$Id: utc.c,v 1.1 1998/08/03 06:45:23 mbritton Exp $
+$Id: utc.c,v 1.2 1998/08/05 12:15:54 straten Exp $
 $Log: utc.c,v $
-Revision 1.1  1998/08/03 06:45:23  mbritton
-Initial revision
+Revision 1.2  1998/08/05 12:15:54  straten
+added bit to str2utc to cut off extraneous characters before parsing
 
+ * Revision 1.1.1.1  1998/08/03  06:45:23  mbritton
+ * start
+ *
 Revision 1.2  1997/04/10 22:27:00  sasha
 New function str2pos()
 
@@ -47,20 +50,54 @@ int str2utc (utc_t *time, const char* str)
   char* temp;
   int   trav;
   int   endstr;
+  char  infield;
+  int   field_count;
+  int   digits;
+
   time->tm_year = 0;
   time->tm_hour = 0;
   time->tm_yday = 0;
   time->tm_min = 0;
   time->tm_sec = 0;
 
-  endstr = strlen(str);
   temp = strdup (str);
 
+  /* count the number of fields and cut the string off after a year, day,
+     hour, minute, and second can be parsed */
+  trav = 0; infield = 0;
+  field_count = digits = 0;
+  while (temp[trav] != '\0') {
+    if (isdigit(temp[trav])) {
+      digits ++;
+      if (!infield) {
+	/* count only the transitions from non digits to a field of digits */
+	field_count ++;
+      }
+      infield = 1;
+    }
+    else {
+      infield = 0;
+    }
+    if (field_count == 5) {
+      /* currently in the seconds field */
+      temp[trav+2] = '\0';
+      break;
+    }
+    else if (digits == 13) {
+      /* enough digits for a date */
+      temp[trav+1] = '\0';
+      break;
+    }
+    trav ++;
+  }
+
+  endstr = strlen(temp);
   /* cut off any trailing characters that are not ASCII numbers */
   while ((endstr>=0) && !isdigit(temp[endstr])) endstr --;
   if (endstr < 0)
     return -1;
   temp [endstr+1] = '\0'; 
+
 
   /* parse UTC seconds */
   trav = endstr - 1;
