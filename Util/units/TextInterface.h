@@ -240,7 +240,7 @@ namespace TextInterface {
 
     //! Import a new component interface
     void import (Component<C>* c) 
-      { components.push_back (c); c->extract(instance); }
+      { components.push_back(c);if(this->instance)c->extract(this->instance); }
 
   protected:
 
