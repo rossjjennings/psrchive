@@ -659,6 +659,8 @@ void Tempo::toa::init()
   phs = 0.0;
   dmc = 0.0;
   observatory [0] = '\0';
+  ci = 7;
+  di = 0;
 
   auxinfo.erase();
 

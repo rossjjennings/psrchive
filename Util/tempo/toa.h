@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/toa.h,v $
-   $Revision: 1.13 $
-   $Date: 2003/05/20 03:56:19 $
+   $Revision: 1.14 $
+   $Date: 2003/05/20 07:06:12 $
    $Author: ahotan $ */
 
 #ifndef __TOA_H
@@ -85,6 +85,11 @@ namespace Tempo {
     // residual for this toa as calculated by tempo
     residual resid;
    
+    // colour index for use with pgplot
+    int ci;
+    // dot index for use with pgplot
+    int di;
+
     toa (Format fmt = Psrclock);
     virtual ~toa () { destroy(); };
     
