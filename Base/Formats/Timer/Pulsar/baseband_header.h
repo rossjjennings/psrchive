@@ -30,10 +30,10 @@ typedef struct baseband_header_t {
 
   // number of passbands kept (usually 2 polns, or maybe one for each of four
   // undersampled analog channels)
-  int pband_channels;
+  int  pband_channels;
 
   // number of bins in passband
-  int pband_resolution;
+  int  pband_resolution;
 
   // # of time samples entering into convolution with the dedispersion kernel
   int  nfft;
@@ -44,10 +44,15 @@ typedef struct baseband_header_t {
   // Version 5 change: As the impulse response function may be
   // assymetric, the old nsmear attribute is now interpreted as
   // nsmear_pos * 2.
-  int nsmear_pos;
+  int  nsmear_pos;
 
   // scrunch detected power before folding
   int  nscrunch;
+
+  // This space ensures that the structure appears the same regardless of
+  // memory alignment convention
+  int memory_align;
+
   // the factor by which the resulting profiles are normalized
   double power_normalization;
 
@@ -83,10 +88,6 @@ typedef struct baseband_header_t {
   // # number of filterbank channels used during reduction
   int nchan;
 
-#if !defined(MALIGN_DOUBLE)
-  char __space[4];
-#endif
-
 } baseband_header;
 
 
@@ -101,6 +102,6 @@ typedef struct baseband_header_t {
 
 // //////////////////////////////////////////////////////////////////////
 // Version
-#define BASEBAND_HEADER_VERSION 5
+#define BASEBAND_HEADER_VERSION 6
 
 #endif

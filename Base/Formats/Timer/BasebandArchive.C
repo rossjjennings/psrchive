@@ -204,7 +204,8 @@ static unsigned header_sizes [BASEBAND_HEADER_VERSION + 1] =
   112,   // Version 2
   128,   // Version 3
   176,   // Version 4
-  184    // Version 5
+  184,   // Version 5
+  184    // Version 6 (memory alignment correction, no additions)
 };
 
 // //////////////////////////////////////////////////////////////////////
@@ -227,6 +228,7 @@ static unsigned header_sizes [BASEBAND_HEADER_VERSION + 1] =
 // post-detection smoothing in the time domain
 #define DetectHanning  0x0000000000001000  // Hanning smoothing
 
+#define TUsedVersion5  0x0000000000001371  // bits used up to Version 5
 
 // //////////////////////////////////////////////////////////////////////
 // how data was manipulated in frequency space
@@ -238,6 +240,7 @@ static unsigned header_sizes [BASEBAND_HEADER_VERSION + 1] =
 #define IntegratePband 0x0000000000001000  // integrated pass-band
 #define PbandIntensity 0x0000000000010000  // pass-band is intensity
 
+#define FUsedVersion5  0x0000000000011017  // bits used up to Version 5
 
 void Pulsar::BasebandArchive::convert_hdr_Endian ()
 {
@@ -298,6 +301,7 @@ void Pulsar::BasebandArchive::set_header ()
     bhdr.nsmear_pos = reduction->get_nsamp_overlap_pos ();
     bhdr.nsmear_neg = reduction->get_nsamp_overlap_neg ();
     
+    bhdr.nchan = reduction->get_nchan ();
     bhdr.nscrunch = reduction->get_ScrunchFactor ();
     
     bhdr.power_normalization = reduction->get_scale ();
@@ -315,6 +319,20 @@ void Pulsar::BasebandArchive::set_header ()
 
   }
 
+  check_extensions ();
+
+  bhdr.time_domain = 0;
+  bhdr.frequency_domain = 0;
+
+  bhdr.mean_power_cutoff = 0;
+  bhdr.hanning_smoothing = 0;
+
+  bhdr.pcalid[0] = '\0';
+
+}
+
+void Pulsar::BasebandArchive::check_extensions ()
+{
   const TwoBitStats* twobit = get<TwoBitStats>();
   if (twobit) {
 
@@ -323,6 +341,8 @@ void Pulsar::BasebandArchive::set_header ()
     bhdr.dls_threshold_limit = 0;
 
   }
+  else
+    bhdr.analog_channels = 0;
 
   const Passband* passband = get<Passband>();
   if (passband) {
@@ -335,15 +355,8 @@ void Pulsar::BasebandArchive::set_header ()
 		   " nchan=" << bhdr.pband_channels << endl;
 
   }
-
-  bhdr.time_domain = 0;
-  bhdr.frequency_domain = 0;
-
-  bhdr.mean_power_cutoff = 0;
-  bhdr.hanning_smoothing = 0;
-
-  bhdr.pcalid[0] = '\0';
-
+  else
+    bhdr.pband_resolution = bhdr.pband_channels = 0;
 }
 
 
@@ -368,6 +381,8 @@ void Pulsar::BasebandArchive::set_reduction ()
   reduction->set_nsamp_fft ( bhdr.nfft );
   reduction->set_nsamp_overlap_pos ( bhdr.nsmear_pos );
   reduction->set_nsamp_overlap_neg ( bhdr.nsmear_neg );
+
+  reduction->set_nchan ( bhdr.nchan );
 
   reduction->set_ScrunchFactor ( bhdr.nscrunch );
 
@@ -396,6 +411,12 @@ void Pulsar::BasebandArchive::correct ()
 void Pulsar::BasebandArchive::set_be_data_size ()
 {
   set_header ();
+  check_be_data_size ();
+}
+
+void Pulsar::BasebandArchive::check_be_data_size ()
+{
+  check_extensions ();
 
   //
   // Calculate the size of the data as it will be written to disk
@@ -422,6 +443,19 @@ void Pulsar::BasebandArchive::set_be_data_size ()
 }
 
 
+void Pulsar::BasebandArchive::fix_header_memory_alignment ()
+{
+  if (verbose == 3)
+    cerr << "BasebandArchive::fix_header_memory_alignment" << endl;
+
+  int* realignment = &(bhdr.nchan);
+  int* end_alignment = &(bhdr.memory_align);
+
+  while (realignment > end_alignment) {
+    *realignment = *(realignment - 1);
+    realignment --;
+  }
+}
 
 // written for the sake of fixing a limited set of broken files
 // that first came out on monolith
@@ -448,6 +482,32 @@ void Pulsar::BasebandArchive::backend_load (FILE* fptr)
     throw Error (InvalidState, "BasebandArchive::backend_load",
 		 "invalid endian code: %x", bhdr.endian);
 
+  /* Unfortunately, the memory map of the baseband_header struct was not
+     carefully considered during its design, and it changes depending on
+     if the system aligns double variables on 8-byte boundaries.
+
+     Although the structure was fixed in Version 6, it still remains to 
+     correct all data written before Version 6.  */
+
+  if ( bhdr.version < 6 && 
+       (bhdr.time_domain & ~TUsedVersion5 ||
+	bhdr.frequency_domain & ~FUsedVersion5) ) 
+    fix_header_memory_alignment ();
+
+#if 0
+
+  cerr << "power_normalization=" << bhdr.power_normalization << endl;
+  cerr << "f_resolution=" <<  bhdr.f_resolution << endl;
+  cerr << "t_resolution=" << bhdr.t_resolution << endl;
+  cerr << "time_domain=" << bhdr.time_domain << endl;
+  cerr << "frequency_domain=" << bhdr.frequency_domain << endl;
+  cerr << "mean_power_cutoff=" << bhdr.mean_power_cutoff << endl;
+  cerr << "hanning_smoothing=" << bhdr.hanning_smoothing << endl;
+  cerr << "nsmear_neg=" << bhdr.nsmear_neg << endl;
+  cerr << "nchan=" << bhdr.nchan << endl;
+
+#endif
+
   int header_size_diff = 0;
 
   if (bhdr.version != BASEBAND_HEADER_VERSION)
@@ -467,6 +527,9 @@ void Pulsar::BasebandArchive::backend_load (FILE* fptr)
   // ////////////////////////////////////////////////////////////////////////
 
   bool swap_passband = false;
+
+  if (verbose == 3) cerr << "Pulsar::BasebandArchive::backend_load version "
+			 << bhdr.version << endl;
 
   if (bhdr.version < 1) {
     bhdr.mean_power_cutoff = 0.0;
@@ -498,6 +561,9 @@ void Pulsar::BasebandArchive::backend_load (FILE* fptr)
 
     bhdr.version = 5;
   }
+
+  // memory alignment corrected in fix_header_memory_alignment
+  bhdr.version = 6;
 
   // ////////////////////////////////////////////////////////////////////////
   // end Version corrections
@@ -575,6 +641,8 @@ void Pulsar::BasebandArchive::backend_load (FILE* fptr)
 
 void Pulsar::BasebandArchive::backend_unload (FILE* fptr) const
 {
+  const_cast<BasebandArchive*>(this)->check_be_data_size ();
+
   if (verbose == 3) cerr << "BasebandArchive::backend_unload header size=" 
                     << bhdr.size << endl;
 
@@ -617,7 +685,7 @@ void Pulsar::BasebandArchive::backend_unload (FILE* fptr) const
   if (bhdr.pband_resolution) {
 
     const Passband* passband = get<Passband>();
-    if (!passband)
+    if (!passband) 
       throw Error (InvalidState, "BasebandArchive::backend_unload",
 		   "no Passband Extension");
 

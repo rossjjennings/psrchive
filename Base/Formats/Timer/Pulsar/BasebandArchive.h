@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/Timer/Pulsar/BasebandArchive.h,v $
-   $Revision: 1.11 $
-   $Date: 2004/07/30 15:47:37 $
+   $Revision: 1.12 $
+   $Date: 2004/08/13 11:56:02 $
    $Author: straten $ */
 
 #ifndef __Baseband_Archive_h
@@ -130,7 +130,16 @@ namespace Pulsar {
     //! Set the backend data size information in the timer header
     void set_be_data_size ();
 
+    //! Check the backend data size information without reseting header
+    void check_be_data_size ();
+
+    //! Check the Passband and TwoBitStats Extensions
+    void check_extensions ();
+
     void init ();
+
+    //! Correct memory alignment error in pre-Version 5 headers
+    void fix_header_memory_alignment ();
 
   };
 

@@ -3,6 +3,26 @@
 
 int main () {
 
+  baseband_header hdr;
+  char* ptr1 = (char*) &hdr;
+  char* ptr2 = 0;
+
+  ptr2 = (char*) &(hdr.power_normalization);
+  fprintf (stderr, "baseband_header.power_normalization = %d\n", ptr2-ptr1);
+
+#if 0
+
+  ptr2 = (char*) &(hdr.);
+  fprintf (stderr, "baseband_header. = %d\n", ptr2-ptr1);
+
+  ptr2 = (char*) &(hdr.);
+  fprintf (stderr, "baseband_header. = %d\n", ptr2-ptr1);
+
+  ptr2 = (char*) &(hdr.);
+  fprintf (stderr, "baseband_header. = %d\n", ptr2-ptr1);
+
+#endif
+
   int size = sizeof(baseband_header);
 
   if (size == BASEBAND_HEADER_SIZE) {
