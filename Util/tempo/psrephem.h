@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/psrephem.h,v $
-   $Revision: 1.29 $
-   $Date: 2004/01/24 02:05:34 $
-   $Author: straten $ */
+   $Revision: 1.30 $
+   $Date: 2004/04/02 08:21:05 $
+   $Author: hknight $ */
 
 #ifndef __PSREPHEM_H
 #define __PSREPHEM_H
@@ -161,7 +161,7 @@ class psrephem : public Reference::Able
   int P_ddot (double& pddot, double& pddot_err) const;
 
   // stability parameter of antt94
-  int psrephem::Delta_t (double& delta_t) const;
+  int Delta_t (double& delta_t) const;
 
   // returns the transverse quadratic Doppler shift due to the apparent
   // acceleration along the line of sight that arises from proper motion
