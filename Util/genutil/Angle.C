@@ -13,6 +13,7 @@
 #include <float.h>
 
 bool Angle::verbose = false;
+Angle::Type Angle::default_type = Angle::Radians;
 
 Angle::Angle (const double & rad) { init(); setradians(rad); }
 
@@ -263,6 +264,55 @@ int operator != (const Angle &a1, const Angle &a2){
   else
       return (0);  
 }
+
+
+
+ostream& operator << (ostream& os, const Angle& angle)
+{
+  switch (Angle::default_type) {
+  case Angle::Radians:
+    // the previous default operation
+    return os << angle.getradians();
+  case Angle::Degrees:
+    return os << angle.getDegrees() << "deg";
+  case Angle::Turns:
+    return os << angle.getTurns() << "trn";
+  }
+}
+
+istream& operator >> (istream& is, Angle& angle)
+{
+  double value;
+  is >> value;
+  std::streampos pos = is.tellg();
+
+  string unit;
+  is >> unit;
+  if (unit == "deg")
+    angle.setDegrees (value);
+  else if (unit == "rad")
+    angle.setRadians (value);
+  else if (unit == "trn")
+    angle.setTurns (value);
+  else {
+    // replace the text
+    is.seekg (pos);
+    switch (Angle::default_type) {
+    case Angle::Radians:
+      angle.setRadians (value); break;
+    case Angle::Degrees:
+      angle.setDegrees(value); break;
+    case Angle::Turns:
+      angle.setTurns(value); break;
+    }
+  }
+
+  return is;
+}
+
+
+
+
 
 // AnglePair stuff for convenience
 

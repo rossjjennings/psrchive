@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Angle.h,v $
-   $Revision: 1.16 $
-   $Date: 2004/12/14 14:45:38 $
+   $Revision: 1.17 $
+   $Date: 2004/12/19 08:37:47 $
    $Author: straten $ */
 
 // redwards 17 Mar 99 -- Time for a definitive C++ suite of
@@ -31,6 +31,10 @@ class Angle
  public:
 
   static bool verbose;
+
+  enum Type { Degrees, Radians, Turns };
+
+  static Type default_type;
 
   Angle (const Angle& a)  
     {init(); radians=a.radians;wrap_point=a.wrap_point;}
@@ -117,8 +121,9 @@ class Angle
   inline friend double cast_double(const Angle &a) {return a.radians;}
 };
 
-inline ostream& operator<< (ostream & os, const Angle & angle)
-{  return os << angle.getradians(); }
+std::ostream& operator << (std::ostream& os, const Angle& angle);
+std::istream& operator >> (std::istream& is, Angle& angle);
+
 
 // More Arctangle stuff... NOTE: remember the Angle = operator
 // DOESN'T set wrap_point, so only use these to e.g. pass directly
