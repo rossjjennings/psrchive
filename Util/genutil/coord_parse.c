@@ -46,13 +46,13 @@ int str2coord (double *ra, double *dec, const char* coordstring)
     return -1;
   }
 
-  // fprintf (stderr, "str2coord: decstr='%s'\n", decstr);
+  /* fprintf (stderr, "str2coord: decstr='%s'\n", decstr); */
   if (str2dec2 (dec, decstr) < 0)
     retval = -1;
 
   *decstr = '\0';
 
-  // fprintf (stderr, "str2coord: rastr='%s'\n", rastr);
+  /* fprintf (stderr, "str2coord: rastr='%s'\n", rastr); */
   if (str2ra (ra, rastr) < 0)
     retval = -1;
 
@@ -132,7 +132,7 @@ int str2unit (double* unit, unsigned nfields,
 	curstr++;
     }
 
-    // fprintf (stderr, "str2unit: field[%d]=%s\n", ifield, field_string_copy);
+    /* fprintf (stderr, "str2unit: field[%d]=%s\n", ifield, field_string_copy); */
 
     if (sscanf (field_string_copy, "%lf", &field_value) != 1)
       break;
@@ -236,7 +236,7 @@ int unit2str (char* unit_string, unsigned unit_strlen,
     }
     else {
 
-      // trick to avoid rounding ugliness in string
+      /* trick to avoid rounding ugliness in string */
       if (ifield+1 < nfields && field_precision[ifield+1]) {
 	field_value = pow (10.0,-(field_precision[ifield+1]+3));
 	unit += field_value/field_scale[ifield+1];
