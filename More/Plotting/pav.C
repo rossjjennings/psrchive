@@ -1,5 +1,5 @@
 //
-// $Id: pav.C,v 1.74 2004/04/01 07:49:49 ahotan Exp $
+// $Id: pav.C,v 1.75 2004/04/14 15:25:39 straten Exp $
 //
 // The Pulsar Archive Viewer
 //
@@ -24,6 +24,7 @@
 #include "Pulsar/PeriastronOrder.h"
 #include "Pulsar/BinLngPeriOrder.h"
 #include "Pulsar/BinLngAscOrder.h"
+#include "Pulsar/FourierSNR.h"
 
 #include "Error.h"
 #include "RealTimer.h"
@@ -57,7 +58,10 @@ void usage ()
     " --convert_binphsasc    nsub\n"
     " --convert_binlngperi   nsub\n"
     " --convert_binlngasc    nsub\n"
-      "\n"
+    "\n"
+    "Functor options:\n"
+    " --snr [fourier|fortran]  Calculate S/N using specified method\n"
+    "\n"
     "Selection & configuration options:\n"
     " -K dev    Manually specify a plot device\n"
     " -M meta   Read a meta-file containing the files to use\n"
@@ -91,6 +95,7 @@ void usage ()
     " -L        Find the width of the pulse profile\n"
     " -j        Display a simple dynamic spectrum image\n"
     " -u        Display morphological difference (requires a standard)\n"
+    " -U        Plot signal-to-noise ratio as a function of pulse frequency\n"
     "\n"
     "Other plotting options: \n"
     " -W             Change colour scheme to suite white background\n"
@@ -156,8 +161,9 @@ int main (int argc, char** argv)
   bool baseline_spectrum = false;
   bool dedisperse = false;
   bool manchester = false;
+  bool spherical = false;
   bool degree = false;
-  bool mercator = false;
+  bool phase_fourier = false;
   bool greyfreq = false;
   bool stopwatch = false;
   bool hat = false;
@@ -193,23 +199,26 @@ int main (int argc, char** argv)
   Pulsar::Plotter plotter;
   Pulsar::Plotter::ColourMap colour_map = Pulsar::Plotter::Heat;
   
+  Pulsar::FourierSNR fourier_snr;
+
   int c = 0;
   
   const char* args = 
-    "AaBb:CDdEeFf:GgH:hI:iJjK:k:LlM:mN:nO:oP:pQq:Rr:Ss:Tt:uVvwWXx:Yy:Zz:";
-  
-  while (1) {
+    "AaBb:CDdEeFf:GgH:hI:iJjK:k:LlM:mN:nO:oP:pQq:Rr:Ss:Tt:UuVvwWXx:Yy:Zz:";
+
+  static struct option long_options[] = {
+    {"convert_binphsperi", 1, 0, 200},
+    {"convert_binphsasc", 1, 0, 201},
+    {"convert_binlngperi", 1, 0, 202},
+    {"convert_binlngasc", 1, 0, 203},
+    {"degree",0,0,204},
+    {"publn",0,0,205},
+    {"cmap",1,0,206},
+    {"snr",1,0,207},
+    {0, 0, 0, 0}
+  };
     
-    static struct option long_options[] = {
-      {"convert_binphsperi", 1, 0, 200},
-      {"convert_binphsasc", 1, 0, 201},
-      {"convert_binlngperi", 1, 0, 202},
-      {"convert_binlngasc", 1, 0, 203},
-      {"degree",0,0,204},
-      {"publn",0,0,205},
-      {"cmap",1,0,206},
-      {0, 0, 0, 0}
-    };
+  while (1) {
     
     int options_index = 0;
     
@@ -282,7 +291,7 @@ int main (int argc, char** argv)
       plotter.set_subint( atoi (optarg) );
       break;
     case 'i':
-      cout << "$Id: pav.C,v 1.74 2004/04/01 07:49:49 ahotan Exp $" << endl;
+      cout << "$Id: pav.C,v 1.75 2004/04/14 15:25:39 straten Exp $" << endl;
       return 0;
 
     case 'j':
@@ -304,9 +313,9 @@ int main (int argc, char** argv)
     case 'L':
       width = true;
       break;
-      
+
     case 'm':
-      mercator = true;
+      spherical = true;
       break;
 
     case 'M':
@@ -375,7 +384,11 @@ int main (int argc, char** argv)
     case 'T':
       tscrunch = 0;
       break;
-      
+
+    case 'U':
+      phase_fourier = true;
+      break;
+
     case 'u':
       if (!std_given)
 	cout << "For -u to be useful you must also specify a standard profile"
@@ -538,7 +551,25 @@ int main (int argc, char** argv)
       colour_map = (Pulsar::Plotter::ColourMap) atoi(optarg);
       break;
     }
+
+    case 207: {
+
+      if (strcasecmp (optarg, "fourier") == 0)
+	Pulsar::Profile::snr_functor.set (&fourier_snr,
+					  &Pulsar::FourierSNR::get_snr);
+      
+      else if (strcasecmp (optarg, "fortran") == 0)
+	Pulsar::Profile::snr_functor.set (&Pulsar::snr_fortran);
+
+      else
+	cerr << "pav: unrecognized snr method '" << optarg << "'" << endl;
+
+      break;
+
+    }
+
     default:
+      cerr << "pav: unrecognized option" << endl;
       return -1; 
     }
   }
@@ -806,9 +837,16 @@ int main (int argc, char** argv)
       plotter.Manchester_degree (archive);
       // plotter.Manchester(archive);
     }
-    if (mercator) {
+
+    if (spherical) {
       cpg_next();
       plotter.spherical (archive);
+    }
+
+    if (phase_fourier) {
+      cpg_next();
+      cpgsvp (0.2, 0.9, 0.15, 0.9);
+      plotter.phase_fourier (archive);
     }
 
     if (periodplot) {
