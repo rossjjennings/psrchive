@@ -1,14 +1,15 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Complex2.h,v $
-   $Revision: 1.3 $
-   $Date: 2004/11/22 19:26:03 $
+   $Revision: 1.4 $
+   $Date: 2005/04/06 20:13:46 $
    $Author: straten $ */
 
 #ifndef __MEAL_Complex2_H
 #define __MEAL_Complex2_H
 
-#include "MEAL/EvaluationBehaviour.h"
+#include "MEAL/Function.h"
+#include "MEAL/EvaluationPolicy.h"
 #include "Estimate.h"
 #include "Jones.h"
 
@@ -17,7 +18,7 @@ namespace MEAL {
   //! Pure virtual base class of all complex 2x2 matrix functions
   /*! The Complex2 class represents any complex 2x2 matrix function with an
     arbitrary number of parameters. */
-  class Complex2 : public EvaluationBehaviour {
+  class Complex2 : public Function {
 
   public:
 
@@ -27,11 +28,36 @@ namespace MEAL {
     //! The return type of the evaluate method
     typedef Jones<double> Result;
 
-    //! Return the Jones matrix and its gradient wrt model parameters
-    virtual Result evaluate (std::vector<Result>* grad=0) const = 0;
+    //! Default constructor
+    Complex2 ();
+
+    //! Copy constructor
+    Complex2 (const Complex2&);
+
+    //! Assignment operator
+    Complex2& operator = (const Complex2&);
+
+    //! Return the Jones matrix and its gradient
+    Result evaluate (std::vector<Result>* grad=0) const
+    { return evaluation_policy->evaluate (grad); }
 
     //! Return the Jones Estimate matrix
     virtual void evaluate (Jones< Estimate<double> >& jones) const;
+
+  protected:
+
+    template<class T> friend class CalculatePolicy;
+
+    //! The policy for managing function evaluation
+    Reference::To< EvaluationPolicy< Jones<double> > > evaluation_policy;
+
+    //! Calculate the Jones matrix and its gradient
+    virtual void calculate (Jones<double>& result,
+			    std::vector<Jones<double> >*) = 0;
+
+    //! Use the calculate method of another Complex2 instance
+    void calculate (Complex2* other, Jones<double>& result,
+                    std::vector<Jones<double> >*);
 
   };
 

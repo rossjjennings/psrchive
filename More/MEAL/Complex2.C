@@ -1,11 +1,31 @@
-#include <complex>
-
-// #include "Estimate.h"
-
 #include "MEAL/Complex2.h"
+#include "MEAL/Cached.h"
+
+#include <complex>
 
 /*! The class name is used in the output of template classes and methods */
 const char* MEAL::Complex2::Name = "Complex2";
+
+MEAL::Complex2::Complex2 ()
+{
+  evaluation_policy = new Cached<Complex2> (this);
+}
+
+MEAL::Complex2::Complex2 (const Complex2& copy) : Function (copy)
+{
+  evaluation_policy = new Cached<Complex2> (this);
+}
+
+MEAL::Complex2& MEAL::Complex2::operator = (const Complex2& copy)
+{
+  Function::operator = (copy);
+}
+
+void MEAL::Complex2::calculate (Complex2* other, Jones<double>& result,
+                                std::vector< Jones<double> >* grad)
+{
+  other->calculate (result, grad);
+}
 
 static inline double sqr (double x) { return x*x; }
 
