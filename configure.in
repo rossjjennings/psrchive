@@ -22,9 +22,6 @@ fi
 AM_INIT_AUTOMAKE([subdir-objects])
 AC_DISABLE_SHARED
 
-# Disable the debugging information option, -g
-SWIN_DEBUG
-
 # Ensure the SIGPROC find does not over-ride the standard
 SWIN_PROG_FIND
 
@@ -38,6 +35,11 @@ AC_PROG_INSTALL
 AC_PROG_LIBTOOL
 AC_PROG_FC
 _STAR_RESTFP_FIX
+
+#
+# Disable the debugging information option, -g
+#
+SWIN_DEBUG
 
 #
 # Set up for standard pulsar installation
