@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Quaternion.h,v $
-   $Revision: 1.6 $
-   $Date: 2003/01/30 16:26:21 $
+   $Revision: 1.7 $
+   $Date: 2003/02/05 14:22:30 $
    $Author: straten $ */
 
 #ifndef __Quaternion_H
@@ -87,6 +87,21 @@ public:
   const friend Quaternion operator / (Quaternion a, T c)
     { a/=c; return a; }
 
+  //! complex multiplication
+  template <typename U>
+  const friend Quaternion operator * (const complex<U>& c, Quaternion a)
+    { a*=c; return a; }
+
+  //! complex multiplication
+  template <typename U>
+  const friend Quaternion operator * (Quaternion a, const complex<U>& c)
+    { a*=c; return a; }
+
+  //! complex division
+  template <typename U>
+  const friend Quaternion operator / (Quaternion a, const complex<U>& c)
+    { a/=c; return a; }
+
   //! Negation
   const friend Quaternion operator - (Quaternion s)
     { s.s0=-s.s0; s.s1=-s.s1; s.s2=-s.s2; s.s3=-s.s3; return s; }
@@ -119,6 +134,17 @@ complex<T> ci (const complex<T>& c)
   return complex<T> (-c.imag(), c.real());
 }
 
+//! Quick multiplication of a real number by i
+template<typename T>
+complex<T> ci (const T& real)
+{
+  return complex<T> (0, real);
+}
+
+//! Return the conjugate of a real number
+template<typename T>
+T conj (const T& x) { return x; };
+
 //! Multiplication of two Biquaternions in the Hermitian basis
 template<typename T>
 const Quaternion<complex<T>, Hermitian>
@@ -146,14 +172,27 @@ const Quaternion<T, Unitary> operator * (const Quaternion<T,Unitary>& a,
 }
 
 
+//! Returns the real component of a Biquaternion
+template<typename T, Basis B>
+Quaternion<T,B> real (const Quaternion<complex<T>,B>& j)
+{
+  return Quaternion<T,B>
+    (j.s0.real(), j.s1.real(), j.s2.real(), j.s3.real());
+}
 
+//! Returns the imag component of a Biquaternion
+template<typename T, Basis B>
+Quaternion<T,B> imag (const Quaternion<complex<T>,B>& j)
+{
+  return Quaternion<T,B>
+    (j.s0.imag(), j.s1.imag(), j.s2.imag(), j.s3.imag());
+}
 
 //! Returns the complex conjugate of a Hermitian Biquaternion
 template<typename T>
-Quaternion<complex<T>,Hermitian>
-conj (const Quaternion<complex<T>,Hermitian>& j)
+Quaternion<T,Hermitian> conj (const Quaternion<T,Hermitian>& j)
 {
-  return Quaternion<complex<T>,Hermitian>
+  return Quaternion<T,Hermitian>
     (conj(j.s0), conj(j.s1), conj(j.s2), -conj(j.s3));
 }
 
@@ -161,31 +200,26 @@ conj (const Quaternion<complex<T>,Hermitian>& j)
 template<typename T>
 Quaternion<T,Unitary> conj (const Quaternion<T,Unitary>& j)
 { 
-  return Quaternion<T,Unitary> (j.s0, -j.s1, -j.s2, j.s3);
+  return Quaternion<T,Unitary>
+    (conj(j.s0), -conj(j.s1), -conj(j.s2), conj(j.s3));
 }
 
 
-//! Returns the Hermitian transpose of a Hermitian matrix
+//! Returns the Hermitian transpose of a Hermitian Quaternion
 template<typename T>
 Quaternion<T, Hermitian> herm (const Quaternion<T,Hermitian>& j)
 {
-  return j;
-}
-
-//! Returns the Hermitian transpose of a biquaternion in Hermitian basis
-template<typename T>
-Quaternion<complex<T>,Hermitian>
-herm (const Quaternion<complex<T>,Hermitian>& j)
-{
-  return Quaternion<complex<T>,Hermitian>
+  return Quaternion<T,Hermitian>
     (conj(j.s0), conj(j.s1), conj(j.s2), conj(j.s3));
 }
+
 
 //! Returns the Hermitian transpose of a Unitary Quaternion
 template<typename T>
 Quaternion<T, Unitary> herm (const Quaternion<T,Unitary>& j)
 {
-  return Quaternion<T,Unitary> (j.s0, -j.s1, -j.s2, -j.s3);
+  return Quaternion<T,Unitary>
+    (conj(j.s0), -conj(j.s1), -conj(j.s2), -conj(j.s3));
 }
 
 
@@ -218,7 +252,8 @@ T trace (const Quaternion<T,B>& j)
   return 2.0 * j.s0;
 }
 
-//! Returns the square of the Frobenius norm of a biquaternion
+
+//! Returns the square of the Frobenius norm of a Biquaternion
 template<typename T, Basis B>
 T norm (const Quaternion<complex<T>,B>& j)
 { 
