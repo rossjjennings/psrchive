@@ -207,10 +207,13 @@ int polynomial::load(string* instr)
       return -1;
     }
   }
+
+#if 0
   size_t endline = instr->find('\n');
   if (endline)  {
     instr->erase(0, endline);
   }
+#endif
 
   if (polyco::verbose)
     cerr << "polynomial::load parsed " << i << " coefficients" << endl;
