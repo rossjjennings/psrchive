@@ -63,8 +63,8 @@ AC_DEFUN([SWIN_LIB_MPI],
                           /usr/local/mpi/include"
 
     ac_save_CPPFLAGS="$CPPFLAGS"
-    ac_save_CC="$CC"
-    CC=$CXX
+
+    AC_LANG_PUSH(C++)
 
     for cf_dir in $cf_include_path_list; do
       CPPFLAGS="-I$cf_dir $ac_save_CPPFLAGS"
@@ -81,7 +81,7 @@ AC_DEFUN([SWIN_LIB_MPI],
       fi
     done
 
-    CC=$ac_save_CC
+    AC_LANG_POP(C++)
 
     if test x"$have_mpi" = xyes; then
 
