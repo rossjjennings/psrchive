@@ -65,7 +65,6 @@ int main (int argc, char** argv)
       Pulsar::Archive::set_verbosity (3);
       Pulsar::Calibrator::verbose = true;
     case 'v':
-      Error::verbose = true;
       verbose = true;
       break;
 
@@ -73,7 +72,7 @@ int main (int argc, char** argv)
   }
 
   if (!metafile && optind >= argc) {
-    cerr << "psrcal requires a list of archive filenames as parameters.\n";
+    cerr << "pacv requires a list of archive filenames as parameters.\n";
     return -1;
   }
 
@@ -134,7 +133,7 @@ int main (int argc, char** argv)
     cpgpage ();
 
   } catch (Error& error) {
-    cerr << "psrcal: Error calibrating " << filenames[ifile] << error << endl;
+    cerr << "pacv: Error loading " << filenames[ifile] << error << endl;
     return -1;
   }
   }
