@@ -23,4 +23,4 @@ libpsrutils_la_LIBADD   = units/libunits.la psrfft/libpsrfft.la \
 
 
 # Dummy C++ source to cause C++ linking.
-nodist_EXTRA_libpsrutils_la_SOURCES = dummy.C
+# nodist_EXTRA_libpsrutils_la_SOURCES = dummy.C
