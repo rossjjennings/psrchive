@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/BasicIntegration.h,v $
-   $Revision: 1.1 $
-   $Date: 2002/04/21 11:41:31 $
-   $Author: straten $ */
+   $Revision: 1.2 $
+   $Date: 2002/04/22 06:59:07 $
+   $Author: ahotan $ */
 
 #ifndef __BasicIntegration_h
 #define __BasicIntegration_h
@@ -17,10 +17,13 @@ namespace Pulsar {
   public:
 
     //! null constructor
-    BasicIntegration ();
+    BasicIntegration () { init(); }
 
     //! copy constructor
     BasicIntegration (const Integration& subint, int _npol=0, int _nchan=0);
+
+    //! destructor
+    virtual ~BasicIntegration () { }
 
     //! Return the pointer to a new copy of self
     virtual Integration* clone (int npol=0, int nchan=0) const;
