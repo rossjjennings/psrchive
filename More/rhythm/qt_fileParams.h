@@ -3,7 +3,6 @@
 
 #include <string>
 #include <qfiledialog.h>
-#include "psr_cpp.h"
 
 class psrephem;
 
@@ -25,7 +24,7 @@ class qt_fileParams : public QFileDialog
   void chosen ( const QString & );
 
  protected:
-  string fileName;
+  std::string fileName;
 };
 
 #endif

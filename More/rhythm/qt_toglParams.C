@@ -34,8 +34,8 @@ qt_toglParams::qt_toglParams (QWidget* parent, const char* name, int columns):
       elements[ieph] = new QCheckBox (parmNames[ieph], table, parmNames[ieph]);
       int id = table -> insert (elements[ieph], ieph);
       if (id != ieph) {
-	cerr << "qt_toglParams: error assigning id:" << ieph << endl;
-	throw (string ("qt_toglParams::error"));
+	std::cerr << "qt_toglParams: error assigning id:" << ieph << std::endl;
+	throw std::string ("qt_toglParams::error");
       }
       if (width < 0) {
 	width = elements[ieph]->fontMetrics().maxWidth();

@@ -49,7 +49,7 @@ int Tempo::residual::load (int lun)
 //             will be loaded
 // ////////////////////////////////////////////////////////////////////////
 int Tempo::residual::load (int r2flun, char* filename, 
-			   vector<residual>* residuals)
+			   std::vector<residual>* residuals)
 {
   fortopen_ (&r2flun, filename, (int) strlen(filename));
   if (verbose)

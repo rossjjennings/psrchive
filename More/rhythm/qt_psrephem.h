@@ -17,8 +17,6 @@
 #include <qvbox.h>
 #include <qlabel.h>
 
-#include <psr_cpp.h>
-
 //#include "psrephem.h"
 
 class qt_psrParameter;  // implementation detail defined in qt_psrParameter.h
@@ -65,7 +63,7 @@ class qt_psrephem : public QVBox
   void show_item ( int ephind, bool );
 
  protected:
-  vector<qt_psrParameter*> params;   // parameters displayed
+  std::vector<qt_psrParameter*> params;   // parameters displayed
   int max_width;                     // maximum width required by psrParameter
 
   void show_item (psrParameter* parm);

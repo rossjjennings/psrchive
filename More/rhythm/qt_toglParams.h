@@ -4,7 +4,6 @@
 #include <vector>
 
 #include <qcheckbox.h>
-#include <psr_cpp.h>
 
 class qt_toglParams : public QWidget
 {
@@ -27,7 +26,7 @@ class qt_toglParams : public QWidget
     { emit getChecked ( ephind, elements[ephind]->isChecked() ); };
 
  private:
-  vector<QCheckBox*> elements;
+  std::vector<QCheckBox*> elements;
 
 };
 

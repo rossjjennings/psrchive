@@ -1,14 +1,13 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/residual.h,v $
-   $Revision: 1.11 $
-   $Date: 2002/01/04 20:35:45 $
+   $Revision: 1.12 $
+   $Date: 2005/02/08 09:24:10 $
    $Author: straten $ */
 
 #ifndef __RESIDUAL_H
 #define __RESIDUAL_H
 
-#include "psr_cpp.h"  // C++ standard work-arounds
 #include <vector>
 
 namespace Tempo {
@@ -47,7 +46,8 @@ namespace Tempo {
     int  load (int lun);
     
     // place a vector load function in the residual namespace
-    static int load (int r2flun, char* filename, vector<residual>* residuals);
+    static int load (int r2flun, char* filename, 
+                     std::vector<residual>* residuals);
   };
 
 }

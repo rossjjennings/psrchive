@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/toa.h,v $
-   $Revision: 1.17 $
-   $Date: 2004/05/06 03:46:23 $
-   $Author: ghobbs $ */
+   $Revision: 1.18 $
+   $Date: 2005/02/08 09:24:10 $
+   $Author: straten $ */
 
 #ifndef __TOA_H
 #define __TOA_H
@@ -80,7 +80,7 @@ namespace Tempo {
     
     // Psrclock / Rhythm extras
 
-    string auxinfo;      /* text information passed to context specific data */
+    std::string auxinfo;   /* text passed to context specific data */
 
     // Information about the parent archive
 
@@ -132,7 +132,7 @@ namespace Tempo {
     void set_arrival   (MJD arrived) { arrival = arrived; };
     void set_error     (float err)   { error = err; };
     void set_telescope (char telcode) { telescope = telcode; };
-    void set_auxilliary_text (const string& text) { auxinfo = text; };
+    void set_auxilliary_text (const std::string& text) { auxinfo = text; };
 
     Format get_format    () const { return format; };
     float  get_StoN      () const { return ston; };
@@ -145,7 +145,7 @@ namespace Tempo {
     MJD    get_arrival   () const { return arrival; };
     float  get_error     () const { return error; };
     char   get_telescope () const { return telescope; };
-    string get_auxilliary_text () const { return auxinfo; };
+    std::string get_auxilliary_text () const { return auxinfo; };
 
     void get_az_zen_para (double ra, double dec,
 			  float& az, float& zen, float& para) const;
@@ -171,7 +171,7 @@ namespace Tempo {
     int    Psrclock_load    (const char* instring);
     int    Psrclock_unload  (FILE* outstream) const;
     int    Psrclock_unload  (char* outstring) const;
-    string Psrclock_unload  () const;
+    std::string Psrclock_unload  () const;
 
     int    Command_load      (const char* instring);
     int    Command_unload    (FILE* outstream) const;
@@ -191,12 +191,12 @@ namespace Tempo {
     { return (t1.arrival < t2.arrival); };
     
     // operations on vectors of toas
-    static int load (const char* filename, vector<toa>* toas);
-    static int load (FILE* instream, vector<toa>* toas);
+    static int load (const char* filename, std::vector<toa>* toas);
+    static int load (FILE* instream, std::vector<toa>* toas);
     
-    static int unload (const char* filename, const vector<toa>& toas,
+    static int unload (const char* filename, const std::vector<toa>& toas,
 		       Format fmt = Unspecified);
-    static int unload (FILE* outstream, const vector<toa>& toas,
+    static int unload (FILE* outstream, const std::vector<toa>& toas,
 		       Format fmt = Unspecified);
     
   private:

@@ -9,14 +9,7 @@
 #ifndef __PSRPARAMS_H
 #define __PSRPARAMS_H
 
-#include <iostream>
 #include <vector>
-#include <string>
-
-#include <stdio.h>
-
-#include "Angle.h"
-#include "psr_cpp.h"
 
 class psrParameter;  // implementation detail defined in psrParameter.h
 class psrephem;      // the psrephem class which this class reflects
@@ -37,7 +30,7 @@ class psrParams
   static bool verbose;
 
  protected:
-  vector <psrParameter*> params;    // pulsar parameters
+  std::vector <psrParameter*> params;    // pulsar parameters
   void destroy ();
 };
 
