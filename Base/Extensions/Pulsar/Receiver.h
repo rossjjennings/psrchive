@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/Receiver.h,v $
-   $Revision: 1.8 $
-   $Date: 2004/10/28 06:18:54 $
+   $Revision: 1.9 $
+   $Date: 2004/11/11 09:19:00 $
    $Author: straten $ */
 
 #ifndef __ReceiverExtension_h
@@ -75,20 +75,63 @@ namespace Pulsar {
     //! Set the basis of the feed receptors
     void set_basis (Signal::Basis _basis) { basis = _basis; }
 
+    /** @name General orthogonal basis interface
+     *  These parameters describe the configuration of a receiver with
+     *  ideal receptors.
+     */
+    //@{
+
+    //! Get the orientation of the basis about the line of sight
+    const Angle get_orientation () const;
+    //! Set the orientation of the basis about the line of sight
+    void set_orientation (const Angle& celestial_position_angle);
+
+    //! Return true if the basis is right-handed
+    bool get_right_handed () const;
+    //! Set true if the basis is right-handed
+    void set_right_handed (bool right = true);
+ 
+    //! Get the phase of the reference source
+    const Angle get_reference_source_phase () const;
+    //! Set the phase of the reference source
+    void set_reference_source_phase (const Angle& phase);
+
+    //@}
+
+    /** @name Basis-dependent interface
+     *  The interpretation of these parameters depends upon the basis.
+     */
+    //@{
+
+    //! Get the orientation of the equal in-phase electric field vector
+    const Angle get_field_orientation () const;
+    //! Set the orientation of the equal in-phase electric field vector
+    void set_field_orientation (const Angle& celestial_position_angle);
+
+    //@}
+
+    /** @name Linear basis-specific interface
+     *  These parameters describe the configuration of a receiver with
+     *  ideal, linearly polarized receptors.
+     */
+    //@{
+
     //! Get the offset of the feed X axis with respect to the platform zero
-    const Angle get_X_offset () const { return X_offset; }
+    const Angle get_X_offset () const;
     //! Set the offset of the feed X axis with respect to the platform zero
-    void set_X_offset (const Angle& offset) { X_offset = offset; }
+    void set_X_offset (const Angle& offset);
 
     //! Get the offset of the feed Y axis from its nominal value
-    const Angle get_Y_offset () const { return Y_offset; }
+    const Angle get_Y_offset () const;
     //! Set the offset of the feed Y axis from its nominal value
-    void set_Y_offset (const Angle& offset) { Y_offset = offset; }
+    void set_Y_offset (const Angle& offset);
 
     //! Get the offset of the feed calibrator axis from its nominal value
-    const Angle get_calibrator_offset () const { return calibrator_offset; }
+    const Angle get_calibrator_offset () const;
     //! Set the offset of the feed calibrator axis from its nominal value
-    void set_calibrator_offset (const Angle& o) { calibrator_offset = o; }
+    void set_calibrator_offset (const Angle& offset);
+
+    //@}
 
     //! Get the flag set when the offset of the feed has been corrected
     bool get_feed_corrected () const { return feed_corrected; }
@@ -137,22 +180,14 @@ namespace Pulsar {
     //! Basis of the feed receptors
     Signal::Basis basis;
 
-    //! Offset of the feed X axis with respect to the platform zero
-    Angle X_offset;
-    
-    //! Offset of the feed Y axis from its nominal value
-    /*! Nominally, the Y axis is offset from the X axis by 90 degrees.
-      However it is also common to encounter systems in which the Y
-      axis is offset by -90 degrees, owing to unaccounted reflections,
-      phase delays, and inconsistent definitions.  Nominally, this
-      parameter should be set to zero. */
-    Angle Y_offset;
+    //! Set true if the basis forms a right-handed coordinate system
+    bool right_handed;
 
-    //! Offset of the calibrator axis from its nominal value
-    /*! Nominally, the position angle of the calibrator reference
-      signal (linear noise diode) is 45 degrees (measured from X
-      toward Y).  Nominally, this parameter should be set to zero. */
-    Angle calibrator_offset;
+    //! The orientation of the basis about the line of sight
+    Angle orientation;
+    
+    //! Phase of p^* q for reference source
+    Angle reference_source_phase;
 
     //! Flag set when the offset of the feed has been corrected
     /*! This flag should be set when the offset of the feed X and Y
@@ -173,6 +208,14 @@ namespace Pulsar {
     //! Attenuator, Poln B
     /*! The software currently does nothing with this value */
     float atten_b;
+
+  private:
+
+    //! The offset of the orientation due to set_Y_offset
+    Angle orientation_Y_offset;
+
+    //! Flag set when set_field_orientation is used
+    bool field_orientation;
 
   };
 

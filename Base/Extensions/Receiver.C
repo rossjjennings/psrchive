@@ -7,7 +7,9 @@ Pulsar::Receiver::Receiver () : Extension ("Receiver")
 {
   tracking_mode = Feed;
   name = "unknown";
+
   basis = Signal::Linear;
+  right_handed = true;
 
   feed_corrected = false;
   platform_corrected = false;
@@ -32,16 +34,18 @@ Pulsar::Receiver::operator= (const Receiver& ext)
   name = ext.name;
   basis = ext.basis;
 
-  X_offset = ext.X_offset;
-  Y_offset = ext.Y_offset;
-
-  calibrator_offset = ext.calibrator_offset;
+  orientation = ext.orientation;
+  right_handed = ext.right_handed;
+  reference_source_phase = ext.reference_source_phase;
 
   feed_corrected = ext.feed_corrected;
   platform_corrected = ext.platform_corrected;
 
   atten_a = ext.atten_a;
   atten_b = ext.atten_b;
+
+  orientation_Y_offset = ext.orientation_Y_offset;
+  field_orientation = ext.field_orientation;
 
   return *this;
 }
@@ -62,6 +66,144 @@ string Pulsar::Receiver::get_tracking_mode_string() const
     return "GPA";
   }
   return "unknown";
+}
+
+const Angle Pulsar::Receiver::get_orientation () const
+{
+  Angle offset;
+  if (field_orientation && basis == Signal::Linear)
+    offset.setDegrees (-45);
+  return orientation + orientation_Y_offset + offset;
+}
+
+/*! If this method is called, then any previous changes due to
+ set_X_offset, set_Y_offset, or set_field_orientation will be
+ reset. */
+void Pulsar::Receiver::set_orientation (const Angle& angle)
+{
+  orientation = angle;
+  orientation_Y_offset = 0.0;
+  field_orientation = false;
+}
+
+//! Return true if the basis is right-handed
+bool Pulsar::Receiver::get_right_handed () const
+{
+  return right_handed;
+}
+
+/*! If this method is called, then any changes due to set_Y_offset
+  will be reset. */
+void Pulsar::Receiver::set_right_handed (bool right)
+{
+  right_handed = right;
+  orientation_Y_offset = 0.0;
+}
+ 
+//! Get the phase of the reference source
+const Angle Pulsar::Receiver::get_reference_source_phase () const
+{
+  return reference_source_phase;
+}
+
+//! Set the phase of the reference source
+void Pulsar::Receiver::set_reference_source_phase (const Angle& angle)
+{
+  reference_source_phase = angle;
+}
+
+/*! The orientation of the electric field vector that induces equal and
+    in-phase responses in orthogonal receptors depends upon the basis.
+    In the linear basis, it has an orientation of 45 degrees.  In the
+    circular basis, 0 degrees.   Therefore, if this attribute is set,
+    the interpretation of the orientation will become basis dependent. */
+void Pulsar::Receiver::set_field_orientation (const Angle& angle)
+{
+  set_orientation (angle);
+  field_orientation = true;
+}
+
+const Angle Pulsar::Receiver::get_field_orientation () const
+{
+  Angle offset = 0.0;
+  if (!field_orientation && basis == Signal::Linear)
+    offset.setDegrees (45.0);
+  return get_orientation() + offset;
+}
+
+
+/*! If this method is called, then any previous changes due to
+  set_orientation or set_field_orientation will be reset. */
+void Pulsar::Receiver::set_X_offset (const Angle& offset)
+{
+  orientation = offset;
+  field_orientation = false;
+}
+
+const Angle Pulsar::Receiver::get_X_offset () const
+{
+  return get_orientation() - orientation_Y_offset;
+}
+
+
+/*! In the right-handed basis, the Y axis points in the direction of
+  East.  However it is also common to encounter systems in which the Y
+  axis is offset by 180 degrees, pointing West.  This is equivalent to
+  switching the sign of the Y probe, which amounts to a 180 degree
+  rotation of the Stokes vector about the Q axis.  It is also equivalent
+  to the product of:
+  <OL>
+  <LI> switching the X and Y probes (a 180 degree rotation about the U axis,
+  as done when the right_handed attribute is false)
+  <LI> a -90 degree rotation about the line of sight (a 180 degree
+  rotation about the V axis, as done when the orientation_Y_offset = -90
+  </OL>
+  which is how the transformation is represented by this class.
+
+  \param offset either 0 or +/- 180 degrees
+
+*/
+void Pulsar::Receiver::set_Y_offset (const Angle& offset)
+{ 
+  if (offset == 0.0)  {
+    set_right_handed( true );
+    orientation_Y_offset = 0;
+  }
+  else if (offset == M_PI || offset == -M_PI) {
+    set_right_handed( false );
+    orientation_Y_offset.setDegrees( -90 );
+  }
+
+  else
+    throw Error (InvalidParam, "Pulsar::Receiver::set_Y_offset",
+		 "invalid offset = %lf deg", offset.getDegrees());
+}
+
+const Angle Pulsar::Receiver::get_Y_offset () const
+{
+  if ( get_right_handed() )
+    return 0.0;
+  else
+    return M_PI;
+}
+
+/*! In the linear basis, the noise diode must illuminate both receptors
+    equally.  Therefore, there are only two valid orientations:
+
+    \param offset either 0 or +/- 90 degrees
+*/
+void Pulsar::Receiver::set_calibrator_offset (const Angle& offset)
+{
+  if (offset == 0.0 || offset == 0.5*M_PI || offset == -0.5*M_PI)
+    reference_source_phase = 2.0 * offset;
+  else
+    throw Error (InvalidParam, "Pulsar::Receiver::set_calibrator_offset",
+                 "invalid offset = %lf deg", offset.getDegrees());
+}
+
+const Angle Pulsar::Receiver::get_calibrator_offset () const
+{ 
+  return 0.5*reference_source_phase;
 }
 
 bool Pulsar::Receiver::match (const Receiver* receiver, string& reason) const
@@ -93,34 +235,35 @@ Jones<double> Pulsar::Receiver::get_transformation () const
 
   Pauli::basis.set_basis( get_basis() );
 
-  if (get_Y_offset().getDegrees() == 180.0) {
+  if (! get_right_handed() ) {
 
     if (Archive::verbose == 3)
-      cerr << "Pulsar::Receiver::get_transformation 180 phase shift Y" << endl;
+      cerr << "Pulsar::Receiver::get_transformation left-handed basis" << endl;
     
-    // rotate the basis by 180 degrees about the Stokes Q axis
-    Calibration::Rotation rotation ( Pauli::basis.get_basis_vector(0) );
+    /* rotate the basis by 180 degrees about the Stokes 2 axis
+       in the linear basis: about the Stokes U axis
+       in the circular basis: about the Stokes Q axis
+       3-vector space is a subset of Stokes 4-vector space 
+       Jones rotations effect twice the angle in Poincare space */
+
+    Calibration::Rotation rotation ( Vector<float, 3>::basis(1) );
     rotation.set_phi ( 0.5 * M_PI );
     
     xform *= rotation.evaluate();
     
   }
-  else if (get_Y_offset() != 0) {
-    
-    Error error (InvalidState, "Pulsar::Receiver::get_transformation");
-    error << "Cannot correct Y_offset=" << Y_offset.getDegrees() << " degrees";
-    throw error;
-      
-  }
   
-  if (get_X_offset() != 0) {
+  if ( get_orientation() != 0 ) {
     
     if (Archive::verbose == 3)
-      cerr << "Pulsar::Receiver::get_transformation X axis offset" << endl;
+      cerr << "Pulsar::Receiver::get_transformation orientation="
+	   << get_orientation().getDegrees() << " deg" << endl;
 
     // rotate the basis about the Stokes V axis
     Calibration::Rotation rotation ( Pauli::basis.get_basis_vector(2) );
-    rotation.set_phi ( -get_X_offset().getRadians() );
+
+    // the sign of this rotation may depend on handedness
+    rotation.set_phi ( -get_orientation().getRadians() );
     
     xform *= rotation.evaluate();
     
@@ -134,26 +277,33 @@ Stokes<double> Pulsar::Receiver::get_reference_source () const
 {
   Jones<double> xform = get_transformation ();
 
-  if (get_calibrator_offset() != 0) {
+  if (get_reference_source_phase() != 0) {
 
     if (Archive::verbose == 3)
-      cerr << "Pulsar::Receiver::get_reference_source calibrator offset="
-	   << get_calibrator_offset() << endl;
+      cerr << "Pulsar::Receiver::get_reference_source phase="
+	   << get_reference_source_phase().getDegrees() << " deg" << endl;
 
-    // rotate the basis about the Stokes V axis
-    Calibration::Rotation rotation ( Pauli::basis.get_basis_vector(2) );
-    rotation.set_phi ( get_calibrator_offset().getRadians() );
+    // rotate the basis about the Stokes 1 axis
+    Calibration::Rotation rotation ( Vector<float,3>::basis(0) );
+    rotation.set_phi ( 0.5*get_reference_source_phase().getRadians() );
 
     xform *= rotation.evaluate();
 
   }
 
-  Stokes<double> noise_diode (1,0,1,0);
-  Stokes<double> output_diode = transform (noise_diode, xform);
+  /* The conversion of a Stokes vector to a coherency matrix depends
+   upon the basis.  The following line provides a basis-independent
+   representation of a reference source that illuminates both
+   receptors equally and in phase. */
+
+  Quaternion<double,Hermitian> input (1,0,1,0);
+
+  Stokes<double> output = coherency (xform * convert(input) * herm(xform));
 
   if (Archive::verbose == 3)
-    cerr << "Pulsar::Receiver::get_reference_source noise diode="
-	 << output_diode << endl;
+    cerr << "Pulsar::Receiver::get_reference_source output="
+	 << output << endl;
 
-  return output_diode;
+  return output;
 }
+
