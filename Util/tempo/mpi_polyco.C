@@ -1,8 +1,11 @@
-//#include <assert.h>
-#include <iostream>
-#define ACTIVATE_MPI
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #include "polyco.h"
 #include "stdmpi.h"
+
+#include <iostream>
 
 int mpiPack_size (const polynomial& pl, MPI_Comm comm, int* size)
 {

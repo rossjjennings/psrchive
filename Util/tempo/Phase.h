@@ -1,15 +1,15 @@
-#ifndef __PHASE_H
-#define __PHASE_H
+#ifndef __POLYCO_PHASE_H
+#define __POLYCO_PHASE_H
 
-#include <math.h>
 #include "environ.h"
-#ifdef ACTIVATE_MPI
-#include "mpi.h"
-#endif
-#include <string>
-
-#include "psr_cpp.h"
 #include "MJD.h"
+
+#include <string>
+#include <math.h>
+
+#ifdef HAVE_MPI
+#include <mpi.h>
+#endif
 
 class Phase {
 
@@ -67,9 +67,9 @@ class Phase {
   double in_turns() const;
   int64  intturns() const;
   double fracturns() const;
-  string strprint(int precision) const;
+  std::string strprint(int precision) const;
 
-#ifdef ACTIVATE_MPI
+#ifdef HAVE_MPI
   friend int mpiPack_size (const Phase&, MPI_Comm comm, int* size);
   friend int mpiPack   (const Phase&, void* outbuf, int outcount, 
 			int* position, MPI_Comm comm);
@@ -79,7 +79,7 @@ class Phase {
 
 };
 
-inline ostream& operator<< (ostream& ostr, const Phase& sz) 
+inline std::ostream& operator<< (std::ostream& ostr, const Phase& sz) 
 { return ostr << sz.strprint(8); }
 
 #endif
