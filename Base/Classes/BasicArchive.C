@@ -11,7 +11,6 @@ Pulsar::BasicArchive::BasicArchive ()
 { 
   telescope_code = -1;
 
-  basis = Signal::Linear;
   state = Signal::Intensity;
   scale = Signal::FluxDensity;
   type = Signal::Pulsar;
@@ -201,19 +200,7 @@ void Pulsar::BasicArchive::set_centre_frequency (double cf)
 {
   centre_frequency = cf;
 }
-    
-//! Return the type of feed used
-Signal::Basis Pulsar::BasicArchive::get_basis () const
-{
-  return basis;
-}
 
-//! Set the type of feed used 
-void Pulsar::BasicArchive::set_basis (Signal::Basis feed)
-{
-  basis = feed;
-}
-    
 //! Return the polarisation state of the data
 Signal::State Pulsar::BasicArchive::get_state () const
 {

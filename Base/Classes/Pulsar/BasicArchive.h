@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/BasicArchive.h,v $
-   $Revision: 1.29 $
-   $Date: 2004/07/16 10:11:30 $
+   $Revision: 1.30 $
+   $Date: 2004/08/05 09:19:14 $
    $Author: straten $ */
 
 #ifndef __BasicArchive_h
@@ -52,11 +52,6 @@ namespace Pulsar {
     virtual char get_telescope_code () const;
     //! Set the tempo code of the telescope used
     virtual void set_telescope_code (char telescope_code);
-
-    //! Get the feed configuration of the receiver
-    virtual Signal::Basis get_basis () const;
-    //! Set the feed configuration of the receiver
-    virtual void set_basis (Signal::Basis type);
 
     //! Get the state of the profiles
     virtual Signal::State get_state () const;
