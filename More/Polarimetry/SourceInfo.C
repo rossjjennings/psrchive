@@ -30,7 +30,7 @@ const char* Pulsar::SourceInfo::get_name (unsigned iclass) const
   static char* replace = strchr (label, 'k');
 
   if (!together)
-    *replace = '1' + iclass;
+    *replace = '0' + iclass;
 
   return label;
 }
