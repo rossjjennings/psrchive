@@ -1,9 +1,14 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <sys/wait.h>
 
 #include "tempo++.h"
+#include "toa.h"
+#include "residual.h"
+#include "psrParams.h"
 
 // ////////////////////////////////////////////////////////////////////////
-// tempo_fit
+// Tempo::fit
 //
 // runs TEMPO on a vector of toa objects, using a given psrParams object.
 // returns a vector of residual objects, along with a new "post-fit"
@@ -16,15 +21,20 @@
 //             be loaded
 // ////////////////////////////////////////////////////////////////////////
 
-int Tempo::fit (const psrParams& model, const vector<toa>& toas,
-		psrParams* postfit, vector<residual>* residuals)
+bool Tempo::verbose = false;
+MJD  Tempo::unspecified;
+
+void Tempo::fit (const psrParams& model, const vector<toa>& toas,
+		 psrParams* postfit, vector<residual>* residuals)
 {
   char* tempo_tim = "arrival.tim";
   char* tempo_par = "arrival.par";
-  // char* tempo_lis = "tempo.lis";
   char* tempo_res = "resid2.tmp";
   
   int   r2flun = 32;
+
+  if (verbose)
+    cerr << "Tempo::fit writing TOAs to '" << tempo_tim << "'" << endl;
 
   // unload the toas into a temporary file
   FILE* fptr = fopen (tempo_tim, "w");
@@ -43,26 +53,35 @@ int Tempo::fit (const psrParams& model, const vector<toa>& toas,
   fclose (fptr); 
 
   // unload the ephemeris
+  if (verbose)
+    cerr << "Tempo::fit writing parameters to '" << tempo_par << "'" << endl;
   model.unload(tempo_par);
 
   // run TEMPO
-  char* tempo = "tempo ";
-  string runtempo = tempo;
+  string runtempo ("tempo ");
   runtempo += tempo_tim;
-  system (runtempo.data());
+
+  if (verbose)
+    cerr << "Tempo::fit system (" << runtempo << ")" << endl;
+
+  int retval = system (runtempo.c_str());
+  if (retval < 0 || (WIFEXITED(retval) != 0)) {
+    cerr << "Tempo::fit error system (" << runtempo << ")";
+    if (retval < 0)
+      perror (" ");
+    throw (string ("Tempo::fit"));
+  }
 
   if (postfit) {
     // load the new ephemeris (PSRNAME.par in current working directory)
     char* dotpar = ".par";
     string tpopar = model.psrname() + dotpar;
-    postfit->load( tpopar.data() );
+    postfit->load( tpopar.c_str() );
   }
 
   if (residuals) {
     // load the residuals from resid2.tmp
     residuals->resize(unloaded);
-    return residual::load (r2flun, tempo_res, residuals);
+    residual::load (r2flun, tempo_res, residuals);
   }
-
-  return 0;
 }

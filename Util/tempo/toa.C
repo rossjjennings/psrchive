@@ -499,9 +499,11 @@ double toa::shift (const polyco& poly) const
 
 int toa::load (const char* filename, vector<toa>* toas)
 {
-  FILE* fp;
-  if((fp = fopen(filename, "r"))==NULL){
-    cerr << "toa_model::load - error opening file " << filename << endl;
+  FILE* fp = fopen(filename, "r");
+  if (fp==NULL){
+    cerr << "\n\ntoa::load - error opening '" << filename << "'::";
+    perror ("");
+    cerr << endl;
     return -1;
   }
   int ret = load (fp, toas);
@@ -533,7 +535,7 @@ int toa::unload(FILE* outstream, const vector<toa>& toas, Format fmt)
 {
   for (int i=0; i<toas.size(); ++i) {
     if (verbose)
-      cerr << "toa_model::unload - unloading toa " << i << endl;
+      cerr << "toa::unload - unloading toa " << i << endl;
     if (toas[i].unload(outstream, fmt) < 0)
       return -1;
   }

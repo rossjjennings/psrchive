@@ -9,6 +9,10 @@ class residual {
  public:
   static int verbose;
 
+  enum   plot { BinaryPhase, Mjd, Seconds, Turns };
+  static plot xtype;
+  static plot ytype;
+
   double mjd;         // --TOA (MJD, referenced to solar system barycenter)
   double turns;       // --Postfit residual (pulse phase, from 0 to 1)
   double seconds;     // --Postfit residual (seconds)
@@ -30,9 +34,7 @@ class residual {
   static int load (int r2flun, char* filename, vector<residual>* residuals);
 };
 
-class psrParams;
-class toa;
-int tempo_fit (const psrParams& model, const vector<toa>& toas,
-	       psrParams* postfit, vector<residual>* residuals);
+float y_ordinate (const residual& r);
+float x_ordinate (const residual& r);
 
 #endif

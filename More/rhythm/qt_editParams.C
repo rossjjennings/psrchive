@@ -36,18 +36,16 @@ bool qt_editParams::verbose = false;
 
 qt_editParams::qt_editParams (QWidget* parent, const char* name)
   : QWidget  (parent, name),
-    editee (this, "ephemeris")
+    display (this, "ephemeris")
 {
   menubarConstruct ();
 
   QBoxLayout* layout = new QVBoxLayout (this, border_width);
 
   layout -> setMenuBar ( (QMenuBar*) menu );
-  layout -> addWidget ( &editee );
+  layout -> addWidget ( &display );
   layout -> setResizeMode ( QLayout::Minimum );
   layout -> activate ();
-
-  io_dialog = new qt_fileParams;
 
   parmboxConstruct ();
 
@@ -143,9 +141,9 @@ void qt_editParams::parmboxConstruct ()
     parm -> installEventFilter ( new qevent_trace );
 
   connect (parm, SIGNAL ( getChecked(int,bool) ), 
-	   &editee, SLOT ( show_item(int,bool) ));
+	   &display, SLOT ( show_item(int,bool) ));
   
-  connect (&editee, SIGNAL ( item_shown(int,bool) ),
+  connect (&display, SIGNAL ( item_shown(int,bool) ),
 	   parm, SLOT ( setChecked(int,bool) ));
 
   QButton* dismiss = new QPushButton ("Dismiss", eph_select, "dismiss");
@@ -188,23 +186,34 @@ void qt_editParams::select_parms()
 
 void qt_editParams::new_data (bool add_to_history)
 {
-  editee.set_psrParams (data);
+  //  if (verbose)
+    cerr << "qt_editParams::new_data set display" << endl;
+  display.set_psrParams (data);
 
   if (add_to_history) {
+    if (verbose)
+      cerr << "qt_editParams::new_data add to history" << endl;
     current ++;
     data_history.resize (current + 1);
     data_history [current] = data;
   }
 
+  if (verbose)
+    cerr << "qt_editParams::new_data adjust menus" << endl;
   edit->setItemEnabled (backwardID, (current > 0));
   edit->setItemEnabled (forwardID, (current < int(data_history.size()) - 1));
-  
   file->setItemEnabled (saveID, true);
+
+  if (verbose)
+    cerr << "qt_editParams::new_data emit newParams" << endl;
   emit newParams ( data );
 }
 
 void qt_editParams::open() 
 {
+  if (!io_dialog)
+    io_dialog = new qt_fileParams;
+
   io_dialog -> open (&data);
   new_data ();
 }
@@ -213,14 +222,16 @@ void qt_editParams::save()
 {
   if (!hasdata())
     return;
+  display.get_psrParams (&data);
 
-  editee.get_psrParams (&data);
+  if (!io_dialog)
+    io_dialog = new qt_fileParams;
   io_dialog -> save (data);
 }
 
 void qt_editParams::print()
 { 
-  editee.get_psrParams().unload (stderr);
+  display.get_psrParams().unload (stderr);
 }
 
 void qt_editParams::closeWin()
@@ -231,7 +242,11 @@ void qt_editParams::closeWin()
 
 void qt_editParams::load (const char* filename)
 {
+  if (verbose)
+    cerr << "qt_editParams::load psrParameters::load(" << filename << ")...";
   data.load (filename);
+  if (verbose)
+    cerr << "  loaded." << endl;
   new_data ();
 }
 
@@ -240,7 +255,7 @@ void qt_editParams::unload (const char* filename)
   if (!hasdata())
     return;
 
-  editee.get_psrParams (&data);
+  display.get_psrParams (&data);
   data.unload (filename);
 }
 
@@ -252,7 +267,7 @@ void qt_editParams::set_psrParams (const psrParams& eph)
 
 void qt_editParams::get_psrParams (psrParams* eph)
 {
-  editee.get_psrParams (eph);
+  display.get_psrParams (eph);
 }
 
 void qt_editParams::forward()
@@ -290,7 +305,7 @@ void qt_editParams::aboutQt()
 QSize qt_editParams::sizeHint () const 
 { 
   if (verbose)
-    cerr << "qt_editParams::sizeHint = " << editee.sizeHint() << endl;
+    cerr << "qt_editParams::sizeHint = " << display.sizeHint() << endl;
 
-  return editee.sizeHint();
+  return display.sizeHint();
 }

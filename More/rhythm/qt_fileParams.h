@@ -3,15 +3,21 @@
 
 #include <qfiledialog.h>
 
-#include "psrParams.h"
+class psrParams;
 
 class qt_fileParams : public QWidget
 {
   Q_OBJECT
  public:
-  qt_fileParams ( const QString& startname = QString::null, QWidget * parent=0 );
-  void open ( psrParams* eph );
-  void save ( const psrParams& eph );
+  qt_fileParams (const QString& startname = QString::null, QWidget* parent=0);
+
+  // returns 0 if user cancels, 1 otherwise
+  int open ( psrParams* eph );
+
+  // returns 0 if user cancels, 1 otherwise
+  int save ( const psrParams& eph );
+
+  // string filename () { return string (fileName); };
 
   static bool verbose;
 

@@ -59,7 +59,7 @@ class qt_editParams : public QWidget
  private:
 
   // the psr parameters display widget
-  qt_psrParams editee;
+  qt_psrParams display;
 
   // the parameters kept in the editor display
   psrParams data;

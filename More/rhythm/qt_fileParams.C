@@ -1,6 +1,8 @@
 #include <iostream>
 
 #include "qt_fileParams.h"
+
+#include "psrParams.h"
 #include "psr_cpp.h"
 
 bool qt_fileParams::verbose = false;
@@ -29,40 +31,30 @@ qt_fileParams::qt_fileParams ( const QString& startname, QWidget* parent )
 	    this, SLOT ( chosen (const QString&) ) );
 }
 
-void qt_fileParams::open (psrParams* eph)
+int qt_fileParams::open (psrParams* eph)
 {
   window -> setMode (QFileDialog::ExistingFile);
   if ( window -> exec () != 1 || fileName.isEmpty() )
-    return;
+    return 0;
 
   if (verbose)
     cerr << "qt_fileParams::open " << fileName << endl;
 
-  try {
-    eph -> load (fileName.ascii());
-  }
-  catch (string err) {
-    cerr << "qt_fileParams::open error loading from " 
-	 << fileName << endl << err << endl;
-  }
+  eph -> load (fileName);
+  return 1;
 }
 
-void qt_fileParams::save (const psrParams& eph)
+int qt_fileParams::save (const psrParams& eph)
 {
   window -> setMode (QFileDialog::AnyFile);
   if ( window -> exec () != 1 || fileName.isEmpty() )
-    return;
+    return 0;
 
   if (verbose)
     cerr << "qt_fileParams::save to " << fileName << endl;
 
-  try {
-    eph.unload (fileName.ascii());
-  }
-  catch (string err) {
-    cerr << "qt_fileParams::open error loading from " 
-	 << fileName << endl << err << endl;
-  }
+  eph.unload (fileName);
+  return 1;
 }
 
 void qt_fileParams::chosen ( const QString& name )

@@ -372,6 +372,30 @@ double psrParams::dm() const
   return -1.0;
 }
 
+Angle psrParams::jra() const
+{
+  psrParameter* el = element (EPH_RAJ);
+  if (el)
+    return el -> getAngle();
+
+  string error ("psrParams::jra() JRA not specified.");
+  if (verbose)
+    cerr << error << endl;
+  throw error;
+}
+
+Angle psrParams::jdec() const
+{
+  psrParameter* el = element (EPH_DECJ);
+  if (el)
+    return el -> getDouble();
+  
+  string error ("psrParams::jdec() JDEC not specified.");
+  if (verbose)
+    cerr << error << endl;
+  throw error;  
+}
+
 double psrParams::p() const
 {
   psrParameter* el = element (EPH_F);
@@ -395,7 +419,6 @@ double psrParams::p_err() const
     if (freq != 0.0)
       return -1.0 / freq / freq * err;
   }
-
   if (verbose)
     cerr << "psrParams::p_err() rotation frequency not specified." << endl;
   return -1.0;

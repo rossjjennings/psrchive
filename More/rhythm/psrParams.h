@@ -14,6 +14,7 @@
 
 #include <stdio.h>
 
+#include "Angle.h"
 #include "psr_cpp.h"
 
 class psrParameter;  // implementation detail defined in psrParameter.h
@@ -70,19 +71,17 @@ class psrParams
   int index (int eph_index) const;
   const psrParameter& operator [] (int eph_index) const;
 
-  double p() const;
-  double p_err() const;
-
   // return some values
   string psrname() const;
   friend bool operator == (const psrParams &, const psrParams &);
   friend bool operator != (const psrParams &, const psrParams &);
 
   double dm() const;
-  /*
-  double jra() const;
-  double jdec() const;
-  */
+  double p() const;
+  double p_err() const;
+
+  Angle  jra() const;
+  Angle  jdec() const;
 
   // static members and methods
   static bool verbose;

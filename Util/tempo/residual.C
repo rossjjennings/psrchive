@@ -48,3 +48,29 @@ int residual::load (int r2flun, char* filename, vector<residual>* residuals)
   return 0;
 }
 
+residual::plot residual::xtype = Mjd;
+residual::plot residual::ytype = Seconds;
+
+float y_ordinate (const residual& r)
+{
+  switch (residual::ytype)  {
+  case residual::Seconds:
+    return r.seconds;
+  case residual::Turns:
+    return r.turns;
+  default:
+    return -1.0;
+  }
+}
+
+float x_ordinate (const residual& r)
+{
+  switch (residual::xtype)  {
+  case residual::Mjd:
+    return r.mjd;
+  case residual::BinaryPhase:
+    return r.binaryphase;
+  default:
+    return -1.0;
+  }
+}
