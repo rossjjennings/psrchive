@@ -174,7 +174,7 @@ void Tempo::lock ()
 
   open_lockfile ();
 
-  flock lock;
+  struct flock lock;
   lock.l_whence = SEEK_SET;
   lock.l_type   = F_WRLCK;
   lock.l_start  = 0;
@@ -194,7 +194,7 @@ void Tempo::unlock ()
 
   open_lockfile ();
 
-  flock lock;
+  struct flock lock;
   lock.l_whence = SEEK_SET;
   lock.l_type   = F_UNLCK;
   lock.l_start  = 0;
