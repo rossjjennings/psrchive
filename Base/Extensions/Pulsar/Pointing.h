@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/Pointing.h,v $
-   $Revision: 1.2 $
-   $Date: 2004/12/14 12:23:43 $
+   $Revision: 1.3 $
+   $Date: 2004/12/15 10:37:56 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Pointing_h
@@ -10,6 +10,7 @@
 
 #include "Pulsar/Integration.h"
 #include "Angle.h"
+#include "Estimate.h"
 
 namespace Pulsar {
   
@@ -33,41 +34,97 @@ namespace Pulsar {
     //! Clone method
     Pointing* clone () const { return new Pointing( *this ); }
 
+    //! Addition operator
+    const Pointing& operator += (const Pointing& extension);
+
     //! Integrate information from another Integration
     void integrate (const Integration* subint);
 
     //! Update information based on the provided Integration
     void update (const Integration* subint);
 
+    //! Set the LST (in seconds) at subint centre
+    void set_local_sidereal_time (double seconds);
+    //! Get the LST (in seconds) at subint centre
+    double get_local_sidereal_time () const;
+
+    //! Set the RA (J2000) at subint centre
+    void set_right_ascension (const Angle&);
+    //! Get the RA (J2000) at subint centre
+    Angle get_right_ascension () const;
+
+    //! Set the DEC (J2000) at subint centre
+    void set_declination (const Angle&);
+    //! Get the DEC (J2000) at subint centre
+    Angle get_declination () const;
+
+    //! Set the Gal longitude at subint centre
+    void set_galactic_longitude (const Angle&);
+    //! Get the Gal longitude at subint centre
+    Angle get_galactic_longitude () const;
+
+    //! Set the Gal latitude at subint centre
+    void set_galactic_latitude (const Angle&);
+    //! Get the Gal latitude at subint centre
+    Angle get_galactic_latitude () const;
+
+    //! Set the Feed angle at subint centre
+    void set_feed_angle (const Angle&);
+    //! Get the Feed angle at subint centre
+    Angle get_feed_angle () const;
+
+    //! Set the Position angle of feed at subint centre
+    void set_position_angle (const Angle&);
+    //! Get the Position angle of feed at subint centre
+    Angle get_position_angle () const;
+
+    //! Set the Parallactic angle at subint centre
+    void set_parallactic_angle (const Angle&);
+    //! Get the Parallactic angle at subint centre
+    Angle get_parallactic_angle () const;
+
+    //! Set the Telescope azimuth at subint centre
+    void set_telescope_azimuth (const Angle&);
+    //! Get the Telescope azimuth at subint centre
+    Angle get_telescope_azimuth () const;
+
+    //! Set the Telescope zenith angle at subint centre
+    void set_telescope_zenith (const Angle&);
+    //! Get the Telescope zenith angle at subint centre
+    Angle get_telescope_zenith () const;
+
+
+  protected:
+
     //! LST (in seconds) at subint centre
-    double lst_sub;
+    MeanRadian<double> local_sidereal_time;
     
     //! RA (J2000, in turns) at subint centre
-    Angle ra_sub;
+    MeanRadian<double> right_ascension;
 
     //! DEC (J2000, in turns) at subint centre
-    Angle dec_sub;
+    MeanRadian<double> declination;
 
-    //! Gal longitude (in degrees) at subint centre
-    Angle glon_sub;
+    //! Gal longitude at subint centre
+    MeanRadian<double> galactic_longitude;
 
-    //! Gal latitude (in degrees) at subint centre
-    Angle glat_sub;
+    //! Gal latitude at subint centre
+    MeanRadian<double> galactic_latitude;
 
-    //! Feed angle (in degrees) at subint centre
-    Angle fd_ang;
+    //! Feed angle at subint centre
+    MeanRadian<double> feed_angle;
 
-    //! Position angle (in degrees) of feed at subint centre
-    Angle pos_ang;
+    //! Position angle of feed at subint centre
+    MeanRadian<double> position_angle;
 
-    //! Parallactic angle (in degrees) at subint centre
-    Angle par_ang;
+    //! Parallactic angle at subint centre
+    MeanRadian<double> parallactic_angle;
 
-    //! Telescope azimuth (in degrees) at subint centre
-    Angle tel_az;
+    //! Telescope azimuth at subint centre
+    MeanRadian<double> telescope_azimuth;
 
-    //! Telescope zenith angle (in degrees) at subint centre
-    Angle tel_zen;
+    //! Telescope zenith angle at subint centre
+    MeanRadian<double> telescope_zenith;
 
   };
   
