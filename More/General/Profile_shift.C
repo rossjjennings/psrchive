@@ -61,8 +61,13 @@ Pulsar::GaussianShift (const Profile& std, const Profile& obs)
   // Remove the baseline
   *ptr -= ptr->mean(ptr->find_min_phase(0.15));
   
+  // Ensure the amps aren't tiny lest the fitter be unhappy
+  while (ptr->max() < 1) {
+    *ptr *= 100;
+  }
+  
   // Find the peak (can be done a number of ways, this is the simplest)
-
+  
   int brise = 0;
   int bfall = 0;
   
