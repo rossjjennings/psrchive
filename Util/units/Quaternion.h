@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Quaternion.h,v $
-   $Revision: 1.16 $
-   $Date: 2004/04/06 13:59:39 $
+   $Revision: 1.17 $
+   $Date: 2004/04/06 16:14:45 $
    $Author: straten $ */
 
 #ifndef __Quaternion_H
@@ -146,7 +146,7 @@ public:
 
   //! Set the vector component
   template<typename U>
-  void set_vector (Vector<U,3>& v) { s1=v[0]; s2=v[1]; s3=v[2]; }
+  void set_vector (const Vector<U,3>& v) { s1=v[0]; s2=v[1]; s3=v[2]; }
 
   //! Identity (should be const, wait for gcc version 3)
   static const Quaternion& identity();

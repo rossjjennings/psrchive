@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Basis.h,v $
-   $Revision: 1.2 $
-   $Date: 2004/04/06 13:59:23 $
+   $Revision: 1.3 $
+   $Date: 2004/04/06 16:14:45 $
    $Author: straten $ */
 
 #ifndef __Basis_H
@@ -37,11 +37,11 @@ public:
 
   //! convert the input vector into the basis
   template<typename U>
-  Vector<U,3> get_in (Vector<U,3>& vect) { return into * vect; }
+  Vector<U,3> get_in (const Vector<U,3>& vect) const { return into * vect; }
 
   //! convert the input vector out of the basis
   template<typename U>
-  Vector<U,3> get_out (Vector<U,3>& vect) { return outof * vect; }
+  Vector<U,3> get_out (const Vector<U,3>& vect) const { return outof * vect; }
 
 protected:
 
