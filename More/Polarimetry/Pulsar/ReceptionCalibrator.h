@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ReceptionCalibrator.h,v $
-   $Revision: 1.47 $
-   $Date: 2003/11/25 08:10:07 $
+   $Revision: 1.48 $
+   $Date: 2003/12/02 14:27:19 $
    $Author: straten $ */
 
 #ifndef __ReceptionCalibrator_H
@@ -72,11 +72,14 @@ namespace Pulsar {
     //! Update the relevant estimate
     void update ();
 
+    //! Add a new signal path for the poln calibrator observations
+    void add_polncal_backend ();
+
     //! Add a new signal path for the flux calibrator observations
     void add_fluxcal_backend ();
 
     //! Fix the rotation about the line of sight
-    void no_rotation ();
+    void fix_orientation ();
 
     //! ReceptionModel
     Reference::To<Calibration::ReceptionModel> equation;
@@ -285,7 +288,7 @@ namespace Pulsar {
       //! Return the number of parameter classes
       unsigned get_nclass () const;
       
-    //! Return the name of the specified class
+      //! Return the name of the specified class
       const char* get_name (unsigned iclass) const;
 
       //! Return the number of parameters in the specified class
@@ -294,8 +297,16 @@ namespace Pulsar {
       //! Return the estimate of the specified parameter
       Estimate<float> get_param (unsigned ichan, unsigned iclass,
 				 unsigned iparam) const;
-      
+
+      //! Return the number of channels in the calibrator estimate
+      unsigned get_nchan () const;
+
+      //! Return the number of channels in the flux calibrator estimate
+      unsigned get_fcal_nchan () const;
+
     protected:
+
+      //! The ReceptionCalibrator
       Reference::To<const ReceptionCalibrator> calibrator;
       
     };

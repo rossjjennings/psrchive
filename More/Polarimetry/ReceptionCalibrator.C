@@ -105,17 +105,7 @@ Pulsar::StandardModel::StandardModel (Calibrator::Type _model)
 
   equation = new Calibration::ReceptionModel;
 
-  // ////////////////////////////////////////////////////////////////////
-  //
-  // initialize the signal path seen by the calibrator
-  //
-  
-  pcal_path = new Calibration::ProductTransformation;
-  pcal_path->add_Transformation( instrument );
-  
-  equation->set_Transformation ( pcal_path );
-  ArtificialCalibrator_path = equation->get_path ();
-
+  ArtificialCalibrator_path = 0;
   FluxCalibrator_path = 0;
 
   // ////////////////////////////////////////////////////////////////////
@@ -127,7 +117,7 @@ Pulsar::StandardModel::StandardModel (Calibrator::Type _model)
   pulsar_path->add_Transformation( instrument );
   pulsar_path->add_Transformation( &parallactic );
 
-  equation->add_path ( pulsar_path );
+  equation->set_Transformation ( pulsar_path );
   Pulsar_path = equation->get_path ();
 
   time.connect (&parallactic, &Calibration::Parallactic::set_epoch);
@@ -146,7 +136,6 @@ void Pulsar::StandardModel::add_fluxcal_backend ()
   fluxcal_backend = new Calibration::SingleAxis;
 
   path->add_Transformation( fluxcal_backend );
-
   path->add_Transformation( physical->get_feed() );
 
   equation->add_path ( path );
@@ -154,8 +143,17 @@ void Pulsar::StandardModel::add_fluxcal_backend ()
   FluxCalibrator_path = equation->get_path ();
 }
 
+void Pulsar::StandardModel::add_polncal_backend ()
+{
+  pcal_path = new Calibration::ProductTransformation;
+  pcal_path->add_Transformation( instrument );
 
-void Pulsar::StandardModel::no_rotation ()
+  equation->add_path ( pcal_path );
+
+  ArtificialCalibrator_path = equation->get_path ();
+}
+
+void Pulsar::StandardModel::fix_orientation ()
 {
 
   if (physical)
@@ -234,7 +232,7 @@ void Pulsar::ReceptionCalibrator::initial_observation (const Archive* data)
     model[ichan] = new StandardModel (model_type);
 
     if (measure_cal_Q)
-      model[ichan] -> no_rotation ();
+      model[ichan] -> fix_orientation ();
 
     model[ichan]->parallactic.set_source_coordinates( coordinates );
     model[ichan]->parallactic.set_observatory_coordinates (latitude,longitude);
@@ -521,8 +519,8 @@ Pulsar::ReceptionCalibrator::add_data(vector<Calibration::MeasuredState>& bins,
 
   }
   catch (Error& error) {
-    cerr << "Pulsar::ReceptionCalibrator::add_data ichan=" << ichan 
-	 << " ibin=" << ibin << error << endl;
+    cerr << "Pulsar::ReceptionCalibrator::add_data discarding ichan=" << ichan 
+	 << " ibin=" << ibin << endl;
   }
 }
 
@@ -556,6 +554,8 @@ void Pulsar::ReceptionCalibrator::add_Calibrator (const ArtificialCalibrator* p)
   assert (npol == 4);
 
   if (calibrator_estimate.source.size() == 0) {
+
+    cerr << "Pulsar::ReceptionCalibrator::add_Calibrator first cal" << endl;
 
     // add the calibrator states to the equations
     init_estimate (calibrator_estimate);
@@ -676,8 +676,15 @@ void Pulsar::ReceptionCalibrator::add_Calibrator (const ArtificialCalibrator* p)
 
 	  measurements.path_index = model[ichan]->FluxCalibrator_path;
 	}
-	else
+	else {
+
+          if (!model[ichan]->ArtificialCalibrator_path)
+            // Flux Calibrator observations are made through a different backend
+            model[ichan]->add_polncal_backend();
+
 	  measurements.path_index = model[ichan]->ArtificialCalibrator_path;
+
+        }
 
         model[ichan]->equation->add_data (measurements);
 
@@ -697,12 +704,8 @@ void Pulsar::ReceptionCalibrator::add_Calibrator (const ArtificialCalibrator* p)
 
       }
 
-      else {
-
-	cal_stokes = correct * cal_stokes * herm(correct);
-	calibrator_estimate.source[ichan].mean += cal_stokes;
-
-      }
+      cal_stokes = correct * cal_stokes * herm(correct);
+      calibrator_estimate.source[ichan].mean += cal_stokes;
 
     }
   }
