@@ -15,22 +15,36 @@
 int main (int argc, char *argv[]) {
   
   bool verbose = false;
-  bool display = true;
+  bool display = false;
   bool write = false;
-
+  
   vector<string> archives;
   
-  int gotc = 0;
+  bool manual_zap = false;
+  vector<int> chans_to_zap;
+  bool simple = false;
   
-  while ((gotc = getopt(argc, argv, "hvVDw")) != -1) {
+  int placeholder;
+  
+  int first;
+  int last;
+  
+  int gotc = 0;
+  char* key = NULL;
+  char whitespace[5] = " \n\t";
+  
+  while ((gotc = getopt(argc, argv, "hvVDwz:Z:")) != -1) {
     switch (gotc) {
     case 'h':
-      cout << "A program for zapping RFI in Pulsar::Archives"  << endl;
-      cout << "Usage: paz [options] filenames"                 << endl;
-      cout << "  -v   Verbose mode"                            << endl;
-      cout << "  -V   Very verbose mode"                       << endl;
-      cout << "  -D   Display results"                         << endl;
-      cout << "  -w   Write changes to the file"               << endl;
+      cout << "A program for zapping RFI in Pulsar::Archives"    << endl;
+      cout << "Usage: paz [options] filenames"                   << endl;
+      cout << "  -v               Verbose mode"                  << endl;
+      cout << "  -V               Very verbose mode"             << endl;
+      cout << "  -D               Display results"               << endl;
+      cout << "  -w               Write changes to the file"     << endl;
+      cout << "  -z \"chanlist\"  Zap these particular channels" << endl;
+      cout << "  -Z \"a b\"        Zap chans between a and b"     << endl;
+      cout << "  -d               Simple mean offset rejection"  << endl;
       return (-1);
       break;
     case 'v':
@@ -45,6 +59,27 @@ int main (int argc, char *argv[]) {
       break;
     case 'w':
       write = true;
+      break;
+    case 'z':
+      key = strtok (optarg, whitespace);
+      manual_zap = true;
+      while (key) {
+	if (sscanf(key, "%d", &placeholder) == 1) {
+	  chans_to_zap.push_back(placeholder);
+	}
+	key = strtok (NULL, whitespace);
+      }
+      cerr << chans_to_zap.size() << endl;
+      break;
+    case 'Z':
+      manual_zap = true;
+      if (sscanf(optarg, "%d %d", &first, &last) != 2) {
+	cerr << "Invalid parameter to option -Z" << endl;
+        return (-1);
+      }
+      break;
+    case 'd':
+      simple = true;
       break;
     default:
       cout << "Unrecognised option" << endl;
@@ -83,9 +118,39 @@ int main (int argc, char *argv[]) {
       
       cout << "Loaded archive: " << archives[i] << endl;
       
-      zapper->zap_chans(arch);
+      int nchan = arch->get_nchan();
       
-      cout << "Zapping complete" << endl;
+      if (simple) {
+	cout << "Using simple mean offset zapper" << endl;
+	zapper->zap_chans(arch);
+	cout << "Zapping complete" << endl;
+      }
+      else if (manual_zap) {
+	if (chans_to_zap.empty()) {
+	  vector<float> mask(nchan, 1.0);
+	  if ((last > nchan) || (first > last) || (first < 0)) {
+	    cerr << "YIKES" << endl;
+	    throw Error(InvalidParam, "Specified channels lie outside range");
+	  }
+	  else {
+	    for (int i = first; i <= last; i++) {
+	      mask[i] = 0.0;
+	    }
+	  }
+	  zapper->zap_specific(arch, mask);
+	}
+	else {
+	  vector<float> mask(nchan, 1.0);
+	  for (unsigned i = 0; i < chans_to_zap.size(); i++) {
+	    mask[chans_to_zap[i]] = 0.0;
+	  }
+	  zapper->zap_specific(arch, mask);
+	}
+      }
+      else {
+	cout << "No zapping scheme specified!" << endl;
+	return (-1);
+      }
       
       if (display)
 	plotter.bandpass(arch);
@@ -102,3 +167,5 @@ int main (int argc, char *argv[]) {
   if (display)
     cpgend();
 }
+
+

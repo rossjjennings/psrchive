@@ -58,6 +58,14 @@ vector<float> Pulsar::RFIMitigation::zap_mask (Pulsar::Integration* integ) {
   return mask;
 }
 
+// Manually set specific channel weights to zero
+void Pulsar::RFIMitigation::zap_specific (Pulsar::Archive* arch, vector<float> mask)
+{
+  for (unsigned i = 0; i < arch->get_nsubint(); i++) {
+    apply_mask(arch->get_Integration(i), mask);
+  }
+}
+
 void Pulsar::RFIMitigation::apply_mask (Pulsar::Integration* integ, vector<float> mask)
 {
   if (mask.size() != integ->get_nchan())

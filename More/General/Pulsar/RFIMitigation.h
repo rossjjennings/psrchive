@@ -17,6 +17,8 @@ namespace Pulsar {
     // Run through an archive, setting the weights arrays in each subint
     void zap_chans (Pulsar::Archive* arch);
     
+    // Manually set specific channel weights to zero
+    void zap_specific (Pulsar::Archive* arch, vector<float> mask);
     
   private:
     
