@@ -32,6 +32,10 @@ Pulsar::Archive* Pulsar::Archive::load (const char* filename)
 
   for (unsigned agent=0; agent<Agent::registry.size(); agent++) try {
 
+    if (verbose)
+      cerr << "Pulsar::Archive::load testing "
+           << Agent::registry[agent]->get_name() << endl;
+
     if (Agent::registry[agent]->advocate (filename)) {
 
       if (verbose)

@@ -523,6 +523,9 @@ void Pulsar::Archive::defaraday (double rotation_measure, double rm_iono)
  */
 void Pulsar::Archive::set_ephemeris (const psrephem& new_ephemeris, bool update)
 {
+  if (verbose)
+    cerr << "Pulsar::Archive::set_ephemeris" << endl;
+
   ephemeris = new psrephem (new_ephemeris);
 
   if (get_source() != ephemeris->psrname()) {
@@ -556,8 +559,14 @@ void Pulsar::Archive::set_ephemeris (const psrephem& new_ephemeris, bool update)
     set_dispersion_measure(ephemeris->get_dm());
   }
 
-  if (update)
+  if (update)  {
+    if (verbose)
+      cerr << "Pulsar::Archive::set_ephemeris update polyco" << endl;
     update_model ();
+  }
+
+  if (verbose)
+    cerr << "Pulsar::Archive::set_ephemeris exit" << endl;
 }
 
 const psrephem Pulsar::Archive::get_ephemeris ()
