@@ -91,6 +91,15 @@ AC_DEFUN([SWIN_LIB_CFITSIO],
   fi
 
   AC_MSG_RESULT([$have_cfitsio])
+
+  if test x"$have_cfitsio" = xyes; then
+    AC_DEFINE([HAVE_CFITSIO], [1], [Define if the CFITSIO library is present])
+    [$1]
+  else
+    echo "	The PSRFITS code will not be compiled"
+   [$2]
+  fi
+
   AC_SUBST(CFITSIO_LIBS)
   AC_SUBST(CFITSIO_CFLAGS)
   AM_CONDITIONAL(HAVE_CFITSIO,[test x"$have_cfitsio" = xyes])
