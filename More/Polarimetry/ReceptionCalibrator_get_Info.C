@@ -2,7 +2,8 @@
 #include "Pulsar/InstrumentInfo.h"
 #include "Pulsar/PolarCalibrator.h"
 
-Pulsar::Calibrator::Info* Pulsar::ReceptionCalibrator::get_Info () const
+Pulsar::ReceptionCalibrator::Info*
+Pulsar::ReceptionCalibrator::get_Info () const
 {
   const_cast<ReceptionCalibrator*>(this)->initialize();
 
