@@ -1,5 +1,6 @@
 #include "Pulsar/PolnCalibrator.h"
 #include "Pulsar/PolnCalibratorExtension.h"
+#include "Pulsar/CorrectionsCalibrator.h"
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
 #include "Pulsar/Receiver.h"
@@ -20,9 +21,15 @@ Pulsar::PolnCalibrator::PolnCalibrator (Archive* archive)
   if (!archive)
     return;
 
+  // store the calibrator archive
   calibrator = archive;
+
+  // store the related Extension, if any
   extension = archive->get<PolnCalibratorExtension>();
+
+  // store the Receiver Extension, if any
   receiver = archive->get<Receiver>();
+
 }
 
 //! Copy constructor
@@ -274,7 +281,7 @@ try {
   string reason;
   if (!calibrator->calibrator_match (arch, reason))
     throw Error (InvalidParam, "Pulsar::FluxCalibrator", "Pulsar::Archive='"
-		 + calibrator->get_filename() + "'\ndoes not mix with '"
+		 + calibrator->get_filename() + "'\ndoes not match '"
 		 + arch->get_filename() + reason);
 
   if (response.size() != arch->get_nchan())
@@ -282,8 +289,22 @@ try {
 
   if (verbose)
     cerr << "Pulsar::PolnCalibrator::calibrate call Archive::transform" << endl;
-
   arch->transform (response);
+
+  arch->set_poln_calibrated (true);
+  arch->set_scale (Signal::ReferenceFluxDensity);
+
+  if (receiver) {
+
+    Receiver* rcvr = arch->get<Receiver>();
+    if (!rcvr)
+      throw Error (InvalidState, "Pulsar::PolnCalibrator::calibrate",
+		   "Archive has no Receiver Extension");
+
+    rcvr->set_feed_corrected (true);
+
+  }
+
 }
 catch (Error& error) {
   error += "Pulsar::PolnCalibrator::calibrate";
