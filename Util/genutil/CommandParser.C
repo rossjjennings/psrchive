@@ -1,18 +1,29 @@
 #include "CommandParser.h"
 #include "string_utils.h"
 
+bool CommandParser::debug = false;
+
 CommandParser::CommandParser()
 {
   quit = false;
   verbose = false;
+  current_command = 0;
 }
 
 static const char* whitespace = " \t\n";
 
 string CommandParser::parse (const char* commandargs)
 {
+  if (debug)
+  cerr << "CommandParser::parse '" << commandargs << "'" << endl;
+
+
   string cmdargs = commandargs;
   string command = stringtok (&cmdargs, whitespace);
+
+  if (debug)
+  cerr << "CommandParser::parse '"<< command <<"' '"<< cmdargs <<"'"<<endl;
+
 
   return parse (command, cmdargs);
 }
@@ -23,8 +34,16 @@ string CommandParser::parse (const char* cmd, const char* args)
   string command = cmd;
   string arguments = args;
 
+  if (debug)
+  cerr << "CommandParser::parse '"<< command <<"' '"<< arguments <<"'"<<endl;
+
+
   if (command.empty())
     return prompt;
+
+  if (debug)
+  cerr << "CommandParser::parse command not empty"<<endl;
+
 
   // //////////////////////////////////////////////////////////////////////
   //
@@ -35,6 +54,10 @@ string CommandParser::parse (const char* cmd, const char* args)
     return "\n";
   }
 
+  if (debug)
+  cerr << "CommandParser::parse command not quit"<<endl;
+
+
   if (command == "verbose") {
     verbose = !verbose;
     if (verbose)
@@ -43,12 +66,32 @@ string CommandParser::parse (const char* cmd, const char* args)
       return prompt;
   }
 
+  if (debug)
+  cerr << "CommandParser::parse command not verbose"<<endl;
+
+
   if (command == "help")
     return help (arguments);
 
+  if (debug)
+    cerr << "CommandParser::parse command not help"<<endl;
+
+
   for (unsigned icmd=0; icmd < commands.size(); icmd++)
     if (command == commands[icmd].command) {
+
+      current_command = icmd;
+
+      if (debug)
+	cerr << "CommandParser::parse execute " << command <<endl;
+
+
       string reply = execute (commands[icmd].token, arguments);
+
+      if (debug)
+	cerr << "CommandParser::parse execute returns '" << reply <<"'"<<endl;
+
+
       if (reply.empty())
 	return prompt;
       else
@@ -70,6 +113,11 @@ void CommandParser::add_command (int token, const char* cmd,
     }
 
   commands.push_back (Command(token, cmd, help, detailed_help));
+}
+
+string CommandParser::usage ()
+{
+  return "usage: " + commands[current_command].detail;
 }
 
 string CommandParser::help (const string& command)

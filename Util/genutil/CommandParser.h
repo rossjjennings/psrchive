@@ -20,6 +20,8 @@ class Command {
 class CommandParser {
 
  public:
+  //! verbose output from CommandParser methods
+  static bool debug;
 
   //! the prompt shown to the user
   string prompt;
