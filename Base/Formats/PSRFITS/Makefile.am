@@ -3,6 +3,8 @@ noinst_LTLIBRARIES = libpsrfits.la
 
 include_HEADERS = Pulsar/FITSArchive.h
 
+dist_data_DATA = psrheader.fits
+
 libpsrfits_la_SOURCES = CalibratorExtensionIO.h FITSArchive.C \
 	unload_FITSHdrExtension.C unload_ObsExtension.C \
 	unload_Receiver.C load_Receiver.C \
