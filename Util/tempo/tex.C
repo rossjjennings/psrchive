@@ -7,12 +7,13 @@
 //
 // //////////////////////////////////////////////////////////////////////////
 
+#include "psrephem.h"
+#include "ephio.h"
+
 #include <vector>
 #include <math.h>
 #include <iostream>
-
-#include "psrephem.h"
-#include "ephio.h"
+#include <assert.h>
 
 extern "C" {
   // routines from the psrinfo library used here
