@@ -1,3 +1,5 @@
+#include <algorithm>
+
 #include <string.h>
 #include <unistd.h>
 #include <libgen.h>
@@ -14,6 +16,8 @@
 #include "Pulsar/BinaryPhaseOrder.h"
 #include "Pulsar/BinLngAscOrder.h"
 #include "Pulsar/BinLngPeriOrder.h"
+
+#include "Pulsar/TimerArchive.h"
 
 #include "Error.h"
 
@@ -41,6 +45,7 @@ void usage()
   cout << "  -C               Set feed basis to Circular"                     << endl;
   cout << "  -B               Flip the sideband sense"                        << endl;
   cout << "  -E ephfile       Install a new ephemeris and update model"       << endl;
+  cout << "  -x \"start end\"   Extract subints in this inclusive range"      << endl;
   cout << endl;
   cout << "The following options take integer arguments"                      << endl;
   cout << "  -t               Time scrunch by this factor"                    << endl;
@@ -130,6 +135,9 @@ int main (int argc, char *argv[]) {
   bool cblpo = false;
   bool cblao = false;
 
+  int subint_extract_start = -1;
+  int subint_extract_end = -1;
+
   Reference::To<Pulsar::IntegrationOrder> myio = 0;
 
   int c = 0;
@@ -149,7 +157,7 @@ int main (int argc, char *argv[]) {
       {0, 0, 0, 0}
     };
     
-    c = getopt_long(argc, argv, "hvVima:e:E:TFpIt:f:b:d:s:r:u:w:D:SBLC",
+    c = getopt_long(argc, argv, "hvVima:e:E:TFpIt:f:b:d:s:r:u:w:D:SBLCx:",
 		    long_options, &options_index);
     
     if (c == -1)
@@ -168,7 +176,7 @@ int main (int argc, char *argv[]) {
       Pulsar::Archive::set_verbosity(3);
       break;
     case 'i':
-      cout << "$Id: pam.C,v 1.29 2004/03/03 01:01:07 ahotan Exp $" << endl;
+      cout << "$Id: pam.C,v 1.30 2004/03/03 07:27:24 hknight Exp $" << endl;
       return 0;
     case 'm':
       save = true;
@@ -298,6 +306,10 @@ int main (int argc, char *argv[]) {
       break;
     case 'B':
       flipsb = true;
+      break;
+    case 'x' :
+      sscanf(optarg,"%d %d",&subint_extract_start,&subint_extract_end);
+      subint_extract_end++;
       break;
     case 200:
       fscr = true;
@@ -511,6 +523,21 @@ int main (int argc, char *argv[]) {
 	myio->organise(arch, ronsub);
       }
       
+      if( subint_extract_start >= 0 && subint_extract_end >= 0 ) {
+	vector<unsigned> subints;
+	unsigned isub = subint_extract_start;
+
+	while ( isub < arch->get_nsubint() && isub < unsigned(subint_extract_end) ){
+	  subints.push_back( isub );
+	  isub++;
+	}
+
+	Reference::To<Pulsar::Archive> extracted( arch->extract(subints) );
+	extracted->set_filename( arch->get_filename() );
+
+	arch = extracted;
+      }
+
       if (tscr) {
 	if (new_nsub > 0) {
 	  arch->tscrunch_to_nsub(new_nsub);
