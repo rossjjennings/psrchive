@@ -46,21 +46,21 @@ void Pulsar::FluxCalibrator::init ()
 
 double Pulsar::FluxCalibrator::meanTsys ()
 {
-  double retval = 0.0;
+  MeanEstimate<double> mean;
+
+  for (unsigned i = 0; i < T_sys.size(); i++)
+    mean += T_sys[i];
   
-  for (unsigned i = 0; i < T_sys.size(); i++) {
-    retval += T_sys[i].val;
-  }
-  
-  return (retval / T_sys.size());
+  return mean.get_Estimate().val;
 }
 
 double Pulsar::FluxCalibrator::Tsys (unsigned ichan)
 {
-  if (ichan > T_sys.size()-1)
-    return 0.0;
+  if (ichan >= T_sys.size())
+    throw Error (InvalidParam, "Pulsar::FluxCalibrator::Tsys",
+                 "ichan=%d > T_sys.size=%d", ichan, T_sys.size());
   
-  return (T_sys[ichan].val);
+  return T_sys[ichan].val;
 }
 
 void Pulsar::FluxCalibrator::add_observation (const Archive* archive)
@@ -139,6 +139,13 @@ void Pulsar::FluxCalibrator::add_observation (const Archive* archive)
 
     if (integration->get_weight(ichan) == 0)
       continue;
+
+    if (cal_lo[0][ichan].val == 0)  {
+      if (verbose)
+        cerr << "Pulsar::FluxCalibrator::add_observation ichan=" << ichan
+             << " division by zero" << endl;
+      continue;
+    }
 
     // Take the ratio of the total intensity
     Estimate<double> ratio = cal_hi[0][ichan]/cal_lo[0][ichan] - unity ;
@@ -322,6 +329,8 @@ try {
 
   const Integration* subint = calibrator->get_Integration(0);
 
+  unsigned good_channels = 0;
+
   for (unsigned ichan=0; ichan<nchan; ++ichan) {
 
     if (on[ichan]==0 || off[ichan]==0) {
@@ -353,8 +362,13 @@ try {
       
       cal_flux[ichan] = T_sys[ichan] = 0;
     }
+    else
+      good_channels ++;
     
   }  // end for each chan
+
+  if (!good_channels)
+    throw Error (InvalidState, string(), "Flux calibrator not detected");
 
   calculated = true;
 }
