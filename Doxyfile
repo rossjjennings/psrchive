@@ -581,7 +581,8 @@ EXPAND_AS_DEFINED      =
 
 # The TAGFILES tag can be used to specify one or more tagfiles. 
 
-TAGFILES               = ../Calibration/doxygen.tag=../Calibration
+TAGFILES  = ../Calibration/doxygen.tag=../Calibration
+TAGFILES += ../utils/units/doxygen.tag=../units
 
 # When a file name is specified after GENERATE_TAGFILE, doxygen will create 
 # a tag file that is based on the input files it reads. 
