@@ -11,6 +11,8 @@
 /*****************************************************************************/
 void Pulsar::TimerArchive::load_header (const char* filename)
 {
+  fprintf(stderr,"In Pulsar::TimerArchive::load_header(%s)\n\n\n",filename);
+
   if (verbose)
     cerr << "TimerArchive::load (" << filename << ")" << endl;
 
@@ -349,6 +351,8 @@ void Pulsar::TimerArchive::subint_load (FILE* fptr)
 
 void Pulsar::TimerArchive::hdr_load (FILE* fptr)
 {
+  fprintf(stderr,"In Pulsar::TimerArchive::hdr_load()\n");
+
   if (verbose)
     cerr << "TimerArchive::hdr_load reading timer header" << endl;
 
