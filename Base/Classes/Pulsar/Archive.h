@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Archive.h,v $
-   $Revision: 1.53 $
-   $Date: 2003/02/05 10:20:56 $
-   $Author: pulsar $ */
+   $Revision: 1.54 $
+   $Date: 2003/02/13 14:04:55 $
+   $Author: straten $ */
 
 /*! \mainpage 
  
@@ -366,10 +366,10 @@ namespace Pulsar {
     virtual void uniform_weight ();
 
     //! Test if arch matches (enough for a pulsar - calibrator match)
-    virtual bool match (const Archive* arch, string& reason);
+    virtual bool match (const Archive* arch, string& reason) const;
 
     //! Test if arch is mixable (enough for append)
-    virtual bool mixable (const Archive* arch, string& reason);
+    virtual bool mixable (const Archive* arch, string& reason) const;
 
     //! Computes the weighted channel frequency over an Integration interval.
     double weighted_frequency (unsigned ichan,

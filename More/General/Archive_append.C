@@ -84,7 +84,7 @@ void Pulsar::Archive::append (const Archive* arch)
   \retval reason if match fails, describes why in English
   \return true if arch matches this 
 */
-bool Pulsar::Archive::mixable (const Archive* arch, string& reason)
+bool Pulsar::Archive::mixable (const Archive* arch, string& reason) const
 {
   if (get_state() != arch->get_state()) {
     reason = stringprintf ("polarimetric state mismatch: %s != %s",
@@ -137,7 +137,7 @@ bool Pulsar::Archive::match_opposite_sideband = false;
   \retval reason if match fails, describes why in English
   \return true if arch matches this 
 */
-bool Pulsar::Archive::match (const Archive* arch, string& reason)
+bool Pulsar::Archive::match (const Archive* arch, string& reason) const
 {
   if (get_basis() != arch->get_basis()) {
     reason = stringprintf ("feed type mismatch: %d != %d", 
