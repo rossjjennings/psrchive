@@ -1,6 +1,6 @@
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Attic/string_utils.h,v $
-   $Revision: 1.6 $
-   $Date: 1999/12/21 04:51:45 $
+   $Revision: 1.7 $
+   $Date: 1999/12/23 01:55:58 $
    $Author: straten $ */
 
 #ifndef __STRING_UTILS_H
@@ -8,6 +8,8 @@
 
 #include <sys/types.h>
 #include <stdio.h>
+
+#include <iostream>
 #include <string>
 #include <vector>
 
@@ -17,7 +19,7 @@
 // reads up to 'nbytes' (or to eof) from 'istr', adding them 
 // to 'str'.  returns number of bytes read or -1 on error
 // ///////////////////////////////////////////////////////////
-ssize_t stringload (string* str, istream &istr, size_t nbytes=0);
+ssize_t stringload (string* str, istream &istr, streamsize nbytes=0);
 
 // ///////////////////////////////////////////////////////////
 // reads up to 'nbytes' (or to eof) from 'fptr', adding them 

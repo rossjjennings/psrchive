@@ -33,7 +33,7 @@ ssize_t stringload (string* str, FILE* fptr, size_t nbytes)
   return bytesread;
 }
 
-ssize_t stringload (string* str, istream &istr, size_t nbytes)
+ssize_t stringload (string* str, istream &istr, streamsize nbytes)
 {
   if (rdline == NULL) rdline = new char [rdsize];
   streamsize eachread  = rdsize;
