@@ -95,15 +95,35 @@ namespace TextInterface {
 
   public:
 
+    //! Generate a new AttributeGet instance
     template<class Get>
       AttributeGet<Class,Type,Get>* 
-      new_attribute (const std::string& n, Get g)
+      named (const std::string& n, Get g)
       { return new AttributeGet<Class,Type,Get> (n, g); }
-
+    
+    //! Generate a new AttributeGetSet instance
     template<class Get, class Set>
-    AttributeGetSet<Class,Type,Get,Set>* 
-      new_attribute (const std::string& n, Get g, Set s)
+      AttributeGetSet<Class,Type,Get,Set>* 
+      named (const std::string& n, Get g, Set s)
       { return new AttributeGetSet<Class,Type,Get,Set> (n, g, s); }
+    
+    //! Generate a new AttributeGet instance with description
+    template<class Get>
+      AttributeGet<Class,Type,Get>* 
+      described (const std::string& n, const std::string& d, Get g)
+      {
+	AttributeGet<Class,Type,Get>* get = named (n,g);
+	get->set_description (d); return get;
+      }
+
+    //! Generate a new AttributeGetSet instance with description
+    template<class Get, class Set>
+      AttributeGetSet<Class,Type,Get,Set>* 
+      described (const std::string& n, const std::string& d, Get g, Set s)
+      {
+	AttributeGetSet<Class,Type,Get,Set>* get = named (n,g,s);
+	get->set_description (d); return get;
+      }
 
   };
 
@@ -143,10 +163,10 @@ namespace TextInterface {
     //! Set the instance
     virtual void set_instance (C* c) { instance = c; }
 
-    //! Add a new named class attribute interface
-    void add_attribute (Attribute<C>* att) { attributes.push_back (att); }
-
   protected:
+
+    //! Add a new named class attribute interface
+    void add (Attribute<C>* att) { attributes.push_back (att); }
 
     //! The named class attribute interfaces
     std::vector< Reference::To< Attribute<C> > > attributes;

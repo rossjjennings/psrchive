@@ -14,6 +14,16 @@ protected:
 
 };
 
+class testerTUI : public TextInterface::ClassGetSet<tester> {
+
+public:
+  testerTUI () {
+   Generator<double> generator;
+   add (generator.described("value", "description", &tester::get_value));
+  }
+
+};
+
 int main ()
 {
   tester test;
@@ -21,8 +31,7 @@ int main ()
   TextInterface::Allocator<tester,double> allocate;
 
   TextInterface::Attribute<tester>* interface;
-  interface = allocate.new_attribute ("value",
-                                      &tester::get_value, &tester::set_value);
+  interface = allocate.named ("value", &tester::get_value, &tester::set_value);
 
   interface->set_value (&test, "3.456");
 
@@ -34,7 +43,7 @@ int main ()
   }
 
   TextInterface::Attribute<tester>* read_only;
-  read_only = allocate.new_attribute ("value", &tester::get_value);
+  read_only = allocate.named ("value", &tester::get_value);
 
   cerr << "AttributeGet::get_value=" << read_only->get_value(&test) << endl;
 
@@ -55,11 +64,8 @@ int main ()
     cerr << "AttributeGet::set_value raises exception as expected" << endl;
   }
 
-  TextInterface::ClassGetSet<tester> getset;
+  testerTUI getset;
   getset.set_instance (&test);
-
-  TextInterface::ClassGetSet<tester>::Generator<double> generator;
-  getset.add_attribute (generator.new_attribute("value", &tester::get_value));
 
   cerr << "ClassGetSet::get_value=" << getset.get_value("value") << endl;
 
