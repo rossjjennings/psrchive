@@ -75,7 +75,7 @@ int main (int argc, char** argv)
   Pulsar::Plotter plotter;
 
   int c = 0;
-  const char* args = "ab:cd:DGe:E:f:FhHm:M:pr:St:TvVwx:y:RZCY";
+  const char* args = "ab:cd:DGe:E:f:FhHm:M:pr:St:TvVwWx:y:RZCYz:";
   while ((c = getopt(argc, argv, args)) != -1)
     switch (c) {
 
@@ -149,6 +149,9 @@ int main (int argc, char** argv)
     case 'w':
       stopwatch = true;
       break;
+    case 'W':
+      plotter.set_white_background ();
+      break;
     case 'x':
       // x panel
       break;
@@ -167,6 +170,18 @@ int main (int argc, char** argv)
     case 'Y':
       timeplot = true;
       break;
+    case 'z':  {
+      char* separator = ",";
+      char* val1 = strtok (optarg, separator);
+      char* val2 = strtok (NULL, separator);
+      if (!val1 || !val2)  {
+        cerr << "Error parsing zoom" << endl;
+        return -1;
+      }
+      plotter.set_zoom (atof(val1), atof(val2));
+    }
+      break;
+
     default:
       cerr << "invalid param '" << c << "'" << endl;
     }
