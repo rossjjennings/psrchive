@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Archive.h,v $
-   $Revision: 1.33 $
-   $Date: 2002/07/27 03:32:30 $
+   $Revision: 1.34 $
+   $Date: 2002/08/19 05:38:12 $
    $Author: straten $ */
 
 /*! \mainpage 
@@ -409,9 +409,9 @@ namespace Pulsar {
     //! Set the state of the profiles
     virtual void set_poln_state (Poln::State state) = 0;
 
-    //! Get the centre frequency of the observation
+    //! Get the dispersion measure (in \f${\rm pc cm}^{-3}\f$)
     virtual double get_dispersion_measure () const = 0;
-    //! Set the centre frequency of the observation
+    //! Set the dispersion measure (in \f${\rm pc cm}^{-3}\f$)
     virtual void set_dispersion_measure (double dm) = 0;
 
 
