@@ -108,7 +108,8 @@ int psrephem::load (const char* filename)
   tempo11 = 1;
   size_dataspace();
 
-  rd_eph (filename, parmStatus, ephemstr, value_double,value_integer,error_double);
+  rd_eph (filename, parmStatus, ephemstr, value_double, 
+	  value_integer, error_double);
   int all_zero = 1;
   for (int i=0;i<EPH_NUM_KEYS;i++)  {
     if (parmStatus[i] == 1) {
@@ -119,7 +120,8 @@ int psrephem::load (const char* filename)
   if (all_zero) {
     if(verbose)
       fprintf (stderr,
-	       "psrephem::load WARNING tempo11-style load of '%s' failed\n", filename);
+	       "psrephem::load WARNING tempo11-style load of '%s' failed\n",
+	       filename);
     return old_load (filename);
   }
 
@@ -215,6 +217,7 @@ string psrephem::par_lookup (const char* name, int use_cwd)
       }
       return filename;
     }
+    /* Look for jname.par in current directory */
     filename = cwd + psr_name + par;
     if (stat (filename.c_str(), &finfo) == 0) {
       if (verbose) {
