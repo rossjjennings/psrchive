@@ -3,6 +3,7 @@
 
 #include <fitsio.h>
 
+#define PSRFITS 1
 #include "poly.h"
 #include "genutil.h"
 #include "fitsutil.h"

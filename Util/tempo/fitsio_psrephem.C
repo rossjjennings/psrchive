@@ -5,6 +5,7 @@
 
 #include <fitsio.h>
 
+#define PSRFITS 1
 #include "psrephem.h"
 #include "ephio.h"
 #include "genutil.h"
