@@ -23,7 +23,7 @@ LIB_SRCS += profile_pgplot.C sub_int_pgplot.C archive_pgplot.C \
 endif
 
 LDFLAGS += -larchive -ltempo++ -lpolyco -leph -ltimes \
-	-lgenutil -lsla $(LFFT) $(LF77) -lm
+	-lgenutil++ -lgenutil -lsla $(LFFT) $(LF77) -lm
 
 PROGRAMS = calinfo.C align.C amps.C chanprep.C crstd.C \
 	mel.C newname.C oneprof.C plotsub.C tadd.C modhead.C \
