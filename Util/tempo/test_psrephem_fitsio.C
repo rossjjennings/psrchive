@@ -103,15 +103,15 @@ int main (int argc, char** argv)
   if (verbose)
     cout << "Parsed ephemeris\n" << eph;
 
-  string first, second;
+  string ephstr1, ephstr2;
 
-  eph.unload (&first);
-  eph2.unload (&second);
+  eph.unload (&ephstr1);
+  eph2.unload (&ephstr2);
 
-  if (second != first)
+  if (ephstr1 != ephstr2)
     cerr << "test_fitsio: FAIL written != read" << endl;
 
-  cerr << "Original\n" << first << "\nWritten\n" << second << endl;
+  cerr << "Original\n" << ephstr1 << "\nWritten\n" << ephstr2 << endl;
 
   return 0;
 }
