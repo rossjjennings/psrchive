@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Profile.h,v $
-   $Revision: 1.7 $
-   $Date: 2002/04/12 02:05:45 $
+   $Revision: 1.8 $
+   $Date: 2002/04/16 01:57:36 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Profile_h
@@ -45,11 +45,17 @@ namespace Pulsar {
     //! returns a pointer to a new copy of self
     virtual Profile* clone ();
 
+    //! sets profile equal to another profile
+    virtual const Profile& operator = (const Profile& profile);
+
+    //! calculates weighted average of profile and another profile
+    virtual const Profile& operator += (const Profile& profile);
+
     //! adds offset to each bin of the profile
-    virtual void offset (float offset);
+    virtual const Profile& operator += (float offset);
 
     //! multiplies each bin of the profile by scale
-    virtual void scale (float scale);
+    virtual const Profile& operator *= (float scale);
 
     //! rotates the profile by phase (in turns)
     virtual void rotate (double phase);
@@ -97,6 +103,9 @@ namespace Pulsar {
     
     //! returns the signal to noise ratio of the profile
     float snr () const;
+
+    //! rotates the profile to remove dispersion delay
+    void dedisperse (double dm, double ref_freq, double pfold);
 
     //! returns the signal to noise ratio of the profile
     //float snr (float duty_cycle, float wing_sigma) const;

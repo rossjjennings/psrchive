@@ -63,7 +63,7 @@ Pulsar::Integration* Pulsar::Integration::clone (int _npol, int _nband) const
 
   Integration* ptr = new Integration;
 
-  ptr->set_start_time (start_time);
+  ptr->set_mid_time (mid_time);
   ptr->set_duration (duration);
   ptr->set_centre_frequency (centrefreq);
   ptr->set_bandwidth (bw);

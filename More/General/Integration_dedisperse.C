@@ -1,9 +1,6 @@
 #include "Integration.h"
 #include "Profile.h"
-
-
-//! returns the dispersion delay between a frequency and reference frequency
-double dispersion_delay (double dm, double reference_freq, double freq);
+#include "Error.h"
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -14,7 +11,7 @@ double dispersion_delay (double dm, double reference_freq, double freq);
   \param frequency the frequency (in MHz) to which the delay is referenced
   \pre the period (in seconds) at which the pulsar signal was folded must
        have been previously set using Integration::set_folding_period.
-  \pre the dispersion measure (in \f${\rm pc cm}^3\f$ must have been
+  \pre the dispersion measure (in \f${\rm pc cm}^{-3}\f$) must have been
        previously set using Integration::set_dispersion_measure.
 */
 void Pulsar::Integration::dedisperse (double frequency)
@@ -30,15 +27,10 @@ void Pulsar::Integration::dedisperse (double frequency)
   if (verbose)
     cerr << "Integration::dedisperse DM="<< dm <<" freq="<< frequency << endl;
 
-  for (int ipol=0; ipol<get_npol(); ipol++) {
-    for (int iband=0; iband<get_nband(); iband++) {
+  for (int ipol=0; ipol<get_npol(); ipol++)
+    for (int iband=0; iband<get_nband(); iband++)
+      profiles[ipol][iband] -> dedisperse (dm, frequency, pfold);
 
-      double cfreq = profiles[ipol][iband] -> get_centre_frequency();
-      double delay = dispersion_delay (dm, frequency, cfreq);
-
-      profiles[ipol][iband] -> rotate (delay/pfold);
-    }
-  }
 }
 
 
@@ -51,10 +43,9 @@ void Pulsar::Integration::dedisperse (double frequency)
   \retval weight the weight to be ascribed if the band interval was integrated
   \param  band_start the first band included in the calculation
   \param  band_end one more than the index of the last band
-  \param  poln the polarization measure on which to operate
 */
 double Pulsar::Integration::weighted_frequency 
-( double* weight, Poln::Measure poln, int band_start, int band_end ) const
+( double* weight, int band_start, int band_end ) const
 {
   if (band_end == 0)
     band_end = get_nband();
@@ -63,15 +54,18 @@ double Pulsar::Integration::weighted_frequency
   int ipol = 0;
 
   if (profiles.size() < 1)
-    throw string ("Integration::weighted_frequency invalid dimensions");
+    throw Error (InvalidRange, "Integration::weighted_frequency",
+		 "profiles.size() == 0");
 
   const vector<Profile*>& prof = profiles[ipol];
 
-  if (band_start > int(prof.size()) || band_start < 0)
-    throw string ("Integration::weighted_frequency invalid band_start");
+  if (band_start >= nband || band_start < 0)
+    throw Error (InvalidRange, "Integration::weighted_frequency",
+		 "band_start=%d >= nband=%d", band_start, nband);
 
-  if (band_end > int(prof.size()) || band_end < 0)
-    throw string ("Integration::weighted_frequency invalid band_end");
+  if (band_end > nband || band_end < 0)
+    throw Error (InvalidRange, "Integration::weighted_frequency",
+		 "band_end=%d > nband=%d", band_end, nband);
 
   double weightsum = 0.0;
   double freqsum = 0.0;
@@ -95,20 +89,4 @@ double Pulsar::Integration::weighted_frequency
   // Nearest kHz
   result = 1e-3 * double( int(result*1e3) );
   return result;
-}
-
-/*! 
-  If the frequency is lower than the reference frequency, then the delay
-  is positive.
-  \return dispersion delay in seconds
-  \param dm the dispersion measure in \f$ {\rm pc cm}^3 \f$
-  \param reference_freq the frequency (in MHz) to which the delay is
-         referenced
-  \param freq the frequency (in MHz) of the delayed band
-*/
-double dispersion_delay (double dm, double reference_freq, double freq)
-{
-  if (reference_freq == 0 || freq == 0)
-    throw string ("dispersion_delay: invalid frequency");
-  return (dm/2.41e-4)*(1.0/(freq*freq)-1.0/(reference_freq*reference_freq));
 }

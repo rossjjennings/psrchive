@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Integration.h,v $
-   $Revision: 1.8 $
-   $Date: 2002/04/12 02:05:45 $
+   $Revision: 1.9 $
+   $Date: 2002/04/16 01:57:36 $
    $Author: straten $ */
 
 /*
@@ -63,16 +63,19 @@ namespace Pulsar {
     virtual void bscrunch (int nscrunch);
 
     //! Integrate profiles from neighbouring bands
-    virtual void fscrunch (int nscrunch = 0);
+    virtual void fscrunch (int nscrunch = 0, bool weighted_cfreq = true);
 
-    //! Integrate profiles from two polarizations into one total intensity
+    //! Integrate profiles from single polarizations into one total intensity
     virtual void pscrunch ();
 
     //! Transform from Stokes (I,Q,U,V) to the polarimetric invariant interval
     virtual void invint ();
 
-    //! Rotate all profiles to remove dispersion delays between bands
+    //! Rotate all profiles in phase to remove dispersion delays between bands
     virtual void dedisperse (double frequency = 0.0);
+
+    //! Rotate all profiles about Stokes V axis to remove Faraday rotation
+    virtual void defaraday (double rm = 0.0, double rm_iono = 0.0);
 
     //! Returns a single Stokes 4-vector for the given band and phase bin
     void get_Stokes (Stokes& S, int iband, int ibin) const;
@@ -101,8 +104,7 @@ namespace Pulsar {
 			  vector<vector<double> >& mean_low) const;
 
     //! Computes the weighted centre frequency of an interval of sub-bands.
-    double weighted_frequency (double* weight = 0, 
-			       Poln::Measure poln = Poln::None,
+    double weighted_frequency (double* weight=0,
 			       int band_start=0, int band_end=0) const;
 
     void cal_levels (vector<Stokes>& hi, vector<Stokes>& lo) const;
@@ -124,13 +126,6 @@ namespace Pulsar {
 
     //! Rotate each profile by time (in seconds)
     virtual void rotate (double time);
-
-
-    //
-    // RM_correct - correct the Faraday rotation of Q into U
-    // Assumes:  archive is in Stokes IQUV representation and that the baseline
-    //           has been removed.
-    virtual void RM_correct (double rotation_measure = 0, double rm_iono = 0);
 
     //
     // snr_weight - set the weight of each profile to its snr squared
@@ -163,17 +158,20 @@ namespace Pulsar {
     int get_nbin () const { return nbin; }
  
     //! Get the MJD at the beginning of the integration
-    MJD get_start_time() const { return start_time; }
+    MJD get_mid_time() const { return mid_time; }
     //! Set the MJD at the beginning of the integration
-    virtual void set_start_time (const MJD& mjd) { start_time = mjd; }
+    virtual void set_mid_time (const MJD& mjd) { mid_time = mjd; }
 
     //! Get the total time integrated (in seconds)
     double get_duration() const { return duration; }
     //! Set the total time integrated (in seconds)
     virtual void set_duration (double seconds) { duration = seconds; }
 
+    //! Get the MJD at the start of the integration (convenience interface)
+    MJD get_start_time () const { return mid_time - .5 * duration; }
+
     //! Get the MJD at the end of the integration (convenience interface)
-    MJD get_end_time () const { return start_time + duration; }
+    MJD get_end_time () const { return mid_time + .5 * duration; }
 
     //! Get the centre frequency (in MHz)
     double get_centre_frequency() const { return centrefreq; }
@@ -206,8 +204,8 @@ namespace Pulsar {
     //! number of bins
     int nbin;
 
-    //! start time of observation
-    MJD start_time;
+    //! time at the middle of the observation
+    MJD mid_time;
 
     //! duration of integration
     double duration;

@@ -4,14 +4,9 @@
 #include <string>
 
 #include "Profile.h"
-
+#include "Physical.h"
+#include "Error.h"
 #include "spectra.h"
-#include "genutil.h"
-
-extern "C" {
- void shiftbyfft_(float *, int *, float *);
-}
-
 
 /*! 
   fractional pulse phase window used by default to calculate the
@@ -19,11 +14,11 @@ extern "C" {
  */
 float Pulsar::Profile::default_duty_cycle = 0.15;
 
-/*! 
-  for debugging.  Add the statement "Pulsar::Profile::verbose =
-  true;" in the calling program to have debug information output on stderr 
+/*!  
+  Add the statement "Pulsar::Profile::verbose = true;" in the calling
+  program to have debug information output on stderr 
 */
-bool Pulsar::Profile::verbose = 0;
+bool Pulsar::Profile::verbose = false;
 
 // utility for correcting the indeces for a range
 void nbinify (int& istart, int& iend, int nbin)
@@ -49,28 +44,91 @@ Pulsar::Profile::~Profile()
   if (amps != NULL) delete [] amps;  amps = NULL;
 }
 
-void Pulsar::Profile::offset (float offset)
+const Pulsar::Profile& Pulsar::Profile::operator= (const Profile& profile)
+{
+  if (this == &profile)
+    return *this;
+
+  resize (profile.nbin);
+
+  set_amps( profile.get_amps() );
+  set_weight ( profile.get_weight() );
+  set_centre_frequency ( profile.get_centre_frequency() );
+  set_state ( profile.get_state() );
+
+  return *this;
+}
+
+const Pulsar::Profile& Pulsar::Profile::operator+= (const Profile& profile)
+{
+  if (nbin != profile.get_nbin())
+    throw Error (InvalidRange, "Pulsar::Profile::operator+=",
+		 "nbin=%d != profile.nbin=%d", nbin, profile.get_nbin());
+
+  // check if the addition will result in some undefined state
+  if (state != profile.get_state())
+    state = Poln::None;
+
+  float* amps1 = amps;
+  const float* amps2 = profile.get_amps();
+
+  float weight1 = weight;
+  float weight2 = profile.get_weight();
+
+  weight = weight1 + weight2;
+  float norm = 1.0 / weight;
+
+  for (int ibin=0; ibin<nbin; ibin++) {
+    *amps1 = norm * ( *amps1 * weight1 + *amps2 * weight2 );
+    amps1 ++; amps2 ++;
+  }
+
+  return *this;
+}
+
+const Pulsar::Profile& Pulsar::Profile::operator+= (float offset)
 {
   for (int i=0;i<nbin;i++)
     amps[i]+=offset;
+  return *this;
 }
  
-void Pulsar::Profile::scale (float factor)
+const Pulsar::Profile& Pulsar::Profile::operator*= (float factor)
 {
   for (int i=0;i<nbin;i++)
     amps[i]*=factor;
+  return *this;
 }
  
-/*!  Rotate the profile by the specified phase.  The profile will be
- rotated such that the power at phase will be found at phase zero.
- ie. \f$t^\prime=t+\phi P\f$, where \f$t^\prime\f$ is the new start
- time (rising edge of bin 0), \f$t\f$ is the original start time,
- \f$\phi\f$ is equal to phase, and \f$P\f$ is the period at the time
- of folding.  */
+/*!  
+  Rotate the profile by the specified phase.  The profile will be
+  rotated such that the power at phase will be found at phase zero. ie.
+
+  \f$t^\prime=t+\phi P\f$
+
+  where \f$t^\prime\f$ is the new start time (rising edge of bin 0),
+  \f$t\f$ is the original start time, \f$\phi\f$ is equal to phase,
+  and \f$P\f$ is the period at the time of folding.
+*/
 void Pulsar::Profile::rotate (double phase)
 {
   if ( fft_shift (nbin, amps, phase*double(nbin)) !=0 )
-    throw_str ("Pulsar::Profile::rotate (%lf) failure", phase);
+    throw Error (FailedCall, "Pulsar::Profile::rotate",
+		 "fft_shift(%lf) failure", phase);
+}
+
+/*!
+  A convenience interface to Profile::rotate.  Rotates the profile in order
+  to remove the dispersion delay with respect to a reference frequency.
+  \param dm the dispersion measure (in \f${\rm pc cm}^{-3}\f$)
+  \param ref_freq the reference frequency (in MHz)
+  \param pfold the folding periond (in seconds)
+  \post centrefreq will be set to ref_freq
+*/
+void Pulsar::Profile::dedisperse (double dm, double ref_freq, double pfold)
+{
+  rotate (dispersion_delay (dm, ref_freq, centrefreq) / pfold);
+  set_centre_frequency (ref_freq);
 }
 
 
@@ -96,7 +154,7 @@ void Pulsar::Profile::fold (int nfold)
     for (int j=1; j<nfold; j++)
        amps[i]+=amps[i+j*nbin/nfold];
   nbin/=nfold;
-  scale (1.0/float(nfold));
+  operator *= (1.0/float(nfold));
 }
  
 void Pulsar::Profile::halvebins (int nhalve)
@@ -245,8 +303,8 @@ void Pulsar::Profile::stats (double* mean, double* variance, double* varmean,
   }
 
   if (counts<2)
-    throw_str ("Pulsar::Profile::stats ERROR invalid range: %d -> %d",
-	       istart, iend);
+    throw Error (InvalidRange, "Pulsar::Profile::stats",
+		 "%d -> %d", istart, iend);
 
   //
   // variance(x) = <(x-<x>)^2> * N/(N-1) = (<x^2>-<x>^2) * N/(N-1)
@@ -271,10 +329,10 @@ float find_phase (int nbin, float* amps, bool max, float duty_cycle)
   register int i, j;
 
   int boxwidth = (int) (.5 * duty_cycle * nbin);
-  if (boxwidth >= nbin/2)
-    throw_str ("Pulsar::Profile::find_[min|max]_phase ERROR"
-	       " smoothing over too many points\n"
-	       " nbin=%d boxwidth=%d\n", nbin, 2*boxwidth);
+  if (boxwidth >= nbin/2 || boxwidth <= 0)
+    throw Pulsar::Error (Pulsar::InvalidParam, 
+			 "Pulsar::Profile::find_[min|max]_phase",
+			 " invalid duty_cycle=%f\n", duty_cycle);
 
   double sum = 0.0;
   for (j=-boxwidth;j<=boxwidth;j++)
@@ -326,9 +384,11 @@ double Pulsar::Profile::sigma (float phase, float duty_cycle) const
 //
 // Pulsar::Profile::snr
 //
-/*!  
-  Using Profile::find_peak_edges(), this function finds 
- */
+/*!
+  Using Profile::find_min_phase and Profile::find_peak_edges, this
+  function finds the integrated power in the pulse profile and divides
+  by the noise in the baseline.
+*/
 float Pulsar::Profile::snr() const
 {
   // find the mean and the r.m.s. of the baseline
@@ -352,80 +412,6 @@ float Pulsar::Profile::snr() const
 }
 
 #if 0
-/**************************************************************/
-/* An adaption of the snr funtion above                       */
-/* Instead of calculating the rms using the sigma() function  */
-/* we pass the function an rms calculated from the residuals  */
-/* of fitting the profile to the standard                     */
-/**************************************************************/
-float Pulsar::Profile::std_snr (float noise, float wing_sigma,
-		       int& bin_st, int& bin_end) const
-{
-  if (verbose)
-    cerr << "Pulsar::Profile::std_snr enter" << endl;
-
-  if (noise <= 0.0)
-    return 0.0;
-
-  // Form cumulative sum
-  double * cumu = new double[nbin*2];
-  int ibin;
-
-  cumu[0] = amps[0];
-  for (ibin=1; ibin<2*nbin; ibin++)
-    cumu[ibin] = cumu[ibin-1] + amps[ibin%nbin];
-  
-  // work out where cumulative sum falls below 10% of sum for the
-  // last time, and where it drops below 90% for the first time.
-  
-  int iten = 0;
-  int ininety = nbin-1;
-
-  double limit = wing_sigma * cumu[nbin-1];
-  for (ibin=0; ibin<nbin; ibin++) if (cumu[ibin] < limit) iten = ibin;
-
-  limit = (1.0-wing_sigma) * cumu[nbin-1];
-  for (ibin=nbin-1; ibin>=0; ibin--) if (cumu[ibin] > limit) ininety = ibin;
-  
-  bin_end = ininety;
-  bin_st = iten;
-
-  // work out where cumulative sum falls below 10% of sum for the
-  // last time, and where it drops below 90% for the first time this
-  // time starting half way along.
-  
-  int iten2, ininety2;
-  int izero = iten2 = nbin/2;
-  int ifull = ininety2 = nbin-1+nbin/2;
-  limit = wing_sigma * (cumu[ifull]-cumu[izero]);
-  for (ibin=izero; ibin<ifull; ibin++)
-    if (cumu[ibin]-cumu[izero] < limit) iten2 = ibin;
-
-  limit = (1.0-wing_sigma) * (cumu[ifull]-cumu[izero]);
-  for (ibin=ifull; ibin>=izero; ibin--)
-    if (cumu[ibin]-cumu[izero] > limit) ininety2 = ibin;
-  //  printf("Signal to noise ratio is %f   duty cycle is %5.2f \%\n",
-  //       (cumu[ininety2]-cumu[iten2])/sqrt(ininety2-iten2+1),
-  //        (float) (ininety2-iten2)/nbin * 100.0);
-  // Decide which one is better - ie narrower.
-
-  if (ininety2-iten2 < ininety-iten) {
-    ininety = ininety2;
-    iten = iten2;
-    bin_end = ininety - nbin/2;
-    bin_st = iten - nbin/2;
-  }
-
-  //cerr << "Pulsar::Profile::std_snr i10=" << iten << " i90=" << ininety << endl;
-  float signal = (cumu[ininety]-cumu[iten])/sqrt(ininety-iten+1);
-  delete [] cumu;
-  
-  if (verbose)
-    cerr << "Pulsar::Profile::std_snr exit" << endl;
-
-  return signal / noise;
-}
-
 
 /*****************************************************************************/
 /* This funtion is very much like fittempl but returns the snr of a profile  */
@@ -436,7 +422,8 @@ float Pulsar::Profile::snr (const profile& std, float& noise, bool allow_rotate)
     cerr << "Pulsar::Profile::snr " << nbin << " bins." << endl;
 
   if (std.nbin != nbin)
-    throw string ("Pulsar::Profile::snr std with unequal nbin");
+    throw Error (InvalidRange, "Pulsar::Profile::snr",
+		 "std.nbin=%d != nbin=%d", std.nbin, nbin);
 
   profile cpy = *this;
 
