@@ -10,7 +10,7 @@ LIB_SRCS := ephio_c.c ephio_def.c ephio.f rnd8.f \
 	psrephem.C set_epoch.C tex.C derived.C
 
 PROGRAMS := keys2c.c keys2fort.c eph2upd.f ephaux.C ephepo.C ephtex.C
-LDFLAGS += -lgenutil++ $(F77LIBS) -lm
+LDFLAGS += $(F77LIBS) -lm
 
 # test programs are intended to be run-alone (ie. no user input required)
 # TESTS := testrnd8.f
