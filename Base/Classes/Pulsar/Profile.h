@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Profile.h,v $
-   $Revision: 1.73 $
-   $Date: 2004/09/27 03:50:41 $
+   $Revision: 1.74 $
+   $Date: 2004/09/27 17:42:47 $
    $Author: ahotan $ */
 
 #ifndef __Pulsar_Profile_h
@@ -11,6 +11,8 @@
 #include "toa.h"
 #include "Types.h"
 #include "Functor.h"
+
+#include "Calibration/Gaussian.h"
 
 namespace Pulsar {
 
@@ -156,15 +158,17 @@ namespace Pulsar {
 
     //! Find the bin numbers at which the cumulative power crosses thresholds
     void find_peak_edges (int& rise, int& fall, bool choose = true) const;
-
+    
     //! Find the bin numbers at which the flux falls below a threshold
-    void find_spike_edges(int& rise, int& fall, float pc = default_amplitude_dropoff,
+    void find_spike_edges(int& rise, int& fall, 
+			  float pc = default_amplitude_dropoff,
 			  int spike_bin = -1) const;
-
+    
     //! Sum the flux in the specified bins
     float sum_flux(int rise, int fall,
 		   float min_phase = -1.0, float dc=default_duty_cycle) const;
-    //! Finding the bin numbers at which the flux falls below a threshold, and sum the flux in those bins
+    /*! Finding the bin numbers at which the flux falls below a threshold, 
+      and sum the flux in those bins */
     //! Assumes profile is delta function
     float sum_flux(float dropoff=default_amplitude_dropoff,
 		   float min_phase = -1.0, float dc=default_duty_cycle) const;
@@ -185,7 +189,8 @@ namespace Pulsar {
     //! Returns integrated flux divided by the number of bins == mean flux
     float flux(float _baseline_fraction = Profile::default_duty_cycle,
 	       float min_phase = -1.0);
-    //! Returns flux as above - but uses peak edges to find the profile region (and an abs value sum) ONLY HI SNR profiles applicable
+    /*! Returns flux as above - but uses peak edges to find the profile 
+      region (and an abs value sum) ONLY HI SNR profiles applicable */
     float flux_hi_snr(float _baseline_fraction = Profile::default_duty_cycle);
     /*! Returns the width of the pulse profile, at the percentage
       of the peak given by pc, where the baseline is calculated
@@ -201,28 +206,27 @@ namespace Pulsar {
 		    Tempo::toa::Format fmt = Tempo::toa::Parkes,
 		    bool td = false) const;
     
-    /*! return the shift (in turns) after fitting to the standard
-      using a parabolic interpolation in the time domain to achieve 
-      fractional bin resolution */
+    // The following algorithms determin the shift between a profile
+    // and a standard template (with fractional bin resolution) using 
+    // a number of different methods. Shifts and errors are returned 
+    // in turns. In some cases, the routine supports the exporting of 
+    // lower level information for use in debugging.
+
+    /*! Parabolic interpolation in the time domain */
     double ParIntShift (const Profile& std, float& error,
 			float* corr = 0, float* fn = 0) const;
     
-    /*! return the shift (in turns) after fitting to the standard
-      and interpolating using a Gaussian model in the time domain 
-      to achieve fractional bin resolution */
-    double GaussianShift (const Profile& std, float& ephase) const;
+    /*! Gaussian interpolation in the time domain */
+    double GaussianShift (const Profile& std, float& ephase, 
+			  vector<float>& corr, Calibration::Gaussian& model,
+			  int& _rise, int& _fall, bool store = false) const;
     
-    /*! return the shift (in turns) after fitting to the standard
-      using an interpolation scheme that involves transforming into
-      the fourier domain, padding with zeroes and transfomring back
-      to a higher resolution profile */
+    /*! Fourier domain zero-pad interpolation */
     double ZeroPadShift (const Profile& std, float& ephase,
 			 vector<float>& corr, vector<float>& interp,
 			 bool store = false) const;
     
-    /*! return the shift (in turns) after fitting to the standard
-      using an FFT based phase rotation to achieve fractional bin
-      resolution */
+    /*! Fourier domain phase gradient fit */
     double PhaseGradShift (const Profile& std, float& ephase,
 			   float& snrfft, float& esnrfft) const;
     
@@ -240,8 +244,8 @@ namespace Pulsar {
     const float* get_amps () const { return amps; }
     float* get_amps () { return amps; }
     
-    /*! returns a pointer to the start of a weighted copy of the 
-      array of amplitudes */
+    /*! returns a vector representation of the array of amplitudes,
+     with all zero-weighted points cleaned out */
     vector<float> get_weighted_amps () const;
     
     //! set the amplitudes array equal to the contents of the data array

@@ -180,18 +180,19 @@ void Pulsar::Profile::scale (double factor)
     amps[i] *= factor;
 }
 
-
 vector<float> Pulsar::Profile::get_weighted_amps () const
 {
   vector<float> wamps;
   
-  for (unsigned i = 0; i < nbin; i++) {
-    wamps.push_back(amps[i] * weight);
-  }
+  if (weight == 0.0)
+    for (unsigned i = 0; i < nbin; i++)
+      wamps.push_back(0.0);
+  else
+    for (unsigned i = 0; i < nbin; i++)
+      wamps.push_back(amps[i]);
   
   return wamps;
 }
-
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -479,7 +480,6 @@ double Pulsar::Profile::sumfabs (int istart, int iend) const
   return tot;
 }
 
-
 /////////////////////////////////////////////////////////////////////////////
 //
 // Pulsar::Profile::sumsq
@@ -534,7 +534,6 @@ string Pulsar::Profile::get_ascii (int bin_start, int bin_end) const
   return result;
 }
 
-
 /////////////////////////////////////////////////////////////////////////////
 //
 // Pulsar::Profile::mean
@@ -550,7 +549,6 @@ double Pulsar::Profile::mean (float phase, float duty_cycle) const
   stats (phase, &result, 0, 0, duty_cycle);
   return result;
 }
-
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -662,10 +660,6 @@ void Pulsar::Profile::find_spike_edges(int& rise, int& fall, float pc,
   float relative_amp = amps[spike_bin] - mean_level;
   float threshold = pc*relative_amp + mean_level;
 
-  //  fprintf(stderr,"\nPulsar::Profile::find_spike_edges() got spike_bin=%d/%d mean_level=%f amp=%f relative_amp=%f pc=%f threshold=%f\n",
-  //  spike_bin,_nbin,mean_level,amps[spike_bin],
-  //  relative_amp,pc,threshold);
-
   bool found_spike_edge = false;
 
   /////////////////////////////////////////////////
@@ -709,9 +703,6 @@ void Pulsar::Profile::find_spike_edges(int& rise, int& fall, float pc,
 		"Could not find spike edge for fall dropoff to %f of %f = %f.  Minimum=%f maximum=%f",
 		pc, amps[spike_bin], threshold,
 		min(), max());
-
-  //fprintf(stderr,"\nPulsar::Profile::find_spike_edges() returning with rise=%d fall=%d\n",
-  //  rise,fall);
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -735,10 +726,11 @@ float Pulsar::Profile::sum_flux(float dropoff,float min_phase,float dc) const{
   return sum_flux(rise,fall,min_phase,dc);
 }
 
-//! Finding the bin numbers at which the flux falls below a threshold, and sum the flux in those bins
+/*! Finding the bin numbers at which the flux falls below a threshold, 
+  and sum the flux in those bins */
 float Pulsar::Profile::sum_flux(int rise, int fall, float min_phase, float dc) const {
   int nbin = get_nbin();
-
+  
   nbinify(rise,fall,nbin);
 
   if( min_phase < 0.0 ){
