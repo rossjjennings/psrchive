@@ -24,7 +24,8 @@ nobase_include_HEADERS = \
 	Pulsar/IntegrationManager.h      Pulsar/Utilities.h \
 	Pulsar/PhaseWeight.h             Pulsar/ArchiveTI.h \
 	Pulsar/PhaseWeightFunction.h     model_profile.h \
-	Pulsar/Plotter.h                 Pulsar/IntegrationTI.h
+	Pulsar/Plotter.h                 Pulsar/IntegrationTI.h \
+	Pulsar/ExtensionTI.h
 
 libpsrchive_la_SOURCES = plugins.csh getopt.h Physical.h plotJones.C \
 	AdaptiveSNR.C                 Integration_new_PolnProfile.C  \
