@@ -128,7 +128,7 @@ void Pulsar::Receiver::set_field_orientation (const Angle& angle)
 const Angle Pulsar::Receiver::get_field_orientation () const
 {
   Angle offset = 0.0;
-  if (!field_orientation && basis == Signal::Linear)
+  if (basis == Signal::Linear)
     offset.setDegrees (45.0);
 
   return get_orientation() + offset;
