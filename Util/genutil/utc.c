@@ -402,6 +402,8 @@ char* utcstrfill (char* tmstr, utc_t time, int numch)
   return (tmstr);
 }
 
+char* calstrfill (char* tmstr, cal_t date, int numch);
+
 char* cal2str (char* tmstr, cal_t date, const char* fmt)
 {
   strcpy (tmstr, fmt);
