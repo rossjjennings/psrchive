@@ -699,9 +699,20 @@ void Rhythm::stride_fit()
 
   clearselection();
   
-  double first = toas[0].get_arrival().in_days();
-  double last  = toas[toas.size()-1].get_arrival().in_days();
+  vector<double> times;
+  for (unsigned i = 0; i < toas.size(); i++)
+    times.push_back(toas[i].get_arrival().in_days());
   
+  double first = times[0];
+  double last  = times[0];
+  
+  for (unsigned i = 0; i < times.size(); i++) {
+    if (times[i] < first)
+      first = times[i];
+    if (times[i] > last)
+      last = times[i];
+  }
+
   double span = last - first;
   double strideval = span / double(temp);
   
