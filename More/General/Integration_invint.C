@@ -51,7 +51,7 @@ void Pulsar::Integration::invint ()
     // set the values
     Sinv->set_amps (invariant.begin());
     // remove the baseline
-    *(Sinv) += (-Sinv->mean (Sinv->find_min_phase()));
+    *(Sinv) -= Sinv->mean( Sinv->find_min_phase() );
 
     if (invint_square)
       Sinv->set_state (Signal::DetRho);
