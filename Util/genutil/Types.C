@@ -225,7 +225,7 @@ const char* Signal::source_string(Source source){
   }
 }
 
-const string Signal::basis_string(Basis basis){
+const char* Signal::basis_string(Basis basis){
   switch( basis ){
   case Circular:
     return "Circular";
