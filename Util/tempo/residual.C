@@ -49,7 +49,7 @@ int residual::load (int r2flun, char* filename, vector<residual>* residuals)
 }
 
 residual::plot residual::xtype = Mjd;
-residual::plot residual::ytype = Seconds;
+residual::plot residual::ytype = Turns;
 
 float y_ordinate (const residual& r)
 {
@@ -74,3 +74,9 @@ float x_ordinate (const residual& r)
     return -1.0;
   }
 }
+
+float y_error (const residual& r)
+{ return r.error/1e3; };
+
+float x_error (const residual& r)
+{ return 0; };
