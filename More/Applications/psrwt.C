@@ -25,10 +25,11 @@ void usage ()
     " -F        Fscrunch all frequency channels after weighting \n"
     " -M meta   meta names a file containing the list of files\n"
     " -P        add polarisations together\n"
-    " -p phs    specify the phase window used in special SNR calculation\n"
+    " -p phs    centre of the phase window used in special SNR calculation\n"
     " -s snr    SNR threshold (weight zero below) default:10\n"
     " -S std    specify the standard pulsar archive\n"
     " -T        Tscrunch all Integrations after weighting \n"
+    " -w width  Width of the phase window used in conjunction with -p\n"
     " -v        Verbose output \n"
     " -V        Very verbose output \n"
        << endl;
@@ -47,6 +48,7 @@ int main (int argc, char** argv)
   bool normal = true;
 
   float snr_phase = 0.0;
+  float duty_cycle = 0.15;
 
   char* metafile = NULL;
 
@@ -54,7 +56,7 @@ int main (int argc, char** argv)
   char* stdfile = NULL;
 
   int c = 0;
-  const char* args = "b:DdFhM:Pp:Ts:S:vV";
+  const char* args = "b:DdFhM:Pp:Ts:S:vVw:";
   while ((c = getopt(argc, argv, args)) != -1)
     switch (c) {
 
@@ -88,6 +90,7 @@ int main (int argc, char** argv)
 
     case 'p':
       snr_phase = atof (optarg);
+      cerr << "psrwt: baseline phase window centre = " << snr_phase << endl;
       normal = false;
       break;
 
@@ -101,6 +104,11 @@ int main (int argc, char** argv)
 
     case 'T':
       tscrunch = 0;
+      break;
+
+    case 'w':
+      duty_cycle = atof(optarg);
+      cerr << "psrwt: baseline phase window width = " << duty_cycle << endl;
       break;
 
     case 'V':
@@ -175,18 +183,31 @@ int main (int argc, char** argv)
 	    double mean, variance;
 
 	    // calculate the mean and variance at the specifed phase
-	    profile->stats (snr_phase, &mean, &variance);
+	    profile->stats (snr_phase, &mean, &variance, 0, duty_cycle);
+
 	    // subtract the mean
 	    *profile -= mean;
+
 	    // sum the remaining power and divide by the rms
-	    snr = profile->sum() / sqrt(variance);
+	    snr = profile->sum();
+
+            // calculate the rms
+            float rms = sqrt (variance);
+
+            cerr << filenames[ifile] << " max/rms=" << profile->max()/rms
+                 << " rms=" << rms << " sum=" << snr;
+
+            snr /= sqrt ( profile->get_nbin() * variance );
+
+            cerr << " snr=" << snr << endl;
 
 	  }
 
 	}
 
-	cerr << filenames[ifile] << "(" << isub << ", " << ichan << ")"
-	     << " snr=" << snr << endl;
+        if (normal)
+	  cerr << filenames[ifile] << "(" << isub << ", " << ichan << ")"
+	       << " snr=" << snr << endl;
 	
 	if (display) {
 	  cpgpage();
