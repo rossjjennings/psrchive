@@ -190,7 +190,7 @@ int main (int argc, char *argv[]) {
 	{0, 0, 0, 0}
       };
     
-      c = getopt_long(argc, argv, "hqvVima:e:E:TFpIt:f:b:d:o:s:r:u:w:D:SBLCx:",
+      c = getopt_long(argc, argv, "hqvVima:e:E:TFpIt:f:b:d:o:s:r:u:w:D:SBLCx:R:",
 		      long_options, &options_index);
     
       if (c == -1)
@@ -213,7 +213,7 @@ int main (int argc, char *argv[]) {
 	Pulsar::Archive::set_verbosity(3);
 	break;
       case 'i':
-	cout << "$Id: pam.C,v 1.44 2004/08/09 01:17:28 hknight Exp $" << endl;
+	cout << "$Id: pam.C,v 1.45 2004/08/20 05:30:27 straten Exp $" << endl;
 	return 0;
       case 'm':
 	save = true;
