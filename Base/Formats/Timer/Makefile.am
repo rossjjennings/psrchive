@@ -29,7 +29,7 @@ PROGRAMS =    calinfo.C align.C amps.C chanprep.C  \
 	      crh.C psrhead.C autotadd.C \
 	      fakedat.C plk.C stokes_plt.C \
 	      headsum.C treduce.C \
-              tcombine2.C ratio.C fixprf.C 
+              tcombine2.C ratio.C fixprf.C xformprof.C
 
 NOT_WORKING     = bandpass.C detail.C xtoa.C bin_ph.C corflux.C flux.C vargain.C \
                   
