@@ -100,10 +100,11 @@ int main (int argc, char *argv[]) {
 
     }
     catch (Error& error) {
+      fflush(stdout);
       cerr << error << endl;
     }
   }
-  
+  fflush(stdout);
 }
 
 
