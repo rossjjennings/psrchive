@@ -29,12 +29,12 @@ An arbitrary quaternion, $\bm{U}$, is given by the linear combination,
 \begin{equation}
 \bm{U}=u_0+u_1i+u_2j+u_3k, \hspace{5mm} u_i\in\R
 \end{equation}
-and, as with matrices, quaternion multiplication in non-commutative.
+and, as with matrices, quaternion multiplication is non-commutative.
 
 A quaternion with complex coefficients is known as a biquaternion.
-The algebra of biquaternions is isomorphic to $2\times2$ complex
-matrices.  A Hermitian matrix, $\bm{H}$, may be represented by the
-linear combination,
+The algebra of biquaternions is isomorphic to the $2\times2$ complex
+matrix group.  Hermitian matrices, $\bm{H}=\bm{H}^\dagger$, may be
+represented by the linear combination,
 \begin{equation}
 \bm{H}=h_0\pauli{0}+h_1\pauli{1}+h_2\pauli{2}+h_3\pauli{3},\hspace{5mm}h_i\in\R
 \end{equation}
@@ -63,8 +63,8 @@ a three-vector:
 \bm{Q}=[q_0+\bm{q}] = q_0\pauli{0} + \bm{q\cdot\sigma}, \hspace{5mm} q_i\in\C
 \end{equation}
 were $\bm{q}=(q_1,q_2,q_3)$ and $\bm\sigma$ is a three-vector whose
-components are the Pauli spin matrices as defined above.
-Using this notation, the quaternion sub-group may be represented as
+components are the Pauli spin matrices as defined above.  Using this
+notation, the left-handed quaternion sub-group may be represented as
 \begin{equation}\label{eqn:quaternion}
 \bm{U}=[u_0+i\bm{u}]= u_0\pauli{0} + \Ci\bm{u\cdot\sigma} \hspace{5mm} u_i\in\R
 \end{equation}
@@ -181,14 +181,9 @@ where $J=(\det{\bf J})^{1/2}$,
 and $\bm{\hat m}$ and $\bm{\hat n}$ are real-valued unit 3-vectors.
 The matrices, \rotat\ and \boost, are unimodular (ie. have unit
 determinant) and are known as the axis-angle representation of unitary
-and Hermitian transformations, respectively.
-
-A matrix may also be represented by ${\bf J} = J \; \rotat[\prime]
-\boost[^\prime]$, noting that $\rotat[^\prime]\ne\rotat$ and
-$\boost[^\prime]\ne\boost$ (owing to the non-commutivity of matrix
-multiplication).  However, as shown in
-Section~\ref{sec:polar_decomposition}, the decomposition shown in
-Eq.~\ref{eqn:polar_decomposition} provides greater advantages.
+and Hermitian transformations, respectively. The same matrix may also
+be represented by ${\bf J}=J\;\rotat\boost[^\prime]$, where
+$\boost[^\prime]=\rotat\boost\rotat[^\dagger]$.
 
 \subsection{Polar Decomposition}
 \label{sec:polar_decomposition}
