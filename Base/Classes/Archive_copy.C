@@ -1,28 +1,34 @@
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
 
-void Pulsar::Archive::copy (const Archive& archive){
+void Pulsar::Archive::copy (const Archive& archive)
+{
+  if (verbose)
+    cerr << "Pulsar::Archive::copy all Integrations" << endl;
+
   vector<unsigned> all_subints(archive.get_nsubint());
   for( unsigned i=0; i<all_subints.size(); i++)
     all_subints[i] = i;
 
-  copy(archive,all_subints);
+  copy (archive, all_subints);
 }
 
 void Pulsar::Archive::copy (const Archive& archive,
 			    const vector<unsigned>& selected)
 {
+  unsigned nsub = selected.size();
+
   if (verbose)
-    cerr << "Pulsar::Archive::copy" << endl;
+    cerr << "Pulsar::Archive::copy " << nsub << " Integrations" << endl;
 
   if (this == &archive)
     return;
   
   // copy only the selected subints
-  resize (selected.size(), archive.get_npol(),
+  resize (nsub, archive.get_npol(),
 	  archive.get_nchan(), archive.get_nbin());
   
-  for (unsigned isub=0; isub<selected.size(); isub++) {
+  for (unsigned isub=0; isub<nsub; isub++) {
     const Integration* subint = archive.get_Integration( selected[isub] );
     get_Integration(isub) -> copy (*(subint));
   }
