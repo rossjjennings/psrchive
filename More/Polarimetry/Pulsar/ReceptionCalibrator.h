@@ -1,19 +1,27 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ReceptionCalibrator.h,v $
-   $Revision: 1.28 $
-   $Date: 2003/06/02 14:31:32 $
+   $Revision: 1.29 $
+   $Date: 2003/08/13 18:41:40 $
    $Author: straten $ */
 
 #ifndef __ReceptionCalibrator_H
 #define __ReceptionCalibrator_H
 
 #include "Calibrator.h"
-#include "Calibration/MultiPathEquation.h"
-#include "Calibration/Polar.h"
+
+// Reception Model and its management
+#include "Calibration/PathManager.h"
+#include "Calibration/TimeManager.h"
+
+// Parameterizations of the instrument and source
+#include "Calibration/PolarEstimate.h"
+#include "Calibration/InstrumentEstimate.h"
+#include "Calibration/StokesEstimate.h"
+
+// Extra transformations
 #include "Calibration/SingleAxis.h"
 #include "Calibration/Parallactic.h"
-#include "Calibration/StokesState.h"
 
 namespace Pulsar {
 
@@ -22,8 +30,6 @@ namespace Pulsar {
   class PolnCalibrator;
   class FluxCalibrator;
 
-  class PolarEstimate;
-
   class SourceEstimate {
 
   public:
@@ -31,24 +37,29 @@ namespace Pulsar {
     //! Construct with the specified bin from Archive
     SourceEstimate (unsigned ibin = 0) { phase_bin = ibin; }
 
-    //! Update each state with the mean
-    void update_state();
-
-    //! Best estimate of Stokes parameters as a function of frequency
-    vector< MeanEstimate<Stokes<double>, double> > mean;
+    //! Update each source with the mean
+    void update_source();
 
     //! Model of Stokes parameters added to equation as a function of frequency
-    vector< Calibration::StokesState > state;
+    vector< Calibration::StokesEstimate > source;
 
     //! Phase bin from which pulsar polarization is derived
     unsigned phase_bin;
 
-    //! The index of the state in the model
-    unsigned state_index;
+    //! The index of the source in the model
+    unsigned source_index;
 
   };
 
-  //! Uses the MultiPathEquation to represent and fit for the system response
+
+  //! Time-varying, multi-path model
+  class TVMPModel : public Calibration::TimeManager,
+		    public Calibration::PathManager 
+  {
+
+  };
+
+  //! Uses the TVMPModel to represent and fit for the system response
   /*! The ReceptionCalibrator implements a technique of single dish
     polarimetric self-calibration.  This class requires a number of
     constraints, which are provided in through the add_observation,
@@ -106,20 +117,20 @@ namespace Pulsar {
     //! Calibrate the polarization of the given archive
     void calibrate (Archive* archive, bool solve_first);
 
-    //! MultiPathEquation as a function of frequency
-    vector<Reference::To<Calibration::MultiPathEquation> > equation;
+    //! TVMPModel as a function of frequency
+    vector<Reference::To<TVMPModel> > equation;
 
     //! Polar decomposition of receiver as a function of frequency
-    vector<Reference::To<Calibration::Polar> > receiver;
+    vector<Reference::To<Calibration::PolarEstimate> > polar;
 
-    //! Polar decomposition of receiver as a function of frequency
+    //! Phenomenological decomposition of receiver as a function of frequency
+    vector<Reference::To<Calibration::InstrumentEstimate> > instrument;
+
+    //! Single-axis decomposition of backend as a function of frequency
     vector<Reference::To<Calibration::SingleAxis> > backend;
 
     //! Uncalibrated estimate of pulsar polarization as a function of phase
     SourceEstimate calibrator;
-
-    //! Best estimate of polar decomposition as a function of frequency
-    vector<PolarEstimate> receiver_guess;
 
     //! Uncalibrated estimate of pulsar polarization as a function of phase
     vector<SourceEstimate> pulsar;
@@ -183,28 +194,6 @@ namespace Pulsar {
 
      //! Flag set after the initialize method has been called
     bool is_initialized;
-
-  };
-
-
-  class PolarEstimate {
-
-  public:
-
-    //! Best estimate of receiver gain
-    MeanEstimate<double> gain;
-
-    //! Best estimate of receiver boost
-    MeanEstimate<double> boostGibbs[3];
-
-    //! Best estimate of receiver rotations
-    MeanRadian<double> rotationEuler[3];
-
-    //! Add the Polar Model to the current best estimate
-    void integrate (const Calibration::Polar& model);
-
-    //! Update the Polar Model with the currect best estimate
-    void update (Calibration::Polar* model);
 
   };
 
