@@ -3,6 +3,7 @@
 #include <stdio.h> 
 #include <stdlib.h>
 #include <limits.h>
+#include <float.h>
 #include <unistd.h>
 #include <string.h>
 #include <sys/stat.h>
@@ -759,7 +760,7 @@ const polynomial& polyco::best (const Phase& p, const string& psr) const
 
 int polyco::i_nearest (const MJD &t, const string& in_psr) const
 {
-  float min_dist = MAXFLOAT;
+  float min_dist = FLT_MAX;
   int imin = -1;
 
   for (unsigned ipolly=0; ipolly<pollys.size(); ipolly ++)  {
@@ -813,7 +814,7 @@ int polyco::i_nearest (const MJD &t, const string& in_psr) const
 
 int polyco::i_nearest (const Phase& phase, const string& in_psr) const
 {
-  float min_dist = MAXFLOAT;
+  float min_dist = FLT_MAX;
   int imin = -1;
 
   for (unsigned ipolly=0; ipolly<pollys.size(); ipolly ++)  {
