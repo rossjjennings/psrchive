@@ -64,6 +64,9 @@ int main (int argc, char **argv)
   // tscrunch+unload when certain limiting conditions are met
   bool auto_add = false; 
 
+  // ensure that archive has data before adding
+  bool check_has_data = true;
+
   // tscrunch total after each new file is appended
   bool tscrunch_total = false;
 
@@ -99,7 +102,7 @@ int main (int argc, char **argv)
       return 0;
       
     case 'i':
-      cout << "$Id: psradd.C,v 1.12 2003/12/22 05:51:35 ahotan Exp $" << endl;
+      cout << "$Id: psradd.C,v 1.13 2004/01/06 19:04:17 straten Exp $" << endl;
       return 0;
       
     case 'b':
@@ -117,6 +120,7 @@ int main (int argc, char **argv)
     case 'F':
       Pulsar::Archive::append_chronological = false;
       Pulsar::Archive::append_must_match = false;
+      check_has_data = false;
       break;
 
     case 'G':
@@ -236,7 +240,7 @@ int main (int argc, char **argv)
     
     archive = Pulsar::Archive::load (filenames[ifile]);
     
-    if (archive->integration_length() == 0) {
+    if (check_has_data && archive->integration_length() == 0) {
       cerr << "psradd: archive [" << filenames[ifile] << "] has no data\n";
       continue;
     }
@@ -267,6 +271,7 @@ int main (int argc, char **argv)
 	total->set_ephemeris (neweph);
 
       correct_total = false;
+
     }
 
     if (reset_total_next_load)  {
