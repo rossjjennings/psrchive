@@ -100,9 +100,9 @@ psrephem::psrephem (const char* psr_name, int use_cwd)
 {
   init();
   if (create (psr_name, use_cwd) < 0) {
-    fprintf (stderr, "psrephem::error creating epemeris for %s.\n",
+    fprintf (stderr, "psrephem::psrephem error creating epemeris for %s.\n",
 	     psr_name);
-    throw ("psrephem::construction error");
+    throw Error(FailedCall, "psrephem::psrephem");
   }
 }
 
@@ -110,8 +110,8 @@ psrephem::psrephem (const char* filename)
 {
   init();
   if (load (filename) < 0) {
-    fprintf (stderr, "psrephem::error loading %s.\n", filename);
-    throw ("psrephem::construction error");
+    fprintf (stderr, "psrephem::psrephem error loading %s.\n", filename);
+    throw Error(FailedCall, "psrephem::psrephem");
   }
 }
 
@@ -343,10 +343,9 @@ string psrephem::psrname() const
     return value_str[EPH_PSRJ];
   else if (tempo11 && parmStatus[EPH_PSRB]==1)
     return value_str[EPH_PSRB];
-
-  string error ("psrephem::psrname() Error determining pulsar name");
-  cerr << error << endl;
-  throw error;
+  
+  throw Error(InvalidParam, "psrephem::psrname",
+	      "Error determining pulsar name");
 }
 
 double psrephem::get_dm() const
@@ -372,20 +371,54 @@ double psrephem::jra() const
 {
   if (tempo11 && parmStatus[EPH_RAJ])
     return value_double[EPH_RAJ];
-
-  string error ("psrephem::jra() Error determining pulsar RA");
-  cerr << error << endl;
-  throw error;
+  
+  throw Error(InvalidParam, "psrephem::jra",
+	      "Error determining pulsar RA");
 }
 
 double psrephem::jdec() const
 {
   if (tempo11 && parmStatus[EPH_DECJ])
     return value_double[EPH_DECJ];
+  
+  throw Error(InvalidParam, "psrephem::jdec",
+	      "Error determining pulsar DEC");
+}
 
-  string error ("psrephem::jra() Error determining pulsar RA");
-  cerr << error << endl;
-  throw error;
+double psrephem::omega() const
+{
+  if (tempo11 && parmStatus[EPH_OM])
+    return value_double[EPH_OM];
+  
+  throw Error(InvalidParam, "psrephem::omega",
+	      "Error determining pulsar OMEGA");
+}
+
+double psrephem::ecc() const
+{
+  if (tempo11 && parmStatus[EPH_E])
+    return value_double[EPH_E];
+  
+  throw Error(InvalidParam, "psrephem::ecc",
+	      "Error determining pulsar E");
+}
+
+double psrephem::t0() const
+{
+  if (tempo11 && parmStatus[EPH_T0])
+    return value_double[EPH_T0];
+  
+  throw Error(InvalidParam, "psrephem::t0",
+	      "Error determining pulsar T0");
+}
+
+double psrephem::x() const
+{
+  if (tempo11 && parmStatus[EPH_A1] && parmStatus[EPH_SINI])
+    return (value_double[EPH_A1] * value_double[EPH_SINI]);
+  
+  throw Error(InvalidParam, "psrephem::x",
+	      "Error determining pulsar A1*SINI");
 }
 
 void psrephem::nofit()
@@ -702,7 +735,10 @@ ostream& operator<< (ostream& ostr, const psrephem& eph)
 //
 // ///////////////////////////////////////////////////////////////////////
 
-// get functions return the value and throw an exception on error
+// get functions return the value and throw an 
+// Error exception on error. Looks like these
+// are still being written...
+
 string psrephem::get_string  (int ephind)
 {
 
@@ -713,27 +749,48 @@ double psrephem::get_double  (int ephind)
 
 }
 
-MJD    psrephem::get_MJD     (int ephind)
+MJD psrephem::get_MJD     (int ephind)
 {
 
 }
 
-Angle  psrephem::get_Angle   (int ephind)
+Angle psrephem::get_Angle   (int ephind)
 {
 
 }
 
-int    psrephem::get_integer (int ephind)
+int psrephem::get_integer (int ephind)
 {
 
 }
 
+// set functions accept the value and throw an 
+// Error exception on error. Again, it seems
+// these have not been frinished...
 
-// set functions accept the value and throw an exception on error
-void psrephem::set_string  (int ephind, const string&);
-void psrephem::set_double  (int ephind, double );
-void psrephem::set_MJD     (int ephind, const MJD&);
-void psrephem::set_Angle   (int ephind, const Angle&);
-void psrephem::set_Integer (int ephind, int);
+void psrephem::set_string (int ephind, const string&)
+{
+
+}
+
+void psrephem::set_double (int ephind, double)
+{
+
+}
+
+void psrephem::set_MJD (int ephind, const MJD&)
+{
+
+}
+
+void psrephem::set_Angle (int ephind, const Angle&)
+{
+
+}
+
+void psrephem::set_Integer (int ephind, int)
+{
+
+}
 
 #endif

@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/psrephem.h,v $
-   $Revision: 1.25 $
-   $Date: 2003/03/29 08:38:02 $
-   $Author: straten $ */
+   $Revision: 1.26 $
+   $Date: 2003/12/06 12:03:45 $
+   $Author: ahotan $ */
 
 #ifndef __PSREPHEM_H
 #define __PSREPHEM_H
@@ -16,6 +16,8 @@
 #ifdef PSRFITS
 #include <fitsio.h>
 #endif
+
+#include "Error.h"
 
 #include "MJD.h"
 #include "Angle.h"
@@ -39,10 +41,10 @@ class psrephem : public Reference::Able
   int*    value_integer;
   double* error_double;
 
-  bool tempo11;
+  bool   tempo11;
   string nontempo11;
 
-  psrephem() { init (); };
+  psrephem()  { init (); };
   ~psrephem() { destroy (); };
 
   psrephem (const psrephem &);
@@ -77,6 +79,7 @@ class psrephem : public Reference::Able
   void fits_map (fitsfile* fptr, vector<int>& ephind, int& maxstrlen) const;
 #endif
 
+  // set fitting attributes
   void   nofit();
   void   fitall();
 
@@ -109,10 +112,14 @@ class psrephem : public Reference::Able
   friend bool operator != (const psrephem &, const psrephem &);
 
   double get_dm() const;
-  void set_dm (double dm);
-
+  void   set_dm (double dm);
+  
   double jra() const;
   double jdec() const;
+  double omega() const;
+  double ecc() const;
+  double t0() const;
+  double x() const;  
 
   // these functions return 0 if no error, -1 on error
   //
@@ -216,6 +223,7 @@ class psrephem : public Reference::Able
   static int   verbose;
 
  protected:
+
   void init ();
   void size_dataspace();
   void destroy ();
