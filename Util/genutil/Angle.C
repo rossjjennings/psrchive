@@ -7,19 +7,9 @@
 
 #include "machine_endian.h"
 #include "angle.h"
+#include "cartesian.h"
 #include "coord.h"
-#include "f772c.h"
 
-
-// Fortran stuff from genutil... leave out of .h to discourage
-// direct use!
-extern "C" double F772C(hmstoturns)(const char *, double *, int);
-extern "C" double F772C(dmstoturns)(const char *, double *, int);
-// and from -lsla
-extern "C" double F772C(sla_dsep)(double *, double *, double *, double*);
-
-
-// Use Willem's angle parsing routines and do our own output
 Angle::Angle(const double & d){
   radians=d; 
   while(radians>M_PI) radians-=2*M_PI;
@@ -46,21 +36,15 @@ string Angle::getHMS (int places) const
 {
   return string (getHMS (angle_str, places));
 }
+
 int Angle::setHMS(const char *str)
 {
-  double prec;
- 
-  //  return str2ra(&radians, str);
-  radians = 2.0*M_PI*F772C(hmstoturns)(str, &prec, strlen(str));
-  return (radians < -10.0);
+  return str2ra(&radians, str);
 }
 
 int Angle::setDMS(const char *str)
 {
-  double prec;
-  //  return str2dec(&radians, str);
-  radians = 2.0*M_PI*F772C(dmstoturns)(str, &prec, strlen(str));
-  return (radians < -10.0);
+  return str2dec(&radians, str);
 }
 
 char * Angle::getDMS(char *str,int places) const
@@ -305,21 +289,15 @@ AnglePair:: getRadMS(long int *az, long int *ze)
 
 // redwards 10Aug99 function to compute angular separation of a pair
 // of spherical coordinates
+// straten 05Oct99 got rid of references to slalib
 Angle
 AnglePair::angularSeparation(const AnglePair& other)
 {
-  Angle a;
-  double a1_1, a1_2, a2_1, a2_2;
+  // convert the angles in spherical coordinates to unit Cartesian vectors
+  Cartesian u1 (*this);
+  Cartesian u2 (other);
 
-
-  a1_1=angle1.getradians();
-  a1_2=angle2.getradians();
-  a2_1=other.angle1.getradians();
-  a2_2=other.angle2.getradians();
-
-    a.setradians(F772C(sla_dsep)(&a1_1, &a1_2, &a2_1, &a2_2));
-
-  return a;
+  return Cartesian::angularSeparation (u1, u2);
 }
 
 AnglePair & AnglePair::operator*= (const double mult){
