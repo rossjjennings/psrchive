@@ -42,6 +42,7 @@ int main (int argc, char** argv)
 
     case 'v':
       verbose = true;
+      psrephem::verbose = true;
       break;
     }
   }
