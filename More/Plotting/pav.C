@@ -1,5 +1,5 @@
 //
-// $Id: pav.C,v 1.49 2003/08/12 15:38:37 straten Exp $
+// $Id: pav.C,v 1.50 2003/08/29 06:12:09 ahotan Exp $
 //
 // The Pulsar Archive Viewer
 //
@@ -69,6 +69,7 @@ void usage ()
     " -S        Plot Stokes parameters in the Manchester style\n"
     " -X        Plot cal amplitude and phase vs frequency channel\n"
     " -Y        Display all subints (time vs pulse phase)\n"
+    " -L        Find the width of the pulse profile\n"
     "\n"
     "Archive::Extension options (file format specific):\n"
     " -o        Plot the original passband\n"
@@ -131,6 +132,7 @@ int main (int argc, char** argv)
   bool pa_spectrum = false;
   bool pa_scatter = false;
   bool orig_passband = false;
+  bool width = false;
 
   char* metafile = NULL;
   
@@ -138,7 +140,7 @@ int main (int argc, char** argv)
   Pulsar::Plotter::ColourMap colour_map = Pulsar::Plotter::Heat;
   
   int c = 0;
-  const char* args = "AaBb:Cc:DdEeFf:GghI:iHlm:M:N:Qq:opP:r:SsTt:VvwWXx:Yy:Zz:";
+  const char* args = "AaBb:Cc:DdEeFf:GghI:iHlLm:M:N:Qq:opP:r:SsTt:VvwWXx:Yy:Zz:";
 
   while ((c = getopt(argc, argv, args)) != -1)
     switch (c) {
@@ -206,13 +208,16 @@ int main (int argc, char** argv)
       plotter.set_subint( atoi (optarg) );
       break;
     case 'i':
-      cout << "$Id: pav.C,v 1.49 2003/08/12 15:38:37 straten Exp $" << endl;
+      cout << "$Id: pav.C,v 1.50 2003/08/29 06:12:09 ahotan Exp $" << endl;
       return 0;
 
     case 'l':
       plotter.set_labels(false);
       break;
-
+    case 'L':
+      width = true;
+      break;
+      
     case 'm':
       // macro file
       break;
@@ -430,7 +435,78 @@ int main (int argc, char** argv)
       cpg_next();
       plotter.cal_plot(archive);
     }
-    
+
+    if (width) {
+      Reference::To<Pulsar::Archive> copy = archive->total();
+      copy->remove_baseline();
+      
+      float max = 0.0;
+      unsigned risebin = 0;
+      unsigned fallbin = 0;
+      max = copy->get_Profile(0,0,0)->max();
+      
+      max /= 2.0;
+      bool transition = false;
+      unsigned nbin = copy->get_nbin();
+      
+      for (unsigned i = 1; i < copy->get_nbin(); i++) {
+	if ((copy->get_Profile(0,0,0)->mean(float(i-1)/float(nbin),0.005) <= max)
+	    && (copy->get_Profile(0,0,0)->mean(float(i)/float(nbin),0.005) >= max))
+	  transition = true;
+	if (transition) {
+	  risebin = i-1;
+	  break;
+	}
+      }
+      
+      transition = false;
+      
+      for (unsigned i = 1; i < nbin; i++) {
+	if ((copy->get_Profile(0,0,0)->mean(float(i-1)/float(nbin),0.005) >= max)
+	    && (copy->get_Profile(0,0,0)->mean(float(i)/float(nbin),0.005) <= max))
+	  transition = true;
+	if (transition) {
+	  fallbin = i-1;
+	  break;
+	}
+      }
+      
+      if (risebin == 0 || fallbin == 0) {
+	cout << "Could not find full width at half maximum!" << endl;
+      }
+      else {
+	double period = copy->get_Integration(0)->get_folding_period();
+	
+	cpg_next();
+	cpgsvp(0.1, 0.9, 0.3, 0.9);
+	plotter.single_period(copy);
+	
+	double tbin = (period*1000.0) / double(copy->get_nbin());
+	double riseedge = double(risebin) * tbin;
+	double falledge = double(fallbin) * tbin;
+	
+	float x1 = 0.0;
+	float x2 = 0.0;
+	float y1 = 0.0;
+	float y2 = 0.0;
+	
+	cpgqwin(&x1, &x2, &y1, &y2);
+	cpgsci(2);
+	cpgmove(riseedge, y1);
+	cpgdraw(riseedge, y2);
+	cpgmove(falledge, y1);
+	cpgdraw(falledge, y2);
+	cpgsch(2.0);
+	
+	char useful[256];
+	sprintf(useful, "Pulse FWHM = %.3lf ms", fabs(falledge-riseedge));
+	
+	cpgmtxt("B", 4, 0.5, 0.5, useful);
+	cpgsch(1.0);
+	cpgsci(1);
+	cpgmtxt("T", 1, 0.5, 0.5, (copy->get_source()).c_str());
+      }
+    }
     if (PA) {
       cpg_next();
       plotter.pa_profile(archive);
