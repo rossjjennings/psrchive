@@ -573,7 +573,7 @@ void Tempo::toa::init()
   dmc = 0.0;
   observatory [0] = '\0';
   ston = -1.0;
-  pa = 0.0;
+  pa = 999.0;
   bw = 0.0;
   dur = 0.0;
   dm = 0.0;
