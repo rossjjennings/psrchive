@@ -1,5 +1,7 @@
 #include "Pulsar/Integration.h"
 #include "Pulsar/Profile.h"
+#include "Physical.h"
+
 #include "Error.h"
 
 /////////////////////////////////////////////////////////////////////////////
@@ -7,66 +9,107 @@
 // Pulsar::Integration::dedisperse
 //
 /*!
-  Rotate the profiles in each chan in order to remove the dispersion delay.
-  \param frequency the frequency (in MHz) to which the delay is referenced
-  \pre the period (in seconds) at which the pulsar signal was folded must
-       have been previously set using Integration::set_folding_period.
-  \pre the dispersion measure (in \f${\rm pc cm}^{-3}\f$) must have been
-       previously set using Integration::set_dispersion_measure.
+
+  Phase rotate the profiles in each frequency channel in order to
+  remove the dispersion delay with respect to the centre frequency
+
+  \post All profiles will be aligned to the reference frequency 
+  returned by Integration::get_centre_frequency.
+
 */
-void Pulsar::Integration::dedisperse (double frequency)
-{
-  double dm = get_dispersion_measure();
+void Pulsar::Integration::dedisperse () try {
+
+  if ( get_dedispersed() &&
+       dedispersed_dispersion_measure == get_dispersion_measure() &&
+       dedispersed_centre_frequency == get_centre_frequency() )
+  {
+    if (verbose)
+      cerr << "Pulsar::Integration::dedisperse already corrected" << endl;
+
+    return;
+  }
+
   double pfold = get_folding_period();
-
-  if (dm == 0)
-    return;
   if (pfold == 0)
-    return;
+    throw Error (InvalidState, "Pulsar::Integration::dedisperse",
+		 "folding period unknown");
 
-  if (frequency == 0.0)
-    frequency = weighted_frequency ();
+  double dm = get_dispersion_measure();
+  double reference_frequency = get_centre_frequency ();
+
+  double base = 0.0;
+
+  if ( get_dedispersed() )  {
+
+    // calculate the delay between the old and new reference frequency, if any
+    base = dispersion_delay (dm, dedispersed_centre_frequency,
+                             reference_frequency);
+
+    if (verbose)
+      cerr << "Pulsar:Integration:::dedisperse delta frequency delay=" 
+	   << base*1e3 << " ms" << endl;
+
+    // set the effective dispersion measure to the difference b/w old and new
+    dm -= dedispersed_dispersion_measure;
+
+  }
 
   if (verbose)
-    cerr << "Integration::dedisperse DM=" << dm
-	 <<" freq="<< frequency << endl;
+    cerr << "Integration::dedisperse effective DM=" << dm
+	 << " reference frequency=" << reference_frequency << endl;
 
-  for (unsigned ipol=0; ipol < get_npol(); ipol++)
-    for (unsigned ichan=0; ichan < get_nchan(); ichan++)
-      profiles[ipol][ichan] -> dedisperse (dm, frequency, pfold);
+  dedisperse (0, get_nchan(), dm, reference_frequency, base);
+
+  dedispersed_dispersion_measure = get_dispersion_measure();
+  dedispersed_centre_frequency = get_centre_frequency();
 
 }
+catch (Error& error) {
+  throw error += "Pulsar::Integration::dedisperse";
+}
 
-void Pulsar::Integration::dedisperse (double frequency, unsigned chan)
+/*! This worker function performs dedispersion without asking many
+  questions.
+
+   \param ichan the first channel to be dedispersed
+   \param kchan the last channel to be dedispersed
+   \param dm the dispersion measure 
+   \param f0 the reference frequency 
+   \param t0 time delay to be applied in addition to dispersion delay */
+
+void Pulsar::Integration::dedisperse (unsigned ichan, unsigned kchan,
+                                      double dm, double f0, double t0)
 {
-  double dm = get_dispersion_measure();
+  if (verbose)
+    cerr << "Integration::dedisperse dm=" << dm << " f0=" << f0 
+         << " t0=" << t0 << endl;
+
+  if (dm == 0 && t0 == 0)
+    return;
+
   double pfold = get_folding_period();
 
-  if (verbose)
-    cerr << "Integration::dedisperse dm=" << dm << " pfold=" << pfold << endl;
-
-  if (dm == 0)
-    return;
   if (pfold == 0)
-    return;
+    throw Error (InvalidState, "Pulsar::Integration::dedisperse",
+                 "folding period unknown");
 
-  if (chan < 0 || chan >= get_nchan())
+  if (ichan >= get_nchan())
     throw Error (InvalidRange, "Integration::dedisperse",
-		 "chan=%d nchan=%d", chan, get_nchan());
+		 "start chan=%d >= nchan=%d", ichan, get_nchan());
 
-  if (frequency == 0.0)
-    throw Error (InvalidParam, "Integration::dedisperse",
-		 "frequency == 0.0");
+  if (kchan > get_nchan())
+    throw Error (InvalidRange, "Integration::dedisperse",
+                 "end chan=%d > nchan=%d", kchan, get_nchan());
 
-  if (verbose)
-    cerr << "Integration::dedisperse chan=" 
-	 << chan << " npol=" << get_npol() << endl;
+  for (unsigned jchan=ichan; jchan < kchan; jchan++) {
 
-  for (unsigned ipol=0; ipol < get_npol(); ipol++)
-    profiles[ipol][chan] -> dedisperse (dm, frequency, pfold);
-  
-  return;
+    double frequency = get_centre_frequency (jchan);
+    double delay = t0 + dispersion_delay (dm, f0, frequency);
+
+    for (unsigned ipol=0; ipol < get_npol(); ipol++)
+      profiles[ipol][jchan] -> rotate (delay / pfold);
+
+  }
+
 }
-
-  // else, dedisperse the lot
 
