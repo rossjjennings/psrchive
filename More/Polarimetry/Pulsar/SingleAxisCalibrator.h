@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/SingleAxisCalibrator.h,v $
-   $Revision: 1.1 $
-   $Date: 2003/02/14 15:20:37 $
+   $Revision: 1.2 $
+   $Date: 2003/02/20 15:46:22 $
    $Author: straten $ */
 
 #ifndef __SingleAxisCalibrator_H
@@ -25,6 +25,9 @@ namespace Pulsar {
 
     //! Destructor
     ~SingleAxisCalibrator ();
+
+    //! PGPLOT the calibrator model parameters as a function of frequency
+    friend void plot (const SingleAxisCalibrator* cal);
 
   protected:
 
