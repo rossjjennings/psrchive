@@ -459,7 +459,7 @@ double Pulsar::Profile::sum (int istart, int iend) const
 //
 // Pulsar::Profile::get_ascii
 //
-string Pulsar::Profile::get_ascii (int bin_start=0, int bin_end=0) const
+string Pulsar::Profile::get_ascii (int bin_start, int bin_end) const
 {
   if (bin_start > bin_end)
     throw Error(InvalidParam, "Pulsar::Profile::get_ascii",
