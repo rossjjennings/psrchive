@@ -246,7 +246,10 @@ void Pulsar::BasebandArchive::set_header ()
 
   bhdr.gulpsize = reduction.get_block_size();
   bhdr.seeksize = reduction.get_block_size() - reduction.get_overlap();
-  bhdr.totaljobs = reduction.get_total_samples() / bhdr.seeksize;
+  if (bhdr.seeksize)
+    bhdr.totaljobs = reduction.get_total_samples() / bhdr.seeksize;
+  else
+    bhdr.totaljobs = 0;
 
   bhdr.voltage_state = int( reduction.get_state() ) + 1;
 
