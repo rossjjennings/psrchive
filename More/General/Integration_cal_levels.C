@@ -21,22 +21,18 @@ Pulsar::Integration::cal_levels (vector<vector<Estimate<double> > >& high,
   if (nchan==0)
     throw Error (InvalidState, "Pulsar::Integration::cal_levels", "nchan = 0");
 
-  high.resize (npol);
-  low.resize (npol);
-  
-  unsigned ipol, ichan;
-
-  for (ipol=0; ipol<npol; ++ipol){
-    high[ipol].resize(nchan);
-    low[ipol].resize(nchan);
-  }
-
   int hightolow, lowtohigh, buffer;
   find_transitions (hightolow, lowtohigh, buffer);
 
-  for (ipol=0; ipol<npol; ++ipol) {
+  high.resize (npol);
+  low.resize (npol);
+  
+  for (unsigned ipol=0; ipol<npol; ipol++) {
 
-    for(ichan=0; ichan<nchan; ++ichan){
+    high[ipol].resize(nchan);
+    low[ipol].resize(nchan);
+
+    for (unsigned ichan=0; ichan<nchan; ichan++) {
 
       high[ipol][ichan] = low[ipol][ichan] = 0.0;
 
