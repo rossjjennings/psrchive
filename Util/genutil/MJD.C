@@ -1,5 +1,5 @@
 #include "rcsid.h"
-RCSID ("$Header: /cvsroot/psrchive/psrchive/Util/genutil/MJD.C,v 1.40 1999/11/02 05:54:25 straten Exp $");
+RCSID ("$Id: MJD.C,v 1.41 1999/11/02 05:57:28 straten Exp $");
 
 #include <iostream>
 #include <string.h>

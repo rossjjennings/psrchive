@@ -2,7 +2,7 @@
 #define __MJD_H
 
 #include "rcsid.h"
-NRCSID (MJD, "$Header: /cvsroot/psrchive/psrchive/Util/genutil/MJD.h,v 1.6 1999/11/02 05:54:26 straten Exp $");
+NRCSID (MJD, "$Id: MJD.h,v 1.7 1999/11/02 05:57:28 straten Exp $");
 
 #include <stdio.h>
 #include <string>
