@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <assert.h>
 
 #include "psrfft.h"
 
@@ -8,13 +9,16 @@
 /* Allows for arrays with npts that are not a power of 2           */
 /* Replaces shiftbyfft.f                                           */
 
-int fft_shift(int npts, float * arr, double shift){
-
+int fft_shift (int npts, float * arr, double shift)
+{
   int i;
   double phase, cp, sp, tmp;
+
   float * cmplx_arr = (float *) malloc(sizeof(float)*2*npts);
   float * fft_cmplx_arr = (float *) malloc(sizeof(float)*2*npts);
   double shiftrad;
+
+  assert (fft_cmplx_arr != 0 && cmplx_arr != 0);
 
   if(npts<=1){
     fprintf(stderr, "fft_shift error - invalid npts:%d\n",npts);
