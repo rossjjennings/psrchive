@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Estimate.h,v $
-   $Revision: 1.13 $
-   $Date: 2003/05/02 14:25:29 $
+   $Revision: 1.14 $
+   $Date: 2003/05/05 10:39:36 $
    $Author: straten $ */
 
 #ifndef __Estimate_h
@@ -14,7 +14,7 @@
 //! Estimates with a value, \f$ x \f$, and a variance, \f$ \sigma^2 \f$
 /*!
   Where \f$ y = f (x_1, x_2, ... x_n) \f$, then
-  \f$ \sigma_y^2 = \sum_{i=1}^n ({\delta f \over \delta x_i})^2\sigma_i^2 \f$
+  \f$ \sigma_y^2 = \sum_{i=1}^n ({\partial f \over \partial x_i})^2\sigma_i^2 \f$
 
   See http://mathworld.wolfram.com/ErrorPropagation.html
 */
@@ -108,12 +108,20 @@ class Estimate
   friend const Estimate log (const Estimate& u)
   { return Estimate (std::log (u.val), u.var/(u.val*u.val)); }
 
-  //! \f$ {\delta\over\delta x} \tan^-1 (x) = (1+x^2)^{-1} \f$
+  //! \f$ \left({\partial\sin x\over\partial x}\right)^2 = (1-\sin^2x) \f$
+  friend const Estimate sin (const Estimate& u)
+  { T val = std::sin (u.val); return Estimate (val, (1-val*val)*u.var); }
+
+  //! \f$ \left({\partial\cos x\over\partial x}\right)^2 = (1-\cos^2x) \f$
+  friend const Estimate cos (const Estimate& u)
+  { T val = std::cos (u.val); return Estimate (val, (1-val*val)*u.var); }
+
+  //! \f$ {\partial\over\partial x} \tan^-1 (x) = (1+x^2)^{-1} \f$
   friend const Estimate atan2 (const Estimate& s, const Estimate& c)
   { T c2 = c.val*c.val;  T s2 = s.val*s.val;
     return Estimate (std::atan2 (s.val, c.val), (c2*s.var+s2*c.var)/(c2+s2)); }
   
-  //! \f$ {\delta\over\delta x} x^\onehalf = \onehalf x^{-\onehalf} \f$
+  //! \f$ {\partial\over\partial x} x^\onehalf = \onehalf x^{-\onehalf} \f$
   friend const Estimate sqrt (const Estimate& u)
   { return Estimate (std::sqrt (u.val), 0.25*u.var/fabs(u.val)); }
 
