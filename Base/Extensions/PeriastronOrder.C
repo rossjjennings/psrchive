@@ -18,6 +18,9 @@ Pulsar::PeriastronOrder::PeriastronOrder (const PeriastronOrder& extension)
   : IntegrationOrder ()
 {
   IndexState = extension.IndexState;
+  Unit       = extension.Unit;
+  indices    = extension.indices;
+
 }
 
 //! Operator =
@@ -25,6 +28,8 @@ const Pulsar::PeriastronOrder&
 Pulsar::PeriastronOrder::operator= (const PeriastronOrder& extension)
 {
   IndexState = extension.IndexState;
+  Unit       = extension.Unit;
+  indices    = extension.indices;
   return *this;
 }
 
@@ -122,6 +127,44 @@ void Pulsar::PeriastronOrder::append (Archive* thiz, const Archive* that)
 
 void Pulsar::PeriastronOrder::combine (Archive* arch, unsigned nscr)
 {
-  throw Error(FailedCall, "PeriastronOrder::combine",
-	      "This method is not implemented");
+  vector<Estimate<double> > oldind = indices;
+  
+  unsigned newsub = 0;
+  if ((arch->get_nsubint() % nscr) == 0)
+    newsub = arch->get_nsubint() / nscr;
+  else
+    newsub = (arch->get_nsubint() / nscr) + 1;
+ 
+  Reference::To<Pulsar::Archive> copy = arch->clone();
+  arch->resize(0);
+  arch->resize(newsub);
+  indices.resize(newsub);
+
+  unsigned count = 0;
+  for (unsigned i = 0; i < newsub; i++) {
+    *(arch->get_Integration(i)) = *(arch->new_Integration(copy->get_Integration(count)));
+    count++;
+    for (unsigned j = 1; j < nscr; j++) {
+      if (count >= copy->get_nsubint())
+	return;
+      *(arch->get_Integration(i)) += *(copy->get_Integration(count));
+      
+      count++;
+    }
+  }
+
+  count = 0;
+  for (unsigned i = 0; i < newsub; i++) {
+    indices[i] = oldind[count];
+    count++;
+    for (unsigned j = 1; j < nscr; j++) {
+      if (count >= oldind.size()) {
+	indices[i] /= j;
+	return;
+      }
+      indices[i] += oldind[count];
+      count++;
+    }
+    indices[i] /= nscr;
+  }
 }

@@ -12,6 +12,8 @@ Pulsar::IntegrationOrder::IntegrationOrder (const IntegrationOrder& extension)
   : Extension ("IntegrationOrder")
 {
   IndexState = extension.IndexState;
+  Unit       = extension.Unit;
+  indices    = extension.indices;
 }
 
 //! Operator =
@@ -19,6 +21,8 @@ const Pulsar::IntegrationOrder&
 Pulsar::IntegrationOrder::operator= (const IntegrationOrder& extension)
 {
   IndexState = extension.IndexState;
+  Unit       = extension.Unit;
+  indices    = extension.indices;
   return *this;
 }
 

@@ -1,8 +1,8 @@
 //-*-C++-*-
                                                                                 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/IntegrationOrder.h,v $
-   $Revision: 1.3 $
-   $Date: 2003/12/30 04:34:09 $
+   $Revision: 1.4 $
+   $Date: 2004/01/06 03:46:50 $
    $Author: ahotan $ */
                                                                                 
 #ifndef __IntegrationOrder_h
@@ -71,7 +71,7 @@ namespace Pulsar {
     //! The units (if any) of this state
     string Unit;
     
-    //! Storage for the actual Integration indicies
+    //! Storage for the actual Integration indices
     vector<Estimate<double> > indices;                                                    
 
   };                                                                            
