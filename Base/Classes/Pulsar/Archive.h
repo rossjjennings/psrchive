@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Archive.h,v $
-   $Revision: 1.3 $
-   $Date: 2002/04/08 08:04:09 $
+   $Revision: 1.4 $
+   $Date: 2002/04/09 06:38:12 $
    $Author: straten $ */
 
 /*
@@ -30,9 +30,14 @@ class polyco;
 namespace Pulsar {
 
   //
-  // feeds - enumerated type for different feed configurations
+  //! different receiver feed configuration states
   //
   enum Feeds { invalid=-1, circular=0, linear=1 };
+
+
+  //
+  //! different states of the integration data
+  //
   enum PolnState { Stokes, Coherency, XXYY, Intensity, Invariant };
 
   class Integration;
@@ -55,9 +60,9 @@ namespace Pulsar {
     { return factory (filename.c_str()); }
 
     //
-    // clone - dynamic copy constructor
+    //! returns a pointer to a new copy of self
     //
-    virtual Archive* clone (const Archive* copy);
+    virtual Archive* clone ();
 
 
     // //////////////////////////////////////////////////////////////////
@@ -67,8 +72,11 @@ namespace Pulsar {
     // //////////////////////////////////////////////////////////////////
 
     //
-    // bscrunch - integrate profiles in phase
-    //
+    //! integrate pulse profiles in phase
+    /*!
+      \param nscrunch the number of phase bins to add together
+      \exception string
+    */
     virtual void bscrunch (int nscrunch);
 
     //
