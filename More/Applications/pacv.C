@@ -4,6 +4,8 @@
 #include "Pulsar/SingleAxisCalibrator.h"
 #include "Pulsar/PolarCalibrator.h"
 
+#include "Pulsar/PolnCalibratorExtension.h"
+
 #include "Pulsar/CalibratorPlotter.h"
 #include "Pulsar/CalibratorStokes.h"
 #include "Pulsar/CalibratorStokesInfo.h"
@@ -31,6 +33,7 @@ void usage ()
     " -C         plot only calibrator Stokes\n"
     " -D dev     specify PGPLOT device\n"
     " -f         treat all archives as members of a fluxcal observation\n"
+    " -t mjd     set the epoch of the PolnCalibrator extension\n"
     " -q         use the single-axis model\n"
     " -P         produce publication-quality plots" << endl;
 }
@@ -55,6 +58,10 @@ int main (int argc, char** argv)
   // produce publication quality plots
   bool publication = false;
 
+  // set the epoch of the PolnCalibratorExtension
+  bool set_epoch = false;
+  MJD epoch;
+
   bool plot_calibrator_stokes = false;
 
   string device = "?";
@@ -62,7 +69,7 @@ int main (int argc, char** argv)
   // verbosity flag
   bool verbose = false;
   char c;
-  while ((c = getopt(argc, argv, "a:c:CD:hfMPqvV")) != -1)  {
+  while ((c = getopt(argc, argv, "a:c:CD:hfMPqt:vV")) != -1)  {
 
     switch (c)  {
 
@@ -118,6 +125,11 @@ int main (int argc, char** argv)
       single_axis = true;
       break;
 
+    case 't':
+      set_epoch = true;
+      epoch.Construct( optarg );
+      break;
+
     case 'V':
       Pulsar::Archive::set_verbosity (3);
       Pulsar::CalibratorPlotter::verbose = true;
@@ -142,10 +154,11 @@ int main (int argc, char** argv)
     for (int ai=optind; ai<argc; ai++)
       dirglob (&filenames, argv[ai]);
 
-  cpgbeg (0, device.c_str(), 0, 0);
-  cpgask(1);
-
-  cpgsvp (.1,.9, .1,.9);
+  if (!set_epoch) {
+    cpgbeg (0, device.c_str(), 0, 0);
+    cpgask(1);
+    cpgsvp (.1,.9, .1,.9);
+  }
   
   // the input calibrator archive
   Reference::To<Pulsar::Archive> input;
@@ -177,6 +190,23 @@ int main (int argc, char** argv)
 
 
     if (input->get_type() == Signal::Calibrator) {
+
+      if (set_epoch)  {
+
+        cerr << "pacv: setting epoch in " << filenames[ifile]
+             << " to " << epoch << endl;
+
+        Pulsar::PolnCalibratorExtension* pce;
+        pce = input->get<Pulsar::PolnCalibratorExtension>();
+        pce -> set_epoch (epoch);
+
+        string newname = filenames[ifile] + ".pacv";
+
+        cerr << "pacv: Unloading " << newname << endl;
+        input -> unload (newname);
+        continue;
+
+      }
 
       calibrator = new Pulsar::PolnCalibrator (input);
 
@@ -218,6 +248,9 @@ int main (int argc, char** argv)
       continue;
 
     }
+
+    if (set_epoch)
+      continue;
 
     for (unsigned ichan=0; ichan<zapchan.size(); ichan++) {
       if (verbose)
@@ -297,6 +330,7 @@ int main (int argc, char** argv)
     return -1;
   }
 
-  cpgend();
+  if (!set_epoch)
+    cpgend();
   return 0;
 }
