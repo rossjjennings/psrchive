@@ -68,6 +68,14 @@ int Timer::load (FILE* fptr, struct timer* hdr, bool big_endian)
     timer_fromBigEndian (hdr);
   else
     timer_fromLittleEndian (hdr);
+
+  // correct an endian mistake made in initial baseband header version
+  float version = hdr->version + hdr->minorversion/10.0;
+  if (version > 8.0 && version < 8.3) {
+    // why not FromBigEndian??  - already done in timer_fromBigEndian
+    ChangeEndian (hdr->be_data_size);
+    hdr->minorversion = 3.0;
+  }
   return 0;
 }
 
