@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/model_profile.h,v $
-   $Revision: 1.2 $
-   $Date: 2004/01/30 21:24:38 $
-   $Author: straten $ */
+   $Revision: 1.3 $
+   $Date: 2004/05/02 08:34:03 $
+   $Author: sord $ */
 
 #ifndef __model_profile_h
 #define __model_profile_h
@@ -18,6 +18,9 @@ namespace Pulsar {
                      double * scale, double * sigma_scale,
                      double * shift, double * sigma_shift, double * chisq,
                      int verbose);
+
+  int legacy_fftconv (int nbin, float *_prof, float *_std, double * _shift, 
+                      double *_eshift, float *_snrfft, float *_esnrfft);;
 
 }
 

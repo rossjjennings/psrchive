@@ -11,8 +11,27 @@
 
 extern "C" {
   void F772C(fccf) (float *, float *, float *);
+  void F772C(fftconv) (int *,float *, float *, float *, float *, float *, float *);
 }
 
+int Pulsar::legacy_fftconv(int npts, float * prf, float * std, double * shift, double *eshift, 
+                           float * snrfft, float * esnrfft) {
+  // This introduced to investigate the behaviour of the pat-model_profile toa routines
+  // By invocation of the legacy fftconv routine - sorry for the kludge WvS - this can come out
+  // when testing is complete -- steveo
+
+  float real_shift = 0, real_err = 0 ; // Required for fftconv .... darned real4....
+  int number = npts;
+
+  F772C (fftconv) (&number,prf,std,&real_shift,&real_err,snrfft,esnrfft);
+
+  if (real_shift != 0) {
+   *shift = (double) real_shift;
+   *eshift = (double) real_err;
+   return (0);
+  }
+  return -1;
+} 
 int Pulsar::model_profile (int npts, int narrays, float** prf, float** std,
 		           double* scale, double* sigma_scale, 
 		           double* shift, double* sigma_shift,
@@ -110,6 +129,8 @@ int Pulsar::model_profile (int npts, int narrays, float** prf, float** std,
       if(ntries>10)
         return(-1);
     }
+    
+
     tau = zbrent (low_tau, high_tau, low_deriv_chisq, high_deriv_chisq, 
 		  edtau, narrays, xcorr_amps, xcorr_phases, nsum);
   }
