@@ -78,7 +78,7 @@ string CommandParser::parse (const char* cmd, const char* args)
 
 
   for (unsigned icmd=0; icmd < commands.size(); icmd++)
-    if (command == commands[icmd].command) {
+    if (command == commands[icmd]->command) {
 
       current_command = icmd;
 
@@ -86,7 +86,7 @@ string CommandParser::parse (const char* cmd, const char* args)
 	cerr << "CommandParser::parse execute " << command <<endl;
 
 
-      string reply = execute (commands[icmd].token, arguments);
+      string reply = commands[icmd]->execute (arguments);
 
       if (debug)
 	cerr << "CommandParser::parse execute returns '" << reply <<"'"<<endl;
@@ -101,23 +101,10 @@ string CommandParser::parse (const char* cmd, const char* args)
   return "invalid command: " + command + "\n" + prompt;
 }
 
-//! derived types may add commands to the list using this method
-void CommandParser::add_command (int token, const char* cmd, 
-				 const char* help, const char* detailed_help)
-{
-  for (unsigned icmd=0; icmd < commands.size(); icmd++)
-    if (token == commands[icmd].token) {
-      string error ("CommandParser::add_command token taken");
-      cerr << error << endl;
-      throw error;
-    }
-
-  commands.push_back (Command(token, cmd, help, detailed_help));
-}
 
 string CommandParser::usage ()
 {
-  return "usage: " + commands[current_command].detail;
+  return "usage: " + commands[current_command]->detail;
 }
 
 string CommandParser::help (const string& command)
@@ -126,7 +113,7 @@ string CommandParser::help (const string& command)
     string help_str = "Available commands:\n\n";
 
     for (unsigned icmd=0; icmd < commands.size(); icmd++)
-      help_str += commands[icmd].command + "\t " + commands[icmd].help + "\n";
+      help_str += commands[icmd]->command + "\t " + commands[icmd]->help + "\n";
 
     help_str += 
       "\nquit \t quit program\n"
@@ -145,24 +132,15 @@ string CommandParser::help (const string& command)
     return "verbose makes the program more verbose\n" + prompt;
 
   for (unsigned icmd=0; icmd < commands.size(); icmd++)
-    if (command == commands[icmd].command) {
-      string help_str = command +"\t "+ commands[icmd].help +"\n\n";
-      if (commands[icmd].detail.empty())
+    if (command == commands[icmd]->command) {
+      string help_str = command +"\t "+ commands[icmd]->help +"\n\n";
+      if (commands[icmd]->detail.empty())
 	return help_str + "\t no detailed help available\n" + prompt;
       else
-	return help_str + commands[icmd].detail + "\n" + prompt;
+	return help_str + commands[icmd]->detail + "\n" + prompt;
     }
       
   return "invalid command: " + command + "\n" + prompt;
 }
 
 
-Command::Command (int _token, const char* _command,
-		  const char* _help, const char* _detail)
-{
-  token   = _token;
-  command = _command;
-  help    = _help;
-  if (_detail)
-    detail = _detail;
-}

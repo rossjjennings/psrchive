@@ -6,18 +6,7 @@
 
 #include "ReferenceAble.h"
 
-class Command {
-
- public:
-  Command (int token, const char* command,
-	   const char* help, const char* detailed_help = 0);
-
-  int    token;
-  string command;
-  string help;
-  string detail;
-
-};
+class ParseMethod;
 
 class CommandParser : public Reference::Able {
 
@@ -33,13 +22,6 @@ class CommandParser : public Reference::Able {
 
   //! destructor
   virtual ~CommandParser () {}
-
-  //! derived types must define what happens for each command parsed
-  virtual string execute (int token, const string& args) = 0;
-
-  //! derived types may add commands to the list using this method
-  void add_command (int token, const char* command,
-		    const char* help, const char* detailed_help = 0);
 
   //! return a help string
   string help (const string& command);
@@ -74,14 +56,96 @@ class CommandParser : public Reference::Able {
 
   string usage ();
 
+ protected:
+  //! Sub-classes add commands to the list using this method
+  template <class Parser>
+    void add_command (string (Parser::*method)(const string&),
+		      const char* command,
+		      const char* help,
+		      const char* detailed_help = 0);
+
  private:
 
-  vector<Command> commands;
+  vector<ParseMethod*> commands;
 
-  //! the command token passed to execute, used by usage()
+  //! the command index, used by usage()
   unsigned current_command;
   
 };
+
+//! Pure virtual base class of the template class Command
+class ParseMethod {
+ public:
+  ParseMethod() {}
+  virtual ~ParseMethod () {}
+  virtual string execute (const string& command) = 0;
+
+  //! The command string corresponding to this method
+  string command;
+  //! The help string for this method
+  string help;
+  //! The detailed help string for this method
+  string detail;
+};
+
+//! Stores a pointer to a CommandParser sub-class and one of its methods
+template <class Parser> class Command : public ParseMethod 
+{
+  friend class CommandParser;
+  
+  typedef string (Parser::*Method) (const string&);
+  
+ public:
+  
+  Command (Parser* _instance, Method _method, const char* _command,
+	   const char* _help, const char* _detailed_help = 0)
+    {
+      instance = _instance;
+      method = _method;
+      command = _command;
+      help    = _help;
+      if (_detailed_help)
+	detail = _detailed_help;
+    }
+
+  //! Execute method
+  string execute (const string& args)
+    {
+      return (instance->*method) (args);
+    }
+
+ protected:
+  //! Method of the sub-class to execute
+  Method method;
+
+  //! Instance through which method is called
+  Parser* instance;
+
+};
+
+//! derived types may add commands to the list using this method
+template<class Parser>
+void CommandParser::add_command (string (Parser::*method) (const string&),
+				 const char* cmd, const char* help, 
+				 const char* detailed_help)
+{
+  Parser* instance = dynamic_cast<Parser*> (this);
+  if (!instance) {
+    string error ("CommandParser::add_command instance/method mis-match");
+    cerr << error << endl;
+    throw error;
+  }
+
+  for (unsigned icmd=0; icmd < commands.size(); icmd++)
+    if (cmd == commands[icmd]->command) {
+      string error ("CommandParser::add_command command key taken");
+      cerr << error << endl;
+      throw error;
+    }
+  
+  commands.push_back ( new Command<Parser> (instance, method,
+					    cmd, help, detailed_help));
+}
 
 
 #endif

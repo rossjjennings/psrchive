@@ -7,22 +7,15 @@ class tester : public CommandParser {
 public:
   tester () {
     prompt = "tester> ";
-    add_command (0, "test", "this is a test command parser");
-    add_command (1, "try",  "type the commands listed");
-    add_command (2, "error","or type a command not listed");
+    add_command (&tester::testing, "test", "this is a test command parser");
+    add_command (&tester::trying, "try",  "type the commands listed");
+    add_command (&tester::erring, "error","or type a command not listed");
   }
 
-  string execute (int token, const string& args) {
-    switch (token) {
-    case 0:
-      return "testing";
-    case 1:
-      return "";
-    case 2:
-      return "no error";
-    }
-    return "poo";
-  }
+  string testing (const string& args) { return "testing"; }
+  string trying (const string& args) { return ""; }
+  string erring (const string& args) { return "no error here"; }
+
 };
 
 int main (int argc, char** argv)
