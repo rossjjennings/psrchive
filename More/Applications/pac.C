@@ -24,6 +24,7 @@ void usage ()
 {
   cout << "A program for calibrating Pulsar::Archives\n"
     "Usage: pac [options] filenames\n"
+    "  -q                     Quiet mode\n"
     "  -v                     Verbose mode\n"
     "  -V                     Very verbose mode\n"
     "  -i                     Show revision information\n"
@@ -39,8 +40,7 @@ void usage ()
     "  -A filename            Use the calibrator specified by filename \n"
     "  -P                     Calibrate polarisations only \n"
     "  -S                     Use the complete Reception model \n"
-    "  -s                     Use the Single Axis Model (default) \n"
-    "  -q                     Use the Polar Model \n"
+    "  -s                     Use the Polar Model \n"
     "\n"
     "Matching options: \n"
     "  -c                     Do not try to match sky coordinates\n"
@@ -114,6 +114,7 @@ int main (int argc, char *argv[]) {
       usage ();
       return 0;
     case 'v':
+      Pulsar::Archive::set_verbosity(2);
       verbose = true;
       break;
     case 'V':
@@ -121,10 +122,10 @@ int main (int argc, char *argv[]) {
       Pulsar::Calibration::verbose = true;
       Pulsar::Calibrator::verbose = true;
       //Calibration::Model::verbose = true;
-      Pulsar::Archive::set_verbosity(1);
+      Pulsar::Archive::set_verbosity(3);
       break;
     case 'i':
-      cout << "$Id: pac.C,v 1.45 2004/06/09 12:46:17 straten Exp $" << endl;
+      cout << "$Id: pac.C,v 1.46 2004/07/12 09:28:04 straten Exp $" << endl;
       return 0;
 
     case 'n': {
@@ -209,12 +210,11 @@ int main (int argc, char *argv[]) {
       command += "-S ";
       break;
     case 's':
-      pcal_type = Pulsar::Calibrator::SingleAxis;
+      pcal_type = Pulsar::Calibrator::Polar;
       command += "-s ";
       break;
     case 'q':
-      pcal_type = Pulsar::Calibrator::Polar;
-      command += "-q ";
+      Pulsar::Archive::set_verbosity(0);
       break;
     case 'A':
       model_file = optarg;
@@ -366,14 +366,7 @@ int main (int argc, char *argv[]) {
 
       pcal_engine->calibrate (arch);
 
-      if (verbose)
-	cerr << "pac: Correcting parallactic angle" << endl;
-
-      arch->deparallactify ();
-
       cout << "pac: Polarisation calibration complete" << endl;
-
-      arch->set_poln_calibrated();
 
       successful_polncal = true;
 
@@ -386,7 +379,7 @@ int main (int argc, char *argv[]) {
 
     bool successful_fluxcal = false;
     
-    if (do_fluxcal && arch->get_flux_calibrated() && check_flags) {
+    if (do_fluxcal && arch->get_scale() == Signal::Jansky && check_flags) {
       cout << "pac: " << archives[i] << " already flux calibrated" << endl;
     }
     else if (do_fluxcal) try {
@@ -403,8 +396,6 @@ int main (int argc, char *argv[]) {
       fcal_engine->calibrate(arch);
       
       cout << "pac: Flux calibration complete" << endl;
-      
-      arch->set_flux_calibrated();
       
       successful_fluxcal = true;
       

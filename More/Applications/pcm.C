@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pcm.C,v $
-   $Revision: 1.24 $
-   $Date: 2004/06/24 11:23:10 $
+   $Revision: 1.25 $
+   $Date: 2004/07/12 09:28:04 $
    $Author: straten $ */
 
 /*! \file pcm.C 
@@ -532,7 +532,12 @@ int main (int argc, char *argv[]) try {
 	  cerr << "pcm: loading " << filenames[i] << endl;
 	
 	archive = Pulsar::Archive::load(filenames[i]);
-	
+
+        if (!archive) {
+          cerr << "pcm: error loading " << filenames[i] << endl;
+          continue;
+        }
+
 	cout << "pcm: loaded archive: " << filenames[i] << endl;
       
       }
@@ -543,7 +548,7 @@ int main (int argc, char *argv[]) try {
 	  cerr << "pcm: dedispersing and removing baseline from pulsar data"
                << endl;
 	
-        archive->dedisperse (0.0, autobin->get_centre_frequency());
+        archive->dedisperse (0.0, archive->get_centre_frequency());
 	archive->convert_state (Signal::Stokes);
         archive->remove_baseline ();
       }
@@ -582,10 +587,10 @@ int main (int argc, char *argv[]) try {
 	model.precalibrate (archive);
 
 	if (verbose)
-	  cerr << "pcm: fscrunch, deparallactify, and add to total" << endl;
+	  cerr << "pcm: fscrunch, correct, and add to total" << endl;
 
         archive->fscrunch ();
-        archive->deparallactify ();
+        archive->correct_instrument ();
 
 	if (!total)
 	  total = archive;
@@ -707,7 +712,7 @@ int main (int argc, char *argv[]) try {
       model.precalibrate( archive );
 
       if (archive->get_type() == Signal::Pulsar)
-	archive->deparallactify ();
+	archive->correct_instrument ();
 
       int index = filenames[i].find_first_of(".", 0);
       string newname = filenames[i].substr(0, index);
@@ -726,7 +731,7 @@ int main (int argc, char *argv[]) try {
           cerr << "pcm: fscrunch and add to calibrated total" << endl;
 
         archive->fscrunch ();
-        archive->deparallactify ();
+        archive->correct_instrument ();
 
         if (!total)
           total = archive;
@@ -823,7 +828,7 @@ int mode_B (const char* standard_filename,
 
       model.calibrate( archive );
 
-      archive->deparallactify ();
+      archive->correct_instrument ();
 
       archive->convert_state (Signal::Stokes);
       standard->append (archive);
