@@ -1,6 +1,11 @@
 #define PGPLOT 1
 
 #include "Pulsar/SingleAxisCalibrator.h"
+#include "Pulsar/SingleAxisCalibratorPlotter.h"
+
+#include "Pulsar/PolarCalibrator.h"
+#include "Pulsar/PolarCalibratorPlotter.h"
+
 #include "Pulsar/Archive.h"
 
 #include "string_utils.h"
@@ -13,16 +18,20 @@
 void usage ()
 {
   cerr << "pacv - Pulsar Archive Calibrator Viewer\n"
-    "usage: pacv file1 [file2 ...]" << endl;
+    "usage: pacv [-q] file1 [file2 ...]" << endl;
 }
 
 int main (int argc, char** argv) 
 {
+  // use the Single Axis model
+  bool single_axis = false;
+  // filename of filenames
   char* metafile = NULL;
-
+  // verbosity flag
   bool verbose = false;
+
   char c;
-  while ((c = getopt(argc, argv, "hvV")) != -1)  {
+  while ((c = getopt(argc, argv, "hMqvV")) != -1)  {
 
     switch (c)  {
 
@@ -32,6 +41,10 @@ int main (int argc, char** argv)
 
     case 'M':
       metafile = optarg;
+      break;
+
+    case 'q':
+      single_axis = true;
       break;
 
     case 'V':
@@ -65,7 +78,8 @@ int main (int argc, char** argv)
   // the calibrator archive
   Reference::To<Pulsar::Archive> archive;
  
-  Reference::To<Pulsar::SingleAxisCalibrator> calibrator;
+  Reference::To<Pulsar::PolnCalibrator> calibrator;
+  Reference::To<Pulsar::CalibratorPlotter> plotter;
 
   for (unsigned ifile=0; ifile<filenames.size(); ifile++) {  try {
 
@@ -77,13 +91,19 @@ int main (int argc, char** argv)
     if (verbose)
       cerr << "pacv: Constructing SingleAxisCalibrator" << endl;
 
-    calibrator = new Pulsar::SingleAxisCalibrator (archive);
+    if (single_axis) {
+      calibrator = new Pulsar::SingleAxisCalibrator (archive);
+      plotter = new Pulsar::SingleAxisCalibratorPlotter;
+    }
+    else
+      calibrator = new Pulsar::PolarCalibrator (archive);
+
     calibrator -> build();
 
     if (verbose)
       cerr << "pacv: Plotting SingleAxisCalibrator" << endl;
 
-    Pulsar::plot (calibrator);
+    plotter->plot (calibrator);
 
   } catch (Error& error) {
     cerr << "psrcal: Error calibrating " << filenames[ifile] << error << endl;
