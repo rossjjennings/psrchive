@@ -3,15 +3,21 @@
 #ifndef _utils_psrfft_FFTW_Transform_h_
 #define _utils_psrfft_FFTW_Transform_h_
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #if HAVE_FFTW
 
 #include <rfftw.h>
 
-#include "psrfft.h"
+namespace FTransform {
+  class FFTW_Plan;
+}
 
-#include "Transform.h"
+#include "FTransform.h"
 
-namespace Transform {
+namespace FTransform {
   int fftw_initialise();
 
   int fftw_frc1d(unsigned ndat, float* dest, float* src);

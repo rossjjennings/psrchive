@@ -3,13 +3,21 @@
 #ifndef _utils_psrfft_FFTW3_Transform_h_
 #define _utils_psrfft_FFTW3_Transform_h_
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #if HAVE_FFTW3
 
 #include <fftw3.h>
 
-#include "Transform.h"
+namespace FTransform {
+  class FFTW3_Plan;
+}
 
-namespace Transform {
+#include "FTransform.h"
+
+namespace FTransform {
   int fftw3_initialise();
 
   int fftw3_frc1d(unsigned ndat, float* dest, float* src);

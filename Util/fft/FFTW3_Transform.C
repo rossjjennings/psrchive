@@ -1,10 +1,14 @@
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #if HAVE_FFTW3
 
 #include "Error.h"
 
 #include "FFTW3_Transform.h"
 
-int Transform::fftw3_initialise(){
+int FTransform::fftw3_initialise(){
   frc1d_calls.push_back( &fftw3_frc1d );
   fcc1d_calls.push_back( &fftw3_fcc1d );
   bcc1d_calls.push_back( &fftw3_bcc1d );
@@ -23,24 +27,24 @@ int Transform::fftw3_initialise(){
   return 0;
 }
 
-Transform::FFTW3_Plan::~FFTW3_Plan(){
+FTransform::FFTW3_Plan::~FFTW3_Plan(){
   if( plan ){
     fftwf_destroy_plan(*plan);
     delete plan;
   }
 }
 
-Transform::FFTW3_Plan::FFTW3_Plan() : Plan() {
+FTransform::FFTW3_Plan::FFTW3_Plan() : Plan() {
   plan = 0;
 }
 
-Transform::FFTW3_Plan::FFTW3_Plan(unsigned _ndat, unsigned _ilib, string _fft_call)
+FTransform::FFTW3_Plan::FFTW3_Plan(unsigned _ndat, unsigned _ilib, string _fft_call)
   : Plan(_ndat,_ilib,_fft_call)
 {
   init(ndat,ilib,fft_call);
 }
 
-void Transform::FFTW3_Plan::init(unsigned _ndat, unsigned _ilib, string _fft_call)
+void FTransform::FFTW3_Plan::init(unsigned _ndat, unsigned _ilib, string _fft_call)
 {
   initialise(_ndat,_ilib,_fft_call);
 
@@ -70,7 +74,7 @@ void Transform::FFTW3_Plan::init(unsigned _ndat, unsigned _ilib, string _fft_cal
   delete [] out;
 }
 
-int Transform::fftw3_frc1d(unsigned ndat, float* dest, float* src){
+int FTransform::fftw3_frc1d(unsigned ndat, float* dest, float* src){
   ///////////////////////////////////////
   // Set up the plan
   static unsigned ilib = get_ilib("FFTW3");
@@ -100,7 +104,7 @@ int Transform::fftw3_frc1d(unsigned ndat, float* dest, float* src){
   return 0;
 }
 
-int Transform::fftw3_fcc1d(unsigned ndat, float* dest, float* src){
+int FTransform::fftw3_fcc1d(unsigned ndat, float* dest, float* src){
   ///////////////////////////////////////
   // Set up the plan
   static unsigned ilib = get_ilib("FFTW3");
@@ -132,7 +136,7 @@ int Transform::fftw3_fcc1d(unsigned ndat, float* dest, float* src){
   return 0;
 }
 
-int Transform::fftw3_bcc1d(unsigned ndat, float* dest, float* src){
+int FTransform::fftw3_bcc1d(unsigned ndat, float* dest, float* src){
   ///////////////////////////////////////
   // Set up the plan
   static unsigned ilib = get_ilib("FFTW3");
