@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Estimate.h,v $
-   $Revision: 1.30 $
-   $Date: 2005/02/13 08:15:21 $
+   $Revision: 1.31 $
+   $Date: 2005/03/22 06:13:46 $
    $Author: straten $ */
 
 #ifndef __Estimate_h
@@ -56,13 +56,29 @@ class Estimate
   const Estimate& operator= (const Estimate& d)
   { val=d.val; var=d.var; return *this; }
 
-  //! Array access to value
-  T& operator [] (unsigned n)
-  { return val; }
+  //! Set the value
+  void set_value (const T& t) { val = t; }
+
+  //! Get the value
+  T get_value () const { return val; }
+
+  //! Set the variance
+  void set_variance (const U& u) { var = u; }
+
+  //! Get the variance
+  U get_variance () const { return var; }
+
+  //! Set the error
+  void set_error (const U& u) { var = u*u; }
+
+  //! Get the error
+  U get_error () const { return sqrt(var); }
 
   //! Array access to value
-  T operator [] (unsigned n) const
-  { return val; }
+  T& operator [] (unsigned n) { return val; }
+
+  //! Array access to value
+  T operator [] (unsigned n) const { return val; }
 
   //! Addition operator
   const Estimate& operator+= (const Estimate& d)
