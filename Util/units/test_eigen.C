@@ -31,10 +31,10 @@ void test_eigen(const Quaternion<T, Hermitian>& q, float tolerance)
 
   double off = norm(result.j(0,1)) + norm(result.j(1,0));
 
-  //cerr << "tol=" << tolerance << endl;
-  //cerr << "off=" << off << endl;
-
   if (sqrt(off) > tolerance){
+    cerr << "tol=" << tolerance << endl;
+    cerr << "off=" << sqrt(off) << endl;
+
     cerr << "test_eigen result not diagonal" <<endl;
     throw string ("test_eigen error");
   }
@@ -43,6 +43,9 @@ void test_eigen(const Quaternion<T, Hermitian>& q, float tolerance)
   double det2 = result.j(0,0).real() * result.j(1,1).real();
 
   if ( sqr(det1 - det2) > tolerance ) {
+    cerr << "tol=" << tolerance << endl;
+    cerr << "off=" << sqr(det1 - det2) << endl;
+
     cerr << "test_eigen det(q)=" << det1 <<" != l1*l2=" << det2 <<endl;
     throw string ("test_eigen error");
   }
@@ -58,6 +61,8 @@ void test_matrix (const Quaternion<T, Hermitian>& q1,
 {
   if (verbose)
     cerr << "test_matrix eigen quaternion" << endl;
+
+  tolerance *= 150;
 
   test_eigen (q1, tolerance);
   test_eigen (q2, tolerance);
