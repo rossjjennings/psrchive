@@ -21,7 +21,7 @@ include $(top_srcdir)/config/Makefile.Qt
 # Dependencies should never be changed
 #
 
-INCLUDES = -I../genutil++ @QT_CXXFLAGS@
+INCLUDES = -I../genutil -I../genutil++ @QT_CXXFLAGS@
 
 LDADD = ../genutil++/libgenutilpp.la @QT_LIBS@ 
 
