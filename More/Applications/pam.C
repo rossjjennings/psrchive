@@ -224,7 +224,7 @@ int main (int argc, char *argv[]) {
 	Pulsar::Archive::set_verbosity(3);
 	break;
       case 'i':
-	cout << "$Id: pam.C,v 1.47 2004/09/23 05:15:03 ahotan Exp $" << endl;
+	cout << "$Id: pam.C,v 1.48 2004/10/04 04:20:03 ahotan Exp $" << endl;
 	return 0;
       case 'm':
 	save = true;
@@ -716,12 +716,14 @@ int main (int argc, char *argv[]) {
 
       if (tscr) {
 	if (tsub > 0.0) {
-	  unsigned factor = unsigned (tsub) / 
-	    unsigned(arch->get_Integration(0)->get_duration());
+	  unsigned factor = 
+	    unsigned (tsub / arch->get_Integration(0)->get_duration());
 	  if (factor == 0) {
-	    throw Error(InvalidParam, "Subints already too long!");
+	    cerr << "Warning: subints already too long" << endl;
 	  }
-	  arch->tscrunch(factor);
+	  else {
+	    arch->tscrunch(factor);
+	  }
 	  if (verbose)
 	    cout << arch->get_filename() << " tscrunched by a factor of " 
 		 << factor << endl;
