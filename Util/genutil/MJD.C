@@ -1,5 +1,7 @@
-#include <iostream>
+#include "rcsid.h"
+RCSID ("$Header: /cvsroot/psrchive/psrchive/Util/genutil/MJD.C,v 1.40 1999/11/02 05:54:25 straten Exp $");
 
+#include <iostream>
 #include <string.h>
 #include <stdio.h>
 #include <sys/time.h>
@@ -15,8 +17,6 @@
 #include "ieee.h"
 
 int MJD::verbose = 0;
-
-RCSID_CXX (MJD,"$Revision: 1.39 $");
 
 int ss2hhmmss (int* hours, int* min, int* sec, int seconds)
 {

@@ -1,6 +1,9 @@
 #ifndef __MJD_H
 #define __MJD_H
 
+#include "rcsid.h"
+NRCSID (MJD, "$Header: /cvsroot/psrchive/psrchive/Util/genutil/MJD.h,v 1.6 1999/11/02 05:54:26 straten Exp $");
+
 #include <stdio.h>
 #include <string>
 #include "environ.h"
@@ -9,11 +12,8 @@
 #include "mpi.h"
 #endif
 #include "psr_cpp.h"
-#include "rcsid.h"
 
 class MJD {
-
-  RCSID_HXX;
 
  private:
   int    days;
