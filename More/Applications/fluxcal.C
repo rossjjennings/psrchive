@@ -6,7 +6,6 @@
 
 #include <unistd.h>
 #include <iostream>
-using namespace std;
 
 // class name of the processed calibrator archive
 static string archive_class = "PSRFITS";
@@ -15,8 +14,8 @@ static double interval = 5.0 * 60.0;
 
 void usage ()
 {
-  cerr << 
-    "fluxcal - produces flux calibrator solution from set of observations\n"
+  cerr << endl <<
+    "fluxcal - produces flux calibrator solutions from sets of observations\n"
     "\n"
     "fluxcal [options] filename[s]\n"
     "options:\n"
@@ -25,7 +24,7 @@ void usage ()
     "  -e extension filename extension added to output archives\n"
     "  -i minutes   maximum number of minutes between archives in same set\n"
     "\n"
-    "By default, flux calibrator information is read from \n\t" 
+    "By default, flux calibrator information is read from \n" 
        << Pulsar::FluxCalibratorDatabase::default_filename << "\n"
     "and the maximum interval between archives in the same\n"
     "flux calibrator set is " << interval/60 << " minutes.\n"
@@ -118,8 +117,13 @@ int main (int argc, char** argv) try {
 
       double gap = (archive->start_time() - last->end_time()).in_seconds();    
       if (gap > interval) {
-	cerr << "fluxcal: gap=" << gap << " greater than interval=" 
-	     << interval << endl;
+
+	cerr << "fluxcal: gap=";
+	if (gap>3600)
+	  cerr << gap/3600 << " hours";
+	else
+	  cerr << gap/3600 << " min";
+	cerr << " > interval=" << interval/60 << " minutes" << endl;
 
 	unload (fluxcal);
 	fluxcal = 0;
