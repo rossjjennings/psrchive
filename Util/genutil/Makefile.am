@@ -18,13 +18,13 @@ libgenutilpp_la_SOURCES = CommandParser.C PlotEvent.C util_plus.C	\
 	thread_utils.C GetPK.C completion.C Cartesian.C Angle.C MJD.C	\
 	sla_MJD.C PlotManager.C PlotVolume.C DataManager.C		\
 	DataSet.C Poincare.C DataVector.C Plugin.C shell.C		\
-	coord_parse.c coord.c sla_coord.c psr2ar.c
+	coord_parse.c coord.c sla_coord.c psr2ar.c dual_parse_it.h
 
 # needs a new home: obsjoin.[hC]
 
 bin_PROGRAMS = getMJD tranScan bshead search_summary xserve_summary
 
-# broken: loopy.C
+# broken: loopy.C timeconvert.c
 
 getMJD_SOURCES			= getMJD.C
 tranScan_SOURCES		= tranScan.C
