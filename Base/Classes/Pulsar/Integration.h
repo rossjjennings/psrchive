@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Integration.h,v $
-   $Revision: 1.62 $
-   $Date: 2004/06/17 09:16:04 $
-   $Author: straten $ */
+   $Revision: 1.63 $
+   $Date: 2004/07/13 01:51:58 $
+   $Author: sord $ */
 
 /*
   
@@ -353,6 +353,9 @@ namespace Pulsar {
 
     //! Rotate all profiles about Stokes V axis to remove Faraday rotation
     virtual void defaraday (double rm = 0.0);
+    
+    //! get PA as a function of phase
+    virtual void get_PA (vector<double> &phases, vector<double> &angles, vector<double> &errors, float _threshold=2.5);
 
     //! Convert polarimetric data to the specified state
     virtual void convert_state (Signal::State state);
