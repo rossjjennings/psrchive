@@ -1,14 +1,15 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Stokes.h,v $
-   $Revision: 1.1 $
-   $Date: 2003/02/05 13:20:40 $
+   $Revision: 1.2 $
+   $Date: 2003/02/15 10:24:14 $
    $Author: straten $ */
 
 #ifndef __Stokes_H
 #define __Stokes_H
 
 #include "Pauli.h"
+#include "Error.h"
 
 template <typename T>
 class Stokes : public Quaternion<T, Hermitian>
@@ -21,13 +22,12 @@ class Stokes : public Quaternion<T, Hermitian>
     Stokes (const Quaternion<U,Hermitian>& q) : Quaternion<T,Hermitian> (q) {}
   
   template <typename U>
-    Stokes (const Quaternion<complex<U>,Hermitian>& q) : 
-    Quaternion<T,Hermitian> (real(q))
-    { /* check that imag(q) is small */ }
+    Stokes (const Quaternion<complex<U>,Hermitian>& q)
+    { operator = (q); }
 
   template <typename U>
-    Stokes (const Jones<U>& j) : Quaternion<T,Hermitian> ( real(convert(j)) )
-    { /* check that imag(q) is small */ }
+    Stokes (const Jones<U>& j)
+    { operator = (j); }
 
   template <typename U>
     Stokes& operator = (const Quaternion<U,Hermitian>& q)
@@ -35,11 +35,17 @@ class Stokes : public Quaternion<T, Hermitian>
   
   template <typename U>
     Stokes& operator = (const Quaternion<complex<U>,Hermitian>& q)
-  { Quaternion<T,Hermitian>::operator = (real(q)); return *this; }
+  { Quaternion<T,Hermitian>::operator = (real(q));
+    Quaternion<T,Hermitian> imaginary (imag(q));
+    if (norm(imaginary) > 1e-5 * norm(*this))
+      throw Error (InvalidParam,
+		   "Stokes::operator = Quaternion<complex<U>,Hermitian>",
+		   "non-zero imaginary component");
+    return *this; }
 
   template <typename U>
     Stokes& operator = (const Jones<U>& j)
-  { Quaternion<T,Hermitian>::operator = ( real(convert(j)) ); return *this; }
+  { return operator = ( convert(j) ); }
 
 };
 
