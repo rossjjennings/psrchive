@@ -15,7 +15,15 @@
 */
 double Pulsar::dispersion_delay (double dm, double ref_freq, double freq)
 {
-  if (ref_freq == 0 || freq == 0)
-    throw Error (InvalidParam, "dispersion_delay", "invalid frequency");
+
+  if (ref_freq == 0)
+    throw Error (InvalidParam, "Pulsar::dispersion_delay", 
+                 "invalid reference frequency");
+
+  if (freq == 0)
+    throw Error (InvalidParam, "Pulsar::dispersion_delay", 
+                 "invalid frequency");
+
   return (dm/2.41e-4) * ( 1.0/(freq*freq) - 1.0/(ref_freq*ref_freq) );
+
 }
