@@ -75,6 +75,11 @@ Pulsar::Profile* Pulsar::Profile::morphological_difference (const Profile& profi
   Pulsar::Profile* temp1 = new Pulsar::Profile(*this);
   Pulsar::Profile* temp2 = new Pulsar::Profile(profile);
 
+  float ephase, snrfft, esnrfft; 
+  double phase = temp1->shift (*temp2, ephase, snrfft, esnrfft);
+
+  temp1->rotate(phase);
+
   float minphs = 0.0;
 
   minphs = temp1->find_min_phase();
