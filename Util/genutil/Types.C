@@ -293,6 +293,23 @@ Signal::State Signal::string2State(string ss){
   return Invariant;  // Because you gotta return something
 }
 
+//! Returns how many polarisations the State most likely is
+//! This function is for when a user specifies a desired output state and you need to convert to an npol
+//! Try and not use this function when you actually have data
+unsigned Signal::State2npol(State s){
+  if( s==Nyquist || s==Analytic || s==PPQQ )
+    return 2;
+  if( s==Coherence || s==Stokes || s==Invariant )
+    return 4;
+  if( s==Intensity )
+    return 1;
+
+  throw Error(InvalidState,"Signal::State2npol()",
+	      "State unknown!");
+
+  return 1;
+}
+
 //! Tells you if your state is consistent with your npol and ndim
 bool Signal::valid_state(Signal::State state,unsigned ndim,unsigned npol, string& reason){
 

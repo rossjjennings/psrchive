@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Types.h,v $
-   $Revision: 1.16 $
-   $Date: 2004/07/29 04:26:00 $
+   $Revision: 1.17 $
+   $Date: 2004/10/17 04:59:34 $
    $Author: hknight $ */
 
 #ifndef __Types_h
@@ -117,6 +117,11 @@ namespace Signal {
   const string State2string (State state);
   const string Basis2string (Basis basis);
   const string Scale2string (Scale scale);
+
+  //! Returns how many polarisations the State most likely is
+  //! This function is for when a user specifies a desired output state and you need to convert to an npol
+  //! Try and not use this function when you actually have data
+  unsigned State2npol(State state);
 
   Basis string2Basis(string ss);
   Source string2Source(string ss);
