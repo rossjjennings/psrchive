@@ -1,15 +1,17 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Plugin.h,v $
-   $Revision: 1.1 $
-   $Date: 2003/03/06 16:39:15 $
-   $Author: straten $ */
+   $Revision: 1.2 $
+   $Date: 2003/03/24 03:17:51 $
+   $Author: pulsar $ */
 
 #ifndef __Plugin_h
 #define __Plugin_h
 
 #include <vector>
 #include <string>
+
+#include "psr_cpp.h"
 
 namespace Registry {
 
