@@ -44,7 +44,8 @@ Pulsar::BasicArchive::operator = (const BasicArchive& copy)
   By over-riding this funciton, inherited types may re-define the type
   of Integration to which the elements of the subints vector point.
 */
-Pulsar::Integration* Pulsar::Archive::new_Integration (Integration* subint)
+Pulsar::Integration*
+Pulsar::BasicArchive::new_Integration (Integration* subint)
 {
   Integration* integration;
 
@@ -54,7 +55,7 @@ Pulsar::Integration* Pulsar::Archive::new_Integration (Integration* subint)
     integration = new BasicIntegration;
 
   if (!integration)
-    throw Error (BadAlloc, "Archive::new_Integration");
+    throw Error (BadAlloc, "BasicArchive::new_Integration");
   
   return integration;
 }
