@@ -90,7 +90,8 @@ int main (int argc, char *argv[]) {
 	cerr << "Loading " << archives[i] << endl;
       
       arch = Pulsar::Archive::load(archives[i]);
-      
+
+      arch->convert_state (Signal::Intensity);      
       arch->toas(toas, stdarch);
 
     }
