@@ -318,7 +318,6 @@ void Pulsar::TimerArchive::set_coordinates (const sky_coord& coordinates)
 
   correct_Integrations ();
 }
-
  
 unsigned Pulsar::TimerArchive::get_nbin () const
 {
@@ -582,6 +581,8 @@ void Pulsar::TimerArchive::set_corrected (int code, bool done)
 
 void Pulsar::TimerArchive::correct_Integrations ()
 { try {
+  if( get_nsubint()==0 )
+    return;
 
   float latitude;
   float longitude;
