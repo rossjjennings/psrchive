@@ -1,6 +1,8 @@
 LOCAL_ROOT = ../../..
 include $(LOCAL_ROOT)/include/Makefile.standard
 
+INCLUDES = psrephem.h ephio.h
+
 LIBRARY  = libeph.a
 LIB_SRCS = psrephem.C ephio_c.c ephio.f rnd8.f
 
@@ -12,6 +14,7 @@ LDFLAGS  += -leph -lpolyco -ltimes -lgenutil $(LGTKMM) $(F77LIBS) -lsla -lm
 # optional GTK-- Widget set
 ##########################################################################
 ifeq ($(PSRGTKMM),yes)
+INCLUDES += gtk_psrephem.h
 NOMD_SRCS = gtk_test.C gtk_psrephem.C
 PROGRAMS += gtk_test.C
 LIB_SRCS += gtk_psrephem.C
@@ -22,8 +25,8 @@ endif
 # optional Qt Widget set
 ##########################################################################
 ifeq ($(PSRQT),yes)
-LIB_SRCS += qt_psrephem.C
-MOC_SRCS += qt_psrephem.h
+INCLUDES += qt_psrephem.h
+LIB_SRCS += qt_psrephem.C moc_qt_psrephem.C
 INCFLAGS += $(IQT)
 PROGRAMS += qt_psrephem_test.C
 LDFLAGS  += $(LQT)
@@ -46,15 +49,12 @@ $(BINDIR)/keys2fort: keys2fort.c Makefile
 keyinfo.com: keys.dat $(BINDIR)/keys2fort Makefile
 	$(BINDIR)/keys2fort
 
-$(LOCAL_ROOT)/include/ephio.h: keys.dat $(BINDIR)/keys2c
+ephio.h: keys.dat $(BINDIR)/keys2c
 	$(BINDIR)/keys2c
-	mv -f ephio.h $(LOCAL_ROOT)/include/ephio.h
 
 # force construction of ephio.h file
-depend: $(LOCAL_ROOT)/include/ephio.h
+depend: ephio.h
 
-#
 # Dependency on constructed include files
 $(LOGIN_ARCH)/ephio.o: keyinfo.com
-$(LOGIN_ARCH)/ephio_c.o: $(LOCAL_ROOT)/include/ephio.h
 
