@@ -3,7 +3,7 @@
 #include "Pulsar/Profile.h"
 
 #include "Pulsar/IntegrationOrder.h"
-#include "Pulsar/FITSSubintExtension.h"
+#include "Pulsar/Pointing.h"
 
 #include "FITSError.h"
 
@@ -60,6 +60,34 @@ Pulsar::FITSArchive::load_Integration (const char* filename, unsigned isubint)
 
   init_Integration ( integ );
 
+  if (get<Pulsar::IntegrationOrder>()) {
+    colnum = 0;
+    fits_get_colnum (sfptr, CASEINSEN, "INDEXVAL", &colnum, &status);
+    
+    double value = 0.0;
+
+    fits_read_col (sfptr, TDOUBLE, colnum, row, 1, 1, &nulldouble,
+		   &value, &initflag, &status);
+    
+    if (status != 0)
+      throw FITSError (status, "FITSArchive::load_Integration", 
+		       "fits_read_col INDEXVAL");
+    
+    get<Pulsar::IntegrationOrder>()->set_Index(row-1,value);
+  }
+  
+  // Set the duration of the integration
+  
+  colnum = 0;
+  fits_get_colnum (sfptr, CASEINSEN, "TSUBINT", &colnum, &status);
+  
+  double duration = 0.0;
+  
+  fits_read_col (sfptr, TDOUBLE, colnum, row, 1, 1, &nulldouble,
+		 &duration, &initflag, &status);
+  
+  integ->set_duration (duration);
+  
   // Set the start time of the integration
   
   initflag = 0;
@@ -101,76 +129,22 @@ Pulsar::FITSArchive::load_Integration (const char* filename, unsigned isubint)
 	   << newmjd << endl;
   }
 
-  // Set the duration of the integration
-  
-  colnum = 0;
-  fits_get_colnum (sfptr, CASEINSEN, "TSUBINT", &colnum, &status);
-  
-  double duration = 0.0;
-  
-  fits_read_col (sfptr, TDOUBLE, colnum, row, 1, 1, &nulldouble,
-		 &duration, &initflag, &status);
-  
-  integ->set_duration (duration);
-  
-  if (get<Pulsar::IntegrationOrder>()) {
-    colnum = 0;
-    fits_get_colnum (sfptr, CASEINSEN, "INDEXVAL", &colnum, &status);
-    
-    double value = 0.0;
 
-    fits_read_col (sfptr, TDOUBLE, colnum, row, 1, 1, &nulldouble,
-		   &value, &initflag, &status);
-    
-    if (status != 0)
-      throw FITSError (status, "FITSArchive::load_Integration", 
-		       "fits_read_col INDEXVAL");
-    
-    get<Pulsar::IntegrationOrder>()->set_Index(row-1,value);
-  }
-  
   // Load other useful info
 
-  load_FITSSubintExtension(sfptr,row,integ);
+  load_Pointing(sfptr,row,integ);
 
   // Set up the data vector, only Pulsar::Archive base class is friend
 
   resize_Integration (integ);
 
-  // Load the profile weights
-
-  if (verbose == 3)
-    cerr << "Pulsar::FITSArchive::load_Integration reading weights" 
-	 << endl;
-  
-  int counter = 1;
-  vector < float >  weights(get_nchan());
-  
-  colnum = 0;
-  fits_get_colnum (sfptr, CASEINSEN, "DAT_WTS", &colnum, &status);
-  
-  for(unsigned b = 0; b < get_nchan(); b++) {
-    fits_read_col (sfptr, TFLOAT, colnum, row, counter, 1, &nullfloat, 
-		   &weights[b], &initflag, &status);
-    counter ++;
-  }
-  
-  // Set the profile weights
-  
-  if (verbose == 3)
-    cerr << "Pulsar::FITSArchive::load_Integration setting weights" 
-	 << endl;
-  
-  for(unsigned j = 0; j < get_nchan(); j++)
-    integ->set_weight(j, weights[j]);
-  
   // Load the channel centre frequencies
   
   if (verbose == 3)
     cerr << "Pulsar::FITSArchive::load_Integration reading channel freqs" 
 	 << endl;
   
-  counter = 1;
+  int counter = 1;
   vector < float >  chan_freqs(get_nchan());
   
   colnum = 0;
@@ -206,24 +180,33 @@ Pulsar::FITSArchive::load_Integration (const char* filename, unsigned isubint)
       integ->set_centre_frequency(j, chan_freqs[j]);
     }
   
-  // Load the profile scale factors
-  
+  // Load the profile weights
+
   if (verbose == 3)
-    cerr << "Pulsar::FITSArchive::load_Integration reading scale factors" 
+    cerr << "Pulsar::FITSArchive::load_Integration reading weights" 
 	 << endl;
-
-  vector < vector < float > > scales(get_npol(),vector<float>(get_nchan()));
-
-  colnum = 0;
-  fits_get_colnum (sfptr, CASEINSEN, "DAT_SCL", &colnum, &status);
   
   counter = 1;
-  for (unsigned a = 0; a < get_npol(); a++) {
-    fits_read_col (sfptr, TFLOAT, colnum, row, counter, get_nchan(), &nullfloat, 
-		   &(scales[a][0]), &initflag, &status);
-    counter += nchan;
+  vector < float >  weights(get_nchan());
+  
+  colnum = 0;
+  fits_get_colnum (sfptr, CASEINSEN, "DAT_WTS", &colnum, &status);
+  
+  for(unsigned b = 0; b < get_nchan(); b++) {
+    fits_read_col (sfptr, TFLOAT, colnum, row, counter, 1, &nullfloat, 
+		   &weights[b], &initflag, &status);
+    counter ++;
   }
-
+  
+  // Set the profile weights
+  
+  if (verbose == 3)
+    cerr << "Pulsar::FITSArchive::load_Integration setting weights" 
+	 << endl;
+  
+  for(unsigned j = 0; j < get_nchan(); j++)
+    integ->set_weight(j, weights[j]);
+  
   // Load the profile offsets
   
   if (verbose == 3)
@@ -239,6 +222,24 @@ Pulsar::FITSArchive::load_Integration (const char* filename, unsigned isubint)
   for (unsigned a = 0; a < get_npol(); a++) {
     fits_read_col (sfptr, TFLOAT, colnum, row, counter, get_nchan(), &nullfloat, 
 		   &(offsets[a][0]), &initflag, &status);
+    counter += nchan;
+  }
+
+  // Load the profile scale factors
+  
+  if (verbose == 3)
+    cerr << "Pulsar::FITSArchive::load_Integration reading scale factors" 
+	 << endl;
+
+  vector < vector < float > > scales(get_npol(),vector<float>(get_nchan()));
+
+  colnum = 0;
+  fits_get_colnum (sfptr, CASEINSEN, "DAT_SCL", &colnum, &status);
+  
+  counter = 1;
+  for (unsigned a = 0; a < get_npol(); a++) {
+    fits_read_col (sfptr, TFLOAT, colnum, row, counter, get_nchan(), &nullfloat, 
+		   &(scales[a][0]), &initflag, &status);
     counter += nchan;
   }
 

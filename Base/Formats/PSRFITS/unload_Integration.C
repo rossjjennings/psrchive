@@ -3,7 +3,7 @@
 #include "Pulsar/Profile.h"
 
 #include "Pulsar/IntegrationOrder.h"
-#include "Pulsar/FITSSubintExtension.h"
+#include "Pulsar/Pointing.h"
 
 #include "FITSError.h"
 #include "genutil.h"
@@ -43,6 +43,38 @@ void Pulsar::FITSArchive::unload_integration (int row,
     throw FITSError (status, "FITSArchive:unload_integration",
 		     "fits_write_col ISUBINT");
   
+  // Write out the index values, if applicable
+  if (has_alt_order) {
+    colnum = 0;
+    fits_get_colnum (thefptr, CASEINSEN, "INDEXVAL", &colnum, &status);
+
+    if (status != 0)
+      throw FITSError (status, "FITSArchive:unload_integration",
+		       "fits_get_colnum INDEXVAL");
+    
+    double value = get<Pulsar::IntegrationOrder>()->get_Index(row-1);
+    fits_write_col (thefptr, TDOUBLE, colnum, row, 1, 1, &value, &status);
+  }
+
+  // Set the duration of the integration
+  
+  colnum = 0;
+  fits_get_colnum (thefptr, CASEINSEN, "TSUBINT", &colnum, &status);
+  
+  if (status != 0)
+    throw FITSError (status, "FITSArchive:unload_integration",
+		     "fits_get_colnum TSUBINT");
+  
+  double duration = integ->get_duration();  
+  fits_write_col (thefptr, TDOUBLE, colnum, row, 1, 1, &duration, &status);
+  
+  if (status != 0)
+    throw FITSError (status, "FITSArchive:unload_integration",
+		     "fits_write_col TSUBINT");
+  
+  if (verbose == 3)
+    cerr << "FITSArchive::unload_integration TSUBINT set" << endl;
+  
   // Set the start time of the integration
     
   colnum = 0;
@@ -64,66 +96,12 @@ void Pulsar::FITSArchive::unload_integration (int row,
   if (verbose == 3)
     cerr << "FITSArchive::unload_integration OFFS_SUB set" << endl;
   
-  // Set the duration of the integration
-  
-  colnum = 0;
-  fits_get_colnum (thefptr, CASEINSEN, "TSUBINT", &colnum, &status);
-  
-  if (status != 0)
-    throw FITSError (status, "FITSArchive:unload_integration",
-		     "fits_get_colnum TSUBINT");
-  
-  double duration = integ->get_duration();  
-  fits_write_col (thefptr, TDOUBLE, colnum, row, 1, 1, &duration, &status);
-  
-  if (status != 0)
-    throw FITSError (status, "FITSArchive:unload_integration",
-		     "fits_write_col TSUBINT");
-  
-  if (verbose == 3)
-    cerr << "FITSArchive::unload_integration TSUBINT set" << endl;
-  
-  // Write out the index values, if applicable
-  if (has_alt_order) {
-    colnum = 0;
-    fits_get_colnum (thefptr, CASEINSEN, "INDEXVAL", &colnum, &status);
-
-    if (status != 0)
-      throw FITSError (status, "FITSArchive:unload_integration",
-		       "fits_get_colnum INDEXVAL");
-    
-    double value = get<Pulsar::IntegrationOrder>()->get_Index(row-1);
-    fits_write_col (thefptr, TDOUBLE, colnum, row, 1, 1, &value, &status);
-  }
 
   // Write other useful info
   
-  const FITSSubintExtension* theExt = integ->get<FITSSubintExtension>();
+  const Pointing* theExt = integ->get<Pointing>();
   if (theExt)
     unload(thefptr,theExt,row);
-  
-  // Write the profile weights
-
-  colnum = 0;
-  fits_get_colnum (thefptr, CASEINSEN, "DAT_WTS", &colnum, &status);
-  
-  if (status != 0)
-    throw FITSError (status, "FITSArchive:unload_integration",
-		     "fits_get_colnum DAT_WTS");
-
-  //fits_modify_vector_len (thefptr, colnum, nchan, &status);
-
-  vector < float >  weights(nchan);
-
-  for(unsigned j = 0; j < nchan; j++)
-    weights[j] = integ->get_weight(j);
-
-  fits_write_col (thefptr, TFLOAT, colnum, row, 1, nchan, 
-		  &(weights[0]), &status);
-
-  if (status != 0)
-    throw FITSError (status, "FITSArchive:unload_integration",
-		     "fits_write_col DAT_WTS");
   
   // Write the channel centre frequencies
 
@@ -136,18 +114,39 @@ void Pulsar::FITSArchive::unload_integration (int row,
   
   //fits_modify_vector_len (thefptr, colnum, nchan, &status);
 
-  vector < float >  chan_freqs(nchan);
+  vector < float >  temp_array(nchan);
 
   for(unsigned j = 0; j < nchan; j++)
-    chan_freqs[j] = integ->get_centre_frequency(j);
+    temp_array[j] = integ->get_centre_frequency(j);
 
   fits_write_col (thefptr, TFLOAT, colnum, row, 1, nchan, 
-		  &(chan_freqs[0]), &status);
+		  &(temp_array[0]), &status);
 
   if (status != 0)
     throw FITSError (status, "FITSArchive:unload_integration",
 		     "fits_write_col DAT_FREQ");
 
+  // Write the profile weights
+
+  colnum = 0;
+  fits_get_colnum (thefptr, CASEINSEN, "DAT_WTS", &colnum, &status);
+  
+  if (status != 0)
+    throw FITSError (status, "FITSArchive:unload_integration",
+		     "fits_get_colnum DAT_WTS");
+
+  //fits_modify_vector_len (thefptr, colnum, nchan, &status);
+
+  for(unsigned j = 0; j < nchan; j++)
+    temp_array[j] = integ->get_weight(j);
+
+  fits_write_col (thefptr, TFLOAT, colnum, row, 1, nchan, 
+		  &(temp_array[0]), &status);
+
+  if (status != 0)
+    throw FITSError (status, "FITSArchive:unload_integration",
+		     "fits_write_col DAT_WTS");
+  
   // Start writing profiles
   
   if (verbose == 3)
