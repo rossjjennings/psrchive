@@ -157,9 +157,13 @@ int main (int argc, char** argv)
 	
 	if (display) {
 	  cpgpage();
-	  copy -> display(isub,0,ichan);
+	  Pulsar::Plotter plotter;
+	  plotter.set_subint(isub);
+	  plotter.set_chan(ichan);
+	  plotter.set_pol(0);
+	  plotter.singleProfile(copy);
 	}
-
+	
 	if (snr < snr_threshold)
 	  snr = 0.0;
 
