@@ -11,14 +11,16 @@
   filename in the same path as the requested output file. */
 void Pulsar::Archive::unload (const char* filename)
 {
+  string unload_to_filename = unload_filename;
+
   if (filename)
-    unload_filename = filename;
+    unload_to_filename = filename;
 
   if (verbose)
-    cerr << "Pulsar::Archive::unload (" << unload_filename << ")" << endl;
+    cerr << "Pulsar::Archive::unload (" << unload_to_filename << ")" << endl;
 
   // create the temporary filename
-  string temp_filename = unload_filename + "XXXXXX";
+  string temp_filename = unload_to_filename + "XXXXXX";
 
   int fd = mkstemp (const_cast<char*> (temp_filename.c_str()));
   if (fd < 0)
@@ -43,9 +45,10 @@ void Pulsar::Archive::unload (const char* filename)
   }
 
   // rename the temporary file with the requested filename
-  int ret = rename (temp_filename.c_str(), unload_filename.c_str());
+  int ret = rename (temp_filename.c_str(), unload_to_filename.c_str());
   if (ret < 0)
     throw Error (FailedSys, "Pulsar::Archive::unload", "failed rename");
 
-  __load_filename = unload_filename;
+  unload_filename = unload_to_filename;
+  __load_filename = unload_to_filename;
 }
