@@ -41,7 +41,7 @@ void Pulsar::FITSArchive::unload (fitsfile* fptr,
 
   char* comment = 0;
 
-  char* cal_mthd = const_cast<char*>( Calibrator::Type2str( pce->get_type() ) );
+  char* cal_mthd= const_cast<char*>( Calibrator::Type2str( pce->get_type() ) );
 
   // Write CAL_MTHD
   fits_update_key (fptr, TSTRING, "CAL_MTHD", cal_mthd, comment, &status);
@@ -52,6 +52,12 @@ void Pulsar::FITSArchive::unload (fitsfile* fptr,
   // Write NCPAR
   fits_update_key (fptr, TINT, "NCPAR", &ncpar, comment, &status);
   
+  // Write EPOCH
+  unsigned precision = 4;
+  string epoch = pce->get_epoch().printdays (precision);
+
+  char* epoch_str = const_cast<char*>( epoch.c_str() );
+  fits_update_key (fptr, TSTRING, "EPOCH", epoch_str, comment, &status);
 
   long dimension = nch_fdpr * ncpar;  
   auto_ptr<float> data ( new float[dimension] );
