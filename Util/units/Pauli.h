@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Pauli.h,v $
-   $Revision: 1.1 $
-   $Date: 2003/02/05 13:21:11 $
+   $Revision: 1.2 $
+   $Date: 2003/02/05 23:27:59 $
    $Author: straten $ */
 
 #ifndef __Pauli_H
@@ -37,6 +37,38 @@ const Quaternion<complex<T>, Hermitian> convert (const Jones<T>& j)
       0.5 * (j.j12 + j.j21),
       0.5 * ci (j.j12 - j.j21) );
 }
+
+
+// convert Jones matrix to Hermitian and Unitary Quaternion
+template<typename T>
+void polar (complex<T>& d, Quaternion<T, Hermitian>& h,
+	    Quaternion<T, Unitary>& u, Jones<T> j)
+{
+  // make j unimodular
+  d = sqrt (det(j));
+  j /= d;
+
+  // calculate the square of h
+  h = real (convert (j*herm(j)));
+
+  T hpsq = h.s1*h.s1 + h.s2*h.s2 + h.s3*h.s3;
+  T hdet = sqrt (h.s0*h.s0 - hpsq);
+  T scale = sqrt (0.5 * (h.s0 - hdet)) / sqrt(hpsq);
+
+  h.s0 = sqrt (0.5 * (h.s0 + hdet));
+  h.s1 *= scale;
+  h.s2 *= scale;
+  h.s3 *= scale;
+
+  // take the hermitian component out of j
+  j = inv(convert(h)) * j;
+
+  u.s0 = 0.5 * (j.j11 + j.j22).real();
+  u.s1 = 0.5 * (j.j11 - j.j22).imag();
+  u.s2 = 0.5 * (j.j12 + j.j21).imag();
+  u.s3 = 0.5 * (j.j12 - j.j21).real();
+}
+
 
 // multiply a Jones matrix by a Quaternion
 template<typename T, typename U, Basis B>
