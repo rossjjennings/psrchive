@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include <ctype.h>
 
 #include "coord.h"
 #include "f772c.h"
@@ -29,138 +30,267 @@
 
 int str2coord (double *ra, double *dec, const char* coordstring) 
 {
+  int retval = 0;
+
   char* coordstr = strdup (coordstring);
   char* rastr = coordstr;   /* beginning of RA */
 
   /* search for the +/- sign of the DEC */
   char* decstr = strchr (coordstr, '-');
-  if (decstr == NULL) {
+  if (decstr == NULL)
     decstr = strchr (coordstr, '+');
-    if (decstr == NULL)
-      decstr = strchr (coordstr, ' ');
-    if (decstr == NULL)
-      decstr = strchr (coordstr, '\t');
-    if (decstr == NULL) {
-      fprintf (stderr, "No +,-,or space or tab in coordinate string '%s'\n",coordstr);
-      free (coordstr);
-      return -1;
-    }
+  if (decstr == NULL)
+    decstr = strchr (coordstr, ' ');
+  if (decstr == NULL)
+    decstr = strchr (coordstr, '\t');
+  if (decstr == NULL) {
+    fprintf (stderr, "str2coord: No +,-,<space>, or <tab> in '%s'\n",coordstr);
+    free (coordstr);
+    return -1;
   }
 
-  if (str2ra (ra, rastr) < 0)
-    return -1;
+  // fprintf (stderr, "str2coord: decstr='%s'\n", decstr);
+  if (str2dec (dec, decstr) < 0)
+    retval = -1;
 
-  return str2dec (dec, decstr);
+  *decstr = '\0';
+
+  // fprintf (stderr, "str2coord: rastr='%s'\n", rastr);
+  if (str2ra (ra, rastr) < 0)
+    retval = -1;
+
+  free (coordstr);
+
+  return retval;
 }
+
+
+/*! parses a string of the form xx:yy:zz or xxyyzz into unit.
+  returns the number of fields parsed from the string. */
+int str2unit (double* unit, unsigned nfields,
+	      const int* field_width, const double* field_scale,
+	      const char* unit_string)
+{
+  char* unit_string_copy = strdup (unit_string);
+  char* field_string_copy = strdup (unit_string);
+
+  char* curstr = unit_string_copy;
+  char* endstr = strchr (curstr, '\0');
+
+  double field_value = 0;
+
+  double sign = 1.0;
+  double value = 0.0;
+  double scale = 1.0;
+
+  unsigned ifield;
+  
+  /* skip leading non-numeric characters */
+  while ( curstr<endstr && !isdigit(*curstr) 
+	  && *curstr != '-' && *curstr != '+' )
+    curstr++;
+
+  if (*curstr == '-') {
+    sign = -1.0;
+    curstr ++;
+  }
+  else if (*curstr == '+') {
+    sign = 1;
+    curstr ++;
+  }
+
+  for (ifield=0; curstr<endstr && ifield<nfields; ifield++) {
+
+    /* skip leading non-numeric characters */
+    while ( curstr<endstr && !isdigit(*curstr) )
+      curstr++;
+
+    if (field_width[ifield]) {
+      strncpy (field_string_copy, curstr, field_width[ifield]);
+      field_string_copy [field_width[ifield]] = '\0';
+      curstr += field_width[ifield];
+    }
+    else {
+      strcpy (field_string_copy, curstr);
+      /* skip to end of numeric characters */
+      while ( curstr<endstr && (isdigit(*curstr) || *curstr=='.') )
+	curstr++;
+    }
+
+    // fprintf (stderr, "str2unit: field[%d]=%s\n", ifield, field_string_copy);
+
+    if (sscanf (field_string_copy, "%lf", &field_value) != 1)
+      break;
+
+    scale /= field_scale[ifield];
+    value += sign * scale * field_value;
+
+  }
+
+  free (field_string_copy);
+  free (unit_string_copy);
+
+  *unit = value;
+  return ifield;
+
+} 
+
+
 
 int str2ra (double *ra, const char* rastring) 
 {
-  char* begra = strdup (rastring);
-  char* rastr = begra;
-  char* endstr = strchr (rastr, '\0');
-  char* travel;
+  int field_width[3] = {2, 2, 0};
+  double field_scale[3] = {24.0, 60.0, 60.0};
 
-  double hr, min, sec;
-
-  hr = min = sec = 0.0;
-
-  /* parse RA hour */
-  if (sscanf (rastr, "%2lf", &hr) != 1)
+  if (str2unit (ra, 3, field_width, field_scale, rastring) < 0)
     return -1;
 
-  travel = strchr (rastr, ':');
-  if (travel && ((travel-rastr) <= 2))
-    rastr = travel +1;
-  else
-    rastr += 2;
+  *ra *= 2.0 * M_PI;
+  return 0;
+}
 
-  if (rastr >= endstr)
+int str2dec (double *dec, const char* decstring) 
+{
+  int field_width[3] = {2, 2, 0};
+  double field_scale[3] = {360.0, 60.0, 60.0};
+
+  if (str2unit (dec, 3, field_width, field_scale, decstring) < 0)
     return -1;
 
-  /* parse RA minutes (if specified) */
-  if (sscanf (rastr, "%2lf", &min) != 1)
-    return -1;
-
-  travel = strchr (rastr, ':');
-  if (travel && ((travel-rastr) <= 2))
-    rastr = travel +1;
-  else
-    rastr += 2;
-
-  /* parse RA seconds (if specified) */
-  if (rastr < endstr)
-    if (sscanf (rastr, "%lf", &sec) != 1)
-      return -1;
-  
-  *ra = (hr + min/60.0 + sec/3600.0)*M_PI/12.0;
-
-  /* printf ("RA %g:%g:%g parsed -> %g radians\n", hr, min, sec, *ra); */
-  free (begra);
+  *dec *= 2.0 * M_PI;
   return 0;
 }
 
 
-int str2dec (double *dec, const char* dectring) 
+
+
+
+
+
+
+
+
+
+
+int coord2str (char* coordstring, unsigned coordstrlen, double ra, double dec,
+	       unsigned places) 
 {
-  char* begdec = strdup (dectring);
-  char* decstr = begdec;
-  char* endstr = strchr (decstr, '\0');
-  char* travel;
+  int decstart;
 
-  int   decsign = 0;
-  double deg, min, sec;
+  ra2str (coordstring, coordstrlen, ra, places);
 
-  deg = min = sec = 0.0;
+  decstart = strlen (coordstring);
 
-  decsign = 1;
-
-  /* rte modif to skip leading spaces */
-  while (*decstr==' ')
-    decstr++;
-
-  if (decstr[0] == '-') {
-    decsign = -1;
-    decstr ++;
-  }
-  else if (decstr[0] == '+') {
-    decsign = 1;
-    decstr ++;
+  if (dec > 0) {
+    coordstring[decstart] = '+';
+    decstart ++;
   }
 
-  /* parse DEC degrees */
-  if (sscanf (decstr, "%2lf", &deg) != 1)
-    return -1;
+  dec2str (coordstring+decstart, coordstrlen-decstart, dec, places);
 
-  travel = strchr (decstr, ':');
-  if (travel && ((travel-decstr) <= 2))
-    decstr = travel +1;
-  else
-    decstr += 2;
-
-  if (decstr >= endstr)
-    return -1;
-
-  /* parse DEC minutes (if specified) */
-  if (sscanf (decstr, "%2lf", &min) != 1)
-    return -1;
-
-  travel = strchr (decstr, ':');
-  if (travel && ((travel-decstr) <= 2))
-    decstr = travel +1;
-  else
-    decstr += 2;
-    
-  /* parse DEC seconds (if specified) */
-  if (decstr < endstr)
-    if (sscanf (decstr, "%lf", &sec) != 1)
-      return -1;
-
-  *dec = (double) decsign * (deg + min/60.0 + sec/3600.0) * M_PI/180.0;
-
-  /* printf ("DEC %g:%g:%g parsed -> %g radians\n", deg, min, sec, *dec); */
-  free (begdec);
   return 0;
+}
+
+
+
+
+
+
+
+
+/*! parses a string of the form xx:yy:zz or xxyyzz into unit.
+  returns the number of fields parsed from the string. */
+int unit2str (char* unit_string, unsigned unit_strlen,
+	      unsigned nfields,
+	      const int* field_width, const int* field_precision,
+	      const double* field_scale, char separator, double unit)
+{
+  char* end_string = unit_string + unit_strlen;
+
+  double field_value = 0;
+
+  unsigned ifield;
+  int printed = 0;
+
+  if (unit_strlen < 1)
+    return 0;
+
+  if (unit < 0) {
+    unit *= -1.0;
+    *unit_string = '-';
+    unit_string ++;
+  }
+
+  for (ifield=0; unit_string<end_string && ifield<nfields; ifield++) {
+
+    if (separator && ifield > 0) {
+      *unit_string = separator;
+      unit_string ++;
+    }
+
+    unit *= field_scale[ifield];
+
+    if (field_precision[ifield]) {
+      field_value = unit;
+      printed = snprintf (unit_string, end_string-unit_string, "%0*.*lf",
+			  field_width[ifield]+field_precision[ifield]+1,
+			  field_precision[ifield], field_value);
+    }
+    else {
+
+      // trick to avoid rounding ugliness in string
+      if (ifield+1 < nfields && field_precision[ifield+1]) {
+	field_value = pow (10.0,-(field_precision[ifield+1]+3));
+	unit += field_value/field_scale[ifield+1];
+      }
+
+      field_value = floor (unit);
+      printed = snprintf (unit_string, end_string-unit_string, "%.*d",
+			  field_width[ifield], (int) field_value);
+    }
+    
+    unit -= field_value;
+
+    if (printed < 0)
+      return ifield;
+
+    unit_string += printed;
+
+  }
+
+  return ifield;
 } 
+
+
+
+int ra2str (char* rastring, unsigned rastrlen, double ra, unsigned places) 
+{
+  int field_width[3] = {2, 2, 2};
+  int field_precision[3] = {0, 0, 0};
+  double field_scale[3] = {24.0, 60.0, 60.0};
+
+  field_precision[2] = places;
+
+  ra /= 2.0 * M_PI;
+  return unit2str (rastring, rastrlen, 3, 
+		   field_width, field_precision, field_scale, ':', ra);
+}
+
+int dec2str (char* dstring, unsigned dstrlen, double dec, unsigned places) 
+{
+  int field_width[3] = {2, 2, 2};
+  int field_precision[3] = {0, 0, 0};
+  double field_scale[3] = {360.0, 60.0, 60.0};
+
+  field_precision[2] = places;
+
+  dec /= 2.0 * M_PI;
+  return unit2str (dstring, dstrlen, 3,
+		   field_width, field_precision, field_scale, ':', dec);
+}
+
+
+
 
 /* takes an RA and DEC in radians and converts it to an hour angle and
    degree format, then outputs this in a 13 digit string */

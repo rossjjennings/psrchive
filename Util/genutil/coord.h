@@ -1,6 +1,6 @@
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/coord.h,v $
-   $Revision: 1.5 $
-   $Date: 2002/04/21 14:53:56 $
+   $Revision: 1.6 $
+   $Date: 2003/01/22 14:53:10 $
    $Author: straten $ */
 
 #ifndef __COORD_H
@@ -41,11 +41,17 @@ extern "C" {
 	DEC in sexagesimal angular measure
 	into an ra and dec in radians
    ******************************************************************** */
-int str2coord (double *ra, double *dec, const char* coordstr);
-int str2ra  (double *ra,  const char* rastr);
-int str2dec (double *dec, const char* decstr);
+  int str2coord (double *ra, double *dec, const char* coordstr);
+  int str2ra  (double *ra,  const char* rastr);
+  int str2dec (double *dec, const char* decstr);
+  
+  int coord2str (char* coordstring, unsigned strlen,
+		 double ra, double dec, unsigned places);
+  int ra2str (char* rastr, unsigned rastrlen, double ra, unsigned places);
+  int dec2str (char* decstr, unsigned decstrlen, double dec, unsigned places);
+  
 
-int coord2name (char* pulsar, double ra, double dec);
+  int coord2name (char* pulsar, double ra, double dec);
 
 /* ********************************************************************
    telescope_coords -
