@@ -429,9 +429,7 @@ Pulsar::EPNArchive::load_Integration (const char* filename, unsigned subint)
 
   BasicIntegration* integration = new BasicIntegration;
   resize_Integration (integration);
-
-  integration->set_state (get_state());
-  integration->set_dispersion_measure (get_dispersion_measure());
+  init_Integration (integration);
 
   MJD epoch (line3.epoch);
   epoch += sub_line1.tstart[0] * 1e-6;
@@ -473,47 +471,25 @@ Pulsar::EPNArchive::load_Integration (const char* filename, unsigned subint)
 
     double avg_freq = total_freq / get_nchan();
 
-    if (ipol == 0) {
+    if (ipol == 0 && subint == 0) {
 
-      integration->set_centre_frequency (avg_freq);
-      integration->set_bandwidth (total_bw);
+      set_centre_frequency (avg_freq);
+      set_bandwidth (total_bw);
 
     }
     else {
 
-      if ( avg_freq != integration->get_centre_frequency() )
+      if ( avg_freq != get_centre_frequency() )
 	throw Error (InvalidState, "Pulsar::EPNArchive::load_Integration",
 		     "ipol=%d centre_frequency=%lf != %lf", ipol, avg_freq,
-		     integration->get_centre_frequency() );
+		     get_centre_frequency() );
 
-      if ( total_bw != integration->get_bandwidth() )
+      if ( total_bw != get_bandwidth() )
 	throw Error (InvalidState, "Pulsar::EPNArchive::load_Integration",
 		     "ipol=%d bandwidth=%lf != %lf", ipol, total_bw,
-		     integration->get_bandwidth() );		     
+		     get_bandwidth() );		     
 
     }
-
-  }
-
-  if (subint == 0) {
-
-    set_centre_frequency( integration->get_centre_frequency() );
-    set_bandwidth( integration->get_bandwidth() );
-
-  }
-  else {
-
-    if ( get_centre_frequency() != integration->get_centre_frequency() )
-      throw Error (InvalidState, "Pulsar::EPNArchive::load_Integration",
-		   "isub=%d centre_frequency=%lf != %lf", subint,
-		   integration->get_centre_frequency(),
-		   get_centre_frequency());
-    
-    if ( get_bandwidth() != integration->get_bandwidth() )
-      throw Error (InvalidState, "Pulsar::EPNArchive::load_Integration",
-		   "isub=%d bandwidth=%lf != %lf", subint,
-		   integration->get_bandwidth(),
-		   get_bandwidth());
 
   }
 
@@ -531,7 +507,7 @@ void Pulsar::EPNArchive::unload_file (const char* filename) const
 
 string Pulsar::EPNArchive::Agent::get_description () 
 {
-  return "EPN Archive Version 1.0";
+  return "EPN Archive Version 6.1";
 }
 
 bool Pulsar::EPNArchive::Agent::advocate (const char* filename)
