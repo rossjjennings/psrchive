@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Quaternion.h,v $
-   $Revision: 1.9 $
-   $Date: 2003/02/25 09:47:57 $
+   $Revision: 1.10 $
+   $Date: 2003/02/26 10:05:01 $
    $Author: straten $ */
 
 #ifndef __Quaternion_H
@@ -21,7 +21,7 @@ public:
   T s0,s1,s2,s3;
 
   //! Null constructor
-  Quaternion () {  }
+  Quaternion () { s0=s1=s2=s3=0; }
 
   //! Construct from T
   Quaternion (T s0_, T s1_, T s2_, T s3_)
