@@ -12,7 +12,9 @@ void quickplot (const vector<T>& vals)
 
   cpgswin (xmin, xmax, ymin, ymax);
 
-  vector<float>::const_iterator ind;
-  for (ind = vals.begin(); ind != vals.end(); ind++)
-    cpgpt1 (ind, vals[ind], 5);
+  cpgmove (0, vals[0]);
+
+  for (unsigned ipt=1; ipt< vals.size(); ipt++)
+    cpgdraw (ipt, vals[ipt]);
+
 }
