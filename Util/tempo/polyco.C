@@ -194,8 +194,8 @@ int polynomial::unload(ostream &ostr) const {
 }
 
 Phase polynomial::phase(const MJD& t) const { 
-   Phase p = Phase(0,0.0);
 
+   Phase p = Phase(0,0.0);
    MJD dt = t - reftime;
    double tm = dt.in_minutes();
 
@@ -208,6 +208,22 @@ Phase polynomial::phase(const MJD& t) const {
    return(ref_phase+p);
 }
 
+double polynomial::frequency(const MJD& t) const {
+
+   double dp = 0;                    // dphase/dt starts as phase per minute.
+   MJD dt = t - reftime;
+   double tm = dt.in_minutes();
+
+   double poweroft = 1.0;
+   for (int i=1;i<coefs.size();i++) {
+     dp+=(double)(i)*coefs[i]*poweroft;
+     poweroft *= tm;
+   }
+   dp /= (double) 60.0;          // Phase per second
+   dp += f0;
+   return(dp);
+}  
+
 Phase polynomial::phase(const MJD& t, float obs_freq) const {
   float dm_delay_in_secs = dm/2.41e-4*(1.0/(obs_freq*obs_freq)-1.0/(freq*freq));
   return(this->phase(t) - dm_delay_in_secs/this->period(t));
@@ -216,22 +232,6 @@ Phase polynomial::phase(const MJD& t, float obs_freq) const {
 double polynomial::period(const MJD& t) const {
    return(1.0/frequency(t));               // Seconds per turn = period of pulsar
  }
-
-double polynomial::frequency(const MJD& t) const {
-   double dp;                    // dphase/dt starts as phase per minute.
-   MJD dt = t - reftime;
-   double tm = dt.in_minutes();
-
-   dp = coefs[1];
-   double poweroft = 1.0;
-   for (int i=2;i<coefs.size();i++) {
-     dp+=(double)(i)*coefs[i]*poweroft;
-     poweroft *= tm;
-   }
-   dp /= (double) 60.0;          // Phase per second
-   dp += f0;
-   return(dp);
-}  
 
 void polynomial::prettyprint() const {
 
@@ -288,8 +288,7 @@ polyco::polyco(char * filename)
 {
   string s = filename;
   if (load (s) < 1) {
-    fprintf (stderr, "polyco::polyco - failed to construct from %s\n", 
-	     filename);
+    fprintf (stderr, "polyco::polyco - failed to construct from %s\n", filename);
     string error = "polyco construct error";
     throw(error);
   }
@@ -302,24 +301,35 @@ int polyco::load(string polyco_filename){
 
 int polyco::load(char * polyco_filename)
 {
-  ifstream file (polyco_filename);
+  ifstream file(polyco_filename);
   return(this->load(file));
 }
 
-int polyco::load(istream &istr){
+int polyco::load(istream &istr, int nbytes){
   int npollys = 0;
   polynomial tst;
   pollys.clear();
-  while(tst.load(istr)==0){
-    pollys.push_back(tst);
-    npollys++;
+  if(nbytes<0){
+    while(tst.load(istr)==0){
+      pollys.push_back(tst);
+      npollys++;
+    }
+  } else {
+    while (istr.tellg()<nbytes){
+      if(tst.load(istr)==0){
+	fprintf(stderr, "polyco::load error - could not load %d bytes\n", nbytes);
+	return(-1);
+      }
+      pollys.push_back(tst);      
+      npollys++;
+    }
   }
   return(npollys);
 }
 
-int polyco::load(FILE *fp){
+int polyco::load(FILE *fp, int nbytes){
   ifstream file(FD(fp));
-  return(this->load(file));
+  return(this->load(file, nbytes));
 }
 
 int polyco::unload(string filename) const {
@@ -481,6 +491,3 @@ size_t polyco::size_in_bytes() const{
 //     size += pollys[i].size_in_bytes();
   //  return(size);
 }
-
-
-
