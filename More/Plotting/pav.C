@@ -1,5 +1,5 @@
 //
-// $Id: pav.C,v 1.79 2004/05/06 13:17:14 ahotan Exp $
+// $Id: pav.C,v 1.80 2004/05/20 05:01:00 sord Exp $
 //
 // The Pulsar Archive Viewer
 //
@@ -7,7 +7,6 @@
 // in Pulsar::Archive objects
 //
 
-// Hello
  
 #include <iostream>
 #include <unistd.h>
@@ -166,6 +165,8 @@ int main (int argc, char** argv)
   bool manchester = false;
   bool spherical = false;
   bool degree = false;
+  bool normalised_m = false;
+  bool mercator = false;
   bool phase_fourier = false;
   bool greyfreq = false;
   bool stopwatch = false;
@@ -220,12 +221,12 @@ int main (int argc, char** argv)
     { "cmap",               1, 0, 206 },
     { "snr",                1, 0, 207 },
     { "mask",               0, 0, 208 },
+    { "normal",             0, 0, 209 },
     { 0, 0, 0, 0 }
   };
     
   while (1) {
-    
-    int options_index = 0;
+   int options_index = 0;
     
     c = getopt_long(argc, argv, args,
 		    long_options, &options_index);
@@ -296,7 +297,7 @@ int main (int argc, char** argv)
       plotter.set_subint( atoi (optarg) );
       break;
     case 'i':
-      cout << "$Id: pav.C,v 1.79 2004/05/06 13:17:14 ahotan Exp $" << endl;
+      cout << "$Id: pav.C,v 1.80 2004/05/20 05:01:00 sord Exp $" << endl;
       return 0;
 
     case 'j':
@@ -544,8 +545,7 @@ int main (int argc, char** argv)
       degree = true;
       cout << "Plotting degree of polarisation" << endl;
       break;
-    }      
-
+    }
     case 205: {
       plotter.set_publn(true);
       cout << "Publication quality" << endl;
@@ -572,11 +572,16 @@ int main (int argc, char** argv)
       break;
 
     }
-
     case 208: {
       mask = true;
       break;
     }
+    case 209: {
+      normalised_m = true;
+      cout << "Plotting normalised Stokes" << endl;	  
+      break;
+    }
+
 
     default:
       cerr << "pav: unrecognized option" << endl;
@@ -870,9 +875,11 @@ int main (int argc, char** argv)
     if (degree) {
       cpg_next();
       plotter.Manchester_degree (archive);
-      // plotter.Manchester(archive);
+    } 
+    if (normalised_m) {
+      cpg_next();
+      plotter.Manchester_normalised (archive);
     }
-
     if (spherical) {
       cpg_next();
       plotter.spherical (archive);
