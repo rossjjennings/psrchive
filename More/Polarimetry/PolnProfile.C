@@ -123,6 +123,18 @@ float* Pulsar::PolnProfile::get_amps (unsigned ipol)
 //
 //
 //
+void Pulsar::PolnProfile::set_amps (unsigned ipol, float* amps)
+{
+  if (ipol >= 4)
+    throw Error (InvalidRange, "PolnProfile::set_amps",
+                 "ipol=%d >= npol=4", ipol);
+
+  profile[ipol]->set_amps(amps);
+}
+
+//
+//
+//
 Stokes<float> Pulsar::PolnProfile::get_Stokes (unsigned ibin)
 {
   if (state != Signal::Stokes)

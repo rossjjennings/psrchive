@@ -48,6 +48,9 @@ namespace Pulsar {
     //! Returns a pointer to the start of the array of amplitudes
     float* get_amps (unsigned ipol);
 
+    //! Set the amplitudes of the specified polarization
+    void set_amps (unsigned ipol, float* amps);
+
     //! Get the Basis of the poln profile
     Signal::Basis get_basis () const { return basis; }
 
