@@ -1,9 +1,7 @@
-#include <vector>
-
 #include "Pulsar/Integration.h"
-#include "Pulsar/Profile.h"
-#include "Angle.h"
-#include "Physical.h"
+#include "Pulsar/PolnProfile.h"
+
+#include "Calibration/Faraday.h"
 
 /*!
   \param rm rotation measure
@@ -12,63 +10,31 @@
   \pre baseline has been removed
   \pre archive has full polarimetric information
 */
-void Pulsar::Integration::defaraday (double rm, double rm_iono)
+void Pulsar::Integration::defaraday (double rm)
 {
-  if (get_state() != Signal::Stokes)
-    throw Error(InvalidState, "Integration::defaraday", "State != Signal::Stokes");
+  Calibration::Faraday faraday;
+
+  faraday.set_rotation_measure( rm );
+  faraday.set_reference_frequency( get_centre_frequency() );
   
-  double c_sq = speed_of_light * speed_of_light;
-  double cfreq = get_centre_frequency();
-  
-  // one over the centre frequency in Hz squared
-  double inv_cfreq_sq = 1e-12 / (cfreq * cfreq);
-  
-  Angle phase;
-  
+  Reference::To<PolnProfile> poln_profile;
+
+  Signal::State state = get_state();
+
   for (unsigned ichan=0; ichan < get_nchan(); ichan++) {
-    
-    double frequency = get_frequency(ichan);
-    double inv_freq_sq = 1e-12 / (frequency * frequency);
-    
-    phase = 2.0 * c_sq * (rm*(inv_cfreq_sq-inv_freq_sq)-rm_iono*inv_freq_sq);
-    
-    float sp = sin(phase.getradians());
-    float cp = cos(phase.getradians());
-    
-    if(verbose) cerr << "Integration::defaraday rotating: " 
-		     << ichan << "\t" << cp << "  " << sp << endl;
-    
-    vector<float> Qtemp(get_nbin());
-    vector<float> Utemp(get_nbin());
 
-    vector<float> Qnew(get_nbin());
-    
-    for (unsigned ibin = 0; ibin < get_nbin(); ibin++) {
-      Qtemp[ibin] = ((profiles[1][ichan])->get_amps())[ibin];
-      Utemp[ibin] = ((profiles[2][ichan]->get_amps()))[ibin];
-    }
+    faraday.set_frequency( get_frequency(ichan) );
 
-    for (unsigned ibin = 0; ibin < get_nbin(); ibin++) {
-      Qtemp[ibin] *= cp;
-      Utemp[ibin] *= sp;
-      
-      Qnew[ibin] = Qtemp[ibin] - Utemp[ibin];
-    }
-    
-    for (unsigned ibin = 0; ibin < get_nbin(); ibin++) {
-      Qtemp[ibin] = ((profiles[1][ichan])->get_amps())[ibin];
-      Utemp[ibin] = ((profiles[2][ichan]->get_amps()))[ibin];
-    }
+    poln_profile = new_PolnProfile (ichan);
 
-    for (unsigned ibin = 0; ibin < get_nbin(); ibin++) {
-      Qtemp[ibin] *= sp;
-      Utemp[ibin] *= cp;
-      
-      Utemp[ibin] += Qtemp[ibin];
-    }
-    
-    (profiles[1][ichan])->set_amps(Qnew);
-    (profiles[2][ichan])->set_amps(Utemp);    
+    poln_profile->transform ( faraday.evaluate() );
+
+    if (ichan == 0)
+      state = poln_profile->get_state();
+
   }
+
+  set_state (state);
+ 
 }
 
