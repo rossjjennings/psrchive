@@ -8,6 +8,7 @@
 
 int main (int argc, char** argv)
 {
+  bool verbose = false;
   int arg=1;
   string first = argv[arg];
 
@@ -18,19 +19,20 @@ int main (int argc, char** argv)
   if ( first == "-v" ) {
     psrephem::verbose = true;
     Error::verbose = true;
+    verbose = true;
     arg++;
   }
 
-  // 
-  psrephem eph;
   fitsfile* fptr = 0;
   int status = 0;
   char err[FLEN_STATUS];   // error message if status != 0
 
-
   //
   // open PSRFITS file and read ephemeris
   //
+
+  cerr << "Reading ephemeris from PSRFITS file: " << argv[arg] << endl;
+
   fits_open_file (&fptr, argv[arg], READONLY, &status);
   if (status != 0) {
     fits_get_errstatus (status, err);
@@ -38,23 +40,35 @@ int main (int argc, char** argv)
     return -1;
   }
 
+  psrephem eph;
   eph.load (fptr);
+
+  cerr << "Ephemeris read." << endl;
   fits_close_file (fptr, &status);
 
-  cout << "Parsed ephemeris\n" << eph;
+  if (verbose)
+    cout << "Parsed ephemeris\n" << eph;
 
   //
-  // create PSRFITS file and write ephemeris
+  // get PSRFITS file template
   //
+
   char* psrfits = getenv ("PSRFITS");
   if (!psrfits) {
-    cerr << "PSRFITS not defined" << endl;
+    cerr << "PSRFITS environment variable not defined.  Cannot continue test."
+	 << endl;
     return -1;
   }
 
   string temp = ".test_psrephem_fitsio.dat";
   string templated = temp + "(" + psrfits + ")";
   
+  //
+  // create PSRFITS file and write ephemeris
+  //
+
+  cerr << "Writing ephemeris to PSRFITS file: " << temp << endl;
+
   fits_create_file (&fptr, templated.c_str(), &status);
     if (status != 0) {
     fits_get_errstatus (status, err);
@@ -62,13 +76,17 @@ int main (int argc, char** argv)
     return -1;
   }
 
-  cerr << "Writing ephemeris to PSRFITS file: " << temp << endl;
   eph.unload (fptr);
+
+  cerr << "Ephemeris written." << endl;
   fits_close_file (fptr, &status);
 
   //
   // open newly created PSRFITS file and read ephemeris
   //
+
+  cerr << "Reading ephemeris from PSRFITS file: " << temp << endl;
+
   fits_open_file (&fptr, temp.c_str(), READONLY, &status);
   if (status != 0) {
     fits_get_errstatus (status, err);
@@ -76,13 +94,14 @@ int main (int argc, char** argv)
     return -1;
   }
 
-  cerr << "Reading ephemeris from PSRFITS file: " << temp << endl;
-
   psrephem written;
   written.load (fptr);
+
+  cerr << "Ephemeris re-read." << endl;
   fits_close_file (fptr, &status);
 
-  cout << "Parsed ephemeris\n" << eph;
+  if (verbose)
+    cout << "Parsed ephemeris\n" << eph;
 
   if (written != eph)
     cerr << "test_fitsio: FAIL written != read" << endl;
