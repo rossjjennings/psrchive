@@ -39,8 +39,10 @@ endif
 ifeq (${PSRQT},yes)
 
 INCLUDES += qt_psrephem.h qt_editeph.h
-LIB_SRCS += qt_psrephem.C moc_qt_psrephem.C qt_editeph.C moc_qt_editeph.C \
-	qt_ephemVal.C qt_togleph.C moc_qt_togleph.C
+LIB_SRCS += qt_ephemVal.C qt_psrephem.C moc_qt_psrephem.C \
+	qt_editeph.C moc_qt_editeph.C \
+	qt_togleph.C moc_qt_togleph.C \
+	qt_fileeph.C moc_qt_fileeph.C
 
 INCFLAGS += $(IQT)
 
