@@ -124,6 +124,17 @@ Pulsar::Archive::get_extension (unsigned iext)
   return extension[iext];
 }
 
+/* Unless a Receiver Extension is present, this method assumes that the
+   signal basis is linear. */
+Signal::Basis Pulsar::Archive::get_basis () const
+{
+  const Receiver* receiver = get<Receiver>();
+  if (receiver)
+    return receiver->get_basis();
+  else
+    return Signal::Linear;
+}
+
 template<class T>
 unsigned find_type (const vector< Reference::To<T> >& array, const T* instance)
 {
@@ -217,27 +228,22 @@ Pulsar::Integration* Pulsar::Archive::load_Integration (unsigned isubint)
 }
 
 /*!
-  This method may be useful during load.  This function assumes
-  that the Integration is totally uninitialized.  As the folding
-  period is unknown until the epoch of the integration is known,
-  Integration::set_folding_period is not called by this method.
+  This method may be useful during load, as only the Archive base class
+  has access to the Integration::archive attribute.
 */
-void Pulsar::Archive::init_Integration (Integration* subint) try {
+void Pulsar::Archive::init_Integration (Integration* subint)
+{
+  subint->archive = this;
 
-  subint -> set_centre_frequency ( get_centre_frequency() );
-  subint -> set_bandwidth ( get_bandwidth() );
-  subint -> set_dispersion_measure ( get_dispersion_measure() );
-  subint -> set_state ( get_state() );
+  if ( get_dedispersed() ) {
+    subint->dedispersed_centre_frequency = get_centre_frequency();
+    subint->dedispersed_dispersion_measure = get_dispersion_measure();
+  }
 
-  Receiver* receiver = get<Receiver>();
-  if (receiver)
-    subint -> set_basis ( receiver->get_basis() );
-  else
-    subint -> set_basis ( Signal::Linear );
-
-}
-catch (Error& error) {
-  throw error += "Pulsar::Archive::init_Integration";
+  if ( get_faraday_corrected() ) {
+    subint->defaradayed_centre_frequency = get_centre_frequency();
+    subint->defaradayed_rotation_measure = get_rotation_measure();
+  }
 }
 
 /*!
@@ -274,13 +280,13 @@ void Pulsar::Archive::bscrunch (unsigned nscrunch)
   Simply calls Integration::fscrunch for each Integration
   \param nscrunch the number of frequency channels to add together
  */
-void Pulsar::Archive::fscrunch (unsigned nscrunch, bool weighted_cfreq)
+void Pulsar::Archive::fscrunch (unsigned nscrunch)
 {
   if (get_nsubint() == 0)
     return;
 
   for (unsigned isub=0; isub < get_nsubint(); isub++)
-    get_Integration(isub) -> fscrunch (nscrunch, weighted_cfreq);
+    get_Integration(isub) -> fscrunch (nscrunch);
 
   set_nchan (get_Integration(0)->get_nchan());
 }
@@ -326,8 +332,8 @@ void Pulsar::Archive::pscrunch()
   for (unsigned isub=0; isub < get_nsubint(); isub++)
     get_Integration(isub) -> pscrunch ();
 
-  set_npol ( get_Integration(0) -> get_npol() );
-  set_state ( get_Integration(0) -> get_state() );
+  set_npol( 1 );
+  set_state( Signal::Intensity );
 }
 
 /*! Rotate pulsar Integrations so that the bin of largest amplitude
@@ -379,22 +385,7 @@ void Pulsar::Archive::centre ()
 }
 
 
-/*!
-  \param dm the dispersion measure
-  \param frequency */
-void Pulsar::Archive::dedisperse (double dm, double frequency)
-{
-  if (get_nsubint() == 0)
-    return;
-  
-  for (unsigned isub=0; isub < get_nsubint(); isub++) {
-    if (dm)
-      get_Integration(isub) -> set_dispersion_measure (dm);
-    get_Integration(isub) -> dedisperse (frequency);
-  }
 
-  set_dedispersed();
-}
 
 /*!
   \param nfold the number of sections to integrate
@@ -418,17 +409,15 @@ void Pulsar::Archive::invint ()
   
   remove_baseline();
   
-  for (unsigned isub=0; isub < get_nsubint(); isub++) {
+  for (unsigned isub=0; isub < get_nsubint(); isub++)
     get_Integration(isub) -> invint ();
-  }
   
-  set_state(Signal::Invariant);
+  set_state( Signal::Invariant );
 }
 
-float Pulsar::Archive::get_poln_flux (int _type) {
-  
-  return (get_Integration(0) -> get_poln_flux (_type,0,0));
-  
+float Pulsar::Archive::get_poln_flux (int _type)
+{  
+  return (get_Integration(0) -> get_poln_flux (_type,0,0)); 
 }
 
 
@@ -507,22 +496,49 @@ void Pulsar::Archive::rotate (double time)
 }
 
 
-/*!
-  \pre Archive polarimetric state must represent Stokes IQUV
-  \pre The baseline should have been removed.
-  \param rotation_measure
-  \param rm_iono
+/*!  
+  The dedisperse method removes the dispersive delay between
+  each frequency channel and that of the reference frequency
+  defined by get_centre_frequency.
 */
-void Pulsar::Archive::defaraday (double rotation_measure)
+void Pulsar::Archive::dedisperse () try {
+
+  if (get_nsubint() == 0)
+    return;
+
+  for (unsigned isub=0; isub < get_nsubint(); isub++)
+    get_Integration(isub) -> dedisperse ();
+
+  set_dedispersed (true);
+
+}
+catch (Error& error) {
+  throw error += "Pulsar::Archive::dedisperse";
+}
+
+/*!
+  The defaraday method corrects the Faraday rotation between
+  each frequency channel and that of the reference frequency
+  defined by get_centre_frequency.
+
+  \pre The Archive must contain full polarimetric data
+  \pre The noise contribution to Stokes Q and U should have been removed.
+*/
+void Pulsar::Archive::defaraday ()
 {
   if (get_nsubint() == 0)
     return;
 
+  if (!get_poln_calibrated() && verbose)
+    cerr << "Pulsar::Archive::defaraday WARNING data not calibrated" << endl;
+
+  if (!get_instrument_corrected() && verbose)
+    cerr << "Pulsar::Archive::defaraday WARNING feed not corrected" << endl;
+
   for (unsigned i = 0; i < get_nsubint(); i++)
-    get_Integration(i)->defaraday (rotation_measure);
+    get_Integration(i)->defaraday ();
   
-  set_state ( get_Integration(0) -> get_state() );
-  set_faraday_corrected(true);
+  set_faraday_corrected (true);
 }
 
 /*! \param new_ephemeris the ephemeris to be installed
