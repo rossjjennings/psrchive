@@ -75,7 +75,7 @@ int main (int argc, char** argv)
       return 0;
 
     case 'i':
-      cout << "$Id: pas.C,v 1.3 2003/05/28 05:23:10 pulsar Exp $" << endl;
+      cout << "$Id: pas.C,v 1.4 2003/06/05 06:08:59 pulsar Exp $" << endl;
       return 0;
 
     case 'r':
@@ -102,14 +102,19 @@ int main (int argc, char** argv)
       cerr << "invalid param '" << c << "'" << endl;
     }
   }
-  
+
+  if (refname == NULL) {
+    cerr << "No specified reference profile " <<endl;
+    usage();
+    return 0;
+  }
+  if (stdname == NULL) {
+    cerr << "No specified standard profile " <<endl;
+    usage();
+    return 0;
+  }
 
   Error::handle_signals ();
-
-  cout << "Input plot device (/xs, /ps, /vps, /gif): ";
-  cin >> plotdev;
-  //  cpgbeg (0, "?", 0, 0);
-  //  cpgask (1);
 
   //original archive
   Reference::To<Pulsar::Archive> refarch = Pulsar::Archive::load(refname);
@@ -148,6 +153,9 @@ int main (int argc, char** argv)
   *refcorr = *refarch;
   *stdcorr = *stdarch;
 
+  cout << "Input plot device : ";
+  cin >> plotdev;
+
   cross_correlation(refcorr->get_Profile(0, 0, 0), stdcorr->get_Profile(0, 0, 0), &rmax, &imax, &pcoef, verbose, line);
 
   //plot profiles
@@ -171,8 +179,8 @@ int main (int argc, char** argv)
 	case 'c':  //Centre Profile
 	  stdphase=stdarch->find_max_phase();
 	  if( verbose ) cout << "Centre: Maximum phase " << stdphase << endl;
-	  stdarch->rotate(convt(stdarch, (stdphase-0.5)*stdarch->get_nbin(), verbose));
-	  if( verbose ) cout << "Centre: Centre the profile" <<endl;
+	  stdarch->rotate((stdphase-0.5)*stdarch->get_Integration(0)->get_folding_period());
+	  if( verbose ) cout << "Centre: Centre the profile, done" <<endl;
 	  break;
 
 	case 'f': //Fast rotate, to the right
@@ -208,15 +216,11 @@ int main (int argc, char** argv)
 	  break;
 	   
 	case 'z':   //Zero base line
-	  //stdarch->remove_baseline();
 	  cout << "Zero baseline: start point set at:" << curs_x << endl;
 	  cout << "Zero baseline: move cursor and set the range" <<endl;
 	  opts = ' ';
 	  cpgband(2, 0, curs_x, curs_y, &x, &y, &opts);
-	  if (opts == 'q' || opts == 'Q') {
-	    cout << "Zero baseline: quit from setting base line zero" << endl; 
-	  }
-	  else if (opts == 'z') {
+	  if (opts == 'z') {
 	    cout << "Zero baseline: end point set at:" << x << endl;
 	    if(verbose) cout << "Zero baseline: zero the profile base line" << endl;
 	    float * tmpdata=stdarch->get_Profile(0, 0, 0)->get_amps();
@@ -228,7 +232,7 @@ int main (int argc, char** argv)
 	    iend = int(x*stdarch->get_Profile(0, 0, 0)->get_nbin());
 	    if(unsigned(iend)>stdarch->get_Profile(0, 0, 0)->get_nbin()) 
 	      iend=stdarch->get_Profile(0, 0, 0)->get_nbin();
-	    if(verbose) cout << "Sero baseline: start & end bin number: " <<istart << ", " <<iend<<endl;
+	    if(verbose) cout << "Zero baseline: start & end bin number: " <<istart << ", " <<iend<<endl;
 	    if(zflag==false) {
 	      meantmp=0;
 	      for(i=unsigned(istart); i<unsigned(iend); i++) {
@@ -238,6 +242,7 @@ int main (int argc, char** argv)
 	      zflag=true;
 	    }
 	    
+	    if (verbose) cout << "Zero baseline: baseline value = " << meantmp << endl;
 	    for(i=unsigned(istart); i<unsigned(iend); i++) 
 	      tmpdata[i]=meantmp;
 
@@ -299,7 +304,6 @@ void plot_it(Reference::To<Pulsar::Archive> refarch, Reference::To<Pulsar::Archi
   unsigned i;
   //options
   cpgbeg(0, plotdev, 1, 1);
-  // cpgeras();
   
   cpgsvp (0.05, .95, 0.75, .98);
   cpgswin (0, 100, 0, 100);
