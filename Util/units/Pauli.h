@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Pauli.h,v $
-   $Revision: 1.6 $
-   $Date: 2003/02/15 10:25:11 $
+   $Revision: 1.7 $
+   $Date: 2003/02/24 17:59:54 $
    $Author: straten $ */
 
 #ifndef __Pauli_H
@@ -38,17 +38,6 @@ const Quaternion<complex<T>, Hermitian> convert (const Jones<T>& j)
       T(0.5) * ci (j.j12 - j.j21) );
 }
 
-// Return the positive definite root of a Hermitian Quaternion
-template<typename T>
-const Quaternion<T, Hermitian> sqrt (const Quaternion<T, Hermitian>& h)
-{
-  T mod = h.s1*h.s1 + h.s2*h.s2 + h.s3*h.s3;
-  T det = sqrt (h.s0*h.s0 - mod);
-  T scale = sqrt (0.5 * (h.s0 - det) / mod);
-
-  return Quaternion<T, Hermitian>
-    (sqrt (0.5 * (h.s0 + det)), h.s1 * scale, h.s2 * scale, h.s3 * scale);
-}
 
 // convert Jones matrix to Hermitian and Unitary Quaternion
 template<typename T>
