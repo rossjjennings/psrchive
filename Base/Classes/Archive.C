@@ -3,6 +3,7 @@
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
 #include "Pulsar/IntegrationOrder.h"
+#include "Pulsar/Profile.h"
 
 #include "Error.h"
 #include "typeutil.h"
@@ -429,6 +430,51 @@ void Pulsar::Archive::remove_baseline (float phase, float dc)
   }
 }
 
+double Pulsar::Archive::find_best_period (){
+
+  // Firstly determine the MIDtime
+  MJD midtime = (get_Integration(get_nsubint()-1)->get_epoch()+
+		 get_Integration(0)->get_epoch())/2.0;
+
+  // Now get the centre folding period
+  double centre_period = get_Integration(0)->get_folding_period();
+
+  // loop over trial periods and remember best snr & p
+  float best_snr;
+  double best_period;
+
+  best_snr = 0.0;
+  best_period = centre_period;
+  
+  // Period limits
+  MJD t_on_2 = midtime-get_Integration(0)->get_epoch();
+  double p_l = centre_period - 0.5 * pow(centre_period,2.0)/
+    t_on_2.in_seconds();
+  double p_u = centre_period + 0.5 * pow(centre_period,2.0)/
+    t_on_2.in_seconds();
+
+  MJD dMJD = midtime-get_Integration(0)->get_epoch();
+  double dt = dMJD.in_seconds();
+  double dp = centre_period/dt/(double)(get_nbin()/2);
+  for (double trial_p = p_l;trial_p<p_u;trial_p+=dp){
+    // Copy the archive into workspace
+    Reference::To<Archive> acopy = clone(); 
+    // make sure appropriate scrunching
+    acopy->fscrunch(0);
+    acopy->pscrunch();
+
+    acopy->new_folding_period(trial_p);
+
+    // scrunch and compute
+    acopy->tscrunch(0);
+    float trial_snr = acopy->get_Profile(0,0,0)->snr();
+    if (trial_snr>best_snr){
+      best_period = trial_p;
+      best_snr = trial_snr;
+    }
+  }
+  return(best_period);
+}
 
 void Pulsar::Archive::rotate (double time)
 {
@@ -544,7 +590,6 @@ void Pulsar::Archive::snr_weight ()
   throw Error (InvalidState, "Pulsar::Archive::snr_weight", "not implemented");
 }
 
-
 MJD Pulsar::Archive::start_time() const
 {
   if (get_nsubint() < 1)
@@ -607,4 +652,18 @@ void Pulsar::Archive::uniform_weight (float new_weight)
 //! A dsp::Transformation into an Archive must be able to call this
 bool Pulsar::Archive::state_is_valid(string& reason) const{
   return Signal::valid_state(get_state(),1,get_npol(),reason);
+}
+
+// Rotates subints as if a new period was being used.
+// Intended for use with non-polyco data.
+void Pulsar::Archive::new_folding_period(double trial_p){
+    MJD mt = (get_Integration(get_nsubint()-1)->get_epoch()+
+		 get_Integration(0)->get_epoch())/2.0;
+    double cp = get_Integration(0)->get_folding_period();
+    for (int i=0;i<(int)get_nsubint();i++){
+      MJD dMJD = mt-get_Integration(i)->get_epoch();
+      double dseconds = dMJD.in_seconds() * (1.0/cp-1.0/trial_p)*cp;
+      get_Integration(i)->rotate(dseconds);
+    }
+    // Doesn't work with   acopy->set_folding_period(trial_p);
 }
