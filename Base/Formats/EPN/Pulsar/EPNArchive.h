@@ -1,97 +1,206 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/EPN/Pulsar/EPNArchive.h,v $
-   $Revision: 1.1 $
-   $Date: 2004/07/06 09:41:25 $
+   $Revision: 1.2 $
+   $Date: 2004/07/06 14:56:27 $
    $Author: straten $ */
 
-#ifndef __EPNArchive_h
-#define __EPNArchive_h
+#ifndef __EPN_Archive_h
+#define __EPN_Archive_h
 
-#include "Pulsar/BasicArchive.h"
+#include "Pulsar/Archive.h"
+#include "epnhdr.h"
 
 namespace Pulsar {
 
-  //! Loads and unloads EPN Pulsar archives
-  /*! This EPNArchive class provides an example of how to inherit the
-    BasicArchive class and add functionality specific to a file format. 
-    By copying the files EPNArchive.h and EPNArchive.C and performing
-    simple text-substitution, the skeleton of a new file-format plugin may
-    be easily developed. */
-  class EPNArchive : public BasicArchive {
+  class EPNArchive : public Archive {
 
   public:
-    
+
     //! Default constructor
     EPNArchive ();
-
-    //! Copy another constructor
-    EPNArchive (const Archive& archive);
 
     //! Copy constructor
     EPNArchive (const EPNArchive& archive);
 
-    //! Extract another constructor
-    EPNArchive (const Archive& a, const vector<unsigned>& subints);
-
-    //! Extraction constructor
-    EPNArchive (const EPNArchive& a, const vector<unsigned>& subints);
-
-    //! Operator =
-    EPNArchive& operator= (const EPNArchive& archive);
-
     //! Destructor
     ~EPNArchive ();
 
-    //! Copy the contents of an Archive into self
-    void copy (const Archive& archive,
-	       const vector<unsigned>& subints = none_selected);
+    //! Assignment operator
+    const EPNArchive& operator = (const EPNArchive& archive);
     
-    //! Return a new copy-constructed EPNArchive instance
-    Archive* clone () const;
+    //! Base copy constructor
+    EPNArchive (const Archive& archive);
 
-    //! Return a new extraction-constructed EPNArchive instance
-    Archive* extract (const vector<unsigned>& subints) const;
-    
+    //! Base extraction constructor
+    EPNArchive (const Archive& archive, const vector<unsigned>& subint);
+
+    //! Copy all of the class attributes and the selected Integration data
+    void copy (const Archive& archive, const vector<unsigned>& subints);
+
+    // //////////////////////////////////////////////////////////////////
+    //
+    // implement the pure virtual methods of the Archive base class
+    //
+
+    //! Return a pointer to a new copy constructed instance equal to this
+    EPNArchive* clone () const;
+
+    //! Return a pointer to a new extraction constructed instance equal to this
+    EPNArchive* extract (const vector<unsigned>& subints) const;
+
+    //! Get the tempo code of the telescope used
+    char get_telescope_code () const;
+    //! Set the tempo code of the telescope used
+    void set_telescope_code (char telescope_code);
+
+    //! Get the state of the profiles
+    Signal::State get_state () const;
+    //! Set the state of the profiles
+    void set_state (Signal::State state);
+
+    //! Get the scale of the profiles
+    Signal::Scale get_scale () const;
+    //! Set the scale of the profiles
+    void set_scale (Signal::Scale scale);
+
+    //! Get the observation type (psr, cal)
+    Signal::Source get_type () const;
+    //! Set the observation type (psr, cal)
+    void set_type (Signal::Source type);
+
+    //! Get the source name
+    string get_source () const;
+    //! Set the source name
+    void set_source (const string& source);
+
+    //! Get the coordinates of the source
+    sky_coord get_coordinates () const;
+    //! Set the coordinates of the source
+    void set_coordinates (const sky_coord& coordinates);
+
+    //! Get the number of pulsar phase bins used
+    /*! This attribute may be set only through Archive::resize */
+    unsigned get_nbin () const;
+
+    //! Get the number of frequency channels used
+    /*! This attribute may be set only through Archive::resize */
+    unsigned get_nchan () const;
+
+    //! Get the number of frequency channels used
+    /*! This attribute may be set only through Archive::resize */
+    unsigned get_npol () const;
+
+    //! Get the number of sub-integrations stored in the file
+    /*! This attribute may be set only through Archive::resize */
+    unsigned get_nsubint () const;
+
+    //! Get the overall bandwidth of the observation
+    double get_bandwidth () const;
+    //! Set the overall bandwidth of the observation
+    void set_bandwidth (double bw);
+
+    //! Get the centre frequency of the observation
+    double get_centre_frequency () const;
+    //! Set the centre frequency of the observation
+    void set_centre_frequency (double cf);
+
+    //! Get the dispersion measure (in \f${\rm pc\, cm}^{-3}\f$)
+    double get_dispersion_measure () const;
+    //! Set the dispersion measure (in \f${\rm pc\, cm}^{-3}\f$)
+    void set_dispersion_measure (double dm);
+
+    //! Get the rotation measure (in \f${\rm rad\, m}^{-2}\f$)
+    double get_rotation_measure () const;
+    //! Set the rotation measure (in \f${\rm rad\, m}^{-2}\f$)
+    void set_rotation_measure (double rm);
+
+    //! Inter-channel dispersion delay has been removed
+    bool get_dedispersed () const;
+    //! Set true when the inter-channel dispersion delay has been removed
+    void set_dedispersed (bool done = true);
+
+    //! Data has been corrected for ISM faraday rotation
+    bool get_faraday_corrected () const;
+    //! Set the status of the ISM RM flag
+    void set_faraday_corrected (bool done = true);
+
+    //! Data has been poln calibrated
+    bool get_poln_calibrated () const;
+    //! Set the status of the poln calibrated flag
+    void set_poln_calibrated (bool done = true);
+
   protected:
-
-    //! Load the EPN header information from filename
-    virtual void load_header (const char* filename);
-
-    //! Load the specified Integration from filename, returning new instance
-    virtual Integration*
-    load_Integration (const char* filename, unsigned subint);
-
-    //! Unload the EPNArchive (header and Integration data) to filename
-    virtual void unload_file (const char* filename) const;
 
     friend class Archive::Advocate<EPNArchive>;
 
-    //! This class registers the EPNArchive plugin class for use
+    //! Represents the interests of the EPNArchive
     class Agent : public Archive::Advocate<EPNArchive> {
-
+    
       public:
 
-        Agent () { } 
+        //! Default constructor (necessary even when empty)
+        Agent () {}
 
-        //! Advocate the use of TimerArchive to interpret filename
+        //! Advocate the use of EPNArchive to interpret filename
         bool advocate (const char* filename);
 
-        //! Return the name of the TimerArchive plugin
+        //! Return the name of the EPNArchive plugin
         string get_name () { return "EPNArchive"; }
-    
+
         //! Return description of this plugin
         string get_description ();
 
-    };
+    }; 
 
-  private:
+    //! Load the header information from filename
+    void load_header (const char* filename);
 
-    //! Initialize all values to null
-    void init ();
+    //! Load the specified Integration from filename, returning new instance
+    Integration* load_Integration (const char* filename, unsigned subint);
+
+    //! Unload the Archive (header and Integration data) to filename
+    void unload_file (const char* filename) const;
+
+    /** @name EPN data
+     *  These structures contain data copied directly from Fortran common blocks
+     *  defined in epnhdr.inc
+     */
+    //@{
+
+    epn_header_line1 line1;
+
+    epn_header_line2 line2;
+    
+    epn_header_line3 line3;
+    
+    epn_header_line4 line4;
+    
+    epn_header_line5 line5;
+    
+    //@}
+
+    //! Set the number of pulsar phase bins
+    virtual void set_nbin (unsigned numbins);
+
+    //! Set the number of frequency channels
+    virtual void set_nchan (unsigned numchan);
+
+    //! Set the number of polarization measurements
+    virtual void set_npol (unsigned numpol);
+
+    //! Set the number of sub-integrations
+    virtual void set_nsubint (unsigned nsubint);
+
+    //! The subints vector will point to EPNIntegrations
+    virtual Integration* new_Integration (Integration* copy_this = 0);
+
+    //! Initialize data structures
+    void init();
 
   };
- 
+
+
 
 }
 

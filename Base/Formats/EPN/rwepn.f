@@ -245,7 +245,7 @@ c
         read(version(4:),'(f5.2)') vno
         if (vno.lt.pvno) then
            if (first) then
-              write(*,*) 'Reading an old EPN file - Version',vno
+c     write(*,*) 'Reading an old EPN file - Version',vno
               first=.false.
            endif
            maxint=9999
