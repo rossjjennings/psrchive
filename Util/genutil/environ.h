@@ -1,6 +1,6 @@
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Attic/environ.h,v $
-   $Revision: 1.1 $
-   $Date: 1999/11/02 09:08:11 $
+   $Revision: 1.2 $
+   $Date: 2000/01/06 04:22:33 $
    $Author: straten $ */
 
 /*
@@ -100,7 +100,7 @@ typedef unsigned long long uint64;
 typedef struct {double f1; double f2;} float128;
 
 /* for parsing a long */
-#define I64 "%ld"
+#define I64 "%Ld"
 
 #endif
 
