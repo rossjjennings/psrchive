@@ -29,7 +29,7 @@ nobase_include_HEADERS = \
 libpsrchive_la_SOURCES = \
 	AdaptiveSNR.C                 Integration_new_PolnProfile.C  \
 	Agent.C                       Integration_remove_baseline.C  \
-	Agent_plugin.C                Integration_resize.C  \
+	                Integration_resize.C  \
 	Archive.C                     Integration_toas.C  \
 	Archive_append.C              Integration_total.C  \  \
 	Archive_convert_state.C       Integration_transform.C  \
@@ -78,10 +78,10 @@ libpsrchive_la_SOURCES = \
 	Integration_invint.C          pafit_get_PA.C  \
 	Integration_match.C
 
-SUBDIRS                 = Extension Calibration psrfits timer
+SUBDIRS                 = Calibration Extension psrfits timer
 
-libpsrchive_la_LIBADD   = Extension/libExtension.la \
-			Calibration/libCalibration.la \
+libpsrchive_la_LIBADD   = Calibration/libCalibration.la \
+			Extension/libExtension.la \
 			psrfits/libpsrfits.la
 			timer/libtimer.la
 
@@ -105,7 +105,10 @@ fix_coords_SOURCES		= fix_coords.C
 fix_fluxcal_SOURCES		= fix_fluxcal.C
 fix_hydra_SOURCES		= fix_hydra.C
 fluxcal_SOURCES			= fluxcal.C
+
 pac_SOURCES			= pac.C
+pac_LDADD			= $(LDADD) @SLA_LIBS@
+
 pam_SOURCES			= pam.C
 pascii_SOURCES			= pascii.C
 pat_SOURCES			= pat.C
@@ -120,16 +123,6 @@ test_Archive_SOURCES		= test_Archive.C
 test_denoise_SOURCES		= test_denoise.C
 test_Difference_SOURCES		= test_Difference.C
 
-#############################################################################
-#
-# Dependencies should never be changed
-#
-
-INCLUDES = -I$(top_srcdir)/utils/include -I$(top_srcdir)/astro/include \
-	@PGPLOT_CFLAGS@ 
-
-LDADD = libpsrchive.la $(top_srcdir)/utils/libpsrutils.la \
-	$(top_srcdir)/astro/libpsrastro.la
 
 # ######################################################################
 #
@@ -173,8 +166,8 @@ endif
 # Rule to create plugins.h
 #
 
-static_plugins.code : plugins.csh $(LOCAL_ROOT)/include/Makefile.psrchive
-	@./plugins.csh $(PSRCHIVE.plugins)
+static_plugins.code : plugins.csh 
+	@./plugins.csh TimerArchive BasebandArchive FITSArchive
 	@touch Archive.h
 
 Agent.C : static_plugins.code
@@ -196,4 +189,17 @@ export:
 	mv doc/html $(EXPORT)
 	chmod -R a+r $(EXPORT)
 	chmod a+x $(EXPORT)
+
+
+#############################################################################
+#
+# Dependencies should never be changed
+#
+
+INCLUDES = -I$(top_srcdir)/utils/include -I$(top_srcdir)/astro/include \
+        -ICalibration -IExtension -Itimer -Ipsrfits @PGPLOT_CFLAGS@
+
+LDADD = libpsrchive.la timer/libtimer.la psrfits/libpsrfits.la \
+	$(top_srcdir)/astro/libpsrastro.la \
+        $(top_srcdir)/utils/libpsrutils.la @FFT_LIBS@ @CFITSIO_LIBS@
 
