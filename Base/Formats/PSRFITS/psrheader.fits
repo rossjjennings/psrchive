@@ -7,7 +7,7 @@ COMMENT   Astrophysics Supplement Series v44/p363, v44/p371, v73/p359, v73/p365.
 COMMENT   Contact the NASA Science Office of Standards and Technology for the
 COMMENT   FITS Definition document #100 and other FITS information.
 COMMENT
-HDRVER  = '1.20            '   / Header version 
+HDRVER  = '1.21            '   / Header version 
 DATE    = '                '   / File creation date (YYYY-MM-DDThh:mm:ss UTC)
 OBSERVER= '                '   / Observer name(s)
 PROJID  = '                '   / Project name
@@ -409,28 +409,29 @@ TFIELDS =                    3 / Number of fields per row
 EXTNAME = 'FLUX_CAL'           / name of this binary table extension
 CAL_MTHD= '        '           / Flux cal method
 SCALFILE= '        '           / Cal file(s) used to derive flux-cal data
-NCH_FLUX=                    * / Nr of channels in flux cal file
+NCHAN   =                    * / Nr of channels in flux cal file
+EPOCH   = '                  ' / Epoch of calibration experiment (MJD)
 #
 TTYPE1  = 'DAT_FREQ'           / [MHz] Centre frequency for each channel
-TFORM1  = 'E       '           / NCH_FLUX floats
+TFORM1  = 'E       '           / NCHAN floats
 #
 TTYPE2  = 'DAT_WTS '           / Weights for each channel
-TFORM2  = 'E       '           / NCH_FLUX floats
+TFORM2  = 'E       '           / NCHAN floats
 #
 TTYPE3  = 'T_SYS   '           / System temperature
-TFORM3  = 'E       '           / NCH_FLUX floats
+TFORM3  = 'E       '           / NCHAN floats
 TUNIT3  = 'Jy      '
 #
 TTYPE4  = 'T_SYSERR'           / Estimated error of system temperature
-TFORM4  = 'E       '           / NCH_FLUX floats
+TFORM4  = 'E       '           / NCHAN floats
 TUNIT4  = 'Jy      '
 #
 TTYPE5  = 'T_CAL   '           / Calibrator flux
-TFORM5  = 'E       '           / NCH_FLUX floats
+TFORM5  = 'E       '           / NCHAN floats
 TUNIT5  = 'Jy      '
 #
 TTYPE6  = 'T_CALERR'           / Estimated error of calibrator flux
-TFORM6  = 'E       '           / NCH_FLUX floats
+TFORM6  = 'E       '           / NCHAN floats
 TUNIT6  = 'Jy      '
 #
 END
@@ -452,17 +453,17 @@ GCOUNT  =                    1 / one data group (required keyword)
 TFIELDS =                    3 / Number of fields per row
 #
 EXTNAME = 'CAL_POLN'           / name of this binary table extension
-NCH_POLN=                    * / Nr of channels in flux cal file
+NCHAN   =                    * / Nr of channels in flux cal file
 #
 TTYPE1  = 'DAT_WTS '           / Weights for each channel
-TFORM1  = 'E       '           / NCH_POLN floats
+TFORM1  = 'E       '           / NCHAN floats
 #
 TTYPE2  = 'DATA    '           / Stokes (Q,U,V) of calibrator
-TFORM2  = 'E       '           / 3*NCH_POLN floats
+TFORM2  = 'E       '           / 3*NCHAN floats
 TUNIT2  = 'C_0     '           / Calibrator flux
 #
 TTYPE3  = 'DATAERR '           / Estimated error of Stokes (Q,U,V)
-TFORM3  = 'E       '           / 3*NCH_POLN floats
+TFORM3  = 'E       '           / 3*NCHAN floats
 TUNIT3  = 'C_0     '           / Calibrator flux
 #
 END
@@ -486,22 +487,22 @@ TFIELDS =                    3 / Number of fields per row
 EXTNAME = 'FEEDPAR '           / Name of this binary table extension
 CAL_MTHD= '        '           / Cross-coupling method
 NCPAR   =                    * / Number of coupling parameters
-NCH_FDPR=                    * / Nr of channels in Feed coupling data
+NCHAN   =                    * / Nr of channels in Feed coupling data
 EPOCH   = '                  ' / Epoch of calibration experiment (MJD)
 #
 TTYPE1  = 'DAT_FREQ'           / [MHz] Centre frequency for each channel
-TFORM1  = 'E       '           / NCH_FDPR floats
+TFORM1  = 'E       '           / NCHAN floats
 #
 TTYPE2  = 'DAT_WTS '           / Weights for each channel
-TFORM2  = 'E       '           / NCH_FDPR floats
+TFORM2  = 'E       '           / NCHAN floats
 #
 TTYPE3  = 'DATA    '           / Cross-coupling data
 TDIM3   = (*,*)                / Dimensions (NCHAN,NCPAR)
-TFORM3  = 'E       '           / NCH_FDPR*NCPAR floats
+TFORM3  = 'E       '           / NCHAN*NCPAR floats
 #
 TTYPE4  = 'DATAERR '           / Estimated error of cross-coupling data
 TDIM4   = (*,*)                / Dimensions (NCHAN,NCPAR)
-TFORM4  = 'E       '           / NCH_FDPR*NCPAR floats
+TFORM4  = 'E       '           / NCHAN*NCPAR floats
 #
 END
 #
