@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Archive.h,v $
-   $Revision: 1.31 $
-   $Date: 2002/07/26 06:14:06 $
-   $Author: ahotan $ */
+   $Revision: 1.32 $
+   $Date: 2002/07/27 00:22:13 $
+   $Author: straten $ */
 
 /*! \mainpage 
  
@@ -175,6 +175,12 @@ namespace Pulsar {
     //! null constructor
     Archive ();
 
+    //! copy constructor
+    Archive (const Archive& archive);
+
+    //! operator =
+    Archive& operator = (const Archive& archive);
+
     //! destructor
     virtual ~Archive ();
 
@@ -184,6 +190,9 @@ namespace Pulsar {
     //! Convenience interface
     static Archive* load (const string& filename)
     { return load (filename.c_str()); }
+
+    //! Copy the profiles and attributes through set_ get_ methods
+    virtual void copy (const Archive& archive);
 
     //! Return a pointer to a new copy of self
     virtual Archive* clone () const = 0;
@@ -345,16 +354,24 @@ namespace Pulsar {
     //
 
     //! Get the tempo code of the telescope used
-    virtual char get_tel_tempo_code () const = 0;
+    virtual char get_telescope_code () const = 0;
+    //! Set the tempo code of the telescope used
+    virtual void set_telescope_code (char telescope_code) = 0;
 
     //! Get the feed configuration of the receiver
     virtual Feed::Type get_feed_type () const = 0;
+    //! Set the feed configuration of the receiver
+    virtual void set_feed_type (Feed::Type type) = 0;
 
     //! Get the observation type (psr, cal)
     virtual Observation::Type get_observation_type () const = 0;
+    //! Set the observation type (psr, cal)
+    virtual void set_observation_type (Observation::Type type) = 0;
 
     //! Get the source name
     virtual string get_source () const = 0;
+    //! Set the source name
+    virtual void set_source (const string& source) = 0;
 
     // //////////////////////////////////////////////////////////////////
     //
