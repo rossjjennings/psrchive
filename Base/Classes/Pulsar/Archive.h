@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Archive.h,v $
-   $Revision: 1.28 $
-   $Date: 2002/05/03 07:20:38 $
+   $Revision: 1.29 $
+   $Date: 2002/05/09 11:49:36 $
    $Author: straten $ */
 
 /*! \mainpage 
@@ -178,12 +178,12 @@ namespace Pulsar {
     //! destructor
     virtual ~Archive ();
 
-    //! Loads an Archive-derived child class from a file.
-    static Archive* factory (const char* filename);
+    //! Dynamic constructor loads an Archive subclass from filename
+    static Archive* load (const char* filename);
 
     //! Convenience interface
-    static Archive* factory (const string& filename)
-    { return factory (filename.c_str()); }
+    static Archive* load (const string& filename)
+    { return load (filename.c_str()); }
 
     //! Return a pointer to a new copy of self
     virtual Archive* clone () const = 0;
@@ -327,20 +327,14 @@ namespace Pulsar {
     //
     // //////////////////////////////////////////////////////////////////
 
-    //! Write archive to disk
-    virtual void unload (const char* filename) = 0;
-
-    //! Read archive from disk
-    virtual void load (const char* filename) = 0;
-
     //! Get the name of the thing from which the archive was loaded
     virtual string get_filename () const = 0;
 
+    //! Write archive to disk
+    virtual void unload (const char* filename) = 0;
+
     //! Convenience interface to the unload function
     void unload (const string& filename) { unload (filename.c_str()); }
-
-    //! Convenience interface to the load function
-    void load (const string& filename) { load (filename.c_str()); }
 
     // //////////////////////////////////////////////////////////////////
     //
