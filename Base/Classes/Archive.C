@@ -1,13 +1,11 @@
 #include "Types.h"
 
 #include "unistd.h"
-#include "cpgplot.h"
 
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
 #include "Pulsar/IntegrationOrder.h"
 #include "Pulsar/Profile.h"
-#include "Pulsar/Plotter.h"
 
 #include "Error.h"
 #include "typeutil.h"
@@ -436,8 +434,6 @@ void Pulsar::Archive::remove_baseline (float phase, float dc)
 
 double Pulsar::Archive::find_best_period (){
 
-  Pulsar::Plotter myplotter;
-  static int loop = 0;
   // Firstly determine the MIDtime
   MJD midtime = (get_Integration(get_nsubint()-1)->get_epoch()+
 		 get_Integration(0)->get_epoch())/2.0;
