@@ -56,9 +56,7 @@ AC_DEFUN([SWIN_LIB_MKL],
               [Define if the Intel Math Kernel Library is present])
     [$1]
   else
-    if test x"$have_fftw" != xyes; then
-      AC_MSG_WARN([Neither FFTW nor MKL FFT libraries were found])
-    fi
+    :
     [$2]
   fi
 
