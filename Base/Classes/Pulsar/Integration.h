@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Integration.h,v $
-   $Revision: 1.31 $
-   $Date: 2003/02/10 10:22:39 $
+   $Revision: 1.32 $
+   $Date: 2003/02/10 19:39:28 $
    $Author: straten $ */
 
 /*
@@ -25,6 +25,7 @@ namespace Tempo {
 }
 
 template<typename T> class Stokes;
+template<typename T> class Estimate;
 
 namespace Pulsar {
 
@@ -120,10 +121,8 @@ namespace Pulsar {
 			  vector<vector<double> > & varmean) const;
 
     //! Returns the mean hi/lo and variance of the mean hi/lo of every profile
-    void find_cal_levels (vector<vector<double> >&m_hi,
-			  vector<vector<double> >&var_m_hi, 
-			  vector<vector<double> >&m_lo, 
-			  vector<vector<double> >&var_m_lo) const;
+    virtual void cal_levels (vector< vector< Estimate<double> > >& hi,
+			     vector< vector< Estimate<double> > >& lo) const;
 
     void find_psr_levels (vector<vector<double> >& mean_high,
 			  vector<vector<double> >& mean_low) const;
