@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PulsarCalibrator.h,v $
-   $Revision: 1.6 $
-   $Date: 2004/07/12 10:54:01 $
+   $Revision: 1.7 $
+   $Date: 2004/10/13 10:27:56 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PulsarCalibrator_H
@@ -10,7 +10,7 @@
 
 #include "Pulsar/PolnCalibrator.h"
 
-#include "Calibration/Complex2Constant.h"
+#include "Calibration/Complex2Value.h"
 #include "Calibration/MeanModel.h"
 
 namespace Pulsar {
@@ -74,7 +74,7 @@ namespace Pulsar {
     vector< Reference::To<MeanXform> > solution;
 
     //! The known instrumental corrections
-    Calibration::Complex2Constant corrections;
+    Calibration::Complex2Value corrections;
 
     //! The model specified on construction
     Calibrator::Type model_type;

@@ -163,7 +163,7 @@ void Pulsar::PulsarCalibrator::add_observation (const Archive* data)
 
     Jones<double> jones;
     jones = correct.get_transformation( data, isub );
-    corrections.set_Jones( jones );
+    corrections.set_value( jones );
 
     if (integrations_added)
       update_solution ();

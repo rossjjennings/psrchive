@@ -121,8 +121,8 @@ void Pulsar::PolnProfileFit::set_standard (const PolnProfile* _standard)
     }
 
     // each complex phase bin of the standard is treated as a known constant
-    Calibration::Complex2Constant* jones = new Calibration::Complex2Constant;
-    jones->set_Jones( convert(stokes) );
+    Calibration::Complex2Constant* jones;
+    jones = new Calibration::Complex2Constant( convert(stokes) );
 
 #ifdef _DEBUG
     cerr << "Pulsar::PolnProfileFit::set_standard ibin=" << ibin 
