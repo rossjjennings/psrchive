@@ -119,6 +119,19 @@ Pulsar::PolnCalibrator::get_Transformation (unsigned ichan) const
   return transformation[ichan];
 }
 
+//! Return the system response for the specified channel
+::Calibration::Transformation*
+Pulsar::PolnCalibrator::get_Transformation (unsigned ichan)
+{
+  if (transformation.size() == 0)
+    calculate_transformation();
+
+  if (ichan >= transformation.size())
+    throw Error (InvalidParam, "Pulsar::PolnCalibrator::get_Transformation",
+		 "ichan=%d >= nchan=%d", ichan, transformation.size());
+
+  return transformation[ichan];
+}
 
 //! Derived classes can create and fill the transformation array
 void Pulsar::PolnCalibrator::calculate_transformation ()
