@@ -7,15 +7,9 @@
 
 int fwrite_compressed (FILE* fptr, const vector<float>& vals)
 {
-#ifdef __alpha
-  vector<float>::iterator minel = min_element(vals.begin(), vals.end());
-  vector<float>::iterator maxel = max_element(vals.begin(), vals.end());
-  vector<float>::iterator ind;
-#else
-  vector<const float>::iterator minel = min_element(vals.begin(), vals.end());
-  vector<const float>::iterator maxel = max_element(vals.begin(), vals.end());
-  vector<const float>::iterator ind;
-#endif
+  vector<float>::const_iterator minel = min_element(vals.begin(), vals.end());
+  vector<float>::const_iterator maxel = max_element(vals.begin(), vals.end());
+  vector<float>::const_iterator ind;
 
   if (minel == vals.end() || maxel == vals.end()) {
     cerr << "fwrite_compressed: empty range" << endl;
