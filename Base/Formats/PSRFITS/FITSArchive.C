@@ -127,6 +127,11 @@ void Pulsar::FITSArchive::copy (const Archive& archive,
   cal_frequency = farchive -> cal_frequency;
   cal_dutycycle = farchive -> cal_dutycycle;
   cal_phase = farchive -> cal_phase;
+
+  history = farchive -> history;    
+  digitiser_statistics = farchive -> digitiser_statistics;
+  digitiser_counts = farchive -> digitiser_counts;
+  original_bandpass = farchive -> original_bandpass;
 }
 
 //! Returns a pointer to a new copy-constructed FITSArchive instance
