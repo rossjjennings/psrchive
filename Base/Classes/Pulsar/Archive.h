@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Archive.h,v $
-   $Revision: 1.40 $
-   $Date: 2002/10/11 07:08:57 $
+   $Revision: 1.41 $
+   $Date: 2002/10/12 23:32:24 $
    $Author: straten $ */
 
 /*! \mainpage 
@@ -125,6 +125,7 @@
 
 #include "polyco.h"
 #include "psrephem.h"
+#include "sky_coord.h"
 
 #include "Types.h"
 #include "Reference.h"
@@ -204,7 +205,8 @@ namespace Pulsar {
     Archive* total () const;
 
     //! Resets the dimensions of the data area
-    virtual void resize (unsigned nsubint, unsigned npol=0, unsigned nchan=0, unsigned nbin=0);
+    virtual void resize (unsigned nsubint, 
+			 unsigned npol=0, unsigned nchan=0, unsigned nbin=0);
 
     //! Return a pointer to the integration
     Integration* get_Integration (unsigned subint);
@@ -212,7 +214,9 @@ namespace Pulsar {
 
     //! Return a pointer to the profile
     Profile* get_Profile (unsigned subint, unsigned pol, unsigned chan);
-    const Profile* get_Profile (unsigned subint, unsigned pol, unsigned chan) const;
+
+    const Profile*
+    get_Profile (unsigned subint, unsigned pol, unsigned chan) const;
 
     // //////////////////////////////////////////////////////////////////
     //
@@ -268,7 +272,7 @@ namespace Pulsar {
     //! Remove the baseline from all profiles
     virtual void remove_baseline (float phase = -1.0);
 
-    //! Install the given ephemeris and calls update_model
+    //! Install the given ephemeris and call update_model
     virtual void set_ephemeris (const psrephem& ephemeris);
 
     //! Install the given polyco and shift profiles to align
@@ -282,6 +286,16 @@ namespace Pulsar {
 
     //! Set the weight of each profile to one (1)
     virtual void uniform_weight ();
+
+    //! Test if arch matches (enough for a pulsar - calibrator match)
+    virtual bool match (const Archive* arch, string& reason);
+
+    //! Test if arch is mixable (enough for append)
+    virtual bool mixable (const Archive* arch, string& reason);
+
+    //! Computes the weighted channel frequency of an interval of subints.
+    double weighted_frequency (unsigned ichan,
+			       unsigned start, unsigned end) const;
 
     // //////////////////////////////////////////////////////////////////
     //
@@ -331,10 +345,19 @@ namespace Pulsar {
     float find_min_phase () const;
 
     //! Plot the requested Profile with some header information
-    void display (unsigned isub=0, unsigned ipol=0, unsigned ichan=0, float phase=0) const;
+    void display (unsigned isub=0, unsigned ipol=0, unsigned ichan=0,
+			  float phase=0) const;
 
     //! Construct a plot of pulse phase vs time for multi-subint archives
     void plot_time_vs_phase ();
+
+    //! Convenience interface to the set_filename (const char*) method
+    void set_filename (const string& filename) const
+    { set_filename (filename.c_str()); }
+
+    //! Convenience interface to the unload (const char*) method
+    void unload (const string& filename) const
+    { unload (filename.c_str()); }
 
     // //////////////////////////////////////////////////////////////////
     //
@@ -344,12 +367,11 @@ namespace Pulsar {
 
     //! Get the name of the thing from which the archive was loaded
     virtual string get_filename () const = 0;
+    //! Set the name of the thing to which the archive will be unloaded
+    virtual void set_filename (const char* filename) = 0;
 
     //! Write archive to disk
     virtual void unload (const char* filename = 0) const = 0;
-
-    //! Convenience interface to the unload function
-    void unload (const string& filename) const { unload (filename.c_str()); }
 
     // //////////////////////////////////////////////////////////////////
     //
@@ -376,6 +398,11 @@ namespace Pulsar {
     //! Set the source name
     virtual void set_source (const string& source) = 0;
 
+    //! Get the coordinates of the source
+    virtual sky_coord get_coordinates () const = 0;
+    //! Set the coordinates of the source
+    virtual void set_coordinates (const sky_coord& coordinates) = 0;
+
     // //////////////////////////////////////////////////////////////////
     //
     // dynamic facts about the archive
@@ -395,7 +422,7 @@ namespace Pulsar {
 
     //! Get the number of sub-integrations stored in the file
     /*! This attribute may be set only through Archive::resize */
-    virtual unsigned get_nsubint () const { return subints.size(); }
+    virtual unsigned get_nsubint () const = 0;
 
     //! Get the overall bandwidth of the observation
     virtual double get_bandwidth () const = 0;
@@ -447,16 +474,6 @@ namespace Pulsar {
     virtual bool get_parallactic_corrected () const = 0;
     //! Set the status of the parallactic angle flag
     virtual void set_parallactic_corrected (bool done = true) = 0;
-
-    //! Test if arch matches (enough for a pulsar - calibrator match)
-    virtual bool match (const Archive* arch, string& reason);
-
-    //! Test if arch is mixable (enough for append)
-    virtual bool mixable (const Archive* arch, string& reason);
-
-    //! Computes the weighted channel frequency of an interval of subints.
-    double weighted_frequency (unsigned ichan,
-			       unsigned start, unsigned end) const;
 
  protected:
 

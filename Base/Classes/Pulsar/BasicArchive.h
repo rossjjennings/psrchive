@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/BasicArchive.h,v $
-   $Revision: 1.15 $
-   $Date: 2002/10/11 04:51:05 $
+   $Revision: 1.16 $
+   $Date: 2002/10/12 23:33:13 $
    $Author: straten $ */
 
 #include "Archive.h"
@@ -68,6 +68,8 @@ namespace Pulsar {
 
     //! Get the name of the thing from which the archive was loaded
     virtual string get_filename () const { return filename; }
+
+    virtual void set_filename (const char* filename);
 
     //! Returns a pointer to a new copy of self
     Archive* clone () const { return new BasicArchive (*this); }
@@ -154,6 +156,12 @@ namespace Pulsar {
     {
       psrname = src;
     }
+
+    //! Get the coordinates of the source
+    sky_coord get_coordinates () const;
+
+    //! Set the coordinates of the source
+    void set_coordinates (const sky_coord& coordinates);
 
     //! Return the bandwidth of the observation
     double get_bandwidth () const
