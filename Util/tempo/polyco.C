@@ -159,12 +159,7 @@ int polynomial::load(string* instr)
   for (int i = 0;i<ncoeftmp;i++){
     line = stringtok (instr, whitespace);
     size_t letterd = line.find('D');
-    if (letterd == line.npos)  {
-      fprintf (stderr, "polynomial::load(string*) no 'D' found in '%s'\n",
-	line.c_str());
-      return -1;
-    }
-    line[letterd] = 'e';
+    if (letterd < line.npos) line[letterd] = 'e';
     if (sscanf (line.c_str(), "%lf", &coefs[i]) != 1)  {
       fprintf (stderr, "polynomial::load(string*) did not parse '%s'\n",
         line.c_str());
@@ -589,3 +584,8 @@ double polyco::frequency(const MJD& t, const string& in_psrname) const {
   return(nearest_polly.frequency(t));
 }
 
+bool polyco::is_tempov11() const {
+  for(int i=0; i<pollys.size(); ++i)
+    if(!pollys[i].is_tempov11()) return(pollys[i].is_tempov11());
+  return(pollys[0].is_tempov11());
+}
