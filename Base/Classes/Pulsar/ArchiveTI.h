@@ -1,18 +1,17 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Attic/ArchiveTI.h,v $
-   $Revision: 1.2 $
-   $Date: 2004/12/16 17:00:54 $
+   $Revision: 1.3 $
+   $Date: 2004/12/16 21:09:45 $
    $Author: straten $ */
 
 #ifndef __Pulsar_ArchiveTUI_h
 #define __Pulsar_ArchiveTUI_h
 
+#include "Pulsar/Archive.h"
 #include "Pulsar/ExtensionTUI.h"
 
 namespace Pulsar {
-
-  class Archive;
 
   //! Smooths a pulse profile using the mean over a boxcar
   class ArchiveTUI : public TextInterface::CompositeGetSet<Archive> {
