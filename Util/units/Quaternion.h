@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Quaternion.h,v $
-   $Revision: 1.17 $
-   $Date: 2004/04/06 16:14:45 $
+   $Revision: 1.18 $
+   $Date: 2004/04/23 13:27:30 $
    $Author: straten $ */
 
 #ifndef __Quaternion_H
@@ -325,6 +325,16 @@ template<typename T, QBasis B>
 T fabs (const Quaternion<T,B>& j)
 { 
   return sqrt (norm(j));
+}
+
+// return a unitary matrix with rows equal to the eigenvectors of q
+template<typename T>
+const Quaternion<T,Unitary> eigen (const Quaternion<T,Hermitian>& q)
+{
+  T p = norm( q.get_vector() );
+  T m = 1.0 / sqrt( 2.0*p*(p+q.s1) );
+
+  return Quaternion<T,Unitary> (m*(p+q.s1), 0.0, -m*q.s3, m*q.s2);
 }
 
 //! Useful for quickly printing the components
