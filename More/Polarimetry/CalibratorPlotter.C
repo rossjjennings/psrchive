@@ -5,6 +5,10 @@
 
 bool Pulsar::CalibratorPlotter::verbose = false;
 
+Pulsar::CalibratorPlotter::CalibratorPlotter ()
+{
+}
+
 Pulsar::CalibratorPlotter::~CalibratorPlotter ()
 {
   // destructors must be defined in .C file so that the Reference::To
