@@ -126,7 +126,7 @@ Pulsar::PolnCalibratorExtension::get_transformation (unsigned ichan) const
 
 void Pulsar::PolnCalibratorExtension::construct ()
 {
-  if (Archive::verbose)
+  if (Archive::verbose == 3)
     cerr << "Pulsar::PolnCalibratorExtension::construct nchan="
          << response.size() << " type=" 
          << Calibrator::Type2str (get_type()) << endl;
