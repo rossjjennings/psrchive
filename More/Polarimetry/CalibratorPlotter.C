@@ -91,13 +91,15 @@ void Pulsar::CalibratorPlotter::plot (const Calibrator::Info* info,
 
   string xaxis;
 
+  unsigned ipanel = 0;
+
   for (unsigned iplot=0; iplot < info->get_nclass(); iplot++) {
 
-    if (iplot % npanel == 0) {
+    if (ipanel % npanel == 0) {
 
       xaxis = "bcnst";
 
-      if (iplot)
+      if (ipanel)
 	cpgpage ();
 
       ybottom = ymin;
@@ -133,6 +135,7 @@ void Pulsar::CalibratorPlotter::plot (const Calibrator::Info* info,
 
     cpgsvp (xmin, xmax, ybottom, ybottom + yheight);
 
+    unsigned plotted = 0;
 
     for (iparam=0; iparam<nparam; iparam++) {
 
@@ -141,18 +144,24 @@ void Pulsar::CalibratorPlotter::plot (const Calibrator::Info* info,
       else
 	plotter.set_graph_marker ( info->get_graph_marker(iplot, iparam) );
 
-      plotter.plot (iparam);
+      plotted += plotter.plot (iparam);
+
     }
 
-    cpgsci (1);
-    cpgbox(xaxis.c_str(),0,0,"bcvnst",0,2);
+    if (plotted > 0) {
 
-    cpgmtxt("L",3.5,.5,.5, info->get_name(iplot));
+      cpgsci (1);
+      cpgbox(xaxis.c_str(),0,0,"bcvnst",0,2);
 
-    if (iplot % npanel == 0)
-      cpgmtxt("B",3.0,.5,.5, "Frequency (MHz)");
+      cpgmtxt("L",3.5,.5,.5, info->get_name(iplot));
+      
+      if (ipanel % npanel == 0)
+	cpgmtxt("B",3.0,.5,.5, "Frequency (MHz)");
 
-    ybottom += ybetween + yheight;
+      ipanel ++;
+      ybottom += ybetween + yheight;
+
+    }
 
   }
 
