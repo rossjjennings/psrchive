@@ -13,28 +13,36 @@ void Pulsar::Archive::fappend (Pulsar::Archive* arch, bool ignore_time_mismatch)
   
   float newcfr = ((arch->get_centre_frequency())+get_centre_frequency())/2.0;
 
-  // Correct the polycos in each archive so that they have the same reference
-  // sky frequency
-  
-  polyco newpol = Tempo::get_polyco(get_ephemeris(),
-				    start_time(),
-				    end_time(),
-				    get_model().get_nspan(),
-				    get_model().get_ncoeff(),
-				    12,
-				    get_model().get_telescope(),
-				    newcfr);
-  set_model(newpol);
+  if( has_model() && !arch->has_model() )
+    throw Error(InvalidState,"Pulsar::Archive::fappend()",
+		"This archive has a model but arch doesn't");
+  if( !has_model() && arch->has_model() )
+    throw Error(InvalidState,"Pulsar::Archive::fappend()",
+		"This archive hasn't a model but arch does");
 
-  polyco newpol2 = Tempo::get_polyco(arch->get_ephemeris(),
-				    arch->start_time(),
-				    arch->end_time(),
-				    arch->get_model().get_nspan(),
-				    arch->get_model().get_ncoeff(),
-				    12,
-				    arch->get_model().get_telescope(),
-				    newcfr);
-  arch->set_model(newpol2);
+  if( has_model() && arch->has_model() ){
+    // Correct the polycos in each archive so that they have the same reference
+    // sky frequency
+    polyco newpol = Tempo::get_polyco(get_ephemeris(),
+				      start_time(),
+				      end_time(),
+				      get_model().get_nspan(),
+				      get_model().get_ncoeff(),
+				      12,
+				      get_model().get_telescope(),
+				      newcfr);
+    set_model(newpol);
+    
+    polyco newpol2 = Tempo::get_polyco(arch->get_ephemeris(),
+				       arch->start_time(),
+				       arch->end_time(),
+				       arch->get_model().get_nspan(),
+				       arch->get_model().get_ncoeff(),
+				       12,
+				       arch->get_model().get_telescope(),
+				       newcfr);
+    arch->set_model(newpol2);
+  }    
 
   // Align the second archive with the epoch of the first, compensating for
   // phase differences that arise from small offsets in the start times
