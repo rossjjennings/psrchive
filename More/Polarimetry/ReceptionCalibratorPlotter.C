@@ -213,7 +213,7 @@ void Pulsar::ReceptionCalibratorPlotter::plot_stokes (EstimatePlotter& plotter,
 						      unsigned ipol,
 						      float spacing)
 {
-  char stokes_label[16] = "\\fiS'\\b\\dn";
+  char stokes_label[64] = "\\fiS'\\b\\d\\fnk";
   int  position = strlen (stokes_label) - 1;
   char* stokes_index = "0123";
 
