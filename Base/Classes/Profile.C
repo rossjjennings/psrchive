@@ -200,6 +200,20 @@ const Pulsar::Profile& Pulsar::Profile::operator *= (float factor)
     amps[i]*=factor;
   return *this;
 }
+
+
+void Pulsar::Profile::get_amps (float* data, int jbin) const
+{
+  register float* dptr = data;
+  register float* aptr = amps;
+  register int ibin;
+
+  for (ibin=0; ibin<nbin; ibin++) {
+    *dptr = *aptr;
+    aptr ++; dptr += jbin;
+  }
+}
+
  
 /////////////////////////////////////////////////////////////////////////////
 //

@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Profile.h,v $
-   $Revision: 1.13 $
-   $Date: 2002/04/22 03:34:13 $
+   $Revision: 1.14 $
+   $Date: 2002/04/26 13:26:31 $
    $Author: pulsar $ */
 
 #ifndef __Pulsar_Profile_h
@@ -150,6 +150,9 @@ namespace Pulsar {
     //! returns a pointer to the start of the array of amplitudes
     const float* get_amps () const { return amps; }
     float* get_amps () { return amps; }
+
+    //! fills data by jumping jbin between each datum
+    void get_amps (float* data, int jbin) const;
 
 #ifdef sun
     // SUN CC 5.0 is stupid
