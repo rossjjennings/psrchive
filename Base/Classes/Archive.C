@@ -62,7 +62,7 @@ void Pulsar::Archive::copy (const Archive& archive)
   // set virtual attributes
   set_telescope_code( archive.get_telescope_code() );
   set_basis( archive.get_basis() );
-  set_observation_type( archive.get_observation_type() );
+  set_type( archive.get_type() );
   set_source( archive.get_source() );
 
   set_bandwidth( archive.get_bandwidth() );
@@ -200,7 +200,7 @@ void Pulsar::Archive::convert_state (Signal::State state)
 void Pulsar::Archive::centre ()
 {
   // this function doesn't work for things without polycos
-  if (get_observation_type () != Signal::Pulsar)
+  if (get_type () != Signal::Pulsar)
     return;
 
   Phase half_turn (0.5);

@@ -80,7 +80,7 @@ void Pulsar::Archive::update_model (unsigned nsubint)
 */
 void Pulsar::Archive::create_updated_model (bool clear_model)
 {
-  if (get_observation_type() != Signal::Pulsar)
+  if (get_type() != Signal::Pulsar)
     throw Error (InvalidState, "Archive::create_updated_model",
 		 "not a pulsar observation");
 
