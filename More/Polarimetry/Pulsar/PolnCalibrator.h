@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PolnCalibrator.h,v $
-   $Revision: 1.25 $
-   $Date: 2003/12/26 08:44:11 $
+   $Revision: 1.26 $
+   $Date: 2004/07/12 09:26:54 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PolnCalibrator_H
@@ -21,6 +21,7 @@ namespace Pulsar {
 
   class Integration;
   class PolnCalibratorExtension;
+  class Receiver;
 
   //! Base class of polarization calibration objects.
   /*! New convention: Polarimetric calibration no longer depends on a
@@ -99,7 +100,7 @@ namespace Pulsar {
     public:
 
       //! Factory returns a suitable instance
-      static Calibrator::Info* create (const PolnCalibrator* calibrator);
+      static PolnCalibrator::Info* create (const PolnCalibrator* calibrator);
 
       //! Constructor
       Info (const PolnCalibrator* calibrator);
@@ -135,7 +136,7 @@ namespace Pulsar {
 
     //! Return the Calibrator::Info information
     /*! By default, derived classes need not necessarily define Info */
-    Calibrator::Info* get_Info () const;
+    Info* get_Info () const;
 
 
   protected:
@@ -151,6 +152,9 @@ namespace Pulsar {
 
     //! The PolnCalibratorExtension of the Archive passed during construction
     Reference::To<PolnCalibratorExtension> extension;
+
+    //! The Receiver Extension of the Archive passed during construction
+    Reference::To<const Receiver> receiver;
 
   private:
 

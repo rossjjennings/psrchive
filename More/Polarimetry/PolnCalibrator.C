@@ -2,6 +2,7 @@
 #include "Pulsar/PolnCalibratorExtension.h"
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
+#include "Pulsar/Receiver.h"
 
 #include "Pauli.h"
 #include "Error.h"
@@ -21,6 +22,7 @@ Pulsar::PolnCalibrator::PolnCalibrator (Archive* archive)
 
   calibrator = archive;
   extension = archive->get<PolnCalibratorExtension>();
+  receiver = archive->get<Receiver>();
 }
 
 //! Copy constructor
@@ -182,6 +184,16 @@ void Pulsar::PolnCalibrator::build (unsigned nchan)
 
     if (transformation[ichan])  {
 
+      // sanity check of model parameters
+      unsigned nparam = transformation[ichan]->get_nparam();
+      for (unsigned iparam=0; iparam < nparam; iparam++)
+        if ( !finite(transformation[ichan]->get_param(iparam)) ) {
+          cerr << "Pulsar::PolnCalibrator::build ichan=" << ichan
+               << " " << transformation[ichan]->get_param_name(iparam)
+               << " not finite" << endl;
+          response[ichan] = Jones<float>::identity();
+        }
+
       double normdet = norm(det( transformation[ichan]->evaluate() ));
 
       if ( normdet < 1e-9 || !finite(normdet) ) {
@@ -212,6 +224,9 @@ void Pulsar::PolnCalibrator::build (unsigned nchan)
       response[ichan] = Jones<float>::identity();
 
     }
+
+    if (receiver)
+      response[ichan] *= receiver->get_correction();
 
   }
 
@@ -412,7 +427,7 @@ int Pulsar::PolnCalibrator::Info::get_graph_marker (unsigned iclass,
 }
 
 
-Pulsar::Calibrator::Info* Pulsar::PolnCalibrator::get_Info () const
+Pulsar::PolnCalibrator::Info* Pulsar::PolnCalibrator::get_Info () const
 {
   return PolnCalibrator::Info::create (this);
 }
