@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Profile.h,v $
-   $Revision: 1.72 $
-   $Date: 2004/09/21 04:50:48 $
+   $Revision: 1.73 $
+   $Date: 2004/09/27 03:50:41 $
    $Author: ahotan $ */
 
 #ifndef __Pulsar_Profile_h
@@ -206,6 +206,11 @@ namespace Pulsar {
       fractional bin resolution */
     double ParIntShift (const Profile& std, float& error,
 			float* corr = 0, float* fn = 0) const;
+    
+    /*! return the shift (in turns) after fitting to the standard
+      and interpolating using a Gaussian model in the time domain 
+      to achieve fractional bin resolution */
+    double GaussianShift (const Profile& std, float& ephase) const;
     
     /*! return the shift (in turns) after fitting to the standard
       using an interpolation scheme that involves transforming into

@@ -5,9 +5,121 @@
 #include "Error.h"
 #include "Estimate.h"
 
+#include "Calibration/LevenbergMarquardt.h"
+#include "Calibration/Gaussian.h"
+#include "Calibration/Polynomial.h"
+#include "Calibration/Axis.h"
+
 #include "interpolate.h"
 #include "model_profile.h"
-#include "GaussJordan.h"
+//#include "GaussJordan.h"
+
+double Pulsar::Profile::GaussianShift (const Profile& std, float& ephase) const
+{
+  // This algorithm interpolates the time domain cross correlation
+  // function by fitting a Gaussian.
+
+  // First compute the standard cross correlation function:
+
+  Reference::To<Pulsar::Profile> ptr = clone();
+  Reference::To<Pulsar::Profile> stp = std.clone();
+
+  // Remove the baseline
+  *ptr -= ptr->mean(ptr->find_min_phase(0.15));
+
+  // Perform the correlation
+  ptr->correlate(&std);
+
+  // Remove the baseline
+  *ptr -= ptr->mean(ptr->find_min_phase(0.15));
+
+  // Find the peak
+
+  int rise = 0;
+  int fall = 0;
+
+  ptr->find_peak_edges(rise, fall);
+  cerr << rise << ", " << fall << endl;
+
+  if (rise > fall) {
+    rise = rise - get_nbin();
+  }
+
+  cerr << rise << ", " << fall << endl;
+
+  try{
+    
+    float threshold = 0.001;
+    
+    Calibration::Gaussian gm;
+    
+    gm.set_centre(ptr->find_max_bin());
+    gm.set_width(fall - rise);
+    gm.set_height(ptr->max());
+    gm.set_cyclic(false);
+    
+    cerr << "Centre: " << gm.get_centre() << endl;
+    cerr << "Width:  " << gm.get_width()  << endl;
+    cerr << "Height: " << gm.get_height() << endl;
+
+    Calibration::Axis<double> argument;
+    gm.set_argument (0, &argument);
+    
+    vector< Calibration::Axis<double>::Value > data_x;  // x-ordinate of data
+    vector< Estimate<double> > data_y;       // y-ordinate of data with error
+    
+    int index = 0;
+    for (int i = rise; i < fall; i++) {
+      data_x.push_back ( argument.get_Value(double(i)) );
+      index = i;
+      if (index < 0)
+	index += ptr->get_nbin();
+      data_y.push_back( Estimate<double>(ptr->get_amps()[index], 0.1) );
+    }
+    
+    Calibration::LevenbergMarquardt<double> fit;
+    fit.verbose = Calibration::Model::verbose;
+    
+    float chisq = fit.init (data_x, data_y, gm);
+    cerr << "initial chisq = " << chisq << endl;
+    
+    unsigned iter = 1;
+    unsigned not_improving = 0;
+    while (not_improving < 25) {
+      cerr << "iteration " << iter << endl;
+      float nchisq = fit.iter (data_x, data_y, gm);
+      cerr << "     chisq = " << nchisq << endl;
+      
+      if (nchisq < chisq) {
+	float diffchisq = chisq - nchisq;
+	chisq = nchisq;
+	not_improving = 0;
+	if (diffchisq/chisq < threshold && diffchisq > 0) {
+	  cerr << "no big diff in chisq = " << diffchisq << endl;
+	  break;
+	}
+      }
+      else
+	not_improving ++;
+      
+      iter ++;
+    }
+    
+    double free_parms = data_x.size() + gm.get_nparam();
+    
+    cerr << "Chi-squared = " << chisq << " / " << free_parms << " = "
+	 << chisq / free_parms << endl;
+    
+    ephase = chisq / (free_parms * ptr->get_nbin());
+    
+    return gm.get_centre();
+    
+  }
+  catch (Error& error) {
+    cerr << error << endl;
+    return (0.0);
+  }
+}
 
 double Pulsar::Profile::ZeroPadShift (const Profile& std, 
 				      float& ephase, vector<float>& corr,
@@ -74,208 +186,6 @@ double Pulsar::Profile::ZeroPadShift (const Profile& std,
     shift -= 1.0;
   
   return shift;
-}
-
-double Pulsar::Profile::ParIntShift (const Profile& std, float& error,
-				     float* corr, float* fn) const
-{
-  // The Profile::correlate function creates a profile whose amps
-  // are the values of the correlation function, starting at zero
-  // lag and increasing
-
-  vector<double> correlation;
-  vector<double> lags;
-
-  Reference::To<Pulsar::Profile> ptr = clone();
-  Reference::To<Pulsar::Profile> stp = std.clone();
-
-  // Remove the baseline (done twice to minimise rounding error)
-  *ptr -= ptr->mean(ptr->find_min_phase(0.15));
-
-  // Perform the correlation
-  ptr->correlate(&std);
-
-  // Remove the baseline
-  *ptr -= ptr->mean(ptr->find_min_phase(0.15));
-
-  if (corr != 0) {
-    for (unsigned i = 0; i < ptr->get_nbin(); i++) {
-      corr[i] = ptr->get_amps()[i];
-    }
-  }  
-
-  // Find the point of best correlation
-  
-  int maxbin = ptr->find_max_bin();
-  
-  double x1,x2,x3;
-  double y1,y2,y3;
-
-  x1 = double(maxbin - 1);
-  x2 = double(maxbin);
-  x3 = double(maxbin + 1);
-
-  y1 = ptr->get_amps()[(maxbin - 1)%get_nbin()];
-  y2 = ptr->get_amps()[(maxbin)%get_nbin()];
-  y3 = ptr->get_amps()[(maxbin + 1)%get_nbin()];
-
-  x1 /= double(get_nbin());
-  x2 /= double(get_nbin());
-  x3 /= double(get_nbin());
- 
-  vector< vector<double> > matrix;
-  vector< vector<double> > empty;
-
-  matrix.resize(3);
-  for (unsigned i = 0; i < matrix.size(); i++) {
-    matrix[i].resize(3);
-  }
-  
-  matrix[0][0] = x1*x1;
-  matrix[0][1] = x1;
-  matrix[0][2] = 1;
-
-  matrix[1][0] = x2*x2;
-  matrix[1][1] = x2;
-  matrix[1][2] = 1;
-
-  matrix[2][0] = x3*x3;
-  matrix[2][1] = x3;
-  matrix[2][2] = 1;
-
-  // Invert the matrix
-
-  Numerical::GaussJordan (matrix, empty, 3);
-
-  // Solve for the coefficients of our parabola, in the form:
-  // y = Ax^2 + Bx + C
-  
-  double A = matrix[0][0]*y1 + matrix[0][1]*y2 + matrix[0][2]*y3;
-  double B = matrix[1][0]*y1 + matrix[1][1]*y2 + matrix[1][2]*y3;
-  double C = matrix[2][0]*y1 + matrix[2][1]*y2 + matrix[2][2]*y3;
-
-  // Now calculate the equivalent coefficients for the form:
-  // y = D - E(x - F)^2
-  //
-  // Which has the physical interperatation:
-  //   D => not much use
-  //   E => related to the TOA error
-  //   F => the relative shift
-
-  // Use the equations:
-  //   A = -E       => E = -A
-  //   B = 2EF      => F = -B/2A
-  //   C = D - EF^2 => D = C - (B^2/4A)
-
-  double D = C - (B*B/(4.0*A));
-  double E = -1.0 * A;
-  double F =  (-1.0 * B) / (2.0 * A);
-
-  if (fn != 0) {
-    fn[0] = D;
-    fn[1] = E;
-    fn[2] = F;
-  }
-
-  /*
-
-  // This error estimate is somewhat speculative... It is
-  // computed as the full width at half maximum of the
-  // parabola, assuming the baseline is the average level
-  // of the two bins either side the maximum bin in the 
-  // correlation function.
-
-  double height = ((y1 + y3) / 2.0);
-
-  if ((D - height)/E < 0.0) {
-    throw Error(FailedCall, "Profile::ParIntShift",
-		"aborting before floating exception");
-  }
-  
-  // The error in phase units
-  error = (float(2.0 * sqrt((D - height)/E)))/2.0;
-
-  // Essentially arbitrary scaling factor
-  error /= 2.0;
-
-  */
-
-  /*
-
-  // This estimate of the error uses the gradient of the
-  // parabola as a measure of the goodness of fit. The
-  // equation of the derivative is simply:
-  //
-  // Dy/Dx = 2Ax + B
-  //
-  // We use the slope of the parabola a distance one bin
-  // away from the peak.
-
-  double s1 = fabs(2.0 * A * (F-(1.0/get_nbin())));
-  
-  error = (1.0 / (s1*500.0));
-
-  */
-
-  // This estimate of the error is even simpler... Hopefully
-  // it will overcome the limitations of the other two. The
-  // slope-based method suffers from problems in absolute
-  // offset... when the peak of the correlation function is
-  // very high, the slope is artificially overestimated.
-  // The width-based method doesn't scale properly because
-  // it is locked too firmly to the bin width.
-  //
-  // The estimate defined here simply involves calculating when
-  // the correlation function drops by a small fixed fraction
-  // of its own peak value.
-
-  float fracdrop = 1e-6;
-  float height = D - (D * fracdrop);
-
-  if ((D - height)/E < 0.0) {
-    throw Error(FailedCall, "Profile::ParIntShift",
-		"aborting before floating exception");
-  }
-
-  // The error in phase units
-  float errwidth = (float(2.0 * sqrt((D - height)/E))) / 2.0;
-
-  // The above doesn't work either, it is too insensitive to
-  // poor parabolic fits. The next method estimates the error
-  // by computing the standard deviation of the correlation
-  // function points companed to the parabolic model.
-
-  vector<float> parb;
-  vector<float> real;
-  vector<float> diff;
-
-  for (int i = -3; i < 3; i++) {
-    real.push_back(ptr->get_amps()[(maxbin + i)%get_nbin()]);
-    // Don't wrap x!
-    float x = float(maxbin + i)/float(get_nbin());
-    parb.push_back(D - E*(x-F)*(x-F));
-  }
-
-  for (unsigned i = 0; i < parb.size(); i++) {
-    diff.push_back(real[i] - parb[i]);
-  }
-
-  // We divide by 6.0 in an unjustified manner...
-  float errfit = Pulsar::SampleStdDev(diff) / D;
-  errfit /= 6.0;
-
-  // The real error is assumed to be the combination of two effects:
-
-  error = sqrt(errfit*errfit + errwidth*errwidth) / 2.0;
-
-  // The shift in phase units, wrapped to be between -0.5 and 0.5
-
-  if (F < -0.5)
-    F += 1.0;
-  else if (F > 0.5)
-    F -= 1.0;
-
-  return F;
 }
 
 double Pulsar::Profile::PhaseGradShift (const Profile& std, float& ephase,
