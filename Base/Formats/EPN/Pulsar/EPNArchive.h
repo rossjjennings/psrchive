@@ -1,15 +1,15 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/EPN/Pulsar/EPNArchive.h,v $
-   $Revision: 1.2 $
-   $Date: 2004/07/06 14:56:27 $
+   $Revision: 1.3 $
+   $Date: 2004/07/07 10:31:45 $
    $Author: straten $ */
 
 #ifndef __EPN_Archive_h
 #define __EPN_Archive_h
 
 #include "Pulsar/Archive.h"
-#include "epnhdr.h"
+#include "epnio.h"
 
 namespace Pulsar {
 
@@ -163,9 +163,7 @@ namespace Pulsar {
     void unload_file (const char* filename) const;
 
     /** @name EPN data
-     *  These structures contain data copied directly from Fortran common blocks
-     *  defined in epnhdr.inc
-     */
+     *  These structures contain data returned by crwepn */
     //@{
 
     epn_header_line1 line1;
@@ -178,7 +176,24 @@ namespace Pulsar {
     
     epn_header_line5 line5;
     
+    epn_block_subheader_line1 sub_line1;
+
+    epn_block_subheader_line2 sub_line2;
+
+    epn_data_block data;
+
+    unsigned current_record;
+
     //@}
+
+    //! The centre frequency
+    double centre_frequency;
+
+    //! The bandwidth
+    double bandwidth;
+
+    //! The state
+    Signal::State state;
 
     //! Set the number of pulsar phase bins
     virtual void set_nbin (unsigned numbins);
@@ -197,6 +212,9 @@ namespace Pulsar {
 
     //! Initialize data structures
     void init();
+
+    //! Read the requested record from filename
+    void read_record (const char* filename, unsigned record);
 
   };
 

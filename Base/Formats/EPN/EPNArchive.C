@@ -6,7 +6,7 @@
 
 void Pulsar::EPNArchive::init ()
 {
-  // initialize the EPNArchive attributes
+  current_record = 0;
 }
 
 Pulsar::EPNArchive::EPNArchive()
@@ -112,21 +112,10 @@ void Pulsar::EPNArchive::set_type (Signal::Source type)
 
 }
 
-string fortran_string (const char* fortran)
-{
-  string result;
-  while (*fortran != ' ') {
-    result += *fortran;
-    fortran ++;
-  }
-
-  return result;
-}
-
 
 string Pulsar::EPNArchive::get_source () const
 {
-  return fortran_string( line2.jname );
+  return line2.jname;
 }
 
 void Pulsar::EPNArchive::set_source (const string& source)
@@ -149,8 +138,8 @@ sky_coord Pulsar::EPNArchive::get_coordinates () const
 {
   sky_coord coordinates;
 
-  coordinates.ra().setHMS( line3.rah, line3.ram, line3.ras);
-  coordinates.dec().setHMS( line3.ded, line3.dem, line3.des);
+  coordinates.ra().setHMS( line3.rah, line3.ram, line3.ras );
+  coordinates.dec().setDMS( line3.ded, line3.dem, line3.des );
 
   return coordinates;
 }
@@ -158,7 +147,11 @@ sky_coord Pulsar::EPNArchive::get_coordinates () const
 //! Set the coordinates of the source
 void Pulsar::EPNArchive::set_coordinates (const sky_coord& coordinates)
 {
-
+  double temp;
+  coordinates.ra().getHMS( line3.rah, line3.ram, temp );
+  line3.ras = temp;
+  coordinates.dec().getDMS( line3.ded, line3.dem, temp );
+  line3.des = temp;
 }
 
 unsigned Pulsar::EPNArchive::get_nbin () const
@@ -216,33 +209,33 @@ void Pulsar::EPNArchive::set_nsubint (unsigned nsubint)
 
 double Pulsar::EPNArchive::get_bandwidth () const
 {
-  return 0;
+  return bandwidth;
 }
 
 void Pulsar::EPNArchive::set_bandwidth (double bw)
 {
-  
+  bandwidth = bw;
 }
 
 double Pulsar::EPNArchive::get_centre_frequency () const
 {
-  return 0;
+  return centre_frequency;
 }
 
 void Pulsar::EPNArchive::set_centre_frequency (double cf)
 {
-  
+  centre_frequency = cf;
 }
 
 
 Signal::State Pulsar::EPNArchive::get_state () const
 {
-  return Signal::Stokes;
+  return state;
 }
 
-void Pulsar::EPNArchive::set_state (Signal::State state)
+void Pulsar::EPNArchive::set_state (Signal::State _state)
 {
-
+  state = _state;
 }
 
 //! Get the scale of the profiles
@@ -337,42 +330,167 @@ Pulsar::EPNArchive::new_Integration (Integration* subint)
   return integration;
 }
 
-
-void Pulsar::EPNArchive::load_header (const char* filename)
+void Pulsar::EPNArchive::read_record (const char* filename, unsigned record)
 {
-  // load all BasicArchive and EPNArchive attributes from filename
-  string fortran_string = filename;
-  fortran_string += " ";
-
-  char* name = const_cast<char*>(fortran_string.c_str());
-
   int readwri = -1;  // read
-  int recno   = 0;   // 
   int padout  = 0;   // no padding
 
   if (verbose)
-    cerr << "Pulsar::EPNArchive::load_header call rwepn " << name << endl;
+    cerr << "Pulsar::EPNArchive::read_record call crwepn " << filename << endl;
 
-  F772C(rwepn) (name, &readwri, &recno, &padout, strlen (name));
+  if (crwepn (filename, readwri, record, padout, 
+	      &line1, &line2, &line3, &line4, &line5,
+	      &sub_line1, &sub_line2, &data) < 0)
+    throw Error (InvalidParam, "Pulsar::EPNArchive::read_record",
+		 "error calling crwpen");
+      
+  if (verbose)
+    cerr << "Pulsar::EPNArchive::read_record rwepn called" << endl;
 
-  line1 = F772C(epn1);
-  line2 = F772C(epn2);
-  line3 = F772C(epn3);
-  line4 = F772C(epn4);
-  line5 = F772C(epn5);
+  current_record = record;
+}
+
+void Pulsar::EPNArchive::load_header (const char* filename)
+{
+  read_record (filename, 1);
+
+  if (get_npol() == 4)
+    set_state (Signal::Stokes);
+  else if (get_npol() == 1)
+    set_state (Signal::Intensity);
+  else
+    throw Error (InvalidState, "Pulsar::EPNArchive::load_header",
+		 "unknown npol=%d", get_npol());
+
+  get_Integration(0);
 
   if (verbose)
-    cerr << "Pulsar::EPNArchive::load_header rwepn called" << endl;
+    cerr << "Pulsar::EPNArchive::load_header exit" << endl;
+}
+
+double MHz_scale (const char* units)
+{
+  if (strstr(units, "GHz"))
+    return 1e3;
+  if (strstr(units, "MHz"))
+    return 1.0;
+  if (strstr(units, "kHz"))
+    return 1e-3;
+  if (strstr(units, "Hz"))
+    return 1e-6;
+  
+  return 0.0;
 }
 
 Pulsar::Integration*
 Pulsar::EPNArchive::load_Integration (const char* filename, unsigned subint)
 {
-  Pulsar::BasicIntegration* integration = new BasicIntegration;
+  if (verbose)
+    cerr << "Pulsar::EPNArchive::load_Integration" << subint << endl;
 
-  // load all BasicIntegration attributes and data from filename
+  if (subint+1 != current_record)
+    read_record (filename, subint+1);
+
+  BasicIntegration* integration = new BasicIntegration;
+  resize_Integration (integration);
+
+  integration->set_state (get_state());
+  integration->set_dispersion_measure (get_dispersion_measure());
+
+  MJD epoch (line3.epoch);
+  epoch += sub_line1.tstart[0] * 1e-6;
+  integration->set_epoch (epoch);
+
+  for (unsigned ipol=0; ipol < get_npol(); ipol++) {
+
+    double total_bw = 0.0;
+    double total_freq = 0.0;
+
+    for (unsigned ichan=0; ichan < get_nchan(); ichan++) {
+      
+      Profile* profile = integration->get_Profile (ipol, ichan);
+      
+      unsigned iblock = ipol * get_nchan() + ichan;
+      
+      /*
+	
+      idfield     - A8     - Description of data stream I Q U V etc. etc.
+      nband       - I4     - ordinal number of data stream
+      navg        - I4     - number of streams averaged into current one
+      f0          - f12.8  - Effective centre sky frequency of this stream
+      f0u         - A8     - String giving unit of f0 [default is GHz]
+      df          - f12.6  - Effective bandwidth of this stream
+      dfu         - A8     - String giving unit of df [default is MHz]
+      tstart      - F17.5  - Time of first bin wrt EPOCH [us]
+      
+      */
+
+      if (verbose) {
+	cerr << "cf=" << sub_line1.f0[iblock] << sub_line1.f0u[iblock] << endl;
+	cerr << "bw=" << sub_line1.df[iblock] << sub_line1.dfu[iblock] << endl;
+	cerr << "state=" << sub_line1.idfield[iblock] << endl;
+      }
+      
+      double freq = sub_line1.f0[iblock] * MHz_scale (sub_line1.f0u[iblock]);
+      double bw = sub_line1.df[iblock] * MHz_scale (sub_line1.dfu[iblock]);
+
+      profile->set_centre_frequency (freq);
+      profile->set_weight (sub_line1.navg[iblock]);
+      profile->set_amps (data.rawdata[iblock]);
+
+      total_freq += freq;
+      total_bw   += bw;
+      
+    }
+
+    double avg_freq = total_freq / get_nchan();
+
+    if (ipol == 0) {
+
+      integration->set_centre_frequency (avg_freq);
+      integration->set_bandwidth (total_bw);
+
+    }
+    else {
+
+      if ( avg_freq != integration->get_centre_frequency() )
+	throw Error (InvalidState, "Pulsar::EPNArchive::load_Integration",
+		     "ipol=%d centre_frequency=%lf != %lf", ipol, avg_freq,
+		     integration->get_centre_frequency() );
+
+      if ( total_bw != integration->get_bandwidth() )
+	throw Error (InvalidState, "Pulsar::EPNArchive::load_Integration",
+		     "ipol=%d bandwidth=%lf != %lf", ipol, total_bw,
+		     integration->get_bandwidth() );		     
+
+    }
+
+  }
+
+  if (subint == 0) {
+
+    set_centre_frequency( integration->get_centre_frequency() );
+    set_bandwidth( integration->get_bandwidth() );
+
+  }
+  else {
+
+    if ( get_centre_frequency() != integration->get_centre_frequency() )
+      throw Error (InvalidState, "Pulsar::EPNArchive::load_Integration",
+		   "isub=%d centre_frequency=%lf != %lf", subint,
+		   integration->get_centre_frequency(),
+		   get_centre_frequency());
+    
+    if ( get_bandwidth() != integration->get_bandwidth() )
+      throw Error (InvalidState, "Pulsar::EPNArchive::load_Integration",
+		   "isub=%d bandwidth=%lf != %lf", subint,
+		   integration->get_bandwidth(),
+		   get_bandwidth());
+
+  }
 
   return integration;
+
 }
 
 void Pulsar::EPNArchive::unload_file (const char* filename) const
