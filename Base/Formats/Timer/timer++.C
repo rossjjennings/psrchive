@@ -234,7 +234,7 @@ void band_init (struct band * bd)
   bd->f_atten_A = -1.0;
   bd->f_atten_B = -1.0;
   bd->polar = -1;
-  bd->feed_offset = -1.0;
+  bd->feed_offset = 0.0;
   bd->nlag = -1;
   bd->flux_B = -1.0;
   bd->flux_err = -1.0;
