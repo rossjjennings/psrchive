@@ -1,15 +1,15 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Quaternion.h,v $
-   $Revision: 1.11 $
-   $Date: 2003/03/03 11:26:39 $
+   $Revision: 1.12 $
+   $Date: 2003/04/10 11:55:26 $
    $Author: straten $ */
 
 #ifndef __Quaternion_H
 #define __Quaternion_H
 
 #include <complex>
-#include "psr_cpp.h"
+#include "Vector.h"
 
 //! Quaternion algebra is isomorphic with either Hermitian or Unitary matrices
 enum Basis { Hermitian, Unitary };
@@ -26,6 +26,10 @@ public:
   //! Construct from T
   Quaternion (T s0_, T s1_, T s2_, T s3_)
     { s0=s0_; s1=s1_; s2=s2_; s3=s3_; }
+
+  //! Construct from a scalar and vector
+  template<typename U> Quaternion (T s, const Vector<U, 3>& v)
+    { s0=s; s1=v[0]; s2=v[1]; s3=v[2]; }
 
   //! Construct from another Quaternion<U> instance
   template<typename U> Quaternion (const Quaternion<U, B>& s)
