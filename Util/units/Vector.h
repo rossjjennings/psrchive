@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Vector.h,v $
-   $Revision: 1.3 $
-   $Date: 2003/06/11 08:52:04 $
-   $Author: straten $ */
+   $Revision: 1.4 $
+   $Date: 2003/06/18 14:50:19 $
+   $Author: redwards $ */
 
 #ifndef __Vector_H
 #define __Vector_H
@@ -122,6 +122,33 @@ const Vector<T,3> cross (const Vector<T,3>& a, const Vector<T,3>& b)
   }
 
   return result;
+}
+
+//! squared "length"/"norm"
+template <typename T, unsigned N>
+T normsq(const Vector<complex<T>, N> &v)
+{
+  T sum = norm(v[0]);
+  unsigned i;
+  for (i=1; i < N; i++)
+    sum += norm(v[i]);
+  return sum;
+}
+//! simpler version for scalar types
+template <typename T, unsigned N>
+T normsq(const Vector<T, N> &v)
+{
+  T sum = v[0]*v[0];
+  unsigned i;
+  for (i=1; i < N; i++)
+    sum += v[i]*v[i];
+  return sum;
+}
+//! and the norm itself; note, won't work for complex
+template <typename T, unsigned N>
+T norm(const Vector<T, N> &v)
+{
+  return sqrt(normsq(v));
 }
 
 //! Useful for quickly printing the components
