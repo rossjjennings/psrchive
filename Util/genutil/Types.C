@@ -237,6 +237,8 @@ const char* Signal::basis_string(Basis basis)
     return "Circular";
   case Linear:
     return "Linear";
+  case Elliptical:
+    return "Elliptical";
   default:
     return "Invalid";
   }
@@ -249,7 +251,11 @@ const string Signal::Basis2string (Basis basis){ return basis_string(basis); }
 Signal::Basis Signal::string2Basis(string ss){
   if(ss=="Circular")
     return Signal::Circular;
-  return Signal::Linear;
+  if(ss=="Linear")
+    return Signal::Linear;
+  if(ss=="Elliptical")
+    return Signal::Elliptical;
+  return (Signal::Basis) -1;
 }
 
 Signal::Source Signal::string2Source(string ss){

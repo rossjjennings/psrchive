@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Types.h,v $
-   $Revision: 1.12 $
-   $Date: 2003/12/11 07:19:52 $
-   $Author: ahotan $ */
+   $Revision: 1.13 $
+   $Date: 2004/04/05 16:41:52 $
+   $Author: straten $ */
 
 #ifndef __Types_h
 #define __Types_h
@@ -29,9 +29,8 @@ namespace Signal {
   };
 
 
-  //! Different receiver feed configurations
-  //! Be sure to modify 
-  enum Basis { Circular=0, Linear=1 };
+  //! The basis in which the electric field is represented
+  enum Basis { Circular=0, Linear=1, Elliptical=2 };
 
   //! Sources of observed signals
   enum Source {
