@@ -76,7 +76,7 @@ FFT_CFLAGS="$MKL_CFLAGS $FFTW_CFLAGS $FFTW3_CFLAGS $IPP_CFLAGS"
 ACLOCAL="$ACLOCAL -I config"
 # For developers: preserve file modification times
 INSTALL_DATA="${INSTALL} -m 644 -p"
-
+install_sh="CPPROG='cp -p' ${install_sh}"
 
 #
 # Checks for header files.
