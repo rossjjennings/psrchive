@@ -11,6 +11,21 @@ void test_polar (const Jones<T>& j)
 
   polar (d, hq, uq, j);
 
+  double determinant = 0;
+
+  determinant = det(hq);
+  if ( fabs(determinant - 1.0) > 1e-8 ) {
+    cerr << "test_matrix polar det(hermitian)=" << determinant <<" != 1"<<endl;
+    throw string ("test_matrix polar decomposition error");
+  }
+
+  determinant = det(uq);
+  if ( fabs(determinant - 1.0) > 1e-8 ) {
+    cerr << "test_matrix polar det(unitary)=" << determinant <<" != 1"<<endl;
+    throw string ("test_matrix polar decomposition error");
+  }
+
+
   // reconstruct the Jones matrix
   Jones<T> oj = d * convert(hq) * convert(uq);
 
@@ -35,32 +50,6 @@ void test_matrix (const Jones<T>& j1, const Jones<T>& j2,
 
   test_polar (j1);
   test_polar (j2);
-
-#if 0
-
-  Jones<T> uj1 = convert (uq1);
-  Jones<T> uj2 = convert (uq2);
-
-  Quaternion<T> pq1 = uq1 * uq2;
-  Quaternion<T> pq2 = convert (uj1 * uj2);
-
-  if ( norm(pq2-pq1)/norm(pq2) > 1e-15 ) {
-    cerr << "test_matrix pq2=" << pq2 
-	 << " != pq1=" << pq1 << endl;
-    throw string ("test_matrix unequal Quaternion/Jones products");
-  }
-
-  Jones<T> pj1 = uj2 * uj1;
-  Jones<T> pj2 = convert (uq2 * uq1);
-
-  diff = norm(pj2-pj1)/norm(pj2);
-  if ( diff > 1e-15 ) {
-    cerr << "test_matrix pj2=" << pj2 
-	 << " != pj1=" << pj1 << endl
-	 << " by " << diff << endl;
-    throw string ("test_matrix unequal Jones/Quaternion products");
-  }
-#endif
 
 }
 
