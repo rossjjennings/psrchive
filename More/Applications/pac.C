@@ -101,7 +101,7 @@ int main (int argc, char *argv[]) {
       Pulsar::Archive::set_verbosity(1);
       break;
     case 'i':
-      cout << "$Id: pac.C,v 1.30 2003/10/26 19:12:01 ahotan Exp $" << endl;
+      cout << "$Id: pac.C,v 1.31 2003/10/29 12:22:07 ahotan Exp $" << endl;
       return 0;
     case 'p':
       cals_are_here = optarg;
@@ -399,7 +399,6 @@ int main (int argc, char *argv[]) {
     }
     catch (Error& error) {
       cerr << error << endl;
-      exit(-1);
     }
   }
 }
