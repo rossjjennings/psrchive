@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PolnCalibrator.h,v $
-   $Revision: 1.22 $
-   $Date: 2003/12/05 20:18:50 $
+   $Revision: 1.23 $
+   $Date: 2003/12/06 18:56:18 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PolnCalibrator_H
@@ -11,8 +11,7 @@
 #include "Pulsar/Calibrator.h"
 #include "Calibration/Transformation.h"
 #include "Jones.h"
-
-// #include "Types.h"
+#include "MJD.h"
 
 namespace Pulsar {
 
@@ -83,6 +82,9 @@ namespace Pulsar {
 
     //! Return the Calibrator::Type of derived class
     virtual Type get_type () const;
+
+    //! Return the reference epoch of the calibration experiment
+    virtual MJD get_epoch () const;
 
     //! Return an Archive with a PolnCalibratorExtension
     virtual Archive* get_solution (const string& archive_class,

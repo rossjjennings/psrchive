@@ -286,6 +286,14 @@ Pulsar::Calibrator::Type Pulsar::PolnCalibrator::get_type () const
   return extension->get_type();
 }
 
+MJD Pulsar::PolnCalibrator::get_epoch () const
+{
+  if (extension)
+    return extension->get_epoch ();
+
+  return 0.5 * (calibrator->start_time() + calibrator->end_time());
+}
+
 Pulsar::Archive*
 Pulsar::PolnCalibrator::get_solution (const string& archive_class,
 				      string filename_extension) const
