@@ -37,3 +37,9 @@ void EstimatePlotter::plot (unsigned index)
     cpgerr1 (6, xval[index][ipt], yval[index][ipt], yerr[index][ipt], 1.0);
 }
 
+void EstimatePlotter::clear ()
+{
+  xval.resize(0);
+  yval.resize(0);
+  yerr.resize(0);
+}
