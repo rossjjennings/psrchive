@@ -126,7 +126,8 @@ void Pulsar::Integration::get_amps (float* data,
   unsigned npol = get_npol();
   unsigned nchan = get_nchan();
 
-  cerr << "int.npol=" << npol << " int.nchan=" << nchan << endl;
+  if (verbose)
+    cerr << "int.npol=" << npol << " int.nchan=" << nchan << endl;
 
   for (unsigned ipol=0; ipol<npol; ipol++) {
     float* chandat = data + ipol * jpol;
