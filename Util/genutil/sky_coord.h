@@ -1,6 +1,6 @@
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/sky_coord.h,v $
-   $Revision: 1.4 $
-   $Date: 2001/06/02 07:23:37 $
+   $Revision: 1.5 $
+   $Date: 2002/03/27 00:56:44 $
    $Author: straten $ */
 
 #ifndef __SKY_COORD_H
@@ -16,6 +16,10 @@ class sky_coord  : public AnglePair
 {
  public:
    sky_coord () : AnglePair() {};
+
+   sky_coord (const char* astr) : AnglePair(astr) {};
+   sky_coord (const sky_coord & co) { *this = co; };
+   // sky_coord & operator= (const sky_coord & co);
 
    // as long as sky_coord is empty, why not simply accept AnglePair?
    sky_coord (const AnglePair & co) { AnglePair::operator=(co); };
