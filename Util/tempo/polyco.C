@@ -1,7 +1,10 @@
 /*
 $Log: polyco.C,v $
-Revision 1.1  1998/08/03 05:42:02  redwards
-Initial revision
+Revision 1.2  1998/08/26 08:01:09  straten
+various fixes to get things running on SGI
+
+Revision 1.1.1.1  1998/08/03 05:42:02  redwards
+importing
 
 Revision 1.11  1997/12/19 02:26:30  mbritton
 *** empty log message ***
@@ -384,7 +387,7 @@ double polyco::phase(MJD t, float obs_freq){
   fscanf (fparptr, "PMDEC %*s\n");
   fscanf (fparptr, "PX %*s\n");
   fscanf (fparptr, "TZRMJD %*s\n");
-  fscanf (fparptr, "TZRFRQ %s\n", &tzrfrq_str);
+  fscanf (fparptr, "TZRFRQ %s\n", tzrfrq_str);
   fclose (fparptr);
 
   /* For some strange reason, exponentials are represented by 'D' in the
