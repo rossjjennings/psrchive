@@ -244,6 +244,25 @@ Rhythm::Rhythm (QApplication* master, QWidget* parent, int argc, char** argv) :
   
   QObject::connect(tabs, SIGNAL(currentChanged(QWidget*)),
 		   this, SLOT(tabChange(QWidget*)));
+
+  // Find standard profiles
+  
+  char temp[128];
+  FILE* fptr = popen("ls -1 *.std", "r");
+  if (ferror(fptr)==0) {
+    while(fscanf(fptr, "%s\n", temp) == 1) {
+      the_stds.push_back(new Pulsar::Profile(Pulsar::Archive::load(temp)->total()->get_Profile(0,0,0)));
+    }
+  }
+
+  pclose(fptr);
+}
+
+Rhythm::~Rhythm () 
+{
+  for (unsigned i = 0; i < the_stds.size(); i++) {
+    delete the_stds[i];
+  }
 }
 
 void Rhythm::load_toas (const char* fname)
@@ -834,7 +853,7 @@ vector<double> Rhythm::give_me_data (toaPlot::AxisQuantity q)
   int sub = 0;
   
   Pulsar::StandardSNR snrobj;
-  
+
   QProgressDialog progress( "Calculating Data...", "Abort", toas.size(),
 			    this, "progress", TRUE );
   
@@ -1055,7 +1074,7 @@ vector<double> Rhythm::give_me_data (toaPlot::AxisQuantity q)
 	continue;
       }
       
-      if (toas[i].get_StoN() >= 0.0) {
+      if (toas[i].get_StoN() >= -999.9) {
 	retval.push_back(toas[i].get_StoN());
 	continue;
       }
@@ -1073,9 +1092,10 @@ vector<double> Rhythm::give_me_data (toaPlot::AxisQuantity q)
 	useful2 += filename;
 	
 	try {
-	  Reference::To<Pulsar::Archive> data = Pulsar::Archive::load(useful2);	
+	  Reference::To<Pulsar::Archive> data = Pulsar::Archive::load(useful2);
 	  data->pscrunch();
-	  Pulsar::Profile* stdprof = Pulsar::find_standard(data, "./");
+	  Reference::To<Pulsar::Profile> stdprof = 
+	    Pulsar::find_standard(data, the_stds);
 	  if (stdprof) {
 	    snrobj.set_standard(stdprof);
 	    toas[i].set_StoN(snrobj.get_morph_snr(data->get_Profile(sub,0,chn)));

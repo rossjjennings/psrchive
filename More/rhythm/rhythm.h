@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/rhythm/rhythm.h,v $
-   $Revision: 1.41 $
-   $Date: 2004/05/12 11:44:41 $
+   $Revision: 1.42 $
+   $Date: 2004/05/30 08:48:56 $
    $Author: ahotan $ */
 
 // //////////////////////////////////////////////////////////////////////////
@@ -121,7 +121,7 @@ class Rhythm : public QMainWindow
   static bool vverbose;
   
   Rhythm (QApplication* master, QWidget* parent, int argc, char** argv);
-  ~Rhythm () {};
+  ~Rhythm ();
 
   // fits the loaded toas using TEMPO with the given psrephem, 'eph'.
   // if 'load_new' is true, loads the new epehemeris into the display
@@ -242,6 +242,8 @@ class Rhythm : public QMainWindow
   // Data extraction routines
   vector<double> give_me_data (toaPlot::AxisQuantity);
   vector<double> give_me_errs (toaPlot::AxisQuantity);
+
+  vector<Pulsar::Profile*> the_stds;
 
  public slots:
 
