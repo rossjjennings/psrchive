@@ -6,7 +6,7 @@ include_HEADERS = psrephem.h ephio_func.h MatchingEphemeris.h
 nodist_include_HEADERS = ephio.h
 BUILT_SOURCES = ephio.h
 
-libpsrephem_la_SOURCES = ephio.h ephio_c.c ephio.f \
+libpsrephem_la_SOURCES = keys.dat ephio.h ephio_c.c ephio.f \
 	psrephem.C set_epoch.C tex.C derived.C MatchingEphemeris.C
 
 nodist_libpsrephem_la_SOURCES = ephio_def.c

@@ -26,12 +26,12 @@ nobase_include_HEADERS = \
 	Pulsar/PhaseWeightFunction.h     model_profile.h \
 	Pulsar/Plotter.h
 
-libpsrchive_la_SOURCES = \
+libpsrchive_la_SOURCES = plugins.csh Physical.h \
 	AdaptiveSNR.C                 Integration_new_PolnProfile.C  \
 	Agent.C                       Integration_remove_baseline.C  \
 	Integration_resize.C  \
 	Archive.C                     Integration_toas.C  \
-	Archive_append.C              Integration_total.C  \  \
+	Archive_append.C              Integration_total.C  \
 	Archive_convert_state.C       Integration_transform.C  \
 	Archive_copy.C                Integration_weighted_frequency.C  \
 	Archive_correct_instrument.C  PhaseWeight.C  \

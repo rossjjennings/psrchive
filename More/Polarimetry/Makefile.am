@@ -1,7 +1,7 @@
 
 noinst_LTLIBRARIES = libCalibration.la
 
-nobase_include_HEADERS = Calibration/CoherencyMeasurement.h
+nobase_include_HEADERS = Calibration/CoherencyMeasurement.h \
 	Calibration/CoherencyMeasurementSet.h Calibration/ConvertMJD.h \
 	Calibration/Faraday.h Calibration/Feed.h Calibration/Instrument.h \
 	Calibration/MeanCoherency.h Calibration/MeanFeed.h \

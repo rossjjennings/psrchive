@@ -2,13 +2,13 @@
 noinst_LTLIBRARIES = libgenutilpp.la
 
 include_HEADERS = Cartesian.h Angle.h MJD.h CommandParser.h		\
-	PlotManager.h PlotVolume.h PlotEvent.h PlotState.h		 \
-	DataManager.h DataSet.h DataPoint.h DataVector.h Poincare.h	 \
-	datum.h xydatum.h smarthist.h datumcond.h kstest.h RealTimer.h	 \
+	PlotManager.h PlotVolume.h PlotEvent.h PlotState.h		\
+	DataManager.h DataSet.h DataPoint.h DataVector.h Poincare.h	\
+	datum.h xydatum.h smarthist.h datumcond.h kstest.h RealTimer.h	\
 	Ready.h sky_coord.h \
-	WindowArray.h StringTokenizer.h					 \
-	Sortable.h Printable.h Header.h thread_utils.h GetPK.h		 \
-	VectorInfo.h Plugin.h shell.h Cartesian.h Angle.h coord_parse.h  \
+	PrimeFactoriser.h WindowArray.h StringTokenizer.h		\
+	Sortable.h Printable.h Header.h thread_utils.h GetPK.h		\
+	VectorInfo.h Plugin.h shell.h Cartesian.h Angle.h coord_parse.h \
 	coord.h anglevel.h
 
 libgenutilpp_la_SOURCES = CommandParser.C PlotEvent.C util_plus.C	\
