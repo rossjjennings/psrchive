@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/rhythm/rhythm.h,v $
-   $Revision: 1.43 $
-   $Date: 2004/10/21 01:42:08 $
-   $Author: ahotan $ */
+   $Revision: 1.44 $
+   $Date: 2005/02/08 16:56:15 $
+   $Author: straten $ */
 
 // //////////////////////////////////////////////////////////////////////////
 //
@@ -144,7 +144,7 @@ class Rhythm : public QMainWindow
   RhythmOptions opts;
   
   // an array of toas
-  vector<Tempo::toa> toas;
+  std::vector<Tempo::toa> toas;
   // the file from which they were read
   string toa_filename;
   
@@ -240,10 +240,10 @@ class Rhythm : public QMainWindow
 
   // /////////////////////////////////////////////////////////////////////////
   // Data extraction routines
-  vector<double> give_me_data (toaPlot::AxisQuantity);
-  vector<double> give_me_errs (toaPlot::AxisQuantity);
+  std::vector<double> give_me_data (toaPlot::AxisQuantity);
+  std::vector<double> give_me_errs (toaPlot::AxisQuantity);
 
-  vector<Pulsar::Profile*> the_stds;
+  std::vector<Pulsar::Profile*> the_stds;
 
  public slots:
 
@@ -302,9 +302,9 @@ class Rhythm : public QMainWindow
   void box_slot ();
   
   void select (int);
-  void select (vector<int>);
+  void select (std::vector<int>);
   void deselect (int);
-  void deselect (vector<int>);
+  void deselect (std::vector<int>);
   void reselect ();
   
   void clearselection ();

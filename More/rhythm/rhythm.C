@@ -215,8 +215,8 @@ Rhythm::Rhythm (QApplication* master, QWidget* parent, int argc, char** argv) :
   QObject::connect(plot_window, SIGNAL(selected(int)),
 		   this, SLOT(select(int)));
 
-  QObject::connect(plot_window, SIGNAL(selected(vector<int>)),
-		   this, SLOT(select(vector<int>)));
+  QObject::connect(plot_window, SIGNAL(selected(std::vector<int>)),
+		   this, SLOT(select(std::vector<int>)));
   
   if (vverbose)
     cerr << "Rhythm:: new qt_editParams" << endl;
@@ -341,7 +341,7 @@ void Rhythm::add_toas (const char* fname)
   if (verbose)
     cerr << "Adding in TOAs from '" << fname << "'";
   
-  vector<Tempo::toa> new_toas;
+  std::vector<Tempo::toa> new_toas;
   
   Tempo::toa::load (fname, &new_toas);
   
@@ -458,7 +458,7 @@ void Rhythm::update_mode ()
   if (weights) {
     Tempo::toa mode_card(Tempo::toa::Command);
     mode_card.set_auxilliary_text("MODE 1");
-    vector<Tempo::toa>::iterator it1 = toas.begin();
+    std::vector<Tempo::toa>::iterator it1 = toas.begin();
     toas.insert(it1, 1, mode_card);
   }
 }
@@ -742,7 +742,7 @@ void Rhythm::stride_fit()
 
   clearselection();
   
-  vector<double> times;
+  std::vector<double> times;
   for (unsigned i = 0; i < toas.size(); i++) {
     if (toas[i].get_state() == Tempo::toa::Deleted)
       continue;
@@ -789,7 +789,7 @@ void Rhythm::stride_fit()
   
   QProgressDialog progress( "Fitting to data... ", "Abort", temp,
 			    this, "progress", TRUE );
-  vector<double> result;
+  std::vector<double> result;
 
   for (int i = 0; i < temp; i++) {
     clearselection();
@@ -855,9 +855,9 @@ void Rhythm::setClassVerbose (bool verbose)
   Tempo::toa::verbose = verbose;
 }
 
-vector<double> Rhythm::give_me_data (toaPlot::AxisQuantity q)
+std::vector<double> Rhythm::give_me_data (toaPlot::AxisQuantity q)
 {
-  vector<double> retval;
+  std::vector<double> retval;
   
   char useful[80];
   char filename[80];
@@ -1274,9 +1274,9 @@ vector<double> Rhythm::give_me_data (toaPlot::AxisQuantity q)
   }
 }
  
-vector<double> Rhythm::give_me_errs (toaPlot::AxisQuantity q)
+std::vector<double> Rhythm::give_me_errs (toaPlot::AxisQuantity q)
 {
-  vector<double> retval;
+  std::vector<double> retval;
   
   // This may require adjustment! Find out what the error
   // is stored as in Willem's residual class...
@@ -1401,16 +1401,16 @@ void Rhythm::tabChange(QWidget* ptr)
 
 void Rhythm::goplot ()
 {
-  vector<double> tempx = give_me_data(xq);
-  vector<double> tempy = give_me_data(yq);
-  vector<double> xerrs = give_me_errs(xq);
-  vector<double> yerrs = give_me_errs(yq);
+  std::vector<double> tempx = give_me_data(xq);
+  std::vector<double> tempy = give_me_data(yq);
+  std::vector<double> xerrs = give_me_errs(xq);
+  std::vector<double> yerrs = give_me_errs(yq);
   
   if ( tempx.size() != toas.size() || tempy.size() != toas.size() ||
        xerrs.size() != toas.size() || yerrs.size() != toas.size() )
     return;
   
-  vector<wrapper> useme;
+  std::vector<wrapper> useme;
   
   for (unsigned i = 0; i < toas.size(); i++) {
     
@@ -1470,7 +1470,7 @@ void Rhythm::deselect (int pt)
   
 }
 
-void Rhythm::deselect (vector<int> pts)
+void Rhythm::deselect (std::vector<int> pts)
 {
   QProgressDialog progress( "De-Selecting Points...", "Abort", pts.size(),
 			    this, "progress", TRUE );
@@ -1508,7 +1508,7 @@ void Rhythm::select (int pt)
   toa_text -> setCurrentItem (pt);
 }
 
-void Rhythm::select (vector<int> pts)
+void Rhythm::select (std::vector<int> pts)
 {
   QProgressDialog progress( "Selecting Points...", "Abort", pts.size(),
 			    this, "progress", TRUE );
@@ -1760,7 +1760,7 @@ void Rhythm::simulateModel()
   
   fit();
 
-  vector<Tempo::toa> fake;
+  std::vector<Tempo::toa> fake;
   fake.resize(toas.size());
 
   for (unsigned i = 0; i < toas.size(); i++) {
