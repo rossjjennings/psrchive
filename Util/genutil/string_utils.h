@@ -1,7 +1,7 @@
 //-*-C++-*-
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Attic/string_utils.h,v $
-   $Revision: 1.28 $
-   $Date: 2003/12/09 00:22:10 $
+   $Revision: 1.29 $
+   $Date: 2004/01/19 05:34:35 $
    $Author: hknight $ */
 
 #ifndef __STRING_UTILS_H
@@ -13,8 +13,7 @@
 
 #include <iostream>
 #include <iomanip>
-#include <strstream>
-//#include <sstream>
+#include <sstream>
 //#include <fstream>
 //#include <ostream>
 #include <string>
@@ -47,6 +46,12 @@ bool h_frontchop(string& ss, unsigned chars);
 
 bool h_frontchomp(string& ss, char gone);
 bool h_frontchomp(string& ss, string gone);
+
+// These take off or add a leading or trailing word
+string pop_word(string& line);
+string& push_word(string& line,string word);
+string frontpop_word(string& line);
+string& frontpush_word(string& line,string word);
 
 // Takes off a leading 'J' or a leading 'B'
 string no_JB(string pulsar);
@@ -139,34 +144,26 @@ string replace_char(string ss,char bad,char good);
 
 template<class T>
 string form_string(T input){
-  ostrstream ost;
-  ost << input << ends;
-  string ss = ost.str();
-  delete ost.str();
-  return ss;
+  ostringstream ost;
+  ost << input;
+  return ost.str();
 }
 
 template<class T>
 string form_string(T input, int precision){
-  ostrstream ost;
-  ost << setprecision( precision ) << input << ends;
-  string ss = ost.str();
-  delete ost.str();
-  return ss;
+  ostringstream ost;
+  ost << setprecision( precision ) << input;
+  return ost.str();
 }
 
 /* Doesn't work for pointers!  (Stupid linux compiler) */
 template<class T>
 T convert_string(string ss){
-  ostrstream ost;
-  ost << ss << ends;
+  stringstream iost;
+  iost << ss;
 
-  istrstream ist(ost.str());
-  
   T outie;
-  ist >> outie;
-
-  delete ost.str();
+  iost >> outie;
 
   return outie;
 }
@@ -174,17 +171,14 @@ T convert_string(string ss){
 /* Doesn't work for pointers!  (Stupid linux compiler) */
 template<class T>
 T convert_string(string ss, int precision){
-  
-  ostrstream ost;
-  ost << setiosflags(ios::fixed) << setprecision( precision ) << ss << ends;
+  stringstream iost;
+  iost << setiosflags(ios::fixed) << setprecision( precision ) << ss;
 
-  istrstream ist(ost.str());
-  ist >> setiosflags(ios::fixed) >> setiosflags(ios::showpoint) >> setprecision( precision );
+  iost >> setiosflags(ios::fixed) >> setiosflags(ios::showpoint) >> setprecision( precision );
 
   T outie;
-  ist >> setw( precision ) >> outie; 
+  iost >> setw( precision ) >> outie; 
   
-  delete ost.str();
   return outie;
 }
 
@@ -221,3 +215,4 @@ bool is_unsigned_integer(const string ss);
 bool is_signed_integer(const string ss);
 
 #endif
+
