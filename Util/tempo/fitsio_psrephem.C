@@ -1,3 +1,7 @@
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #include <iostream>
 #include <vector>
 #include <algorithm>
@@ -12,7 +16,6 @@
 
 #include <fitsio.h>
 
-#define PSRFITS 1
 #include "psrephem.h"
 #include "ephio.h"
 

@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/polyco.h,v $
-   $Revision: 1.23 $
-   $Date: 2004/12/14 23:59:38 $
-   $Author: hknight $ */
+   $Revision: 1.24 $
+   $Date: 2004/12/27 13:06:37 $
+   $Author: straten $ */
 
 #ifndef __POLY_H
 #define __POLY_H
@@ -11,11 +11,11 @@
 #include <string>
 #include <vector>
 
-#ifdef ACTIVATE_MPI
+#ifdef HAVE_MPI
 #include <mpi.h>
 #endif
 
-#ifdef PSRFITS
+#ifdef HAVE_CFITSIO
 #include <fitsio.h>
 #endif
 
@@ -153,7 +153,7 @@ public:
   friend int operator != (const polynomial &, const polynomial &);
 
   // MPI functions
-#ifdef ACTIVATE_MPI
+#ifdef HAVE_MPI
   friend int mpiPack_size (const polynomial&, MPI_Comm comm, int* size);
   friend int mpiPack (const polynomial&, void* outbuf, int outcount,
 		      int* position, MPI_Comm comm);
@@ -161,7 +161,7 @@ public:
 			polynomial*, MPI_Comm comm);
 #endif
 
-#ifdef PSRFITS
+#ifdef HAVE_CFITSIO
   void load (fitsfile* fptr, long row);
   void unload (fitsfile* fptr, long row) const;
 #endif
@@ -269,7 +269,7 @@ class polyco : public Reference::Able {
   friend int operator == (const polyco &, const polyco &);
   friend int operator != (const polyco &, const polyco &);
 
-#ifdef ACTIVATE_MPI
+#ifdef HAVE_MPI
   friend int mpiPack_size (const polyco&, MPI_Comm comm, int* size);
   friend int mpiPack   (const polyco&, void* outbuf, int outcount,
 			int* position, MPI_Comm comm);
@@ -277,7 +277,7 @@ class polyco : public Reference::Able {
 			polyco*, MPI_Comm comm);
 #endif
 
-#ifdef PSRFITS
+#ifdef HAVE_CFITSIO
   void load (fitsfile* fptr, int back=0);
   void unload (fitsfile* fptr, int back=0) const;
 #endif

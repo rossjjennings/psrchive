@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/psrephem.h,v $
-   $Revision: 1.30 $
-   $Date: 2004/04/02 08:21:05 $
-   $Author: hknight $ */
+   $Revision: 1.31 $
+   $Date: 2004/12/27 13:05:37 $
+   $Author: straten $ */
 
 #ifndef __PSREPHEM_H
 #define __PSREPHEM_H
@@ -13,7 +13,7 @@
 #include <vector>
 #include <string>
 
-#ifdef PSRFITS
+#ifdef HAVE_CFITSIO
 #include <fitsio.h>
 #endif
 
@@ -72,7 +72,7 @@ class psrephem : public Reference::Able
   int load   (string* str);
   int unload (string* str) const;
 
-#ifdef PSRFITS
+#ifdef HAVE_CFITSIO
   void load   (fitsfile* fptr, long row=0);
   void unload (fitsfile* fptr, long row=0) const;
 

@@ -1,9 +1,12 @@
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #include <iostream>
 #include <assert.h>
 
 #include <fitsio.h>
 
-#define PSRFITS 1
 #include "poly.h"
 #include "genutil.h"
 #include "fitsutil.h"
