@@ -2,7 +2,7 @@ LOCAL_ROOT = ../../..
 include ${LOCAL_ROOT}/include/Makefile.standard
 
 INCLUDES = archive.h archhdr.h headers.h mini++.h timer++.h timer.h mini.h band.h \
-	timer.inc band.inc mini.inc
+	timer.inc band.inc mini.inc convert_endian.h
 
 LIBRARY    = libarchive.a
 LIB_C_SRCS = pg_plot_gnu.C profile.C sub_int.C archive.C superarchive.C  \
@@ -19,9 +19,9 @@ LDFLAGS   += -larchive -lpolyco ${LDIALOG} -ltimes \
              -lpsrinfo -leph -lgenutil -lsla $(LFFT) -lm $(LIBNSL) \
 	     -lcpgplot $(LPGPLOT) 
 
-treduce.OBJS = xtinit.o xtmac.o xtproc.o xtlplt.o xtinplot.o xtshdr.o    \
-	       xtshst.o xtcopy.o xtswap.o xtunld.o xtgrey.o xtreduce.o   \
-               newtreduce.o
+treduce.srcs = xtinit.C xtmac.C xtproc.C xtlplt.C xtinplot.C xtshdr.C    \
+	       xtshst.C xtcopy.C xtswap.C xtunld.C xtgrey.C xtreduce.C   \
+               newtreduce.f
 
 PROGRAMS =    calinfo.C align.C amps.C chanprep.C  \
 	      mel.C newname.C oneprof.C plotsub.C    \
