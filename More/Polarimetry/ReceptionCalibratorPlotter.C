@@ -3,6 +3,7 @@
 #include "Pulsar/Archive.h"
 
 #include "Calibration/Gain.h"
+#include "Calibration/Polar.h"
 
 #include "EstimatePlotter.h"
 
@@ -97,7 +98,7 @@ void Pulsar::ReceptionCalibratorPlotter::plot_constraints (unsigned ichan,
 		 "ichan=%d >= nchan=%d", ichan, calibrator->get_nchan());
 
   // extract the appropriate equation
-  const Calibration::SAtPEquation* equation = calibrator->equation[ichan];
+  const Calibration::TimeEquation* equation = calibrator->equation[ichan];
 
   unsigned nmeas = equation->get_nmeasurements ();
 
@@ -196,7 +197,7 @@ void Pulsar::ReceptionCalibratorPlotter::plot_model (unsigned ichan,
 		 "ichan=%d >= nchan=%d", ichan, calibrator->get_nchan());
 
   // extract the appropriate equation
-  Calibration::SAtPEquation* equation = calibrator->equation[ichan];
+  Calibration::TimeEquation* equation = calibrator->equation[ichan];
 
   equation->get_model()->set_state (istate);
 
