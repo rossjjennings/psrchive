@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Profile.h,v $
-   $Revision: 1.58 $
-   $Date: 2004/05/06 09:00:42 $
+   $Revision: 1.59 $
+   $Date: 2004/05/06 13:17:14 $
    $Author: ahotan $ */
 
 #ifndef __Pulsar_Profile_h
@@ -203,6 +203,11 @@ namespace Pulsar {
     /*! Note that there is no set_nbin; this attribute may be set only
       through Profile::resize */
     unsigned get_nbin () const { return nbin; }
+
+    /*! returns a vector of floats representing which bins in the
+      profile are "on pulse", indicated by the presence of a '1', 
+      or "off pulse", indicated by the presence of a '0' */
+    vector<unsigned> get_mask () const;
 
     //! returns a pointer to the start of the array of amplitudes
     const float* get_amps () const { return amps; }

@@ -1,5 +1,5 @@
 //
-// $Id: pav.C,v 1.78 2004/05/06 09:00:42 ahotan Exp $
+// $Id: pav.C,v 1.79 2004/05/06 13:17:14 ahotan Exp $
 //
 // The Pulsar Archive Viewer
 //
@@ -101,6 +101,7 @@ void usage ()
     "\n"
     "Other plotting options: \n"
     " -W             Change colour scheme to suite white background\n"
+    " --mask         Display a profile with mask\n"
     " --degree       Plot the degree of polarisation profile\n"
     " --publn        Publication quality plot\n"
     " --cmap index   Select a colour map for PGIMAG style plots\n"
@@ -190,6 +191,7 @@ int main (int argc, char** argv)
   bool cbpao = false;
   bool cblpo = false;
   bool cblao = false;
+  bool mask = false;
 
   Reference::To<Pulsar::Archive> std_arch;
   Reference::To<Pulsar::Profile> std_prof;
@@ -209,15 +211,16 @@ int main (int argc, char** argv)
     "AaBb:CDdEeFf:GgH:hI:iJjK:k:LlM:mN:nO:oP:pQq:Rr:Ss:Tt:UuVvwWXx:Yy:Zz:";
 
   static struct option long_options[] = {
-    {"convert_binphsperi", 1, 0, 200},
-    {"convert_binphsasc", 1, 0, 201},
-    {"convert_binlngperi", 1, 0, 202},
-    {"convert_binlngasc", 1, 0, 203},
-    {"degree",0,0,204},
-    {"publn",0,0,205},
-    {"cmap",1,0,206},
-    {"snr",1,0,207},
-    {0, 0, 0, 0}
+    { "convert_binphsperi", 1, 0, 200 },
+    { "convert_binphsasc",  1, 0, 201 },
+    { "convert_binlngperi", 1, 0, 202 },
+    { "convert_binlngasc",  1, 0, 203 },
+    { "degree",             0, 0, 204 },
+    { "publn",              0, 0, 205 },
+    { "cmap",               1, 0, 206 },
+    { "snr",                1, 0, 207 },
+    { "mask",               0, 0, 208 },
+    { 0, 0, 0, 0 }
   };
     
   while (1) {
@@ -293,7 +296,7 @@ int main (int argc, char** argv)
       plotter.set_subint( atoi (optarg) );
       break;
     case 'i':
-      cout << "$Id: pav.C,v 1.78 2004/05/06 09:00:42 ahotan Exp $" << endl;
+      cout << "$Id: pav.C,v 1.79 2004/05/06 13:17:14 ahotan Exp $" << endl;
       return 0;
 
     case 'j':
@@ -570,6 +573,11 @@ int main (int argc, char** argv)
 
     }
 
+    case 208: {
+      mask = true;
+      break;
+    }
+
     default:
       cerr << "pav: unrecognized option" << endl;
       return -1; 
@@ -694,6 +702,30 @@ int main (int argc, char** argv)
       plotter.line_phase_subints(archive);
     }
 
+    if (mask) {
+      Reference::To<Pulsar::Profile> prof =
+	archive->get_Profile(plotter.get_subint(),
+			     plotter.get_pol(),
+			     plotter.get_chan());
+      
+      float minphs = prof->find_min_phase();
+      *prof -= (prof->mean(minphs));
+
+      plotter.singleProfile(archive);
+      
+      vector<unsigned> mask = prof->get_mask();
+      
+      float level = (prof->max()) / 2.0;
+
+      cpgsci(3);
+
+      for (unsigned i = 0; i < archive->get_nbin(); i++) {
+	cpgpt1(float(i)/archive->get_nbin(), mask[i]*level, 2);
+      }
+
+      cpgsci(1);
+    }
+    
     if (mdiff) {
       if (std_prof) {
 	cpg_next();
