@@ -34,8 +34,6 @@ Tempo::toa::toa (Format fmt)
 {
   init ();
   format = fmt;
-  if (format == Rhythm)
-    set_when_calculated (time(NULL));
 }
 
 Tempo::toa::toa (const toa & in_toa)
@@ -58,7 +56,6 @@ Tempo::toa& Tempo::toa::operator = (const toa & in_toa)
   observatory[0] = in_toa.observatory[0];
   observatory[1] = in_toa.observatory[1]; 
 
-  calculated = in_toa.calculated;
   auxinfo = in_toa.auxinfo;
   
   // if (auxdata.is_only())
@@ -148,7 +145,7 @@ int Tempo::toa::Parkes_unload (char* outstring) const
 int Tempo::toa::parkes_out (char* outstring) const
 {
   // output the basic line
-  sprintf (datestr, "%8.7lf", frequency);
+  sprintf (datestr, "%8.7f", frequency);
   sprintf (outstring, " %8.8s  %s   %5.2f %7.2f        %1c",
  	   datestr, arrival.printdays(13).c_str(), phs, error, telescope);
   return 0;
@@ -286,74 +283,6 @@ int Tempo::toa::Psrclock_unload (FILE* outstream) const
 
 // ////////////////////////////////////////////////////////////////////////
 //
-// Rhythm_load,unload - load/unload TOA in the Rhythm Format
-// 
-// ////////////////////////////////////////////////////////////////////////
-
-int Tempo::toa::Rhythm_load (const char* instring)
-{
-  if (verbose)
-    cerr << "Tempo::toa::Rhythm_load" << endl;
-
-  if (Parkes_load (instring) < 0)
-    return -1;
-
-  // the basic toa line has been parsed.
-  
-  int scanned = sscanf (instring+1, "%s", datestr);
-  if (scanned == 1) {
-    struct tm date;
-    extern long timezone; // defined in time.h
-    if (str2tm (&date, datestr) < 0) {
-      if (verbose) cerr << "Tempo::toa::load(char*) Error parsing '"
-			<< datestr << "' as UTC." << endl;
-      return -1;
-    }
-    calculated = mktime (&date);
-    calculated -= timezone;
-  }
-
-  if (strlen(instring) < 81+14 || instring[80] != 'R')
-    return 0;
-
-  auxinfo = instring + 81;
-
-  // LOAD AUX
-
-  format = Rhythm;
-  return 0;
-}
-
-int Tempo::toa::Rhythm_unload (char* outstring) const
-{
-  Parkes_unload (outstring);
-
-  // output the time stamp
-  if (calculated == -1)
-    time ((time_t*)&calculated);
-
-  int out = (int)strftime (outstring+1, 24, "%Y/%m/%d-%H:%M:%S",
-			   gmtime (&calculated));
-  // over-write any \0 placed at the end of the string
-  if (out < 24)
-    *(outstring+1+out) = ' ';
-
-  outstring[80] = 'R';
-
-  sprintf (outstring+81, "%s", auxinfo.c_str());
-  return 0;
-}
-
-int Tempo::toa::Rhythm_unload (FILE* outstream) const
-{
-  sizebuf (83 + auxinfo.length());
-  Rhythm_unload (buffer);
-  fprintf (outstream, "%s\n", buffer);
-  return 0;
-}
-
-// ////////////////////////////////////////////////////////////////////////
-//
 // generic load,unload - load/unload TOA in appropriate format
 //
 // these functions will usually be called at the high level
@@ -365,18 +294,16 @@ int Tempo::toa::load (const char* instring)
   if ( !instring )
     return -1;
 
-  if ( instring[80] == 'R' )
-    return Rhythm_load( instring );
-
   else if ( isdigit( instring[0] ) )
     return Princeton_load( instring );
 
-  else if ( instring[17] != ' ' )
+  else if ( instring[1] != ' ' )
     return Psrclock_load( instring );
 
   else
     return Parkes_load( instring );
 }
+
 
 // returns 0 if toa was loaded, 1 if end of file reached, -1 if error occurs
 
@@ -429,9 +356,6 @@ int Tempo::toa::unload (FILE* outstream, Format fmt) const
   case Psrclock:
     if (verbose) cerr << "Unloading Psrclock Format" << endl;
     return Psrclock_unload (outstream);
-  case Rhythm:
-    if (verbose) cerr << "Unloading Rhythm Format" << endl;
-    return Rhythm_unload (outstream);
   default:
     cerr << "Tempo::toa::unload undefined format" << endl;
     return -1;
@@ -450,8 +374,6 @@ int Tempo::toa::unload (char* outstring, Format fmt) const
     return Princeton_unload (outstring);
   case Psrclock:
     return Psrclock_unload (outstring);
-  case Rhythm:
-    return Rhythm_unload (outstring);
   default:
     cerr << "Tempo::toa::unload undefined format" << endl;
     return -1;
@@ -468,13 +390,14 @@ int Tempo::toa::Tempo_unload (FILE* outstream) const
 {
   switch (format) {
   case Parkes:
+    return Parkes_unload (outstream);
   case Psrclock:
-  case Rhythm:
     return Parkes_unload (outstream);
   case Princeton:
     return Princeton_unload (outstream);
   default:
-    if (verbose) cerr << "Tempo::toa::Tempo_unload undefined format" << endl;
+    if (verbose) 
+      cerr << "Tempo::toa::Tempo_unload undefined format" << endl;
     return -1;
   }
 }
@@ -483,13 +406,14 @@ int Tempo::toa::Tempo_unload (char* outstring) const
 {
   switch (format) {
   case Parkes:
+    return Parkes_unload (outstring);
   case Psrclock:
-  case Rhythm:
     return Parkes_unload (outstring);
   case Princeton:
     return Princeton_unload (outstring);
   default:
-    if (verbose) cerr << "Tempo::toa::Tempo_unload undefined format" << endl;
+    if (verbose) 
+      cerr << "Tempo::toa::Tempo_unload undefined format" << endl;
     return -1;
   }
 }
@@ -672,7 +596,6 @@ void Tempo::toa::init()
   dmc = 0.0;
   observatory [0] = '\0';
 
-  calculated = -1;
   auxinfo.erase();
 
   state = Normal;

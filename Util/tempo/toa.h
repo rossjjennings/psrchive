@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/toa.h,v $
-   $Revision: 1.11 $
-   $Date: 2003/04/04 07:46:00 $
+   $Revision: 1.12 $
+   $Date: 2003/04/24 03:33:19 $
    $Author: ahotan $ */
 
 #ifndef __TOA_H
@@ -32,7 +32,7 @@ namespace Tempo {
 
   public:
     
-    enum Format { Unspecified, Princeton, Parkes, ITOA, Psrclock, Rhythm };
+    enum Format { Unspecified, Princeton, Parkes, ITOA, Psrclock};
     enum DataType {
       // a null state
       Nothing,
@@ -73,8 +73,7 @@ namespace Tempo {
     // ITOA Format specific
     char   observatory[2]; // Observatory (two-letter code)
     
-    // Rhythm extras
-    time_t calculated;   /* the date when this toa was calculated */
+    // Psrclock / Rhythm extras
     string auxinfo;      /* text information passed to context specific data */
 
     // Reference::To<toaInfo> auxdata;    /* context specific data */
@@ -86,7 +85,7 @@ namespace Tempo {
     // residual for this toa as calculated by tempo
     residual resid;
    
-    toa (Format fmt = Rhythm);
+    toa (Format fmt = Psrclock);
     virtual ~toa () { destroy(); };
     
     // copy constructor
@@ -105,7 +104,6 @@ namespace Tempo {
     void set_arrival   (MJD arrived) { arrival = arrived; };
     void set_error     (float err)   { error = err; };
     void set_telescope (char telcode) { telescope = telcode; };
-    void set_when_calculated (time_t when) { calculated = when; };
     void set_auxilliary_text (const string& text) { auxinfo = text; };
 
     Format get_format    () const { return format; };
@@ -113,7 +111,6 @@ namespace Tempo {
     MJD    get_arrival   () const { return arrival; };
     float  get_error     () const { return error; };
     char   get_telescope () const { return telescope; };
-    time_t get_when_calculated () const { return calculated; };
     string get_auxilliary_text () const { return auxinfo; };
 
     // //////////////////////////////////////////////////////////////////
