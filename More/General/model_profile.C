@@ -20,8 +20,10 @@ extern "C" {
   void F77_fftconv (int *,float *, float *, float *, float *, float *, float *);
 }
 
-int Pulsar::legacy_fftconv(int npts, float * prf, float * std, double * shift, double *eshift, 
-                           float * snrfft, float * esnrfft) {
+int Pulsar::legacy_fftconv(int npts, const float * prf, const float * std, 
+                           double * shift, double *eshift, 
+                           float * snrfft, float * esnrfft) 
+{
   // This introduced to investigate the behaviour of the pat-model_profile toa routines
   // By invocation of the legacy fftconv routine - sorry for the kludge WvS - this can come out
   // when testing is complete -- steveo
@@ -29,7 +31,9 @@ int Pulsar::legacy_fftconv(int npts, float * prf, float * std, double * shift, d
   float real_shift = 0, real_err = 0 ; // Required for fftconv .... darned real4....
   int number = npts;
 
-  F77_fftconv (&number,prf,std,&real_shift,&real_err,snrfft,esnrfft);
+  F77_fftconv (&number,const_cast<float*>(prf),
+                       const_cast<float*>(std),
+               &real_shift,&real_err,snrfft,esnrfft);
 
   if (real_shift != 0) {
    *shift = (double) real_shift;
@@ -38,7 +42,8 @@ int Pulsar::legacy_fftconv(int npts, float * prf, float * std, double * shift, d
   }
   return -1;
 } 
-int Pulsar::model_profile (int npts, int narrays, float** prf, float** std,
+int Pulsar::model_profile (int npts, int narrays, 
+                           float* const * prf, float* const* std,
 		           double* scale, double* sigma_scale, 
 		           double* shift, double* sigma_shift,
 		           double* chisq, int verbose)
