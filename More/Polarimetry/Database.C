@@ -732,7 +732,7 @@ Pulsar::Database::generatePolnCalibrator (Archive* arch, Calibrator::Type m)
     throw Error (InvalidParam, "Database::generatePolnCalibrator",
 		 "no Pulsar::Archive given");
   
-  // if (verbose)
+  if (verbose)
     cerr << "Pulsar::Database::generatePolnCalibrator search for " 
          << Calibrator::Type2str (m) << " match" << endl;
 
