@@ -4,9 +4,15 @@ include ${LOCAL_ROOT}/headers/Makefile.standard
 INCLUDES = superarchive.h archive.h sub_int.h profile.h archhdr.h headers.h \
         mini++.h timer++.h timer.h mini.h band.h archdefs.h \
 	timer.inc band.inc mini.inc convert_endian.h misc.h \
-	poln_profile.h \
+	poln_profile.h TimerArchive.h TimerIntegration.h BasebandArchive.h
 
-LIBRARY = libarchive.a
+# ############################################################################
+#
+# The main timer archive library
+#
+# ############################################################################
+
+LIBRARY := libarchive.a
 
 LIB_SRCS = profile.C sub_int.C archive.C superarchive.C  \
 	toa.C archive_toa.C sub_int_toa.C profile_toa.C \
@@ -17,13 +23,34 @@ LIB_SRCS = profile.C sub_int.C archive.C superarchive.C  \
 	width.f tsky1.f fftconv.f scan_fort_val.f convolve.f \
 	galrot.C getvel.C
 
+
 ifeq ($(has_PGPLOT),yes)
 LIB_SRCS += profile_pgplot.C sub_int_pgplot.C archive_pgplot.C \
 	profplot.C plot2profs.C scintplot.C 
 endif
 
-LDFLAGS += -larchive -ltempo++ -lpolyco -leph -ltimes \
-	-lgenutil++ -lgenutil -lsla $(LFFT) $(LF77) -lm
+# ############################################################################
+#
+# The TimerArchive psrchive plugin
+#
+# ############################################################################
+
+DSO_NAME := Pulsar/TimerArchive.so
+
+DSO_SRCS := TimerArchive.C TimerArchive_load.C TimerArchive_unload.C \
+	TimerIntegration.C TimerIntegration_load.C TimerIntegration_unload.C \
+	TimerProfile_load.C TimerProfile_unload.C BasebandArchive.C
+
+DSO_FLAGS := $(LDFLAGS) -larchive -ltimes -lgenutil $(LSLA)
+
+# TimerIntegration_cal_levels.C
+
+
+# ############################################################################
+#
+# Executables
+#
+# ############################################################################
 
 PROGRAMS = calinfo.C align.C amps.C chanprep.C crstd.C \
 	mel.C newname.C oneprof.C plotsub.C tadd.C modhead.C \
@@ -35,6 +62,8 @@ PROGRAMS = calinfo.C align.C amps.C chanprep.C crstd.C \
 
 TESTS = timer_size.c
 
+LDFLAGS += -larchive -ltempo++ -lpolyco -leph -ltimes \
+	-lgenutil++ -lgenutil -lsla $(LFFT) $(LF77) -lm
 
 oneprof.LDFLAGS := $(LDFLAGS) $(LCPGPLOT)
 plotsub.LDFLAGS := $(LDFLAGS) $(LCPGPLOT)
