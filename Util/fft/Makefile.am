@@ -18,13 +18,14 @@ check_PROGRAMS = $(TESTS)
 
 test_normalization_SOURCES	= test_normalization.C
 test_interpolate_SOURCES	= test_interpolate.C
+test_interpolate_LDADD		= $(LDADD) ../units/libunits.la
 
 #############################################################################
 #
 # Dependencies should never be changed
 #
 
-INCLUDES = -I$(top_srcdir) -I../genutil
+INCLUDES = -I$(top_srcdir) -I../units -I../genutil
 
 LDADD = libpsrfft.la @FFT_LIBS@ 
 
