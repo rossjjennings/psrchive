@@ -25,7 +25,7 @@ Pulsar::FluxCalibrator::FluxCalibrator (const vector<Archive*>& archs)
 		   + archs[iarch]->get_filename() + "' not a FluxCal");
 
     string reason;
-    if (iarch > 0 && !archs[0]->mixable (archs[iarch], reason))
+    if (iarch > 0 && !archs[0]->match (archs[iarch], reason))
       throw Error (InvalidParam, "Pulsar::FluxCalibrator", "Pulsar::Archive='"
 		   + archs[iarch]->get_filename() + "'\ndoes not mix with '"
 		   + archs[0]->get_filename() + "\n" + reason);
