@@ -122,7 +122,7 @@ void psrephem::set_epoch (const MJD& new_epoch, bool binary)
     pb_dot = value_double [EPH_PBDOT] * 1e-12;
 
   bin_phase -= bin_phase*bin_phase * pb_dot;
-  int iphase = bin_phase;
+  int iphase = int(bin_phase);
   bin_phase -= double(iphase);
 
   // set the requested epoch to the next binary phase zero
