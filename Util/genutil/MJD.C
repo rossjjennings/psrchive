@@ -124,6 +124,18 @@ MJD& MJD::operator -= (const double & d)
   return *this;
 }
 
+MJD& MJD::operator *= (const double & d)
+{
+  *this = *this*d;
+  return *this;
+}
+
+MJD& MJD::operator /= (const double & d)
+{
+  *this = *this/d;
+  return *this;
+}
+
 const MJD operator + (const MJD &m1, const MJD &m2) {
   return MJD(m1.intday() + m2.intday(),
 	     m1.get_secs() + m2.get_secs(),
