@@ -1,7 +1,6 @@
 #include "Pulsar/Profile.h"
 #include "Error.h"
-
-#include <rfftw.h>
+#include "fftm.h"
 
 void Pulsar::Profile::convolve (const Profile* profile)
 {
@@ -44,42 +43,23 @@ void Pulsar::Profile::fft_convolve (const Profile* p1)
 		 "profile nbin values not equal");
   }
 
-  rfftw_plan forward_plan;
-  rfftw_plan backward_plan;
+  auto_ptr<float> temp1( new float[bins+2] );
+  auto_ptr<float> temp2( new float[bins+2] );
+  auto_ptr<float> resultant( new float[bins+2] );
 
-  forward_plan = rfftw_create_plan(bins, FFTW_REAL_TO_COMPLEX, FFTW_ESTIMATE);
-  backward_plan = rfftw_create_plan(bins, FFTW_COMPLEX_TO_REAL, FFTW_ESTIMATE);
+  fft::frc1d (bins, temp1.get(), get_amps());
+  fft::frc1d (bins, temp2.get(), p1->get_amps());
 
-  vector<float> temp1;
-  vector<float> temp2;
-  vector<float> resultant;
+  // cast the float* arrays to complex<float>*
+  complex<float>* c1 = (complex<float>*) temp1.get();
+  complex<float>* c2 = (complex<float>*) temp2.get();
+  complex<float>* r = (complex<float>*) resultant.get();
 
-  temp1.resize(bins);
-  temp2.resize(bins);
-  resultant.resize(bins);
+  unsigned ncomplex = bins/2+1;
 
-  rfftw_one(forward_plan, (fftw_real*)get_amps(), 
-	    (fftw_real*)(&(temp1[0])));
-  rfftw_one(forward_plan, (fftw_real*)(p1->get_amps()), 
-	    (fftw_real*)(&(temp2[0])));
-
-  // Perform the frequency domain multiplication:
-  // No complex part for the first element
-
-  resultant[0] = temp1[0]*temp2[0];
-
-  // Complex multiplication of the other elements
-
-  for (unsigned int i = 1; i < (bins+1)/2; i++) {
-    resultant[i] = temp1[i]*temp2[i] - temp1[bins-i]*temp2[bins-i];
-    resultant[bins-i] = temp1[i]*temp2[bins-i] +temp2[i]*temp1[bins-i];
-  }
-
-  // Deal with the middle element if the array has even length
-
-  if (bins % 2 == 0) {
-    resultant[bins/2] = temp1[bins/2]*temp2[bins/2];
-  }
+  // Complex multiplication of the elements
+  for (unsigned i = 0; i < ncomplex; i++)
+    r[i] = c1[i]*c2[i];
 
   // Transform back to the time domain to get the convolved solution
 
@@ -87,8 +67,7 @@ void Pulsar::Profile::fft_convolve (const Profile* p1)
 
   solution.resize(bins);
 
-  rfftw_one(backward_plan, (fftw_real*)(&(resultant[0])), 
-	    (fftw_real*)(&(solution[0])));
+  fft::bcr1d (bins, &(solution[0]), resultant.get());
 
   // Return the profile
 
