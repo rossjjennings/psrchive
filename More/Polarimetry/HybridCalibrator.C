@@ -6,8 +6,7 @@
 
 Pulsar::HybridCalibrator::HybridCalibrator (PolnCalibrator* _calibrator)
 {
-  precalibrator = _calibrator;
-  calibrator = precalibrator->get_Archive();
+  set_precalibrator (_calibrator);
 }
 
 //! Destructor
@@ -31,6 +30,9 @@ void Pulsar::HybridCalibrator::set_reference_input (CalibratorStokes* reference)
 void Pulsar::HybridCalibrator::set_reference_observation (ArtificialCalibrator* observation)
 {
   reference_observation = observation;
+
+  filenames.resize (2);
+  filenames[1] = observation->get_filenames();
 }
     
 //! Set the PolnCalibrator to be supplemented
@@ -38,6 +40,9 @@ void Pulsar::HybridCalibrator::set_precalibrator (PolnCalibrator* _calibrator)
 {
   precalibrator = _calibrator;
   calibrator = precalibrator->get_Archive();
+
+  filenames.resize (2);
+  filenames[0] = precalibrator->get_filenames();
 }
 
 void Pulsar::HybridCalibrator::calculate_transformation ()
