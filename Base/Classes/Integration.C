@@ -79,6 +79,11 @@ Pulsar::Integration& Pulsar::Integration::operator= (const Integration& subint)
   return *this;
 }
 
+/*! Users of this method should be aware that it does not keep
+  full track of all the parameters of an Integration. It is
+  designed to be used for low level arithmetic style addition
+  only, not fully consistent combination. The supplied tscrunch
+  routines should be used for such purposes. */
 void Pulsar::Integration::operator+= (const Integration& subint)
 {
   float total_weight = 0.0;
@@ -103,14 +108,8 @@ void Pulsar::Integration::operator+= (const Integration& subint)
   }
   
   double total = get_duration() + subint.get_duration();
-  double mine = get_duration() / total;
-  double yours = subint.get_duration() / total;
   
-  set_epoch(get_epoch()*mine + subint.get_epoch()*yours);
   set_duration(total);
-  
-  set_folding_period(get_folding_period()*mine + 
-		     subint.get_folding_period()*yours);
   
   return;
 }
