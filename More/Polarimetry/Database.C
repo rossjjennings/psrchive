@@ -19,7 +19,9 @@
 #include "MJD.h"
 #include "sky_coord.h"
 
+#include "genutil.h"
 #include "dirutil.h"
+
 #include <unistd.h> 
 #include <errno.h>
 
@@ -90,10 +92,6 @@ Pulsar::Database::Entry::Entry (const Pulsar::Archive& arch)
   else
     time = ( arch.start_time() + arch.end_time() ) / 2.0;
 
-  if (time == 0.0)
-    throw Error (InvalidParam, "Pulsar::Database::Entry",
-		 arch.get_filename() + " has epoch = 0 (MJD)");
-
   position = arch.get_coordinates();
   bandwidth = arch.get_bandwidth();
   frequency = arch.get_centre_frequency();
@@ -141,10 +139,6 @@ void Pulsar::Database::Entry::load (const char* str)
   string mjdstr  = stringtok (&line, whitespace);
   time = MJD (mjdstr);
 
-  if (time == 0.0)
-    throw Error (InvalidParam, "Pulsar::Database::Entry::load",
-		 filename + " has epoch = 0 (MJD)");
-
   // /////////////////////////////////////////////////////////////////
   // bandwidth, frequency, number of channels
   int s = sscanf (line.c_str(), "%lf %lf %d", &bandwidth, &frequency, &nchan);
@@ -189,6 +183,20 @@ void Pulsar::Database::Entry::unload (string& retval)
   retval += stringprintf (" %lf %lf %d", bandwidth, frequency, nchan);
 
   retval += " " + instrument + " " + receiver;
+}
+
+bool operator == (const Pulsar::Database::Entry& a, 
+		  const Pulsar::Database::Entry& b)
+{
+  return
+    a.obsType == b.obsType &&
+    a.calType == b.calType &&
+    a.bandwidth == b.bandwidth &&
+    a.frequency == b.frequency &&
+    a.instrument == b.instrument &&
+    a.receiver == b.receiver &&
+    (a.time - b.time).in_seconds() < 10.0 &&
+    a.position.angularSeparation(b.position).getDegrees() < 0.1;
 }
 
 bool Pulsar::Database::Criterion::match_verbose = false;
@@ -526,21 +534,24 @@ void Pulsar::Database::load (const string& dbase_filename)
     cerr << "Pulsar::Database::load resizing for "
 	 << useful << " entries" << endl;
 
-  entries.resize(useful);
+  entries.resize (0);
+  Entry entry;
 
   for (unsigned ie=0; ie<entries.size(); ie++) try {
-    fgets (temp, 4096, fptr);
+
+    if (!fgets (temp, 4096, fptr))
+      throw Error (FailedCall, "Pulsar::Database::load", "fgets");
 
     if (verbose)
       cerr << "Pulsar::Database::load '"<< temp << "'" << endl;
 
-    entries[ie].load(temp);
+    entry.load(temp);
+    add (entry);
+
   }
   catch (Error& error) {
     cerr << "Pulsar::Database::load discarding entry:\n\t" 
          << error.get_message() << endl;
-    entries.erase (entries.begin() + ie);
-    ie --;
   }
 
   fclose (fptr);
@@ -569,20 +580,39 @@ void Pulsar::Database::unload (const string& filename)
 void Pulsar::Database::add (const Pulsar::Archive* archive)
 {
   if (!archive)
-    throw Error (InvalidParam, "Pulsar::Database::add", "null Archive*");
-
+    throw Error (InvalidParam, "Pulsar::Database::add Archive",
+		 "null Archive*");
   try {
     Entry entry (*archive);
-
-    // strip the base path name off of the entry filename
-    if (entry.filename.substr(0, path.length()) == path)
-      entry.filename.erase (0, path.length()+1);
-    
-    entries.push_back (entry);
+    add (entry);
   }
   catch (Error& error) {
-    throw error += "Pulsar::Database::add";
+    throw error += "Pulsar::Database::add Archive";
   }
+}
+
+
+//! Add the given Archive to the database
+void Pulsar::Database::add (Pulsar::Database::Entry& entry)
+{
+  // strip the base path name off of the entry filename
+  if (entry.filename.substr(0, path.length()) == path)
+    entry.filename.erase (0, path.length()+1);
+  
+  if (entry.time == 0.0)
+    throw Error (InvalidParam, "Pulsar::Database::add Entry",
+		 entry.filename + " has epoch = 0 (MJD)");
+
+  for (unsigned ie=0; ie < entries.size(); ie++) 
+    if (entries[ie] == entry) {
+      cerr << "Pulsar::Database::add duplicate entry... keeping newest file\n";
+      if ( file_mod_time (get_filename(entry).c_str()) <
+	   file_mod_time (get_filename(entries[ie]).c_str()) )
+	entries[ie] = entry;
+      return;
+    }
+
+  entries.push_back (entry);
 }
 
 void Pulsar::Database::all_matching (const Criterion& criterion,

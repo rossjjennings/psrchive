@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/Database.h,v $
-   $Revision: 1.7 $
-   $Date: 2004/10/25 11:12:03 $
+   $Revision: 1.8 $
+   $Date: 2004/10/25 20:02:40 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Database_h
@@ -117,6 +117,8 @@ namespace Pulsar {
       friend bool operator < (const Entry& a, const Entry& b)
       { return a.time < b.time; }
 
+      friend bool operator == (const Entry& a, const Entry& b);
+
     protected:
       
       //! Clean slate
@@ -181,6 +183,8 @@ namespace Pulsar {
     //! Returns the full pathname of the Entry filename
     string get_filename (const Entry&) const;
     
+    //! Add the given entry to the database
+    void add (Pulsar::Database::Entry& entry);
 
   protected:
     
