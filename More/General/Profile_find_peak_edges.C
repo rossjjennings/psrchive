@@ -71,7 +71,7 @@ void Pulsar::Profile::find_peak_edges (int& rise, int& fall) const
 
     // find where cumulative sum falls below max_threshold for the first time.
     ifall[itry] = nbin-1;
-    for (ibin=nbin-1; ibin>=0; ibin--) 
+    for (ibin=nbin-1; ibin>0; ibin--) 
       if (cumu[ibin] > fall_threshold) 
 	ifall[itry] = ibin;
 
