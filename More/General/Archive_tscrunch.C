@@ -44,6 +44,14 @@ void Pulsar::Archive::tscrunch (unsigned nscrunch)
   if (verbose == 3) cerr << "Pulsar::Archive::tscrunch - scrunching " 
 		    << nsub << " Integrations by " << nscrunch << endl;
   
+  double dm = get_dispersion_measure();
+  double rm = get_rotation_measure();
+
+  bool must_dedisperse = dm != 0 && !get_dedispersed();
+  bool must_defaraday = rm != 0 && !get_faraday_corrected();
+
+  unsigned save_nscrunch = nscrunch;
+
   try {
     
     for (unsigned isub=0; isub < newsub; isub++) {
@@ -53,24 +61,37 @@ void Pulsar::Archive::tscrunch (unsigned nscrunch)
       
       unsigned start = isub * nscrunch;
       
+      // the last Integration may not have nscrunch contributions
+      if (start+nscrunch >= nsub)
+	nscrunch = nsub - start;
+
       for (unsigned ichan=0; ichan < get_nchan(); ichan++) {
 	
-	if (verbose == 3) cerr << "Pulsar::Archive::tscrunch weighted_frequency chan="
-			  << ichan << endl;
+	if (verbose == 3) 
+	  cerr << "Pulsar::Archive::tscrunch weighted_frequency chan="
+	       << ichan << endl;
 	
-	double cfreq = 0.0;
-	if (start+nscrunch <= nsub)
-	  cfreq = weighted_frequency (ichan, start, start+nscrunch);
-	else
-	  cfreq = weighted_frequency (ichan, start, 0);
+	double reference_frequency = 0.0;
+
+	reference_frequency = weighted_frequency (ichan, start,start+nscrunch);
 	
 	if (verbose == 3) 
-	  cerr << "Pulsar::Archive::tscrunch dedisperse cfreq=" << cfreq << endl;
-	
+	  cerr << "Pulsar::Archive::tscrunch ichan=" << ichan
+	       << " new frequency=" << reference_frequency << endl;
+
+    
 	for (unsigned iadd=0; iadd < nscrunch; iadd++) {
-	  if (start+iadd >= nsub)
-	    break;
-	  get_Integration(start+iadd) -> dedisperse (cfreq, ichan);
+
+	  Integration* subint = get_Integration(start+iadd);
+
+	  if (must_dedisperse)
+	    subint->dedisperse (ichan, ichan+1, dm, reference_frequency);
+
+	  if (must_defaraday)
+	    subint->defaraday (ichan, ichan+1, rm, reference_frequency);
+
+	  subint->set_centre_frequency (ichan, reference_frequency);
+
 	}
 	
 	if (verbose == 3) 
@@ -84,8 +105,6 @@ void Pulsar::Archive::tscrunch (unsigned nscrunch)
 	  *(avg) = *(add);
 	  
 	  for (unsigned jsub=1; jsub<nscrunch; jsub++) {
-	    if (start+jsub >= nsub)
-	      break;
 	    add = get_Profile (start+jsub, ipol, ichan);
 	    *(avg) += *(add);
 	  }
@@ -98,19 +117,22 @@ void Pulsar::Archive::tscrunch (unsigned nscrunch)
   catch (Error& err) {
     throw err += "Pulsar::Archive::tscrunch";
   }
-  
+
+  nscrunch = save_nscrunch;
+
   for (unsigned isub=0; isub < newsub; isub++) {
     
     unsigned start = isub * nscrunch;
     
+    // the last Integration may not have nscrunch contributions
+    if (start+nscrunch >= nsub)
+      nscrunch = nsub - start;
+
     MJD    mjd;
     double duration = 0.0;
     int count = 0;
     
     for (unsigned iadd=0; iadd < nscrunch; iadd++) {
-      
-      if (start+iadd >= nsub)
-	break;
       
       count++;
       
@@ -141,7 +163,7 @@ void Pulsar::Archive::tscrunch (unsigned nscrunch)
 	continue;
       
       // get the time of the first subint to be integrated into isub
-      MJD firstmjd = get_Integration (isub * nscrunch) -> get_epoch ();
+      MJD firstmjd = get_Integration (start) -> get_epoch ();
       // get the period at the time of the first subint
       double first_period = model->period(firstmjd);
       // get the phase at the time of the first subint
