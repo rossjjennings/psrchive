@@ -19,12 +19,6 @@ else
   fi
 fi
 
-#
-# Set up for standard pulsar installation
-#
-CPPFLAGS="-I$PSRHOME/packages/$LOGIN_ARCH/include $CPPFLAGS"
-LDFLAGS="-L$PSRHOME/packages/$LOGIN_ARCH/lib $LDFLAGS"
-
 AM_INIT_AUTOMAKE([subdir-objects])
 AC_DISABLE_SHARED
 
@@ -44,6 +38,12 @@ AC_PROG_INSTALL
 AC_PROG_LIBTOOL
 AC_PROG_FC
 _STAR_RESTFP_FIX
+
+#
+# Set up for standard pulsar installation
+#
+CPPFLAGS="-I$PSRHOME/packages/$LOGIN_ARCH/include $CPPFLAGS"
+LDFLAGS="-L$PSRHOME/packages/$LOGIN_ARCH/lib $LDFLAGS"
 
 #
 # Checks for libraries
