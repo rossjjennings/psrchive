@@ -1,7 +1,10 @@
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include "Calibration/Parallactic.h"
 #include "Pauli.h"
 #include "sky_coord.h"
-#include "f772c.h"
 
 #include <limits.h>
 
@@ -62,10 +65,11 @@ MJD Calibration::Parallactic::get_epoch () const
   return current_epoch;
 }
 
-extern "C" void F772C(sla_altaz) (double*, double*, double*,
-				  double*, double*, double*,
-				  double*, double*, double*,
-				  double*, double*, double*);
+#define F77_sla_altaz F77_SLA(sla_altaz,SLA_ALTAZ)
+extern "C" void F77_sla_altaz (double*, double*, double*,
+				double*, double*, double*,
+				double*, double*, double*,
+				double*, double*, double*);
 
 //! Set the hour angle in radians
 void Calibration::Parallactic::set_hour_angle (double hour_angle)
@@ -86,7 +90,7 @@ void Calibration::Parallactic::set_hour_angle (double hour_angle)
   double azimuth, elevation, para;
   double ignore;
 
-  F772C(sla_altaz) (&ha, &dec, &lat, 
+  F77_sla_altaz (&ha, &dec, &lat, 
 		    &azimuth,   &ignore, &ignore,
 		    &elevation, &ignore, &ignore,
 		    &para,      &ignore, &ignore);
