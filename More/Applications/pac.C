@@ -125,7 +125,7 @@ int main (int argc, char *argv[]) {
       Pulsar::Archive::set_verbosity(3);
       break;
     case 'i':
-      cout << "$Id: pac.C,v 1.46 2004/07/12 09:28:04 straten Exp $" << endl;
+      cout << "$Id: pac.C,v 1.47 2004/07/13 02:08:01 sord Exp $" << endl;
       return 0;
 
     case 'n': {
@@ -405,6 +405,8 @@ int main (int argc, char *argv[]) {
     catch (Error& error)  {
       cerr << "pac: Could not perform flux calibration\n\t"
 	   << error.get_message() << endl;
+
+      throw Error (InvalidState, "pac:","Cannot perform Flux Calibration and Calibration required");
     }
 
     // find first of "." turns ./cal/poo.cfb info .unload_ext WvS
