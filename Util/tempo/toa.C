@@ -7,15 +7,16 @@
 #include "string_utils.h"
 #include "polyco.h"
 #include "toa.h"
+#include "toaInfo.h"
 
-toa::toa (char* datastr)
+Tempo::toa::toa (char* datastr)
 {
   if (load (datastr) < 0) {
-    throw ("toa::toa (char* datastr) failed");
+    throw ("Tempo::toa::toa (char* datastr) failed");
   }
 }
 
-toa::toa (const toa & in_toa)
+Tempo::toa::toa (const toa & in_toa)
 {
   init ();
   this->operator=(in_toa);
@@ -35,29 +36,32 @@ toa::toa (const toa & in_toa)
 //
 // ////////////////////////////////////////////////////////////////////////
 
-int toa::Parkes_load (const char* instring)
+int Tempo::toa::Parkes_load (const char* instring)
 {
   if (verbose)
-    cerr << "toa::Parkes_load" << endl;
+    cerr << "Tempo::toa::Parkes_load" << endl;
 
   destroy ();
+
   if ((instring[0]=='C') || (instring[0]=='c'))
-    deleted = 1;
+    state = Deleted;
+
   return parkes_parse (instring+25);
 }
 
-int toa::parkes_parse (const char* instring)
+int Tempo::toa::parkes_parse (const char* instring)
 {
   int scanned = sscanf (instring, "%lf %s %f %f %d",
  			&frequency, datestr, &phs, &error, &telescope);
-  if (!deleted && scanned < 5) {
+
+  if (state != Deleted && scanned < 5) {
     // an invalid line was not commented out
-    if (verbose) cerr << "toa::parkes_parse(char*) Error scan:"
+    if (verbose) cerr << "Tempo::toa::parkes_parse(char*) Error scan:"
 		      << scanned << "/5 '" << instring << "'" << endl;
     return -1;
   }
   if (arrival.Construct(datestr) < 0)  {
-    if (verbose) cerr << "toa::parkes_parse(char*) Error MJD parsing '" 
+    if (verbose) cerr << "Tempo::toa::parkes_parse(char*) Error MJD parsing '" 
 		      << datestr << "'" << endl;
     return -1;
   }
@@ -69,18 +73,18 @@ int toa::parkes_parse (const char* instring)
   return 0;
 }
 
-int toa::Parkes_unload (char* outstring) const
+int Tempo::toa::Parkes_unload (char* outstring) const
 {
   for (int ic=0; ic<25; ic++)
     outstring [ic] = ' ';
 
-  if (deleted)
+  if (is_deleted())
     outstring[0]='C';
 
   return parkes_out (outstring+25);
 }
 
-int toa::parkes_out (char* outstring) const
+int Tempo::toa::parkes_out (char* outstring) const
 {
   // output the basic line
   sprintf (datestr, "%8.7lf", frequency);
@@ -89,7 +93,7 @@ int toa::parkes_out (char* outstring) const
   return 0;
 }
 
-int toa::Parkes_unload (FILE* outstream) const
+int Tempo::toa::Parkes_unload (FILE* outstream) const
 {
   sizebuf (81);
   Parkes_unload (buffer);
@@ -111,10 +115,10 @@ int toa::Parkes_unload (FILE* outstream) const
 //
 // ////////////////////////////////////////////////////////////////////////
 
-int toa::Princeton_load (const char* instring)
+int Tempo::toa::Princeton_load (const char* instring)
 {
   if (verbose)
-    cerr << "toa::Princeton_load" << endl;
+    cerr << "Tempo::toa::Princeton_load" << endl;
 
   destroy ();
 
@@ -125,12 +129,12 @@ int toa::Princeton_load (const char* instring)
 
   if (scanned < 4) {
     // an invalid line was not commented out
-    if (verbose) cerr << "toa::Princeton_load(char*) Error scanning '"
+    if (verbose) cerr << "Tempo::toa::Princeton_load(char*) Error scanning '"
 		      << instring << "'" << endl;
     return -1;
   }
   if (arrival.Construct(datestr) < 0)  {
-    if (verbose) cerr << "toa::Princeton_load(char*) Error MJD parsing '"
+    if (verbose) cerr << "Tempo::toa::Princeton_load(char*) Error MJD parsing '"
 		      << datestr << "'" << endl;
     return -1;
   }
@@ -142,7 +146,7 @@ int toa::Princeton_load (const char* instring)
   return 0;
 }
 
-int toa::Princeton_unload (char* outstring) const
+int Tempo::toa::Princeton_unload (char* outstring) const
 {
   // output the basic line
   outstring[0] = char ('0' + telescope);
@@ -152,7 +156,7 @@ int toa::Princeton_unload (char* outstring) const
   return 0;
 }
 
-int toa::Princeton_unload (FILE* outstream) const
+int Tempo::toa::Princeton_unload (FILE* outstream) const
 {
   sizebuf (81);
   Princeton_unload (buffer);
@@ -166,65 +170,54 @@ int toa::Princeton_unload (FILE* outstream) const
 // 
 // ////////////////////////////////////////////////////////////////////////
 
-int toa::Psrclock_load (const char* instring)
+int Tempo::toa::Psrclock_load (const char* instring)
 {
   if (verbose)
-    cerr << "toa::Psrclock_load ";
+    cerr << "Tempo::toa::Psrclock_load ";
 
   destroy ();
 
-  char* whitespace = " \n\t";
+  string whitespace (" \n\t");
+
   string parse = instring + 1;
-  filename = stringtok (&parse, whitespace);
-  if (verbose)
-    cerr << "filename='" << filename << "'  ";
+
+  auxinfo = stringtok (&parse, whitespace) + " "
+    + stringtok (&parse, whitespace) + " " + stringtok (&parse, whitespace);
 
   if ((instring[0]=='C') || (instring[0]=='c'))
-    deleted = 1;
-
-  if (sscanf (parse.c_str(), "%d %d", &subint, &subband) != 2) {
-    if (verbose) cerr << "toa::Psrclock_load - error parsing '"
-		      << instring << "'" << endl;
-    return -1;
-  }
-  if (verbose)
-    cerr << "int=" << subint << " band=" << subband;
-
-  // remove the subint and subband
-  stringtok (&parse, whitespace);
-  stringtok (&parse, whitespace);
+    state = Deleted;
 
   if (verbose)
-    cerr << "  rest='" << parse << "'" << endl;
+    cerr << "Tempo::toa::Psrclock_load Parkes format = '" << parse << "'" << endl;
 
   if (parkes_parse (parse.c_str()) < 0)
     return -1;
 
-  guess_instrument();
+  // LOAD AUX
   format = Psrclock;
 
   if (verbose) {
-    cerr << "toa::Psrclock_loaded ";
+    cerr << "Tempo::toa::Psrclock_loaded ";
     unload (stderr);
   }
   return 0;
 }
 
-int toa::Psrclock_unload (char* outstring) const
+int Tempo::toa::Psrclock_unload (char* outstring) const
 {
-  if (deleted)
+  if (is_deleted())
     outstring[0]='C';
   else
     outstring[0]=' ';
 
-  sprintf (outstring+1, "%s %3d %2d     ", filename.c_str(), subint, subband);
+  sprintf (outstring+1, "%s    ", auxinfo.c_str());
 
-  return parkes_out (outstring+filename.length()+9);
+  return parkes_out (outstring + 1 + auxinfo.length() + 3);
 }
 
-int toa::Psrclock_unload (FILE* outstream) const
+int Tempo::toa::Psrclock_unload (FILE* outstream) const
 {
-  sizebuf (81 + filename.length());
+  sizebuf (81 + auxinfo.length());
   Psrclock_unload (buffer);
   fprintf (outstream, "%s\n", buffer);
   return 0;
@@ -236,10 +229,10 @@ int toa::Psrclock_unload (FILE* outstream) const
 // 
 // ////////////////////////////////////////////////////////////////////////
 
-int toa::Rhythm_load (const char* instring)
+int Tempo::toa::Rhythm_load (const char* instring)
 {
   if (verbose)
-    cerr << "toa::Rhythm_load" << endl;
+    cerr << "Tempo::toa::Rhythm_load" << endl;
 
   if (Parkes_load (instring) < 0)
     return -1;
@@ -251,7 +244,7 @@ int toa::Rhythm_load (const char* instring)
     struct tm date;
     extern long timezone; // defined in time.h
     if (str2tm (&date, datestr) < 0) {
-      if (verbose) cerr << "toa::load(char*) Error parsing '"
+      if (verbose) cerr << "Tempo::toa::load(char*) Error parsing '"
 			<< datestr << "' as UTC." << endl;
       return -1;
     }
@@ -262,22 +255,15 @@ int toa::Rhythm_load (const char* instring)
   if (strlen(instring) < 81+14 || instring[80] != 'R')
     return 0;
 
-  scanned = sscanf (instring+81, "%6d%6d%2d", &subint, &subband, &subpoln);
-  if (scanned < 3) {
-    if (verbose) cerr << "toa::Rhythm_load(char*) Error scanning '"
-		      << instring + 81 << "'" << endl;
-    return -1;
-  }
+  auxinfo = instring + 81;
 
-  filename = string (instring+81+14);
-  filename = stringtok (&filename, " #\n\t");
+  // LOAD AUX
 
-  guess_instrument();
   format = Rhythm;
   return 0;
 }
 
-int toa::Rhythm_unload (char* outstring) const
+int Tempo::toa::Rhythm_unload (char* outstring) const
 {
   Parkes_unload (outstring);
 
@@ -293,14 +279,13 @@ int toa::Rhythm_unload (char* outstring) const
 
   outstring[80] = 'R';
 
-  sprintf (outstring+81, "%6d%6d%2d %s", 
-	   subint, subband, subpoln, filename.c_str());
+  sprintf (outstring+81, "%s", auxinfo.c_str());
   return 0;
 }
 
-int toa::Rhythm_unload (FILE* outstream) const
+int Tempo::toa::Rhythm_unload (FILE* outstream) const
 {
-  sizebuf (82 + 14 + filename.length() + 1);
+  sizebuf (83 + auxinfo.length());
   Rhythm_unload (buffer);
   fprintf (outstream, "%s\n", buffer);
   return 0;
@@ -314,7 +299,7 @@ int toa::Rhythm_unload (FILE* outstream) const
 // 
 // ////////////////////////////////////////////////////////////////////////
 
-int toa::load (const char* instring)
+int Tempo::toa::load (const char* instring)
 {
   if ( !instring )
     return -1;
@@ -334,7 +319,7 @@ int toa::load (const char* instring)
 
 // returns 0 if toa was loaded, 1 if end of file reached, -1 if error occurs
 
-int toa::load (FILE * instream)
+int Tempo::toa::load (FILE * instream)
 {
   // start with a length of line
   size_t chunk = 160;
@@ -356,19 +341,19 @@ int toa::load (FILE * instream)
     startbuf = buffer + inbuf;
   }
   if (ferror (instream)) {
-    perror ("toa::load(FILE*) error");
+    perror ("Tempo::toa::load(FILE*) error");
     return -1;
   }
   if (buffer[0] == '\0')
     return 1;
 
   if (verbose)
-    cerr << "toa::load(FILE*) to parse '" << buffer << "'" << endl;
+    cerr << "Tempo::toa::load(FILE*) to parse '" << buffer << "'" << endl;
 
   return load (buffer);
 }
 
-int toa::unload (FILE* outstream, Format fmt) const
+int Tempo::toa::unload (FILE* outstream, Format fmt) const
 {
   if (fmt == Unspecified)
     fmt = format;
@@ -383,12 +368,12 @@ int toa::unload (FILE* outstream, Format fmt) const
   case Rhythm:
     return Rhythm_unload (outstream);
   default:
-    if (verbose) cerr << "toa::unload undefined format" << endl;
+    if (verbose) cerr << "Tempo::toa::unload undefined format" << endl;
     return -1;
   }
 }
 
-int toa::unload (char* outstring, Format fmt) const
+int Tempo::toa::unload (char* outstring, Format fmt) const
 {
   if (fmt == Unspecified)
     fmt = format;
@@ -403,7 +388,7 @@ int toa::unload (char* outstring, Format fmt) const
   case Rhythm:
     return Rhythm_unload (outstring);
   default:
-    if (verbose) cerr << "toa::unload undefined format" << endl;
+    if (verbose) cerr << "Tempo::toa::unload undefined format" << endl;
     return -1;
   }
 }
@@ -414,7 +399,7 @@ int toa::unload (char* outstring, Format fmt) const
 // 
 // ////////////////////////////////////////////////////////////////////////
 
-int toa::Tempo_unload (FILE* outstream) const
+int Tempo::toa::Tempo_unload (FILE* outstream) const
 {
   switch (format) {
   case Parkes:
@@ -424,12 +409,12 @@ int toa::Tempo_unload (FILE* outstream) const
   case Princeton:
     return Princeton_unload (outstream);
   default:
-    if (verbose) cerr << "toa::Tempo_unload undefined format" << endl;
+    if (verbose) cerr << "Tempo::toa::Tempo_unload undefined format" << endl;
     return -1;
   }
 }
 
-int toa::Tempo_unload (char* outstring) const
+int Tempo::toa::Tempo_unload (char* outstring) const
 {
   switch (format) {
   case Parkes:
@@ -439,52 +424,21 @@ int toa::Tempo_unload (char* outstring) const
   case Princeton:
     return Princeton_unload (outstring);
   default:
-    if (verbose) cerr << "toa::Tempo_unload undefined format" << endl;
+    if (verbose) cerr << "Tempo::toa::Tempo_unload undefined format" << endl;
     return -1;
   }
 }
 
-void toa::guess_instrument ()
-{
-  if (filename.empty())
-    return;
-
-  const char* beg = strrchr (filename.c_str(), '/');
-  if (beg)
-    beg ++;
-  else
-    beg = filename.c_str();
-    
-  switch (*beg) {
-  case 'c':
-  case 'd':
-    instrument = FPTM; 
-    break;
-  case 'f':
-  case 'g':
-    instrument = FILTERBANK;
-    break;
-  case 's':
-  case 'a':
-    instrument = S2;
-    break;
-  case 'o':
-    instrument = CPSR;
-    break;
-  default:
-    instrument = UNKNOWN;
-  }
-}
 
 // ////////////////////////////////////////////////////////////////////////
 //
-// toa::shift
+// Tempo::toa::shift
 //
 // shifts a time of arrival to the nearest zero phase
 // 
 // ////////////////////////////////////////////////////////////////////////
 
-double toa::shift (const polyco& poly) const
+double Tempo::toa::shift (const polyco& poly) const
 { 
   double toashift = poly.phase (this->arrival, frequency).fracturns();
   if (toashift >.5) toashift -= 1.0;
@@ -497,11 +451,11 @@ double toa::shift (const polyco& poly) const
 //
 // ////////////////////////////////////////////////////////////////////////
 
-int toa::load (const char* filename, vector<toa>* toas)
+int Tempo::toa::load (const char* filename, vector<toa>* toas)
 {
   FILE* fp = fopen(filename, "r");
   if (fp==NULL){
-    cerr << "\n\ntoa::load - error opening '" << filename << "'::";
+    cerr << "\n\nTempo::toa::load - error opening '" << filename << "'::";
     perror ("");
     cerr << endl;
     return -1;
@@ -511,7 +465,7 @@ int toa::load (const char* filename, vector<toa>* toas)
   return ret;
 }
 
-int toa::load (FILE* instream, vector<toa>* toas)
+int Tempo::toa::load (FILE* instream, vector<toa>* toas)
 {
   toa tmp_toa;
   while (tmp_toa.load(instream) == 0)
@@ -519,7 +473,7 @@ int toa::load (FILE* instream, vector<toa>* toas)
   return 0;
 }
 
-int toa::unload(const char* filename, const vector<toa>& toas, Format fmt)
+int Tempo::toa::unload(const char* filename, const vector<toa>& toas, Format fmt)
 {
   FILE * fp;
   if((fp = fopen(filename, "w"))==NULL){
@@ -531,11 +485,11 @@ int toa::unload(const char* filename, const vector<toa>& toas, Format fmt)
   return ret;
 }
 
-int toa::unload(FILE* outstream, const vector<toa>& toas, Format fmt)
+int Tempo::toa::unload(FILE* outstream, const vector<toa>& toas, Format fmt)
 {
-  for (int i=0; i<toas.size(); ++i) {
+  for (unsigned i=0; i<toas.size(); ++i) {
     if (verbose)
-      cerr << "toa::unload - unloading toa " << i << endl;
+      cerr << "Tempo::toa::unload - unloading toa " << i << endl;
     if (toas[i].unload(outstream, fmt) < 0)
       return -1;
   }
@@ -548,14 +502,16 @@ int toa::unload(FILE* outstream, const vector<toa>& toas, Format fmt)
 // 
 // ////////////////////////////////////////////////////////////////////////
 
-int    toa::verbose = 0;
-char*  toa::buffer = NULL;
-size_t toa::bufsz = 0;
-char   toa::datestr [25];
+bool   Tempo::toa::verbose = false;
+char*  Tempo::toa::buffer = NULL;
+size_t Tempo::toa::bufsz = 0;
+char   Tempo::toa::datestr [25];
 
-void toa::init()
+void Tempo::toa::init()
 {
   format = Unspecified;
+  auxdata = NULL;
+
   frequency = 0.0;
   arrival = MJD (0.0,0.0,0.0);
   error = 0.0;
@@ -565,27 +521,23 @@ void toa::init()
   observatory [0] = '\0';
 
   calculated = -1;
-  filename.erase();
-  subint = -1;
-  subband = -1;
-  subpoln = -1;
-  instrument = UNKNOWN;
+  auxinfo.erase();
 
-  deleted = 0;
-  selected = 1;
+  state = Normal;
 }
 
-void toa::destroy()
+void Tempo::toa::destroy()
 {
+  if (auxdata) delete auxdata; auxdata = NULL;
   init ();
 }
 
-void toa::sizebuf (size_t length)
+void Tempo::toa::sizebuf (size_t length)
 {
   if (bufsz < length) {
     void* temp = realloc (buffer, length);
     if (temp == NULL) {
-      cerr << "toa::sizebuf Cannot allocate buffer space" << endl;
+      cerr << "Tempo::toa::sizebuf Cannot allocate buffer space" << endl;
       throw ("bad_alloc");
     }
     buffer = (char*) temp;
@@ -593,20 +545,20 @@ void toa::sizebuf (size_t length)
   }
 }
 
-bool toa::valid()
+bool Tempo::toa::valid()
 {
   if (frequency < 20.0) {
-    if (verbose) cerr << "toa::load(char*) Error: FREQUENCY=" << frequency
+    if (verbose) cerr << "Tempo::toa::load(char*) Error: FREQUENCY=" << frequency
 		      << " is too small." << endl;
     return 0;
   }
   if (arrival < MJD (40000,0,0.0)) {
-    if (verbose) cerr << "toa::load(char*) Error: MJD=" << arrival 
+    if (verbose) cerr << "Tempo::toa::load(char*) Error: MJD=" << arrival 
 		      << " is too small" << endl;
     return 0;
   }
   if ((error <= 0.0) || (error > 999999999.0)) {
-    if (verbose) cerr << "toa::load(char*) Error: ERROR=" << error 
+    if (verbose) cerr << "Tempo::toa::load(char*) Error: ERROR=" << error 
 		      << " is weird." << endl;
     return 0;
   }
@@ -621,29 +573,29 @@ bool toa::valid()
 // 
 // ////////////////////////////////////////////////////////////////////////
 
-int toa_model::verbose = 0;
+int Tempo::toa_model::verbose = 0;
 
-toa_model::toa_model (const toa_model & toamodel)
+Tempo::toa_model::toa_model (const toa_model & toamodel)
 {
   this->operator=(toamodel);
 }
 
-toa_model & toa_model::operator = (const toa_model & toamodel)
+Tempo::toa_model & Tempo::toa_model::operator = (const toa_model & toamodel)
 {
   if (this != &toamodel)
     toas = toamodel.toas;
   return(*this);
 }
 
-void toa_model::load (const char * filename)
+void Tempo::toa_model::load (const char * filename)
 {
   toas.clear();
-  if (toa::load (filename, &toas) < 0)
+  if (Tempo::toa::load (filename, &toas) < 0)
     throw ("toa_model::load");
 }
 
-void toa_model::unload (const char * filename)
+void Tempo::toa_model::unload (const char * filename)
 {
-  if (toa::unload (filename, toas) < 0)
-    throw ("toa_model::load");
+  if (Tempo::toa::unload (filename, toas) < 0)
+    throw ("Tempo::toa_model::load");
 }

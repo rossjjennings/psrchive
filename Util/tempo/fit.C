@@ -5,6 +5,7 @@
 #include "tempo++.h"
 #include "toa.h"
 #include "residual.h"
+#include "resio.h"
 #include "psrParams.h"
 
 // ////////////////////////////////////////////////////////////////////////
@@ -24,8 +25,8 @@
 bool Tempo::verbose = false;
 MJD  Tempo::unspecified;
 
-void Tempo::fit (const psrParams& model, const vector<toa>& toas,
-		 psrParams* postfit, vector<residual>* residuals)
+void Tempo::fit (const psrParams& model, vector<toa>& toas,
+		 psrParams* postfit, bool track)
 {
   char* tempo_tim = "arrival.tim";
   char* tempo_par = "arrival.par";
@@ -43,13 +44,51 @@ void Tempo::fit (const psrParams& model, const vector<toa>& toas,
     perror (":");
     throw ("fit() cannot open file");
   }
-  int unloaded = 0;
-  for (unsigned iarr=0; iarr < toas.size(); iarr++)  {
-    if (!toas[iarr].is_deleted() && toas[iarr].is_selected()) {
+
+  int      unloaded = 0;       // count of toas unloaded
+  double   sumphase = 0.0;     // phase sum used for tracking mode
+  unsigned iarr;
+
+  for (iarr=0; iarr < toas.size(); iarr++)  {
+
+    if (!toas[iarr].is_selected())
+      continue;
+
+    if (track)  {
+      if (!toas[iarr].resid.valid) {
+	cerr << "Tempo::fit invalid residual for toa #" << unloaded + 1
+	     << " ... tracking disabled" << endl;
+	track = false;
+      }
+      
+      if (unloaded == 0)
+	sumphase = toas[iarr].resid.turns;
+      
+      /* straten copied this from psrclock:
+	 This is the agonising bit. 
+	 Following makes up for things not starting at zero.
+	 This is equivalent to standard tempo only: we can
+	 simulate tracking mode by making sure what is plotted is
+	 how tempo will interpret it. 
+	 */
+      
+      double current_phase = toas[iarr].resid.turns;
+      float  sumout = 0.0;
+      
+      while (current_phase - sumphase > 0.5) {
+	sumphase ++; sumout ++;
+      }
+      while (current_phase - sumphase < -0.5) {
+	sumphase --; sumout --;
+      }
+      if (sumout > 0.5) fprintf  (fptr, "PHASE +%f\n", sumout);
+      if (sumout < -0.5) fprintf (fptr, "PHASE %f\n", sumout);
+      
       toas[iarr].Tempo_unload (fptr);
       unloaded ++;
     }
   }
+
   fclose (fptr); 
   if (verbose)
     cerr << "Tempo::fit unloaded " << unloaded << " TOAs to '" 
@@ -78,16 +117,26 @@ void Tempo::fit (const psrParams& model, const vector<toa>& toas,
     throw (string ("Tempo::fit"));
   }
 
-  if (postfit) {
-    // load the new ephemeris (PSRNAME.par in current working directory)
-    char* dotpar = ".par";
-    string tpopar = model.psrname() + dotpar;
-    postfit->load( tpopar.c_str() );
-  }
+  // load the new ephemeris (PSRNAME.par in current working directory)
+  if (postfit)
+    postfit->load( model.psrname() + ".par" );
 
-  if (residuals) {
-    // load the residuals from resid2.tmp
-    residuals->resize(unloaded);
-    residual::load (r2flun, tempo_res, residuals);
+  // load the residuals from resid2.tmp
+  resopen_ (&r2flun, tempo_res, (int) strlen(tempo_res));
+
+  for (unsigned iarr=0; iarr < toas.size(); iarr++)  {
+
+    if (!toas[iarr].is_selected())
+      continue;
+
+    if (unloaded == 0)
+      throw string ("Tempo::fit error attempting to read more than unloaded");
+    if (toas[iarr].resid.load (r2flun) != 0)
+      throw string ("Tempo::fit error reading residual from ") + tempo_res;
+    unloaded --;
   }
+  if (unloaded != 0)
+    throw string ("Tempo::fit error read fewer residuals than unloaded toas");
+
+  resclose_ (&r2flun);
 }

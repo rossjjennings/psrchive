@@ -1,4 +1,10 @@
 //-*-C++-*-
+
+/* $Source: /cvsroot/psrchive/psrchive/Util/tempo/tempo++.h,v $
+   $Revision: 1.4 $
+   $Date: 2000/05/22 17:40:26 $
+   $Author: straten $ */
+
 #ifndef __TEMPOPLUSPLUS_H
 #define __TEMPOPLUSPLUS_H
 
@@ -9,10 +15,11 @@
 
 class psrParams;
 class psrephem;
-class toa;
-class residual;
 
 namespace Tempo {
+
+  class toa;
+  class residual;
 
   extern bool verbose;
   extern MJD  unspecified;
@@ -30,8 +37,8 @@ namespace Tempo {
 
   // given pulsar parameters and times of arrival, calls TEMPO to determine
   // the residual TOA.
-  void fit (const psrParams& model, const vector<toa>& toas,
-	    psrParams* postfit, vector<residual>* residuals);
+  void fit (const psrParams& model, vector<toa>& toas,
+	    psrParams* postfit = NULL, bool track = false);
 
   // returns a polyco valid over the range in MJD specified by m1 and m2
   polyco predict (const psrephem& eph,

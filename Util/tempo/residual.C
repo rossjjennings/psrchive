@@ -1,27 +1,38 @@
+#include <string>
 #include <stdio.h>
 
 #include "resio.h"
 #include "residual.h"
 
-int residual::verbose = 0;
+bool Tempo::residual::verbose = 0;
 
-void residual::init ()
+Tempo::residual::residual (int lun)
+{
+  init();
+  if (load(lun) < 0)
+    throw string ("Tempo::residual load error");
+};
+
+void Tempo::residual::init ()
 {
   mjd = turns = seconds = binaryphase = obsfreq 
     = weight = error = preres = 0.0;
+  valid = false;
 }
 
-int residual::load (int lun)
+int Tempo::residual::load (int lun)
 {
   int status = 0;
   obsfreq = -20.0;
   resread_ (&lun, &mjd, &turns, &seconds, &binaryphase,
 	    &obsfreq, &weight, &error, &preres, &status);
+  if (status == 0)
+    valid = true;
   return status;
 }
 
 // ////////////////////////////////////////////////////////////////////////
-// residual::load
+// Tempo::residual::load
 //
 // Loads residual objects from the fortran binary file produced by TEMPO
 // (usually resid2.tmp).
@@ -31,7 +42,8 @@ int residual::load (int lun)
 // residuals - vector of residual objects into which .size() residuals
 //             will be loaded
 // ////////////////////////////////////////////////////////////////////////
-int residual::load (int r2flun, char* filename, vector<residual>* residuals)
+int Tempo::residual::load (int r2flun, char* filename, 
+			   vector<residual>* residuals)
 {
   resopen_ (&r2flun, filename, (int) strlen(filename));
   if (verbose)
@@ -47,36 +59,3 @@ int residual::load (int r2flun, char* filename, vector<residual>* residuals)
   resclose_ (&r2flun);
   return 0;
 }
-
-residual::plot residual::xtype = Mjd;
-residual::plot residual::ytype = Turns;
-
-float y_ordinate (const residual& r)
-{
-  switch (residual::ytype)  {
-  case residual::Seconds:
-    return r.seconds;
-  case residual::Turns:
-    return r.turns;
-  default:
-    return -1.0;
-  }
-}
-
-float x_ordinate (const residual& r)
-{
-  switch (residual::xtype)  {
-  case residual::Mjd:
-    return r.mjd;
-  case residual::BinaryPhase:
-    return r.binaryphase;
-  default:
-    return -1.0;
-  }
-}
-
-float y_error (const residual& r)
-{ return r.error/1e3; };
-
-float x_error (const residual& r)
-{ return 0; };
