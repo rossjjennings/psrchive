@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/SingleAxisCalibrator.h,v $
-   $Revision: 1.5 $
-   $Date: 2003/04/17 22:04:14 $
+   $Revision: 1.6 $
+   $Date: 2003/09/04 10:21:33 $
    $Author: straten $ */
 
 #ifndef __SingleAxisCalibrator_H
@@ -19,6 +19,7 @@ namespace Pulsar {
   public:
 
     friend class SingleAxisCalibratorPlotter;
+    friend class ReceptionCalibrator;
 
     //! Construct from an vector of PolnCal Pulsar::Archives
     SingleAxisCalibrator (const vector<Archive*>& a) : PolnCalibrator (a) {}
