@@ -445,7 +445,12 @@ double Pulsar::Profile::sum (int istart, int iend) const
 
   nbinify (istart, iend, nbin);
 
+  if( verbose )
+    fprintf(stderr,"Pulsar::Profile::sum() got istart=%d iend=%d\n",
+	    istart,iend);
+
   double tot = 0;
+  
   for (int ibin=istart; ibin < iend; ibin++)
     tot += (double) amps[ibin%nbin];
 
@@ -701,13 +706,13 @@ void Pulsar::Profile::find_spike_edges(int& rise, int& fall, float pc,
 		pc, amps[spike_bin], threshold,
 		min(), max());
 
-  //  fprintf(stderr,"\nPulsar::Profile::find_spike_edges() returning with rise=%d fall=%d\n",
+  //fprintf(stderr,"\nPulsar::Profile::find_spike_edges() returning with rise=%d fall=%d\n",
   //  rise,fall);
 }
 
 /////////////////////////////////////////////////////////////////////////////
 //
-// Pulsar::Profile::find_pulse_flux
+// Pulsar::Profile::sum_flux
 //
 /*! From the given pulse width this calculates the average flux contained
 within the pulse.  Useful for single pulse work where the pulse
@@ -717,17 +722,17 @@ by other flux calculators may not be valid.
 Default behaviour is to calculate a pulse width about the maximum bin
  */
 
-//! Find the flux of the pulse
-float Pulsar::Profile::find_pulse_flux(float dropoff) const{
+//! Sum the flux in the specified bins
+float Pulsar::Profile::sum_flux(float dropoff) const{
   int rise = 0;
   int fall = 0;
   find_spike_edges(rise,fall,dropoff);
 
-  return find_pulse_flux(rise,fall);
+  return sum_flux(rise,fall);
 }
 
-//! Find the flux of the pulse
-float Pulsar::Profile::find_pulse_flux(int rise, int fall) const {
+//! Finding the bin numbers at which the flux falls below a threshold, and sum the flux in those bins
+float Pulsar::Profile::sum_flux(int rise, int fall) const {
   int nbin = get_nbin();
 
   nbinify(rise,fall,nbin);
@@ -737,16 +742,29 @@ float Pulsar::Profile::find_pulse_flux(int rise, int fall) const {
   if( spike_antiphase > 1.0 )
     spike_antiphase--;
 
-  //  fprintf(stderr,"\nPulsar::Profile::find_pulse_flux() got spike_phase=%f spike_antiphase=%f fall-rise=%d\n",
+  //fprintf(stderr,"\nPulsar::Profile::sum_flux() got spike_phase=%f spike_antiphase=%f fall-rise=%d\n",
   //  spike_phase, spike_antiphase, fall-rise);
 
   float integrated_flux = 0.0;
 
   const float* amps = get_amps();
 
-  for( int i=rise; i<fall; i++)
-    integrated_flux += amps[i%nbin];
+  float mean_off_pulse = mean(spike_antiphase);
 
-  return integrated_flux - mean(spike_antiphase)*(fall-rise);
+  for( int i=rise; i<fall; i++){
+    //fprintf(stderr,"Pulsar::Profile::sum_flux() adding in %f\n",
+    //    amps[i%nbin]-mean_off_pulse);
+    integrated_flux += amps[i%nbin];
+  }
+
+  //  fprintf(stderr,"\nPulsar::Profile::sum_flux() returning integrated_flux - mean(spike_antiphase)*(fall-rise)\n"
+  //  " = %f - mean(%f) * (%d-%d)\n"
+  //  " = %f - %f * %f\n"
+  //  " = %f\n",
+  //  integrated_flux, spike_antiphase, fall, rise,
+  //  integrated_flux, mean_off_pulse, float(fall-rise),
+  //  integrated_flux - mean_off_pulse*(fall-rise));
+
+  return integrated_flux - mean_off_pulse*(fall-rise);
 }
   
