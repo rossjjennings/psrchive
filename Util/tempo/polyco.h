@@ -59,6 +59,7 @@ public:
   double period            (const MJD &t) const;
   Phase  phase             (const MJD &t) const;
   Phase  phase             (const MJD &t, float obs_freq) const;
+  MJD    iphase            (const Phase& p) const;
   double frequency         (const MJD &t) const;
   bool   is_tempov11       () const {return (tempov11);};
   int    get_telescope     () const {return (telescope);};
@@ -74,6 +75,11 @@ public:
   MJD end_time () const 
     { return reftime + nspan_mins * 60.0/2.0; };
 
+  Phase start_phase () const
+    { return phase (start_time()); };
+  Phase end_phase () const
+    { return phase (end_time()); };
+  
   friend int operator == (const polynomial &, const polynomial &);
   friend int operator != (const polynomial &, const polynomial &);
 
@@ -131,10 +137,11 @@ class polyco {
   const polynomial* nearest (const MJD &t, 
 			     const string& psrname = anyPsr) const;
 
-  const polynomial& best (const MJD &t, 
-			  const string& psrname = anyPsr) const;
+  const polynomial& best (const MJD &t, const string& psr = anyPsr) const;
+  const polynomial& best (const Phase &p, const string& psr = anyPsr) const;
 
-  int i_nearest (const MJD &t, const string& psrname = anyPsr) const;
+  int i_nearest (const MJD &t,   const string& psrname = anyPsr) const;
+  int i_nearest (const Phase &p, const string& psrname = anyPsr) const;
 
   double doppler_shift (const MJD& t, const string& psr = anyPsr) const
     { return best(t, psr).get_doppler_shift(); };
@@ -144,6 +151,9 @@ class polyco {
 
   Phase phase (const MJD& t, float obs_freq, const string& psr = anyPsr) const
     { return best(t, psr).phase(t, obs_freq); };
+
+  MJD iphase (const Phase& phase, const string& psr = anyPsr) const
+    { return best(phase, psr).iphase(phase); };
 
   double period(const MJD& t, const string& psr = anyPsr) const
     { return best(t, psr).period(t); };
@@ -159,11 +169,13 @@ class polyco {
   float  get_dm        () const { return pollys.front().get_dm(); };
   int    get_ncoeff    () const { return pollys.front().get_ncoeff(); };
 
-
   bool is_tempov11() const;
 
   MJD  start_time () const { return pollys.front().start_time(); };
   MJD  end_time ()   const { return pollys.back().end_time(); };
+
+  Phase start_phase () const { return pollys.front().start_phase(); };
+  Phase end_phase ()   const { return pollys.back().end_phase(); };
 
   friend int operator == (const polyco &, const polyco &);
   friend int operator != (const polyco &, const polyco &);

@@ -7,7 +7,9 @@
 #include "mpi.h"
 #endif
 #include <string>
+
 #include "psr_cpp.h"
+#include "MJD.h"
 
 class Phase {
 
@@ -15,20 +17,36 @@ class Phase {
   int64 turns;
   double fturns;
 
+  void settle ();
+
  public:
   Phase();
   ~Phase(){turns=0; fturns=0.0;};
-  Phase(int64 tns, double ftns);
-  
+  Phase (int64 tns, double ftns);
+  Phase (double turns);
+
   Phase& operator= (const Phase &in_Phase);
+  Phase& operator= (double turns);
 
   friend Phase operator + (const Phase &, double); 
   friend Phase operator - (const Phase &, double); 
   friend Phase operator + (const Phase &, const Phase &);
   friend Phase operator - (const Phase &, const Phase &);
-  friend Phase operator / (const Phase &, double);
+
+  // some may disagree with this usage of the operator
+  friend MJD operator * (const Phase &, double period);
+  friend MJD operator / (const Phase &, double frequency);
+
+  Phase& operator += (const Phase &);
+  Phase& operator -= (const Phase &);
   Phase& operator += (double);
   Phase& operator -= (double);
+  Phase& operator += (int);
+  Phase& operator -= (int);
+  // increment/decrement by one turn
+  Phase& operator ++ ();
+  Phase& operator -- ();
+
   friend int operator > (const Phase &, const Phase &) ;
   friend int operator < (const Phase &, const Phase &) ;
   friend int operator >= (const Phase &, const Phase &);
@@ -36,8 +54,11 @@ class Phase {
   friend int operator == (const Phase &, const Phase &);
   friend int operator != (const Phase &, const Phase &);
 
+  friend Phase ceil  (const Phase &);
+  friend Phase floor (const Phase &);
+
   double in_turns() const;
-  int64 intturns() const;
+  int64  intturns() const;
   double fracturns() const;
   string strprint(int precision) const;
 
@@ -50,5 +71,8 @@ class Phase {
 #endif
 
 };
+
+inline ostream& operator<< (ostream& ostr, const Phase& sz) 
+{ return ostr << sz.strprint(8); }
 
 #endif

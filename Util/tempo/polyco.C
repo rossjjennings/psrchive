@@ -303,49 +303,89 @@ int polynomial::unload (FILE* fptr) const
   return bout;
 }
 
-Phase polynomial::phase(const MJD& t) const { 
+Phase polynomial::phase(const MJD& t) const
+{
+  Phase dp (0.0);
+  MJD dt = t - reftime;
+  double tm = dt.in_minutes();
 
-   Phase p = Phase(0,0.0);
-   MJD dt;
-   if(t>reftime) dt = t - reftime;
-   else {
-     dt = reftime-t;
-     dt = dt*-1.0;
-   }
-   double tm = dt.in_minutes();
-   double poweroft = 1.0;
-   for (int i=0;i<coefs.size();i++) {
-      p += (coefs[i]*poweroft);
-      poweroft *= tm;
-   }
-   p += tm*f0*60.0;
-   return(ref_phase+p);
+  double poweroft = 1.0;
+  for (int i=0;i<coefs.size();i++) {
+    dp += (coefs[i]*poweroft);
+    poweroft *= tm;
+  }
+  dp += tm*f0*60.0;
+
+  return ref_phase + dp;
 }
 
-double polynomial::frequency(const MJD& t) const {
+// /////////////////////////////////////////////////////////////////////////
+// polynomial::iphase
+//
+// uses the Newton-Raphson method to very quickly solve:
+// PHASE = RPHASE + DT*60*F0 + COEFF(1) + DT*COEFF(2) + DT^2*COEFF(3) + ....
+// for DT, given PHASE.  Where:
+//
+// DT    = time - reftime;
+// PHASE = p;
+// 
+// RETURN value is time
+//
+MJD polynomial::iphase(const Phase& p) const
+{
+  MJD guess = reftime + (p - ref_phase) / f0;
+  MJD dt;
 
-   double dp = 0;                    // dphase/dt starts as phase per minute.
-   MJD dt = t - reftime;
-   double tm = dt.in_minutes();
+  int gi = 0;
+  double converge_faster = 1.0;  // kludge!!
+  double converge_factor = 0.5;
 
-   double poweroft = 1.0;
-   for (int i=1;i<coefs.size();i++) {
-     dp+=(double)(i)*coefs[i]*poweroft;
-     poweroft *= tm;
-   }
-   dp /= (double) 60.0;          // Phase per second
-   dp += f0;
-   return(dp);
+  for (gi=0; gi<10000; gi++) {
+    dt = (phase(guess) - p) / frequency(guess);
+
+    guess -= dt * converge_faster;
+
+    // every six iterations, give the convergence a little bump
+    if (gi && !(gi % 6))
+      converge_faster *= converge_factor;
+
+    if (fabs (dt.in_seconds())  < MJD::precision)
+      return guess;
+  }
+
+  cerr << "polynomial::iphase maximum iterations exceeded - error="
+       << dt.in_seconds() * 1e6 << "us" << endl;
+  
+  return guess;
+}
+
+double polynomial::frequency(const MJD& t) const
+{  
+  double dp = 0;                    // dphase/dt starts as phase per minute.
+  MJD dt = t - reftime;
+  double tm = dt.in_minutes();
+
+  double poweroft = 1.0;
+  for (int i=1;i<coefs.size();i++) {
+    dp+=(double)(i)*coefs[i]*poweroft;
+    poweroft *= tm;
+  }
+  dp /= (double) 60.0;          // Phase per second
+  dp += f0;
+  return dp;
 }  
 
-Phase polynomial::phase(const MJD& t, float obs_freq) const {
-  float dm_delay_in_secs = dm/2.41e-4*(1.0/(obs_freq*obs_freq)-1.0/(freq*freq));
-  return(this->phase(t) - dm_delay_in_secs/this->period(t));
+Phase polynomial::phase(const MJD& t, float obs_freq) const
+{
+  float dm_delay_in_secs = 
+    dm/2.41e-4*(1.0/(obs_freq*obs_freq)-1.0/(freq*freq));
+  return phase(t) - dm_delay_in_secs/period(t);
 }
 
-double polynomial::period(const MJD& t) const {
-   return(1.0/frequency(t));               // Seconds per turn = period of pulsar
- }
+// Seconds per turn = period of pulsar
+double polynomial::period (const MJD& t) const {
+   return(1.0/frequency(t));
+}
 
 void polynomial::prettyprint() const {
 
@@ -429,19 +469,25 @@ polyco::polyco(const char * filename)
   }
 }
 
-int polyco::load(const string polyco_filename, size_t nbytes){
-  ifstream file(polyco_filename.c_str());
-  return(this->load(file,nbytes));
+int polyco::load(const string polyco_filename, size_t nbytes) {
+  return load (polyco_filename.c_str());
 }
 
 int polyco::load(const char * polyco_filename, size_t nbytes)
 {
   ifstream file(polyco_filename);
+  if (!file) {
+    cerr << "polyco::load Could not open " << polyco_filename << endl;
+    return -1;
+  }
   return(this->load(file,nbytes));
 }
 
 int polyco::load (istream &istr, size_t nbytes)
 {
+  if (!istr)
+    return -1;
+
   string total;
   string line;
   size_t bytes = 0;
@@ -570,10 +616,9 @@ void polyco::prettyprint() const {
 
 // returns a pointer to the best polynomial for use over the period
 // defined by t1 to t2
-
-const polynomial* polyco::nearest (const MJD &t, const string& in_psrname) const
+const polynomial* polyco::nearest (const MJD &t, const string& psr) const
 {
-  int ipolly = i_nearest (t, in_psrname);
+  int ipolly = i_nearest (t, psr);
 
   if (ipolly < 0)  {
     string failed = "polyco::nearest_polly no polynomial";
@@ -582,9 +627,20 @@ const polynomial* polyco::nearest (const MJD &t, const string& in_psrname) const
   return &pollys[ipolly];
 }
 
-const polynomial& polyco::best (const MJD &t, const string& in_psrname) const
+const polynomial& polyco::best (const MJD &t, const string& psr) const
 {
-  int ipolly = i_nearest (t, in_psrname);
+  int ipolly = i_nearest (t, psr);
+
+  if (ipolly < 0)  {
+    string failed = "polyco::best no polynomial";
+    throw(failed);
+  }
+  return pollys[ipolly];
+}
+
+const polynomial& polyco::best (const Phase& p, const string& psr) const
+{
+  int ipolly = i_nearest (p, psr);
 
   if (ipolly < 0)  {
     string failed = "polyco::best no polynomial";
@@ -629,6 +685,38 @@ int polyco::i_nearest (const MJD &t, const string& in_psr) const
   cerr << "polyco::i_nearest - no polynomial for MJD " << t.printdays(15)
        << "\npolyco::i_nearest - range " << start_time().printdays(5) 
        << " - " << end_time().printdays(5) << endl;
+  return -1;
+}
+
+int polyco::i_nearest (const Phase& phase, const string& in_psr) const
+{
+  float min_dist = MAXFLOAT;
+  int imin = -1;
+
+  for (unsigned ipolly=0; ipolly<pollys.size(); ipolly ++)  {
+    if (in_psr==anyPsr || pollys[ipolly].psrname==in_psr) {      
+      float dist = fabs ( (pollys[ipolly].ref_phase - phase).in_turns() );
+      if (dist < min_dist) {
+	imin = ipolly;
+	min_dist = dist;
+      }
+    }
+  }
+  // check if any polynomial matched
+  if (imin < 0) {
+    cerr << "polyco::i_nearest - no polynomial found for pulsar: '"
+	 << in_psr << "'\n";
+    return -1;
+  }
+
+  if ( (phase > start_phase()) && (phase < end_phase()) )
+    return imin;
+
+  // the time is out of range of the nearest polynomial
+  cerr << "polyco::i_nearest - no polynomial for MJD " << phase.strprint(15)
+       << "\npolyco::i_nearest - range " << start_phase().strprint(15)
+       << " - " << end_phase().strprint(15) << endl;
+
   return -1;
 }
 
