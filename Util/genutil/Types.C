@@ -210,7 +210,8 @@ const string Signal::State2string (State state)
   }
 }
 
-const char* Signal::source_string(Source source){
+const char* Signal::source_string(Source source)
+{
   switch( source ){
   case Unknown:
     return "Unknown";
@@ -225,7 +226,8 @@ const char* Signal::source_string(Source source){
   }
 }
 
-const char* Signal::basis_string(Basis basis){
+const char* Signal::basis_string(Basis basis)
+{
   switch( basis ){
   case Circular:
     return "Circular";

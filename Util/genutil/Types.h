@@ -1,12 +1,14 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Types.h,v $
-   $Revision: 1.6 $
-   $Date: 2002/12/04 05:00:56 $
-   $Author: hknight $ */
+   $Revision: 1.7 $
+   $Date: 2003/02/10 10:00:27 $
+   $Author: straten $ */
 
 #ifndef __Types_h
 #define __Types_h
+
+#include <string>
 
 namespace Signal {
 
