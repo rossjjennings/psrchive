@@ -51,21 +51,33 @@ int main (int argc, char** argv) try {
   Pulsar::ReceiverTUI receiver_tui;
   tui.import( "rcvr", &receiver_tui );
 
+  bool edit = false;
+  bool save = false;
+  string save_ext;
+
   int gotc;
-  while ((gotc = getopt (argc, argv, "c:hHvV")) != -1)
+  while ((gotc = getopt (argc, argv, "c:e:hHmvV")) != -1)
     switch (gotc) {
 
     case 'c': {
-      char whitespace[5] = " ,\n\t";
+      char whitespace[5] = ",";
       char* cmd = strtok (optarg, whitespace);
       while (cmd) {
         if (verbose)
           cerr << "psredit: parsed command '" << cmd << "'" << endl;
         commands.push_back(cmd);
+
+	if (strchr(cmd,'='))
+	  edit = true;
         cmd = strtok (NULL, whitespace);
       }
       break;
     }
+
+    case 'e':
+      save = true;
+      save_ext = optarg;
+      break;
 
     case 'h':
       usage ();
@@ -86,6 +98,11 @@ int main (int argc, char** argv) try {
 
     }
 
+
+    case 'm':
+      save = true;
+      break;
+
     case 'v':
       verbose = true;
       Pulsar::Archive::set_verbosity(2);
@@ -101,7 +118,12 @@ int main (int argc, char** argv) try {
       cerr << "Unknown command line option" << endl;
       return -1;
     }
-  
+
+  if (edit && !save) {
+    cout << "psredit: changes will not be saved."
+      " Use -m or -e to write results to disk" << endl;
+  }
+
   vector<string> filenames;
   for (int ai=optind; ai<argc; ai++)
     dirglob (&filenames, argv[ai]);
@@ -122,6 +144,24 @@ int main (int argc, char** argv) try {
     }
 
     cout << endl;
+
+    if (edit && save) {
+
+      if (save_ext.empty()) {
+	archive->unload();
+	cout << archive->get_filename() << " updated on disk" << endl;
+      }
+      else {
+	string name = archive->get_filename();
+	unsigned index = name.find_last_of(".");
+	if (index == string::npos)
+	  index = name.length();    
+	name = name.substr(0, index) + "." + save_ext;
+	archive->unload(name);
+	cout << archive->get_filename() << " written to disk" << endl;
+      }
+
+    }
 
   } // for each archive
 
