@@ -150,6 +150,7 @@ int psrephem::old_load (const char* filename)
     fprintf (stderr, "psrephem::old_load error\n");
     return -1;
   }
+  fclose(fptr);
   return 0;
 }
 
