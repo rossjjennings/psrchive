@@ -30,9 +30,13 @@ void Pulsar::Archive::append (const Archive* arch)
   if (arch->get_nsubint() == 0)
     return;
 
+  string reason;
   if (append_must_match) {
-    string reason;
     if (!mixable (arch, reason))
+      throw Error (InvalidState, "Archive::append", reason);
+  }
+  else {
+    if (!standard_match (arch, reason))
       throw Error (InvalidState, "Archive::append", reason);
   }
 
@@ -115,15 +119,6 @@ Pulsar::Archive::standard_match (const Archive* arch, string& reason) const
 
   if (get_source() != arch->get_source()) {
     reason = "source name mismatch: "+get_source()+" != "+arch->get_source();
-    return false;
-  }
-
-  double cf1 = get_centre_frequency();
-  double cf2 = arch->get_centre_frequency();
-  double dfreq = fabs (cf2 - cf1);
-
-  if (dfreq > 0.2 * cf1) {
-    reason = stringprintf ("centre frequency mismatch: %lf and %lf", cf1, cf2);
     return false;
   }
 
