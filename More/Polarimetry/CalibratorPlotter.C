@@ -58,7 +58,7 @@ void Pulsar::CalibratorPlotter::plot (const Calibrator::Info* info,
 
   if (verbose)
     cerr << "Pulsar::CalibratorPlotter::plot nchan=" << nchan 
-	 << " nplot=" << nplot << endl;
+	 << " nplot=" << nplot << " cfreq=" << cfreq << " bw=" << bw << endl;
 
   float xmin, xmax, ymin, ymax;
   cpgqvp (0, &xmin, &xmax, &ymin, &ymax);
@@ -114,6 +114,10 @@ void Pulsar::CalibratorPlotter::plot (const Calibrator::Info* info,
     plotter.clear ();
 
     unsigned nparam = info->get_nparam( iplot );
+
+    if (verbose) cerr << "Pulsar::CalibratorPlotter::plot iplot=" << iplot
+		      << " nparam=" << nparam << endl;
+
     float yscale = info->get_scale( iplot );
 
     unsigned iparam = 0;
