@@ -1,19 +1,19 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/SingleAxisCalibrator.h,v $
-   $Revision: 1.4 $
-   $Date: 2003/04/05 11:12:14 $
+   $Revision: 1.5 $
+   $Date: 2003/04/17 22:04:14 $
    $Author: straten $ */
 
 #ifndef __SingleAxisCalibrator_H
 #define __SingleAxisCalibrator_H
 
 #include "PolnCalibrator.h"
-#include "Calibration/SingleAxisModel.h"
+#include "Calibration/SingleAxis.h"
 
 namespace Pulsar {
 
-  //! Uses SingleAxisModel to represent the system response
+  //! Uses SingleAxis to represent the system response
   class SingleAxisCalibrator : public PolnCalibrator {
     
   public:
@@ -31,16 +31,16 @@ namespace Pulsar {
 
   protected:
 
-    //! Return the system response as determined by the SingleAxisModel
+    //! Return the system response as determined by the SingleAxis
     virtual Jones<double> solve (const vector<Estimate<double> >& hi,
 				 const vector<Estimate<double> >& lo,
 				 unsigned ichan);
 
-    //! Resize the space used to store SingleAxisModel parameters
+    //! Resize the space used to store SingleAxis parameters
     virtual void resize_parameters (unsigned nchan);
 
-    //! SingleAxisModel representation of the instrument
-    vector<Calibration::SingleAxisModel> model;
+    //! SingleAxis representation of the instrument
+    vector<Calibration::SingleAxis> model;
 
   };
 

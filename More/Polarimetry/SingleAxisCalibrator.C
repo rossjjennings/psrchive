@@ -6,7 +6,7 @@ Pulsar::SingleAxisCalibrator::~SingleAxisCalibrator ()
   // desctructor can delete forward declared objects
 }
 
-//! Return the system response as determined by the SingleAxisModel
+//! Return the system response as determined by the SingleAxis
 Jones<double> 
 Pulsar::SingleAxisCalibrator::solve (const vector<Estimate<double> >& hi,
 				     const vector<Estimate<double> >& lo,
@@ -18,16 +18,16 @@ Pulsar::SingleAxisCalibrator::solve (const vector<Estimate<double> >& hi,
   for (unsigned ipol=0; ipol<npol; ++ipol)
     cal[ipol] = hi[ipol] - lo[ipol];
 
-  Calibration::SingleAxisModel qm;
-  qm.solve (cal, verbose);
+  Calibration::SingleAxis qm;
+  qm.solve (cal);
 
   if (store_parameters)
     model[ichan] = qm;
 
-  return qm.get_Jones();
+  return qm.evaluate();
 }
 
-//! Resize the space used to store SingleAxisModel parameters
+//! Resize the space used to store SingleAxis parameters
 void Pulsar::SingleAxisCalibrator::resize_parameters (unsigned nchan)
 {
   if (verbose)
