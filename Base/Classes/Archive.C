@@ -354,7 +354,14 @@ void Pulsar::Archive::rotate (double time)
 */
 void Pulsar::Archive::defaraday (double rotation_measure, double rm_iono)
 {
-
+  convert_state(Signal::Stokes);
+  remove_baseline();
+  
+  for (unsigned i = 0; i < get_nsubint(); i++)
+    get_Integration(i)->defaraday(rotation_measure, rm_iono);
+  
+  set_ism_rm_corrected(true);
+  set_iono_rm_corrected(true);
 }
 
 void Pulsar::Archive::set_ephemeris (const psrephem& new_ephemeris)

@@ -37,6 +37,9 @@ int main (int argc, char *argv[]) {
   bool dedisperse = false;
   double dm = 0.0;
 
+  bool defaraday = false;
+  double rm = 0.0;
+  
   bool reset_weights = false;
   float new_weight = 1.0;
 
@@ -54,7 +57,7 @@ int main (int argc, char *argv[]) {
 
   int gotc = 0;
   
-  while ((gotc = getopt(argc, argv, "hvVme:TFpit:f:b:d:s:r:w:")) != -1) {
+  while ((gotc = getopt(argc, argv, "hvVme:TFpit:f:b:d:s:r:w:D:")) != -1) {
     switch (gotc) {
     case 'h':
       cout << "A program for manipulating Pulsar::Archives"            << endl;
@@ -72,6 +75,7 @@ int main (int argc, char *argv[]) {
       cout << "  -f [int f]       Frequency scrunch by a factor of f"  << endl;
       cout << "  -b [int f]       Bin scrunch by a factor of f"        << endl;
       cout << "  -d [float dm]    Dedisperse to dm"                    << endl;
+      cout << "  -D [float rm]    Correct for ISM faraday rotation"    << endl;
       cout << "  -s [float c]     Smear with duty cycle c"             << endl;
       cout << "  -r [float p]     Rotate profiles by phase p"          << endl;
       cout << "  -w [float w]     Reset all profile weights to w"      << endl;
@@ -148,6 +152,15 @@ int main (int argc, char *argv[]) {
       command += " -d ";
       command += optarg;
       break;
+    case 'D':
+      defaraday = true;
+      if (sscanf(optarg, "%lf", &rm) != 1) {
+	cout << "That is not a valid rotation measure." << endl;
+	return -1;
+      }
+      command += " -D ";
+      command += optarg;
+      break;
     case 's':
       smear = true;
       if (sscanf(optarg, "%f", &smear_dc) != 1) {
@@ -222,6 +235,12 @@ int main (int argc, char *argv[]) {
 	arch->dedisperse(dm,arch->get_centre_frequency());
 	if (verbose)
 	  cout << "Archive dedispersed to a DM of " << dm << endl;
+      }
+
+      if (defaraday) {
+	arch->defaraday(rm, 0.0);
+	if (verbose)
+	  cout << "Archive corrected for a RM of " << rm << endl;
       }
       
       if (tscr) {
