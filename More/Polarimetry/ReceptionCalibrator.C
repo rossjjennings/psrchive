@@ -142,10 +142,15 @@ void Pulsar::ReceptionCalibrator::init_estimate (SourceEstimate& estimate)
 
 
 
-//! Get the number of pulse phase bin state constraints
+//! Get the total number of input polarization states
 unsigned Pulsar::ReceptionCalibrator::get_nstate () const
 {
-  return pulsar.size();
+  unsigned nstate = pulsar.size();
+
+  if (PolnCalibrator_path)
+    nstate += 1;
+
+  return nstate;
 }
 
 unsigned Pulsar::ReceptionCalibrator::get_nchan () const
