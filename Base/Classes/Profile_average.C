@@ -89,9 +89,9 @@ Pulsar::Profile* Pulsar::Profile::morphological_difference (const Profile& profi
   maxphs = temp1->find_max_phase();
   float max = temp1->mean(maxphs);
 
-  float ratio = temp2->sum() / temp1->sum();
+  float ratio = temp1->sum() / temp2->sum();
   
-  *temp1 *= ratio;
+  *temp2 *= ratio;
   
   float* amps1 = temp1->get_amps();
   float* amps2 = temp2->get_amps();
