@@ -233,14 +233,14 @@ int polyco::Construct (const char* psr, const char* parfile,
   int   rmeph = 0;
 
   if (parfile) {
-    sprintf(syscom,"polyco -f %s %lf %lf %d %d %d %d > /tmp/polyco.stdout",
+    sprintf(syscom,"polyco -f %s %lf %lf %d %d %d %d > /dev/null",
 	    parfile, m1.in_days(), m2.in_days(), ns, nc, maxha, tel);
 
     ephfile = new char [strlen(parfile) + 1];
     strcpy (ephfile, parfile);
   }
   else {
-    sprintf(syscom,"polyco %s %lf %lf %d %d %d %d > /tmp/polyco.stdout",
+    sprintf(syscom,"polyco %s %lf %lf %d %d %d %d > /dev/null",
 	    psr, m1.in_days(), m2.in_days(), ns, nc, maxha, tel);
 
     ephfile = new char [strlen(psr) + 5];
@@ -271,8 +271,6 @@ int polyco::Construct (const char* psr, const char* parfile,
 		 WEXITSTATUS(status));
     }
     fprintf (stderr, "polyco::cmdline: %s\n", syscom);
-    fprintf (stderr, "polyco::stdout:\n");
-    system ("cat /tmp/polyco.stdout");
     retries --;
     
     if (retries == 0) {
