@@ -1,8 +1,8 @@
 //-*-C++-*-
                                                                                 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/IntegrationOrder.h,v $
-   $Revision: 1.5 $
-   $Date: 2004/02/06 12:26:34 $
+   $Revision: 1.6 $
+   $Date: 2004/09/27 17:15:56 $
    $Author: ahotan $ */
                                                                                 
 #ifndef __IntegrationOrder_h
@@ -43,6 +43,9 @@ namespace Pulsar {
     
     //! Return a string describing the units of this state
     string get_Unit () const;
+
+    //! Return the size of the index array
+    unsigned size() const;
 
     //! Change the size of the index array
     void resize(unsigned i);
