@@ -1,9 +1,13 @@
 #ifndef __QTOOLS_H
 #define __QTOOLS_H
 
+#include <iostream>
+
 #include <qsize.h>
 #include <qobject.h>
 #include <qevent.h>
+
+#include "psr_cpp.h"
 
 //
 // a nice way of outputting QSize
