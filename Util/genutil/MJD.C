@@ -1,6 +1,3 @@
-#include "rcsid.h"
-RCSID ("$Header: /cvsroot/psrchive/psrchive/Util/genutil/MJD.C,v 1.42 1999/11/02 07:42:54 straten Exp $");
-
 #include <iostream>
 #include <string.h>
 #include <stdio.h>
@@ -15,7 +12,6 @@ RCSID ("$Header: /cvsroot/psrchive/psrchive/Util/genutil/MJD.C,v 1.42 1999/11/02
 #include "machine_endian.h"
 #include "ieee.h"
 
-#define RCS_HDEF
 #include "MJD.h"
 
 int MJD::verbose = 0;

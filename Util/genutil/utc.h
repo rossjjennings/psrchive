@@ -1,14 +1,18 @@
+/* $Source: /cvsroot/psrchive/psrchive/Util/genutil/utc.h,v $
+   $Revision: 1.4 $
+   $Date: 1999/11/02 08:55:48 $
+   $Author: straten $ */
+
+/* ************************************************************************
+   UTC time structure - a subset of 'struct tm' used when you don't know
+   or want to calculate neither the day of month nor month of year.
+   ************************************************************************ */
+
 #ifndef UTC_H
 #define UTC_H
 
-#include "time.h"
+#include <time.h>
 
-/* #define UTC_DEBUG */
-
-/* ******************
-   UTC time structure - a subset of 'struct tm' used when you don't know
-   or want to calculate neither the day of month nor month of year.
-   ****************** */
 typedef struct {
    int tm_sec;
    int tm_min;
@@ -31,19 +35,13 @@ int    utc_inc    (utc_t *time, int seconds);
 int    utc_dec    (utc_t *time, int seconds);
 
 /* function to fill the fields of a C 'struct tm' - replaces str2cal */
-int    str2tm (struct tm* time, const char* str);
-/* cal2str has been removed - users should use std C 'strftime()' */
-/*
-  char*  cal2str    (char* str, cal_t date, const char* format);
-  char*  calstrfill (char* str, cal_t date, int fill_chars);
- */
+int str2tm (struct tm* time, const char* str);
 
 int tm2utc (utc_t *time, struct tm caltime);
 int utc2tm (struct tm *caltim, utc_t time);
 
 int utc_f2LST (double* lst, utc_t timeutc, double fracsec, float longitude);
 int utc2LST (double* lst, utc_t timeutc, float east_longitude);
-
 
 #ifdef __cplusplus
 }

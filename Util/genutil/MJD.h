@@ -1,8 +1,10 @@
+/* $Source: /cvsroot/psrchive/psrchive/Util/genutil/MJD.h,v $
+   $Revision: 1.9 $
+   $Date: 1999/11/02 08:55:46 $
+   $Author: straten $ */
+
 #ifndef __MJD_H
 #define __MJD_H
-
-#include "rcsid.h"
-HRCSID (MJD, "$Header: /cvsroot/psrchive/psrchive/Util/genutil/MJD.h,v 1.8 1999/11/02 07:42:55 straten Exp $");
 
 #include <stdio.h>
 #include <string>
