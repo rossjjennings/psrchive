@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Matrix.h,v $
-   $Revision: 1.5 $
-   $Date: 2004/04/06 16:35:48 $
+   $Revision: 1.6 $
+   $Date: 2004/04/23 13:27:12 $
    $Author: straten $ */
 
 #ifndef __Matrix_H
@@ -177,6 +177,18 @@ const Matrix<T, Columns, Rows> transpose (const Matrix<T, Rows, Columns>& m)
   for (unsigned i=0; i<Rows; i++)
     for (unsigned j=0; j<Columns; j++)
       result[j][i] = m[i][j];
+
+  return result;
+}
+
+template <typename T, unsigned Rows, unsigned Columns>
+const Matrix<T, Columns, Rows> herm (const Matrix<T, Rows, Columns>& m)
+{
+  Matrix<T, Columns, Rows> result;
+
+  for (unsigned i=0; i<Rows; i++)
+    for (unsigned j=0; j<Columns; j++)
+      result[j][i] = conj( m[i][j] );
 
   return result;
 }
