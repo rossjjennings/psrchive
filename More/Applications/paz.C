@@ -8,6 +8,7 @@
 #include "Pulsar/Integration.h"
 #include "Pulsar/Plotter.h"
 #include "Pulsar/RFIMitigation.h"
+#include "Pulsar/StandardSNR.h"
 
 #include "Error.h"
 
@@ -53,6 +54,8 @@ int main (int argc, char *argv[]) {
   char* key = NULL;
   char whitespace[5] = " \n\t";
   
+  Pulsar::StandardSNR standard_snr;
+
   while ((gotc = getopt(argc, argv, "hvViDme:z:k:Z:x:X:dE:s:u:w:W:C:S:P:")) != -1) {
     switch (gotc) {
     case 'h':
@@ -96,7 +99,7 @@ int main (int argc, char *argv[]) {
       Pulsar::Archive::set_verbosity(1);
       break;
     case 'i':
-      cout << "$Id: paz.C,v 1.18 2004/03/03 01:15:46 ahotan Exp $" << endl;
+      cout << "$Id: paz.C,v 1.19 2004/04/15 10:10:35 straten Exp $" << endl;
       return 0;
     case 'D':
       display = true;
@@ -244,8 +247,14 @@ int main (int argc, char *argv[]) {
 	data->pscrunch();
 	data->fscrunch();
 	data->tscrunch();
-	thestd = data.release()->get_Profile(0,0,0);
+	thestd = data->get_Profile(0,0,0);
 	std_given = true;
+
+	standard_snr.set_standard( thestd );
+	
+	Pulsar::Profile::snr_functor.set (&standard_snr,
+					  &Pulsar::StandardSNR::get_snr);
+
       }
       catch (Error& error) {
 	cout << error << endl;
@@ -403,18 +412,7 @@ int main (int argc, char *argv[]) {
 	  }
 	}
       }
-      else if (zap_ston && thestd) {
-	double theston = 0.0;
-	arch->pscrunch();
-	for (unsigned isub = 0; isub < arch->get_nsubint(); isub++) {
-	  for (unsigned ichan = 0; ichan < arch->get_nchan(); ichan++) {
-	    theston = arch->get_Profile(isub,0,ichan)->snr(thestd);
-	    if (theston < ston_cutoff) {
-	      arch->get_Integration(isub)->set_weight(ichan, 0.0);
-	    } 
-	  }
-	}
-      }
+
       
       if (display)
 	plotter.bandpass(arch);
