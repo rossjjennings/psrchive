@@ -39,11 +39,11 @@ Pulsar::ProcHistory::~ProcHistory ()
 void Pulsar::ProcHistory::init ()
 {
   rows.resize (0);
-  command_str = "UNKNOWN";
-  the_cal_mthd = "UNKNOWN";
-  the_sc_mthd = "UNKNOWN";
-  the_cal_file = "UNKNOWN";
-  the_rfi_mthd = "UNKNOWN";
+  command_str  = "UNKNOWN";
+  the_cal_mthd = "NONE";
+  the_sc_mthd  = "NONE";
+  the_cal_file = "NONE";
+  the_rfi_mthd = "NONE";
 }
 
 Pulsar::ProcHistory::row& Pulsar::ProcHistory::get_last ()

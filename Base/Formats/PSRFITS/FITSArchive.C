@@ -1863,12 +1863,12 @@ void Pulsar::FITSArchive::update_history()
   if (get_poln_calibrated())
     history.get_last().cal_mthd = history.get_cal_mthd();
   else
-    history.get_last().cal_mthd = "OFF";
+    history.get_last().cal_mthd = "NONE";
   
   if (get_flux_calibrated())
     history.get_last().sc_mthd = history.get_sc_mthd();
   else
-    history.get_last().sc_mthd = "OFF";
+    history.get_last().sc_mthd = "NONE";
   
   history.get_last().cal_file = history.get_cal_file();
   history.get_last().rfi_mthd = history.get_rfi_mthd();;
