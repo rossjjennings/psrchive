@@ -69,6 +69,15 @@ unsigned Pulsar::SingleAxisCalibrator::Info::get_nparam (unsigned iclass) const
   return 0;
 }
 
+//! Return the scale of parameters in the specified class
+float Pulsar::SingleAxisCalibrator::Info::get_scale (unsigned iclass) const
+{
+  if (iclass == 2)
+    return 180.0 / M_PI;
+  
+  return 1.0;
+}
+
 Pulsar::Calibrator::Info* Pulsar::SingleAxisCalibrator::get_Info () const
 {
   return new SingleAxisCalibrator::Info (this);
@@ -78,3 +87,4 @@ Pulsar::Calibrator::Type Pulsar::SingleAxisCalibrator::get_type () const
 {
   return SingleAxis;
 }
+
