@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/FluxCalibrator.h,v $
-   $Revision: 1.5 $
-   $Date: 2003/05/23 09:06:33 $
-   $Author: straten $ */
+   $Revision: 1.6 $
+   $Date: 2003/05/23 10:28:28 $
+   $Author: pulsar $ */
 
 #ifndef __FluxCalibrator_H
 #define __FluxCalibrator_H
@@ -53,7 +53,7 @@ namespace Pulsar {
     vector< Estimate<double> > T_sys;
 
     //! Reference to the Pulsar::Archive with which this instance associates
-    Reference::To<Archive> calibrator;
+    Reference::To<const Archive> calibrator;
 
     //! Ratio of cal hi/lo on hydra
     vector<Estimate<double> > ratio_on;
