@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Archive.h,v $
-   $Revision: 1.47 $
-   $Date: 2003/01/13 10:38:21 $
+   $Revision: 1.48 $
+   $Date: 2003/01/13 10:59:49 $
    $Author: straten $ */
 
 /*! \mainpage 
@@ -230,25 +230,25 @@ namespace Pulsar {
     static Archive* load (const char* filename);
 
     //! Convenience interface to Archive::load (const char*)
-    static Archive* load (const string& filename)
-    { return load (filename.c_str()); }
+    static Archive* load (const string& name) { return load (name.c_str()); }
 
     //! Write the archive to filename
     void unload (const char* filename = 0);
 
     //! Convenience interface to Archive::unload (const char*)
-    void unload (const string& filename)
-    { unload (filename.c_str()); }
+    void unload (const string& filename) { unload (filename.c_str()); }
 
     //! Get the name of the file to which the archive will be unloaded
-    virtual string get_filename ();
+    string get_filename () const { return unload_filename; }
 
-    //! Set the name of the file to which the archive will be unloaded
-    virtual void set_filename (const char* filename);
+    //! Set the filename of the Archive
+    /*! The filename is the name of the file to which the archive will be 
+      written on the next call to Archive::unload, if no arguments are given
+      to the Archive::unload method. */
+    void set_filename (const char* filename) { unload_filename = filename; }
 
     //! Convenience interface to Archive::set_filename (const char*)
-    void set_filename (const string& filename) const
-    { set_filename (filename.c_str()); }
+    void set_filename (const string& filename) { unload_filename = filename; }
 
     //! Update the current archive, saving current Integration data
     void update ();
