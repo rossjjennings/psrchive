@@ -37,8 +37,9 @@ OTHER_SRCS      = align.C amps.C chanprep.C  \
 		  plot_gry_diff.C pepoch.C stokes_plt.C freduce.C \
 		  cleanarch.C fixhdr.C crm.C  \
 		  getcal.C crh.C psrhead.C autotadd.C \
-		  fakedat.C quik_cal.C headsum.C \
-		  cal_arch.C feedmix.C fitmix.C
+		  fakedat.C quik_cal.C polytst.C \
+		  cal_arch.C feedmix.C fitmix.C calplt.C vargain.C \
+		  headsum.C
 
 NOT_WORKING     = bandpass.C detail.C xtoa.C bin_ph.C corflux.C flux.C
 
