@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Archive.h,v $
-   $Revision: 1.22 $
-   $Date: 2002/04/23 08:39:27 $
-   $Author: straten $ */
+   $Revision: 1.23 $
+   $Date: 2002/04/23 16:40:14 $
+   $Author: pulsar $ */
 
 /*! \mainpage 
  
@@ -206,6 +206,9 @@ namespace Pulsar {
     //! Integrate pulse profiles in phase
     virtual void bscrunch (int nscrunch);
 
+    //! Integrate neighbouring sections of the pulse profiles
+    virtual void fold (int nfold);
+
     //! Integrate profiles in polarization
     virtual void pscrunch();
 
@@ -215,162 +218,52 @@ namespace Pulsar {
     //! Integrate profiles in time
     virtual void tscrunch (unsigned nscrunch=0);
 
-    // 
-    //! Appends the sub-integrations from 'a' to 'this'
-    /*!
-      \param a pointer to the Archive containing the new sub-ints
-      \param check_ephemeris
-      \exception string
-    */
-    virtual void append (const Archive* a);
-
-
-    //
-    //! Rotates the profiles so that pulse phase 0 is in nbin/2
-    /*!
-      \exception string
-    */
-    virtual void centre ();
-
-    //
-    //! Creates a new polyco and rotates profiles to align
-    /*!
-      \exception string
-    */
-    virtual void correct();
-
-    //
-    //! Rotates the profiles to remove dispersion delays b/w chans
-    /*!
-      \param dm the dispersion measure
-      \param frequency
-      \exception string
-    */
-    virtual void dedisperse (double dm = 0.0, double frequency = 0.0);
-
-    //
-    //! Fold profiles into 1/nfold 
-    //  (for use with pulsars that have more than one period across the profile)
-    /*!
-      \param nfold
-      \exception string
-    */
-    virtual void fold (int nfold);
-
-    //
-    //! Fits each profile to the standard and returns toas
-    /*!
-      \param standard
-      \param toas
-      \param mode
-      \param wt
-      \exception string
-    */
-    virtual void toas (const Archive& standard,
-		       vector<Tempo::toa>& toas, int mode=0, bool wt=false);
-
-    //
-    // deparallactify - corrects receiver feed angle orientation
-    //
-    //! Corrects receiver feed angle orientation
-    /*!
-      \exception string
-    */
-    virtual void deparallactify();
-
-    //
-    //! Un-corrects receiver feed angle orientation
-    /*!
-      \exception
-    */
-    virtual void parallactify();
-
-    //
-    //! Converts Stokes parameters to coherency products 
-    //  ie. I,Q,U,V -> PP,QQ,Re[PQ],Im[PQ]
-    /*!
-      \exception string
-    */
-    virtual void ppqq();
-
-    //
-    //! Converts coherency products to Stokes parameters 
-    //  ie. PP,QQ,Re[PQ],Im[PQ] -> I,Q,U,V
-    /*!
-      \exception string
-    */
-    virtual void iquv();
-
-    //
-    //! Transforms Stokes I,Q,U,V into the polarimetric invariant interval
-    //  ie. Inv where Inv*Inv = II-QQ-UU-VV
-    /*!
-      \param square_root
-      \param baseline_ph
-      \exception string
-    */
-    virtual void invint ();
-  
-    //
-    // remove_baseline - remove the baseline from all profiles
-    //
-    //! Remove the baseline from all profiles
-    /*!
-      \param poln
-      \param phase
-      \exception string
-    */
-    virtual void remove_baseline ();
-
-    //
     //! Rotate each profile by time seconds
-    /*!
-      \param time
-      \exception string
-    */
     virtual void rotate (double time);
 
-    //
-    //! Rotate each profile by Phase
-    /*!
-      \param shift
-      \exception string
-    */
-    virtual void rotate (const Phase& shift);
+    //! Append the Integrations from 'archive' to 'this'
+    virtual void append (const Archive* archive);
 
-    //
+    //! Rotate pulsar Integrations so that pulse phase zero is centred
+    virtual void centre ();
+
+    //! Rotate the Profiles to remove dispersion delays b/w chans
+    virtual void dedisperse (double dm = 0.0, double frequency = 0.0);
+
     //! Correct the Faraday rotation of Q into U
-    //     Assumes:  archive is in Stokes IQUV representation and 
-    //               that the baseline has been removed.
-    /*!
-      \param rotation_measure
-      \param rm_iono
-    */
-    virtual void RM_correct (double rotation_measure = 0, double rm_iono = 0);
+    virtual void defaraday (double rotation_measure = 0, double rm_iono = 0);
 
-    //
-    //! Installs the given ephemeris, constructs a new polyco and shifts the profiles to align
-    /*!
-      \param e
-      \exception string
-    */
-    virtual void set_ephem (const psrephem& e);
+    //! Fit Profiles to the standard and return toas
+    virtual void toas (const Archive* std, vector<Tempo::toa>& toas);
 
-    //
-    // set_polyco - installs the given polyco and shifts profiles to align
-    //
-    //! Installs the given polyco and shifts profiles to align
-    /*!
-      \param p
-      \exception string
-    */
-    virtual void set_polyco (const polyco& p);
+    //! Correct receiver feed angle orientation
+    virtual void deparallactify();
 
-    //
+    //! Un-correct receiver feed angle orientation
+    virtual void parallactify();
+
+    //! Convert Stokes parameters to coherency products 
+    virtual void ppqq();
+
+    //! Convert coherency products to Stokes parameters 
+    virtual void iquv();
+
+    //! Transform Stokes I,Q,U,V into the polarimetric invariant interval
+    virtual void invint ();
+  
+    //! Remove the baseline from all profiles
+    virtual void remove_baseline ();
+
+    //! Install the given ephemeris and calls update_model
+    virtual void set_ephemeris (const psrephem& ephemeris);
+
+    //! Install the given polyco and shift profiles to align
+    virtual void set_model (const polyco& model);
+
+    //! Create a new polyco and align the Integrations to the new model
+    virtual void update_model ();
+
     //! Set the weight of each profile to its snr squared
-    /*!
-      \exception string
-    */
     virtual void snr_weight ();
 
     // //////////////////////////////////////////////////////////////////
@@ -380,25 +273,13 @@ namespace Pulsar {
     // //////////////////////////////////////////////////////////////////
 
     //! Call bscrunch with the appropriate value
-    /*!
-      \param new_nbin
-      \exception string
-    */
-    void bscrunch_nbin (int new_nbin);
+    void bscrunch_to_nbin (int new_nbin);
 
-    //! Halve the bins?
-    /*!
-      \param nhalve
-      \exception string
-    */
+    //! Halve the bins
     void halvebins (int nhalve);
 
     //! Call fscrunch with the appropriate value
-    /*!
-      \param new_nchan
-      \exception string
-    */
-    void fscrunch_nchan (int new_nchan);
+    void fscrunch_to_nchan (int new_nchan);
 
     //! Return the MJD at the beginning of the first sub-integration
     MJD  start_time() const;
@@ -420,38 +301,22 @@ namespace Pulsar {
     //
     // //////////////////////////////////////////////////////////////////
 
-    //
     //! Write archive to disk
-    /*!
-      \param filename the name of the file to write data to
-      \exception string
-    */
     virtual void unload (const char* filename) = 0;
 
     //! Convenience interface to the unload function
-    /*!
-      \param filename the name of the file to write data to
-      \exception string
-    */
     void unload (const string& filename) { unload (filename.c_str()); }
 
-    //
     //! Read archive from disk
-    /*!
-      \param filename the name of the file to read data frrom
-      \exception string
-    */
     virtual void load (const char* filename) = 0;
 
     //! Convenience interface to the load function
-    /*!
-      \param filename the name of the file to read data from
-      \exception string
-    */
     void load (const string& filename) { load (filename.c_str()); }
 
-    // get/set the observation vital statistics
-    // ////////////////////////////////////////
+    // //////////////////////////////////////////////////////////////////
+    //
+    // static facts about the archive
+    //
 
     //! Get the tempo code of the telescope used
     virtual char get_tel_tempo_code () const = 0;
@@ -465,8 +330,10 @@ namespace Pulsar {
     //! Get the source name
     virtual string get_source () const = 0;
 
-    // get/set the number of bins, chans, subints, etc
-    // ///////////////////////////////////////////////
+    // //////////////////////////////////////////////////////////////////
+    //
+    // dynamic facts about the archive
+    //
 
     //! Get the number of pulsar phase bins used
     /*! This attribute may be set only through Archive::resize */
@@ -505,29 +372,30 @@ namespace Pulsar {
     virtual void set_dispersion_measure (double dm) = 0;
 
 
-    // Get the state of various corrected flags
-    // //////////////////////////////////////////
+    // //////////////////////////////////////////////////////////////////
+    //
+    // various state flags
+    //
 
-    //! Return whether or not the data has been corrected for feed angle errors
+    //! Data has been corrected for feed angle errors
     virtual bool get_feedangle_corrected () const = 0;
     //! Set the status of the feed angle flag
     virtual void set_feedangle_corrected (bool done = true) = 0;
 
-    //! Return whether or not the data has been corrected for ionospheric faraday rotation
+    //! Data has been corrected for ionospheric faraday rotation
     virtual bool get_iono_rm_corrected () const = 0;
     //! Set the status of the ionospheric RM flag
     virtual void set_iono_rm_corrected (bool done = true) = 0;
 
-    //!  Return whether or not the data has been corrected for ISM faraday rotation
+    //! Data has been corrected for ISM faraday rotation
     virtual bool get_ism_rm_corrected () const = 0;
     //! Set the status of the ISM RM flag
     virtual void set_ism_rm_corrected (bool done = true) = 0;
 
-    //! Return whether or not the data has been corrected for parallactic angle errors
+    //! Data has been corrected for parallactic angle errors
     virtual bool get_parallactic_corrected () const = 0;
     //! Set the status of the parallactic angle flag
     virtual void set_parallactic_corrected (bool done = true) = 0;
-
 
     //! Test if arch matches (enough for a pulsar - calibrator match)
     virtual bool match (const Archive* arch, string& reason);
@@ -586,15 +454,16 @@ namespace Pulsar {
     //! Creates polynomials to span the Integration set
     void create_updated_model (bool clear_old);
 
-    //! Returns true if the model does not apply to new Integration set
-    bool need_create_model () const;
+    //! Returns true if the given model spans the Integration set
+    bool good_model (const polyco& test_model) const;
 
   private:
 
     //! This flag may be raised only by Archive::update_model.
     /*!
       As it is set only during run-time, this flag makes it known that
-      the current Integration set has been aligned to a current polyco.
+      the current Integration set has been aligned to a polyco created
+      during run-time
     */
     bool model_updated;
 

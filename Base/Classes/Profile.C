@@ -9,14 +9,13 @@
 #include "spectra.h"
 
 /*! 
-  fractional pulse phase window used by default to calculate the
-  the minimum or maximum of the pulse profile 
+  Default fractional pulse phase window used to calculate statistics
+  related to the baseline.
  */
 float Pulsar::Profile::default_duty_cycle = 0.15;
 
 /*!  
-  Add the statement "Pulsar::Profile::verbose = true;" in the calling
-  program to have debug information output on stderr 
+  When true, Profile methods will output debugging information on cerr
 */
 bool Pulsar::Profile::verbose = false;
 
@@ -35,7 +34,7 @@ void nbinify (int& istart, int& iend, int nbin)
 
 /////////////////////////////////////////////////////////////////////////////
 //
-// Pulsar::Profile::
+// Pulsar::Profile::init
 //
 void Pulsar::Profile::init()
 {
@@ -45,6 +44,11 @@ void Pulsar::Profile::init()
   centrefreq = -1.0;
   amps = NULL;
 }
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Pulsar::Profile destructor
+//
 
 Pulsar::Profile::~Profile () 
 {
@@ -74,25 +78,6 @@ void Pulsar::Profile::resize (int _nbin)
 
 /////////////////////////////////////////////////////////////////////////////
 //
-// Pulsar::Profile::operator =
-//
-const Pulsar::Profile& Pulsar::Profile::operator = (const Profile& profile)
-{
-  if (this == &profile)
-    return *this;
-
-  resize (profile.nbin);
-
-  set_amps( profile.get_amps() );
-  set_weight ( profile.get_weight() );
-  set_centre_frequency ( profile.get_centre_frequency() );
-  set_state ( profile.get_state() );
-
-  return *this;
-}
-
-/////////////////////////////////////////////////////////////////////////////
-//
 // Pulsar::Profile::clone
 //
 Pulsar::Profile* Pulsar::Profile::clone ()
@@ -102,6 +87,35 @@ Pulsar::Profile* Pulsar::Profile::clone ()
     throw Error (BadAlloc, "Profile::clone");
   return retval;
 }
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Pulsar::Profile::operator =
+//
+/*!
+  Sets all attributes of this Profile equal to that of the input Profile,
+  resizes and copies the amps array.
+*/
+const Pulsar::Profile& Pulsar::Profile::operator = (const Profile& input)
+{
+  if (this == &input)
+    return *this;
+
+  try {
+    resize (input.nbin);
+
+    set_amps( input.get_amps() );
+    set_weight ( input.get_weight() );
+    set_centre_frequency ( input.get_centre_frequency() );
+    set_state ( input.get_state() );
+  }
+  catch (Error& error) {
+    throw error += "Profile::operator =";
+  }
+
+  return *this;
+}
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -123,22 +137,32 @@ const Pulsar::Profile& Pulsar::Profile::operator += (const Profile& profile)
     throw Error (InvalidRange, "Pulsar::Profile::operator+=",
 		 "nbin=%d != profile.nbin=%d", nbin, profile.get_nbin());
 
-  // check if the addition will result in some undefined state
-  if (state != profile.get_state())
-    state = Poln::None;
+  try {
 
-  float* amps1 = amps;
-  const float* amps2 = profile.get_amps();
+    // check if the addition will result in some undefined state
+    if (state != profile.get_state())
+      state = Poln::None;
+    
+    float* amps1 = amps;
+    const float* amps2 = profile.get_amps();
+    
+    double weight1 = weight;
+    double weight2 = profile.get_weight();
+    
+    weight = weight1 + weight2;
+    
+    double norm = 0.0;
+    if (weight != 0)
+      norm = 1.0 / weight;
+    
+    for (int ibin=0; ibin<nbin; ibin++) {
+      *amps1 = norm * ( double(*amps1)*weight1 + double(*amps2)*weight2 );
+      amps1 ++; amps2 ++;
+    }
 
-  double weight1 = weight;
-  double weight2 = profile.get_weight();
-
-  weight = weight1 + weight2;
-  double norm = 1.0 / weight;
-
-  for (int ibin=0; ibin<nbin; ibin++) {
-    *amps1 = float( norm * (double(*amps1)*weight1 + double(*amps2)*weight2) );
-    amps1 ++; amps2 ++;
+  }
+  catch (Error& error) {
+    throw error += "Profile::operator += Profile&";
   }
 
   return *this;
@@ -146,7 +170,7 @@ const Pulsar::Profile& Pulsar::Profile::operator += (const Profile& profile)
 
 /////////////////////////////////////////////////////////////////////////////
 //
-// Pulsar::Profile::
+// Pulsar::Profile::operator +=
 //
 const Pulsar::Profile& Pulsar::Profile::operator += (float offset)
 {
@@ -157,7 +181,7 @@ const Pulsar::Profile& Pulsar::Profile::operator += (float offset)
  
 /////////////////////////////////////////////////////////////////////////////
 //
-// Pulsar::Profile::
+// Pulsar::Profile::operator -=
 //
 const Pulsar::Profile& Pulsar::Profile::operator -= (float offset)
 {
@@ -168,7 +192,7 @@ const Pulsar::Profile& Pulsar::Profile::operator -= (float offset)
  
 /////////////////////////////////////////////////////////////////////////////
 //
-// Pulsar::Profile::
+// Pulsar::Profile::operator *=
 //
 const Pulsar::Profile& Pulsar::Profile::operator *= (float factor)
 {

@@ -1,12 +1,10 @@
 #include <iostream>
 
-#include "tempo++.h"
-#include "string_utils.h"
-
 #include "Archive.h"
 #include "Integration.h"
 #include "Error.h"
 
+#include "string_utils.h"  // for stringprintf
 
 bool Pulsar::Archive::append_chronological = false;
 
@@ -62,8 +60,9 @@ void Pulsar::Archive::append (const Archive* arch)
   if (model == arch->model)
     return;
 
-  // otherwise, update the model
-  update_model (old_nsubint);
+  // if the current model does not span all Integrations, update the model
+  if (!good_model (model))
+    update_model (old_nsubint);
 
   // correct the new subints against their old model
   for (unsigned isub=old_nsubint; isub < subints.size(); isub++)
@@ -71,155 +70,10 @@ void Pulsar::Archive::append (const Archive* arch)
 
 }
 
-bool Pulsar::Archive::need_create_model () const
-{
-  for (unsigned isub=0; isub < subints.size(); isub++)
-    if ( model.i_nearest (subints[isub]->get_mid_time()) == -1 )
-      return true;
-
-  return false;
-}
-
-/*!  
-  The polyco needs only describe the phase and period of every
-  Integration in the subints array.  When the Integrations are
-  separated by a large amount of time, the creation of a new polyco to
-  completely span this time results in a huge polyco.dat and a huge
-  waste of time.
-
-  Therefore, this method attempts to create the minimum set of polyco
-  polynomials required to describe the data.  If a match is not found
-  in the current model, a single polynomial is created and appended to
-  the current model.
-
-  \param clear_model delete the old model after getting its attributes
-*/
-void Pulsar::Archive::create_updated_model (bool clear_model)
-{
-  if (get_observation_type() != Observation::Pulsar)
-    throw Error (InvalidState, "Archive::create_updated_model",
-		 "not a pulsar observation");
-
-  int  maxha   = 12;
-  char nsite   = model.get_telescope ();
-  int  ncoeff  = model.get_ncoeff ();
-  double freq  = model.get_freq ();
-  double nspan = model.get_nspan ();
-
-  if (clear_model)
-    model = polyco();
-
-  for (unsigned isub = 0; isub < subints.size(); isub++) {
-
-    MJD time = subints[isub]->get_mid_time();
-
-    if ( model.i_nearest (time) == -1 ) {
-      // no match, create a new polyco for the Integration
-      polyco part = Tempo::get_polyco (ephemeris, time, time,
-				       nspan, ncoeff, maxha, nsite, freq);
-      model.append (part);
-    }
-
-  }
-}
-
-/*!
-
-  This method economizes on the number of times that the polynomial is
-  re-created and the Integration set is re-aligned to the model.
-  By setting the run-time only flag, Archive::model_updated, the old
-  Integration set is flagged as no longer in need of correction.
-
-  \param old_nsubint the number of subints in the old Integration set
-*/
-void Pulsar::Archive::update_model (unsigned old_nsubint)
-{
-  bool modelok = ! need_create_model ();
-
-  if (modelok)
-    return;
-
-  polyco oldmodel;
-
-  if (!model_updated)
-    // store the old model
-    oldmodel = model;
-
-  // if the model has not already been updated, create a completely new polyco
-  create_updated_model (!model_updated);
-
-  // if previously updated, no need to correct the old subints
-  if (model_updated)
-    return;
-
-  // correct the old subints with the old model
-  for (unsigned isub = 0; isub < old_nsubint; isub++)
-    apply_model (oldmodel, subints[isub]);
-  
-  model_updated = true;
-}
-
-void Pulsar::Archive::apply_model (const polyco& old, Integration* subint)
-{
-  if ( model.get_telescope() != old.get_telescope() )
-    throw Error (InvalidState, "Archive::apply_model", "mismatched telescope");
-
-  try {
-
-    if (verbose) 
-      model.unload (stderr);
-
-    // get the MJD of the rising edge of bin zero
-    MJD subint_mjd = subint -> get_mid_time();
-
-    // get the phase shift due to differing observing frequencies between
-    // old and current polyco
-    Phase freq_shift_phase = 
-      model.phase (subint_mjd, old.get_freq()) - model.phase (subint_mjd);
-
-    // get the phase of the rising edge of bin zero
-    Phase phase = model.phase (subint_mjd);
-    
-    // the Integration is rotated by -phase to bring zero phase to bin zero
-    Phase dphase = freq_shift_phase - phase;
-    
-    double period = model.period (subint_mjd);
-    double shift_time = dphase.fracturns() * period;
-    
-    if (verbose)
-      cerr << "Archive::apply_model"
-	   << " old MJD " << subint_mjd
-	   << " old polyco phase " << old.phase(subint_mjd)
-	   << " new polyco phase " << phase << endl
-	
-	   << " old freq " << old.get_freq()
-	   << " new freq " << model.get_freq()
-	   << " freq phase shift " << freq_shift_phase << endl
-	
-	   << " time shift      " << shift_time/86400.0
-	   << " days  " << shift_time << " seconds "
-	   << " total phase shift " << dphase.fracturns() << endl; 
-    
-    subint -> set_folding_period (period);  
-    subint -> rotate (shift_time);
-    
-    if (verbose) {
-      subint_mjd = subint -> get_mid_time();
-      cerr << "Archive::apply_model"
-	   << " new MJD "   << subint_mjd
-	   << " new phase " << model.phase(subint_mjd)
-	   << endl;
-    }
-  }
-  catch (Error& err) {
-    throw err += "Archive::apply_model";
-  }
-}
-
 void Pulsar::Archive::append (const vector<Integration*>& more_subints)
 {
   for (unsigned isub=0; isub<more_subints.size(); isub++)
-    subints.push_back (more_subints[isub]->clone());
+    subints.push_back ( new_Integration(more_subints[isub]) );
 
   set_nsubint (int(subints.size()));
 }  

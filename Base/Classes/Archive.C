@@ -143,24 +143,50 @@ void Pulsar::Archive::pscrunch()
   for (unsigned isub=0; isub < subints.size(); isub++)
     subints[isub] -> pscrunch ();
 
-  set_npol (subints[0]->get_npol());
+  set_npol ( subints[0] -> get_npol() );
+  set_poln_state ( subints[0] -> get_poln_state() );
 }
 
+/*
+  Uses the polyco model, as well as the centre frequency and mid-time of
+  each Integration to determine the predicted pulse phase
+ */
 void Pulsar::Archive::centre ()
 {
+  // this function doesn't work for things without polycos
+  if (get_observation_type () != Observation::Pulsar)
+    return;
 
+  Phase half_turn (0.5);
+
+  for (int isub=0; isub < get_nsubint(); isub++)  {
+
+    Integration* subint = subints[isub];
+
+    // Rotate according to polyco prediction
+    Phase phase = model.phase (subint -> get_mid_time(),
+			       subint -> get_centre_frequency());
+
+    if (verbose)
+      cerr << "Archive::center phase=" << phase << endl;
+
+    double fracturns = (half_turn - phase).fracturns();
+    subint -> rotate ( fracturns * subint -> get_folding_period() );
+  }
 }
 
-void Pulsar::Archive::correct()
-{
 
-}
-
+/*!
+  \param dm the dispersion measure
+  \param frequency */
 void Pulsar::Archive::dedisperse (double dm, double frequency)
 {
 
 }
 
+/*!
+  \param nfold the number of sections to integrate
+*/
 void Pulsar::Archive::fold (int nfold)
 {
   if (subints.size() == 0)
@@ -172,8 +198,11 @@ void Pulsar::Archive::fold (int nfold)
   set_nbin (subints[0]->get_nbin());
 }
 
-void Pulsar::Archive::toas (const Archive& standard,
-                       vector<Tempo::toa>& toas, int mode, bool wt)
+/*!
+  \param standard
+  \retval toas
+*/
+void Pulsar::Archive::toas (const Archive* standard, vector<Tempo::toa>& toas)
 {
 
 }
@@ -213,24 +242,41 @@ void Pulsar::Archive::rotate (double time)
 
 }
 
-void Pulsar::Archive::rotate (const Phase& shift)
+
+/*!
+  \pre Archive polarimetric state must represent Stokes IQUV
+  \pre The baseline must have been removed.
+/*!
+  \param rotation_measure
+  \param rm_iono
+*/
+void Pulsar::Archive::defaraday (double rotation_measure, double rm_iono)
 {
 
 }
 
-void Pulsar::Archive::RM_correct (double rotation_measure, double rm_iono)
+void Pulsar::Archive::set_ephemeris (const psrephem& new_ephemeris)
 {
-
+  ephemeris = new_ephemeris;
+  update_model ();
 }
 
-void Pulsar::Archive::set_ephem (const psrephem& e)
+void Pulsar::Archive::set_model (const polyco& new_model)
 {
+  if (!good_model (new_model))
+    throw Error (InvalidParam, "Archive::set_model",
+		 "supplied model does not span Integrations");
 
-}
+  // swap the old with the new
+  polyco oldmodel = model;
+  model = new_model;
 
-void Pulsar::Archive::set_polyco (const polyco& p)
-{
+  // correct the subints against the old model
+  for (unsigned isub = 0; isub < subints.size(); isub++)
+    apply_model (oldmodel, subints[isub]);
 
+  // it may not be true the that supplied model was generated at runtime
+  model_updated = false; 
 }
 
 void Pulsar::Archive::snr_weight ()
