@@ -75,9 +75,6 @@ void Pulsar::Profile::find_peak_edges (int& rise, int& fall) const
       if (cumu[ibin] > fall_threshold) 
 	ifall[itry] = ibin;
 
-cerr << "iten=" << irise[itry] << " inin=" << ifall[itry] << endl;
-
-
     // do it again; this time starting half way along.
     istart = nbin/2;
 
