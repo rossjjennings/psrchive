@@ -86,6 +86,8 @@ void usage()
     "                   'Pulsar', 'PolnCal', 'FluxCalOn', 'FluxCalOff', 'Calibrator'\n"
     "  --inst inst      Change the instrument name (Archive must have\n"
     "                   'BackendName' extension for this to work)\n"
+    "  --site site      Correct 'site' of telescope (One letter tempo code- GBT=1, PKS=7 etc)\n"
+    "  --name name      Change source name\n"
     "\n"
     "See http://astronomy.swin.edu.au/pulsar/software/manuals/pam.html"
        << endl;
@@ -171,6 +173,8 @@ int main (int argc, char *argv[]) {
     Signal::Source new_type = Signal::Unknown;
     string instrument;
     bool reverse_freqs = false;
+    string site;
+    string name;
 
     Reference::To<Pulsar::IntegrationOrder> myio;
     Reference::To<Pulsar::Receiver> install_receiver;
@@ -180,6 +184,8 @@ int main (int argc, char *argv[]) {
     const int TYPE = 1208;
     const int INST = 1209;
     const int REVERSE_FREQS = 1210;
+    const int SITE = 1211;
+    const int NAME = 1212;
 
     while (1) {
 
@@ -198,6 +204,8 @@ int main (int argc, char *argv[]) {
 	{"type",       1, 0, TYPE},
 	{"inst",       1, 0, INST},
 	{"reverse_freqs",no_argument,0,REVERSE_FREQS},
+	{"site",       1, 0, SITE},
+	{"name",       1, 0, NAME},
 	{0, 0, 0, 0}
       };
     
@@ -224,7 +232,7 @@ int main (int argc, char *argv[]) {
 	Pulsar::Archive::set_verbosity(3);
 	break;
       case 'i':
-	cout << "$Id: pam.C,v 1.49 2004/12/06 14:40:14 straten Exp $" << endl;
+	cout << "$Id: pam.C,v 1.50 2005/03/02 07:27:12 hknight Exp $" << endl;
 	return 0;
       case 'm':
 	save = true;
@@ -502,6 +510,10 @@ int main (int argc, char *argv[]) {
       case INST: instrument = optarg; break;
 
       case REVERSE_FREQS: reverse_freqs = true; break;
+
+      case SITE: site = optarg; break;
+
+      case NAME: name = optarg; break;
 	  
       default:
 	cout << "Unrecognised option" << endl;
@@ -589,6 +601,15 @@ int main (int argc, char *argv[]) {
 	else
 	  b->set_name(instrument);
       }
+
+      if( site != string() ){
+	if( site.size() != 1 )
+	  throw Error(InvalidState,"main()",
+		      "You can only use a single character for the telescope site code!");
+	arch->set_telescope_code( site[0] );
+      }
+      if( name != string() )
+	arch->set_source( name );
 
       if (new_eph) {
 	if (!eph_file.empty()) {
