@@ -5,7 +5,7 @@
 #if HAVE_MKL
 
 #include <string>
-
+#include <stdio.h>
 #include "psr_cpp.h"
 
 #include "MKL_Transform.h"
