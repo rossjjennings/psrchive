@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/EPN/Pulsar/EPNArchive.h,v $
-   $Revision: 1.3 $
-   $Date: 2004/07/07 10:31:45 $
+   $Revision: 1.4 $
+   $Date: 2004/07/12 12:40:57 $
    $Author: straten $ */
 
 #ifndef __EPN_Archive_h
@@ -146,7 +146,7 @@ namespace Pulsar {
         bool advocate (const char* filename);
 
         //! Return the name of the EPNArchive plugin
-        string get_name () { return "EPNArchive"; }
+        string get_name () { return "EPN"; }
 
         //! Return description of this plugin
         string get_description ();
