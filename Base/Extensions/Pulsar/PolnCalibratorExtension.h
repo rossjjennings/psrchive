@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/PolnCalibratorExtension.h,v $
-   $Revision: 1.4 $
-   $Date: 2003/09/12 18:43:55 $
+   $Revision: 1.5 $
+   $Date: 2003/10/02 07:33:46 $
    $Author: straten $ */
 
 #ifndef __PolnCalibratorExtension_h
@@ -13,7 +13,9 @@
 #include "Pulsar/Archive.h"
 
 namespace Pulsar {
-  
+
+  class PolnCalibrator;
+
   //! PolnCalibrator Extension
   /*! This Extension implements the storage of PolnCalibrator data. */
   
@@ -32,6 +34,9 @@ namespace Pulsar {
 
     //! Destructor
     ~PolnCalibratorExtension ();
+
+    //! Construct from a PolnCalibrator instance
+    PolnCalibratorExtension (const PolnCalibrator*);
 
     //! Set the type of the instrumental response parameterization
     void set_type (Calibrator::Type type);
