@@ -80,7 +80,7 @@ int main (int argc, char *argv[])
       break;
 
     case 'i':
-      cout << "$Id: pat.C,v 1.19 2004/05/03 04:03:25 ghobbs Exp $" << endl;
+      cout << "$Id: pat.C,v 1.20 2004/05/05 06:47:44 ahotan Exp $" << endl;
       return 0;
 
     case 'F':
@@ -239,7 +239,7 @@ int main (int argc, char *argv[])
 	  else
 	    stdarch->convert_state(Signal::Intensity);
 	}
-        arch->toas(toas, stdarch, time_domain);
+        arch->toas(toas, stdarch, "", time_domain, Tempo::toa::Parkes);
 
       }
 

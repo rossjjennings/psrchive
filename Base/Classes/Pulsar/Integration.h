@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Integration.h,v $
-   $Revision: 1.60 $
-   $Date: 2004/03/28 02:45:55 $
-   $Author: sord $ */
+   $Revision: 1.61 $
+   $Date: 2004/05/05 06:47:43 $
+   $Author: ahotan $ */
 
 /*
   
@@ -21,9 +21,7 @@
 #include "Reference.h"
 #include "Estimate.h"
 
-namespace Tempo {
-  class toa;
-}
+#include "toa.h"
 
 template<typename T> class Stokes;
 template<typename T> class Jones;
@@ -138,7 +136,9 @@ namespace Pulsar {
     
     //! Return a vector of tempo++ toa objects
     void toas (vector<Tempo::toa>& toas, const Integration& std_subint,
-	       char nsite, bool time_domain = false,
+	       char nsite, string arguments = "", 
+	       bool time_domain = false, 
+	       Tempo::toa::Format fmt = Tempo::toa::Parkes,
 	       bool discard_bad = false) const;
     
     //! Remove the baseline from all profiles

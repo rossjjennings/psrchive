@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Profile.h,v $
-   $Revision: 1.54 $
-   $Date: 2004/05/02 08:35:33 $
-   $Author: sord $ */
+   $Revision: 1.55 $
+   $Date: 2004/05/05 06:47:44 $
+   $Author: ahotan $ */
 
 #ifndef __Pulsar_Profile_h
 #define __Pulsar_Profile_h
@@ -172,13 +172,15 @@ namespace Pulsar {
 
     /*! find the shift relative to a standard using a time domain
       convolution and gaussian fit, returning a Tempo::toa object */
-    Tempo::toa time_domain_toa (const Profile& std, const MJD& mjd, 
-				double period, char nsite) const;
+    Tempo::toa tdt (const Profile& std, const MJD& mjd, 
+		    double period, char nsite, string arguments = "",
+		    Tempo::toa::Format fmt = Tempo::toa::Parkes) const;
     
     //! fit to the standard and return a Tempo::toa object
     Tempo::toa toa (const Profile& std, const MJD& mjd, 
-		    double period, char nsite) const;
-
+		    double period, char nsite, string arguments = "",
+		    Tempo::toa::Format fmt = Tempo::toa::Parkes) const;
+    
     //! return the shift (in turns) after fitting to the standard
     double shift (const Profile& std, float& ephase,
 		  float& snrfft, float& esnrfft) const;

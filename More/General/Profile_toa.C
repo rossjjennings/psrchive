@@ -3,19 +3,19 @@
 #include "Pulsar/Profile.h"
 #include "Error.h"
 
-#include "Calibration/LevenbergMarquardt.h"
-#include "Calibration/Polynomial.h"
-#include "Calibration/Axis.h"
-
 #include "model_profile.h"
+#include "GaussJordan.h"
 
-/*! Calculates the shift relative to a standard using a time domain
-  correlation to get course discrete values of the correlation function 
-  and a gaussian interpolation to find the point of maximum correlation, 
-  returning a Tempo::toa object */
-Tempo::toa Pulsar::Profile::time_domain_toa (const Profile& std, 
-					     const MJD& mjd, 
-					     double period, char nsite) const
+/*! Calculates the shift relative to a standard profile using a time
+  domain correlation to get course discrete estimates of the shift and
+  a quadratic interpolation to find the point of maximum correlation.
+
+  Returns a Tempo::toa object */
+
+Tempo::toa Pulsar::Profile::tdt (const Profile& std, 
+				 const MJD& mjd, 
+				 double period, char nsite, string arguments,
+				 Tempo::toa::Format fmt) const
 {
   // The Profile::correlate function creates a profile whose amps
   // are the values of the correlation function, starting at zero
@@ -35,96 +35,116 @@ Tempo::toa Pulsar::Profile::time_domain_toa (const Profile& std,
   // Remove the baseline
   *ptr -= ptr->mean(ptr->find_min_phase(0.15));
   
-  // Fit a gaussian to the peak part of the correlation function
-
   // Find the point of best correlation
   
-  double maxpt = ptr->find_max_phase(0.15);
-
-  // Centre on it, to allow the gaussian fit a better 
-  // chance of success
-
-  ptr->rotate(0.5-maxpt);
-
-  float phswidth = ptr->width(85.0);
-  float binwidth = phswidth * nbin;
-
-  int nbin = get_nbin();
   int maxbin = ptr->find_max_bin();
-
-  int lowbin = int(maxbin-(binwidth/2));
-  int hibin  = int(maxbin+(binwidth/2));
-
-  if (lowbin < 0)
-    lowbin = 0;
-
-  if (hibin > nbin)
-    hibin = nbin;
-
-  for (int i = lowbin; i < hibin; i++) {
-    correlation.push_back(ptr->get_amps()[i]);
-    lags.push_back(double(i));
-  }
-
-  // Construct a polynomial model
   
-  Calibration::Polynomial model(3);
+  double x1,x2,x3;
+  double y1,y2,y3;
 
-  Calibration::Axis<double> argument;
-  model.set_argument (0, &argument);
+  x1 = double(maxbin - 1);
+  x2 = double(maxbin);
+  x3 = double(maxbin + 1);
 
-  vector< Calibration::Axis<double>::Value > data_x;  // x-ordinate of data
-  vector< Estimate<double> > data_y;       // y-ordinate of data with error
+  //cerr << x1 << ", " << x2 << ", " << x3 << endl;
 
-  for (unsigned i = 0; i < correlation.size(); i++) {
-    data_x.push_back ( argument.get_Value(lags[i]) );
-    data_y.push_back ( Estimate<double>(correlation[i],0.0) );
+  y1 = ptr->get_amps()[(maxbin - 1)%get_nbin()];
+  y2 = ptr->get_amps()[(maxbin)%get_nbin()];
+  y3 = ptr->get_amps()[(maxbin + 1)%get_nbin()];
+
+  //cerr << y1 << ", " << y2 << ", " << y3 << endl;
+
+  // Phases can be outside the 0->1 range here, they get wrapped later
+
+  x1 /= double(get_nbin());
+  x2 /= double(get_nbin());
+  x3 /= double(get_nbin());
+ 
+  //cerr << x1 << ", " << x2 << ", " << x3 << endl;
+
+  vector< vector<double> > matrix;
+  vector< vector<double> > empty;
+
+  matrix.resize(3);
+  for (unsigned i = 0; i < matrix.size(); i++) {
+    matrix[i].resize(3);
   }
+  
+  //cerr << "About to populate matrix" << endl;
 
-  Calibration::LevenbergMarquardt<double> fit;
-  fit.verbose = Calibration::Model::verbose;
+  matrix[0][0] = x1*x1;
+  matrix[0][1] = x1;
+  matrix[0][2] = 1;
 
-  float chisq = fit.init (data_x, data_y, model);
-  cerr << "initial chisq = " << chisq << endl;
+  matrix[1][0] = x2*x2;
+  matrix[1][1] = x2;
+  matrix[1][2] = 1;
 
-  float threshold = 0.001;
+  matrix[2][0] = x3*x3;
+  matrix[2][1] = x3;
+  matrix[2][2] = 1;
 
-  int iter = 1;
-  while (iter < 25) {
-    cerr << "iteration " << iter << endl;
-    float nchisq = fit.iter (data_x, data_y, model);
-    cerr << "     chisq = " << nchisq << endl;
+  // Invert the matrix
+  Numerical::GaussJordan (matrix, empty, 3);
 
-    if (nchisq < chisq) {
-      float diffchisq = chisq - nchisq;
-      chisq = nchisq;
-      iter = 1;
-      if (diffchisq/chisq < threshold && diffchisq > 0) {
-        cerr << "no big diff in chisq = " << diffchisq << endl;
-        break;
-      }
-    }
-    else
-      iter ++;
+  // Solve for the coefficients of our parabola, in the form:
+  // y = Ax^2 +Bx +C
+  
+  double A = matrix[0][0]*y1 + matrix[0][1]*y2 + matrix[0][2]*y3;
+  double B = matrix[1][0]*y1 + matrix[1][1]*y2 + matrix[1][2]*y3;
+  double C = matrix[2][0]*y1 + matrix[2][1]*y2 + matrix[2][2]*y3;
+
+  //cerr << A << ", " << B << ", " << C << endl;
+
+  // Now calculate the equivalent coefficients for the form:
+  // y = D - E(x - F)^2
+  //
+  // Which has the physical interperatation:
+  //   D => no use
+  //   E => proportional to the TOA error
+  //   F => the relative shift
+
+  // Use the equations:
+  //   A = -E       => E = -A
+  //   B = 2EF      => F = -B/2A
+  //   C = D - EF^2 => D = C - (B^2/4A)
+
+  double D = C - (B*B/(4.0*A));
+  double E = -1.0 * A;
+  double F =  (-1.0 * B) / (2.0 * A);
+
+  cerr << F << endl;
+
+  // The error estimate is somewhat speculative... It is
+  // computed as the full width at half maximum of the
+  // parabola, assuming the baseline is the average level
+  // of the two bins either side the maximum bin in the 
+  // correlation function.
+
+  double height = y2 - (y1 + y3) / 2.0;
+  height /= 2.0;
+
+  if ((D - height)/E < 0.0) {
+    throw Error(FailedCall, "Profile::tdt",
+		"aborting before floating exception");
   }
+  
+  double error = 2.0 * sqrt((D - height)/E);
 
-  double free_parms = data_x.size() + model.get_nparam();
-
-  cerr << "Chi-squared = " << chisq << " / " << free_parms << " = "
-       << chisq / free_parms << endl;
+  double shift = F;
 
   double bin_time = period / double(nbin);
-  double offset = (model.get_param(0) - maxpt*nbin) * bin_time;
-  double error = model.get_variance(0) * bin_time;
+  double offset = shift * get_nbin() * bin_time;
 
-  Tempo::toa retval (Tempo::toa::Parkes);
+  Tempo::toa retval (fmt);
 
   retval.set_frequency (centrefreq);
   retval.set_arrival   (mjd + offset);
   retval.set_error     (error);
 
   retval.set_telescope (nsite);
-  
+  retval.set_auxilliary_text(arguments);
+
   return retval;
 }
 
@@ -133,9 +153,10 @@ Tempo::toa Pulsar::Profile::time_domain_toa (const Profile& std,
   Returns a basic Tempo::toa object
 */
 Tempo::toa Pulsar::Profile::toa (const Profile& std, const MJD& mjd, 
-				 double period, char nsite) const
+				 double period, char nsite, string arguments,
+				 Tempo::toa::Format fmt) const
 {
-  Tempo::toa retval (Tempo::toa::Parkes);
+  Tempo::toa retval (fmt);
 
   float ephase, snrfft, esnrfft; 
   double phase = shift (std, ephase, snrfft, esnrfft);
@@ -145,7 +166,8 @@ Tempo::toa Pulsar::Profile::toa (const Profile& std, const MJD& mjd,
   retval.set_error     (ephase * period * 1e6);
 
   retval.set_telescope (nsite);
-
+  retval.set_auxilliary_text(arguments);
+  
   if (verbose) {
     fprintf (stderr, "Pulsar::Profile::toa created:\n");
     retval.unload (stderr);

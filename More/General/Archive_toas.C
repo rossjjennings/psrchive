@@ -10,7 +10,9 @@
 */
 void Pulsar::Archive::toas (vector<Tempo::toa>& toas,
 			    const Archive* standard,
-			    bool time_domain) const
+			    string arguments,
+			    bool time_domain,
+			    Tempo::toa::Format fmt) const
 {
   if (get<IntegrationOrder>()) {
     throw Error (InvalidState, "Pulsar::Archive::toas",
@@ -36,18 +38,20 @@ void Pulsar::Archive::toas (vector<Tempo::toa>& toas,
   char nsite = get_telescope_code();
 
   for (unsigned isub=0; isub<get_nsubint(); isub++) {
-
-    // some extra information to place in each toa
-    char extra[20];
-    sprintf (extra, " %d ", isub);
     
     vector<Tempo::toa> toaset;
-    get_Integration(isub)->toas (toaset, *std, nsite, time_domain);
+    get_Integration(isub)->toas (toaset, *std, nsite, arguments, 
+				 time_domain, fmt);
     
-    for (unsigned itoa=0; itoa < toaset.size(); itoa++) {
-      string aux = get_filename() + extra + toaset[itoa].get_auxilliary_text();
-      toaset[itoa].set_auxilliary_text (aux);
-      toas.push_back (toaset[itoa]);
+    if (fmt == Tempo::toa::Parkes || fmt == Tempo::toa::Psrclock) {
+      // some extra information to place in each toa
+      char extra[20];
+      sprintf (extra, " %d ", isub);
+      for (unsigned itoa=0; itoa < toaset.size(); itoa++) {
+	string aux = get_filename() + extra + toaset[itoa].get_auxilliary_text();
+	toaset[itoa].set_auxilliary_text (aux);
+	toas.push_back (toaset[itoa]);
+      }
     }
 
   }
