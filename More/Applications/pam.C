@@ -49,6 +49,7 @@ void usage()
     "  -F               Frequency scrunch to one channel \n"
     "  -p               Polarisation scrunch to total intensity \n"
     "  -D               Dedisperse (but not fscrunch) \n"
+    "  --DD             Dededisperse (i.e. undo -D option) \n"
     "  -I               Transform to Invariant Interval \n"
     "  -S               Transform to Stokes parameters \n"
     "  -x \"start end\"   Extract subints in this inclusive range \n"
@@ -134,6 +135,7 @@ int main (int argc, char *argv[]) {
     double rphase = 0.0;
 
     bool dedisperse = false;
+    bool dededisperse = false;
 
     bool pscr = false;
 
@@ -186,6 +188,7 @@ int main (int argc, char *argv[]) {
     const int REVERSE_FREQS = 1210;
     const int SITE = 1211;
     const int NAME = 1212;
+    const int DD   = 1213;
 
     while (1) {
 
@@ -206,6 +209,7 @@ int main (int argc, char *argv[]) {
 	{"reverse_freqs",no_argument,0,REVERSE_FREQS},
 	{"site",       1, 0, SITE},
 	{"name",       1, 0, NAME},
+	{"DD",no_argument,0,DD},
 	{0, 0, 0, 0}
       };
     
@@ -232,7 +236,7 @@ int main (int argc, char *argv[]) {
 	Pulsar::Archive::set_verbosity(3);
 	break;
       case 'i':
-	cout << "$Id: pam.C,v 1.50 2005/03/02 07:27:12 hknight Exp $" << endl;
+	cout << "$Id: pam.C,v 1.51 2005/03/04 07:14:09 hknight Exp $" << endl;
 	return 0;
       case 'm':
 	save = true;
@@ -514,6 +518,8 @@ int main (int argc, char *argv[]) {
       case SITE: site = optarg; break;
 
       case NAME: name = optarg; break;
+
+      case DD: dededisperse = true; break;
 	  
       default:
 	cout << "Unrecognised option" << endl;
@@ -678,6 +684,20 @@ int main (int argc, char *argv[]) {
 	arch->dedisperse();
 	if (verbose)
 	  cout << "Archive dedipsersed" << endl;
+      }
+
+      if( dededisperse ){
+	if( arch->get_dedispersed() ){
+	  arch->set_dedispersed( false );
+	  double dm = arch->get_dispersion_measure();
+	  arch->set_dispersion_measure( -dm );
+	  arch->dedisperse();
+	  arch->set_dedispersed( false );
+	  arch->set_dispersion_measure( dm );
+	}
+	else
+	  fprintf(stderr,"Can't dededisperse as archive '%s' is not dedispersed\n",
+		  arch->get_filename().c_str());
       }
 
       if (defaraday) {
