@@ -91,7 +91,7 @@ bool Pulsar::Archive::standard_match (const Archive* archive,
 
   if (get_nbin() != archive->get_nbin()) {
     reason += match_indent
-      + stringprintf ("numbers of bins mismatch: %d != %d",
+      + stringprintf ("number of bins mismatch: %d != %d",
 		      get_nbin(), archive->get_nbin());
     result = false;
   }
@@ -197,7 +197,7 @@ bool Pulsar::Archive::calibrator_match (const Archive* archive,
   double bw1 = get_bandwidth();
   double bw2 = archive->get_bandwidth();
 
-  if ( ( bw1 != bw2 ) && !( match_opposite_sideband && (bw1 != -bw2) ) ) {
+  if ( ( bw1 != bw2 ) && !(match_opposite_sideband && (bw1 == -bw2)) ) {
     reason += match_indent
       + stringprintf ("bandwidth mismatch: %lf and %lf", bw1, bw2);
     result = false;
