@@ -31,7 +31,7 @@ PROGRAMS = align.C amps.C chanprep.C  \
 	      fakedat.C quik_cal.C plk.C \
 	      cal_arch.C fitmix.C calplt.C vargain.C \
 	      headsum.C iono_model.C treduce.C plk.C \
-              tcombine2.C ratio.C fixprf.C yellowline.C
+              tcombine2.C ratio.C fixprf.C
 
 NOT_WORKING     = bandpass.C detail.C xtoa.C bin_ph.C corflux.C flux.C
 
