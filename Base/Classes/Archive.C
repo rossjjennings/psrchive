@@ -158,7 +158,7 @@ void Pulsar::Archive::bscrunch (unsigned nscrunch)
 /*!
   Simply calls Integration::fscrunch on each element of subints
   \param nscrunch the number of frequency channels to add together
-  */
+ */
 void Pulsar::Archive::fscrunch (unsigned nscrunch, bool weighted_cfreq)
 {
   if (subints.size() == 0)
@@ -170,6 +170,16 @@ void Pulsar::Archive::fscrunch (unsigned nscrunch, bool weighted_cfreq)
   set_nchan (subints[0]->get_nchan());
 }
 
+/*!
+  Useful wrapper for Archive::fscrunch
+*/
+void Pulsar::Archive::fscrunch_to_nchan (unsigned new_chan)
+{
+  if (get_nchan() % new_chan != 0)
+    throw Error (InvalidParam, "Archive::fscrunch_to_nchan");
+  else
+    fscrunch(get_nchan() / new_chan);
+}
 
 /*!
   Simply calls Integration::pscrunch on each element of subints
