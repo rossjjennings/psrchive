@@ -119,13 +119,13 @@ string c2str (const char* instr, char c, const char* repstr)
   }
   ret += repstr;
 
-  for (; pos<len; pos++)
+  for (pos++; pos<len; pos++)
     ret += instr[pos];
 
   return ret;
 }
 
-string psrephem::tex_name ()
+string psrephem::tex_name () const
 {
   string ret;
 
@@ -146,7 +146,7 @@ string psrephem::tex_name ()
 
 // outputs a LaTex formatted string for the value
 // indexed by 'ephi' (as in ephio.h)
-string psrephem::tex_val (int ephi, double fac, unsigned precision)
+string psrephem::tex_val (int ephi, double fac, unsigned precision) const
 {
   if (verbose)
     cerr << "psrephem::tex_val(" << ephi << ") entered" << endl;
@@ -209,29 +209,30 @@ const char* psrephem::tex_descriptor (int ephind)
 {
   switch (ephind) {
   case EPH_PEPOCH: return "$P$ epoch (MJD)";
-  case EPH_RAJ:   return "Right ascenscion, $\\alpha$ (J2000.0)";
-  case EPH_DECJ:  return "Declination, $\\delta$ (J2000.0)";
-  case EPH_PMRA:  return "Proper motion, $\\mu_\\alpha$ (mas/yr)";
-  case EPH_PMDEC: return "Proper motion, $\\mu_\\delta$ (mas/yr)";
-  case EPH_PB:    return "Orbital period, $P_{\\rm b}$ (days)";
-  case EPH_A1:    return "Projected semi-major axis, $x=a_p \\sin i$ (lt-s)";
-  case EPH_T0:    return "Epoch of periastron, $T_{0}$ (MJD)";
-  case EPH_OM:    return "Longitude of periastron, $\\omega$ (\\degr)";
-  case EPH_E:     return "Orbital eccentricity, $e$";
-  case EPH_KIN:   return "Orbital inclination, $i$ (\\degr)";
-  case EPH_KOM:   return "Longitude of ascension, $\\Omega$ (\\degr)";
-  case EPH_PX:    return "Annual parallax, $\\pi$ (mas)";
-  case EPH_PBDOT: return "$\\dot P_{\\rm b} (10^{-12})$"; 
-  case EPH_OMDOT: return "$\\dot \\omega (\\degr/yr)$";
-  case EPH_M2:    return "Companion mass, m$_2$ M$_{\\odot}$";
-  default:        return NULL;
+  case EPH_RAJ:    return "Right ascenscion, $\\alpha$ (J2000.0)";
+  case EPH_DECJ:   return "Declination, $\\delta$ (J2000.0)";
+  case EPH_PMRA:   return "Proper motion, $\\mu_\\alpha$ (mas/yr)";
+  case EPH_PMDEC:  return "Proper motion, $\\mu_\\delta$ (mas/yr)";
+  case EPH_PB:     return "Orbital period, $P_{\\rm b}$ (days)";
+  case EPH_A1:     return "Projected semi-major axis, $x$ (lt-s)";
+  case EPH_T0:     return "Epoch of periastron, $T_{0}$ (MJD)";
+  case EPH_OM:     return "Longitude of periastron, $\\omega$ (\\degr)";
+  case EPH_E:      return "Orbital eccentricity, $e$";
+  case EPH_KIN:    return "Orbital inclination, $i$ (\\degr)";
+  case EPH_KOM:    return "Longitude of ascension, $\\Omega$ (\\degr)";
+  case EPH_PX:     return "Annual parallax, $\\pi$ (mas)";
+  case EPH_PBDOT:  return "$\\dot P_{\\rm b} (10^{-12})$"; 
+  case EPH_OMDOT:  return "$\\dot \\omega (\\degr/yr)$";
+  case EPH_M2:     return "Companion mass, m$_2$ (M$_{\\odot})$";
+  default:
+    return NULL;
   }
 }
 
 // outputs a LaTex formatted string with table entries for
 // valid entries in the psrephem class.
 // feel free to add more as you see fit
-string psrephem::tex ()
+string psrephem::tex () const
 {
   bool binary = parmStatus[EPH_BINARY] > 0;
 
@@ -282,6 +283,11 @@ string psrephem::tex ()
       ;
   }
 
+  double mp, mp_err;
+  m1 (mp, mp_err);
+  retval += "Pulsar mass, m$_{\\rm p}$ (M$_{\\odot})$" + bw
+    + tex_double (mp, mp_err) + nl;
+
   double beta, beta_err;
   Shklovskii (beta, beta_err);
   retval += "Quadratic Doppler shift, $\\beta$ (10$^{-20}$s$^{-1}$)" + bw
@@ -307,7 +313,7 @@ string psrephem::tex ()
   double SPb_dot = beta * (pb * 86400.0);
   double SPb_dot_err = SPb_dot * sqrt (sqr(beta_err/beta) + sqr(pb_err/pb));
 
-  retval += "Expected $\\dot P_{\\rm b} (10^{-12})$"
+  retval += "Induced $\\dot P_{\\rm b} (10^{-12})$"
     + bw + tex_double (SPb_dot*1e12, SPb_dot_err*1e12) + nl;
 
 #if 0

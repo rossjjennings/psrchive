@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/psrephem.h,v $
-   $Revision: 1.8 $
-   $Date: 2001/02/01 03:20:37 $
+   $Revision: 1.9 $
+   $Date: 2001/02/02 07:13:41 $
    $Author: straten $ */
 
 #ifndef __PSREPHEM_H
@@ -97,11 +97,11 @@ class psrephem
   // -lpsrinfo
 
   // returns a block of LaTeX formatted text suitable for use in tables
-  string tex ();
+  string tex () const;
   // returns the LaTeX formatted pulsar name
-  string tex_name ();
+  string tex_name () const;
   // returns the a LaTeX formatted string for the parameter at ephind
-  string tex_val (int ephind, double fac=1.0, unsigned precision=1);
+  string tex_val (int ephind, double fac=1.0, unsigned precision=1) const;
 
   // returns a LateX formatted string suitable for labelling the parameter
   static const char* tex_descriptor (int ephind);

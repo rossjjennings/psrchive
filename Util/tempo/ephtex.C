@@ -57,7 +57,7 @@ int main (int argc, char** argv)
     cout <<
       "\\begin{table}\n"
       "\\begin{tabular}{lr}\n"
-      "\\multicolumn{2}{c}{\bf Derived Parameters for " 
+      "\\multicolumn{2}{c}{\\bf Derived Parameters for " 
 	 << eph.tex_name() << "} \\\\"
 	 << endl;
 
