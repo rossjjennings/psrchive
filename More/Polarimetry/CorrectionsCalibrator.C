@@ -98,8 +98,6 @@ void Pulsar::CorrectionsCalibrator::calibrate (Archive* archive)
 
   receiver->set_platform_corrected (true);
 
-  archive->set_state (archive->get_Integration(0)->get_state());
-
 }
 
 

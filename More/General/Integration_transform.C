@@ -9,9 +9,7 @@ void Pulsar::Integration::transform (const Jones<float>& response)
     throw Error (InvalidState, "Pulsar::Integration::transform",
 		 "incomplete polarization information");
 
-  Signal::State state = get_state();
-
-  for (unsigned ichan=0; ichan < get_nchan(); ichan++) {
+  for (unsigned ichan=0; ichan < get_nchan(); ichan++) try {
 
     PolnProfile poln (get_basis(), get_state(), 
 		      profiles[0][ichan], profiles[1][ichan],
@@ -19,11 +17,13 @@ void Pulsar::Integration::transform (const Jones<float>& response)
 
     poln.transform (response);
 
-    if (ichan == 0)
-      state = poln.get_state();
   }
-
-  set_state (state);
+  catch (Error& error) {
+    if (verbose)
+      cerr << "Pulsar::Integration::transform error ichan=" << ichan
+           << error << endl;
+    set_weight (ichan, 0);
+  }
 }
  
 void Pulsar::Integration::transform (const vector< Jones<float> >& response)
@@ -39,8 +39,6 @@ void Pulsar::Integration::transform (const vector< Jones<float> >& response)
   if (verbose)
     cerr << "Pulsar::Integration::transform vector<Jones<float>>" << endl;
 
-  Signal::State state = get_state();
-
   for (unsigned ichan=0; ichan < get_nchan(); ichan++) try {
 
     PolnProfile poln (get_basis(), get_state(), 
@@ -49,8 +47,6 @@ void Pulsar::Integration::transform (const vector< Jones<float> >& response)
 
     poln.transform (response[ichan]);
     
-    state = poln.get_state();
-
   }
   catch (Error& error) {
     if (verbose)
@@ -59,7 +55,6 @@ void Pulsar::Integration::transform (const vector< Jones<float> >& response)
     set_weight (ichan, 0);
   }
 
-  set_state (state);
 }
  
 
