@@ -132,6 +132,14 @@ void Pulsar::Archive::init_Integration (Integration* subint)
   subint -> set_state ( get_state() );
 }
 
+//! Call bscrunch with the appropriate value
+void Pulsar::Archive::bscrunch_to_nbin (unsigned new_nbin)
+{
+  unsigned scr = get_nbin() / new_nbin;
+  if (scr > 0)
+    bscrunch (scr);
+}
+
 /*!
   Simply calls Integration::bscrunch on each element of subints
   \param nscrunch the number of phase bins to add together
@@ -227,7 +235,19 @@ void Pulsar::Archive::centre ()
   \param frequency */
 void Pulsar::Archive::dedisperse (double dm, double frequency)
 {
+  if (subints.size() == 0)
+    return;
 
+  if (get_dedispersed())
+    return;
+
+  for (unsigned isub=0; isub < subints.size(); isub++) {
+    if (dm)
+      subints[isub] -> set_dispersion_measure (dm);
+    subints[isub] -> dedisperse (frequency);
+  }
+
+  set_dedispersed();
 }
 
 /*!
