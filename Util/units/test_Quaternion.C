@@ -9,14 +9,14 @@ float norm (float x)
 
 int main () 
 {
-  unsigned testloops = 10;
+  unsigned loops = RAND_MAX/1000;
 
   FourSpaceTest <Quaternion<float,Unitary>, 
     Quaternion<double,Unitary>, float > testu;
 
   try {
-    cerr << "Testing Unitary Quaternion operations" << endl;
-    testu.runtest (testloops);
+    cerr << "Testing " << loops << " Unitary Quaternion variations" << endl;
+    testu.runtest (loops);
   }
   catch (Error& error) {
     cerr << error << endl;
@@ -30,8 +30,8 @@ int main ()
     Quaternion<double,Hermitian>, float > testh;
 
   try {
-    cerr << "Testing Hermitian Quaternion operations" << endl;
-    testh.runtest (testloops);
+    cerr << "Testing " << loops << " Hermitian Quaternion variations" << endl;
+    testh.runtest (loops);
   }
   catch (Error& error) {
     cerr << error << endl;

@@ -14,30 +14,31 @@
 
 \section{Introduction}
 
-Quaternions may be considered an generalization of complex numbers,
-and are best known by the fundamental formula of quaternion algebra,
+Quaternions were invented by the famous Irish mathematician, William
+Rowan Hamilton, when he carved the fundamental formula of quaternion
+algebra,
 \begin{equation}
 i^2=j^2=k^2=ijk=-1
 \end{equation}
-which is said to have been carved into the stone of the Brougham
-bridge by the famous mathematician, William Rowan Hamilton, when the
-idea occured to him.
+into the stone of the Brougham bridge.
 
-An arbitrary quaternion, $\bm{U}$, is given by the linear combination,
-$\bm{U}=u_0,+u_1i+u_2j+u_3k$, $u_i\in\Re$.  Defined in this way, the
-multiplicative quaternion group may be said to be isomorphic with the
-$2\times2$ unitary tranformations, SU(2).
+An arbitrary quaternion, $\bm{U}$, is given by the linear combination
+\begin{equation}
+\bm{U}=u_0,+u_1i+u_2j+u_3k, \hspace{5mm} u_i\in\Re. 
+\end{equation}
+and the multiplicative quaternion group may be said to be isomorphic with
+the $2\times2$ unitary tranformations, SU(2).
 
-It is also possible to define the quaternion such that it is isomorphic
-with $2\times2$ Hermitian matrices.  In this case, $i^2=j^2=k^2=ijk=1$,
-and an arbitrary quaternion, $\bm{H}$, may be represented by the
-linear combination:
+A quaternion with complex coefficients is known as a biquaternion.
+The algebra of biquaternions is isomorphic to $2\times2$ complex
+matrices.  With biquaternions, a Hermitian matrix, $\bm{H}$, may be 
+represented by the linear combination:
 \begin{equation}
 \bm{H}=h_0\pauli{0} + h_1\pauli{1}
 	+ h_2\pauli{2} + h_3\pauli{3}, \hspace{5mm} h_i\in\Re
 \end{equation}
-In this notation, $\pauli{0}$ may be understood as the identity matrix,
-$\bm{I}$, and $\pauli{1-3}$ as the Pauli spin matrices:
+where $\pauli{0}$ equals the identity matrix, $\bm{I}$, and $\pauli{1-3}$
+are the Pauli spin matrices:
 \begin{eqnarray}
 \pauli{1} = \left( \begin{array}{cc}
 1 & 0 \\
@@ -55,24 +56,27 @@ $\bm{I}$, and $\pauli{1-3}$ as the Pauli spin matrices:
 \end{array}\right).
 \label{pauli}
 \end{eqnarray}
-From the above definitions, it can easily be shown that the Pauli spin
+A very useful notation represents the biquaternion as a complex scalar plus
+a three-vector:
+\begin{equation}
+\bm{Q}=[q+\bm{q}] = q\pauli{0} + \bm{q\cdot\sigma},
+\end{equation}
+were $\bm{q}=(q_1,q_2,q_3)$ and $\bm\sigma$ is a three-vector whose
+components are the Pauli spin matrices as defined above.
+Using this notation, the quaternion sub-group may be represented as
+\begin{equation}
+\bm{U}=[u_0+i\bm{u}]= u_0\pauli{0} + i\bm{u\cdot\sigma} \hspace{5mm} u_i\in\Re
+\end{equation}
+
+
+From the definitions of Eq.~\ref{pauli}, it can be shown that the Pauli spin
 matrices have the following properties:
-\begin{eqnarray}
-\pauli{i}^2 = \bm{I}, & \pauli{i}\pauli{j} = -\pauli{j}\pauli{i} = \Ci\pauli{k}
-\end{eqnarray}
+\begin{equation}
+\pauli{i}^2 = \bm{I}, \hspace{5mm} 
+\pauli{i}\pauli{j} = -\pauli{j}\pauli{i} = \Ci\pauli{k}
+\end{equation}
 where $\{i,j,k\}$ is chosen from cyclic permutations of $\{1,2,3\}$.
 
-Quaternions may be represented as a four-vector, $\bm{H}=[h_0,h_1,h_2,h_3]$.
-A very useful notation represents the quaternion as a scalar plus a 
-three vector, 
-\begin{equation}
-\bm{H}=[h+\bm{h}] = h\sigma{0} + \bm{h\cdot\sigma}.
-\end{equation}
-Here, $\bm{h}=(h_1,h_2,h_3)$ and $\bm\sigma$ is a 3-vector whose
-components are the Pauli spin matrices as defined above.
-
-Quaternions with complex coefficients are known as a biquaternions and
-will not be further discussed in this paper.
 
 \section{Some Algebraic Derivations}
 
@@ -80,15 +84,22 @@ will not be further discussed in this paper.
 As with matrices, quaternion multiplication is non-commutative.  It is
 useful to derive the result of the multiplication of two quaternions in some
 detail. Starting with $\bm{A}=[a+\bm{a}]$ and $\bm{B}=[b+\bm{b}]$
-\[
-\bm{A}\bm{B}=
+\begin{eqnarray}\label{multiplication}
+\begin{array}{ccl}
+\bm{A}\bm{B} & = &
 (a_0\pauli{0} + a_1\pauli{1} + a_2\pauli{2} + a_3\pauli{3})
 (b_0\pauli{0} + b_1\pauli{1} + b_2\pauli{2} + b_3\pauli{3}) \\
-= a_0b_0\pauli{0}\pauli{0} + a_0b_1\pauli{0}\pauli{1}
+& = & a_0b_0\pauli{0}\pauli{0} + a_0b_1\pauli{0}\pauli{1}
 	+ a_0b_2\pauli{0}\pauli{2} + a_0b_2\pauli{0}\pauli{2} \\
-+ a_1b_0\pauli{1}\pauli{0} + a_1b_1\pauli{1}\pauli{1}
-	+ a_1b_2\pauli{1}\pauli{2} + a_1b_2\pauli{1}\pauli{2}
-\]
+& & + a_1b_0\pauli{1}\pauli{0} + a_1b_1\pauli{1}\pauli{1}
+	+ a_1b_2\pauli{1}\pauli{2} + a_1b_2\pauli{1}\pauli{2} \\
+& & + a_2b_0\pauli{2}\pauli{0} + a_2b_1\pauli{2}\pauli{1}
+	+ a_2b_2\pauli{2}\pauli{2} + a_2b_2\pauli{2}\pauli{2} \\
+& & + a_3b_0\pauli{3}\pauli{0} + a_3b_1\pauli{3}\pauli{1}
+	+ a_3b_2\pauli{3}\pauli{2} + a_3b_2\pauli{3}\pauli{2}
+\end{array}
+\end{eqnarray}
+
 
 \section{Isomorphism with Jones matrices}
 

@@ -14,13 +14,13 @@ void random (complex<T>& val)
 
 int main () 
 {
-  unsigned testloops = 10;
+  unsigned loops = RAND_MAX/1000;
 
   FourSpaceTest <Jones<float>, Jones<double>, complex<float> > test;
 
   try {
-    cerr << "Testing Jones matrix operations" << endl;
-    test.runtest (testloops);
+    cerr << "Testing " << loops << " Jones matrix variations" << endl;
+    test.runtest (loops);
   }
   catch (Error& error) {
     cerr << error << endl;
