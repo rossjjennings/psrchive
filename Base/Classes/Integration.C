@@ -61,12 +61,18 @@ Pulsar::Integration::get_extension (unsigned iext)
   implemented by the Integration base class simply calls this method. */
 void Pulsar::Integration::add_extension (Extension* ext)
 {
-  unsigned index = find( extension, typeid(ext) );
+  unsigned index = find( extension, ext );
 
-  if (index < extension.size())
+  if (index < extension.size())  {
+    if (verbose)
+      cerr << "Pulsar::Integration::add_extension replacing" << endl;
     extension[index] = ext;
-  else
+  }
+  else {
+    if (verbose)
+      cerr << "Pulsar::Integration::add_extension appending" << endl;
     extension.push_back(ext);
+  }
 }
 
 Pulsar::Integration::Integration ()

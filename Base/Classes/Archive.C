@@ -149,19 +149,6 @@ Signal::Basis Pulsar::Archive::get_basis () const
     return Signal::Linear;
 }
 
-template<class T>
-unsigned find_type (const vector< Reference::To<T> >& array, const T* instance)
-{
-  unsigned index;
-
-  for (index=0; index<array.size(); index++)
-    if ( typeid(*instance) == typeid(*array[index].ptr()) )
-      break;
-
-  return index;
-}
-
-
 /*! Derived classes need only define this method, as the non-const version
   implemented by the Archive base class simply calls this method. */
 void Pulsar::Archive::add_extension (Extension* ext)
@@ -183,7 +170,7 @@ void Pulsar::Archive::add_extension (Extension* ext)
   // If we reach here, there are no IntegrationOrder conflicts.
   // Continue as normal... AWH 29/12/2003
   
-  unsigned index = find_type (extension, ext);
+  unsigned index = find (extension, ext);
 
   if (index < extension.size())  {
     if (verbose == 3)
