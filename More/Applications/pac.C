@@ -48,7 +48,7 @@ int main (int argc, char *argv[]) {
       cout << "  -v   Verbose mode"                         << endl;
       cout << "  -V   Very verbose mode"                    << endl;
       cout << "  -p   Path to CAL file directory"           << endl;
-      cout << "  -e   Scan for CALs with these extensions"  << endl;
+      cout << "  -e   Scan for files with these extensions" << endl;
       cout << "       uses .cf and .pcal as defaults"       << endl;
       cout << "  -w   Write a new database summary file"    << endl;
       cout << "       if using -p"                          << endl;
@@ -64,6 +64,7 @@ int main (int argc, char *argv[]) {
       cout << "  -P   Calibrate polarisations only"         << endl;
       cout << "  -s   Use the Single Axis Model (default)"  << endl;
       cout << "  -q   Use the Polar Model"                  << endl;
+      return 0;
       break;
     case 'v':
       verbose = true;
@@ -71,6 +72,7 @@ int main (int argc, char *argv[]) {
       break;
     case 'V':
       verbose = true;
+      Pulsar::Calibration::verbose = true;
       Pulsar::Archive::set_verbosity(1);
       break;
     case 'p':
