@@ -25,7 +25,7 @@ void Calibration::Feed::init ()
     // receptor->name = "Feed::receptor[" + rname + "]";
 
     Jones<double> select_jones;
-    select_jones.j(ir, ir) = 1.0;
+    select_jones(ir, ir) = 1.0;
 
     // construct the 2x2 selection matrix
     selection = new MEAL::Complex2Constant (select_jones);
