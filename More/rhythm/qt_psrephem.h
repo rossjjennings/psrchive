@@ -17,6 +17,8 @@
 #include <qvbox.h>
 #include <qlabel.h>
 
+#include <psr_cpp.h>
+
 //#include "psrephem.h"
 
 class qt_psrParameter;  // implementation detail defined in qt_psrParameter.h
