@@ -49,7 +49,8 @@ char * Angle::getHMS(char *str, int places) const
 static char angle_str [100];
 string Angle::getHMS (int places) const
 {
-  return string (getHMS (angle_str, places));
+  ra2str (angle_str, 100, radians, places);
+  return angle_str;
 }
 
 int Angle::setHMS(const char *str)
@@ -109,7 +110,8 @@ char * Angle::getDMS(char *str,int places) const
 
 string Angle::getDMS(int places) const
 {
-  return string (getDMS (angle_str, places));
+  dec2str2 (angle_str, 100, radians, places);
+  return angle_str;
 }
 
 
