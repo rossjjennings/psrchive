@@ -1,14 +1,15 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Quaternion.h,v $
-   $Revision: 1.25 $
-   $Date: 2004/11/22 19:26:04 $
+   $Revision: 1.26 $
+   $Date: 2004/12/22 13:32:15 $
    $Author: straten $ */
 
 #ifndef __Quaternion_H
 #define __Quaternion_H
 
 #include "Traits.h"
+#include "complex_promote.h"
 #include "Vector.h"
 
 //! Quaternion algebra is isomorphic with either Hermitian or Unitary matrices
@@ -20,57 +21,53 @@ template<typename T, QBasis B = Unitary> class Quaternion {
 public:
   T s0,s1,s2,s3;
 
-  //! Null constructor
-  Quaternion () { s0=s1=s2=s3=0.0; }
-
-  //! Construct from T
-  Quaternion (T s0_, T s1_, T s2_, T s3_)
-    : s0(s0_), s1(s1_), s2(s2_), s3(s3_) {  }
+  //! Default constructor
+  Quaternion (const T& a=0.0, const T& b=0.0, const T& c=0.0, const T& d=0.0)
+    : s0(a), s1(b), s2(c), s3(d) { }
 
   //! Construct from a scalar and vector
   template<typename U> Quaternion (T s, const Vector<U, 3>& v)
-    { s0=s; s1=v[0]; s2=v[1]; s3=v[2]; }
+    : s0(s), s1(v[0]), s2(v[1]), s3(v[2]) { }
 
   //! Construct from another Quaternion<U> instance
   template<typename U> Quaternion (const Quaternion<U, B>& s)
-    { operator=(s); }
+    : s0(s.s0), s1(s.s1), s2(s.s2), s3(s.s3) { }
 
   //! Set this instance equal to another Quaternion<U> instance
-  template<typename U> const Quaternion& operator = (const Quaternion<U, B>& s)
-    { s0=T(s.s0); s1=T(s.s1);
-      s2=T(s.s2); s3=T(s.s3); return *this; }
-
-  //! Set this instance equal to a scalar
-  const Quaternion& operator = (T s)
-    { s0=s; s1=s2=s3=0; return *this; }
+  template<typename U>
+  const Quaternion& operator = (const Quaternion<U,B>& s)
+    { s0=T(s.s0); s1=T(s.s1); s2=T(s.s2); s3=T(s.s3); return *this; }
 
   //! Scalar addition
-  const Quaternion& operator += (T s)
+  const Quaternion& operator += (const T& s)
     { s0+=s; return *this; }
 
   //! Scalar subtraction
-  const Quaternion& operator -= (T s)
+  const Quaternion& operator -= (const T& s)
     { s0-=s; return *this; }
 
-  //! Quaternion addition
-  const Quaternion& operator += (const Quaternion& s)
-    { s0+=s.s0; s1+=s.s1; s2+=s.s2; s3+=s.s3; return *this; }
-
-  //! Quaternion subtraction
-  const Quaternion& operator -= (const Quaternion& s)
-    { s0-=s.s0; s1-=s.s1; s2-=s.s2; s3-=s.s3; return *this; }
-
-  //! Quaternion multiplication
-  const Quaternion& operator *= (const Quaternion& s)
-    { *this = *this * s; return *this; }
-
   //! Scalar multiplication
-  const Quaternion& operator *= (T a)
+  const Quaternion& operator *= (const T& a)
     { s0*=a; s1*=a; s2*=a; s3*=a; return *this; }
 
   //! Scalar division
-  const Quaternion& operator /= (T a)
+  const Quaternion& operator /= (const T& a)
     { T d(1.0); d/=a; s0*=d; s1*=d; s2*=d; s3*=d; return *this; }
+
+  //! Quaternion addition
+  template<class U>
+  const Quaternion& operator += (const Quaternion<U,B>& s)
+    { s0+=s.s0; s1+=s.s1; s2+=s.s2; s3+=s.s3; return *this; }
+
+  //! Quaternion subtraction
+  template<class U>
+  const Quaternion& operator -= (const Quaternion<U,B>& s)
+    { s0-=s.s0; s1-=s.s1; s2-=s.s2; s3-=s.s3; return *this; }
+
+  //! Quaternion multiplication
+  template<class U>
+  const Quaternion& operator *= (const Quaternion<U,B>& s)
+    { *this = *this * s; return *this; }
 
   //! Equality
   bool operator == (const Quaternion& b) const
@@ -83,44 +80,6 @@ public:
   //! Inequality
   bool operator != (const Quaternion& b) const
     { return ! operator==(b); }
-
-
-  //! Quaternion addition
-  template<typename U>
-  const friend Quaternion operator + (Quaternion a, const Quaternion<U,B>& b)
-    { a+=b; return a; }
-
-  //! Quaternion subtraction
-  template<typename U> 
-  const friend Quaternion operator - (Quaternion a, const Quaternion<U,B>& b)
-    { a-=b; return a; }
-
-  //! Scalar multiplication
-  const friend Quaternion operator * (Quaternion a, T c)
-    { a*=c; return a; }
-
-  //! Scalar multiplication
-  const friend Quaternion operator * (T c, Quaternion a)
-    { a*=c; return a; }
-
-  //! Scalar division
-  const friend Quaternion operator / (Quaternion a, T c)
-    { a/=c; return a; }
-
-  //! complex multiplication
-  template <typename U>
-  const friend Quaternion operator * (const std::complex<U>& c, Quaternion a)
-    { a*=c; return a; }
-
-  //! complex multiplication
-  template <typename U>
-  const friend Quaternion operator * (Quaternion a, const std::complex<U>& c)
-    { a*=c; return a; }
-
-  //! complex division
-  template <typename U>
-  const friend Quaternion operator / (Quaternion a, const std::complex<U>& c)
-    { a/=c; return a; }
 
   //! Negation
   const friend Quaternion operator - (Quaternion s)
@@ -148,7 +107,7 @@ public:
   template<typename U>
   void set_vector (const Vector<U,3>& v) { s1=v[0]; s2=v[1]; s3=v[2]; }
 
-  //! Identity (should be const, wait for gcc version 3)
+  //! Identity
   static const Quaternion& identity();
 
   //! Dimension of data
@@ -156,11 +115,63 @@ public:
 
 };
 
+//! Quaternion addition
+template<typename T, QBasis B, typename U>
+const Quaternion<typename PromoteTraits<T,U>::promote_type,B>
+operator + (const Quaternion<T,B>& a, const Quaternion<U,B>& b)
+{
+  Quaternion<typename PromoteTraits<T,U>::promote_type,B> ret(a);
+  ret+=b;
+  return ret;
+}
+
+//! Quaternion subtraction
+template<typename T, QBasis B, typename U>
+const Quaternion<typename PromoteTraits<T,U>::promote_type,B>
+operator - (const Quaternion<T,B>& a, const Quaternion<U,B>& b)
+{
+  Quaternion<typename PromoteTraits<T,U>::promote_type,B> ret(a);
+  ret-=b;
+  return ret;
+}
+
+//! Scalar multiplication
+/*! The return type should use PromoteTraits, but the compiler won't */
+template<typename T, QBasis B, typename U>
+const Quaternion<T,B>
+operator * (const Quaternion<T,B>& a, const U& c)
+{ 
+  Quaternion<typename PromoteTraits<T,U>::promote_type,B> ret(a);
+  ret*=c;
+  return ret;
+}
+
+//! Scalar multiplication
+/*! The return type should use PromoteTraits, but the compiler won't */
+template<typename T, QBasis B, typename U>
+const Quaternion<T,B>
+operator * (const U& c, const Quaternion<T,B>& a)
+{
+  Quaternion<typename PromoteTraits<T,U>::promote_type,B> ret(a);
+  ret*=c;
+  return ret;
+}
+
+//! Scalar division
+template<typename T, QBasis B, typename U>
+const Quaternion<typename PromoteTraits<T,U>::promote_type,B>
+operator / (const Quaternion<T,B>& a, const U& c)
+{
+  Quaternion<typename PromoteTraits<T,U>::promote_type,B> ret(a);
+  ret/=c;
+  return ret;
+}
+
 //! The identity Quaternion
 template<typename T, QBasis B>
 const Quaternion<T,B>& Quaternion<T,B>::identity ()
 {
-  static Quaternion I (1,0,0,0);
+  static Quaternion<T,B> I (1,0,0,0);
   return I;
 }
 
@@ -195,25 +206,26 @@ template<typename T>
 T conj (const T& x) { return x; };
 
 //! Multiplication of two Biquaternions in the Hermitian basis
-template<typename T>
-const Quaternion<std::complex<T>, Hermitian>
+template<typename T, typename U>
+const Quaternion<std::complex<typename PromoteTraits<T,U>::promote_type>,
+                 Hermitian>
 operator * (const Quaternion<std::complex<T>,Hermitian>& a,
-	    const Quaternion<std::complex<T>,Hermitian>& b)
+	    const Quaternion<std::complex<U>,Hermitian>& b)
 {
-  return Quaternion<std::complex<T>, Hermitian>
+  typedef std::complex<typename PromoteTraits<T,U>::promote_type> R;
+  return Quaternion<R,Hermitian>
     ( a.s0*b.s0 + a.s1*b.s1 + a.s2*b.s2 + a.s3*b.s3 ,
       a.s0*b.s1 + a.s1*b.s0 + ci(a.s2*b.s3) - ci(a.s3*b.s2) ,
       a.s0*b.s2 - ci(a.s1*b.s3) + a.s2*b.s0 + ci(a.s3*b.s1) ,
       a.s0*b.s3 + ci(a.s1*b.s2) - ci(a.s2*b.s1) + a.s3*b.s0 );
 }
 
-
 //! Multiplication of two Quaternions in the Unitary basis
-template<typename T>
-const Quaternion<T, Unitary> operator * (const Quaternion<T,Unitary>& a,
-					 const Quaternion<T,Unitary>& b)
+template<typename T, typename U>
+const Quaternion<typename PromoteTraits<T,U>::promote_type, Unitary>
+operator * (const Quaternion<T,Unitary>& a, const Quaternion<U,Unitary>& b)
 {
-  return Quaternion<T, Unitary>
+  return Quaternion<typename PromoteTraits<T,U>::promote_type, Unitary>
     (a.s0*b.s0 - a.s1*b.s1 - a.s2*b.s2 - a.s3*b.s3,
      a.s0*b.s1 + a.s1*b.s0 - a.s2*b.s3 + a.s3*b.s2,
      a.s0*b.s2 + a.s1*b.s3 + a.s2*b.s0 - a.s3*b.s1,

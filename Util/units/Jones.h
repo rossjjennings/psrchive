@@ -1,14 +1,15 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Jones.h,v $
-   $Revision: 1.24 $
-   $Date: 2004/11/23 11:25:43 $
+   $Revision: 1.25 $
+   $Date: 2004/12/22 13:32:15 $
    $Author: straten $ */
 
 #ifndef __Jones_H
 #define __Jones_H
 
 #include "Traits.h"
+#include "complex_promote.h"
 
 //! Jones matrices are 2x2 matrices with complex elements
 template<typename T> class Jones {
@@ -91,22 +92,6 @@ public:
   bool operator != (const Jones& b) const
   { return ! Jones::operator==(b); }
 
-
-  //! Binary addition
-  template<typename U>
-  const friend Jones operator + (Jones a, const Jones<U>& b)
-    { a+=b; return a; }
-
-  //! Binary subtraction
-  template<typename U> 
-  const friend Jones operator - (Jones a, const Jones<U>& b)
-    { a-=b; return a; }
-
-  //! Binary multiplication of two Jones matrices
-  template<typename U>
-  const friend Jones operator * (Jones a, const Jones<U>& b)
-    { a*=b; return a; }
-
   //! Binary multiplication of Jones<T> and std::complex<U>
   template<typename U> 
   const friend Jones operator * (Jones a, std::complex<U> c)
@@ -155,6 +140,25 @@ public:
   //! Dimension of data
   unsigned size () const { return 4; }
 };
+
+//! Binary addition
+template<typename T, typename U>
+const Jones<typename PromoteTraits<T,U>::promote_type>
+operator + (const Jones<T>& a, const Jones<U>& b)
+{ Jones<typename PromoteTraits<T,U>::promote_type> ret(a); ret+=b; return ret; }
+
+//! Binary subtraction
+template<typename T, typename U>
+const Jones<typename PromoteTraits<T,U>::promote_type> 
+operator - (const Jones<T>& a, const Jones<U>& b)
+{ Jones<typename PromoteTraits<T,U>::promote_type> ret(a); ret-=b; return ret; }
+
+//! Binary multiplication of two Jones matrices
+template<typename T, typename U>
+const Jones<typename PromoteTraits<T,U>::promote_type> 
+operator * (const Jones<T>& a, const Jones<U>& b)
+{ Jones<typename PromoteTraits<T,U>::promote_type> ret(a); ret*=b; return ret; }
+
 
 //! The identity matrix
 template<typename T>
