@@ -522,6 +522,8 @@ void Pulsar::FITSArchive::load_header (const char* filename)
 	cerr << "FITSArchive::load_header using Signal::PolnCal" << endl;
     }
   }
+  else if (strcmp (tempstr.get(), "PCM") == 0)
+    set_type ( Signal::Calibrator );
   else if (strcmp (tempstr.get(), "SEARCH") == 0)
     set_type ( Signal::Unknown );
   else {
@@ -699,16 +701,17 @@ void Pulsar::FITSArchive::load_header (const char* filename)
 
     ephemeris = new psrephem;
     ephemeris->load(fptr);
+    dispersion_measure = ephemeris->get_dm();
 
     if (verbose)
       cerr << "FITSArchive::load_header ephemeris loaded" << endl;
 
   }
-  else
+  else {
     ephemeris = 0;
-  
-  dispersion_measure = ephemeris->get_dm();
-  
+    dispersion_measure = 0;
+  }
+
   // Load the polyco from the FITS file
   
   fits_movnam_hdu (fptr, BINARY_TBL, "POLYCO", 0, &status);
@@ -1323,6 +1326,8 @@ try {
     obs_mode = "CAL";
   else if (get_type() == Signal::FluxCalOff)
     obs_mode = "CAL";
+  else if (get_type() == Signal::Calibrator)
+    obs_mode = "PCM";
   else
     obs_mode = "UNKNOWN";
   
@@ -1395,14 +1400,13 @@ try {
 
   // Write the ephemeris to the FITS file
   
-  ephemeris->set_dm(dispersion_measure);
-  
   if (ephemeris) {
 
-   ephemeris->unload(fptr);
+    ephemeris->set_dm(dispersion_measure);
+    ephemeris->unload(fptr);
 
-   if (verbose)
-     cerr << "FITSArchive::unload_file ephemeris written" << endl;
+    if (verbose)
+      cerr << "FITSArchive::unload_file ephemeris written" << endl;
 
   }
   else
