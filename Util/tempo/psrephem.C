@@ -12,6 +12,8 @@
 #include "psrephem.h"
 #include "string_utils.h"
 
+psrephem::~psrephem(){ destroy(); }
+
 // defines the recognized filename extensions used for pulsar ephemeris files
 vector<string> psrephem::extensions ()
 {

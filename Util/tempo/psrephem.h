@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/psrephem.h,v $
-   $Revision: 1.26 $
-   $Date: 2003/12/06 12:03:45 $
-   $Author: ahotan $ */
+   $Revision: 1.27 $
+   $Date: 2003/12/09 00:59:22 $
+   $Author: hknight $ */
 
 #ifndef __PSREPHEM_H
 #define __PSREPHEM_H
@@ -44,8 +44,8 @@ class psrephem : public Reference::Able
   bool   tempo11;
   string nontempo11;
 
-  psrephem()  { init (); };
-  ~psrephem() { destroy (); };
+  psrephem() { init (); };
+  virtual ~psrephem();
 
   psrephem (const psrephem &);
 
