@@ -1,5 +1,6 @@
 #include "TimerArchive.h"
 #include "TimerIntegration.h"
+#include "Pulsar/IntegrationOrder.h"
 #include "Pulsar/Profile.h"
 #include "Error.h"
 
@@ -10,6 +11,19 @@
 /*****************************************************************************/
 void Pulsar::TimerArchive::unload_file (const char* filename) const
 {
+  // TimerArchives do not support alternate ordering schemes
+  bool has_alt_order = false;
+  
+  for (unsigned i = 0; i < extension.size(); i++) {
+    if (dynamic_cast<Pulsar::IntegrationOrder*>(extension[i].get()))
+      has_alt_order = true;
+  }
+  
+  if (has_alt_order)
+    throw Error(InvalidState, "Archive::add_extension",
+		"The TimerArchive class does not support unloading of files with"
+		"alternate IntegrationOrder extensions");
+  
   FILE* fptr = fopen (filename, "w");
   if (!fptr)
     throw Error (FailedSys, "TimerArchive::unload", "fopen");
