@@ -9,7 +9,6 @@
 #include "genutil.h"
 
 #include <unistd.h>
-#include <errno.h>
 
 Tempo::Predict::Predict ()
 {
