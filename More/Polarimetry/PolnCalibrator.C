@@ -1,8 +1,12 @@
 #include "Pulsar/PolnCalibrator.h"
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
+
 #include "Pauli.h"
 #include "Error.h"
+
+#include "interpolate.h"
+#include "smooth.h"
 
 bool Pulsar::PolnCalibrator::store_parameters = false;
 
@@ -89,18 +93,41 @@ void Pulsar::PolnCalibrator::create (unsigned nchan)
 
   calibrator->get_Integration(0)->cal_levels (cal_hi, cal_lo);
 
+  unsigned npol = cal_hi.size();
+  unsigned ipol = 0;
+
+  float smoothing = calibrator->get_bandwidth() / median_smoothing_bandwidth;
+  unsigned window = unsigned (float(calibrator->get_nchan()) * smoothing);
+
+  if (verbose)
+    cerr << "Pulsar::PolnCalibrator::create median smoothing window width = "
+	 << window << " channels" << endl;
+
+  if (window < 2)
+    window = 2;
+
+  for (ipol=0; ipol < npol; ipol++) {
+    fft::median_smooth (cal_lo[ipol], window);
+    fft::median_smooth (cal_hi[ipol], window);
+  }
+
   if (calibrator->get_nchan() == nchan) {
     calculate (cal_hi, cal_lo);
     return;
   }
 
-  throw Error (InvalidState, "Pulsar::FluxCalibrator::create",
-	       "Cannot currently calibrate archives with different nchan");
-
   // make hi and lo the right size of cal_hi and cal_lo
-  vector<vector<Estimate<double> > > hi;
-  vector<vector<Estimate<double> > > lo;
+  vector<vector<Estimate<double> > > hi (npol);
+  vector<vector<Estimate<double> > > lo (npol);
+ 
+  for (ipol=0; ipol < npol; ipol++) {
+    lo[ipol].resize (nchan);
+    fft::interpolate (lo[ipol], cal_lo[ipol]);
     
+    hi[ipol].resize (nchan);
+    fft::interpolate (hi[ipol], cal_hi[ipol]);
+  }
+
   calculate (hi, lo);
 }
 
