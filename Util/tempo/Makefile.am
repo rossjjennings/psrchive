@@ -4,9 +4,8 @@ noinst_LTLIBRARIES = libpsrephem.la
 include_HEADERS = psrephem.h ephio_func.h MatchingEphemeris.h
 
 nodist_include_HEADERS = ephio.h
-BUILT_SOURCES = ephio.h
 
-libpsrephem_la_SOURCES = keys.dat ephio.h ephio_c.c ephio.f \
+libpsrephem_la_SOURCES = keys.dat ephio_c.c ephio.f \
 	psrephem.C set_epoch.C tex.C derived.C MatchingEphemeris.C
 
 nodist_libpsrephem_la_SOURCES = ephio_def.c
@@ -48,11 +47,13 @@ keyinfo.com: keys.dat ./keys2fort
 ephio.h: keys.dat ./keys2c
 	./keys2c
 
-keys2fort_LDADD =
-keys2c_LDADD =
-
-# Dependency on constructed include files
+# Depend on constructed include files
 ephio.lo: keyinfo.com
+ephio_c.lo: ephio.h
+
+BUILT_SOURCES = ephio.h
+keys2fort_LDADD = 
+keys2c_LDADD =  
 
 #############################################################################
 #
