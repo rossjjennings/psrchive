@@ -15,6 +15,15 @@ void Pulsar::Integration::init ()
   state = Poln::invalid;
 }
 
+Pulsar::Integration::~Integration ()
+{
+  for (int ipol=0; ipol<npol; ipol++)
+    for (int ichan=0; ichan<nchan; ichan++)
+      delete profiles[ipol][ichan];
+
+  init();
+}
+
 /*!
   If any current dimension is greater than that requested, the Profiles
   will be deleted and the dimension resized.  If any current dimension is
@@ -78,44 +87,38 @@ Pulsar::Profile* Pulsar::Integration::new_Profile ()
 /* not much to say here, either */
 Pulsar::Integration* Pulsar::Integration::clone (int _npol, int _nchan) const
 {
+  return new Integration (*this, _npol, _nchan);
+}
+
+Pulsar::Integration::Integration (const Integration& subint,
+				  int _npol, int _nchan)
+{
   if (_npol == 0)
-    _npol = npol;
+    _npol = subint.npol;
 
   if (_nchan == 0)
-    _nchan = nchan;
+    _nchan = subint.nchan;
 
-  if (_npol > npol)
-    throw Error (InvalidRange, "Integration::clone",
-		 "requested npol=%d.  have npol=%d", _npol, npol);
+  if (_npol > subint.npol)
+    throw Error (InvalidRange, "Integration copy constructor",
+		 "requested npol=%d.  have npol=%d", _npol, subint.npol);
 
-  if (_nchan > nchan)
-    throw Error (InvalidRange, "Integration::clone",
-		 "requested nchan=%d.  have nchan=%d", _nchan, nchan);
+  if (_nchan > subint.nchan)
+    throw Error (InvalidRange, "Integration copy constructor",
+		 "requested nchan=%d.  have nchan=%d", _nchan, subint.nchan);
 
-  Integration* ptr = new Integration;
+  set_mid_time (subint.mid_time);
+  set_duration (subint.duration);
+  set_centre_frequency (subint.centrefreq);
+  set_bandwidth (subint.bw);
+  set_dispersion_measure (subint.dm);
+  set_folding_period (subint.pfold);
 
-  ptr->set_mid_time (mid_time);
-  ptr->set_duration (duration);
-  ptr->set_centre_frequency (centrefreq);
-  ptr->set_bandwidth (bw);
-  ptr->set_dispersion_measure (dm);
-  ptr->set_folding_period (pfold);
+  resize (_npol, _nchan, subint.nbin);
 
-  ptr->profiles.resize (_npol);
-
-  for (int ipol=0; ipol<_npol; ipol++) {
-
-    ptr->profiles[ipol].resize (_nchan);
-
-    for (int ichan=0; ichan<_nchan; ichan++) {
-      ptr->profiles[ipol][ichan] = profiles[ipol][ichan]->clone();
-      // sanity check
-      assert (ptr->profiles[ipol][ichan] != 0);
-    }
-
-  }
-
-  return ptr;
+  for (int ipol=0; ipol<npol; ipol++)
+    for (int ichan=0; ichan<nchan; ichan++)
+      *(profiles[ipol][ichan]) = *(subint.profiles[ipol][ichan]);
 }
 
 Pulsar::Profile* Pulsar::Integration::get_Profile (int ipol, int ichan)

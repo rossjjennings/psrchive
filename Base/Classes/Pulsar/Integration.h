@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Integration.h,v $
-   $Revision: 1.13 $
-   $Date: 2002/04/17 14:25:03 $
+   $Revision: 1.14 $
+   $Date: 2002/04/19 08:12:55 $
    $Author: straten $ */
 
 /*
@@ -19,14 +19,9 @@
 #include "MJD.h"
 #include "ArchiveTypes.h"
 
-class profile;
-
 namespace Tempo {
   class toa;
 }
-
-class Angle;
-class Phase;
 
 class Stokes;
 
@@ -48,7 +43,10 @@ namespace Pulsar {
     Integration () { init(); }
 
     //! Destructor deletes data area
-    virtual ~Integration () { resize(0,0,0); }
+    virtual ~Integration ();
+
+    //! Copy constructor
+    Integration (const Integration& subint, int npol=0, int nchan=0);
 
     //! Return the pointer to a new copy of self
     virtual Integration* clone (int npol=0, int nchan=0) const;

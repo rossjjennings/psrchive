@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Archive.h,v $
-   $Revision: 1.16 $
-   $Date: 2002/04/17 14:23:42 $
+   $Revision: 1.17 $
+   $Date: 2002/04/19 08:12:55 $
    $Author: straten $ */
 
 /*! \mainpage 
@@ -34,8 +34,8 @@
   The Pulsar::Profile class implements a minimal set of operations required
   to manipulate a pulsar profile.  These include:
   <UL>
-  <LI> offset - adds offset to each bin of the profile </LI>
-  <LI> scale - multiplies each bin of the profile by scale </LI>
+  <LI> operator += - adds offset to each bin of the profile </LI>
+  <LI> operator *= - multiplies each bin of the profile by scale </LI>
   <LI> rotate - rotates the profile in phase </LI>
   <LI> bscrunch - integrates neighbouring phase bins in profile </LI>
   <LI> fold - integrates neighbouring sections of the profile </LI>
@@ -47,11 +47,11 @@
   routines that may be used to calculate statistics, find minima and
   maxima, and fit to a standard.  Combinations of these functions can
   perform basic tasks.  For instance, baseline removal is simply and
-  clearly implemented as:
+  transparently implemented as:
   <pre>
-  offset( -mean( find_min_phase(duty_cycle), duty_cycle ) );
+  profile -= mean (find_min_phase());
   </pre>
-  However, it may be decided to also implement such convenience interfaces.
+  However, it may be decided to also implement a more convenient interface.
 
   The Pulsar::Subint class implements a minimal set of operations required
   to manipulate a set of Pulsar::Profile objects.  In addition to the simple
@@ -186,6 +186,9 @@ namespace Pulsar {
     //! Returns a pointer to a new copy of self
     virtual Archive* clone () const = 0;
 
+    //! Resets the dimensions of the data area
+    virtual void resize (int nsubint, int npol=0, int nchan=0, int nbin=0);
+
     // //////////////////////////////////////////////////////////////////
     //
     // virtual methods - implemented by Archive
@@ -212,6 +215,7 @@ namespace Pulsar {
       \exception string
     */
     virtual void append (const Archive* a);
+
 
     //
     //! Rotates the profiles so that pulse phase 0 is in nbin/2
@@ -438,32 +442,33 @@ namespace Pulsar {
 
     //! Get the tempo code of the telescope used
     virtual char get_tel_tempo_code () const = 0;
-    //! Set the tempo code of the telescope used
-    virtual void set_tel_tempo_code (char id_char) = 0;
+
+    //! Get the feed configuration of the receiver
+    virtual Feed::Type get_feed_type () const = 0;
 
     //! Get the observation type (psr, cal)
     virtual Observation::Type get_observation_type () const = 0;
-    //! Set the observation type (psr, cal)
-    virtual void set_observation_type (Observation::Type type) = 0;
 
     //! Get the source name
     virtual string get_source () const = 0;
-    //! Set the source name
-    virtual void set_source (const string& source) = 0;
 
     // get/set the number of bins, chans, subints, etc
     // ///////////////////////////////////////////////
 
     //! Get the number of pulsar phase bins used
+    /*! This attribute may be set only through Archive::resize */
     virtual int get_nbin () const = 0;
 
     //! Get the number of frequency channels used
+    /*! This attribute may be set only through Archive::resize */
     virtual int get_nchan () const = 0;
 
     //! Get the number of frequency channels used
+    /*! This attribute may be set only through Archive::resize */
     virtual int get_npol () const = 0;
 
     //! Get the number of sub-integrations stored in the file
+    /*! This attribute may be set only through Archive::resize */
     virtual int get_nsubint () const { return subints.size(); }
 
     //! Get the overall bandwidth of the observation
@@ -476,11 +481,6 @@ namespace Pulsar {
     //! Set the centre frequency of the observation
     virtual void set_centre_frequency (double cf) = 0;
 
-    //! Get the feed configuration of the receiver
-    virtual Feed::Type get_feed_type () const = 0;
-    //! Set the feed configuration of the receiver
-    virtual void set_feed_type (Feed::Type feed) = 0;
-
     //! Get the state of the profiles
     virtual Poln::State get_poln_state () const = 0;
     //! Set the state of the profiles
@@ -491,25 +491,21 @@ namespace Pulsar {
 
     //! Return whether or not the data has been corrected for feed angle errors
     virtual bool get_feedangle_corrected () const = 0;
-
-    //! Return whether or not the data has been corrected for ionospheric faraday rotation
-    virtual bool get_iono_rm_corrected () const = 0;
-
-    //!  Return whether or not the data has been corrected for ISM faraday rotation
-    virtual bool get_ism_rm_corrected () const = 0;
-
-    //! Return whether or not the data has been corrected for parallactic angle errors
-    virtual bool get_parallactic_corrected () const = 0;
-
     //! Set the status of the feed angle flag
     virtual void set_feedangle_corrected (bool done = true) = 0;
 
+    //! Return whether or not the data has been corrected for ionospheric faraday rotation
+    virtual bool get_iono_rm_corrected () const = 0;
     //! Set the status of the ionospheric RM flag
     virtual void set_iono_rm_corrected (bool done = true) = 0;
 
+    //!  Return whether or not the data has been corrected for ISM faraday rotation
+    virtual bool get_ism_rm_corrected () const = 0;
     //! Set the status of the ISM RM flag
     virtual void set_ism_rm_corrected (bool done = true) = 0;
 
+    //! Return whether or not the data has been corrected for parallactic angle errors
+    virtual bool get_parallactic_corrected () const = 0;
     //! Set the status of the parallactic angle flag
     virtual void set_parallactic_corrected (bool done = true) = 0;
 
@@ -535,24 +531,25 @@ namespace Pulsar {
     vector<Integration*> subints;
 
     //! All new Integration instances are created through this method
-    virtual Integration* new_Integration ();
+    virtual Integration* new_Integration (Integration* subint = 0);
 
-    //! Resets the dimensions of the data area
-    virtual void resize (int nsubint, int npol=0, int nchan=0, int nbin=0);
-
-    //! Set the number of pulsar phase bins used
+    //! Set the number of pulsar phase bins
+    /*! Called by Archive methods to update child attribute */
     virtual void set_nbin (int numbins) = 0;
 
-    //! Set the number of frequency channels used
+    //! Set the number of frequency channels
+    /*! Called by Archive methods to update child attribute */
     virtual void set_nchan (int numchan) = 0;
 
-    //! Set the number of frequency channels used
+    //! Set the number of polarization measurements
+    /*! Called by Archive methods to update child attribute */
     virtual void set_npol (int numpol) = 0;
 
-    //! Set the number of sub-integrations stored in the file
+    //! Set the number of sub-integrations
+    /*! Called by Archive methods to update child attribute */
     virtual void set_nsubint (int num_sub) { }
 
-    //! Sets all values to default
+    //! Set all values to null
     void init ();
 
     //! Append clones of Integration objects to subints

@@ -64,13 +64,18 @@ void Pulsar::Archive::resize (int nsubint, int npol, int nchan, int nbin)
   By over-riding this funciton, inherited types may re-define the type
   of Integration to which the elements of the subints vector point.
 */
-Pulsar::Integration* Pulsar::Archive::new_Integration ()
+Pulsar::Integration* Pulsar::Archive::new_Integration (Integration* subint)
 {
-  Integration* integration = new Integration;
+  Integration* integration;
+
+  if (subint)
+    integration = subint -> clone();
+  else
+    integration = new Integration;
 
   if (!integration)
-    throw Error (BadAlloc, "Integration::new_Integration");
-
+    throw Error (BadAlloc, "Archive::new_Integration");
+  
   return integration;
 }
 
