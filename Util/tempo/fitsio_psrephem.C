@@ -190,7 +190,7 @@ void psrephem::load (fitsfile* fptr, long row)
 	}
 	else {
 	  // separate the integer
-	  value_integer[ieph] = value_double[ieph];
+	  value_integer[ieph] = int (value_double[ieph]);  // truncate
 	  value_double[ieph] -= value_integer[ieph];
 	}
 	break;
