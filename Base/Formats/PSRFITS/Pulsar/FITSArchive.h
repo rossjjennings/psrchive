@@ -1,22 +1,15 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/PSRFITS/Pulsar/FITSArchive.h,v $
-   $Revision: 1.2 $
-   $Date: 2003/03/08 11:11:16 $
+   $Revision: 1.3 $
+   $Date: 2003/04/23 14:58:58 $
    $Author: straten $ */
-
-#include <stdio.h>
-#include <math.h>
-#include <iostream>
 
 #include <fitsio.h>
 
 #define PSRFITS 1
 #include "Pulsar/BasicArchive.h"
-#include "Pulsar/BasicIntegration.h"
 #include "MJD.h"
-#include "sky_coord.h"
-#include "genutil.h"
 
 namespace Pulsar {
 
@@ -70,9 +63,6 @@ namespace Pulsar {
     //! Return a new select_copy-constructed FITSArchive instance
     Archive* extract (const vector<unsigned>& subints) const;
 
-    //! Returns a new Integration instance
-    virtual Integration* new_Integration (Integration* copy_this = 0);
-    
   protected:
 
     //! This class registers the FITSArchive plugin class for use

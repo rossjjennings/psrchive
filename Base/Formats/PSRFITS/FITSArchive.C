@@ -1,21 +1,13 @@
-#include <string.h>
-#include <math.h>
-#include <stdlib.h>
-#include <time.h>
-
-#include "MJD.h"
-
 #include "Pulsar/FITSArchive.h"
 #include "Pulsar/Integration.h"
 #include "Pulsar/Profile.h"
 
 #include "FITSError.h"
-#include "environ.h"
+#include "genutil.h"
 
 //! null constructor
 // //////////////////////////
 // //////////////////////////
-
 
 
 void Pulsar::FITSArchive::init ()
@@ -154,28 +146,6 @@ Pulsar::FITSArchive::extract (const vector<unsigned>& subints) const
   return new FITSArchive (*this, subints);
 }
 
-// ////////////////////////////////////////////////////////////////////////////
-//! Return a new Integration object
-//
-
-Pulsar::Integration* 
-Pulsar::FITSArchive::new_Integration (Integration* subint)
-{
-  if (verbose)
-    cerr << "FITSArchive::new_Integration" << endl;
-  
-  BasicIntegration* integration;
-  
-  if (subint)
-    integration = new BasicIntegration (*subint);
-  else
-    integration = new BasicIntegration ();
-
-  if (!integration)
-    throw Error (BadAllocation, "FITSArchive::new_Integration");
-  
-  return integration;
-}
 
 
 // ////////////////////////////////////////////////////////////////////////////
