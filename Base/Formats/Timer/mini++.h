@@ -1,6 +1,6 @@
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/Timer/mini++.h,v $
-   $Revision: 1.4 $
-   $Date: 2000/01/17 04:20:40 $
+   $Revision: 1.5 $
+   $Date: 2002/10/12 23:48:42 $
    $Author: straten $ */
 
 #ifndef __MINI_PLUSPLUS_H
@@ -24,6 +24,9 @@ namespace Mini {
 
   // may be used to receive soft error messages
   extern string reason;
+
+  // a function to set most of mini struct to default values.
+  void init (struct mini& hdr);
 
   // loads a mini struct, givent a file name
   int fload (const char* fname, struct mini* hdr, bool big_endian=true);
