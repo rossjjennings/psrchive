@@ -388,6 +388,8 @@ void Rhythm::save_toas (const char* fname)
   QString str = "TOA list saved";
   
   footer->setText(str);
+
+  toas_modified = false;
 }
 
 void Rhythm::hc ()
