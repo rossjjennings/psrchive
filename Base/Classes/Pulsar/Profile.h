@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Profile.h,v $
-   $Revision: 1.76 $
-   $Date: 2004/10/26 01:56:23 $
+   $Revision: 1.77 $
+   $Date: 2004/11/08 02:19:37 $
    $Author: ahotan $ */
 
 #ifndef __Pulsar_Profile_h
@@ -195,7 +195,8 @@ namespace Pulsar {
     /*! Returns the width of the pulse profile, at the percentage
       of the peak given by pc, where the baseline is calculated
       using a duty cycle dc */
-    float width(float pc, float dc = Profile::default_duty_cycle) const;
+    float width(float& error, float pc,
+		float dc = Profile::default_duty_cycle) const;
     
     //! Rotates the profile to remove dispersion delay
     void dedisperse (double dm, double ref_freq, double pfold);

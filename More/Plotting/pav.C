@@ -1,5 +1,5 @@
 //
-// $Id: pav.C,v 1.92 2004/11/07 08:08:59 straten Exp $
+// $Id: pav.C,v 1.93 2004/11/08 02:19:37 ahotan Exp $
 //
 // The Pulsar Archive Viewer
 //
@@ -323,7 +323,7 @@ int main (int argc, char** argv)
       plotter.set_subint( atoi (optarg) );
       break;
     case 'i':
-      cout << "$Id: pav.C,v 1.92 2004/11/07 08:08:59 straten Exp $" << endl;
+      cout << "$Id: pav.C,v 1.93 2004/11/08 02:19:37 ahotan Exp $" << endl;
       return 0;
 
     case 'j':
@@ -839,8 +839,9 @@ int main (int argc, char** argv)
       
 	float maxbin = float(copy->get_Profile(0,0,0)->find_max_bin());
 
+	float error = 0.0;
 	float nbin  = float(copy->get_nbin());
-	float width = copy->get_Profile(0,0,0)->width(10.0,0.6);
+	float width = copy->get_Profile(0,0,0)->width(error,10.0,0.6);
 	width /= 2.0;
 
 	float period = copy->get_Integration(0)->get_folding_period();
