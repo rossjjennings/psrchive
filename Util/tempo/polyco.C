@@ -380,6 +380,24 @@ double polynomial::frequency(const MJD& t) const
   return dp;
 }  
 
+double polynomial::chirp(const MJD& t) const
+{
+  double d2p = 0;                    // d^2phase/dt^2 starts as phase/minute^2
+  MJD dt = t - reftime;
+  double tm = dt.in_minutes();
+
+  double poweroft = 1.0;
+  for (int i=2;i<coefs.size();i++) {
+    d2p+=(double)(i)*(i-1)*coefs[i]*poweroft;
+    poweroft *= tm;
+  }
+  d2p /= (double) 60.0*60.0;          // Phase per second^2
+
+  return d2p;
+}  
+
+
+
 Phase polynomial::phase(const MJD& t, float obs_freq) const
 {
   float dm_delay_in_secs = 

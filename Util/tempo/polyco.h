@@ -1,3 +1,4 @@
+//-*-C++-*-
 /* this file is part of the 'polyco' module */
 #ifndef __POLY_H
 #define __POLY_H
@@ -61,6 +62,9 @@ public:
   Phase  phase             (const MJD &t, float obs_freq) const;
   MJD    iphase            (const Phase& p) const;
   double frequency         (const MJD &t) const;
+  double chirp             (const MJD &t) const; // d/dt frequency (s^-2)
+  double accel             (const MJD &t) const // apparrent accel (m s^-2)
+                              { return chirp(t)/frequency(t)*2.9979e8; }
   bool   is_tempov11       () const {return (tempov11);};
   int    get_telescope     () const {return (telescope);};
   double get_freq          () const {return (freq);};
@@ -161,6 +165,12 @@ class polyco {
 
   double frequency(const MJD& t, const string& psr = anyPsr) const
     { return best(t, psr).frequency(t); };
+
+  double chirp(const MJD& t, const string& psr = anyPsr) const
+    { return best(t, psr).chirp(t); };
+
+  double accel(const MJD& t, const string& psr = anyPsr) const
+    { return best(t, psr).accel(t); };
 
   // bool   is_tempov11   () const { return pollys.front().is_tempov11(); };
   int    get_telescope () const { return pollys.front().get_telescope(); };
