@@ -14,18 +14,12 @@ nodist_libpsrephem_la_SOURCES = ephio_def.c
 bin_PROGRAMS = keys2c keys2fort ephaux ephepo ephtex
 
 ephaux_SOURCES	= ephaux.C
+ephaux_LDADD	= $(LDADD) @SLA_LIBS@
+
 ephepo_SOURCES	= ephepo.C
+
 ephtex_SOURCES	= ephtex.C
-
-#############################################################################
-#
-# Dependencies should never be changed
-#
-
-INCLUDES = -I$(top_srcdir)/utils/include @CFITSIO_CFLAGS@
-
-LDADD = libpsrephem.la $(top_srcdir)/utils/libpsrutils.la @FLIBS@
-
+ephtex_LDADD	= $(LDADD) @SLA_LIBS@
 
 # ######################################################################
 #
@@ -59,4 +53,13 @@ keys2c_LDADD =
 
 # Dependency on constructed include files
 ephio.lo: keyinfo.com
+
+#############################################################################
+#
+# Dependencies should never be changed
+#
+
+INCLUDES = -I$(top_srcdir)/utils/include @CFITSIO_CFLAGS@
+
+LDADD = libpsrephem.la $(top_srcdir)/utils/libpsrutils.la @FLIBS@
 
