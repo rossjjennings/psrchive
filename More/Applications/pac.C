@@ -19,7 +19,6 @@
 #include "Pulsar/ProcHistory.h"
 
 // A command line tool for calibrating Pulsar::Archives
-
 const char* args = "A:bcd:e:fFhiIn:op:PqsSt:Tu:vVwW";
 
 void usage ()
@@ -50,6 +49,7 @@ void usage ()
     "  -T                     Do not try to match times\n"
     "  -F                     Do not try to match frequencies\n"
     "  -b                     Do not try to match bandwidths\n"
+    "  -o                     Allow opposite sidebands\n"
     "\n"
     "Expert options: \n"
     "  -f                     Override flux calibration flag\n"
@@ -106,16 +106,24 @@ int main (int argc, char *argv[]) {
 
   unsigned char flip_sign = 0x00;
 
-  while ((gotc = getopt(argc, argv, args)) != -1) {
+  while ((gotc = getopt(argc, argv, args)) != -1) 
+
     switch (gotc) {
+
     case 'h':
       usage ();
       return 0;
+
+    case 'q':
+      Pulsar::Archive::set_verbosity(0);
+      break;
+
     case 'v':
       Pulsar::Archive::set_verbosity(2);
       Pulsar::Database::Criterion::match_verbose = true;
       verbose = true;
       break;
+
     case 'V':
       verbose = true;
       Pulsar::Database::verbose = true;
@@ -125,8 +133,26 @@ int main (int argc, char *argv[]) {
       Pulsar::Archive::set_verbosity(3);
       break;
     case 'i':
-      cout << "$Id: pac.C,v 1.55 2004/08/25 07:42:15 hknight Exp $" << endl;
+      cout << "$Id: pac.C,v 1.56 2004/10/11 14:26:27 straten Exp $" << endl;
       return 0;
+
+    case 'A':
+      model_file = optarg;
+      command += "-A ";
+      break;
+
+    case 'd':
+      cals_are_here = optarg;
+      new_database = false;
+      break;
+
+    case 'e':
+      unload_ext = optarg;
+      break;
+
+    case 'f':
+      check_flags = false;
+      break;
 
     case 'n': {
 
@@ -152,17 +178,29 @@ int main (int argc, char *argv[]) {
       break;
     }
 
+    case 'o':
+      Pulsar::Archive::match_opposite_sideband = true;
+      break;
+
     case 'p':
       cals_are_here = optarg;
       break;
-    case 'd':
-      cals_are_here = optarg;
-      new_database = false;
-      break;
+
     case 'P':
       do_fluxcal = false;
       command += "-P ";
       break;
+
+    case 's':
+      pcal_type = Pulsar::Calibrator::Polar;
+      command += "-s ";
+      break;
+
+    case 'S':
+      pcal_type = Pulsar::Calibrator::Hybrid;
+      command += "-S ";
+      break;
+
     case 'u':
       key = strtok (optarg, whitespace);
       while (key) {
@@ -173,17 +211,18 @@ int main (int argc, char *argv[]) {
         key = strtok (NULL, whitespace);
       }
       break;
-    case 'e':
-      unload_ext = optarg;
-      break;
-    case 'f':
-      check_flags = false;
-      break;
+
     case 'w':
       write_database_file = true;
       break;
+
     case 'W':
       Pulsar::PolnProfile::correct_weights = false;
+      break;
+
+    case 'b':
+      criterion.check_bandwidth = false;
+      command += "-b ";
       break;
     case 'c':
       criterion.check_coordinates = false;
@@ -201,30 +240,11 @@ int main (int argc, char *argv[]) {
       criterion.check_frequency = false;
       command += "-F ";
       break;
-    case 'b':
-      criterion.check_bandwidth = false;
-      command += "-b ";
-      break;
-    case 'S':
-      pcal_type = Pulsar::Calibrator::Hybrid;
-      command += "-S ";
-      break;
-    case 's':
-      pcal_type = Pulsar::Calibrator::Polar;
-      command += "-s ";
-      break;
-    case 'q':
-      Pulsar::Archive::set_verbosity(0);
-      break;
-    case 'A':
-      model_file = optarg;
-      command += "-A ";
-      break;
 
     default:
       return -1;
     }
-  }
+ 
 
   Pulsar::Database::set_default_criterion (criterion);
 
@@ -283,7 +303,7 @@ int main (int argc, char *argv[]) {
       }
 	
       if (verbose)
-	cout << "pac: " << dbase->size() << " calibrators found" << endl;
+	cerr << "pac: " << dbase->size() << " calibrators found" << endl;
 	
       if (write_database_file) {
 	  
@@ -312,13 +332,15 @@ int main (int argc, char *argv[]) {
   // Start calibrating archives
   
   for (unsigned i = 0; i < archives.size(); i++) try {
-      
+
+    cout << endl;
+
     if (verbose)
-      cout << "pac: Loading " << archives[i] << endl;
+      cerr << "pac: Loading " << archives[i] << endl;
     
     Reference::To<Pulsar::Archive> arch = Pulsar::Archive::load(archives[i]);
     
-    cout << "pac: Loaded Archive: " << archives[i] << endl;
+    cout << "pac: Loaded archive " << archives[i] << endl;
     
     bool successful_polncal = false;
 
@@ -348,8 +370,7 @@ int main (int argc, char *argv[]) {
       
       pcal_file = pcal_engine->get_filenames();
 
-      if (verbose)
-	cout << "pac: Calibrator constructed from: " << pcal_file << endl;
+      cout << "pac: PolnCalibrator constructed from:\n\t" << pcal_file << endl;
 
       pcal_engine->calibrate (arch);
 
@@ -360,7 +381,7 @@ int main (int argc, char *argv[]) {
 	arch->correct_instrument ();
       }
 
-      cout << "pac: Polarisation calibration complete" << endl;
+      cout << "pac: Poln calibration complete" << endl;
 
       successful_polncal = true;
 
@@ -373,9 +394,12 @@ int main (int argc, char *argv[]) {
 
     bool successful_fluxcal = false;
     
-    if (do_fluxcal && arch->get_scale() == Signal::Jansky && check_flags) {
+    if (do_fluxcal && arch->get_scale() == Signal::Jansky && check_flags)
       cout << "pac: " << archives[i] << " already flux calibrated" << endl;
-    }
+    
+    else if (!dbase)
+      cout << "pac: Not performing flux calibration (no database)." << endl;
+
     else if (do_fluxcal) try {
 
       if (verbose)
@@ -384,8 +408,11 @@ int main (int argc, char *argv[]) {
       Reference::To<Pulsar::FluxCalibrator> fcal_engine;
       fcal_engine = dbase->generateFluxCalibrator(arch);
       
+      cout << "pac: FluxCalibrator constructed from:\n\t"
+	   << fcal_engine->get_filenames() << endl;
+
       if (verbose) 
-	cout << "pac: Calibrating Archive fluxes" << endl;
+	cerr << "pac: Calibrating Archive fluxes" << endl;
       
       fcal_engine->calibrate(arch);
       
@@ -393,7 +420,8 @@ int main (int argc, char *argv[]) {
       
       successful_fluxcal = true;
       
-      cout << "pac: Mean Tsys = " << fcal_engine->meanTsys() << endl;
+      cout << "pac: Mean Tsys = " << fcal_engine->meanTsys() 
+	   << " mJy" << endl;
       
     }
     catch (Error& error) {
@@ -419,9 +447,12 @@ int main (int argc, char *argv[]) {
     
     newname += ".";
     newname += unload_ext;
-    
+
+    if (!successful_fluxcal)
+      newname += "P";
+
     if (verbose)
-      cout << "pac: Calibrated Archive name '" << newname << "'" << endl;
+      cerr << "pac: Calibrated Archive name '" << newname << "'" << endl;
     
 
     if (flip_sign) {
@@ -494,7 +525,7 @@ int main (int argc, char *argv[]) {
     
     arch->unload(newname);
     
-    cout << "pac: New file " << newname << " unloaded" << endl;
+    cout << "pac: Calibrated archive " << newname << " unloaded" << endl;
     
   }
   catch (Error& error) {
@@ -502,7 +533,7 @@ int main (int argc, char *argv[]) {
     cerr << error << endl;
   }
 
-  cerr << "pac: Finished all files" << endl;
+  cout << "\npac: Finished all files" << endl;
   return 0;
 }
 

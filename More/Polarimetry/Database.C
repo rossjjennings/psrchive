@@ -24,6 +24,12 @@
 
 bool Pulsar::Database::verbose = false;
 
+/*! By default, the long time scale is set to four weeks. */
+double Pulsar::Database::long_time_scale = 60.0 * 24.0 * 28.0;
+
+/*! By default, the short time scale is set to one hour. */
+double Pulsar::Database::short_time_scale = 60.0;
+
 
 // //////////////////////////////////////////////////////////////////////
 //
@@ -71,16 +77,15 @@ Pulsar::Database::Entry::Entry (const Pulsar::Archive& arch)
 
   if (obsType == Signal::Calibrator) {
 
-    const PolnCalibratorExtension* pcext = arch.get<PolnCalibratorExtension>();
+    const CalibratorExtension* ext = arch.get<CalibratorExtension>();
 
-    if (!pcext)
+    if (!ext)
       throw Error (InvalidState, "Pulsar::Database::Entry",
 		   "Archive::get_type==Signal::Calibrator but"
-		   " no PolnCalibratorExtension");
+		   " no CalibratorExtension");
 
-    calType = pcext->get_type();
-
-    time = pcext->get_epoch();
+    calType = ext->get_type();
+    time = ext->get_epoch();
 
   }
   else
@@ -189,9 +194,9 @@ bool Pulsar::Database::Criterion::match_verbose = false;
 
 Pulsar::Database::Criterion::Criterion ()
 {
-  minutes_apart = 0.0;
-  RA_deg_apart  = 0.0;
-  DEC_deg_apart = 0.0;
+  minutes_apart = 720.0;
+  RA_deg_apart  = 5.0;
+  DEC_deg_apart = 5.0;
 
   check_instrument  = true;
   check_frequency   = true;
@@ -387,38 +392,47 @@ Pulsar::Database::Database (const char* filename)
   load (filename);
 }
 
+string get_current_path ()
+{
+  unsigned size = 128;
+  char* fullpath = new char [size];
+
+  while (getcwd(fullpath, size) == 0) {
+    delete fullpath;
+    if (errno != ERANGE)
+      throw Error (FailedSys, "get_current_path", "getcwd");
+    size *= 2;
+    fullpath = new char[size];
+  }
+
+  string retval = fullpath;
+  delete fullpath;
+  return retval;
+}
+
+
 
 /*! This constructor scans the given directory for calibrator files
   ending in the extensions specified in the second argument.
 */      
-Pulsar::Database::Database (string _path,
-			    const vector<string>& extensions)
+Pulsar::Database::Database (string _path, const vector<string>& extensions)
 {
-  char original[4096];
-  getcwd(original, 4096);
-  
-  path = _path;
+  string current = get_current_path ();
 
-  if (path.at(path.length()-1) != '/')
-    path += "/";
+  if (chdir(_path.c_str()) != 0)
+    throw Error (FailedSys, "Pulsar::Database", "chdir("+_path+")");
 
-  if (chdir(path.c_str()) != 0)
-    throw Error (FailedCall, "Pulsar::Database chdir");
-
-  char useful[4096];
-  getcwd(useful, 4096);
-
-  if (verbose)
-    cout << "Pulsar::Database setting path to " << useful << endl;
-
-  path = useful;
+  path = get_current_path ();
 
   vector<string> filenames;
-
   for (unsigned i = 0; i < extensions.size(); i++) {
     string glob = "*." + extensions[i];
-    dirglob (&filenames, glob);
+    dirglobtree (&filenames, "", glob);
   } 
+
+  if (chdir(current.c_str()) != 0)
+    throw Error (FailedSys, "Pulsar::Database", "chdir("+current+")");
+
 
   if (verbose)
     cerr << "Pulsar::Database " << filenames.size() 
@@ -426,32 +440,29 @@ Pulsar::Database::Database (string _path,
   
   Reference::To<Pulsar::Archive> newArch;
   
-  for (unsigned ifile=0; ifile<filenames.size(); ifile++) {
-    try {
+  for (unsigned ifile=0; ifile<filenames.size(); ifile++) try {
 
-      if (verbose)
-        cerr << "Pulsar::Database loading "
-             << filenames[ifile] << endl;
-
-      newArch = Archive::load(filenames[ifile]);
-
-      if (verbose)
-        cerr << "Pulsar::Database create new Entry" << endl;
-
-      Entry new_entry(*newArch);
-      entries.push_back(new_entry);
-
-    }
-    catch (Error& error) {
-      cerr << error << endl;
-    }
+    if (verbose)
+      cerr << "Pulsar::Database loading "
+	   << filenames[ifile] << endl;
+    
+    newArch = Archive::load(filenames[ifile]);
+    
+    if (verbose)
+      cerr << "Pulsar::Database create new Entry" << endl;
+    
+    Entry new_entry(*newArch);
+    entries.push_back(new_entry);
+    
+  }
+  catch (Error& error) {
+    cerr << "Pulsar::Database error" << error.get_message() << endl;
   }
 
   if (verbose)
     cerr << "Pulsar::Database constructed with "
          << entries.size() << " Entries" << endl; 
   
-  chdir(original);
 }
 
 //! Destructor
@@ -566,36 +577,7 @@ void Pulsar::Database::set_default_criterion (const Criterion& criterion)
   default_criterion = criterion;
 }
 
-//! Get the default matching criterion for PolnCal observations
-Pulsar::Database::Criterion
-Pulsar::Database::get_default_PolnCal_criterion ()
-{
-  Criterion criterion = get_default_criterion ();
-  criterion.minutes_apart = 720.0;
-  criterion.RA_deg_apart  = 5.0;
-  criterion.DEC_deg_apart = 5.0;
-  return criterion;
-}
 
-//! Get the default matching criterion for FluxCal observations
-Pulsar::Database::Criterion
-Pulsar::Database::get_default_FluxCal_criterion ()
-{
-  Criterion criterion = get_default_criterion ();
-  criterion.minutes_apart = 43200.0;
-  criterion.check_coordinates = false;
-  return criterion;
-}
-
-//! Get the default matching criterion for Reception model solutions
-Pulsar::Database::Criterion
-Pulsar::Database::get_default_Reception_criterion ()
-{
-  Criterion criterion = get_default_criterion ();
-  criterion.minutes_apart = 43200.0;
-  criterion.check_coordinates = false;
-  return criterion;
-}
 
 
 //! Returns one Entry that matches the given parameters and is nearest in time.
@@ -604,7 +586,7 @@ Pulsar::Database::PolnCal_match (Pulsar::Archive* arch,
 				 Calibrator::Type calType,
 				 bool only_observations)
 {
-  Criterion criterion = get_default_PolnCal_criterion();
+  Criterion criterion = get_default_criterion();
 
   criterion.entry = Entry (*arch);
   criterion.entry.obsType = Signal::PolnCal;
@@ -627,7 +609,7 @@ Pulsar::Database::PolnCal_match (Pulsar::Archive* arch,
 
   if (matches.size() == 0)
     throw Error (InvalidParam,
-		 "Pulsar::Database::PolnCalibrator_match",
+		 "Pulsar::Database::PolnCal_match",
 		 "no %s Calibrator found", Calibrator::Type2str (calType));
 
   return closest_match (criterion, matches);
@@ -635,10 +617,13 @@ Pulsar::Database::PolnCal_match (Pulsar::Archive* arch,
 
 //! Returns one Entry that matches the given parameters and is nearest in time.
 Pulsar::Database::Entry 
-Pulsar::Database::Reception_match (Pulsar::Archive* arch,
-				   Calibrator::Type calType)
+Pulsar::Database::allsky_match (Pulsar::Archive* arch,
+				Calibrator::Type calType,
+				double minutes_apart)
 {
-  Criterion criterion = get_default_Reception_criterion();
+  Criterion criterion = get_default_criterion();
+  criterion.check_coordinates = false;
+  criterion.minutes_apart = minutes_apart;
 
   criterion.entry = Entry (*arch);
 
@@ -697,11 +682,35 @@ Pulsar::Database::closest_match (const Criterion& criterion,
   flux calibration of the original pulsar observation.
 */      
 Pulsar::FluxCalibrator* 
-Pulsar::Database::generateFluxCalibrator (Pulsar::Archive* arch)
-{
-  Criterion criterion = get_default_FluxCal_criterion();
-  criterion.entry = Entry (*arch);
+Pulsar::Database::generateFluxCalibrator (Archive* arch, bool allow_raw) try {
 
+  Entry match = allsky_match (arch, Calibrator::Flux, long_time_scale);
+  Reference::To<Archive> archive = Archive::load( get_filename(match) );
+  return new FluxCalibrator (archive);
+
+}
+catch (Error& error) {
+  
+  if (verbose)
+    cerr << "Pulsar::Database::generateFluxCalibrator failure"
+      " generating processed FluxCal\n" << error.get_message() << endl;
+  
+  if (allow_raw)
+    return rawFluxCalibrator (arch);
+  
+  else
+    throw error += "Pulsar::Database::generateFluxCalibrator";
+  
+}
+
+Pulsar::FluxCalibrator* 
+Pulsar::Database::rawFluxCalibrator (Pulsar::Archive* arch)
+{
+  Criterion criterion = get_default_criterion();
+  criterion.check_coordinates = false;
+  criterion.minutes_apart = long_time_scale;
+
+  criterion.entry = Entry (*arch);
   criterion.entry.obsType = Signal::FluxCalOn;
   vector<Pulsar::Database::Entry> oncals = all_matching (criterion);
 
@@ -718,24 +727,19 @@ Pulsar::Database::generateFluxCalibrator (Pulsar::Archive* arch)
                  "Pulsar::Database::generateFluxCalibrator",
                  "no FluxCalOff observations found to match observation");
 
-  vector<const Archive*> fluxcalarchs;
-  
-  for (unsigned i = 0; i < oncals.size(); i++)
-    fluxcalarchs.push_back( Pulsar::Archive::load(get_filename(oncals[i])) );
-			   
-  for (unsigned i = 0; i < offcals.size(); i++)
-    fluxcalarchs.push_back( Pulsar::Archive::load(get_filename(offcals[i])) );
-  
-  if (verbose) {
-    cout << "Constructing FluxCalibrator from these files:" << endl;
-    for (unsigned i = 0; i < oncals.size(); i++)
-      cout << get_filename(oncals[i]) << endl;
-    for (unsigned i = 0; i < offcals.size(); i++)
-      cout << get_filename(offcals[i]) << endl;
-  }
 
-  FluxCalibrator* fcal = new FluxCalibrator(fluxcalarchs);
-  return fcal;
+  Reference::To<FluxCalibrator> fluxcal = new FluxCalibrator;
+  Reference::To<Archive> archive;
+
+  unsigned ifile = 0;
+
+  for (ifile=0; ifile < oncals.size(); ifile++)
+    fluxcal->add_observation (Archive::load( get_filename(oncals[ifile]) ));
+
+  for (ifile=0; ifile < oncals.size(); ifile++)
+    fluxcal->add_observation (Archive::load( get_filename(offcals[ifile]) ));
+
+  return fluxcal.release();
 }
   
 
@@ -819,7 +823,7 @@ Pulsar::Database::generateHybridCalibrator
 
     if (verbose)
       cerr << "  Attempting to find a matching Britton Model" << endl;
-    entry = Reception_match (arch, Calibrator::Britton);
+    entry = allsky_match (arch, Calibrator::Britton, long_time_scale);
 
   }
   catch (Error& error) {
@@ -829,7 +833,7 @@ Pulsar::Database::generateHybridCalibrator
       if (verbose)
 	cerr << "  Attempting to find a matching Hamaker Model" << endl;
       
-      entry = Reception_match (arch, Calibrator::Hamaker);
+      entry = allsky_match (arch, Calibrator::Hamaker, long_time_scale);
 
     }
     catch (Error& error) {
