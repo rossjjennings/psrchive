@@ -61,30 +61,34 @@ int main (int argc, char *argv[]) {
 
   int gotc = 0;
   
-  while ((gotc = getopt(argc, argv, "hvVme:TFpit:f:b:d:s:r:w:D:SB")) != -1) {
+  while ((gotc = getopt(argc, argv, "hvVime:TFpIt:f:b:d:s:r:w:D:SB")) != -1) {
     switch (gotc) {
     case 'h':
       cout << "A program for manipulating Pulsar::Archives"            << endl;
       cout << "Usage: pam [options] filenames"                         << endl;
       cout << "  -v               Verbose mode"                        << endl;
       cout << "  -V               Very verbose mode"                   << endl;
-      cout << "  -m               Modify the original data"            << endl;
-      cout << "  -e [string e]    Write new files with extension e"    << endl;
-      cout << endl;
+      cout << "  -i               Show revision information"           << endl;
+      cout << "  -m               Modify the original files on disk"   << endl;
+      cout << "  -e extension     Write new files with this extension" << endl;
       cout << "  -T               Time scrunch"                        << endl;
       cout << "  -F               Frequency scrunch"                   << endl;
       cout << "  -p               Polarisation scrunch"                << endl;
-      cout << "  -i               Transform to Invariant Interval"     << endl;
-      cout << "  -t [int f]       Time scrunch by a factor of f"       << endl;
-      cout << "  -f [int f]       Frequency scrunch by a factor of f"  << endl;
-      cout << "  -b [int f]       Bin scrunch by a factor of f"        << endl;
-      cout << "  -d [float dm]    Change the dispersion measure"       << endl;
-      cout << "  -D [float rm]    Correct for ISM faraday rotation"    << endl;
-      cout << "  -s [float c]     Smear with duty cycle c"             << endl;
-      cout << "  -r [float p]     Rotate profiles by phase p"          << endl;
-      cout << "  -w [float w]     Reset all profile weights to w"      << endl;
-      cout << "  -S               Convert to Stokes parameters"        << endl;
+      cout << "  -I               Transform to Invariant Interval"     << endl;
+      cout << "  -S               Transform to Stokes parameters"      << endl;
       cout << "  -B               Flip the sideband sense (DANGEROUS)" << endl;
+      cout << endl;
+      cout << "The following options take integer arguments"           << endl;
+      cout << "  -t tscr          Time scrunch by this factor"         << endl;
+      cout << "  -f fscr          Frequency scrunch by this factor"    << endl;
+      cout << "  -b bscr          Bin scrunch by this factor"          << endl;
+      cout << endl;
+      cout << "The following options take floating point arguments"    << endl;
+      cout << "  -d dm            Alter the header dispersion measure" << endl;
+      cout << "  -D rm            Correct for ISM faraday rotation"    << endl;
+      cout << "  -s dc            Smear with this duty cycle"          << endl;
+      cout << "  -r phase         Rotate profiles by this many turns"  << endl;
+      cout << "  -w weight        Reset profile weights to this value" << endl;
       return (-1);
       break;
     case 'v':
@@ -94,6 +98,9 @@ int main (int argc, char *argv[]) {
       verbose = true;
       Pulsar::Archive::set_verbosity(1);
       break;
+    case 'i':
+      cout << "$Id: pam.C,v 1.19 2003/09/30 08:04:09 ahotan Exp $" << endl;
+      return 0;
     case 'm':
       save = true;
       break;
@@ -113,15 +120,15 @@ int main (int argc, char *argv[]) {
       pscr = true;
       command += " -p";
       break;
-    case 'i':
+    case 'I':
       invint = true;
       pscr = false;
-      command += " -i";
+      command += " -I";
       break;
     case 'f':
       fscr = true;
       if (sscanf(optarg, "%d", &fscr_fac) != 1) {
-	cout << "That is not a valid fscrunch factor." << endl;
+	cout << "That is not a valid fscrunch factor" << endl;
 	return -1;
       }
       command += " -f ";
@@ -130,7 +137,7 @@ int main (int argc, char *argv[]) {
     case 't':
       tscr = true;
       if (sscanf(optarg, "%d", &tscr_fac) != 1) {
-	cout << "That is not a valid tscrunch factor." << endl;
+	cout << "That is not a valid tscrunch factor" << endl;
 	return -1;
       }
       command += " -t ";
@@ -139,11 +146,11 @@ int main (int argc, char *argv[]) {
     case 'b':
       bscr = true;
       if (sscanf(optarg, "%d", &bscr_fac) != 1) {
-	cout << "That is not a valid bscrunch factor." << endl;
+	cout << "That is not a valid bscrunch factor" << endl;
 	return -1;
       }
       if (bscr_fac <= 0) {
-	cout << "That is not a valid bscrunch factor." << endl;
+	cout << "That is not a valid bscrunch factor" << endl;
 	return -1;
       }
       command += " -b ";
@@ -152,7 +159,7 @@ int main (int argc, char *argv[]) {
     case 'd':
       dedisperse = true;
       if (sscanf(optarg, "%lf", &dm) != 1) {
-	cout << "That is not a valid dispersion measure." << endl;
+	cout << "That is not a valid dispersion measure" << endl;
 	return -1;
       }
       command += " -d ";
@@ -161,7 +168,7 @@ int main (int argc, char *argv[]) {
     case 'D':
       defaraday = true;
       if (sscanf(optarg, "%lf", &rm) != 1) {
-	cout << "That is not a valid rotation measure." << endl;
+	cout << "That is not a valid rotation measure" << endl;
 	return -1;
       }
       command += " -D ";
@@ -170,7 +177,7 @@ int main (int argc, char *argv[]) {
     case 's':
       smear = true;
       if (sscanf(optarg, "%f", &smear_dc) != 1) {
-	cout << "That is not a valid smearing duty cycle." << endl;
+	cout << "That is not a valid smearing duty cycle" << endl;
 	return -1;
       }
       command += " -s ";
@@ -179,11 +186,11 @@ int main (int argc, char *argv[]) {
     case 'r':
       rotate = true;
       if (sscanf(optarg, "%lf", &rphase) != 1) {
-	cout << "That is not a valid rotation phase." << endl;
+	cout << "That is not a valid rotation phase" << endl;
 	return -1;
       }
       if (rphase <= 0.0 || rphase >= 1.0) {
-	cout << "That is not a valid rotation phase." << endl;
+	cout << "That is not a valid rotation phase" << endl;
 	return -1;
       }
       command += " -r ";
@@ -192,7 +199,7 @@ int main (int argc, char *argv[]) {
     case 'w':
       reset_weights = true;
       if (sscanf(optarg, "%f", &new_weight) != 1) {
-	cout << "That is not a valid weight." << endl;
+	cout << "That is not a valid weight" << endl;
 	return -1;
       }
       command += " -w ";
@@ -205,7 +212,7 @@ int main (int argc, char *argv[]) {
       flipsb = true;
       break;
     default:
-      cout << "Unrecognised option." << endl;
+      cout << "Unrecognised option" << endl;
     }
   }
   
@@ -220,7 +227,7 @@ int main (int argc, char *argv[]) {
   Reference::To<Pulsar::Archive> arch;
 
   if (!save) {
-    cout << "Changes will not be saved. Use -m or -e to write results to disk." << endl;
+    cout << "Changes will not be saved. Use -m or -e to write results to disk" << endl;
   }
 
   for (unsigned i = 0; i < archives.size(); i++) {

@@ -1,5 +1,5 @@
 //
-// $Id: pav.C,v 1.52 2003/09/30 06:29:45 ahotan Exp $
+// $Id: pav.C,v 1.53 2003/09/30 08:04:09 ahotan Exp $
 //
 // The Pulsar Archive Viewer
 //
@@ -30,8 +30,8 @@
 
 void usage ()
 {
-  cout << "program to look at Pulsar::Archive(s) in various ways \n"
-    "Usage: pav [options] file1 [file2 ...] \n"
+  cout << "A program to look at Pulsar::Archive(s) in various ways\n"
+    "Usage: pav [options] file1 [file2 ...]\n"
     "\n"
     "Preprocessing options:\n"
     " -b scr    Bscrunch scr phase bins together\n"
@@ -82,7 +82,8 @@ void usage ()
     " -i        Show revision information\n"
     " -v        Verbose output \n"
     " -V        Very verbose output \n"
-    " -w        Use stopwatch (for benchmarking)\n"
+    " -w        Use stopwatch (for benchmarking)\n\n"
+    "See http://astronomy.swin.edu.au/pulsar/software/manuals/pav.html"
        << endl;
 }
 
@@ -213,7 +214,7 @@ int main (int argc, char** argv)
       plotter.set_subint( atoi (optarg) );
       break;
     case 'i':
-      cout << "$Id: pav.C,v 1.52 2003/09/30 06:29:45 ahotan Exp $" << endl;
+      cout << "$Id: pav.C,v 1.53 2003/09/30 08:04:09 ahotan Exp $" << endl;
       return 0;
 
     case 'j':

@@ -31,16 +31,18 @@ void cross(Reference::To<Pulsar::Archive>,Reference::To<Pulsar::Archive>,bool,bo
 
 void usage ()
 {
-  cout << "Program to align standard profiles \n"
-    "Usage: pas [-r reference_profile] [-v] [-V] standard_profile  \n"
-    "Where the options are as follows \n"
-    " -h        This help page \n"
-    " -i        Revision information\n"
-    " -r ref    Reference profile \n"
-    " -v        Verbose output \n"
+  cout << "A program for aligning standard profiles\n"
+    "Usage: pas [-r reference_profile] [-v] [-V] standard_profile\n"
+    "Other possible options are as follows:\n"
+    " -h        This help page\n"
+    " -i        Show revision information\n"
+    " -r ref    Reference profile\n"
+    " -v        Verbose output\n"
     " -V        Very verbose output \n\n"
 
-    " This program works on keyboard interaction. To set baseline zero you type 'z' to set the start point, move the cursor and type 'z' again to accept the region.\n"
+    "This program works via keyboard interaction. To set baseline zero\n"
+    "you type 'z' to set the start point, move the cursor and type 'z'\n"
+    "again to accept the region."
        << endl;
 }
 
@@ -77,7 +79,7 @@ int main (int argc, char** argv)
       return 0;
 
     case 'i':
-      cout << "$Id: pas.C,v 1.6 2003/09/30 00:33:47 nwang Exp $" << endl;
+      cout << "$Id: pas.C,v 1.7 2003/09/30 08:04:09 ahotan Exp $" << endl;
       return 0;
 
     case 'r':

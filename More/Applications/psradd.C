@@ -10,35 +10,36 @@
 #include "dirutil.h"
 #include "string_utils.h"
 
-static const char* psradd_args = "b:Ce:f:Fg:hi:M:p:PstT:vV";
+static const char* psradd_args = "b:Ce:f:FG:hiI:M:p:PstT:vV";
 
 void usage () {
   cout <<
     "A program for adding Pulsar::Archives together\n"
     "USAGE: psradd [" << psradd_args << "] filenames\n"
-    " -b nbin     bin scrunch to nbin bins when each file is loaded\n"
-    " -C          check that ephemerides are equal\n"
-    " -f fname    output result to 'fname'\n"
-    " -F          force append despite mismatch of header parameters\n"
-    " -M meta     filename with list of files\n"
-    " -p fname    load new ephemeris from 'fname'\n"
-    " -P          correct for parallactic angle before tscrunch\n"
-    " -s          tscrunch result after each new file (nice on RAM)\n"
-    " -t          make no changes to file system (testing mode)\n"
-    " -T tempo    system call to tempo\n"
+    " -h          This help page\n"
+    " -v          Verbose mode\n"
+    " -V          Very verbose (debugging) mode\n"
+    " -i          Show revision information\n"
     "\n"
-    " -h          this help page \n"
-    " -v          verbose mode \n"
-    " -V          very verbose (debugging) mode \n"
+    " -b nbin     Bin scrunch to nbin bins when each file is loaded\n"
+    " -C          Check that ephemerides are equal\n"
+    " -f fname    Output result to 'fname'\n"
+    " -F          Force append despite mismatch of header parameters\n"
+    " -M meta     Filename with list of files\n"
+    " -p fname    Load new ephemeris from 'fname'\n"
+    " -P          Correct for parallactic angle before tscrunch\n"
+    " -s          Tscrunch result after each new file (nice on RAM)\n"
+    " -t          Make no changes to file system (testing mode)\n"
+    " -T tempo    System call to tempo\n"
     "\n"
     "AUTO ADD options:\n"
-    " -e ext   extension added to output filenames (default .it)\n"
-    " -g sec   tscrunch+unload when time between archives > 'sec' seconds\n"
-    " -i sec   tscrunch+unload when archive contains 'sec' seconds\n"
+    " -e ext      Extension added to output filenames (default .it)\n"
+    " -G sec      Tscrunch+unload when time between archives > 'sec' seconds\n"
+    " -I sec      Tscrunch+unload when archive contains 'sec' seconds\n"
     "\n"
     "Note:\n"
-    " AUTO ADD options, '-i' and '-g', are incompatible with '-S' and '-f'\n";
-
+    " AUTO ADD options, '-I' and '-G', are incompatible with '-S' and '-f'"
+       << endl;
 }
 
 
@@ -91,7 +92,11 @@ int main (int argc, char **argv)
     case 'h':
       usage();
       return 0;
-
+      
+    case 'i':
+      cout << "$Id: psradd.C,v 1.9 2003/09/30 08:04:09 ahotan Exp $" << endl;
+      return 0;
+      
     case 'b':
       nbin = atoi (optarg);
       break;
@@ -109,7 +114,7 @@ int main (int argc, char **argv)
       Pulsar::Archive::append_must_match = false;
       break;
 
-    case 'g':
+    case 'G':
       if (sscanf (optarg, "%f", &interval) != 1) {
 	cerr << "psradd error parsing '"<< optarg <<"' as maximum interval\n";
 	return -1;
@@ -117,7 +122,7 @@ int main (int argc, char **argv)
       auto_add = true;
       break;
 
-    case 'i':
+    case 'I':
       if (sscanf (optarg, "%f", &integrate) != 1) {
 	cerr << "psradd error parsing '"<< optarg <<"' as integration total\n";
 	return -1;

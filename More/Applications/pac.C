@@ -21,24 +21,24 @@ void usage ()
 {
   cout << "A program for calibrating Pulsar::Archives\n"
     "Usage: pac [options] filenames\n"
-    "  -v   Verbose mode\n"
-    "  -V   Very verbose mode\n"
+    "  -v                     Verbose mode\n"
+    "  -V                     Very verbose mode\n"
+    "  -i                     Show revision information\n"
     "\n"
-    "  -p   Path to CAL file directory\n"
-    "  -e   Scan for files with these extensions\n"
-    "       uses .cf and .pcal as defaults\n"
-    "  -u   Use this extension when unloading results\n"
-    "  -w   Write a new database summary file if using -p\n"
-    "  -W   Same as -w but exit after writing summary\n"
-    "  -d   Read ASCII summary (instead of -p)\n"   
-    "  -c   Do not try to match sky coordinates\n"
-    "  -i   Do not try to match instruments\n"
-    "  -t   Do not try to match times\n"
-    "  -f   Do not try to match frequencies\n"
-    "  -b   Do not try to match bandwidths\n"
-    "  -o   Do not try to match obs types\n"
-    "  -D   Display calibration model parameters\n"
-    "  -P   Calibrate polarisations only\n"
+    "  -p path                Set the CAL file directory\n"
+    "  -u ext1 ext2 ...       Scan for files with these extensions\n"
+    "                         uses .cf and .pcal as defaults\n"
+    "  -e extension           Use this extension when unloading results\n"
+    "  -w                     Write a new database summary file if using -p\n"
+    "  -W                     Same as -w but exit after writing summary\n"
+    "  -d database            Read ASCII summary (instead of -p)\n"   
+    "  -c                     Do not try to match sky coordinates\n"
+    "  -I                     Do not try to match instruments\n"
+    "  -T                     Do not try to match times\n"
+    "  -F                     Do not try to match frequencies\n"
+    "  -b                     Do not try to match bandwidths\n"
+    "  -o                     Do not try to match obs types\n"
+    "  -P                     Calibrate polarisations only\n"
     "\n"
     "  -S   Use the SingleAxis(t)Polar (SAtP selfcal) model\n"
     "  -s   Use the Single Axis Model (default)\n"
@@ -50,7 +50,6 @@ int main (int argc, char *argv[]) {
     
   bool verbose = false;
   bool new_database = true;
-  bool display_params = false;
   bool do_fluxcal = true;
   bool do_polncal = true;
   bool do_selfcal = false;
@@ -80,7 +79,7 @@ int main (int argc, char *argv[]) {
 
   string command = "pac ";
 
-  while ((gotc = getopt(argc, argv, "hvVp:e:u:d:wWcitfboDPsSq")) != -1) {
+  while ((gotc = getopt(argc, argv, "hvVip:u:e:d:wWcITFboPsSq")) != -1) {
     switch (gotc) {
     case 'h':
       usage ();
@@ -97,6 +96,9 @@ int main (int argc, char *argv[]) {
       Calibration::Model::verbose = true;
       Pulsar::Archive::set_verbosity(1);
       break;
+    case 'i':
+      cout << "$Id: pac.C,v 1.27 2003/09/30 08:04:09 ahotan Exp $" << endl;
+      return 0;
     case 'p':
       cals_are_here = optarg;
       break;
@@ -104,21 +106,18 @@ int main (int argc, char *argv[]) {
       cals_are_here = optarg;
       new_database = false;
       break;
-    case 'D':
-      display_params = true;
-      break;
     case 'P':
       do_fluxcal = false;
       command += "-P ";
       break;
-    case 'e':
+    case 'u':
       key = strtok (optarg, whitespace);
       while (key) {
         exts.push_back(key);
         key = strtok (NULL, whitespace);
       }
       break;
-    case 'u':
+    case 'e':
       unload_ext = optarg;
       break;
     case 'w':
@@ -133,17 +132,17 @@ int main (int argc, char *argv[]) {
       test_coords = false;
       command += "-c ";
       break;
-    case 'i':
+    case 'I':
       test_instr = false;
-      command += "-i ";
+      command += "-I ";
       break;
-    case 't':
+    case 'T':
       test_times = false;
-      command += "-t ";
+      command += "-T ";
       break;
-    case 'f':
+    case 'F':
       test_frequency = false;
-      command += "-f ";
+      command += "-F ";
       break;
     case 'b':
       test_bandwidth = false;
@@ -167,7 +166,7 @@ int main (int argc, char *argv[]) {
       break;
 
     default:
-      cout << "Unrecognised option!" << endl;
+      cout << "Unrecognised option" << endl;
     }
   }
   
@@ -182,7 +181,7 @@ int main (int argc, char *argv[]) {
   
   if (archives.empty()) {
     if (!summary_only) {
-      cout << "No archives were specified!" << endl;
+      cout << "No archives were specified" << endl;
       exit(-1);
     }
   } 
@@ -210,7 +209,7 @@ int main (int argc, char *argv[]) {
       dbase -> test_obst(test_obstype);
 
       if (dbase->size() <= 0) {
-	cout << "No CAL files found!" << endl;
+	cout << "No CAL files found" << endl;
 	return -1;
       }
 
@@ -283,11 +282,8 @@ int main (int argc, char *argv[]) {
 	cout << "Polarisation Calibration Complete" << endl;
         arch->set_poln_calibrated();
 	pcal_file = (pcal_engine->get_Archive())->get_filename();
-	if (display_params) {
-	  cout << "not implemented; use pacv" << endl;
-	}	
       }
-
+      
       /* The PolnCalibrator classes normalize everything so that flux
 	 is given in units of the calibrator flux.  Unless the calibrator
 	 is flux calibrated, it will undo the flux calibration step.

@@ -49,27 +49,31 @@ int main (int argc, char *argv[]) {
   char* key = NULL;
   char whitespace[5] = " \n\t";
   
-  while ((gotc = getopt(argc, argv, "hvVDme:z:k:Z:dE:s:S:P:")) != -1) {
+  while ((gotc = getopt(argc, argv, "hvViDme:z:k:Z:dE:s:S:P:")) != -1) {
     switch (gotc) {
     case 'h':
       cout << "A program for zapping RFI in Pulsar::Archives"                     << endl;
       cout << "Usage: paz [options] filenames"                                    << endl;
       cout << "  -v               Verbose mode"                                   << endl;
       cout << "  -V               Very verbose mode"                              << endl;
-      cout << "  -D               Display results"                                << endl;
+      cout << "  -i               Show revision information"                      << endl;
+      cout << "  -D               Display resulting bandpass and weights"         << endl;
       cout << "  -m               Modify the original files on disk"              << endl;
       cout << "  -e               Unload to new files using this extension"       << endl;
       cout << "  -z \"a b c ...\"   Zap these particular channels"                << endl;
-      cout << "  -k \"filename\"    Zap chans listed in filename"                 << endl;
+      cout << "  -k filename      Zap chans listed in this kill file"             << endl;
       cout << "  -Z \"a b\"         Zap chans between a and b"                    << endl;
-      cout << "  -E percent       Zap band edges"                                 << endl;
-      cout << "  -s \"list\"        Zap these sub-integrations"                   << endl;
-      cout << "  -d               Simple mean offset spike rejection"             << endl;
+      cout << "  -E percent       Zap this much of the band at the edges"         << endl;
+      cout << "  -s \"a b c ...\"   Zap these sub-integrations"                   << endl;
+      cout << "  -d               Use simple mean offset spike zapping"           << endl;
       cout << "  -S cutoff        Zap channels based on S/N (using std if given)" << endl;
-      cout << "  -P               Use this standard profile"                      << endl;
+      cout << "  -P stdfile       Use this standard profile"                      << endl;
       cout << endl;
       cout << "The format of the kill file used with the -k option is simply"    << endl;
-      cout << "a list of channel numbers, separated by spaces or newlines."  << endl;
+      cout << "a list of channel numbers, separated by spaces or newlines"  << endl;
+      cout << endl;
+      cout << "The cutoff S/N value used with -S is largely arbitrary. You will" << endl;
+      cout << "need to experiment to find the best value for your archives" << endl;
       return (-1);
       break;
     case 'v':
@@ -79,6 +83,9 @@ int main (int argc, char *argv[]) {
       verbose = true;
       Pulsar::Archive::set_verbosity(1);
       break;
+    case 'i':
+      cout << "$Id: paz.C,v 1.12 2003/09/30 08:04:09 ahotan Exp $" << endl;
+      return 0;
     case 'D':
       display = true;
       break;
@@ -167,6 +174,9 @@ int main (int argc, char *argv[]) {
     cerr << "No archives were specified" << endl;
     exit(-1);
   } 
+  
+  if (!write)
+    cout << "Changes will not be saved. Use -m or -e to write results to disk" << endl;
   
   Pulsar::Plotter plotter;
   
