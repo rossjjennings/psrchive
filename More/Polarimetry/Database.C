@@ -528,7 +528,7 @@ void Pulsar::Database::load (const string& dbase_filename)
 
   entries.resize(useful);
 
-  for (unsigned ie=0; ie<entries.size(); ie++) {
+  for (unsigned ie=0; ie<entries.size(); ie++) try {
     fgets (temp, 4096, fptr);
 
     if (verbose)
@@ -536,6 +536,13 @@ void Pulsar::Database::load (const string& dbase_filename)
 
     entries[ie].load(temp);
   }
+  catch (Error& error) {
+    cerr << "Pulsar::Database::load discarding entry:\n\t" 
+         << error.get_message() << endl;
+    entries.erase (entries.begin() + ie);
+    ie --;
+  }
+
   fclose (fptr);
 }
 
