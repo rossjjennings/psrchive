@@ -629,16 +629,27 @@ void datatype_match (int typecode, int ephind)
 		      TSTRING,  // h:m:s
 		      TSTRING,  // d:m:s
 		      TDOUBLE,  // MJD
-		      TSHORT }; // integer
+		      TINT };   // integer
   
   if (psrephem::verbose)
     cerr << "typecode=" << typecode << " datatype[" << parmtype << "]="
 	 << datatype[parmtype] << endl;
-  
-  if (typecode != datatype[parmtype])
+
+  bool match = false;
+
+  // suffer 'I' and 'J' inconsistency
+  if (datatype[parmtype] == TINT)
+    match = (typecode == TSHORT || typecode == TINT || typecode == TLONG);
+  else
+    match = (typecode == datatype[parmtype]);
+
+  if (!match)
     throw Error (InvalidState, "psrephem::datatype_match",
-		 "PSRFITS binary table column datatype:%s\n" 
-		 "doesn't match parmType:%d for %s\n", 
-		 fits_datatype_str(typecode), parmtype,
-		 parmNames[ephind]);
+		 "PSRFITS binary table column datatype:%s\n\t" 
+		 "doesn't match that required:%s\n\t"
+                 "for parmType:%d = %s\n", 
+		 fits_datatype_str(typecode),
+                 fits_datatype_str(datatype[parmtype]),
+                 parmtype, parmNames[ephind]);
+
 }
