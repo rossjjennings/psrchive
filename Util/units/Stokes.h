@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Stokes.h,v $
-   $Revision: 1.4 $
-   $Date: 2003/02/25 12:46:13 $
+   $Revision: 1.5 $
+   $Date: 2003/02/27 14:49:10 $
    $Author: straten $ */
 
 #ifndef __Stokes_H
@@ -54,7 +54,7 @@ class Stokes : public Quaternion<T, Hermitian>
 
 // useful method for generating random source polarization
 template <class T, class U>
-void random_value (Stokes<T>& val, U scale)
+void random_value (Stokes<T>& val, U scale, float max_polarization = 1.0)
 {
   // total intensity is always equal to scale
   val.s0 = scale;
@@ -63,6 +63,7 @@ void random_value (Stokes<T>& val, U scale)
   T fraction_polarized;
   random_value (fraction_polarized, 0.5);
   fraction_polarized += 0.5;
+  fraction_polarized *= max_polarization;
 
   unsigned i=0;
   
