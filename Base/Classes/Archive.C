@@ -62,8 +62,6 @@ Pulsar::Archive::operator = (const Archive& a)
 //! Return a null-constructed instance of the derived class
 Pulsar::Archive* Pulsar::Archive::new_Archive (const string class_name)
 {
-  Agent::init ();
-
   if (Agent::registry.size() == 0)
     throw Error (InvalidState, "Pulsar::Archive::new_Archive",
 		 "no Agents loaded");
@@ -130,32 +128,42 @@ Pulsar::Archive::get_extension (unsigned iext)
   return extension[iext];
 }
 
+template<class T>
+unsigned find_type (const vector< Reference::To<T> >& array, const T* instance)
+{
+  unsigned index;
+
+  for (index=0; index<array.size(); index++)
+    if ( typeid(*instance) == typeid(*array[index].ptr()) )
+      break;
+
+  return index;
+}
+
+
 /*! Derived classes need only define this method, as the non-const version
   implemented by the Archive base class simply calls this method. */
 void Pulsar::Archive::add_extension (Extension* ext)
 {
-  // Test to see if the archive has already had its Integrations
-  // re-ordered. At the moment the code only supports doing this
-  // once, otherwise each IntegrationOrder class would have to
-  // know how to convert from all of its fellows and this would
-  // get very complicated... AWH 29/12/2003
-  
-  bool has_alt_order = false;
-  
-  for (unsigned i = 0; i < extension.size(); i++) {
-    if (dynamic_cast<Pulsar::IntegrationOrder*>(extension[i].get()))
-      has_alt_order = true;
-  }
-  
-  if (dynamic_cast<Pulsar::IntegrationOrder*>(ext) && has_alt_order)
-    throw Error(InvalidState, "Archive::add_extension",
-		"Stacking IntegrationOrder Extensions is not supported");
+
+  if (dynamic_cast<Pulsar::IntegrationOrder*>(ext))
+
+    // Test to see if the archive has already had its Integrations
+    // re-ordered. At the moment the code only supports doing this
+    // once, otherwise each IntegrationOrder class would have to know
+    // how to convert from all of its fellows and this would get very
+    // complicated... AWH 29/12/2003
+    
+    for (unsigned i = 0; i < extension.size(); i++)
+      if (dynamic_cast<Pulsar::IntegrationOrder*>(extension[i].get()))
+	throw Error(InvalidState, "Archive::add_extension",
+		    "Stacking IntegrationOrder Extensions is not supported");
   
   // If we reach here, there are no IntegrationOrder conflicts.
   // Continue as normal... AWH 29/12/2003
-
-  unsigned index = find( extension, typeid(ext) );
   
+  unsigned index = find_type (extension, ext);
+
   if (index < extension.size())
     extension[index] = ext;
   else
