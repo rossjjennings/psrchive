@@ -7,11 +7,10 @@ void Pulsar::ArchiveTUI::process (const std::string& command)
 {
   string temp = command;
 
-  string param = stringtok (&temp, "=\t\n");
-  string value = stringtok (&temp, " \t\n");
+  string param = stringtok (&temp, "=");
 
-  if (value.length())
-    set_value (param, value);
+  if (temp.length())
+    set_value (param, temp);
   else
     cout << " " << param << "=" << get_value (param);
 }
