@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PolnCalibrator.h,v $
-   $Revision: 1.8 $
-   $Date: 2003/04/27 10:53:38 $
+   $Revision: 1.9 $
+   $Date: 2003/05/05 10:48:38 $
    $Author: straten $ */
 
 #ifndef __PolnCalibrator_H
@@ -45,6 +45,14 @@ namespace Pulsar {
 
     //! Build the model at the native frequency resolution
     virtual void build ();
+
+    //! Return the mean levels of the calibrator hi and lo states
+    void get_levels (unsigned isubint, unsigned nchan, 
+		     vector<vector<Estimate<double> > >& cal_hi,
+		     vector<vector<Estimate<double> > >& cal_lo) const;
+
+    //! Return a const reference to the calibrator archive
+    const Archive* get_Archive () const { return calibrator; }
 
   protected:
 

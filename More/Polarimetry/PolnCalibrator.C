@@ -55,6 +55,7 @@ Pulsar::PolnCalibrator::PolnCalibrator (const Archive* arch)
     calibrator = arch;
 }
 
+
 /*! Upon completion, the flux of the archive will be normalized with respect
   to the flux of the calibrator, such that a FluxCalibrator simply needs
   to scale the archive by the calibrator flux. */
@@ -82,19 +83,23 @@ void Pulsar::PolnCalibrator::build ()
   create (calibrator->get_nchan());
 }
 
-void Pulsar::PolnCalibrator::create (unsigned nchan)
+/*!
+  \param isubint the calibrator Integration from which to derive levels
+  \param nchan the desired frequency resolution
+  \retval cal_hi the mean levels of the calibrator hi state
+  \retval cal_lo the mean levels of the calibrator lo state
+*/
+void 
+Pulsar::PolnCalibrator::get_levels (unsigned isubint, unsigned nchan, 
+				    vector<vector<Estimate<double> > >& cal_hi,
+				    vector<vector<Estimate<double> > >& cal_lo)
+  const
 {
   if (verbose)
-    cerr << "Pulsar::PolnCalibrator::create nchan=" << nchan << endl;
+    cerr << "Pulsar::PolnCalibrator::get_levels call Integration::cal_levels"
+	 << endl;
 
-  // get the calibrator hi and lo levels from the PolnCal archive
-  vector<vector<Estimate<double> > > cal_hi;
-  vector<vector<Estimate<double> > > cal_lo;
-
-  if (verbose)
-    cerr << "Pulsar::PolnCalibrator::create Integration::cal_levels" <<endl;
-
-  calibrator->get_Integration(0)->cal_levels (cal_hi, cal_lo);
+  calibrator->get_Integration(isubint)->cal_levels (cal_hi, cal_lo);
 
   unsigned npol = cal_hi.size();
   unsigned ipol = 0;
@@ -102,7 +107,7 @@ void Pulsar::PolnCalibrator::create (unsigned nchan)
   unsigned window = unsigned (calibrator->get_nchan() * median_smoothing);
 
   if (verbose)
-    cerr << "Pulsar::PolnCalibrator::create median smoothing window width = "
+    cerr << "Pulsar::PolnCalibrator::get_levels median smoothing window = "
 	 << window << " channels" << endl;
 
   // even a 3-window sort can zap a single channel birdie
@@ -114,10 +119,8 @@ void Pulsar::PolnCalibrator::create (unsigned nchan)
     fft::median_smooth (cal_hi[ipol], window);
   }
 
-  if (calibrator->get_nchan() == nchan) {
-    calculate (cal_hi, cal_lo);
+  if (calibrator->get_nchan() == nchan)
     return;
-  }
 
   // make hi and lo the right size of cal_hi and cal_lo
   vector<vector<Estimate<double> > > hi (npol);
@@ -131,7 +134,59 @@ void Pulsar::PolnCalibrator::create (unsigned nchan)
     fft::interpolate (hi[ipol], cal_hi[ipol]);
   }
 
-  calculate (hi, lo);
+  cal_lo = lo;
+  cal_hi = hi;
+}
+
+void Pulsar::PolnCalibrator::create (unsigned nchan)
+{
+  if (verbose)
+    cerr << "Pulsar::PolnCalibrator::create nchan=" << nchan << endl;
+
+  // get the calibrator hi and lo levels from the PolnCal archive
+  vector<vector<MeanEstimate<double> > > total_hi;
+  vector<vector<MeanEstimate<double> > > total_lo;
+
+  // get the calibrator hi and lo levels from the PolnCal archive
+  vector<vector<Estimate<double> > > cal_hi;
+  vector<vector<Estimate<double> > > cal_lo;
+
+  unsigned nsub = calibrator->get_nsubint();
+  unsigned npol = calibrator->get_npol();
+
+  for (unsigned isub=0; isub<nsub; isub++) {
+
+    get_levels (isub, nchan, cal_hi, cal_lo);
+
+    if (nsub > 1) {
+      if (isub == 1) {
+	total_hi.resize (cal_hi.size());
+	total_lo.resize (cal_lo.size());
+	for (unsigned ipol=0; ipol<npol; ipol++) {
+	  total_hi[ipol].resize (nchan);
+	  total_lo[ipol].resize (nchan);
+	}
+      }
+      for (unsigned ipol=0; ipol<npol; ipol++) {
+	for (unsigned ichan=0; ichan<nchan; ichan++) {
+	  total_hi[ipol][ichan] += cal_hi[ipol][ichan];
+	  total_lo[ipol][ichan] += cal_lo[ipol][ichan];
+	}
+      }
+    }
+
+  }
+
+  if (nsub > 1) {
+    for (unsigned ipol=0; ipol<npol; ipol++) {
+      for (unsigned ichan=0; ichan<nchan; ichan++) {
+	cal_hi[ipol][ichan] = total_hi[ipol][ichan].get_Estimate();
+	cal_lo[ipol][ichan] = total_lo[ipol][ichan].get_Estimate();
+      }
+    }
+  }
+
+  calculate (cal_hi, cal_lo);
 }
 
 void Pulsar::PolnCalibrator::calculate (vector<vector<Estimate<double> > >& hi,
