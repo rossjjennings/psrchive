@@ -31,7 +31,7 @@ int main (int argc, char** argv)
   // open PSRFITS file and read ephemeris
   //
 
-  cerr << "Reading ephemeris from PSRFITS file: " << argv[arg] << endl;
+  cerr << "Loading ephemeris from PSRFITS file: " << argv[arg] << endl;
 
   fits_open_file (&fptr, argv[arg], READONLY, &status);
   if (status != 0) {
@@ -43,7 +43,7 @@ int main (int argc, char** argv)
   psrephem eph;
   eph.load (fptr);
 
-  cerr << "Ephemeris read." << endl;
+  cerr << "Ephemeris loaded." << endl;
   fits_close_file (fptr, &status);
 
   if (verbose)
@@ -85,7 +85,7 @@ int main (int argc, char** argv)
   // open newly created PSRFITS file and read ephemeris
   //
 
-  cerr << "Reading ephemeris from PSRFITS file: " << temp << endl;
+  cerr << "Re-loading ephemeris from PSRFITS file: " << temp << endl;
 
   fits_open_file (&fptr, temp.c_str(), READONLY, &status);
   if (status != 0) {
@@ -94,17 +94,24 @@ int main (int argc, char** argv)
     return -1;
   }
 
-  psrephem written;
-  written.load (fptr);
+  psrephem eph2;
+  eph2.load (fptr);
 
-  cerr << "Ephemeris re-read." << endl;
+  cerr << "Ephemeris re-loaded." << endl;
   fits_close_file (fptr, &status);
 
   if (verbose)
     cout << "Parsed ephemeris\n" << eph;
 
-  if (written != eph)
+  string first, second;
+
+  eph.unload (&first);
+  eph2.unload (&second);
+
+  if (second != first)
     cerr << "test_fitsio: FAIL written != read" << endl;
+
+  cerr << "Original\n" << first << "\nWritten\n" << second << endl;
 
   return 0;
 }
