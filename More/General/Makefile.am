@@ -218,3 +218,5 @@ LDADD = libpsrchive.la $(top_srcdir)/astro/libpsrastro.la \
         $(top_srcdir)/utils/libpsrutils.la \
 	@FFT_LIBS@ @CFITSIO_LIBS@ @SLA_LIBS@
 
+include $(top_srcdir)/config/Makefile.local
+
