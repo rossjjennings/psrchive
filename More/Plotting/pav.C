@@ -1,5 +1,5 @@
 //
-// $Id: pav.C,v 1.85 2004/09/01 06:59:44 hknight Exp $
+// $Id: pav.C,v 1.86 2004/09/09 00:57:05 hknight Exp $
 //
 // The Pulsar Archive Viewer
 //
@@ -56,6 +56,7 @@ void usage ()
     " -T        Tscrunch all Integrations\n"
     " -p        Add all polarisations together\n"
     " -Z        Smear profiles before plotting\n"
+    " --nbin n  Bscrunch profiles to this many bins\n"
     "\n"
     "Integration re-ordering (nsub = final # of subints):\n"
     " --convert_binphsperi   nsub\n"
@@ -147,6 +148,8 @@ int main (int argc, char** argv)
   int fscrunch = -1;
   int tscrunch = -1;
   int pscrunch = -1;
+
+  int nbin_requested = -1;
   
   int n1 = 1;
   int n2 = 1;
@@ -219,6 +222,7 @@ int main (int argc, char** argv)
 
   const int TOTAL = 1010;
   const int EXTRA = 1011;
+  const int NBIN  = 1012;
 
   static struct option long_options[] = {
     { "convert_binphsperi", 1, 0, 200 },
@@ -231,8 +235,9 @@ int main (int argc, char** argv)
     { "snr",                1, 0, 207 },
     { "mask",               0, 0, 208 },
     { "normal",             0, 0, 209 },
-    { "total",no_argument,0,TOTAL},
-    { "extra",required_argument,0,EXTRA},
+    { "total",              no_argument,      0,TOTAL},
+    { "extra",              required_argument,0,EXTRA},
+    { "nbin",               required_argument,0,NBIN},
     { 0, 0, 0, 0 }
   };
     
@@ -313,7 +318,7 @@ int main (int argc, char** argv)
       plotter.set_subint( atoi (optarg) );
       break;
     case 'i':
-      cout << "$Id: pav.C,v 1.85 2004/09/01 06:59:44 hknight Exp $" << endl;
+      cout << "$Id: pav.C,v 1.86 2004/09/09 00:57:05 hknight Exp $" << endl;
       return 0;
 
     case 'j':
@@ -593,6 +598,7 @@ int main (int argc, char** argv)
     }
     case TOTAL: plot_total_archive = true; break;
     case EXTRA: filenames.push_back( optarg ); breakup_archives.push_back( true); break;
+    case NBIN: nbin_requested = atoi(optarg); break;
     default:
       cerr << "pav: unrecognized option" << endl;
       return -1; 
@@ -661,7 +667,19 @@ int main (int argc, char** argv)
 	  cerr << "dedispersion toook " << clock << endl;
 	}
       }
-      
+
+      if( nbin_requested > 0 ) {
+	bscrunch = -1;
+	if (stopwatch)
+	  clock.start();
+	archive -> bscrunch_to_nbin (nbin_requested);
+	if (stopwatch) {
+	  clock.stop();
+	  cerr << "bscrunch took " << clock << endl;
+	}
+	
+      }
+
       if (bscrunch > 0) {
 	if (stopwatch)
 	  clock.start();
