@@ -18,7 +18,13 @@ void Pulsar::BasicArchive::init ()
   
   facorr = pacorr = rm_ism = rm_iono = dedisp = true;
 }
-  
+
+Pulsar::BasicArchive::~BasicArchive () 
+{ 
+  if (verbose)
+    cerr << "Pulsar::BasicArchive::destructor" << endl;
+}
+
 const Pulsar::BasicArchive&
 Pulsar::BasicArchive::operator = (const BasicArchive& copy)
 {
@@ -30,4 +36,52 @@ Pulsar::BasicArchive::operator = (const BasicArchive& copy)
   // etc
 
   return *this;
+}
+
+//! Get the number of sub-integrations in the archive
+int Pulsar::BasicArchive::get_nsubint () const
+{
+  return nsubint;
+}
+
+//! Set the number of sub-integrations in the archive
+void Pulsar::BasicArchive::set_nsubint (int num_sub) 
+{
+  nsubint = num_sub;
+}
+
+//! Get the number of frequency polns used
+int Pulsar::BasicArchive::get_npol () const
+{
+  return npol;
+}
+
+//! Set the number of frequency polns used
+void Pulsar::BasicArchive::set_npol (int numpol)
+{
+  npol = numpol;
+}
+
+//! Get the number of frequency channels used
+int Pulsar::BasicArchive::get_nchan () const
+{
+  return nchan;
+}
+
+//! Set the number of frequency channels used
+void Pulsar::BasicArchive::set_nchan (int numchan)
+{
+  nchan = numchan;
+}
+
+//! Get the number of pulsar phase bins used
+int Pulsar::BasicArchive::get_nbin () const
+{
+  return nbin;
+}
+
+//! Set the number of pulsar phase bins used
+void Pulsar::BasicArchive::set_nbin (int numbins)
+{
+  nbin = numbins;
 }

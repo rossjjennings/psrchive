@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/BasicArchive.h,v $
-   $Revision: 1.5 $
-   $Date: 2002/04/17 13:35:53 $
+   $Revision: 1.6 $
+   $Date: 2002/04/17 14:27:00 $
    $Author: straten $ */
 
 #include "Archive.h"
@@ -73,7 +73,7 @@ namespace Pulsar {
     const BasicArchive& operator = (const BasicArchive& copy);
 
     //! destructor
-    virtual ~BasicArchive () { }
+    virtual ~BasicArchive ();
 
     // Define the pure virtual functions defined in the ArchiveBase
     // that are used to get/set the above variables
@@ -173,52 +173,28 @@ namespace Pulsar {
       }
 
     //! Get the number of sub-integrations in the archive
-    int get_nsubint () const
-    {
-      return nsubint;
-    }
+    int get_nsubint () const;
 
     //! Set the number of sub-integrations in the archive
-    void set_nsubint (int num_sub) 
-    {
-      nsubint = num_sub;
-    }
+    void set_nsubint (int num_sub);
 
     //! Get the number of frequency polns used
-    int get_npol () const
-    {
-      return npol;
-    }
+    int get_npol () const;
     
     //! Set the number of frequency polns used
-    void set_npol (int numpol)
-    {
-      npol = numpol;
-    }
+    void set_npol (int numpol);
     
     //! Get the number of frequency channels used
-    int get_nchan () const
-    {
-      return nchan;
-    }
+    int get_nchan () const;
     
     //! Set the number of frequency channels used
-    void set_nchan (int numchan)
-    {
-      nchan = numchan;
-    }
-    
+    void set_nchan (int numchan);
+
     //! Get the number of pulsar phase bins used
-    int get_nbin () const
-    {
-      return nbin;
-    }
+    int get_nbin () const;
     
     //! Set the number of pulsar phase bins used
-    void set_nbin (int numbins)
-    {
-      nbin = numbins;
-    }
+    void set_nbin (int numbins);
     
     //! Return the type of feed used
     Feed::Type get_feed_type () const
