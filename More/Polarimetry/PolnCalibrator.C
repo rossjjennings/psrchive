@@ -55,6 +55,8 @@ Pulsar::PolnCalibrator::PolnCalibrator (const Archive* arch)
   }
   else
     calibrator = arch;
+
+  built = false;
 }
 
 
@@ -87,6 +89,20 @@ void Pulsar::PolnCalibrator::build (unsigned nchan)
     nchan = calibrator->get_nchan();
 
   create (nchan);
+
+  built = true;
+}
+
+Jones<float> Pulsar::PolnCalibrator::get_response (unsigned ichan) const
+{
+  if (!built)
+    const_cast<PolnCalibrator*>(this)->build();
+
+  if (ichan >= jones.size())
+    throw Error (InvalidParam, "Pulsar::PolnCalibrator::get_response",
+		 "ichan=%d >= nchan=%d", ichan, jones.size());
+
+  return jones[ichan];
 }
 
 /*!

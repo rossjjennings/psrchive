@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PolnCalibrator.h,v $
-   $Revision: 1.11 $
-   $Date: 2003/06/02 12:18:45 $
-   $Author: pulsar $ */
+   $Revision: 1.12 $
+   $Date: 2003/09/04 10:18:03 $
+   $Author: straten $ */
 
 #ifndef __PolnCalibrator_H
 #define __PolnCalibrator_H
@@ -49,6 +49,9 @@ namespace Pulsar {
     //! Build the model at the native frequency resolution, or that specified
     virtual void build (unsigned nchan = 0);
 
+    //! Return the system response for the specified channel
+    virtual Jones<float> get_response (unsigned ichan) const;
+
     //! Return the mean levels of the calibrator hi and lo states
     void get_levels (unsigned isubint, unsigned nchan, 
 		     vector<vector<Estimate<double> > >& cal_hi,
@@ -92,6 +95,9 @@ namespace Pulsar {
     //! Calculate the Jones matrix frequency response from the CAL hi and lo
     void calculate (vector<vector<Estimate<double> > >& cal_hi,
 		    vector<vector<Estimate<double> > >& cal_lo);
+
+    //! Flag set after call to build
+    bool built;
 
   };
 
