@@ -109,6 +109,8 @@ int main (int argc, char** argv)
 
     plotter->plot (calibrator);
 
+    cpgpage ();
+
   } catch (Error& error) {
     cerr << "psrcal: Error calibrating " << filenames[ifile] << error << endl;
     return -1;
