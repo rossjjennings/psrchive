@@ -11,7 +11,8 @@
 
 string polyco::anyPsr;       // an empty string
 MJD    polyco::today;        // MJD zero
-int    polyco::verbose = 0;  // default: non-verbose
+bool   polyco::verbose = false;
+bool   polyco::debug = false;
 
 // not going to get > ns precision out of a routine based in minutes
 double polyco::precision = 1e-10;
@@ -204,7 +205,7 @@ int polynomial::load(string* instr)
   for (int i = 0;i<ncoeftmp;i++){
     line = stringtok (instr, whitespace);
     size_t letterd = line.find('D');
-    if (letterd < line.npos) line[letterd] = 'e';
+    if (letterd != string::npos) line[letterd] = 'e';
     if (sscanf (line.c_str(), "%lf", &coefs[i]) != 1)  {
       fprintf (stderr, "polynomial::load(string*) did not parse '%s'\n",
         line.c_str());

@@ -107,7 +107,8 @@ class polyco {
   static MJD    today;
 
  public:
-  static int verbose;
+  static bool verbose;
+  static bool debug;
   static double precision;
 
   vector<polynomial> pollys;
