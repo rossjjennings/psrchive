@@ -21,6 +21,7 @@ void usage ()
     " -c        Correct data for bad ephemeris \n"
     " -d dm     Dedisperse data at a new dm \n"
     " -D        Plot Integration 0, poln 0, chan 0 \n"
+    " -G        Greyscale of profiles in frequency and phase\n"
     " -E f.eph  install new ephemeris given in file 'f.eph' \n"
     " -e xx     Output data to new file with ext xx \n"
     " -f scr    Fscrunch scr frequency channels together \n"
@@ -48,11 +49,12 @@ int main (int argc, char** argv)
 
   bool verbose = false;
   bool display = false;
+  bool greyfreq = false;
 
   char* metafile = NULL;
 
   int c = 0;
-  const char* args = "ab:cd:De:E:f:FHm:M:pSt:TvVx:y:";
+  const char* args = "ab:cd:DGe:E:f:FHm:M:pSt:TvVx:y:";
   while ((c = getopt(argc, argv, args)) != -1)
     switch (c) {
 
@@ -70,6 +72,9 @@ int main (int argc, char** argv)
       break;
     case 'D':
       display = true;
+      break;
+    case 'G':
+      greyfreq = true;
       break;
     case 'e':
       // parse ext
@@ -137,7 +142,7 @@ int main (int argc, char** argv)
     return 0;
   }
 
-  if (display)
+  if (display || greyfreq)
     cpgbeg (0, "?", 0, 0);
 
   Pulsar::Archive* archive = 0;
@@ -159,10 +164,17 @@ int main (int argc, char** argv)
 
     if (pscrunch > 0)
       archive -> pscrunch ();
-
+    
     if (display) 
       archive -> get_Profile(0,0,0) -> display();
-
+    
+    if (greyfreq) {
+      archive -> tscrunch ();
+      archive -> pscrunch ();
+      string tempstr = archive -> get_source();
+      Pulsar::plot_greyscale (archive -> get_Integration (0), tempstr);
+    }
+    
     delete archive; archive = 0;
   }
   catch (Pulsar::Error& error) {
@@ -175,10 +187,11 @@ int main (int argc, char** argv)
     if (archive)
       delete archive; archive = 0;
   }
-
-  if (display)
+  
+  if (display || greyfreq)
     cpgend();
-
+  
   return 0;
 }
+
 
