@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ReceptionCalibrator.h,v $
-   $Revision: 1.9 $
-   $Date: 2003/04/29 10:27:25 $
-   $Author: straten $ */
+   $Revision: 1.10 $
+   $Date: 2003/04/29 13:27:19 $
+   $Author: pulsar $ */
 
 #ifndef __ReceptionCalibrator_H
 #define __ReceptionCalibrator_H
@@ -99,7 +99,7 @@ namespace Pulsar {
     bool includes_FluxCalibrator;
 
     //! Check that the model is ready 
-    void check_ready (const char* method);
+    void check_ready (const char* method, bool init = true);
 
     //! Initialization performed using the first observation added
     void initial_observation (const Archive* data);

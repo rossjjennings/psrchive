@@ -99,7 +99,7 @@ void Pulsar::ReceptionCalibrator::initial_observation (const Archive* data)
 //! Add the specified pulse phase bin to the set of state constraints
 void Pulsar::ReceptionCalibrator::add_state (unsigned phase_bin)
 {
-  check_ready ("Pulsar::ReceptionCalibrator::add_state");
+  check_ready ("Pulsar::ReceptionCalibrator::add_state", false);
 
   if (verbose)
     cerr << "Pulsar::ReceptionCalibrator::add_state phase bin=" 
@@ -145,10 +145,10 @@ unsigned Pulsar::ReceptionCalibrator::get_nstate () const
 //! Add the specified pulsar observation to the set of constraints
 void Pulsar::ReceptionCalibrator::add_observation (const Archive* data)
 {
+  check_ready ("Pulsar::ReceptionCalibrator::add_observation", false);
+
   if (!uncalibrated)
     initial_observation (data);
-
-  check_ready ("Pulsar::ReceptionCalibrator::add_observation");
 
   string reason;
   if (!uncalibrated->mixable (data, reason))
@@ -298,10 +298,7 @@ void Pulsar::ReceptionCalibrator::calibrate (Archive* data)
 
 void Pulsar::ReceptionCalibrator::solve ()
 {
-  if (is_fit) {
-    cerr << "Pulsar::ReceptionCalibrator::solve equation already fit" << endl;
-    return;
-  }
+  check_ready ("Pulsar::ReceptionCalibrator::solve");
 
   if (!ncoef_set) {
     /* it might be nice to try and choose a good ncoef, based on the
@@ -328,12 +325,12 @@ void Pulsar::ReceptionCalibrator::solve ()
 
 
 
-void Pulsar::ReceptionCalibrator::check_ready (const char* method)
+void Pulsar::ReceptionCalibrator::check_ready (const char* method, bool unc)
 {
   if (is_fit)
     throw Error (InvalidState, method, "Model has been fit. Cannot add data.");
 
-  if (!uncalibrated)
+  if (unc && !uncalibrated)
     throw Error (InvalidState, method, "Initial observation required.");
 }
 
