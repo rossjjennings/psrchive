@@ -8,15 +8,12 @@ void Pulsar::ArchiveTUI::process (const std::string& command)
   string temp = command;
 
   string param = stringtok (&temp, "=\t\n");
-
-  TextInterface::Attribute<Archive>* attribute = find (param);
-
   string value = stringtok (&temp, " \t\n");
 
   if (value.length())
-    attribute->set_value (instance, value);
+    set_value (param, value);
   else
-    cout << " " << param << "=" << attribute->get_value (instance);
+    cout << " " << param << "=" << get_value (param);
 }
 
 void Pulsar::ArchiveTUI::init ()
