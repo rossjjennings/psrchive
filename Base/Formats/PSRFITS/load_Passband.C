@@ -30,8 +30,9 @@ void Pulsar::FITSArchive::load_Passband (fitsfile* fptr)
   // Get the dimensions  
   int nch_orig = 0;
   fits_read_key (fptr, TINT, "NCH_ORIG", &nch_orig, comment, &status);
-
+  
   if (status != 0) {
+    if (verbose)
       cerr << FITSError (status, "FITSArchive::load_Passband", 
 			 "fits_read_key NCH_ORIG").warning() << endl;
     return;
@@ -63,6 +64,7 @@ void Pulsar::FITSArchive::load_Passband (fitsfile* fptr)
   fits_read_col (fptr, TFLOAT, colnum, 1, 1, npol, &nullfloat,
 		 data_offsets, &initflag, &status);
   if (status != 0) {
+    if (verbose)
       cerr << FITSError (status, "FITSArchive::load_Passband", 
 			 "fits_read_col DAT_OFFS").warning() << endl;
     return;
@@ -82,14 +84,15 @@ void Pulsar::FITSArchive::load_Passband (fitsfile* fptr)
   fits_read_col (fptr, TFLOAT, colnum, 1, 1, npol, &nullfloat, 
 		 data_scales, &initflag, &status);
   if (status != 0) {
+    if (verbose)
       cerr << FITSError (status, "FITSArchive::load_Passband", 
 			 "fits_read_col DAT_SCL").warning() << endl;
     return;
   }
-
+  
   if (verbose)
     cerr << "FITSArchive::load_Passband scale factors read" << endl;
-
+  
   // Read the data itself
   
   colnum = 0;
@@ -103,6 +106,7 @@ void Pulsar::FITSArchive::load_Passband (fitsfile* fptr)
   fits_read_col (fptr, TINT, colnum, 1, 1, dimension, &nullfloat, 
 		 data, &initflag, &status);
   if (status != 0) {
+    if (verbose)
       cerr << FITSError (status, "FITSArchive::load_Passband", 
 			 "fits_read_col DATA").warning() << endl;
     return;
