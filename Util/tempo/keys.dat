@@ -74,8 +74,7 @@ DM7 1 1
 DM8 1 1
 DM9 1 1
 
-# RM has been removed as it is not a timing parameter
-# RM 1 1      # Rotation Measure (rad m^-2)
+RM 1 1      # Rotation Measure (rad m^-2)
 
 START 4 0     # Epoch of start of fit (MJD)
 FINISH 4 0    # Epoch of end of fit (MJD)
