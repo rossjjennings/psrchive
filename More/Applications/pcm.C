@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pcm.C,v $
-   $Revision: 1.30 $
-   $Date: 2004/07/24 07:30:19 $
+   $Revision: 1.31 $
+   $Date: 2004/08/13 13:06:19 $
    $Author: straten $ */
 
 /*! \file pcm.C 
@@ -273,7 +273,7 @@ int main (int argc, char *argv[]) try {
   bool publication_plots = false;
 
   int gotc = 0;
-  const char* args = "a:b:c:C:d:Df:hM:m:n:Pp:qsS:t:uvV:";
+  const char* args = "a:b:c:C:d:Df:hM:m:n:OPp:qsS:t:uvV:";
   while ((gotc = getopt(argc, argv, args)) != -1) {
     switch (gotc) {
 
@@ -329,6 +329,10 @@ int main (int argc, char *argv[]) try {
       cerr << "pcm: using a maximum of " << maxbins << " bins or harmonics" 
 	   << endl;
       maxbins_set = true;
+      break;
+
+    case 'O':
+      Calibration::Model::signal_changed = false;
       break;
 
     case 'P':
