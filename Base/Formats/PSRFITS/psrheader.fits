@@ -7,9 +7,8 @@ COMMENT   Astrophysics Supplement Series v44/p363, v44/p371, v73/p359, v73/p365.
 COMMENT   Contact the NASA Science Office of Standards and Technology for the
 COMMENT   FITS Definition document #100 and other FITS information.
 COMMENT
-HDRVER  = '1.6             '   / Header version 
+HDRVER  = '1.7             '   / Header version 
 DATE    = '                '   / File creation date (YYYY-MM-DDThh:mm:ss UTC)
-ORIGIN  = '                '   / Output class
 OBSERVER= '                '   / Observer name(s)
 PROJID  = '                '   / Project name
 TELESCOP= '                '   / Telescope name
@@ -17,15 +16,17 @@ ANT_X   = *                    / [m] Antenna ITRF X-coordinate (D)
 ANT_Y   = *                    / [m] Antenna ITRF Y-coordinate (D)
 ANT_Z   = *                    / [m] Antenna ITRF Z-coordinate (D)
 FRONTEND= '                '   / Rx and feed ID
+FD_POLN = '                '   / LIN or CIRC
+XPOL_ANG= *                    / [deg] Angle of X-probe wrt platform zero (E)
 BACKEND = '                '   / Backend ID
 BECONFIG= '                '   / Backend configuration file name
 NRCVR   = *                    / Number of receiver channels (I)
-OBSTYPE = '                '   / (PSR, CAL, SEARCH)
+OBS_MODE= '                '   / (PSR, CAL, SEARCH)
 SRC_NAME= '                '   / Source or scan ID 
 COORD_MD= '                '   / Coordinate mode (J2000, Gal, Ecliptic, AZEL, HADEC)
 STT_CRD1= '                '   / Start coord 1 (hh:mm:ss.sss or ddd.ddd)
 STT_CRD2= '                '   / Start coord 2 (-dd:mm:ss.sss or -dd.ddd) 
-TRKMODE = '                '   / Track mode (TRACK, SCANGC, SCANLAT)
+TRK_MODE= '                '   / Track mode (TRACK, SCANGC, SCANLAT)
 STP_CRD1= '                '   / Stop coord 1 (hh:mm:ss.sss or ddd.ddd)
 STP_CRD2= '                '   / Stop coord 2 (-dd:mm:ss.sss or -dd.ddd) 
 SCANLEN = *                    / [s] Requested scan length (E)
@@ -44,18 +45,6 @@ STT_IMJD= *                    / Start MJD (UTC days) (J - long integer)
 STT_SMJD= *                    / [s] Start time (sec past UTC 00h) (J)
 STT_OFFS= *                    / [s] Start time offset (D)   
 STT_LST = *                    / [s] Start LST (D)
-END
-XTENSION= 'BINTABLE'           / ***** Pointing parameters *****
-BITPIX  =                    8 / N/A
-NAXIS   =                    2 / 2-dimensional binary table
-NAXIS1  =                    *  / width of table in bytes
-NAXIS2  =                    1 / number of rows - incremented with each operation
-PCOUNT  =                    0 / size of special data area
-GCOUNT  =                    1 / one data group (required keyword)
-TFIELDS =                    1 / number of fields per row
-EXTNAME = 'POINTPAR'           / name of this binary table extension
-TTYPE1  = 'PPAR    '           / Pointing parameters
-TFORM1  = '12E     '           / Floats
 END
 XTENSION= 'BINTABLE'           / ***** Processing history *****
 BITPIX  =                    8 / N/A
