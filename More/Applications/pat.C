@@ -10,6 +10,8 @@
 #include "Pulsar/PolnProfileFit.h"
 #include "Calibration/Polar.h"
 
+#include "Pulsar/ObsExtension.h"
+
 #include "Phase.h"
 #include "toa.h"
 #include "Error.h"
@@ -38,7 +40,11 @@ void usage ()
     "  -p               Perform full polarimetric fit in Fourier domain \n"
     "  -s stdfile       Location of standard profile \n"
     "  -t               Fit in the time domain \n"
-    "  -l               Legacy mode -- use old FFTCONV in toa calculator \n"
+    "\n"
+    "Output options:\n"
+    "  -f \"format <flags>\"  Output format (parkes = default, tempo2, itoa, princeton ...)\n"
+    "                       For tempo2 output the flags are i = display instrument \n"
+    "                                                       r = display receiver   \n"
     "See http://astronomy.swin.edu.au/pulsar/software/manuals/pat.html"
        << endl;
 }
@@ -54,7 +60,9 @@ int main (int argc, char *argv[])
 
   bool fscrunch = false;
   bool tscrunch = false;
+
   string std;
+  string outFormat("parkes"),outFormatFlags;
 
   vector<string> archives;
   vector<string> stdprofiles;
@@ -63,8 +71,7 @@ int main (int argc, char *argv[])
   int gotc = 0;
 
   Pulsar::PolnProfileFit fit;
-
-  while ((gotc = getopt(argc, argv, "hiFln:ps:tTvV")) != -1) {
+  while ((gotc = getopt(argc, argv, "hiFn:ps:a:tTvV:f:")) != -1) {
     switch (gotc) {
     case 'h':
       usage ();
@@ -81,15 +88,13 @@ int main (int argc, char *argv[])
       break;
 
     case 'i':
-      cout << "$Id: pat.C,v 1.21 2004/05/05 23:22:33 sord Exp $" << endl;
+      cout << "$Id: pat.C,v 1.22 2004/05/06 03:45:22 ghobbs Exp $" << endl;
       return 0;
 
     case 'F':
       fscrunch = true;
       break;
-    case 'l':
-      Pulsar::Profile::legacy = true;
-      break;
+
     case 'n':
       fit.set_maximum_harmonic( atoi(optarg) );
       break;
@@ -128,6 +133,12 @@ int main (int argc, char *argv[])
       time_domain = true;
       break;
 
+    case 'f':
+      {
+	outFormat = string(optarg).substr(0,string(optarg).find(" "));  /* Set the output format */
+	if (string(optarg).find(" ")!=string::npos) outFormatFlags = string(optarg).substr(string(optarg).find(" "));
+	break;
+      }
     default:
       cout << "Unrecognised option " << gotc << endl;
     }
@@ -176,6 +187,10 @@ int main (int argc, char *argv[])
 	return -1;
       }
     }
+  // Give format information for Tempo2 output 
+  if (strcasecmp(outFormat.c_str(),"tempo2")==0)
+    cout << "FORMAT 1" << endl;
+
   for (unsigned i = 0; i < archives.size(); i++) {
     
     try {
@@ -242,21 +257,42 @@ int main (int argc, char *argv[])
 	  else
 	    stdarch->convert_state(Signal::Intensity);
 	}
-        arch->toas(toas, stdarch, "", time_domain, Tempo::toa::Parkes);
-
+	if (strcasecmp(outFormat.c_str(),"parkes")==0)
+	  arch->toas(toas, stdarch, "", time_domain, Tempo::toa::Parkes); 
+	else if (strcasecmp(outFormat.c_str(),"princeton")==0)
+	  arch->toas(toas, stdarch, "", time_domain, Tempo::toa::Princeton); 
+	else if (strcasecmp(outFormat.c_str(),"itoa")==0)
+	  arch->toas(toas, stdarch, "", time_domain, Tempo::toa::ITOA); 
+	else if (strcasecmp(outFormat.c_str(),"psrclock")==0)
+	  arch->toas(toas, stdarch, "", time_domain, Tempo::toa::Psrclock); 
+	else if (strcasecmp(outFormat.c_str(),"tempo2")==0)
+	  {
+	    string args;
+	    args = archives[i];
+	    if (outFormatFlags.find("i")!=string::npos) args += string(" -i ") + arch->get_backend();
+	    if (outFormatFlags.find("r")!=string::npos) args += string(" -r ") + arch->get_receiver();
+	    if (outFormatFlags.find("o")!=string::npos) /* Include observer info. */
+	      {
+		const Pulsar::ObsExtension* ext = 0;
+		ext = arch->get<Pulsar::ObsExtension>();
+		if (!ext) {
+		  args += " -o N/A";
+		}
+		else {
+		  args += " -o " + ext->observer;
+		}
+	      }
+	    arch->toas(toas, stdarch, args, time_domain, Tempo::toa::Tempo2); 
+	  }   
       }
-
-
       for (unsigned i = 0; i < toas.size(); i++)
 	toas[i].unload(stdout);
-
     }
     catch (Error& error) {
-      fflush(stdout);
+      fflush(stdout); 
       cerr << error << endl;
     }
   }
-
   fflush(stdout);
   return 0;
 
