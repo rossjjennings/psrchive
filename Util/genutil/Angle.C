@@ -148,6 +148,14 @@ const Angle operator + (const Angle &a1, const Angle &a2) {
   return a;
 }
 
+// returns the negative
+const Angle operator - (const Angle& a)
+{
+  Angle ret(a);
+  ret.setradians(-a.radians);
+  return ret;
+}
+
 const Angle operator - (const Angle &a1, const Angle &a2) {
   Angle a3 = a2*-1.0;
   return (a1+a3);
