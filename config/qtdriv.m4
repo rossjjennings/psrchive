@@ -22,8 +22,8 @@ AC_DEFUN([SWIN_LIB_QTDRIV],
   AC_REQUIRE([BNV_HAVE_QT])
   AC_REQUIRE([AC_F77_WRAPPERS])
 
-  QTDRIV_CFLAGS=""
-  QTDRIV_LIBS=""
+  QTDRIV_CFLAGS="$QT_CXXFLAGS $PGPLOT_CFLAGS"
+  QTDRIV_LIBS="-lQtPgplot $QT_LIBS $PGPLOT_LIBS"
 
   if test $have_pgplot = yes -a $have_qt = yes; then
 
@@ -45,8 +45,8 @@ AC_DEFUN([SWIN_LIB_QTDRIV],
 
       AC_LANG_PUSH(C++)
 
-      CXXFLAGS="$ac_save_CXXFLAGS $PGPLOT_CFLAGS"
-      LIBS="$ac_save_LIBS -lQtPgplot $QT_LIBS $PGPLOT_LIBS"
+      CXXFLAGS="$ac_save_CXXFLAGS $QTDRIV_CFLAGS"
+      LIBS="$ac_save_LIBS $QTDRIV_LIBS"
 
       AC_TRY_LINK([#include "qpgplot.h"],[QPgplot widget;],
                   have_qtdriv=yes, have_qtdriv=no)
@@ -64,11 +64,11 @@ AC_DEFUN([SWIN_LIB_QTDRIV],
 
   if test x"$have_qtdriv" = xyes; then
     AC_DEFINE([HAVE_QTDRIV], [1], [Define if PGPLOT library has Qt driver])
-    QTDRIV_CFLAGS="$PGPLOT_CFLAGS"
-    QTDRIV_LIBS="-lQtPgplot $QT_LIBS $PGPLOT_LIBS"
     [$1]
   else
     AC_MSG_WARN([PSRCHIVE rhythm will not be compiled])
+    QTDRIV_CFLAGS=""
+    QTDRIV_LIBS=""
     [$2]
   fi
 
