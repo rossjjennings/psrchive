@@ -75,12 +75,17 @@ void Pulsar::PolnCalibrator::build ()
   create (calibrator->get_nchan());
 }
 
-
 void Pulsar::PolnCalibrator::create (unsigned nchan)
 {
+  if (verbose)
+    cerr << "Pulsar::PolnCalibrator::create nchan=" << nchan << endl;
+
   // get the calibrator hi and lo levels from the PolnCal archive
   vector<vector<Estimate<double> > > cal_hi;
   vector<vector<Estimate<double> > > cal_lo;
+
+  if (verbose)
+    cerr << "Pulsar::PolnCalibrator::create Integration::cal_levels" <<endl;
 
   calibrator->get_Integration(0)->cal_levels (cal_hi, cal_lo);
 
@@ -102,6 +107,9 @@ void Pulsar::PolnCalibrator::create (unsigned nchan)
 void Pulsar::PolnCalibrator::calculate (vector<vector<Estimate<double> > >& hi,
 					vector<vector<Estimate<double> > >& lo)
 {
+  if (verbose)
+    cerr << "Pulsar::PolnCalibrator::calculate" << endl;
+
   unsigned npol = hi.size();
   unsigned nchan = hi[0].size();
 
