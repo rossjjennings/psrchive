@@ -129,8 +129,6 @@ int Pulsar::model_profile (int npts, int narrays, float** prf, float** std,
       if(ntries>10)
         return(-1);
     }
-    
-
     tau = zbrent (low_tau, high_tau, low_deriv_chisq, high_deriv_chisq, 
 		  edtau, narrays, xcorr_amps, xcorr_phases, nsum);
   }
@@ -228,8 +226,8 @@ double Pulsar::zbrent(float low_tau, float high_tau,
   double fb = high_deriv_chisq;
   double fc = fb;
 
-  for (int i=1; i<i_max; ++i) {
 
+  for (int i=1; i<i_max; ++i) {
     if(fb*fc>0){
       c  = a;
       fc = fa;
@@ -277,9 +275,9 @@ double Pulsar::zbrent(float low_tau, float high_tau,
     if(fabs(d)>tol1) b+=d;
     else b+=tol1*xm/fabs(xm);
     fb = 0;
-    for(int i=0; i<narrays; ++i)
-      for(int iter=1; iter<=nsum; ++iter)
-	fb+=iter*xcorr_amps[i][iter]*sin(-xcorr_phases[i][iter]+iter*b);
+    for(int j=0; j<narrays; ++j) {
+      for(int iter=1; iter<nsum; ++iter)
+	fb+=iter*xcorr_amps[j][iter]*sin(-xcorr_phases[j][iter]+iter*b); }
   }
   return(b);
 }

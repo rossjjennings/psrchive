@@ -263,6 +263,7 @@ void Pulsar::Profile::fftconv (Profile& std,
   
   int ret=0;
 
+
   if (!Profile::legacy)
     ret = model_profile (nbin, 1, &amps, &(std.amps), &scale, &sigma_scale, 
 			   &dshift, &sigma_dshift, &chisq, verbose);
@@ -272,7 +273,6 @@ void Pulsar::Profile::fftconv (Profile& std,
 
   if (ret != 0)
     throw Error (FailedCall, "Profile::fftconv", "model_profile failed");
-  
   if (verbose) cerr << "Profile::fftconv"
 		 " shift=" << dshift << " bins,"
 		 " error=" << sigma_dshift <<
