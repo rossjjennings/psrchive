@@ -1,9 +1,10 @@
 #include "Pulsar/BasicArchive.h"
-#include "plugins.h"
 
 Registry::List<Pulsar::Archive::Agent> Pulsar::Archive::Agent::registry;
 
-bool Pulsar::Archive::Agent::loaded = false;
+string Pulsar::Archive::Agent::plugin_path;
+
+bool Pulsar::Archive::Agent::loaded = Pulsar::Archive::Agent::init ();
 
 //! Destructor
 Pulsar::Archive::Agent::~Agent ()
@@ -15,8 +16,6 @@ Pulsar::Archive::Agent::~Agent ()
 // reports on the status of the plugins
 void Pulsar::Archive::Agent::report ()
 {
-  init ();
-
   cerr << endl;
 
   if (verbose)
@@ -40,18 +39,9 @@ void Pulsar::Archive::Agent::report ()
 
 }
 
-#ifndef _PSRCHIVE_STATIC
-
-void Pulsar::Archive::Agent::init ()
+// reports on the status of the plugins
+void Pulsar::Archive::Agent::verify_revisions ()
 {
-  if (verbose)
-    cerr << "Pulsar::Archive::Agent::init <dynamic>" << endl;
-
-  Pulsar::BasicArchive::ensure_linkage();
-
-  if (!loaded)
-    plugin_load ();
-
   unsigned agent = 0;
 
   while (agent < registry.size())
@@ -59,7 +49,7 @@ void Pulsar::Archive::Agent::init ()
     if ( registry[agent]->get_revision() != Archive::get_revision() )  {
 
       cerr << "Pulsar::Archive::Agent::init " << registry[agent]->get_name() 
- 	   << " revision=" << registry[agent]->get_revision() 
+ 	   << "::revision=" << registry[agent]->get_revision() 
  	   << " != Archive::revision=" << Archive::get_revision() << endl;
 
       registry.erase( agent );
@@ -67,8 +57,38 @@ void Pulsar::Archive::Agent::init ()
     }
     else
       agent ++;
+}
+
+#ifndef _PSRCHIVE_STATIC
+
+bool Pulsar::Archive::Agent::init () try {
+
+  cerr << "Pulsar::Archive::Agent::init <dynamic>" << endl;
+  
+  Pulsar::BasicArchive::ensure_linkage();
+
+  if (!loaded)
+    plugin_load ();
+
+  verify_revisions ();
+
+  return true;
 
 }
+catch (Error& error)
+{
+  cerr << "Pulsar::Archive::Agent::init" << error << endl;
+  return false;
+}
+catch (...)
+{
+  cerr << "Pulsar::Archive::Agent::init Unknown exception" << endl;
+  return false;
+}
+
+#else
+
+#include "static_plugins.code"
 
 #endif  // not _PSRCHIVE_STATIC
 

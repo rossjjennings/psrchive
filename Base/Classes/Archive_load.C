@@ -20,8 +20,6 @@ Pulsar::Archive* Pulsar::Archive::load (const char* filename)
 			  "cannot open '%s'", filename);
   fclose (fptr);
   
-  Agent::init ();
-
   if (Agent::registry.size() == 0)
     throw Error (InvalidState, "Pulsar::Archive::load", "no Agents loaded");
 

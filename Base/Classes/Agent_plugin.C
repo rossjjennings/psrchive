@@ -1,10 +1,8 @@
 #include "Archive.h"
 #include "Plugin.h"
 
-// load the plugins
+// the plugins loader
 static Registry::Plugin plugins;
-
-string Pulsar::Archive::Agent::plugin_path;
 
 void Pulsar::Archive::Agent::plugin_load ()
 {
@@ -13,6 +11,9 @@ void Pulsar::Archive::Agent::plugin_load ()
     Registry::Plugin::verbose = true;
   }
 
+  if (!plugins)
+    plugins = new Registry::Plugin;
+ 
   if (plugin_path.length() != 0)  {
     if (verbose)
       cerr << "Pulsar::Archive::Agent::plugin_load plugin_path="
@@ -38,9 +39,6 @@ void Pulsar::Archive::Agent::plugin_load ()
 
     plugins.load (env);
 
-    if (plugins.ok.size())
-      loaded = true;
-
   }
   else {
 
@@ -51,16 +49,13 @@ void Pulsar::Archive::Agent::plugin_load ()
 
     plugins.load (path);
 
-    if (plugins.ok.size())
-      loaded = true;
-
   }
 
 }
 
 void Pulsar::Archive::Agent::plugin_report ()
 {
-  if (plugins.ok.size() == 0)
+  if (!plugins || plugins.ok.size() == 0)
     cerr << "Archive::Agent::report No successfully loaded plugins." << endl;
   else
     cerr << "Archive::Agent::report Successfully loaded plugins:" << endl;
