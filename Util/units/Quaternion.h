@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Quaternion.h,v $
-   $Revision: 1.15 $
-   $Date: 2004/04/06 11:44:57 $
+   $Revision: 1.16 $
+   $Date: 2004/04/06 13:59:39 $
    $Author: straten $ */
 
 #ifndef __Quaternion_H
@@ -137,9 +137,16 @@ public:
   //! Access to scalar component
   T get_scalar () const { return s0; }
 
+  //! Set the scalar component
+  void set_scalar (T s) { s0 = s; }
+
   //! Access to vector component
   Vector<T,3> get_vector () const 
     { Vector<T,3> ret; ret[0]=s1; ret[1]=s2; ret[2]=s3; return ret; }
+
+  //! Set the vector component
+  template<typename U>
+  void set_vector (Vector<U,3>& v) { s1=v[0]; s2=v[1]; s3=v[2]; }
 
   //! Identity (should be const, wait for gcc version 3)
   static const Quaternion& identity();
