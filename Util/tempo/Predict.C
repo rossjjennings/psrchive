@@ -14,7 +14,7 @@
 Tempo::Predict::Predict ()
 {
   nspan  = 960;
-  ncoeff = 12;
+  ncoef = 12;
   maxha  = 8;
   asite  = '7';
   frequency = 1400.0;
@@ -45,9 +45,9 @@ void Tempo::Predict::set_nspan (unsigned minutes)
   nspan = minutes;
 }
 
-void Tempo::Predict::set_ncoeff (unsigned _ncoeff)
+void Tempo::Predict::set_ncoef (unsigned _ncoef)
 {
-  ncoeff = _ncoeff;
+  ncoef = _ncoef;
 }
 
 void Tempo::Predict::set_parameters (const psrephem& _parameters)
@@ -105,7 +105,7 @@ void Tempo::Predict::write_tzin () const
 		 "ERROR fopen (" + tzin + ")");
 
   fprintf (fptr,"%c %d %d %d %8g\n", 
-	   asite, maxha, nspan, ncoeff, frequency);
+	   asite, maxha, nspan, ncoef, frequency);
 
   fprintf(fptr,"\n");
   fprintf(fptr,"\n");
@@ -215,10 +215,10 @@ polyco Tempo::Predict::get_polyco (const MJD& m1, const MJD& m2) const
 	     << "\n   requested: " << m1.in_days() << " -> " << m2.in_days()
 	     << endl;
       
-      if (poly.start_time() > (m1+half_day))
+      if (poly.start_time() > m1)
 	to_tempo_m1 -= half_day;
 
-      if (poly.end_time() < (m2-half_day))
+      if (poly.end_time() < m2)
 	to_tempo_m2 += half_day;
 
       if (verbose)
