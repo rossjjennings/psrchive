@@ -64,16 +64,13 @@ void Pulsar::IntegrationManager::append (const IntegrationManager* more)
   set_nsubint (subints.size());
 }  
 
-#include "Pulsar/Archive.h"
-#include "Pulsar/Integration.h"
-
 /*!
   If any current dimension is greater than that requested, the Profiles
   will be destroyed and the dimension resized.  If any current dimension is
   smaller than that requested, the dimension will be resized and new Profiles
   will be constructed.  If any of the supplied paramaters is equal to zero,
   the dimension is left unchanged.
-  */
+*/
 
 void Pulsar::IntegrationManager::resize (unsigned nsubint, bool instances)
 {
