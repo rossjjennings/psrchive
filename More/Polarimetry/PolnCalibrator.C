@@ -14,6 +14,10 @@
 #include "templates.h"
 #include "median_smooth.h"
 
+#ifdef sun
+#include <ieeefp.h>
+#endif
+
 /*! 
   If a Pulsar::Archive is provided, and if it contains a
   PolnCalibratorExtension, then the constructed instance can be
