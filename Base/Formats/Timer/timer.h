@@ -1,6 +1,6 @@
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/Timer/timer.h,v $
-   $Revision: 1.8 $
-   $Date: 2002/04/24 14:02:40 $
+   $Revision: 1.9 $
+   $Date: 2002/10/25 04:32:32 $
    $Author: straten $ */
 
 /* include file for the main timer structure                            */
@@ -60,6 +60,7 @@
 #define RM_IONO_CORRECTED 0x0002  /* ionospheric rotation measure */
 #define PARA_CORRECTED    0x0004  /* parallactic angle */
 #define FEED_CORRECTED    0x0008  /* feed angle */
+#define DEDISPERSED       0x0010  /* dispersion delays removed */
 
 #define RCVR_ID_STRLEN 8
 
