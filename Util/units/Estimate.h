@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Estimate.h,v $
-   $Revision: 1.6 $
-   $Date: 2003/02/14 12:15:54 $
+   $Revision: 1.7 $
+   $Date: 2003/02/15 10:15:00 $
    $Author: straten $ */
 
 #ifndef __Estimate_h
@@ -84,6 +84,9 @@ class Estimate
   friend const Estimate operator / (Estimate a, const Estimate& b)
   { return a/=b; }
 
+  //! Negation operator
+  friend const Estimate operator - (Estimate a)
+  { return Estimate (-a.val, a.var); }
 
   //! See http://mathworld.wolfram.com/ErrorPropagation.html Equation (15)
   friend const Estimate exp (const Estimate& u)
