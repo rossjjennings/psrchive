@@ -1,15 +1,16 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Parameters.h,v $
-   $Revision: 1.3 $
-   $Date: 2004/11/22 19:26:04 $
-   $Author: straten $ */
+   $Revision: 1.4 $
+   $Date: 2004/12/22 07:45:27 $
+   $Author: hknight $ */
 
 #ifndef __Parameters_H
 #define __Parameters_H
 
 #include "MEAL/ParameterBehaviour.h"
 
+#include "EstimatePlotter.h"
 #include "Estimate.h"
 #include "Error.h"
 
