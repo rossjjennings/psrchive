@@ -5,6 +5,8 @@
 #include <float.h>
 #include <sunmath.h>
 #endif
+#include <math.h>
+
 #include "MJD.h"
 #include "machine_endian.h"
 #include "ieee.h"
@@ -361,10 +363,10 @@ MJD::MJD(int d, int s, double f) {
 
 MJD::MJD(int intday, double fracday){
   
-  int secs = (int)fracday*86400;
-  double fracsecs = fracday*86400 - secs;
+  int isecs = (int)fracday*86400;
+  double fracsecs = fracday*86400 - double(isecs);
   
-  *this = MJD(intday, secs, fracsecs);
+  *this = MJD(intday, isecs, fracsecs);
 }
   
 // Converts a string containing utc fields yyyy ddd hh mm ss to internal format
