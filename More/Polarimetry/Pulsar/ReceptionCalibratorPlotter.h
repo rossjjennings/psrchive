@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/Attic/ReceptionCalibratorPlotter.h,v $
-   $Revision: 1.6 $
-   $Date: 2003/05/23 11:41:54 $
-   $Author: straten $ */
+   $Revision: 1.7 $
+   $Date: 2003/05/23 13:34:16 $
+   $Author: pulsar $ */
 
 #ifndef __ReceptionCalibratorPlotter_H
 #define __ReceptionCalibratorPlotter_H
@@ -43,10 +43,7 @@ namespace Pulsar {
     Estimate<float> get_rotation (unsigned idat, unsigned irot);
 
     //! Plot the Stokes parameters versus parallactic angle
-    void plot_constraints ();
-
-    //! Plot the Stokes parameters versus parallactic angle
-    void plot_cal_constraints ();
+    void plot_constraints (unsigned ichan);
 
     //! Plot the Stokes parameters versus parallactic angle
     void plot_cal_constraints (unsigned ichan);

@@ -66,14 +66,9 @@ Pulsar::ReceptionCalibratorPlotter::get_rotation (unsigned idat, unsigned irot)
   return calibrator->equation[idat]->get_receiver()->get_rotationEuler(irot);
 }
 
-void Pulsar::ReceptionCalibratorPlotter::plot_constraints ()
+void Pulsar::ReceptionCalibratorPlotter::plot_constraints (unsigned ichan)
 {
-  plot_constraints (calibrator->get_nchan()/2, calibrator->get_nstate()/4);
-}
-
-void Pulsar::ReceptionCalibratorPlotter::plot_cal_constraints ()
-{
-  plot_cal_constraints (calibrator->get_nchan()/2);
+  plot_constraints (ichan, calibrator->get_nstate()/4);
 }
 
 void Pulsar::ReceptionCalibratorPlotter::plot_cal_constraints (unsigned ichan)
@@ -84,6 +79,11 @@ void Pulsar::ReceptionCalibratorPlotter::plot_cal_constraints (unsigned ichan)
 void Pulsar::ReceptionCalibratorPlotter::plot_constraints (unsigned ichan,
 							   unsigned istate)
 {
+  if (!calibrator)
+    throw Error (InvalidState,
+		 "Pulsar::ReceptionCalibratorPlotter::plot_constraints",
+                 "ReceptionCalibrator not set");
+
   if (istate >= calibrator->get_nstate())
     throw Error (InvalidRange,
 		 "Pulsar::ReceptionCalibratorPlotter::plot_constraints",
@@ -143,9 +143,22 @@ void Pulsar::ReceptionCalibratorPlotter::plot_constraints (unsigned ichan,
   cpgsci (1);
   cpgbox ("bcnst",0,0,"bcnst",0,0);
 
-  cpglab ("Parallactic Angle (degrees)",
-	  "Uncalibrated Stokes",
-	  "Self-Calibration Constraints");
+  string label;
+  char buffer [256];
+
+  if (istate == 0)
+    label = "Calibrator Constraints";
+  else {
+    label = "Pulsar Constraints";
+    unsigned phase_bin = calibrator->pulsar[istate-1].phase_bin;
+    sprintf (buffer, " phase bin %d", phase_bin);
+    label += buffer;
+  }
+
+  sprintf (buffer, " freq. channel %d", ichan);
+  label += buffer;
+
+  cpglab ("Parallactic Angle (degrees)", "Uncalibrated Stokes", label.c_str());
 
   if (!calibrator->get_solved())
     return;
