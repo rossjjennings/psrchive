@@ -125,7 +125,7 @@ int main (int argc, char *argv[]) {
       Pulsar::Archive::set_verbosity(3);
       break;
     case 'i':
-      cout << "$Id: pac.C,v 1.48 2004/07/16 09:16:51 straten Exp $" << endl;
+      cout << "$Id: pac.C,v 1.49 2004/07/16 16:05:25 straten Exp $" << endl;
       return 0;
 
     case 'n': {
@@ -387,7 +387,7 @@ int main (int argc, char *argv[]) {
     if (do_fluxcal && arch->get_scale() == Signal::Jansky && check_flags) {
       cout << "pac: " << archives[i] << " already flux calibrated" << endl;
     }
-    else if (do_fluxcal) {
+    else if (do_fluxcal) try {
 
       if (verbose)
 	cout << "pac: Generating flux calibrator" << endl;
@@ -406,6 +406,10 @@ int main (int argc, char *argv[]) {
       
       cout << "pac: Mean Tsys = " << fcal_engine->meanTsys() << endl;
       
+    }
+    catch (Error& error) {
+      cerr << "pac: Could not flux calibrate " << arch->get_filename() << endl
+	   << "\t" << error.get_message() << endl;
     }
 
     // find first of "." turns ./cal/poo.cfb info .unload_ext WvS
