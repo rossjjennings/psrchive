@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/fft/interpolate.h,v $
-   $Revision: 1.4 $
-   $Date: 2001/08/09 06:42:59 $
+   $Revision: 1.5 $
+   $Date: 2003/05/07 15:50:43 $
    $Author: straten $*/
 
 #ifndef __fft_interpolate_h
@@ -38,7 +38,7 @@ namespace fft {
       for (ipt=0; ipt < in.size(); ipt++)
 	dom1[ipt] = in[ipt][idim];
 
-      fft::frc1d (in.size(), dom2.begin(), dom1.begin());
+      fft::frc1d (in.size(), &(dom2[0]), &(dom1[0]));
 
       unsigned end = dom2.size()-2;
       // copy the conjugate of the transform, backwards, into the
@@ -56,7 +56,7 @@ namespace fft {
       for (ipt=in.size(); ipt<stop; ipt++)
 	dom2[ipt] = 0;
 
-      fft::bcc1d (out.size(), dom1.begin(), dom2.begin());
+      fft::bcc1d (out.size(), &(dom1[0]), &(dom2[0]));
 
       // this factor may need to be carefully chosen, depending
       // on how the FFT routines operate
