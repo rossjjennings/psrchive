@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Pauli.h,v $
-   $Revision: 1.5 $
-   $Date: 2003/02/15 10:18:28 $
+   $Revision: 1.6 $
+   $Date: 2003/02/15 10:25:11 $
    $Author: straten $ */
 
 #ifndef __Pauli_H
@@ -32,10 +32,10 @@ template<typename T>
 const Quaternion<complex<T>, Hermitian> convert (const Jones<T>& j)
 {
   return Quaternion<complex<T>, Hermitian>
-    ( 0.5 * (j.j11 + j.j22),
-      0.5 * (j.j11 - j.j22),
-      0.5 * (j.j12 + j.j21),
-      0.5 * ci (j.j12 - j.j21) );
+    ( T(0.5) * (j.j11 + j.j22),
+      T(0.5) * (j.j11 - j.j22),
+      T(0.5) * (j.j12 + j.j21),
+      T(0.5) * ci (j.j12 - j.j21) );
 }
 
 // Return the positive definite root of a Hermitian Quaternion
