@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Profile.h,v $
-   $Revision: 1.66 $
-   $Date: 2004/08/08 06:45:57 $
+   $Revision: 1.67 $
+   $Date: 2004/08/09 01:34:19 $
    $Author: hknight $ */
 
 #ifndef __Pulsar_Profile_h
@@ -159,10 +159,10 @@ namespace Pulsar {
     void find_spike_edges(int& rise, int& fall, float pc = default_amplitude_dropoff,
 			  int spike_bin = -1) const;
 
-    //! Find the flux of the pulse
-    float find_pulse_flux(int rise, int fall) const;
-    //! Find the flux of the pulse
-    float find_pulse_flux(float dropoff=default_amplitude_dropoff) const;
+    //! Sum the flux in the specified bins
+    float sum_flux(int rise, int fall) const;
+    //! Finding the bin numbers at which the flux falls below a threshold, and sum the flux in those bins
+    float sum_flux(float dropoff=default_amplitude_dropoff) const;
 
     //! Returns the bin number with the maximum amplitude
     int find_max_bin (int bin_start=0, int bin_end=0) const;
