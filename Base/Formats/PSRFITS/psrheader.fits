@@ -7,7 +7,7 @@ COMMENT   Astrophysics Supplement Series v44/p363, v44/p371, v73/p359, v73/p365.
 COMMENT   Contact the NASA Science Office of Standards and Technology for the
 COMMENT   FITS Definition document #100 and other FITS information.
 COMMENT
-HDRVER  = '1.5             '   / Header version 
+HDRVER  = '1.6             '   / Header version 
 DATE    = '                '   / File creation date (YYYY-MM-DDThh:mm:ss UTC)
 ORIGIN  = '                '   / Output class
 OBSERVER= '                '   / Observer name(s)
@@ -20,7 +20,7 @@ FRONTEND= '                '   / Rx and feed ID
 BACKEND = '                '   / Backend ID
 BECONFIG= '                '   / Backend configuration file name
 NRCVR   = *                    / Number of receiver channels (I)
-OBSTYPE = '                '   / (PSR, SEARCH)
+OBSTYPE = '                '   / (PSR, CAL, SEARCH)
 SRC_NAME= '                '   / Source or scan ID 
 COORD_MD= '                '   / Coordinate mode (J2000, Gal, Ecliptic, AZEL, HADEC)
 STT_CRD1= '                '   / Start coord 1 (hh:mm:ss.sss or ddd.ddd)
@@ -300,7 +300,7 @@ NAXIS1  =                    * / width of table in bytes
 NAXIS2  =                    * / number of rows in table
 PCOUNT  =                    0 / size of special data area
 GCOUNT  =                    1 / one data group (required keyword)
-TFIELDS =                   12 / Number of fields per row
+TFIELDS =                   13 / Number of fields per row
 EXTNAME = 'POLYCO   '          / name of this binary table extension
 TTYPE1  = 'DATE_PRO'           / Processing date and time (YYYY-MM-DDThh:mm:ss UTC)
 TFORM1  = '24A     '           / 24-char string
@@ -326,8 +326,8 @@ TTYPE11 = 'REF_F0  '           / [Hz] Zero-order pulsar frequency
 TFORM11 = '1D      '           / Double
 TTYPE12 = 'LGFITERR'           / Log_10 of polynomial fit rms error in periods
 TFORM12 = '1D      '           / Double
-TTYPE12 = 'COEFF   '           / Polyco coefficients
-TFORM12 = '15D     '           / NCOEF doubles
+TTYPE13 = 'COEFF   '           / Polyco coefficients
+TFORM13 = '15D     '           / NCOEF doubles
 END
 XTENSION= 'BINTABLE'           / ***** Flux Calibration Data *****
 BITPIX  =                    8 / N/A 
