@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Pauli.h,v $
-   $Revision: 1.9 $
-   $Date: 2003/05/05 10:39:10 $
+   $Revision: 1.10 $
+   $Date: 2003/12/26 11:27:08 $
    $Author: straten $ */
 
 #ifndef __Pauli_H
@@ -12,6 +12,22 @@
 #include "Quaternion.h"
 
 #include <vector>
+
+// convert Hermitian Quaternion to Jones matrix
+template<typename T>
+const Jones<T> convert (const Quaternion<complex<T>,Hermitian>& q)
+{
+  return Jones<T> (q.s0+q.s1, q.s2-ci(q.s3),
+		   q.s2+ci(q.s3), q.s0-q.s1);
+}
+
+// convert Unitary Quaternion to Jones matrix
+template<typename T>
+const Jones<T> convert (const Quaternion<complex<T>,Unitary>& q)
+{
+  return Jones<T> (q.s0+ci(q.s1), q.s3+ci(q.s2),
+		   -q.s3+ci(q.s2), q.s0-ci(q.s1));
+}
 
 // convert Hermitian Quaternion to Jones matrix
 template<typename T>
