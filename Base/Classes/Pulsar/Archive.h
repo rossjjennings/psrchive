@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Archive.h,v $
-   $Revision: 1.69 $
-   $Date: 2003/04/26 06:52:02 $
+   $Revision: 1.70 $
+   $Date: 2003/04/28 12:02:40 $
    $Author: straten $ */
 
 /*! \mainpage 
@@ -291,11 +291,14 @@ namespace Pulsar {
     //! Amount by which integration intervals may overlap in Archive::append
     static double append_max_overlap;
 
-    //! Flag opposite sense of sideband (upper/lower) ok in Archive::match
+    //! Ok to mix upper/lower sideband in Archive::calibrator_match
     static bool match_opposite_sideband;
 
-    //! Amount by which centre frequencies may differ in Archive::match
+    //! Maximum centre frequency difference in Archive::calibrator_match
     static double match_max_frequency_difference;
+
+    //! String inserted between match failure reason strings
+    static string match_indent;
 
     //! Weight integrations by their integration length, or duration
     static bool weight_by_duration;
@@ -478,7 +481,10 @@ namespace Pulsar {
     virtual bool standard_match (const Archive* arch, string& reason) const;
 
     //! Test if arch matches (enough for a pulsar - calibrator match)
-    virtual bool match (const Archive* arch, string& reason) const;
+    virtual bool calibrator_match (const Archive* arch, string& reason) const;
+
+    //! Test if arch matches (enough for a pulsar - pulsar match)
+    virtual bool processing_match (const Archive* arch, string& reason) const;
 
     //! Test if arch is mixable (enough for append)
     virtual bool mixable (const Archive* arch, string& reason) const;
@@ -606,35 +612,41 @@ namespace Pulsar {
     //! Set the dispersion measure (in \f${\rm pc cm}^{-3}\f$)
     virtual void set_dispersion_measure (double dm) = 0;
 
-    //! Data has been flux calibrated
-    virtual bool get_flux_calibrated () const = 0;
-    //! Set the status of the flux calibrated flag
-    virtual void set_flux_calibrated (bool done = true) = 0;
-
-    //! Data has been corrected for feed angle errors
-    virtual bool get_feedangle_corrected () const = 0;
-    //! Set the status of the feed angle flag
-    virtual void set_feedangle_corrected (bool done = true) = 0;
-
-    //! Data has been corrected for ionospheric faraday rotation
-    virtual bool get_iono_rm_corrected () const = 0;
-    //! Set the status of the ionospheric RM flag
-    virtual void set_iono_rm_corrected (bool done = true) = 0;
+    //! Inter-channel dispersion delay has been removed
+    virtual bool get_dedispersed () const = 0;
+    //! Set the status of the parallactic angle flag
+    virtual void set_dedispersed (bool done = true) = 0;
 
     //! Data has been corrected for ISM faraday rotation
     virtual bool get_ism_rm_corrected () const = 0;
     //! Set the status of the ISM RM flag
     virtual void set_ism_rm_corrected (bool done = true) = 0;
 
+    //! Data has been corrected for ionospheric faraday rotation
+    virtual bool get_iono_rm_corrected () const = 0;
+    //! Set the status of the ionospheric RM flag
+    virtual void set_iono_rm_corrected (bool done = true) = 0;
+
     //! Data has been corrected for parallactic angle errors
     virtual bool get_parallactic_corrected () const = 0;
     //! Set the status of the parallactic angle flag
     virtual void set_parallactic_corrected (bool done = true) = 0;
 
-    //! Inter-channel dispersion delay has been removed
-    virtual bool get_dedispersed () const = 0;
-    //! Set the status of the parallactic angle flag
-    virtual void set_dedispersed (bool done = true) = 0;
+    //! Data has been corrected for feed angle errors
+    virtual bool get_feedangle_corrected () const = 0;
+    //! Set the status of the feed angle flag
+    virtual void set_feedangle_corrected (bool done = true) = 0;
+
+    //! Data has been calibrated for polarimetric response of instrument
+    virtual bool get_poln_calibrated () const = 0;
+    //! Set the status of the polarimetric instrumental response flag
+    virtual void set_poln_calibrated (bool done = true) = 0;
+
+    //! Data has been flux calibrated
+    virtual bool get_flux_calibrated () const = 0;
+    //! Set the status of the flux calibrated flag
+    virtual void set_flux_calibrated (bool done = true) = 0;
+
 
   protected:
 
