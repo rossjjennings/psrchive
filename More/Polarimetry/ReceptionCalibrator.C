@@ -274,9 +274,9 @@ void Pulsar::ReceptionCalibrator::add_observation (const Archive* data)
       equation[ichan]->add_path (new Calibration::Gain);
 
       equation[ichan]->add_Transformation 
-	(equation[ichan]->get_Transformation (Pulsar_path));
+	((Calibration::Transformation*)(equation[ichan]->get_Transformation (Pulsar_path)));
 
-      equation[ichan]->add_data (epoch, measurements);
+      equation[ichan]->Calibration::TimeManager::add_data (epoch, measurements);
     }
   }
 }
@@ -426,9 +426,9 @@ void Pulsar::ReceptionCalibrator::add_PolnCalibrator (const PolnCalibrator* p)
       equation[ichan]->add_path (new Calibration::Gain);
 
       equation[ichan]->add_Transformation 
-	(equation[ichan]->get_Transformation (PolnCalibrator_path));
+	((Calibration::Transformation*)(equation[ichan]->get_Transformation (PolnCalibrator_path)));
 
-      equation[ichan]->add_data (epoch, state);
+      equation[ichan]->Calibration::TimeManager::add_data (epoch, state);
 
       if (polcal) {
 	Jones<double> caltor = inv (polcal->model[ichan].evaluate());
