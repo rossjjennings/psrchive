@@ -4,27 +4,27 @@
 #include "polyco.h"
 #include "stdmpi.h"
 
-int polynomial::mpiPack_size (MPI_Comm comm, int* size) const
+int mpiPack_size (const polynomial& pl, MPI_Comm comm, int* size)
 {
   int total_size = 0;
   int temp_size = 0;
 
-  stdmpi::Pack_size (psrname, comm, &temp_size);
+  mpiPack_size (pl.psrname, comm, &temp_size);
   total_size += temp_size;
-  stdmpi::Pack_size (date, comm, &temp_size);
+  mpiPack_size (pl.date, comm, &temp_size);
   total_size += temp_size;
-  stdmpi::Pack_size (utc,  comm, &temp_size);
+  mpiPack_size (pl.utc,  comm, &temp_size);
   total_size += temp_size;
 
   MPI_Pack_size (1, MPI_CHAR,    comm, &temp_size);  // tempov11
   total_size += temp_size;
-  if(tempov11){
+  if (pl.tempov11) {
     MPI_Pack_size (1, MPI_DOUBLE, comm, &temp_size);  // doppler_shift
     total_size += temp_size;
     MPI_Pack_size (1, MPI_DOUBLE, comm, &temp_size);  // log_rms_resid
     total_size += temp_size;
   }
-  ref_phase.mpiPack_size(comm, &temp_size);
+  mpiPack_size (pl.ref_phase, comm, &temp_size);
   total_size += temp_size;
   MPI_Pack_size (1, MPI_DOUBLE, comm, &temp_size);  // f0
   total_size += temp_size;
@@ -34,7 +34,7 @@ int polynomial::mpiPack_size (MPI_Comm comm, int* size) const
   total_size += temp_size;
   MPI_Pack_size (1, MPI_INT,    comm, &temp_size);  // binary
   total_size += temp_size;
-  if(binary){
+  if (pl.binary) {
     MPI_Pack_size (1, MPI_DOUBLE,  comm, &temp_size);  // binph
     total_size += temp_size;
     MPI_Pack_size (1, MPI_DOUBLE,  comm, &temp_size);  // binfreq
@@ -47,98 +47,122 @@ int polynomial::mpiPack_size (MPI_Comm comm, int* size) const
   MPI_Pack_size (1, MPI_INT,    comm, &temp_size);  // coefs.size()
   total_size += temp_size;
 
-  MPI_Pack_size ((int)coefs.size(), MPI_DOUBLE, comm, &temp_size); // ncoef doubles
+  MPI_Pack_size ((int)pl.coefs.size(), MPI_DOUBLE, comm, &temp_size); 
+  // ncoef doubles
   total_size += temp_size;
 
-  reftime.mpiPack_size (comm, &temp_size);
+  mpiPack_size (pl.reftime, comm, &temp_size);
   total_size += temp_size;
 
   *size = total_size;
   return 0; // no error, not dynamic
 }
 
-int polynomial::mpiPack (void* outbuf, int outcount, int* position, 
-			  MPI_Comm comm) const
+int mpiPack (const polynomial& pl, void* outbuf, int outcount, int* position, 
+	     MPI_Comm comm)
 {
-  stdmpi::Pack (psrname, outbuf, outcount, position, comm);
-  stdmpi::Pack (date, outbuf, outcount, position, comm);
-  stdmpi::Pack (utc, outbuf, outcount, position, comm);
+  mpiPack (pl.psrname, outbuf, outcount, position, comm);
+  mpiPack (pl.date, outbuf, outcount, position, comm);
+  mpiPack (pl.utc, outbuf, outcount, position, comm);
 
-  char boolean = tempov11;
+  char boolean = pl.tempov11;
   MPI_Pack (&boolean, 1, MPI_CHAR,    outbuf, outcount, position, comm);
 
   double temp = 0;
-  if (tempov11) {
-    temp = doppler_shift;
+  if (pl.tempov11) {
+    temp = pl.doppler_shift;
     MPI_Pack (&temp,  1, MPI_DOUBLE, outbuf, outcount, position, comm);
-    temp = log_rms_resid;
+    temp = pl.log_rms_resid;
     MPI_Pack (&temp,  1, MPI_DOUBLE, outbuf, outcount, position, comm);
   }
-  ref_phase.mpiPack(outbuf, outcount, position, comm);
+  mpiPack (pl.ref_phase, outbuf, outcount, position, comm);
 
-  MPI_Pack ((void*)&f0,        1, MPI_DOUBLE, outbuf, outcount, position, comm);
-  MPI_Pack ((void*)&telescope, 1, MPI_INT,    outbuf, outcount, position, comm);
-  MPI_Pack ((void*)&freq,      1, MPI_DOUBLE, outbuf, outcount, position, comm);
-  boolean = binary;
-  MPI_Pack (&boolean,          1, MPI_CHAR,   outbuf, outcount, position, comm);
-  if (binary) {
-    MPI_Pack ((void*)&binph,   1, MPI_DOUBLE, outbuf, outcount, position, comm);
-    MPI_Pack ((void*)&binfreq, 1, MPI_DOUBLE, outbuf, outcount, position, comm);
+  MPI_Pack ((void*)&pl.f0,
+	    1, MPI_DOUBLE, outbuf, outcount, position, comm);
+  MPI_Pack ((void*)&pl.telescope,
+	    1, MPI_INT,    outbuf, outcount, position, comm);
+  MPI_Pack ((void*)&pl.freq,
+	    1, MPI_DOUBLE, outbuf, outcount, position, comm);
+  boolean = pl.binary;
+  MPI_Pack (&boolean,
+	    1, MPI_CHAR,   outbuf, outcount, position, comm);
+  if (pl.binary) {
+    MPI_Pack ((void*)&pl.binph,
+	      1, MPI_DOUBLE, outbuf, outcount, position, comm);
+    MPI_Pack ((void*)&pl.binfreq,
+	      1, MPI_DOUBLE, outbuf, outcount, position, comm);
   }
-  MPI_Pack ((void*)&nspan_mins,1, MPI_DOUBLE, outbuf, outcount, position, comm);
-  MPI_Pack ((void*)&dm,        1, MPI_DOUBLE, outbuf, outcount, position, comm);
-  int length = (int)(coefs.size());
-  MPI_Pack (&length,           1, MPI_INT,    outbuf, outcount, position, comm);
-  for (int i=0; i<coefs.size(); ++i) {
-    temp = coefs[i];
+  MPI_Pack ((void*)&pl.nspan_mins,
+	    1, MPI_DOUBLE, outbuf, outcount, position, comm);
+  MPI_Pack ((void*)&pl.dm,
+	    1, MPI_DOUBLE, outbuf, outcount, position, comm);
+
+  int length = (int)(pl.coefs.size());
+  MPI_Pack (&length,
+	    1, MPI_INT,    outbuf, outcount, position, comm);
+  for (int i=0; i<pl.coefs.size(); ++i) {
+    temp = pl.coefs[i];
     MPI_Pack (&temp, 1, MPI_DOUBLE, outbuf, outcount, position, comm);
   }
 
-  reftime.mpiPack (outbuf, outcount, position, comm);
+  mpiPack (pl.reftime, outbuf, outcount, position, comm);
 
   return MPI_SUCCESS;
 }
 
-int polynomial::mpiUnpack (void* inbuf, int insize, int* position, 
-			MPI_Comm comm)
+int mpiUnpack (void* inbuf, int insize, int* position, 
+			polynomial* pl, MPI_Comm comm)
 {
   char boolean;
 
-  stdmpi::Unpack  (inbuf, insize, position, &psrname, comm);
-  stdmpi::Unpack  (inbuf, insize, position, &date, comm);
-  stdmpi::Unpack  (inbuf, insize, position, &utc, comm);
+  mpiUnpack  (inbuf, insize, position, &(pl->psrname), comm);
+  mpiUnpack  (inbuf, insize, position, &(pl->date), comm);
+  mpiUnpack  (inbuf, insize, position, &(pl->utc), comm);
   MPI_Unpack (inbuf, insize, position, &boolean, 1, MPI_CHAR, comm);
-  tempov11 = boolean;
-  if (tempov11) {
-    MPI_Unpack (inbuf, insize, position, &doppler_shift, 1, MPI_DOUBLE, comm);
-    MPI_Unpack (inbuf, insize, position, &log_rms_resid, 1, MPI_DOUBLE, comm);
+  pl->tempov11 = boolean;
+  if (pl->tempov11) {
+    MPI_Unpack (inbuf, insize, position, &(pl->doppler_shift),
+		1, MPI_DOUBLE, comm);
+    MPI_Unpack (inbuf, insize, position, &(pl->log_rms_resid),
+		1, MPI_DOUBLE, comm);
   }
-  ref_phase.mpiUnpack(inbuf, insize, position, comm);
+  mpiUnpack(inbuf, insize, position, &(pl->ref_phase), comm);
 
-  MPI_Unpack (inbuf, insize, position, &f0,        	 1, MPI_DOUBLE, comm);
-  MPI_Unpack (inbuf, insize, position, &telescope, 	 1, MPI_INT,    comm);
-  MPI_Unpack (inbuf, insize, position, &freq,      	 1, MPI_DOUBLE, comm);
-  MPI_Unpack (inbuf, insize, position, &boolean, 	 1, MPI_CHAR,   comm);
-  binary = boolean;
-  if (binary) {
-    MPI_Unpack (inbuf, insize, position, &binph,     	 1, MPI_DOUBLE, comm);
-    MPI_Unpack (inbuf, insize, position, &binfreq,     	 1, MPI_DOUBLE, comm);
+  MPI_Unpack (inbuf, insize, position, &(pl->f0),
+	      1, MPI_DOUBLE, comm);
+  MPI_Unpack (inbuf, insize, position, &(pl->telescope),
+	      1, MPI_INT,    comm);
+  MPI_Unpack (inbuf, insize, position, &(pl->freq),
+	      1, MPI_DOUBLE, comm);
+  MPI_Unpack (inbuf, insize, position, &boolean,
+	      1, MPI_CHAR,   comm);
+
+  pl->binary = boolean;
+  if (pl->binary) {
+    MPI_Unpack (inbuf, insize, position, &(pl->binph),
+		1, MPI_DOUBLE, comm);
+    MPI_Unpack (inbuf, insize, position, &(pl->binfreq),
+		1, MPI_DOUBLE, comm);
   }
-  MPI_Unpack (inbuf, insize, position, &nspan_mins,	 1, MPI_DOUBLE, comm);
-  MPI_Unpack (inbuf, insize, position, &dm,        	 1, MPI_DOUBLE, comm);
+  MPI_Unpack (inbuf, insize, position, &(pl->nspan_mins),
+	      1, MPI_DOUBLE, comm);
+  MPI_Unpack (inbuf, insize, position, &(pl->dm),
+	      1, MPI_DOUBLE, comm);
 
   int tmpint = 0;
-  MPI_Unpack (inbuf, insize, position, &tmpint, 	 1, MPI_INT,    comm);
-  coefs.resize(tmpint);
-  for(int i=0; i<coefs.size(); ++i)  
-    MPI_Unpack (inbuf, insize, position, &(coefs[i]),  1, MPI_DOUBLE,   comm);
+  MPI_Unpack (inbuf, insize, position, &tmpint,
+	      1, MPI_INT,    comm);
+  pl->coefs.resize(tmpint);
+  for(int i=0; i<pl->coefs.size(); ++i)  
+    MPI_Unpack (inbuf, insize, position, &(pl->coefs[i]),
+		1, MPI_DOUBLE,   comm);
 
-  reftime.mpiUnpack (inbuf, insize, position, comm);
+  mpiUnpack (inbuf, insize, position, &(pl->reftime), comm);
 
   return MPI_SUCCESS;
 }
 
-int polyco::mpiPack_size (MPI_Comm comm, int* size) const
+int mpiPack_size (const polyco& poly, MPI_Comm comm, int* size)
 {
   int total_size = 0;
   int temp_size = 0;
@@ -146,35 +170,35 @@ int polyco::mpiPack_size (MPI_Comm comm, int* size) const
   MPI_Pack_size (1,  MPI_INT,  comm, &temp_size);  // npollys
   total_size += temp_size;
 
-  for (int i=0; i<pollys.size(); i++) {
-    pollys[i].mpiPack_size (comm, &temp_size);
+  for (int i=0; i<poly.pollys.size(); i++) {
+    mpiPack_size (poly.pollys[i], comm, &temp_size);
     total_size += temp_size;
   }
   *size = total_size;
   return 1; // no error, dynamic
 }
 
-int polyco::mpiPack (void* outbuf, int outcount, int* position, 
-		     MPI_Comm comm) const
+int mpiPack (const polyco& poly, void* outbuf, int outcount, int* position, 
+	     MPI_Comm comm)
 {
-  int length = (int)(pollys.size());
+  int length = (int) poly.pollys.size();
   MPI_Pack (&length, 1, MPI_INT, outbuf, outcount, position, comm);
-  for (int i=0; i<pollys.size(); i++) {
-    pollys[i].mpiPack (outbuf, outcount, position, comm);
+  for (int i=0; i<poly.pollys.size(); i++) {
+    mpiPack (poly.pollys[i], outbuf, outcount, position, comm);
   }
   return MPI_SUCCESS;
 }
 
-int polyco::mpiUnpack (void* inbuf, int insize, int* position, 
-		       MPI_Comm comm)
+int mpiUnpack (void* inbuf, int insize, int* position, 
+		       polyco* poly, MPI_Comm comm)
 {
   int npollys;
   int i = 0;
 
   MPI_Unpack (inbuf, insize, position, &npollys, 1, MPI_INT, comm);
-  pollys.resize(npollys);
+  poly->pollys.resize(npollys);
   for (i=0; i<npollys; i++) 
-    pollys[i].mpiUnpack (inbuf, insize, position, comm);
+    mpiUnpack (inbuf, insize, position, &(poly->pollys[i]), comm);
 
   return MPI_SUCCESS;
 }

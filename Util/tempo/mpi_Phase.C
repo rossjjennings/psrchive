@@ -1,9 +1,7 @@
-#include <assert.h>
-
 #define MPI
 #include "Phase.h"
 
-int Phase::mpiPack_size (MPI_Comm comm, int* size) const
+int mpiPack_size (const Phase& ph, MPI_Comm comm, int* size)
 {
   int total_size = 0;
   int temp_size = 0;
@@ -17,19 +15,19 @@ int Phase::mpiPack_size (MPI_Comm comm, int* size) const
   return 0;
 }
 
-int Phase::mpiPack (void* outbuf, int outcount, int* position, 
-		    MPI_Comm comm) const 
+int mpiPack (const Phase& ph, void* outbuf, int outcount, int* position, 
+	     MPI_Comm comm)
 {
-  MPI_Pack ((void*)&turns, 1, MPI_INT, outbuf, outcount, position, comm);
-  MPI_Pack ((void*)&fturns, 1, MPI_DOUBLE, outbuf, outcount, position, comm);
+  MPI_Pack ((void*)&ph.turns, 1, MPI_INT, outbuf, outcount, position, comm);
+  MPI_Pack ((void*)&ph.fturns, 1, MPI_DOUBLE, outbuf, outcount, position,comm);
   return MPI_SUCCESS;
 }
 
-int Phase::mpiUnpack (void* inbuf, int insize, int* position, 
-		      MPI_Comm comm)
+int mpiUnpack (void* inbuf, int insize, int* position, Phase* ph,
+	       MPI_Comm comm)
 {
-  MPI_Unpack (inbuf, insize, position, &turns, 1, MPI_INT, comm);
-  MPI_Unpack (inbuf, insize, position, &fturns, 1, MPI_DOUBLE,  comm);
+  MPI_Unpack (inbuf, insize, position, &(ph->turns), 1, MPI_INT, comm);
+  MPI_Unpack (inbuf, insize, position, &(ph->fturns), 1, MPI_DOUBLE, comm);
   return MPI_SUCCESS;
 }
 
