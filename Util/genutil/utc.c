@@ -313,31 +313,51 @@ int tm2utc (utc_t *time, struct tm calendar)
 
 int utc2tm (struct tm *calendar, utc_t time)
 {
+  /* the struct tm has the following data members:
+     tm_sec       Seconds after the minute [0-60]
+     tm_min       Minutes after the hour [0-59]
+     tm_hour      Hours since midnight [0-23]
+     tm_mday      Day of the month [1-31]
+     tm_mon       Months since January [0-11]
+     tm_year      Years since 1900
+   */
+
   int days_in_month[12] = {31,28,31,30,31,30,31,31,30,31,30,31};
   int month;
   int day_of_year;
+  time_t date;
+
+  day_of_year = time.tm_yday;
+
+  while (day_of_year < 1) {
+    time.tm_year --;
+    day_of_year += UTC_JULIANDAYS (time.tm_year);
+  }
 
   if (UTC_LEAPYEAR(time.tm_year)) {
     days_in_month[1] = 29;
   }
 
-  day_of_year = time.tm_yday;
   for (month=0; month<12 && day_of_year>0; month++)  {
     day_of_year -= days_in_month[month];
   }
+  month --;
 
   if (day_of_year > 0)
     return -1;
 
   calendar->tm_year  = time.tm_year - 1900;
   calendar->tm_mon   = month;
-  calendar->tm_mday  = day_of_year + days_in_month[month-1];
+  calendar->tm_mday  = day_of_year + days_in_month[month];
   calendar->tm_hour  = time.tm_hour;
   calendar->tm_min   = time.tm_min;
   calendar->tm_sec   = time.tm_sec;
 
-  mktime (calendar);
+  calendar->tm_isdst = -1;
 
+  date = mktime (calendar);
+  if (date == (time_t)-1)
+    return -1;
   return 0;
 }
 

@@ -29,10 +29,9 @@ int main (int argc, char* argv[])
       fprintf (stderr, "Error converting '%s' to UTC.\n", argv[1]);
       return -1;
     }
-    fprintf (stderr, "UTC parsed: %s\n",
+    fprintf (stderr, "Using UTC parsed: %s\n",
 	       utc2str (printhere, utcdate, "yyyy-ddd-hh:mm:ss"));
     stuffit = MJD (utcdate);
-    return -1;
   }
   else {
     time_t temp = time(NULL);
@@ -41,7 +40,7 @@ int main (int argc, char* argv[])
     stuffit = MJD (date);
   }
 
-  printf ("MJD: %11.5f\n", stuffit.in_days());
+  printf ("%11.5f\n", stuffit.in_days());
 
   if (verbose) {
     utc_t  stuffback;

@@ -469,6 +469,15 @@ int MJD::Construct (const utc_t& utc)
     fprintf (stderr, "MJD::Construct(utc_t) error converting to gregorian\n");
     return -1;
   }
+
+#if 0
+  char buffer [100];
+  strftime (buffer, 50, "%Y-%j-%H:%M:%S", &greg);
+  fprintf (stderr, "MJD::Construct utc:%s = greg:%s\n",
+	   utc2str (buffer+50, utc, "yyyy-ddd-hh:mm:ss"),
+	   buffer);
+#endif
+
   return Construct (greg);
 }
 
@@ -494,9 +503,11 @@ MJD::MJD (const struct tm& greg)
 int MJD::Construct (const struct tm& greg)
 {
   int year = greg.tm_year + 1900;
-  days = (1461*(year-(12-greg.tm_mon)/10+4712))/4
-    +(306*((greg.tm_mon+9)%12)+5)/10
-    -(3*((year-(12-greg.tm_mon)/10+4900)/100))/4
+  int month = greg.tm_mon + 1;
+
+  days = (1461*(year-(12-month)/10+4712))/4
+    +(306*((month+9)%12)+5)/10
+    -(3*((year-(12-month)/10+4900)/100))/4
     +greg.tm_mday-2399904;
 
   // Work out seconds, fracsecs always zero.

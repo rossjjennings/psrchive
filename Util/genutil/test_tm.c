@@ -9,7 +9,8 @@ int main ()
 {
   time_t calculated, backup;
   struct tm* date;
-  char datestr [25];
+  char datestr1 [25];
+  char datestr2 [25];
   int out;
 
   calculated = time (NULL);
@@ -26,8 +27,8 @@ int main ()
     calculated = backup;
   }
 
-  out = strftime (datestr, 25, "%Y/%m/%d-%H:%M:%S", date);
-  printf ("local: %s\n", datestr);
+  out = strftime (datestr1, 25, "%Y/%m/%d-%H:%M:%S", date);
+  printf ("local: %s\n", datestr1);
 
   if (backup != calculated)  {
     printf ("WARNING: strftime() modifies its time_t argument.!!\n");
@@ -39,8 +40,8 @@ int main ()
     perror ("Error calling gmtime");
     return -1;
   }
-  out = strftime (datestr, 25, "%Y/%m/%d-%H:%M:%S", date);
-  printf ("UTC: %s\n", datestr);
+  out = strftime (datestr1, 25, "%Y/%m/%d-%H:%M:%S", date);
+  printf ("UTC: %s\n", datestr1);
 
   date = gmtime (&calculated);
   if (date == NULL)  {
@@ -60,8 +61,13 @@ int main ()
     return -1;
   }
 
-  out = strftime (datestr, 25, "%Y/%m/%d-%H:%M:%S", date);
-  printf ("UTC: %s\n", datestr);
+  out = strftime (datestr2, 25, "%Y/%m/%d-%H:%M:%S", date);
+  printf ("UTC: %s\n", datestr2);
+
+  if (strcmp (datestr1, datestr2)) {
+    fprintf (stderr, "Inconsistent UTC returned by mktime()!\n");
+    return -1;
+  }
 
   date = localtime (&calculated);
   if (date == NULL)  {
@@ -69,8 +75,8 @@ int main ()
     return -1;
   }
 
-  out = strftime (datestr, 25, "%Y/%m/%d-%H:%M:%S", date);
-  printf ("local: %s\n", datestr);
+  out = strftime (datestr2, 25, "%Y/%m/%d-%H:%M:%S", date);
+  printf ("local: %s\n", datestr2);
 
   printf ("difference between UTC and local time: %ld seconds.\n", timezone);
 
