@@ -9,7 +9,7 @@ bool Pulsar::Archive::verbose = false;
 void Pulsar::Archive::init ()
 {
   if (verbose)
-    cerr << "Pulsar::Archive::init" << endl;
+    cerr << "Archive::init" << endl;
 
   model_updated = false;
 }
@@ -17,20 +17,66 @@ void Pulsar::Archive::init ()
 Pulsar::Archive::Archive () 
 { 
   if (verbose)
-    cerr << "Pulsar::Archive::null constructor" << endl;
+    cerr << "Archive::null constructor" << endl;
 
   init(); 
+}
+
+Pulsar::Archive::Archive (const Archive& archive)
+{
+  throw Error (Undefined, "Archive copy constructor",
+	       "sub-classes must define copy constructor");
+}
+
+Pulsar::Archive& Pulsar::Archive::operator = (const Archive& archive)
+{
+  copy (archive);
+  return *this;
 }
 
 Pulsar::Archive::~Archive () 
 { 
   if (verbose)
-    cerr << "Pulsar::Archive::destructor" << endl;
+    cerr << "Archive::destructor" << endl;
 
   for (unsigned isub=0; isub<subints.size(); isub++)
     delete subints[isub];
 }
 
+void Pulsar::Archive::copy (const Archive& archive)
+{
+  if (verbose)
+    cerr << "Archive::copy" << endl;
+
+  if (this == &archive)
+    return;
+
+  // set attributes
+  resize (archive.get_nsubint(), archive.get_npol(),
+	  archive.get_nchan(), archive.get_nbin());
+
+  for (int isub=0; isub<archive.get_nsubint(); isub++)
+    subints[isub] -> copy (*(archive.subints[isub]));
+
+  ephemeris = archive.ephemeris;
+  model = archive.model;
+
+  // set virtual attributes
+  set_telescope_code( archive.get_telescope_code() );
+  set_feed_type( archive.get_feed_type() );
+  set_observation_type( archive.get_observation_type() );
+  set_source( archive.get_source() );
+
+  set_bandwidth( archive.get_bandwidth() );
+  set_centre_frequency( archive.get_centre_frequency() );
+  set_poln_state( archive.get_poln_state() );
+  set_dispersion_measure( archive.get_dispersion_measure() );
+
+  set_feedangle_corrected( archive.get_feedangle_corrected() );
+  set_iono_rm_corrected( archive.get_iono_rm_corrected() );
+  set_ism_rm_corrected( archive.get_ism_rm_corrected() );
+  set_parallactic_corrected( archive.get_parallactic_corrected() );
+}
 
 /*!
   \param subint the index of the requested Integration
@@ -315,8 +361,8 @@ void
 Pulsar::Archive::telescope_coordinates 
 (float* lat, float* lon, float* ele) const
 {
-  int ret = telescope_coords (get_tel_tempo_code(), lat, lon, ele);
+  int ret = telescope_coords (get_telescope_code(), lat, lon, ele);
   if (ret < 0)
     throw Error (FailedCall, "Archive::telescope_coordinates",
-		 "tempo code=%c", get_tel_tempo_code ());
+		 "tempo code=%c", get_telescope_code ());
 }
