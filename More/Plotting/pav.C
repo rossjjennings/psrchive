@@ -1,5 +1,5 @@
 //
-// $Id: pav.C,v 1.84 2004/08/26 06:21:15 hknight Exp $
+// $Id: pav.C,v 1.85 2004/09/01 06:59:44 hknight Exp $
 //
 // The Pulsar Archive Viewer
 //
@@ -158,7 +158,6 @@ int main (int argc, char** argv)
   bool verbose = false;
   bool zoomed = false;
   bool fzoomed = false;
-  bool szoomed = false;
 
   bool display = false;
   bool nesting = false;
@@ -232,7 +231,7 @@ int main (int argc, char** argv)
     { "snr",                1, 0, 207 },
     { "mask",               0, 0, 208 },
     { "normal",             0, 0, 209 },
-    { "total",required_argument,0,TOTAL},
+    { "total",no_argument,0,TOTAL},
     { "extra",required_argument,0,EXTRA},
     { 0, 0, 0, 0 }
   };
@@ -314,7 +313,7 @@ int main (int argc, char** argv)
       plotter.set_subint( atoi (optarg) );
       break;
     case 'i':
-      cout << "$Id: pav.C,v 1.84 2004/08/26 06:21:15 hknight Exp $" << endl;
+      cout << "$Id: pav.C,v 1.85 2004/09/01 06:59:44 hknight Exp $" << endl;
       return 0;
 
     case 'j':
@@ -472,15 +471,9 @@ int main (int argc, char** argv)
     }
 
     case 'y': {
-      char* separator = ",";
-      char* val1 = strtok (optarg, separator);
-      char* val2 = strtok (NULL, separator);
-      if (!val1 || !val2)  {
-        cerr << "Error parsing frequencies" << endl;
-        return -1;
-      }
-      plotter.set_sub_range (atoi(val1), atoi(val2));
-      szoomed = true;
+      int start_sub, finish_sub;
+      dual_parse(optarg,start_sub,finish_sub,"y");
+      plotter.set_sub_range (start_sub,finish_sub);
       break;
     }
 
@@ -611,10 +604,10 @@ int main (int argc, char** argv)
     
     if (metafile)
       stringfload (&extra_filenames, metafile);
-    else 
+    else
       for (int ai=optind; ai<argc; ai++)
 	dirglob (&extra_filenames, argv[ai]);
-    
+
     for( unsigned i=0; i<extra_filenames.size(); i++){
       filenames.push_back( extra_filenames[i] );
       breakup_archives.push_back( false );
