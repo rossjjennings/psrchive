@@ -9,7 +9,7 @@
 #include "string_utils.h"
 
 char* psrephem::tempo_pardir = NULL;
-int   psrephem::verbose = 0;
+int   psrephem::verbose = 1;
 char  psrephem::ephemstr [EPH_NUM_KEYS][EPH_STR_LEN];
 
 static const char* psrephem_tmp_fname = "psrephem_tmp.eph";
@@ -109,6 +109,7 @@ int psrephem::load (const char* filename)
   size_dataspace();
   int istat = rd_eph (filename, parmStatus, ephemstr, value_double,
 		      value_integer, error_double);
+  
   if (!istat) {
     fprintf (stderr,
     "psrephem::load WARNING tempo11-style load of '%s' failed\n", filename);
@@ -381,19 +382,8 @@ int psrephem::load (string* instr)
     return -1;
   }
   fclose (temp);
-
-  int istat = rd_eph (psrephem_tmp_fname, parmStatus, ephemstr, value_double,
-		      value_integer, error_double);
-  remove (psrephem_tmp_fname);
-  if (!istat) {
-    fprintf (stderr,
-		 "psrephem::load WARNING tempo11-style string load failed\n");
-    tempo11 = 0;
-    nontempo11 = *instr;
-  }
-  for (int i=0;i<EPH_NUM_KEYS;i++)
-    value_str[i] = ephemstr[i];
-
+  if(this->load(psrephem_tmp_fname)!=0) return(-1);
+  remove(psrephem_tmp_fname);
   return 0;
 }
 
