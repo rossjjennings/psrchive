@@ -6,7 +6,7 @@
 #include <sunmath.h>
 #endif
 #include "MJD.h"
-#include "endian.h"
+#include "machine_endian.h"
 #include "ieee.h"
 
 int ss2hhmmss (int* hours, int* min, int* sec, int seconds)
@@ -432,7 +432,32 @@ MJD::MJD (const cal_t& greg)
   Construct (greg);
 }
 
-MJD::Construct (const cal_t& greg)
+// parses a string of the form 51298.45034 ish
+int MJD::Construct (const char* mjdstr)
+{
+  int scanned = sscanf (mjdstr, "%d", &days);
+  if (scanned < 1)
+    return -1;
+
+  char* fracstr = strchr (mjdstr, '.');
+  if (fracstr) {
+    double fracday;
+    int scanned = sscanf (fracstr, "%lf", &fracday);
+    if (scanned < 1)
+      return -1;
+
+    fracday *= 86400.0;
+    secs = int (fracday);
+    fracsec = fracday - double (secs);
+  }
+  else {
+    fracsec = 0.0;
+    secs = 0;
+  }
+  return 0;
+}
+
+int MJD::Construct (const cal_t& greg)
 {
   days = (1461*(greg.tm_year-(12-greg.tm_month)/10+4712))/4
     +(306*((greg.tm_month+9)%12)+5)/10
@@ -442,5 +467,6 @@ MJD::Construct (const cal_t& greg)
   // Work out seconds, fracsecs always zero.
   secs = 3600.0 * greg.tm_hour + 60.0 * greg.tm_min + greg.tm_sec;
   fracsec = 0.0;
+  return 0;
 }
 
