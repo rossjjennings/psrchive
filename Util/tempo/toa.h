@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/toa.h,v $
-   $Revision: 1.10 $
-   $Date: 2002/10/12 01:19:00 $
-   $Author: straten $ */
+   $Revision: 1.11 $
+   $Date: 2003/04/04 07:46:00 $
+   $Author: ahotan $ */
 
 #ifndef __TOA_H
 #define __TOA_H
@@ -64,7 +64,7 @@ namespace Tempo {
     double frequency;      // Observing frequency (MHz)
     MJD    arrival;        // TOA
     float  error;          // TOA uncertainty
-    int    telescope;      // Observatory (one-character code)
+    char    telescope;      // Observatory (one-character code)
     
     // Parkes Format specific
     float  phs;            // Phase offset (fraction of P0, added to TOA)
@@ -104,7 +104,7 @@ namespace Tempo {
     void set_frequency (double freq) { frequency = freq; };
     void set_arrival   (MJD arrived) { arrival = arrived; };
     void set_error     (float err)   { error = err; };
-    void set_telescope (int telcode) { telescope = telcode; };
+    void set_telescope (char telcode) { telescope = telcode; };
     void set_when_calculated (time_t when) { calculated = when; };
     void set_auxilliary_text (const string& text) { auxinfo = text; };
 
@@ -112,7 +112,7 @@ namespace Tempo {
     double get_frequency () const { return frequency; };
     MJD    get_arrival   () const { return arrival; };
     float  get_error     () const { return error; };
-    int    get_telescope () const { return telescope; };
+    char   get_telescope () const { return telescope; };
     time_t get_when_calculated () const { return calculated; };
     string get_auxilliary_text () const { return auxinfo; };
 

@@ -100,7 +100,7 @@ int Tempo::toa::Parkes_load (const char* instring)
 
 int Tempo::toa::parkes_parse (const char* instring)
 {
-  int scanned = sscanf (instring, "%lf %s %f %f %d",
+  int scanned = sscanf (instring, "%lf %s %f %f %c",
  			&frequency, datestr, &phs, &error, &telescope);
 
   if (state != Deleted && scanned < 5) {
@@ -183,7 +183,7 @@ int Tempo::toa::Princeton_load (const char* instring)
 
   destroy ();
 
-  telescope = instring[0] - '0';
+  telescope = instring[0];
 
   int scanned = sscanf (instring+15, "%lf %s %f %f",
  			&frequency, datestr, &error, &dmc);
@@ -210,7 +210,7 @@ int Tempo::toa::Princeton_load (const char* instring)
 int Tempo::toa::Princeton_unload (char* outstring) const
 {
   // output the basic line
-  outstring[0] = char ('0' + telescope);
+  outstring[0] = telescope;
 
   sprintf (outstring+15, "%8.7g %13.13s %4.2f %8.2f",
  	   frequency, arrival.printdays(13).c_str(), error, dmc);
@@ -421,12 +421,16 @@ int Tempo::toa::unload (FILE* outstream, Format fmt) const
 
   switch (fmt) {
   case Parkes:
+    if (verbose) cerr << "Unloading Parkes Format" << endl;
     return Parkes_unload (outstream);
   case Princeton:
+    if (verbose) cerr << "Unloading Princeton Format" << endl;
     return Princeton_unload (outstream);
   case Psrclock:
+    if (verbose) cerr << "Unloading Psrclock Format" << endl;
     return Psrclock_unload (outstream);
   case Rhythm:
+    if (verbose) cerr << "Unloading Rhythm Format" << endl;
     return Rhythm_unload (outstream);
   default:
     cerr << "Tempo::toa::unload undefined format" << endl;
@@ -663,7 +667,7 @@ void Tempo::toa::init()
   frequency = 0.0;
   arrival = MJD (0.0,0.0,0.0);
   error = 0.0;
-  telescope = 0;
+  telescope = '0';
   phs = 0.0;
   dmc = 0.0;
   observatory [0] = '\0';
