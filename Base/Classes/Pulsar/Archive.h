@@ -1,15 +1,32 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Archive.h,v $
-   $Revision: 1.6 $
-   $Date: 2002/04/09 13:15:11 $
-   $Author: ahotan $ */
+   $Revision: 1.7 $
+   $Date: 2002/04/09 16:16:48 $
+   $Author: straten $ */
 
-/*
-  
-  Pulsar::Archive - pure virtual base class of pulsar data archives
+/*! \mainpage 
+ 
+  \section intro Introduction
+ 
+  The Pulsar Data Archival and Analysis Library 
+ 
+  \section profiles Pulse Profiles
+ 
+  The basic quantity observed in most pulsar experiments is the pulse
+  profile, and is implemented by the Pulsar::Profile class.  The
+  Pulsar::Integration class implements a two-dimensional array of
+  Pulsar::Profiles integrated over the same time interval.  The axis
+  of this array are polarimetric measure and observing frequency.  The
+  Pulsar::Archive class implements a one-dimensional array of
+  Pulsar::Integrations, each starting at the same pulse phase.
 
-*/
+  The main class used in most high-level code is the Pulsar::Archive
+  class, which implements various basic operations on sequences of
+  pulse profiles, such as integration in time, frequency, and
+  polarization, removal of dispersion delays between sub-bands, etc.
+   
+ */
 
 #ifndef __Pulsar_Archive_h
 #define __Pulsar_Archive_h
@@ -29,16 +46,12 @@ class polyco;
 
 namespace Pulsar {
 
-  //
   //! Different receiver feed configuration states
-  //
   namespace Feed {
     enum Type { invalid=-1, Circular=0, Linear=1 };
   }
 
-  //
   //! Different states of the integration data
-  //
   namespace Poln {
     enum State { invalid, Stokes, Coherency, XXYY, Intensity, Invariant };
   }
@@ -171,6 +184,8 @@ namespace Pulsar {
 		       vector<Tempo::toa>& toas, int mode=0, bool wt=false);
 
     //
+    // deparallactify - corrects receiver feed angle orientation
+    //
     //! Corrects receiver feed angle orientation
     /*!
       \exception string
@@ -211,6 +226,8 @@ namespace Pulsar {
     virtual void invint (bool square_root = true, // take sqrt(II-QQ-UU-VV)
 			 float baseline_ph=-1);   // phase of baseline window
   
+    //
+    // remove_baseline - remove the baseline from all profiles
     //
     //! Remove the baseline from all profiles
     /*!
@@ -254,6 +271,8 @@ namespace Pulsar {
     */
     virtual void set_ephem (const psrephem& e);
 
+    //
+    // set_polyco - installs the given polyco and shifts profiles to align
     //
     //! Installs the given polyco and shifts profiles to align
     /*!
@@ -436,13 +455,11 @@ namespace Pulsar {
 
     //! Get the feed configuration of the receiver
     virtual Feed::Type get_feed_type () const = 0;
-
     //! Set the feed configuration of the receiver
     virtual void set_feed_type (Feed::Type feed) const = 0;
 
     //! Get the state of the profiles
     virtual Poln::State get_poln_state () const = 0;
-
     //! Set the state of the profiles
     virtual void set_poln_state (Poln::State state) const = 0;
 
