@@ -4,7 +4,8 @@ SUBDIRS                 = units genutil genutil++ psrfft
 lib_LTLIBRARIES         = libpsrutils.la
 libpsrutils_la_SOURCES  =
 libpsrutils_la_LIBADD   = units/libunits.la psrfft/libpsrfft.la \
-			genutil/libgenutil.la genutil++/libgenutilpp.la
+			genutil/libgenutil.la genutil++/libgenutilpp.la \
+			@FLIBS@
 
 if HAVE_CFITSIO
   SUBDIRS += fitsutil
