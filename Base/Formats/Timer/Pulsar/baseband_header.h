@@ -19,7 +19,7 @@ typedef struct baseband_header_t {
   uint64         gulpsize;
   uint64         seeksize;
 
-  // state of voltage: analytic(complex)=1 or Nyquist(real)=2
+  // state of voltage: analytic(complex)=2 or Nyquist(real)=1
   int  voltage_state;
   // the number of independantly sampled analog channels
   int  analog_channels;
@@ -37,8 +37,14 @@ typedef struct baseband_header_t {
 
   // # of time samples entering into convolution with the dedispersion kernel
   int  nfft;
+
   // # of (native voltage state) time samples discarded after convolution
-  int  nsmear;
+  // int nsmear;
+
+  // Version 5 change: As the impulse response function may be
+  // assymetric, the old nsmear attribute is now interpreted as
+  // nsmear_pos * 2.
+  int nsmear_pos;
 
   // scrunch detected power before folding
   int  nscrunch;
@@ -69,6 +75,10 @@ typedef struct baseband_header_t {
   // (note that Version 4 simply increases the size of pcalid)
   char pcalid [64];
 
+  // Version 5 addition
+  // 
+  int nsmear_neg;
+
 #if defined(linux) || (defined (sun) && defined(__i386))
   char __space[4];
 #endif
@@ -78,7 +88,7 @@ typedef struct baseband_header_t {
 
 // //////////////////////////////////////////////////////////////////////
 // sizeof(baseband_header)
-#define BASEBAND_HEADER_SIZE 176
+#define BASEBAND_HEADER_SIZE 180
 
 // //////////////////////////////////////////////////////////////////////
 // Endian code
@@ -87,6 +97,6 @@ typedef struct baseband_header_t {
 
 // //////////////////////////////////////////////////////////////////////
 // Version
-#define BASEBAND_HEADER_VERSION 4
+#define BASEBAND_HEADER_VERSION 5
 
 #endif
