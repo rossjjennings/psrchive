@@ -9,6 +9,7 @@
 #include <qpopupmenu.h>
 #include <qpalette.h>
 #include <qplatinumstyle.h>
+#include <qfont.h>
 
 #include "qt_editParams.h"
 
@@ -113,6 +114,11 @@ Rhythm::Rhythm (QWidget* parent, int argc, char** argv) :
   header = new QLabel(leftpanel);
   header->setFrameStyle( QFrame::Panel | QFrame::Sunken );
   header->setPixmap(*pretty_pic);
+
+  footer = new QLabel("Status Message Box", leftpanel);
+  footer->setMinimumHeight(30);
+  footer->setAlignment(Qt::AlignCenter);
+  footer->setFont (QFont( "Times", 10, QFont::Bold));
 
   bottompanel = new QHBox(leftpanel);
 
@@ -220,17 +226,18 @@ Rhythm::Rhythm (QWidget* parent, int argc, char** argv) :
 void Rhythm::load_toas (const char* fname)
 {
   if (verbose)
-    cerr << "Loading TOAs from '" << fname << "'...";
+    cerr << "Loading TOAs from '" << fname << "'";
   
   Tempo::toa::load (fname, &toas);
   
-  //if (verbose)
-  //  cerr << "...loaded " << toas.size() << ".\nSorting...";
-
-  //sort (toas.begin(), toas.end());
-
-  if (verbose)
-    cerr << " done." << endl;
+  char num[8];
+  sprintf(num, "%d", toas.size());
+  
+  QString str = "Loaded ";
+  str += num;
+  str += " TOA's";
+  
+  footer->setText(str);
 
   tempo->setItemEnabled (fitID, true);
   tempo->setItemEnabled (fitSelID, true);
@@ -260,7 +267,7 @@ void Rhythm::load_toas (const char* fname)
 void Rhythm::add_toas (const char* fname)
 {
   if (verbose)
-    cerr << "Adding in TOAs from '" << fname << "'...";
+    cerr << "Adding in TOAs from '" << fname << "'";
   
   vector<Tempo::toa> new_toas;
   
@@ -271,11 +278,15 @@ void Rhythm::add_toas (const char* fname)
   
   for (unsigned i = 0; i < new_toas.size(); i++)
     toas.push_back(new_toas[i]);
+
+  char num[8];
+  sprintf(num, "%d", toas.size());
   
-  //if (verbose)
-  //  cout << "Sorting the entire list...";
+  QString str = "Added ";
+  str += num;
+  str += " TOA's";
   
-  //sort (toas.begin(), toas.end());
+  footer->setText(str);
   
   if (verbose)
     cout << " done." << endl;
@@ -316,6 +327,10 @@ void Rhythm::save_toas (const char* fname)
 
   if (verbose)
     cerr << " done." << endl;
+
+  QString str = "TOA list saved";
+  
+  footer->setText(str);
 }
 
 void Rhythm::set_Params (const psrephem& eph)
@@ -428,48 +443,60 @@ void Rhythm::fit()
 }
 
 void Rhythm::fit (const psrephem& eph, bool load_new)
-{ try {
+{ 
+  try {
     
-  if (toas.size() < 1) {
+    if (toas.size() < 1) {
+      if (verbose)
+	cerr << "Rhythm::fit No Arrival Times loaded" << endl;
+      return;
+    }
+    
     if (verbose)
-      cerr << "Rhythm::fit No Arrival Times loaded" << endl;
-    return;
-  }
+      cerr << "Rhythm::fit Calculating residuals" << endl;
+    
+    psrephem pf_eph;
+    
+    Tempo::fit (eph, toas, &pf_eph, true);
+    
+    if (load_new && fitpopup) {
+      // set_psrephem will result in generation of newEph signal, 
+      // which should be ignored since it was set from here.
+      ignore_one_eph = true;
+      
+      if (verbose)
+	cerr << "Rhythm::fit Displaying new ephemeris" << endl;
+      
+      fitpopup -> set_psrephem (pf_eph);
+    }
+    
+    char temp[128];
+    
+    FILE* fptr = popen("tail -1 tempo.lis", "r");
+    fgets(temp, 1024, fptr);
+    pclose(fptr);
+    
+    string temp2 = temp;
+    string temp3 = "Residual: " + temp2.substr(23, 54);
 
-  if (verbose)
-    cerr << "Rhythm::fit Calculating residuals" << endl;
-  
-  psrephem pf_eph;
-  
-  Tempo::fit (eph, toas, &pf_eph, true);
-  
-  if (load_new && fitpopup) {
-    // set_psrephem will result in generation of newEph signal, 
-    // which should be ignored since it was set from here.
-    ignore_one_eph = true;
+    footer->setText(temp3.c_str());
     
+  } 
+  catch (Error& error) {
     if (verbose)
-      cerr << "Rhythm::fit Displaying new ephemeris" << endl;
-    
-    fitpopup -> set_psrephem (pf_eph);
+      cerr << "Rhythm::fit ERROR " << error << endl;
+    QMessageBox::critical (this, "Rhythm::fit",
+			   "They're all out to get you...  ",
+			   "Trust no one...");
   }
-  
-} 
- catch (Error& error) {
-   if (verbose)
-     cerr << "Rhythm::fit ERROR " << error << endl;
-   QMessageBox::critical (this, "Rhythm::fit",
-			  "They're all out to get you...  ",
-			  "Trust no one...");
- }
- catch (...) {
-   if (verbose)
-     cerr << "Rhythm::fit ERROR Unhandled Exception" << endl;
-   QMessageBox::critical (this, "Rhythm::fit",
-			  "If you are seeing this it is already too late.   \n"
-			  "Abandon all hope...                              \n",
-			  "Run Away!");
- }
+  catch (...) {
+    if (verbose)
+      cerr << "Rhythm::fit ERROR Unhandled Exception" << endl;
+    QMessageBox::critical (this, "Rhythm::fit",
+			   "If you are seeing this it is already too late.   \n"
+			   "Abandon all hope...                              \n",
+			   "Run Away!");
+  }
 }
 
 void Rhythm::fit_selected()
@@ -504,7 +531,6 @@ void Rhythm::fit_selected()
 
 void Rhythm::fit_selected (const psrephem& eph, bool load_new)
 { 
-
   try {
     
     if (toas.size() < 1) {
@@ -544,6 +570,17 @@ void Rhythm::fit_selected (const psrephem& eph, bool load_new)
       fitpopup -> set_psrephem (pf_eph);
     }
     
+    char temp[128];
+    
+    FILE* fptr = popen("tail -1 tempo.lis", "r");
+    fgets(temp, 1024, fptr);
+    pclose(fptr);
+    
+    string temp2 = temp;
+    string temp3 = "Residual: " + temp2.substr(23, 54);
+
+    footer->setText(temp3.c_str());
+
   } 
   catch (Error& error) {
     if (verbose)

@@ -1,15 +1,15 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/rhythm/rhythm.h,v $
-   $Revision: 1.26 $
-   $Date: 2003/05/20 07:05:32 $
+   $Revision: 1.27 $
+   $Date: 2003/05/23 05:46:56 $
    $Author: ahotan $ */
 
 // //////////////////////////////////////////////////////////////////////////
 //
 // Rhythm
 //
-// Application for interactively plotting a Tempo::ModelDataSet
+// A Graphical User Interface to Tempo
 //
 // //////////////////////////////////////////////////////////////////////////
 
@@ -137,6 +137,7 @@ class Rhythm : public QMainWindow
   QHBox* bottompanel;
   QVBox* controls;
   QLabel* header;
+  QLabel* footer;
   QButtonGroup* modechanger;
   QRadioButton* zoom;
   QRadioButton* sel;
