@@ -291,8 +291,12 @@ Pulsar::PolnProfileFit::fourier_transform (const PolnProfile* input) const try
   fourier->resize( nbin );
 
   unsigned npol = 4;
-  for (unsigned ipol=0; ipol<npol; ipol++)
-    fft::frc1d (nbin, fourier->get_amps(ipol), input->get_amps(ipol));
+  auto_ptr<float> amps( new float[nbin+2] );
+
+  for (unsigned ipol=0; ipol<npol; ipol++)  {
+    fft::frc1d (nbin, amps.get(), input->get_amps(ipol));
+    fourier->set_amps(ipol, amps.get());
+  }
 
   fourier->convert_state (Signal::Stokes);
 
