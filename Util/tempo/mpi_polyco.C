@@ -64,8 +64,6 @@ int polynomial::mpiPack (void* outbuf, int outcount, int* position,
   stdmpi::Pack (date, outbuf, outcount, position, comm);
   stdmpi::Pack (utc, outbuf, outcount, position, comm);
 
-cerr << "PACKED: '" << psrname << "' '" << date << "' '" << utc << "'\n";
-
   char boolean = tempov11;
   MPI_Pack (&boolean, 1, MPI_CHAR,    outbuf, outcount, position, comm);
 
