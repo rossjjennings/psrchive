@@ -28,6 +28,9 @@ int main (int argc, char *argv[]) {
   bool zero_subints = false;
   vector<unsigned> subs_to_zap;
 
+  bool nozap_subints = false;
+  vector<unsigned> subs_nozap;
+
   bool edge_zap = false;
   float percent = 0.0;
   
@@ -47,7 +50,7 @@ int main (int argc, char *argv[]) {
   char* key = NULL;
   char whitespace[5] = " \n\t";
   
-  while ((gotc = getopt(argc, argv, "hvViDme:z:k:Z:dE:s:w:W:C:S:P:")) != -1) {
+  while ((gotc = getopt(argc, argv, "hvViDme:z:k:Z:x:X:dE:s:w:W:C:S:P:")) != -1) {
     switch (gotc) {
     case 'h':
       cout << "A program for zapping RFI in Pulsar::Archives"                      << endl;
@@ -61,6 +64,8 @@ int main (int argc, char *argv[]) {
       cout << "  -z \"a b c ...\"   Zap these particular channels"                 << endl;
       cout << "  -k filename      Zap chans listed in this kill file"              << endl;
       cout << "  -Z \"a b\"         Zap chans between a and b inclusive"           << endl;
+      cout << "  -x \"a b c ...\"   Zap all sub-integrations except these"         << endl;
+      cout << "  -X \"a b\"         Zap all sub-integrations except a to b inclusive" << endl;
       cout << "  -E percent       Zap this much of the band at the edges"          << endl;
       cout << "  -s \"a b c ...\"   Zap these sub-integrations"                    << endl;
       cout << "  -S \"a b\"         Zap sub-integrations between a and b inclusive"<< endl;
@@ -87,7 +92,7 @@ int main (int argc, char *argv[]) {
       Pulsar::Archive::set_verbosity(1);
       break;
     case 'i':
-      cout << "$Id: paz.C,v 1.15 2003/11/13 11:18:04 hknight Exp $" << endl;
+      cout << "$Id: paz.C,v 1.16 2003/12/01 11:30:10 rmanches Exp $" << endl;
       return 0;
     case 'D':
       display = true;
@@ -125,6 +130,31 @@ int main (int argc, char *argv[]) {
 	
 	for( unsigned i=first; i<=last; i++)
 	  chans_to_zap.push_back( i );
+      }
+      break;
+    case 'x':
+      key = strtok (optarg, whitespace);
+      nozap_subints = true;
+      while (key) {
+	if (sscanf(key, "%d", &placeholder) == 1) {
+	  subs_nozap.push_back(placeholder);
+	}
+	key = strtok (NULL, whitespace);
+      }
+      break;
+    case 'X':
+      {
+	unsigned first = 1;
+	unsigned last = 0;
+
+	nozap_subints = true;
+	if (sscanf(optarg, "%d %d", &first, &last) != 2) {
+	  cerr << "Invalid parameter to option -X" << endl;
+	  return (-1);
+	}
+	
+	for( unsigned i=first; i<=last; i++)
+	  subs_nozap.push_back( i );
       }
       break;
     case 'd':
@@ -273,6 +303,31 @@ int main (int argc, char *argv[]) {
 	    }
 	  if (!ignore) {
 	    subs_to_keep.push_back(i);
+	  }
+	}
+	new_arch = arch->extract(subs_to_keep);
+	string useful = arch->get_filename();
+	arch = new_arch->clone();
+	arch->set_filename(useful);
+      }
+      
+      if (nozap_subints) {
+
+	Reference::To<Pulsar::Archive> new_arch;
+
+	vector<unsigned> subs_to_keep;
+	bool keep;
+	
+	for (unsigned i = 0; i < arch->get_nsubint(); i++) {
+	  keep = false;
+	  for (unsigned j = 0; j < subs_nozap.size(); j++)
+	    if (subs_nozap[j] == i) {
+	      keep = true;
+	    }
+	  if (keep) {
+	    subs_to_keep.push_back(i);
+	    if (verbose)
+		  cout << "Keeping subint " << i << endl;
 	  }
 	}
 	new_arch = arch->extract(subs_to_keep);
