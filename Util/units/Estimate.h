@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Estimate.h,v $
-   $Revision: 1.10 $
-   $Date: 2003/04/04 11:06:00 $
+   $Revision: 1.11 $
+   $Date: 2003/04/26 06:45:46 $
    $Author: straten $ */
 
 #ifndef __Estimate_h
@@ -34,7 +34,8 @@ class Estimate
   Estimate (T _val=0, U _var=0) { val=_val; var=_var; }
 
   //! Construct from another Estimate
-  Estimate (const Estimate& d) { val=d.val; var=d.var; }
+  template <typename V, typename W>
+  Estimate (const Estimate<V,W>& d) { val=d.val; var=d.var; }
 
   //! Assignment operator
   const Estimate& operator= (const Estimate& d)
@@ -161,8 +162,8 @@ class MeanEstimate
   { norm_val += d.norm_val; inv_var += d.inv_var; return *this; }
 
   //! Addition operator
-  const MeanEstimate& operator+= (const Estimate<T>& d)
-  { T iv=1.0/d.var; norm_val += d.val*iv; inv_var += iv; return *this; }
+  const MeanEstimate& operator+= (const Estimate<T,U>& d)
+  { U iv=1.0/d.var; norm_val += d.val*iv; inv_var += iv; return *this; }
 
   //! Equality operator
   bool operator == (T _norm_val) const
