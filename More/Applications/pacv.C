@@ -1,5 +1,8 @@
 #define PGPLOT 1
 
+#include "Pulsar/FluxCalibrator.h"
+#include "Pulsar/FluxCalibratorPlotter.h"
+
 #include "Pulsar/SingleAxisCalibrator.h"
 #include "Pulsar/SingleAxisCalibratorPlotter.h"
 
@@ -27,19 +30,28 @@ int main (int argc, char** argv)
 {
   // use the Single Axis model
   bool single_axis = false;
+
+  // treat all of the Archives as one FluxCalibrator observation set
+  bool flux_cal = false;
+
   // filename of filenames
   char* metafile = NULL;
+
   // verbosity flag
   bool verbose = false;
 
   char c;
-  while ((c = getopt(argc, argv, "hMqvV")) != -1)  {
+  while ((c = getopt(argc, argv, "hfMqvV")) != -1)  {
 
     switch (c)  {
 
     case 'h':
       usage();
       return 0;
+
+    case 'f':
+      flux_cal = true;
+      break;
 
     case 'M':
       metafile = optarg;
@@ -83,6 +95,8 @@ int main (int argc, char** argv)
   Reference::To<Pulsar::PolnCalibrator> calibrator;
   Reference::To<Pulsar::CalibratorPlotter> plotter;
 
+  Pulsar::FluxCalibrator fluxcal;
+
   for (unsigned ifile=0; ifile<filenames.size(); ifile++) {  try {
 
     if (verbose)
@@ -90,8 +104,16 @@ int main (int argc, char** argv)
 
     archive = Pulsar::Archive::load( filenames[ifile] );
 
+    if (flux_cal) {
+      if (verbose)
+	cerr << "pacv: Adding Archive to FluxCalibrator" << endl;
+      
+      fluxcal.add_observation (archive);
+      continue;
+    }
+
     if (verbose)
-      cerr << "pacv: Constructing Calibrator" << endl;
+      cerr << "pacv: Constructing PolnCalibrator" << endl;
 
     if (single_axis) {
       calibrator = new Pulsar::SingleAxisCalibrator (archive);
@@ -105,7 +127,7 @@ int main (int argc, char** argv)
     calibrator -> build();
 
     if (verbose)
-      cerr << "pacv: Plotting Calibrator" << endl;
+      cerr << "pacv: Plotting PolnCalibrator" << endl;
 
     plotter->plot (calibrator);
 
@@ -115,6 +137,12 @@ int main (int argc, char** argv)
     cerr << "psrcal: Error calibrating " << filenames[ifile] << error << endl;
     return -1;
   }
+  }
+
+  if (flux_cal) {
+    cerr << "pacv: Plotting FluxCalibrator" << endl;
+    plotter = new Pulsar::FluxCalibratorPlotter;
+    plotter->plot (&fluxcal);
   }
 
   cpgend();
