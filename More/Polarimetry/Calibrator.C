@@ -70,12 +70,12 @@ MJD Pulsar::Calibrator::get_epoch () const
 Pulsar::Archive*
 Pulsar::Calibrator::new_solution (const string& archive_class) const
 {
-  if (verbose) cerr << "Pulsar::PolnCalibrator::get_solution"
+  if (verbose) cerr << "Pulsar::PolnCalibrator::new_solution"
 		 " create PolnCalibratorExtension" << endl;
 
   Reference::To<CalibratorExtension> ext = new_Extension ();
 
-  if (verbose) cerr << "Pulsar::PolnCalibrator::get_solution"
+  if (verbose) cerr << "Pulsar::PolnCalibrator::new_solution"
 		 " create " << archive_class << endl;
   
   Reference::To<Archive> output = Pulsar::Archive::new_Archive (archive_class);

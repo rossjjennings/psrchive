@@ -7,13 +7,13 @@ Pulsar::ReceptionCalibrator::get_calibrator_stokes () const
   if (calibrator_stokes)
     return calibrator_stokes;
 
-  if (verbose) cerr << "Pulsar::ReceptionCalibrator::get_solution"
+  if (verbose) cerr << "Pulsar::ReceptionCalibrator::get_calibrator_stokes"
 		 " create CalibratorStokes Extension" << endl;
 
   unsigned nchan = get_transformation_nchan();
 
   if (nchan != calibrator_estimate.source.size())
-    throw Error (InvalidState, "Pulsar::ReceptionCalibrator::get_solution",
+    throw Error (InvalidState, "Pulsar::ReceptionCalibrator::get_calibrator_stokes",
 		 "Calibrator Stokes nchan=%d != Transformation nchan=%d",
 		 calibrator_estimate.source.size(), nchan);
 
@@ -41,11 +41,8 @@ Pulsar::ReceptionCalibrator::get_calibrator_stokes () const
 
   }
   catch (Error& error) {
-    throw error += "Pulsar::ReceptionCalibrator::get_solution";
+    throw error += "Pulsar::ReceptionCalibrator::get_calibrator_stokes";
   }
 
 }
-
-
-
 
