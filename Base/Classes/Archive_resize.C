@@ -48,3 +48,8 @@ void Pulsar::Archive::resize (unsigned nsubint, unsigned npol,
   if (verbose)
     cerr << "Pulsar::Archive::resize exit" << endl;
 }
+
+void Pulsar::Archive::resize (Integration* integration)
+{
+  integration->resize (get_npol(), get_nchan(), get_nbin());
+}
