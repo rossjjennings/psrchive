@@ -185,3 +185,32 @@ const char* Signal::state_string (State state)
     return "Invalid";
   }
 }
+
+const char* Signal::source_string(Source source){
+  switch( source ){
+  case Unknown:
+    return "Unknown";
+  case Pulsar:
+    return "Pulsar";
+  case PolCal:
+    return "PolCal";
+  case FluxCal:
+    return "FluxCal";
+  default:
+    return "Invalid";
+  }
+}
+
+const char* Signal::basis_string(Basis basis){
+  switch( basis ){
+  case Circular:
+    return "Circular";
+  case Linear:
+    return "Linear";
+  default:
+    return "Invalid";
+  }
+}
+
+
+
