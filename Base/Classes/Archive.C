@@ -419,6 +419,8 @@ void Pulsar::Archive::defaraday (double rotation_measure, double rm_iono)
 void Pulsar::Archive::set_ephemeris (const psrephem& new_ephemeris)
 {
   ephemeris = new psrephem (new_ephemeris);
+  set_source (ephemeris->psrname());
+  set_dispersion_measure (ephemeris->get_dm());
   update_model ();
 }
 
