@@ -1,6 +1,6 @@
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Attic/string_utils.h,v $
-   $Revision: 1.8 $
-   $Date: 2000/01/20 01:29:14 $
+   $Revision: 1.9 $
+   $Date: 2000/01/24 12:21:04 $
    $Author: redwards $ */
 
 #ifndef __STRING_UTILS_H
@@ -71,6 +71,12 @@ inline int stringlen (float val, unsigned precision = 6)
 { return stringlen (double(val), precision); }
 
 string stringprintf(char *fmt ...);
+
+vector<string> 
+   stringdecimate(const string& wordstr, const string& delimiters);
+string stringdelimit(const vector<string>& words, char delimiter);
+
+
 
 
 #endif
