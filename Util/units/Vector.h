@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Vector.h,v $
-   $Revision: 1.5 $
-   $Date: 2003/08/19 16:42:23 $
+   $Revision: 1.6 $
+   $Date: 2004/04/06 14:00:04 $
    $Author: straten $ */
 
 #ifndef __Vector_H
@@ -23,6 +23,9 @@ public:
   //! Null constructor
   Vector () 
   { for (unsigned i=0; i<N; i++) x[i] = 0; }
+
+  Vector (T x0, T x1, T x2)
+  { x[0] = x0; x[1] = x1; x[2] = x2; }
 
   //! Construct from another Vector<U> instance
   template<typename U> Vector (const Vector<U, N>& s)
