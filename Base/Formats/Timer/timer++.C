@@ -293,7 +293,7 @@ void band_init (struct band * bd)
 void Timer::init (struct timer * hdr)
 {
   band_init (&(hdr->banda));
-  band_init (&(hdr->extra.bandb));
+  band_init (&(hdr->bandb));
 
   /* nothing yet */
   strcpy(hdr->ram_boards," ");
