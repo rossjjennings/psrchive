@@ -17,7 +17,7 @@
 #include "genutil.h"
 
 #include <cpgplot.h>
-
+#include <math.h>
 #include <string.h>
 
 void usage ()
@@ -33,6 +33,7 @@ void usage ()
     "  -T               Time scrunch before fitting \n"
     "\n"
     "Fitting options:\n"
+    "  -a stdfiles      Automatic selection of standard profiles from frequency \n"
     "  -n harmonics     Use up to the specified number of harmonics\n"
     "  -p               Perform full polarimetric fit in Fourier domain \n"
     "  -s stdfile       Location of standard profile \n"
@@ -46,6 +47,7 @@ int main (int argc, char *argv[])
   
   bool verbose = false;
   bool std_given = false;
+  bool std_multiple = false;
   bool time_domain = false;
   bool full_poln = false;
 
@@ -55,15 +57,14 @@ int main (int argc, char *argv[])
   string std;
 
   vector<string> archives;
+  vector<string> stdprofiles;
   vector<Tempo::toa> toas;
 
   int gotc = 0;
 
   Pulsar::PolnProfileFit fit;
-
-  while ((gotc = getopt(argc, argv, "hiFn:ps:tTvV")) != -1) {
+  while ((gotc = getopt(argc, argv, "hiFn:ps:a:tTvV")) != -1) {
     switch (gotc) {
-
     case 'h':
       usage ();
       return 0;
@@ -79,7 +80,7 @@ int main (int argc, char *argv[])
       break;
 
     case 'i':
-      cout << "$Id: pat.C,v 1.18 2004/04/20 13:07:36 straten Exp $" << endl;
+      cout << "$Id: pat.C,v 1.19 2004/05/03 04:03:25 ghobbs Exp $" << endl;
       return 0;
 
     case 'F':
@@ -98,6 +99,23 @@ int main (int argc, char *argv[])
       full_poln = true;
       break;
 
+    case 'a':
+      std_given     = true;
+      std_multiple  = true;
+      std = optarg;
+      if (strchr(optarg,'*')) /* have something like "*.std" */
+	dirglob (&stdprofiles, optarg);
+      else /* Break up inputs (e.g. have "10cm.std 20cm.std") */
+	{
+	  char *str;
+	  str = strtok(optarg," ");
+	  do 
+	    {
+	      stdprofiles.push_back(str);
+	    } while ((str = strtok(NULL," "))!=NULL);
+	}
+      break;
+
     case 's':
       std_given = true;
       std = optarg;
@@ -111,7 +129,6 @@ int main (int argc, char *argv[])
       cout << "Unrecognised option " << gotc << endl;
     }
   }
-  
   for (int ai=optind; ai<argc; ai++)
     dirglob (&archives, argv[ai]);
   
@@ -131,29 +148,31 @@ int main (int argc, char *argv[])
 
   Reference::To<const Pulsar::PolnProfile> poln_profile;
 
-  try {
-    
-    stdarch = Pulsar::Archive::load(std);
-    stdarch->fscrunch();
-    stdarch->tscrunch();
-
-    if (full_poln) {
-
-      cerr << "pat: full polarization fitting with " << std << endl;
-      fit.set_standard( stdarch->get_Integration(0)->new_PolnProfile(0) );
-      fit.set_transformation( new Calibration::Polar );
-
+  if (!std_multiple) /* If only using one standard profile */
+    {
+      try {
+	
+	stdarch = Pulsar::Archive::load(std);
+	stdarch->fscrunch();
+	stdarch->tscrunch();
+	
+	if (full_poln) {
+	  
+	  cerr << "pat: full polarization fitting with " << std << endl;
+	  fit.set_standard( stdarch->get_Integration(0)->new_PolnProfile(0) );
+	  fit.set_transformation( new Calibration::Polar );
+	  
+	}
+	else
+	  stdarch->convert_state(Signal::Intensity);
+	
+      }
+      catch (Error& error) {
+	cerr << "Error processing standard profile:" << endl;
+	cerr << error << endl;
+	return -1;
+      }
     }
-    else
-      stdarch->convert_state(Signal::Intensity);
-
-  }
-  catch (Error& error) {
-    cerr << "Error processing standard profile:" << endl;
-    cerr << error << endl;
-    return -1;
-  }
-
   for (unsigned i = 0; i < archives.size(); i++) {
     
     try {
@@ -190,6 +209,36 @@ int main (int argc, char *argv[])
       else {
 
 	arch->convert_state (Signal::Intensity);
+	/* If multiple standard profiles given must now choose and load 
+           the one closest in frequency */
+	if (std_multiple) {	  
+	  double freq = arch->get_centre_frequency();
+	  double minDiff=0.0;
+	  int    jDiff=0;
+	  unsigned j;
+	  for (j = 0;j < stdprofiles.size();j++)	    
+	    {
+	      stdarch = Pulsar::Archive::load(stdprofiles[j]);	      
+	      if (j==0 || fabs(stdarch->get_centre_frequency() - freq)<minDiff)
+		{
+		  minDiff = fabs(stdarch->get_centre_frequency()-freq);
+		  jDiff   = j;
+		}
+	    }
+	  stdarch = Pulsar::Archive::load(stdprofiles[jDiff]);
+	  stdarch->fscrunch();
+	  stdarch->tscrunch();
+	  
+	  if (full_poln) {
+	    
+	    cerr << "pat: full polarization fitting with " << std << endl;
+	    fit.set_standard( stdarch->get_Integration(0)->new_PolnProfile(0) );
+	    fit.set_transformation( new Calibration::Polar );
+	    
+	  }
+	  else
+	    stdarch->convert_state(Signal::Intensity);
+	}
         arch->toas(toas, stdarch, time_domain);
 
       }
