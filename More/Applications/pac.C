@@ -20,6 +20,8 @@
 
 // A command line tool for calibrating Pulsar::Archives
 
+const char* args = "A:bcd:e:fFhiIn:op:PqsSt:Tu:vVwW";
+
 void usage ()
 {
   cout << "A program for calibrating Pulsar::Archives\n"
@@ -104,7 +106,7 @@ int main (int argc, char *argv[]) {
 
   unsigned char flip_sign = 0x00;
 
-  while ((gotc = getopt(argc, argv, "A:bcd:e:fFhiIn:op:PqsSTu:vVwW")) != -1) {
+  while ((gotc = getopt(argc, argv, args)) != -1) {
     switch (gotc) {
     case 'h':
       usage ();
@@ -123,7 +125,7 @@ int main (int argc, char *argv[]) {
       Pulsar::Archive::set_verbosity(3);
       break;
     case 'i':
-      cout << "$Id: pac.C,v 1.54 2004/08/08 06:34:51 hknight Exp $" << endl;
+      cout << "$Id: pac.C,v 1.55 2004/08/25 07:42:15 hknight Exp $" << endl;
       return 0;
 
     case 'n': {
