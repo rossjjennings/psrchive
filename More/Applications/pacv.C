@@ -11,6 +11,8 @@
 #include "string_utils.h"
 #include "dirutil.h"
 
+#include <cpgplot.h>
+
 #include <iostream>
 #include <unistd.h>
 
