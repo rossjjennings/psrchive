@@ -17,7 +17,7 @@ Phase::Phase(int64 tns, double ftns) {
   turns += (int) ftns;
   fturns = ftns - (int) ftns;
   if(fturns<0 && turns>0) {
-    fturns = 1.0-fturns;
+    fturns = 1.0+fturns;
     turns--;
   }
   if(fturns>0 && turns<0) {
