@@ -45,9 +45,9 @@ class toaPlot: public QPgplot {
   void plotter ();
   void handleEvent (float x, float y, char ch);
   
-  void setPoints (AxisQuantity, AxisQuantity, vector<wrapper>);
-  
- public slots:
+  void setPoints (AxisQuantity, AxisQuantity, vector<wrapper>, bool, bool);
+
+  public slots:
 
   void xzoomer ();
   void yzoomer ();
@@ -73,6 +73,9 @@ class toaPlot: public QPgplot {
   
   float xmin, xmax, ymin, ymax;
   AxisQuantity xq, yq;
+
+  bool logx;
+  bool logy;
   
   int mode;
   int task;

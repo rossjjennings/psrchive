@@ -382,6 +382,16 @@ void Rhythm::save_toas (const char* fname)
   footer->setText(str);
 }
 
+void Rhythm::hc ()
+{
+  plot_window->hardcopy("rhythm.ps/ps");
+}
+
+void Rhythm::chc ()
+{
+  plot_window->hardcopy("rhythm.ps/cps");
+}
+
 void Rhythm::set_Params (const psrephem& eph)
 {
   tempo->setItemEnabled (saveParmsID, true);
@@ -1335,7 +1345,8 @@ void Rhythm::goplot ()
     
     useme.push_back(tempw);
   }
-  plot_window->setPoints(xq, yq, useme);
+  plot_window->setPoints(xq, yq, useme, 
+			 chooser->isLogX(), chooser->isLogY());
 }
 
 void Rhythm::reselect ()
@@ -1666,10 +1677,10 @@ void Rhythm::simulateModel()
 AxisSelector::AxisSelector (QWidget* parent)
   : QHBox(parent)
 {
-  Xgrp = new QButtonGroup(13, Qt::Vertical, "X Axis", this);
+  Xgrp = new QButtonGroup(14, Qt::Vertical, "X Axis", this);
   Xgrp -> setRadioButtonExclusive(true);
   
-  Ygrp = new QButtonGroup(13, Qt::Vertical, "Y Axis", this);
+  Ygrp = new QButtonGroup(14, Qt::Vertical, "Y Axis", this);
   Ygrp -> setRadioButtonExclusive(true);
 
   X1 = new QRadioButton("Residual (us)", Xgrp);
@@ -1685,7 +1696,8 @@ AxisSelector::AxisSelector (QWidget* parent)
   X11 = new QRadioButton("Length", Xgrp);
   X12 = new QRadioButton("P.A.", Xgrp);
   X13 = new QRadioButton("TOA Index", Xgrp);
-
+  Xlog = new QCheckBox("Log Scale", Xgrp);
+  
   X3->setChecked(true);
 
   Y1 = new QRadioButton("Residual (us)", Ygrp);
@@ -1701,6 +1713,7 @@ AxisSelector::AxisSelector (QWidget* parent)
   Y11 = new QRadioButton("Length", Ygrp);
   Y12 = new QRadioButton("P.A.", Ygrp);
   Y13 = new QRadioButton("TOA Index", Ygrp);
+  Ylog = new QCheckBox("Log Scale", Ygrp);
 
   Y1->setChecked(true);
   
@@ -1717,6 +1730,7 @@ AxisSelector::AxisSelector (QWidget* parent)
   Xgrp->insert(X11,11);
   Xgrp->insert(X12,12);
   Xgrp->insert(X13,13);
+  Xgrp->insert(Xlog,14);
 
   Ygrp->insert(Y1,1);
   Ygrp->insert(Y2,2);
@@ -1731,6 +1745,7 @@ AxisSelector::AxisSelector (QWidget* parent)
   Ygrp->insert(Y11,11);
   Ygrp->insert(Y12,12);
   Ygrp->insert(Y13,13);
+  Ygrp->insert(Ylog,14);
 
   QObject::connect(Xgrp, SIGNAL(clicked(int)),
 		   this, SLOT(Xuseful(int)));
@@ -1741,10 +1756,26 @@ AxisSelector::AxisSelector (QWidget* parent)
 
 void AxisSelector::Xuseful(int placeholder)
 {
+  if (placeholder == 14)
+    return;
+
   emit XChange(toaPlot::AxisQuantity(placeholder));
 }
 
 void AxisSelector::Yuseful(int placeholder)
 {
+  if (placeholder == 14)
+    return;
+
   emit YChange(toaPlot::AxisQuantity(placeholder));
+}
+
+bool AxisSelector::isLogX()
+{
+  return (Xlog->isChecked());
+}
+
+bool AxisSelector::isLogY()
+{
+  return (Ylog->isChecked());
 }

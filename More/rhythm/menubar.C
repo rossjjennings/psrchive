@@ -20,13 +20,17 @@ void Rhythm::menubarConstruct ()
   //
   QPopupMenu *file = new QPopupMenu( menuBar() );  CHECK_PTR( file );
 
-  file->insertItem( "&Load TOAs",      this, 
+  file->insertItem( "&Load TOAs",       this, 
 		    SLOT( load_toas() ), ALT+Key_L );
-  file->insertItem( "&Add TOAs",      this, 
+  file->insertItem( "&Add TOAs",        this, 
 		    SLOT( add_toas() ), ALT+Key_A );
-  file->insertItem( "&Save TOAs",      this, 
+  file->insertItem( "&Save TOAs",       this, 
 		    SLOT( save_toas() ), ALT+Key_S );
-
+  file->insertSeparator();
+  file->insertItem( "Write Postscript", this, 
+		    SLOT( hc() ));
+  file->insertItem( "Write Colour PS", this, 
+		    SLOT( chc() ));
   file->insertSeparator();
   file->insertItem( "&Close", this, SLOT(close_toas()), ALT+Key_C );
   file->insertItem( "E&xit",  qApp, SLOT(quit()),     ALT+Key_X );

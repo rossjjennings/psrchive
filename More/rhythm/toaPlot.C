@@ -21,6 +21,7 @@ toaPlot::toaPlot (QWidget *parent, const char *name )
   xmax = ymax = 1.0;
   
   xq = yq = None;
+  logx = logy = false;
   
   mode = 0;
   task = 1;
@@ -38,7 +39,15 @@ void toaPlot::plotter ()
   cpgsvp (0.1,0.9,0.1,0.9);
   
   cpgswin (xmin, xmax, ymin, ymax);
-  cpgbox ("bcnst",0.0,0,"bcnst",0.0,0);
+  
+  if (logx && logy)
+    cpgbox ("bcnstl",0.0,0,"bcnstl",0.0,0);
+  else if (logx)
+    cpgbox ("bcnstl",0.0,0,"bcnst",0.0,0);
+  else if (logy)
+    cpgbox ("bcnst",0.0,0,"bcnstl",0.0,0);
+  else
+    cpgbox ("bcnst",0.0,0,"bcnst",0.0,0);
   
   string xlab, ylab;
   
@@ -47,43 +56,43 @@ void toaPlot::plotter ()
     xlab = " ";
     break;
   case ResidualMicro:
-    xlab = "Residual Microseconds";
+    xlab += "Residual Microseconds";
     break;
   case ResidualMilliTurns:
-    xlab = "Residual Milliturns";
+    xlab += "Residual Milliturns";
     break;
   case TOA_MJD:
-    xlab = "Arrival Time (Days Since MJD 50000)";
+    xlab += "Arrival Time (Days Since MJD 50000)";
     break;
   case BinaryPhase:
-    xlab = "Binary Phase";
+    xlab += "Binary Phase";
     break;
   case ObsFreq:
-    xlab = "Observing Frequency";
+    xlab += "Observing Frequency";
     break;
   case DayOfYear:
-    xlab = "Day of Year";
+    xlab += "Day of Year";
     break;
   case ErrorMicro:
-    xlab = "Timing Error (Microseconds)";
+    xlab += "Timing Error (Microseconds)";
     break;
   case SignalToNoise:
-    xlab = "Signal / Noise Ratio";
+    xlab += "Signal / Noise Ratio";
     break;
   case Bandwidth:
-    xlab = "Observed Bandwidth";
+    xlab += "Observed Bandwidth";
     break;
   case DispersionMeasure:
-    xlab = "Dispersion Measure";
+    xlab += "Dispersion Measure";
     break;
   case Duration:
-    xlab = "Observation Length (Seconds)";
+    xlab += "Observation Length (Seconds)";
     break;
   case ParallacticAngle:
-    xlab = "Parallactic Angle (degrees)";
+    xlab += "Parallactic Angle (degrees)";
     break;
   case PointNumber:
-    xlab = "TOA List Index";
+    xlab += "TOA List Index";
     break;
   }
   
@@ -92,43 +101,43 @@ void toaPlot::plotter ()
     ylab = " ";
     break;
   case ResidualMicro:
-    ylab = "Residual Microseconds";
+    ylab += "Residual Microseconds";
     break;
   case ResidualMilliTurns:
-    ylab = "Residual Milliturns";
+    ylab += "Residual Milliturns";
     break;
   case TOA_MJD:
-    ylab = "Arrival Time (MJD)";
+    ylab += "Arrival Time (MJD)";
     break;
   case BinaryPhase:
-    ylab = "Binary Phase";
+    ylab += "Binary Phase";
     break;
   case ObsFreq:
-    ylab = "Observing Frequency";
+    ylab += "Observing Frequency";
     break;
   case DayOfYear:
-    ylab = "Day of Year";
+    ylab += "Day of Year";
     break;
   case ErrorMicro:
-    ylab = "Timing Error (Microseconds)";
+    ylab += "Timing Error (Microseconds)";
     break;
   case SignalToNoise:
-    ylab = "Signal / Noise Ratio";
+    ylab += "Signal / Noise Ratio";
     break;
   case Bandwidth:
-    ylab = "Observed Bandwidth";
+    ylab += "Observed Bandwidth";
     break;
   case DispersionMeasure:
-    ylab = "Dispersion Measure";
+    ylab += "Dispersion Measure";
     break;
   case Duration:
-    ylab = "Observation Length (Seconds)";
+    ylab += "Observation Length (Seconds)";
     break;
   case ParallacticAngle:
-    ylab = "Parallactic Angle (degrees)";
+    ylab += "Parallactic Angle (degrees)";
     break;
   case PointNumber:
-    ylab = "TOA List Index";
+    ylab += "TOA List Index";
     break;
   }
 
@@ -430,7 +439,8 @@ void toaPlot::boxselector ()
   handleEvent(0,0,'~');
 }
 
-void toaPlot::setPoints(AxisQuantity _xq, AxisQuantity _yq, vector<wrapper> _data)
+void toaPlot::setPoints(AxisQuantity _xq, AxisQuantity _yq, vector<wrapper> _data,
+			bool _logx, bool _logy)
 {
   if (_data.empty()) {
     clearScreen();
@@ -441,6 +451,33 @@ void toaPlot::setPoints(AxisQuantity _xq, AxisQuantity _yq, vector<wrapper> _dat
   yq = _yq;
 
   data = _data;
+
+  logx = _logx;
+  logy = _logy;
+
+  if (logx) {
+    for (unsigned i = 0; i < data.size(); i++) {
+      if (data[i].x <= 0.0) {
+	logx = false;
+	break;
+      }
+      data[i].x = log10(data[i].x);
+      if (data[i].ex > 0.0)
+	data[i].ex = log10(data[i].ex);
+    }
+  }
+
+  if (logy) {
+    for (unsigned i = 0; i < data.size(); i++) {
+      if (data[i].y <= 0.0) {
+	logy = false;
+	break;
+      }
+      data[i].y = log10(data[i].y);
+      if (data[i].ey > 0.0)
+	data[i].ey = log10(data[i].ey);
+    }
+  }
 
   clearScreen();
   drawPlot();

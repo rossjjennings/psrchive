@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/rhythm/rhythm.h,v $
-   $Revision: 1.38 $
-   $Date: 2003/10/19 23:59:55 $
+   $Revision: 1.39 $
+   $Date: 2003/10/25 01:04:29 $
    $Author: ahotan $ */
 
 // //////////////////////////////////////////////////////////////////////////
@@ -31,6 +31,7 @@
 #include <qtabwidget.h>
 #include <qprogressdialog.h>
 #include <qfiledialog.h>
+#include <qcheckbox.h>
 
 #include "psrephem.h"
 #include "ephio.h"
@@ -77,6 +78,7 @@ class AxisSelector : public QHBox
   QRadioButton* X11;
   QRadioButton* X12;
   QRadioButton* X13;
+  QCheckBox*    Xlog;
 
   QRadioButton* Y1;
   QRadioButton* Y2;
@@ -91,11 +93,15 @@ class AxisSelector : public QHBox
   QRadioButton* Y11;
   QRadioButton* Y12;
   QRadioButton* Y13;
+  QCheckBox*    Ylog;
   
  public slots:
 
   void Xuseful(int);
   void Yuseful(int);
+
+  bool isLogX();
+  bool isLogY();
 
  signals:
 
@@ -245,6 +251,8 @@ class Rhythm : public QMainWindow
   void close_toas ();
   int  prompt_save_toas ();
   void save_toas ();
+  void chc ();
+  void hc ();
 
   // Tempo menu callbacks
   void fit();
