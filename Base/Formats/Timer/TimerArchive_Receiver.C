@@ -2,11 +2,14 @@
 #include "Pulsar/TimerArchive.h"
 #include "Pulsar/Parkes.h"
 
-bool is_null_terminated (const char* str, unsigned length)
+bool is_valid_string (const char* str, unsigned length)
 {
-  for (unsigned i=0; i < length; i++)
+  for (unsigned i=0; i < length; i++) {
+    if (!isalnum(str[i]))
+      return false;
     if (str[i] == '\0')
       return true;
+  }
   return false;
 }
 
@@ -23,7 +26,7 @@ void Pulsar::TimerArchive::unpack (Receiver* receiver)
   }
 
   // check that the receiver is a null-terminated string
-  if (!is_null_terminated( hdr.rcvr_id, RCVR_ID_STRLEN )) {
+  if (!is_valid_string( hdr.rcvr_id, RCVR_ID_STRLEN )) {
 
     if (verbose)
       cerr << "Pulsar::TimerArchive::unpack Receiver name corrupted." << endl;
