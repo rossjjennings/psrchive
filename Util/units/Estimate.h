@@ -1,17 +1,22 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Estimate.h,v $
-   $Revision: 1.4 $
-   $Date: 2003/02/12 14:55:03 $
+   $Revision: 1.5 $
+   $Date: 2003/02/13 16:32:04 $
    $Author: straten $ */
 
-#ifndef __Estimate_H
-#define __Estimate_H
+#ifndef __Estimate_h
+#define __Estimate_h
 
-//! Estimates have a value, \f$ x \f$, and a variance, \f$ \sigma^2 \f$
+#include <iostream>
+#include <math.h>
+
+//! Estimates with a value, \f$ x \f$, and a variance, \f$ \sigma^2 \f$
 /*!
   Where \f$ y = f (x_1, x_2, ... x_n) \f$, then
   \f$ \sigma_y^2 = \sum_{i=1}^n ({\delta f \over \delta x_i})^2\sigma_i^2 \f$
+
+  See http://mathworld.wolfram.com/ErrorPropagation.html
 */
 template <typename T>
 class Estimate
@@ -50,25 +55,52 @@ class Estimate
   { return operator *= (d.inverse()); }
 
   //! Equality operator
-  bool operator == (T _val) const
-  { return val == _val; }
+  bool operator == (const Estimate& d) const
+  { return val == d.val; }
+
+  //! Inequality operator
+  bool operator != (const Estimate& d) const
+  { return ! operator == (d); }
+
+  //! Comparison operator
+  bool operator < (const Estimate& d) const
+  { return val < d.val; }
+
 
   //! Inversion operator
   /*! Where \f$ r=1/x \f$, \f$ \sigma_r = r^2\sigma_x/x^2 = sigma_x/x^4 */
   const Estimate inverse () const
   { T v=1.0/val; return Estimate (v,var*v*v*v*v); }
 
-  friend Estimate operator + (Estimate a, const Estimate& b)
+  friend const Estimate operator + (Estimate a, const Estimate& b)
   { return a+=b; }
 
-  friend Estimate operator - (Estimate a, const Estimate& b)
+  friend const Estimate operator - (Estimate a, const Estimate& b)
   { return a-=b; }
   
-  friend Estimate operator * (Estimate a, const Estimate& b)
+  friend const Estimate operator * (Estimate a, const Estimate& b)
   { return a*=b; }
   
-  friend Estimate operator / (Estimate a, const Estimate& b)
+  friend const Estimate operator / (Estimate a, const Estimate& b)
   { return a/=b; }
+
+
+  //! See http://mathworld.wolfram.com/ErrorPropagation.html Equation (15)
+  friend const Estimate exp (const Estimate& u)
+  { T val = std::exp (u.val); return Estimate (val, val*val*u.var); }
+
+  //! See http://mathworld.wolfram.com/ErrorPropagation.html Equation (17)
+  friend const Estimate log (const Estimate& u)
+  { return Estimate (std::log (u.val), u.var/(u.val*u.val)); }
+
+  //! \f$ {\delta\over\delta x} \tan^-1 (x) = (1+x^2)^{-1} \f$
+  friend const Estimate atan2 (const Estimate& s, const Estimate& c)
+  { Estimate tan = s/c; T d = 1.0 + tan.val*tan.val;
+    return Estimate (std::atan2 (s.val, c.val), tan.var/(d*d)); }
+
+  //! \f$ {\delta\over\delta x} x^\onehalf = \onehalf x^{-\onehalf} \f$
+  friend const Estimate sqrt (const Estimate& u)
+  { return Estimate (std::sqrt (u.val), 0.25*u.var/fabs(u.val)); }
 
 };
 
@@ -82,6 +114,8 @@ ostream& operator<< (ostream& ostr, const Estimate<T>& estimate)
 
 /*!
   \f$ {\bar{x} over \bar{\sigma}^2} = \sum_{i=1}^n {x_i \over \sigma_i^2} \f$
+
+  See http://mathworld.wolfram.com/MaximumLikelihood.html (Eqs. 16 and 19)
 */
 template <typename T>
 class MeanEstimate
