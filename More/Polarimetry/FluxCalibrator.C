@@ -18,7 +18,7 @@ bool Pulsar::FluxCalibrator::self_calibrate = false;
 */
 Pulsar::FluxCalibrator::FluxCalibrator (const Archive* archive)
 {
-  calculated = false;
+  init ();
 
   if (!archive)
     return;
@@ -38,6 +38,10 @@ Pulsar::FluxCalibrator::FluxCalibrator (const Archive* archive)
     add_observation (archive);
 }
 
+void Pulsar::FluxCalibrator::init ()
+{
+  calculated = have_on = have_off = false;
+}
 
 double Pulsar::FluxCalibrator::meanTsys ()
 {
@@ -64,6 +68,11 @@ void Pulsar::FluxCalibrator::add_observation (const Archive* archive)
     throw Error (InvalidParam, "Pulsar::FluxCalibrator::add_observation",
                  "invalid Pulsar::Archive pointer");
 
+  if (verbose)
+    cerr << "Pulsar::FluxCalibrator::add_observation source name=" 
+         << archive->get_source() << " type=" 
+         << Signal::Source2string(archive->get_type()) << endl;
+
   if ( archive->get_type() != Signal::FluxCalOn &&
        archive->get_type() != Signal::FluxCalOff )
 
@@ -74,9 +83,8 @@ void Pulsar::FluxCalibrator::add_observation (const Archive* archive)
   string reason;
   if (calibrator && !calibrator->calibrator_match (archive, reason))
     throw Error (InvalidParam, "Pulsar::FluxCalibrator::add_observation",
-		 "Pulsar::Archive='" + calibrator->get_filename() + "'"
-		 "\ndoes not mix with '" + archive->get_filename() + "'"
-		 "\n" + reason);
+		 "mismatch between\n\t" + calibrator->get_filename() +
+                 " and\n\t" + archive->get_filename() + reason);
 
   unsigned nchan = archive->get_nchan ();
   string filename = archive->get_filename ();
@@ -145,6 +153,10 @@ void Pulsar::FluxCalibrator::add_observation (const Archive* archive)
     filenames.push_back (filename);
 
   calculated = false;
+  if (archive->get_type() == Signal::FluxCalOn)
+    have_on = true;
+  if (archive->get_type() == Signal::FluxCalOff)
+    have_off = true;
 
 }
 
@@ -198,6 +210,14 @@ void Pulsar::FluxCalibrator::create (unsigned required_nchan)
 
   if (calculated && cal_flux.size() == required_nchan)
     return;
+
+  if (!have_on)
+    throw Error (InvalidState, "Pulsar::FluxCalibrator::calibrate",
+                 "no FluxCal-On data");
+
+  if (!have_off)
+    throw Error (InvalidState, "Pulsar::FluxCalibrator::calibrate",
+                 "no FluxCal-Off data");
 
   ratio_on.resize (nchan);
   ratio_off.resize (nchan);

@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/FluxCalibrator.h,v $
-   $Revision: 1.16 $
-   $Date: 2004/10/11 14:25:21 $
+   $Revision: 1.17 $
+   $Date: 2004/10/21 06:39:38 $
    $Author: straten $ */
 
 #ifndef __Pulsar_FluxCalibrator_H
@@ -93,6 +93,15 @@ namespace Pulsar {
 
     //! Set true after call to calculate
     bool calculated;
+
+    //! FluxCal-On data available
+    bool have_on;
+
+    //! FluxCal-Off data available
+    bool have_off;
+
+    //! Initialize attributes
+    void init ();
 
   };
 
