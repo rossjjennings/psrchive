@@ -13,7 +13,7 @@
 #include "dirutil.h"
 #include "string_utils.h"
 
-static const char* psradd_args = "b:c:Ce:f:FG:hiI:M:p:Pqr:sS:tT:vV";
+static const char* psradd_args = "b:c:Ce:f:FG:hiI:M:p:Pqr:sS:tT:vVZ:";
 
 void usage () {
   cout <<
@@ -36,6 +36,7 @@ void usage () {
     " -s          Tscrunch result after each new file (nice on RAM)\n"
     " -t          Make no changes to file system (testing mode)\n"
     " -T tempo    System call to tempo\n"
+    " -Z time     Only add archives that are time (+/- 0.5) seconds long\n"
     "\n"
     "AUTO ADD options:\n"
     " -e ext      Extension added to output filenames (default .it)\n"
@@ -99,6 +100,9 @@ int main (int argc, char **argv)
   // The centre frequency to select upon
   double centre_frequency = -1.0;
 
+  // Only add in archives if their length matches this time
+  float required_archive_length = -1.0;
+
   int c;
 
   while ((c = getopt(argc, argv, psradd_args)) != -1)  {
@@ -109,7 +113,7 @@ int main (int argc, char **argv)
       return 0;
       
     case 'i':
-      cout << "$Id: psradd.C,v 1.16 2004/07/12 09:28:56 straten Exp $" << endl;
+      cout << "$Id: psradd.C,v 1.17 2004/08/10 05:20:02 hknight Exp $" << endl;
       return 0;
       
     case 'b':
@@ -197,6 +201,8 @@ int main (int argc, char **argv)
       verbose = true;
       break;
 
+    case 'Z': required_archive_length = atof(optarg); break;
+
     } 
   }
 
@@ -269,6 +275,14 @@ int main (int argc, char **argv)
       cerr << "psradd: archive [" << filenames[ifile] << "] has no data\n";
       continue;
     }
+
+    if( required_archive_length > 0 && fabs(archive->integration_length()-required_archive_length) > 0.5 ){
+      fprintf(stderr,"psradd: archive [%s] not %f seconds long- it was %f seconds long\n",
+	      filenames[ifile].c_str(), archive->integration_length(),
+	      required_archive_length);
+      continue;
+    }
+
 
     if( centre_frequency > 0.0 && fabs(archive->get_centre_frequency()-centre_frequency) > 0.0001 )
       continue;
