@@ -13,7 +13,7 @@ LIB_C_SRCS = pg_plot_gnu.C profile.C sub_int.C archive.C                \
 	     convert_endian.C main_hdr.C
 LIB_F_SRCS = ffft.f fftfit.f brent.f fccf.f cprof.f shiftbyfft.f \
              convolve.f width.f newtreduce.f tsky1.f \
-             fftconv.f scan_fort_val.f iono_rm.f ionrm.f pdma_fortran.f
+             fftconv.f scan_fort_val.f iono_rm.f ionrm.f 
 
 LIB_SRCS   = ${LIB_C_SRCS} ${LIB_F_SRCS}
 
@@ -35,12 +35,16 @@ OTHER_SRCS      = align.C amps.C chanprep.C  \
                   mel.C newname.C oneprof.C plotsub.C    \
                   tadd.C calfbar.C modhead.C   \
 		  plot_gry_diff.C pepoch.C stokes_plt.C freduce.C cal_arch.C \
-		  cleanarch.C fixhdr.C feedmix.C xtoa.C crm.C  \
+		  cleanarch.C fixhdr.C feedmix.C crm.C  \
 		  getcal.C crh.C psrhead.C autotadd.C \
 		  bin_ph.C corflux.C flux.C fakedat.C quik_cal.C pdma.C
 
-NOT_WORKING     = bandpass.C detail.C 
+NOT_WORKING     = bandpass.C detail.C pdma_fortran.f xtoa.C 
 
 PROGRAMS = $(ESSENTIAL_SRCS) $(OTHER_SRCS)
 
 include $(LOCAL_ROOT)/include/Makefile.extended
+
+
+
+
