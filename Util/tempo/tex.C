@@ -74,11 +74,23 @@ string tex_dec (char* str)
 
 // receives any other value, as output by psrinfo
 // outputs a LaTeX formatted string
-static char buf [128];
+static char* buf = 0;
+static unsigned bufsz = 1024;
+
+static string nodata = " \\nodata ";
+
 string tex_double (double val, double err)
 {
+  if (!buf) {
+    buf = new char[bufsz];
+    assert (buf != 0);
+  }
+
+  if (psrephem::verbose)
+    cerr << "tex_double (" << val << "," << err << ")" << endl;
+
   if (val == 0.0)
-    return string ("\\nodata");
+    return nodata;
 
   else if (err <=0.0) {
     sprintf (buf, "%.6f", val);
@@ -86,11 +98,10 @@ string tex_double (double val, double err)
   }
 
   string ret;
-  char str[128];
   
-  eoutchop2 (val, err, "%30f", str);
+  eoutchop2 (val, err, "%30f", buf);
   
-  char* s = strtok(str, " ");
+  char* s = strtok(buf, " ");
   char* e = strchr(s, 'E');
   
   if (e!=NULL)
@@ -149,11 +160,16 @@ string psrephem::tex_name () const
 // indexed by 'ephi' (as in ephio.h)
 string psrephem::tex_val (int ephi, double fac, unsigned precision) const
 {
+  if (!buf) {
+    buf = new char[bufsz];
+    assert (buf != 0);
+  }
+
   if (verbose)
-    cerr << "psrephem::tex_val(" << ephi << ") entered" << endl;
+    cerr << "psrephem::tex_val(" << parmNames[ephi] << ") entered" << endl;
 
   if (parmStatus[ephi] < 1)
-    return " \\nodata ";
+    return nodata;
 
   switch ( parmTypes[ephi] ) {
 
@@ -208,6 +224,9 @@ string psrephem::tex_val (int ephi, double fac, unsigned precision) const
 // indexed by 'ephi' (as in ephio.h)
 const char* psrephem::tex_descriptor (int ephind)
 {
+  //if (psrephem::short_tex)
+  //return short_tex_descriptor (ephind);
+
   switch (ephind) {
   case EPH_PEPOCH: return "$P$ epoch (MJD)";
   case EPH_RAJ:    return "Right ascension, $\\alpha$ (J2000.0)";
@@ -246,6 +265,7 @@ string psrephem::tex () const
 
 string psrephem::tex (vector<psrephem>& vals, bool dots)
 {
+  string retval;
   bool binary = false;
   unsigned ip;
 
@@ -260,8 +280,47 @@ string psrephem::tex (vector<psrephem>& vals, bool dots)
     bw = " & ";
   string nl = " \\\\\n";
 
+  // reference ephoch
+  retval += tex_descriptor(EPH_PEPOCH);
+  for (ip=0; ip<vals.size(); ip++)
+    retval += bw + vals[ip].tex_val (EPH_PEPOCH);
+  retval += nl;
+  
+  // spin period
+  retval += "Pulse period, $P$ (ms)";
+  for (ip=0; ip<vals.size(); ip++) {
+    double p, p_err;
+    vals[ip].P (p, p_err);
+    retval += bw + tex_double (p*1e3, p_err*1e3);
+  }
+  retval += nl;
+
+  // spin period derivative
+  retval += "Period derivative, $\\dot{P}$ (10$^{-20}$)";
+  for (ip=0; ip<vals.size(); ip++) {
+    double p_dot, p_dot_err;
+    vals[ip].P_dot (p_dot, p_dot_err);
+    retval += bw + tex_double (p_dot*1e20, p_dot_err*1e20);
+  }
+  retval += nl;
+
+  // second spin period derivative
+  retval += "Second period derivative, $\\ddot{P}$ (10$^{-32}$)";
+  for (ip=0; ip<vals.size(); ip++) {
+    double p_ddot, p_ddot_err;
+
+    if (vals[ip].P_ddot (p_ddot, p_ddot_err) < 0) {
+      cerr << "psrephem::tex no second period derivative" << endl;
+      retval += nodata;
+    }
+    else
+      retval += bw + tex_double (p_ddot*1e32, p_ddot_err*1e32);
+
+  }
+  retval += nl;
+
   // right ascenscion
-  string retval = tex_descriptor(EPH_RAJ);
+  retval += tex_descriptor(EPH_RAJ);
   for (ip=0; ip<vals.size(); ip++)
     retval += bw + vals[ip].tex_val (EPH_RAJ);
   retval += nl;
@@ -308,29 +367,6 @@ string psrephem::tex (vector<psrephem>& vals, bool dots)
     retval += bw + vals[ip].tex_val (EPH_PX);
   retval += nl;
 
-  // spin period
-  retval += "Pulse period, $P$ (ms)";
-  for (ip=0; ip<vals.size(); ip++) {
-    double p, p_err;
-    vals[ip].P (p, p_err);
-    retval += bw + tex_double (p*1e3, p_err*1e3);
-  }
-  retval += nl;
-
-  // reference ephoch
-  retval += tex_descriptor(EPH_PEPOCH);
-  for (ip=0; ip<vals.size(); ip++)
-    retval += bw + vals[ip].tex_val (EPH_PEPOCH);
-  retval += nl;
-  
-  // spin period derivative
-  retval += "Period derivative, $\\dot{P}$ (10$^{-20}$)";
-  for (ip=0; ip<vals.size(); ip++) {
-    double p_dot, p_dot_err;
-    vals[ip].P_dot (p_dot, p_dot_err);
-    retval += bw + tex_double (p_dot*1e20, p_dot_err*1e20);
-  }
-  retval += nl;
 
   if (binary)
   {
@@ -392,9 +428,13 @@ string psrephem::tex (vector<psrephem>& vals, bool dots)
   retval += "Pulsar mass, m$_{\\rm p}$ (M$_{\\odot})$";
   for (ip=0; ip<vals.size(); ip++) {
     double mp, mp_err;
-    vals[ip].m1 (mp, mp_err);
-    retval += bw + tex_double (mp, mp_err);
+
+    if (vals[ip].m1 (mp, mp_err) < 0)
+      retval += nodata;
+    else
+      retval += bw + tex_double (mp, mp_err);
   }
+
   retval += nl;
 
   retval += "Quadratic Doppler shift, $\\beta$ (10$^{-20}$s$^{-1}$)";
@@ -479,7 +519,6 @@ string psrephem::tex (vector<psrephem>& vals, bool dots)
     cerr << "******* Error GR_w_dot!" << endl;
   cout << "GAMMA: " << gamma << endl;
 
-#if 0
   printf("\\\\\n");
   printf("Surface magnetic field, $B_{\\rm surf}$ (10$^8$ Gauss)\\dotfill\n");
   for (i=0 ; i < psrs.size(); i++)
@@ -491,7 +530,6 @@ string psrephem::tex (vector<psrephem>& vals, bool dots)
 	   sqrt(psrs[i]->pb.value * psrs[i]->pbdot.value*1e-15)*3.2e19);
   }
   printf("\\\\\n");
-#endif
 
 #endif
 
