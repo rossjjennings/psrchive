@@ -23,12 +23,19 @@ void Pulsar::CalibratorPlotter::plot (const Calibrator* calibrator)
   if (verbose)
     cerr << "Pulsar::CalibratorPlotter::plot" << endl;
 
-  Reference::To<Calibrator::Info> info = calibrator->get_Info ();
+  plot( calibrator->get_Info (), calibrator->get_nchan (),
+	calibrator->get_Archive()->get_centre_frequency(),
+	calibrator->get_Archive()->get_bandwidth() );
 
+}
+
+void Pulsar::CalibratorPlotter::plot (const Calibrator::Info* info,
+				      unsigned nchan, double cfreq, double bw)
+{
   if (!info)
     return;
-
-  unsigned nchan = calibrator->get_nchan ();
+  
+  Reference::To<const Calibrator::Info> manage = info;
 
   if (nchan == 0) {
     cerr << "Pulsar::CalibratorPlotter::plot no points to plot" << endl;
@@ -52,9 +59,6 @@ void Pulsar::CalibratorPlotter::plot (const Calibrator* calibrator)
 
   // the plotting class
   EstimatePlotter plotter;
-
-  double cfreq = calibrator->get_Archive()->get_centre_frequency();
-  double bw = calibrator->get_Archive()->get_bandwidth();
 
   plotter.set_xrange (cfreq-0.5*bw, cfreq+0.5*bw);
 
@@ -105,8 +109,12 @@ void Pulsar::CalibratorPlotter::plot (const Calibrator* calibrator)
 
     cpgsvp (xmin, xmax, ybottom, ybottom + yheight);
 
+    unsigned colour_offset = 1;
+    if (nparam == 3)
+      colour_offset = 2;
+
     for (iparam=0; iparam<nparam; iparam++) {
-      cpgsci (iparam+2);
+      cpgsci (iparam+colour_offset);
       plotter.plot (iparam);
     }
 
