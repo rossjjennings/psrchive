@@ -380,6 +380,7 @@ void Pulsar::PolnProfile::convert_basis (Signal::Basis to) {
 
   if (state == Signal::Stokes) {
     if (to == Signal::Circular) {
+      cout << "Converting to Circular" << endl;
       float* V = profile[1]->get_amps();
       float* Q = profile[2]->get_amps();
       float* U = profile[3]->get_amps();
