@@ -1,7 +1,7 @@
 /* $Source: /cvsroot/psrchive/psrchive/Util/qtutil/qt_Angle.h,v $
-   $Revision: 1.5 $
-   $Date: 2004/12/05 19:39:37 $
-   $Author: straten $ */
+   $Revision: 1.6 $
+   $Date: 2005/03/02 05:35:42 $
+   $Author: sord $ */
 
 #ifndef __QT_Angle_H
 #define __QT_Angle_H
@@ -22,6 +22,8 @@ class qt_Angle : public qt_value
 
   void displayHMS ();
   void displayDMS ();
+
+  void setWrap (double wrap) {valset.setWrapPoint(wrap);};
 
  protected:
   bool   hms;
