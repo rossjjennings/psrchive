@@ -57,9 +57,12 @@ Pulsar::Profile* Pulsar::Integration::new_Profile ()
 }
 
 
-Pulsar::Integration::Integration ()
+void Pulsar::Integration::init ()
 {
-  cerr << "Integration null constructor" << endl;
+  npol = nband = nbin = 0;
+  duration = centrefreq = bw = pfold = dm = 0.0;
+
+  state = Poln::invalid;
 }
 
 Pulsar::Integration::~Integration ()

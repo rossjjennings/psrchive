@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Integration.h,v $
-   $Revision: 1.10 $
-   $Date: 2002/04/16 04:02:25 $
+   $Revision: 1.11 $
+   $Date: 2002/04/16 07:49:50 $
    $Author: ahotan $ */
 
 /*
@@ -45,7 +45,7 @@ namespace Pulsar {
     static bool invint_square;
 
     //! Null constructor simply intializes defaults
-    Integration ();
+    Integration () { init(); }
 
     //! Destructor deletes data area
     virtual ~Integration ();
@@ -227,6 +227,9 @@ namespace Pulsar {
 
     //! The data area
     vector< vector<Profile*> > profiles;
+
+    //! initialize null values
+    void init ();
 
     //! Inherited types may re-define the type of profile contained in profiles
     virtual Profile* new_Profile ();
