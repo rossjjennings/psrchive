@@ -1,0 +1,71 @@
+#include <iostream>
+
+#include "qt_fileParams.h"
+#include "psr_cpp.h"
+
+bool qt_fileParams::verbose = false;
+
+qt_fileParams::qt_fileParams ( const QString& startname, QWidget* parent ) 
+  : QWidget (parent, "eph file dialog")
+{
+  window = new QFileDialog (this, "EphFileDialog", true );
+
+  fileName = startname;
+  window -> setSelection (fileName);
+
+  QString intro ("TEMPO PSR Parameter Files (*");
+  QString close (")");
+
+  QStringList filter;
+ 
+  vector<string> ephext = psrParams::extensions ();
+  for (vector<string>::iterator str = ephext.begin();
+       str != ephext.end(); str ++)
+    filter.append ( intro + QString( str->c_str() ) + close );
+
+  window -> setFilters ( filter );
+
+  connect ( window, SIGNAL ( fileSelected (const QString&) ), 
+	    this, SLOT ( chosen (const QString&) ) );
+}
+
+void qt_fileParams::open (psrParams* eph)
+{
+  window -> setMode (QFileDialog::ExistingFile);
+  if ( window -> exec () != 1 || fileName.isEmpty() )
+    return;
+
+  if (verbose)
+    cerr << "qt_fileParams::open " << fileName << endl;
+
+  try {
+    eph -> load (fileName.ascii());
+  }
+  catch (string err) {
+    cerr << "qt_fileParams::open error loading from " 
+	 << fileName << endl << err << endl;
+  }
+}
+
+void qt_fileParams::save (const psrParams& eph)
+{
+  window -> setMode (QFileDialog::AnyFile);
+  if ( window -> exec () != 1 || fileName.isEmpty() )
+    return;
+
+  if (verbose)
+    cerr << "qt_fileParams::save to " << fileName << endl;
+
+  try {
+    eph.unload (fileName.ascii());
+  }
+  catch (string err) {
+    cerr << "qt_fileParams::open error loading from " 
+	 << fileName << endl << err << endl;
+  }
+}
+
+void qt_fileParams::chosen ( const QString& name )
+{
+  fileName = name;
+}
