@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/PSRFITS/Pulsar/FITSArchive.h,v $
-   $Revision: 1.12 $
-   $Date: 2003/08/21 03:00:56 $
+   $Revision: 1.13 $
+   $Date: 2003/09/24 05:40:39 $
    $Author: ahotan $ */
 
 #include <fitsio.h>
@@ -75,12 +75,18 @@ namespace Pulsar {
     //! Return the number of extensions available
     unsigned get_nextension () const;
     
+    //! Add an Extension to the Archive instance
+    void add_extension (Pulsar::Archive::Extension *extension);
+    
     //! Add a new row to the history, reflecting the current state
     void update_history ();
     
     //! Return a pointer to the specified extension
     const Extension* get_extension (unsigned iextension) const;
     
+    //! Return a pointer to the specified extension
+    Extension* get_extension (unsigned iextension);
+
     //! Set the dispersion measure (in \f${\rm pc cm}^{-3}\f$)
     void set_dispersion_measure (double dm);
     
@@ -124,15 +130,18 @@ namespace Pulsar {
     
     // Archive Extensions used by FITSArchive
     
-    ObsExtension         obs_ext;
-    FITSHdrExtension     hdr_ext;
-    ITRFExtension        itrf_ext;
-    CalInfoExtension     cal_ext;
-    FrontendExtension    fe_ext;
-    BackendExtension     be_ext;
-    ProcHistory          history;
-    DigitiserStatistics  digitiser_statistics;
-    Passband             bandpass;
+    vector< Reference::To<Extension> > ev;
+    
+    // Useful names for simplicity of code
+    ObsExtension*         obs_ext;
+    FITSHdrExtension*     hdr_ext;
+    ITRFExtension*        itrf_ext;
+    CalInfoExtension*     cal_ext;
+    FrontendExtension*    fe_ext;
+    BackendExtension*     be_ext;
+    ProcHistory*          history;
+    DigitiserStatistics*  dstats;
+    Passband*             bandpass;
 
     // Channel bandwidth
 
