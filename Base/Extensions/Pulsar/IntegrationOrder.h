@@ -1,16 +1,15 @@
 //-*-C++-*-
                                                                                 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/IntegrationOrder.h,v $
-   $Revision: 1.4 $
-   $Date: 2004/01/06 03:46:50 $
+   $Revision: 1.5 $
+   $Date: 2004/02/06 12:26:34 $
    $Author: ahotan $ */
                                                                                 
 #ifndef __IntegrationOrder_h
 #define __IntegrationOrder_h
                                                                                 
 #include "Pulsar/Archive.h"
-#include "Estimate.h"
-                                                                                
+
 namespace Pulsar {
   
   /*! This IntegrationOrder class provides a means for developers to
@@ -25,7 +24,7 @@ namespace Pulsar {
     // These are the standard Archive::Extension methods:
 
     //! Default constructor
-    IntegrationOrder ();
+    IntegrationOrder (const char* name);
     
     //! Copy constructor
     IntegrationOrder (const IntegrationOrder& extension);
@@ -45,11 +44,14 @@ namespace Pulsar {
     //! Return a string describing the units of this state
     string get_Unit () const;
 
+    //! Change the size of the index array
+    void resize(unsigned i);
+    
     //! Set the custom index value associated with an Integration
-    void set_Index (unsigned subint, Estimate<double> i);
+    void set_Index (unsigned subint, double i);
     
     //! Get the custom index value associated with an Integration
-    Estimate<double> get_Index (unsigned subint) const;
+    double get_Index (unsigned subint) const;
 
     // These are the virtual base methods of the IntegrationOrder class:
 
@@ -72,7 +74,7 @@ namespace Pulsar {
     string Unit;
     
     //! Storage for the actual Integration indices
-    vector<Estimate<double> > indices;                                                    
+    vector<double> indices;                                                    
 
   };                                                                            
                                                                                 

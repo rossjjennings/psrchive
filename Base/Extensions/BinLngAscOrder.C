@@ -3,7 +3,7 @@
 
 //! Default constructor
 Pulsar::BinLngAscOrder::BinLngAscOrder ()
-  : IntegrationOrder ()
+  : IntegrationOrder ("BINLNGASC")
 {
   IndexState = "Binary Longitude (w.r.t. Asc. Node)";
   Unit = "degrees";
@@ -17,7 +17,7 @@ Pulsar::BinLngAscOrder::~BinLngAscOrder ()
 
 //! Copy constructor
 Pulsar::BinLngAscOrder::BinLngAscOrder (const BinLngAscOrder& extension)
-  : IntegrationOrder ()
+  : IntegrationOrder ("BINLNGASC")
 {
   IndexState = extension.IndexState;
   Unit       = extension.Unit;
@@ -58,6 +58,11 @@ void Pulsar::BinLngAscOrder::organise (Archive* arch, unsigned newsub)
 				  arch->get_ephemeris(), 
 				  arch->get_Integration(i)->get_centre_frequency(),
 				  arch->get_telescope_code()));
+    if (isnan(lngs[i])) {
+      throw Error(FailedCall, "PeriastronOrder::organise",
+		  "get_binlng_asc returned nan");
+    }
+    
     used.push_back(false);
 
     // The problem with this section is that archives with gaps in the
@@ -111,14 +116,14 @@ void Pulsar::BinLngAscOrder::organise (Archive* arch, unsigned newsub)
 	if (first) {
 	  *(arch->get_Integration(i)) = 
 	    *(arch->new_Integration(copy->get_Integration(j)));
-	  set_Index(i, Estimate<double>(lngs[j], 0.0));
+	  set_Index(i, lngs[j]);
 	  used[j] = true;
 	  tally += 1;
 	  first = false;
 	}
 	else {
 	  *(arch->get_Integration(i)) += *(copy->get_Integration(j));
-	  indices[i] += Estimate<double>(lngs[j], 0.0);
+	  indices[i] += lngs[j];
 	  used[j] = true;
 	  tally += 1;
 	}
@@ -138,7 +143,7 @@ void Pulsar::BinLngAscOrder::append (Archive* thiz, const Archive* that)
 
 void Pulsar::BinLngAscOrder::combine (Archive* arch, unsigned nscr)
 {
-  vector<Estimate<double> > oldind = indices;
+  vector<double> oldind = indices;
   
   unsigned newsub = 0;
   if ((arch->get_nsubint() % nscr) == 0)

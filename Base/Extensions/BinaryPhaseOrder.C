@@ -3,9 +3,10 @@
 
 //! Default constructor
 Pulsar::BinaryPhaseOrder::BinaryPhaseOrder ()
-  : IntegrationOrder ()
+  : IntegrationOrder ("BINPHSASC")
 {
   IndexState = "Binary Phase (w.r.t. Ascending Node)";
+  Unit = "phase";
 }
 
 //! Destructor
@@ -16,7 +17,7 @@ Pulsar::BinaryPhaseOrder::~BinaryPhaseOrder ()
 
 //! Copy constructor
 Pulsar::BinaryPhaseOrder::BinaryPhaseOrder (const BinaryPhaseOrder& extension)
-  : IntegrationOrder ()
+  : IntegrationOrder ("BINPHSASC")
 {
   IndexState = extension.IndexState;
   Unit       = extension.Unit;
@@ -57,6 +58,11 @@ void Pulsar::BinaryPhaseOrder::organise (Archive* arch, unsigned newsub)
 				    arch->get_ephemeris(), 
 				    arch->get_Integration(i)->get_centre_frequency(),
 				    arch->get_telescope_code()));
+    if (isnan(phases[i])) {
+      throw Error(FailedCall, "PeriastronOrder::organise",
+		  "get_binphs_asc returned nan");
+    }
+
     used.push_back(false);
 
     // The problem with this section is that archives with gaps in the
@@ -110,14 +116,14 @@ void Pulsar::BinaryPhaseOrder::organise (Archive* arch, unsigned newsub)
 	if (first) {
 	  *(arch->get_Integration(i)) = 
 	    *(arch->new_Integration(copy->get_Integration(j)));
-	  set_Index(i, Estimate<double>(phases[j], 0.0));
+	  set_Index(i, phases[j]);
 	  used[j] = true;
 	  tally += 1;
 	  first = false;
 	}
 	else {
 	  *(arch->get_Integration(i)) += *(copy->get_Integration(j));
-	  indices[i] += Estimate<double>(phases[j], 0.0);
+	  indices[i] += phases[j];
 	  used[j] = true;
 	  tally += 1;
 	}
@@ -137,7 +143,7 @@ void Pulsar::BinaryPhaseOrder::append (Archive* thiz, const Archive* that)
 
 void Pulsar::BinaryPhaseOrder::combine (Archive* arch, unsigned nscr)
 {
-  vector<Estimate<double> > oldind = indices;
+  vector<double> oldind = indices;
   
   unsigned newsub = 0;
   if ((arch->get_nsubint() % nscr) == 0)

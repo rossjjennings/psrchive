@@ -1,15 +1,15 @@
 #include "Pulsar/IntegrationOrder.h"
 
 //! Default constructor
-Pulsar::IntegrationOrder::IntegrationOrder ()
-  : Extension ("IntegrationOrder")
+Pulsar::IntegrationOrder::IntegrationOrder (const char* name)
+  : Extension (name)
 {
   IndexState = "Null State";
 }
 
 //! Copy constructor
 Pulsar::IntegrationOrder::IntegrationOrder (const IntegrationOrder& extension)
-  : Extension ("IntegrationOrder")
+  : Extension (extension.get_name().c_str())
 {
   IndexState = extension.IndexState;
   Unit       = extension.Unit;
@@ -41,7 +41,12 @@ string Pulsar::IntegrationOrder::get_Unit () const
   return Unit;
 }
 
-Estimate<double> Pulsar::IntegrationOrder::get_Index (unsigned subint) const
+void Pulsar::IntegrationOrder::resize (unsigned i)
+{
+  indices.resize(i);
+}
+
+double Pulsar::IntegrationOrder::get_Index (unsigned subint) const
 {
   if (subint > indices.size())
     throw Error (InvalidParam, "Pulsar::IntegrationOrder::get_Index",
@@ -50,7 +55,7 @@ Estimate<double> Pulsar::IntegrationOrder::get_Index (unsigned subint) const
   return indices[subint];
 }
 
-void Pulsar::IntegrationOrder::set_Index (unsigned subint, Estimate<double> i)
+void Pulsar::IntegrationOrder::set_Index (unsigned subint, double i)
 {
   if (subint > indices.size())
     throw Error (InvalidParam, "Pulsar::IntegrationOrder::set_Index",

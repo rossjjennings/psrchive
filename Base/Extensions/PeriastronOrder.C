@@ -3,9 +3,10 @@
 
 //! Default constructor
 Pulsar::PeriastronOrder::PeriastronOrder ()
-  : IntegrationOrder ()
+  : IntegrationOrder ("BINPHSPERI")
 {
   IndexState = "Binary Phase (w.r.t. Periastron)";
+  Unit = "phase";
 }
 
 //! Destructor
@@ -15,11 +16,14 @@ Pulsar::PeriastronOrder::~PeriastronOrder ()
 
 //! Copy constructor
 Pulsar::PeriastronOrder::PeriastronOrder (const PeriastronOrder& extension)
-  : IntegrationOrder ()
+  : IntegrationOrder ("BINPHSPERI")
 {
   IndexState = extension.IndexState;
   Unit       = extension.Unit;
-  indices    = extension.indices;
+  
+  indices.resize(extension.indices.size());
+  for (unsigned i = 0; i < indices.size(); i++)
+    indices[i] = extension.indices[i];
 }
 
 //! Operator =
@@ -28,14 +32,18 @@ Pulsar::PeriastronOrder::operator= (const PeriastronOrder& extension)
 {
   IndexState = extension.IndexState;
   Unit       = extension.Unit;
-  indices    = extension.indices;
+  
+  indices.resize(extension.indices.size());
+  for (unsigned i = 0; i < indices.size(); i++)
+    indices[i] = extension.indices[i];
+  
   return *this;
 }
 
 //! Clone method
 Pulsar::IntegrationOrder* Pulsar::PeriastronOrder::clone () const
 {
-  return new PeriastronOrder( *this ); 
+  return new PeriastronOrder( *this );
 }
 
 // These are the methods that do the real work:
@@ -56,8 +64,13 @@ void Pulsar::PeriastronOrder::organise (Archive* arch, unsigned newsub)
 				     arch->get_ephemeris(), 
 				     arch->get_Integration(i)->get_centre_frequency(),
 				     arch->get_telescope_code()));
-    used.push_back(false);
+    if (isnan(phases[i])) {
+      throw Error(FailedCall, "PeriastronOrder::organise",
+		  "get_binphs_peri returned nan");
+    }
 
+    used.push_back(false);
+    
     // The problem with this section is that archives with gaps in the
     // phase coverage have the total coverage mis-represented. This
     // should just result in blank space in the end result, but I have
@@ -70,14 +83,14 @@ void Pulsar::PeriastronOrder::organise (Archive* arch, unsigned newsub)
     if (phases[i] < minphs)
       minphs = phases[i];
   }
-  
+
   // Interperate the newsub parameter as the number of integrations
   // required across a full phase wrap. This must be adjusted depending
   // on the phase coverage available in the archive
-  
+
   float    phs_coverage = maxphs - minphs;
   unsigned mysub        = 0;
-  
+
   if (phs_coverage == 0.0)
     mysub = 1;
   else
@@ -94,11 +107,11 @@ void Pulsar::PeriastronOrder::organise (Archive* arch, unsigned newsub)
 
   Reference::To<Pulsar::Archive> copy = arch->clone();
   Reference::To<Pulsar::Integration> integ = 0;
-  
+
   // Resize for the new configuration
   arch->resize(mysub);
   indices.resize(mysub);
-  
+
   for (unsigned i = 0; i < mysub; i++) {
     *(arch->get_Integration(i)) = *(arch->new_Integration());
     bool first = true;
@@ -109,14 +122,14 @@ void Pulsar::PeriastronOrder::organise (Archive* arch, unsigned newsub)
 	if (first) {
 	  *(arch->get_Integration(i)) = 
 	    *(arch->new_Integration(copy->get_Integration(j)));
-	  set_Index(i, Estimate<double>(phases[j], 0.0));
+	  set_Index(i, phases[j]);
 	  used[j] = true;
 	  tally += 1;
 	  first = false;
 	}
 	else {
 	  *(arch->get_Integration(i)) += *(copy->get_Integration(j));
-	  indices[i] += Estimate<double>(phases[j], 0.0);
+	  indices[i] += phases[j];
 	  used[j] = true;
 	  tally += 1;
 	}
@@ -125,7 +138,6 @@ void Pulsar::PeriastronOrder::organise (Archive* arch, unsigned newsub)
     if (tally > 0)
       indices[i] /= tally;
   }
-
 }
 
 void Pulsar::PeriastronOrder::append (Archive* thiz, const Archive* that)
@@ -136,7 +148,7 @@ void Pulsar::PeriastronOrder::append (Archive* thiz, const Archive* that)
 
 void Pulsar::PeriastronOrder::combine (Archive* arch, unsigned nscr)
 {
-  vector<Estimate<double> > oldind = indices;
+  vector<double> oldind(indices);
   
   unsigned newsub = 0;
   if ((arch->get_nsubint() % nscr) == 0)
