@@ -1,7 +1,7 @@
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/coord.h,v $
-   $Revision: 1.7 $
-   $Date: 2003/12/23 01:06:22 $
-   $Author: ahotan $ */
+   $Revision: 1.8 $
+   $Date: 2004/12/14 06:44:50 $
+   $Author: redwards $ */
 
 #ifndef __COORD_H
 #define __COORD_H
@@ -43,12 +43,12 @@ extern "C" {
    ******************************************************************** */
   int str2coord (double *ra, double *dec, const char* coordstr);
   int str2ra  (double *ra,  const char* rastr);
-  int str2dec (double *dec, const char* decstr);
+  int str2dec2 (double *dec, const char* decstr);
   
   int coord2str (char* coordstring, unsigned strlen,
 		 double ra, double dec, unsigned places);
   int ra2str (char* rastr, unsigned rastrlen, double ra, unsigned places);
-  int dec2str (char* decstr, unsigned decstrlen, double dec, unsigned places);
+  int dec2str2 (char* decstr, unsigned decstrlen, double dec, unsigned places);
   
 
   int coord2name (char* pulsar, double ra, double dec);

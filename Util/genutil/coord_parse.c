@@ -47,7 +47,7 @@ int str2coord (double *ra, double *dec, const char* coordstring)
   }
 
   // fprintf (stderr, "str2coord: decstr='%s'\n", decstr);
-  if (str2dec (dec, decstr) < 0)
+  if (str2dec2 (dec, decstr) < 0)
     retval = -1;
 
   *decstr = '\0';
@@ -162,7 +162,7 @@ int str2ra (double *ra, const char* rastring)
   return 0;
 }
 
-int str2dec (double *dec, const char* decstring) 
+int str2dec2 (double *dec, const char* decstring) 
 {
   int field_width[3] = {2, 2, 0};
   double field_scale[3] = {360.0, 60.0, 60.0};
@@ -192,7 +192,7 @@ int coord2str (char* coordstring, unsigned coordstrlen, double ra, double dec,
     decstart ++;
   }
 
-  dec2str (coordstring+decstart, coordstrlen-decstart, dec, places);
+  dec2str2 (coordstring+decstart, coordstrlen-decstart, dec, places);
 
   return 0;
 }
@@ -282,7 +282,7 @@ int ra2str (char* rastring, unsigned rastrlen, double ra, unsigned places)
   return xms2str (rastring, rastrlen, ra, 24.0, places);
 }
 
-int dec2str (char* dstring, unsigned dstrlen, double dec, unsigned places) 
+int dec2str2 (char* dstring, unsigned dstrlen, double dec, unsigned places) 
 {
   return xms2str (dstring, dstrlen, dec, 360.0, places);
 }

@@ -294,7 +294,7 @@ void psrephem::load (fitsfile* fptr, long row)
           cerr << "psrephem::load d:m:s:'" << strval << "' in column "
                << icol+1 << " (" << parmNames[ieph] << ")" << endl;
 
-	if (str2dec (value_double + ieph, strval) != 0) {
+	if (str2dec2 (value_double + ieph, strval) != 0) {
 	  if (verbose)
 	    cerr << "psrephem::load PSRFITS could not parse d:m:s from '" 
 		 << strval << "'" << endl;
@@ -539,7 +539,7 @@ void psrephem::unload (fitsfile* fptr, long row) const
     case 3:  // d:m:s
       {
 	// convert from turns to radians
-        dec2str (strval, maxstrlen, value_double[ieph]*2.0*M_PI, 10);
+        dec2str2 (strval, maxstrlen, value_double[ieph]*2.0*M_PI, 10);
 
 	if (verbose)
 	  cerr << "psrephem::unload d:m:s:'" << strval << "' in column "

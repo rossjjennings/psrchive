@@ -59,7 +59,7 @@ int Angle::setHMS(const char *str)
 
 int Angle::setDMS(const char *str)
 {
-  return str2dec(&radians, str);
+  return str2dec2(&radians, str);
 }
 
 void Angle::setHMS (int hours, int minutes, double seconds)
