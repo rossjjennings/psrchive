@@ -1,7 +1,7 @@
 //-*-C++-*-
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Attic/string_utils.h,v $
-   $Revision: 1.13 $
-   $Date: 2002/08/14 18:42:06 $
+   $Revision: 1.14 $
+   $Date: 2002/10/29 04:36:38 $
    $Author: hknight $ */
 
 #ifndef __STRING_UTILS_H
@@ -16,6 +16,8 @@
 #include <vector>
 
 #include "psr_cpp.h"
+
+#include "environ.h"
 
 // Like perl chomp.  Returns true if successful.
 bool h_chomp(string& ss, char gone='\n');
@@ -101,8 +103,16 @@ string stringdelimit(const vector<string>& words, char delimiter);
 vector<string> cstrarray2vec(const char **vals, int nelem);
 
 template<class T>
-string make_string(T input){
+string form_string(T input){
   ostrstream ost;
+  ost << input << ends;
+  return ost.str();
+}
+
+template<class T>
+string form_string(T input, int precision){
+  ostrstream ost;
+  ost << setprecision( precision );
   ost << input << ends;
   return ost.str();
 }
@@ -118,6 +128,33 @@ T convert_string(string ss){
   return outie;
 }
 
+template<class T>
+T convert_string(string ss, int precision){
+  ostrstream ost;
+  ost << ss << ends;
+  istrstream ist(ost.str());
+  ist.setprecision( precision );
+  
+  T outie;
+  ist >> outie; 
+  return outie;
+}
+
+/* these use stdio- if you don't like the MEMORY LEAKING istrstreams */
+string make_string(int input);
+string make_string(unsigned input);
+string make_string(int64 input);
+string make_string(uint64 input);
+string make_string(float input);
+string make_string(float input, int precision);
+string make_string(double input);
+string make_string(double input, int precision);
+string make_string(void* input);
+string make_string(char input); // just incase someone is dumb enough...
+string make_string(unsigned char input); // just incase someone is dumb enough...
+
+
 #endif
+
 
 

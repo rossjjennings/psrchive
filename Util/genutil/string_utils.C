@@ -1,11 +1,12 @@
-
-#include "string_utils.h"
+#include "environ.h"
 
 #include <string>
 #include <vector>
 #include <algorithm>
 
 #include <stdio.h>
+
+#include "string_utils.h"
 
 // Like perl chomp
 bool h_chomp(string& ss,char gone){
@@ -103,4 +104,75 @@ cstrarray2vec(const char **vals, int nelem)
   return v;
 }
 
+string make_string(int input){
+  char dummy[50];
+  sprintf(dummy,"%d",input);
+  return string(dummy);
+}
+
+string make_string(unsigned input){
+  char dummy[50];
+  sprintf(dummy,"%d",input);
+  return string(dummy);
+}
+
+string make_string(int64 input){
+  char dummy[50];
+  sprintf(dummy,I64,input);
+  return string(dummy);
+}
+
+string make_string(uint64 input){
+  char dummy[50];
+  sprintf(dummy,UI64,input);
+  return string(dummy);
+}
+
+string make_string(float input){
+  char dummy[50];
+  sprintf(dummy,"%f",input);
+  return string(dummy);
+}
+
+string make_string(float input, int precision){
+  char dummy1[50];
+  char dummy2[50];
+  sprintf(dummy1,"%%.%df",precision);
+  sprintf(dummy2,dummy1,input);
+  return string(dummy2);
+}
+
+string make_string(double input){
+  char dummy[50];
+  sprintf(dummy,"%f",input);
+  return string(dummy);
+}
+
+string make_string(double input, int precision){
+  char dummy1[50];
+  char dummy2[50];
+  sprintf(dummy1,"%%.%df",precision);
+  sprintf(dummy2,dummy1,input);
+  return string(dummy2);
+}
+
+string make_string(void* input){
+  char dummy[50];
+  sprintf(dummy,"%p",input);
+  return string(dummy);
+}
+
+// just incase someone is dumb enough...
+string make_string(char input){
+  char dummy[50];
+  sprintf(dummy,"%c",input);
+  return string(dummy);
+}
+
+// just incase someone is dumb enough...
+string make_string(unsigned char input){
+  char dummy[50];
+  sprintf(dummy,"%d",input);
+  return string(dummy);
+}
 
