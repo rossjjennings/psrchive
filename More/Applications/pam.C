@@ -64,6 +64,7 @@ void usage()
     "  -w               Reset profile weights to this value \n"
     "\n"
     "The following options override archive paramaters \n"
+    "  --receiver file  Install the Receiver described in the text file \n"
     "  -L               Set feed basis to Linear \n"
     "  -C               Set feed basis to Circular \n"
     "  -E ephfile       Install a new ephemeris and update model \n"
@@ -149,7 +150,8 @@ int main (int argc, char *argv[]) {
   bool new_cfreq = false;
   float new_fr = 0.0;
 
-  Reference::To<Pulsar::IntegrationOrder> myio = 0;
+  Reference::To<Pulsar::IntegrationOrder> myio;
+  Reference::To<Pulsar::Receiver> install_receiver;
 
   int c = 0;
   
@@ -165,6 +167,7 @@ int main (int argc, char *argv[]) {
       {"binphsasc",  1, 0, 204},
       {"binlngperi", 1, 0, 205},
       {"binlngasc",  1, 0, 206},
+      {"receiver",   1, 0, 207},
       {0, 0, 0, 0}
     };
     
@@ -191,7 +194,7 @@ int main (int argc, char *argv[]) {
       Pulsar::Archive::set_verbosity(3);
       break;
     case 'i':
-      cout << "$Id: pam.C,v 1.38 2004/07/16 07:31:19 straten Exp $" << endl;
+      cout << "$Id: pam.C,v 1.39 2004/07/23 13:05:51 straten Exp $" << endl;
       return 0;
     case 'm':
       save = true;
@@ -430,6 +433,17 @@ int main (int argc, char *argv[]) {
       cblao = true;
       break;
     }
+
+    case 207: try {
+      install_receiver = Pulsar::Receiver::load (optarg);
+      break;
+    }
+    catch (Error& error) {
+      cerr << "pam: Error loading Receiver from " << optarg << endl
+	   << error.get_message() << endl;
+      return -1;
+    }
+
     default:
       cout << "Unrecognised option" << endl;
     }
@@ -446,289 +460,302 @@ int main (int argc, char *argv[]) {
   Reference::To<Pulsar::Archive> arch;
 
   if (!save) {
-    cout << "Changes will not be saved. Use -m or -e to write results to disk" << endl;
+    cout << "Changes will not be saved. Use -m or -e to write results to disk"
+	 << endl;
   }
 
-  for (unsigned i = 0; i < archives.size(); i++) {
-    
-    try {
+  for (unsigned i = 0; i < archives.size(); i++) try {
       
+    if (verbose)
+      cerr << "Loading " << archives[i] << endl;
+      
+    arch = Pulsar::Archive::load(archives[i]);
+
+    if (install_receiver) {
+
       if (verbose)
-	cerr << "Loading " << archives[i] << endl;
-      
-      arch = Pulsar::Archive::load(archives[i]);
+	cerr << "pam: Installing receiver: " << install_receiver->get_name()
+	     << " in archive" << endl;
 
-      if (lin || circ) {
+      arch->add_extension (install_receiver);
 
-	Pulsar::Receiver* receiver = arch->get<Pulsar::Receiver>();
+    }
 
-	if (!receiver)
-	  cerr << "No Receiver Extension in " << archives[i] << endl;
+    if (lin || circ) {
 
-	else {
+      Pulsar::Receiver* receiver = arch->get<Pulsar::Receiver>();
 
-	  if (lin) {
-	    receiver->set_basis (Signal::Linear);
-	    cout << "Feed basis set to Linear" << endl;
-	  }
+      if (!receiver)
+	cerr << "No Receiver Extension in " << archives[i] << endl;
 
-	  if (circ) {
-	    receiver->set_basis (Signal::Circular);
-	    cout << "Feed basis set to Circular" << endl;
-	  }
+      else {
 
+	if (lin) {
+	  receiver->set_basis (Signal::Linear);
+	  cout << "Feed basis set to Linear" << endl;
+	}
+
+	if (circ) {
+	  receiver->set_basis (Signal::Circular);
+	  cout << "Feed basis set to Circular" << endl;
 	}
 
       }
 
-      if (new_cfreq) {
-	float nc = arch->get_nchan();
-	float bw = arch->get_bandwidth();
-        float cw = bw / nc;
+    }
 
-	float fr = new_fr - (bw / 2.0) + (cw / 2.0);
+    if (new_cfreq) {
+      float nc = arch->get_nchan();
+      float bw = arch->get_bandwidth();
+      float cw = bw / nc;
+
+      float fr = new_fr - (bw / 2.0) + (cw / 2.0);
 	
-	for (unsigned i = 0; i < arch->get_nsubint(); i++) {
-	  for (unsigned j = 0; j < arch->get_nchan(); j++) {
-	    arch->get_Integration(i)->set_centre_frequency(j,(fr + (j*cw)));
-	  }
+      for (unsigned i = 0; i < arch->get_nsubint(); i++) {
+	for (unsigned j = 0; j < arch->get_nchan(); j++) {
+	  arch->get_Integration(i)->set_centre_frequency(j,(fr + (j*cw)));
 	}
+      }
 	
-	arch->set_centre_frequency(new_fr);
-      }
+      arch->set_centre_frequency(new_fr);
+    }
 
-      if (new_eph) {
-	if (!eph_file.empty()) {
-	  psrephem eph;
-	  if (eph.load(eph_file) == 0)
-	    arch->set_ephemeris(eph);
-	  else
-	    cerr << "Could not load new ephemeris" << endl;
+    if (new_eph) {
+      if (!eph_file.empty()) {
+	psrephem eph;
+	if (eph.load(eph_file) == 0)
+	  arch->set_ephemeris(eph);
+	else
+	  cerr << "Could not load new ephemeris" << endl;
+      }
+    }
+
+    if (flipsb) {
+      for (unsigned i = 0; i < arch->get_nsubint(); i++) {
+	vector<float> labels;
+	labels.resize(arch->get_nchan());
+	for (unsigned j = 0; j < arch->get_nchan(); j++) {
+	  labels[j] = arch->get_Integration(i)->get_centre_frequency(j);
+	}
+	for (unsigned j = 0; j < arch->get_nchan(); j++) {
+	  float new_frequency = labels[labels.size()-1-j];
+	  arch->get_Integration(i)->set_centre_frequency(j,new_frequency);
 	}
       }
+      arch->set_bandwidth(-1.0 * arch->get_bandwidth());
+    }
 
-      if (flipsb) {
-	for (unsigned i = 0; i < arch->get_nsubint(); i++) {
-	  vector<float> labels;
-	  labels.resize(arch->get_nchan());
-	  for (unsigned j = 0; j < arch->get_nchan(); j++) {
-	    labels[j] = arch->get_Integration(i)->get_centre_frequency(j);
-	  }
-	  for (unsigned j = 0; j < arch->get_nchan(); j++) {
-	    arch->get_Integration(i)->set_centre_frequency(j,labels[labels.size()-1-j]);
-	  }
-	}
-	arch->set_bandwidth(-1.0 * arch->get_bandwidth());
+    if (reset_weights) {
+      arch->uniform_weight(new_weight);
+      if (verbose)
+	cout << "All profile weights set to " << new_weight << endl;
+    }
+      
+    if (rotate) {
+      double period = arch->get_Integration(0)->get_folding_period();
+      arch->rotate(period*rphase);
+    }
+      
+    if (newdm) {
+      arch->set_dispersion_measure(dm);
+      if (verbose)
+	cout << "Archive dispersion measure set to " << dm << endl;
+    }
+
+    if (dedisperse) {
+      arch->dedisperse();
+      if (verbose)
+	cout << "Archive dedipsersed" << endl;
+    }
+
+    if (defaraday) {
+      arch->set_rotation_measure (rm);
+      arch->defaraday();
+      if (verbose)
+	cout << "Archive corrected for a RM of " << rm << endl;
+    }
+
+    if (stokesify) {
+      if (arch->get_npol() != 4)
+	throw Error(InvalidState, "Convert to Stokes",
+		    "Not enough polarisation information");
+      arch->convert_state(Signal::Stokes);
+      if (verbose)
+	cout << "Archive converted to Stokes parameters" << endl;
+    }
+
+    if (cbppo) {
+      myio = new Pulsar::PeriastronOrder();
+      arch->add_extension(myio);
+      myio->organise(arch, ronsub);
+    }
+      
+    if (cbpao) {
+      myio = new Pulsar::BinaryPhaseOrder();
+      arch->add_extension(myio);
+      myio->organise(arch, ronsub);
+    }
+      
+    if (cblpo) {
+      myio = new Pulsar::BinLngPeriOrder();
+      arch->add_extension(myio);
+      myio->organise(arch, ronsub);
+    }
+      
+    if (cblao) {
+      myio = new Pulsar::BinLngAscOrder();
+      arch->add_extension(myio);
+      myio->organise(arch, ronsub);
+    }
+      
+    if( subint_extract_start >= 0 && subint_extract_end >= 0 ) {
+      vector<unsigned> subints;
+      unsigned isub = subint_extract_start;
+
+      while ( isub<arch->get_nsubint() && isub<unsigned(subint_extract_end) ) {
+	subints.push_back( isub );
+	isub++;
       }
 
-      if (reset_weights) {
-	arch->uniform_weight(new_weight);
+      Reference::To<Pulsar::Archive> extracted( arch->extract(subints) );
+      extracted->set_filename( arch->get_filename() );
+
+      arch = extracted;
+    }
+
+    if (tscr) {
+      if (new_nsub > 0) {
+	arch->tscrunch_to_nsub(new_nsub);
 	if (verbose)
-	  cout << "All profile weights set to " << new_weight << endl;
+	  cout << arch->get_filename() << " tscrunched to " 
+	       << new_nsub << " subints" << endl;
       }
-      
-      if (rotate) {
-	double period = arch->get_Integration(0)->get_folding_period();
-	arch->rotate(period*rphase);
-      }
-      
-      if (newdm) {
-	arch->set_dispersion_measure(dm);
+      else if (tscr_fac > 0) {
+	arch->tscrunch(tscr_fac);
 	if (verbose)
-	  cout << "Archive dispersion measure set to " << dm << endl;
+	  cout << arch->get_filename() << " tscrunched by a factor of " 
+	       << tscr_fac << endl;
       }
-
-      if (dedisperse) {
-        arch->dedisperse();
-        if (verbose)
-          cout << "Archive dedipsersed" << endl;
-      }
-
-      if (defaraday) {
-	arch->set_rotation_measure (rm);
-	arch->defaraday();
+      else {
+	arch->tscrunch();
 	if (verbose)
-	  cout << "Archive corrected for a RM of " << rm << endl;
+	  cout << arch->get_filename() << " tscrunched" << endl;
       }
-
-      if (stokesify) {
-	if (arch->get_npol() != 4)
-	  throw Error(InvalidState, "Convert to Stokes",
-		      "Not enough polarisation information");
-	arch->convert_state(Signal::Stokes);
-	if (verbose)
-	  cout << "Archive converted to Stokes parameters" << endl;
-      }
-
-      if (cbppo) {
-	myio = new Pulsar::PeriastronOrder();
-	arch->add_extension(myio);
-	myio->organise(arch, ronsub);
-      }
+    }
       
-      if (cbpao) {
-	myio = new Pulsar::BinaryPhaseOrder();
-	arch->add_extension(myio);
-	myio->organise(arch, ronsub);
-      }
-      
-      if (cblpo) {
-	myio = new Pulsar::BinLngPeriOrder();
-	arch->add_extension(myio);
-	myio->organise(arch, ronsub);
-      }
-      
-      if (cblao) {
-	myio = new Pulsar::BinLngAscOrder();
-	arch->add_extension(myio);
-	myio->organise(arch, ronsub);
-      }
-      
-      if( subint_extract_start >= 0 && subint_extract_end >= 0 ) {
-	vector<unsigned> subints;
-	unsigned isub = subint_extract_start;
-
-	while ( isub < arch->get_nsubint() && isub < unsigned(subint_extract_end) ){
-	  subints.push_back( isub );
-	  isub++;
-	}
-
-	Reference::To<Pulsar::Archive> extracted( arch->extract(subints) );
-	extracted->set_filename( arch->get_filename() );
-
-	arch = extracted;
-      }
-
-      if (tscr) {
-	if (new_nsub > 0) {
-	  arch->tscrunch_to_nsub(new_nsub);
-	  if (verbose)
-	    cout << arch->get_filename() << " tscrunched to " 
-		 << new_nsub << " subints" << endl;
-	}
-	else if (tscr_fac > 0) {
-	  arch->tscrunch(tscr_fac);
-	  if (verbose)
-	    cout << arch->get_filename() << " tscrunched by a factor of " 
-		 << tscr_fac << endl;
-	}
-	else {
-	  arch->tscrunch();
-	  if (verbose)
-	    cout << arch->get_filename() << " tscrunched" << endl;
-	}
-      }
-      
-      if (pscr) {
-	arch->pscrunch();
-	if (verbose)
-	  cout << arch->get_filename() << " pscrunched" << endl;
-      } 
-
-      if (invint) {
-	arch->invint();
-	if (verbose)
-	  cout << arch->get_filename() << " invinted" << endl;
-      }
-      
-      if (fscr) {
-	if (new_nchn > 0) {
-	  arch->fscrunch_to_nchan(new_nchn);
-	  if (verbose)
-	    cout << arch->get_filename() << " fscrunched to " 
-		 << new_nchn << " channels" << endl;
-	}
-	else if (fscr_fac > 0) {
-	  arch->fscrunch(fscr_fac);
-	  if (verbose)
-	    cout << arch->get_filename() << " fscrunched by a factor of " 
-		 << fscr_fac << endl;
-	}
-	else {
-	  arch->fscrunch();
-	  if (verbose)
-	    cout << arch->get_filename() << " fscrunched" << endl;
-	}
-      }
-      
-      if (bscr) {
-	if (new_nbin > 0) {
-	  arch->bscrunch_to_nbin(new_nbin);
-	  if (verbose)
-	    cout << arch->get_filename() << " bscrunched to " 
-		 << new_nbin << " bins" << endl;
-	}
-	else {
-	  arch->bscrunch(bscr_fac);
-	  if (verbose)
-	    cout << arch->get_filename() << " bscrunched by a factor of " 
-		 << bscr_fac << endl;
-	}
-      }     
-
-      if (smear) {
-	for (unsigned i = 0; i < arch->get_nsubint(); i++) {
-	  for (unsigned j = 0; j < arch->get_npol(); j++) {
-	    for (unsigned k = 0; k < arch->get_nchan(); k++) {
-	      arch->get_Profile(i,j,k)->smear(smear_dc);
-	    }
-	  }
-	}
-      }
-      
-      if (save) {
-
-        if (archive_class)  {
-
-          // unload an archive of the specified class
-          Reference::To<Pulsar::Archive> output;
-          output = Pulsar::Archive::new_Archive (archive_class);
-          output -> copy (*arch);
-          output -> set_filename ( arch->get_filename() );
-
-          arch = output;
-
-        }
-
-
-	// See if the archive contains a history that should be updated:
-	
-	Pulsar::ProcHistory* fitsext = arch->get<Pulsar::ProcHistory>();
-	
-	if (fitsext) {
-	  
-	  if (command.length() > 80) {
-	    cout << "WARNING: ProcHistory command string truncated to 80 chars" << endl;
-	    fitsext->set_command_str(command.substr(0, 80));
-	  }
-	  else {
-	    fitsext->set_command_str(command);
-	  }
-	  
-	}
-	
-	if (ext.empty()) {
-	  arch->unload();
-	  cout << arch->get_filename() << " updated on disk" << endl;
-	}
-	else {
-	  string the_old = arch->get_filename();
-	  int index = the_old.find_last_of(".",the_old.length());
-	  string primary = the_old.substr(0, index);
-	  string the_new;
-	  if (!ulpath.empty())
-	    the_new = ulpath + primary + "." + ext;
-	  else
-	    the_new = primary + "." + ext;
-          arch->unload(the_new);
-          cout << "New file " << the_new << " written to disk" << endl;
-	}
-      }
-    }  
-    catch (Error& error) {
-      cerr << error << endl;
+    if (pscr) {
+      arch->pscrunch();
+      if (verbose)
+	cout << arch->get_filename() << " pscrunched" << endl;
     } 
-  }
+
+    if (invint) {
+      arch->invint();
+      if (verbose)
+	cout << arch->get_filename() << " invinted" << endl;
+    }
+      
+    if (fscr) {
+      if (new_nchn > 0) {
+	arch->fscrunch_to_nchan(new_nchn);
+	if (verbose)
+	  cout << arch->get_filename() << " fscrunched to " 
+	       << new_nchn << " channels" << endl;
+      }
+      else if (fscr_fac > 0) {
+	arch->fscrunch(fscr_fac);
+	if (verbose)
+	  cout << arch->get_filename() << " fscrunched by a factor of " 
+	       << fscr_fac << endl;
+      }
+      else {
+	arch->fscrunch();
+	if (verbose)
+	  cout << arch->get_filename() << " fscrunched" << endl;
+      }
+    }
+      
+    if (bscr) {
+      if (new_nbin > 0) {
+	arch->bscrunch_to_nbin(new_nbin);
+	if (verbose)
+	  cout << arch->get_filename() << " bscrunched to " 
+	       << new_nbin << " bins" << endl;
+      }
+      else {
+	arch->bscrunch(bscr_fac);
+	if (verbose)
+	  cout << arch->get_filename() << " bscrunched by a factor of " 
+	       << bscr_fac << endl;
+      }
+    }     
+
+    if (smear) {
+      for (unsigned i = 0; i < arch->get_nsubint(); i++) {
+	for (unsigned j = 0; j < arch->get_npol(); j++) {
+	  for (unsigned k = 0; k < arch->get_nchan(); k++) {
+	    arch->get_Profile(i,j,k)->smear(smear_dc);
+	  }
+	}
+      }
+    }
+      
+    if (save) {
+
+      if (archive_class)  {
+
+	// unload an archive of the specified class
+	Reference::To<Pulsar::Archive> output;
+	output = Pulsar::Archive::new_Archive (archive_class);
+	output -> copy (*arch);
+	output -> set_filename ( arch->get_filename() );
+
+	arch = output;
+
+      }
+
+
+      // See if the archive contains a history that should be updated:
+	
+      Pulsar::ProcHistory* fitsext = arch->get<Pulsar::ProcHistory>();
+	
+      if (fitsext) {
+	  
+	if (command.length() > 80) {
+	  cout << "WARNING: ProcHistory command string truncated to 80 chars" 
+	       << endl;
+	  fitsext->set_command_str(command.substr(0, 80));
+	}
+	else {
+	  fitsext->set_command_str(command);
+	}
+	  
+      }
+	
+      if (ext.empty()) {
+	arch->unload();
+	cout << arch->get_filename() << " updated on disk" << endl;
+      }
+      else {
+	string the_old = arch->get_filename();
+	int index = the_old.find_last_of(".",the_old.length());
+	string primary = the_old.substr(0, index);
+	string the_new;
+	if (!ulpath.empty())
+	  the_new = ulpath + primary + "." + ext;
+	else
+	  the_new = primary + "." + ext;
+	arch->unload(the_new);
+	cout << "New file " << the_new << " written to disk" << endl;
+      }
+    }
+  }  
+  catch (Error& error) {
+    cerr << error << endl;
+  } 
+  
+  return 0;
+
 }
 
 
