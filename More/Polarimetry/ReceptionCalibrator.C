@@ -85,8 +85,12 @@ void Pulsar::ReceptionCalibrator::initial_observation (const Archive* data)
 
   for (unsigned ichan=0; ichan<nchan; ichan++) {
 
-    equation[ichan] = new Calibration::SAtPEquation;
-    equation[ichan]->add_backend();
+    equation[ichan] = new Calibration::RandomGainEquation;
+
+    Calibration::Polar* polar = equation[ichan]->get_receiver ();
+
+    equation[ichan]->get_model()->add_path();
+    equation[ichan]->get_model()->add_transformation( polar );
     equation[ichan]->get_model()->add_transformation( &parallactic );
 
   }
@@ -190,7 +194,12 @@ void Pulsar::ReceptionCalibrator::add_discontinuity ()
   unsigned nchan = uncalibrated->get_nchan ();
 
   for (unsigned ichan=0; ichan<nchan; ichan++) {
-    equation[ichan]->add_backend();
+
+    Calibration::Polar* polar = equation[ichan]->get_receiver ();
+
+    equation[ichan]->get_model()->add_path();
+    equation[ichan]->get_model()->add_transformation( polar );
+    equation[ichan]->get_model()->add_transformation( &parallactic );
 
     unsigned nparam = equation[ichan]->get_model()->get_nparam ();
 
@@ -613,6 +622,7 @@ void Pulsar::ReceptionCalibrator::solve (int only_ichan)
 
     cerr << "Pulsar::ReceptionCalibrator::solve ichan=" << ichan << endl;
 
+#if 0
     if (ncoef)
       equation[ichan]->set_ncoef (ncoef);
 
@@ -620,6 +630,7 @@ void Pulsar::ReceptionCalibrator::solve (int only_ichan)
       equation[ichan]->get_receiver()->set_param (6, 0.0);
       equation[ichan]->get_receiver()->set_infit (6, false);
     }
+#endif
 
     equation[ichan]->solve ();
 

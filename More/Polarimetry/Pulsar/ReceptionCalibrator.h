@@ -1,15 +1,15 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ReceptionCalibrator.h,v $
-   $Revision: 1.23 $
-   $Date: 2003/05/30 09:34:10 $
-   $Author: pulsar $ */
+   $Revision: 1.24 $
+   $Date: 2003/05/30 15:49:06 $
+   $Author: straten $ */
 
 #ifndef __ReceptionCalibrator_H
 #define __ReceptionCalibrator_H
 
 #include "Calibrator.h"
-#include "Calibration/SAtPEquation.h"
+#include "Calibration/RandomGainEquation.h"
 #include "Calibration/Parallactic.h"
 #include "Calibration/StokesState.h"
 
@@ -23,7 +23,7 @@ namespace Pulsar {
   class SourceEstimate;
   class PolarEstimate;
 
-  //! Uses the SAtPEquation to represent and fit for the system response
+  //! Uses the RandomGainEquation to represent and fit for the system response
   /*! The ReceptionCalibrator implements a technique of single dish
     polarimetric self-calibration.  This class requires a number of
     constraints, which are provided in through the add_observation,
@@ -91,7 +91,7 @@ namespace Pulsar {
     void calibrate (Archive* archive, bool solve_first);
 
     //! SingleAxis(t)Polar Equation as a function of frequency
-    vector<Calibration::SAtPEquation*> equation;
+    vector<Calibration::RandomGainEquation*> equation;
 
     //! Calibrator state as a function of frequency
     vector<Calibration::StokesState> calibrator;
