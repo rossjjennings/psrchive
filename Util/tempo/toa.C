@@ -149,7 +149,7 @@ int Tempo::toa::parkes_out (char* outstring) const
 {
   // output the basic line
   sprintf (datestr, "%8.7lf", frequency);
-  sprintf (outstring, " %8.8s  %s   %5.2f %7.2f        %1d",
+  sprintf (outstring, " %8.8s  %s   %5.2f %7.2f        %1c",
  	   datestr, arrival.printdays(13).c_str(), phs, error, telescope);
   return 0;
 }
