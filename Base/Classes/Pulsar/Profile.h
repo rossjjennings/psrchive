@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Profile.h,v $
-   $Revision: 1.62 $
-   $Date: 2004/07/21 05:28:07 $
-   $Author: straten $ */
+   $Revision: 1.63 $
+   $Date: 2004/07/22 07:26:40 $
+   $Author: ahotan $ */
 
 #ifndef __Pulsar_Profile_h
 #define __Pulsar_Profile_h
@@ -85,7 +85,8 @@ namespace Pulsar {
     //! calculates the difference of profile and another profile after
     /*! normalising their flux */
     virtual Profile* morphological_difference (const Profile& profile,
-					       double& scale, double& shift);
+					       double& scale, double& shift,
+					       float phs1 = 0, float phs2 = 1.0);
     
     //! adds offset to each bin of the profile
     virtual const Profile& operator += (float offset);

@@ -65,7 +65,8 @@ const Pulsar::Profile& Pulsar::Profile::average (const Profile& profile,
 
 Pulsar::Profile*
 Pulsar::Profile::morphological_difference (const Profile& profile,
-					   double& scale, double& shift)
+					   double& scale, double& shift,
+					   float phs1, float phs2)
 {
   if (get_nbin() != profile.get_nbin())
     throw Error (InvalidRange, "Pulsar::Profile::morphological_difference",
@@ -120,10 +121,12 @@ Pulsar::Profile::morphological_difference (const Profile& profile,
   // This section scales the total flux under the profile to
   // be the same as under the standard
   
-  float t2sum = temp2->sum();
-
-  float ratio = t2sum / temp1->sum();
-
+  float t2sum = temp2->sum(phs1*(profile.get_nbin()),
+			   phs2*(profile.get_nbin()));
+  
+  float ratio = t2sum / temp1->sum(phs1*(profile.get_nbin()),
+				   phs2*(profile.get_nbin()));
+  
   *temp1 *= ratio;
 
   scale = ratio;
