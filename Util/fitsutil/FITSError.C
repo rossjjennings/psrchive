@@ -3,6 +3,8 @@
 #include <stdarg.h>
 #include <fitsio.h>
 
+using namespace std;
+
 FITSError::FITSError (int status, const char* func, const char* msg, ...)
 {
   char buf[1024];

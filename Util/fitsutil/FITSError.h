@@ -13,7 +13,7 @@ class FITSError : public Error {
   FITSError (int status, const char* func, const char* msg=0, ...);
 
   //! Error with string message
-  FITSError (int status, const char* func, const string& msg);
+  FITSError (int status, const char* func, const std::string& msg);
 
   //! Destructor
   ~FITSError () {}
