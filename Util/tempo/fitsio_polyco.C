@@ -197,7 +197,7 @@ void polynomial::load (fitsfile* fptr, long row)
 // fitsfile - points to an open PSRFITS archive
 // back     - if specified, go back in history  NOT IMPLEMENTED
 //
-void polyco::unload (fitsfile* fptr, int back)
+void polyco::unload (fitsfile* fptr, int back) const
 {
 #ifdef DEBUG
   cerr << "polyco::unload PSRFITS 1" << endl;
@@ -241,7 +241,7 @@ void polyco::unload (fitsfile* fptr, int back)
 
 
 
-void polynomial::unload (fitsfile* fptr, long row)
+void polynomial::unload (fitsfile* fptr, long row) const
 {
   // these are used to pull out the data from a cell
   long firstelem = 1;
@@ -274,9 +274,10 @@ void polynomial::unload (fitsfile* fptr, long row)
   if (status)
     throw FITSError (status, "polynomial::unload", "fits_write_col NSITE");
 
+  double temp = freq;
   fits_get_colnum (fptr, CASEINSEN, "REF_FREQ", &colnum, &status);
   fits_write_col (fptr, TDOUBLE, colnum, row, firstelem, onelement,
-		 &freq, &status);
+		 &temp, &status);
   if (status)
     throw FITSError (status, "polynomial::unload", "fits_write_col REF_FREQ");
 
@@ -293,11 +294,11 @@ void polynomial::unload (fitsfile* fptr, long row)
 		 &ref_phs, &status);
   if (status)
     throw FITSError (status, "polynomial::unload", "fits_write_col REF_PHS");
-
-  
+ 
+  temp = f0; 
   fits_get_colnum (fptr, CASEINSEN, "REF_F0", &colnum, &status);
   fits_write_col (fptr, TDOUBLE, colnum, row, firstelem, onelement,
-		 &f0, &status);
+		 &temp, &status);
   if (status)
     throw FITSError (status, "polynomial::unload", "fits_write_col REF_F0");
 
@@ -307,18 +308,15 @@ void polynomial::unload (fitsfile* fptr, long row)
   long repeat = 0;
   long width = 0;
   
-#ifdef DEBUG
-  cerr << "polynomial::unload PSRFITS 5" << endl;
-#endif
-
   fits_get_colnum (fptr, CASEINSEN, "COEFF", &colnum, &status);
   fits_get_coltype (fptr, colnum, &typecode, &repeat, &width, &status);  
   if (repeat < ncoef)
     throw Error (InvalidState, "polynomial::unload",
 	       "COEFF vector repeat count=%ld < NCOEF=%d", repeat, ncoef);
 
+  double* coeff = const_cast<double*>(coefs.begin());
   fits_write_col (fptr, TDOUBLE, colnum, row, firstelem, ncoef,
-		 coefs.begin(), &status);
+		  coeff, &status);
 
   if (status)
     throw FITSError (status, "polynomial::unload", "fits_write_col COEFF");

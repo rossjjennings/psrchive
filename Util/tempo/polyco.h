@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/polyco.h,v $
-   $Revision: 1.17 $
-   $Date: 2003/01/22 20:07:06 $
+   $Revision: 1.18 $
+   $Date: 2003/01/23 10:22:22 $
    $Author: straten $ */
 
 #ifndef __POLY_H
@@ -158,7 +158,7 @@ public:
 
 #ifdef PSRFITS
   void load (fitsfile* fptr, long row);
-  void unload (fitsfile* fptr, long row);
+  void unload (fitsfile* fptr, long row) const;
 #endif
 
 };
@@ -182,8 +182,8 @@ class polyco : public Reference::Able {
   polyco (const polyco& poly) { operator = (poly); }
 
   //! Load in polycos
-  polyco (const char * id);
-  polyco (const string id);
+  polyco (const char* id);
+  polyco (const string& id);
   polyco& operator = (const polyco& poly);
 
   ~polyco() {}
@@ -272,7 +272,7 @@ class polyco : public Reference::Able {
 
 #ifdef PSRFITS
   void load (fitsfile* fptr, int back=0);
-  void unload (fitsfile* fptr, int back=0);
+  void unload (fitsfile* fptr, int back=0) const;
 #endif
 
 };
