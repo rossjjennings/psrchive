@@ -25,22 +25,26 @@ void Pulsar::Archive::unload (const char* filename)
   
   if (ephemeris) {
     if (get_source() != ephemeris->psrname()) {
-      string temp1 = get_source();
-      string temp2 = ephemeris->psrname();
-      if (temp1.length() > temp2.length()) {
-	if (temp1.substr(1,temp1.length()) != temp2) {
-	  cout << "Archive::unload Informative Notice:\n" 
-	       << "   Source name will be updated to match archive ephemeris\n"
-	       << "   New name: " << temp2 << endl;
-	  set_source(temp2);
+      if (ephemeris->psrname() != "CAL" && ephemeris->psrname() != "cal" &&
+	  ephemeris->psrname() != "Cal" && ephemeris->psrname() != "JCAL" &&
+	  ephemeris->psrname() != "jcal") {
+	string temp1 = get_source();
+	string temp2 = ephemeris->psrname();
+	if (temp1.length() > temp2.length()) {
+	  if (temp1.substr(1,temp1.length()) != temp2) {
+	    cout << "Archive::unload Informative Notice:\n" 
+		 << "   Source name will be updated to match archive ephemeris\n"
+		 << "   New name: " << temp2 << endl;
+	    set_source(temp2);
+	  }
 	}
-      }
-      else {
-	if (temp2.substr(1,temp2.length()) != temp1) {
-	  cout << "Archive::unload Informative Notice:\n" 
-	       << "   Source name will be updated to match archive ephemeris\n"
-	       << "   New name: " << temp2 << endl;
-	  set_source(temp2);
+	else {
+	  if (temp2.substr(1,temp2.length()) != temp1) {
+	    cout << "Archive::unload Informative Notice:\n" 
+		 << "   Source name will be updated to match archive ephemeris\n"
+		 << "   New name: " << temp2 << endl;
+	    set_source(temp2);
+	  }
 	}
       }
       if (get_dispersion_measure() != ephemeris->get_dm()) {
@@ -51,7 +55,7 @@ void Pulsar::Archive::unload (const char* filename)
       }
     }
   }
-
+  
   // create the temporary filename
   string temp_filename = unload_to_filename + ".XXXXXXXX";
 
