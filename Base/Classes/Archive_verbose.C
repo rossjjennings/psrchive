@@ -9,7 +9,6 @@
 void Pulsar::Archive::set_verbosity (unsigned level)
 {
   // level 3
-  Registry::List<Agent>::verbose = (level >= 3);
   Tempo::verbose    = (level >= 3);
   psrephem::verbose = (level >= 3);
   polyco::verbose   = (level >= 3);
