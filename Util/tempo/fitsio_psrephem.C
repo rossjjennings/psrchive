@@ -313,7 +313,7 @@ void psrephem::load (fitsfile* fptr, long row)
     case 4:  // MJD
       {
 	#ifdef sun
-	  double nul = 0.0;
+	  double nul = FP_QNAN;
 	#else
 	  double nul = NAN;
 	#endif
