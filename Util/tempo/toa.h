@@ -6,21 +6,16 @@
 
 #include "MJD.h"
 
-class archive;
-class sub_int;
-class profile;
 class polyco;
 
 class toa
 {
- protected:
+ public:
 
   enum Instrument { UNKNOWN, FPTM, FILTERBANK, S2, CPSR };
-  enum Format { Unformatted, Princeton, Parkes, ITOA, Psrclock, Rhythm };
+  enum Format { Unspecified, Princeton, Parkes, ITOA, Psrclock, Rhythm };
 
-  Format format;
-
- public:
+ protected:
   // fundamental TOA LINE as on:
   // http://pulsar.princeton.edu/tempo/ref_man_sections/toa.txt
   double frequency;      // Observing frequency (MHz)
@@ -38,16 +33,19 @@ class toa
   // Rhythm extras
   time_t calculated;   /* the date when this toa was calculated */
   string filename;     /* name of archive file */
-  archive* arch;       /* the archive from which this toa derives */
   int  subint;
   int  subband;
   int  subpoln;
   Instrument instrument;
 
+  Format format;
+
   /* flags used when in group */
-  static int verbose;
   char deleted;
   char selected;
+
+ public:
+  static int verbose;
 
   toa () { init(); };
   ~toa () { destroy(); };
@@ -55,25 +53,49 @@ class toa
   // copy constructor
   toa (const toa & in_toa);
 
-  // construct from a profile and standard
-  toa (const profile& pulsar_prf, const profile& std_prf,
-       const MJD& prf_start_time, double folding_period, int nsite,
-       const string& fname, int isubint, int isubband, int ipol);
-
   // construct from an open file
   toa (FILE* instream);
 
   // construct from a string
   toa (char* indata);
 
-  // only operation
+  // methods for setting/getting things (may eventually check validity)
+  void set_instrument(Instrument i){ instrument = i; };
+  void set_format    (Format fmt)  { format = fmt; };
+  void set_frequency (double freq) { frequency = freq; };
+  void set_arrival   (MJD arrived) { arrival = arrived; };
+  void set_error     (float err)   { error = err; };
+  void set_telescope (int telcode) { telescope = telcode; };
+  void set_when_calculated (time_t when) { calculated = when; };
+  void set_filename  (const char* fname)  { filename = fname;  };
+  void set_subint    (int isbint)  { subint = isbint;   };
+  void set_subband   (int isbband) { subband = isbband; };
+  void set_subpoln   (int isbpoln) { subpoln = isbpoln; };
+
+  Instrument get_instrument() { return instrument; };
+  Format get_format    () { return format; };
+  double get_frequency () { return frequency; };
+  MJD    get_arrival   () { return arrival; };
+  float  get_error     () { return error; };
+  int    get_telescope () { return telescope; };
+  time_t get_when_calculated () { return calculated; };
+  string get_filename  () { return filename; };
+  int    get_subint    () { return subint;   };
+  int    get_subband   () { return subband; };
+  int    get_subpoln   () { return subpoln; };
+
+  bool is_deleted ()  const { return deleted == 1; };
+  bool is_selected () const { return selected == 1; };
+  void set_deleted (bool yup) { if (yup) deleted = 1; else deleted = 0; };
+  void set_selected (bool yup) { if (yup) selected = 1; else selected = 0; };
+
   double shift (const polyco & poly) const;
 
   // loading and unloading to/from file and string
   int    load   (FILE* instream);
   int    load   (const char* instring);
-  int    unload (FILE* outstream, Format fmt = Unformatted) const;
-  int    unload (char* outstring, Format fmt = Unformatted) const;
+  int    unload (FILE* outstream, Format fmt = Unspecified) const;
+  int    unload (char* outstring, Format fmt = Unspecified) const;
 
   int    parkes_parse (const char* instring);
   int    parkes_out   (char* outstring) const;
@@ -106,18 +128,10 @@ class toa
   static int load (FILE* instream, vector<toa>* toas);
   
   static int unload (const char* filename, const vector<toa>& toas,
-		     Format fmt = Unformatted);
+		     Format fmt = Unspecified);
   static int unload (FILE* outstream, const vector<toa>& toas,
-		     Format fmt = Unformatted);
+		     Format fmt = Unspecified);
   
-  static int mk_toas (const archive & pulsar_arch, const archive & std_arch,
-		      vector<toa>* toas, int mode, int wt=0);
-
-  static int mk_toas (const sub_int& pulsar_subint, const sub_int& std_subint,
-		      int nsite, const string& fname, 
-		      int subint, int nsubchan,
-		      vector<toa>* toas, int mode, int wt=0);
-
  private:
   // low-level stuff
   void init();
@@ -139,7 +153,6 @@ class toa_model {
   toa_model(){};
   ~toa_model(){};
   toa_model (const toa_model & toamodel);
-  toa_model(const archive & pulsar_arch, const archive & std_arch, int wt = 0);
 
   toa_model & operator=(const toa_model & toamodel);
 

@@ -1,11 +1,12 @@
+#include <iostream>
+
 #include <stdio.h>
 #include <sys/types.h>
 #include <time.h>
 
 #include "string_utils.h"
-
+#include "polyco.h"
 #include "toa.h"
-#include "archive.h"
 
 toa::toa (char* datastr)
 {
@@ -345,9 +346,9 @@ int toa::load (FILE * instream)
   return load (buffer);
 }
 
-int toa::unload (FILE* outstream, format_t fmt) const
+int toa::unload (FILE* outstream, Format fmt) const
 {
-  if (fmt == None)
+  if (fmt == Unspecified)
     fmt = format;
 
   switch (fmt) {
@@ -365,9 +366,9 @@ int toa::unload (FILE* outstream, format_t fmt) const
   }
 }
 
-int toa::unload (char* outstring, format_t fmt) const
+int toa::unload (char* outstring, Format fmt) const
 {
-  if (fmt == None)
+  if (fmt == Unspecified)
     fmt = format;
 
   switch (fmt) {
@@ -461,49 +462,11 @@ void toa::guess_instrument ()
 // 
 // ////////////////////////////////////////////////////////////////////////
 
-double toa::shift (const polyco & poly) const
+double toa::shift (const polyco& poly) const
 { 
   double toashift = poly.phase (this->arrival, frequency).fracturns();
   if (toashift >.5) toashift -= 1.0;
   return (toashift*poly.period (this->arrival));
-}
-
-// ////////////////////////////////////////////////////////////////////////
-//
-// toa constructor
-//
-// Constructs a toa object from a profile and standard.
-// 
-// ////////////////////////////////////////////////////////////////////////
-
-toa::toa (const profile& pulsar_prf, const profile& std_prf,
-	  const MJD& prf_start_time, double folding_period, int nsite,
-	  const string& fname, int isubint, int isubband, int ipol)
-{
-  init ();
-
-  format = Rhythm;
-  frequency = pulsar_prf.centrefreq;
-
-  float ephase, snrfft, esnrfft;  
-  float phase = pulsar_prf.shift (std_prf, &ephase, &snrfft, &esnrfft);
-
-  arrival = prf_start_time + (double)(phase * folding_period);
-
-  error = ephase * folding_period * 1000.0 * 1000.0;
-
-  telescope = nsite;
-  time (&calculated);
-  filename = fname;
-
-  subint = isubint;
-  subband = isubband;
-  subpoln = ipol;
-
-  if (verbose) {
-    fprintf (stderr, "toa created:\n");
-    unload (stderr);
-  }
 }
 
 // ////////////////////////////////////////////////////////////////////////
@@ -532,7 +495,7 @@ int toa::load (FILE* instream, vector<toa>* toas)
   return 0;
 }
 
-int toa::unload(const char* filename, const vector<toa>& toas, format_t fmt)
+int toa::unload(const char* filename, const vector<toa>& toas, Format fmt)
 {
   FILE * fp;
   if((fp = fopen(filename, "w"))==NULL){
@@ -544,69 +507,13 @@ int toa::unload(const char* filename, const vector<toa>& toas, format_t fmt)
   return ret;
 }
 
-int toa::unload(FILE* outstream, const vector<toa>& toas, format_t fmt)
+int toa::unload(FILE* outstream, const vector<toa>& toas, Format fmt)
 {
   for (int i=0; i<toas.size(); ++i) {
     if (verbose)
       cerr << "toa_model::unload - unloading toa " << i << endl;
     if (toas[i].unload(outstream, fmt) < 0)
       return -1;
-  }
-  return 0;
-}
-
-// ////////////////////////////////////////////////////////////////////////
-//
-// toa::toas vector of toa objects constructor
-//
-// Constructs a vector of toa objects from an archive and standard.
-// 
-// ////////////////////////////////////////////////////////////////////////
-
-int toa::mk_toas (const archive& pulsar_arch, const archive& std_arch,
-		  vector<toa>* toas, int mode, int wt)
-{ 
-  int nsite;
-  if (sscanf (pulsar_arch.hdr.telid,"%1d",&nsite) < 1){
-    nsite = 7;   /* Didn't scanf so assume Parkes unless proven otherwise */
-    if (!strcmp(pulsar_arch.hdr.telid,"AAT")) nsite = 5;
-    if (!strcmp(pulsar_arch.hdr.telid,"ATCA")) nsite = 2;
-    if (!strcmp(pulsar_arch.hdr.telid,"DSS43")) nsite = 6;
-  }  
-
-  if (verbose)
-    fprintf (stderr, "toa::mk_toas (archive) telescope:%d  subints:%d\n",
-	     nsite, pulsar_arch.hdr.nsub_int);
-
-  for (int isub=0; isub<pulsar_arch.hdr.nsub_int; ++isub) {
-    mk_toas (*(pulsar_arch.sub_ints[isub]), *(std_arch.sub_ints[0]),
-	     nsite, pulsar_arch.name, isub, pulsar_arch.hdr.nsub_band,
-	     toas, mode, wt);
-    if (verbose)
-      fprintf (stderr, "toa::mk_toas (archive) isub:%d tot:%d\n",
-	       isub, toas->size());
-  }
-  return 0;
-}
-
-int toa::mk_toas (const sub_int& pulsar_subint, const sub_int& std_subint,
-		  int nsite, const string& fname, int subint, int nsubchan,
-		  vector<toa>* toas, int mode, int wt)
-{ 
-  MJD prf_start_time = MJD (pulsar_subint.mini.mjd,
-			    pulsar_subint.mini.fracmjd);
-  double folding_period = pulsar_subint.mini.pfold;
-  
-  if (verbose)
-    fprintf (stderr, "toa::mk_toas (sub_int) MJD:%s period:%lf nchan:%d\n",
-	     prf_start_time.printdays(10).data(), folding_period, nsubchan);
-
-  for (int ichan=0; ichan < nsubchan; ++ichan) {
-    if (wt && pulsar_subint.profiles[0][ichan]->wt == 0) continue;
-    toas->push_back(toa(*(pulsar_subint.profiles[0][ichan]),
-			*(std_subint.profiles[0][0]), 
-			prf_start_time, folding_period, nsite,
-			fname, subint, ichan, 0));
   }
   return 0;
 }
@@ -624,7 +531,7 @@ char   toa::datestr [25];
 
 void toa::init()
 {
-  format = None;
+  format = Unspecified;
   frequency = 0.0;
   arrival = MJD (0.0,0.0,0.0);
   error = 0.0;
@@ -635,7 +542,6 @@ void toa::init()
 
   calculated = -1;
   filename.erase();
-  arch = NULL;
   subint = -1;
   subband = -1;
   subpoln = -1;
@@ -647,7 +553,6 @@ void toa::init()
 
 void toa::destroy()
 {
-  if (arch) delete arch;
   init ();
 }
 
@@ -703,14 +608,6 @@ toa_model & toa_model::operator = (const toa_model & toamodel)
   if (this != &toamodel)
     toas = toamodel.toas;
   return(*this);
-}
-
-toa_model::toa_model (const archive & pulsar_arch, const archive & std_arch,
-		      int wt)
-{ 
-  toas.clear();
-  if (toa::mk_toas (pulsar_arch, std_arch, &toas, 0, wt) < 0)
-    throw ("toa_model::toa_model");
 }
 
 void toa_model::load (const char * filename)
