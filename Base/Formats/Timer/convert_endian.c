@@ -71,6 +71,7 @@ void timerChangeEndian(struct timer * hdr){
 	changeEndian(&hdr->obstype,4);
 	changeEndian(&hdr->wts_and_bpass,4);
 	changeEndian(&hdr->wtscheme,4);
+	ChangeEndian(hdr->be_data_size);
 }
 
 void 
