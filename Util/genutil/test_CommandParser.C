@@ -7,9 +7,9 @@ class tester : public CommandParser {
 public:
   tester () {
     prompt = "tester> ";
-    add_command (0, "test", "this is a test command parser");
-    add_command (1, "try",  "try it out by typing the commands listed");
-    add_command (2, "error","or by typing a command not listed");
+    add_command (0, "test", "this is a test command parser", "no detail");
+    add_command (1, "try",  "type the commands listed", "no detail");
+    add_command (2, "error","or type a command not listed", "no detail");
   }
 
   string execute (int token, const string& args) {
@@ -21,6 +21,7 @@ public:
     case 2:
       return "no error";
     }
+    return "poo";
   }
 };
 
