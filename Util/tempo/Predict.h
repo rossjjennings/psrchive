@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/Predict.h,v $
-   $Revision: 1.2 $
-   $Date: 2004/04/29 11:44:04 $
+   $Revision: 1.3 $
+   $Date: 2004/11/01 09:54:56 $
    $Author: straten $ */
 
 #ifndef __Tempo_Predict_h
@@ -77,6 +77,11 @@ namespace Tempo {
 
     //! Verify the time spanned by polynomial ephemerides
     bool verify;
+
+  private:
+
+    //! Cached polynomial
+    Reference::To<polyco> cached;
 
   };
 

@@ -27,31 +27,49 @@ void Tempo::Predict::set_asite (char code)
   if (code < 10)
     code += '0';
 
+  if (asite != code)
+    cached = 0;
+
   asite = code;
 }
 
 void Tempo::Predict::set_frequency (double MHz)
 {
+  if (frequency != MHz)
+    cached = 0;
+
   frequency = MHz;
 }
 
 void Tempo::Predict::set_maxha (unsigned hours)
 {
+  if (maxha != hours)
+    cached = 0;
+
   maxha = hours;
 }
 
 void Tempo::Predict::set_nspan (unsigned minutes)
 {
+  if (nspan != minutes)
+    cached = 0;
+
   nspan = minutes;
 }
 
 void Tempo::Predict::set_ncoef (unsigned _ncoef)
 {
+  if (ncoef != _ncoef)
+    cached = 0;
+
   ncoef = _ncoef;
 }
 
 void Tempo::Predict::set_parameters (const psrephem& _parameters)
 {
+  if (parameters != _parameters)
+    cached = 0;
+
   parameters = _parameters;
 
   psrname = parameters.psrname();
@@ -117,7 +135,16 @@ void Tempo::Predict::write_tzin () const
 
 //! Returns a polyco valid over the range in MJD specified by m1 and m2
 polyco Tempo::Predict::get_polyco (const MJD& m1, const MJD& m2) const
-{  
+{
+  if (cached && cached->start_time() < m1 && cached->end_time() > m2  ) {
+
+    if (Tempo::verbose)
+      cerr << "Tempo::Predict::get_polyco returning cached polyco" << endl;
+
+    return *cached;
+
+  }
+
   MJD to_tempo_m1 = m1;
   MJD to_tempo_m2 = m2;
 
@@ -192,33 +219,34 @@ polyco Tempo::Predict::get_polyco (const MJD& m1, const MJD& m2) const
       fprintf (stderr, "********* END OF FILE *********\n");
     }
 
-    polyco poly;
+    const_cast<Predict*>(this)->cached = new polyco;
 
-    if (poly.load(polyco_dat) < 1)
+    if (cached->load(polyco_dat) < 1)
       throw Error (FailedSys, "Tempo::predict",
 		   "failed polyco::load(" + polyco_dat + ")");
 
     if (verbose)
-      cerr << "Tempo::predict scanned " << poly.pollys.size() 
+      cerr << "Tempo::predict scanned " << cached->pollys.size() 
 	   << " polynomials" << endl;
     
     if (!verify || m1 == unspecified)
       // no need for a validity check
-      return poly;
+      return *cached;
     
     // a simple validity check
-    if ( poly.start_time() > m1 || poly.end_time() < m2  ) {
+    if ( cached->start_time() > m1 || cached->end_time() < m2  ) {
 
       if (verbose)
-	cerr << "Tempo::predict insufficient span: " <<
-	  poly.start_time().in_days() << " -> " << poly.end_time().in_days() 
+	cerr << "Tempo::predict insufficient span: "
+	     << cached->start_time().in_days() << " -> " 
+	     << cached->end_time().in_days() 
 	     << "\n   requested: " << m1.in_days() << " -> " << m2.in_days()
 	     << endl;
       
-      if (poly.start_time() > m1)
+      if (cached->start_time() > m1)
 	to_tempo_m1 -= half_day;
 
-      if (poly.end_time() < m2)
+      if (cached->end_time() < m2)
 	to_tempo_m2 += half_day;
 
       if (verbose)
@@ -232,12 +260,12 @@ polyco Tempo::Predict::get_polyco (const MJD& m1, const MJD& m2) const
 	fprintf (stderr, 
 		 "Tempo::predict:: polyco span OK.\n");
 	fprintf (stderr, "span: %g->%g\n",
-		 poly.start_time().in_days(), poly.end_time().in_days());
+		 cached->start_time().in_days(), cached->end_time().in_days());
 	
 	fprintf (stderr, "reqd: %g->%g\n", m1.in_days(), m2.in_days());
       }
 
-      return poly;
+      return *cached;
 
     }  // end else polyco OK
   }  // end while not satisfied
