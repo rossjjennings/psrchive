@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pcm.C,v $
-   $Revision: 1.23 $
-   $Date: 2004/06/19 11:19:42 $
+   $Revision: 1.24 $
+   $Date: 2004/06/24 11:23:10 $
    $Author: straten $ */
 
 /*! \file pcm.C 
@@ -103,8 +103,8 @@ void auto_select (Pulsar::ReceptionCalibrator& model,
   sort (bins.begin(), bins.end());
 
   for (unsigned ibin=0; ibin < bins.size(); ibin++) {
-    cerr << "pcm: adding phase bin " << ibin << endl;
-    model.add_state (ibin);
+    cerr << "pcm: adding phase bin " << bins[ibin] << endl;
+    model.add_state (bins[ibin]);
   }
 }
 
@@ -248,7 +248,8 @@ int main (int argc, char *argv[]) try {
   bool publication_plots = false;
 
   int gotc = 0;
-  while ((gotc = getopt(argc, argv, "a:b:c:d:Df:hM:m:n:Pp:qsS:t:uvV:")) != -1) {
+  const char* args = "a:b:c:C:d:Df:hM:m:n:Pp:qsS:t:uvV:";
+  while ((gotc = getopt(argc, argv, args)) != -1) {
     switch (gotc) {
 
     case 'a':
@@ -379,8 +380,9 @@ int main (int argc, char *argv[]) try {
     }
   }
 
-  if (phmin == phmax && !binfile) {
-    cerr << "pcm: At least one of the following options must be specified:\n"
+  if (!stdfile && phmin == phmax && !binfile) {
+    cerr << "pcm: In mode A, at least one of the following options"
+      " must be specified:\n"
       " -p min,max  Choose constraints from the specified pulse phase range \n"
       " -c archive  Choose optimal constraints from the specified archive \n"
 	 << endl;
@@ -504,6 +506,11 @@ int main (int argc, char *argv[]) try {
 
   if (binfile) try {
     autobin = Pulsar::Archive::load (binfile);
+    autobin->dedisperse (0.0, autobin->get_centre_frequency());
+    autobin->fscrunch ();
+    autobin->tscrunch ();
+    autobin->convert_state (Signal::Stokes);
+    autobin->remove_baseline ();
   }
   catch (Error& error) {
     cerr << "pcm: could not load constraint archive " << binfile << endl
@@ -536,7 +543,7 @@ int main (int argc, char *argv[]) try {
 	  cerr << "pcm: dedispersing and removing baseline from pulsar data"
                << endl;
 	
-        archive->dedisperse ();
+        archive->dedisperse (0.0, autobin->get_centre_frequency());
 	archive->convert_state (Signal::Stokes);
         archive->remove_baseline ();
       }
@@ -545,12 +552,14 @@ int main (int argc, char *argv[]) try {
 
 	if (autobin) {
 
+#if 0
 	  string reason;
 	  if ( ! archive->mixable (autobin, reason) ) {
 	    cerr << "pcm: cannot choose constraints from " << binfile
 		 << endl << reason << endl;
 	    return -1;
 	  }
+#endif
 
 	  auto_select (model, autobin, maxbins);
 
