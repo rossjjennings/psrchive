@@ -223,9 +223,9 @@ MJD::MJD(float128 mjd) {
 MJD::MJD(float128 mjd) {
   double ndays = 0.0, seconds = 0.0, fracseconds = 0.0;
 
-  printf ("Not sure how to parse these bits!\n");
+  fprintf (stderr, "Not sure how to parse these bits!\n");
 
-  printf ("%lf ..  %lf\n", mjd.f1, mjd.f2);
+  fprintf (stderr, "%lf ..  %lf\n", mjd.f1, mjd.f2);
   /*
   fromBigEndian ((void*)&(mjd.f1), sizeof (double));
   fromBigEndian ((void*)&(mjd.f2), sizeof (double));
