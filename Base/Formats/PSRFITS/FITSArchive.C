@@ -12,6 +12,7 @@
 #include "Pulsar/ProcHistory.h"
 #include "Pulsar/Passband.h"
 #include "Pulsar/PolnCalibratorExtension.h"
+#include "Pulsar/FluxCalibratorExtension.h"
 #include "Pulsar/CalibratorStokes.h"
 #include "Pulsar/IntegrationOrder.h"
 #include "Pulsar/PeriastronOrder.h"
@@ -608,27 +609,24 @@ void Pulsar::FITSArchive::load_header (const char* filename)
 	 << endl;
   
   // Load the processing history
-
   load_ProcHistory (fptr);
 
   // Load the digitiser statistics
-  
   load_DigitiserStatistics (fptr);
   
   // Load the original bandpass data
-
   load_Passband (fptr);
 
+  // Load the flux calibrator extension
+  load_FluxCalibratorExtension (fptr);
+
   // Load the calibrator stokes parameters
-  
   load_CalibratorStokes (fptr);
 
   // Load the calibration model description
-  
   load_PolnCalibratorExtension (fptr);
 
   // Load the ephemeris from the FITS file
-  
   fits_movnam_hdu (fptr, BINARY_TBL, "PSREPHEM", 0, &status);
 
   if (status == 0) {
@@ -991,6 +989,12 @@ try {
   else
     delete_hdu (fptr, "BANDPASS");
 
+  const FluxCalibratorExtension* fce = get<FluxCalibratorExtension>();
+  if (fce)
+    unload (fptr, fce);
+  else
+    delete_hdu (fptr, "FLUX_CAL");
+
   const CalibratorStokes* stokes = get<CalibratorStokes>();
   if (stokes)
     unload (fptr, stokes);
@@ -1031,50 +1035,6 @@ catch (Error& error) {
 // //////////////////////////////////////////
 
 
-
-string Pulsar::FITSArchive::Agent::get_description () 
-{
-  return "PSRFITS version 1.4";
-}
-
-// /////////////////////////////////////////////////////////////////////
-// /////////////////////////////////////////////////////////////////////
-/*! The method tests whether or not the given file is of FITS type. */
-bool Pulsar::FITSArchive::Agent::advocate (const char* filename)
-{
-  fitsfile* test_fptr;
-  int status = 0;
-  char error[FLEN_ERRMSG];
-
-  if (verbose == 3)
-    cerr << "Pulsar::FITSArchive::Agent::advocate test " << filename << endl;
-
-  fits_open_file(&test_fptr, filename, READONLY, &status);
-
-  if (status != 0) {
-
-    if (Archive::verbose == 3) {
-      fits_get_errstatus (status, error);
-      cerr << "FITSAgent::advocate fits_open_file: " << error << endl;
-    }
-
-    return false;
-  }
-
-  else {
-
-    fits_close_file(test_fptr, &status);
-    return true;
-
-  }
-}
-
-
-
-//
-// End of function
-// ///////////////
-// ///////////////
 
 // !A quick little helper function for internal use.
 // /////////////////////////////////////////////////

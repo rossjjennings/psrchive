@@ -53,12 +53,17 @@ void Pulsar::FITSArchive::load_FluxCalibratorExtension (fitsfile* fptr)
   int nch_flux = 0;
   fits_read_key (fptr, TINT, "NCH_FLUX", &nch_flux, comment, &status);
   
-  if (status == 0 && nch_flux >= 0)
-    fce->set_nchan(nch_flux);
+  if (status == 0) {
+    if (verbose == 3)
+      cerr << "FITSArchive::load_FluxCalibratorExtension"
+              " NCH_FLUX=" << nch_flux << endl;
+    if (nch_flux >= 0)
+      fce->set_nchan(nch_flux);
+  }
 
   Pulsar::load (fptr, fce);
 
-  if (fce->get_nchan()) {
+  if (fce->get_nchan() == 0) {
     if (verbose == 3)
       cerr << "FITSArchive::load_FluxCalibratorExtension FLUX_CAL HDU"
 	   << " contains no data. FluxCalibratorExtension not loaded" << endl;

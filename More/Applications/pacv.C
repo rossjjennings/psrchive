@@ -5,6 +5,7 @@
 #include "Pulsar/PolarCalibrator.h"
 
 #include "Pulsar/PolnCalibratorExtension.h"
+#include "Pulsar/FluxCalibratorExtension.h"
 
 #include "Pulsar/CalibratorPlotter.h"
 #include "Pulsar/CalibratorStokes.h"
@@ -44,7 +45,7 @@ int main (int argc, char** argv)
   bool single_axis = true;
 
   // treat all of the Archives as one FluxCalibrator observation set
-  bool flux_cal = false;
+  Reference::To<Pulsar::FluxCalibrator> fluxcal;
 
   // filename of filenames
   char* metafile = NULL;
@@ -110,7 +111,7 @@ int main (int argc, char** argv)
       break;
 
     case 'f':
-      flux_cal = true;
+      fluxcal = new Pulsar::FluxCalibrator;
       break;
 
     case 'M':
@@ -180,7 +181,6 @@ int main (int argc, char** argv)
     cpgslw (2);
   }
 
-  Pulsar::FluxCalibrator fluxcal;
   Pulsar::Plotter archplot;
 
   for (unsigned ifile=0; ifile<filenames.size(); ifile++) try {
@@ -190,17 +190,19 @@ int main (int argc, char** argv)
 
     input = Pulsar::Archive::load( filenames[ifile] );
 
-
     if (input->get_type() == Signal::Calibrator) {
+
+      cerr << "pacv: " << filenames[ifile] << " is a processed Calibrator"
+           << endl;
 
       if (set_epoch)  {
 
         cerr << "pacv: setting epoch in " << filenames[ifile]
              << " to " << epoch << endl;
 
-        Pulsar::PolnCalibratorExtension* pce;
-        pce = input->get<Pulsar::PolnCalibratorExtension>();
-        pce -> set_epoch (epoch);
+        Pulsar::CalibratorExtension* ce;
+        ce = input->get<Pulsar::CalibratorExtension>();
+        ce -> set_epoch (epoch);
 
         string newname = filenames[ifile] + ".pacv";
 
@@ -208,6 +210,20 @@ int main (int argc, char** argv)
         input -> unload (newname);
         continue;
 
+      }
+
+      if (input->get<Pulsar::FluxCalibratorExtension>()) {
+
+        cerr << "pacv: constructing FluxCalibrator from Extension" << endl;
+        fluxcal = new Pulsar::FluxCalibrator (input);
+
+        cerr << "pacv: Plotting FluxCalibrator" << endl;
+        plotter.plot (fluxcal);
+
+        // disable attempt to plot again after end of main loop
+        fluxcal = 0;
+
+        continue;
       }
 
       calibrator = new Pulsar::PolnCalibrator (input);
@@ -264,11 +280,11 @@ int main (int argc, char** argv)
     }
 
 
-    if (flux_cal) {
+    if (fluxcal) {
       if (verbose)
 	cerr << "pacv: Adding Archive to FluxCalibrator" << endl;
       
-      fluxcal.add_observation (input);
+      fluxcal->add_observation (input);
       continue;
     }
 
@@ -304,13 +320,9 @@ int main (int argc, char** argv)
     input->convert_state (Signal::Stokes);
     archplot.calibrator_spectrum (input);
 
-    Pulsar::Calibrator* cal = calibrator;
-    if (flux_cal)
-      cal = &fluxcal;
-
     cerr << "pacv: Creating " << archive_class << " Archive" << endl;
   
-    output = cal->new_solution (archive_class);
+    output = calibrator->new_solution (archive_class);
 
     int index = filenames[ifile].find_first_of(".", 0);
     string newname = filenames[ifile].substr(0, index) + ".pacv";
@@ -328,9 +340,20 @@ int main (int argc, char** argv)
   }
 
 
-  if (flux_cal) try {
+  if (fluxcal) try {
     cerr << "pacv: Plotting FluxCalibrator" << endl;
-    plotter.plot (&fluxcal);
+    plotter.plot (fluxcal);
+
+    cerr << "pacv: Creating " << archive_class << " Archive" << endl;
+
+    output = fluxcal->new_solution (archive_class);
+
+    cerr << "pacv: Creating new filename" << endl;
+    int index = filenames[0].find_first_of(".", 0);
+    string newname = filenames[0].substr(0, index) + ".fcal";
+
+    cerr << "pacv: Unloading " << newname << endl;
+    output -> unload (newname);
   }
   catch (Error& error) {
     cerr << "pacv: Error plotting FluxCalibrator" << error << endl;
@@ -339,5 +362,6 @@ int main (int argc, char** argv)
 
   if (!set_epoch)
     cpgend();
+
   return 0;
 }
