@@ -68,9 +68,14 @@ class CommandParser {
   //! verbose operation enabled by "verbose"
   bool verbose;
 
+  string usage ();
+
  private:
 
   vector<Command> commands;
+
+  //! the command token passed to execute, used by usage()
+  unsigned current_command;
   
 };
 
