@@ -148,8 +148,12 @@ string Tempo::get_directory ()
 // run tempo with the given arguments
 void Tempo::tempo (const string& arguments, const string& input)
 {
-  string runtempo = "cd " + get_directory() + "; "
-    + get_system() + " " + arguments;
+  char cwd[FILENAME_MAX];
+
+  if (getcwd (cwd, FILENAME_MAX) == NULL)
+    throw Error (FailedSys, "Tempo::tempo", "failed getcwd");
+  
+  string runtempo = get_system() + " " + arguments;
 
   if (!Tempo::verbose)
     runtempo += " > /dev/null 2> " + stderr_filename;
@@ -168,7 +172,16 @@ void Tempo::tempo (const string& arguments, const string& input)
   string errstr;
 
   while (retries) {    
+
+    if (chdir (get_directory().c_str()) != 0)
+      throw Error (FailedSys, "Tempo::tempo",
+		   "failed chdir(" + get_directory() + ")");
+
     int err = system (runtempo.c_str());
+
+    if (chdir (cwd) != 0)
+      throw Error (FailedSys, "Tempo::tempo", "failed chdir(%s)", cwd);
+
     if (!err)
       return;
 
@@ -176,7 +189,7 @@ void Tempo::tempo (const string& arguments, const string& input)
     if (err < 0)
       errstr = strerror (err);
     else
-      errstr = stringprintf ("\n  Tempo returns err code %i", WIFEXITED(err));
+      errstr = stringprintf ("\n\tTempo returns err code %i", WIFEXITED(err));
     
     fsleep (5e-4);
     retries --; 
