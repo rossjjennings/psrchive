@@ -6,8 +6,7 @@ include ${LOCAL_ROOT}/include/Makefile.standard
 LIBRARY    = libarchive.a
 LIB_C_SRCS = pg_plot_gnu.C profile.C sub_int.C archive.C superarchive.C  \
              toa.C profplot.C plot2profs.C scintplot.C misc.C heapsort.C \
-             get_epoch_and_name.C archhdr.C convert_endian.C headers.C  \
-             caldata.C cal_fns.C cpg_fns.C iono.C 
+             get_epoch_and_name.C archhdr.C convert_endian.C headers.C 
 
 LIB_F_SRCS = ffft.f fftfit.f brent.f fccf.f cprof.f shiftbyfft.f ionrm.f \
              width.f tsky1.f fftconv.f scan_fort_val.f iono_rm.f convolve.f
@@ -28,9 +27,8 @@ PROGRAMS = align.C amps.C chanprep.C  \
 	      plot_gry_diff.C pepoch.C freduce.C \
 	      cleanarch.C fixhdr.C crm.C  \
 	      crh.C psrhead.C autotadd.C \
-	      fakedat.C plk.C \
-	      cal_arch.C vargain.C \
-	      headsum.C iono_model.C treduce.C plk.C \
+	      fakedat.C plk.C vargain.C \
+	      headsum.C treduce.C plk.C \
               tcombine2.C ratio.C fixprf.C
 
 NOT_WORKING     = bandpass.C detail.C xtoa.C bin_ph.C corflux.C flux.C
