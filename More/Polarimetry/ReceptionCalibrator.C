@@ -3,6 +3,9 @@
 #include "Pulsar/Integration.h"
 #include "Pulsar/Archive.h"
 
+#include "Calibration/Gain.h"
+#include "Calibration/Boost.h"
+
 #include <algorithm>
 
 /*! The Archive passed to this constructor will be used to supply the first
@@ -69,15 +72,24 @@ void Pulsar::ReceptionCalibrator::initial_observation (const Archive* data)
 
   equation.resize (nchan);
   receiver.resize (nchan);
+  receiver_guess.resize (nchan);
 
   for (unsigned ichan=0; ichan<nchan; ichan++) {
 
-    equation[ichan] = new Calibration::RandomGainEquation;
+    equation[ichan] = new Calibration::MultiPathEquation;
+    receiver[ichan] = new Calibration::Polar;
 
-    Calibration::Polar* polar = equation[ichan]->get_receiver ();
+#if 0
+      boost    = new Calibration::Boost    (Vector<double, 3>::basis(0));
+      boost->name = "SingleAxis Boost";
+#endif
 
+    // add the receiver to the PolnCalibrator_path
+    equation[ichan]->get_model()->add_transformation( receiver[ichan] );
+
+    // add the receiver and the feed rotation to the Pulsar_path
     equation[ichan]->get_model()->add_path();
-    equation[ichan]->get_model()->add_transformation( polar );
+    equation[ichan]->get_model()->add_transformation( receiver[ichan] );
     equation[ichan]->get_model()->add_transformation( &parallactic );
 
   }
@@ -124,7 +136,7 @@ void Pulsar::ReceptionCalibrator::load_calibrators ()
 
   cerr << "Setting " << nchan << " channel receiver" << endl;
   for (unsigned ichan=0; ichan<nchan; ichan+=1)
-    receiver[ichan].update (equation[ichan]->get_receiver());
+    receiver_guess[ichan].update (receiver[ichan]);
 
 }
 
@@ -254,7 +266,8 @@ void Pulsar::ReceptionCalibrator::add_observation (const Archive* data)
 	measurements.back().state_index = pulsar_base_index + istate;
       }
 
-      equation[ichan]->add_measurement (epoch, measurements);
+      equation[ichan]->set_pre_xform (new Calibration::Gain);
+      equation[ichan]->add_measurement (epoch, Pulsar_path, measurements);
     }
   }
 }
@@ -298,7 +311,7 @@ Pulsar::ReceptionCalibrator::add_data(vector<Calibration::MeasuredState>& bins,
      them to best estimate of the input state */
 
   // the receiver is updated every time a PolarCalibrator observation is added
-  Jones<double> rcvr = equation[ichan]->get_receiver()->evaluate();
+  Jones<double> rcvr = receiver[ichan]->evaluate();
 
   // the parallactic transformation epoch is set in add_observation
   Jones<double> para = parallactic.evaluate();
@@ -395,7 +408,13 @@ void Pulsar::ReceptionCalibrator::add_PolnCalibrator (const PolnCalibrator* p)
 
       state.state_index = calibrator_state_index;
 
-      equation[ichan]->add_measurement (epoch, state);
+#if 0
+      boost    = new Calibration::Boost    (Vector<double, 3>::basis(0));
+      boost->name = "SingleAxis Boost";
+#endif
+
+      equation[ichan]->set_pre_xform (new Calibration::Gain);
+      equation[ichan]->add_measurement (epoch, PolnCalibrator_path, state);
 
     }
   }
@@ -406,10 +425,10 @@ void Pulsar::ReceptionCalibrator::add_PolnCalibrator (const PolnCalibrator* p)
     cerr << "Pulsar::ReceptionCalibrator::add_PolnCalibrator"
 	" add Polar Model" << endl;
 
-    assert (receiver.size() == nchan);
+    assert (receiver_guess.size() == nchan);
 
     for (unsigned ichan = 0; ichan<nchan; ichan++)
-      receiver[ichan].integrate( polcal->model[ichan] );
+      receiver_guess[ichan].integrate( polcal->model[ichan] );
   }
 
 }
@@ -595,7 +614,7 @@ void Pulsar::ReceptionCalibrator::initialize ()
   for (unsigned ichan=0; ichan<nchan; ichan+=1) {
 
     equation[ichan]->set_reference_epoch (mid);
-    receiver[ichan].update (equation[ichan]->get_receiver());
+    receiver_guess[ichan].update (receiver[ichan]);
 
   }
 

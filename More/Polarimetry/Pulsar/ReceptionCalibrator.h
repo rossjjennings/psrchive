@@ -1,15 +1,16 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ReceptionCalibrator.h,v $
-   $Revision: 1.25 $
-   $Date: 2003/05/31 06:43:32 $
-   $Author: pulsar $ */
+   $Revision: 1.26 $
+   $Date: 2003/05/31 07:49:39 $
+   $Author: straten $ */
 
 #ifndef __ReceptionCalibrator_H
 #define __ReceptionCalibrator_H
 
 #include "Calibrator.h"
-#include "Calibration/RandomGainEquation.h"
+#include "Calibration/MultiPathEquation.h"
+#include "Calibration/Polar.h"
 #include "Calibration/Parallactic.h"
 #include "Calibration/StokesState.h"
 
@@ -23,7 +24,7 @@ namespace Pulsar {
   class SourceEstimate;
   class PolarEstimate;
 
-  //! Uses the RandomGainEquation to represent and fit for the system response
+  //! Uses the MultiPathEquation to represent and fit for the system response
   /*! The ReceptionCalibrator implements a technique of single dish
     polarimetric self-calibration.  This class requires a number of
     constraints, which are provided in through the add_observation,
@@ -81,8 +82,11 @@ namespace Pulsar {
     //! Calibrate the polarization of the given archive
     void calibrate (Archive* archive, bool solve_first);
 
-    //! SingleAxis(t)Polar Equation as a function of frequency
-    vector<Calibration::RandomGainEquation*> equation;
+    //! MultiPathEquation as a function of frequency
+    vector<Reference::To<Calibration::MultiPathEquation> > equation;
+
+    //! Polar decomposition of receiver as a function of frequency
+    vector<Reference::To<Calibration::Polar> > receiver;
 
     //! Calibrator state as a function of frequency
     vector<Calibration::StokesState> calibrator;
@@ -94,7 +98,7 @@ namespace Pulsar {
     unsigned pulsar_base_index;
 
     //! Best estimate of polar decomposition as a function of frequency
-    vector<PolarEstimate> receiver;
+    vector<PolarEstimate> receiver_guess;
 
     //! Uncalibrated estimate of pulsar polarization as a function of phase
     vector<SourceEstimate> pulsar;
