@@ -92,6 +92,7 @@ AC_CONFIG_FILES([utils/units/Makefile
 		utils/plot2d/Makefile
 		utils/qtutil/Makefile
 		utils/fitsutil/Makefile
+		utils/mpiutil/Makefile
 		utils/Makefile
 		astro/polyco/Makefile
 		astro/psrephem/Makefile
