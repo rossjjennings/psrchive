@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pcm.C,v $
-   $Revision: 1.13 $
-   $Date: 2003/12/04 11:41:53 $
+   $Revision: 1.14 $
+   $Date: 2003/12/26 09:06:18 $
    $Author: straten $ */
 
 /*! \file pcm.C 
@@ -161,7 +161,7 @@ void plot_constraints (Pulsar::ReceptionCalibratorPlotter& plotter,
       unsigned plot_state = istate+start_state;
 
       // cerr << "ichan=" << ichan << " istate=" << plot_state << endl;
-      plotter.plot_constraints (ichan, plot_state);
+      plotter.plot_psr_constraints (ichan, plot_state);
 
       if (istate+1 < nstate)
 	cpgpage();
