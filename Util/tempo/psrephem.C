@@ -349,14 +349,23 @@ string psrephem::psrname() const
   throw error;
 }
 
-double psrephem::dm() const
+double psrephem::get_dm() const
 {
   if (tempo11 && parmStatus[EPH_DM])
     return value_double[EPH_DM];
 
-  string error ("psrephem::dm() Error determining pulsar DM");
-  cerr << error << endl;
-  throw error;
+  return 0;
+}
+
+void psrephem::set_dm( double dm )
+{
+  if (!tempo11)
+    return;
+
+  if (!parmStatus[EPH_DM])
+    parmStatus[EPH_DM] = 1;
+
+  value_double[EPH_DM] = dm;
 }
 
 double psrephem::jra() const
