@@ -153,7 +153,7 @@ c     PSRJ or PSRB, and don't include any prefix letter in the value
                end if
 c     Now, store the value in the way specified in parmTypes (see keys.dat)
                if (parmTypes(keypos) .eq. 1) then
-                  read(tok,'(d)',err=60)value_double(keypos)
+                  read(tok,'(d)',err=61)value_double(keypos)
                else if (parmTypes(keypos) .eq. 2) then !h:m:s
                   value_double(keypos) = hmsToTurns(tok,prec)
                else if (parmTypes(keypos) .eq. 3) then !d:m:s
@@ -162,7 +162,7 @@ c     Now, store the value in the way specified in parmTypes (see keys.dat)
                   call realTo2part(tok, value_integer(keypos),
      +                 value_double(keypos))
                else if (parmTypes(keypos) .eq. 5) then
-                  read(tok,'(i)',err=60)value_integer(keypos)
+                  read(tok,'(i)',err=61)value_integer(keypos)
                end if
 c     Next token, if present.
                call citem(buffer, ll, tokpos, tok, toklen)
@@ -189,10 +189,10 @@ c     Handle old ephemeris position values (RAJ and DECJ)
                   if (isOldEphem .and. 
      +                 ((keypos.eq.EPH_RAJ)
      +                 .or.(keypos.eq.EPH_DECJ))) then
-                     read(tok(1:toklen),'(i)', err=60), tmp
+                     read(tok(1:toklen),'(i)', err=61), tmp
                      error_double(keypos) = dfloat(tmp)*prec
                   else
-                     read(tok(1:toklen),'(d)', err=60)
+                     read(tok(1:toklen),'(d)', err=61)
      +                    error_double(keypos)
                   end if
                   if (error_double(keypos).lt.0.0d0) ! invalid
@@ -212,7 +212,10 @@ c     Ignore the line if there's no error value and the value is zero
          end if                 ! end of if keyword found then...
          goto 50                ! no errors, skip over
 c     This is the general error handler for processling a line
- 60      write (*,'("Error on line ",i,", skipping.")') lineNum
+ 60      write (*,'("Error citem ",i3,", skipping.")') lineNum
+         goto 62
+ 61      write (*,'("Error parsing line ",i3,", skipping.")') lineNum
+ 62      continue
 c     There was an error. If we parsed a keyword, flag it as unknown
 c     just in case
          if (keypos .gt. 0) parmStatus(keypos) = 0  
@@ -755,7 +758,7 @@ c     Fractional part...
       fracbit = " "
       write(fracbit,'(0p,d23.16,1p)') frac
 c How many extra zeros do we need? ie -1*the exponent used above
-      read (fracbit(22:), '(2i)') nzeros
+      read (fracbit(22:), '(i2)') nzeros
 c      write (*,*) fracbit(22:), nzeros
       if (nzeros.gt.0) then
          do i=length(s)+1,length(s)+nzeros
