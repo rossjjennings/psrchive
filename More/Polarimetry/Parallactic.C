@@ -2,11 +2,9 @@
 #include "Pauli.h"
 #include "sky_coord.h"
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
-
 #include <limits.h>
+#include <slalib.h>
+
 
 //! Default constructor
 Calibration::Parallactic::Parallactic ()
@@ -65,12 +63,6 @@ MJD Calibration::Parallactic::get_epoch () const
   return current_epoch;
 }
 
-#define SLA_altaz SLA_FUNC(sla_altaz,slaAltaz)
-extern "C" void SLA_altaz (double*, double*, double*,
-			   double*, double*, double*,
-			   double*, double*, double*,
-			   double*, double*, double*);
-
 //! Set the hour angle in radians
 void Calibration::Parallactic::set_hour_angle (double hour_angle)
 {
@@ -90,10 +82,10 @@ void Calibration::Parallactic::set_hour_angle (double hour_angle)
   double azimuth, elevation, para;
   double ignore;
 
-  SLA_altaz (&ha, &dec, &lat, 
-		    &azimuth,   &ignore, &ignore,
-		    &elevation, &ignore, &ignore,
-		    &para,      &ignore, &ignore);
+  slaAltaz (ha, dec, lat, 
+	    &azimuth,   &ignore, &ignore,
+	    &elevation, &ignore, &ignore,
+	    &para,      &ignore, &ignore);
 
   set_phi (-para);
   current_hour_angle = hour_angle;

@@ -1,9 +1,7 @@
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
-
 #include "coord.h"
+
 #include <math.h>
+#include <slalib.h>
 
 /* **********************************************************************
 
@@ -22,10 +20,6 @@
 
    ********************************************************************** */
 
-#define SLA_altaz SLA_FUNC(sla_altaz,slaAltaz)
-
-void SLA_altaz (double*, double*, double*, double*, double*, double*,
-		 double*, double*, double*, double*, double*, double*);
 
 int az_zen_para (double ra, double dec, float lst, float latitude,
 		 float* tel_az, float* tel_zen, float* para_angle)
@@ -40,10 +34,10 @@ int az_zen_para (double ra, double dec, float lst, float latitude,
   if (lst < 0.0 || lst > 24.0)
     return -1;
 
-  SLA_altaz (&HA, &dec, &dlat, 
-	      &azimuth, &ignore, &ignore,
-	      &altitude,  &ignore, &ignore,
-	      &PA,      &ignore, &ignore);
+  slaAltaz (HA, dec, dlat, 
+	    &azimuth,  &ignore, &ignore,
+	    &altitude, &ignore, &ignore,
+	    &PA,       &ignore, &ignore);
 
   *para_angle = (float) PA  * rad2deg;
   *tel_zen = 90.0 - (float) altitude * rad2deg;

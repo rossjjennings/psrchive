@@ -1,12 +1,9 @@
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
-
 #include "ephio.h"
 #include "psrephem.h"
 #include "orbital.h"
 #include "Estimate.h"
 
+#include <slalib.h>
 #include <math.h>
 
 #define sqr(x) (x*x)
@@ -31,9 +28,6 @@ const double v_0 = 222;   // km/s
 // distance of sun from galactic centre
 const double R_0 = 7.7e3; // parsec
 
-#define SLA_eqgal SLA_FUNC(sla_eqgal,slaEqgal)
-extern "C" double SLA_eqgal(double *, double *, double *, double *);
-
 
 // ////////////////////////////////////////////////////////////////////////
 //
@@ -49,7 +43,7 @@ int psrephem::galactic (double& l, double& b)
   double delta = value_double [EPH_DECJ] * 2*M_PI;
   // double delta_err  = error_double [EPH_DECJ];
 
-  SLA_eqgal (&alpha, &delta, &l, &b);
+  slaEqgal (alpha, delta, &l, &b);
 
   return 0;
 }

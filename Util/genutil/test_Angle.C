@@ -1,33 +1,27 @@
 #include "sky_coord.h"
 #include "coord.h"
 
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
-
 #include <iostream>
 #include <stdio.h>
 #include <string.h>
 #include <values.h>
 
+#include <slalib.h>
+
 // redwards 10Aug99 function to compute angular separation of a pair
 // of spherical coordinates
-
-#define SLA_dsep SLA_FUNC(sla_dsep,slaDsep)
-extern "C" double SLA_dsep(double *, double *, double *, double*);
 
 Angle oldAngularSeparation(const AnglePair& a1, const AnglePair& a2)
 {
   Angle a;
   double a1_1, a1_2, a2_1, a2_2;
 
-
   a1_1=a1.angle1.getradians();
   a1_2=a1.angle2.getradians();
   a2_1=a2.angle1.getradians();
   a2_2=a2.angle2.getradians();
 
-  a.setradians(SLA_dsep(&a1_1, &a1_2, &a2_1, &a2_2));
+  a.setradians(slaDsep(a1_1, a1_2, a2_1, a2_2));
 
   return a;
 }
