@@ -79,10 +79,12 @@ int main (int argc, char *argv[]) {
     case 'v':
       verbose = true;
       Pulsar::Calibration::verbose = true;
+      Pulsar::Calibrator::verbose = true;
       break;
     case 'V':
       verbose = true;
       Pulsar::Calibration::verbose = true;
+      Pulsar::Calibrator::verbose = true;
       Pulsar::Archive::set_verbosity(1);
       break;
     case 'p':
@@ -159,14 +161,14 @@ int main (int argc, char *argv[]) {
   try {
     
     if (new_database) {
-      if (exts.empty()) {
-	exts.push_back("cf");
-	exts.push_back("pcal");
-      }
+      
+      exts.push_back("cf");
+      exts.push_back("pcal");
+      
       cout << "Generating new database" << endl;
       
       dbase = new Pulsar::Calibration::Database (cals_are_here.c_str(), exts);
-
+      
       dbase -> test_inst(test_instr);
       dbase -> test_posn(test_coords);
       dbase -> test_time(test_times);
