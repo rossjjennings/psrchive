@@ -31,7 +31,7 @@ PROGRAMS =    calinfo.C align.C amps.C chanprep.C  \
 	      cleanarch.C fixhdr.C crm.C  \
 	      crh.C psrhead.C autotadd.C \
 	      fakedat.C plk.C stokes_plt.C \
-	      headsum.C treduce.C \
+	      headsum.C treduce.C testbpass.C\
               tcombine2.C ratio.C fixprf.C xformprof.C archive_test.C
 
 NOT_WORKING = bandpass.C detail.C xtoa.C bin_ph.C corflux.C flux.C \
@@ -39,3 +39,5 @@ NOT_WORKING = bandpass.C detail.C xtoa.C bin_ph.C corflux.C flux.C \
 
 include $(LOCAL_ROOT)/include/Makefile.extended
 
+# these header files were moved to this repository by cvsmvinc
+INCLUDES += pg_plot_gnu.h
