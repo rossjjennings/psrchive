@@ -16,12 +16,17 @@ AC_DEFUN([SWIN_LIB_MPI],
               AC_HELP_STRING([--with-mpi-lib-dir=DIR],
                              [MPI library is in DIR]))
 
+  AC_ARG_WITH([mpi-link],
+              AC_HELP_STRING([--with-mpi-link=ARGS],
+                             [MPI link arguments]))
+
   MPI_CFLAGS=""
   MPI_LIBS=""
 
   if test x"$with_mpi_dir" = x"no" ||
      test x"$with_mpi_include-dir" = x"no" ||
-     test x"$with_mpi_lib_dir" = x"no"; then
+     test x"$with_mpi_lib_dir" = x"no" ||
+     test x"$with_mpi_link" = x"no"; then
     # user disabled mpi. Leave cache alone.
     have_mpi="User disabled MPI."
   else
@@ -43,6 +48,9 @@ AC_DEFUN([SWIN_LIB_MPI],
       else
         with_mpi_lib_dir=
       fi
+    fi
+    if test x"$with_mpi_link" = xyes; then
+      with_mpi_link=
     fi
 
     AC_MSG_CHECKING([for MPI installation])
@@ -86,9 +94,29 @@ AC_DEFUN([SWIN_LIB_MPI],
 
       ac_save_LIBS="$LIBS"
 
+      if test x"$with_mpi_link" != x; then
+
+        LIBS="$with_mpi_link"
+        AC_TRY_LINK([#include <mpi.h>],[MPI_Init(0,0);],
+                    have_mpi=yes, have_mpi=no)
+
+        if test $have_mpi = yes; then
+          MPI_LIBS="$LIBS"
+        else
+          AC_MSG_RESULT(no)
+          AC_MSG_ERROR([User specified MPI link arguments failed])
+        fi
+
+      fi
+
       for cf_dir in $cf_lib_path_list; do
 
+        if test x"$MPI_LIBS" != x; then
+          break
+        fi
+
         LIBS="-L$cf_dir -lmpi -llam -lpthread $ac_save_LIBS"
+
         AC_TRY_LINK([#include <mpi.h>],[MPI_Init(0,0);],
                     have_mpi=lam, have_mpi=no)
         if test x"$have_mpi" != xno; then
