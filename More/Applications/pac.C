@@ -30,7 +30,7 @@ int main (int argc, char *argv[]) {
   char* key = NULL;
   char whitespace[5] = " \n\t";
 
-  while ((gotc = getopt(argc, argv, "hvVp:d:DFP")) != -1) {
+  while ((gotc = getopt(argc, argv, "hvVp:e:wDFP")) != -1) {
     switch (gotc) {
     case 'h':
       cout << "A program for calibrating Pulsar::Archives"  << endl;
