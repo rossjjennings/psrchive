@@ -131,7 +131,6 @@ int main (int argc, char** argv)
       Pulsar::Archive::set_verbosity (3);
       Pulsar::CalibratorPlotter::verbose = true;
       Pulsar::Calibrator::verbose = true;
-      Calibration::Model::verbose = true;
       verbose = true;
       break;
     case 'v':
