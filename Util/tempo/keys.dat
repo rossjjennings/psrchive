@@ -73,7 +73,6 @@ DM9 1 1
 # RM has been removed as it is not a timing parameter
 # RM 1 1       # Rotation Measure (rad m^-2)
 
-TASC 4 0     # Time of ascending node (MJD)
 START 4 0    # Epoch of start of fit (MJD)
 FINISH 4 0   # Epoch of end of fit (MJD)
  
@@ -135,6 +134,7 @@ BP 1 0       # Tensor multi-scalar parameter beta-prime (not fit)
 BPP 1 0      # Tensor multi-scalar parameter beta-prime-prime (not fit)
 EPS1 1 1     # ELL1 timing model param (dinensionless)
 EPS2 1 1     # "
+TASC 4 1     # Time of ascending node (MJD)
 
 # Glitches
 
