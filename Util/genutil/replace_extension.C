@@ -1,10 +1,15 @@
 #include <string>
 
+using namespace std;
+
 // a simple command for replacing the extension on a filename
-std::string replace_extension (std::string filename, const std::string& ext)
+string replace_extension (string filename, const string& ext)
 {
+  if (!(ext.length() && filename.length()))
+    return;
+
   unsigned index = filename.find_last_of( ".", filename.length() );
-  if (index == std::string::npos)
+  if (index == string::npos)
     index = filename.length();
 
   filename = filename.substr(0, index);
@@ -13,4 +18,6 @@ std::string replace_extension (std::string filename, const std::string& ext)
     filename += ".";
 
   filename += ext;
+
+  return filename;
 }
