@@ -103,6 +103,13 @@ void Rhythm::menubarConstruct ()
   movies->insertItem( "Profile Movie", this, SLOT(profileMovie()));
 
   // ///////////////////////////////////////////////////////////////////////
+  // SIMULATION menu options
+  //
+  QPopupMenu* sims = new QPopupMenu ( menuBar() );
+  CHECK_PTR (sims);
+  sims->insertItem( "Simulate Model", this, SLOT(simulateModel()));
+  
+  // ///////////////////////////////////////////////////////////////////////
   // HELP menu options
   //
   QPopupMenu *help = new QPopupMenu( menuBar() );
@@ -113,13 +120,14 @@ void Rhythm::menubarConstruct ()
   
   menuBar() -> setSeparator ( QMenuBar::InWindowsStyle );
   
-  menuBar() -> insertItem   ( "File",    file );
-  menuBar() -> insertItem   ( "Tempo",   tempo );
-  menuBar() -> insertItem   ( "Options", options );
-  menuBar() -> insertItem   ( "Movies",  movies );
+  menuBar() -> insertItem   ( "File",        file );
+  menuBar() -> insertItem   ( "Tempo",       tempo );
+  menuBar() -> insertItem   ( "Options",     options );
+  menuBar() -> insertItem   ( "Movies",      movies );
+  menuBar() -> insertItem   ( "Simulation",  sims );
   menuBar() -> insertSeparator();
   menuBar() -> insertItem   ( "Help", help );
-
+  
   if (verbose) cerr << "Rhythm::menubarConstruct () returns\n";
 }
 

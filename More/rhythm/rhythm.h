@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/rhythm/rhythm.h,v $
-   $Revision: 1.36 $
-   $Date: 2003/09/15 09:21:31 $
+   $Revision: 1.37 $
+   $Date: 2003/09/18 07:21:53 $
    $Author: ahotan $ */
 
 // //////////////////////////////////////////////////////////////////////////
@@ -29,7 +29,8 @@
 #include <qradiobutton.h>
 #include <qinputdialog.h>
 #include <qtabwidget.h>
-#include "qprogressdialog.h"
+#include <qprogressdialog.h>
+#include <qfiledialog.h>
 
 #include "psrephem.h"
 #include "ephio.h"
@@ -304,6 +305,8 @@ class Rhythm : public QMainWindow
   
   void setDataPath ();
   void profileMovie ();
+
+  void simulateModel ();
 
   void tabChange(QWidget*);
 };

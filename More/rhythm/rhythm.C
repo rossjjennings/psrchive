@@ -700,8 +700,11 @@ void Rhythm::stride_fit()
   clearselection();
   
   vector<double> times;
-  for (unsigned i = 0; i < toas.size(); i++)
+  for (unsigned i = 0; i < toas.size(); i++) {
+    if (toas[i].get_state() == Tempo::toa::Deleted)
+      continue;
     times.push_back(toas[i].get_arrival().in_days());
+  }
   
   double first = times[0];
   double last  = times[0];
@@ -763,9 +766,41 @@ void Rhythm::stride_fit()
     result.push_back(myeph.value_double[index]);
     cout.precision(16);
     cout << parmNames[index] << 
-      " for block " << i << " = " << myeph.value_double[index] << endl;
+      " for block " << i << " = " << float(myeph.value_double[index]) << endl;
   }
   clearselection();
+
+  // Display the result
+  
+  if (result.empty())
+    return;
+  
+  float min = result[0];
+  float max = result[0];
+  
+  for (unsigned i = 0; i < result.size(); i++) {
+    if (result[i] < min)
+      min = result[i];
+    if (result[i] > max)
+      max = result[i];
+  }
+  
+  if (min == max) {
+    footer->setText("No range in result!");
+    return;
+  }
+  
+  string label = parmNames[index];
+  
+  cpgopen("9295/xs");
+  cpgsvp(0.1, 0.9, 0.1, 0.9);
+  cpgswin(0, temp, min, max);
+  cpgbox("BCNST", 0.0, 0, "BCNST", 0.0, 0);
+  cpglab("Block Number", label.c_str(), "Stride Fit Result");
+  for (unsigned i = 0; i < result.size(); i++) {
+    cpgpt1(i,result[i],0);
+  }
+  cpgclos();
 }
 
 void Rhythm::setClassVerbose (bool verbose)
@@ -1591,6 +1626,38 @@ void Rhythm::setseldot (int index)
     
   }
   goplot ();
+}
+
+
+void Rhythm::simulateModel()
+{
+  if (toas.empty()) {
+    footer->setText("Cannot simulate: no TOAS loaded");
+    return;
+  }
+  
+  if (!fitpopup || !fitpopup -> hasdata()) {
+    footer->setText("Cannot simulate: no model loaded");
+    return;
+  }
+  
+  fit();
+
+  vector<Tempo::toa> fake;
+  fake.resize(toas.size());
+
+  for (unsigned i = 0; i < toas.size(); i++) {
+    fake[i] = toas[i];
+    fake[i].set_arrival(toas[i].get_arrival()-(toas[i].resid.time/1000000.0));
+  }
+  
+  QString fileName (QFileDialog::getSaveFileName ( "perfect.tim", "*.tim", this ));
+  
+  if ( fileName.isNull() )
+    return;
+  
+  Tempo::toa::unload(fileName.ascii(), fake);
+  
 }
 
 AxisSelector::AxisSelector (QWidget* parent)
