@@ -27,12 +27,34 @@ void Pulsar::Integration::dedisperse (double frequency)
   if (verbose)
     cerr << "Integration::dedisperse DM="<< dm <<" freq="<< frequency << endl;
 
-  for (int ipol=0; ipol<get_npol(); ipol++)
-    for (int ichan=0; ichan<get_nchan(); ichan++)
+  for (int ipol=0; ipol < npol; ipol++)
+    for (int ichan=0; ichan < nchan; ichan++)
       profiles[ipol][ichan] -> dedisperse (dm, frequency, pfold);
 
 }
 
+void Pulsar::Integration::dedisperse (double frequency, int chan)
+{
+  if (dm == 0)
+    return;
+  if (pfold == 0)
+    return;
+
+  if (chan < 0 || chan >= nchan)
+    throw Error (InvalidRange, "Integration::dedisperse",
+		 "chan=%d nchan=%d", chan, nchan);
+
+  if (frequency == 0.0)
+    throw Error (InvalidParam, "Integration::dedisperse",
+		 "frequency == 0.0");
+
+  for (int ipol=0; ipol < npol; ipol++)
+    profiles[ipol][chan] -> dedisperse (dm, frequency, pfold);
+  
+  return;
+}
+
+  // else, dedisperse the lot
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -40,20 +62,19 @@ void Pulsar::Integration::dedisperse (double frequency)
 //
 /*!
   \return the new weighted centre frequency (in MHz, to nearest kHz)
-  \retval weight the weight to be ascribed if the chan interval was integrated
   \param  chan_start the first chan included in the calculation
   \param  chan_end one more than the index of the last chan
 */
-double Pulsar::Integration::weighted_frequency 
-( double* weight, int chan_start, int chan_end ) const
+double Pulsar::Integration::weighted_frequency (int chan_start, int chan_end) 
+  const
 {
   if (chan_end == 0)
-    chan_end = get_nchan();
+    chan_end = nchan;
 
   // for now, ignore poln
   int ipol = 0;
 
-  if (profiles.size() < 1)
+  if (npol < 1)
     throw Error (InvalidRange, "Integration::weighted_frequency",
 		 "profiles.size() == 0");
 
@@ -61,11 +82,11 @@ double Pulsar::Integration::weighted_frequency
 
   if (chan_start >= nchan || chan_start < 0)
     throw Error (InvalidRange, "Integration::weighted_frequency",
-		 "chan_start=%d >= nchan=%d", chan_start, nchan);
+		 "chan_start=%d nchan=%d", chan_start, nchan);
 
   if (chan_end > nchan || chan_end < 0)
     throw Error (InvalidRange, "Integration::weighted_frequency",
-		 "chan_end=%d > nchan=%d", chan_end, nchan);
+		 "chan_end=%d nchan=%d", chan_end, nchan);
 
   double weightsum = 0.0;
   double freqsum = 0.0;
@@ -75,9 +96,6 @@ double Pulsar::Integration::weighted_frequency
     weightsum += prof[ichan]->get_weight();
   }
  
-  if (weight)
-    *weight = weightsum;
-
   double result = 0.0;
 
   if (weightsum != 0.0)

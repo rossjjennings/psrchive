@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Integration.h,v $
-   $Revision: 1.12 $
-   $Date: 2002/04/16 15:52:02 $
+   $Revision: 1.13 $
+   $Date: 2002/04/17 14:25:03 $
    $Author: straten $ */
 
 /*
@@ -80,6 +80,9 @@ namespace Pulsar {
     //! Rotate all profiles in phase to remove dispersion delays between chans
     virtual void dedisperse (double frequency = 0.0);
 
+    //! Dedisperse only the profiles in the given channel
+    virtual void dedisperse (double frequency, int chan);
+
     //! Rotate all profiles about Stokes V axis to remove Faraday rotation
     virtual void defaraday (double rm = 0.0, double rm_iono = 0.0);
 
@@ -116,8 +119,7 @@ namespace Pulsar {
 			  vector<vector<double> >& mean_low) const;
 
     //! Computes the weighted centre frequency of an interval of sub-chans.
-    double weighted_frequency (double* weight=0,
-			       int chan_start=0, int chan_end=0) const;
+    double weighted_frequency (int chan_start=0, int chan_end=0) const;
 
     void cal_levels (vector<Stokes>& hi, vector<Stokes>& lo) const;
     void psr_levels (vector<Stokes>& hi, vector<Stokes>& lo) const;
@@ -231,7 +233,7 @@ namespace Pulsar {
     //! initialize null values
     void init ();
 
-    //! Inherited types may re-define the type of profile contained in profiles
+    //! All new Profile instances are created through this method
     virtual Profile* new_Profile ();
 
     // convert Stokes IQUV to XYUV, where X=.5(I+Q) and Y=.5(I-Q).
