@@ -71,7 +71,7 @@ void psrephem::destroy()
   init ();
 }
 
-psrephem::psrephem (char* psr_name, int use_cwd)
+psrephem::psrephem (const char* psr_name, int use_cwd)
 {
   if (create (psr_name, use_cwd) < 0) {
     fprintf (stderr, "psrephem::error creating epemeris for %s.\n",
@@ -80,7 +80,7 @@ psrephem::psrephem (char* psr_name, int use_cwd)
   }
 }
 
-psrephem::psrephem (char* filename)
+psrephem::psrephem (const char* filename)
 {
   if (load (filename) < 0) {
     fprintf (stderr, "psrephem::error loading %s.\n", filename);
@@ -88,7 +88,7 @@ psrephem::psrephem (char* filename)
   }
 }
 
-int psrephem::create (char* psr_name, int use_cwd)
+int psrephem::create (const char* psr_name, int use_cwd)
 {
   string filename = par_lookup (psr_name, use_cwd);
   if (filename.empty()) {
