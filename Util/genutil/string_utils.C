@@ -246,6 +246,10 @@ string make_string(unsigned char input){
   return string(dummy);
 }
 
+string make_string(string input){
+  return input;
+}
+
 string to_upper_case(string input){
   string out = input;
   for(unsigned int i=0; i < input.size(); i++)

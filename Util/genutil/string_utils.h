@@ -1,7 +1,7 @@
 //-*-C++-*-
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Attic/string_utils.h,v $
-   $Revision: 1.22 $
-   $Date: 2003/07/20 14:21:27 $
+   $Revision: 1.23 $
+   $Date: 2003/09/22 09:16:19 $
    $Author: hknight $ */
 
 #ifndef __STRING_UTILS_H
@@ -187,7 +187,8 @@ string make_string(void* input);
 string make_string(char input);
 // just incase someone is CRAZY enough - writes as an int!
 string make_string(unsigned char input);
-
+// For templated functions
+string make_string(string input);
 
 string to_upper_case(string input);
 string to_lower_case(string input);
