@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pcm.C,v $
-   $Revision: 1.36 $
-   $Date: 2004/11/07 08:09:08 $
+   $Revision: 1.37 $
+   $Date: 2004/11/22 21:39:42 $
    $Author: straten $ */
 
 /*! \file pcm.C 
@@ -405,10 +405,10 @@ int main (int argc, char *argv[]) try {
       verbose = true;
 
       if (level > 3)
-        Calibration::Model::very_verbose = true;
+        Calibration::ReceptionModel::very_verbose = true;
 
       if (level > 2) 
-        Calibration::Model::verbose = true;
+        Calibration::ReceptionModel::verbose = true;
 
       if (level > 1)
         Pulsar::Calibrator::verbose = true;

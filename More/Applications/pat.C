@@ -101,13 +101,13 @@ int main (int argc, char *argv[])
     case 'V':
       verbose = true;
       Pulsar::Archive::set_verbosity(3);
-      Calibration::Model::verbose = true;
+      MEAL::Function::verbose = true;
       break;
     case 'D':
       denoise = true;
       break;
     case 'i':
-      cout << "$Id: pat.C,v 1.29 2004/11/22 21:32:31 straten Exp $" << endl;
+      cout << "$Id: pat.C,v 1.30 2004/11/22 21:39:42 straten Exp $" << endl;
       return 0;
 
     case 'F':

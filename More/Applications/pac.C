@@ -10,7 +10,6 @@
 #include "Pulsar/PolnCalibrator.h"
 #include "Pulsar/PolnProfile.h"
 #include "Pulsar/FluxCalibrator.h"
-#include "Calibration/Model.h"
 
 #include "Error.h"
 
@@ -134,7 +133,7 @@ int main (int argc, char *argv[]) {
       break;
 
     case 'i':
-      cout << "$Id: pac.C,v 1.58 2004/10/28 06:19:15 straten Exp $" << endl;
+      cout << "$Id: pac.C,v 1.59 2004/11/22 21:39:42 straten Exp $" << endl;
       return 0;
 
     case 'A':
