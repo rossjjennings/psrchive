@@ -1,7 +1,7 @@
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/coord.h,v $
-   $Revision: 1.6 $
-   $Date: 2003/01/22 14:53:10 $
-   $Author: straten $ */
+   $Revision: 1.7 $
+   $Date: 2003/12/23 01:06:22 $
+   $Author: ahotan $ */
 
 #ifndef __COORD_H
 #define __COORD_H
@@ -60,6 +60,14 @@ extern "C" {
    ******************************************************************** */
 int telescope_coords (char telescope, float* latitude, 
 		      float* longitude, float* elevation);
+
+/* ********************************************************************
+   telescope_xyz -
+        returns ITRF X, Y, X  coordinates (in metres) about the
+        geocentre for a telescope given by its tempo code
+   ******************************************************************** */
+int telescope_xyz (char telescope, double* x_, 
+		      double* y_, double* z_);
 
 /* ********************************************************************
    az_zen_para -
