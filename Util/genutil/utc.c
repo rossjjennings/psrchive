@@ -279,6 +279,10 @@ int str2tm (struct tm* time, const char* str)
   if (time->tm_year > 1900)
     time->tm_year -= 1900;
 
+  /* Y2K bug catch (hopefully) */
+  if (time->tm_year < 30)
+     time->tm_year += 100;
+
   mktime (time);
 
   return 0;
