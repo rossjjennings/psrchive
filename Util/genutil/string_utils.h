@@ -1,3 +1,8 @@
+/* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Attic/string_utils.h,v $
+   $Revision: 1.4 $
+   $Date: 1999/11/02 09:18:16 $
+   $Author: straten $ */
+
 #ifndef __STRING_UTILS_H
 #define __STRING_UTILS_H
 

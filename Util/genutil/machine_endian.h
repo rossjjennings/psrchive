@@ -1,3 +1,8 @@
+/* $Source: /cvsroot/psrchive/psrchive/Util/genutil/machine_endian.h,v $
+   $Revision: 1.3 $
+   $Date: 1999/11/02 09:18:12 $
+   $Author: straten $ */
+
 #ifndef __M_ENDIAN_H
 #define __M_ENDIAN_H
 
