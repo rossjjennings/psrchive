@@ -11,6 +11,17 @@
 #include "psrephem.h"
 #include "string_utils.h"
 
+// defines the recognized filename extensions used for pulsar ephemeris files
+vector<string> psrephem::extensions ()
+{
+  vector <string> retval;
+
+  retval.push_back (string (".eph"));
+  retval.push_back (string (".par"));
+
+  return retval;
+}
+
 char* psrephem::tempo_pardir = NULL;
 int   psrephem::verbose = 0;
 char  psrephem::tmp_fname[25];
@@ -216,27 +227,20 @@ string psrephem::par_lookup (const char* name, int use_cwd)
   // these string literals are assigned to char* to work around a
   // bug in the Sun C4.2 compiler
   char* cwd = "./";
-  char* eph = ".eph";
-  char* par = ".par";
   char* tempo_cfg = "/tempo.cfg";
   char* psrinfo_cmd = "psrinfo -e ";
 
   if (use_cwd) {
-    /* Look for jname.eph in current directory */
-    filename = cwd + psr_name + eph;
-    if (stat (filename.c_str(), &finfo) == 0) {
-      if (verbose) {
-	fprintf (stderr, "psrephem::Using %s from cwd.\n", filename.c_str());
+    vector <string> exts = extensions ();
+    for (int iext=0; iext < exts.size(); iext++) {
+      /* Look for jname.ext in current directory */
+      filename = cwd + psr_name + exts[iext];
+      if (stat (filename.c_str(), &finfo) == 0) {
+	if (verbose) {
+	  fprintf (stderr, "psrephem::Using %s from cwd.\n", filename.c_str());
+	}
+	return filename;
       }
-      return filename;
-    }
-    /* Look for jname.par in current directory */
-    filename = cwd + psr_name + par;
-    if (stat (filename.c_str(), &finfo) == 0) {
-      if (verbose) {
-	fprintf (stderr, "psrephem::Using %s from cwd.\n", filename.c_str());
-      }
-      return filename;
     }
   }
 
@@ -277,7 +281,7 @@ string psrephem::par_lookup (const char* name, int use_cwd)
   } // end if tempo_pardir == NULL
 
   if (tempo_pardir != NULL) {
-    filename = tempo_pardir + psr_name + par;
+    filename = tempo_pardir + psr_name + ".par";
     if (stat (filename.c_str(), &finfo) == 0) {
       if (verbose)
 	printf("psrephem:: Using %s from PARDIR\n", filename.c_str());
@@ -298,7 +302,7 @@ string psrephem::par_lookup (const char* name, int use_cwd)
     filename.erase();
     return filename;
   }
-  filename = cwd + psr_name + eph;
+  filename = cwd + psr_name + ".eph";
   if (stat (filename.c_str(), &finfo) == 0) {
     if (verbose)
       printf("psrephem:: Using %s from PARDIR\n", filename.c_str());

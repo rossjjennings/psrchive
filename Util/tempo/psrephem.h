@@ -2,8 +2,11 @@
 #define __PSREPHEM_H
 
 #include <stdio.h>
+
+#include <vector>
 #include <string>
 #include "psr_cpp.h"
+
 #define PSREPHEM_TMP_FNAME ".psrephem_XXXXXX"
 
 class psrephem 
@@ -15,6 +18,7 @@ class psrephem
 
   // this string needs to be long enough to hold the above-defined MACRO
   static char tmp_fname[25];
+  static vector<string> extensions();
 
   int*    parmStatus;
   string* value_str;
