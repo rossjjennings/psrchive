@@ -271,6 +271,12 @@ int polyco::Construct (const char* psr, const char* parfile,
 		 WEXITSTATUS(status));
     }
     fprintf (stderr, "polyco::cmdline: %s\n", syscom);
+    if (retries == 3)  {
+      // first time failure
+      // remove the > /dev/null so the user can see the error
+      char* nul = strchr (syscom, '>');
+      if (nul) *nul = '\0';
+    }
     retries --;
     
     if (retries == 0) {
