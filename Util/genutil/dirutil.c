@@ -147,19 +147,19 @@ int makedir (const char* path)
 /* this function removes a directory, including everything in it */
 int removedir (const char *path)
 {
-  // the length of the path string plus "/" plus "\0"
+  /* the length of the path string plus "/" plus "\0" */
   unsigned pathlength = strlen (path) + 2;
 
-  // the entry from the directory
+  /* the entry from the directory */
   struct dirent *entry;
 
-  // the complete path to the entry
+  /* the complete path to the entry */
   char filename [FILENAME_MAX];
 
-  // handle to each sub-directory
+  /* handle to each sub-directory */
   DIR* subdird = 0;
 
-  // handle to directory at path
+  /* handle to directory at path */
   DIR* dird = opendir (path);
 
   if (dird == NULL) {
