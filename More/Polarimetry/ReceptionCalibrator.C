@@ -1,6 +1,6 @@
 #include "Pulsar/ReceptionCalibrator.h"
-#include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
+#include "Pulsar/Archive.h"
 
 /*! The Archive passed to this constructor will be used to supply the first
   guess for each pulse phase bin used to constrain the fit. */
@@ -82,9 +82,11 @@ void Pulsar::ReceptionCalibrator::initial_observation (const Archive* data)
     for (unsigned istokes=0; istokes<4; istokes++)
       calibrator[ichan].set_infit (istokes, false);
     
+    equation[ichan] = new Calibration::SAtPEquation;
+
     // add the calibrator state before the parallactic angle transformation
-    equation[ichan].model.add_state( &(calibrator[ichan]) );
-    equation[ichan].model.add_transformation( &parallactic );
+    equation[ichan]->model.add_state( &(calibrator[ichan]) );
+    equation[ichan]->model.add_transformation( &parallactic );
 
   }
 
@@ -131,7 +133,7 @@ void Pulsar::ReceptionCalibrator::init_estimate (PhaseEstimate& estimate)
   estimate.state.resize (nchan);
 
   for (unsigned ichan=0; ichan<nchan; ichan++)
-    equation[ichan].model.add_state( &(estimate.state[ichan]) );
+    equation[ichan]->model.add_state( &(estimate.state[ichan]) );
 }
 
 
@@ -181,7 +183,7 @@ void Pulsar::ReceptionCalibrator::add_observation (const Archive* data)
 	measurements.back().state_index = istate + 1;
       }
 
-      equation[ichan].add_measurement (epoch, measurements);
+      equation[ichan]->add_measurement (epoch, measurements);
     }
   }
 }
@@ -277,8 +279,8 @@ void Pulsar::ReceptionCalibrator::calibrate (Archive* data)
     MJD epoch = integration->get_epoch ();
 
     for (unsigned ichan=0; ichan<nchan; ichan++) {
-      equation[ichan].set_epoch (epoch);
-      response[ichan] = equation[ichan].model.get_Jones();
+      equation[ichan]->set_epoch (epoch);
+      response[ichan] = equation[ichan]->model.get_Jones();
     }
 
     Calibrator::calibrate (integration, response);
@@ -313,11 +315,11 @@ void Pulsar::ReceptionCalibrator::solve ()
 
   for (unsigned ichan=0; ichan<equation.size(); ichan++) {
     if (ncoef)
-      equation[ichan].set_ncoef (ncoef);
+      equation[ichan]->set_ncoef (ncoef);
 
-    equation[ichan].set_reference_epoch (mid);
+    equation[ichan]->set_reference_epoch (mid);
 
-    equation[ichan].solve ();
+    equation[ichan]->solve ();
   }
 
   is_fit = true;

@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ReceptionCalibrator.h,v $
-   $Revision: 1.10 $
-   $Date: 2003/04/29 13:27:19 $
-   $Author: pulsar $ */
+   $Revision: 1.11 $
+   $Date: 2003/05/02 08:40:42 $
+   $Author: straten $ */
 
 #ifndef __ReceptionCalibrator_H
 #define __ReceptionCalibrator_H
@@ -63,7 +63,7 @@ namespace Pulsar {
   protected:
 
     //! SingleAxis(t)Polar Equation as a function of frequency
-    vector<Calibration::SAtPEquation> equation;
+    vector<Calibration::SAtPEquation*> equation;
 
     //! Calibrator state as a function of frequency
     vector<Calibration::StokesState> calibrator;
