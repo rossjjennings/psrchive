@@ -70,8 +70,8 @@ Pulsar::Profile* Pulsar::Profile::morphological_difference (const Profile& profi
     throw Error (InvalidRange, "Pulsar::Profile::morphological_difference",
 		 "incompatible number of phase bins");
 
-  Pulsar::Profile* temp1 = new Pulsar::Profile(*this);
-  Pulsar::Profile* temp2 = new Pulsar::Profile(profile);
+  Reference::To<Pulsar::Profile> temp1 = this->clone();
+  Reference::To<Pulsar::Profile> temp2 = profile.clone();
 
   float ephase, snrfft, esnrfft; 
   double phase = temp1->shift (*temp2, ephase, snrfft, esnrfft);
@@ -122,7 +122,7 @@ Pulsar::Profile* Pulsar::Profile::morphological_difference (const Profile& profi
     }
   }
 
-  return temp1;
+  return temp1.release();
 }
 
 
