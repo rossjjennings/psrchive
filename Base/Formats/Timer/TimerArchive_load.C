@@ -83,51 +83,53 @@ void Pulsar::TimerArchive::subint_load (FILE* fptr)
   bool reverse_U = false;
   bool reverse_V = false;
 
-  // feed_offset is set to -1 by default in older versions of psrdisp
-  if (baseband && version < 15.1)
-    hdr.banda.feed_offset = 0.0;
+  if( string(hdr.software).find("psrdisp",0) != string::npos ) {
+    // feed_offset is set to -1 by default in older versions of psrdisp
+    if (baseband && version < 15.1)
+      hdr.banda.feed_offset = 0.0;
 
-  if (baseband && version < 15.1 && hdr.banda.npol==4 && circular) {
+    if (baseband && version < 15.1 && hdr.banda.npol==4 && circular) {
+      
+      if (verbose)
+	cerr << "TimerArchive::subint_load correct psrdisp circular" << endl;
+      
+      // an unjustified sign reversal of Stokes U in psrdisp was 
+      // removed in version 14.2.  It turns out that it was necessary.
+      if (version >= 14.2)
+	reverse_U = true;
+      
+      // and that Stokes V need also be inverted
+      reverse_V = true;
+      
+      // reversing the sign of Stokes U and V (for circular feeds)
+      // is equivalent to swapping Left and Right inputs.  This has
+      // been done in version 15.1
+      hdr.version = 15.0;
+      hdr.minorversion = 0.1;
+    }
 
-    if (verbose)
-      cerr << "TimerArchive::subint_load correct psrdisp circular" << endl;
+    // Before psrdisp v.17.1, all archives contained Stokes IQUV
+    // With v.17.1 and onward, they may or may not.
+    if (baseband && version<17.1 && hdr.banda.npol==4)  {
+      set_state (Signal::Stokes);
+      hdr.version = 17.0;
+      hdr.minorversion = 0.1;
+    }
 
-    // an unjustified sign reversal of Stokes U in psrdisp was 
-    // removed in version 14.2.  It turns out that it was necessary.
-    if (version >= 14.2)
-      reverse_U = true;
-
-    // and that Stokes V need also be inverted
-    reverse_V = true;
-
-    // reversing the sign of Stokes U and V (for circular feeds)
-    // is equivalent to swapping Left and Right inputs.  This has
-    // been done in version 15.1
-    hdr.version = 15.0;
-    hdr.minorversion = 0.1;
-  }
-
-  // Before psrdisp v.17.1, all archives contained Stokes IQUV
-  // With v.17.1 and onward, they may or may not.
-  if (baseband && version<17.1 && hdr.banda.npol==4)  {
-    set_state (Signal::Stokes);
-    hdr.version = 17.0;
-    hdr.minorversion = 0.1;
-  }
-
-  // Before psrdisp v.18.1, lower sideband data did not have their sign
-  // of Stokes V properly flipped.
-  if (baseband && version<18.1 && hdr.banda.npol==4 && hdr.banda.bw < 0.0)  {
-    hdr.version = 18.0;
-    hdr.minorversion = 0.1;
-    reverse_V = true;
-  }
+    // Before psrdisp v.18.1, lower sideband data did not have their sign
+    // of Stokes V properly flipped.
+    if (baseband && version<18.1 && hdr.banda.npol==4 && hdr.banda.bw < 0.0)  {
+      hdr.version = 18.0;
+      hdr.minorversion = 0.1;
+      reverse_V = true;
+    }
+  }    
 
   for (unsigned isub=0; isub < get_nsubint(); isub++) { 
     if (verbose)
       cerr << "TimerArchive::subint_load " 
 	   << isub+1 << "/" << get_nsubint() << endl;
-
+    
     // by over-riding Archive::new_Integration, the subints array points to
     // instances of TimerIntegrations
 
