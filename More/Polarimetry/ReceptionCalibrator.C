@@ -352,6 +352,12 @@ unsigned Pulsar::ReceptionCalibrator::get_nchan () const
   return model.size();
 }
 
+MJD Pulsar::ReceptionCalibrator::get_epoch () const
+{
+  return 0.5 * (start_epoch + end_epoch);
+}
+
+
 //! Add the specified pulsar observation to the set of constraints
 void Pulsar::ReceptionCalibrator::add_calibrator (const Archive* data)
 {

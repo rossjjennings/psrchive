@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ReceptionCalibrator.h,v $
-   $Revision: 1.48 $
-   $Date: 2003/12/02 14:27:19 $
+   $Revision: 1.49 $
+   $Date: 2003/12/08 15:58:44 $
    $Author: straten $ */
 
 #ifndef __ReceptionCalibrator_H
@@ -161,7 +161,10 @@ namespace Pulsar {
     //! Construct with optional first pulsar archive
     ReceptionCalibrator (Calibrator::Type model,
 			 const Archive* archive = 0);
-    
+
+    //! Return the reference epoch of the calibration experiment
+    MJD get_epoch () const;
+
     //! Return Calibrator::Hamaker or Calibrator::Britton
     Type get_type () const;
 
