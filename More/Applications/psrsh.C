@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include "ArchiveProcessor.h"
+#include "Pulsar/ArchiveProcessor.h"
 
 int main (int argc, char** argv)
 {

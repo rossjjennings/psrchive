@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Integration.h,v $
-   $Revision: 1.28 $
-   $Date: 2002/10/18 16:46:41 $
-   $Author: pulsar $ */
+   $Revision: 1.29 $
+   $Date: 2002/10/28 01:02:45 $
+   $Author: straten $ */
 
 /*
   

@@ -1,11 +1,11 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/BasicArchive.h,v $
-   $Revision: 1.17 $
-   $Date: 2002/10/25 04:07:12 $
+   $Revision: 1.18 $
+   $Date: 2002/10/28 01:02:45 $
    $Author: straten $ */
 
-#include "Archive.h"
+#include "Pulsar/Archive.h"
   
 namespace Pulsar {
 

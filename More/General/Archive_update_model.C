@@ -1,7 +1,7 @@
 #include <iostream>
 
-#include "Archive.h"
-#include "Integration.h"
+#include "Pulsar/Archive.h"
+#include "Pulsar/Integration.h"
 #include "Error.h"
 
 #include "tempo++.h"

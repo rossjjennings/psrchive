@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Archive.h,v $
-   $Revision: 1.43 $
-   $Date: 2002/10/25 04:04:47 $
+   $Revision: 1.44 $
+   $Date: 2002/10/28 01:02:45 $
    $Author: straten $ */
 
 /*! \mainpage 

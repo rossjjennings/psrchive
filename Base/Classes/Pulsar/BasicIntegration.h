@@ -1,14 +1,14 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/BasicIntegration.h,v $
-   $Revision: 1.4 $
-   $Date: 2002/10/12 23:34:44 $
+   $Revision: 1.5 $
+   $Date: 2002/10/28 01:02:45 $
    $Author: straten $ */
 
 #ifndef __BasicIntegration_h
 #define __BasicIntegration_h
 
-#include "Integration.h"
+#include "Pulsar/Integration.h"
   
 namespace Pulsar {
 

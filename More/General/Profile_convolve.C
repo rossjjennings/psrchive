@@ -1,6 +1,6 @@
 #include <rfftw.h>
 
-#include "Profile.h"
+#include "Pulsar/Profile.h"
 #include "Error.h"
 
 void Pulsar::Profile::fft_convolve(Profile* p1, Profile* p2)

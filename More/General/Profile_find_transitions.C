@@ -1,4 +1,4 @@
-#include "Profile.h"
+#include "Pulsar/Profile.h"
 
 /*! 
   Fractional pulse phase window used to calculate the transitions in

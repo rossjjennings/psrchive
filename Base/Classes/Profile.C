@@ -3,7 +3,7 @@
 
 #include <math.h>
 
-#include "Profile.h"
+#include "Pulsar/Profile.h"
 #include "Physical.h"
 #include "Error.h"
 #include "spectra.h"

@@ -1,5 +1,5 @@
-#include "Integration.h"
-#include "Profile.h"
+#include "Pulsar/Integration.h"
+#include "Pulsar/Profile.h"
 
 /*!
   If any current dimension is greater than that requested, the Profiles

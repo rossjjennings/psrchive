@@ -1,4 +1,4 @@
-#include "Profile.h"
+#include "Pulsar/Profile.h"
 #include "Error.h"
 
 #include "model_profile.h"

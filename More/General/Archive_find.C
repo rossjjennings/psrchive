@@ -1,6 +1,6 @@
-#include "Archive.h"
-#include "Integration.h"
-#include "Profile.h"
+#include "Pulsar/Archive.h"
+#include "Pulsar/Integration.h"
+#include "Pulsar/Profile.h"
 #include "Error.h"
 
 /////////////////////////////////////////////////////////////////////////////

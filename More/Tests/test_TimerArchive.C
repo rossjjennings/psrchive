@@ -1,8 +1,8 @@
 #include <cpgplot.h>
 
-#include "TimerArchive.h"
-#include "Integration.h"
-#include "Profile.h"
+#include "TimerPulsar/Archive.h"
+#include "Pulsar/Integration.h"
+#include "Pulsar/Profile.h"
 #include "Error.h"
 
 int main (int argc, char** argv)  {

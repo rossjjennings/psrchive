@@ -1,12 +1,12 @@
 
 #ifdef PSRFITS
-#include "FITSArchive.h"
+#include "Pulsar/FITSArchive.h"
 #endif
 
 #define PSRTIMER 1
 #ifdef PSRTIMER
-#include "TimerArchive.h"
-#include "BasebandArchive.h"
+#include "Pulsar/TimerArchive.h"
+#include "Pulsar/BasebandArchive.h"
 #endif
 
 #include "Error.h"

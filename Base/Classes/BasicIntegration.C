@@ -1,4 +1,4 @@
-#include "BasicIntegration.h"
+#include "Pulsar/BasicIntegration.h"
 
 /* not much to say really */
 void Pulsar::BasicIntegration::init ()

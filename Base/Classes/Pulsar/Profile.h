@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Profile.h,v $
-   $Revision: 1.22 $
-   $Date: 2002/10/16 07:38:04 $
-   $Author: pulsar $ */
+   $Revision: 1.23 $
+   $Date: 2002/10/28 01:02:45 $
+   $Author: straten $ */
 
 #ifndef __Pulsar_Profile_h
 #define __Pulsar_Profile_h

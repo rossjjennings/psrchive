@@ -1,5 +1,5 @@
-#include "BasicArchive.h"
-#include "BasicIntegration.h"
+#include "Pulsar/BasicArchive.h"
+#include "Pulsar/BasicIntegration.h"
 #include "Error.h"
 
 Pulsar::BasicArchive::BasicArchive () 
