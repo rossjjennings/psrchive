@@ -38,15 +38,12 @@ int main(int argc, char *argv[]) {
     case 'v':
       verbose = true;
       break;
-    case 'a':
-      Pulsar::Archive::Agent::report ();
-      return 0;
     }
   }
   
   Reference::To<Pulsar::Archive> arch;
   Pulsar::FITSArchive* fitsarch = 0;
-
+  
   if ((argc - optind )!= 1) {
     usage();
     exit(-1);
@@ -68,14 +65,13 @@ int main(int argc, char *argv[]) {
     cerr << "# of polns: " << fitsarch -> get_npol() << endl;
     cerr << "# of channels: " << fitsarch -> get_nchan() << endl;
     cerr << "# of bins: " << fitsarch -> get_nbin() << endl;
-
+    
     fitsarch -> unload("data.fits");
     cerr << "Unloaded FITS Archive." << endl;
   }
   catch (Error& error) {
     cerr << error << endl;
   }
-  
 }
 
 
