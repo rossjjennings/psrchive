@@ -53,6 +53,9 @@ void Pulsar::BinaryPhaseOrder::organise (Archive* arch, unsigned newsub)
   float minphs = 1.0;
   float maxphs = 0.0;
 
+  // Pad to avoid thorwing exceptions when get_Integration is called
+  indices.resize(arch->get_nsubint());
+
   for (unsigned i = 0; i < arch->get_nsubint(); i++) {
     phases.push_back(get_binphs_asc((arch->get_Integration(i)->get_epoch()).in_days(),
 				    arch->get_ephemeris(), 

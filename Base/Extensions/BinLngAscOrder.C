@@ -53,6 +53,9 @@ void Pulsar::BinLngAscOrder::organise (Archive* arch, unsigned newsub)
   float minlng = 360.0;
   float maxlng = 0.0;
   
+  // Pad to avoid thorwing exceptions when get_Integration is called
+  indices.resize(arch->get_nsubint());
+
   for (unsigned i = 0; i < arch->get_nsubint(); i++) {
     lngs.push_back(get_binlng_asc((arch->get_Integration(i)->get_epoch()).in_days(),
 				  arch->get_ephemeris(), 
