@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/Attic/ReceptionCalibratorPlotter.h,v $
-   $Revision: 1.1 $
-   $Date: 2003/05/02 14:30:35 $
+   $Revision: 1.2 $
+   $Date: 2003/05/16 07:09:11 $
    $Author: straten $ */
 
 #ifndef __ReceptionCalibratorPlotter_H
@@ -41,6 +41,9 @@ namespace Pulsar {
 
     //! Get the gain for the specified point
     Estimate<float> get_rotation (unsigned idat, unsigned irot);
+
+    //! Plot the Stokes parameters versus parallactic angle
+    void plot_constraints (unsigned ichan, unsigned istate);
 
   protected:
 
