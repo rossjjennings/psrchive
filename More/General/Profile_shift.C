@@ -39,9 +39,8 @@ Estimate<double> Pulsar::Profile::shift (const Profile& std) const
 }
 
 
-#if FIXED
-
-double Pulsar::Profile::GaussianShift (const Profile& std, float& ephase) const
+Estimate<double> 
+Pulsar::GaussianShift (const Profile& std, const Profile& obs)
 {
   // This algorithm interpolates the time domain cross correlation
   // function by fitting a Gaussian.
@@ -50,7 +49,7 @@ double Pulsar::Profile::GaussianShift (const Profile& std, float& ephase) const
 
   // First compute the standard cross correlation function:
 
-  Reference::To<Pulsar::Profile> ptr = clone();
+  Reference::To<Pulsar::Profile> ptr = obs.clone();
   Reference::To<Pulsar::Profile> stp = std.clone();
 
   // Remove the baseline
@@ -179,18 +178,18 @@ double Pulsar::Profile::GaussianShift (const Profile& std, float& ephase) const
       itr += 0.01;
     }
 
-    ephase = (itr * 2.0) / double(ptr->get_nbin());
+    double ephase = (itr * 2.0) / double(ptr->get_nbin());
 
-    return shift;
+    return Estimate<double>(shift,ephase*ephase);
   }
   catch (Error& error) {
     cerr << error << endl;
-    ephase = 0.5;
-    return (0.0);
+    return Estimate<double>(0.0,0.25);
   }
 }
 
-double Pulsar::Profile::ZeroPadShift (const Profile& std, float& ephase) const
+Estimate<double>
+Pulsar::ZeroPadShift (const Profile& std, const Profile& obs)
 {
   // This algorithm uses zero padding in the fourier domain to
   // interpolate the cross correlation function in the time
@@ -200,7 +199,7 @@ double Pulsar::Profile::ZeroPadShift (const Profile& std, float& ephase) const
 
   // First compute the standard cross correlation function:
 
-  Reference::To<Pulsar::Profile> ptr = clone();
+  Reference::To<Pulsar::Profile> ptr = obs.clone();
   Reference::To<Pulsar::Profile> stp = std.clone();
 
   // Remove the baseline
@@ -214,7 +213,7 @@ double Pulsar::Profile::ZeroPadShift (const Profile& std, float& ephase) const
   
   vector< Estimate<float> > correlation;
   
-  for (unsigned i = 0; i < get_nbin(); i++) {
+  for (unsigned i = 0; i < obs.get_nbin(); i++) {
     correlation.push_back(ptr->get_amps()[i]);
   }
   
@@ -239,19 +238,17 @@ double Pulsar::Profile::ZeroPadShift (const Profile& std, float& ephase) const
   }
   
   // Error estimate (???)
-  ephase = 1.0 / float(get_nbin());
+  float ephase = 1.0 / float(obs.get_nbin());
   
-  double shift = double(maxloc) / double(get_nbin());
+  double shift = double(maxloc) / double(obs.get_nbin());
   
   if (shift < -0.5)
     shift += 1.0;
   else if (shift > 0.5)
     shift -= 1.0;
   
-  return shift;
+  return Estimate<double>(shift,ephase*ephase);
 }
-
-#endif
 
 void Pulsar::Profile::fftconv (const Profile& std, 
 			       double& shift, float& eshift, 

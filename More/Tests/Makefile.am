@@ -159,7 +159,7 @@ libpsrchive_la_SOURCES += ArchiveProcessor.C Plotter.C CalibratorPlotter.C  \
 	Plotter_phase_frequency.C
 
 bin_PROGRAMS += pacv pcvar paz pav pas psrwt psrsh pcm pvt \
-	binphs_test pcm_chooser rmfit psrband
+	binphs_test pcm_chooser rmfit psrband SimTiming
 
 SimTiming_SOURCES		= SimTiming.C
 binphs_test_SOURCES		= binphs_test.C
