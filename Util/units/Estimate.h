@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Estimate.h,v $
-   $Revision: 1.20 $
-   $Date: 2003/09/03 09:49:56 $
+   $Revision: 1.21 $
+   $Date: 2003/10/16 13:38:22 $
    $Author: straten $ */
 
 #ifndef __Estimate_h
@@ -72,7 +72,7 @@ class Estimate
   { val -= d.val; var += d.var; return *this; }
 
   //! Multiplication operator
-  /*! Where \f$ r=x*y \f$, \f$ \sigma_r = y^2\sigma_x + x^2\sigma_y */
+  /*! Where \f$ r=x*y \f$, \f$\sigma^2_r = y^2\sigma^2_x + x^2\sigma^2_y\f$ */
   const Estimate& operator*= (const Estimate& d)
   { T v=val; val*=d.val; var=v*v*d.var+d.val*d.val*var; return *this; }
 
@@ -153,7 +153,7 @@ unsigned Estimate<T, U>::ndim = 1;
 template<typename T, typename U>
 ostream& operator<< (ostream& ostr, const Estimate<T,U>& estimate)
 {
-  return ostr << "(" << estimate.val << "\261" << estimate.var << ")";
+  return ostr << "(" << estimate.val << "\261" << sqrt(estimate.var) << ")";
 }
 
 
