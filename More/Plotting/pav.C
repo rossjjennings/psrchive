@@ -165,8 +165,8 @@ int main (int argc, char** argv)
   }
 
   if (display) {
-    cpgsvp (0.1, 0.9, 0.05, 0.85);
-    //cpgsch (2.0);
+    cpgsvp (0.05, 0.95, 0.0, 0.8);
+    cpgsch (2.0);
   }
 
   //#ifdef HEAT

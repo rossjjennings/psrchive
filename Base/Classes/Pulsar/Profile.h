@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Profile.h,v $
-   $Revision: 1.16 $
-   $Date: 2002/06/12 02:24:29 $
+   $Revision: 1.17 $
+   $Date: 2002/06/12 03:55:00 $
    $Author: ahotan $ */
 
 #ifndef __Pulsar_Profile_h
@@ -138,7 +138,7 @@ namespace Pulsar {
 
     //! set the world coordinates of the pgplot window and draw the profile
     void display (float phase=0, float xmin=0, float xmax=1,
-		  float ymin=0, float ymax=1, string title="") const;
+		  float ymin=0, float ymax=1) const;
 
     //! draw the profile using pgplot
     void draw (float phase=0) const;
