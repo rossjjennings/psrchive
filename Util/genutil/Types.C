@@ -188,7 +188,7 @@ const char* Signal::state_string (State state)
   }
 }
 
-const char* Signal::State2string (State state)
+const string Signal::State2string (State state)
 {
   switch (state)  {
   case Nyquist:

@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Types.h,v $
-   $Revision: 1.5 $
-   $Date: 2002/12/04 01:37:45 $
+   $Revision: 1.6 $
+   $Date: 2002/12/04 05:00:56 $
    $Author: hknight $ */
 
 #ifndef __Types_h
@@ -71,9 +71,9 @@ namespace Signal {
   
   int get_ipol (State state, Component poln);
   
-  const string source_string (Source source);
-  const string state_string (State state);
-  const string basis_string (Basis basis);
+  const char* source_string (Source source);
+  const char* state_string (State state);
+  const char* basis_string (Basis basis);
 
   const string Source2string (Source source);
   const string State2string (State state);
