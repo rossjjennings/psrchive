@@ -12,14 +12,12 @@ LIB_SRCS := ephio_c.c ephio_def.c ephio.f rnd8.f \
 PROGRAMS := keys2c.c keys2fort.c eph2upd.f ephaux.C ephepo.C ephtex.C
 LDFLAGS += $(F77LIBS) -lm
 
-# test programs are intended to be run-alone (ie. no user input required)
-# TESTS := testrnd8.f
+keys2c.LDFLAGS := $(LDFLAGS) $(F77LIBS) -lm
+keys2fort.LDFLAGS := $(LDFLAGS) $(F77LIBS) -lm
 
-eph2upd.LDFLAGS := $(LDFLAGS) -leph -lgenutil
-ephaux.LDFLAGS  := $(LDFLAGS) -leph -lgenutil $(LSLA)
-ephtex.LDFLAGS  := $(LDFLAGS) -leph -lpsrinfo -leph -lgenutil $(LSLA)
-ephepo.LDFLAGS  := $(LDFLAGS) -leph -lgenutil $(LTIMES)
-testrnd8.LDFLAGS:= $(LDFLAGS) -leph
+LDFLAGS += -leph $(LTIMES) -lgenutil++ -lgenutil $(LSLA)
+
+ephtex.LDFLAGS  := $(LDFLAGS) -lpsrinfo -leph -lgenutil $(LSLA)
 
 # ######################################################################
 # PSRFITS specific code
@@ -28,7 +26,7 @@ ifeq ($(has_CFITS),yes)
 
 LIB_SRCS += fitsio.C
 TESTS += test_psrephem_fitsio.C
-test_psrephem_fitsio.LDFLAGS := $(LDFLAGS) -leph $(LTIMES) $(LCFITSIO)
+test_psrephem_fitsio.LDFLAGS := $(LDFLAGS) -lfitsutil $(LCFITSIO)
 
 endif
 # ######################################################################
