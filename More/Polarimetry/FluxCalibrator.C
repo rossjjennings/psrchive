@@ -10,6 +10,7 @@
 #include "Calibration/ScalarConstant.h"
 
 #include "Error.h"
+#include "interpolate.h"
 
 /*! When true, the FluxCalibrator constructor will first calibrate the
   the flux calibrator observations using the off-pulse polarization to
@@ -287,20 +288,32 @@ void Pulsar::FluxCalibrator::resize (unsigned required_nchan)
   if (nchan == required_nchan)
     return;
 
-  if (required_nchan > nchan)
-    throw Error (InvalidState, "Pulsar::FluxCalibrator::resize",
-		 "resize to required nchan=%d > %d not yet implemented",
-		 required_nchan, nchan);
+  if (required_nchan < nchan)  {
 
-  unsigned nscrunch = nchan / required_nchan;
+    unsigned nscrunch = nchan / required_nchan;
   
-  if (verbose)
-      cerr << "Pulsar::FluxCalibrator::resize required nchan="
-	   << required_nchan << " < nchan=" << nchan 
-	   << " nscrunch=" << nscrunch << endl;
+    if (verbose)
+        cerr << "Pulsar::FluxCalibrator::resize required nchan="
+	     << required_nchan << " < nchan=" << nchan 
+	     << " nscrunch=" << nscrunch << endl;
 
-  scrunch (cal_flux, nscrunch);
-  scrunch (T_sys, nscrunch);
+    scrunch (cal_flux, nscrunch);
+    scrunch (T_sys, nscrunch);
+
+  }
+  else {
+
+    if (verbose)
+        cerr << "Pulsar::FluxCalibrator::resize required nchan="
+             << required_nchan << " > nchan=" << nchan << endl;
+
+    vector< Estimate<double> > temp (required_nchan);
+    fft::interpolate (temp, cal_flux);
+    cal_flux = temp;
+    fft::interpolate (temp, T_sys);
+    T_sys = temp;
+
+  }
 }
 
 
