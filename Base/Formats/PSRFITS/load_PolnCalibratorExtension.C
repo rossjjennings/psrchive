@@ -48,12 +48,14 @@ void Pulsar::FITSArchive::load_PolnCalibratorExtension (fitsfile* fptr)
   if (ncpar < 0)
     ncpar = 0;
 
-  // Get NCH_FDPR
+  // Get NCH_FDPR (old versions of PSRFITS header)
   int nch_fdpr = 0;
   fits_read_key (fptr, TINT, "NCH_FDPR", &nch_fdpr, comment, &status);
   
   if (status == 0 && nch_fdpr >= 0)
     pce->set_nchan(nch_fdpr);
+
+  status = 0;
 
   Pulsar::load (fptr, pce);
 
@@ -66,9 +68,15 @@ void Pulsar::FITSArchive::load_PolnCalibratorExtension (fitsfile* fptr)
       return;
   }
 
-  for (int ichan=0; ichan < nch_fdpr; ichan++)
-    if ( pce->get_weight (ichan) == 0 )
+  unsigned ichan;
+
+  for (ichan=0; ichan < pce->get_nchan(); ichan++)
+    if ( pce->get_weight (ichan) == 0 )  {
+      if (verbose == 3)
+        cerr << "FITSArchive::load_PolnCalibratorExtension ichan=" << ichan
+             << " flagged invalid" << endl;
       pce->set_valid (ichan, false);
+    }
 
   auto_ptr<float> data ( new float[dimension] );
   
@@ -88,10 +96,10 @@ void Pulsar::FITSArchive::load_PolnCalibratorExtension (fitsfile* fptr)
     cerr << "FITSArchive::load_PolnCalibratorExtension data read" << endl;
   
   int count = 0;
-  for (int i = 0; i < nch_fdpr; i++) {
-    if (pce->get_valid(i))
+  for (ichan = 0; ichan < pce->get_nchan(); ichan++) {
+    if (pce->get_valid(ichan))
       for (int j = 0; j < ncpar; j++) {
-	pce->get_transformation(i)->set_param(j,data.get()[count]);
+	pce->get_transformation(ichan)->set_param(j,data.get()[count]);
 	count++;
       }
     else
@@ -113,11 +121,11 @@ void Pulsar::FITSArchive::load_PolnCalibratorExtension (fitsfile* fptr)
     cerr << "FITSArchive::load_PolnCalibratorExtension dataerr read" << endl;
   
   count = 0;
-  for (int i = 0; i < nch_fdpr; i++) {
-    if (pce->get_valid(i))
+  for (ichan = 0; ichan < pce->get_nchan(); ichan++) {
+    if (pce->get_valid(ichan))
       for (int j = 0; j < ncpar; j++) {
 	float err = data.get()[count];
-	pce->get_transformation(i)->set_variance (j, err*err);
+	pce->get_transformation(ichan)->set_variance (j, err*err);
 	count++;
       }
     else
