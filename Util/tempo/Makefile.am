@@ -5,7 +5,8 @@ INCLUDES = psrephem.h ephio.h ephio_func.h
 NONMODULE = ephio.h
 
 LIBRARY  = libeph.a
-LIB_SRCS = psrephem.C ephio_c.c ephio.f rnd8.f set_epoch.C tex.C
+LIB_SRCS = psrephem.C ephio_c.c ephio.f rnd8.f set_epoch.C \
+	tex.C derived.C
 
 PROGRAMS = keys2c.c keys2fort.c eph2upd.f ephaux.C ephepo.C ephtex.C
 

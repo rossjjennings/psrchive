@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/psrephem.h,v $
-   $Revision: 1.11 $
-   $Date: 2001/02/19 12:18:40 $
+   $Revision: 1.12 $
+   $Date: 2001/02/20 03:16:08 $
    $Author: straten $ */
 
 #ifndef __PSREPHEM_H
@@ -108,6 +108,9 @@ class psrephem
 
   // returns the intrinsic Pb_dot due to gravitational wave emission
   int GR_omega_dot (double& Pb_dot) const;
+
+  // returns the general relativistic prediction of gamma
+  int GR_gamma (double& gamma) const;
 
   // used by the above
   int GR_f_e (double& f_e) const;

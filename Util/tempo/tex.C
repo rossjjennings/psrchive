@@ -337,6 +337,10 @@ string psrephem::tex () const
   retval += "$\\dot \\omega^{\\rm GR} (\\degr yr^{-1})$" + bw
     + tex_double (GRw_dot, 0) + nl;
 
+  double gamma;
+  if (GR_gamma (gamma) < 0)
+    cerr << "******* Error GR_w_dot!" << endl;
+  cout << "GAMMA: " << gamma << endl;
 
 #if 0
   printf("\\\\\n");
