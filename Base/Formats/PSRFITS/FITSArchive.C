@@ -7,7 +7,7 @@
 #include "Pulsar/ObsExtension.h"
 #include "Pulsar/ITRFExtension.h"
 #include "Pulsar/CalInfoExtension.h"
-#include "Pulsar/FrontendExtension.h"
+#include "Pulsar/Receiver.h"
 #include "Pulsar/BackendExtension.h"
 #include "Pulsar/DigitiserStatistics.h"
 #include "Pulsar/ProcHistory.h"
@@ -185,12 +185,10 @@ void Pulsar::FITSArchive::load_header (const char* filename)
 
   add_extension (new ObsExtension);
   add_extension (new FITSHdrExtension);
-  add_extension (new FrontendExtension);
   add_extension (new BackendExtension);
 
   ObsExtension*      obs_ext  = get<ObsExtension>();
   FITSHdrExtension*  hdr_ext  = get<FITSHdrExtension>();
-  FrontendExtension* fe_ext   = get<FrontendExtension>();
   BackendExtension*  be_ext   = get<BackendExtension>();
 
   // /////////////////////////////////////////////////////////////////
@@ -394,62 +392,10 @@ void Pulsar::FITSArchive::load_header (const char* filename)
 
   load_ITRFExtension (fptr);
 
-  // Receiver name
+  // Receiver parameters
 
-  if (verbose)
-    cerr << "FITSArchive::load_header reading receiver" << endl;
+  load_Receiver (fptr);
 
-  fits_read_key (fptr, TSTRING, "FRONTEND", tempstr, comment, &status);
-  if (status != 0) {
-    if (verbose) {
-      fits_get_errstatus(status,error);
-      cerr << "FITSArchive::load_header WARNING reading FRONTEND: " 
-	   << error << endl;
-    }
-    status = 0;
-  }
-  else
-    set_receiver(tempstr);
-  
-  // Read the feed configuration
-
-  if (verbose)
-    cerr << "FITSArchive::load_header reading feed config" << endl;
-
-  fits_read_key (fptr, TSTRING, "FD_POLN", tempstr, comment, &status);
-  if (status != 0) {
-    if (verbose) {
-      fits_get_errstatus(status,error);
-      cerr << "FITSArchive::load_header WARNING reading FD_POLN: " 
-	   << error << endl;
-    }
-    status = 0;
-  }
-  else {
-    if (strncasecmp(tempstr,"LIN",3) == 0)
-      set_basis ( Signal::Linear );
-    else if (strncasecmp(tempstr,"CIRC",4) == 0)
-      set_basis ( Signal::Circular );
-    else
-      throw Error (InvalidParam, "FITSArchive::load_header",
-	           "unknown FD_POLN: %s", tempstr);
-  }
-  
-  // Read angle of X-probe wrt platform zero
-
-  if (verbose)
-    cerr << "FITSArchive::load_header reading XPLO_ANG" << endl;
-  
-  fits_read_key (fptr, TFLOAT, "XPOL_ANG", &(fe_ext->xpol_ang), comment, &status);
-  if (status != 0) {
-    if (verbose) {
-      fits_get_errstatus(status,error);
-      cerr << "FITSArchive::load_header WARNING reading XPOL_ANG: " 
-	   << error << endl;
-    }
-    status = 0;
-  }
-  
   // Read the name of the instrument used
 
   if (verbose)
@@ -609,37 +555,6 @@ void Pulsar::FITSArchive::load_header (const char* filename)
   else
     hdr_ext->trk_mode = tempstr;
   
-  // Feed track mode
-
-  if (verbose)
-    cerr << "FITSArchive::load_header reading feed track mode" << endl;
-
-  fits_read_key (fptr, TSTRING, "FD_MODE", tempstr, comment, &status);
-  if (status != 0) {
-    if (verbose) {
-      fits_get_errstatus(status,error);
-      cerr << "FITSArchive::load_header WARNING reading FD_MODE: " 
-	   << error << endl;
-    }
-    status = 0;
-  }
-  else
-    fe_ext->fd_mode = tempstr;
-
-  // Read requested feed angle
-  
-  if (verbose)
-    cerr << "FITSArchive::load_header reading requested feed angle" << endl;
-  
-  fits_read_key (fptr, TFLOAT, "FA_REQ", &(fe_ext->fa_req), comment, &status);
-  if (status != 0) {
-    if (verbose) {
-      fits_get_errstatus(status,error);
-      cerr << "FITSArchive::load_header WARNING reading FA_REQ: " 
-	   << error << endl;
-    }
-    status = 0;
-  }
 
   // Read correlator cycle time
 
@@ -656,21 +571,6 @@ void Pulsar::FITSArchive::load_header (const char* filename)
     status = 0;
   }
   
-  // Read attenuator settings
-
-  if (verbose)
-    cerr << "FITSArchive::load_header reading attenuator settings" << endl;
-
-  fits_read_key (fptr, TFLOAT, "ATTEN_A", &(fe_ext->atten_a), comment, &status);
-  fits_read_key (fptr, TFLOAT, "ATTEN_B", &(fe_ext->atten_b), comment, &status);
-  if (status != 0) {
-    if (verbose) {
-      fits_get_errstatus(status,error);
-      cerr << "FITSArchive::load_header WARNING reading ATTEN_A,B: " 
-	   << error << endl;
-    }
-    status = 0;
-  }
 
   // Read the start UT date
 
@@ -1346,26 +1246,7 @@ try {
   
   fits_update_key (fptr, TSTRING, "SRC_NAME",
 		   const_cast<char*>(source.c_str()), comment, &status);
-  
-  char* useful = new char[16];
-  
-  if (get_basis() == Signal::Linear)
-    sprintf(useful, "%s", "LIN");
-  
-  else if (get_basis() == Signal::Circular)
-    sprintf(useful, "%s", "CIRC");
-  
-  else
-    sprintf(useful, "%s", "    ");
-  
-  fits_update_key (fptr, TSTRING, "FD_POLN", 
-		   useful, comment, &status);
-  
-  delete[] useful;
-  
-  fits_update_key (fptr, TSTRING, "FRONTEND", 
-  		   (char*)get_receiver().c_str(), comment, &status);
-  
+    
   fits_update_key (fptr, TSTRING, "BACKEND", 
 		   (char*)get_backend().c_str(), comment, &status);
   
@@ -1428,13 +1309,13 @@ try {
   }
 
   {
-    const FrontendExtension* ext = get<FrontendExtension>();
+    const ITRFExtension* ext = get<ITRFExtension>();
     if (ext) 
       unload (fptr, ext);
   }
 
   {
-    const ITRFExtension* ext = get<ITRFExtension>();
+    const Receiver* ext = get<Receiver>();
     if (ext) 
       unload (fptr, ext);
   }
