@@ -67,6 +67,12 @@ namespace Pulsar {
     //! Set the Stokes 4-vector for the specified bin
     void set_Stokes (unsigned ibin, const Stokes<float>& stokes);
 
+    //! Get the coherency matrix for the specified bin
+    Jones<double> get_coherence (unsigned ibin);
+
+    //! Set the coherency matrix for the specified bin
+    void set_coherence (unsigned ibin, const Jones<double>& coherency);
+
     //! Returns the sum of all amplitudes
     double sum (int bin_start=0, int bin_end=0) const;
 
@@ -112,7 +118,7 @@ void Pulsar::PolnProfile::transform (const Jones<T>& response)
   Jones<float> response_dagger = herm(response);
 
   for (unsigned ibin = 0; ibin < nbin; ibin++)
-    set_Stokes (ibin, (response * get_Stokes(ibin)) * response_dagger);
+    set_coherence (ibin, (response * get_coherence(ibin)) * response_dagger);
 
   if (correct_weights)
     for (unsigned ipol=0; ipol < 4; ipol++)

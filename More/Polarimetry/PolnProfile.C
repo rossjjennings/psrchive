@@ -147,6 +147,45 @@ void Pulsar::PolnProfile::set_Stokes (unsigned ibin,
 //
 //
 //
+Jones<double> Pulsar::PolnProfile::get_coherence (unsigned ibin)
+{
+  if (state != Signal::Coherence)
+    convert_state (Signal::Coherence);
+
+  if (ibin >= profile[0]->get_nbin())
+    throw Error (InvalidRange, "PolnProfile::get_coherence",
+                 "ibin=%d >= nbin=%d", ibin, profile[0]->get_nbin());
+
+  complex<double> cross (profile[2]->get_amps()[ibin], 
+                         profile[3]->get_amps()[ibin]);
+
+  return Jones<double> (profile[0]->get_amps()[ibin], conj(cross),
+                        cross, profile[1]->get_amps()[ibin]);
+}
+
+//
+//
+//
+void Pulsar::PolnProfile::set_coherence (unsigned ibin,
+                                         const Jones<double>& new_amps)
+{
+  if (state != Signal::Coherence)
+    convert_state (Signal::Coherence);
+
+  if (ibin >= profile[0]->get_nbin())
+    throw Error (InvalidRange, "PolnProfile::set_coherence",
+                 "ibin=%d >= nbin=%d", ibin, profile[0]->get_nbin());
+
+  profile[0]->get_amps()[ibin] = new_amps.j(0,0).real();
+  profile[1]->get_amps()[ibin] = new_amps.j(1,1).real();
+  profile[2]->get_amps()[ibin] = new_amps.j(0,1).real();
+  profile[3]->get_amps()[ibin] = new_amps.j(1,0).imag();
+
+}
+
+//
+//
+//
 double Pulsar::PolnProfile::sum (int bin_start, int bin_end) const
 {
   double sum = 0;
