@@ -172,7 +172,19 @@ void Pulsar::Profile::get_amps (float* data, unsigned jbin) const
     aptr ++; dptr += jbin;
   }
 }
- 
+
+
+vector<float> Pulsar::Profile::get_weighted_amps () const
+{
+  vector<float> wamps;
+  
+  for (unsigned i = 0; i < nbin; i++) {
+    wamps.push_back(amps[i] * weight);
+  }
+  
+  return wamps;
+}
+
 /////////////////////////////////////////////////////////////////////////////
 //
 // Pulsar::Profile::rotate
@@ -708,8 +720,8 @@ float Pulsar::Profile::snr() const
   // subtract the total power due to the baseline
   power -= min_avg * double (fall - rise);
 
-  double flux = power;
-  double width = (double) (fall - rise);
+  //double flux = power;
+  //double width = (double) (fall - rise);
 
   // divide by the sqrt of the number of bins
   power /= sqrt (double(fall-rise));
