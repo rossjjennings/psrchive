@@ -1,41 +1,42 @@
 \documentclass[12pt]{article}
-\usepackage{bm}       % bold mathematic symbols
+\usepackage{amsfonts}
+\usepackage{bm}
 
 % symbol used for sqrt(-1)
 \newcommand{\Ci}{{\rm i}}
 
-% general Lorentz boost and rotation
-\newcommand\boost[1]{\ensuremath{ {\bf H}^{#1}_{\bm{\hat m}}(\beta) }}
-\newcommand\rotat[1]{\ensuremath{ {\bf U}^{#1}_{\bm{\hat n}}(\phi) }}
+\newcommand{\C}{\mathbb{C}}
+\newcommand{\R}{\mathbb{R}}
 
-\newcommand\pauli[1]{\ensuremath{ \bm{\sigma}_{\rm #1} }}
+\newcommand{\code}[1]{{\tt{#1}}}
+
+\newcommand{\boost}[1][]{{\ensuremath{ {\bf H}{#1}_{\bm{\hat m}}(\beta) }}}
+\newcommand{\rotat}[1][]{{\ensuremath{ {\bf U}{#1}_{\bm{\hat n}}(\phi) }}}
+
+\newcommand{\pauli}[1]{\ensuremath{ {\bm\sigma}_{\rm #1} }}
 
 \begin{document}
 
 \section{Introduction}
 
-Quaternions were invented by the famous Irish mathematician, William
-Rowan Hamilton, when he carved the fundamental formula of quaternion
-algebra,
+Quaternions were invented by William Rowan Hamilton when he carved the
+fundamental formula of quaternion algebra,
 \begin{equation}
 i^2=j^2=k^2=ijk=-1
 \end{equation}
 into the stone of the Brougham bridge.
-
-An arbitrary quaternion, $\bm{U}$, is given by the linear combination
+An arbitrary quaternion, $\bm{U}$, is given by the linear combination,
 \begin{equation}
-\bm{U}=u_0,+u_1i+u_2j+u_3k, \hspace{5mm} u_i\in\Re. 
+\bm{U}=u_0+u_1i+u_2j+u_3k, \hspace{5mm} u_i\in\R
 \end{equation}
-and the multiplicative quaternion group may be said to be isomorphic with
-the $2\times2$ unitary tranformations, SU(2).
+and, as with matrices, quaternion multiplication in non-commutative.
 
 A quaternion with complex coefficients is known as a biquaternion.
 The algebra of biquaternions is isomorphic to $2\times2$ complex
-matrices.  With biquaternions, a Hermitian matrix, $\bm{H}$, may be 
-represented by the linear combination:
+matrices.  A Hermitian matrix, $\bm{H}$, may be represented by the
+linear combination,
 \begin{equation}
-\bm{H}=h_0\pauli{0} + h_1\pauli{1}
-	+ h_2\pauli{2} + h_3\pauli{3}, \hspace{5mm} h_i\in\Re
+\bm{H}=h_0\pauli{0}+h_1\pauli{1}+h_2\pauli{2}+h_3\pauli{3},\hspace{5mm}h_i\in\R
 \end{equation}
 where $\pauli{0}$ equals the identity matrix, $\bm{I}$, and $\pauli{1-3}$
 are the Pauli spin matrices:
@@ -54,24 +55,24 @@ are the Pauli spin matrices:
 0 & -\Ci \\
 \Ci & 0
 \end{array}\right).
-\label{pauli}
+\label{eqn:pauli}
 \end{eqnarray}
-A very useful notation represents the biquaternion as a complex scalar plus
+A very useful notation represents the biquaternion as a scalar plus
 a three-vector:
-\begin{equation}
-\bm{Q}=[q+\bm{q}] = q\pauli{0} + \bm{q\cdot\sigma},
+\begin{equation}\label{eqn:biquaternion}
+\bm{Q}=[q_0+\bm{q}] = q_0\pauli{0} + \bm{q\cdot\sigma}, \hspace{5mm} q_i\in\C
 \end{equation}
 were $\bm{q}=(q_1,q_2,q_3)$ and $\bm\sigma$ is a three-vector whose
 components are the Pauli spin matrices as defined above.
 Using this notation, the quaternion sub-group may be represented as
-\begin{equation}
-\bm{U}=[u_0+i\bm{u}]= u_0\pauli{0} + i\bm{u\cdot\sigma} \hspace{5mm} u_i\in\Re
+\begin{equation}\label{eqn:quaternion}
+\bm{U}=[u_0+i\bm{u}]= u_0\pauli{0} + \Ci\bm{u\cdot\sigma} \hspace{5mm} u_i\in\R
 \end{equation}
 
 
-From the definitions of Eq.~\ref{pauli}, it can be shown that the Pauli spin
-matrices have the following properties:
-\begin{equation}
+From the definitions of Eq.~\ref{eqn:pauli}, it can be shown that the
+Pauli spin matrices have the following properties:
+\begin{equation}\label{eqn:properties}
 \pauli{i}^2 = \bm{I}, \hspace{5mm} 
 \pauli{i}\pauli{j} = -\pauli{j}\pauli{i} = \Ci\pauli{k}
 \end{equation}
@@ -80,25 +81,84 @@ where $\{i,j,k\}$ is chosen from cyclic permutations of $\{1,2,3\}$.
 
 \section{Some Algebraic Derivations}
 
-\subsection{Quaternion Multiplication}
+\subsection{Biquaternion Multiplication}
 As with matrices, quaternion multiplication is non-commutative.  It is
-useful to derive the result of the multiplication of two quaternions in some
-detail. Starting with $\bm{A}=[a+\bm{a}]$ and $\bm{B}=[b+\bm{b}]$
-\begin{eqnarray}\label{multiplication}
+useful to derive the result of the multiplication of two quaternions
+in some detail. Start with two biquaternions, $\bm{A}=[a_0+\bm{a}]$
+and $\bm{B}=[b_0+\bm{b}]$, as defined in Eq.~\ref{eqn:biquaternion},
+and expand to yield
+\begin{eqnarray}
 \begin{array}{ccl}
 \bm{A}\bm{B} & = &
 (a_0\pauli{0} + a_1\pauli{1} + a_2\pauli{2} + a_3\pauli{3})
 (b_0\pauli{0} + b_1\pauli{1} + b_2\pauli{2} + b_3\pauli{3}) \\
 & = & a_0b_0\pauli{0}\pauli{0} + a_0b_1\pauli{0}\pauli{1}
-	+ a_0b_2\pauli{0}\pauli{2} + a_0b_2\pauli{0}\pauli{2} \\
-& & + a_1b_0\pauli{1}\pauli{0} + a_1b_1\pauli{1}\pauli{1}
-	+ a_1b_2\pauli{1}\pauli{2} + a_1b_2\pauli{1}\pauli{2} \\
-& & + a_2b_0\pauli{2}\pauli{0} + a_2b_1\pauli{2}\pauli{1}
-	+ a_2b_2\pauli{2}\pauli{2} + a_2b_2\pauli{2}\pauli{2} \\
-& & + a_3b_0\pauli{3}\pauli{0} + a_3b_1\pauli{3}\pauli{1}
-	+ a_3b_2\pauli{3}\pauli{2} + a_3b_2\pauli{3}\pauli{2}
+	+ a_0b_2\pauli{0}\pauli{2} + a_0b_3\pauli{0}\pauli{3} \\
+& + & a_1b_0\pauli{1}\pauli{0} + a_1b_1\pauli{1}\pauli{1}
+	+ a_1b_2\pauli{1}\pauli{2} + a_1b_3\pauli{1}\pauli{3} \\
+& + & a_2b_0\pauli{2}\pauli{0} + a_2b_1\pauli{2}\pauli{1}
+	+ a_2b_2\pauli{2}\pauli{2} + a_2b_3\pauli{2}\pauli{3} \\
+& + & a_3b_0\pauli{3}\pauli{0} + a_3b_1\pauli{3}\pauli{1}
+	+ a_3b_2\pauli{3}\pauli{2} + a_3b_3\pauli{3}\pauli{3}
 \end{array}
 \end{eqnarray}
+By applying the properties shown in Eq.~\ref{eqn:properties}, this may
+be reduced to
+\begin{eqnarray}\label{eqn:biquaternion_multiplication}
+\begin{array}{ccl}
+\bm{A}\bm{B}
+& = & (a_0b_0 + a_1b_1 + a_2b_2 + a_3b_3) \pauli{0} \\
+& + & (a_0b_1 + a_1b_0 + \Ci a_2b_3 - \Ci a_3b_2) \pauli{1} \\
+& + & (a_0b_2 - \Ci a_1b_3 + a_2b_0 + \Ci a_3b_1) \pauli{2} \\
+& + & (a_0b_3 + \Ci a_1b_2 - \Ci a_2b_1 + a_3b_0) \pauli{3}	
+\end{array}
+\end{eqnarray}
+
+\subsection{Quaternion Multiplication}
+Equation~\ref{eqn:biquaternion_multiplication} may be used to derive
+the multiplication rule for quaternions.  Assuming that
+$\bm{C}=[c_0+\Ci\bm{c}]$ and $\bm{D}=[d_0+\Ci\bm{d}]$, as defined in
+Eq.~\ref{eqn:quaternion}, the quaternion product,
+$\bm{X}=[x_0+\Ci\bm{x}]=\bm{CD}$, is given by
+\begin{equation}\label{eqn:quaternion_multiplication}
+\begin{array}{rl}
+x_0 & = c_0d_0 - c_1d_1 - c_2d_2 - c_3d_3 \\
+x_1 & = c_0d_1 + c_1d_0 - c_2d_3 + c_3d_2 \\
+x_2 & = c_0d_2 + c_1d_3 + c_2d_0 - c_3d_1 \\
+x_3 & = c_0d_3 - c_1d_2 + c_2d_1 + c_3d_0
+\end{array}
+\end{equation}
+
+\section{The \code{Quaternion} template class}
+
+The \code{Quaternion} template class was designed to implement both
+quaternions and biquaternions using either Hamilton's \{$i$, $j$,
+$k$\} or the Pauli spin matrices as the basis.  When using the Pauli
+spin matrices as a basis, it is possible to represent a Hermitian
+matrix using only four real numbers.  However, as the product of two
+Hermitian matrices is not Hermitian (unless the matrices commute), it
+is not possible to multiply two real quaternions in the Pauli basis.
+
+In summary, there are four ways to create a null-constructed instance
+of a Quaternion object:
+\begin{verbatim}
+// Hamilton's quaternion (unitary basis)
+Quaternion<float> q;
+
+// Representation of Hermitian matrix (non-multiplicative)
+Quaternion<float, Hermitian> h;
+
+// Biquaternion in unitary basis
+Quaternion<complex<float>,Unitary> bq;
+
+// Biquaternion in Hermitian basis
+Quaternion<complex<float>, Hermitian> bh;
+\end{verbatim}
+Note that the floating-point precision is specified in the first
+template argument.  As Hamilton's quaternion is most common and
+useful, it is the basis used by default.  However, as shown in the
+above example, it may be explicitly specified in the second template
+argument with \code{Unitary}.
 
 
 \section{Isomorphism with Jones matrices}
@@ -106,30 +166,39 @@ detail. Starting with $\bm{A}=[a+\bm{a}]$ and $\bm{B}=[b+\bm{b}]$
 An arbitrary $2\times2$ complex, or Jones, matrix may be represented
 by its polar decomposition,
 \begin{equation}
-{\bf J} = J \; \boost{} \rotat{},
+{\bf J} = J \; \boost \rotat,
 \label{eqn:polar_decomposition}
 \end{equation}
 where $J=(\det{\bf J})^{1/2}$,
 \begin{eqnarray}
-\boost{} &=& \exp(\bm{\sigma\cdot}\bm{\hat m}\beta)
+\boost &=& \exp(\bm{\sigma\cdot}\bm{\hat m}\beta)
         = [\cosh\beta,\sinh\beta\;\bm{\hat m}],
 \label{eqn:boost} \\
-\rotat{} &=& \exp(i\bm{\sigma\cdot}\bm{\hat n}\phi)
+\rotat &=& \exp(i\bm{\sigma\cdot}\bm{\hat n}\phi)
         = [\cos\phi,i\sin\phi\;\bm{\hat n}],
 \label{eqn:rotation}
 \end{eqnarray}
 and $\bm{\hat m}$ and $\bm{\hat n}$ are real-valued unit 3-vectors.
-The matrices, \rotat{}\ and \boost{}, are unimodular (ie. have unit
+The matrices, \rotat\ and \boost, are unimodular (ie. have unit
 determinant) and are known as the axis-angle representation of unitary
 and Hermitian transformations, respectively.
 
-A matrix may also be represented by ${\bf J} = J \; \rotat{\prime}
-\boost{\prime}$, noting that $\rotat{\prime}\ne\rotat{}$ and
-$\boost{\prime}\ne\boost{}$ (owing to the non-commutivity of matrix
-multiplication).  However, as shown in Section~\ref{sec:root}, the
-decomposition shown in Eq.~\ref{eqn:polar_decomposition} provides greater
-advantages.
+A matrix may also be represented by ${\bf J} = J \; \rotat[\prime]
+\boost[^\prime]$, noting that $\rotat[^\prime]\ne\rotat$ and
+$\boost[^\prime]\ne\boost$ (owing to the non-commutivity of matrix
+multiplication).  However, as shown in
+Section~\ref{sec:polar_decomposition}, the decomposition shown in
+Eq.~\ref{eqn:polar_decomposition} provides greater advantages.
 
+\subsection{Polar Decomposition}
+\label{sec:polar_decomposition}
+
+The polar decomposition of Eq.~\ref{eqn:polar_decomposition} may be 
+calculated noting that
+\begin{equation}
+{\bf JJ}^\dagger = (J\boost\rotat)(J^*\rotat[^\dagger]\boost[^\dagger])
+	= |J|^2 \boost[^2]
+\end{equation}
 
 
 \end{document}

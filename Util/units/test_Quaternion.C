@@ -26,11 +26,12 @@ int main ()
 
 
 
-  FourSpaceTest <Quaternion<float,Hermitian>, 
-    Quaternion<double,Hermitian>, float > testh;
+  FourSpaceTest <Quaternion<complex<float>,Hermitian>, 
+    Quaternion<complex<double>,Hermitian>, complex<float> > testh;
 
   try {
-    cerr << "Testing " << loops << " Hermitian Quaternion variations" << endl;
+    cerr 
+      << "Testing " << loops << " Hermitian Biquaternion variations" << endl;
     testh.runtest (loops);
   }
   catch (Error& error) {
