@@ -3,19 +3,17 @@
 
 #include <qtabdialog.h>
 
+class qt_ModelOptions;
+
 class RhythmOptions : public QTabDialog
 {
   Q_OBJECT
 
  public:
   RhythmOptions ( QWidget *parent, const char *name);
-
- public slots:
-  void setXAxis ( int residual_plot );
-  void setYAxis ( int residual_plot );
+  qt_ModelOptions* modelOptions;
 
  protected:
-  void setupPlot ();
   void setupTab2 ();
   void setupTab3 ();
 };

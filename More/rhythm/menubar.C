@@ -8,7 +8,6 @@
 
 #include "qt_fileParams.h"
 #include "qt_editParams.h"
-#include "tempo++.h"
 #include "rhythm.h"
 
 void Rhythm::menubarConstruct ()
@@ -142,8 +141,8 @@ void Rhythm::load_toas ()
   }
 
   QString startName = QString::null;
-  if ( !tim_filename.empty() )
-    startName = tim_filename.c_str();
+  if ( !model.filename.empty() )
+    startName = model.filename.c_str();
 
   QString fileName (QFileDialog::getOpenFileName ( startName, "*.tim", this ));
 
@@ -172,12 +171,7 @@ void Rhythm::setVerbosity ( int verbosityID )
   verbose = (mediumID == verbosityID || noisyID  == verbosityID);
   vverbose = (noisyID  == verbosityID);
 
-  qt_fileParams::verbose = vverbose;
-  qt_editParams::verbose = vverbose;
-  xmp_manager::verbose = vverbose;
-  pg_manager::verbose = vverbose;
-  xyplot::verbose = vverbose;
-  Tempo::verbose = vverbose;
+  setClassVerbose (vverbose);
 
   if (vverbose)
     cerr << "rhythm: very verbose on" << endl;

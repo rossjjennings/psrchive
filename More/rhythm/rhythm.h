@@ -1,19 +1,30 @@
+//-*-C++-*-
+
+/* $Source: /cvsroot/psrchive/psrchive/More/rhythm/rhythm.h,v $
+   $Revision: 1.10 $
+   $Date: 2000/05/30 18:29:35 $
+   $Author: straten $ */
+
+// //////////////////////////////////////////////////////////////////////////
+//
+// Rhythm
+//
+// A class for interactively plotting Tempo::ModelDataSet using the
+// PlotManager and DataManager classes defined in genutil++
+//
+// //////////////////////////////////////////////////////////////////////////
+
 #ifndef __RHYTHM_H
 #define __RHYTHM_H
 
 #include <vector>
 #include <qmainwindow.h>
 
-#include "qxmp_manager.h"
-#include "pg_2dplot.h"
-
-#include "toa.h"
-#include "residual.h"
-#include "psrParams.h"
-
+#include "ModelDataSet.h"
 #include "Options.h"
 
 class qt_editParams;
+class DataManager;
 
 class Rhythm : public QMainWindow
 {
@@ -29,24 +40,30 @@ class Rhythm : public QMainWindow
   // fits the loaded toas using TEMPO with the given psrParams, 'eph'.
   // if 'load_new' is true, loads the new epehemeris into the display
   void fit (const psrParams& eph, bool load_new);
- 
+
+  // set the verbosity flag for a number of the classes on which
+  // this application is based
+  void setClassVerbose (bool verbose);
+
  protected:
   RhythmOptions opts;
 
   // an array of toas and the filename from which they were loaded
-  vector<toa> arrival_times;
+  Tempo::ModelDataSet modelPlot;
+  Tempo::Model model;
 
   void load_toas (const char* fname);
-  string tim_filename;
-
-  // an array of residuals corresponding to the above toas.  These are plotted
-  vector<residual> residuals;
 
   // /////////////////////////////////////////////////////////////////////////
-  // Main Plotting Window
-  qxmp_manager plot_manager;
-  xyplot       res_plot;
-  void labelPlot();            // labels the axis appropriately
+  // Main Plotting Window(s)
+  vector<QWidget*> plot_manager;
+  vector<DataManager*> data_manager;
+
+  void initializePlot ();            // defined in initializePlot.C
+
+  // /////////////////////////////////////////////////////////////////////////
+  // Fit parameters Menu Widget
+  qt_editParams* fitpopup;
 
   // /////////////////////////////////////////////////////////////////////////
   // ToolBar and its constructor
@@ -72,11 +89,6 @@ class Rhythm : public QMainWindow
   int quietID;
   int mediumID;
   int noisyID;
-
-  // /////////////////////////////////////////////////////////////////////////
-  // Fit parameters menu widgets/routines
-  qt_editParams* fitpopup;
-  //void fit_popup (int nothing);
 
   // /////////////////////////////////////////////////////////////////////////
   // Command line parsing and exit routines

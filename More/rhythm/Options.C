@@ -11,17 +11,16 @@
 #include <qapplication.h>
 
 #include "Options.h"
-#include "rhythm.h"
-#include "residual.h"
-
+// #include "rhythm.h"
+#include "qt_ModelOptions.h"
 
 RhythmOptions::RhythmOptions( QWidget *parent, const char *name )
     : QTabDialog ( parent, name )
 {
-  setupPlot();
+  modelOptions = new qt_ModelOptions ( (QWidget*) this);
+  addTab( modelOptions, "Plot Options" );
   setupTab2();
-  setupTab3();
-  
+  setupTab3();  
   // connect( this, SIGNAL( applyButtonPressed() ), qApp, SLOT( quit() ) );
 }
 
@@ -55,42 +54,12 @@ void RhythmOptions::setupTab2()
   addTab( tab1, "General" );
 }
 
+#if 0
 void RhythmOptions::setupPlot()
 {
   QVBox *plotTab = new QVBox( this );
   plotTab->setMargin( 5 );
 
-  QHBox *axisTab = new QHBox( plotTab );
-
-  QRadioButton *radbut;
-
-  QButtonGroup *xaxis = new QButtonGroup( 1, QGroupBox::Horizontal, 
-					  "X-Axis", axisTab );
-  xaxis -> setRadioButtonExclusive (true);
-  connect( xaxis, SIGNAL( clicked(int) ), this, SLOT( setXAxis(int) ) );
-
-  radbut = new QRadioButton( "MJD", xaxis );
-  xaxis -> insert ( radbut, residual::Mjd );
-  radbut->setChecked( residual::xtype == residual::Mjd );
-
-  radbut = new QRadioButton( "Binary Phase", xaxis );
-  xaxis -> insert ( radbut, residual::BinaryPhase );
-  radbut->setChecked( residual::xtype == residual::BinaryPhase );
-
-  // enum   plot { BinaryPhase, Mjd, Seconds, Turns };
- 
-  QButtonGroup *yaxis = new QButtonGroup( 1, QGroupBox::Horizontal, 
-					  "Y-Axis", axisTab );
-  yaxis -> setRadioButtonExclusive (true);
-  connect( yaxis, SIGNAL( clicked(int) ), this, SLOT( setYAxis(int) ) );
-
-  radbut = new QRadioButton( "Seconds", yaxis );
-  yaxis -> insert ( radbut, residual::Seconds );
-  radbut->setChecked( residual::ytype == residual::Seconds );
-
-  radbut = new QRadioButton( "Turns", yaxis );
-  yaxis -> insert ( radbut, residual::Turns );
-  radbut->setChecked( residual::ytype == residual::Turns );
 
   QButtonGroup *bg2 = new QButtonGroup( 2, QGroupBox::Horizontal, 
 					"Owner", plotTab );
@@ -105,6 +74,7 @@ void RhythmOptions::setupPlot()
   
   addTab( plotTab, "Plot" );
 }
+#endif
 
 void RhythmOptions::setupTab3()
 {
@@ -126,16 +96,3 @@ void RhythmOptions::setupTab3()
   addTab( tab3, "Applications" );
 }
 
-void RhythmOptions::setXAxis ( int residual_plot )
-{
-  if (Rhythm::verbose)
-    cerr << "RhythmOptions::setXAxis " << residual_plot << endl;
-  residual::xtype = residual_plot; 
-}
-
-void RhythmOptions::setYAxis ( int residual_plot )
-{
-  if (Rhythm::verbose)
-    cerr << "RhythmOptions::setYAxis " << residual_plot << endl;
-  residual::ytype = residual_plot;
-}

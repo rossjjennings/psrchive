@@ -14,7 +14,8 @@ void Rhythm::command_line_help ()
 
 void Rhythm::command_line_parse (int argc, char** argv)
 {
-  string eph_filename;
+  char* eph_filename = NULL;
+  char* tim_filename = NULL;
 
   int optc;
   while ((optc = getopt (argc, argv, cl_args)) != -1)  {
@@ -91,13 +92,13 @@ void Rhythm::command_line_parse (int argc, char** argv)
     basename = argv[argi];
   }
 
-  if (!tim_filename.empty())
-    load_toas (tim_filename.c_str());
+  if (tim_filename)
+    load_toas (tim_filename);
 
-  if (!eph_filename.empty()) {
+  if (eph_filename) {
     if (verbose && !vverbose)
       cerr << "Loading TEMPO Parameters from '" << eph_filename << "'" << endl;
-    fitpopup -> load (eph_filename.c_str());
+    fitpopup -> load (eph_filename);
     if (verbose && !vverbose)
       cerr << "Parameters Loaded." << endl;
   }

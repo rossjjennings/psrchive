@@ -10,47 +10,92 @@
 #include <qxt.h>
 
 #include "qt_editParams.h"
+#include "qt_ModelOptions.h"
+
 #include "rhythm.h"
 #include "tempo++.h"
+#include "DataManager.h"
+#include "PlotVolume.h"
+#include "PlotManager.h"
 
-bool Rhythm::verbose = false;
-bool Rhythm::vverbose = false;
+bool Rhythm::verbose = true;
+bool Rhythm::vverbose = true;
 
 int main (int argc, char** argv)
-{
+{ try {
+
   QXtApplication app (argc, argv, "RhythmApp");
   Rhythm rhythm (0, argc, argv);
-  
+
+  if (Rhythm::vverbose)
+    cerr << "call QXtApplication::setMainWidget" << endl;
   app.setMainWidget (&rhythm);
+
+  if (Rhythm::vverbose)
+    cerr << "call Rhythm::show" << endl;
   rhythm.show();
+
+
+  if (Rhythm::vverbose)
+    cerr << "call QXtApplication::exec" << endl;
   return app.exec();
+}
+catch (string error) {
+  cerr << "rhythm: Fatal exception caught:" << error << endl;
+}
+catch (char* error) {
+  cerr << "rhythm: Fatal exception caught:" << error << endl;
+}
+catch (Reference::invalid) {
+  cerr << "rhythm: Fatal exception caught: Reference::invalid" << endl;
+}
+catch (...) {
+  cerr << "rhythm: Fatal exception unhandled" << endl;
+}
 }
 
 Rhythm::Rhythm (QWidget* parent, int argc, char** argv) :
   QMainWindow (parent, "Rhythm"),
-  opts (0, "Options"),
-  plot_manager (this, 800, 700),
-  res_plot (pg_point(0.049,0.089),pg_point(0.98,0.98))
+  opts (0, "Options")
 {
   autofit = true;
   ignore_one_eph = false;
 
-  plot_manager.manage (&res_plot);
-  labelPlot ();
+  setClassVerbose (vverbose);
+  initializePlot ();
 
+  if (data_manager.size() > 0) {
+    if (vverbose)
+      cerr << "Rhythm:: first data_manager manage model" << endl;
+    data_manager[0]->manage (modelPlot);
+    setCentralWidget (plot_manager[0]);
+  }
+
+  if (vverbose)
+    cerr << "Rhythm:: data set model" << endl;
+  modelPlot.setModel(model);
+
+  opts.modelOptions -> setModel(modelPlot);
+
+  if (vverbose)
+    cerr << "Rhythm:: new qt_editParams" << endl;
   fitpopup = new qt_editParams;
   connect ( fitpopup, SIGNAL( closed() ),
 	    this, SLOT( togledit() ) );
   connect ( fitpopup, SIGNAL( newParams(const psrParams&) ),
 	    this, SLOT( set_Params(const psrParams&) ) );
 
+  if (vverbose)
+    cerr << "Rhythm:: call menubarConstruct" << endl;
   menubarConstruct(); 
   // toolbarConstruct(); 
 
-  setCentralWidget (&plot_manager);
-
+  if (vverbose)
+    cerr << "Rhythm:: call command_line_parse" << endl;
   command_line_parse (argc, argv);
 
+  if (vverbose)
+    cerr << "Rhythm:: show qt_editParams" << endl;
   fitpopup -> show();
 }
 
@@ -59,15 +104,12 @@ void Rhythm::load_toas (const char* fname)
   if (verbose)
     cerr << "Loading TOAs from '" << fname << "' ...";
 
-  if (toa::load (fname, &arrival_times) < 0) {
-    cerr << "Error!" << endl;
-    return;
-  }
+  model.load (fname);
 
   if (verbose)
-    cerr << "  loaded." << endl << "Sorting TOAS...";
+    cerr << "  loaded " << model.toas.size() << ".\nSorting TOAS...";
 
-  sort (arrival_times.begin(), arrival_times.end());
+  sort (model.toas.begin(), model.toas.end());
 
   if (verbose)
     cerr << "  sorted." << endl;
@@ -104,23 +146,16 @@ void Rhythm::fit()
 void Rhythm::fit (const psrParams& eph, bool load_new)
 { try {
     
-  if (arrival_times.size() < 1) {
+  if (model.toas.size() < 1) {
     if (verbose)
       cerr << "Rhythm::fit No Arrival Times loaded" << endl;
     return;
   }
 
-  if (!res_plot.empty()) {
-    // fit only for the points that are in sight
-    for (unsigned ipt=0; ipt<arrival_times.size(); ipt++)
-      arrival_times[ipt].set_selected(res_plot.getMostSelect(ipt));
-  }
-
   if (verbose)
     cerr << "Rhythm::fit Calculating residuals" << endl;
   
-  psrParams neweph;
-  Tempo::fit (eph, arrival_times, &neweph, &residuals);
+  Tempo::fit (eph, model.toas, &model.eph, true);
   
   if (load_new && fitpopup) {
     // set_psrParams will result in generation of newEph signal, which should
@@ -130,29 +165,12 @@ void Rhythm::fit (const psrParams& eph, bool load_new)
       cerr << "Rhythm::fit Displaying new ephemeris" << endl;
 
     ignore_one_eph = true;
-    fitpopup -> set_psrParams (neweph);
+    fitpopup -> set_psrParams (model.eph);
   }
   
   if (verbose)
     cerr << "Rhythm::fit plotting residuals" << endl;
-
-  if (res_plot.empty()) {
-    res_plot.load_points  (residuals, false);  // load points, no range calc
-    res_plot.load_yerrors (residuals, false);  // load errors, no range calc
-    res_plot.auto_range   (false);             // calc range, do not force
-  }
-  else {
-    unsigned iresid = 0;
-    for (unsigned ipt=0; ipt<arrival_times.size(); ipt++) {
-      if (arrival_times[ipt].is_selected()) {
-	res_plot.set_point (ipt, residuals[iresid]);
-	res_plot.set_yerror (ipt, residuals[iresid]);
-	iresid ++;
-      }
-    }
-  }
-  if (plot_manager.isVisible())
-    plot_manager.pgplot();
+  modelPlot.setModel (model);
 } 
  catch (string error) {
    if (verbose)
@@ -168,29 +186,13 @@ void Rhythm::fit (const psrParams& eph, bool load_new)
  }
 }
 
-void Rhythm::labelPlot()
+void Rhythm::setClassVerbose (bool verbose)
 {
-  switch (residual::ytype)  {
-  case residual::Seconds:
-    res_plot.set_ylabel ("Residual (seconds)");
-    break;
-  case residual::Turns:
-    res_plot.set_ylabel ("Residual (turns)");
-    break;
-  default:
-    cerr << "Rhythm::labelPlot unhandled case for y-axis" << endl;
-    break;
-  }
-
-  switch (residual::xtype)  {
-  case residual::Mjd:
-    res_plot.set_xlabel ("MJD");
-    break;
-  case residual::BinaryPhase:
-    res_plot.set_xlabel ("Binary Phase");
-    break;
-  default:
-    cerr << "Rhythm::labelPlot unhandled case for x-axis" << endl;
-    break;
-  }
+  // qt_fileParams::verbose = verbose;
+  qt_editParams::verbose = verbose;
+  Tempo::verbose = verbose;
+  Tempo::ModelDataSet::verbose = verbose;
+  Plot::Volume::verbose = verbose;
+  Plot::Manager::verbose = verbose;
+  DataManager::verbose = verbose;
 }
