@@ -7,7 +7,7 @@ COMMENT   Astrophysics Supplement Series v44/p363, v44/p371, v73/p359, v73/p365.
 COMMENT   Contact the NASA Science Office of Standards and Technology for the
 COMMENT   FITS Definition document #100 and other FITS information.
 COMMENT
-HDRVER  = '1.16            '   / Header version 
+HDRVER  = '1.17            '   / Header version 
 DATE    = '                '   / File creation date (YYYY-MM-DDThh:mm:ss UTC)
 OBSERVER= '                '   / Observer name(s)
 PROJID  = '                '   / Project name
@@ -513,14 +513,16 @@ NAXIS2  =                    * / Number of rows in table (NSUBINT)
 PCOUNT  =                    0 / size of special data area
 GCOUNT  =                    1 / one data group (required keyword)
 TFIELDS =                   18 / Number of fields per row 
+INT_TYPE= '                  ' / Time axis (TIME, BINPHSPERI, BINLNGASC, etc)
+INT_UNIT= '                  ' / Unit of time axis (SEC, PHS (0-1), DEG)    
 NCH_FILE=                    * / Number of channels/sub-bands in this file
 NCH_STRT=                    * / Start channel/sub-band number (0 to NCHAN-1)
-EXTNAME = 'SUBINT '            / name of this binary table extension
+EXTNAME = 'SUBINT  '           / name of this binary table extension
 TTYPE1  = 'ISUBINT '           / Subint number. If NAXIS2=-1, 0 indicates EOD.
 TFORM1  = '1J      '           / Long integer
-TTYPE2  = 'TSUBINT '           / [s] Length of subintegration 
+TTYPE2  = 'TSUBINT '           / Length of subintegration (in INT_UNIT) 
 TFORM2  = '1D      '           / Double 
-TTYPE3  = 'OFFS_SUB'           / [s] Offset from Start UTC of subint centre 
+TTYPE3  = 'OFFS_SUB'           / Offset from Start of subint centre (in INT_UNIT) 
 TFORM3  = '1D      '           / Double 
 TTYPE4  = 'LST_SUB '           / [s] LST at subint centre 
 TFORM4  = '1D      '           / Double 
