@@ -25,39 +25,39 @@ void Pulsar::Archive::tscrunch (unsigned nscrunch)
     nscrunch = nsub;
 
   if (nsub % nscrunch)
-    throw Error (InvalidRange, "Pulsar::Archive::tscrunch",
+    throw Error (InvalidRange, "Archive::tscrunch",
 		 "nsubint=%d %% nscrunch=%d = %d",
 		 nsub, nscrunch, nsub%nscrunch);
 
   unsigned newsub = nsub / nscrunch;
 
-  if (verbose) cerr << "Pulsar::Archive::tscrunch - scrunching " 
+  if (verbose) cerr << "Archive::tscrunch - scrunching " 
 		    << nsub << " subints by " << nscrunch << endl;
 
   try {
 
     for (unsigned isub=0; isub < newsub; isub++) {
 
+      if (verbose) cerr << "Archive::tscrunch resulting subint " 
+			<< isub+1 << "/" << newsub << endl;
+
       int start = isub * nscrunch;
 
       for (int ichan=0; ichan < get_nchan(); ichan++) {
 
-	if (verbose) 
-	  cerr << "Pulsar::Archive::tscrunch " << isub+1 << "/" << newsub 
-	       << " calculate weighted_frequency"<< endl;
+	if (verbose) cerr << "Archive::tscrunch weighted_frequency chan="
+			  << ichan << endl;
 
 	double cfreq = weighted_frequency (ichan, start, start+nscrunch);
 
 	if (verbose) 
-	  cerr << "Pulsar::Archive::tscrunch " << isub+1 << "/" << newsub 
-	       << " dedisperse cfreq=" << cfreq << endl;
+	  cerr << "Archive::tscrunch dedisperse cfreq=" << cfreq << endl;
 
 	for (unsigned iadd=0; iadd < nscrunch; iadd++)
 	  subints[start+iadd] -> dedisperse (cfreq, ichan);
 
 	if (verbose) 
-	  cerr <<  "Pulsar::Archive::tscrunch " << isub+1 << "/" << newsub 
-	       << " summing profiles" << endl;
+	  cerr <<  "Archive::tscrunch sum profiles" << endl;
 	
 	for (int ipol=0; ipol < get_npol(); ++ipol) {
 
@@ -175,9 +175,9 @@ double Pulsar::Archive::weighted_frequency (int ichan, int start, int end)
       double freq   = prof->get_centre_frequency();
       double weight = prof->get_weight();
       
-      if (verbose)
-	cerr << "Archive::weighted_frequency [" << isubint << "]"
-	  " freq=" << freq << " wt=" << weight << endl;
+      //if (verbose)
+      //cerr << "Archive::weighted_frequency [" << isubint << "]"
+      //  " freq=" << freq << " wt=" << weight << endl;
 
       if (weight_by_duration)
 	weight *= subints[isubint]->get_duration();
