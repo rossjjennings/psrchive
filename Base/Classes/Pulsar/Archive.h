@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Archive.h,v $
-   $Revision: 1.27 $
-   $Date: 2002/04/29 11:42:41 $
+   $Revision: 1.28 $
+   $Date: 2002/05/03 07:20:38 $
    $Author: straten $ */
 
 /*! \mainpage 
@@ -196,9 +196,11 @@ namespace Pulsar {
 
     //! Return a pointer to the integration
     Integration* get_Integration (unsigned subint);
+    const Integration* get_Integration (unsigned subint) const;
 
     //! Return a pointer to the profile
     Profile* get_Profile (unsigned subint, int pol, int chan);
+    const Profile* get_Profile (unsigned subint, int pol, int chan) const;
 
     // //////////////////////////////////////////////////////////////////
     //
@@ -316,6 +318,9 @@ namespace Pulsar {
     //! Returns the centre phase of the region with minimum total intensity
     float find_min_phase () const;
 
+    //! Plot the requested Profile with some header information
+    void display (int isub=0, int ipol=0, int ichan=0) const;
+
     // //////////////////////////////////////////////////////////////////
     //
     // pure virtual methods - must be implemented by children
@@ -329,7 +334,7 @@ namespace Pulsar {
     virtual void load (const char* filename) = 0;
 
     //! Get the name of the thing from which the archive was loaded
-    virtual string get_filename () = 0;
+    virtual string get_filename () const = 0;
 
     //! Convenience interface to the unload function
     void unload (const string& filename) { unload (filename.c_str()); }

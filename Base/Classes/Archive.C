@@ -45,6 +45,15 @@ Pulsar::Integration* Pulsar::Archive::get_Integration (unsigned subint)
 	       "isubint=%u nsubint=%u", subint, subints.size());
 }
 
+const Pulsar::Integration* 
+Pulsar::Archive::get_Integration (unsigned subint) const
+{
+  if (subint < subints.size())
+    return subints[subint];
+
+  throw Error (InvalidRange, "Archive::get_Integration",
+	       "isubint=%u nsubint=%u", subint, subints.size());
+}
 //! Return a pointer to the Profile
 /*!
   \param subint the index of the requested Integration
@@ -54,6 +63,12 @@ Pulsar::Integration* Pulsar::Archive::get_Integration (unsigned subint)
 */
 Pulsar::Profile* 
 Pulsar::Archive::get_Profile (unsigned subint, int pol, int chan)
+{
+  return get_Integration (subint) -> get_Profile (pol, chan);
+}
+
+const Pulsar::Profile* 
+Pulsar::Archive::get_Profile (unsigned subint, int pol, int chan) const
 {
   return get_Integration (subint) -> get_Profile (pol, chan);
 }
