@@ -51,7 +51,7 @@ const char* Pulsar::SingleAxisCalibrator::Info::get_name (unsigned iclass) const
 {
   switch (iclass) {
   case 0:
-    return "\\fiG \\fn(\\fic\\d0\\u\\fn)";
+    return "\\fiG\\fn (\\fic\\fn\\d0\\u)";
   case 1:
     return "\\gg (\\x10)";
   case 2:
