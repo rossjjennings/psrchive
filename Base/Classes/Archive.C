@@ -81,9 +81,17 @@ void Pulsar::Archive::agent_list ()
   Agent::print_list (stdout);
 }
 
+template<class T> void clean_dangling (vector<T>& data)
+{
+  for (unsigned i=0; i<data.size(); i++)
+    if (!data[i])
+      data.erase( data.begin() + i );
+}
+
 //! Return the number of extensions available
 unsigned Pulsar::Archive::get_nextension () const
 {
+  clean_dangling (const_cast<Archive*>(this)->extension);
   return extension.size ();
 }
 
@@ -110,6 +118,9 @@ Pulsar::Archive::get_extension (unsigned iext) const
     throw Error (InvalidRange, "Pulsar::Archive::get_extension",
 		 "index=%d >= nextension=%d", iext, extension.size());
 
+  if ( !extension[iext] )
+    return 0;
+
   return extension[iext];
 }
 
@@ -120,6 +131,9 @@ Pulsar::Archive::get_extension (unsigned iext)
   if ( iext >= extension.size() )
     throw Error (InvalidRange, "Pulsar::Archive::get_extension",
 		 "index=%d >= nextension=%d", iext, extension.size());
+
+  if ( !extension[iext] )
+    return 0;
 
   return extension[iext];
 }
@@ -441,10 +455,6 @@ void Pulsar::Archive::remove_baseline (float phase, float dc)
     if (phase < 0.0)
       phase = find_min_phase (dc);
     
-    if( verbose )
-      fprintf(stderr,"Within Pulsar::Archive::remove_baseline() with dc=%f phase=%f\n",
-	    dc,phase);
-
     for (unsigned isub=0; isub < get_nsubint(); isub++)
       get_Integration(isub) -> remove_baseline (phase, dc);
 
