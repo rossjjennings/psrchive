@@ -3,23 +3,25 @@
 #include <stdarg.h>
 #include <fitsio.h>
 
-FITSError::FITSError (int status, const char* func, const char* msg=0, ...)
+FITSError::FITSError (int status, const char* func, const char* msg, ...)
 {
   char buf[1024];
-  va_list args;
+  string this_msg;
+
+  if (msg) {
+    va_list args;
   
-  va_start(args, msg);
-  vsnprintf(buf, 1024, msg, args);
-  va_end(args);
-  message = buf;
+    va_start(args, msg);
+    vsnprintf(buf, 1024, msg, args);
+    va_end(args);
+    this_msg = buf;
+  }
 
   char fits_error[FLEN_ERRMSG];
-
   fits_get_errstatus (status, fits_error);
-  message += ": ";
-  message += fits_error;
+  this_msg += ": ";
+  this_msg += fits_error;
 
-  code = FailedCall; 
-
-  functions.push_back(func);
+  construct (FailedCall, func, this_msg.c_str());
 } 
+
