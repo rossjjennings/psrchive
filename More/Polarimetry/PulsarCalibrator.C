@@ -1,7 +1,9 @@
 #include "Pulsar/PulsarCalibrator.h"
-#include "Pulsar/PolnProfileFit.h"
-#include "Pulsar/Integration.h"
+#include "Pulsar/CorrectionsCalibrator.h"
+
 #include "Pulsar/Archive.h"
+#include "Pulsar/Integration.h"
+#include "Pulsar/PolnProfileFit.h"
 
 #include "Calibration/Instrument.h"
 #include "Calibration/MeanInstrument.h"
@@ -38,7 +40,7 @@ Pulsar::Calibrator::Type Pulsar::PulsarCalibrator::get_type () const
 }
 
 //! Return the Calibrator information
-Pulsar::Calibrator::Info* Pulsar::PulsarCalibrator::get_Info () const
+Pulsar::PolnCalibrator::Info* Pulsar::PulsarCalibrator::get_Info () const
 {
   throw Error (InvalidState, "Pulsar::PulsarCalibrator::get_Info",
 	       "not implemented");
@@ -71,11 +73,11 @@ void Pulsar::PulsarCalibrator::set_standard (const Archive* data)
 		 data->get_filename().c_str(),
 		 Signal::state_string(data->get_state()));
 
-  if (!data->get_parallactic_corrected ())
+  if (!data->get_instrument_corrected ())
     throw Error (InvalidParam,
 		 "Pulsar::PulsarCalibrator::set_standard",
 		 "Pulsar::Archive='" + data->get_filename() + "'\n"
-		 "has not been corrected for parallactic angle rotation");
+		 "has not been corrected for instrumental configuration");
 		 
   if (!data->get_poln_calibrated ())
     throw Error (InvalidParam,
@@ -84,13 +86,6 @@ void Pulsar::PulsarCalibrator::set_standard (const Archive* data)
 		 "has not been calibrated");
 
   calibrator = data->clone();
-
-  float latitude = 0, longitude = 0;
-  calibrator->telescope_coordinates (&latitude, &longitude);
-  sky_coord coordinates = calibrator->get_coordinates();
-
-  parallactic.set_source_coordinates( coordinates );
-  parallactic.set_observatory_coordinates (latitude,longitude);
 
   unsigned nchan = calibrator->get_nchan();
 
@@ -121,7 +116,7 @@ void Pulsar::PulsarCalibrator::set_standard (const Archive* data)
       model[ichan]->set_maximum_harmonic( maximum_harmonic );
 
     model[ichan]->set_standard ( integration->new_PolnProfile (ichan) );
-    model[ichan]->set_transformation ( transformation[ichan] * &parallactic );
+    model[ichan]->set_transformation ( transformation[ichan] * &corrections );
 
   }
 
@@ -157,6 +152,8 @@ void Pulsar::PulsarCalibrator::add_observation (const Archive* data)
     cerr << "Pulsar::PulsarCalibrator::add_observation warning:\n"
       "  data has alreayd been calibrated" << endl;
 
+  CorrectionsCalibrator correct;
+
   unsigned nsub = data->get_nsubint ();
   unsigned nchan = data->get_nchan ();
 
@@ -164,10 +161,9 @@ void Pulsar::PulsarCalibrator::add_observation (const Archive* data)
 
     const Integration* integration = data->get_Integration (isub);
 
-    if (!data->get_parallactic_corrected ())
-      parallactic.set_epoch( integration->get_epoch () );
-    else
-      parallactic.set_phi( 0 );
+    Jones<double> jones;
+    jones = correct.get_transformation( data, integration->get_epoch() );
+    corrections.set_Jones( jones );
 
     if (integrations_added)
       update_solution ();
