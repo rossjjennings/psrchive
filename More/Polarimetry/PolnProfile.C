@@ -13,6 +13,13 @@ Pulsar::PolnProfile::PolnProfile ()
   basis = Signal::Linear;
 }
 
+Pulsar::PolnProfile* Pulsar::PolnProfile::clone () const
+{
+  return new PolnProfile (basis, state,
+			  profile[0]->clone(), profile[1]->clone(),
+			  profile[2]->clone(), profile[3]->clone());
+}
+
 //
 //
 //

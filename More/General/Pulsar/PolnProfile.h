@@ -35,8 +35,11 @@ namespace Pulsar {
 		 Profile* p0, Profile* p1, Profile* p2, Profile* p3);
     
     //! Destructor
-    ~PolnProfile();
-    
+    virtual ~PolnProfile();
+
+    //! Clone operator
+    virtual PolnProfile* clone () const;
+
     //! Set the number of bins
     void resize (unsigned nbin);
 
