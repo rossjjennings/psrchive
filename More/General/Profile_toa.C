@@ -3,85 +3,125 @@
 #include "Pulsar/Profile.h"
 #include "Error.h"
 
+#include "Calibration/LevenbergMarquardt.h"
+#include "Calibration/Polynomial.h"
+#include "Calibration/Axis.h"
+
 #include "model_profile.h"
 
-#include "Gaussian.h"
-#include "GaussianModel.h"
-#include "LevenbergMarquardt.h"
-
 /*! Calculates the shift relative to a standard using a time domain
-  convolution and gaussian fit, returning a Tempo::toa object */
-Tempo::toa Pulsar::Profile::time_domain_toa (const Profile& std, const MJD& mjd, 
+  correlation to get course discrete values of the correlation function 
+  and a gaussian interpolation to find the point of maximum correlation, 
+  returning a Tempo::toa object */
+Tempo::toa Pulsar::Profile::time_domain_toa (const Profile& std, 
+					     const MJD& mjd, 
 					     double period, char nsite) const
 {
-  vector<double> convolution;
-  vector<double> indices;
+  // The Profile::correlate function creates a profile whose amps
+  // are the values of the correlation function, starting at zero
+  // lag and increasing
+
+  vector<double> correlation;
+  vector<double> lags;
+
+  Reference::To<Pulsar::Profile> ptr = clone();
+
+  // Remove the baseline (done twice to minimise rounding error)
+  *ptr -= ptr->mean(ptr->find_min_phase(0.15));
+
+  // Perform the correlation
+  ptr->correlate(&std);
+
+  // Remove the baseline
+  *ptr -= ptr->mean(ptr->find_min_phase(0.15));
+  
+  // Fit a gaussian to the peak part of the correlation function
+
+  // Find the point of best correlation
+  
+  double maxpt = ptr->find_max_phase(0.15);
+
+  // Centre on it, to allow the gaussian fit a better 
+  // chance of success
+
+  ptr->rotate(0.5-maxpt);
+
+  float phswidth = ptr->width(85.0);
+  float binwidth = phswidth * nbin;
+
   int nbin = get_nbin();
-  for (int i = -1*(nbin/2); i < nbin/2; i++) {
-    convolution.push_back(tdl_convolve(&std, i));
-    indices.push_back(double(i));
+  int maxbin = ptr->find_max_bin();
+
+  int lowbin = int(maxbin-(binwidth/2));
+  int hibin  = int(maxbin+(binwidth/2));
+
+  if (lowbin < 0)
+    lowbin = 0;
+
+  if (hibin > nbin)
+    hibin = nbin;
+
+  for (int i = lowbin; i < hibin; i++) {
+    correlation.push_back(ptr->get_amps()[i]);
+    lags.push_back(double(i));
   }
 
-  // Fit a gaussian to the convolution function
-
-  // Three parameters for the gaussian:
-
-  // Midpoint
-  // Height
-  // Width
-
-  vector<double> params;
-  params.resize(3);
-  params[1] = 0.0;
-
-  for (unsigned i = 0; i < convolution.size(); i++) {
-    if (convolution[i] > params[1]) {
-      params[1] = convolution[i];
-      params[0] = indices[i];
-    }
-  }
+  // Construct a polynomial model
   
-  params[2] = double(nbin)/8.0;
+  Calibration::Polynomial model(3);
 
-  // The weights array (set to a uniform value)
-  vector<double> weights;
-  
-  for (unsigned i = 0; i < convolution.size(); i++) {
-    weights.push_back(params[1] / 20.0);
+  Calibration::Axis<double> argument;
+  model.set_argument (0, &argument);
+
+  vector< Calibration::Axis<double>::Value > data_x;  // x-ordinate of data
+  vector< Estimate<double> > data_y;       // y-ordinate of data with error
+
+  for (unsigned i = 0; i < correlation.size(); i++) {
+    data_x.push_back ( argument.get_Value(lags[i]) );
+    data_y.push_back ( Estimate<double>(correlation[i],0.0) );
   }
 
-  // A vector to hold the solution
-  vector<double> ans;
-  ans.resize(convolution.size());
-  
-  Numerical::GaussianModel model (params);
-  model.set_fitall(true);
-  model.gaussians[0].cyclic=false;
-  model.fill (indices,ans);
+  Calibration::LevenbergMarquardt<double> fit;
+  fit.verbose = Calibration::Model::verbose;
 
-  Numerical::LevenbergMarquardt<double> fit;
-  float chisq = fit.init (indices, convolution, weights, model);
+  float chisq = fit.init (data_x, data_y, model);
+  cerr << "initial chisq = " << chisq << endl;
+
+  float threshold = 0.001;
+
   int iter = 1;
-  while (iter < 100) {
-    float nchisq = fit.iter (indices, convolution, weights, model);
-                      
+  while (iter < 25) {
+    cerr << "iteration " << iter << endl;
+    float nchisq = fit.iter (data_x, data_y, model);
+    cerr << "     chisq = " << nchisq << endl;
+
     if (nchisq < chisq) {
+      float diffchisq = chisq - nchisq;
       chisq = nchisq;
-    }                                                                                
-    iter ++;
+      iter = 1;
+      if (diffchisq/chisq < threshold && diffchisq > 0) {
+        cerr << "no big diff in chisq = " << diffchisq << endl;
+        break;
+      }
+    }
+    else
+      iter ++;
   }
 
-  // Now ans should contain the fitted points in the gaussian
+  double free_parms = data_x.size() + model.get_nparam();
+
+  cerr << "Chi-squared = " << chisq << " / " << free_parms << " = "
+       << chisq / free_parms << endl;
 
   double bin_time = period / double(nbin);
-  double offset = model.gaussians[0].centre * bin_time;
-  double error = model.gaussians[0].sigma * bin_time;
+  double offset = (model.get_param(0) - maxpt*nbin) * bin_time;
+  double error = model.get_variance(0) * bin_time;
 
   Tempo::toa retval (Tempo::toa::Parkes);
 
   retval.set_frequency (centrefreq);
   retval.set_arrival   (mjd + offset);
-  retval.set_error     (error * 1e6);
+  retval.set_error     (error);
 
   retval.set_telescope (nsite);
   

@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Profile.h,v $
-   $Revision: 1.52 $
-   $Date: 2004/04/15 10:09:36 $
-   $Author: straten $ */
+   $Revision: 1.53 $
+   $Date: 2004/04/16 00:27:39 $
+   $Author: ahotan $ */
 
 #ifndef __Pulsar_Profile_h
 #define __Pulsar_Profile_h
@@ -228,10 +228,6 @@ namespace Pulsar {
     //! set the state of the polarization measurement
     virtual void set_state (Signal::Component _state) { state = _state; }
 
-    /*! returns the value of the convolution function for a specified
-      lag, calculated in the time domain */
-    double tdl_convolve(const Profile* p1, int bins_to_lag) const;
-    
     //! convolves this with the given profile (using fft method)
     void fft_convolve (const Profile* profile); 
 
