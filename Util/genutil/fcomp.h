@@ -6,8 +6,6 @@
 #include <stdio.h>
 #include <assert.h>
 
-#include "convert_endian.h"
-
 /******************************************************************************/
 /* these two functions are used by load and unload functions. */
 /* so need to declare them here                               */ 

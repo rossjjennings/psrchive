@@ -1,7 +1,7 @@
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Attic/environ.h,v $
-   $Revision: 1.8 $
-   $Date: 2004/03/05 19:42:12 $
-   $Author: straten $ */
+   $Revision: 1.9 $
+   $Date: 2004/08/31 06:40:36 $
+   $Author: redwards $ */
 
 /*
  * When sending packets back and forth between different architectures,
@@ -110,6 +110,25 @@ typedef struct {double f1; double f2;} float128;
 
 #define ORDER_LITTLE_ENDIAN 1
 #define ORDER_BIG_ENDIAN    0
+
+#endif
+
+/* ********************************************** Darwin */
+#if defined(__APPLE__) && defined(__POWERPC__) 
+typedef long           int32;
+typedef unsigned long  uint32;
+
+typedef long long int64;
+typedef unsigned long long uint64;
+typedef struct {double f1; double f2;} float128;
+
+/* for parsing a long */
+#define I64 "%Ld"
+#define UI64 "%Lu"
+#define I32 "%ld"
+
+#define ORDER_LITTLE_ENDIAN 0
+#define ORDER_BIG_ENDIAN    1
 
 #endif
 

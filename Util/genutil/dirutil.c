@@ -9,7 +9,7 @@
 #ifdef linux
  #include <sys/vfs.h>
 #else
- #ifdef __FreeBSD__
+#if defined (__FreeBSD__) || defined(__MACH__)
   #include <sys/param.h>
   #include <sys/mount.h>
  #else
@@ -237,7 +237,7 @@ int dirspace (const char* path, double* space)
   if (error == -1)
     return (-1);
 
-#if defined(linux) || defined(__FreeBSD__)
+#if defined(linux) || defined(__FreeBSD__) || defined(__MACH__)
   *space = (double) info.f_bavail * (double) info.f_bsize;
 #else
   *space = (double) info.f_bavail * (double) info.f_frsize;

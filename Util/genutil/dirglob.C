@@ -30,7 +30,7 @@ void dirglob (vector<string>* filenames, const char* text)
 
   int ret = glob (text, GLOB_NOSORT, NULL, &rglob);
   if (ret != 0 
-#ifndef __FreeBSD__
+#if !defined(__FreeBSD__) && !defined(__MACH__)
       && ret != GLOB_NOMATCH
 #endif
               )  {

@@ -1,12 +1,17 @@
 #include <stdio.h>
 #include <assert.h>
-#include <math.h>
 #include <iostream>
 
 #include "psr_cpp.h"
 
-#include "convert_endian.h"
+#include "machine_endian.h"
 #include "fcomp.h"
+#include <math.h>
+
+// for some strange reason, isnan is getting undefed somehow
+#if defined(__APPLE__) && defined (__POWERPC__)
+#define isnan(x) __isnanf(x)
+#endif
 
 /******************************************************************************/
 /* these two functions are used by load and unload functions. */
@@ -52,7 +57,7 @@ int fcompread (unsigned nvals, float * vals, FILE * fptr, bool big_endian)
     N_FromLittleEndian (nvals, packed_buf);
   }
 
-  if(scale==0 || isnan(scale) ){
+  if(scale==0 ||isnan(scale) ){
     fprintf(stderr, "fcompread error - scale==0, indicating imminent divsion by zero\n");
     return(-1);
   }

@@ -1,4 +1,5 @@
 #include <sys/time.h>
+#include <unistd.h>
 
 void fsleep (double seconds)
 {
