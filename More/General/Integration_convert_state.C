@@ -19,8 +19,7 @@ void Pulsar::Integration::convert_state (Signal::State state)
   // convert from Coherence products to Stokes parameters
   if (get_state() == Signal::Coherence && state == Signal::Stokes) {
 
-    // take the sum and difference of PP and QQ
-    intensity_mix (1, 2.0);
+    poln_convert (state);
 
     if (get_basis() == Signal::Circular)
       // rotate Stokes VQU into QUV
@@ -38,8 +37,7 @@ void Pulsar::Integration::convert_state (Signal::State state)
       // rotate Stokes QUV into VQU
       poln_cycle (-1);
 
-    // take the sum and difference of the total intensity and Q or V
-    intensity_mix (1, 1.0);
+    poln_convert (state);
 
     set_state ( state );
     return;
@@ -54,16 +52,18 @@ void Pulsar::Integration::convert_state (Signal::State state)
 
 }
 catch (Error& error) {
-  throw error += "Integration::convert_state";
+  throw error += "Pulsar::Integration::convert_state";
 }
   
- throw Error (InvalidPolnState, "Integration::convert_state",
+ throw Error (InvalidPolnState, "Pulsar::Integration::convert_state",
 	      "cannot convert from %s to %s", 
 	      Signal::state_string (get_state()),
 	      Signal::state_string (state));
 }
 
-/*! 
+/*! As it performs no error checking, this method should not be called 
+  directly.  Use Pulsar::Integration::convert_state.
+
   \param direction specifies the direction in which the indeces are cycled
   <UL>
   <LI> +1 : QUV -> UVQ
@@ -77,7 +77,8 @@ void Pulsar::Integration::poln_cycle (int direction)
     return;
 
   if (abs(direction) != 1)
-    throw Error (InvalidParam, "Integration::poln_cycle", "bad direction");
+    throw Error (InvalidParam, "Pulsar::Integration::poln_cycle",
+		 "bad direction");
 
   for (unsigned ichan=0; ichan < get_nchan(); ichan++) {
 
@@ -99,22 +100,51 @@ void Pulsar::Integration::poln_cycle (int direction)
   }
 }
 
-//! Mix the intensity with the specified polarization
-void Pulsar::Integration::intensity_mix (int ipol, float fac)
+//! Converts between coherency products and Stokes parameters
+/*! As it performs no error checking, this method should not be called 
+  directly.  Use Pulsar::Integration::convert_state. */
+void Pulsar::Integration::poln_convert (Signal::State out_state)
 {
-  static Profile temp;
-
+  if (out_state != Signal::Stokes && out_state != Signal::Coherence)
+    throw Error (InvalidParam, "Pulsar::Integration::poln_convert",
+		 "invalid output state %s", Signal::state_string (out_state));
+    
   for (unsigned ichan=0; ichan < get_nchan(); ichan++) {
+    
+    sum_difference (profiles[0][ichan], profiles[1][ichan]);
+    
+    if (out_state == Signal::Stokes) {
+      // profiles 2 and 3 are equivalent to 2*Re[PQ] and 2*Im[PQ]
+      *(profiles[2][ichan]) *= 2.0;
+      *(profiles[3][ichan]) *= 2.0;
+    }
+    else if (out_state == Signal::Coherence) {
+      // The above sum and difference produced 2*PP and 2*QQ.  As well,
+      // profiles 2 and 3 are equivalent to 2*Re[PQ] and 2*Im[PQ].
+      for (unsigned ipol=0; ipol<4; ipol++)
+	*(profiles[ipol][ichan]) *= 0.5;
+    }
+  }
+}
 
-    temp = *(profiles[0][ichan]);
-    temp *= fac;
+/*! \retval sum = sum + difference
+    \retval difference = sum - difference
+*/
+void Pulsar::Integration::sum_difference (Profile* sum, Profile* difference)
+{
+  unsigned nbin = sum->get_nbin();
 
-    // form the sum
-    *(profiles[0][ichan]) += *(profiles[ipol][ichan]);
-    *(profiles[0][ichan]) *= fac;
+  if (nbin != difference->get_nbin())
+    throw Error (InvalidParam, "Pulsar::Integration::sum_difference",
+		 "nbin=%d != nbin=%d", nbin, difference->get_nbin());
 
-    // form the difference
-    *(profiles[ipol][ichan]) *= -fac;
-    *(profiles[ipol][ichan]) += temp;
+  float* s = sum->get_amps ();
+  float* d = difference->get_amps ();
+  float temp;
+
+  for (unsigned ibin=0; ibin<nbin; ibin++) {
+    temp = s[ibin];
+    s[ibin] += d[ibin];
+    d[ibin] = temp - d[ibin];
   }
 }

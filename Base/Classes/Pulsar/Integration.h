@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Integration.h,v $
-   $Revision: 1.29 $
-   $Date: 2002/10/28 01:02:45 $
+   $Revision: 1.30 $
+   $Date: 2003/01/06 11:03:35 $
    $Author: straten $ */
 
 /*
@@ -254,11 +254,15 @@ namespace Pulsar {
     //! All new Profile instances are created through this method
     virtual Profile* new_Profile ();
 
+  private:
     //! Performs a cyclic permutation of the polarization vector
     void poln_cycle (int direction);
 
-    //! Mix the intensity with the specified polarization
-    void intensity_mix (int ipoln, float fac);
+    //! Converts between coherency products and Stokes parameters
+    void poln_convert (Signal::State out_state);
+
+    //! Efficiently forms the inplace sum and difference of two profiles
+    void sum_difference (Profile* sum, Profile* difference);
 
   };
 
