@@ -225,12 +225,6 @@ int operator != (const Angle &a1, const Angle &a2){
       return (0);  
 }
 
-
-ostream& operator<< (ostream & os, const Angle & angle)
-{
-  return os << angle.radians;
-}
-
 // AnglePair stuff for convenience
 
 AnglePair::AnglePair(const Angle & a1, const Angle & a2){

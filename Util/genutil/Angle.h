@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Angle.h,v $
-   $Revision: 1.8 $
-   $Date: 2001/02/24 03:46:39 $
+   $Revision: 1.9 $
+   $Date: 2001/04/27 09:20:41 $
    $Author: straten $ */
 
 // redwards 17 Mar 99 -- Time for a definitive C++ suite of
@@ -99,8 +99,10 @@ class Angle
   friend int operator != (const Angle &, const Angle &);
 
   inline friend double cast_double(const Angle &a) {return a.radians;}
-  friend ostream& operator<< (ostream&, const Angle&);
 };
+
+inline ostream& operator<< (ostream & os, const Angle & angle)
+{  return os << angle.getradians(); }
 
 // More Arctangle stuff... NOTE: remember the Angle = operator
 // DOESN'T set wrap_point, so only use these to e.g. pass directly
