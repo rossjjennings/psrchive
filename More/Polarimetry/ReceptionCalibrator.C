@@ -611,10 +611,10 @@ try {
 
   string reason;
   if (!calibrator->calibrator_match (cal, reason))
-    throw Error (InvalidParam,
-		 "Pulsar::ReceptionCalibrator::add_calibrator",
-		 "'" + cal->get_filename() + "' does not match "
-		 "'" + calibrator->get_filename() + reason);
+    throw Error (InvalidParam, "Pulsar::PulsarCalibrator::add_observation",
+		 "mismatch between calibrators\n\t" 
+		 + calibrator->get_filename() +
+                 " and\n\t" + cal->get_filename() + reason);
 
   unsigned nchan = calibrator->get_nchan ();
   unsigned nsub = cal->get_nsubint();
@@ -851,10 +851,10 @@ void Pulsar::ReceptionCalibrator::precalibrate (Archive* data)
 
   string reason;
   if (!calibrator->calibrator_match (data, reason))
-    throw Error (InvalidParam, "Pulsar::ReceptionCalibrator::calibrate",
-		 "'" + data->get_filename() + "' does not match "
-		 "'" + calibrator->get_filename() + "'" + reason);
-
+    throw Error (InvalidParam, "Pulsar::PulsarCalibrator::add_observation",
+		 "mismatch between calibrator\n\t" 
+		 + calibrator->get_filename() +
+                 " and\n\t" + data->get_filename() + reason);
 
   unsigned nsub = data->get_nsubint ();
   unsigned nchan = data->get_nchan ();

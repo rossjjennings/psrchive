@@ -297,9 +297,10 @@ void Pulsar::PolnCalibrator::calibrate (Archive* arch) try {
 
   string reason;
   if (!calibrator->calibrator_match (arch, reason))
-    throw Error (InvalidParam, "Pulsar::FluxCalibrator", "Pulsar::Archive='"
-		 + calibrator->get_filename() + "'\ndoes not match '"
-		 + arch->get_filename() + reason);
+    throw Error (InvalidParam, "Pulsar::PolnCalibrator::add_observation",
+		 "mismatch between calibrator\n\t" 
+		 + calibrator->get_filename() +
+                 " and\n\t" + arch->get_filename() + reason);
 
   if (response.size() != arch->get_nchan())
     build( arch->get_nchan() );
