@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Archive.h,v $
-   $Revision: 1.18 $
-   $Date: 2002/04/19 12:45:09 $
+   $Revision: 1.19 $
+   $Date: 2002/04/19 22:06:45 $
    $Author: straten $ */
 
 /*! \mainpage 
@@ -140,6 +140,7 @@ class polyco;
 namespace Pulsar {
 
   class Integration;
+  class Profile;
 
   //! Group of Pulsar::Integration observations with the same pulse phase.
   /*! This pure virtual base class implements the storage and manipulation
@@ -188,6 +189,12 @@ namespace Pulsar {
 
     //! Resets the dimensions of the data area
     virtual void resize (int nsubint, int npol=0, int nchan=0, int nbin=0);
+
+    //! Return a pointer to the integration
+    Integration* get_Integration (unsigned subint);
+
+    //! Return a pointer to the profile
+    Profile* get_Profile (unsigned subint, int pol, int chan);
 
     // //////////////////////////////////////////////////////////////////
     //

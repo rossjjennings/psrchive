@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Profile.h,v $
-   $Revision: 1.11 $
-   $Date: 2002/04/19 02:07:42 $
-   $Author: ahotan $ */
+   $Revision: 1.12 $
+   $Date: 2002/04/19 22:06:45 $
+   $Author: straten $ */
 
 #ifndef __Pulsar_Profile_h
 #define __Pulsar_Profile_h
@@ -135,6 +135,13 @@ namespace Pulsar {
     //! return the shift (in turns) after fitting to the standard
     double shift (const Profile& std, float& ephase,
 		  float& snrfft, float& esnrfft) const;
+
+    //! set the world coordinates of the pgplot window and draw the profile
+    void display (float phase=0, float xmin=0, float xmax=1,
+		  float ymin=0, float ymax=1) const;
+
+    //! draw the profile using pgplot
+    void draw (float phase=0) const;
 
     //! get the number of bins
     /*! This attribute may be set only through Profile::resize */

@@ -81,6 +81,23 @@ Pulsar::Integration* Pulsar::Archive::new_Integration (Integration* subint)
   return integration;
 }
 
+//! Return a pointer to the integration
+Pulsar::Integration* Pulsar::Archive::get_Integration (unsigned subint)
+{
+  if (subint < subints.size())
+    return subints[subint];
+
+  throw Error (InvalidRange, "Archive::get_Integration",
+	       "isubint=%u nsubint=%u", subint, subints.size());
+}
+
+//! Return a pointer to the profile
+Pulsar::Profile* 
+Pulsar::Archive::get_Profile (unsigned subint, int pol, int chan)
+{
+  return get_Integration (subint) -> get_Profile (pol, chan);
+}
+
 /*!
   \param nscrunch the number of phase bins to add together
   */
