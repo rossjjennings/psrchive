@@ -108,7 +108,10 @@ int main (int argc, char *argv[]) {
       cout << "Generating new database" << endl;
       
       dbase = new Pulsar::Calibration::Database (cals_are_here.c_str(), exts);
-      
+
+      if (verbose)
+	cerr << dbase->size() << " Calibrator Archives found" << endl;
+
       if (write_database_file) {
 	cout << "Writing database summary file" << endl;
 	
@@ -135,8 +138,12 @@ int main (int argc, char *argv[]) {
   for (unsigned i = 0; i < archives.size(); i++) {
     
     try {
-      
+
+      if (verbose)
+	cerr << "Loading " << archives[i] << endl;
+
       Pulsar::Archive* arch = Pulsar::Archive::load(archives[i]);
+
       cout << "Loaded archive: " << archives[i] << endl;
       
       if (do_fluxcal) {
