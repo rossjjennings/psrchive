@@ -1,10 +1,10 @@
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/coord_parse.h,v $
-   $Revision: 1.2 $
-   $Date: 2004/12/14 06:44:50 $
-   $Author: redwards $ */
+   $Revision: 1.3 $
+   $Date: 2004/12/22 10:53:26 $
+   $Author: straten $ */
 
-#ifndef __COORD_H
-#define __COORD_H
+#ifndef __COORD_PARSE_H
+#define __COORD_PARSE_H
 
 #ifdef __cplusplus
 extern "C" {
