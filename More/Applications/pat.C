@@ -10,6 +10,7 @@
 #include "Pulsar/Plotter.h"
 #include "Error.h"
 #include "Pulsar/Profile.h"
+#include "Phase.h"
 #include "toa.h"
 
 int main (int argc, char *argv[]) {
@@ -66,25 +67,19 @@ int main (int argc, char *argv[]) {
   toas.resize(archives.size());
 
   Reference::To<Pulsar::Archive> arch;
-  Reference::To<Pulsar::Archive> total;
+  Reference::To<Pulsar::Archive> stdarch;
   Reference::To<Pulsar::Profile> prof;
-  Reference::To<Pulsar::Profile> stdp;
-
-  MJD start_time;
-  double period;
 
   try {
     
-    arch = Pulsar::Archive::load(std);
-    total = arch->clone();
-    total->fscrunch();
-    total->tscrunch();
-    total->centre();
-    total->convert_state(Signal::Intensity);
-    stdp = total->get_Profile(0,0,0);
+    stdarch = Pulsar::Archive::load(std);
+    stdarch->fscrunch();
+    stdarch->tscrunch();
+    stdarch->convert_state(Signal::Intensity);
 
   }
   catch (Error& error) {
+    cerr << "Error processing standard profile:" << endl;
     cerr << error << endl;
     return -1;
   }
@@ -97,18 +92,9 @@ int main (int argc, char *argv[]) {
 	cerr << "Loading " << archives[i] << endl;
       
       arch = Pulsar::Archive::load(archives[i]);
-      total = arch->clone();
-      total->fscrunch();
-      total->tscrunch();
-      total->centre();
-      total->convert_state(Signal::Intensity);
-
-      prof = total->get_Profile(0,0,0);
-      start_time = arch->start_time();
-      period = arch->get_Integration(0)->get_folding_period();
       
-      toas[i] = prof->toa(stdp.get(), start_time, period,
-			  total->get_telescope_code());
+      arch->toas(stdarch,toas);
+
     }
     catch (Error& error) {
       cerr << error << endl;
