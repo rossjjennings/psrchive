@@ -1,4 +1,4 @@
-#include "RFIMitigation.h"
+#include "Pulsar/RFIMitigation.h"
 
 // Destructor
 Pulsar::RFIMitigation::~RFIMitigation () {

@@ -5,7 +5,7 @@
 // Pulsar::Profile::snr
 //
 
-#include "Profile.h"
+#include "Pulsar/Profile.h"
 
 /*! By default, the snr is calculated using Pulsar::snr_phase */
 Functor<float(const Pulsar::Profile*)> 

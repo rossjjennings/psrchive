@@ -1,4 +1,4 @@
-#include "Integration.h"
+#include "Pulsar/Integration.h"
 
 /*!
   Maximum frequency difference in MHz
