@@ -27,12 +27,12 @@ const double mas  = M_PI/(60.0*60.0*180.0*1000.0);  // radians
 const double gGc    = 0.01720209895;        // AU^3/2 / (day* M_s^1/2)
 const double GM_s   = sqr(gGc) * cube(au);  // km^3 / (day^2 * M_s)
 
-void psrephem::mass_function (double& mf, double& mf_err) const
+int psrephem::mass_function (double& mf, double& mf_err) const
 {
   mf_err = mf = -1.0;
 
   if (parmStatus[EPH_A1] < 1 || parmStatus[EPH_PB] < 1)
-    return;
+    return -1;
 
   double x     = value_double [EPH_A1];
   double x_err = error_double [EPH_A1];
@@ -42,54 +42,71 @@ void psrephem::mass_function (double& mf, double& mf_err) const
 
   mf = 4.0 * sqr(M_PI) * cube(x*c) / (sqr(pb) * GM_s);
   mf_err = mf * sqrt( 9.0*sqr(x_err/x) + 4.0*sqr(pb_err/pb) );
+
+  return 0;
 }
 
-void psrephem::m1 (double& m1, double& m1_err) const
+int psrephem::sini (double& si, double& si_err) const
 {
-  m1 = m1_err = -1.0;
+  if (parmStatus[EPH_KIN] > 0) {
+    double i = value_double [EPH_KIN] * M_PI/180.0;
+    si     = sin(i);
+    si_err = cos(i) * error_double [EPH_KIN] * M_PI/180.0;
+  }
+  else if (parmStatus[EPH_SINI] > 0) {
+    si     = value_double [EPH_SINI];
+    si_err = error_double [EPH_SINI];
+  }
+  else
+    return -1;
 
-  if (parmStatus[EPH_SINI] < 1 || parmStatus[EPH_M2] < 1)
-    return;
+  return 0;
+}
+
+int psrephem::m1 (double& m1, double& m1_err) const
+{
+  if (parmStatus[EPH_M2] < 1 )
+    return -1;
 
   double m2     = value_double [EPH_M2];
   double m2_err = error_double [EPH_M2];
 
-  double si     = value_double [EPH_SINI];
-  double si_err = error_double [EPH_SINI];
+  double si, si_err;
+  if (sini (si, si_err) != 0)
+    return -1;
 
-  double mass_func = 0.0;
-  double mass_func_err = 0.0;
-
-  mass_function (mass_func, mass_func_err);
-
-  if (mass_func < 0.0)
-    return;
+  double mass_func, mass_func_err;
+  if (mass_function (mass_func, mass_func_err) != 0)
+    return -1;
 
   double term1 = sqrt (cube(m2*si)/mass_func);
   m1 = term1 - m2;
   m1_err = sqrt( sqr(0.5 * term1 * mass_func_err/mass_func) +
 		 sqr(1.5 * term1 * si_err/si) +
 		 sqr((1.5 * term1/m2 -1.0) * m2_err) );
+  return 0;
 }
 
-void psrephem::m2 (double& m2, double m1) const
+int psrephem::m2 (double& m2, double m1) const
 {
-  m2 = 0.0;
-  if (parmStatus[EPH_SINI] < 1)
-    return;
-  double sini = value_double [EPH_SINI];
+  double si, si_err;
+  if (sini (si, si_err) != 0)
+    return -1;
 
   double mf, mf_err;
-  mass_function (mf, mf_err);
-  if (mf < 0.0)
-    return;
+  if (mass_function (mf, mf_err) != 0)
+    return -1;
 
-  m2 = companion_mass (mf, sini, m1);
+  m2 = companion_mass (mf, si, m1);
+  return 0;
 }
 
 // returns the composite proper motion
-void psrephem::pm (double& pm, double& pm_err) const
+int psrephem::pm (double& pm, double& pm_err) const
 {
+  if (parmStatus[EPH_PMRA] < 1 || parmStatus[EPH_PMDEC] < 1)
+    return -1;
+
   double covar = 0.0;   // covariance b/w mu_alpha and mu_delta
 
   double mu_alpha = value_double [EPH_PMRA];
@@ -102,11 +119,15 @@ void psrephem::pm (double& pm, double& pm_err) const
 
   pm_err = sqrt ( sqr(mu_alpha*mu_aerr) + sqr(mu_delta*mu_derr)
 		  + 2.0 * covar * mu_alpha * mu_delta ) / pm;
+  return 0;
 }
 
 // returns the proper motion celestial position angle
-void psrephem::phi (double& phi, double& phi_err) const
+int psrephem::phi (double& phi, double& phi_err) const
 {
+  if (parmStatus[EPH_PMRA] < 1 || parmStatus[EPH_PMDEC] < 1)
+    return -1;
+
   double covar = 0.0;   // covariance b/w mu_alpha and mu_delta
 
   double mu_alpha = value_double [EPH_PMRA];
@@ -121,20 +142,29 @@ void psrephem::phi (double& phi, double& phi_err) const
 
   phi_err = sqrt ( sqr(mu_alpha*mu_derr) + sqr(mu_delta*mu_aerr)
 		   + 2.0 * covar * mu_alpha * mu_delta ) / sqr_pm;
+  return 0;
 }
 
 // returns the orbital period in seconds
-void psrephem::P (double& p, double& p_err) const
+int psrephem::P (double& p, double& p_err) const
 {
+  if (parmStatus[EPH_F] < 1)
+    return -1;
+
   double rf = value_double [EPH_F];
   double rf_err = error_double [EPH_F];
   p = 1.0 / rf;
   p_err = p * rf_err / rf;
+
+  return 0;
 }
 
 // returns the orbital period derivative in seconds
-void psrephem::P_dot (double& p_dot, double& p_dot_err) const
+int psrephem::P_dot (double& p_dot, double& p_dot_err) const
 {
+  if (parmStatus[EPH_F] < 1 || parmStatus[EPH_F1] < 1)
+    return -1;
+
   double rf = value_double [EPH_F];
   double rf_err = error_double [EPH_F];
 
@@ -143,10 +173,21 @@ void psrephem::P_dot (double& p_dot, double& p_dot_err) const
 
   p_dot = - rf_dot / sqr(rf);
   p_dot_err = p_dot * sqrt(sqr(2*rf_err/rf) + sqr(rf_dot_err/rf_dot));
+
+  return 0;
 }
 
-void psrephem::Shklovskii (double& beta, double& beta_err) const
+int psrephem::Shklovskii (double& beta, double& beta_err) const
 {
+  if (parmStatus[EPH_PX] < 1)
+    return -1;
+
+  double mu, mu_err;
+  if (pm (mu, mu_err) < 0)
+    return -1;
+
+  double mu_radsec = mu * mas/year;
+
   double px = value_double [EPH_PX];
   double px_err = error_double [EPH_PX];
 
@@ -154,12 +195,10 @@ void psrephem::Shklovskii (double& beta, double& beta_err) const
   double dist = au / (px * mas);
   double dist_err = dist * px_err/px;
 
-  double mu, mu_err;
-  pm (mu, mu_err);
-  double mu_radsec = mu * mas/year;
-
   beta = sqr(mu_radsec) * dist / c;
   beta_err = beta * sqrt (sqr(2.0*mu_err/mu) + sqr(dist_err/dist));
+
+  return 0;
 }
 
 // defines the recognized filename extensions used for pulsar ephemeris files
@@ -530,6 +569,15 @@ void psrephem::fitall()
   for (int i=0;i<EPH_NUM_KEYS;i++) {
     if (parmStatus[i]==1) parmStatus[i]=2;
   }
+}
+
+void psrephem::efac (float fac)
+{
+  if (!tempo11)
+    return;
+
+  for (int i=0;i<EPH_NUM_KEYS;i++)
+    if (parmStatus[i]==2) error_double[i]*=fac;
 }
 
 int psrephem::load (FILE* fptr, size_t nbytes)

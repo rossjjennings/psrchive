@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/psrephem.h,v $
-   $Revision: 1.9 $
-   $Date: 2001/02/02 07:13:41 $
+   $Revision: 1.10 $
+   $Date: 2001/02/15 05:15:28 $
    $Author: straten $ */
 
 #ifndef __PSREPHEM_H
@@ -57,7 +57,11 @@ class psrephem
   void   nofit();
   void   fitall();
 
+  // update all parameters to the new_epoch
   void   set_epoch (const MJD& new_epoch, bool binary = false);
+
+  // multiply all errors by efac
+  void   efac (float efac);
 
   double p() const;
   double p_err() const;
@@ -71,26 +75,30 @@ class psrephem
   double jra() const;
   double jdec() const;
 
+  // these functions return 0 if no error, -1 on error
+  //
+  // returns the sine of the inclination angle
+  int sini (double& si, double& si_err) const;
   // returns the simple calculation based on Pb and x
-  void mass_function (double& mf, double& mf_err) const;
+  int mass_function (double& mf, double& mf_err) const;
   // returns m1 mass based on mass function, sin(i), and m2
-  void m1 (double& m1, double& m1_err) const;
+  int m1 (double& m1, double& m1_err) const;
   // inverts the above to return m2, given m1
-  void m2 (double& m2, double m1) const;
+  int m2 (double& m2, double m1) const;
 
   // returns the composite proper motion
-  void pm (double& pm, double& pm_err) const;
+  int pm (double& pm, double& pm_err) const;
   // returns the proper motion celestial position angle
-  void phi (double& phi, double& phi_err) const;
+  int phi (double& phi, double& phi_err) const;
 
   // returns the orbital period in seconds
-  void P (double& p, double& p_err) const;
+  int P (double& p, double& p_err) const;
   // returns the orbital period derivative in seconds
-  void P_dot (double& p, double& p_err) const;
+  int P_dot (double& p, double& p_err) const;
   
   // returns the quadratic Doppler shift due to apparent acceleration along
   // the line of sight that arises from proper motion
-  void Shklovskii (double& beta, double& beta_err) const;
+  int Shklovskii (double& beta, double& beta_err) const;
 
   // //////////////////////////////////////////////////////////////////////
   // to use the following two functions, you will need to link with 
