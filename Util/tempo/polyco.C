@@ -215,7 +215,8 @@ int polynomial::load(string* instr)
   coefs.clear();
   coefs.resize(ncoeftmp);  
   // Read in the coefficients 
-  for (int i = 0;i<ncoeftmp;i++){
+  int i;
+  for (i = 0;i<ncoeftmp;i++){
     line = stringtok (instr, whitespace);
     size_t letterd = line.find('D');
     if (letterd != string::npos) line[letterd] = 'e';
@@ -229,6 +230,9 @@ int polynomial::load(string* instr)
   if (endline)  {
     instr->erase(0, endline);
   }
+
+  if (polyco::verbose)
+    cerr << "polynomial::load parsed " << i << " coefficients" << endl;
   return 0;
 }
 
