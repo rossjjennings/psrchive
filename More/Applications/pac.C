@@ -15,7 +15,7 @@
 int main (int argc, char *argv[]) {
   
   bool verbose = false;
-  bool new_database = false;
+  bool new_database = true;
   bool display_params = false;
   bool do_fluxcal = true;
   bool do_polncal = true;
@@ -31,7 +31,9 @@ int main (int argc, char *argv[]) {
   Pulsar::Calibration::Database::ModelTypes m;
   m = Pulsar::Calibration::Database::SingleAxis;
   
-  string cals_are_here;
+  Error::verbose = true;
+
+  string cals_are_here = "./";
   vector<string> exts;
 
   vector<string> archives;
@@ -77,10 +79,10 @@ int main (int argc, char *argv[]) {
       break;
     case 'p':
       cals_are_here = optarg;
-      new_database = true;
       break;
     case 'd':
       cals_are_here = optarg;
+      new_database = false;
       break;
     case 'D':
       display_params = true;
@@ -161,6 +163,11 @@ int main (int argc, char *argv[]) {
       dbase -> test_bw(test_bandwidth);
       dbase -> test_obst(test_obstype);
 
+      if (dbase->size() <= 0) {
+	cerr << "No CAL files found!" << endl;
+	return -1;
+      }
+
       if (verbose)
 	cerr << dbase->size() << " Calibrator Archives found" << endl;
 
@@ -174,7 +181,7 @@ int main (int argc, char *argv[]) {
     else {
       cerr << "Reading from database summary file" << endl;
       cerr << "Not implimented yet..." << endl;
-      
+      return -1;
       //dbase = new Pulsar::Calibration::Database (cals_are_here.c_str());
     }
   }
@@ -182,7 +189,7 @@ int main (int argc, char *argv[]) {
     cerr << "Error generating CAL database" << endl;
     cerr << error << endl;
     cerr << "Aborting calibration attempt" << endl;
-    exit(-1);
+    return -1;
   }
   
   // Start calibrating archives
