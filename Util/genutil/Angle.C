@@ -22,7 +22,12 @@ void Angle::wrap()
   //while(radians<-wrap_point) radians+=2.0*wrap_point;
 
   // first cut the radian down to size
-  radians -= 2.0*M_PI * int(0.5*radians/M_PI);
+
+  while (fabs(radians) > 4.0*M_PI)  {
+    double irad = floor(0.5*radians/M_PI);
+    irad *= 2.0*M_PI;
+    radians -= irad;
+  }
 
   while (radians>wrap_point) radians-=2.0*M_PI;
   while (radians<wrap_point-2.0*M_PI) radians+=2.0*M_PI;
