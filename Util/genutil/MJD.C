@@ -511,7 +511,7 @@ int MJD::Construct (const struct tm& greg)
     +greg.tm_mday-2399904;
 
   // Work out seconds, fracsecs always zero.
-  secs = 3600.0 * greg.tm_hour + 60.0 * greg.tm_min + greg.tm_sec;
+  secs = 3600 * greg.tm_hour + 60 * greg.tm_min + greg.tm_sec;
   fracsec = 0.0;
   return 0;
 }
