@@ -1,6 +1,6 @@
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/Timer/timer++.h,v $
-   $Revision: 1.4 $
-   $Date: 1999/11/19 09:45:43 $
+   $Revision: 1.5 $
+   $Date: 2000/01/17 04:20:59 $
    $Author: straten $ */
 
 #ifndef __TIMER_PLUSPLUS_H
@@ -17,9 +17,10 @@
 #include <stdio.h>
 #include "timer.h"
 #include "MJD.h"
-//#include "psrnamespace.h"
 
 namespace Timer {
+
+  extern bool verbose;
 
   const int nbackends = 1;
   static char backends[nbackends][BACKEND_STRLEN+1] =
@@ -39,7 +40,7 @@ namespace Timer {
   string get_backend (const struct timer& hdr);
 
   // may be used to receive soft error messages
-  static string reason;
+  extern string reason;
 
   // loads a timer struct, givent a file name
   int fload (const char* fname, struct timer* hdr, bool big_endian=true);

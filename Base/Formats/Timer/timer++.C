@@ -4,8 +4,8 @@
 #include "timer++.h"
 #include "convert_endian.h"
 
-//int Timer::nbackends = 1;
-//char Timer::backends[][BACKEND_STRLEN+1] = { "baseband" };
+string Timer::reason;
+bool   Timer::verbose = false;
 
 unsigned long Timer::backend_data_size (const struct timer& hdr)
 {
@@ -44,8 +44,10 @@ int Timer::fload (const char* fname, struct timer* hdr, bool big_endian)
 {
   FILE* fptr = fopen (fname, "r");
   if (fptr == NULL) {
-    fprintf (stderr, "Timer::load Cannot open '%s'", fname);
-    perror ("");
+    if (verbose) {
+      fprintf (stderr, "Timer::load Cannot open '%s'", fname);
+      perror ("");
+    }
     return -1;
   }
   int ret = load (fptr, hdr, big_endian);
@@ -56,8 +58,10 @@ int Timer::fload (const char* fname, struct timer* hdr, bool big_endian)
 int Timer::load (FILE* fptr, struct timer* hdr, bool big_endian)
 {
   if (fread (hdr, sizeof(struct timer), 1, fptr) < 1)  {
-    fprintf (stderr, "Timer::load Cannot read timer struct from FILE*");
-    perror ("");
+    if (verbose) {
+      fprintf (stderr, "Timer::load Cannot read timer struct from FILE*");
+      perror ("");
+    }
     return -1;
   }
   if (big_endian)
@@ -72,8 +76,10 @@ int Timer::unload (FILE* fptr, struct timer& hdr)
 {
   timer_toBigEndian (&hdr);
   if (fwrite (&hdr, sizeof(struct timer), 1, fptr) < 1)  {
-    fprintf(stderr,"Timer::unload Cannot write timer struct to FILE*");
-    perror ("");
+    if (verbose) {
+      fprintf(stderr,"Timer::unload Cannot write timer struct to FILE*");
+      perror ("");
+    }
     return -1;
   }
   timer_fromBigEndian(&hdr);

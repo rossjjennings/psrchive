@@ -6,10 +6,11 @@ INCLUDES = archive.h archhdr.h headers.h mini++.h timer++.h \
 	timer.inc band.inc mini.inc convert_endian.h misc.h
 
 LIBRARY    = libarchive.a
-LIB_C_SRCS = pg_plot_gnu.C profile.C sub_int.C archive.C superarchive.C  \
+LIB_C_SRCS = profile.C sub_int.C archive.C superarchive.C  \
              toa.C profplot.C plot2profs.C scintplot.C misc.C heapsort.C \
              get_epoch_and_name.C archhdr.C convert_endian.c headers.C \
-             timer++.C mini++.C
+             timer++.C mini++.C \
+	     profile_pgplot.C sub_int_pgplot.C archive_pgplot.C
 
 LIB_F_SRCS = ffft.f fftfit.f brent.f fccf.f cprof.f shiftbyfft.f \
              width.f tsky1.f fftconv.f scan_fort_val.f convolve.f
