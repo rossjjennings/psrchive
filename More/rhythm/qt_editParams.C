@@ -276,6 +276,23 @@ void qt_editParams::get_psrephem (psrephem& eph)
   display.get_psrephem (eph);
 }
 
+int qt_editParams::get_hist_length ()
+{
+  return data_history.size();
+}
+
+psrephem qt_editParams::get_historic (unsigned which)
+{
+  psrephem mydata;
+  data_history[which].get_psrephem(mydata);
+  return mydata;
+}
+
+bool qt_editParams::query_fit_for(int ephind)
+{
+  return display.item_fit(ephind);
+}
+
 void qt_editParams::forward()
 {
   if (current >= int( data_history.size() ))

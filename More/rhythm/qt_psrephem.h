@@ -47,6 +47,9 @@ class qt_psrephem : public QVBox
 
   void unload (FILE* outstream);
 
+  bool item_shown ( int ephind );
+  bool item_fit   ( int ephind );
+
   static int max_chars;
 
   // Functions that assist the geometry manager

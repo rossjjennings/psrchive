@@ -58,8 +58,13 @@ class qt_editParams : public QWidget
   void forward();          // go forward to newer parameter set
   void backward();         // go back to last parameter set
   void select_parms();     // hides/shows the selection grid
-  void fitall ();
-  void fitnone ();
+  void fitall();
+  void fitnone();
+
+  // Interface functions
+  int      get_hist_length();
+  psrephem get_historic(unsigned which);
+  bool     query_fit_for(int ephind);
 
   // Help Menu Callbacks
   void about();
@@ -77,10 +82,10 @@ class qt_editParams : public QWidget
   vector<psrParams> data_history;
   int current;
 
-  void menubarConstruct ();   // constructs the menubar
+  void menubarConstruct();   // constructs the menubar
   QWidget* menu;              // the menubar
   
-  void parmboxConstruct ();   // constructs a dialog box with qt_toglParams
+  void parmboxConstruct();   // constructs a dialog box with qt_toglParams
   QWidget* eph_select;        // the dialog created in parmboxConstruct ();
 
   // the open/save popup dialog
@@ -88,7 +93,7 @@ class qt_editParams : public QWidget
 
   // performs various book-keeping tasks whenever
   // a new TEMPO Parameter set is loaded/set
-  void new_data (bool add_to_history = true);
+  void new_data(bool add_to_history = true);
 
   // ///////////////////////////////////////////////////////////////////
   // the popup menus
@@ -102,10 +107,10 @@ class qt_editParams : public QWidget
 
  protected:
   // Functions that assist the geometry manager
-  QSize sizeHint () const;
-  QSizePolicy sizePolicy () const 
-    { return QSizePolicy (QSizePolicy::Minimum, QSizePolicy::Expanding); };
-  QSize minimumSizeHint () const 
+  QSize sizeHint() const;
+  QSizePolicy sizePolicy() const 
+    { return QSizePolicy(QSizePolicy::Minimum, QSizePolicy::Expanding); };
+  QSize minimumSizeHint() const 
     { return sizeHint(); };
 };
 

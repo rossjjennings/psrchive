@@ -68,6 +68,20 @@ qt_psrephem::~qt_psrephem ()
     delete params[iparm];
 }
 
+bool qt_psrephem::item_shown (int ephind)
+{
+  if (params[ephind]->isVisible()) {
+    return true;
+  }
+  
+  return false;
+}
+
+bool qt_psrephem::item_fit (int ephind)
+{
+  return params[ephind]->getFit();
+}
+
 void qt_psrephem::show_item (psrParameter* parm)
 {
   int ephind = psrParameter::check (parm -> get_ephind());
