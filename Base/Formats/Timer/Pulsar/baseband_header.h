@@ -83,7 +83,7 @@ typedef struct baseband_header_t {
   // # number of filterbank channels used during reduction
   int nchan;
 
-#if defined(linux) || (defined (sun) && defined(__i386))
+#if !defined(MALIGN_DOUBLE)
   char __space[4];
 #endif
 
