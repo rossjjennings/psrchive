@@ -3,10 +3,7 @@
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
 #include "Error.h"
-
-#include "ephio.h"
-
-#include "tempo++.h"
+#include "Predict.h"
 
 // ///////////////////////////////////////////////////////////////////////
 //
@@ -123,44 +120,25 @@ void Pulsar::Archive::update_model (const MJD& time, bool clear_model)
     return;
   }
 
-  int    maxha  = 0;
-  char   nsite  = '!';
-  int    ncoeff = 0;
-  double freq   = 0.0;
-  double nspan  = 0.0;
-  
+  Tempo::Predict predict;
+
+  predict.set_frequency ( get_centre_frequency() );
+  predict.set_parameters ( *ephemeris );
+  predict.set_asite ( get_telescope_code() );
+  predict.set_maxha ( 12 );
+
   if (model && model->pollys.size() > 0) {
 
-    maxha   = 12;
-    nsite   = model->get_telescope();
-    ncoeff  = model->get_ncoeff();
-    freq    = get_centre_frequency();
-    nspan   = model->get_nspan();
-
-    if (verbose == 3) {
-      cout << "Using nspan  = " << nspan << endl;
-      cout << "Using ncoeff = " << ncoeff << endl;
-      cout << "Using maxha  = " << maxha << endl;
-    }
+    predict.set_nspan ( model->get_nspan() );
+    predict.set_ncoef ( model->get_ncoeff() );
 
   }
   else {
 
-    cout << "Warning: using default values to build polyco" << endl;
-
     model = new polyco;
 
-    maxha   = 12;
-    nsite   = ephemeris->value_str[EPH_TZRSITE][0];
-    ncoeff  = 12;
-    freq    = get_centre_frequency();
-    nspan   = 960;
-
-    if (verbose == 3) {
-      cout << "Using nspan  = " << nspan << endl;
-      cout << "Using ncoeff = " << ncoeff << endl;
-      cout << "Using maxha  = " << maxha << endl;
-    }
+    predict.set_nspan ( 960 );
+    predict.set_ncoef ( 12 );
 
   }
 
@@ -169,8 +147,8 @@ void Pulsar::Archive::update_model (const MJD& time, bool clear_model)
 
   if ( model->i_nearest (time) == -1 ) {
     // no match, create a new polyco for the specified time
-    polyco part = Tempo::get_polyco (*ephemeris, time, time,
-				     nspan, ncoeff, maxha, nsite, freq);   
+
+    polyco part = predict.get_polyco (time, time);
     model->append (part);
   }
 }
