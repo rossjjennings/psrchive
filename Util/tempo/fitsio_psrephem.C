@@ -26,6 +26,8 @@ extern "C" {
 // utility function defined at the end of the file
 void datatype_match (int typecode, int ephind);
 
+// return the FITS TFORM field for the specified EPHIO index
+char* eph_tform (int ephind);
 
 /*! This method prepares a mapping between the columns of the PSREPHEM hdu
   and the indeces used internally.
@@ -89,6 +91,9 @@ void psrephem::fits_map (fitsfile* fptr, vector<int>& ephind, int& maxstrlen)
     if ( parstr == "PSR-NAME" || parstr == "PSR_NAME" )
       parstr = "PSRJ";
 
+    if ( parstr == "ECC" )
+      parstr = "E";
+
     //
     // columns containing the fractional component must be preceded by integer
     //
@@ -121,7 +126,7 @@ void psrephem::fits_map (fitsfile* fptr, vector<int>& ephind, int& maxstrlen)
 	// test the validity of operating assumption.  datatype match
 	// will display an error if there is a mismatch in assumption
 	if (verbose)
-	  cerr << "psrephem::fit_map column " << icol
+	  cerr << "psrephem::fits_map column " << icol
 	       << " matches ephind " << ieph << " ";
 
 	datatype_match (typecode, ieph);
@@ -138,6 +143,8 @@ void psrephem::fits_map (fitsfile* fptr, vector<int>& ephind, int& maxstrlen)
 
   }
 
+  if (verbose)
+    cerr << "psrephem::fits_map exit" << endl;
 }
 
 
@@ -349,7 +356,8 @@ void psrephem::load (fitsfile* fptr, long row)
 //
 void psrephem::unload (fitsfile* fptr, long row) const
 {
-  vector<int> ephind;   // ephio index for column number
+  int status = 0;          // status returned by FITSIO routines
+  vector<int> ephind;      // ephio index for column number
   int maxstrlen;
 
   // when fits_map returns, fptr will be set to the PSREPHEM hdu
@@ -358,12 +366,23 @@ void psrephem::unload (fitsfile* fptr, long row) const
   // check that all of the required columns exist in the table
   for (int ieph=0; ieph < EPH_NUM_KEYS; ieph++)
     if (parmStatus[ieph] &&
-	find (ephind.begin(), ephind.end(), ieph) == ephind.end())
-      throw Error (InvalidState, "psrephem::unload",
-		   "TO-DO: create %s column in PSREPHEM hdu", parmNames[ieph]);
+	find (ephind.begin(), ephind.end(), ieph) == ephind.end())  {
+
+      //
+      int colnum = ephind.size() + 1;
+      char* ttype = parmNames[ieph];
+      char* tform = eph_tform (ieph);
+
+      fits_insert_col (fptr, colnum, ttype, tform, &status);
+
+      if (status) throw Error (InvalidState, "psrephem::unload",
+        "fits_insert_col (%d,%s,%s) in PSREPHEM hdu", colnum, ttype, tform);
+
+      ephind.push_back (ieph);
+
+    }
   
   // ask for the number of rows in the binary table
-  int status = 0;          // status returned by FITSIO routines
   long nrows = 0;
   fits_get_num_rows (fptr, &nrows, &status);
   if (status != 0)
@@ -407,7 +426,8 @@ void psrephem::unload (fitsfile* fptr, long row) const
 
       fits_write_col_null (fptr, icol+1, row, firstelem, onelement, &status);
       if (status)
-	throw FITSError (status, "psrephem::unload", "fits_write_col_null");
+	throw FITSError (status, "psrephem::unload",
+          "fits_write_col_null (col=%d=%s, row=%d)", icol+1, parmNames[ieph], row);
 
       continue;
 
@@ -532,7 +552,21 @@ void psrephem::unload (fitsfile* fptr, long row) const
 
 
 
+char* eph_tform (int ephind)
+{
+  int parmtype = parmTypes[ephind];
+  assert (parmtype>=0 && parmtype<6);
 
+  // the FITSIO TFORM corresponding to each parmType
+  static char* tform[7] = { "12A",  // string
+                            "1D",   // double
+                            "24A",  // h:m:s
+                            "24A",  // d:m:s
+                            "1D",   // MJD
+                            "1J" }; // integer
+
+  return tform[parmtype];
+}
 
 void datatype_match (int typecode, int ephind)
 {
