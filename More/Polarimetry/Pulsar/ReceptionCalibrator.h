@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ReceptionCalibrator.h,v $
-   $Revision: 1.42 $
-   $Date: 2003/09/23 14:20:06 $
+   $Revision: 1.43 $
+   $Date: 2003/09/24 05:47:27 $
    $Author: straten $ */
 
 #ifndef __ReceptionCalibrator_H
@@ -12,6 +12,7 @@
 
 // Reception Model and its management
 #include "Calibration/ReceptionModel.h"
+#include "Calibration/ConvertMJD.h"
 #include "Calibration/Axis.h"
 
 // Parameterizations of the instrument and source
@@ -82,8 +83,8 @@ namespace Pulsar {
     //! The signal path experienced by the pulsar
     Reference::To<Calibration::ProductTransformation> pulsar_path;
 
-    //! The instrumental model in use
-    Reference::To<Calibration::Transformation> instrument;
+    //! The instrumental model and any additional transformations
+    Reference::To<Calibration::ProductTransformation> instrument;
 
     // ////////////////////////////////////////////////////////////////////
     //
@@ -116,6 +117,9 @@ namespace Pulsar {
 
     //! The time axis
     Calibration::Axis<MJD> time;
+
+    //! Used to convert MJD to double
+    Calibration::ConvertMJD convert;
 
     //! The signal path of the FluxCalibrator source
     unsigned FluxCalibrator_path;
@@ -240,7 +244,7 @@ namespace Pulsar {
 
     //! Add Integration data to the MeasuredState vector
     /*! Data is taken from the specified frequency channel and phase bin.
-      \retval bins the vector to which an new MeasuredState will be appended
+      \retval bins the vector to which a new MeasuredState will be appended
       \param estimate contains the bin number and a running mean estimate
       \param ichan the frequency channel
       \param data the Integration data

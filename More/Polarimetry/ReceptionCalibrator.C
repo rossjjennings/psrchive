@@ -11,6 +11,9 @@
 #include "Calibration/Boost.h"
 #include "Calibration/Gain.h"
 
+#include "Calibration/SingleAxisPolynomial.h"
+#include "Calibration/Polynomial.h"
+
 #include <algorithm>
 #include <assert.h>
 
@@ -49,20 +52,47 @@ Pulsar::StandardModel::StandardModel (Calibrator::Type _model)
   model = _model;
   valid = true;
 
+  instrument = new Calibration::ProductTransformation;
+
+#if 0
+  Calibration::SingleAxisPolynomial* backend;
+  backend = new Calibration::SingleAxisPolynomial (4);
+  backend -> set_infit(0, false);
+  convert.connect (backend, &Calibration::SingleAxisPolynomial::set_abscissa);
+#else
+
+  Calibration::Transformation* operation;
+  operation = new Calibration::Rotation(Vector<double, 3>::basis(0));
+
+  Calibration::Polynomial* poly = new Calibration::Polynomial (4);
+  poly -> set_infit(0, false);
+  convert.connect (poly, &Calibration::Polynomial::set_abscissa);
+
+  Calibration::FunctionTransformation* backend;
+  backend = new Calibration::FunctionTransformation;
+
+  backend -> set_Transformation ( operation );
+  backend -> set_Function (0, poly);
+
+#endif
+
+  instrument -> add_Transformation (backend);
+  time.connect (&convert, &Calibration::ConvertMJD::set_epoch);
+
   switch (model) {
 
   case Calibrator::Hamaker:
     if (ReceptionCalibrator::verbose)
       cerr << "Pulsar::StandardModel Hamaker" << endl;
     polar = new Calibration::Polar;
-    instrument = polar;
+    instrument -> add_Transformation( polar );
     break;
 
   case Calibrator::Britton:
     if (ReceptionCalibrator::verbose)
       cerr << "Pulsar::StandardModel Britton" << endl;
     physical = new Calibration::Instrument;
-    instrument = physical;
+    instrument -> add_Transformation( physical );
     break;
 
   default:
@@ -104,6 +134,10 @@ Pulsar::StandardModel::StandardModel (Calibrator::Type _model)
 
 void Pulsar::StandardModel::add_fluxcal_backend ()
 {
+  if (!physical)
+    throw Error (InvalidState, "Pulsar::StandardModel::add_fluxcal_backend",
+		 "Cannot model flux calibrator with Hamaker model");
+
   Calibration::ProductTransformation* path = 0;
   path = new Calibration::ProductTransformation;
 
@@ -111,10 +145,7 @@ void Pulsar::StandardModel::add_fluxcal_backend ()
 
   path->add_Transformation( fluxcal_backend );
 
-  if (physical)
-    path->add_Transformation( physical->get_feed() );
-  else
-    path->add_Transformation( polar );
+  path->add_Transformation( physical->get_feed() );
 
   equation->add_path ( path );
 
@@ -661,8 +692,7 @@ void Pulsar::ReceptionCalibrator::add_Calibrator (const ArtificialCalibrator* p)
     }
   }
 
-  if (polcal && !flux_calibrator &&
-      polcal->get_Transformation_nchan() == nchan)  {
+  if (polcal && polcal->get_Transformation_nchan() == nchan)  {
 
     cerr << "Pulsar::ReceptionCalibrator::add_Calibrator add Polar Model" 
 	 << endl;
@@ -672,10 +702,13 @@ void Pulsar::ReceptionCalibrator::add_Calibrator (const ArtificialCalibrator* p)
     const Calibration::Polar* polar;
 
     for (unsigned ichan = 0; ichan<nchan; ichan++) {
+
       polar = dynamic_cast<const Calibration::Polar*>
 	( polcal->get_Transformation(ichan) );
+
       if (polar)
 	model[ichan]->polar_estimate.integrate( *polar );
+
     }
 
   }
@@ -734,7 +767,6 @@ void Pulsar::ReceptionCalibrator::precalibrate (Archive* data)
 
     Integration* integration = data->get_Integration (isub);
 
-
     for (unsigned ichan=0; ichan<nchan; ichan++) {
 
       if (!model[ichan]->valid) {
@@ -760,6 +792,10 @@ void Pulsar::ReceptionCalibrator::precalibrate (Archive* data)
       case Signal::PolnCal:
 	signal_path = model[ichan]->pcal_path;
 	break;
+      case Signal::FluxCalOn:
+        model[ichan]->equation->set_path (model[ichan]->FluxCalibrator_path);
+        signal_path = model[ichan]->equation->get_Transformation ();
+        break;
       default:
 	throw Error (InvalidParam, "Pulsar::ReceptionCalibrator::calibrate",
 		     "unknown Archive type for " + data->get_filename() );
@@ -782,8 +818,6 @@ void Pulsar::ReceptionCalibrator::precalibrate (Archive* data)
 
   data->set_poln_calibrated (true);
 
-  // if (FluxCalibrator_path)
-  // data->set_flux_calibrated (true);
 }
 
 //! Calibrate the polarization of the given archive
@@ -793,11 +827,18 @@ void Pulsar::ReceptionCalibrator::calculate_transformation ()
 
   transformation.resize( nchan );
 
-  for (unsigned ichan=0; ichan<nchan; ichan++)
-    if (model[ichan]->valid)
-      transformation[ichan] = model[ichan]->instrument;
-    else
-      transformation[ichan] = 0;
+  for (unsigned ichan=0; ichan<nchan; ichan++)  {
+
+    transformation[ichan] = 0;
+
+    if (model[ichan]->valid)  {
+      if (model[ichan]->polar)
+        transformation[ichan] = model[ichan]->polar;
+      else if (model[ichan]->physical)
+        transformation[ichan] = model[ichan]->physical;
+    }
+
+  }
 }
 
 bool Pulsar::ReceptionCalibrator::get_solved () const
@@ -871,8 +912,13 @@ void Pulsar::ReceptionCalibrator::initialize ()
   for (unsigned istate=0; istate<pulsar.size(); istate++)
     pulsar[istate].update_source ();
 
-  for (unsigned ichan=0; ichan<model.size(); ichan++)
+  MJD epoch = 0.5 * (end_epoch + start_epoch);
+  cerr << "Pulsar::ReceptionCalibrator::solve reference epoch: " << epoch << endl;
+
+  for (unsigned ichan=0; ichan<model.size(); ichan++) {
+    model[ichan]->convert.set_reference_epoch ( epoch );
     model[ichan]->update ();
+  }
 
   is_initialized = true;
 }
