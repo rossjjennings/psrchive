@@ -283,6 +283,52 @@ int Tempo::toa::Psrclock_unload (FILE* outstream) const
 
 // ////////////////////////////////////////////////////////////////////////
 //
+// Deal with TEMPO commands (eg. jumps)
+//
+// ////////////////////////////////////////////////////////////////////////
+
+int Tempo::toa::Command_load (const char* instring)
+{
+  init();
+
+  format = Command;
+
+  if ( strstr(instring, "JUMP") ) {
+    auxinfo = "JUMP";
+    return 0;
+  }
+  
+  if ( strstr(instring, "NOSKIP") ) {
+    auxinfo = "NOSKIP";
+    return 0;
+  }
+
+  if ( strstr(instring, "SKIP") ) {
+    auxinfo = "SKIP";
+    return 0;
+  }
+
+  return -1;
+}
+
+int Tempo::toa::Command_unload (char* outstring) const
+{
+  if ( sprintf(outstring, "%s", auxinfo.c_str()) > 1 )
+    return 0;
+  else
+    return -1;
+}
+
+int Tempo::toa::Command_unload (FILE* outstream) const
+{
+  sizebuf (81 + auxinfo.length());
+  Command_unload (buffer);
+  fprintf (outstream, "%s\n", buffer);
+  return 0;
+}
+
+// ////////////////////////////////////////////////////////////////////////
+//
 // generic load,unload - load/unload TOA in appropriate format
 //
 // these functions will usually be called at the high level
@@ -293,19 +339,24 @@ int Tempo::toa::load (const char* instring)
 {
   if ( !instring )
     return -1;
-
+  
+  if ( instring[0] == 'J' || instring[0] == 'S')
+    return Command_load( instring );
+  
   else if ( isdigit( instring[0] ) )
     return Princeton_load( instring );
-
+  
   else if ( instring[1] != ' ' )
     return Psrclock_load( instring );
-
+  
   else
     return Parkes_load( instring );
 }
 
-
-// returns 0 if toa was loaded, 1 if end of file reached, -1 if error occurs
+// Return values:
+//    0 if toa was loaded, 
+//    1 if end of file reached, 
+//   -1 if error occurs
 
 int Tempo::toa::load (FILE * instream)
 {
@@ -347,6 +398,9 @@ int Tempo::toa::unload (FILE* outstream, Format fmt) const
     fmt = format;
 
   switch (fmt) {
+  case Command:
+    if (verbose) cerr << "Unloading Command Format" << endl;
+    return Command_unload (outstream);
   case Parkes:
     if (verbose) cerr << "Unloading Parkes Format" << endl;
     return Parkes_unload (outstream);
@@ -368,11 +422,17 @@ int Tempo::toa::unload (char* outstring, Format fmt) const
     fmt = format;
 
   switch (fmt) {
+  case Command:
+    if (verbose) cerr << "Unloading Command Format" << endl;
+    return Command_unload (outstring);
   case Parkes:
+    if (verbose) cerr << "Unloading Parkes Format" << endl;
     return Parkes_unload (outstring);
   case Princeton:
+    if (verbose) cerr << "Unloading Princeton Format" << endl;
     return Princeton_unload (outstring);
   case Psrclock:
+    if (verbose) cerr << "Unloading Psrclock Format" << endl;
     return Psrclock_unload (outstring);
   default:
     cerr << "Tempo::toa::unload undefined format" << endl;
@@ -389,6 +449,8 @@ int Tempo::toa::unload (char* outstring, Format fmt) const
 int Tempo::toa::Tempo_unload (FILE* outstream) const
 {
   switch (format) {
+  case Command:
+    return Command_unload (outstream);
   case Parkes:
     return Parkes_unload (outstream);
   case Psrclock:
@@ -405,6 +467,8 @@ int Tempo::toa::Tempo_unload (FILE* outstream) const
 int Tempo::toa::Tempo_unload (char* outstring) const
 {
   switch (format) {
+  case Command:
+    return Command_unload (outstring);
   case Parkes:
     return Parkes_unload (outstring);
   case Psrclock:
@@ -625,6 +689,9 @@ void Tempo::toa::sizebuf (size_t length)
 
 bool Tempo::toa::valid()
 {
+  if (format == Command)
+    return 1;
+  
   if (frequency < 20.0) {
     if (verbose) cerr << "Tempo::toa::load(char*) Error: FREQUENCY=" << frequency
 		      << " is too small." << endl;
@@ -644,4 +711,6 @@ bool Tempo::toa::valid()
   // passed all tests, return true
   return 1;
 }
+
+
 

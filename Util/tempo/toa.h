@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/toa.h,v $
-   $Revision: 1.12 $
-   $Date: 2003/04/24 03:33:19 $
+   $Revision: 1.13 $
+   $Date: 2003/05/20 03:56:19 $
    $Author: ahotan $ */
 
 #ifndef __TOA_H
@@ -32,7 +32,7 @@ namespace Tempo {
 
   public:
     
-    enum Format { Unspecified, Princeton, Parkes, ITOA, Psrclock};
+    enum Format { Unspecified, Princeton, Parkes, ITOA, Psrclock, Command };
     enum DataType {
       // a null state
       Nothing,
@@ -64,7 +64,7 @@ namespace Tempo {
     double frequency;      // Observing frequency (MHz)
     MJD    arrival;        // TOA
     float  error;          // TOA uncertainty
-    char    telescope;      // Observatory (one-character code)
+    char   telescope;      // Observatory (one-character code)
     
     // Parkes Format specific
     float  phs;            // Phase offset (fraction of P0, added to TOA)
@@ -148,9 +148,9 @@ namespace Tempo {
     int    Psrclock_unload  (char* outstring) const;
     string Psrclock_unload  () const;
 
-    int    Rhythm_load      (const char* instring);
-    int    Rhythm_unload    (FILE* outstream) const;
-    int    Rhythm_unload    (char* outstring) const;
+    int    Command_load      (const char* instring);
+    int    Command_unload    (FILE* outstream) const;
+    int    Command_unload    (char* outstring) const;
     
     int    Tempo_unload     (FILE* outstream) const;
     int    Tempo_unload     (char* outstring) const;

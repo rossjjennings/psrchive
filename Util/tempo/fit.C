@@ -7,6 +7,7 @@
 #include "residual.h"
 #include "resio.h"
 #include "psrephem.h"
+#include "Error.h"
 
 // ////////////////////////////////////////////////////////////////////////
 // Tempo::fit
@@ -38,8 +39,7 @@ void Tempo::fit (const psrephem& model, vector<toa>& toas,
   FILE* fptr = fopen (tempo_tim, "w");
   if (fptr==NULL) {
     fprintf (stderr, "fit error opening %s:\n", tempo_tim);
-    perror (":");
-    throw ("fit() cannot open file");
+    throw Error (FailedCall, "fit() cannot open file");
   }
 
   int      unloaded = 0;       // count of toas unloaded
@@ -111,9 +111,9 @@ void Tempo::fit (const psrephem& model, vector<toa>& toas,
       perror (" ");
     else
       cerr << ":: tempo returns:" << WIFEXITED(retval) << endl;
-    throw (string ("Tempo::fit"));
+    throw Error (FailedCall, "Tempo::fit");
   }
-
+  
   // load the new ephemeris (PSRNAME.par in current working directory)
   if (postfit)
     postfit->load( (model.psrname() + ".par").c_str() );
@@ -126,14 +126,21 @@ void Tempo::fit (const psrephem& model, vector<toa>& toas,
     if (toas[iarr].state < min_state)
       continue;
 
+    if (toas[iarr].get_format() == Tempo::toa::Command) {
+      unloaded --;
+      continue;
+    }
+    
     if (unloaded == 0)
-      throw string ("Tempo::fit error attempting to read more than unloaded");
+      throw Error (InvalidParam, "Tempo::fit error attempting to read more than unloaded");
     if (toas[iarr].resid.load (r2flun) != 0)
-      throw string ("Tempo::fit error reading residual from ") + tempo_res;
+      throw Error (FailedCall, "Tempo::fit error reading residual file");
     unloaded --;
   }
   if (unloaded != 0)
-    throw string ("Tempo::fit error read fewer residuals than unloaded toas");
-
+    throw Error (InvalidParam, "Tempo::fit error read fewer residuals than unloaded toas");
+  
   fortclose_ (&r2flun);
 }
+
+
