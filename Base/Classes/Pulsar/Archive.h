@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Archive.h,v $
-   $Revision: 1.2 $
-   $Date: 2002/04/05 09:37:29 $
+   $Revision: 1.3 $
+   $Date: 2002/04/08 08:04:09 $
    $Author: straten $ */
 
 /*
@@ -11,8 +11,21 @@
 
 */
 
-#ifndef __psrchive_h
-#define __psrchive_h
+#ifndef __Pulsar_Archive_h
+#define __Pulsar_Archive_h
+
+#include <vector>
+#include <string>
+
+#include "MJD.h"
+
+namespace Tempo {
+  class toa;
+}
+
+class Phase;
+class psrephem;
+class polyco;
 
 namespace Pulsar {
 
@@ -22,18 +35,30 @@ namespace Pulsar {
   enum Feeds { invalid=-1, circular=0, linear=1 };
   enum PolnState { Stokes, Coherency, XXYY, Intensity, Invariant };
 
+  class Integration;
+
   class Archive {
 
   public:
+    static bool verbose;
+
     Archive ();
     virtual ~Archive ();
 
-    // clone - dynamic copy constructor
-    virtual Archive* clone ();
-
-    // factory - dynamic constructor returns
+    //
+    // factory - dynamic constructor returns a new instantiation of an
+    //           Archive-derived child class
+    //
     static Archive* factory (const char* filename);
-    static Archive* factory (const string& filename);
+    // convenience interface
+    static Archive* factory (const string& filename)
+    { return factory (filename.c_str()); }
+
+    //
+    // clone - dynamic copy constructor
+    //
+    virtual Archive* clone (const Archive* copy);
+
 
     // //////////////////////////////////////////////////////////////////
     //
@@ -119,15 +144,12 @@ namespace Pulsar {
     //          interval, Inv, where Inv*Inv = II-QQ-UU-VV
     //
     virtual void invint (bool square_root = true, // take sqrt(II-QQ-UU-VV)
-			 float duty_cycle = 0.1,  // size of baseline window
 			 float baseline_ph=-1);   // phase of baseline window
   
     //
     // remove_baseline - remove the baseline from all profiles
     //
-    virtual void remove_baseline (float duty_cycle = 0.1,
-				  int poln = 0,
-				  float phase = -1.0);
+    virtual void remove_baseline (int poln = 0, float phase = -1.0);
 
     //
     // rotate - rotate each profile by time seconds
@@ -146,14 +168,28 @@ namespace Pulsar {
     virtual void RM_correct (double rotation_measure = 0, double rm_iono = 0);
 
     //
+    // set_ephem - installs the given ephemeris, constructs a new polyco,
+    //             and shifts the profiles to align
+    //
+    virtual void set_ephem (const psrephem& e);
+
+    //
     // set_polyco - installs the given polyco and shifts profiles to align
     //
-    virtual void set_polyco (const polyco& p, const Phase& ref_ph = Phase());
+    virtual void set_polyco (const polyco& p);
+
+
+    //
+    // set_baseline_window - set the duty cycle of the window used to calculate
+    //                  baseline statistics (mean, noise, etc.)
+    //
+    void set_baseline_window (float duty_cycle);
+    static void set_default_baseline_window (float duty_cycle);
 
     //
     // snr_weight - set the weight of each profile to its snr squared
     //
-    virtual void snr_weight (float noise_window = 1.0);
+    virtual void snr_weight ();
 
     // //////////////////////////////////////////////////////////////////
     //
@@ -173,7 +209,7 @@ namespace Pulsar {
     // return the MJD at the end of the last sub-integration
     MJD  end_time () const;
 
-    // returns the total time integrated into all sub-integrations (s)
+    // returns the total time integrated into all sub-integrations (in seconds)
     double integration_length() const;
 
     // //////////////////////////////////////////////////////////////////
@@ -197,8 +233,6 @@ namespace Pulsar {
     void load (const string& filename) { load (filename.c_str()); }
 
     // get/set the number of bins, bands, subints, etc
-
-    ...
 
     // get/set the bandwidth of the observation (MHz)
     virtual double get_bandwidth () const = 0;
@@ -224,15 +258,24 @@ namespace Pulsar {
 
     virtual void set_feedangle_corrected (bool done = true) = 0;
     virtual void set_iono_rm_corrected (bool done = true) = 0;
-    virutal void set_ism_rm_corrected (bool done = true) = 0;
+    virtual void set_ism_rm_corrected (bool done = true) = 0;
     virtual void set_parallactic_corrected (bool done = true) = 0;
+
 
  protected:
 
     //
     // subints - the data area
     //
-    vector<Integration> subints;
+    vector<Integration*> subints;
+
+    //
+    // baseline_window - duty cycle (0.0->1.0) of the window used to calculate
+    //                   baseline statistics (mean, noise, etc.)
+    //
+    float baseline_window;
+    static float default_baseline_window;
+
 
     // //////////////////////////////////////////////////////////////////
     //
@@ -254,7 +297,7 @@ namespace Pulsar {
     //
     // resize - resets the dimensions of the data area
     //
-    virtual void resize (int nsubint, int nband, int nbin);
+    virtual void resize (int nsubint, int nband=0, int npol=0, int nbin=0);
 
     //
     // users should call ppqq and iquv to interface these routines
