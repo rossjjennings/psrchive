@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Estimate.h,v $
-   $Revision: 1.14 $
-   $Date: 2003/05/05 10:39:36 $
-   $Author: straten $ */
+   $Revision: 1.15 $
+   $Date: 2003/05/06 14:15:44 $
+   $Author: pulsar $ */
 
 #ifndef __Estimate_h
 #define __Estimate_h
@@ -171,14 +171,15 @@ class MeanEstimate
 
   //! Addition operator
   const MeanEstimate& operator+= (const Estimate<T,U>& d)
-  { U iv=1.0/d.var; norm_val += d.val*iv; inv_var += iv; return *this; }
+  { if (d.var){ U v=1.0/d.var; norm_val+=d.val*v; inv_var+=v; } return *this; }
 
   //! Equality operator
   bool operator == (T _norm_val) const
   { return norm_val == _norm_val; }
 
   Estimate<T,U> get_Estimate () const
-  { U var=1.0/inv_var; return Estimate<T,U> (norm_val*var, var); }
+  { U var=0.0; if (inv_var != 0.0) var = 1.0/inv_var; 
+    return Estimate<T,U> (norm_val*var, var); }
 
 };
 
