@@ -42,7 +42,7 @@ test_ReferenceFit_SOURCES	= test_ReferenceFit.C
 test_Header_SOURCES		= test_Header.C
 test_VectorInfo_SOURCES		= test_VectorInfo.C 
 
-CPPFLAGS = -D_REENTRANT=1
+AM_CPPFLAGS = -D_REENTRANT=1
 
 #############################################################################
 #
