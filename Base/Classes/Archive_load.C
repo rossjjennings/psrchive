@@ -54,7 +54,8 @@ Pulsar::Archive* Pulsar::Archive::load (const char* filename)
       archive -> load_header (filename);
       // set the filename from which data for this instance can be loaded
       archive -> __load_filename = filename;
-      return archive;
+      archive -> set_filename (filename);
+      return archive.release();
     }
 
   }
