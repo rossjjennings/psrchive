@@ -36,6 +36,20 @@ Pulsar::Archive::~Archive ()
     cerr << "Pulsar::Archive::destructor" << endl;
 }
 
+//! Return the number of extensions available
+unsigned Pulsar::Archive::get_nextension () const
+{
+  return 0;
+}
+
+    //! Return a pointer to the specified extension
+const Pulsar::Archive::Extension*
+Pulsar::Archive::get_extension (unsigned iextension) const
+{
+  throw Error (InvalidState, "Pulsar::Archive::get_extension",
+	       "The Pulsar::Archive base class contains no extensions");
+}
+
 
 void Pulsar::Archive::refresh()
 {
@@ -317,8 +331,9 @@ void Pulsar::Archive::set_model (const polyco& new_model)
   model = new_model;
 
   if ( oldmodel.pollys.size() ) {
+
     if (verbose)
-      cerr << "Pulsar::Archive::set_model correcting against the old model" << endl;
+      cerr << "Pulsar::Archive::set_model apply the new model" << endl;
 
     // correct Integrations against the old model
     for (unsigned isub = 0; isub < get_nsubint(); isub++)
@@ -331,23 +346,20 @@ void Pulsar::Archive::set_model (const polyco& new_model)
 
 const polyco Pulsar::Archive::get_model ()
 {
-  polyco retval;
-  retval = model;
-
-  return retval;
-
+  return model;
 }
 
 void Pulsar::Archive::snr_weight ()
 {
-
+  throw Error (InvalidState, "Pulsar::Archive::snr_weight", "not implemented");
 }
 
 
 MJD Pulsar::Archive::start_time() const
 {
   if (get_nsubint() < 1)
-    throw Error (InvalidState, "Pulsar::Archive::start_time", "no Integrations");
+    throw Error (InvalidState, "Pulsar::Archive::start_time",
+		 "no Integrations");
 
   return get_Integration(0) -> get_start_time();
 }
@@ -355,7 +367,8 @@ MJD Pulsar::Archive::start_time() const
 MJD Pulsar::Archive::end_time() const
 {
   if (get_nsubint() < 1)
-    throw Error (InvalidState, "Pulsar::Archive::end_time", "no Integrations");
+    throw Error (InvalidState, "Pulsar::Archive::end_time",
+		 "no Integrations");
 
   return get_Integration(get_nsubint()-1) -> get_end_time();
 }

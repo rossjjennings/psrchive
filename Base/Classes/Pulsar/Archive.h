@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Archive.h,v $
-   $Revision: 1.75 $
-   $Date: 2003/05/28 00:14:10 $
-   $Author: pulsar $ */
+   $Revision: 1.76 $
+   $Date: 2003/06/05 13:12:16 $
+   $Author: straten $ */
 
 /*! \mainpage 
  
@@ -182,10 +182,6 @@ namespace Tempo {
   class toa;
 }
 
-class Phase;
-class psrephem;
-class polyco;
-
 template<typename T> class Jones;
 
 //! The root level namespace, containing everything pulsar related
@@ -230,7 +226,13 @@ namespace Pulsar {
       //! Return the name of the plugins directory
       static string plugin_path (const char* environment_variable = "CVSHOME");
 
-      //! Report to cerr on the status of the Registry and plugins
+      //! Load plugins from the plugin_path
+      static void plugin_load ();
+
+      //! Report to cerr on the status of the plugins
+      static void plugin_report ();
+
+      //! Report to cerr on the status of the Registry (and plugins)
       static void report ();
 
     protected:
@@ -242,9 +244,6 @@ namespace Pulsar {
 
       //! Declare friends with Archive so Archive::load can access registry
       friend class Archive;
-
-      //! Load plugins from the plugin_path
-      static void plugin_load ();
 
       //! Flag that plugin_load has been called
       static bool loaded;
@@ -278,11 +277,25 @@ namespace Pulsar {
       //! Constructor compilation ensures that template entry is instantiated
       Advocate () { entry.get(); }
 
+      //! Ensure that Agent code is linked
+      /*! When linking against static libraries, this method is called
+	in Archive::load in order to ensure that the plugin object
+	code is linked. */
+      static void ensure_linkage ();
+
     private:
       static Registry::List<Archive::Agent>::Enter<typename Child::Agent> entry;
 
     };
 
+    //! Pure virtual base class of Archive::Extension objects
+    /* Archive derived classes may provide access to additional information
+       through Extension-derived objects. */
+    class Extension : public Reference::Able {
+
+      // no specification for now
+
+    };
 
     //! Archive::append should enforce chronological order
     static bool append_chronological;
@@ -308,9 +321,6 @@ namespace Pulsar {
     //! Set the verbosity level (0 to 3)
     static void set_verbosity (unsigned level);
 
-    //! Print plugin status information to cerr
-    static void plugin_report ();
-
     // //////////////////////////////////////////////////////////////////
     //
     // constructors, destructor, operator =,
@@ -332,6 +342,19 @@ namespace Pulsar {
     //! Copy the profiles and attributes through set_ get_ methods
     virtual void copy (const Archive& archive,
 		       const vector<unsigned>& only_subints = none_selected);
+
+
+    // //////////////////////////////////////////////////////////////////
+    //
+    // Extension access
+    //
+    // //////////////////////////////////////////////////////////////////
+
+    //! Return the number of extensions available
+    virtual unsigned get_nextension () const;
+
+    //! Return a pointer to the specified extension
+    virtual const Extension* get_extension (unsigned iextension) const;
 
 
     // //////////////////////////////////////////////////////////////////
@@ -756,6 +779,9 @@ namespace Pulsar {
   template<class Child>
   Registry::List<Archive::Agent>::Enter<typename Child::Agent> 
   Archive::Advocate<Child>::entry;
+
+  template<class Child>
+  void Archive::Advocate<Child>::ensure_linkage() { }
 
 }
 
