@@ -1,7 +1,33 @@
 #include "Pulsar/Utilities.h"
 
 //
-// Function to select a standard profile
+// Function to select a standard profile from a loaded list
+//
+Pulsar::Profile* Pulsar::find_standard (const Pulsar::Archive* data, 
+					const vector<Pulsar::Profile*> cans) {
+  int selected = -1;
+  float diff = 1e6;
+
+  for (unsigned i = 0; i < cans.size(); i++) {
+    float temp = fabs(data->get_centre_frequency() - 
+		      cans[i]->get_centre_frequency());
+    if (temp < diff) {
+      diff = temp;
+      selected = i;
+    }
+  }
+
+  if (selected < 0) {
+    throw Error(FailedCall, "Pulsar::find_standard",
+		"No suitable profile found");
+  }
+  else {
+    return cans[selected];
+  }
+}
+
+//
+// Function to select a standard profile from a set of filenames
 //
 Pulsar::Profile* Pulsar::find_standard (const Pulsar::Archive* data, 
 					string path) {
