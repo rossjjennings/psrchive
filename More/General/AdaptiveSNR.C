@@ -5,7 +5,7 @@ Pulsar::AdaptiveSNR::AdaptiveSNR ()
 {
   initial_baseline_window = Profile::default_duty_cycle;
   baseline_threshold = 5.0;
-  max_iterations = 10;
+  max_iterations = 100;
 }
 
 //! Set the width of the window used to find the initial baseline
@@ -119,18 +119,17 @@ float Pulsar::AdaptiveSNR::get_snr (const Profile* profile)
   }
 
   double rms = sqrt (var);
+  double energy = profile->sum() - mean * nbin;
 
   if (Profile::verbose)
     cerr << "Pulsar::AdaptiveSNR::get_snr " << count << " out of "
 	 << nbin << " bins in baseline\n"
-      "  mean=" << mean << " rms=" << rms << endl;
+      "  mean=" << mean << " rms=" << rms << " energy=" << energy << " S/N=" << energy/rms << endl;
 
-  double power = profile->sum() - mean * nbin;
+  if (energy < 0)
+    energy = 0.0;
 
-  if (power < 0)
-    power = 0.0;
-
-  return power/rms;
+  return energy/rms;
 
 }    
 
