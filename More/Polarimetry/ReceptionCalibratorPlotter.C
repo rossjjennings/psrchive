@@ -341,7 +341,7 @@ void Pulsar::ReceptionCalibratorPlotter::plotcal ()
   ndim = 4;
   for (idim=0; idim<ndim; idim++) {
     for (ipt=0; ipt<npt; ipt++)
-      data[ipt] = calibrator->calibrator.state[ipt].get_Estimate(ndim);
+      data[ipt] = calibrator->calibrator.state[ipt].get_Estimate(idim);
 
     plotter.add_plot (data);
   }
@@ -360,10 +360,4 @@ void Pulsar::ReceptionCalibratorPlotter::plotcal ()
   cpgsvp (xmin, xmax, ymin, ymax);
 
 }
-
-
-
-
-
-
 
