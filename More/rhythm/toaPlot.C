@@ -486,16 +486,16 @@ void toaPlot::autoscale ()
 {
   if (data.empty()) return;
   
-  vector<float> xpts;
-  vector<float> ypts;
+  float* xpts = new float[data.size()];
+  float* ypts = new float[data.size()];
   
   for (unsigned i = 0; i < data.size(); i++) {
-    xpts.push_back(float(data[i].x));
-    ypts.push_back(float(data[i].y));
+    xpts[i] = float(data[i].x);
+    ypts[i] = float(data[i].y);
   }
   
-  findminmax(&(xpts.front()), &(xpts.back()), xmin, xmax);
-  findminmax(&(ypts.front()), &(ypts.back()), ymin, ymax);
+  findminmax(xpts, xpts+data.size(), xmin, xmax);
+  findminmax(ypts, ypts+data.size(), ymin, ymax);
   
   float xdiff = xmax - xmin;
   float ydiff = ymax - ymin;
@@ -508,6 +508,9 @@ void toaPlot::autoscale ()
   
   ymax += fabs(ydiff * 0.2);
   
+  delete[] xpts;
+  delete[] ypts;
+
   clearScreen();
   drawPlot();
 }

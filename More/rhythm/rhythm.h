@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/rhythm/rhythm.h,v $
-   $Revision: 1.39 $
-   $Date: 2003/10/25 01:04:29 $
+   $Revision: 1.40 $
+   $Date: 2004/05/10 02:14:52 $
    $Author: ahotan $ */
 
 // //////////////////////////////////////////////////////////////////////////
@@ -49,6 +49,9 @@
 #include "Pulsar/Archive.h"
 #include "Pulsar/Profile.h"
 #include "Pulsar/Calculator.h"
+
+#include "Pulsar/StandardSNR.h"
+#include "Pulsar/Utilities.h"
 
 class qt_editParams;
 

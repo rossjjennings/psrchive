@@ -27,9 +27,6 @@ int main (int argc, char** argv)
   
   try {
     
-    // See which files are understood
-    Pulsar::Archive::Agent::report();
-    
     QStyle* mystyle = new QPlatinumStyle();
     QPalette mypalette(Qt::darkBlue, Qt::darkCyan);
 
@@ -458,9 +455,14 @@ void Rhythm::plot_current ()
   char useful[80];
   char filename[80];
 
+  int chn = 0;
+  int sub = 0;
+
   toas[index].unload(useful);
 
-  sscanf(useful+1, "%s ", filename);
+  if (sscanf(useful+1, "%s %d %d", filename, &chn, &sub) != 3) {
+    throw Error(FailedCall, "Information not available");
+  }
 
   if (verbose)
     cerr << "Attempting to load archive '" << filename << "'" << endl;
@@ -470,12 +472,12 @@ void Rhythm::plot_current ()
 
   try {
     Reference::To<Pulsar::Archive> data = Pulsar::Archive::load(useful2);
-    data->fscrunch();
-    data->tscrunch();
     data->pscrunch();
     data->centre();
     cpgsvp (0.1,0.9,0.1,0.9);
     Pulsar::Plotter plotter;
+    plotter.set_subint(sub);
+    plotter.set_chan(chn);
     plotter.singleProfile(data);
   }
   catch (Error& error) {
@@ -825,6 +827,10 @@ vector<double> Rhythm::give_me_data (toaPlot::AxisQuantity q)
   
   char useful[80];
   char filename[80];
+  int chn = 0;
+  int sub = 0;
+  
+  Pulsar::StandardSNR snrobj;
   
   QProgressDialog progress( "Calculating Data...", "Abort", toas.size(),
 			    this, "progress", TRUE );
@@ -1053,8 +1059,8 @@ vector<double> Rhythm::give_me_data (toaPlot::AxisQuantity q)
       
       toas[i].unload(useful);
       
-      if (sscanf(useful+1, "%s ", filename) != 1) {
-	throw Error(FailedCall, "No archive-derived info available");
+      if (sscanf(useful+1, "%s %d %d", filename, &chn, &sub) != 3) {
+	throw Error(FailedCall, "Information not available");
       }
       else {
 	if (verbose)
@@ -1065,10 +1071,9 @@ vector<double> Rhythm::give_me_data (toaPlot::AxisQuantity q)
 	
 	try {
 	  Reference::To<Pulsar::Archive> data = Pulsar::Archive::load(useful2);	
-	  data->fscrunch();
-	  data->tscrunch();
 	  data->pscrunch();
-	  toas[i].set_StoN(data->get_Profile(0,0,0)->snr()); 
+	  snrobj.set_standard(Pulsar::find_standard(data, "./"));
+	  toas[i].set_StoN(snrobj.get_morph_snr(data->get_Profile(sub,0,chn)));
 	  retval.push_back(toas[i].get_StoN());
 	}
 	catch (Error& error) {
