@@ -91,16 +91,18 @@ int main (int argc, char *argv[]) {
       
       arch = Pulsar::Archive::load(archives[i]);
       
-      arch->toas(stdarch,toas);
+      arch->toas(toas, stdarch);
 
     }
     catch (Error& error) {
       cerr << error << endl;
     }
+
+    for (unsigned i = 0; i < toas.size(); i++)
+      toas[i].unload(stdout);
+
   }
 
-  for (unsigned i = 0; i < toas.size(); i++)
-    toas[i].unload(stdout);
   
 }
 
