@@ -1,7 +1,11 @@
 
 /*
-$Id: utc.c,v 1.2 1998/08/05 12:15:54 straten Exp $
+$Id: utc.c,v 1.3 1998/08/12 07:10:20 straten Exp $
 $Log: utc.c,v $
+Revision 1.3  1998/08/12 07:10:20  straten
+bug fix - when adding month days to make year day, use previous month
+so month -> month-1
+
 Revision 1.2  1998/08/05 12:15:54  straten
 added bit to str2utc to cut off extraneous characters before parsing
 
@@ -163,50 +167,188 @@ int str2utc (utc_t *time, const char* str)
 } 
 
 
-/*-*************************************************************************-*/
-int str2pos (long int *tape_position, char* tape_str, char* fmt)
+int str2cal (cal_t *time, const char* str)
 {
-    /* fmt : h:mm:ss */
-   int pos;
-   int hc = 3600;
-   int mc = 60; 
-   int sc = 1;  
-/*
-   	sc = 1;
-   	mc = 60;
-   	hc = 3600;
-*/
-   	for (pos = strlen(fmt) -1; pos >= 0; pos--)  
-		{
-      		switch (fmt[pos])  
-			{
-         	case 's':	
-			if ( !(isdigit(tape_str[pos])) )
-				return (-1);
-            		*tape_position += (long) (tape_str[pos] - '0') * sc;
-            		sc *= 10;
-			if (sc == 100 && (*tape_position >= 60))
-				return (-1);
-         		break;
-         	case 'm':
-			if ( !(isdigit(tape_str[pos])) )
-				return (-1);
-            		*tape_position += (long) (tape_str[pos] - '0') * mc;
-            		mc *= 10;
-			if (mc == 6000 && ((int)(tape_str[pos] - '0') >= 6))
-				return (-1);
-         		break;
-         	case 'h':
-			if ( !(isdigit(tape_str[pos])) )
-				return (-1);
-            		*tape_position += (long) (tape_str[pos] - '0') * hc;
-         		break;
-         	default:
-         	break;
-      			}
-   		}
-   return (0);
+  char* temp;
+  int   trav;
+  int   endstr;
+  char  infield;
+  int   field_count;
+  int   digits;
+
+  time->tm_year = 0;
+  time->tm_month = 0;
+  time->tm_day = 0;
+  time->tm_hour = 0;
+  time->tm_min = 0;
+  time->tm_sec = 0;
+
+  temp = strdup (str);
+
+  /* count the number of fields and cut the string off after a year, day,
+     hour, minute, and second can be parsed */
+  trav = 0; infield = 0;
+  field_count = digits = 0;
+  while (temp[trav] != '\0') {
+    if (isdigit(temp[trav])) {
+      digits ++;
+      if (!infield) {
+	/* count only the transitions from non digits to a field of digits */
+	field_count ++;
+      }
+      infield = 1;
+    }
+    else {
+      infield = 0;
+    }
+    if (field_count == 6) {
+      /* currently in the seconds field */
+      temp[trav+2] = '\0';
+      break;
+    }
+    else if (digits == 14) {
+      /* enough digits for a date */
+      temp[trav+1] = '\0';
+      break;
+    }
+    trav ++;
+  }
+
+  endstr = strlen(temp);
+  /* cut off any trailing characters that are not ASCII numbers */
+  while ((endstr>=0) && !isdigit(temp[endstr])) endstr --;
+  if (endstr < 0)
+    return -1;
+  temp [endstr+1] = '\0'; 
+
+
+  /* parse UTC seconds */
+  trav = endstr - 1;
+  if ((trav < 0) || !isdigit(temp[trav]))
+    trav++;
+  sscanf (temp+trav, "%2d", &(time->tm_sec));
+
+  /* cut out seconds and extra characters */
+  endstr = trav-1;
+  while ((endstr>=0) && !isdigit(temp[endstr])) endstr --;
+  if (endstr < 0)
+    return 0;
+  temp [endstr+1] = '\0'; 
+
+  /* parse UTC minutes */
+  trav = endstr - 1;
+  if ((trav < 0) || !isdigit(temp[trav]))
+    trav++;
+  sscanf (temp+trav, "%2d", &(time->tm_min));
+
+  /* cut out minutes and extra characters */
+  endstr = trav-1;
+  while ((endstr>=0) && !isdigit(temp[endstr])) endstr --;
+  if (endstr < 0)
+    return 0;
+  temp [endstr+1] = '\0'; 
+
+  /* parse UTC hours */
+  trav = endstr - 1;
+  if ((trav < 0) || !isdigit(temp[trav]))
+    trav++;
+  sscanf (temp+trav, "%2d", &(time->tm_hour));
+
+  /* cut out minutes and extra characters */
+  endstr = trav-1;
+  while ((endstr>=0) && !isdigit(temp[endstr])) endstr --;
+  if (endstr < 0)
+    return 0;
+  temp [endstr+1] = '\0'; 
+
+  /* parse UTC days */
+  trav = endstr - 1;
+  if ((trav < 0) || !isdigit(temp[trav]))
+    trav++;
+  sscanf (temp+trav, "%2d", &(time->tm_day));
+
+  /* cut out minutes and extra characters */
+  endstr = trav-1;
+  while ((endstr>=0) && !isdigit(temp[endstr])) endstr --;
+  if (endstr < 0)
+    return 0;
+  temp [endstr+1] = '\0'; 
+
+  /* parse UTC months */
+  trav = endstr - 1;
+  if ((trav < 0) || !isdigit(temp[trav]))
+    trav++;
+  sscanf (temp+trav, "%2d", &(time->tm_month));
+
+  /* cut out minutes and extra characters */
+  endstr = trav-1;
+  while ((endstr>=0) && !isdigit(temp[endstr])) endstr --;
+  if (endstr < 0)
+    return 0;
+  temp [endstr+1] = '\0'; 
+
+  /* parse UTC year */
+  trav = endstr;
+  while ((trav >= 0) && (endstr-trav < 4) && isdigit(temp[trav]))
+    trav--;
+  sscanf (temp+trav+1, "%4d", &(time->tm_year));
+
+  free (temp);
+  return 0;
+} 
+
+
+int cal2utc (utc_t *time, cal_t calendar)
+{
+  int days_in_month[12] = {31,28,31,30,31,30,31,31,30,31,30,31};
+  int month;
+
+  if (UTC_LEAPYEAR(calendar.tm_year)) {
+    days_in_month[1] = 29;
+  }
+
+  time->tm_year = calendar.tm_year;
+  time->tm_yday = 0;
+  for (month=1; month<calendar.tm_month; month++) {
+    time->tm_yday += days_in_month[month-1];
+  }
+  time->tm_yday += calendar.tm_day;
+  time->tm_hour = calendar.tm_hour;
+  time->tm_min = calendar.tm_min;
+  time->tm_sec = calendar.tm_sec;
+
+  return 0;
 }
+
+int utc2cal (cal_t *calendar, utc_t time)
+{
+  int leapyr;
+  int day_of_year = time.tm_yday;
+  int day_of_month;
+  int month[12] = {31,28,31,30,31,30,31,31,30,31,30,31};
+  int Month;
+  int i = 0;
+
+  if (time.tm_year%4==0) leapyr=1; else leapyr=0;  
+  if (time.tm_year%100==0 && time.tm_year%400!=0) leapyr=0; 
+
+  if (leapyr) month[1] = 29;
+
+  i=0;
+  while (day_of_year > 0)  {
+    day_of_year -= month[i];
+    i++;
+  }
+  Month = i;
+  day_of_month = day_of_year + month[i-1];
+
+  /*  sprintf(utdatestr,"%2d-%2d-%4d",day_of_month,Month,time.tm_year);
+  if (day_of_month < 10) utdatestr[0] = '0';
+  if (Month < 10)        utdatestr[3] = '0';*/
+
+  return 0;
+}
+
 
 /* *************************************************************************
    utc2str -
