@@ -43,9 +43,9 @@ namespace Pulsar {
       int index;
       
       // Information in the row
-      char* date_pro;
-      char* proc_cmd;
-      char* pol_type;
+      string date_pro;
+      string proc_cmd;
+      string pol_type;
       int npol;
       int nbin;
       int nbin_prd;
@@ -56,10 +56,10 @@ namespace Pulsar {
       int par_corr;
       int rm_corr;
       int dedisp;
-      char* sc_mthd;
-      char* cal_mthd;
-      char* cal_file;
-      char* rfi_mthd;
+      string sc_mthd;
+      string cal_mthd;
+      string cal_file;
+      string rfi_mthd;
       
       //Destructor
       ~row ();
@@ -70,9 +70,9 @@ namespace Pulsar {
     };
     
     // The storage array
-    vector<row*> rows;
-
-    ProcHistory::row* get_last ();
+    vector<row> rows;
+    
+    ProcHistory::row& get_last ();
     void add_blank_row ();
     
   private:

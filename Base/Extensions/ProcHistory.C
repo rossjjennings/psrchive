@@ -31,14 +31,14 @@ void Pulsar::ProcHistory::init ()
   rows.resize (0);
 }
 
-Pulsar::ProcHistory::row* Pulsar::ProcHistory::get_last ()
+Pulsar::ProcHistory::row& Pulsar::ProcHistory::get_last ()
 {
-  return rows[rows.size()-1];
+  return rows.back();
 }
 
 void Pulsar::ProcHistory::add_blank_row ()
 {
-  rows.push_back(new row ());
+  rows.push_back(row());
 }
 
 // //////////////////////////////////////////////////
@@ -47,32 +47,17 @@ void Pulsar::ProcHistory::add_blank_row ()
 
 Pulsar::ProcHistory::row::~row ()
 {
-  delete [] date_pro;
-  delete [] proc_cmd;
-  delete [] pol_type;
-  delete [] sc_mthd;
-  delete [] cal_mthd;
-  delete [] cal_file;
-  delete [] rfi_mthd;
 }
 
 void Pulsar::ProcHistory::row::init ()
 {
-  date_pro = new char[24];
-  proc_cmd = new char[80];
-  pol_type = new char[8];
-  sc_mthd  = new char[32];
-  cal_mthd = new char[32];
-  cal_file = new char[32];
-  rfi_mthd = new char[32];
-  
-  sprintf(date_pro, "%s", "unset");
-  sprintf(proc_cmd, "%s", "unset");
-  sprintf(pol_type, "%s", "unset");
-  sprintf(sc_mthd,  "%s", "NONE");
-  sprintf(cal_mthd, "%s", "NONE");
-  sprintf(cal_file, "%s", "NONE");
-  sprintf(rfi_mthd, "%s", "NONE");
+  date_pro = "unset";
+  proc_cmd = "unset";
+  pol_type = "unset";
+  sc_mthd  = "NONE";
+  cal_mthd = "NONE";
+  cal_file = "NONE";
+  rfi_mthd = "NONE";
   
   npol     = 0;
   nbin     = 0;
