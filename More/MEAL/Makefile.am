@@ -13,7 +13,8 @@ libunits_la_SOURCES = Error.C HeapTracked.C ReferenceAble.C stringtok.C	      \
 	OptimizedComplex2.C Complex2Constant.C Gain.C Phase.C Boost.C	      \
 	Rotation.C Polar.C Coherency.C NormalizeStokes.C Tracer.C	      \
 	CongruenceTransformation.C Function_load.C Function_parse.C	      \
-	Function_print.C Function_new_Function.C Pauli.C linchi2.C
+	Function_print.C Function_new_Function.C Pauli.C linchi2.C            \
+	TextInterface.C
 
 nobase_include_HEADERS = Error.h HeapTracked.h ReferenceAble.h stringtok.h \
 	Traits.h Reference.h ReferenceTo.h Registry.h Functor.h \
@@ -63,8 +64,8 @@ check_PROGRAMS = test_Error test_HeapTracked test_Reference \
 	test_Estimate test_Vector test_Matrix test_Jacobi test_eigen \
 	test_Jones test_Quaternion test_Pauli test_Basis test_Stokes \
 	test_Axis test_Projection test_Composite test_Scalar \
-	test_Complex2Product test_TextInterface
-	
+	test_Complex2Product test_TextInterface test_parse_indeces
+
 TESTS = $(check_PROGRAMS)
 
 test_Error_SOURCES		= test_Error.C
@@ -90,9 +91,10 @@ test_Composite_SOURCES		= test_Composite.C
 test_Scalar_SOURCES		= test_Scalar.C
 test_Complex2Product_SOURCES	= test_Complex2Product.C
 test_TextInterface_SOURCES	= test_TextInterface.C
+test_parse_indeces_SOURCES	= test_parse_indeces.C
 
 lmfit_SOURCES 			= lmfit.C
-lmfit_LDADD = libunits.la @PGPLOT_LIBS@
+lmfit_LDADD			= libunits.la @PGPLOT_LIBS@
 
 #############################################################################
 #
