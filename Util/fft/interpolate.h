@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/fft/interpolate.h,v $
-   $Revision: 1.8 $
-   $Date: 2004/11/23 11:31:22 $
+   $Revision: 1.9 $
+   $Date: 2005/01/28 06:27:08 $
    $Author: straten $*/
 
 #ifndef __fft_interpolate_h
@@ -19,23 +19,23 @@ namespace fft {
   extern bool verbose;
 
   template <class T>
-  void interpolate (vector<T>& out, const vector<T>& in) {
+  void interpolate (std::vector<T>& out, const std::vector<T>& in) {
     
     if (in.size() >= out.size())
       throw Error (InvalidParam, "fft::interpolate",
 		   "in.size=%d >= out.size=%d.  just scrunch",
 		   in.size() >= out.size());
     
-    vector< std::complex<float> > dom1 (out.size());
-    vector< std::complex<float> > dom2 (out.size());
+    std::vector< std::complex<float> > dom1 (out.size());
+    std::vector< std::complex<float> > dom2 (out.size());
     
     DatumTraits<T> datum_traits;
 
     unsigned ndim = datum_traits.ndim();
     
     if (verbose)
-      cerr << "fft::interpolate " << ndim << " dimensions from "
-	   << in.size() << " to " << out.size() << endl;
+      std::cerr << "fft::interpolate " << ndim << " dimensions from "
+	        << in.size() << " to " << out.size() << std::endl;
     
     unsigned ipt;
 

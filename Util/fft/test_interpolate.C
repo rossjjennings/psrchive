@@ -2,13 +2,13 @@
 
 int main () try {
 
-  vector< complex<float> > C_in (128);
-  vector< complex<float> > C_out (256);
+  std::vector< std::complex<float> > C_in (128);
+  std::vector< std::complex<float> > C_out (256);
 
   fft::interpolate (C_out, C_in);
 
-  vector< double > R_in (128);
-  vector< double > R_out (256);
+  std::vector< double > R_in (128);
+  std::vector< double > R_out (256);
 
   fft::interpolate (R_out, R_in);
 
@@ -16,6 +16,6 @@ int main () try {
 
 }
 catch (Error& error) {
-  cerr << error << endl;
+  std::cerr << error << std::endl;
   return -1;
 }
