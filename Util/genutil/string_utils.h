@@ -1,7 +1,7 @@
 //-*-C++-*-
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Attic/string_utils.h,v $
-   $Revision: 1.27 $
-   $Date: 2003/10/30 02:32:27 $
+   $Revision: 1.28 $
+   $Date: 2003/12/09 00:22:10 $
    $Author: hknight $ */
 
 #ifndef __STRING_UTILS_H
@@ -22,24 +22,31 @@
 
 #include "psr_cpp.h"
 
-// Like perl chomp.  Returns true if successful.
-bool h_chomp(string& ss, char gone='\n');
-bool h_chomp(string& ss, string gone);
-
-// Like perl chop
-string& h_chop(string& ss);
-// Exactly the same as h_chop()
+// These return the input string
 string& chop(string& ss);
+string& chop(string& ss, unsigned chars);
 
-// Returns ss instead of a boolean value
 string& chomp(string& ss, char gone='\n');
 string& chomp(string& ss, string gone);
 
-// Like chomp, but takes the character off the front of the string
+string& frontchop(string& ss);
+string& frontchop(string& ss, unsigned chars);
+
 string& frontchomp(string& ss, char gone);
 string& frontchomp(string& ss, string gone);
 
-string& frontchop(string& ss);
+// These return true on success
+bool h_chop(string& ss);
+bool h_chop(string& ss, unsigned chars);
+
+bool h_chomp(string& ss, char gone='\n');
+bool h_chomp(string& ss, string gone);
+
+bool h_frontchop(string& ss);
+bool h_frontchop(string& ss, unsigned chars);
+
+bool h_frontchomp(string& ss, char gone);
+bool h_frontchomp(string& ss, string gone);
 
 // Takes off a leading 'J' or a leading 'B'
 string no_JB(string pulsar);

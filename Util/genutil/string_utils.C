@@ -10,47 +10,51 @@
 
 #include "string_utils.h"
 
-// Like perl chomp
-bool h_chomp(string& ss,char gone){
-  if(ss[ss.size()-1]==gone){
+string& chop(string& ss){
+  if( ss.size()!=0 )
     ss.resize(ss.size()-1);
-    return true;
-  }
-  return false;
-}
-
-bool h_chomp(string& ss,string gone){
-  if( ss.find( gone, ss.length()-gone.length()) != string::npos ){
-    ss.resize(ss.size()-gone.size());
-    return true;
-  }
-  return false;
-}
-
-// Like perl chop
-string& h_chop(string& ss){
-  ss.resize(ss.size()-1);
   return ss;
 }
-// Exactly the same as h_chop()
-string& chop(string& ss){
-  ss.resize(ss.size()-1);
+
+string& chop(string& ss, unsigned chars){
+  if( ss.size() < chars )
+    ss.resize(0);
+  else
+    ss.resize( ss.size()-chars );
+
   return ss;
 }
 
 string& chomp(string& ss,char gone){
-  if(ss[ss.size()-1]==gone)
+  if(ss.size()!=0 && ss[ss.size()-1]==gone)
     ss.resize(ss.size()-1);
   return ss;
 }
 
 string& chomp(string& ss,string gone){
+  if( ss.size() < gone.size() )
+    return ss;
   if( ss.find( gone, ss.length()-gone.length()) != string::npos )
     ss.resize(ss.size()-gone.size());
   return ss;
 }
 
-// Like chomp, but takes the character off the front of the string
+string& frontchop(string& ss){
+  if( ss.size()!=0 )
+    ss = string(ss.begin()+1,ss.end());
+
+  return ss;
+}
+
+string& frontchop(string& ss, unsigned chars){
+  if( ss.size() <= chars )
+    ss.resize(0);
+  else
+    ss = string(ss.begin()+chars,ss.end());
+
+  return ss;
+}
+
 string& frontchomp(string& ss, char gone){
   if( ss.size()==0 )
     return ss;
@@ -62,7 +66,7 @@ string& frontchomp(string& ss, char gone){
 }
 
 string& frontchomp(string& ss, string gone){
-  if( ss.size()==0 || gone.size()==0 )
+  if( ss.size() < gone.size() )
     return ss;
 
   if( ss.substr(0,gone.size())==gone )
@@ -71,13 +75,81 @@ string& frontchomp(string& ss, string gone){
   return ss;
 }
 
-string& frontchop(string& ss){
+bool h_chop(string& ss){
   if( ss.size()==0 )
-    return ss;
+    return false;
+  ss.resize(ss.size()-1);
+  return true;
+}
 
+bool h_chop(string& ss,unsigned chars){
+  if( ss.size() < chars ){
+    ss.resize(0);
+    return false;
+  }
+
+  ss.resize(ss.size()-chars);
+  return true;
+}
+
+bool h_chomp(string& ss,char gone){
+  if( ss.size()==0 )
+    return false;
+
+  if(ss[ss.size()-1]==gone){
+    ss.resize(ss.size()-1);
+    return true;
+  }
+  return false;
+}
+
+bool h_chomp(string& ss,string gone){
+  if( ss.size() < gone.size() )
+    return false;
+
+  if( ss.find( gone, ss.length()-gone.length()) != string::npos ){
+    ss.resize(ss.size()-gone.size());
+    return true;
+  }
+  return false;
+}
+
+bool h_frontchop(string& ss){
+  if( ss.size()==0 )
+    return false;
   ss = string(ss.begin()+1,ss.end());
+  return true;
+}
 
-  return ss;
+bool h_frontchop(string& ss, unsigned chars){
+  if( ss.size() < chars ){
+    ss.resize(0);
+    return false;
+  }
+  ss = string(ss.begin()+chars,ss.end());
+  return true;
+}
+
+bool h_frontchomp(string& ss, char gone){
+  if( ss.size() == 0 )
+    return false;
+
+  if( ss[0]==gone ){
+    ss = string(ss.begin()+1,ss.end());
+    return true;
+  }
+  return false;
+}
+
+bool h_frontchomp(string& ss, string gone){
+  if( ss.size() < gone.size() )
+    return false;
+
+  if( ss.substr(0,gone.size())==gone ){
+    ss = string(ss.begin()+gone.size(),ss.end());
+    return true;
+  }
+  return false;
 }
 
 // Takes off a leading 'J' or a leading 'B'
