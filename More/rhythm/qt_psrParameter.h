@@ -33,6 +33,7 @@ class qt_psrParameter : public QHBox, public psrParameter
   virtual ~qt_psrParameter () {};
 
   void setFit (bool infit);
+  bool getFit () const;
 
   void setLabel (const char* textval);
   void setLabel (const QPixmap& ulabel);

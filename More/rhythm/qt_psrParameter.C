@@ -56,6 +56,11 @@ void qt_psrParameter::setFit (bool fit)
   checkfit.setChecked (infit);
 }
 
+bool qt_psrParameter::getFit () const
+{
+  return checkfit.isChecked ();
+}
+
 // //////////////////////////////////////////////////////////////////////////
 // puts text in the box on the left.
 // Where this label ends up depends on whether

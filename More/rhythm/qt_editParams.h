@@ -32,6 +32,8 @@ class qt_editParams : public QWidget
   void set_psrParams (const psrParams& eph);
   void get_psrParams (psrParams* eph);
 
+  // see fitall() and fitnone() slots
+
   // returns true if the editor currently contains a set of TEMPO 11 parameters
   bool hasdata() { return current != -1; };
 
@@ -52,12 +54,14 @@ class qt_editParams : public QWidget
   void forward();          // go forward to newer parameter set
   void backward();         // go back to last parameter set
   void select_parms();     // hides/shows the selection grid
+  void fitall ();
+  void fitnone ();
 
   // Help Menu Callbacks
   void about();
   void aboutQt();
 
- private:
+ protected:
 
   // the psr parameters display widget
   qt_psrParams display;

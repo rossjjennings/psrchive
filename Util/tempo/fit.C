@@ -39,7 +39,7 @@ void Tempo::fit (const psrParams& model, const vector<toa>& toas,
   // unload the toas into a temporary file
   FILE* fptr = fopen (tempo_tim, "w");
   if (fptr==NULL) {
-    fprintf (stderr, "fit error opening %s:\n",tempo_tim);
+    fprintf (stderr, "fit error opening %s:\n", tempo_tim);
     perror (":");
     throw ("fit() cannot open file");
   }
@@ -51,6 +51,9 @@ void Tempo::fit (const psrParams& model, const vector<toa>& toas,
     }
   }
   fclose (fptr); 
+  if (verbose)
+    cerr << "Tempo::fit unloaded " << unloaded << " TOAs to '" 
+	 << tempo_tim << "'" << endl;
 
   // unload the ephemeris
   if (verbose)

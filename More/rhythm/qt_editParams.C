@@ -74,7 +74,7 @@ void qt_editParams::menubarConstruct ()
   file->setItemEnabled (saveID, false);
 
   file->insertSeparator();
-  file->insertItem( "&Print (stderr)",
+  file->insertItem( "&Print (cerr)",
 		    this, SLOT( print() ), ALT+Key_P );
 
   if (isTopLevel()) {
@@ -96,8 +96,11 @@ void qt_editParams::menubarConstruct ()
   edit->setItemEnabled (forwardID, false);
 
   edit->insertSeparator();
-  selectID = edit->insertItem ("Select P&arameters", 
-				  this, SLOT(select_parms()), ALT+Key_A );
+  selectID = edit->insertItem ("S&elect Parameters", 
+				  this, SLOT(select_parms()), ALT+Key_E );
+
+  edit->insertItem ("Fit &All",  this, SLOT( fitall() ), ALT+Key_A);
+  edit->insertItem ("Fit &None", this, SLOT( fitnone() ), ALT+Key_N);
 
   // the Help Menu
   QPopupMenu *help = new QPopupMenu( menu );
@@ -109,10 +112,10 @@ void qt_editParams::menubarConstruct ()
   //
   // the whole thing
   //
-  ((QMenuBar*) menu) -> insertItem   ( "&File", file );
-  ((QMenuBar*) menu) -> insertItem   ( "&Edit", edit );
+  ((QMenuBar*) menu) -> insertItem   ( "File", file );
+  ((QMenuBar*) menu) -> insertItem   ( "Edit", edit );
   ((QMenuBar*) menu) -> insertSeparator();
-  ((QMenuBar*) menu) -> insertItem   ( "&Help", help );
+  ((QMenuBar*) menu) -> insertItem   ( "Help", help );
   ((QMenuBar*) menu) -> setSeparator ( QMenuBar::InWindowsStyle );
 
   return;
@@ -231,7 +234,8 @@ void qt_editParams::save()
 
 void qt_editParams::print()
 { 
-  display.get_psrParams().unload (stderr);
+  display.get_psrParams (&data);
+  data.unload (stderr);
 }
 
 void qt_editParams::closeWin()
@@ -308,4 +312,14 @@ QSize qt_editParams::sizeHint () const
     cerr << "qt_editParams::sizeHint = " << display.sizeHint() << endl;
 
   return display.sizeHint();
+}
+
+void qt_editParams::fitall ()
+{
+  display.setFitAll (true);
+}
+
+void qt_editParams::fitnone ()
+{
+  display.setFitAll (false);
 }
