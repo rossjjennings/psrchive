@@ -196,6 +196,10 @@ bool Timer::mixable (const timer& hdr1, const timer& hdr2,
 bool Timer::cal_mixable (const timer& hdr1, const timer& hdr2,
 			double maxfsep, bool allow_opposite_sideband)
 {
+  if (hdr1.banda.polar != hdr2.banda.polar) {
+    reason = "Archives have different senses of polarisation";
+    return false;
+  }
   if (hdr1.nsub_band != hdr2.nsub_band) {
     reason = "Archives have different numbers of subbands";
     return false;
