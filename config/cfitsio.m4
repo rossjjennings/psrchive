@@ -66,11 +66,12 @@ AC_DEFUN([SWIN_LIB_CFITSIO],
     ## Look for the library ##
     cf_lib_path_list="$with_cfitsio_lib_dir .
                       /usr/local/lib
-                      /usr/local/cfitsio/lib"
+                      /usr/local/cfitsio/lib
+                      ${PSRHOME}/packages/${LOGIN_ARCH}/cfitsio"
 
     ac_save_LIBS="$LIBS"
 
-    for cf_dir in $cf_include_path_list; do
+    for cf_dir in $cf_lib_path_list; do
       LIBS="-L$cf_dir -lcfitsio $ac_save_LIBS"
       AC_TRY_LINK([#include <fitsio.h>], [fits_movnam_hdu(0,0,0,0,0);],
                   have_cfitsio=yes, have_cfitsio=no)
