@@ -54,6 +54,9 @@ Pulsar::Profile* Pulsar::Integration::new_Profile ()
 void Pulsar::Integration::copy (const Integration& subint,
 				int _npol, int _nchan)
 {
+  if (Pulsar::Integration::verbose)
+    cerr << "Pulsar::Integration::copy entered" << endl;
+
   if (this == &subint)
     return;
 

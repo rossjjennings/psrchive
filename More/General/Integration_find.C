@@ -14,6 +14,9 @@
 */
 Pulsar::Integration* Pulsar::Integration::total () const
 {
+  if (Pulsar::Integration::verbose)
+    cerr << "Pulsar::Integration::total entered" << endl;
+
   if (get_npol()<1 || get_nchan()<1)
     throw Error (InvalidState, "Pulsar::Integration::total",
 		 "npol=%d nchan=%d", get_npol(), get_nchan());
@@ -100,6 +103,9 @@ void Pulsar::Integration::find_peak_edges (int& rise, int& fall) const
 */
 float Pulsar::Integration::find_min_phase () const
 {
+  if (Pulsar::Integration::verbose)
+    cerr << "Pulsar::Integration::find_min_phase entered" << endl;
+
   Integration* copy = 0;
   float min_phase = -1.0;
 

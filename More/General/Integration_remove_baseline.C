@@ -14,6 +14,10 @@
   */
 void Pulsar::Integration::remove_baseline (float phase)
 {
+
+  if (Pulsar::Integration::verbose)
+    cerr << "Pulsar::Integration::remove_baseline entered" << endl;
+
   try {
 
     if (phase == -1.0)
