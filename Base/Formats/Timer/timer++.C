@@ -74,7 +74,7 @@ int Timer::poln_storage (const struct timer& hdr)
 
 // the difference in frequencies should not be more than 100kHz...
 // double Timer::default_max_freq_sep = 0.1;
-// string Timer::reason;
+string Timer::reason;
 
 bool Timer::mixable (const timer& hdr1, const timer& hdr2, double max_freq_sep)
 {
