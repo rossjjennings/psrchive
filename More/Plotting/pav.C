@@ -108,6 +108,9 @@ int main (int argc, char** argv)
       tscrunch = 0;
       break;
     case 'V':
+      Pulsar::Archive::verbose = true;
+      Pulsar::Integration::verbose = true;
+      Pulsar::Profile::verbose = true;
     case 'v':
       verbose = true;
       break;
@@ -139,6 +142,8 @@ int main (int argc, char** argv)
 
   Pulsar::Archive* archive = 0;
 
+  Pulsar::Error::handle_signals ();
+
   for (unsigned ifile=0; ifile < filenames.size(); ifile++) try {
 
     archive = Pulsar::Archive::factory (filenames[ifile]);
@@ -161,6 +166,11 @@ int main (int argc, char** argv)
     delete archive; archive = 0;
   }
   catch (Pulsar::Error& error) {
+    cerr << error << endl;
+    if (archive)
+      delete archive; archive = 0;
+  }
+  catch (string& error) {
     cerr << error << endl;
     if (archive)
       delete archive; archive = 0;
