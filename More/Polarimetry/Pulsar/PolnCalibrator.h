@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PolnCalibrator.h,v $
-   $Revision: 1.16 $
-   $Date: 2003/09/12 18:39:37 $
+   $Revision: 1.17 $
+   $Date: 2003/10/08 14:28:04 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PolnCalibrator_H
@@ -95,6 +95,12 @@ namespace Pulsar {
       Estimate<float> get_param (unsigned ichan, unsigned iclass,
 				 unsigned iparam) const;
       
+      //! Return the colour index
+      int get_colour_index (unsigned iclass, unsigned iparam) const;
+
+      //! Return the graph marker
+      int get_graph_marker (unsigned iclass, unsigned iparam) const;
+
     protected:
 
       //! The PolnCalibrator to be plotted

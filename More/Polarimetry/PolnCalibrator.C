@@ -56,6 +56,10 @@ unsigned Pulsar::PolnCalibrator::get_Transformation_nchan () const
   if (transformation.size() == 0)
     const_cast<PolnCalibrator*>(this)->calculate_transformation();
 
+  if (verbose)
+    cerr << "Pulsar::PolnCalibrator::get_Transformation_nchan nchan="
+         << transformation.size() << endl;
+
   return transformation.size();
 }
 
@@ -89,7 +93,8 @@ Pulsar::PolnCalibrator::get_Transformation (unsigned ichan) const
 
 
 void Pulsar::PolnCalibrator::build (unsigned nchan)
-{
+{ try {
+
   if (transformation.size() == 0)
     const_cast<PolnCalibrator*>(this)->calculate_transformation();
 
@@ -137,11 +142,14 @@ void Pulsar::PolnCalibrator::build (unsigned nchan)
 
   if (response.size() == nchan)
     return;
-
+ 
   throw Error (InvalidState, "Pulsar::PolnCalibrator::build",
 	       "interpolating/averaging Jones matrices not yet implemented");
 }
-
+catch (Error& error) {
+  error += "Pulsar::PolnCalibrator::build";
+}
+}
 
 
 
@@ -150,7 +158,8 @@ void Pulsar::PolnCalibrator::build (unsigned nchan)
   respect to the flux of the calibrator, such that a FluxCalibrator
   simply scales the archive by the calibrator flux. */
 void Pulsar::PolnCalibrator::calibrate (Archive* arch)
-{
+{ try {
+
   cerr << "Pulsar::PolnCalibrator::calibrate" << endl;
 
   if (!calibrator)
@@ -168,6 +177,10 @@ void Pulsar::PolnCalibrator::calibrate (Archive* arch)
 
   arch->transform (response);
 }
+catch (Error& error) {
+  error += "Pulsar::PolnCalibrator::calibrate";
+}
+}
 
 //! Constructor
 Pulsar::PolnCalibrator::Info::Info (const PolnCalibrator* cal)
@@ -183,11 +196,11 @@ Pulsar::PolnCalibrator::Info::Info (const PolnCalibrator* cal)
 
   // find the first valid transformation
   const Calibration::Transformation* xform = 0;
-  for (unsigned ichan = 0; ichan < nchan; ichan++) {
-    xform = cal->get_Transformation (ichan);
-    if (xform)
+  for (unsigned ichan = 0; ichan < nchan; ichan++)
+    if ( cal->get_Transformation_valid (ichan) ) {
+      xform = cal->get_Transformation (ichan);
       break;
-  }
+    }
 
   if (!xform)
     return;
@@ -227,6 +240,33 @@ Estimate<float> Pulsar::PolnCalibrator::Info::get_param (unsigned ichan,
 
   return calibrator->get_Transformation(ichan)->get_Estimate(iparam+offset);
 }
+
+
+//! Return the colour index
+int Pulsar::PolnCalibrator::Info::get_colour_index (unsigned iclass,
+						    unsigned iparam) const
+{
+  unsigned colour_offset = 1;
+  if (get_nparam (iclass) == 3)
+    colour_offset = 2;
+
+  return colour_offset + iparam;
+}
+
+//! Return the graph marker
+int Pulsar::PolnCalibrator::Info::get_graph_marker (unsigned iclass, 
+						    unsigned iparam) const
+{
+  if (iparam == 0 || iparam > 3)
+    return -1;
+
+  iparam --;
+
+  int nice_markers[3] = { 16, 13, 17 };
+
+  return nice_markers[iparam];
+}
+
 
 Pulsar::Calibrator::Info* Pulsar::PolnCalibrator::get_Info () const
 {
