@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Profile.h,v $
-   $Revision: 1.79 $
-   $Date: 2004/12/30 11:04:01 $
+   $Revision: 1.80 $
+   $Date: 2004/12/30 23:40:53 $
    $Author: ahotan $ */
 
 #ifndef __Pulsar_Profile_h
@@ -208,8 +208,7 @@ namespace Pulsar {
     // lower level information for use in debugging.
 
     //! Functor that impliments shift algorithms
-    static Functor<double(const Pulsar::Profile&, 
-			  float& ephase)> shift_functor;
+    //static Functor<double(const Pulsar::Profile&, float&)> shift_functor;
 
     /*! Parabolic interpolation in the time domain */
     double ParIntShift (const Profile& std, float& ephase) const;

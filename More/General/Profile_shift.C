@@ -31,7 +31,7 @@ void wrap (int& binval, int nbin) {
 }
 
 //Functor<double(const Pulsar::Profile&, float&)>
-//Pulsar::Profile::shift_functor (&Pulsar::Profile::PhaseGradShift);
+//Pulsar::Profile::shift_functor (&PhaseGradShift);
 
 double Pulsar::Profile::GaussianShift (const Profile& std, float& ephase) const
 {
