@@ -10,6 +10,10 @@
 #include "genutil.h"
 #include "coord.h"
 
+// some utility functions
+const char* fits_datatype_str (int datatype);
+void datatype_match (int typecode, int ephind);
+
 // ///////////////////////////////////////////////////////////////////////
 //
 // load an ephemeris from a PSRFITS file
@@ -18,71 +22,6 @@
 // row      - if specified, parse the row'th record in the binary table
 //            otherwise, parse the last (most recent) row
 //
-
-const char* fits_datatype_str (int datatype)
-{
-  switch (datatype) {
-
-  case TBIT:
-    return "bit 'X'";
-  case TBYTE:
-    return "byte 'B'";
-  case TLOGICAL:
-    return "logical 'L'";
-  case TSTRING:
-    return "string 'A'";
-  case TSHORT:
-    return "short 'I'";
-  case TINT32BIT:
-    return "32-bit int 'J'";
-    //  case TLONG:
-    //  return "long";
-  case TFLOAT:
-    return "float 'E'";
-  case TDOUBLE:
-    return "double 'D'";
-  case TCOMPLEX:
-    return "complex 'C'";
-  case TDBLCOMPLEX:
-    return "double complex 'M'";
-  case TINT:
-    return "int";
-  case TUINT:
-    return "unsigned int";
-  case TUSHORT:
-    return "unsigned short";
-  case TULONG:
-    return "unsigned long";
-  default:
-    return "unknown";
-  }
-
-  return "unknown";
-}
-
-void datatype_match (int typecode, int ephind)
-{
-  int parmtype = parmTypes[ephind];
-  assert (parmtype>=0 && parmtype<6);
-
-  // the CFITSIO datatype corresponding to each parmType
-  static int datatype[6] = { TSTRING,  // string
-			     TDOUBLE,  // double
-			     TSTRING,  // h:m:s
-			     TSTRING,  // d:m:s
-			     TDOUBLE,  // MJD
-			     TSHORT }; // integer
-  
-  cerr << "typecode=" << typecode << " datatype[" << parmtype << "]="
-       << datatype[parmtype] << endl;
-  
-  if (typecode != datatype[parmtype])
-    fprintf (stderr, 
-	     "psrephem::load PSRFITS binary table element datatype:%s\n" 
-	     "doesn't match parmType:%d for %s\n", 
-	     fits_datatype_str(typecode), parmtype,
-	     parmNames[ephind]);
-}
 
 void psrephem::load (fitsfile* fptr, long row)
 {
@@ -138,12 +77,12 @@ void psrephem::load (fitsfile* fptr, long row)
 
     fits_get_coltype (fptr, icol+1, &typecode, &repeat, &width, &status);
 
-    sprintf(keyword, "TTYPE%d", icol+1);
+    fits_make_keyn ("TTYPE", icol+1, keyword, &status);
     fits_read_key (fptr, TSTRING, keyword, value, comment, &status);
 
     if (verbose)
       cerr << icol+1 << " '" << value << "' repeat=" << repeat 
-	   << " width=" << width << " typecode=" << typecode 
+	   << " width=" << width << " typecode=" << typecode
 	   << " comment=" << comment << endl;
     
     parstr = value;
@@ -160,7 +99,7 @@ void psrephem::load (fitsfile* fptr, long row)
 	// match found ... 
 	// test the validity of operating assumption.  datatype match
 	// will display an error if there is a mismatch in assumption
-	// datatype_match (typecode, ieph);
+	datatype_match (typecode, ieph);
 
 	ephind[icol] = ieph;
 
@@ -171,9 +110,10 @@ void psrephem::load (fitsfile* fptr, long row)
 	break;
       }
     }
+
   }
 
-  char* strval = new char [maxstrlen + 1];
+  char* strval = new char [maxstrlen];
 
   for (icol=0; icol<ncols && status==0; icol++) {
 
@@ -182,7 +122,7 @@ void psrephem::load (fitsfile* fptr, long row)
       continue;
 
     long firstelem = 1;
-    long nelements = 1;
+    long onelement = 1;
     int anynul = 0;
 
     switch (parmTypes[ieph]) {
@@ -190,9 +130,8 @@ void psrephem::load (fitsfile* fptr, long row)
     case 0:  // string
       {
 	char* nul = " ";
-	fits_read_col (fptr, TSTRING, icol+1, row, firstelem, nelements,
-		       nul, strval, &anynul, &status);
-	cerr << "READ STR=" << strval << endl;
+	fits_read_col (fptr, TSTRING, icol+1, row, firstelem, onelement,
+		       nul, &strval, &anynul, &status);
 	value_str[ieph] = strval;
 	break;
       }
@@ -200,38 +139,42 @@ void psrephem::load (fitsfile* fptr, long row)
     case 1:  // double
       {
 	double nul = 0.0;
-	fits_read_col (fptr, TDOUBLE, icol+1, row, firstelem, nelements,
+	fits_read_col (fptr, TDOUBLE, icol+1, row, firstelem, onelement,
 		       &nul, value_double + ieph, &anynul, &status);
 	break;
       }
     case 2:  // h:m:s
       {
 	char* nul = " ";
-	fits_read_col (fptr, TSTRING, icol+1, row, firstelem, nelements,
-		       nul, strval, &anynul, &status);
-	cerr << "READ RA=" << strval << endl;
+	fits_read_col (fptr, TSTRING, icol+1, row, firstelem, onelement,
+		       nul, &strval, &anynul, &status);
 
-	if (str2ra (value_double + ieph, strval) != 0)
-	  cerr << "psrephem::load PSRFITS could not parse h:m:s from '" 
-	       << strval << "'" << endl;
+	if (str2ra (value_double + ieph, strval) != 0) {
+	  if (verbose)
+	    cerr << "psrephem::load PSRFITS could not parse h:m:s from '" 
+		 << strval << "'" << endl;
+	  anynul = 1;
+	}
 	break;
       }
     case 3:  // d:m:s
       {
 	char* nul = " ";
-	fits_read_col (fptr, TSTRING, icol+1, row, firstelem, nelements,
-		       nul, strval, &anynul, &status);
-	cerr << "READ DEC=" << strval << endl;
+	fits_read_col (fptr, TSTRING, icol+1, row, firstelem, onelement,
+		       nul, &strval, &anynul, &status);
 
-	if (str2dec (value_double + ieph, strval) != 0)
-	  cerr << "psrephem::load PSRFITS could not parse d:m:s from '" 
-	       << strval << "'" << endl;
+	if (str2dec (value_double + ieph, strval) != 0) {
+	  if (verbose)
+	    cerr << "psrephem::load PSRFITS could not parse d:m:s from '" 
+		 << strval << "'" << endl;
+	  anynul = 1;
+	}
 	break;
       }
     case 4:  // MJD
       {
 	double nul = 0.0;
-	fits_read_col (fptr, TDOUBLE, icol+1, row, firstelem, nelements,
+	fits_read_col (fptr, TDOUBLE, icol+1, row, firstelem, onelement,
 		       &nul, value_double + ieph, &anynul, &status);
 
 	value_integer[ieph] = value_double[ieph];
@@ -241,7 +184,7 @@ void psrephem::load (fitsfile* fptr, long row)
     case 5:  // integer
       {
 	int nul = 0;
-	fits_read_col (fptr, TINT, icol+1, row, firstelem, nelements,
+	fits_read_col (fptr, TINT, icol+1, row, firstelem, onelement,
 		       &nul, value_integer + ieph, &anynul, &status);
 	break;
       }
@@ -259,7 +202,7 @@ void psrephem::load (fitsfile* fptr, long row)
       status = 0;
     }
 
-    if (anynul)
+    if (anynul != 0)
       parmStatus[ieph] = 0;
 
   }
@@ -270,3 +213,69 @@ void psrephem::load (fitsfile* fptr, long row)
 
 }
 
+
+const char* fits_datatype_str (int datatype)
+{
+  switch (datatype) {
+
+  case TBIT:
+    return "bit 'X'";
+  case TBYTE:
+    return "byte 'B'";
+  case TLOGICAL:
+    return "logical 'L'";
+  case TSTRING:
+    return "string 'A'";
+  case TSHORT:
+    return "short 'I'";
+  case TINT32BIT:
+    return "32-bit int 'J'";
+    //  case TLONG:
+    //  return "long";
+  case TFLOAT:
+    return "float 'E'";
+  case TDOUBLE:
+    return "double 'D'";
+  case TCOMPLEX:
+    return "complex 'C'";
+  case TDBLCOMPLEX:
+    return "double complex 'M'";
+  case TINT:
+    return "int";
+  case TUINT:
+    return "unsigned int";
+  case TUSHORT:
+    return "unsigned short";
+  case TULONG:
+    return "unsigned long";
+  default:
+    return "unknown";
+  }
+
+  return "unknown";
+}
+
+void datatype_match (int typecode, int ephind)
+{
+  int parmtype = parmTypes[ephind];
+  assert (parmtype>=0 && parmtype<6);
+
+  // the CFITSIO datatype corresponding to each parmType
+  int datatype[7] = { TSTRING,  // string
+		      TDOUBLE,  // double
+		      TSTRING,  // h:m:s
+		      TSTRING,  // d:m:s
+		      TDOUBLE,  // MJD
+		      TSHORT }; // integer
+  
+  if (psrephem::verbose)
+    cerr << "typecode=" << typecode << " datatype[" << parmtype << "]="
+	 << datatype[parmtype] << endl;
+  
+  if (typecode != datatype[parmtype])
+    fprintf (stderr, 
+	     "psrephem::load PSRFITS binary table column datatype:%s\n" 
+	     "doesn't match parmType:%d for %s\n", 
+	     fits_datatype_str(typecode), parmtype,
+	     parmNames[ephind]);
+}
