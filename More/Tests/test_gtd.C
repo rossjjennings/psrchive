@@ -186,8 +186,8 @@ int main(int argc, char** argv) {
       ymax += (ymax-ymin)/10.0;
 
       cpgswin(0.0,1.0,ymin,ymax);
-      cpgbox ("BCNST", 0.0, 0, "BCNST", 0.0, 0);
-      cpglab("", "", "Cross Correlation");
+      cpgbox ("BCINST", 0.0, 0, "BCINST", 0.0, 0);
+      cpglab("", "Amplitude (Arbitrary)", "Pulse Phase");
       
       cpgmove(0.0, corr[0]);
       for (unsigned j = 1; j < nbin; j++) {
@@ -230,7 +230,7 @@ int main(int argc, char** argv) {
       cpgsls(1);
       
       cpgpanl(1,2);
-      cpgsvp(0.1,0.5,0.1,0.9);
+      cpgsvp(0.1,0.5,0.15,0.9);
       
       float maxphs = 0.0;
       int   maxbin = 0;
@@ -262,8 +262,8 @@ int main(int argc, char** argv) {
       float phsmax = binmax/float(nbin);
 
       cpgswin(phsmin, phsmax, ymin, ymax);
-      cpgbox ("BCNST", 0.0, 0, "BCNST", 0.0, 0);
-      cpglab("", "", "Interpolation Region");
+      cpgbox ("BCINST", 0.0, 0, "BCINST", 0.0, 0);
+      cpglab("Pulse Phase", "Amplitude (Arbitrary)", "Interpolation Region");
       
       for (int j = binmin; j < binmax; j++) {
 	cpgpt1(float(j)/float(nbin), corr[j], 0);
@@ -306,14 +306,14 @@ int main(int argc, char** argv) {
 
       cpgsvp(0.525,0.7,0.5,0.9);
       cpgsci(1);
-      cpgbox("BCT", 0.0, 0, "BCT", 0.0, 0);
+      cpgbox("BCIT", 0.0, 0, "BCIT", 0.0, 0);
       cpglab("", "", "Observed Profile");
       cpgsci(7);
       plotter.plot(profs[i]);
 
       cpgsvp(0.725,0.9,0.5,0.9);
       cpgsci(1);
-      cpgbox("BCT", 0.0, 0, "BCT", 0.0, 0);
+      cpgbox("BCIT", 0.0, 0, "BCIT", 0.0, 0);
       cpglab("", "", "Standard Profile");
       cpgsci(7);
       plotter.plot(stdprof);
