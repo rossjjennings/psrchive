@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/Timer/Pulsar/TimerIntegration.h,v $
-   $Revision: 1.3 $
-   $Date: 2004/07/16 07:56:46 $
+   $Revision: 1.4 $
+   $Date: 2005/03/29 11:55:43 $
    $Author: straten $ */
 
 /*
@@ -120,6 +120,13 @@ namespace Pulsar {
 
     //! Set all values to null
     void init ();
+
+    //! Load in the "new-style"
+    void load_extra (FILE* fptr, bool big_endian);
+
+    //! Load in the "old-style"
+    void load_old (FILE* fptr, bool big_endian);
+
   };
 
   //! load a Profile from a timer archive
