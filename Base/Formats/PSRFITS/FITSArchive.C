@@ -880,37 +880,36 @@ void Pulsar::FITSArchive::load_header (const char* filename)
   original_bandpass = new bandpass();
   original_bandpass->load(fptr, nrcvr);
   
-  // Load the TZRSITE code from the ephemeris history
+  // Load the NSITE code from the polyco
 
   int colnum = 0;
-  int rownum = 0;
+  long rownum = 0;
   int initflag = 0;
-
-  fits_movnam_hdu (fptr, BINARY_TBL, "PSREPHEM", 0, &status);
+  
+  if (verbose)
+    cerr << "FITSArchive::load_header reading NSITE from polyco" 
+	 << endl;
+  
+  fits_movnam_hdu (fptr, BINARY_TBL, "POLYCO", 0, &status);
   if (status != 0)
     throw FITSError (status, "FITSArchive::load_header", 
-		     "fits_movnam_hdu PSREPHEM");
+		     "fits_movnam_hdu POLYCO");
 
-  fits_get_num_rows (fptr, &numrows, &status);
-
-  cerr << numrows << endl;
-
-  fits_get_colnum (fptr, CASEINSEN, "TZRSITE", &colnum, &status);
+  fits_get_num_rows (fptr, &rownum, &status);
   
-  cerr << colnum << endl;
-
+  fits_get_colnum (fptr, CASEINSEN, "NSITE", &colnum, &status);
+  
   static char* nullstr = strdup(" ");
-  char the_code = ' ';
+  char* the_code = new char;
+  
   fits_read_col (fptr, TSTRING, colnum, rownum, 1, 1, nullstr, 
                  &the_code, &initflag, &status);
-
-  cerr << the_code << endl;
-
+  
   if (status != 0)
     throw FITSError (status, "FITSArchive::load_header", 
 		     "fits_read_col TZRSITE");
 
-  set_telescope_code(the_code);
+  set_telescope_code(*the_code);
 
   // Load the ephemeris from the FITS file
   
@@ -1136,8 +1135,12 @@ Pulsar::FITSArchive::load_Integration (const char* filename, unsigned isubint)
   fits_read_col (sfptr, TDOUBLE, colnum, row, 1, 1, &nulldouble,
 		 &time, &initflag, &status);
   
+  if (status != 0)
+    throw FITSError (status, "FITSArchive::load_Integration", 
+		     "fits_read_col OFFS_SUB");
+  
   newmjd = start_time + time;
-
+  
   // Set the folding period
 
   integ -> set_folding_period (model.period(newmjd));
@@ -1147,8 +1150,34 @@ Pulsar::FITSArchive::load_Integration (const char* filename, unsigned isubint)
   Phase stt_phs = model.phase(start_time);
   Phase off_phs = model.phase(newmjd);
 
-  double diff = (off_phs - stt_phs).fracturns();
-  newmjd += diff * integ -> get_folding_period();
+  double diff = off_phs.fracturns() - stt_phs.fracturns();
+
+  if (verbose) {
+    
+    cerr << "I think the phase of the start time is "
+	 << stt_phs.fracturns() << " fracturns" << endl;
+    
+    cerr << "I think the phase of the integration mid time is "
+	 << off_phs.fracturns() << " fracturns" << endl;
+    
+    cerr << "I think there is an offset of " << diff
+	 << " fractional turns between the phase of the start time"
+	 << "and the phase of the mid-time in integration " 
+	 << isubint << endl;
+
+  }
+  
+  newmjd -= diff * integ -> get_folding_period();
+  
+  if (verbose) {
+    
+    cerr << "I think the folding period is " << integ -> get_folding_period()
+	 << " seconds" << endl;
+    
+    cerr << "Subtracting an offset of " << diff * integ -> get_folding_period()
+	 << " seconds to correct for the phase offset" << endl;
+    
+  }
 
   integ -> set_epoch (newmjd);
   
@@ -1687,29 +1716,6 @@ try {
   if (verbose)
     cerr << "FITSArchive::unload_file ephemeris written" << endl;
 
-  // Write the TZRSITE code to the ephemeris history
-
-  long numrows = 0;
-  int colnum = 0;
-
-  fits_movnam_hdu (myfptr, BINARY_TBL, "PSREPHEM", 0, &status);
-  if (status != 0)
-    throw FITSError (status, "FITSArchive::unload_file", 
-		     "fits_movnam_hdu PSREPHEM");
-
-  fits_get_num_rows (myfptr, &numrows, &status);
-
-  fits_get_colnum (myfptr, CASEINSEN, "TZRSITE", &colnum, &status);
-  
-  static char* nullstr = strdup(" ");
-  char the_code = get_telescope_code();
-  fits_write_col (myfptr, TSTRING, colnum, numrows, 1, 1,
-		  &the_code, &status);
-  
-  if (status != 0)
-    throw FITSError (status, "FITSArchive::unload_file",
-		     "fits_write_col TZRSITE");
-  
   // Write the polyco to the FITS file
   
   model.unload(myfptr);
@@ -1780,7 +1786,7 @@ try {
 
   // Set the sizes of the columns which may have changed
   
-  colnum = 0;
+  int colnum = 0;
   
   fits_get_colnum (myfptr, CASEINSEN, "DAT_FREQ", &colnum, &status);
   fits_modify_vector_len (myfptr, colnum, nchan, &status);
