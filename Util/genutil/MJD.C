@@ -1,45 +1,4 @@
-/* $Log: MJD.C,v $
-/* Revision 1.9  1998/09/25 06:49:20  mbritton
-/* #included float.h for suns
-/*
- * Revision 1.8  1998/09/23  02:09:46  mbritton
- * Added operators >= <= and !=
- * Placed a limit on the precision of these comparisons of 2*pow(10,-DBL_DIG)
- * fracsecs, where DBL_DIG is defined in /usr/include/float.h as the max
- * precision of a double
- *
- * Revision 1.7  1998/09/21  09:29:42  mbritton
- * Added operator != and increased the precision printed by printfs to 15 digits,
- * which is the precision of a double.
- *
- * Revision 1.6  1998/09/08  13:03:35  straten
- * put back nint with #ifdef sun solution
- *
- * Revision 1.5  1998/09/08 05:13:09  mbritton
- * removed nint from MJD.c and test_utc.c from Makefile
- *
- * Revision 1.4  1998/09/07 10:10:18  straten
- * removed the print statements and things that were left behind...
- *
- * Revision 1.3  1998/09/02  05:22:53  straten
- * modified the MJD::MJD(double, double, double) re-normalizer.
- * It was not a serious problem, not even something I would call an error.
- *
- * Revision 1.2  1998/08/24 16:16:21  straten
- * new MJD constructor (from long double)
- *
- * Revision 1.1.1.1  1998/08/03 06:45:23  mbritton
- * start
- *
- * Revision 1.7  1996/12/03 05:37:43  mtoscano
- * *** empty log message ***
- *
- * Revision 1.6  1996/09/13 23:13:18  mbailes
- * Added more functions
- *
- * Revision 1.5  1996/09/09 23:12:17  mbailes
- * Added more functions, MJDs can be -ve now.
- * */
+
 #include <string.h>
 #include <stdio.h>
 #ifdef sun
@@ -49,13 +8,13 @@
 #include "MJD.h"
 #include "endian.h"
 
-char * MJD::printdays(){
+char * MJD::printdays() const {
   static char permanent[10];
   sprintf(permanent, "%d",days);
   return (permanent);
 }
 
-char * MJD::printhhmmss(){
+char * MJD::printhhmmss() const {
   static char permanent[10];
   int hh = secs/3600;
   int mm = (secs-3600*hh)/60;
@@ -65,7 +24,7 @@ char * MJD::printhhmmss(){
   return (permanent);
 }
 
-char * MJD::printfs(){
+char * MJD::printfs() const {
   static char permanent[20];
   char temp[20];
   sprintf(temp,"%.15lf",fracsec);
@@ -73,7 +32,7 @@ char * MJD::printfs(){
   return (permanent);
 }
 
-char * MJD::printall(){
+char * MJD::printall() const {
   static char permanent[40];
   sprintf(permanent,"%s:%s%s",printdays(),printhhmmss(),printfs());
   return (permanent);
@@ -87,21 +46,21 @@ char * MJD::strtempo(){
   return (permanent);
 }
 
-double MJD::in_seconds(){
+double MJD::in_seconds() const {
   return((double)days*86400.0+(double)secs+fracsec);
 }
-double MJD::in_days(){
+double MJD::in_days() const {
   return((double)days + ((double)secs+fracsec)/86400.0);
 }
-double MJD::in_minutes(){
+double MJD::in_minutes() const {
   return((double) days*1440.0 + ((double)secs+fracsec)/60.0);
 }
 
-int MJD::intday(){
+int MJD::intday() const {
   return(days);
 }
 
-double MJD::fracday(){
+double MJD::fracday() const {
     return((double)secs/86400.0 + fracsec/86400.0);
 }
 
@@ -298,7 +257,9 @@ MJD::MJD(double dd, double ss, double fs){
       fs = fmod(fs,1.0);
       ss += sec_to_add;
     }
-
+    else {
+      fs -= 5e-16;
+    }
     // Make sure that there aren't too many seconds'
 
     days_to_add =0;

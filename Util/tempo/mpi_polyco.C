@@ -3,6 +3,7 @@
 #include <assert.h>
 
 #define MPI
+#include "mpi.h"
 #include "polyco.h"
 
 int polynomial::mpiPack_size (MPI_Comm comm)
@@ -62,31 +63,31 @@ int polynomial::mpiPack (void* outbuf, int outcount, int* position,
   return MPI_SUCCESS;
 }
 
-int polynomial::mpiUnpack (void* outbuf, int outcount, int* position, 
+int polynomial::mpiUnpack (void* inbuf, int insize, int* position, 
 			    MPI_Comm comm)
 {
-  MPI_Unpack (outbuf, outcount, position, &psrname,   9, MPI_CHAR,   comm);
-  MPI_Unpack (outbuf, outcount, position, &date,     12, MPI_CHAR,   comm);
-  MPI_Unpack (outbuf, outcount, position, &ph0,       1, MPI_DOUBLE, comm);
-  MPI_Unpack (outbuf, outcount, position, &f0,        1, MPI_DOUBLE, comm);
-  MPI_Unpack (outbuf, outcount, position, &telescope, 1, MPI_INT,    comm);
-  MPI_Unpack (outbuf, outcount, position, &freq,      1, MPI_FLOAT,  comm);
-  MPI_Unpack (outbuf, outcount, position, &binph,     1, MPI_FLOAT,  comm);
-  MPI_Unpack (outbuf, outcount, position, &binp,      1, MPI_FLOAT,  comm);
-  MPI_Unpack (outbuf, outcount, position, &nspan,     1, MPI_INT,    comm);
-  MPI_Unpack (outbuf, outcount, position, &dm,        1, MPI_FLOAT,  comm);
+  MPI_Unpack (inbuf, insize, position, &psrname,   9, MPI_CHAR,   comm);
+  MPI_Unpack (inbuf, insize, position, &date,     12, MPI_CHAR,   comm);
+  MPI_Unpack (inbuf, insize, position, &ph0,       1, MPI_DOUBLE, comm);
+  MPI_Unpack (inbuf, insize, position, &f0,        1, MPI_DOUBLE, comm);
+  MPI_Unpack (inbuf, insize, position, &telescope, 1, MPI_INT,    comm);
+  MPI_Unpack (inbuf, insize, position, &freq,      1, MPI_FLOAT,  comm);
+  MPI_Unpack (inbuf, insize, position, &binph,     1, MPI_FLOAT,  comm);
+  MPI_Unpack (inbuf, insize, position, &binp,      1, MPI_FLOAT,  comm);
+  MPI_Unpack (inbuf, insize, position, &nspan,     1, MPI_INT,    comm);
+  MPI_Unpack (inbuf, insize, position, &dm,        1, MPI_FLOAT,  comm);
 
   int curncoef = ncoef;
-  MPI_Unpack (outbuf, outcount, position, &ncoef,     1, MPI_INT,    comm);
+  MPI_Unpack (inbuf, insize, position, &ncoef,     1, MPI_INT,    comm);
 
   if (curncoef != ncoef) {
     if (coefs != NULL) delete [] coefs;
     coefs = new double [ncoef];
     assert (coefs != (double*)NULL);
   }
-  MPI_Unpack (outbuf, outcount, position, coefs,  ncoef, MPI_DOUBLE, comm);
+  MPI_Unpack (inbuf, insize, position, coefs,  ncoef, MPI_DOUBLE, comm);
 
-  reftime.mpiUnpack                     (outbuf, outcount, position, comm);
+  reftime.mpiUnpack                     (inbuf, insize, position, comm);
 
   return MPI_SUCCESS;
 }
@@ -164,13 +165,13 @@ int polyco::mpiPack (void* outbuf, int outcount, int* position,
   return MPI_SUCCESS;
 }
 
-int polyco::mpiUnpack (void* outbuf, int outcount, int* position, 
+int polyco::mpiUnpack (void* inbuf, int insize, int* position, 
 		       MPI_Comm comm)
 {
   int old_npollys = npollys;
   int i = 0;
 
-  MPI_Unpack (outbuf, outcount, position, &npollys, 1, MPI_INT, comm);
+  MPI_Unpack (inbuf, insize, position, &npollys, 1, MPI_INT, comm);
 
   if (old_npollys != npollys) {
     if (pollys != NULL) {
@@ -186,7 +187,7 @@ int polyco::mpiUnpack (void* outbuf, int outcount, int* position,
     }
   }
   for (i=0; i<npollys; i++) {
-    pollys[i]->mpiUnpack (outbuf, outcount, position, comm);
+    pollys[i]->mpiUnpack (inbuf, insize, position, comm);
   }
   return MPI_SUCCESS;
 }

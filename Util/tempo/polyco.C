@@ -154,7 +154,7 @@ int polynomial::load(FILE * fptr){
    return(0);
 }
 
-char *polynomial::pulsar () const
+const char *polynomial::pulsar () const
 {
   return psrname;
 }
@@ -180,6 +180,7 @@ polyco::polyco (char* psr, MJD m1, MJD m2, int ns, int nc, int maxha, int tel)
   sprintf(syscom,"polyco %s %lf %lf %d %d %d %d > /dev/null",
 	  psr,m1.in_days(),
 	  m2.in_days(),ns,nc,maxha,tel);
+
   int status = system(syscom);
 
   if (status != 0) {
