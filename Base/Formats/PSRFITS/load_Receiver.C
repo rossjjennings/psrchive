@@ -110,6 +110,8 @@ void Pulsar::FITSArchive::load_Receiver (fitsfile* fptr)
 	           "unknown FD_MODE: %s", tempstr.get());
   }
 
+#if 0
+
   // Read requested feed angle
   
   if (verbose)
@@ -122,6 +124,8 @@ void Pulsar::FITSArchive::load_Receiver (fitsfile* fptr)
 			 "fits_read_key FA_REQ").warning() << endl;
     status = 0;
   }
+
+#endif
 
   // Read attenuator settings
 
