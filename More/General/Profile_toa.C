@@ -1,3 +1,5 @@
+#include <math.h>
+
 #include "Pulsar/Profile.h"
 #include "Error.h"
 
