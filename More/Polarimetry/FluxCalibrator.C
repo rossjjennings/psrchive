@@ -226,7 +226,7 @@ namespace Pulsar {
     unsigned get_nclass () const { return 2; }
     
     //! Return the name of the specified class
-    const char* get_name (unsigned iclass)
+    const char* get_name (unsigned iclass) const
     {
       switch (iclass) {
       case 0:
@@ -239,14 +239,14 @@ namespace Pulsar {
     }
     
     //! Return the number of parameters in the specified class
-    unsigned get_nparam (unsigned iclass)
+    unsigned get_nparam (unsigned iclass) const
     {
       return 1;
     }
     
     //! Return the estimate of the specified parameter
     Estimate<float> get_param (unsigned ichan, unsigned iclass,
-			       unsigned iparam)
+			       unsigned iparam) const
     {
       Estimate<float> retval;
       

@@ -47,7 +47,7 @@ unsigned Pulsar::SingleAxisCalibrator::Info::get_nclass () const
 }
 
 //! Return the name of the specified class
-const char* Pulsar::SingleAxisCalibrator::Info::get_name (unsigned iclass)
+const char* Pulsar::SingleAxisCalibrator::Info::get_name (unsigned iclass) const
 {
   switch (iclass) {
   case 0:
@@ -62,7 +62,7 @@ const char* Pulsar::SingleAxisCalibrator::Info::get_name (unsigned iclass)
 } 
   
 //! Return the number of parameters in the specified class
-unsigned Pulsar::SingleAxisCalibrator::Info::get_nparam (unsigned iclass)
+unsigned Pulsar::SingleAxisCalibrator::Info::get_nparam (unsigned iclass) const
 {
   if (iclass < 3)
     return 1;

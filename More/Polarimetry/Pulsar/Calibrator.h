@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/Attic/Calibrator.h,v $
-   $Revision: 1.8 $
-   $Date: 2003/09/12 18:24:14 $
+   $Revision: 1.9 $
+   $Date: 2003/09/12 18:39:37 $
    $Author: straten $ */
 
 #ifndef __Calibrator_H
@@ -75,14 +75,14 @@ namespace Pulsar {
       virtual unsigned get_nclass () const = 0;
 
       //! Return the name of the specified class
-      virtual const char* get_name (unsigned iclass) = 0;
+      virtual const char* get_name (unsigned iclass) const = 0;
 
       //! Return the number of parameters in the specified class
-      virtual unsigned get_nparam (unsigned iclass) = 0;
+      virtual unsigned get_nparam (unsigned iclass) const = 0;
 
       //! Return the estimate of the specified parameter
       virtual Estimate<float> get_param (unsigned ichan, unsigned iclass,
-					 unsigned iparam) = 0;
+					 unsigned iparam) const = 0;
 
     };
 

@@ -195,13 +195,13 @@ unsigned Pulsar::PolnCalibrator::Info::get_nclass () const
 }
 
 /*! The name of each parameter is unknown */
-const char* Pulsar::PolnCalibrator::Info::get_name (unsigned iclass)
+const char* Pulsar::PolnCalibrator::Info::get_name (unsigned iclass) const
 {
   return "unknown";
 }
 
 /*! Each parameter of the Transformation is treated as a separate class. */
-unsigned Pulsar::PolnCalibrator::Info::get_nparam (unsigned iclass)
+unsigned Pulsar::PolnCalibrator::Info::get_nparam (unsigned iclass) const
 {
   return 1;
 }
@@ -209,7 +209,7 @@ unsigned Pulsar::PolnCalibrator::Info::get_nparam (unsigned iclass)
 //! Return the estimate of the specified parameter
 Estimate<float> Pulsar::PolnCalibrator::Info::get_param (unsigned ichan, 
 							 unsigned iclass,
-							 unsigned iparam)
+							 unsigned iparam) const
 {
   if (! calibrator->get_Transformation_valid(ichan) )
     return 0;

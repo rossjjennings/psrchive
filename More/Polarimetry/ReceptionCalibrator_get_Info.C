@@ -37,7 +37,7 @@ public:
   }
 
   //! Return the number of parameters in the specified class
-  unsigned get_nparam (unsigned iclass)
+  unsigned get_nparam (unsigned iclass) const
   {
     if (iclass < Pulsar::SingleAxisCalibrator::Info::get_nclass())
       return Pulsar::SingleAxisCalibrator::Info::get_nparam(iclass);
