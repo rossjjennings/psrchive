@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pcm.C,v $
-   $Revision: 1.12 $
-   $Date: 2003/12/02 14:29:59 $
+   $Revision: 1.13 $
+   $Date: 2003/12/04 11:41:53 $
    $Author: straten $ */
 
 /*! \file pcm.C 
@@ -43,23 +43,27 @@ static string Hamaker = "Hamaker";
 void usage ()
 {
   cout << "A program for performing self-calibration \n"
-    "Usage: pcm [options] filenames \n"
+    "Usage: pcm [options] [filenames] \n"
+    "\n"
     "  -a archive set the output archive class name \n"
-    "  -c meta    filename with list of calibrator files \n"
-    "  -d dbase   Calibration::Database filename \n"
-    "  -f chan    solve for only the specified channel \n"
     "  -m model   model: Britton [default] or Hamaker \n"
+    "\n"
+    "  -c meta    filename with list of calibrator files \n"
+    "  -d dbase   filename of Calibration::Database \n"
     "  -M meta    filename with list of pulsar files \n"
-    " \n"
+    "\n"
+    "  -f chan    solve for only the specified channel \n"
+    "  -t nproc   solve using nproc threads \n"
+    "\n"
     "  -b bin     add phase bin to constraints \n"
     "  -n nbin    set the number of phase bins to choose as input states \n"
     "  -p pA,pB   set the phase window from which to choose input states \n"
-    " \n"
+    "\n"
     "  -s         do not normalize Stokes parameters by invariant interval \n"
-    " \n"
+    "\n"
     "  -q         assume that CAL Stokes Q = 0 \n"
     "  -v         assume that CAL Stokes V = 0 \n"
-    " \n"
+    "\n"
     "  -h         this help page \n"
     "  -V         verbose mode \n"
        << endl;
@@ -227,7 +231,7 @@ int main (int argc, char *argv[]) try {
   bool publication_plots = false;
 
   int gotc = 0;
-  while ((gotc = getopt(argc, argv, "a:b:c:d:Df:hM:m:n:Pp:qsuvV")) != -1) {
+  while ((gotc = getopt(argc, argv, "a:b:c:d:Df:hM:m:n:Pp:qst:uvV")) != -1) {
     switch (gotc) {
 
     case 'a':
@@ -294,6 +298,21 @@ int main (int argc, char *argv[]) try {
     case 's':
       normalize_by_invariant = false;
       break;
+
+    case 't':  {
+
+      unsigned nthreads = atoi (optarg);
+      if (nthreads == 0)  {
+        cerr << "pcm: invalid number of threads = " << nthreads << endl;
+        return -1;
+      }
+
+      ::Calibration::ReceptionModel::set_nsolve (nthreads);
+
+      cerr << "pcm: solving using " << nthreads << " threads" << endl;
+      break;
+
+    }
 
     case 'q':
       measure_cal_Q = false;
