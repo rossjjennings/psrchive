@@ -6,7 +6,7 @@
 #include "convert_endian.h"
 #include "Error.h"
 
-string Timer::reason;
+std::string Timer::reason;
 bool   Timer::verbose = false;
 
 static char backends[Timer::nbackends][BACKEND_STRLEN+1] =
@@ -36,13 +36,13 @@ int Timer::set_backend (struct timer* hdr, const char* backend)
   return 0;
 }
 
-string Timer::get_backend (const struct timer& hdr)
+std::string Timer::get_backend (const struct timer& hdr)
 {
   int ibe = backend_recognized (hdr.backend);
   if (ibe < 0)
-    return string ("un-recognized");
+    return std::string ("un-recognized");
 
-  return string (backends[ibe]);
+  return std::string (backends[ibe]);
 }
 
 int Timer::fload (const char* fname, struct timer* hdr, bool big_endian)
@@ -60,7 +60,7 @@ int Timer::fload (const char* fname, struct timer* hdr, bool big_endian)
   return ret;
 }
 
-bool Timer::is_timer (const struct timer& hdr, string* reason) 
+bool Timer::is_timer (const struct timer& hdr, std::string* reason) 
 {
   if (hdr.nbin < 1) {
     if (reason)
@@ -195,7 +195,7 @@ int Timer::get_npol (const struct timer& hdr)
   case 6: return 4;
   case 5: return 1;
   }
-  throw string ("Timer::get_npol invalid correlator mode");
+  throw std::string ("Timer::get_npol invalid correlator mode");
 }
 
 

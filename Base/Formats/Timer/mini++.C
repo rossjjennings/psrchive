@@ -4,7 +4,7 @@
 #include "mini++.h"
 #include "convert_endian.h"
 
-string Mini::reason;
+std::string Mini::reason;
 
 void Mini::init (struct mini& hdr)
 {

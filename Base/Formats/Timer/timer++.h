@@ -1,6 +1,6 @@
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/Timer/timer++.h,v $
-   $Revision: 1.12 $
-   $Date: 2004/10/15 12:11:22 $
+   $Revision: 1.13 $
+   $Date: 2004/12/27 14:09:49 $
    $Author: straten $ */
 
 #ifndef __TIMER_PLUSPLUS_H
@@ -35,10 +35,10 @@ namespace Timer {
   int set_backend (struct timer* hdr, const char* backend);
 
   // returns a string containing the backend code, or "un-recognized" if so
-  string get_backend (const struct timer& hdr);
+  std::string get_backend (const struct timer& hdr);
 
   // may be used to receive soft error messages
-  extern string reason;
+  extern std::string reason;
 
   // loads a timer struct, givent a file name
   int fload (const char* fname, struct timer* hdr, bool big_endian=true);
@@ -73,7 +73,7 @@ namespace Timer {
   void init (struct timer * hdr);
 
   // return true if timer struct seems valid enough
-  bool Timer::is_timer (const struct timer& hdr, string* reason = 0);
+  bool Timer::is_timer (const struct timer& hdr, std::string* reason = 0);
 
 }
 
