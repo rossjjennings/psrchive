@@ -279,7 +279,7 @@ int str2tm (struct tm* time, const char* str)
   if (time->tm_year > 1900)
     time->tm_year -= 1900;
 
-  /* Y2K bug catch (hopefully) */
+  /* Y2K bug assumption */
   if (time->tm_year < 30)
      time->tm_year += 100;
 
@@ -294,7 +294,7 @@ int tm2utc (utc_t *time, struct tm calendar)
   int days_in_month[12] = {31,28,31,30,31,30,31,31,30,31,30,31};
   int month;
 
-  if (UTC_LEAPYEAR(calendar.tm_year)) {
+  if (UTC_LEAPYEAR(calendar.tm_year+1900)) {
     days_in_month[1] = 29;
   }
 
