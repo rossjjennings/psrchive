@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Jones.h,v $
-   $Revision: 1.13 $
-   $Date: 2004/07/07 19:04:03 $
+   $Revision: 1.14 $
+   $Date: 2004/07/07 21:35:13 $
    $Author: straten $ */
 
 #ifndef __Jones_H
@@ -20,7 +20,7 @@ public:
   complex<T> j00,j01,j10,j11;
 
   //! Default constructor
-  Jones (T scalar = 0)
+  Jones (T scalar = 0.0)
     { j00=scalar; j01=0; j10=0; j11=scalar; }
 
   //! Construct from complex<T>
