@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Integration.h,v $
-   $Revision: 1.55 $
-   $Date: 2003/12/24 01:18:37 $
+   $Revision: 1.56 $
+   $Date: 2003/12/29 10:07:29 $
    $Author: ahotan $ */
 
 /*
@@ -287,7 +287,7 @@ namespace Pulsar {
 
     friend class Archive;
     friend class BinaryPhaseOrder;
-    friend class LANOrder;
+    friend class PeriastronOrder;
     friend class Calibrator;
     friend class Plotter;
 
