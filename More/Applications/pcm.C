@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pcm.C,v $
-   $Revision: 1.9 $
-   $Date: 2003/12/01 18:13:16 $
+   $Revision: 1.10 $
+   $Date: 2003/12/01 18:21:00 $
    $Author: straten $ */
 
 /*! \file pcm.C 
@@ -21,6 +21,8 @@
 
 #include "Pulsar/ReceptionCalibratorPlotter.h"
 #include "Pulsar/ReceptionCalibrator.h"
+#include "Pulsar/Calibration.h"
+
 #include "Pulsar/Plotter.h"
 #include "Pulsar/Archive.h"
 
@@ -372,10 +374,10 @@ int main (int argc, char *argv[]) try {
 
   if (dbfile) {
 
-    archive = Pulsar::Archive::load(filenames.last());
+    archive = Pulsar::Archive::load(filenames.back());
     MJD end = archive->end_time();
 
-    archive = Pulsar::Archive::load(filenames.first());
+    archive = Pulsar::Archive::load(filenames.front());
     MJD start = archive->start_time();
 
     MJD mid = 0.5 * (end + start);
@@ -389,9 +391,8 @@ int main (int argc, char *argv[]) try {
 
     double minutes = 0.5 * hours * 60.0;
 
-    vector<Pulsar::Calibration::Entry> oncals = dbase.all_matching (archive, mid,
-								    Signal::FluxCalOn, 
-								    minutes);
+    vector<Pulsar::Calibration::Entry> oncals;
+    oncals = dbase.all_matching (archive, mid, Signal::FluxCalOn, minutes);
   
     if (oncals.size() == 0)
       cerr << "pcm: No FluxCalOn observations found" << endl;
