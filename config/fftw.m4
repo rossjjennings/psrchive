@@ -3,50 +3,68 @@ dnl
 AC_DEFUN([SWIN_LIB_FFTW],
 [
   AC_PROVIDE([SWIN_LIB_FFTW])
-  AC_MSG_CHECKING([for FFTW installation])
 
-  ac_save_LIBS="$LIBS"       
-  LIBS="-lfftw $ac_save_LIBS"
-  AC_TRY_LINK([#include <fftw.h>],
-              [fftw_create_plan (1024, FFTW_FORWARD, FFTW_ESTIMATE);],
-              have_fftw=yes, have_fftw=no)
+  AC_MSG_CHECKING([for single-precision FFTW-2 header])
 
-  have_fftw_msg="no"
+  AC_TRY_COMPILE([#include <fftw.h>],
+                 [#ifndef FFTW_ENABLE_FLOAT
+                  #error must have single-precision library
+                  #endif],
+                 have_fftw=yes, have_fftw=no)
+
+  AC_MSG_RESULT($have_fftw)
+
+  ac_save_LIBS="$LIBS"
   FFTW_LIBS=""
 
-  if test x"$have_fftw" = xyes; then
-    AC_DEFINE(HAVE_FFTW,1,[Define if the FFTW library is installed])
-    FFTW_LIBS="-lfftw"
-    have_fftw_msg="fftw"
+  if test $have_fftw = yes; then
+
+    AC_MSG_CHECKING([for FFTW-2 library])
+
+    LIBS="-lfftw $ac_save_LIBS"
+    AC_TRY_LINK([#include <fftw.h>],
+                [fftw_create_plan (1024, FFTW_FORWARD, FFTW_ESTIMATE);],
+                have_fftw=yes, have_fftw=no)
+
+    AC_MSG_RESULT($have_fftw)
+
+    if test $have_fftw = yes; then
+      AC_DEFINE(HAVE_FFTW,1,[Define if the FFTW library is installed])
+      FFTW_LIBS="-lfftw"
+    fi
+
+    AC_MSG_CHECKING([for FFTW-2 real-to-complex library])
+
+    LIBS="-lrfftw -lfftw $ac_save_LIBS"
+    AC_TRY_LINK([#include <fftw.h>],
+                [rfftw_create_plan (1024, FFTW_FORWARD, FFTW_ESTIMATE);],
+                have_rfftw=yes, have_rfftw=no)
+
+    AC_MSG_RESULT($have_rfftw)
+
+    if test $have_rfftw = yes; then
+      AC_DEFINE(HAVE_RFFTW,1,[Define if the FFTW real library is installed])
+      FFTW_LIBS="-lrfftw -lfftw"
+    fi
+
   fi
 
-  LIBS="-lrfftw -lfftw $ac_save_LIBS"
-  AC_TRY_LINK([#include <fftw.h>],
-              [rfftw_create_plan (1024, FFTW_FORWARD, FFTW_ESTIMATE);],
-              have_rfftw=yes, have_rfftw=no)
-
-  if test x"$have_rfftw" = xyes; then
-    AC_DEFINE(HAVE_RFFTW,1,[Define if the FFTW real library is installed])
-    FFTW_LIBS="-lrfftw -lfftw"
-    have_fftw_msg="$have_fftw_msg rfftw"
-  fi
+  AC_MSG_CHECKING([for single-precision FFTW-3 library])
 
   LIBS="-lfftw3f $ac_save_LIBS"
   AC_TRY_LINK([#include <fftw3.h>],
               [fftwf_plan_dft_1d (1024, 0, 0, FFTW_FORWARD, FFTW_ESTIMATE);],
               have_fftw3=yes, have_fftw3=no)
 
-  if test x"$have_fftw3" = xyes; then
+  AC_MSG_RESULT($have_fftw3)
+
+  if test $have_fftw3 = yes; then
     AC_DEFINE(HAVE_FFTW3,1,[Define if the FFTW3 library is installed])
     FFTW_LIBS="-lfftw3f $FFTW_LIBS"
-    if test x"$have_fftw_msg" = xno; then
-      have_fftw_msg="fftw3"
-    else
-      have_fftw_msg="$have_fftw_msg fftw3"
-    fi
   fi
 
-  AC_MSG_RESULT([$have_fftw_msg])
+  AM_CONDITIONAL(HAVE_FFTW2,[test x"$have_fftw" != xno])
+
   AC_SUBST(FFTW_LIBS)
   LIBS="$ac_save_LIBS"
 
