@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ReceptionCalibrator.h,v $
-   $Revision: 1.20 $
-   $Date: 2003/05/23 11:41:54 $
-   $Author: straten $ */
+   $Revision: 1.21 $
+   $Date: 2003/05/23 13:33:37 $
+   $Author: pulsar $ */
 
 #ifndef __ReceptionCalibrator_H
 #define __ReceptionCalibrator_H
@@ -68,7 +68,7 @@ namespace Pulsar {
     void add_FluxCalibrator (const FluxCalibrator* fluxcal);
 
     //! Solve equation for each frequency
-    void solve ();
+    void solve (int only_ichan = -1);
 
     //! Get the status of the model
     bool get_solved () const;

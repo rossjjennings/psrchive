@@ -526,7 +526,7 @@ bool Pulsar::ReceptionCalibrator::get_solved () const
   return is_fit;
 }
 
-void Pulsar::ReceptionCalibrator::solve ()
+void Pulsar::ReceptionCalibrator::solve (int only_ichan)
 {
   if (!is_initialized)
   check_ready ("Pulsar::ReceptionCalibrator::solve");
@@ -555,9 +555,16 @@ void Pulsar::ReceptionCalibrator::solve ()
   initialize ();
 
   unsigned nchan = equation.size();
-  unsigned incr = 1;
 
-  for (unsigned ichan=0; ichan<nchan; ichan+=incr) try {
+  unsigned start_chan = nchan/8;
+
+  if (only_ichan >= 0)
+    start_chan = only_ichan;
+  else
+    cerr << "Pulsar::ReceptionCalibrator::solve CPSR-II aliasing issue:\n"
+          "WARNING not solving the first " << start_chan << " channels" <<endl;
+
+  for (unsigned ichan=start_chan; ichan<nchan; ichan+=1) try {
 
     cerr << "Pulsar::ReceptionCalibrator::solve ichan=" << ichan << endl;
 
@@ -570,6 +577,9 @@ void Pulsar::ReceptionCalibrator::solve ()
     }
 
     equation[ichan]->solve ();
+
+    if (only_ichan >= 0)
+      break;
 
   }
   catch (Error& error) {
