@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/psrephem.h,v $
-   $Revision: 1.21 $
-   $Date: 2002/10/11 07:55:50 $
+   $Revision: 1.22 $
+   $Date: 2003/01/10 14:27:49 $
    $Author: straten $ */
 
 #ifndef __PSREPHEM_H
@@ -56,7 +56,10 @@ class psrephem : public Reference::Able
     { return create (psr_name.c_str(), use_cwd); }
 
   int load   (const char* filename);
+  int load   (const string& filename) { return load (filename.c_str()); }
+
   int unload (const char* filename) const;
+  int unload (const string& fname) const { return unload (fname.c_str()); }
 
   int load   (FILE* instream, size_t bytes);
   int unload (FILE* outstream) const;
