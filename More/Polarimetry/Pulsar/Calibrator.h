@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/Attic/Calibrator.h,v $
-   $Revision: 1.9 $
-   $Date: 2003/09/12 18:39:37 $
+   $Revision: 1.10 $
+   $Date: 2003/10/02 07:32:07 $
    $Author: straten $ */
 
 #ifndef __Calibrator_H
@@ -29,6 +29,8 @@ namespace Pulsar {
 
     //! Types of Models supported
     enum Type {
+      //! Flux calibrator
+      Flux,
       //! Gain, differential gain and differential phase
       SingleAxis,
       //! Gain, 3-D boost, and two rotations (van Straten 2002)
@@ -53,6 +55,9 @@ namespace Pulsar {
 
     //! Calibrate the Pulsar::Archive
     virtual void calibrate (Archive* archive) = 0;
+
+    //! Return the Calibrator::Type of derived class
+    virtual Type get_type () const = 0;
 
     //! Get the number of frequency channels in the calibrator
     virtual unsigned get_nchan () const = 0;

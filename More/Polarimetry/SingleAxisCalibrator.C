@@ -73,3 +73,8 @@ Pulsar::Calibrator::Info* Pulsar::SingleAxisCalibrator::get_Info () const
 {
   return new SingleAxisCalibrator::Info (this);
 }
+
+Pulsar::Calibrator::Type Pulsar::SingleAxisCalibrator::get_type () const
+{
+  return SingleAxis;
+}

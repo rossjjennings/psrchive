@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/FluxCalibrator.h,v $
-   $Revision: 1.7 $
-   $Date: 2003/09/11 21:15:41 $
+   $Revision: 1.8 $
+   $Date: 2003/10/02 07:32:07 $
    $Author: straten $ */
 
 #ifndef __Pulsar_FluxCalibrator_H
@@ -28,6 +28,12 @@ namespace Pulsar {
     //! Construct from an vector of FluxCal Pulsar::Archives
     FluxCalibrator (const vector<Archive*>& archives);
 
+    //! Return Calibrator::Flux
+    Type get_type () const;
+
+    //! Return the FluxCalibrator information
+    Info* get_Info () const;
+
     //! Return the flux of Hydra in mJy
     double hydra_flux_mJy (double frequency_MHz);
 
@@ -39,9 +45,6 @@ namespace Pulsar {
 
     //! Get the number of frequency channels in the calibrator
     unsigned get_nchan () const;
-
-    //! Return the FluxCalibrator information
-    Info* get_Info () const;
 
   protected:
 

@@ -89,3 +89,7 @@ Pulsar::Calibrator::Info* Pulsar::ReceptionCalibrator::get_Info () const
   }
 }
 
+Pulsar::Calibrator::Type Pulsar::ReceptionCalibrator::get_type () const
+{
+  return model_type;
+}

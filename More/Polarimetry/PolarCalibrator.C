@@ -81,3 +81,8 @@ Pulsar::Calibrator::Info* Pulsar::PolarCalibrator::get_Info () const
 {
   return new PolarCalibrator::Info (this);
 }
+
+Pulsar::Calibrator::Type Pulsar::PolarCalibrator::get_type () const
+{
+  return Polar;
+}

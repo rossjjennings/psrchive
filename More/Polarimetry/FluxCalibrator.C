@@ -273,3 +273,8 @@ Pulsar::Calibrator::Info* Pulsar::FluxCalibrator::get_Info () const
   const_cast<FluxCalibrator*>(this)->create();
   return new FluxCalibratorInfo (this);
 }
+
+Pulsar::Calibrator::Type Pulsar::FluxCalibrator::get_type () const
+{
+  return Flux;
+}

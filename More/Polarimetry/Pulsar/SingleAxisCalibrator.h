@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/SingleAxisCalibrator.h,v $
-   $Revision: 1.9 $
-   $Date: 2003/09/12 18:39:37 $
+   $Revision: 1.10 $
+   $Date: 2003/10/02 07:32:07 $
    $Author: straten $ */
 
 #ifndef __Pulsar_SingleAxisCalibrator_H
@@ -23,6 +23,9 @@ namespace Pulsar {
 
     //! Destructor
     ~SingleAxisCalibrator ();
+
+    //! Return Calibrator::SingleAxis
+    Type get_type () const;
 
     //! Return the SingleAxisCalibrator information
     Calibrator::Info* get_Info () const;

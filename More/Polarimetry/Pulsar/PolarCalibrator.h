@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PolarCalibrator.h,v $
-   $Revision: 1.8 $
-   $Date: 2003/09/12 18:39:37 $
+   $Revision: 1.9 $
+   $Date: 2003/10/02 07:32:07 $
    $Author: straten $ */
 
 #ifndef __PolarCalibrator_H
@@ -23,6 +23,9 @@ namespace Pulsar {
 
     //! Destructor
     ~PolarCalibrator ();
+
+    //! Return Calibrator::Polar
+    Type get_type () const;
 
     //! Return the PolarAxisCalibrator information
     Calibrator::Info* get_Info () const;

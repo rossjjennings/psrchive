@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ReceptionCalibrator.h,v $
-   $Revision: 1.43 $
-   $Date: 2003/09/24 05:47:27 $
+   $Revision: 1.44 $
+   $Date: 2003/10/02 07:32:07 $
    $Author: straten $ */
 
 #ifndef __ReceptionCalibrator_H
@@ -155,6 +155,12 @@ namespace Pulsar {
     ReceptionCalibrator (Calibrator::Type model,
 			 const Archive* archive = 0);
     
+    //! Return Calibrator::Hamaker or Calibrator::Britton
+    Type get_type () const;
+
+    //! Return the Calibrator information
+    Calibrator::Info* get_Info () const;
+
     bool measure_cal_V;
 
     //! Add the specified pulse phase bin to the set of state constraints
@@ -190,9 +196,6 @@ namespace Pulsar {
     //! Pre-calibrate the polarization of the given archive
     virtual void precalibrate (Archive* archive);
     
-    //! Return the Calibrator information
-    Calibrator::Info* get_Info () const;
-
   protected:
     
     //! Initialize the PolnCalibration::transformation attribute
