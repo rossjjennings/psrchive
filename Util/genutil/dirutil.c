@@ -47,7 +47,7 @@ int file_is_directory (const char* filename)
 {
   struct stat statistics;
   if (stat (filename, &statistics) < 0) {
-    fprintf (stderr, "ftime() error stat (%s)",
+    fprintf (stderr, "file_is_directory error stat (%s)",
 	     filename);
     perror ("");
     return 0;
