@@ -38,11 +38,11 @@ OTHER_SRCS      = align.C amps.C chanprep.C  \
 		  plot_gry_diff.C pepoch.C stokes_plt.C freduce.C \
 		  cleanarch.C fixhdr.C crm.C  \
 		  getcal.C crh.C psrhead.C autotadd.C \
-		  fakedat.C quik_cal.C pdma.C \
+		  fakedat.C quik_cal.C \
 		  cal_arch.C feedmix.C fitmix.C test.C
 
 
-NOT_WORKING     = bandpass.C detail.C pdma_fortran.f xtoa.C bin_ph.C corflux.C flux.C
+NOT_WORKING     = bandpass.C detail.C pdma_fortran.f xtoa.C bin_ph.C corflux.C flux.C pdma.C
 
 PROGRAMS = $(ESSENTIAL_SRCS) $(OTHER_SRCS)
 
