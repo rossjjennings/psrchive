@@ -25,6 +25,12 @@ void Pulsar::ReceptionCalibratorPlotter::plot_cal_constraints (unsigned ichan)
 		    calibrator->model[ichan]->ArtificialCalibrator_path);
 }
 
+void Pulsar::ReceptionCalibratorPlotter::plot_psr_constraints (unsigned ichan,
+							       unsigned istate)
+{
+  plot_constraints (ichan, istate, calibrator->model[ichan]->Pulsar_path);
+}
+
 void Pulsar::ReceptionCalibratorPlotter::plot_constraints (unsigned ichan,
 							   unsigned istate,
 							   unsigned ipath)
