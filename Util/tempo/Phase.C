@@ -1,9 +1,11 @@
 #include <string.h>
 #include <stdio.h>
-#ifdef sun
-#include <float.h>
+#include <limits.h>
+
+#if defined (sun) && !defined(__GNUC__)
 #include <sunmath.h>
 #endif
+
 #include "Phase.h"
 
 
