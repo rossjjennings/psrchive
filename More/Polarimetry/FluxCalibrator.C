@@ -399,6 +399,12 @@ Pulsar::Calibrator::Type Pulsar::FluxCalibrator::get_type () const
   return Flux;
 }
 
+Pulsar::CalibratorExtension*
+Pulsar::FluxCalibrator::new_Extension () const
+{
+  return new FluxCalibratorExtension (this);
+}
+
 Pulsar::FluxCalibrator::source Pulsar::FluxCalibrator::get_RefSrc(string name)
 {
   if (verbose)

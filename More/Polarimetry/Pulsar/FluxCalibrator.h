@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/FluxCalibrator.h,v $
-   $Revision: 1.13 $
-   $Date: 2004/10/08 10:10:41 $
+   $Revision: 1.14 $
+   $Date: 2004/10/09 05:37:03 $
    $Author: straten $ */
 
 #ifndef __Pulsar_FluxCalibrator_H
@@ -49,6 +49,9 @@ namespace Pulsar {
     //! Return the FluxCalibrator information
     Info* get_Info () const;
     
+    //! Return a new FluxCalibratorExtension
+    CalibratorExtension* new_Extension () const;
+
     //! Return the flux of 0407-658 in mJy
     double ofos_flux_mJy (double frequency_MHz);
     
