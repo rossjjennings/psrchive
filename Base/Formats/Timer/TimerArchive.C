@@ -461,7 +461,7 @@ void Pulsar::TimerArchive::set_state (Signal::State state)
     default:
       hdr.banda.correlator_mode = -1;
       throw Error (InvalidParam, "TimerArchive::set_state",
-		   "unrecognized state");
+		   "unrecognized state=" + State2string(state));
     }
 }
 
@@ -650,8 +650,12 @@ void Pulsar::TimerArchive::correct ()
   hdr.ndump_sub_int = 1;
 
   // correct the polyco parameters
-  hdr.nspan = (int) model.get_nspan();
-  hdr.ncoeff = model.get_ncoeff();
+  if (model) {
+    hdr.nspan = (int) model->get_nspan();
+    hdr.ncoeff = model->get_ncoeff();
+  }
+  else
+    hdr.nspan = hdr.ncoeff = 0;
 
   /* General info */
   char hostname[50];

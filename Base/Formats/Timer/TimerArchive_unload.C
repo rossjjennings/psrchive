@@ -90,27 +90,41 @@ void Pulsar::TimerArchive::hdr_unload (FILE* fptr) const
 
   struct timer* header = const_cast<struct timer*> (&hdr);
 
-  if (verbose) cerr << "TimerArchive::hdr_unload get polyco size" << endl;
 
-  header->nbytespoly = model.unload (&text);
-  if (hdr.nbytespoly < 0)
-    throw Error (FailedCall, "TimerArchive::hdr_unload", "polyco::unload");
+  if (!model)
+    header->nbytespoly = 0;
 
-  if (verbose) cerr << "TimerArchive::hdr_unload polyco size = " 
-		    << hdr.nbytespoly << " bytes" << endl;
+  else {
 
-  if (verbose) cerr << "TimerArchive::hdr_unload get psrephem size" << endl;
+    if (verbose) cerr << "TimerArchive::hdr_unload get polyco size" << endl;
 
-  header->nbytesephem = ephemeris.unload (&text);
-  if (hdr.nbytesephem < 0)
-    throw Error (FailedCall, "TimerArchive::hdr_unload", "psrephem::unload");
-  
-  if (verbose) cerr << "TimerArchive::hdr_unload psrephem size = " 
-		    << hdr.nbytesephem << " bytes" << endl;
+    header->nbytespoly = model->unload (&text);
+    if (hdr.nbytespoly < 0)
+      throw Error (FailedCall, "TimerArchive::hdr_unload", "polyco::unload");
+    
+    if (verbose) cerr << "TimerArchive::hdr_unload polyco size = " 
+		      << hdr.nbytespoly << " bytes" << endl;
 
-  if (this -> get_nsubint() == 1) {
-    header->sub_int_time = (float)(this -> integration_length());
   }
+
+  if (!ephemeris)
+    header->nbytesephem = 0;
+
+  else {
+
+    if (verbose) cerr << "TimerArchive::hdr_unload get psrephem size" << endl;
+    
+    header->nbytesephem = ephemeris->unload (&text);
+    if (hdr.nbytesephem < 0)
+      throw Error (FailedCall, "TimerArchive::hdr_unload", "psrephem::unload");
+    
+    if (verbose) cerr << "TimerArchive::hdr_unload psrephem size = " 
+		      << hdr.nbytesephem << " bytes" << endl;
+
+  }
+
+  if (get_nsubint() == 1)
+    header->sub_int_time = integration_length();
 
   if (verbose)
     cerr << "TimerArchive::hdr_unload writing timer header" << endl;
@@ -126,22 +140,22 @@ void Pulsar::TimerArchive::backend_unload (FILE* fptr) const
 
 void Pulsar::TimerArchive::psr_unload (FILE* fptr) const
 {
-  if (hdr.nbytespoly > 0) {
+  if (model && hdr.nbytespoly > 0) {
     if (verbose)
       cerr << "TimerArchive::psr_unload "
 	   << hdr.nbytespoly << " bytes in polyco" << endl;
 
-    if (model.unload (fptr) != hdr.nbytespoly)
+    if (model->unload (fptr) != hdr.nbytespoly)
       throw Error (FailedCall, "TimerArchive::psr_unload",
 		   "polyco::unload != %d bytes", hdr.nbytespoly);
   }
 
-  if (hdr.nbytesephem > 0) {
+  if (ephemeris && hdr.nbytesephem > 0) {
     if (verbose) 
       cerr << "TimerArchive::psr_unload "
 	   << hdr.nbytesephem << " bytes in ephemeris" << endl;
 
-    if (ephemeris.unload (fptr) != hdr.nbytesephem)
+    if (ephemeris->unload (fptr) != hdr.nbytesephem)
       throw Error (FailedCall, "TimerArchive::psr_unload",
 		   "psrephem::unload != %d bytes", hdr.nbytesephem);
   }

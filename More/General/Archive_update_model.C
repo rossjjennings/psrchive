@@ -42,7 +42,7 @@ void Pulsar::Archive::update_model()
 */
 void Pulsar::Archive::update_model (unsigned nsubint)
 {
-  polyco oldmodel;
+  Reference::To<polyco> oldmodel;
 
   if (!model_updated)
     // store the old model
@@ -52,12 +52,12 @@ void Pulsar::Archive::update_model (unsigned nsubint)
   create_updated_model (!model_updated);
 
   // if previously updated, no need to correct the old Integrations
-  if (model_updated)
+  if (model_updated || !oldmodel)
     return;
 
   // correct the old Integrations with the old model
   for (unsigned isub = 0; isub < nsubint; isub++)
-    apply_model (oldmodel, get_Integration(isub));
+    apply_model (*oldmodel, get_Integration(isub));
   
   model_updated = true;
 }
@@ -80,7 +80,7 @@ void Pulsar::Archive::update_model (unsigned nsubint)
 void Pulsar::Archive::create_updated_model (bool clear_model)
 {
   if (get_type() != Signal::Pulsar)
-    throw Error (InvalidState, "Archive::create_updated_model",
+    throw Error (InvalidState, "Pulsar::Archive::create_updated_model",
 		 "not a pulsar observation");
 
   for (unsigned isub = 0; isub < get_nsubint(); isub++) {
@@ -103,49 +103,61 @@ void Pulsar::Archive::create_updated_model (bool clear_model)
 void Pulsar::Archive::update_model (const MJD& time, bool clear_model)
 {
   if (get_type() != Signal::Pulsar)
-    throw Error (InvalidState, "Archive::create_updated_model",
+    throw Error (InvalidState, "Pulsar::Archive::update_model",
 		 "not a pulsar observation");
-  
+
+  if (!ephemeris) {
+    model = 0;
+    return;
+  }
+
   int    maxha  = 0;
   char   nsite  = '!';
   int    ncoeff = 0;
   double freq   = 0.0;
   double nspan  = 0.0;
   
-  if (model.pollys.size() > 0) {
+  if (model && model->pollys.size() > 0) {
+
     maxha   = 12;
-    nsite   = model.get_telescope();
-    ncoeff  = model.get_ncoeff();
-    freq    = model.get_freq();
-    nspan   = model.get_nspan();
+    nsite   = model->get_telescope();
+    ncoeff  = model->get_ncoeff();
+    freq    = model->get_freq();
+    nspan   = model->get_nspan();
     if (verbose) {
       cout << "Using nspan  = " << nspan << endl;
       cout << "Using ncoeff = " << ncoeff << endl;
       cout << "Using maxha  = " << maxha << endl;
     }
+
   }
   else {
+
     cout << "Warning: using default values to build polyco" << endl;
     if (verbose) {
       cout << "Using nspan  = " << nspan << endl;
       cout << "Using ncoeff = " << ncoeff << endl;
       cout << "Using maxha  = " << maxha << endl;
     }
+
+    model = new polyco;
+
     maxha   = 12;
-    nsite   = ephemeris.value_str[EPH_TZRSITE][0];
+    nsite   = ephemeris->value_str[EPH_TZRSITE][0];
     ncoeff  = 12;
     freq    = get_centre_frequency();
     nspan   = 960;
+
   }
 
   if (clear_model)
-    model = polyco();
+    model = new polyco;
 
-  if ( model.i_nearest (time) == -1 ) {
+  if ( model->i_nearest (time) == -1 ) {
     // no match, create a new polyco for the specified time
-    polyco part = Tempo::get_polyco (ephemeris, time, time,
+    polyco part = Tempo::get_polyco (*ephemeris, time, time,
 				     nspan, ncoeff, maxha, nsite, freq);   
-    model.append (part);
+    model->append (part);
   }
 }
 
@@ -164,13 +176,17 @@ void Pulsar::Archive::update_model (const MJD& time, bool clear_model)
 */
 void Pulsar::Archive::apply_model (const polyco& old, Integration* subint)
 {
-  if ( model.get_telescope() != old.get_telescope() )
-    throw Error (InvalidState, "Archive::apply_model", "telescope mismatch");
+  if ( !model )
+    throw Error (InvalidState, "Pulsar::Archive::apply_model", "no polyco");
+
+  if ( model->get_telescope() != old.get_telescope() )
+    throw Error (InvalidState, "Pulsar::Archive::apply_model",
+		 "telescope mismatch");
 
   try {
 
     if (verbose) 
-      model.unload (stderr);
+      model->unload (stderr);
 
     // get the MJD of the rising edge of bin zero
     MJD subint_mjd = subint -> get_epoch();
@@ -178,25 +194,25 @@ void Pulsar::Archive::apply_model (const polyco& old, Integration* subint)
     // get the phase shift due to differing observing frequencies between
     // old and current polyco
     Phase freq_shift_phase = 
-      model.phase (subint_mjd, old.get_freq()) - model.phase (subint_mjd);
+      model->phase (subint_mjd, old.get_freq()) - model->phase (subint_mjd);
 
     // get the phase of the rising edge of bin zero
-    Phase phase = model.phase (subint_mjd);
+    Phase phase = model->phase (subint_mjd);
     
     // the Integration is rotated by -phase to bring zero phase to bin zero
     Phase dphase = freq_shift_phase - phase;
     
-    double period = model.period (subint_mjd);
+    double period = model->period (subint_mjd);
     double shift_time = dphase.fracturns() * period;
     
     if (verbose)
-      cerr << "Archive::apply_model"
+      cerr << "Pulsar::Archive::apply_model"
 	   << " old MJD " << subint_mjd
 	   << " old polyco phase " << old.phase(subint_mjd)
 	   << " new polyco phase " << phase << endl
 	
 	   << " old freq " << old.get_freq()
-	   << " new freq " << model.get_freq()
+	   << " new freq " << model->get_freq()
 	   << " freq phase shift " << freq_shift_phase << endl
 	
 	   << " time shift      " << shift_time/86400.0
@@ -208,14 +224,14 @@ void Pulsar::Archive::apply_model (const polyco& old, Integration* subint)
     
     if (verbose) {
       subint_mjd = subint -> get_epoch();
-      cerr << "Archive::apply_model"
+      cerr << "Pulsar::Archive::apply_model"
 	   << " new MJD "   << subint_mjd
-	   << " new phase " << model.phase(subint_mjd)
+	   << " new phase " << model->phase(subint_mjd)
 	   << endl;
     }
   }
   catch (Error& err) {
-    throw err += "Archive::apply_model";
+    throw err += "Pulsar::Archive::apply_model";
   }
 }
 
@@ -231,7 +247,7 @@ void Pulsar::Archive::apply_model (const polyco& old, Integration* subint)
 bool Pulsar::Archive::good_model (const polyco& test_model) const
 {
   if (verbose)
-    cerr << "Archive::good_model testing polyco on " << get_nsubint()
+    cerr << "Pulsar::Archive::good_model testing polyco on " << get_nsubint()
 	 << " integrations" << endl;
 
   unsigned isub=0;
@@ -246,7 +262,7 @@ bool Pulsar::Archive::good_model (const polyco& test_model) const
   
   if (isub < get_nsubint()) {
     if (verbose)
-      cerr << "Archive::good_model polyco failed on integration "
+      cerr << "Pulsar::Archive::good_model polyco failed on integration "
 	   << isub << endl;
     return false;
   }

@@ -68,16 +68,19 @@ void Pulsar::Archive::append (const Archive* arch)
   }
 
   // if the polycos are equivalent, no corrections needed
-  if (model == arch->model)
+  if (!model && !arch->model)
+    return;
+
+  if (model && arch->model && *model == *(arch->model) )
     return;
 
   // if the current model does not span all Integrations, update the model
-  if (!good_model (model))
+  if (!model || !good_model (*model))
     update_model (old_nsubint);
 
   // correct the new subints against their old model
   for (unsigned isub=old_nsubint; isub < get_nsubint(); isub++)
-    apply_model (arch->model, get_Integration(isub));
+    apply_model (*(arch->model), get_Integration(isub));
 
 }
 

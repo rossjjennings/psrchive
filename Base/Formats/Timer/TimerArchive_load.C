@@ -45,6 +45,9 @@ void Pulsar::TimerArchive::load (FILE* fptr)
 
   backend_load (fptr);
 
+  ephemeris = 0;
+  model = 0;
+
   if (get_type() == Signal::Pulsar)
     psr_load (fptr);
 
@@ -386,18 +389,19 @@ void Pulsar::TimerArchive::psr_load (FILE* fptr)
       cerr << "TimerArchive::psr_load "
 	   << hdr.nbytespoly << " bytes in polyco" << endl;
 
-    if (model.load (fptr, hdr.nbytespoly) <= 0)
+    model = new polyco;
+
+    if (model->load (fptr, hdr.nbytespoly) <= 0)
       throw Error (FailedCall, "TimerArchive::psr_load", "polyco::load");
 
     if (verbose) {
-      cerr << "TimerArchive::psr_load read in polyco:\n" << model << endl;
+      cerr << "TimerArchive::psr_load read in polyco:\n" << *model << endl;
       cerr << "TimerArchive::psr_load end of polyco" << endl;
     }
   }
   else {
     if (verbose)
       cerr << "TimerArchive::psr_load no polyco" << endl;
-    model = polyco();
   }
 
   if (hdr.nbytesephem > 0) {
@@ -405,16 +409,17 @@ void Pulsar::TimerArchive::psr_load (FILE* fptr)
       cerr << "TimerArchive::psr_load "
 	   << hdr.nbytesephem << " bytes in ephemeris" << endl;
 
-    if (ephemeris.load (fptr, hdr.nbytesephem) < 0)
+    ephemeris = new psrephem;
+
+    if (ephemeris->load (fptr, hdr.nbytesephem) < 0)
       throw Error (FailedCall, "TimerArchive::psr_load", "psrephem::load");
 
     if (verbose) {
-      cerr << "TimerArchive::psr_load read in psrephem:\n" << ephemeris <<endl;
+      cerr << "TimerArchive::psr_load read in psrephem:\n"<< *ephemeris <<endl;
       cerr << "TimerArchive::psr_load end of psrephem" << endl;
     }
   }
   else {
-    ephemeris = psrephem();
     if (verbose)
       cerr << "TimerArchive::psr_load no ephemeris" << endl;
   }

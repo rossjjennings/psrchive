@@ -32,21 +32,21 @@ void Pulsar::Archive::tscrunch (unsigned nscrunch)
   if (nsub % nscrunch)
     newsub += 1;
   
-  if (verbose) cerr << "Archive::tscrunch - scrunching " 
+  if (verbose) cerr << "Pulsar::Archive::tscrunch - scrunching " 
 		    << nsub << " Integrations by " << nscrunch << endl;
 
   try {
 
     for (unsigned isub=0; isub < newsub; isub++) {
 
-      if (verbose) cerr << "Archive::tscrunch resulting subint " 
+      if (verbose) cerr << "Pulsar::Archive::tscrunch resulting subint " 
 			<< isub+1 << "/" << newsub << endl;
 
       unsigned start = isub * nscrunch;
 
       for (unsigned ichan=0; ichan < get_nchan(); ichan++) {
 
-	if (verbose) cerr << "Archive::tscrunch weighted_frequency chan="
+	if (verbose) cerr << "Pulsar::Archive::tscrunch weighted_frequency chan="
 			  << ichan << endl;
 
 	double cfreq = 0.0;
@@ -56,7 +56,7 @@ void Pulsar::Archive::tscrunch (unsigned nscrunch)
 	  cfreq = weighted_frequency (ichan, start, 0);
 
 	if (verbose) 
-	  cerr << "Archive::tscrunch dedisperse cfreq=" << cfreq << endl;
+	  cerr << "Pulsar::Archive::tscrunch dedisperse cfreq=" << cfreq << endl;
 	
 	for (unsigned iadd=0; iadd < nscrunch; iadd++) {
 	  if (start+iadd >= nsub)
@@ -65,7 +65,7 @@ void Pulsar::Archive::tscrunch (unsigned nscrunch)
 	}
 
 	if (verbose) 
-	  cerr <<  "Archive::tscrunch sum profiles" << endl;
+	  cerr <<  "Pulsar::Archive::tscrunch sum profiles" << endl;
 	
 	for (unsigned ipol=0; ipol < get_npol(); ++ipol) {
 
@@ -87,7 +87,7 @@ void Pulsar::Archive::tscrunch (unsigned nscrunch)
   } // end try block
 
   catch (Error& err) {
-    throw err += "Archive::tscrunch";
+    throw err += "Pulsar::Archive::tscrunch";
   }
 
   for (unsigned isub=0; isub < newsub; isub++) {
@@ -116,21 +116,23 @@ void Pulsar::Archive::tscrunch (unsigned nscrunch)
 
     mjd /= double (count);
 
-    if (get_type() == Signal::Pulsar)
+    if (get_type() == Signal::Pulsar) {
+
       // ensure that the polyco includes the new integration time
       update_model (mjd);
 
-    if (get_type() == Signal::Pulsar) {
+      if (!model)
+	continue;
 
       // get the time of the first subint to be integrated into isub
       MJD firstmjd = get_Integration (isub * nscrunch) -> get_epoch ();
       // get the period at the time of the first subint
-      double first_period = model.period(firstmjd);
+      double first_period = model->period(firstmjd);
       // get the phase at the time of the first subint
-      Phase first_phase = model.phase(firstmjd);
+      Phase first_phase = model->phase(firstmjd);
       
       // get the phase at the midtime of the result
-      Phase mid_phase = model.phase (mjd); 
+      Phase mid_phase = model->phase (mjd); 
 
       // calculate the phase difference
       Phase dphase = mid_phase - first_phase;
@@ -139,11 +141,12 @@ void Pulsar::Archive::tscrunch (unsigned nscrunch)
       mjd -= dphase.fracturns() * first_period;
 
       get_Integration (isub)->set_epoch (mjd);
-      get_Integration (isub)->set_folding_period (model.period(mjd));
+      get_Integration (isub)->set_folding_period (model->period(mjd));
       
       // The original code did not include the number of 
       // integer turns when computing the shift_time
     }
+
   }
 
   resize (newsub);
@@ -171,14 +174,14 @@ double Pulsar::Archive::weighted_frequency (unsigned ichan,
   unsigned ipol = 0;
 
   if (nsubint == 0)
-    throw Error (InvalidRange, "Archive::weighted_frequency", "nsubint == 0");
+    throw Error (InvalidRange, "Pulsar::Archive::weighted_frequency", "nsubint == 0");
 
   if (start >= nsubint)
-    throw Error (InvalidRange, "Archive::weighted_frequency",
+    throw Error (InvalidRange, "Pulsar::Archive::weighted_frequency",
 		 "start=%d nsubint=%d", start, nsubint);
 
   if (end > nsubint)
-    throw Error (InvalidRange, "Archive::weighted_frequency",
+    throw Error (InvalidRange, "Pulsar::Archive::weighted_frequency",
 		 "end=%d nsubint=%d", end, nsubint);
 
   double weightsum = 0.0;
@@ -196,7 +199,7 @@ double Pulsar::Archive::weighted_frequency (unsigned ichan,
       double weight = prof->get_weight();
       
       //if (verbose)
-      //cerr << "Archive::weighted_frequency [" << isubint << "]"
+      //cerr << "Pulsar::Archive::weighted_frequency [" << isubint << "]"
       //  " freq=" << freq << " wt=" << weight << endl;
 
       if (weight_by_duration)
@@ -212,7 +215,7 @@ double Pulsar::Archive::weighted_frequency (unsigned ichan,
     }
   }
   catch (Error& err) {
-    throw err += "Archive::weighted_frequency";
+    throw err += "Pulsar::Archive::weighted_frequency";
   }
   
   double result = 0.0;
