@@ -134,6 +134,7 @@ void Pulsar::BasebandArchive::copy (const Archive& archive,
     return;
 
   TimerArchive::copy (archive, subints);
+  set_be_data_size ();
 
   const BasebandArchive* barchive;
   barchive = dynamic_cast<const BasebandArchive*>(&archive);
@@ -383,8 +384,17 @@ void Pulsar::BasebandArchive::set_reduction ()
 
 void Pulsar::BasebandArchive::correct ()
 {
-  cerr << "Pulsar::BasebandArchive::correct" << endl;
+  if (verbose == 3)
+    cerr << "Pulsar::BasebandArchive::correct" << endl;
 
+  set_be_data_size ();
+
+  TimerArchive::correct ();
+}
+
+
+void Pulsar::BasebandArchive::set_be_data_size ()
+{
   set_header ();
 
   //
@@ -409,7 +419,6 @@ void Pulsar::BasebandArchive::correct ()
   Timer::set_backend (&hdr, "baseband");
   hdr.be_data_size = bhdr.size;
 
-  TimerArchive::correct ();
 }
 
 
