@@ -1,3 +1,7 @@
+#include <stdio.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+
 #include "TimerArchive.h"
 #include "TimerIntegration.h"
 #include "Pulsar/IntegrationOrder.h"
@@ -23,10 +27,18 @@ void Pulsar::TimerArchive::unload_file (const char* filename) const
     throw Error(InvalidState, "Archive::add_extension",
 		"The TimerArchive class does not support unloading of files with"
 		" alternate IntegrationOrder extensions");
+
   
   FILE* fptr = fopen (filename, "w");
   if (!fptr)
     throw Error (FailedSys, "TimerArchive::unload", "fopen");
+
+  int orig_umask = umask(0);
+  umask(orig_umask);
+
+  int perm = (S_IWUSR | S_IRUSR | S_IWGRP | S_IRGRP | S_IWOTH | S_IROTH) & ~orig_umask;
+
+  fchmod(fileno(fptr),perm);
 
   if (verbose == 3) 
     cerr << "TimerArchive::unload opened '" << filename << "'" << endl;
@@ -39,6 +51,7 @@ void Pulsar::TimerArchive::unload_file (const char* filename) const
     throw error += "TimerArchive::unload(" + string(filename) + ")";
   }
   fclose (fptr);
+  
 }
 
 
