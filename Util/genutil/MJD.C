@@ -430,13 +430,15 @@ MJD::MJD (int intday, double fracday)
   settle();
 }
 
+extern "C" double sla_gmst_(double * ut);
+
 double MJD::LST (float longitude) const
 {
-  utc_t  utc;
-  double lst;
-
-  UTC (&utc, NULL);
-  utc_f2LST (&lst, utc, fracsec, longitude);
+  double passed_MJD = this->in_days();
+  double gmst = sla_gmst_(&passed_MJD);
+  double lst = gmst/M_PI*180.0/15.0 + longitude/360.0*24.0;
+  while (lst<0.0) lst+=24.0;
+  while (lst>=24.0) lst-=24.0;
   return lst;
 }
 
