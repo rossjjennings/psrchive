@@ -84,7 +84,10 @@ void Pulsar::ReceptionCalibrator::initial_observation (const Archive* data)
       boost->name = "SingleAxis Boost";
 #endif
 
-    // add the receiver to the PolnCalibrator_path
+    // add differential gain and the receiver to the PolnCalibrator_path
+    Calibration::Boost* boost;
+    boost = new Calibration::Boost(Vector<double, 3>::basis(0));
+    equation[ichan]->get_model()->add_transformation( boost );
     equation[ichan]->get_model()->add_transformation( receiver[ichan] );
 
     // add the receiver and the feed rotation to the Pulsar_path
