@@ -1,14 +1,14 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/PolnCalibratorExtension.h,v $
-   $Revision: 1.8 $
-   $Date: 2003/12/06 15:08:53 $
+   $Revision: 1.9 $
+   $Date: 2003/12/26 08:34:45 $
    $Author: straten $ */
 
 #ifndef __PolnCalibratorExtension_h
 #define __PolnCalibratorExtension_h
 
-#include "Calibration/Transformation.h"
+#include "Calibration/Complex2.h"
 #include "Pulsar/Calibrator.h"
 #include "Pulsar/Archive.h"
 
@@ -62,9 +62,9 @@ namespace Pulsar {
     void set_valid (unsigned ichan, bool valid);
 
     //! Get the transformation for the specified frequency channel
-    ::Calibration::Transformation* get_Transformation (unsigned c);
+    ::Calibration::Complex2* get_transformation (unsigned c);
     //! Get the transformation for the specified frequency channel
-    const ::Calibration::Transformation* get_Transformation (unsigned c) const;
+    const ::Calibration::Complex2* get_transformation (unsigned c) const;
 
   protected:
 
@@ -75,10 +75,10 @@ namespace Pulsar {
     Calibrator::Type type;
     
     //! The instrumental response as a function of frequency
-    vector< Reference::To< ::Calibration::Transformation > > response;
+    vector< Reference::To< ::Calibration::Complex2 > > response;
 
-    //! Return a new Transformation instance, based on type attribute
-    ::Calibration::Transformation* new_Transformation ();
+    //! Return a new Calibration::Complex2 instance, based on type attribute
+    ::Calibration::Complex2* new_transformation ();
 
     //! Construct the response array according to the current attributes
     void construct ();

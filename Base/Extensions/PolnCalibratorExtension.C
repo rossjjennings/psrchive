@@ -104,23 +104,23 @@ void Pulsar::PolnCalibratorExtension::set_valid (unsigned ichan, bool valid)
   if (!valid)
     response[ichan] = 0;
   else if (!response[ichan])
-    response[ichan] = new_Transformation ();
+    response[ichan] = new_transformation ();
 }
 
 
 //! Get the transformation for the specified frequency channel
-::Calibration::Transformation* 
-Pulsar::PolnCalibratorExtension::get_Transformation (unsigned ichan)
+::Calibration::Complex2* 
+Pulsar::PolnCalibratorExtension::get_transformation (unsigned ichan)
 {
-  range_check (ichan, "Pulsar::PolnCalibratorExtension::get_Transformation");
+  range_check (ichan, "Pulsar::PolnCalibratorExtension::get_transformation");
   return response[ichan];
 }
 
 //! Get the transformation for the specified frequency channel
-const ::Calibration::Transformation*
-Pulsar::PolnCalibratorExtension::get_Transformation (unsigned ichan) const
+const ::Calibration::Complex2*
+Pulsar::PolnCalibratorExtension::get_transformation (unsigned ichan) const
 {
-  range_check (ichan, "Pulsar::PolnCalibratorExtension::get_Transformation");
+  range_check (ichan, "Pulsar::PolnCalibratorExtension::get_transformation");
   return response[ichan];
 }
 
@@ -132,7 +132,7 @@ void Pulsar::PolnCalibratorExtension::construct ()
          << Calibrator::Type2str (get_type()) << endl;
 
   for (unsigned ichan=0; ichan<response.size(); ichan++)
-    response[ichan] = new_Transformation();
+    response[ichan] = new_transformation();
 
 }
 
@@ -144,9 +144,9 @@ void Pulsar::PolnCalibratorExtension::range_check (unsigned ichan,
 		 ichan, response.size());
 }
 
-//! Return a new Transformation instance, based on type attribute
-::Calibration::Transformation* 
-Pulsar::PolnCalibratorExtension::new_Transformation ()
+//! Return a new Calibration::Complex2 instance, based on type attribute
+::Calibration::Complex2* 
+Pulsar::PolnCalibratorExtension::new_transformation ()
 {
   switch (type) {
   case Calibrator::SingleAxis:
@@ -159,7 +159,7 @@ Pulsar::PolnCalibratorExtension::new_Transformation ()
     return new ::Calibration::Instrument;
   default:
     throw Error (InvalidState,
-		 "Pulsar::PolnCalibratorExtension::new_Transformation",
+		 "Pulsar::PolnCalibratorExtension::new_transformation",
 		 "unrecognized Calibrator::Type = %d", (int) type);
   }
 }
