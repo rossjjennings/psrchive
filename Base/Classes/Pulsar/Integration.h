@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Integration.h,v $
-   $Revision: 1.21 $
-   $Date: 2002/04/26 13:28:04 $
-   $Author: pulsar $ */
+   $Revision: 1.22 $
+   $Date: 2002/06/04 04:58:49 $
+   $Author: ahotan $ */
 
 /*
   
@@ -271,7 +271,7 @@ namespace Pulsar {
   };
 
   void plot_greyscale (const Integration* my_integ, const string& str);
-  
+  void plot_color (const Integration* my_integ, const string& str);
 }
 
 #endif
