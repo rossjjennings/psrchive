@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/Attic/Calibrator.h,v $
-   $Revision: 1.11 $
-   $Date: 2003/10/08 14:24:08 $
+   $Revision: 1.12 $
+   $Date: 2003/10/22 10:33:50 $
    $Author: straten $ */
 
 #ifndef __Calibrator_H
@@ -40,6 +40,12 @@ namespace Pulsar {
       //! Phenomenological decomposition, (Britton 2000)
       Britton
     };
+
+    //! Convert Type to string
+    static const char* Type2str (Type type);
+
+    //! Convert string to Type
+    static Type str2Type (const char* s);
 
     //! Verbosity flag
     static bool verbose;

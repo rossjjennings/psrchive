@@ -10,6 +10,42 @@ bool Pulsar::Calibrator::verbose = false;
    sensible value is around 0.05. */
 float Pulsar::Calibrator::median_smoothing = 0.0;
 
+
+const char* Pulsar::Calibrator::Type2str (Type type)
+{
+  switch (type) {
+  case Flux:
+    return "Flux";
+  case SingleAxis:
+    return "SingleAxis";
+  case Polar:
+    return "Polar";
+  case Hamaker:
+    return "Hamaker";
+  case Britton:
+    return "Britton";
+  default:
+    return "Invalid";
+  }
+}
+
+
+Pulsar::Calibrator::Type Pulsar::Calibrator::str2Type (const char* s)
+{
+  if (strcasecmp(s, "Flux") == 0)
+    return Flux;
+  if (strcasecmp(s, "SingleAxis") == 0)
+    return SingleAxis;
+  if (strcasecmp(s, "Polar") == 0)
+    return Polar;
+  if (strcasecmp(s, "Hamaker") == 0)
+    return Hamaker;
+  if (strcasecmp(s, "Britton") == 0)
+    return Britton;
+  return (Type) -1;
+}
+
+
 Pulsar::Calibrator::Calibrator ()
 {
 }
