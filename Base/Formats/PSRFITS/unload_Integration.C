@@ -73,7 +73,8 @@ void Pulsar::FITSArchive::unload_integration (int row,
 		     "fits_write_col TSUBINT");
   
   if (verbose == 3)
-    cerr << "FITSArchive::unload_integration TSUBINT set" << endl;
+    cerr << "FITSArchive::unload_integration row=" << row
+         << " TSUBINT = " << duration << " written" << endl;
   
   // Set the start time of the integration
     
@@ -84,8 +85,14 @@ void Pulsar::FITSArchive::unload_integration (int row,
     throw FITSError (status, "FITSArchive:unload_integration",
 		     "fits_get_colnum OFFS_SUB");
 
+  if (verbose == 3)
+    cerr << "FITSArchive::unload_integration row=" << row
+         << " epoch=" << integ->get_epoch () << endl;
+
   double time = 0.0;
-  time = (integ->get_epoch () - reference_epoch).in_seconds();
+
+  if (duration != 0)
+    time = (integ->get_epoch () - reference_epoch).in_seconds();
   
   fits_write_col (thefptr, TDOUBLE, colnum, row, 1, 1, &time, &status);
   
@@ -94,8 +101,8 @@ void Pulsar::FITSArchive::unload_integration (int row,
 		     "fits_write_col OFFS_SUB");
   
   if (verbose == 3)
-    cerr << "FITSArchive::unload_integration OFFS_SUB set" << endl;
-  
+    cerr << "FITSArchive::unload_integration row=" << row 
+         << " OFFS_SUB = " << time << " written" << endl;
 
   // Write other useful info
   
