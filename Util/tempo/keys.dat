@@ -82,6 +82,8 @@ EPHEM 0 0    # Solar system ephemeris
 TZRMJD 4 0   # Reference TOA (MJD)
 TZRFRQ 1 0   # Frequency of reference TOA (MHz)
 TZRSITE 0 0  # One-letter observatory code of reference TOA
+TZNSPAN 5 0  # Span of polyco
+TZNCOEF 1 0  # Number of co-efficients in polyco
 
 #TAU 1 1   # LOG10 of the temporal broadening of pulses at 1 GHz (log10(s))
 
@@ -178,4 +180,7 @@ NTOA 5 0
 
 # Number of iterations
 NITS 5 0
+
+# special Kopeikin 96 flag takes out derivatives due to pm
+K96 5 0
 
