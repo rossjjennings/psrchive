@@ -40,9 +40,10 @@ void usage ()
     "  -o                     Do not try to match obs types\n"
     "  -P                     Calibrate polarisations only\n"
     "\n"
-    "  -S   Use the SingleAxis(t)Polar (SAtP selfcal) model\n"
-    "  -s   Use the Single Axis Model (default)\n"
-    "  -q   Use the Polar Model\n\n"
+    "  -S                     Use the SingleAxis(t)Polar (SAtP selfcal) model\n"
+    "  -s                     Use the Single Axis Model (default)\n"
+    "  -q                     Use the Polar Model\n"
+    "  -A filename            Use an existing selfcal model\n\n"
     "See http://astronomy.swin.edu.au/pulsar/software/manuals/pac.html"
        << endl;
 }
@@ -54,6 +55,7 @@ int main (int argc, char *argv[]) {
   bool do_fluxcal = true;
   bool do_polncal = true;
   bool do_selfcal = false;
+  bool apply_model = false;
   bool write_database_file = false;
   bool summary_only = false;
 
@@ -68,6 +70,7 @@ int main (int argc, char *argv[]) {
   
   string cals_are_here = "./";
   string unload_ext = "calib";
+  string model_file;
   vector<string> exts;
 
   vector<string> archives;
@@ -80,7 +83,7 @@ int main (int argc, char *argv[]) {
 
   string command = "pac ";
 
-  while ((gotc = getopt(argc, argv, "hvVip:u:e:d:wWcITFboPsSq")) != -1) {
+  while ((gotc = getopt(argc, argv, "hvVip:u:e:d:wWcITFboPsSqA:")) != -1) {
     switch (gotc) {
     case 'h':
       usage ();
@@ -98,7 +101,7 @@ int main (int argc, char *argv[]) {
       Pulsar::Archive::set_verbosity(1);
       break;
     case 'i':
-      cout << "$Id: pac.C,v 1.29 2003/10/25 05:03:20 ahotan Exp $" << endl;
+      cout << "$Id: pac.C,v 1.30 2003/10/26 19:12:01 ahotan Exp $" << endl;
       return 0;
     case 'p':
       cals_are_here = optarg;
@@ -165,9 +168,14 @@ int main (int argc, char *argv[]) {
       m = Pulsar::Calibrator::Polar;
       command += "-q ";
       break;
+    case 'A':
+      apply_model = true;
+      model_file = optarg;
+      command += "-A ";
+      break;
 
     default:
-      cout << "Unrecognised option" << endl;
+      return -1;
     }
   }
   
@@ -182,107 +190,143 @@ int main (int argc, char *argv[]) {
   
   if (archives.empty()) {
     if (!summary_only) {
-      cout << "No archives were specified" << endl;
+      cout << "No Archives were specified. Exiting" << endl;
       exit(-1);
     }
   } 
 
-  // Load or generate the CAL file database
-  
+  // Define the objects that will do the work
+
+  Pulsar::Archive* model_arch = 0;
+  Pulsar::PolnCalibrator* model_calibrator = 0;
   Pulsar::Calibration::Database* dbase = 0;
+
+  // See if we're applying a pre-existing model
   
-  try {
+  if (apply_model) {
+
+    if (model_file.empty()) {
+      cerr << "No model file specified" << endl;
+      return -1;
+    }
     
-    if (new_database) {
-      
-      exts.push_back("cf");
-      exts.push_back("pcal");
-      
-      cout << "Generating new database" << endl;
-      
-      dbase = new Pulsar::Calibration::Database (cals_are_here.c_str(), exts);
-      
-      dbase -> test_inst(test_instr);
-      dbase -> test_posn(test_coords);
-      dbase -> test_time(test_times);
-      dbase -> test_freq(test_frequency);
-      dbase -> test_bw(test_bandwidth);
-      dbase -> test_obst(test_obstype);
-
-      if (dbase->size() <= 0) {
-	cout << "No CAL files found" << endl;
-	return -1;
-      }
-
-      if (verbose)
-	cout << dbase->size() << " Calibrator Archives found" << endl;
-
-      if (write_database_file) {
-	
-	//string temp;
-	
-	//if (cals_are_here.find_last_of("/", 0) != cals_are_here.length()-1)
-	//  temp = cals_are_here + "/database.txt";
-	//else
-	//  temp = cals_are_here + "database.txt";
-	
-	cout << "Writing database summary file" << endl;
-	dbase -> unload("database.txt");
-	
-	if (summary_only)
-	  return (0);
-      }
-      
+    try {
+      model_arch = Pulsar::Archive::load(model_file);
     }
-    else {
-      cout << "Reading from database summary file" << endl;
-      dbase = new Pulsar::Calibration::Database (cals_are_here.c_str());
-
-      dbase -> test_inst(test_instr);
-      dbase -> test_posn(test_coords);
-      dbase -> test_time(test_times);
-      dbase -> test_freq(test_frequency);
-      dbase -> test_bw(test_bandwidth);
-      dbase -> test_obst(test_obstype);
+    catch (Error& error) {
+      cerr << "Could not load Archive containing calibration Model" << endl;
+      cerr << error << endl;
+      return -1;
     }
+    model_calibrator = new Pulsar::PolnCalibrator(model_arch);
   }
-  catch (Error& error) {
-    cerr << "Error generating CAL database" << endl;
-    cerr << error << endl;
-    cerr << "Aborting calibration attempt" << endl;
-    return -1;
-  }
+  else if (!apply_model || do_fluxcal) {
+    
+    // Load or generate the CAL file database
+    
+    try {
+      
+      if (new_database) {
+	
+	exts.push_back("cf");
+	exts.push_back("pcal");
+	
+	cout << "Generating new CAL file database" << endl;
+	
+	dbase = new Pulsar::Calibration::Database (cals_are_here.c_str(), exts);
+	
+	dbase -> test_inst(test_instr);
+	dbase -> test_posn(test_coords);
+	dbase -> test_time(test_times);
+	dbase -> test_freq(test_frequency);
+	dbase -> test_bw(test_bandwidth);
+	dbase -> test_obst(test_obstype);
+	
+	if (dbase->size() <= 0) {
+	  cout << "No CAL files found. Bailing out" << endl;
+	  return -1;
+	}
+	
+	if (verbose)
+	  cout << dbase->size() << " calibrator Archives found" << endl;
+	
+	if (write_database_file) {
+	  
+	  //string temp;
+	  
+	  //if (cals_are_here.find_last_of("/", 0) != cals_are_here.length()-1)
+	  //  temp = cals_are_here + "/database.txt";
+	  //else
+	  //  temp = cals_are_here + "database.txt";
+	  
+	  cout << "Writing database summary file" << endl;
+	  dbase -> unload("database.txt");
+	  
+	  if (summary_only)
+	    return (0);
+	}
+	
+      }
+      else {
+	cout << "Reading from database summary file" << endl;
+	dbase = new Pulsar::Calibration::Database (cals_are_here.c_str());
+	
+	dbase -> test_inst(test_instr);
+	dbase -> test_posn(test_coords);
+	dbase -> test_time(test_times);
+	dbase -> test_freq(test_frequency);
+	dbase -> test_bw(test_bandwidth);
+	dbase -> test_obst(test_obstype);
+      }
+    }
+    catch (Error& error) {
+      cerr << "Error generating CAL database" << endl;
+      cerr << error << endl;
+      cerr << "Aborting calibration attempt" << endl;
+      return -1;
+    }
+  }  
   
   // Start calibrating archives
   
   for (unsigned i = 0; i < archives.size(); i++) {
     
     try {
-
+      
       if (verbose)
 	cout << "Loading " << archives[i] << endl;
 
       Pulsar::Archive* arch = Pulsar::Archive::load(archives[i]);
 
-      cout << "Loaded archive: " << archives[i] << endl;
-      
+      cout << "Loaded Archive: " << archives[i] << endl;
      
       if (do_polncal) {
-
-        if (verbose)
-          cout << "Finding PolnCalibrator" << endl;
-
-	Pulsar::PolnCalibrator* pcal_engine  = 0;
-	pcal_engine = dbase->generatePolnCalibrator(arch, m);
 	
-        if (verbose)
-          cout << "Calibrating Archive Polarisation" << endl;
-
-	pcal_engine->calibrate(arch);
-	
-	cout << "Polarisation Calibration Complete" << endl;
-        arch->set_poln_calibrated();
-	pcal_file = (pcal_engine->get_Archive())->get_filename();
+	if (apply_model) {
+	  if (verbose)
+	    cout << "Applying calibration Model" << endl;
+	  
+	  model_calibrator->calibrate(arch);
+	  cout << "Polarisation calibration complete" << endl;
+	  arch->set_poln_calibrated();
+	  pcal_file = model_file;
+	}
+	else {
+	  if (verbose)
+	    cout << "Finding PolnCalibrator" << endl;
+	  
+	  Pulsar::PolnCalibrator* pcal_engine  = 0;
+	  pcal_engine = dbase->generatePolnCalibrator(arch, m);
+	  
+	  if (verbose)
+	    cout << "Calibrating Archive polarisations" << endl;
+	  
+	  pcal_engine->calibrate(arch);
+	  
+	  cout << "Polarisation calibration complete" << endl;
+	  arch->set_poln_calibrated();
+	  pcal_file = (pcal_engine->get_Archive())->get_filename();
+	}
       }
       
       /* The PolnCalibrator classes normalize everything so that flux
@@ -294,17 +338,17 @@ int main (int argc, char *argv[]) {
 
 	Pulsar::FluxCalibrator* fcal_engine = 0;
 	fcal_engine = dbase->generateFluxCalibrator(arch);
-
+	
 	if (verbose) {
-	  cout << "Generated Flux Calibrator" << endl;
-	  cout << "Calibrating Archive Fluxes" << endl;
+	  cout << "Generated flux calibrator" << endl;
+	  cout << "Calibrating Archive fluxes" << endl;
 	}
 
 	fcal_engine->calibrate(arch);
-
+	
 	cout << "Flux calibration complete" << endl;
         arch->set_flux_calibrated();
-
+	
 	cout << "Mean Tsys = " << fcal_engine->meanTsys() << endl;
       }
  
@@ -315,7 +359,7 @@ int main (int argc, char *argv[]) {
       newname += unload_ext;
 
       if (verbose)
-        cout << "pac: Calibrated Archive name '" << newname << "'" << endl;
+        cout << "Calibrated Archive name '" << newname << "'" << endl;
       
       // See if the archive contains a history that should be updated:
       
@@ -332,6 +376,8 @@ int main (int argc, char *argv[]) {
 	    fitsext->set_cal_mthd("SingleAxis");
 	  if (do_selfcal)
 	    fitsext->set_cal_mthd("SelfCAL");
+	  if (apply_model)
+	    fitsext->set_cal_mthd("SelfCAL(pcm)");
 	  if (m == Pulsar::Calibrator::Polar)
 	    fitsext->set_cal_mthd("Polar");
 	  fitsext->set_cal_file(pcal_file);
