@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Cartesian.h,v $
-   $Revision: 1.7 $
-   $Date: 2001/08/02 08:12:18 $
+   $Revision: 1.8 $
+   $Date: 2002/04/24 11:57:30 $
    $Author: straten $ */
 
 #ifndef __CARTESIAN_H
@@ -42,6 +42,9 @@ class Cartesian
 
   double& operator[] (int d)
     { return *(&x+d); }
+
+  operator double* ()
+    { return &x; }
 
   const double& operator [] (int d) const
     { return *(&x+d); }
