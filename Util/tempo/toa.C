@@ -620,7 +620,7 @@ bool Tempo::toa::valid()
 		      << " is too small" << endl;
     return 0;
   }
-  if ((error <= 0.0) || (error > 999999999.0)) {
+  if ((error < 0.0) || (error > 999999999.0)) {
     if (verbose) cerr << "Tempo::toa::load(char*) Error: ERROR=" << error 
 		      << " is weird." << endl;
     return 0;
