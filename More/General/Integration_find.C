@@ -4,44 +4,6 @@
 
 /////////////////////////////////////////////////////////////////////////////
 //
-// Pulsar::Integration::total
-//
-/*!
-  This method is primarily designed for use by the Integration::find_*
-  methods.  Integration::fscrunch is called with weighted_cfreq ==
-  false so that the phase of the total profile will always relate to
-  the centre frequency of the Integration.
-*/
-Pulsar::Integration* Pulsar::Integration::total () const
-{
-  if (Pulsar::Integration::verbose)
-    cerr << "Pulsar::Integration::total entered" << endl;
-
-  if (get_npol()<1 || get_nchan()<1)
-    throw Error (InvalidState, "Pulsar::Integration::total",
-		 "npol=%d nchan=%d", get_npol(), get_nchan());
-
-  int npol_keep = 1;
-  if (get_state() == Signal::Coherence || get_state() == Signal::PPQQ)
-    npol_keep = 2;
-
-  Integration* copy = 0;
-
-  try {
-    copy = clone (npol_keep);
-    copy->fscrunch (0, false);
-    copy->pscrunch ();
-  }
-  catch (Error& err) {
-    if (copy) delete copy;
-    throw err += "Integration::total";
-  }
-  
-  return copy;
-}
-
-/////////////////////////////////////////////////////////////////////////////
-//
 // Pulsar::Integration::find_transitions
 //
 /*!
@@ -51,19 +13,22 @@ Pulsar::Integration* Pulsar::Integration::total () const
   </UL>
 */
 void Pulsar::Integration::find_transitions (int& hi2lo, int& lo2hi, int& buf)
-  const
-{
-  Integration* copy = 0;
+  const try {
 
-  try {
-    copy = total ();
-    copy->profiles[0][0]->find_transitions (hi2lo, lo2hi, buf);
-  }
-  catch (Error& err) {
-    if (copy) delete copy;
-    throw err += "Integration::find_transitions";
-  }
-  delete copy;
+  if (verbose)
+    cerr << "Pulsar::Integration::find_transitions call total" << endl;
+
+  Reference::To<Integration> copy = total ();
+
+  if (verbose)
+    cerr << "Pulsar::Integration::find_transitions"
+            " call Profile::find_transitions" << endl;
+
+  copy->profiles[0][0]->find_transitions (hi2lo, lo2hi, buf);
+
+}
+catch (Error& err) {
+  throw err += "Integration::find_transitions";
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -77,19 +42,24 @@ void Pulsar::Integration::find_transitions (int& hi2lo, int& lo2hi, int& buf)
   </UL>
 */
 void Pulsar::Integration::find_peak_edges (int& rise, int& fall) const
-{
-  Integration* copy = 0;
+try {
 
-  try {
-    copy = total ();
-    copy->profiles[0][0]->find_peak_edges (rise, fall);
-  }
-  catch (Error& err) {
-    if (copy) delete copy;
-    throw err += "Integration::find_peak_edges";
-  }
-  delete copy;
+  if (verbose)
+    cerr << "Pulsar::Integration::find_peak_edges call total" << endl;
+
+  Reference::To<Integration> copy = total ();
+
+  if (verbose)
+    cerr << "Pulsar::Integration::find_transitions"
+            " call Profile::find_peak_edges" << endl;
+
+  copy->profiles[0][0]->find_peak_edges (rise, fall);
+
 }
+catch (Error& err) {
+  throw err += "Integration::find_peak_edges";
+}
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -102,25 +72,19 @@ void Pulsar::Integration::find_peak_edges (int& rise, int& fall) const
   </UL>
 */
 float Pulsar::Integration::find_min_phase (float dc) const
-{
+try {
+
   if (Pulsar::Integration::verbose)
     cerr << "Pulsar::Integration::find_min_phase entered" << endl;
 
-  Integration* copy = 0;
-  float min_phase = -1.0;
+  Reference::To<Integration> copy = total ();
+  return copy->profiles[0][0]->find_min_phase (dc);
 
-  try {
-    copy = total ();
-    min_phase = copy->profiles[0][0]->find_min_phase (dc);
-  }
-  catch (Error& err) {
-    if (copy) delete copy;
-    throw err += "Integration::find_peak_edges";
-  }
-  delete copy;
-
-  return min_phase;
 }
+catch (Error& err) {
+  throw err += "Integration::find_peak_edges";
+}
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -133,115 +97,13 @@ float Pulsar::Integration::find_min_phase (float dc) const
   </UL>
 */
 float Pulsar::Integration::find_max_phase () const
-{
-  Integration* copy = 0;
-  float max_phase = -1.0;
+try {
 
-  try {
-    copy = total ();
-    max_phase = copy->profiles[0][0]->find_max_phase ();
-  }
-  catch (Error& err) {
-    if (copy) delete copy;
-    throw err += "Integration::find_peak_edges";
-  }
-  delete copy;
+  Reference::To<Integration> copy = total ();
+  return copy->profiles[0][0]->find_max_phase ();
 
-  return max_phase;
+}
+catch (Error& err) {
+  throw err += "Integration::find_peak_edges";
 }
 
-#if 0
-void Pulsar::Integration::cal_levels (vector<Stokes>& hi,
-			  vector<Stokes>& lo)
-{
-  if (nbin<1)
-    throw Error (InvalidState, "Pulsar::Integration::cal_levels",
-		 "nbin<1");
-  if (npol!=4)
-    throw Error (InvalidState, "Pulsar::Integration::cal_levels",
-		 "npol!=4");
-  if (nsub<1)
-    throw Error (InvalidState, "Pulsar::Integration::cal_levels",
-		 "nsub<1");
-
-  hi.resize(nsub);
-  lo.resize(nsub);
-
-  int hightolow, lowtohigh, buffer;
-  find_cal_transitions (hightolow, lowtohigh, buffer);
-
-  Stokes zero;
-  for (int ichan=0; ichan<nsub; ++ichan) {
-    if (wts[ichan]==0) {
-      hi[ichan] = lo[ichan] = zero;
-      continue;
-    }
-    for (int ipol=0; ipol<4; ++ipol) {
-      profiles[ipol][ichan]->stats (&hi[ichan][ipol], 0, 0,
-				    lowtohigh + buffer,
-				    hightolow - buffer);
-      profiles[ipol][ichan]->stats (&lo[ichan][ipol], 0, 0,
-				    hightolow + buffer,
-				    lowtohigh - buffer);
-    }
-  }
-}
-
-void Pulsar::Integration::psr_levels (vector<Stokes>& hi,
-			  vector<Stokes>& lo, float window)
-{
-  if (nbin<1)
-    throw Error (InvalidState, "Pulsar::Integration::cal_levels",
-		 "nbin<1");
-  if (npol!=4)
-    throw Error (InvalidState, "Pulsar::Integration::cal_levels",
-		 "npol!=4");
-  if (nsub<1)
-    throw Error (InvalidState, "Pulsar::Integration::cal_levels",
-		 "nsub<1");
-
-  hi.resize(nsub);
-  lo.resize(nsub);
-
-  int ichan=0, ipol=0;
-
-  // first, find the power in each pulse profile;
-  Pulsar::Integration copy (*this);
-  copy.remove_baseline(0, window);
-  for (ichan=0; ichan<nsub; ++ichan)
-    for (ipol=0; ipol<4; ++ipol)
-      hi[ichan][ipol] = profiles[ipol][ichan]->sum()/nbin;
-
-  // then, find the phase centre of the baseline in Stokes I
-  copy.fscrunch ();
-  // if only XX, add YY
-  if (copy.profiles[0][0]->poln == 1)
-    *(copy.profiles[0][0]) += *(copy.profiles[1][0]);
-
-  float phase;
-  copy.profiles[0][0]->min (&phase, window);
-
-  Stokes zero;
-  for (ichan=0; ichan<nsub; ++ichan) {
-
-    if (wts[ichan]==0) {
-      hi[ichan] = lo[ichan] = zero;
-      continue;
-    }
-
-    // shift the phase centre of the baseline for each freq channel
-    double fcentre = profiles[0][ichan]->centrefreq;
-    double shift = dm/(2.41e-4)*(1.0/(fcentre*fcentre)-
-				 1.0/(centrefreq*centrefreq)) / mini.pfold;
-
-    int min = (phase + shift + window/2) * nbin;
-    int max = (phase + shift - window/2) * nbin;
-
-    for (ipol=0; ipol<4; ++ipol)
-      profiles[ipol][ichan]->stats (&lo[ichan][ipol], 0, 0, min, max);
-
-  }
-}
-
-
-#endif
