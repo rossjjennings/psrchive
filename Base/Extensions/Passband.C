@@ -90,6 +90,21 @@ void Pulsar::Passband::set_passband (const vector<float>& data,
   passband[ipol+iband*npol] = data;
 }
 
+//! Set the specified passband
+void Pulsar::Passband::set_passband (const float* data,
+				     unsigned ipol, unsigned iband)
+{
+  range_check (ipol, iband, "Pulsar::Passband::set_passband");
+
+  vector<float>& pband = passband[ipol+iband*npol];
+
+  pband.resize (nchan);
+
+  for (unsigned ichan=0; ichan<nchan; ichan++)
+    pband[ichan] = data[ichan];
+}
+
+
 void Pulsar::Passband::range_check (unsigned ipol, unsigned iband,
 				    const char* method) const
 {

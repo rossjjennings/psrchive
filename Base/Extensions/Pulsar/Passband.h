@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/Passband.h,v $
-   $Revision: 1.1 $
-   $Date: 2003/06/12 18:40:00 $
+   $Revision: 1.2 $
+   $Date: 2003/06/16 21:24:49 $
    $Author: straten $ */
 
 #ifndef __Passband_h
@@ -48,6 +48,9 @@ namespace Pulsar {
 
     //! Set the specified passband
     void set_passband (const vector<float>&, unsigned ipol, unsigned iband=0);
+
+    //! Set the specified passband
+    void set_passband (const float* data, unsigned ipol, unsigned iband=0);
 
     //! Set all passband datum (not dimensions) to zero
     void zero ();
