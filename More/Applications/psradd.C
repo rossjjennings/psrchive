@@ -10,7 +10,7 @@
 #include "dirutil.h"
 #include "string_utils.h"
 
-static const char* psradd_args = "b:Ce:f:Fg:hi:M:p:PtT:vV";
+static const char* psradd_args = "b:Ce:f:Fg:hi:M:p:PstT:vV";
 
 void usage () {
   cout <<
@@ -23,7 +23,7 @@ void usage () {
     " -M meta     filename with list of files\n"
     " -p fname    load new ephemeris from 'fname'\n"
     " -P          correct for parallactic angle before tscrunch\n"
-    " -S          tscrunch result after each new file (nice on RAM)\n"
+    " -s          tscrunch result after each new file (nice on RAM)\n"
     " -t          make no changes to file system (testing mode)\n"
     " -T tempo    system call to tempo\n"
     "\n"
@@ -137,7 +137,7 @@ int main (int argc, char **argv)
       deparallactify = true;
       break;
 
-    case 'S':
+    case 's':
       tscrunch_total = true;
       break;
 
