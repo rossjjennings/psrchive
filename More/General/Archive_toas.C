@@ -6,47 +6,32 @@
   \param standard
   \retval toas
 */
-void Pulsar::Archive::toas (const Archive* standard, vector<Tempo::toa>& toas)
+void Pulsar::Archive::toas (vector<Tempo::toa>& toas,
+			    const Archive* standard) const
 {
-  Pulsar::Archive* stdarch = standard->clone();
+  string reason;
+  if (!standard_match (standard, reason))
+    cerr << "Pulsar::Archive::toas WARNING " << reason << endl;
 
-  // Extract the standard profile
-  stdarch->fscrunch();
-  stdarch->tscrunch();
-  stdarch->convert_state(Signal::Intensity);
+  const Integration* std = standard->get_Integration (0);
 
-  Pulsar::Profile* stdprof = stdarch->get_Profile(0,0,0);
+  char nsite = get_telescope_code();
 
-  // Set up this archive
-  fscrunch();
-  convert_state(Signal::Intensity);
+  for (unsigned isub=0; isub<get_nsubint(); isub++) {
 
-  Pulsar::Profile* prof;
-  MJD mid_time;
-  Phase phase;
-  double period;
+    // some extra information to place in each toa
+    char extra[20];
+    sprintf (extra, " %d ", isub);
 
-  for (unsigned i = 0; i < get_nsubint(); i++) {
-    
-    // Extract the profile from the Integration
-    prof = get_Profile(i,0,0);
+    vector<Tempo::toa> toaset;
+    get_Integration(isub)->toas (toaset, *std, nsite);
 
-    // Extract the mid-time of the Integration
-    mid_time = get_Integration(i)->get_mid_time();
+    for (unsigned itoa=0; itoa < toaset.size(); itoa++) {
+      string aux = get_filename() + extra + toaset[itoa].get_auxilliary_text();
+      toaset[itoa].set_auxilliary_text (aux);
+      toas.push_back (toaset[itoa]);
+    }
 
-    // Find the topocentric period and phase at the mid-time
-    period = model.period(mid_time);
-    phase = model.phase(mid_time, get_centre_frequency());
-    
-    // Calculate the adjustment required to refer the mid-time
-    // to pulse phase zero
-    double offset = phase.fracturns() * period;
-    
-    // Adjust the mid-time
-    mid_time -= offset;
-    
-    toas.push_back(prof->toa(stdprof, mid_time, period,
-			     get_telescope_code()));
   }
-
 }
+
