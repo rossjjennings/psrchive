@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Profile.h,v $
-   $Revision: 1.33 $
-   $Date: 2003/08/27 00:44:29 $
-   $Author: sord $ */
+   $Revision: 1.34 $
+   $Date: 2003/08/31 07:36:31 $
+   $Author: straten $ */
 
 #ifndef __Pulsar_Profile_h
 #define __Pulsar_Profile_h
@@ -160,17 +160,6 @@ namespace Pulsar {
     //! fills data by jumping jbin between each datum
     void get_amps (float* data, unsigned jbin) const;
 
-#if defined(sun) && !defined(__GNUC__)
-    // SUN CC 5.0 is stupid
-    void set_amps (const float* data);
-    void set_amps (const double* data);
-    void set_amps (const int* data);
-    void set_amps (const unsigned* data);
-    void set_amps (const short* data);
-    void set_amps (const unsigned short* data);
-    void set_amps (const char* data);
-    void set_amps (const unsigned char* data);
-#else
     //! set the amplitudes array equal to the contents of the data array
     template <typename T> void set_amps (const T* data);
 
@@ -179,7 +168,6 @@ namespace Pulsar {
 
     //! set the amplitudes array equal to the contents of the data array
     template <typename T> void get_amps (vector<T>& data);
-#endif
 
     //! get the centre frequency (in MHz)
     double get_centre_frequency () const { return centrefreq; }
@@ -250,7 +238,6 @@ namespace Pulsar {
 
 }
 
-#if !defined(sun) || defined(__GNUC__)
 
 /*! 
   \param data pointer to the data elements to be copied.
@@ -285,7 +272,5 @@ void Pulsar::Profile::get_amps (vector<T>& data)
     data[ibin] = static_cast<T>( amps[ibin] );
 }
 
-
-#endif // bloody SUN CC 5.0 workaround
 
 #endif // !defined __Pulsar_Profile_h
