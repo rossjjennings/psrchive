@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Estimate.h,v $
-   $Revision: 1.21 $
-   $Date: 2003/10/16 13:38:22 $
-   $Author: straten $ */
+   $Revision: 1.22 $
+   $Date: 2004/06/17 09:53:26 $
+   $Author: hknight $ */
 
 #ifndef __Estimate_h
 #define __Estimate_h
@@ -119,28 +119,28 @@ class Estimate
 
   //! See http://mathworld.wolfram.com/ErrorPropagation.html Equation (15)
   friend const Estimate exp (const Estimate& u)
-  { T val = std::exp (u.val); return Estimate (val, val*val*u.var); }
+  { T val = ::exp (u.val); return Estimate (val, val*val*u.var); }
 
   //! See http://mathworld.wolfram.com/ErrorPropagation.html Equation (17)
   friend const Estimate log (const Estimate& u)
-  { return Estimate (std::log (u.val), u.var/(u.val*u.val)); }
+  { return Estimate (::log (u.val), u.var/(u.val*u.val)); }
 
   //! \f$ \left({\partial\sin x\over\partial x}\right)^2 = (1-\sin^2x) \f$
   friend const Estimate sin (const Estimate& u)
-  { T val = std::sin (u.val); return Estimate (val, (1-val*val)*u.var); }
+  { T val = ::sin (u.val); return Estimate (val, (1-val*val)*u.var); }
 
   //! \f$ \left({\partial\cos x\over\partial x}\right)^2 = (1-\cos^2x) \f$
   friend const Estimate cos (const Estimate& u)
-  { T val = std::cos (u.val); return Estimate (val, (1-val*val)*u.var); }
+  { T val = ::cos (u.val); return Estimate (val, (1-val*val)*u.var); }
 
   //! \f$ {\partial\over\partial x} \tan^-1 (x) = (1+x^2)^{-1} \f$
   friend const Estimate atan2 (const Estimate& s, const Estimate& c)
   { T c2 = c.val*c.val;  T s2 = s.val*s.val;  T sc2 = c2+s2;
-    return Estimate (std::atan2 (s.val, c.val),(c2*s.var+s2*c.var)/(sc2*sc2)); }
+    return Estimate (::atan2 (s.val, c.val),(c2*s.var+s2*c.var)/(sc2*sc2)); }
   
   //! \f$ {\partial\over\partial x} x^\onehalf = \onehalf x^{-\onehalf} \f$
   friend const Estimate sqrt (const Estimate& u)
-  { return Estimate (std::sqrt (u.val), 0.25*u.var/fabs(u.val)); }
+  { return Estimate (::sqrt (u.val), 0.25*u.var/fabs(u.val)); }
 
 };
 

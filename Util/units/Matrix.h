@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Matrix.h,v $
-   $Revision: 1.8 $
-   $Date: 2004/04/28 14:11:14 $
-   $Author: straten $ */
+   $Revision: 1.9 $
+   $Date: 2004/06/17 09:53:13 $
+   $Author: hknight $ */
 
 #ifndef __Matrix_H
 #define __Matrix_H
@@ -21,7 +21,7 @@ class Matrix : public Vector< Vector<T, Columns>, Rows > {
 public:
 
   //! Null constructor
-  Matrix () { for (unsigned i=0; i<Rows; i++) x[i] = 0; }
+  Matrix () { for (unsigned i=0; i<Rows; i++) Vector<Vector<T,Columns>,Rows>::x[i] = 0; }
 
   //! Construct from another Matrix<U> instance
   template<typename U> Matrix (const Matrix<U, Rows, Columns>& s)
@@ -29,7 +29,7 @@ public:
 
   //! Set this instance equal to another Matrix<U> instance
   template<typename U> Matrix& operator = (const Matrix<U, Rows, Columns>& s)
-  { for (unsigned i=0; i<Rows; i++) x[i] = s.x[i]; return *this; }
+  { for (unsigned i=0; i<Rows; i++) Vector<Vector<T,Columns>,Rows>::x[i] = s.Vector<Vector<T,Columns>,Rows>::x[i]; return *this; }
   
 };
 

@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Stokes.h,v $
-   $Revision: 1.11 $
-   $Date: 2004/04/26 18:51:42 $
-   $Author: straten $ */
+   $Revision: 1.12 $
+   $Date: 2004/06/17 09:52:56 $
+   $Author: hknight $ */
 
 #ifndef __Stokes_H
 #define __Stokes_H
@@ -25,7 +25,13 @@ class Stokes : public Quaternion<T, Hermitian>
     Stokes (T s, const Vector<U, 3>& v) : Quaternion<T,Hermitian> (s, v) {}
 
   template<typename U>
-    Stokes (const Stokes<U>& s) { s0=s.s0; s1=s.s1; s2=s.s2; s3=s.s3; }
+    Stokes (const Stokes<U>& s)
+  {
+    Quaternion<T,Hermitian>::s0 = s.Quaternion<U,Hermitian>::s0;
+    Quaternion<T,Hermitian>::s1 = s.Quaternion<U,Hermitian>::s1;
+    Quaternion<T,Hermitian>::s2 = s.Quaternion<U,Hermitian>::s2;
+    Quaternion<T,Hermitian>::s3 = s.Quaternion<U,Hermitian>::s3;
+  }
 
   template <typename U>
     Stokes (const Quaternion<U,Hermitian>& q) 
@@ -68,7 +74,7 @@ class Stokes : public Quaternion<T, Hermitian>
     Stokes& operator = (const Jones<U>& j)
   { return operator = ( convert(j) ); }
 
-  T abs_vect () const { return sqrt (s1*s1 + s2*s2 + s3*s3); }
+  T abs_vect () const { return sqrt (Quaternion<T,Hermitian>::s1*Quaternion<T,Hermitian>::s1 + Quaternion<T,Hermitian>::s2*Quaternion<T,Hermitian>::s2 + Quaternion<T,Hermitian>::s3*Quaternion<T,Hermitian>::s3); }
 
 };
 
