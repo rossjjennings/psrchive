@@ -51,11 +51,11 @@ const char* Pulsar::SingleAxisCalibrator::Info::get_name (unsigned iclass) const
 {
   switch (iclass) {
   case 0:
-    return "Gain (C\\d0\\u)";
+    return "\\fiG \\fn(\\fiC\\d0\\u\\fn)";
   case 1:
-    return "Diff. Gain";
+    return "\\gg (\\x10)";
   case 2:
-    return "Diff. Phase";
+    return "\\gf (deg.)";
   default:
     return "";
   }
@@ -72,6 +72,9 @@ unsigned Pulsar::SingleAxisCalibrator::Info::get_nparam (unsigned iclass) const
 //! Return the scale of parameters in the specified class
 float Pulsar::SingleAxisCalibrator::Info::get_scale (unsigned iclass) const
 {
+  if (iclass == 1)
+    return 10.0;
+
   if (iclass == 2)
     return 180.0 / M_PI;
   
