@@ -83,8 +83,8 @@ Rhythm::Rhythm (QWidget* parent, int argc, char** argv) :
   fitpopup = new qt_editParams;
   connect ( fitpopup, SIGNAL( closed() ),
 	    this, SLOT( togledit() ) );
-  connect ( fitpopup, SIGNAL( newParams(const psrParams&) ),
-	    this, SLOT( set_Params(const psrParams&) ) );
+  connect ( fitpopup, SIGNAL( newParams(const psrephem&) ),
+	    this, SLOT( set_Params(const psrephem&) ) );
 
   if (vverbose)
     cerr << "Rhythm:: call menubarConstruct" << endl;
@@ -129,7 +129,7 @@ void Rhythm::load_toas (const char* fname)
     fit ();
 }
 
-void Rhythm::set_Params (const psrParams& eph)
+void Rhythm::set_Params (const psrephem& eph)
 {
   tempo->setItemEnabled (saveParmsID, true);
 
@@ -146,13 +146,13 @@ void Rhythm::fit()
   if (!fitpopup || !fitpopup -> hasdata())
     return;
 
-  psrParams eph;
-  fitpopup -> get_psrParams (&eph);
+  psrephem eph;
+  fitpopup -> get_psrephem (eph);
 
   fit (eph, true);
 }
 
-void Rhythm::fit (const psrParams& eph, bool load_new)
+void Rhythm::fit (const psrephem& eph, bool load_new)
 { try {
     
   if (model.toas.size() < 1) {
@@ -167,14 +167,14 @@ void Rhythm::fit (const psrParams& eph, bool load_new)
   Tempo::fit (eph, model.toas, &model.eph, true);
   
   if (load_new && fitpopup) {
-    // set_psrParams will result in generation of newEph signal, which should
+    // set_psrephem will result in generation of newEph signal, which should
     // be ignored since it was set from here.
 
     if (verbose)
       cerr << "Rhythm::fit Displaying new ephemeris" << endl;
 
     ignore_one_eph = true;
-    fitpopup -> set_psrParams (model.eph);
+    fitpopup -> set_psrephem (model.eph);
   }
   
   if (verbose)

@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/rhythm/rhythm.h,v $
-   $Revision: 1.11 $
-   $Date: 2000/05/31 15:06:34 $
+   $Revision: 1.12 $
+   $Date: 2001/03/05 13:25:01 $
    $Author: straten $ */
 
 // //////////////////////////////////////////////////////////////////////////
@@ -37,9 +37,9 @@ class Rhythm : public QMainWindow
   Rhythm (QWidget* parent, int argc, char** argv);
   ~Rhythm () {};
 
-  // fits the loaded toas using TEMPO with the given psrParams, 'eph'.
+  // fits the loaded toas using TEMPO with the given psrephem, 'eph'.
   // if 'load_new' is true, loads the new epehemeris into the display
-  void fit (const psrParams& eph, bool load_new);
+  void fit (const psrephem& eph, bool load_new);
 
   // set the verbosity flag for a number of the classes on which
   // this application is based
@@ -127,7 +127,7 @@ class Rhythm : public QMainWindow
   void closeWin() {fprintf (stderr, "Not implemented\n");};
 
   // callback connected to qt_editParams::newParams
-  void set_Params (const psrParams&);
+  void set_Params (const psrephem&);
 };
 
 #endif
