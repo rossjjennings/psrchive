@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/BasicArchive.h,v $
-   $Revision: 1.9 $
-   $Date: 2002/04/26 06:01:18 $
-   $Author: pulsar $ */
+   $Revision: 1.10 $
+   $Date: 2002/05/03 07:21:12 $
+   $Author: straten $ */
 
 #include "Archive.h"
   
@@ -65,7 +65,7 @@ namespace Pulsar {
     void load (const char * foo) { cerr << "Cannot load " << foo << endl; }
 
     //! Get the name of the thing from which the archive was loaded
-    virtual string get_filename () { return filename; }
+    virtual string get_filename () const { return filename; }
 
     //! Returns a pointer to a new copy of self
     Archive* clone () const { return new BasicArchive (*this); }
