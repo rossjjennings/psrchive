@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/CongruenceTransformation.h,v $
-   $Revision: 1.3 $
-   $Date: 2004/11/22 19:26:03 $
+   $Revision: 1.4 $
+   $Date: 2004/11/23 12:17:50 $
    $Author: straten $ */
 
 #ifndef __MEAL_CongruenceTransformation_H
@@ -14,7 +14,7 @@
 
 namespace MEAL {
 
-  //! Functions the congruence transformation, \f$\rho^prime=J\rho J^\dagger\f$.
+  //! A congruence transformation, \f$\rho^\prime=J\rho J^\dagger\f$.
   /*! This class models the transformation of the matrix, \f$ \rho \f$ by
     a congruence transformation in \f$ J \f$.  The partial derivatives of the
     output, \f$ \rho^\prime \f$, are computed using the product rule
