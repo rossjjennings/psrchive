@@ -18,7 +18,7 @@ LDFLAGS += $(F77LIBS) -lm
 eph2upd.LDFLAGS := $(LDFLAGS) -leph -lgenutil
 ephaux.LDFLAGS  := $(LDFLAGS) -leph -lgenutil $(LSLA)
 ephtex.LDFLAGS  := $(LDFLAGS) -leph -lpsrinfo -leph -lgenutil $(LSLA)
-ephepo.LDFLAGS  := $(LDFLAGS) -leph $(LTIMES)
+ephepo.LDFLAGS  := $(LDFLAGS) -leph -lgenutil $(LTIMES)
 testrnd8.LDFLAGS:= $(LDFLAGS) -leph
 
 # ######################################################################
