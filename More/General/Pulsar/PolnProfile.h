@@ -1,18 +1,15 @@
 #ifndef __Pulsar_PolnProfile_h
 #define __Pulsar_PolnProfile_h
 
-#include "Reference.h"
+#include "Pulsar/Profile.h"
 #include "Stokes.h"
 #include "Jones.h"
-#include "Types.h"
 
 #ifdef sun
 #include <ieeefp.h>
 #endif
 
 namespace Pulsar {
-
-  class Profile;
 
   //! Implements polarimetric pulse profile operations.
   /*! This class does not actually store its own profiles.  Rather, it
