@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ReceptionCalibrator.h,v $
-   $Revision: 1.53 $
-   $Date: 2003/12/31 17:42:49 $
+   $Revision: 1.54 $
+   $Date: 2004/01/01 12:09:05 $
    $Author: straten $ */
 
 #ifndef __Pulsar_ReceptionCalibrator_H
@@ -16,9 +16,9 @@
 #include "Calibration/Axis.h"
 
 // Parameterizations of the instrument and source
-#include "Calibration/PolarEstimate.h"
-#include "Calibration/SingleAxisEstimate.h"
-#include "Calibration/CoherencyEstimate.h"
+#include "Calibration/MeanPolar.h"
+#include "Calibration/MeanSingleAxis.h"
+#include "Calibration/MeanCoherency.h"
 #include "Calibration/CoherencyMeasurementSet.h"
 #include "Calibration/NormalizeStokes.h"
 
@@ -47,9 +47,12 @@ namespace Pulsar {
     void update_source();
 
     //! Model of Stokes parameters added to equation as a function of frequency
-    vector< Calibration::CoherencyEstimate > source;
+    vector< Calibration::Coherency > source;
 
-    //! Validity flags for each CoherencyEstimate
+    //! Best guess of Stokes parameters
+    vector< Calibration::MeanCoherency > source_guess;
+
+    //! Validity flags for each Coherency
     vector< bool > valid;
 
     //! Phase bin from which pulsar polarization is derived
@@ -100,7 +103,7 @@ namespace Pulsar {
     Reference::To<Calibration::Polar> polar;
 
     //! The best estimate of the polar model
-    Calibration::PolarEstimate polar_estimate;
+    Calibration::MeanPolar polar_estimate;
 
     // ////////////////////////////////////////////////////////////////////
     //
@@ -108,7 +111,7 @@ namespace Pulsar {
     Reference::To<Calibration::Instrument> physical;
 
     //! The best estimate of the physical model
-    Calibration::SingleAxisEstimate physical_estimate;
+    Calibration::MeanSingleAxis physical_estimate;
 
     // ////////////////////////////////////////////////////////////////////
     //
@@ -116,7 +119,7 @@ namespace Pulsar {
     Reference::To<Calibration::SingleAxis> fluxcal_backend;
 
     //! The best estimate of the flux calibration backend
-    Calibration::SingleAxisEstimate fluxcal_backend_estimate;
+    Calibration::MeanSingleAxis fluxcal_backend_estimate;
 
     // ////////////////////////////////////////////////////////////////////
     //

@@ -315,6 +315,7 @@ void Pulsar::ReceptionCalibrator::init_estimate (SourceEstimate& estimate)
 		 "phase bin=%d >= nbin=%d", estimate.phase_bin, nbin);
 
   estimate.source.resize (nchan);
+  estimate.source_guess.resize (nchan);
 
   for (unsigned ichan=0; ichan<nchan; ichan++) {
 
@@ -524,7 +525,7 @@ Pulsar::ReceptionCalibrator::add_data
     
     stokes = correct * stokes * herm(correct);
     
-    estimate.source[ichan].mean += stokes;
+    estimate.source_guess[ichan].integrate( stokes );
 
   }
   catch (Error& error) {
@@ -715,12 +716,12 @@ void Pulsar::ReceptionCalibrator::add_Calibrator (const ArtificialCalibrator* p)
       if (flux_calibrator) {
 
 	fcal_stokes = correct * fcal_stokes * herm(correct);
-	flux_calibrator_estimate.source[ichan].mean += fcal_stokes;
+	flux_calibrator_estimate.source_guess[ichan].integrate (fcal_stokes);
 
       }
 
       cal_stokes = correct * cal_stokes * herm(correct);
-      calibrator_estimate.source[ichan].mean += cal_stokes;
+      calibrator_estimate.source_guess[ichan].integrate (cal_stokes);
 
     }
   }
@@ -743,7 +744,7 @@ void Pulsar::ReceptionCalibrator::add_Calibrator (const ArtificialCalibrator* p)
 	( polcal->get_transformation(ichan) );
 
       if (polar)
-	model[ichan]->polar_estimate.integrate( *polar );
+	model[ichan]->polar_estimate.integrate( polar );
 
     }
 
@@ -767,9 +768,9 @@ void Pulsar::ReceptionCalibrator::add_Calibrator (const ArtificialCalibrator* p)
 
       if (sa) {
 	if (flux_calibrator)
-	  model[ichan]->fluxcal_backend_estimate.integrate( *sa );
+	  model[ichan]->fluxcal_backend_estimate.integrate( sa );
 	else
-	  model[ichan]->physical_estimate.integrate( *sa );
+	  model[ichan]->physical_estimate.integrate( sa );
       }
 
     }
@@ -1017,7 +1018,7 @@ void Pulsar::SourceEstimate::update_source ()
     valid[ichan] = true;
 
   for (ichan=0; ichan < source.size(); ichan++) try {
-    source[ichan].update();
+    source_guess[ichan].update( &(source[ichan]) );
   }
   catch (Error& error) {
     cerr << "Pulsar::SourceEstimate::update_source error ichan=" << ichan
