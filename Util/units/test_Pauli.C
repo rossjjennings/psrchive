@@ -27,7 +27,7 @@ void test_polar (const Jones<T>& j)
 
 
   // reconstruct the Jones matrix
-  Jones<T> oj = d * convert(hq) * convert(uq);
+  Jones<T> oj = d * (hq * uq);
 
   // test that you get the same matrix back
   double diff = norm(oj-j)/norm(oj);
@@ -61,32 +61,6 @@ int main ()
 #else
   unsigned loops = RAND_MAX*10;
 #endif
-
-
-
-  Quaternion<float, Hermitian> hq0 (1,2,3,4);
-  Quaternion<float, Unitary> uq0 (5,6,7,8);
-
-  cerr << "hq=" << hq0 << " uq=" << uq0 << endl;
-
-  Jones<float> hj0 = convert(hq0);
-  Jones<float> uj0 = convert(uq0);
-
-  cerr << "hj=" << hj0 << " uj=" << uj0 << endl;
-
-  Jones<float> j0 = hj0 * uj0;
-  cerr << " IN j0=" << j0 << endl;
-
-  complex<float> d0;
-  polar (d0, hq0, uq0, j0);
-
-  hj0 = convert(hq0);
-  uj0 = convert(uq0);
-
-  j0 = d0 * hj0 * uj0;
-
-  cerr << "OUT j0=" << j0 << endl;
-
 
   MatrixTest <Jones<double>, Quaternion<double>, complex<double> > test;
 
