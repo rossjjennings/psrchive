@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/FluxCalibrator.h,v $
-   $Revision: 1.17 $
-   $Date: 2004/10/21 06:39:38 $
+   $Revision: 1.18 $
+   $Date: 2004/10/21 09:39:51 $
    $Author: straten $ */
 
 #ifndef __Pulsar_FluxCalibrator_H
@@ -75,6 +75,9 @@ namespace Pulsar {
 
     //! Create the cal_flux spectrum at the requested resolution
     void create (unsigned nchan = 0);
+
+    //! Resize the T_sys and cal_flux vector
+    void resize (unsigned required_nchan);
 
     //! Calculate the ratio_on and ratio_off
     void calculate ();
