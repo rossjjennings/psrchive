@@ -80,6 +80,7 @@ void Pulsar::TimerIntegration::copy (const Integration& subint,
   if (verbose)
     cerr << "TimerIntegration::copy another TimerIntegration" << endl;
 
+  mini = t_subint->mini;
   wts = t_subint->wts;
   med = t_subint->med;
   bpass = t_subint->bpass;
