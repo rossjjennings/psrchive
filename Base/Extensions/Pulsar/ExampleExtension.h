@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/ExampleExtension.h,v $
-   $Revision: 1.2 $
-   $Date: 2003/10/08 14:17:38 $
+   $Revision: 1.3 $
+   $Date: 2005/02/18 09:05:18 $
    $Author: straten $ */
 
 #ifndef __ExampleExtension_h
@@ -18,7 +18,7 @@ namespace Pulsar {
     ExampleExtension.h and ExampleExtension.C and performing simple
     text-substitution, the skeleton of a new Extension may be easily
     developed. */
-  class ExampleExtension : public Pulsar::Archive::Extension {
+  class ExampleExtension : public Archive::Extension {
 
   public:
     
@@ -26,10 +26,10 @@ namespace Pulsar {
     ExampleExtension ();
 
     //! Copy constructor
-    ExampleExtension (const ExampleExtension& extension);
+    ExampleExtension (const ExampleExtension&);
 
     //! Operator =
-    const ExampleExtension& operator= (const ExampleExtension& extension);
+    const ExampleExtension& operator= (const ExampleExtension&);
 
     //! Destructor
     ~ExampleExtension ();

@@ -128,8 +128,7 @@ void Pulsar::PolnCalibratorExtension::construct ()
 
 
 //! Return a new MEAL::Complex2 instance, based on type attribute
-::MEAL::Complex2* 
-Pulsar::PolnCalibratorExtension::new_transformation ()
+MEAL::Complex2* Pulsar::PolnCalibratorExtension::new_transformation ()
 {
   switch (type) {
   case Calibrator::SingleAxis:
