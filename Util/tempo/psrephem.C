@@ -457,6 +457,11 @@ psrephem & psrephem::operator = (const psrephem & p2)
   if (this == &p2)
     return *this;
 
+  destroy();
+  init();
+  if(!p2.parmStatus)
+    return(*this);
+
   tempo11 = p2.tempo11;
   size_dataspace();
   
