@@ -9,12 +9,13 @@
   the dimension is left unchanged.
   */
 
-void Pulsar::Archive::resize (int nsubint, int npol, int nchan, int nbin)
+void Pulsar::Archive::resize (unsigned nsubint, unsigned npol,
+			      unsigned nchan, unsigned nbin)
 {
-  int cur_nsub = subints.size();
-  int cur_npol = get_npol();
-  int cur_nchan = get_nchan();
-  int cur_nbin = get_nbin();
+  unsigned cur_nsub = subints.size();
+  unsigned cur_npol = get_npol();
+  unsigned cur_nchan = get_nchan();
+  unsigned cur_nbin = get_nbin();
 
   if (nsubint == 0)
     nsubint = cur_nsub;
@@ -31,7 +32,7 @@ void Pulsar::Archive::resize (int nsubint, int npol, int nchan, int nbin)
 	 << " old nsub=" << cur_nsub << " npol=" << cur_npol
 	 << " nchan=" << cur_nchan << " nbin=" << cur_nbin << endl;
 
-  int isub;
+  unsigned isub;
   for (isub=nsubint; isub<cur_nsub; isub++)
     delete subints[isub];
 

@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/BasicArchive.h,v $
-   $Revision: 1.14 $
-   $Date: 2002/10/10 08:00:58 $
+   $Revision: 1.15 $
+   $Date: 2002/10/11 04:51:05 $
    $Author: straten $ */
 
 #include "Archive.h"
@@ -47,7 +47,7 @@ namespace Pulsar {
     char        telcode;
 
     string      psrname,telid,frontend,backend,datatype;
-    int         nbin,nchan,npol,nsubint;
+    unsigned         nbin,nchan,npol,nsubint;
     double      bandwidth,cenfreq;
     float       calfreq,caldcyc,calphase;
     bool        facorr,pacorr,rm_ism,rm_iono,dedisp;
@@ -180,28 +180,28 @@ namespace Pulsar {
       }
 
     //! Get the number of sub-integrations in the archive
-    int get_nsubint () const;
+    unsigned get_nsubint () const;
 
     //! Set the number of sub-integrations in the archive
-    void set_nsubint (int num_sub);
+    void set_nsubint (unsigned num_sub);
 
     //! Get the number of frequency polns used
-    int get_npol () const;
+    unsigned get_npol () const;
     
     //! Set the number of frequency polns used
-    void set_npol (int numpol);
+    void set_npol (unsigned numpol);
     
     //! Get the number of frequency channels used
-    int get_nchan () const;
+    unsigned get_nchan () const;
     
     //! Set the number of frequency channels used
-    void set_nchan (int numchan);
+    void set_nchan (unsigned numchan);
 
     //! Get the number of pulsar phase bins used
-    int get_nbin () const;
+    unsigned get_nbin () const;
     
     //! Set the number of pulsar phase bins used
-    void set_nbin (int numbins);
+    void set_nbin (unsigned numbins);
     
     //! Return the type of feed used
     Signal::Basis get_basis () const

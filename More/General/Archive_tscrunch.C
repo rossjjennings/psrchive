@@ -41,9 +41,9 @@ void Pulsar::Archive::tscrunch (unsigned nscrunch)
       if (verbose) cerr << "Archive::tscrunch resulting subint " 
 			<< isub+1 << "/" << newsub << endl;
 
-      int start = isub * nscrunch;
+      unsigned start = isub * nscrunch;
 
-      for (int ichan=0; ichan < get_nchan(); ichan++) {
+      for (unsigned ichan=0; ichan < get_nchan(); ichan++) {
 
 	if (verbose) cerr << "Archive::tscrunch weighted_frequency chan="
 			  << ichan << endl;
@@ -59,7 +59,7 @@ void Pulsar::Archive::tscrunch (unsigned nscrunch)
 	if (verbose) 
 	  cerr <<  "Archive::tscrunch sum profiles" << endl;
 	
-	for (int ipol=0; ipol < get_npol(); ++ipol) {
+	for (unsigned ipol=0; ipol < get_npol(); ++ipol) {
 
 	  Profile* avg = subints[isub]  -> get_Profile (ipol, ichan);
 	  Profile* add = subints[start] -> get_Profile (ipol, ichan);
@@ -82,7 +82,7 @@ void Pulsar::Archive::tscrunch (unsigned nscrunch)
 
   for (unsigned isub=0; isub < newsub; isub++) {
 
-    int start = isub * nscrunch;
+    unsigned start = isub * nscrunch;
 
     MJD    mjd;
     double duration = 0.0;
@@ -138,26 +138,26 @@ void Pulsar::Archive::tscrunch (unsigned nscrunch)
   \param  subint_start the first subint included in the calculation
   \param  subint_end one more than the index of the last subint
 */
-double Pulsar::Archive::weighted_frequency (int ichan, int start, int end) 
+double Pulsar::Archive::weighted_frequency (unsigned ichan,
+					    unsigned start, unsigned end) 
   const
 {
-  int nsubint = int (subints.size());
+  unsigned nsubint = subints.size();
 
   if (end == 0)
     end = nsubint;
 
   // for now, ignore poln
-  int ipol = 0;
+  unsigned ipol = 0;
 
-  if (nsubint < 1)
-    throw Error (InvalidRange, "Archive::weighted_frequency",
-		 "subints.size() == 0");
+  if (nsubint == 0)
+    throw Error (InvalidRange, "Archive::weighted_frequency", "nsubint == 0");
 
-  if (start >= nsubint || start < 0)
+  if (start >= nsubint)
     throw Error (InvalidRange, "Archive::weighted_frequency",
 		 "start=%d nsubint=%d", start, nsubint);
 
-  if (end > nsubint || end < 0)
+  if (end > nsubint)
     throw Error (InvalidRange, "Archive::weighted_frequency",
 		 "end=%d nsubint=%d", end, nsubint);
 
@@ -168,7 +168,7 @@ double Pulsar::Archive::weighted_frequency (int ichan, int start, int end)
   double fend = 0.0;
 
   try {
-    for (int isubint=start; isubint < end; isubint++){
+    for (unsigned isubint=start; isubint < end; isubint++){
       
       Profile* prof = subints[isubint]->get_Profile(ipol, ichan);
       

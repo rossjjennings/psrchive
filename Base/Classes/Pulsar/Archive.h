@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Archive.h,v $
-   $Revision: 1.38 $
-   $Date: 2002/10/10 08:00:58 $
+   $Revision: 1.39 $
+   $Date: 2002/10/11 04:51:05 $
    $Author: straten $ */
 
 /*! \mainpage 
@@ -201,15 +201,15 @@ namespace Pulsar {
     Archive* total () const;
 
     //! Resets the dimensions of the data area
-    virtual void resize (int nsubint, int npol=0, int nchan=0, int nbin=0);
+    virtual void resize (unsigned nsubint, unsigned npol=0, unsigned nchan=0, unsigned nbin=0);
 
     //! Return a pointer to the integration
     Integration* get_Integration (unsigned subint);
     const Integration* get_Integration (unsigned subint) const;
 
     //! Return a pointer to the profile
-    Profile* get_Profile (unsigned subint, int pol, int chan);
-    const Profile* get_Profile (unsigned subint, int pol, int chan) const;
+    Profile* get_Profile (unsigned subint, unsigned pol, unsigned chan);
+    const Profile* get_Profile (unsigned subint, unsigned pol, unsigned chan) const;
 
     // //////////////////////////////////////////////////////////////////
     //
@@ -218,16 +218,16 @@ namespace Pulsar {
     // //////////////////////////////////////////////////////////////////
 
     //! Integrate pulse profiles in phase
-    virtual void bscrunch (int nscrunch);
+    virtual void bscrunch (unsigned nscrunch);
 
     //! Integrate neighbouring sections of the pulse profiles
-    virtual void fold (int nfold);
+    virtual void fold (unsigned nfold);
 
     //! Integrate profiles in polarization
     virtual void pscrunch();
 
     //! Integrate profiles in frequency
-    virtual void fscrunch (int nscrunch=0, bool weighted_cfreq = true);
+    virtual void fscrunch (unsigned nscrunch=0, bool weighted_cfreq = true);
 
     //! Integrate profiles in time
     virtual void tscrunch (unsigned nscrunch=0);
@@ -287,13 +287,13 @@ namespace Pulsar {
     // //////////////////////////////////////////////////////////////////
 
     //! Call bscrunch with the appropriate value
-    void bscrunch_to_nbin (int new_nbin);
+    void bscrunch_to_nbin (unsigned new_nbin);
 
     //! Halve the bins
-    void halvebins (int nhalve);
+    void halvebins (unsigned nhalve);
 
     //! Call fscrunch with the appropriate value
-    void fscrunch_to_nchan (int new_nchan);
+    void fscrunch_to_nchan (unsigned new_nchan);
 
     //! Return the MJD at the beginning of the first sub-integration
     MJD  start_time() const;
@@ -328,7 +328,7 @@ namespace Pulsar {
     float find_min_phase () const;
 
     //! Plot the requested Profile with some header information
-    void display (int isub=0, int ipol=0, int ichan=0, float phase=0) const;
+    void display (unsigned isub=0, unsigned ipol=0, unsigned ichan=0, float phase=0) const;
 
     //! Construct a plot of pulse phase vs time for multi-subint archives
     void plot_time_vs_phase ();
@@ -343,7 +343,7 @@ namespace Pulsar {
     virtual string get_filename () const = 0;
 
     //! Write archive to disk
-    virtual void unload (const char* filename) const = 0;
+    virtual void unload (const char* filename = 0) const = 0;
 
     //! Convenience interface to the unload function
     void unload (const string& filename) const { unload (filename.c_str()); }
@@ -380,19 +380,19 @@ namespace Pulsar {
 
     //! Get the number of pulsar phase bins used
     /*! This attribute may be set only through Archive::resize */
-    virtual int get_nbin () const = 0;
+    virtual unsigned get_nbin () const = 0;
 
     //! Get the number of frequency channels used
     /*! This attribute may be set only through Archive::resize */
-    virtual int get_nchan () const = 0;
+    virtual unsigned get_nchan () const = 0;
 
     //! Get the number of frequency channels used
     /*! This attribute may be set only through Archive::resize */
-    virtual int get_npol () const = 0;
+    virtual unsigned get_npol () const = 0;
 
     //! Get the number of sub-integrations stored in the file
     /*! This attribute may be set only through Archive::resize */
-    virtual int get_nsubint () const { return subints.size(); }
+    virtual unsigned get_nsubint () const { return subints.size(); }
 
     //! Get the overall bandwidth of the observation
     virtual double get_bandwidth () const = 0;
@@ -452,7 +452,8 @@ namespace Pulsar {
     virtual bool mixable (const Archive* arch, string& reason);
 
     //! Computes the weighted channel frequency of an interval of subints.
-    double weighted_frequency (int ichan, int start, int end) const;
+    double weighted_frequency (unsigned ichan,
+			       unsigned start, unsigned end) const;
 
  protected:
 
@@ -470,19 +471,19 @@ namespace Pulsar {
 
     //! Set the number of pulsar phase bins
     /*! Called by Archive methods to update child attribute */
-    virtual void set_nbin (int numbins) = 0;
+    virtual void set_nbin (unsigned numbins) = 0;
 
     //! Set the number of frequency channels
     /*! Called by Archive methods to update child attribute */
-    virtual void set_nchan (int numchan) = 0;
+    virtual void set_nchan (unsigned numchan) = 0;
 
     //! Set the number of polarization measurements
     /*! Called by Archive methods to update child attribute */
-    virtual void set_npol (int numpol) = 0;
+    virtual void set_npol (unsigned numpol) = 0;
 
     //! Set the number of sub-integrations
     /*! Called by Archive methods to update child attribute */
-    virtual void set_nsubint (int num_sub) { }
+    virtual void set_nsubint (unsigned num_sub) { }
 
     //! Initialize an Integration to reflect Archive attributes.
     void init_Integration (Integration* subint);

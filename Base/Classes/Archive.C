@@ -55,7 +55,7 @@ void Pulsar::Archive::copy (const Archive& archive)
   resize (archive.get_nsubint(), archive.get_npol(),
 	  archive.get_nchan(), archive.get_nbin());
 
-  for (int isub=0; isub<archive.get_nsubint(); isub++)
+  for (unsigned isub=0; isub<archive.get_nsubint(); isub++)
     subints[isub] -> copy (*(archive.subints[isub]));
 
   ephemeris = archive.ephemeris;
@@ -108,13 +108,13 @@ Pulsar::Archive::get_Integration (unsigned subint) const
   \return pointer to Profile instance
 */
 Pulsar::Profile* 
-Pulsar::Archive::get_Profile (unsigned subint, int pol, int chan)
+Pulsar::Archive::get_Profile (unsigned subint, unsigned pol, unsigned chan)
 {
   return get_Integration (subint) -> get_Profile (pol, chan);
 }
 
 const Pulsar::Profile* 
-Pulsar::Archive::get_Profile (unsigned subint, int pol, int chan) const
+Pulsar::Archive::get_Profile (unsigned subint, unsigned pol, unsigned chan) const
 {
   return get_Integration (subint) -> get_Profile (pol, chan);
 }
@@ -138,7 +138,7 @@ void Pulsar::Archive::init_Integration (Integration* subint)
   Simply calls Integration::bscrunch on each element of subints
   \param nscrunch the number of phase bins to add together
   */
-void Pulsar::Archive::bscrunch (int nscrunch)
+void Pulsar::Archive::bscrunch (unsigned nscrunch)
 {
   if (subints.size() == 0)
     return;
@@ -153,7 +153,7 @@ void Pulsar::Archive::bscrunch (int nscrunch)
   Simply calls Integration::fscrunch on each element of subints
   \param nscrunch the number of frequency channels to add together
   */
-void Pulsar::Archive::fscrunch (int nscrunch, bool weighted_cfreq)
+void Pulsar::Archive::fscrunch (unsigned nscrunch, bool weighted_cfreq)
 {
   if (subints.size() == 0)
     return;
@@ -207,7 +207,7 @@ void Pulsar::Archive::centre ()
 
   Phase half_turn (0.5);
 
-  for (int isub=0; isub < get_nsubint(); isub++)  {
+  for (unsigned isub=0; isub < get_nsubint(); isub++)  {
 
     Integration* subint = subints[isub];
 
@@ -235,7 +235,7 @@ void Pulsar::Archive::dedisperse (double dm, double frequency)
 /*!
   \param nfold the number of sections to integrate
 */
-void Pulsar::Archive::fold (int nfold)
+void Pulsar::Archive::fold (unsigned nfold)
 {
   if (subints.size() == 0)
     return;
@@ -284,7 +284,7 @@ void Pulsar::Archive::remove_baseline (float phase)
     if (phase == -1.0)
       phase = find_min_phase ();
 
-    for (int isub=0; isub < get_nsubint(); isub++)
+    for (unsigned isub=0; isub < get_nsubint(); isub++)
       subints[isub] -> remove_baseline (phase);
 
   }
@@ -367,7 +367,7 @@ double Pulsar::Archive::integration_length() const
 {
   double total = 0.0;
 
-  for (int i = 0; i < get_nsubint(); i++) {
+  for (unsigned i = 0; i < get_nsubint(); i++) {
     total = total + get_Integration(i) -> get_duration();
   }
 
@@ -387,7 +387,7 @@ Pulsar::Archive::telescope_coordinates
 
 void Pulsar::Archive::uniform_weight ()
 {
-  for (int isub=0; isub < get_nsubint(); isub++)
+  for (unsigned isub=0; isub < get_nsubint(); isub++)
     subints[isub] -> uniform_weight ();
 }
 
