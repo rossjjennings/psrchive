@@ -1,15 +1,17 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/EstimatePlotter.h,v $
-   $Revision: 1.1 $
-   $Date: 2003/05/02 14:25:29 $
-   $Author: straten $ */
+   $Revision: 1.2 $
+   $Date: 2003/05/09 00:27:15 $
+   $Author: hknight $ */
 
 #ifndef __EstimatePlotter_h
 #define __EstimatePlotter_h
 
 #include "Estimate.h"
 #include <vector>
+
+#include "psr_cpp.h"
 
 class EstimatePlotter {
 
