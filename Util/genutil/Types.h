@@ -1,34 +1,35 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Types.h,v $
-   $Revision: 1.1 $
-   $Date: 2002/10/10 05:27:41 $
+   $Revision: 1.2 $
+   $Date: 2002/10/10 08:04:48 $
    $Author: straten $ */
 
 #ifndef __Types_h
 #define __Types_h
 
-//! Dimensions of the data (so far)
-enum Dimension {
-  //! Time given in MJD
-  Time,
-  //! Radio Frequency in MHz
-  Frequency,
-  //! Light
-  Polarization,
-  //! Pulsar Phase, for instance
-  Phase,
-  //! Mathematical space (real, complex, jones, etc.)
-  Space
-};
-
-//! Types of observed source
-enum SourceType { Unknown, Pulsar, PolCal, FluxCal };
-
-//! Different receiver feed configurations
-enum FeedType { Circular=0, Linear=1 };
-
 namespace Signal {
+
+  //! Dimensions of the data (so far)
+  enum Dimension {
+    //! Time given in MJD
+    Time,
+    //! Radio Frequency in MHz
+    Frequency,
+    //! Light
+    Polarization,
+    //! Pulsar Phase, for instance
+    Phase,
+    //! Mathematical space (real, complex, jones, etc.)
+    Space
+  };
+
+
+  //! Different receiver feed configurations
+  enum Basis { Circular=0, Linear=1 };
+
+  //! Sources of observed signals
+  enum Source { Unknown, Pulsar, PolCal, FluxCal };
 
   //! Possible polarimetric states of the data
   enum State {
@@ -50,27 +51,28 @@ namespace Signal {
   
   //! States of different polarization dimensions
   enum Component {
-    Invalid = -1,
+    //! Unknown
+    None,
     //@{
     //! Stokes I,Q,U,V
     Si, Sq, Su, Sv,
     //@}
     //@{
-    //! Coherency Products, Linear Feeds
+    //! Coherency Products, Linear Basis
     XX, YY, ReXY, ImXY,
     //@}
     //@{
-    //! Coherency Products, Circular Feeds
+    //! Coherency Products, Circular Basis
     LL, RR, ReLR, ImLR,
     //@}
     //! Stokes Invariant Interval
-    InvS,
+    Inv,
     //! Coherency Matrix Determinant
     DetRho,
   };
   
   
-  Component get_Component (FeedType type, State state, int ipol);
+  Component get_Component (Basis basis, State state, int ipol);
   
   int get_ipol (State state, Component poln);
   

@@ -1,8 +1,8 @@
 #include "Types.h"
 
-//! Given FeedType and State, returns the default Component code of ipol
+//! Given Basis and State, returns the default Component code of ipol
 Signal::Component 
-Signal::get_Component (FeedType type, State state, int ipol)
+Signal::get_Component (Basis basis, State state, int ipol)
 {
   switch (state) 
     {
@@ -24,7 +24,7 @@ Signal::get_Component (FeedType type, State state, int ipol)
 
     case Coherence:
 
-      if (type == Linear)
+      if (basis == Linear)
 	switch (ipol) 	{
 	case 0:
 	  return XX;
@@ -37,7 +37,7 @@ Signal::get_Component (FeedType type, State state, int ipol)
 	default:
 	  break;
 	}
-      else if (type == Circular)
+      else if (basis == Circular)
 	switch (ipol) 	{
 	case 0:
 	  return LL;
@@ -53,7 +53,7 @@ Signal::get_Component (FeedType type, State state, int ipol)
       break;
   
     case PPQQ:
-      if (type == Linear)
+      if (basis == Linear)
 	switch (ipol) 
 	  {
 	  case 0:
@@ -63,7 +63,7 @@ Signal::get_Component (FeedType type, State state, int ipol)
 	  default:
 	    break;
 	  }
-      else if (type == Circular)
+      else if (basis == Circular)
 	switch (ipol) 
 	  {
 	  case 0:
@@ -82,14 +82,14 @@ Signal::get_Component (FeedType type, State state, int ipol)
 
     case Invariant:
       if (ipol == 0)
-	return InvS;
+	return Inv;
       break;
       
     default:
       break;
     }
   
-  return Invalid;
+  return None;
 }
 
 //! Given State, returns the default ipol of Component
@@ -153,7 +153,7 @@ int Signal::get_ipol (State state, Component poln)
       break;
 
     case Invariant:
-      if (poln == InvS || poln == DetRho) 
+      if (poln == Inv || poln == DetRho) 
 	return 0;
       break;
 
