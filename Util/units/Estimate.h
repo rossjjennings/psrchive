@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Estimate.h,v $
-   $Revision: 1.9 $
-   $Date: 2003/02/21 09:23:59 $
+   $Revision: 1.10 $
+   $Date: 2003/04/04 11:06:00 $
    $Author: straten $ */
 
 #ifndef __Estimate_h
@@ -18,7 +18,7 @@
 
   See http://mathworld.wolfram.com/ErrorPropagation.html
 */
-template <typename T>
+template <typename T, typename U=T>
 class Estimate
 {
  public:
@@ -28,10 +28,10 @@ class Estimate
   //! The value, \f$ x \f$
   T val;
   //! The variance of the value, \f$ \sigma_x^2 \f$
-  T var;
+  U var;
 
   //! Construct from a value, \f$ x \f$, and its variance, \f$ \sigma^2 \f$
-  Estimate (T _val=0, T _var=0) { val=_val; var=_var; }
+  Estimate (T _val=0, U _var=0) { val=_val; var=_var; }
 
   //! Construct from another Estimate
   Estimate (const Estimate& d) { val=d.val; var=d.var; }
@@ -119,13 +119,13 @@ class Estimate
 };
 
 
-template <typename T>
-unsigned Estimate<T>::ndim = 1;
+template <typename T, typename U>
+unsigned Estimate<T, U>::ndim = 1;
 
 
 //! Useful for quickly printing the values
-template<typename T>
-ostream& operator<< (ostream& ostr, const Estimate<T>& estimate)
+template<typename T, typename U>
+ostream& operator<< (ostream& ostr, const Estimate<T,U>& estimate)
 {
   return ostr << "(" << estimate.val << "\261" << estimate.var << ")";
 }
@@ -136,7 +136,7 @@ ostream& operator<< (ostream& ostr, const Estimate<T>& estimate)
 
   See http://mathworld.wolfram.com/MaximumLikelihood.html (Eqs. 16 and 19)
 */
-template <typename T>
+template <typename T, typename U=T>
 class MeanEstimate
 {
  public:
@@ -146,7 +146,7 @@ class MeanEstimate
   T inv_var;
 
   //! Construct from a value and its estimated error, \f$ \sigma^2 \f$
-  MeanEstimate (T _val=0, T _var=0) { norm_val=_val; inv_var=_var; }
+  MeanEstimate (T _val=0, U _var=0) { norm_val=_val; inv_var=_var; }
 
   //! Construct from another MeanEstimate
   MeanEstimate (const MeanEstimate& d)
@@ -168,8 +168,8 @@ class MeanEstimate
   bool operator == (T _norm_val) const
   { return norm_val == _norm_val; }
 
-  Estimate<T> get_Estimate () const
-  { T var=1.0/inv_var; return Estimate<T> (norm_val*var, var); }
+  Estimate<T,U> get_Estimate () const
+  { U var=1.0/inv_var; return Estimate<T,U> (norm_val*var, var); }
 
 };
 
