@@ -65,10 +65,13 @@ void Tempo::fit (const psrParams& model, const vector<toa>& toas,
     cerr << "Tempo::fit system (" << runtempo << ")" << endl;
 
   int retval = system (runtempo.c_str());
-  if (retval < 0 || (WIFEXITED(retval) != 0)) {
-    cerr << "Tempo::fit error system (" << runtempo << ")";
+  if (retval != 0)  {
+    cerr << "Tempo::fit ERROR system (\"" << runtempo 
+	 << "\") returns " << retval;
     if (retval < 0)
       perror (" ");
+    else
+      cerr << ":: tempo returns:" << WIFEXITED(retval) << endl;
     throw (string ("Tempo::fit"));
   }
 
