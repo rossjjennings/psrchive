@@ -178,12 +178,14 @@ void Pulsar::PolnProfileFit::fit (const PolnProfile* observation)
   Reference::To<PolnProfile> fourier = fourier_transform (observation);
   double power = fourier->sumsq (1);
   double gain = power / standard_power;
-  cerr << "gain=" << gain << endl;
 
   for (unsigned ipol=0; ipol<npol; ipol++) 
     // the Fourier transform will inflate the variance
     variance[ipol] = (variance[ipol] + gain*standard_variance[ipol]) * nbin;
     // variance[ipol] *= nbin;
+
+  gain = sqrt(gain);
+  cerr << "gain=" << gain << endl;
 
   // calculate the rms in the baseline of each profile
 
@@ -192,9 +194,6 @@ void Pulsar::PolnProfileFit::fit (const PolnProfile* observation)
   nbin /= 2;
 
   model->delete_data ();
-
-  RealTimer clock;
-  clock.start();
 
   // initialize the measurement sets
   for (unsigned ibin=1; ibin<nbin; ibin++) {
@@ -224,17 +223,13 @@ void Pulsar::PolnProfileFit::fit (const PolnProfile* observation)
 
   }
 
-  clock.stop();
-  cerr << "add_data took " << clock << endl;
+  RealTimer clock;
 
   clock.start();
   model->solve_work ();
   clock.stop();
 
-  cerr << "solve took " << clock << endl;
-
-  if (Profile::verbose)
-    cerr << "Pulsar::PolnProfileFit::fit exit" << endl;
+  cerr << "Pulsar::PolnProfileFit::fit solved in " << clock << endl;
 
 }
 

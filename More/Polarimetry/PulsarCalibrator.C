@@ -99,6 +99,8 @@ void Pulsar::PulsarCalibrator::set_standard (const Archive* data)
 
   for (unsigned ichan=0; ichan<nchan; ichan++) {
 
+    cerr << "Pulsar::PulsarCalibrator::set_standard ichan=" << ichan << endl;
+
     if (integration->get_weight (ichan) == 0) {
       cerr << "Pulsar::PulsarCalibrator::set_standard ichan="
 	   << ichan << " flagged invalid" << endl;
@@ -183,7 +185,14 @@ void Pulsar::PulsarCalibrator::add_observation (const Archive* data)
         continue;
       }
 
+      cerr << "Pulsar::PulsarCalibrator::add_observation" << endl;
+      cerr << "  ichan=" << ichan << endl;
+
       model[ichan]->fit( integration->new_PolnProfile (ichan) );
+
+      cerr << "  gain = " << transformation[ichan]->get_Estimate(0) << endl;
+      cerr << "  phase = " << model[ichan]->get_phase() << endl;
+
       solution[ichan]->integrate( transformation[ichan] );
 
       if (ichan+1 < nchan && transformation[ichan+1])

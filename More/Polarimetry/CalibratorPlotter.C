@@ -122,9 +122,15 @@ void Pulsar::CalibratorPlotter::plot (const Calibrator::Info* info,
 
     float yscale = info->get_scale( iplot );
 
+    if (verbose) cerr << "Pulsar::CalibratorPlotter::plot iplot=" << iplot
+                      << " yscale=" << yscale << endl;
+
     unsigned iparam = 0;
 
     for (iparam=0; iparam<nparam; iparam++) {
+
+      if (verbose) cerr << "Pulsar::CalibratorPlotter::plot iplot=" << iplot
+                      << " iparam=" << iparam << endl;
 
       for (unsigned ichan=0; ichan<nchan; ichan++)
 	data[ichan] = yscale * info->get_param (ichan, iplot, iparam);
@@ -132,6 +138,9 @@ void Pulsar::CalibratorPlotter::plot (const Calibrator::Info* info,
       plotter.add_plot (data);
 
     }
+
+    if (verbose) cerr << "Pulsar::CalibratorPlotter::plot iplot=" << iplot
+                      << " plots initialized" << endl;
 
     cpgsvp (xmin, xmax, ybottom, ybottom + yheight);
 
@@ -150,6 +159,9 @@ void Pulsar::CalibratorPlotter::plot (const Calibrator::Info* info,
 
     if (plotted > 0) {
 
+      if (verbose) cerr << "Pulsar::CalibratorPlotter::plot iplot=" << iplot
+                        << " plot axis" << endl;
+
       cpgsci (1);
       cpgbox(xaxis.c_str(),0,0,"bcvnst",0,2);
 
@@ -167,6 +179,8 @@ void Pulsar::CalibratorPlotter::plot (const Calibrator::Info* info,
 
   // restore the viewport
   cpgsvp (xmin, xmax, ymin, ymax);
+
+  if (verbose) cerr << "Pulsar::CalibratorPlotter::plot return" << endl;
 
 }
 catch (Error& error) {
