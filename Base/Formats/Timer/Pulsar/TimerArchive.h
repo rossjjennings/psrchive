@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/Timer/Pulsar/TimerArchive.h,v $
-   $Revision: 1.5 $
-   $Date: 2003/06/05 15:38:28 $
+   $Revision: 1.6 $
+   $Date: 2003/08/14 19:02:37 $
    $Author: straten $ */
 
 #ifndef __Timer_Archive_h
@@ -168,12 +168,13 @@ namespace Pulsar {
     //! Set various redundant parameters in the timer and mini headers
     virtual void correct ();
 
+  protected:
+
+    friend class Archive::Advocate<TimerArchive>;
+
     class Agent : public Archive::Advocate<TimerArchive> {
     
       public:
-
-        Agent () 
-        { if (verbose) cerr << "TimerArchive::Agent construct" << endl; }
 
         //! Advocate the use of TimerArchive to interpret filename
         bool advocate (const char* filename);
@@ -185,8 +186,6 @@ namespace Pulsar {
         string get_description ();
 
     }; 
-
-  protected:
 
     //! Load the header information from filename
     virtual void load_header (const char* filename);
