@@ -962,6 +962,9 @@ std::vector<double> Rhythm::give_me_data (toaPlot::AxisQuantity q)
 	progress.setProgress( i );
 	myapp->processEvents();
 	
+	if ( progress.wasCancelled() )
+	  break;
+	
 	if (toas[i].get_format() == Tempo::toa::Command) {
 	  retval.push_back(0.0);
 	  continue;
@@ -1055,8 +1058,8 @@ std::vector<double> Rhythm::give_me_data (toaPlot::AxisQuantity q)
     
   case toaPlot::PointNumber:
     for ( unsigned i = 0; i < toas.size(); i++ ) {
-      progress.setProgress( i );
-      myapp->processEvents();
+      //progress.setProgress( i );
+      //myapp->processEvents();
 
       if (toas[i].get_format() == Tempo::toa::Command) {
 	retval.push_back(0.0);
@@ -1064,7 +1067,7 @@ std::vector<double> Rhythm::give_me_data (toaPlot::AxisQuantity q)
       }
       retval.push_back(i);
     }
-    progress.setProgress( toas.size() );
+    //progress.setProgress( toas.size() );
     
     return retval;
     break;
@@ -1132,6 +1135,9 @@ std::vector<double> Rhythm::give_me_data (toaPlot::AxisQuantity q)
       progress.setProgress( i );
       myapp->processEvents();
       
+      if ( progress.wasCancelled() )
+	break;
+      
       if (toas[i].get_format() == Tempo::toa::Command) {
 	retval.push_back(0.0);
 	continue;
@@ -1178,6 +1184,9 @@ std::vector<double> Rhythm::give_me_data (toaPlot::AxisQuantity q)
       progress.setProgress( i );
       myapp->processEvents();
 
+      if ( progress.wasCancelled() )
+	break;
+
       if (toas[i].get_format() == Tempo::toa::Command) {
 	retval.push_back(0.0);
 	continue;
@@ -1223,6 +1232,9 @@ std::vector<double> Rhythm::give_me_data (toaPlot::AxisQuantity q)
     for ( unsigned i = 0; i < toas.size(); i++ ) {
       progress.setProgress( i );
       myapp->processEvents();
+
+      if ( progress.wasCancelled() )
+	break;
       
       if (toas[i].get_format() == Tempo::toa::Command) {
 	retval.push_back(0.0);
