@@ -1,12 +1,14 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/Smooth.h,v $
-   $Revision: 1.1 $
-   $Date: 2004/04/15 15:44:07 $
-   $Author: straten $ */
+   $Revision: 1.2 $
+   $Date: 2004/04/16 00:27:56 $
+   $Author: ahotan $ */
 
 #ifndef __Pulsar_Smooth_h
 #define __Pulsar_Smooth_h
+
+#include <memory>
 
 #include "ReferenceAble.h"
 
