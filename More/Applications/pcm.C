@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pcm.C,v $
-   $Revision: 1.15 $
-   $Date: 2004/01/02 18:11:46 $
+   $Revision: 1.16 $
+   $Date: 2004/01/02 18:45:01 $
    $Author: straten $ */
 
 /*! \file pcm.C 
@@ -58,12 +58,16 @@ void usage ()
   cout << "A program for performing self-calibration \n"
     "Usage: pcm [options] [filenames] \n"
     "\n"
+    "  -h         this help page \n"
+    "  -V         verbose mode \n"
     "  -a archive set the output archive class name \n"
     "  -m model   model: Britton [default] or Hamaker \n"
     "\n"
     "  -c meta    filename with list of calibrator files \n"
     "  -d dbase   filename of Calibration::Database \n"
     "  -M meta    filename with list of pulsar files \n"
+    "\n"
+    "MODE A: Fit multiple observations of unknown source \n"
     "\n"
     "  -f chan    solve for only the specified channel \n"
     "  -t nproc   solve using nproc threads \n"
@@ -77,8 +81,9 @@ void usage ()
     "  -q         assume that CAL Stokes Q = 0 \n"
     "  -v         assume that CAL Stokes V = 0 \n"
     "\n"
-    "  -h         this help page \n"
-    "  -V         verbose mode \n"
+    "MODE B: Fit single observations of known source \n"
+    "\n"
+    "  -S fname   filename of calibrated standard \n"
        << endl;
 }
 
@@ -192,6 +197,20 @@ void plot_constraints (Pulsar::ReceptionCalibratorPlotter& plotter,
 
 }
 
+int mode_B (const char* standard_filename,
+	    const vector<string>& filenames);
+
+// name of the default parameterization
+Pulsar::Calibrator::Type model_name = Pulsar::Calibrator::Britton;
+
+// class name of the calibrator solution archives to be produced
+string archive_class = "FITSArchive";
+
+// plot the solution before calibrating with it
+bool display = true;
+
+// verbosity flags
+bool verbose = false;
 
 
 int main (int argc, char *argv[]) try {
@@ -207,20 +226,12 @@ int main (int argc, char *argv[]) try {
   // name of file containing a Calibration::Database
   char* dbfile = NULL;
 
+  // name of file containing the calibrated standard
+  char* stdfile = NULL;
+
   // number of hours over which CALs will be found from Database
   float hours = 24.0;
 
-  // name of the default parameterization
-  Pulsar::Calibrator::Type model_name = Pulsar::Calibrator::Britton;
-
-  // class name of the calibrator solution archives to be produced
-  string archive_class = "FITSArchive";
-
-  // plot the solution before calibrating with it
-  bool display = true;
-
-  // verbosity flags
-  bool verbose = false;
 
   //! The maximum number of bins to use
   unsigned maxbins = 16;
@@ -244,7 +255,7 @@ int main (int argc, char *argv[]) try {
   bool publication_plots = false;
 
   int gotc = 0;
-  while ((gotc = getopt(argc, argv, "a:b:c:d:Df:hM:m:n:Pp:qst:uvV")) != -1) {
+  while ((gotc = getopt(argc, argv, "a:b:c:d:Df:hM:m:n:Pp:qsS:t:uvV")) != -1) {
     switch (gotc) {
 
     case 'a':
@@ -312,6 +323,10 @@ int main (int argc, char *argv[]) try {
       normalize_by_invariant = false;
       break;
 
+    case 'S':
+      stdfile = optarg;
+      break;
+
     case 't':  {
 
       unsigned nthreads = atoi (optarg);
@@ -368,11 +383,11 @@ int main (int argc, char *argv[]) try {
   // assumes that sorting by filename also sorts by epoch
   sort (filenames.begin(), filenames.end());
 
-  // the reception calibration class
-  Pulsar::ReceptionCalibrator model (model_name);
+  if (stdfile)
+    return mode_B (stdfile, filenames);
 
   // the reception calibration class
-  Pulsar::PulsarCalibrator standard (model_name);
+  Pulsar::ReceptionCalibrator model (model_name);
 
   if (measure_cal_V)
     cerr << "pcm: assuming that System + Hydra A Stokes V = 0" << endl;
@@ -697,3 +712,35 @@ catch (Error& error) {
   return -1;
 }
 
+int mode_B (const char* standard_filename,
+	    const vector<string>& filenames)
+{
+
+  // the reception calibration class
+  Pulsar::PulsarCalibrator model (model_name);
+
+  Reference::To<Pulsar::Archive> archive;
+
+  for (unsigned i = 0; i < filenames.size(); i++) try {
+
+    if (verbose)
+      cerr << "pcm: loading " << filenames[i] << endl;
+    
+    archive = Pulsar::Archive::load(filenames[i]);
+    
+    cout << "pcm: loaded archive: " << filenames[i] << endl;
+
+    model.add_observation( archive );
+
+  }
+  catch (Error& error) {
+    cerr << error << endl;
+  }
+
+  Reference::To<Pulsar::Archive> solution = model.get_solution (archive_class);
+
+  cerr << "psc: unloading solution to " << solution->get_filename() << endl;
+  solution->unload( "pcm.fits" );
+
+  return 0;
+}
