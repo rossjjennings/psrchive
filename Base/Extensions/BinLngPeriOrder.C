@@ -63,14 +63,14 @@ void Pulsar::BinLngPeriOrder::organise (Archive* arch, unsigned newsub)
   }
 
   // Interperate the newsub parameter as the number of integrations
-  // required across a full phase wrap. This must be adjusted depending
-  // on the phase coverage available in the archive
+  // required across a full  wrap. This must be adjusted depending
+  // on the longitude coverage available in the archive
   
-  float    phs_coverage = maxlng - minlng;
-  unsigned mysub        = unsigned(phs_coverage * float(newsub));
+  float    lng_coverage = maxlng - minlng;
+  unsigned mysub        = unsigned(lng_coverage/360.0 * float(newsub));
 
   // This is equivalent to 360.0 / newsub given the above condition
-  float PhaseGap = phs_coverage / float(mysub);
+  float LngGap = lng_coverage / float(mysub);
 
   // The "used" vector will ensure that no subints are counted
   // twice, but since they cannot be sub-divided, if you ask
@@ -91,8 +91,8 @@ void Pulsar::BinLngPeriOrder::organise (Archive* arch, unsigned newsub)
     bool first = true;
     int tally = 0;
     for (unsigned j = 0; j < lngs.size(); j++) {
-      if ((lngs[j] >= (minlng + (i*PhaseGap))) && 
-	  (lngs[j] < (minlng + ((i+1)*PhaseGap))) && !used[j]) {
+      if ((lngs[j] >= (minlng + (i*LngGap))) && 
+	  (lngs[j] < (minlng + ((i+1)*LngGap))) && !used[j]) {
 	if (first) {
 	  *(arch->get_Integration(i)) = 
 	    *(arch->new_Integration(copy->get_Integration(j)));
