@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Archive.h,v $
-   $Revision: 1.21 $
-   $Date: 2002/04/22 13:14:19 $
-   $Author: pulsar $ */
+   $Revision: 1.22 $
+   $Date: 2002/04/23 08:39:27 $
+   $Author: straten $ */
 
 /*! \mainpage 
  
@@ -127,7 +127,7 @@
 #include "psrephem.h"
 
 #include "ArchiveTypes.h"
-#include "Reference.h"
+#include "ReferenceAble.h"
 
 namespace Tempo {
   class toa;
