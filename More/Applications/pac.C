@@ -99,11 +99,11 @@ int main (int argc, char *argv[]) {
       verbose = true;
       Pulsar::Calibration::verbose = true;
       Pulsar::Calibrator::verbose = true;
-      Calibration::Model::verbose = true;
+      //Calibration::Model::verbose = true;
       Pulsar::Archive::set_verbosity(1);
       break;
     case 'i':
-      cout << "$Id: pac.C,v 1.34 2003/12/05 23:22:54 straten Exp $" << endl;
+      cout << "$Id: pac.C,v 1.35 2003/12/06 00:28:44 straten Exp $" << endl;
       return 0;
     case 'p':
       cals_are_here = optarg;
@@ -267,7 +267,7 @@ int main (int argc, char *argv[]) {
 	  //  temp = cals_are_here + "database.txt";
 	  
 	  cout << "Writing database summary file to " 
-               << dbase -> get_filename ("database.txt") << endl;
+               << dbase -> get_path() << "/database.txt" << endl;
 
 	  dbase -> unload("database.txt");
 	  
