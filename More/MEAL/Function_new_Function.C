@@ -14,7 +14,7 @@ typedef MEAL::SumRule<MEAL::Scalar> ScalarSum;
 static MEAL::Advocate<ScalarSum> scalar_sum;
 
 //! Construct a new model instance from a string
-MEAL::Function* MEAL::Function::new_Function (const string& text)
+MEAL::Function* MEAL::Function::new_Function (const std::string& text)
 {
   for (unsigned agent=0; agent<Agent::registry.size(); agent++) {
 
