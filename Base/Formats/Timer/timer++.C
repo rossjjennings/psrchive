@@ -116,9 +116,12 @@ int Timer::load (FILE* fptr, struct timer* hdr, bool big_endian)
   
   if (verbose) cerr << "Timer::load correct header" << endl;
 
-  if (strcmp (hdr->machine_id, "S2") == 0)  {
-    hdr->version = 0;
+  if ( !strcmp (hdr->machine_id, "S2") && !strstr (hdr->software, "psrdisp"))  {
+    if (verbose) cerr << "Timer::load S2 version=" << hdr->version << ":" 
+                      << hdr->minorversion << " reset to 5.0" << endl;
+    hdr->version = 5.0;
     hdr->minorversion = 0;
+    strcpy (hdr->software, "psrdisp version < 5.0");
   }
 
   // correct an endian mistake made in initial baseband header version
