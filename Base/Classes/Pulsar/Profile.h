@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Profile.h,v $
-   $Revision: 1.50 $
-   $Date: 2004/04/14 08:15:45 $
+   $Revision: 1.51 $
+   $Date: 2004/04/14 15:25:23 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Profile_h
@@ -39,6 +39,15 @@ namespace Pulsar {
 
     //! When true, Profile::rotate shifts bins in the phase domain
     static bool rotate_in_phase_domain;
+
+    //! fractional phase window used to find rise and fall of running mean
+    static float transition_duty_cycle;
+
+    //! fractional phase window used in most functions
+    static float default_duty_cycle;
+
+    //! fraction of total power used to find peak
+    static float peak_edge_threshold;
 
     //! null constructor produces an empty profile of zero size
     Profile () { init(); }
@@ -131,7 +140,7 @@ namespace Pulsar {
     void find_transitions (int& highlow, int& lowhigh, int& width) const;
 
     //! Find the bin numbers at which the cumulative power crosses thresholds
-    void find_peak_edges (int& rise, int& fall) const;
+    void find_peak_edges (int& rise, int& fall, bool choose = true) const;
 
     //! Returns the bin number with the maximum amplitude
     int find_max_bin (int bin_start=0, int bin_end=0) const;
@@ -139,7 +148,7 @@ namespace Pulsar {
     int find_min_bin (int bin_start=0, int bin_end=0) const;
 
     //! The functor that implements the snr method
-    static Functor<double(const Pulsar::Profile*)> snr_functor;
+    static Functor<float(const Pulsar::Profile*)> snr_functor;
 
     //! Returns the signal to noise ratio of the profile
     float snr () const;
@@ -187,7 +196,8 @@ namespace Pulsar {
     void draw (float phase=0) const;
 
     //! get the number of bins
-    /*! This attribute may be set only through Profile::resize */
+    /*! Note that there is no set_nbin; this attribute may be set only
+      through Profile::resize */
     unsigned get_nbin () const { return nbin; }
 
     //! returns a pointer to the start of the array of amplitudes
@@ -263,15 +273,6 @@ namespace Pulsar {
     //! initializes all values to null
     void init ();
 
-    //! fractional phase window used to find rise and fall of running mean
-    static float transition_duty_cycle;
-
-    //! fractional phase window used in most functions
-    static float default_duty_cycle;
-
-    //! fraction of total power used to find peak
-    static float peak_edge_threshold;
-
     //! number of bins in the profile
     unsigned nbin;
 
@@ -292,8 +293,11 @@ namespace Pulsar {
 		  float& snrfft, float& esnrfft);
   };
 
-  //! Default implmentation of Profile::snr method
+  //! Default implementation of Profile::snr method
   double snr_phase (const Profile* profile);
+
+  //! Alternative implementation uses a fortran routine
+  float snr_fortran (const Profile* profile);
 
 }
 

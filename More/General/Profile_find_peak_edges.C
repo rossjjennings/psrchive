@@ -22,29 +22,44 @@ float Pulsar::Profile::peak_edge_threshold = 0.1;
   The threshold defining the rising edge of the pulse is defined by
   Profile::peak_edge_threshold*Profile::sum().  The falling edge
   threshold is defined by
-  (1-Profile::peak_edge_threshold)*Profile::sum().  If no edges are
-  found, Profile::find_max_phase is called with a duty cycle of 0.4 in
-  order to find the "peak".  In this case, rise and fall are set to
-  reflect the phase of peak-0.2 and peak+0.2, respectively.
+  (1-Profile::peak_edge_threshold)*Profile::sum().  The profile
+  baseline is first subtracted from each amplitude, and the width of
+  the window used to calculate the baseline should be set using
+  Profile::default_duty_cycle.
+
+  If the choose flag is true, then the search for the peak edges will
+  be performed twice and the narrowest peak will be returned.  On the
+  second try, the search starts half way into the profile. If no edges
+  are found, Profile::find_max_phase is called with a duty cycle of
+  0.4 in order to find the "peak".  In this case, rise and fall are
+  set to reflect the phase of peak-0.2 and peak+0.2, respectively.
+
+  If the choose flag is false, then the first peaks found will be returned.
 
   \retval rise bin at which the cummulative power last remains above threshold1
   \retval fall bin at which the cummulative power first falls below threshold2
 
   \post On success, this method will return rise < fall
 */
-void Pulsar::Profile::find_peak_edges (int& rise, int& fall) const
+void Pulsar::Profile::find_peak_edges (int& rise, int& fall, bool choose) const
 {
-  // the search for the edge is performed twice.
-  // on the second try, the search starts half way into the profile
+  if (verbose)
+    cerr << "Pulsar::Profile::find_peak_edges nbin=" << nbin <<
+      " baseline duty_cycle=" << default_duty_cycle << endl;
 
-  // the mean is removed from each amplitude
-  // Note deviation from defaults, which give problems
-  // for narrow duty cycle pulsars
+  verbose = true;
 
-  float min_amp = mean ( find_min_phase(0.5) , 0.5);
+  // WvS - if the calculation of the baseline is to be modified, the value
+  // of Profile::default_duty_cycle should be set.
+  float min_amp = mean ( find_min_phase() );
 
   // the total power under the pulse
   double tot_amp = sum() - double(min_amp) * double(nbin);
+
+  if (verbose)
+    cerr << "Pulsar::Profile::find_peak_edges baseline mean=" << min_amp
+	 << " total power=" << tot_amp << endl;
+
   // set the thresholds for the search
   double rise_threshold = double(peak_edge_threshold) * tot_amp;
   double fall_threshold = double(1.0-peak_edge_threshold) * tot_amp;
@@ -59,7 +74,12 @@ void Pulsar::Profile::find_peak_edges (int& rise, int& fall) const
   int irise[2];
   int ifall[2];  
 
-  for (int itry=0; itry<2; itry++) {
+  unsigned ntries = 2;
+
+  if (!choose)
+    ntries = 1;
+
+  for (unsigned itry=0; itry<ntries; itry++) {
 
     unsigned ibin = 0;
 
@@ -87,6 +107,7 @@ void Pulsar::Profile::find_peak_edges (int& rise, int& fall) const
     //cpgsci(2);
     //cpgmove(0.0,fall_threshold);
     //cpgdraw((float)nbin-1,fall_threshold);
+
     // find where cumulative sum falls below max_threshold for the first time.
     ifall[itry] = nbin-1;
     for (ibin=nbin-1; ibin>0; ibin--)
@@ -97,6 +118,10 @@ void Pulsar::Profile::find_peak_edges (int& rise, int& fall) const
     if (cumu[ibin] > fall_threshold) 
       ifall[itry] = ibin;
     
+    if (verbose)
+      cerr << "Pulsar::Profile::find_peak_edges try=" << itry 
+	   << " irise=" << irise[itry] << " ifall=" << ifall[itry] << endl;
+
     // do it again; this time starting half way along.
     istart = nbin/2;
 
@@ -108,15 +133,13 @@ void Pulsar::Profile::find_peak_edges (int& rise, int& fall) const
   int diff0 = ifall[0] - irise[0];
   int diff1 = ifall[1] - irise[1];
 
-  if (diff0 < diff1 && diff0 > 0) {
+  if ( !choose || (diff0 < diff1 && diff0 > 0) ) {
     rise = irise[0];
     fall = ifall[0];
   }
   else if (diff1 > 0) {
     rise = irise[1] + nbin/2;
-    rise = rise%nbin;
     fall = ifall[1] + nbin/2;
-    fall = fall%nbin;
   }
   else {
     // In noisy data, ifall can be < irise!  In this case, just find
@@ -125,7 +148,5 @@ void Pulsar::Profile::find_peak_edges (int& rise, int& fall) const
     rise = int ((phase - 0.2) * nbin);
     fall = int ((phase + 0.2) * nbin);
   }
+
 }
-
-
-
