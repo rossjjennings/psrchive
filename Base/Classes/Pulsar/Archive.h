@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Archive.h,v $
-   $Revision: 1.70 $
-   $Date: 2003/04/28 12:02:40 $
-   $Author: straten $ */
+   $Revision: 1.71 $
+   $Date: 2003/04/29 11:32:32 $
+   $Author: pulsar $ */
 
 /*! \mainpage 
  
@@ -251,6 +251,7 @@ namespace Pulsar {
     };
 
   public:
+
     //! Classes derived from Archive are registered for use via an Advocate
     /*! This abstract template base class must be inherited in order
       to register plugins for use with the Archive::load factory.  The
@@ -305,6 +306,9 @@ namespace Pulsar {
 
     //! Set the verbosity level (0 to 3)
     static void set_verbosity (unsigned level);
+
+    //! Print plugin status information to cerr
+    static void plugin_report ();
 
     // //////////////////////////////////////////////////////////////////
     //

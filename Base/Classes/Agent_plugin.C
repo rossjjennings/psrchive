@@ -84,3 +84,8 @@ void Pulsar::Archive::Agent::report ()
   cerr << endl;
 }
 
+void Pulsar::Archive::plugin_report ()
+{
+  Pulsar::Archive::Agent::report();
+}
+
