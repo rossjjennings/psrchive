@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Profile.h,v $
-   $Revision: 1.23 $
-   $Date: 2002/10/28 01:02:45 $
+   $Revision: 1.24 $
+   $Date: 2003/01/06 11:59:40 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Profile_h
@@ -160,14 +160,14 @@ namespace Pulsar {
 
     //! get the number of bins
     /*! This attribute may be set only through Profile::resize */
-    int get_nbin () const { return nbin; }
+    unsigned get_nbin () const { return nbin; }
 
     //! returns a pointer to the start of the array of amplitudes
     const float* get_amps () const { return amps; }
     float* get_amps () { return amps; }
 
     //! fills data by jumping jbin between each datum
-    void get_amps (float* data, int jbin) const;
+    void get_amps (float* data, unsigned jbin) const;
 
 #if defined(sun) && !defined(__GNUC__)
     // SUN CC 5.0 is stupid
@@ -212,16 +212,16 @@ namespace Pulsar {
     void hat_profile(int bin_number, int width);
 
     //! integrate neighbouring phase bins in profile
-    virtual void bscrunch (int nscrunch);
+    virtual void bscrunch (unsigned nscrunch);
 
     //! integrate neighbouring sections of the profile
-    virtual void fold (int nfold);
+    virtual void fold (unsigned nfold);
 
     //! resize the data area
-    virtual void resize (int nbin);
+    virtual void resize (unsigned nbin);
 
     //! halves the number of bins like bscrunch(2^nhalve)
-    virtual void halvebins (int nhalve);
+    virtual void halvebins (unsigned nhalve);
 
   protected:
 
@@ -238,7 +238,7 @@ namespace Pulsar {
     static float peak_edge_threshold;
 
     //! number of bins in the profile
-    int nbin;
+    unsigned nbin;
 
     //! amplitudes at each pulse phase
     float *amps;
@@ -268,7 +268,7 @@ namespace Pulsar {
 template <typename T>
 void Pulsar::Profile::set_amps (const T* data)
 {
-  for (int ibin=0; ibin<nbin; ibin++)
+  for (unsigned ibin=0; ibin<nbin; ibin++)
     amps[ibin] = static_cast<float>( data[ibin] );
 }
 
@@ -279,7 +279,7 @@ template <typename T>
 void Pulsar::Profile::set_amps (const vector<T>& data)
 {
   resize (data.size());
-  for (int ibin=0; ibin<nbin; ibin++)
+  for (unsigned ibin=0; ibin<nbin; ibin++)
     amps[ibin] = static_cast<float>( data[ibin] );
 }
 
@@ -290,7 +290,7 @@ template <typename T>
 void Pulsar::Profile::get_amps (vector<T>& data)
 {
   data.resize (nbin);
-  for (int ibin=0; ibin<nbin; ibin++)
+  for (unsigned ibin=0; ibin<nbin; ibin++)
     data[ibin] = static_cast<T>( amps[ibin] );
 }
 

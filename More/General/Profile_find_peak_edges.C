@@ -48,7 +48,7 @@ void Pulsar::Profile::find_peak_edges (int& rise, int& fall) const
   double* cumu = new double [nbin];
 
   // start on first bin, then on nbin/2
-  int istart = 0;
+  unsigned istart = 0;
 
   // one result for each try
   int irise[2];
@@ -56,7 +56,7 @@ void Pulsar::Profile::find_peak_edges (int& rise, int& fall) const
 
   for (int itry=0; itry<2; itry++) {
 
-    int ibin = 0;
+    unsigned ibin = 0;
 
     // form cumulative sum
     cumu[0] = amps[istart] - min_amp;

@@ -59,7 +59,7 @@ Pulsar::Profile::~Profile ()
 //
 // Pulsar::Profile::resize
 //
-void Pulsar::Profile::resize (int _nbin)
+void Pulsar::Profile::resize (unsigned _nbin)
 {
   if (nbin == _nbin)
     return;
@@ -73,7 +73,7 @@ void Pulsar::Profile::resize (int _nbin)
 
   amps = new float [nbin];
   if (!amps)
-    throw Error (BadAlloc, "Profile::resize");
+    throw Error (BadAlloc, "Pulsar::Profile::resize");
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -84,7 +84,7 @@ Pulsar::Profile* Pulsar::Profile::clone ()
 {
   Profile* retval = new Profile (*this);
   if (!retval)
-    throw Error (BadAlloc, "Profile::clone");
+    throw Error (BadAlloc, "Pulsar::Profile::clone");
   return retval;
 }
 
@@ -110,7 +110,7 @@ const Pulsar::Profile& Pulsar::Profile::operator = (const Profile& input)
     set_state ( input.get_state() );
   }
   catch (Error& error) {
-    throw error += "Profile::operator =";
+    throw error += "Pulsar::Profile::operator =";
   }
 
   return *this;
@@ -133,7 +133,7 @@ const Pulsar::Profile& Pulsar::Profile::operator -= (const Profile& profile)
 //
 const Pulsar::Profile& Pulsar::Profile::operator += (float offset)
 {
-  for (int i=0;i<nbin;i++)
+  for (unsigned i=0;i<nbin;i++)
     amps[i]+=offset;
   return *this;
 }
@@ -144,7 +144,7 @@ const Pulsar::Profile& Pulsar::Profile::operator += (float offset)
 //
 const Pulsar::Profile& Pulsar::Profile::operator -= (float offset)
 {
-  for (int i=0;i<nbin;i++)
+  for (unsigned i=0;i<nbin;i++)
     amps[i]-=offset;
   return *this;
 }
@@ -155,17 +155,17 @@ const Pulsar::Profile& Pulsar::Profile::operator -= (float offset)
 //
 const Pulsar::Profile& Pulsar::Profile::operator *= (float factor)
 {
-  for (int i=0;i<nbin;i++)
+  for (unsigned i=0;i<nbin;i++)
     amps[i]*=factor;
   return *this;
 }
 
 
-void Pulsar::Profile::get_amps (float* data, int jbin) const
+void Pulsar::Profile::get_amps (float* data, unsigned jbin) const
 {
   register float* dptr = data;
   register float* aptr = amps;
-  register int ibin;
+  register unsigned ibin;
 
   for (ibin=0; ibin<nbin; ibin++) {
     *dptr = *aptr;
@@ -191,7 +191,7 @@ void Pulsar::Profile::get_amps (float* data, int jbin) const
 void Pulsar::Profile::rotate (double phase)
 {
   if (verbose)
-    cerr << "Profile::rotate phase=" << phase << " nbin=" << nbin << endl;
+    cerr << "Pulsar::Profile::rotate phase=" << phase << " nbin=" << nbin << endl;
 
   if (phase == 0.0)
     return;
@@ -216,13 +216,13 @@ void Pulsar::Profile::rotate (double phase)
 void Pulsar::Profile::dedisperse (double dm, double ref_freq, double pfold)
 {
   if (verbose)
-    cerr << "Profile::dedisperse dm=" << dm << " pfold=" << pfold 
+    cerr << "Pulsar::Profile::dedisperse dm=" << dm << " pfold=" << pfold 
 	 << " ref_freq=" << ref_freq << endl;
 
   double delay = dispersion_delay (dm, ref_freq, centrefreq);
 
   if (verbose)
-    cerr << "Profile::dedisperse delay=" << delay << " seconds" << endl;
+    cerr << "Pulsar::Profile::dedisperse delay=" << delay << " seconds" << endl;
 
   rotate (delay / pfold);
   set_centre_frequency (ref_freq);
@@ -236,7 +236,7 @@ void Pulsar::Profile::dedisperse (double dm, double ref_freq, double pfold)
 void Pulsar::Profile::zero()
 {
   weight = 0;
-  for (int ibin = 0; ibin < nbin; ibin++)
+  for (unsigned ibin = 0; ibin < nbin; ibin++)
     amps[ibin] = 0;
 }
  
@@ -246,7 +246,7 @@ void Pulsar::Profile::zero()
 //
 void Pulsar::Profile::square_root()
 {
-  for (int ibin=0; ibin<nbin; ++ibin) {
+  for (unsigned ibin=0; ibin<nbin; ++ibin) {
     float sign = (amps[ibin]>0) ? 1.0 : -1.0;
     amps[ibin] = sign * sqrt(sign * amps[ibin]);
   }
@@ -257,16 +257,16 @@ void Pulsar::Profile::square_root()
 //
 // Pulsar::Profile::
 //
-void Pulsar::Profile::fold (int nfold)
+void Pulsar::Profile::fold (unsigned nfold)
 {
   if (nbin % nfold)
-    throw Error (InvalidRange, "Profile::fold",
+    throw Error (InvalidRange, "Pulsar::Profile::fold",
 		 "nbin=%d %% nfold=%d != 0", nbin, nfold);
 
-  int newbin = nbin/nfold;
+  unsigned newbin = nbin/nfold;
 
-  for (int i=0; i<newbin; i++)
-    for (int j=1; j<nfold; j++)
+  for (unsigned i=0; i<newbin; i++)
+    for (unsigned j=1; j<nfold; j++)
       amps[i] += amps[i+j*newbin];
 
   nbin = newbin;
@@ -279,7 +279,7 @@ void Pulsar::Profile::fold (int nfold)
 //
 // Pulsar::Profile::bscrunch
 //
-void Pulsar::Profile::bscrunch (int nscrunch) { try
+void Pulsar::Profile::bscrunch (unsigned nscrunch) { try
 {
   if (nscrunch < 1)
     throw Error (InvalidParam, 0, "nscrunch=%d", nscrunch);
@@ -288,11 +288,11 @@ void Pulsar::Profile::bscrunch (int nscrunch) { try
     throw Error (InvalidRange, 0, 
 		 "nbin=%d %% nscrunch=%d != 0", nbin, nscrunch);
 
-  int newbin = nbin/nscrunch;
+  unsigned newbin = nbin/nscrunch;
 
-  for (int i=0; i<newbin; i++) {
+  for (unsigned i=0; i<newbin; i++) {
     amps[i] = amps[i*nscrunch];
-    for (int j=1; j<nscrunch; j++)
+    for (unsigned j=1; j<nscrunch; j++)
       amps[i] += amps[i*nscrunch+j];
   }
 
@@ -301,7 +301,7 @@ void Pulsar::Profile::bscrunch (int nscrunch) { try
   operator *= (1.0/float(nscrunch));
 }
 catch (Error& error) {
-  throw error += "Profile::bscrunch";
+  throw error += "Pulsar::Profile::bscrunch";
 }
 } // end function
 
@@ -309,15 +309,15 @@ catch (Error& error) {
 //
 // Pulsar::Profile::halvebins
 //
-void Pulsar::Profile::halvebins (int nhalve)
+void Pulsar::Profile::halvebins (unsigned nhalve)
 {
-  for (int i=0; i<nhalve && nbin>1; i++) {
+  for (unsigned i=0; i<nhalve && nbin>1; i++) {
 
     if (nbin % 2)
-      throw Error (InvalidRange, "Profile::halvebins", 
+      throw Error (InvalidRange, "Pulsar::Profile::halvebins", 
 		   "nbin=%d %% 2 != 0", nbin);
     nbin /= 2;
-    for (int nb = 0; nb < nbin; nb++)
+    for (unsigned nb = 0; nb < nbin; nb++)
       amps[nb] = 0.5*(amps[2*nb] + amps[2*nb+1]);
 
   }
@@ -541,7 +541,7 @@ float find_phase (int nbin, float* amps, bool max, float duty_cycle)
 
   int boxwidth = (int) (.5 * duty_cycle * nbin);
   if (boxwidth >= nbin/2 || boxwidth <= 0)
-    throw Error (InvalidParam, "Profile::find_[min|max]_phase",
+    throw Error (InvalidParam, "Pulsar::Profile::find_[min|max]_phase",
 		 " invalid duty_cycle=%f\n", duty_cycle);
 
   double sum = 0.0;
@@ -605,7 +605,7 @@ float Pulsar::Profile::snr() const
   double min_rms = sigma (min_ph);
 
   if (verbose)
-    cerr << "Profile::snr rms=" << min_rms << endl;
+    cerr << "Pulsar::Profile::snr rms=" << min_rms << endl;
 
   if (min_rms == 0.0)
     return 0;
@@ -644,7 +644,7 @@ float Pulsar::Profile::snr (const Profile& std) const
 
 void Pulsar::Profile::set_amps (const float* data)
 {
-  for (int ibin=0; ibin<nbin; ibin++)
+  for (unsigned ibin=0; ibin<nbin; ibin++)
     amps[ibin] = data[ibin];
 }
 

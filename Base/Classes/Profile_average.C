@@ -40,7 +40,7 @@ const Pulsar::Profile& Pulsar::Profile::average (const Profile& profile,
     if (weight != 0)
       norm = 1.0 / weight;
     
-    for (int ibin=0; ibin<nbin; ibin++) {
+    for (unsigned ibin=0; ibin<nbin; ibin++) {
       *amps1 = norm * ( double(*amps1)*weight1 + sign*double(*amps2)*weight2 );
       amps1 ++; amps2 ++;
     }
