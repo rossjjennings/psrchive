@@ -21,14 +21,6 @@
 #include "coord.h"
 #include "genutil.h"
 
-#include "f772c.h"
-
-extern "C" {
-  // these are defined in ephio.f
-  int F772C(turnstodms) (double* turns, char* dms);
-  int F772C(turnstohms) (double* turns, char* hms);
-}
-
 // utility function defined at the end of the file
 void datatype_match (int typecode, int ephind);
 
