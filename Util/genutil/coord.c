@@ -306,6 +306,8 @@ int telescope_coords (int telescope, float* latitude,
     elev = 670.0;
     break;
 
+  case 0: 
+    fprintf(stderr, "Telescope code is 0 -- assuming Parkes!\n");
   case 7:
     /* Parkes */
     latd = -33.0;
