@@ -557,40 +557,43 @@ int utc2LST (double* lst, utc_t timeutc, float longitude)
   return utc_f2LST (lst, timeutc, 0.0, longitude);
 }
 
+#define UTC2LST_FIRST_YEAR   1996
+#define UTC2LST_TOTAL_YEARS  4
+
 int utc_f2LST (double* lst, utc_t timeutc, double fracsec, float longitude)
 {
   double F1_YY, UT, GMST;
-  double F1_96 = 6.5967564;     /* (hours) For 1996 see ASTRO ALMANAC pg B6 */
-  double F1_97 = 6.6465521;     /* (hours) For 1997 see ASTRO ALMANAC pg B6 */
-  /* 99 6.6147239
-	98 6.6306380
-  */
 
+  /* Greenwich mean sidereal time (hours) at 12AM (UTC) day zero.
+     see ASTRO ALMANAC pg B6 */
+  double gmst0[UTC2LST_TOTAL_YEARS] = { 6.5967564, /* 1996 */
+					6.6465521, /* 1997 */
+					6.6306380, /* 1998 */
+					6.6147239  /* 1999 */
+  };
+  double F1;
   double F2 = 0.0657098244;     /* (hours) */
   double F3 = 1.00273791;       /* (hours) */
-
+  
   /* convert longitude in degrees to east_long in hours */
   double east_long = longitude * (24.0 / 360.0);
-
-  if      (timeutc.tm_year==1996) F1_YY = F1_96;
-  else if (timeutc.tm_year==1997) F1_YY = F1_97;
-  else if (timeutc.tm_year==1998) F1_YY = F1_97;
-  else {
+  
+  if ( (timeutc.tm_year < UTC2LST_FIRST_YEAR) ||
+       (timeutc.tm_year >= UTC2LST_FIRST_YEAR + UTC2LST_TOTAL_YEARS) )  {
     fprintf(stderr,"Hello, this a utc2LST WARNING\n");
     fprintf(stderr,"The year %d is out of range\n",timeutc.tm_year);
     fprintf(stderr,"Enter revised conversion formula\n");
     fprintf(stderr,"from page B6 of current ASTRO ALMANAC\n");
     return -1;
   }
-
+  F1 = gmst0 [timeutc.tm_year - UTC2LST_FIRST_YEAR];
+  
   UT = (double)timeutc.tm_hour + (double)timeutc.tm_min/60.0
     + ((double)timeutc.tm_sec + fracsec)/3600.0;
   GMST = F1_YY+F2*(double)timeutc.tm_yday+F3*UT;
-
+  
   *lst =  GMST + east_long;
   while (*lst<0.0) *lst+=24.0;
   if(*lst>=24.0) *lst=(float) fmod((double) *lst,24.0);
   return 0;
 }
-
-
