@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/fft/interpolate.h,v $
-   $Revision: 1.6 $
-   $Date: 2004/10/26 12:54:37 $
+   $Revision: 1.7 $
+   $Date: 2004/10/27 06:14:04 $
    $Author: straten $*/
 
 #ifndef __fft_interpolate_h
@@ -37,29 +37,35 @@ namespace fft {
       cerr << "fft::interpolate " << ndim << " dimensions from "
 	   << in.size() << " to " << out.size() << endl;
     
-    unsigned ipt, idim;
+    unsigned ipt;
 
     // for each dimension of the type T, perform an interpolation
-    for (idim=0; idim<ndim; idim++) {
+    for (unsigned idim=0; idim<ndim; idim++) {
 
       for (ipt=0; ipt < in.size(); ipt++)
 	dom1[ipt] = datum_traits.element (in[ipt], idim);
 
       fft::fcc1d (in.size(), (float*)&(dom2[0]), (float*)&(dom1[0]));
 
+      // shift the negative frequencies
+      unsigned npt2 = in.size()/2;
+      for (ipt=0; ipt<npt2; ipt++)
+	dom2[out.size()-1-ipt] = dom2[in.size()-1-ipt];
+      
       // zero pad the rest
-      for (ipt=in.size(); ipt<dom2.size(); ipt++)
+      unsigned end = out.size() - npt2;
+      for (ipt=npt2; ipt<end; ipt++)
 	dom2[ipt] = 0;
 
       fft::bcc1d (out.size(), (float*)&(dom1[0]), (float*)&(dom2[0]));
 
       // this factor may need to be carefully chosen, depending
       // on how the FFT routines operate
-      float factor = in.size();
+      float factor = 1.0/in.size();
 
       for (ipt=0; ipt < out.size(); ipt++)
 	datum_traits.element (out[ipt], idim) = 
-	  datum_traits.element_traits.cast (dom1[ipt*2]/factor);
+	  datum_traits.element_traits.cast (dom1[ipt]*factor);
 
     } // end for each dimension
 
