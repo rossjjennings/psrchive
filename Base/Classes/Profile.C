@@ -73,7 +73,7 @@ void Pulsar::Profile::resize (unsigned _nbin)
 
   amps = new float [nbin];
   if (!amps)
-    throw Error (BadAlloc, "Pulsar::Profile::resize");
+    throw Error (BadAllocation, "Pulsar::Profile::resize");
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -84,7 +84,7 @@ Pulsar::Profile* Pulsar::Profile::clone ()
 {
   Profile* retval = new Profile (*this);
   if (!retval)
-    throw Error (BadAlloc, "Pulsar::Profile::clone");
+    throw Error (BadAllocation, "Pulsar::Profile::clone");
   return retval;
 }
 

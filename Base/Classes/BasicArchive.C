@@ -83,7 +83,7 @@ Pulsar::BasicArchive::new_Integration (Integration* subint)
     integration = new BasicIntegration;
 
   if (!integration)
-    throw Error (BadAlloc, "BasicArchive::new_Integration");
+    throw Error (BadAllocation, "BasicArchive::new_Integration");
   
   return integration;
 }

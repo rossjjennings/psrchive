@@ -40,7 +40,7 @@ Pulsar::Profile* Pulsar::Integration::new_Profile ()
   Profile* profile = new Profile;
 
   if (!profile)
-    throw Error (BadAlloc, "Integration::new_Profile");
+    throw Error (BadAllocation, "Integration::new_Profile");
 
   return profile;
 }

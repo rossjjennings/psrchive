@@ -172,7 +172,7 @@ Pulsar::FITSArchive::new_Integration (Integration* subint)
     integration = new BasicIntegration ();
 
   if (!integration)
-    throw Error (BadAlloc, "FITSArchive::new_Integration");
+    throw Error (BadAllocation, "FITSArchive::new_Integration");
   
   return integration;
 }

@@ -126,7 +126,7 @@ Pulsar::TimerArchive::new_Integration (Integration* subint)
     integration = new TimerIntegration;
 
   if (!integration)
-    throw Error (BadAlloc, "TimerArchive::new_Integration");
+    throw Error (BadAllocation, "TimerArchive::new_Integration");
   
   return integration;
 }
