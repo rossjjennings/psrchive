@@ -22,9 +22,6 @@
 //             be loaded
 // ////////////////////////////////////////////////////////////////////////
 
-bool Tempo::verbose = false;
-MJD  Tempo::unspecified;
-
 void Tempo::fit (const psrParams& model, vector<toa>& toas,
 		 psrParams* postfit, bool track, DataPoint::State min_state)
 {

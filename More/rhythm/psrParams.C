@@ -179,8 +179,6 @@ void psrParams::load (istream& istr, size_t nbytes)
     throw (error);
   }
   load (&total);
-
-  cerr << "psrParams::load(istream&) EXITS" << endl;
 }
 
 void psrParams::load (FILE* fptr, size_t nbytes)
@@ -234,7 +232,7 @@ void psrParams::load (string* instr)
 	 << *instr << "***** END" << endl;
 
   prepare_static_load_area ();
-  while (instr -> length() > EPH_STR_LEN) {
+  while (instr -> length() > 1) {
 
     // get the next line from the incoming text
     string line ( stringtok (instr, "\n") );
@@ -311,7 +309,6 @@ void psrParams::load (string* instr)
       params.push_back (newparm);
     }
   }
-  cerr << "DONE LOADING" << endl;
 }
 
 void psrParams::unload (const char* filename) const
@@ -409,7 +406,7 @@ Angle psrParams::jdec() const
 {
   psrParameter* el = element (EPH_DECJ);
   if (el)
-    return el -> getDouble();
+    return el -> getAngle();
   
   string error ("psrParams::jdec() JDEC not specified.");
   if (verbose)
