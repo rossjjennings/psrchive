@@ -1,18 +1,18 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Archive.h,v $
-   $Revision: 1.10 $
-   $Date: 2002/04/10 01:19:07 $
-   $Author: ahotan $ */
+   $Revision: 1.11 $
+   $Date: 2002/04/10 08:26:13 $
+   $Author: straten $ */
 
 /*! \mainpage 
  
   \section intro Introduction
  
-  The Pulsar Data Archival and Analysis Library contains a family of
+  The Pulsar Data Archival and Analysis Library implements a family of
   C++ classes that may be used in the storage, manipulation, and
-  analysis of the observational data from most pulsar experiments.
-  The various levels of functionality are organized in a heirarchy of
+  analysis of the observational data used in pulsar experiments.
+  Various levels of functionality are organized in a heirarchy of
   inheritance with the base classes implementing a minimal set of
   general, flexible routines.
  
@@ -22,17 +22,98 @@
   profile, which is implemented by the Pulsar::Profile class.  The
   Pulsar::Integration class implements a two-dimensional array of
   Pulsar::Profile objects, each integrated over the same time
-  interval.  The axis of the 2-D Profile array are polarimetric
-  measure and observing frequency.  The Pulsar::Archive class
-  implements a one-dimensional array of Pulsar::Integration objects,
-  each with similar observational parameters and each in "pulse phase"
-  with eachother.
+  interval.  The axis of the 2-D Profile array are defined to be
+  polarimetric measure and observing frequency.  The Pulsar::Archive
+  class implements a one-dimensional array of Pulsar::Integration
+  objects, each with similar observational parameters and each in
+  "pulse phase" with eachother.
 
-  The main class used in most high-level code is the Pulsar::Archive
-  class, which implements various basic operations on sequences of
-  pulse profiles, such as integration in time, frequency, and
-  polarization, removal of dispersion delays between sub-bands, etc.
-   
+  \section minimal Minimal Interface
+
+  The Pulsar::Profile class implements a minimal set of operations required
+  to manipulate a pulsar profile.  These include:
+  <UL>
+  <LI> offset - adds offset to each bin of the profile </LI>
+  <LI> scale - multiplies each bin of the profile by scale </LI>
+  <LI> rotate - rotates the profile in phase </LI>
+  <LI> bscrunch - integrates neighbouring phase bins in profile </LI>
+  <LI> fold - integrates neighbouring sections of the profile </LI>
+  <LI> zero - sets all amplitudes to zero </LI>
+  <LI> resize - resizes the data area </LI>
+  </UL>
+
+  As well, the Pulsar::Profile class implements a basic set of
+  routines that may be used to calculate statistics, find minima and
+  maxima, and fit to a standard.  Combinations of these functions can
+  perform basic tasks.  For instance, baseline removal is simply and
+  clearly implemented as:
+  <pre>
+  offset( -mean( find_min_phase(duty_cycle), duty_cycle ) );
+  </pre>
+  However, it may be decided to also implement such convenience interfaces.
+
+  The Pulsar::Subint class implements a minimal set of operations required
+  to manipulate a set of Pulsar::Profile objects.  In addition to the simple
+  nested calls of the above functions, these include:
+  <UL>
+  <LI> dedisperse - rotates all profiles to remove dispersion delays between bands </LI>
+  <LI> defaraday - V_rotates all profiles to remove faraday rotation between bands </LI>
+  <LI> fscrunch - integrates profiles from neighbouring bands </LI>
+  <LI> pscrunch - integrates profiles from two polarizations into one total intensity </LI>
+  <LI> invint - transforms from Stokes (I,Q,U,V) to the polarimetric invariant interval </LI>
+  <LI> [Q|U|V]_boost - perform Lorentz boost on Stokes (I,Q,U,V) </LI>
+  <LI> [Q|U|V]_rotate - perform rotation on Stokes (I,Q,U,V) </LI>
+  </UL>
+
+  The Pulsar::Archive class will be used in most high-level code.  In
+  addition to providing interfaces to all of the above functions, the
+  Pulsar::Archive class implements:
+  <UL>
+  <LI> tscrunch - integrates profiles from neighbouring Integrations </LI>
+  <LI> append - copies (or transfers) the Integrations from one Archive to another </LI>
+  <LI> set_ephemeris - installs a new ephemeris and polyco </LI>
+  <LI> set_polyco - installs a new polynomial and aligns all profiles to it </LI>
+  </UL>
+
+  For a complete list of the methods defined in each of these base classes,
+  please see the <a href="annotated.html>Compound List</a>.
+
+  \section inheritance Inherited Types
+
+  In general, the use of object inheritance enables:
+  <UL>
+  <LI> the most basic set of essential information to be defined; </LI>
+  <LI> the implementation of general, powerful routines without the need of 
+  various implementation details; and</LI>
+  <LI> the simple extension of functionality in a manner that does not
+  change the implementation of the underlying, base class methods</LI>
+  </UL>
+
+  Most observatories, instruments, and groups not only use a unique
+  file format but also associate different pieces of information with
+  the observation.  Some of these pieces of auxilliary information may
+  need to be updated or modified during a basic operations.  For
+  example, consider class B, which publicly inherits Pulsar::Archive.
+  Class B may include a passband in its auxilliary data, and may wish
+  to integrate passbands when one B is appended to another.  Class B
+  can over-ride the virtual Pulsar::Archive::append function as follows:
+  <pre>
+  void B::append (Pulsar::Archive* aptr)
+  {
+    // call the function implemented by Pulsar::Archive
+    Pulsar::archive::append (aptr);
+
+    // dynamic_cast returns a pointer only if aptr points to an instance of B
+    B* bptr = dynamic_cast<B*>(aptr);
+
+    // test if *aptr is a B
+    if (!bptr)
+      return;
+
+    // do B-specific things, such as integrate bptr->passband
+  }
+  </pre>
+
  */
 
 #ifndef __Pulsar_Archive_h
@@ -42,6 +123,7 @@
 #include <string>
 
 #include "MJD.h"
+#include "psrchive_types.h"
 
 namespace Tempo {
   class toa;
@@ -54,19 +136,15 @@ class polyco;
 //! The root level namespace, containing everything pulsar related
 namespace Pulsar {
 
-  //! Different receiver feed configuration states
-  namespace Feed {
-    enum Type { invalid=-1, Circular=0, Linear=1 };
-  }
-
-  //! Different states of the integration data
-  namespace Poln {
-    enum State { invalid, Stokes, Coherency, XXYY, Intensity, Invariant };
-  }
-
   class Integration;
 
-  //! Group of Pulsar::Integration observations with the same pulse phase
+  //! Group of Pulsar::Integration observations with the same pulse phase.
+  /*! This pure virtual base class implements the storage and manipulation
+    of a vector of Pulsar::Integration objects.  Each Pulsar::Integration
+    has similar attributes, such as centre frequency, bandwidth, and source,
+    and each contains profiles that are aligned to start on the same pulse
+    phase. */
+
   class Archive {
 
   public:

@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Integration.h,v $
-   $Revision: 1.2 $
-   $Date: 2002/04/09 17:03:04 $
+   $Revision: 1.3 $
+   $Date: 2002/04/10 08:26:13 $
    $Author: straten $ */
 
 /*
@@ -17,6 +17,7 @@
 #include <vector>
 
 #include "MJD.h"
+#include "psrchive_types.h"
 
 class profile;
 
@@ -32,13 +33,22 @@ class Stokes;
 
 namespace Pulsar {
 
+  class Profile;
+
   //! Group of Pulsar::Profile objects integrated over the same time interval
   class Integration  {
 
   public:
+    //! flag controls the amount output to stderr by Integration methods
     static bool verbose;
 
+    //! flag controls the behaviour of the invint function
+    static bool default_invint_square;
+
+    //! Null constructor simply intializes defaults
     Integration ();
+
+    //! Destructor deletes data area
     virtual ~Integration ();
 
     //! Return pointer to copy of self
@@ -54,15 +64,13 @@ namespace Pulsar {
     virtual void fscrunch (double dispersion_measure = 0.0, int nscrunch = 0);
 
     //! Integrate profiles from two polarizations into one total intensity
-    virtual void pscrunch();
+    virtual void pscrunch ();
 
     //! Transform from Stokes I,Q,U,V to the polarimetric invariant interval
-    virtual void invint (bool square_root = true,
-			 float baseline_ph=-1);
+    virtual void invint (bool square = default_invint_square);
 
     //! Rotate all profiles to remove dispersion delays between bands
-    virtual void dedisperse (double dm = 0.0, double frequency = 0.0);
-
+    virtual void dedisperse (double pfold, double dm, double frequency = 0.0);
 
     //! Find the transitions between hi and low states in a pulsed CAL
     void find_cal_transitions (int& hightolow, int& lowtohigh,
@@ -80,40 +88,33 @@ namespace Pulsar {
 
     void find_psr_levels (vector<vector<double> >& mean_high,
 			  vector<vector<double> >& mean_low) const;
-  
-    void  cal_levels (vector<Stokes>& hi, vector<Stokes>& lo) const;
-    void  psr_levels (vector<Stokes>& hi, vector<Stokes>& lo) const;
-    void  getStokes  (vector<Stokes>& S, int chan=0) const;
 
-    //
-    // adds to a vector of tempo++ toa objects
-    //
-    void toas (const sub_int& std_subint,
+    //! Computes the weighted centre frequency of an interval of sub-bands.
+    double weighted_frequency (double* weight = 0, 
+			       Poln::Measure poln = Poln::None,
+			       int band_start=0, int band_end=0) const;
+
+    void cal_levels (vector<Stokes>& hi, vector<Stokes>& lo) const;
+    void psr_levels (vector<Stokes>& hi, vector<Stokes>& lo) const;
+    void getStokes  (vector<Stokes>& S, int chan=0) const;
+
+    //! Adds to a vector of tempo++ toa objects
+    void toas (const Integration& std_subint,
 	       int nsite, const char* fname, int subint,
 	       vector<Tempo::toa>& toas, int nsubchan,
 	       int mode=0, bool wt=false);
 
-    //
-    // returns a toa from weighted-average over sub-channels
-    //
-    Tempo::toa toa (const sub_int& std_subint,
+    //! Returns a toa from weighted-average over sub-channels
+    Tempo::toa toa (const Integration& std_subint,
 		    int nsite, const char* fname, int subint,
 		    int nsubchan, int mode, bool wt);
 
-    //
-    // remove_baseline - remove the baseline from all profiles
-    //
+    //! Remove the baseline from all profiles
     virtual void remove_baseline (int poln = 0, float phase = -1.0);
 
-    //
-    // rotate - rotate each profile by time seconds
-    //
+    //! Rotate each profile by time (in seconds)
     virtual void rotate (double time);
 
-    //
-    // rotate - rotate each profile by Phase
-    //
-    virtual void rotate (const Phase& shift, double period = 0.0);
 
     //
     // RM_correct - correct the Faraday rotation of Q into U
@@ -137,25 +138,37 @@ namespace Pulsar {
 
     virtual void Q_boost (const vector<double> & hphases);
     virtual void U_boost (const vector<double> & hphases);
-    virtua  void V_boost (const vector<double> & hphases);
+    virtual void V_boost (const vector<double> & hphases);
     virtual void Q_rotation (const vector<Angle> & phases);
     virtual void U_rotation (const vector<Angle> & phases);
     virtual void V_rotation (const vector<Angle> & phases);
 
+    vector<Profile *>& operator[] (Poln::Measure poln);
+
   protected:
 
-    int nbin;	               // number of bins in a profile
-    int npol;	               // number of polarizations stored
-    int nband;	               // number of sub-bands
+    //! number of bins in each profile
+    int nbin;
+
+    //! number of polarization measurments
+    int npol;
+
+    //! number of sub-bands
+    int nband;
     
-    double centrefreq;         // Centre frequency (MHz)
-    double bw;	               // Bandwidth (MHz)
+    //! centre frequency (in MHz)
+    double centrefreq;
 
-    vector<vector<Profile*> profiles;
+    //! bandwidth (in MHz)
+    double bw;
 
-    //
-    // resize - resets the dimensions of the data area
-    //
+    //! polarimetric state of profiles
+    Poln::State state;
+
+    //! The data area
+    vector< vector<Profile*> > profiles;
+
+    //! Resizes the dimensions of the data area
     virtual void resize (int nsubint, int nband=0, int npol=0, int nbin=0);
 
     // convert Stokes IQUV to XYUV, where X=.5(I+Q) and Y=.5(I-Q).

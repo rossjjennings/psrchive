@@ -1,26 +1,23 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Profile.h,v $
-   $Revision: 1.2 $
-   $Date: 2002/04/09 17:03:04 $
+   $Revision: 1.3 $
+   $Date: 2002/04/10 08:26:13 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Profile_h
 #define __Pulsar_Profile_h
 
 #include "toa.h"
+#include "psrchive_types.h"
 
 namespace Pulsar {
 
-  namespace Poln {
-    enum Measure { invalid=-1, 
-		   I, Q, U, V,
-		   XX, YY, ReXY, ImXy,
-		   RR, LL, ReRL, ImRL,
-		   Invariant };
-  }
+  //! The basic observed quantity; the pulse profile.
+  /*! The Pulsar::Profile class implements a useful, yet minimal, set
+    of functionality required to store, manipulate, and analyse pulsar
+    profiles. */
 
-  //! the basic observed quantity; the pulse profile
   class Profile {
 
   public:
@@ -43,8 +40,8 @@ namespace Pulsar {
     //! multiplies each bin of the profile by scale
     virtual void scale (float scale);
 
-    //! rotates the profile
-    virtual void rotate (double nbins);
+    //! rotates the profile by phase (in turns)
+    virtual void rotate (double phase);
 
     //! integrate neighbouring phase bins in profile
     virtual void bscrunch (int nscrunch);
@@ -55,6 +52,9 @@ namespace Pulsar {
     //! set all amplitudes to zero
     virtual void zero();
   
+    //! calculate the signed sqrt of the absolute value of each bin 
+    virtual void square_root();
+
     //! resize the data area
     virtual void resize (int nbin);
 
@@ -86,17 +86,13 @@ namespace Pulsar {
     //! Returns the phase of the centre of the region with maximum mean
     float find_max_phase (float duty_cycle = default_duty_cycle) const;
 
-
-    //! subtracts the mean of the specified region from all bins
-    void remove_mean (float phase, float duty_cycle=default_duty_cycle);
-
-    //! calculates the mean and variance of the mean of the specified region
-    void mean (float phase, double* mean, double* varmean,
-	       float duty_cycle = default_duty_cycle) const;
-
+    //! Returns the mean of the specified region
+    double mean (float phase, float duty_cycle = default_duty_cycle,
+		 double* varmean = 0) const;
+    
     //! Returns the r.m.s. of the specified region
-    float sigma (float phase, float duty_cycle = default_duty_cycle) const;
-
+    double sigma (float phase, float duty_cycle = default_duty_cycle) const;
+    
     //! returns the signal to noise ratio of the profile
     float snr (float duty_cycle = default_duty_cycle) const;
 
@@ -125,6 +121,26 @@ namespace Pulsar {
 			   double period, int nsite, const char* fname, 
 			   int isubint, int isubband, int ipol);
 
+    //! returns a pointer to the start of the array of amplitudes
+    float* get_amps ();
+
+    //! get the centre frequency (in MHz)
+    double get_centre_frequency () { return centrefreq; }
+    //! set the centre frequency (in MHz)
+    void set_centre_frequency (double cfreq) { centrefreq = cfreq; }
+
+    //! get the weight of the profile
+    float get_weight () { return weight; }
+    //! set the weight of the profile
+    void set_weight (float wt) { weight = wt; }
+
+    //! set the amplitudes array equal to the contents of the vector
+    template <typename T>
+    void set_amps (const vector<T>& data);
+
+    //! set the state of the polarization measurement
+    virtual void set_Poln (Poln::Measure _state) { state = _state; }
+
   protected:
 
     //! fractional phase window used to find rise and fall of CAL
@@ -135,8 +151,8 @@ namespace Pulsar {
     int nbin;
     //! amplitudes at each pulse phase
     float *amps;
-    //! centre frequency of profile
-    float centrefreq;
+    //! centre frequency of profile (in MHz)
+    double centrefreq;
     //! weight of profile
     float weight;
     //! polarization measure of amplitude data
@@ -144,6 +160,14 @@ namespace Pulsar {
 
   };
 
+}
+
+template <typename T>
+void Pulsar::Profile::set_amps (const vector<T>& data)
+{
+  resize (data.size());
+  for (int ibin=0; ibin<nbin; ibin++)
+    amps[ibin] = static_cast<float>( data[ibin] );
 }
 
 #endif

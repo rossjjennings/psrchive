@@ -44,7 +44,7 @@ void nbinify (int& istart, int& iend, int nbin)
 Pulsar::Profile::Profile()
 {
   nbin   = 0;
-  state  = Poln::invalid;
+  state  = Poln::None;
   weight = 0.0;
   centrefreq = -1.0;
   amps = NULL;
@@ -67,21 +67,16 @@ void Pulsar::Profile::scale (float factor)
     amps[i]*=factor;
 }
  
-/*!  
- Rotate profile by number of bins specified by shift.  The
- profile will be rotated such that the power in bin shift will be
- found in bin zero.  ie.
-
-    t' = t + shift * period / nbin.
-
- Where:  t' is the new start time (rising edge of bin 0)
-         t  is the original start time
-         and period is the period at the time of folding
-*/
-void Pulsar::Profile::rotate (double shift)
+/*!  Rotate the profile by the specified phase.  The profile will be
+ rotated such that the power at phase will be found at phase zero.
+ ie. \f$t^\prime=t+\phi P\f$, where \f$t^\prime\f$ is the new start
+ time (rising edge of bin 0), \f$t\f$ is the original start time,
+ \f$\phi\f$ is equal to phase, and \f$P\f$ is the period at the time
+ of folding.  */
+void Pulsar::Profile::rotate (double phase)
 {
-  if ( fft_shift (nbin, amps, shift) !=0 )
-    throw_str ("Pulsar::Profile::rotate (%lf) failure", shift);
+  if ( fft_shift (nbin, amps, phase*double(nbin)) !=0 )
+    throw_str ("Pulsar::Profile::rotate (%lf) failure", phase);
 }
 
 
@@ -91,6 +86,14 @@ void Pulsar::Profile::zero()
   for (int k = 0; k < nbin; k++) amps[k] = 0;
 }
  
+void Pulsar::Profile::square_root()
+{
+  for (int ibin=0; ibin<nbin; ++ibin) {
+    float sign = (amps[ibin]>0) ? 1.0 : -1.0;
+    amps[ibin] = sign * sqrt(sign * amps[ibin]);
+  }
+}
+
 
 void Pulsar::Profile::fold (int nfold)
 {
@@ -198,13 +201,15 @@ float Pulsar::Profile::rms (int istart, int iend) const
   return sqrt(sumsq/nbin);
 }
 
-void Pulsar::Profile::mean (float phase, double* mean, double* varmean,
-			    float duty_cycle) const
+double Pulsar::Profile::mean (float phase, float duty_cycle,
+			      double* varmean) const
 {
   int start_bin = int ((phase - 0.5 * duty_cycle) * nbin);
   int stop_bin = int ((phase + 0.5 * duty_cycle) * nbin);
 
-  stats (mean, 0, varmean, start_bin, stop_bin);
+  double meanval;
+  stats (&meanval, 0, varmean, start_bin, stop_bin);
+  return meanval;
 }
 
 /*! Returns the mean, variance, and variance of the mean over the specified
@@ -305,22 +310,6 @@ float Pulsar::Profile::find_max_phase (float duty_cycle) const
 }
 
 
-/*! Offset the profile by subtracting the mean of the region centred
-  at mean_phase, and averaged over the fraction of the profile
-  specified by duty_cycle.
-
-  \param mean_phase phase at which to centre the region from which the mean
-         is calculated
-
-  \param duty_cycle fraction of the profile included in the region */
-void Pulsar::Profile::remove_mean (float mean_phase, float duty_cycle)
-{
-  int start_bin = int ((mean_phase - 0.5 * duty_cycle) * nbin);
-  int stop_bin = int ((mean_phase + 0.5 * duty_cycle) * nbin);
-
-  offset (-mean(start_bin, stop_bin));
-}
- 
 /*! Finds the power transitions in a pulsed calibrator profile, which
     is usually a square wave with 0.5 duty cycle.  Uses a window of
     width given by "Pulsar::Profile::cal_transition_window" to detect
@@ -330,7 +319,6 @@ void Pulsar::Profile::remove_mean (float mean_phase, float duty_cycle)
     \retval lowtohigh bin at which the cal turns on (from left to right)
     \retval width     number of bins in window used to find transition
 */
-
 void Pulsar::Profile::find_cal_transitions (int& hightolow, int& lowtohigh,
 					    int& width) const
 {
@@ -397,7 +385,7 @@ void Pulsar::Profile::find_cal_transitions (int& hightolow, int& lowtohigh,
 
 
 //! Returns the r.m.s. at the minimum of the profile
-float Pulsar::Profile::sigma (float phase, float duty_cycle) const
+double Pulsar::Profile::sigma (float phase, float duty_cycle) const
 {
   int start_bin = int ((phase - 0.5 * duty_cycle) * nbin);
   int stop_bin = int ((phase + 0.5 * duty_cycle) * nbin);
@@ -413,9 +401,7 @@ float Pulsar::Profile::snr (float duty_cycle) const
 
   float rms = sigma (min_phase, duty_cycle);
   double maxval = max();
-  double min=0;
-
-  mean (min_phase, &min, 0, duty_cycle);
+  double min= mean (min_phase, duty_cycle);
 
   double signal = maxval - min;
 
@@ -598,7 +584,7 @@ float Pulsar::Profile::snr (const profile& std, float& noise, bool allow_rotate)
 	return -1.0;
       if (verbose)
 	cerr << "Pulsar::Profile::snr rotate profile by " << shift << endl;
-      cpy.rotate (shift * double(nbin)); 
+      cpy.rotate (shift); 
     }
     catch (...) {
       return 0.0;
