@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Estimate.h,v $
-   $Revision: 1.12 $
-   $Date: 2003/04/27 10:43:43 $
+   $Revision: 1.13 $
+   $Date: 2003/05/02 14:25:29 $
    $Author: straten $ */
 
 #ifndef __Estimate_h
@@ -173,10 +173,6 @@ class MeanEstimate
   { U var=1.0/inv_var; return Estimate<T,U> (norm_val*var, var); }
 
 };
-
-#ifdef PGPLOT
-#include "pgplot_Estimate.h"
-#endif
 
 #endif
 
