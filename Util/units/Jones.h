@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Jones.h,v $
-   $Revision: 1.8 $
-   $Date: 2003/08/19 21:45:40 $
+   $Revision: 1.9 $
+   $Date: 2003/09/03 13:46:48 $
    $Author: straten $ */
 
 #ifndef __Jones_H
@@ -45,8 +45,10 @@ public:
 
   //! Set this instance equal to another Jones<U> instance
   template<typename U> Jones& operator = (const Jones<U>& s)
-    { j11=complex<T>(s.j11); j12=complex<T>(s.j12);
-      j21=complex<T>(s.j21); j22=complex<T>(s.j22); return *this; }
+    { j11=complex<T>(s.j11.real(), s.j11.imag()); 
+      j12=complex<T>(s.j12.real(), s.j12.imag());
+      j21=complex<T>(s.j21.real(), s.j21.imag()); 
+      j22=complex<T>(s.j22.real(), s.j22.imag()); return *this; }
 
   //! Add another Jones<T> instance to this one
   Jones& operator += (const Jones& s)
