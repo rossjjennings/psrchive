@@ -25,14 +25,14 @@ treduce.OBJS = xtinit.o xtmac.o xtproc.o xtlplt.o xtinplot.o xtshdr.o    \
 PROGRAMS =    calinfo.C align.C amps.C chanprep.C  \
 	      mel.C newname.C oneprof.C plotsub.C    \
 	      tadd.C calfbar.C modhead.C   \
-	      plot_gry_diff.C pepoch.C freduce.C \
+	      plot_gry_diff.C freduce.C \
 	      cleanarch.C fixhdr.C crm.C  \
 	      crh.C psrhead.C autotadd.C \
 	      fakedat.C plk.C stokes_plt.C \
 	      headsum.C treduce.C \
-              tcombine2.C ratio.C fixprf.C xformprof.C
+              tcombine2.C ratio.C fixprf.C xformprof.C 
 
-NOT_WORKING = bandpass.C detail.C xtoa.C bin_ph.C corflux.C flux.C vargain.C
+NOT_WORKING = bandpass.C detail.C xtoa.C bin_ph.C corflux.C flux.C vargain.C pepoch.C wtplt.C
 
 include $(LOCAL_ROOT)/include/Makefile.extended
 
