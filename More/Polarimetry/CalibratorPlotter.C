@@ -20,8 +20,8 @@ Pulsar::CalibratorPlotter::~CalibratorPlotter ()
 }
 
 //! PGPLOT the calibrator model parameters as a function of frequency
-void Pulsar::CalibratorPlotter::plot (const Calibrator* calibrator)
-{ try {
+void Pulsar::CalibratorPlotter::plot (const Calibrator* calibrator) try {
+
   if (!calibrator)
     return;
 
@@ -36,7 +36,7 @@ void Pulsar::CalibratorPlotter::plot (const Calibrator* calibrator)
 catch (Error& error) {
   throw error += "Pulsar::CalibratorPlotter::plot(Calibrator*)";
 }
-}
+
 
 void Pulsar::CalibratorPlotter::plot (const Calibrator::Info* info,
 				      unsigned nchan, double cfreq, double bw)
