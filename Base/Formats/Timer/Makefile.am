@@ -1,9 +1,7 @@
 #############################################################################
 # include "Master" makefile which defines important parameters
-include $(PSRHOME)/include/Makefile.$(LOGIN_ARCH)
-
-PWDIR      = ${PSRHOME}/soft/tas/archive
-INCLUDES   = timer.h archive.h mini.h band.h main_hdr.h convert_endian.h
+LOCAL_ROOT = ../../../
+include ${LOCAL_ROOT}/include/Makefile.${LOGIN_ARCH}
 
 LIBRARY    = libarchive.a
 LIB_C_SRCS = pg_plot_gnu.C profile.C sub_int.C archive.C                \
@@ -45,4 +43,4 @@ NOT_WORKING     = bandpass.C detail.C
 
 PROGRAMS = $(ESSENTIAL_SRCS) $(OTHER_SRCS)
 
-include $(PSRHOME)/include/Makefile.extended
+include $(LOCAL_ROOT)/include/Makefile.extended
