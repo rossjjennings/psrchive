@@ -47,8 +47,6 @@ void Pulsar::Profile::find_peak_edges (int& rise, int& fall, bool choose) const
     cerr << "Pulsar::Profile::find_peak_edges nbin=" << nbin <<
       " baseline duty_cycle=" << default_duty_cycle << endl;
 
-  verbose = true;
-
   // WvS - if the calculation of the baseline is to be modified, the value
   // of Profile::default_duty_cycle should be set.
   float min_amp = mean ( find_min_phase() );
@@ -148,5 +146,8 @@ void Pulsar::Profile::find_peak_edges (int& rise, int& fall, bool choose) const
     rise = int ((phase - 0.2) * nbin);
     fall = int ((phase + 0.2) * nbin);
   }
+
+  rise %= nbin;
+  fall %= nbin;
 
 }
