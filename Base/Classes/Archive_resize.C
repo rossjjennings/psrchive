@@ -11,7 +11,7 @@
 
 void Pulsar::Archive::resize (int nsubint, int npol, int nchan, int nbin)
 {
-  int cur_nsub = get_nsubint();
+  int cur_nsub = subints.size();
   int cur_npol = get_npol();
   int cur_nchan = get_nchan();
   int cur_nbin = get_nbin();
