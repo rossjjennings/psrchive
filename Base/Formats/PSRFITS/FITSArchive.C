@@ -78,6 +78,15 @@ Pulsar::FITSArchive::FITSArchive (const FITSArchive& arch,
   FITSArchive::copy (arch, subints);
 }
 
+
+void Pulsar::FITSArchive::copy (const Archive& archive){
+  vector<unsigned> all_subints(archive.get_nsubint());
+  for( unsigned i=0; i<all_subints.size(); i++)
+    all_subints[i] = i;
+
+  FITSArchive::copy(archive,all_subints);
+}
+
 void Pulsar::FITSArchive::copy (const Archive& archive, 
 				const vector<unsigned>& subints)
 {
@@ -86,7 +95,7 @@ void Pulsar::FITSArchive::copy (const Archive& archive,
 
   if (this == &archive)
     return;
-
+  
   Archive::copy (archive, subints);
 
   if (verbose)

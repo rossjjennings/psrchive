@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/PSRFITS/Pulsar/FITSArchive.h,v $
-   $Revision: 1.18 $
-   $Date: 2003/11/08 23:35:11 $
+   $Revision: 1.19 $
+   $Date: 2003/12/16 10:04:31 $
    $Author: ahotan $ */
 
 #ifndef __Pulsar_FITSArchive_h
@@ -71,9 +71,15 @@ namespace Pulsar {
     //! destructor
     ~FITSArchive ();
 
-    //! Copy the contents of an Archive into self
-    void copy (const Archive& archive,
-	       const vector<unsigned>& subints = none_selected);
+    //! Copy the entire contents of an Archive into self
+    virtual void copy(const Archive& archive);
+    
+    /*! Copy a subset of an Archive into self, where the
+      subset can contain anywhere between none and all of
+      integrations in the source Archive */
+    
+    virtual void copy (const Archive& archive,
+		       const vector<unsigned>& subints);
     
     //! Return a new copy-constructed FITSArchive instance
     Archive* clone () const;
