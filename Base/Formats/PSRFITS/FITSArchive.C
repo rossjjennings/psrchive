@@ -1260,7 +1260,7 @@ Pulsar::FITSArchive::load_Integration (const char* filename, unsigned isubint)
   
   // Set up the data vector, only Pulsar::Archive base class is friend
 
-  resize (integ);
+  resize_Integration (integ);
 
   // Load the profile weights
 
