@@ -1,5 +1,5 @@
 //
-// $Id: pav.C,v 1.65 2004/01/02 00:10:50 ahotan Exp $
+// $Id: pav.C,v 1.66 2004/01/05 01:53:00 ahotan Exp $
 //
 // The Pulsar Archive Viewer
 //
@@ -85,7 +85,8 @@ void usage ()
     " -n        Plot S/N against frequency\n"
     " -S        Plot Stokes parameters in the Manchester style\n"
     " -X        Plot cal amplitude and phase vs frequency channel\n"
-    " -Y        Plot sub-integrations against pulse phase\n"
+    " -Y        Plot colour map of sub-integrations against pulse phase\n"
+    " -R        Plot stacked sub-integration profiles\n"
     " -L        Find the width of the pulse profile\n"
     " -j        Display a simple dynamic spectrum image\n"
     " -u        Display morphological difference (requires a standard)\n"
@@ -159,6 +160,7 @@ int main (int argc, char** argv)
   bool psas = false;
   bool std_given = false;
   bool mdiff = false;
+  bool stacked = false;
   bool cbppo = false;
   bool cbpao = false;
   bool cblpo = false;
@@ -177,7 +179,7 @@ int main (int argc, char** argv)
   int c = 0;
   
   const char* args = 
-    "AaBb:Cc:DdEeFf:GgH:hI:iJjK:k:LlM:mN:nO:oP:pQq:r:Ss:Tt:uVvwWXx:Yy:Zz:";
+    "AaBb:Cc:DdEeFf:GgH:hI:iJjK:k:LlM:mN:nO:oP:pQq:Rr:Ss:Tt:uVvwWXx:Yy:Zz:";
   
   while (1) {
     
@@ -265,7 +267,7 @@ int main (int argc, char** argv)
       plotter.set_subint( atoi (optarg) );
       break;
     case 'i':
-      cout << "$Id: pav.C,v 1.65 2004/01/02 00:10:50 ahotan Exp $" << endl;
+      cout << "$Id: pav.C,v 1.66 2004/01/05 01:53:00 ahotan Exp $" << endl;
       return 0;
 
     case 'j':
@@ -321,6 +323,10 @@ int main (int argc, char** argv)
     case 'r':
       phase = atof (optarg);
       plotter.set_phase (phase);
+      break;
+
+    case 'R':
+      stacked = true;
       break;
 
     case 'n':
@@ -607,15 +613,19 @@ int main (int argc, char** argv)
     }
 
     if (centre) {
-      cerr << "pav centre archive" << endl;
-      archive -> centre();
+      archive->centre();
+    }
+
+    if (stacked) {
+      plotter.line_phase_subints(archive);
     }
 
     if (mdiff) {
       if (std_prof) {
 	cpg_next();
 	Pulsar::Profile* mdp = 
-	  archive->get_Profile(plotter.get_subint(),plotter.get_pol(),plotter.get_chan())->
+	  archive->get_Profile(plotter.get_subint(),
+			       plotter.get_pol(),plotter.get_chan())->
 	  morphological_difference(*std_prof);
 	mdp->display(0,0,1,0,1,1.0,false,true);
 	delete mdp;
@@ -629,7 +639,7 @@ int main (int argc, char** argv)
 
     if (baseline_spectrum) {
       cpg_next();
-      plotter.baseline_spectrum (archive);
+      plotter.baseline_spectrum(archive);
     }
 
     if (pa_scatter) {
