@@ -9,7 +9,11 @@ LIBRARY  := libeph.a
 LIB_SRCS := ephio_c.c ephio_def.c ephio.f \
 	psrephem.C set_epoch.C tex.C derived.C
 
-PROGRAMS := keys2c.c keys2fort.c eph2upd.f ephaux.C ephepo.C ephtex.C
+PROGRAMS := keys2c.c keys2fort.c ephaux.C ephepo.C ephtex.C
+
+# This PROGRAM no longer works under gcc 3.x.
+# eph2upd.f
+
 LDFLAGS += $(F77LIBS) -lm
 
 keys2c.LDFLAGS := $(LDFLAGS) $(F77LIBS) -lm
