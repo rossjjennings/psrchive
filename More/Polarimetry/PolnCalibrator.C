@@ -83,10 +83,26 @@ bool Pulsar::PolnCalibrator::get_Transformation_valid (unsigned ichan) const
     const_cast<PolnCalibrator*>(this)->calculate_transformation();
 
   if (ichan >= transformation.size())
-    throw Error (InvalidParam, "Pulsar::PolnCalibrator::get_Transformation",
+    throw Error (InvalidParam,
+		 "Pulsar::PolnCalibrator::get_Transformation_valid",
 		 "ichan=%d >= nchan=%d", ichan, transformation.size());
 
   return transformation[ichan];
+}
+
+//! Return the system response for the specified channel
+void Pulsar::PolnCalibrator::set_Transformation_invalid (unsigned ichan)
+{
+  if (transformation.size() == 0)
+    const_cast<PolnCalibrator*>(this)->calculate_transformation();
+
+  if (ichan >= transformation.size())
+    throw Error (InvalidParam,
+		 "Pulsar::PolnCalibrator::set_Transformation_invalid",
+		 "ichan=%d >= nchan=%d", ichan, transformation.size());
+
+  transformation[ichan] = 0;
+
 }
 
 //! Return the system response for the specified channel
@@ -145,13 +161,19 @@ void Pulsar::PolnCalibrator::build (unsigned nchan)
 
   for (unsigned ichan=0; ichan < response.size(); ichan++)
     if (transformation[ichan])  {
+
       if ( norm(det( transformation[ichan]->evaluate() )) < 1e-9 ) {
-        cerr << "Pulsar::PolnCalibrator::build ichan=" << ichan <<
-                " faulty response" << endl;
-         response[ichan] = Jones<float>::identity();
+
+	if (verbose)
+	  cerr << "Pulsar::PolnCalibrator::build ichan=" << ichan <<
+	    " faulty response" << endl;
+
+	response[ichan] = Jones<float>::identity();
+
       }
       else
          response[ichan] = inv( transformation[ichan]->evaluate() );
+
     }
     else
       response[ichan] = Jones<float>::identity();
@@ -343,5 +365,5 @@ int Pulsar::PolnCalibrator::Info::get_graph_marker (unsigned iclass,
 
 Pulsar::Calibrator::Info* Pulsar::PolnCalibrator::get_Info () const
 {
-  return new PolnCalibrator::Info (this);
+  return PolnCalibrator::Info::create (this);
 }
