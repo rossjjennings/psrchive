@@ -1,6 +1,5 @@
 #include <string.h>
 #include <unistd.h>
-#include <getopt.h>
 #include <libgen.h>
 #include "dirutil.h"
 #include <time.h>
@@ -8,6 +7,8 @@
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
 #include "Pulsar/Profile.h"
+#include "Pulsar/getopt.h"
+
 #include "Error.h"
 
 // Extensions this program understands
@@ -137,7 +138,7 @@ int main (int argc, char *argv[]) {
       Pulsar::Archive::set_verbosity(3);
       break;
     case 'i':
-      cout << "$Id: pam.C,v 1.23 2003/11/13 11:31:36 ahotan Exp $" << endl;
+      cout << "$Id: pam.C,v 1.24 2003/12/02 04:00:37 ahotan Exp $" << endl;
       return 0;
     case 'm':
       save = true;
