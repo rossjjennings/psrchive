@@ -13,6 +13,7 @@
  * ************************************************************************* */
 
 void F772C(rwepn) (char* filename, int* rw, int* recno, int* padout, int len);
+int F772C(nepnrec) (char* filename, int len);
 
 extern epn_header_line1 F772C(epn1);
 extern epn_header_line2 F772C(epn2);
@@ -198,5 +199,37 @@ int crwepn ( const char* filename, int readwri, int recno, int padout,
   /* fprintf (stderr, "crwepn return\n"); */
 
   return 0;
+}
+
+void epn_dump (const epn_header_line1* line1,
+               const epn_header_line2* line2,
+               const epn_header_line3* line3,
+               const epn_header_line4* line4,
+               const epn_header_line5* line5)
+{
+  fprintf (stderr, "line 5: npol=%d\n", line5->npol);
+  fprintf (stderr, "line 5: nfreq=%d\n", line5->nfreq);
+  fprintf (stderr, "line 5: nbin=%d\n", line5->nbin);
+  fprintf (stderr, "line 5: tbin=%lf\n", line5->tbin);
+  fprintf (stderr, "line 5: nint=%d\n", line5->nint);
+  fprintf (stderr, "line 5: ncal=%d\n", line5->ncal);
+}
+
+int cnepnrec (const char* filename)
+{
+  /* for dealing with filename string */
+  unsigned i, length = 0;
+  char f77_filename [80];
+
+  if (!filename)
+    return -1;
+
+  /* space-terminate the filename */
+  length = strlen (filename);
+  strcpy (f77_filename, filename);
+  for (i=length; i<80; i++)
+    f77_filename[i] = ' ';
+
+  return F772C(nepnrec) (f77_filename, length);
 }
 

@@ -212,15 +212,12 @@ void Pulsar::EPNArchive::set_npol (unsigned numpol)
 
 unsigned Pulsar::EPNArchive::get_nsubint () const
 {
-  if (line5.nint < 0)
-    return 0;
-
-  return line5.nint;
+  return nsubint;
 }
 
-void Pulsar::EPNArchive::set_nsubint (unsigned nsubint)
+void Pulsar::EPNArchive::set_nsubint (unsigned _nsubint)
 {
-  line5.nint = nsubint;
+  nsubint = _nsubint;
 }
 
 double Pulsar::EPNArchive::get_bandwidth () const
@@ -380,14 +377,25 @@ void Pulsar::EPNArchive::read_record (const char* filename, unsigned record)
     throw Error (InvalidParam, "Pulsar::EPNArchive::read_record",
 		 "error calling crwpen");
       
-  if (verbose == 3)
+  if (verbose == 3)  {
     cerr << "Pulsar::EPNArchive::read_record rwepn called" << endl;
+    epn_dump (&line1, &line2, &line3, &line4, &line5);
+  }
 
   current_record = record;
 }
 
 void Pulsar::EPNArchive::load_header (const char* filename)
 {
+  int nrec = cnepnrec (filename);
+  if (nrec < 0)
+    nsubint = 0;
+  else
+    nsubint = nrec;
+
+  if (verbose == 3)
+    cerr << "Pulsar::EPNArchive::load_header nsubint=" << nsubint << endl;
+
   read_record (filename, 1);
 
   if (get_npol() == 4)

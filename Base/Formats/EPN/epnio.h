@@ -112,6 +112,15 @@ extern "C" {
                epn_block_subheader_line2* sub_line2,
                epn_data_block* data );
 
+  /* C wrapper of the Fortran nepnrec function */
+  int cnepnrec (const char* filename);
+
+  void epn_dump (const epn_header_line1* line1,
+                 const epn_header_line2* line2,
+                 const epn_header_line3* line3,
+                 const epn_header_line4* line4,
+                 const epn_header_line5* line5);
+
 #ifdef __cplusplus
 }
 #endif

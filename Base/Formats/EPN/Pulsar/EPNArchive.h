@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/EPN/Pulsar/EPNArchive.h,v $
-   $Revision: 1.4 $
-   $Date: 2004/07/12 12:40:57 $
+   $Revision: 1.5 $
+   $Date: 2004/11/13 08:17:40 $
    $Author: straten $ */
 
 #ifndef __EPN_Archive_h
@@ -194,6 +194,9 @@ namespace Pulsar {
 
     //! The state
     Signal::State state;
+
+    //! The number of sub-integrations
+    unsigned nsubint;
 
     //! Set the number of pulsar phase bins
     virtual void set_nbin (unsigned numbins);
