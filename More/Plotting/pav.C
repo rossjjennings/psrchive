@@ -1,5 +1,5 @@
 //
-// $Id: pav.C,v 1.26 2003/02/16 00:52:20 pulsar Exp $
+// $Id: pav.C,v 1.27 2003/02/16 08:35:06 pulsar Exp $
 //
 // The Pulsar Archive Viewer
 //
@@ -61,6 +61,7 @@ void usage ()
     " -s        SNR frequency spectrum plot\n"
     " -g        Position angle across a profile\n"
     " -B        Off-pulse bandpass\n"
+    " -X        Plot cal amplitude and phase vs frequency channel\n"
        << endl;
 }
 
@@ -91,7 +92,8 @@ int main (int argc, char** argv)
   bool snrplot = false;
   bool PA = false;
   bool bandpass = false;
-  
+  bool calinfo = false;  
+
   char* metafile = NULL;
   
   Pulsar::Plotter plotter;
@@ -137,7 +139,7 @@ int main (int argc, char** argv)
       usage ();
       return 0;
     case 'i':
-      cout << "$Id: pav.C,v 1.26 2003/02/16 00:52:20 pulsar Exp $" << endl;
+      cout << "$Id: pav.C,v 1.27 2003/02/16 08:35:06 pulsar Exp $" << endl;
       return 0;
     case 'm':
       // macro file
@@ -217,6 +219,9 @@ int main (int argc, char** argv)
       break;
     case 'g':
       PA = true;
+      break;
+    case 'X':
+      calinfo = true;
       break;
     case 'B':
       bandpass = true;
@@ -327,6 +332,16 @@ int main (int argc, char** argv)
       cpgsvp (0.1, 0.9, 0.1, 0.9);
       cpgeras();
       plotter.bandpass(archive);
+      cpgend();
+      exit(0);
+    }
+
+    if (calinfo) {
+      cpgbeg (0, "?", 0, 0);
+      cpgask(1);
+      cpgsvp (0.1, 0.9, 0.1, 0.9);
+      cpgeras();
+      plotter.cal_plot(archive);
       cpgend();
       exit(0);
     }
