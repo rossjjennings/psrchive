@@ -30,6 +30,8 @@ Pulsar::PolnCalibrator::PolnCalibrator (Archive* archive)
   // store the Receiver Extension, if any
   receiver = archive->get<Receiver>();
 
+  filenames.push_back( archive->get_filename() );
+
 }
 
 //! Copy constructor
