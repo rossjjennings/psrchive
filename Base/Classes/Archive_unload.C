@@ -11,6 +11,10 @@
   filename in the same path as the requested output file. */
 void Pulsar::Archive::unload (const char* filename)
 {
+  if( verbose )
+    fprintf(stderr,"In Pulsar::Archive::unload() with filename='%s' and unload_filename='%s'\n",
+	    filename,unload_filename.c_str());
+  
   string unload_to_filename = unload_filename;
 
   if (filename)
@@ -46,6 +50,7 @@ void Pulsar::Archive::unload (const char* filename)
 
   // rename the temporary file with the requested filename
   int ret = rename (temp_filename.c_str(), unload_to_filename.c_str());
+
   if (ret < 0)
     throw Error (FailedSys, "Pulsar::Archive::unload", "failed rename");
 
