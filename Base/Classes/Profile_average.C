@@ -63,77 +63,101 @@ const Pulsar::Profile& Pulsar::Profile::average (const Profile& profile,
   individual profiles involved.
 */
 
-Pulsar::Profile* Pulsar::Profile::morphological_difference (const Profile& profile,
-							    bool scale_by_bins)
+Pulsar::Profile*
+Pulsar::Profile::morphological_difference (const Profile& profile)
 {
   if (get_nbin() != profile.get_nbin())
     throw Error (InvalidRange, "Pulsar::Profile::morphological_difference",
-		 "incompatible number of phase bins");
+		 "nbin mismatch");
 
   Reference::To<Pulsar::Profile> temp1 = clone();
   Reference::To<Pulsar::Profile> temp2 = profile.clone();
-
-  float ephase, snrfft, esnrfft; 
+  
+  // First it is essential to align the profiles in phase, so that our
+  // subtraction occurs between the equivalent bins in both profiles.
+  
+  float ephase, snrfft, esnrfft;
   double phase;
   
+  // First try the FFT based shift routine and if it fails, revert
+  // to an incoherent cross correlation, accurate only to the
+  // nearest bin.
+  
   try {
-     phase = temp1->shift (*temp2, ephase, snrfft, esnrfft);
+    phase = temp1->shift (*temp2, ephase, snrfft, esnrfft);
   }
   catch (Error& error) {
-    cerr << "Profile::morphological_difference FFT shift failed." << endl;
-    cerr << "  Trying simple cross correlation..." << endl;
-
+    cerr << "Pulsar::Profile::morphological_difference FFT shift failed" 
+	 << endl;
+    cerr << "  Trying simple cross correlation instead..." << endl;
+    
     Reference::To<Pulsar::Profile> ptr = clone();
     
     *ptr -= ptr->mean(ptr->find_min_phase(0.15));
     ptr->correlate(temp2);
     phase = ptr->find_max_phase(0.15);
   }
+  
+  // Perform the rotation in phase
 
   temp1->rotate(phase);
-
+  
   float minphs = 0.0;
+
+  // Remove the baselines from our reference and subject profiles
 
   minphs = temp1->find_min_phase(0.6);
   *temp1 -= (temp1->mean(minphs));
 
   minphs = temp2->find_min_phase(0.6);
   *temp2 -= (temp2->mean(minphs));
-
-  if (!scale_by_bins) { 
-    float ratio = 100.0 / temp1->sum();
-    *temp1 *= ratio;
-    ratio = 100.0 / temp2->sum();
-    *temp2 *= ratio;
-    
-    float* amps1 = temp1->get_amps();
-    float* amps2 = temp2->get_amps();
-    
-    for (unsigned i = 0; i < temp1->get_nbin(); i++) {
-      amps1[i] = amps1[i] - amps2[i];
-    }
-  }
-  else {
-    float ratio = temp1->sum() / temp2->sum();
-    *temp2 *= ratio;
   
-    float* amps1 = temp1->get_amps();
-    float* amps2 = temp2->get_amps();
-    float temp = 0.0;
+  // Perform the difference operation, using one of the following
+  // possible schemes
+  
+  // This section scales the total flux under the profile to
+  // be (arbitrarily) 100 units for both the reference and
+  // the subject.
+  
+  float ratio = 100.0 / temp1->sum();
+  *temp1 *= ratio;
+  ratio = 100.0 / temp2->sum();
+  *temp2 *= ratio;
+  
+  // End section
+  
+  /*
     
-    int rise = 0;
-    int fall = 0;
+  // This section normalises the standard deviation in the
+  // baseline of the reference and subject profiles to be
+  // (arbitrarily) 10 units. This normalisation should be
+  // more susceptible to variations in intrinsic brightness
+  // but perhaps more physically meaningful?
+  
+  float phs1 = temp1->find_min_phase();
+  float phs2 = temp2->find_min_phase();
+  
+  double mean    = 0.0;
+  double var     = 0.0;
+  double varmean = 0.0;
+  
+  temp1->stats(phs1,&mean, &var, &varmean);
+  *temp1 *= 10/sqrt(var);
+  
+  temp2->stats(phs2,&mean, &var, &varmean);
+  *temp2 *= 10/sqrt(var);
+  
+  // End section
+  
+  */
 
-    temp1->find_peak_edges(rise, fall);
-    
-    for (int i = 0; i < int(temp1->get_nbin()); i++) {
-      temp = amps1[i];
-      amps1[i] = amps1[i] - amps2[i];
-      if ( i > rise && i < fall )
-	amps1[i] /= temp;
-      else
-	amps1[i] = 0.0;
-    }
+  // Subtract the reference from the subject
+  
+  float* amps1 = temp1->get_amps();
+  float* amps2 = temp2->get_amps();
+  
+  for (unsigned i = 0; i < temp1->get_nbin(); i++) {
+    amps1[i] = amps1[i] - amps2[i];
   }
 
   return temp1.release();

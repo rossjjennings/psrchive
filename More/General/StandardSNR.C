@@ -45,11 +45,14 @@ float Pulsar::StandardSNR::get_morph_snr (const Profile* profile)
   double var     = 0.0;
   double varmean = 0.0;
 
+  // Find the statistics of the difference profile
+
   diff->stats(&mean, &var, &varmean);
+  double stddev1 = sqrt(var);
 
-  double stddev = sqrt(var);
+  // Now it gets interesting... How exactly is S/N defined?
 
-  double base_flux = pcopy->get_nbin() * stddev;
+  double base_flux = pcopy->get_nbin() * stddev1;
   double puls_flux = pcopy->sum();
 
   if (base_flux < 0.0000001)
