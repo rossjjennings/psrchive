@@ -91,19 +91,21 @@ int main (int argc, char** argv)
     archive = Pulsar::Archive::load( filenames[ifile] );
 
     if (verbose)
-      cerr << "pacv: Constructing SingleAxisCalibrator" << endl;
+      cerr << "pacv: Constructing Calibrator" << endl;
 
     if (single_axis) {
       calibrator = new Pulsar::SingleAxisCalibrator (archive);
       plotter = new Pulsar::SingleAxisCalibratorPlotter;
     }
-    else
+    else {
       calibrator = new Pulsar::PolarCalibrator (archive);
+      plotter = new Pulsar::PolarCalibratorPlotter;
+    }
 
     calibrator -> build();
 
     if (verbose)
-      cerr << "pacv: Plotting SingleAxisCalibrator" << endl;
+      cerr << "pacv: Plotting Calibrator" << endl;
 
     plotter->plot (calibrator);
 
