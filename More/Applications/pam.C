@@ -28,6 +28,8 @@ int main (int argc, char *argv[]) {
   bool bscr = false;
   int bscr_fac = 0;
 
+  bool reset_weights = false;
+
   bool smear = false;
   float smear_dc = 0.0;
 
@@ -35,7 +37,7 @@ int main (int argc, char *argv[]) {
 
   int gotc = 0;
   
-  while ((gotc = getopt(argc, argv, "hvVxe:TFpt:f:b:s:")) != -1) {
+  while ((gotc = getopt(argc, argv, "hvVxe:TFpt:f:b:s:z")) != -1) {
     switch (gotc) {
     case 'h':
       cout << "A program for manipulating Pulsar::Archives"            << endl;
@@ -52,6 +54,7 @@ int main (int argc, char *argv[]) {
       cout << "  -f [int]         Frequency scrunch by this factor"    << endl;
       cout << "  -b [int]         Bin scrunch by this factor"          << endl;
       cout << "  -s [float]       Smear with this duty cycle"          << endl;
+      cout << "  -z               Reset all profile weights to 1.0"    << endl;
       return (-1);
       break;
     case 'v':
@@ -110,6 +113,9 @@ int main (int argc, char *argv[]) {
 	return -1;
       }
       break;
+    case 'z':
+      reset_weights = true;
+      break;
     default:
       cout << "Unrecognised option" << endl;
     }
@@ -133,27 +139,54 @@ int main (int argc, char *argv[]) {
 	cerr << "Loading " << archives[i] << endl;
       
       arch = Pulsar::Archive::load(archives[i]);
+
+      if (reset_weights) {
+	arch->uniform_weight();
+	if (verbose)
+	  cout << "All profile weights set to 1.0" << endl;
+      }
       
       if (tscr) {
-	if (tscr_fac > 0)
+	if (tscr_fac > 0) {
 	  arch->tscrunch(tscr_fac);
-	else
+	  if (verbose)
+	    cout << arch->get_filename() << " tscrunched by a factor of " 
+		 << tscr_fac << endl;
+	}
+	else {
 	  arch->tscrunch();
+	  if (verbose)
+	    cout << arch->get_filename() << " tscrunched" << endl;
+	}
       }
       
       if (fscr) {
-	if (fscr_fac > 0)
+	if (fscr_fac > 0) {
 	  arch->fscrunch(fscr_fac);
-	else
+	  if (verbose)
+	    cout << arch->get_filename() << " fscrunched by a factor of " 
+		 << fscr_fac << endl;
+	}
+	else {
 	  arch->fscrunch();
+	  if (verbose)
+	    cout << arch->get_filename() << " fscrunched" << endl;
+	}
       }
       
-      if (bscr)
+      if (bscr) {
 	arch->bscrunch(bscr_fac);
+	if (verbose)
+	  cout << arch->get_filename() << " bscrunched by a factor of " 
+	       << bscr_fac << endl;
+      }
       
-      if (pscr)
+      if (pscr) {
 	arch->pscrunch();
-      
+	if (verbose)
+	  cout << arch->get_filename() << " pscrunched" << endl;
+      }      
+
       if (smear) {
 	for (unsigned i = 0; i < arch->get_nsubint(); i++) {
 	  for (unsigned j = 0; j < arch->get_npol(); j++) {
@@ -167,7 +200,7 @@ int main (int argc, char *argv[]) {
       if (update) {
 	if (ext.empty()) {
 	  arch->unload();
-	  cout << "Archive " << arch->get_filename() << " updated on disk" << endl;
+	  cout << arch->get_filename() << " updated on disk" << endl;
 	}
 	else {
 	  string the_old = arch->get_filename();
