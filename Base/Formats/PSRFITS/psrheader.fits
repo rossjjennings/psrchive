@@ -7,7 +7,7 @@ COMMENT   Astrophysics Supplement Series v44/p363, v44/p371, v73/p359, v73/p365.
 COMMENT   Contact the NASA Science Office of Standards and Technology for the
 COMMENT   FITS Definition document #100 and other FITS information.
 COMMENT
-HDRVER  = '1.21            '   / Header version 
+HDRVER  = '1.23            '   / Header version 
 DATE    = '                '   / File creation date (YYYY-MM-DDThh:mm:ss UTC)
 OBSERVER= '                '   / Observer name(s)
 PROJID  = '                '   / Project name
@@ -17,9 +17,9 @@ ANT_Y   = *                    / [m] Antenna ITRF Y-coordinate (D)
 ANT_Z   = *                    / [m] Antenna ITRF Z-coordinate (D)
 FRONTEND= '                '   / Rx and feed ID
 FD_POLN = '                '   / LIN or CIRC
-XPOL_ANG= *                    / [deg] Angle of X-probe wrt platform zero (E)
-YPOL_ANG= *                    / [deg] Angle of Y-probe wrt platform zero (E)
-CAL_ANG = *                    / [deg] Angle of calibrator wrt zero (E)
+FD_HAND = *                    / +/- 1. +1 is LIN:A=X,B=Y, CIRC:A=L,B=R (I)
+FD_SANG = *                    / [deg] FA of E vect for equal sig in A&B (E)
+FD_XYPH = *                    / [deg] Phase of A^* B for injected cal (E)
 BACKEND = '                '   / Backend ID
 BECONFIG= '                '   / Backend configuration file name
 TCYCLE  = *                    / [s] Correlator cycle time (D)
