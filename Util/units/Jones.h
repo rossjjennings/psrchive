@@ -1,15 +1,14 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Jones.h,v $
-   $Revision: 1.6 $
-   $Date: 2003/02/24 18:04:53 $
+   $Revision: 1.7 $
+   $Date: 2003/02/25 09:48:20 $
    $Author: straten $ */
 
 #ifndef __Jones_H
 #define __Jones_H
 
 #include <complex>
-#include <stdlib.h>
 
 #include "psr_cpp.h"
 
@@ -135,19 +134,26 @@ public:
     { s.j11=-s.j11; s.j12=-s.j12; s.j21=-s.j21; s.j22=-s.j22; return s; }
 
   //! Returns reference to the value of the matrix at j(ir,ic)
-  complex<T>& j (int ir, int ic)
+  complex<T>& j (unsigned ir, unsigned ic)
   { complex<T>* val = &j11; return val[ir*2+ic]; }
   
   //! Returns const reference to the value of the matrix at j(ir,ic)
-  const complex<T>& j (int ir, int ic) const
+  const complex<T>& j (unsigned ir, unsigned ic) const
     { const complex<T>* val = &j11; return val[ir*2+ic]; }
+
+  //! Alternative access to elements
+  complex<T>&  operator [] (unsigned n)
+  { complex<T>* val = &j11; return val[n]; }
+
+  //! Alternative access to elements 
+  const complex<T>& operator [] (unsigned n) const
+  { const complex<T>* val = &j11; return val[n]; }
 
   //! The identity matrix
   static const Jones& identity();
 
-  //! Return a random Jones matrix
-  static const Jones random (T scale);
-
+  //! Dimension of data
+  unsigned size () { return 4; }
 };
 
 //! The identity matrix
@@ -159,20 +165,6 @@ const Jones<T>& Jones<T>::identity ()
   return I;
 }
 
-
-inline double randouble (double scale)
-{
-  return ( double(rand()) - 0.5*double(RAND_MAX) ) * 2*scale / RAND_MAX;
-}
-
-template <class T>
-const Jones<T> Jones<T>::random (T scale)
-{
-  return Jones<T> (complex<T>(randouble(scale), randouble(scale)),
-		   complex<T>(randouble(scale), randouble(scale)),
-		   complex<T>(randouble(scale), randouble(scale)),
-		   complex<T>(randouble(scale), randouble(scale)));
-}
 
 //! Multiply another Jones<T> instance into this one (this=this*j)
 template<typename T>
