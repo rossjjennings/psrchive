@@ -33,13 +33,14 @@ xserve_summary_SOURCES		= xserve_summary.C
 #loopy_SOURCES			= loopy.C
 
 TESTS = test_coord test_Cartesian test_MJD test_Angle test_ReferenceFit \
-	test_Header test_VectorInfo test_CommandParser test_Sortable
+	test_Header test_VectorInfo
 
-check_PROGRAMS = $(TESTS)
+check_PROGRAMS = $(TESTS) test_CommandParser test_Sortable
 
 test_Cartesian_SOURCES		= test_Cartesian.C
 test_MJD_SOURCES		= test_MJD.C
 test_Angle_SOURCES		= test_Angle.C
+test_Angle_LDADD		= $(LDADD) @SLA_LIBS@
 test_ReferenceFit_SOURCES	= test_ReferenceFit.C
 test_Header_SOURCES		= test_Header.C
 test_VectorInfo_SOURCES		= test_VectorInfo.C 
