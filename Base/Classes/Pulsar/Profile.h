@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Profile.h,v $
-   $Revision: 1.53 $
-   $Date: 2004/04/16 00:27:39 $
-   $Author: ahotan $ */
+   $Revision: 1.54 $
+   $Date: 2004/05/02 08:35:33 $
+   $Author: sord $ */
 
 #ifndef __Pulsar_Profile_h
 #define __Pulsar_Profile_h
@@ -48,6 +48,9 @@ namespace Pulsar {
 
     //! fraction of total power used to find peak
     static float peak_edge_threshold;
+
+    //! Invoke legacy toa algorithm in shift
+    static bool legacy;
 
     //! null constructor produces an empty profile of zero size
     Profile () { init(); }

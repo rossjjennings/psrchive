@@ -201,14 +201,11 @@ double Pulsar::Profile::shift (const Profile& std, float& ephase,
   float eshift = 0.0;
 
   prfcopy.fftconv (stdcopy, shift, eshift, snrfft, esnrfft);
-
-  if (ephase)
+  if (ephase) {
     ephase = eshift / float(stdcopy.nbin);
-
+  }
   return shift / double(stdcopy.nbin);
-
 }
-
 
 void Pulsar::Profile::fftconv (Profile& std, 
 			       double& shift, float& eshift, 
@@ -218,8 +215,14 @@ void Pulsar::Profile::fftconv (Profile& std,
   double dshift, sigma_dshift;
   double chisq;
   
-  int ret = model_profile (nbin, 1, &amps, &(std.amps), &scale, &sigma_scale, 
+  int ret=0;
+
+  if (!Profile::legacy)
+    ret = model_profile (nbin, 1, &amps, &(std.amps), &scale, &sigma_scale, 
 			   &dshift, &sigma_dshift, &chisq, verbose);
+  else
+    ret = legacy_fftconv (nbin, &amps[0], &(std.amps[0]),&dshift,&sigma_dshift,&snrfft,&esnrfft);
+  
 
   if (ret != 0)
     throw Error (FailedCall, "Profile::fftconv", "model_profile failed");
@@ -236,9 +239,10 @@ void Pulsar::Profile::fftconv (Profile& std,
   shift = dshift;
 
   eshift = sigma_dshift;
-
-  snrfft = 2 * sqrt( float(nbin) ) * scale / rms;
-
-  esnrfft = snrfft * eshift / scale;
+  if (!Pulsar::Profile::legacy) {
+    snrfft = 2 * sqrt( float(nbin) ) * scale / rms;
+    
+    esnrfft = snrfft * eshift / scale;
+  }
 }  
 
