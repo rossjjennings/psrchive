@@ -29,20 +29,20 @@ Pulsar::FluxCalibrator::FluxCalibrator (const vector<Archive*>& archs)
 		   + archs[iarch]->get_filename() + "'\ndoes not mix with '"
 		   + archs[0]->get_filename() + "\n" + reason);
 
-    if (!archive && archs[iarch]->get_type() == Signal::FluxCalOn)
+    if (!calibrator && archs[iarch]->get_type() == Signal::FluxCalOn)
       // Keep the FPTM naming convention in which the
       // Pulsar::FluxCalibrator is named for the first on-source
       // observation
-      archive = archs[iarch];
+      calibrator = archs[iarch];
 
     filenames.push_back (archs[iarch]->get_filename());
   }
 
-  if (!archive)
+  if (!calibrator)
     throw Error (InvalidState, "Pulsar::FluxCalibrator",
 		 "No FluxCal-On Observation Provided");
 
-  unsigned nchan = archive->get_nchan ();
+  unsigned nchan = calibrator->get_nchan ();
   
   vector<MeanEstimate<double> > mean_ratio_on (nchan);
   vector<MeanEstimate<double> > mean_ratio_off (nchan);
@@ -94,35 +94,48 @@ Pulsar::FluxCalibrator::FluxCalibrator (const vector<Archive*>& archs)
 //! Calibrate the flux in the given archive
 void Pulsar::FluxCalibrator::calibrate (Archive* arch)
 {
-  if (!archive)
+  if (!calibrator)
     throw Error (InvalidState, "Pulsar::FluxCalibrator::calibrate",
 		 "no FluxCal Archive");
 
   string reason;
-  if (!archive->mixable (arch, reason))
+  if (!calibrator->mixable (arch, reason))
     throw Error (InvalidParam, "Pulsar::FluxCalibrator", "Pulsar::Archive='"
-		 + archive->get_filename() + "'\ndoes not mix with '"
+		 + calibrator->get_filename() + "'\ndoes not mix with '"
 		 + arch->get_filename() + "\n" + reason);
 
-  if (cal_flux.size() != arch->get_nchan()) {
+  if (cal_flux.size() != arch->get_nchan())
+    create (arch->get_nchan());
 
-    vector<Estimate<double> > on;
-    vector<Estimate<double> > off;
+  for (unsigned isub=0; isub < arch->get_nsubint(); isub++)
+    calibrate (arch->get_Integration(isub));
+}
 
-    // make on and off the right size of ratio_on and ratio_off
 
-    calculate (on, off);
-
+void Pulsar::FluxCalibrator::create (unsigned nchan)
+{
+  if (ratio_on.size() == ratio_off.size() && ratio_on.size() == nchan) {
+    calculate (ratio_on, ratio_off);
+    return;
   }
 
+  throw Error (InvalidState, "Pulsar::FluxCalibrator::create",
+	       "Cannot currently calibrate archives with different nchan");
+
+  vector<Estimate<double> > on;
+  vector<Estimate<double> > off;
+  
+  // make on and off the right size of ratio_on and ratio_off
+  
+  calculate (on, off);
 
 }
+
 
 void Pulsar::FluxCalibrator::calculate (vector<Estimate<double> >& on,
 					vector<Estimate<double> >& off)
 {
-
-  double hyd_mJy = hydra_flux_mJy (archive->get_centre_frequency());
+  double hyd_mJy = hydra_flux_mJy (calibrator->get_centre_frequency());
   unsigned nchan = on.size();
 
   cal_flux.resize (nchan);
