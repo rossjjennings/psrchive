@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/Timer/Pulsar/TimerArchive.h,v $
-   $Revision: 1.11 $
-   $Date: 2004/07/12 11:54:46 $
+   $Revision: 1.12 $
+   $Date: 2004/07/12 12:23:14 $
    $Author: straten $ */
 
 #ifndef __Timer_Archive_h
@@ -154,7 +154,7 @@ namespace Pulsar {
         bool advocate (const char* filename);
 
         //! Return the name of the TimerArchive plugin
-        string get_name () { return "TimerArchive"; }
+        string get_name () { return "Timer"; }
 
         //! Return description of this plugin
         string get_description ();
