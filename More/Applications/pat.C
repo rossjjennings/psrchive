@@ -64,8 +64,6 @@ int main (int argc, char *argv[]) {
     return -1;
   }
 
-  toas.resize(archives.size());
-
   Reference::To<Pulsar::Archive> arch;
   Reference::To<Pulsar::Archive> stdarch;
   Reference::To<Pulsar::Profile> prof;
