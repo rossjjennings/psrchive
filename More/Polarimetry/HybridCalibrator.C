@@ -124,8 +124,10 @@ void Pulsar::HybridCalibrator::calculate_transformation ()
 
     // 1) solve S" = M_1 S
 
-    for (unsigned ipol=0; ipol<npol; ++ipol)
-      cal[ipol] = cal_hi[ipol][ichan] - cal_lo[ipol][ichan];
+    for (unsigned ipol=0; ipol<npol; ++ipol) {
+      cal[ipol] = cal_hi[ipol][ichan];
+      cal[ipol] -= cal_lo[ipol][ichan];
+    }
     
     correction = new Calibration::SingleAxis;
     correction->solve (cal);
