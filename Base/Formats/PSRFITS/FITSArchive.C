@@ -12,12 +12,11 @@
 
 void Pulsar::FITSArchive::init ()
 {
-  history = new ProcHistory ();
-
+  history = ProcHistory ();
+  digitiser_statistics = DigitiserStatistics();
+  bandpass = Passband();
+  
   chanbw = 0.0;
-  digitiser_statistics.resize(0);
-  digitiser_counts = 0;
-  original_bandpass = 0;
 }
 
 Pulsar::FITSArchive::FITSArchive()
@@ -95,10 +94,9 @@ void Pulsar::FITSArchive::copy (const Archive& archive,
   fe_ext   = farchive->fe_ext;
   be_ext   = farchive->be_ext;
   
-  history = farchive -> history;    
-  digitiser_statistics = farchive -> digitiser_statistics;
-  digitiser_counts = farchive -> digitiser_counts;
-  original_bandpass = farchive -> original_bandpass;
+  history = farchive->history;    
+  digitiser_statistics = farchive->digitiser_statistics;
+  bandpass = farchive->bandpass;
 }
 
 //! Returns a pointer to a new copy-constructed FITSArchive instance
@@ -121,14 +119,14 @@ Pulsar::FITSArchive::extract (const vector<unsigned>& subints) const
 //! Return the number of extensions available
 unsigned Pulsar::FITSArchive::get_nextension () const
 {
-  return 7;
+  return 9;
 }
 
 //! Return a pointer to the specified extension
 const Pulsar::Archive::Extension*
 Pulsar::FITSArchive::get_extension (unsigned iext) const
 {
-  if (iext < 0 || iext > 6)
+  if (iext < 0 || iext > 8)
     throw Error (InvalidRange, "Pulsar::FITSArchive::get_extension",
 		 "invalid index");
   
@@ -152,7 +150,13 @@ Pulsar::FITSArchive::get_extension (unsigned iext) const
     return &be_ext;
     break;
   case 6:
-    return history;
+    return &history;
+    break;
+  case 7:
+    return &digitiser_statistics;
+    break;
+  case 8:
+    return &bandpass;
     break;
   default:
     return 0;
@@ -191,7 +195,6 @@ void Pulsar::FITSArchive::load_header (const char* filename)
   long day;
   long sec;
   double frac;
-  char* tempstr1 = new char [FLEN_VALUE];
   
   if (verbose)
     cerr << "FITSArchive::load_header reading MJDs" << endl;
@@ -207,9 +210,16 @@ void Pulsar::FITSArchive::load_header (const char* filename)
   hdr_ext.start_time = MJD ((int)day, (int)sec, frac);
   
   if (verbose)
+    cerr << "Got start time: " << hdr_ext.start_time.printall() << endl;
+  
+  if (verbose)
     cerr << "FITSArchive::load_header reading coordinates" << endl;
   
   // Read where the telescope was pointing
+
+  char* tempstr1 = new char [FLEN_VALUE];
+  char* tempstr2 = new char [FLEN_VALUE];
+
   fits_read_key (fptr, TSTRING, "COORD_MD", tempstr1, comment, &status);
   if (status != 0) {
     if (verbose) {
@@ -221,10 +231,12 @@ void Pulsar::FITSArchive::load_header (const char* filename)
   }
   
   hdr_ext.coordmode = tempstr1;
+  if (verbose)
+    cerr << "Got coordinate type: " << tempstr1 << endl;
+
   sky_coord coord;
   
   if (hdr_ext.coordmode == "J2000") {
-    char* tempstr2 = new char [FLEN_VALUE];
     fits_read_key (fptr, TSTRING, "STT_CRD1", tempstr1, comment, &status);
     fits_read_key (fptr, TSTRING, "STT_CRD2", tempstr2, comment, &status);
     coord.setHMSDMS(tempstr1,tempstr2);
@@ -267,12 +279,17 @@ void Pulsar::FITSArchive::load_header (const char* filename)
   else
     set_coordinates (coord);
   
+  delete[] tempstr1;
+  delete[] tempstr2;
+
   // Pulsar FITS header definiton version
   
+  char* tempstr3 = new char [FLEN_VALUE];
+
   if (verbose)
     cerr << "FITSArchive::load_header reading FITS header version" << endl;
   
-  fits_read_key (fptr, TSTRING, "HDRVER", tempstr1, comment, &status);
+  fits_read_key (fptr, TSTRING, "HDRVER", tempstr3, comment, &status);
   if (status != 0) {
     if (verbose) {
       fits_get_errstatus(status,error);
@@ -282,14 +299,21 @@ void Pulsar::FITSArchive::load_header (const char* filename)
     status = 0;
   }
   else 
-    hdr_ext.hdrver = tempstr1;
+    hdr_ext.hdrver = tempstr3;
   
+  if (verbose)
+    cerr << "Got: Version " << tempstr3 << endl;
+  
+  delete[] tempstr3;
+
   // File creation date
   
+  char* tempstr4 = new char [FLEN_VALUE];
+
   if (verbose)
     cerr << "FITSArchive::load_header reading file creation date" << endl;
 
-  fits_read_key (fptr, TSTRING, "DATE", tempstr1, comment, &status);
+  fits_read_key (fptr, TSTRING, "DATE", tempstr4, comment, &status);
   if (status != 0) {
     if (verbose) {
       fits_get_errstatus(status,error);
@@ -299,14 +323,18 @@ void Pulsar::FITSArchive::load_header (const char* filename)
     status = 0;
   }
   else
-    hdr_ext.creation_date = tempstr1;
-  
+    hdr_ext.creation_date = tempstr4;
+
+  delete[] tempstr4;
+
   // Name of observer
+  
+  char* tempstr5 = new char [FLEN_VALUE];
 
   if (verbose)
     cerr << "FITSArchive::load_header reading observer name" << endl;
-
-  fits_read_key (fptr, TSTRING, "OBSERVER", tempstr1, comment, &status);
+  
+  fits_read_key (fptr, TSTRING, "OBSERVER", tempstr5, comment, &status);
   if (status != 0) {
     if (verbose) {
       fits_get_errstatus(status,error);
@@ -316,14 +344,21 @@ void Pulsar::FITSArchive::load_header (const char* filename)
     status = 0;
   }
   else
-    obs_ext.observer = tempstr1;
+    obs_ext.observer = tempstr5;
   
+  if (verbose)
+    cerr << "Got observer: " << tempstr5 << endl;
+  
+  delete[] tempstr5;
+
   // Project ID
+  
+  char* tempstr6 = new char [FLEN_VALUE];
 
   if (verbose)
     cerr << "FITSArchive::load_header reading project ID" << endl;
 
-  fits_read_key (fptr, TSTRING, "PROJID", tempstr1, comment, &status);
+  fits_read_key (fptr, TSTRING, "PROJID", tempstr6, comment, &status);
   if (status != 0) {
     if (verbose) {
       fits_get_errstatus(status,error);
@@ -333,14 +368,21 @@ void Pulsar::FITSArchive::load_header (const char* filename)
     status = 0;
   }
   else
-    obs_ext.project_ID = tempstr1;
+    obs_ext.project_ID = tempstr6;
+
+  if (verbose)
+    cerr << "Got PID: " << tempstr6 << endl;
+  
+  delete[] tempstr6;
   
   // Telescope name
-
+  
+  char* tempstr7 = new char [FLEN_VALUE];
+  
   if (verbose)
     cerr << "FITSArchive::load_header reading telescope name" << endl;
 
-  fits_read_key (fptr, TSTRING, "TELESCOP", tempstr1, comment, &status);
+  fits_read_key (fptr, TSTRING, "TELESCOP", tempstr7, comment, &status);
   if (status != 0) {
     if (verbose) {
       fits_get_errstatus(status,error);
@@ -350,7 +392,12 @@ void Pulsar::FITSArchive::load_header (const char* filename)
     status = 0;
   }
   else
-    obs_ext.telescope = tempstr1;
+    obs_ext.telescope = tempstr7;
+  
+  if (verbose)
+    cerr << "Got telescope: " << tempstr7 << endl;
+  
+  delete[] tempstr7;
   
   // Antenna ITRF coordinates
 
@@ -371,10 +418,12 @@ void Pulsar::FITSArchive::load_header (const char* filename)
   
   // Receiver name
 
+  char* tempstr8 = new char [FLEN_VALUE];
+  
   if (verbose)
     cerr << "FITSArchive::load_header reading receiver" << endl;
 
-  fits_read_key (fptr, TSTRING, "FRONTEND", tempstr1, comment, &status);
+  fits_read_key (fptr, TSTRING, "FRONTEND", tempstr8, comment, &status);
   if (status != 0) {
     if (verbose) {
       fits_get_errstatus(status,error);
@@ -384,14 +433,18 @@ void Pulsar::FITSArchive::load_header (const char* filename)
     status = 0;
   }
   else
-    set_receiver(tempstr1);
-
+    set_receiver(tempstr8);
+  
+  delete[] tempstr8;
+  
   // Read the feed configuration
+
+  char* tempstr9 = new char [FLEN_VALUE];
 
   if (verbose)
     cerr << "FITSArchive::load_header reading feed config" << endl;
 
-  fits_read_key (fptr, TSTRING, "FD_POLN", tempstr1, comment, &status);
+  fits_read_key (fptr, TSTRING, "FD_POLN", tempstr9, comment, &status);
   if (status != 0) {
     if (verbose) {
       fits_get_errstatus(status,error);
@@ -401,16 +454,18 @@ void Pulsar::FITSArchive::load_header (const char* filename)
     status = 0;
   }
   else {
-    if (tempstr1 == "LIN")
+    if (strcmp(tempstr9,"LIN") == 0 || strcmp(tempstr9,"LINEAR") == 0)
       set_basis ( Signal::Linear );
-    else if (tempstr1 == "CIRC")
+    else if (strcmp(tempstr9,"CIRC") == 0 || strcmp(tempstr9,"CIRCULAR") == 0)
       set_basis ( Signal::Circular );
     else
       if (verbose) {
-	cerr << "FITSArchive::load_header WARNING unknown FD_POLN: " 
-	     << error << endl;
+	cerr << "FITSArchive::load_header Unknown FD_POLN: " 
+	     << tempstr9 << endl;
       }
   }
+  
+  delete[] tempstr9;
   
   // Read angle of X-probe wrt platform zero
 
@@ -429,12 +484,14 @@ void Pulsar::FITSArchive::load_header (const char* filename)
   
   // Read the name of the instrument used
 
+  char* tempstr10 = new char [FLEN_VALUE];
+
   if (verbose)
     cerr << "FITSArchive::load_header reading instrument name" << endl;
 
-  fits_read_key (fptr, TSTRING, "BACKEND", tempstr1, comment, &status);
+  fits_read_key (fptr, TSTRING, "BACKEND", tempstr10, comment, &status);
   if(status == 0) {
-    set_backend(tempstr1);
+    set_backend(tempstr10);
   }
   else {
     if (verbose) {
@@ -445,14 +502,18 @@ void Pulsar::FITSArchive::load_header (const char* filename)
     status = 0;
   }
   
+  delete[] tempstr10;
+  
   // Read the name of the instrument configuration file (if any)
+
+  char* tempstr11 = new char [FLEN_VALUE];
 
   if (verbose)
     cerr << "FITSArchive::load_header reading instrument config" << endl;
 
-  fits_read_key (fptr, TSTRING, "BECONFIG", tempstr1, comment, &status);
+  fits_read_key (fptr, TSTRING, "BECONFIG", tempstr11, comment, &status);
   if(status == 0) {
-    be_ext.configfile = tempstr1;
+    be_ext.configfile = tempstr11;
   }
   else {
     if (verbose) {
@@ -462,6 +523,8 @@ void Pulsar::FITSArchive::load_header (const char* filename)
     }
     status = 0;
   }
+  
+  delete[] tempstr11;
   
   // Read the number of receiver channels
   
@@ -480,32 +543,38 @@ void Pulsar::FITSArchive::load_header (const char* filename)
   
   // Read the name of the source
 
+  char* tempstr12 = new char [FLEN_VALUE];
+
   if (verbose)
     cerr << "FITSArchive::load_header reading source name" << endl;
 
-  fits_read_key (fptr, TSTRING, "SRC_NAME", tempstr1, comment, &status);
+  fits_read_key (fptr, TSTRING, "SRC_NAME", tempstr12, comment, &status);
   if (status != 0)
     throw FITSError (status, "FITSArchive::load_header", 
 		     "fits_read_key SRC_NAME");
   
-  set_source ( tempstr1 );
+  set_source ( tempstr12 );
   
+  delete[] tempstr12;
+
   // Figure out what kind of observation it was
+
+  char* tempstr13 = new char [FLEN_VALUE];
 
   if (verbose)
     cerr << "FITSArchive::load_header reading OBS_MODE" << endl;
 
-  fits_read_key (fptr, TSTRING, "OBS_MODE", tempstr1, comment, &status);
+  fits_read_key (fptr, TSTRING, "OBS_MODE", tempstr13, comment, &status);
   if (status != 0)
     throw FITSError (status, "FITSArchive::load_header", 
 		     "fits_read_key OBSTYPE");
   
-  if (strcmp(tempstr1, "PSR") == 0 || strcmp(tempstr1, "LEVPSR") == 0) {
+  if (strcmp(tempstr1, "PSR") == 0 || strcmp(tempstr13, "LEVPSR") == 0) {
     set_type ( Signal::Pulsar );
     if (verbose)
       cerr << "FITSArchive::load_header using Signal::Pulsar" << endl;
   }
-  else if (strcmp(tempstr1, "CAL") == 0 || strcmp(tempstr1, "LEVCAL") == 0) {
+  else if (strcmp(tempstr13, "CAL") == 0 || strcmp(tempstr13, "LEVCAL") == 0) {
     
     if (get_source() == "HYDRA_ON"  || 
 	get_source() == "VIRGO_ON") {
@@ -525,14 +594,16 @@ void Pulsar::FITSArchive::load_header (const char* filename)
 	cerr << "FITSArchive::load_header using Signal::PolnCal" << endl;
     }
   }
-  else if (strcmp (tempstr1, "SEARCH") == 0)
+  else if (strcmp (tempstr13, "SEARCH") == 0)
     set_type ( Signal::Unknown );
   else {
     if (verbose)
       cerr << "FITSArchive::load_header WARNING unknown OBSTYPE = " 
-	   << tempstr1 <<endl;
+	   << tempstr13 <<endl;
     set_type ( Signal::Unknown );
   }
+  
+  delete[] tempstr13;
   
   // Read detailed CAL information
 
@@ -559,10 +630,12 @@ void Pulsar::FITSArchive::load_header (const char* filename)
   
   // Track mode
 
+  char* tempstr14 = new char [FLEN_VALUE];
+
   if (verbose)
     cerr << "FITSArchive::load_header reading track mode" << endl;
 
-  fits_read_key (fptr, TSTRING, "TRK_MODE", tempstr1, comment, &status);
+  fits_read_key (fptr, TSTRING, "TRK_MODE", tempstr14, comment, &status);
   if (status != 0) {
     if (verbose) {
       fits_get_errstatus(status,error);
@@ -572,14 +645,18 @@ void Pulsar::FITSArchive::load_header (const char* filename)
     status = 0;
   }
   else
-    hdr_ext.trk_mode = tempstr1;
+    hdr_ext.trk_mode = tempstr14;
+  
+  delete[] tempstr14;
   
   // Feed track mode
 
+  char* tempstr15 = new char [FLEN_VALUE];
+  
   if (verbose)
     cerr << "FITSArchive::load_header reading feed track mode" << endl;
 
-  fits_read_key (fptr, TSTRING, "FD_MODE", tempstr1, comment, &status);
+  fits_read_key (fptr, TSTRING, "FD_MODE", tempstr15, comment, &status);
   if (status != 0) {
     if (verbose) {
       fits_get_errstatus(status,error);
@@ -589,10 +666,12 @@ void Pulsar::FITSArchive::load_header (const char* filename)
     status = 0;
   }
   else
-    fe_ext.fd_mode = tempstr1;
+    fe_ext.fd_mode = tempstr15;
+
+  delete[] tempstr15;
 
   // Read requested feed angle
-
+  
   if (verbose)
     cerr << "FITSArchive::load_header reading requested feed angle" << endl;
   
@@ -605,7 +684,7 @@ void Pulsar::FITSArchive::load_header (const char* filename)
     }
     status = 0;
   }
-  
+
   // Read correlator cycle time
 
   if (verbose)
@@ -637,12 +716,31 @@ void Pulsar::FITSArchive::load_header (const char* filename)
     status = 0;
   }
   
+  // Read the CAL mode
+  
+  char* tempstr99 = new char [FLEN_VALUE];
+  fits_read_key (fptr, TSTRING, "CAL_MODE", tempstr99, comment, &status);
+  if (status != 0) {
+    if (verbose) {
+      fits_get_errstatus(status,error);
+      cerr << "FITSArchive::load_header WARNING reading CAL_MODE: " 
+	   << error << endl;
+    }
+    status = 0;
+  }
+  else
+    cal_ext.cal_mode = tempstr99;
+  
+  delete[] tempstr99;
+
   // Read the start UT date
+
+  char* tempstr16 = new char [FLEN_VALUE];
   
   if (verbose)
     cerr << "FITSArchive::load_header reading start date" << endl;
 
-  fits_read_key (fptr, TSTRING, "STT_DATE", tempstr1, comment, &status);
+  fits_read_key (fptr, TSTRING, "STT_DATE", tempstr16, comment, &status);
   if (status != 0) {
     if (verbose) {
       fits_get_errstatus(status,error);
@@ -652,14 +750,18 @@ void Pulsar::FITSArchive::load_header (const char* filename)
     status = 0;
   }
   else
-    hdr_ext.stt_date = tempstr1;
+    hdr_ext.stt_date = tempstr16;
   
+  delete[] tempstr16;
+
   // Read the start UT
+
+  char* tempstr17 = new char [FLEN_VALUE];
 
   if (verbose)
     cerr << "FITSArchive::load_header reading start UT" << endl;
 
-  fits_read_key (fptr, TSTRING, "STT_TIME", tempstr1, comment, &status);
+  fits_read_key (fptr, TSTRING, "STT_TIME", tempstr17, comment, &status);
   if (status != 0) {
     if (verbose) {
       fits_get_errstatus(status,error);
@@ -669,7 +771,9 @@ void Pulsar::FITSArchive::load_header (const char* filename)
     status = 0;
   }
   else
-    hdr_ext.stt_time = tempstr1;
+    hdr_ext.stt_time = tempstr17;
+  
+  delete[] tempstr17;
   
   // Read the start LST (in seconds)
 
@@ -699,16 +803,16 @@ void Pulsar::FITSArchive::load_header (const char* filename)
   // Load the processing history
   
   load_hist (fptr);
+
+  set_nbin ((history.get_last()).nbin);
+  set_npol ((history.get_last()).npol);
+  set_centre_frequency ((history.get_last()).ctr_freq);
+  set_nchan ((history.get_last()).nchan);
   
-  set_nbin (history->get_last()->nbin);
-  set_npol (history->get_last()->npol);
-  set_centre_frequency (history->get_last()->ctr_freq);
-  set_nchan (history->get_last()->nchan);
+  chanbw = (history.get_last()).chanbw;
   
-  chanbw = history->get_last()->chanbw;
-  
-  string polstr = history->get_last()->pol_type;
-  
+  string polstr = (history.get_last()).pol_type;
+
   if(polstr == "XXYY") {
     set_state ( Signal::PPQQ );
     if (verbose)
@@ -743,11 +847,11 @@ void Pulsar::FITSArchive::load_header (const char* filename)
   
   set_bandwidth(get_nchan()*chanbw);
   
-  if(history->get_last()->rm_corr == 1) {
+  if((history.get_last()).rm_corr == 1) {
     set_ism_rm_corrected (true);
     set_iono_rm_corrected (true);
   }
-  else if(history->get_last()->rm_corr == 0) {
+  else if((history.get_last()).rm_corr == 0) {
     set_ism_rm_corrected (false);
     set_iono_rm_corrected (false);
   }
@@ -774,11 +878,11 @@ void Pulsar::FITSArchive::load_header (const char* filename)
   // Worth noting though.
   //  
 
-  if(history->get_last()->par_corr == 1) {
+  if((history.get_last()).par_corr == 1) {
     set_parallactic_corrected (true);
     set_feedangle_corrected (false);
   }
-  else if(history->get_last()->par_corr == 0) {
+  else if((history.get_last()).par_corr == 0) {
     set_feedangle_corrected (false);
     set_parallactic_corrected (false);
   }
@@ -795,9 +899,9 @@ void Pulsar::FITSArchive::load_header (const char* filename)
     cerr << "FITSArchive::load WARNING, assuming PA_CORR implies FA_CORR"
 	 << endl;
   
-  if(history->get_last()->dedisp == 1)
+  if((history.get_last()).dedisp == 1)
     set_dedispersed (true);
-  else if(history->get_last()->dedisp == 0)
+  else if((history.get_last()).dedisp == 0)
     set_dedispersed (false);
   else {
     if (verbose) {
@@ -811,39 +915,14 @@ void Pulsar::FITSArchive::load_header (const char* filename)
     cerr << "FITSArchive::load_header finished with processing history" 
 	 << endl;
   
-  // Move to the DIG_STAT Header Data Unit
+  // Load the digitiser statistics
   
-  fits_movnam_hdu (fptr, BINARY_TBL, "DIG_STAT", 0, &status);
-  if (status != 0)
-    throw FITSError (status, "FITSArchive::load_header", 
-		     "fits_movnam_hdu DIG_STAT");
+  load_digistat(fptr);
   
-  // Get the number of rows (ie. the number of sub-ints)
-  
-  long numrows = 0;
-  fits_get_num_rows (fptr, &numrows, &status);
-  
-  digitiser_statistics.resize(numrows);
-  
-  for (int i = 0; i < numrows; i++) {
-    digitiser_statistics[i] = new digistat();
-    digitiser_statistics[i]->load(fptr, i+1);
-  }
-  
-#if 0
-  
-  // Move to the DIG_CNTS Header Data Unit
-  
-  digitiser_counts = new digicount();
-  digitiser_counts->load(fptr);
-  
-#endif
-  
-  // Move to the BANDPASS Header Data Unit
-  
-  original_bandpass = new bandpass();
-  original_bandpass->load(fptr, be_ext.nrcvr);
-  
+  // Load the original bandpass data
+
+  load_passband(fptr, be_ext.nrcvr);
+
   // Load the NSITE code from the polyco
 
   int colnum = 0;
@@ -905,7 +984,7 @@ void Pulsar::FITSArchive::load_header (const char* filename)
   
   // Get the number of rows (ie. the number of sub-ints)
   
-  numrows = 0;
+  long numrows = 0;
   fits_get_num_rows (fptr, &numrows, &status);
   
   set_nsubint(numrows);
@@ -986,14 +1065,14 @@ Pulsar::FITSArchive::load_Integration (const char* filename, unsigned isubint)
     status = 0;
   }
   else {
-    if (tempstr1 == "LIN")
+    if (strcmp(tempstr1,"LIN") == 0 || strcmp(tempstr1,"LINEAR") == 0)
       integ->set_basis ( Signal::Linear );
-    else if (tempstr1 == "CIRC")
-      integ->set_basis ( Signal::Circular );
+    else if (strcmp(tempstr1,"CIRC") == 0 || strcmp(tempstr1,"CIRCULAR") == 0)
+      integ->set_basis( Signal::Circular );
     else
       if (verbose) {
-	cerr << "FITSArchive::load_Integration WARNING unknown FD_POLN: " 
-	     << error << endl;
+	cerr << "FITSArchive::load_Integration unknown FD_POLN: " 
+	     << tempstr1 << endl;
       }
   }
   
@@ -1036,27 +1115,27 @@ Pulsar::FITSArchive::load_Integration (const char* filename, unsigned isubint)
   delete [] polcode;
   
   if(polstr == "XXYY") {
-    integ -> set_state ( Signal::PPQQ );
+    integ->set_state ( Signal::PPQQ );
     if (verbose)
       cerr << "FITSArchive:load_Integration setting Signal::PPQQ" << endl;
   }
   else if(polstr == "STOKE") {
-    integ -> set_state ( Signal::Stokes );
+    integ->set_state ( Signal::Stokes );
     if (verbose)
       cerr << "FITSArchive:load_Integration setting Signal::Stokes" << endl;
   }
   else if(polstr == "XXYYCRCI") {
-    integ -> set_state ( Signal::Coherence );
+    integ->set_state ( Signal::Coherence );
     if (verbose)
       cerr << "FITSArchive:load_Integration setting Signal::Coherence" << endl;
   }
   else if(polstr == "INTEN") {
-    integ -> set_state ( Signal::Intensity );
+    integ->set_state ( Signal::Intensity );
     if (verbose)
       cerr << "FITSArchive:load_Integration setting Signal::Intensity" << endl;
   }
   else if(polstr == "INVAR")
-    integ -> set_state ( Signal::Invariant );
+    integ->set_state ( Signal::Invariant );
   else {
     if (verbose) {
       cerr << "FITSArchive:load_Integration WARNING unknown POL_TYPE = " 
@@ -1064,7 +1143,7 @@ Pulsar::FITSArchive::load_Integration (const char* filename, unsigned isubint)
       cerr << "FITSArchive:load_Integration setting Signal::Intensity" 
 	   << endl;
     }
-    integ -> set_state ( Signal::Intensity );
+    integ->set_state ( Signal::Intensity );
   }
   
   // Move to the SUBINT Header Data Unit
@@ -1076,15 +1155,15 @@ Pulsar::FITSArchive::load_Integration (const char* filename, unsigned isubint)
   
   // Set the centre frequency
   
-  integ -> set_centre_frequency ( get_centre_frequency() );
+  integ->set_centre_frequency ( get_centre_frequency() );
 
   // Set the observation bandwidth
 
-  integ -> set_bandwidth ( get_bandwidth() );
+  integ->set_bandwidth ( get_bandwidth() );
   
   // Set the dispersion measure
   
-  integ -> set_dispersion_measure ( get_dispersion_measure() );
+  integ->set_dispersion_measure ( get_dispersion_measure() );
 
   // Set the start time of the integration
   
@@ -1107,7 +1186,7 @@ Pulsar::FITSArchive::load_Integration (const char* filename, unsigned isubint)
   
   // Set the folding period
 
-  integ -> set_folding_period (model.period(newmjd));
+  integ->set_folding_period (model.period(newmjd));
 
   // Correct for a possible phase offset
 
@@ -1126,24 +1205,24 @@ Pulsar::FITSArchive::load_Integration (const char* filename, unsigned isubint)
     
     cerr << "I think there is an offset of " << diff
 	 << " fractional turns between the phase of the start time"
-	 << "and the phase of the mid-time in integration " 
+	 << " and the phase of the mid-time in integration " 
 	 << isubint << endl;
 
   }
   
-  newmjd -= diff * integ -> get_folding_period();
+  newmjd -= diff * integ->get_folding_period();
   
   if (verbose) {
     
-    cerr << "I think the folding period is " << integ -> get_folding_period()
+    cerr << "I think the folding period is " << integ->get_folding_period()
 	 << " seconds" << endl;
     
-    cerr << "Subtracting an offset of " << diff * integ -> get_folding_period()
+    cerr << "Subtracting an offset of " << diff * integ->get_folding_period()
 	 << " seconds to correct for the phase offset" << endl;
     
   }
 
-  integ -> set_epoch (newmjd);
+  integ->set_epoch (newmjd);
   
   if (verbose)
     cerr << "Pulsar::FITSArchive::load_Integration epoch " 
@@ -1159,7 +1238,7 @@ Pulsar::FITSArchive::load_Integration (const char* filename, unsigned isubint)
   fits_read_col (sfptr, TDOUBLE, colnum, row, 1, 1, &nulldouble,
 		 &duration, &initflag, &status);
   
-  integ -> set_duration (duration);
+  integ->set_duration (duration);
   
   // Set up the data vector, only Pulsar::Archive base class is friend
 
@@ -1190,7 +1269,7 @@ Pulsar::FITSArchive::load_Integration (const char* filename, unsigned isubint)
 	 << endl;
   
   for(unsigned j = 0; j < get_nchan(); j++)
-    integ -> set_weight(j, weights[j]);
+    integ->set_weight(j, weights[j]);
   
   // Load the channel centre frequencies
   
@@ -1224,14 +1303,14 @@ Pulsar::FITSArchive::load_Integration (const char* filename, unsigned isubint)
     if (verbose)
       cerr << "FITSArchive::load_Integration all frequencies unity - reseting" << endl;
     for (unsigned j = 0; j < get_nchan(); j++) {
-      integ -> set_frequency (j, get_centre_frequency()
+      integ->set_frequency (j, get_centre_frequency()
 			      -0.5*(get_bandwidth()+chanbw)+j*chanbw);
     }
   }
   else
     for (unsigned j = 0; j < get_nchan(); j++) {
-      //integ -> set_frequency(j, chan_freqs[j]);
-      integ -> set_frequency(j, chan_freqs[j]);
+      //integ->set_frequency(j, chan_freqs[j]);
+      integ->set_frequency(j, chan_freqs[j]);
     }
   
   // Load the profile scale factors
@@ -1294,7 +1373,7 @@ Pulsar::FITSArchive::load_Integration (const char* filename, unsigned isubint)
   for (unsigned a = 0; a < get_npol(); a++) {
     for (unsigned b = 0; b < get_nchan(); b++) {
       
-      p = integ -> get_Profile(a,b);
+      p = integ->get_Profile(a,b);
       
       fits_read_col (sfptr, TSHORT, colnum, row, counter, get_nbin(), 
 		     &nullshort, temparray, &initflag, &status);
@@ -1312,8 +1391,8 @@ Pulsar::FITSArchive::load_Integration (const char* filename, unsigned isubint)
 	fltarray[j] = temparray[j] * scales[a][b] + offsets[a][b];
       }
 
-      p -> set_amps(fltarray);
-      p -> set_state(polmeas);
+      p->set_amps(fltarray);
+      p->set_state(polmeas);
       
     }  
   }
@@ -1439,8 +1518,8 @@ try {
     
     newcoord = get_coordinates().getGalactic();
     
-    char l_deg[32];
-    char b_deg[32];
+    char* l_deg = new char[32];
+    char* b_deg = new char[32];
     
     sprintf(l_deg, "%f", newcoord.angle1.getDegrees());
     sprintf(b_deg, "%f", newcoord.angle2.getDegrees());
@@ -1449,6 +1528,8 @@ try {
 		     comment, &status);
     fits_update_key (myfptr, TSTRING, "STT_CRD2", b_deg, 
 		     comment, &status); 
+    delete[] l_deg;
+    delete[] b_deg;
   }
   else if (hdr_ext.coordmode == "Ecliptic") {
     if (verbose) {
@@ -1481,18 +1562,21 @@ try {
     sprintf(useful, "%s", "LIN");
     fits_update_key (myfptr, TSTRING, "FD_POLN", 
 		     useful, comment, &status);
+    delete[] useful;
   }
   else if (get_basis() == Signal::Circular) {
     char* useful = new char[4];
     sprintf(useful, "%s", "CIRC");
     fits_update_key (myfptr, TSTRING, "FD_POLN", 
 		     useful, comment, &status);
+    delete[] useful;
   }
   else {
     char* useful = new char[4];
     sprintf(useful, "%s", "    ");
     fits_update_key (myfptr, TSTRING, "FD_POLN", 
 		     useful, comment, &status);
+    delete[] useful;
   }
   
   fits_update_key (myfptr, TSTRING, "HDRVER", 
@@ -1547,7 +1631,7 @@ try {
 		   comment, &status);
   fits_update_key (myfptr, TFLOAT, "ATTEN_B", (float*)&(fe_ext.atten_b), 
 		   comment, &status);
-   
+  
   fits_update_key (myfptr, TSTRING, "CAL_MODE", 
   		   (char*)(cal_ext.cal_mode.c_str()), comment, &status);
   
@@ -1622,34 +1706,9 @@ try {
   
   // Unload some of the other HDU's
 
-  // Move to the DIG_STAT Header Data Unit
+  unload_digistat(myfptr);
   
-  fits_movnam_hdu (myfptr, BINARY_TBL, "DIG_STAT", 0, &status);
-  if (status != 0)
-    throw FITSError (status, "FITSArchive::unload_file", 
-		     "fits_movnam_hdu DIG_STAT");
-  
-  //long oldrownum = 0;
-  //fits_get_num_rows (myfptr, &oldrownum, &status);
-  //fits_delete_rows (myfptr, 1, oldrownum, &status);
-  
-  fits_insert_rows (myfptr, 0, digitiser_statistics.size(), &status);
-  
-  for (unsigned i = 0; i < digitiser_statistics.size(); i++) {
-    digitiser_statistics[i]->unload(myfptr, i+1);
-  }
-  
-#if 0
-  
-  // Move to the DIG_CNTS Header Data Unit
-  
-  digitiser_counts->unload(myfptr);
-  
-#endif
-  
-  // Move to the BANDPASS Header Data Unit
-  
-  original_bandpass->unload(myfptr, be_ext.nrcvr);
+  unload_passband(myfptr, be_ext.nrcvr);
   
   // Now write the actual integrations to file
 
@@ -1760,13 +1819,21 @@ void Pulsar::FITSArchive::unload_integration (int row,
 					      fitsfile* thefptr) const
 {
   int status = 0;
+
+  // Set the subint number
+  
+  int colnum = 0;
+  fits_get_colnum (thefptr, CASEINSEN, "ISUBINT", &colnum, &status);
+  
+  fits_write_col (thefptr, TINT, colnum, row, 1, 1, &row, &status);
+  
   // Set the start time of the integration
 
-  int colnum = 0;
+  colnum = 0;
   fits_get_colnum (thefptr, CASEINSEN, "OFFS_SUB", &colnum, &status);
   
   double time = 0.0;
-  time = (integ -> get_epoch () - (hdr_ext.start_time)).in_seconds();
+  time = (integ->get_epoch () - (hdr_ext.start_time)).in_seconds();
 
   fits_write_col (thefptr, TDOUBLE, colnum, row, 1, 1, &time, &status);
   
@@ -1779,7 +1846,7 @@ void Pulsar::FITSArchive::unload_integration (int row,
   colnum = 0;
   fits_get_colnum (thefptr, CASEINSEN, "TSUBINT", &colnum, &status);
  
-  double duration = integ -> get_duration();
+  double duration = integ->get_duration();
   
   fits_write_col (thefptr, TDOUBLE, colnum, row, 1, 1, &duration, &status);
   
@@ -1790,7 +1857,7 @@ void Pulsar::FITSArchive::unload_integration (int row,
   vector < float >  weights(nchan);
 
   for(unsigned j = 0; j < nchan; j++)
-    weights[j] = integ -> get_weight(j);
+    weights[j] = integ->get_weight(j);
 
   colnum = 0;
   fits_get_colnum (thefptr, CASEINSEN, "DAT_WTS", &colnum, &status);
@@ -1805,7 +1872,7 @@ void Pulsar::FITSArchive::unload_integration (int row,
   vector < float >  chan_freqs(nchan);
 
   for(unsigned j = 0; j < nchan; j++)
-    chan_freqs[j] = integ -> get_frequency(j);
+    chan_freqs[j] = integ->get_frequency(j);
 
   colnum = 0;
   fits_get_colnum (thefptr, CASEINSEN, "DAT_FREQ", &colnum, &status);
@@ -1871,11 +1938,14 @@ void Pulsar::FITSArchive::unload_integration (int row,
   for(unsigned a = 0; a < npol; a++) {
     for(unsigned b = 0; b < nchan; b++) {
      
-      p = integ -> get_Profile(a,b);
-      temparray1 = p -> get_amps();
+      p = integ->get_Profile(a,b);
+      temparray1 = p->get_amps();
 
-      if (verbose)
+      if (verbose) {
 	cerr << "FITSArchive::unload_integration got profile" << endl;
+	cerr << "nchan = " << b << endl;
+	cerr << "npol  = " << a << endl;
+      }
 
       minmaxval(nbin, (float*)temparray1, &min, &max);
 
@@ -1977,7 +2047,7 @@ void Pulsar::FITSArchive::unload_integration (int row,
 
 string Pulsar::FITSArchive::Agent::get_description () 
 {
-  return "PSRFITS version 1.2";
+  return "PSRFITS version 1.3";
 }
 
 // /////////////////////////////////////////////////////////////////////

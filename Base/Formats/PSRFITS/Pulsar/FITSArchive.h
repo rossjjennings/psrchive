@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/PSRFITS/Pulsar/FITSArchive.h,v $
-   $Revision: 1.6 $
-   $Date: 2003/06/19 03:46:08 $
+   $Revision: 1.7 $
+   $Date: 2003/07/26 10:23:30 $
    $Author: ahotan $ */
 
 #include <fitsio.h>
@@ -11,11 +11,13 @@
 #include "Pulsar/BasicArchive.h"
 #include "Pulsar/FITSHdrExtension.h"
 #include "Pulsar/ProcHistory.h"
+#include "Pulsar/DigitiserStatistics.h"
 #include "Pulsar/CalInfoExtension.h"
 #include "Pulsar/ObsExtension.h"
 #include "Pulsar/ITRFExtension.h"
 #include "Pulsar/FrontendExtension.h"
 #include "Pulsar/BackendExtension.h"
+#include "Pulsar/Passband.h"
 #include "MJD.h"
 
 namespace Pulsar {
@@ -95,87 +97,6 @@ namespace Pulsar {
         string get_description ();
 
     };
-
-    // Class for holding a row of digitiser statistics
-    
-    class digistat {
-      
-    public:
-      
-      digistat () { init(); }
-      
-      void load (fitsfile* fptr, int row);
-      void unload (fitsfile* fptr, int row);
-      
-      ~digistat ();
-      
-    protected:
-      
-      void init ();
-      
-      string dig_mode;
-      int ndigr;
-      int nlev;
-      int ncycsub;
-      string diglev;
-
-      vector<float> data;
-      
-    };
-
-    // Class for holding a row of digitiser counts
-    
-    class digicount {
-      
-    public:
-      
-      digicount () { init(); }
-      
-      void load (fitsfile* fptr);
-      void unload (fitsfile* fptr);
-      
-      ~digicount ();
-      
-    protected:
-      
-      void init ();
-      
-      string dig_mode;
-      int ndigr;
-      int nlev;
-      int npthist;
-      string diglev;
-
-      vector<float> data_offsets;
-      vector<float> data_scales;
-      vector<int> data;
-      
-    };
-
-    // Class for holding the original bandpasses
-    
-    class bandpass {
-      
-    public:
-      
-      bandpass () { init(); }
-      
-      void load (fitsfile* fptr, int nrcvr);
-      void unload (fitsfile* fptr, int nrcvr);
-      
-      ~bandpass ();
-      
-    protected:
-      
-      void init ();
-      
-      int nch_orig;
-      
-      vector<float> data_offsets;
-      vector<float> data_scales;
-      vector<int> data;
-      
-    };
     
     //! Load the FITS header information from filename
     virtual void load_header (const char* filename);
@@ -191,30 +112,34 @@ namespace Pulsar {
     
     // Archive Extensions used by FITSArchive
     
-    ObsExtension      obs_ext;
-    FITSHdrExtension  hdr_ext;
-    ITRFExtension     itrf_ext;
-    CalInfoExtension  cal_ext;
-    FrontendExtension fe_ext;
-    BackendExtension  be_ext;
-    
-    // Objects to contain the information in other HDU areas
-    
-    //! Channel bandwidth
+    ObsExtension         obs_ext;
+    FITSHdrExtension     hdr_ext;
+    ITRFExtension        itrf_ext;
+    CalInfoExtension     cal_ext;
+    FrontendExtension    fe_ext;
+    BackendExtension     be_ext;
+    ProcHistory          history;
+    DigitiserStatistics  digitiser_statistics;
+    Passband             bandpass;
+
+    // Channel bandwidth
+
     double chanbw;
+
+    // Extension I/O routines
+
+    void load_hist (fitsfile*);
+    void unload_hist (fitsfile*) const;
+    void load_hist_row (fitsfile*, int);
+    void unload_hist_row (fitsfile*, int) const;
     
-    ProcHistory* history;
+    void load_digistat (fitsfile*);
+    void unload_digistat (fitsfile*) const;
+    void load_digistat_row (fitsfile*, int);
+    void unload_digistat_row (fitsfile*, int) const;
     
-    void load_hist (fitsfile* fptr);
-    void unload_hist (fitsfile* fptr) const;
-    void load_hist_row (fitsfile* fptr, int row);
-    void unload_hist_row (fitsfile* fptr, int row) const;
-			  
-    vector<digistat*> digitiser_statistics;
-    
-    digicount* digitiser_counts;
-    
-    bandpass* original_bandpass;
+    void load_passband (fitsfile*, int);
+    void unload_passband (fitsfile*, int) const;
     
     // //////////////////////////////////////////////////////////////////////
 
