@@ -146,37 +146,6 @@ int Timer::load (FILE* fptr, struct timer* hdr, bool big_endian)
   if (hdr->rotm == -100000)
     hdr->rotm = 0.0;
 
-  // timer supplement - added 23 July 04
-
-  if (hdr->extra.supplement.version > 0 
-      && hdr->extra.bandb.nlag > 0
-      && hdr->extra.bandb.flux_A > 0
-      && hdr->extra.bandb.flux_B > 0)  {
-    cerr << "Timer::load WARNING bandB apparently in use" << endl;
-
-    if (verbose == 3)  {
-      archband B(hdr->extra.bandb);
-      B.print(cerr);
-    }
-
-    return 0;
-  }
-
-  if (hdr->extra.supplement.version < -2)  {
-    if (verbose)
-      cerr << "Timer::load WARNING bandB uninitialized npol=" 
-           << hdr->extra.bandb.npol << endl;
-    hdr->extra.bandb.npol = 0;
-  }
-
-  // correct the Version -2 parameters
-  if (hdr->extra.supplement.version > -2) {
-    hdr->extra.supplement.X_offset = 0.0;
-    hdr->extra.supplement.Y_offset = 0.0;
-    hdr->extra.supplement.calibrator_offset = 0.0;
-    hdr->extra.supplement.version = -2;
-  }
-
   return 0;
 }
 

@@ -1,6 +1,6 @@
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/Timer/timer.h,v $
-   $Revision: 1.13 $
-   $Date: 2004/07/24 07:19:02 $
+   $Revision: 1.14 $
+   $Date: 2004/07/28 15:58:30 $
    $Author: straten $ */
 
 /* include file for the main timer structure                            */
@@ -99,7 +99,6 @@ that we get several dumps becoming a sub_int.
 */
 #include "environ.h"
 #include "band.h"
-#include "timer_supp.h"
 
 struct timer {
 
@@ -166,10 +165,7 @@ struct timer {
 /* Details of each band */
 
   struct band banda;				/* details of band a */
-  union {
-    struct band bandb;				/*    "    "   "   b */
-    struct supp supplement;                     /* added 23 July 04  */
-  } extra;
+  struct band bandb;				/*    "    "   "   b */
 
 /* Misc */		  
 		
