@@ -32,10 +32,10 @@ int Pulsar::model_profile (int npts, int narrays, float** prf, float** std,
 
   for (i=0; i<narrays; ++i) {
 
-    fft_std[i] = new float[npts];
-    fft_prf[i] = new float[npts];
-    xcorr_amps[i] = new float[npts];
-    xcorr_phases[i] = new float[npts];
+    fft_std[i] = new float[npts+2];
+    fft_prf[i] = new float[npts+2];
+    xcorr_amps[i] = new float[npt2];
+    xcorr_phases[i] = new float[npt2];
 
     assert (fft_std[i]!=0 && fft_prf[i]!=0 && 
 	    xcorr_amps[i]!=0 && xcorr_phases[i]!=0);
@@ -80,7 +80,10 @@ int Pulsar::model_profile (int npts, int narrays, float** prf, float** std,
   double low_tau = 0, low_deriv_chisq = 0, high_tau = 0, high_deriv_chisq = 0;
   int start_bin = 32;
 
-  for(int nsum=start_bin; nsum<npt2; nsum*=2){
+  // allow this loop index to go all the way up to npts/2, the second loop will
+  // ensure the that the old Nyquist index is not accessed
+
+  for (int nsum=start_bin; nsum<=npt2; nsum*=2) {
     dtau = 2*M_PI/(float)(5.0*nsum);
     edtau = 1.0/(float)(2.0*nsum+1.0);
     if(nsum>npts/4.0) edtau = .00001;
@@ -90,7 +93,7 @@ int Pulsar::model_profile (int npts, int narrays, float** prf, float** std,
     while(low == 0 || high == 0){ 
       deriv_chisq = 0;
       for(i=0; i<narrays; ++i)
-	for(int iter=1; iter<=nsum; ++iter)
+	for(int iter=1; iter<nsum; ++iter)
 	  deriv_chisq+=iter*xcorr_amps[i][iter]*sin(-xcorr_phases[i][iter]+iter*tau);
       ntries++;
       if(deriv_chisq<0){
@@ -134,9 +137,14 @@ int Pulsar::model_profile (int npts, int narrays, float** prf, float** std,
     }
   }
 
-  if ((s1==0 || s2<=0 || s3<=0) && verbose) {
-    cerr << "model_profile: partial sums s1=" << s1 << " s2=" << s2 
-	 << " s3=" << s3 << endl;
+  if (s1<=0 || s2==0 || s3<=0) {
+    cerr << "model_profile: aborting before floating point exception" << endl;
+    if (s1<=0)
+      cerr << "  Numerator to Equation A9 = " << s1 << endl;
+    if (s2==0)
+      cerr << "  Denominator to Equations A9 and A11 equals zero" << endl;
+    if (s3<=0)
+      cerr << "  Denominator to Equation A10 = " << s3 << endl;
     return -1;
   }
 
@@ -179,7 +187,8 @@ int Pulsar::model_profile (int npts, int narrays, float** prf, float** std,
   delete [] fft_prf;
   delete [] xcorr_amps;
   delete [] xcorr_phases;
-  return(0);
+
+  return 0;
 }
 
 double Pulsar::zbrent(float low_tau, float high_tau,
