@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Archive.h,v $
-   $Revision: 1.25 $
-   $Date: 2002/04/26 05:58:59 $
+   $Revision: 1.26 $
+   $Date: 2002/04/26 13:29:12 $
    $Author: pulsar $ */
 
 /*! \mainpage 
@@ -294,7 +294,13 @@ namespace Pulsar {
     void telescope_coordinates (float* latitude = 0,
 				float* longitude = 0,
 				float* elevation = 0) const;
-    
+
+    //! Returns a block of amplitudes ordered according to the specified axis
+    void get_amps (vector<float>& amps,
+		   Dimension::Axis x1 = Dimension::Phase,
+		   Dimension::Axis x2 = Dimension::Frequency,
+		   Dimension::Axis x3 = Dimension::Poln) const;
+
     // //////////////////////////////////////////////////////////////////
     //
     // pure virtual methods - must be implemented by children
