@@ -14,7 +14,8 @@
   of the file. */
 Pulsar::Integration* 
 Pulsar::FITSArchive::load_Integration (const char* filename, unsigned isubint)
-{
+try {
+
   if (!filename)
     throw Error (InvalidParam, "FITSArchive::load_Integration",
 		 "filename unspecified");
@@ -104,12 +105,12 @@ Pulsar::FITSArchive::load_Integration (const char* filename, unsigned isubint)
   if (status != 0)
     throw FITSError (status, "FITSArchive::load_Integration", 
 		     "fits_read_col OFFS_SUB");
-  
+
   newmjd = reference_epoch + time;
   
   // Set the folding period
 
-  if (model) {
+  if (model && duration) {
 
     integ->set_folding_period (model->period(newmjd));
 
@@ -308,4 +309,7 @@ Pulsar::FITSArchive::load_Integration (const char* filename, unsigned isubint)
   fits_close_file(sfptr,&status);
 
   return integ;
+}
+catch (Error& error) {
+  throw error += "Pulsar::FITSArchive::load_Integration";
 }
