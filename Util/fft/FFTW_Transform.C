@@ -8,6 +8,8 @@
 
 #include "FFTW_Transform.h"
 
+#include "psrfft.h"
+
 int FTransform::fftw_initialise(){
   frc1d_calls.push_back( &fftw_frc1d );
   fcc1d_calls.push_back( &fftw_fcc1d );
@@ -111,7 +113,7 @@ int FTransform::fftw_frc1d(unsigned ndat, float* dest, float* src){
 
   rfftw_one (*(rfftw_plan*)plan->plan, (fftw_real*)src,
 	     (fftw_real*)plan->tmp);
-  rfftw_resort(ndat, plan->tmp, dest);
+  rfftw_sort(ndat, plan->tmp, dest);
 
   return 0;
 }
