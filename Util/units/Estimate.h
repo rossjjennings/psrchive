@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Estimate.h,v $
-   $Revision: 1.25 $
-   $Date: 2004/11/23 12:14:35 $
+   $Revision: 1.26 $
+   $Date: 2004/12/15 06:51:36 $
    $Author: straten $ */
 
 #ifndef __Estimate_h
@@ -228,6 +228,26 @@ class MeanRadian
 {
 
  public:
+
+  //! Default constructor
+  MeanRadian ();
+
+  //! Copy constructor
+  MeanRadian (const MeanRadian& mean)
+  { operator = (mean); }
+
+  //! Assignment operator
+  const MeanRadian& operator= (const MeanRadian& mean)
+  { cosine = mean.cosine; sine = mean.sine; return *this; }
+
+  //! Construct from an Estimate
+  MeanRadian (const Estimate<T,U>& d)
+  { operator = (d); }
+
+  //! Assignment operator, Estimate represents a value in radians
+  const MeanRadian& operator= (const Estimate<T,U>& d)
+  { cosine = cos(d); sine = sin(d); return *this; }
+
   //! Addition operator
   const MeanRadian& operator+= (const MeanRadian& d)
   { cosine += d.cosine; sine += d.sine; return *this; }
