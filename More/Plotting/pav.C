@@ -158,6 +158,17 @@ int main (int argc, char** argv)
     cpgsch (2.0);
   }
 
+#ifdef HEAT
+
+  float heat_l[] = {0.0, 0.2, 0.4, 0.6, 1.0};
+  float heat_r[] = {0.0, 0.5, 1.0, 1.0, 1.0};
+  float heat_g[] = {0.0, 0.0, 0.5, 1.0, 1.0};
+  float heat_b[] = {0.0, 0.0, 0.0, 0.3, 1.0};
+  
+  cpgctab(heat_l, heat_r, heat_g, heat_b, 4, 1.0, 0.5);
+
+#endif
+
   Pulsar::Archive* archive = 0;
 
   Pulsar::Error::handle_signals ();
@@ -166,7 +177,7 @@ int main (int argc, char** argv)
 
   for (unsigned ifile=0; ifile < filenames.size(); ifile++) try {
 
-    archive = Pulsar::Archive::factory (filenames[ifile]);
+    archive = Pulsar::Archive::load (filenames[ifile]);
 
     if (bscrunch > 0) {
       if (stopwatch)
