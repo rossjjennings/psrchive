@@ -10,13 +10,17 @@ LIBRARY = libarchive.a
 
 LIB_SRCS = profile.C sub_int.C archive.C superarchive.C  \
 	toa.C archive_toa.C sub_int_toa.C profile_toa.C \
-	profplot.C plot2profs.C scintplot.C misc.C heapsort.C \
+	misc.C heapsort.C \
 	archhdr.C convert_endian.c headers.C \
-	timer++.C mini++.C profile_pgplot.C sub_int_pgplot.C archive_pgplot.C \
-	poln_profile.C faraday_course.C \
+	timer++.C mini++.C poln_profile.C faraday_course.C \
 	ffft.f fftfit.f brent.f fccf.f cprof.f shiftbyfft.f \
 	width.f tsky1.f fftconv.f scan_fort_val.f convolve.f \
 	galrot.C getvel.C
+
+ifeq ($(has_PGPLOT),yes)
+LIB_SRCS += profile_pgplot.C sub_int_pgplot.C archive_pgplot.C \
+	profplot.C plot2profs.C scintplot.C 
+endif
 
 LDFLAGS += -larchive -ltempo++ -lpolyco -leph -ltimes \
 	-lgenutil -lsla $(LFFT) $(LF77) -lm

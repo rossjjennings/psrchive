@@ -24,7 +24,7 @@ testrnd8.LDFLAGS:= $(LDFLAGS) -leph
 # ######################################################################
 # PSRFITS specific code
 #
-ifeq (${PSRFITS},yes)
+ifeq ($(has_CFITS),yes)
 
 LIB_SRCS += fitsio.C
 TESTS += test_psrephem_fitsio.C
