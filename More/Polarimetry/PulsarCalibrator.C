@@ -165,6 +165,7 @@ void Pulsar::PulsarCalibrator::add_observation (const Archive* data)
 
       model[ichan]->fit( integration->new_PolnProfile (ichan) );
       solution[ichan]->integrate( transformation[ichan] );
+      solution[ichan]->update( transformation[ichan] );
 
     }
     catch (Error& error) {
