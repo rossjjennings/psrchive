@@ -29,6 +29,7 @@ void usage ()
     " -a archive set the output archive class name\n"
     " -c ICHAN   mark ICHAN as bad\n"
     " -C         plot only calibrator Stokes\n"
+    " -D dev     specify PGPLOT device\n"
     " -f         treat all archives as members of a fluxcal observation\n"
     " -q         use the single-axis model\n"
     " -P         produce publication-quality plots" << endl;
@@ -54,12 +55,14 @@ int main (int argc, char** argv)
   // produce publication quality plots
   bool publication = false;
 
-  bool calibrator_stokes_only = false;
+  bool plot_calibrator_stokes = false;
+
+  string device = "?";
 
   // verbosity flag
   bool verbose = false;
   char c;
-  while ((c = getopt(argc, argv, "a:c:ChfMPqvV")) != -1)  {
+  while ((c = getopt(argc, argv, "a:c:CD:hfMPqvV")) != -1)  {
 
     switch (c)  {
 
@@ -92,7 +95,11 @@ int main (int argc, char** argv)
     }
       
     case 'C':
-      calibrator_stokes_only = true;
+      plot_calibrator_stokes = true;
+      break;
+
+    case 'D':
+      device = optarg;
       break;
 
     case 'f':
@@ -135,7 +142,7 @@ int main (int argc, char** argv)
     for (int ai=optind; ai<argc; ai++)
       dirglob (&filenames, argv[ai]);
 
-  cpgbeg (0, "?", 0, 0);
+  cpgbeg (0, device.c_str(), 0, 0);
   cpgask(1);
 
   cpgsvp (.1,.9, .1,.9);
@@ -176,7 +183,7 @@ int main (int argc, char** argv)
       cerr << "pacv: Archive Calibrator with nchan=" 
 	   << calibrator->get_nchan() << endl;
 
-      if (!calibrator_stokes_only) {
+      if (!plot_calibrator_stokes) {
 
 	for (unsigned ichan=0; ichan<zapchan.size(); ichan++)
 	  calibrator->set_Transformation_invalid (zapchan[ichan]);
@@ -186,10 +193,12 @@ int main (int argc, char** argv)
 	
 	cpgpage ();
 	plotter.plot (calibrator);
-	
-      }
 
-      calibrator_stokes = input->get<Pulsar::CalibratorStokes>();
+        calibrator_stokes = 0;
+
+      }
+      else
+        calibrator_stokes = input->get<Pulsar::CalibratorStokes>();
 
       if (calibrator_stokes) {
 
