@@ -131,6 +131,11 @@ void Pulsar::ReceptionCalibrator::init_estimate (SourceEstimate& estimate)
 }
 
 
+//! Get the number of pulsar phase bin input polarization states
+unsigned Pulsar::ReceptionCalibrator::get_nstate_pulsar () const
+{
+  return pulsar.size();
+}
 
 //! Get the total number of input polarization states
 unsigned Pulsar::ReceptionCalibrator::get_nstate () const
@@ -198,6 +203,7 @@ void Pulsar::ReceptionCalibrator::add_observation (const Archive* data)
 	measurements.back().state_index = istate;
       }
 
+      equation[ichan]->get_model()->set_path (0);
       equation[ichan]->add_measurement (epoch, measurements);
     }
   }
@@ -278,9 +284,7 @@ void Pulsar::ReceptionCalibrator::add_PolnCalibrator (const PolnCalibrator* p)
     // add the calibrator state
     Stokes<double> cal_state (1,0,1,0);
 
-    calibrator_state_index = equation[0]->get_model()->get_nstate ();
-
-cerr << "Cal state index" << calibrator_state_index << endl;
+    calibrator_state_index = get_nstate ();
 
     PolnCalibrator_path = equation[0]->get_nbackend();
 
@@ -334,6 +338,7 @@ cerr << "Cal state index" << calibrator_state_index << endl;
 
       state.state_index = calibrator_state_index;
 
+      equation[ichan]->get_model()->set_path (PolnCalibrator_path);
       equation[ichan]->add_measurement (epoch, state);
 
     }

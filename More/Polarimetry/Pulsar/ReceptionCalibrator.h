@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ReceptionCalibrator.h,v $
-   $Revision: 1.17 $
-   $Date: 2003/05/21 13:01:05 $
-   $Author: straten $ */
+   $Revision: 1.18 $
+   $Date: 2003/05/22 06:47:12 $
+   $Author: pulsar $ */
 
 #ifndef __ReceptionCalibrator_H
 #define __ReceptionCalibrator_H
@@ -42,6 +42,9 @@ namespace Pulsar {
       
     //! Add the specified pulse phase bin to the set of state constraints
     void add_state (unsigned pulse_phase_bin);
+
+    //! Get the number of pulsar phase bin input polarization states
+    unsigned get_nstate_pulsar () const;
 
     //! Get the total number of input polarization states (pulsar and cal)
     unsigned get_nstate () const;
