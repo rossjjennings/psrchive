@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/pgutil/Plot3D.h,v $
-   $Revision: 1.1 $
-   $Date: 2001/02/25 06:26:00 $
+   $Revision: 1.2 $
+   $Date: 2001/08/19 14:44:17 $
    $Author: straten $*/
 
 #ifndef __CurvePlotter2D3_H
@@ -22,10 +22,6 @@ namespace Plot2D {
     CurvePlotter3() { init(); }
     virtual ~CurvePlotter3() {}
     
-    CurvePlotter3 (const Cartesian& frame_bottom_left, 
-		   const Cartesian& frame_top_right)
-    : Plot2D::Volume (frame_bottom_left, frame_top_right) { init(); }
-    
     // override virtual method of PlotVolume2D base class
     void painter();
     // need this in order to get world coordinates set by DataSets
@@ -39,10 +35,14 @@ namespace Plot2D {
     void plot (const Cartesian& pt, int symbol);
     void text (const Cartesian& pt, const char* text);
 
+    void arrow (const Cartesian& from, const Cartesian& to);
+
     void poly (const vector<Cartesian>& pts);
 
     // set camera position - phi and theta in degrees
     void set_camera (double theta, double phi);
+
+    void where (float& x, float& y, const Cartesian& pt);
 
   protected:
     Cartesian vx_axis;

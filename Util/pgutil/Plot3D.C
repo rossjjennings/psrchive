@@ -3,6 +3,12 @@
 
 #include "CurvePlotter2D3.h"
 
+void Plot2D::CurvePlotter3::where (float& x, float& y, const Cartesian& pt)
+{
+  x = pt * vx_axis;
+  y = pt * vy_axis;
+}
+
 void Plot2D::CurvePlotter3::poly (const vector<Cartesian>& pts)
 {
   if (pts.size() == 0)
@@ -69,6 +75,16 @@ void Plot2D::CurvePlotter3::text (const Cartesian& pt, const char* text)
 
 }
 
+void Plot2D::CurvePlotter3::arrow (const Cartesian& from, const Cartesian& to)
+{
+  float fx = from * vx_axis;
+  float fy = from * vy_axis;
+  float tx = to * vx_axis;
+  float ty = to * vy_axis;
+
+  cpgarro (fx, fy, tx, ty);
+}
+
 // set camera position - phi and theta in degrees
 void Plot2D::CurvePlotter3::set_camera (double theta, double phi)
 {
@@ -128,16 +144,16 @@ void Plot2D::CurvePlotter3::drawPlot (DataSet* plot)
     cerr << "Plot2D::CurvePlotter::drawPlot " << npts << " points" << endl;
   
   if (Plot2D::Volume::verbose || DataManager::verbose) {
-    if (plot->getPlotType() == DataSet::PointScatter)
+    if (plot->getPlotType() == DataSet::Points)
       cerr << "Plot2D::CurvePlotter::drawPlot single points" << endl;
-    else if (plot->getPlotType() == DataSet::PointJoin)
+    else if (plot->getPlotType() == DataSet::Line)
       cerr << "Plot2D::CurvePlotter::drawPlot join points" << endl;
     else
       cerr << "Plot2D::CurvePlotter::drawPlot"
 	" unsupported DataSet::PlotType" << endl;
   }
 
-  bool lines = plot->getPlotType() == DataSet::PointJoin;
+  bool lines = plot->getPlotType() != DataSet::Points;
   bool first = true;
 
   Cartesian error;
