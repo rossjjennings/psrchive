@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/PSRFITS/Pulsar/FITSArchive.h,v $
-   $Revision: 1.11 $
-   $Date: 2003/08/18 07:36:06 $
+   $Revision: 1.12 $
+   $Date: 2003/08/21 03:00:56 $
    $Author: ahotan $ */
 
 #include <fitsio.h>
@@ -80,7 +80,13 @@ namespace Pulsar {
     
     //! Return a pointer to the specified extension
     const Extension* get_extension (unsigned iextension) const;
-
+    
+    //! Set the dispersion measure (in \f${\rm pc cm}^{-3}\f$)
+    void set_dispersion_measure (double dm);
+    
+    //! Get the dispersion measure (in \f${\rm pc cm}^{-3}\f$)
+    double get_dispersion_measure () const;
+    
   protected:
 
     friend class Archive::Advocate<FITSArchive>;

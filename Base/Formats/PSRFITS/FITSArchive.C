@@ -989,11 +989,6 @@ void Pulsar::FITSArchive::load_header (const char* filename)
     cerr << "FITSArchive::load_header ephemeris loaded" 
 	 << endl;
   
-  // Set the dispersion measure
-  
-  double dispmeas = ephemeris.get_dm();
-  set_dispersion_measure(dispmeas);
-  
   // Load the polyco from the FITS file
   
   model.load(fptr);
@@ -2172,6 +2167,15 @@ bool Pulsar::FITSArchive::Agent::advocate (const char* filename)
 // ///////////////
 // ///////////////
 
+void Pulsar::FITSArchive::set_dispersion_measure (double dm)
+{
+  ephemeris.set_dm(dm);
+}
+
+double Pulsar::FITSArchive::get_dispersion_measure () const
+{
+  return ephemeris.get_dm();
+}
 
 // !A quick little helper function for internal use.
 // /////////////////////////////////////////////////
