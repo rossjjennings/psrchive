@@ -37,11 +37,14 @@ int main (int argc, char *argv[]) {
   bool smear = false;
   float smear_dc = 0.0;
 
+  bool rotate = false;
+  double rphase = 0.0;
+
   bool pscr = false;
 
   int gotc = 0;
   
-  while ((gotc = getopt(argc, argv, "hvVme:TFpt:f:b:d:s:w:")) != -1) {
+  while ((gotc = getopt(argc, argv, "hvVme:TFpt:f:b:d:s:r:w:")) != -1) {
     switch (gotc) {
     case 'h':
       cout << "A program for manipulating Pulsar::Archives"            << endl;
@@ -59,6 +62,7 @@ int main (int argc, char *argv[]) {
       cout << "  -b [int f]       Bin scrunch by a factor of f"        << endl;
       cout << "  -d [float dm]    Dedisperse to dm"                    << endl;
       cout << "  -s [float c]     Smear with duty cycle c"             << endl;
+      cout << "  -r [float p]     Rotate profiles by phase p"          << endl;
       cout << "  -w [float w]     Reset all profile weights to w"      << endl;
       return (-1);
       break;
@@ -124,6 +128,17 @@ int main (int argc, char *argv[]) {
 	return -1;
       }
       break;
+    case 'r':
+      rotate = true;
+      if (sscanf(optarg, "%lf", &rphase) != 1) {
+	cout << "That is not a valid rotation phase." << endl;
+	return -1;
+      }
+      if (rphase <= 0.0 || rphase >= 1.0) {
+	cout << "That is not a valid rotation phase." << endl;
+	return -1;
+      }
+      break;
     case 'w':
       reset_weights = true;
       if (sscanf(optarg, "%f", &new_weight) != 1) {
@@ -164,7 +179,12 @@ int main (int argc, char *argv[]) {
 	if (verbose)
 	  cout << "All profile weights set to " << new_weight << endl;
       }
-
+      
+      if (rotate) {
+	double period = arch->get_Integration(0)->get_folding_period();
+	arch->rotate(period*rphase);
+      }
+      
       if (dedisperse) {
 	arch->dedisperse(dm,arch->get_centre_frequency());
 	if (verbose)
