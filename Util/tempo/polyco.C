@@ -176,12 +176,13 @@ int polynomial::unload (string* outstr) const
   int bytes = 0;
 
   if(tempov11)
-    bytes += sprintf(numstr, "%-10.9s%9.9s%12.12s%22s%19f%7.3lf%7.3lf\n", 
-	    psrname.c_str(), date.c_str(), utc.c_str(), reftime.strtempo(),
-	    dm, doppler_shift, log_rms_resid);
+    bytes += sprintf(numstr, "%-10.9s%9.9s%12.12s%22s%19f%7.3lf%7.3lf\n",
+          psrname.c_str(), date.c_str(), utc.c_str(), reftime.strtempo(),
+          dm, doppler_shift, log_rms_resid);
   else
-    bytes += sprintf(numstr, "%-10.9s%9.9s%12.12s%22s%19f\n", 
-	    psrname.c_str(), date.c_str(), utc.c_str(), reftime.strtempo(),dm);    
+    bytes += sprintf(numstr, "%-10.9s%9.9s%12.12s%22s%19f\n",
+          psrname.c_str(), date.c_str(), utc.c_str(), reftime.strtempo(),dm); 
+
   *outstr += numstr;
   
   if(binary)
