@@ -29,5 +29,5 @@ libpsrutils_la_LIBADD   = units/libunits.la psrfft/libpsrfft.la \
 all: intermediate-install
 
 intermediate-install:
-	$(MAKE) prefix=.. install-data
+	CPPROG="cp -p" $(MAKE) prefix=.. install-data
 
