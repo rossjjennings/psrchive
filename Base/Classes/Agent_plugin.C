@@ -12,8 +12,12 @@ void Pulsar::Archive::Agent::plugin_load ()
   }
 
   char* env = getenv ("PSRCHIVE_PLUGINS");
-  if (env)
+  if (env) {
+    if (verbose)
+      cerr << "Pulsar::Archive::Agent::plugin_load"
+              " PSRCHIVE_PLUGINS=" << env <<endl;
     plugins.load (env);
+  }
 
   if (plugins.ok.size() == 0)
     plugins.load (plugin_path ("CVSHOME"));

@@ -44,6 +44,9 @@ void Pulsar::Archive::Agent::report ()
 
 void Pulsar::Archive::Agent::init ()
 {
+  if (verbose)
+    cerr << "Pulsar::Archive::Agent::init <dynamic>" << endl;
+
   Pulsar::BasicArchive::ensure_linkage();
 
   if (!loaded)
