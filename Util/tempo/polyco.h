@@ -63,8 +63,8 @@ public:
   MJD    iphase            (const Phase& p) const;
   double frequency         (const MJD &t) const;
   double chirp             (const MJD &t) const; // d/dt frequency (s^-2)
-  double accel             (const MJD &t) const // apparrent los accel (m s^-2)
-                              { return -chirp(t)/frequency(t)*2.9979e8; }
+  double accel             (const MJD &t) const // apparrent accel (m s^-2)
+  { return chirp(t)/frequency(t)*2.9979e8; }    // toward observer
   bool   is_tempov11       () const {return (tempov11);};
   int    get_telescope     () const {return (telescope);};
   double get_freq          () const {return (freq);};
