@@ -1,5 +1,5 @@
-#ifndef __PolnProfile_h
-#define __PolnProfile_h
+#ifndef __Pulsar_PolnProfile_h
+#define __Pulsar_PolnProfile_h
 
 #include "Reference.h"
 #include "Stokes.h"
@@ -32,20 +32,25 @@ namespace Pulsar {
 
     //! Construct from four externally-managed Profile objects
     PolnProfile (Signal::Basis basis, Signal::State state,
-		 Reference::To<Profile>& p0, Reference::To<Profile>& p1,
-		 Reference::To<Profile>& p2, Reference::To<Profile>& p3);
+		 Profile* p0, Profile* p1, Profile* p2, Profile* p3);
     
     //! Destructor
     ~PolnProfile();
     
+    //! Get the number of bins
+    unsigned get_nbin () const;
+
+    //! Returns a pointer to the start of the array of amplitudes
+    const float* get_amps (unsigned ipol) const;
+
+    //! Get the State of the poln profile
+    Signal::State get_state () const { return state; }
+
     //! Get the Stokes 4-vector for the specified bin
     Stokes<float> get_Stokes (unsigned ibin);
 
     //! Set the Stokes 4-vector for the specified bin
     void set_Stokes (unsigned ibin, const Stokes<float>& stokes);
-
-    //! Get the State of the poln profile
-    Signal::State get_state () const { return state; }
 
     //! Perform the congruence transformation on each bin of the profile
     template <typename T> void transform (const Jones<T>& response);
@@ -61,7 +66,7 @@ namespace Pulsar {
     Signal::State state;
 
     //! References to the polarimetric profiles
-    Reference::To<Profile> &p0, &p1, &p2, &p3;
+    Reference::To<Profile> profile[4];
 
     //! Efficiently forms the inplace sum and difference of two profiles
     void sum_difference (Profile* sum, Profile* difference);
@@ -69,9 +74,6 @@ namespace Pulsar {
     //! Set everthing to null values
     void init ();
 
-  private:
-    //! Empty reference used for null constructor
-    static Reference::To<Profile> null;
   };
 
 }
