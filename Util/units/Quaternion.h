@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Quaternion.h,v $
-   $Revision: 1.5 $
-   $Date: 2003/01/30 16:18:53 $
+   $Revision: 1.6 $
+   $Date: 2003/01/30 16:26:21 $
    $Author: straten $ */
 
 #ifndef __Quaternion_H
@@ -165,11 +165,20 @@ Quaternion<T,Unitary> conj (const Quaternion<T,Unitary>& j)
 }
 
 
-//! Returns the Hermitian transpose of a Hermitian Quaternion
+//! Returns the Hermitian transpose of a Hermitian matrix
 template<typename T>
 Quaternion<T, Hermitian> herm (const Quaternion<T,Hermitian>& j)
 {
   return j;
+}
+
+//! Returns the Hermitian transpose of a biquaternion in Hermitian basis
+template<typename T>
+Quaternion<complex<T>,Hermitian>
+herm (const Quaternion<complex<T>,Hermitian>& j)
+{
+  return Quaternion<complex<T>,Hermitian>
+    (conj(j.s0), conj(j.s1), conj(j.s2), conj(j.s3));
 }
 
 //! Returns the Hermitian transpose of a Unitary Quaternion
