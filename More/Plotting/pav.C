@@ -1,5 +1,5 @@
 //
-// $Id: pav.C,v 1.60 2003/10/27 12:25:25 straten Exp $
+// $Id: pav.C,v 1.61 2003/10/27 17:49:01 ahotan Exp $
 //
 // The Pulsar Archive Viewer
 //
@@ -49,8 +49,9 @@ void usage ()
     " -c map    Choose a colour map\n"
     " -M meta   Read a meta-file containing the list of filenames\n"
     " -s std    Select a standard profile\n"
-    " -P        Select which polarization to display\n"
-    " -I        Select which subint to display\n"
+    " -H chan   Select which frequency channel to display\n"
+    " -P pol    Select which polarization to display\n"
+    " -I subint Select which subint to display\n"
     " -W        Change colour scheme to suite white background\n"
     " -z x1,x2  Zoom to this pulse phase range\n"
     " -k f1,f2  Zoom to this frequency range\n"
@@ -232,7 +233,7 @@ int main (int argc, char** argv)
       plotter.set_subint( atoi (optarg) );
       break;
     case 'i':
-      cout << "$Id: pav.C,v 1.60 2003/10/27 12:25:25 straten Exp $" << endl;
+      cout << "$Id: pav.C,v 1.61 2003/10/27 17:49:01 ahotan Exp $" << endl;
       return 0;
 
     case 'j':
