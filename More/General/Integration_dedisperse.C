@@ -43,6 +43,9 @@ void Pulsar::Integration::dedisperse (double frequency, int chan)
   double dm = get_dispersion_measure();
   double pfold = get_folding_period();
 
+  if (verbose)
+    cerr << "Integration::dedisperse dm=" << dm << " pfold=" << pfold << endl;
+
   if (dm == 0)
     return;
   if (pfold == 0)
@@ -55,6 +58,10 @@ void Pulsar::Integration::dedisperse (double frequency, int chan)
   if (frequency == 0.0)
     throw Error (InvalidParam, "Integration::dedisperse",
 		 "frequency == 0.0");
+
+  if (verbose)
+    cerr << "Integration::dedisperse chan=" 
+	 << chan << " npol=" << get_npol() << endl;
 
   for (int ipol=0; ipol < get_npol(); ipol++)
     profiles[ipol][chan] -> dedisperse (dm, frequency, pfold);

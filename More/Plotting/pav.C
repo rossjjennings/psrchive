@@ -169,8 +169,6 @@ int main (int argc, char** argv)
       archive -> get_Profile(0,0,0) -> display();
     
     if (greyfreq) {
-      archive -> tscrunch ();
-      archive -> pscrunch ();
       string tempstr = archive -> get_source();
       Pulsar::plot_greyscale (archive -> get_Integration (0), tempstr);
     }

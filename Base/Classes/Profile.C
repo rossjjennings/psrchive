@@ -217,6 +217,12 @@ const Pulsar::Profile& Pulsar::Profile::operator *= (float factor)
 */
 void Pulsar::Profile::rotate (double phase)
 {
+  if (verbose)
+    cerr << "Profile::rotate phase=" << phase << " nbin=" << nbin << endl;
+
+  if (phase == 0.0)
+    return;
+
   if ( fft_shift (nbin, amps, phase*double(nbin)) !=0 )
     throw Error (FailedCall, "Pulsar::Profile::rotate",
 		 "fft_shift(%lf) failure", phase);
@@ -236,7 +242,16 @@ void Pulsar::Profile::rotate (double phase)
 */
 void Pulsar::Profile::dedisperse (double dm, double ref_freq, double pfold)
 {
-  rotate (dispersion_delay (dm, ref_freq, centrefreq) / pfold);
+  if (verbose)
+    cerr << "Profile::dedisperse dm=" << dm << " pfold=" << pfold 
+	 << " ref_freq=" << ref_freq << endl;
+
+  double delay = dispersion_delay (dm, ref_freq, centrefreq);
+
+  if (verbose)
+    cerr << "Profile::dedisperse delay=" << delay << " seconds" << endl;
+
+  rotate (delay / pfold);
   set_centre_frequency (ref_freq);
 }
 

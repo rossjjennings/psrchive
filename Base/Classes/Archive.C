@@ -73,7 +73,10 @@ void Pulsar::Archive::resize (int nsubint, int npol, int nchan, int nbin)
     cerr << "Pulsar::Archive::resize exit" << endl;
 }
 
-//! Return a pointer to the integration
+/*!
+  \param subint the index of the requested Integration
+  \return pointer to Integration instance
+*/
 Pulsar::Integration* Pulsar::Archive::get_Integration (unsigned subint)
 {
   if (subint < subints.size())
@@ -83,7 +86,13 @@ Pulsar::Integration* Pulsar::Archive::get_Integration (unsigned subint)
 	       "isubint=%u nsubint=%u", subint, subints.size());
 }
 
-//! Return a pointer to the profile
+//! Return a pointer to the Profile
+/*!
+  \param subint the index of the requested Integration
+  \param pol the index of the requested polarization
+  \param chan the index of the requested frequency channel
+  \return pointer to Profile instance
+*/
 Pulsar::Profile* 
 Pulsar::Archive::get_Profile (unsigned subint, int pol, int chan)
 {
@@ -106,6 +115,7 @@ void Pulsar::Archive::init_Integration (Integration* subint)
 }
 
 /*!
+  Simply calls Integration::bscrunch on each element of subints
   \param nscrunch the number of phase bins to add together
   */
 void Pulsar::Archive::bscrunch (int nscrunch)
@@ -120,10 +130,10 @@ void Pulsar::Archive::bscrunch (int nscrunch)
 }
 
 /*!
-  \param nscrunch 
-  \param weighted_cfreq
+  Simply calls Integration::fscrunch on each element of subints
+  \param nscrunch the number of frequency channels to add together
   */
-void Pulsar::Archive::fscrunch (int nscrunch, bool weighted_cfreq)
+void Pulsar::Archive::fscrunch (int nscrunch)
 {
   if (subints.size() == 0)
     return;
@@ -135,6 +145,9 @@ void Pulsar::Archive::fscrunch (int nscrunch, bool weighted_cfreq)
 }
 
 
+/*!
+  Simply calls Integration::pscrunch on each element of subints
+*/
 void Pulsar::Archive::pscrunch()
 {
   if (subints.size() == 0)
@@ -147,9 +160,9 @@ void Pulsar::Archive::pscrunch()
   set_poln_state ( subints[0] -> get_poln_state() );
 }
 
-/*
+/*!
   Uses the polyco model, as well as the centre frequency and mid-time of
-  each Integration to determine the predicted pulse phase
+  each Integration to determine the predicted pulse phase.
  */
 void Pulsar::Archive::centre ()
 {

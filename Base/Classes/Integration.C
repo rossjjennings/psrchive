@@ -150,6 +150,20 @@ Pulsar::Profile* Pulsar::Integration::get_Profile (int ipol, int ichan)
   return profiles[ipol][ichan];
 }
 
+const Pulsar::Profile*
+Pulsar::Integration::get_Profile (int ipol, int ichan) const
+{
+  if (ipol < 0 || ipol>=get_npol())
+    throw Error (InvalidRange, "Integration::get_Profile",
+		 "ipol=%d npol=%d", ipol, get_npol());
+
+  if (ichan < 0 || ichan>=get_nchan())
+    throw Error (InvalidRange, "Integration::get_Profile",
+		 "ichan=%d nchan=%d", ichan, get_nchan());
+
+  return profiles[ipol][ichan];
+}
+
 //! Get the frequency of the given channel
 /*!
   \param ichan the index of the channel to get

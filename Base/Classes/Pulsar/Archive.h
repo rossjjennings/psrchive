@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Archive.h,v $
-   $Revision: 1.23 $
-   $Date: 2002/04/23 16:40:14 $
+   $Revision: 1.24 $
+   $Date: 2002/04/25 13:06:37 $
    $Author: pulsar $ */
 
 /*! \mainpage 
@@ -213,7 +213,7 @@ namespace Pulsar {
     virtual void pscrunch();
 
     //! Integrate profiles in frequency
-    virtual void fscrunch (int nscrunch=0, bool weighted_cfreq=true);
+    virtual void fscrunch (int nscrunch=0);
 
     //! Integrate profiles in time
     virtual void tscrunch (unsigned nscrunch=0);

@@ -42,13 +42,22 @@ void Pulsar::Archive::tscrunch (unsigned nscrunch)
 
       for (int ichan=0; ichan < get_nchan(); ichan++) {
 
+	if (verbose) 
+	  cerr << "Pulsar::Archive::tscrunch " << isub+1 << "/" << newsub 
+	       << " calculate weighted_frequency"<< endl;
+
 	double cfreq = weighted_frequency (ichan, start, start+nscrunch);
+
+	if (verbose) 
+	  cerr << "Pulsar::Archive::tscrunch " << isub+1 << "/" << newsub 
+	       << " dedisperse cfreq=" << cfreq << endl;
 
 	for (unsigned iadd=0; iadd < nscrunch; iadd++)
 	  subints[start+iadd] -> dedisperse (cfreq, ichan);
 
 	if (verbose) 
-	  cerr <<  "Pulsar::Archive::tscrunch - summing profiles" << endl;
+	  cerr <<  "Pulsar::Archive::tscrunch " << isub+1 << "/" << newsub 
+	       << " summing profiles" << endl;
 	
 	for (int ipol=0; ipol < get_npol(); ++ipol) {
 
@@ -166,6 +175,10 @@ double Pulsar::Archive::weighted_frequency (int ichan, int start, int end)
       double freq   = prof->get_centre_frequency();
       double weight = prof->get_weight();
       
+      if (verbose)
+	cerr << "Archive::weighted_frequency [" << isubint << "]"
+	  " freq=" << freq << " wt=" << weight << endl;
+
       if (weight_by_duration)
 	weight *= subints[isubint]->get_duration();
       
