@@ -7,7 +7,7 @@ COMMENT   Astrophysics Supplement Series v44/p363, v44/p371, v73/p359, v73/p365.
 COMMENT   Contact the NASA Science Office of Standards and Technology for the
 COMMENT   FITS Definition document #100 and other FITS information.
 COMMENT
-HDRVER  = '1.7             '   / Header version 
+HDRVER  = '1.8             '   / Header version 
 DATE    = '                '   / File creation date (YYYY-MM-DDThh:mm:ss UTC)
 OBSERVER= '                '   / Observer name(s)
 PROJID  = '                '   / Project name
@@ -31,8 +31,7 @@ STP_CRD1= '                '   / Stop coord 1 (hh:mm:ss.sss or ddd.ddd)
 STP_CRD2= '                '   / Stop coord 2 (-dd:mm:ss.sss or -dd.ddd) 
 SCANLEN = *                    / [s] Requested scan length (E)
 FD_MODE = '                '   / Feed track mode - Const FA, CPA, GPA
-FA_OFFS = *                    / [deg] Feed angle offset (E)
-ATT_MODE= '                '   / Attenuator mode (AUTO, FIX)
+FA_REQ  = *                    / [deg] Feed/Posn angle requested (E)
 ATTEN_A = *                    / [db] Attenuator, Poln A (E)
 ATTEN_B = *                    / [db] Attenuator, Poln B (E)
 CAL_MODE= '                '   / Cal mode (OFF, SYNC, EXT1, EXT2)
@@ -53,7 +52,7 @@ NAXIS1  =                    *  / width of table in bytes
 NAXIS2  =                    1 / number of rows - incremented with each operation
 PCOUNT  =                    0 / size of special data area
 GCOUNT  =                    1 / one data group (required keyword)
-TFIELDS =                   21 / number of fields per row
+TFIELDS =                   18 / number of fields per row
 EXTNAME = 'HISTORY'            / name of this binary table extension
 TTYPE1  = 'DATE_PRO'           / Processing date and time (YYYY-MM-DDThh:mm:ss UTC)
 TFORM1  = '24A     '           / 24-char string
@@ -87,20 +86,14 @@ TTYPE13 = 'RM_CORR '           / RM correction applied
 TFORM13 = '1I      '           / Integer flag 
 TTYPE14 = 'DEDISP  '           / Data dedispersed
 TFORM14 = '1I      '           / Integer flag 
-TTYPE15 = 'SC_PWR  '           / Scattered power correction applied
-TFORM15 = '1I      '           / Integer flag 
-TTYPE16 = 'SC_MTHD '           / Scattered power correction method
+TTYPE15 = 'SC_MTHD '           / Scattered power correction method
+TFORM15 = '32A     '           / 32-char string
+TTYPE16 = 'CAL_MTHD'           / Calibration method
 TFORM16 = '32A     '           / 32-char string
-TTYPE17 = 'S_CAL   '           / Flux density calibration applied
-TFORM17 = '1I      '           / Integer flag 
-TTYPE18 = 'CAL_MTHD'           / Calibration method
+TTYPE17 = 'CAL_FILE'           / Name of gain calibration file
+TFORM17 = '32A     '           / 32-char string
+TTYPE18 = 'RFI_MTHD'           / RFI excision method
 TFORM18 = '32A     '           / 32-char string
-TTYPE19 = 'CAL_FILE'           / Name of gain calibration file
-TFORM19 = '32A     '           / 32-char string
-TTYPE20 = 'IMP_CORR'           / Poln impurity correction applied
-TFORM20 = '1I      '           / Integer flag 
-TTYPE21 = 'RFI_EXCN'           / RFI excision method
-TFORM21 = '80A     '           / 80-char string
 END
 XTENSION= 'BINTABLE'           / ***** Digitiser statistics *****
 BITPIX  =                    8 / N/A
@@ -150,15 +143,16 @@ NAXIS2  =                    1 / number of rows in table
 PCOUNT  =                    0 / size of special data area
 GCOUNT  =                    1 / one data group (required keyword)
 TFIELDS =                    3 / number of fields per row
+NCH_ORIG= *                    / Number of channels in original bandpass
 EXTNAME = 'BANDPASS'           / name of this binary table extension
 TTYPE1  = 'DAT_OFFS'           / Data offset for each bandpass
-TFORM1  = 'E      '           / NPOL floats
+TFORM1  = 'E       '           / NRCVR floats
 TTYPE2  = 'DAT_SCL '           / Data scale factor for each bandpass
-TFORM2  = 'E      '           / NPOL floats
-TTYPE3  = 'DATA    '           / Bandpass for each correlator product
-TDIM3   = (*,*)                / Data table dimensions = (NCHAN_original,NPOL)
+TFORM2  = 'E       '           / NRCVR floats
+TTYPE3  = 'DATA    '           / Bandpass for autocorrelations
+TDIM3   = (*,*)                / Data table dimensions = (NCH_ORIG,NRCVR)
 TUNIT3  = 'Jy      '           / Bandpass amplitude units
-TFORM3  = ' I      '           / NCHAN*NPOL integers
+TFORM3  = ' I      '           / NCH_ORIG*NRCVR integers
 END
 XTENSION= 'BINTABLE'           / ***** Pulsar ephemeris history *****
 BITPIX  =                    8 / N/A
