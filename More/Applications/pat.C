@@ -98,13 +98,10 @@ int main (int argc, char *argv[]) {
     catch (Error& error) {
       cerr << error << endl;
     }
-
-    for (unsigned i = 0; i < toas.size(); i++)
-      toas[i].unload(stdout);
-
   }
-
   
+  for (unsigned i = 0; i < toas.size(); i++)
+    toas[i].unload(stdout);
 }
 
 
