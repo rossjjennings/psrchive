@@ -153,7 +153,7 @@ void Rhythm::togledit()
 void Rhythm::temposys()
 {
   QString current = "The current tempo system call is:\n\n";
-  current += Tempo::get_system();
+  current += (Tempo::get_system()).c_str();
   current += "\n\nPlease enter the new system call to use:";
   
   QString temp = QInputDialog::getText("Tempo System Call", current);
