@@ -65,9 +65,12 @@ void Pulsar::Archive::resize (int nsubint, int npol, int nchan, int nbin)
     cerr << "Pulsar::Archive::resize calling book-keeping functions" << endl;
 
   set_nsubint (nsubint);
-  set_npol (npol);
-  set_nchan (nchan);
-  set_nbin (nbin);
+  if (npol > 0)
+    set_npol (npol);
+  if (nchan > 0)
+    set_nchan (nchan);
+  if (nbin > 0)
+    set_nbin (nbin);
 
   if (verbose)
     cerr << "Pulsar::Archive::resize exit" << endl;
