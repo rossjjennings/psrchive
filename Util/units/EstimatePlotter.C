@@ -83,8 +83,8 @@ void EstimatePlotter::separate_viewports (bool scaled, bool vertical)
     minmax (xrange, xmin, xmax, yrange, ymin, ymax,
 	    xval[index], yval[index], yerr[index]);
 
-    cerr << "index=" << index << " xmin=" << xmin << " xmax=" << xmax
-	 << " ymin=" << ymin << " ymax=" << ymax << endl;
+    // cerr << "index=" << index << " xmin=" << xmin << " xmax=" << xmax
+	 // << " ymin=" << ymin << " ymax=" << ymax << endl;
 
     if (scaled)
       if (vertical)
@@ -109,8 +109,8 @@ void EstimatePlotter::separate_viewports (bool scaled, bool vertical)
   // query the current size of the viewport in normalized device coordinates
   cpgqvp (0, &vp_x1, &vp_x2, &vp_y1, &vp_y2);
  
-  cerr << "viewport: vp_x1=" << vp_x1 << " vp_x2=" << vp_x2
-       << " vp_y1=" << vp_y1 << " vp_y2=" << vp_y2 << endl;
+  // cerr << "viewport: vp_x1=" << vp_x1 << " vp_x2=" << vp_x2
+       // << " vp_y1=" << vp_y1 << " vp_y2=" << vp_y2 << endl;
 
   viewports_set = true;
   viewports_vertical = vertical;
