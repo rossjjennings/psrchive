@@ -19,6 +19,11 @@ Tempo::toa Pulsar::Profile::toa (const Profile& std, const MJD& mjd,
   phase = Ephase.val;
   ephase = sqrt(Ephase.var);
 
+  if (verbose) {
+    cerr << "Pulsar::Profile::toa phase shift = " << phase << endl;
+    cerr << "Pulsar::Profile::toa phase error = " << ephase << endl;
+  }
+
   retval.set_frequency (centrefreq);
   retval.set_arrival   (mjd + phase * period);
   retval.set_error     (ephase * period * 1e6);
