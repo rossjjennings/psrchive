@@ -1,7 +1,10 @@
 /* $Log: MJD.C,v $
-/* Revision 1.4  1998/09/07 10:10:18  straten
-/* removed the print statements and things that were left behind...
+/* Revision 1.5  1998/09/08 05:13:09  mbritton
+/* removed nint from MJD.c and test_utc.c from Makefile
 /*
+ * Revision 1.4  1998/09/07 10:10:18  straten
+ * removed the print statements and things that were left behind...
+ *
  * Revision 1.3  1998/09/02  05:22:53  straten
  * modified the MJD::MJD(double, double, double) re-normalizer.
  * It was not a serious problem, not even something I would call an error.
@@ -35,10 +38,13 @@ char * MJD::printdays(){
 
 char * MJD::printhhmmss(){
   static char permanent[10];
-  int d = secs;
-  int hh = d/3600;
-  int mm = (d-3600*hh)/60;
-  int ss = nint(d-3600*hh-60*mm);
+  int hh = secs/3600;
+  int mm = (secs-3600*hh)/60;
+  double tmp = secs-3600*hh-60*mm;
+  int ss;
+  // solaris doesn't have nint in their standard library
+  if(fmod(tmp,1.0)<.5) ss = (int)tmp;
+  else ss = (int)tmp + 1;
   sprintf(permanent,"%2.2d%2.2d%2.2d",hh,mm,ss);
   return (permanent);
 }
