@@ -20,7 +20,7 @@
 Stokes<float> Pulsar::Integration::get_Stokes (unsigned ichan, unsigned ibin,
 					       float* variance) const
 {
-  Stokes<float>& S;
+  Stokes<float> S;
   unsigned nvar = 0;
 
   if (get_state() == Signal::Stokes) {
@@ -59,7 +59,7 @@ Stokes<float> Pulsar::Integration::get_Stokes (unsigned ichan, unsigned ibin,
 
     *variance = 0.0;
 
-    for (unsigned ipol=0; ipol<ivar; ipol++) {
+    for (unsigned ipol=0; ipol<nvar; ipol++) {
       double mean, var;
       profiles[ipol][ichan]->stats (profiles[ipol][ichan]->find_min_phase(),
 				    &mean, &var);

@@ -40,7 +40,7 @@ void Pulsar::Integration::invint ()
 
     for (unsigned ibin=0; ibin<get_nbin(); ++ibin) {
       // get the Stokes 4-vector
-      get_Stokes (stokes, ichan, ibin);
+      stokes = get_Stokes (ichan, ibin);
       // calculate \det\rho
       invariant[ibin] = det (stokes);
     }
