@@ -6,10 +6,10 @@
 int main (int argc, char** argv)
 { try {
   // trap C-style errors and throw Error exception
-  Pulsar::Error::handle_signals ();
+  Error::handle_signals ();
 
   // Pulsar::Archive::verbose = true;
-  // Pulsar::Error::verbose = true;
+  // Error::verbose = true;
   // Pulsar::Integration::verbose = true;
 
   string filename ("test.ar");
@@ -47,7 +47,7 @@ int main (int argc, char** argv)
   clone -> unload ("out.ar");
 
 }
-catch (Pulsar::Error& error) {
+catch (Error& error) {
   cerr << error << endl;
   return -1;
 }
