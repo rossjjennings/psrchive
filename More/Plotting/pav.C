@@ -1,5 +1,5 @@
 //
-// $Id: pav.C,v 1.23 2003/02/08 00:46:17 pulsar Exp $
+// $Id: pav.C,v 1.24 2003/02/08 16:17:59 pulsar Exp $
 //
 // The Pulsar Archive Viewer
 //
@@ -96,7 +96,7 @@ int main (int argc, char** argv)
   Pulsar::Plotter::ColourMap colour_map = Pulsar::Plotter::Heat;
   
   int c = 0;
-  const char* args = "ab:c:d:DGe:E:f:FhiHm:M:pP:r:St:TvVwWx:y:RZCYz:Asg";
+  const char* args = "ab:c:d:DGe:E:f:FhiHm:M:pP:r:St:TvVwWx:y:RZCYz:AsgX";
   while ((c = getopt(argc, argv, args)) != -1)
     switch (c) {
       
@@ -135,7 +135,7 @@ int main (int argc, char** argv)
       usage ();
       return 0;
     case 'i':
-      cout << "$Id: pav.C,v 1.23 2003/02/08 00:46:17 pulsar Exp $" << endl;
+      cout << "$Id: pav.C,v 1.24 2003/02/08 16:17:59 pulsar Exp $" << endl;
       return 0;
     case 'm':
       // macro file
