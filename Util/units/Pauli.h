@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Pauli.h,v $
-   $Revision: 1.2 $
-   $Date: 2003/02/05 23:27:59 $
+   $Revision: 1.3 $
+   $Date: 2003/02/07 16:31:46 $
    $Author: straten $ */
 
 #ifndef __Pauli_H
@@ -51,11 +51,9 @@ void polar (complex<T>& d, Quaternion<T, Hermitian>& h,
   // calculate the square of h
   h = real (convert (j*herm(j)));
 
-  T hpsq = h.s1*h.s1 + h.s2*h.s2 + h.s3*h.s3;
-  T hdet = sqrt (h.s0*h.s0 - hpsq);
-  T scale = sqrt (0.5 * (h.s0 - hdet)) / sqrt(hpsq);
+  T scale = sqrt (0.5 * (h.s0 - 1.0) / (h.s1*h.s1 + h.s2*h.s2 + h.s3*h.s3));
 
-  h.s0 = sqrt (0.5 * (h.s0 + hdet));
+  h.s0 = sqrt (0.5 * (h.s0 + 1.0));
   h.s1 *= scale;
   h.s2 *= scale;
   h.s3 *= scale;

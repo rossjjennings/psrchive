@@ -21,14 +21,16 @@ class MatrixTest {
 template <class T>
 void random (T& val)
 {
-  T r1 = T(rand()) - T(RAND_MAX)/2.0;
+  T scale = 1e3 / T(RAND_MAX);
+
+  T r1 = ( T(rand()) - T(RAND_MAX)/2.0 ) * scale;
 
   int random = rand() + 1;
 
-  T r2 = T(random);
+  T r2 = T(random) * scale;
 
-  if (random%2)
-    r2 = 1.0/r2;
+  //if (random%2)
+  //r2 = 1.0/r2;
 
   val = r1*r2;
 }
