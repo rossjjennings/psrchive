@@ -43,7 +43,7 @@ string Pulsar::Calibrator::get_filenames () const
     names = filenames[0];
 
   for (unsigned i=1; i<filenames.size(); i++)
-    names += ", " + filenames[i];
+    names += "\n\t" + filenames[i];
 
   return names;
 
