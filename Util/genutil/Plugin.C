@@ -26,7 +26,7 @@ void Registry::Plugin::load (const char* path)
     if (verbose)
       cerr << "Registry::Plugin::load dlopen("<< filenames[ifile] <<")"<< endl;
 
-    void* dLibrary = dlopen(filenames[ifile].c_str(), RTLD_NOW);
+    void* dLibrary = dlopen(filenames[ifile].c_str(), RTLD_GLOBAL | RTLD_NOW);
 
     if (dLibrary == NULL)  {
 
