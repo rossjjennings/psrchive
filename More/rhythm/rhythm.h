@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/rhythm/rhythm.h,v $
-   $Revision: 1.14 $
-   $Date: 2003/04/03 04:38:44 $
+   $Revision: 1.15 $
+   $Date: 2003/04/04 07:43:45 $
    $Author: ahotan $ */
 
 // //////////////////////////////////////////////////////////////////////////
@@ -18,7 +18,7 @@
 
 #include <vector>
 #include <qmainwindow.h>
-#include <qtextedit.h>
+#include <qlistbox.h>
 #include <qhbox.h>
 #include <qvbox.h>
 #include <qbuttongroup.h>
@@ -91,7 +91,7 @@ class Rhythm : public QMainWindow
   string toa_filename;
   
   // the central display slate
-  QTextEdit* toa_text;
+  QListBox* toa_text;
 
   void load_toas (const char* fname);
   
@@ -103,9 +103,22 @@ class Rhythm : public QMainWindow
   toaPlot::AxisQuantity yq;
 
   QVBox* controls;
-  QPushButton* xzoom;
-  QPushButton* yzoom;
-  QPushButton* id;
+  QButtonGroup* modechanger;
+  QRadioButton* zoom;
+  QRadioButton* sel;
+
+  QPushButton* cut;
+  
+  QPushButton* xrange;
+  QPushButton* yrange;
+  QPushButton* point;
+  QPushButton* box;
+  
+  QPushButton* clearsel;
+  QPushButton* undel;
+  QPushButton* autoscl;
+
+  int mode;
   
   // /////////////////////////////////////////////////////////////////////////
   // Fit parameters Menu Widget
@@ -177,6 +190,22 @@ class Rhythm : public QMainWindow
   void XChange (toaPlot::AxisQuantity);
   void YChange (toaPlot::AxisQuantity);
   void goplot ();
+
+  void change_mode (int);
+
+  void xrange_slot ();
+  void yrange_slot ();
+  void point_slot ();
+  void box_slot ();
+  
+  void select (int);
+  void deselect (int);
+  void reselect ();
+  
+  void clearselection ();
+  void deleteselection ();
+
+  void undeleteall ();
 };
 
 #endif

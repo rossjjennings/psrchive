@@ -4,11 +4,19 @@
 
 #include "minmax.h"
 
+wrapper::wrapper () {  
+  x = 0.0;
+  y = 0.0;
+  e = 0.0; 
+  ci = 1;
+  dot = 1;
+  id = 0;
+}
+
 toaPlot::toaPlot (QWidget *parent, const char *name )
   : QPgplot (parent, name)
 {
-  x.resize(0);
-  y.resize(0);
+  v.resize(0);
   npts = 0;
   
   xmin = ymin = 0.0;
@@ -17,7 +25,12 @@ toaPlot::toaPlot (QWidget *parent, const char *name )
   xq = yq = None;
   
   mode = 0;
+  task = 1;
   clicks = 0;
+  
+  tempint = 0;
+  distance = 0.0;
+  min = 0.0;
 
   requestEvent(mode);
 }
@@ -34,7 +47,7 @@ void toaPlot::plotter ()
   cpgbox ("bcnst",0.0,0,"bcnst",0.0,0);
   
   string xlab, ylab;
-
+  
   switch (xq) {
   case None:
     xlab = " ";
@@ -67,11 +80,13 @@ void toaPlot::plotter ()
 
   cpglab (xlab.c_str(), ylab.c_str(), "");
   
-  cpgsci (2);
   cpgsls (2);
   cpgslw (4);
-  cpgpt (npts, &(x.front()), &(y.front()), 1);
-
+  for (unsigned i = 0; i < npts; i++) {
+    cpgsci(v[i].ci);
+    cpgpt1 (float(v[i].x), float(v[i].y), v[i].dot);
+  }
+  cpgsci(1);
 }
 
 void toaPlot::handleEvent (float x, float y, char ch)
@@ -83,81 +98,265 @@ void toaPlot::handleEvent (float x, float y, char ch)
     clearScreen();
     drawPlot();
   }
-  else {    
+  else {
     switch (mode) {
-    case 4:
-      if (clicks == 0) {
-	xmin = x;
-	clicks++;
-	break;
+    case 0:
+      if (task == 1) {
+	//Do Nothing
       }
-      if (clicks == 1) {
-	xmax = x;
-	clicks = 0;
-	clearScreen();
-	drawPlot();
-	break;
+      else if (task == 2) {
+	if (v.empty()) 
+	  break;
+	min = sqrt(pow(fabs(x-float(v[0].x)),2.0) + pow(fabs(y-float(v[0].y)),2.0));
+	for (unsigned i = 1; i < v.size(); i++) {
+	  distance = sqrt(pow(fabs(x-float(v[i].x)),2.0) + pow(fabs(y-float(v[i].y)),2.0));
+	  if (distance < min) {
+	    min = distance;
+	    tempint = v[i].id;
+	  }
+	}
+	emit selected(tempint);
+      }
+      break;
+    case 4:
+      if (task == 1) {
+	if (clicks == 0) {
+	  x1 = x;
+	  clicks++;
+	  break;
+	}
+	if (clicks == 1) {
+	  x2 = x;
+	  clicks = 0;
+	  if (x1 > x2) {
+	    xmin = x2;
+	    xmax = x1;
+	  }
+	  else {
+	    xmin = x1;
+	    xmax = x2;
+	  }
+	  clearScreen();
+	  drawPlot();
+	  break;
+	}
+      }
+      else if (task == 2) {
+	if (clicks == 0) {
+	  x1 = x;
+	  clicks++;
+	  break;
+	}
+	if (clicks == 1) {
+	  x2 = x;
+	  clicks = 0;
+	  if (x1 > x2) {
+	    float handy1 = x1;
+	    float handy2 = x2;
+	    x2 = handy1;
+	    x1 = handy2;
+	  } 
+	  for (unsigned i = 0; i < v.size(); i++) {
+	    if ((v[i].x > x1) && (v[i].x < x2))
+	      emit selected(int(i)); 
+	  }
+	  break;
+	}
       }
     case 3:
-      if (clicks == 0) {
-	ymin = y;
-	clicks++;
-	break;
+      if (task == 1) {
+	if (clicks == 0) {
+	  y1 = y;
+	  clicks++;
+	  break;
+	}
+	if (clicks == 1) {
+	  y2 = y;
+	  clicks = 0;
+	  if (y1 > y2) {
+	    ymin = y2;
+	    ymax = y1;
+	  }
+	  else {
+	    ymin = y1;
+	    ymax = y2;
+	  }
+	  clearScreen();
+	  drawPlot();
+	  break;
+	}
       }
-      if (clicks == 1) {
-	ymax = y;
-	clicks = 0;
-	clearScreen();
-	drawPlot();
-	break;
+      else if (task == 2) {
+	if (clicks == 0) {
+	  y1 = y;
+	  clicks++;
+	  break;
+	}
+	if (clicks == 1) {
+	  y2 = y;
+	  clicks = 0;
+	  if (y1 > y2) {
+	    float handy1 = y1;
+	    float handy2 = y2;
+	    y2 = handy1;
+	    y1 = handy2;
+	  } 
+	  for (unsigned i = 0; i < v.size(); i++) {
+	    if ((v[i].y > y1) && (v[i].y < y2))
+	      emit selected(int(i)); 
+	  }
+	  break;
+	}
+      }
+    case 2:
+      if (task == 1) {
+	if (clicks == 0) {
+	  x1 = x;
+	  y1 = y;
+	  clicks++;
+	  break;
+	}
+	if (clicks == 1) {
+	  x2 = x;
+	  y2 = y;
+	  clicks = 0;
+	  if (y1 > y2) {
+	    ymin = y2;
+	    ymax = y1;
+	  }
+	  else {
+	    ymin = y1;
+	    ymax = y2;
+	  }
+	  if (x1 > x2) {
+	    xmin = x2;
+	    xmax = x1;
+	  }
+	  else {
+	    xmin = x1;
+	    xmax = x2;
+	  }
+	  clearScreen();
+	  drawPlot();
+	  mode = 0;
+	  handleEvent(0,0,'~');
+	  break;
+	}
+      }
+      else if (task == 2) {
+	if (clicks == 0) {
+	  x1 = x;
+	  y1 = y;
+	  clicks++;
+	  break;
+	}
+	if (clicks == 1) {
+	  x2 = x;
+	  y2 = y;
+	  clicks = 0;
+	  if (x1 > x2) {
+	    float handy1 = x1;
+	    float handy2 = x2;
+	    x2 = handy1;
+	    x1 = handy2;
+	  } 
+	  if (y1 > y2) {
+	    float handy1 = y1;
+	    float handy2 = y2;
+	    y2 = handy1;
+	    y1 = handy2;
+	  } 
+	  for (unsigned i = 0; i < v.size(); i++) {
+	    if ((v[i].y > y1) && (v[i].y < y2) && (v[i].x > x1) && (v[i].x < x2))
+	      emit selected(int(i)); 
+	  }
+	  mode = 0;
+	  handleEvent(0,0,'~');
+	  break;
+	}
       }
     }
   }
   
-  requestEvent(mode);
+  requestEvent(mode,x,y);
 }
 
-void toaPlot::ider ()
+void toaPlot::ptselector ()
 {
   mode = 0;
+  task = 2;
   handleEvent(0,0,'~');
 }
 
 void toaPlot::xzoomer ()
 {
   mode = 4;
+  task = 1;
   handleEvent(0,0,'~');
 }
 
 void toaPlot::yzoomer ()
 {
   mode = 3;
+  task = 1;
   handleEvent(0,0,'~');
 }
 
-void toaPlot::setPoints(AxisQuantity _xq, vector<double> xpts, 
-			AxisQuantity _yq, vector<double> ypts)
+void toaPlot::boxzoomer ()
 {
-  if (xpts.size() != ypts.size())
-    throw Error(InvalidParam, "toaPlot::setPoints array sizes not equal");
+  mode = 2;
+  task = 1;
+}
 
-  npts = xpts.size();
+void toaPlot::xselector ()
+{
+  mode = 4;
+  task = 2;
+  handleEvent(0,0,'~');
+}
 
-  if (npts == 0) return;
+void toaPlot::yselector ()
+{
+  mode = 3;
+  task = 2;
+  handleEvent(0,0,'~');
+}
 
+void toaPlot::boxselector ()
+{
+  mode = 2;
+  task = 2;
+}
+
+void toaPlot::setPoints(AxisQuantity _xq, AxisQuantity _yq, vector<wrapper> _v)
+{
+  if (_v.size() == 0) return;
+  
+  npts = _v.size();
+  
   xq = _xq;
   yq = _yq;
-  
-  x.resize(0);
-  y.resize(0);
+
+  v = _v;
+
+  clearScreen();
+  drawPlot();
+}
+
+void toaPlot::autoscale ()
+{
+  if (npts <= 0) return;
+
+  vector<float> xpts;
+  vector<float> ypts;
   
   for (unsigned i = 0; i < npts; i++) {
-    x.push_back(float(xpts[i]));
-    y.push_back(float(ypts[i]));
+    xpts.push_back(float(v[i].x));
+    ypts.push_back(float(v[i].y));
   }
-
-  findminmax(&(x.front()), &(x.back()), xmin, xmax);
-  findminmax(&(y.front()), &(y.back()), ymin, ymax);
+  
+  findminmax(&(xpts.front()), &(xpts.back()), xmin, xmax);
+  findminmax(&(ypts.front()), &(ypts.back()), ymin, ymax);
   
   xmin = xmin - fabs(xmin/20.0);
   xmax = xmax + fabs(xmax/20.0);
@@ -167,13 +366,6 @@ void toaPlot::setPoints(AxisQuantity _xq, vector<double> xpts,
   clearScreen();
   drawPlot();
 }
-
-
-
-
-
-
-
 
 
 

@@ -56,6 +56,8 @@ Rhythm::Rhythm (QWidget* parent, int argc, char** argv) :
   xq = toaPlot::None;
   yq = toaPlot::None;
 
+  mode = 1;
+
   QHBox* container = new QHBox(this);
   container -> setFocus();
   setCentralWidget(container);
@@ -66,20 +68,53 @@ Rhythm::Rhythm (QWidget* parent, int argc, char** argv) :
   plot_window -> show();
   
   controls = new QVBox(container);
-  id = new QPushButton("Select", controls);
-  QObject::connect(id, SIGNAL(clicked()),
-		   plot_window, SLOT(ider()));
-  xzoom = new QPushButton("X Zoom", controls);  
-  QObject::connect(xzoom, SIGNAL(clicked()),
-		   plot_window, SLOT(xzoomer()));
-  yzoom = new QPushButton("Y Zoom", controls);
-  QObject::connect(yzoom, SIGNAL(clicked()),
-		   plot_window, SLOT(yzoomer()));
-
-  toa_text = new QTextEdit(container, "TOA_INFO");
-  toa_text -> setText("Welcome to Rhythm");
-  toa_text -> setReadOnly(true);
   
+  modechanger = new QButtonGroup(3, Qt::Vertical, "Mode", controls);
+  modechanger -> setRadioButtonExclusive(true);
+  
+  zoom = new QRadioButton("Zoom", modechanger);
+  sel = new QRadioButton("Select", modechanger);
+  
+  modechanger->insert(zoom,1);
+  modechanger->insert(sel,2);
+  
+  QObject::connect(modechanger, SIGNAL(clicked(int)),
+		   this, SLOT(change_mode(int)));
+
+  point = new QPushButton("Point", controls);
+  QObject::connect(point, SIGNAL(clicked()),
+		   this, SLOT(point_slot()));
+  xrange = new QPushButton("X Range", controls);
+  QObject::connect(xrange, SIGNAL(clicked()),
+		   this, SLOT(xrange_slot()));
+  yrange = new QPushButton("Yrange", controls);  
+  QObject::connect(yrange, SIGNAL(clicked()),
+		   this, SLOT(yrange_slot()));
+  box = new QPushButton("Box", controls);
+  QObject::connect(box, SIGNAL(clicked()),
+		   this, SLOT(box_slot()));
+  autoscl = new QPushButton("Scale", controls);
+  QObject::connect(autoscl, SIGNAL(clicked()),
+		   plot_window, SLOT(autoscale()));
+  clearsel = new QPushButton("Clear", controls);
+  QObject::connect(clearsel, SIGNAL(clicked()),
+		   this, SLOT(clearselection()));
+  cut = new QPushButton("Delete", controls);
+  QObject::connect(cut, SIGNAL(clicked()),
+		   this, SLOT(deleteselection()));
+  undel = new QPushButton("Restore", controls);
+  QObject::connect(undel, SIGNAL(clicked()),
+		   this, SLOT(undeleteall()));
+  
+  toa_text = new QListBox(container, "TOA_INFO");
+  toa_text -> setSelectionMode(QListBox::Multi);
+  
+  QObject::connect(toa_text, SIGNAL(selectionChanged()),
+		   this, SLOT(reselect()));
+  
+  QObject::connect(plot_window, SIGNAL(selected(int)),
+		   this, SLOT(select(int)));
+
   chooser = new AxisSelector(container);
 
   QObject::connect(chooser, SIGNAL(YChange(toaPlot::AxisQuantity)),
@@ -89,7 +124,7 @@ Rhythm::Rhythm (QWidget* parent, int argc, char** argv) :
 		   this, SLOT(XChange(toaPlot::AxisQuantity)));
 
   
-  autofit = true;
+  autofit = false;
   ignore_one_eph = false;
   
   setClassVerbose (vverbose);
@@ -135,16 +170,14 @@ void Rhythm::load_toas (const char* fname)
 
   toa_filename = fname;
   
+  toa_text -> clear();
+
   char useful[256];
-  string output;
   for (unsigned i = 0; i < toas.size(); i++) {
     toas[i].unload(useful);
-    output += useful;
-    output += "\n";
+    toa_text -> insertItem(useful);
   }
   
-  toa_text -> setText(output.c_str());
-
   if (autofit)
     fit ();
 }
@@ -199,26 +232,14 @@ void Rhythm::fit (const psrephem& eph, bool load_new)
     fitpopup -> set_psrephem (pf_eph);
   }
   
-  char useful[256];
-  string output;
-  
-  for (unsigned i = 0; i < toas.size(); i++) {
-    toas[i].unload(useful);
-    output += useful;
-    output += "   RESIDUAL (us) :   ";
-    sprintf(useful, "%f", toas[i].resid.time);
-    output += useful;
-    output += "\n";
-  }
-
-  toa_text -> setText(output);
-  
   if (verbose)
     cerr << "Rhythm::fit plotting residuals" << endl;
   
   xq = toaPlot::TOA_MJD;
   yq = toaPlot::ResidualMicro;
+  
   goplot ();
+  plot_window->autoscale();
   
 } 
  catch (string error) {
@@ -277,8 +298,165 @@ void Rhythm::YChange (toaPlot::AxisQuantity q)
 
 void Rhythm::goplot ()
 {
-  plot_window->setPoints(xq,give_me_this(xq), 
-			 yq, give_me_this(yq));
+  vector<double> tempx = give_me_this(xq);
+  vector<double> tempy = give_me_this(yq);
+
+  vector<wrapper> useme;
+
+  for (unsigned i = 0; i < toas.size(); i++) {
+    if (toas[i].state != Tempo::toa::Deleted) {
+      wrapper tempw;
+      tempw.x = tempx[i];
+      tempw.y = tempy[i];
+      if (toas[i].state == Tempo::toa::Selected)
+	tempw.ci = 2;
+      tempw.id = i;
+      useme.push_back(tempw);
+    }
+  }
+  
+  plot_window->setPoints(xq, yq, useme);
+}
+
+void Rhythm::reselect ()
+{
+  for (unsigned i = 0; i < toas.size(); i++) {
+    
+    if (toas[i].state == Tempo::toa::Deleted)
+      continue;
+    
+    if (toa_text->isSelected(i))
+      toas[i].state = Tempo::toa::Selected;
+    else
+      toas[i].state = Tempo::toa::Normal;
+  }
+  
+  goplot ();
+}
+
+void Rhythm::deselect (int pt)
+{
+  if (pt >= int(toas.size()))
+    return;
+  if (pt < 0)
+    return;
+  
+  if (toas[pt].state == Tempo::toa::Deleted)
+    return;
+  
+  toas[pt].state = Tempo::toa::Normal;
+  toa_text -> setSelected (pt, false);
+  
+  goplot ();
+}
+
+void Rhythm::select (int pt)
+{
+  if (pt >= int(toas.size()))
+    return;
+  if (pt < 0)
+    return;
+  
+  if (toas[pt].state == Tempo::toa::Deleted)
+    return;
+  
+  toas[pt].state = Tempo::toa::Selected;
+  toa_text -> setSelected (pt, true);
+
+  goplot ();  
+}
+
+void Rhythm::change_mode (int m)
+{
+  mode = m;
+  cerr << "Mode changed to " << m << endl;
+  plot_window->ptselector();
+}
+
+void Rhythm::xrange_slot ()
+{
+  switch (mode) {
+  case 1: // Zoom
+    plot_window->xzoomer();
+    break;
+  case 2: // Select
+    plot_window->xselector();
+    break;
+  }
+}
+
+void Rhythm::yrange_slot ()
+{
+  switch (mode) {
+  case 1: // Zoom
+    plot_window->yzoomer();
+    break;
+  case 2: // Select
+    plot_window->yselector();
+    break;
+  }
+}
+
+void Rhythm::point_slot ()
+{
+  switch (mode) {
+  case 1: // Zoom
+    // Do nothing here...
+    break;
+  case 2: // Select
+    plot_window->ptselector();
+    break;
+  case 3: // Cut
+    break;
+  }
+}
+
+void Rhythm::box_slot ()
+{
+  switch (mode) {
+  case 1: // Zoom
+    plot_window->boxzoomer();
+    break;
+  case 2: // Select
+    plot_window->boxselector();
+    break;
+  }
+}
+
+void Rhythm::deleteselection ()
+{
+  for (unsigned i = 0; i < toas.size(); i++) {
+    if (toas[i].state == Tempo::toa::Selected)
+      toas[i].state = Tempo::toa::Deleted;
+  }
+  goplot ();
+}
+
+void Rhythm::undeleteall ()
+{
+  for (unsigned i = 0; i < toas.size(); i++) {
+    if (toas[i].state == Tempo::toa::Deleted)
+      toas[i].state = Tempo::toa::Normal;
+  }
+  goplot ();
+}
+
+
+void Rhythm::clearselection ()
+{
+  for (unsigned i = 0; i < toas.size(); i++) {
+    if (i >= int(toas.size()))
+      return;
+    if (i < 0)
+      return;
+    
+    if (toas[i].state == Tempo::toa::Deleted)
+      return;
+    
+    toas[i].state = Tempo::toa::Normal;
+    toa_text -> setSelected (i, false);
+  }
+  goplot ();
 }
 
 AxisSelector::AxisSelector (QWidget* parent)

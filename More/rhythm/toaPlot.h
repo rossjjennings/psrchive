@@ -10,6 +10,22 @@
 
 #include "qpgplot.h"
 
+class wrapper {
+
+ public:
+
+  wrapper();
+
+  double x;
+  double y;
+  double e;
+
+  int ci;
+  int dot;
+
+  int id;
+};
+
 class toaPlot: public QPgplot {
   
   Q_OBJECT
@@ -25,31 +41,50 @@ class toaPlot: public QPgplot {
   void plotter ();
   void handleEvent (float x, float y, char ch);
   
-  void setPoints (AxisQuantity, vector<double>, 
-		  AxisQuantity, vector<double>);
+  void setPoints (AxisQuantity, AxisQuantity, vector<wrapper>);
   
  public slots:
 
   void xzoomer ();
   void yzoomer ();
-  void ider ();
+  void ptselector ();
+  void xselector ();
+  void yselector ();
+  void boxzoomer ();
+  void boxselector ();
+
+  void autoscale ();
+
+ signals:
+
+  void selected (int);
 
  protected:
 
   // Information about data display
 
-  vector<float> x;
-  vector<float> y;
+  vector<wrapper> v;
   unsigned npts;
   
   float xmin, xmax, ymin, ymax;
   AxisQuantity xq, yq;
   
   int mode;
+  int task;
 
   // Interactivity buffers
   unsigned clicks;
+  
+  int   tempint;
+  float distance;
+  float min;
+
+  float x1;
+  float x2;
+  float y1;
+  float y2;
 };
+
 
 
 
