@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/psrephem.h,v $
-   $Revision: 1.5 $
-   $Date: 2001/01/04 14:04:30 $
+   $Revision: 1.6 $
+   $Date: 2001/01/30 06:52:15 $
    $Author: straten $ */
 
 #ifndef __PSREPHEM_H
@@ -70,6 +70,13 @@ class psrephem
   double dm() const;
   double jra() const;
   double jdec() const;
+
+  // returns the simple calculation based on Pb and x
+  void mass_function (double& mf, double& mf_err) const;
+  // returns m1 mass based on mass function, sin(i), and m2
+  void m1 (double& m1, double& m1_err) const;
+  // inverts the above to return m2, given m1
+  void m2 (double& m2, double m1) const;
 
   string par_lookup (const char* name, int use_cwd);
   static char* tempo_pardir;

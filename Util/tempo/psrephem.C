@@ -12,6 +12,77 @@
 #include "ephio.h"
 #include "psrephem.h"
 #include "string_utils.h"
+#include "orbital.h"
+
+#define sqr(x) (x*x)
+#define cube(x) (x*x*x)
+
+const double au     = 1.49597870e8;         // km
+const double c      = 2.99792458e5;         // km/s
+
+// Gaussian Gravitational Constant
+const double gGc    = 0.01720209895;        // AU^3/2 / (day* M_s^1/2)
+const double GM_s   = sqr(gGc) * cube(au);  // km^3 / (day^2 * M_s)
+
+void psrephem::mass_function (double& mf, double& mf_err) const
+{
+  mf_err = mf = -1.0;
+
+  if (parmStatus[EPH_A1] < 1 || parmStatus[EPH_PB] < 1)
+    return;
+
+  double x     = value_double [EPH_A1];
+  double x_err = error_double [EPH_A1];
+
+  double pb = value_double [EPH_PB];
+  double pb_err = error_double [EPH_PB];
+
+  mf = 4.0 * sqr(M_PI) * cube(x*c) / (sqr(pb) * GM_s);
+  mf_err = mf * sqrt( 9.0*sqr(x_err/x) + 4.0*sqr(pb_err/pb) );
+}
+
+void psrephem::m1 (double& m1, double& m1_err) const
+{
+  m1 = m1_err = -1.0;
+
+  if (parmStatus[EPH_SINI] < 1 || parmStatus[EPH_M2] < 1)
+    return;
+
+  double m2     = value_double [EPH_M2];
+  double m2_err = error_double [EPH_M2];
+
+  double si     = value_double [EPH_SINI];
+  double si_err = error_double [EPH_SINI];
+
+  double mass_func = 0.0;
+  double mass_func_err = 0.0;
+
+  mass_function (mass_func, mass_func_err);
+
+  if (mass_func < 0.0)
+    return;
+
+  double term1 = sqrt (cube(m2*si)/mass_func);
+  m1 = term1 - m2;
+  m1_err = sqrt( sqr(0.5 * term1 * mass_func_err/mass_func) +
+		 sqr(1.5 * term1 * si_err/si) +
+		 sqr((1.5 * term1/m2 -1.0) * m2_err) );
+}
+
+void psrephem::m2 (double& m2, double m1) const
+{
+  m2 = 0.0;
+  if (parmStatus[EPH_SINI] < 1)
+    return;
+  double sini = value_double [EPH_SINI];
+
+  double mf, mf_err;
+  mass_function (mf, mf_err);
+  if (mf < 0.0)
+    return;
+
+  m2 = companion_mass (mf, sini, m1);
+}
 
 // defines the recognized filename extensions used for pulsar ephemeris files
 vector<string> psrephem::extensions ()
