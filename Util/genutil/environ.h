@@ -1,6 +1,6 @@
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Attic/environ.h,v $
-   $Revision: 1.9 $
-   $Date: 2004/08/31 06:40:36 $
+   $Revision: 1.10 $
+   $Date: 2004/09/02 04:54:25 $
    $Author: redwards $ */
 
 /*
@@ -115,6 +115,11 @@ typedef struct {double f1; double f2;} float128;
 
 /* ********************************************** Darwin */
 #if defined(__APPLE__) && defined(__POWERPC__) 
+typedef short          int16;
+typedef unsigned short uint16;
+
+typedef float          float32;
+typedef double         float64;
 typedef long           int32;
 typedef unsigned long  uint32;
 
