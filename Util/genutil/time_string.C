@@ -4,7 +4,7 @@
 string time_string (double seconds)
 {
   if (seconds > 86400.0)
-   return stringprintf ("%.1fhr", seconds / 86400.0);
+   return stringprintf ("%.1fdy", seconds / 86400.0);
   else if (seconds > 3600.0)
     return stringprintf ("%.1fhr", seconds / 3600.0);
   else if (seconds > 60.0)
