@@ -3,7 +3,7 @@
 #include <unistd.h>
 
 #include "rhythm.h"
-#include "qt_editeph.h"
+#include "qt_editParams.h"
 
 static char* cl_args = "hp:t:v";
 void Rhythm::command_line_parse (int argc, char** argv)
@@ -40,9 +40,9 @@ void Rhythm::command_line_parse (int argc, char** argv)
   // read any remaining options as filenames or a basename
   string basename;
 
-  vector<string> ephext = psrephem::extensions();
+  vector<string> ephext = psrParams::extensions();
   if (verbose) {
-    cerr << "psrephem extensions: ";
+    cerr << "psrParams extensions: ";
     for (int iext=0; iext < ephext.size(); iext++)
       cerr << ephext[iext].c_str() << " ";
     cerr << endl;

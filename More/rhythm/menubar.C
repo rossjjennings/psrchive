@@ -7,7 +7,7 @@
 #include <qfiledialog.h>
 
 #include "rhythm.h"
-#include "qt_editeph.h"
+#include "qt_editParams.h"
 
 void Rhythm::menubarConstruct ()
 {

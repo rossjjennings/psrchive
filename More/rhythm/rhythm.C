@@ -5,9 +5,10 @@
 
 #include <qapplication.h>
 #include <qmainwindow.h>
+#include <qpopupmenu.h>
 #include <qxt.h>
 
-#include "qt_editeph.h"
+#include "qt_editParams.h"
 #include "rhythm.h"
 
 bool Rhythm::verbose = true;
@@ -29,11 +30,11 @@ Rhythm::Rhythm (QWidget* parent, int argc, char** argv) :
   autofit = true;
   ignore_one_eph = false;
     
-  fitpopup = new qt_editeph;
+  fitpopup = new qt_editParams;
   connect ( fitpopup, SIGNAL( closed() ),
 	    this, SLOT( togledit() ) );
-  connect ( fitpopup, SIGNAL( newEph(const psrephem&) ),
-	    this, SLOT( set_ephem(const psrephem&) ) );
+  connect ( fitpopup, SIGNAL( newParams(const psrParams&) ),
+	    this, SLOT( set_Params(const psrParams&) ) );
 
   menubarConstruct(); 
 
@@ -68,7 +69,7 @@ void Rhythm::load_toas (const char* fname)
     fit ();
 }
 
-void Rhythm::set_ephem (const psrephem& eph)
+void Rhythm::set_Params (const psrParams& eph)
 {
   if (ignore_one_eph) {
     ignore_one_eph = false;
@@ -83,13 +84,13 @@ void Rhythm::fit()
   if (!fitpopup || !fitpopup -> hasdata())
     return;
 
-  psrephem eph;
-  fitpopup -> get_psrephem (&eph);
+  psrParams eph;
+  fitpopup -> get_psrParams (&eph);
 
   fit (eph, true);
 }
 
-void Rhythm::fit (const psrephem& eph, bool load_new)
+void Rhythm::fit (const psrParams& eph, bool load_new)
 {
   if (arrival_times.size() < 1) {
     if (verbose)
@@ -100,13 +101,13 @@ void Rhythm::fit (const psrephem& eph, bool load_new)
   if (verbose)
     cerr << "Rhythm::fit Calculating residuals" << endl;
   
-  psrephem neweph;
+  psrParams neweph;
   tempo_fit (eph, arrival_times, &neweph, &residuals);
 
   if (load_new && fitpopup) {
-    // set_psrephem will result in generation of newEph signal, which should
+    // set_psrParams will result in generation of newEph signal, which should
     // be ignored since it was set from here.
     ignore_one_eph = true;
-    fitpopup -> set_psrephem (neweph);
+    fitpopup -> set_psrParams (neweph);
   }
 }

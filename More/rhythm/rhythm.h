@@ -10,9 +10,9 @@
 
 #include "toa.h"
 #include "residual.h"
-#include "psrephem.h"
+#include "psrParams.h"
 
-class qt_editeph;
+class qt_editParams;
 
 class Rhythm : public QMainWindow
 {
@@ -24,9 +24,9 @@ class Rhythm : public QMainWindow
   Rhythm (QWidget* parent, int argc, char** argv);
   ~Rhythm () {};
 
-  // fits the loaded toas using TEMPO with the given psrephem, 'eph'.
+  // fits the loaded toas using TEMPO with the given psrParams, 'eph'.
   // if 'load_new' is true, loads the new epehemeris into the display
-  void fit (const psrephem& eph, bool load_new);
+  void fit (const psrParams& eph, bool load_new);
  
  protected:
   // an array of toas and the filename from which they were loaded
@@ -52,12 +52,12 @@ class Rhythm : public QMainWindow
   int autofitID;          // ID of the 'Autofit' menu item
 
   bool autofit;           // fit whenever TOAs or TEMPO Parameters are loaded
-  bool ignore_one_eph;    // ignore the newEph signal from qt_editeph ONCE
+  bool ignore_one_eph;    // ignore the newParams signal from qt_editeph ONCE
   bool toas_modified;     // the toas have been modified since loaded
 
   // /////////////////////////////////////////////////////////////////////////
   // Fit parameters menu widgets/routines
-  qt_editeph* fitpopup;
+  qt_editParams* fitpopup;
   //void fit_popup (int nothing);
 
   // /////////////////////////////////////////////////////////////////////////
@@ -84,8 +84,8 @@ class Rhythm : public QMainWindow
   void aboutQt();
   void closeWin() {fprintf (stderr, "Not implemented\n");};
 
-  // callback connected to qt_editeph::newEph
-  void set_ephem (const psrephem&);
+  // callback connected to qt_editParams::newParams
+  void set_Params (const psrParams&);
 };
 
 #endif
