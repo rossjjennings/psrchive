@@ -3,6 +3,7 @@
 #endif
 
 #include "MJD.h"
+#include <math.h>
 
 #define F77_sla_gmst F77_SLA(sla_gmst,SLA_GMST)
 extern "C" double F77_sla_gmst(double *);
