@@ -112,6 +112,9 @@ void Pulsar::PolnProfile::convert_state (Signal::State out_state)
       data[3] = V;
     }
 
+    // record the new state
+    state = Signal::Stokes;
+
   }
   else if (out_state == Signal::Coherence) {
 
@@ -131,6 +134,9 @@ void Pulsar::PolnProfile::convert_state (Signal::State out_state)
     // data 2 and 3 are equivalent to 2*Re[PQ] and 2*Im[PQ].
     for (unsigned ipol=0; ipol<4; ipol++)
       *(data[ipol]) *= 0.5;
+
+    // record the new state
+    state = Signal::Coherence;
 
   }
   else
