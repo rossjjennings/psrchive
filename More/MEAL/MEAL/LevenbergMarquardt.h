@@ -1,14 +1,15 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/LevenbergMarquardt.h,v $
-   $Revision: 1.6 $
-   $Date: 2004/11/23 11:32:01 $
+   $Revision: 1.7 $
+   $Date: 2005/03/22 06:13:54 $
    $Author: straten $ */
 
 #ifndef __Levenberg_Marquardt_h
 #define __Levenberg_Marquardt_h
 
 #include "MEAL/GaussJordan.h"
+#include "MEAL/Axis.h"
 #include "Estimate.h"
 #include "Error.h"
 
@@ -151,6 +152,23 @@ namespace MEAL {
     static std::vector<std::vector<double> > null_arg;
 
   };
+
+  template<class Xt>
+  class AbscissaTraits {
+  public:
+    template<class Mt>
+    static void apply (Mt& model, const Xt& abscissa)
+    { abscissa.apply(); }
+  };
+
+  template<>
+  class AbscissaTraits<double> {
+  public:
+    template<class Mt>
+    static void apply (Mt& model, double abscissa)
+    { model.set_abscissa(abscissa); }
+  };
+
 
   //! Enables broader use of the LevenberMarquardt algorithm
   template<class Et>
@@ -606,8 +624,8 @@ float MEAL::lmcoff (// input
   if (LevenbergMarquardt<Grad>::verbose > 2)
     std::cerr << "MEAL::lmcoff data val=" << data.val
 	 << " var=" << data.var << std::endl;
- 
-  abscissa.apply();
+
+  AbscissaTraits<Xt>::apply (model, abscissa);
 
   WeightingScheme<Et> weight (data.var);
   Yt model_y = model.evaluate (&gradient);
