@@ -13,7 +13,7 @@ LIB_F_SRCS = ffft.f fftfit.f brent.f fccf.f cprof.f shiftbyfft.f \
 
 LIB_SRCS   = ${LIB_C_SRCS} ${LIB_F_SRCS}
 
-LDFLAGS   += -larchive -lpolyco -ldialog -ltimes \
+LDFLAGS   += -larchive -lpolyco ${LDIALOG} -ltimes \
              -lpsrinfo -leph -lsla -lgenutil $(LFFT) -lm $(LIBNSL) \
 	     -lcpgplot $(LPGPLOT) 
 
