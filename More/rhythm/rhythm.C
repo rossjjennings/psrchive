@@ -166,6 +166,9 @@ Rhythm::Rhythm (QApplication* master, QWidget* parent, int argc, char** argv) :
   autoscl = new QPushButton("Autoscale Axes", controls);
   QObject::connect(autoscl, SIGNAL(clicked()),
 		   plot_window, SLOT(autoscale()));
+  autobin = new QPushButton("Auto Bin", controls);
+  QObject::connect(autobin, SIGNAL(clicked()),
+		   this, SLOT(autobin_ask()));
   clearsel = new QPushButton("Clear Selected", controls);
   QObject::connect(clearsel, SIGNAL(clicked()),
 		   this, SLOT(clearselection()));
@@ -187,7 +190,7 @@ Rhythm::Rhythm (QApplication* master, QWidget* parent, int argc, char** argv) :
   dotify = new QPushButton("Change Symbol", controls);
   QObject::connect(dotify, SIGNAL(clicked()),
 		   this, SLOT(symbol_selector()));
-  
+
 
   // Instantiate the Axis selection panels
 
@@ -1491,6 +1494,16 @@ void Rhythm::select (vector<int> pts)
   
 }
 
+void Rhythm::autobin_ask ()
+{
+  int temp = -1;
+  
+  temp = QInputDialog::getInteger("Rhythm",
+				  "Please enter the number of bins:"); 
+  if (temp >= 0)
+    plot_window->autobin(temp);
+}
+
 void Rhythm::freqsort ()
 {
   for (unsigned i = 0; i < toas.size(); i++) {
@@ -1664,7 +1677,6 @@ void Rhythm::colour_selector ()
   
   temp = QInputDialog::getInteger("Rhythm",
 				  "Please enter the colour index: (0 -> 15)");
-  
   if (temp >= 0 && temp < 16)
     setselcol (temp);
 }

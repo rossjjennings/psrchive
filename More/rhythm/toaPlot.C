@@ -482,6 +482,56 @@ void toaPlot::setPoints(AxisQuantity _xq, AxisQuantity _yq, vector<wrapper> _dat
   drawPlot();
 }
 
+void toaPlot::autobin (int nbins)
+{
+  float* xvals = new float[nbins];
+  float* yvals = new float[nbins];
+  float* binerrors = new float[nbins];
+  float* bincount = new float[nbins];
+  
+  // Zero everything.
+  
+  for (int i = 0; i < nbins; i++){
+    xvals[i]     = 0.0;
+    yvals[i]     = 0.0;
+    binerrors[i] = 0.0;
+    bincount[i]  = 0.0;
+  }
+
+  // compute sum(x(i)wt(i))
+  for (unsigned i = 0; i < data.size(); i++){
+    int binnumber = int((data[i].x - xmin)/(xmax - xmin)*nbins);
+    if (binnumber == nbins) binnumber--;
+    xvals[binnumber] += data[i].x / data[i].ey / data[i].ey;
+    yvals[binnumber] += data[i].y / data[i].ey / data[i].ey;
+    bincount[binnumber]+=1.0 / (data[i].ey * data[i].ey);
+  }
+
+  beginDrawing();
+  cpgsci(11);
+  cpgsch(2.0);
+
+  // reweight and draw if valid data
+  for (int i = 0; i < nbins; i++){
+    if (bincount[i] != 0.0) {
+      xvals[i] /= bincount[i];
+      yvals[i] /= bincount[i];
+      binerrors[i] = 1.0 / bincount[i];
+      cpgpt1  (xvals[i],yvals[i],17);
+      cpgerr1 (6,xvals[i],yvals[i],binerrors[i],1.0);
+    }
+  }
+
+  cpgsci(1);
+  cpgsch(1.0);
+  endDrawing();
+
+  delete[] xvals;
+  delete[] yvals;
+  delete[] binerrors;
+  delete[] bincount;
+}
+
 void toaPlot::autoscale ()
 {
   if (data.empty()) return;

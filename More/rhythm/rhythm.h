@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/rhythm/rhythm.h,v $
-   $Revision: 1.40 $
-   $Date: 2004/05/10 02:14:52 $
+   $Revision: 1.41 $
+   $Date: 2004/05/12 11:44:41 $
    $Author: ahotan $ */
 
 // //////////////////////////////////////////////////////////////////////////
@@ -183,6 +183,7 @@ class Rhythm : public QMainWindow
   QPushButton* clearsel;
   QPushButton* undel;
   QPushButton* autoscl;
+  QPushButton* autobin;
   QPushButton* freqs;
   QPushButton* show_button;
 
@@ -314,6 +315,7 @@ class Rhythm : public QMainWindow
   void undeleteall ();
 
   void freqsort ();
+  void autobin_ask ();
   
   void setDataPath ();
   void profileMovie ();

@@ -58,6 +58,7 @@ class toaPlot: public QPgplot {
   void boxselector ();
 
   void autoscale ();
+  void autobin (int nbin = 10);
 
  signals:
 
