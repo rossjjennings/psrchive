@@ -1,5 +1,6 @@
 #include "Pulsar/FluxCalibratorDatabase.h"
 #include "Pulsar/FluxCalibrator.h"
+#include "Pulsar/Database.h"
 #include "Pulsar/Archive.h"
 #include "string_utils.h"
 #include "dirutil.h"
@@ -11,6 +12,7 @@
 static string archive_class = "PSRFITS";
 static string output_ext = "fluxcal";
 static double interval = 5.0 * 60.0;
+static Pulsar::Database* database = 0;
 
 void usage ()
 {
@@ -20,11 +22,12 @@ void usage ()
     "fluxcal [options] filename[s]\n"
     "options:\n"
     "  -a class     Pulsar::Archive class used to represent output\n"
-    "  -d database  name of file containing flux calibrator information\n"
+    "  -c file.cfg  name of file containing standard candle information\n"
+    "  -d database  get FluxCal archives from database and file solutions\n"
     "  -e extension filename extension added to output archives\n"
     "  -i minutes   maximum number of minutes between archives in same set\n"
     "\n"
-    "By default, flux calibrator information is read from \n" 
+    "By default, standard candle information is read from \n" 
        << Pulsar::FluxCalibratorDatabase::default_filename << "\n"
     "and the maximum interval between archives in the same\n"
     "flux calibrator set is " << interval/60 << " minutes.\n"
@@ -32,8 +35,7 @@ void usage ()
 }
 
 
-void unload (Pulsar::FluxCalibrator* fluxcal)
-try {
+void unload (Pulsar::FluxCalibrator* fluxcal) try {
 
   Reference::To<Pulsar::Archive> archive;
   cerr << "fluxcal: creating " << archive_class << " Archive" << endl;
@@ -44,18 +46,26 @@ try {
 
   cerr << "fluxcal: unloading " << newname << endl;
   archive -> unload (newname);
+
+  if (database) {
+    cerr << "fluxcal: adding new entry to database" << endl;
+    database->add (archive);
+  }
+
 }
 catch (Error& error) {
   cerr << "fluxcal: error unloading solution\n\t"
        << error.get_message() << endl;
 }
 
+
 int main (int argc, char** argv) try {
 
-  Pulsar::FluxCalibratorDatabase* database = 0;
+  Pulsar::FluxCalibratorDatabase* standards = 0;
+  string database_filename;
 
   char c;
-  while ((c = getopt(argc, argv, "hqvVa:d:e:i:")) != -1) 
+  while ((c = getopt(argc, argv, "hqvVa:c:d:e:i:")) != -1) 
 
     switch (c)  {
 
@@ -77,9 +87,15 @@ int main (int argc, char** argv) try {
       cerr << "fluxcal: will write to " << archive_class << " files" << endl;
       break;
 
+    case 'c':
+      standards = new Pulsar::FluxCalibratorDatabase (optarg);
+      cerr << "fluxcal: standard candles loaded from " << optarg << endl;
+      break;
+
     case 'd':
-      database = new Pulsar::FluxCalibratorDatabase (optarg);
+      database = new Pulsar::Database (optarg);
       cerr << "fluxcal: database loaded from " << optarg << endl;
+      database_filename = optarg;
       break;
 
     case 'e':
@@ -103,10 +119,48 @@ int main (int argc, char** argv) try {
   for (int ai=optind; ai<argc; ai++)
     dirglob (&filenames, argv[ai]);
 
-  if (filenames.size() == 0) {
+  if (filenames.size() == 0 && !database) {
     cerr << "fluxcal: please specify filename[s]" << endl;
     return -1;
   }
+
+  sort (filenames.begin(), filenames.end());
+
+  if (database) {
+
+    if (filenames.size() != 0) {
+      cerr << "fluxcal: do not specify filename[s] with -d option" << endl;
+      return -1;
+    }
+
+    // get all of the fluxcal on/off observations and sort them
+    Pulsar::Database::Criterion criterion;
+    vector<Pulsar::Database::Entry> entries;
+
+    criterion = database->criterion(Pulsar::Database::any, Signal::FluxCalOn);
+    database->all_matching (criterion, entries);
+
+    criterion = database->criterion(Pulsar::Database::any, Signal::FluxCalOff);
+    database->all_matching (criterion, entries);
+
+    sort (entries.begin(), entries.end());
+
+    if (!entries.size()) {
+      cerr << "fluxcal: no FluxCalOn|Off observations in database" << endl;
+      return -1;
+    }
+
+    // break them into sets
+
+    // check for solutions (requires set identification)
+
+    // add to filenames
+    filenames.resize( entries.size() );
+    for (unsigned ifile=0; ifile < filenames.size(); ifile++)
+      filenames[ifile] = database->get_filename (entries[ifile]);
+
+  }
+
 
   Reference::To<Pulsar::Archive> last;
   Reference::To<Pulsar::Archive> archive;
@@ -153,8 +207,8 @@ int main (int argc, char** argv) try {
 
       cerr << "fluxcal: starting new FluxCalibrator" << endl;
       fluxcal = new Pulsar::FluxCalibrator (archive);
-      if (database)
-	fluxcal->set_database (database);
+      if (standards)
+	fluxcal->set_database (standards);
 
     }
 
@@ -168,6 +222,17 @@ int main (int argc, char** argv) try {
 
   if (fluxcal)
     unload (fluxcal);
+
+  if (database) {
+
+    string backup = database_filename + ".bkp";
+    cerr << "fluxcal: backing up old database" << endl;
+    rename (database_filename.c_str(), backup.c_str());
+    
+    cerr << "fluxcal: writing new database" << endl;
+    database->unload (database_filename);
+
+  }
 
   return 0;
 }
