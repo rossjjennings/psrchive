@@ -543,6 +543,18 @@ void Pulsar::TimerArchive::set_dispersion_measure (double dm)
   hdr.dm = dm;
 }
 
+//! Get the rotation measure (in \f${\rm rad\, m}^{-2}\f$)
+double Pulsar::TimerArchive::get_rotation_measure () const
+{
+  return hdr.rotm;
+}
+
+//! Set the rotation measure (in \f${\rm rad\, m}^{-2}\f$)
+void Pulsar::TimerArchive::set_rotation_measure (double rm)
+{
+  hdr.rotm = rm;
+}
+
 bool Pulsar::TimerArchive::get_flux_calibrated () const
 {
   return hdr.calibrated;

@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/Timer/Pulsar/TimerArchive.h,v $
-   $Revision: 1.9 $
-   $Date: 2003/12/22 14:06:07 $
+   $Revision: 1.10 $
+   $Date: 2004/06/17 09:10:17 $
    $Author: straten $ */
 
 #ifndef __Timer_Archive_h
@@ -117,10 +117,15 @@ namespace Pulsar {
     //! Set the state of the profiles
     virtual void set_state (Signal::State state);
 
-    //! Get the dispersion measure (in \f${\rm pc cm}^{-3}\f$)
+    //! Get the dispersion measure (in \f${\rm pc\, cm}^{-3}\f$)
     virtual double get_dispersion_measure () const;
-    //! Set the dispersion measure (in \f${\rm pc cm}^{-3}\f$)
+    //! Set the dispersion measure (in \f${\rm pc\, cm}^{-3}\f$)
     virtual void set_dispersion_measure (double dm);
+
+    //! Get the rotation measure (in \f${\rm rad\, m}^{-2}\f$)
+    virtual double get_rotation_measure () const;
+    //! Set the rotation measure (in \f${\rm rad\, m}^{-2}\f$)
+    virtual void set_rotation_measure (double rm);
 
     //! Inter-channel dispersion delay has been removed
     virtual bool get_dedispersed () const;
@@ -168,6 +173,7 @@ namespace Pulsar {
 
     friend class Archive::Advocate<TimerArchive>;
 
+    //! Represents the interests of the TimerArchive
     class Agent : public Archive::Advocate<TimerArchive> {
     
       public:
