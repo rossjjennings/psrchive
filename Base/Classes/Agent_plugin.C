@@ -6,8 +6,8 @@ static Registry::Plugin plugins;
 
 void Pulsar::Archive::Agent::plugin_load ()
 {
-  if (registry.size() != 0)
-    return;
+  if (verbose)
+    cerr << "Pulsar::Archive::Agent::plugin_load" << endl;
 
   plugins.load (plugin_path ());
 
@@ -19,9 +19,6 @@ void Pulsar::Archive::Agent::plugin_load ()
 
 void Pulsar::Archive::Agent::plugin_report ()
 {
-  if (!loaded)
-    plugin_load ();
-
   if (plugins.ok.size() == 0)
     cerr << "Archive::Agent::report No successfully loaded plugins." << endl;
   else
@@ -31,7 +28,7 @@ void Pulsar::Archive::Agent::plugin_report ()
   
   for (ip=0; ip < plugins.ok.size(); ip++)
     cerr << " " << plugins.ok[ip] << endl;
-  
+
   cerr << endl;
 
   if (plugins.fail.size() == 0)
