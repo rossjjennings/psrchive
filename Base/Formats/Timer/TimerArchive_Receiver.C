@@ -2,13 +2,16 @@
 #include "Pulsar/TimerArchive.h"
 #include "Pulsar/Parkes.h"
 
+#include "timer_supp.h"
+
+// return true if all characters up to the null terminator are alphanumeric
 bool is_valid_string (const char* str, unsigned length)
 {
   for (unsigned i=0; i < length; i++) {
-    if (!isalnum(str[i]))
-      return false;
     if (str[i] == '\0')
       return true;
+    if (!isalnum(str[i]))
+      return false;
   }
   return false;
 }
@@ -61,7 +64,7 @@ void Pulsar::TimerArchive::unpack (Receiver* receiver)
     break;
     
   default:
-    throw Error (InvalidParam, "Pulsar::TimerArchive::pack Receiver",
+    throw Error (InvalidParam, "Pulsar::TimerArchive::unpack Receiver",
 		 "unrecognized feedmode=%d", hdr.feedmode);
     
   }
@@ -75,25 +78,55 @@ void Pulsar::TimerArchive::unpack (Receiver* receiver)
   angle.setDegrees (hdr.banda.feed_offset); 
   receiver->set_tracking_angle (angle);
 
-  if (verbose == 3)
-      cerr << "Pulsar::TimerArchive::unpack Receiver X_offset="
-           << hdr.extra.supplement.X_offset << endl;
+  // timer supplement - added 23 July 04
 
-  angle.setDegrees (hdr.extra.supplement.X_offset);
+  struct supp* supplement = reinterpret_cast<struct supp*>( &(hdr.bandb) );
+
+  if (supplement->version > 0
+      && hdr.bandb.nlag > 0
+      && hdr.bandb.flux_A > 0
+      && hdr.bandb.flux_B > 0)
+    cerr << "Timer::load WARNING bandB apparently in use" << endl;
+
+  if (supplement->version < -2)  {
+    if (verbose)
+      cerr << "Timer::load WARNING bandB uninitialized npol="
+           << hdr.bandb.npol << endl;
+    hdr.bandb.npol = 0;
+  }
+
+  // correct the Version -2 parameters
+  if (supplement->version > -2) {
+
+    if (verbose == 3)
+      cerr << "Pulsar::TimerArchive::unpack Receiver no supplement" << endl;
+
+    supplement->X_offset = 0.0;
+    supplement->Y_offset = 0.0;
+    supplement->calibrator_offset = 0.0;
+    supplement->version = -2;
+
+  }
+
+  if (verbose == 3)
+    cerr << "Pulsar::TimerArchive::unpack Receiver X_offset="
+         << supplement->X_offset << endl;
+
+  angle.setDegrees (supplement->X_offset);
   receiver->set_X_offset (angle);
 
   if (verbose == 3)
       cerr << "Pulsar::TimerArchive::unpack Receiver Y_offset="
-           << hdr.extra.supplement.Y_offset << endl;
+           << supplement->Y_offset << endl;
 
-  angle.setDegrees (hdr.extra.supplement.Y_offset);
+  angle.setDegrees (supplement->Y_offset);
   receiver->set_Y_offset (angle);
 
   if (verbose == 3)
       cerr << "Pulsar::TimerArchive::unpack Receiver calibrator_offset="
-           << hdr.extra.supplement.calibrator_offset << endl;
+           << supplement->calibrator_offset << endl;
 
-  angle.setDegrees (hdr.extra.supplement.calibrator_offset);
+  angle.setDegrees (supplement->calibrator_offset);
   receiver->set_calibrator_offset (angle);
 
   receiver->set_feed_corrected (hdr.corrected & FEED_CORRECTED);
@@ -106,6 +139,9 @@ void Pulsar::TimerArchive::unpack (Receiver* receiver)
 
 void Pulsar::TimerArchive::pack (const Receiver* receiver)
 {
+  if (verbose == 3)
+    cerr << "Pulsar::TimerArchive::pack Receiver" << endl;
+
   if (verbose && receiver->get_name().length()+1 >= RCVR_ID_STRLEN)
     cerr << "Pulsar::TimerArchive::pack Receiver WARNING"
       " truncating receiver name " << receiver->get_name() <<
@@ -146,14 +182,31 @@ void Pulsar::TimerArchive::pack (const Receiver* receiver)
 
   hdr.banda.feed_offset = receiver->get_tracking_angle().getDegrees (); 
 
-  hdr.extra.supplement.X_offset = receiver->get_X_offset().getDegrees ();
+  struct supp* supplement = reinterpret_cast<struct supp*>( &(hdr.bandb) );
 
-  hdr.extra.supplement.Y_offset = receiver->get_Y_offset().getDegrees ();
+  supplement->X_offset = receiver->get_X_offset().getDegrees ();
 
-  hdr.extra.supplement.calibrator_offset 
+  if (verbose == 3)
+      cerr << "Pulsar::TimerArchive::pack Receiver X_offset="
+           << supplement->X_offset << endl;
+
+  supplement->Y_offset = receiver->get_Y_offset().getDegrees ();
+
+  if (verbose == 3)
+      cerr << "Pulsar::TimerArchive::pack Receiver Y_offset="
+           << supplement->Y_offset << endl;
+
+  supplement->calibrator_offset 
     = receiver->get_calibrator_offset().getDegrees ();
+
+  if (verbose == 3)
+      cerr << "Pulsar::TimerArchive::pack Receiver calibrator_offset="
+           << supplement->calibrator_offset << endl;
 
   set_corrected (FEED_CORRECTED, receiver->get_feed_corrected());
   set_corrected (PARA_CORRECTED,  receiver->get_platform_corrected());
 
+  supplement->version = -2;
+
 }
+
