@@ -10,6 +10,8 @@
 char* psrephem::tempo_pardir = NULL;
 int   psrephem::verbose = 0;
 
+static const char* psrephem_tmp_fname = "psrephem_tmp.eph";
+
 #if 0
 void psrephem::init()
 {
@@ -18,8 +20,6 @@ void psrephem::init()
   double value_double[EPH_NUM_KEYS];
   int value_integer  [EPH_NUM_KEYS];
   double error_double[EPH_NUM_KEYS];
-
-
 }
 #endif
 
@@ -263,12 +263,9 @@ int psrephem::load (FILE* instream, size_t bytes)
     return -1;
   }
 
-  char* filename = "psrephem_load.tmp";
-  // mktemp (filename); // stdlib.h
-
-  FILE* temp = fopen (filename, "w");
+  FILE* temp = fopen (psrephem_tmp_fname, "w");
   if (temp == NULL) {
-    fprintf (stderr, "psrephem::load error fopen(%s)", filename);
+    fprintf (stderr, "psrephem::load error fopen(%s)", psrephem_tmp_fname);
     perror ("");
     return -1;
   }
@@ -277,16 +274,16 @@ int psrephem::load (FILE* instream, size_t bytes)
     if (ferror (instream) != 0)
       perror ("psrephem::load error fwrite");
     fprintf (stderr, "psrephem::load fwrite only %d/%d bytes\n", bio,bytes);
-    remove (filename);
+    remove (psrephem_tmp_fname);
     return -1;
   }
   fclose (temp);
 
-  int istat = rd_eph (filename, parmStatus, value_str, value_double,
+  int istat = rd_eph (psrephem_tmp_fname, parmStatus, value_str, value_double,
 		      value_integer, error_double);
-  remove (filename);
+  remove (psrephem_tmp_fname);
   if (!istat) {
-    fprintf(stderr,"psrephem::load error loading %s\n",filename);
+    fprintf(stderr,"psrephem::load error loading %s\n",psrephem_tmp_fname);
     return -1;
   }
   return 0;
@@ -296,28 +293,25 @@ int psrephem::load (FILE* instream, size_t bytes)
 
 int psrephem::unload (FILE* outstream, size_t* nbytes) const
 {
-  char* filename = "psrephem_unload.tmp";
-  // mktemp (filename);  // stdlib.h
-
-  int istat = wr_eph (filename, parmStatus, value_str, value_double,
+  int istat = wr_eph (psrephem_tmp_fname, parmStatus, value_str, value_double,
 		      value_integer, error_double);
   if (!istat) {
-    fprintf(stderr,"psrephem::unload error unloading %s\n",filename);
-    remove (filename);
+    fprintf(stderr,"psrephem::unload error unloading %s\n",psrephem_tmp_fname);
+    remove (psrephem_tmp_fname);
     return -1;
   }
 
-  FILE* temp = fopen (filename, "r");
+  FILE* temp = fopen (psrephem_tmp_fname, "r");
   if (temp == NULL) {
-    fprintf (stderr, "psrephem::unload error fopen(%s)", filename);
+    fprintf (stderr, "psrephem::unload error fopen(%s)", psrephem_tmp_fname);
     perror ("");
-    remove (filename);
+    remove (psrephem_tmp_fname);
     return -1;
   }
 
   if (fseek (temp, 0L, SEEK_END) != 0) {
     perror ("psrephem::unload error fseek()");
-    remove (filename);
+    remove (psrephem_tmp_fname);
     return -1;
   }
   size_t bytes = ftell (temp);
@@ -330,7 +324,7 @@ int psrephem::unload (FILE* outstream, size_t* nbytes) const
     if (psre_buffer == NULL) {
       fprintf (stderr, "psrephem::unload could not allocate %d bytes", bytes);
       perror ("");
-      remove (filename);
+      remove (psrephem_tmp_fname);
       throw ("psrephem::unload memory allocation error");
     }
     psre_bufsz = bytes;
@@ -338,7 +332,7 @@ int psrephem::unload (FILE* outstream, size_t* nbytes) const
 
   if (fseek (temp, 0L, SEEK_SET) != 0) {
     perror ("psrephem::unload error fseek()");
-    remove (filename);
+    remove (psrephem_tmp_fname);
     return -1;
   }
 
@@ -350,11 +344,11 @@ int psrephem::unload (FILE* outstream, size_t* nbytes) const
     if (ferror (outstream) != 0)
       perror ("psrephem::unload error fread");
     fprintf (stderr, "psrephem::unload fread only %d/%d bytes\n", bio,bytes);
-    remove (filename);
+    remove (psrephem_tmp_fname);
     return -1;
   }
 
-  remove (filename);
+  remove (psrephem_tmp_fname);
 
 #ifdef _DEBUG
   fprintf (stderr, "psrephem::unload fwrite %d bytes\n", bytes);
@@ -409,10 +403,6 @@ psrephem & psrephem::operator = (const psrephem & p2)
   return *this;
 }
 
-// Default arguments are those of polyco
-
-#define PSREPHEM_OUT "psrephem_tmp.eph"
-
 polyco psrephem::mkpolyco (MJD m1, MJD m2, double nspan, int ncoeff, 
 			   int maxha, int tel, double centrefreq) const
 {
@@ -430,32 +420,49 @@ polyco psrephem::mkpolyco (MJD m1, MJD m2, double nspan, int ncoeff,
   fprintf(fptr,"%s\n",psrname().c_str());
   fclose(fptr);
 
-  this->unload (PSREPHEM_OUT);
+  this->unload (psrephem_tmp_fname);
 
   string syscall = "tempo -z -f ";
-  syscall += PSREPHEM_OUT;
+  syscall += psrephem_tmp_fname;
 
+  if (verbose)  {
+    fprintf (stderr, "psrephem::mkpolyco Calling '%s'\n", syscall.c_str());
+    fprintf (stderr, "psrephem::mkpolyco MJD1: '%g'\n", m1.in_days());
+  }
   fptr = popen (syscall.c_str(), "w");
   if (fptr == NULL) {
-    fprintf (stderr, "psrephem::polyco Error calling '%s'", syscall.c_str());
+    fprintf (stderr, "psrephem::mkpolyco Error calling '%s'", syscall.c_str());
     perror ("");
     remove ("tz.in");
-    throw ("psrephem::polyco construct error");
+    throw ("psrephem::mkpolyco construct error");
   }
+  if (verbose)  {
+    fprintf (stderr, "psrephem::mkpolyco Successful popen with tempo\n");
+  }
+
   if (m1 == MJD(0.0,0.0,0.0)) {
     fprintf(fptr,"\n");
   }
   else {
-    fprintf (fptr, " %s", m1.in_days());
-    fprintf (fptr, " %s\n", m2.in_days());
+    if (verbose)  {
+      fprintf (stderr, "psrephem::mkpolyco Entering MJD1 '%g'\n", m1.in_days());
+    }
+    fprintf (fptr, " %g", m1.in_days());
+    if (verbose)  {
+      fprintf (stderr, "psrephem::mkpolyco Entering MJD2 '%g'\n", m2.in_days());
+    }
+    fprintf (fptr, " %g\n", m2.in_days());
   }
   fflush (fptr);
   pclose (fptr);
   remove ("tz.in");
   remove ("tz.tmp");
   remove ("tempo.lis");
-  remove (PSREPHEM_OUT);
+  remove (psrephem_tmp_fname);
 
+  if (verbose)  {
+    fprintf (stderr, "psrephem::mkpolyco loading polyco.dat\n");
+  }
   polyco poly;
   if (poly.load("polyco.dat") < 1) {
     fprintf (stderr, "psrephem::polyco loaded less than 1 polyco\n");
