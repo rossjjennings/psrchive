@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/psrephem.h,v $
-   $Revision: 1.12 $
-   $Date: 2001/02/20 03:16:08 $
+   $Revision: 1.13 $
+   $Date: 2001/02/28 03:56:08 $
    $Author: straten $ */
 
 #ifndef __PSREPHEM_H
@@ -45,6 +45,9 @@ class psrephem
   psrephem& operator = (const psrephem &);
 
   int create (const char* psr_name, int use_cwd);
+  int create (const string& psr_name, int use_cwd)
+    { return create (psr_name.c_str(), use_cwd); }
+
   int load   (const char* filename);
   int unload (const char* filename) const;
 

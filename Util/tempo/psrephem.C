@@ -108,6 +108,9 @@ psrephem::psrephem (const char* filename)
 
 int psrephem::create (const char* psr_name, int use_cwd)
 {
+  if (verbose)
+    fprintf (stderr, "psrephem::create '%s'\n", psr_name);
+ 
   string filename = par_lookup (psr_name, use_cwd);
   if (filename.empty()) {
     fprintf (stderr, "psrephem::create no ephemeris file for %s found.\n",
@@ -247,6 +250,8 @@ string psrephem::par_lookup (const char* name, int use_cwd)
   }
 
   if (tempo_pardir == NULL) {
+    if (verbose)
+      fprintf(stderr,"psrephem::par_lookup load tempo .par directory\n");
     /* Find PARDIR - the TEMPO directory for name.par files */
     char* tpodir = (char *) getenv("TEMPO");
     if (tpodir == NULL) {
@@ -283,6 +288,9 @@ string psrephem::par_lookup (const char* name, int use_cwd)
   } // end if tempo_pardir == NULL
 
   if (tempo_pardir != NULL) {
+    if (verbose)
+      fprintf(stderr,"psrephem::par_lookup using TEMPO .par = '%s'\n",
+	      tempo_pardir);
     filename = tempo_pardir + psr_name + ".par";
     if (stat (filename.c_str(), &finfo) == 0) {
       if (verbose)
@@ -308,7 +316,7 @@ string psrephem::par_lookup (const char* name, int use_cwd)
   filename = cwd + psr_name + ".eph";
   if (stat (filename.c_str(), &finfo) == 0) {
     if (verbose)
-      printf("psrephem:: Using %s from PARDIR\n", filename.c_str());
+      printf("psrephem:: Using '%s'\n", filename.c_str());
     return filename;
   }
 
