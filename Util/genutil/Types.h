@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Types.h,v $
-   $Revision: 1.4 $
-   $Date: 2002/10/29 04:37:09 $
+   $Revision: 1.5 $
+   $Date: 2002/12/04 01:37:45 $
    $Author: hknight $ */
 
 #ifndef __Types_h
@@ -26,6 +26,7 @@ namespace Signal {
 
 
   //! Different receiver feed configurations
+  //! Be sure to modify 
   enum Basis { Circular=0, Linear=1 };
 
   //! Sources of observed signals
@@ -53,18 +54,12 @@ namespace Signal {
   enum Component {
     //! Unknown
     None,
-    //@{
     //! Stokes I,Q,U,V
     Si, Sq, Su, Sv,
-    //@}
-    //@{
     //! Coherency Products, Linear Basis
     XX, YY, ReXY, ImXY,
-    //@}
-    //@{
     //! Coherency Products, Circular Basis
     LL, RR, ReLR, ImLR,
-    //@}
     //! Stokes Invariant Interval
     Inv,
     //! Coherency Matrix Determinant
@@ -76,9 +71,18 @@ namespace Signal {
   
   int get_ipol (State state, Component poln);
   
-  const char* source_string (Source source);
-  const char* state_string (State state);
-  const char* basis_string (Basis basis);
+  const string source_string (Source source);
+  const string state_string (State state);
+  const string basis_string (Basis basis);
+
+  const string Source2string (Source source);
+  const string State2string (State state);
+  const string Basis2string (Basis basis);
+
+  Basis string2Basis(string ss);
+  Source string2Source(string ss);
+  State string2State(string ss);
+  
 }
 
 #endif

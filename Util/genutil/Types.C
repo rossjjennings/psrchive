@@ -1,3 +1,5 @@
+#include "Error.h"
+
 #include "Types.h"
 
 //! Given Basis and State, returns the default Component code of ipol
@@ -164,7 +166,7 @@ int Signal::get_ipol (State state, Component poln)
   return -1;
 }
 
-const char* Signal::state_string (State state)
+const string Signal::state_string (State state)
 {
   switch (state)  {
   case Nyquist:
@@ -186,7 +188,29 @@ const char* Signal::state_string (State state)
   }
 }
 
-const char* Signal::source_string(Source source){
+const string Signal::State2string (State state)
+{
+  switch (state)  {
+  case Nyquist:
+    return "Nyquist";
+  case Analytic:
+    return "Analytic";
+  case Stokes:
+    return "Stokes";
+  case Coherence:
+    return "Coherence";
+  case PPQQ:
+    return "PPQQ";
+  case Intensity:
+    return "Intensity";
+  case Invariant:
+    return "Invariant";
+  default:
+    return "Invalid";
+  }
+}
+
+const string Signal::source_string(Source source){
   switch( source ){
   case Unknown:
     return "Unknown";
@@ -201,7 +225,7 @@ const char* Signal::source_string(Source source){
   }
 }
 
-const char* Signal::basis_string(Basis basis){
+const string Signal::basis_string(Basis basis){
   switch( basis ){
   case Circular:
     return "Circular";
@@ -212,5 +236,45 @@ const char* Signal::basis_string(Basis basis){
   }
 }
 
+const string Signal::Source2string (Source source){ return source_string(source); }
+const string Signal::Basis2string (Basis basis){ return basis_string(basis); }
+
+
+Signal::Basis Signal::string2Basis(string ss){
+  if(ss=="Circular")
+    return Signal::Circular;
+  return Signal::Linear;
+}
+
+Signal::Source Signal::string2Source(string ss){
+  if(ss=="Pulsar")
+    return Pulsar;
+  else if(ss=="PolCal")
+    return PolCal;
+  else if(ss=="FluxCal")
+    return FluxCal;
+  return Unknown;
+}
+
+Signal::State Signal::string2State(string ss){
+  if(ss=="Nyquist")
+    return Nyquist;
+  else if(ss=="Analytic")
+    return Analytic;
+  else if(ss=="Intensity")
+    return Intensity;
+  else if(ss=="PPQQ")
+    return PPQQ;
+  else if(ss=="Coherence")
+    return Coherence;
+  else if(ss=="Stokes")
+    return Stokes;
+  else if(ss=="Invariant")
+    return Invariant;
+  
+  throw Error(InvalidState,"string2State()",
+	      "Unknown state- '%s'",ss.c_str());
+  return Invariant;  // Because you gotta return something
+}
 
 
