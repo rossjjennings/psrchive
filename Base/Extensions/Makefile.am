@@ -37,3 +37,13 @@ check_PROGRAMS = test_Receiver
 
 test_Receiver_SOURCES = test_Receiver.C
 
+#############################################################################
+#
+# Dependencies should never be changed
+#
+
+INCLUDES = -I$(top_srcdir)/utils/include -I$(top_srcdir)/astro/include \
+	-I.. -I../Calibration
+
+LDADD = $(top_srcdir)/utils/libpsrutils.la
+
