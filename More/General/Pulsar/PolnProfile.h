@@ -6,6 +6,10 @@
 #include "Jones.h"
 #include "Types.h"
 
+#ifdef sun
+#include <ieeefp.h>
+#endif
+
 namespace Pulsar {
 
   class Profile;
