@@ -10,6 +10,10 @@ MEAL::Projection::Projection (Function* _model, Composite* _meta)
     _meta->map (this);
 }
 
+MEAL::Projection::~Projection ()
+{
+}
+
 //! Return the mapped index
 unsigned MEAL::Projection::get_imap (unsigned index) const
 {

@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Projection.h,v $
-   $Revision: 1.3 $
-   $Date: 2004/11/22 19:26:04 $
+   $Revision: 1.4 $
+   $Date: 2005/02/13 08:33:03 $
    $Author: straten $ */
 
 #ifndef __Projection_H
@@ -22,6 +22,9 @@ namespace MEAL {
   public:
     //! Default constructor
     Projection (Function* model=0, Composite* meta=0);
+
+    //! Destructor
+    ~Projection ();
 
     //! Return the mapped index
     unsigned get_imap (unsigned index) const;
