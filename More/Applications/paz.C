@@ -20,6 +20,8 @@ int main (int argc, char *argv[]) {
   bool write = false;
   
   vector<string> archives;
+
+  string ulpath;
   
   bool manual_zap = false;
   string killfile;
@@ -51,7 +53,7 @@ int main (int argc, char *argv[]) {
   char* key = NULL;
   char whitespace[5] = " \n\t";
   
-  while ((gotc = getopt(argc, argv, "hvViDme:z:k:Z:x:X:dE:s:w:W:C:S:P:")) != -1) {
+  while ((gotc = getopt(argc, argv, "hvViDme:z:k:Z:x:X:dE:s:u:w:W:C:S:P:")) != -1) {
     switch (gotc) {
     case 'h':
       cout << "A program for zapping RFI in Pulsar::Archives"                      << endl;
@@ -62,18 +64,19 @@ int main (int argc, char *argv[]) {
       cout << "  -D               Display resulting bandpass and weights"          << endl;
       cout << "  -m               Modify the original files on disk"               << endl;
       cout << "  -e               Unload to new files using this extension"        << endl;
-      cout << "  -z \"a b c ...\"   Zap these particular channels"                 << endl;
-      cout << "  -k filename      Zap chans listed in this kill file"              << endl;
-      cout << "  -Z \"a b\"         Zap chans between a and b inclusive"           << endl;
-      cout << "  -x \"a b c ...\"   Zap all sub-integrations except these"         << endl;
-      cout << "  -X \"a b\"         Zap all sub-integrations except a to b inclusive" << endl;
-      cout << "  -E percent       Zap this much of the band at the edges"          << endl;
-      cout << "  -s \"a b c ...\"   Zap these sub-integrations"                    << endl;
-      cout << "  -S \"a b\"         Zap sub-integrations between a and b inclusive"<< endl;
-      cout << "  -w \"a b c ...\"   Zap (zero weight) these sub-integrations"      << endl;
-      cout << "  -W \"a b\"         Zap (zero weight) sub-integrations in this inclusive range"      << endl;
-      cout << "  -d               Use simple mean offset spike zapping"            << endl;
-      cout << "  -C cutoff        Zap channels based on S/N (using std if given)"  << endl;
+      cout << "  -u path          Write new files to this location"                << endl;
+      cout << "  -z \"a b c ...\"   Zero weight these particular channels"         << endl;
+      cout << "  -k filename      Zero weight chans listed in this kill file"      << endl;
+      cout << "  -Z \"a b\"         Zero weight chans between a & b inclusive"     << endl;
+      cout << "  -x \"a b c ...\"   Delete all sub-integrations except these"      << endl;
+      cout << "  -X \"a b\"         Delete all sub-ints except a to b inclusive"   << endl;
+      cout << "  -E percent       Zero weight this much of the band edges"         << endl;
+      cout << "  -s \"a b c ...\"   Delete these sub-integrations"                 << endl;
+      cout << "  -S \"a b\"         Delete sub-ints between a & b inclusive"       << endl;
+      cout << "  -w \"a b c ...\"   Zero weight these sub-integrations"            << endl;
+      cout << "  -W \"a b\"         Zero weight sub-ints between a & b inclusive"  << endl;
+      cout << "  -d               Zero weight chans using mean offset rejection"   << endl;
+      cout << "  -C cutoff        Zero weight chans based on S/N (std optional)"   << endl;
       cout << "  -P stdfile       Use this standard profile"                       << endl;
       cout << endl;
       cout << "The format of the kill file used with the -k option is simply"      << endl;
@@ -93,7 +96,7 @@ int main (int argc, char *argv[]) {
       Pulsar::Archive::set_verbosity(1);
       break;
     case 'i':
-      cout << "$Id: paz.C,v 1.17 2003/12/02 04:03:48 ahotan Exp $" << endl;
+      cout << "$Id: paz.C,v 1.18 2004/03/03 01:15:46 ahotan Exp $" << endl;
       return 0;
     case 'D':
       display = true;
@@ -160,6 +163,11 @@ int main (int argc, char *argv[]) {
       break;
     case 'd':
       simple = true;
+      break;
+    case 'u':
+      ulpath = optarg;
+      if (ulpath.substr(ulpath.length()-1,1) != "/")
+	ulpath += "/";
       break;
     case 'E':
       edge_zap = true;
@@ -420,7 +428,11 @@ int main (int argc, char *argv[]) {
 	  string the_old = arch->get_filename();
 	  int index = the_old.find_last_of(".",the_old.length());
 	  string primary = the_old.substr(0, index);
-	  string the_new = primary + "." + ext;
+	  string the_new;
+	  if (!ulpath.empty())
+	    the_new = ulpath + primary + "." + ext;
+	  else
+	    the_new = primary + "." + ext;
 	  arch->unload(the_new);
 	  cout << "New file " << the_new << " written to disk" << endl;
 	}
