@@ -15,7 +15,9 @@ Tempo::toa Pulsar::Profile::toa (const Profile& std, const MJD& mjd,
   float  ephase;
   double phase;
   
-  phase = PhaseGradShift (std, ephase);
+  Estimate<double> Ephase = shift (std);
+  phase = Ephase.val;
+  ephase = sqrt(Ephase.var);
 
   retval.set_frequency (centrefreq);
   retval.set_arrival   (mjd + phase * period);

@@ -50,7 +50,7 @@ Pulsar::PhaseGradShift (const Profile& std, const Profile& obs)
   prfcopy.fftconv (stdcopy, shift, eshift, snrfft, esnrfft);
   double ephase = eshift / float(stdcopy.get_nbin());
 
-  return Estimate<double> (shift / double(stdcopy.get_nbin()), ephase);
+  return Estimate<double> (shift / double(stdcopy.get_nbin()), ephase*ephase);
 
 }
 

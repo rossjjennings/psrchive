@@ -7,7 +7,8 @@
 
 #include "MEAL/GaussJordan.h"
 
-double Pulsar::Profile::ParIntShift (const Profile& std, float& error) const
+Estimate<double>
+Pulsar::ParIntShift (const Profile& std, const Profile& obs)
 {
   // The Profile::correlate function creates a profile whose amps
   // are the values of the correlation function, starting at zero
@@ -16,7 +17,7 @@ double Pulsar::Profile::ParIntShift (const Profile& std, float& error) const
   vector<double> correlation;
   vector<double> lags;
 
-  Reference::To<Pulsar::Profile> ptr = clone();
+  Reference::To<Pulsar::Profile> ptr = obs.clone();
   Reference::To<Pulsar::Profile> stp = std.clone();
 
   // Remove the baseline (done twice to minimise rounding error)
@@ -39,13 +40,13 @@ double Pulsar::Profile::ParIntShift (const Profile& std, float& error) const
   x2 = double(maxbin);
   x3 = double(maxbin + 1);
 
-  y1 = ptr->get_amps()[(maxbin - 1)%get_nbin()];
-  y2 = ptr->get_amps()[(maxbin)%get_nbin()];
-  y3 = ptr->get_amps()[(maxbin + 1)%get_nbin()];
+  y1 = ptr->get_amps()[(maxbin - 1)%obs.get_nbin()];
+  y2 = ptr->get_amps()[(maxbin)%obs.get_nbin()];
+  y3 = ptr->get_amps()[(maxbin + 1)%obs.get_nbin()];
 
-  x1 /= double(get_nbin());
-  x2 /= double(get_nbin());
-  x3 /= double(get_nbin());
+  x1 /= double(obs.get_nbin());
+  x2 /= double(obs.get_nbin());
+  x3 /= double(obs.get_nbin());
  
   vector< vector<double> > matrix;
   vector< vector<double> > empty;
@@ -129,7 +130,7 @@ double Pulsar::Profile::ParIntShift (const Profile& std, float& error) const
   // We use the slope of the parabola a distance one bin
   // away from the peak.
 
-  double s1 = fabs(2.0 * A * (F-(1.0/get_nbin())));
+  double s1 = fabs(2.0 * A * (F-(1.0/obs.get_nbin())));
   
   error = (1.0 / (s1*500.0));
 
@@ -168,9 +169,9 @@ double Pulsar::Profile::ParIntShift (const Profile& std, float& error) const
   vector<float> diff;
 
   for (int i = -3; i < 3; i++) {
-    real.push_back(ptr->get_amps()[(maxbin + i)%get_nbin()]);
+    real.push_back(ptr->get_amps()[(maxbin + i)%obs.get_nbin()]);
     // Don't wrap x!
-    float x = float(maxbin + i)/float(get_nbin());
+    float x = float(maxbin + i)/float(obs.get_nbin());
     parb.push_back(D - E*(x-F)*(x-F));
   }
 
@@ -184,7 +185,7 @@ double Pulsar::Profile::ParIntShift (const Profile& std, float& error) const
 
   // The real error is assumed to be the combination of two effects:
 
-  error = sqrt(errfit*errfit + errwidth*errwidth) / 2.0;
+  double var = (errfit*errfit + errwidth*errwidth) / 4.0;
 
   // The shift in phase units, wrapped to be between -0.5 and 0.5
 
@@ -193,5 +194,5 @@ double Pulsar::Profile::ParIntShift (const Profile& std, float& error) const
   else if (F > 0.5)
     F -= 1.0;
 
-  return F;
+  return Estimate<double> (F,var);
 }
