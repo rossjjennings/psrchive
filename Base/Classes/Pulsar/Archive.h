@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Archive.h,v $
-   $Revision: 1.61 $
-   $Date: 2003/03/08 10:41:08 $
+   $Revision: 1.62 $
+   $Date: 2003/03/08 10:52:49 $
    $Author: straten $ */
 
 /*! \mainpage 
@@ -179,11 +179,10 @@ namespace Pulsar {
 
   class Archive : public IntegrationManager {
 
-  public:
+  private:
 
-    //! Classes derived from Archive are registered for use via an Agent
-    /*! This abstract base class must be used to register derived classes
-      with the Archive::load factory. */
+    //! Pure virtual base class of Archive::Advocate template base class
+    /* This class is private.  The Archive::Advocate template should be used. */
     class Agent : public Reference::Able {
 
     public:
@@ -194,14 +193,14 @@ namespace Pulsar {
       //! Advocate the use of the derived class to interpret filename
       virtual bool advocate (const char* filename) = 0;
       
-      //! Return a null-constructed instance of the derived class
-      virtual Archive* new_Archive () = 0;
-
       //! Return the name of the derived class
       virtual string get_name () = 0;
 
       //! Return a description of the derived class
       virtual string get_description () = 0;
+
+      //! Return a null-constructed instance of the derived class
+      virtual Archive* new_Archive () = 0;
 
       //! Return the name of the plugins directory
       static string plugin_path ();
@@ -227,19 +226,37 @@ namespace Pulsar {
 
     };
 
+  public:
+    //! Classes derived from Archive are registered for use via an Advocate
+    /*! This abstract template base class must be inherited in order
+      to register plugins for use with the Archive::load factory.  The
+      following abstract methods of the Agent base class must be defined:
+
+      //! Advocate the use of the derived class to interpret filename
+      virtual bool advocate (const char* filename) = 0;
+      
+      //! Return the name of the derived class
+      virtual string get_name () = 0;
+
+      //! Return a description of the derived class
+      virtual string get_description () = 0;
+
+    */
     template<class Child>
     class Advocate : public Agent {
 
     public:
+      //! Return a new instance of the Archive derived class
       virtual Archive* new_Archive () { return new Child; }
 
-    protected:
+      //! Constructor compilation ensures that template entry is instantiated
       Advocate () { entry.get(); }
 
     private:
       static Registry::List<Archive::Agent>::Enter<typename Child::Agent> entry;
 
     };
+
 
     //! Flag that Archive::append should enforce chronological order
     static bool append_chronological;
@@ -640,6 +657,9 @@ namespace Pulsar {
 
     //! Default selected subints
     static const vector<unsigned> none_selected;
+
+
+
 
   private:
 
