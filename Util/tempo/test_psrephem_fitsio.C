@@ -104,7 +104,7 @@ int main (int argc, char** argv)
     cout << "Parsed ephemeris\n" << eph;
 
   FILE* cfptr = fopen (".test_fitsio.in", "w");
-  if (cfptr) {
+  if (!cfptr) {
     perror ("test_fitsio: could not open .test_fitsio.in");
     return -1;
   }
@@ -112,14 +112,17 @@ int main (int argc, char** argv)
   fclose (cfptr);
 
   cfptr = fopen (".test_fitsio.out", "w");
-  if (cfptr) {
+  if (!cfptr) {
     perror ("test_fitsio: could not open .test_fitsio.out");
     return -1;
   }
   eph2.unload (cfptr);
   fclose (cfptr);
 
-  cout << "Run: diff .test_fitsio.in .test_fitsio.out" << endl;
+  string system_call = "diff .test_fitsio.in .test_fitsio.out";
+  cerr << system_call << endl;
+
+  system (system_call.c_str());
 
   return 0;
 }
