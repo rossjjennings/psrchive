@@ -7,6 +7,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 /* fatal errors ... */
 #define FATAL_1(s1) {fprintf(stderr, "Fatal: "); fprintf(stderr, s1); exit(1);}
