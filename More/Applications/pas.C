@@ -21,21 +21,22 @@
 #include "dirutil.h"
 #include "string_utils.h"
 
-void plot_it(Reference::To<Pulsar::Archive>, Reference::To<Pulsar::Archive>, int, int, int, char *, char *);
+void plot_it(Reference::To<Pulsar::Archive>, Reference::To<Pulsar::Archive>, int, int, int, int, char *, char *, bool);
 void coef (float *, float *, int, int, double *, int *, double *, bool);
-void cross_correlation(Reference::To<Pulsar::Profile>, Reference::To<Pulsar::Profile>, double *, int *, double *, bool, char *);
+void cross_correlation(Reference::To<Pulsar::Profile>, Reference::To<Pulsar::Profile>, double *, int *, double *, bool);
 void smooth (Reference::To<Pulsar::Profile>, bool);
 double convt(Reference::To<Pulsar::Archive>, float, bool);
+void cross(Reference::To<Pulsar::Archive>,Reference::To<Pulsar::Archive>,bool,bool,char*);
+
 
 void usage ()
 {
   cout << "Program to align standard profiles \n"
-    "Usage: pas [-r reference profile] [-s standard profile] [-v] [-V] \n"
+    "Usage: pas [-r reference_profile] [-v] [-V] standard_profile  \n"
     "Where the options are as follows \n"
     " -h        This help page \n"
     " -i        Revision information\n"
     " -r ref    Reference profile \n"
-    " -s std    Standard profile to align with reference profile \n"
     " -v        Verbose output \n"
     " -V        Very verbose output \n\n"
 
@@ -46,26 +47,28 @@ void usage ()
 
 int main (int argc, char** argv) 
 {
-  char* refname = NULL;
-  char* stdname = NULL;
+  //  char* refname = NULL;
+  string refname;
+  vector<string> stdname;
   char line[100];
   char plotdev[5];
   char opts;
   float curs_x, curs_y, x, y, meantmp =0;
   float stdphase=0;
+  float ephase, snrfft, esnrfft;    
   unsigned int i;
   bool verbose = false;
   bool vverbose = false;
+  bool refflag = false;
   int c = 0;
-  int imax=0;
+  float fmax;
   bool zflag = false;
-  double rmax=0, pcoef=0;
   //color of lines
-  int ci_ref = 1;  //white  
-  int ci_std = 2;  //red
-  int ci_tex = 5;  //grey
-
-  const char* args = "hir:s:vV";
+  int ci_ref = 7;  //yellow  
+  int ci_std = 5;  //grey
+  int ci_tex = 1;  //white
+  int ci_dis = 15; //dark 
+  const char* args = "hir:vV";
 
   while ((c = getopt(argc, argv, args)) != -1) {
     switch (c) {
@@ -75,16 +78,13 @@ int main (int argc, char** argv)
       return 0;
 
     case 'i':
-      cout << "$Id: pas.C,v 1.4 2003/06/05 06:08:59 pulsar Exp $" << endl;
+      cout << "$Id: pas.C,v 1.5 2003/09/07 07:15:12 nwang Exp $" << endl;
       return 0;
 
     case 'r':
+      refflag = true;
       refname = optarg;
-      break;
-
-    case 's':
-      stdname = optarg;
-      break;
+     break;
 
     case 'v':
       verbose = true;
@@ -103,42 +103,43 @@ int main (int argc, char** argv)
     }
   }
 
-  if (refname == NULL) {
-    cerr << "No specified reference profile " <<endl;
+  if (refflag==true && refname == "") {
+    cerr << "No specified reference profile" <<endl;
     usage();
     return 0;
   }
-  if (stdname == NULL) {
-    cerr << "No specified standard profile " <<endl;
+
+  if(argv[optind]==NULL) {
+    cerr << "No specified standard profile " << endl <<endl;
     usage();
-    return 0;
+    exit(-1);    
   }
+
+  dirglob (&stdname, argv[optind]);
+
+  if (stdname.empty()) {
+    cerr << "No specified standard profile " << endl <<endl;
+    usage();
+    exit(-1);
+  } 
+
 
   Error::handle_signals ();
 
-  //original archive
-  Reference::To<Pulsar::Archive> refarch = Pulsar::Archive::load(refname);
-  Reference::To<Pulsar::Archive> stdarch = Pulsar::Archive::load(stdname);
-  if(verbose) cout << "archives loaded" << endl;
+  //open new standard profile
+  Reference::To<Pulsar::Archive> stdarch = Pulsar::Archive::load(stdname[0]);
+  Reference::To<Pulsar::Profile> stdprof=stdarch->get_Profile(0, 0, 0);
 
-  //keep the original archive
-  Reference::To<Pulsar::Archive> refarch0 (refarch->clone());
+  if(verbose) cout << "new standard archives loaded" << endl;
+  stdphase=stdarch->find_max_phase();
+  if(verbose) cout <<"   original stdphase " <<stdphase <<endl;
+  //rotate 0.5 phase period
+  stdarch->rotate(convt(stdarch, -0.5*stdarch->get_nbin(), verbose));
+  //keep the original new standard profile for reload
   Reference::To<Pulsar::Archive> stdarch0 (stdarch->clone());
   //profile to correlate
-  Reference::To<Pulsar::Archive> refcorr (refarch->clone()); 
   Reference::To<Pulsar::Archive> stdcorr (stdarch->clone());
-
-  //check reference profile
-  if( verbose ){
-    cout << "Reference profile: " << refarch->get_filename() << endl;
-    cout <<"  Profile has " << refarch->get_Profile(0, 0, 0)->get_nbin() << " bins" << endl;
-  }
-  if( !power_of_two(refarch->get_Profile(0, 0, 0)->get_nbin()) )
-    throw Error(InvalidState,"Check: ",
-		"profile from archive '%s' doesn't have nbin a power of two (%d)", 
-		refarch->get_filename().c_str(), refarch->get_Profile(0, 0, 0)->get_nbin());
-  
-  //check new profile
+  //check profile bin number
   if( verbose ) {
     cout << "Processing profile:" << stdarch->get_filename() << endl;
     cout <<"  Profile has " << stdarch->get_nbin() << " bins" << endl;
@@ -148,47 +149,77 @@ int main (int argc, char** argv)
 		"profile from archive '%s' doesn't have nbin a power of two (%d)", 
 		stdarch->get_filename().c_str(),stdarch->get_nbin());
 
+  //open original ref. archive
+  if(refflag==false) refname = stdname[0].c_str();//open a dummy ref profile
+  Reference::To<Pulsar::Archive> refarch = Pulsar::Archive::load(refname);
+  if(verbose) cout << "ref. archive loaded" << endl;
   refarch->rotate(convt(refarch, -0.5*refarch->get_nbin(), verbose));
-  stdarch->rotate(convt(stdarch, -0.5*stdarch->get_nbin(), verbose));
-  *refcorr = *refarch;
-  *stdcorr = *stdarch;
+  //keep the original ref. archive
+  Reference::To<Pulsar::Archive> refarch0 (refarch->clone());
+  //profile to correlate
+  Reference::To<Pulsar::Archive> refcorr (refarch->clone()); 
+  //check reference profile
+  if( verbose ){
+    cout << "Reference profile: " << refarch->get_filename() << endl;
+    cout << "  Profile has " << refarch->get_Profile(0, 0, 0)->get_nbin() << " bins" << endl;
+  }
+  if( !power_of_two(refarch->get_Profile(0, 0, 0)->get_nbin()) )
+    throw Error(InvalidState,"Check: ",
+		"profile from archive '%s' doesn't have nbin a power of two (%d)", 
+		refarch->get_filename().c_str(), refarch->get_Profile(0, 0, 0)->get_nbin());
+
+  if(refflag==true)
+    cross(refcorr, stdcorr, verbose, vverbose, line);
 
   cout << "Input plot device : ";
   cin >> plotdev;
-
-  cross_correlation(refcorr->get_Profile(0, 0, 0), stdcorr->get_Profile(0, 0, 0), &rmax, &imax, &pcoef, verbose, line);
-
   //plot profiles
-  plot_it(refarch, stdarch, ci_ref, ci_std, ci_tex, line, plotdev);
+  plot_it(refarch, stdarch, ci_ref, ci_std, ci_tex, ci_dis, line, plotdev, refflag);
 
   opts = ' ';
   if (cpgcurs(&curs_x, &curs_y, &opts) == 1) {
-    while (opts != 'e') {  
+    while (opts != 'q') {  
       try {
 	switch(opts) {
 	case 'a':   //Align
-	    stdarch->rotate(convt(stdarch, imax, verbose));
-	    if(verbose) cout << "Align: rotated " <<imax <<" bins"<<endl;
-	    break;
+	  if(refflag==true) {  
+	    stdprof=stdarch->get_Profile(0, 0, 0);
+	    stdphase=float(stdprof->shift(refarch->get_Profile(0, 0, 0), ephase, snrfft, esnrfft));
+	    fmax=stdphase*stdarch->get_Profile(0,0,0)->get_nbin();
+	    stdarch->rotate(convt(stdarch, fmax, verbose));
+	    if(verbose) cout << "Align: rotated " <<stdphase << "phase, " << fmax <<" bins" << endl;
+	  }
+	  else cout << "No specified ref. profile" << endl;
+	  break;
 
 	case 'b':  //Bscrunch
 	  stdarch->bscrunch(2);
 	  if( verbose ) cout << "Bscrunch: Profile is smoothed by factor 2" << endl;
 	  break;
 	 
-	case 'c':  //Centre Profile
+	case 'c':  //Centre Profile, not work properly according to find_max_phase()
 	  stdphase=stdarch->find_max_phase();
 	  if( verbose ) cout << "Centre: Maximum phase " << stdphase << endl;
 	  stdarch->rotate((stdphase-0.5)*stdarch->get_Integration(0)->get_folding_period());
 	  if( verbose ) cout << "Centre: Centre the profile, done" <<endl;
 	  break;
 
-	case 'f': //Fast rotate, to the right
-	  stdarch->rotate (convt(stdarch, -20.0, verbose));
-	  if( verbose ) cout << "Fast Rotate profile: 20 bins to the right" <<endl;
+	case 'l':
+	  stdarch->rotate (convt(stdarch, 0.05, verbose));
+	  if( verbose ) cout << "Delicate rotate profile: 0.05 bin to the left" << endl;
+	  break;
+
+	case 'r':
+	  stdarch->rotate (convt(stdarch, -0.05, verbose));
+	  if( verbose ) cout << "Delicate rotate profile: 0.05 bin to the right" << endl;
 	  break;
 	  
-	case 'l':  //Left rotate
+	case 'f': //Fast rotate, to the right
+	  stdarch->rotate (convt(stdarch, -20.0, verbose));
+	  if( verbose ) cout << "Fast rotate profile: 20 bins to the right" <<endl;
+	  break;
+	  
+	case 'L':  //Left rotate
 	  stdarch->rotate (convt(stdarch, 1.0, verbose));
 	  if( verbose ) cout << "Rotate profile: 1 bin to the left" << endl;
 	  break;
@@ -198,19 +229,13 @@ int main (int argc, char** argv)
 	  if( verbose ) cout << "Smooth: profile smoothed" << endl;
 	  break;
 
-	case 'o':  //Back to Origin
+	case 'o':  //Back to Original
 	  *stdarch = *stdarch0;
-	  stdarch->rotate(convt(stdarch, -0.5*stdarch->get_nbin(), verbose));
 	  *stdcorr = *stdarch;
- 	  if( verbose ) cout << "Back to origin" << endl;
-	  break;
-	  
-	case 'q':  //Rotate quarterly
-	  stdarch->rotate(convt(stdarch, -0.25*stdarch->get_nbin(), verbose)); //right rotate
-	  if( verbose ) cout << "Center: Profile is centered" << endl;
+ 	  if( verbose ) cout << "Back to original" << endl;
 	  break;
 	
-	case 'r':  //Right rotate
+	case 'R':  //Right rotate
 	  stdarch->rotate (convt(stdarch, -1.0, verbose));
 	  if( verbose ) cout << "Rotate profile: 1 bin to the right" << endl;
 	  break;
@@ -248,7 +273,7 @@ int main (int argc, char** argv)
 
 	    if (vverbose) 
 	      for(i=0; i<stdarch->get_Profile(0, 0, 0)->get_nbin(); i++) 
-		cout << i << ": " << tmpdata[i]<<"  ";
+		cout << "  " << i << ": " << tmpdata[i]<<"  ";
 	      
 	    stdarch->get_Profile(0, 0, 0)->set_amps(tmpdata);
 	    if (verbose) cout << "Zero baseline: done" << endl;
@@ -261,14 +286,8 @@ int main (int argc, char** argv)
 	  if(verbose) cout << "Save: the archive file is " << the_old <<endl;
 	  string the_new = " ";
 	  cout << "Save: the center freq is " << stdarch->get_centre_frequency() << "MHz, "<< (30/(1e-3* stdarch->get_centre_frequency()))<< "cm" <<endl;
-	  cout << "      new file name ('x' for default name): ";
+	  cout << "      new file name: ";
 	  cin >> the_new;
-	  if( the_new == "x" ) {
-	    int index = the_old.find_last_of(".",the_old.length());
-	    string primary = the_old.substr(0, index);
-	    the_new = primary + "." + "new";
-	    cout << "      default file name " << the_new << endl;
-	  }
 	  stdarch->rotate(convt(stdarch, -0.5*stdarch->get_nbin(), verbose));
 	  stdarch->unload(the_new);
 	  stdarch->rotate(convt(stdarch, 0.5*stdarch->get_nbin(), verbose));
@@ -276,10 +295,13 @@ int main (int argc, char** argv)
 	  break;	 
 	}
 
-	*refcorr=*refarch;
 	*stdcorr=*stdarch;
-	cross_correlation(refcorr->get_Profile(0, 0, 0), stdcorr->get_Profile(0, 0, 0), &rmax, &imax, &pcoef, verbose, line);
-	plot_it(refarch, stdarch, ci_ref, ci_std, ci_tex, line, plotdev);
+	if(refflag==true) {
+	  *refcorr=*refarch;
+	  cross(refcorr, stdcorr, verbose, verbose, line);
+	  //cross_correlation(refcorr->get_Profile(0, 0, 0), stdcorr->get_Profile(0, 0, 0), &rmax, &imax, &pcoef, vverbose);
+	}
+	plot_it(refarch, stdarch, ci_ref, ci_std, ci_tex, ci_dis, line, plotdev, refflag);
 	cout << "Waiting for option ...." << endl;
 	cpgcurs(&curs_x, &curs_y, &opts);
       }
@@ -298,54 +320,62 @@ int main (int argc, char** argv)
 }
 
 
-void plot_it(Reference::To<Pulsar::Archive> refarch, Reference::To<Pulsar::Archive> stdarch, int ci_ref, int ci_std, int ci_tex, char line[100], char plotdev[5]) {
+void plot_it(Reference::To<Pulsar::Archive> refarch, Reference::To<Pulsar::Archive> stdarch, int ci_ref, int ci_std, int ci_tex, int ci_dis, char line[100], char plotdev[5], bool refflag) {
   float x, y;
   char str[50];
   unsigned i;
   //options
   cpgbeg(0, plotdev, 1, 1);
   
-  cpgsvp (0.05, .95, 0.75, .98);
+  cpgsvp (0.05, .95, 0.70, .98);
   cpgswin (0, 100, 0, 100);
   cpgsch (0.8);
-  cpgsci (ci_tex);
-  int step=14;
+
+  int step=11;
   for(i=0; i<10; i++) {
+    cpgsci (ci_tex);
     x=5;
     y=100-i*step;
-    if(i==0)
+    if(i==0){
+      if(refflag==false)
+	cpgsci (ci_dis);
       cpgtext (x, y, "a:  Align with reference profile");
+    }
     else if(i==1)
       cpgtext (x, y, "b:  Bscrunch by factor 2");
     else if(i==2)
       cpgtext (x, y, "c:  Center the profile");
     else if(i==3)
-      cpgtext (x, y, "e:  Exit the program");
+      cpgtext (x, y, "f:  Fast rotate 20 bins to the right");
     else if(i==4)
-      cpgtext (x, y, "f:  Fast rotate profile: 20 bins to the right");
+      cpgtext (x, y, "m: sMooth the profile");
     else if(i==5)
-      cpgtext (x, y, "l:  Left rotate profile, step: 1 bin");
+      cpgtext (x, y, "o:  back to Origin");
+    else if(i==6)
+      cpgtext (x, y, "q:  Quit the program");
     else    break;
   }
-  cpgsci (ci_ref);
-  cpgmove (x, 15);
-  cpgdraw (x+10, 15);
-  strncpy(str, "", 50);
-  sprintf(str, "Reference profile    %d bins", refarch->get_Profile(0, 0, 0)->get_nbin());
-  cpgtext (x+13, 15, str);
+  if(refflag==true) {
+    cpgsci (ci_ref);
+    cpgmove (x+3, 22);
+    cpgdraw (x+10, 22);
+    strncpy(str, "", 50);
+    sprintf(str, "Reference profile    %d bins", refarch->get_Profile(0, 0, 0)->get_nbin());
+    cpgtext (x+13, 22, str);
+  }
 
   cpgsci(ci_tex);
   for(i=0; i<10; i++) {
     x=60;
     y=100-i*step;
     if(i==0)
-      cpgtext (x, y, "m: sMooth the profile");
+      cpgtext (x, y, "L:  Left rotate profile, step:   1 bin");
     else if(i==1)
-      cpgtext (x, y, "o:  back to Origin");
+      cpgtext (x, y, "R:  Right rotate profile, step: 1 bin");
     else if(i==2)
-      cpgtext (x, y, "q:  Quarter rotate to the right");
+      cpgtext (x, y, "l:   fine rotate 0.05 bin to the left");
     else if(i==3)
-      cpgtext (x, y, "r:  Right rotate profile, step: 1 bin");
+      cpgtext (x, y, "r:  fine rotate 0.05 bin to the right");
     else if(i==4)
       cpgtext (x, y, "s:  Save the standard profile");
     else if(i==5)
@@ -353,30 +383,40 @@ void plot_it(Reference::To<Pulsar::Archive> refarch, Reference::To<Pulsar::Archi
     else  break;
   }
   cpgsci (ci_std);
-  cpgmove (x, 15);
-  cpgdraw (x+10, 15);
+  cpgmove (x+3, 22);
+  cpgdraw (x+10, 22);
   strncpy(str, "", 50);
   sprintf(str, "New profile    %d bins", stdarch->get_Profile(0, 0, 0)->get_nbin());
-  cpgtext (x+13, 15, str);
+  cpgtext (x+13, 22, str);
 
-  //write the cross correlation function
-  cpgsci (5);
-  cpgtext (10, 0, line);
+  //write the cross correlation message
+  if(refflag == true) {
+    cpgsci (ci_tex);
+    cpgtext (10, 10, line);
+  }
 
   //profiles window
-  cpgsvp (0.1, 0.9, 0.05, 0.7);
+  cpgsvp (0.1, 0.9, 0.03, 0.05);
+  cpgswin (0, 1, 0, 1);
+  cpgsci(ci_tex);
+  cpgbox("BNTS", 0.1, 5, "", 0.0, 0);
+
+  cpgsvp (0.1, 0.9, 0.05, 0.68);
   cpgswin (0, 1, 0, 1);
   
   //draw the centre line
-  cpgsci (11); //blue
+  cpgsci (ci_tex); //grey
   cpgsls (2);
   cpgmove (0.5, 0.0);
   cpgdraw (0.5, 1.0);
-  
+  cpgtext(0.48, 1.02, "Ref.");
+
   //draw the profiles
   cpgsls (1);
-  cpgsci (ci_ref);
-  refarch->get_Profile(0, 0, 0)->Pulsar::Profile::display (0, 0, 1, 0, 1, 1.0);
+  if(refflag == true) {
+    cpgsci (ci_ref);
+    refarch->get_Profile(0, 0, 0)->Pulsar::Profile::display (0, 0, 1, 0, 1, 1.0);
+  }
   cpgsci (ci_std);
   stdarch->get_Profile(0, 0, 0)->Pulsar::Profile::display (0, 0, 1, 0, 1, 1.0);
 }
@@ -427,31 +467,51 @@ void coef (float *x, float *y, int maxdelay, int n, double *rmax, int *imax, dou
   }
 }
 
-void cross_correlation(Reference::To<Pulsar::Profile> refprof, Reference::To<Pulsar::Profile> stdprof, double *rmax, int *imax, double *pcoef, bool verbose, char line[100])
+
+void cross(Reference::To<Pulsar::Archive> refcorr, Reference::To<Pulsar::Archive> stdcorr, bool verbose, bool vverbose, char line[100]) 
+{
+  float fmax, ephase, snrfft, esnrfft, stdphase;
+  int imax; 
+  double rmax, pcoef, ppcoef;
+  Reference::To<Pulsar::Archive> stdclone (stdcorr->clone());
+  Reference::To<Pulsar::Profile> stdprof;
+
+  //original
+  cross_correlation(refcorr->get_Profile(0, 0, 0), stdclone->get_Profile(0, 0, 0), &rmax, &imax, &pcoef, vverbose);
+
+  //max after rotate fractional phase bin
+  stdprof=stdcorr->get_Profile(0, 0, 0);
+  stdphase=stdprof->shift(refcorr->get_Profile(0, 0, 0), ephase, snrfft, esnrfft);
+  fmax=float(stdphase)*stdcorr->get_Profile(0,0,0)->get_nbin();
+  stdcorr->rotate(convt(stdcorr, fmax, verbose));
+  cross_correlation(refcorr->get_Profile(0, 0, 0), stdcorr->get_Profile(0, 0, 0), &rmax, &imax, &ppcoef, vverbose);
+
+  if(verbose) cout << "Maximum cross correlation coeffecient: " << rmax << " at bin lag " << fmax <<endl;
+  if(verbose) cout << "Present cross correlation coeffecient: " << pcoef <<endl;
+  strncmp(line, "", 100);
+  sprintf(line, "Maximum cross correlation coeffecient = %f at bin lag %f   Present = %f", ppcoef, fmax, pcoef);
+}
+
+
+void cross_correlation(Reference::To<Pulsar::Profile> refprof, Reference::To<Pulsar::Profile> stdprof, double *rmax, int *imax, double *pcoef, bool vverbose)
 {
   float fact_nbin;
   int corr_nbin=0;
   
   if((fact_nbin = 1.0*stdprof->get_nbin()/refprof->get_nbin())>=1) 
-    //        stdprof->halvebins(log2(fact_nbin));
     stdprof->bscrunch(int(fact_nbin));
   else
-    //    refprof->halvebins(log2(1/fact_nbin));
     refprof->bscrunch(int(1/fact_nbin));
 
     corr_nbin=stdprof->get_nbin();
-    if(verbose) cout << "Cross correlation: " <<corr_nbin << " bins applied"<< endl;
-    if(verbose) cout << "bin fact stdprof/refprof: " <<fact_nbin <<endl;
+    if(vverbose) cout << "  cross correlation: " <<corr_nbin << " bins applied"<< endl;
+    if(vverbose) cout << "  bin fact stdprof/refprof: " <<fact_nbin <<endl;
 
   //call coef
   float *ref = refprof->get_amps();
   float *std = stdprof->get_amps();
-  coef(ref, std, corr_nbin/2, corr_nbin, rmax, imax, pcoef, verbose);
+  coef(ref, std, corr_nbin/2, corr_nbin, rmax, imax, pcoef, vverbose);
   if (fact_nbin>=1) *imax = int(*imax*fact_nbin);
-  if(verbose) cout << "Maximum cross correlation coeffecient: " << *rmax << " on bin lag " << *imax <<endl;
-  if(verbose) cout << "Present cross correlation coeffecient: " << *pcoef <<endl;
-  strncmp(line, "", 100);
-  sprintf(line, "Maximum cross correlation coeffecient = %f on lag %d.   Present = %f", *rmax, *imax, *pcoef);
 }
 
 
@@ -466,7 +526,8 @@ void smooth(Reference::To<Pulsar::Profile> prof, bool vverbose)
     if(k1<0)                   k1=prof->get_nbin()+k1;
     if(k2>=int(prof->get_nbin()))   k2=prof->get_nbin()-k2;
     smth[i]=0.25*(temp[k1]+temp[k2])+0.5*temp[i];
-    if (vverbose)    fprintf(stderr, "%d:%f %f  ",i, temp[i], smth[i]);
+    //    if (vverbose)    fprintf(stderr, "  %d:%f %f  \n",i, temp[i], smth[i]);
+    if(vverbose)  cout << "  smooth: "  << i << " " << temp[i]  << " " << smth[i] << endl;
   }
 
   prof->set_amps(smth);
