@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/FluxCalibrator.h,v $
-   $Revision: 1.19 $
-   $Date: 2004/12/27 14:21:56 $
+   $Revision: 1.20 $
+   $Date: 2005/02/09 14:48:47 $
    $Author: straten $ */
 
 #ifndef __Pulsar_FluxCalibrator_H
@@ -26,6 +26,9 @@ namespace Pulsar {
 
     //! Default constructor
     FluxCalibrator (const Archive* archive = 0);
+
+    //! Destructor
+    ~FluxCalibrator ();
 
     //! Return Calibrator::Flux
     Type get_type () const;

@@ -44,6 +44,10 @@ Pulsar::FluxCalibrator::FluxCalibrator (const Archive* archive)
     add_observation (archive);
 }
 
+Pulsar::FluxCalibrator::~FluxCalibrator ()
+{
+}
+
 void Pulsar::FluxCalibrator::init ()
 {
   calculated = have_on = have_off = false;
