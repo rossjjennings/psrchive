@@ -1,5 +1,5 @@
 //
-// $Id: pav.C,v 1.55 2003/10/08 14:30:20 straten Exp $
+// $Id: pav.C,v 1.56 2003/10/10 05:57:38 ahotan Exp $
 //
 // The Pulsar Archive Viewer
 //
@@ -52,6 +52,7 @@ void usage ()
     " -I        Select which subint to display\n"
     " -W        Change colour scheme to suite white background\n"
     " -z x1,x2  Zoom to this pulse phase range\n"
+    " -k f1,f2  Zoom to this frequency range\n"
     " -N x,y    Divide the window into x by y panels\n"
     "\n"
     "Plotting options:\n"
@@ -116,6 +117,7 @@ int main (int argc, char** argv)
   
   bool verbose = false;
   bool zoomed = false;
+  bool fzoomed = false;
 
   bool display = false;
   bool nesting = false;
@@ -151,7 +153,7 @@ int main (int argc, char** argv)
   Pulsar::Plotter::ColourMap colour_map = Pulsar::Plotter::Heat;
   
   int c = 0;
-  const char* args = "AaBb:Cc:DdEeFf:GgHhI:iJjK:LlM:m:N:O:oP:pQq:r:SsTt:VvwWXx:Yy:Zz:";
+  const char* args = "AaBb:Cc:DdEeFf:GgHhI:iJjk:K:LlM:m:N:O:oP:pQq:r:SsTt:VvwWXx:Yy:Zz:";
 
   while ((c = getopt(argc, argv, args)) != -1)
     switch (c) {
@@ -219,7 +221,7 @@ int main (int argc, char** argv)
       plotter.set_subint( atoi (optarg) );
       break;
     case 'i':
-      cout << "$Id: pav.C,v 1.55 2003/10/08 14:30:20 straten Exp $" << endl;
+      cout << "$Id: pav.C,v 1.56 2003/10/10 05:57:38 ahotan Exp $" << endl;
       return 0;
 
     case 'j':
@@ -333,6 +335,20 @@ int main (int argc, char** argv)
       zoomed = true;
       break;
     }
+
+    case 'k': {
+      char* separator = ",";
+      char* val1 = strtok (optarg, separator);
+      char* val2 = strtok (NULL, separator);
+      if (!val1 || !val2)  {
+        cerr << "Error parsing frequencies" << endl;
+        return -1;
+      }
+      plotter.set_freq_zoom (atof(val1), atof(val2));
+      fzoomed = true;
+      break;
+    }
+
     case 'N': {
       char* separator = ",";
       char* val1 = strtok (optarg, separator);
@@ -346,6 +362,7 @@ int main (int argc, char** argv)
       nesting = true;
       break;
     }
+
     case 'Z':
       hat = true;
       break;
