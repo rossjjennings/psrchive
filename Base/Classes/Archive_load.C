@@ -11,13 +11,13 @@
    source code file separate from all other archive methods so that it will
    be linked into executables only when called directly.
 */
-Pulsar::Archive* Pulsar::Archive::load (const char* filename)
+Pulsar::Archive* Pulsar::Archive::load (const string& filename)
 {
   // check if file can be opened for reading
-  FILE* fptr = fopen (filename, "r");
+  FILE* fptr = fopen (filename.c_str(), "r");
 
   if (!fptr) throw Error (FailedSys, "Pulsar::Archive::load",
-			  "cannot open '%s'", filename);
+			  "cannot open '%s'", filename.c_str());
   fclose (fptr);
   
   if (Agent::registry.size() == 0)
@@ -36,7 +36,7 @@ Pulsar::Archive* Pulsar::Archive::load (const char* filename)
       cerr << "Pulsar::Archive::load testing "
            << Agent::registry[agent]->get_name() << endl;
 
-    if (Agent::registry[agent]->advocate (filename)) {
+    if (Agent::registry[agent]->advocate (filename.c_str())) {
 
       if (verbose == 3)
         cerr << "Pulsar::Archive::load using " 
@@ -45,7 +45,7 @@ Pulsar::Archive* Pulsar::Archive::load (const char* filename)
       archive = Agent::registry[agent]->new_Archive();
       
       archive -> __load_filename = filename;
-      archive -> load_header (filename);
+      archive -> load_header (filename.c_str());
       archive -> set_filename (filename);
 
       return archive.release();
@@ -65,11 +65,6 @@ Pulsar::Archive* Pulsar::Archive::load (const char* filename)
   // none of the registered agents advocates the use of a derived
   // class for the interpretation of this file
   throw Error (InvalidParam, "Pulsar::Archive::load", 
-	       "'%s' not a recognized file format", filename);
-}
-
-Pulsar::Archive* Pulsar::Archive::load (const string& filename)
-{ 
-  return load (filename.c_str());
+	       "'%s' not a recognized file format", filename.c_str());
 }
 
