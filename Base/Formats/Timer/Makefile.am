@@ -13,15 +13,14 @@ LIB_C_SRCS = pg_plot_gnu.C profile.C sub_int.C archive.C                \
 	     convert_endian.C main_hdr.C cal_fns.C cpg_fns.C
 
 LIB_F_SRCS = ffft.f fftfit.f brent.f fccf.f cprof.f shiftbyfft.f \
-             convolve.f width.f newtreduce.f tsky1.f \
+             convolve.f width.f tsky1.f newtreduce.f \
              fftconv.f scan_fort_val.f iono_rm.f ionrm.f 
 
 LIB_SRCS   = ${LIB_C_SRCS} ${LIB_F_SRCS}
 
-LDFLAGS   += -larchive -lpolyco -lgenutil -ltimes \
+LDFLAGS   += -larchive -lpolyco -ldialog -lgenutil -ltimes \
              -lpsrinfo -leph -lsla -lm $(LIBNSL) \
 	     -lcpgplot $(LPGPLOT)
-
 
 ############################################################################
 # Here you should ONLY add programs which are ESSENTIAL for
