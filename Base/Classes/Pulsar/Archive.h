@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Archive.h,v $
-   $Revision: 1.68 $
-   $Date: 2003/04/23 12:14:45 $
+   $Revision: 1.69 $
+   $Date: 2003/04/26 06:52:02 $
    $Author: straten $ */
 
 /*! \mainpage 
@@ -506,6 +506,11 @@ namespace Pulsar {
     double integration_length() const;
 
     //! Return the coordinates of the telescope at which observation was made
+    /*!
+      \retval latitude in degrees
+      \retval longitude in degrees
+      \retval elevation in metres
+    */
     void telescope_coordinates (float* latitude = 0,
 				float* longitude = 0,
 				float* elevation = 0) const;
@@ -676,9 +681,6 @@ namespace Pulsar {
     //! Provide Integration::resize access to Archive-derived classes
     void resize (Integration* integration);
 
-    //! Set all values to null
-    void init ();
-  
     //! Apply the current model to the Integration
     void apply_model (const polyco& old, Integration* subint);
 
@@ -719,6 +721,9 @@ namespace Pulsar {
 
     //! Load a new instance of the specified integration from __load_filename
     Integration* load_Integration (unsigned isubint);
+
+    //! Set all values to null
+    void init ();
 
   };
 
