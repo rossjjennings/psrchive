@@ -166,7 +166,7 @@ void Pulsar::ReceptionCalibrator::init_estimate (SourceEstimate& estimate)
   estimate.state.resize (nchan);
 
   for (unsigned ichan=0; ichan<nchan; ichan++) {
-    equation[ichan]->set_backend(0);
+    equation[ichan]->get_model()->set_path(0);
     equation[ichan]->get_model()->add_state( &(estimate.state[ichan]) );
   }
 }
@@ -349,7 +349,7 @@ void Pulsar::ReceptionCalibrator::add_PolnCalibrator (const PolnCalibrator* p)
 
     // calibrator_state_index = get_nstate_pulsar ();
 
-    PolnCalibrator_path = equation[0]->get_nbackend();
+    PolnCalibrator_path = equation[0]->get_model()->get_npath();
 
     for (unsigned ichan=0; ichan<nchan; ichan++) {
 
@@ -358,7 +358,11 @@ void Pulsar::ReceptionCalibrator::add_PolnCalibrator (const PolnCalibrator* p)
 	calibrator[ichan].set_infit (istokes, false);
     
       // add the calibrator states to a new signal path
-      equation[ichan]->add_backend ();
+      equation[ichan]->get_model()->add_path ();
+
+      Calibration::Polar* polar = equation[ichan]->get_receiver();
+
+      equation[ichan]->get_model()->add_transformation (polar);
 
       equation[ichan]->get_model()->add_state( &(calibrator[ichan]) );
 
@@ -495,7 +499,7 @@ void Pulsar::ReceptionCalibrator::calibrate (Archive* data, unsigned path)
     MJD epoch = integration->get_epoch ();
 
     for (unsigned ichan=0; ichan<nchan; ichan++) {
-      equation[ichan]->set_backend (path);
+      equation[ichan]->get_model()->set_path (path);
       equation[ichan]->set_epoch (epoch);
       response[ichan] = inv( equation[ichan]->get_model()->get_Jones() );
     }
@@ -516,6 +520,11 @@ void Pulsar::ReceptionCalibrator::calibrate (Archive* data, unsigned path)
     data->set_flux_calibrated (true);
 }
 
+
+bool Pulsar::ReceptionCalibrator::get_solved () const
+{
+  return is_fit;
+}
 
 void Pulsar::ReceptionCalibrator::solve ()
 {
@@ -552,10 +561,8 @@ void Pulsar::ReceptionCalibrator::solve ()
 
     cerr << "Pulsar::ReceptionCalibrator::solve ichan=" << ichan << endl;
 
-    if (ncoef) {
-      equation[ichan]->set_backend (0);
+    if (ncoef)
       equation[ichan]->set_ncoef (ncoef);
-    }
 
     if (degenerate_rotV) {
       equation[ichan]->get_receiver()->set_param (6, 0.0);

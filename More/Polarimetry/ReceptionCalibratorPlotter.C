@@ -68,7 +68,7 @@ Pulsar::ReceptionCalibratorPlotter::get_rotation (unsigned idat, unsigned irot)
 
 void Pulsar::ReceptionCalibratorPlotter::plot_constraints ()
 {
-  plot_constraints (calibrator->get_nchan()/2, calibrator->get_nstate()/2);
+  plot_constraints (calibrator->get_nchan()/2, calibrator->get_nstate()/4);
 }
 
 void Pulsar::ReceptionCalibratorPlotter::plot_cal_constraints ()
@@ -146,6 +146,63 @@ void Pulsar::ReceptionCalibratorPlotter::plot_constraints (unsigned ichan,
   cpglab ("Parallactic Angle (degrees)",
 	  "Uncalibrated Stokes",
 	  "Self-Calibration Constraints");
+
+  if (!calibrator->get_solved())
+    return;
+
+  plot_model (ichan, istate);
+}
+
+
+
+void Pulsar::ReceptionCalibratorPlotter::plot_model (unsigned ichan,
+						     unsigned istate)
+{
+  if (istate >= calibrator->get_nstate())
+    throw Error (InvalidRange,
+		 "Pulsar::ReceptionCalibratorPlotter::plot_constraints",
+		 "istate=%d >= nstate=%d", istate, calibrator->get_nstate());
+
+  if (ichan >= calibrator->get_nchan())
+    throw Error (InvalidRange,
+		 "Pulsar::ReceptionCalibratorPlotter::plot_constraints",
+		 "ichan=%d >= nchan=%d", ichan, calibrator->get_nchan());
+
+  // extract the appropriate equation
+  Calibration::SAtPEquation* equation = calibrator->equation[ichan];
+
+  equation->get_model()->set_state (istate);
+
+  unsigned npt = 100;
+
+  vector<float> para (npt);
+  vector<Stokes<float> > stokes (npt);
+
+  MJD start = calibrator->start_epoch;
+  MJD end = calibrator->end_epoch;
+  MJD step = (end-start)/npt;
+
+  for (unsigned ipt=0; ipt<npt; ipt++) {
+
+    MJD epoch = start + step * ipt;
+
+    equation->set_epoch (epoch);
+
+    para[ipt] = calibrator->parallactic.get_param(0) * 180.0/M_PI;
+
+    vector<Jones<double> > grad;
+    stokes[ipt] = equation->get_model()->evaluate (grad);
+
+  }
+
+  for (unsigned ipol=0; ipol<4; ipol++) {
+    cpgsci (ipol+1);
+    
+    cpgmove (para[0], stokes[0][ipol]);
+    for (unsigned ipt=1; ipt<npt; ipt++)
+      cpgdraw (para[ipt], stokes[ipt][ipol]);
+    
+  }
 
 }
 

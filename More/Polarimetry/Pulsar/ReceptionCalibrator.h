@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ReceptionCalibrator.h,v $
-   $Revision: 1.19 $
-   $Date: 2003/05/22 14:41:43 $
+   $Revision: 1.20 $
+   $Date: 2003/05/23 11:41:54 $
    $Author: straten $ */
 
 #ifndef __ReceptionCalibrator_H
@@ -69,6 +69,9 @@ namespace Pulsar {
 
     //! Solve equation for each frequency
     void solve ();
+
+    //! Get the status of the model
+    bool get_solved () const;
 
     //! Calibrate the polarization of the given archive
     virtual void calibrate (Archive* archive);
