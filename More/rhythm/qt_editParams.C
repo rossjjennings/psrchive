@@ -186,7 +186,7 @@ void qt_editParams::select_parms()
 
 void qt_editParams::new_data (bool add_to_history)
 {
-  //  if (verbose)
+  if (verbose)
     cerr << "qt_editParams::new_data set display" << endl;
   display.set_psrParams (data);
 
@@ -214,8 +214,8 @@ void qt_editParams::open()
   if (!io_dialog)
     io_dialog = new qt_fileParams;
 
-  io_dialog -> open (&data);
-  new_data ();
+  if (io_dialog -> open (&data))
+    new_data ();
 }
 
 void qt_editParams::save() 
