@@ -1,22 +1,79 @@
+#include <iostream>
+#include <algorithm>
+
 #include "Calibration.h"
+#include "string_utils.h"
 
-int main () 
+void usage ()
 {
-  Pulsar::Calibrator::verbose = true;
-  Pulsar::Archive::verbose = true;
+  cerr << "psrcal file1 [file2 ...]" << endl;
+}
 
-  try {
+int main (int argc, char** argv) 
+{
+  char* metafile = NULL;
 
-    Pulsar::Calibration::Database dbase;
- 
-    Pulsar::Archive* arch = Pulsar::Archive::load ("fake");
+  bool verbose = false;
+  char c;
+  while ((c = getopt(argc, argv, "hvV")) != -1)  {
 
-    Pulsar::PolnCalibrator* pcal_engine = dbase.generatePolnCalibrator (arch);
+    switch (c)  {
 
+    case 'h':
+      usage();
+      return 0;
+
+    case 'M':
+      metafile = optarg;
+      break;
+
+    case 'V':
+      Pulsar::Archive::set_verbosity (3);
+      Pulsar::Calibrator::verbose = true;
+    case 'v':
+      Error::verbose = true;
+      verbose = true;
+      break;
+
+    } 
   }
-  catch (Error& error) {
-    cerr << error << endl;
+
+  if (!metafile && optind >= argc) {
+    cerr << "psrcal requires a list of archive filenames as parameters.\n";
     return -1;
   }
 
+  vector <string> filenames;
+  if (metafile)
+    stringfload (&filenames, metafile);
+  else
+    for (int ai=optind; ai<argc; ai++)
+      dirglob (&filenames, argv[ai]);
+
+  // sort the filename (roughly speaking, by date)
+  sort (filenames.begin(), filenames.end());
+
+  // the individual archive
+  Reference::To<Pulsar::Archive> archive;
+
+  Pulsar::Calibration::Database dbase;
+ 
+  for (unsigned ifile=0; ifile<filenames.size(); ifile++) {  try {
+
+    archive = Pulsar::Archive::load( filenames[ifile] );
+
+    Pulsar::PolnCalibrator* pcal = dbase.generatePolnCalibrator (archive);
+    
+    pcal->calibrate (archive);
+    
+    archive->unload ( filenames[ifile] + ".calib" );
+
+  }
+  catch (Error& error) {
+    cerr << "psrcal: Error calibrating " << filenames[ifile] << error << endl;
+    return -1;
+  }
+  }
+
+  return 0;
 }
