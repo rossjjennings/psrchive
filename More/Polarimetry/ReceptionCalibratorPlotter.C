@@ -38,19 +38,19 @@ unsigned Pulsar::ReceptionCalibratorPlotter::get_nrotation () const
 Estimate<float>
 Pulsar::ReceptionCalibratorPlotter::get_gain (unsigned idat)
 {
-  return calibrator->equation[idat]->get_receiver().get_gain();
+  return calibrator->equation[idat]->get_receiver()->get_gain();
 }
 
 //! Get the gain for the specified point
 Estimate<float>
 Pulsar::ReceptionCalibratorPlotter::get_boost (unsigned idat, unsigned iboost)
 {
-  return calibrator->equation[idat]->get_receiver().get_boostGibbs(iboost);
+  return calibrator->equation[idat]->get_receiver()->get_boostGibbs(iboost);
 }
 
     //! Get the gain for the specified point
 Estimate<float>
 Pulsar::ReceptionCalibratorPlotter::get_rotation (unsigned idat, unsigned irot)
 {
-  return calibrator->equation[idat]->get_receiver().get_rotationEuler(irot);
+  return calibrator->equation[idat]->get_receiver()->get_rotationEuler(irot);
 }
