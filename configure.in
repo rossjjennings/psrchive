@@ -3,26 +3,34 @@
 
 AC_PREREQ(2.57)
 AC_INIT([PSRCHIVE],[3.0],[psrchive@astro.swin.edu.au])
+
 AC_CONFIG_AUX_DIR([config])
 AC_CONFIG_SRCDIR([tas/calib/test_Pauli.C])
 
-AM_INIT_AUTOMAKE
-
-AC_CONFIG_SRCDIR([tas/calib/test_Pauli.C])
-
-AM_CONFIG_HEADER([config.h])
-AC_CONFIG_FILES([utils/units/makefile utils/makefile makefile])
+AM_INIT_AUTOMAKE([subdir-objects])
+AC_DISABLE_SHARED
 
 # Checks for programs.
 AC_PROG_CXX
 AC_PROG_CC
-AC_PROG_RANLIB
-AC_PROG_INSTALL
-AC_PROG_LN_S
+AC_PROG_LIBTOOL
+AM_PROG_CC_C_O
+
+AC_ARG_VAR(PSRHOME)
+AC_ARG_VAR(LOGIN_ARCH)
+
+# Set up for standard pulsar installation
+CPPFLAGS="-I$PSRHOME/packages/$LOGIN_ARCH/include $CPPFLAGS"
+LDFLAGS="-L$PSRHOME/packages/$LOGIN_ARCH/lib $LDFLAGS"
 
 # Checks for libraries
 AC_CHECK_LIB([m], [sin])
+SWIN_LIB_FFTW
 SWIN_LIB_PGPLOT
+BNV_HAVE_QT
+
+AC_SUBST(FFT_LIBS)
+FFT_LIBS="$FFTW_LIBS $FFTW3_LIBS"
 
 # Checks for header files.
 AC_HEADER_DIRENT
@@ -42,6 +50,7 @@ AC_CHECK_DECLS([sys_siglist])
 AC_HEADER_TIME
 AC_STRUCT_TM
 AC_C_VOLATILE
+AC_F77_WRAPPERS
 
 # Checks for library functions.
 AC_FUNC_CLOSEDIR_VOID
@@ -61,6 +70,15 @@ AC_FUNC_UTIME_NULL
 AC_FUNC_VPRINTF
 AC_CHECK_FUNCS([alarm floor ftruncate getcwd gethostbyaddr gethostbyname gethostname gettimeofday inet_ntoa memmove memset mkdir modf pow regcomp rint rmdir select socket sqrt strcasecmp strchr strcspn strdup strerror strncasecmp strpbrk strrchr strspn strstr utime])
 
+AM_CONFIG_HEADER([config.h])
+AC_CONFIG_FILES([utils/units/Makefile
+		utils/psrfft/Makefile
+		utils/genutil/Makefile
+		utils/genutil++/Makefile
+		utils/pgutil/Makefile
+		utils/plot2d/Makefile
+		utils/Makefile
+		Makefile])
 
 AC_OUTPUT
 
