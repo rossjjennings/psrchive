@@ -27,7 +27,7 @@ Pulsar::PolnCalibrator::PolnCalibrator (Archive* archive)
   calibrator = archive;
 
   // store the related Extension, if any
-  extension = archive->get<PolnCalibratorExtension>();
+  extension = poln_extension = archive->get<PolnCalibratorExtension>();
 
   // store the Receiver Extension, if any
   receiver = archive->get<Receiver>();
@@ -164,17 +164,17 @@ void Pulsar::PolnCalibrator::calculate_transformation ()
   if (verbose)
     cerr << "Pulsar::PolnCalibrator::calculate_transformation" << endl;
 
-  if (!extension)
+  if (!poln_extension)
     throw Error (InvalidState,
 		 "Pulsar::PolnCalibrator::calculate_transformation",
 		 "no PolnCalibratorExtension available");
 
-  unsigned nchan = extension->get_nchan();
+  unsigned nchan = poln_extension->get_nchan();
   transformation.resize (nchan);
 
   for (unsigned ichan=0; ichan < nchan; ichan++)
-    if ( extension->get_valid(ichan) )
-      transformation[ichan] = extension->get_transformation(ichan);
+    if ( poln_extension->get_valid(ichan) )
+      transformation[ichan] = poln_extension->get_transformation(ichan);
     else
       transformation[ichan] = 0;
 }
@@ -362,21 +362,14 @@ catch (Error& error) {
 
 Pulsar::Calibrator::Type Pulsar::PolnCalibrator::get_type () const
 {
-  if (!extension)
+  if (!poln_extension)
     throw Error (InvalidState,
 		 "Pulsar::PolnCalibrator::get_type",
 		 "no PolnCalibratorExtension available");
 
-  return extension->get_type();
+  return poln_extension->get_type();
 }
 
-MJD Pulsar::PolnCalibrator::get_epoch () const
-{
-  if (extension)
-    return extension->get_epoch ();
-
-  return 0.5 * (calibrator->start_time() + calibrator->end_time());
-}
 
 Pulsar::Archive*
 Pulsar::PolnCalibrator::get_solution (const string& archive_class,

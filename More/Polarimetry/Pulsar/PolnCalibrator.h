@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PolnCalibrator.h,v $
-   $Revision: 1.27 $
-   $Date: 2004/07/21 05:28:18 $
+   $Revision: 1.28 $
+   $Date: 2004/10/08 10:10:51 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PolnCalibrator_H
@@ -158,7 +158,7 @@ namespace Pulsar {
     vector< Jones<float> > response;
 
     //! The PolnCalibratorExtension of the Archive passed during construction
-    Reference::To<PolnCalibratorExtension> extension;
+    Reference::To<PolnCalibratorExtension> poln_extension;
 
     //! The Receiver Extension of the Archive passed during construction
     Reference::To<const Receiver> receiver;
