@@ -26,10 +26,8 @@ void Pulsar::Archive::Agent::report ()
   else
     cerr << "Archive::Agent::report " << registry.size() 
 	 << " Registered Agents:" << endl;
-
-  for (unsigned agent=0; agent<registry.size(); agent++)
-    cerr << " " << registry[agent]->get_name() << "\t" 
-         << registry[agent]->get_description() << endl;
+  
+  print_list (stdout);
 
   cerr << endl;
 
@@ -37,6 +35,13 @@ void Pulsar::Archive::Agent::report ()
   plugin_report ();
 #endif
 
+}
+
+void Pulsar::Archive::Agent::print_list (FILE* out)
+{
+  for (unsigned agent=0; agent<registry.size(); agent++)
+    fprintf (out, " %16s %s\n", registry[agent]->get_name().c_str(),
+	     registry[agent]->get_description().c_str() );
 }
 
 // reports on the status of the plugins
