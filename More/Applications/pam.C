@@ -59,9 +59,11 @@ int main (int argc, char *argv[]) {
 
   string command = "pam";
 
+  char* archive_class = 0;
+
   int gotc = 0;
   
-  while ((gotc = getopt(argc, argv, "hvVime:TFpIt:f:b:d:s:r:w:D:SB")) != -1) {
+  while ((gotc = getopt(argc, argv, "hvVima:e:TFpIt:f:b:d:s:r:w:D:SB")) != -1) {
     switch (gotc) {
     case 'h':
       cout << "A program for manipulating Pulsar::Archives"                       << endl;
@@ -70,6 +72,7 @@ int main (int argc, char *argv[]) {
       cout << "  -V               Very verbose mode"                              << endl;
       cout << "  -i               Show revision information"                      << endl;
       cout << "  -m               Modify the original files on disk"              << endl;
+      cout << "  -a archive       Write new files using this archive class"       << endl;
       cout << "  -e extension     Write new files with this extension"            << endl;
       cout << "  -T               Time scrunch"                                   << endl;
       cout << "  -F               Frequency scrunch"                              << endl;
@@ -98,13 +101,16 @@ int main (int argc, char *argv[]) {
       break;
     case 'V':
       verbose = true;
-      Pulsar::Archive::set_verbosity(1);
+      Pulsar::Archive::set_verbosity(3);
       break;
     case 'i':
-      cout << "$Id: pam.C,v 1.20 2003/09/30 08:33:18 ahotan Exp $" << endl;
+      cout << "$Id: pam.C,v 1.21 2003/10/10 12:34:41 straten Exp $" << endl;
       return 0;
     case 'm':
       save = true;
+      break;
+    case 'a':
+      archive_class = optarg;
       break;
     case 'e':
       save = true;
@@ -348,7 +354,20 @@ int main (int argc, char *argv[]) {
       }
       
       if (save) {
-	
+
+        if (archive_class)  {
+
+          // unload an archive of the specified class
+          Reference::To<Pulsar::Archive> output;
+          output = Pulsar::Archive::new_Archive (archive_class);
+          output -> copy (*arch);
+          output -> set_filename ( arch->get_filename() );
+
+          arch = output;
+
+        }
+
+
 	// See if the archive contains a history that should be updated:
 	
 	Pulsar::ProcHistory* fitsext = arch->get<Pulsar::ProcHistory>();
