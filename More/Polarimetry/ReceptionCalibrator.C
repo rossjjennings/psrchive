@@ -67,8 +67,8 @@ Pulsar::StandardModel::StandardModel (Calibrator::Type _model)
   operation = new Calibration::Rotation(Vector<double, 3>::basis(0));
 
   Calibration::Polynomial* poly = new Calibration::Polynomial (4);
-  poly -> set_infit(0, false);
-  convert.connect (poly, &Calibration::Polynomial::set_abscissa);
+  poly -> set_infit (0, false);
+  poly -> set_argument (0, &convert);
 
   Calibration::ChainRule<Calibration::Complex2>* backend;
   backend = new Calibration::ChainRule<Calibration::Complex2>;
@@ -79,7 +79,7 @@ Pulsar::StandardModel::StandardModel (Calibrator::Type _model)
 #endif
 
   *instrument *= backend;
-  time.connect (&convert, &Calibration::ConvertMJD::set_epoch);
+  time.signal.connect (&convert, &Calibration::ConvertMJD::set_epoch);
 
   switch (model) {
 
@@ -120,7 +120,7 @@ Pulsar::StandardModel::StandardModel (Calibrator::Type _model)
   equation->add_transformation ( pulsar_path );
   Pulsar_path = equation->get_transformation_index ();
 
-  time.connect (&parallactic, &Calibration::Parallactic::set_epoch);
+  time.signal.connect (&parallactic, &Calibration::Parallactic::set_epoch);
 
 }
 
@@ -452,11 +452,11 @@ void Pulsar::ReceptionCalibrator::add_observation (const Archive* data)
       }
 
       // the selected pulse phase bins
-      Calibration::Abscissa* abscissa = model[ichan]->time.new_Value(epoch);
+      Calibration::Argument::Value* arg = model[ichan]->time.new_Value(epoch);
 
       unsigned xform_index = model[ichan]->Pulsar_path;
       Calibration::CoherencyMeasurementSet measurements (xform_index);
-      measurements.add_coordinate( abscissa );
+      measurements.add_coordinate( arg );
 
       for (unsigned istate=0; istate < pulsar.size(); istate++) {
 
@@ -673,9 +673,9 @@ void Pulsar::ReceptionCalibrator::add_calibrator (const ArtificialCalibrator* p)
 
       try {
 
-	Calibration::Abscissa* abscissa = model[ichan]->time.new_Value(epoch);
+	Calibration::Argument::Value* arg = model[ichan]->time.new_Value(epoch);
 	Calibration::CoherencyMeasurementSet measurements;
-	measurements.add_coordinate( abscissa );
+	measurements.add_coordinate( arg );
 
         // convert to CoherencyMeasurement format
         Calibration::CoherencyMeasurement 
@@ -852,7 +852,7 @@ void Pulsar::ReceptionCalibrator::precalibrate (Archive* data)
         continue;
       }
 
-      model[ichan]->time.send( integration->get_epoch() );
+      model[ichan]->time.set_value( integration->get_epoch() );
 
       response[ichan] = signal_path->evaluate();
 

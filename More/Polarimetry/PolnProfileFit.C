@@ -50,7 +50,7 @@ void Pulsar::PolnProfileFit::init ()
   phase -> set_param (0, 0.0);
   phase -> set_infit (0, false);
 
-  phase_axis.connect (phase, &Calibration::Polynomial::set_abscissa);
+  phase -> set_argument (0, &phase_axis);
 
   Calibration::ChainRule<Calibration::Complex2>* chain = 0;
   chain = new Calibration::ChainRule<Calibration::Complex2>;
