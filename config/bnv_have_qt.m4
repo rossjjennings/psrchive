@@ -74,7 +74,7 @@ dnl variables are set to the empty string.
 dnl
 dnl Calls BNV_PATH_QT_DIRECT as a subroutine.
 dnl
-dnl @version $Id: bnv_have_qt.m4,v 1.3 2004/12/01 20:50:46 straten Exp $
+dnl @version $Id: bnv_have_qt.m4,v 1.4 2004/12/10 13:05:57 straten Exp $
 dnl @author Bastiaan N. Veelo <Bastiaan.N.Veelo@immtek.ntnu.no>
 dnl
 AC_DEFUN([BNV_HAVE_QT],
@@ -329,7 +329,7 @@ EOF
 dnl Internal subroutine of BNV_HAVE_QT
 dnl Set bnv_qt_dir bnv_qt_include_dir bnv_qt_bin_dir bnv_qt_lib_dir bnv_qt_lib
 dnl Copyright 2001 Bastiaan N. Veelo <Bastiaan.N.Veelo@immtek.ntnu.no>
-AC_DEFUN(BNV_PATH_QT_DIRECT,
+AC_DEFUN([BNV_PATH_QT_DIRECT],
 [
   ## Binary utilities ##
   if test x"$with_Qt_bin_dir" != x; then
