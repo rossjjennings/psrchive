@@ -13,15 +13,16 @@
 #include "dirutil.h"
 #include "string_utils.h"
 
-static const char* psradd_args = "b:c:Ce:f:FG:hiI:M:p:Pr:sS:tT:vV";
+static const char* psradd_args = "b:c:Ce:f:FG:hiI:M:p:Pqr:sS:tT:vV";
 
 void usage () {
   cout <<
     "A program for adding Pulsar::Archives together\n"
     "USAGE: psradd [" << psradd_args << "] filenames\n"
     " -h          This help page\n"
-    " -v          Verbose mode\n"
-    " -V          Very verbose (debugging) mode\n"
+    " -q          Quiet mode (suppress warnings)\n"
+    " -v          Verbose mode (informational)\n"
+    " -V          Very verbose mode (debugging)\n"
     " -i          Show revision information\n"
     "\n"
     " -b nbin     Bin scrunch to nbin bins when each file is loaded\n"
@@ -31,7 +32,6 @@ void usage () {
     " -F          Force append despite mismatch of header parameters\n"
     " -M meta     Filename with list of files\n"
     " -p fname    Load new ephemeris from 'fname'\n"
-    " -P          Correct for parallactic angle before tscrunch\n"
     " -r freq     Disregard input files if they do not have this centre frequency\n"
     " -s          Tscrunch result after each new file (nice on RAM)\n"
     " -t          Make no changes to file system (testing mode)\n"
@@ -85,9 +85,6 @@ int main (int argc, char **argv)
   // maximum interval (in seconds) across which integration should occur
   float interval = 0.0;
 
-  // correct for parallactic angle of receiver before tscrunch
-  bool deparallactify = false;
-
   // name of file containing list of Archive filenames
   char* metafile = NULL;
 
@@ -112,7 +109,7 @@ int main (int argc, char **argv)
       return 0;
       
     case 'i':
-      cout << "$Id: psradd.C,v 1.15 2004/02/18 01:27:52 hknight Exp $" << endl;
+      cout << "$Id: psradd.C,v 1.16 2004/07/12 09:28:56 straten Exp $" << endl;
       return 0;
       
     case 'b':
@@ -169,16 +166,16 @@ int main (int argc, char **argv)
       parname = optarg;
       break;
 
-    case 'P':
-      deparallactify = true;
-      break;
-
-    case 's':
-      tscrunch_total = true;
+    case 'q':
+      Pulsar::Archive::set_verbosity (0);
       break;
 
     case 'r':
       centre_frequency = atof(optarg);
+      break;
+
+    case 's':
+      tscrunch_total = true;
       break;
 
     case 't':
@@ -189,10 +186,14 @@ int main (int argc, char **argv)
       Tempo::set_system (optarg);
       break;
 
+    case 'v':
+      Pulsar::Archive::set_verbosity (2);
+      verbose = true;
+      break;
+
     case 'V':
       Pulsar::Archive::set_verbosity (3);
       vverbose = true;
-    case 'v':
       verbose = true;
       break;
 
@@ -220,12 +221,18 @@ int main (int argc, char **argv)
 
   psrephem neweph;
   if (!parname.empty()) {
+
     if (verbose)
       cerr << "psradd: loading ephemeris from '"<< parname <<"'" << endl;
+
     if (neweph.load (parname.c_str()) < 0) {
       cerr << "psradd could not load ephemeris from '"<< parname <<"'" << endl;
       return -1;
     }
+
+    if (vverbose)
+      cerr << "psradd: ephemeris loaded=\n" << neweph << endl;
+
   }
 
   vector <string> filenames;
@@ -272,11 +279,6 @@ int main (int argc, char **argv)
     if( nchan )
       archive->fscrunch_to_nchan (nchan);
 
-    if (deparallactify) {
-      if (verbose) cerr << "psradd: Correct parallactic angle" << endl;
-      archive->deparallactify();
-    }
-
     if (reset_total_next_load) {
       if (verbose) cerr << "psradd: Setting total" << endl;
       total = archive;
@@ -291,8 +293,14 @@ int main (int argc, char **argv)
       if (verbose)
 	cerr << "psradd: New filename: '" << newname << "'" << endl;
 
-      if (!parname.empty())
+      if (!parname.empty()) {
+
+        if (verbose)
+          cerr << "psradd: Installing new ephemeris" << endl;
+
 	total->set_ephemeris (neweph);
+
+      }
 
       correct_total = false;
 
