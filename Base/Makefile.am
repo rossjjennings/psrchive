@@ -177,8 +177,6 @@ static_plugins.code : plugins.csh $(LOCAL_ROOT)/include/Makefile.psrchive
 	@./plugins.csh $(PSRCHIVE.plugins)
 	@touch Archive.h
 
-ifeq ($(PSRCHIVE_STATIC),yes)
-
 Agent.C : static_plugins.code
 
 # this rule simply forces all code that #includes Archive.h to be recompiled
