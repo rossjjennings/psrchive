@@ -42,7 +42,8 @@ void Pulsar::Profile::find_transitions (int& hi2lo, int& lo2hi, int& width)
       "nbin=" << nbin << " box=" << box << endl;
 
   // the average power over the whole profile
-  double avg = mean();
+  double avg;
+  stats (&avg);
 
   // the running mean in the sliding window
   double running_mean=0;
