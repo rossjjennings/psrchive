@@ -4,6 +4,7 @@
 
 #include "timer++.h"
 #include "coord.h"
+#include "string_utils.h"
 
 #include <unistd.h>
 
@@ -322,6 +323,10 @@ void Pulsar::TimerArchive::set_backend (const string& backend)
         
     new_backend = backend.substr(0,colon_pos);
     
+    // Remove trailing spaces and tabs
+    while( h_chomp(new_backend,' ') );
+    while( h_chomp(new_backend,'\t') );
+
     if( new_backend.length() > MACHINE_ID_STRLEN )
       throw Error (InvalidParam, "Pulsar::TimerArchive::set_backend",
                    "length of modified backend '%s'=%d > MACHINE_ID_STRLEN=%d",
