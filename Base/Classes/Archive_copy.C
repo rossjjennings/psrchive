@@ -3,7 +3,7 @@
 
 void Pulsar::Archive::copy (const Archive& archive)
 {
-  if (verbose)
+  if (verbose == 3)
     cerr << "Pulsar::Archive::copy all Integrations" << endl;
 
   vector<unsigned> all_subints(archive.get_nsubint());
@@ -18,7 +18,7 @@ void Pulsar::Archive::copy (const Archive& archive,
 {
   unsigned nsub = selected.size();
 
-  if (verbose)
+  if (verbose == 3)
     cerr << "Pulsar::Archive::copy " << nsub << " Integrations" << endl;
 
   if (this == &archive)
@@ -49,30 +49,24 @@ void Pulsar::Archive::copy (const Archive& archive,
   set_nchan( archive.get_nchan() );
   set_npol( archive.get_npol() );
   set_telescope_code( archive.get_telescope_code() );
-  set_basis( archive.get_basis() );
   set_state( archive.get_state() );
+  set_scale( archive.get_scale() );
   set_type( archive.get_type() );
   set_source( archive.get_source() );
-  set_receiver( archive.get_receiver() );
-  set_backend( archive.get_backend() );
   set_coordinates( archive.get_coordinates() );
   set_bandwidth( archive.get_bandwidth() );
   set_centre_frequency( archive.get_centre_frequency() );
   set_dispersion_measure( archive.get_dispersion_measure() );
   
-  set_feedangle_corrected( archive.get_feedangle_corrected() );
-  set_iono_rm_corrected( archive.get_iono_rm_corrected() );
-  set_ism_rm_corrected( archive.get_ism_rm_corrected() );
-  set_parallactic_corrected( archive.get_parallactic_corrected() );
+  set_faraday_corrected( archive.get_faraday_corrected() );
   set_dedispersed( archive.get_dedispersed() );
   set_poln_calibrated( archive.get_poln_calibrated() );
-  set_flux_calibrated( archive.get_flux_calibrated() );
 
   // Using a Reference::To<Extension> ensures that the cloned
   // Extension will be deleted if the derived class chooses not to
   // manage it.
 
-  if (verbose)
+  if (verbose == 3)
     cerr << "Pulsar::Archive::copy " << archive.get_nextension()
 	 << " Extensions" << endl;
 
@@ -80,9 +74,9 @@ void Pulsar::Archive::copy (const Archive& archive,
 
   for (unsigned iext=0; iext < archive.get_nextension(); iext++) {
 
-    if (verbose)
+    if (verbose == 3)
       cerr << "Pulsar::Archive::copy clone " 
-	   << archive.get_extension(iext)->get_name() << endl;
+	   << archive.get_extension(iext)->get_extension_name() << endl;
 
     Reference::To<Extension> ext = archive.get_extension(iext)->clone();
     add_extension (ext);

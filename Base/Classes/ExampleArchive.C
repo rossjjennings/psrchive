@@ -20,46 +20,37 @@ Pulsar::ExampleArchive::~ExampleArchive()
 Pulsar::ExampleArchive::ExampleArchive (const Archive& arch)
 {
   if (verbose)
-    cerr << "ExampleArchive construct copy Archive" << endl;
+    cerr << "Pulsar::ExampleArchive construct copy Archive" << endl;
 
   init ();
-  ExampleArchive::copy (arch);
+  Archive::copy (arch);
 }
 
 Pulsar::ExampleArchive::ExampleArchive (const ExampleArchive& arch)
 {
   if (verbose)
-    cerr << "ExampleArchive construct copy ExampleArchive" << endl;
+    cerr << "Pulsar::ExampleArchive construct copy ExampleArchive" << endl;
 
   init ();
-  ExampleArchive::copy (arch);
+  Archive::copy (arch);
 }
 
 Pulsar::ExampleArchive::ExampleArchive (const Archive& arch, 
-				  const vector<unsigned>& subints)
+					const vector<unsigned>& subints)
 {
   if (verbose)
-    cerr << "ExampleArchive construct extract Archive" << endl;
+    cerr << "Pulsar::ExampleArchive construct extract Archive" << endl;
 
   init ();
-  ExampleArchive::copy (arch, subints);
+  Archive::copy (arch, subints);
 }
 
-Pulsar::ExampleArchive::ExampleArchive (const ExampleArchive& arch, 
-				  const vector<unsigned>& subints)
-{
-  if (verbose)
-    cerr << "ExampleArchive construct extract ExampleArchive" << endl;
-
-  init ();
-  ExampleArchive::copy (arch, subints);
-}
 
 void Pulsar::ExampleArchive::copy (const Archive& archive, 
 				   const vector<unsigned>& subints)
 {
   if (verbose)
-    cerr << "ExampleArchive::copy" << endl;
+    cerr << "Pulsar::ExampleArchive::copy" << endl;
 
   if (this == &archive)
     return;
@@ -67,30 +58,30 @@ void Pulsar::ExampleArchive::copy (const Archive& archive,
   Archive::copy (archive, subints);
 
   if (verbose)
-    cerr << "ExampleArchive::copy dynamic cast call" << endl;
+    cerr << "Pulsar::ExampleArchive::copy dynamic cast call" << endl;
   
-  const ExampleArchive* farchive = dynamic_cast<const ExampleArchive*>(&archive);
-  if (!farchive)
+  const ExampleArchive* like_me = dynamic_cast<const ExampleArchive*>(&archive);
+  if (!like_me)
     return;
   
   if (verbose)
-    cerr << "ExampleArchive::copy another ExampleArchive" << endl;
+    cerr << "Pulsar::ExampleArchive::copy another ExampleArchive" << endl;
 
   // copy ExampleArchive attributes
 }
 
-Pulsar::Archive* Pulsar::ExampleArchive::clone () const
+Pulsar::ExampleArchive* Pulsar::ExampleArchive::clone () const
 {
   if (verbose)
-    cerr << "ExampleArchive::clone" << endl;
+    cerr << "Pulsar::ExampleArchive::clone" << endl;
   return new ExampleArchive (*this);
 }
 
-Pulsar::Archive* 
+Pulsar::ExampleArchive* 
 Pulsar::ExampleArchive::extract (const vector<unsigned>& subints) const
 {
   if (verbose)
-    cerr << "ExampleArchive::extract" << endl;
+    cerr << "Pulsar::ExampleArchive::extract" << endl;
   return new ExampleArchive (*this, subints);
 }
 

@@ -2,17 +2,17 @@
 #include "Pulsar/Integration.h"
 #include "Pulsar/IntegrationOrder.h"
 #include "Pulsar/Profile.h"
+#include "Pulsar/Receiver.h"
 
 #include "Types.h"
 #include "Error.h"
 #include "typeutil.h"
-#include "coord.h"
 
 const vector<unsigned> Pulsar::Archive::none_selected;
 
 void Pulsar::Archive::init ()
 {
-  if (verbose)
+  if (verbose == 3)
     cerr << "Pulsar::Archive::init" << endl;
 
   model_updated = false;
@@ -20,7 +20,7 @@ void Pulsar::Archive::init ()
 
 Pulsar::Archive::Archive () 
 { 
-  if (verbose)
+  if (verbose == 3)
     cerr << "Pulsar::Archive::null constructor" << endl;
 
   init(); 
@@ -36,7 +36,7 @@ Pulsar::Archive::Archive (const Archive& archive)
 
 Pulsar::Archive::~Archive () 
 { 
-  if (verbose)
+  if (verbose == 3)
     cerr << "Pulsar::Archive::destructor" << endl;
 }
 
@@ -90,16 +90,16 @@ unsigned Pulsar::Archive::get_nextension () const
 
 Pulsar::Archive::Extension::Extension (const char* _name)
 {
-  name = _name;
+  extension_name = _name;
 }
 
 Pulsar::Archive::Extension::~Extension ()
 {
 }
 
-string Pulsar::Archive::Extension::get_name () const
+string Pulsar::Archive::Extension::get_extension_name () const
 {
-  return name;
+  return extension_name;
 }
 
 /*! Derived classes need only define this method, as the non-const version
@@ -169,7 +169,7 @@ void Pulsar::Archive::add_extension (Extension* ext)
 
 void Pulsar::Archive::refresh()
 {
-  if (verbose)
+  if (verbose == 3)
     cerr << "Pulsar::Archive::refresh" << endl;
   
   IntegrationManager::resize(0);
@@ -179,7 +179,7 @@ void Pulsar::Archive::refresh()
 
 void Pulsar::Archive::update()
 {
-  if (verbose)
+  if (verbose == 3)
     cerr << "Pulsar::Archive::update" << endl;
 
   load_header (__load_filename.c_str());
@@ -207,7 +207,7 @@ Pulsar::Archive::get_Profile (unsigned sub, unsigned pol, unsigned chan) const
 
 Pulsar::Integration* Pulsar::Archive::load_Integration (unsigned isubint)
 {
-  if (verbose)
+  if (verbose == 3)
     cerr << "Pulsar::Archive::load_Integration" << endl;
 
   if (!__load_filename.length())
@@ -217,19 +217,28 @@ Pulsar::Integration* Pulsar::Archive::load_Integration (unsigned isubint)
   return load_Integration (__load_filename.c_str(), isubint);
 }
 
-/*!  
+/*!
   This method may be useful during load.  This function assumes
   that the Integration is totally uninitialized.  As the folding
   period is unknown until the epoch of the integration is known,
-  Integration::set_folding_period is not called by this method.  
+  Integration::set_folding_period is not called by this method.
 */
-void Pulsar::Archive::init_Integration (Integration* subint)
-{
+void Pulsar::Archive::init_Integration (Integration* subint) try {
+
   subint -> set_centre_frequency ( get_centre_frequency() );
   subint -> set_bandwidth ( get_bandwidth() );
   subint -> set_dispersion_measure ( get_dispersion_measure() );
-  subint -> set_basis ( get_basis() );
   subint -> set_state ( get_state() );
+
+  Receiver* receiver = get<Receiver>();
+  if (receiver)
+    subint -> set_basis ( receiver->get_basis() );
+  else
+    subint -> set_basis ( Signal::Linear );
+
+}
+catch (Error& error) {
+  throw error += "Pulsar::Archive::init_Integration";
 }
 
 /*!
@@ -362,7 +371,7 @@ void Pulsar::Archive::centre ()
     Phase phase = model->phase (subint -> get_epoch(),
 				subint -> get_centre_frequency());
 
-    if (verbose)
+    if (verbose == 3)
       cerr << "Pulsar::Archive::center phase=" << phase << endl;
 
     double fracturns = (half_turn - phase).fracturns();
@@ -501,21 +510,20 @@ void Pulsar::Archive::rotate (double time)
 
 /*!
   \pre Archive polarimetric state must represent Stokes IQUV
-  \pre The baseline must have been removed.
+  \pre The baseline should have been removed.
   \param rotation_measure
   \param rm_iono
 */
 void Pulsar::Archive::defaraday (double rotation_measure)
 {
-  convert_state(Signal::Stokes);
-  remove_baseline();
-  
+  if (get_nsubint() == 0)
+    return;
+
   for (unsigned i = 0; i < get_nsubint(); i++)
     get_Integration(i)->defaraday (rotation_measure);
   
-  set_ism_rm_corrected(true);
-  set_iono_rm_corrected(true);
-  set_state (get_Integration(0)->get_state());
+  set_state ( get_Integration(0) -> get_state() );
+  set_faraday_corrected(true);
 }
 
 /*! \param new_ephemeris the ephemeris to be installed
@@ -523,7 +531,7 @@ void Pulsar::Archive::defaraday (double rotation_measure)
  */
 void Pulsar::Archive::set_ephemeris (const psrephem& new_ephemeris, bool update)
 {
-  if (verbose)
+  if (verbose == 3)
     cerr << "Pulsar::Archive::set_ephemeris" << endl;
 
   ephemeris = new psrephem (new_ephemeris);
@@ -560,12 +568,12 @@ void Pulsar::Archive::set_ephemeris (const psrephem& new_ephemeris, bool update)
   }
 
   if (update)  {
-    if (verbose)
+    if (verbose == 3)
       cerr << "Pulsar::Archive::set_ephemeris update polyco" << endl;
     update_model ();
   }
 
-  if (verbose)
+  if (verbose == 3)
     cerr << "Pulsar::Archive::set_ephemeris exit" << endl;
 }
 
@@ -587,11 +595,11 @@ void Pulsar::Archive::set_model (const polyco& new_model)
   Reference::To<polyco> oldmodel = model;
   model = new polyco (new_model);
 
-  if (verbose)
+  if (verbose == 3)
     cerr << "Pulsar::Archive::set_model model set" << endl;
 
   if ( oldmodel && oldmodel->pollys.size() ) {
-    if (verbose)
+    if (verbose == 3)
       cerr << "Pulsar::Archive::set_model apply the new model" << endl;
 
     // correct Integrations against the old model
@@ -654,19 +662,6 @@ bool Pulsar::Archive::type_is_cal () const
     get_type() == Signal::FluxCalOff;
 }
 
-/*!
-  \retval lat latitude in degrees
-  \retval lon longitude in degrees
-  \retval ele elevation in metres
-*/
-void Pulsar::Archive::telescope_coordinates (float* lat, float* lon, 
-					     float* ele) const
-{
-  int ret = telescope_coords (get_telescope_code(), lat, lon, ele);
-  if (ret < 0)
-    throw Error (FailedCall, "Pulsar::Archive::telescope_coordinates",
-		 "tempo code=%c", get_telescope_code ());
-}
 
 void Pulsar::Archive::uniform_weight (float new_weight)
 {

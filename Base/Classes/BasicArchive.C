@@ -13,7 +13,7 @@ Pulsar::BasicArchive::BasicArchive ()
 
   basis = Signal::Linear;
   state = Signal::Intensity;
-
+  scale = Signal::FluxDensity;
   type = Signal::Pulsar;
 
   source = "unknown";
@@ -30,19 +30,15 @@ Pulsar::BasicArchive::BasicArchive ()
   dispersion_measure = 0.0;
   rotation_measure = 0.0;
 
-  flux_calibrated = false;
   poln_calibrated = false;
-  feedangle_corrected = false;
-  iono_rm_corrected = false;
-  ism_rm_corrected = false;
-  parallactic_corrected = false;
+  faraday_corrected = false;
   dedispersed = false;
 }
 
 Pulsar::BasicArchive::BasicArchive (const BasicArchive& copy,
 				    const vector<unsigned>& subints)
 {
-  if (verbose)
+  if (verbose == 3)
     cerr << "Pulsar::BasicArchive:: copy constructor" << endl;
 
   Archive::copy (copy, subints);
@@ -52,7 +48,7 @@ Pulsar::BasicArchive::BasicArchive (const BasicArchive& copy,
 const Pulsar::BasicArchive&
 Pulsar::BasicArchive::operator = (const BasicArchive& copy)
 {
-  if (verbose)
+  if (verbose == 3)
     cerr << "Pulsar::BasicArchive::operator =" << endl;
 
   if (this == &copy)
@@ -66,7 +62,7 @@ Pulsar::BasicArchive::operator = (const BasicArchive& copy)
 
 Pulsar::BasicArchive::~BasicArchive () 
 { 
-  if (verbose)
+  if (verbose == 3)
     cerr << "Pulsar::BasicArchive::destructor" << endl;
 }
 
@@ -252,6 +248,18 @@ void Pulsar::BasicArchive::set_state (Signal::State _state)
   state = _state;
 }
     
+//! Return the polarisation scale of the data
+Signal::Scale Pulsar::BasicArchive::get_scale () const
+{
+  return scale;
+}
+    
+//! Set the polarisation scale of the data
+void Pulsar::BasicArchive::set_scale (Signal::Scale _scale)
+{
+  scale = _scale;
+}
+    
 //! Get the centre frequency of the observation
 double Pulsar::BasicArchive::get_dispersion_measure () const
 {
@@ -289,67 +297,19 @@ void Pulsar::BasicArchive::set_poln_calibrated (bool done)
   poln_calibrated = done;
 }
 
-//! Data has been flux calibrated
-bool Pulsar::BasicArchive::get_flux_calibrated () const
-{
-  return flux_calibrated;
-}
 
-//! Set the status of the flux calibrated flag
-void Pulsar::BasicArchive::set_flux_calibrated (bool done)
-{
-  flux_calibrated = done;
-}
-
-
-//! Return true when the data has been corrected for feed angle errors
-bool Pulsar::BasicArchive::get_feedangle_corrected () const
-{
-  return feedangle_corrected;
-}
-
-//! Set true when the data has been corrected for feed angle errors
-void Pulsar::BasicArchive::set_feedangle_corrected (bool done)
-{
-  feedangle_corrected = done;
-}
-
-//! Return true when the data has been corrected for ionospheric Faraday rotation
-bool Pulsar::BasicArchive::get_iono_rm_corrected () const
-{
-  return iono_rm_corrected;
-}
-    
-//! Set true when the data has been corrected for ionospheric Faraday rotation
-void Pulsar::BasicArchive::set_iono_rm_corrected (bool done)
-{
-  iono_rm_corrected = done;
-}
-    
 //! Return true when the data has been corrected for ISM Faraday rotation
-bool Pulsar::BasicArchive::get_ism_rm_corrected () const
+bool Pulsar::BasicArchive::get_faraday_corrected () const
 {
-  return ism_rm_corrected;
+  return faraday_corrected;
 }
     
 //! Set true when the data has been corrected for ISM Faraday rotation
-void Pulsar::BasicArchive::set_ism_rm_corrected (bool done)
+void Pulsar::BasicArchive::set_faraday_corrected (bool done)
 {
-  ism_rm_corrected = done;
+  faraday_corrected = done;
 }
-    
-//! Return true when the data has been corrected for parallactic angle errors
-bool Pulsar::BasicArchive::get_parallactic_corrected () const
-{
-  return parallactic_corrected;
-} 
-    
-//! Set true when the data has been corrected for parallactic angle errors
-void Pulsar::BasicArchive::set_parallactic_corrected (bool done)
-{
-  parallactic_corrected = done;
-}
-    
+
 //! Inter-channel dispersion delay has been removed
 bool Pulsar::BasicArchive::get_dedispersed () const
 {

@@ -1,4 +1,5 @@
-#include "Archive.h"
+#include "Pulsar/Archive.h"
+#include "Pulsar/Receiver.h"
 
 #include "string_utils.h"  // for stringprintf
 
@@ -106,7 +107,7 @@ bool Pulsar::Archive::standard_match (const Archive* archive,
   that should be equal before data from two archives are combined,
   The following are tested for equality:
   <UL>
-  <LI> get_state
+  <LI> get_scale
   <LI> get_type
   <LI> get_source
   <LI> get_nbin
@@ -121,37 +122,16 @@ bool Pulsar::Archive::processing_match (const Archive* archive,
   bool result = true;
 
   //! Data has been flux calibrated
-  if (get_flux_calibrated() != archive->get_flux_calibrated()) {
+  if (get_scale() != archive->get_scale()) {
     reason += match_indent
-      + stringprintf ("flux calibration mismatch");
-    result = false;
-  }
-
-  //! Data has been corrected for feed angle errors
-  if (get_feedangle_corrected() != archive->get_feedangle_corrected()) {
-    reason += match_indent
-      + stringprintf ("feed angle correction mismatch");
-    result = false;
-  }
-
-  //! Data has been corrected for ionospheric faraday rotation
-  if (get_iono_rm_corrected() != archive->get_iono_rm_corrected()) {
-    reason += match_indent
-      + stringprintf ("ionospheric RM correction mismatch");
+      + stringprintf ("scale mismatch");
     result = false;
   }
 
   //! Data has been corrected for ISM faraday rotation
-  if (get_ism_rm_corrected() != archive->get_ism_rm_corrected()) {
+  if (get_faraday_corrected() != archive->get_faraday_corrected()) {
     reason += match_indent
-      + stringprintf ("ISM RM correction mismatch");
-    result = false;
-  }
-  
-  //! Data has been corrected for parallactic angle errors
-  if (get_parallactic_corrected() != archive->get_parallactic_corrected()) {
-    reason += match_indent
-      + stringprintf ("parallactic angle correction mismatch");
+      + stringprintf ("faraday rotation correction mismatch");
     result = false;
   }
   
@@ -162,6 +142,7 @@ bool Pulsar::Archive::processing_match (const Archive* archive,
     result = false;
   }
 
+  
   return result;
 }
 
@@ -184,12 +165,9 @@ bool Pulsar::Archive::calibrator_match (const Archive* archive,
 {
   bool result = true;
 
-  if (get_basis() != archive->get_basis()) {
-    reason += match_indent
-      + stringprintf ("feed type mismatch: %d != %d", 
-		      get_basis(), archive->get_basis());
+  if (!get<Receiver>() -> match (archive->get<Receiver>(), reason))
     result = false;
-  }
+
   if (get_nchan() != archive->get_nchan()) {
     reason += match_indent
       + stringprintf ("numbers of channels mismatch: %d != %d",

@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/ExampleArchive.h,v $
-   $Revision: 1.3 $
-   $Date: 2003/08/14 19:09:14 $
+   $Revision: 1.4 $
+   $Date: 2004/07/12 09:25:31 $
    $Author: straten $ */
 
 #ifndef __ExampleArchive_h
@@ -25,33 +25,29 @@ namespace Pulsar {
     //! Default constructor
     ExampleArchive ();
 
-    //! Copy another constructor
-    ExampleArchive (const Archive& archive);
-
     //! Copy constructor
     ExampleArchive (const ExampleArchive& archive);
-
-    //! Extract another constructor
-    ExampleArchive (const Archive& a, const vector<unsigned>& subints);
-
-    //! Extraction constructor
-    ExampleArchive (const ExampleArchive& a, const vector<unsigned>& subints);
-
-    //! Operator =
-    ExampleArchive& operator= (const ExampleArchive& archive);
 
     //! Destructor
     ~ExampleArchive ();
 
-    //! Copy the contents of an Archive into self
-    void copy (const Archive& archive,
-	       const vector<unsigned>& subints = none_selected);
+    //! Assignment operator
+    const ExampleArchive& operator = (const ExampleArchive& archive);
     
+    //! Base copy constructor
+    ExampleArchive (const Archive& archive);
+
+    //! Base extraction constructor
+    ExampleArchive (const Archive& archive, const vector<unsigned>& subint);
+
+    //! Copy all of the class attributes and the selected Integration data
+    void copy (const Archive& archive, const vector<unsigned>& subints);
+
     //! Return a new copy-constructed ExampleArchive instance
-    Archive* clone () const;
+    ExampleArchive* clone () const;
 
     //! Return a new extraction-constructed ExampleArchive instance
-    Archive* extract (const vector<unsigned>& subints) const;
+    ExampleArchive* extract (const vector<unsigned>& subints) const;
     
   protected:
 

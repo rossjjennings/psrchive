@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/BasicArchive.h,v $
-   $Revision: 1.27 $
-   $Date: 2004/06/17 09:15:51 $
+   $Revision: 1.28 $
+   $Date: 2004/07/12 09:25:31 $
    $Author: straten $ */
 
 #ifndef __BasicArchive_h
@@ -63,6 +63,11 @@ namespace Pulsar {
     //! Set the state of the profiles
     virtual void set_state (Signal::State state);
 
+    //! Get the scale in which flux density is measured
+    virtual Signal::Scale get_scale () const;
+    //! Set the scale in which flux density is measured
+    virtual void set_scale (Signal::Scale scale);
+
     //! Get the observation type (psr, cal)
     virtual Signal::Source get_type () const;
     //! Set the observation type (psr, cal)
@@ -121,7 +126,7 @@ namespace Pulsar {
 
     //! Inter-channel dispersion delay has been removed
     virtual bool get_dedispersed () const;
-    //! Set the status of the parallactic angle flag
+    //! Set the status of the dispersion delay flag
     virtual void set_dedispersed (bool done = true);
 
     //! Get the rotation measure (in \f${\rm rad\, m}^{-2}\f$)
@@ -130,34 +135,14 @@ namespace Pulsar {
     virtual void set_rotation_measure (double rm);
 
     //! data has been corrected for ISM faraday rotation
-    virtual bool get_ism_rm_corrected () const;
+    virtual bool get_faraday_corrected () const;
     //! Set the status of the ISM RM flag
-    virtual void set_ism_rm_corrected (bool done = true);
-
-    //! data has been corrected for ionospheric faraday rotation
-    virtual bool get_iono_rm_corrected () const;
-    //! Set the status of the ionospheric RM flag
-    virtual void set_iono_rm_corrected (bool done = true);
-
-    //! data has been corrected for parallactic angle errors
-    virtual bool get_parallactic_corrected () const;
-    //! Set the status of the parallactic angle flag
-    virtual void set_parallactic_corrected (bool done = true);
-
-    //! data has been corrected for feed angle errors
-    virtual bool get_feedangle_corrected () const;
-    //! Set the status of the feed angle flag
-    virtual void set_feedangle_corrected (bool done = true);
+    virtual void set_faraday_corrected (bool done = true);
 
     //! Data has been poln calibrated
     virtual bool get_poln_calibrated () const;
     //! Set the status of the poln calibrated flag
     virtual void set_poln_calibrated (bool done = true);
-
-    //! Data has been flux calibrated
-    virtual bool get_flux_calibrated () const;
-    //! Set the status of the flux calibrated flag
-    virtual void set_flux_calibrated (bool done = true);
 
     //! Ensure that BasicArchive code is linked
     /*! This method is called in Archive::load only to ensure that the
@@ -190,6 +175,9 @@ namespace Pulsar {
 
     //! The state of the profiles
     Signal::State state;
+
+    //! The scale in which flux density is measured
+    Signal::Scale scale;
 
     //! The observation type (psr, cal)
     Signal::Source type;
@@ -234,27 +222,16 @@ namespace Pulsar {
     //! The rotation measure (in \f${\rm rad\, m}^{-2}\f$)
     double rotation_measure;
 
-    //! Data has been flux calibrated
-    bool flux_calibrated;
+    //! data has been dedispersed
+    bool dedispersed;
+
+    //! data has been corrected for ISM faraday rotation
+    bool faraday_corrected;
 
     //! Data has been poln calibrated
     bool poln_calibrated;
 
-    //! data has been corrected for feed angle errors
-    bool feedangle_corrected;
-
-    //! data has been corrected for ionospheric faraday rotation
-    bool iono_rm_corrected;
-
-    //! data has been corrected for ISM faraday rotation
-    bool ism_rm_corrected;
-
-    //! data has been corrected for parallactic angle errors
-    bool parallactic_corrected;
-
-    bool dedispersed;
-
-    //! Return a pointer to a new BasicIntegration
+     //! Return a pointer to a new BasicIntegration
     Integration* new_Integration (Integration* copy_this = 0);
     
   };
