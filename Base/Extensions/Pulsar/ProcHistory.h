@@ -72,8 +72,26 @@ namespace Pulsar {
     // The storage array
     vector<row> rows;
     
+    string command_str;
+    string the_cal_mthd;
+    string the_sc_mthd;
+    string the_cal_file;
+    string the_rfi_mthd;
+
     ProcHistory::row& get_last ();
-    void add_blank_row ();
+
+    void   set_command_str (string str);
+    string get_command_str ();
+    void   set_cal_mthd (string str);
+    string get_cal_mthd ();
+    void   set_sc_mthd (string str);
+    string get_sc_mthd ();
+    void   set_cal_file (string str);
+    string get_cal_file ();
+    void   set_rfi_mthd (string str);
+    string get_rfi_mthd ();
+    
+    void   add_blank_row ();
     
   private:
     

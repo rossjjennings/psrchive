@@ -13,12 +13,22 @@
 Pulsar::ProcHistory::ProcHistory (const ProcHistory& extension)
 {
   rows = extension.rows;
+  command_str = extension.command_str;
+  the_cal_mthd = extension.the_cal_mthd;
+  the_sc_mthd = extension.the_sc_mthd;
+  the_cal_file = extension.the_cal_file;
+  the_rfi_mthd = extension.the_rfi_mthd;
 }
 
 const Pulsar::ProcHistory& 
 Pulsar::ProcHistory::operator= (const ProcHistory& extension)
 {
   rows = extension.rows;
+  command_str = extension.command_str; 
+  the_cal_mthd = extension.the_cal_mthd;
+  the_sc_mthd = extension.the_sc_mthd;
+  the_cal_file = extension.the_cal_file;
+  the_rfi_mthd = extension.the_rfi_mthd;
   return *this;
 }
 
@@ -29,11 +39,66 @@ Pulsar::ProcHistory::~ProcHistory ()
 void Pulsar::ProcHistory::init ()
 {
   rows.resize (0);
+  command_str = "UNKNOWN";
+  the_cal_mthd = "UNKNOWN";
+  the_sc_mthd = "UNKNOWN";
+  the_cal_file = "UNKNOWN";
+  the_rfi_mthd = "UNKNOWN";
 }
 
 Pulsar::ProcHistory::row& Pulsar::ProcHistory::get_last ()
 {
   return rows.back();
+}
+
+void Pulsar::ProcHistory::set_command_str(string str)
+{
+  command_str = str;
+}
+
+string Pulsar::ProcHistory::get_command_str()
+{
+  return command_str;
+}
+
+void Pulsar::ProcHistory::set_cal_mthd(string str)
+{
+  the_cal_mthd = str;
+}
+
+string Pulsar::ProcHistory::get_cal_mthd()
+{
+  return the_cal_mthd;
+}
+
+void Pulsar::ProcHistory::set_sc_mthd(string str)
+{
+  the_sc_mthd = str;
+}
+
+string Pulsar::ProcHistory::get_sc_mthd()
+{
+  return the_sc_mthd;
+}
+
+void Pulsar::ProcHistory::set_cal_file(string str)
+{
+  the_cal_file = str;
+}
+
+string Pulsar::ProcHistory::get_cal_file()
+{
+  return the_cal_file;
+}
+
+void Pulsar::ProcHistory::set_rfi_mthd(string str)
+{
+  the_rfi_mthd = str;
+}
+
+string Pulsar::ProcHistory::get_rfi_mthd()
+{
+  return the_rfi_mthd;
 }
 
 void Pulsar::ProcHistory::add_blank_row ()
@@ -51,9 +116,9 @@ Pulsar::ProcHistory::row::~row ()
 
 void Pulsar::ProcHistory::row::init ()
 {
-  date_pro = "unset";
-  proc_cmd = "unset";
-  pol_type = "unset";
+  date_pro = "UNSET";
+  proc_cmd = "UNSET";
+  pol_type = "UNSET";
   sc_mthd  = "NONE";
   cal_mthd = "NONE";
   cal_file = "NONE";
