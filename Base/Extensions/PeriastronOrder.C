@@ -61,18 +61,20 @@ void Pulsar::PeriastronOrder::organise (Archive* arch, unsigned newsub)
   
   // Pad to avoid thorwing exceptions when get_Integration is called
   indices.resize(arch->get_nsubint());
-  
+  phases.resize(arch->get_nsubint());
+  used.resize(arch->get_nsubint());
+
   for (unsigned i = 0; i < arch->get_nsubint(); i++) {
-    phases.push_back(get_binphs_peri((arch->get_Integration(i)->get_epoch()).in_days(),
-				     arch->get_ephemeris(), 
-				     arch->get_Integration(i)->get_centre_frequency(),
-				     arch->get_telescope_code()));
+    phases[i] = get_binphs_peri((arch->get_Integration(i)->get_epoch()).in_days(),
+				arch->get_ephemeris(), 
+				arch->get_Integration(i)->get_centre_frequency(),
+				arch->get_telescope_code());
     if (isnan(phases[i])) {
       throw Error(FailedCall, "PeriastronOrder::organise",
 		  "get_binphs_peri returned nan");
     }
 
-    used.push_back(false);
+    used[i] = false;
     
     // The problem with this section is that archives with gaps in the
     // phase coverage have the total coverage mis-represented. This
