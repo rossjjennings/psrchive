@@ -440,6 +440,8 @@ void Pulsar::ReceptionCalibrator::solve ()
 
   MJD mid = 0.5 * (start_epoch + end_epoch);
 
+  parallactic.set_reference_epoch (mid);
+
   unsigned nchan = equation.size();
   unsigned incr = 1;
 
