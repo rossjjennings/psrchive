@@ -39,8 +39,16 @@ Pulsar::Archive::~Archive ()
     cerr << "Pulsar::Archive::destructor" << endl;
 }
 
+//! operator =
+Pulsar::Archive&
+Pulsar::Archive::operator = (const Archive& a)
+{
+  copy (a); 
+  return *this;
+}
+
 //! Return a null-constructed instance of the derived class
-Pulsar::Archive* Pulsar::Archive::new_Archive (const char* class_name)
+Pulsar::Archive* Pulsar::Archive::new_Archive (const string class_name)
 {
   Agent::init ();
 
@@ -53,7 +61,7 @@ Pulsar::Archive* Pulsar::Archive::new_Archive (const char* class_name)
       return Agent::registry[agent]->new_Archive();
 
   throw Error (InvalidParam, "Pulsar::Archive::new_Archive",
-		 "no Agent named '%s'", class_name);
+		 "no Agent named '" + class_name + "'");
 }
 
 void Pulsar::Archive::agent_report ()
