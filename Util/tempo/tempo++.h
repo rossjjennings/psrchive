@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/tempo++.h,v $
-   $Revision: 1.11 $
-   $Date: 2002/06/13 04:11:03 $
+   $Revision: 1.12 $
+   $Date: 2002/10/12 01:09:09 $
    $Author: straten $ */
 
 #ifndef __TEMPO_PP_H
@@ -12,9 +12,8 @@
 
 #include "MJD.h"
 #include "poly.h"
+#include "psrephem.h"
 #include "toa.h"
-
-class psrephem;
 
 namespace Tempo {
   
@@ -44,19 +43,6 @@ namespace Tempo {
 
   // default value passed to predict functions
   extern MJD unspecified;
-
-  // exception thrown on error
-  class Error {
-  protected:
-    string msg;
-  public:
-    Error () { msg = "Tempo::Error"; }
-    Error (const char* str) { msg = str; }
-    Error (const string& str) { msg = str; }
-    
-    friend ostream& operator<< (ostream& ostr, const Error& error)
-      { return ostr << error.msg; }
-  };
 
   // given a tempo ephemeris, generate toas over the range of MJD given
   // with characteristics specififed by rms and error.
