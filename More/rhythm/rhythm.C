@@ -109,7 +109,13 @@ void Rhythm::fit (const psrParams& eph, bool load_new)
       cerr << "Rhythm::fit No Arrival Times loaded" << endl;
     return;
   }
-  
+
+  if (!res_plot.empty()) {
+    // fit only for the points that are in sight
+    for (unsigned ipt=0; ipt<arrival_times.size(); ipt++)
+      arrival_times[ipt].set_selected(res_plot.getMostSelect(ipt));
+  }
+
   if (verbose)
     cerr << "Rhythm::fit Calculating residuals" << endl;
   
@@ -130,24 +136,36 @@ void Rhythm::fit (const psrParams& eph, bool load_new)
   if (verbose)
     cerr << "Rhythm::fit plotting residuals" << endl;
 
-  res_plot.load_points (residuals);  // load new points
-  plot_manager.pgplot();
-  
+  if (res_plot.empty()) {
+    res_plot.load_points  (residuals, false);  // load points, no range calc
+    res_plot.load_yerrors (residuals, false);  // load errors, no range calc
+    res_plot.auto_range   (false);             // calc range, do not force
+  }
+  else {
+    unsigned iresid = 0;
+    for (unsigned ipt=0; ipt<arrival_times.size(); ipt++) {
+      if (arrival_times[ipt].is_selected()) {
+	res_plot.set_point (ipt, residuals[iresid]);
+	res_plot.set_yerror (ipt, residuals[iresid]);
+	iresid ++;
+      }
+    }
+  }
+  if (plot_manager.isVisible())
+    plot_manager.pgplot();
 } 
- catch (string error)
-   {
-     if (verbose)
-       cerr << "Rhythm::fit ERROR" << error << endl;
-     QMessageBox::critical (this, "Rhythm::fit",
-			    error.c_str(), "Dismiss");
-   }
- catch (...)
-   {
-     if (verbose)
-       cerr << "Rhythm::fit ERROR Unhandled Exception" << endl;
-     QMessageBox::critical (this, "Rhythm::fit",
-			    "An Unhandled Exception Occured", "Dismiss");
-   }
+ catch (string error) {
+   if (verbose)
+     cerr << "Rhythm::fit ERROR " << error << endl;
+   QMessageBox::critical (this, "Rhythm::fit",
+			  error.c_str(), "Dismiss");
+ }
+ catch (...) {
+   if (verbose)
+     cerr << "Rhythm::fit ERROR Unhandled Exception" << endl;
+   QMessageBox::critical (this, "Rhythm::fit",
+			  "An Unhandled Exception Occured", "Dismiss");
+ }
 }
 
 void Rhythm::labelPlot()
@@ -157,7 +175,7 @@ void Rhythm::labelPlot()
     res_plot.set_ylabel ("Residual (seconds)");
     break;
   case residual::Turns:
-    res_plot.set_ylabel ("Residual (seconds)");
+    res_plot.set_ylabel ("Residual (turns)");
     break;
   default:
     cerr << "Rhythm::labelPlot unhandled case for y-axis" << endl;
