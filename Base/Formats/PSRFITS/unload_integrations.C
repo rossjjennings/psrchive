@@ -15,7 +15,8 @@ void Pulsar::FITSArchive::unload_integrations (fitsfile* ffptr) const
   // Delete all information in the data HDU to ensure
   // no conflicts with the new state
 
-  cerr << "FITSArchive::unload_integrations nsubint=" << nsubint << endl;
+  if (verbose)
+    cerr << "FITSArchive::unload_integrations nsubint=" << nsubint << endl;
 
   long oldrownum = 0;
 

@@ -1361,8 +1361,6 @@ try {
   long sec = (long)(reference_epoch.get_secs());
   double frac = reference_epoch.get_fracsec();
 
-  cerr << "unload epoch=" << reference_epoch << endl;
-
   fits_update_key (fptr, TLONG, "STT_IMJD", &day, comment, &status);
   fits_update_key (fptr, TLONG, "STT_SMJD", &sec, comment, &status);
   fits_update_key (fptr, TDOUBLE, "STT_OFFS", &frac, comment, &status);
