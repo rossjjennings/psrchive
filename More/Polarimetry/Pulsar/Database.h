@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/Database.h,v $
-   $Revision: 1.5 $
-   $Date: 2004/10/11 15:32:27 $
+   $Revision: 1.6 $
+   $Date: 2004/10/12 13:28:03 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Database_h
@@ -37,6 +37,9 @@ namespace Pulsar {
 
     //! Time scale over which differential gain and phase remain stable
     static double short_time_scale;
+
+    //! The maximum angular separation between calibrator and pulsar
+    static double max_angular_separation;
 
     //! Null constructor
     Database ();
@@ -122,10 +125,7 @@ namespace Pulsar {
       Entry entry;
       
       double minutes_apart;
-      
-      double RA_deg_apart;
-      
-      double DEC_deg_apart;
+      double deg_apart;
       
       bool check_receiver;
       bool check_instrument;
@@ -140,6 +140,8 @@ namespace Pulsar {
       //! Return true if entry matches within the criterion
       bool match (const Entry& entry) const;
       
+      //! Return the best of two entries
+      Entry best (const Entry& a, const Entry& b) const;
     };
     
     
@@ -149,24 +151,20 @@ namespace Pulsar {
     //! Set the default matching criterion for all observations
     static void set_default_criterion (const Criterion& criterion);
 
-    //! Returns a vector of Entry objects that match the given parameters.
+    //! Returns a vector of Entry instances that match the given Criterion
     vector<Entry> all_matching (const Criterion& criterion) const;
     
-    //! Returns the nearest (in time) Entry that matches the Criterion
-    Entry closest_match (const Criterion& criterion,
-			 const vector<Entry>& entries);
+    //! Returns the best Entry that matches the given Criterion
+    Entry best_match (const Criterion& criterion) const;
 
-    //! Return a match using the default_criterion
-    Entry PolnCal_match (Pulsar::Archive* arch,
-			 Calibrator::Type calType,
-			 bool only_observations = false);
+    //! Return the Criterion for the specified Pulsar::Archive
+    Criterion criterion (Pulsar::Archive* arch,
+			 Signal::Source obsType) const;
     
-    //! Return a match using the default_criterion
-    Entry allsky_match (Pulsar::Archive* arch,
-			Calibrator::Type calType,
-			double minutes_apart);
-     
-    
+    //! Return the Criterion for the specified Pulsar::Archive
+    Criterion criterion (Pulsar::Archive* archive,
+			 Calibrator::Type calType) const;
+
     //! Returns the full pathname of the Entry filename
     string get_filename (const Entry& entry) const;
     
