@@ -1,246 +1,131 @@
-#  lofar_mpi.m4
-#
-#  Copyright (C) 2002
-#  ASTRON (Netherlands Foundation for Research in Astronomy)
-#  P.O.Box 2, 7990 AA Dwingeloo, The Netherlands, seg@astron.nl
-#
-#  This program is free software; you can redistribute it and/or modify
-#  it under the terms of the GNU General Public License as published by
-#  the Free Software Foundation; either version 2 of the License, or
-#  (at your option) any later version.
-#
-#  This program is distributed in the hope that it will be useful,
-#  but WITHOUT ANY WARRANTY; without even the implied warranty of
-#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#  GNU General Public License for more details.
-#
-#  You should have received a copy of the GNU General Public License
-#  along with this program; if not, write to the Free Software
-#  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-#
-#  $Id: mpi.m4,v 1.2 2004/12/01 20:50:48 straten Exp $
-
-
-# lofar_MPI
-#
-# Macro to check for MPICH or ScaMPI mpi.h header file
-#
-AC_DEFUN([lofar_MPI],dnl
-[dnl
-AC_ARG_ENABLE(mpi-profiler,
-	[  --enable-mpi-profiler   enable MPI profiler (default=no)],
-	[mpi_profiler=yes], [mpi_profiler=no])
-lofar_HEADER_MPICH([])dnl
-lofar_HEADER_LAM([])dnl
-lofar_HEADER_SCAMPI()dnl
+dnl @synopsis SWIN_LIB_MPI
+dnl 
+AC_DEFUN([SWIN_LIB_MPI],
 [
-enable_mpi=0
-if test "$enable_mpich" = "yes"; then
-  enable_mpi=${enable_mpi}1
-fi
-if test "$enable_lam" = "yes"; then
-  enable_mpi=${enable_mpi}1
-fi
-if test "$enable_scampi" = "yes"; then
-  enable_mpi=${enable_mpi}1
-fi
-if test "$enable_bglmpich" = "yes"; then
-  enable_mpi=${enable_mpi}1
-fi
-if test $enable_mpi -gt 1; then
-]
-    AC_MSG_ERROR([Cannot use more than one MPI implementation.])
-[fi
-if test $enable_mpi -eq 1; then]
-AC_DEFINE(HAVE_MPI,dnl
-	1, [Define if we have an MPI implementation installed])dnl
-[fi]
-[if test "$mpi_profiler" = "yes"; then]
-  [if test $enable_mpi = 0; then]
-    AC_MSG_ERROR([Cannot enable MPI profiler without enabling MPI])
-  [fi]
-   AC_DEFINE(HAVE_MPI_PROFILER,dnl
-	     1, [Define if MPI profiler should be enabled])
-[fi]
+  AC_PROVIDE([SWIN_LIB_MPI])
 
-AM_CONDITIONAL(HAVE_MPI, [test $enable_mpi -eq 1])
+  AC_ARG_WITH([mpi-dir],
+              AC_HELP_STRING([--with-mpi-dir=DIR],
+                             [MPI is in DIR]))
 
-])
+  AC_ARG_WITH([mpi-include-dir],
+              AC_HELP_STRING([--with-mpi-include-dir=DIR],
+                             [MPI header files are in DIR]))
+
+  AC_ARG_WITH([mpi-lib-dir],
+              AC_HELP_STRING([--with-mpi-lib-dir=DIR],
+                             [MPI library is in DIR]))
+
+  MPI_CFLAGS=""
+  MPI_LIBS=""
+
+  if test x"$with_mpi_dir" = x"no" ||
+     test x"$with_mpi_include-dir" = x"no" ||
+     test x"$with_mpi_lib_dir" = x"no"; then
+    # user disabled mpi. Leave cache alone.
+    have_mpi="User disabled MPI."
+  else
+
+    # "yes" is not a specification
+    if test x"$with_mpi_dir" = xyes; then
+      with_mpi_dir=
+    fi
+    if test x"$with_mpi_include_dir" = xyes; then
+      if test x"$with_mpi_dir" = xyes; then
+        with_mpi_include_dir=$with_mpi_dir/include
+      else
+        with_mpi_include_dir=
+      fi
+    fi
+    if test x"$with_mpi_lib_dir" = xyes; then
+      if test x"$with_mpi_dir" = xyes; then
+        with_mpi_lib_dir=$with_mpi_dir/lib
+      else
+        with_mpi_lib_dir=
+      fi
+    fi
+
+    AC_MSG_CHECKING([for MPI installation])
+
+    ## Look for the header file ##
+    cf_include_path_list="$with_mpi_include_dir .
+                          $PSRHOME/packages/$LOGIN_ARCH/lam/include
+                          $PSRHOME/packages/$LOGIN_ARCH/mpich/include
+                          /usr/local/include/mpi
+                          /usr/local/mpi/include"
+
+    ac_save_CPPFLAGS="$CPPFLAGS"
+
+    for cf_dir in $cf_include_path_list; do
+      CPPFLAGS="-I$cf_dir $ac_save_CPPFLAGS"
+      AC_TRY_COMPILE([#include <mpi.h>],[MPI_Init(0,0);],
+                     have_mpi=yes, have_mpi=no)
+      if test x"$have_mpi" = xyes; then
+        if test x"$cf_dir" == x.; then
+          MPI_CFLAGS=""
+        else
+          MPI_CFLAGS="-I$cf_dir"
+        fi
+        break
+      fi
+    done
+
+    ## Look for the library ##
+    cf_lib_path_list="$with_mpi_lib_dir .
+                      $PSRHOME/packages/$LOGIN_ARCH/lam/lib
+                      $PSRHOME/packages/$LOGIN_ARCH/mpich/lib
+                      /usr/local/lib
+                      /usr/local/mpi/lib"
+
+    ac_save_LIBS="$LIBS"
+
+    for cf_dir in $cf_lib_path_list; do
+
+      LIBS="-L$cf_dir -lmpi -llam $ac_save_LIBS"
+      AC_TRY_LINK([#include <mpi.h>],[MPI_Init(0,0);],
+                  have_mpi=lam, have_mpi=no)
+      if test x"$have_mpi" != xno; then
+        if test x"$cf_dir" == x.; then
+          MPI_LIBS="-lmpi -llam"
+        else
+          MPI_LIBS="-L$cf_dir -lmpi -llam"
+        fi
+        break
+      fi
 
 
-#
-#
-# lofar_HEADER_MPICH([VERSION])
-#
-# Macro to check for MPICH mpi.h header
-# -------------------------------------------------
-#
-AC_DEFUN([lofar_HEADER_MPICH],
-[dnl
-AC_PREREQ(2.13)dnl
-ifelse($1, [], define(MPICH_VERSION,[]), define(MPICH_VERSION,$1))
-AC_ARG_WITH(mpich,
-	[  --with-mpich[=PFX]      prefix where MPICH is installed (default=/usr/local/mpich]MPICH_VERSION[)],
-	[mpich_prefix="$withval"],
-	[mpich_prefix="no"])
-[
-if test "$mpich_prefix" = "no" ; then
-  enable_mpich=no
-else
-  if test "$mpich_prefix" = "yes"; then
-    mpich_prefix=/usr/local/mpich]MPICH_VERSION
-[
+      LIBS="-L$cf_dir -lmpich $ac_save_LIBS"
+      AC_TRY_LINK([#include <mpi.h>],[MPI_Init(0,0);],
+                  have_mpi=mpich, have_mpi=no)
+      if test x"$have_mpi" != xno; then
+        if test x"$cf_dir" == x.; then
+          MPI_LIBS="-lmpich"
+        else
+          MPI_LIBS="-L$cf_dir -lmpich"
+        fi
+        break
+      fi
+
+    done
+
+    LIBS="$ac_save_LIBS"
+    CPPFLAGS="$ac_save_CPPFLAGS"
+
   fi
-  enable_mpich=yes
-]
-dnl
-AC_CHECK_FILE([$mpich_prefix/include/mpi.h],
-	[lofar_cv_header_mpich=yes],
-	[lofar_cv_header_mpich=no])
-[
-	if test $lofar_cv_header_mpich = yes ; then
 
-		MPIBIN="$mpich_prefix/bin"
-		MPICH_CC="$MPIBIN/mpicc"
-		MPICH_CXX="$MPIBIN/mpiCC"
+  AC_MSG_RESULT([$have_mpi])
 
-		if test "$mpi_profiler" = "yes"; then
-		  MPICH_CC="$MPICH_CC -mpilog";
-		  MPICH_CXX="$MPICH_CXX -mpilog";
-		fi
-
-		CC="$MPICH_CC"
-		CXX="$MPICH_CXX"
-]
-AC_SUBST(MPIBIN)dnl
-AC_SUBST(CC)dnl
-AC_SUBST(CXX)dnl
-AC_DEFINE(HAVE_MPICH,dnl
-	1, [Define if MPICH is installed])dnl
-[
-	else]
-AC_MSG_ERROR([Could not find MPICH in $mpich_prefix])
-[		enable_mpich=no
-	fi
-fi]
-])
-
-
-#
-#
-# lofar_HEADER_LAM([VERSION])
-#
-# Macro to check for LAM mpi.h header
-# -------------------------------------------------
-#
-AC_DEFUN([lofar_HEADER_LAM],
-[dnl
-AC_PREREQ(2.13)dnl
-ifelse($1, [], define(LAM_VERSION,[6.5.6]), define(LAM_VERSION,$1))
-AC_ARG_WITH(lam,
-	[  --with-lam[=PFX]        prefix where LAM is installed (default=/usr/local/lam-]LAM_VERSION[)],
-	[lam_prefix="$withval"],
-	[lam_prefix="no"])
-[
-if test "$lam_prefix" = "no" ; then
-  enable_lam=no
-else
-  if test "$lam_prefix" = "yes"; then
-    lam_prefix=/usr/local/lam-]LAM_VERSION
-[
+  if test x"$have_mpi" != xno; then
+    AC_DEFINE([HAVE_MPI], [1], [Define if an MPI library is present])
+    [$1]
+  else
+    echo "	MPI-specific code will not be compiled"
+    [$2]
   fi
-  enable_lam=yes
-]
-dnl
-AC_CHECK_FILE([$lam_prefix/include/mpi.h],
-	[lofar_cv_header_lam=yes],
-	[lofar_cv_header_lam=no])
-[
-	if test $lofar_cv_header_lam = yes ; then
 
-		MPIBIN="$lam_prefix/bin"
-		LAM_CC="$MPIBIN/mpicc"
-		LAM_CXX="$MPIBIN/mpiCC"
+  AC_SUBST(MPI_LIBS)
+  AC_SUBST(MPI_CFLAGS)
+  AM_CONDITIONAL(HAVE_MPI,[test x"$have_mpi" = xyes])
 
-		if test "$mpi_profiler" = "yes"; then]
-AC_MSG_ERROR([LAM MPI does not support the MPE profiler])
-[               fi
-
-		CC="$LAM_CC"
-		CXX="$LAM_CXX"
-]
-AC_SUBST(MPIBIN)dnl
-AC_SUBST(CC)dnl
-AC_SUBST(CXX)dnl
-AC_DEFINE(HAVE_LAM,dnl
-	1, [Define if LAM is installed])dnl
-[
-	else]
-AC_MSG_ERROR([Could not find LAM in $lam_prefix])
-[		enable_lam=no
-	fi
-fi]
 ])
-
-
-#
-#
-# lofar_HEADER_SCAMPI([DEFAULT_PREFIX])
-#
-# Macro to check for ScaMPI mpi.h header
-# -------------------------------------------------
-#
-AC_DEFUN([lofar_HEADER_SCAMPI],
-[dnl
-AC_PREREQ(2.13)dnl
-ifelse($1, [], define(SCAMPI_DEFAULT_PREFIX,[/opt/scali]), define(SCAMPI_DEFAULT_PREFIX,$1))
-AC_ARG_WITH(scampi,
-	[  --with-scampi[=PFX]     prefix where ScaMPI is installed (default=]SCAMPI_DEFAULT_PREFIX[)],
-	[scampi_prefix="$withval"],
-	[scampi_prefix="no"])
-[
-if test "$scampi_prefix" = "no"; then
-  enable_scampi=no
-else
-  if test "$scampi_prefix" = "yes"; then
-    scampi_prefix=]SCAMPI_DEFAULT_PREFIX
-[
-  fi
-  enable_scampi=yes
-]
-dnl
-AC_CHECK_FILE([$scampi_prefix/include/mpi.h],
-	[lofar_cv_header_scampi=yes],
-	[lofar_cv_header_scampi=no])
-[
-	if test $lofar_cv_header_scampi = yes ; then
-
-		MPIBIN="$scampi_prefix/bin"
-		SCAMPI_CPPFLAGS="-I$scampi_prefix/include"
-		SCAMPI_LDFLAGS="-L$scampi_prefix/lib"
-		SCAMPI_LIBS="-lmpi"
-		SCAMPI_PLIBS="-llmpe -lmpe"
-
-		CPPFLAGS="$CPPFLAGS $SCAMPI_CPPFLAGS"
-		LDFLAGS="$LDFLAGS $SCAMPI_LDFLAGS"
-		LIBS="$LIBS $SCAMPI_LIBS"
-
-		if test "$mpi_profiler" = "yes"; then
-		  LIBS="$LIBS $SCAMPI_PLIBS"
-		fi
-]
-AC_SUBST(MPIBIN)
-AC_SUBST(CPPFLAGS)
-AC_SUBST(LDFLAGS)
-AC_SUBST(LIBS)
-AC_DEFINE(HAVE_SCAMPI,dnl
-	1, [Define if ScaMPI is installed])dnl
-[
-	else]
-AC_MSG_ERROR([Could not find ScaMPI in $scampi_prefix])
-	  [enable_scampi=no
-	fi
-fi]
-])
-
 
