@@ -140,6 +140,7 @@ void toaPlot::handleEvent (float x, float y, char ch)
 	  }
 	}
 	emit selected(tempint);
+	emit ineednewdata();
 	handleEvent(0,0,'~');
       }
       break;
@@ -185,6 +186,7 @@ void toaPlot::handleEvent (float x, float y, char ch)
 	    if ((data[i].x > x1) && (data[i].x < x2))
 	      emit selected(data[i].id); 
 	  }
+	  emit ineednewdata();
 	  break;
 	}
       }
@@ -230,6 +232,7 @@ void toaPlot::handleEvent (float x, float y, char ch)
 	    if ((data[i].y > y1) && (data[i].y < y2))
 	      emit selected(data[i].id);
 	  }
+	  emit ineednewdata();
 	  break;
 	}
       }
@@ -295,6 +298,7 @@ void toaPlot::handleEvent (float x, float y, char ch)
 	    if ((data[i].y > y1) && (data[i].y < y2) && (data[i].x > x1) && (data[i].x < x2))
 	      emit selected(data[i].id); 
 	  }
+	  emit ineednewdata();
 	  mode = 0;
 	  handleEvent(0,0,'~');
 	  break;

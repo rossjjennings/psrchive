@@ -58,6 +58,7 @@ class toaPlot: public QPgplot {
  signals:
 
   void selected (int);
+  void ineednewdata ();
 
  protected:
 

@@ -94,6 +94,9 @@ Rhythm::Rhythm (QWidget* parent, int argc, char** argv) :
   plot_window = new toaPlot(0,0);
   plot_window -> show();
 
+  QObject::connect(plot_window, SIGNAL(ineednewdata()),
+		   this, SLOT(request_update()));
+
   // Build the cursor control panel
 
   leftpanel = new QVBox(container);
@@ -550,6 +553,10 @@ void Rhythm::deselect (int pt)
   toas[pt].state = Tempo::toa::Normal;
   toa_text -> setSelected (pt, false);
   
+}
+
+void Rhythm::request_update ()
+{
   goplot ();
 }
 
@@ -566,7 +573,6 @@ void Rhythm::select (int pt)
   toas[pt].state = Tempo::toa::Selected;
   toa_text -> setSelected (pt, true);
 
-  goplot ();  
 }
 
 void Rhythm::change_mode (int m)
