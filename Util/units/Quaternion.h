@@ -1,14 +1,14 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Quaternion.h,v $
-   $Revision: 1.21 $
-   $Date: 2004/07/19 11:40:05 $
+   $Revision: 1.22 $
+   $Date: 2004/10/26 12:37:07 $
    $Author: straten $ */
 
 #ifndef __Quaternion_H
 #define __Quaternion_H
 
-#include <complex>
+#include "Traits.h"
 #include "Vector.h"
 
 //! Quaternion algebra is isomorphic with either Hermitian or Unitary matrices
@@ -109,17 +109,17 @@ public:
 
   //! complex multiplication
   template <typename U>
-  const friend Quaternion operator * (const complex<U>& c, Quaternion a)
+  const friend Quaternion operator * (const std::complex<U>& c, Quaternion a)
     { a*=c; return a; }
 
   //! complex multiplication
   template <typename U>
-  const friend Quaternion operator * (Quaternion a, const complex<U>& c)
+  const friend Quaternion operator * (Quaternion a, const std::complex<U>& c)
     { a*=c; return a; }
 
   //! complex division
   template <typename U>
-  const friend Quaternion operator / (Quaternion a, const complex<U>& c)
+  const friend Quaternion operator / (Quaternion a, const std::complex<U>& c)
     { a/=c; return a; }
 
   //! Negation
@@ -152,7 +152,7 @@ public:
   static const Quaternion& identity();
 
   //! Dimension of data
-  unsigned size () const { return 4; }
+  unsigned size () const { return ndim; }
 
 };
 
@@ -164,18 +164,30 @@ const Quaternion<T,B>& Quaternion<T,B>::identity ()
   return I;
 }
 
+//! Enable the Quaternion class to be passed to certain template functions
+template<typename T, QBasis B> struct DatumTraits< Quaternion<T,B> >
+{
+  ElementTraits<T> element_traits;
+  static inline unsigned ndim () { return 4; }
+  static inline T& element (Quaternion<T,B>& t, unsigned idim) 
+  { return t[idim]; }
+  static inline const T& element (const Quaternion<T,B>& t, unsigned idim)
+  { return t[idim]; }
+};
+
+
 //! Quick multiplication of a complex number by i
 template<typename T>
-complex<T> ci (const complex<T>& c)
+std::complex<T> ci (const std::complex<T>& c)
 {
-  return complex<T> (-c.imag(), c.real());
+  return std::complex<T> (-c.imag(), c.real());
 }
 
 //! Quick multiplication of a real number by i
 template<typename T>
-complex<T> ci (const T& real)
+std::complex<T> ci (const T& real)
 {
-  return complex<T> (0.0, real);
+  return std::complex<T> (0.0, real);
 }
 
 //! Return the conjugate of a real number
@@ -184,11 +196,11 @@ T conj (const T& x) { return x; };
 
 //! Multiplication of two Biquaternions in the Hermitian basis
 template<typename T>
-const Quaternion<complex<T>, Hermitian>
-operator * (const Quaternion<complex<T>,Hermitian>& a,
-	    const Quaternion<complex<T>,Hermitian>& b)
+const Quaternion<std::complex<T>, Hermitian>
+operator * (const Quaternion<std::complex<T>,Hermitian>& a,
+	    const Quaternion<std::complex<T>,Hermitian>& b)
 {
-  return Quaternion<complex<T>, Hermitian>
+  return Quaternion<std::complex<T>, Hermitian>
     ( a.s0*b.s0 + a.s1*b.s1 + a.s2*b.s2 + a.s3*b.s3 ,
       a.s0*b.s1 + a.s1*b.s0 + ci(a.s2*b.s3) - ci(a.s3*b.s2) ,
       a.s0*b.s2 - ci(a.s1*b.s3) + a.s2*b.s0 + ci(a.s3*b.s1) ,
@@ -211,7 +223,7 @@ const Quaternion<T, Unitary> operator * (const Quaternion<T,Unitary>& a,
 
 //! Returns the real component of a Biquaternion
 template<typename T, QBasis B>
-Quaternion<T,B> real (const Quaternion<complex<T>,B>& j)
+Quaternion<T,B> real (const Quaternion<std::complex<T>,B>& j)
 {
   return Quaternion<T,B>
     (j.s0.real(), j.s1.real(), j.s2.real(), j.s3.real());
@@ -219,7 +231,7 @@ Quaternion<T,B> real (const Quaternion<complex<T>,B>& j)
 
 //! Returns the imag component of a Biquaternion
 template<typename T, QBasis B>
-Quaternion<T,B> imag (const Quaternion<complex<T>,B>& j)
+Quaternion<T,B> imag (const Quaternion<std::complex<T>,B>& j)
 {
   return Quaternion<T,B>
     (j.s0.imag(), j.s1.imag(), j.s2.imag(), j.s3.imag());
@@ -309,7 +321,7 @@ const Quaternion<T, Hermitian> sqrt (const Quaternion<T, Hermitian>& h)
 
 //! Returns the square of the Frobenius norm of a Biquaternion
 template<typename T, QBasis B>
-T norm (const Quaternion<complex<T>,B>& j)
+T norm (const Quaternion<std::complex<T>,B>& j)
 { 
   return 2.0 * (norm(j.s0) + norm(j.s1) + norm(j.s2) + norm(j.s3));
 }

@@ -1,16 +1,18 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Estimate.h,v $
-   $Revision: 1.23 $
-   $Date: 2004/07/03 07:20:51 $
+   $Revision: 1.24 $
+   $Date: 2004/10/26 12:37:07 $
    $Author: straten $ */
 
 #ifndef __Estimate_h
 #define __Estimate_h
 
+#include "Traits.h"
+
 #include <iostream>
 #include <math.h>
-#include "psr_cpp.h"
+
 
 // forward declarations
 template <typename T, typename U=T> class MeanEstimate;
@@ -28,8 +30,6 @@ class Estimate
 {
 
  public:
-  //! Enables vector< Estimate<T> > to be used in fft::interpolate template
-  static unsigned ndim;
 
   //! The value, \f$ x \f$
   T val;
@@ -145,13 +145,22 @@ class Estimate
 };
 
 
-template <typename T, typename U>
-unsigned Estimate<T, U>::ndim = 1;
+//! Enable Estimate class to be passed to certain template functions
+template <class T, class U> struct DatumTraits< Estimate<T,U> >
+{
+  ElementTraits<T> element_traits;
+  static inline unsigned ndim () { return 1; }
+  static inline T& element (Estimate<T,U>& t, unsigned idim) 
+  { return t.val; }
+  static inline const T& element (const Estimate<T,U>& t, unsigned idim)
+  { return t.val; }
+};
+
 
 
 //! Useful for quickly printing the values
 template<typename T, typename U>
-ostream& operator<< (ostream& ostr, const Estimate<T,U>& estimate)
+std::ostream& operator<< (std::ostream& ostr, const Estimate<T,U>& estimate)
 {
   return ostr << "(" << estimate.val << "\261" << sqrt(estimate.var) << ")";
 }
@@ -206,7 +215,7 @@ class MeanEstimate
 
 //! Useful for quickly printing the values
 template<typename T, typename U>
-ostream& operator<< (ostream& ostr, const MeanEstimate<T,U>& mean)
+std::ostream& operator<< (std::ostream& ostr, const MeanEstimate<T,U>& mean)
 {
   return ostr << mean.get_Estimate();
 }
@@ -239,7 +248,7 @@ class MeanRadian
 
 //! Useful for quickly printing the values
 template<typename T, typename U>
-ostream& operator<< (ostream& ostr, const MeanRadian<T,U>& mean)
+std::ostream& operator<< (std::ostream& ostr, const MeanRadian<T,U>& mean)
 {
   return ostr << mean.get_Estimate();
 }
