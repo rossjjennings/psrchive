@@ -1,4 +1,31 @@
+#
 # SWIN_LIB_CPGPLOT([ACTION-IF-FOUND [,ACTION-IF-NOT-FOUND]])
+#
+# This m4 macro checks availability of the PGPLOT Graphics Subroutine 
+# Library by T. J. Pearson, setting the following variables:
+#
+# PGPLOT_CFLAGS - autoconfig variable with flags required for compiling
+# PGPLOT_LIBS   - autoconfig variable with flags required for linking
+# HAVE_PGPLOT   - automake conditional
+# HAVE_PGPLOT   - pre-processor macro in config.h
+#
+# This macro tries to link a test program, first using only 
+#
+#    -L$PGPLOT_DIR -lcpgplot -lpgplot $FLIBS
+#
+# and, if this fails, by adding 
+#
+#    $X_LIBS -lX11
+#
+# Notice that the environment variable PGPLOT_DIR is used.
+#
+# Extra libraries may be required if certain PGPLOT drivers are enabled.
+# These may be specified using the
+#
+#    --with-pgplot-extra
+#
+# argument to the configure script.
+#
 # ----------------------------------------------------------
 AC_DEFUN([SWIN_LIB_PGPLOT],
 [
@@ -6,11 +33,19 @@ AC_DEFUN([SWIN_LIB_PGPLOT],
   AC_REQUIRE([AC_F77_LIBRARY_LDFLAGS])
   AC_REQUIRE([SWIN_LIB_X11])
 
+  AC_ARG_WITH([pgplot-extra],
+              AC_HELP_STRING([--with-pgplot-extra=LIBS],
+                             [Specify LIBS required by PGPLOT drivers]))
+
   AC_MSG_CHECKING([for PGPLOT installation])
 
   PGPLOT_CFLAGS="-I$PGPLOT_DIR"
   PGPLOT_LIBS="-L$PGPLOT_DIR -lcpgplot -lpgplot $FLIBS"
 
+  # "yes" is not a specification
+  if test x"$with_pgplot_extra" != xyes; then
+    PGPLOT_LIBS="$PGPLOT_LIBS $with_pgplot_extra"
+  fi
 
   ac_save_CFLAGS="$CFLAGS"
   ac_save_LIBS="$LIBS"
@@ -20,13 +55,12 @@ AC_DEFUN([SWIN_LIB_PGPLOT],
   AC_TRY_LINK([#include <cpgplot.h>],[cpgopen(""); cpgend();],
               have_pgplot=yes, have_pgplot=no)
 
-  if test x"$have_pgplot" = xno; then
+  if test $have_pgplot = no; then
     PGPLOT_LIBS="$PGPLOT_LIBS $X_LIBS -lX11"
     LIBS="$ac_save_LIBS $PGPLOT_LIBS"
     AC_TRY_LINK([#include <cpgplot.h>],[cpgopen(""); cpgend();],
                 have_pgplot=yes, have_pgplot=no)
   fi
-
 
   AC_MSG_RESULT($have_pgplot)
 
