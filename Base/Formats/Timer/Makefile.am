@@ -39,7 +39,7 @@ OTHER_SRCS      = align.C amps.C chanprep.C  \
 		  cleanarch.C fixhdr.C crm.C  \
 		  getcal.C crh.C psrhead.C autotadd.C \
 		  fakedat.C quik_cal.C pdma.C \
-		  cal_arch.C feedmix.C fitmix.C 
+		  cal_arch.C feedmix.C fitmix.C test.C
 
 
 NOT_WORKING     = bandpass.C detail.C pdma_fortran.f xtoa.C bin_ph.C corflux.C flux.C
