@@ -204,6 +204,7 @@ Pulsar::Database::Criterion::Criterion ()
 //! returns true if this matches observation parameters
 bool Pulsar::Database::Criterion::match (const Entry& _entry) const
 {
+
   if (verbose)
     cerr << "Pulsar::Database::Criterion::match" << endl;
  
@@ -444,8 +445,21 @@ void Pulsar::Database::load (const char* dbase_filename)
   if (!fptr)
     throw Error (FailedCall, "Pulsar::Database::load fopen");
 
+  bool old_style = false;
+
   char temp[4096];
-  fscanf (fptr, "Pulsar::Database::path %s\n", temp);
+  int scanned = fscanf (fptr, "Pulsar::Database::path %s\n", temp);
+  if (!scanned) {
+    rewind (fptr);
+    scanned = fscanf (fptr, "Pulsar::Calibration::Database::path %s\n", temp);
+    if (scanned)
+      cerr << "Pulsar::Database::load old database summmary file" << endl;
+    else
+      throw Error (InvalidParam, "Pulsar::Database::load",
+                   "%s is not a database file", dbase_filename);
+    old_style = true;
+  }
+
   path = temp;
 
   if (verbose)
@@ -454,8 +468,11 @@ void Pulsar::Database::load (const char* dbase_filename)
 
   int useful = 0;
 
-  fscanf (fptr, "Pulsar::Database # of entries = %d\n", &useful);
-  
+  if (!old_style)
+    scanned = fscanf (fptr, "Pulsar::Database # of entries = %d\n", &useful);
+  else
+    scanned = fscanf (fptr, "Pulsar::Calibration::Database # of entries = %d\n", &useful);
+
   if (verbose)
     cerr << "Pulsar::Database::load resizing for "
 	 << useful << " entries" << endl;
@@ -502,7 +519,8 @@ vector<Pulsar::Database::Entry>
 Pulsar::Database::all_matching (const Criterion& criterion) const
 {
   if (verbose)
-    cerr << "Database::all_matching entered" << endl;
+    cerr << "Pulsar::Database::all_matching " << entries.size()
+         << " entries" << endl;
   
   vector<Pulsar::Database::Entry> matches;
   
@@ -714,8 +732,9 @@ Pulsar::Database::generatePolnCalibrator (Archive* arch, Calibrator::Type m)
     throw Error (InvalidParam, "Database::generatePolnCalibrator",
 		 "no Pulsar::Archive given");
   
-  if (verbose)
-    cerr << "Attempting to find a matching cal file" << endl;
+  // if (verbose)
+    cerr << "Pulsar::Database::generatePolnCalibrator search for " 
+         << Calibrator::Type2str (m) << " match" << endl;
 
   // the Calibrator must contain an observation of the Reference source
   bool only_observations = m == Pulsar::Calibrator::Hybrid;
