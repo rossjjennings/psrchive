@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/Timer/Pulsar/TimerArchive.h,v $
-   $Revision: 1.3 $
-   $Date: 2003/04/28 12:07:11 $
+   $Revision: 1.4 $
+   $Date: 2003/05/13 12:03:17 $
    $Author: straten $ */
 
 #ifndef __Timer_Archive_h
@@ -168,20 +168,8 @@ namespace Pulsar {
     //! Set various redundant parameters in the timer and mini headers
     virtual void correct ();
 
-  protected:
-
-    //! Load the header information from filename
-    virtual void load_header (const char* filename);
-
-    //! Load the specified Integration from filename, returning new instance
-    virtual Integration*
-    load_Integration (const char* filename, unsigned subint);
-
-    //! Unload the Archive (header and Integration data) to filename
-    virtual void unload_file (const char* filename) const;
-
     class Agent : public Archive::Advocate<TimerArchive> {
-
+    
       public:
 
         Agent () { }
@@ -195,7 +183,19 @@ namespace Pulsar {
         //! Return description of this plugin
         string get_description ();
 
-    };
+    }; 
+
+  protected:
+
+    //! Load the header information from filename
+    virtual void load_header (const char* filename);
+
+    //! Load the specified Integration from filename, returning new instance
+    virtual Integration*
+    load_Integration (const char* filename, unsigned subint);
+
+    //! Unload the Archive (header and Integration data) to filename
+    virtual void unload_file (const char* filename) const;
 
     //! The original FPTM header information
     struct timer hdr;
