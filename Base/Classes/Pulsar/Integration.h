@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Integration.h,v $
-   $Revision: 1.36 $
-   $Date: 2003/04/04 11:05:32 $
-   $Author: straten $ */
+   $Revision: 1.37 $
+   $Date: 2003/04/09 06:47:29 $
+   $Author: pulsar $ */
 
 /*
   
@@ -231,6 +231,12 @@ namespace Pulsar {
 
     //! Integrate profiles from single polarizations into one total intensity
     virtual void pscrunch ();
+
+    //! Append frequency channels from another Integration
+    //
+    //  Note that this is dangerous and only intended for use with instruments
+    //  whose band is split into adjoining segments (like cpsr2)
+    void fappend (Pulsar::Integration* integ);
 
     //! Transform from Stokes (I,Q,U,V) to the polarimetric invariant interval
     virtual void invint ();

@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Archive.h,v $
-   $Revision: 1.64 $
-   $Date: 2003/04/07 08:25:15 $
-   $Author: straten $ */
+   $Revision: 1.65 $
+   $Date: 2003/04/09 06:47:29 $
+   $Author: pulsar $ */
 
 /*! \mainpage 
  
@@ -410,6 +410,12 @@ namespace Pulsar {
 
     //! Append the Integrations from 'archive' to 'this'
     virtual void append (const Archive* archive);
+
+    //! Append frequency channels from another Archive
+    //
+    //  Note that this is dangerous and only intended for use with instruments
+    //  whose band is split into adjoining segments (like cpsr2)
+    void fappend (Pulsar::Archive* arch);
 
     //! Return pointer to a new fscrunched, tscrunched and pscrunched clone
     Archive* total () const;
