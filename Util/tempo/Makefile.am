@@ -16,10 +16,10 @@ LDFLAGS  += -leph -lpolyco -ltimes -lgenutil $(LGTKMM) $(F77LIBS) -lsla -lm
 ##########################################################################
 # optional GTK-- Widget set
 ##########################################################################
-ifeq ($(PSRGTKMM),yes)
+ifeq (${PSRGTKMM},yes)
 INCLUDES += gtk_psrephem.h
 NOMD_SRCS = gtk_test.C gtk_psrephem.C
-PROGRAMS += gtk_test.C
+TESTS += gtk_test.C
 LIB_SRCS += gtk_psrephem.C
 INCFLAGS += $(GTKMM_CCFLAGS)
 endif
@@ -27,15 +27,15 @@ endif
 ##########################################################################
 # optional Qt Widget set
 ##########################################################################
-ifeq ($(PSRQT),yes)
+ifeq (${PSRQT},yes)
 INCLUDES += qt_psrephem.h
 LIB_SRCS += qt_psrephem.C moc_qt_psrephem.C
 INCFLAGS += $(IQT)
-PROGRAMS += qt_psrephem_test.C
-LDFLAGS  += $(LQT)
+TESTS += qt_psrephem_test.C
+qt_psrephem_test.LDFLAGS := $(LDFLAGS) $(LQT)
 endif
 
-include ${LOCAL_ROOT}/include/Makefile.extended
+include $(LOCAL_ROOT)/include/Makefile.extended
 
 CLEAN += keyinfo.com $(LOCAL_ROOT)/include/ephio.h
 
@@ -54,9 +54,6 @@ keyinfo.com: keys.dat $(BINDIR)/keys2fort Makefile
 
 ephio.h: keys.dat $(BINDIR)/keys2c
 	$(BINDIR)/keys2c
-
-# force construction of ephio.h file
-depend: ephio.h
 
 # Dependency on constructed include files
 $(LOGIN_ARCH)/ephio.o: keyinfo.com
