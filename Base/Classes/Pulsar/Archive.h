@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Archive.h,v $
-   $Revision: 1.79 $
-   $Date: 2003/07/26 07:34:24 $
-   $Author: sord $ */
+   $Revision: 1.80 $
+   $Date: 2003/08/11 10:46:38 $
+   $Author: ahotan $ */
 
 /*! \mainpage 
  
@@ -553,6 +553,9 @@ namespace Pulsar {
     //! Call fscrunch with the appropriate value
     void fscrunch_to_nchan (unsigned new_nchan);
 
+    //! Call tscrunch with the appropriate value
+    void tscrunch_to_nsub (unsigned new_nsub);
+    
     //! Return the MJD at the start of the first sub-integration
     MJD  start_time () const;
 
@@ -608,9 +611,9 @@ namespace Pulsar {
     /*! This attribute may be set only through Archive::resize */
     virtual unsigned get_npol () const = 0;
 
-    //! Get the tempo code of the telescope used
+    //! Get the tempo code of the telescope used
     virtual char get_telescope_code () const = 0;
-    //! Set the tempo code of the telescope used
+    //! Set the tempo code of the telescope used
     virtual void set_telescope_code (char telescope_code) = 0;
 
     //! Get the feed configuration of the receiver
