@@ -13,8 +13,13 @@ bool Pulsar::TimerArchive::Agent::advocate (const char* filename)
   
   if ( Timer::fload (filename, &hdr, TimerArchive::big_endian) < 0 )
     return false;
-  else
-    return true;
+
+  /* If backend-specific extensions exist, do not advocate use of this class
+     and allow the backend-specific plugin to deal with it */
+  if ( Timer::backend_recognized (hdr.backend) != -1)
+    return false;
+
+  return true;
 }
 
 
