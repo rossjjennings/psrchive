@@ -21,7 +21,10 @@ float Pulsar::Profile::default_duty_cycle = 0.15;
 */
 bool Pulsar::Profile::verbose = false;
 
-// utility for correcting the indeces for a range
+/////////////////////////////////////////////////////////////////////////////
+//
+// nbinify - utility for correcting the indeces of a range
+//
 void nbinify (int& istart, int& iend, int nbin)
 {
   if (istart < 0)
@@ -31,7 +34,11 @@ void nbinify (int& istart, int& iend, int nbin)
     iend += ( (istart-iend)/nbin + 1 ) * nbin;
 }
 
-Pulsar::Profile::Profile()
+/////////////////////////////////////////////////////////////////////////////
+//
+// Pulsar::Profile::
+//
+void Pulsar::Profile::init()
 {
   nbin   = 0;
   state  = Poln::None;
@@ -40,11 +47,10 @@ Pulsar::Profile::Profile()
   amps = NULL;
 }
 
-Pulsar::Profile::~Profile()
-{
-  resize (0);
-}
-
+/////////////////////////////////////////////////////////////////////////////
+//
+// Pulsar::Profile::
+//
 void Pulsar::Profile::resize (int _nbin)
 {
   if (nbin == _nbin)
@@ -61,6 +67,10 @@ void Pulsar::Profile::resize (int _nbin)
   assert (amps != 0);
 }
 
+/////////////////////////////////////////////////////////////////////////////
+//
+// Pulsar::Profile::
+//
 const Pulsar::Profile& Pulsar::Profile::operator= (const Profile& profile)
 {
   if (this == &profile)
@@ -76,6 +86,10 @@ const Pulsar::Profile& Pulsar::Profile::operator= (const Profile& profile)
   return *this;
 }
 
+/////////////////////////////////////////////////////////////////////////////
+//
+// Pulsar::Profile::
+//
 Pulsar::Profile* Pulsar::Profile::clone ()
 {
   Profile* retval = new Profile;
@@ -83,7 +97,11 @@ Pulsar::Profile* Pulsar::Profile::clone ()
   return retval;
 }
 
-const Pulsar::Profile& Pulsar::Profile::operator+= (const Profile& profile)
+/////////////////////////////////////////////////////////////////////////////
+//
+// Pulsar::Profile::
+//
+const Pulsar::Profile& Pulsar::Profile::operator += (const Profile& profile)
 {
   if (nbin != profile.get_nbin())
     throw Error (InvalidRange, "Pulsar::Profile::operator+=",
@@ -96,34 +114,57 @@ const Pulsar::Profile& Pulsar::Profile::operator+= (const Profile& profile)
   float* amps1 = amps;
   const float* amps2 = profile.get_amps();
 
-  float weight1 = weight;
-  float weight2 = profile.get_weight();
+  double weight1 = weight;
+  double weight2 = profile.get_weight();
 
   weight = weight1 + weight2;
-  float norm = 1.0 / weight;
+  double norm = 1.0 / weight;
 
   for (int ibin=0; ibin<nbin; ibin++) {
-    *amps1 = norm * ( *amps1 * weight1 + *amps2 * weight2 );
+    *amps1 = float( norm * (double(*amps1)*weight1 + double(*amps2)*weight2) );
     amps1 ++; amps2 ++;
   }
 
   return *this;
 }
 
-const Pulsar::Profile& Pulsar::Profile::operator+= (float offset)
+/////////////////////////////////////////////////////////////////////////////
+//
+// Pulsar::Profile::
+//
+const Pulsar::Profile& Pulsar::Profile::operator += (float offset)
 {
   for (int i=0;i<nbin;i++)
     amps[i]+=offset;
   return *this;
 }
  
-const Pulsar::Profile& Pulsar::Profile::operator*= (float factor)
+/////////////////////////////////////////////////////////////////////////////
+//
+// Pulsar::Profile::
+//
+const Pulsar::Profile& Pulsar::Profile::operator -= (float offset)
+{
+  for (int i=0;i<nbin;i++)
+    amps[i]-=offset;
+  return *this;
+}
+ 
+/////////////////////////////////////////////////////////////////////////////
+//
+// Pulsar::Profile::
+//
+const Pulsar::Profile& Pulsar::Profile::operator *= (float factor)
 {
   for (int i=0;i<nbin;i++)
     amps[i]*=factor;
   return *this;
 }
  
+/////////////////////////////////////////////////////////////////////////////
+//
+// Pulsar::Profile::
+//
 /*!  
   Rotate the profile by the specified phase.  The profile will be
   rotated such that the power at phase will be found at phase zero. ie.
@@ -141,6 +182,10 @@ void Pulsar::Profile::rotate (double phase)
 		 "fft_shift(%lf) failure", phase);
 }
 
+/////////////////////////////////////////////////////////////////////////////
+//
+// Pulsar::Profile::
+//
 /*!
   A convenience interface to Profile::rotate.  Rotates the profile in order
   to remove the dispersion delay with respect to a reference frequency.
@@ -156,6 +201,10 @@ void Pulsar::Profile::dedisperse (double dm, double ref_freq, double pfold)
 }
 
 
+/////////////////////////////////////////////////////////////////////////////
+//
+// Pulsar::Profile::
+//
 void Pulsar::Profile::zero()
 {
   weight = 0;
@@ -163,6 +212,10 @@ void Pulsar::Profile::zero()
     amps[ibin] = 0;
 }
  
+/////////////////////////////////////////////////////////////////////////////
+//
+// Pulsar::Profile::
+//
 void Pulsar::Profile::square_root()
 {
   for (int ibin=0; ibin<nbin; ++ibin) {
@@ -172,92 +225,144 @@ void Pulsar::Profile::square_root()
 }
 
 
+/////////////////////////////////////////////////////////////////////////////
+//
+// Pulsar::Profile::
+//
 void Pulsar::Profile::fold (int nfold)
 {
-  for (int i=0; i<nbin/nfold;i++)
+  if (nbin % nfold)
+    throw Error (InvalidRange, "Profile::fold",
+		 "nbin=%d %% nfold=%d != 0", nbin, nfold);
+
+  int newbin = nbin/nfold;
+
+  for (int i=0; i<newbin; i++)
     for (int j=1; j<nfold; j++)
-       amps[i]+=amps[i+j*nbin/nfold];
-  nbin/=nfold;
+      amps[i] += amps[i+j*newbin];
+
+  nbin = newbin;
+
   operator *= (1.0/float(nfold));
 }
  
 
-void Pulsar::Profile::bscrunch (int scr)
+/////////////////////////////////////////////////////////////////////////////
+//
+// Pulsar::Profile::bscrunch
+//
+void Pulsar::Profile::bscrunch (int nscrunch)
 {
-  cerr << "Profile::bscrunch not implemented" << endl;
+  if (nbin % nscrunch)
+    throw Error (InvalidRange, "Profile::bscrunch",
+		 "nbin=%d %% nscrunch=%d != 0", nbin, nscrunch);
+
+  int newbin = nbin/nscrunch;
+
+  for (int i=0; i<newbin; i++) {
+    amps[i] = amps[i*newbin];
+    for (int j=1; j<nscrunch; j++)
+      amps[i] += amps[i*newbin+j];
+  }
+
+  nbin = newbin;
+
+  operator *= (1.0/float(nscrunch));
 }
 
+/////////////////////////////////////////////////////////////////////////////
+//
+// Pulsar::Profile::halvebins
+//
 void Pulsar::Profile::halvebins (int nhalve)
 {
-  /* only need to do if nhalve > 0 */
-  if(nhalve>0) {
-    for (int i=0;i<nhalve;i++) {
-      if(nbin>1) {
-        for (int nb = 0; nb < nbin/2; nb++)
-           amps[nb] = 0.5*(amps[2*nb] + amps[2*nb+1]);
-        nbin = nbin/2;
-      }
-    }
+  for (int i=0; i<nhalve && nbin>1; i++) {
+
+    if (nbin % 2)
+      throw Error (InvalidRange, "Profile::halvebins", 
+		   "nbin=%d %% 2 != 0", nbin);
+    nbin /= 2;
+    for (int nb = 0; nb < nbin; nb++)
+      amps[nb] = 0.5*(amps[2*nb] + amps[2*nb+1]);
+
   }
 }
- 
-int Pulsar::Profile::bin_max () const
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// minmax - worker function for Pulsar::Profile::<bin_>[min|max]
+//
+void minmax (int nbin, const float* amps, int* mi, float* mv, bool max,
+	     int istart, int iend)
 {
-  float highest = amps[0];
-  int imax = 0;
+  nbinify (istart, iend, nbin);
 
-  for (int ibin =0; ibin<nbin; ibin++)
-    if (amps[ibin] > highest) {
-      highest = amps[ibin];
-      imax = ibin;
+  float val = 0;
+
+  float best = amps[istart%nbin];
+  int ibest = istart;
+
+  for (int ibin=istart+1; ibin < iend; ibin++) {
+    val = amps[ibin%nbin];
+    if ( (max && val > best) || (!max && val < best) ) {
+      best = val;
+      ibest = ibin;
     }
+  }
+  if (mi)
+    *mi = ibest;
+  if (mv)
+    *mv = best;
+}
 
+/////////////////////////////////////////////////////////////////////////////
+//
+// Pulsar::Profile::bin_max
+//
+int Pulsar::Profile::bin_max (int istart, int iend) const
+{
+  int imax=0;
+  minmax (nbin, amps, &imax, 0, true, istart, iend);
   return imax;
 }
- 
-int Pulsar::Profile::bin_min () const
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Pulsar::Profile::bin_min
+//
+int Pulsar::Profile::bin_min (int istart, int iend) const
 {
-  float lowest = amps[0];
-  int imin = 0;
-
-  for (int ibin =0; ibin<nbin; ibin++)
-    if (amps[ibin] < lowest) {
-      lowest = amps[ibin];
-      imin = ibin;
-    }
-
+  int imin=0;
+  minmax (nbin, amps, &imin, 0, false, istart, iend);
   return imin;
 }
- 
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Pulsar::Profile::max
+//
 float Pulsar::Profile::max (int istart, int iend) const
 {
-  nbinify (istart, iend, nbin);
-
-  float val = 0;
-  float highest = amps[istart%nbin];
-  for (int ibin=istart; ibin < iend; ibin++) {
-    val = amps[ibin%nbin];
-    if (val > highest)
-      highest = val;
-  }
-  return highest;
+  float maxval=0;
+  minmax (nbin, amps, 0, &maxval, true, istart, iend);
+  return maxval;
 }
 
+/////////////////////////////////////////////////////////////////////////////
+//
+// Pulsar::Profile::min
+//
 float Pulsar::Profile::min (int istart, int iend) const
 {
-  nbinify (istart, iend, nbin);
-
-  float val = 0;
-  float lowest = amps[istart%nbin];
-  for (int ibin=istart; ibin < iend; ibin++) {
-    val = amps[ibin%nbin];
-    if (val < lowest)
-      lowest = val;
-  }
-
-  return lowest;
+  float minval=0;
+  minmax (nbin, amps, 0, &minval, false, istart, iend);
+  return minval;
 }
 
+/////////////////////////////////////////////////////////////////////////////
+//
+// Pulsar::Profile::sum
+//
 double Pulsar::Profile::sum (int istart, int iend) const
 {
   nbinify (istart, iend, nbin);
@@ -269,6 +374,10 @@ double Pulsar::Profile::sum (int istart, int iend) const
   return tot;
 }
 
+/////////////////////////////////////////////////////////////////////////////
+//
+// Pulsar::Profile::mean
+//
 double Pulsar::Profile::mean (int istart, int iend) const
 {
   nbinify (istart, iend, nbin);
@@ -276,6 +385,10 @@ double Pulsar::Profile::mean (int istart, int iend) const
   return sum (istart, iend) / double(totbin);
 }
 
+/////////////////////////////////////////////////////////////////////////////
+//
+// Pulsar::Profile::rms
+//
 double Pulsar::Profile::rms (int istart, int iend) const
 {
   nbinify (istart, iend, nbin);
@@ -292,6 +405,16 @@ double Pulsar::Profile::rms (int istart, int iend) const
   return sqrt(sumsq/totbin);
 }
 
+/////////////////////////////////////////////////////////////////////////////
+//
+// Pulsar::Profile::mean
+//
+/*! 
+  \param phase centre of region
+  \param duty_cycle width of region
+  \retval varmean if an address is given, the variance of the mean is returned
+  \return mean of region
+  */
 double Pulsar::Profile::mean (float phase, float duty_cycle,
 			      double* varmean) const
 {
@@ -303,6 +426,28 @@ double Pulsar::Profile::mean (float phase, float duty_cycle,
   return meanval;
 }
 
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Pulsar::Profile::sigma
+//
+/*! 
+  \param phase centre of region
+  \param duty_cycle width of region
+  \return r.m.s. of region
+  */
+double Pulsar::Profile::sigma (float phase, float duty_cycle) const
+{
+  int start_bin = int ((phase - 0.5 * duty_cycle) * nbin);
+  int stop_bin = int ((phase + 0.5 * duty_cycle) * nbin);
+
+  return rms (start_bin, stop_bin);
+}
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Pulsar::Profile::stats
+//
 /*! Returns the mean, variance, and variance of the mean over the specified
   interval.
   \retval mean the mean of the interval
@@ -351,8 +496,9 @@ void Pulsar::Profile::stats (double* mean, double* variance, double* varmean,
     *varmean = var_x / double(counts);
 }
 
+/////////////////////////////////////////////////////////////////////////////
 //
-// worker function for the following two methods
+// find_phase - worker function for Profile::find_[min|max]_phase
 //
 float find_phase (int nbin, float* amps, bool max, float duty_cycle)
 {
@@ -382,6 +528,10 @@ float find_phase (int nbin, float* amps, bool max, float duty_cycle)
   return float(bin) / float(nbin);
 }
  
+/////////////////////////////////////////////////////////////////////////////
+//
+// Pulsar::Profile::find_min_phase
+//
 /*! Returns the centre phase of the region with minimum mean
   \param duty_cycle width of the region over which the mean is calculated
   \retval min_val returns the minimum mean
@@ -391,6 +541,10 @@ float Pulsar::Profile::find_min_phase (float duty_cycle) const
   return find_phase (nbin, amps, false, duty_cycle);
 }
 
+/////////////////////////////////////////////////////////////////////////////
+//
+// Pulsar::Profile::find_max_phase
+//
 /*! Returns the centre phase of the region with maximum mean
   \param duty_cycle width of the region over which the mean is calculated
   \retval max_val returns the maximum mean
@@ -400,16 +554,6 @@ float Pulsar::Profile::find_max_phase (float duty_cycle) const
   return find_phase (nbin, amps, true, duty_cycle);
 }
 
-
-//! Returns the r.m.s. at the 
-double Pulsar::Profile::sigma (float phase, float duty_cycle) const
-{
-  int start_bin = int ((phase - 0.5 * duty_cycle) * nbin);
-  int stop_bin = int ((phase + 0.5 * duty_cycle) * nbin);
-
-  return rms (start_bin, stop_bin);
-}
-
 /////////////////////////////////////////////////////////////////////////////
 //
 // Pulsar::Profile::snr
@@ -417,7 +561,7 @@ double Pulsar::Profile::sigma (float phase, float duty_cycle) const
 /*!
   Using Profile::find_min_phase and Profile::find_peak_edges, this
   function finds the integrated power in the pulse profile and divides
-  by the noise in the baseline.
+  this by the noise in the baseline.
 */
 float Pulsar::Profile::snr() const
 {

@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Integration.h,v $
-   $Revision: 1.11 $
-   $Date: 2002/04/16 07:49:50 $
-   $Author: ahotan $ */
+   $Revision: 1.12 $
+   $Date: 2002/04/16 15:52:02 $
+   $Author: straten $ */
 
 /*
   
@@ -48,37 +48,43 @@ namespace Pulsar {
     Integration () { init(); }
 
     //! Destructor deletes data area
-    virtual ~Integration ();
+    virtual ~Integration () { resize(0,0,0); }
 
-    //! Return pointer to copy of self
-    virtual Integration* clone (int npol=0, int nband=0) const;
+    //! Return the pointer to a new copy of self
+    virtual Integration* clone (int npol=0, int nchan=0) const;
+
+    //! Return the pointer to a new fscrunched and pscrunched copy of self
+    Integration* total () const;
 
     //! Resizes the dimensions of the data area
-    virtual void resize (int npol, int nband, int nbin);
+    virtual void resize (int npol, int nchan, int nbin);
 
     //! Call Profile::fold on every profile
-    // virtual void fold (int nfold);
+    virtual void fold (int nfold);
 
     //! Call Profile::bsrunch on every profile
-    //virtual void bscrunch (int nscrunch);
+    virtual void bscrunch (int nscrunch);
     
-    //! Integrate profiles from neighbouring bands
+    //! Rotate each profile by time (in seconds)
+    virtual void rotate (double time);
+
+    //! Integrate profiles from neighbouring chans
     virtual void fscrunch (int nscrunch = 0, bool weighted_cfreq = true);
 
     //! Integrate profiles from single polarizations into one total intensity
-    //virtual void pscrunch ();
+    virtual void pscrunch ();
 
     //! Transform from Stokes (I,Q,U,V) to the polarimetric invariant interval
     virtual void invint ();
 
-    //! Rotate all profiles in phase to remove dispersion delays between bands
+    //! Rotate all profiles in phase to remove dispersion delays between chans
     virtual void dedisperse (double frequency = 0.0);
 
     //! Rotate all profiles about Stokes V axis to remove Faraday rotation
     virtual void defaraday (double rm = 0.0, double rm_iono = 0.0);
 
-    //! Returns a single Stokes 4-vector for the given band and phase bin
-    void get_Stokes (Stokes& S, int iband, int ibin) const;
+    //! Returns a single Stokes 4-vector for the given chan and phase bin
+    void get_Stokes (Stokes& S, int ichan, int ibin) const;
 
     //! Returns a vector of Stokes parameters along the specified dimension
     void get_Stokes (vector<Stokes>& S, int iother,
@@ -89,6 +95,12 @@ namespace Pulsar {
 
     //! Find the bins in which the total intensity exceeds a threshold
     void find_peak_edges (int& rise, int& fall) const;
+
+    //! Returns the centre phase of the region with maximum total intensity
+    float find_max_phase () const;
+
+    //! Returns the centre phase of the region with minimum total intensity
+    float find_min_phase () const;
 
     //! Return the mean and variance of the mean in every profile baseline
     void baseline_levels (vector<vector<double> > & mean,
@@ -103,9 +115,9 @@ namespace Pulsar {
     void find_psr_levels (vector<vector<double> >& mean_high,
 			  vector<vector<double> >& mean_low) const;
 
-    //! Computes the weighted centre frequency of an interval of sub-bands.
+    //! Computes the weighted centre frequency of an interval of sub-chans.
     double weighted_frequency (double* weight=0,
-			       int band_start=0, int band_end=0) const;
+			       int chan_start=0, int chan_end=0) const;
 
     void cal_levels (vector<Stokes>& hi, vector<Stokes>& lo) const;
     void psr_levels (vector<Stokes>& hi, vector<Stokes>& lo) const;
@@ -122,32 +134,20 @@ namespace Pulsar {
 		    int nsubchan, int mode, bool wt);
 
     //! Remove the baseline from all profiles
-    //virtual void remove_baseline (int poln = 0, float phase = -1.0);
+    virtual void remove_baseline (float phase = -1.0);
 
-    //! Rotate each profile by time (in seconds)
-    //virtual void rotate (double time);
-
-    //
-    // snr_weight - set the weight of each profile to its snr squared
-    //
-    // virtual void snr_weight ();
+    //! Set the weight of each profile to its snr squared
+    void snr_weight ();
     
-    //virtual void Q_boost (const vector<double> & hphases);
-    //virtual void U_boost (const vector<double> & hphases);
-    //virtual void V_boost (const vector<double> & hphases);
-    //virtual void Q_rotation (const vector<Angle> & phases);
-    //virtual void U_rotation (const vector<Angle> & phases);
-    //virtual void V_rotation (const vector<Angle> & phases);
-
-    //! Returns a pointer to a Profile
-    Profile* get_Profile (int ipol, int iband);
+    //! Returns a pointer to the Profile given by the specified indeces
+    Profile* get_Profile (int ipol, int ichan);
 
     //! Returns a pointer to the vector of Profile objects for poln
     vector<Profile *>& operator[] (Poln::Measure poln);
 
-    //! Get the number of bands
+    //! Get the number of chans
     /*! This attribute may be set only through Integration::resize */
-    int get_nband () const { return nband; }
+    int get_nchan () const { return nchan; }
 
     //! Get the number of polarization measurements
     /*! This attribute may be set only through Integration::resize */
@@ -198,8 +198,8 @@ namespace Pulsar {
     //! number of polarization measurments
     int npol;
 
-    //! number of sub-bands
-    int nband;
+    //! number of sub-chans
+    int nchan;
     
     //! number of bins
     int nbin;

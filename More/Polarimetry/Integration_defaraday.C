@@ -3,7 +3,6 @@
 #include "Angle.h"
 #include "Physical.h"
 
-//!
 /*!
   \param rm rotation measure
   \param rm_iono rotation measure due to ionosphere
@@ -18,14 +17,14 @@ void Pulsar::Integration::defaraday (double rm, double rm_iono)
   // one over the centre frequency in Hz squared
   double inv_cfreq_sq = 1e-12 / (centrefreq * centrefreq);
 
-  vector<Angle> phases (nband);
+  vector<Angle> phases (nchan);
 
-  for (int iband=0; iband < nband; iband++)
+  for (int ichan=0; ichan < nchan; ichan++)
   {
-    double frequency = profiles[0][iband]->get_centre_frequency();
+    double frequency = profiles[0][ichan]->get_centre_frequency();
     double inv_freq_sq = 1e-12 / (frequency * frequency);
 
-    phases[iband] = 2.0 * c_sq * (rm * (inv_cfreq_sq-inv_freq_sq)
+    phases[ichan] = 2.0 * c_sq * (rm * (inv_cfreq_sq-inv_freq_sq)
 				  - rm_iono * inv_freq_sq);
   }
 

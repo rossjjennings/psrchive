@@ -1,54 +1,52 @@
-
 #include "Archive.h"
+#include "Integration.h"
 
-float Pulsar::Archive::default_baseline_window = 0.1;
-bool  Pulsar::Archive::verbose = false;
+bool Pulsar::Archive::verbose = false;
 
 void Pulsar::Archive::init ()
 {
-  baseline_window = default_baseline_window;
-}
-
-// Virtual method defns
-
-Pulsar::Archive::Archive ()
-{
 
 }
 
-Pulsar::Archive::~Archive ()
-{
-
-}
-
-Pulsar::Archive* Pulsar::Archive::clone ()
-{
-
-}
-
+/*!
+  \param nscrunch the number of phase bins to add together
+  */
 void Pulsar::Archive::bscrunch (int nscrunch)
 {
+  if (subints.size() == 0)
+    return;
 
+  for (unsigned isub=0; isub < subints.size(); isub++)
+    subints[isub] -> bscrunch (nscrunch);
+
+  set_nbin (subints[0]->get_nbin());
 }
 
-void Pulsar::Archive::fscrunch (int nscrunch=0, bool dedisp=true)
+/*!
+  \param nscrunch 
+  \param weighted_cfreq
+  */
+void Pulsar::Archive::fscrunch (int nscrunch, bool weighted_cfreq)
 {
+  if (subints.size() == 0)
+    return;
 
+  for (unsigned isub=0; isub < subints.size(); isub++)
+    subints[isub] -> fscrunch (nscrunch);
+
+  set_nchan (subints[0]->get_nchan());
 }
 
-void Pulsar::Archive::tscrunch (int nscrunch=0, bool poly=true, bool wt=true)
-{
-
-}
 
 void Pulsar::Archive::pscrunch()
 {
+  if (subints.size() == 0)
+    return;
 
-}
+  for (unsigned isub=0; isub < subints.size(); isub++)
+    subints[isub] -> pscrunch ();
 
-void Pulsar::Archive::append (const Archive* a, bool check_ephemeris = true)
-{
-
+  set_npol (subints[0]->get_npol());
 }
 
 void Pulsar::Archive::centre ()
@@ -133,11 +131,6 @@ void Pulsar::Archive::set_polyco (const polyco& p)
 
 }
 
-void Pulsar::Archive::set_baseline_window (float duty_cycle)
-{
-
-}
-
 void Pulsar::Archive::snr_weight ()
 {
 
@@ -148,7 +141,7 @@ void Pulsar::Archive::destroy ()
 
 }
 
-void Pulsar::Archive::resize (int nsubint, int nband=0, int npol=0, int nbin=0)
+void Pulsar::Archive::resize (int nsubint, int nchan=0, int npol=0, int nbin=0)
 {
 
 }

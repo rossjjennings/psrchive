@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Archive.h,v $
-   $Revision: 1.13 $
-   $Date: 2002/04/16 04:02:25 $
-   $Author: ahotan $ */
+   $Revision: 1.14 $
+   $Date: 2002/04/16 15:52:02 $
+   $Author: straten $ */
 
 /*! \mainpage 
  
@@ -153,8 +153,8 @@ namespace Pulsar {
     //! A verbosity flag that can be set for debugging purposes
     static bool verbose;
 
-    Archive ();
-    virtual ~Archive ();
+    Archive () { init(); }
+    virtual ~Archive () { resize(0); }
 
     //! Loads an Archive-derived child class from a file.
     static Archive* factory (const char* filename);
@@ -164,8 +164,7 @@ namespace Pulsar {
     { return factory (filename.c_str()); }
 
     //! Returns a pointer to a new copy of self
-    virtual Archive* clone ();
-
+    virtual Archive* clone () const = 0;
 
     // //////////////////////////////////////////////////////////////////
     //
@@ -173,38 +172,16 @@ namespace Pulsar {
     //
     // //////////////////////////////////////////////////////////////////
 
-    //
     //! Integrate pulse profiles in phase
-    /*!
-      \param nscrunch the number of phase bins to add together
-      \exception string
-    */
     virtual void bscrunch (int nscrunch);
 
-    //
     //! Integrate profiles in frequency
-    /*!
-      \param nscrunch 
-      \param dedisp
-      \exception string
-    */
-    virtual void fscrunch (int nscrunch=0, bool dedisp=true);
+    virtual void fscrunch (int nscrunch=0, bool weighted_cfreq=true);
 
-    //
     //! Integrate profiles in time
-    /*!
-      \param nscrunch
-      \param poly
-      \param wt
-      \exception string
-    */
     virtual void tscrunch (int nscrunch=0, bool poly=true, bool wt=true);
 
-    //
     //! Integrate profiles in polarization
-    /*!
-      \exception string
-    */
     virtual void pscrunch();
 
     // 
@@ -358,18 +335,6 @@ namespace Pulsar {
     */
     virtual void set_polyco (const polyco& p);
 
-
-    //
-    //! Set the duty cycle of the window used to calculate baseline statistics (mean, noise, etc.)
-    /*!
-      \param duty_cycle
-      \exception string
-    */
-    void set_baseline_window (float duty_cycle);
-
-    //! Set the default baseline window
-    static void set_default_baseline_window (float duty_cycle);
-
     //
     //! Set the weight of each profile to its snr squared
     /*!
@@ -495,50 +460,47 @@ namespace Pulsar {
     // ///////////////////////////////////////////////
 
     //! Get the number of pulsar phase bins used
-    virtual int get_nbins () const = 0;
+    virtual int get_nbin () const = 0;
+    //! Set the number of pulsar phase bins used
+    virtual void set_nbin (int numbins) = 0;
 
     //! Get the number of frequency channels used
     virtual int get_nchan () const = 0;
-
-    //! Get the channel bandwidth
-    virtual double get_chanbw () const = 0;
-
-    //! Get the number of sub-integrations stored in the file
-    virtual int get_num_subints () const = 0;
-
-    //! Set the number of pulsar phase bins used
-    virtual void set_nbins (int numbins) = 0;
-
     //! Set the number of frequency channels used
     virtual void set_nchan (int numchan) = 0;
 
+    //! Get the number of frequency channels used
+    virtual int get_npol () const = 0;
+    //! Set the number of frequency channels used
+    virtual void set_npol (int numpol) = 0;
+
+    //! Get the number of sub-integrations stored in the file
+    virtual int get_nsubint () const = 0;
+    //! Set the number of sub-integrations stored in the file
+    virtual void set_nsubint (int num_sub) = 0;
+
+    //! Get the channel bandwidth
+    virtual double get_chanbw () const = 0;
     //! Set the channel bandwidth
     virtual void set_chanbw (double chan_width) = 0;
 
-   //! Set the number of sub-integrations stored in the file
-    virtual void set_num_subints (int num_sub) = 0;
-
     //! Get the overall bandwidth of the observation
     virtual double get_bandwidth () const = 0;
-
     //! Set the overall bandwidth of the observation
     virtual void set_bandwidth (double bw) = 0;
 
     //! Get the centre frequency of the observation
     virtual double get_centre_frequency () const = 0;
-
     //! Set the centre frequency of the observation
     virtual void set_centre_frequency (double cf) = 0;
 
     //! Get the feed configuration of the receiver
     virtual Feed::Type get_feed_type () const = 0;
-
     //! Set the feed configuration of the receiver
     virtual void set_feed_type (Feed::Type feed) = 0;
 
     //! Get the state of the profiles
     virtual Poln::State get_poln_state () const = 0;
-
     //! Set the state of the profiles
     virtual void set_poln_state (Poln::State state) = 0;
 
@@ -577,13 +539,6 @@ namespace Pulsar {
     //
     vector<Integration*> subints;
 
-    //
-    //! Duty cycle (0.0->1.0) of the window used to calculate baseline statistics (mean, noise, etc.)
-    //
-    float baseline_window;
-    static float default_baseline_window;
-
-
     // //////////////////////////////////////////////////////////////////
     //
     // virtual methods - though implemented by Archive, should generally
@@ -594,12 +549,12 @@ namespace Pulsar {
     //
     //! Deletes all allocated memory resources
     //
-    virtual void destroy ();
+    void destroy ();
 
     //
     //! Sets all values to default
     //
-    virtual void init ();
+    void init ();
 
     //
     //! Resets the dimensions of the data area

@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/BasicArchive.h,v $
-   $Revision: 1.2 $
-   $Date: 2002/04/16 04:02:25 $
-   $Author: ahotan $ */
+   $Revision: 1.3 $
+   $Date: 2002/04/16 15:52:02 $
+   $Author: straten $ */
 
 #include "Archive.h"
 #include "polyco.h"
@@ -54,10 +54,28 @@ namespace Pulsar {
     psrephem    ephemeris;
     polyco      model;
 
+    void init();
+
   public:
 
+    // while testing, an empty load and unload
+    void unload (const char * foo) { cerr << "Cannot unload " << foo << endl; }
+
+    void load (const char * foo) { cerr << "Cannot load " << foo << endl; }
+
+    //! Returns a pointer to a new copy of self
+    BasicArchive* clone () const { return new BasicArchive (*this); }
+
     //! A null constructor to initialize the storage variables
-    BasicArchive::BasicArchive ();
+    BasicArchive () { init(); }
+
+    //! A copy constructor
+    BasicArchive (const BasicArchive& copy) { operator = (copy); }
+
+    const BasicArchive& operator = (const BasicArchive& copy);
+
+    //! destructor
+    virtual ~BasicArchive () { }
 
     // Define the pure virtual functions defined in the ArchiveBase
     // that are used to get/set the above variables
@@ -147,17 +165,53 @@ namespace Pulsar {
       }
 
     //! Get the number of sub-integrations in the archive
-    int get_num_subints () const
+    int get_nsubint () const
     {
       return nsubint;
     }
 
     //! Set the number of sub-integrations in the archive
-    void set_num_subints (int num_sub) 
+    void set_nsubint (int num_sub) 
     {
       nsubint = num_sub;
     }
 
+    //! Get the number of frequency polns used
+    int get_npol () const
+    {
+      return npol;
+    }
+    
+    //! Set the number of frequency polns used
+    void set_npol (int numpol)
+    {
+      npol = numpol;
+    }
+    
+    //! Get the number of frequency channels used
+    int get_nchan () const
+    {
+      return nchan;
+    }
+    
+    //! Set the number of frequency channels used
+    void set_nchan (int numchan)
+    {
+      nchan = numchan;
+    }
+    
+    //! Get the number of pulsar phase bins used
+    int get_nbin () const
+    {
+      return nbin;
+    }
+    
+    //! Set the number of pulsar phase bins used
+    void set_nbin (int numbins)
+    {
+      nbin = numbins;
+    }
+    
     //! Return the type of feed used
     Feed::Type get_feed_type () const
       {
@@ -230,36 +284,12 @@ namespace Pulsar {
 	pacorr = done;
       }
     
-    //! Get the number of pulsar phase bins used
-    int get_nbins () const
-    {
-      return nbin;
-    }
-    
-    //! Get the number of frequency channels used
-    int get_nchan () const
-    {
-      return nchan;
-    }
-    
     //! Get the channel bandwidth
     double get_chanbw () const
     {
       return chanbw;
     }
 
-    //! Set the number of pulsar phase bins used
-    void set_nbins (int numbins)
-    {
-      nbin = numbins;
-    }
-    
-    //! Set the number of frequency channels used
-    void set_nchan (int numchan)
-    {
-      nchan = numchan;
-    }
-    
     //! Set the channel bandwidth
     void set_chanbw (double chan_width)
     {

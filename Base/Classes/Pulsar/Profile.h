@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Profile.h,v $
-   $Revision: 1.8 $
-   $Date: 2002/04/16 01:57:36 $
+   $Revision: 1.9 $
+   $Date: 2002/04/16 15:52:02 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Profile_h
@@ -37,10 +37,10 @@ namespace Pulsar {
     static bool verbose;
     
     //! null constructor produces an empty profile of zero size
-    Profile ();
+    Profile () { init(); }
 
     //! destructor destroys the data area
-    virtual ~Profile ();
+    virtual ~Profile () { resize(0); }
     
     //! returns a pointer to a new copy of self
     virtual Profile* clone ();
@@ -53,6 +53,9 @@ namespace Pulsar {
 
     //! adds offset to each bin of the profile
     virtual const Profile& operator += (float offset);
+
+    //! subtracts offset from each bin of the profile
+    virtual const Profile& operator -= (float offset);
 
     //! multiplies each bin of the profile by scale
     virtual const Profile& operator *= (float scale);
@@ -67,9 +70,9 @@ namespace Pulsar {
     virtual void square_root();
 
     //! returns the bin number with the maximum amplitude
-    int bin_max() const;
+    int bin_max (int bin_start=0, int bin_end=0) const;
     //! returns the bin number with the minimum amplitude
-    int bin_min() const;
+    int bin_min (int bin_start=0, int bin_end=0) const;
 
     //! returns the maximum amplitude
     float max (int bin_start=0, int bin_end=0) const;
@@ -125,12 +128,12 @@ namespace Pulsar {
     //! fit for the shift and return a Tempo::toa object
     Tempo::toa toa (const Profile& std_prf,
 		    const MJD& prf_start_time, double period, int nsite,
-		    const char* fname, int isubint, int isubband, int ipol);
+		    const char* fname, int isubint, int isubchan, int ipol);
 
     static Tempo::toa toa (double phase, float ephase,
 			   const MJD& prf_start_time, double freq,
 			   double period, int nsite, const char* fname, 
-			   int isubint, int isubband, int ipol);
+			   int isubint, int isubchan, int ipol);
 
     //! get the number of bins
     /*! This attribute may be set only through Profile::resize */
@@ -139,6 +142,7 @@ namespace Pulsar {
     //! returns a pointer to the start of the array of amplitudes
     const float* get_amps () const { return amps; }
     float* get_amps () { return amps; }
+
     //! set the amplitudes array equal to the contents of the data array
     template <typename T>
     void set_amps (const T* data);
@@ -171,6 +175,9 @@ namespace Pulsar {
 
     //! calls bscrunch with the appropriate argument
     void halvebins (int nhalve);
+
+    //! initializes all values to null
+    void init ();
 
   private:
     //! fractional phase window used to find rise and fall of running mean
