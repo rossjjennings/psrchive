@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/tempo++.h,v $
-   $Revision: 1.7 $
-   $Date: 2001/02/15 04:15:29 $
+   $Revision: 1.8 $
+   $Date: 2001/02/24 08:34:27 $
    $Author: straten $ */
 
 #ifndef __TEMPO_PP_H
@@ -87,8 +87,8 @@ namespace Tempo {
 		double nspan=960, int ncoeff=12, int maxha=8, 
 		int tel=7, double centrefreq=1400.0);
   
-  polyco poly_span (const polyco & first_poly, 
-		    const polyco & second_poly, const psrephem& pephem);
+  polyco span (const polyco& first_poly, const polyco& second_poly,
+	       const psrephem& pephem);
   
   // //////////////////////////////////////////////////////////////////////
   // Calculates the Lomb-Scargle periodogram from a set of residuals.
