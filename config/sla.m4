@@ -8,37 +8,40 @@ AC_DEFUN([SWIN_LIB_SLA],
   AC_MSG_CHECKING([for SLA installation])
 
   SLA_CFLAGS=""
-  SLA_LIBS="-lsla $FLIBS"
+  SLA_LIBS="-lsla"
 
   ac_save_CFLAGS="$CFLAGS"
   ac_save_LIBS="$LIBS"
   LIBS="$ac_save_LIBS $SLA_LIBS"
   CFLAGS="$ac_save_CFLAGS $SLA_CFLAGS"
 
-  sla_underscore=""
-
-  sla_trial_list="sla_gmst sla_gmst_ sla_gmst__"
-  for sla_trial in $sla_trial_list; do
-    AC_TRY_LINK([double $sla_trial(double *);],
-                [double gmst = $sla_trial(0);],
-                [have_sla="yes: fortran"$sla_underscore], [have_sla=no])
-    if test "$have_sla" != no; then
-      sla_def="name"
-      if test x"$sla_underscore" != x; then
-        sla_def="$sla_def ## $sla_underscore"
-      fi
-      break
-    fi
-    sla_underscore="$sla_underscore"_
-  done
-
+  AC_TRY_LINK([#include<slalib.h>;],
+              [double gmst = slaGmst(0);],
+              [have_sla="yes: C"], [have_sla=no])
+  
   if test "$have_sla" = no; then
-    SLA_LIBS="-lsla"
+
+    SLA_LIBS="-lsla $FLIBS"
     LIBS="$ac_save_LIBS $SLA_LIBS"
-    AC_TRY_LINK([double slaGmst(double *);],
-                [double gmst = slaGmst(0);],
-                [have_sla="yes: C"], [have_sla=no])
-    sla_def="Name"
+
+    sla_underscore=""
+    sla_def=""
+
+    sla_trial_list="sla_gmst sla_gmst_ sla_gmst__"
+    for sla_trial in $sla_trial_list; do
+      AC_TRY_LINK([double $sla_trial(double *);],
+                  [double gmst = $sla_trial(0);],
+                  [have_sla="yes: fortran"$sla_underscore], [have_sla=no])
+      if test "$have_sla" != no; then
+        sla_def="name"
+        if test x"$sla_underscore" != x; then
+          sla_def="$sla_def ## $sla_underscore"
+        fi
+        break
+      fi
+      sla_underscore="$sla_underscore"_
+    done
+
   fi
 
   LIBS="$ac_save_LIBS"
@@ -48,8 +51,8 @@ AC_DEFUN([SWIN_LIB_SLA],
 
   if test "$have_sla" != no; then
     AC_DEFINE([HAVE_SLA], [1], [Define to 1 if you have the SLA library])
-    AH_TEMPLATE([SLA_FUNC], [Fortran or C in libsla])
-    AC_DEFINE_UNQUOTED([SLA_FUNC(name,Name)],$sla_def)
+    AH_TEMPLATE([SLA_FUNC], [Fortran name mangling in libsla])
+    AC_DEFINE_UNQUOTED([SLA_FUNC(name,NAME)],$sla_def)
     [$1]
   else
     SLA_CFLAGS=""
@@ -59,7 +62,7 @@ AC_DEFUN([SWIN_LIB_SLA],
 
   AC_SUBST(SLA_CFLAGS)
   AC_SUBST(SLA_LIBS)
-  AM_CONDITIONAL(HAVE_SLA, [test x"$have_sla" = xyes])
+
+  AM_CONDITIONAL(HAVE_SLA_FORTRAN, [test x"$sla_def" != x])
 
 ])
-
