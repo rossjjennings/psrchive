@@ -9,10 +9,18 @@ void Pulsar::Archive::Agent::plugin_load ()
   if (verbose)
     cerr << "Pulsar::Archive::Agent::plugin_load" << endl;
 
-  plugins.load (plugin_path ());
+  char* env = getenv ("PSRCHIVE_PLUGINS");
+  if (env)
+    plugins.load (env);
+
+  if (plugins.ok.size() == 0)
+    plugins.load (plugin_path ("CVSHOME"));
 
   if (plugins.ok.size() == 0)
     plugins.load (plugin_path ("PSRHOME"));
+
+  if (plugins.ok.size() == 0)
+    plugins.load ("./Pulsar");
 
   loaded = true;
 }
@@ -46,17 +54,14 @@ void Pulsar::Archive::Agent::plugin_report ()
 /*! constructs the plugin directory name from environment variables */
 string Pulsar::Archive::Agent::plugin_path (const char* environment_variable)
 {
-  char* env = getenv ("PSRCHIVE_PLUGINS");
+  char* env = getenv (environment_variable);
 
-  if (env)
-    return env;
-
-  env = getenv (environment_variable);
+  string path;
 
   if (!env)
-    return "./Pulsar";
+    return path;
 
-  string path = env;
+  path = env;
   path += "/lib";
 
   env = getenv ("LOGIN_ARCH");
