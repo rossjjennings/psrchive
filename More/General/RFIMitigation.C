@@ -89,6 +89,16 @@ void Pulsar::RFIMitigation::zap_specific (Pulsar::Archive* arch, vector<float> m
   }
 }
 
+// Manually set specific channel weights in specific subints to zero
+void Pulsar::RFIMitigation::zap_very_specific (Pulsar::Archive* arch, 
+					       vector<float> mask, vector<unsigned> subs)
+{
+  for (unsigned i = 0; i < subs.size(); i++) {
+    if (subs[i] >= 0 && subs[i] < arch->get_nsubint())
+      apply_mask(arch->get_Integration(subs[i]), mask);
+  }
+}
+
 // Apply a zap mask to an integration. Channels whose mask value is 1.0
 // are not changed, all other channels have their weights set to the
 // value in the mask vector

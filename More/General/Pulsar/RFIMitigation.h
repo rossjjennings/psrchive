@@ -15,10 +15,15 @@ namespace Pulsar {
     ~RFIMitigation ();
     
     // Run through an archive, setting the weights arrays in each subint
+    // according to an automated bad point detection algorithm
     void zap_chans (Pulsar::Archive* arch);
     
     // Manually set specific channel weights to zero
     void zap_specific (Pulsar::Archive* arch, vector<float> mask);
+
+    // Manually set specific channel weights in specific subints to zero
+    void zap_very_specific (Pulsar::Archive* arch, vector<float> mask,
+			    vector<unsigned> subs);
     
   private:
     

@@ -25,6 +25,7 @@ int main (int argc, char *argv[]) {
   vector<int> chans_to_zap;
 
   bool zap_subints = false;
+  bool zero_subints = false;
   vector<unsigned> subs_to_zap;
 
   bool edge_zap = false;
@@ -49,7 +50,7 @@ int main (int argc, char *argv[]) {
   char* key = NULL;
   char whitespace[5] = " \n\t";
   
-  while ((gotc = getopt(argc, argv, "hvViDme:z:k:Z:dE:s:S:P:")) != -1) {
+  while ((gotc = getopt(argc, argv, "hvViDme:z:k:Z:dE:s:w:S:P:")) != -1) {
     switch (gotc) {
     case 'h':
       cout << "A program for zapping RFI in Pulsar::Archives"                     << endl;
@@ -64,7 +65,8 @@ int main (int argc, char *argv[]) {
       cout << "  -k filename      Zap chans listed in this kill file"             << endl;
       cout << "  -Z \"a b\"         Zap chans between a and b"                    << endl;
       cout << "  -E percent       Zap this much of the band at the edges"         << endl;
-      cout << "  -s \"a b c ...\"   Zap these sub-integrations"                   << endl;
+      cout << "  -s \"a b c ...\"   Delete these sub-integrations"                << endl;
+      cout << "  -w \"a b c ...\"   Zap (zero weight) these sub-integrations"     << endl;
       cout << "  -d               Use simple mean offset spike zapping"           << endl;
       cout << "  -S cutoff        Zap channels based on S/N (using std if given)" << endl;
       cout << "  -P stdfile       Use this standard profile"                      << endl;
@@ -86,7 +88,7 @@ int main (int argc, char *argv[]) {
       Pulsar::Archive::set_verbosity(1);
       break;
     case 'i':
-      cout << "$Id: paz.C,v 1.13 2003/09/30 08:33:18 ahotan Exp $" << endl;
+      cout << "$Id: paz.C,v 1.14 2003/11/07 04:03:50 ahotan Exp $" << endl;
       return 0;
     case 'D':
       display = true;
@@ -135,6 +137,16 @@ int main (int argc, char *argv[]) {
     case 's':
       key = strtok (optarg, whitespace);
       zap_subints = true;
+      while (key) {
+	if (sscanf(key, "%d", &placeholder) == 1) {
+	  subs_to_zap.push_back(placeholder);
+	}
+	key = strtok (NULL, whitespace);
+      }
+      break;
+    case 'w':
+      key = strtok (optarg, whitespace);
+      zero_subints = true;
       while (key) {
 	if (sscanf(key, "%d", &placeholder) == 1) {
 	  subs_to_zap.push_back(placeholder);
@@ -229,6 +241,11 @@ int main (int argc, char *argv[]) {
 	string useful = arch->get_filename();
 	arch = new_arch->clone();
 	arch->set_filename(useful);
+      }
+      
+      if (zero_subints) {
+	vector<float> mask(nchan, 0.0);
+	zapper->zap_very_specific(arch,mask,subs_to_zap);
       }
       
       if (simple) {
