@@ -90,7 +90,7 @@ double slaEpj (double date)
 /* *********************************************************************** */
 
 #define SLA_eqgal SLA_FUNC(sla_eqgal,slaEqgal)
-double SLA_eqgal (double *, double *, double *, double *);
+void SLA_eqgal (double *, double *, double *, double *);
 
 void slaEqgal (double dr, double dd, double *dl, double *db)
 {
@@ -114,11 +114,11 @@ void slaEvp (double date, double deqx,
 /* *********************************************************************** */
 
 #define SLA_galeq SLA_FUNC(sla_galeq,slaGaleq)
-double SLA_galeq (double *, double *, double *, double *);
+void SLA_galeq (double *, double *, double *, double *);
 
 void slaGaleq (double dl, double db, double *dr, double *dd)
 {
-  return SLA_galeq (&dl, &db, dr, dd);
+  SLA_galeq (&dl, &db, dr, dd);
 }
 
 /* *********************************************************************** */
