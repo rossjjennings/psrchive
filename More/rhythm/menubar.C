@@ -173,8 +173,10 @@ void Rhythm::profileMovie()
 			    this, "progress", TRUE );
 
   cpgopen("9090/xs");
-
+  
   for (unsigned i = 0; i < toa_text->count(); i++) {
+    if (toas[i].get_format() == Tempo::toa::Command)
+      continue;
     cpgbbuf();
     cpgeras();
     progress.setProgress( i );
