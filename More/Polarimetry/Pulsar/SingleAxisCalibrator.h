@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/SingleAxisCalibrator.h,v $
-   $Revision: 1.13 $
-   $Date: 2004/07/12 09:27:55 $
+   $Revision: 1.14 $
+   $Date: 2004/07/19 11:26:48 $
    $Author: straten $ */
 
 #ifndef __Pulsar_SingleAxisCalibrator_H
@@ -10,6 +10,7 @@
 
 #include "Pulsar/ReferenceCalibrator.h"
 #include "Calibration/SingleAxis.h"
+#include "Calibration/SingleAxisSolver.h"
 
 namespace Pulsar {
 
@@ -63,6 +64,9 @@ namespace Pulsar {
     //! Return a new Calibration::SingleAxis instance
     ::Calibration::Complex2* solve (const vector<Estimate<double> >& hi,
 				    const vector<Estimate<double> >& lo);
+
+    //! Optimization for SingleAxis solve
+    Reference::To< ::Calibration::SingleAxisSolver > solver;
 
   };
 
