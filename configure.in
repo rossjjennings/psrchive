@@ -60,9 +60,7 @@ BNV_HAVE_QT
 #
 # Check that at least one FFT library is available
 #
-if test x"$have_fftw" = xno \
--a test x"$have_fftw3" = xno \
--a test x"$have_mkl" = xno; then
+if test x"$have_fftw" = xno -a x"$have_fftw3" = xno -a x"$have_mkl" = xno; then
   AC_MSG_ERROR([No FFTW-2, FFTW-3, nor MKL FFT libraries were found])
 fi
 
