@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/pgutil/ColourMap.h,v $
-   $Revision: 1.1 $
-   $Date: 2004/10/22 12:44:59 $
+   $Revision: 1.2 $
+   $Date: 2004/10/22 15:53:05 $
    $Author: straten $ */
 
 #ifndef __ColourMap_H
@@ -31,7 +31,7 @@ namespace pgplot {
     };
 
     //! Set the colour map name
-    void set_colour_map (Name name);
+    void set_name (Name name);
 
     //! Set the contrast (0 to 1; normally 1)
     void set_contrast (float contrast);

@@ -16,7 +16,7 @@ void pgplot::ColourMap::set_contrast (float _contrast)
     return;
 
   contrast = _contrast;
-  set_colour_map (name);
+  set_name (name);
 }
 
 
@@ -27,12 +27,12 @@ void pgplot::ColourMap::set_brightness (float _brightness)
     return;
 
   brightness = _brightness;
-  set_colour_map (name);
+  set_name (name);
 }
 
 
 //! Set the colour map name
-void pgplot::ColourMap::set_colour_map (Name name)
+void pgplot::ColourMap::set_name (Name name)
 {
   switch (name) {
     
