@@ -27,6 +27,8 @@ PROGRAMS = calinfo.C align.C amps.C chanprep.C crstd.C \
 	headsum.C treduce.C testbpass.C mel2.C invint.C \
 	tcombine2.C ratio.C fixprf.C xformprof.C archive_test.C \
 
+TESTS = timer_size.c
+
 oneprof.LDFLAGS := $(LDFLAGS) $(LCPGPLOT)
 plotsub.LDFLAGS := $(LDFLAGS) $(LCPGPLOT)
 plot_gry_diff.LDFLAGS := $(LDFLAGS) $(LCPGPLOT)
