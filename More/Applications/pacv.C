@@ -35,6 +35,7 @@ void usage ()
     " -D dev     specify PGPLOT device\n"
     " -f         treat all archives as members of a fluxcal observation\n"
     " -t mjd     set the epoch of the PolnCalibrator extension\n"
+    " -T tel     Set telescope ID to 'tel'\n"
     " -q         use the single-axis model\n"
     " -P         produce publication-quality plots" << endl;
 }
@@ -66,11 +67,12 @@ int main (int argc, char** argv)
   bool plot_calibrator_stokes = false;
 
   string device = "?";
+  char telescope = 0;
 
   // verbosity flag
   bool verbose = false;
   char c;
-  while ((c = getopt(argc, argv, "a:c:CD:hfMPqt:vV")) != -1)  {
+  while ((c = getopt(argc, argv, "a:c:CD:hfMPqt:T:vV")) != -1)  {
 
     switch (c)  {
 
@@ -126,6 +128,8 @@ int main (int argc, char** argv)
       set_epoch = true;
       epoch.Construct( optarg );
       break;
+
+    case 'T': telescope = optarg[0]; break;
 
     case 'V':
       Pulsar::Archive::set_verbosity (3);
@@ -188,6 +192,12 @@ int main (int argc, char** argv)
       cerr << "pacv: Loading " << filenames[ifile] << endl;
 
     input = Pulsar::Archive::load( filenames[ifile] );
+
+    if( telescope != 0 ){
+      input->set_telescope_code( telescope );
+      fprintf(stderr,"set telescope code to '%c'\n",
+	      input->get_telescope_code());
+    }
 
     if (input->get_type() == Signal::Calibrator) {
 
