@@ -11,11 +11,11 @@ Tempo::residual::residual (int lun)
   init();
   if (load(lun) < 0)
     throw string ("Tempo::residual load error");
-};
+}
 
 void Tempo::residual::init ()
 {
-  mjd = turns = seconds = binaryphase = obsfreq 
+  mjd = turns = time = binaryphase = obsfreq 
     = weight = error = preres = 0.0;
   valid = false;
 }
@@ -24,10 +24,10 @@ int Tempo::residual::load (int lun)
 {
   int status = 0;
   obsfreq = -20.0;
-  resread_ (&lun, &mjd, &turns, &seconds, &binaryphase,
+  resread_ (&lun, &mjd, &turns, &time, &binaryphase,
 	    &obsfreq, &weight, &error, &preres, &status);
   if (status == 0) {
-    seconds *= 1e6;  // convert to micro-seconds
+    time *= 1e6;     // convert residual to micro-seconds
     preres *= 1e6;
     valid = true;
   }

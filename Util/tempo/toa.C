@@ -528,7 +528,7 @@ double Tempo::toa::getData (DataType code) const
     case ResidualPhase:
       return resid.turns;
     case ResidualTime:
-      return resid.seconds;
+      return resid.time;
     case BinaryPhase:
       return resid.binaryphase;
     case BarycentreFrequency:

@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/residual.h,v $
-   $Revision: 1.7 $
-   $Date: 2000/05/31 15:04:05 $
+   $Revision: 1.8 $
+   $Date: 2000/06/01 13:52:03 $
    $Author: straten $ */
 
 #ifndef __RESIDUAL_H
@@ -23,7 +23,7 @@ namespace Tempo {
 
     double mjd;         // --TOA (MJD, referenced to solar system barycenter)
     double turns;       // --Postfit residual (pulse phase, from 0 to 1)
-    double seconds;     // --Postfit residual (micro-seconds)
+    double time;        // --Postfit residual (micro-seconds)
     double binaryphase; // --Orbital phase (where applicable)
     double obsfreq;     // --Observing frequency (in barycenter frame)
     double weight;      // --Weight of point in the fit
