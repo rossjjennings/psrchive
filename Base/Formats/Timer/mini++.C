@@ -4,7 +4,7 @@
 #include "mini++.h"
 #include "convert_endian.h"
 
-int MININAMESPACE miniload (const char* fname, struct mini* hdr, bool big_endian)
+int Mini::load (const char* fname, struct mini* hdr, bool big_endian)
 {
   FILE* fptr = fopen (fname, "r");
   if (fptr == NULL) {
@@ -12,10 +12,12 @@ int MININAMESPACE miniload (const char* fname, struct mini* hdr, bool big_endian
     perror ("");
     return -1;
   }
-  return miniload (fptr, hdr, big_endian);
+  int ret = load (fptr, hdr, big_endian);
+  fclose (fptr);
+  return ret;
 }
 
-int MININAMESPACE miniload (FILE* fptr, struct mini* hdr, bool big_endian)
+int Mini::load (FILE* fptr, struct mini* hdr, bool big_endian)
 {
   if (fread (hdr, sizeof(struct mini), 1, fptr) < 1)  {
     fprintf (stderr, "Mini::load Cannot read mini struct from FILE*");
@@ -30,7 +32,7 @@ int MININAMESPACE miniload (FILE* fptr, struct mini* hdr, bool big_endian)
 }
 
 // unloads a mini struct to a file (always big endian)
-int MININAMESPACE miniunload (FILE* fptr, struct mini& hdr)
+int Mini::unload (FILE* fptr, struct mini& hdr)
 {
   mini_toBigEndian (&hdr);
   if (fwrite (&hdr, sizeof(struct mini), 1, fptr) < 1)  {
@@ -42,12 +44,12 @@ int MININAMESPACE miniunload (FILE* fptr, struct mini& hdr)
   return 0;
 }
 
-MJD MININAMESPACE miniget_MJD (const struct mini& hdr)
+MJD Mini::get_MJD (const struct mini& hdr)
 { 
   return MJD(hdr.mjd, hdr.fracmjd);
 }
 
-void MININAMESPACE miniset_MJD (struct mini& hdr, const MJD& mjd)
+void Mini::set_MJD (struct mini& hdr, const MJD& mjd)
 {
   hdr.mjd = mjd.intday();
   hdr.fracmjd = mjd.fracday();
