@@ -10,8 +10,7 @@ LIB_C_SRCS = pg_plot_gnu.C profile.C sub_int.C archive.C                \
              xtswap.C xtunld.C xtgrey.C xtreduce.C profplot.C           \
 	     plot2profs.C scintplot.C misc.C heapsort.C calarsub.C      \
              plotcalsub.C get_epoch_and_name.C microhdr.C               \
-	     convert_endian.C headers.C cal_fns.C cpg_fns.C iono.C      \
-	     fft_shift.c
+	     convert_endian.C headers.C cal_fns.C cpg_fns.C iono.C     
 
 LIB_F_SRCS = ffft.f fftfit.f brent.f fccf.f cprof.f shiftbyfft.f \
              convolve.f width.f tsky1.f newtreduce.f \
@@ -40,7 +39,7 @@ OTHER_SRCS      = align.C amps.C chanprep.C  \
 		  getcal.C crh.C psrhead.C autotadd.C \
 		  fakedat.C quik_cal.C plk.C \
 		  cal_arch.C fitmix.C calplt.C vargain.C \
-		  headsum.C iono_model.C
+		  headsum.C iono_model.C 
 
 NOT_WORKING     = bandpass.C detail.C xtoa.C bin_ph.C corflux.C flux.C
 
