@@ -1,6 +1,6 @@
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/Timer/timer++.h,v $
-   $Revision: 1.6 $
-   $Date: 2000/04/10 03:23:22 $
+   $Revision: 1.7 $
+   $Date: 2000/06/02 05:56:18 $
    $Author: straten $ */
 
 #ifndef __TIMER_PLUSPLUS_H
@@ -59,6 +59,10 @@ namespace Timer {
 
   // returns the poln_storage code from a timer struct
   int poln_storage (const struct timer& hdr);
+
+  // returns the number of polarizations
+  int get_npol (const struct timer& hdr);
+  void set_npol (struct timer& hdr, int npol);
 
   // returns true if two archives can be mixed (tadded, for instance)
   // set max_freq_sep if you wish to alter the action of this function

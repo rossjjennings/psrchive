@@ -72,6 +72,12 @@ int Timer::load (FILE* fptr, struct timer* hdr, bool big_endian)
     timer_fromLittleEndian (hdr);
 
   if (verbose) cerr << "Timer::load correct header" << endl;
+
+  if (strcmp (hdr->machine_id, "S2") == 0)  {
+    hdr->version = 0;
+    hdr->minorversion = 0;
+  }
+
   // correct an endian mistake made in initial baseband header version
   float version = hdr->version + hdr->minorversion/10.0;
   if (version >= 8.0 && version < 8.3) {
@@ -106,6 +112,29 @@ void Timer::set_MJD (struct timer& hdr, const MJD& mjd)
   hdr.mjd = mjd.intday();
   hdr.fracmjd = mjd.fracday();
 }
+
+int Timer::get_npol (const struct timer& hdr)
+{
+  switch (hdr.banda.correlator_mode) {
+  case 0: return 1;
+  case 1: return 2;
+  case 2: return 4;
+  case 5: return 1;
+  }
+  throw string ("Timer::get_npol invalid correlator mode");
+}
+
+void Timer::set_npol (struct timer& hdr, int npol)
+{
+  hdr.banda.npol = npol;
+  switch (npol)  {
+    case 1: hdr.banda.correlator_mode = 0; break;
+    case 2: hdr.banda.correlator_mode = 1; break;
+    case 4: hdr.banda.correlator_mode = 2; break;
+    default: throw string ("Timer::set_npol invalid npol");
+  }
+}
+
 
 int Timer::poln_storage (const struct timer& hdr)
 {
