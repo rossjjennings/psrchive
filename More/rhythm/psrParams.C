@@ -150,15 +150,27 @@ void psrParams::create (const char* psr_name, bool use_cwd)
 
 void psrParams::load (const char* filename)
 {
+  if (verbose)
+    cerr << "psrParams::load create ifstream (" << filename << ")" << endl;
+
   ifstream istr (filename);
+  if (!istr) {
+    string error ("psrParams::load could not open ");
+    error += filename;
+    cerr << error;
+    throw (error);
+  }
   load (istr);
 }
 
-void psrParams::load (istream &istr, size_t nbytes)
+void psrParams::load (istream& istr, size_t nbytes)
 {
+  if (verbose)
+    cerr << "psrParams::load(istream&)" << endl;
+
   string total;
   if (stringload (&total, istr, nbytes) < 0)  {
-    string error ("psrParams::load ERROR");
+    string error ("psrParams::load(istream&) ERROR");
     cerr << error << endl;
     throw (error);
   }
@@ -167,6 +179,8 @@ void psrParams::load (istream &istr, size_t nbytes)
 
 void psrParams::load (FILE* fptr, size_t nbytes)
 {
+  if (verbose)
+    cerr << "psrParams::load(FILE*)" << endl;
   string total;
   if (stringload (&total, fptr, nbytes) < 0)  {
     string error ("psrParams::load ERROR");
@@ -210,7 +224,8 @@ void prepare_static_load_area ()
 void psrParams::load (string* instr)
 {
   if (verbose)
-    cerr << "psrParams::load *****" << endl << *instr << "***** END" << endl;
+    cerr << "psrParams::load(string*) *****" << endl
+	 << *instr << "***** END" << endl;
 
   prepare_static_load_area ();
   while (instr -> length() > EPH_STR_LEN) {
@@ -249,7 +264,6 @@ void psrParams::load (string* instr)
 
     if (parmStatus[ieph] == 0)
       continue;
-
 
     // parmTypes defined in ephio.h
     switch (parmTypes[ieph]) {
@@ -291,6 +305,7 @@ void psrParams::load (string* instr)
       params.push_back (newparm);
     }
   }
+  cerr << "DONE LOADING" << endl;
 }
 
 void psrParams::unload (const char* filename) const
