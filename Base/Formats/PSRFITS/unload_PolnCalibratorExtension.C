@@ -4,6 +4,10 @@
 
 #include <assert.h>
 
+#ifdef sun
+#include <ieeefp.h>
+#endif
+
 void Pulsar::FITSArchive::unload (fitsfile* fptr, 
 				  const PolnCalibratorExtension* pce)
 {
@@ -103,7 +107,7 @@ void Pulsar::FITSArchive::unload (fitsfile* fptr,
   int count = 0;
   #ifdef sun
     for (count = 0; count < dimension; count++)
-      data.get()[count] = 0.0;
+      data.get()[count] = FP_QNAN;
   #else
     for (count = 0; count < dimension; count++)
       data.get()[count] = NAN;

@@ -85,7 +85,7 @@ void Pulsar::FITSArchive::load_PolnCalibratorExtension (fitsfile* fptr)
   fits_get_colnum (fptr, CASEINSEN, "DAT_FREQ", &colnum, &status);
  
   #ifdef sun
-    float nullfloat = 0.0;
+    float nullfloat = FP_QNAN;
   #else
     float nullfloat = NAN;
   #endif

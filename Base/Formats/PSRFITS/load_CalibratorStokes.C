@@ -51,13 +51,11 @@ void Pulsar::FITSArchive::load_CalibratorStokes (fitsfile* fptr)
   
   auto_ptr<float> data ( new float[dimension] );
 
-
   #ifdef sun
-    float nullfloat = 0.0/0.0;
+    float nullfloat = FP_QNAN;
   #else
     float nullfloat = NAN;
   #endif
-  
 
   // Read the data scale weights
   
