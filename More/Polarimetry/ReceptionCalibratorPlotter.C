@@ -2,6 +2,8 @@
 #include "Pulsar/ReceptionCalibrator.h"
 #include "Pulsar/Archive.h"
 
+#include "Calibration/Gain.h"
+
 #include "EstimatePlotter.h"
 
 #include <cpgplot.h>
@@ -198,6 +200,68 @@ void Pulsar::ReceptionCalibratorPlotter::plot_model (unsigned ichan,
 
   equation->get_model()->set_state (istate);
 
+  unsigned nmeas = equation->get_nmeasurements ();
+
+  unsigned nstate = calibrator->get_nstate_pulsar();
+  unsigned multiple = 1;
+
+  if (istate>0)
+    multiple = 1 + calibrator->PA_jump.size();
+
+  for (unsigned imeas=0; imeas<nmeas; imeas++) {
+
+    //! Get the specified Measurements
+    const Calibration::Measurements& measurements
+      = equation->get_measurements (imeas);
+
+    if (!measurements.xform)
+      continue;
+
+    Calibration::Gain* gain;
+    gain = dynamic_cast<Calibration::Gain*>(measurements.xform.get());
+
+    if (!gain)
+      continue;
+
+    float Gain = gain->get_param(0) * gain->get_param(0);
+
+    double xval = measurements.interval[0];
+
+    unsigned mstate = measurements.size();
+
+    for (unsigned jstate=0; jstate<mstate; jstate++)  {
+
+      unsigned check_state = istate;
+      for (unsigned itime=0; itime < multiple; itime++)  {
+        if (measurements[jstate].state_index == check_state) {
+
+	  float yval = measurements[jstate].val[0] * Gain;
+
+	  calibrator->parallactic.set_abscissa (0, xval);
+	  xval = calibrator->parallactic.get_param(0) * 180.0/M_PI;
+
+	  cpgpt1 (xval, yval, 5);
+        }
+        check_state += nstate;
+      }
+
+    }
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   unsigned npt = 100;
 
   vector<float> para (npt);
@@ -207,7 +271,6 @@ void Pulsar::ReceptionCalibratorPlotter::plot_model (unsigned ichan,
   MJD end = calibrator->end_epoch;
   MJD step = (end-start)/npt;
 
-  unsigned nstate = calibrator->get_nstate_pulsar();
   unsigned current_jump = 0;
 
   for (unsigned ipt=0; ipt<npt; ipt++) {
