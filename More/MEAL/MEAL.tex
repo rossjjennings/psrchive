@@ -27,27 +27,26 @@
 \section{Introduction}
 
 This is a quick reference for the Measurement and Error Analysis
-Library (MEAL), defined within the {\tt MEAL} namespace.  These
+Library (MEAL), as defined within the {\tt MEAL} namespace.  These
 classes implement a general-purpose library for performing non-linear
 least-squares and error propagation.
 
 \section{Function Behaviours}
 
-All functions are derived from the {\tt Function} class.  A {\tt Function}
-is a function of an arbitrary number of variables; a distinction is
-made between model parameters, ${\mbf a}=(a_0, a_1, ... , a_N)$ and
-independent variables, or arguments, ${\mbf x}=(x_0, x_1, ... , x_M)$.
-Each {\tt Function} class defines an evaluation function that returns a
-result, $M({\mbf x},{\mbf a})$, and the partial derivatives of this
-result with respect to each of the parameters, $\partial M/\partial
-a_i$.
+All mathematical expressions are derived from the {\tt Function} base
+class.  A {\tt Function} may have an arbitrary number of variables;
+however, a distinction is made between parameters, ${\mbf a}=(a_0,
+a_1, ... , a_N)$ and independent variables, or arguments, ${\mbf
+x}=(x_0, x_1, ... , x_M)$.  Each {\tt Function} class defines an
+evaluation method that returns a result, $M({\mbf x},{\mbf a})$, and
+the partial derivatives of this result with respect to each of the
+parameters, $\partial M/\partial a_i$.
 
-Function functionality is organized into three behaviours: parameter,
-argument, and evaluation, (as explained in the following
-sub-sections).  Behaviours are represented by three base classes, each
-of which virtually inherits the {\tt Function} base class.  As each
-behaviour is mutually exclusive, derived classes can incorporate
-pre-defined behaviours by multiple inheritance.
+Functionality is organized into three behaviours: parameter, argument,
+and evaluation.  These behaviours are represented by three base
+classes, each of which virtually inherits the {\tt Function} base
+class.  As each behaviour is mutually exclusive, derived classes can
+incorporate pre-defined behaviours by multiple inheritance.
 
 \subsection{Parameter Behaviour}
 
@@ -85,7 +84,7 @@ templates, or Rules.
 
 \section{Modular Construction}
 
-TO DO: Show how new functions can be built up from basic components.
+TO DO: Show how new functions can be built up from more basic elements.
 
 \section{Example Usage}
 
@@ -95,23 +94,61 @@ TO DO: Document lmfit
 
 \subsection{Error Propagation}
 
-The computation of partial derivatives with respect to model
-parameters readily lends itself to the problem of error propagation.
-A simplified interface is implemented by the {\tt
-ScalarMath} class.  {\tt ScalarMath} objects may be
-conveniently initialized as a single parameter and its estimated
-variance using the Estimate template class.  Like float and double
-types, ScalarMath objects may be combined using normal arithmetic
-operations and basic mathematical functions, creating Scalar functions
-of any number of parameters.  For example:
+The {\tt Estimate} template class is very useful for storing a value
+and its estimated variance.  There are also operators and functions
+which enable the propagation of error estimates to derived quantities;
+for example:
 \begin{verbatim}
-  Calibration::ScalarMath x (Estimate<double> (0.9587, 0.00058));
-  Calibration::ScalarMath y (Estimate<double> (-0.283, 0.00034));
+Estimate<float> y (0.596,0.0034);
+Estimate<float> x (-0.83,0.0072);
+Estimate<float> z = pow (y,x);
+\end{verbatim}
+automatically computes the variance of the new variable, {\tt z}.
+However, the {\tt Estimate} template class fails when a variable
+appears more than once in an expression; e.g.
+\begin{verbatim}
+Estimate<float> ratio = x/x;
+\end{verbatim}
+should yield $1\pm0$; however, the {\tt Estimate} template class does
+not recognize that the numerator and denominator are the same
+variable, and incorrectly sums the weighted variances.
+
+The problem of correctly computing the partial derivatives of an
+expression with respect to its variables makes use of the exact same
+functionality used to generate the gradient and Hessian matrix in
+non-linear least squares fitting.
+
+A simplified interface to this functionality is implemented by the
+{\tt ScalarMath} class.  {\tt ScalarMath} objects may be conveniently
+initialized as a single parameter and its estimated variance using the
+{\tt Estimate} template class.  As with float and double types, {\tt
+ScalarMath} objects may be combined using normal arithmetic operations
+and basic mathematical functions, creating {\tt Scalar} functions of
+any number of parameters.  For example:
+\begin{verbatim}
+  MEAL::ScalarMath x (Estimate<double> (0.9587, 0.00058));
+  MEAL::ScalarMath y (Estimate<double> (-0.283, 0.00034));
   cerr << "Polar angle = " << atan2 (y, x) << endl;
 \end{verbatim}
 yields the output
 \begin{verbatim}
   Polar angle = (-0.287039 +/- 0.0189612)
 \end{verbatim}
+\newpage
+\noindent
+As with any native type, the {\tt ScalarMath} class can be used as a
+template argument, e.g.
+\begin{verbatim}
+  complex<MEAL::ScalarMath> z (Estimate<double> (0.87, 0.0041),
+                               Estimate<double> (2.38, 0.0095));
+
+  complex<MEAL::ScalarMath> w (Estimate<double> (1.74, 0.0081),
+                               Estimate<double> (-.63, 0.0043));
+
+  Jones<MEAL::ScalarMath> jones (z, conj(z),
+                                 conj(w), w);
+\end{verbatim}
+enabling error propagation through increasingly complex expressions.
 
 \end{document}
+
