@@ -4,9 +4,8 @@
 #include "sky_coord.h"
 #include "f772c.h"
 
-
-extern "C" double F772C2(sla_galeq)(double *, double *, double *, double *);
-extern "C" double F772C2(sla_eqgal)(double *, double *, double *, double *);
+extern "C" double F772C(sla_galeq)(double *, double *, double *, double *);
+extern "C" double F772C(sla_eqgal)(double *, double *, double *, double *);
 
 sky_coord & sky_coord::operator= (const sky_coord & co)
 {

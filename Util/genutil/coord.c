@@ -304,6 +304,12 @@ int telescope_coords (int telescope, float* latitude,
     elev = 496.0;
     break;
     
+  case 5:
+    /* Urumqi */
+    latd = 43.47;
+    longd = 87.1778;
+    elev = 2029.3;
+
   case 6:
     /* Tidbinbilla */
     latd = -35.4;
@@ -312,7 +318,7 @@ int telescope_coords (int telescope, float* latitude,
     break;
 
   case 0: 
-    fprintf(stderr, "Telescope code is 0 -- assuming Parkes!\n");
+    fprintf(stderr, "telescope_coords: 0 -- assuming Parkes!\n");
   case 7:
     /* Parkes */
     latd = -33.0;
@@ -321,7 +327,7 @@ int telescope_coords (int telescope, float* latitude,
     break;
 
   default:
-    fprintf (stderr, "telescope_coords: latitude unknown for code %d\n",
+    fprintf (stderr, "telescope_coords: unknown telescope code %d\n",
 	     telescope);
     return -1;
   }
@@ -353,7 +359,7 @@ int telescope_coords (int telescope, float* latitude,
 
    ********************************************************************** */
 
-void F772C2(sla_altaz) (double*, double*, double*, double*, double*, double*,
+void F772C(sla_altaz) (double*, double*, double*, double*, double*, double*,
 		 double*, double*, double*, double*, double*, double*);
 
 int az_zen_para (double ra, double dec, float lst, float latitude,

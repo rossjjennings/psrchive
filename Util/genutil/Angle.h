@@ -1,7 +1,9 @@
+//-*-C++-*-
+
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Angle.h,v $
-   $Revision: 1.7 $
-   $Date: 2001/02/06 05:19:27 $
-   $Author: redwards $ */
+   $Revision: 1.8 $
+   $Date: 2001/02/24 03:46:39 $
+   $Author: straten $ */
 
 // redwards 17 Mar 99 -- Time for a definitive C++ suite of
 // angle and sky coordinate functions
@@ -30,14 +32,14 @@ class Angle
 
   static bool verbose;
 
-  Angle() {init();}
-  Angle(const Angle & a)  
+  Angle (const Angle& a)  
     {init(); radians=a.radians;wrap_point=a.wrap_point;}
-  Angle(const double & rad) ;
+  Angle (const double& rad = 0);
 
   void setWrapPoint(double wp){wrap_point=wp; wrap();}
   double getWrapPoint() {return wrap_point;}
   void makeArctangle() { setWrapPoint(0.5*M_PI); }
+
   int     setHMS (const char *);
   char*   getHMS (char* str, int places=3) const;
   string  getHMS (int places = 3) const;
@@ -97,7 +99,6 @@ class Angle
   friend int operator != (const Angle &, const Angle &);
 
   inline friend double cast_double(const Angle &a) {return a.radians;}
-
   friend ostream& operator<< (ostream&, const Angle&);
 };
 

@@ -3,19 +3,17 @@
 #include <stdio.h>
 #include <sys/time.h>
 
-
-
 #if defined(sun) && !defined(__GNUC__)
 #include <float.h>
 #include <sunmath.h>
 #endif
 #include <math.h>
+#include <limits.h>
 
 #include "machine_endian.h"
 #include "ieee.h"
 
 #include "MJD.h"
-
 #include "f772c.h"
 
 int MJD::verbose = 0;
@@ -435,7 +433,7 @@ MJD::MJD (int intday, double fracday)
   settle();
 }
 
-extern "C" double F772C2(sla_gmst)(double * ut);
+extern "C" double F772C(sla_gmst)(double * ut);
 
 double MJD::LST (float longitude) const
 {
