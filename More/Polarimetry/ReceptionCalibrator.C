@@ -247,8 +247,8 @@ void Pulsar::ReceptionCalibrator::initial_observation (const Archive* data)
 
   Calibration::Complex2* feed = 0;
   if (receiver) {
-    feed = new Calibration::Complex2Constant (receiver->get_correction());
-    cerr << "Pulsar::ReceptionCalibrator adding correction transformation\n"
+    feed = new Calibration::Complex2Constant (receiver->get_transformation());
+    cerr << "Pulsar::ReceptionCalibrator known receiver transformation\n"
 	"\t" << feed->evaluate() << endl;
   }
 

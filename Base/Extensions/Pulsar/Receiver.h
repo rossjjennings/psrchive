@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/Receiver.h,v $
-   $Revision: 1.7 $
-   $Date: 2004/07/23 12:45:05 $
+   $Revision: 1.8 $
+   $Date: 2004/10/28 06:18:54 $
    $Author: straten $ */
 
 #ifndef __ReceiverExtension_h
@@ -117,7 +117,7 @@ namespace Pulsar {
     string get_tracking_mode_string() const;
 
     //! Return the feed correction matrix
-    Jones<double> get_correction () const;
+    Jones<double> get_transformation () const;
 
     //! Return the Stokes parameters of the reference source (e.g. noise diode)
     Stokes<double> get_reference_source () const;

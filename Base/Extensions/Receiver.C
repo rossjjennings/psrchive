@@ -84,7 +84,7 @@ bool Pulsar::Receiver::match (const Receiver* receiver, string& reason) const
 }
 
 //! Return the feed correction matrix
-Jones<double> Pulsar::Receiver::get_correction () const
+Jones<double> Pulsar::Receiver::get_transformation () const
 {
   Jones<double> xform = Jones<double>::identity();
 
@@ -96,7 +96,7 @@ Jones<double> Pulsar::Receiver::get_correction () const
   if (get_Y_offset().getDegrees() == 180.0) {
 
     if (Archive::verbose == 3)
-      cerr << "Pulsar::Receiver::get_correction 180 phase shift in Y" << endl;
+      cerr << "Pulsar::Receiver::get_transformation 180 phase shift Y" << endl;
     
     // rotate the basis by 180 degrees about the Stokes Q axis
     Calibration::Rotation rotation ( Pauli::basis.get_basis_vector(0) );
@@ -107,7 +107,7 @@ Jones<double> Pulsar::Receiver::get_correction () const
   }
   else if (get_Y_offset() != 0) {
     
-    Error error (InvalidState, "Pulsar::Receiver::get_correction");
+    Error error (InvalidState, "Pulsar::Receiver::get_transformation");
     error << "Cannot correct Y_offset=" << Y_offset.getDegrees() << " degrees";
     throw error;
       
@@ -116,7 +116,7 @@ Jones<double> Pulsar::Receiver::get_correction () const
   if (get_X_offset() != 0) {
     
     if (Archive::verbose == 3)
-      cerr << "Pulsar::Receiver::get_correction X axis offset" << endl;
+      cerr << "Pulsar::Receiver::get_transformation X axis offset" << endl;
 
     // rotate the basis about the Stokes V axis
     Calibration::Rotation rotation ( Pauli::basis.get_basis_vector(2) );
@@ -132,7 +132,7 @@ Jones<double> Pulsar::Receiver::get_correction () const
 
 Stokes<double> Pulsar::Receiver::get_reference_source () const
 {
-  Jones<double> xform = get_correction ();
+  Jones<double> xform = get_transformation ();
 
   if (get_calibrator_offset() != 0) {
 

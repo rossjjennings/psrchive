@@ -159,7 +159,7 @@ Pulsar::CorrectionsCalibrator::get_transformation (const Archive* archive,
   Pauli::basis.set_basis( receiver->get_basis() );
 
   if (must_correct_feed)
-    xform *= receiver->get_correction();
+    xform *= receiver->get_transformation();
 
   double feed_rotation = 0.0;
 

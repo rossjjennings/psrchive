@@ -125,11 +125,11 @@ void Pulsar::HybridCalibrator::calculate_transformation ()
     }
 
     // get the Stokes parameters of the reference source observation
-    Stokes< Estimate<double> > output_stokes = coherency( convert (cal) );
+    Stokes< Estimate<double> > output_stokes = coherency (convert (cal));
     output_stokes *= 2.0;
 
     // get the Stokes parameters of the reference source input
-    Stokes<Estimate<double> > cal_stokes = reference_input->get_stokes (ichan);
+    Stokes< Estimate<double> > cal_stokes = reference_input->get_stokes(ichan);
 
     // get the precalibrator transformation
     Jones< Estimate<double> > response;
@@ -138,11 +138,11 @@ void Pulsar::HybridCalibrator::calculate_transformation ()
     // get the Receiver correction, if any
     if (precalibrator->has_Receiver()) {
       const Receiver* receiver = precalibrator->get_Receiver();
-      response *= receiver->get_correction ();
+      response *= receiver->get_transformation ();
     }
 
     // pass the reference Stokes parameters through the instrument
-    Stokes<Estimate<double> > input_stokes = transform (cal_stokes, response);
+    Stokes< Estimate<double> > input_stokes = transform (cal_stokes, response);
 
     // solve for the SingleAxis model that relates input and output states
     correction = new Calibration::SingleAxis;
