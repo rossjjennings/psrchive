@@ -95,7 +95,7 @@ endif
 #
 # programs
 #
-bin_PROGRAMS = pac vap psradd fadd pat pam fluxcal \
+bin_PROGRAMS = pac vap vip psradd fadd pat pam fluxcal \
 	fix_coords test_Difference fix_hydra sesdiv \
         fix_3C353 archive_correct archive_denoise \
         fix_fluxcal archive_split psrconv pascii \
@@ -122,6 +122,7 @@ psradd_SOURCES			= psradd.C
 psrconv_SOURCES			= psrconv.C
 sesdiv_SOURCES			= sesdiv.C
 vap_SOURCES			= vap.C
+vip_SOURCES			= vip.C
 
 check_PROGRAMS = test_Archive test_denoise test_Difference
 
