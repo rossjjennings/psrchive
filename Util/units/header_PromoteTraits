@@ -34,13 +34,20 @@ class PromoteTraits {
 template<typename A, typename B, template<typename> class C>
 class PromoteTraits< C<A>, B > {
 public:
-  typedef C<promote<A,B>::promote_type> promote_type;
+  typedef C<typename PromoteTraits<A,B>::promote_type> promote_type;
 };
 
 //! Partial template specialization for template types
 template<typename A, typename B, template<typename> class C>
 class PromoteTraits< A, C<B> > {
 public:
-  typedef C<promote<A,B>::promote_type> promote_type;
+  typedef C<typename PromoteTraits<A,B>::promote_type> promote_type;
+};
+
+//! Partial template specialization for template types
+template<typename A, typename B, template<typename> class C>
+class PromoteTraits< C<A>, C<B> > {
+public:
+  typedef C<typename PromoteTraits<A,B>::promote_type> promote_type;
 };
 
