@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Archive.h,v $
-   $Revision: 1.48 $
-   $Date: 2003/01/13 10:59:49 $
+   $Revision: 1.49 $
+   $Date: 2003/01/13 16:24:19 $
    $Author: straten $ */
 
 /*! \mainpage 
@@ -57,11 +57,15 @@
   to manipulate a set of Pulsar::Profile objects.  In addition to the simple
   nested calls of the above functions, these include:
   <UL>
-  <LI> dedisperse - rotates all profiles to remove dispersion delays between chans </LI>
-  <LI> defaraday - V_rotates all profiles to remove faraday rotation between chans </LI>
-  <LI> fscrunch - integrates profiles from neighbouring chans </LI>
-  <LI> pscrunch - integrates profiles from two polarizations into one total intensity </LI>
-  <LI> invint - transforms from Stokes (I,Q,U,V) to the polarimetric invariant interval </LI>
+  <LI> dedisperse - rotates all profiles to remove dispersion delays 
+  between channels </LI>
+  <LI> defaraday - V_rotates all profiles to remove faraday rotation
+  between channels </LI>
+  <LI> fscrunch - integrates profiles from neighbouring channels </LI>
+  <LI> pscrunch - integrates profiles from two polarizations into 
+  one total intensity </LI>
+  <LI> invint - transforms from Stokes (I,Q,U,V) to the polarimetric 
+  invariant interval </LI>
   <LI> [Q|U|V]_boost - perform Lorentz boost on Stokes (I,Q,U,V) </LI>
   <LI> [Q|U|V]_rotate - perform rotation on Stokes (I,Q,U,V) </LI>
   </UL>
@@ -71,9 +75,11 @@
   Pulsar::Archive class implements:
   <UL>
   <LI> tscrunch - integrates profiles from neighbouring Integrations </LI>
-  <LI> append - copies (or transfers) the Integrations from one Archive to another </LI>
+  <LI> append - copies (or transfers) the Integrations from one Archive
+  to another </LI>
   <LI> set_ephemeris - installs a new ephemeris and polyco </LI>
-  <LI> set_polyco - installs a new polynomial and aligns all profiles to it </LI>
+  <LI> set_polyco - installs a new polynomial and aligns all profiles
+  to it </LI>
   </UL>
 
   For a complete list of the methods defined in each of these base classes,
@@ -128,6 +134,7 @@
 #include "psrephem.h"
 #include "sky_coord.h"
 
+#include "Registry.h"
 #include "Types.h"
 
 namespace Tempo {
@@ -154,6 +161,30 @@ namespace Pulsar {
   class Archive : public IntegrationManager {
 
   public:
+
+    //! Classes derived from Archive are registered for use via an Agent
+    /*! This abstract base class must be used to register derived classes
+      with the Archive::load factory. */
+    class Agent {
+
+    public:
+      //! Advocate the use of the derived class to interpret filename
+      bool advocate (const char* filename);
+      
+      //! Return a null-constructed instance of the derived class
+      Archive* new_Archive ();
+
+    protected:
+      //! Agents registered for creating derived classes in Archive::load
+      static Registry::List<Agent> registry;
+      
+      // Declare friends with Registry::Entry<Agent> so it can access registry
+      friend class Registry::Entry<Agent>;
+
+      // Declare friends with Archive so Archive::load can access registry
+      friend class Archive;
+
+    };
 
     //! Flag that Archive::append should enforce chronological order
     static bool append_chronological;

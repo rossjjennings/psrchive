@@ -1,21 +1,9 @@
-
-#ifdef PSRFITS
-#include "Pulsar/FITSArchive.h"
-#endif
-
-#define PSRTIMER 1
-#ifdef PSRTIMER
-#include "Pulsar/TimerArchive.h"
-#include "Pulsar/BasebandArchive.h"
-#endif
-
+#include "Archive.h"
 #include "Error.h"
 
 /* Dynamic constructor returns a pointer to a new instance of one of the
-   Archive subclasses.  This is the only member of the Archive
-   class that must know about the derived types, and is the entry point
-   for loading any new archive from file.  The recognized children must
-   be added to the source code manually.
+   Archive derived classes.   Derived classes must be registered using
+   an Archive::Agent.
 
    \param filename path to the file containing a pulsar archive
 */
@@ -32,30 +20,18 @@ Pulsar::Archive* Pulsar::Archive::load (const char* filename)
   // see if any of the derived classes recognize the file
   Reference::To<Archive> archive;
 
-  try {
+  for (unsigned agent=0; agent<Agent::registry.size(); agent++) try {
 
-#ifdef PSRFITS
-    if (Pulsar::FITSArchive::recognises (filename))
-      archive = new Pulsar::FITSArchive;
-    else
-#endif
-  
-#ifdef PSRTIMER
-    if (Pulsar::BasebandArchive::recognises (filename))
-      archive = new Pulsar::BasebandArchive;
-    else
+    if (Agent::registry[agent]->advocate (filename)) {
 
-    if (Pulsar::TimerArchive::recognises (filename))
-      archive = new Pulsar::TimerArchive;
-#endif
+      archive = Agent::registry[agent]->new_Archive();
 
-    if (archive) {
-      // call the pure virtual load_header
       archive -> load_header (filename);
-      // set the filename from which data for this instance can be loaded
-      archive -> __load_filename = filename;
       archive -> set_filename (filename);
+      archive -> __load_filename = filename;
+
       return archive.release();
+
     }
 
   }
@@ -65,8 +41,9 @@ Pulsar::Archive* Pulsar::Archive::load (const char* filename)
   catch (string& error) {
     throw Error (FailedCall, "Pulsar::Archive::load", error);
   }
-
-  // none of the above formats recognises the file
+  
+  // none of the registered agents advocates the use of a derived
+  // class for the interpretation of this file
   throw Error (InvalidParam, "Pulsar::Archive::load", 
 	       "'%s' not a recognized file format", filename);
 }
