@@ -17,12 +17,16 @@ void Pulsar::Profile::fft_convolve(Profile* p1, Profile* p2)
   forward_plan = rfftw_create_plan(bins, FFTW_REAL_TO_COMPLEX, FFTW_ESTIMATE);
   backward_plan = rfftw_create_plan(bins, FFTW_COMPLEX_TO_REAL, FFTW_ESTIMATE);
 
-  float temp1[bins];
-  float temp2[bins];
-  float resultant[bins];
+  vector<float> temp1;
+  vector<float> temp2;
+  vector<float> resultant;
 
-  rfftw_one(forward_plan, p1 -> get_amps(), temp1);
-  rfftw_one(forward_plan, p2 -> get_amps(), temp2);
+  temp1.resize(bins);
+  temp2.resize(bins);
+  resultant.resize(bins);
+
+  rfftw_one(forward_plan, p1 -> get_amps(), temp1.begin());
+  rfftw_one(forward_plan, p2 -> get_amps(), temp2.begin());
 
   // Perform the frequency domain multiplication:
   // No complex part for the first element
@@ -44,14 +48,16 @@ void Pulsar::Profile::fft_convolve(Profile* p1, Profile* p2)
 
   // Transform back to the time domain to get the convolved solution
 
-  float solution[bins];
+  vector<float> solution;
 
-  rfftw_one(backward_plan, resultant, solution);
+  solution.resize(bins);
+
+  rfftw_one(backward_plan, resultant.begin(), solution.begin());
 
   // Return the profile
 
   resize(bins);
-  set_amps(solution);
+  set_amps(solution.begin());
 }
 
 
