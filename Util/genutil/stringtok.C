@@ -10,7 +10,8 @@ string stringtok (string* instr, const string& delimiters)
   if (last == instr->npos)
     last = instr->length();
 
-  string retval = instr->substr(first, last);
+  string retval = instr->substr(first, last-first);
   instr->erase(0,last);
+
   return retval;
 }
