@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Profile.h,v $
-   $Revision: 1.56 $
-   $Date: 2004/05/05 13:42:47 $
+   $Revision: 1.57 $
+   $Date: 2004/05/06 01:50:04 $
    $Author: ahotan $ */
 
 #ifndef __Pulsar_Profile_h
@@ -169,8 +169,7 @@ namespace Pulsar {
     //! Rotates the profile to remove dispersion delay
     void dedisperse (double dm, double ref_freq, double pfold);
 
-    /*! find the shift relative to a standard using a time domain
-      convolution and gaussian fit, returning a Tempo::toa object */
+    //! fit to the standard and return a Tempo::toa object
     Tempo::toa tdt (const Profile& std, const MJD& mjd, 
 		    double period, char nsite, string arguments = "",
 		    Tempo::toa::Format fmt = Tempo::toa::Parkes) const;
@@ -180,7 +179,14 @@ namespace Pulsar {
 		    double period, char nsite, string arguments = "",
 		    Tempo::toa::Format fmt = Tempo::toa::Parkes) const;
     
-    //! return the shift (in turns) after fitting to the standard
+    /*! return the shift (in turns) after fitting to the standard
+      using a parabolic interpolation in the time domain to achieve 
+      fractional bin resolution */
+    double TimeShift (const Profile& std, float& error) const;
+
+    /*! return the shift (in turns) after fitting to the standard
+      using an FFT based phase rotation to achieve fractional bin
+      resolution */
     double shift (const Profile& std, float& ephase,
 		  float& snrfft, float& esnrfft) const;
 
