@@ -50,6 +50,9 @@ void usage ()
     "  -b                     Do not try to match bandwidths\n"
     "  -o                     Do not try to match obs types\n"
     "\n"
+    "Expert options: \n"
+    "  -f                     Override flux calibration flag\n"
+    "\n"
     "Output options: \n"
     "  -e extension           Use this extension when unloading results \n"
     "  -W                     do not correct profile weights \n"
@@ -85,6 +88,8 @@ int main (int argc, char *argv[]) {
   bool test_frequency = true;
   bool test_bandwidth = true;
   bool test_obstype = true;
+
+  bool check_flags = true;
   
   Pulsar::Calibrator::Type pcal_type = Pulsar::Calibrator::SingleAxis;
   
@@ -105,7 +110,7 @@ int main (int argc, char *argv[]) {
 
   unsigned char flip_sign = 0x00;
 
-  while ((gotc = getopt(argc, argv, "A:bcd:e:FhiIn:op:PqsSTu:vVwW")) != -1) {
+  while ((gotc = getopt(argc, argv, "A:bcd:e:fFhiIn:op:PqsSTu:vVwW")) != -1) {
     switch (gotc) {
     case 'h':
       usage ();
@@ -121,7 +126,7 @@ int main (int argc, char *argv[]) {
       Pulsar::Archive::set_verbosity(1);
       break;
     case 'i':
-      cout << "$Id: pac.C,v 1.43 2004/04/12 11:45:59 straten Exp $" << endl;
+      cout << "$Id: pac.C,v 1.44 2004/06/05 09:58:52 ahotan Exp $" << endl;
       return 0;
 
     case 'n': {
@@ -168,6 +173,9 @@ int main (int argc, char *argv[]) {
       break;
     case 'e':
       unload_ext = optarg;
+      break;
+    case 'f':
+      check_flags = false;
       break;
     case 'w':
       write_database_file = true;
@@ -382,11 +390,11 @@ int main (int argc, char *argv[]) {
        Therefore, the flux cal should take place after the poln cal */
 
     bool successful_fluxcal = false;
-
-    if (do_fluxcal && arch->get_flux_calibrated() )
+    
+    if (do_fluxcal && arch->get_flux_calibrated() && check_flags) {
       cout << "pac: " << archives[i] << " already flux calibrated" << endl;
-
-    else if (do_fluxcal && !arch->get_flux_calibrated()) try {
+    }
+    else if (do_fluxcal) try {
 
       if (verbose)
 	cout << "pac: Generating flux calibrator" << endl;
