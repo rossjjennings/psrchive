@@ -1,4 +1,3 @@
-#include <qapplication.h>
-
+class QApplication;
 QApplication *qApp = 0;
 
