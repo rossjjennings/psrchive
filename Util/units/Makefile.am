@@ -123,8 +123,7 @@ Error.lo: PromoteTraits.h
 
 BUILT_SOURCES = PromoteTraits.h
 
-localdir = .
-local_PROGRAMS = generate_PromoteTraits
+noinst_PROGRAMS = generate_PromoteTraits
 generate_PromoteTraits_SOURCES = generate_PromoteTraits.C
 generate_PromoteTraits_LDADD =  
 
