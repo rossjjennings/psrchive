@@ -110,7 +110,7 @@ double Pulsar::FluxCalibratorDatabase::Entry::get_flux_mJy (double MHz)
 {
   if( !spectral_coeffs.empty() ){
     double ret = spectral_coeffs[0];
-    double log_freq = log10f(MHz);
+    double log_freq = log(MHz)/log(10.0);
 
     if( verbose )
       fprintf(stderr,"Pulsar::FluxCalibratorDatabase::Entry::get_flux_mJy Got f=%f MHz and log(f)=%f and ret=%f\n",
