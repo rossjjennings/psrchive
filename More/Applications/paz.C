@@ -136,7 +136,7 @@ int main (int argc, char *argv[]) {
       if (verbose)
 	cerr << "Loading " << archives[i] << endl;
       
-      Pulsar::Archive* arch = Pulsar::Archive::load(archives[i]);
+      Reference::To<Pulsar::Archive> arch = Pulsar::Archive::load(archives[i]);
       
       cout << "Loaded archive: " << archives[i] << endl;
       
