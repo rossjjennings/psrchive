@@ -1,5 +1,5 @@
 //
-// $Id: pav.C,v 1.28 2003/02/26 00:20:28 ahotan Exp $
+// $Id: pav.C,v 1.29 2003/02/26 05:36:44 ahotan Exp $
 //
 // The Pulsar Archive Viewer
 //
@@ -63,6 +63,7 @@ void usage ()
     " -B        Off-pulse bandpass\n"
     " -X        Plot cal amplitude and phase vs frequency channel\n"
     " -W        Change colour scheme to suite white background\n"
+    " -q        Plot a position angle frequency spectrum colour map\n"
        << endl;
 }
 
@@ -72,12 +73,13 @@ int main (int argc, char** argv)
   int fscrunch = -1;
   int tscrunch = -1;
   int pscrunch = -1;
-
+  
   unsigned poln = 0;
-
+  float the_phase = 0.0;
+  
   double phase = 0;
   double new_dm = 0.0;
-
+  
   bool verbose = false;
   bool zoomed = false;
   bool display = false;
@@ -93,7 +95,8 @@ int main (int argc, char** argv)
   bool snrplot = false;
   bool PA = false;
   bool bandpass = false;
-  bool calinfo = false;  
+  bool calinfo = false;
+  bool pa_spectrum = false;
 
   char* metafile = NULL;
   
@@ -101,7 +104,7 @@ int main (int argc, char** argv)
   Pulsar::Plotter::ColourMap colour_map = Pulsar::Plotter::Heat;
   
   int c = 0;
-  const char* args = "ab:c:d:DGe:E:f:FhiHm:M:pP:r:St:TvVwWx:y:RZCYz:AsgXB";
+  const char* args = "ab:c:d:DGe:E:f:FhiHm:M:pP:r:St:TvVwWx:y:RZCYz:AsgXBq:";
   while ((c = getopt(argc, argv, args)) != -1)
     switch (c) {
       
@@ -140,7 +143,7 @@ int main (int argc, char** argv)
       usage ();
       return 0;
     case 'i':
-      cout << "$Id: pav.C,v 1.28 2003/02/26 00:20:28 ahotan Exp $" << endl;
+      cout << "$Id: pav.C,v 1.29 2003/02/26 05:36:44 ahotan Exp $" << endl;
       return 0;
     case 'm':
       // macro file
@@ -226,6 +229,10 @@ int main (int argc, char** argv)
       break;
     case 'B':
       bandpass = true;
+      break;
+    case 'q':
+      sscanf(optarg, "%f", &the_phase);
+      pa_spectrum = true;
       break;
       
     default:
@@ -326,6 +333,17 @@ int main (int argc, char** argv)
     if (centre) {
       archive -> centre();
     }
+    
+    if (pa_spectrum) {
+      cpgbeg (0, "?", 0, 0);
+      cpgask(1);
+      cpgsvp (0.1, 0.9, 0.1, 0.9);
+      cpgeras();
+      plotter.pa_vs_frequency(archive, the_phase);
+      cpgend();
+      exit(0);
+    }
+    
 
     if (bandpass) {
       cpgbeg (0, "?", 0, 0);
