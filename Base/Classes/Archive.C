@@ -276,7 +276,8 @@ void Pulsar::Archive::remove_baseline (float phase)
 
 void Pulsar::Archive::rotate (double time)
 {
-
+  for (unsigned isub=0; isub < get_nsubint(); isub++)
+    get_Integration(isub) -> rotate (time);
 }
 
 
