@@ -1,33 +1,28 @@
-## Process this file with automake to produce Makefile.in
 
-if HAVE_PGPLOT
-  PGPLOT_SUBDIRS = pgutil plot2d
-  PGPLOT_LIBADD = pgutil/libpgutil.la plot2d/libplot2d.la
-endif
-
-if HAVE_QT
-  QT_SUBDIRS = qtutil
-  QT_LIBADD = qtutil/libqtutil.la
-endif
-
-if HAVE_CFITSIO
-  CFITSIO_SUBDIRS = fitsutil
-  CFITSIO_LIBADD = fitsutil/libfitsutil.la
-endif
-
-
-SUBDIRS                 = units genutil genutil++ psrfft \
-			$(PGPLOT_SUBDIRS) $(QT_SUBDIRS) $(CFITSIO_SUBDIRS) .
-
+SUBDIRS                 = units genutil genutil++ psrfft
 
 lib_LTLIBRARIES         = libpsrutils.la
 libpsrutils_la_SOURCES  =
 libpsrutils_la_LIBADD   = units/libunits.la psrfft/libpsrfft.la \
-			genutil/libgenutil.la genutil++/libgenutilpp.la \
-			$(PGPLOT_LIBADD) $(QT_LIBADD) $(CFITSIO_LIBADD)
+			genutil/libgenutil.la genutil++/libgenutilpp.la
+
+if HAVE_PGPLOT
+  SUBDIRS += pgutil plot2d
+  libpsrutils_la_LIBADD += pgutil/libpgutil.la plot2d/libplot2d.la
+endif
+
+if HAVE_QT
+  SUBDIRS += qtutil
+  libpsrutils_la_LIBADD += qtutil/libqtutil.la
+endif
+
+if HAVE_CFITSIO
+  SUBDIRS += fitsutil
+  libpsrutils_la_LIBADD += fitsutil/libfitsutil.la
+endif
+
 
 all: intermediate-install
 
-intermediate-install:
-	CPPROG="cp -p" $(MAKE) prefix=.. install-data
+include $(top_srcdir)/config/Makefile.local
 
