@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Archive.h,v $
-   $Revision: 1.56 $
-   $Date: 2003/02/17 16:18:45 $
+   $Revision: 1.57 $
+   $Date: 2003/02/20 10:37:35 $
    $Author: straten $ */
 
 /*! \mainpage 
@@ -144,6 +144,8 @@ namespace Tempo {
 class Phase;
 class psrephem;
 class polyco;
+
+template<typename T> class Jones;
 
 //! The root level namespace, containing everything pulsar related
 namespace Pulsar {
@@ -338,6 +340,15 @@ namespace Pulsar {
 
     //! Convert polarimetric data to the specified state
     virtual void convert_state (Signal::State state);
+
+    //! Perform the transformation on each polarimetric profile
+    virtual void transform (const Jones<float>& transformation);
+
+    //! Perform frequency response on each polarimetric profile
+    virtual void transform (const vector< Jones<float> >& response);
+
+    //! Perform the time and frequency response on each polarimetric profile
+    virtual void transform (const vector< vector< Jones<float> > >& response);
 
     //! Transform Stokes I,Q,U,V into the polarimetric invariant interval
     virtual void invint ();
@@ -555,6 +566,9 @@ namespace Pulsar {
 
     //! Initialize an Integration to reflect Archive attributes.
     void init_Integration (Integration* subint);
+
+    //! Provide Integration::resize access to Archive-derived classes
+    void resize (Integration* integration);
 
     //! Set all values to null
     void init ();
