@@ -709,7 +709,7 @@ void Pulsar::TimerArchive::correct ()
 
   time_t now;
   now = time(NULL);
-  sprintf (hdr.comment,"TimerArchive created on %s - %s",
+  snprintf (hdr.comment, COMMENT_STRLEN, "TimerArchive created on %.12s - %s",
 	   hostname, ctime(&now));
 
   correct_Integrations();
