@@ -2,7 +2,7 @@ LOCAL_ROOT = ../../..
 include $(LOCAL_ROOT)/include/Makefile.standard
 
 LIBRARY  = libeph.a
-LIB_SRCS = ephio_c.c psrephem.C ephio.f rnd8.f
+LIB_SRCS = psrephem.C ephio_c.c ephio.f rnd8.f
 
 PROGRAMS = ephtest.c keys2c.c keys2fort.c eph2upd.f psrephem_test.C
 

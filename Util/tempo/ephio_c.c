@@ -4,6 +4,7 @@
 #include <string.h>
 #include <stdlib.h>
 
+#if 0
 /* extern "C" {   **** include this for C++ compilers */
 int length_(char *, int);  /* Fortan string length, in ephio.f */
 
@@ -16,7 +17,7 @@ int rd_eph_lun_(int *, int *, char *, double *,
 int wr_eph_lun_(int *, int *, char *, double *,
 	    int *, double *, long int);
 /*}*/
-
+#endif
 
 int rd_eph_wrap (int uselun, char *fname, int lun, 
 		 int parmStatus[EPH_NUM_KEYS], 
@@ -29,10 +30,10 @@ int rd_eph_wrap (int uselun, char *fname, int lun,
   int i,j, retval;
 
   if (uselun)
-    retval = rd_eph_lun_(&lun, parmStatus, v_str, value_double, value_integer,
+    retval = rd_eph_lun__(&lun, parmStatus, v_str, value_double, value_integer,
 		     error_double, EPH_STR_LEN);
   else
-    retval = rd_eph_(fname, parmStatus, v_str, value_double, value_integer,
+    retval = rd_eph__(fname, parmStatus, v_str, value_double, value_integer,
 		     error_double, strlen(fname), EPH_STR_LEN);
 
   /* fix up the 2-d array. If C compilers would stick to standards we
@@ -95,10 +96,10 @@ int wr_eph_wrap(int uselun, char *fname, int lun,
   }
 
   if (uselun)
-    retval = wr_eph_lun_(&lun, parmStatus, v_str, value_double, value_integer,
+    retval = wr_eph_lun__(&lun, parmStatus, v_str, value_double, value_integer,
 		   error_double, EPH_STR_LEN);
   else
-    retval = wr_eph_(fname, parmStatus, v_str, value_double, value_integer,
+    retval = wr_eph__(fname, parmStatus, v_str, value_double, value_integer,
 		   error_double, strlen(fname), EPH_STR_LEN);
 
   return retval;
