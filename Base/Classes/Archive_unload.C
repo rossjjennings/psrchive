@@ -20,7 +20,7 @@ void Pulsar::Archive::unload (const char* filename)
     cerr << "Pulsar::Archive::unload (" << unload_to_filename << ")" << endl;
 
   // create the temporary filename
-  string temp_filename = unload_to_filename + "XXXXXX";
+  string temp_filename = unload_to_filename + ".XXXXXXXX";
 
   int fd = mkstemp (const_cast<char*> (temp_filename.c_str()));
   if (fd < 0)
