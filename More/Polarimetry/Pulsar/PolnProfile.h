@@ -37,11 +37,17 @@ namespace Pulsar {
     //! Destructor
     ~PolnProfile();
     
+    //! Set the number of bins
+    void resize (unsigned nbin);
+
     //! Get the number of bins
     unsigned get_nbin () const;
 
     //! Returns a pointer to the start of the array of amplitudes
     const float* get_amps (unsigned ipol) const;
+
+    //! Get the Basis of the poln profile
+    Signal::Basis get_basis () const { return basis; }
 
     //! Get the State of the poln profile
     Signal::State get_state () const { return state; }

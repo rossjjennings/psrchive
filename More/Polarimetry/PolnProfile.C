@@ -40,6 +40,12 @@ Pulsar::PolnProfile::~PolnProfile ()
 
 }
 
+void Pulsar::PolnProfile::resize (unsigned nbin)
+{
+  for (unsigned ipol=0; ipol < 4; ipol++)
+    profile[ipol]->resize (nbin);
+}
+
 //! Get the number of bins
 unsigned Pulsar::PolnProfile::get_nbin () const
 {
