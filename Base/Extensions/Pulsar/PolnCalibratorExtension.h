@@ -1,39 +1,37 @@
 //-*-C++-*-
 
-/* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/CalibratorExtension.h,v $
+/* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/PolnCalibratorExtension.h,v $
    $Revision: 1.1 $
-   $Date: 2003/09/11 21:21:32 $
+   $Date: 2003/09/12 11:50:34 $
    $Author: straten $ */
 
-#ifndef __CalibratorExtension_h
-#define __CalibratorExtension_h
+#ifndef __PolnCalibratorExtension_h
+#define __PolnCalibratorExtension_h
 
 #include "Calibration/Transformation.h"
 #include "Pulsar/Calibration.h"
 #include "Pulsar/Archive.h"
 
-// using Calibration::Transformation;
-
 namespace Pulsar {
   
-  //! Calibrator Extension
-  /*! This Extension implements the storage of Calibrator data. */
+  //! PolnCalibrator Extension
+  /*! This Extension implements the storage of PolnCalibrator data. */
   
-  class CalibratorExtension : public Pulsar::Archive::Extension {
+  class PolnCalibratorExtension : public Pulsar::Archive::Extension {
     
   public:
     
     //! Default constructor
-    CalibratorExtension ();
+    PolnCalibratorExtension ();
 
     //! Copy constructor
-    CalibratorExtension (const CalibratorExtension&);
+    PolnCalibratorExtension (const PolnCalibratorExtension&);
 
     //! Operator =
-    const CalibratorExtension& operator= (const CalibratorExtension&);
+    const PolnCalibratorExtension& operator= (const PolnCalibratorExtension&);
 
     //! Destructor
-    ~CalibratorExtension ();
+    ~PolnCalibratorExtension ();
 
     //! Set the type of the instrumental response parameterization
     void set_type (CalibratorType type);
@@ -51,9 +49,9 @@ namespace Pulsar {
     unsigned get_nchan () const;
 
     //! Get the transformation for the specified frequency channel
-    ::Calibration::Transformation* get_Transformation (unsigned ch);
+    ::Calibration::Transformation* get_Transformation (unsigned c);
     //! Get the transformation for the specified frequency channel
-    const ::Calibration::Transformation* get_Transformation (unsigned ch) const;
+    const ::Calibration::Transformation* get_Transformation (unsigned c) const;
 
   protected:
     

@@ -1,23 +1,25 @@
-#include "Pulsar/CalibratorExtension.h"
+#include "Pulsar/PolnCalibratorExtension.h"
 #include "Calibration/SingleAxis.h"
 #include "Calibration/Instrument.h"
 #include "Calibration/Polar.h"
 
 //! Default constructor
-Pulsar::CalibratorExtension::CalibratorExtension ()
+Pulsar::PolnCalibratorExtension::PolnCalibratorExtension ()
 {
   type = SingleAxis;
 }
 
 //! Copy constructor
-Pulsar::CalibratorExtension::CalibratorExtension (const CalibratorExtension& c)
+Pulsar::PolnCalibratorExtension::PolnCalibratorExtension
+(const PolnCalibratorExtension& copy)
 {
-  operator = (c);
+  operator = (copy);
 }
 
 //! Operator =
-const Pulsar::CalibratorExtension&
-Pulsar::CalibratorExtension::operator= (const CalibratorExtension& copy)
+const Pulsar::PolnCalibratorExtension&
+Pulsar::PolnCalibratorExtension::operator= 
+(const PolnCalibratorExtension& copy)
 {
   if (this == &copy)
     return *this;
@@ -35,12 +37,12 @@ Pulsar::CalibratorExtension::operator= (const CalibratorExtension& copy)
 }
 
 //! Destructor
-Pulsar::CalibratorExtension::~CalibratorExtension ()
+Pulsar::PolnCalibratorExtension::~PolnCalibratorExtension ()
 {
 }
 
 //! Set the type of the instrumental response parameterization
-void Pulsar::CalibratorExtension::set_type (CalibratorType _type)
+void Pulsar::PolnCalibratorExtension::set_type (CalibratorType _type)
 {
   if (type == _type)
     return;
@@ -50,28 +52,28 @@ void Pulsar::CalibratorExtension::set_type (CalibratorType _type)
 }
 
 //! Get the type of the instrumental response parameterization
-Pulsar::CalibratorType Pulsar::CalibratorExtension::get_type () const
+Pulsar::CalibratorType Pulsar::PolnCalibratorExtension::get_type () const
 {
   return type;
 }
 
 //! Set the name of the instrumental response parameterization
-void Pulsar::CalibratorExtension::set_name (const string& name)
+void Pulsar::PolnCalibratorExtension::set_name (const string& name)
 {
-  throw Error (InvalidState, "Pulsar::CalibratorExtension::set_name",
+  throw Error (InvalidState, "Pulsar::PolnCalibratorExtension::set_name",
 	       "not implemented");
 }
 
 //! Get the name of the instrumental response parameterization
-string Pulsar::CalibratorExtension::get_name () const
+string Pulsar::PolnCalibratorExtension::get_name () const
 {
-  throw Error (InvalidState, "Pulsar::CalibratorExtension::get_name",
+  throw Error (InvalidState, "Pulsar::PolnCalibratorExtension::get_name",
 	       "not implemented");
 }
 
 
 //! Set the number of frequency channels
-void Pulsar::CalibratorExtension::set_nchan (unsigned _nchan)
+void Pulsar::PolnCalibratorExtension::set_nchan (unsigned _nchan)
 {
   if (response.size() == _nchan)
     return;
@@ -81,34 +83,34 @@ void Pulsar::CalibratorExtension::set_nchan (unsigned _nchan)
 }
 
 //! Get the number of frequency channels
-unsigned Pulsar::CalibratorExtension::get_nchan () const
+unsigned Pulsar::PolnCalibratorExtension::get_nchan () const
 {
   return response.size();
 }
 
 //! Get the transformation for the specified frequency channel
 ::Calibration::Transformation* 
-Pulsar::CalibratorExtension::get_Transformation (unsigned ichan)
+Pulsar::PolnCalibratorExtension::get_Transformation (unsigned ichan)
 {
-  range_check (ichan, "Pulsar::CalibratorExtension::get_Transformation");
+  range_check (ichan, "Pulsar::PolnCalibratorExtension::get_Transformation");
   return response[ichan];
 }
 
 //! Get the transformation for the specified frequency channel
 const ::Calibration::Transformation*
-Pulsar::CalibratorExtension::get_Transformation (unsigned ichan) const
+Pulsar::PolnCalibratorExtension::get_Transformation (unsigned ichan) const
 {
-  range_check (ichan, "Pulsar::CalibratorExtension::get_Transformation");
+  range_check (ichan, "Pulsar::PolnCalibratorExtension::get_Transformation");
   return response[ichan];
 }
 
-void Pulsar::CalibratorExtension::construct ()
+void Pulsar::PolnCalibratorExtension::construct ()
 {
   for (unsigned ichan=0; ichan<response.size(); ichan++)
     response[ichan] = new_Transformation();
 }
 
-void Pulsar::CalibratorExtension::range_check (unsigned ichan,
+void Pulsar::PolnCalibratorExtension::range_check (unsigned ichan,
 					       const char* method) const
 {
   if (ichan >= response.size())
@@ -118,7 +120,7 @@ void Pulsar::CalibratorExtension::range_check (unsigned ichan,
 
 //! Return a new Transformation instance, based on type attribute
 ::Calibration::Transformation* 
-Pulsar::CalibratorExtension::new_Transformation ()
+Pulsar::PolnCalibratorExtension::new_Transformation ()
 {
   switch (type) {
   case SingleAxis:
@@ -131,7 +133,7 @@ Pulsar::CalibratorExtension::new_Transformation ()
     return new ::Calibration::Instrument;
   default:
     throw Error (InvalidState,
-		 "Pulsar::CalibratorExtension::new_Transformation",
+		 "Pulsar::PolnCalibratorExtension::new_Transformation",
 		 "unrecognized CalibratorType = %d", (int) type);
   }
 }
