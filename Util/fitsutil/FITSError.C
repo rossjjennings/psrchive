@@ -25,3 +25,13 @@ FITSError::FITSError (int status, const char* func, const char* msg, ...)
   construct (FailedCall, func, this_msg.c_str());
 } 
 
+FITSError::FITSError (int status, const char* func, const string& msg)
+{
+  string this_msg = msg;
+  char fits_error[FLEN_ERRMSG];
+  fits_get_errstatus (status, fits_error);
+  this_msg += ": ";
+  this_msg += fits_error;
+
+  construct (FailedCall, func, this_msg.c_str());
+}
