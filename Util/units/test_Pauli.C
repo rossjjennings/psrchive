@@ -1,8 +1,10 @@
 #include "MatrixTest.h"
 #include "Pauli.h"
 
+template <typename T> T sqr (T x) { return x*x; }
+
 template <typename T>
-void test_polar (const Jones<T>& j)
+void test_polar (const Jones<T>& j, float tolerance)
 {
   // pull the jones matrix apart into its Hermitian and Unitary components
   complex<T> d;
@@ -14,13 +16,13 @@ void test_polar (const Jones<T>& j)
   double determinant = 0;
 
   determinant = det(hq);
-  if ( fabs(determinant - 1.0) > 1e-8 ) {
+  if ( sqr(determinant - 1.0) > tolerance ) {
     cerr << "test_matrix polar det(hermitian)=" << determinant <<" != 1"<<endl;
     throw string ("test_matrix polar decomposition error");
   }
 
   determinant = det(uq);
-  if ( fabs(determinant - 1.0) > 1e-8 ) {
+  if ( sqr(determinant - 1.0) > tolerance ) {
     cerr << "test_matrix polar det(unitary)=" << determinant <<" != 1"<<endl;
     throw string ("test_matrix polar decomposition error");
   }
@@ -31,7 +33,7 @@ void test_polar (const Jones<T>& j)
 
   // test that you get the same matrix back
   double diff = norm(oj-j)/norm(oj);
-  if ( diff > 1e-10 ) {
+  if ( diff > tolerance ) {
     cerr << "test_matrix polar\n"
       " out=" << oj << " !=\n"
       "  in=" << j << endl << " diff=" << diff << endl;
@@ -43,13 +45,13 @@ void test_polar (const Jones<T>& j)
 template <typename T>
 void test_matrix (const Jones<T>& j1, const Jones<T>& j2,
 		  const Quaternion<T>& q, const complex<T>& c,
-		  bool verbose)
+		  float scale, float tolerance, bool verbose)
 {
   if (verbose)
     cerr << "test_matrix Jones/Quaternion Isomorphism" << endl;
 
-  test_polar (j1);
-  test_polar (j2);
+  test_polar (j1, tolerance);
+  test_polar (j2, tolerance);
 
 }
 
