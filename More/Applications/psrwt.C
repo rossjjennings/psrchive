@@ -6,6 +6,8 @@
 #include "Pulsar/FourierSNR.h"
 #include "Pulsar/StandardSNR.h"
 #include "Pulsar/AdaptiveSNR.h"
+#include "Pulsar/BaselineMask.h"
+#include "Pulsar/PhaseWeight.h"
 
 #include "Pulsar/SmoothMedian.h"
 #include "Pulsar/SmoothMean.h"
@@ -38,6 +40,7 @@ void usage ()
     "           fourier, fortran, or adaptive \n"
     " -w width  width of off-pulse baseline used in S/N calculations\n"
     " -c sigma  cut-off sigma used in adaptive S/N method \n"
+    " -p phs    phase centre of off-pulse baseline (implies -G)\n"
     "\n"
     "Output options:\n"
     " -b scr    add scr phase bins together \n"
@@ -47,9 +50,9 @@ void usage ()
     "\n"
     "Display options:\n"
     " -D        plot each profile \n"
-    " -d        display s/n but do not output weighted result\n"
+    " -d        display s/n but do not output weighted result \n"
+    " -G        print giant-pulse search numbers \n"
     " -o M:w    smooth profile using method, M, and window size, w \n"
-    " -p phs    phase centre of off-pulse baseline (giant-pulse search)\n"
        << endl;
 }
 
@@ -65,7 +68,7 @@ int main (int argc, char** argv)
   bool unload_result = true;
   bool normal = true;
 
-  float snr_phase = 0.0;
+  float snr_phase = -1.0;
   float duty_cycle = 0.15;
 
   char* metafile = NULL;
@@ -73,16 +76,20 @@ int main (int argc, char** argv)
   double snr_threshold = 10.0;
 
   bool snr_chosen = false;
+
   Pulsar::FourierSNR fourier_snr;
   Pulsar::StandardSNR standard_snr;
   Pulsar::AdaptiveSNR adaptive_snr;
+
+  Pulsar::BaselineMask mask;
+  adaptive_snr.set_baseline (&mask);
 
   Reference::To<Pulsar::Archive> standard;
 
   Pulsar::Smooth* smooth = 0;
 
   int c = 0;
-  const char* args = "b:c:DdFhm:M:o:Pp:Ts:S:vVw:";
+  const char* args = "b:c:DdFGhm:M:o:Pp:Ts:S:vVw:";
   while ((c = getopt(argc, argv, args)) != -1)
     switch (c) {
       
@@ -92,7 +99,7 @@ int main (int argc, char** argv)
 
     case 'c': {
       float cutoff = atof (optarg);
-      adaptive_snr.set_baseline_threshold (cutoff);
+      mask.set_threshold (cutoff);
       break;
     }
 
@@ -106,6 +113,10 @@ int main (int argc, char** argv)
 
     case 'F':
       fscrunch = 0;
+      break;
+
+    case 'G':
+      normal = false;
       break;
 
     case 'h':
@@ -173,10 +184,15 @@ int main (int argc, char** argv)
       break;
 
     case 'p':
+
       snr_phase = atof (optarg);
+      if (snr_phase < 0 || snr_phase > 1) {
+	cerr << "psrwt: invalid phase=" << snr_phase << endl;
+	return -1;
+      }
+
       cerr << "psrwt: baseline phase window centre = " << snr_phase << endl;
       normal = false;
-      // unload_result = false;
       break;
 
     case 's':
@@ -211,7 +227,7 @@ int main (int argc, char** argv)
       cerr << "psrwt: baseline phase window width = " << duty_cycle << endl;
 
       Pulsar::Profile::default_duty_cycle = duty_cycle;
-      adaptive_snr.set_initial_baseline_window (duty_cycle);
+      mask.set_initial_window (duty_cycle);
       fourier_snr.set_baseline_extent (duty_cycle);
 
       break;
@@ -294,26 +310,40 @@ int main (int argc, char** argv)
 
 	else {
 	    
+	  unload_result = false;
+
 	  double mean, variance;
 
-	  // calculate the mean and variance at the specifed phase
-	  profile->stats (snr_phase, &mean, &variance, 0, duty_cycle);
-	  
-	  // subtract the mean
-	  *profile -= mean;
-	  
-	  // sum the remaining power
-	  snr = profile->sum();
-	  
+	  if (snr_phase >= 0) {
+
+	    // calculate the mean and variance at the specifed phase
+	    profile->stats (snr_phase, &mean, &variance, 0, duty_cycle);
+	    
+	  }
+
+	  else {
+
+	    Pulsar::PhaseWeight weight;
+
+	    mask.set_Profile (profile);
+	    mask.get_weight (weight);
+
+	    weight.stats (profile, &mean, &variance);
+
+	  }
+
+	  // sum the total power above the baseline
+	  double snr = profile->sum() - mean * profile->get_nbin();
+	    
 	  // calculate the rms
 	  float rms = sqrt (variance);
-	  
+	    
 	  // find the maximum bin
 	  int maxbin = profile->find_max_bin();
 	  
 	  // get the maximum value
 	  float max = profile->get_amps()[maxbin];
-	  
+	    
 	  double phase = double(maxbin) / double(subint->get_nbin());
 	  cerr << "phase=" << phase << endl;
 	  double seconds = phase * subint->get_folding_period();
