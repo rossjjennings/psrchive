@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pcm.C,v $
-   $Revision: 1.16 $
-   $Date: 2004/01/02 18:45:01 $
+   $Revision: 1.17 $
+   $Date: 2004/01/04 10:20:42 $
    $Author: straten $ */
 
 /*! \file pcm.C 
@@ -59,7 +59,7 @@ void usage ()
     "Usage: pcm [options] [filenames] \n"
     "\n"
     "  -h         this help page \n"
-    "  -V         verbose mode \n"
+    "  -V level   set verbosity level [0->4] \n"
     "  -a archive set the output archive class name \n"
     "  -m model   model: Britton [default] or Hamaker \n"
     "\n"
@@ -255,7 +255,7 @@ int main (int argc, char *argv[]) try {
   bool publication_plots = false;
 
   int gotc = 0;
-  while ((gotc = getopt(argc, argv, "a:b:c:d:Df:hM:m:n:Pp:qsS:t:uvV")) != -1) {
+  while ((gotc = getopt(argc, argv, "a:b:c:d:Df:hM:m:n:Pp:qsS:t:uvV:")) != -1) {
     switch (gotc) {
 
     case 'a':
@@ -355,13 +355,26 @@ int main (int argc, char *argv[]) try {
       usage ();
       return 0;
 
-    case 'V':
+    case 'V': {
+
+      int level = atoi (optarg);
       verbose = true;
-      Pulsar::ReceptionCalibrator::verbose = true;
-      Pulsar::ReceptionCalibratorPlotter::verbose = true;
-      Pulsar::Archive::verbose = true;
+
+      if (level > 3)
+        Calibration::Model::very_verbose = true;
+
+      if (level > 2) 
+        Calibration::Model::verbose = true;
+
+      if (level > 1) {
+        Pulsar::ReceptionCalibrator::verbose = true;
+        Pulsar::ReceptionCalibratorPlotter::verbose = true;
+        Pulsar::Archive::verbose = true;
+      }
+
       break;
 
+    }
 
     default:
       cout << "Unrecognised option" << endl;
@@ -721,14 +734,20 @@ int mode_B (const char* standard_filename,
 
   Reference::To<Pulsar::Archive> archive;
 
+  archive = Pulsar::Archive::load (standard_filename);
+
+  model.set_standard (archive);
+
   for (unsigned i = 0; i < filenames.size(); i++) try {
 
     if (verbose)
       cerr << "pcm: loading " << filenames[i] << endl;
     
     archive = Pulsar::Archive::load(filenames[i]);
-    
+
     cout << "pcm: loaded archive: " << filenames[i] << endl;
+
+    archive->convert_state (Signal::Stokes);
 
     model.add_observation( archive );
 
