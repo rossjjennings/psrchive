@@ -6,12 +6,44 @@ static Registry::Plugin plugins;
 
 void Pulsar::Archive::Agent::plugin_load ()
 {
+  if (registry.size() != 0)
+    return;
+
   plugins.load (plugin_path ());
 
   if (plugins.ok.size() == 0)
     plugins.load (plugin_path ("PSRHOME"));
 
   loaded = true;
+}
+
+void Pulsar::Archive::Agent::plugin_report ()
+{
+  if (!loaded)
+    plugin_load ();
+
+  if (plugins.ok.size() == 0)
+    cerr << "Archive::Agent::report No successfully loaded plugins." << endl;
+  else
+    cerr << "Archive::Agent::report Successfully loaded plugins:" << endl;
+  
+  unsigned ip = 0;
+  
+  for (ip=0; ip < plugins.ok.size(); ip++)
+    cerr << " " << plugins.ok[ip] << endl;
+  
+  cerr << endl;
+
+  if (plugins.fail.size() == 0)
+    return;
+
+  cerr << "Archive::Agent::report Failed plugins:" << endl;
+
+  for (unsigned ip=0; ip < plugins.fail.size(); ip++)
+    cerr << "##############################################################\n"
+	 << plugins.fail[ip] << endl;
+
+  cerr << endl;
 }
 
 /*! constructs the plugin directory name from environment variables */
@@ -39,53 +71,5 @@ string Pulsar::Archive::Agent::plugin_path (const char* environment_variable)
   path += "/Pulsar";
 
   return path;
-}
-
-// reports on the status of the plugins
-void Pulsar::Archive::Agent::report ()
-{
-  if (!loaded)
-    plugin_load ();
-
-  cerr << endl;
-
-  if (registry.size() == 0)
-    cerr << "Archive::Agent::report No Agents registered." << endl;
-  else
-    cerr << "Archive::Agent::report Registered Agents:" << endl;
-
-  for (unsigned agent=0; agent<registry.size(); agent++)
-    cerr << " " << registry[agent]->get_name() << "\t" 
-         << registry[agent]->get_description() << endl;
-
-  cerr << endl;
-
-  if (plugins.ok.size() == 0)
-    cerr << "Archive::Agent::report No successfully loaded plugins." << endl;
-  else
-    cerr << "Archive::Agent::report Successfully loaded plugins:" << endl;
-
-  unsigned ip = 0;
-
-  for (ip=0; ip < plugins.ok.size(); ip++)
-    cerr << " " << plugins.ok[ip] << endl;
-
-  cerr << endl;
-
-  if (plugins.fail.size() == 0)
-    return;
-
-  cerr << "Archive::Agent::report Failed plugins:" << endl;
-
-  for (ip=0; ip < plugins.fail.size(); ip++)
-    cerr << "##############################################################\n"
-	 << plugins.fail[ip] << endl;
-
-  cerr << endl;
-}
-
-void Pulsar::Archive::plugin_report ()
-{
-  Pulsar::Archive::Agent::report();
 }
 

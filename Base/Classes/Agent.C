@@ -1,12 +1,34 @@
-#include "Archive.h"
+#include "Pulsar/Archive.h"
+#include "Pulsar/plugins.h"
 
 Registry::List<Pulsar::Archive::Agent> Pulsar::Archive::Agent::registry;
-
 bool Pulsar::Archive::Agent::loaded = false;
 
 //! Destructor
 Pulsar::Archive::Agent::~Agent ()
 {
+
+}
+
+// reports on the status of the plugins
+void Pulsar::Archive::Agent::report ()
+{
+  cerr << endl;
+
+  if (registry.size() == 0)
+    cerr << "Archive::Agent::report No Agents registered." << endl;
+  else
+    cerr << "Archive::Agent::report Registered Agents:" << endl;
+
+  for (unsigned agent=0; agent<registry.size(); agent++)
+    cerr << " " << registry[agent]->get_name() << "\t" 
+         << registry[agent]->get_description() << endl;
+
+  cerr << endl;
+
+#ifndef _PSRCHIVE_STATIC
+  plugin_report ();
+#endif
 
 }
 
