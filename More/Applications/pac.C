@@ -125,7 +125,7 @@ int main (int argc, char *argv[]) {
       Pulsar::Archive::set_verbosity(3);
       break;
     case 'i':
-      cout << "$Id: pac.C,v 1.47 2004/07/13 02:08:01 sord Exp $" << endl;
+      cout << "$Id: pac.C,v 1.48 2004/07/16 09:16:51 straten Exp $" << endl;
       return 0;
 
     case 'n': {
@@ -366,6 +366,11 @@ int main (int argc, char *argv[]) {
 
       pcal_engine->calibrate (arch);
 
+      if (verbose)
+	cerr << "pac: Correcting platform" << endl;
+
+      arch->correct_instrument ();
+
       cout << "pac: Polarisation calibration complete" << endl;
 
       successful_polncal = true;
@@ -382,7 +387,7 @@ int main (int argc, char *argv[]) {
     if (do_fluxcal && arch->get_scale() == Signal::Jansky && check_flags) {
       cout << "pac: " << archives[i] << " already flux calibrated" << endl;
     }
-    else if (do_fluxcal) try {
+    else if (do_fluxcal) {
 
       if (verbose)
 	cout << "pac: Generating flux calibrator" << endl;
@@ -401,12 +406,6 @@ int main (int argc, char *argv[]) {
       
       cout << "pac: Mean Tsys = " << fcal_engine->meanTsys() << endl;
       
-    }
-    catch (Error& error)  {
-      cerr << "pac: Could not perform flux calibration\n\t"
-	   << error.get_message() << endl;
-
-      throw Error (InvalidState, "pac:","Cannot perform Flux Calibration and Calibration required");
     }
 
     // find first of "." turns ./cal/poo.cfb info .unload_ext WvS
@@ -461,9 +460,6 @@ int main (int argc, char *argv[]) {
     Pulsar::ProcHistory* fitsext = arch->get<Pulsar::ProcHistory>();
     
     if (fitsext) {
-      
-      if (successful_fluxcal)
-	fitsext->set_sc_mthd("PAC");
       
       if (successful_polncal) {
 	
