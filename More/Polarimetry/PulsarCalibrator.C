@@ -147,7 +147,7 @@ void Pulsar::PulsarCalibrator::add_observation (const Archive* data)
     throw Error (InvalidParam, "Pulsar::PulsarCalibrator::add_observation",
 		 "mismatch between calibrator\n\t" 
 		 + calibrator->get_filename() +
-                 " and\n\t" + arch->get_filename() + reason);
+                 " and\n\t" + data->get_filename() + reason);
 		 
   if (data->get_poln_calibrated ())
     cerr << "Pulsar::PulsarCalibrator::add_observation warning:\n"
