@@ -13,23 +13,23 @@ LDFLAGS  += -leph $(F77LIBS) -lm
 
 include ${LOCAL_ROOT}/include/Makefile.extended
 
-CLEAN += $(BINDIR)ephtest $(BINDIR)keys2fort $(BINDIR)keys2c keyinfo.com $(LOCAL_ROOT)/include/ephio.h
+CLEAN += $(BINDIR)/ephtest $(BINDIR)/keys2fort $(BINDIR)/keys2c keyinfo.com $(LOCAL_ROOT)/include/ephio.h
 
 #
 # Assembly of include files
 #
 
-$(BINDIR)keys2c: keys2c.c Makefile
+$(BINDIR)/keys2c: keys2c.c Makefile
 	$(CC) -g -o $@ keys2c.c
 
-$(BINDIR)keys2fort: keys2fort.c Makefile
+$(BINDIR)/keys2fort: keys2fort.c Makefile
 	$(CC) -g -o $@ keys2fort.c
 
-keyinfo.com: keys.dat $(BINDIR)keys2fort Makefile
-	$(BINDIR)keys2fort
+keyinfo.com: keys.dat $(BINDIR)/keys2fort Makefile
+	$(BINDIR)/keys2fort
 
-$(LOCAL_ROOT)include/ephio.h: keys.dat $(BINDIR)keys2c
-	$(BINDIR)keys2c
+$(LOCAL_ROOT)include/ephio.h: keys.dat $(BINDIR)/keys2c
+	$(BINDIR)/keys2c
 	mv -f ephio.h $(LOCAL_ROOT)/include/ephio.h
 
 # force construction of that crazy ephio.h file
