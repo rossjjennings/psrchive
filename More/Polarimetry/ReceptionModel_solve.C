@@ -2,6 +2,8 @@
 #include "Calibration/CoherencyMeasurementSet.h"
 #include "MEAL/LevenbergMarquardt.h"
 
+#include <iostream>
+
 using namespace std;
 
 // ///////////////////////////////////////////////////////////////////////////
