@@ -39,34 +39,69 @@ unsigned Pulsar::ReceptionCalibratorPlotter::get_ndat () const
 //! Get the number of boost parameters
 unsigned Pulsar::ReceptionCalibratorPlotter::get_nboost () const
 {
-  return 3;
+  switch (calibrator->model_type) {
+  case StandardModel::Hamaker:
+    return 3;
+  case StandardModel::Britton:
+    return 1;
+  default:
+    return 0;
+  }
 }
 
 //! Get the number of rotation parameters
 unsigned Pulsar::ReceptionCalibratorPlotter::get_nrotation () const
 {
-  return 3;
+  switch (calibrator->model_type) {
+  case StandardModel::Hamaker:
+    return 3;
+  case StandardModel::Britton:
+    return 1;
+  default:
+    return 0;
+  }
 }
 
 //! Get the gain for the specified point
 Estimate<float>
 Pulsar::ReceptionCalibratorPlotter::get_gain (unsigned idat)
 {
-  return calibrator->model[idat]->polar->get_gain();
+  switch (calibrator->model_type) {
+  case StandardModel::Hamaker:
+    return calibrator->model[idat]->polar->get_gain();
+  case StandardModel::Britton:
+    return calibrator->model[idat]->physical->get_gain();
+  default:
+    return 0;
+  }
 }
 
 //! Get the gain for the specified point
 Estimate<float>
 Pulsar::ReceptionCalibratorPlotter::get_boost (unsigned idat, unsigned iboost)
 {
-  return calibrator->model[idat]->polar->get_boostGibbs(iboost);
+  switch (calibrator->model_type) {
+  case StandardModel::Hamaker:
+    return calibrator->model[idat]->polar->get_boostGibbs(iboost);
+  case StandardModel::Britton:
+    return calibrator->model[idat]->physical->get_gamma();
+  default:
+    return 0;
+  }
 }
 
     //! Get the gain for the specified point
 Estimate<float>
 Pulsar::ReceptionCalibratorPlotter::get_rotation (unsigned idat, unsigned irot)
 {
-  return calibrator->model[idat]->polar->get_rotationEuler(irot);
+  switch (calibrator->model_type) {
+  case StandardModel::Hamaker:
+    return calibrator->model[idat]->polar->get_rotationEuler(irot);
+  case StandardModel::Britton:
+    return calibrator->model[idat]->physical->get_phi();
+  default:
+    return 0;
+  }
 }
 
 void Pulsar::ReceptionCalibratorPlotter::plot_constraints (unsigned ichan)
@@ -101,6 +136,9 @@ void Pulsar::ReceptionCalibratorPlotter::plot_constraints (unsigned ichan,
   const Calibration::ReceptionModel* equation;
   equation = calibrator->model[ichan]->equation;
 
+  const Calibration::Parallactic* parallactic;
+  parallactic = &(calibrator->model[ichan]->parallactic);
+
   vector< Estimate<float> > stokes[4];
   vector< float > para;
 
@@ -122,7 +160,7 @@ void Pulsar::ReceptionCalibratorPlotter::plot_constraints (unsigned ichan,
 	  stokes[ipol].back() = data[jstate][ipol];
 	}
 
-	para.push_back ( calibrator->parallactic.get_param(0) * 180.0/M_PI );
+	para.push_back ( parallactic->get_param(0) * 180.0/M_PI );
 
       }
   }
@@ -182,15 +220,17 @@ void Pulsar::ReceptionCalibratorPlotter::plot_model (unsigned ichan,
 
   // extract the appropriate equation
   Calibration::ReceptionModel* equation = calibrator->model[ichan]->equation;
+  Calibration::Parallactic* para = &(calibrator->model[ichan]->parallactic);
 
   equation->set_source (istate);
+
+  bool plot_model_points = false;
 
   unsigned nmeas = equation->get_ndata ();
   for (unsigned imeas=0; imeas<nmeas; imeas++) {
 
     //! Get the specified Measurements
-    const Calibration::Measurements& data
-      = equation->get_data (imeas);
+    const Calibration::Measurements& data = equation->get_data (imeas);
 
     unsigned mstate = data.size();
     bool was_measured = false;
@@ -202,19 +242,22 @@ void Pulsar::ReceptionCalibratorPlotter::plot_model (unsigned ichan,
     if (!was_measured)
       continue;
 
-    // set the independent variables for this set of measurements
-    data.set_coordinates();
-
     // set the signal path through which these measurements were observed
     equation->set_path (data.path_index);
 
-    float para = calibrator->parallactic.get_param(0) * 180.0/M_PI;
+    if (!plot_model_points)
+      break;
+
+    // set the independent variables for this set of measurements
+    data.set_coordinates();
+
+    float parallactic = para->get_param(0) * 180.0/M_PI;
 
     Stokes<float> stokes = equation->evaluate ();
 
     for (unsigned ipol=0; ipol<4; ipol++) {
       cpgsci (ipol+1);
-      cpgpt1 (para, stokes[ipol], 5);
+      cpgpt1 (parallactic, stokes[ipol], 5);
     }
 
   }
@@ -222,7 +265,7 @@ void Pulsar::ReceptionCalibratorPlotter::plot_model (unsigned ichan,
 
   unsigned npt = 100;
 
-  vector<float> para (npt);
+  vector<float> parallactic (npt);
   vector<Stokes<float> > stokes (npt);
 
   MJD start = calibrator->start_epoch;
@@ -233,21 +276,21 @@ void Pulsar::ReceptionCalibratorPlotter::plot_model (unsigned ichan,
 
     MJD epoch = start + step * ipt;
 
-    calibrator->time.send (epoch);
+    calibrator->model[ichan]->time.send (epoch);
 
-    para[ipt] = calibrator->parallactic.get_param(0);
+    parallactic[ipt] = para->get_param(0);
 
     stokes[ipt] = equation->evaluate ();
-    para[ipt] *= 180.0/M_PI;
+    parallactic[ipt] *= 180.0/M_PI;
 
   }
 
   for (unsigned ipol=0; ipol<4; ipol++) {
     cpgsci (ipol+1);
     
-    cpgmove (para[0], stokes[0][ipol]);
+    cpgmove (parallactic[0], stokes[0][ipol]);
     for (unsigned ipt=1; ipt<npt; ipt++)
-      cpgdraw (para[ipt], stokes[ipt][ipol]);
+      cpgdraw (parallactic[ipt], stokes[ipt][ipol]);
     
   }
 
@@ -356,6 +399,92 @@ void Pulsar::ReceptionCalibratorPlotter::plotcal ()
   cpgsci (1);
   cpgbox("bcst",0,0,"bcnvst",0,0);
   cpgmtxt("L",2.5,.5,.5,"Stokes");
+
+  // restore the viewport
+  cpgsvp (xmin, xmax, ymin, ymax);
+
+}
+
+//! PGPLOT the calibrator model parameters as a function of frequency
+void Pulsar::ReceptionCalibratorPlotter::plot_feed ()
+{
+  unsigned ipt = 0, npt = get_ndat ();
+
+  if (npt == 0) {
+    cerr << "Pulsar::ReceptionCalibratorPlotter::plot no points to plot"
+	 << endl;
+    return;
+  }
+
+  float xmin, xmax, ymin, ymax;
+  cpgqvp (0, &xmin, &xmax, &ymin, &ymax);
+
+  float ybottom = ymin;
+  float yrange = ymax - ymin;
+  float yspace = 0.1 * yrange;
+  float yheight = (yrange - yspace) / 3.0;
+
+  cpgsci(1);
+  cpgslw(1);
+  cpgsch(1);
+
+  // the plotting class
+  EstimatePlotter plotter;
+
+  // the data to be plotted
+  vector< Estimate<float> > data (npt);
+
+  // ////////////////////////////////////////////////////////////////////
+
+  // skip the gain plot
+
+  ybottom += 0.5 * (yspace + yheight);
+
+  unsigned idim = 0, ndim = 2;
+
+  // ////////////////////////////////////////////////////////////////////
+
+  plotter.clear ();
+
+  for (idim=0; idim<ndim; idim++) {
+    for (ipt=0; ipt<npt; ipt++)
+      data[ipt] = calibrator->model[ipt]->physical->get_theta(idim)*180.0/M_PI;
+
+    plotter.add_plot (data);
+  }
+
+  cpgsvp(xmin, xmax, ybottom, ybottom + yheight);
+  for (idim=0; idim<ndim; idim++) {
+    cpgsci (idim+2);
+    plotter.plot (idim);
+  }
+
+  cpgsci (1);
+  cpgbox("bcst",0,0,"bcnvst",0,0);
+  cpgmtxt("L",2.5,.5,.5,"Orientation");
+
+  ybottom += 0.5*yspace + yheight;
+
+  // ////////////////////////////////////////////////////////////////////
+
+  plotter.clear ();
+
+  for (idim=0; idim<ndim; idim++) {
+    for (ipt=0; ipt<npt; ipt++)
+      data[ipt] = calibrator->model[ipt]->physical->get_chi(idim)*180.0/M_PI;
+
+    plotter.add_plot (data);
+  }
+
+  cpgsvp(xmin, xmax, ybottom, ybottom + yheight);
+  for (idim=0; idim<ndim; idim++) {
+    cpgsci (idim+2);
+    plotter.plot (idim);
+  }
+
+  cpgsci (1);
+  cpgbox("bcst",0,0,"bcnvst",0,0);
+  cpgmtxt("L",2.5,.5,.5,"Ellipticity");
 
   // restore the viewport
   cpgsvp (xmin, xmax, ymin, ymax);

@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ReceptionCalibrator.h,v $
-   $Revision: 1.35 $
-   $Date: 2003/09/03 13:52:10 $
+   $Revision: 1.36 $
+   $Date: 2003/09/04 10:20:54 $
    $Author: straten $ */
 
 #ifndef __ReceptionCalibrator_H
@@ -91,6 +91,12 @@ namespace Pulsar {
     //! Single-axis decomposition of backend
     Reference::To<Calibration::SingleAxis> backend;
 
+    //! The parallactic angle rotation
+    Calibration::Parallactic parallactic;
+
+    //! The time axis
+    Calibration::Axis<MJD> time;
+
     //! The signal path of the PolnCalibrator sources
     unsigned PolnCalibrator_path;
 
@@ -119,7 +125,8 @@ namespace Pulsar {
     friend class ReceptionCalibratorPlotter;
     
     //! Construct with optional first pulsar archive
-    ReceptionCalibrator (const Archive* archive = 0);
+    ReceptionCalibrator (StandardModel::Model model,
+			 const Archive* archive = 0);
     
     //! Add the specified pulse phase bin to the set of state constraints
     void add_state (unsigned pulse_phase_bin);
@@ -167,7 +174,10 @@ namespace Pulsar {
     
     //! The calibration model as a function of frequency
     vector< Reference::To<StandardModel> > model;
-    
+
+    //! The model specified on construction
+    StandardModel::Model model_type;
+
     //! Uncalibrated estimate of calibrator polarization
     SourceEstimate calibrator;
     
@@ -177,12 +187,6 @@ namespace Pulsar {
     //! The calibrators to be loaded during initial_observation
     vector<string> calibrator_filenames;
     
-    //! The parallactic angle rotation
-    Calibration::Parallactic parallactic;
-
-    //! The time axis
-    Calibration::Axis<MJD> time;
-
     //! Uncalibrated best estimate of the average pulse profile
     Reference::To<const Archive> uncalibrated;
 

@@ -1,19 +1,25 @@
 #include "Pulsar/ReceptionCalibrator.h"
+
+#include "Pulsar/SingleAxisCalibrator.h"
 #include "Pulsar/PolarCalibrator.h"
+
 #include "Pulsar/Integration.h"
 #include "Pulsar/Archive.h"
 
-#include "Calibration/Gain.h"
-#include "Calibration/Boost.h"
 #include "Calibration/SingleAxis.h"
+#include "Calibration/Boost.h"
+#include "Calibration/Gain.h"
 
 #include <algorithm>
 #include <assert.h>
 
 /*! The Archive passed to this constructor will be used to supply the first
   guess for each pulse phase bin used to constrain the fit. */
-Pulsar::ReceptionCalibrator::ReceptionCalibrator (const Archive* archive)
+Pulsar::ReceptionCalibrator::ReceptionCalibrator (StandardModel::Model type,
+						  const Archive* archive)
 {
+  model_type = type;
+
   is_fit = false;
   is_initialized = false;
 
@@ -21,9 +27,6 @@ Pulsar::ReceptionCalibrator::ReceptionCalibrator (const Archive* archive)
 
   if (archive)
     initial_observation (archive);
-
-  time.connect (&parallactic, &Calibration::Parallactic::set_epoch);
-
 }
 
 void Pulsar::ReceptionCalibrator::set_calibrators (const vector<string>& names)
@@ -94,9 +97,12 @@ Pulsar::StandardModel::StandardModel (Model _model)
 
   pulsar_path = new Calibration::ProductTransformation;
   pulsar_path->add_Transformation( instrument );
+  pulsar_path->add_Transformation( &parallactic );
 
   equation->add_path ( pulsar_path );
   Pulsar_path = equation->get_path ();
+
+  time.connect (&parallactic, &Calibration::Parallactic::set_epoch);
 
 }
 
@@ -147,11 +153,9 @@ void Pulsar::ReceptionCalibrator::initial_observation (const Archive* data)
 
   uncalibrated = data->clone();
 
-  parallactic.set_source_coordinates( uncalibrated->get_coordinates() );
-
   float latitude = 0, longitude = 0;
   uncalibrated->telescope_coordinates (&latitude, &longitude);
-  parallactic.set_observatory_coordinates (latitude, longitude);
+  sky_coord coordinates = uncalibrated->get_coordinates();
 
   unsigned nchan = uncalibrated->get_nchan();
 
@@ -159,9 +163,10 @@ void Pulsar::ReceptionCalibrator::initial_observation (const Archive* data)
 
   for (unsigned ichan=0; ichan<nchan; ichan++) {
 
-    model[ichan] = new StandardModel;
+    model[ichan] = new StandardModel (model_type);
 
-    model[ichan]->pulsar_path->add_Transformation( &parallactic );
+    model[ichan]->parallactic.set_source_coordinates( coordinates );
+    model[ichan]->parallactic.set_observatory_coordinates (latitude,longitude);
 
   }
 
@@ -174,8 +179,8 @@ void Pulsar::ReceptionCalibrator::initial_observation (const Archive* data)
 
   start_epoch = end_epoch = data->start_time ();
 
-  parallactic.set_epoch (start_epoch);
-  PA_max = PA_min = parallactic.get_param (0);
+  model[0]->parallactic.set_epoch (start_epoch);
+  PA_max = PA_min = model[0]->parallactic.get_param (0);
 
 }
 
@@ -286,15 +291,33 @@ void Pulsar::ReceptionCalibrator::add_calibrator (const Archive* data)
     throw Error (InvalidState, "Pulsar::ReceptionCalibrator::add_calibrator",
 		 "No Archive containing pulsar data has yet been added");
 
-  if (verbose)
-    cerr << "Pulsar::ReceptionCalibrator::add_calibrator"
-      " new PolarCalibrator" << endl;
+  Reference::To<PolnCalibrator> polncal;
 
-  Reference::To<PolnCalibrator> polarcal = new PolarCalibrator (data);
+  if (model_type == StandardModel::Hamaker) {
 
-  polarcal->build( uncalibrated->get_nchan() );
+    if (verbose)
+      cerr << "Pulsar::ReceptionCalibrator::add_calibrator"
+	" new PolarCalibrator" << endl;
+    
+    polncal = new PolarCalibrator (data);
+    
+  }
+  else if (model_type == StandardModel::Hamaker) {
 
-  add_PolnCalibrator (polarcal);
+    if (verbose)
+      cerr << "Pulsar::ReceptionCalibrator::add_calibrator"
+	" new SingleAxisCalibrator" << endl;
+    
+    polncal = new SingleAxisCalibrator (data);
+    
+  }
+  else 
+    throw Error (InvalidState, "Pulsar::ReceptionCalibrator::add_calibrator",
+		 "unknown StandardModel type");
+
+
+  polncal->build( uncalibrated->get_nchan() );
+  add_PolnCalibrator (polncal);
 
 }
 
@@ -330,8 +353,8 @@ void Pulsar::ReceptionCalibrator::add_observation (const Archive* data)
     if (epoch > end_epoch)
       end_epoch = epoch;
 
-    parallactic.set_epoch (epoch);
-    float PA = parallactic.get_param (0);
+    model[0]->parallactic.set_epoch (epoch);
+    float PA = model[0]->parallactic.get_param (0);
 
     if (PA < PA_min)
       PA_min = PA;
@@ -352,7 +375,8 @@ void Pulsar::ReceptionCalibrator::add_observation (const Archive* data)
       }
 
       // the selected pulse phase bins
-      Calibration::Measurements measurements ( time.new_Value(epoch) );
+      Calibration::Abscissa* abscissa = model[ichan]->time.new_Value(epoch);
+      Calibration::Measurements measurements ( abscissa );
 
       for (unsigned istate=0; istate < pulsar.size(); istate++) {
 
@@ -490,7 +514,13 @@ void Pulsar::ReceptionCalibrator::add_PolnCalibrator (const PolnCalibrator* p)
 
   }
 
-  const PolarCalibrator* polcal = dynamic_cast<const PolarCalibrator*>(p);
+  const PolarCalibrator* polcal = 0;
+  if (model_type == StandardModel::Hamaker)
+    polcal = dynamic_cast<const PolarCalibrator*>(p);
+
+  const SingleAxisCalibrator* sacal = 0;
+  if (model_type == StandardModel::Britton)
+    sacal = dynamic_cast<const SingleAxisCalibrator*>(p);
 
   vector<vector<Estimate<double> > > cal_hi;
   vector<vector<Estimate<double> > > cal_lo;
@@ -524,9 +554,10 @@ void Pulsar::ReceptionCalibrator::add_PolnCalibrator (const PolnCalibrator* p)
         // convert to MeasuredState format
         Calibration::MeasuredState state (stokes, calibrator.source_index);
 
-        Calibration::Measurements measurements ( time.new_Value(epoch) );
-        measurements.push_back (state);
+	Calibration::Abscissa* abscissa = model[ichan]->time.new_Value(epoch);
+	Calibration::Measurements measurements ( abscissa );
 
+        measurements.push_back (state);
         measurements.path_index = model[ichan]->PolnCalibrator_path;
 
         model[ichan]->equation->add_data (measurements);
@@ -536,15 +567,13 @@ void Pulsar::ReceptionCalibrator::add_PolnCalibrator (const PolnCalibrator* p)
                 " error adding ichan=" << ichan << error << endl;
       }
 
-      if (polcal) {
-	Jones< Estimate<double> > correct;
-	correct = inv (polcal->model[ichan].evaluate());
+      Jones< Estimate<double> > correct;
+      correct = inv ( p->get_response(ichan) );
 
-	stokes = correct * stokes * herm(correct);
+      stokes = correct * stokes * herm(correct);
 
-	// add the observed
-	calibrator.source[ichan].mean += stokes;
-      }
+      // add the observed
+      calibrator.source[ichan].mean += stokes;
 
     }
   }
@@ -559,6 +588,17 @@ void Pulsar::ReceptionCalibrator::add_PolnCalibrator (const PolnCalibrator* p)
     for (unsigned ichan = 0; ichan<nchan; ichan++)
       model[ichan]->polar->integrate( polcal->model[ichan] );
   }
+
+  if (sacal && sacal->model.size() == nchan)  {
+    cerr << "Pulsar::ReceptionCalibrator::add_PolnCalibrator"
+	" add Polar Model" << endl;
+
+    assert (model.size() == nchan);
+
+    for (unsigned ichan = 0; ichan<nchan; ichan++)
+      model[ichan]->physical->integrate( sacal->model[ichan] );
+  }
+
 
 }
 
@@ -615,7 +655,6 @@ void Pulsar::ReceptionCalibrator::calibrate (Archive* data, bool solve_first)
 
     Integration* integration = data->get_Integration (isub);
 
-    time.send( integration->get_epoch() );
 
     for (unsigned ichan=0; ichan<nchan; ichan++) {
 
@@ -634,6 +673,7 @@ void Pulsar::ReceptionCalibrator::calibrate (Archive* data, bool solve_first)
 		     "unknown Archive type for " + data->get_filename() );
       }
 
+      model[ichan]->time.send( integration->get_epoch() );
       response[ichan] = inv( signal_path->evaluate() );
 
     }

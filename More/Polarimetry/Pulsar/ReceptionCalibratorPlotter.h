@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/Attic/ReceptionCalibratorPlotter.h,v $
-   $Revision: 1.8 $
-   $Date: 2003/06/02 14:31:32 $
+   $Revision: 1.9 $
+   $Date: 2003/09/04 10:20:54 $
    $Author: straten $ */
 
 #ifndef __ReceptionCalibratorPlotter_H
@@ -44,6 +44,9 @@ namespace Pulsar {
 
     //! Plot the calibrator as a function of frequency
     void plotcal ();
+
+    //! Plot the feed as a function of frequency
+    void plot_feed ();
 
     //! Plot the Stokes parameters versus parallactic angle
     void plot_constraints (unsigned ichan);
