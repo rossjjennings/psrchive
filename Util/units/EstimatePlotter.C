@@ -9,6 +9,10 @@ EstimatePlotter::EstimatePlotter ()
   xrange_min = x_min = y_min = 0.0;
   xrange_max = x_max = y_max = 1.0;
 
+  minimum_error = maximum_error = -1.0;
+
+  graph_marker = -1;
+
   range_set = false;
 }
 
@@ -24,6 +28,26 @@ void EstimatePlotter::set_xrange (float xmin, float xmax)
   xrange_max = xmax;
 }
 
+//! Set the minimum value of error to plot
+void EstimatePlotter::set_minimum_error (float error)
+{
+  minimum_error = error;
+}
+
+//! Set the maximum value of error to plot
+void EstimatePlotter::set_maximum_error (float error)
+{
+  maximum_error = error;
+}
+
+/*! See <a href="http://www.astro.caltech.edu/~tjp/pgplot/chapter4.html>
+Section 4.4</a> of the PGPLOT  Graphics Subroutine Library User's Manual. */
+void EstimatePlotter::set_graph_marker (int symbol)
+{
+  graph_marker = symbol;
+}
+
+
 void EstimatePlotter::plot (unsigned index)
 {
   if (index >= xval.size())
@@ -37,9 +61,21 @@ void EstimatePlotter::plot (unsigned index)
 
   unsigned npt = xval[index].size();
 
-  for (unsigned ipt=0; ipt<npt; ipt++)
+  for (unsigned ipt=0; ipt<npt; ipt++) {
+
+    if (minimum_error >= 0.0 && yerr[index][ipt] <= minimum_error)
+      continue;
+
+    if (maximum_error >= 0.0 && yerr[index][ipt] >= maximum_error)
+      continue;
+
     cpgerr1 (6, xval[index][ipt], yval[index][ipt], yerr[index][ipt], 1.0);
+    cpgpt1 (xval[index][ipt], yval[index][ipt], graph_marker);
+
+  }
+
 }
+
 
 void EstimatePlotter::clear ()
 {

@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/EstimatePlotter.h,v $
-   $Revision: 1.5 $
-   $Date: 2003/05/30 13:33:02 $
-   $Author: pulsar $ */
+   $Revision: 1.6 $
+   $Date: 2003/10/08 13:32:18 $
+   $Author: straten $ */
 
 #ifndef __EstimatePlotter_h
 #define __EstimatePlotter_h
@@ -28,6 +28,15 @@ class EstimatePlotter {
 
   //! Set the range of x values
   void set_xrange (float x_min, float x_max);
+
+  //! Set the minimum value of error to plot
+  void set_minimum_error (float error);
+
+  //! Set the maximum value of error to plot
+  void set_maximum_error (float error);
+
+  //! Set the PGPLOT standard graph marker
+  void set_graph_marker (int symbol);
 
   //! Add a vector of Estimates to the current data set
   template<class T> void add_plot (const vector< Estimate<T> >& data);
@@ -61,6 +70,15 @@ class EstimatePlotter {
   //! range set
   bool range_set;
 
+  //! The minimum error in plot
+  float minimum_error;
+
+  //! The maximum error in plot
+  float maximum_error;
+
+  //! PGPLOT Standard Graph Marker
+  int graph_marker;
+
   vector< vector<float> > xval;
   vector< vector<float> > yval;
   vector< vector<float> > yerr;
@@ -91,18 +109,16 @@ void EstimatePlotter::add_plot (const vector< Estimate<T> >& data)
     errors[ipt] = sqrt (data[ipt].var);
 
   if (!range_set) {
-    y_min = data[0].val - errors[0];
-    y_max = data[0].val + errors[0];
     x_min = xrange_min;
     x_max = xrange_max;
-    range_set = true;
   }
-
-  if (xrange_min < x_min)
-    x_min = xrange_min;
-
-  if (xrange_max < x_max)
-    x_max = xrange_max;
+  else {
+    if (xrange_min < x_min)
+      x_min = xrange_min;
+    
+    if (xrange_max < x_max)
+      x_max = xrange_max;
+  }
 
   vector<float>& x = xval.back();
   vector<float>& y = yval.back();
@@ -110,12 +126,26 @@ void EstimatePlotter::add_plot (const vector< Estimate<T> >& data)
   double xscale = double(xrange_max - xrange_min) / double(npt-1);
 
   for (ipt=0; ipt<npt; ipt++) {
-    float yval = data[ipt].val - errors[ipt];
-    if (yval < y_min)
-      y_min = yval;
-    yval = data[ipt].val + errors[ipt];
-    if (yval > y_max)
-      y_max = yval;
+
+    if (minimum_error >= 0.0 && errors[ipt] <= minimum_error)
+      continue;
+
+    if (maximum_error >= 0.0 && errors[ipt] >= maximum_error)
+      continue;
+
+    if (!range_set) {
+      y_min = data[ipt].val - errors[ipt];
+      y_max = data[ipt].val + errors[ipt];
+      range_set = true;
+    }
+    else {
+      float yval = data[ipt].val - errors[ipt];
+      if (yval < y_min)
+	y_min = yval;
+      yval = data[ipt].val + errors[ipt];
+      if (yval > y_max)
+	y_max = yval;
+    }
 
     x[ipt] = xrange_min + xscale * double(ipt);
     y[ipt] = data[ipt].val;
