@@ -29,6 +29,7 @@ void Pulsar::CalibratorPlotter::plot (const Calibrator* calib)
   float xmin, xmax, ymin, ymax;
   cpgqvp (0, &xmin, &xmax, &ymin, &ymax);
 
+  float ybottom = ymin;
   float yrange = ymax - ymin;
   float yspace = 0.1 * yrange;
   float yheight = (yrange - yspace) / 3.0;
@@ -48,14 +49,14 @@ void Pulsar::CalibratorPlotter::plot (const Calibrator* calib)
   for (ipt=0; ipt<npt; ipt++)
     data[ipt] = get_gain( ipt );
 
-  cpgsvp (xmin, xmax, ymin, ymin + yheight);
+  cpgsvp (xmin, xmax, ybottom, ybottom + yheight);
 
   plotter.plot (data);
 
   cpgbox("bcst",0,0,"bcnvst",0,0);
   cpgmtxt("L",2.5,.5,.5,"Gain");
 
-  ymin += 0.5*yspace + yheight;
+  ybottom += 0.5*yspace + yheight;
 
 
   unsigned idim = 0, ndim = 0;
@@ -72,7 +73,7 @@ void Pulsar::CalibratorPlotter::plot (const Calibrator* calib)
     plotter.add_plot (data);
   }
 
-  cpgsvp(xmin, xmax, ymin, ymin + yheight);
+  cpgsvp(xmin, xmax, ybottom, ybottom + yheight);
   for (idim=0; idim<ndim; idim++) {
     cpgsci (idim+2);
     plotter.plot (idim);
@@ -82,7 +83,7 @@ void Pulsar::CalibratorPlotter::plot (const Calibrator* calib)
   cpgbox("bcst",0,0,"bcnvst",0,0);
   cpgmtxt("L",2.5,.5,.5,"Boost");
 
-  ymin += 0.5*yspace + yheight;
+  ybottom += 0.5*yspace + yheight;
 
   // ////////////////////////////////////////////////////////////////////
 
@@ -96,7 +97,7 @@ void Pulsar::CalibratorPlotter::plot (const Calibrator* calib)
     plotter.add_plot (data);
   }
 
-  cpgsvp(xmin, xmax, ymin, ymin + yheight);
+  cpgsvp(xmin, xmax, ybottom, ybottom + yheight);
   for (idim=0; idim<ndim; idim++) {
     cpgsci (idim+2);
     plotter.plot (idim);
@@ -105,6 +106,9 @@ void Pulsar::CalibratorPlotter::plot (const Calibrator* calib)
   cpgsci (1);
   cpgbox("bcst",0,0,"bcnvst",0,0);
   cpgmtxt("L",2.5,.5,.5,"Phase");
+
+  // restore the viewport
+  cpgsvp (xmin, xmax, ymin, ymax);
 
 }
 
