@@ -67,10 +67,10 @@ void Pulsar::Archive::find_peak_edges (int& rise, int& fall) const
   <LI> Calls Profile::find_min_phase on the total intensity
   </UL>
 */
-float Pulsar::Archive::find_min_phase () const
+float Pulsar::Archive::find_min_phase (float dc) const
 {
   Reference::To<Archive> copy = total ();
-  return copy->get_Profile(0,0,0)->find_min_phase ();
+  return copy->get_Profile(0,0,0)->find_min_phase (dc);
 }
 
 /////////////////////////////////////////////////////////////////////////////

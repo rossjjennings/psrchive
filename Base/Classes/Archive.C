@@ -413,15 +413,15 @@ float Pulsar::Archive::get_poln_flux (int _type) {
   reaches a minimum.  This phase is then used to remove the baseline from
   each of the Integrations.
   */
-void Pulsar::Archive::remove_baseline (float phase)
+void Pulsar::Archive::remove_baseline (float phase, float dc)
 {
   try {
 
     if (phase == -1.0)
-      phase = find_min_phase ();
+      phase = find_min_phase (dc);
 
     for (unsigned isub=0; isub < get_nsubint(); isub++)
-      get_Integration(isub) -> remove_baseline (phase);
+      get_Integration(isub) -> remove_baseline (phase, dc);
 
   }
   catch (Error& error) {

@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Integration.h,v $
-   $Revision: 1.58 $
-   $Date: 2004/01/02 00:10:30 $
+   $Revision: 1.59 $
+   $Date: 2004/02/10 05:41:10 $
    $Author: ahotan $ */
 
 /*
@@ -120,7 +120,7 @@ namespace Pulsar {
     float find_max_phase () const;
 
     //! Returns the centre phase of the region with minimum total intensity
-    float find_min_phase () const;
+    float find_min_phase (float dc = 0.15) const;
 
     //! Return the statistics of every profile baseline
     void baseline_stats (vector< vector< Estimate<double> > >* mean,
@@ -142,7 +142,7 @@ namespace Pulsar {
 	       bool discard_bad = false) const;
     
     //! Remove the baseline from all profiles
-    virtual void remove_baseline (float phase = -1.0);
+    virtual void remove_baseline (float phase = -1.0, float dc = 0.15);
 
     //! Set the weight of each profile to its snr squared
     void snr_weight ();

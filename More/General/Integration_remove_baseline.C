@@ -37,7 +37,7 @@ void dispersive_phases (const Pulsar::Integration* integration,
   dispersion measure and folding period have been previously set, the
   baseline phase is shifted according to the dispersion relation.
   */
-void Pulsar::Integration::remove_baseline (float phase)
+void Pulsar::Integration::remove_baseline (float phase, float dc)
 {
 
   if (Pulsar::Integration::verbose)
@@ -46,7 +46,7 @@ void Pulsar::Integration::remove_baseline (float phase)
   try {
 
     if (phase == -1.0)
-      phase = find_min_phase ();
+      phase = find_min_phase (dc);
 
     vector<float> phases;
     dispersive_phases (this, phases);
@@ -56,7 +56,8 @@ void Pulsar::Integration::remove_baseline (float phase)
       float chanphase = phase + phases[ichan];
 	
       for (unsigned ipol=0; ipol<get_npol(); ipol++)
-	*(profiles[ipol][ichan]) -= profiles[ipol][ichan] -> mean (chanphase);
+	*(profiles[ipol][ichan]) -= 
+	  profiles[ipol][ichan] -> mean (chanphase, dc);
 
     }
 

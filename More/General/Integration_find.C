@@ -101,7 +101,7 @@ void Pulsar::Integration::find_peak_edges (int& rise, int& fall) const
   <LI> Calls Profile::find_min_phase on the total intensity
   </UL>
 */
-float Pulsar::Integration::find_min_phase () const
+float Pulsar::Integration::find_min_phase (float dc) const
 {
   if (Pulsar::Integration::verbose)
     cerr << "Pulsar::Integration::find_min_phase entered" << endl;
@@ -111,7 +111,7 @@ float Pulsar::Integration::find_min_phase () const
 
   try {
     copy = total ();
-    min_phase = copy->profiles[0][0]->find_min_phase ();
+    min_phase = copy->profiles[0][0]->find_min_phase (dc);
   }
   catch (Error& err) {
     if (copy) delete copy;
