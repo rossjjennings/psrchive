@@ -1973,7 +1973,7 @@ void Pulsar::FITSArchive::unload_integration (int row,
       }
       else
 	// Find the scale factor
-	scalefac = max_short / (max - min);
+	scalefac = (max - min) / max_short;
       
       if (verbose)
 	cerr << "FITSArchive::unload_integration scalefac = "
@@ -1983,7 +1983,7 @@ void Pulsar::FITSArchive::unload_integration (int row,
       // Apply the scale factor
       
       for (unsigned i = 0; i < nbin; i++) {
-	temparray2[i] = int16 ((temparray1[i]-offset) * scalefac);
+	temparray2[i] = int16 ((temparray1[i]-offset) / scalefac);
       }
 
       // Write the scale factor to file
@@ -2050,7 +2050,7 @@ void Pulsar::FITSArchive::unload_integration (int row,
 
 string Pulsar::FITSArchive::Agent::get_description () 
 {
-  return "PSRFITS version 1.1";
+  return "PSRFITS version 1.2";
 }
 
 // /////////////////////////////////////////////////////////////////////
