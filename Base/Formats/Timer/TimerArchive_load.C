@@ -83,7 +83,11 @@ void Pulsar::TimerArchive::subint_load (FILE* fptr)
   bool reverse_U = false;
   bool reverse_V = false;
 
-  if (baseband && version<15.1 && hdr.banda.npol==4 && circular) {
+  // feed_offset is set to -1 by default in older versions of psrdisp
+  if (baseband && version < 15.1)
+    hdr.banda.feed_offset = 0.0;
+
+  if (baseband && version < 15.1 && hdr.banda.npol==4 && circular) {
 
     if (verbose)
       cerr << "TimerArchive::subint_load correct psrdisp circular" << endl;
@@ -111,6 +115,13 @@ void Pulsar::TimerArchive::subint_load (FILE* fptr)
     hdr.minorversion = 0.1;
   }
 
+  // Before psrdisp v.18.1, lower sideband data did not have their sign
+  // of Stokes V properly flipped.
+  if (baseband && version<18.1 && hdr.banda.npol==4)  {
+    hdr.version = 18.0;
+    hdr.minorversion = 0.1;
+    reverse_V = true;
+  }
 
   for (unsigned isub=0; isub < get_nsubint(); isub++) { 
     if (verbose)
@@ -241,18 +252,18 @@ void Pulsar::TimerArchive::subint_load (FILE* fptr)
 
     if (reverse_U) {
       if (verbose)
-	cerr << "TimerArchive::subint_load reversing sign of Stokes U" 
+	cerr << "TimerArchive::subint_load reversing sign of ipol=2" 
 	     << endl;
       for (int ichan=0; ichan<hdr.nsub_band; ichan++)
-	subint->profiles[2][ichan]->operator*=(-1.0);
+	*(subint->profiles[2][ichan]) *= -1.0;
     }
     
     if (reverse_V) {
       if (verbose)
-	cerr << "TimerArchive::subint_load reversing sign of Stokes V" 
+	cerr << "TimerArchive::subint_load reversing sign of ipol=3" 
 	     << endl;
       for (int ichan=0; ichan<hdr.nsub_band; ichan++)
-	subint->profiles[3][ichan]->operator*=(-1.0);
+	*(subint->profiles[3][ichan]) *= -1.0;
     }
 
   } // end for each sub_int
@@ -260,10 +271,6 @@ void Pulsar::TimerArchive::subint_load (FILE* fptr)
   // Weights initialized to one in subint constructor, will always be 
   // unloaded as such - MCB
   hdr.wts_and_bpass = 1;
-
-  // feed_offset is set to -1 by default in older versions of psrdisp
-  if (baseband && version < 15.1)
-    hdr.banda.feed_offset = 0.0;
 
   if (verbose) 
     fprintf(stderr, "TimerArchive::subint_load Read in %d sub_ints\n",
