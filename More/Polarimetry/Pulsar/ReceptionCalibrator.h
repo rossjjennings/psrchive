@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ReceptionCalibrator.h,v $
-   $Revision: 1.5 $
-   $Date: 2003/04/26 06:52:02 $
+   $Revision: 1.6 $
+   $Date: 2003/04/27 10:54:38 $
    $Author: straten $ */
 
 #ifndef __ReceptionCalibrator_H
@@ -16,6 +16,7 @@
 namespace Pulsar {
 
   class Archive;
+  class Integration;
   class PolnCalibrator;
   class FluxCalibrator;
 
@@ -73,8 +74,11 @@ namespace Pulsar {
     //! The parallactic angle rotation
     Calibration::Parallactic parallactic;
 
-    //! First, uncalibrated estimate of the average pulse profile
+    //! Uncalibrated best estimate of the average pulse profile
     Reference::To<const Archive> uncalibrated;
+
+    //! Flag set after the fit method has been called
+    bool fixed;
 
     //! Solve equation for each frequency
     void fit ();
@@ -82,8 +86,19 @@ namespace Pulsar {
     //! Check that the model is fixed
     void check_fixed (const char* method);
 
-    //! Add the archive to the data
-    void add_data (PhaseEstimate& estimate, const Archive* data);
+    //! Add the estimate to pulsar attribute
+    void add_estimate (PhaseEstimate& estimate);
+
+    //! Add Integration data to the MeasuredState vector
+    /*! Data is taken from the specified frequency channel and phase bin.
+      \retval bins the measured states to which an entry will be appended
+      \param estimate contains the bin number and a running mean estimate
+      \param ichan the frequency channel
+      \param data the Integration data */
+    void add_data (vector<Calibration::MeasuredState>& bins,
+		   PhaseEstimate& estimate,
+		   unsigned ichan,
+		   const Integration* data);
 
   };
 
@@ -94,11 +109,18 @@ namespace Pulsar {
     //! Construct with the specified bin from Archive
     PhaseEstimate (unsigned ibin = 0) { phase_bin = ibin; }
 
-    //! Pulsar polarization as a function of frequency
-    vector< MeanEstimate<Stokes<double>, double> > states;
+    //! Update each state with the mean
+    void update_state();
+
+    //! Best estimate of Stokes parameters as a function of frequency
+    vector< MeanEstimate<Stokes<double>, double> > mean;
+
+    //! Model fit of added to equation as a function of frequency
+    vector< Calibration::StokesState > state;
 
     //! Phase bin from which
     unsigned phase_bin;
+
   };
 
 }

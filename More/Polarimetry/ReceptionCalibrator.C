@@ -35,12 +35,32 @@ Pulsar::ReceptionCalibrator::ReceptionCalibrator (const Archive* archive)
   else
     uncalibrated = archive;
 
-  float latitude = 0;
-  uncalibrated->telescope_coordinates (&latitude);
-  parallactic.set_observatory_latitude( latitude * M_PI/180.0 );
+  parallactic.set_source_coordinates( uncalibrated->get_coordinates() );
 
-  sky_coord position = uncalibrated->get_coordinates();
-  parallactic.set_source_declination( position.dec().getRadians() );
+  float latitude = 0, longitude = 0;
+  uncalibrated->telescope_coordinates (&latitude, &longitude);
+  parallactic.set_observatory_coordinates (latitude, longitude);
+
+  unsigned nchan = uncalibrated->get_nchan();
+
+  equation.resize (nchan);
+  calibrator.resize (nchan);
+
+  Stokes<double> cal_state (1,0,1,0);
+
+  for (unsigned ichan=0; ichan<nchan; ichan++) {
+
+    calibrator[ichan].set_stokes (cal_state);
+    for (unsigned istokes=0; istokes<4; istokes++)
+      calibrator[ichan].set_infit (istokes, false);
+    
+    // add the calibrator state before the parallactic angle transformat
+    equation[ichan].model.add_state( &(calibrator[ichan]) );
+    equation[ichan].model.add_transformation( &parallactic );
+
+  }
+
+  fixed = false;
 }
 
 
@@ -63,8 +83,8 @@ void Pulsar::ReceptionCalibrator::add_state (float phase)
       return;
     }
 
-  pulsar.push_back ( PhaseEstimate (ibin) );
-  add_data (pulsar.back(), uncalibrated);
+  pulsar.push_back( PhaseEstimate (ibin) );
+  add_estimate( pulsar.back() );
 }
 
 
@@ -77,6 +97,8 @@ unsigned Pulsar::ReceptionCalibrator::get_nstate () const
 //! Add the specified pulsar observation to the set of constraints
 void Pulsar::ReceptionCalibrator::add_observation (const Archive* data)
 {
+  check_fixed ("Pulsar::ReceptionCalibrator::add_observation");
+
   string reason;
 
   if (!uncalibrated->mixable (data, reason))
@@ -85,11 +107,77 @@ void Pulsar::ReceptionCalibrator::add_observation (const Archive* data)
 		 "'\ndoes not mix with '" + uncalibrated->get_filename() + 
 		 "\n" + reason);
 
+  unsigned nsub = data->get_nsubint ();
+  unsigned nchan = data->get_nchan ();
+
+  for (unsigned isub=0; isub<nsub; isub++) {
+
+    const Integration* integration = data->get_Integration (isub);
+    MJD epoch = integration->get_epoch ();
+
+    parallactic.set_epoch (epoch);
+
+    for (unsigned ichan=0; ichan<nchan; ichan++) {
+
+      // the selected pulse phase bins
+      vector<Calibration::MeasuredState> measurements;
+
+      for (unsigned istate=0; istate < pulsar.size(); istate++) {
+	add_data (measurements, pulsar[istate], ichan, integration);
+	measurements.back().state_index = istate + 1;
+      }
+
+      equation[ichan].add_measurement (epoch, measurements);
+    }
+  }
+}
+
+void
+Pulsar::ReceptionCalibrator::add_data(vector<Calibration::MeasuredState>& bins,
+				      PhaseEstimate& estimate,
+				      unsigned ichan,
+				      const Integration* data)
+{
+  unsigned nchan = data->get_nchan ();
+
+  // sanity check
+  if (estimate.mean.size () != nchan)
+    throw Error (InvalidState, "Pulsar::ReceptionCalibrator::add_data",
+		 "PhaseEstimate.nchan=%d != Integration.nchan=%d",
+		 estimate.mean.size(), nchan);
+
+  unsigned ibin = estimate.phase_bin;
+
+  Estimate<Stokes<float>, float> stokes;
+
+  // optimization: the variance is the same for all pulse phase bins
+  float* var = 0;
+  if (bins.size() == 0)
+    var = &(stokes.var);
+  else
+    stokes.var = bins[0].var;
+
+  stokes.val = data->get_Stokes ( ichan, ibin, var );
+
+  // NOTE: the measured states are NOT corrected for PA
+  Calibration::MeasuredState state;
+  state.val = stokes.val;
+  state.var = stokes.var;
+
+  bins.push_back ( state );
+
+  // Correct for parallactic angle rotation before adding to best estimate
+  Jones<double> unpara = inv( parallactic.evaluate() );
+  stokes.val = unpara * stokes.val * herm(unpara);
+  estimate.mean[ichan] += stokes;
+
 }
 
 //! Add the specified PolnCalibrator observation to the set of constraints
 void Pulsar::ReceptionCalibrator::add_PolnCalibrator (const PolnCalibrator* p)
 {
+  check_fixed ("Pulsar::ReceptionCalibrator::add_PolnCalibrator");
+
   cerr << "Pulsar::ReceptionCalibrator::add_PolnCalibrator unimplemented"
        << endl;
 }
@@ -97,72 +185,96 @@ void Pulsar::ReceptionCalibrator::add_PolnCalibrator (const PolnCalibrator* p)
 //! Add the specified FluxCalibrator observation to the set of constraints
 void Pulsar::ReceptionCalibrator::add_FluxCalibrator (const FluxCalibrator* f)
 {
+  check_fixed ("Pulsar::ReceptionCalibrator::add_FluxCalibrator");
+
   cerr << "Pulsar::ReceptionCalibrator::add_FluxCalibrator unimplemented"
        << endl;
 }
 
 //! Calibrate the polarization of the given archive
-void Pulsar::ReceptionCalibrator::calibrate (Archive* archive)
+void Pulsar::ReceptionCalibrator::calibrate (Archive* data)
 {
-  cerr << "Pulsar::ReceptionCalibrator::calibrate unimplemented" << endl;
+  cerr << "Pulsar::ReceptionCalibrator::calibrate" << endl;
+
+  if (!fixed)
+    fit ();
+
+  string reason;
+  if (!uncalibrated->match (data, reason))
+    throw Error (InvalidParam, "Pulsar::ReceptionCalibrator::calibrate",
+		 "Pulsar::Archive='" + data->get_filename() +
+		 "'\ndoes not match '" + uncalibrated->get_filename() + 
+		 "\n" + reason);
+
+  unsigned nsub = data->get_nsubint ();
+  unsigned nchan = data->get_nchan ();
+
+  // sanity check
+  assert (nchan == equation.size());
+
+  vector< Jones<float> > response (nchan);
+
+  for (unsigned isub=0; isub<nsub; isub++) {
+
+    Integration* integration = data->get_Integration (isub);
+    MJD epoch = integration->get_epoch ();
+
+    for (unsigned ichan=0; ichan<nchan; ichan++) {
+      equation[ichan].set_epoch (epoch);
+      response[ichan] = equation[ichan].model.get_Jones();
+    }
+
+    Calibrator::calibrate (integration, response);
+
+    if (isub == 0)
+      data->set_state (integration->get_state());
+    
+  }
+
+  // TODO: set calibrated flags
 }
 
 
 void Pulsar::ReceptionCalibrator::fit ()
 {
-  unsigned nchan = uncalibrated->get_nchan();
+  if (fixed)
+    return;
 
-  equation.resize (nchan);
-  calibrator.resize (nchan);
+  for (unsigned istate=0; istate<pulsar.size(); istate++)
+    pulsar[istate].update_state ();
 
-  Stokes<double> cal_state (1,0,1,0);
+  for (unsigned ichan=0; ichan<equation.size(); ichan++)
+    equation[ichan].solve ();
 
-  for (unsigned ichan=0; ichan<nchan; ichan++) {
-
-    calibrator[ichan].set_stokes (cal_state);
-    for (unsigned istokes=0; istokes<4; istokes++)
-      calibrator[ichan].set_infit (istokes, false);
-    
-    // add the calibrator state before the parallactic angle transformat
-    equation[ichan].model.add_state( &(calibrator[ichan]) );
-    equation[ichan].model.add_transformation (&parallactic);
-
-    // for (unsigned istate=0; istate<pulsar.size(); istate++)
-      // pulsar[istate].states[ichan].get_Estimate();
-  }
+  fixed = true;
 }
 
-void Pulsar::ReceptionCalibrator::add_data (PhaseEstimate& estimate,
-					    const Archive* data)
+
+void Pulsar::ReceptionCalibrator::add_estimate (PhaseEstimate& estimate)
 {
-  unsigned nchan = data->get_nchan ();
-  estimate.states.resize (nchan);
+  unsigned nchan = uncalibrated->get_nchan ();
 
-  unsigned nsub = data->get_nsubint ();
+  estimate.mean.resize (nchan);
+  estimate.state.resize (nchan);
 
-  unsigned ibin = estimate.phase_bin;
-
-  for (unsigned isub=0; isub<nsub; isub++) {
-
-    const Integration* integration = data->get_Integration (isub);
-    Estimate<Stokes<float>, float> stokes;
-
-    for (unsigned ichan=0; ichan<nchan; ichan++) {
-
-      stokes.val = integration->get_Stokes ( ichan, ibin, &(stokes.var) );
-
-      // TODO: undo parallactic angle transformation
-
-      estimate.states[ichan] += stokes;
-//Estimate<Stokes<double>, double>(stokes);
-
-    }
-  }
+  for (unsigned ichan=0; ichan<nchan; ichan++)
+    equation[ichan].model.add_state( &(estimate.state[ichan]) );
 }
-
 
 void Pulsar::ReceptionCalibrator::check_fixed (const char* method)
 {
   if (is_fixed())
     throw Error (InvalidState, method, "Model has been fit. Cannot add data.");
+}
+
+bool Pulsar::ReceptionCalibrator::is_fixed () const
+{
+  return fixed;
+}
+
+/*! Update the best guess of each unknown input state */
+void Pulsar::PhaseEstimate::update_state ()
+{
+  for (unsigned ichan=0; ichan < state.size(); ichan++)
+    state[ichan].set_stokes( mean[ichan].get_Estimate().val );
 }
