@@ -140,7 +140,7 @@ void Pulsar::FITSArchive::load_PolnCalibratorExtension (fitsfile* fptr)
   for (int i = 0; i < nch_fdpr; i++) {
     if (pce->get_valid(i))
       for (int j = 0; j < ncpar; j++) {
-	pce->get_Transformation(i)->set_param(j,data.get()[count]);
+	pce->get_transformation(i)->set_param(j,data.get()[count]);
 	count++;
       }
     else
@@ -166,7 +166,7 @@ void Pulsar::FITSArchive::load_PolnCalibratorExtension (fitsfile* fptr)
     if (pce->get_valid(i))
       for (int j = 0; j < ncpar; j++) {
 	float err = data.get()[count];
-	pce->get_Transformation(i)->set_variance (j, err*err);
+	pce->get_transformation(i)->set_variance (j, err*err);
 	count++;
       }
     else

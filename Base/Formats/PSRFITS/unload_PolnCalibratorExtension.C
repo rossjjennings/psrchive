@@ -34,7 +34,7 @@ void Pulsar::FITSArchive::unload (fitsfile* fptr,
   
   for (int i = 0; i < nch_fdpr; i++)
     if (pce->get_valid(i))
-      ncpar = pce->get_Transformation(i)->get_nparam(); 
+      ncpar = pce->get_transformation(i)->get_nparam(); 
 
   if (verbose) cerr << "FITSArchive::unload PolnCalibratorExtension nchan=" 
 		    << nch_fdpr <<  " nparam=" << ncpar << endl;
@@ -113,7 +113,7 @@ void Pulsar::FITSArchive::unload (fitsfile* fptr,
   for (int i = 0; i < nch_fdpr; i++)
     if (pce->get_valid(i))
       for (int j = 0; j < ncpar; j++) {
-	data.get()[count] = pce->get_Transformation(i)->get_param(j);
+	data.get()[count] = pce->get_transformation(i)->get_param(j);
 	count++;
       }
     else
@@ -137,7 +137,7 @@ void Pulsar::FITSArchive::unload (fitsfile* fptr,
   for (int i = 0; i < nch_fdpr; i++)
     if (pce->get_valid(i))
       for (int j = 0; j < ncpar; j++) {
-	data.get()[count] = sqrt( pce->get_Transformation(i)->get_variance(j) );
+	data.get()[count] = sqrt( pce->get_transformation(i)->get_variance(j) );
 	count++;
       }
     else
