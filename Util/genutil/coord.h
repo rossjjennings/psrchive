@@ -1,6 +1,6 @@
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/coord.h,v $
-   $Revision: 1.4 $
-   $Date: 2001/06/02 07:24:54 $
+   $Revision: 1.5 $
+   $Date: 2002/04/21 14:53:56 $
    $Author: straten $ */
 
 #ifndef __COORD_H
@@ -52,7 +52,7 @@ int coord2name (char* pulsar, double ra, double dec);
 	returns latitude and longitude (in degrees) and height
 	(in metres) for telescope given by its tempo code
    ******************************************************************** */
-int telescope_coords (int telescope, float* latitude, 
+int telescope_coords (char telescope, float* latitude, 
 		      float* longitude, float* elevation);
 
 /* ********************************************************************

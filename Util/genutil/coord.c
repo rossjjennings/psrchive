@@ -206,50 +206,50 @@ int coord2name (char* pulsar, double ra, double dec)
 
    ********************************************************************** */
 
-int telescope_coords (int telescope, float* latitude, 
+int telescope_coords (char telescope, float* latitude, 
 		      float* longitude, float* elevation)
 {
   float latd=-999, longd=-999, elev=-1e9;
   
   switch (telescope) {
 
-  case 2:
+  case '2':
     /* ATCA Narrabri */
     latd = -30.31;
     longd = 149.57;
     elev = 217.0;
     break;
 
-  case 3:
+  case '3':
     /* Arecibo */
     latd = 18.345;
     longd = 293.247;
     elev = 496.0;
     break;
 
-  case 4:
+  case '4':
     /* Hobart */
     latd = 42.805;
     longd = 147.439;
     elev = 26.0;
     break;
     
-  case 5:
+  case '5':
     /* Urumqi */
     latd = 43.47;
     longd = 87.1778;
     elev = 2029.3;
 
-  case 6:
+  case '6':
     /* Tidbinbilla */
     latd = -35.4;
     longd = 148.98;
     elev = 670.0;
     break;
 
-  case 0: 
+  case '0': 
     fprintf(stderr, "telescope_coords: 0 -- assuming Parkes!\n");
-  case 7:
+  case '7':
     /* Parkes */
     latd = -33.0;
     longd = 148.2617;
