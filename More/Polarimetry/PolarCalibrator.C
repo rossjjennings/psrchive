@@ -1,4 +1,5 @@
 #include "Pulsar/PolarCalibrator.h"
+#include "Pauli.h"
 
 //! Construct from an single PolnCal Pulsar::Archive
 Pulsar::PolarCalibrator::PolarCalibrator (const Archive* archive) 
@@ -23,8 +24,8 @@ Pulsar::PolarCalibrator::solve (const vector<Estimate<double> >& hi,
     cerr << "Pulsar::PolarCalibrator::solve" << endl;
 
   // Convert the coherency vectors into Stokes parameters.  
-  Stokes< Estimate<double> > stokes_hi = convert (hi);
-  Stokes< Estimate<double> > stokes_lo = convert (lo);
+  Stokes< Estimate<double> > stokes_hi = coherency( convert (hi) );
+  Stokes< Estimate<double> > stokes_lo = coherency( convert (lo) );
 
   stokes_hi *= 2.0;
   stokes_lo *= 2.0;
@@ -57,7 +58,7 @@ const char* Pulsar::PolarCalibrator::Info::get_name (unsigned iclass) const
   case 1:
     return "Boost, sinh\\(2128)\\.m\\b\\u \\(0832)";
   case 2:
-    return "Rotation";
+    return "\\gf\\dk\\u (deg.)";
   default:
     return "";
   }
@@ -76,6 +77,16 @@ unsigned Pulsar::PolarCalibrator::Info::get_nparam (unsigned iclass) const
     return 0;
   }
 }
+
+//! Return the scale of parameters in the specified class
+float Pulsar::PolarCalibrator::Info::get_scale (unsigned iclass) const
+{
+  if (iclass == 2)
+    return 180.0 / M_PI;
+  
+  return 1.0;
+}
+
 
 Pulsar::Calibrator::Info* Pulsar::PolarCalibrator::get_Info () const
 {

@@ -12,6 +12,7 @@
 #include "Calibration/CoherencyMeasurementSet.h"
 
 #include "RealTimer.h"
+#include "Pauli.h"
 #include "fftm.h"
 
 #ifdef _DEBUG

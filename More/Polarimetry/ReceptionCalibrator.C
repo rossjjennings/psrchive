@@ -1,10 +1,14 @@
 #include "Pulsar/ReceptionCalibrator.h"
 
+#include "Pulsar/CorrectionsCalibrator.h"
 #include "Pulsar/SingleAxisCalibrator.h"
 #include "Pulsar/PolarCalibrator.h"
 
-#include "Pulsar/Integration.h"
+#include "Pulsar/Telescope.h"
+#include "Pulsar/Receiver.h"
+
 #include "Pulsar/Archive.h"
+#include "Pulsar/Integration.h"
 
 #include "Calibration/SingleAxis.h"
 #include "Calibration/Feed.h"
@@ -13,6 +17,8 @@
 
 #include "Calibration/SingleAxisPolynomial.h"
 #include "Calibration/Polynomial.h"
+
+#include "Pauli.h"
 
 #include <algorithm>
 #include <assert.h>
@@ -205,7 +211,12 @@ void Pulsar::ReceptionCalibrator::initial_observation (const Archive* data)
 		 data->get_filename().c_str(),
 		 Signal::state_string(data->get_state()));
 
-  if (data->get_parallactic_corrected ())
+  // use the CorrectionsCalibrator class to determine applicability
+  CorrectionsCalibrator corrections;
+
+  if (! (corrections.needs_correction (data) &&
+	 corrections.should_correct_vertical &&
+	 corrections.must_correct_platform) )
     throw Error (InvalidParam,
 		 "Pulsar::ReceptionCalibrator::initial_observation",
 		 "Pulsar::Archive='" + data->get_filename() + "'\n"
@@ -217,8 +228,9 @@ void Pulsar::ReceptionCalibrator::initial_observation (const Archive* data)
 
   calibrator = data->clone();
 
-  float latitude = 0, longitude = 0;
-  calibrator->telescope_coordinates (&latitude, &longitude);
+  float latitude = corrections.telescope->get_latitude().getDegrees();
+  float longitude = corrections.telescope->get_longitude().getDegrees();
+
   sky_coord coordinates = calibrator->get_coordinates();
 
   unsigned nchan = calibrator->get_nchan();
@@ -232,7 +244,7 @@ void Pulsar::ReceptionCalibrator::initial_observation (const Archive* data)
     if (measure_cal_Q)
       model[ichan] -> fix_orientation ();
 
-    model[ichan]->parallactic.set_source_coordinates( coordinates );
+    model[ichan]->parallactic.set_source_coordinates (coordinates);
     model[ichan]->parallactic.set_observatory_coordinates (latitude,longitude);
 
   }
@@ -526,7 +538,7 @@ Pulsar::ReceptionCalibrator::add_data
     Jones<Estimate<double> > correct;
     correct = inv( model[ichan]->pulsar_path->evaluate() );
     
-    stokes = correct * stokes * herm(correct);
+    stokes = transform( stokes, correct );
     
     estimate.source_guess[ichan].integrate( stokes );
 
@@ -674,10 +686,10 @@ try {
       }
 
       // convert to Stokes parameters
-      Stokes< Estimate<double> > cal_stokes = convert (cal);
+      Stokes< Estimate<double> > cal_stokes = coherency( convert (cal) );
       cal_stokes *= 2.0;
 
-      Stokes< Estimate<double> > fcal_stokes = convert (fcal);
+      Stokes< Estimate<double> > fcal_stokes = coherency( convert (fcal) );
       fcal_stokes *= 2.0;
 
       try {
@@ -727,12 +739,12 @@ try {
 
       if (flux_calibrator) {
 
-	fcal_stokes = correct * fcal_stokes * herm(correct);
+	fcal_stokes = transform( fcal_stokes, correct );
 	flux_calibrator_estimate.source_guess[ichan].integrate (fcal_stokes);
 
       }
 
-      cal_stokes = correct * cal_stokes * herm(correct);
+      cal_stokes = transform( cal_stokes, correct );
       calibrator_estimate.source_guess[ichan].integrate (cal_stokes);
 
     }
@@ -896,8 +908,18 @@ void Pulsar::ReceptionCalibrator::precalibrate (Archive* data)
     
   }
 
-  data->set_parallactic_corrected (parallactic_corrected);
   data->set_poln_calibrated (true);
+
+  Receiver* receiver = data->get<Receiver>();
+
+  if (!receiver) {
+    cerr << "Pulsar::ReceptionCalibrator::precalibrate WARNING: "
+      "cannot record corrections" << endl;
+    return;
+  }
+
+  receiver->set_platform_corrected (parallactic_corrected);
+  receiver->set_feed_corrected (true);
 
 }
 

@@ -3,6 +3,7 @@
 #include "Pulsar/CalibratorStokes.h"
 
 #include "Calibration/SingleAxis.h"
+#include "Pauli.h"
 
 Pulsar::HybridCalibrator::HybridCalibrator (PolnCalibrator* _calibrator)
 {
@@ -148,12 +149,12 @@ void Pulsar::HybridCalibrator::calculate_transformation ()
     xform->evaluate (response);
 
     Stokes< Estimate<double> > stokes = reference_input->get_stokes (ichan);
-    Jones< Estimate<double> > coherence = response * stokes * herm(response);
+    Jones< Estimate<double> > rho = response * convert(stokes) * herm(response);
 
-    cal[0] = 0.5 * coherence.j(0,0).real();
-    cal[1] = 0.5 * coherence.j(1,1).real();
-    cal[2] = 0.5 * coherence.j(1,0).real();
-    cal[3] = 0.5 * coherence.j(1,0).imag();
+    cal[0] = 0.5 * rho.j(0,0).real();
+    cal[1] = 0.5 * rho.j(1,1).real();
+    cal[2] = 0.5 * rho.j(1,0).real();
+    cal[3] = 0.5 * rho.j(1,0).imag();
 
     pre_single_axis.solve (cal);
 
