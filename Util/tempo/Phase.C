@@ -1,10 +1,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <limits.h>
-
-//#if defined (sun) && !defined(__GNUC__)
-//#include <sunmath.h>
-//#endif
+#include <math.h>
 
 #include "Phase.h"
 
