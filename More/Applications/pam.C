@@ -1,4 +1,8 @@
 #include <algorithm>
+#include <exception>
+#include <stdexcept>
+#include <typeinfo>
+#include <new>
 
 #include <string.h>
 #include <unistd.h>
@@ -197,7 +201,7 @@ int main (int argc, char *argv[]) {
 	Pulsar::Archive::set_verbosity(3);
 	break;
       case 'i':
-	cout << "$Id: pam.C,v 1.40 2004/07/26 01:18:41 hknight Exp $" << endl;
+	cout << "$Id: pam.C,v 1.41 2004/07/26 04:33:37 hknight Exp $" << endl;
 	return 0;
       case 'm':
 	save = true;
@@ -760,7 +764,12 @@ int main (int argc, char *argv[]) {
     return 0;
 
   } catch(Error& er) { cerr << er << endl;
-  } catch(...) { cerr << "Unknown exception caught" << endl;
+  } catch (string& error){  cerr << "exception thrown: " << error << endl;
+  } catch (bad_alloc& ba){  cerr << "Caught a bad_alloc: '" << ba.what() << "'" << endl ;
+  } catch (exception& e) {  cerr << "caught an exception of type '" 
+				 << typeid(e).name() << "'" << endl; 
+  } catch(...){ fprintf(stderr,"Unknown exception caught\n");
+
   }
   exit(-1);
 }
