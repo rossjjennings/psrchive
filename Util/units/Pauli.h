@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Pauli.h,v $
-   $Revision: 1.11 $
-   $Date: 2004/04/06 11:44:57 $
+   $Revision: 1.12 $
+   $Date: 2004/04/23 13:27:20 $
    $Author: straten $ */
 
 #ifndef __Pauli_H
@@ -76,7 +76,7 @@ const Quaternion<complex<T>, Hermitian> convert (const Jones<T>& j)
       T(0.5) * ci (j.j12 - j.j21) );
 }
 
-// convert Jones matrix to Hermitian Biquaternion
+// convert Jones matrix to Unitary Biquaternion
 template<typename T>
 const Quaternion<complex<T>, Unitary> unitary (const Jones<T>& j)
 {
