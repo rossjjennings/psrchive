@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/rhythm/rhythm.h,v $
-   $Revision: 1.17 $
-   $Date: 2003/04/22 07:58:10 $
+   $Revision: 1.18 $
+   $Date: 2003/04/23 07:36:14 $
    $Author: ahotan $ */
 
 // //////////////////////////////////////////////////////////////////////////
@@ -104,7 +104,8 @@ class Rhythm : public QMainWindow
   QListBox* toa_text;
 
   void load_toas (const char* fname);
-  
+  void save_toas (const char* fname);
+
   // /////////////////////////////////////////////////////////////////////////
   // Main Plotting Window(s)
   toaPlot* plot_window;
@@ -176,7 +177,7 @@ class Rhythm : public QMainWindow
  public slots:
   // File menu callbacks
   void load_toas ();
-  void prompt_save_toas ();
+  int prompt_save_toas ();
   void save_toas ();
 
   // Tempo menu callbacks

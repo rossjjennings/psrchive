@@ -146,9 +146,10 @@ void Rhythm::aboutQt()
 void Rhythm::load_toas ()
 {
   if (toas_modified) {
-    prompt_save_toas ();
+    if (prompt_save_toas() != 0)
+      return;
   }
-
+  
   QString startName = QString::null;
   if ( !toa_filename.empty() )
     startName = toa_filename.c_str();
@@ -161,14 +162,40 @@ void Rhythm::load_toas ()
   load_toas ( fileName.ascii() );
 }
 
-void Rhythm::prompt_save_toas ()
+int Rhythm::prompt_save_toas ()
 {
-  fprintf (stderr, "Rhythm::prompt_save_toas Not implemented.");
+  switch( QMessageBox::information( this, "Rhythm",
+				    "You have edited the TOAs\n"
+				    "Do you want to save the changes?",
+				    "&Save", "&Discard", "Cancel",
+				    0,      // Enter == button 0
+				    2 ) ) { // Escape == button 2
+  case 0: // Save clicked or Alt+S pressed or Enter pressed.
+    save_toas();
+    return 0;
+    break;
+  case 1: // Discard clicked or Alt+D pressed
+    return 0;
+    break;
+  case 2: // Cancel clicked or Alt+C pressed or Escape pressed
+    return -1;
+    break;
+  }
+  return -1;
 }
 
 void Rhythm::save_toas ()
 {
-  fprintf (stderr, "Rhythm::save_toas Not implemented.");
+  QString startName = QString::null;
+  if ( !toa_filename.empty() )
+    startName = toa_filename.c_str();
+
+  QString fileName (QFileDialog::getSaveFileName ( startName, "*.tim", this ));
+
+  if ( fileName.isNull() )
+    return;
+
+  save_toas ( fileName.ascii() );
 }
 
 void Rhythm::setVerbosity ( int verbosityID )
@@ -187,3 +214,12 @@ void Rhythm::setVerbosity ( int verbosityID )
   else if (verbose)
     cerr << "rhythm: verbose on" << endl;
 }
+
+
+
+
+
+
+
+
+

@@ -67,6 +67,8 @@ Rhythm::Rhythm (QWidget* parent, int argc, char** argv) :
   xq = toaPlot::TOA_MJD;
   yq = toaPlot::ResidualMicro;
 
+  toas_modified = false;
+
   mode = 1;
 
   autofit = false;
@@ -92,7 +94,7 @@ Rhythm::Rhythm (QWidget* parent, int argc, char** argv) :
 
   leftpanel = new QVBox(container);
 
-  QPixmap* pretty_pic = new QPixmap("/home/office/ahotan/crabshrug_rox.jpg");
+  QPixmap* pretty_pic = new QPixmap("/home/cluster/ahotan/cvshome/soft_swin/tas/rhythm/banner.jpg");
   header = new QLabel(leftpanel);
   header->setFrameStyle( QFrame::Panel | QFrame::Sunken );
   header->setPixmap(*pretty_pic);
@@ -218,8 +220,23 @@ void Rhythm::load_toas (const char* fname)
     toa_text -> insertItem(useful);
   }
   
+  toas_modified = false;
+
   if (autofit)
     fit ();
+}
+
+void Rhythm::save_toas (const char* fname)
+{
+  if (verbose)
+    cerr << "Saving TOAs to '" << fname << "' ...";
+
+  Tempo::toa::unload(fname, toas);
+
+  toa_filename = fname;
+
+  if (verbose)
+    cerr << " done." << endl;
 }
 
 void Rhythm::set_Params (const psrephem& eph)
@@ -341,7 +358,7 @@ vector<double> Rhythm::give_me_data (toaPlot::AxisQuantity q)
     break;
   case toaPlot::ResidualMilliTurns:
     for (unsigned i = 0; i < toas.size(); i++)
-      retval.push_back((toas[i].resid.turns)/1000.0);
+      retval.push_back((toas[i].resid.turns)*1000.0);
     return retval;
     break;
   default:
@@ -369,9 +386,21 @@ vector<double> Rhythm::give_me_errs (toaPlot::AxisQuantity q)
     return retval;
     break;
   case toaPlot::ResidualMilliTurns:
-    for (unsigned i = 0; i < toas.size(); i++)
-      retval.push_back(0.0);
-    return retval;
+    // Need the pulsar period:
+    if (fitpopup->hasdata()) {
+      psrephem myeph;
+      fitpopup -> get_psrephem (myeph);
+      double period = myeph.p();
+      period *= 1000.0;
+      for (unsigned i = 0; i < toas.size(); i++)
+	retval.push_back(toas[i].resid.error / period);
+      return retval;
+    }
+    else {
+      for (unsigned i = 0; i < toas.size(); i++)
+	retval.push_back(0.0);
+      return retval;
+    }
     break;
   case toaPlot::BinaryPhase:
     for (unsigned i = 0; i < toas.size(); i++)
@@ -546,6 +575,8 @@ void Rhythm::deleteselection ()
     if (toas[i].state == Tempo::toa::Selected)
       toas[i].state = Tempo::toa::Deleted;
   }
+
+  toas_modified = true;
 
   goplot ();
   plot_window->autoscale();

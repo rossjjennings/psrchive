@@ -91,8 +91,10 @@ void toaPlot::plotter ()
     break;
   }
 
+  cpgsci (3);
   cpglab (xlab.c_str(), ylab.c_str(), "");
-  
+  cpgsci (1);
+
   for (unsigned i = 0; i < data.size(); i++) {
 
     cpgsci  (data[i].ci);
