@@ -1,5 +1,5 @@
 //
-// $Id: pav.C,v 1.89 2004/09/22 15:38:45 straten Exp $
+// $Id: pav.C,v 1.90 2004/10/05 23:24:04 ahotan Exp $
 //
 // The Pulsar Archive Viewer
 //
@@ -322,7 +322,7 @@ int main (int argc, char** argv)
       plotter.set_subint( atoi (optarg) );
       break;
     case 'i':
-      cout << "$Id: pav.C,v 1.89 2004/09/22 15:38:45 straten Exp $" << endl;
+      cout << "$Id: pav.C,v 1.90 2004/10/05 23:24:04 ahotan Exp $" << endl;
       return 0;
 
     case 'j':
@@ -758,10 +758,6 @@ int main (int argc, char** argv)
 	}
       }
 
-      if (stacked) {
-	plotter.line_phase_subints(archive);
-      }
-
       if (mask) {
 	Reference::To<Pulsar::Profile> prof =
 	  archive->get_Profile(plotter.get_subint(),
@@ -802,6 +798,11 @@ int main (int argc, char** argv)
       if (pa_spectrum) {
 	cpg_next();
 	plotter.pa_vs_frequency(archive, the_phase);
+      }
+
+      if (stacked) {
+	cpg_next();
+	plotter.line_phase_subints(archive);
       }
 
       if (baseline_spectrum) {
