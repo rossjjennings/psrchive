@@ -12,14 +12,19 @@ int main (int argc, char** argv) try {
   unsigned nloops = 100;
   
   char* template_file = getenv ("PSRFITSDEFN");
-  if (!template_file)
+  if (!template_file)  {
     cerr << "test_template: PSRFITSDEFN not defined" << endl;
+    return 0;
+  }
 
+  cerr << "Parsing " << template_file << endl;
   parse_template (template_file);
 
+  cerr << "Creating " << nloops << " files from template" << endl;
   for (unsigned iloop=0; iloop<nloops; iloop++)
-    test_template (template_file);
+    test_template (template_file, false);
 
+  cerr << "Test passed" << endl;
   return 0;
 
 }
