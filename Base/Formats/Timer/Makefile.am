@@ -10,7 +10,8 @@ LIB_C_SRCS = pg_plot_gnu.C profile.C sub_int.C archive.C                \
              xtswap.C xtunld.C xtgrey.C xtreduce.C profplot.C           \
 	     plot2profs.C scintplot.C misc.C heapsort.C calarsub.C      \
              plotcalsub.C get_epoch_and_name.C microhdr.C               \
-	     convert_endian.C headers.C cal_fns.C cpg_fns.C iono.C
+	     convert_endian.C headers.C cal_fns.C cpg_fns.C iono.C      \
+	     fft_shift.c
 
 LIB_F_SRCS = ffft.f fftfit.f brent.f fccf.f cprof.f shiftbyfft.f \
              convolve.f width.f tsky1.f newtreduce.f \
@@ -19,7 +20,7 @@ LIB_F_SRCS = ffft.f fftfit.f brent.f fccf.f cprof.f shiftbyfft.f \
 LIB_SRCS   = ${LIB_C_SRCS} ${LIB_F_SRCS}
 
 LDFLAGS   += -larchive -lpolyco -ldialog -lgenutil -ltimes \
-             -lpsrinfo -leph -lsla -lm $(LIBNSL) \
+             -lpsrinfo -leph -lsla -lpsrfft -lm $(LIBNSL) \
 	     -lcpgplot $(LPGPLOT)
 
 ############################################################################
