@@ -134,7 +134,7 @@ void Pulsar::Archive::update_model (const MJD& time, bool clear_model)
     maxha   = 12;
     nsite   = model->get_telescope();
     ncoeff  = model->get_ncoeff();
-    freq    = model->get_freq();
+    freq    = get_centre_frequency();
     nspan   = model->get_nspan();
 
     if (verbose) {
