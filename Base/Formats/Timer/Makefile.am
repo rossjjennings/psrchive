@@ -83,11 +83,13 @@ h1_studies.LDFLAGS := $(LDFLAGS) $(LCPGPLOT) $(LSLA)
 # ########################################################################
 # treduce dialog stuff is not for linux
 ifneq ($(LOGIN_ARCH),linux)
+ifneq ($(LOGIN_ARCH),linux_gcc3)
 ifneq ($(LOGIN_ARCH),sungcc)
 treduce.LDFLAGS := $(LDFLAGS) $(LDIALOG) -lgenutil $(LCPGPLOT) 
 treduce.srcs = xtinit.C xtmac.C xtproc.C xtlplt.C xtinplot.C xtshdr.C    \
 	       xtshst.C xtcopy.C xtswap.C xtunld.C xtgrey.C xtreduce.C   \
                newtreduce.f
+endif
 endif
 endif
 
