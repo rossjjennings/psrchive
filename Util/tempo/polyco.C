@@ -165,6 +165,11 @@ int polynomial::load(string* instr)
     }
     return -1;
   }
+  if (polyco::verbose)
+    cerr << "polynomial::load scanned mjd=" << mjd_day_num 
+	 << "+" << frac_mjd << " dm=" << dm << " dop=" << doppler_shift
+	 << " rms=" << log_rms_resid << endl;
+
   reftime = MJD(mjd_day_num, frac_mjd);
 
   if (scanned < 5)
@@ -184,9 +189,15 @@ int polynomial::load(string* instr)
   double fracturns;
 
   sscanf (refphstr.c_str(), I64" %lf\n", &turns, &fracturns);
+  if (polyco::verbose)
+    cerr << "polynomial::load scanned phase=" << turns
+	 << "+" << fracturns << endl;
 
   if(turns>0) ref_phase = Phase(turns, fracturns);
   else ref_phase = Phase(turns, -fracturns);
+
+  if (polyco::verbose)
+    cerr << "polynomial::load Phase=" << ref_phase << endl;
 
   int ncoeftmp=0;
   scanned = sscanf (line.c_str(), "%lf %d %lf %d %lf %lf %lf\n",
