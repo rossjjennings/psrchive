@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/polyco.h,v $
-   $Revision: 1.14 $
-   $Date: 2002/04/17 06:27:22 $
-   $Author: straten $ */
+   $Revision: 1.15 $
+   $Date: 2002/04/25 10:35:53 $
+   $Author: pulsar $ */
 
 #ifndef __POLY_H
 #define __POLY_H
@@ -265,7 +265,7 @@ class polyco {
 #endif
 
 #ifdef PSRFITS
-  void load (fitsfile* fptr, long row=0);
+  void load (fitsfile* fptr, int back=0);
 #endif
 
 };
