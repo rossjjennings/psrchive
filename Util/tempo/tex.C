@@ -209,10 +209,10 @@ const char* psrephem::tex_descriptor (int ephind)
 {
   switch (ephind) {
   case EPH_PEPOCH: return "$P$ epoch (MJD)";
-  case EPH_RAJ:    return "Right ascenscion, $\\alpha$ (J2000.0)";
+  case EPH_RAJ:    return "Right ascension, $\\alpha$ (J2000.0)";
   case EPH_DECJ:   return "Declination, $\\delta$ (J2000.0)";
-  case EPH_PMRA:   return "Proper motion, $\\mu_\\alpha$ (mas/yr)";
-  case EPH_PMDEC:  return "Proper motion, $\\mu_\\delta$ (mas/yr)";
+  case EPH_PMRA:   return "Proper motion, $\\mu_\\alpha$ (mas yr$^{-1}$)";
+  case EPH_PMDEC:  return "Proper motion, $\\mu_\\delta$ (mas yr$^{-1}$)";
   case EPH_PB:     return "Orbital period, $P_{\\rm b}$ (days)";
   case EPH_A1:     return "Projected semi-major axis, $x$ (lt-s)";
   case EPH_T0:     return "Epoch of periastron, $T_{0}$ (MJD)";
@@ -222,7 +222,7 @@ const char* psrephem::tex_descriptor (int ephind)
   case EPH_KOM:    return "Longitude of ascension, $\\Omega$ (\\degr)";
   case EPH_PX:     return "Annual parallax, $\\pi$ (mas)";
   case EPH_PBDOT:  return "$\\dot P_{\\rm b} (10^{-12})$"; 
-  case EPH_OMDOT:  return "$\\dot \\omega (\\degr/yr)$";
+  case EPH_OMDOT:  return "$\\dot \\omega$ (\\degr yr$^{-1}$)";
   case EPH_M2:     return "Companion mass, m$_2$ (M$_{\\odot})$";
   default:
     return NULL;
@@ -245,7 +245,7 @@ string psrephem::tex () const
 
   double mu, mu_err;
   pm (mu, mu_err);
-  retval += "Composite proper motion, $\\mu$ (mas/yr)" + bw 
+  retval += "Composite proper motion, $\\mu$ (mas yr$^{-1}$)" + bw 
        + tex_double(mu, mu_err) + nl;
 
   double ph, ph_err;
