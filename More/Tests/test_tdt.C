@@ -17,6 +17,8 @@
 #include "Error.h"
 #include "minmax.h"
 
+#define ZOOM 4
+
 int main(int argc, char** argv) {
   
   bool display = false;
@@ -120,8 +122,8 @@ int main(int argc, char** argv) {
   }
   else {
     bmrng mygen;
-    SyntheticProfile fakep(1024, 10.0, 100.0, 512+(100.0*mygen.rand()));
-    SyntheticProfile fakes(1024, 10.0, 100.0, 512+(100.0*mygen.rand()));
+    SyntheticProfile fakep(1024, 5.0, 40.0, 512 + (100.0*mygen.rand()));
+    SyntheticProfile fakes(1024, 10.0, 40.0, 512 + (100.0*mygen.rand()));
 
     fakep.build();
     fakep.add_noise();
@@ -149,7 +151,6 @@ int main(int argc, char** argv) {
     for (unsigned j = 0; j < nbin; j++) {
       bins[j] = float(j)/float(nbin);
       parb[j] = fn[0] - fn[1]*(bins[j]-fn[2])*(bins[j]-fn[2]);
-      //parb[j] = fn[0]*bins[j]*bins[j] + fn[1]*bins[j] + fn[2];
     }
     
     if (display) {
@@ -192,8 +193,8 @@ int main(int argc, char** argv) {
 	}
       }
 
-      int binmin = maxbin - 3;
-      int binmax = maxbin + 3;
+      int binmin = maxbin - ZOOM;
+      int binmax = maxbin + ZOOM;
 
       if (binmin < 0)
 	binmin = 0;
@@ -221,7 +222,6 @@ int main(int argc, char** argv) {
       for (unsigned j = 0; j < nbin; j++) {
 	bins[j] = phsmin + float(j)*stepsize;
 	parb[j] = fn[0] - fn[1]*(bins[j]-fn[2])*(bins[j]-fn[2]);
-	//parb[i] = fn[0]*bins[j]*bins[j] + fn[1]*bins[j] + fn[2];
       }
 
       cpgsci(2);
@@ -263,14 +263,14 @@ int main(int argc, char** argv) {
       sprintf(useful, "%f", shift);
 
       cpgmtxt("T", -2.0, 0.1, 0.0, "Shift = ");
-      cpgmtxt("T", -2.0, 0.275, 0.0, useful);
-      cpgmtxt("T", -2.0, 0.55, 0.0, "Phase Units");
+      cpgmtxt("T", -2.0, 0.3, 0.0, useful);
+      cpgmtxt("T", -2.0, 0.6, 0.0, "Phase Units");
 
       sprintf(useful, "%f", error);
       
       cpgmtxt("T", -3.5, 0.1, 0.0, "Error = ");
-      cpgmtxt("T", -3.5, 0.275, 0.0, useful);
-      cpgmtxt("T", -3.5, 0.55, 0.0, "Phase Units");
+      cpgmtxt("T", -3.5, 0.3, 0.0, useful);
+      cpgmtxt("T", -3.5, 0.6, 0.0, "Phase Units");
     }
   }
 }
