@@ -12,7 +12,7 @@
 Pulsar::Archive* Pulsar::Archive::total () const
 try {
 
-  if (verbose)
+  if (verbose == 3)
     cerr << "Pulsar::Archive::total extracting an empty copy" << endl;
 
   vector<unsigned> empty;
@@ -21,7 +21,7 @@ try {
   copy->set_nchan( 1 );
   copy->set_npol( 1 );
 
-  if (verbose)
+  if (verbose == 3)
     cerr << "Pulsar::Archive::total adding " << get_nsubint()
          << "Integration::total copies" << endl;
 

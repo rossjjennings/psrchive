@@ -30,7 +30,7 @@ double Pulsar::Archive::append_max_overlap = 30.0;
  */
 void Pulsar::Archive::append (const Archive* arch)
 {
-  if (verbose)
+  if (verbose == 3)
     cerr << "Pulsar::Archive::append entered\n";
 
   if (arch->get_nsubint() == 0)
@@ -72,7 +72,7 @@ void Pulsar::Archive::append (const Archive* arch)
     return;
   }
 
-  if (verbose)
+  if (verbose == 3)
     cerr << "Pulsar::Archive::append compare\n";
   
   string reason;
@@ -87,7 +87,7 @@ void Pulsar::Archive::append (const Archive* arch)
   
   if (append_chronological && get_nsubint() > 0) {
     
-    if (verbose) 
+    if (verbose == 3) 
       cerr << "Pulsar::Archive::append ensuring chronological order" << endl;
     
     MJD curlast  = end_time ();
@@ -101,21 +101,21 @@ void Pulsar::Archive::append (const Archive* arch)
   
   unsigned old_nsubint = get_nsubint();
 
-  if (verbose)
+  if (verbose == 3)
     cerr << "Pulsar::Archive::append call IntegrationManager::append" << endl;
  
   IntegrationManager::append (arch);
   
   // if observation is not a pulsar, no further checks required
   if (get_type() != Signal::Pulsar) {
-    if (verbose)
+    if (verbose == 3)
       cerr << "Pulsar::Archive::append no pulsar; no polyco to correct" << endl;
     return;
   }
   
   // if neither archive has a polyco, no correction needed
   if (!model && !arch->model) {
-    if (verbose)    
+    if (verbose == 3)    
       cerr << "Pulsar::Archive::append no polyco to correct" << endl;
     return;
   }
@@ -123,21 +123,21 @@ void Pulsar::Archive::append (const Archive* arch)
   // if the polycos are equivalent and the archives are already properly
   // phased to the polycos, then no corrections are needed
   if (append_phase_zero && model && arch->model && *model == *(arch->model))  {
-    if (verbose)
+    if (verbose == 3)
       cerr << "Pulsar::Archive::append identical polycos [optimized]" << endl;
     return;
   }
 
   // if the current model does not span all Integrations, update the model
   if (!model || !good_model (*model)) {
-    if (verbose)
+    if (verbose == 3)
       cerr << "Pulsar::Archive::append update polyco" << endl;
     update_model (old_nsubint);
   }
 
   if (!append_phase_zero && !model_updated) {
 
-    if (verbose)
+    if (verbose == 3)
       cerr << "Pulsar::Archive::append phasing old integrations" << endl;
 
     for (unsigned isub=0; isub < old_nsubint; isub++)
@@ -145,7 +145,7 @@ void Pulsar::Archive::append (const Archive* arch)
 
   }
 
-  if (verbose)
+  if (verbose == 3)
     cerr << "Pulsar::Archive::append phasing new integrations" << endl;
 
   // correct the new subints against their old model
@@ -154,6 +154,6 @@ void Pulsar::Archive::append (const Archive* arch)
 
   model_updated = true;
 
-  if (verbose)
+  if (verbose == 3)
     cerr << "Pulsar::Archive::append exit" << endl;
 }

@@ -9,7 +9,7 @@ void Pulsar::Archive::convert_state (Signal::State state)
   if (get_nsubint() == 0)
     return;
 
-  if (verbose)
+  if (verbose == 3)
     cerr << "Pulsar::Archive::convert_state current="
          << Signal::state_string (get_state()) << " request="
          << Signal::state_string (state) << endl;

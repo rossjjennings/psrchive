@@ -9,7 +9,7 @@ bool Pulsar::Archive::Agent::loaded = Pulsar::Archive::Agent::init ();
 //! Destructor
 Pulsar::Archive::Agent::~Agent ()
 {
-  if (verbose)
+  if (verbose == 3)
     cerr << "Pulsar::Archive::Agent::~Agent" << endl;
 }
 
@@ -18,7 +18,7 @@ void Pulsar::Archive::Agent::report ()
 {
   cerr << endl;
 
-  if (verbose)
+  if (verbose == 3)
     cerr << "Archive::Agent::report registry=" << &registry << endl;
 
   if (registry.size() == 0)

@@ -11,16 +11,16 @@
   filename in the same path as the requested output file. */
 void Pulsar::Archive::unload (const char* filename)
 {
-  if( verbose )
-    fprintf(stderr,"In Pulsar::Archive::unload() with filename='%s' and unload_filename='%s'\n",
-	    filename,unload_filename.c_str());
+  if (verbose == 3)
+    cerr << "Pulsar::Archive::unload filename='" << filename << "'"
+      " and unload_filename='" << unload_filename << "'" << endl;
   
   string unload_to_filename = unload_filename;
 
   if (filename)
     unload_to_filename = filename;
   
-  if (verbose)
+  if (verbose == 3)
     cerr << "Pulsar::Archive::unload (" << unload_to_filename << ")" << endl;
 
   // create the temporary filename
@@ -31,7 +31,7 @@ void Pulsar::Archive::unload (const char* filename)
     throw Error (FailedSys, "Pulsar::Archive::unload", "failed mkstemp");
   close (fd);
 
-  if (verbose)
+  if (verbose == 3)
     cerr << "Pulsar::Archive::unload calling unload_file "
       "(" << temp_filename << ")" << endl;
 

@@ -6,13 +6,13 @@ static Registry::Plugin plugins;
 
 void Pulsar::Archive::Agent::plugin_load ()
 {
-  if (verbose) {
+  if (verbose == 3) {
     cerr << "Pulsar::Archive::Agent::plugin_load" << endl;
     Registry::Plugin::verbose = true;
   }
 
   if (plugin_path.length() != 0)  {
-    if (verbose)
+    if (verbose > 1)
       cerr << "Pulsar::Archive::Agent::plugin_load plugin_path="
            << plugin_path << endl;
 
@@ -20,7 +20,7 @@ void Pulsar::Archive::Agent::plugin_load ()
   }
 
   if (plugins.ok.size() != 0) {
-    if (verbose)
+    if (verbose > 1)
       cerr << "Pulsar::Archive::Agent::plugin_load ok="
            << plugins.ok.size() << endl;
     return;
@@ -30,7 +30,7 @@ void Pulsar::Archive::Agent::plugin_load ()
 
   if (env) {
 
-    if (verbose)
+    if (verbose > 1)
       cerr << "Pulsar::Archive::Agent::plugin_load"
               " PSRCHIVE_PLUGINS=" << env <<endl;
 
@@ -41,7 +41,7 @@ void Pulsar::Archive::Agent::plugin_load ()
 
     string path = get_plugin_path ("PSRHOME");
 
-    if (verbose)
+    if (verbose > 1)
       cerr << "Pulsar::Archive::Agent::plugin_load from " << path << endl;
 
     plugins.load (path);

@@ -19,7 +19,7 @@
 */
 void Pulsar::Archive::update_model() 
 {
-  if (verbose)
+  if (verbose == 3)
     cerr << "Pulsar::Archive::update_model" << endl;
 
   model_updated = false;
@@ -45,7 +45,7 @@ void Pulsar::Archive::update_model()
 */
 void Pulsar::Archive::update_model (unsigned nsubint)
 {
-  if (verbose)
+  if (verbose == 3)
     cerr << "Pulsar::Archive::update_model nsubint=" << nsubint << endl;
 
   Reference::To<polyco> oldmodel;
@@ -61,7 +61,7 @@ void Pulsar::Archive::update_model (unsigned nsubint)
   if (model_updated || !oldmodel)
     return;
 
-  if (verbose)
+  if (verbose == 3)
     cerr << "Pulsar::Archive::update_model apply model" << endl;
 
   // correct the old Integrations with the old model
@@ -115,7 +115,7 @@ void Pulsar::Archive::update_model (const MJD& time, bool clear_model)
     throw Error (InvalidState, "Pulsar::Archive::update_model",
 		 "not a pulsar observation");
 
-  if (verbose) cerr << "Pulsar::Archive::update_model time=" << time 
+  if (verbose == 3) cerr << "Pulsar::Archive::update_model time=" << time 
                     << " clear=" << clear_model << endl;
 
   if (!ephemeris) {
@@ -137,7 +137,7 @@ void Pulsar::Archive::update_model (const MJD& time, bool clear_model)
     freq    = get_centre_frequency();
     nspan   = model->get_nspan();
 
-    if (verbose) {
+    if (verbose == 3) {
       cout << "Using nspan  = " << nspan << endl;
       cout << "Using ncoeff = " << ncoeff << endl;
       cout << "Using maxha  = " << maxha << endl;
@@ -156,7 +156,7 @@ void Pulsar::Archive::update_model (const MJD& time, bool clear_model)
     freq    = get_centre_frequency();
     nspan   = 960;
 
-    if (verbose) {
+    if (verbose == 3) {
       cout << "Using nspan  = " << nspan << endl;
       cout << "Using ncoeff = " << ncoeff << endl;
       cout << "Using maxha  = " << maxha << endl;
@@ -216,7 +216,7 @@ void Pulsar::Archive::apply_model (const polyco& old, Integration* subint)
     double period = model->period (subint_mjd);
     double shift_time = dphase.fracturns() * period;
     
-    if (verbose)
+    if (verbose == 3)
       cerr << "Pulsar::Archive::apply_model"
 	   << "\n  old MJD " << subint_mjd
 	   << "\n  old polyco phase " << old.phase(subint_mjd)
@@ -233,7 +233,7 @@ void Pulsar::Archive::apply_model (const polyco& old, Integration* subint)
     subint -> set_folding_period (period);  
     subint -> rotate (shift_time);
     
-    if (verbose) {
+    if (verbose == 3) {
       subint_mjd = subint -> get_epoch();
       cerr << "Pulsar::Archive::apply_model"
 	   << "\n  new MJD "   << subint_mjd
@@ -257,7 +257,7 @@ void Pulsar::Archive::apply_model (const polyco& old, Integration* subint)
  */
 bool Pulsar::Archive::good_model (const polyco& test_model) const
 {
-  if (verbose)
+  if (verbose == 3)
     cerr << "Pulsar::Archive::good_model testing polyco on " << get_nsubint()
 	 << " integrations" << endl;
 
@@ -265,20 +265,20 @@ bool Pulsar::Archive::good_model (const polyco& test_model) const
   for (isub=0; isub < get_nsubint(); isub++)
     try {
       if ( test_model.i_nearest (get_Integration(isub)->get_epoch()) == -1 ) {
-	if (verbose) cerr << "Pulsar::Archive::good_model"
+	if (verbose == 3) cerr << "Pulsar::Archive::good_model"
                              " polyco::i_nearest returns none" << endl;
 	break;
       }
     }
     catch (...) {
-      if (verbose) cerr << "Pulsar::Archive::good_model"
+      if (verbose == 3) cerr << "Pulsar::Archive::good_model"
                            " polyco::i_nearest throws exception" << endl;
       break;
     }
   
   if (isub < get_nsubint()) {
 
-    if (verbose)
+    if (verbose == 3)
       cerr << "Pulsar::Archive::good_model polyco failed on integration "
 	   << isub << endl;
 
@@ -286,7 +286,7 @@ bool Pulsar::Archive::good_model (const polyco& test_model) const
 
   }
 
-  if (verbose)
+  if (verbose == 3)
     cerr << "Pulsar::Archive::good_model polyco passes test" << endl;
 
   return true;

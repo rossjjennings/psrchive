@@ -24,7 +24,7 @@ void Pulsar::Archive::transform (const vector<Jones<float> >& jones) try {
 
   unsigned nsub = get_nsubint ();
 
-  if (verbose)
+  if (verbose == 3)
     cerr << "Pulsar::Archive::transform vector<Jones<float>> nsub=" << nsub << endl;
 
   for (unsigned isub=0; isub < nsub; isub++)

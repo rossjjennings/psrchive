@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/IntegrationManager.h,v $
-   $Revision: 1.5 $
-   $Date: 2004/04/08 09:43:02 $
+   $Revision: 1.6 $
+   $Date: 2004/07/12 09:24:36 $
    $Author: straten $ */
 
 #ifndef __Pulsar_IntegrationManager_h
@@ -23,7 +23,7 @@ namespace Pulsar {
   public:
 
     //! A verbosity flag that can be set for debugging purposes
-    static bool verbose;
+    static unsigned verbose;
 
     //! null constructor
     IntegrationManager ();

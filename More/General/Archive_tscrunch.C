@@ -41,21 +41,21 @@ void Pulsar::Archive::tscrunch (unsigned nscrunch)
   if (nsub % nscrunch)
     newsub += 1;
   
-  if (verbose) cerr << "Pulsar::Archive::tscrunch - scrunching " 
+  if (verbose == 3) cerr << "Pulsar::Archive::tscrunch - scrunching " 
 		    << nsub << " Integrations by " << nscrunch << endl;
   
   try {
     
     for (unsigned isub=0; isub < newsub; isub++) {
       
-      if (verbose) cerr << "Pulsar::Archive::tscrunch resulting subint " 
+      if (verbose == 3) cerr << "Pulsar::Archive::tscrunch resulting subint " 
 			<< isub+1 << "/" << newsub << endl;
       
       unsigned start = isub * nscrunch;
       
       for (unsigned ichan=0; ichan < get_nchan(); ichan++) {
 	
-	if (verbose) cerr << "Pulsar::Archive::tscrunch weighted_frequency chan="
+	if (verbose == 3) cerr << "Pulsar::Archive::tscrunch weighted_frequency chan="
 			  << ichan << endl;
 	
 	double cfreq = 0.0;
@@ -64,7 +64,7 @@ void Pulsar::Archive::tscrunch (unsigned nscrunch)
 	else
 	  cfreq = weighted_frequency (ichan, start, 0);
 	
-	if (verbose) 
+	if (verbose == 3) 
 	  cerr << "Pulsar::Archive::tscrunch dedisperse cfreq=" << cfreq << endl;
 	
 	for (unsigned iadd=0; iadd < nscrunch; iadd++) {
@@ -73,7 +73,7 @@ void Pulsar::Archive::tscrunch (unsigned nscrunch)
 	  get_Integration(start+iadd) -> dedisperse (cfreq, ichan);
 	}
 	
-	if (verbose) 
+	if (verbose == 3) 
 	  cerr <<  "Pulsar::Archive::tscrunch sum profiles" << endl;
 	
 	for (unsigned ipol=0; ipol < get_npol(); ++ipol) {
@@ -214,7 +214,7 @@ double Pulsar::Archive::weighted_frequency (unsigned ichan,
       double freq   = prof->get_centre_frequency();
       double weight = prof->get_weight();
       
-      //if (verbose)
+      //if (verbose == 3)
       //cerr << "Pulsar::Archive::weighted_frequency [" << isubint << "]"
       //  " freq=" << freq << " wt=" << weight << endl;
 

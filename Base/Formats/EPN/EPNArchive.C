@@ -7,11 +7,14 @@
 void Pulsar::EPNArchive::init ()
 {
   current_record = 0;
+  bandwidth = 0;
+  centre_frequency = 0;
+  state = Signal::Intensity;
 }
 
 Pulsar::EPNArchive::EPNArchive()
 {
-  if (verbose)
+  if (verbose == 3)
     cerr << "EPNArchive construct" << endl;
 
   init ();
@@ -24,7 +27,7 @@ Pulsar::EPNArchive::~EPNArchive()
 
 Pulsar::EPNArchive::EPNArchive (const Archive& arch)
 {
-  if (verbose)
+  if (verbose == 3)
     cerr << "EPNArchive construct copy Archive" << endl;
 
   init ();
@@ -33,7 +36,7 @@ Pulsar::EPNArchive::EPNArchive (const Archive& arch)
 
 Pulsar::EPNArchive::EPNArchive (const EPNArchive& arch)
 {
-  if (verbose)
+  if (verbose == 3)
     cerr << "EPNArchive construct copy EPNArchive" << endl;
 
   init ();
@@ -43,7 +46,7 @@ Pulsar::EPNArchive::EPNArchive (const EPNArchive& arch)
 Pulsar::EPNArchive::EPNArchive (const Archive& arch, 
 				const vector<unsigned>& subints)
 {
-  if (verbose)
+  if (verbose == 3)
     cerr << "EPNArchive construct extract Archive" << endl;
 
   init ();
@@ -54,7 +57,7 @@ Pulsar::EPNArchive::EPNArchive (const Archive& arch,
 void Pulsar::EPNArchive::copy (const Archive& archive, 
 			       const vector<unsigned>& subints)
 {
-  if (verbose)
+  if (verbose == 3)
     cerr << "EPNArchive::copy" << endl;
 
   if (this == &archive)
@@ -62,22 +65,34 @@ void Pulsar::EPNArchive::copy (const Archive& archive,
 
   Archive::copy (archive, subints);
 
-  if (verbose)
+  if (verbose == 3)
     cerr << "EPNArchive::copy dynamic cast call" << endl;
   
   const EPNArchive* like_me = dynamic_cast<const EPNArchive*>(&archive);
   if (!like_me)
     return;
   
-  if (verbose)
+  if (verbose == 3)
     cerr << "EPNArchive::copy another EPNArchive" << endl;
 
-  // copy EPNArchive attributes
+  line1 = like_me->line1;
+  line2 = like_me->line2;
+  line3 = like_me->line3;
+  line4 = like_me->line4;
+  line5 = like_me->line5;
+  
+  // no block data is copied
+  current_record = 0;
+
+  centre_frequency = like_me->centre_frequency;
+  bandwidth = like_me->bandwidth;
+  state = like_me->state;
+
 }
 
 Pulsar::EPNArchive* Pulsar::EPNArchive::clone () const
 {
-  if (verbose)
+  if (verbose == 3)
     cerr << "EPNArchive::clone" << endl;
   return new EPNArchive (*this);
 }
@@ -85,7 +100,7 @@ Pulsar::EPNArchive* Pulsar::EPNArchive::clone () const
 Pulsar::EPNArchive* 
 Pulsar::EPNArchive::extract (const vector<unsigned>& subints) const
 {
-  if (verbose)
+  if (verbose == 3)
     cerr << "EPNArchive::extract" << endl;
   return new EPNArchive (*this, subints);
 }
@@ -133,6 +148,7 @@ void Pulsar::EPNArchive::set_source (const string& source)
   c     ded         - I3     - Degrees of declination   (J2000)
   c     dem         - I2     - Minutes of declination   (J2000)
   c     des         - F6.3   - Seconds of declination   (J2000)
+
 */
 sky_coord Pulsar::EPNArchive::get_coordinates () const
 {
@@ -241,13 +257,33 @@ void Pulsar::EPNArchive::set_state (Signal::State _state)
 //! Get the scale of the profiles
 Signal::Scale Pulsar::EPNArchive::get_scale () const
 {
-  return Signal::FluxDensity;
+  switch (line5.fluxflag)  {
+  case 'F':
+    return Signal::Jansky;
+  case 'R':
+    return Signal::ReferenceFluxDensity;
+  default:
+    return Signal::FluxDensity;
+  }
 }
 
 //! Set the scale of the profiles
 void Pulsar::EPNArchive::set_scale (Signal::Scale scale)
 {
-
+  switch (scale) {
+  case Signal::Jansky:
+    line5.fluxflag = 'F';
+    break;
+  case Signal::ReferenceFluxDensity:
+    line5.fluxflag = 'R';
+    break;
+  case Signal::FluxDensity:
+    line5.fluxflag = ' ';
+    break;
+  default:
+    throw Error (InvalidParam, "Pulsar::EPNArchive::set_scale",
+		 "unknown scale");
+  }
 }
 
 
@@ -314,7 +350,7 @@ void Pulsar::EPNArchive::set_dedispersed (bool done)
 Pulsar::Integration* 
 Pulsar::EPNArchive::new_Integration (Integration* subint)
 {
-  if (verbose)
+  if (verbose == 3)
     cerr << "Pulsar::EPNArchive::new_Integration" << endl;
 
   BasicIntegration* integration;
@@ -335,7 +371,7 @@ void Pulsar::EPNArchive::read_record (const char* filename, unsigned record)
   int readwri = -1;  // read
   int padout  = 0;   // no padding
 
-  if (verbose)
+  if (verbose == 3)
     cerr << "Pulsar::EPNArchive::read_record call crwepn " << filename << endl;
 
   if (crwepn (filename, readwri, record, padout, 
@@ -344,7 +380,7 @@ void Pulsar::EPNArchive::read_record (const char* filename, unsigned record)
     throw Error (InvalidParam, "Pulsar::EPNArchive::read_record",
 		 "error calling crwpen");
       
-  if (verbose)
+  if (verbose == 3)
     cerr << "Pulsar::EPNArchive::read_record rwepn called" << endl;
 
   current_record = record;
@@ -364,7 +400,7 @@ void Pulsar::EPNArchive::load_header (const char* filename)
 
   get_Integration(0);
 
-  if (verbose)
+  if (verbose == 3)
     cerr << "Pulsar::EPNArchive::load_header exit" << endl;
 }
 
@@ -385,7 +421,7 @@ double MHz_scale (const char* units)
 Pulsar::Integration*
 Pulsar::EPNArchive::load_Integration (const char* filename, unsigned subint)
 {
-  if (verbose)
+  if (verbose == 3)
     cerr << "Pulsar::EPNArchive::load_Integration" << subint << endl;
 
   if (subint+1 != current_record)
@@ -411,21 +447,8 @@ Pulsar::EPNArchive::load_Integration (const char* filename, unsigned subint)
       Profile* profile = integration->get_Profile (ipol, ichan);
       
       unsigned iblock = ipol * get_nchan() + ichan;
-      
-      /*
-	
-      idfield     - A8     - Description of data stream I Q U V etc. etc.
-      nband       - I4     - ordinal number of data stream
-      navg        - I4     - number of streams averaged into current one
-      f0          - f12.8  - Effective centre sky frequency of this stream
-      f0u         - A8     - String giving unit of f0 [default is GHz]
-      df          - f12.6  - Effective bandwidth of this stream
-      dfu         - A8     - String giving unit of df [default is MHz]
-      tstart      - F17.5  - Time of first bin wrt EPOCH [us]
-      
-      */
 
-      if (verbose) {
+      if (verbose == 3) {
 	cerr << "cf=" << sub_line1.f0[iblock] << sub_line1.f0u[iblock] << endl;
 	cerr << "bw=" << sub_line1.df[iblock] << sub_line1.dfu[iblock] << endl;
 	cerr << "state=" << sub_line1.idfield[iblock] << endl;
@@ -440,7 +463,12 @@ Pulsar::EPNArchive::load_Integration (const char* filename, unsigned subint)
 
       total_freq += freq;
       total_bw   += bw;
-      
+     
+      if (sub_line1.tstart[iblock] != sub_line1.tstart[0])
+	throw Error (InvalidState, "Pulsar::EPNArchive::load_Integration",
+		     "ipol=%d ichan=%d tstart=%lf != %lf",
+		     sub_line1.tstart[iblock] != sub_line1.tstart[0]);
+
     }
 
     double avg_freq = total_freq / get_nchan();
@@ -519,7 +547,7 @@ bool Pulsar::EPNArchive::Agent::advocate (const char* filename)
   if (scanned != 1)
     return false;
 
-  if (verbose)
+  if (verbose == 3)
     cerr << "Pulsar::EPNArchive::Agent::advocate EPN version " << version << endl;
 
   return true;

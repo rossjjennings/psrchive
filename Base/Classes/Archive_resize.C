@@ -24,28 +24,28 @@ void Pulsar::Archive::resize (unsigned nsubint, unsigned npol,
   if (nbin == 0)
     nbin = cur_nbin;
   
-  if (verbose)
+  if (verbose == 3)
     cerr << "Archive::resize nsub=" << nsubint << " npol=" << npol
 	 << " nchan=" << nchan << " nbin=" << nbin << endl 
 	 << " old nsub=" << cur_nsub << " npol=" << cur_npol
 	 << " nchan=" << cur_nchan << " nbin=" << cur_nbin << endl;
 
 
-  if (verbose)
+  if (verbose == 3)
     cerr << "Pulsar::Archive::resize subints" << endl;
   IntegrationManager::resize (nsubint);
 
   for (unsigned isub=0; isub<nsubint; isub++)
     get_Integration(isub) -> resize (npol, nchan, nbin);
 
-  if (verbose)
+  if (verbose == 3)
     cerr << "Pulsar::Archive::resize calling book-keeping functions" << endl;
 
   set_npol (npol);
   set_nchan (nchan);
   set_nbin (nbin);
 
-  if (verbose)
+  if (verbose == 3)
     cerr << "Pulsar::Archive::resize exit" << endl;
 }
 

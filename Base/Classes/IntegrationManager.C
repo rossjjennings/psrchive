@@ -2,11 +2,11 @@
 #include "Pulsar/Integration.h"
 #include "Error.h"
 
-bool Pulsar::IntegrationManager::verbose = false;
+unsigned Pulsar::IntegrationManager::verbose = 1;
 
 Pulsar::IntegrationManager::IntegrationManager () 
 { 
-  if (verbose)
+  if (verbose == 3)
     cerr << "IntegrationManager null constructor" << endl;
 }
 
@@ -18,7 +18,7 @@ Pulsar::IntegrationManager::IntegrationManager (const IntegrationManager& o)
 
 Pulsar::IntegrationManager::~IntegrationManager () 
 { 
-  if (verbose)
+  if (verbose == 3)
     cerr << "IntegrationManager::destructor" << endl;
 }
 
@@ -40,7 +40,7 @@ Pulsar::IntegrationManager::get_Integration (unsigned subint)
   // if the subint has not already been loaded, call the pure virtual
   // method, load_Integration, to load the requested sub-int.
   if (!subints[subint]) {
-    if (verbose) cerr << "Pulsar::IntegrationManager::get_Integration"
+    if (verbose == 3) cerr << "Pulsar::IntegrationManager::get_Integration"
                          " load_Integration" << endl;
     subints[subint] = load_Integration (subint);
   }
@@ -64,7 +64,7 @@ Pulsar::IntegrationManager::get_last_Integration ()
 const Pulsar::Integration* 
 Pulsar::IntegrationManager::get_Integration (unsigned subint) const
 {
-  if (verbose)
+  if (verbose == 3)
     cerr << "Pulsar::IntegrationManager::get_Integration const" << endl;
 
   IntegrationManager* thiz = const_cast<IntegrationManager*> (this);
@@ -109,7 +109,7 @@ void Pulsar::IntegrationManager::resize (unsigned nsubint, bool instances)
 {
   unsigned cur_nsub = subints.size();
 
-  if (verbose)
+  if (verbose == 3)
     cerr << "Pulsar::IntegrationManager::resize nsub=" << nsubint
 	 << "  old nsub=" << cur_nsub  << endl;
 
@@ -121,6 +121,6 @@ void Pulsar::IntegrationManager::resize (unsigned nsubint, bool instances)
 
   set_nsubint (nsubint);
 
-  if (verbose)
+  if (verbose == 3)
     cerr << "Pulsar::IntegrationManager::resize exit" << endl;
 }
