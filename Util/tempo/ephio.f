@@ -597,9 +597,8 @@ c Pulsar name parameters
          keynum = EPH_RAJ
       else if (strmatch("DEC",s)) then
          keynum = EPH_DECJ
-c      else if (strmatch("NAME",s)) then
-c         keynum = EPH_PSR
-c         convert(keynum) = 1   
+      else if (strmatch("PSR",s)) then
+         keynum = EPH_PSRJ
 c Frequency stuff
       else if (strmatch("F0",s)) then
          keynum = EPH_F
