@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Profile.h,v $
-   $Revision: 1.17 $
-   $Date: 2002/06/12 03:55:00 $
+   $Revision: 1.18 $
+   $Date: 2002/06/24 05:37:57 $
    $Author: ahotan $ */
 
 #ifndef __Pulsar_Profile_h
@@ -184,6 +184,12 @@ namespace Pulsar {
     Poln::Measure get_state () const { return state; }
     //! set the state of the polarization measurement
     virtual void set_state (Poln::Measure _state) { state = _state; }
+
+    //! convolves two profiles (using fft methods)
+    void fft_convolve(Profile* p1, Profile* p2); 
+
+    //! generates a profile containing a hat function
+    void hat_profile(int bin_number, int width);
 
   protected:
 
