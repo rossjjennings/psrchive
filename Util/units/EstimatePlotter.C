@@ -42,4 +42,5 @@ void EstimatePlotter::clear ()
   xval.resize(0);
   yval.resize(0);
   yerr.resize(0);
+  y_range = false;
 }
