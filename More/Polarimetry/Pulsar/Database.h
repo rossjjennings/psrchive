@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/Database.h,v $
-   $Revision: 1.2 $
-   $Date: 2004/07/21 05:27:41 $
+   $Revision: 1.3 $
+   $Date: 2004/07/21 15:25:10 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Calibration_Database_h
@@ -106,6 +106,8 @@ namespace Pulsar {
       
     public:
       
+      static bool match_verbose;
+
       //! The parameters to match
       Entry entry;
       

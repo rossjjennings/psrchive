@@ -185,6 +185,7 @@ void Pulsar::Database::Entry::unload (string& str)
   str = retval;
 }
 
+bool Pulsar::Database::Criterion::match_verbose = false;
 
 Pulsar::Database::Criterion::Criterion ()
 {
@@ -202,33 +203,45 @@ Pulsar::Database::Criterion::Criterion ()
 
 
 //! returns true if this matches observation parameters
-bool Pulsar::Database::Criterion::match (const Entry& _entry) const
+bool Pulsar::Database::Criterion::match (const Entry& have) const
 {
 
-  if (verbose)
+  if (match_verbose)
     cerr << "Pulsar::Database::Criterion::match" << endl;
  
   if (check_obs_type) {
 
-    if (entry.obsType == _entry.obsType) {
-      if (verbose)
-	cerr << "  Observation type match found" << endl; 
+    if (match_verbose)
+      cerr << "  Seeking obsType="
+	   << Signal::source_string(entry.obsType) 
+	   << " have obsType="
+	   << Signal::source_string(have.obsType);
+    
+    if (entry.obsType == have.obsType) {
+      if (match_verbose)
+	cerr << "... match found" << endl; 
     }
     else {
-      if (verbose)
-	cerr << "  Observation types do not match" << endl;
+      if (match_verbose)
+	cerr << "... no match" << endl;
       return false;
     }
 
     if (entry.obsType == Signal::Calibrator) {
 
-      if (entry.calType == _entry.calType) {
-	if (verbose)
-	  cerr << "  Calibrator type match found" << endl; 
+      if (match_verbose)
+	cerr << "  Seeking calType="
+	     << Calibrator::Type2str(entry.calType) 
+	     << " have calType="
+	     << Calibrator::Type2str(have.calType);
+
+      if (entry.calType == have.calType) {
+	if (match_verbose)
+	  cerr << "... match found" << endl; 
       }
       else {
-	if (verbose)
-	  cerr << "  Calibrator types do not match" << endl;
+	if (match_verbose)
+	  cerr << "... no match" << endl;
 	return false;
       }
 
@@ -238,106 +251,116 @@ bool Pulsar::Database::Criterion::match (const Entry& _entry) const
 
   if (check_bandwidth) {
 
-    if (entry.bandwidth==_entry.bandwidth) {
-      if (verbose)
-	cerr << "  Bandwidth match found" << endl; 
+    if (match_verbose)
+      cerr << "  Seeking bandwidth=" << entry.bandwidth
+	   << " have bandwidth=" << have.bandwidth;
+
+    if (entry.bandwidth==have.bandwidth) {
+      if (match_verbose)
+	cerr << " ... match found" << endl; 
     }
     else {
-      if (verbose)
-	cerr << "  Bandwidth does not match" << endl;
+      if (match_verbose)
+	cerr << "... no match" << endl;
       return false;
     }
   }
 
   if (check_frequency) {
 
-    if (entry.frequency==_entry.frequency) {
-      if (verbose)
-	cerr << "  Frequency match found" << endl; 
+    if (match_verbose)
+      cerr << "  Seeking frequency=" << entry.frequency
+	   << " have frequency=" << have.frequency;
+
+    if (entry.frequency==have.frequency) {
+      if (match_verbose)
+	cerr << " ... match found" << endl; 
     }
     else {
-      if (verbose)
-	cerr << "  Frequency does not match" << endl;
+      if (match_verbose)
+	cerr << "... no match" << endl;
       return false;
     }
   }
 
   if (check_instrument) {
 
-    if (entry.instrument==_entry.instrument) {
-      if (verbose)
-	cerr << "  Instrument match found" << endl;
+    if (match_verbose)
+      cerr << "  Seeking instrument=" << entry.instrument
+	   << " have instrument=" << have.instrument;
+
+    if (entry.instrument==have.instrument) {
+      if (match_verbose)
+	cerr << " ... match found" << endl;
     }
     else {
-      if (verbose)
-	cerr << "  Instrument does not match" << endl;
+      if (match_verbose)
+	cerr << "... no match" << endl;
       return false;
     }
   }
   
-  if (verbose) {
-    cerr <<
-      "  MidTime that: " << _entry.time.in_minutes() << " min" << "\n"
-      "  MidTime this: " << entry.time.in_minutes() << " min" << "\n"
-      "  Time difference: " << fabs( (_entry.time-entry.time).in_minutes() )
-         << " minutes" << endl <<
-      "  Threshold difference:" << minutes_apart << " min" << endl;
-  }
-
-  if (check_time) {
-    if (fabs( (_entry.time - entry.time).in_minutes() ) < minutes_apart) {
-      if (verbose)
-	cerr << "  Time match found" << endl;
-    }
-    else {
-      if (verbose)
-	cerr << "  Times do not match" << endl;
-      return false;
-    }
-  }
-
-  if (verbose) {
-    cerr << "  RA that = " << _entry.position.ra().getHMS() << endl;
-    cerr << "  RA this = " << entry.position.ra().getHMS() << endl;  
-  }
-
   double diff;
 
+  if (check_time) {
+
+    diff = fabs( (have.time - entry.time).in_minutes() );
+
+    if (match_verbose) {
+      cerr << "  Seeking time=" << entry.time
+	   << " have time=" << have.time
+	   << "\n    difference=" << diff << " minutes "
+	"(max=" << minutes_apart << ")";
+    }
+
+    if (fabs( (have.time - entry.time).in_minutes() ) < minutes_apart) {
+      if (match_verbose)
+	cerr << " ... match found" << endl;
+    }
+    else {
+      if (match_verbose)
+	cerr << " do not match" << endl;
+      return false;
+    }
+  }
+
+
+
   if (check_coordinates) {
 
-    diff = _entry.position.ra().getDegrees()-entry.position.ra().getDegrees();
+    if (match_verbose)
+      cerr << "  Seeking ra=" << entry.position.ra().getHMS()
+	   << " have ra=" << have.position.ra().getHMS();
+
+    diff = have.position.ra().getDegrees()-entry.position.ra().getDegrees();
     if (fabs(diff) < RA_deg_apart) {
-      if (verbose)
-	cerr << "  RA match found" << endl;
+      if (match_verbose)
+	cerr << " ... match found" << endl;
     }
     else {
-      if (verbose)
-	cerr << "  RA does not match" << endl;
+      if (match_verbose)
+	cerr << "... no match" << endl;
       return false;
     }
-  }
 
-  if (verbose) {
-    cerr << "  DEC that = " << _entry.position.dec().getDMS() << endl;
-    cerr << "  DEC this = " << entry.position.dec().getDMS() << endl;
-  }
+    if (match_verbose)
+      cerr << "  Seeking dec=" << entry.position.dec().getHMS()
+	   << " have dec=" << have.position.dec().getHMS();
 
-  if (check_coordinates) {
-
-    diff= _entry.position.dec().getDegrees()-entry.position.dec().getDegrees();
+    diff= have.position.dec().getDegrees()-entry.position.dec().getDegrees();
     if (fabs(diff) < DEC_deg_apart) {
-      if (verbose)
-	cerr << "  DEC match found" << endl;
+      if (match_verbose)
+	cerr << " ... match found" << endl;
     }
     else {
-      if (verbose)
-	cerr << "  DEC does not match" << endl;
+      if (match_verbose)
+	cerr << "... no match" << endl;
       return false;
     }
   }
 
-  if (verbose)
-    cerr << "  This is a match." << endl;
+  if (match_verbose)
+    cerr << "Pulsar::Database::Criterion::match found" << endl;
   
   return true;
 }

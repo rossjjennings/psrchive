@@ -111,6 +111,7 @@ int main (int argc, char *argv[]) {
       return 0;
     case 'v':
       Pulsar::Archive::set_verbosity(2);
+      Pulsar::Database::Criterion::match_verbose = true;
       verbose = true;
       break;
     case 'V':
@@ -121,7 +122,7 @@ int main (int argc, char *argv[]) {
       Pulsar::Archive::set_verbosity(3);
       break;
     case 'i':
-      cout << "$Id: pac.C,v 1.51 2004/07/21 08:09:30 straten Exp $" << endl;
+      cout << "$Id: pac.C,v 1.52 2004/07/21 15:25:10 straten Exp $" << endl;
       return 0;
 
     case 'n': {
