@@ -213,7 +213,7 @@ int main (int argc, char *argv[]) {
 	Pulsar::Archive::set_verbosity(3);
 	break;
       case 'i':
-	cout << "$Id: pam.C,v 1.43 2004/08/08 06:34:08 hknight Exp $" << endl;
+	cout << "$Id: pam.C,v 1.44 2004/08/09 01:17:28 hknight Exp $" << endl;
 	return 0;
       case 'm':
 	save = true;
@@ -358,7 +358,7 @@ int main (int argc, char *argv[]) {
 	flipsb = true;
 	break;
       case 'x' :
-	dual_parse(optarg,subint_extract_start,subint_extract_end,'x');
+	dual_parse(optarg,subint_extract_start,subint_extract_end,"x");
 	subint_extract_end++;
 	break;
       case 200:
