@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Archive.h,v $
-   $Revision: 1.93 $
-   $Date: 2003/12/10 01:01:43 $
-   $Author: hknight $ */
+   $Revision: 1.94 $
+   $Date: 2003/12/10 16:00:37 $
+   $Author: straten $ */
 
 /*! \mainpage 
  
@@ -407,6 +407,10 @@ namespace Pulsar {
     //! Template method searches for an Extension of the specified type
     template<class ExtensionType>
     ExtensionType* get ();
+
+    //! Template method returns an Extension of the specified type
+    template<class ExtensionType>
+    ExtensionType* getadd ();
 
     //! Add an Extension to the Archive instance
     /*! The derived class must ensure that only one instance of the Extension
@@ -889,6 +893,29 @@ namespace Pulsar {
   {
     const Archive* thiz = this;
     return const_cast<ExtensionType*>( thiz->get<ExtensionType>() );
+  }
+
+  /*! If the specified ExtensionType does not exist, an atempt is made to
+      add it using add_extension.  If this fails, NULL is returned. */
+  template<class ExtensionType>
+  ExtensionType* Archive::getadd ()
+  {
+    const Archive* thiz = this;
+    ExtensionType* retv = 0;
+    retv = const_cast<ExtensionType*>( thiz->get<ExtensionType>() );
+
+    if (retv)
+      return retv;
+
+    try {
+      Reference::To<ExtensionType> add_ext = new ExtensionType;
+      add_extension (add_ext);
+      return add_ext;
+    }
+    catch (Error& error) {
+      return retv;
+    }
+
   }
 
 }
