@@ -12,6 +12,8 @@ Pulsar::PulsarCalibrator::PulsarCalibrator (Calibrator::Type model)
 {
   model_type = model;
   maximum_harmonic = 0;
+  mean_solution = true;
+  integrations_added = 0;
 }
 
 //! Constructor
@@ -98,11 +100,6 @@ void Pulsar::PulsarCalibrator::set_standard (const Archive* data)
 
   const Integration* integration = calibrator->get_Integration (0);
 
-  // the noise power in the profile baselines are used to estimate the
-  // variance in each Stokes parameter
-  vector< vector< double > > baseline_variance;
-  integration->baseline_stats (0, &baseline_variance);
-
   for (unsigned ichan=0; ichan<nchan; ichan++) {
 
     cerr << "Pulsar::PulsarCalibrator::set_standard ichan=" << ichan << endl;
@@ -128,6 +125,8 @@ void Pulsar::PulsarCalibrator::set_standard (const Archive* data)
 
   }
 
+  integrations_added = 0;
+
   if (verbose)
     cerr << "Pulsar::PulsarCalibrator::set_standard exit" << endl;
 
@@ -138,11 +137,6 @@ void Pulsar::PulsarCalibrator::add_observation (const Archive* data)
 {
   if (!data)
     return;
-
-  if (data->get_type() == Signal::PolnCal) {
-    add_calibrator (data);
-    return;
-  }
 
   if (!calibrator)
     throw Error (InvalidState, "Pulsar::PulsarCalibrator::add_observation",
@@ -175,10 +169,8 @@ void Pulsar::PulsarCalibrator::add_observation (const Archive* data)
     else
       parallactic.set_phi( 0 );
 
-    // the noise power in the baseline is used to estimate the
-    // variance in each Stokes parameter
-    vector< vector< double > > baseline_variance;
-    integration->baseline_stats (0, &baseline_variance);
+    if (integrations_added)
+      update_solution ();
 
     for (unsigned ichan=0; ichan<nchan; ichan++) try {
 
@@ -204,7 +196,7 @@ void Pulsar::PulsarCalibrator::add_observation (const Archive* data)
 
       solution[ichan]->integrate( transformation[ichan] );
 
-      if (ichan+1 < nchan && transformation[ichan+1])
+      if (!integrations_added && ichan+1 < nchan && transformation[ichan+1])
         transformation[ichan+1]->copy( transformation[ichan] );
 
     }
@@ -213,7 +205,16 @@ void Pulsar::PulsarCalibrator::add_observation (const Archive* data)
 	   << ichan << " error" << error << endl;
     }
 
+    integrations_added ++;
+
   }
+
+}
+
+//! Set the flag to return the mean solution or the last fit
+void Pulsar::PulsarCalibrator::set_return_mean_solution (bool return_mean)
+{
+  mean_solution = return_mean;
 }
 
 void Pulsar::PulsarCalibrator::update_solution ()
@@ -224,20 +225,15 @@ void Pulsar::PulsarCalibrator::update_solution ()
       solution[ichan]->update( transformation[ichan] );
 }
 
-//! Add the calibrator observation to the set of constraints
-void Pulsar::PulsarCalibrator::add_calibrator (const Archive* data)
-{
-}
-    
-//! Add the ArtificialCalibrator observation to the set of constraints
-void 
-Pulsar::PulsarCalibrator::add_calibrator (const ArtificialCalibrator* polncal)
-{
-}
    
 //! Initialize the PolnCalibration::transformation attribute
 void Pulsar::PulsarCalibrator::calculate_transformation ()
 {
+  // if the mean solution is not required, then the last
+  // transformation calculated will be returned
+  if (!mean_solution)
+    return;
+
   unsigned nchan = model.size();
 
   transformation.resize( nchan );

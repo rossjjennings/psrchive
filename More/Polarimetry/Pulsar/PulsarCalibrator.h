@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PulsarCalibrator.h,v $
-   $Revision: 1.4 $
-   $Date: 2004/04/20 13:07:36 $
+   $Revision: 1.5 $
+   $Date: 2004/05/03 12:59:06 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PulsarCalibrator_H
@@ -51,11 +51,8 @@ namespace Pulsar {
     //! Add the observation to the set of constraints
     void add_observation (const Archive* data);
     
-    //! Add the calibrator observation to the set of constraints
-    void add_calibrator (const Archive* data);
-    
-    //! Add the ArtificialCalibrator observation to the set of constraints
-    void add_calibrator (const ArtificialCalibrator* polncal);
+    //! Set the flag to return the mean solution or the last fit
+    void set_return_mean_solution (bool return_mean = true);
 
     //! Set the solution to the mean
     void update_solution ();
@@ -84,6 +81,12 @@ namespace Pulsar {
 
     //! The maximum number of harmonics to include in the fit
     unsigned maximum_harmonic;
+
+    //! When true, calculate_transformation will return the mean solution
+    bool mean_solution;
+
+    //! Count of the number of Integrations added
+    unsigned integrations_added;
 
   };
 
