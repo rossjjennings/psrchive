@@ -471,7 +471,8 @@ polyco psrephem::mkpolyco (MJD m1, MJD m2, double nspan, int ncoeff,
     system ("pwd");
     throw ("psrephem::polyco construct error");
   }
-  fprintf(fptr,"%d %d %g %d %8g\n", tel, maxha, nspan, ncoeff, centrefreq);
+  fprintf (fptr,"%d %d %g %d %8g\n", 
+	tel, maxha, nspan, ncoeff, centrefreq);
   fprintf(fptr,"\n");
   fprintf(fptr,"\n");
   fprintf(fptr,"%s\n",psrname().c_str());
@@ -479,23 +480,28 @@ polyco psrephem::mkpolyco (MJD m1, MJD m2, double nspan, int ncoeff,
 
   this->unload (psrephem_tmp_fname);
 
+  // this is not at all funny.
   char* tempo_call = "tempo -z -f ";
+  char* devnull = " > /dev/null";
   string syscall = tempo_call;
   syscall += psrephem_tmp_fname;
+  syscall += devnull;
 
   if (verbose)  {
-    fprintf (stderr, "psrephem::mkpolyco Calling '%s'\n", syscall.c_str());
+    fprintf (stderr, "psrephem::mkpolyco Calling '%s'\n", 
+	syscall.c_str());
     fprintf (stderr, "psrephem::mkpolyco MJD1: '%g'\n", m1.in_days());
   }
   fptr = popen (syscall.c_str(), "w");
   if (fptr == NULL) {
-    fprintf (stderr, "psrephem::mkpolyco Error calling '%s'", syscall.c_str());
+    fprintf (stderr, "psrephem::mkpolyco Error calling '%s'", 
+	syscall.c_str());
     perror ("");
     remove ("tz.in");
     throw ("psrephem::mkpolyco construct error");
   }
   if (verbose)  {
-    fprintf (stderr, "psrephem::mkpolyco Successful popen with tempo\n");
+    fprintf (stderr, "psrephem::mkpolyco Successful popen tempo\n");
   }
 
   if (m1 == MJD(0.0,0.0,0.0)) {
@@ -503,11 +509,13 @@ polyco psrephem::mkpolyco (MJD m1, MJD m2, double nspan, int ncoeff,
   }
   else {
     if (verbose)  {
-      fprintf (stderr, "psrephem::mkpolyco Entering MJD1 '%g'\n", m1.in_days());
+      fprintf (stderr, "psrephem::mkpolyco Entering MJD1 '%g'\n", 
+		m1.in_days());
     }
     fprintf (fptr, " %g", m1.in_days());
     if (verbose)  {
-      fprintf (stderr, "psrephem::mkpolyco Entering MJD2 '%g'\n", m2.in_days());
+      fprintf (stderr, "psrephem::mkpolyco Entering MJD2 '%g'\n", 
+		m2.in_days());
     }
     fprintf (fptr, " %g\n", m2.in_days());
   }
