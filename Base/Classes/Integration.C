@@ -164,6 +164,21 @@ Pulsar::Integration::get_Profile (int ipol, int ichan) const
   return profiles[ipol][ichan];
 }
 
+void Pulsar::Integration::get_amps (float* data, int jpol, int jchan, int jbin)
+  const
+{
+  int npol = get_npol();
+  int nchan = get_nchan();
+
+  cerr << "int.npol=" << npol << " int.nchan=" << nchan << endl;
+
+  for (int ipol=0; ipol<npol; ipol++) {
+    float* chandat = data + ipol * jpol;
+    for (int ichan=0; ichan<nchan; ichan++)
+      profiles[ipol][ichan] -> get_amps (chandat + ichan * jchan, jbin);
+  }
+}
+
 //! Get the frequency of the given channel
 /*!
   \param ichan the index of the channel to get

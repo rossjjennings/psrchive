@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Integration.h,v $
-   $Revision: 1.20 $
-   $Date: 2002/04/25 10:59:44 $
+   $Revision: 1.21 $
+   $Date: 2002/04/26 13:28:04 $
    $Author: pulsar $ */
 
 /*
@@ -94,6 +94,8 @@ namespace Pulsar {
     //! Returns a vector of Stokes parameters along the specified dimension
     void get_Stokes (vector<Stokes>& S, int iother,
 		     Dimension::Axis abscissa = Dimension::Phase ) const;
+
+    void get_amps (float* data, int jpol, int jchan, int jbin) const;
 
     //! Find the transitions between high and low states in total intensity
     void find_transitions (int& hi2lo, int& lo2hi, int& buffer) const;
