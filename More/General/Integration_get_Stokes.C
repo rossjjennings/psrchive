@@ -95,7 +95,7 @@ void Pulsar::Integration::get_Stokes (vector< Stokes<float> >& S,
   else
     throw Error (InvalidParam, "Integration::get_Stokes", "invalid abscissa");
 
-  if (iother<0 || iother>=ndim_other)
+  if (iother>=ndim_other)
     throw Error (InvalidParam, "Integration::get_Stokes", "invalid dimension");
 
   S.resize(ndim);

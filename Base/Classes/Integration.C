@@ -272,7 +272,7 @@ Pulsar::Integration::get_Profile (unsigned ipol, unsigned ichan) const
 double Pulsar::Integration::get_centre_frequency (unsigned ichan,
 						  Signal::Dimension dim) const
 {
-  if (ichan < 0 || ichan>=get_nchan() || get_npol() < 1)
+  if (ichan>=get_nchan() || get_npol() < 1)
     throw Error (InvalidRange, "Pulsar::Integration::get_centre_frequency");
 
   if (dim == Signal::Phase && get_dedispersed())
@@ -293,7 +293,7 @@ double Pulsar::Integration::get_centre_frequency (unsigned ichan,
 */
 double Pulsar::Integration::get_centre_frequency (unsigned ichan) const
 {
-  if (ichan < 0 || ichan>=get_nchan() || get_npol() < 1)
+  if (ichan>=get_nchan() || get_npol() < 1)
     return 0;
 
   return profiles[0][ichan]->get_centre_frequency();
@@ -307,7 +307,7 @@ double Pulsar::Integration::get_centre_frequency (unsigned ichan) const
 void Pulsar::Integration::set_centre_frequency (unsigned ichan,
 						double frequency)
 {
-  if (ichan < 0 || ichan>=get_nchan())
+  if (ichan>=get_nchan())
     throw Error (InvalidRange, "Integration::set_frequency",
 		 "ichan=%d nchan=%d", ichan, get_nchan());
 
@@ -322,7 +322,7 @@ void Pulsar::Integration::set_centre_frequency (unsigned ichan,
 */
 float Pulsar::Integration::get_weight (unsigned ichan) const
 {
-  if (ichan < 0 || ichan>=get_nchan() || get_npol() < 1)
+  if (ichan>=get_nchan() || get_npol() < 1)
     return 0;
 
   return profiles[0][ichan]->get_weight();
@@ -335,7 +335,7 @@ float Pulsar::Integration::get_weight (unsigned ichan) const
 */
 void Pulsar::Integration::set_weight (unsigned ichan, float weight)
 {
-  if (ichan < 0 || ichan>=get_nchan())
+  if (ichan>=get_nchan())
     throw Error (InvalidRange, "Integration::set_weight",
 		 "ichan=%d nchan=%d", ichan, get_nchan());
 
