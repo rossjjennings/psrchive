@@ -34,7 +34,8 @@ class CommandParser {
   virtual string execute (int token, const string& args) = 0;
 
   //! derived types may add commands to the list using this method
-  void add_command (int token, const char* command, const char* help);
+  void add_command (int token, const char* command,
+		    const char* help, const char* detailed_help);
 
   //! return a help string
   string help (const string& command);

@@ -14,10 +14,6 @@ string CommandParser::parse (const char* commandargs)
   string cmdargs = commandargs;
   string command = stringtok (&cmdargs, whitespace);
 
-  if (verbose)
-    cerr << "CommandParser::parse"
-      " command=" << command << " args=" << cmdargs << endl;
-
   return parse (command, cmdargs);
 }
 
@@ -63,7 +59,8 @@ string CommandParser::parse (const char* cmd, const char* args)
 }
 
 //! derived types may add commands to the list using this method
-void CommandParser::add_command (int token, const char* cmd, const char* help)
+void CommandParser::add_command (int token, const char* cmd, 
+				 const char* help, const char* detailed_help)
 {
   for (unsigned icmd=0; icmd < commands.size(); icmd++)
     if (token == commands[icmd].token) {
@@ -72,7 +69,7 @@ void CommandParser::add_command (int token, const char* cmd, const char* help)
       throw error;
     }
 
-  commands.push_back (Command(token, cmd, help));
+  commands.push_back (Command(token, cmd, help, detailed_help));
 }
 
 string CommandParser::help (const string& command)
@@ -86,18 +83,26 @@ string CommandParser::help (const string& command)
       help_str += commands[icmd].command + "\t " + commands[icmd].help + "\n";
 
     help_str += "\nquit \t quit program\n";
-    help_str += "verbose\t toggle verbosity\n";
-
+    help_str += "verbose\t toggle verbosity\n\n";
+    help_str += "Type \"help command\" to get detailed help on each command\n";
     return help_str + "\n" + prompt;
   }
 
   // a command was specified
+
+  if (command == "quit")
+    return "quit|exit exits the program\n" + prompt;
+
+  if (command == "verbose")
+    return "verbose makes the program more verbose\n" + prompt;
+
   for (unsigned icmd=0; icmd < commands.size(); icmd++)
     if (command == commands[icmd].command) {
+      string help_str = command +"\t "+ commands[icmd].help +"\n\n";
       if (commands[icmd].detail.empty())
-	return command + "\t no detailed help available\n" + prompt;
+	return help_str + "\t no detailed help available\n" + prompt;
       else
-	return command + "\t " + commands[icmd].detail + "\n" + prompt;
+	return help_str + commands[icmd].detail + "\n" + prompt;
     }
       
   return "invalid command: " + command + "\n" + prompt;
