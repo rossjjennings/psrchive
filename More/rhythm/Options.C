@@ -11,17 +11,12 @@
 #include <qapplication.h>
 
 #include "Options.h"
-// #include "rhythm.h"
-#include "qt_ModelOptions.h"
 
 RhythmOptions::RhythmOptions( QWidget *parent, const char *name )
     : QTabDialog ( parent, name )
 {
-  modelOptions = new qt_ModelOptions ( (QWidget*) this);
-  addTab( modelOptions, "Plot Options" );
   setupTab2();
   setupTab3();  
-  // connect( this, SIGNAL( applyButtonPressed() ), qApp, SLOT( quit() ) );
 }
 
 static QFileInfo fileinfo ("0437-4715.par");
@@ -32,7 +27,7 @@ void RhythmOptions::setupTab2()
   tab1->setMargin( 5 );
   
   (void)new QLabel( "Filename:", tab1 );
-  QLineEdit *fname = new QLineEdit( "poop", tab1 );
+  QLineEdit *fname = new QLineEdit( "", tab1 );
   fname->setFocus();
   
   (void)new QLabel( "Path:", tab1 );
@@ -54,35 +49,13 @@ void RhythmOptions::setupTab2()
   addTab( tab1, "General" );
 }
 
-#if 0
-void RhythmOptions::setupPlot()
-{
-  QVBox *plotTab = new QVBox( this );
-  plotTab->setMargin( 5 );
-
-
-  QButtonGroup *bg2 = new QButtonGroup( 2, QGroupBox::Horizontal, 
-					"Owner", plotTab );
-  
-  (void)new QLabel( "Owner", bg2 );
-  QLabel *owner = new QLabel( fileinfo.owner(), bg2 );
-  owner->setFrameStyle( QFrame::Panel | QFrame::Sunken );
-  
-  (void)new QLabel( "Group", bg2 );
-  QLabel *group = new QLabel( fileinfo.group(), bg2 );
-  group->setFrameStyle( QFrame::Panel | QFrame::Sunken );
-  
-  addTab( plotTab, "Plot" );
-}
-#endif
-
 void RhythmOptions::setupTab3()
 {
   QVBox *tab3 = new QVBox( this );
   tab3->setMargin( 5 );
   tab3->setSpacing( 5 );
   
-  (void)new QLabel( QString( "Open %1 with:" ).arg( "poop" ), tab3 );
+  (void)new QLabel( QString( "Open %1 with:" ).arg( "" ), tab3 );
   
   QListBox *prgs = new QListBox( tab3 );
   for ( unsigned int i = 0; i < 30; i++ ) {

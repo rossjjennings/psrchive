@@ -11,7 +11,6 @@ class RhythmOptions : public QTabDialog
 
  public:
   RhythmOptions ( QWidget *parent, const char *name);
-  qt_ModelOptions* modelOptions;
 
  protected:
   void setupTab2 ();

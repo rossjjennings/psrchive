@@ -8,57 +8,44 @@
 #include <qmessagebox.h> 
 #include <qpopupmenu.h>
 
-#ifdef Rhythm2D
-#include <qxt.h>
-#endif
-
 #include "qt_editParams.h"
-#include "qt_ModelOptions.h"
 
 #include "rhythm.h"
 #include "tempo++.h"
-#include "DataManager.h"
-#include "PlotVolume.h"
-#include "PlotManager.h"
 
 bool Rhythm::verbose = true;
 bool Rhythm::vverbose = true;
 
 int main (int argc, char** argv)
 { try {
-
-#ifdef Rhythm2D
-  QXtApplication app (argc, argv, "rhythm");
-#else
+  
   QApplication app (argc, argv);
-#endif
-
+  
   Rhythm rhythm (0, argc, argv);
-
+  
   if (Rhythm::vverbose)
-    cerr << "call QXtApplication::setMainWidget" << endl;
+    cerr << "call QApplication::setMainWidget" << endl;
   app.setMainWidget (&rhythm);
-
+  
   if (Rhythm::vverbose)
     cerr << "call Rhythm::show" << endl;
   rhythm.show();
-
-
+  
   if (Rhythm::vverbose)
-    cerr << "call QXtApplication::exec" << endl;
+    cerr << "call QApplication::exec" << endl;
   return app.exec();
 }
 catch (string error) {
-  cerr << "rhythm: Fatal exception caught:" << error << endl;
+  cerr << "rhythm: exception caught:" << error << endl;
 }
 catch (char* error) {
-  cerr << "rhythm: Fatal exception caught:" << error << endl;
+  cerr << "rhythm: exception caught:" << error << endl;
 }
-catch (Reference::invalid) {
-  cerr << "rhythm: Fatal exception caught: Reference::invalid" << endl;
+catch (Error& error) {
+  cerr << "rhythm: exception caught:" << error << endl;
 }
 catch (...) {
-  cerr << "rhythm: Fatal exception unhandled" << endl;
+  cerr << "rhythm: fatal exception unhandled" << endl;
 }
 }
 
@@ -66,18 +53,30 @@ Rhythm::Rhythm (QWidget* parent, int argc, char** argv) :
   QMainWindow (parent, "Rhythm"),
   opts (0, "Options")
 {
+  xq = toaPlot::None;
+  yq = toaPlot::None;
+
+  QHBox* container = new QHBox(this);
+  container -> setFocus();
+  setCentralWidget(container);
+  
+  toa_text = new QTextEdit(container, "TOA_INFO");
+  toa_text -> setText("Welcome to Rhythm");
+  toa_text -> setReadOnly(true);
+  
+  chooser = new AxisSelector(container);
+
+  QObject::connect(chooser, SIGNAL(YChange(toaPlot::AxisQuantity)),
+		   this, SLOT(YChange(toaPlot::AxisQuantity)));
+
+  QObject::connect(chooser, SIGNAL(XChange(toaPlot::AxisQuantity)),
+		   this, SLOT(XChange(toaPlot::AxisQuantity)));
+  
   autofit = true;
   ignore_one_eph = false;
-
+  
   setClassVerbose (vverbose);
-  initializePlot ();
-
-  if (vverbose)
-    cerr << "Rhythm:: data set model" << endl;
-  modelPlot.setModel(model);
-
-  opts.modelOptions -> setModel(modelPlot);
-
+  
   if (vverbose)
     cerr << "Rhythm:: new qt_editParams" << endl;
   fitpopup = new qt_editParams;
@@ -89,7 +88,6 @@ Rhythm::Rhythm (QWidget* parent, int argc, char** argv) :
   if (vverbose)
     cerr << "Rhythm:: call menubarConstruct" << endl;
   menubarConstruct(); 
-  // toolbarConstruct(); 
 
   if (vverbose)
     cerr << "Rhythm:: call command_line_parse" << endl;
@@ -99,12 +97,10 @@ Rhythm::Rhythm (QWidget* parent, int argc, char** argv) :
     cerr << "Rhythm:: show qt_editParams" << endl;
   fitpopup -> show();
 
-  if (plot_id.size() > 0) {
-    if (vverbose)
-      cerr << "Rhythm:: first data_manager manage model" << endl;
-
-    setPlotter (plot_id[0]);
-  }
+  if (vverbose)
+    cerr << "Rhythm:: creating toaPlotter" << endl;
+  plot_window = new toaPlot(0,0);
+  plot_window -> show();
 
 }
 
@@ -112,18 +108,30 @@ void Rhythm::load_toas (const char* fname)
 {
   if (verbose)
     cerr << "Loading TOAs from '" << fname << "' ...";
-
-  model.load (fname);
-
+  
+  Tempo::toa::load (fname, &toas);
+  
   if (verbose)
-    cerr << "  loaded " << model.toas.size() << ".\nSorting TOAS...";
+    cerr << "  loaded " << toas.size() << ".\nSorting TOAS...";
 
-  sort (model.toas.begin(), model.toas.end());
+  sort (toas.begin(), toas.end());
 
   if (verbose)
     cerr << "  sorted." << endl;
 
   tempo->setItemEnabled (fitID, true);
+
+  toa_filename = fname;
+  
+  char useful[256];
+  string output;
+  for (unsigned i = 0; i < toas.size(); i++) {
+    toas[i].unload(useful);
+    output += useful;
+    output += "\n";
+  }
+  
+  toa_text -> setText(output.c_str());
 
   if (autofit)
     fit ();
@@ -155,7 +163,7 @@ void Rhythm::fit()
 void Rhythm::fit (const psrephem& eph, bool load_new)
 { try {
     
-  if (model.toas.size() < 1) {
+  if (toas.size() < 1) {
     if (verbose)
       cerr << "Rhythm::fit No Arrival Times loaded" << endl;
     return;
@@ -164,22 +172,42 @@ void Rhythm::fit (const psrephem& eph, bool load_new)
   if (verbose)
     cerr << "Rhythm::fit Calculating residuals" << endl;
   
-  Tempo::fit (eph, model.toas, &model.eph, true);
+  psrephem pf_eph;
+  
+  Tempo::fit (eph, toas, &pf_eph, true);
   
   if (load_new && fitpopup) {
-    // set_psrephem will result in generation of newEph signal, which should
-    // be ignored since it was set from here.
-
+    // set_psrephem will result in generation of newEph signal, 
+    // which should be ignored since it was set from here.
+    ignore_one_eph = true;
+    
     if (verbose)
       cerr << "Rhythm::fit Displaying new ephemeris" << endl;
-
-    ignore_one_eph = true;
-    fitpopup -> set_psrephem (model.eph);
+    
+    fitpopup -> set_psrephem (pf_eph);
   }
+  
+  char useful[256];
+  string output;
+  
+  for (unsigned i = 0; i < toas.size(); i++) {
+    toas[i].unload(useful);
+    output += useful;
+    output += "   RESIDUAL (us) :   ";
+    sprintf(useful, "%f", toas[i].resid.time);
+    output += useful;
+    output += "\n";
+  }
+
+  toa_text -> setText(output);
   
   if (verbose)
     cerr << "Rhythm::fit plotting residuals" << endl;
-  modelPlot.setModel (model);
+  
+  xq = toaPlot::TOA_MJD;
+  yq = toaPlot::ResidualMicro;
+  goplot ();
+  
 } 
  catch (string error) {
    if (verbose)
@@ -197,11 +225,88 @@ void Rhythm::fit (const psrephem& eph, bool load_new)
 
 void Rhythm::setClassVerbose (bool verbose)
 {
-  // qt_fileParams::verbose = verbose;
   qt_editParams::verbose = verbose;
   Tempo::verbose = verbose;
-  Tempo::ModelDataSet::verbose = verbose;
-  Plot::Volume::verbose = verbose;
-  Plot::Manager::verbose = verbose;
-  DataManager::verbose = verbose;
+}
+
+vector<double> Rhythm::give_me_this (toaPlot::AxisQuantity q)
+{
+  vector<double> retval;
+  
+  switch (q) {
+  case toaPlot::TOA_MJD:
+    for (unsigned i = 0; i < toas.size(); i++)
+      retval.push_back((toas[i].resid.mjd)-50000.0);
+    return retval;
+  case toaPlot::ResidualMicro:
+    for (unsigned i = 0; i < toas.size(); i++)
+      retval.push_back(toas[i].resid.time);
+    return retval;
+  case toaPlot::ResidualMilliTurns:
+    for (unsigned i = 0; i < toas.size(); i++)
+      retval.push_back((toas[i].resid.turns)/1000.0);
+    return retval;
+  default:
+    return retval;
+  }
+}
+ 
+void Rhythm::XChange (toaPlot::AxisQuantity q)
+{
+  xq = q;
+  goplot ();
+}
+
+void Rhythm::YChange (toaPlot::AxisQuantity q)
+{
+  yq = q;
+  goplot ();
+}
+
+void Rhythm::goplot ()
+{
+  plot_window->setPoints(xq,give_me_this(xq), 
+			 yq, give_me_this(yq));
+}
+
+AxisSelector::AxisSelector (QWidget* parent)
+  : QHBox(parent)
+{
+  Xgrp = new QButtonGroup(3, Qt::Vertical, "X Axis", this);
+  Xgrp -> setRadioButtonExclusive(true);
+  
+  Ygrp = new QButtonGroup(3, Qt::Vertical, "Y Axis", this);
+  Ygrp -> setRadioButtonExclusive(true);
+
+  X1 = new QRadioButton("Res(us)", Xgrp);
+  X2 = new QRadioButton("Res(mt)", Xgrp);
+  X3 = new QRadioButton("TOA(MJD)", Xgrp);
+
+  Y1 = new QRadioButton("Res(us)", Ygrp);
+  Y2 = new QRadioButton("Res(mt)", Ygrp);
+  Y3 = new QRadioButton("TOA(MJD)", Ygrp);
+
+  Xgrp->insert(X1,1);
+  Xgrp->insert(X2,2);
+  Xgrp->insert(X3,3);
+
+  Ygrp->insert(Y1,1);
+  Ygrp->insert(Y2,2);
+  Ygrp->insert(Y3,3);
+
+  QObject::connect(Xgrp, SIGNAL(clicked(int)),
+		   this, SLOT(Xuseful(int)));
+  
+  QObject::connect(Ygrp, SIGNAL(clicked(int)),
+		   this, SLOT(Yuseful(int)));
+}
+
+void AxisSelector::Xuseful(int placeholder)
+{
+  emit XChange(toaPlot::AxisQuantity(placeholder));
+}
+
+void AxisSelector::Yuseful(int placeholder)
+{
+  emit YChange(toaPlot::AxisQuantity(placeholder));
 }

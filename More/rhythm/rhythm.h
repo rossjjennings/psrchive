@@ -1,16 +1,15 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/rhythm/rhythm.h,v $
-   $Revision: 1.12 $
-   $Date: 2001/03/05 13:25:01 $
-   $Author: straten $ */
+   $Revision: 1.13 $
+   $Date: 2003/04/03 03:25:06 $
+   $Author: ahotan $ */
 
 // //////////////////////////////////////////////////////////////////////////
 //
 // Rhythm
 //
-// A class for interactively plotting Tempo::ModelDataSet using the
-// PlotManager and DataManager classes defined in genutil++
+// Application for interactively plotting a Tempo::ModelDataSet
 //
 // //////////////////////////////////////////////////////////////////////////
 
@@ -19,12 +18,49 @@
 
 #include <vector>
 #include <qmainwindow.h>
+#include <qtextedit.h>
+#include <qhbox.h>
+#include <qbuttongroup.h>
+#include <qradiobutton.h>
 
-#include "ModelDataSet.h"
+#include "psrephem.h"
+#include "toaPlot.h"
+#include "toa.h"
+#include "residual.h"
+
 #include "Options.h"
 
 class qt_editParams;
-class DataManager;
+
+class AxisSelector : public QHBox
+{
+ Q_OBJECT
+  
+ public:
+
+  AxisSelector (QWidget* parent);
+
+ protected:
+
+  QButtonGroup* Xgrp;
+  QButtonGroup* Ygrp;
+  QRadioButton* X1;
+  QRadioButton* X2; 
+  QRadioButton* X3;
+  QRadioButton* Y1;
+  QRadioButton* Y2;
+  QRadioButton* Y3;
+  
+ public slots:
+
+  void Xuseful(int);
+  void Yuseful(int);
+
+ signals:
+
+  void XChange (toaPlot::AxisQuantity);
+  void YChange (toaPlot::AxisQuantity);
+};
 
 class Rhythm : public QMainWindow
 {
@@ -47,24 +83,24 @@ class Rhythm : public QMainWindow
 
  protected:
   RhythmOptions opts;
-
-  // an array of toas and the filename from which they were loaded
-  Tempo::ModelDataSet modelPlot;
-  Tempo::Model model;
+  
+  // an array of toas
+  vector<Tempo::toa> toas;
+  // the file from which they were read
+  string toa_filename;
+  
+  // the central display slate
+  QTextEdit* toa_text;
 
   void load_toas (const char* fname);
-
+  
   // /////////////////////////////////////////////////////////////////////////
   // Main Plotting Window(s)
-  vector<QWidget*> plot_manager;   // vector of plot manager widgets
-  vector<string> plot_descriptor;  // vector of strings for each manager
-  vector<int> plot_id;             // Options menu id for each manager
-
-  vector<DataManager*> data_manager;
-
-  int plot_selected_id;
-  void initializePlot ();            // defined in initializePlot.C
-
+  toaPlot* plot_window;
+  AxisSelector* chooser;
+  toaPlot::AxisQuantity xq;
+  toaPlot::AxisQuantity yq;
+  
   // /////////////////////////////////////////////////////////////////////////
   // Fit parameters Menu Widget
   qt_editParams* fitpopup;
@@ -78,7 +114,7 @@ class Rhythm : public QMainWindow
   void menubarConstruct ();    // construct the menubar along the top
 
   // The TEMPO popup menu and IDs of its individual options
-  QPopupMenu *tempo;      // pointer to the Tempo popup menu
+  QPopupMenu* tempo;      // pointer to the Tempo popup menu
   int dispID;             // ID of the 'Display Parameters' menu item
   int fitID;              // ID of the 'Fit' menu item
   int autofitID;          // ID of the 'Autofit' menu item
@@ -89,7 +125,7 @@ class Rhythm : public QMainWindow
   bool toas_modified;     // the toas have been modified since loaded
 
   // The OPTIONS popup menu and IDs of its individual options
-  QPopupMenu *options;
+  QPopupMenu* options;
   int quietID;
   int mediumID;
   int noisyID;
@@ -100,6 +136,10 @@ class Rhythm : public QMainWindow
   void command_line_help ();
   void command_line_parse (int argc, char** argv);
 
+  // /////////////////////////////////////////////////////////////////////////
+  // Data extraction routines
+  vector<double> give_me_this (toaPlot::AxisQuantity);
+  
  public slots:
   // File menu callbacks
   void load_toas ();
@@ -113,8 +153,6 @@ class Rhythm : public QMainWindow
 
   // Options->Verbosity menu callback
   void setVerbosity (int id);
-  // Options->Plotter menu callback
-  void setPlotter ( int plotterID );
   // Options->Preferences
   void showOptions () { opts.show(); };
 
@@ -128,6 +166,19 @@ class Rhythm : public QMainWindow
 
   // callback connected to qt_editParams::newParams
   void set_Params (const psrephem&);
+
+  // plot selection slots
+  void XChange (toaPlot::AxisQuantity);
+  void YChange (toaPlot::AxisQuantity);
+  void goplot ();
 };
 
 #endif
+
+
+
+
+
+
+
+

@@ -49,9 +49,9 @@ void Rhythm::menubarConstruct ()
 				 this, SLOT( toglauto() ));
 
   // ///////////////////////////////////////////////////////////////////////
-  // OPTIONS menu options
+  // VERBOSITY menu options
   //
-  QPopupMenu* verbosity = new QPopupMenu( menuBar() );  CHECK_PTR (verbosity);
+  QPopupMenu* verbosity = new QPopupMenu( menuBar() );
   quietID  = verbosity->insertItem( "Quiet" );
   mediumID = verbosity->insertItem( "Verbose" );
   noisyID  = verbosity->insertItem( "Noisy" );
@@ -60,19 +60,15 @@ void Rhythm::menubarConstruct ()
   connect ( verbosity, SIGNAL( activated (int) ),
 	    this, SLOT( setVerbosity(int) ) );
 
-  QPopupMenu* plotter = new QPopupMenu( menuBar() );  CHECK_PTR (plotter);
+  // ///////////////////////////////////////////////////////////////////////
+  // PLOT menu options (probably redendant)
+  //
+  QPopupMenu* plotter = new QPopupMenu( menuBar() );  
 
-  plot_id.resize (plot_descriptor.size());
-  for (unsigned iplt=0; iplt < plot_descriptor.size(); iplt++)
-    plot_id[iplt] = plotter->insertItem( plot_descriptor[iplt].c_str() );
-
-  if (plot_selected_id != 0)
-    plotter->setItemChecked( plot_id[plot_selected_id], true );
-
-  connect ( plotter, SIGNAL( activated (int) ),
-	    this, SLOT( setPlotter(int) ) );
-
-  options = new QPopupMenu( menuBar() );  CHECK_PTR (options);
+  // ///////////////////////////////////////////////////////////////////////
+  // OPTIONS menu options
+  //
+  options = new QPopupMenu( menuBar() );
   options->insertItem( "Preferences", this, SLOT(showOptions()));
   options->insertItem( "Plotter", plotter, ALT+Key_V);
   options->insertSeparator();
@@ -86,9 +82,9 @@ void Rhythm::menubarConstruct ()
   help->insertItem( "&Usage", this, SLOT(about()), CTRL+Key_H );
   if (isTopLevel())
     help->insertItem( "About Qt", this, SLOT(aboutQt()), 0);
-
+  
   menuBar() -> setSeparator ( QMenuBar::InWindowsStyle );
-
+  
   menuBar() -> insertItem   ( "File",    file );
   menuBar() -> insertItem   ( "Tempo",   tempo );
   menuBar() -> insertItem   ( "Options", options );
@@ -154,8 +150,8 @@ void Rhythm::load_toas ()
   }
 
   QString startName = QString::null;
-  if ( !model.filename.empty() )
-    startName = model.filename.c_str();
+  if ( !toa_filename.empty() )
+    startName = toa_filename.c_str();
 
   QString fileName (QFileDialog::getOpenFileName ( startName, "*.tim", this ));
 
