@@ -1,4 +1,4 @@
-#include "Pulsar/CalibratorExtensionIO.h"
+#include "CalibratorExtensionIO.h"
 
 void Pulsar::unload (fitsfile* fptr, const CalibratorExtension* ext)
 {

@@ -1,6 +1,6 @@
 #include "Pulsar/FITSArchive.h"
 #include "Pulsar/FluxCalibratorExtension.h"
-#include "Pulsar/CalibratorExtensionIO.h"
+#include "CalibratorExtensionIO.h"
 
 void Pulsar::FITSArchive::unload (fitsfile* fptr, 
 				  const FluxCalibratorExtension* fce)

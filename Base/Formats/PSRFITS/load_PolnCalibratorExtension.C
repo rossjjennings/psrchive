@@ -1,6 +1,6 @@
 #include "Pulsar/FITSArchive.h"
 #include "Pulsar/PolnCalibratorExtension.h"
-#include "Pulsar/CalibratorExtensionIO.h"
+#include "CalibratorExtensionIO.h"
 
 #include <stdlib.h>
 #include <assert.h>
