@@ -1,6 +1,6 @@
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Attic/environ.h,v $
-   $Revision: 1.5 $
-   $Date: 2002/05/24 07:35:41 $
+   $Revision: 1.6 $
+   $Date: 2002/05/29 10:06:36 $
    $Author: straten $ */
 
 /*
@@ -107,6 +107,9 @@ typedef struct {double f1; double f2;} float128;
 #define I64 "%Ld"
 #define UI64 "%Lu"
 #define I32 "%ld"
+
+#define ORDER_LITTLE_ENDIAN 1
+#define ORDER_BIG_ENDIAN    0
 
 #endif
 
