@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Profile.h,v $
-   $Revision: 1.40 $
-   $Date: 2003/12/24 04:17:29 $
-   $Author: ahotan $ */
+   $Revision: 1.41 $
+   $Date: 2003/12/28 14:02:48 $
+   $Author: straten $ */
 
 #ifndef __Pulsar_Profile_h
 #define __Pulsar_Profile_h
@@ -223,6 +223,8 @@ namespace Pulsar {
     virtual void halvebins (unsigned nhalve);
 
   protected:
+
+    friend class PolnProfile;
 
     //! initializes all values to null
     void init ();
