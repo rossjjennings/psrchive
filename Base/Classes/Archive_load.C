@@ -38,9 +38,6 @@ Pulsar::Archive* Pulsar::Archive::load (const char* filename)
 
       archive = Agent::registry[agent]->new_Archive();
       
-      // Set this here then allow derived classes to override
-      archive -> index_state = TimeOrder;
-      
       archive -> load_header (filename);
       archive -> set_filename (filename);
       archive -> __load_filename = filename;

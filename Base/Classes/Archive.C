@@ -13,7 +13,6 @@ void Pulsar::Archive::init ()
     cerr << "Pulsar::Archive::init" << endl;
 
   model_updated = false;
-  index_state = TimeOrder;
 }
 
 Pulsar::Archive::Archive () 
@@ -127,7 +126,6 @@ void Pulsar::Archive::refresh()
     cerr << "Pulsar::Archive::refresh" << endl;
   
   IntegrationManager::resize(0);
-  indices.resize(0);
   
   load_header (__load_filename.c_str());
 }
@@ -569,27 +567,5 @@ void Pulsar::Archive::uniform_weight (float new_weight)
     get_Integration(isub) -> uniform_weight (new_weight);
 }
 
-Pulsar::Archive::IndexState Pulsar::Archive::get_index_state () const
-{
-  return index_state;
-}
-
-Estimate<double> Pulsar::Archive::get_Index (unsigned subint)
-{
-  if (subint > indices.size())
-    throw Error (InvalidParam, "Pulsar::Archive::get_Index",
-		 "Invalid subint number");
-  
-  return indices[subint];
-}
-
-void Pulsar::Archive::set_Index (unsigned subint, Estimate<double> i)
-{
-  if (subint > indices.size())
-    throw Error (InvalidParam, "Pulsar::Archive::set_Index",
-		 "Invalid subint number");
-
-  indices[subint] = i;
-}
 
 

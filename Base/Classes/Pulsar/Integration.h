@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Integration.h,v $
-   $Revision: 1.52 $
-   $Date: 2003/12/03 07:54:52 $
+   $Revision: 1.53 $
+   $Date: 2003/12/07 06:34:47 $
    $Author: ahotan $ */
 
 /*
@@ -286,6 +286,7 @@ namespace Pulsar {
     virtual void set_npol (unsigned npol) = 0;
 
     friend class Archive;
+    friend class BinaryPhaseOrder;
     friend class Calibrator;
     friend class Plotter;
 

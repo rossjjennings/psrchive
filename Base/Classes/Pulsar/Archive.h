@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Archive.h,v $
-   $Revision: 1.91 $
-   $Date: 2003/12/04 08:47:15 $
+   $Revision: 1.92 $
+   $Date: 2003/12/07 06:34:47 $
    $Author: ahotan $ */
 
 /*! \mainpage 
@@ -175,7 +175,6 @@
 #include "psrephem.h"
 #include "sky_coord.h"
 
-#include "Estimate.h"
 #include "Registry.h"
 #include "Types.h"
 
@@ -258,16 +257,6 @@ namespace Pulsar {
 
   public:
 
-    //! A description of the way information in Integrations is indexed
-    enum IndexState {
-      //! Time ordering (default)
-      TimeOrder,
-      //! Binary orbital phase
-      BinaryPhase,
-      //! Longitude with respect to ascending node
-      LoAscNode
-    };
-    
     //! Classes derived from Archive are registered for use via an Advocate
     /*! This abstract template base class must be inherited in order
       to register plugins for use with the Archive::load factory.  The
@@ -450,15 +439,6 @@ namespace Pulsar {
     virtual void resize (unsigned nsubint, 
 			 unsigned npol=0, unsigned nchan=0, unsigned nbin=0);
     
-    //! Return the Integration index state
-    IndexState get_index_state() const;
-    
-    //! Set the custom index value associated with an Integration
-    void set_Index (unsigned subint, Estimate<double> i);
-    
-    //! Get the custom index value associated with an Integration
-    Estimate<double> get_Index (unsigned subint);
-    
     // //////////////////////////////////////////////////////////////////
     //
     // File loading and unloading
@@ -556,13 +536,6 @@ namespace Pulsar {
     //! Convert polarimetric data to the specified state
     virtual void convert_state (Signal::State state);
 
-    //! Re-build the subint structure based on a new indexing scheme
-    /*! Note that this conversion is typically irreversible
-      as it involves summing profiles together. Not all derived
-      classes will be able to handle writing out Archives that
-      are not in the default TimeOrder index state. */
-    virtual void convert_index_state (IndexState state);
-    
     //! Perform the transformation on each polarimetric profile
     virtual void transform (const Jones<float>& transformation);
 
@@ -780,7 +753,10 @@ namespace Pulsar {
 
 
   protected:
-
+    
+    // Classes that inherit from IntegrationOrder need low-level access
+    friend class BinaryPhaseOrder;
+    
     //! Set the number of pulsar phase bins
     /*! Called by Archive methods to update child attribute */
     virtual void set_nbin (unsigned numbins) = 0;
@@ -869,11 +845,6 @@ namespace Pulsar {
     //! Set all values to null
     void init ();
 
-    //! Stores the Integration IndexState
-    IndexState index_state;
-
-    //! Stores the actual indicies, if required
-    vector< Estimate<double> > indices;
   };
 
   template<class Type>
