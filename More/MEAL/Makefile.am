@@ -17,7 +17,7 @@ libunits_la_SOURCES = Error.C HeapTracked.C ReferenceAble.C stringtok.C	      \
 
 nobase_include_HEADERS = Error.h HeapTracked.h ReferenceAble.h stringtok.h \
 	Traits.h Reference.h ReferenceTo.h Registry.h Functor.h \
-        Callback.h Estimate.h Matrix.h Vector.h Jacobi.h \
+        Callback.h TextInterface.h Estimate.h Matrix.h Vector.h Jacobi.h \
         Quaternion.h Jones.h Pauli.h Basis.h Stokes.h Cloude.h  \
         tostring.h random.h EstimatePlotter.h complexPlotter.h linchi2.h \
 	MEAL/Agent.h \
@@ -63,7 +63,7 @@ check_PROGRAMS = test_Error test_HeapTracked test_Reference \
 	test_Estimate test_Vector test_Matrix test_Jacobi test_eigen \
 	test_Jones test_Quaternion test_Pauli test_Basis test_Stokes \
 	test_Axis test_Projection test_Composite test_Scalar \
-	test_Complex2Product
+	test_Complex2Product test_TextInterface
 	
 TESTS = $(check_PROGRAMS)
 
@@ -89,6 +89,7 @@ test_Projection_SOURCES		= test_Projection.C
 test_Composite_SOURCES		= test_Composite.C
 test_Scalar_SOURCES		= test_Scalar.C
 test_Complex2Product_SOURCES	= test_Complex2Product.C
+test_TextInterface_SOURCES	= test_TextInterface.C
 
 lmfit_SOURCES 			= lmfit.C
 lmfit_LDADD = libunits.la @PGPLOT_LIBS@
