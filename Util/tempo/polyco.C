@@ -1,252 +1,318 @@
-
 #include <stdio.h> 
 #include <stdlib.h>
+#include <unistd.h>
 #include <sys/stat.h>
 #include <sys/wait.h>
-#include <unistd.h>
-#include <assert.h>
 #include <errno.h>
-#include <string.h>
+#include "poly.h"
 
-#include "MJD.h"
-#include "polyco.h"
-
-extern "C" { int scan_fortran_(char *,double *,double *, double *, int ); }
+void polynomial::init(){
+  dm = 0;
+  doppler_shift = 0;
+  log_rms_resid = 0;
+  f0 = 0;
+  telescope = 0;
+  nspan_mins = 0;
+  freq = 0;
+  binph = 0;
+  binfreq = 0;
+  binary = 0;
+  tempov11 = 0;
+}
 
 polynomial::polynomial(){
-  coefs = NULL;
-  ncoef = 0;
+  this->init();
 }
 
-polynomial::~polynomial(){
-  if (ncoef!=0) delete [] coefs;
-  ncoef = 0;
+polynomial::polynomial(const polynomial & in_poly){
+  
+  psrname = in_poly.psrname;
+  date = in_poly.date;
+  utc = in_poly.utc;
+  reftime = in_poly.reftime;
+  dm = in_poly.dm;
+  doppler_shift = in_poly.doppler_shift;
+  log_rms_resid = in_poly.log_rms_resid;
+  ref_phase = in_poly.ref_phase;
+  f0 = in_poly.f0;
+  telescope = in_poly.telescope;
+  nspan_mins = in_poly.nspan_mins;
+  freq = in_poly.freq;
+  binph = in_poly.binph;
+  binfreq = in_poly.binfreq;
+  coefs = in_poly.coefs;
+  binary = in_poly.binary;
+  tempov11 = in_poly.tempov11;
 }
 
-int polynomial::telid() const
-{
-  return telescope;
-}
+polynomial & polynomial::operator = (const polynomial & in_poly) {
 
-double polynomial::period(const MJD& tp) const
-{
-  double dp;                    // dphase/dt starts as phase per minute.
-  MJD dt = tp - reftime;
-  double t = dt.in_minutes();
-  dp = coefs[1];
-  double poweroft = t;
-  for (int i=2;i<ncoef;i++) {
-    dp+=(double)(i)*coefs[i]*poweroft;
-    poweroft *= t;
+  if(this == &in_poly) 
+    return(*this);
+  psrname = in_poly.psrname;
+  date = in_poly.date;
+  utc = in_poly.utc;
+  reftime = in_poly.reftime;
+  dm = in_poly.dm;
+  doppler_shift = in_poly.doppler_shift;
+  log_rms_resid = in_poly.log_rms_resid;
+  ref_phase = in_poly.ref_phase;
+  f0 = in_poly.f0;
+  telescope = in_poly.telescope;
+  nspan_mins = in_poly.nspan_mins;
+  freq = in_poly.freq;
+  binph = in_poly.binph;
+  binfreq = in_poly.binfreq;
+  coefs = in_poly.coefs; 
+  binary = in_poly.binary;
+  tempov11 = in_poly.tempov11;
+  return(*this);
+}  
+
+int polynomial::load(istream &istr){
+  
+  int mjd_day_num;
+  double frac_mjd;
+  int ncoeftmp=0;
+
+  this->init();    
+
+  istr >> psrname;
+  if(!istr.good()) return(-1);  // a quick peek to see if we're wasting time
+  istr >> date;
+  istr >> utc;
+  istr >> mjd_day_num;
+  istr >> frac_mjd;
+  istr >> dm;
+  while(istr.peek()==' ') istr.get();
+  if(istr.peek() == '\n') tempov11 = 0;
+  else {
+    istr >> doppler_shift;
+    istr >> log_rms_resid;  
+    tempov11 = 1;
   }
-  dp /= (double) 60.0;          // Phase per second
-  dp += f0;
-  return(1.0/dp);               // Seconds per turn = period of pulsar
+  string refphstr;
+  istr >> refphstr;  
+  istr >> f0; 
+  istr >> telescope;
+  istr >> nspan_mins;
+  istr >> ncoeftmp;
+  istr >> freq;
+  while(istr.peek()==' ') istr.get();
+  if(istr.peek() == '\n') binary = 0;
+  else {
+    istr >> binph;
+    istr >> binfreq;
+    binary = 1;
+  }
+
+  // if input unsuccessful, exit with error 
+  // before constructing any dependent objects
+  if(!istr.good()) return(-1);  
+  reftime = MJD(mjd_day_num, frac_mjd);
+  int64 turns;
+  double fracturns;
+#ifdef sun
+  sscanf(refphstr.c_str(), "%lld %lf\n", &turns, &fracturns);
+#else
+  sscanf(refphstr.c_str(), "%ld %lf\n", &turns, &fracturns);
+#endif
+  if(turns>0) ref_phase = Phase(turns, fracturns);
+  else ref_phase = Phase(turns, -fracturns);
+
+  coefs.clear();
+  coefs.resize(ncoeftmp);  
+  // Read in the coefficients 
+  for (int i = 0;i<ncoeftmp;i++){
+    string strexp;
+    int exp;
+    double ord;
+    istr >> ord;
+    if(istr.get()!='D') return(-1);
+    istr >> strexp;               // Did it this way because of
+    exp = atoi(strexp.c_str());   // cryptic solaris bug....
+    coefs[i] = ord * pow(10, exp);
+  }
+  if(!istr.good()) return(-1);
+
+  return(0);
 }
 
-double polynomial::phase(const MJD& tp) const
+// This should be converted to use stringstreams
+// when we move to solaris CC 5.0
+size_t polynomial::size_in_bytes() {
+return(0);
+}
+
+int polynomial::unload(ostream &ostr){
+
+  char numstr[100];  // max length of string set by princeton at 86...
+
+  if(tempov11)
+    sprintf(numstr, "%-10.9s%9.9s%12.12s%22s%19f%7.3lf%7.3lf", 
+	    psrname.c_str(), date.c_str(), utc.c_str(), reftime.strtempo(),
+	    dm, doppler_shift, log_rms_resid);
+  else
+    sprintf(numstr, "%-10.9s%9.9s%12.12s%22s%19f", 
+	    psrname.c_str(), date.c_str(), utc.c_str(), reftime.strtempo(),dm);    
+  ostr << numstr << endl;
+  
+  if(binary)
+    sprintf(numstr, "%20s%18.12lf%5d%5.0lf%5d%10.3f%7.4f%9.4f", 
+	    ref_phase.strprint(6).c_str(), f0, telescope, nspan_mins, 
+	    coefs.size(), freq, binph, binfreq);
+  else 
+    sprintf(numstr, "%20s%18.12lf%5d%5.0lf%5d%10.3f", 
+	    ref_phase.strprint(6).c_str(), f0, telescope, nspan_mins, 
+	    coefs.size(), freq);
+  ostr << numstr << endl;
+  
+  int nrows = (int)(coefs.size()/3);
+  if(nrows*3 < coefs.size()) nrows++;
+
+  for(int i=0; i<nrows; ++i){
+    for(int j=0; j<3 && (i*3+j)<coefs.size(); ++j){
+      double ord = coefs[i*3+j];
+      int exp = 0;
+      while(fabs(ord)<.1){
+	ord *= 10.0; exp--;
+      }
+      while(fabs(ord)>1){
+	ord /= 10.0; exp++;
+      }
+      sprintf(numstr, "%21.17lfD%+03d", ord, exp);
+      ostr << numstr;
+    }
+    ostr << endl;
+  }
+  if(!ostr.good()){
+    fprintf(stderr, "polynomial::unload error: bad stream state detected\n");
+    return(-1);
+  }
+  return(0);
+}
+
+Phase polynomial::phase(const MJD& t) const
 { 
-   double p;
+   Phase p = Phase(0,0.0);
 
-//   printf("polynomial::phase input time is %s\n",tp.printall());
-//   printf("polynomial::phase refer time is %s\n",reftime.printall());
-
-   MJD dt = tp - reftime;
-   double t = dt.in_minutes();
-
-//   printf("polynomial::phase dt in some easier is %s\n",dt.printall());
-//   printf("polynomial::phase dt in minutes is %18.12lf\n",t);
-   p = 0.0;
+   MJD dt = t - reftime;
+   double tm = dt.in_minutes();
 
    double poweroft = 1.0;
-   for (int i=0;i<ncoef;i++) {
-      p+= coefs[i]*poweroft;
-      poweroft *= t;
-//      printf("polynomial::phase coef[%d] is %lf\n",i,coefs[i]);
+   for (int i=0;i<coefs.size();i++) {
+      p += (coefs[i]*poweroft);
+      poweroft *= tm;
    }
-   p += t*f0*60.0;
-   return(p+ph0);
+   p += tm*f0*60.0;
+   return(ref_phase+p);
 }
 
-double polynomial::phi(const MJD& tp) const
-{
-   double p;
+Phase polynomial::phase(const MJD& t, float obs_freq) const {
+  float dm_delay_in_secs = dm/2.41e-4*(1.0/(obs_freq*obs_freq)-1.0/(freq*freq));
+  return(this->phase(t) - dm_delay_in_secs/this->period(t));
+}
 
-//   printf("polynomial::phase input time is %s\n",tp.printall());
-//   printf("polynomial::phase refer time is %s\n",reftime.printall());
+double polynomial::period(const MJD& t) const {
+   return(1.0/frequency(t));               // Seconds per turn = period of pulsar
+ }
 
-   MJD dt = tp - reftime;
-   double t = dt.in_minutes();
+double polynomial::frequency(const MJD& t) const {
+   double dp;                    // dphase/dt starts as phase per minute.
+   MJD dt = t - reftime;
+   double tm = dt.in_minutes();
 
-//   printf("polynomial::phase dt in some easier is %s\n",dt.printall());
-//   printf("polynomial::phase dt in minutes is %18.12lf\n",t);
-   p = 0.0;
-
+   dp = coefs[1];
    double poweroft = 1.0;
-   for (int i=0;i<ncoef;i++) {
-      p+= fmod (coefs[i]*poweroft, 1.0);
-      poweroft *= t;
-//      printf("polynomial::phase coef[%d] is %lf\n",i,coefs[i]);
+   for (int i=2;i<coefs.size();i++) {
+     dp+=(double)(i)*coefs[i]*poweroft;
+     poweroft *= tm;
    }
-   p += fmod (t*f0*60.0, 1.0);
+   dp /= (double) 60.0;          // Phase per second
+   dp += f0;
+   return(dp);
+}  
 
-   // NEW
-   //fprintf (stderr, "Phi not: %30.28lf, p: %30.28lf\n", ph0, p);
-   //fflush (stderr);
+void polynomial::prettyprint() {
 
-   double phi = fmod (ph0, 1.0);
-
-   //fprintf (stderr, "Fractional turns in Phi not: %30.28lf\n", phi);
-   //fflush (stderr);
-
-   phi += p;
-
-   //fprintf (stderr, "Turns in phi: %d\n", (int)phi);
-   //fflush (stderr);
-
-   phi = fmod(phi,1.0);
-
-   //fprintf (stderr, "Phi: %30.28lf\n", phi);
-   //fflush (stderr);
-
-   return(phi);
+  cout << "PSR Name\t\t\t" << psrname << endl;
+  cout << "Date\t\t\t\t" << date << endl;
+  cout << "UTC\t\t\t\t" << utc << endl;
+  cout << "Ref. Time\t\t\t" << reftime.strtempo() << endl;
+  cout << "DM\t\t\t\t" << dm << endl;
+  if(tempov11){
+    cout << "Doppler Shift\t\t\t" << doppler_shift << endl;
+    cout << "Log RMS Residuals\t\t" << log_rms_resid << endl;
+  }
+  cout << "Ref. Phase\t\t\t" << ref_phase.intturns() << ref_phase.fracturns() << endl;
+  cout << "Ref. Rotation Frequency\t\t" << f0 << endl;
+  cout << "Telescope\t\t\t" << telescope << endl;
+  cout << "Span in Minutes\t\t\t" << nspan_mins << endl;
+  cout << "Number of Coefficients\t\t" << coefs.size() << endl;
+  cout << "Reference Frequency\t\t" << freq << endl;
+  if(binary){
+    cout << "Binary Phase\t\t\t" << binph << endl;
+    cout << "Binary Frequency\t\t" << binfreq << endl;
+  }
+  for(int i=0; i<coefs.size(); ++i) 
+    cout << "\tCoeff  " << i+1 << "\t\t" << coefs[i] << endl;
 }
 
-int polynomial::load(FILE * fptr){
-   static char aline[120];
-   int mjd_day_num;
-   double frac_mjd;
-   int ncoeftmp;
-   
-   // Grab first line.
-   if (fgets(aline,120,fptr)!=NULL) {
-     sscanf(aline,"%s",psrname);
-     sscanf(&aline[10],"%s",date);
-     sscanf(&aline[34],"%5d",&mjd_day_num);
-     sscanf(&aline[39],"%lf",&frac_mjd);
-     sscanf(&aline[60],"%f",&dm);
-
-     reftime = MJD(mjd_day_num,(int) (86400.0 * frac_mjd),
-         (double) fmod(frac_mjd*86400.0,1.0));
-   }
-   else
-     return(-1);
-
-   //Grab second line
-   if (fgets(aline,120,fptr)!='\0') {
-     char* period = strchr (aline, '.');
-     if (period == NULL) {
-       fprintf (stderr, "polynomial::load no decimal found ?!?\n");
-       return -1;
-     }
-     sscanf(period,"%lf %lf %d %d %d %f %f %f",&ph0,&f0,&telescope,
-     &nspan,&ncoeftmp,&freq,&binph,&binp);
-   }
-   else
-     return(-1);
-
-   // Is there room? If not make space.
-   if (ncoeftmp>ncoef) {
-     if (coefs!=NULL) delete [] coefs;
-     coefs = new double[ncoeftmp];
-     if (coefs == NULL)  {
-       perror ("polynomial::load could not allocate new double");
-       return -1;
-     }
-     ncoef = ncoeftmp;
-   }
-
-   // Read in the coefficients  - they come in lots of threes
-   for (int i = 0;i<ncoef/3;i++){
-     fgets(aline,120,fptr);
-     // eliminate scan_fortran_ in favour of C code for test of theory
-     //scan_fortran_(aline,&coefs[3*i],&coefs[3*i+1],&coefs[3*i+2],strlen(aline));
-     char* capdee = strchr (aline, 'D');
-     while (capdee) {
-       *capdee = 'e';
-       capdee = strchr (capdee+1, 'D');
-     }
-     sscanf(aline, "%lf %lf %lf", &coefs[3*i],&coefs[3*i+1],&coefs[3*i+2]);
-   }
-
-   return(0);
-}
-
-const char *polynomial::pulsar () const
-{
-  return psrname;
-}
+/******************************************/
 
 polyco::polyco(){
-  init ();
+  pollys.clear();
 }
 
-void polyco::init()
-{
-  npollys = 0;
-  pollys = NULL;
-  the_tztot = the_polyco = NULL;
-  nbytes_in_polyco = nbytes_in_tztot = 0;
+polyco::polyco(const polyco & in_poly){
+  pollys = in_poly.pollys;
 }
 
-/* ************************************************************************
-   polyco constructor from user-specified pulsar name (and other catalogue
-                      parameters)
-   ************************************************************************ */
+polyco & polyco::operator = (const polyco & in_poly){
+  if(this == &in_poly)
+    return(*this);
+  pollys = in_poly.pollys;
+  return(*this);
+} 
 
-polyco::polyco (const char* psr, const MJD& m1, const MJD& m2, 
-		int ns, int nc, int maxha, int tel)
+polyco::polyco(string filename)
 {
-  static char* errstr = NULL;
-  init ();
-  if (Construct (psr, NULL, m1, m2, ns, nc, maxha, tel) != 0) {
-    if (errstr) free (errstr);
-    errstr = strdup ("polyco::polyco - failed to construct\n");
-    throw (errstr);
+  if(load (filename) != 0) { 
+    fprintf (stderr, "polyco::polyco - failed to construct from %s\n", filename.c_str());
+    exit(-1);
+  }
+}
+ 
+polyco::polyco(char * filename)
+{
+  string s = filename;
+  if (load (s) != 0) {
+    fprintf (stderr, "polyco::polyco - failed to construct from %s\n", filename);
+    exit(-1);
   }
 }
 
-/* ************************************************************************
-   polyco constructor from user-specified .par or .eph file
-   ************************************************************************ */
-
-polyco::polyco (const char* psr, const char* parfile, 
-		const MJD& m1, const MJD& m2, 
-		int ns, int nc, int maxha, int tel)
-{
-  static char* errstr = NULL;
-  init ();
-  if (Construct (psr, parfile, m1, m2, ns, nc, maxha, tel) != 0) {
-    if (errstr) free (errstr);
-    errstr = strdup ("polyco::polyco - failed to construct\n");
-    throw (errstr);
-  }
-}
-
-
-int polyco::Construct (const char* psr, const char* parfile, 
-		       const MJD& m1, const MJD& m2, 
-		       int ns, int nc, int maxha, int tel)
-{
-  char  syscom[120];
-  char* ephfile = NULL;
+// Default arguments are those of polyco
+int polyco::Construct (char* psr, char* parfile, const MJD& m1, const MJD& m2, 
+	 	       double ns=960.0, int nc=12, int maxha=8, int tel=7, double centrefreq = 1400.0) { 
+  char  syscom[120]; 
+  string ephfile;
+  string polyfile = "polyco.dat";
   int   rmeph = 0;
 
   if (parfile) {
-    sprintf(syscom,"polyco -f %s %lf %lf %d %d %d %d > /dev/null",
-	    parfile, m1.in_days(), m2.in_days(), ns, nc, maxha, tel);
-
-    ephfile = new char [strlen(parfile) + 1];
-    strcpy (ephfile, parfile);
+    sprintf(syscom,"polyco -f %s %lf %lf %lf %d %d %d %lf > /tmp/polyco.stdout",
+	    parfile, m1.in_days(), m2.in_days(), ns, nc, maxha, tel, centrefreq);
+    
+    ephfile = parfile;
   }
   else {
-    sprintf(syscom,"polyco %s %lf %lf %d %d %d %d > /dev/null",
-	    psr, m1.in_days(), m2.in_days(), ns, nc, maxha, tel);
+    sprintf(syscom,"polyco %s %lf %lf %lf %d %d %d %lf > /tmp/polyco.stdout",
+	    psr, m1.in_days(), m2.in_days(), ns, nc, maxha, tel, centrefreq);
 
-    ephfile = new char [strlen(psr) + 5];
-    if (psr[0] == 'J')
-      psr++;
-    sprintf (ephfile, "%s.eph",psr);
+    if (psr[0] == 'J') ephfile = &(psr[1]);
+    else ephfile = psr;
+    ephfile += ".eph";
     rmeph = 1;
   }
 
@@ -255,8 +321,7 @@ int polyco::Construct (const char* psr, const char* parfile,
 
     errno = 0;
     int status = system(syscom);
-    if (status == 0)
-      break;
+    if (status == 0) break;
 
     fprintf (stderr, "polyco::polyco - failed: %d\n", retries);
     if (status == -1)
@@ -271,346 +336,248 @@ int polyco::Construct (const char* psr, const char* parfile,
 		 WEXITSTATUS(status));
     }
     fprintf (stderr, "polyco::cmdline: %s\n", syscom);
-    if (retries == 3)  {
-      // first time failure
-      // remove the > /dev/null so the user can see the error
-      char* nul = strchr (syscom, '>');
-      if (nul) *nul = '\0';
-    }
+    fprintf (stderr, "polyco::stdout:\n");
+    system ("cat /tmp/polyco.stdout");
     retries --;
     
-    if (retries == 0) {
-      delete [] ephfile;
-      return -1;
-    }
+    if (retries == 0) return -1;
+
     if ((errno == EWOULDBLOCK) || (errno == EAGAIN)) {
       sleep (5);
     }
   }
 
-  int retval = file_Construct ("polyco.dat", ephfile);
-  if (retval != 0) {
-    fprintf (stderr, "polyco::polyco - failed to construct from %s and %s\n",
-	     "polyco.dat", ephfile);
+  if (this->load(polyfile)<=0) {
+    fprintf (stderr, "polyco::polyco - failed to construct from %s and %s\n", 
+	     polyfile.c_str(), ephfile.c_str());
   }
-
-  if (rmeph)
-    remove (ephfile);
-  delete [] ephfile;
+  if (rmeph) remove (ephfile.c_str());
   remove ("polyco.dat");
   remove ("dates.tmp");
   remove ("tz.in");
   remove ("tz.tmp");
   remove ("tztot.dat");
   remove ("tempo.lis");
-
-  return retval;
+  return 0;
 }
 
-/* ************************************************************************
-   polyco constructor from user-specified .polyco and .tztot file
-   ************************************************************************ */
-
-polyco::polyco(const char * id)
+polyco::polyco (char* psr, char* parfile, const MJD& m1, const MJD& m2,
+		double ns, int nc, int maxha, int tel, double centrefreq)
 {
-  char* polyname;
-  char* tztotname;
-
-  int length = strlen (id) + 10;
-  polyname  = new char [length];
-  tztotname = new char [length];
-
-  sprintf(polyname, "%s.polyco",id); 
-  sprintf(tztotname,"%s.tztot", id);
-
-  int retval = file_Construct (polyname, tztotname);
-
-  delete [] polyname;
-  delete [] tztotname;
-
-  if (retval != 0) {
-    char errstr[256];
-    sprintf (errstr, "polyco::polyco - failed to construct from %s and %s\n",
-	     polyname, tztotname);
+  string errstr;
+  if (Construct (psr, parfile, m1, m2, ns, nc, maxha, tel, centrefreq) != 0) {
+    errstr = "polyco::polyco - failed to construct\n";
     throw (errstr);
   }
 }
 
-/* ************************************************************************
-   the guts of all constructors listed above
-   ************************************************************************ */
-
-int polyco::file_Construct (const char* polyco_filename, 
-			    const char* tztot_filename)
+polyco::polyco (char* psr, const MJD& m1, const MJD& m2,
+		double ns, int nc, int maxha, int tel, double centrefreq)
 {
-  FILE *polly, *tztot;
-  struct stat  file_info;
-  polynomial tst;
-  
-  // first, simply count the number of polynomials in the polyco file
-  polly = fopen (polyco_filename, "r");
-  if (polly == NULL)  {
-    fprintf (stderr, "polyco::file_Construct - could not open %s\n",
-	     polyco_filename);
-    perror ("polyco::error");
-    fflush (stderr);
-    return -1;
+  string errstr;
+  if (Construct (psr, NULL, m1, m2, ns, nc, maxha, tel, centrefreq) != 0) {
+    errstr = "polyco::polyco - failed to construct\n";
+    throw (errstr);
   }
-  npollys = 0;
-  
-  while (tst.load(polly)==0){
+}
+
+int polyco::load(string polyco_filename){
+  ifstream file(polyco_filename.c_str());
+  return(this->load(file));
+}
+
+int polyco::load(char * polyco_filename)
+{
+  ifstream file(polyco_filename);
+  return(this->load(file));
+}
+
+int polyco::load(istream &istr){
+  int npollys = 0;
+  polynomial tst;
+  pollys.clear();
+  while(tst.load(istr)==0){
+    pollys.push_back(tst);
     npollys++;
   }
-  pollys = new polynomial * [npollys];
-  assert (pollys != NULL);
-  
-  // then, load all of the polynomials in the polyco file
-  if (fseek (polly, 0, SEEK_SET) < 0)  {
-    perror ("polyco::file_Construct - error fseek");
-    fclose(polly);
-    return -1;
-  }
-  for (int i=0;i<npollys;i++) {
-    pollys[i]=new polynomial(); 
-    pollys[i]->load(polly);
-  }
-  
-  // then, load the raw file into the_polyco buffer
-  if (stat (polyco_filename, &file_info) < 0)  {
-    perror ("polyco::file_Construct - stat");
-    fclose(polly);
-    return -1;
-  }
-  if (fseek (polly, 0, SEEK_SET) < 0)  {
-    perror ("polyco::file_Construct - error fseek");
-    fclose(polly);
-    return -1;
-  }
-  int count=file_info.st_size;
-  the_polyco = new char [count+1];
-  assert (the_polyco != NULL);
-  fread(the_polyco,count,1,polly);
-  nbytes_in_polyco = count;
-  fclose(polly);
-  
-  // then, load the raw tztot file into the_tztot buffer
-  if (stat (tztot_filename, &file_info) < 0)  {
-    fprintf (stderr, "polyco::file_Construct - err stat(%s)",tztot_filename);
-    perror ("");
-    return -1;
-  }
-  count=file_info.st_size;
-  the_tztot = new char [count+1];
-  assert (the_tztot != NULL);
-  
-  tztot = fopen (tztot_filename, "r");
-  if (tztot == NULL)  {
-    fprintf (stderr, "polyco::file_Construct - could not open %s\n",
-	     tztot_filename);
-    perror ("polyco::error");
-    return -1;
-  }
-  fread(the_tztot,count,1,tztot);
-  nbytes_in_tztot = count;
-  fclose(tztot);
-  
-  return 0;
+  return(npollys);
 }
 
-
-polyco::~polyco()
-{
-  if (npollys!=0) {
-    for (int i=0;i<npollys;i++) delete pollys[i];
-    delete [] pollys;
+int polyco::load(FILE *fp, int nbytes){
+  // this is truly a terrible way, but solaris
+  // does not yet support stringstreams
+  char * polychar = new char[nbytes];
+  if (fread(polychar,nbytes,1,fp)!=1){
+    fprintf(stderr,"polyco::load: cannot read %d bytes\n", nbytes);
+    return(-1);
   }
-  if (nbytes_in_polyco!=0) {
-    delete [] the_polyco;
-  }
-  if (nbytes_in_tztot!=0) {
-    delete [] the_tztot;
-  }
-}
-
-int polyco::telid () const
-{
-  if (pollys == NULL)
-    return -1;
-  if (pollys[0] == NULL)
-    return -1;
-  return pollys[0]->telid();
-}
-
-
-/*
- * The reference frequency for polyco::phase is obtained from the tzpar
- *   file for the pulsar.
- */
-double polyco::phase(const MJD& t, float obs_freq) const
-{
-  /* This static tzrfrq is dangerous if there is more than one polyco instance
-   *   with different reference frequencies.  This is rarely ever required,
-   *   and there is a considerable speed increase from not having to
-   *   read from file again and again.
-   */
-  static float tzrfrq = 0; 
-
-  if (tzrfrq != 0)
-    return (this->phase (t, obs_freq, tzrfrq));
-
-  char *tempo_dir = getenv ("TEMPO");
-  assert (tempo_dir != NULL);
-
-  char *tempo_cfg = new char[FILENAME_MAX];
-  assert (tempo_cfg != NULL);
-  strcpy (tempo_cfg, tempo_dir);
-  strcat (tempo_cfg, "/tempo.cfg");
-
-  FILE *cfgfptr;
-  if ((cfgfptr = fopen (tempo_cfg, "r")) == NULL) {
-    fprintf (stderr, "polyco::phase - could not open tempo config file %s\n",
-             tempo_cfg);
-    return -1;
-  }
-  delete [] tempo_cfg;
-
-  char *tempo_par = new char[FILENAME_MAX];
-  assert (tempo_par != NULL);
-
-  const int ALINE_MAX = 80;
-  char aline[ALINE_MAX];
-  fgets(aline, ALINE_MAX, cfgfptr);
-  while (sscanf(aline, "PARDIR %s", tempo_par) != 1) 
-    fgets(aline, ALINE_MAX, cfgfptr);
-  fclose(cfgfptr);
-
-  assert (pollys[0] != NULL);
-  strncat (tempo_par, pollys[0]->pulsar (), 9);
-  strcat (tempo_par, ".par"); 
-  FILE *parfptr;
-  if ((parfptr = fopen (tempo_par, "r")) == NULL) {
-    fprintf (stderr, "polyco::phase - could not open tempo par file %s\n", 
-             tempo_par);
-    return -1;
-  } 
-  delete [] tempo_par;
-
-  char tzrfrq_str[30];
-  fgets(aline, ALINE_MAX, parfptr);
-  while (sscanf(aline, "TZRFRQ %s", tzrfrq_str) != 1) 
-    fgets(aline, ALINE_MAX, parfptr);
-  fclose(parfptr);
-
-  /* For some strange reason, exponentials are represented by 'D' in the
-   *   tzpar files. 
-   */
-  char *dptr;
-  if ((dptr = strchr(tzrfrq_str, 'D')) != NULL)
-    *dptr = 'E';
-  sscanf(tzrfrq_str, "%f", &tzrfrq); 
-
-  return (this->phase (t, obs_freq, tzrfrq));
-}
-
-double polyco::phase(const MJD& t, float obs_freq, float ref_freq) const {
-   float dm_delay_in_secs = pollys[0]->dm/2.41e-4*
-        (1.0/(obs_freq*obs_freq)-1.0/(ref_freq*ref_freq));
-   double current_period = this->period(t);
-   if (current_period>0) {
-      float dm_delay_in_turns = dm_delay_in_secs/current_period;
-      double current_phase = this->phase(t);
-      return(current_phase - dm_delay_in_turns);
-   }
-   else
-     return(0);
-}
-
-double polyco::phi(const MJD& t) const {
-  // Find correct polynomial and use it
-  int ipolly=0;
-  while (ipolly<npollys) {
-    MJD t1 = pollys[ipolly]->reftime - (double) pollys[ipolly]->nspan*30.0;
-    MJD t2 = pollys[ipolly]->reftime + (double) pollys[ipolly]->nspan*30.0;
-
-    if (t<t1) {
-      fprintf(stderr,"MJD %s not found in polyco\n",t.printall());
-      fprintf(stderr,"lower b is %s\n",t1.printall());
-      fprintf(stderr,"reftime is %s\n",pollys[ipolly]->reftime.printall());
-      fprintf(stderr,"upper b is %s\n",t2.printall());
-      return(0);
-    }
-
-    if (t>t1 && t<t2) {
-      return(pollys[ipolly]->phi(t));
-    }
-    ipolly++;
-  }
-  return(0.0);
-}
-
-double polyco::phase(const MJD& t) const {
-  // Find correct polynomial and use it
-  int ipolly=0;
-  while (ipolly<npollys) {
-    MJD t1 = pollys[ipolly]->reftime - (double) pollys[ipolly]->nspan*30.0;
-    MJD t2 = pollys[ipolly]->reftime + (double) pollys[ipolly]->nspan*30.0;
-
-    if (t<t1) {
-      fprintf(stderr,"MJD %s not found in polyco\n",t.printall());
-      fprintf(stderr,"lower b is %s\n",t1.printall());
-      fprintf(stderr,"reftime is %s\n",pollys[ipolly]->reftime.printall());
-      fprintf(stderr,"upper b is %s\n",t2.printall());
-      return(0);
-    }
-
-    if (t>t1 && t<t2) {
-      return(pollys[ipolly]->phase(t));
-    }
-    ipolly++;
-  }
-  return(0.0);
-}
-
-double polyco::period(const MJD& t) const {
-  // Find correct polynomial and use it
-     int ipolly=0;
-     while (ipolly<npollys) {
-       MJD t1 = pollys[ipolly]->reftime - (double)(pollys[ipolly]->nspan*30.0);
-       MJD t2 = pollys[ipolly]->reftime + (double)(pollys[ipolly]->nspan*30.0);
-
-       if (t<t1) {
-	 fprintf(stderr,"MJD %s not found in polyco\n",t.printall());
-	 return(0.0);
-       }
-
-       if (t>t1 && t<t2) {
-	 return(pollys[ipolly]->period(t));
-       }
-       ipolly++;
-     }
-    fprintf(stderr,"polyco::period WARNING time %s not found in polyco\n",
-	    t.printall());
+  FILE *fout;
+  if((fout=fopen("polyco.dat.tmp", "w")) == NULL){
+    fprintf(stderr, "polyco::load error: could not open file polyco.dat.tmp\n");
     return(-1.0);
+  }
+  if(fwrite(polychar,nbytes,1,fout)!=1){
+    fprintf(stderr, "polyco::load error: could not write file polyco.dat.tmp\n");
+    return(-1.0);
+  }
+  ifstream file("polyco.dat.tmp");
+  delete [] polychar;
+  return(this->load(file));
 }
 
-int polyco::writepolyco(char * uni) const {
-  char *name = new char[strlen(uni) + 8];
-  FILE *fptr;
+int polyco::unload(string filename){
+  return(this->unload(filename.c_str()));
+}
 
-  sprintf(name,"%s.polyco",uni);
-  fptr = fopen(name,"w");
-  fwrite(the_polyco,nbytes_in_polyco,1,fptr);
-  fclose(fptr); 
+int polyco::unload(char *filename){
+  ofstream ostr(filename);
+  return(this->unload(ostr));
+}
+
+int polyco::unload(ostream &ostr){
+  for(int i=0; i<pollys.size(); ++i){
+    if(pollys[i].unload(ostr)!=0){
+      fprintf(stderr, "polyco::unload error - couldn't unload polynomial %d\n", i);
+      return(-1);
+    }
+  }
   return(0);
 }
 
-int polyco::writetztot(char * uni) const {
-  char *name = new char[strlen(uni) + 7];
-  FILE *fptr;
+int polyco::unload(FILE *fp, int nbytes){
+  // this is truly a terrible way, but solaris
+  // does not yet support stringstreams
+  ofstream file("polyco.dat.tmp");
+  if(unload(file)!=0) return(-1);
+  FILE *fin;
+  if((fin=fopen("polyco.dat.tmp", "r"))==NULL){
+    fprintf(stderr, "polyco::unload: cannot open file polyco.dat.tmp\n");
+    return(-1);
+  }
+  char * polychar = new char[nbytes];
+  if(fread(polychar, nbytes, 1, fin)!=1){
+    fprintf(stderr, "polyco::unload: cannot read file polyco.dat.tmp\n");
+    return(-1);
+  }
 
-  sprintf(name,"%s.tztot",uni);
-  fptr = fopen(name,"w");
-  fwrite(the_tztot,nbytes_in_tztot,1,fptr);
-  fclose(fptr); 
+  if (fwrite(polychar,nbytes,1,fp)!=1){
+    fprintf(stderr,"polyco::unload: cannot write %d bytes\n", nbytes);
+    return(-1);
+  }
   return(0);
+}
+
+void polyco::prettyprint(){
+  for(int i=0; i<pollys.size(); ++i) 
+    pollys[i].prettyprint();
+}
+
+polynomial polyco::nearest_polly(const MJD &t) const {
+
+  int ipolly=0;
+  while (ipolly<pollys.size()) {
+    MJD t1 = pollys[ipolly].reftime - (double) pollys[ipolly].nspan_mins*60.0/2.0;
+    MJD t2 = pollys[ipolly].reftime + (double) pollys[ipolly].nspan_mins*60.0/2.0;
+    
+    if (t>t1 && t<t2) {
+      return(pollys[ipolly]);
+    }
+    ipolly++;
+  }
+  string failed = "no polynomial";
+  throw(failed);
+}  
+
+polynomial polyco::nearest_polly(string in_psrname,const MJD &t) const {
+
+  int ipolly=0;
+  while (ipolly<pollys.size()) {
+    MJD t1 = pollys[ipolly].reftime - (double) pollys[ipolly].nspan_mins*60.0/2.0;
+    MJD t2 = pollys[ipolly].reftime + (double) pollys[ipolly].nspan_mins*60.0/2.0;
+    
+    if (t>t1 && t<t2 && pollys[ipolly].psrname==in_psrname) {
+      return(pollys[ipolly]);
+    }
+    ipolly++;
+  }
+  string failed = "no polynomial";
+  throw(failed);
+}  
+
+Phase polyco::phase(const MJD& t) const{
+  polynomial nearest_polly;
+  try{ nearest_polly = this->nearest_polly(t);}
+  catch(...) {throw("no polynomial");}
+  return(nearest_polly.phase(t));
+}
+
+Phase polyco::phase(string in_psrname, const MJD& t) const {
+  polynomial nearest_polly;
+  try{ nearest_polly = this->nearest_polly(in_psrname, t);}
+  catch(...) {throw("no polynomial");}
+  return(nearest_polly.phase(t));
+}
+
+Phase polyco::phase(const MJD& t, float obs_freq) const {
+  polynomial nearest_polly;
+  try{ nearest_polly = this->nearest_polly(t);}
+  catch(...) {throw("no polynomial");}
+  return(nearest_polly.phase(t, obs_freq));
+} 
+
+Phase polyco::phase(string in_psrname, const MJD& t, float obs_freq) const {
+  polynomial nearest_polly;
+  try{ nearest_polly = this->nearest_polly(in_psrname, t);}
+  catch(...) {throw("no polynomial");}
+  return(nearest_polly.phase(t, obs_freq));
+}
+
+double polyco::period(const MJD& t) const{
+  polynomial nearest_polly;
+  try{ nearest_polly = this->nearest_polly(t);}
+  catch(...) {throw("no polynomial");}
+  return(nearest_polly.period(t));
+}
+
+double polyco::period(string in_psrname, const MJD& t) const{
+  polynomial nearest_polly;
+  try{ nearest_polly = this->nearest_polly(in_psrname, t);}
+  catch(...) { throw("no polynomial");}
+  return(nearest_polly.period(t));
+}
+
+double polyco::frequency(const MJD& t) const {
+  polynomial nearest_polly;
+  try{ nearest_polly = this->nearest_polly(t);}
+  catch(...) { throw("no polynomial");}  
+  return(nearest_polly.frequency(t));
+}
+
+double polyco::frequency(string in_psrname, const MJD& t) const {
+  polynomial nearest_polly;
+  try{ nearest_polly = this->nearest_polly(in_psrname, t);}
+  catch(...) { throw("no polynomial");}
+  return(nearest_polly.frequency(t));
+}
+
+size_t polyco::size_in_bytes(){
+  // this is truly a terrible way, but solaris
+  // does not yet support stringstreams
+  struct stat filestat;
+  string s = "polyco.dat.tmp";
+  ofstream file(s.c_str());
+  if(this->unload(file)!=0){
+    fprintf(stderr, "polyco::size_in_bytes error: could not unload file %s\n", s.c_str());
+    return(0);
+  }
+  if(stat(s.c_str(), &filestat)!=0){
+    fprintf(stderr, "polyco::size_in_bytes error: could not stat file %s\n", s.c_str());
+    return(0);
+  }
+  remove(s.c_str());
+  return(filestat.st_size);
+
+//   for(int i=0; i<pollys.size(); ++i) 
+//     size += pollys[i].size_in_bytes();
+  //  return(size);
 }
