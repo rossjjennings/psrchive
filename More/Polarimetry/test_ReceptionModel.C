@@ -1,8 +1,6 @@
 #include <iostream>
 #include <algorithm>
 #include <unistd.h>
-#include <cpgplot.h>
-
 
 #include "Calibration/ReceptionModel.h"
 #include "Calibration/Parallactic.h"
@@ -58,7 +56,6 @@ unsigned ncal = 1;
 bool hamaker = true;
 
 // plot things
-bool plot = false;
 bool verbose = false;
 bool vverbose= false;
 
@@ -86,7 +83,6 @@ void usage ()
        << nstates << ")\n"
     "  -t x error tolerance (default="
        << error_tolerance << ")\n\n"
-    "  -D   display plot of parallactic angle versus hour angle\n"
     "  -h   help\n"
     "  -v   verbose\n"
     "  -V   very verbose\n"
@@ -94,44 +90,6 @@ void usage ()
 }
 
 
-
-void plot_para (Calibration::Parallactic& parallactic)
-{
-  parallactic.set_hour_angle (ha_min);
-  float PA_min = parallactic.get_param (0);
-  
-  parallactic.set_hour_angle (ha_max);
-  float PA_max = parallactic.get_param (0);
-
-  PA_min *= 180.0/M_PI;
-  PA_max *= 180.0/M_PI;
-
-  cerr << "Parallactic angle ranges from " << PA_min << " to " << PA_max
-       << " degrees" << endl;
-
-  cpgbeg (0, "?", 0, 0);
-  cpgsvp (0.1,.95, 0.1,.95);
-  cpgswin (ha_min, ha_max, PA_min, PA_max);
-  cpgbox("bcnst",0.0,0,"bcnst",0.0,0);
-  cpglab("Hour Angle", "Parallactic Angle", "");
-
-  float ha_step = (ha_max - ha_min) / float(nobs-1);
-
-  for (unsigned iobs = 0; iobs < nobs; iobs++) {
-
-    // form the rotation matrix about the V-axis
-    float ha = ha_min + float(iobs) * ha_step;
-
-    parallactic.set_hour_angle (ha);
-
-    float PA = parallactic.get_param (0);
-    PA *= 180.0/M_PI;
-  
-    cpgpt1 (ha, PA, 5);
-  }
-
-  cpgend ();
-}
 
 void random_receiver (Jones<double>& receiver)
 {
@@ -660,10 +618,6 @@ int main (int argc, char** argv)
 	cerr << "difficulty must be >0 and <" << sqrt(3.0) << endl;
       break;
 
-    case 'D':
-      plot = true;
-      break;
-
     case 'f':
       max_poln = atof (optarg);
       if (max_poln > 1.0 || max_poln < 0.0)
@@ -733,9 +687,6 @@ int main (int argc, char** argv)
   ha_min /= 24.0;
   ha_max /= 24.0;
     
-  if (plot)
-    plot_para (parallactic);
-
   unsigned errors = 0;
   unsigned reported_errors = 0;
 
