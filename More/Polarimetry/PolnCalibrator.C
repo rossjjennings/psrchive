@@ -242,7 +242,7 @@ void Pulsar::PolnCalibrator::calculate (vector<vector<Estimate<double> > >& hi,
 	cerr << "Pulsar::PolnCalibrator::calculate ichan=" << ichan <<
 	  " bad calibrator levels" << endl;
       baseline[ichan] = 0;
-      jones[ichan] = Jones<float>();
+      jones[ichan] = Jones<float>::identity();
       continue;
     }
 
