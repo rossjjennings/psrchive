@@ -100,7 +100,8 @@ int mpiPack (const polynomial& pl, void* outbuf, int outcount, int* position,
   int length = (int)(pl.coefs.size());
   MPI_Pack (&length,
 	    1, MPI_INT,    outbuf, outcount, position, comm);
-  for (int i=0; i<pl.coefs.size(); ++i) {
+
+  for (unsigned i=0; i<pl.coefs.size(); ++i) {
     temp = pl.coefs[i];
     MPI_Pack (&temp, 1, MPI_DOUBLE, outbuf, outcount, position, comm);
   }
@@ -152,8 +153,9 @@ int mpiUnpack (void* inbuf, int insize, int* position,
   int tmpint = 0;
   MPI_Unpack (inbuf, insize, position, &tmpint,
 	      1, MPI_INT,    comm);
+
   pl->coefs.resize(tmpint);
-  for(int i=0; i<pl->coefs.size(); ++i)  
+  for(unsigned i=0; i<pl->coefs.size(); ++i)  
     MPI_Unpack (inbuf, insize, position, &(pl->coefs[i]),
 		1, MPI_DOUBLE,   comm);
 
@@ -170,7 +172,7 @@ int mpiPack_size (const polyco& poly, MPI_Comm comm, int* size)
   MPI_Pack_size (1,  MPI_INT,  comm, &temp_size);  // npollys
   total_size += temp_size;
 
-  for (int i=0; i<poly.pollys.size(); i++) {
+  for (unsigned i=0; i<poly.pollys.size(); i++) {
     mpiPack_size (poly.pollys[i], comm, &temp_size);
     total_size += temp_size;
   }
@@ -183,7 +185,8 @@ int mpiPack (const polyco& poly, void* outbuf, int outcount, int* position,
 {
   int length = (int) poly.pollys.size();
   MPI_Pack (&length, 1, MPI_INT, outbuf, outcount, position, comm);
-  for (int i=0; i<poly.pollys.size(); i++) {
+
+  for (unsigned i=0; i<poly.pollys.size(); i++) {
     mpiPack (poly.pollys[i], outbuf, outcount, position, comm);
   }
   return MPI_SUCCESS;
