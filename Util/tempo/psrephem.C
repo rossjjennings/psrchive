@@ -10,34 +10,65 @@
 
 char* psrephem::tempo_pardir = NULL;
 int   psrephem::verbose = 0;
+char  psrephem::ephemstr [EPH_NUM_KEYS][EPH_STR_LEN];
 
 static const char* psrephem_tmp_fname = "psrephem_tmp.eph";
 
-#if 0
 void psrephem::init()
 {
-  int parmStatus     [EPH_NUM_KEYS];
-  char value_str     [EPH_NUM_KEYS][EPH_STR_LEN];
-  double value_double[EPH_NUM_KEYS];
-  int value_integer  [EPH_NUM_KEYS];
-  double error_double[EPH_NUM_KEYS];
-}
-#endif
-
-
-psrephem::~psrephem(){
+  nontempo11.erase();
+  parmStatus    = NULL;
+  value_str     = NULL;
+  value_double  = NULL;
+  value_integer = NULL;
+  error_double  = NULL;
 }
 
-psrephem::psrephem()
+void psrephem::size_dataspace()
 {
+  if (!tempo11)  {
+    destroy ();
+    return;
+  }
+
+  if (parmStatus)  {
+    zero();
+    return;
+  }
+
+  parmStatus    = new int    [EPH_NUM_KEYS];
+  value_double  = new double [EPH_NUM_KEYS];
+  value_str     = new string [EPH_NUM_KEYS];
+  value_integer = new int    [EPH_NUM_KEYS];
+  error_double  = new double [EPH_NUM_KEYS];
+
+  zero();
+}
+
+void psrephem::zero()
+{
+  char* tpo_safe = " ";
+  static string tempo_safe_string (tpo_safe);
+
   for (int i=0;i<EPH_NUM_KEYS;i++) {
     parmStatus   [i] = 0;
     value_double [i] = 0.0;
     value_integer[i] = 0;
+    value_str    [i] = tempo_safe_string;
     error_double[i]  = 0.0;
-    value_str[i][0]  = ' ';
-    value_str[i][1]  = '\0';
   }
+}
+
+void psrephem::destroy()
+{
+  if (parmStatus)  {
+    delete [] parmStatus;
+    delete [] value_double;
+    delete [] value_integer;
+    delete [] error_double;
+    delete [] value_str;
+  }
+  init ();
 }
 
 psrephem::psrephem (char* psr_name, int use_cwd)
@@ -60,8 +91,7 @@ psrephem::psrephem (char* filename)
 int psrephem::create (char* psr_name, int use_cwd)
 {
   string filename = par_lookup (psr_name, use_cwd);
-
-  if (filename == "") {
+  if (filename.empty()) {
     fprintf (stderr, "psrephem::create no ephemeris file for %s found.\n",
 	     psr_name);
     return -1;
@@ -75,29 +105,79 @@ int psrephem::create (char* psr_name, int use_cwd)
 
 int psrephem::load (const char* filename)
 {
-  int istat = rd_eph (filename, parmStatus, value_str, value_double,
+  tempo11 = 1;
+  size_dataspace();
+  int istat = rd_eph (filename, parmStatus, ephemstr, value_double,
 		      value_integer, error_double);
   if (!istat) {
-    fprintf(stderr,"psrephem::load error rd_eph %s\n", filename);
-    return -1;
+    fprintf (stderr,
+    "psrephem::load WARNING tempo11-style load of '%s' failed\n", filename);
+    return old_load (filename);
   }
+  for (int i=0;i<EPH_NUM_KEYS;i++)
+    value_str[i] = ephemstr [i];
+
   if (verbose) {
-    fprintf(stderr,"psrephem::load loaded %s ok\n", filename);
+    fprintf(stderr,"psrephem::load tempo11-style loaded '%s' ok\n", filename);
+  }
+  return 0;
+}
+
+int psrephem::old_load (const char* filename)
+{
+  tempo11 = 0;
+  size_dataspace();
+
+  FILE* fptr = fopen(filename,"r");
+  if (fptr == NULL) {
+    fprintf (stderr, "psrephem::old_load error fopen(%s)", filename);
+    perror (":");
+  }
+  if (stringload (&nontempo11, fptr) < 0)  {
+    fprintf (stderr, "psrephem::old_load error\n");
+    return -1;
   }
   return 0;
 }
 
 int psrephem::unload (const char* filename) const
 {
-  int istat = wr_eph (filename, parmStatus, value_str, value_double,
-		      value_integer, error_double);
-  if (!istat) {
-    fprintf(stderr,"psrephem::unload error wr_eph %s\n", filename);
-    return -1;
+  if (tempo11)  {
+    for (int i=0;i<EPH_NUM_KEYS;i++)
+      strcpy (ephemstr[i], value_str[i].data());
+    int istat = wr_eph (filename, parmStatus, ephemstr, value_double,
+		        value_integer, error_double);
+    if (!istat) {
+      fprintf(stderr,"psrephem::unload error wr_eph %s\n", filename);
+      return -1;
+    }
+  }
+  else  {
+    return old_unload (filename);
   }
   if (verbose) {
     fprintf(stderr,"psrephem::unload unloaded %s ok\n", filename);
   }
+  return 0;
+}
+
+int psrephem::old_unload (const char* filename) const
+{
+  if (tempo11)
+    return -1;
+
+  FILE* fptr = fopen (filename,"w");
+  if (fptr == NULL) {
+    fprintf (stderr, "psrephem::old_unload error fopen(%s)", filename);
+    perror (":");
+    return -1;
+  }
+  if (fwrite (nontempo11.data(), 1, nontempo11.length(), fptr) 
+	< nontempo11.length())  {
+    perror ("psrephem::old_unload error");
+    return -1;
+  }
+  fclose (fptr);
   return 0;
 }
 
@@ -112,16 +192,24 @@ string psrephem::par_lookup (const char* name, int use_cwd)
   else
     psr_name = name;
 
+  // these string literals are assigned to char* to work around a
+  // bug in the Sun C4.2 compiler
+  char* cwd = "./";
+  char* eph = ".eph";
+  char* par = ".par";
+  char* tempo_cfg = "/tempo.cfg";
+  char* psrinfo_cmd = "psrinfo -e ";
+
   if (use_cwd) {
     /* Look for jname.eph in current directory */
-    filename = "./" + psr_name + ".eph";
+    filename = cwd + psr_name + eph;
     if (stat (filename.c_str(), &finfo) == 0) {
       if (verbose) {
 	fprintf (stderr, "psrephem::Using %s from cwd.\n", filename.c_str());
       }
       return filename;
     }
-    filename = "./" + psr_name + ".par";
+    filename = cwd + psr_name + par;
     if (stat (filename.c_str(), &finfo) == 0) {
       if (verbose) {
 	fprintf (stderr, "psrephem::Using %s from cwd.\n", filename.c_str());
@@ -138,7 +226,7 @@ string psrephem::par_lookup (const char* name, int use_cwd)
     }
     else {
       filename = tpodir;
-      filename += "/tempo.cfg";
+      filename += tempo_cfg;
       FILE* fptr = fopen(filename.c_str(),"r");
       if (fptr == NULL) {
 	fprintf (stderr, "psrephem::par_lookup error fopen(%s)",
@@ -167,7 +255,7 @@ string psrephem::par_lookup (const char* name, int use_cwd)
   } // end if tempo_pardir == NULL
 
   if (tempo_pardir != NULL) {
-    filename = tempo_pardir + psr_name + ".par";
+    filename = tempo_pardir + psr_name + par;
     if (stat (filename.c_str(), &finfo) == 0) {
       if (verbose)
 	printf("psrephem:: Using %s from PARDIR\n", filename.c_str());
@@ -177,7 +265,7 @@ string psrephem::par_lookup (const char* name, int use_cwd)
 
   /* Create name.eph in local directory */ 
 
-  filename = "psrinfo -e " + psr_name;
+  filename = psrinfo_cmd + psr_name;
   if (verbose)
     fprintf (stderr, "psrephem:: Creating %s.eph using psrinfo.\n",
 	     psr_name.c_str());
@@ -185,10 +273,10 @@ string psrephem::par_lookup (const char* name, int use_cwd)
   if (system(filename.c_str()) != 0) {
     fprintf (stderr, "psrephem:: Error executing system (%s)\n",
 	     filename.c_str());
-    filename = "";
+    filename.erase();
     return filename;
   }
-  filename = "./" + psr_name + ".eph";
+  filename = cwd + psr_name + eph;
   if (stat (filename.c_str(), &finfo) == 0) {
     if (verbose)
       printf("psrephem:: Using %s from PARDIR\n", filename.c_str());
@@ -199,26 +287,32 @@ string psrephem::par_lookup (const char* name, int use_cwd)
     fprintf (stderr, "psrephem:: Cannot find %s after call to psrinfo.\n", 
 	     filename.c_str());
   }
-  filename = "";
+  filename.erase();
   return filename;
 }
 
 string psrephem::psrname() const
 {
-  string ret = "";
+  string empty;
+
+  if (!tempo11)
+    return empty;
 
   if (parmStatus[EPH_PSRJ]==1)
-    ret = value_str[EPH_PSRJ];
+    return value_str[EPH_PSRJ];
   else if (parmStatus[EPH_PSRB]==1)
-    ret = value_str[EPH_PSRJ];
+    return value_str[EPH_PSRJ];
   else if (verbose)
     fprintf(stderr, "psrephem::psrname() Error determining pulsar name\n");
 
-  return ret;
+  return empty;
 }
 
 double psrephem::dm() const
 {
+  if (!tempo11)
+    return -1;
+
   if (parmStatus[EPH_DM]==1)
     return value_double[EPH_DM];
 
@@ -228,7 +322,11 @@ double psrephem::dm() const
   return -1.0;
 }
 
-void psrephem::nofit(){
+void psrephem::nofit()
+{
+  if (!tempo11)
+    return;
+
   for (int i=0;i<EPH_NUM_KEYS;i++) {
     if (parmStatus[i]==2) parmStatus[i]=1;
   }
@@ -247,19 +345,21 @@ int psrephem::load (FILE* fptr, size_t nbytes)
 int psrephem::unload (FILE* fptr) const
 {
   string out;
-  if (unload(&out) < 0)
+  if (!tempo11)
+    out = nontempo11;
+  else if (unload(&out) < 0)
     return -1;
 
-  int size = (int) out.length();
-  int bout = fprintf (fptr, out.c_str());
+  size_t size = out.length();
+  size_t bout = fwrite (out.data(), 1, size, fptr);
   if (bout < size)  {
-    fprintf (stderr, "psrephem::unload(FILE*) ERROR fprintf only %d/%d",
+    fprintf (stderr, "psrephem::unload(FILE*) ERROR fprintf only %lu/%lu",
         bout, size);
     perror ("");
     return -1;
   }
   fflush (fptr);
-  return bout;
+  return (int) bout;
 }
 
 int psrephem::load (string* instr)
@@ -282,19 +382,31 @@ int psrephem::load (string* instr)
   }
   fclose (temp);
 
-  int istat = rd_eph (psrephem_tmp_fname, parmStatus, value_str, value_double,
+  int istat = rd_eph (psrephem_tmp_fname, parmStatus, ephemstr, value_double,
 		      value_integer, error_double);
   remove (psrephem_tmp_fname);
   if (!istat) {
-    fprintf(stderr,"psrephem::load error loading %s\n",psrephem_tmp_fname);
-    return -1;
+    fprintf (stderr,
+		 "psrephem::load WARNING tempo11-style string load failed\n");
+    tempo11 = 0;
+    nontempo11 = *instr;
   }
+  for (int i=0;i<EPH_NUM_KEYS;i++)
+    value_str[i] = ephemstr[i];
+
   return 0;
 }
 
 int psrephem::unload (string* outstr) const
 {
-  int istat = wr_eph (psrephem_tmp_fname, parmStatus, value_str, value_double,
+  if (!tempo11)  {
+    *outstr += nontempo11;
+    return 0;
+  }
+  for (int i=0;i<EPH_NUM_KEYS;i++)
+    strcpy (ephemstr[i], value_str[i].data());
+
+  int istat = wr_eph (psrephem_tmp_fname, parmStatus, ephemstr, value_double,
 		      value_integer, error_double);
   if (!istat) {
     fprintf(stderr,"psrephem::unload error unloading %s\n",psrephem_tmp_fname);
@@ -315,15 +427,22 @@ int psrephem::unload (string* outstr) const
 
 double psrephem::p(void)
 {
-    if ((value_double[EPH_F])!=0.0){
+  if (!tempo11)
+    return -1;
+
+  if ((value_double[EPH_F])!=0.0)  {
     return (1.0/value_double[EPH_F]);
-  } else
-  fprintf(stderr,"psrephem::p warning rotation frequency 0.0\n");
+  } 
+  else
+    fprintf (stderr,"psrephem::p warning rotation frequency 0.0\n");
   return(1.0);
 }
 
 double psrephem::p_err(void)
 {
+  if (!tempo11)
+    return -1;
+
   if ((value_double[EPH_F])!=0.0){
     return (-1.0/value_double[EPH_F]/value_double[EPH_F]
 	    *error_double[EPH_F]);
@@ -345,7 +464,7 @@ psrephem & psrephem::operator = (const psrephem & p2)
       value_double[i]=p2.value_double[i];
       value_integer[i]=p2.value_integer[i];
       error_double[i]=p2.error_double[i];
-      for (int j=0;j<EPH_STR_LEN;j++)value_str[i][j]=p2.value_str[i][j];
+      value_str[i]=p2.value_str[i];
     }
   }
   return *this;
@@ -370,7 +489,8 @@ polyco psrephem::mkpolyco (MJD m1, MJD m2, double nspan, int ncoeff,
 
   this->unload (psrephem_tmp_fname);
 
-  string syscall = "tempo -z -f ";
+  char* tempo_call = "tempo -z -f ";
+  string syscall = tempo_call;
   syscall += psrephem_tmp_fname;
 
   if (verbose)  {
@@ -412,7 +532,8 @@ polyco psrephem::mkpolyco (MJD m1, MJD m2, double nspan, int ncoeff,
     fprintf (stderr, "psrephem::mkpolyco loading polyco.dat\n");
   }
   polyco poly;
-  if (poly.load("polyco.dat") < 1) {
+  char* polyco_dat = "polyco.dat";
+  if (poly.load(polyco_dat) < 1) {
     fprintf (stderr, "psrephem::polyco loaded less than 1 polyco\n");
   }
   remove ("polyco.dat");
