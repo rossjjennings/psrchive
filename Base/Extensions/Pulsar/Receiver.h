@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/Receiver.h,v $
-   $Revision: 1.6 $
-   $Date: 2004/07/12 07:34:18 $
+   $Revision: 1.7 $
+   $Date: 2004/07/23 12:45:05 $
    $Author: straten $ */
 
 #ifndef __ReceiverExtension_h
@@ -21,6 +21,12 @@ namespace Pulsar {
 
   public:
     
+    //! Construct a new Receiver instance from a file
+    static Receiver* load (const string& filename);
+
+    //! Construct a new Receiver instance from a string
+    static Receiver* new_Receiver (const string& text);
+
     //! Default constructor
     Receiver ();
 
@@ -36,6 +42,8 @@ namespace Pulsar {
     //! Clone method
     Receiver* clone () const { return new Receiver(*this); }
 
+    //! Parses the value of a Receiver attribute from a string
+    virtual void parse (string text);
 
     //! Different modes of feed rotational tracking
     enum Tracking {
