@@ -205,6 +205,9 @@ void observe (vector<Calibration::CoherencyMeasurementSet>& observations,
 
     Jones<double> xform = signal_path.evaluate ();
 
+    if (vverbose)
+      cerr << "iobs=" << iobs << " xform=" << xform << endl;
+
     for (unsigned istate = 0; istate < states.size(); istate++) {
 
       Stokes<double> value = transform( states[istate], xform );
@@ -308,6 +311,7 @@ int runtest (Calibration::Parallactic& parallactic)
   float intensity = 10;
   for (unsigned istate = 0; istate < nstates; istate++) {
     random_value (source[istate], intensity, max_poln);
+
     if (vverbose)
       cerr << "random source[" << istate << "]=" << source[istate] << endl;
   }
@@ -337,10 +341,16 @@ int runtest (Calibration::Parallactic& parallactic)
 
     Jones<Estimate<double> > para = parallactic.evaluate ();
 
+    if (vverbose)
+      cerr << "iobs=" << iobs << " para=" << para << endl;
+
     for (unsigned istate = 0; istate < nstates; istate++) {
 
       // get the observation
       Stokes< Estimate<double> > state = source_obs[iobs][istate].get_stokes();
+
+      if (vverbose)
+	cerr << "state["<<istate<<"]=" << state << endl;
 
       // deparallactify
       state = transform( state, herm (para) );
@@ -389,6 +399,10 @@ int runtest (Calibration::Parallactic& parallactic)
 
     // update the best first guess
     source_guess[istate].update (&(source_model[istate]));
+
+    if (vverbose)
+      cerr << "source[" << istate << "] guess="
+	   << source_model[istate].get_stokes() << endl;
 
     // add to the model
     model.add_input (&(source_model[istate]));
@@ -650,6 +664,7 @@ int main (int argc, char** argv)
       return 0;
 
     case 'V':
+      //MEAL::Function::very_verbose = true;
       MEAL::Function::verbose = true;
       MEAL::Argument::verbose = true;
       vverbose = true;
