@@ -1,78 +1,75 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Archive.h,v $
-   $Revision: 1.59 $
-   $Date: 2003/03/07 16:00:01 $
+   $Revision: 1.60 $
+   $Date: 2003/03/07 17:23:33 $
    $Author: straten $ */
 
 /*! \mainpage 
  
   \section intro Introduction
  
-  The Pulsar Data Archival and Analysis Library implements a family of
-  C++ classes that may be used in the storage, manipulation, and
-  analysis of the observational data used in pulsar experiments.
-  Various levels of functionality are organized in a heirarchy of
-  inheritance; with the base classes implementing a minimal set of
-  general, flexible routines.  This work is still very much under
-  construction.
+  The Pulsar Data Archival and Analysis Library implements a set of
+  base classes (in C++) that may be used in the storage, manipulation,
+  and analysis of the observational data used in pulsar experiments.
+  The base classes implement a minimal set of general, flexible
+  routines.
  
   \section profiles Pulse Profiles
  
   The basic quantity observed in most pulsar experiments is the pulse
-  profile, which is implemented by the Pulsar::Profile class.  The
-  Pulsar::Integration class implements a two-dimensional array of
-  Pulsar::Profile objects, each integrated over the same time
-  interval.  The axis of the 2-D Profile array are defined to be
-  polarimetric measure and observing frequency.  The Pulsar::Archive
-  class implements a one-dimensional array of Pulsar::Integration
-  objects, each with similar observational parameters and each in
-  "pulse phase" with eachother.
+  profile, a one-dimensional array of some measured quantity as a
+  function of pulse phase.  This is represented by the Pulsar::Profile
+  class.  The Pulsar::Integration class contains a two-dimensional
+  array of Pulsar::Profile objects, each integrated over the same time
+  interval.  The Pulsar::Profile objects are usually organized as a
+  function of polarimetric measure and observing frequency, though
+  other measured states are possible.  The Pulsar::Archive class
+  implements a one-dimensional array of Pulsar::Integration objects,
+  each with similar observational parameters and each in "pulse phase"
+  with eachother.
 
   \section minimal Minimal Interface
 
-  The Pulsar::Profile class implements a minimal set of operations required
-  to manipulate a pulsar profile.  These include:
+  The Pulsar::Profile class implements a minimal set of operations
+  required to manipulate a pulsar profiles in the phase domain.  These
+  include, but are not limited to:
   <UL>
   <LI> operator += - adds offset to each bin of the profile </LI>
   <LI> operator *= - multiplies each bin of the profile by scale </LI>
   <LI> rotate - rotates the profile in phase </LI>
   <LI> bscrunch - integrates neighbouring phase bins in profile </LI>
   <LI> fold - integrates neighbouring sections of the profile </LI>
-  <LI> zero - sets all amplitudes to zero </LI>
-  <LI> resize - resizes the data area </LI>
   </UL>
 
-  As well, the Pulsar::Profile class implements a basic set of
-  routines that may be used to calculate statistics, find minima and
-  maxima, and fit to a standard.  Combinations of these functions can
-  perform basic tasks.  For instance, baseline removal is simply and
-  transparently implemented as:
-  <pre>
-  profile -= mean (find_min_phase());
-  </pre>
-  However, it may be decided to also implement a more convenient interface.
+  As well, a basic set of routines are included that may be used to
+  calculate statistics, find minima and maxima, find the shift between
+  the profile and a standard, etc..  Combinations of these functions
+  can be used to perform basic tasks.  For instance, baseline removal
+  is simply and transparently implemented as:
 
-  The Pulsar::Subint class implements a minimal set of operations required
-  to manipulate a set of Pulsar::Profile objects.  In addition to the simple
-  nested calls of the above functions, these include:
+  <pre> profile -= mean (find_min_phase()); </pre> 
+
+  The Pulsar::Integration class implements a minimal set of operations
+  required to manipulate a set of Pulsar::Profile objects in the
+  polarization and frequency domains.  In addition to simple nested
+  calls of the above functions, these include:
   <UL>
   <LI> dedisperse - rotates all profiles to remove dispersion delays 
   between channels </LI>
-  <LI> defaraday - V_rotates all profiles to remove faraday rotation
+  <LI> defaraday - transforms all profiles to remove faraday rotation
   between channels </LI>
   <LI> fscrunch - integrates profiles from neighbouring channels </LI>
   <LI> pscrunch - integrates profiles from two polarizations into 
   one total intensity </LI>
-  <LI> invint - transforms from Stokes (I,Q,U,V) to the polarimetric 
-  invariant interval </LI>
-  <LI> [Q|U|V]_boost - perform Lorentz boost on Stokes (I,Q,U,V) </LI>
-  <LI> [Q|U|V]_rotate - perform rotation on Stokes (I,Q,U,V) </LI>
+  <LI> invint - forms the polarimetric invariant interval from 
+  Stokes (I,Q,U,V) </LI>
+  <LI> transform - performs a polarimetric transformation </LI>
   </UL>
 
-  The Pulsar::Archive class will be used in most high-level code.  In
-  addition to providing interfaces to all of the above functions, the
-  Pulsar::Archive class implements:
+  The Pulsar::Archive virtual base class is the interface that will be
+  used in most applications.  In addition to providing interfaces to
+  all of the above functions, the Pulsar::Archive class implements:
   <UL>
   <LI> tscrunch - integrates profiles from neighbouring Integrations </LI>
   <LI> append - copies (or transfers) the Integrations from one Archive
@@ -85,26 +82,30 @@
   For a complete list of the methods defined in each of these base classes,
   please see the <a href="annotated.html>Compound List</a>.
 
-  \section inheritance Inherited Types
+  \section format Archive File Formats
 
-  In general, the use of object inheritance enables:
-  <UL>
-  <LI> the most basic set of essential information to be defined; </LI>
-  <LI> the implementation of general, powerful routines without the need of 
-  various implementation details; and</LI>
-  <LI> the simple extension of functionality in a manner that does not
-  change the implementation of the underlying, base class methods</LI>
-  </UL>
+  The Pulsar::Archive virtual base class specifies only the minimal
+  set of information required in order to implement basic data
+  reduction algorithms.  Although it specifies the interface to set
+  and get the values of various attributes and load and unload data
+  from file, no storage or I/O capability is implemented by
+  Pulsar::Archive.  These methods, especially those related to file
+  I/O, must be implemented by classes that inherit the Pulsar::Archive
+  base class.
 
-  Most observatories, instruments, and groups not only use a unique
-  file format but also associate different pieces of information with
-  the observation.  Some of these pieces of auxilliary information may
-  need to be updated or modified during a basic operations.  For
-  example, consider class B, which publicly inherits Pulsar::Archive.
-  Class B may include a passband in its auxilliary data, and may wish
-  to integrate passbands when one B is appended to another.  Class B
-  can over-ride the virtual Pulsar::Archive::append function as follows:
+  Most observatories and research groups use unique file formats and
+  associate different pieces of information with their observations.
+  The derived classes must therefore implement the storage and
+  modification of this auxilliary information.  For this reason, most
+  of the Pulsar::Archive methods are declared virtual, and may be
+  over-ridden as in the following example:
+
   <pre>
+  class B : public Pulsar::Archive {
+    public:
+      void append (Pulsar::Archive* aptr);
+  };
+
   void B::append (Pulsar::Archive* aptr)
   {
     // call the function implemented by Pulsar::Archive
@@ -117,9 +118,25 @@
     if (!bptr)
       return;
 
-    // do B-specific things, such as integrate bptr->passband
+    // do B-specific things
   }
   </pre>
+
+  In general, applications need not know anything about the specific
+  archive file format with which they are dealing.  New Pulsar::Archive
+  instances may be created and loaded from file by calling the static
+  Pulsar::Archive::load factory.  For instance:
+
+  <pre>
+  Pulsar::Archive* archive = Pulsar::Archive::load (filename);
+  </pre>
+
+  \subsection plugin File Format Plugins
+
+  Classes that inherit Pulsar::Archive and implement the I/O routines
+  for a specific archive file format are loaded as plugins.  Plugins are
+  registered for use in applications by inheriting the 
+  Pulsar::Archive::Agent template base class.
 
  */
 
