@@ -276,7 +276,8 @@ void Pulsar::Archive::bscrunch_to_nbin (unsigned new_nbin)
 		 "Invalid nbin request");
   else if (get_nbin() < new_nbin)
     throw Error (InvalidParam, "Pulsar::Archive::bscrunch_to_nbin",
-		 "Archive has too few bins");
+		 "Archive has too few bins (%d) to bscrunch to %d bins",
+		 get_nbin(), new_nbin);
   else
     bscrunch(get_nbin() / new_nbin);
 }
