@@ -1,5 +1,5 @@
 //
-// $Id: pav.C,v 1.94 2004/12/06 14:40:14 straten Exp $
+// $Id: pav.C,v 1.95 2005/03/30 13:19:51 straten Exp $
 //
 // The Pulsar Archive Viewer
 //
@@ -323,7 +323,7 @@ int main (int argc, char** argv)
       plotter.set_subint( atoi (optarg) );
       break;
     case 'i':
-      cout << "$Id: pav.C,v 1.94 2004/12/06 14:40:14 straten Exp $" << endl;
+      cout << "$Id: pav.C,v 1.95 2005/03/30 13:19:51 straten Exp $" << endl;
       return 0;
 
     case 'j':
@@ -580,11 +580,11 @@ int main (int argc, char** argv)
     case 207: {
 
       if (strcasecmp (optarg, "fourier") == 0)
-	Pulsar::Profile::snr_functor.set (&fourier_snr,
+	Pulsar::Profile::snr_strategy.set (&fourier_snr,
 					  &Pulsar::FourierSNR::get_snr);
       
       else if (strcasecmp (optarg, "fortran") == 0)
-	Pulsar::Profile::snr_functor.set (&Pulsar::snr_fortran);
+	Pulsar::Profile::snr_strategy.set (&Pulsar::snr_fortran);
 
       else
 	cerr << "pav: unrecognized snr method '" << optarg << "'" << endl;

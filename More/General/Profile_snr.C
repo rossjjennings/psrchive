@@ -7,17 +7,19 @@
 
 #include "Pulsar/Profile.h"
 
-/*! By default, the snr is calculated using Pulsar::snr_phase */
+/*! This use of the Functor template implements the Strategy design
+ pattern (ghjv94 p.315) for calculating the signal-to-noise ratio
+ (S/N).  By default, the S/N is calculated using Pulsar::snr_phase */
 Functor<float(const Pulsar::Profile*)> 
-Pulsar::Profile::snr_functor (&snr_phase);
+Pulsar::Profile::snr_strategy (&snr_phase);
 
-/*! This method calls Profile::snr_functor */
+/*! This method calls Profile::snr_strategy */
 float Pulsar::Profile::snr() const try {
   
   if (verbose)
     cerr << "Pulsar::Profile::snr" << endl;
   
-  return snr_functor (this);
+  return snr_strategy (this);
   
 }
 catch (Error& error) {
@@ -27,7 +29,7 @@ catch (Error& error) {
 // defined in Profile.C
 void nbinify (int& istart, int& iend, int nbin);
 
-/*! The default implementation of the Profile::snr method is taken
+/*! This default implementation of the Profile::snr method is taken
  from the old timer archive code.  Using Profile::find_min_phase and
  Profile::find_peak_edges, this function finds the integrated power in
  the pulse profile and divides this by the noise in the baseline.

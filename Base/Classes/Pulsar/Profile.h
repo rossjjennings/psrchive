@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Profile.h,v $
-   $Revision: 1.81 $
-   $Date: 2004/12/31 17:23:01 $
+   $Revision: 1.82 $
+   $Date: 2005/03/30 13:19:51 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Profile_h
@@ -178,8 +178,8 @@ namespace Pulsar {
     //! Returns the bin number with the minimum amplitude
     int find_min_bin (int bin_start=0, int bin_end=0) const;
 
-    //! The functor that implements the snr method
-    static Functor<float(const Pulsar::Profile*)> snr_functor;
+    //! The default implementation of the snr method
+    static Functor<float(const Pulsar::Profile*)> snr_strategy;
 
     //! Returns the signal to noise ratio of the profile
     float snr () const;
@@ -201,14 +201,8 @@ namespace Pulsar {
     //! Rotates the profile to remove dispersion delay
     void dedisperse (double dm, double ref_freq, double pfold);
     
-    // The following algorithms determin the shift between a profile
-    // and a standard template (with fractional bin resolution) using 
-    // a number of different methods. Shifts and errors are returned 
-    // in turns. In some cases, the routine supports the exporting of 
-    // lower level information for use in debugging.
-
-    //! The functor that implements the shift method
-    static Functor<Estimate<double>(Profile, Profile)> shift_functor;
+    //! The default implementation of the shift method
+    static Functor<Estimate<double>(Profile, Profile)> shift_strategy;
 
     //! Returns the shift (in turns) between profile and standard
     Estimate<double> shift (const Profile& std) const;

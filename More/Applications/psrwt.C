@@ -132,15 +132,15 @@ int main (int argc, char** argv)
       }
 
       if (strcasecmp (optarg, "fourier") == 0)
-	Pulsar::Profile::snr_functor.set (&fourier_snr,
-					  &Pulsar::FourierSNR::get_snr);
+	Pulsar::Profile::snr_strategy.set (&fourier_snr,
+					   &Pulsar::FourierSNR::get_snr);
       
       else if (strcasecmp (optarg, "fortran") == 0)
-	Pulsar::Profile::snr_functor.set (&Pulsar::snr_fortran);
+	Pulsar::Profile::snr_strategy.set (&Pulsar::snr_fortran);
       
       else if (strcasecmp (optarg, "adaptive") == 0)
-	Pulsar::Profile::snr_functor.set (&adaptive_snr,
-					  &Pulsar::AdaptiveSNR::get_snr);
+	Pulsar::Profile::snr_strategy.set (&adaptive_snr,
+					   &Pulsar::AdaptiveSNR::get_snr);
 
       else {
 	cerr << "psrwt: unrecognized S/N method '" << optarg << "'" << endl;
@@ -214,8 +214,8 @@ int main (int argc, char** argv)
 	return -1;
       }
      
-      Pulsar::Profile::snr_functor.set (&standard_snr,
-					&Pulsar::StandardSNR::get_snr);
+      Pulsar::Profile::snr_strategy.set (&standard_snr,
+					 &Pulsar::StandardSNR::get_snr);
 
       cerr << "psrwt: loading standard from " << optarg << endl;
       standard = Pulsar::Archive::load (optarg);

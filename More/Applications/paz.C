@@ -99,7 +99,7 @@ int main (int argc, char *argv[]) {
       Pulsar::Archive::set_verbosity(3);
       break;
     case 'i':
-      cout << "$Id: paz.C,v 1.23 2004/12/06 14:40:14 straten Exp $" << endl;
+      cout << "$Id: paz.C,v 1.24 2005/03/30 13:19:51 straten Exp $" << endl;
       return 0;
     case 'D':
       display = true;
@@ -256,8 +256,8 @@ int main (int argc, char *argv[]) {
 
 	standard_snr.set_standard( thestd );
 	
-	Pulsar::Profile::snr_functor.set (&standard_snr,
-					  &Pulsar::StandardSNR::get_snr);
+	Pulsar::Profile::snr_strategy.set (&standard_snr,
+					   &Pulsar::StandardSNR::get_snr);
 
       }
       catch (Error& error) {

@@ -117,7 +117,7 @@ int main (int argc, char *argv[])
       denoise = true;
       break;
     case 'i':
-      cout << "$Id: pat.C,v 1.37 2005/02/16 04:33:39 ahotan Exp $" << endl;
+      cout << "$Id: pat.C,v 1.38 2005/03/30 13:19:50 straten Exp $" << endl;
       return 0;
 
     case 'F':
@@ -161,16 +161,16 @@ int main (int argc, char *argv[])
     case 'A':
 
       if (strcasecmp (optarg, "PGS") == 0)
-	Pulsar::Profile::shift_functor.set(&Pulsar::PhaseGradShift);
+	Pulsar::Profile::shift_strategy.set(&Pulsar::PhaseGradShift);
       
       else if (strcasecmp (optarg, "GIS") == 0)
-	Pulsar::Profile::shift_functor.set(&Pulsar::GaussianShift);
+	Pulsar::Profile::shift_strategy.set(&Pulsar::GaussianShift);
       
       else if (strcasecmp (optarg, "PIS") == 0)
-	Pulsar::Profile::shift_functor.set(&Pulsar::ParIntShift);
+	Pulsar::Profile::shift_strategy.set(&Pulsar::ParIntShift);
 
       else if (strcasecmp (optarg, "ZPS") == 0)
-	Pulsar::Profile::shift_functor.set(&Pulsar::ZeroPadShift);
+	Pulsar::Profile::shift_strategy.set(&Pulsar::ZeroPadShift);
       
       else
 	cerr << "pat: unrecognized shift method '" << optarg << "'" << endl;
