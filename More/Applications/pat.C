@@ -1,9 +1,8 @@
  
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
-#include "Pulsar/Plotter.h"
-#include "Pulsar/Plotter.h"
 #include "Pulsar/Profile.h"
+#include "Pulsar/Plotter.h"
 #include "Pulsar/getopt.h"
 
 #include "Pulsar/PolnProfile.h"
@@ -11,6 +10,8 @@
 #include "Calibration/Polar.h"
 
 #include "Pulsar/ObsExtension.h"
+#include "Pulsar/Backend.h"
+#include "Pulsar/Receiver.h"
 
 #include "Phase.h"
 #include "toa.h"
@@ -33,7 +34,8 @@ void usage ()
 {
   cout << "pat - Pulsar::Archive timing \n"
     "Usage: pat [options] filenames \n"
-    "  -v               Verbose mode \n" 
+    "  -q               Quiet mode \n"
+    "  -v               Verbose mode \n"
     "  -V               Very verbose mode \n"
     "  -i               Show revision information \n"
     "\n"
@@ -82,13 +84,18 @@ int main (int argc, char *argv[])
   int gotc = 0;
 
   Pulsar::PolnProfileFit fit;
-  while ((gotc = getopt(argc, argv, "hiDFn:ps:g:a:tTvV:f:")) != -1) {
+  while ((gotc = getopt(argc, argv, "hiDFn:ps:g:a:tTvV:f:q")) != -1) {
     switch (gotc) {
     case 'h':
       usage ();
       return 0;
 
+    case 'q':
+      Pulsar::Archive::set_verbosity(0);
+      break;
+
     case 'v':
+      Pulsar::Archive::set_verbosity(2);
       verbose = true;
       break;
 
@@ -101,7 +108,7 @@ int main (int argc, char *argv[])
       denoise = true;
       break;
     case 'i':
-      cout << "$Id: pat.C,v 1.26 2004/06/08 01:12:15 sord Exp $" << endl;
+      cout << "$Id: pat.C,v 1.27 2004/07/12 09:28:46 straten Exp $" << endl;
       return 0;
 
     case 'F':
@@ -294,8 +301,20 @@ int main (int argc, char *argv[])
 	  {
 	    string args;
 	    args = archives[i];
-	    if (outFormatFlags.find("i")!=string::npos) args += string(" -i ") + arch->get_backend();
-	    if (outFormatFlags.find("r")!=string::npos) args += string(" -r ") + arch->get_receiver();
+
+	    if (outFormatFlags.find("i")!=string::npos) {
+	      Pulsar::Backend* backend;
+	      backend = arch->get<Pulsar::Backend>();
+	      if (backend)
+		args += string(" -i ") + backend->get_name();
+	    }
+
+	    if (outFormatFlags.find("r")!=string::npos) {
+	      Pulsar::Receiver* receiver = arch->get<Pulsar::Receiver>();
+	      if (receiver)
+		args += string(" -i ") + receiver->get_name();
+	    }
+
 	    if (outFormatFlags.find("o")!=string::npos) /* Include observer info. */
 	      {
 		const Pulsar::ObsExtension* ext = 0;
@@ -335,7 +354,7 @@ void loadGaussian(string file,  Reference::To<Pulsar::Archive> &stdarch,  Refere
   static vector<float> pos,width,amp;
   static unsigned int    ncomp;
   float version;
-  int    n=0;
+  unsigned n=0;
   static bool firstTime=true;
 
   if (firstTime)
