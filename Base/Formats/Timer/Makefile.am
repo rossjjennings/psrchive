@@ -4,23 +4,23 @@ LOCAL_ROOT = ../../../
 include ${LOCAL_ROOT}/include/Makefile.standard
 
 LIBRARY    = libarchive.a
-LIB_C_SRCS = pg_plot_gnu.C profile.C sub_int.C archive.C                \
-             superarchive.C toa.C xtinit.C xtmac.C                      \
-	     xtproc.C xtlplt.C xtinplot.C xtshdr.C xtshst.C xtcopy.C    \
-             xtswap.C xtunld.C xtgrey.C xtreduce.C profplot.C           \
-	     plot2profs.C scintplot.C misc.C heapsort.C                 \
-                          get_epoch_and_name.C microhdr.C               \
-	     convert_endian.C headers.C cal_fns.C cpg_fns.C iono.C     
+LIB_C_SRCS = pg_plot_gnu.C profile.C sub_int.C archive.C superarchive.C  \
+             toa.C profplot.C plot2profs.C scintplot.C misc.C heapsort.C \
+             get_epoch_and_name.C microhdr.C convert_endian.C headers.C  \
+             cal_fns.C cpg_fns.C iono.C 
 
-LIB_F_SRCS = ffft.f fftfit.f brent.f fccf.f cprof.f shiftbyfft.f \
-             convolve.f width.f tsky1.f newtreduce.f \
-             fftconv.f scan_fort_val.f iono_rm.f ionrm.f 
+LIB_F_SRCS = ffft.f fftfit.f brent.f fccf.f cprof.f shiftbyfft.f ionrm.f \
+             width.f tsky1.f fftconv.f scan_fort_val.f iono_rm.f convolve.f
 
 LIB_SRCS   = ${LIB_C_SRCS} ${LIB_F_SRCS}
 
 LDFLAGS   += -larchive -lpolyco -ldialog -ltimes \
              -lpsrinfo -leph -lsla -lpsrfft -lgenutil -lfftw -lm $(LIBNSL) \
 	     -lcpgplot $(LPGPLOT) 
+
+treduce.OBJS = xtinit.o xtmac.o xtproc.o xtlplt.o xtinplot.o xtshdr.o    \
+	       xtshst.o xtcopy.o xtswap.o xtunld.o xtgrey.o xtreduce.o   \
+               newtreduce.o
 
 PROGRAMS = align.C amps.C chanprep.C  \
 	      mel.C newname.C oneprof.C plotsub.C    \
