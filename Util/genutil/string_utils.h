@@ -1,8 +1,8 @@
 //-*-C++-*-
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Attic/string_utils.h,v $
-   $Revision: 1.12 $
-   $Date: 2002/06/03 05:05:14 $
-   $Author: pulsar $ */
+   $Revision: 1.13 $
+   $Date: 2002/08/14 18:42:06 $
+   $Author: hknight $ */
 
 #ifndef __STRING_UTILS_H
 #define __STRING_UTILS_H
@@ -11,10 +11,18 @@
 #include <stdio.h>
 
 #include <iostream>
+#include <strstream>
 #include <string>
 #include <vector>
 
 #include "psr_cpp.h"
+
+// Like perl chomp.  Returns true if successful.
+bool h_chomp(string& ss, char gone='\n');
+bool h_chomp(string& ss, string gone);
+
+// Like perl chop
+void h_chop(string& ss);
 
 // ///////////////////////////////////////////////////////////
 // reads up to 'nbytes' (or to eof) from 'istr', adding them 
@@ -91,6 +99,24 @@ string stringdelimit(const vector<string>& words, char delimiter);
 // Stuff to turn an array of char *'s into a vector of strings
 // useful for taking lists of files on the command line
 vector<string> cstrarray2vec(const char **vals, int nelem);
+
+template<class T>
+string make_string(T input){
+  ostrstream ost;
+  ost << input << ends;
+  return ost.str();
+}
+
+template<class T>
+T convert_string(string ss){
+  ostrstream ost;
+  ost << ss << ends;
+  istrstream ist(ost.str());
+  
+  T outie;
+  ist >> outie; 
+  return outie;
+}
 
 #endif
 
