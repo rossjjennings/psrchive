@@ -53,7 +53,15 @@ void Pulsar::FITSArchive::load_PolnCalibratorExtension (fitsfile* fptr)
 
   long dimension = nch_fdpr * ncpar;  
   auto_ptr<float> data ( new float[dimension] );
-
+  
+  if (dimension == 0) {
+    if (verbose) {
+      cerr << "FITSArchive::load_PolnCalibratorExtension FEEDPAR HDU"
+	   << " contains no data. PolnCalibratorExtension not loaded" << endl;
+    }
+    return;
+  }
+  
   // Read the centre frequencies
   
   int colnum = 0;
