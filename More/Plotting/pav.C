@@ -1,5 +1,5 @@
 //
-// $Id: pav.C,v 1.73 2004/04/01 04:46:30 rmanches Exp $
+// $Id: pav.C,v 1.74 2004/04/01 07:49:49 ahotan Exp $
 //
 // The Pulsar Archive Viewer
 //
@@ -60,13 +60,11 @@ void usage ()
       "\n"
     "Selection & configuration options:\n"
     " -K dev    Manually specify a plot device\n"
-    " -c map    Select a colour map for PGIMAG style plots\n"
     " -M meta   Read a meta-file containing the files to use\n"
     " -s std    Select a standard profile (where applicable)\n"
     " -H chan   Select which frequency channel to display\n"
     " -P pol    Select which polarization to display\n"
     " -I subint Select which sub-integration to display\n"
-    " -W        Change colour scheme to suite white background\n"
     " -z x1,x2  Zoom to this pulse phase range\n"
     " -k f1,f2  Zoom to this frequency range\n"
     " -y s1,s2  Zoom to this subint range\n"
@@ -95,8 +93,18 @@ void usage ()
     " -u        Display morphological difference (requires a standard)\n"
     "\n"
     "Other plotting options: \n"
-    " --degree  Plot the degree of polarisation profile\n"
-    " --publn   Publication quality plot\n"
+    " -W             Change colour scheme to suite white background\n"
+    " --degree       Plot the degree of polarisation profile\n"
+    " --publn        Publication quality plot\n"
+    " --cmap index   Select a colour map for PGIMAG style plots\n"
+    "                  The available indices are:\n"
+    "                    0 -> Greyscale\n"
+    "                    1 -> Inverse Greyscale\n"
+    "                    2 -> Heat\n"
+    "                    3 -> Cold\n"
+    "                    4 -> Plasma\n"
+    "                    5 -> Forest\n"
+    "                    6 -> Alien Glow\n"
     "\n"
     "Archive::Extension options (file format specific):\n"
     " -o        Plot the original bandpass\n"
@@ -188,7 +196,7 @@ int main (int argc, char** argv)
   int c = 0;
   
   const char* args = 
-    "AaBb:Cc:DdEeFf:GgH:hI:iJjK:k:LlM:mN:nO:oP:pQq:Rr:Ss:Tt:uVvwWXx:Yy:Zz:";
+    "AaBb:CDdEeFf:GgH:hI:iJjK:k:LlM:mN:nO:oP:pQq:Rr:Ss:Tt:uVvwWXx:Yy:Zz:";
   
   while (1) {
     
@@ -199,6 +207,7 @@ int main (int argc, char** argv)
       {"convert_binlngasc", 1, 0, 203},
       {"degree",0,0,204},
       {"publn",0,0,205},
+      {"cmap",1,0,206},
       {0, 0, 0, 0}
     };
     
@@ -225,10 +234,6 @@ int main (int argc, char** argv)
 
     case 'B':
       bandpass = true;
-      break;
-
-    case 'c':
-      colour_map = (Pulsar::Plotter::ColourMap) atoi(optarg);
       break;
 
     case 'C':
@@ -277,7 +282,7 @@ int main (int argc, char** argv)
       plotter.set_subint( atoi (optarg) );
       break;
     case 'i':
-      cout << "$Id: pav.C,v 1.73 2004/04/01 04:46:30 rmanches Exp $" << endl;
+      cout << "$Id: pav.C,v 1.74 2004/04/01 07:49:49 ahotan Exp $" << endl;
       return 0;
 
     case 'j':
@@ -516,16 +521,23 @@ int main (int argc, char** argv)
       cblao = true;
       break;
     }
+
     case 204: {
       degree = true;
       cout << "Plotting degree of polarisation" << endl;
       break;
     }      
+
     case 205: {
       plotter.set_publn(true);
       cout << "Publication quality" << endl;
       break;
     }      
+
+    case 206: {
+      colour_map = (Pulsar::Plotter::ColourMap) atoi(optarg);
+      break;
+    }
     default:
       return -1; 
     }
