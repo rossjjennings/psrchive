@@ -25,10 +25,10 @@ Pulsar::FluxCalibrator::FluxCalibrator (const vector<Archive*>& archs)
 		   + archs[iarch]->get_filename() + "' not a FluxCal");
 
     string reason;
-    if (iarch > 0 && !archs[0]->match (archs[iarch], reason))
+    if (iarch > 0 && !archs[0]->calibrator_match (archs[iarch], reason))
       throw Error (InvalidParam, "Pulsar::FluxCalibrator", "Pulsar::Archive='"
 		   + archs[iarch]->get_filename() + "'\ndoes not mix with '"
-		   + archs[0]->get_filename() + "\n" + reason);
+		   + archs[0]->get_filename() + reason);
 
     if (!calibrator && archs[iarch]->get_type() == Signal::FluxCalOn)
       // Keep the FPTM naming convention in which the
@@ -100,10 +100,10 @@ void Pulsar::FluxCalibrator::calibrate (Archive* arch)
 		 "no FluxCal Archive");
 
   string reason;
-  if (!calibrator->match (arch, reason))
+  if (!calibrator->calibrator_match (arch, reason))
     throw Error (InvalidParam, "Pulsar::FluxCalibrator", "Pulsar::Archive='"
 		 + calibrator->get_filename() + "'\ndoes not mix with '"
-		 + arch->get_filename() + "\n" + reason);
+		 + arch->get_filename() + reason);
 
   if (cal_flux.size() != arch->get_nchan())
     create (arch->get_nchan());
