@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/toa.h,v $
-   $Revision: 1.5 $
-   $Date: 2000/05/30 17:19:35 $
+   $Revision: 1.6 $
+   $Date: 2001/01/08 11:25:14 $
    $Author: straten $ */
 
 #ifndef __TOA_H
@@ -13,6 +13,7 @@
 
 #include "residual.h"
 #include "DataPoint.h"
+// #include "Reference.h"
 #include "MJD.h"
 
 class polyco;   // tempo-generated polynomial describing pulsar phase = f(MJD)
@@ -81,7 +82,7 @@ namespace Tempo {
     time_t calculated;   /* the date when this toa was calculated */
     string auxinfo;      /* text information passed to context specific data */
 
-    toaInfo* auxdata;    /* context specific data */
+    // Reference::To<toaInfo> auxdata;    /* context specific data */
 
     // one of the available formats on loading
     Format format;
@@ -95,7 +96,8 @@ namespace Tempo {
     
     // copy constructor
     toa (const toa & in_toa);
-    
+    toa& operator = (const toa & in_toa);
+
     // construct from an open file
     toa (FILE* instream);
     
@@ -123,6 +125,9 @@ namespace Tempo {
     const char* getDescriptor (DataType code) const;
 
     double shift (const polyco & poly) const;
+
+    void get_az_zen_para (double ra, double dec,
+			  float& az, float& zen, float& para) const;
 
     // loading and unloading to/from file and string
     int    load   (FILE* instream);
@@ -187,8 +192,10 @@ namespace Tempo {
   // //////////////////////////////////////////////////////////////////////////
 
   class toaInfo {
+// : public Reference::Able {
 
   public:
+    virtual ~toaInfo ();
     // the value of this object at serial number
     virtual double getData (toa::DataType code) const = 0;
     // the short descriptive string corresponding to the serial number

@@ -1,4 +1,5 @@
 #include <iostream>
+#include <algorithm>
 
 #include <stdio.h>
 #include <sys/types.h>
@@ -7,6 +8,20 @@
 #include "string_utils.h"
 #include "polyco.h"
 #include "toa.h"
+#include "coord.h"
+
+void Tempo::toa::get_az_zen_para (double ra, double dec,
+				  float& az, float& zen, float& para) const
+{
+  float latitude=0, longitude=0;
+    
+  if (telescope_coords (telescope, &latitude, &longitude, NULL) < 0)
+    cerr << "Tempo::toa::az_zen_para: error getting coords for telecope " 
+	 << telescope << endl;
+
+  az_zen_para (ra, dec, arrival.LST(longitude), latitude,
+	       &az, &zen, &para);
+}
 
 Tempo::toa::toa (char* datastr)
 {
@@ -18,7 +33,8 @@ Tempo::toa::toa (char* datastr)
 Tempo::toa::toa (Format fmt)
 {
   init ();
-  if (fmt == Rhythm)
+  format = fmt;
+  if (format == Rhythm)
     set_when_calculated (time(NULL));
 }
 
@@ -26,6 +42,33 @@ Tempo::toa::toa (const toa & in_toa)
 {
   init ();
   this->operator=(in_toa);
+}
+
+Tempo::toa& Tempo::toa::operator = (const toa & in_toa)
+{
+  if (this == &in_toa)
+   return *this;
+
+  frequency = in_toa.frequency;
+  arrival = in_toa.arrival;
+  error = in_toa.error; 
+  telescope = in_toa.telescope;
+  phs = in_toa.phs;
+  dmc = in_toa.dmc;
+  observatory[0] = in_toa.observatory[0];
+  observatory[1] = in_toa.observatory[1]; 
+
+  calculated = in_toa.calculated;
+  auxinfo = in_toa.auxinfo;
+  
+  // if (auxdata.is_only())
+    // delete (toaInfo*) auxdata;
+  // auxdata = in_toa.auxdata;
+
+  format = in_toa.format;
+  resid = in_toa.resid;
+
+  return *this;
 }
 
 // ////////////////////////////////////////////////////////////////////////
@@ -81,11 +124,16 @@ int Tempo::toa::parkes_parse (const char* instring)
 
 int Tempo::toa::Parkes_unload (char* outstring) const
 {
-  for (int ic=0; ic<25; ic++)
-    outstring [ic] = ' ';
-
   if (state == Deleted)
     outstring[0]='C';
+  else
+    outstring[0]=' ';
+
+  if (auxinfo.length())
+    strcpy (outstring+1, auxinfo.c_str());
+
+  for (int ic=auxinfo.length()+1; ic<26; ic++)
+    outstring [ic] = ' ';
 
   return parkes_out (outstring+25);
 }
@@ -94,7 +142,7 @@ int Tempo::toa::parkes_out (char* outstring) const
 {
   // output the basic line
   sprintf (datestr, "%8.7lf", frequency);
-  sprintf (outstring, "%8.8s   %s   %5.2f %7.2f        %1d ",
+  sprintf (outstring, " %8.8s  %s   %5.2f %7.2f        %1d ",
  	   datestr, arrival.printdays(13).c_str(), phs, error, telescope);
   return 0;
 }
@@ -374,7 +422,7 @@ int Tempo::toa::unload (FILE* outstream, Format fmt) const
   case Rhythm:
     return Rhythm_unload (outstream);
   default:
-    if (verbose) cerr << "Tempo::toa::unload undefined format" << endl;
+    cerr << "Tempo::toa::unload undefined format" << endl;
     return -1;
   }
 }
@@ -394,7 +442,7 @@ int Tempo::toa::unload (char* outstring, Format fmt) const
   case Rhythm:
     return Rhythm_unload (outstring);
   default:
-    if (verbose) cerr << "Tempo::toa::unload undefined format" << endl;
+    cerr << "Tempo::toa::unload undefined format" << endl;
     return -1;
   }
 }
@@ -542,8 +590,8 @@ double Tempo::toa::getData (DataType code) const
     }
   }
 
-  if (auxdata && code > PrefitResidualTime)
-    return auxdata -> getData (code);
+  // if (auxdata && code > PrefitResidualTime)
+    // return auxdata -> getData (code);
   
   throw FaultCode;
 }
@@ -583,8 +631,8 @@ const char* Tempo::toa::getDescriptor (DataType code) const
     break;
   }
 
-  if (auxdata)
-    return auxdata -> getDescriptor (code);
+  // if (auxdata)
+    // return auxdata -> getDescriptor (code);
   return NULL;
 }
 
@@ -602,7 +650,7 @@ char   Tempo::toa::datestr [25];
 void Tempo::toa::init()
 {
   format = Unspecified;
-  auxdata = NULL;
+  // auxdata = NULL;
   resid.valid = false;
 
   frequency = 0.0;
@@ -621,7 +669,10 @@ void Tempo::toa::init()
 
 void Tempo::toa::destroy()
 {
-  if (auxdata) delete auxdata; auxdata = NULL;
+  // if (auxdata.is_only())
+    // delete (toaInfo*) auxdata;
+
+  // auxdata = NULL;
   init ();
 }
 
