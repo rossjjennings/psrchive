@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/FluxCalibrator.h,v $
-   $Revision: 1.9 $
-   $Date: 2003/10/25 05:01:31 $
+   $Revision: 1.10 $
+   $Date: 2003/10/30 11:29:45 $
    $Author: ahotan $ */
 
 #ifndef __Pulsar_FluxCalibrator_H
@@ -19,6 +19,19 @@ namespace Pulsar {
     friend class FluxCalibratorInfo;
 
   public:
+    
+    //! List of possible calibration standards
+    enum source {
+      //! Virgo A
+      Virgo,
+      //! Hydra A
+      Hydra,
+      //! 3C353
+      TCTFT,
+      //! Undetermined
+      Unknown
+    };
+    
     //! Self-calibrate flux calibrator archives before computing hi/lo ratios
     static bool self_calibrate;
 
@@ -33,9 +46,15 @@ namespace Pulsar {
 
     //! Return the FluxCalibrator information
     Info* get_Info () const;
-
+    
+    //! Return the flux of Virgo in mJy
+    double virgo_flux_mJy (double frequency_MHz);
+    
     //! Return the flux of Hydra in mJy
     double hydra_flux_mJy (double frequency_MHz);
+    
+    //! Return the flux of 3C353 in mJy
+    double three_C_353_flux_mJy (double frequency_MHz);
     
     //! Return the system temperature in Kelvin
     double meanTsys ();
@@ -54,16 +73,19 @@ namespace Pulsar {
 
   protected:
 
+    //! Return the FluxCalibrator::source corresponding to name
+    source get_RefSrc(string name);
+    
     //! Calibrator flux in mJy as a function of frequency
     vector< Estimate<double> > cal_flux;
 
     //! Temperature of system (+ sky) in mJy as a function of frequency
     vector< Estimate<double> > T_sys;
 
-    //! Ratio of cal hi/lo on hydra
+    //! Ratio of cal hi/lo on source
     vector<Estimate<double> > ratio_on;
 
-    //! Ratio of cal hi/lo off hydra
+    //! Ratio of cal hi/lo off source
     vector<Estimate<double> > ratio_off;
 
     //! Create the cal_flux spectrum at the requested resolution
@@ -72,7 +94,7 @@ namespace Pulsar {
     //! Calculate the ratio_on and ratio_off
     void calculate ();
 
-    //! Compute cal_flux and T_sys, given the hi/lo ratios on and off hydra
+    //! Compute cal_flux and T_sys, given the hi/lo ratios on and off source
     void calculate (vector<Estimate<double> >& on,
 		    vector<Estimate<double> >& off);
 
