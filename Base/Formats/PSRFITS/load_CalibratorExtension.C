@@ -1,5 +1,9 @@
 #include "Pulsar/CalibratorExtensionIO.h"
 
+#ifdef sun
+#include <ieeefp.h>
+#endif
+
 void Pulsar::load (fitsfile* fptr, CalibratorExtension* ext)
 {
   int status = 0;
