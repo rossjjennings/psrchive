@@ -17,7 +17,6 @@
 #include "dirutil.h"
 #include "genutil.h"
 
-#include <cpgplot.h>
 #include <math.h>
 #include <string.h>
 
@@ -117,7 +116,7 @@ int main (int argc, char *argv[])
       denoise = true;
       break;
     case 'i':
-      cout << "$Id: pat.C,v 1.34 2005/01/03 23:09:08 ahotan Exp $" << endl;
+      cout << "$Id: pat.C,v 1.35 2005/02/02 15:35:56 straten Exp $" << endl;
       return 0;
 
     case 'F':

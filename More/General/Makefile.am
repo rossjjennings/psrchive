@@ -27,7 +27,7 @@ nobase_include_HEADERS = \
 	Pulsar/Plotter.h                 Pulsar/IntegrationTI.h \
 	Pulsar/ExtensionTI.h
 
-libpsrchive_la_SOURCES = plugins.csh getopt.h Physical.h plotJones.C \
+libpsrchive_la_SOURCES = plugins.csh getopt.h Physical.h \
 	AdaptiveSNR.C                 Integration_new_PolnProfile.C  \
 	Agent.C                       Integration_remove_baseline.C  \
 	Agent_static.C                Integration_resize.C  \
@@ -149,7 +149,7 @@ test_Difference_SOURCES		= test_Difference.C
 if HAVE_PGPLOT
 
 libpsrchive_la_SOURCES += ArchiveProcessor.C Plotter.C CalibratorPlotter.C  \
-	ReceptionCalibratorPlotter.C  \
+	ReceptionCalibratorPlotter.C   plotJones.C\
 	Plotter_Mercator.C             Plotter_phase_subints.C  \
 	Plotter_baseline_spectrum.C    Plotter_plot.C  \
 	Plotter_calibrator_spectrum.C  Plotter_set_colour_map.C  \

@@ -1,6 +1,6 @@
 #include "Pulsar/Profile.h"
 
-#include "cpgplot.h"
+//#include "cpgplot.h"
 
 /*! 
   Fractional pulse phase window used to calculate the transitions in
