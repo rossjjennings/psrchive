@@ -370,40 +370,35 @@ int telescope_coords (int telescope, float* latitude,
 
 		 para_angle, tel_az and tel_zen are returned in degrees
 
+   Uses: SLALIB SUBROUTINE sla_ALTAZ (HA, DEC, PHI,
+                           AZ, AZD, AZDD, EL, ELD, ELDD, PA, PAD, PADD)
+
    ********************************************************************** */
 
+void sla_altaz_ (double*, double*, double*, double*, double*, double*,
+		 double*, double*, double*, double*, double*, double*);
+
 int az_zen_para (double ra, double dec, float lst, float latitude,
-          float * tel_az, float * tel_zen, float * para_angle)
+		 float* tel_az, float* tel_zen, float* para_angle)
 {
-  double cosZ, cosA, sinZ, cosl, sinl;
-  double HA = lst * M_PI/12 - ra;  /* hour angle */
-  double zenith, azimuth, PA;
+  double altitude, azimuth, PA;
+  double ignore;
+
+  double HA = lst * M_PI/12.0 - ra;     /* hour angle */
+  double rad2deg = 180.0 / M_PI;
+  double dlat = latitude / rad2deg;
 
   if (lst < 0.0 || lst > 24.0)
     return -1;
 
-  latitude *= M_PI/180;
+  sla_altaz_ (&HA, &dec, &dlat, 
+	      &azimuth, &ignore, &ignore,
+	      &altitude,  &ignore, &ignore,
+	      &PA,      &ignore, &ignore);
 
-  cosl = cos(latitude);
-  sinl = sin(latitude);
-  cosZ = sin(dec)*sinl + cos(dec)*cos(HA)*cosl;
-  zenith = acos(cosZ);
-  sinZ = sin(zenith);
-  cosA = (sin(dec)-cosZ*sinl)/(sinZ*cosl);
-
-  zenith =  (180.0/M_PI) * (zenith);
-  azimuth = (180.0/M_PI) * (acos(cosA));
-  PA = (180.0/M_PI) * acos ((sinl-cosZ*cos(dec-M_PI_2))/
-       (sinZ*sin(dec-M_PI_2)));
-
-  if (HA>0.0) {
-    azimuth = 360.0 - azimuth;
-    PA = -1.0 * PA;
-  }
-
-  *para_angle = (float) PA;
-  *tel_zen = (float) zenith;
-  *tel_az = (float) azimuth;
+  *para_angle = (float) PA  * rad2deg;
+  *tel_zen = 90.0 - (float) altitude * rad2deg;
+  *tel_az = (float) azimuth * rad2deg;
 
   return 0;
 }
