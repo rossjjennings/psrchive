@@ -181,7 +181,7 @@ void polynomial::load (fitsfile* fptr, long row)
   coefs.resize (ncoef);
 
   fits_read_col (fptr, TDOUBLE, colnum, row, firstelem, ncoef,
-		 NULL, coefs.begin(), &anynul, &status);
+		 NULL, &coefs[0], &anynul, &status);
 
   if (anynul || status)
     throw FITSError (status, "polynomial::load failed to parse COEFF");
@@ -314,7 +314,7 @@ void polynomial::unload (fitsfile* fptr, long row) const
     throw Error (InvalidState, "polynomial::unload",
 	       "COEFF vector repeat count=%ld < NCOEF=%d", repeat, ncoef);
 
-  double* coeff = const_cast<double*>(coefs.begin());
+  double* coeff = const_cast<double*>(&coefs[0]);
   fits_write_col (fptr, TDOUBLE, colnum, row, firstelem, ncoef,
 		  coeff, &status);
 
