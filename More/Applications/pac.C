@@ -259,7 +259,7 @@ int main (int argc, char *argv[]) {
 	pcal_engine->calibrate(arch);
 	
 	cout << "Polarisation Calibration Complete" << endl;
-	
+        arch->set_poln_calibrated();	
 	if (display_params) {
 	  cerr << "not implemented; use pacv" << endl;
 	}	
@@ -283,7 +283,7 @@ int main (int argc, char *argv[]) {
 	fcal_engine->calibrate(arch);
 
 	cout << "Flux calibration complete" << endl;
-
+        arch->set_flux_calibrated();
       }
  
       int index = archives[i].find_first_of(".", 0);
