@@ -7,7 +7,7 @@ COMMENT   Astrophysics Supplement Series v44/p363, v44/p371, v73/p359, v73/p365.
 COMMENT   Contact the NASA Science Office of Standards and Technology for the
 COMMENT   FITS Definition document #100 and other FITS information.
 COMMENT
-HDRVER  = '1.11            '   / Header version 
+HDRVER  = '1.12            '   / Header version 
 DATE    = '                '   / File creation date (YYYY-MM-DDThh:mm:ss UTC)
 OBSERVER= '                '   / Observer name(s)
 PROJID  = '                '   / Project name
@@ -379,6 +379,39 @@ TFORM6  = 'E       '           / NCH_FLUX floats
 TUNIT6  = 'Jy      '
 #
 END
+#
+#
+###############################################################################
+#
+# Artificial Calibrator Stokes Parameters Binary Table Extension
+#
+###############################################################################
+#
+XTENSION= 'BINTABLE'           / ***** Artificial Calibrator Stokes Data *****
+BITPIX  =                    8 / N/A 
+NAXIS   =                    2 / 2-dimensional binary table
+NAXIS1  =                    * / width of table in bytes
+NAXIS2  =                    1 / number of rows in table
+PCOUNT  =                    0 / size of special data area
+GCOUNT  =                    1 / one data group (required keyword)
+TFIELDS =                    3 / Number of fields per row
+#
+EXTNAME = 'CAL_POLN'           / name of this binary table extension
+NCH_POLN=                    * / Nr of channels in flux cal file
+#
+TTYPE1  = 'DAT_WTS '           / Weights for each channel
+TFORM1  = 'E       '           / NCH_POLN floats
+#
+TTYPE2  = 'DATA    '           / Stokes (Q,U,V) of calibrator
+TFORM2  = 'E       '           / 3*NCH_POLN floats
+TUNIT2  = 'C_0     '           / Calibrator flux
+#
+TTYPE3  = 'DATAERR '           / Estimated error of Stokes (Q,U,V)
+TFORM3  = 'E       '           / 3*NCH_POLN floats
+TUNIT3  = 'C_0     '           / Calibrator flux
+#
+END
+#
 #
 ###############################################################################
 #
