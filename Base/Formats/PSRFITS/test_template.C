@@ -8,16 +8,11 @@ using namespace std;
 void test_template (const char* template_file, bool verbose = true);
 void parse_template (const char* template_file, bool verbose = true);
 
-
 int main (int argc, char** argv) try {
 
   unsigned nloops = 100;
   
-  char* template_file = getenv ("PSRFITSDEFN");
-  if (!template_file)  {
-    cerr << "test_template: PSRFITSDEFN not defined" << endl;
-    return 0;
-  }
+  char* template_file = "psrheader.fits";
 
   cerr << "Parsing " << template_file << endl;
   parse_template (template_file);
