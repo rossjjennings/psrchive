@@ -8,6 +8,9 @@
 string Timer::reason;
 bool   Timer::verbose = false;
 
+static char backends[Timer::nbackends][BACKEND_STRLEN+1] =
+{ "baseband" };
+
 unsigned long Timer::backend_data_size (const struct timer& hdr)
 {
   if (backend_recognized (hdr.backend) != -1)
