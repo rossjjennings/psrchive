@@ -539,7 +539,7 @@ int MJD::Construct (const struct timeval& tp)
   time_t utcsecs = tp.tv_sec;
   if (Construct (utcsecs) < 0)
     return -1;
-  fracsec = tp.tv_usec * 1e-6;
+  fracsec = double(tp.tv_usec) * 1e-6;
   return 0;
 }
 
