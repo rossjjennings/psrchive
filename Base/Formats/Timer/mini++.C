@@ -4,7 +4,7 @@
 #include "mini++.h"
 #include "convert_endian.h"
 
-int Mini::load (const char* fname, struct mini* hdr, bool big_endian)
+int Mini::fload (const char* fname, struct mini* hdr, bool big_endian)
 {
   FILE* fptr = fopen (fname, "r");
   if (fptr == NULL) {
