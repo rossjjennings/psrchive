@@ -3,6 +3,7 @@ dnl
 AC_DEFUN([SWIN_LIB_CFITSIO],
 [
   AC_PROVIDE([SWIN_LIB_CFITSIO])
+  AC_REQUIRE([ETR_SOCKET_NSL])
 
   AC_ARG_WITH([cfitsio-dir],
               AC_HELP_STRING([--with-cfitsio-dir=DIR],
@@ -72,14 +73,14 @@ AC_DEFUN([SWIN_LIB_CFITSIO],
     ac_save_LIBS="$LIBS"
 
     for cf_dir in $cf_lib_path_list; do
-      LIBS="-L$cf_dir -lcfitsio $ac_save_LIBS"
+      LIBS="-L$cf_dir -lcfitsio $SOCKET_LIBS $ac_save_LIBS"
       AC_TRY_LINK([#include <fitsio.h>], [fits_movnam_hdu(0,0,0,0,0);],
                   have_cfitsio=yes, have_cfitsio=no)
       if test x"$have_cfitsio" = xyes; then
         if test x"$cf_dir" == x.; then
-          CFITSIO_LIBS="-lcfitsio"
+          CFITSIO_LIBS="-lcfitsio $SOCKET_LIBS"
         else
-          CFITSIO_LIBS="-L$cf_dir -lcfitsio"
+          CFITSIO_LIBS="-L$cf_dir -lcfitsio $SOCKET_LIBS"
         fi
         break
       fi
