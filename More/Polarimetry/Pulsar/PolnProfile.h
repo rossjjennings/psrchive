@@ -81,7 +81,7 @@ namespace Pulsar {
 template <typename T>
 void Pulsar::PolnProfile::transform (const Jones<T>& response)
 {
-  unsigned nbin = p0->get_nbin();
+  unsigned nbin = profile[0]->get_nbin();
 
   float Gain = abs( det(response) );
   if (!finite(Gain))
@@ -93,14 +93,9 @@ void Pulsar::PolnProfile::transform (const Jones<T>& response)
   for (unsigned ibin = 0; ibin < nbin; ibin++)
     set_Stokes (ibin, (response * get_Stokes(ibin)) * response_dagger);
 
-  if (correct_weights) {
-
-    p0->set_weight ( p0->get_weight() / Gain );
-    p1->set_weight ( p1->get_weight() / Gain );
-    p2->set_weight ( p2->get_weight() / Gain );
-    p3->set_weight ( p3->get_weight() / Gain );
-
-  }
+  if (correct_weights)
+    for (unsigned ipol=0; ipol < 4; ipol++)
+      profile[ipol]->set_weight ( profile[ipol]->get_weight() / Gain );
 
 }
 
