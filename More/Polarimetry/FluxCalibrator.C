@@ -108,7 +108,6 @@ void Pulsar::FluxCalibrator::add_observation (const Archive* archive)
 
     // Take the ratio of the total intensity
     Estimate<double> ratio = cal_hi[0][ichan]/cal_lo[0][ichan] - unity ;
-    cerr << ratio << endl;      
     if (arch->get_type() == Signal::FluxCalOn)
       mean_ratio_on[ichan] += ratio;
     else if (arch->get_type() == Signal::FluxCalOff)
