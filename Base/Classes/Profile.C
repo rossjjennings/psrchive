@@ -80,7 +80,7 @@ void Pulsar::Profile::resize (unsigned _nbin)
 //
 // Pulsar::Profile::clone
 //
-Pulsar::Profile* Pulsar::Profile::clone ()
+Pulsar::Profile* Pulsar::Profile::clone () const
 {
   Profile* retval = new Profile (*this);
   if (!retval)

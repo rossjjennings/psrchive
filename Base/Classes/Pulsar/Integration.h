@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Integration.h,v $
-   $Revision: 1.51 $
-   $Date: 2003/11/27 04:58:48 $
+   $Revision: 1.52 $
+   $Date: 2003/12/03 07:54:52 $
    $Author: ahotan $ */
 
 /*
@@ -134,11 +134,12 @@ namespace Pulsar {
 
     //! Computes the weighted centre frequency of an interval of sub-chans.
     double weighted_frequency (unsigned ch_start=0, unsigned ch_end=0) const;
-
+    
     //! Return a vector of tempo++ toa objects
     void toas (vector<Tempo::toa>& toas, const Integration& std_subint,
-	       char nsite, bool discard_bad = false) const;
-
+	       char nsite, bool time_domain = false,
+	       bool discard_bad = false) const;
+    
     //! Remove the baseline from all profiles
     virtual void remove_baseline (float phase = -1.0);
 

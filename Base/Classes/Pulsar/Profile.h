@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Profile.h,v $
-   $Revision: 1.37 $
-   $Date: 2003/10/25 05:04:15 $
+   $Revision: 1.38 $
+   $Date: 2003/12/03 07:54:53 $
    $Author: ahotan $ */
 
 #ifndef __Pulsar_Profile_h
@@ -53,7 +53,7 @@ namespace Pulsar {
     virtual ~Profile ();
     
     //! returns a pointer to a new copy of self
-    virtual Profile* clone ();
+    virtual Profile* clone () const;
 
     //! sets profile equal to another profile
     virtual const Profile& operator = (const Profile& profile);
@@ -140,6 +140,11 @@ namespace Pulsar {
     //! rotates the profile to remove dispersion delay
     void dedisperse (double dm, double ref_freq, double pfold);
 
+    /*! find the shift relative to a standard using a time domain
+      convolution and gaussian fit, returning a Tempo::toa object */
+    Tempo::toa time_domain_toa (const Profile& std, const MJD& mjd, 
+				double period, char nsite) const;
+    
     //! fit to the standard and return a Tempo::toa object
     Tempo::toa toa (const Profile& std, const MJD& mjd, 
 		    double period, char nsite) const;
@@ -191,6 +196,10 @@ namespace Pulsar {
     //! set the state of the polarization measurement
     virtual void set_state (Signal::Component _state) { state = _state; }
 
+    /*! returns the value of the convolution function for a specified
+      lag, calculated in the time domain */
+    double tdl_convolve(const Profile* p1, int bins_to_lag) const;
+    
     //! convolves this with the given profile (using fft method)
     void fft_convolve(Profile* p1); 
 
@@ -248,8 +257,7 @@ namespace Pulsar {
 
 /*! 
   \param data pointer to the data elements to be copied.
-  \pre data must point to at least get_nbin() elements
-*/
+  \pre data must point to at least get_nbin() elements */
 template <typename T>
 void Pulsar::Profile::set_amps (const T* data)
 {

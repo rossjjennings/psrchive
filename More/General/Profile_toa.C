@@ -5,6 +5,89 @@
 
 #include "model_profile.h"
 
+#include "Gaussian.h"
+#include "GaussianModel.h"
+#include "LevenbergMarquardt.h"
+
+/*! Calculates the shift relative to a standard using a time domain
+  convolution and gaussian fit, returning a Tempo::toa object */
+Tempo::toa Pulsar::Profile::time_domain_toa (const Profile& std, const MJD& mjd, 
+					     double period, char nsite) const
+{
+  vector<double> convolution;
+  vector<double> indices;
+  int nbin = get_nbin();
+  for (int i = -1*(nbin/2); i < nbin/2; i++) {
+    convolution.push_back(tdl_convolve(&std, i));
+    indices.push_back(double(i));
+  }
+
+  // Fit a gaussian to the convolution function
+
+  // Three parameters for the gaussian:
+
+  // Midpoint
+  // Height
+  // Width
+
+  vector<double> params;
+  params.resize(3);
+  params[1] = 0.0;
+
+  for (unsigned i = 0; i < convolution.size(); i++) {
+    if (convolution[i] > params[1]) {
+      params[1] = convolution[i];
+      params[0] = indices[i];
+    }
+  }
+  
+  params[2] = double(nbin)/8.0;
+
+  // The weights array (set to a uniform value)
+  vector<double> weights;
+  
+  for (unsigned i = 0; i < convolution.size(); i++) {
+    weights.push_back(params[1] / 20.0);
+  }
+
+  // A vector to hold the solution
+  vector<double> ans;
+  ans.resize(convolution.size());
+  
+  Numerical::GaussianModel model (params);
+  model.set_fitall(true);
+  model.gaussians[0].cyclic=false;
+  model.fill (indices,ans);
+
+  Numerical::LevenbergMarquardt<double> fit;
+  float chisq = fit.init (indices, convolution, weights, model);
+  int iter = 1;
+  while (iter < 100) {
+    float nchisq = fit.iter (indices, convolution, weights, model);
+                      
+    if (nchisq < chisq) {
+      chisq = nchisq;
+    }                                                                                
+    iter ++;
+  }
+
+  // Now ans should contain the fitted points in the gaussian
+
+  double bin_time = period / double(nbin);
+  double offset = model.gaussians[0].centre * bin_time;
+  double error = model.gaussians[0].sigma * bin_time;
+
+  Tempo::toa retval (Tempo::toa::Parkes);
+
+  retval.set_frequency (centrefreq);
+  retval.set_arrival   (mjd + offset);
+  retval.set_error     (error * 1e6);
+
+  retval.set_telescope (nsite);
+  
+  return retval;
+}
+
 /*!
   Calculates the shift between
   Returns a basic Tempo::toa object

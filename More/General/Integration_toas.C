@@ -5,7 +5,8 @@
   be it the total intensity, XX, invariant interval, etc. */
 void Pulsar::Integration::toas (vector<Tempo::toa>& toas,
 				const Integration& std_subint,
-				char nsite, bool discard_bad) const
+				char nsite, bool time_domain,
+				bool discard_bad) const
 {
   // empty the vector
   toas.resize (0);
@@ -33,8 +34,11 @@ void Pulsar::Integration::toas (vector<Tempo::toa>& toas,
       continue;
 
     try {
-
-      toa = profile->toa (standard, epoch, folding_period, nsite);
+      
+      if (time_domain)
+	toa = profile->time_domain_toa (standard, epoch, folding_period, nsite);
+      else
+	toa = profile->toa (standard, epoch, folding_period, nsite);
 
     }
     catch (Error& error)  {

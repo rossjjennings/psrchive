@@ -60,6 +60,32 @@ void Pulsar::Profile::fft_convolve(Profile* p1)
   set_amps(solution);
 }
 
+double Pulsar::Profile::tdl_convolve(const Profile* p1, int bins_to_lag) const
+{
+  Reference::To<Pulsar::Profile> thiz = clone();
+  Reference::To<Pulsar::Profile> that = p1->clone();
+  
+  // Remove the baselines
+  *thiz -= thiz->mean(thiz->find_min_phase());
+  *that -= that->mean(that->find_min_phase());
+  
+  if (thiz->get_nbin() != that->get_nbin())
+    throw Error(InvalidParam, "Pulsar::Profile::tdl_convolve",
+		"unequal number of bins");
+
+  double result = 0.0;
+
+  for (unsigned i = 0; i < thiz->get_nbin(); i++) {
+    if ((i - bins_to_lag < 0 ) || (i - bins_to_lag >= thiz->get_nbin()))
+      result += 0.0;
+    else
+      result += thiz->get_amps()[i] * that->get_amps()[i - bins_to_lag];
+  }
+
+  // Note that this result is not normalised in any way
+
+  return result;
+}
 
 Pulsar::Profile* Pulsar::Profile::hat_profile(int nbin, float duty_cycle)
 {

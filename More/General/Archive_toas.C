@@ -7,7 +7,8 @@
   \retval toas
 */
 void Pulsar::Archive::toas (vector<Tempo::toa>& toas,
-			    const Archive* standard) const
+			    const Archive* standard,
+			    bool time_domain) const
 {
   toas.resize (0);
 
@@ -32,10 +33,10 @@ void Pulsar::Archive::toas (vector<Tempo::toa>& toas,
     // some extra information to place in each toa
     char extra[20];
     sprintf (extra, " %d ", isub);
-
+    
     vector<Tempo::toa> toaset;
-    get_Integration(isub)->toas (toaset, *std, nsite);
-
+    get_Integration(isub)->toas (toaset, *std, nsite, time_domain);
+    
     for (unsigned itoa=0; itoa < toaset.size(); itoa++) {
       string aux = get_filename() + extra + toaset[itoa].get_auxilliary_text();
       toaset[itoa].set_auxilliary_text (aux);
@@ -44,4 +45,3 @@ void Pulsar::Archive::toas (vector<Tempo::toa>& toas,
 
   }
 }
-

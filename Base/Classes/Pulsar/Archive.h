@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Archive.h,v $
-   $Revision: 1.89 $
-   $Date: 2003/11/27 20:16:40 $
-   $Author: straten $ */
+   $Revision: 1.90 $
+   $Date: 2003/12/03 07:54:52 $
+   $Author: ahotan $ */
 
 /*! \mainpage 
  
@@ -539,10 +539,11 @@ namespace Pulsar {
 
     //! Correct the Faraday rotation of Q into U
     virtual void defaraday (double rotation_measure = 0, double rm_iono = 0);
-
+    
     //! Fit Profiles to the standard and return toas
-    virtual void toas (vector<Tempo::toa>& toas, const Archive* std) const;
-
+    virtual void toas (vector<Tempo::toa>& toas, const Archive* std,
+		       bool time_domain = false) const;
+    
     //! Correct receiver feed angle orientation
     virtual void deparallactify();
 
