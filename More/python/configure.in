@@ -1,0 +1,36 @@
+#                                               -*- Autoconf -*-
+# Process this file with autoconf to produce a configure script.
+
+AC_PREREQ(2.57)
+AC_INIT([PSRCHIVE_PYTHON],[3.1],[psrchive@astro.swin.edu.au])
+AC_CONFIG_SRCDIR([psrchive.i])
+AM_INIT_AUTOMAKE
+
+# Checks for programs.
+AC_PROG_CXX
+AC_PROG_CXXCPP
+AC_PROG_INSTALL
+AC_PROG_LIBTOOL
+
+#
+# SWIG generated python wrapper
+#
+AC_PROG_SWIG
+SWIG_ENABLE_CXX
+SWIG_PYTHON
+
+PSRCHIVE_LIBS=`psrchive_ldflags`
+AC_SUBST(PSRCHIVE_LIBS)
+
+PSRCHIVE_CFLAGS=`psrchive_cflags`
+AC_SUBST(PSRCHIVE_CFLAGS)
+
+# 
+# For developers: ensure that the config directory m4 macros are parsed
+#
+ACLOCAL="$ACLOCAL -I ."
+
+AC_CONFIG_FILES(Makefile)
+
+AC_OUTPUT
+
