@@ -3,14 +3,19 @@
 #include <unistd.h>
 #include <stdio.h>
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#ifdef HAVE_PGPLOT
 #include <cpgplot.h>
+#include "EstimatePlotter.h"
+#endif
 
 #include "MEAL/LevenbergMarquardt.h"
 #include "MEAL/Gaussian.h"
 #include "MEAL/Polynomial.h"
 #include "MEAL/Axis.h"
-
-#include "EstimatePlotter.h"
 
 using namespace std;
 
@@ -135,6 +140,15 @@ int main (int argc, char** argv) try {
 
   }
 
+  unsigned npts = 500;
+
+  double xmin = *min_element(data_x.begin(), data_x.end());
+  double xmax = *max_element(data_x.begin(), data_x.end());
+
+  cerr << "xmin=" << xmin << " xmax=" << xmax << endl;
+
+#ifdef HAVE_PGPLOT
+
   //
   // Plot the data
   //
@@ -154,15 +168,10 @@ int main (int argc, char** argv) try {
   // Plot the input model
   //
 
-  unsigned npts = 500;
-
-  double xmin = *min_element(data_x.begin(), data_x.end());
-  double xmax = *max_element(data_x.begin(), data_x.end());
-
-  cerr << "xmin=" << xmin << " xmax=" << xmax << endl;
-
   cpgsci(2);
   plot_model (argument, scalar, npts, xmin, xmax);
+
+#endif
 
   MEAL::LevenbergMarquardt<double> fit;
   fit.verbose = MEAL::Function::verbose;
@@ -206,9 +215,11 @@ int main (int argc, char** argv) try {
     scalar->set_variance (iparm, 2.0*covariance[iparm][iparm]);
   }
 
+#ifdef HAVE_PGPLOT
   cpgsci(3);
   plot_model (argument, scalar, npts, xmin, xmax);
   cpgend();
+#endif
 
   scalar->print (model_text);
   cout << "ANSWER:\n" << model_text << endl;
@@ -223,6 +234,8 @@ catch (...) {
   cerr << "Unhandled exception" << endl;
   return -1;
 }
+
+#ifdef HAVE_PGPLOT
 
 void plot_model (MEAL::Axis<double>& argument,
 		 MEAL::Scalar* scalar,
@@ -245,3 +258,5 @@ void plot_model (MEAL::Axis<double>& argument,
   }
 
 }
+
+#endif
