@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ReceptionCalibrator.h,v $
-   $Revision: 1.15 $
-   $Date: 2003/05/20 16:25:51 $
+   $Revision: 1.16 $
+   $Date: 2003/05/21 12:13:12 $
    $Author: straten $ */
 
 #ifndef __ReceptionCalibrator_H
@@ -87,9 +87,6 @@ namespace Pulsar {
     //! Uncalibrated best estimate of the average pulse profile
     Reference::To<const Archive> uncalibrated;
 
-    //! Flag set after the fit method has been called
-    bool is_fit;
-
     //! The number of polynomial coefficients in SingleAxis(t)
     unsigned ncoef;
 
@@ -111,7 +108,10 @@ namespace Pulsar {
     //! Signal path assigned to add_FluxCalibrator
     unsigned FluxCalibrator_path;
 
-    //! Check that the model is ready 
+    //! Set the initial guesses and update the reference epoch
+    void initialize ();
+
+    //! Check that the model is ready to receive additional constraints
     void check_ready (const char* method, bool init = true);
 
     //! Initialization performed using the first observation added
@@ -130,6 +130,13 @@ namespace Pulsar {
 		   SourceEstimate& estimate,
 		   unsigned ichan,
 		   const Integration* data);
+
+  private:
+    //! Flag set after the solve method has been called
+    bool is_fit;
+
+     //! Flag set after the initialize method has been called
+    bool is_initialized;
 
   };
 

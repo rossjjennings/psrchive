@@ -8,6 +8,8 @@
 Pulsar::ReceptionCalibrator::ReceptionCalibrator (const Archive* archive)
 {
   is_fit = false;
+  is_initialized = false;
+
   ncoef = 0;
   ncoef_set = false;
  
@@ -459,19 +461,7 @@ void Pulsar::ReceptionCalibrator::solve ()
        amount of time spanned by the observations */
   }
 
-  PA_min *= 180.0/M_PI;
-  PA_max *= 180.0/M_PI;
-
-  cerr << "Pulsar::ReceptionCalibrator::solve information:\n"
-    "  Parallactic angle ranges from " << PA_min <<
-    " to " << PA_max << " degrees" << endl;
-
-  for (unsigned istate=0; istate<pulsar.size(); istate++)
-    pulsar[istate].update_state ();
-
-  MJD mid = 0.5 * (start_epoch + end_epoch);
-
-  parallactic.set_reference_epoch (mid);
+  initialize ();
 
   unsigned nchan = equation.size();
   unsigned incr = 1;
@@ -482,10 +472,6 @@ void Pulsar::ReceptionCalibrator::solve ()
 
     if (ncoef)
       equation[ichan]->set_ncoef (ncoef);
-
-    equation[ichan]->set_reference_epoch (mid);
-
-    receiver[ichan].update (equation[ichan]->get_receiver());
 
     if (degenerate_rotV) {
       equation[ichan]->get_receiver()->set_param (6, 0.0);
@@ -502,15 +488,49 @@ void Pulsar::ReceptionCalibrator::solve ()
   is_fit = true;
 }
 
+void Pulsar::ReceptionCalibrator::initialize ()
+{
+  if (is_initialized)
+    return;
 
+  PA_min *= 180.0/M_PI;
+  PA_max *= 180.0/M_PI;
+
+  cerr << "Pulsar::ReceptionCalibrator::solve information:\n"
+    "  Parallactic angle ranges from " << PA_min <<
+    " to " << PA_max << " degrees" << endl;
+
+  for (unsigned istate=0; istate<pulsar.size(); istate++)
+    pulsar[istate].update_state ();
+
+  MJD mid = 0.5 * (start_epoch + end_epoch);
+  parallactic.set_reference_epoch (mid);
+
+  unsigned nchan = equation.size();
+
+  for (unsigned ichan=0; ichan<nchan; ichan+=1) {
+
+    equation[ichan]->set_reference_epoch (mid);
+    receiver[ichan].update (equation[ichan]->get_receiver());
+
+  }
+
+  is_initialized = true;
+}
 
 void Pulsar::ReceptionCalibrator::check_ready (const char* method, bool unc)
 {
   if (is_fit)
-    throw Error (InvalidState, method, "Model has been fit. Cannot add data.");
+    throw Error (InvalidState, method,
+		 "Model has been fit. Cannot add data.");
+
+  if (is_initialized)
+    throw Error (InvalidState, method,
+		 "Model has been initialized. Cannot add data.");
 
   if (unc && !uncalibrated)
-    throw Error (InvalidState, method, "Initial observation required.");
+    throw Error (InvalidState, method,
+		 "Initial observation required.");
 }
 
 

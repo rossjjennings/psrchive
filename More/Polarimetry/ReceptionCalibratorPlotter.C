@@ -20,6 +20,9 @@ void Pulsar::ReceptionCalibratorPlotter::init (const Calibrator* calib)
   }
 
   calibrator = const_cast<ReceptionCalibrator*> (temp);
+
+  calibrator->initialize();
+
 }
 
 //! Get the number of data points to plot
