@@ -16,6 +16,7 @@ AC_DEFUN([SWIN_LIB_FFTW],
 
   ac_save_LIBS="$LIBS"
   FFTW_LIBS=""
+  FFTW_CFLAGS=""
 
   if test $have_fftw = yes; then
 
@@ -66,6 +67,7 @@ AC_DEFUN([SWIN_LIB_FFTW],
   AM_CONDITIONAL(HAVE_FFTW2,[test x"$have_fftw" != xno])
 
   AC_SUBST(FFTW_LIBS)
+  AC_SUBST(FFTW_CFLAGS)
   LIBS="$ac_save_LIBS"
 
 ])
