@@ -28,6 +28,7 @@ void usage ()
     "where:\n"
     " -a archive set the output archive class name\n"
     " -c ICHAN   mark ICHAN as bad\n"
+    " -C         plot only calibrator Stokes\n"
     " -f         treat all archives as members of a fluxcal observation\n"
     " -q         use the single-axis model\n"
     " -P         produce publication-quality plots" << endl;
@@ -53,10 +54,12 @@ int main (int argc, char** argv)
   // produce publication quality plots
   bool publication = false;
 
+  bool calibrator_stokes_only = false;
+
   // verbosity flag
   bool verbose = false;
   char c;
-  while ((c = getopt(argc, argv, "a:c:hfMPqvV")) != -1)  {
+  while ((c = getopt(argc, argv, "a:c:ChfMPqvV")) != -1)  {
 
     switch (c)  {
 
@@ -88,6 +91,10 @@ int main (int argc, char** argv)
       break;
     }
       
+    case 'C':
+      calibrator_stokes_only = true;
+      break;
+
     case 'f':
       flux_cal = true;
       break;
@@ -169,20 +176,27 @@ int main (int argc, char** argv)
       cerr << "pacv: Archive Calibrator with nchan=" 
 	   << calibrator->get_nchan() << endl;
 
-      for (unsigned ichan=0; ichan<zapchan.size(); ichan++)
-	calibrator->set_Transformation_invalid (zapchan[ichan]);
+      if (!calibrator_stokes_only) {
 
-      if (verbose)
-	cerr << "pacv: Plotting PolnCalibrator" << endl;
-      
-      cpgpage ();
-      plotter.plot (calibrator);
+	for (unsigned ichan=0; ichan<zapchan.size(); ichan++)
+	  calibrator->set_Transformation_invalid (zapchan[ichan]);
+	
+	if (verbose)
+	  cerr << "pacv: Plotting PolnCalibrator" << endl;
+	
+	cpgpage ();
+	plotter.plot (calibrator);
+	
+      }
 
       calibrator_stokes = input->get<Pulsar::CalibratorStokes>();
 
       if (calibrator_stokes) {
 
 	cerr << "pacv: Plotting CalibratorStokes" << endl;
+
+	for (unsigned ichan=0; ichan<zapchan.size(); ichan++)
+	  calibrator_stokes->set_valid (zapchan[ichan], false);
 
 	cpgpage ();
 	plotter.plot( new Pulsar::CalibratorStokesInfo (calibrator_stokes),
