@@ -2,6 +2,8 @@
 
 #include <string.h>
 #include <stdio.h>
+#include <sys/time.h>
+
 #ifdef sun
 #include <float.h>
 #include <sunmath.h>
@@ -466,6 +468,7 @@ int MJD::Construct (const struct timeval& tp)
   if (Construct (utcsecs) < 0)
     return -1;
   fracsec = tp.tv_usec * 1e-6;
+  return 0;
 }
 
 // long long to get a 64-bit unsigned
