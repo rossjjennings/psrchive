@@ -3,6 +3,22 @@
 
 template <typename T> T sqr (T x) { return x*x; }
 
+
+template <typename T, Basis B>
+void test_det (const Quaternion<T, B>& q, float tolerance)
+{
+  Jones<T> j = convert(q);
+
+  T det1 = det(j).real();
+  T det2 = det(q);
+
+  if ( sqr(det1 - det2) > tolerance ) {
+    cerr << "test_det det(Jones)=" << det1 << " != det(Quaternion)=" << det2
+	 << endl;
+    throw string ("test_Pauli determinant error");
+  }
+}
+
 template <typename T>
 void test_polar (const Jones<T>& j, float tolerance)
 {
@@ -39,6 +55,12 @@ void test_polar (const Jones<T>& j, float tolerance)
       "  in=" << j << endl << " diff=" << diff << endl;
     throw string ("test_matrix polar decomposition error");
   }
+
+  double value;
+  random_value (value, 10.0);
+  
+  test_det (hq*value, tolerance);
+  test_det (uq*value, tolerance);
 }
 
 // specialize the test_matrix template function defined in MatrixTest.h
