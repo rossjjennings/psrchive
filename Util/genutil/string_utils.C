@@ -216,3 +216,16 @@ string make_string(unsigned char input){
   return string(dummy);
 }
 
+string to_upper_case(string input){
+  string out = input;
+  for(unsigned int i=0; i < input.size(); i++)
+    out[i] = toupper(input[i]);
+  return out;
+}
+
+string to_lower_case(string input){
+  string out = input;
+  for(unsigned int i=0; i < input.size(); i++)
+    out[i] = tolower(input[i]);
+  return out;
+}

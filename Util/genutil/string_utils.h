@@ -1,8 +1,8 @@
 //-*-C++-*-
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Attic/string_utils.h,v $
-   $Revision: 1.17 $
-   $Date: 2002/12/08 14:47:32 $
-   $Author: hknight $ */
+   $Revision: 1.18 $
+   $Date: 2003/03/20 06:59:36 $
+   $Author: cwest $ */
 
 #ifndef __STRING_UTILS_H
 #define __STRING_UTILS_H
@@ -180,7 +180,7 @@ string make_string(char input);
 string make_string(unsigned char input);
 
 
+string to_upper_case(string input);
+string to_lower_case(string input);
+
 #endif
-
-
-
