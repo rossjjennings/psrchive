@@ -5,6 +5,9 @@
 
 // Language independent exception handler
 %include exception.i       
+%include std_string.i
+
+using namespace std;
 
 %exception {
     try {
