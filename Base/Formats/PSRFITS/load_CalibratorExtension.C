@@ -1,5 +1,4 @@
 #include "Pulsar/CalibratorExtensionIO.h"
-#include <limits>
 
 #ifdef sun
 #include <ieeefp.h>
@@ -58,9 +57,7 @@ void Pulsar::load (fitsfile* fptr, CalibratorExtension* ext)
   int initflag = 0;
   fits_get_colnum (fptr, CASEINSEN, "DAT_FREQ", &colnum, &status);
 
-  float nullfloat = std::numeric_limits<float>::infinity();
-
-  fits_read_col (fptr, TFLOAT, colnum, 1, 1, nchan, &nullfloat,
+  fits_read_col (fptr, TFLOAT, colnum, 1, 1, nchan, &fits_nullfloat,
 		 data.get(), &initflag, &status);
 
   if (status)
@@ -80,8 +77,8 @@ void Pulsar::load (fitsfile* fptr, CalibratorExtension* ext)
   colnum = 0;
   initflag = 0;
   fits_get_colnum (fptr, CASEINSEN, "DAT_WTS", &colnum, &status);
- 
-  fits_read_col (fptr, TFLOAT, colnum, 1, 1, nchan, &nullfloat, 
+  
+  fits_read_col (fptr, TFLOAT, colnum, 1, 1, nchan, &fits_nullfloat, 
 		 data.get(), &initflag, &status);
 
   if (status)
