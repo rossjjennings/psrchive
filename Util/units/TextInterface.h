@@ -316,13 +316,22 @@ namespace TextInterface {
   /*! Derived classes need only define the extract_element and get_nelement
     methods. */
   template<class C,class E>
-  class ElementGetSet : public ClassGetSet<C> {
+  class ElementGetSet : public Component<C> {
 
   public:
 
     //! Construct from name and component interface
     ElementGetSet (const std::string& n, ClassGetSet<E>* part) 
       { name = n; element_interface = part; }
+
+    //! Get the name of the component
+    std::string get_component_name () const { return name + "*"; }
+
+    //! Return true if the name argument matches
+    bool matches (const std::string& name) const;
+
+    //! Extract the component from the composite
+    void extract (C* c) { composite = c; }
 
     //! Get the value(s) of the attribute
     std::string get_value (const std::string& name) const;
@@ -345,16 +354,23 @@ namespace TextInterface {
   protected:
 
     //! Return a pointer to the element
-    virtual E* extract_element (C*, unsigned index) = 0;
+    virtual E* extract_element (C*, unsigned index) const = 0;
 
     //! Return the number of elements
-    virtual unsigned get_nelement () const = 0;
+    virtual unsigned get_nelement (C*) const = 0;
 
     //! The interface with which this interfaces
     Reference::To< ClassGetSet<E> > element_interface;
 
+    //! The instance from which elements should be extracted
+    Reference::To< C > composite;
+
+    //! The component name
+    std::string name;
+
     // Helper function
-    std::string get_indeces (std::vector<unsigned>&, const std::string& name);
+    std::string get_indeces (std::vector<unsigned>& indeces, 
+                             const std::string& name) const;
 
   };
 
@@ -476,9 +492,6 @@ void TextInterface::CompositeGetSet<C>::set_instance (C* c)
     components[i]->extract (c);
 }
 
-
-
-
 template<class C, class E>
 std::string
 TextInterface::ElementGetSet<C,E>::get_value (const std::string& name) const
@@ -488,8 +501,9 @@ TextInterface::ElementGetSet<C,E>::get_value (const std::string& name) const
   std::ostringstream ost;
 
   for (unsigned i=0; i<ind.size(); i++) {
-    element_interface->set_instance( extract_element(this->instance, ind[i]) );
-    ost << "[" << i << "]:" << element_interface->get_value(sub_name);
+    if (i) ost << ",";
+    element_interface->set_instance( extract_element(this->composite, ind[i]) );
+    ost << ind[i] << ")" << element_interface->get_value(sub_name);
   }
 
   return ost.str();
@@ -503,20 +517,20 @@ void TextInterface::ElementGetSet<C,E>::set_value (const std::string& name,
   std::string sub_name = get_indeces (ind, name);
 
   for (unsigned i=0; i<ind.size(); i++) {
-    element_interface->set_instance( extract_element(this->instance, ind[i]) );
+    element_interface->set_instance( extract_element(this->composite, ind[i]) );
     element_interface->set_value(sub_name, value);
   }
 }
 
 template<class C, class E>
 std::string
-TextInterface::ElementGetSet<C,E>::get_indeces (vector<unsigned>& indeces,
-						const string& name)
+TextInterface::ElementGetSet<C,E>::get_indeces (std::vector<unsigned>& indeces,
+						const std::string& name) const
 {
   std::string sub_name = name;
   parse_indeces (indeces, sub_name);
 
-  unsigned n = this->get_nelement();
+  unsigned n = this->get_nelement(this->composite);
 
   if (indeces.size() == 0) {
     indeces.resize (n);
@@ -546,6 +560,12 @@ template<class C>
 bool TextInterface::Component<C>::matches (const std::string& name) const
 {
   return strcasecmp(name.c_str(), get_component_name().c_str()) == 0;
+}
+
+template<class C,class E>
+bool TextInterface::ElementGetSet<C,E>::matches (const std::string& n) const
+{
+  return strcasecmp(n.c_str(), name.c_str()) == 0;
 }
 
 #endif
