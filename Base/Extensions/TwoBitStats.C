@@ -1,3 +1,6 @@
+#include "Error.h"
+#include "Reference.h"
+
 #include "Pulsar/TwoBitStats.h"
 
 //! Default constructor
