@@ -707,6 +707,9 @@ float Pulsar::Profile::snr() const
   // subtract the total power due to the baseline
   power -= min_avg * double (fall - rise);
 
+  double flux = power;
+  double width = (double) (fall - rise);
+
   // divide by the sqrt of the number of bins
   power /= sqrt (double(fall-rise));
 

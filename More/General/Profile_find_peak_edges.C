@@ -1,5 +1,7 @@
 #include "Pulsar/Profile.h"
 
+#include "cpgplot.h"
+
 /*! 
   Fractional pulse phase window used to calculate the transitions in
   Pulsar::Profile::find_cal_transition
@@ -36,7 +38,10 @@ void Pulsar::Profile::find_peak_edges (int& rise, int& fall) const
   // on the second try, the search starts half way into the profile
 
   // the mean is removed from each amplitude
-  float min_amp = mean ( find_min_phase() );
+  // Note deviation from defaults, which give problems
+  // for narrow duty cycle pulsars
+
+  float min_amp = mean ( find_min_phase(0.5) , 0.5);
 
   // the total power under the pulse
   double tot_amp = sum() - double(min_amp) * double(nbin);
@@ -69,6 +74,19 @@ void Pulsar::Profile::find_peak_edges (int& rise, int& fall) const
       if (cumu[ibin] < rise_threshold) 
 	irise[itry] = ibin;
 
+    //    cpgeras();
+    //cpgsci(1);
+    //cpgswin(0.0,(float)nbin,cumu[0],cumu[nbin-1]);
+    //cpgmove(0.0,cumu[0]);
+    //for (ibin=0;ibin<nbin;ibin++){
+    //  cpgdraw((float)ibin,cumu[ibin]);
+    //}
+    //cpgsci(2);
+    //cpgmove(0.0,rise_threshold);
+    //cpgdraw((float)nbin-1,rise_threshold);
+    //cpgsci(2);
+    //cpgmove(0.0,fall_threshold);
+    //cpgdraw((float)nbin-1,fall_threshold);
     // find where cumulative sum falls below max_threshold for the first time.
     ifall[itry] = nbin-1;
     for (ibin=nbin-1; ibin>0; ibin--)
@@ -106,4 +124,6 @@ void Pulsar::Profile::find_peak_edges (int& rise, int& fall) const
     fall = int ((phase + 0.2) * nbin);
   }
 }
+
+
 

@@ -1,9 +1,13 @@
 #include "Types.h"
 
+#include "unistd.h"
+#include "cpgplot.h"
+
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
 #include "Pulsar/IntegrationOrder.h"
 #include "Pulsar/Profile.h"
+#include "Pulsar/Plotter.h"
 
 #include "Error.h"
 #include "typeutil.h"
@@ -432,6 +436,8 @@ void Pulsar::Archive::remove_baseline (float phase, float dc)
 
 double Pulsar::Archive::find_best_period (){
 
+  Pulsar::Plotter myplotter;
+  static int loop = 0;
   // Firstly determine the MIDtime
   MJD midtime = (get_Integration(get_nsubint()-1)->get_epoch()+
 		 get_Integration(0)->get_epoch())/2.0;
@@ -453,20 +459,36 @@ double Pulsar::Archive::find_best_period (){
   double p_u = centre_period + 0.5 * pow(centre_period,2.0)/
     t_on_2.in_seconds();
 
-  MJD dMJD = midtime-get_Integration(0)->get_epoch();
-  double dt = dMJD.in_seconds();
-  double dp = centre_period/dt/(double)(get_nbin()/2);
+  double dt = t_on_2.in_seconds();
+  double dp = pow(centre_period,2.0)/dt/(double)(get_nbin()/2);
+
+  Reference::To<Archive> scrunched_copy = clone(); 
+  // make sure appropriate scrunching
+  scrunched_copy->fscrunch(0);
+  scrunched_copy->pscrunch();
   for (double trial_p = p_l;trial_p<p_u;trial_p+=dp){
     // Copy the archive into workspace
-    Reference::To<Archive> acopy = clone(); 
-    // make sure appropriate scrunching
-    acopy->fscrunch(0);
-    acopy->pscrunch();
 
+    Reference::To<Archive> acopy = scrunched_copy->clone();
     acopy->new_folding_period(trial_p);
-
-    // scrunch and compute
+    //    cpgbbuf();
     acopy->tscrunch(0);
+    // find the edges and plot them in red.
+    int rise=0,fall=0;
+    acopy->get_Profile(0,0,0)->find_peak_edges(rise,fall);
+    /*    cpgbbuf();
+    cpgeras();
+    myplotter.singleProfile(acopy);
+    cpgsci(2);
+    rise = rise % get_nbin();
+    fall = fall % get_nbin();
+    cpgmove((float)rise/get_nbin(),0.0);
+    cpgdraw((float)rise/get_nbin(),1000000.0);
+    cpgsci(3);
+    cpgmove((float)fall/get_nbin(),0.0);
+    cpgdraw((float)fall/get_nbin(),1000000.0);
+    cpgebuf();
+    */
     float trial_snr = acopy->get_Profile(0,0,0)->snr();
     if (trial_snr>best_snr){
       best_period = trial_p;
