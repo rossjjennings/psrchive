@@ -3,7 +3,7 @@ noinst_LTLIBRARIES = libepn.la
 
 nobase_include_HEADERS = Pulsar/EPNArchive.h
 
-libepn_la_SOURCES = EPNArchive.C epnio.c rwepn.f
+libepn_la_SOURCES = EPNArchive.C epnio.c rwepn.f epnhdr.inc epnio.h
 
 #############################################################################
 
