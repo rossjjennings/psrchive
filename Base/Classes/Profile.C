@@ -163,15 +163,13 @@ const Pulsar::Profile& Pulsar::Profile::operator *= (float factor)
 void Pulsar::Profile::offset (double factor)
 {
   for (unsigned i=0;i<nbin;i++)
-    amps[i]+=factor;
-  return *this;
+    amps[i] += factor;
 }
 
 void Pulsar::Profile::scale (double factor)
 {
   for (unsigned i=0;i<nbin;i++)
-    amps[i]*=factor;
-  return *this;
+    amps[i] *= factor;
 }
 
 
