@@ -191,7 +191,7 @@ double Cartesian::mod () const
   return sqrt (x*x + y*y + z*z);
 }
 
-void simple_rot (double& x1, double& x2, double radians)
+void Cartesian::rotate (double& x1, double& x2, double radians)
 {
   double cosr = cos (radians);
   double sinr = sin (radians);
@@ -203,17 +203,17 @@ void simple_rot (double& x1, double& x2, double radians)
 
 void Cartesian::x_rot (const Angle& phi)
 {
-  simple_rot (y, z, phi.getradians());
+  rotate (y, z, phi.getradians());
 }
 
 void Cartesian::y_rot (const Angle& phi)
 {
-  simple_rot (z, x, phi.getradians());
+  rotate (z, x, phi.getradians());
 }
 
 void Cartesian::z_rot (const Angle& phi)
 {
-  simple_rot (x, y, phi.getradians());
+  rotate (x, y, phi.getradians());
 }
 
 // rotates the point about an arbitrary vector

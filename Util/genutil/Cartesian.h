@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Cartesian.h,v $
-   $Revision: 1.5 $
-   $Date: 2001/02/24 03:27:21 $
+   $Revision: 1.6 $
+   $Date: 2001/06/02 07:22:57 $
    $Author: straten $ */
 
 #ifndef __CARTESIAN_H
@@ -65,6 +65,9 @@ class Cartesian
   void rot (const Cartesian& r_vect, const Angle& phi);
 
   static Angle angularSeparation (const Cartesian& c1, const Cartesian& c2);
+
+  static void rotate (double& x1, double& x2, double radians);
+
 };
 
 ostream& operator<< (ostream& ostr, const Cartesian&);
