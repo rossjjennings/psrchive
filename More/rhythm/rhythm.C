@@ -696,9 +696,6 @@ vector<double> Rhythm::give_me_data (toaPlot::AxisQuantity q)
   char useful[80];
   char filename[80];
   
-  psrephem eph;
-  fitpopup -> get_psrephem (eph);
-  
   QProgressDialog progress( "Calculating Data...", "Abort", toas.size(),
 			    this, "progress", TRUE );
   
@@ -783,35 +780,64 @@ vector<double> Rhythm::give_me_data (toaPlot::AxisQuantity q)
     
     return retval;
     break;
-
-  case toaPlot::ParallacticAngle:
-    for ( unsigned i = 0; i < toas.size(); i++ ) {
-      progress.setProgress( i );
-      myapp->processEvents();
-
-      if (toas[i].get_format() == Tempo::toa::Command) {
-	retval.push_back(0.0);
-	continue;
-      }
-      // Extract the time
-      MJD mjd(toas[i].resid.mjd);
-      
-      // Extract the coordinates
-      sky_coord crd(eph.value_str[EPH_RAJ][0], eph.value_str[EPH_DECJ][0]);
-      
-      // Extract the lat and lon
-      char telid = eph.value_str[EPH_TZRSITE][0];
-      
-      double lat = Pulsar::tzr_lat(telid);
-      double lon = Pulsar::tzr_lon(telid);
-      
-      retval.push_back(Pulsar::parallactic_angle(crd, mjd, lat, lon));
-    }
-    progress.setProgress( toas.size() );
     
+  case toaPlot::ParallacticAngle:
+    if (fitpopup->hasdata()) {
+      psrephem myeph;
+      fitpopup -> get_psrephem (myeph);
+      for ( unsigned i = 0; i < toas.size(); i++ ) {
+	progress.setProgress( i );
+	myapp->processEvents();
+	
+	if (toas[i].get_format() == Tempo::toa::Command) {
+	  retval.push_back(0.0);
+	  continue;
+	}
+	
+	if (toas[i].get_pa() != 999.0) {
+	  retval.push_back(toas[i].get_pa());
+	  continue;
+	}
+	
+	// Extract the time
+	MJD mjd(toas[i].resid.mjd);
+	
+	// Extract the coordinates
+	sky_coord crd;
+
+	toas[i].unload(useful);
+	
+	if (sscanf(useful+1, "%s ", filename) != 1) {
+	  throw Error(FailedCall, "No archive-derived info available");
+	}
+	else {
+	  if (verbose)
+	    cerr << "Attempting to load archive '" << filename << "'" << endl;
+	  
+	  string useful2 = dataPath + "/";
+	  useful2 += filename;
+	  
+	  Reference::To<Pulsar::Archive> data = Pulsar::Archive::load(useful2);
+	  
+	  crd = data->get_coordinates();
+	}
+	
+	// Extract the lat and lon
+	char telid = myeph.value_str[EPH_TZRSITE][0];
+	
+	double lat = Pulsar::tzr_lat(telid);
+	double lon = Pulsar::tzr_lon(telid);
+	
+	double answer = Pulsar::parallactic_angle(crd, mjd, lat, lon);
+	
+	retval.push_back(answer);
+	toas[i].set_pa(answer);
+      }
+      progress.setProgress( toas.size() );
+    }
     return retval;
     break;
-
+    
   case toaPlot::ResidualMilliTurns:
     for ( unsigned i = 0; i < toas.size(); i++ ) {
       //progress.setProgress( i );
