@@ -58,7 +58,7 @@ void Pulsar::PolnCalibrator::calibrate (Archive* arch)
 		 "no PolnCal Archive");
 
   string reason;
-  if (!calibrator->mixable (arch, reason))
+  if (!calibrator->match (arch, reason))
     throw Error (InvalidParam, "Pulsar::FluxCalibrator", "Pulsar::Archive='"
 		 + calibrator->get_filename() + "'\ndoes not mix with '"
 		 + arch->get_filename() + "\n" + reason);

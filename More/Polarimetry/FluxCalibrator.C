@@ -100,7 +100,7 @@ void Pulsar::FluxCalibrator::calibrate (Archive* arch)
 		 "no FluxCal Archive");
 
   string reason;
-  if (!calibrator->mixable (arch, reason))
+  if (!calibrator->match (arch, reason))
     throw Error (InvalidParam, "Pulsar::FluxCalibrator", "Pulsar::Archive='"
 		 + calibrator->get_filename() + "'\ndoes not mix with '"
 		 + arch->get_filename() + "\n" + reason);
