@@ -11,7 +11,7 @@
 #include "dirutil.h"
 #include "string_utils.h"
 
-static const char* psradd_args = "b:Ce:f:FG:hiI:M:p:PsS:tT:vV";
+static const char* psradd_args = "b:c:Ce:f:FG:hiI:M:p:PsS:tT:vV";
 
 void usage () {
   cout <<
@@ -23,6 +23,7 @@ void usage () {
     " -i          Show revision information\n"
     "\n"
     " -b nbin     Bin scrunch to nbin bins when each file is loaded\n"
+    " -c nchan    Frequency scrunch to nchan chans when each file is loaded\n"
     " -C          Check that ephemerides are equal\n"
     " -f fname    Output result to 'fname'\n"
     " -F          Force append despite mismatch of header parameters\n"
@@ -60,6 +61,9 @@ int main (int argc, char **argv)
 
   // if specified, bscrunch each archive to nbin
   int nbin = 0;
+
+  // if specified, fscrunch each archive to nchan
+  int nchan = 0;
 
   // tscrunch+unload when certain limiting conditions are met
   bool auto_add = false; 
@@ -102,11 +106,15 @@ int main (int argc, char **argv)
       return 0;
       
     case 'i':
-      cout << "$Id: psradd.C,v 1.13 2004/01/06 19:04:17 straten Exp $" << endl;
+      cout << "$Id: psradd.C,v 1.14 2004/02/18 00:14:43 hknight Exp $" << endl;
       return 0;
       
     case 'b':
       nbin = atoi (optarg);
+      break;
+
+    case 'c':
+      nchan = atoi(optarg);
       break;
 
     case 'e':
@@ -247,6 +255,9 @@ int main (int argc, char **argv)
 
     if (nbin)
       archive->bscrunch_to_nbin (nbin);
+
+    if( nchan )
+      archive->fscrunch_to_nchan (nchan);
 
     if (deparallactify) {
       if (verbose) cerr << "psradd: Correct parallactic angle" << endl;
