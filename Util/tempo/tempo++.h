@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/tempo++.h,v $
-   $Revision: 1.13 $
-   $Date: 2003/01/10 14:23:36 $
-   $Author: straten $ */
+   $Revision: 1.14 $
+   $Date: 2003/06/30 04:53:39 $
+   $Author: ahotan $ */
 
 #ifndef __TEMPO_PP_H
 #define __TEMPO_PP_H
@@ -75,7 +75,7 @@ namespace Tempo {
   // the residual TOA.
   void fit (const psrephem& model, vector<toa>& toas,
 	    psrephem* postfit = NULL, bool track=false,
-	    DataPoint::State min_state = DataPoint::Normal);
+	    Tempo::toa::State min_state = Tempo::toa::Normal);
   
   // returns a polyco valid over the range in MJD specified by m1 and m2
   polyco get_polyco (const psrephem& eph,

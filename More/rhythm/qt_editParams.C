@@ -1,5 +1,7 @@
+/* 
 
-/* PLANS:
+   PLANS:
+
    1) qt_psrephem not a data member.  Instead, this object acts on its own
    and has a method that points it at a qt_psrephem object (or something
    like that)
@@ -7,7 +9,7 @@
    2) to protect against segfaults.  qt_psrephem will emit a signal when
    destroyed.
 
-   */
+*/
 
 #include <iostream>
 #include <vector>
@@ -296,9 +298,10 @@ void qt_editParams::backward()
 
 void qt_editParams::about()
 {
-  QMessageBox::about (NULL, "PSR Ephemeris Editor",
+  QMessageBox::about (NULL, "Pulsar Ephemeris Editor",
 		      "Use the File Menu to Open/Save a TEMPO ephemeris.\n"
-		      "Use the Edit Menu to Add/Remove parameters." );
+		      "Use the Edit Menu to Add/Remove parameters & access history information.\n"
+		      "\nSee http://www.astronomy.swin.edu.au/pulsar/software/manuals/rhythm for more.\n");
 }
 
 void qt_editParams::aboutQt()

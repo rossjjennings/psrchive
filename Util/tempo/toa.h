@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/toa.h,v $
-   $Revision: 1.14 $
-   $Date: 2003/05/20 07:06:12 $
+   $Revision: 1.15 $
+   $Date: 2003/06/30 04:53:39 $
    $Author: ahotan $ */
 
 #ifndef __TOA_H
@@ -12,7 +12,6 @@
 #include <string>
 
 #include "residual.h"
-#include "DataPoint.h"
 #include "MJD.h"
 
 class polyco;   // tempo-generated polynomial describing pulsar phase = f(MJD)
@@ -24,79 +23,95 @@ namespace Tempo {
   // //////////////////////////////////////////////////////////////////////////
   //
   // toa - class that encapsulates TEMPO data format
+  // 
+  // Note that very few of the parameters defined here are essential. Most are
+  // provided just in case they might be useful. The default values have in
+  // most cases been set to something that is obviously not real.
   //
   // //////////////////////////////////////////////////////////////////////////
 
-  class toa : public DataPoint
+  class toa
   {
-
+    
   public:
     
-    enum Format { Unspecified, Princeton, Parkes, ITOA, Psrclock, Command };
-    enum DataType {
-      // a null state
-      Nothing,
-      // from the toa class
-      Frequency,
-      Arrival,
-      Sigma,
-      Telescope,
-      PhaseOffset,
-      DMCorrection,
-      // from the residual
-      BarycentreArrival,
-      ResidualPhase,
-      ResidualTime,
-      BinaryPhase,
-      BarycentreFrequency,
-      Weight,
-      PrefitResidualTime,
-      // and a code to mark the last
-      Last
+    enum Format { 
+      Unspecified, 
+      Princeton, 
+      Parkes, 
+      ITOA, 
+      Psrclock, 
+      Command 
     };
-
+    
+    enum State { 
+      Undefined = -2,   // point will never be plotted or used
+      Deleted = -1,     // point will not be plotted unless an undelete happens
+      Hidden = 0,       // point is temporarily outside of viewing region
+      Normal = 1,       // point is in viewing region and plotted
+      Selected = 2      // like Normal, but highlighted selection
+    };
+    
     static bool verbose;
 
   protected:
     
     // fundamental TOA LINE as on:
     // http://pulsar.princeton.edu/tempo/ref_man_sections/toa.txt
+
     double frequency;      // Observing frequency (MHz)
     MJD    arrival;        // TOA
     float  error;          // TOA uncertainty
     char   telescope;      // Observatory (one-character code)
     
     // Parkes Format specific
+
     float  phs;            // Phase offset (fraction of P0, added to TOA)
+
     // Princeton and ITOA Format specfic
+
     float  dmc;            // DM correction (pc cm^-3)
+
     // ITOA Format specific
+
     char   observatory[2]; // Observatory (two-letter code)
     
     // Psrclock / Rhythm extras
+
     string auxinfo;      /* text information passed to context specific data */
 
-    // Reference::To<toaInfo> auxdata;    /* context specific data */
+    // Information about the parent archive
+
+    float ston;
+    float pa;
+    float bw;
+    float dur;
+    float dm;
 
     // one of the available formats on loading
+
     Format format;
+    State state;
 
   public:
+
     // residual for this toa as calculated by tempo
     residual resid;
-   
+    
     // colour index for use with pgplot
     int ci;
+
     // dot index for use with pgplot
     int di;
-
+    
+    // Basic constructors and destructors
     toa (Format fmt = Psrclock);
     virtual ~toa () { destroy(); };
     
     // copy constructor
     toa (const toa & in_toa);
     toa& operator = (const toa & in_toa);
-
+    
     // construct from an open file
     toa (FILE* instream);
     
@@ -105,6 +120,12 @@ namespace Tempo {
     
     // methods for setting/getting things (may eventually check validity)
     void set_format    (Format fmt)  { format = fmt; };
+    void set_StoN      (float sn)    { ston = sn; };
+    void set_pa        (float p)     { pa = p; };
+    void set_bw        (float b)     { bw = b; };
+    void set_dur       (float d)     { dur = d; };
+    void set_dm        (float d)     { dm = d; };
+    void set_state     (State st)    { state = st; };
     void set_frequency (double freq) { frequency = freq; };
     void set_arrival   (MJD arrived) { arrival = arrived; };
     void set_error     (float err)   { error = err; };
@@ -112,25 +133,22 @@ namespace Tempo {
     void set_auxilliary_text (const string& text) { auxinfo = text; };
 
     Format get_format    () const { return format; };
+    float  get_StoN      () const { return ston; };
+    float  get_pa        () const { return pa; };
+    float  get_bw        () const { return bw; };
+    float  get_dur       () const { return dur; };
+    float  get_dm        () const { return dm; };
+    State  get_state     () const { return state; };
     double get_frequency () const { return frequency; };
     MJD    get_arrival   () const { return arrival; };
     float  get_error     () const { return error; };
     char   get_telescope () const { return telescope; };
     string get_auxilliary_text () const { return auxinfo; };
 
-    // //////////////////////////////////////////////////////////////////
-    // these functions return information in a context-free fashion that
-    // allows inherited types to add to the class without changing
-    // high-level routines (such as ModelDataSet
-    //
-    // abstract interface for query
-    virtual double      getData (DataType which) const;
-    virtual const char* getDescriptor (DataType code) const;
-
-    double shift (const polyco & poly) const;
-
     void get_az_zen_para (double ra, double dec,
 			  float& az, float& zen, float& para) const;
+
+    double shift (const polyco & poly) const;
 
     // loading and unloading to/from file and string
     int    load   (FILE* instream);
@@ -163,11 +181,11 @@ namespace Tempo {
     // comparison operators
     friend int operator < (const toa& t1, const toa& t2)
     { return (t1.arrival < t2.arrival); };
-
+    
     // operations on vectors of toas
     static int load (const char* filename, vector<toa>* toas);
     static int load (FILE* instream, vector<toa>* toas);
-  
+    
     static int unload (const char* filename, const vector<toa>& toas,
 		       Format fmt = Unspecified);
     static int unload (FILE* outstream, const vector<toa>& toas,
@@ -184,29 +202,10 @@ namespace Tempo {
     static size_t bufsz;
     static char   datestr [25];
   };
-    
-
-  // //////////////////////////////////////////////////////////////////////////
-  //
-  // toaInfo - abstract base class for context-specific information
-  //
-  // inherit this class when you wish to add additional information to the
-  // toa class in a generic way.
-  //
-  // //////////////////////////////////////////////////////////////////////////
-
-  class toaInfo {
-// : public Reference::Able {
-
-  public:
-    virtual ~toaInfo ();
-    // the value of this object at serial number
-    virtual double getData (toa::DataType code) const = 0;
-    // the short descriptive string corresponding to the serial number
-    virtual const char* getDescriptor (toa::DataType code) const = 0;
-
-  };
 
 }
 
 #endif
+
+
+

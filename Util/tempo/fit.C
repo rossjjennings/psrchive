@@ -24,7 +24,7 @@
 // ////////////////////////////////////////////////////////////////////////
 
 void Tempo::fit (const psrephem& model, vector<toa>& toas,
-		 psrephem* postfit, bool track, DataPoint::State min_state)
+		 psrephem* postfit, bool track, Tempo::toa::State min_state)
 {
   char* tempo_tim = "arrival.tim";
   char* tempo_par = "arrival.par";
@@ -48,7 +48,7 @@ void Tempo::fit (const psrephem& model, vector<toa>& toas,
 
   for (iarr=0; iarr < toas.size(); iarr++)  {
 
-    if (toas[iarr].state < min_state)
+    if (toas[iarr].get_state() < min_state)
       continue;
 
     if (track && !toas[iarr].resid.valid) {
@@ -123,7 +123,7 @@ void Tempo::fit (const psrephem& model, vector<toa>& toas,
 
   for (iarr=0; iarr < toas.size(); iarr++)  {
 
-    if (toas[iarr].state < min_state)
+    if (toas[iarr].get_state() < min_state)
       continue;
 
     if (toas[iarr].get_format() == Tempo::toa::Command) {

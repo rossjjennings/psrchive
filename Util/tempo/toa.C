@@ -55,14 +55,20 @@ Tempo::toa& Tempo::toa::operator = (const toa & in_toa)
   dmc = in_toa.dmc;
   observatory[0] = in_toa.observatory[0];
   observatory[1] = in_toa.observatory[1]; 
+  ston = in_toa.ston;
+  pa = in_toa.pa;
+  bw = in_toa.bw;
+  dur = in_toa.dur;
+  dm = in_toa.dm;
 
+  ci = in_toa.ci;
+  di = in_toa.di;
+  
   auxinfo = in_toa.auxinfo;
   
-  // if (auxdata.is_only())
-    // delete (toaInfo*) auxdata;
-  // auxdata = in_toa.auxdata;
-
   format = in_toa.format;
+  state = in_toa.state;
+
   resid = in_toa.resid;
 
   return *this;
@@ -549,92 +555,6 @@ int Tempo::toa::unload(FILE* outstream, const vector<toa>& toas, Format fmt)
   return 0;
 }
 
-double Tempo::toa::getData (DataType code) const
-{
-  switch (code) {
-  case Frequency:
-    return frequency;
-  case Arrival:
-    return arrival.in_days();
-  case Sigma:
-    return error;
-  case Telescope:
-    return telescope;
-  case PhaseOffset:
-    return phs;
-  case DMCorrection:
-    return dmc;
-  default:
-    break;
-  }
-
-  if (resid.valid) {
-    switch (code) {
-    case BarycentreArrival:
-      return resid.mjd;
-    case ResidualPhase:
-      return resid.turns;
-    case ResidualTime:
-      return resid.time;
-    case BinaryPhase:
-      return resid.binaryphase;
-    case BarycentreFrequency:
-      return resid.obsfreq;
-    case Weight:
-      return resid.weight;
-    case PrefitResidualTime:
-      return resid.preres;
-    default:
-      break;
-    }
-  }
-
-  // if (auxdata && code > PrefitResidualTime)
-    // return auxdata -> getData (code);
-  
-  throw Error (InvalidParam, "Tempo::toa::getData invalid code");
-}
-
-const char* Tempo::toa::getDescriptor (DataType code) const
-{
-  switch (code) {
-  case Nothing:
-    return "Nothing";
-  case Frequency:
-    return "Frequency";
-  case Arrival:
-    return "Arrival";
-  case Sigma:
-    return "Error";
-  case Telescope:
-    return "Telescope";
-  case PhaseOffset:
-    return "Phase Offset";
-  case DMCorrection:
-    return "DM Correction";
-  case BarycentreArrival:
-    return "Barycentric Arrival";
-  case ResidualPhase:
-    return "Residual Phase";
-  case ResidualTime:
-    return "Residual Time";
-  case BinaryPhase:
-    return "Binary Phase";
-  case BarycentreFrequency:
-    return "Barycentric RF";
-  case Weight:
-    return "Fit Weight";
-  case PrefitResidualTime:
-    return "Prefit Residual";
-  default:
-    break;
-  }
-
-  // if (auxdata)
-    // return auxdata -> getDescriptor (code);
-  return NULL;
-}
-
 // ////////////////////////////////////////////////////////////////////////
 //
 // low-level toa stuff
@@ -659,12 +579,18 @@ void Tempo::toa::init()
   phs = 0.0;
   dmc = 0.0;
   observatory [0] = '\0';
+  ston = -1.0;
+  pa = 0.0;
+  bw = 0.0;
+  dur = 0.0;
+  dm = 0.0;
+
   ci = 7;
   di = 0;
 
   auxinfo.erase();
 
-  state = Normal;
+  state = Tempo::toa::Normal;
 }
 
 void Tempo::toa::destroy()
@@ -713,6 +639,3 @@ bool Tempo::toa::valid()
   // passed all tests, return true
   return 1;
 }
-
-
-
