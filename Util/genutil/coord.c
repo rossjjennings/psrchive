@@ -224,6 +224,13 @@ int telescope_coords (int telescope, float* latitude,
     longd = 293.247;
     elev = 496.0;
     break;
+
+  case 4:
+    /* Hobart */
+    latd = 42.805;
+    longd = 147.439;
+    elev = 26.0;
+    break;
     
   case 5:
     /* Urumqi */
