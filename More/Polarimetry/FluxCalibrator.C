@@ -103,6 +103,9 @@ void Pulsar::FluxCalibrator::add_observation (const Archive* archive)
 
   for (unsigned ichan=0; ichan<nchan; ++ichan) {
 
+    if (integration->get_weight(ichan) == 0)
+      continue;
+
     // Take the ratio of the total intensity
     Estimate<double> ratio = cal_hi[0][ichan]/cal_lo[0][ichan] - unity ;
     cerr << ratio << endl;      
@@ -293,9 +296,9 @@ namespace Pulsar {
     {
       switch (iclass) {
       case 0:
-	return "Calibrator (Jy)";
+	return "\\fiC\\d0\\u\\fn (Jy)";
       case 1:
-	return "System (Jy)";
+	return "\\fiT\\dsys\\u\\fn (Jy)";
       default:
 	return "";
       }
@@ -344,16 +347,24 @@ Pulsar::Calibrator::Type Pulsar::FluxCalibrator::get_type () const
 
 Pulsar::FluxCalibrator::source Pulsar::FluxCalibrator::get_RefSrc(string name)
 {
+  if (verbose)
+    cerr << "Pulsar::FluxCalibrator::get_RefSrc name=" << name << endl;
+
+
   if (name.find("0407-658",0) != string::npos)
     return Pulsar::FluxCalibrator::OFOS;
+
   if (name.find("3C353",0) != string::npos)
     return Pulsar::FluxCalibrator::TCTFT;
-  else if (name.find("HYDRA",0) != string::npos || name.find("Hydra",0) != string::npos ||
-	   name.find("hydra",0) != string::npos || name.find("0918",0) != string::npos)
-    return Pulsar::FluxCalibrator::Hydra;
-  else if (name.find("VIRGO",0) != string::npos || name.find("Virgo",0) != string::npos ||
-	   name.find("virgo",0) != string::npos)
+
+  if (strncasecmp(name.c_str(), "virgo", 5) == 0)
     return Pulsar::FluxCalibrator::Virgo;
+
+  if ( strncasecmp(name.c_str(), "cal", 3) == 0 ||
+       strncasecmp(name.c_str(), "hydra", 5) == 0 ||
+       name.find("0918",0) != string::npos )
+    return Pulsar::FluxCalibrator::Hydra;
+
   else
     return Pulsar::FluxCalibrator::Unknown;
 }
