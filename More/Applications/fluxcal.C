@@ -3,6 +3,7 @@
 #include "Pulsar/Archive.h"
 #include "dirutil.h"
 
+#include <unistd.h>
 #include <iostream>
 using namespace std;
 
