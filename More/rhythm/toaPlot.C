@@ -516,7 +516,7 @@ void toaPlot::autobin (int nbins)
     if (bincount[i] != 0.0) {
       xvals[i] /= bincount[i];
       yvals[i] /= bincount[i];
-      binerrors[i] = 1.0 / bincount[i];
+      binerrors[i] = sqrt(1.0 / bincount[i]);
       cpgpt1  (xvals[i],yvals[i],17);
       cpgerr1 (6,xvals[i],yvals[i],binerrors[i],1.0);
     }
