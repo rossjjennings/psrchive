@@ -1,5 +1,6 @@
 #include "Pulsar/PolnProfile.h"
 #include "Pulsar/Profile.h"
+#include "Pauli.h"
 #include "Error.h"
 
 #ifdef sun
@@ -213,8 +214,19 @@ void Pulsar::PolnProfile::transform (const Jones<double>& response)
 
   Jones<float> response_dagger = herm(response);
 
-  for (unsigned ibin = 0; ibin < nbin; ibin++)
-    set_coherence (ibin, (response * get_coherence(ibin)) * response_dagger);
+  if (state == Signal::Stokes)
+    for (unsigned ibin = 0; ibin < nbin; ibin++)
+      set_Stokes (ibin, ::transform (get_Stokes(ibin), response));
+  
+  else if (state == Signal::Coherence) {
+    Jones<float> response_dagger = herm(response);
+    for (unsigned ibin = 0; ibin < nbin; ibin++)
+      set_coherence (ibin, (response * get_coherence(ibin)) * response_dagger);
+  }
+  
+  else
+    throw Error (InvalidState, "Pulsar::PolnProfile::transform",
+		 "unknown state=" + Signal::State2string(state));
 
   if (correct_weights)
     for (unsigned ipol=0; ipol < 4; ipol++)
