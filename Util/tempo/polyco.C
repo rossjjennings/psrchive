@@ -167,6 +167,11 @@ polyco::polyco(char * psr, MJD m){
 */
 
 polyco::polyco(){
+  init ();
+}
+
+void polyco::init()
+{
   npollys = 0;
   pollys = NULL;
   the_tztot = the_polyco = NULL;
@@ -174,6 +179,17 @@ polyco::polyco(){
 }
 
 polyco::polyco (char* psr, MJD m1, MJD m2, int ns, int nc, int maxha, int tel)
+{
+  static char errstr[256];
+  init ();
+  if (Construct (psr, m1, m2, ns, nc, maxha, tel) != 0) {
+    sprintf (errstr, "polyco::polyco - failed to construct\n");
+    throw (errstr);
+  }
+}
+
+int polyco::Construct (char* psr, MJD m1, MJD m2, 
+		       int ns, int nc, int maxha, int tel)
 {
   char syscom[120];
 
@@ -196,19 +212,16 @@ polyco::polyco (char* psr, MJD m1, MJD m2, int ns, int nc, int maxha, int tel)
     psr++;
   sprintf (tztotname, "%s.eph",psr);
 
-  if (file_Construct (polyname, tztotname) != 0) {
-    char errstr[256];
+  int retval = file_Construct (polyname, tztotname);
+  if (retval != 0) {
     fprintf (stderr, "polyco::polyco - failed to construct from %s and %s\n",
 	     polyname, tztotname);
-    fflush (stderr);
-    sprintf (errstr, "polyco::polyco - failed to construct from %s and %s\n",
-	     polyname, tztotname);
-    throw (errstr);
   }
-
   remove(tztotname);
   remove("polyco.dat");
   remove("tztot.dat");
+
+  return retval;
 }
 
 polyco::polyco(char * id){
