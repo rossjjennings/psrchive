@@ -1,7 +1,7 @@
 LOCAL_ROOT = ../../..
 include ${LOCAL_ROOT}/include/Makefile.standard
 
-INCLUDES = archive.h sub_int.h profile.h archhdr.h headers.h \
+INCLUDES = superarchive.h archive.h sub_int.h profile.h archhdr.h headers.h \
         mini++.h timer++.h timer.h mini.h band.h \
 	timer.inc band.inc mini.inc convert_endian.h misc.h
 
