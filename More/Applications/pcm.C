@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pcm.C,v $
-   $Revision: 1.10 $
-   $Date: 2003/12/01 18:21:00 $
-   $Author: straten $ */
+   $Revision: 1.11 $
+   $Date: 2003/12/02 04:13:01 $
+   $Author: ahotan $ */
 
 /*! \file pcm.C 
     \brief (Pulsar) Polarimetric Calibration Modelling (Package)
@@ -25,6 +25,7 @@
 
 #include "Pulsar/Plotter.h"
 #include "Pulsar/Archive.h"
+#include "Pulsar/getopt.h"
 
 #include "Error.h"
 #include "dirutil.h"
@@ -33,7 +34,7 @@
 #include <cpgplot.h>
 
 #include <iostream>
-#include <unistd.h>
+#include <algorithm>
 
 static string Britton = "Britton";
 static string Hamaker = "Hamaker";
