@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Quaternion.h,v $
-   $Revision: 1.2 $
-   $Date: 2003/01/27 16:17:43 $
+   $Revision: 1.3 $
+   $Date: 2003/01/29 11:31:38 $
    $Author: straten $ */
 
 #ifndef __Quaternion_H
@@ -55,6 +55,15 @@ public:
   Quaternion& operator /= (T a)
     { T d=1.0/a; s0*=d; s1*=d; s2*=d; s3*=d; return *this; }
 
+  //! Equality
+  bool operator == (const Quaternion& b) const
+    { return  s0==b.s0 && s1==b.s1 && s2==b.s2 && s3==b.s3; }
+
+  //! Inequality
+  bool operator != (const Quaternion& b) const
+    { return ! operator==(b); }
+
+
   //! Vector addition
   template<typename U>
   const friend Quaternion operator + (Quaternion a, const Quaternion<U,B>& b)
@@ -89,28 +98,23 @@ public:
   T operator [] (int n) const
     { return *(&s0+n); }
 
-  //! Returns the inverse
-  Quaternion inv () const { return conj()/norm(*this); }
-  
-  //! Returns the complex conjugate
-  Quaternion conj () const { return Quaternion (s0, -s1, -s2, -s3); };
-  
-  //! Returns the Hermitian transpose (transpose of complex conjugate)
-  Quaternion dag () const { throw "undefined"; }
-  
   //! Identity (should be const, wait for gcc version 3)
-  static Quaternion identity;
+  static const Quaternion& identity();
 
 };
 
 //! The identity Quaternion
 template<typename T, Basis B>
-Quaternion<T,B> Quaternion<T,B>::identity (1,0,0,0);
+const Quaternion<T,B>& Quaternion<T,B>::identity ()
+{
+  static Quaternion I (1,0,0,0);
+  return I;
+}
 
 //! Multiplication of two Quaternions in the Hermitian basis
-template<typename T>
+template<typename T, typename U>
 const Quaternion<T, Hermitian> operator * (const Quaternion<T,Hermitian>& a,
-					   const Quaternion<T,Hermitian>& b)
+					   const Quaternion<U,Hermitian>& b)
 {
   return Quaternion<T, Hermitian>
     (a.s0*b.s0 + a.s1*b.s1 + a.s2*b.s2 + a.s3*b.s3,
@@ -121,9 +125,9 @@ const Quaternion<T, Hermitian> operator * (const Quaternion<T,Hermitian>& a,
 
 
 //! Multiplication of two Quaternions in the Unitary basis
-template<typename T>
+template<typename T, typename U>
 const Quaternion<T, Unitary> operator * (const Quaternion<T,Unitary>& a,
-					 const Quaternion<T,Unitary>& b)
+					 const Quaternion<U,Unitary>& b)
 {
   return Quaternion<T, Unitary>
     (a.s0*b.s0 - a.s1*b.s1 - a.s2*b.s2 - a.s3*b.s3,
@@ -132,44 +136,89 @@ const Quaternion<T, Unitary> operator * (const Quaternion<T,Unitary>& a,
      a.s0*b.s3 + a.s1*b.s2 - a.s2*b.s1 + a.s3*b.s0);
 }
 
-#if 0
 
-//! Returns the determinant
-template<typename T, Basis B>
-T det (const Quaternion<T,B>& j) { return j.j11*j.j22 - j.j12*j.j21; }
 
-//! Returns the trace
+
+//! Returns the complex conjugate of a Hermitian Quaternion
+template<typename T>
+Quaternion<T,Hermitian> conj (const Quaternion<T,Hermitian>& j)
+{
+  return Quaternion<T,Hermitian> (j.s0, j.s1, j.s2, -j.s3);
+}
+
+//! Returns the complex conjugate of a Unitary Quaternion
+template<typename T>
+Quaternion<T,Unitary> conj (const Quaternion<T,Unitary>& j)
+{ 
+  return Quaternion<T,Unitary> (j.s0, -j.s1, -j.s2, j.s3);
+}
+
+
+//! Returns the Hermitian transpose of a Hermitian Quaternion
+template<typename T>
+Quaternion<T, Hermitian> herm (const Quaternion<T,Hermitian>& j)
+{
+  return j;
+}
+
+//! Returns the Hermitian transpose of a Unitary Quaternion
+template<typename T>
+Quaternion<T, Unitary> herm (const Quaternion<T,Unitary>& j)
+{
+  return Quaternion<T,Unitary> (j.s0, -j.s1, -j.s2, -j.s3);
+}
+
+
+//! Returns the inverse of Quaternion, j
 template<typename T, Basis B>
-complex<T> trace (const Quaternion<T,B>& j) { return j.j11 + j.j22; }
+Quaternion<T, B> inv (const Quaternion<T,B>& j) 
+{
+  T d=-1.0/det(j);
+  return Quaternion<T,B> (-d*j.s0, d*j.s1, d*j.s2, d*j.s3);
+}
+
+
+//! Returns the determinant of a Hermitian Quaternion
+template<typename T>
+T det (const Quaternion<T,Hermitian>& j)
+{ return j.s0*j.s0 - j.s1*j.s1 - j.s2*j.s2 - j.s3*j.s3; }
+
+//! Returns the determinant of a Unitary Quaternion
+template<typename T>
+T det (const Quaternion<T,Unitary>& j)
+{ return j.s0*j.s0 + j.s1*j.s1 + j.s2*j.s2 + j.s3*j.s3; }
+
+
+
+
+//! Returns the trace of Quaternion, j
+template<typename T, Basis B>
+T trace (const Quaternion<T,B>& j)
+{ 
+  return 2.0 * j.s0;
+}
+
 
 //! Returns the variance (square of the Frobenius norm)
 template<typename T, Basis B>
 T norm (const Quaternion<T,B>& j)
-{ return
-    norm(j.j11) + norm(j.j12) + 
-    norm(j.j21) + norm(j.j22); }
-
-#endif
-
-
-//! Equality
-template<typename T, typename U, Basis B>
-bool operator == (const Quaternion<T,B>& a, const Quaternion<U,B>& b)
-{ return 
-    a.s0==T(b.s0) && a.s1==T(b.s1) && 
-    a.s2==T(b.s2) && a.s3==T(b.s3);
+{ 
+  return 2.0 * (j.s0*j.s0 + j.s1*j.s1 + j.s2*j.s2 + j.s3*j.s3);
 }
 
-//! Inequality
-template<typename T, typename U, Basis B>
-bool operator != (const Quaternion<T,B>& a, const Quaternion<U,B>& b)
-{ return !(a==b); }
 
 //! Useful for quickly printing the components
-template<typename T, Basis B>
-ostream& operator<< (ostream& ostr, const Quaternion<T,B>& j)
+template<typename T>
+ostream& operator<< (ostream& ostr, const Quaternion<T,Hermitian>& j)
 {
-  return ostr << "[" << j.s0 <<","<< j.s1 <<","<< j.s2 <<","<< j.s3 << "]";
+  return ostr << "[h:" << j.s0 <<","<< j.s1 <<","<< j.s2 <<","<< j.s3 << "]";
+}
+
+//! Useful for quickly printing the components
+template<typename T>
+ostream& operator<< (ostream& ostr, const Quaternion<T,Unitary>& j)
+{
+  return ostr << "[u:" << j.s0 <<","<< j.s1 <<","<< j.s2 <<","<< j.s3 << "]";
 }
 
 #endif  /* not __Quaternion_H defined */

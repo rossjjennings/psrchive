@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Jones.h,v $
-   $Revision: 1.1 $
-   $Date: 2003/01/24 15:41:41 $
+   $Revision: 1.2 $
+   $Date: 2003/01/29 11:31:38 $
    $Author: straten $ */
 
 #ifndef __Jones_H
@@ -11,7 +11,6 @@
 #include <complex>
 #include "psr_cpp.h"
 
-#define const_kludge
 
 //! returns the projection of one complex vector onto another
 template<typename T> T proj (const complex<T>& c1, const complex<T>& c2)
@@ -75,6 +74,18 @@ public:
   Jones& operator /= (T a)
     { T d=1.0/a; j11*=d; j12*=d; j21*=d; j22*=d; return *this; }
 
+  //! Equality
+  bool operator == (const Jones& b) const
+  { return 
+      j11 == b.j11  &&  j12 == b.j12 && 
+      j21 == b.j21  &&  j22 == b.j22;
+  }
+
+  //! Inequality
+  bool operator != (const Jones& b) const
+  { return ! Jones::operator==(b); }
+
+
   //! Binary addition
   template<typename U>
   const friend Jones operator + (Jones a, const Jones<U>& b)
@@ -114,21 +125,6 @@ public:
   const friend Jones operator - (Jones s)
     { s.j11=-s.j11; s.j12=-s.j12; s.j21=-s.j21; s.j22=-s.j22; return s; }
 
-  //! Returns the inverse
-  Jones<T> inv () const
-    { complex<T> d=1.0/det(*this);
-    return Jones<T>(d*j22, -d*j12, -d*j21, d*j11); }
-  
-  //! Returns the complex conjugate
-  Jones<T> conj () const
-    { return Jones<T>(std::conj(j11), std::conj(j12),
-		      std::conj(j21), std::conj(j22)); }
-  
-  //! Returns the Hermitian transpose (transpose of complex conjugate)
-  Jones<T> dag () const
-  { return Jones<T>(std::conj(j11), std::conj(j21),
-		    std::conj(j12), std::conj(j22)); }
-  
   //! Returns reference to the value of the matrix at j(ir,ic)
   complex<T>& j (int ir, int ic)
   { complex<T>* val = &j11; return val[ir*2+ic]; }
@@ -137,16 +133,19 @@ public:
   const complex<T>& j (int ir, int ic) const
     { const complex<T>* val = &j11; return val[ir*2+ic]; }
 
-  //! The identity matrix (should be const, wait for gcc version 3)
-  static const_kludge Jones identity;
+  //! The identity matrix
+  static const Jones& identity();
 
 };
 
 //! The identity matrix
 template<typename T>
-const_kludge Jones<T> Jones<T>::identity (1,0,
-					  0,1);
-
+const Jones<T>& Jones<T>::identity ()
+{
+  static Jones<T> I (1,0,
+ 	             0,1);
+  return I;
+}
 
 //! Multiply another Jones<T> instance into this one (this=this*j)
 template<typename T>
@@ -158,6 +157,31 @@ Jones<T>& Jones<T>::operator *= (const Jones<T>& j)
   temp = j21 * j.j11 + j22 * j.j21;
   j22  = j21 * j.j12 + j22 * j.j22; j21=temp;
   return *this; 
+}
+
+//! Returns the inverse
+template<typename T>
+Jones<T> inv (const Jones<T>& j)
+{
+  complex<T> d=1.0/det(j);
+  return Jones<T>(d*j.j22, -d*j.j12,
+		  -d*j.j21, d*j.j11);
+}
+
+//! Returns the complex conjugate
+template<typename T>
+Jones<T> conj (const Jones<T>& j)
+{
+  return Jones<T>(std::conj(j.j11), std::conj(j.j12),
+		  std::conj(j.j21), std::conj(j.j22));
+}
+
+//! Returns the Hermitian transpose (transpose of complex conjugate)
+template<typename T> 
+Jones<T> herm (const Jones<T>& j)
+{
+  return Jones<T>(std::conj(j.j11), std::conj(j.j21),
+		  std::conj(j.j12), std::conj(j.j22));
 }
 
 //! Returns the determinant
@@ -173,8 +197,9 @@ template<typename T>
 T norm (const Jones<T>& j)
 { return
     norm(j.j11) + norm(j.j12) + 
-    norm(j.j21) + norm(j.j22); }
-  
+    norm(j.j21) + norm(j.j22);
+}
+
 //! Returns the projection of Jones matrices onto each other
 template<typename T>
 T proj (const Jones<T>& a, const Jones<T>& b)
@@ -182,18 +207,6 @@ T proj (const Jones<T>& a, const Jones<T>& b)
     proj(a.j11,b.j11) + proj(a.j12,b.j12) + 
     proj(a.j21,b.j21) + proj(a.j22,b.j22); }
 
-//! Binary equality
-template<typename T, typename U>
-bool operator == (const Jones<T>& a, const Jones<U>& b)
-{ return 
-    a.j11==complex<T>(b.j11) && a.j12==complex<T>(b.j12) && 
-    a.j21==complex<T>(b.j21) && a.j22==complex<T>(b.j22);
-}
-
-//! Binary inequality
-template<typename T, typename U>
-bool operator != (const Jones<T>& a, const Jones<U>& b)
-{ return !(a==b); }
 
 //! Useful for quickly printing the values of matrix elements
 template<typename T>
