@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/IntegrationManager.h,v $
-   $Revision: 1.6 $
-   $Date: 2004/07/12 09:24:36 $
+   $Revision: 1.7 $
+   $Date: 2004/11/22 21:28:56 $
    $Author: straten $ */
 
 #ifndef __Pulsar_IntegrationManager_h
@@ -87,7 +87,7 @@ namespace Pulsar {
       Access to Integrations must be made through the
       Pulsar::IntegrationManager::get_Integration method
     */
-    vector< Reference::To<Integration> > subints;
+    std::vector< Reference::To<Integration> > subints;
 
   };
 

@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/PhaseWeight.h,v $
-   $Revision: 1.1 $
-   $Date: 2004/04/27 15:28:23 $
+   $Revision: 1.2 $
+   $Date: 2004/11/22 21:28:56 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PhaseWeight_h
@@ -29,7 +29,7 @@ namespace Pulsar {
     PhaseWeight (const PhaseWeight& weight);
 
     //! Copy vector of float constructor
-    PhaseWeight (const vector<float>& weight);
+    PhaseWeight (const std::vector<float>& weight);
 
     //! Destructor
     ~PhaseWeight ();
@@ -53,7 +53,7 @@ namespace Pulsar {
     double get_weight_max () const;
 
     //! Retrieve the weights
-    void get_weights (vector<float>& weights) const;
+    void get_weights (std::vector<float>& weights) const;
 
     //! Get the statistics of the weighted phase bins
     void stats (const Profile* profile,
@@ -62,7 +62,7 @@ namespace Pulsar {
   protected:
 
     //! The weights
-    vector<float> weight;
+    std::vector<float> weight;
 
   };
 
