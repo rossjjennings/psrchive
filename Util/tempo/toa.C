@@ -9,6 +9,7 @@
 #include "polyco.h"
 #include "toa.h"
 #include "coord.h"
+#include "Error.h"
 
 void Tempo::toa::get_az_zen_para (double ra, double dec,
 				  float& az, float& zen, float& para) const
@@ -25,9 +26,8 @@ void Tempo::toa::get_az_zen_para (double ra, double dec,
 
 Tempo::toa::toa (char* datastr)
 {
-  if (load (datastr) < 0) {
-    throw ("Tempo::toa::toa (char* datastr) failed");
-  }
+  if (load (datastr) < 0)
+    throw Error (FailedCall, "Tempo::toa (char*)", "load(%s) failed", datastr);
 }
 
 Tempo::toa::toa (Format fmt)
@@ -564,7 +564,7 @@ double Tempo::toa::getData (DataType code) const
     return frequency;
   case Arrival:
     return arrival.in_days();
-  case Error:
+  case Sigma:
     return error;
   case Telescope:
     return telescope;
@@ -600,7 +600,7 @@ double Tempo::toa::getData (DataType code) const
   // if (auxdata && code > PrefitResidualTime)
     // return auxdata -> getData (code);
   
-  throw FaultCode;
+  throw string ("Tempo::toa::getData invalid code");
 }
 
 const char* Tempo::toa::getDescriptor (DataType code) const
@@ -612,7 +612,7 @@ const char* Tempo::toa::getDescriptor (DataType code) const
     return "Frequency";
   case Arrival:
     return "Arrival";
-  case Error:
+  case Sigma:
     return "Error";
   case Telescope:
     return "Telescope";

@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/toa.h,v $
-   $Revision: 1.9 $
-   $Date: 2002/10/12 01:14:54 $
+   $Revision: 1.10 $
+   $Date: 2002/10/12 01:19:00 $
    $Author: straten $ */
 
 #ifndef __TOA_H
@@ -39,7 +39,7 @@ namespace Tempo {
       // from the toa class
       Frequency,
       Arrival,
-      Error,
+      Sigma,
       Telescope,
       PhaseOffset,
       DMCorrection,
