@@ -16,7 +16,7 @@ ssize_t stringload (string* str, FILE* fptr, size_t nbytes)
   if (fptr == NULL || str == NULL)
     return -1;
 
-  if (rdline == NULL) rdline = new char [rdsize];
+  if (rdline == NULL) rdline = new char [rdsize+1];
   size_t eachread = rdsize;
   size_t bytesread = 0;
   while (!nbytes || bytesread<nbytes) {
