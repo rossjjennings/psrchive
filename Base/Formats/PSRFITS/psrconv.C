@@ -6,6 +6,7 @@
 #include <unistd.h>
 
 #include "Pulsar/Archive.h"
+#include "TimerArchive.h"
 #include "Pulsar/FITSArchive.h"
 #include "Error.h"
 
@@ -25,7 +26,7 @@ int main(int argc, char *argv[]) {
   bool verbose = false;
 
   int gotc = 0;
-  while ((gotc = getopt(argc, argv, "hVv")) != -1) {
+  while ((gotc = getopt(argc, argv, "hVva")) != -1) {
     switch (gotc) {
     case 'h':
       usage();
@@ -38,10 +39,13 @@ int main(int argc, char *argv[]) {
     case 'v':
       verbose = true;
       break;
+    case 'a':
+      Pulsar::Archive::Agent::report ();
+      return 0;
     }
   }
   
-  Pulsar::Archive* arch = 0;
+  Reference::To<Pulsar::Archive> arch;
   Pulsar::FITSArchive* fitsarch = 0;
 
   if ((argc - optind )!= 1) {
@@ -66,7 +70,7 @@ int main(int argc, char *argv[]) {
     cerr << "# of channels: " << fitsarch -> get_nchan() << endl;
     cerr << "# of bins: " << fitsarch -> get_nbin() << endl;
 
-    fitsarch -> unload("!data.fits");
+    fitsarch -> unload("data.fits");
     cerr << "Unloaded FITS Archive." << endl;
   }
   catch (Error& error) {
