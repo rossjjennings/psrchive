@@ -1,5 +1,5 @@
 //
-// $Id: pav.C,v 1.67 2004/01/05 04:01:31 ahotan Exp $
+// $Id: pav.C,v 1.68 2004/01/05 11:09:10 ahotan Exp $
 //
 // The Pulsar Archive Viewer
 //
@@ -269,7 +269,7 @@ int main (int argc, char** argv)
       plotter.set_subint( atoi (optarg) );
       break;
     case 'i':
-      cout << "$Id: pav.C,v 1.67 2004/01/05 04:01:31 ahotan Exp $" << endl;
+      cout << "$Id: pav.C,v 1.68 2004/01/05 11:09:10 ahotan Exp $" << endl;
       return 0;
 
     case 'j':
@@ -549,30 +549,6 @@ int main (int argc, char** argv)
 
     archive = Pulsar::Archive::load (filenames[ifile]);
 
-    if (cbppo) {
-      Pulsar::IntegrationOrder* myio = new Pulsar::BinaryPhaseOrder();
-      archive->add_extension(myio); 
-      myio->organise(archive, ronsub);
-    }
-    
-    if (cbpao) {
-      Pulsar::IntegrationOrder* myio = new Pulsar::PeriastronOrder();
-      archive->add_extension(myio);
-      myio->organise(archive, ronsub);
-    }
-
-    if (cblpo) {
-      Pulsar::IntegrationOrder* myio = new Pulsar::BinLngPeriOrder();
-      archive->add_extension(myio);
-      myio->organise(archive, ronsub);
-    }
-
-    if (cblao) {
-      Pulsar::IntegrationOrder* myio = new Pulsar::BinLngAscOrder();
-      archive->add_extension(myio);
-      myio->organise(archive, ronsub);
-    }
-
     if (dedisperse) {
       if (stopwatch)
 	clock.start();
@@ -625,6 +601,30 @@ int main (int argc, char** argv)
 
     if (centre) {
       archive->centre();
+    }
+
+    if (cbppo) {
+      Pulsar::IntegrationOrder* myio = new Pulsar::BinaryPhaseOrder();
+      archive->add_extension(myio); 
+      myio->organise(archive, ronsub);
+    }
+    
+    if (cbpao) {
+      Pulsar::IntegrationOrder* myio = new Pulsar::PeriastronOrder();
+      archive->add_extension(myio);
+      myio->organise(archive, ronsub);
+    }
+
+    if (cblpo) {
+      Pulsar::IntegrationOrder* myio = new Pulsar::BinLngPeriOrder();
+      archive->add_extension(myio);
+      myio->organise(archive, ronsub);
+    }
+
+    if (cblao) {
+      Pulsar::IntegrationOrder* myio = new Pulsar::BinLngAscOrder();
+      archive->add_extension(myio);
+      myio->organise(archive, ronsub);
     }
 
     if (stacked) {
