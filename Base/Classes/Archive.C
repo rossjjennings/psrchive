@@ -40,6 +40,14 @@ Pulsar::Archive::~Archive ()
     cerr << "Pulsar::Archive::destructor" << endl;
 }
 
+string Pulsar::Archive::get_revision (const char* revision)
+{
+  char buf1 [64];
+  char buf2 [64];
+  sscanf (revision, "%s %s", buf1, buf2);
+  return buf2;
+}
+
 //! operator =
 Pulsar::Archive&
 Pulsar::Archive::operator = (const Archive& a)
