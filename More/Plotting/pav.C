@@ -1,5 +1,5 @@
 //
-// $Id: pav.C,v 1.59 2003/10/25 05:04:15 ahotan Exp $
+// $Id: pav.C,v 1.60 2003/10/27 12:25:25 straten Exp $
 //
 // The Pulsar Archive Viewer
 //
@@ -160,7 +160,7 @@ int main (int argc, char** argv)
   Pulsar::Plotter::ColourMap colour_map = Pulsar::Plotter::Heat;
   
   int c = 0;
-  const char* args = "AaBb:Cc:DdEeFf:GgHhI:iJjK:k:LlM:mN:nO:oP:pQq:r:Ss:Tt:uVvwWXx:Yy:Zz:";
+  const char* args = "AaBb:Cc:DdEeFf:GgH:hI:iJjK:k:LlM:mN:nO:oP:pQq:r:Ss:Tt:uVvwWXx:Yy:Zz:";
 
   while ((c = getopt(argc, argv, args)) != -1)
     switch (c) {
@@ -220,6 +220,10 @@ int main (int argc, char** argv)
       greyfreq = true;
       break;
 
+    case 'H':
+      plotter.set_chan( atoi (optarg) );
+      break;
+
     case 'h':
       usage ();
       return 0;
@@ -228,7 +232,7 @@ int main (int argc, char** argv)
       plotter.set_subint( atoi (optarg) );
       break;
     case 'i':
-      cout << "$Id: pav.C,v 1.59 2003/10/25 05:04:15 ahotan Exp $" << endl;
+      cout << "$Id: pav.C,v 1.60 2003/10/27 12:25:25 straten Exp $" << endl;
       return 0;
 
     case 'j':
@@ -636,8 +640,6 @@ int main (int argc, char** argv)
     
     if (display) {
       cpg_next();
-      plotter.set_subint(0);
-      plotter.set_chan(0);
       plotter.singleProfile (archive);
 
       if (display_axis)
