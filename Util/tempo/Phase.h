@@ -24,6 +24,8 @@ class Phase {
   //! The largest number to be considered "close enough" to zero
   static double rounding_threshold;
 
+  static const Phase zero;
+
   ~Phase(){}
   Phase (int64 tns, double ftns);
   Phase (double turns=0);

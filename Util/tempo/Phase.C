@@ -8,6 +8,8 @@
 
 double Phase::rounding_threshold = 1e-9;
 
+const Phase Phase::zero;
+
 void Phase::settle ()
 {
   if (turns>0 && fturns < -rounding_threshold) {
