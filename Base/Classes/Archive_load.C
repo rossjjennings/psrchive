@@ -6,6 +6,7 @@
 #define PSRTIMER 1
 #ifdef PSRTIMER
 #include "TimerArchive.h"
+#include "BasebandArchive.h"
 #endif
 
 #include "Error.h"
@@ -31,6 +32,12 @@ Pulsar::Archive* Pulsar::Archive::load (const char* filename)
 #endif
   
 #ifdef PSRTIMER
+    if (Pulsar::BasebandArchive::recognises (filename)) {
+      Pulsar::BasebandArchive* archive = new Pulsar::BasebandArchive;
+      archive -> load (filename);
+      return archive;
+    }
+
     if (Pulsar::TimerArchive::recognises (filename)) {
       Pulsar::TimerArchive* archive = new Pulsar::TimerArchive;
       archive -> load (filename);
