@@ -28,6 +28,8 @@ Pulsar::ReceptionCalibrator::ReceptionCalibrator (Calibrator::Type type,
   is_initialized = false;
 
   measure_cal_V = true;
+  measure_cal_Q = false;
+
   normalize_by_invariant = true;
 
   PA_min = PA_max = 0.0;
@@ -152,6 +154,20 @@ void Pulsar::StandardModel::add_fluxcal_backend ()
   FluxCalibrator_path = equation->get_path ();
 }
 
+
+void Pulsar::StandardModel::no_rotation ()
+{
+
+  if (physical)
+    // set the orientation of the first receptor
+    physical->set_infit (4, false);
+
+  if (polar)
+    // set the orientation of the last rotation
+    polar->set_infit (6, false);
+
+}
+
 void Pulsar::StandardModel::update ()
 {
   switch (model) {
@@ -216,6 +232,9 @@ void Pulsar::ReceptionCalibrator::initial_observation (const Archive* data)
   for (unsigned ichan=0; ichan<nchan; ichan++) {
 
     model[ichan] = new StandardModel (model_type);
+
+    if (measure_cal_Q)
+      model[ichan] -> no_rotation ();
 
     model[ichan]->parallactic.set_source_coordinates( coordinates );
     model[ichan]->parallactic.set_observatory_coordinates (latitude,longitude);
@@ -553,6 +572,11 @@ void Pulsar::ReceptionCalibrator::add_Calibrator (const ArtificialCalibrator* p)
 
       // Stokes U may vary
       calibrator_estimate.source[ichan].set_infit (2, true);
+
+      if (measure_cal_Q)
+	// Stokes Q of the calibrator may vary!
+	calibrator_estimate.source[ichan].set_infit (1, true);
+
 
     }
 

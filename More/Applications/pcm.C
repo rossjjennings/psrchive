@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pcm.C,v $
-   $Revision: 1.6 $
-   $Date: 2003/10/28 08:51:00 $
+   $Revision: 1.7 $
+   $Date: 2003/11/24 09:53:25 $
    $Author: straten $ */
 
 /*! \file pcm.C 
@@ -49,6 +49,7 @@ void usage ()
     "  -n nbin    set the number of phase bins to use as input states\n"
     "  -p pA,pB   set the phase window from which to take input states\n"
     "  -s         do not normalize Stokes parameters by invariant interval\n"
+    "  -q         allow CAL Stokes Q to vary\n"
     "  -u         assume that CAL Stokes V = 0\n"
     "  -v         verbose mode\n"
     "  -V         very verbose mode\n"
@@ -202,12 +203,13 @@ try {
   vector<unsigned> phase_bins;
 
   bool measure_cal_V = true;
+  bool measure_cal_Q = false;
   bool normalize_by_invariant = true;
 
   bool publication_plots = false;
 
   int gotc = 0;
-  while ((gotc = getopt(argc, argv, "a:b:C:Df:hM:m:n:Pp:suvV")) != -1) {
+  while ((gotc = getopt(argc, argv, "a:b:C:Df:hM:m:n:Pp:qsuvV")) != -1) {
     switch (gotc) {
 
     case 'a':
@@ -271,6 +273,10 @@ try {
       usage ();
       return 0;
 
+    case 'q':
+      measure_cal_Q = true;
+      break;
+
     case 's':
       normalize_by_invariant = false;
       break;
@@ -314,7 +320,12 @@ try {
   if (measure_cal_V)
     cerr << "pcm: assuming that System + Hydra A Stokes V = 0" << endl;
   else
-    cerr << "pcm: assuming that the CAL Stokes V = 0" << endl;
+    cerr << "pcm: assuming that CAL Stokes V = 0" << endl;
+
+  if (measure_cal_Q)
+    cerr << "pcm: allowing CAL Stokes Q to vary" << endl;
+  else
+    cerr << "pcm: assuming that CAL Stokes Q = 0" << endl;
 
   if (normalize_by_invariant)
     cerr << "pcm: normalizing Stokes parameters by invariant interval" << endl;
@@ -322,6 +333,7 @@ try {
     cerr << "pcm: not normalizing Stokes parameters" << endl;
 
   model.measure_cal_V = measure_cal_V;
+  model.measure_cal_Q = measure_cal_Q;
   model.normalize_by_invariant = normalize_by_invariant;
 
   // add the specified phase bins
