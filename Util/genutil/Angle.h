@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Angle.h,v $
-   $Revision: 1.13 $
-   $Date: 2004/02/26 06:55:46 $
+   $Revision: 1.14 $
+   $Date: 2004/07/06 14:57:54 $
    $Author: straten $ */
 
 // redwards 17 Mar 99 -- Time for a definitive C++ suite of
@@ -42,9 +42,16 @@ class Angle
   // WvS - this not only changes the wrap-point but also changes the scale
   // void makeArctangle() { setWrapPoint(0.5*M_PI); }
 
+  void setHMS (int hours, int minutes, double seconds);
+  void getHMS (int& hours, int& minutes, double& seconds) const;
+
   int     setHMS (const char *);
   char*   getHMS (char* str, int places=3) const;
   string  getHMS (int places = 3) const;
+
+  void setDMS (int degrees, int minutes, double seconds);
+  void getDMS (int& degrees, int& minutes, double& seconds) const;
+
   int     setDMS (const char *);
   char*   getDMS (char* str, int places=3) const;
   string  getDMS (int places = 3) const;

@@ -28,16 +28,12 @@ char * Angle::getHMS(char *str, int places) const
 {
   int hours, minutes;
   double seconds;
-  double posradians = radians;
-  if (posradians < 0.0)
-     posradians += 2.0*M_PI;
 
-  hours = (int)floor(posradians * 12.0/M_PI); 
-  minutes = (int)floor(posradians * 720.0/M_PI) % 60;
-  seconds = posradians * 43200.0/M_PI - ((hours*60.0)+minutes)*60.0;
+  getHMS (hours, minutes, seconds);
 
   sprintf(str, "%02d:%02d:%0*.*f", hours, minutes, 
 	  3+places, places, seconds);
+
   return str;
 }
 
@@ -57,14 +53,40 @@ int Angle::setDMS(const char *str)
   return str2dec(&radians, str);
 }
 
+void Angle::setHMS (int hours, int minutes, double seconds)
+{
+  radians = M_PI * ( hours/12.0 + minutes/720.0 + seconds/43200.0 );
+}
+
+void Angle::getHMS (int& hours, int& minutes, double& seconds) const
+{
+  double posradians = radians;
+  if (posradians < 0.0)
+     posradians += 2.0*M_PI;
+
+  hours = (int)floor(posradians * 12.0/M_PI); 
+  minutes = (int)floor(posradians * 720.0/M_PI) % 60;
+  seconds = posradians * 43200.0/M_PI - ((hours*60.0)+minutes)*60.0;
+}
+
+void Angle::setDMS (int degrees, int minutes, double seconds)
+{
+  radians = M_PI * ( degrees/180.0 + minutes/720.0 + seconds/43200.0 );
+}
+
+void Angle::getDMS (int& degrees, int& minutes, double& seconds) const
+{
+  degrees = (int)floor(fabs(radians) * 180.0/M_PI); 
+  minutes = (int)floor(fabs(radians) * 10800.0/M_PI) % 60;
+  seconds = fabs(radians) * 648000.0/M_PI - ((degrees*60.0)+minutes)*60.0;
+}
+
 char * Angle::getDMS(char *str,int places) const
 {
   int degrees, minutes;
   double seconds;
 
-  degrees = (int)floor(fabs(radians) * 180.0/M_PI); 
-  minutes = (int)floor(fabs(radians) * 10800.0/M_PI) % 60;
-  seconds = fabs(radians) * 648000.0/M_PI - ((degrees*60.0)+minutes)*60.0;
+  getDMS (degrees, minutes, seconds);
 
   if (radians < 0.0)
     sprintf(str, "-%02d:%02d:%0*.*f", degrees, minutes, 
