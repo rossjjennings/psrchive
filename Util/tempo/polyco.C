@@ -332,6 +332,8 @@ void polynomial::prettyprint() const {
 
 /******************************************/
 
+polyco::verbose = 0;
+
 polyco::polyco(){
   pollys.clear();
 }
