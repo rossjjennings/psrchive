@@ -88,18 +88,18 @@ libpsrchive_la_LIBADD   = Calibration/libCalibration.la \
 			timer/libtimer.la epn/libepn.la
 
 if HAVE_CFITSIO
-
 SUBDIRS += psrfits
 libpsrchive_la_LIBADD += psrfits/libpsrfits.la
-
 endif
 
 SUBDIRS += .
 
 if HAVE_QT
-
 SUBDIRS += GUI
+endif
 
+if HAVE_QTDRIV
+SUBDIRS += rhythm
 endif
 
 
