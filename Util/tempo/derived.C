@@ -1,10 +1,13 @@
-#include <math.h>
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 
 #include "ephio.h"
 #include "psrephem.h"
 #include "orbital.h"
-#include "f772c.h"
 #include "Estimate.h"
+
+#include <math.h>
 
 #define sqr(x) (x*x)
 #define cube(x) (x*x*x)
@@ -28,8 +31,9 @@ const double v_0 = 222;   // km/s
 // distance of sun from galactic centre
 const double R_0 = 7.7e3; // parsec
 
-extern "C" double F772C(sla_eqgal) (double* ra, double* dec, 
-				    double* l, double* b);
+#define F77_sla_eqgal F77_FUNC_(sla_eqgal,SLA_EQGAL)
+extern "C" double F77_sla_eqgal(double *, double *, double *, double *);
+
 
 // ////////////////////////////////////////////////////////////////////////
 //
@@ -45,7 +49,7 @@ int psrephem::galactic (double& l, double& b)
   double delta = value_double [EPH_DECJ] * 2*M_PI;
   // double delta_err  = error_double [EPH_DECJ];
 
-  F772C(sla_eqgal) (&alpha, &delta, &l, &b);
+  F77_sla_eqgal (&alpha, &delta, &l, &b);
 
   return 0;
 }
