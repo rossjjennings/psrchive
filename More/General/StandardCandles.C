@@ -6,6 +6,7 @@
 #include <algorithm>
 
 #include <math.h>
+#include <ctype.h>
 
 bool Pulsar::FluxCalibratorDatabase::verbose = false;
 
@@ -64,8 +65,8 @@ void Pulsar::FluxCalibratorDatabase::Entry::unload (string& str)
 
 bool close_enough (string A, string B)
 {
-  transform (A.begin(), A.end(), A.begin(), tolower);
-  transform (B.begin(), B.end(), B.begin(), tolower);
+  std::transform (A.begin(), A.end(), A.begin(), ::tolower);
+  std::transform (B.begin(), B.end(), B.begin(), ::tolower);
 
   return A.find(B)!=string::npos || B.find(A)!=string::npos;
 }
