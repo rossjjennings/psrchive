@@ -77,6 +77,7 @@ void Pulsar::PolnProfileFit::set_standard (const PolnProfile* _standard)
 
   standard_variance = get_variance (standard);
   Reference::To<PolnProfile> fourier = fourier_transform (standard);
+  standard_power = fourier->sumsq (1);
 
   // number of complex phase bins in Fourier domain
   nbin /= 2;
@@ -87,6 +88,9 @@ void Pulsar::PolnProfileFit::set_standard (const PolnProfile* _standard)
   model->add_transformation ();
   if (transformation)
     model->set_transformation (transformation);
+
+  if (Profile::verbose)
+    cerr << "Pulsar::PolnProfileFit::set_standard nbin=" << nbin << endl;
 
   // initialize the model input states
   for (unsigned ibin=1; ibin<nbin; ibin++) {
@@ -113,6 +117,9 @@ void Pulsar::PolnProfileFit::set_standard (const PolnProfile* _standard)
     model->add_input( input * phase_xform );
 
   }
+
+  if (Profile::verbose)
+    cerr << "Pulsar::PolnProfileFit::set_standard exit" << endl;
 
 }
 
@@ -168,12 +175,15 @@ void Pulsar::PolnProfileFit::fit (const PolnProfile* observation)
 
   Stokes<float> variance = get_variance (observation);
 
+  Reference::To<PolnProfile> fourier = fourier_transform (observation);
+  double power = fourier->sumsq (1);
+  double gain = power / standard_power;
+  cerr << "gain=" << gain << endl;
+
   for (unsigned ipol=0; ipol<npol; ipol++) 
     // the Fourier transform will inflate the variance
-    // variance[ipol] = (variance[ipol] + standard_variance[ipol]) * nbin;
-    variance[ipol] *= nbin;
-
-  Reference::To<PolnProfile> fourier = fourier_transform (observation);
+    variance[ipol] = (variance[ipol] + gain*standard_variance[ipol]) * nbin;
+    // variance[ipol] *= nbin;
 
   // calculate the rms in the baseline of each profile
 
@@ -215,13 +225,16 @@ void Pulsar::PolnProfileFit::fit (const PolnProfile* observation)
   }
 
   clock.stop();
-  cerr << "add_data toook " << clock << endl;
+  cerr << "add_data took " << clock << endl;
 
   clock.start();
   model->solve_work ();
   clock.stop();
 
-  cerr << "solve toook " << clock << endl;
+  cerr << "solve took " << clock << endl;
+
+  if (Profile::verbose)
+    cerr << "Pulsar::PolnProfileFit::fit exit" << endl;
 
 }
 

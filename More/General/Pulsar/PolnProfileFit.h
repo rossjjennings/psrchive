@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/Attic/PolnProfileFit.h,v $
-   $Revision: 1.4 $
-   $Date: 2003/12/29 15:35:40 $
+   $Revision: 1.5 $
+   $Date: 2004/01/05 19:40:20 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PolnProfileFit_h
@@ -95,6 +95,9 @@ namespace Pulsar {
     //! The variance of the standard
     Stokes<float> standard_variance;
 
+    //! The power of the standard
+    double standard_power;
+
     //! Construtor helper
     void init ();
 
@@ -103,6 +106,4 @@ namespace Pulsar {
 }
 
 #endif
-
-
 
