@@ -43,5 +43,19 @@ int main ()
     return -1;
   }
 
+
+  MatrixTest <Quaternion<complex<float>, Unitary>, 
+    Quaternion<complex<double>, Unitary>, complex<float> > testub;
+
+  try {
+    cerr 
+      << "Testing " << loops << " Unitary Biquaternion variations" << endl;
+    testub.runtest (loops);
+  }
+  catch (string& error) {
+    cerr << error << endl;
+    return -1;
+  }
+
   return 0;
 }
