@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Archive.h,v $
-   $Revision: 1.86 $
-   $Date: 2003/10/02 07:29:36 $
+   $Revision: 1.87 $
+   $Date: 2003/10/08 14:10:34 $
    $Author: straten $ */
 
 /*! \mainpage 
@@ -80,7 +80,7 @@
   </UL>
 
   For a complete list of the methods defined in each of these base classes,
-  please see the <a href="annotated.html>Compound List</a>.
+  please see the <a href="annotated.html">Compound List</a>.
 
   \section format Archive File Formats
 
@@ -293,12 +293,29 @@ namespace Pulsar {
 
     };
 
-    //! Pure virtual base class of Archive::Extension objects
+    //! Abstract base class of Archive::Extension objects
     /* Archive derived classes may provide access to additional information
        through Extension-derived objects. */
     class Extension : public Reference::Able {
 
-      // no specification for now
+    public:
+
+      //! Construct with a name
+      Extension (const char* name);
+
+      //! Destructor
+      virtual ~Extension ();
+
+      //! Return a new copy-constructed instance identical to this instance
+      virtual Extension* clone () const = 0;
+
+      //! Return the name of the Extension
+      string get_name () const;
+
+    protected:
+
+      //! Extension name - useful when debugging
+      string name;
 
     };
 
@@ -388,6 +405,13 @@ namespace Pulsar {
     ExtensionType* get ();
 
     //! Add an Extension to the Archive instance
+    /*! The derived class must ensure that only one instance of the Extension
+      type is stored.
+
+      \return On successful addition, this method should return the
+      pointer to the Extension, equal to the extension argument.  If the
+      Extension is not supported, this method should return a null pointer.
+    */
     virtual void add_extension (Extension* extension);
 
     // //////////////////////////////////////////////////////////////////
@@ -761,11 +785,14 @@ namespace Pulsar {
     string unload_filename;
 
     //! The pulsar ephemeris, as used by TEMPO
-    psrephem ephemeris;
+    Reference::To<psrephem> ephemeris;
 
     //! The pulsar phase model, as created using TEMPO
-    polyco model;
+    Reference::To<polyco> model;
 
+    //! The Extensions added to this Archive instance
+    vector< Reference::To<Extension> > extension;
+    
     //! Initialize an Integration to reflect Archive attributes.
     void init_Integration (Integration* subint);
 
@@ -830,11 +857,21 @@ namespace Pulsar {
   const ExtensionType* Archive::get () const
   {
     const ExtensionType* extension = 0;
+
     for (unsigned iext=0; iext<get_nextension(); iext++) {
-      extension = dynamic_cast<const ExtensionType*>( get_extension(iext) );
+
+      const Extension* ext = get_extension (iext);
+
+      if (verbose)
+	cerr << "Pulsar::Archive::get<Ext> name=" << ext->get_name() << endl;
+
+      extension = dynamic_cast<const ExtensionType*>( ext );
+
       if (extension)
 	break;
+
     }
+
     return extension;
   }
 

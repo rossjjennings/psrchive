@@ -1,7 +1,8 @@
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
-#include "Error.h"
 
+#include "Error.h"
+#include "typeutil.h"
 #include "coord.h"
 
 const vector<unsigned> Pulsar::Archive::none_selected;
@@ -67,32 +68,56 @@ void Pulsar::Archive::set_plugin_path (const char* path)
 //! Return the number of extensions available
 unsigned Pulsar::Archive::get_nextension () const
 {
-  return 0;
+  return extension.size ();
+}
+
+Pulsar::Archive::Extension::Extension (const char* _name)
+{
+  name = _name;
+}
+
+Pulsar::Archive::Extension::~Extension ()
+{
+}
+
+string Pulsar::Archive::Extension::get_name () const
+{
+  return name;
 }
 
 /*! Derived classes need only define this method, as the non-const version
   implemented by the Archive base class simply calls this method. */
 const Pulsar::Archive::Extension*
-Pulsar::Archive::get_extension (unsigned iextension) const
+Pulsar::Archive::get_extension (unsigned iext) const
 {
-  throw Error (InvalidState, "Pulsar::Archive::get_extension",
-	       "The Pulsar::Archive base class contains no extensions");
+  if ( iext >= extension.size() )
+    throw Error (InvalidRange, "Pulsar::Archive::get_extension",
+		 "index=%d >= nextension=%d", iext, extension.size());
+
+  return extension[iext];
 }
 
 /*! Simply calls get_extension const */
 Pulsar::Archive::Extension*
-Pulsar::Archive::get_extension (unsigned iextension)
+Pulsar::Archive::get_extension (unsigned iext)
 {
-  const Archive* thiz = this;
-  return const_cast<Extension*>( thiz->get_extension(iextension) );
+  if ( iext >= extension.size() )
+    throw Error (InvalidRange, "Pulsar::Archive::get_extension",
+		 "index=%d >= nextension=%d", iext, extension.size());
+
+  return extension[iext];
 }
 
 /*! Derived classes need only define this method, as the non-const version
   implemented by the Archive base class simply calls this method. */
-void Pulsar::Archive::add_extension (Extension* extension)
+void Pulsar::Archive::add_extension (Extension* ext)
 {
-  throw Error (InvalidState, "Pulsar::Archive::add_extension",
-	       "The Pulsar::Archive base class contains no extensions");
+  unsigned index = find( extension, typeid(ext) );
+
+  if (index < extension.size())
+    extension[index] = ext;
+  else
+    extension.push_back(ext);
 }
 
 void Pulsar::Archive::refresh()
@@ -260,6 +285,10 @@ void Pulsar::Archive::centre ()
   if (get_type () != Signal::Pulsar)
     return;
 
+  if (!model)
+    throw Error (InvalidState, "Pulsar::Archive::centre",
+		 "Pulsar observation with no polyco");
+
   Phase half_turn (0.5);
 
   for (unsigned isub=0; isub < get_nsubint(); isub++)  {
@@ -267,8 +296,8 @@ void Pulsar::Archive::centre ()
     Integration* subint = get_Integration(isub);
 
     // Rotate according to polyco prediction
-    Phase phase = model.phase (subint -> get_epoch(),
-			       subint -> get_centre_frequency());
+    Phase phase = model->phase (subint -> get_epoch(),
+				subint -> get_centre_frequency());
 
     if (verbose)
       cerr << "Pulsar::Archive::center phase=" << phase << endl;
@@ -389,16 +418,16 @@ void Pulsar::Archive::defaraday (double rotation_measure, double rm_iono)
 
 void Pulsar::Archive::set_ephemeris (const psrephem& new_ephemeris)
 {
-  ephemeris = new_ephemeris;
+  ephemeris = new psrephem (new_ephemeris);
   update_model ();
 }
 
 const psrephem Pulsar::Archive::get_ephemeris ()
 {
-  psrephem retval;
-  retval = ephemeris;
+  if (!ephemeris)
+    throw Error (InvalidState,"Pulsar::Archive::get_ephemeris","no ephemeris");
 
-  return retval;
+  return *ephemeris;
 }
 
 void Pulsar::Archive::set_model (const polyco& new_model)
@@ -408,17 +437,18 @@ void Pulsar::Archive::set_model (const polyco& new_model)
 		 "supplied model does not span Integrations");
 
   // swap the old with the new
-  polyco oldmodel = model;
-  model = new_model;
+  Reference::To<polyco> oldmodel = model;
 
-  if ( oldmodel.pollys.size() ) {
+  model = new polyco (new_model);
+
+  if ( oldmodel && oldmodel->pollys.size() ) {
 
     if (verbose)
       cerr << "Pulsar::Archive::set_model apply the new model" << endl;
 
     // correct Integrations against the old model
     for (unsigned isub = 0; isub < get_nsubint(); isub++)
-      apply_model (oldmodel, get_Integration(isub));
+      apply_model (*oldmodel, get_Integration(isub));
   }
 
   // it may not be true the that supplied model was generated at runtime
@@ -427,7 +457,10 @@ void Pulsar::Archive::set_model (const polyco& new_model)
 
 const polyco Pulsar::Archive::get_model ()
 {
-  return model;
+  if (!model)
+    throw Error (InvalidState, "Pulsar::Archive::get_model", "no model");
+		 
+  return *model;
 }
 
 void Pulsar::Archive::snr_weight ()
