@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Types.h,v $
-   $Revision: 1.2 $
-   $Date: 2002/10/10 08:04:48 $
-   $Author: straten $ */
+   $Revision: 1.3 $
+   $Date: 2002/10/18 02:34:27 $
+   $Author: hknight $ */
 
 #ifndef __Types_h
 #define __Types_h
@@ -68,7 +68,7 @@ namespace Signal {
     //! Stokes Invariant Interval
     Inv,
     //! Coherency Matrix Determinant
-    DetRho,
+    DetRho
   };
   
   

@@ -7,8 +7,15 @@
 
 int fwrite_compressed (FILE* fptr, const vector<float>& vals)
 {
+#ifdef __alpha
+  vector<float>::iterator minel = min_element(vals.begin(), vals.end());
+  vector<float>::iterator maxel = max_element(vals.begin(), vals.end());
+  vector<float>::iterator ind;
+#else
   vector<const float>::iterator minel = min_element(vals.begin(), vals.end());
   vector<const float>::iterator maxel = max_element(vals.begin(), vals.end());
+  vector<const float>::iterator ind;
+#endif
 
   if (minel == vals.end() || maxel == vals.end()) {
     cerr << "fwrite_compressed: empty range" << endl;
@@ -46,7 +53,6 @@ int fwrite_compressed (FILE* fptr, const vector<float>& vals)
   }
 
   unsigned short value = 0;
-  vector<const float>::iterator ind;
   for (ind = vals.begin(); ind != vals.end(); ind++) {
     value = (unsigned short) ((*ind - xmin) / ratio);
     writ = fwrite (&value, sizeof(unsigned short), 1, fptr);
