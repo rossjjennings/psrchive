@@ -26,6 +26,10 @@ Phase::Phase(int64 tns, double ftns) {
   }
 }
 
+double Phase::in_turns() const {
+  return(turns+fturns);
+}
+
 int64 Phase::intturns() const {
   return(turns);
 }
