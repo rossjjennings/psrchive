@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Quaternion.h,v $
-   $Revision: 1.7 $
-   $Date: 2003/02/05 14:22:30 $
+   $Revision: 1.8 $
+   $Date: 2003/02/24 18:01:15 $
    $Author: straten $ */
 
 #ifndef __Quaternion_H
@@ -46,7 +46,7 @@ public:
 
   //! Quaternion multiplication
   Quaternion& operator *= (const Quaternion& s)
-    { *this = *this * j; return *this; }
+    { *this = *this * s; return *this; }
 
   //! Scalar multiplication
   Quaternion& operator *= (T a)
@@ -59,6 +59,10 @@ public:
   //! Equality
   bool operator == (const Quaternion& b) const
     { return  s0==b.s0 && s1==b.s1 && s2==b.s2 && s3==b.s3; }
+
+  //! Equality
+  bool operator == (T scalar) const
+    { return  s0==scalar && s1==0 && s2==0 && s3==0; }
 
   //! Inequality
   bool operator != (const Quaternion& b) const
@@ -253,6 +257,19 @@ T trace (const Quaternion<T,B>& j)
 }
 
 
+// Return the positive definite square root of a Hermitian Quaternion
+template<typename T>
+const Quaternion<T, Hermitian> sqrt (const Quaternion<T, Hermitian>& h)
+{
+  T mod = h.s1*h.s1 + h.s2*h.s2 + h.s3*h.s3;
+  T det = sqrt (h.s0*h.s0 - mod);
+  T scale = sqrt (0.5 * (h.s0 - det) / mod);
+
+  return Quaternion<T, Hermitian>
+    (sqrt (0.5 * (h.s0 + det)), h.s1 * scale, h.s2 * scale, h.s3 * scale);
+}
+
+
 //! Returns the square of the Frobenius norm of a Biquaternion
 template<typename T, Basis B>
 T norm (const Quaternion<complex<T>,B>& j)
@@ -267,6 +284,11 @@ T norm (const Quaternion<T,B>& j)
   return 2.0 * (j.s0*j.s0 + j.s1*j.s1 + j.s2*j.s2 + j.s3*j.s3);
 }
 
+template<typename T, Basis B>
+T fabs (const Quaternion<T,B>& j)
+{ 
+  return sqrt (norm(j));
+}
 
 //! Useful for quickly printing the components
 template<typename T>
