@@ -31,6 +31,12 @@ void Pulsar::FITSArchive::unload (fitsfile* fptr, const Receiver* ext)
   degrees = ext->X_offset.getDegrees();
   fits_update_key (fptr, TFLOAT, "XPOL_ANG", &degrees, comment, &status);
 
+  degrees = ext->Y_offset.getDegrees() + 90.0;
+  fits_update_key (fptr, TFLOAT, "YPOL_ANG", &degrees, comment, &status);
+
+  degrees = ext->calibrator_offset.getDegrees() + 45.0;
+  fits_update_key (fptr, TFLOAT, "CAL_ANG", &degrees, comment, &status);
+
   switch (ext->basis) {
   case Receiver::Feed:
     strcpy (tempstr.get(), "FA"); break;
@@ -44,6 +50,9 @@ void Pulsar::FITSArchive::unload (fitsfile* fptr, const Receiver* ext)
 
   fits_update_key (fptr, TSTRING, "FD_MODE", tempstr.get(), comment, &status);
   
+  degrees = ext->tracking_angle.getDegrees();
+  fits_update_key (fptr, TFLOAT, "FA_REQ", &degrees, comment, &status);
+
   fits_update_key (fptr, TFLOAT, "ATTEN_A",
 		   const_cast<float*>(&(ext->atten_a)), comment, &status);
 
