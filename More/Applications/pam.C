@@ -14,6 +14,9 @@
 #include "Pulsar/Profile.h"
 #include "Pulsar/getopt.h"
 
+#include "Pulsar/Backend.h"
+#include "Pulsar/BackendName.h"
+
 #include "Pulsar/IntegrationOrder.h"
 #include "Pulsar/PeriastronOrder.h"
 #include "Pulsar/BinaryPhaseOrder.h"
@@ -77,6 +80,7 @@ void usage()
     "  -B               Flip the sideband sense \n"
     "  -o centre_freq   Change the frequency labels \n"
     "  --type type      Change the 'type' parameter where 'type' is one of: 'Pulsar', 'PolnCal', 'FluxCalOn', 'FluxCalOff', 'Calibrator'\n"
+    "  --inst inst      Change the instrument name (Archive must have 'BackendName' extension for this to work)\n"
     "\n"
     "See http://astronomy.swin.edu.au/pulsar/software/manuals/pam.html"
        << endl;
@@ -158,14 +162,16 @@ int main (int argc, char *argv[]) {
     bool new_cfreq = false;
     float new_fr = 0.0;
     Signal::Source new_type = Signal::Unknown;
+    string instrument;
 
     Reference::To<Pulsar::IntegrationOrder> myio;
     Reference::To<Pulsar::Receiver> install_receiver;
 
     int c = 0;
 
-    const int TYPE = 208;
-  
+    const int TYPE = 1208;
+    const int INST = 1209;
+
     while (1) {
 
       int options_index = 0;
@@ -180,6 +186,7 @@ int main (int argc, char *argv[]) {
 	{"binlngasc",  1, 0, 206},
 	{"receiver",   1, 0, 207},
 	{"type",       1, 0, TYPE},
+	{"inst",       1, 0, INST},
 	{0, 0, 0, 0}
       };
     
@@ -206,7 +213,7 @@ int main (int argc, char *argv[]) {
 	Pulsar::Archive::set_verbosity(3);
 	break;
       case 'i':
-	cout << "$Id: pam.C,v 1.42 2004/07/28 08:30:19 hknight Exp $" << endl;
+	cout << "$Id: pam.C,v 1.43 2004/08/08 06:34:08 hknight Exp $" << endl;
 	return 0;
       case 'm':
 	save = true;
@@ -471,6 +478,8 @@ int main (int argc, char *argv[]) {
 	  command += " --type " + s;
 	}
 	break;
+
+      case INST: instrument = optarg; break;
 	  
       default:
 	cout << "Unrecognised option" << endl;
@@ -550,6 +559,14 @@ int main (int argc, char *argv[]) {
 
       if( new_type != Signal::Unknown )
 	arch->set_type( new_type );
+
+      if( instrument != string() ){
+	Pulsar::BackendName* b = arch->get<Pulsar::BackendName>();
+	if( !b )
+	  fprintf(stderr,"Could not change instrument name- archive does not have BackendName extension\n");
+	else
+	  b->set_name(instrument);
+      }
 
       if (new_eph) {
 	if (!eph_file.empty()) {
