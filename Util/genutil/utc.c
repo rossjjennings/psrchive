@@ -1,32 +1,4 @@
 
-/*
-$Id: utc.c,v 1.4 1998/09/24 09:03:09 straten Exp $
-$Log: utc.c,v $
-Revision 1.4  1998/09/24 09:03:09  straten
-1) added fractional seconds to utc2LST in utc_f2LST
-2) mpi pack and unpack routines added to increase transmission efficiency
-
-Revision 1.3  1998/08/12 07:10:20  straten
-bug fix - when adding month days to make year day, use previous month
-so month -> month-1
-
-Revision 1.2  1998/08/05 12:15:54  straten
-added bit to str2utc to cut off extraneous characters before parsing
-
- * Revision 1.1.1.1  1998/08/03  06:45:23  mbritton
- * start
- *
-Revision 1.2  1997/04/10 22:27:00  sasha
-New function str2pos()
-
-Revision 1.1  1996/11/18 19:53:55  sasha
-Initial revision
-
-Revision 1.1  1996/09/01 17:59:18  willem
-Initial revision
-
-*/
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <strings.h>
@@ -102,10 +74,11 @@ int str2utc (utc_t *time, const char* str)
   endstr = strlen(temp);
   /* cut off any trailing characters that are not ASCII numbers */
   while ((endstr>=0) && !isdigit(temp[endstr])) endstr --;
+
   if (endstr < 0)
     return -1;
-  temp [endstr+1] = '\0'; 
 
+  temp [endstr+1] = '\0'; 
 
   /* parse UTC seconds */
   trav = endstr - 1;
@@ -326,29 +299,28 @@ int cal2utc (utc_t *time, cal_t calendar)
 
 int utc2cal (cal_t *calendar, utc_t time)
 {
-  int leapyr;
-  int day_of_year = time.tm_yday;
-  int day_of_month;
-  int month[12] = {31,28,31,30,31,30,31,31,30,31,30,31};
-  int Month;
-  int i = 0;
+  int days_in_month[12] = {31,28,31,30,31,30,31,31,30,31,30,31};
+  int month;
+  int day_of_year;
 
-  if (time.tm_year%4==0) leapyr=1; else leapyr=0;  
-  if (time.tm_year%100==0 && time.tm_year%400!=0) leapyr=0; 
-
-  if (leapyr) month[1] = 29;
-
-  i=0;
-  while (day_of_year > 0)  {
-    day_of_year -= month[i];
-    i++;
+  if (UTC_LEAPYEAR(time.tm_year)) {
+    days_in_month[1] = 29;
   }
-  Month = i;
-  day_of_month = day_of_year + month[i-1];
 
-  /*  sprintf(utdatestr,"%2d-%2d-%4d",day_of_month,Month,time.tm_year);
-  if (day_of_month < 10) utdatestr[0] = '0';
-  if (Month < 10)        utdatestr[3] = '0';*/
+  day_of_year = time.tm_yday;
+  for (month=0; month<12 && day_of_year>0; month++)  {
+    day_of_year -= days_in_month[month];
+  }
+
+  if (day_of_year > 0)
+    return -1;
+
+  calendar->tm_year  = time.tm_year;
+  calendar->tm_month = month;
+  calendar->tm_day   = day_of_year + days_in_month[month-1];
+  calendar->tm_hour  = time.tm_hour;
+  calendar->tm_min   = time.tm_min;
+  calendar->tm_sec   = time.tm_sec;
 
   return 0;
 }
@@ -399,40 +371,78 @@ char* utc2str (char* tmstr, utc_t time, const char* fmt)
    ************************************************************************* */
 char* utcstrfill (char* tmstr, utc_t time, int numch)
 {
-   int pos;                 /* position in "tmstr" */
-   int yc, dc, hc, mc, sc;  /* These variables contain the powers of ten
-                               by which characters are pulled off of the
-                               respective components of the time.
-                               ie. yc - year, dc - day, hc - hour ...  */
-   yc = dc = hc = mc = sc = 1;
+  int pos;                 /* position in "tmstr" */
+  
+  for (pos = numch -1; pos >= 0; pos--)  {
+    switch (tmstr[pos])  {
+    case 'y':
+      tmstr[pos] = (char) (time.tm_year % 10) + '0';
+      time.tm_year /= 10;
+      break;
+    case 'd':
+      tmstr[pos] = (char) (time.tm_yday % 10) + '0';
+      time.tm_yday /= 10;
+      break;
+    case 'h':
+      tmstr[pos] = (char) (time.tm_hour % 10) + '0';
+      time.tm_hour /= 10;
+      break;
+    case 'm':
+      tmstr[pos] = (char) (time.tm_min % 10) + '0';
+      time.tm_min /= 10;
+      break;
+    case 's':
+      tmstr[pos] = (char) (time.tm_sec % 10) + '0';
+      time.tm_sec /= 10;
+      break;
+    default:
+      break;
+    }
+  }
+  return (tmstr);
+}
 
-   for (pos = numch -1; pos >= 0; pos--)  {
-      switch (tmstr[pos])  {
-         case 'y':
-            tmstr[pos] = (char) ((time.tm_year / yc) % 10) + '0';
-            yc *= 10;
-         break;
-         case 'd':
-            tmstr[pos] = (char) ((time.tm_yday / dc) % 10) + '0';
-            dc *= 10;
-         break;
-         case 'h':
-            tmstr[pos] = (char) ((time.tm_hour / hc) % 10) + '0';
-            hc *= 10;
-         break;
-         case 'm':
-            tmstr[pos] = (char) ((time.tm_min / mc) % 10) + '0';
-            mc *= 10;
-         break;
-         case 's':
-            tmstr[pos] = (char) ((time.tm_sec / sc) % 10) + '0';
-            sc *= 10;
-         break;
-         default:
-         break;
-      }
-   }
-   return (tmstr);
+char* cal2str (char* tmstr, cal_t date, const char* fmt)
+{
+  strcpy (tmstr, fmt);
+  return (calstrfill (tmstr, date, strlen(fmt)));
+}
+
+char* calstrfill (char* tmstr, cal_t date, int numch)
+{
+  int pos;                 /* position in "tmstr" */
+
+  for (pos = numch -1; pos >= 0; pos--)  {
+    switch (tmstr[pos])  {
+    case 'y':
+      tmstr[pos] = (char) (date.tm_year % 10) + '0';
+      date.tm_year  /= 10;
+      break;
+    case 'M':
+      tmstr[pos] = (char) (date.tm_month % 10) + '0';
+      date.tm_month /= 10;
+      break;
+    case 'd':
+      tmstr[pos] = (char) (date.tm_day % 10) + '0';
+      date.tm_day   /= 10;
+      break;
+    case 'h':
+      tmstr[pos] = (char) (date.tm_hour % 10) + '0';
+      date.tm_hour  /= 10;
+      break;
+    case 'm':
+      tmstr[pos] = (char) (date.tm_min  % 10) + '0';
+      date.tm_min   /= 10;
+      break;
+    case 's':
+      tmstr[pos] = (char) (date.tm_sec  % 10) + '0';
+      date.tm_sec   /= 10;
+      break;
+    default:
+      break;
+    }
+  }
+  return (tmstr);
 }
 
 /* *************************************************************************
@@ -556,9 +566,9 @@ int utc_f2LST (double* lst, utc_t timeutc, double fracsec, float longitude)
   /* convert longitude in degrees to east_long in hours */
   double east_long = longitude * (24.0 / 360.0);
 
-  if(timeutc.tm_year==1996) F1_YY = F1_96;
-  else if(timeutc.tm_year==1997) F1_YY = F1_97;
-  else if(timeutc.tm_year==1998) F1_YY = F1_97;
+  if      (timeutc.tm_year==1996) F1_YY = F1_96;
+  else if (timeutc.tm_year==1997) F1_YY = F1_97;
+  else if (timeutc.tm_year==1998) F1_YY = F1_97;
   else {
     fprintf(stderr,"Hello, this a utc2LST WARNING\n");
     fprintf(stderr,"The year %d is out of range\n",timeutc.tm_year);
@@ -574,35 +584,6 @@ int utc_f2LST (double* lst, utc_t timeutc, double fracsec, float longitude)
   *lst =  GMST + east_long;
   while (*lst<0.0) *lst+=24.0;
   if(*lst>=24.0) *lst=(float) fmod((double) *lst,24.0);
-  return 0;
-}
-
-int utc2datestr (char* utdatestr, utc_t time)
-{
-  int leapyr;
-  int day_of_year = time.tm_yday;
-  int day_of_month;
-  int month[12] = {31,28,31,30,31,30,31,31,30,31,30,31};
-  int Month;
-  int i = 0;
-
-  if (time.tm_year%4==0) leapyr=1; else leapyr=0;  
-  if (time.tm_year%100==0 && time.tm_year%400!=0) leapyr=0; 
-
-  if (leapyr) month[1] = 29;
-
-  i=0;
-  while (day_of_year > 0)  {
-    day_of_year -= month[i];
-    i++;
-  }
-  Month = i;
-  day_of_month = day_of_year + month[i-1];
-
-  sprintf(utdatestr,"%2d-%2d-%4d",day_of_month,Month,time.tm_year);
-  if (day_of_month < 10) utdatestr[0] = '0';
-  if (Month < 10)        utdatestr[3] = '0';
-
   return 0;
 }
 

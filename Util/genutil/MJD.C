@@ -8,6 +8,17 @@
 #include "MJD.h"
 #include "endian.h"
 
+int ss2hhmmss (int* hours, int* min, int* sec, int seconds)
+{
+  *hours   = seconds/3600;
+  seconds -= 3600 * (*hours);
+  *min     = seconds/60;
+  seconds -= 60 * (*min);
+  *sec     = seconds;
+
+  return 0;
+}
+
 char * MJD::printdays() const {
   static char permanent[10];
   sprintf(permanent, "%d",days);
@@ -16,10 +27,10 @@ char * MJD::printdays() const {
 
 char * MJD::printhhmmss() const {
   static char permanent[10];
-  int hh = secs/3600;
-  int mm = (secs-3600*hh)/60;
-  double tmp = secs-3600*hh-60*mm;
-  int ss = nint (tmp);
+  int hh, mm, ss;
+
+  ss2hhmmss (&hh, &mm, &ss, secs);
+
   sprintf(permanent,"%2.2d%2.2d%2.2d",hh,mm,ss);
   return (permanent);
 }
@@ -36,6 +47,16 @@ char * MJD::printall() const {
   static char permanent[40];
   sprintf(permanent,"%s:%s%s",printdays(),printhhmmss(),printfs());
   return (permanent);
+}
+
+char* MJD::datestr (char* dstr, const char* format) const
+{
+  cal_t greg;
+
+  if (gregorian (&greg, NULL) < 0)
+    return NULL;
+
+  return cal2str (dstr, greg, format);
 }
 
 char * MJD::strtempo(){
@@ -331,12 +352,12 @@ MJD::MJD(double dd, double ss, double fs){
   }
 }
 
-MJD::MJD(int d, int s, double f){
+MJD::MJD(int d, int s, double f) {
   *this = MJD((double)d,(double)s,f);
 }
 
 // Converts a string containing utc fields yyyy ddd hh mm ss to internal format
-MJD::MJD(char* utc_string)
+MJD::MJD (char* utc_string)
 {
   utc_t utc;
   char temp [40];
@@ -347,54 +368,62 @@ MJD::MJD(char* utc_string)
   *this = MJD(utc);
 }
 
-
-MJD::MJD(utc_t utc)
+double MJD::LST (float longitude) const
 {
-  int leapyr;
-  int month[13];
+  utc_t  utc;
+  double lst;
 
-  int year = utc.tm_year;
-  int ddd = utc.tm_yday;
-  int hour = utc.tm_hour;
-  int minute = utc.tm_min;
-  int second = utc.tm_sec;
+  UTC (&utc, NULL);
+  utc_f2LST (&lst, utc, fracsec, longitude);
+  return lst;
+}
 
-  if(year%4==0){leapyr=1;}else{leapyr=0;}  
-  if(year%100==0 && year%400!=0){leapyr=0;}
+int MJD::UTC (utc_t* utc, double* fsec) const
+{
+  cal_t  greg;
 
-  month[0]=0;
-  month[1]=31;
-  month[2]=28+leapyr;
-  month[3]=31;
-  month[4]=30;
-  month[5]=31;
-  month[6]=30;
-  month[7]=31;
-  month[8]=31;
-  month[9]=30;
-  month[10]=31;
-  month[11]=30;
-  month[12]=31;
+  gregorian (&greg, fsec);
+  return cal2utc (utc, greg);
+}
 
-// Work out integer days.
+int MJD::gregorian (cal_t* gregdate, double* fsec) const
+{
+  int julian_day = days + 2400001;
 
-  for(int i=0;i<13 && ddd>0;i++){
+  int n_four = 4  * (julian_day+((6*((4*julian_day-17918)/146097))/4+1)/2-37);
+  int n_dten = 10 * (((n_four-237)%1461)/4) + 5;
 
-     ddd -= month[i];
+  gregdate->tm_year  = n_four/1461 - 4712;
+  gregdate->tm_month = (n_dten/306+2)%12 + 1;
+  gregdate->tm_day   = (n_dten%306)/10 + 1;
 
-           if(ddd<=0){
-	   
-	   int Month = i;
-	   days = ( (1461*(year-(12-Month)/10+4712))/4
-                       +(306*((Month+9)%12)+5)/10
-                       -(3*((year-(12-Month)/10+4900)/100))/4
-                       +ddd+month[i]-2399904  );
-	   }
-  }
+  ss2hhmmss (&gregdate->tm_hour, &gregdate->tm_min, &gregdate->tm_sec, secs);
+
+  if (fsec)
+    *fsec = fracsec;
+
+  return 0;
+}
+
+// construct an MJD from a UTC
+MJD::MJD (utc_t utc)
+{
+  cal_t greg;
+
+  utc2cal (&greg, utc);
+  MJD::MJD(greg);
+}
+
+// construct an MJD from a gregorian
+MJD::MJD (cal_t greg)
+{
+  days = (1461*(greg.tm_year-(12-greg.tm_month)/10+4712))/4
+    +(306*((greg.tm_month+9)%12)+5)/10
+    -(3*((greg.tm_year-(12-greg.tm_month)/10+4900)/100))/4
+    +greg.tm_day-2399904;
 
   // Work out seconds, fracsecs always zero.
-
-  secs = 3600.0 * hour + 60.0 * minute + second;
+  secs = 3600.0 * greg.tm_hour + 60.0 * greg.tm_min + greg.tm_sec;
   fracsec = 0.0;
 }
 
