@@ -211,7 +211,6 @@ void toaPlot::handleEvent (float x, float y, char ch)
 	}
 	emit selected(tempint);
 	emit ineednewdata();
-	handleEvent(0,0,'~');
       }
       break;
     case 4:
