@@ -130,9 +130,13 @@ int polynomial::load(string* instr)
   if (line.length() < 1)
     return -1;
 
-  psrname = stringtok (&line, whitespace);
-  if (psrname.length() < 1)
-    return -1;
+  // rte: this doesn't work for pulsars with letter suffices
+  //  psrname = stringtok (&line, whitespace);
+  // if (psrname.length() < 1)
+  //    return -1;
+  psrname = line.substr(0, 9);
+  psrname = stringtok(&psrname, whitespace);
+  line.erase(0,9);
 
   date = stringtok (&line, whitespace);
   if (date.length() < 1)
