@@ -4,6 +4,8 @@
 #include "Pulsar/Integration.h"
 #include "Error.h"
 
+#include "ephio.h"
+
 #include "tempo++.h"
 
 // ///////////////////////////////////////////////////////////////////////
@@ -103,12 +105,28 @@ void Pulsar::Archive::update_model (const MJD& time, bool clear_model)
   if (get_type() != Signal::Pulsar)
     throw Error (InvalidState, "Archive::create_updated_model",
 		 "not a pulsar observation");
-
-  int  maxha   = 12;
-  char nsite   = model.get_telescope ();
-  int  ncoeff  = model.get_ncoeff ();
-  double freq  = model.get_freq ();
-  double nspan = model.get_nspan ();
+  
+  int  maxha;
+  char nsite;
+  int  ncoeff;
+  double freq;
+  double nspan;
+  
+  if (model.pollys.size() > 0) {
+    maxha   = 12;
+    nsite   = model.get_telescope();
+    ncoeff  = model.get_ncoeff();
+    freq    = model.get_freq();
+    nspan   = model.get_nspan();
+  }
+  else {
+    cout << "Warning: Using default values to build polyco" << endl;
+    maxha   = 12;
+    nsite   = ephemeris.value_str[EPH_TZRSITE][0];
+    ncoeff  = 12;
+    freq    = get_centre_frequency();
+    nspan   = 960;
+  }
 
   if (clear_model)
     model = polyco();
