@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/FluxCalibrator.h,v $
-   $Revision: 1.1 $
-   $Date: 2003/02/10 19:22:14 $
+   $Revision: 1.2 $
+   $Date: 2003/02/12 22:11:29 $
    $Author: straten $ */
 
 #ifndef __FluxCalibrator_H
@@ -36,11 +36,11 @@ namespace Pulsar {
     //! Filenames of Pulsar::Archives from which instance was created
     vector<string> filenames;
 
-    //! Flux[npol][nsub_band] of noise cal in mJy  
-    vector< vector< Estimate<double> > > cal_flux;
+    //! Calibrator flux in mJy as a function of frequency
+    vector< Estimate<double> > cal_flux;
 
-    //! Flux[npol][nsub_band] of Tsys+Tsky in mJy
-    vector< vector< Estimate<double> > > T_sys;
+    //! Temperature of system (+ sky) in mJy as a function of frequency
+    vector< Estimate<double> > T_sys;
 
     //! Reference to the Pulsar::Archive with which this instance associates
     Reference::To<Pulsar::Archive> archive;
