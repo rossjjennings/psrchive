@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Basis.h,v $
-   $Revision: 1.4 $
-   $Date: 2004/11/22 19:36:25 $
+   $Revision: 1.5 $
+   $Date: 2004/11/22 19:58:44 $
    $Author: straten $ */
 
 #ifndef __Basis_H
@@ -48,7 +48,7 @@ public:
 protected:
 
   //! The basis code
-  Basis basis;
+  Type basis;
 
   //! The orientation 
   double orientation;
