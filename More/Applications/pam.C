@@ -76,6 +76,7 @@ void usage()
     "  -E ephfile       Install a new ephemeris and update model \n"
     "  -B               Flip the sideband sense \n"
     "  -o centre_freq   Change the frequency labels \n"
+    "  --type type      Change the 'type' parameter where 'type' is one of: 'Pulsar', 'PolnCal', 'FluxCalOn', 'FluxCalOff', 'Calibrator'\n"
     "\n"
     "See http://astronomy.swin.edu.au/pulsar/software/manuals/pam.html"
        << endl;
@@ -156,11 +157,14 @@ int main (int argc, char *argv[]) {
 
     bool new_cfreq = false;
     float new_fr = 0.0;
+    Signal::Source new_type = Signal::Unknown;
 
     Reference::To<Pulsar::IntegrationOrder> myio;
     Reference::To<Pulsar::Receiver> install_receiver;
 
     int c = 0;
+
+    const int TYPE = 208;
   
     while (1) {
 
@@ -175,6 +179,7 @@ int main (int argc, char *argv[]) {
 	{"binlngperi", 1, 0, 205},
 	{"binlngasc",  1, 0, 206},
 	{"receiver",   1, 0, 207},
+	{"type",       1, 0, TYPE},
 	{0, 0, 0, 0}
       };
     
@@ -201,7 +206,7 @@ int main (int argc, char *argv[]) {
 	Pulsar::Archive::set_verbosity(3);
 	break;
       case 'i':
-	cout << "$Id: pam.C,v 1.41 2004/07/26 04:33:37 hknight Exp $" << endl;
+	cout << "$Id: pam.C,v 1.42 2004/07/28 08:30:19 hknight Exp $" << endl;
 	return 0;
       case 'm':
 	save = true;
@@ -451,6 +456,22 @@ int main (int argc, char *argv[]) {
 	return -1;
       }
 
+      case TYPE:
+	{
+	  string s = optarg;
+	  if(s=="Pulsar")     new_type = Signal::Pulsar;
+	  else if(s=="PolnCal")    new_type = Signal::PolnCal;
+	  else if(s=="FluxCalOn")  new_type = Signal::FluxCalOn;
+	  else if(s=="FluxCalOff") new_type = Signal::FluxCalOff;
+	  else if(s=="Calibrator") new_type = Signal::Calibrator;
+	  else{
+	    fprintf(stderr,"Unrecognised argument to --type: '%s'\n",optarg);
+	    exit(-1);
+	  }
+	  command += " --type " + s;
+	}
+	break;
+	  
       default:
 	cout << "Unrecognised option" << endl;
       }
@@ -526,6 +547,9 @@ int main (int argc, char *argv[]) {
 	
 	arch->set_centre_frequency(new_fr);
       }
+
+      if( new_type != Signal::Unknown )
+	arch->set_type( new_type );
 
       if (new_eph) {
 	if (!eph_file.empty()) {
