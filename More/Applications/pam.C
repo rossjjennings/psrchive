@@ -16,7 +16,6 @@
 #include "Pulsar/BinaryPhaseOrder.h"
 #include "Pulsar/BinLngAscOrder.h"
 #include "Pulsar/BinLngPeriOrder.h"
-#include "Pulsar/Receiver.h"
 
 #include "Error.h"
 
@@ -26,53 +25,51 @@
 
 void usage()
 {
-  cout << "A program for manipulating Pulsar::Archives \n"
-    "Usage: pam [options] filenames \n"
-    "  -q               Quiet mode \n"
-    "  -v               Verbose mode \n"
-    "  -V               Very verbose mode \n"
-    "  -i               Show revision information \n"
-    "  -m               Modify the original files on disk \n"
-    "  -a archive       Write new files using this archive class \n"
-    "  -e extension     Write new files with this extension \n"
-    "  -u path          Write files to this location \n"
-    "  -T               Time scrunch to one subint \n"
-    "  -F               Frequency scrunch to one channel \n"
-    "  -p               Polarisation scrunch to total intensity \n"
-    "  -I               Transform to Invariant Interval \n"
-    "  -S               Transform to Stokes parameters \n"
-    "  -x \"start end\"   Extract subints in this inclusive range \n"
-    "\n"
-    "The following options take integer arguments \n"
-    "  -t               Time scrunch by this factor \n"
-    "  -f               Frequency scrunch by this factor \n"
-    "  -b               Bin scrunch by this factor \n"
-    "  --setnsub        Time scrunch to this many subints \n"
-    "  --setnchn        Frequency scrunch to this many channels \n"
-    "  --setnbin        Bin scrunch to this many bins \n"
-    "  --binphsperi     Convert to binary phase periastron order \n"
-    "  --binphsasc      Convert to binary phase asc node order \n"
-    "  --binlngperi     Convert to binary longitude periastron order \n"
-    "  --binlngasc      Convert to binary longitude asc node order \n"
-    "\n"
-    "The following options take floating point arguments \n"
-    "  -d               Alter the header dispersion measure \n"
-    "  -D RM            Correct for ISM faraday rotation \n"
-    "  -s               Smear with this duty cycle \n"
-    "  -r               Rotate profiles by this many turns \n" 
-    "  -w               Reset profile weights to this value \n"
-    "\n"
-    "The following options override archive paramaters \n"
-    "  -L               Set feed basis to Linear \n"
-    "  -C               Set feed basis to Circular \n"
-    "  -E ephfile       Install a new ephemeris and update model \n"
-    "  -B               Flip the sideband sense \n"
-    "  -o centre_freq   Change the frequency labels \n"
-    "\n"
-    "See http://astronomy.swin.edu.au/pulsar/software/manuals/pam.html"
-       << endl;
-
-    return;
+  cout << "A program for manipulating Pulsar::Archives"                       << endl;
+  cout << "Usage: pam [options] filenames"                                    << endl;
+  cout << "  -v               Verbose mode"                                   << endl;
+  cout << "  -V               Very verbose mode"                              << endl;
+  cout << "  -i               Show revision information"                      << endl;
+  cout << "  -m               Modify the original files on disk"              << endl;
+  cout << "  -a archive       Write new files using this archive class"       << endl;
+  cout << "  -e extension     Write new files with this extension"            << endl;
+  cout << "  -u path          Write files to this location"                   << endl;
+  cout << "  -T               Time scrunch to one subint"                     << endl;
+  cout << "  -F               Frequency scrunch to one channel"               << endl;
+  cout << "  -p               Polarisation scrunch to total intensity"        << endl;
+  cout << "  -I               Transform to Invariant Interval"                << endl;
+  cout << "  -S               Transform to Stokes parameters"                 << endl;
+  cout << "  -x \"start end\"   Extract subints in this inclusive range"      << endl;
+  cout << endl;
+  cout << "The following options take integer arguments"                      << endl;
+  cout << "  -t               Time scrunch by this factor"                    << endl;
+  cout << "  -f               Frequency scrunch by this factor"               << endl;
+  cout << "  -b               Bin scrunch by this factor"                     << endl;
+  cout << "  --setnsub        Time scrunch to this many subints"              << endl;
+  cout << "  --setnchn        Frequency scrunch to this many channels"        << endl;
+  cout << "  --setnbin        Bin scrunch to this many bins"                  << endl;
+  cout << "  --binphsperi     Convert to binary phase periastron order"       << endl;
+  cout << "  --binphsasc      Convert to binary phase asc node order"         << endl;
+  cout << "  --binlngperi     Convert to binary longitude periastron order"   << endl;
+  cout << "  --binlngasc      Convert to binary longitude asc node order"     << endl;
+  cout << endl;
+  cout << "The following options take floating point arguments"               << endl;
+  cout << "  -d               Alter the header dispersion measure"            << endl;
+  cout << "  -D               Dedisperse (but not fscrunch)"                  << endl;
+  cout << "  -R               Correct for ISM faraday rotation"               << endl;
+  cout << "  -s               Smear with this duty cycle"                     << endl;
+  cout << "  -r               Rotate profiles by this many turns"             << endl;
+  cout << "  -w               Reset profile weights to this value"            << endl;
+  cout << endl;
+  cout << "The following options override archive paramaters"                 << endl;
+  cout << "  -L               Set feed basis to Linear"                       << endl;
+  cout << "  -C               Set feed basis to Circular"                     << endl;
+  cout << "  -E ephfile       Install a new ephemeris and update model"       << endl;
+  cout << "  -B               Flip the sideband sense"                        << endl;
+  cout << "  -o centre_freq   Change the frequency labels"                    << endl;
+  cout << endl;
+  cout << "See http://astronomy.swin.edu.au/pulsar/software/manuals/pam.html" << endl;
+  return;
 }
 
 // PAM: A command line tool for modifying archives
@@ -97,7 +94,7 @@ int main (int argc, char *argv[]) {
   bool bscr = false;
   int bscr_fac = 0;
 
-  bool dedisperse = false;
+  bool newdm = false;
   double dm = 0.0;
 
   bool defaraday = false;
@@ -111,6 +108,8 @@ int main (int argc, char *argv[]) {
 
   bool rotate = false;
   double rphase = 0.0;
+
+  bool dedisperse = false;
 
   bool pscr = false;
 
@@ -165,7 +164,7 @@ int main (int argc, char *argv[]) {
       {0, 0, 0, 0}
     };
     
-    c = getopt_long(argc, argv, "hqvVima:e:E:TFpIt:f:b:d:o:s:r:u:w:D:SBLCx:",
+    c = getopt_long(argc, argv, "hvVima:e:E:TFpIt:f:b:d:o:s:r:u:w:D:SBLCx:",
 		    long_options, &options_index);
     
     if (c == -1)
@@ -176,19 +175,15 @@ int main (int argc, char *argv[]) {
       usage();
       return (0);
       break;
-    case 'q':
-      Pulsar::Archive::set_verbosity(0);
-      break;
     case 'v':
       verbose = true;
-      Pulsar::Archive::set_verbosity(2);
       break;
     case 'V':
       verbose = true;
       Pulsar::Archive::set_verbosity(3);
       break;
     case 'i':
-      cout << "$Id: pam.C,v 1.34 2004/07/12 09:28:35 straten Exp $" << endl;
+      cout << "$Id: pam.C,v 1.35 2004/07/13 22:28:17 rmanches Exp $" << endl;
       return 0;
     case 'm':
       save = true;
@@ -269,7 +264,7 @@ int main (int argc, char *argv[]) {
       command += optarg;
       break;
     case 'd':
-      dedisperse = true;
+      newdm = true;
       if (sscanf(optarg, "%lf", &dm) != 1) {
 	cout << "That is not a valid dispersion measure" << endl;
 	return -1;
@@ -278,12 +273,16 @@ int main (int argc, char *argv[]) {
       command += optarg;
       break;
     case 'D':
+      dedisperse = true;
+      command += " -D ";
+      break;
+    case 'R':
       defaraday = true;
       if (sscanf(optarg, "%lf", &rm) != 1) {
 	cout << "That is not a valid rotation measure" << endl;
 	return -1;
       }
-      command += " -D ";
+      command += " -R ";
       command += optarg;
       break;
     case 's':
@@ -451,27 +450,14 @@ int main (int argc, char *argv[]) {
       
       arch = Pulsar::Archive::load(archives[i]);
 
-      if (lin || circ) {
+      if (lin) {
+	arch->set_basis(Signal::Linear);
+	cout << "Feed basis set to Linear" << endl;
+      }
 
-	Pulsar::Receiver* receiver = arch->get<Pulsar::Receiver>();
-
-	if (!receiver)
-	  cerr << "No Receiver Extension in " << archives[i] << endl;
-
-	else {
-
-	  if (lin) {
-	    receiver->set_basis (Signal::Linear);
-	    cout << "Feed basis set to Linear" << endl;
-	  }
-
-	  if (circ) {
-	    receiver->set_basis (Signal::Circular);
-	    cout << "Feed basis set to Circular" << endl;
-	  }
-
-	}
-
+      if (circ) {
+	arch->set_basis(Signal::Circular);
+	cout << "Feed basis set to Circular" << endl;
       }
 
       if (new_cfreq) {
@@ -525,13 +511,19 @@ int main (int argc, char *argv[]) {
 	arch->rotate(period*rphase);
       }
       
-      if (dedisperse) {
+      if (newdm) {
 	for (unsigned isub=0; isub < arch->get_nsubint(); isub++)
 	  arch->get_Integration(isub)->set_dispersion_measure (dm);
 	
 	arch->set_dispersion_measure(dm);
 	if (verbose)
 	  cout << "Archive dispersion measure set to " << dm << endl;
+      }
+
+      if (dedisperse) {
+	arch->dedisperse();
+	if (verbose)
+	  cout << "Archive dedipsersed" << endl;
       }
 
       if (defaraday) {
