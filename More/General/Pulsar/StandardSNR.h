@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/StandardSNR.h,v $
-   $Revision: 1.2 $
-   $Date: 2004/05/01 08:34:08 $
+   $Revision: 1.3 $
+   $Date: 2004/08/09 04:22:17 $
    $Author: ahotan $ */
 
 #ifndef __Pulsar_StandardSNR_h
@@ -20,7 +20,7 @@ namespace Pulsar {
   public:
 
     //! Set the standard against which the S/N will be calculated
-    void set_standard (const Profile* standard);
+    void set_standard (const Profile* profile);
 
     //! Return the signal to noise ratio based on the shift
     float get_snr (const Profile* profile);
