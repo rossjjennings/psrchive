@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Archive.h,v $
-   $Revision: 1.52 $
-   $Date: 2003/01/31 16:05:03 $
-   $Author: straten $ */
+   $Revision: 1.53 $
+   $Date: 2003/02/05 10:20:56 $
+   $Author: pulsar $ */
 
 /*! \mainpage 
  
@@ -409,10 +409,6 @@ namespace Pulsar {
 
     //! Returns the centre phase of the region with minimum total intensity
     float find_min_phase () const;
-
-    //! Plot the requested Profile with some header information
-    void display (unsigned isub=0, unsigned ipol=0, unsigned ichan=0,
-			  float phase=0) const;
 
     // //////////////////////////////////////////////////////////////////
     //
