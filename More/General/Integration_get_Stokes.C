@@ -17,12 +17,17 @@
   get_state() must return either Signal::Stokes or Signal::Coherence.  An
   exception is thrown otherwise.
 */
-void Pulsar::Integration::get_Stokes ( Stokes<float>& S, unsigned ichan, unsigned ibin ) const
+Stokes<float> Pulsar::Integration::get_Stokes (unsigned ichan, unsigned ibin,
+					       float* variance) const
 {
+  Stokes<float>& S;
+  unsigned nvar = 0;
+
   if (get_state() == Signal::Stokes) {
     for (unsigned ipol=0; ipol<4; ++ipol)
       S[ipol] = profiles[ipol][ichan]->get_amps()[ibin];
-    return;
+
+    nvar = 1;
   }
 
   else if (get_state() == Signal::Coherence) {
@@ -32,7 +37,7 @@ void Pulsar::Integration::get_Stokes ( Stokes<float>& S, unsigned ichan, unsigne
     float RePQ = profiles[2][ichan]->get_amps()[ibin];
     float ImPQ = profiles[3][ichan]->get_amps()[ibin];
 
-    if (get_basis() == Signal::Circular) {
+    if (get_basis() == Signal::Linear) {
       S.s0 = PP + QQ;
       S.s1 = PP - QQ;
       S.s2 = 2.0 * RePQ;
@@ -40,14 +45,31 @@ void Pulsar::Integration::get_Stokes ( Stokes<float>& S, unsigned ichan, unsigne
     }
     else {
       S.s0 = PP + QQ;
-      S.s1 = PP - QQ;
-      S.s2 = 2.0 * RePQ;
-      S.s3 = 2.0 * ImPQ;
+      S.s3 = PP - QQ;
+      S.s1 = 2.0 * RePQ;
+      S.s2 = 2.0 * ImPQ;
     }
-    return;
+
+    nvar = 2;
+  }
+  else
+    throw Error (InvalidPolnState, "Integration::get_Stokes");
+
+  if (variance) {
+
+    *variance = 0.0;
+
+    for (unsigned ipol=0; ipol<ivar; ipol++) {
+      double mean, var;
+      profiles[ipol][ichan]->stats (profiles[ipol][ichan]->find_min_phase(),
+				    &mean, &var);
+      *variance += var;
+    }
+
   }
 
-  throw Error (InvalidPolnState, "Integration::get_Stokes");
+  return S;
+
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -108,7 +130,7 @@ void Pulsar::Integration::get_Stokes (vector< Stokes<float> >& S,
     else
       ibin = idim;
 
-    get_Stokes (S[idim], ichan, ibin);
+    S[idim] = get_Stokes (ichan, ibin);
 
   }
 }
