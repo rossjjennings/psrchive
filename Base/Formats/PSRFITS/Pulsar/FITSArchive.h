@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/PSRFITS/Pulsar/FITSArchive.h,v $
-   $Revision: 1.8 $
-   $Date: 2003/08/11 06:08:32 $
-   $Author: ahotan $ */
+   $Revision: 1.9 $
+   $Date: 2003/08/14 19:11:08 $
+   $Author: straten $ */
 
 #include <fitsio.h>
 
@@ -83,12 +83,12 @@ namespace Pulsar {
 
   protected:
 
+    friend class Archive::Advocate<FITSArchive>;
+
     //! This class registers the FITSArchive plugin class for use
     class Agent : public Archive::Advocate<FITSArchive> {
 
       public:
-
-        Agent () { } 
 
         //! Advocate the use of TimerArchive to interpret filename
         bool advocate (const char* filename);
