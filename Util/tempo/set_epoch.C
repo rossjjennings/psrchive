@@ -1,7 +1,7 @@
-
 #include "psrephem.h"
 #include "ephio.h"
 #include "Cartesian.h"
+#include "Error.h"
 
 void pospm_conv (double alpha, double delta, double pmra, double pmdec,
 		 Cartesian& r, Cartesian& u)
@@ -23,7 +23,7 @@ void pospm_conv (double alpha, double delta, double pmra, double pmdec,
   double sd = sin(2.0*M_PI*delta);
 
   if (cd < 0.0)
-    throw string ("pospm_conv: |delta| > pi/2");
+    throw Error (InvalidParam, "pospm_conv", "|delta| > pi/2");
 
   r.x = ca*cd;
   r.y = sa*cd;
@@ -42,7 +42,8 @@ void psrephem::set_epoch (const MJD& new_epoch, bool binary)
     current_epoch = MJD (value_integer[EPH_PEPOCH],
 			 value_double [EPH_PEPOCH]);
   else
-    throw string ("psrephem::set_epoch current epoch unknown");
+    throw Error (InvalidParam, "psrephem::set_epoch",
+		 "current PEPOCH unknown");
 
   double seconds = (new_epoch - current_epoch).in_seconds();
 
@@ -102,6 +103,10 @@ void psrephem::set_epoch (const MJD& new_epoch, bool binary)
     value_double[EPH_DECJ] += mu_delta * years;
     
     value_double[EPH_RAJ]  = atan2 (sin_alpha, cos_alpha) / (2.0*M_PI);
+
+    if (value_double[EPH_RAJ] < 0)
+      value_double[EPH_RAJ] += 1.0;
+
     value_double[EPH_DECJ] = atan2 (sin_delta, cos_delta) / (2.0*M_PI);
   }
 
