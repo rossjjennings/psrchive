@@ -61,12 +61,6 @@ static bool is_timer (struct timer& hdr)
   if (hdr.nbin < 1)
     return false;
 
-  if (hdr.tape_number < 0)
-    return false;
-
-  if (hdr.file_number < 0)
-    return false;
-
   if (hdr.mjd < 2000 || hdr.mjd > 500000)
     return false;
 
