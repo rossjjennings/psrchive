@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Integration.h,v $
-   $Revision: 1.4 $
-   $Date: 2002/04/11 07:01:18 $
+   $Revision: 1.5 $
+   $Date: 2002/04/11 15:07:23 $
    $Author: straten $ */
 
 /*
@@ -211,6 +211,9 @@ namespace Pulsar {
 
     //! The data area
     vector< vector<Profile*> > profiles;
+
+    //! Inherited types may re-define the type of profile contained in profiles
+    virtual Profile* new_Profile ();
 
     // convert Stokes IQUV to XYUV, where X=.5(I+Q) and Y=.5(I-Q).
     // Should only be called on data with linear feeds
