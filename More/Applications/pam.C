@@ -165,7 +165,7 @@ int main (int argc, char *argv[]) {
       Pulsar::Archive::set_verbosity(3);
       break;
     case 'i':
-      cout << "$Id: pam.C,v 1.27 2004/02/08 14:57:05 ahotan Exp $" << endl;
+      cout << "$Id: pam.C,v 1.28 2004/02/17 03:48:35 ahotan Exp $" << endl;
       return 0;
     case 'm':
       save = true;
@@ -187,6 +187,7 @@ int main (int argc, char *argv[]) {
       new_eph = true;
       eph_file = optarg;
       command += " -E";
+      break;
     case 'T':
       tscr = true;
       command += " -T";
