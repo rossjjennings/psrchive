@@ -2,14 +2,14 @@
 
 #include "CommandParser.h"
 
-class tester : public CommandParser {
+class parent : public CommandParser {
 
 public:
-  tester () {
-    prompt = "tester> ";
-    add_command (&tester::testing, "test", "this is a test command parser");
-    add_command (&tester::trying, "try",  "type the commands listed");
-    add_command (&tester::erring, "error","or type a command not listed");
+  parent () {
+    prompt = "parent> ";
+    add_command (&parent::testing, "test", "this is a test command parser");
+    add_command (&parent::trying, "try",  "type the commands listed");
+    add_command (&parent::erring, "error","or type a command not listed");
   }
 
   string testing (const string& args) { return "testing"; }
@@ -18,9 +18,22 @@ public:
 
 };
 
+class child : public parent {
+
+public:
+  child () { value = 0; }
+  int value;
+};
+
 int main (int argc, char** argv)
 {
-  tester processor;
+  CommandParser::debug = true;
+
+  cerr << "Creating parent instance" << endl;
+  parent test;
+
+  cerr << "Creating child instance" << endl;
+  child processor;
 
   cout << processor.prompt;
 

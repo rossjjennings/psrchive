@@ -129,12 +129,23 @@ void CommandParser::add_command (string (Parser::*method) (const string&),
 				 const char* cmd, const char* help, 
 				 const char* detailed_help)
 {
+  if (debug)
+    cerr << "CommandParser::add_command \"" << cmd << "\"" << endl;
+
+  Parser* instance = static_cast<Parser*> (this);
+
+#if __GNU_C_PLUS_PLUS_dynamic_cast_BUG_GETS_FIXED
+  // this is actually more correct
   Parser* instance = dynamic_cast<Parser*> (this);
   if (!instance) {
     string error ("CommandParser::add_command instance/method mis-match");
     cerr << error << endl;
     throw error;
   }
+
+  if (debug)
+    cerr << "CommandParser::add_command dynamic_cast ok" << endl;
+#endif
 
   for (unsigned icmd=0; icmd < commands.size(); icmd++)
     if (cmd == commands[icmd]->command) {
@@ -143,6 +154,9 @@ void CommandParser::add_command (string (Parser::*method) (const string&),
       throw error;
     }
   
+  if (debug)
+    cerr << "CommandParser::add_command push_back new Command<Parser>" << endl;
+
   commands.push_back ( new Command<Parser> (instance, method,
 					    cmd, help, detailed_help));
 }
