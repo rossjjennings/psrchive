@@ -124,6 +124,19 @@ Pulsar::Integration::Integration (const Integration& subint,
       *(profiles[ipol][ichan]) = *(subint.profiles[ipol][ichan]);
 }
 
+//! copy the main information from another subint
+void Pulsar::Integration::copy (const Integration& subint)
+{
+  set_mid_time ( subint.get_mid_time());
+  set_duration ( subint.get_duration());
+  set_centre_frequency ( subint.get_centre_frequency() );
+  set_bandwidth ( subint.get_bandwidth() );
+  set_dispersion_measure ( subint.get_dispersion_measure() );
+  set_folding_period ( subint.get_folding_period() );
+  set_feed_type ( subint.get_feed_type() );
+  set_poln_state ( subint.get_poln_state() );
+}
+
 Pulsar::Profile* Pulsar::Integration::get_Profile (int ipol, int ichan)
 {
   if (ipol < 0 || ipol>=get_npol())

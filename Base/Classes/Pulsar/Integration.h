@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Integration.h,v $
-   $Revision: 1.16 $
-   $Date: 2002/04/20 10:35:27 $
-   $Author: straten $ */
+   $Revision: 1.17 $
+   $Date: 2002/04/22 06:59:36 $
+   $Author: ahotan $ */
 
 /*
   
@@ -45,8 +45,11 @@ namespace Pulsar {
     //! Destructor deletes data area
     virtual ~Integration ();
 
-    //! Copy constructor
+    //! Copy constructor - copies only the profiles
     Integration (const Integration& subint, int npol=0, int nchan=0);
+
+    //! Copy the common attributes
+    virtual void copy (const Integration& subint);
 
     //! Return the pointer to a new copy of self
     virtual Integration* clone (int npol=0, int nchan=0) const = 0;
