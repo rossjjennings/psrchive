@@ -56,6 +56,32 @@ int Timer::fload (const char* fname, struct timer* hdr, bool big_endian)
   return ret;
 }
 
+static bool is_timer (struct timer& hdr) 
+{
+  if (hdr.nbin < 1)
+    return false;
+
+  if (hdr.tape_number < 0)
+    return false;
+
+  if (hdr.file_number < 0)
+    return false;
+
+  if (hdr.mjd < 2000 || hdr.mjd > 500000)
+    return false;
+
+  if (hdr.nsub_int < 0)
+    return false;
+
+  if (hdr.nsub_band < 0)
+    return false;
+
+  if (hdr.obstype < 0 || hdr.obstype > 30)
+    return false;
+
+  return true;
+}
+
 int Timer::load (FILE* fptr, struct timer* hdr, bool big_endian)
 {
   if (fread (hdr, sizeof(struct timer), 1, fptr) < 1)  {
@@ -72,6 +98,10 @@ int Timer::load (FILE* fptr, struct timer* hdr, bool big_endian)
   else
     timer_fromLittleEndian (hdr);
 
+  // sanity check and return -1 on error
+  if (! is_timer (*hdr) )
+    return -1;
+  
   if (verbose) cerr << "Timer::load correct header" << endl;
 
   if (strcmp (hdr->machine_id, "S2") == 0)  {
