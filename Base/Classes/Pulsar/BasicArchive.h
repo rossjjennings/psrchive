@@ -1,15 +1,15 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/BasicArchive.h,v $
-   $Revision: 1.16 $
-   $Date: 2002/10/12 23:33:13 $
+   $Revision: 1.17 $
+   $Date: 2002/10/25 04:07:12 $
    $Author: straten $ */
 
 #include "Archive.h"
   
 namespace Pulsar {
 
-  //! A class that defines most of the pure virtual methods declared in Archive.h
+  //! Defines the pure virtual methods declared in Pulsar::Archive
   /*!  This class is designed to make it easier to develop new objects
     of type Pulsar::Archive.  It is a minimal implimentation of the
     Pulsar::Archive class that defines a set of variables which can be
@@ -24,312 +24,208 @@ namespace Pulsar {
     class as required.  */
 
   class BasicArchive : public Archive {
-    
-    // Variables to hold the data we will be working with
-
-  protected:
-
-    //! The MJD at the start of the observation
-    MJD         startmjd;
-
-    //! The MJD at the end of the observation
-    MJD         endmjd;
-
-    //! The type of feed used
-    Signal::Basis feedtype;
-
-    //! The polarisation state of the data (XXYY, IQUV, etc.)
-    Signal::State polstate;
-
-    Signal::Source obstype;
-
-    //! The tempo ID character of the telescope used
-    char        telcode;
-
-    string      psrname,telid,frontend,backend,datatype;
-    unsigned         nbin,nchan,npol,nsubint;
-    double      bandwidth,cenfreq;
-    float       calfreq,caldcyc,calphase;
-    bool        facorr,pacorr,rm_ism,rm_iono,dedisp;
-
-    //! name of the file from which the archive was loaded
-    string filename;
-
-    void init();
 
   public:
 
-    // while testing, an empty load and unload
-    void unload (const char * foo) const 
-    { cerr << "BasicArchive::unload Cannot unload " << foo << endl; }
+    //! null constructor
+    BasicArchive ();
 
-    void load (const char * foo)
-    { cerr << "BasicArchive::load Cannot load " << foo << endl; }
+    //! copy constructor
+    BasicArchive (const BasicArchive& archive);
 
-    //! Get the name of the thing from which the archive was loaded
-    virtual string get_filename () const { return filename; }
-
-    virtual void set_filename (const char* filename);
-
-    //! Returns a pointer to a new copy of self
-    Archive* clone () const { return new BasicArchive (*this); }
-
-    //! A null constructor to initialize the storage variables
-    BasicArchive () { init(); }
-
-    //! A copy constructor
-    BasicArchive (const BasicArchive& copy) { operator = (copy); }
-
-    const BasicArchive& operator = (const BasicArchive& copy);
+    //! copy constructor
+    const BasicArchive& operator = (const BasicArchive& archive);
 
     //! destructor
-    virtual ~BasicArchive ();
+    ~BasicArchive ();
 
-    // Define the pure virtual functions defined in the ArchiveBase
-    // that are used to get/set the above variables
- 
-    //! Return the name of the telescope used
-    string get_tel_id () const
-      {
-	return telid;
-      }
+    // //////////////////////////////////////////////////////////////////
+    //
+    // implement the pure virtual methods of the Archive base class
+    //
+
+    //! Get the name of the thing from which the archive was loaded
+    virtual string get_filename () const;
+    //! Set the name of the thing to which the archive will be unloaded
+    virtual void set_filename (const char* filename);
 
     //! Get the tempo code of the telescope used
-    char get_telescope_code () const
-    {
-      return telcode;
-    }
+    virtual char get_telescope_code () const;
     //! Set the tempo code of the telescope used
-    void set_telescope_code (char telescope_code)
-    {
-      telcode = telescope_code;
-    }
+    virtual void set_telescope_code (char telescope_code);
 
-    //! Return the name of the front-end system used
-    string get_frontend_id () const
-      {
-	return frontend;
-      }
+    //! Get the feed configuration of the receiver
+    virtual Signal::Basis get_basis () const;
+    //! Set the feed configuration of the receiver
+    virtual void set_basis (Signal::Basis type);
 
-    //! Return the name of the back-end system used
-    string get_backend_id () const
-      {
-	return backend;
-      }
+    //! Get the state of the profiles
+    virtual Signal::State get_state () const;
+    //! Set the state of the profiles
+    virtual void set_state (Signal::State state);
 
-    //! Return the type of observation (psr, cal, etc.)
-    Signal::Source get_observation_type () const
-      {
-	return obstype;
-      }
+    //! Get the observation type (psr, cal)
+    virtual Signal::Source get_type () const;
+    //! Set the observation type (psr, cal)
+    virtual void set_type (Signal::Source type);
 
-    string get_source () const
-    {
-      return psrname;
-    }
-
-    //! Set the name of the telescope use
-    void set_tel_id (string name)
-      {
-	telid = name;
-      }
-
-    //! Set the name of the front-end system used
-    void set_frontend_id (string name)
-      {
-	frontend = name;
-      }
-
-    //! Set the name of the back-end system used
-    void set_backend_id (string name)
-      {
-	backend = name;
-      }
-
-    //! Set the observation type (psr, cal etc.)
-    void set_observation_type (Signal::Source ob_type)
-      {
-	obstype = ob_type;
-      }
-    
-    void set_source (const string& src)
-    {
-      psrname = src;
-    }
+    //! Get the source name
+    virtual string get_source () const;
+    //! Set the source name
+    virtual void set_source (const string& source);
 
     //! Get the coordinates of the source
-    sky_coord get_coordinates () const;
-
+    virtual sky_coord get_coordinates () const;
     //! Set the coordinates of the source
-    void set_coordinates (const sky_coord& coordinates);
-
-    //! Return the bandwidth of the observation
-    double get_bandwidth () const
-      {
-	return bandwidth;
-      }
-    
-    //! Set the bandwidth of the observation
-    void set_bandwidth (double bw)
-      {
-	bandwidth = bw;
-      }
-    
-    //! Return the centre frequency of the observation
-    double get_centre_frequency () const
-      {
-	return cenfreq;
-      }
-    
-    //! Set the centre frequency of the observation
-    void set_centre_frequency (double cf)
-      {
-	cenfreq = cf;
-      }
-
-    //! Get the number of sub-integrations in the archive
-    unsigned get_nsubint () const;
-
-    //! Set the number of sub-integrations in the archive
-    void set_nsubint (unsigned num_sub);
-
-    //! Get the number of frequency polns used
-    unsigned get_npol () const;
-    
-    //! Set the number of frequency polns used
-    void set_npol (unsigned numpol);
-    
-    //! Get the number of frequency channels used
-    unsigned get_nchan () const;
-    
-    //! Set the number of frequency channels used
-    void set_nchan (unsigned numchan);
+    virtual void set_coordinates (const sky_coord& coordinates);
 
     //! Get the number of pulsar phase bins used
-    unsigned get_nbin () const;
-    
-    //! Set the number of pulsar phase bins used
-    void set_nbin (unsigned numbins);
-    
-    //! Return the type of feed used
-    Signal::Basis get_basis () const
-      {
-	return feedtype;
-      }
+    /*! This attribute may be set only through Archive::resize */
+    virtual unsigned get_nbin () const;
 
-    //! Set the type of feed used 
-    void set_basis (Signal::Basis feed)
-      {
-	feedtype = feed;
-      }
-    
-    //! Return the polarisation state of the data
-    Signal::State get_state () const
-      {
-	return polstate;
-      }
-    
-    //! Set the polarisation state of the data
-    void set_state (Signal::State state)
-      {
-	polstate = state;
-      }
-    
+    //! Get the number of frequency channels used
+    /*! This attribute may be set only through Archive::resize */
+    virtual unsigned get_nchan () const;
+
+    //! Get the number of frequency channels used
+    /*! This attribute may be set only through Archive::resize */
+    virtual unsigned get_npol () const;
+
+    //! Get the number of sub-integrations stored in the file
+    /*! This attribute may be set only through Archive::resize */
+    virtual unsigned get_nsubint () const;
+
+    //! Get the overall bandwidth of the observation
+    virtual double get_bandwidth () const;
+    //! Set the overall bandwidth of the observation
+    virtual void set_bandwidth (double bw);
+
     //! Get the centre frequency of the observation
-    virtual double get_dispersion_measure () const
-    {
-      return ephemeris.get_dm();
-    }
-
+    virtual double get_centre_frequency () const;
     //! Set the centre frequency of the observation
-    virtual void set_dispersion_measure (double dm)
-    {
-      ephemeris.set_dm (dm);
-    }
+    virtual void set_centre_frequency (double cf);
+
+    //! Get the dispersion measure (in \f${\rm pc cm}^{-3}\f$)
+    virtual double get_dispersion_measure () const;
+    //! Set the dispersion measure (in \f${\rm pc cm}^{-3}\f$)
+    virtual void set_dispersion_measure (double dm);
 
     //! Data has been flux calibrated
-    bool get_flux_calibrated () const
-    {
-      cerr << "BasicArchive::get_flux_calibrated not implemented" << endl;
-      return false;
-    }
-
+    virtual bool get_flux_calibrated () const;
     //! Set the status of the flux calibrated flag
-    void set_flux_calibrated (bool done = true)
-    {
-      cerr << "BasicArchive::set_flux_calibrated not implemented" << endl;
-    }
+    virtual void set_flux_calibrated (bool done = true);
 
+    //! data has been corrected for feed angle errors
+    virtual bool get_feedangle_corrected () const;
+    //! Set the status of the feed angle flag
+    virtual void set_feedangle_corrected (bool done = true);
 
-    //! Return whether or not the data has been corrected for feed angle errors
-    bool get_feedangle_corrected () const
-      {
-	return facorr;
-      }
+    //! data has been corrected for ionospheric faraday rotation
+    virtual bool get_iono_rm_corrected () const;
+    //! Set the status of the ionospheric RM flag
+    virtual void set_iono_rm_corrected (bool done = true);
 
-    //! Return whether or not the data has been corrected for ionospheric Faraday rotation
-    bool get_iono_rm_corrected () const
-      {
-	return rm_iono;
-      }
-    
-    //! Return whether or not the data has been corrected for ISM Faraday rotation
-    bool get_ism_rm_corrected () const
-      {
-	return rm_ism;
-      }
-    
-    //! Return whether or not the data has been corrected for parallactic angle errors
-    bool get_parallactic_corrected () const
-      {
-	return pacorr;
-      } 
-    
-    //! Set whether or not the data has been corrected for feed angle errors
-    void set_feedangle_corrected (bool done = true)
-      {
-	facorr = done;
-      }
-    
-    //! Set whether or not the data has been corrected for ionospheric Faraday rotation
-    void set_iono_rm_corrected (bool done = true)
-      {
-	rm_iono = done;
-      }
-    
-    //! Set whether or not the data has been corrected for ISM Faraday rotation
-    void set_ism_rm_corrected (bool done = true)
-      {
-	rm_ism = done;
-      }
-    
-    //! Set whether or not the data has been corrected for parallactic angle errors
-    void set_parallactic_corrected (bool done = true)
-      {
-	pacorr = done;
-      }
-    
-    //! Get the channel bandwidth
-    double get_chanbw () const
-    {
-      if (nchan)
-	return bandwidth / nchan;
-      else
-	return 0;
-    }
+    //! data has been corrected for ISM faraday rotation
+    virtual bool get_ism_rm_corrected () const;
+    //! Set the status of the ISM RM flag
+    virtual void set_ism_rm_corrected (bool done = true);
 
-    //! Set the channel bandwidth
-    void set_chanbw (double chan_width)
-    {
-      bandwidth = chan_width * nchan;
-    }
+    //! data has been corrected for parallactic angle errors
+    virtual bool get_parallactic_corrected () const;
+    //! Set the status of the parallactic angle flag
+    virtual void set_parallactic_corrected (bool done = true);
+
+    //! Inter-channel dispersion delay has been removed
+    virtual bool get_dedispersed () const;
+    //! Set the status of the parallactic angle flag
+    virtual void set_dedispersed (bool done = true);
+
 
   protected:
+
+    //! set the number of pulsar phase bins used
+    /*! This attribute may be set only through Archive::resize */
+    virtual void set_nbin (unsigned nbin);
+
+    //! Get the number of frequency channels used
+    /*! This attribute may be set only through Archive::resize */
+    virtual void set_nchan (unsigned nchan);
+
+    //! Get the number of frequency channels used
+    /*! This attribute may be set only through Archive::resize */
+    virtual void set_npol (unsigned npol);
+
+    //! Get the number of sub-integrations stored in the file
+    /*! This attribute may be set only through Archive::resize */
+    virtual void set_nsubint (unsigned nsubint);
+
+    //! The name of the thing from which the archive was loaded
+    string filename;
+
+    //! The tempo code of the telescope used
+    char telescope_code;
+
+    //! The feed configuration of the receiver
+    Signal::Basis basis;
+
+    //! The state of the profiles
+    Signal::State state;
+
+    //! The observation type (psr, cal)
+    Signal::Source type;
+
+    //! The source name
+    string source;
+ 
+    //! The coordinates of the source
+    sky_coord coordinates;
+
+    //! The number of pulsar phase bins used
+    /*! This attribute may be set only through Archive::resize */
+    unsigned nbin;
+
+    //! The number of frequency channels used
+    /*! This attribute may be set only through Archive::resize */
+    unsigned nchan;
+
+    //! The number of frequency channels used
+    /*! This attribute may be set only through Archive::resize */
+    unsigned npol;
+
+    //! The number of sub-integrations stored in the file
+    /*! This attribute may be set only through Archive::resize */
+    unsigned nsubint;
+
+    //! The overall bandwidth of the observation
+    double bandwidth;
+
+    //! The centre frequency of the observation
+    double centre_frequency;
+
+    //! The dispersion measure (in \f${\rm pc cm}^{-3}\f$)
+    double dispersion_measure;
+
+    //! Data has been flux calibrated
+    bool flux_calibrated;
+
+    //! data has been corrected for feed angle errors
+    bool feedangle_corrected;
+
+    //! data has been corrected for ionospheric faraday rotation
+    bool iono_rm_corrected;
+
+    //! data has been corrected for ISM faraday rotation
+    bool ism_rm_corrected;
+
+    //! data has been corrected for parallactic angle errors
+    bool parallactic_corrected;
+
+    bool dedispersed;
+
     //! Return a pointer to a new BasicIntegration
     Integration* new_Integration (Integration* subint);
     
   };
-  
 
 }
 
