@@ -239,7 +239,7 @@ void Pulsar::Archive::fscrunch_to_nchan (unsigned new_chan)
 */
 void Pulsar::Archive::tscrunch_to_nsub (unsigned new_nsub)
 {
-  if (get_nsubint() % new_nsub != 0)
+  if (new_nsub <= 0)
     throw Error (InvalidParam, "Pulsar::Archive::tscrunch_to_nsub");
   else
     tscrunch(get_nsubint() / new_nsub);
