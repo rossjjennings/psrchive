@@ -1,16 +1,16 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Profile.h,v $
-   $Revision: 1.49 $
-   $Date: 2004/03/28 02:39:12 $
-   $Author: sord $ */
+   $Revision: 1.50 $
+   $Date: 2004/04/14 08:15:45 $
+   $Author: straten $ */
 
 #ifndef __Pulsar_Profile_h
 #define __Pulsar_Profile_h
 
 #include "toa.h"
 #include "Types.h"
-#include "Reference.h"
+#include "Functor.h"
 
 namespace Pulsar {
 
@@ -138,6 +138,8 @@ namespace Pulsar {
     //! Returns the bin number with the minimum amplitude
     int find_min_bin (int bin_start=0, int bin_end=0) const;
 
+    //! The functor that implements the snr method
+    static Functor<double(const Pulsar::Profile*)> snr_functor;
 
     //! Returns the signal to noise ratio of the profile
     float snr () const;
@@ -289,6 +291,9 @@ namespace Pulsar {
     void fftconv (Profile& std, double& shift, float& eshift, 
 		  float& snrfft, float& esnrfft);
   };
+
+  //! Default implmentation of Profile::snr method
+  double snr_phase (const Profile* profile);
 
 }
 
