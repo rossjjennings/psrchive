@@ -257,25 +257,6 @@ void Pulsar::FITSArchive::unload_integration (int row,
 	temparray2[i] = int16 ((temparray1[i]-offset) / scalefac);
       }
 
-      // Write the scale factor to file
-
-      if (verbose == 3)
-	cerr << "FITSArchive::unload_integration writing scale fac" << endl;
-
-      colnum = 0;
-      fits_get_colnum (thefptr, CASEINSEN, "DAT_SCL", &colnum, &status);
-
-      if (status != 0)
-	throw FITSError (status, "FITSArchive:unload_integration",
-			 "fits_get_colnum DAT_SCL");
-
-      fits_write_col (thefptr, TFLOAT, colnum, row, counter1, 1, 
-		      &scalefac, &status);
-      
-      if (status != 0)
-	throw FITSError (status, "FITSArchive:unload_integration",
-			 "fits_write_col DAT_SCL");
-      
       // Write the offset to file
 
       if (verbose == 3)
@@ -295,6 +276,25 @@ void Pulsar::FITSArchive::unload_integration (int row,
 	throw FITSError (status, "FITSArchive:unload_integration",
 			 "fits_write_col DAT_OFFS");
 
+      // Write the scale factor to file
+
+      if (verbose == 3)
+	cerr << "FITSArchive::unload_integration writing scale fac" << endl;
+
+      colnum = 0;
+      fits_get_colnum (thefptr, CASEINSEN, "DAT_SCL", &colnum, &status);
+
+      if (status != 0)
+	throw FITSError (status, "FITSArchive:unload_integration",
+			 "fits_get_colnum DAT_SCL");
+
+      fits_write_col (thefptr, TFLOAT, colnum, row, counter1, 1, 
+		      &scalefac, &status);
+      
+      if (status != 0)
+	throw FITSError (status, "FITSArchive:unload_integration",
+			 "fits_write_col DAT_SCL");
+      
       counter1 ++;
 
       // Write the data
