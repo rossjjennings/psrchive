@@ -116,7 +116,7 @@ int main (int argc, char *argv[])
       denoise = true;
       break;
     case 'i':
-      cout << "$Id: pat.C,v 1.35 2005/02/02 15:35:56 straten Exp $" << endl;
+      cout << "$Id: pat.C,v 1.36 2005/02/13 08:13:59 straten Exp $" << endl;
       return 0;
 
     case 'F':
@@ -411,17 +411,18 @@ void loadGaussian(string file,  Reference::To<Pulsar::Archive> &stdarch,  Refere
   // Now replace profile with Gaussian components
   Reference::To<Pulsar::Profile> prof;
   float *amps;
-  float x,y;
+  double x,y;
   unsigned int i,j;
 
   prof = stdarch->get_Profile(0,0,0);
   amps = prof->get_amps();
   for (i=0;i<stdarch->get_nbin();i++)
     {
-      x = (float)i*360.0/(float)stdarch->get_nbin();
+      x = double(i)*360.0/double(stdarch->get_nbin());
       y = 0.0;
+      double two = 2.0;
       for (j=0;j<ncomp;j++)
-	y+=amp[j]*exp(-pow(x-pos[j],2)/pow(width[j],2));
+	y+=amp[j]*exp(-pow(x-pos[j],two)/pow(double(width[j]),two));
       amps[i]=y;
       if (firstTime) cout << i << " " << y << " PROFILE " << endl;
     }
