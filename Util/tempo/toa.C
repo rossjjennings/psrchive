@@ -298,10 +298,10 @@ int Tempo::toa::Command_load (const char* instring)
   init();
 
   format = Command;
+  string temp = instring;
+  auxinfo = temp.substr(0, temp.length()-1);
 
-  auxinfo = instring;
-  
-  return -1;
+  return 0;
 }
 
 int Tempo::toa::Command_unload (char* outstring) const
