@@ -38,29 +38,67 @@ void TextInterface::parse_indeces (vector<unsigned>& index, string& name)
       throw Error (InvalidParam, "TextInterface::parse_indeces",
 		   "invalid range '" + range + "'");
 
-  if (verbose)
-    cerr << "TextInterface::parse_indeces remaining name=" << name << endl;
-
   string backup = range;
 
   while (!range.empty()) {
-    string sub = stringtok (range, ",");
-    unsigned start, end;
+    string sub = stringtok (range, ",", false, false);
+    int start, end;
+    char c;
 
-    int scanned = sscanf (sub.c_str(), "%u-%u", &start, &end);
+    int scanned = sscanf (sub.c_str(), "%d%c%d", &start, &c, &end);
 
-    if (scanned == 2)
-      for (unsigned i=start; i <= end; i++)
+    if (scanned == 3)  {
+
+      if (c != '-')
+        throw Error (InvalidParam, "TextInterface::parse_indeces",
+                     "invalid sub-range '" + range + "'");
+
+      if (verbose)
+        cerr << "TextInterface::parse_indeces start=" << start 
+             << " end=" << end << endl;
+
+      if (start < 0)
+        throw Error (InvalidRange, "TextInterface::parse_indeces",
+                     "start=%d < 0", start);
+
+      if (end < 0)
+        throw Error (InvalidRange, "TextInterface::parse_indeces",
+                     "end index=%d < 0", end);
+
+      if (end < start)
+        throw Error (InvalidRange, "TextInterface::parse_indeces",
+                     "end=%d < start=%d", end, start);
+
+
+      for (int i=start; i <= end; i++)
 	index.push_back (i);
-    else if (scanned == 1)
+
+    }
+
+    else if (scanned == 1)  {
+
+      if (verbose)
+        cerr << "TextInterface::parse_indeces index=" << start << endl;
+
+      if (start < 0)
+        throw Error (InvalidRange, "TextInterface::parse_indeces",
+                     "index=%d < 0", start);
+
       index.push_back (start);
+
+    }
+
     else
-      throw (InvalidParam, "TextInterface::parse_indeces",
-		   "invalid sub-range '" + sub + "'");
+      throw Error (InvalidParam, "TextInterface::parse_indeces",
+		                 "invalid sub-range '" + sub + "'");
   }
 
   // satisfied that the range is valid, remove it from the qualified name
   name.erase (0, pos+2);
+
+  if (verbose)
+    cerr << "TextInterface::parse_indeces remaining name=" << name << endl;
+
 }
 
 
