@@ -83,7 +83,7 @@ void Pulsar::PolnProfile::transform (const Jones<T>& response)
 
   if (correct_weights) {
 
-    float Gain = det(response).real();
+    float Gain = abs( det(response) );
 
     p0->set_weight ( p0->get_weight() / Gain );
     p1->set_weight ( p1->get_weight() / Gain );
