@@ -1,4 +1,5 @@
 #include "Pulsar/ReceptionCalibrator.h"
+#include "Pulsar/PolnCalibrator.h"
 #include "Pulsar/Integration.h"
 #include "Pulsar/Archive.h"
 
@@ -42,16 +43,8 @@ void Pulsar::ReceptionCalibrator::initial_observation (const Archive* data)
 		 "Pulsar::ReceptionCalibrator::initial_observation",
 		 "Pulsar::Archive='" + data->get_filename() 
 		 + "' not a Pulsar observation");
-  
-  // Check that the archive has full polarization information
-  Signal::State state = data->get_state();
-  bool fullStokes = state == Signal::Stokes || state == Signal::Coherence;
 
-  if (!fullStokes)
-    throw Error (InvalidParam,
-		 "Pulsar::ReceptionCalibrator::initial_observation",
-		 "Pulsar::Archive='" + data->get_filename() + "'\n"
-		 "invalid state=" + State2string(state));
+  assert_full_poln (data, "Pulsar::ReceptionCalibrator::initial_observation");
 
   if (data->get_parallactic_corrected ())
     throw Error (InvalidParam,
@@ -250,7 +243,66 @@ void Pulsar::ReceptionCalibrator::add_PolnCalibrator (const PolnCalibrator* p)
   cerr << "Pulsar::ReceptionCalibrator::add_PolnCalibrator unimplemented"
        << endl;
 
-  // includes_PolnCalibrator = true;
+  const Archive* calibrator = p->get_Archive();
+
+  if (calibrator->get_state() != Signal::Coherence)
+    throw Error (InvalidParam, 
+		 "Pulsar::ReceptionCalibrator::add_PolnCalibrator",
+		 "Archive='" + calibrator->get_filename() + "' "
+		 "invalid state=" + State2string(calibrator->get_state()));
+
+  string reason;
+  if (!uncalibrated->calibrator_match (calibrator, reason))
+    throw Error (InvalidParam,
+		 "Pulsar::ReceptionCalibrator::add_PolnCalibrator",
+		 "'" + calibrator->get_filename() + "' does not match "
+		 "'" + uncalibrated->get_filename() + reason);
+
+  unsigned nchan = uncalibrated->get_nchan ();
+  unsigned nsub = calibrator->get_nsubint();
+  unsigned npol = calibrator->get_npol();
+  
+  assert (npol == 4);
+
+  vector<vector<Estimate<double> > > cal_hi;
+  vector<vector<Estimate<double> > > cal_lo;
+
+  for (unsigned isub=0; isub<nsub; isub++) {
+
+    p->get_levels (isub, nchan, cal_hi, cal_lo);
+
+    const Integration* integration = calibrator->get_Integration (isub);
+    MJD epoch = integration->get_epoch ();
+
+    if (epoch < start_epoch)
+      start_epoch = epoch;
+    if (epoch > end_epoch)
+      end_epoch = epoch;
+
+    for (unsigned ichan=0; ichan<nchan; ichan++) {
+
+      unsigned ipol = 0;
+
+      // transpose [ipol][ichan] output of PolnCalibrator::get_levels
+      vector< Estimate<double> > cal (npol);
+      for (ipol = 0; ipol<npol; ipol++)
+	cal[ipol] = cal_hi[ipol][ichan] - cal_lo[ipol][ichan];
+
+      // convert to Stokes parameters
+      Stokes< Estimate<double> > stokes = convert (cal);
+
+      // convert to MeasuredState format
+      Calibration::MeasuredState state;
+      for (ipol = 0; ipol<npol; ipol++)
+	state.val[ipol] = stokes[ipol].val;
+      state.var = stokes[0].var;
+
+      state.state_index = 0;
+
+      equation[ichan]->add_measurement (epoch, state);
+
+    }
+  }
 }
 
 //! Add the specified FluxCalibrator observation to the set of constraints
@@ -315,6 +367,21 @@ void Pulsar::ReceptionCalibrator::solve ()
 {
   check_ready ("Pulsar::ReceptionCalibrator::solve");
 
+  bool degenerate_rotV = false;
+
+  if (!includes_PolnCalibrator) {
+
+    if (!includes_FluxCalibrator)
+      throw Error (InvalidState, "Pulsar::ReceptionCalibrator::solve",
+		   "no PolnCalibrator or FluxCalibrator data available");
+
+    cerr << "Pulsar::ReceptionCalibrator::solve warning:\n"
+      " Without a PolnCalibrator, there remains a degeneracy"
+      " along the Stokes V axis" << endl;
+
+    degenerate_rotV = true;
+  }
+
   if (!ncoef_set) {
     /* it might be nice to try and choose a good ncoef, based on the
        timescale on which the backend is expected to change and the
@@ -341,6 +408,11 @@ void Pulsar::ReceptionCalibrator::solve ()
       equation[ichan]->set_ncoef (ncoef);
 
     equation[ichan]->set_reference_epoch (mid);
+
+    if (degenerate_rotV) {
+      equation[ichan]->get_receiver()->set_param (6, 0.0);
+      equation[ichan]->get_receiver()->set_infit (6, false);
+    }
 
     equation[ichan]->solve ();
   }
