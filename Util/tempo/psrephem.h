@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/psrephem.h,v $
-   $Revision: 1.31 $
-   $Date: 2004/12/27 13:05:37 $
+   $Revision: 1.32 $
+   $Date: 2005/03/09 16:27:33 $
    $Author: straten $ */
 
 #ifndef __PSREPHEM_H
@@ -101,7 +101,7 @@ class psrephem : public Reference::Able
   void set_double  (int ephind, double );
   void set_MJD     (int ephind, const MJD&);
   void set_Angle   (int ephind, const Angle&);
-  void set_Integer (int ephind, int);
+  void set_integer (int ephind, int);
 
   double p() const;
   double p_err() const;
