@@ -78,8 +78,9 @@ int polynomial::load(istream &istr){
 
   this->init();    
 
+  long int start_pos = istr.tellg();
+
   istr >> psrname;
-  if(!istr.good()) return(-1);  // a quick peek to see if we're wasting time
   istr >> date;
   istr >> utc;
   istr >> mjd_day_num;
@@ -109,7 +110,10 @@ int polynomial::load(istream &istr){
 
   // if input unsuccessful, exit with error 
   // before constructing any dependent objects
-  if(!istr.good()) return(-1);  
+  if(!istr.good()){
+    istr.seekg(start_pos);
+    return(-1);  
+  }
   reftime = MJD(mjd_day_num, frac_mjd);
   int64 turns;
   double fracturns;
@@ -134,20 +138,17 @@ int polynomial::load(istream &istr){
     exp = atoi(strexp.c_str());   // cryptic solaris bug....
     coefs[i] = ord * pow(10, exp);
   }
-  if(!istr.good()) return(-1);
-
+  if(!istr.good()){
+    istr.seekg(start_pos);
+    return(-1);
+  }
   return(0);
-}
-
-// This should be converted to use stringstreams
-// when we move to solaris CC 5.0
-size_t polynomial::size_in_bytes() const {
-return(0);
 }
 
 int polynomial::unload(ostream &ostr) const {
 
   char numstr[100];  // max length of string set by princeton at 86...
+  long int start_pos = ostr.tellp();
 
   if(tempov11)
     sprintf(numstr, "%-10.9s%9.9s%12.12s%22s%19f%7.3lf%7.3lf", 
@@ -188,9 +189,11 @@ int polynomial::unload(ostream &ostr) const {
   }
   if(!ostr.good()){
     fprintf(stderr, "polynomial::unload error: bad stream state detected\n");
+    ostr.seekp(start_pos);
+    ostr.flush();
     return(-1);
   }
-  return(0);
+  return(ostr.tellp() - start_pos);
 }
 
 Phase polynomial::phase(const MJD& t) const { 
@@ -275,7 +278,7 @@ polyco & polyco::operator = (const polyco & in_poly){
   return(*this);
 } 
 
-polyco::polyco(string filename)
+polyco::polyco(const string filename)
 {
   if(load (filename) < 1) { 
     fprintf (stderr, "polyco::polyco - failed to construct from %s\n", filename.c_str());
@@ -284,7 +287,7 @@ polyco::polyco(string filename)
   }
 }
  
-polyco::polyco(char * filename)
+polyco::polyco(const char * filename)
 {
   string s = filename;
   if (load (s) < 1) {
@@ -294,36 +297,28 @@ polyco::polyco(char * filename)
   }
 }
 
-int polyco::load(string polyco_filename){
+int polyco::load(const string polyco_filename, int nbytes){
   ifstream file(polyco_filename.c_str());
-  return(this->load(file));
+  return(this->load(file,nbytes));
 }
 
-int polyco::load(char * polyco_filename)
+int polyco::load(const char * polyco_filename, int nbytes)
 {
   ifstream file(polyco_filename);
-  return(this->load(file));
+  return(this->load(file,nbytes));
 }
 
 int polyco::load(istream &istr, int nbytes){
   int npollys = 0;
   polynomial tst;
   pollys.clear();
-  if(nbytes<0){
-    while(tst.load(istr)==0){
-      pollys.push_back(tst);
-      npollys++;
-    }
-  } else {
-    while (istr.tellg()<nbytes){
-      if(tst.load(istr)==0){
-	fprintf(stderr, "polyco::load error - could not load %d bytes\n", nbytes);
-	return(-1);
-      }
-      pollys.push_back(tst);      
-      npollys++;
-    }
+  int start_pos = (int) istr.tellg();
+  while(tst.load(istr)==0){
+    if(nbytes>0 && nbytes-(int)(istr.tellg()-start_pos)<0) break;
+    pollys.push_back(tst);      
+    npollys++;
   }
+  if(nbytes>0) istr.seekg(start_pos+nbytes);
   return(npollys);
 }
 
@@ -332,23 +327,28 @@ int polyco::load(FILE *fp, int nbytes){
   return(this->load(file, nbytes));
 }
 
-int polyco::unload(string filename) const {
+int polyco::unload(const string filename) const {
   return(this->unload(filename.c_str()));
 }
 
-int polyco::unload(char *filename) const {
+int polyco::unload(const char *filename) const {
   ofstream ostr(filename);
   return(this->unload(ostr));
 }
 
 int polyco::unload(ostream &ostr) const {
+  int bytes_unloaded;
+  int total_bytes = 0;
+  int start_pos = ostr.tellp();
   for(int i=0; i<pollys.size(); ++i){
-    if(pollys[i].unload(ostr)!=0){
+    if((bytes_unloaded = pollys[i].unload(ostr))<0){
       fprintf(stderr, "polyco::unload error - couldn't unload polynomial %d\n", i);
+      ostr.seekp(start_pos);
       return(-1);
     }
+    total_bytes += bytes_unloaded;
   }
-  return(0);
+  return(total_bytes);
 }
 
 int polyco::unload(FILE *fp) const {
@@ -356,37 +356,37 @@ int polyco::unload(FILE *fp) const {
   return(this->unload(file));
 }
 
-int polyco::print(char * chpolly) const{
-  // Terrible terrible terrible
-  // use stringstreams
-  this->unload("polyco.dat.tmp");
-  FILE * fp;
-  if((fp=fopen("polyco.dat.tmp", "r"))==NULL){
-    fprintf(stderr, "polyco::print error - could not open file\n");
-    return(-1);
-  }
-  if(fread(chpolly, this->size_in_bytes(), 1, fp)!=1){
-    fprintf(stderr, "polyco::print error reading file\n");
-    return(-1);
-  }
-  fclose(fp);
-  remove("polyco.dat.tmp");
-  return(0);
-} 
+// int polyco::print(char * chpolly) const{
+//   // Terrible terrible terrible
+//   // use stringstreams
+//   this->unload("polyco.dat.tmp");
+//   FILE * fp;
+//   if((fp=fopen("polyco.dat.tmp", "r"))==NULL){
+//     fprintf(stderr, "polyco::print error - could not open file\n");
+//     return(-1);
+//   }
+//   if(fread(chpolly, this->size_in_bytes(), 1, fp)!=1){
+//     fprintf(stderr, "polyco::print error reading file\n");
+//     return(-1);
+//   }
+//   fclose(fp);
+//   remove("polyco.dat.tmp");
+//   return(0);
+// } 
 
 void polyco::prettyprint() const {
   for(int i=0; i<pollys.size(); ++i) 
     pollys[i].prettyprint();
 }
 
-polynomial polyco::nearest_polly(const MJD &t) const {
+polynomial polyco::nearest_polly(const MJD &t, const string in_psrname) const {
 
   int ipolly=0;
   while (ipolly<pollys.size()) {
     MJD t1 = pollys[ipolly].reftime - (double) pollys[ipolly].nspan_mins*60.0/2.0;
     MJD t2 = pollys[ipolly].reftime + (double) pollys[ipolly].nspan_mins*60.0/2.0;
     
-    if (t>=t1 && t<=t2) {
+    if (t>=t1 && t<=t2 && (in_psrname==pollys[ipolly].psrname || in_psrname=="any")) {
       return(pollys[ipolly]);
     }
     ipolly++;
@@ -396,98 +396,31 @@ polynomial polyco::nearest_polly(const MJD &t) const {
   throw(failed);
 }  
 
-polynomial polyco::nearest_polly(string in_psrname,const MJD &t) const {
-
-  int ipolly=0;
-  while (ipolly<pollys.size()) {
-    MJD t1 = pollys[ipolly].reftime - (double) pollys[ipolly].nspan_mins*60.0/2.0;
-    MJD t2 = pollys[ipolly].reftime + (double) pollys[ipolly].nspan_mins*60.0/2.0;
-    
-    if (t>=t1 && t<=t2 && pollys[ipolly].psrname==in_psrname) {
-      return(pollys[ipolly]);
-    }
-    ipolly++;
-  }
-  fprintf(stderr, "polyco::nearest_polly error - could not find polynomial for MJD %s\n", t.printall());
-  string failed = "no polynomial";
-  throw(failed);
-}  
-
-Phase polyco::phase(const MJD& t) const{
+Phase polyco::phase(const MJD& t, const string in_psrname) const {
   polynomial nearest_polly;
-  try{ nearest_polly = this->nearest_polly(t);}
+  try{ nearest_polly = this->nearest_polly(t,in_psrname);}
   catch(...) {throw("no polynomial");}
   return(nearest_polly.phase(t));
 }
 
-Phase polyco::phase(string in_psrname, const MJD& t) const {
+Phase polyco::phase(const MJD& t, float obs_freq, const string in_psrname) const {
   polynomial nearest_polly;
-  try{ nearest_polly = this->nearest_polly(in_psrname, t);}
-  catch(...) {throw("no polynomial");}
-  return(nearest_polly.phase(t));
-}
-
-Phase polyco::phase(const MJD& t, float obs_freq) const {
-  polynomial nearest_polly;
-  try{ nearest_polly = this->nearest_polly(t);}
+  try{ nearest_polly = this->nearest_polly(t,in_psrname);}
   catch(...) {throw("no polynomial");}
   return(nearest_polly.phase(t, obs_freq));
 } 
 
-Phase polyco::phase(string in_psrname, const MJD& t, float obs_freq) const {
+double polyco::period(const MJD& t, const string in_psrname) const{
   polynomial nearest_polly;
-  try{ nearest_polly = this->nearest_polly(in_psrname, t);}
-  catch(...) {throw("no polynomial");}
-  return(nearest_polly.phase(t, obs_freq));
-}
-
-double polyco::period(const MJD& t) const{
-  polynomial nearest_polly;
-  try{ nearest_polly = this->nearest_polly(t);}
+  try{ nearest_polly = this->nearest_polly(t,in_psrname);}
   catch(...) {throw("no polynomial");}
   return(nearest_polly.period(t));
 }
 
-double polyco::period(string in_psrname, const MJD& t) const{
+double polyco::frequency(const MJD& t, const string in_psrname) const {
   polynomial nearest_polly;
-  try{ nearest_polly = this->nearest_polly(in_psrname, t);}
-  catch(...) { throw("no polynomial");}
-  return(nearest_polly.period(t));
-}
-
-double polyco::frequency(const MJD& t) const {
-  polynomial nearest_polly;
-  try{ nearest_polly = this->nearest_polly(t);}
+  try{ nearest_polly = this->nearest_polly(t,in_psrname);}
   catch(...) { throw("no polynomial");}  
   return(nearest_polly.frequency(t));
 }
 
-double polyco::frequency(string in_psrname, const MJD& t) const {
-  polynomial nearest_polly;
-  try{ nearest_polly = this->nearest_polly(in_psrname, t);}
-  catch(...) { throw("no polynomial");}
-  return(nearest_polly.frequency(t));
-}
-
-size_t polyco::size_in_bytes() const{
-  // this is truly a terrible way, but solaris
-  // does not yet support stringstreams
-  struct stat filestat;
-  string s = "polyco.dat.tmp";
-  ofstream file(s.c_str());
-  if(this->unload(file)!=0){
-    fprintf(stderr, "polyco::size_in_bytes error: could not unload file %s\n", s.c_str());
-    return(0);
-  }
-  if(stat(s.c_str(), &filestat)!=0){
-    fprintf(stderr, "polyco::size_in_bytes error: could not stat file %s\n", s.c_str());
-    return(0);
-  }
-  remove(s.c_str());
-
-  return(filestat.st_size);
-
-//   for(int i=0; i<pollys.size(); ++i) 
-//     size += pollys[i].size_in_bytes();
-  //  return(size);
-}
