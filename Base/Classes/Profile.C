@@ -660,7 +660,7 @@ float Pulsar::Profile::flux() const
   stats (find_min_phase(), &min_avg, &min_var);
 
   if (verbose)
-    cerr << "Pulsar::Profile::power mean(off pulse) =" << min_avg << endl;
+    cerr << "Pulsar::Profile::flux mean(off pulse) =" << min_avg << endl;
 
   // find the total power under the pulse
   int rise = 0, fall = 0;
