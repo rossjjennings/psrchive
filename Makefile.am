@@ -1,3 +1,3 @@
 
-SUBDIRS	= utils
+SUBDIRS	= utils astro
 

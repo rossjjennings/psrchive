@@ -28,10 +28,12 @@ LDFLAGS="-L$PSRHOME/packages/$LOGIN_ARCH/lib $LDFLAGS"
 
 # Checks for libraries
 AC_CHECK_LIB([m], [sin])
+SWIN_LIB_SLA([],AC_MSG_ERROR([Cannot link against SLALIB]))
 SWIN_LIB_FFTW
 SWIN_LIB_PGPLOT
 SWIN_LIB_CFITSIO
 BNV_HAVE_QT
+lofar_MPI
 
 AC_SUBST(FFT_LIBS)
 FFT_LIBS="$FFTW_LIBS $FFTW3_LIBS"
@@ -82,7 +84,18 @@ AC_CONFIG_FILES([utils/units/Makefile
 		utils/pgutil/Makefile
 		utils/plot2d/Makefile
 		utils/qtutil/Makefile
+		utils/fitsutil/Makefile
 		utils/Makefile
+		astro/polyco/Makefile
+		astro/psrephem/Makefile
+		astro/psrmath/Makefile
+		astro/tempo++/Makefile
+		astro/Makefile
+		psrchive/timer/Makefile
+		psrchive/psrfits/Makefile
+		psrchive/Extension/Makefile
+		psrchive/Calibration/Makefile
+		psrchive/Makefile
 		Makefile])
 
 AC_OUTPUT
