@@ -38,13 +38,16 @@ int ss2hhmmss (int* hours, int* min, int* sec, int seconds)
 // no static kludgeyness, no memory leaks
 string MJD::printdays (unsigned prec) const
 {
-  char* temp = new char [prec + 10];
+  char* temp = new char [prec + 80];
   sprintf (temp, "%d", days);
   string output = temp;
   if (prec > 0)  {
     sprintf (temp, "%*.*lf", prec+3, prec, fracday());
     char* period = strchr (temp, '.');
-    output += period;
+    if (!period)
+      output += "." + temp;
+    else
+      output += period;
   }
   delete [] temp;
   return output;
