@@ -78,6 +78,7 @@ void usage()
     "  -C               Set feed basis to Circular \n"
     "  -E ephfile       Install a new ephemeris and update model \n"
     "  -B               Flip the sideband sense \n"
+    "  --reverse_freqs  Reverse the ordering of the frequency channels and change the bandwidth flag accordingly\n"
     "  -o centre_freq   Change the frequency labels \n"
     "  --type type      Change the 'type' parameter where 'type' is one of: 'Pulsar', 'PolnCal', 'FluxCalOn', 'FluxCalOff', 'Calibrator'\n"
     "  --inst inst      Change the instrument name (Archive must have 'BackendName' extension for this to work)\n"
@@ -163,6 +164,7 @@ int main (int argc, char *argv[]) {
     float new_fr = 0.0;
     Signal::Source new_type = Signal::Unknown;
     string instrument;
+    bool reverse_freqs = false;
 
     Reference::To<Pulsar::IntegrationOrder> myio;
     Reference::To<Pulsar::Receiver> install_receiver;
@@ -171,6 +173,7 @@ int main (int argc, char *argv[]) {
 
     const int TYPE = 1208;
     const int INST = 1209;
+    const int REVERSE_FREQS = 1210;
 
     while (1) {
 
@@ -187,6 +190,7 @@ int main (int argc, char *argv[]) {
 	{"receiver",   1, 0, 207},
 	{"type",       1, 0, TYPE},
 	{"inst",       1, 0, INST},
+	{"reverse_freqs",no_argument,0,REVERSE_FREQS},
 	{0, 0, 0, 0}
       };
     
@@ -213,7 +217,7 @@ int main (int argc, char *argv[]) {
 	Pulsar::Archive::set_verbosity(3);
 	break;
       case 'i':
-	cout << "$Id: pam.C,v 1.45 2004/08/20 05:30:27 straten Exp $" << endl;
+	cout << "$Id: pam.C,v 1.46 2004/09/01 06:58:25 hknight Exp $" << endl;
 	return 0;
       case 'm':
 	save = true;
@@ -480,6 +484,8 @@ int main (int argc, char *argv[]) {
 	break;
 
       case INST: instrument = optarg; break;
+
+      case REVERSE_FREQS: reverse_freqs = true; break;
 	  
       default:
 	cout << "Unrecognised option" << endl;
@@ -591,6 +597,27 @@ int main (int argc, char *argv[]) {
 	  }
 	}
 	arch->set_bandwidth(-1.0 * arch->get_bandwidth());
+      }
+
+      if( reverse_freqs ) {
+	// Of course it would be nice to do this with pointers.... but oh well I guess copying will have to do HSK 27/8/04
+
+	unsigned nchan = arch->get_nchan();
+
+	for( unsigned isub=0; isub<arch->get_nsubint(); isub++){
+	  for( unsigned ipol =0; ipol<arch->get_npol(); ipol++){
+	    for( unsigned ichan=0; ichan<nchan/2; ichan++){
+	      Reference::To<Pulsar::Profile> lo = arch->get_Profile(isub,ipol,ichan);	      
+	      Reference::To<Pulsar::Profile> tmp = lo->clone();
+
+	      Reference::To<Pulsar::Profile> hi = arch->get_Profile(isub,ipol,nchan-1-ichan);
+
+	      lo->operator=(*hi);
+	      hi->operator=(*tmp);
+	    }
+	  }
+	}
+	arch->set_bandwidth( -1.0 * arch->get_bandwidth() );
       }
 
       if (reset_weights) {
@@ -788,11 +815,13 @@ int main (int argc, char *argv[]) {
 	  string the_old = arch->get_filename();
 	  int index = the_old.find_last_of(".",the_old.length());
 	  string primary = the_old.substr(0, index);
+
 	  string the_new;
 	  if (!ulpath.empty())
 	    the_new = ulpath + primary + "." + ext;
 	  else
 	    the_new = primary + "." + ext;
+	  
 	  arch->unload(the_new);
 	  cout << "New file " << the_new << " written to disk" << endl;
 	}
