@@ -313,13 +313,19 @@ void Pulsar::ReceptionCalibrator::solve ()
 
   MJD mid = 0.5 * (start_epoch + end_epoch);
 
-  for (unsigned ichan=0; ichan<equation.size(); ichan++) {
+  for (unsigned ichan=0; ichan<equation.size(); ichan++) try {
+
+    cerr << "Pulsar::ReceptionCalibrator::solve ichan=" << ichan << endl;
+
     if (ncoef)
       equation[ichan]->set_ncoef (ncoef);
 
     equation[ichan]->set_reference_epoch (mid);
 
     equation[ichan]->solve ();
+  }
+  catch (Error& error) {
+    throw error += "Pulsar::ReceptionCalibrator::solve";
   }
 
   is_fit = true;
