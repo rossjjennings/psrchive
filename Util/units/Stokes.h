@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Stokes.h,v $
-   $Revision: 1.6 $
-   $Date: 2003/04/10 11:55:26 $
-   $Author: straten $ */
+   $Revision: 1.7 $
+   $Date: 2003/05/30 09:35:15 $
+   $Author: pulsar $ */
 
 #ifndef __Stokes_H
 #define __Stokes_H
@@ -42,11 +42,20 @@ class Stokes : public Quaternion<T, Hermitian>
     Stokes& operator = (const Quaternion<complex<U>,Hermitian>& q)
   { Quaternion<T,Hermitian>::operator = (real(q));
     Quaternion<T,Hermitian> imaginary (imag(q));
-    if (norm(imaginary) > 1e-5 * norm(*this))
+    T nr = norm(*this);
+    T ni = norm(imaginary);
+    if (ni > 1e-5 * nr)
+#if THROW
       throw Error (InvalidParam, 
 		   "Stokes::operator = Quaternion<complex<U>,Hermitian>",
 		   "non-zero imaginary component");
-    return *this; }
+#else
+      cerr << "Stokes::operator = Quaternion<complex<U>,Hermitian> "
+              "non-zero imaginary component\n"
+              "   norm(imag(q))=" << ni << " norm=" << nr << endl;
+#endif
+    return *this;
+  }
 
   template <typename U>
     Stokes& operator = (const Jones<U>& j)
