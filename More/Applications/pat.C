@@ -40,6 +40,7 @@ void usage ()
     "  -p               Perform full polarimetric fit in Fourier domain \n"
     "  -s stdfile       Location of standard profile \n"
     "  -t               Fit in the time domain \n"
+    "  -D               Denoise standard \n"
     "\n"
     "Output options:\n"
     "  -f \"format <flags>\"  Output format (parkes = default, tempo2, itoa, princeton ...)\n"
@@ -61,6 +62,7 @@ int main (int argc, char *argv[])
   bool fscrunch = false;
   bool tscrunch = false;
 
+  bool denoise = true;
   string std;
   string outFormat("parkes"),outFormatFlags;
 
@@ -71,7 +73,7 @@ int main (int argc, char *argv[])
   int gotc = 0;
 
   Pulsar::PolnProfileFit fit;
-  while ((gotc = getopt(argc, argv, "hiFn:ps:a:tTvV:f:")) != -1) {
+  while ((gotc = getopt(argc, argv, "hiDFn:ps:a:tTvV:f:")) != -1) {
     switch (gotc) {
     case 'h':
       usage ();
@@ -86,9 +88,11 @@ int main (int argc, char *argv[])
       Pulsar::Archive::set_verbosity(3);
       Calibration::Model::verbose = true;
       break;
-
+    case 'D':
+      denoise = true;
+      break;
     case 'i':
-      cout << "$Id: pat.C,v 1.22 2004/05/06 03:45:22 ghobbs Exp $" << endl;
+      cout << "$Id: pat.C,v 1.23 2004/05/20 02:32:51 sord Exp $" << endl;
       return 0;
 
     case 'F':
@@ -169,6 +173,9 @@ int main (int argc, char *argv[])
 	stdarch = Pulsar::Archive::load(std);
 	stdarch->fscrunch();
 	stdarch->tscrunch();
+
+        if (denoise)
+          stdarch->denoise();
 	
 	if (full_poln) {
 	  
