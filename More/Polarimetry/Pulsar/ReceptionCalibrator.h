@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ReceptionCalibrator.h,v $
-   $Revision: 1.41 $
-   $Date: 2003/09/23 14:08:34 $
+   $Revision: 1.42 $
+   $Date: 2003/09/23 14:20:06 $
    $Author: straten $ */
 
 #ifndef __ReceptionCalibrator_H
@@ -254,7 +254,7 @@ namespace Pulsar {
 
 
     //! Calibrator parameter communication
-    class CalInfo : public Calibrator::Info {
+    friend class CalInfo : public Calibrator::Info {
       
     public:
       
