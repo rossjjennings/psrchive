@@ -432,8 +432,12 @@ void Pulsar::Archive::remove_baseline (float phase, float dc)
 {
   try {
 
-    if (phase == -1.0)
+    if (phase < 0.0)
       phase = find_min_phase (dc);
+    
+    if( verbose )
+      fprintf(stderr,"Within Pulsar::Archive::remove_baseline() with dc=%f phase=%f\n",
+	    dc,phase);
 
     for (unsigned isub=0; isub < get_nsubint(); isub++)
       get_Integration(isub) -> remove_baseline (phase, dc);
