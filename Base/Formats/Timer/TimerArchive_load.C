@@ -11,8 +11,6 @@
 /*****************************************************************************/
 void Pulsar::TimerArchive::load_header (const char* filename)
 {
-  fprintf(stderr,"In Pulsar::TimerArchive::load_header(%s)\n\n\n",filename);
-
   if (verbose)
     cerr << "TimerArchive::load (" << filename << ")" << endl;
 
@@ -152,9 +150,10 @@ void Pulsar::TimerArchive::subint_load (FILE* fptr)
     if (hdr.mjd < 51401 && strcmp(hdr.machine_id,"CPSR")==0 
         && version == 10.0)  {
  
-      if (verbose) cerr << "TimerArchive::subint_load Correcting psrdisp v10.0 MJD error"
-			<< endl;
-
+      if (verbose) 
+	cerr << "TimerArchive::subint_load Correcting psrdisp v10.0 MJD error"
+	     << endl;
+      
       double seconds_per_file = 53.6870912;
 
       if (isub == 0)
@@ -175,7 +174,8 @@ void Pulsar::TimerArchive::subint_load (FILE* fptr)
       double difftime,tcorr;
       double freqerror = 32.0e6/4.0/(pow(2.0,32.0))/2.0/1024.0;
       /* end nint() correction  jss */
-      if(verbose) cerr << "TimerArchive::subint_load Correcting nint error\n";
+      if(verbose) 
+	cerr << "TimerArchive::subint_load Correcting nint error" << endl;
       difftime = subint->mini.mjd + subint->mini.fracmjd 
 	- hdr.mjd - hdr.fracmjd; 
       tcorr = difftime*freqerror*subint->mini.pfold;
@@ -208,7 +208,8 @@ void Pulsar::TimerArchive::subint_load (FILE* fptr)
 	break;
       }
       if (year<=1997) {
-	cerr << "TimerArchive::subint_load performing S2 MJD correction" <<endl;
+	cerr << "TimerArchive::subint_load performing S2 MJD correction" 
+	     << endl;
 	MJD old_mjd = Mini::get_MJD (subint->mini);
 	Mini::set_MJD (subint->mini, old_mjd + 1.0);
 
@@ -240,14 +241,16 @@ void Pulsar::TimerArchive::subint_load (FILE* fptr)
 
     if (reverse_U) {
       if (verbose)
-	cerr << "TimerArchive::subint_load reversing sign of Stokes U" << endl;
+	cerr << "TimerArchive::subint_load reversing sign of Stokes U" 
+	     << endl;
       for (int ichan=0; ichan<hdr.nsub_band; ichan++)
 	subint->profiles[2][ichan]->operator*=(-1.0);
     }
     
     if (reverse_V) {
       if (verbose)
-	cerr << "TimerArchive::subint_load reversing sign of Stokes V" << endl;
+	cerr << "TimerArchive::subint_load reversing sign of Stokes V" 
+	     << endl;
       for (int ichan=0; ichan<hdr.nsub_band; ichan++)
 	subint->profiles[3][ichan]->operator*=(-1.0);
     }
@@ -262,9 +265,10 @@ void Pulsar::TimerArchive::subint_load (FILE* fptr)
   if (baseband && version < 15.1)
     hdr.banda.feed_offset = 0.0;
 
-  if (verbose) fprintf(stderr, "TimerArchive::subint_load Read in %d sub_ints\n",
-				get_nsubint());
-
+  if (verbose) 
+    fprintf(stderr, "TimerArchive::subint_load Read in %d sub_ints\n",
+	    get_nsubint());
+  
   // profile.wt correction - MCB
   // profile weights from the S2 set to zero during software coherent
   // dedispersion.  Here we fill in the weights with the integration
@@ -282,7 +286,7 @@ void Pulsar::TimerArchive::subint_load (FILE* fptr)
     if (weights==0) {
       cerr << "TimerArchive::subint_load"
 	"replacing profile weights by sub int time" << endl;
-
+      
       for(unsigned i=0;i<get_nsubint();i++)
 	for(unsigned j=0; j<get_npol(); ++j)
 	  for(unsigned k=0; k<get_nchan(); ++k)
@@ -307,18 +311,20 @@ void Pulsar::TimerArchive::subint_load (FILE* fptr)
 	}
       }
     }
-
+    
     if(hdr.wts_and_bpass == 0 || weights == 0){
-      if(verbose) cerr << "Multiply FB wts by dump time:" << tdmp << endl;
-	for(unsigned i=0;i<get_nsubint();i++)
-	  for(unsigned j=0; j<get_npol(); ++j)
-	    for(unsigned k=0; k<get_nchan(); ++k) {
-	      Profile* profile = get_Profile(i,j,k);
-	      profile->set_weight( profile->get_weight() * tdmp );
-	    }
+      if(verbose) 
+	cerr << "Multiply FB wts by dump time:" << tdmp << endl;
+      for(unsigned i=0;i<get_nsubint();i++)
+	for(unsigned j=0; j<get_npol(); ++j)
+	  for(unsigned k=0; k<get_nchan(); ++k) {
+	    Profile* profile = get_Profile(i,j,k);
+	    profile->set_weight( profile->get_weight() * tdmp );
+	  }
     }
     if(hdr.calibrated == 0){
-      if(verbose) cerr << "Setting FB calibration\n";
+      if(verbose) 
+	cerr << "Setting FB calibration" << endl;
       for(unsigned i=0;i<get_nsubint();i++)
 	for(unsigned j=0; j<get_npol(); ++j)
 	  for(unsigned k=0; k<get_nchan(); ++k){
@@ -327,13 +333,14 @@ void Pulsar::TimerArchive::subint_load (FILE* fptr)
 	    // this scaling is preserved by tscrunch and fscrunch.
 	    *get_Profile(i,j,k) *= hdr.tsmp / tdmp * sqrt(chbw * hdr.tsmp);
 	  }
-      if(verbose) cerr << "ndmp:" <<hdr.ndump_sub_int << " tsmp:" << hdr.tsmp 
-		       << " tsub_int:" << hdr.sub_int_time
-		       << " chbw: " << chbw << endl;
+      if(verbose) 
+	cerr << "ndmp:" <<hdr.ndump_sub_int << " tsmp:" << hdr.tsmp 
+	     << " tsub_int:" << hdr.sub_int_time
+	     << " chbw: " << chbw << endl;
       hdr.calibrated = 1;
     }
   }
-	
+  
   // Set flag so weights always unloaded
   hdr.wts_and_bpass = 1;
 
@@ -345,14 +352,12 @@ void Pulsar::TimerArchive::subint_load (FILE* fptr)
   if (strcmp(hdr.machine_id, "S2")==0 && !hdr.corrected) hdr.corrected = 1;
 
   if (verbose) 
-    cerr << "TimerArchive::subint_load - exiting\n";
+    cerr << "TimerArchive::subint_load - exiting" << endl;
 }
 
 
 void Pulsar::TimerArchive::hdr_load (FILE* fptr)
 {
-  fprintf(stderr,"In Pulsar::TimerArchive::hdr_load()\n");
-
   if (verbose)
     cerr << "TimerArchive::hdr_load reading timer header" << endl;
 
@@ -417,10 +422,12 @@ void Pulsar::TimerArchive::psr_load (FILE* fptr)
 
     if (ephemeris->load (fptr, hdr.nbytesephem) < 0)
       throw Error (FailedCall, "TimerArchive::psr_load", "psrephem::load");
-
+    
     if (verbose) {
-      cerr << "TimerArchive::psr_load read in psrephem:\n"<< *ephemeris <<endl;
-      cerr << "TimerArchive::psr_load end of psrephem" << endl;
+      cerr << "TimerArchive::psr_load read in psrephem:\n"<< *ephemeris 
+	   << endl;
+      cerr << "TimerArchive::psr_load end of psrephem" 
+	   << endl;
     }
   }
   else {
