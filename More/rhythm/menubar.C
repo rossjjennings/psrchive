@@ -21,6 +21,8 @@ void Rhythm::menubarConstruct ()
 
   file->insertItem( "&Load TOAs",      this, 
 		    SLOT( load_toas() ), ALT+Key_L );
+  file->insertItem( "&Add TOAs",      this, 
+		    SLOT( add_toas() ), ALT+Key_A );
   file->insertItem( "&Save TOAs",      this, 
 		    SLOT( save_toas() ), ALT+Key_S );
 
@@ -171,6 +173,20 @@ void Rhythm::load_toas ()
     return;
 
   load_toas ( fileName.ascii() );
+}
+
+void Rhythm::add_toas ()
+{
+  QString startName = QString::null;
+  if ( !toa_filename.empty() )
+    startName = toa_filename.c_str();
+  
+  QString fileName (QFileDialog::getOpenFileName ( startName, "*.tim", this ));
+
+  if ( fileName.isNull() )
+    return;
+
+  add_toas ( fileName.ascii() );
 }
 
 int Rhythm::prompt_save_toas ()

@@ -218,10 +218,10 @@ void Rhythm::load_toas (const char* fname)
   
   Tempo::toa::load (fname, &toas);
   
-  if (verbose)
-    cerr << "...loaded " << toas.size() << ".\nSorting...";
+  //if (verbose)
+  //  cerr << "...loaded " << toas.size() << ".\nSorting...";
 
-  sort (toas.begin(), toas.end());
+  //sort (toas.begin(), toas.end());
 
   if (verbose)
     cerr << " done." << endl;
@@ -241,6 +241,49 @@ void Rhythm::load_toas (const char* fname)
   }
   
   toas_modified = false;
+
+  if (autofit)
+    fit ();
+}
+
+void Rhythm::add_toas (const char* fname)
+{
+  if (verbose)
+    cerr << "Adding in TOAs from '" << fname << "'...";
+  
+  vector<Tempo::toa> new_toas;
+  
+  Tempo::toa::load (fname, &new_toas);
+  
+  if (verbose)
+    cout << "...loaded " << new_toas.size() << " new TOA's" << endl;
+  
+  for (unsigned i = 0; i < new_toas.size(); i++)
+    toas.push_back(new_toas[i]);
+  
+  //if (verbose)
+  //  cout << "Sorting the entire list...";
+  
+  //sort (toas.begin(), toas.end());
+  
+  if (verbose)
+    cout << " done." << endl;
+  
+  tempo->setItemEnabled (fitID, true);
+  tempo->setItemEnabled (fitSelID, true);
+
+  toa_filename = "newfile.tim";
+  
+  toa_text -> clear();
+
+  char useful[256];
+
+  for (unsigned i = 0; i < toas.size(); i++) {
+    toas[i].unload(useful);
+    toa_text -> insertItem(useful);
+  }
+  
+  toas_modified = true;
 
   if (autofit)
     fit ();
@@ -275,6 +318,10 @@ void Rhythm::close_toas ()
 {
   toa_text -> clear();
   toas.resize(0);
+
+  tempo->setItemEnabled (fitID, false);
+  tempo->setItemEnabled (fitSelID, false);
+
   goplot();
 }
 
@@ -336,6 +383,12 @@ void Rhythm::fit()
 {
   if (!fitpopup || !fitpopup -> hasdata())
     return;
+  
+  if (toas.size() < 1) {
+    if (verbose)
+      cerr << "Rhythm::fit No Arrival Times loaded" << endl;
+    return;
+  }
 
   psrephem eph;
   fitpopup -> get_psrephem (eph);
@@ -755,20 +808,67 @@ void Rhythm::goplot ()
   vector<double> yerrs = give_me_errs(yq);
 
   vector<wrapper> useme;
-
+  
   for (unsigned i = 0; i < toas.size(); i++) {
+    
     if (toas[i].state != Tempo::toa::Deleted) {
-
+      
       wrapper tempw;
+      
+      if (toas[i].get_format() == Tempo::toa::Command) {
+	
+	if (i == 0) {
+	  tempw.x = tempx[1];
+	  tempw.y = tempy[1];
+	  tempw.e = 0.0;
+	  
+	  tempw.dot = 4;
+	  
+	  tempw.ci = 4;
+	  tempw.id = 0;
+	  
+	  useme.push_back(tempw);
+	}
+	else if (i == toas.size() - 1) {
+	  
+	  int ind = toas.size() - 2;
+	  
+	  tempw.x = tempx[ind];
+	  tempw.y = tempy[ind];
+	  tempw.e = 0.0;
+	  
+	  tempw.dot = 4;
+	  
+	  tempw.ci = 4;
+	  tempw.id = toas.size() - 1;
+	  
+	  useme.push_back(tempw);
+	}
+	else {
+	  
+	  tempw.x = (tempx[i-1] + tempx[i+1]) / 2.0;
+	  tempw.y = (tempy[i-1] + tempy[i+1]) / 2.0;
+	  tempw.e = 0.0;
+	  
+	  tempw.id = i;
+	  tempw.ci = 4;
+	  
+	  tempw.dot = 4;
+	  
+	  useme.push_back(tempw);
+	}
+      }
+      else {
 
-      tempw.x = tempx[i];
-      tempw.y = tempy[i];
-      tempw.e = yerrs[i];
-      tempw.id = i;
-      if (toas[i].state == Tempo::toa::Selected)
-	tempw.ci = 2;
-
-      useme.push_back(tempw);
+	tempw.x = tempx[i];
+	tempw.y = tempy[i];
+	tempw.e = yerrs[i];
+	tempw.id = i;
+	if (toas[i].state == Tempo::toa::Selected)
+	  tempw.ci = 2;
+	
+	useme.push_back(tempw);
+      }
     }
   }
   
@@ -830,7 +930,6 @@ void Rhythm::select (int pt)
 void Rhythm::change_mode (int m)
 {
   mode = m;
-  cerr << "Mode changed to " << m << endl;
   plot_window->ptselector();
 }
 
