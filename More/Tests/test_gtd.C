@@ -17,7 +17,7 @@
 #include "Error.h"
 #include "minmax.h"
 
-#define ZOOM 6
+#define ZOOM 12
 
 void gtd_wrap(int& index, int nbin) {
   if (index < 0)
@@ -34,6 +34,9 @@ int main(int argc, char** argv) {
   bool stdflag   = false;
   bool synthetic = false;
 
+  float dc = 0.05;
+  int nbin = 1024;
+
   Reference::To<Pulsar::Archive> stdarch;
   Reference::To<Pulsar::Profile> stdprof;
 
@@ -41,7 +44,7 @@ int main(int argc, char** argv) {
   
   vector<string> archives;
   
-  while ((gotc = getopt(argc, argv, "hvVDs:S")) != -1) {
+  while ((gotc = getopt(argc, argv, "hvVDs:Sd:")) != -1) {
     switch (gotc) {
     case 'h':
       cout << "A program for testing the TimeDomain TOA algorithm" << endl;
@@ -52,6 +55,7 @@ int main(int argc, char** argv) {
       cout << "  -D               Display results"                 << endl;
       cout << "  -s               Standard profile"                << endl;
       cout << "  -S               Use synthetic profiles"          << endl;
+      cout << "  -d               Duty cycle of synthetic profs"   << endl;
       return (-1);
       break;
     case 'v':
@@ -80,7 +84,10 @@ int main(int argc, char** argv) {
       synthetic = true;
       stdflag   = true;
       break;
-      
+    case 'd':
+      dc = atof(optarg);
+      break;
+
     default:
       cout << "Unrecognised option" << endl;
     }
@@ -131,14 +138,15 @@ int main(int argc, char** argv) {
     bmrng mygen;
 
     for (unsigned i = 0; i < 1; i++) {
-      SyntheticProfile fakep(1024, 2.0, 10.0, 512 + (100.0*mygen.rand()));
+      SyntheticProfile fakep(nbin, 2.0, 
+			     dc*nbin, nbin/2 + (100.0*mygen.rand()));
       
       fakep.build();
       fakep.add_noise();
       profs.push_back(new Pulsar::Profile(fakep.get_Profile())); 
     }
-
-    SyntheticProfile fakes(1024, 50.0, 10.0, 512 + (100.0*mygen.rand()));
+    
+    SyntheticProfile fakes(nbin, 50.0, dc*nbin, nbin/2 + (100.0*mygen.rand()));
     fakes.build();
     fakes.add_noise();
     stdprof = fakes.get_Profile().clone();
