@@ -20,10 +20,11 @@
 
 #include "MJD.h"
 #include "f772c.h"
+#include "Error.h"
 
 #define RINGBUFFER_SIZE 10
 
-int MJD::verbose = 0;
+int MJD::verbose = 0; 
 
 double   MJD::precision = 2.0e-12;
 unsigned MJD::ostream_precision = 15;
@@ -354,6 +355,8 @@ int parse_float128 (long double mjd, double* ndays, double* seconds,
 }
 
 MJD::MJD(float128 mjd) {
+  if (verbose)
+    cerr << "MJD (float128)" << endl;
   double ndays = 0.0, seconds = 0.0, fracseconds = 0.0;
   parse_float128 ((long double)mjd, &ndays, &seconds, &fracseconds);
   *this = MJD (ndays,seconds,fracseconds);
@@ -379,9 +382,9 @@ MJD::MJD (double dd, double ss, double fs)
 {
   cerr.precision(15);
 
-  if (verbose) cerr
-    << endl << "MJD::MJD - constructing with values " << dd << "\t" 
-    << ss << "\t" << fs << endl;
+  if (verbose)
+    cerr << "MJD (double dd=" << dd << ", double ss=" 
+         << ss << ", double fs=" << fs << ")" << endl;
 
   // pull the integer/fractional seconds out of fs
   secs = int (fs);
@@ -396,21 +399,39 @@ MJD::MJD (double dd, double ss, double fs)
   add_day (dd);
 
   settle ();
+
+  if (verbose)
+    cerr << "MJD this=" << *this << endl;
 }
 
 MJD::MJD (int d, int s, double f) {
+
+  if (verbose)        
+    cerr << "MJD (int d=" << d << ", int s=" << s
+         << ", double f=" << f << ")" << endl;
+
   days = d;
   secs = s;
   fracsec = f;
   settle ();
+
+  if (verbose)
+    cerr << "MJD this=" << *this << endl;
 }
 
 MJD::MJD (double mjd) {
+
+  if (verbose)        
+    cerr << "MJD (double mjd=" << mjd << ")" << endl;
+
   days = 0;
   secs = 0;
   fracsec = 0.0;
   add_day (mjd);
   settle ();
+
+  if (verbose)
+    cerr << "MJD this=" << *this << endl;
 }
 
 void MJD::add_day (double dd)
@@ -458,6 +479,7 @@ void MJD::settle()
   }
 
 #ifdef DESPARATE_MEASURES
+
   // Make sure fractional seconds are truly fractional
   // round to the nearest fempto second
   if (fabs(fracsec + sign*precision) > 1.0) {
@@ -470,11 +492,23 @@ void MJD::settle()
     days ++;
     secs -= seconds_in_day;
   }
+
 #endif
+
+  // sanity check
+  if (fabs(fracsec) > 1.0)
+    throw Error (InvalidState, "MJD::settle", "|fracsec=%lf| > 1.0", fracsec);
+
+  if (abs(secs) >= 86400)
+    throw Error (InvalidState, "MJD::settle", "|secs=%d| > 86400", secs);
 
 }
 
 MJD::MJD (const char* mjdstring) {
+
+  if (verbose)
+    cerr << "MJD (const char*=" << mjdstring << ")"  << endl;
+
   if (Construct (mjdstring) < 0)
     throw string ("MJD::MJD(char*) construct error");
 }
@@ -486,12 +520,19 @@ MJD::MJD (const string& mjd) {
 
 MJD::MJD (int intday, double fracday)
 {
+  if (verbose)
+    cerr << "MJD (int intday=" << intday << ", double fracday=" << fracday
+         << ")" << endl;
+
   secs = 0;
   fracsec = 0.0;
   days = intday;
 
   add_day (fracday);
   settle();
+
+  if (verbose)
+    cerr << "MJD this=" << *this << endl;
 }
 
 extern "C" double F772C(sla_gmst)(double * ut);
