@@ -283,4 +283,54 @@ Signal::State Signal::string2State(string ss){
   return Invariant;  // Because you gotta return something
 }
 
+//! Tells you if your state is consistent with your npol and ndim
+bool Signal::valid_state(Signal::State state,unsigned ndim,unsigned npol, string& reason){
+
+  switch (state) {
+  case Signal::Nyquist:
+    if (ndim != 1)  {
+      reason = "state=" + string(state_string(state)) + " and ndim!=1";
+      return false;
+    }
+    break;
+
+  case Signal::Analytic:
+    if (ndim != 2) {
+      reason = "state=" + string(state_string(state)) + " and ndim!=2";
+      return false;
+    }
+    break;
+
+  case Signal::Invariant:
+  case Signal::Intensity:
+    if (npol != 1) {
+      reason = "state=" + string(state_string(state)) + " and npol!=1";
+      return false;
+    }
+    break;
+
+  case Signal::PPQQ:
+    if (npol != 2) {
+      reason = "state=" + string(state_string(state)) + " and npol!=2";
+      return false;
+    }
+    break;
+
+  case Signal::Coherence:
+  case Signal::Stokes:
+    if (ndim*npol != 4) {
+      reason = "state=" + string(state_string(state)) + " and ndim*npol!=4";
+      return false;
+    }
+    break;
+
+  default:
+    reason = "unknown state";
+    return false;
+  }
+
+  return true;
+}
+
+
 
