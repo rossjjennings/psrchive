@@ -168,6 +168,9 @@ Rhythm::Rhythm (QWidget* parent, int argc, char** argv) :
   show_button = new QPushButton("Show Profile", controls);
   QObject::connect(show_button, SIGNAL(clicked()),
 		   this, SLOT(show_me()));
+  freqs = new QPushButton("Freq Sort", controls);
+  QObject::connect(freqs, SIGNAL(clicked()),
+		   this, SLOT(freqsort()));
   colour = new QPushButton("Change Colour", controls);
   QObject::connect(colour, SIGNAL(clicked()),
 		   this, SLOT(colour_selector()));
@@ -521,7 +524,8 @@ void Rhythm::fit_selected()
     cerr << "Rhythm::fit_selected plotting residuals" << endl;
 
   goplot();
-  
+  plot_window->autoscale();
+
   toa_text -> clear();
   
   char useful[256];
@@ -542,16 +546,16 @@ void Rhythm::fit_selected (const psrephem& eph, bool load_new)
       return;
     }
     
-    vector<Tempo::toa> subset;
+    unsigned tally = 0;
     
     for (unsigned i = 0; i < toas.size(); i++) {
-      if (toas[i].state == Tempo::toa::Selected)
-	subset.push_back(toas[i]);
+      if (toas[i].get_state() == Tempo::toa::Selected)
+	tally++;
     }
     
-    if (subset.size() < 1) {
+    if (tally < 2) {
       if (verbose)
-	cerr << "Rhythm::fit_selected No Arrival Times selected" << endl;
+	cerr << "Rhythm::fit_selected Not Enough Arrival Times selected" << endl;
       return;
     }
     
@@ -560,7 +564,7 @@ void Rhythm::fit_selected (const psrephem& eph, bool load_new)
     
     psrephem pf_eph;
     
-    Tempo::fit (eph, subset, &pf_eph, false);
+    Tempo::fit (eph, toas, &pf_eph, false, Tempo::toa::Selected);
     
     if (load_new && fitpopup) {
       // set_psrephem will result in generation of newEph signal, 
@@ -615,6 +619,9 @@ vector<double> Rhythm::give_me_data (toaPlot::AxisQuantity q)
   
   char useful[80];
   char filename[80];
+  
+  psrephem eph;
+  fitpopup -> get_psrephem (eph);
   
   switch (q) {
 
@@ -673,6 +680,29 @@ vector<double> Rhythm::give_me_data (toaPlot::AxisQuantity q)
     return retval;
     break;
 
+  case toaPlot::ParallacticAngle:
+    for (unsigned i = 0; i < toas.size(); i++) {
+      if (toas[i].get_format() == Tempo::toa::Command) {
+	retval.push_back(0.0);
+	continue;
+      }
+      // Extract the time
+      MJD mjd(toas[i].resid.mjd);
+      
+      // Extract the coordinates
+      sky_coord crd(eph.value_str[EPH_RAJ][0], eph.value_str[EPH_DECJ][0]);
+      
+      // Extract the lat and lon
+      char telid = eph.value_str[EPH_TZRSITE][0];
+      
+      double lat = Pulsar::tzr_lat(telid);
+      double lon = Pulsar::tzr_lon(telid);
+      
+      retval.push_back(Pulsar::parallactic_angle(crd, mjd, lat, lon));
+    }
+    return retval;
+    break;
+
   case toaPlot::ResidualMilliTurns:
     for (unsigned i = 0; i < toas.size(); i++) {
       if (toas[i].get_format() == Tempo::toa::Command) {
@@ -694,7 +724,7 @@ vector<double> Rhythm::give_me_data (toaPlot::AxisQuantity q)
     }
     return retval;
     break;
-
+    
   case toaPlot::SignalToNoise:
     for (unsigned i = 0; i < toas.size(); i++) {
       
@@ -703,23 +733,32 @@ vector<double> Rhythm::give_me_data (toaPlot::AxisQuantity q)
 	continue;
       }
     
+      if (toas[i].get_StoN() >= 0.0) {
+	retval.push_back(toas[i].get_StoN());
+	continue;
+      }
+      
       toas[i].unload(useful);
       
-      sscanf(useful+1, "%s ", filename);
-      
-      if (verbose)
-	cerr << "Attempting to load archive '" << filename << "'" << endl;
-      
-      string useful2 = dataPath + "/";
-      useful2 += filename;
-      
-      Reference::To<Pulsar::Archive> data = Pulsar::Archive::load(useful2);
-      
-      data->fscrunch();
-      data->tscrunch();
-      data->pscrunch();
-
-      retval.push_back(data->get_Profile(0,0,0)->snr());      
+      if (sscanf(useful+1, "%s ", filename) != 1) {
+	throw Error(FailedCall, "No archive-derived info available");
+      }
+      else {
+	if (verbose)
+	  cerr << "Attempting to load archive '" << filename << "'" << endl;
+	
+	string useful2 = dataPath + "/";
+	useful2 += filename;
+	
+	Reference::To<Pulsar::Archive> data = Pulsar::Archive::load(useful2);
+	
+	data->fscrunch();
+	data->tscrunch();
+	data->pscrunch();
+	
+	toas[i].set_StoN(data->get_Profile(0,0,0)->snr()); 
+	retval.push_back(toas[i].get_StoN());
+      }
     }
     return retval;
     break;
@@ -731,24 +770,33 @@ vector<double> Rhythm::give_me_data (toaPlot::AxisQuantity q)
 	retval.push_back(0.0);
 	continue;
       }
-  
+      
+      if (toas[i].get_bw() != 0.0) {
+	retval.push_back(toas[i].get_bw());
+	continue;
+      }
+      
       toas[i].unload(useful);
       
-      sscanf(useful+1, "%s ", filename);
-      
-      if (verbose)
-	cerr << "Attempting to load archive '" << filename << "'" << endl;
-      
-      string useful2 = dataPath + "/";
-      useful2 += filename;
-      
-      Reference::To<Pulsar::Archive> data = Pulsar::Archive::load(useful2);
-      
-      retval.push_back(data->get_bandwidth());      
+      if (sscanf(useful+1, "%s ", filename) != 1) {
+	throw Error(FailedCall, "No archive-derived info available");
+      }
+      else {
+	if (verbose)
+	  cerr << "Attempting to load archive '" << filename << "'" << endl;
+	
+	string useful2 = dataPath + "/";
+	useful2 += filename;
+	
+	Reference::To<Pulsar::Archive> data = Pulsar::Archive::load(useful2);
+	
+	toas[i].set_bw(data->get_bandwidth());
+	retval.push_back(toas[i].get_bw());      
+      }
     }
     return retval;
     break;
-
+    
   case toaPlot::DispersionMeasure:
     for (unsigned i = 0; i < toas.size(); i++) {
 
@@ -757,19 +805,28 @@ vector<double> Rhythm::give_me_data (toaPlot::AxisQuantity q)
 	continue;
       }
       
+      if (toas[i].get_dm() > 0.0) {
+	retval.push_back(toas[i].get_dm());
+	continue;
+      }
+      
       toas[i].unload(useful);
       
-      sscanf(useful+1, "%s ", filename);
-      
-      if (verbose)
-	cerr << "Attempting to load archive '" << filename << "'" << endl;
-      
-      string useful2 = dataPath + "/";
-      useful2 += filename;
-      
-      Reference::To<Pulsar::Archive> data = Pulsar::Archive::load(useful2);
-
-      retval.push_back(data->get_dispersion_measure());
+      if (sscanf(useful+1, "%s ", filename) != 1) {
+	throw Error(FailedCall, "No archive-derived info available");
+      }
+      else {
+	if (verbose)
+	  cerr << "Attempting to load archive '" << filename << "'" << endl;
+	
+	string useful2 = dataPath + "/";
+	useful2 += filename;
+	
+	Reference::To<Pulsar::Archive> data = Pulsar::Archive::load(useful2);
+	
+	toas[i].set_dm(data->get_dispersion_measure());
+	retval.push_back(toas[i].get_dm());
+      }
     }
     return retval;
     break;
@@ -781,20 +838,29 @@ vector<double> Rhythm::give_me_data (toaPlot::AxisQuantity q)
 	retval.push_back(0.0);
 	continue;
       }
-
+      
+      if (toas[i].get_dur() > 0.0) {
+	retval.push_back(toas[i].get_dur());
+	continue;
+      }
+      
       toas[i].unload(useful);
       
-      sscanf(useful+1, "%s ", filename);
-      
-      if (verbose)
-	cerr << "Attempting to load archive '" << filename << "'" << endl;
-      
-      string useful2 = dataPath + "/";
-      useful2 += filename;
-      
-      Reference::To<Pulsar::Archive> data = Pulsar::Archive::load(useful2);
-      
-      retval.push_back(data->integration_length());      
+      if (sscanf(useful+1, "%s ", filename) != 1) {
+	throw Error(FailedCall, "No archive-derived info available");
+      }
+      else {
+	if (verbose)
+	  cerr << "Attempting to load archive '" << filename << "'" << endl;
+	
+	string useful2 = dataPath + "/";
+	useful2 += filename;
+	
+	Reference::To<Pulsar::Archive> data = Pulsar::Archive::load(useful2);
+	
+	toas[i].set_dur(data->integration_length());
+	retval.push_back(toas[i].get_dur());     
+      }
     }
     return retval;
     break;
@@ -851,6 +917,12 @@ vector<double> Rhythm::give_me_errs (toaPlot::AxisQuantity q)
     break;
 
   case toaPlot::ObsFreq:
+    for (unsigned i = 0; i < toas.size(); i++)
+      retval.push_back(0.0);
+    return retval;
+    break;
+    
+  case toaPlot::ParallacticAngle:
     for (unsigned i = 0; i < toas.size(); i++)
       retval.push_back(0.0);
     return retval;
@@ -916,13 +988,14 @@ void Rhythm::goplot ()
 {
   vector<double> tempx = give_me_data(xq);
   vector<double> tempy = give_me_data(yq);
+  vector<double> xerrs = give_me_errs(xq);
   vector<double> yerrs = give_me_errs(yq);
-
+  
   vector<wrapper> useme;
   
   for (unsigned i = 0; i < toas.size(); i++) {
     
-    if (toas[i].state != Tempo::toa::Deleted) {
+    if (toas[i].get_state() != Tempo::toa::Deleted) {
       
       wrapper tempw;
       
@@ -931,12 +1004,13 @@ void Rhythm::goplot ()
 	if (i == 0) {
 	  tempw.x = tempx[1];
 	  tempw.y = tempy[1];
-	  tempw.e = 0.0;
+	  tempw.ex = 0.0;
+	  tempw.ey = 0.0;
 	  
 	  tempw.dot = toas[i].di;
 	  tempw.id = 0;
 	  
-	  if (toas[i].state == Tempo::toa::Selected)
+	  if (toas[i].get_state() == Tempo::toa::Selected)
 	    tempw.ci = 2;
 	  else
 	    tempw.ci = toas[i].ci;
@@ -949,12 +1023,13 @@ void Rhythm::goplot ()
 	  
 	  tempw.x = tempx[ind];
 	  tempw.y = tempy[ind];
-	  tempw.e = 0.0;
+	  tempw.ex = 0.0;
+	  tempw.ey = 0.0;
 	  
 	  tempw.dot = toas[i].di;
 	  tempw.id = toas.size() - 1;
 	  
-	  if (toas[i].state == Tempo::toa::Selected)
+	  if (toas[i].get_state() == Tempo::toa::Selected)
 	    tempw.ci = 2;
 	  else
 	    tempw.ci = toas[i].ci;
@@ -965,11 +1040,12 @@ void Rhythm::goplot ()
 	  
 	  tempw.x = (tempx[i-1] + tempx[i+1]) / 2.0;
 	  tempw.y = (tempy[i-1] + tempy[i+1]) / 2.0;
-	  tempw.e = 0.0;
-	  
+	  tempw.ex = 0.0;
+	  tempw.ey = 0.0;
+
 	  tempw.id = i;
 
-	  if (toas[i].state == Tempo::toa::Selected)
+	  if (toas[i].get_state() == Tempo::toa::Selected)
 	    tempw.ci = 2;
 	  else
 	    tempw.ci = toas[i].ci;
@@ -983,12 +1059,13 @@ void Rhythm::goplot ()
 
 	tempw.x = tempx[i];
 	tempw.y = tempy[i];
-	tempw.e = yerrs[i];
+	tempw.ex = xerrs[i];
+	tempw.ey = yerrs[i];
 	tempw.id = i;
 	
 	tempw.dot = toas[i].di;
-
-	if (toas[i].state == Tempo::toa::Selected)
+	
+	if (toas[i].get_state() == Tempo::toa::Selected)
 	  tempw.ci = 2;
 	else
 	  tempw.ci = toas[i].ci;
@@ -1005,13 +1082,13 @@ void Rhythm::reselect ()
 {
   for (unsigned i = 0; i < toas.size(); i++) {
     
-    if (toas[i].state == Tempo::toa::Deleted)
+    if (toas[i].get_state() == Tempo::toa::Deleted)
       continue;
     
     if (toa_text->isSelected(i))
-      toas[i].state = Tempo::toa::Selected;
+      toas[i].set_state(Tempo::toa::Selected);
     else
-      toas[i].state = Tempo::toa::Normal;
+      toas[i].set_state(Tempo::toa::Normal);
   }
   
   goplot ();
@@ -1024,10 +1101,10 @@ void Rhythm::deselect (int pt)
   if (pt < 0)
     return;
   
-  if (toas[pt].state == Tempo::toa::Deleted)
+  if (toas[pt].get_state() == Tempo::toa::Deleted)
     return;
   
-  toas[pt].state = Tempo::toa::Normal;
+  toas[pt].set_state(Tempo::toa::Normal);
   toa_text -> setSelected (pt, false);
   
 }
@@ -1044,13 +1121,55 @@ void Rhythm::select (int pt)
   if (pt < 0)
     return;
   
-  if (toas[pt].state == Tempo::toa::Deleted)
+  if (toas[pt].get_state() == Tempo::toa::Deleted)
     return;
   
-  toas[pt].state = Tempo::toa::Selected;
+  toas[pt].set_state(Tempo::toa::Selected);
   toa_text -> setSelected (pt, true);
   toa_text -> setCurrentItem (pt);
+  
+}
 
+void Rhythm::freqsort ()
+{
+  for (unsigned i = 0; i < toas.size(); i++) {
+    if (toas[i].resid.obsfreq != 0.0) {
+      if (toas[i].resid.obsfreq < 500.0)
+	toas[i].ci = 3;
+      else if (toas[i].resid.obsfreq < 800.0)
+	toas[i].ci = 4;
+      else if (toas[i].resid.obsfreq < 1600.0)
+	toas[i].ci = 5;
+      else if (toas[i].resid.obsfreq < 2400.0)
+	toas[i].ci = 6;
+      else if (toas[i].resid.obsfreq < 5500.0)
+	toas[i].ci = 8;
+      else if (toas[i].resid.obsfreq < 9000.0)
+	toas[i].ci = 9;
+      else
+	toas[i].ci = 10;
+    }
+    else if (toas[i].get_frequency() != 0.0) {
+      if (toas[i].get_frequency() < 500.0)
+	toas[i].ci = 3;
+      else if (toas[i].get_frequency() < 800.0)
+	toas[i].ci = 4;
+      else if (toas[i].get_frequency() < 1600.0)
+	toas[i].ci = 5;
+      else if (toas[i].get_frequency() < 2400.0)
+	toas[i].ci = 6;
+      else if (toas[i].get_frequency() < 5500.0)
+	toas[i].ci = 8;
+      else if (toas[i].get_frequency() < 9000.0)
+	toas[i].ci = 9;
+      else
+	toas[i].ci = 10;
+    }
+    else {
+      footer->setText("No frequency information available!");
+      return;
+    }
+  }
 }
 
 void Rhythm::change_mode (int m)
@@ -1112,8 +1231,8 @@ void Rhythm::box_slot ()
 void Rhythm::deleteselection ()
 {
   for (unsigned i = 0; i < toas.size(); i++) {
-    if (toas[i].state == Tempo::toa::Selected)
-      toas[i].state = Tempo::toa::Deleted;
+    if (toas[i].get_state() == Tempo::toa::Selected)
+      toas[i].set_state(Tempo::toa::Deleted);
   }
 
   toas_modified = true;
@@ -1125,8 +1244,8 @@ void Rhythm::deleteselection ()
 void Rhythm::undeleteall ()
 {
   for (unsigned i = 0; i < toas.size(); i++) {
-    if (toas[i].state == Tempo::toa::Deleted) {
-      toas[i].state = Tempo::toa::Normal;
+    if (toas[i].get_state() == Tempo::toa::Deleted) {
+      toas[i].set_state(Tempo::toa::Normal);
       toa_text -> setSelected (i, false);
     }
   }
@@ -1139,10 +1258,10 @@ void Rhythm::clearselection ()
 {
   for (unsigned i = 0; i < toas.size(); i++) {
     
-    if (toas[i].state == Tempo::toa::Deleted)
+    if (toas[i].get_state() == Tempo::toa::Deleted)
       continue;
     
-    toas[i].state = Tempo::toa::Normal;
+    toas[i].set_state(Tempo::toa::Normal);
     toa_text -> setSelected (i, false);
   }
   goplot ();
@@ -1163,7 +1282,7 @@ void Rhythm::setselcol (int index)
 {
   for (unsigned i = 0; i < toas.size(); i++) {
     
-    if (toas[i].state == Tempo::toa::Selected)
+    if (toas[i].get_state() == Tempo::toa::Selected)
       toas[i].ci = index;
     
   }
@@ -1185,7 +1304,7 @@ void Rhythm::setseldot (int index)
 {
   for (unsigned i = 0; i < toas.size(); i++) {
     
-    if (toas[i].state == Tempo::toa::Selected)
+    if (toas[i].get_state() == Tempo::toa::Selected)
       toas[i].di = index;
     
   }
@@ -1195,10 +1314,10 @@ void Rhythm::setseldot (int index)
 AxisSelector::AxisSelector (QWidget* parent)
   : QHBox(parent)
 {
-  Xgrp = new QButtonGroup(11, Qt::Vertical, "X Axis", this);
+  Xgrp = new QButtonGroup(12, Qt::Vertical, "X Axis", this);
   Xgrp -> setRadioButtonExclusive(true);
   
-  Ygrp = new QButtonGroup(11, Qt::Vertical, "Y Axis", this);
+  Ygrp = new QButtonGroup(12, Qt::Vertical, "Y Axis", this);
   Ygrp -> setRadioButtonExclusive(true);
 
   X1 = new QRadioButton("Residual (us)", Xgrp);
@@ -1212,6 +1331,7 @@ AxisSelector::AxisSelector (QWidget* parent)
   X9 = new QRadioButton("Bandwidth", Xgrp);
   X10 = new QRadioButton("DM", Xgrp);
   X11 = new QRadioButton("Length", Xgrp);
+  X12 = new QRadioButton("P.A.", Xgrp);
 
   X3->setChecked(true);
 
@@ -1226,9 +1346,10 @@ AxisSelector::AxisSelector (QWidget* parent)
   Y9 = new QRadioButton("Bandwidth", Ygrp);
   Y10 = new QRadioButton("DM", Ygrp);
   Y11 = new QRadioButton("Length", Ygrp);
-
+  Y12 = new QRadioButton("P.A.", Ygrp);
+  
   Y1->setChecked(true);
-
+  
   Xgrp->insert(X1,1);
   Xgrp->insert(X2,2);
   Xgrp->insert(X3,3);
@@ -1240,6 +1361,7 @@ AxisSelector::AxisSelector (QWidget* parent)
   Xgrp->insert(X9,9);
   Xgrp->insert(X10,10);
   Xgrp->insert(X11,11);
+  Xgrp->insert(X12,12);
 
   Ygrp->insert(Y1,1);
   Ygrp->insert(Y2,2);
@@ -1252,6 +1374,7 @@ AxisSelector::AxisSelector (QWidget* parent)
   Ygrp->insert(Y9,9);
   Ygrp->insert(Y10,10);
   Ygrp->insert(Y11,11);
+  Ygrp->insert(Y12,12);
 
   QObject::connect(Xgrp, SIGNAL(clicked(int)),
 		   this, SLOT(Xuseful(int)));

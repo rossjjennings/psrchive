@@ -18,7 +18,8 @@ class wrapper {
 
   double x;
   double y;
-  double e;
+  double ex;
+  double ey;
 
   int ci;
   int dot;
@@ -35,7 +36,7 @@ class toaPlot: public QPgplot {
   enum AxisQuantity { None, ResidualMicro, ResidualMilliTurns, 
 		      TOA_MJD, BinaryPhase, ObsFreq, DayOfYear,
 		      ErrorMicro, SignalToNoise, Bandwidth,
-		      DispersionMeasure, Duration };
+		      DispersionMeasure, Duration, ParallacticAngle };
   
   toaPlot ( QWidget *parent=0, const char *name=0 );
   

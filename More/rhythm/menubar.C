@@ -164,9 +164,10 @@ void Rhythm::toglauto()
 
 void Rhythm::about()
 {
-  QMessageBox::about (NULL, "Rhythm",
+  QMessageBox::about (NULL, "Rhythm Pulsar Timing",
 		      "A graphical user interface to TEMPO.\n\n"
-		      "   Written by: W. van Straten & A. Hotan   \n");
+		      "Written by: W. van Straten & A. W. Hotan\n\n"
+		      "See http://www.astronomy.swin.edu.au/pulsar/software/manuals/rhythm for more.\n");
 }
 
 void Rhythm::aboutQt()

@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/rhythm/rhythm.h,v $
-   $Revision: 1.28 $
-   $Date: 2003/05/29 00:01:24 $
+   $Revision: 1.29 $
+   $Date: 2003/06/30 04:52:44 $
    $Author: ahotan $ */
 
 // //////////////////////////////////////////////////////////////////////////
@@ -28,15 +28,20 @@
 #include <qinputdialog.h>
 
 #include "psrephem.h"
+#include "ephio.h"
 #include "toaPlot.h"
 #include "toa.h"
 #include "residual.h"
+
+#include "sky_coord.h"
+#include "MJD.h"
 
 #include "Options.h"
 
 #include "Pulsar/Plotter.h"
 #include "Pulsar/Archive.h"
 #include "Pulsar/Profile.h"
+#include "Pulsar/Calculator.h"
 
 class qt_editParams;
 
@@ -64,6 +69,7 @@ class AxisSelector : public QHBox
   QRadioButton* X9;
   QRadioButton* X10;
   QRadioButton* X11;
+  QRadioButton* X12;
 
   QRadioButton* Y1;
   QRadioButton* Y2;
@@ -76,7 +82,8 @@ class AxisSelector : public QHBox
   QRadioButton* Y9;
   QRadioButton* Y10;
   QRadioButton* Y11;
-
+  QRadioButton* Y12;
+  
  public slots:
 
   void Xuseful(int);
@@ -152,6 +159,7 @@ class Rhythm : public QMainWindow
   QPushButton* clearsel;
   QPushButton* undel;
   QPushButton* autoscl;
+  QPushButton* freqs;
   QPushButton* show_button;
 
   QPushButton* colour;
@@ -262,6 +270,8 @@ class Rhythm : public QMainWindow
   void setseldot (int);
 
   void undeleteall ();
+
+  void freqsort ();
   
   void setDataPath ();
 };

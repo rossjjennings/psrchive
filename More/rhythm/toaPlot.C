@@ -5,7 +5,8 @@
 wrapper::wrapper () {  
   x = 0.0;
   y = 0.0;
-  e = 0.0; 
+  ex = 0.0;
+  ey = 0.0;
   ci = 7;
   dot = 0;
   id = 0;
@@ -78,6 +79,9 @@ void toaPlot::plotter ()
   case Duration:
     xlab = "Observation Length (Seconds)";
     break;
+  case ParallacticAngle:
+    xlab = "Parallactic Angle (degrees)";
+    break;
   }
   
   switch (yq) {
@@ -117,6 +121,9 @@ void toaPlot::plotter ()
   case Duration:
     ylab = "Observation Length (Seconds)";
     break;
+  case ParallacticAngle:
+    ylab = "Parallactic Angle (degrees)";
+    break;
   }
 
   cpgsci (3);
@@ -128,9 +135,11 @@ void toaPlot::plotter ()
     cpgsci (data[i].ci);
     cpgpt1 (float(data[i].x), float(data[i].y), data[i].dot);
 
-    if (data[i].e != 0.0)
-      cpgerr1 (6, float(data[i].x), float(data[i].y), float(data[i].e), 1.0);
-
+    if (data[i].ex != 0.0)
+      cpgerr1 (5, float(data[i].x), float(data[i].y), float(data[i].ex), 1.0);
+    
+    if (data[i].ey != 0.0)
+      cpgerr1 (6, float(data[i].x), float(data[i].y), float(data[i].ey), 1.0);
   }
 
   cpgsci(1);
@@ -417,27 +426,18 @@ void toaPlot::autoscale ()
   
   findminmax(&(xpts.front()), &(xpts.back()), xmin, xmax);
   findminmax(&(ypts.front()), &(ypts.back()), ymin, ymax);
-
-  if (xmin < 10.0 && xmin > -10.0)
-    xmin -= fabs(xmin * 0.5);
-  else
-    xmin -= fabs(xmin * 0.05);
-
-  if (xmax < 10.0 && xmax > -10.0)
-    xmax += fabs(xmax * 0.5);
-  else
-    xmax += fabs(xmax * 0.05);
   
-  if (ymin < 10.0 && ymin > -10.0)
-    ymin -= fabs(ymin * 0.5);
-  else
-    ymin -= fabs(ymin * 0.05);
+  float xdiff = xmax - xmin;
+  float ydiff = ymax - ymin;
   
-  if (ymax < 10.0 && ymax > -10.0)
-    ymax += fabs(ymax * 0.5);
-  else
-    ymax += fabs(ymax * 0.05);
-
+  xmin -= fabs(xdiff * 0.2);
+  
+  xmax += fabs(xdiff * 0.2);
+  
+  ymin -= fabs(ydiff * 0.2);
+  
+  ymax += fabs(ydiff * 0.2);
+  
   clearScreen();
   drawPlot();
 }
