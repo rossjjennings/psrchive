@@ -60,5 +60,5 @@ Pulsar::Archive* Pulsar::Archive::load (const char* filename)
   fclose (fptr);
 
   throw Pulsar::Error (Pulsar::InvalidParam, "Archive::load", 
-		       "'%s' is not a recognized file format", filename);
+		       "'%s' not a recognized file format", filename);
 }
