@@ -101,7 +101,7 @@ int main (int argc, char *argv[])
       denoise = true;
       break;
     case 'i':
-      cout << "$Id: pat.C,v 1.25 2004/06/07 23:27:36 ghobbs Exp $" << endl;
+      cout << "$Id: pat.C,v 1.26 2004/06/08 01:12:15 sord Exp $" << endl;
       return 0;
 
     case 'F':
@@ -265,7 +265,11 @@ int main (int argc, char *argv[])
 	  stdarch = Pulsar::Archive::load(stdprofiles[jDiff]);
 	  stdarch->fscrunch();
 	  stdarch->tscrunch();
-	  
+	
+          if (denoise)
+            stdarch->denoise();
+	
+  
 	  if (full_poln) {
 	    
 	    cerr << "pat: full polarization fitting with " << std << endl;
