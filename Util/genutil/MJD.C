@@ -516,7 +516,7 @@ int MJD::Construct (const char* mjdstr)
     fprintf (stderr, "MJD::Construct Could not parse '%s'\n", mjdstr);
     return -1;
   }
-  char* fracstr = strchr (mjdstr, '.');
+  const char* fracstr = strchr (mjdstr, '.');
   if (fracstr) {
     double fracday;
     if (sscanf (fracstr, "%lf", &fracday) < 1)

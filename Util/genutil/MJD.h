@@ -8,7 +8,7 @@
 #ifdef MPI
 #include "mpi.h"
 #endif
-
+#include "psr_cpp.h"
 // using namespace std;
 
 class MJD {
