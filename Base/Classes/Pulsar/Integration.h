@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Integration.h,v $
-   $Revision: 1.56 $
-   $Date: 2003/12/29 10:07:29 $
-   $Author: ahotan $ */
+   $Revision: 1.57 $
+   $Date: 2003/12/29 12:21:34 $
+   $Author: straten $ */
 
 /*
   
@@ -31,6 +31,7 @@ template<typename T> class Jones;
 namespace Pulsar {
 
   class Profile;
+  class PolnProfile;
 
   //! Group of Pulsar::Profile objects integrated over the same time interval
   class Integration : public Reference::Able {
@@ -153,6 +154,11 @@ namespace Pulsar {
     Profile* get_Profile (unsigned ipol, unsigned ichan);
 
     const Profile* get_Profile (unsigned ipol, unsigned ichan) const;
+
+    //! Returns a pointer to a new PolnProfile instance specified by ichan
+    PolnProfile* new_PolnProfile (unsigned ichan);
+
+    const PolnProfile* new_PolnProfile (unsigned ichan) const;
 
     //! Get the MJD at the start of the integration (convenience interface)
     MJD get_start_time () const;
