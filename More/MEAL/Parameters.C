@@ -1,29 +1,34 @@
 #include "MEAL/Parameters.h"
+#include "MEAL/Function.h"
 
 using namespace std;
 
-//! Default constructor
-MEAL::Parameters::Parameters (unsigned nparam)
-  : params(nparam), fit(nparam, true)
+MEAL::Parameters::Parameters (Function* context, unsigned nparam)
+  : ParameterPolicy(context), params(nparam), fit(nparam, true), names(nparam)
 {
 }
 
 
-//! Copy constructor
-MEAL::Parameters::Parameters (const Parameters& np)
-  : params(np.params), fit(np.fit)
+MEAL::Parameters::Parameters (const Parameters& p)
+  : ParameterPolicy(0), params(p.params), fit(p.fit), names(p.names)
 {
 }
 
+//! Clone construtor
+MEAL::Parameters* MEAL::Parameters::clone (Function* context) const 
+{
+  MEAL::Parameters* retval = new Parameters (context, get_nparam());
+  *retval = *this;
+  return retval;
+}
 
-//! Equality operator
 MEAL::Parameters& 
 MEAL::Parameters::operator = (const Parameters& np)
 {
   if (&np == this)
     return *this;
 
-  if (very_verbose)
+  if (Function::very_verbose)
     cerr << "MEAL::Parameters::operator= nparam=" << get_nparam()
          << " new nparam=" << np.get_nparam() << endl;
 
@@ -31,11 +36,12 @@ MEAL::Parameters::operator = (const Parameters& np)
 
   params = np.params;
   fit = np.fit;
+  names = np.names;
 
-  set_evaluation_changed ();
+  get_context()->set_evaluation_changed ();
 
   if (nparam_changed)
-    changed.send (ParameterCount);
+    get_context()->changed.send (Function::ParameterCount);
 
   return *this;
 }
@@ -46,28 +52,29 @@ void MEAL::Parameters::set_param (unsigned index, double value)
 {
   range_check (index, "MEAL::Parameters::set_param");
   
-  if (very_verbose) cerr << "MEAL::Parameters::set_param "
+  if (Function::very_verbose) cerr << "MEAL::Parameters::set_param "
 		 "(" << index << "," << value << ")" << endl;
   
   if (params[index].val == value)
     return;
 
   params[index].val = value;
-  set_evaluation_changed ();
+  get_context()->set_evaluation_changed ();
 }
 
 
 void MEAL::Parameters::resize (unsigned nparam)
 {
-  if (very_verbose)
+  if (Function::very_verbose)
     cerr << "MEAL::Parameters::resize " << nparam << endl;
   
   unsigned current = params.size();
   params.resize (nparam);
   fit.resize (nparam);
+  names.resize (nparam);
   for (; current < nparam; current++)
     fit[current] = true;
   
-  changed.send (ParameterCount);
+  get_context()->changed.send (Function::ParameterCount);
 }
 

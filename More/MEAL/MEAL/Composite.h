@@ -1,26 +1,28 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Composite.h,v $
-   $Revision: 1.3 $
-   $Date: 2004/11/22 19:26:03 $
+   $Revision: 1.4 $
+   $Date: 2005/04/06 20:13:52 $
    $Author: straten $ */
 
 #ifndef __Composite_H
 #define __Composite_H
 
-#include "MEAL/ParameterBehaviour.h"
-#include "MEAL/ArgumentBehaviour.h"
+#include "MEAL/Function.h"
 #include "MEAL/Projection.h"
 
 namespace MEAL {
 
-  //! Abstract base class representing a model composed of models
-  class Composite : public ParameterBehaviour, public ArgumentBehaviour {
+  //! Parameter policy for composite functions
+  class Composite : public ParameterPolicy {
 
   public:
 
     //! Default constructor
-    Composite ();
+    Composite (Function* context);
+
+    //! Clone constructor
+    Composite* clone (Function* context) const { return 0; }
 
     //! Get the number of models mapped into this model
     unsigned get_nmodel () const;
@@ -30,7 +32,7 @@ namespace MEAL {
 
     // ///////////////////////////////////////////////////////////////////
     //
-    // Function implementation
+    // ParameterPolicy implementation
     //
     // ///////////////////////////////////////////////////////////////////
  
@@ -58,19 +60,20 @@ namespace MEAL {
     //! Set flag for parameter at index to be fitted
     void set_infit (unsigned index, bool flag);
 
+    // ///////////////////////////////////////////////////////////////////
+    //
+    // ArgumentPolicy implementation
+    //
+    // ///////////////////////////////////////////////////////////////////
+
     //! Set the independent variable of the specified dimension
     void set_argument (unsigned dimension, Argument* axis);
-
-  protected:
-
-    //! Provide access to Projection base class
-    friend class Projection;
 
     //! Convenience interface to map (Projection*)
     template <class Type>
     void map (Project<Type>& model, bool signal_changes = true)
     {
-      if (very_verbose)
+      if (Function::very_verbose)
 	std::cerr << class_name() + "map (Project<Type>)" << std::endl;
       map (model.get_map(), signal_changes);
     }
@@ -79,7 +82,7 @@ namespace MEAL {
     template <class Type>
     void unmap (Project<Type>& model, bool signal_changes = true)
     {
-      if (very_verbose)
+      if (Function::very_verbose)
 	std::cerr << class_name() + "unmap (Project<Type>)" << std::endl;
       unmap (model.get_map(), signal_changes);
     }
@@ -89,6 +92,11 @@ namespace MEAL {
 
     //! Remove the Projection from the composite mapping
     void unmap (Projection* model, bool signal_changes = true);
+
+  protected:
+
+    //! Provide access to Projection base class
+    friend class Projection;
 
     //! Return the index for the specified model
     unsigned find_Function (Function* model) const;
@@ -114,7 +122,7 @@ namespace MEAL {
     unsigned current_index;
 
     //! Method called when a Function attribute has changed
-    void attribute_changed (Attribute attribute);
+    void attribute_changed (Function::Attribute attribute);
 
     //! Recursive function does the work for map
     void add_component (Function* model, std::vector<unsigned>& imap);

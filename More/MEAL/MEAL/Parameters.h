@@ -1,15 +1,14 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Parameters.h,v $
-   $Revision: 1.5 $
-   $Date: 2004/12/22 09:25:33 $
+   $Revision: 1.6 $
+   $Date: 2005/04/06 20:20:54 $
    $Author: straten $ */
 
 #ifndef __Parameters_H
 #define __Parameters_H
 
-#include "MEAL/ParameterBehaviour.h"
-
+#include "MEAL/ParameterPolicy.h"
 #include "Estimate.h"
 #include "Error.h"
 
@@ -18,18 +17,21 @@
 namespace MEAL {
   
   //! Abstract base class implements parameter storage and access
-  class Parameters : public ParameterBehaviour {
+  class Parameters : public ParameterPolicy {
 
   public:
 
     //! Default constructor
-    Parameters (unsigned nparam = 0);
+    Parameters (Function* context, unsigned nparam = 0);
 
     //! Copy constructor
     Parameters (const Parameters& np);
 
-    //! Equality operator
+    //! Assignment operator
     Parameters& operator = (const Parameters& np);
+
+    //! Clone construtor
+    Parameters* clone (Function*) const;
 
     // ///////////////////////////////////////////////////////////////////
     //
@@ -41,6 +43,20 @@ namespace MEAL {
     unsigned get_nparam () const
     {
       return params.size();
+    }
+
+    //! Return the name of the specified parameter
+    std::string get_param_name (unsigned index) const
+    {
+      range_check (index, "MEAL::Parameters::get_param_name");
+      return names[index];
+    }
+
+    //! Return the name of the specified parameter
+    void set_param_name (unsigned index, const std::string& name)
+    {
+      range_check (index, "MEAL::Parameters::set_param_name");
+      names[index] = name;
     }
 
     //! Return the value of the specified parameter
@@ -81,12 +97,10 @@ namespace MEAL {
       fit[index] = flag;
     }
 
-  protected:
+    //! Resize arrays, setting fit=true for new parameters
+    void resize (unsigned nparam);
 
-    //! Resize params and fit arrays, setting fit=true for new parameters
-    /*! This method is protected so that derived types can choose to provide
-      external resize access. */
-    virtual void resize (unsigned nparam);
+  protected:
 
     //! Ensure that index <= get_nparam
     void range_check (unsigned index, const char* method) const
@@ -99,10 +113,13 @@ namespace MEAL {
   private:
 
     //! The Estimates of the parameters
-    std::vector<Estimate<double> > params;
+    std::vector< Estimate<double> > params;
 
-    //! Fit flag for each Stokes parameter
+    //! Fit flag for each parameter
     std::vector<bool> fit;
+
+    //! The name of each parameter
+    std::vector<std::string> names;
 
   };
 

@@ -1,25 +1,31 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/NoParameters.h,v $
-   $Revision: 1.3 $
-   $Date: 2004/11/22 19:26:04 $
+   $Revision: 1.4 $
+   $Date: 2005/04/06 20:16:44 $
    $Author: straten $ */
 
-#ifndef __NoParameters_H
-#define __NoParameters_H
+#ifndef __MEAL_NoParameters_H
+#define __MEAL_NoParameters_H
 
-#include "MEAL/ParameterBehaviour.h"
+#include "MEAL/ParameterPolicy.h"
 
 namespace MEAL {
 
   //! Represents a model with no parameters
-  class NoParameters : public ParameterBehaviour {
+  class NoParameters : public ParameterPolicy {
 
   public:
 
+    //! Default constructor
+    NoParameters () : ParameterPolicy (0) { }
+
+    //! Clone construtor
+    NoParameters* clone (Function*) const { return new NoParameters; }
+
     // ///////////////////////////////////////////////////////////////////
     //
-    // Function implementation
+    // ParameterPolicy implementation
     //
     // ///////////////////////////////////////////////////////////////////
  

@@ -1,12 +1,12 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Constant.h,v $
-   $Revision: 1.2 $
-   $Date: 2004/11/22 19:26:03 $
+   $Revision: 1.3 $
+   $Date: 2005/04/06 20:20:54 $
    $Author: straten $ */
 
-#ifndef __Constant_H
-#define __Constant_H
+#ifndef __MEAL_Constant_H
+#define __MEAL_Constant_H
 
 #include "MEAL/NoParameters.h"
 
@@ -21,14 +21,6 @@ namespace MEAL {
 
   public:
 
-    // ///////////////////////////////////////////////////////////////////
-    //
-    // Function implementation
-    //
-    // ///////////////////////////////////////////////////////////////////
- 
-    //! Return true if the result has changed
-    bool get_changed () const { return false; }
 
   };
 
