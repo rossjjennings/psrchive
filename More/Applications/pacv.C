@@ -218,6 +218,7 @@ int main (int argc, char** argv)
         fluxcal = new Pulsar::FluxCalibrator (input);
 
         cerr << "pacv: Plotting FluxCalibrator" << endl;
+	cpgpage ();
         plotter.plot (fluxcal);
 
         // disable attempt to plot again after end of main loop
