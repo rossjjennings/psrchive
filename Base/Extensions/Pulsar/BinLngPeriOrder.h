@@ -1,0 +1,51 @@
+//-*-C++-*-
+                                                                                
+/* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/BinLngPeriOrder.h,v $
+   $Revision: 1.1 $
+   $Date: 2004/01/02 00:11:18 $
+   $Author: ahotan $ */
+                                                                                
+#ifndef __BinLngPeriOrder_h
+#define __BinLngPeriOrder_h
+                                                                                
+#include "Pulsar/Archive.h"
+#include "Pulsar/Integration.h"
+#include "Pulsar/IntegrationOrder.h"
+                                                                            
+namespace Pulsar {
+  
+  /*! This BinLngPeriOrder class provides a means for developers to
+    re-index the way Integrations are stored. It is a virtual base class
+    that must be inherited by developers who wish to define a new way to
+    index the Integrations in their Archive */
+  
+  class BinLngPeriOrder : public Pulsar::IntegrationOrder {
+                                                                                
+  public:
+    
+    // These are the standard Archive::Extension methods:
+
+    //! Default constructor
+    BinLngPeriOrder ();
+    
+    //! Destructor
+    ~BinLngPeriOrder ();
+    
+    //! Copy constructor
+    BinLngPeriOrder (const BinLngPeriOrder& extension);
+    
+    //! Operator =
+    const BinLngPeriOrder& operator= (const BinLngPeriOrder& extension);
+    
+    //! Clone method
+    IntegrationOrder* clone () const;
+    
+    void organise (Archive*, unsigned);
+    void append   (Archive*, const Archive*);    
+    void combine  (Archive*, unsigned);
+
+  };                                                                            
+  
+}
+                                                                                
+#endif
