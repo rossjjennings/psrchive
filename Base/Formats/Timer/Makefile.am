@@ -84,10 +84,12 @@ h1_studies.LDFLAGS := $(LDFLAGS) $(LCPGPLOT) $(LSLA)
 ifneq ($(LOGIN_ARCH),linux)
 ifneq ($(LOGIN_ARCH),linux_gcc3)
 ifneq ($(LOGIN_ARCH),sungcc)
+ifneq ($(LOGIN_ARCH),Darwin)
 treduce.LDFLAGS := $(LDFLAGS) $(LDIALOG) -lgenutil $(LCPGPLOT) 
 treduce.srcs = xtinit.C xtmac.C xtproc.C xtlplt.C xtinplot.C xtshdr.C    \
 	       xtshst.C xtcopy.C xtswap.C xtunld.C xtgrey.C xtreduce.C   \
                newtreduce.f
+endif
 endif
 endif
 endif
