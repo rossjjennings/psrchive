@@ -7,7 +7,7 @@
 //! unload the subint to file
 void Pulsar::TimerIntegration::unload (FILE* fptr) const
 {
-  if (verbose == 3) cerr << "TimerIntegration::unload" << endl;
+  if (verbose) cerr << "TimerIntegration::unload" << endl;
 
   struct mini* outmini = const_cast<struct mini*>(&mini);
 
@@ -22,7 +22,7 @@ void Pulsar::TimerIntegration::unload (FILE* fptr) const
   }
 
   try {
-    if (verbose == 3) cerr << "TimerIntegration::unload writing weights" << endl;
+    if (verbose) cerr << "TimerIntegration::unload writing weights" << endl;
     N_ToBigEndian (nchan, const_cast<float*>(&(wts[0])));
     fwrite(&(wts[0]),nchan*sizeof(float),1,fptr);
     N_FromBigEndian (nchan, const_cast<float*>(&(wts[0])));
@@ -32,7 +32,7 @@ void Pulsar::TimerIntegration::unload (FILE* fptr) const
   }
  
   try {
-    if (verbose == 3) cerr << "TimerIntegration::unload writing med" << endl;
+    if (verbose) cerr << "TimerIntegration::unload writing med" << endl;
     for (unsigned ipol=0; ipol<npol; ipol++) {
       N_ToBigEndian (nchan, const_cast<float*>(&(med[ipol][0])));
       fwrite(&(med[ipol][0]),nchan*sizeof(float),1,fptr);
@@ -45,7 +45,7 @@ void Pulsar::TimerIntegration::unload (FILE* fptr) const
 
  
   try {
-    if (verbose == 3) cerr << "TimerIntegration::unload writing bpass" << endl; 
+    if (verbose) cerr << "TimerIntegration::unload writing bpass" << endl; 
     for (unsigned ipol=0; ipol<npol; ipol++) {
       N_ToBigEndian (nchan, const_cast<float*>(&(bpass[ipol][0])));
       fwrite(&(bpass[ipol][0]),nchan*sizeof(float),1,fptr);
@@ -57,7 +57,7 @@ void Pulsar::TimerIntegration::unload (FILE* fptr) const
   }
 
   // And the profiles
-  if(verbose == 3) cerr << "TimerIntegration::unload unloading profiles npol=" 
+  if(verbose) cerr << "TimerIntegration::unload unloading profiles npol=" 
 		   << npol << " nchan=" << nchan << endl;
 
   try {
@@ -65,7 +65,7 @@ void Pulsar::TimerIntegration::unload (FILE* fptr) const
     for (unsigned ipol=0; ipol<npol; ipol++)
       for (unsigned ichan=0; ichan<nchan; ichan++) {
 	
-	if (verbose == 3) cerr << "TimerIntegration::unload ipol=" << ipol 
+	if (verbose) cerr << "TimerIntegration::unload ipol=" << ipol 
 			  << "\t ichan=" << ichan << "\r";
 	
 	TimerProfile_unload (fptr, profiles[ipol][ichan]);
@@ -77,6 +77,6 @@ void Pulsar::TimerIntegration::unload (FILE* fptr) const
     throw error += "TimerIntegration::unload profiles";
   }
   
-  if (verbose == 3) cerr << "TimerIntegration::unload exit" << endl;
+  if (verbose) cerr << "TimerIntegration::unload exit" << endl;
 
 }
