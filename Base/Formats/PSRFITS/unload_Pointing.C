@@ -15,7 +15,7 @@ void Pulsar::FITSArchive::unload (fitsfile* fptr, const Pointing* ext, int row)
   int colnum = 0;
   fits_get_colnum (fptr, CASEINSEN, "LST_SUB", &colnum, &status);
   
-  double tempdouble = ext->lst_sub;
+  double tempdouble = ext->get_local_sidereal_time ();
   fits_write_col (fptr, TDOUBLE, colnum, row, 1, 1, &tempdouble, &status);
   
   if (status != 0)
@@ -25,7 +25,7 @@ void Pulsar::FITSArchive::unload (fitsfile* fptr, const Pointing* ext, int row)
   colnum = 0;
   fits_get_colnum (fptr, CASEINSEN, "RA_SUB", &colnum, &status);
   
-  tempdouble = ext->ra_sub.getDegrees();
+  tempdouble = ext->get_right_ascension().getDegrees();
   fits_write_col (fptr, TDOUBLE, colnum, row, 1, 1, &tempdouble, &status);
   
   if (status != 0)
@@ -35,7 +35,7 @@ void Pulsar::FITSArchive::unload (fitsfile* fptr, const Pointing* ext, int row)
   colnum = 0;
   fits_get_colnum (fptr, CASEINSEN, "DEC_SUB", &colnum, &status);
   
-  tempdouble = ext->dec_sub.getDegrees();
+  tempdouble = ext->get_declination().getDegrees();
   fits_write_col (fptr, TDOUBLE, colnum, row, 1, 1, &tempdouble, &status);
   
   if (status != 0)
@@ -45,7 +45,7 @@ void Pulsar::FITSArchive::unload (fitsfile* fptr, const Pointing* ext, int row)
   colnum = 0;
   fits_get_colnum (fptr, CASEINSEN, "GLON_SUB", &colnum, &status);
   
-  tempdouble = ext->glon_sub.getDegrees();
+  tempdouble = ext->get_galactic_longitude().getDegrees();
   fits_write_col (fptr, TDOUBLE, colnum, row, 1, 1, &tempdouble, &status);
   
   if (status != 0)
@@ -55,7 +55,7 @@ void Pulsar::FITSArchive::unload (fitsfile* fptr, const Pointing* ext, int row)
   colnum = 0;
   fits_get_colnum (fptr, CASEINSEN, "GLAT_SUB", &colnum, &status);
   
-  tempdouble = ext->glat_sub.getDegrees();
+  tempdouble = ext->get_galactic_latitude().getDegrees();
   fits_write_col (fptr, TDOUBLE, colnum, row, 1, 1, &tempdouble, &status);
   
   if (status != 0)
@@ -65,7 +65,7 @@ void Pulsar::FITSArchive::unload (fitsfile* fptr, const Pointing* ext, int row)
   colnum = 0;
   fits_get_colnum (fptr, CASEINSEN, "FD_ANG", &colnum, &status);
   
-  float tempfloat = ext->fd_ang.getDegrees();
+  float tempfloat = ext->get_feed_angle().getDegrees();
   fits_write_col (fptr, TFLOAT, colnum, row, 1, 1, &tempfloat, &status);
   
   if (status != 0)
@@ -75,7 +75,7 @@ void Pulsar::FITSArchive::unload (fitsfile* fptr, const Pointing* ext, int row)
   colnum = 0;
   fits_get_colnum (fptr, CASEINSEN, "POS_ANG", &colnum, &status);
   
-  tempfloat = ext->pos_ang.getDegrees();
+  tempfloat = ext->get_position_angle().getDegrees();
   fits_write_col (fptr, TFLOAT, colnum, row, 1, 1, &tempfloat, &status);
   
   if (status != 0)
@@ -85,7 +85,7 @@ void Pulsar::FITSArchive::unload (fitsfile* fptr, const Pointing* ext, int row)
   colnum = 0;
   fits_get_colnum (fptr, CASEINSEN, "PAR_ANG", &colnum, &status);
   
-  tempfloat = ext->par_ang.getDegrees();
+  tempfloat = ext->get_parallactic_angle().getDegrees();
   fits_write_col (fptr, TFLOAT, colnum, row, 1, 1, &tempfloat, &status);
   
   if (status != 0)
@@ -95,7 +95,7 @@ void Pulsar::FITSArchive::unload (fitsfile* fptr, const Pointing* ext, int row)
   colnum = 0;
   fits_get_colnum (fptr, CASEINSEN, "TEL_AZ", &colnum, &status);
   
-  tempfloat = ext->tel_az.getDegrees();
+  tempfloat = ext->get_telescope_azimuth().getDegrees();
   fits_write_col (fptr, TFLOAT, colnum, row, 1, 1, &tempfloat, &status);
   
   if (status != 0)
@@ -105,7 +105,7 @@ void Pulsar::FITSArchive::unload (fitsfile* fptr, const Pointing* ext, int row)
   colnum = 0;
   fits_get_colnum (fptr, CASEINSEN, "TEL_ZEN", &colnum, &status);
   
-  tempfloat = ext->tel_zen.getDegrees();
+  tempfloat = ext->get_telescope_zenith().getDegrees();
   fits_write_col (fptr, TFLOAT, colnum, row, 1, 1, &tempfloat, &status);
   
   if (status != 0)

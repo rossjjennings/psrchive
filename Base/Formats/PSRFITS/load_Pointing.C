@@ -6,7 +6,7 @@
   \pre The current HDU is the SUBINT HDU
 */
 void Pulsar::FITSArchive::load_Pointing (fitsfile* fptr, int row,
-						    Pulsar::Integration* integ)
+				         Pulsar::Integration* integ)
 {
   if (verbose == 3)
     cerr << "FITSArchive::load_Pointing" << endl;
@@ -22,157 +22,171 @@ void Pulsar::FITSArchive::load_Pointing (fitsfile* fptr, int row,
   double nulldouble = 0.0;
 
   fits_get_colnum (fptr, CASEINSEN, "LST_SUB", &colnum, &status);
-  
+
+  double lst_in_seconds;
+
   fits_read_col (fptr, TDOUBLE, colnum, row, 1, 1, &nulldouble,
-		 &(ext->lst_sub), &initflag, &status);
-  
+		 &lst_in_seconds, &initflag, &status);
+
   if (status != 0)
     throw FITSError (status, "FITSArchive::load_Pointing", 
 		     "fits_read_col LST_SUB");
+
+  ext->set_local_sidereal_time (lst_in_seconds);
 
   initflag = 0;
   colnum = 0;
   
   fits_get_colnum (fptr, CASEINSEN, "RA_SUB", &colnum, &status);
   
-  double my_angle = 0.0;
-  
+  double double_angle = 0.0;
+  Angle angle;
+
   fits_read_col (fptr, TDOUBLE, colnum, row, 1, 1, &nulldouble,
-		 &my_angle, &initflag, &status);
+		 &double_angle, &initflag, &status);
   
   if (status != 0)
     throw FITSError (status, "FITSArchive::load_Pointing", 
 		     "fits_read_col RA_SUB");
-  
-  ext->ra_sub.setDegrees(my_angle);
+
+  angle.setDegrees (double_angle);  
+  ext->set_right_ascension (angle);
 
   initflag = 0;
   colnum = 0;
 
   fits_get_colnum (fptr, CASEINSEN, "DEC_SUB", &colnum, &status);
   
-  my_angle = 0.0;
+  double_angle = 0.0;
   
   fits_read_col (fptr, TDOUBLE, colnum, row, 1, 1, &nulldouble,
-		 &my_angle, &initflag, &status);
+		 &double_angle, &initflag, &status);
   
   if (status != 0)
     throw FITSError (status, "FITSArchive::load_Pointing", 
 		     "fits_read_col DEC_SUB");
   
-  ext->dec_sub.setDegrees(my_angle);
+  angle.setDegrees (double_angle);
+  ext->set_declination (angle);
 
   initflag = 0;
   colnum = 0;
   
   fits_get_colnum (fptr, CASEINSEN, "GLON_SUB", &colnum, &status);
   
-  my_angle = 0.0;
+  double_angle = 0.0;
   
   fits_read_col (fptr, TDOUBLE, colnum, row, 1, 1, &nulldouble,
-		 &my_angle, &initflag, &status);
+		 &double_angle, &initflag, &status);
   
   if (status != 0)
     throw FITSError (status, "FITSArchive::load_Pointing", 
 		     "fits_read_col GLON_SUB");
   
-  ext->glon_sub.setDegrees(my_angle);
+  angle.setDegrees (double_angle);
+  ext->set_galactic_longitude (angle);
 
   initflag = 0;
   colnum = 0;
   
   fits_get_colnum (fptr, CASEINSEN, "GLAT_SUB", &colnum, &status);
   
-  my_angle = 0.0;
+  double_angle = 0.0;
   
   fits_read_col (fptr, TDOUBLE, colnum, row, 1, 1, &nulldouble,
-		 &my_angle, &initflag, &status);
+		 &double_angle, &initflag, &status);
   
   if (status != 0)
     throw FITSError (status, "FITSArchive::load_Pointing", 
 		     "fits_read_col GLAT_SUB");
   
-  ext->glat_sub.setDegrees(my_angle);
+  angle.setDegrees (double_angle);
+  ext->set_galactic_latitude (angle);
 
   initflag = 0;
   colnum = 0;
   
   fits_get_colnum (fptr, CASEINSEN, "FD_ANG", &colnum, &status);
   
-  float my_other_angle = 0.0;
+  float float_angle = 0.0;
   
   fits_read_col (fptr, TFLOAT, colnum, row, 1, 1, &nullfloat,
-		 &my_other_angle, &initflag, &status);
+		 &float_angle, &initflag, &status);
   
   if (status != 0)
     throw FITSError (status, "FITSArchive::load_Pointing", 
 		     "fits_read_col FD_ANG");
   
-  ext->fd_ang.setDegrees(my_other_angle);
+  angle.setDegrees (float_angle);
+  ext->set_feed_angle (angle);
 
   initflag = 0;
   colnum = 0;
   
   fits_get_colnum (fptr, CASEINSEN, "POS_ANG", &colnum, &status);
   
-  my_other_angle = 0.0;
+  float_angle = 0.0;
   
   fits_read_col (fptr, TFLOAT, colnum, row, 1, 1, &nullfloat,
-		 &my_other_angle, &initflag, &status);
+		 &float_angle, &initflag, &status);
   
   if (status != 0)
     throw FITSError (status, "FITSArchive::load_Pointing", 
 		     "fits_read_col POS_ANG");
   
-  ext->pos_ang.setDegrees(my_other_angle);
+  angle.setDegrees (float_angle);
+  ext->set_position_angle (angle);
 
   initflag = 0;
   colnum = 0;
   
   fits_get_colnum (fptr, CASEINSEN, "PAR_ANG", &colnum, &status);
   
-  my_other_angle = 0.0;
+  float_angle = 0.0;
   
   fits_read_col (fptr, TFLOAT, colnum, row, 1, 1, &nullfloat,
-		 &my_other_angle, &initflag, &status);
+		 &float_angle, &initflag, &status);
   
   if (status != 0)
     throw FITSError (status, "FITSArchive::load_Pointing", 
 		     "fits_read_col PAR_ANG");
   
-  ext->par_ang.setDegrees(my_other_angle);
+  angle.setDegrees (float_angle);
+  ext->set_parallactic_angle (angle);
 
   initflag = 0;
   colnum = 0;
   
   fits_get_colnum (fptr, CASEINSEN, "TEL_AZ", &colnum, &status);
   
-  my_other_angle = 0.0;
+  float_angle = 0.0;
   
   fits_read_col (fptr, TFLOAT, colnum, row, 1, 1, &nullfloat,
-		 &my_other_angle, &initflag, &status);
+		 &float_angle, &initflag, &status);
   
   if (status != 0)
     throw FITSError (status, "FITSArchive::load_Pointing", 
 		     "fits_read_col TEL_AZ");
   
-  ext->tel_az.setDegrees(my_other_angle);
+  angle.setDegrees (float_angle);
+  ext->set_telescope_azimuth (angle);
 
   initflag = 0;
   colnum = 0;
   
   fits_get_colnum (fptr, CASEINSEN, "TEL_ZEN", &colnum, &status);
   
-  my_other_angle = 0.0;
+  float_angle = 0.0;
   
   fits_read_col (fptr, TFLOAT, colnum, row, 1, 1, &nullfloat,
-		 &my_other_angle, &initflag, &status);
+		 &float_angle, &initflag, &status);
   
   if (status != 0)
     throw FITSError (status, "FITSArchive::load_Pointing", 
 		     "fits_read_col TEL_ZEN");
   
-  ext->tel_zen.setDegrees(my_other_angle);
+  angle.setDegrees (float_angle);
+  ext->set_telescope_zenith (angle);
 
   if (status == 0) {
     integ->add_extension (ext);

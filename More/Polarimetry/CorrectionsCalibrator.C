@@ -42,8 +42,8 @@ bool Pulsar::CorrectionsCalibrator::needs_correction (const Archive* archive,
   if (pointing) {
     if (Archive::verbose == 3)
       cerr << "Pulsar::CorrectionsCalibrator::needs_correction"
-	" using Pointing::pos_ang=" << pointing->pos_ang << endl;
-    should_correct_vertical |= pointing->pos_ang != 0.0;
+	" using Pointing::get_position_angle()=" << pointing->get_position_angle() << endl;
+    should_correct_vertical |= pointing->get_position_angle() != 0.0;
   }
   else
     should_correct_vertical |= receiver->get_tracking_angle () != 0.0;
@@ -136,15 +136,17 @@ Pulsar::CorrectionsCalibrator::get_transformation (const Archive* archive,
 
   const Pointing* pointing = integration->get<Pointing>();
 
-  if (pointing && !equal_pi (pointing->pos_ang,
-			     pointing->fd_ang + pointing->par_ang) )  {
+  if (pointing && !equal_pi (pointing->get_position_angle(),
+			     pointing->get_feed_angle() 
+                             + pointing->get_parallactic_angle()) )  {
 
     // verify self-consistency of attributes
 
     if (Archive::verbose)
       cerr << "Pulsar::CorrectionsCalibrator::get_transformation WARNING\n"
-	"  Pointing pos_ang=" << pointing->pos_ang << " != fd_ang+par_ang="
-	   << pointing->fd_ang + pointing->par_ang << endl;
+	"  Pointing position_angle=" << pointing->get_position_angle() 
+           << " != feed_angle+get_parallactic_angle()="
+	   << pointing->get_feed_angle() + pointing->get_parallactic_angle() << endl;
     
     pointing = 0;
     
@@ -164,7 +166,7 @@ Pulsar::CorrectionsCalibrator::get_transformation (const Archive* archive,
   double feed_rotation = 0.0;
 
   if (pointing)
-    feed_rotation = pointing->pos_ang.getRadians();
+    feed_rotation = pointing->get_position_angle().getRadians();
   else
     feed_rotation = receiver->get_tracking_angle().getRadians();
 
@@ -196,12 +198,12 @@ Pulsar::CorrectionsCalibrator::get_transformation (const Archive* archive,
     if (pointing) {
 
       // check that the para_ang is equal
-      if (!equal_pi( pointing->par_ang, -para.get_phi() ))
+      if (!equal_pi( pointing->get_parallactic_angle(), -para.get_phi() ))
 	
 	if (Archive::verbose)
 	  cerr << "Pulsar::CorrectionsCalibrator::get_transformation WARNING\n"
-	    "  Pointing par_ang=" << pointing->par_ang << " != "
-	       << -para.get_phi() << " calculated for MJD="
+	    " Pointing parallactic_angle=" << pointing->get_parallactic_angle()
+               << " != " << -para.get_phi() << " calculated for MJD="
 	       << integration->get_epoch() << endl;
 
     }
