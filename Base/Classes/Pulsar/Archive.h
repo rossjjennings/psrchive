@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Archive.h,v $
-   $Revision: 1.29 $
-   $Date: 2002/05/09 11:49:36 $
-   $Author: straten $ */
+   $Revision: 1.30 $
+   $Date: 2002/05/29 08:09:07 $
+   $Author: pulsar $ */
 
 /*! \mainpage 
  
@@ -319,7 +319,7 @@ namespace Pulsar {
     float find_min_phase () const;
 
     //! Plot the requested Profile with some header information
-    void display (int isub=0, int ipol=0, int ichan=0) const;
+    void display (int isub=0, int ipol=0, int ichan=0, float phase=0) const;
 
     // //////////////////////////////////////////////////////////////////
     //

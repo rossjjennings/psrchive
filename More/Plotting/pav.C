@@ -31,6 +31,7 @@ void usage ()
     " -m macro  Process data using steps in macro \n"
     " -M meta   meta names a file containing the list of files\n"
     " -p        add polarisations together \n"
+    " -r phase  rotate the profiles by phase (in turns)\n"
     " -S        plot pulsar dynamic spectra:  frequency vs time. \n"
     " -t src    Tscrunch scr Integrations together \n"
     " -T        Tscrunch all Integrations \n"
@@ -50,6 +51,8 @@ int main (int argc, char** argv)
   int tscrunch = -1;
   int pscrunch = -1;
 
+  double phase = 0;
+
   bool verbose = false;
   bool display = false;
   bool textinfo = false;
@@ -59,7 +62,7 @@ int main (int argc, char** argv)
   char* metafile = NULL;
 
   int c = 0;
-  const char* args = "ab:cd:DGe:E:f:FHm:M:pSt:TvVwx:y:R";
+  const char* args = "ab:cd:DGe:E:f:FHm:M:pr:St:TvVwx:y:R";
   while ((c = getopt(argc, argv, args)) != -1)
     switch (c) {
 
@@ -107,6 +110,9 @@ int main (int argc, char** argv)
       break;
     case 'p':
       pscrunch = 1;
+      break;
+    case 'r':
+      phase = atof (optarg);
       break;
     case 'S':
       // dynamic spectra
@@ -226,7 +232,7 @@ int main (int argc, char** argv)
 
     if (display) {
       cpgpage();
-      archive -> display();
+      archive -> display(0,0,0,phase);
     }
     
     if (greyfreq) {
