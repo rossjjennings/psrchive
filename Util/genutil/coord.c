@@ -211,7 +211,7 @@ int telescope_coords (char telescope, float* latitude,
 {
   float latd=-999, longd=-999, elev=-1e9;
   
-  if (telescope < 10) // if the char is < 10 then it was probably an int 
+  if (telescope < 10) /* if the char is < 10 then it was probably an int */
      telescope = '0' + telescope;
 
   switch (telescope) {
