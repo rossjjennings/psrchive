@@ -19,6 +19,9 @@
 */
 void Pulsar::Archive::update_model() 
 {
+  if (verbose)
+    cerr << "Pulsar::Archive::update_model" << endl;
+
   model_updated = false;
   update_model (get_nsubint());
 }
@@ -42,6 +45,9 @@ void Pulsar::Archive::update_model()
 */
 void Pulsar::Archive::update_model (unsigned nsubint)
 {
+  if (verbose)
+    cerr << "Pulsar::Archive::update_model nsubint=" << nsubint << endl;
+
   Reference::To<polyco> oldmodel;
 
   if (!model_updated)
@@ -54,6 +60,9 @@ void Pulsar::Archive::update_model (unsigned nsubint)
   // if previously updated, no need to correct the old Integrations
   if (model_updated || !oldmodel)
     return;
+
+  if (verbose)
+    cerr << "Pulsar::Archive::update_model apply model" << endl;
 
   // correct the old Integrations with the old model
   for (unsigned isub = 0; isub < nsubint; isub++)
@@ -106,6 +115,9 @@ void Pulsar::Archive::update_model (const MJD& time, bool clear_model)
     throw Error (InvalidState, "Pulsar::Archive::update_model",
 		 "not a pulsar observation");
 
+  if (verbose) cerr << "Pulsar::Archive::update_model time=" << time 
+                    << " clear=" << clear_model << endl;
+
   if (!ephemeris) {
     model = 0;
     return;
@@ -124,6 +136,7 @@ void Pulsar::Archive::update_model (const MJD& time, bool clear_model)
     ncoeff  = model->get_ncoeff();
     freq    = model->get_freq();
     nspan   = model->get_nspan();
+
     if (verbose) {
       cout << "Using nspan  = " << nspan << endl;
       cout << "Using ncoeff = " << ncoeff << endl;
@@ -253,19 +266,30 @@ bool Pulsar::Archive::good_model (const polyco& test_model) const
   unsigned isub=0;
   for (isub=0; isub < get_nsubint(); isub++)
     try {
-      if ( test_model.i_nearest (get_Integration(isub)->get_epoch()) == -1 )
+      if ( test_model.i_nearest (get_Integration(isub)->get_epoch()) == -1 ) {
+	if (verbose) cerr << "Pulsar::Archive::good_model"
+                             " polyco::i_nearest returns none" << endl;
 	break;
+      }
     }
     catch (...) {
+      if (verbose) cerr << "Pulsar::Archive::good_model"
+                           " polyco::i_nearest throws exception" << endl;
       break;
     }
   
   if (isub < get_nsubint()) {
+
     if (verbose)
       cerr << "Pulsar::Archive::good_model polyco failed on integration "
 	   << isub << endl;
+
     return false;
+
   }
-  
+
+  if (verbose)
+    cerr << "Pulsar::Archive::good_model polyco passes test" << endl;
+
   return true;
 }

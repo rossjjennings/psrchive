@@ -13,11 +13,20 @@ void Pulsar::Archive::Agent::plugin_load ()
     Registry::Plugin::verbose = true;
   }
 
-  if (plugin_path.length() != 0)
-    plugins.load (plugin_path);
+  if (plugin_path.length() != 0)  {
+    if (verbose)
+      cerr << "Pulsar::Archive::Agent::plugin_load plugin_path="
+           << plugin_path << endl;
 
-  if (plugins.ok.size() != 0)
+    plugins.load (plugin_path);
+  }
+
+  if (plugins.ok.size() != 0) {
+    if (verbose)
+      cerr << "Pulsar::Archive::Agent::plugin_load ok="
+           << plugins.ok.size() << endl;
     return;
+  }
 
   char* env = getenv ("PSRCHIVE_PLUGINS");
   if (env) {

@@ -39,8 +39,11 @@ Pulsar::IntegrationManager::get_Integration (unsigned subint)
 
   // if the subint has not already been loaded, call the pure virtual
   // method, load_Integration, to load the requested sub-int.
-  if (!subints[subint])
+  if (!subints[subint]) {
+    if (verbose) cerr << "Pulsar::IntegrationManager::get_Integration"
+                         " load_Integration" << endl;
     subints[subint] = load_Integration (subint);
+  }
 
   return subints[subint];
 
