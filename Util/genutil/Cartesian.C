@@ -187,6 +187,49 @@ double Cartesian::mod () const
   return sqrt (x*x + y*y + z*z);
 }
 
+void simple_rot (double& x1, double& x2, double radians)
+{
+  double cosr = cos (radians);
+  double sinr = sin (radians);
+
+  double temp = x1;
+  x1 = cosr * temp - sinr * x2;
+  x2 = sinr * temp + cosr * x2;
+}
+
+void Cartesian::x_rot (const Angle& phi)
+{
+  simple_rot (y, z, phi.getradians());
+}
+
+void Cartesian::y_rot (const Angle& phi)
+{
+  simple_rot (z, x, phi.getradians());
+}
+
+void Cartesian::z_rot (const Angle& phi)
+{
+  simple_rot (x, y, phi.getradians());
+}
+
+// rotates the point about an arbitrary vector
+void Cartesian::rot (const Cartesian& v, const Angle& phi)
+{
+  double s = sin(phi.getradians());
+  double c = cos(phi.getradians());
+  double u = 1.0 - c;
+
+  double R[3][3] =
+  { v.x*v.x*u + c    ,  v.y*v.x*u - v.z*s,  v.z*v.x*u + v.y*s,
+    v.x*v.y*u + v.z*s,  v.y*v.y*u + c    ,  v.z*v.y*u - v.x*s,
+    v.x*v.z*u - v.y*s,  v.y*v.z*u + v.x*s,  v.z*v.z*u + c };
+
+  double tx=x, ty=y, tz=z;
+  x = R[0][0]*tx + R[0][1]*ty + R[0][2]*tz;
+  y = R[1][0]*tx + R[1][1]*ty + R[1][2]*tz;
+  z = R[2][0]*tx + R[2][1]*ty + R[2][2]*tz;
+}
+
 Angle Cartesian::angularSeparation (const Cartesian& c1, const Cartesian& c2)
 {
   return Angle (acos( (c1 * c2) / (c1.mod() * c2.mod()) ));

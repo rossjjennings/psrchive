@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Cartesian.h,v $
-   $Revision: 1.4 $
-   $Date: 2000/05/28 04:31:38 $
+   $Revision: 1.5 $
+   $Date: 2001/02/24 03:27:21 $
    $Author: straten $ */
 
 #ifndef __CARTESIAN_H
@@ -33,6 +33,8 @@ class Cartesian
   const friend Cartesian operator - (const Cartesian &, const Cartesian &);
   const friend Cartesian operator * (const Cartesian &, double);  
   const friend Cartesian operator / (const Cartesian &, double);
+  const friend Cartesian operator * (double a, const Cartesian& v)
+    { return v * a; }
 
   // just does a piece-wise division (x/x, y/y, z/z)
   const friend Cartesian pdiv (const Cartesian &, const Cartesian &);
@@ -53,6 +55,15 @@ class Cartesian
 
   double modSquared () const;
   double mod () const;
+
+  // rotates the point about the specifies axis
+  void x_rot (const Angle& phi);
+  void y_rot (const Angle& phi);
+  void z_rot (const Angle& phi);
+
+  // rotates the point about an arbitrary vector
+  void rot (const Cartesian& r_vect, const Angle& phi);
+
   static Angle angularSeparation (const Cartesian& c1, const Cartesian& c2);
 };
 
