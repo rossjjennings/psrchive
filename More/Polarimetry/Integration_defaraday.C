@@ -37,31 +37,31 @@ void Pulsar::Integration::defaraday (double rm, double rm_iono)
     if(verbose) cerr << "Integration::defaraday rotating: " 
 		     << ichan << "\t" << cp << "  " << sp << endl;
     
+    Pulsar::Profile Qtemp;
     Pulsar::Profile Utemp;
-    Pulsar::Profile Vtemp;
     
+    Qtemp = *(profiles[1][ichan]);
     Utemp = *(profiles[2][ichan]);
-    Vtemp = *(profiles[3][ichan]);
 
-    Utemp *= cp;
-    Vtemp *= sp;
+    Qtemp *= cp;
+    Utemp *= sp;
     
-    Utemp -= Vtemp;
+    Qtemp -= Utemp;
+    
+    Reference::To<Pulsar::Profile> Qnew = Qtemp.clone();
+    
+    Qtemp = *(profiles[1][ichan]);
+    Utemp = *(profiles[1][ichan]);
+    
+    Utemp *= cp;
+    Qtemp *= sp;
+    
+    Utemp += Qtemp;
     
     Reference::To<Pulsar::Profile> Unew = Utemp.clone();
     
-    Utemp = *(profiles[2][ichan]);
-    Vtemp = *(profiles[3][ichan]);
-    
-    Vtemp *= cp;
-    Utemp *= sp;
-    
-    Vtemp += Utemp;
-    
-    Reference::To<Pulsar::Profile> Vnew = Vtemp.clone();
-    
+    profiles[1][ichan] = Qnew;
     profiles[2][ichan] = Unew;
-    profiles[3][ichan] = Vnew;
   }
 }
 
