@@ -42,10 +42,10 @@ void usage ()
     "  -o                     Do not try to match obs types\n"
     "  -P                     Calibrate polarisations only\n"
     "\n"
-    "  -S                     Use the SingleAxis(t)Polar (SAtP selfcal) model\n"
-    "  -s                     Use the Single Axis Model (default)\n"
-    "  -q                     Use the Polar Model\n"
-    "  -A filename            Use an existing selfcal model\n\n"
+    "  -S                     Use the complete Reception model \n"
+    "  -s                     Use the Single Axis Model (default) \n"
+    "  -q                     Use the Polar Model \n\n"
+    "  -A filename            Use the calibrator specified by filename \n\n"
     "See http://astronomy.swin.edu.au/pulsar/software/manuals/pac.html"
        << endl;
 }
@@ -101,7 +101,7 @@ int main (int argc, char *argv[]) {
       Pulsar::Archive::set_verbosity(1);
       break;
     case 'i':
-      cout << "$Id: pac.C,v 1.39 2004/04/03 08:29:42 straten Exp $" << endl;
+      cout << "$Id: pac.C,v 1.40 2004/04/04 06:38:32 straten Exp $" << endl;
       return 0;
     case 'p':
       cals_are_here = optarg;
@@ -178,12 +178,6 @@ int main (int argc, char *argv[]) {
       return -1;
     }
   }
-  
-  char tmppath[256];
-  char opath[256];
-  getcwd(tmppath, 256);
- 
-  sprintf(opath,"%s/",tmppath);
   
   for (int ai=optind; ai<argc; ai++)
     dirglob (&archives, argv[ai]);
