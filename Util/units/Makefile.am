@@ -106,6 +106,20 @@ libunits_la_SOURCES += EstimatePlotter.C complexPlotter.C
 
 endif
 
+##############################################################################
+#
+# Rule to install doxygen-generated documentation in $HOME/public_html/psrchive
+#
+
+EXPORT := ${HOME}/public_html/units
+
+export:
+	doxygen
+	rm -rf $(EXPORT)
+	mv doc/html $(EXPORT)
+	chmod -R a+r $(EXPORT)
+	chmod a+x $(EXPORT)
+
 
 #############################################################################
 #
