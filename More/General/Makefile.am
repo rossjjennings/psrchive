@@ -77,7 +77,8 @@ libpsrchive_la_SOURCES = plugins.csh getopt.h Physical.h plotJones.C \
 	Integration_get_Stokes.C      model_profile.C  \
 	Integration_invint.C          pafit_get_PA.C  \
 	Integration_match.C           ArchiveTI.C \
-	IntegrationTI.C               ArchiveTI_import.C
+	IntegrationTI.C               ArchiveTI_import.C \
+	PhaseGradShift.C
 
 SUBDIRS                 = Calibration Extension timer epn
 
