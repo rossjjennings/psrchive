@@ -135,10 +135,15 @@ void Pulsar::PulsarCalibrator::add_observation (const Archive* data)
 		 "no calibrator");
 
   string reason;
-  if (!calibrator->mixable (data, reason))
+  if (!calibrator->standard_match (data, reason))
     throw Error (InvalidParam, "Pulsar::PulsarCalibrator::add_observation",
 		 "'" + data->get_filename() + "' does not match "
 		 "'" + calibrator->get_filename() + reason);
+
+  if (!calibrator->calibrator_match (data, reason))
+    throw Error (InvalidParam, "Pulsar::PulsarCalibrator::add_observation",
+                 "'" + data->get_filename() + "' does not match "
+                 "'" + calibrator->get_filename() + reason);
 
   unsigned nsub = data->get_nsubint ();
   unsigned nchan = data->get_nchan ();
@@ -163,9 +168,18 @@ void Pulsar::PulsarCalibrator::add_observation (const Archive* data)
 	continue;
       }
 
+      if (!model[ichan]) {
+        cerr << "Pulsar::PulsarCalibrator::add_observation standard ichan="
+             << ichan << " flagged invalid" << endl;
+        continue;
+      }
+
       model[ichan]->fit( integration->new_PolnProfile (ichan) );
       solution[ichan]->integrate( transformation[ichan] );
       solution[ichan]->update( transformation[ichan] );
+
+      if (ichan+1 < nchan)
+        solution[ichan]->update( transformation[ichan+1] );
 
     }
     catch (Error& error) {
