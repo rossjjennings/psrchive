@@ -2,8 +2,10 @@
 #include "Pulsar/Integration.h"
 #include "Pulsar/Profile.h"
 #include "Pulsar/Plotter.h"
+
 #include "Pulsar/FourierSNR.h"
 #include "Pulsar/StandardSNR.h"
+#include "Pulsar/AdaptiveSNR.h"
 
 #include "Pulsar/SmoothMedian.h"
 #include "Pulsar/SmoothMean.h"
@@ -32,7 +34,10 @@ void usage ()
     "Weighting options: \n"
     " -s s/n    S/N threshold (weight zero below) default:10\n"
     " -S std    calculate S/N using a standard pulsar archive\n"
-    " -m method calculate S/N using the named method: fourier or fortran\n"
+    " -m method calculate S/N using the named method: \n"
+    "           fourier, fortran, or adaptive \n"
+    " -w width  width of off-pulse baseline used in S/N calculations\n"
+    " -c sigma  cut-off sigma used in adaptive S/N method \n"
     "\n"
     "Output options:\n"
     " -b scr    add scr phase bins together \n"
@@ -45,7 +50,6 @@ void usage ()
     " -d        display s/n but do not output weighted result\n"
     " -o M:w    smooth profile using method, M, and window size, w \n"
     " -p phs    phase centre of off-pulse baseline (giant-pulse search)\n"
-    " -w width  width of off-pulse baseline (used with -p)\n"
        << endl;
 }
 
@@ -68,21 +72,29 @@ int main (int argc, char** argv)
 
   double snr_threshold = 10.0;
 
+  bool snr_chosen = false;
   Pulsar::FourierSNR fourier_snr;
   Pulsar::StandardSNR standard_snr;
+  Pulsar::AdaptiveSNR adaptive_snr;
 
   Reference::To<Pulsar::Archive> standard;
 
   Pulsar::Smooth* smooth = 0;
 
   int c = 0;
-  const char* args = "b:DdFhm:M:o:Pp:Ts:S:vVw:";
+  const char* args = "b:c:DdFhm:M:o:Pp:Ts:S:vVw:";
   while ((c = getopt(argc, argv, args)) != -1)
     switch (c) {
       
     case 'b':
       bscrunch = atoi (optarg);
       break;
+
+    case 'c': {
+      float cutoff = atof (optarg);
+      adaptive_snr.set_baseline_threshold (cutoff);
+      break;
+    }
 
     case 'D':
       display = true;
@@ -102,6 +114,11 @@ int main (int argc, char** argv)
 
     case 'm':
 
+      if (snr_chosen) {
+	cerr << "psrwt: cannot use more than one S/N method" << endl;
+	return -1;
+      }
+
       if (strcasecmp (optarg, "fourier") == 0)
 	Pulsar::Profile::snr_functor.set (&fourier_snr,
 					  &Pulsar::FourierSNR::get_snr);
@@ -109,11 +126,16 @@ int main (int argc, char** argv)
       else if (strcasecmp (optarg, "fortran") == 0)
 	Pulsar::Profile::snr_functor.set (&Pulsar::snr_fortran);
       
+      else if (strcasecmp (optarg, "adaptive") == 0)
+	Pulsar::Profile::snr_functor.set (&adaptive_snr,
+					  &Pulsar::AdaptiveSNR::get_snr);
+
       else {
 	cerr << "psrwt: unrecognized S/N method '" << optarg << "'" << endl;
 	return -1;
       }
 
+      snr_chosen = true;
       break;
 
     case 'M':
@@ -162,12 +184,20 @@ int main (int argc, char** argv)
       break;
 
     case 'S':
+
+      if (snr_chosen) {
+	cerr << "psrwt: cannot use more than one S/N method" << endl;
+	return -1;
+      }
+     
       Pulsar::Profile::snr_functor.set (&standard_snr,
 					&Pulsar::StandardSNR::get_snr);
 
       cerr << "psrwt: loading standard from " << optarg << endl;
       standard = Pulsar::Archive::load (optarg);
       standard->convert_state (Signal::Intensity);
+
+      snr_chosen = true;
 
       break;
 
@@ -176,8 +206,14 @@ int main (int argc, char** argv)
       break;
 
     case 'w':
+
       duty_cycle = atof(optarg);
       cerr << "psrwt: baseline phase window width = " << duty_cycle << endl;
+
+      Pulsar::Profile::default_duty_cycle = duty_cycle;
+      adaptive_snr.set_initial_baseline_window (duty_cycle);
+      fourier_snr.set_baseline_extent (duty_cycle);
+
       break;
 
     case 'V':

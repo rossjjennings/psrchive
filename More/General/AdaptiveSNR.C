@@ -46,7 +46,91 @@ void Pulsar::AdaptiveSNR::set_max_iterations (unsigned iterations)
 //! Return the signal to noise ratio
 float Pulsar::AdaptiveSNR::get_snr (const Profile* profile)
 {
+  // the mean, variance, and variance of the mean
+  double mean, var, var_mean;
 
+  if (initial_baseline_window == 1.0)
+    profile->stats (&mean, &var, &var_mean);
+
+  else {
+    float centre = profile->find_min_phase(initial_baseline_window);
+    profile->stats (centre, &mean, &var, &var_mean, initial_baseline_window);
+  }
+
+  if (var == 0.0)
+    return 0;
+
+  vector<bool> mask (profile->get_nbin(), false);
+
+  const float* amps = profile->get_amps();
+  unsigned nbin = profile->get_nbin();
+  unsigned count = 0;
+
+  for (unsigned iter=0; iter < max_iterations; iter++) {
+
+    double cutoff = baseline_threshold * sqrt (var + var_mean);
+
+    if (Profile::verbose)
+      cerr << "Pulsar::AdaptiveSNR::get_snr iter=" << iter
+	   << " baseline mean=" << mean << " cutoff=" << cutoff << endl;
+
+    bool changed = false;
+
+    double tot = 0.0;
+    double totsq = 0.0;
+    count = 0;
+
+    for (unsigned ibin=0; ibin<nbin; ibin++) {
+
+      if ( fabs(amps[ibin]-mean) < cutoff ) {
+
+	tot += amps[ibin];
+	totsq += amps[ibin]*amps[ibin];
+	count ++;
+
+	if (!mask[ibin])
+	  changed = true;
+
+	mask[ibin] = true;
+
+      }
+      else {
+
+	if (mask[ibin])
+	  changed = true;
+
+	mask[ibin] = false;
+
+      }
+
+    }
+
+    if (count < 2)
+      return 0;
+
+    mean = tot / double(count);
+    double meansq = totsq / double(count);
+    var = (meansq - mean*mean) * double(count)/double(count-1);
+    var_mean = var / double(count);
+
+    if (!changed)
+      break;
+
+  }
+
+  double rms = sqrt (var);
+
+  if (Profile::verbose)
+    cerr << "Pulsar::AdaptiveSNR::get_snr " << count << " out of "
+	 << nbin << " bins in baseline\n"
+      "  mean=" << mean << " rms=" << rms << endl;
+
+  double power = profile->sum() - mean * nbin;
+
+  if (power < 0)
+    power = 0.0;
+
+  return power/rms;
 
 }    
 
