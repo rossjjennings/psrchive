@@ -36,24 +36,31 @@ ssize_t stringload (string* str, FILE* fptr, size_t nbytes)
 ssize_t stringload (string* str, istream &istr, streamsize nbytes)
 {
   if (rdline == NULL) rdline = new char [rdsize];
-  streamsize eachread  = rdsize;
-  streamsize bytesread = 0;
+  streamsize eachread  = rdsize - 1;
+  streamsize bytestoread = nbytes;
 
-  streampos start_pos = istr.tellg();
+  while (istr) {
+    if (nbytes && eachread > bytestoread)
+      eachread = bytestoread;
 
-  while (!nbytes || bytesread<nbytes) {
-    if (nbytes && eachread > (nbytes-bytesread))
-      eachread = nbytes-bytesread;
+    // istream::get() reads to the first \n char and terminates with a \0
+    istr.get (rdline, eachread);
+    streamsize bytes = istr.gcount();
 
-    istr.read (rdline, eachread);
-    streampos bytes = istr.tellg() - (bytesread + start_pos);
-    if (bytes < 1)
-      break;
-    rdline [bytes] = '\0';
     *str += rdline;
-    bytesread += bytes;
+
+    if (nbytes) {
+      bytestoread -= bytes;
+      if (!bytestoread)
+	break;
+    }
+
+    if (istr.get() == '\n')
+      *str += "\n";
   }
-  return bytesread;
+  if (istr.bad())
+    return -1;
+  return 0;
 }
 
 // //////////////////////////////////////////////////////////////////
