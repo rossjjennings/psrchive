@@ -37,6 +37,12 @@ AC_PROG_FC
 _STAR_RESTFP_FIX
 
 #
+# Check C++ template compilation
+#
+SWIN_BEST_PARTIAL_SPECIALIZATION
+SWIN_DEFAULT_PARTIAL_SPECIALIZATION
+
+#
 # Disable the debugging information option, -g
 #
 SWIN_DEBUG
