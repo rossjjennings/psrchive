@@ -37,11 +37,11 @@ void Rhythm::command_line_parse (int argc, char** argv)
       break;
 
     case 'v':
-      medium();
+      setVerbosity (mediumID);
       break;
 
     case 'V':
-      noisy();
+      setVerbosity (noisyID);
       break;
 
     default:
