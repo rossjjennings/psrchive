@@ -10,6 +10,8 @@
 
 #include <vector>
 
+#include <qpopupmenu.h>
+
 #include "qt_psrephem.h"
 #include "psrephem.h"
 #include "psrParams.h"
