@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Jones.h,v $
-   $Revision: 1.3 $
-   $Date: 2003/01/30 15:57:39 $
+   $Revision: 1.4 $
+   $Date: 2003/02/05 13:23:09 $
    $Author: straten $ */
 
 #ifndef __Jones_H
@@ -11,10 +11,6 @@
 #include <complex>
 #include "psr_cpp.h"
 
-
-//! returns the projection of one complex vector onto another
-template<typename T> T proj (const complex<T>& c1, const complex<T>& c2)
-{ return c1.real()*c2.real() + c1.imag()*c2.imag(); } 
 
 //! Jones matrices are 2x2 matrices with complex elements
 template<typename T> class Jones {
@@ -199,14 +195,6 @@ T norm (const Jones<T>& j)
     norm(j.j11) + norm(j.j12) + 
     norm(j.j21) + norm(j.j22);
 }
-
-//! Returns the projection of Jones matrices onto each other
-template<typename T>
-T proj (const Jones<T>& a, const Jones<T>& b)
-{ return 
-    proj(a.j11,b.j11) + proj(a.j12,b.j12) + 
-    proj(a.j21,b.j21) + proj(a.j22,b.j22); }
-
 
 //! Useful for quickly printing the values of matrix elements
 template<typename T>
