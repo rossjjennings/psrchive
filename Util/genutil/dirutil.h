@@ -32,4 +32,9 @@ bool is_glob_argument (const string& text);
 void dirglob (vector<string>* filenames, const char* text);
 void dirglob (vector<string>* filenames, const string& text);
 
+// in dirglobtree.C
+// recursively follows directories
+void dirglobtree (vector<string>* filenames, 
+		  const string& root, const string& pattern);
+
 #endif
