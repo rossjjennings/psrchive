@@ -23,5 +23,6 @@ include $(top_srcdir)/config/Makefile.Qt
 
 INCLUDES = -I../genutil -I../genutil++ @QT_CXXFLAGS@
 
-LDADD = ../genutil++/libgenutilpp.la @QT_LIBS@ 
+LDADD = libqtutil.la ../genutil++/libgenutilpp.la ../genutil/libgenutil.la \
+	../units/libunits.la @QT_LIBS@ 
 
