@@ -1,5 +1,10 @@
 #include "Pulsar/Pointing.h"
+
+#include "Pulsar/Archive.h"
+#include "Pulsar/Telescope.h"
+
 #include "string_utils.h"
+#include "coord.h"
 
 //! Default constructor
 Pulsar::Pointing::Pointing () : Extension ("Pointing")
@@ -36,13 +41,53 @@ Pulsar::Pointing::~Pointing ()
 {
 }
 
-void Pulsar::Pointing::append (Extension* ext)
+/*! Based on the epoch of the Integration, uses slalib to re-calculate
+  the following Pointing attributes: lst_sub, par_ang, tel_az, and
+  tel_zen. */
+void Pulsar::Pointing::update (const Integration* subint)
 {
-  Pulsar::Pointing* useful = 
-    dynamic_cast<Pulsar::Pointing*>(ext);
+  const Archive* archive = get_parent (subint);
 
-  if (!useful)
+  if (!archive)
+    throw (InvalidState, "Pulsar::Pointing::update",
+	   "Integration has no parent Archive");
+
+  const Telescope* telescope = archive->get<Telescope>();
+
+  if (!telescope)
+    throw (InvalidState, "Pulsar::Pointing::update",
+	   "parent Archive has no telescope Extension");
+
+  // correct the Pointing LST (in hours)
+  lst_sub = subint->get_epoch().LST (telescope->get_longitude().getDegrees());
+    
+  // correct the Pointing azimuth, zenith, and parallactic angles
+  float azimuth=0, zenith=0, parallactic=0;
+  if (az_zen_para (ra_sub.getRadians(), dec_sub.getRadians(), lst_sub,
+		   telescope->get_latitude().getDegrees(),
+		   &azimuth, &zenith, &parallactic) < 0)
+    throw (FailedCall, "Pulsar::Pointing::update", "az_zen_para");
+	   
+  par_ang.setDegrees( parallactic );
+  tel_az.setDegrees( azimuth );
+  tel_zen.setDegrees( zenith );
+
+  // correct the Pointing LST (in seconds)
+  lst_sub *= 3600.0;
+
+}
+
+
+/*! Calculates the mean of the Pointing attributes. */
+void Pulsar::Pointing::integrate (const Integration* subint)
+{ 
+  const Pointing* useful = subint->get<Pointing>();
+
+  if (!useful) {
+    if (Integration::verbose)
+      cerr << "Pulsar::Pointing::integrate subint has no Pointing" << endl;
     return;
+  }
 
   lst_sub += useful->lst_sub;
   lst_sub /= 2.0;
