@@ -4,6 +4,7 @@
 #include "psrephem.h"
 #include "polyco.h"
 #include "tempo++.h"
+#include "Error.h"
 
 void Pulsar::Archive::set_verbosity (unsigned level)
 {
@@ -12,6 +13,7 @@ void Pulsar::Archive::set_verbosity (unsigned level)
   psrephem::verbose = (level >= 3);
   polyco::verbose   = (level >= 3);
   Profile::verbose  = (level >= 3);
+  Error::verbose    = (level >= 3);
 
   // level 2
   Integration::verbose = (level >= 2);
