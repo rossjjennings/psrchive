@@ -14,7 +14,7 @@ LIB_F_SRCS = ffft.f fftfit.f brent.f fccf.f cprof.f shiftbyfft.f ionrm.f \
 
 LIB_SRCS   = ${LIB_C_SRCS} ${LIB_F_SRCS}
 
-LDFLAGS   += -larchive -lpolyco -ldialog -ltimes \
+LDFLAGS   += -larchive -lpolyco -ldialog -ltimes -lfptm\
              -lpsrinfo -leph -lsla -lpsrfft -lgenutil -lfftw -lm $(LIBNSL) \
 	     -lcpgplot $(LPGPLOT) 
 
@@ -31,7 +31,7 @@ PROGRAMS = align.C amps.C chanprep.C  \
 	      fakedat.C quik_cal.C plk.C \
 	      cal_arch.C fitmix.C calplt.C vargain.C \
 	      headsum.C iono_model.C treduce.C plk.C \
-              tcombine2.C ratio.C fixprf.C
+              tcombine2.C ratio.C fixprf.C yellowline.C
 
 NOT_WORKING     = bandpass.C detail.C xtoa.C bin_ph.C corflux.C flux.C
 
