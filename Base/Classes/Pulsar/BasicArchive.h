@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/BasicArchive.h,v $
-   $Revision: 1.23 $
-   $Date: 2003/03/06 16:26:51 $
+   $Revision: 1.24 $
+   $Date: 2003/04/27 10:52:11 $
    $Author: straten $ */
 
 #include "Pulsar/Archive.h"
@@ -146,24 +146,26 @@ namespace Pulsar {
     //! Set the status of the parallactic angle flag
     virtual void set_dedispersed (bool done = true);
 
-    //! This trick is done only to ensure that BasicArchive code is linked
+    //! Ensure that BasicArchive code is linked
+    /*! This method is called in Archive::load only to ensure that the
+      BasicArchive object code is linked for use by plugin classes. */
     static void ensure_linkage ();
 
   protected:
 
-    //! set the number of pulsar phase bins used
+    //! Set the number of pulsar phase bins used
     /*! This attribute may be set only through Archive::resize */
     virtual void set_nbin (unsigned nbin);
 
-    //! Get the number of frequency channels used
+    //! Set the number of frequency channels used
     /*! This attribute may be set only through Archive::resize */
     virtual void set_nchan (unsigned nchan);
 
-    //! Get the number of frequency channels used
+    //! Set the number of frequency channels used
     /*! This attribute may be set only through Archive::resize */
     virtual void set_npol (unsigned npol);
 
-    //! Get the number of sub-integrations stored in the file
+    //! Set the number of sub-integrations stored in the file
     /*! This attribute may be set only through Archive::resize */
     virtual void set_nsubint (unsigned nsubint);
 
