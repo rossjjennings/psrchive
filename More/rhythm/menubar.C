@@ -56,8 +56,12 @@ void Rhythm::menubarConstruct ()
   weightsID = tempo->insertItem( "Enable &Weights",
 				this, SLOT( toglweights() ));
   tempo->insertSeparator();
-  autofitID = tempo->insertItem( "Tempo System Call",
-				 this, SLOT( temposys() ));
+  stdID = tempo->insertItem( "Use Standard TEMPO",
+			     this, SLOT( set_std_tempo() ));
+  ddkID = tempo->insertItem( "Use TEMPO_DDK",
+			     this, SLOT( set_ddk() ));
+  temsysID = tempo->insertItem( "Customise Tempo Call",
+				this, SLOT( temposys() ));
 
   // ///////////////////////////////////////////////////////////////////////
   // VERBOSITY menu options
@@ -133,6 +137,16 @@ void Rhythm::temposys()
     return;
   else
     Tempo::set_system(temp.ascii());
+}
+
+void Rhythm::set_std_tempo()
+{
+  Tempo::set_system("tempo");
+}
+
+void Rhythm::set_ddk()
+{
+  Tempo::set_system("tempo_ddk");
 }
 
 void Rhythm::setDataPath()
