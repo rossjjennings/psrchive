@@ -3,7 +3,7 @@
 #define MPI
 #include "polyco.h"
 
-int polynomial::mpiPack_size (MPI_Comm comm, int* size)
+int polynomial::mpiPack_size (MPI_Comm comm, int* size) const
 {
   int total_size = 0;
   int temp_size = 0;
@@ -62,7 +62,7 @@ int polynomial::mpiPack_size (MPI_Comm comm, int* size)
 }
 
 int polynomial::mpiPack (void* outbuf, int outcount, int* position, 
-			  MPI_Comm comm)
+			  MPI_Comm comm) const
 {
   int length, mpi_bool;
   const char * data;
@@ -81,26 +81,26 @@ int polynomial::mpiPack (void* outbuf, int outcount, int* position,
   mpi_bool = tempov11;
   MPI_Pack (&mpi_bool,        	   1, MPI_INT,    outbuf, outcount, position, comm);
   if(tempov11){
-    MPI_Pack (&doppler_shift,    	   1, MPI_DOUBLE, outbuf, outcount, position, comm);
-    MPI_Pack (&log_rms_resid,    	   1, MPI_DOUBLE, outbuf, outcount, position, comm);
+    MPI_Pack ((void*)&doppler_shift,    	   1, MPI_DOUBLE, outbuf, outcount, position, comm);
+    MPI_Pack ((void*)&log_rms_resid,    	   1, MPI_DOUBLE, outbuf, outcount, position, comm);
   }
   ref_phase.mpiPack(outbuf, outcount, position, comm);
 
-  MPI_Pack (&f0,               	   1, MPI_DOUBLE, outbuf, outcount, position, comm);
-  MPI_Pack (&telescope,        	   1, MPI_INT,    outbuf, outcount, position, comm);
-  MPI_Pack (&freq,             	   1, MPI_DOUBLE,  outbuf, outcount, position, comm);
+  MPI_Pack ((void*)&f0,               	   1, MPI_DOUBLE, outbuf, outcount, position, comm);
+  MPI_Pack ((void*)&telescope,        	   1, MPI_INT,    outbuf, outcount, position, comm);
+  MPI_Pack ((void*)&freq,             	   1, MPI_DOUBLE,  outbuf, outcount, position, comm);
   mpi_bool = binary;
   MPI_Pack (&mpi_bool,        	   1, MPI_INT,    outbuf, outcount, position, comm);
   if(binary){
-    MPI_Pack (&binph,            	   1, MPI_DOUBLE,  outbuf, outcount, position, comm);
-    MPI_Pack (&binfreq,         	   1, MPI_DOUBLE,  outbuf, outcount, position, comm);
+    MPI_Pack ((void*)&binph,            	   1, MPI_DOUBLE,  outbuf, outcount, position, comm);
+    MPI_Pack ((void*)&binfreq,         	   1, MPI_DOUBLE,  outbuf, outcount, position, comm);
   }
-  MPI_Pack (&nspan_mins,       	   1, MPI_DOUBLE,    outbuf, outcount, position, comm);
-  MPI_Pack (&dm,               	   1, MPI_DOUBLE,  outbuf, outcount, position, comm);
+  MPI_Pack ((void*)&nspan_mins,       	   1, MPI_DOUBLE,    outbuf, outcount, position, comm);
+  MPI_Pack ((void*)&dm,               	   1, MPI_DOUBLE,  outbuf, outcount, position, comm);
   length = (int)(coefs.size());
   MPI_Pack (&length,     	   1, MPI_INT,    outbuf, outcount, position, comm);
   for(int i=0; i<coefs.size(); ++i)
-    MPI_Pack (&(coefs[i]),        1, MPI_DOUBLE, outbuf, outcount, position, comm);
+    MPI_Pack ((void*)&(coefs[i]),        1, MPI_DOUBLE, outbuf, outcount, position, comm);
 
   reftime.mpiPack                     (outbuf, outcount, position, comm);
 
@@ -149,7 +149,7 @@ int polynomial::mpiUnpack (void* inbuf, int insize, int* position,
   return MPI_SUCCESS;
 }
 
-int polyco::mpiPack_size (MPI_Comm comm, int* size)
+int polyco::mpiPack_size (MPI_Comm comm, int* size) const
 {
   int total_size = 0;
   int temp_size = 0;
@@ -166,7 +166,7 @@ int polyco::mpiPack_size (MPI_Comm comm, int* size)
 }
 
 int polyco::mpiPack (void* outbuf, int outcount, int* position, 
-		     MPI_Comm comm)
+		     MPI_Comm comm) const
 {
   int length = (int)(pollys.size());
   MPI_Pack (&length,   1, MPI_INT,   outbuf, outcount, position, comm);

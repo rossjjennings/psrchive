@@ -63,22 +63,22 @@ Phase& Phase::operator = (const Phase &in_Phase)
   return *this;
 }
 
-const Phase operator + (const Phase &p1, const Phase &p2) {
+Phase operator + (const Phase &p1, const Phase &p2) {
   return Phase(p1.turns + p2.turns,
 	       p1.fturns + p2.fturns); 
 }
 
-const Phase operator - (const Phase &p1, const Phase &p2) {
+Phase operator - (const Phase &p1, const Phase &p2) {
   return Phase(p1.turns - p2.turns,
 	     p1.fturns - p2.fturns); 
 }
 
-const Phase operator + (const Phase &p1, double turns) {
+Phase operator + (const Phase &p1, double turns) {
   double addturns = p1.fturns + turns;
   return Phase(p1.turns,addturns);
 }
 
-const Phase operator - (const Phase &p1, double turns) {
+Phase operator - (const Phase &p1, double turns) {
   double subturns = p1.fturns - turns;
   return Phase(p1.turns,subturns);
 }
@@ -123,7 +123,7 @@ int operator <= (const Phase &p1, const Phase &p2) {
   else return (p1.fturns<p2.fturns);
 }
 
-int operator == (const Phase &p1, const Phase &p2){
+int operator == (const Phase &p1, const Phase &p2) {
   double precision_limit = 2*pow(10,-DBL_DIG);
   if ((p1.turns == p2.turns) &&
       (fabs(p1.fturns-p2.fturns)<precision_limit)) 
@@ -132,7 +132,7 @@ int operator == (const Phase &p1, const Phase &p2){
       return (0);  
 }
 
-int operator != (const Phase &p1, const Phase &p2){
+int operator != (const Phase &p1, const Phase &p2) {
   double precision_limit = 2*pow(10,-DBL_DIG);
   if ((p1.turns != p2.turns) ||
       (fabs(p1.fturns-p2.fturns)>precision_limit)) 

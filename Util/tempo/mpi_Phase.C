@@ -3,7 +3,7 @@
 #define MPI
 #include "Phase.h"
 
-int Phase::mpiPack_size (MPI_Comm comm, int* size)
+int Phase::mpiPack_size (MPI_Comm comm, int* size) const
 {
   int total_size = 0;
   int temp_size = 0;
@@ -18,9 +18,9 @@ int Phase::mpiPack_size (MPI_Comm comm, int* size)
 }
 
 int Phase::mpiPack (void* outbuf, int outcount, int* position, 
-		    MPI_Comm comm){
-  MPI_Pack (&turns,        	   1, MPI_INT,    outbuf, outcount, position, comm);
-  MPI_Pack (&fturns,        	   1, MPI_DOUBLE,  outbuf, outcount, position, comm);
+		    MPI_Comm comm) const {
+  MPI_Pack ((void*)&turns,        	   1, MPI_INT,    outbuf, outcount, position, comm);
+  MPI_Pack ((void*)&fturns,        	   1, MPI_DOUBLE,  outbuf, outcount, position, comm);
   return MPI_SUCCESS;
 }
 

@@ -145,7 +145,7 @@ size_t polynomial::size_in_bytes() const {
 return(0);
 }
 
-int polynomial::unload(ostream &ostr){
+int polynomial::unload(ostream &ostr) const {
 
   char numstr[100];  // max length of string set by princeton at 86...
 
@@ -193,8 +193,7 @@ int polynomial::unload(ostream &ostr){
   return(0);
 }
 
-Phase polynomial::phase(const MJD& t) const
-{ 
+Phase polynomial::phase(const MJD& t) const { 
    Phase p = Phase(0,0.0);
 
    MJD dt = t - reftime;
@@ -234,7 +233,7 @@ double polynomial::frequency(const MJD& t) const {
    return(dp);
 }  
 
-void polynomial::prettyprint() {
+void polynomial::prettyprint() const {
 
   cout << "PSR Name\t\t\t" << psrname << endl;
   cout << "Date\t\t\t\t" << date << endl;
@@ -409,16 +408,16 @@ int polyco::load(FILE *fp){
   return(this->load(file));
 }
 
-int polyco::unload(string filename){
+int polyco::unload(string filename) const {
   return(this->unload(filename.c_str()));
 }
 
-int polyco::unload(char *filename){
+int polyco::unload(char *filename) const {
   ofstream ostr(filename);
   return(this->unload(ostr));
 }
 
-int polyco::unload(ostream &ostr){
+int polyco::unload(ostream &ostr) const {
   for(int i=0; i<pollys.size(); ++i){
     if(pollys[i].unload(ostr)!=0){
       fprintf(stderr, "polyco::unload error - couldn't unload polynomial %d\n", i);
@@ -428,7 +427,7 @@ int polyco::unload(ostream &ostr){
   return(0);
 }
 
-int polyco::unload(FILE *fp){
+int polyco::unload(FILE *fp) const {
   ofstream file(FD(fp));
   return(this->unload(file));
 }
@@ -451,7 +450,7 @@ int polyco::print(char * chpolly) const{
   return(0);
 } 
 
-void polyco::prettyprint(){
+void polyco::prettyprint() const {
   for(int i=0; i<pollys.size(); ++i) 
     pollys[i].prettyprint();
 }

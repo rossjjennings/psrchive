@@ -61,7 +61,7 @@ char* MJD::datestr (char* dstr, int len, const char* format) const
   return dstr;
 }
 
-char * MJD::strtempo(){
+char * MJD::strtempo() const{
   static char permanent[40];
   char temp[20];
   sprintf(temp,"%14.13lf",fracday());
