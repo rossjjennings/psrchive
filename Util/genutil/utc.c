@@ -143,7 +143,7 @@ int str2utc (utc_t *time, const char* str)
 } 
 
 
-int str2cal (cal_t *time, const char* str)
+int str2tm (struct tm* time, const char* str)
 {
   char* temp;
   int   trav;
@@ -153,8 +153,8 @@ int str2cal (cal_t *time, const char* str)
   int   digits;
 
   time->tm_year = 0;
-  time->tm_month = 0;
-  time->tm_day = 0;
+  time->tm_mon = 0;
+  time->tm_mday = 0;
   time->tm_hour = 0;
   time->tm_min = 0;
   time->tm_sec = 0;
@@ -237,11 +237,11 @@ int str2cal (cal_t *time, const char* str)
     return 0;
   temp [endstr+1] = '\0'; 
 
-  /* parse UTC days */
+  /* parse UTC days in month */
   trav = endstr - 1;
   if ((trav < 0) || !isdigit(temp[trav]))
     trav++;
-  sscanf (temp+trav, "%2d", &(time->tm_day));
+  sscanf (temp+trav, "%2d", &(time->tm_mday));
 
   /* cut out minutes and extra characters */
   endstr = trav-1;
@@ -254,7 +254,7 @@ int str2cal (cal_t *time, const char* str)
   trav = endstr - 1;
   if ((trav < 0) || !isdigit(temp[trav]))
     trav++;
-  sscanf (temp+trav, "%2d", &(time->tm_month));
+  sscanf (temp+trav, "%2d", &(time->tm_mon));
 
   /* cut out minutes and extra characters */
   endstr = trav-1;
@@ -270,11 +270,18 @@ int str2cal (cal_t *time, const char* str)
   sscanf (temp+trav+1, "%4d", &(time->tm_year));
 
   free (temp);
+
+  time->tm_wday = 0;
+  time->tm_yday = 0;
+  time->tm_isdst = -1;
+
+  mktime (time);
+
   return 0;
 } 
 
 
-int cal2utc (utc_t *time, cal_t calendar)
+int tm2utc (utc_t *time, struct tm calendar)
 {
   int days_in_month[12] = {31,28,31,30,31,30,31,31,30,31,30,31};
   int month;
@@ -285,10 +292,10 @@ int cal2utc (utc_t *time, cal_t calendar)
 
   time->tm_year = calendar.tm_year;
   time->tm_yday = 0;
-  for (month=1; month<calendar.tm_month; month++) {
+  for (month=1; month<calendar.tm_mon; month++) {
     time->tm_yday += days_in_month[month-1];
   }
-  time->tm_yday += calendar.tm_day;
+  time->tm_yday += calendar.tm_mday;
   time->tm_hour = calendar.tm_hour;
   time->tm_min = calendar.tm_min;
   time->tm_sec = calendar.tm_sec;
@@ -296,7 +303,7 @@ int cal2utc (utc_t *time, cal_t calendar)
   return 0;
 }
 
-int utc2cal (cal_t *calendar, utc_t time)
+int utc2tm (struct tm *calendar, utc_t time)
 {
   int days_in_month[12] = {31,28,31,30,31,30,31,31,30,31,30,31};
   int month;
@@ -315,11 +322,13 @@ int utc2cal (cal_t *calendar, utc_t time)
     return -1;
 
   calendar->tm_year  = time.tm_year;
-  calendar->tm_month = month;
-  calendar->tm_day   = day_of_year + days_in_month[month-1];
+  calendar->tm_mon   = month;
+  calendar->tm_mday  = day_of_year + days_in_month[month-1];
   calendar->tm_hour  = time.tm_hour;
   calendar->tm_min   = time.tm_min;
   calendar->tm_sec   = time.tm_sec;
+
+  mktime (calendar);
 
   return 0;
 }
@@ -401,6 +410,7 @@ char* utcstrfill (char* tmstr, utc_t time, int numch)
   return (tmstr);
 }
 
+#if 0
 char* calstrfill (char* tmstr, cal_t date, int numch);
 
 char* cal2str (char* tmstr, cal_t date, const char* fmt)
@@ -445,6 +455,8 @@ char* calstrfill (char* tmstr, cal_t date, int numch)
   }
   return (tmstr);
 }
+
+#endif
 
 /* *************************************************************************
    utc_diff - returns the number of seconds between

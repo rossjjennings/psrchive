@@ -50,14 +50,15 @@ char * MJD::printall() const {
   return (permanent);
 }
 
-char* MJD::datestr (char* dstr, const char* format) const
+char* MJD::datestr (char* dstr, int len, const char* format) const
 {
-  cal_t greg;
+  struct tm greg;
 
   if (gregorian (&greg, NULL) < 0)
     return NULL;
 
-  return cal2str (dstr, greg, format);
+  strftime (dstr, len, format, &greg);
+  return dstr;
 }
 
 char * MJD::strtempo(){
@@ -385,13 +386,13 @@ double MJD::LST (float longitude) const
 
 int MJD::UTC (utc_t* utc, double* fsec) const
 {
-  cal_t  greg;
+  struct tm  greg;
 
   gregorian (&greg, fsec);
-  return cal2utc (utc, greg);
+  return tm2utc (utc, greg);
 }
 
-int MJD::gregorian (cal_t* gregdate, double* fsec) const
+int MJD::gregorian (struct tm* gregdate, double* fsec) const
 {
   int julian_day = days + 2400001;
 
@@ -399,8 +400,8 @@ int MJD::gregorian (cal_t* gregdate, double* fsec) const
   int n_dten = 10 * (((n_four-237)%1461)/4) + 5;
 
   gregdate->tm_year  = n_four/1461 - 4712;
-  gregdate->tm_month = (n_dten/306+2)%12 + 1;
-  gregdate->tm_day   = (n_dten%306)/10 + 1;
+  gregdate->tm_mon   = (n_dten/306+2)%12 + 1;
+  gregdate->tm_mday  = (n_dten%306)/10 + 1;
 
   ss2hhmmss (&gregdate->tm_hour, &gregdate->tm_min, &gregdate->tm_sec, secs);
 
@@ -413,9 +414,9 @@ int MJD::gregorian (cal_t* gregdate, double* fsec) const
 // construct an MJD from a UTC
 MJD::MJD (const utc_t& utc)
 {
-  cal_t greg;
+  struct tm greg;
 
-  utc2cal (&greg, utc);
+  utc2tm (&greg, utc);
 
   /*
 char temp [40];
@@ -427,7 +428,7 @@ fprintf (stderr, "Passing %s to MJD(cal) constructor\n",
 }
 
 // construct an MJD from a gregorian
-MJD::MJD (const cal_t& greg)
+MJD::MJD (const struct tm& greg)
 {
   Construct (greg);
 }
@@ -457,12 +458,12 @@ int MJD::Construct (const char* mjdstr)
   return 0;
 }
 
-int MJD::Construct (const cal_t& greg)
+int MJD::Construct (const struct tm& greg)
 {
-  days = (1461*(greg.tm_year-(12-greg.tm_month)/10+4712))/4
-    +(306*((greg.tm_month+9)%12)+5)/10
-    -(3*((greg.tm_year-(12-greg.tm_month)/10+4900)/100))/4
-    +greg.tm_day-2399904;
+  days = (1461*(greg.tm_year-(12-greg.tm_mon)/10+4712))/4
+    +(306*((greg.tm_mon+9)%12)+5)/10
+    -(3*((greg.tm_year-(12-greg.tm_mon)/10+4900)/100))/4
+    +greg.tm_mday-2399904;
 
   // Work out seconds, fracsecs always zero.
   secs = 3600.0 * greg.tm_hour + 60.0 * greg.tm_min + greg.tm_sec;
