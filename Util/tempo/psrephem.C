@@ -12,7 +12,7 @@ char* psrephem::tempo_pardir = NULL;
 int   psrephem::verbose = 0;
 char  psrephem::ephemstr [EPH_NUM_KEYS][EPH_STR_LEN];
 
-char* psrephem::tmp_fname = "psrephem_tmp.eph";
+char  psrephem::tmp_fname[25];
 
 void psrephem::init()
 {
@@ -370,10 +370,12 @@ int psrephem::unload (FILE* fptr) const
 
 int psrephem::load (string* instr)
 {
+  strcpy (psrephem::tmp_fname, PSREPHEM_TMP_FNAME);
+  mktemp (psrephem::tmp_fname);
   FILE* temp = fopen (psrephem::tmp_fname, "w");
   if (temp == NULL) {
     fprintf (stderr, "psrephem::load error fopen(%s)", psrephem::tmp_fname);
-    perror ("");
+    perror (":");
     return -1;
   }
   ssize_t bytes = instr->length();
@@ -383,13 +385,14 @@ int psrephem::load (string* instr)
     if (ferror (temp) != 0)
       perror ("psrephem::load error fwrite");
     fprintf (stderr, "psrephem::load fwrite only %d/%d bytes\n", bio,bytes);
+    fclose (temp);
     remove (psrephem::tmp_fname);
     return -1;
   }
   fclose (temp);
-  if(this->load(psrephem::tmp_fname)!=0) return(-1);
+  int ret = this->load(psrephem::tmp_fname);
   remove(psrephem::tmp_fname);
-  return 0;
+  return ret;
 }
 
 int psrephem::unload (string* outstr) const
@@ -401,6 +404,8 @@ int psrephem::unload (string* outstr) const
   for (int i=0;i<EPH_NUM_KEYS;i++)
     strcpy (ephemstr[i], value_str[i].data());
 
+  strcpy (psrephem::tmp_fname, PSREPHEM_TMP_FNAME);
+  mktemp (psrephem::tmp_fname);
   int istat = wr_eph (psrephem::tmp_fname, parmStatus, ephemstr, value_double,
 		      value_integer, error_double);
   if (!istat) {
@@ -418,7 +423,12 @@ int psrephem::unload (string* outstr) const
     return -1;
   }
 
-  return (int) stringload (outstr, temp);
+  int ret = (int) stringload (outstr, temp);
+
+  fclose (temp);
+  remove (psrephem::tmp_fname);
+
+  return ret;
 }
 
 double psrephem::p(void)
