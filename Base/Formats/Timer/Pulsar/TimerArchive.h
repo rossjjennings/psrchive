@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/Timer/Pulsar/TimerArchive.h,v $
-   $Revision: 1.7 $
-   $Date: 2003/08/15 07:53:13 $
-   $Author: straten $ */
+   $Revision: 1.8 $
+   $Date: 2003/12/10 00:54:17 $
+   $Author: hknight $ */
 
 #ifndef __Timer_Archive_h
 #define __Timer_Archive_h
@@ -35,19 +35,21 @@ namespace Pulsar {
     TimerArchive (const TimerArchive& archive, const vector<unsigned>& subint);
 
     //! operator =
-    TimerArchive& operator= (const TimerArchive& archive);
+    virtual TimerArchive& operator= (const TimerArchive& archive);
 
     //! destructor
-    ~TimerArchive ();
+    virtual ~TimerArchive ();
 
     // //////////////////////////////////////////////////////////////////
     //
     // implement the pure virtual methods of the Archive base class
     //
 
+    void copy(const Archive& archive);
+
     //! Copy the contents of an Archive into self
     void copy (const Archive& archive, 
-	       const vector<unsigned>& subints = none_selected);
+	       const vector<unsigned>& subints);
 
     //! Returns a pointer to a new copy of self
     virtual Archive* clone () const;
