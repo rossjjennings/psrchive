@@ -17,8 +17,11 @@
 #define sqr(x) (x*x)
 #define cube(x) (x*x*x)
 
-const double au     = 1.49597870e8;         // km
-const double c      = 2.99792458e5;         // km/s
+const double au   = 1.49597870e8;   // km
+const double c    = 2.99792458e5;   // km/s
+const double day  = 24.0 * 3600.0;  // seconds
+const double year = 365.2422 * day; // seconds
+const double mas  = M_PI/(60.0*60.0*180.0*1000.0);  // radians
 
 // Gaussian Gravitational Constant
 const double gGc    = 0.01720209895;        // AU^3/2 / (day* M_s^1/2)
@@ -82,6 +85,81 @@ void psrephem::m2 (double& m2, double m1) const
     return;
 
   m2 = companion_mass (mf, sini, m1);
+}
+
+// returns the composite proper motion
+void psrephem::pm (double& pm, double& pm_err) const
+{
+  double covar = 0.0;   // covariance b/w mu_alpha and mu_delta
+
+  double mu_alpha = value_double [EPH_PMRA];
+  double mu_aerr  = error_double [EPH_PMRA];
+
+  double mu_delta = value_double [EPH_PMDEC];
+  double mu_derr  = error_double [EPH_PMDEC];
+
+  pm = sqrt (sqr(mu_alpha) + sqr(mu_delta));
+
+  pm_err = sqrt ( sqr(mu_alpha*mu_aerr) + sqr(mu_delta*mu_derr)
+		  + 2.0 * covar * mu_alpha * mu_delta ) / pm;
+}
+
+// returns the proper motion celestial position angle
+void psrephem::phi (double& phi, double& phi_err) const
+{
+  double covar = 0.0;   // covariance b/w mu_alpha and mu_delta
+
+  double mu_alpha = value_double [EPH_PMRA];
+  double mu_aerr  = error_double [EPH_PMRA];
+
+  double mu_delta = value_double [EPH_PMDEC];
+  double mu_derr  = error_double [EPH_PMDEC];
+
+  double sqr_pm = sqr(mu_alpha) + sqr(mu_delta);
+
+  phi = atan2 (mu_alpha, mu_delta);
+
+  phi_err = sqrt ( sqr(mu_alpha*mu_derr) + sqr(mu_delta*mu_aerr)
+		   + 2.0 * covar * mu_alpha * mu_delta ) / sqr_pm;
+}
+
+// returns the orbital period in seconds
+void psrephem::P (double& p, double& p_err) const
+{
+  double rf = value_double [EPH_F];
+  double rf_err = error_double [EPH_F];
+  p = 1.0 / rf;
+  p_err = p * rf_err / rf;
+}
+
+// returns the orbital period derivative in seconds
+void psrephem::P_dot (double& p_dot, double& p_dot_err) const
+{
+  double rf = value_double [EPH_F];
+  double rf_err = error_double [EPH_F];
+
+  double rf_dot = value_double [EPH_F1];
+  double rf_dot_err = error_double [EPH_F1];
+
+  p_dot = - rf_dot / sqr(rf);
+  p_dot_err = p_dot * sqrt(sqr(2*rf_err/rf) + sqr(rf_dot_err/rf_dot));
+}
+
+void psrephem::Shklovskii (double& beta, double& beta_err) const
+{
+  double px = value_double [EPH_PX];
+  double px_err = error_double [EPH_PX];
+
+  // distance to pulsar in km
+  double dist = au / (px * mas);
+  double dist_err = dist * px_err/px;
+
+  double mu, mu_err;
+  pm (mu, mu_err);
+  double mu_radsec = mu * mas/year;
+
+  beta = sqr(mu_radsec) * dist / c;
+  beta_err = beta * sqrt (sqr(2.0*mu_err/mu) + sqr(dist_err/dist));
 }
 
 // defines the recognized filename extensions used for pulsar ephemeris files

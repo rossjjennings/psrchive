@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/psrephem.h,v $
-   $Revision: 1.6 $
-   $Date: 2001/01/30 06:52:15 $
+   $Revision: 1.7 $
+   $Date: 2001/01/30 15:21:31 $
    $Author: straten $ */
 
 #ifndef __PSREPHEM_H
@@ -77,6 +77,33 @@ class psrephem
   void m1 (double& m1, double& m1_err) const;
   // inverts the above to return m2, given m1
   void m2 (double& m2, double m1) const;
+
+  // returns the composite proper motion
+  void pm (double& pm, double& pm_err) const;
+  // returns the proper motion celestial position angle
+  void phi (double& phi, double& phi_err) const;
+
+  // returns the orbital period in seconds
+  void P (double& p, double& p_err) const;
+  // returns the orbital period derivative in seconds
+  void P_dot (double& p, double& p_err) const;
+  
+  // returns the quadratic Doppler shift due to apparent acceleration along
+  // the line of sight that arises from proper motion
+  void Shklovskii (double& beta, double& beta_err) const;
+
+  // //////////////////////////////////////////////////////////////////////
+  // to use the following two functions, you will need to link with 
+  // -lpsrinfo
+
+  // returns a block of LaTeX formatted text suitable for use in tables
+  string tex ();
+  // returns the a LaTeX formatted string for the parameter at ephind
+  string tex_val (int ephind, double fac=1.0, unsigned precision=1);
+
+  // returns a LateX formatted string suitable for labelling the parameter
+  static const char* tex_descriptor (int ephind);
+
 
   string par_lookup (const char* name, int use_cwd);
   static char* tempo_pardir;
