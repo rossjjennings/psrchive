@@ -262,6 +262,11 @@ Rhythm::Rhythm (QApplication* master, QWidget* parent, int argc, char** argv) :
   }
 
   pclose(fptr);
+
+  if (fitpopup->hasdata() && toas.size() > 1) {
+    fitpopup->fitnone();
+    fit();
+  }
 }
 
 Rhythm::~Rhythm ()
@@ -724,6 +729,8 @@ void Rhythm::fit_selected (const psrephem& eph, bool load_new)
 
 void Rhythm::stride_fit()
 {
+#if 0
+
   int temp = 0;
   
   temp = QInputDialog::getInteger("Rhythm Stride Fit",
@@ -742,8 +749,8 @@ void Rhythm::stride_fit()
     times.push_back(toas[i].get_arrival().in_days());
   }
   
-  double first = times[0];
-  double last  = times[0];
+  double first = times.front();
+  double last  = times.front();
   
   for (unsigned i = 0; i < times.size(); i++) {
     if (times[i] < first)
@@ -837,6 +844,8 @@ void Rhythm::stride_fit()
     cpgpt1(i,result[i],0);
   }
   cpgclos();
+
+#endif
 }
 
 void Rhythm::setClassVerbose (bool verbose)
