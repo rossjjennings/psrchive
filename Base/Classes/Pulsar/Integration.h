@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Integration.h,v $
-   $Revision: 1.35 $
-   $Date: 2003/02/20 10:33:05 $
+   $Revision: 1.36 $
+   $Date: 2003/04/04 11:05:32 $
    $Author: straten $ */
 
 /*
@@ -19,6 +19,7 @@
 #include "MJD.h"
 #include "Types.h"
 #include "Reference.h"
+#include "Estimate.h"
 
 namespace Tempo {
   class toa;
@@ -26,7 +27,6 @@ namespace Tempo {
 
 template<typename T> class Stokes;
 template<typename T> class Jones;
-template<typename T> class Estimate;
 
 namespace Pulsar {
 
