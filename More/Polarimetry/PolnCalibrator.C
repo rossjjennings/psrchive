@@ -69,6 +69,13 @@ void Pulsar::PolnCalibrator::calibrate (Archive* arch)
   arch->transform (jones);
 }
 
+void Pulsar::PolnCalibrator::build ()
+{
+  store_parameters = true;
+  create (calibrator->get_nchan());
+}
+
+
 void Pulsar::PolnCalibrator::create (unsigned nchan)
 {
   // get the calibrator hi and lo levels from the PolnCal archive
