@@ -110,7 +110,7 @@ void Pulsar::FITSArchive::unload (fitsfile* fptr,
       data.get()[count] = FP_QNAN;
   #else
     for (count = 0; count < dimension; count++)
-      data.get()[count] = NAN;
+      data.get()[count] = strtod("NAN(n-charsequence)", (char**) NULL);
   #endif
 
   count = 0;

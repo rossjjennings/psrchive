@@ -2,6 +2,7 @@
 #include "Pulsar/CalibratorStokes.h"
 #include "FITSError.h"
 
+#include <stdlib.h>
 #include <assert.h>
 
 #ifdef sun
@@ -54,7 +55,7 @@ void Pulsar::FITSArchive::load_CalibratorStokes (fitsfile* fptr)
   #ifdef sun
     float nullfloat = FP_QNAN;
   #else
-    float nullfloat = NAN;
+    float nullfloat = strtod("NAN(n-charsequence)", (char**) NULL);
   #endif
 
   // Read the data scale weights

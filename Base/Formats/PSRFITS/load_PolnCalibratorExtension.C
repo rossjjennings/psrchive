@@ -2,6 +2,7 @@
 #include "Pulsar/PolnCalibratorExtension.h"
 #include "FITSError.h"
 
+#include <stdlib.h>
 #include <assert.h>
 
 #ifdef sun
@@ -87,7 +88,7 @@ void Pulsar::FITSArchive::load_PolnCalibratorExtension (fitsfile* fptr)
   #ifdef sun
     float nullfloat = FP_QNAN;
   #else
-    float nullfloat = NAN;
+    float nullfloat = strtod("NAN(n-charsequence)", (char**) NULL);
   #endif
   
   fits_read_col (fptr, TFLOAT, colnum, 1, 1, nch_fdpr, &nullfloat,
