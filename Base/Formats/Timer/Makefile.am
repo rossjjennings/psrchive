@@ -46,7 +46,9 @@ DSO_SRCS := BasebandArchive.C TimerArchive.C TimerArchive_Receiver.C \
 
 LIB_SRCS += $(DSO_SRCS)
 
-DSO_LDFLAGS := $(LDFLAGS) -lpsrchive_Extension -larchive $(LTIMES)
+DSO_LDFLAGS := $(LDFLAGS) -lpsrchive -lpsrchive_Extension -larchive $(LTIMES) \
+               -lCalibration -lpolyco -leph -ltempo++ -lunits -lgenutil++ \
+               -lgenutil -lpsrmath $(LFFT) -lsla $(LF77)
 
 # TimerIntegration_cal_levels.C
 
