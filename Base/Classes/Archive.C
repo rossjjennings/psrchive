@@ -36,6 +36,28 @@ Pulsar::Archive::~Archive ()
     cerr << "Pulsar::Archive::destructor" << endl;
 }
 
+//! Return a null-constructed instance of the derived class
+Pulsar::Archive* Pulsar::Archive::new_Archive (const char* class_name)
+{
+  Agent::init ();
+
+  if (Agent::registry.size() == 0)
+    throw Error (InvalidState, "Pulsar::Archive::new_Archive",
+		 "no Agents loaded");
+
+  for (unsigned agent=0; agent<Agent::registry.size(); agent++)
+    if (Agent::registry[agent]->get_name() == class_name)
+      return Agent::registry[agent]->new_Archive();
+
+  throw Error (InvalidParam, "Pulsar::Archive::new_Archive",
+		 "no Agent named '%s'", class_name);
+}
+
+void Pulsar::Archive::agent_report ()
+{
+  Agent::report ();
+}
+
 //! Return the number of extensions available
 unsigned Pulsar::Archive::get_nextension () const
 {

@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Archive.h,v $
-   $Revision: 1.77 $
-   $Date: 2003/06/05 15:39:55 $
+   $Revision: 1.78 $
+   $Date: 2003/06/16 16:49:06 $
    $Author: straten $ */
 
 /*! \mainpage 
@@ -199,11 +199,10 @@ namespace Pulsar {
 
   class Archive : public IntegrationManager {
 
-  public:
+  private:
 
     //! Pure virtual base class of Archive::Advocate template base class
-    /* Though this class is public, only the Archive::Advocate template 
-       should be inherited. */
+    /*! This class is inherited through the Archive::Advocate template. */
     class Agent : public Reference::Able {
 
     public:
@@ -270,12 +269,12 @@ namespace Pulsar {
       virtual string get_description () = 0;
 
     */
-    template<class Child>
+    template<class Type>
     class Advocate : public Agent {
 
     public:
       //! Return a new instance of the Archive derived class
-      virtual Archive* new_Archive () { return new Child; }
+      virtual Archive* new_Archive () { return new Type; }
 
       //! Constructor compilation ensures that template entry is instantiated
       Advocate () { entry.get(); }
@@ -287,7 +286,7 @@ namespace Pulsar {
       static void ensure_linkage ();
 
     private:
-      static Registry::List<Archive::Agent>::Enter<typename Child::Agent> entry;
+      static Registry::List<Archive::Agent>::Enter<typename Type::Agent> entry;
 
     };
 
@@ -299,6 +298,9 @@ namespace Pulsar {
       // no specification for now
 
     };
+
+    //! Public access to Agent::report
+    static void agent_report ();
 
     //! Archive::append should enforce chronological order
     static bool append_chronological;
@@ -338,6 +340,15 @@ namespace Pulsar {
     
     //! destructor
     virtual ~Archive ();
+
+    //! Return a null-constructed instance of the derived class
+    static Archive* new_Archive (const char* class_name);
+
+    //! Convenience interface to new_Archive (const char*)
+    static Archive* new_Archive (const string& class_name)
+    {
+      return new_Archive (class_name.c_str());
+    }
 
     //! operator =
     Archive& operator = (const Archive& a) { copy (a); return *this; }
@@ -779,12 +790,12 @@ namespace Pulsar {
 
   };
 
-  template<class Child>
-  Registry::List<Archive::Agent>::Enter<typename Child::Agent> 
-  Archive::Advocate<Child>::entry;
+  template<class Type>
+  Registry::List<Archive::Agent>::Enter<typename Type::Agent> 
+  Archive::Advocate<Type>::entry;
 
-  template<class Child>
-  void Archive::Advocate<Child>::ensure_linkage() { }
+  template<class Type>
+  void Archive::Advocate<Type>::ensure_linkage() { }
 
 }
 
