@@ -11,6 +11,7 @@
 #include <qapplication.h>
 
 #include "Options.h"
+#include "rhythm.h"
 #include "residual.h"
 
 
@@ -125,10 +126,14 @@ void RhythmOptions::setupTab3()
 
 void RhythmOptions::setXAxis ( int residual_plot )
 {
+  if (Rhythm::verbose)
+    cerr << "RhythmOptions::setXAxis " << residual_plot << endl;
   residual::xtype = residual_plot; 
 }
 
 void RhythmOptions::setYAxis ( int residual_plot )
 {
+  if (Rhythm::verbose)
+    cerr << "RhythmOptions::setYAxis " << residual_plot << endl;
   residual::ytype = residual_plot;
 }
