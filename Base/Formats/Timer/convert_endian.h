@@ -1,7 +1,10 @@
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/Timer/convert_endian.h,v $
-   $Revision: 1.4 $
-   $Date: 2000/01/18 01:40:32 $
+   $Revision: 1.5 $
+   $Date: 2000/04/17 01:44:01 $
    $Author: straten $ */
+
+#ifndef __CONVERT_ENDIAN_H
+#define __CONVERT_ENDIAN_H
 
 #include "machine_endian.h"
 
@@ -50,4 +53,6 @@ void miniChangeEndian  (struct mini * m);
 #define band_fromBigEndian(p)
 #define band_fromLittleEndian(p)   bandChangeEndian(p)
 #endif
+
+#endif /* ndef __CONVERT_ENDIAN_H */
 
