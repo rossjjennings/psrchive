@@ -36,6 +36,8 @@ void psrephem::init()
   value_double  = NULL;
   value_integer = NULL;
   error_double  = NULL;
+
+  tempo11 = false;
 }
 
 void psrephem::size_dataspace()
@@ -49,23 +51,30 @@ void psrephem::size_dataspace()
     // the arrays have already been initialized.  zero them
     if (verbose)
       fprintf (stderr, "psrephem::size_dataspace zero\n");
-    zero();
+    zero_work();
     return;
   }
-
+  
   parmStatus    = new int    [EPH_NUM_KEYS];
   value_double  = new double [EPH_NUM_KEYS];
   value_str     = new string [EPH_NUM_KEYS];
   value_integer = new int    [EPH_NUM_KEYS];
   error_double  = new double [EPH_NUM_KEYS];
-
-  zero();
+  
+  zero_work();
 }
 
 void psrephem::zero()
 {
-  static string tempo_safe_string (" ");
+  tempo11 = true;
+  size_dataspace ();
+}
 
+
+void psrephem::zero_work()
+{
+  static string tempo_safe_string (" ");
+  
   for (int i=0;i<EPH_NUM_KEYS;i++) {
     parmStatus   [i] = 0;
     value_double [i] = 0.0;
@@ -638,3 +647,46 @@ ostream& operator<< (ostream& ostr, const psrephem& eph)
   ostr << out;
   return ostr;
 }
+
+#if 0
+// ///////////////////////////////////////////////////////////////////////
+//
+// set/get functions
+//
+// ///////////////////////////////////////////////////////////////////////
+
+// get functions return the value and throw an exception on error
+string psrephem::get_string  (int ephind)
+{
+
+}
+
+double psrephem::get_double  (int ephind)
+{
+
+}
+
+MJD    psrephem::get_MJD     (int ephind)
+{
+
+}
+
+Angle  psrephem::get_Angle   (int ephind)
+{
+
+}
+
+int    psrephem::get_integer (int ephind)
+{
+
+}
+
+
+// set functions accept the value and throw an exception on error
+void psrephem::set_string  (int ephind, const string&);
+void psrephem::set_double  (int ephind, double );
+void psrephem::set_MJD     (int ephind, const MJD&);
+void psrephem::set_Angle   (int ephind, const Angle&);
+void psrephem::set_Integer (int ephind, int);
+
+#endif

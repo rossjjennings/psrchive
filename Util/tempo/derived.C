@@ -83,11 +83,13 @@ int psrephem::m1 (double& m1, double& m1_err) const
   if (mass_function (mass_func, mass_func_err) != 0)
     return -1;
 
-  double term1 = sqrt (cube(m2*si)/mass_func);
-  m1 = term1 - m2;
-  m1_err = sqrt( sqr(0.5 * term1 * mass_func_err/mass_func) +
-		 sqr(1.5 * term1 * si_err/si) +
-		 sqr((1.5 * term1/m2 -1.0) * m2_err) );
+  double mtot = sqrt (cube(m2*si)/mass_func);
+  double mtot_err = mtot * sqrt( sqr(0.5 * mass_func_err/mass_func) +
+				   sqr(1.5 * si_err/si) +
+				   sqr(1.5 * m2_err/m2) );
+
+  m1 = mtot - m2;
+  m1_err = sqrt( sqr(mtot_err) + sqr(m2_err) );
   return 0;
 }
 
@@ -159,7 +161,7 @@ int psrephem::phi (double& phi, double& phi_err) const
 
 // ////////////////////////////////////////////////////////////////////////
 //
-// returns the orbital period in seconds
+// returns the spin period in seconds
 //
 // ////////////////////////////////////////////////////////////////////////
 int psrephem::P (double& p, double& p_err) const
@@ -177,7 +179,7 @@ int psrephem::P (double& p, double& p_err) const
 
 // ////////////////////////////////////////////////////////////////////////
 //
-// returns the orbital period derivative
+// returns the spin period derivative
 //
 // ////////////////////////////////////////////////////////////////////////
 int psrephem::P_dot (double& p_dot, double& p_dot_err) const
@@ -199,9 +201,43 @@ int psrephem::P_dot (double& p_dot, double& p_dot_err) const
 
 // ////////////////////////////////////////////////////////////////////////
 //
+// returns the second spin period derivative
 //
 // ////////////////////////////////////////////////////////////////////////
-int psrephem::Shklovskii (double& beta, double& beta_err) const
+int psrephem::P_ddot (double& p_ddot, double& p_ddot_err) const
+{
+  p_ddot = p_ddot_err = 0;
+
+  if (parmStatus[EPH_F] < 1 || parmStatus[EPH_F1] < 1 
+      || parmStatus[EPH_F2] < 1)
+    return -1;
+
+  double rf = value_double [EPH_F];
+  double rf_err = error_double [EPH_F];
+
+  double rf_dot = value_double [EPH_F1];
+  double rf_dot_err = error_double [EPH_F1];
+
+  double rf_ddot = value_double [EPH_F2];
+  double rf_ddot_err = error_double [EPH_F2];
+
+  double t1 = 2.0 * sqr(rf_dot) / cube(rf);
+  double t1_err = t1 * sqrt(sqr(2*rf_dot_err/rf_dot) + sqr(3*rf_err/rf));
+
+  double t2 = rf_ddot / sqr(rf);
+  double t2_err = t2 * sqrt(sqr(rf_ddot_err/rf_ddot)+sqr(2*rf_dot_err/rf_dot));
+
+  p_ddot = t1 - t2;
+  p_ddot_err = p_ddot * sqrt(sqr(t1_err/t1) + sqr(t2_err/t2));
+
+  return 0;
+}
+
+// ////////////////////////////////////////////////////////////////////////
+//
+//
+// ////////////////////////////////////////////////////////////////////////
+int psrephem::quadratic_Doppler (double& beta, double& beta_err) const
 {
   if (parmStatus[EPH_PX] < 1)
     return -1;
@@ -222,6 +258,93 @@ int psrephem::Shklovskii (double& beta, double& beta_err) const
   beta = sqr(mu_radsec) * dist / c;
   beta_err = beta * sqrt (sqr(2.0*mu_err/mu) + sqr(dist_err/dist));
 
+  return 0;
+}
+
+// ////////////////////////////////////////////////////////////////////////
+//
+// returns the cubic Doppler shift given the radial velocity in km/s
+//
+// ////////////////////////////////////////////////////////////////////////
+int psrephem::cubic_Doppler (double& gamma, double& gamma_err,
+			     double pmrv, double pmrv_err) const
+{
+  double mu, mu_err;
+  if (pm (mu, mu_err) < 0)
+    return -1;
+
+  double mu_radsec = mu * mas/year;
+
+  gamma = sqr(mu_radsec) * pmrv / c;
+  gamma_err = gamma * sqrt (sqr(2.0*mu_err/mu) + sqr(pmrv_err/pmrv));
+  return 0;
+}
+
+int psrephem::Doppler_P_dotdot (double& P_dotdot, double& P_dotdot_err,
+				double pmrv, double pmrv_err) const
+{
+  double beta=0, beta_err=0;
+  if (quadratic_Doppler (beta, beta_err) < 0)
+    return -1;
+
+  double gamma, gamma_err;
+  if (cubic_Doppler (gamma, gamma_err, pmrv, pmrv_err) < 0)
+    return -1;
+
+  double p=0, p_err=0;
+  if (P (p, p_err) < 0)
+    return -1;
+
+  double p_dot=0, p_dot_err=0;
+  if (P_dot (p_dot, p_dot_err) < 0)
+    return -1;
+
+  P_dotdot = 2.0 * p_dot * beta - 3.0 * p * gamma;
+  P_dotdot_err = 0; // for now
+  return 0;
+}
+
+int psrephem::intrinsic_P_dotdot (double& P_dotdot, double& P_dotdot_err,
+				  float braking_index) const
+{
+  double p=0, p_err=0;
+  if (P (p, p_err) < 0)
+    return -1;
+
+  double p_dot=0, p_dot_err=0;
+  if (P_dot (p_dot, p_dot_err) < 0)
+    return -1;
+
+  // solve n=2-P*P_dot_dot/sqr(P_dot)
+  P_dotdot = (2.0 - braking_index) * sqr (p_dot) / p;
+  P_dotdot_err = P_dotdot * sqrt (sqr(2.0*p_dot_err/p_dot) + sqr(p_err/p));
+
+  return 0;
+}
+
+int psrephem::Doppler_F2 (double& f2, double& f2_err,
+			  double pmrv, double pmrv_err) const
+{
+  double beta=0, beta_err=0;
+  if (quadratic_Doppler (beta, beta_err) < 0)
+    return -1;
+
+  double gamma, gamma_err;
+  if (cubic_Doppler (gamma, gamma_err, pmrv, pmrv_err) < 0)
+    return -1;
+
+  double p=0, p_err=0;
+  if (P (p, p_err) < 0)
+    return -1;
+
+  double p_dot=0, p_dot_err=0;
+  if (P_dot (p_dot, p_dot_err) < 0)
+    return -1;
+
+  double p_dotdot = 2.0 * p_dot * beta - 3.0 * p * gamma;
+
+  f2 = (2.0*sqr(p_dot)/p - p_dotdot) / sqr(p);
+  f2_err = 0; // for now
   return 0;
 }
 
@@ -341,6 +464,64 @@ int psrephem::GR_omega_dot (double& w_dot) const
   return 0;
 }
 
+// ////////////////////////////////////////////////////////////////////////
+//
+//
+int psrephem::GR_omega_dot_mtot (double& mtot, double& mtot_err) const
+{
+  if (parmStatus[EPH_OMDOT] < 1 )
+    return -1;
+
+  double omega_dot     = value_double [EPH_OMDOT] * M_PI/180.0 / year;
+  double omega_dot_err = error_double [EPH_OMDOT] * M_PI/180.0 / year;
+
+  if (parmStatus[EPH_PB] < 1 )
+    return -1;
+
+  double Pb     = value_double [EPH_PB];
+  double Pb_err = error_double [EPH_PB];
+
+  double ecc     = value_double [EPH_E];
+  double ecc_err = error_double [EPH_E];
+
+  double invn = Pb * 86400.0 / (2.0 * M_PI);
+
+  double term = omega_dot * (1.0-sqr(ecc)) / 3.0;
+
+  mtot = pow(term, 1.5) * pow(invn, 2.5) / T_sol;
+
+  mtot_err = mtot * sqrt ( sqr(1.5 * omega_dot_err/omega_dot) +
+			   sqr(omega_dot*ecc/term * ecc_err) +
+			   sqr(2.5 * Pb_err/Pb) );
+  return 0;
+}
+
+// ////////////////////////////////////////////////////////////////////////
+//
+//
+int psrephem::GR_omega_dot_m2 (double& m2, double& m2_err) const
+{
+  double mt, mt_err;
+  if (GR_omega_dot_mtot (mt, mt_err) != 0)
+    return -1;
+
+  cerr << "psrephem::GR_omega_dot_m2 mtot " << mt << " +/- " << mt_err << endl;
+
+  double si, si_err;
+  if (sini (si, si_err) != 0)
+    return -1;
+
+  double mf, mf_err;
+  if (mass_function (mf, mf_err) != 0)
+    return -1;
+
+  m2 = pow (mf * sqr(mt), 1.0/3.0) / si;
+  m2_err = m2 * sqrt ( sqr (2.0/3.0 * mt_err/mt) +
+		       sqr (1.0/3.0 * mf_err/mf) +
+		       sqr (si_err/si) );
+
+  return 0;
+}
 
 // ////////////////////////////////////////////////////////////////////////
 //
