@@ -13,6 +13,11 @@ Pulsar::PulsarCalibrator::PulsarCalibrator (Calibrator::Type model)
   model_type = model;
 }
 
+//! Constructor
+Pulsar::PulsarCalibrator::~PulsarCalibrator ()
+{
+}
+
 //! Return the reference epoch of the calibration experiment
 MJD Pulsar::PulsarCalibrator::get_epoch () const
 {

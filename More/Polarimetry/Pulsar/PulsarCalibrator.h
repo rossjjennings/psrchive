@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PulsarCalibrator.h,v $
-   $Revision: 1.1 $
-   $Date: 2004/01/02 17:38:07 $
+   $Revision: 1.2 $
+   $Date: 2004/01/02 18:10:34 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PulsarCalibrator_H
@@ -30,6 +30,9 @@ namespace Pulsar {
     //! Constructor
     PulsarCalibrator (Calibrator::Type model);
 
+    //! Destructor
+    ~PulsarCalibrator ();
+
     //! Return the reference epoch of the calibration experiment
     MJD get_epoch () const;
 
@@ -50,9 +53,6 @@ namespace Pulsar {
     
     //! Add the ArtificialCalibrator observation to the set of constraints
     void add_Calibrator (const ArtificialCalibrator* polncal);
-
-    //! Return a PolnCalibrator::get_solution with a CalibratorStokes Extension
-    Archive* get_solution (const string& archive_type, string ext) const;
 
   protected:
     
