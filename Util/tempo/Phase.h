@@ -20,6 +20,10 @@ class Phase {
   void settle ();
 
  public:
+
+  //! The largest number to be considered "close enough" to zero
+  static double rounding_threshold;
+
   ~Phase(){}
   Phase (int64 tns, double ftns);
   Phase (double turns=0);

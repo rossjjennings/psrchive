@@ -6,13 +6,15 @@
 
 #include "Phase.h"
 
+double Phase::rounding_threshold = 1e-9;
+
 void Phase::settle ()
 {
-  if (fturns<0 && turns>0) {
+  if (turns>0 && fturns < -rounding_threshold) {
     fturns += 1.0;
     turns--;
   }
-  if (fturns>0 && turns<0) {
+  if (turns<0 && fturns > rounding_threshold) {
     fturns -= 1.0;
     turns++;
   }
