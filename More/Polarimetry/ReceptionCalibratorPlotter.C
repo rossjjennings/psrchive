@@ -75,6 +75,13 @@ void Pulsar::ReceptionCalibratorPlotter::plot_constraints (unsigned ichan,
 
   }
 
+  if (stokes[0].size() == 0) {
+    cerr << "Pulsar::ReceptionCalibratorPlotter::plot_constraints "
+            "ichan=" << ichan << " istate=" << istate << " no data" << endl;
+    return;
+  }
+
+
   if (!calibrator->get_solved()) {
 
     char buffer[256];
