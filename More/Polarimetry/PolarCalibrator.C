@@ -20,6 +20,9 @@ Pulsar::PolarCalibrator::solve (const vector<Estimate<double> >& hi,
   Stokes< Estimate<double> > stokes_hi = convert (hi);
   Stokes< Estimate<double> > stokes_lo = convert (lo);
 
+  stokes_hi *= 2.0;
+  stokes_lo *= 2.0;
+
   Calibration::Polar qm;
   qm.solve (stokes_hi, stokes_lo);
 
