@@ -6,6 +6,7 @@
 
 //! Default constructor
 Pulsar::PolnCalibratorExtension::PolnCalibratorExtension ()
+  : Extension ("PolnCalibratorExtension")
 {
   type = Calibrator::SingleAxis;
 }
@@ -13,6 +14,7 @@ Pulsar::PolnCalibratorExtension::PolnCalibratorExtension ()
 //! Copy constructor
 Pulsar::PolnCalibratorExtension::PolnCalibratorExtension
 (const PolnCalibratorExtension& copy)
+  : Extension ("PolnCalibratorExtension")
 {
   operator = (copy);
 }
@@ -33,7 +35,7 @@ Pulsar::PolnCalibratorExtension::operator=
 
   for (unsigned ichan = 0; ichan < nchan; ichan++)
     if ( copy.get_valid(ichan) )
-      *(response[ichan]) = *(copy.response[ichan]);
+      response[ichan]->copy(copy.response[ichan]);
     else
       response[ichan] = 0;
 
@@ -101,8 +103,13 @@ Pulsar::PolnCalibratorExtension::get_Transformation (unsigned ichan) const
 
 void Pulsar::PolnCalibratorExtension::construct ()
 {
+  if (Archive::verbose)
+    cerr << "Pulsar::PolnCalibratorExtension::construct nchan="
+         << response.size() << endl;
+
   for (unsigned ichan=0; ichan<response.size(); ichan++)
     response[ichan] = new_Transformation();
+
 }
 
 void Pulsar::PolnCalibratorExtension::range_check (unsigned ichan,

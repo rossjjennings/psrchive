@@ -7,10 +7,8 @@
 #include "timer++.h"
 
 
-void Pulsar::BasebandArchive::init ()
+void init (baseband_header& bhdr)
 {
-  Timer::init (&hdr);
-
   bhdr.endian  = BASEBAND_HEADER_ENDIAN;
   bhdr.version = BASEBAND_HEADER_VERSION;
   bhdr.size =    BASEBAND_HEADER_SIZE;
@@ -45,6 +43,12 @@ void Pulsar::BasebandArchive::init ()
 
   bhdr.nsmear_neg = 0;
 
+}
+
+void Pulsar::BasebandArchive::init ()
+{
+  Timer::init (&hdr);
+  ::init (bhdr);
 }
 
 
@@ -96,10 +100,6 @@ void Pulsar::BasebandArchive::copy (const Archive& archive)
     cerr << "BasebandArchive::copy another BasebandArchive" << endl;
 
   bhdr = barchive->bhdr;
-
-  reduction = barchive->reduction;
-  twobit = barchive->twobit;
-  passband = barchive->passband;
 }
 
 //! Returns a pointer to a new copy of self
@@ -108,33 +108,6 @@ Pulsar::Archive* Pulsar::BasebandArchive::clone () const
   return new BasebandArchive (*this);
 }
 
-//! Return the number of extensions available
-unsigned Pulsar::BasebandArchive::get_nextension () const
-{
-  return 3;
-}
-
-//! Return a pointer to the specified extension
-const Pulsar::Archive::Extension*
-Pulsar::BasebandArchive::get_extension (unsigned iext) const
-{
-  switch (iext) {
-
-  case 0:
-    return &reduction;
-
-  case 1:
-    return &twobit;
-
-  case 2:
-    return &passband;
-
-  default:
-    throw Error (InvalidRange, "Pulsar::BasebandArchive::get_extension",
-		 "iext=%d > next=3", iext);
-
-  }
-}
 
 // /////////////////////////////////////////////////////////////////////////
 //
@@ -243,33 +216,49 @@ void Pulsar::BasebandArchive::convert_hdr_Endian ()
   Archive::Extension attributes */
 void Pulsar::BasebandArchive::set_header ()
 {
+  ::init (bhdr);
 
-  bhdr.gulpsize = reduction.get_block_size();
-  bhdr.seeksize = reduction.get_block_size() - reduction.get_overlap();
-  if (bhdr.seeksize)
-    bhdr.totaljobs = reduction.get_total_samples() / bhdr.seeksize;
-  else
-    bhdr.totaljobs = 0;
+  const dspReduction* reduction = get<dspReduction>();
+  if (reduction) {
 
-  bhdr.voltage_state = int( reduction.get_state() ) + 1;
+    bhdr.gulpsize = reduction->get_block_size();
+    bhdr.seeksize = reduction->get_block_size() - reduction->get_overlap();
+    if (bhdr.seeksize)
+      bhdr.totaljobs = reduction->get_total_samples() / bhdr.seeksize;
+    else
+      bhdr.totaljobs = 0;
 
-  bhdr.ppweight = twobit.get_nsample ();
-  bhdr.analog_channels = twobit.get_ndig ();
-  bhdr.dls_threshold_limit = 0;
+    bhdr.voltage_state = int( reduction->get_state() ) + 1;
 
-  bhdr.pband_resolution = passband.get_nchan ();
-  bhdr.pband_channels = passband.get_npol ();
+    bhdr.nfft = reduction->get_nsamp_fft ();
+    bhdr.nsmear_pos = reduction->get_nsamp_overlap_pos ();
+    bhdr.nsmear_neg = reduction->get_nsamp_overlap_neg ();
+    
+    bhdr.nscrunch = reduction->get_ScrunchFactor ();
+    
+    bhdr.power_normalization = reduction->get_scale ();
+    
+    bhdr.f_resolution = reduction->get_freq_res ();
+    bhdr.t_resolution = reduction->get_time_res ();
 
-  bhdr.nfft = reduction.get_nsamp_fft ();
-  bhdr.nsmear_pos = reduction.get_nsamp_overlap_pos ();
-  bhdr.nsmear_neg = reduction.get_nsamp_overlap_neg ();
+  }
 
-  bhdr.nscrunch = reduction.get_ScrunchFactor ();
+  const TwoBitStats* twobit = get<TwoBitStats>();
+  if (twobit) {
 
-  bhdr.power_normalization = reduction.get_scale ();
+    bhdr.ppweight = twobit->get_nsample ();
+    bhdr.analog_channels = twobit->get_ndig ();
+    bhdr.dls_threshold_limit = 0;
 
-  bhdr.f_resolution = reduction.get_freq_res ();
-  bhdr.t_resolution = reduction.get_time_res ();
+  }
+
+  const Passband* passband = get<Passband>();
+  if (passband) {
+
+    bhdr.pband_resolution = passband->get_nchan ();
+    bhdr.pband_channels = passband->get_npol ();
+    
+  }
 
   bhdr.time_domain = 0;
   bhdr.frequency_domain = 0;
@@ -289,22 +278,27 @@ void Pulsar::BasebandArchive::set_reduction ()
   if (verbose)
     cerr << "Pulsar::BasebandArchive::set_reduction" << endl;
 
-  reduction.set_block_size( bhdr.gulpsize );
-  reduction.set_overlap( reduction.get_block_size() - bhdr.seeksize );
-  reduction.set_total_samples( bhdr.totaljobs * bhdr.seeksize );
+  dspReduction* reduction = get<dspReduction>();
 
-  reduction.set_state( Signal::State(bhdr.voltage_state - 1) );
+  if (!reduction)
+    return;
 
-  reduction.set_nsamp_fft ( bhdr.nfft );
-  reduction.set_nsamp_overlap_pos ( bhdr.nsmear_pos );
-  reduction.set_nsamp_overlap_neg ( bhdr.nsmear_neg );
+  reduction->set_block_size( bhdr.gulpsize );
+  reduction->set_overlap( reduction->get_block_size() - bhdr.seeksize );
+  reduction->set_total_samples( bhdr.totaljobs * bhdr.seeksize );
 
-  reduction.set_ScrunchFactor ( bhdr.nscrunch );
+  reduction->set_state( Signal::State(bhdr.voltage_state - 1) );
 
-  reduction.set_scale ( bhdr.power_normalization );
+  reduction->set_nsamp_fft ( bhdr.nfft );
+  reduction->set_nsamp_overlap_pos ( bhdr.nsmear_pos );
+  reduction->set_nsamp_overlap_neg ( bhdr.nsmear_neg );
 
-  reduction.set_freq_res ( bhdr.f_resolution );
-  reduction.set_time_res ( bhdr.t_resolution );
+  reduction->set_ScrunchFactor ( bhdr.nscrunch );
+
+  reduction->set_scale ( bhdr.power_normalization );
+
+  reduction->set_freq_res ( bhdr.f_resolution );
+  reduction->set_time_res ( bhdr.t_resolution );
 }
 
 
@@ -430,7 +424,8 @@ void Pulsar::BasebandArchive::backend_load (FILE* fptr)
     if (verbose) cerr << "BasebandArchive::backend_load " 
 		      << bhdr.analog_channels << " histograms.\n";
 
-    twobit.resize (bhdr.ppweight, bhdr.analog_channels);
+    Reference::To<TwoBitStats> twobit = new TwoBitStats;
+    twobit->resize (bhdr.ppweight, bhdr.analog_channels);
 
     for (int idc=0; idc<bhdr.analog_channels; idc++) {
 
@@ -438,8 +433,10 @@ void Pulsar::BasebandArchive::backend_load (FILE* fptr)
 	throw Error (FailedSys, "BasebandArchive::backend_load",
 		     "fread_compressed histogram[%d]", idc);
 
-      twobit.set_histogram (temp, idc);
+      twobit->set_histogram (temp, idc);
     }
+
+    add_extension (twobit);
   }
 
   if (bhdr.pband_resolution) {
@@ -447,7 +444,8 @@ void Pulsar::BasebandArchive::backend_load (FILE* fptr)
     if (verbose) cerr << "BasebandArchive::backend_load "
 		      << bhdr.pband_channels << " bandpasses.\n";
 
-    passband.resize (bhdr.pband_resolution, bhdr.pband_channels);
+    Reference::To<Passband> passband = new Passband;
+    passband->resize (bhdr.pband_resolution, bhdr.pband_channels);
 
     for (int ipb=0; ipb<bhdr.pband_channels; ipb++) {
 
@@ -462,9 +460,11 @@ void Pulsar::BasebandArchive::backend_load (FILE* fptr)
 	  swap (temp[ipt], temp[nswap+ipt]);
       }
 
-      passband.set_passband (temp, ipb);
+      passband->set_passband (temp, ipb);
       
     }
+
+    add_extension (passband);
   }
   
   long file_end = ftell (fptr);
@@ -508,8 +508,13 @@ void Pulsar::BasebandArchive::backend_unload (FILE* fptr) const
 
   if (bhdr.ppweight) {
 
+    const TwoBitStats* twobit = get<TwoBitStats>();
+    if (!twobit)
+      throw Error (InvalidState, "BasebandArchive::backend_unload",
+		   "no TwoBitStats Extension");
+
     for (int idc=0; idc<bhdr.analog_channels; idc++)
-      if (fwrite_compressed (fptr, twobit.get_histogram(idc)) < 0)
+      if (fwrite_compressed (fptr, twobit->get_histogram(idc)) < 0)
 	throw Error (FailedSys, "BasebandArchive::backend_unload",
 		     "fwrite_compressed histogram[%d]", idc);
 
@@ -517,8 +522,13 @@ void Pulsar::BasebandArchive::backend_unload (FILE* fptr) const
 
   if (bhdr.pband_resolution) {
 
+    const Passband* passband = get<Passband>();
+    if (!passband)
+      throw Error (InvalidState, "BasebandArchive::backend_unload",
+		   "no Passband Extension");
+
     for (int ipb=0; ipb<bhdr.pband_channels; ipb++)
-      if (fwrite_compressed (fptr, passband.get_passband(ipb)) < 0)
+      if (fwrite_compressed (fptr, passband->get_passband(ipb)) < 0)
 	throw Error (FailedSys, "BasebandArchive::backend_unload",
 		     "fwrite_compressed passband[%d]", ipb);
 
@@ -535,12 +545,24 @@ void Pulsar::BasebandArchive::backend_unload (FILE* fptr) const
 const vector<float>& 
 Pulsar::BasebandArchive::get_passband (unsigned channel) const
 {
-  return passband.get_passband (channel);
+  const Passband* passband = get<Passband>();
+
+  if (!passband)
+    throw Error (InvalidState, "Pulsar::BasebandArchive::get_histogram",
+		 "no Passband Extension");
+
+  return passband->get_passband (channel);
 }
 
 const vector<float>& Pulsar::BasebandArchive::get_histogram (unsigned channel) const
 {
-  return twobit.get_histogram (channel);
+  const TwoBitStats* twobit = get<TwoBitStats>();
+
+  if (!twobit)
+    throw Error (InvalidState, "Pulsar::BasebandArchive::get_histogram",
+		 "no TwoBitStats Extension");
+
+  return twobit->get_histogram (channel);
 }
 
 bool Pulsar::BasebandArchive::get_scattered_power_corrected () const {

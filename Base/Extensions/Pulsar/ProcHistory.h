@@ -18,7 +18,7 @@ namespace Pulsar {
   public:
     
     //Default constructor
-    ProcHistory () { init(); }
+    ProcHistory ();
     
     // Copy constructor
     ProcHistory (const Pulsar::ProcHistory& extension);
@@ -29,6 +29,9 @@ namespace Pulsar {
     // Destructor
     ~ProcHistory ();
     
+    //! Clone method
+    ProcHistory* clone () const { return new ProcHistory( *this ); }
+
     ///////////////////////////////////////////////////////////////
     // The information container
     

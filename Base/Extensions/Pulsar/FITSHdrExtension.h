@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/FITSHdrExtension.h,v $
-   $Revision: 1.3 $
-   $Date: 2003/06/19 03:48:44 $
-   $Author: ahotan $ */
+   $Revision: 1.4 $
+   $Date: 2003/10/08 14:17:38 $
+   $Author: straten $ */
 
 #ifndef __FITSHdrExtension_h
 #define __FITSHdrExtension_h
@@ -29,6 +29,14 @@ namespace Pulsar {
     
     //! Destructor
     ~FITSHdrExtension ();
+
+    //! Clone method
+    FITSHdrExtension* clone () const { return new FITSHdrExtension( *this ); }
+
+    //! Return two strings based on coordmode attribute
+    void get_coord_string (const sky_coord& coordinates,
+			   string& coord1, string& coord2) const;
+
 
     //////////////////////////////////////////////////////////////////////
     

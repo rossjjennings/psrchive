@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/PolnCalibratorExtension.h,v $
-   $Revision: 1.5 $
-   $Date: 2003/10/02 07:33:46 $
+   $Revision: 1.6 $
+   $Date: 2003/10/08 14:17:38 $
    $Author: straten $ */
 
 #ifndef __PolnCalibratorExtension_h
@@ -34,6 +34,10 @@ namespace Pulsar {
 
     //! Destructor
     ~PolnCalibratorExtension ();
+
+    //! Clone method
+    PolnCalibratorExtension* clone () const
+    { return new PolnCalibratorExtension( *this ); }
 
     //! Construct from a PolnCalibrator instance
     PolnCalibratorExtension (const PolnCalibrator*);

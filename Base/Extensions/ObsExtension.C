@@ -2,6 +2,7 @@
 
 //! Default constructor
 Pulsar::ObsExtension::ObsExtension ()
+  : Extension ("ObsExtension")
 {
   observer = "UNSET";
   affiliation = "UNSET";
@@ -11,6 +12,7 @@ Pulsar::ObsExtension::ObsExtension ()
 
 //! Copy constructor
 Pulsar::ObsExtension::ObsExtension (const ObsExtension& extension)
+  : Extension ("ObsExtension")
 {
   observer = extension.observer;
   affiliation = extension.affiliation;

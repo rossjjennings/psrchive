@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/ITRFExtension.h,v $
-   $Revision: 1.1 $
-   $Date: 2003/06/12 18:40:00 $
+   $Revision: 1.2 $
+   $Date: 2003/10/08 14:17:38 $
    $Author: straten $ */
 
 #ifndef __ITRFExtension_h
@@ -32,6 +32,9 @@ namespace Pulsar {
     //! Destructor
     ~ITRFExtension ();
     
+    //! Clone method
+    ITRFExtension* clone () const { return new ITRFExtension( *this ); }
+
     ////////////////////////////////////////////////////////////////
 
     //! Antenna ITRF X-coordinate

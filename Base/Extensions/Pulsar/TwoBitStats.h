@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/TwoBitStats.h,v $
-   $Revision: 1.1 $
-   $Date: 2003/06/12 18:40:00 $
+   $Revision: 1.2 $
+   $Date: 2003/10/08 14:17:38 $
    $Author: straten $ */
 
 #ifndef __TwoBitStats_h
@@ -31,6 +31,9 @@ namespace Pulsar {
 
     //! Operator =
     const TwoBitStats& operator= (const TwoBitStats& extension);
+
+    //! Clone method
+    TwoBitStats* clone () const { return new TwoBitStats( *this ); }
 
     //! Set the number of samples per estimate and number of digitizers
     void resize (unsigned nsample, unsigned ndig);

@@ -2,6 +2,7 @@
 
 //! Default constructor
 Pulsar::ITRFExtension::ITRFExtension ()
+  : Extension ("ITRFExtension")
 {
   ant_x = 0.0;
   ant_y = 0.0;
@@ -10,6 +11,7 @@ Pulsar::ITRFExtension::ITRFExtension ()
 
 //! Copy constructor
 Pulsar::ITRFExtension::ITRFExtension (const ITRFExtension& extension)
+  : Extension ("ITRFExtension")
 {
   ant_x = extension.ant_x;
   ant_y = extension.ant_y;

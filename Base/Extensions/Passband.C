@@ -2,6 +2,7 @@
 
 //! Default constructor
 Pulsar::Passband::Passband ()
+  : Extension ("Passband")
 {
   nchan = 0;
   npol = 0;
@@ -10,6 +11,7 @@ Pulsar::Passband::Passband ()
 
 //! Copy constructor
 Pulsar::Passband::Passband (const Passband& pband)
+  : Extension ("Passband")
 {
   operator=(pband);
 }
@@ -25,6 +27,10 @@ Pulsar::Passband::operator= (const Passband& pband)
   passband = pband.passband;
 
   return *this;
+}
+
+Pulsar::Passband::~Passband ()
+{
 }
 
 //! Get the number of frequency channels in each passband
@@ -113,6 +119,11 @@ void Pulsar::Passband::range_check (unsigned ipol, unsigned iband,
 
   if (iband >= nband)
     throw Error (InvalidRange, method, "iband=%d >= nband=%d", iband, nband);
+
+  if (ipol+iband*npol > passband.size())
+    throw Error (InvalidState, method, "ipol=%d iband=%d size=%d",
+		 ipol, iband, passband.size());
+
 }
 
 

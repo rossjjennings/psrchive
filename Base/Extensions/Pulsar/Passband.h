@@ -1,23 +1,19 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/Passband.h,v $
-   $Revision: 1.2 $
-   $Date: 2003/06/16 21:24:49 $
+   $Revision: 1.3 $
+   $Date: 2003/10/08 14:17:38 $
    $Author: straten $ */
 
-#ifndef __Passband_h
-#define __Passband_h
+#ifndef __Pulsar_Passband_h
+#define __Pulsar_Passband_h
 
 #include "Pulsar/Archive.h"
 
 namespace Pulsar {
 
-  //! Example Pulsar::Archive Extension
-  /*! This Passband class provides an example of how to
-    inherit the Pulsar::Archive::Extension class. By copying the files
-    Passband.h and Passband.C and performing simple
-    text-substitution, the skeleton of a new Extension may be easily
-    developed. */
+  //! Instrumental passband (or bandpass)
+  /*! This Extension stores the instrumental bandpass in a Pulsar::Archive. */
   class Passband : public Pulsar::Archive::Extension {
 
   public:
@@ -30,6 +26,12 @@ namespace Pulsar {
 
     //! Operator =
     const Passband& operator= (const Passband& extension);
+
+    //! Destructor
+    ~Passband ();
+
+    //! Clone method
+    Passband* clone () const { return new Passband( *this ); }
 
     //! Get the number of frequency channels in each passband
     unsigned get_nchan () const;

@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/dspReduction.h,v $
-   $Revision: 1.3 $
-   $Date: 2003/08/13 18:42:42 $
+   $Revision: 1.4 $
+   $Date: 2003/10/08 14:17:38 $
    $Author: straten $ */
 
 #ifndef __dspReduction_h
@@ -33,6 +33,9 @@ namespace Pulsar {
 
     //! Destructor
     ~dspReduction ();
+
+    //! Clone method
+    dspReduction* clone () const { return new dspReduction( *this ); }
 
     /** @name dsp::Input parameters
      *  These parameters describe the state of the dsp::Input from which the

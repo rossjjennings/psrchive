@@ -1,7 +1,9 @@
 #include "Pulsar/FITSHdrExtension.h"
+#include "string_utils.h"
 
 //! Default constructor
 Pulsar::FITSHdrExtension::FITSHdrExtension ()
+  : Extension ("FITSHdrExtension")
 {
   start_time.Construct("00000.00000");
   hdrver = "UNSET";
@@ -15,6 +17,7 @@ Pulsar::FITSHdrExtension::FITSHdrExtension ()
 
 //! Copy constructor
 Pulsar::FITSHdrExtension::FITSHdrExtension (const FITSHdrExtension& extension)
+  : Extension ("FITSHdrExtension")
 {
   start_time = extension.start_time;
   hdrver = extension.hdrver;
@@ -47,3 +50,36 @@ Pulsar::FITSHdrExtension::~FITSHdrExtension ()
 {
 }
 
+
+void Pulsar::FITSHdrExtension::get_coord_string (const sky_coord& coordinates,
+						 string& coord1,
+						 string& coord2) const
+{
+  AnglePair newcoord;
+  
+  if (coordmode == "J2000") {
+    
+    newcoord = coordinates.getRaDec();
+    
+    coord1 = newcoord.angle1.getHMS();
+    coord2 = newcoord.angle2.getDMS();
+   
+    return;
+
+  }
+
+  if (coordmode == "Gal") {
+    
+    newcoord = coordinates.getGalactic();
+    
+    coord1 = stringprintf ("%f", newcoord.angle1.getDegrees());
+    coord2 = stringprintf ("%f", newcoord.angle2.getDegrees());
+    
+    return;
+
+  }
+
+  cerr << "WARNING: FITSHdrExtension::get_coord_string COORD_MD="
+       << coordmode << " not implimented" << endl;
+
+}

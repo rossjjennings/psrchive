@@ -8,7 +8,14 @@
 // DigitiserStatistics methods
 //
 
+Pulsar::DigitiserStatistics::DigitiserStatistics () 
+  : Extension ("DigitiserStatistics")
+{ 
+  init(); 
+}
+ 
 Pulsar::DigitiserStatistics::DigitiserStatistics (const DigitiserStatistics& extension)
+  : Extension ("DigitiserStatistics")
 {
   rows = extension.rows;
 }
@@ -42,6 +49,7 @@ Pulsar::DigitiserStatistics::row& Pulsar::DigitiserStatistics::get_last ()
 void Pulsar::DigitiserStatistics::push_blank_row ()
 {
   rows.push_back(row());
+  rows.back().index = rows.size();
 }
 
 // Row methods

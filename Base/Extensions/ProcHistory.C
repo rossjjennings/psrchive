@@ -10,7 +10,15 @@
 // ProcHistory methods
 //
 
+//Default constructor
+Pulsar::ProcHistory::ProcHistory ()
+  : Extension ("ProcHistory")
+{
+  init();
+}
+
 Pulsar::ProcHistory::ProcHistory (const ProcHistory& extension)
+  : Extension ("ProcHistory")
 {
   rows = extension.rows;
   command_str = extension.command_str;
@@ -104,6 +112,7 @@ string Pulsar::ProcHistory::get_rfi_mthd()
 void Pulsar::ProcHistory::add_blank_row ()
 {
   rows.push_back(row());
+  rows.back().index = rows.size();
 }
 
 // //////////////////////////////////////////////////

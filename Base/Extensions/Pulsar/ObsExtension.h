@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/ObsExtension.h,v $
-   $Revision: 1.1 $
-   $Date: 2003/06/12 18:40:00 $
+   $Revision: 1.2 $
+   $Date: 2003/10/08 14:17:38 $
    $Author: straten $ */
 
 #ifndef __ObsExtension_h
@@ -32,6 +32,9 @@ namespace Pulsar {
     
     //! Destructor
     ~ObsExtension ();
+
+    //! Clone method
+    ObsExtension* clone () const { return new ObsExtension( *this ); }
 
     //////////////////////////////////////////////////////////////
 

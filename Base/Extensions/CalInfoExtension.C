@@ -2,6 +2,7 @@
 
 //! Default constructor
 Pulsar::CalInfoExtension::CalInfoExtension ()
+  : Extension ("CalInfoExtension")
 {
   cal_mode      = "UNSET";
   cal_frequency = 0.0;
@@ -11,11 +12,9 @@ Pulsar::CalInfoExtension::CalInfoExtension ()
 
 //! Copy constructor
 Pulsar::CalInfoExtension::CalInfoExtension (const CalInfoExtension& extension)
+  : Extension ("CalInfoExtension")
 {
-  cal_mode = extension.cal_mode;
-  cal_frequency = extension.cal_frequency;
-  cal_dutycycle = extension.cal_dutycycle;
-  cal_phase = extension.cal_phase;
+  operator = (extension);
 }
 
 //! Operator =

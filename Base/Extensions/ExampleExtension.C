@@ -2,11 +2,13 @@
 
 //! Default constructor
 Pulsar::ExampleExtension::ExampleExtension ()
+  : Extension ("Example")
 {
 }
 
 //! Copy constructor
 Pulsar::ExampleExtension::ExampleExtension (const ExampleExtension& extension)
+  : Extension ("Example")
 {
 }
 

@@ -14,17 +14,21 @@ namespace Pulsar {
   public:
     
     //Default constructor
-    DigitiserStatistics () { init(); }
+    DigitiserStatistics ();
     
     // Copy constructor
-    DigitiserStatistics (const Pulsar::DigitiserStatistics& extension);
+    DigitiserStatistics (const DigitiserStatistics& extension);
     
     // Operator =
-    const DigitiserStatistics& operator= (const DigitiserStatistics& extension);
+    const DigitiserStatistics& operator= (const DigitiserStatistics&);
     
     // Destructor
     ~DigitiserStatistics ();
     
+    //! Clone method
+    DigitiserStatistics* clone () const 
+    { return new DigitiserStatistics( *this ); }
+
     ///////////////////////////////////////////////////////////////
     // The information container
     

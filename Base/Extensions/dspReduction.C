@@ -2,6 +2,7 @@
 
 //! Default constructor
 Pulsar::dspReduction::dspReduction ()
+  : Extension ("dspReduction")
 {
   total_samples = 0;
   block_size = 0;
@@ -24,6 +25,7 @@ Pulsar::dspReduction::dspReduction ()
 
 //! Copy constructor
 Pulsar::dspReduction::dspReduction (const dspReduction& extension)
+  : Extension ("dspReduction")
 {
   operator=(*this);
 }

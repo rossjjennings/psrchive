@@ -5,6 +5,7 @@
 
 //! Default constructor
 Pulsar::TwoBitStats::TwoBitStats ()
+  : Extension ("TwoBitStats")
 {
   nsample = 0;
   ndig = 0;
@@ -15,6 +16,7 @@ Pulsar::TwoBitStats::TwoBitStats ()
 
 //! Copy constructor
 Pulsar::TwoBitStats::TwoBitStats (const TwoBitStats& stats)
+  : Extension ("TwoBitStats")
 {
   operator=(stats);
 }
