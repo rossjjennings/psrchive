@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/PSRFITS/Pulsar/FITSArchive.h,v $
-   $Revision: 1.1 $
-   $Date: 2003/03/08 10:22:57 $
+   $Revision: 1.2 $
+   $Date: 2003/03/08 11:11:16 $
    $Author: straten $ */
 
 #include <stdio.h>
@@ -74,6 +74,24 @@ namespace Pulsar {
     virtual Integration* new_Integration (Integration* copy_this = 0);
     
   protected:
+
+    //! This class registers the FITSArchive plugin class for use
+    class Agent : public Archive::Advocate<FITSArchive> {
+
+      public:
+
+        Agent () { } 
+
+        //! Advocate the use of TimerArchive to interpret filename
+        bool advocate (const char* filename);
+
+        //! Return the name of the TimerArchive plugin
+        string get_name () { return "FITSArchive"; }
+    
+        //! Return description of this plugin
+        string get_description ();
+
+    };
 
     // Class for holding a row of digitiser statistics
 
@@ -315,20 +333,6 @@ namespace Pulsar {
 
   };
  
-
-  class FITSAgent : public Archive::Agent {
-
-    public:
-
-    FITSAgent ();
-
-    //! Advocate the use of FITSArchive to interpret filename
-    bool advocate (const char* filename);
-    
-    //! Return a null-constructed instance of a FITSArchive
-    Archive* new_Archive ();
-
-  };
 
 }
 

@@ -1905,15 +1905,15 @@ void Pulsar::FITSArchive::unload_integration (int row,
 // //////////////////////////////////
 
 
-static Registry::List<Pulsar::Archive::Agent>::Enter<Pulsar::FITSAgent> fits;
-
-Pulsar::FITSAgent::FITSAgent () 
-  : Pulsar::Archive::Agent ("PSRFITS version 1.1") {}
+string Pulsar::FITSArchive::Agent::get_description () 
+{
+  return "PSRFITS version 1.1";
+}
 
 // /////////////////////////////////////////////////////////////////////
 // /////////////////////////////////////////////////////////////////////
 /*! The method tests whether or not the given file is of FITS type. */
-bool Pulsar::FITSAgent::advocate (const char* filename)
+bool Pulsar::FITSArchive::Agent::advocate (const char* filename)
 {
   fitsfile* test_fptr;
   int status = 0;
@@ -1936,7 +1936,6 @@ bool Pulsar::FITSAgent::advocate (const char* filename)
 }
 
 
-Pulsar::Archive* Pulsar::FITSAgent::new_Archive () { return new FITSArchive; }
 
 //
 // End of function
