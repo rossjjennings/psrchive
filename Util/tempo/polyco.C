@@ -9,6 +9,7 @@
 #include <sys/wait.h>
 #include <errno.h>
 
+#include "Error.h"
 #include "string_utils.h"
 #include "poly.h"
 
@@ -475,28 +476,24 @@ polyco & polyco::operator = (const polyco & in_poly)
   return *this;
 } 
 
-polyco::polyco (const string filename)
+polyco::polyco (const string& filename)
 {
-  if (load (filename) < 1) { 
-    fprintf (stderr, "polyco::polyco - failed to construct from %s\n", filename.c_str());
-    string error = "polyco construct error";
-    throw(error);
-  }
+  if (load (filename) < 1)
+    throw Error (FailedCall, "polyco::polyco(string)",
+		"polyco::load (" + filename + ")");
 }
  
 polyco::polyco (const char * filename)
 {
-  if (load (filename) < 1) {
-    fprintf (stderr, "polyco::polyco - failed to construct from %s\n", filename);
-    string error = "polyco construct error";
-    throw(error);
-  }
+  if (load (filename) < 1)  
+    throw Error (FailedCall, "polyco::polyco(string)",
+                "polyco::load (%s)", filename);
 }
 
 int polyco::load (const char* polyco_filename, size_t nbytes)
 {
   if (verbose)
-    cerr << "polyco::load '" << polyco_filename << "'" << endl;
+    cerr << "polyco::load (" << polyco_filename << ")" << endl;
 
   FILE* fptr = fopen (polyco_filename, "r");
   if (!fptr)  {
@@ -508,23 +505,33 @@ int polyco::load (const char* polyco_filename, size_t nbytes)
   int ret = load (fptr, nbytes);
   fclose (fptr);
 
+  if (verbose)
+    cerr << "polyco::load (" << polyco_filename << ") return " << ret << endl;
+
   return ret;
 }
 
 int polyco::load (FILE* fptr, size_t nbytes)
 {
+  if (verbose)
+    cerr << "polyco::load FILE*" << endl;
+
   string total;
   if (stringload (&total, fptr, nbytes) < 0)  {
     fprintf (stderr, "polyco::load stringload error\n");
     return -1;
   }
+
+  if (verbose)
+    cerr << "polyco::load FILE* string='" << total << "'" << endl;
+
   return load (&total);
 }
 
 int polyco::load (string* instr)
 {
   if (verbose)
-    cerr << "polyco::load '\n" << *instr << "\n'" << endl;
+    cerr << "polyco::load string* '" << *instr << "'" << endl;
 
   int npollys = 0;
   pollys.clear();
@@ -534,7 +541,11 @@ int polyco::load (string* instr)
     pollys.push_back(tst);      
     npollys++;
   }
-  return(npollys);
+
+  if (verbose)
+    cerr << "polyco::load (string*) return npollys" << endl;
+
+  return npollys;
 }
 
 int polyco::unload (const char *filename) const
@@ -606,10 +617,10 @@ const polynomial* polyco::nearest (const MJD &t, const string& psr) const
 {
   int ipolly = i_nearest (t, psr);
 
-  if (ipolly < 0)  {
-    string failed = "polyco::nearest_polly no polynomial";
-    throw(failed);
-  }
+  if (ipolly < 0)
+    throw Error (InvalidParam, "polyco::nearest",
+                 "no polynomial for MJD=" + t.printdays(13) + " psr=" + psr);
+
   return &pollys[ipolly];
 }
 
@@ -617,10 +628,10 @@ const polynomial& polyco::best (const MJD &t, const string& psr) const
 {
   int ipolly = i_nearest (t, psr);
 
-  if (ipolly < 0)  {
-    string failed = "polyco::best no polynomial";
-    throw(failed);
-  }
+  if (ipolly < 0)
+    throw Error (InvalidParam, "polyco::best",
+                 "no polynomial for MJD=" + t.printdays(13) + " psr=" + psr);
+
   return pollys[ipolly];
 }
 
@@ -628,10 +639,10 @@ const polynomial& polyco::best (const Phase& p, const string& psr) const
 {
   int ipolly = i_nearest (p, psr);
 
-  if (ipolly < 0)  {
-    string failed = "polyco::best no polynomial";
-    throw(failed);
-  }
+  if (ipolly < 0)
+    throw Error (InvalidParam, "polyco::best",
+                 "no polynomial for Phase=" + p.strprint(13) + " psr=" + psr);
+
   return pollys[ipolly];
 }
 
