@@ -28,7 +28,9 @@ void Pulsar::Integration::convert_state (Signal::State state)
     // form the invariant interval
   }
   else if (state == Signal::Intensity) {
-    // pscrunch
+    pscrunch();
+    set_state ( state );
+    return;
   }
 
 }
@@ -58,3 +60,8 @@ void Pulsar::Integration::poln_convert (Signal::State out_state)
 
   }
 }
+
+
+
+
+
