@@ -1,6 +1,6 @@
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/Timer/convert_endian.h,v $
-   $Revision: 1.3 $
-   $Date: 1999/11/02 09:58:21 $
+   $Revision: 1.4 $
+   $Date: 2000/01/18 01:40:32 $
    $Author: straten $ */
 
 #include "machine_endian.h"
@@ -19,7 +19,7 @@ void miniChangeEndian  (struct mini * m);
 }
 #endif
 
-#ifdef MACHINE_LITTLE_ENDIAN
+#if MACHINE_LITTLE_ENDIAN
 #define timer_toBigEndian(p)       timerChangeEndian(p)
 #define timer_toLittleEndian(p)
 #define timer_fromBigEndian(p)     timerChangeEndian(p)
