@@ -246,7 +246,7 @@ Pulsar::Calibrator::Type Pulsar::PolnCalibrator::get_type () const
 }
 
 Pulsar::Archive*
-Pulsar::PolnCalibrator::get_solution (string archive_class,
+Pulsar::PolnCalibrator::get_solution (const string& archive_class,
 				      string filename_extension) const
 {
   if (verbose) cerr << "Pulsar::PolnCalibrator::get_solution"
@@ -265,7 +265,7 @@ Pulsar::PolnCalibrator::get_solution (string archive_class,
   output -> add_extension (ext);
   
   string filename = calibrator->get_filename();
-  int index = filename.find_first_of(".", 0);
+  int index = filename.find_last_of(".", 0);
   filename = filename.substr(0, index) + filename_extension;
 
   output -> set_filename (filename);
