@@ -45,8 +45,9 @@ void Pulsar::Parkes::guess (Receiver* receiver, Archive* archive)
 
     else {
       
-      cerr << "Pulsar::Parkes::guess nothing for " 
-	   << archive->get_centre_frequency() << " MHz" << endl;
+      if (Archive::verbose > 0)
+        cerr << "Pulsar::Parkes::guess nothing for " 
+             << archive->get_centre_frequency() << " MHz" << endl;
       
     }
 
