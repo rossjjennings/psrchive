@@ -1,6 +1,6 @@
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/MJD.h,v $
-   $Revision: 1.11 $
-   $Date: 1999/12/23 02:03:37 $
+   $Revision: 1.12 $
+   $Date: 2000/01/17 06:07:32 $
    $Author: straten $ */
 
 #ifndef __MJD_H
@@ -25,30 +25,40 @@ class MJD {
   int    secs;
   double fracsec;
 
- public:
-  static int verbose;
-  MJD () { days=0;secs=0;fracsec=0.0; };
-  MJD (int dd, int ss, double fs);       // Create and verify an MJD
-  MJD (int intday, double fracday);
+  void add_day (double dd);
+  void settle();
 
-  // construct from a string of the form "50312.4569"
-  MJD (const char* mjdstring) {
-    if (Construct (mjdstring) < 0)
-      throw ("MJD::MJD(char*) construct error");
-  };
+ public:
+  static double   precision;
+  static unsigned ostream_precision;
+
+  static int verbose;
+
+  // null constructor
+  MJD () { days=0;secs=0;fracsec=0.0; };
+
+  // construct from standard C types
+  MJD (double dd);                        // mjd given as day
+  MJD (int intday, double fracday);       // mjd given with separate fracday
+  MJD (double dd, double ss, double fs);  // mjd with seconds and fracsec
+  MJD (int dd, int ss, double fs);        // again
+
+  // construct from a C string of the form "50312.4569"
+  MJD (const char* mjdstring);
+
+  // construct from a long double given in days
+  MJD (float128 mjd);
 
   // some standard C time formats
-  MJD (time_t time);               // returned by time()
-  MJD (const struct tm& greg);     // returned by gmtime()
-  MJD (const struct timeval& tp);  // returned by gettimeofday()
+  MJD (time_t time);                // returned by time()
+  MJD (const struct tm& greg);      // returned by gmtime()
+  MJD (const struct timeval& tp);   // returned by gettimeofday()
 
   // simple little struct invented in S2 days
   MJD (const utc_t& utc);
 
-  MJD (double yy,double ss, double fs);
-
-  // long double (from Sun) used by CPSR
-  MJD (float128 mjd);
+  // construct from a C++ string
+  MJD (const string& mjd);
 
   // parses a string of the form 51298.45034 ish
   int Construct (const char* mjdstr);
@@ -90,6 +100,10 @@ class MJD {
   const friend MJD operator - (const MJD &, double);  // Take seconds from MJD
   const friend MJD operator * (const MJD &, double);  
   const friend MJD operator / (const MJD &, double);  
+
+  // return the -ve of m
+  const friend MJD operator - (MJD m);
+
   friend int operator > (const MJD &, const MJD &);
   friend int operator < (const MJD &, const MJD &);
   friend int operator >= (const MJD &, const MJD &);
@@ -130,10 +144,12 @@ class MJD {
 			MJD*, MPI_Comm comm);
 #endif
 
+ protected:
+  friend bool equal (const MJD &m1, const MJD &m2);
+
 };
 
-inline ostream& operator<< (ostream& ostr, const MJD& sz) 
-{ return ostr << sz.printdays(8); }
+ostream& operator<< (ostream& ostr, const MJD& mjd);
 
 #endif  /* not __MJD_H defined */
 

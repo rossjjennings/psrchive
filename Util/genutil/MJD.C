@@ -16,6 +16,11 @@
 
 int MJD::verbose = 0;
 
+double   MJD::precision = 2.0e-12;
+unsigned MJD::ostream_precision = 15;
+
+const int seconds_in_day = 86400;
+
 int ss2hhmmss (int* hours, int* min, int* sec, int seconds)
 {
   *hours   = seconds/3600;
@@ -28,13 +33,13 @@ int ss2hhmmss (int* hours, int* min, int* sec, int seconds)
 }
 
 // no static kludgeyness, no memory leaks
-string MJD::printdays (unsigned precision) const
+string MJD::printdays (unsigned prec) const
 {
-  char* temp = new char [precision + 10];
+  char* temp = new char [prec + 10];
   sprintf (temp, "%d", days);
   string output = temp;
-  if (precision > 0)  {
-    sprintf (temp, "%*.*lf", precision+3, precision, fracday());
+  if (prec > 0)  {
+    sprintf (temp, "%*.*lf", prec+3, prec, fracday());
     char* period = strchr (temp, '.');
     output += period;
   }
@@ -170,14 +175,23 @@ const MJD operator - (const MJD &m1, const MJD &m2) {
 	      m1.get_fracsec() - m2.get_fracsec());
 }
 
-const MJD operator + (const MJD &m1, double sss) {
-  double secs_add = m1.get_fracsec() + sss;
-  return MJD((double)m1.intday(),(double)m1.get_secs(),secs_add);
+const MJD operator + (const MJD &m1, double sss)
+{
+  int isec = int (sss);
+  sss -= double (isec);
+
+  return MJD(m1.days, m1.secs+isec, m1.fracsec+sss);
 }
 
 const MJD operator - (const MJD &m1, double sss) {
-  double secs_take = m1.fracsec - sss;
-  return MJD((double)m1.intday(),(double)m1.get_secs(),secs_take);
+  return m1 + -sss;
+}
+
+const MJD operator - (MJD m1) {
+  m1.days = -m1.days;
+  m1.secs = -m1.secs;
+  m1.fracsec = -m1.fracsec;
+  return m1;
 }
 
 const MJD operator * (const MJD &m1, double d) {
@@ -188,67 +202,56 @@ const MJD operator * (const MJD &m1, double d) {
 }
 
 const MJD operator / (const MJD &m1, double divisor) {
-  double ddays = ((double) m1.intday()) / divisor;
-  double dsecs = ((double) m1.get_secs()) /divisor; 
-  double dfracsec = m1.get_fracsec() / divisor;
-  return MJD(ddays,dsecs,dfracsec);
+  return m1 * (1.0/divisor);
 }
 
-MJD abs(const MJD & in_mjd) {
-  if(in_mjd.intday()>0) return(in_mjd);
-  else return(MJD(in_mjd.intday()*-1.0,in_mjd.fracday()*-1.0));
+MJD abs (const MJD & in_mjd) {
+  if (in_mjd.intday() > 0)
+    return in_mjd;
+  else 
+    return -in_mjd;
 }
 
-int operator > (const MJD &m1, const MJD &m2) {
-  if (m1.days != m2.days) return (m1.days>m2.days);
-  if (m1.secs != m2.secs) return (m1.secs>m2.secs);
-  double precision_limit = 2*pow(10,-DBL_DIG);
-  if(fabs(m1.fracsec-m2.fracsec)<precision_limit) return(0);
-  else return (m1.fracsec>m2.fracsec);
+int operator > (const MJD &m1, const MJD &m2)
+{
+  if (m1.days != m2.days)
+    return m1.days > m2.days;
+  if (m1.secs != m2.secs)
+    return m1.secs > m2.secs;
+  if (fabs(m1.fracsec-m2.fracsec) < MJD::precision)
+    return 0;
+  else 
+    return m1.fracsec > m2.fracsec;
+}
+
+int operator < (const MJD &m1, const MJD &m2)
+{
+  if (m1.days != m2.days)
+    return m1.days < m2.days;
+  if (m1.secs != m2.secs)
+    return m1.secs < m2.secs;
+  if (fabs(m1.fracsec-m2.fracsec) < MJD::precision)
+    return 0;
+  else 
+    return m1.fracsec < m2.fracsec;
+}
+
+int operator == (const MJD &m1, const MJD &m2) {
+  return equal(m1, m2) ||
+    equal(m1+1.5*MJD::precision, m2) ||
+    equal(m1,m2+1.5*MJD::precision);
 }
 
 int operator >= (const MJD &m1, const MJD &m2) {
-  if (m1.days != m2.days) return (m1.days>m2.days);
-  if (m1.secs != m2.secs) return (m1.secs>m2.secs);
-  double precision_limit = 2*pow(10,-DBL_DIG);
-  if(fabs(m1.fracsec-m2.fracsec)<precision_limit) return(1);
-  else return (m1.fracsec>m2.fracsec);
-}
-
-int operator < (const MJD &m1, const MJD &m2) {
-  if (m1.days != m2.days) return (m1.days<m2.days);
-  if (m1.secs != m2.secs) return (m1.secs<m2.secs);
-  double precision_limit = 2*pow(10,-DBL_DIG);
-  if(fabs(m1.fracsec-m2.fracsec)<precision_limit) return(0);
-  else return (m1.fracsec<m2.fracsec);
+  return m1 == m2 || m1 > m2;
 }
 
 int operator <= (const MJD &m1, const MJD &m2) {
-  if (m1.days != m2.days) return (m1.days<m2.days);
-  if (m1.secs != m2.secs) return (m1.secs<m2.secs);
-  double precision_limit = 2*pow(10,-DBL_DIG);
-  if(fabs(m1.fracsec-m2.fracsec)<precision_limit) return(1);
-  else return (m1.fracsec<m2.fracsec);
+  return m1 == m2 || m1 < m2;
 }
 
-int operator == (const MJD &m1, const MJD &m2){
-  double precision_limit = 2*pow(10,-DBL_DIG);
-  if ((m1.days == m2.days) &&
-      (m1.secs == m2.secs) &&
-      (fabs(m1.fracsec-m2.fracsec)<precision_limit)) 
-      return (1);
-  else
-      return (0);  
-}
-
-int operator != (const MJD &m1, const MJD &m2){
-  double precision_limit = 2*pow(10,-DBL_DIG);
-  if ((m1.days != m2.days) ||
-      (m1.secs != m2.secs) ||
-      (fabs(m1.fracsec-m2.fracsec)>precision_limit)) 
-      return (1);
-  else
-      return (0);  
+int operator != (const MJD &m1, const MJD &m2) {
+  return !(m1 == m2);
 }
 
 int MJD::print (FILE *stream){
@@ -296,92 +299,135 @@ MJD::MJD(float128 mjd) {
 #else
 
 MJD::MJD(float128 mjd) {
-  double ndays = 0.0, fracdays = 0.0, seconds = 0.0, fracseconds = 0.0;
+  double ndays = 0.0, fracdays = 0.0;
 
   /* Stuart's ieee.C function */
   if (cnvrt_long_double ((u_char*) &mjd, &ndays, &fracdays) < 0)  {
     fprintf (stderr, "MJD::MJD(float128 mjd) error cnvrt_long_double\n");
     throw (string("MJD conversion"));
   }
-
-  seconds = fracdays * 86400;
-  fracseconds = fmod (seconds, 1.0);
-  seconds -= fracseconds;
-  *this = MJD (ndays,seconds,fracseconds);
+  
+  *this = MJD (ndays, fracdays);
 }
 
 #endif
 
-MJD::MJD(double dd, double ss, double fs){
+MJD::MJD (double dd, double ss, double fs)
+{
   cerr.precision(15);
-  if(verbose) cerr << endl << "MJD::MJD - constructing with values " << dd << "\t" << ss << "\t" << fs << endl;
-  // Everything should be positive - or everything should
-  // be negative. If not modify accordingly.
-  int sign;
-  if (dd + (ss+fs)/86400.0 > 0.0) sign = 1;
-  else sign = -1;
-  int chsecs, chdays;
-  if(sign*fs<0.0){
-    chsecs = (int)fs - sign;
-    ss += chsecs;
-    fs -= chsecs;
-  }
-  if(verbose) cerr << "MJD::MJD - fracsec with sign " << sign << "\t" << dd << "\t" << ss << "\t" << fs << endl;
-  if(sign*ss<0.0){
-    chdays = (int)(ss/86400.0) - sign;
-    dd += chdays;
-    ss -= chdays*86400.0;
+
+  if (verbose) cerr
+    << endl << "MJD::MJD - constructing with values " << dd << "\t" 
+    << ss << "\t" << fs << endl;
+
+  // pull the integer/fractional seconds out of fs
+  secs = int (fs);
+  fracsec = fs - double(secs);
+
+  // pull the integer/fractional seconds out of ss
+  int isecs = int (ss);
+  secs += isecs;
+  fracsec += ss - double(isecs);   // fracsec may be > 1.0 at this point
+
+  days = 0;
+  add_day (dd);
+
+  settle ();
+}
+
+MJD::MJD (int d, int s, double f) {
+  days = d;
+  secs = s;
+  fracsec = f;
+  settle ();
+}
+
+MJD::MJD (double mjd) {
+  days = 0;
+  secs = 0;
+  fracsec = 0.0;
+  add_day (mjd);
+  settle ();
+}
+
+void MJD::add_day (double dd)
+{
+  // pull the integer day out of dd
+  int idays = int (dd);
+  days += idays;
+
+  double fdays = dd - double(idays);
+
+  // and the integer/fractional seconds out of fractional day
+  double seconds = fdays * double(seconds_in_day);
+  int isecs = int (seconds);
+  secs += isecs;
+  fracsec += seconds - double(isecs);
+}
+
+void MJD::settle()
+{
+  // pull integer secs out of fracsec, if any
+  int isecs = int (fracsec);
+  secs += isecs;
+  fracsec -= double (isecs);
+
+  // pull integer days out of secs, if any
+  int idays = (int) floor(double(secs)/double(seconds_in_day));
+  days += idays;
+  secs -= idays * seconds_in_day;
+
+  // Everything should have the same sign.
+  int sign = -1;
+  if (double(days) + (secs+fracsec)/86400.0 >= 0.0) 
+    sign = 1;
+
+  // check the sign on the fractional seconds
+  if (sign*fracsec < 0.0) {
+    secs -= sign;
+    fracsec += double(sign);
   }
 
-  if(verbose) cerr << "MJD::MJD - sec with sign " << sign << "\t" << dd << "\t" << ss << "\t" << fs << endl;
-  // Now, make dd and ss integers - give remainder
-  // to lower order members.
-  if (fmod (dd,1.0)!=0.0){
-    ss += sign * 86400.0 * (fmod(dd,1.0));
-    dd = (int) dd;
-  }  
-  if (fmod (ss,1.0)!=0.0) {
-    fs += sign*fmod(ss,1.0);
-    ss = (int) ss;
+  // check the sign on the integer seconds
+  if (sign*secs < 0) {
+    days -= sign;
+    secs += sign * seconds_in_day;
   }
-  
-  if(verbose) cerr << "MJD::MJD - integer days and secs " << dd << "\t" << ss << "\t" << fs << endl;
+
+#ifdef DESPARATE_MEASURES
   // Make sure fractional seconds are truly fractional
   // round to the nearest fempto second
-  fs += sign*5e-16;
-  if (fabs(fs)>1.0) {
-    chsecs = (int) fs;
-    fs -= sign*chsecs;
-    ss += sign*chsecs;
-  } else fs -= sign*5e-16;
-
-  if(verbose) cerr << "MJD::MJD - modified fracsecs " << dd << "\t" << ss << "\t" << fs << endl;
-  // Make sure that there aren't too many seconds'
-  if (fabs(ss)>(86400-1)) {
-    chdays = (int) (ss/86400);
-    ss = (int) fmod((double)ss,86400);
-    dd += sign*chdays;
+  if (fabs(fracsec + sign*precision) > 1.0) {
+    secs += sign;
+    fracsec -= double (sign);
   }
-  
-  if(verbose) cerr << "MJD::MJD - modified secs " << dd << "\t" << ss << "\t" << fs << endl;
-  // install the values.
-  days = (int) (dd+sign*0.5);
-  secs = (int) (ss+sign*0.5);
-  fracsec = fs; 
-  if(verbose) cerr << "MJD::MJD - final values " << days << "\t" << secs << "\t" << fracsec << endl << endl;
+
+  // Make sure that there aren't too many seconds'
+  while (sign*secs >= seconds_in_day) {
+    days ++;
+    secs -= seconds_in_day;
+  }
+#endif
+
 }
 
-MJD::MJD(int d, int s, double f) {
-  *this = MJD((double)d,(double)s,f);
+MJD::MJD (const char* mjdstring) {
+  if (Construct (mjdstring) < 0)
+    throw ("MJD::MJD(char*) construct error");
 }
 
-MJD::MJD(int intday, double fracday)
+MJD::MJD (const string& mjd) {
+  if (Construct (mjd.c_str()) < 0)
+    throw ("MJD::MJD(string&) construct error");
+}
+
+MJD::MJD (int intday, double fracday)
 {
-  double secs_in_fracday = fracday * 86400.0;
-  int isecs = (int) secs_in_fracday;
-  double fracsecs = secs_in_fracday - double(isecs);
-  
-  *this = MJD(intday, isecs, fracsecs);
+  secs = 0;
+  fracsec = 0.0;
+  days = intday;
+  add_day (fracday);
+  settle();
 }
 
 double MJD::LST (float longitude) const
@@ -520,19 +566,43 @@ int MJD::Construct (const char* mjdstr)
     fprintf (stderr, "MJD::Construct Could not parse '%s'\n", mjdstr);
     return -1;
   }
+  fracsec = 0.0;
+  secs = 0;
+
   const char* fracstr = strchr (mjdstr, '.');
   if (fracstr) {
     double fracday;
     if (sscanf (fracstr, "%lf", &fracday) < 1)
       return -1;
-    fracday *= 86400.0;
-    secs = int (fracday);
-    fracsec = fracday - double (secs);
-  }
-  else {
-    fracsec = 0.0;
-    secs = 0;
+    add_day (fracday);
   }
   return 0;
 }
 
+ostream& operator<< (ostream& ostr, const MJD& mjd)  {
+  return ostr << mjd.printdays(MJD::ostream_precision); 
+}
+
+bool equal (const MJD &m1, const MJD &m2) {
+  return m1.days == m2.days &&
+    m1.secs == m2.secs &&
+    (fabs (m1.fracsec-m2.fracsec))/2.0 < MJD::precision;
+}
+
+#if 0
+bool equal (const MJD &m1, const MJD &m2) {
+  if (m1.days != m2.days) {
+    cerr << "equal: "<< iter <<" days: " << m1.days <<"!="<< m2.days << endl;
+    return false;
+  }
+  if (m1.secs != m2.secs) {
+    cerr << "equal: "<< iter <<" secs: " << m1.secs <<"!="<< m2.secs << endl;
+    return false;
+  }
+  if (fabs (m1.fracsec-m2.fracsec)  >= MJD::precision) {
+    cerr << "equal: "<< iter <<" fsecs diff: " << m1.fracsec-m2.fracsec << endl;
+    return false;
+  }
+  return true;
+}
+#endif
