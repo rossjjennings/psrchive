@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/LevenbergMarquardt.h,v $
-   $Revision: 1.3 $
-   $Date: 2004/11/22 19:26:04 $
+   $Revision: 1.4 $
+   $Date: 2004/11/22 22:23:30 $
    $Author: straten $ */
 
 #ifndef __Levenberg_Marquardt_h
@@ -12,6 +12,10 @@
 #include "Estimate.h"
 #include "Error.h"
 #include "casts.h"
+
+#ifdef sun
+#include <ieeefp.h>
+#endif
 
 namespace MEAL {
 
