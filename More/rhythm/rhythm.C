@@ -572,6 +572,7 @@ void Rhythm::select (int pt)
   
   toas[pt].state = Tempo::toa::Selected;
   toa_text -> setSelected (pt, true);
+  toa_text -> setCurrentItem (pt);
 
 }
 
