@@ -1,3 +1,7 @@
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #include <iostream>
 
 #include <assert.h>
@@ -5,13 +9,15 @@
 
 #include "fftm.h"
 #include "model_profile.h"
-#include "f772c.h"
 
 #define SQR(x) ((x)*(x))
 
+#define F77_fccf F77_FUNC(fccf,FCCF)
+#define F77_fftconv F77_FUNC(fftconv,FFTCONV)
+
 extern "C" {
-  void F772C(fccf) (float *, float *, float *);
-  void F772C(fftconv) (int *,float *, float *, float *, float *, float *, float *);
+  void F77_fccf (float *, float *, float *);
+  void F77_fftconv (int *,float *, float *, float *, float *, float *, float *);
 }
 
 int Pulsar::legacy_fftconv(int npts, float * prf, float * std, double * shift, double *eshift, 
@@ -23,7 +29,7 @@ int Pulsar::legacy_fftconv(int npts, float * prf, float * std, double * shift, d
   float real_shift = 0, real_err = 0 ; // Required for fftconv .... darned real4....
   int number = npts;
 
-  F772C (fftconv) (&number,prf,std,&real_shift,&real_err,snrfft,esnrfft);
+  F77_fftconv (&number,prf,std,&real_shift,&real_err,snrfft,esnrfft);
 
   if (real_shift != 0) {
    *shift = (double) real_shift;
@@ -80,7 +86,7 @@ int Pulsar::model_profile (int npts, int narrays, float** prf, float** std,
   // on the cross-correlation function
 
   float xcorr_shift;
-  F772C(fccf) (&(xcorr_amps[0][1]), &(xcorr_phases[0][1]), &xcorr_shift);
+  F77_fccf (&(xcorr_amps[0][1]), &(xcorr_phases[0][1]), &xcorr_shift);
 
   if (verbose)
     cerr << "xcorr_shift=" << xcorr_shift << endl;
