@@ -28,5 +28,9 @@ void Pulsar::Calibrator::calibrate (Integration* integration,
 //! Return a const reference to the calibrator archive
 const Pulsar::Archive* Pulsar::Calibrator::get_Archive () const
 {
+  if (!calibrator)
+    throw Error (InvalidState, "Pulsar::Calibrator::get_Archive",
+		 "no calibrator Archive");
+
   return calibrator; 
 }
