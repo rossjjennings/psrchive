@@ -158,8 +158,6 @@ double Pulsar::Profile::GaussianShift (const Profile& std, float& ephase,
       cerr << "Chi-squared = " << chisq << " / " << free_parms << " = "
 	   << chisq / free_parms << endl;
     
-    ephase = chisq / (free_parms * ptr->get_nbin());
-    
     if (store) {
       model = gm;
     }
@@ -173,6 +171,23 @@ double Pulsar::Profile::GaussianShift (const Profile& std, float& ephase,
       shift += 1.0;
     else if (shift > 0.5)
       shift -= 1.0;
+
+    // Compute the error based on how far you have to move the
+    // centre of the Gaussian before the chi-sq doubles
+
+    float aim = (chisq / free_parms) * 2.0;
+    float cst = (chisq / free_parms);
+
+    double raw = gm.get_centre();
+    double itr = 0.0;
+
+    while (cst < aim) {
+      gm.set_centre(raw + itr);
+      cst = fit.init(data_x, data_y, gm);
+      itr += 0.01;
+    }
+
+    ephase = (itr * 2.0) / double(ptr->get_nbin());
 
     return shift;
   }
