@@ -66,35 +66,13 @@ void Pulsar::Integration::remove_baseline (float phase)
   }
 }
 
-
-// /////////////////////////////////////////////////////////////////////////
-// baseline_levels
-//
-// for each profile
-//   pulse = profile with baseline removed
-//   noise = profile minus pulse
-//   find mean and var_mean of noise
-// 
-void Pulsar::Integration::baseline_levels
-(vector<vector<Estimate<double> > >& mean) const
-{
-  baseline_stats (&mean, 0);
-}
-
-//! Return the noise power in every profile baseline
-void Pulsar::Integration::baseline_power
-(vector< vector<double> >& variance) const
-{
-  baseline_stats (0, &variance);
-}
-
 //! Return the statistics of every profile baseline
 void
 Pulsar::Integration::baseline_stats (vector<vector<Estimate<double> > >* mean,
 				     vector< vector<double> >* variance) const
 {
-  if (Pulsar::Integration::verbose)
-    cerr << "Pulsar::Integration::baseline_stats entered" << endl;
+  if (verbose)
+    cerr << "Pulsar::Integration::baseline_stats" << endl;
 
   try {
 
@@ -142,8 +120,10 @@ Pulsar::Integration::baseline_stats (vector<vector<Estimate<double> > >* mean,
 
   }
   catch (Error& error) {
-    throw error += "Integration::baseline_levels";
+    throw error += "Integration::baseline_stats";
   }
 
+  if (verbose)
+    cerr << "Pulsar::Integration::baseline_stats exit" << endl;
 
 }

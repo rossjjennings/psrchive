@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Integration.h,v $
-   $Revision: 1.48 $
-   $Date: 2003/09/03 13:51:22 $
+   $Revision: 1.49 $
+   $Date: 2003/10/15 12:56:11 $
    $Author: straten $ */
 
 /*
@@ -81,15 +81,9 @@ namespace Pulsar {
     //! Returns the centre phase of the region with minimum total intensity
     float find_min_phase () const;
 
-    //! Return the mean and variance of the mean in every profile baseline
-    void baseline_levels (vector< vector< Estimate<double> > >& mean) const;
-
-    //! Return the noise power in every profile baseline
-    void baseline_power (vector< vector<double> >& variance) const;
-
     //! Return the statistics of every profile baseline
     void baseline_stats (vector< vector< Estimate<double> > >* mean,
-			 vector< vector<double> >* variance) const;
+			 vector< vector<double> >* variance = 0) const;
 
     //! Returns the mean hi/lo and variance of the mean hi/lo of every profile
     virtual void cal_levels (vector< vector< Estimate<double> > >& hi,
@@ -223,6 +217,7 @@ namespace Pulsar {
 
     friend class Archive;
     friend class Calibrator;
+    friend class Plotter;
 
     //! Copy the profiles and attributes through set_ get_ methods
     virtual void copy (const Integration& subint, int npol=-1, int nchan=-1);
