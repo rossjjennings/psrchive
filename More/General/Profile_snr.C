@@ -6,7 +6,7 @@
 #include "Profile.h"
 
 /*! By default, the snr is calculated using Pulsar::snr_phase */
-Functor<double(const Pulsar::Profile*)> 
+Functor<float(const Pulsar::Profile*)> 
 Pulsar::Profile::snr_functor (&snr_phase);
 
 /*! This method calls Profile::snr_functor */
@@ -46,6 +46,10 @@ double Pulsar::snr_phase (const Profile* profile)
   profile->find_peak_edges (rise, fall);
 
   double power = profile->sum (rise, fall);
+
+  if (Profile::verbose)
+    cerr << "Pulsar::snr_phase rise=" << rise << " fall=" << fall 
+	 << " power=" << power << endl;
 
   // subtract the total power due to the baseline
   power -= min_avg * double (fall - rise);
