@@ -22,15 +22,16 @@ void usage ()
     "  -p   Path to CAL file directory\n"
     "  -e   Scan for files with these extensions\n"
     "       uses .cf and .pcal as defaults\n"
+    "  -u   Use this extension when unloading results\n"
     "  -w   Write a new database summary file if using -p\n"                      
-    // "  -d   Read ASCII summary (instead of -p)"   
-    "  -c   Do not try to match sky coordinates"
+    // "  -d   Read ASCII summary (instead of -p)\n"   
+    "  -c   Do not try to match sky coordinates\n"
     "  -i   Do not try to match instruments\n"
     "  -t   Do not try to match times\n"
     "  -f   Do not try to match frequencies\n"
     "  -b   Do not try to match bandwidths\n"
     "  -o   Do not try to match obs types\n"
-    "  -D   Display calibration model parameters"
+    "  -D   Display calibration model parameters\n"
     "  -F   Calibrate fluxes only\n"
     "  -P   Calibrate polarisations only\n"
     "\n"
@@ -63,6 +64,7 @@ int main (int argc, char *argv[]) {
   Error::verbose = true;
 
   string cals_are_here = "./";
+  string unload_ext = "calib";
   vector<string> exts;
 
   vector<string> archives;
@@ -71,7 +73,7 @@ int main (int argc, char *argv[]) {
   char* key = NULL;
   char whitespace[5] = " \n\t";
 
-  while ((gotc = getopt(argc, argv, "hvVp:e:wcitfboDFPsSq")) != -1) {
+  while ((gotc = getopt(argc, argv, "hvVp:e:u:wcitfboDFPsSq")) != -1) {
     switch (gotc) {
     case 'h':
       usage ();
@@ -109,6 +111,9 @@ int main (int argc, char *argv[]) {
         exts.push_back(key);
         key = strtok (NULL, whitespace);
       }
+      break;
+    case 'u':
+      unload_ext = optarg;
       break;
     case 'w':
       write_database_file = true;
@@ -187,7 +192,7 @@ int main (int argc, char *argv[]) {
       if (write_database_file) {
 	cout << "Writing database summary file" << endl;
 	
-	string temp = cals_are_here + "/database.txt";
+	string temp = cals_are_here + "database.txt";
 	dbase -> unload(temp.c_str());
       }
     }
@@ -265,7 +270,8 @@ int main (int argc, char *argv[]) {
  
       int index = archives[i].find_first_of(".", 0);
       string newname = archives[i].substr(0, index);
-      newname += ".calib";
+      newname += ".";
+      newname += unload_ext;
 
       if (verbose)
         cerr << "pac: Calibrated Archive name '" << newname << "'" << endl;
