@@ -18,6 +18,9 @@ void Pulsar::TimerProfile_load (FILE* fptr, Profile* profile,
   int   poln;	         /* 0=I, 1=LL, 2=RR, 3=LR, 4=RL, 5=Q, 6=U, 7=V */
   int   nbin;
 
+  if (TimerIntegration::verbose)
+    cerr << "Pulsar::TimerProfile_load start offset=" << ftell(fptr) << "\r";
+
   //Read in the centre frequency
   if (fread(&centrefreq,sizeof(centrefreq),1,fptr) < 1)
     throw Error (FailedSys, "TimerProfile_load", "fread centrefreq");
@@ -50,15 +53,19 @@ void Pulsar::TimerProfile_load (FILE* fptr, Profile* profile,
 
   if (unsigned(nbin) != profile->get_nbin())
     throw Error (InvalidState, "TimerProfile_load",
-		 "nbin=%d != Profile::nbin=%d", nbin, profile->get_nbin());
+		 "from file nbin=%d != Profile::nbin=%d", 
+                 nbin, profile->get_nbin());
 
   if (Integration::verbose)
-    cerr << "TimerProfile_load nbin=" << nbin << " poln=" << poln
-         << "wt=" << wt << " cfreq=" << centrefreq << endl;
+    cerr << "Pulsar::TimerProfile_load nbin=" << nbin << " poln=" << poln
+         << "wt=" << wt << " cfreq=" << centrefreq << "\r";
 
   // uncompress the data and read in as 2byte integers
   if (fcompread (nbin,profile->get_amps(),fptr,big_endian)!=0)
     throw Error (FailedCall, "TimerProfile_load", "fcompread data");
+
+  if (TimerIntegration::verbose)
+    cerr << "Pulsar::TimerProfile_load end offset=" << ftell(fptr) << "\r";
 
   profile -> set_weight (wt);
   profile -> set_centre_frequency (centrefreq);

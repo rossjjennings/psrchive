@@ -59,9 +59,9 @@ void Pulsar::TimerProfile_unload (FILE* fptr, const Profile* profile)
   int   poln       = TimerProfile_poln (profile -> get_state());
   float wt         = profile -> get_weight ();
 
-  if (nbin <= 0)
+  if (nbin < 1)
     throw Error (InvalidParam, "Pulsar::TimerProfile_unload",
-		 "invalid nbin=%d", nbin);
+                 "invalid Profile::nbin=%d", nbin);
 
   const float* amps = profile->get_amps();
   for (int ibin=0; ibin < nbin; ibin++)
@@ -73,6 +73,9 @@ void Pulsar::TimerProfile_unload (FILE* fptr, const Profile* profile)
   toBigEndian(&nbin, sizeof(nbin));
   toBigEndian(&poln, sizeof(poln));
   toBigEndian(&wt,   sizeof(wt));
+
+  if (TimerIntegration::verbose)
+    cerr << "Pulsar::TimerProfile_unload start offset=" << ftell(fptr) << "\r";
 
   //Write out the values
   if (fwrite (&centrefreq, sizeof(centrefreq),1,fptr) < 1)
@@ -87,11 +90,14 @@ void Pulsar::TimerProfile_unload (FILE* fptr, const Profile* profile)
   fromBigEndian(&nbin, sizeof(nbin));
 
   if (TimerIntegration::verbose)
-    cerr << "TimerProfile_unload fcompwrite data nbin=" << nbin << "\r";
+    cerr << "Pulsar::TimerProfile_unload fcompwrite data nbin=" << nbin << "\r";
 
   // Compress the data and write out as 2byte integers
   if (fcompwrite (nbin,profile->get_amps(),fptr) != 0)
     throw Error (FailedCall, "TimerProfile_unload", "fcompwrite data");
+
+  if (TimerIntegration::verbose)
+    cerr << "Pulsar::TimerProfile_unload end offset=" << ftell(fptr) << "\r";
 
 }
 
