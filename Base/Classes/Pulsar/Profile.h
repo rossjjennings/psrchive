@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Profile.h,v $
-   $Revision: 1.27 $
-   $Date: 2003/04/19 20:22:18 $
+   $Revision: 1.28 $
+   $Date: 2003/04/26 06:50:46 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Profile_h
@@ -110,13 +110,6 @@ namespace Pulsar {
     //! Returns the phase of the centre of the region with maximum mean
     float find_max_phase (float duty_cycle = default_duty_cycle) const;
 
-    //! Returns the mean of the specified region
-    double mean (float phase, float duty_cycle = default_duty_cycle,
-		 double* varmean = 0) const;
-    
-    //! Returns the r.m.s. of the specified region
-    double sigma (float phase, float duty_cycle = default_duty_cycle) const;
-    
     //! Returns the signal to noise ratio of the profile
     float snr () const;
 
@@ -143,6 +136,11 @@ namespace Pulsar {
     //! calculates the mean, variance, and variance of the mean a section
     void stats (double* mean, double* variance, double* varmean,
 		int istart, int iend) const;
+
+    //! Convenience interface to stats (start_bin, end_bin)
+    void stats (float phase, 
+		double* mean, double* variance = 0, double* varmean = 0,
+		float duty_cycle = default_duty_cycle) const;
 
     //! fit to the standard and return a Tempo::toa object
     Tempo::toa toa (const Profile& std, const MJD& mjd, 

@@ -478,51 +478,6 @@ double Pulsar::Profile::rms (int istart, int iend) const
 
 /////////////////////////////////////////////////////////////////////////////
 //
-// Pulsar::Profile::mean
-//
-/*! 
-  \param phase centre of region
-  \param duty_cycle width of region
-  \retval varmean if an address is given, the variance of the mean is returned
-  \return mean of region
-  */
-double Pulsar::Profile::mean (float phase, float duty_cycle,
-			      double* varmean) const
-{
-  if (verbose)
-    cerr << "Pulsar::Profile::mean" << endl;
-
-  int start_bin = int ((phase - 0.5 * duty_cycle) * nbin);
-  int stop_bin = int ((phase + 0.5 * duty_cycle) * nbin);
-
-  double meanval;
-  stats (&meanval, 0, varmean, start_bin, stop_bin);
-  return meanval;
-}
-
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// Pulsar::Profile::sigma
-//
-/*! 
-  \param phase centre of region
-  \param duty_cycle width of region
-  \return r.m.s. of region
-  */
-double Pulsar::Profile::sigma (float phase, float duty_cycle) const
-{
-  if (verbose)
-    cerr << "Pulsar::Profile::sigma" << endl;
-  
-  int start_bin = int ((phase - 0.5 * duty_cycle) * nbin);
-  int stop_bin = int ((phase + 0.5 * duty_cycle) * nbin);
-
-  return rms (start_bin, stop_bin);
-}
-
-/////////////////////////////////////////////////////////////////////////////
-//
 // Pulsar::Profile::stats
 //
 /*! Returns the mean, variance, and variance of the mean over the specified
@@ -574,6 +529,30 @@ void Pulsar::Profile::stats (double* mean, double* variance, double* varmean,
     *variance = var_x;
   if (varmean)
     *varmean = var_x / double(counts);
+}
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Pulsar::Profile::stats
+//
+/*! 
+  \param phase centre of region
+  \param duty_cycle width of region
+  \return mean of region
+  */
+void Pulsar::Profile::stats (float phase,
+			     double* mean, 
+			     double* variance,
+			     double* varmean,
+			     float duty_cycle) const
+{
+  if (verbose)
+    cerr << "Pulsar::Profile::stats" << endl;
+
+  int start_bin = int ((phase - 0.5 * duty_cycle) * nbin);
+  int stop_bin = int ((phase + 0.5 * duty_cycle) * nbin);
+
+  stats (mean, variance, varmean, start_bin, stop_bin);
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -654,9 +633,9 @@ float Pulsar::Profile::snr() const
     cerr << "Pulsar::Profile::snr" << endl;
   
   // find the mean and the r.m.s. of the baseline
-  float min_ph = find_min_phase ();
-  double min_avg = mean (min_ph);
-  double min_rms = sigma (min_ph);
+  double min_avg, min_var;
+  stats (find_min_phase(), &min_avg, &min_var);
+  double min_rms = sqrt (min_var);
 
   if (verbose)
     cerr << "Pulsar::Profile::snr rms=" << min_rms << endl;
