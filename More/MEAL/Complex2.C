@@ -1,0 +1,37 @@
+#include <complex>
+
+// #include "Estimate.h"
+
+#include "Calibration/Complex2.h"
+
+/*! The class name is used in the output of template classes and methods */
+const char* Calibration::Complex2::Name = "Complex2";
+
+static inline double sqr (double x) { return x*x; }
+
+void Calibration::Complex2::evaluate (Jones<Estimate<double> >& j) const
+{
+  vector< Jones<double> > gradient;
+
+  j = evaluate (&gradient);
+
+  unsigned nparam = get_nparam();
+
+  if (gradient.size() != nparam)
+    throw Error (InvalidState, "Calibration::Complex2::evaluate",
+		 "gradient.size=%d != nparam=%d", gradient.size(), nparam);
+
+  for (unsigned iparam=0; iparam<nparam; iparam++) {
+
+    double variance = get_variance(iparam);
+
+    for (unsigned i=0; i < j.size(); i++) {
+      j[i] += complex<Estimate<double> >(Estimate<double>(0.0,sqr( gradient[iparam][i].real() ) * variance),Estimate<double>(0.0,sqr( gradient[iparam][i].imag() ) * variance));
+
+      // This code doesn't work as real() and imag() don't return references
+      //j[i].real().var += sqr( gradient[iparam][i].real() ) * variance;
+      //j[i].imag().var += sqr( gradient[iparam][i].imag() ) * variance;
+    }
+
+  }
+}
