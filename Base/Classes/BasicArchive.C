@@ -28,6 +28,7 @@ Pulsar::BasicArchive::BasicArchive ()
   bandwidth = 0.0;
   centre_frequency = 0.0;
   dispersion_measure = 0.0;
+  rotation_measure = 0.0;
 
   flux_calibrated = false;
   poln_calibrated = false;
@@ -264,6 +265,16 @@ void Pulsar::BasicArchive::set_dispersion_measure (double dm)
     ephemeris->set_dm(dm);
 
   dispersion_measure = dm;
+}
+
+double Pulsar::BasicArchive::get_rotation_measure () const
+{
+  return rotation_measure;
+}
+
+void Pulsar::BasicArchive::set_rotation_measure (double rm)
+{
+  rotation_measure = rm;
 }
 
 //! Data has been poln calibrated

@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/BasicArchive.h,v $
-   $Revision: 1.26 $
-   $Date: 2003/06/05 15:42:25 $
+   $Revision: 1.27 $
+   $Date: 2004/06/17 09:15:51 $
    $Author: straten $ */
 
 #ifndef __BasicArchive_h
@@ -114,15 +114,20 @@ namespace Pulsar {
     //! Set the centre frequency of the observation
     virtual void set_centre_frequency (double cf);
 
-    //! Get the dispersion measure (in \f${\rm pc cm}^{-3}\f$)
+    //! Get the dispersion measure (in \f${\rm pc\, cm}^{-3}\f$)
     virtual double get_dispersion_measure () const;
-    //! Set the dispersion measure (in \f${\rm pc cm}^{-3}\f$)
+    //! Set the dispersion measure (in \f${\rm pc\, cm}^{-3}\f$)
     virtual void set_dispersion_measure (double dm);
 
     //! Inter-channel dispersion delay has been removed
     virtual bool get_dedispersed () const;
     //! Set the status of the parallactic angle flag
     virtual void set_dedispersed (bool done = true);
+
+    //! Get the rotation measure (in \f${\rm rad\, m}^{-2}\f$)
+    virtual double get_rotation_measure () const;
+    //! Set the rotation measure (in \f${\rm rad\, m}^{-2}\f$)
+    virtual void set_rotation_measure (double rm);
 
     //! data has been corrected for ISM faraday rotation
     virtual bool get_ism_rm_corrected () const;
@@ -223,8 +228,11 @@ namespace Pulsar {
     //! The centre frequency of the observation
     double centre_frequency;
 
-    //! The dispersion measure (in \f${\rm pc cm}^{-3}\f$)
+    //! The dispersion measure (in \f${\rm pc\, cm}^{-3}\f$)
     double dispersion_measure;
+
+    //! The rotation measure (in \f${\rm rad\, m}^{-2}\f$)
+    double rotation_measure;
 
     //! Data has been flux calibrated
     bool flux_calibrated;
