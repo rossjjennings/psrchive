@@ -106,8 +106,8 @@ void Pulsar::FITSArchive::load_Receiver (fitsfile* fptr)
     else if (strncasecmp(tempstr.get(),"GPA",3) == 0)
       ext->mode = Receiver::Galactic;
     else
-      throw Error (InvalidParam, "FITSArchive::load_Receiver",
-	           "unknown FD_MODE: %s", tempstr.get());
+      cerr << "FITSArchive::load_Receiver unknown FD_MODE=" 
+           << tempstr.get() << endl;
   }
 
 #if 0
