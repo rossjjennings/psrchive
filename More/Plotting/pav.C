@@ -1,5 +1,5 @@
 //
-// $Id: pav.C,v 1.41 2003/05/21 01:14:45 ahotan Exp $
+// $Id: pav.C,v 1.42 2003/05/28 00:15:43 pulsar Exp $
 //
 // The Pulsar Archive Viewer
 //
@@ -38,27 +38,30 @@ void usage ()
     " -p        Add polarisations together\n"
     " -Z        Smear profiles before plotting\n"
     "\n"
+    "Selection options:\n"
+    " -c map    Choose a colour map\n"
+    " -M meta   meta names a file containing the list of files\n"
+    " -P        Select which polarization to display\n"
+    " -I        Select which subint to display\n"
+    " -W        Change colour scheme to suite white background\n"
+    " -z x1,x2  Zoom to this pulse phase range\n"
+    "\n"
     "Plotting options:\n"
     " -A        Plot instrumental phase across the band\n"
     " -B        Display off-pulse bandpass & channel weights\n"
-    " -c map    Choose a colour map\n"
     " -D        Plot selected profile (chan 0, poln 0, subint 0 by default)\n"
     " -E        Display baseline spectrum\n"
     " -e        like -D with abscissa equal to time in milliseconds \n"
     " -g        Display position angle profile\n"
     " -G        Plot frequency against pulse phase\n"
     " -l        Do not display labels outside of plotting area\n"
-    " -M meta   meta names a file containing the list of files\n"
-    " -P        Select which polarization to display\n"
     " -q        Plot a position angle frequency spectrum colour map\n"
     " -Q        Position angle frequency spectrum for on-pulse region\n"
     " -r phase  rotate the profiles by phase (in turns)\n"
     " -s        Plot S/N against frequency\n"
     " -S        Plot Stokes parameters in the Manchester style\n"
-    " -W        Change colour scheme to suite white background\n"
     " -X        Plot cal amplitude and phase vs frequency channel\n"
     " -Y        Display all subints (time vs pulse phase)\n"
-    " -z x1,x2  Zoom to this pulse phase range\n"
     "\n"
     "Various options:\n"
     " -a        Print available plugin information\n"
@@ -117,7 +120,7 @@ int main (int argc, char** argv)
   Pulsar::Plotter::ColourMap colour_map = Pulsar::Plotter::Heat;
   
   int c = 0;
-  const char* args = "AaBb:Cc:DdEeFf:GghiHlm:M:Qq:pP:r:SsTt:VvwWXx:Yy:Zz:";
+  const char* args = "AaBb:Cc:DdEeFf:GghI:iHlm:M:Qq:pP:r:SsTt:VvwWXx:Yy:Zz:";
 
   while ((c = getopt(argc, argv, args)) != -1)
     switch (c) {
@@ -179,9 +182,12 @@ int main (int argc, char** argv)
     case 'h':
       usage ();
       return 0;
-
+      
+    case 'I':
+      plotter.set_subint( atoi (optarg) );
+      break;
     case 'i':
-      cout << "$Id: pav.C,v 1.41 2003/05/21 01:14:45 ahotan Exp $" << endl;
+      cout << "$Id: pav.C,v 1.42 2003/05/28 00:15:43 pulsar Exp $" << endl;
       return 0;
 
     case 'l':
