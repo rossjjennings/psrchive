@@ -1,3 +1,5 @@
+#include <vector>
+
 #include "Pulsar/Integration.h"
 #include "Pulsar/Profile.h"
 #include "Angle.h"
@@ -36,10 +38,10 @@ void Pulsar::Integration::defaraday (double rm, double rm_iono)
     if(verbose) cerr << "Integration::defaraday rotating: " 
 		     << ichan << "\t" << cp << "  " << sp << endl;
     
-    float Qtemp[get_nbin()];
-    float Utemp[get_nbin()];
+    vector<float> Qtemp(get_nbin());
+    vector<float> Utemp(get_nbin());
 
-    float Qnew[get_nbin()];
+    vector<float> Qnew(get_nbin());
     
     for (unsigned ibin = 0; ibin < get_nbin(); ibin++) {
       Qtemp[ibin] = ((profiles[1][ichan])->get_amps())[ibin];
