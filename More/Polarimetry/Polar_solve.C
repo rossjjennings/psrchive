@@ -1,3 +1,21 @@
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
+#ifndef HAVE_COMPLEX_TEMPLATE
+
+#include "MEAL/Polar.h"
+#include "Error.h"
+
+//! Polar decompose the Jones matrix
+void MEAL::Polar::solve (Jones< Estimate<double> >& j)
+{
+  throw Error (InvalidState, "MEAL::Polar::solve",
+               "faulty complex template class; method not implemented");
+}
+
+#else
+
 #include "MEAL/Polar.h"
 
 #include "MEAL/ScalarMath.h"
@@ -5,11 +23,7 @@
 
 #include "Pauli.h"
 
-using namespace std;;
-
-#if defined(__ICC)
-#include "icomplex.h"
-#endif
+using namespace std;
 
 complex<MEAL::ScalarMath> 
 ComplexScalar (const complex< Estimate<double> >& z)
@@ -39,3 +53,6 @@ void MEAL::Polar::solve (Jones< Estimate<double> >& j)
     set_rotationEuler( i, rotation[i+1].get_Estimate() );
   } 
 }
+
+#endif
+
