@@ -382,7 +382,7 @@ string psrephem::par_lookup (const char* name, int use_cwd)
   }
 
   vector<string> filenames;
-  dirglob (&filenames, get_directory() + "*.eph");
+  dirglob (&filenames, get_directory() + "/*.eph");
 
   if (filenames.size() != 1)
     throw Error (InvalidState, "psrephem", "psrinfo created %d files",
