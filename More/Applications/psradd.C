@@ -113,7 +113,7 @@ int main (int argc, char **argv)
       return 0;
       
     case 'i':
-      cout << "$Id: psradd.C,v 1.17 2004/08/10 05:20:02 hknight Exp $" << endl;
+      cout << "$Id: psradd.C,v 1.18 2004/08/10 05:26:43 hknight Exp $" << endl;
       return 0;
       
     case 'b':
@@ -278,8 +278,8 @@ int main (int argc, char **argv)
 
     if( required_archive_length > 0 && fabs(archive->integration_length()-required_archive_length) > 0.5 ){
       fprintf(stderr,"psradd: archive [%s] not %f seconds long- it was %f seconds long\n",
-	      filenames[ifile].c_str(), archive->integration_length(),
-	      required_archive_length);
+	      filenames[ifile].c_str(), required_archive_length,
+	      archive->integration_length());
       continue;
     }
 
