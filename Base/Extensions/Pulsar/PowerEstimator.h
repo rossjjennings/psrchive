@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/PowerEstimator.h,v $
-   $Revision: 1.2 $
-   $Date: 2005/02/18 09:53:43 $
+   $Revision: 1.3 $
+   $Date: 2005/02/18 10:05:20 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PowerEstimator_h
@@ -22,7 +22,7 @@ namespace Pulsar {
     PowerEstimator (const char* name) : Archive::Extension (name) { }
 
     //! Return the estimated power spectrum
-    virtual void get_power (unsigned isub, unsigned ipol
+    virtual void get_power (unsigned isub, unsigned ipol,
 			    std::vector<float>& on,
 			    std::vector<float>& off) = 0;
 

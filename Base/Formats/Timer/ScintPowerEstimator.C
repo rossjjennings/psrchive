@@ -1,4 +1,4 @@
-#include "Pulsar/ScintPowerEstimator.h"
+#include "ScintPowerEstimator.h"
 #include "Pulsar/ScintArchive.h"
 
 //! Default constructor
