@@ -80,7 +80,7 @@ int main (int argc, char** argv)
       return 0;
 
     case 'i':
-      cout << "$Id: pas.C,v 1.9 2003/12/06 09:56:23 ahotan Exp $" << endl;
+      cout << "$Id: pas.C,v 1.10 2004/03/23 06:48:36 nwang Exp $" << endl;
       return 0;
 
     case 'r':
@@ -201,13 +201,7 @@ int main (int argc, char** argv)
 	 
 	case 'c': {
 	  //Centre Profile, not work properly according to find_max_phase()
-	  int rise_bin = 0;
-	  int fall_bin = 0;
-	  stdarch->total()->find_peak_edges(rise_bin, fall_bin);
-	  int centre_bin = (abs(rise_bin - fall_bin) / 2) + rise_bin;
-	  int move_me = (stdarch->get_nbin() / 2) - centre_bin;
-	  if( verbose ) cout << "Centre: Maximum bin " << centre_bin << endl;
-	  stdarch->rotate(convt(stdarch, -1 * move_me, verbose));
+	  stdarch->centre_max_bin();
 	  if( verbose ) cout << "Centre: Centre the profile, done" <<endl;
 	}
 	break;
