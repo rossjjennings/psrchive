@@ -1,3 +1,9 @@
+#include "MJD.h"
+#include "Error.h"
+
+#include "machine_endian.h"
+#include "ieee.h"
+
 #include <iostream>
 #include <algorithm>
 #include <memory>
@@ -15,11 +21,7 @@
 #include <math.h>
 #include <limits.h>
 
-#include "machine_endian.h"
-#include "ieee.h"
-
-#include "MJD.h"
-#include "Error.h"
+using namespace std;
 
 #define RINGBUFFER_SIZE 10
 
