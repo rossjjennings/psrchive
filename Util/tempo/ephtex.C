@@ -1,4 +1,6 @@
 #include <iostream>
+#include <unistd.h>
+
 #include "psrephem.h"
 
 int main (int argc, char** argv)
@@ -8,19 +10,22 @@ int main (int argc, char** argv)
   bool verbose = false;
 
   int c;
-  while ((c = getopt(argc, argv, "hanv")) != -1) {
+  float efac = 0.0;
+
+  while ((c = getopt(argc, argv, "hae:nv")) != -1) {
     switch (c)  {
     case 'h':
       cerr <<
 	"ephtex - produce a LaTeX formatted table of pulsar parameters\n"
 	"\n"
-	"USAGE:  ephtex [hanv] filename\n"
+	"USAGE:  ephtex [-hanv] [-e fac] filename\n"
 	"\n"
-	" -h    this help\n"
-	" -a    aastex deluxe table\n"
-	" -n    Nature suitable\n"
-	"       (see http://www.nature.com/nature/submit/gta/index.html#4.6\n"
-	" -v    verbose on stderr\n"
+	" -h     this help\n"
+	" -a     aastex deluxe table\n"
+	" -e fac multiply errors by fac\n"
+	" -n     Nature suitable\n"
+	"        see http://www.nature.com/nature/submit/gta/index.html#4.6\n"
+	" -v     verbose on stderr\n"
 	   << endl;
       return 0;
 
@@ -28,6 +33,9 @@ int main (int argc, char** argv)
       aastex = true;
       break;
 
+    case 'e':
+      efac = atof (optarg);
+      break;
     case 'n':
       nature = true;
       break;
@@ -42,7 +50,10 @@ int main (int argc, char** argv)
     cerr << "ephtex: provide a TEMPO parameter file as the last argument"
 	 << endl;
   
-  psrephem eph (argv[1]);
+  psrephem eph (argv[optind]);
+
+  if (efac > 0)
+    eph.efac (efac);
 
   if (aastex) {
     cout <<
