@@ -1,6 +1,7 @@
 #include "Pulsar/FluxCalibrator.h"
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
+#include "Pulsar/Profile.h"
 #include "Error.h"
 
 /*! When true, the FluxCalibrator constructor will first calibrate the
@@ -177,7 +178,7 @@ void Pulsar::FluxCalibrator::calibrate (Integration* subint)
 
   for (unsigned ichan=0; ichan<nchan; ichan++)
     for (unsigned ipol=0; ipol<npol; ipol++)
-      *(subint->get_Profile (ipol, ichan)) *= cal_flux[ichan];
+      *(subint->get_Profile (ipol, ichan)) *= cal_flux[ichan].val;
 }
 
 //! Given the observing frequency in MHz, returns the flux of Hydra in mJy

@@ -196,7 +196,7 @@ void Pulsar::PolnCalibrator::calibrate (Integration* subint)
 {
   if (subint->get_npol() != 4)
     throw Error (InvalidState, "Pulsar::PolnCalibrator::calibrate",
-		 "npol != 4 not implemented");
+		 "TODO: npol != 4 not implemented");
 
   subint->transform (jones);
 }
