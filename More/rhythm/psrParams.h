@@ -1,3 +1,4 @@
+//-*-C++-*-
 
 /* ///////////////////////////////////////////////////////////////////////
    psrParams --- object that can read/write/manipulate TEMPO parameter set
@@ -27,9 +28,9 @@ class psrParams
   psrParams () {};
   psrParams (const psrParams &);
 
-  psrParams (const string& psr_name, int use_cwd)
+  psrParams (const string& psr_name, bool use_cwd)
     { create (psr_name, use_cwd); };
-  psrParams (const char* psr_name, int use_cwd)
+  psrParams (const char* psr_name, bool use_cwd)
     { create (psr_name, use_cwd); };
   psrParams (const string& filename)
     { load (filename); };
@@ -41,16 +42,15 @@ class psrParams
   ~psrParams () { destroy (); };
 
   // string class "wrapper" functions
-  void create (const string& psr_name, bool use_cwd)
+  void create (const string& psr_name, bool use_cwd = true)
     { create (psr_name.c_str(), use_cwd); };
   void load   (const string& filename)
     { load (filename.c_str()); };
   void unload (const string& filename) const
     { unload (filename.c_str()); };
 
-
   // Create TEMPO parameters, given the pulsar name
-  void create (const char* psr_name, bool use_cwd);
+  void create (const char* psr_name, bool use_cwd = true);
  
   // Load TEMPO parameters from file
   void load   (const char* filename);
