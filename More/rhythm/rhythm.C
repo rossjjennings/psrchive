@@ -219,6 +219,7 @@ void Rhythm::load_toas (const char* fname)
     cerr << " done." << endl;
 
   tempo->setItemEnabled (fitID, true);
+  tempo->setItemEnabled (fitSelID, true);
 
   toa_filename = fname;
   
@@ -320,6 +321,12 @@ void Rhythm::fit()
 
   fit (eph, true);
 
+  if (verbose)
+    cerr << "Rhythm::fit plotting residuals" << endl;
+
+  goplot();
+  plot_window->autoscale();
+
   toa_text -> clear();
 
   char useful[256];
@@ -357,12 +364,6 @@ void Rhythm::fit (const psrephem& eph, bool load_new)
     fitpopup -> set_psrephem (pf_eph);
   }
   
-  if (verbose)
-    cerr << "Rhythm::fit plotting residuals" << endl;
-  
-  goplot ();
-  plot_window->autoscale();
-  
 } 
  catch (Error& error) {
    if (verbose)
@@ -375,6 +376,95 @@ void Rhythm::fit (const psrephem& eph, bool load_new)
    if (verbose)
      cerr << "Rhythm::fit ERROR Unhandled Exception" << endl;
    QMessageBox::critical (this, "Rhythm::fit",
+			  "An Unhandled Exception Occured", "Dismiss");
+ }
+}
+
+void Rhythm::fit_selected()
+{
+  if (!fitpopup || !fitpopup -> hasdata())
+    return;
+
+  psrephem eph;
+  fitpopup -> get_psrephem (eph);
+
+  fit_selected (eph, true);
+
+  fitpopup -> get_psrephem (eph);
+  eph.nofit();
+
+  cerr << "I'm going to use this ephemeris now" << endl;
+  eph.unload(stdout);
+
+  fit (eph, false);
+
+  if (verbose)
+    cerr << "Rhythm::fit_selected plotting residuals" << endl;
+
+  goplot();
+  
+  toa_text -> clear();
+  
+  char useful[256];
+
+  for (unsigned i = 0; i < toas.size(); i++) {
+    toas[i].unload(useful);
+    toa_text -> insertItem(useful);
+  }
+}
+
+void Rhythm::fit_selected (const psrephem& eph, bool load_new)
+{ try {
+    
+  if (toas.size() < 1) {
+    if (verbose)
+      cerr << "Rhythm::fit_selected No Arrival Times loaded" << endl;
+    return;
+  }
+  
+  vector<Tempo::toa> subset;
+  
+  for (unsigned i = 0; i < toas.size(); i++) {
+    if (toas[i].state == Tempo::toa::Selected)
+      subset.push_back(toas[i]);
+  }
+  
+  if (subset.size() < 1) {
+    if (verbose)
+      cerr << "Rhythm::fit_selected No Arrival Times selected" << endl;
+    return;
+  }
+
+  if (verbose)
+    cerr << "Rhythm::fit_selected Calculating residuals" << endl;
+  
+  psrephem pf_eph;
+  
+  Tempo::fit (eph, subset, &pf_eph, true);
+  
+  if (load_new && fitpopup) {
+    // set_psrephem will result in generation of newEph signal, 
+    // which should be ignored since it was set from here.
+    ignore_one_eph = true;
+    
+    if (verbose)
+      cerr << "Rhythm::fit_selected Displaying new ephemeris" << endl;
+    
+    fitpopup -> set_psrephem (pf_eph);
+  }
+  
+} 
+ catch (Error& error) {
+   if (verbose)
+     cerr << "Rhythm::fit_selected ERROR " << error << endl;
+   QMessageBox::critical (this, "Rhythm::fit_selected",
+			  "They're all out to get you...", 
+			  "Dismiss");
+ }
+ catch (...) {
+   if (verbose)
+     cerr << "Rhythm::fit_selected ERROR Unhandled Exception" << endl;
+   QMessageBox::critical (this, "Rhythm::fit_selected",
 			  "An Unhandled Exception Occured", "Dismiss");
  }
 }

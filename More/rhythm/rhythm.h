@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/rhythm/rhythm.h,v $
-   $Revision: 1.20 $
-   $Date: 2003/04/24 04:43:22 $
+   $Revision: 1.21 $
+   $Date: 2003/04/24 06:36:40 $
    $Author: ahotan $ */
 
 // //////////////////////////////////////////////////////////////////////////
@@ -92,6 +92,10 @@ class Rhythm : public QMainWindow
   // if 'load_new' is true, loads the new epehemeris into the display
   void fit (const psrephem& eph, bool load_new);
 
+  // fits the selected toas using TEMPO with the given psrephem, 'eph'.
+  // if 'load_new' is true, loads the new epehemeris into the display
+  void fit_selected (const psrephem& eph, bool load_new);
+
   // set the verbosity flag for a number of the classes on which
   // this application is based
   void setClassVerbose (bool verbose);
@@ -157,6 +161,7 @@ class Rhythm : public QMainWindow
   QPopupMenu* tempo;      // pointer to the Tempo popup menu
   int dispID;             // ID of the 'Display Parameters' menu item
   int fitID;              // ID of the 'Fit' menu item
+  int fitSelID;           // ID of the 'Fit Selected' menu item
   int autofitID;          // ID of the 'Autofit' menu item
   int saveParmsID;
 
@@ -193,6 +198,7 @@ class Rhythm : public QMainWindow
 
   // Tempo menu callbacks
   void fit();
+  void fit_selected();
   void togledit();
   void toglauto();
 

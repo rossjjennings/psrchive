@@ -35,6 +35,8 @@ void Rhythm::menubarConstruct ()
 
   fitID = tempo->insertItem( "&Fit", this, SLOT( fit() ));
   tempo->setItemEnabled (fitID, false);
+  fitSelID = tempo->insertItem( "Fit &Selected", this, SLOT( fit_selected() ));
+  tempo->setItemEnabled (fitSelID, false);
   dispID = tempo->insertItem( "&Display Parameters", this, SLOT( togledit() ));
   tempo->setItemEnabled (dispID, false);
 
