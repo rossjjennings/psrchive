@@ -227,7 +227,6 @@ class psrAngle : public psrParameter
     { value = val; };
  
   void is_RA () { 
-                cout << "Setting Angle to RA" << endl;
                 value.setWrapPoint(2*M_PI);
    		if (value.getradians() < 0) {
 		   value.setradians(value.getradians()+2*M_PI);
