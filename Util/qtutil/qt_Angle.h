@@ -1,6 +1,6 @@
 /* $Source: /cvsroot/psrchive/psrchive/Util/qtutil/qt_Angle.h,v $
-   $Revision: 1.3 $
-   $Date: 1999/12/23 02:05:46 $
+   $Revision: 1.4 $
+   $Date: 2004/02/28 06:58:48 $
    $Author: straten $ */
 
 #ifndef __QT_Angle_H
@@ -20,8 +20,8 @@ class qt_Angle : public qt_value
   void setAngle ( const Angle& angle = Angle() );
   Angle getAngle () const { return valset; };
 
-  void displayHMS () { hms = true;  setAngle(valset); };
-  void displayDMS () { hms = false; setAngle(valset); };
+  void displayHMS ();
+  void displayDMS ();
 
  protected:
   bool   hms;

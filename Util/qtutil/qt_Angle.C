@@ -36,3 +36,18 @@ void qt_Angle::value_Entered_CB ()
   }
   setAngle (newval);
 }
+
+void qt_Angle::displayHMS ()
+{
+  hms = true;
+  valset.setWrapPoint (2*M_PI);
+  setAngle (valset);
+}
+
+void qt_Angle::displayDMS ()
+{
+  hms = false;
+  valset.setWrapPoint (M_PI);
+  setAngle (valset);
+}
+
