@@ -66,6 +66,8 @@ void psrephem::fits_map (fitsfile* fptr, vector<int>& ephind, int& maxstrlen)
 
   maxstrlen = 0;
 
+  string previous;
+
   for (int icol=0; icol<ncols && status==0; icol++) {
 
     int  typecode = 0;
@@ -83,12 +85,32 @@ void psrephem::fits_map (fitsfile* fptr, vector<int>& ephind, int& maxstrlen)
     
     parstr = value;
 
-    if ( parstr == "PSR-NAME" )
+    // standardize the various strings encountered to date
+    if ( parstr == "PSR-NAME" || parstr == "PSR_NAME" )
       parstr = "PSRJ";
-    
-    if ( parstr == "TZRFMJD" )
-      parstr = "TZRMJD";
 
+    //
+    // columns containing the fractional component must be preceded by integer
+    //
+    if ( parstr == "TZRFMJD" ) {
+      if (previous != "TZRIMJD")
+	throw Error (InvalidState, "psrephem::fits_map",
+		     "TZRFMJD does not follow TZRIMJD");
+      parstr = "TZRMJD";
+    }
+
+    if ( parstr == "FF0" ) {
+      if (previous != "IF0")
+	throw Error (InvalidState, "psrephem::fits_map",
+		     "FF0 does not follow IF0");
+      parstr = "F";
+    }
+
+    previous = parstr;
+
+    //
+    // search for a match
+    //
     ephind[icol] = -1;
 
     for (int ieph=0; ieph<EPH_NUM_KEYS; ieph++) {
@@ -98,6 +120,10 @@ void psrephem::fits_map (fitsfile* fptr, vector<int>& ephind, int& maxstrlen)
 	// match found ... 
 	// test the validity of operating assumption.  datatype match
 	// will display an error if there is a mismatch in assumption
+	if (verbose)
+	  cerr << "psrephem::fit_map column " << icol
+	       << " matches ephind " << ieph << " ";
+
 	datatype_match (typecode, ieph);
 
 	ephind[icol] = ieph;
@@ -186,6 +212,20 @@ void psrephem::load (fitsfile* fptr, long row)
 	fits_read_col (fptr, TDOUBLE, icol+1, row, firstelem, onelement,
 		       &nul, value_double + ieph, &anynul, &status);
 	break;
+
+
+	if (ieph == EPH_F) {
+	  int inul = 0;
+	  // special case for FF0:
+	  // Assumes that IF0 is in the column preceding FF0
+	  fits_read_col (fptr, TINT, icol, row, firstelem, onelement,
+			 &inul, value_integer + ieph, &anynul, &status);
+
+	  // for now, this class represents F as a double
+	  value_double[ieph] += value_integer[ieph];
+	  value_integer[ieph] = 0;
+	}
+
       }
     case 2:  // h:m:s
       {
@@ -193,12 +233,19 @@ void psrephem::load (fitsfile* fptr, long row)
 	fits_read_col (fptr, TSTRING, icol+1, row, firstelem, onelement,
 		       nul, &strval, &anynul, &status);
 
+	if (verbose)
+	  cerr << "psrephem::load PSRFITS h:m:s=" << strval << endl;
+
 	if (str2ra (value_double + ieph, strval) != 0) {
 	  if (verbose)
 	    cerr << "psrephem::load PSRFITS could not parse h:m:s from '" 
 		 << strval << "'" << endl;
 	  anynul = 1;
 	}
+
+	// convert from radians to turns
+	value_double[ieph] /= 2.0 * M_PI;
+
 	break;
       }
     case 3:  // d:m:s
@@ -207,12 +254,19 @@ void psrephem::load (fitsfile* fptr, long row)
 	fits_read_col (fptr, TSTRING, icol+1, row, firstelem, onelement,
 		       nul, &strval, &anynul, &status);
 
+	if (verbose)
+	  cerr << "psrephem::load PSRFITS d:m:s=" << strval << endl;
+
 	if (str2dec (value_double + ieph, strval) != 0) {
 	  if (verbose)
 	    cerr << "psrephem::load PSRFITS could not parse d:m:s from '" 
 		 << strval << "'" << endl;
 	  anynul = 1;
 	}
+
+	// convert from radians to turns
+	value_double[ieph] /= 2.0 * M_PI;
+
 	break;
       }
     case 4:  // MJD
@@ -347,8 +401,21 @@ void psrephem::unload (fitsfile* fptr, long row) const
 
     case 1:  // double
       {
+	double value = value_double[ieph];
+
+	if (ieph == EPH_F) {
+	  // special case for FF0:
+	  // Assumes that IF0 is in the column preceding FF0
+	  int intval = int (value);
+
+	  fits_write_col (fptr, TINT, icol, row, firstelem, onelement,
+			  &intval, &status);
+
+	  value -= intval;
+	}
+
 	fits_write_col (fptr, TDOUBLE, icol+1, row, firstelem, onelement,
-			value_double + ieph, &status);
+			&value, &status);
 	break;
       }
     case 2:  // h:m:s
@@ -424,9 +491,9 @@ void datatype_match (int typecode, int ephind)
 	 << datatype[parmtype] << endl;
   
   if (typecode != datatype[parmtype])
-    fprintf (stderr, 
-	     "psrephem::load PSRFITS binary table column datatype:%s\n" 
-	     "doesn't match parmType:%d for %s\n", 
-	     fits_datatype_str(typecode), parmtype,
-	     parmNames[ephind]);
+    throw Error (InvalidState, "psrephem::datatype_match",
+		 "PSRFITS binary table column datatype:%s\n" 
+		 "doesn't match parmType:%d for %s\n", 
+		 fits_datatype_str(typecode), parmtype,
+		 parmNames[ephind]);
 }
