@@ -1,7 +1,11 @@
 
 /*
-$Id: utc.c,v 1.3 1998/08/12 07:10:20 straten Exp $
+$Id: utc.c,v 1.4 1998/09/24 09:03:09 straten Exp $
 $Log: utc.c,v $
+Revision 1.4  1998/09/24 09:03:09  straten
+1) added fractional seconds to utc2LST in utc_f2LST
+2) mpi pack and unpack routines added to increase transmission efficiency
+
 Revision 1.3  1998/08/12 07:10:20  straten
 bug fix - when adding month days to make year day, use previous month
 so month -> month-1
@@ -538,6 +542,11 @@ int str2LST (double* lst, char* timestr, float longitude)
 /* longitude is given in degrees */
 int utc2LST (double* lst, utc_t timeutc, float longitude)
 {
+  return utc_f2LST (lst, timeutc, 0.0, longitude);
+}
+
+int utc_f2LST (double* lst, utc_t timeutc, double fracsec, float longitude)
+{
   double F1_YY, UT, GMST;
   double F1_96 = 6.5967564;     /* (hours) For 1996 see ASTRO ALMANAC pg B6 */
   double F1_97 = 6.6465521;     /* (hours) For 1997 see ASTRO ALMANAC pg B6 */
@@ -559,7 +568,7 @@ int utc2LST (double* lst, utc_t timeutc, float longitude)
   }
 
   UT = (double)timeutc.tm_hour + (double)timeutc.tm_min/60.0
-    + (double)timeutc.tm_sec/3600.0;
+    + ((double)timeutc.tm_sec + fracsec)/3600.0;
   GMST = F1_YY+F2*(double)timeutc.tm_yday+F3*UT;
 
   *lst =  GMST + east_long;
