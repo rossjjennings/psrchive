@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ReceptionCalibrator.h,v $
-   $Revision: 1.46 $
-   $Date: 2003/11/04 15:29:02 $
+   $Revision: 1.47 $
+   $Date: 2003/11/25 08:10:07 $
    $Author: straten $ */
 
 #ifndef __ReceptionCalibrator_H
@@ -72,8 +72,11 @@ namespace Pulsar {
     //! Update the relevant estimate
     void update ();
 
-    //! Add a backend and return the path index
+    //! Add a new signal path for the flux calibrator observations
     void add_fluxcal_backend ();
+
+    //! Fix the rotation about the line of sight
+    void no_rotation ();
 
     //! ReceptionModel
     Reference::To<Calibration::ReceptionModel> equation;
@@ -165,7 +168,10 @@ namespace Pulsar {
     //! Return a PolnCalibrator::get_solution with a CalibratorStokes Extension
     Archive* get_solution (const string& archive_type, string ext=".pc") const;
 
+    //! Allow the CAL Stokes V to vary (applies only if FluxCal observed)
     bool measure_cal_V;
+    //! Allow the CAL Stokes Q to vary
+    bool measure_cal_Q;
 
     bool normalize_by_invariant;
 
