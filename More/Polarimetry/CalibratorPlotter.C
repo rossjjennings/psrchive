@@ -73,8 +73,12 @@ void Pulsar::CalibratorPlotter::plot (const Calibrator* calib)
   }
 
   cpgsvp(xmin, xmax, ymin, ymin + yheight);
-  plotter.plot ();
+  for (idim=0; idim<ndim; idim++) {
+    cpgsci (idim+2);
+    plotter.plot (idim);
+  }
 
+  cpgsci (1);
   cpgbox("bcst",0,0,"bcnvst",0,0);
   cpgmtxt("L",2.5,.5,.5,"Boost");
 
@@ -93,8 +97,12 @@ void Pulsar::CalibratorPlotter::plot (const Calibrator* calib)
   }
 
   cpgsvp(xmin, xmax, ymin, ymin + yheight);
-  plotter.plot ();
+  for (idim=0; idim<ndim; idim++) {
+    cpgsci (idim+2);
+    plotter.plot (idim);
+  }
 
+  cpgsci (1);
   cpgbox("bcst",0,0,"bcnvst",0,0);
   cpgmtxt("L",2.5,.5,.5,"Phase");
 
