@@ -94,14 +94,16 @@ int main (int argc, char *argv[]) {
       arch->convert_state (Signal::Intensity);      
       arch->toas(toas, stdarch);
 
+      // Archive::toas now does the right thing: setting instead of appending
+      for (unsigned i = 0; i < toas.size(); i++)
+	toas[i].unload(stdout);
+
     }
     catch (Error& error) {
       cerr << error << endl;
     }
   }
   
-  for (unsigned i = 0; i < toas.size(); i++)
-    toas[i].unload(stdout);
 }
 
 

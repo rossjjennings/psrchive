@@ -9,9 +9,19 @@
 void Pulsar::Archive::toas (vector<Tempo::toa>& toas,
 			    const Archive* standard) const
 {
+  toas.resize (0);
+
   string reason;
   if (!standard_match (standard, reason))
     cerr << "Pulsar::Archive::toas WARNING " << reason << endl;
+
+  double cf1 = get_centre_frequency();
+  double cf2 = standard->get_centre_frequency();
+  double dfreq = fabs (cf2 - cf1);
+
+  if (dfreq > 0.2 * cf1)
+    cerr << "Pulsar::Archive::toas WARNING standard centre frequency = " << cf2
+	 << " != " << cf1 << endl;
 
   const Integration* std = standard->get_Integration (0);
 
