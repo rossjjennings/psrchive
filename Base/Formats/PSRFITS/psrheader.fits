@@ -7,7 +7,7 @@ COMMENT   Astrophysics Supplement Series v44/p363, v44/p371, v73/p359, v73/p365.
 COMMENT   Contact the NASA Science Office of Standards and Technology for the
 COMMENT   FITS Definition document #100 and other FITS information.
 COMMENT
-HDRVER  = '1.9             '   / Header version 
+HDRVER  = '1.10            '   / Header version 
 DATE    = '                '   / File creation date (YYYY-MM-DDThh:mm:ss UTC)
 OBSERVER= '                '   / Observer name(s)
 PROJID  = '                '   / Project name
@@ -84,14 +84,16 @@ TTYPE12 = 'RM_CORR '           / RM correction applied
 TFORM12 = '1I      '           / Integer flag 
 TTYPE13 = 'DEDISP  '           / Data dedispersed
 TFORM13 = '1I      '           / Integer flag 
-TTYPE14 = 'SC_MTHD '           / Scattered power correction method
+TTYPE14 = 'DDS_MTHD'           / Dedispersion method
 TFORM14 = '32A     '           / 32-char string
-TTYPE15 = 'CAL_MTHD'           / Calibration method
+TTYPE15 = 'SC_MTHD '           / Scattered power correction method
 TFORM15 = '32A     '           / 32-char string
-TTYPE16 = 'CAL_FILE'           / Name of gain calibration file
+TTYPE16 = 'CAL_MTHD'           / Calibration method
 TFORM16 = '32A     '           / 32-char string
-TTYPE17 = 'RFI_MTHD'           / RFI excision method
+TTYPE17 = 'CAL_FILE'           / Name of gain calibration file
 TFORM17 = '32A     '           / 32-char string
+TTYPE18 = 'RFI_MTHD'           / RFI excision method
+TFORM18 = '32A     '           / 32-char string
 END
 XTENSION= 'BINTABLE'           / ***** Digitiser statistics *****
 BITPIX  =                    8 / N/A
@@ -120,6 +122,7 @@ PCOUNT  =                    0 / Size of special data area
 GCOUNT  =                    1 / One data group (required keyword)
 TFIELDS =                    3 / Number of fields per row
 DIG_MODE= '                '   / Digitiser mode
+DYN_LEVT= *                    / Timescale for dynamic leveling
 NDIGR   = *                    / Number of digitised channels (I)
 NLEV    = *                    / Number of digitiser levels
 NPTHIST = *                    / Number of points in histogram (I)
@@ -151,6 +154,24 @@ TTYPE3  = 'DATA    '           / Bandpass for autocorrelations
 TDIM3   = (*,*)                / Data table dimensions = (NCH_ORIG,NRCVR)
 TUNIT3  = 'Jy      '           / Bandpass amplitude units
 TFORM3  = ' I      '           / NCH_ORIG*NRCVR integers
+END
+XTENSION= 'BINTABLE'           / ***** Coherent Dedispersion Parameters *****
+BITPIX  =                    8 / N/A
+NAXIS   =                    2 / 2-dimensional binary table
+NAXIS1  =                    * / width of table in bytes
+NAXIS2  =                    1 / number of rows in table (NCHAN)
+PCOUNT  =                    0 / size of special data area
+GCOUNT  =                    1 / one data group (required keyword)
+TFIELDS =                    3 / number of fields per row
+NFFT    =                    * / Size of forward FFT 
+EXTNAME = 'COHDDISP'           / name of this binary table extension
+TTYPE1  = 'NOVERLAP'           / Number of overlap points for each sub-band
+TFORM1  = '1I      '           / Integer
+TTYPE2  = 'NCHIRP  '           / Number of points in chirp function
+TFORM2  = '1I      '           / Integer
+TTYPE3  = 'DATA    '           / Bandpass for autocorrelations
+TDIM3   = (*)                  / Data table dimension = (NCHIRP)
+TFORM3  = 'E       '           / NCHIRP floats
 END
 XTENSION= 'BINTABLE'           / ***** Pulsar ephemeris history *****
 BITPIX  =                    8 / N/A
@@ -320,15 +341,16 @@ GCOUNT  =                    1 / one data group (required keyword)
 TFIELDS =                    3 / Number of fields per row
 CAL_MTHD= '        '           / Flux cal method
 SCALFILE= '        '           / Cal file(s) used to derive flux-cal data
+NCH_FLUX=                    * / Nr of channels in flux cal file
 EXTNAME = 'FLUX_CAL'           / name of this binary table extension
 TTYPE1  = 'DAT_FREQ'           / [MHz] Centre frequency for each channel
-TFORM1  = 'E       '           / NCHAN floats
+TFORM1  = 'E       '           / NCH_FLUX floats
 TTYPE2  = 'DAT_WTS '           / Weights for each channel
-TFORM2  = 'E       '           / NCHAN floats
+TFORM2  = 'E       '           / NCH_FLUX floats
 TTYPE3  = 'DATA'
-TDIM3   = (2,*,*)              / Dimensions (2,NCHAN,NPOL)(cal, system equiv f.d.) 
+TDIM3   = (2,*,*)              / Dim: (2,NCH_FLUX,NPOL)(cal, system equiv f.d.) 
 TUNIT3  = 'Jy      '
-TFORM3  = 'E       '           / 2*NCHAN*NPOL floats
+TFORM3  = 'E       '           / 2*NCH_FLUX*NPOL floats
 END
 XTENSION= 'BINTABLE'           / ***** Feed Cross-Coupling parameters *****
 BITPIX  =                    8 / N/A 
@@ -340,15 +362,15 @@ GCOUNT  =                    1 / one data group (required keyword)
 TFIELDS =                    3 / Number of fields per row
 CAL_MTHD= '        '           / Cross-coupling method
 NCPAR   = '1I      '           / Number of coupling parameters
-DATE_PRO= '        '           / 
+NCH_FDPR=                    * / Nr of channels in Feed coupling data
 EXTNAME = 'FEEDPAR '           / Name of this binary table extension
 TTYPE1  = 'DAT_FREQ'           / [MHz] Centre frequency for each channel
-TFORM1  = 'E       '           / NCHAN floats
+TFORM1  = 'E       '           / NCH_FDPR floats
 TTYPE2  = 'DAT_WTS '           / Weights for each channel
-TFORM2  = 'E       '           / NCHAN floats
+TFORM2  = 'E       '           / NCH_FDPR floats
 TTYPE3  = 'DATA    '           / Cross-coupling data
 TDIM3   = (*,*)                / Dimensions (NCHAN,NCPAR)
-TFORM3  = 'E       '           / NCHAN*NCPAR floats
+TFORM3  = 'E       '           / NCH_FDPR*NCPAR floats
 END
 XTENSION= 'BINTABLE'           / ***** Subintegration data  *****
 BITPIX  =                    8 / N/A
@@ -358,6 +380,8 @@ NAXIS2  =                    * / Number of rows in table (NSUBINT or -1 for tape
 PCOUNT  =                    0 / size of special data area
 GCOUNT  =                    1 / one data group (required keyword)
 TFIELDS =                   18 / Number of fields per row 
+NCH_FILE=                    * / Number of channels/sub-bands in this file
+NCH_STRT=                    * / Start channel/sub-band number for this file
 EXTNAME = 'SUBINT '            / name of this binary table extension
 TTYPE1  = 'ISUBINT '           / Subint number. If NAXIS=-1, 0 indicates EOD.
 TFORM1  = '1J      '           / Double integer
@@ -385,16 +409,16 @@ TTYPE12 = 'TEL_AZ  '           / [deg] Telescope azimuth at subint centre
 TFORM12 = '1E      '           / Float 
 TTYPE13 = 'TEL_ZEN '           / [deg] Telescope zenith angle at subint centre
 TFORM13 = '1E      '           / Float
-TTYPE14 = 'DAT_FREQ'           / [MHz] Centre frequency for each channel
-TFORM14 = 'E       '           / NCHAN floats
-TTYPE15 = 'DAT_WTS '           / Weights for each channel
-TFORM15 = 'E       '           / NCHAN floats
-TTYPE16 = 'DAT_OFFS'           / Data offset for each channel
-TFORM16 = 'E       '           / NCHAN*NPOL floats
-TTYPE17 = 'DAT_SCL '           / Data scale factor for each channel
-TFORM17 = 'E       '           / NCHAN*NPOL floats
-TTYPE18 = 'DATA    '           / Subint data table
-TDIM18  = (*,*,*)              / Dimensions of data table = (NBIN,NCHAN,NPOL)
-TUNIT18 = 'Jy      '           / Units of subint data
-TFORM18 = 'I       '           / NBIN*NCHAN*NPOL integers
+TTYPE16 = 'DAT_FREQ'           / [MHz] Centre frequency for each channel
+TFORM16 = 'E       '           / NCH_FILE floats
+TTYPE17 = 'DAT_WTS '           / Weights for each channel
+TFORM17 = 'E       '           / NCH_FILE floats
+TTYPE18 = 'DAT_OFFS'           / Data offset for each channel
+TFORM18 = 'E       '           / NCH_FILE*NPOL floats
+TTYPE19 = 'DAT_SCL '           / Data scale factor for each channel
+TFORM19 = 'E       '           / NCH_FILE*NPOL floats
+TTYPE20 = 'DATA    '           / Subint data table
+TDIM20  = (*,*,*)              / Dimensions of data table = (NBIN,NCH_FILE,NPOL)
+TUNIT20 = 'Jy      '           / Units of subint data
+TFORM20 = 'I       '           / NBIN*NCH_FILE*NPOL integers
 END
