@@ -142,10 +142,8 @@ void Pulsar::HybridCalibrator::calculate_transformation ()
     Jones< Estimate<double> > response;
     xform->evaluate (response);
 
-    Stokes< Estimate<float> > stokes = reference_input->get_stokes (ichan);
-    stokes = response * stokes * herm(response);
-
-    Jones< Estimate<float> > coherence = convert (stokes);
+    Stokes< Estimate<double> > stokes = reference_input->get_stokes (ichan);
+    Jones< Estimate<double> > coherence = response * stokes * herm(response);
 
     cal[0] = 0.5 * coherence.j(0,0).real();
     cal[1] = 0.5 * coherence.j(1,1).real();
