@@ -275,6 +275,13 @@ int str2tm (struct tm* time, const char* str)
   time->tm_yday = 0;
   time->tm_isdst = -1;
 
+  /* a bug in DEC mktime makes these terrible assumptions necessary */
+  if (time->tm_year < 1900) {
+    if (time->tm_year < 30)
+      time->tm_year += 2000;
+    else
+      time->tm_year += 1900;
+  }
   mktime (time);
 
   return 0;

@@ -32,7 +32,6 @@ int main ()
 
   strcpy (tempstr1,  "970309-094500");
   str2tm (&cal, tempstr1);
-  cal.tm_year += 1900;
   tm2utc (&time, cal);
   printf ("TIME %s  ->  %s\n", tempstr1,
            utc2str (tempstr2, time, "yyyy-ddd-hh:mm:ss"));
@@ -44,7 +43,6 @@ int main ()
 
   strcpy (tempstr1,  "880309-094500");
   str2tm (&cal, tempstr1);
-  cal.tm_year += 1900;
   tm2utc (&time, cal);
   printf ("TIME %s  ->  %s\n", tempstr1,
            utc2str (tempstr2, time, "yyyy-ddd-hh:mm:ss"));
@@ -56,7 +54,6 @@ int main ()
 
   strcpy (tempstr1,  "000309-000000");
   str2tm (&cal, tempstr1);
-  cal.tm_year += 2000;
   tm2utc (&time, cal);
   printf ("TIME %s  ->  %s\n", tempstr1,
            utc2str (tempstr2, time, "yyyy-ddd-hh:mm:ss"));
@@ -80,7 +77,6 @@ int main ()
 
   strcpy (tempstr1,  "960201_205958");
   str2tm (&cal, tempstr1);
-  cal.tm_year += 1900;
   tm2utc (&time, cal);
   printf ("TIME %s  ->  %s\n", tempstr1,
            utc2str (tempstr2, time, "yyyy-ddd-hh:mm:ss"));
@@ -92,7 +88,6 @@ int main ()
 
   strcpy (tempstr1,  "960229_160535");
   str2tm (&cal, tempstr1);
-  cal.tm_year += 1900;
   tm2utc (&time, cal);
   printf ("TIME %s  ->  %s\n", tempstr1,
            utc2str (tempstr2, time, "yyyy-ddd-hh:mm:ss"));
