@@ -29,7 +29,7 @@ char Telescope::code (const char* name)
 }
 
 //! Convert a telecope code to a name
-const char* name (char code)
+const char* Telescope::name (char code)
 {
   switch (code) {
   case Parkes:
