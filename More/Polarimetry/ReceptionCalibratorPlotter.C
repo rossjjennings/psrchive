@@ -270,3 +270,100 @@ void Pulsar::ReceptionCalibratorPlotter::plot_phase_constraints ()
 
   }
 }
+
+
+//! PGPLOT the calibrator model parameters as a function of frequency
+void Pulsar::ReceptionCalibratorPlotter::plotcal ()
+{
+  unsigned ipt = 0, npt = get_ndat ();
+
+  if (npt == 0) {
+    cerr << "Pulsar::ReceptionCalibratorPlotter::plot no points to plot"
+	 << endl;
+    return;
+  }
+
+  float xmin, xmax, ymin, ymax;
+  cpgqvp (0, &xmin, &xmax, &ymin, &ymax);
+
+  float ybottom = ymin;
+  float yrange = ymax - ymin;
+  float yspace = 0.1 * yrange;
+  float yheight = (yrange - yspace) / 3.0;
+
+  cpgsci(1);
+  cpgslw(1);
+  cpgsch(1);
+
+  // the plotting class
+  EstimatePlotter plotter;
+
+  // the data to be plotted
+  vector< Estimate<float> > data (npt);
+
+  // ////////////////////////////////////////////////////////////////////
+
+  for (ipt=0; ipt<npt; ipt++)
+    data[ipt] = calibrator->backend[ipt]->get_beta();
+
+  cpgsvp (xmin, xmax, ybottom, ybottom + yheight);
+
+  plotter.plot (data);
+
+  cpgbox("bcst",0,0,"bcnvst",0,0);
+  cpgmtxt("L",2.5,.5,.5,"Boost");
+
+  ybottom += 0.5*yspace + yheight;
+
+
+  unsigned idim = 0, ndim = 0;
+
+  // ////////////////////////////////////////////////////////////////////
+
+  plotter.clear ();
+
+  for (ipt=0; ipt<npt; ipt++)
+    data[ipt] = calibrator->backend[ipt]->get_phi();
+
+  cpgsvp(xmin, xmax, ybottom, ybottom + yheight);
+
+  plotter.plot (data);
+
+  cpgbox("bcst",0,0,"bcnvst",0,0);
+  cpgmtxt("L",2.5,.5,.5,"Rotation");
+
+  ybottom += 0.5*yspace + yheight;
+
+  // ////////////////////////////////////////////////////////////////////
+
+  plotter.clear ();
+
+  ndim = 4;
+  for (idim=0; idim<ndim; idim++) {
+    for (ipt=0; ipt<npt; ipt++)
+      data[ipt] = calibrator->calibrator.state[ipt].get_Estimate(ndim);
+
+    plotter.add_plot (data);
+  }
+
+  cpgsvp(xmin, xmax, ybottom, ybottom + yheight);
+  for (idim=0; idim<ndim; idim++) {
+    cpgsci (idim+1);
+    plotter.plot (idim);
+  }
+
+  cpgsci (1);
+  cpgbox("bcst",0,0,"bcnvst",0,0);
+  cpgmtxt("L",2.5,.5,.5,"Stokes");
+
+  // restore the viewport
+  cpgsvp (xmin, xmax, ymin, ymax);
+
+}
+
+
+
+
+
+
+

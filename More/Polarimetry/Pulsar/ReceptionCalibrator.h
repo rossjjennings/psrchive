@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ReceptionCalibrator.h,v $
-   $Revision: 1.27 $
-   $Date: 2003/06/02 14:18:32 $
+   $Revision: 1.28 $
+   $Date: 2003/06/02 14:31:32 $
    $Author: straten $ */
 
 #ifndef __ReceptionCalibrator_H
@@ -11,6 +11,7 @@
 #include "Calibrator.h"
 #include "Calibration/MultiPathEquation.h"
 #include "Calibration/Polar.h"
+#include "Calibration/SingleAxis.h"
 #include "Calibration/Parallactic.h"
 #include "Calibration/StokesState.h"
 
@@ -110,6 +111,9 @@ namespace Pulsar {
 
     //! Polar decomposition of receiver as a function of frequency
     vector<Reference::To<Calibration::Polar> > receiver;
+
+    //! Polar decomposition of receiver as a function of frequency
+    vector<Reference::To<Calibration::SingleAxis> > backend;
 
     //! Uncalibrated estimate of pulsar polarization as a function of phase
     SourceEstimate calibrator;

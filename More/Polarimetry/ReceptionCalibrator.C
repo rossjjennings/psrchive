@@ -70,6 +70,8 @@ void Pulsar::ReceptionCalibrator::initial_observation (const Archive* data)
 
   equation.resize (nchan);
   receiver.resize (nchan);
+  backend.resize (nchan);
+
   receiver_guess.resize (nchan);
 
   for (unsigned ichan=0; ichan<nchan; ichan++) {
@@ -77,19 +79,11 @@ void Pulsar::ReceptionCalibrator::initial_observation (const Archive* data)
     equation[ichan] = new Calibration::MultiPathEquation;
     receiver[ichan] = new Calibration::Polar;
 
-    // add differential gain and the receiver to the PolnCalibrator_path
-    Calibration::Transformation* backend;
-
-#if 0
-    // only differential gain
-    backend = new Calibration::Boost(Vector<double, 3>::basis(0));
-#else
     // differential gain and phase
-    backend = new Calibration::SingleAxis;
-    backend->set_infit (0, false);  // disable fit for absolute Gain
-#endif
+    backend[ichan] = new Calibration::SingleAxis;
+    backend[ichan]->set_infit (0, false);  // disable fit for absolute Gain
 
-    equation[ichan]->get_model()->add_transformation( backend );
+    equation[ichan]->get_model()->add_transformation( backend[ichan] );
     equation[ichan]->get_model()->add_transformation( receiver[ichan] );
 
     // add the receiver and the feed rotation to the Pulsar_path
