@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Archive.h,v $
-   $Revision: 1.55 $
-   $Date: 2003/02/15 13:03:07 $
-   $Author: pulsar $ */
+   $Revision: 1.56 $
+   $Date: 2003/02/17 16:18:45 $
+   $Author: straten $ */
 
 /*! \mainpage 
  
@@ -215,9 +215,6 @@ namespace Pulsar {
 
     //! copy constructor
     Archive (const Archive& archive);
-
-    //! extraction constructor
-    Archive (const Archive& archive, vector<unsigned> subints);
     
     //! destructor
     virtual ~Archive ();
@@ -226,10 +223,8 @@ namespace Pulsar {
     Archive& operator = (const Archive& a) { copy (a); return *this; }
 
     //! Copy the profiles and attributes through set_ get_ methods
-    virtual void copy (const Archive& archive);
-
-    //! Similar to copy, using only a subset of the data
-    virtual void select_copy (const Archive& archive, vector<unsigned> subints);
+    virtual void copy (const Archive& archive,
+		       const vector<unsigned>& only_subints = none_selected);
 
 
     // //////////////////////////////////////////////////////////////////
@@ -419,8 +414,8 @@ namespace Pulsar {
     //! Return a pointer to a new, copy constructed instance equal to this
     virtual Archive* clone () const = 0;
 
-    //! Return a pointer to a new archive that contains a subset of the data in this
-    virtual Archive* extract (vector<unsigned> subints) const = 0;
+    //! Return a pointer to a new copy containing only selected subints
+    virtual Archive* extract (const vector<unsigned>& subints) const = 0;
 
     //! Get the number of pulsar phase bins used
     /*! This attribute may be set only through Archive::resize */
@@ -575,6 +570,9 @@ namespace Pulsar {
 
     //! Returns true if the given model spans the Integration set
     bool good_model (const polyco& test_model) const;
+
+    //! Default selected subints
+    static const vector<unsigned> none_selected;
 
   private:
 
