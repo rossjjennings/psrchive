@@ -20,7 +20,7 @@ AC_DEFUN([SWIN_LIB_PGPLOT],
   AC_TRY_LINK([#include <cpgplot.h>],[cpgopen(""); cpgend();],
               have_pgplot=yes, have_pgplot=no)
 
-  if test "x$have_pgplot" = "xno"; then
+  if test x"$have_pgplot" = xno; then
     PGPLOT_LIBS="$PGPLOT_LIBS $X_LIBS"
     LIBS="$LIBS $X_LIBS"
     AC_TRY_LINK([#include <cpgplot.h>],[cpgopen(""); cpgend();],
@@ -33,7 +33,7 @@ AC_DEFUN([SWIN_LIB_PGPLOT],
   LIBS="$ac_save_LIBS"
   CFLAGS="$ac_save_CFLAGS"
 
-  if test "x$have_pgplot" = "xyes"; then
+  if test x"$have_pgplot" = xyes; then
     AC_DEFINE([HAVE_PGPLOT], [1], [Define to 1 if you have the PGPLOT library])
     [$1]
   else
@@ -45,7 +45,7 @@ AC_DEFUN([SWIN_LIB_PGPLOT],
 
   AC_SUBST(PGPLOT_CFLAGS)
   AC_SUBST(PGPLOT_LIBS)
-  AM_CONDITIONAL(HAVE_PGPLOT, [test "$have_pgplot" = "yes"])
+  AM_CONDITIONAL(HAVE_PGPLOT, [test x"$have_pgplot" = xyes])
 
 ])
 
