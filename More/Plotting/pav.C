@@ -1,5 +1,5 @@
 //
-// $Id: pav.C,v 1.80 2004/05/20 05:01:00 sord Exp $
+// $Id: pav.C,v 1.81 2004/07/13 02:10:47 sord Exp $
 //
 // The Pulsar Archive Viewer
 //
@@ -297,7 +297,7 @@ int main (int argc, char** argv)
       plotter.set_subint( atoi (optarg) );
       break;
     case 'i':
-      cout << "$Id: pav.C,v 1.80 2004/05/20 05:01:00 sord Exp $" << endl;
+      cout << "$Id: pav.C,v 1.81 2004/07/13 02:10:47 sord Exp $" << endl;
       return 0;
 
     case 'j':
@@ -833,7 +833,7 @@ int main (int argc, char** argv)
 
     if (PA) {
       cpg_next();
-      plotter.pa_profile(archive);
+      plotter.pa_err(archive);
     }
 
     if (snrplot) {
