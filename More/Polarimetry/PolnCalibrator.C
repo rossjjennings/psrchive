@@ -336,8 +336,13 @@ void Pulsar::PolnCalibrator::calibrate (Archive* arch) try {
     for (unsigned isub=0; isub < nsub; isub++) {
       Integration* subint = arch->get_Integration (isub);
       for (unsigned ichan=0; ichan < nchan; ichan++) {
+
 	double gain = abs(det( response[ichan] ));
-	subint->get_Profile (0, ichan) -> scale (gain);
+	Profile* profile = subint->get_Profile (0, ichan);
+
+	profile -> scale (gain);
+	profile -> set_weight ( profile->get_weight() / gain );
+
       }
     }
 
