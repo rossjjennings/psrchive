@@ -24,7 +24,7 @@ void Pulsar::FITSArchive::load_PolnCalibratorExtension (fitsfile* fptr)
     throw FITSError (status, "FITSArchive::load_PolnCalibratorExtension", 
 		     "fits_movnam_hdu FEEDPAR");
 
-  Reference::To<PolnCalibratorExtension> mypce = new PolnCalibratorExtension;
+  Reference::To<PolnCalibratorExtension> mypce = new PolnCalibratorExtension();
 
   char* comment = 0;
   float nullfloat = 0.0;
@@ -48,12 +48,17 @@ void Pulsar::FITSArchive::load_PolnCalibratorExtension (fitsfile* fptr)
   char* cal_mthd = new char[80];
   fits_read_key (fptr, TSTRING, "CAL_MTHD", cal_mthd, comment, &status);
   
-  /*
-
-    call mypce->set_type() depending on the value of this string
-
-   */
-
+  if (strcasecmp(cal_mthd, "flux") == 0)
+    mypce->set_type(Calibrator::Flux);
+  else if (strcasecmp(cal_mthd, "singleaxis") == 0)
+    mypce->set_type(Calibrator::SingleAxis);
+  else if (strcasecmp(cal_mthd, "polar") == 0)
+    mypce->set_type(Calibrator::Polar);
+  else if (strcasecmp(cal_mthd, "hamaker") == 0)
+    mypce->set_type(Calibrator::Hamaker);
+  else if (strcasecmp(cal_mthd, "britton") == 0)
+    mypce->set_type(Calibrator::Britton);
+  
   delete[] cal_mthd;
 
   // Read the centre frequencies
