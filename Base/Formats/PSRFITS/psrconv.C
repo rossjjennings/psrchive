@@ -6,7 +6,6 @@
 #include <unistd.h>
 
 #include "Pulsar/Archive.h"
-#include "TimerArchive.h"
 #include "Pulsar/FITSArchive.h"
 #include "Error.h"
 
