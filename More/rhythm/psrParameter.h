@@ -76,12 +76,14 @@ class psrParameter
   double getDouble ();
   MJD    getMJD    ();
   Angle  getAngle  ();
+  int    getInteger();
 
   // set value
   void setString (const string&);
   void setDouble (double );
   void setMJD    (const MJD&);
   void setAngle  (const Angle&);
+  void setInteger(int);
 
  protected:
   int    ephio_index; // where in the ephio.h of things this element fits in
@@ -115,9 +117,6 @@ class psrString : public psrParameter
   string getString () { return value; };
   void   setString (const string& str) { value = str; };
 
-  // define generic virtual unload
-  void unload (string* str) const;
-
  protected:
   string value;
 };
@@ -145,11 +144,34 @@ class psrDouble : public psrParameter
   void   setDouble (double val)
     { value = val; };
 
-  // define generic virtual unload
-  void unload (string* str) const;
-
  protected:
   double value;
+};
+
+// //////////////////////////////////////////////////////////////////////////
+// //////////////////////////////////////////////////////////////////////////
+//
+// psrInteger
+//
+// Class defines the appearance/behaviour of psrParams real valued elements.
+//
+// //////////////////////////////////////////////////////////////////////////
+// //////////////////////////////////////////////////////////////////////////
+class psrInteger : public psrParameter
+{
+ public:
+  psrInteger (int ephind, int val, int err = 0, bool in_fit = false) :
+    psrParameter (ephind, in_fit, err),
+    value (val) { };
+    
+  int getInteger () { return value; };
+  void setInteger (int val, int err)
+    { value = val; error = err; };
+  void setInteger (int val)
+    { value = val; };
+
+ protected:
+  int value;
 };
 
 // //////////////////////////////////////////////////////////////////////////
@@ -178,9 +200,6 @@ class psrMJD : public psrParameter
     { value = val; error = err; };
   void   setMJD (const MJD& val)
     { value = val; };
-
-  // define generic virtual unload
-  void unload (string* str) const;
 
  protected:
   MJD value;
@@ -211,9 +230,6 @@ class psrAngle : public psrParameter
     { value = val; error = err; };
   void   setAngle (const Angle& val)
     { value = val; };
-  
-  // define generic virtual unload
-  void unload (string* str) const;
   
  protected:
   Angle value;

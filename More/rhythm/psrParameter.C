@@ -69,6 +69,16 @@ double psrParameter::getDouble ()
   return retval;
 }
 
+int psrParameter::getInteger ()
+{
+  int retval = 0;
+  psrInteger* me = dynamic_cast<psrInteger*>(this);
+  if (me)
+    retval = me -> getInteger();
+
+  return retval;
+}
+
 MJD psrParameter::getMJD ()
 {
   MJD  retval;
@@ -98,11 +108,18 @@ void psrParameter::setString (const string& val)
     me -> setString(val);
 }
 
+void psrParameter::setInteger (int val)
+{
+  psrInteger* me = dynamic_cast<psrInteger*>(this);
+  if (me)
+    me -> setInteger(val);
+}
+
 void psrParameter::setDouble (double val)
 {
   psrDouble* me = dynamic_cast<psrDouble*>(this);
   if (me)
-    me -> getDouble();
+    me -> setDouble(val);
 }
 
 void psrParameter::setMJD (const MJD& val)
@@ -169,6 +186,12 @@ void psrParameter::unload (string* str)
     value   = mjd.fracday();
     break;
 
+  case 5:  // any integer
+    if (verbose)
+      cerr << "psrParameter::unload Integer:" << parmNames[ephio_index];
+    value = dynamic_cast<psrInteger*>(this) -> getInteger();
+    break;
+
   default:
     return;
   }
@@ -200,6 +223,9 @@ psrParameter* psrParameter::duplicate ()
 
   case 4:  // MJDs
     return new psrMJD ( *dynamic_cast<psrMJD*>(this) );
+
+  case 5:  // MJDs
+    return new psrInteger ( *dynamic_cast<psrInteger*>(this) );
 
   default:
     return NULL;
@@ -234,9 +260,12 @@ bool psrParameter::equal (psrParameter* p1, psrParameter* p2)
     return dynamic_cast<psrMJD*>(p1) -> getMJD()
       == dynamic_cast<psrMJD*>(p2) -> getMJD();
 
+  case 5:  // any Integer
+    return dynamic_cast<psrInteger*>(p1) -> getInteger() 
+      == dynamic_cast<psrInteger*>(p2) -> getInteger();
+
   default:
     return false;
   }
 }
-
 

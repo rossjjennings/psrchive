@@ -137,6 +137,29 @@ class qt_psrDouble : public qt_psrParameter
 // //////////////////////////////////////////////////////////////////////////
 // //////////////////////////////////////////////////////////////////////////
 //
+// qt_psrInteger
+//
+// Class defines the appearance/behaviour of psrParams real valued elements.
+//
+// //////////////////////////////////////////////////////////////////////////
+// //////////////////////////////////////////////////////////////////////////
+class qt_psrInteger : public qt_psrParameter
+{
+ private:
+  qt_double  value;
+
+ public:
+  qt_psrInteger (int eph_index, bool has_error=false, QWidget* parent=0) :
+    qt_psrParameter (eph_index, parent),
+    value (has_error, &body) { };
+
+  int   getInteger () const { return (int) value.getDouble(); };
+  void  setInteger (int val) { value.setDouble((double)val); };
+};
+
+// //////////////////////////////////////////////////////////////////////////
+// //////////////////////////////////////////////////////////////////////////
+//
 // qt_psrMJD
 //
 // Class defines the appearance/behaviour of psrParams MJD elements.
@@ -234,7 +257,11 @@ qt_psrParameter* qt_psrParameter::factory (int ephind, QWidget* parent)
   case 4:  // MJDs
     return new qt_psrMJD (ephind, parmError[ephind]==1, parent);
 
+  case 5:  // integers
+    return new qt_psrInteger (ephind, parmError[ephind]==1, parent);
+
   default:
+    cerr << "qt_psrParameter::factory no type:" << parmTypes[ephind] << endl;
     return NULL;
   }
 }
@@ -270,6 +297,10 @@ void qt_psrParameter::setValue (psrParameter* parm)
     setMJD ( parm->getMJD() );
     break;
 
+  case 5:  // MJDs
+    setInteger ( parm->getInteger() );
+    break;
+
   default:
     if (verbose)
       cerr << "qt_psrParameter::setValue unhandled case" << endl;
@@ -299,6 +330,10 @@ psrParameter* qt_psrParameter::duplicate ()
 
   case 4:  // MJDs
     return new psrMJD ( ephio_index, getMJD(), getError(), getFit() );
+    break;
+
+  case 5:  // integers
+    return new psrInteger ( ephio_index, getInteger(), getError(), getFit() );
     break;
 
   default:
