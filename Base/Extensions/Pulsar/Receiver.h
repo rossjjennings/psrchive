@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/Receiver.h,v $
-   $Revision: 1.1 $
-   $Date: 2004/06/18 11:32:53 $
+   $Revision: 1.2 $
+   $Date: 2004/06/18 16:58:42 $
    $Author: straten $ */
 
 #ifndef __ReceiverExtension_h
@@ -60,10 +60,13 @@ namespace Pulsar {
     //! Name of the receiver
     string name;
 
-    //! Offset of the receiver X axis with respect to the platform zero
+    //! Basis of the feed receptors
+    Signal::Basis basis;
+
+    //! Offset of the feed X axis with respect to the platform zero
     Angle X_offset;
     
-    //! Offset of the receiver Y axis from its nominal value
+    //! Offset of the feed Y axis from its nominal value
     /*! Nominally, the Y axis is offset from the X axis by 90 degrees.
       However it is also common to encounter systems in which the Y
       axis is offset by -90 degrees, owing to unaccounted reflections,
@@ -76,7 +79,7 @@ namespace Pulsar {
       noise diode) is usually 45 degrees. */
     Angle calibrator_orientation;
 
-    //! Flag set when the offset of the feed from vertical has been corrected
+    //! Flag set when the offset of the feed has been corrected
     /*! This flag should be set when the offset of the feed X and Y
       axes and any rotation of the feed (feed_angle) with respect to
       the platform zero have been corrected. */

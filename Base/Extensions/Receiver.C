@@ -5,6 +5,7 @@ Pulsar::Receiver::Receiver () : Extension ("Receiver")
 {
   mode = Feed;
   name = "unknown";
+  basis = Signal::Linear;
 
   calibrator_orientation.setDegrees( 45.0 );
 
@@ -28,6 +29,7 @@ Pulsar::Receiver::operator= (const Receiver& ext)
 {
   mode = ext.mode;
   name = ext.name;
+  basis = ext.basis;
 
   X_offset = ext.X_offset;
   Y_offset = ext.Y_offset;
