@@ -36,6 +36,10 @@ Pulsar::Archive* Pulsar::Archive::load (const char* filename)
 
     if (Agent::registry[agent]->advocate (filename)) {
 
+      if (verbose)
+        cerr << "Pulsar::Archive::load using " 
+	     << Agent::registry[agent]->get_name() << endl;
+
       archive = Agent::registry[agent]->new_Archive();
 
       archive -> load_header (filename);

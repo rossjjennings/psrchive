@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Archive.h,v $
-   $Revision: 1.60 $
-   $Date: 2003/03/07 17:23:33 $
+   $Revision: 1.61 $
+   $Date: 2003/03/08 10:41:08 $
    $Author: straten $ */
 
 /*! \mainpage 
@@ -188,17 +188,20 @@ namespace Pulsar {
 
     public:
 
-      //! Null constructor
-      Agent (const char* name);
-
       //! Destructor
-      ~Agent ();
+      virtual ~Agent ();
 
       //! Advocate the use of the derived class to interpret filename
       virtual bool advocate (const char* filename) = 0;
       
       //! Return a null-constructed instance of the derived class
       virtual Archive* new_Archive () = 0;
+
+      //! Return the name of the derived class
+      virtual string get_name () = 0;
+
+      //! Return a description of the derived class
+      virtual string get_description () = 0;
 
       //! Return the name of the plugins directory
       static string plugin_path ();
@@ -222,8 +225,20 @@ namespace Pulsar {
       //! Flag that plugin_load has been called
       static bool loaded;
 
-      //! The name of this Agent
-      string name;
+    };
+
+    template<class Child>
+    class Advocate : public Agent {
+
+    public:
+      virtual Archive* new_Archive () { return new Child; }
+
+    protected:
+      Advocate () { entry.get(); }
+
+    private:
+      static Registry::List<Archive::Agent>::Enter<typename Child::Agent> entry;
+
     };
 
     //! Flag that Archive::append should enforce chronological order
@@ -647,6 +662,10 @@ namespace Pulsar {
     Integration* load_Integration (unsigned isubint);
 
   };
+
+  template<class Child>
+  Registry::List<Archive::Agent>::Enter<typename Child::Agent> 
+  Archive::Advocate<Child>::entry;
 
 }
 

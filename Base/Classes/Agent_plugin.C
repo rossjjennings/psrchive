@@ -52,7 +52,8 @@ void Pulsar::Archive::Agent::report ()
     cerr << "Archive::Agent::report Registered Agents:" << endl;
 
   for (unsigned agent=0; agent<registry.size(); agent++)
-    cerr << " " << registry[agent]->name << endl;
+    cerr << " " << registry[agent]->get_name() << "\t" 
+         << registry[agent]->get_description() << endl;
 
   cerr << endl;
 
@@ -64,7 +65,7 @@ void Pulsar::Archive::Agent::report ()
   unsigned ip = 0;
 
   for (ip=0; ip < plugins.ok.size(); ip++)
-    cerr << "  " << plugins.ok[ip] << endl;
+    cerr << " " << plugins.ok[ip] << endl;
 
   cerr << endl;
 
