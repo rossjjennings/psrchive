@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pcm.C,v $
-   $Revision: 1.29 $
-   $Date: 2004/07/22 14:03:35 $
+   $Revision: 1.30 $
+   $Date: 2004/07/24 07:30:19 $
    $Author: straten $ */
 
 /*! \file pcm.C 
@@ -135,6 +135,9 @@ void range_select (Pulsar::ReceptionCalibrator& model,
 void plot_pulsar (Pulsar::ReceptionCalibratorPlotter& plotter,
 		  Pulsar::ReceptionCalibrator& model)
 {
+  unsigned panels = plotter.npanel;
+  plotter.npanel = 4;
+
   unsigned nstate = model.get_nstate_pulsar();
   double centre_frequency = model.get_Archive()->get_centre_frequency();
   double bandwidth = model.get_Archive()->get_bandwidth();
@@ -149,6 +152,9 @@ void plot_pulsar (Pulsar::ReceptionCalibratorPlotter& plotter,
     plotter.plot (info, model.get_nchan(), centre_frequency, bandwidth);
 
   }
+
+  plotter.npanel = panels;
+
 }
 
 void plot_constraints (Pulsar::ReceptionCalibratorPlotter& plotter,
@@ -669,6 +675,13 @@ int main (int argc, char *argv[]) try {
 
     cpgend();
 
+    cpgbeg (0, "guess_source.ps/CPS", 0, 0);
+    cpgsvp (0.1,.9, 0.1,.9);
+
+    cerr << "pcm: plotting guess pulsar states" << endl;
+    plot_pulsar (plotter, model);
+
+    cpgend ();
 
     cerr << "pcm: plotting pulsar constraints" << endl;
     plot_constraints (plotter, model.get_nchan(),
