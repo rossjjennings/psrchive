@@ -1,3 +1,5 @@
+#include "Types.h"
+
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
 
@@ -474,14 +476,12 @@ void Pulsar::Archive::set_model (const polyco& new_model)
 
   // swap the old with the new
   Reference::To<polyco> oldmodel = model;
-
   model = new polyco (new_model);
 
   if (verbose)
     cerr << "Pulsar::Archive::set_model model set" << endl;
 
   if ( oldmodel && oldmodel->pollys.size() ) {
-
     if (verbose)
       cerr << "Pulsar::Archive::set_model apply the new model" << endl;
 
@@ -567,5 +567,7 @@ void Pulsar::Archive::uniform_weight (float new_weight)
     get_Integration(isub) -> uniform_weight (new_weight);
 }
 
-
-
+//! A dsp::Transformation into an Archive must be able to call this
+bool Pulsar::Archive::state_is_valid(string& reason) const{
+  return Signal::valid_state(get_state(),1,get_npol(),reason);
+}
