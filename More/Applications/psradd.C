@@ -126,6 +126,7 @@ int main (int argc, char **argv)
       Pulsar::Archive::set_verbosity (3);
       vverbose = 1;
     case 'v':
+      Error::verbose = true;
       verbose = 1;
       break;
 
@@ -245,6 +246,12 @@ int main (int argc, char **argv)
 	if (auto_unload)
 	  reset_total_current = true;
       }
+      catch (...) {
+        cerr << "psradd: Archive::append exception thrown" << endl;
+        if (auto_unload)
+          reset_total_current = true;
+      }
+
     }
 
     if (integrate != 0.0)  {
