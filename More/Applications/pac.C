@@ -8,6 +8,7 @@
 #include "Pulsar/BasicIntegration.h"
 #include "Pulsar/Calibration.h"
 #include "Pulsar/PolnCalibrator.h"
+#include "Pulsar/PolnProfile.h"
 #include "Pulsar/FluxCalibrator.h"
 #include "Calibration/Model.h"
 
@@ -35,12 +36,11 @@ void usage ()
     "  -q                     Use the Polar Model \n"
     "\n"
     "Database options: \n"
-    "  -d database            Read ASCII summary (instead of -p)\n"   
+    "  -d database            Read ASCII summary (instead of -p) \n"   
     "  -p path                Search for CAL files in the specified path \n"
     "  -u ext1 ext2 ...       Add to file extensions recognized in search \n"
-    "                         (defaults: .cf .pcal .fcal .pfit)\n"
-    "  -w                     Write a new database summary file if using -p\n"
-    "  -W                     Same as -w but exit after writing summary\n"
+    "                         (defaults: .cf .pcal .fcal .pfit) \n"
+    "  -w                     Write a new database summary file \n"
     "\n"
     "Matching options: \n"
     "  -c                     Do not try to match sky coordinates\n"
@@ -51,7 +51,8 @@ void usage ()
     "  -o                     Do not try to match obs types\n"
     "\n"
     "Output options: \n"
-    "  -e extension           Use this extension when unloading results\n"
+    "  -e extension           Use this extension when unloading results \n"
+    "  -W                     do not correct profile weights \n"
     "  -n [q|u|v]             Flip the sign of Stokes Q, U, or V \n"
     "\n"
     "See http://astronomy.swin.edu.au/pulsar/software/manuals/pac.html"
@@ -77,7 +78,6 @@ int main (int argc, char *argv[]) {
   bool do_polncal = true;
 
   bool write_database_file = false;
-  bool summary_only = false;
 
   bool test_instr = true;
   bool test_coords = true;
@@ -121,7 +121,7 @@ int main (int argc, char *argv[]) {
       Pulsar::Archive::set_verbosity(1);
       break;
     case 'i':
-      cout << "$Id: pac.C,v 1.42 2004/04/06 16:52:56 straten Exp $" << endl;
+      cout << "$Id: pac.C,v 1.43 2004/04/12 11:45:59 straten Exp $" << endl;
       return 0;
 
     case 'n': {
@@ -170,12 +170,10 @@ int main (int argc, char *argv[]) {
       unload_ext = optarg;
       break;
     case 'w':
-      if (new_database)
-	write_database_file = true;
+      write_database_file = true;
       break;
     case 'W':
-      write_database_file = true;
-      summary_only = true;
+      Pulsar::PolnProfile::correct_weights = false;
       break;
     case 'c':
       test_coords = false;
@@ -227,7 +225,7 @@ int main (int argc, char *argv[]) {
     dirglob (&archives, argv[ai]);
   
   if (archives.empty()) {
-    if (!summary_only) {
+    if (!write_database_file) {
       cout << "pac: No Archives were specified. Exiting" << endl;
       exit(-1);
     }
@@ -295,9 +293,6 @@ int main (int argc, char *argv[]) {
 
 	dbase -> unload ("database.txt");
 	  
-	if (summary_only)
-	  return 0;
-
       }
 	
     }
