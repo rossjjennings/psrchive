@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/EstimatePlotter.h,v $
-   $Revision: 1.4 $
-   $Date: 2003/05/21 11:51:11 $
-   $Author: straten $ */
+   $Revision: 1.5 $
+   $Date: 2003/05/30 13:33:02 $
+   $Author: pulsar $ */
 
 #ifndef __EstimatePlotter_h
 #define __EstimatePlotter_h
@@ -109,7 +109,7 @@ void EstimatePlotter::add_plot (const vector< Estimate<T> >& data)
 
   double xscale = double(xrange_max - xrange_min) / double(npt-1);
 
-  for (ipt=1; ipt<npt; ipt++) {
+  for (ipt=0; ipt<npt; ipt++) {
     float yval = data[ipt].val - errors[ipt];
     if (yval < y_min)
       y_min = yval;
@@ -153,7 +153,7 @@ void EstimatePlotter::add_plot (const vector<Xt>& xdata,
   vector<float>& x = xval.back();
   vector<float>& y = yval.back();
 
-  for (ipt=1; ipt<npt; ipt++) {
+  for (ipt=0; ipt<npt; ipt++) {
     float yval = ydata[ipt].val - errors[ipt];
     if (yval < y_min)
       y_min = yval;
