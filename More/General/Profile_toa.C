@@ -10,7 +10,7 @@
 Tempo::toa Pulsar::Profile::toa (const Profile& std, const MJD& mjd, 
 				 double period, char nsite) const
 {
-  Tempo::toa retval;
+  Tempo::toa retval (Tempo::toa::Parkes);
 
   float ephase, snrfft, esnrfft; 
   double phase = shift (std, ephase, snrfft, esnrfft);
