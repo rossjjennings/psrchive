@@ -5,6 +5,12 @@
 #include "coord.h"
 #include <math.h>
 
+//#include "f772c.h"
+#ifndef F772C_H
+#define F772C_H
+#define F772C(x) x##_
+#endif
+
 /* **********************************************************************
 
    az_zen_para - given the J2000 ra and dec, local sidereal time, and
@@ -22,10 +28,9 @@
 
    ********************************************************************** */
 
-#define SLA_altaz SLA_FUNC(sla_altaz,slaAltaz)
 
-void SLA_altaz (double*, double*, double*, double*, double*, double*,
-		 double*, double*, double*, double*, double*, double*);
+void F772C(sla_altaz) (double*, double*, double*, double*, double*, double*,
+		       double*, double*, double*, double*, double*, double*);
 
 int az_zen_para (double ra, double dec, float lst, float latitude,
 		 float* tel_az, float* tel_zen, float* para_angle)
@@ -40,11 +45,11 @@ int az_zen_para (double ra, double dec, float lst, float latitude,
   if (lst < 0.0 || lst > 24.0)
     return -1;
 
-  SLA_altaz (&HA, &dec, &dlat, 
-	      &azimuth, &ignore, &ignore,
-	      &altitude,  &ignore, &ignore,
-	      &PA,      &ignore, &ignore);
-
+  F772C(sla_altaz) (&HA, &dec, &dlat, 
+		    &azimuth, &ignore, &ignore,
+		    &altitude,  &ignore, &ignore,
+		    &PA,      &ignore, &ignore);
+  
   *para_angle = (float) PA  * rad2deg;
   *tel_zen = 90.0 - (float) altitude * rad2deg;
   *tel_az = (float) azimuth * rad2deg;

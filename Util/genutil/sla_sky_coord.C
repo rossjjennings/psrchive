@@ -2,13 +2,21 @@
 #include <config.h>
 #endif
 
+//#include "f772c.h"
+#ifndef F772C_H
+#define F772C_H
+#define F772C(x) x##_
+#endif
+
 #include "sky_coord.h"
 
-#define SLA_galeq SLA_FUNC(sla_galeq,slaGaleq)
-extern "C" double SLA_galeq (double *, double *, double *, double *);
+extern "C" {
+  double F772C(sla_galeq) (double *, double *, double *, double *);
+}
 
-#define SLA_eqgal SLA_FUNC(sla_eqgal,slaEqgal)
-extern "C" double SLA_eqgal(double *, double *, double *, double *);
+extern "C"{
+  double F772C(sla_galeq) (double *, double *, double *, double *);
+}
 
 // redwards -- function to construct from Galactic coordinates
 const sky_coord&
@@ -20,7 +28,7 @@ sky_coord::setGalactic(AnglePair &gal)
   l = gal.angle1.getradians();
   b = gal.angle2.getradians();
 
-  SLA_galeq (&l, &b, &ra, &dec);
+  F772C(sla_galeq) (&l, &b, &ra, &dec);
 
   angle1.setradians(ra);
   angle2.setradians(dec);
@@ -37,7 +45,7 @@ sky_coord::getGalactic() const
   ra = angle1.getradians();
   dec= angle2.getradians();
 
-  SLA_eqgal (&ra, &dec, &l, &b);
+  F772C(sla_galeq)(&ra, &dec, &l, &b);
 
   gal.angle1.setradians(l);
   gal.angle2.setradians(b);
