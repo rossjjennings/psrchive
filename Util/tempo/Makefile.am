@@ -18,6 +18,17 @@ LIB_SRCS += gtk_psrephem.C
 INCFLAGS += $(GTKMM_CCFLAGS)
 endif
 
+##########################################################################
+# optional Qt Widget set
+##########################################################################
+ifeq ($(PSRQT),yes)
+LIB_SRCS += qt_psrephem.C
+MOC_SRCS += qt_psrephem.h
+INCFLAGS += $(IQT)
+PROGRAMS += qt_psrephem_test.C
+LDFLAGS  += $(LQT)
+endif
+
 include ${LOCAL_ROOT}/include/Makefile.extended
 
 CLEAN += keyinfo.com $(LOCAL_ROOT)/include/ephio.h
