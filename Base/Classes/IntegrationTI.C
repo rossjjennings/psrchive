@@ -10,10 +10,10 @@ void Pulsar::IntegrationTI::init ()
   {
     Generator<unsigned> gen;
 
-    add( gen.described ("nbin", "Number of frequency channels",
+    add( gen.described ("nchan", "Number of frequency channels",
                         &Integration::get_nchan) );
 
-    add( gen.described ("nbin", "Number of polarizations",
+    add( gen.described ("npol", "Number of polarizations",
                         &Integration::get_npol) );
 
     add( gen.described ("nbin", "Number of pulse phase bins",
