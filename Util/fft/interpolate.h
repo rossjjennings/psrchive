@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/fft/interpolate.h,v $
-   $Revision: 1.7 $
-   $Date: 2004/10/27 06:14:04 $
+   $Revision: 1.8 $
+   $Date: 2004/11/23 11:31:22 $
    $Author: straten $*/
 
 #ifndef __fft_interpolate_h
@@ -65,7 +65,7 @@ namespace fft {
 
       for (ipt=0; ipt < out.size(); ipt++)
 	datum_traits.element (out[ipt], idim) = 
-	  datum_traits.element_traits.cast (dom1[ipt]*factor);
+	  datum_traits.element_traits.from_complex (dom1[ipt]*factor);
 
     } // end for each dimension
 
