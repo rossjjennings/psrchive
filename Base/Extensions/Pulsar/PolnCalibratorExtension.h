@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/PolnCalibratorExtension.h,v $
-   $Revision: 1.10 $
-   $Date: 2004/10/08 10:05:22 $
+   $Revision: 1.11 $
+   $Date: 2004/10/08 10:27:54 $
    $Author: straten $ */
 
 #ifndef __PolnCalibratorExtension_h
@@ -72,9 +72,6 @@ namespace Pulsar {
 
     //! Construct the response array according to the current attributes
     void construct ();
-
-    //! Ensure that ichan < get_nchan
-    void range_check (unsigned ichan, const char* method) const;
 
   };
  
