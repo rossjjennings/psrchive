@@ -33,7 +33,7 @@ void Pulsar::ReceptionCalibratorPlotter::init (const Calibrator* calib)
 //! Get the number of data points to plot
 unsigned Pulsar::ReceptionCalibratorPlotter::get_ndat () const
 {
-  return calibrator->equation.size();
+  return calibrator->model.size();
 }
 
 //! Get the number of boost parameters
@@ -52,21 +52,21 @@ unsigned Pulsar::ReceptionCalibratorPlotter::get_nrotation () const
 Estimate<float>
 Pulsar::ReceptionCalibratorPlotter::get_gain (unsigned idat)
 {
-  return calibrator->polar[idat]->get_gain();
+  return calibrator->model[idat]->polar->get_gain();
 }
 
 //! Get the gain for the specified point
 Estimate<float>
 Pulsar::ReceptionCalibratorPlotter::get_boost (unsigned idat, unsigned iboost)
 {
-  return calibrator->polar[idat]->get_boostGibbs(iboost);
+  return calibrator->model[idat]->polar->get_boostGibbs(iboost);
 }
 
     //! Get the gain for the specified point
 Estimate<float>
 Pulsar::ReceptionCalibratorPlotter::get_rotation (unsigned idat, unsigned irot)
 {
-  return calibrator->polar[idat]->get_rotationEuler(irot);
+  return calibrator->model[idat]->polar->get_rotationEuler(irot);
 }
 
 void Pulsar::ReceptionCalibratorPlotter::plot_constraints (unsigned ichan)
@@ -98,7 +98,8 @@ void Pulsar::ReceptionCalibratorPlotter::plot_constraints (unsigned ichan,
 		 "ichan=%d >= nchan=%d", ichan, calibrator->get_nchan());
 
   // extract the appropriate equation
-  const Calibration::ReceptionModel* equation = calibrator->equation[ichan];
+  const Calibration::ReceptionModel* equation;
+  equation = calibrator->model[ichan]->equation;
 
   vector< Estimate<float> > stokes[4];
   vector< float > para;
@@ -181,7 +182,7 @@ void Pulsar::ReceptionCalibratorPlotter::plot_model (unsigned ichan,
 		 "ichan=%d >= nchan=%d", ichan, calibrator->get_nchan());
 
   // extract the appropriate equation
-  Calibration::ReceptionModel* equation = calibrator->equation[ichan];
+  Calibration::ReceptionModel* equation = calibrator->model[ichan]->equation;
 
   equation->set_source (istate);
 
@@ -301,7 +302,7 @@ void Pulsar::ReceptionCalibratorPlotter::plotcal ()
   // ////////////////////////////////////////////////////////////////////
 
   for (ipt=0; ipt<npt; ipt++)
-    data[ipt] = calibrator->backend[ipt]->get_gamma();
+    data[ipt] = calibrator->model[ipt]->backend->get_gamma();
 
   cpgsvp (xmin, xmax, ybottom, ybottom + yheight);
 
@@ -320,7 +321,7 @@ void Pulsar::ReceptionCalibratorPlotter::plotcal ()
   plotter.clear ();
 
   for (ipt=0; ipt<npt; ipt++)
-    data[ipt] = calibrator->backend[ipt]->get_phi();
+    data[ipt] = calibrator->model[ipt]->backend->get_phi();
 
   cpgsvp(xmin, xmax, ybottom, ybottom + yheight);
 

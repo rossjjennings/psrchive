@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ReceptionCalibrator.h,v $
-   $Revision: 1.31 $
-   $Date: 2003/08/27 14:42:28 $
+   $Revision: 1.32 $
+   $Date: 2003/08/28 07:44:01 $
    $Author: straten $ */
 
 #ifndef __ReceptionCalibrator_H
@@ -12,7 +12,6 @@
 
 // Reception Model and its management
 #include "Calibration/ReceptionModel.h"
-#include "Calibration/PathManager.h"
 #include "Calibration/Axis.h"
 
 // Parameterizations of the instrument and source
@@ -49,6 +48,47 @@ namespace Pulsar {
 
     //! The index of the source in the model
     unsigned source_index;
+
+  };
+
+  //! Stores the various elements related to the calibration model
+  class StandardModel : public Reference::Able {
+
+  public:
+
+    //! The available representations of the instrumental response
+    enum Model { Hamaker, Britton };
+
+    //! Construct
+    StandardModel (Model model = Hamaker);
+
+    //! Update the relevant estimate
+    void update ();
+
+    //! ReceptionModel
+    Reference::To<Calibration::ReceptionModel> equation;
+
+    //! The signal path experienced by the calibrator
+    Reference::To<Calibration::ProductTransformation> pcal_path;
+
+    //! The signal path experienced by the pulsar
+    Reference::To<Calibration::ProductTransformation> pulsar_path;
+
+    //! The instrumental model in use
+    Reference::To<Calibration::Transformation> instrument;
+
+    //! Polar decomposition of instrumental response (Hamaker)
+    Reference::To<Calibration::PolarEstimate> polar;
+
+    //! Phenomenological decomposition of instrumental response (Britton)
+    Reference::To<Calibration::InstrumentEstimate> physical;
+
+    //! Single-axis decomposition of backend
+    Reference::To<Calibration::SingleAxis> backend;
+
+  protected:
+    //! The model specified on construction
+    Model model;
 
   };
 
@@ -111,20 +151,8 @@ namespace Pulsar {
     //! Calibrate the polarization of the given archive
     void calibrate (Archive* archive, bool solve_first);
 
-    //! ReceptionModel as a function of frequency
-    vector<Reference::To<Calibration::ReceptionModel> > equation;
-
-    //! PathManager as a function of frequency
-    vector<Reference::To<Calibration::PathManager> > path;
-
-    //! Polar decomposition of receiver as a function of frequency
-    vector<Reference::To<Calibration::PolarEstimate> > polar;
-
-    //! Phenomenological decomposition of receiver as a function of frequency
-    vector<Reference::To<Calibration::InstrumentEstimate> > instrument;
-
-    //! Single-axis decomposition of backend as a function of frequency
-    vector<Reference::To<Calibration::SingleAxis> > backend;
+    //! The calibration model as a function of frequency
+    vector< Reference::To<StandardModel> > model;
 
     //! Uncalibrated estimate of calibrator polarization
     SourceEstimate calibrator;
@@ -152,15 +180,6 @@ namespace Pulsar {
 
     //! Minimum and maximum values of parallactic angle (informational)
     float PA_min, PA_max;
-
-    //! Signal path assigned to Pulsar data
-    unsigned Pulsar_path;
-
-    //! Signal path assigned to PolnCalibrator
-    unsigned PolnCalibrator_path;
-
-    //! Signal path assigned to add_FluxCalibrator
-    unsigned FluxCalibrator_path;
 
     //! Set the initial guesses and update the reference epoch
     void initialize ();
