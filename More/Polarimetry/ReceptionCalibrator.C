@@ -1,47 +1,79 @@
 #include "ReceptionCalibrator.h"
+#include "Archive.h"
 
-Pulsar::ReceptionCalibrator::ReceptionCalibrator ()
+/*! The Archive passed to this constructor will be used to supply the first
+  guess for each pulse phase bin used to constrain the fit. */
+Pulsar::ReceptionCalibrator::ReceptionCalibrator (const Archive* archive)
 {
-  nchan = 1;
-  nsource = 1;
-  ncalibrator = 0;
+  if (!archive)
+    throw Error (InvalidState, "ReceptionCalibrator::", "no Archive");
+
+  if (verbose)
+    cerr << "Pulsar::ReceptionCalibrator" << endl;
+
+  if (archive->get_type() != Signal::Pulsar)
+    throw Error (InvalidParam, "Pulsar::ReceptionCalibrator",
+		 "Pulsar::Archive='" + archive->get_filename() 
+		 + "' not a Pulsar observation");
+  
+  // Here the decision is made about full stokes or dual band observations.
+  Signal::State state = archive->get_state();
+
+  bool fullStokes = state == Signal::Stokes || state == Signal::Coherence;
+
+  if (!fullStokes)
+    throw Error (InvalidParam, "Pulsar::ReceptionCalibrator",
+		 "Pulsar::Archive='" + archive->get_filename() + "'\n"
+		 "invalid state=" + State2string(state));
+
+  if (state != Signal::Stokes) {
+    Archive* clone = archive->clone();
+    clone->convert_state (Signal::Stokes);
+    uncalibrated = clone;
+  }
+  else
+    uncalibrated = archive;
 }
 
-//! Set the number of source polarization states for which to solve
-void Pulsar::ReceptionCalibrator::set_nsource (unsigned _nsource)
+
+//! Add the specified pulse phase bin to the set of state constraints
+void Pulsar::ReceptionCalibrator::add_state (float pulse_phase)
 {
-  nsource = _nsource;
+
 }
 
-//! Get the number of source polarization states for which to solve
-unsigned Pulsar::ReceptionCalibrator::get_nsource () const
+
+//! Get the number of pulse phase bin state constraints
+unsigned Pulsar::ReceptionCalibrator::get_nstate () const
 {
-  return nsource;
+  return 0;
 }
 
-//! Set the number of calibrator polarization states for which to solve
-void Pulsar::ReceptionCalibrator::set_ncalibrator (unsigned _ncalibrator)
+//! Add the specified pulsar observation to the set of constraints
+void Pulsar::ReceptionCalibrator::add_observation (const Archive* data)
 {
-  ncalibrator = _ncalibrator;
+  string reason;
+
+  if (!uncalibrated->mixable (data, reason))
+    throw Error (InvalidParam, "Pulsar::ReceptionCalibrator",
+		 "Pulsar::Archive='" + data->get_filename() +
+		 "'\ndoes not mix with '" + uncalibrated->get_filename() + 
+		 "\n" + reason);
+
 }
 
-//! Get the number of calibrator polarization states for which to solve
-unsigned Pulsar::ReceptionCalibrator::get_ncalibrator () const
+//! Add the specified PolnCalibrator observation to the set of constraints
+void Pulsar::ReceptionCalibrator::add_PolnCalibrator (const PolnCalibrator* p)
 {
-  return ncalibrator;
+  cerr << "Pulsar::ReceptionCalibrator::add_PolnCalibrator unimplemented"
+       << endl;
 }
 
-//! Set the number of frequency channels
-void Pulsar::ReceptionCalibrator::set_nchan (unsigned _nchan)
+//! Add the specified FluxCalibrator observation to the set of constraints
+void Pulsar::ReceptionCalibrator::add_FluxCalibrator (const FluxCalibrator* f)
 {
-  nchan = _nchan;
-  model.resize (nchan);
-}
-
-//! Get the number of frequency channels
-unsigned Pulsar::ReceptionCalibrator::get_nchan () const
-{
-  return nchan;
+  cerr << "Pulsar::ReceptionCalibrator::add_FluxCalibrator unimplemented"
+       << endl;
 }
 
 //! Calibrate the polarization of the given archive

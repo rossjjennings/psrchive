@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ReceptionCalibrator.h,v $
-   $Revision: 1.3 $
-   $Date: 2003/04/07 10:02:02 $
+   $Revision: 1.4 $
+   $Date: 2003/04/19 20:21:27 $
    $Author: straten $ */
 
 #ifndef __ReceptionCalibrator_H
@@ -10,8 +10,14 @@
 
 #include "Calibrator.h"
 #include "Calibration/ReceptionModel.h"
+#include "Calibration/Polar.h"
+#include "Calibration/FunctionTransformation.h"
 
 namespace Pulsar {
+
+  class Archive;
+  class PolnCalibrator;
+  class FluxCalibrator;
 
   //! Uses ReceptionModel to represent and fit for the system response
   /*! The ReceptionCalibrator implements the technique of single dish
@@ -25,26 +31,26 @@ namespace Pulsar {
 
     friend class ReceptionCalibratorPlotter;
 
-    //! Constructor
-    ReceptionCalibrator ();
+    //! Construct from the best estimate of the average pulse profile
+    ReceptionCalibrator (const Archive* archive);
 
     //! Destructor
     ~ReceptionCalibrator ();
 
-    //! Set the number of source polarization states for which to solve
-    void set_nsource (unsigned nsource);
-    //! Get the number of source polarization states for which to solve
-    unsigned get_nsource () const;
+    //! Add the specified pulse phase bin to the set of state constraints
+    void add_state (float pulse_phase);
 
-    //! Set the number of calibrator polarization states for which to solve
-    void set_ncalibrator (unsigned ncalibrator);
-    //! Get the number of calibrator polarization states for which to solve
-    unsigned get_ncalibrator () const;
+    //! Get the number of pulse phase bin state constraints
+    unsigned get_nstate () const;
 
-    //! Set the number of frequency channels
-    void set_nchan (unsigned nchan);
-    //! Get the number of frequency channels
-    unsigned get_nchan () const;
+    //! Add the specified pulsar observation to the set of constraints
+    void add_observation (const Archive* data);
+
+    //! Add the specified PolnCalibrator observation to the set of constraints
+    void add_PolnCalibrator (const PolnCalibrator* polncal);
+
+    //! Add the specified FluxCalibrator observation to the set of constraints
+    void add_FluxCalibrator (const FluxCalibrator* fluxcal);
 
     //! Calibrate the polarization of the given archive
     virtual void calibrate (Archive* archive);
@@ -54,18 +60,14 @@ namespace Pulsar {
     //! Model of receiver and source states as a function of frequency
     vector<Calibration::ReceptionModel> model;
 
-    //! Number of frequency channels
-    unsigned nchan;
+    //! Model of receiver as a function of frequency
+    vector<Calibration::Polar> receiver;
 
-    //! Number of source polarization states
-    unsigned nsource;
+    //! Model of backend as a function of frequency and time
+    vector<Calibration::FunctionTransformation> backend;
 
-    //! Number of calibrator polarization states
-    unsigned ncalibrator;
-
-    //! Resizes the model and data arrays
-    void size_dataspace ();
-
+    //! Best, uncalibrated estimate of the average pulse profile
+    Reference::To<const Archive> uncalibrated;
   };
 
 }
