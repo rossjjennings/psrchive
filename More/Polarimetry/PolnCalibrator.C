@@ -12,6 +12,12 @@ Pulsar::PolnCalibrator::~PolnCalibrator ()
   // desctructor can delete forward declared objects
 }
 
+Pulsar::PolnCalibrator::PolnCalibrator (const vector<Archive*>& archives)
+{
+  throw Error (InvalidState, "PolnCalibrator::",
+	       "vector constructor not implemented");
+}
+
 Pulsar::PolnCalibrator::PolnCalibrator (const Archive* arch)
 {
   if (verbose)
