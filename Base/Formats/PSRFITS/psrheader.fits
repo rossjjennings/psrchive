@@ -7,7 +7,7 @@ COMMENT   Astrophysics Supplement Series v44/p363, v44/p371, v73/p359, v73/p365.
 COMMENT   Contact the NASA Science Office of Standards and Technology for the
 COMMENT   FITS Definition document #100 and other FITS information.
 COMMENT
-HDRVER  = '1.15            '   / Header version 
+HDRVER  = '1.16            '   / Header version 
 DATE    = '                '   / File creation date (YYYY-MM-DDThh:mm:ss UTC)
 OBSERVER= '                '   / Observer name(s)
 PROJID  = '                '   / Project name
@@ -60,7 +60,7 @@ NAXIS1  =                    * / width of table in bytes
 NAXIS2  =                    1 / number of rows
 PCOUNT  =                    0 / size of special data area
 GCOUNT  =                    1 / one data group (required keyword)
-TFIELDS =                   17 / number of fields per row
+TFIELDS =                   18 / number of fields per row
 EXTNAME = 'HISTORY'            / name of this binary table extension
 TTYPE1  = 'DATE_PRO'           / Processing date and time (UTC)
 TFORM1  = '24A     '           / 24-char string
@@ -516,7 +516,7 @@ TFIELDS =                   18 / Number of fields per row
 NCH_FILE=                    * / Number of channels/sub-bands in this file
 NCH_STRT=                    * / Start channel/sub-band number (0 to NCHAN-1)
 EXTNAME = 'SUBINT '            / name of this binary table extension
-TTYPE1  = 'ISUBINT '           / Subint number. If NAXIS=-1, 0 indicates EOD.
+TTYPE1  = 'ISUBINT '           / Subint number. If NAXIS2=-1, 0 indicates EOD.
 TFORM1  = '1J      '           / Long integer
 TTYPE2  = 'TSUBINT '           / [s] Length of subintegration 
 TFORM2  = '1D      '           / Double 
