@@ -11,6 +11,7 @@ bool Pulsar::CalibratorPlotter::verbose = false;
 Pulsar::CalibratorPlotter::CalibratorPlotter ()
 {
   npanel = 3;
+  between_panels = 0.1;
   use_colour = true;
 }
 
@@ -41,9 +42,11 @@ void Pulsar::CalibratorPlotter::plot (const Calibrator::Info* info,
 				      unsigned nchan, double cfreq, double bw)
 { try {
 
-  if (!info)
+  if (!info) {
+    cerr << "Pulsar::CalibratorPlotter::plot no Calibrator::Info" << endl;
     return;
-  
+  }
+
   Reference::To<const Calibrator::Info> manage = info;
 
   if (nchan == 0) {
@@ -51,34 +54,35 @@ void Pulsar::CalibratorPlotter::plot (const Calibrator::Info* info,
     return;
   }
 
+  unsigned nplot = info->get_nclass();
+
   if (verbose)
-    cerr << "Pulsar::CalibratorPlotter::plot nchan = " << nchan << endl;
+    cerr << "Pulsar::CalibratorPlotter::plot nchan=" << nchan 
+	 << " nplot=" << nplot << endl;
 
   float xmin, xmax, ymin, ymax;
   cpgqvp (0, &xmin, &xmax, &ymin, &ymax);
 
   float ybottom = ymin;
   float yrange = ymax - ymin;
-  float yspace = 0.1 * yrange;
+  float yspace = between_panels * yrange;
   float yheight = (yrange - yspace) / float(npanel);
   float ybetween = 0;
   if (npanel > 1)
     ybetween = yspace / float(npanel -1);
 
   cpgsci(1);
-  cpgslw(1);
   cpgsch(1);
 
   // the plotting class
   EstimatePlotter plotter;
 
-  if (bw < 0.0)
-    bw *= -1.0;
-
   plotter.set_xrange (cfreq-0.5*bw, cfreq+0.5*bw);
 
   // don't plot points with zero variance
   plotter.set_minimum_error (0.0);
+
+  plotter.set_border (0.03, 0.045);
 
   // the data to be plotted
   vector< Estimate<float> > data (nchan);
@@ -86,14 +90,12 @@ void Pulsar::CalibratorPlotter::plot (const Calibrator::Info* info,
   // ////////////////////////////////////////////////////////////////////
 
   string xaxis;
-  string xlabel;
 
   for (unsigned iplot=0; iplot < info->get_nclass(); iplot++) {
 
     if (iplot % npanel == 0) {
 
       xaxis = "bcnst";
-      xlabel = "Frequency (MHz)";
 
       if (iplot)
 	cpgpage ();
@@ -106,10 +108,8 @@ void Pulsar::CalibratorPlotter::plot (const Calibrator::Info* info,
 	ybottom += 0.5 * (ybetween + yheight) * float(npanel - to_plot);
 
     }
-    else {
+    else
       xaxis = "bcst";
-      xlabel = "";
-    }
 
     plotter.clear ();
 
@@ -141,8 +141,12 @@ void Pulsar::CalibratorPlotter::plot (const Calibrator::Info* info,
     }
 
     cpgsci (1);
-    cpgbox(xaxis.c_str(),0,0,"bcnst",0,0);
-    cpglab (xlabel.c_str(), info->get_name(iplot), "");
+    cpgbox(xaxis.c_str(),0,0,"bcvnst",0,2);
+
+    cpgmtxt("L",3.5,.5,.5, info->get_name(iplot));
+
+    if (iplot % npanel == 0)
+      cpgmtxt("B",3.0,.5,.5, "Frequency (MHz)");
 
     ybottom += ybetween + yheight;
 
