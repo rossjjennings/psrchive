@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Archive.h,v $
-   $Revision: 1.42 $
-   $Date: 2002/10/18 16:46:41 $
-   $Author: pulsar $ */
+   $Revision: 1.43 $
+   $Date: 2002/10/25 04:04:47 $
+   $Author: straten $ */
 
 /*! \mainpage 
  
@@ -313,7 +313,7 @@ namespace Pulsar {
     void fscrunch_to_nchan (unsigned new_nchan);
 
     //! Return the MJD at the beginning of the first sub-integration
-    MJD  start_time() const;
+    MJD  start_time () const;
 
     //! Return the MJD at the end of the last sub-integration
     MJD  end_time () const;
@@ -386,9 +386,9 @@ namespace Pulsar {
     virtual void set_basis (Signal::Basis type) = 0;
 
     //! Get the observation type (psr, cal)
-    virtual Signal::Source get_observation_type () const = 0;
+    virtual Signal::Source get_type () const = 0;
     //! Set the observation type (psr, cal)
-    virtual void set_observation_type (Signal::Source type) = 0;
+    virtual void set_type (Signal::Source type) = 0;
 
     //! Get the source name
     virtual string get_source () const = 0;
@@ -472,7 +472,12 @@ namespace Pulsar {
     //! Set the status of the parallactic angle flag
     virtual void set_parallactic_corrected (bool done = true) = 0;
 
- protected:
+    //! Inter-channel dispersion delay has been removed
+    virtual bool get_dedispersed () const = 0;
+    //! Set the status of the parallactic angle flag
+    virtual void set_dedispersed (bool done = true) = 0;
+
+  protected:
 
     //! The pulsar ephemeris, as used by TEMPO
     psrephem ephemeris;
