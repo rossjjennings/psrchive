@@ -376,6 +376,8 @@ void Pulsar::ReceptionCalibrator::add_PolnCalibrator (const PolnCalibrator* p)
 
   }
 
+  const PolarCalibrator* polcal = dynamic_cast<const PolarCalibrator*>(p);
+
   vector<vector<Estimate<double> > > cal_hi;
   vector<vector<Estimate<double> > > cal_lo;
 
@@ -419,19 +421,20 @@ void Pulsar::ReceptionCalibrator::add_PolnCalibrator (const PolnCalibrator* p)
       equation[ichan]->set_post_xform (new Calibration::Gain);
       equation[ichan]->add_measurement (epoch, PolnCalibrator_path, state);
 
-      Jones<double> caltor = inv (receiver[ichan]->evaluate());
+      if (polcal) {
+	Jones<double> caltor = inv (polcal->model[ichan].evaluate());
 
-      Estimate<Stokes<float>, float> calcal;
-      calcal.val = caltor * state.val * herm(caltor);
-      calcal.var = state.var;
+	Estimate<Stokes<float>, float> calcal;
+	calcal.val = caltor * state.val * herm(caltor);
+	calcal.var = state.var;
 
-      // add the observed
-      calibrator.mean[ichan] += calcal;
+	// add the observed
+	calibrator.mean[ichan] += calcal;
+      }
 
     }
   }
 
-  const PolarCalibrator* polcal = dynamic_cast<const PolarCalibrator*>(p);
 
   if (polcal && polcal->model.size() == nchan)  {
     cerr << "Pulsar::ReceptionCalibrator::add_PolnCalibrator"
