@@ -34,16 +34,17 @@ void usage ()
 {
   cout << "A program for performing self-calibration\n"
     "Usage: psc [options] filenames\n"
-    "  -a bin    Add phase bin to constraints\n"
-    "  -C meta   filename with list of calibrator files\n"
-    "  -f chan   solve for only the specified channel\n"
-    "  -m model  Britton [default] or Hamaker\n"
-    "  -M meta   filename with list of pulsar files\n"
-    "  -n nbin   set the number of phase bins to use as input states\n"
-    "  -p pA,pB  Set the phase window from which to take input states\n"
-    "  -u        Assume that Hydra is unpolarized\n"
-    "  -v        Verbose mode\n"
-    "  -V        Very verbose mode\n"
+    "  -a archive set the output archive class name\n"
+    "  -b bin     add phase bin to constraints\n"
+    "  -C meta    filename with list of calibrator files\n"
+    "  -f chan    solve for only the specified channel\n"
+    "  -m model   model: Britton [default] or Hamaker\n"
+    "  -M meta    filename with list of pulsar files\n"
+    "  -n nbin    set the number of phase bins to use as input states\n"
+    "  -p pA,pB   set the phase window from which to take input states\n"
+    "  -u         assume that Hydra is unpolarized\n"
+    "  -v         verbose mode\n"
+    "  -V         very verbose mode\n"
        << endl;
 }
 
@@ -164,6 +165,9 @@ int main (int argc, char *argv[])
   // name of the default parameterization
   Pulsar::Calibrator::Type model_name = Pulsar::Calibrator::Britton;
 
+  // class name of the calibrator solution archives to be produced
+  string archive_class = "FITSArchive";
+
   // plot the solution before calibrating with it
   bool display = true;
 
@@ -187,10 +191,14 @@ int main (int argc, char *argv[])
   bool measure_cal_V = false;
 
   int gotc = 0;
-  while ((gotc = getopt(argc, argv, "a:C:Df:M:m:n:p:huvV")) != -1) {
+  while ((gotc = getopt(argc, argv, "a:b:C:Df:M:m:n:p:huvV")) != -1) {
     switch (gotc) {
 
-    case 'a': {
+    case 'a':
+      archive_class = optarg;
+      break;
+
+    case 'b': {
       unsigned bin = atoi (optarg);
       cerr << "psc: adding phase bin " << bin << endl;
       phase_bins.push_back (bin);
@@ -409,6 +417,10 @@ int main (int argc, char *argv[])
     return -1;
   }
 
+  Reference::To<Pulsar::Archive> solution = model.get_solution (archive_class);
+
+  cerr << "psc: unloading solution to " << solution->get_filename() << endl;
+  solution->unload();
 
   if (display) {
 
