@@ -474,7 +474,8 @@ int psrephem::load (string* instr)
     // get the next line from the incoming text
     string line ( stringtok (instr, "\n") );
     if (verbose)
-      cerr << "psrParams::load '" << line << "'" << endl;
+      cerr << "psrParams::load '" << line << "' len=" << line.length() 
+	   << " instr.len=" << instr -> length() << endl;
 
     if (line.length() < 1)
       continue;
