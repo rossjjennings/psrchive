@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <values.h>
 #include <unistd.h>
+#include <string.h>
 #include <sys/stat.h>
 #include <sys/wait.h>
 #include <errno.h>
@@ -254,20 +255,32 @@ int polynomial::unload (string* outstr) const
   char numstr[100];  // max length of string set by princeton at 86...
   int bytes = 0;
 
-  if(tempov11)
+  if (tempov11)  {
+    if (polyco::verbose)
+      cerr << "polynomial::unload tempo11" << endl;
+
     bytes += sprintf(numstr, "%-10.10s %9.9s%12.12s%22s%19f%7.3lf%7.3lf\n",
           psrname.c_str(), date.c_str(), utc.c_str(), reftime.strtempo(),
           dm, doppler_shift, log_rms_resid);
-  else
+  }
+  else  {
+    if (polyco::verbose)
+      cerr << "polynomial::unload not tempo11" << endl;
     bytes += sprintf(numstr, "%-10.9s%9.9s%12.12s%22s%19f\n",
           psrname.c_str(), date.c_str(), utc.c_str(), reftime.strtempo(),dm); 
+  }
 
   *outstr += numstr;
   
-  if(binary)
+  if(binary)  {
+
+    if (polyco::verbose)
+      cerr << "polynomial::unload binary" << endl;
+
     bytes += sprintf(numstr, "%20s%18.12lf%5d%5.0lf%5d%10.3f%7.4f%9.4f\n", 
 	    ref_phase.strprint(6).c_str(), f0, telescope, nspan_mins, 
 	    coefs.size(), freq, binph, binfreq);
+  }
   else 
     bytes += sprintf(numstr, "%20s%18.12lf%5d%5.0lf%5d%10.3f\n", 
 	    ref_phase.strprint(6).c_str(), f0, telescope, nspan_mins, 
@@ -275,21 +288,26 @@ int polynomial::unload (string* outstr) const
 
   *outstr += numstr;
 
-  int nrows = (int)(coefs.size()/3);
+  unsigned nrows = (int)(coefs.size()/3);
   if(nrows*3 < coefs.size()) nrows++;
 
+  if (polyco::verbose)
+    cerr << "polynomial::unload nrows=" << nrows << endl;
+
   char* newline = "\n";
-  for(int i=0; i<nrows; ++i){
-    for(int j=0; j<3 && (i*3+j)<coefs.size(); ++j){
-      double ord = coefs[i*3+j];
-      int exp = 0;
-      while(fabs(ord)<.1){
-	ord *= 10.0; exp--;
-      }
-      while(fabs(ord)>1){
-	ord /= 10.0; exp++;
-      }
-      bytes += sprintf(numstr, "%21.17lfD%+03d", ord, exp);
+
+  for (unsigned i=0; i<nrows; ++i){
+
+    if (polyco::verbose)
+      cerr << "polynomial::unload row=" << i << endl;
+
+    for (unsigned j=0; j<3 && (i*3+j)<coefs.size(); ++j) {
+
+      bytes += sprintf (numstr, " %+22.17le", coefs[i*3+j]);
+      char* ep = strchr (numstr, 'e');
+      if (ep)
+        *ep = 'D';
+
       *outstr += numstr;
     }
     *outstr += newline;
@@ -323,7 +341,7 @@ Phase polynomial::phase(const MJD& t) const
   double tm = dt.in_minutes();
 
   double poweroft = 1.0;
-  for (int i=0;i<coefs.size();i++) {
+  for (unsigned i=0;i<coefs.size();i++) {
     dp += (coefs[i]*poweroft);
     poweroft *= tm;
   }
@@ -381,7 +399,7 @@ double polynomial::frequency(const MJD& t) const
   double tm = dt.in_minutes();
 
   double poweroft = 1.0;
-  for (int i=1;i<coefs.size();i++) {
+  for (unsigned i=1; i<coefs.size(); i++) {
     dp+=(double)(i)*coefs[i]*poweroft;
     poweroft *= tm;
   }
@@ -397,7 +415,7 @@ double polynomial::chirp(const MJD& t) const
   double tm = dt.in_minutes();
 
   double poweroft = 1.0;
-  for (int i=2;i<coefs.size();i++) {
+  for (unsigned i=2; i<coefs.size(); i++) {
     d2p+=(double)(i)*(i-1)*coefs[i]*poweroft;
     poweroft *= tm;
   }
@@ -441,7 +459,7 @@ void polynomial::prettyprint() const {
     cout << "Binary Phase\t\t\t" << binph << endl;
     cout << "Binary Frequency\t\t" << binfreq << endl;
   }
-  for(int i=0; i<coefs.size(); ++i) 
+  for(unsigned i=0; i<coefs.size(); ++i) 
     cout << "\tCoeff  " << i+1 << "\t\t" << coefs[i] << endl;
 }
 
@@ -565,7 +583,13 @@ int polyco::unload (const char *filename) const
 // ///////////////////////////////////////////////////////////////////
 int polyco::unload (string* outstr) const {
   int bytes = 0;
-  for (int i=0; i<pollys.size(); ++i) {
+
+  if (verbose)
+    cerr << "polyco::unload " << pollys.size() << " polynomials" << endl;
+
+  for (unsigned i=0; i<pollys.size(); ++i) {
+    if (verbose)
+      cerr << "polyco::unload " << i << endl;
     bytes += pollys[i].unload(outstr);
   }
   return bytes;
@@ -590,7 +614,7 @@ int polyco::unload (FILE* fptr) const
 }
 
 void polyco::prettyprint() const {
-  for(int i=0; i<pollys.size(); ++i) 
+  for(unsigned i=0; i<pollys.size(); ++i) 
     pollys[i].prettyprint();
 }
 
@@ -634,7 +658,7 @@ int polyco::i_nearest (const MJD &t, const string& in_psr) const
   float min_dist = MAXFLOAT;
   int imin = -1;
 
-  for (int ipolly=0; ipolly<pollys.size(); ipolly ++)  {
+  for (unsigned ipolly=0; ipolly<pollys.size(); ipolly ++)  {
     if (in_psr==anyPsr || pollys[ipolly].psrname==in_psr) {      
       float dist = fabs ( (pollys[ipolly].reftime - t).in_minutes() );
       if (dist < min_dist) {
@@ -701,14 +725,14 @@ int polyco::i_nearest (const Phase& phase, const string& in_psr) const
 }
 
 bool polyco::is_tempov11() const {
-  for(int i=0; i<pollys.size(); ++i)
+  for(unsigned i=0; i<pollys.size(); ++i)
     if(!pollys[i].is_tempov11()) return(pollys[i].is_tempov11());
   return(pollys[0].is_tempov11());
 }
 
 int operator == (const polyco & p1, const polyco & p2){
   if(p1.pollys.size()!=p2.pollys.size()) return(0);
-  for(int i=0; i<p1.pollys.size(); ++i)
+  for(unsigned i=0; i<p1.pollys.size(); ++i)
     if(p1.pollys[i]!=p2.pollys[i]) return(0);
   return(1);
 }
