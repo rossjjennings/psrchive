@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/MJD.h,v $
-   $Revision: 1.15 $
-   $Date: 2001/04/27 09:21:34 $
+   $Revision: 1.16 $
+   $Date: 2001/08/05 12:03:36 $
    $Author: straten $ */
 
 #ifndef __MJD_H
@@ -103,6 +103,8 @@ class MJD {
   const friend MJD operator + (const MJD &, double);  // Add seconds to an MJD
   const friend MJD operator - (const MJD &, double);  // Take seconds from MJD
   const friend MJD operator * (const MJD &, double);  
+  const friend MJD operator * (double a, const MJD& m)
+    { return m * a; }
   const friend MJD operator / (const MJD &, double);  
 
   // return the -ve of m
