@@ -8,8 +8,6 @@
 #include "Error.h"
 #include "typeutil.h"
 
-const vector<unsigned> Pulsar::Archive::none_selected;
-
 void Pulsar::Archive::init ()
 {
   if (verbose == 3)
