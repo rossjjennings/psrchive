@@ -175,12 +175,10 @@ void psrephem::load (fitsfile* fptr, long row)
 
   if (verbose)
     cerr << "psrephem::load PSRFITS nrows=" << nrows << " ncols=" 
-	 << ephind.size() << endl;
+	 << ephind.size() << " loading row=" << row << endl;
 
   // get ready to parse the values
-  tempo11 = 1;
-  size_dataspace();
-
+  zero ();
 
   char* strval = new char [maxstrlen+1];
   unsigned icol=0;
@@ -199,9 +197,14 @@ void psrephem::load (fitsfile* fptr, long row)
 
     case 0:  // string
       {
-	char* nul = " ";
+	static char* nul = strdup(" ");
 	fits_read_col (fptr, TSTRING, icol+1, row, firstelem, onelement,
-		       nul, &strval, &anynul, &status);
+		       &nul, &strval, &anynul, &status);
+
+	if (verbose)
+	  cerr << "psrephem::load string:'" << strval << "' in column "
+	       << icol+1 << " (" << parmNames[ieph] << ")" << endl;
+
 	value_str[ieph] = strval;
 	break;
       }
@@ -211,21 +214,25 @@ void psrephem::load (fitsfile* fptr, long row)
 	double nul = 0.0;
 	fits_read_col (fptr, TDOUBLE, icol+1, row, firstelem, onelement,
 		       &nul, value_double + ieph, &anynul, &status);
-	break;
 
+	if (verbose)
+	  cerr << "psrephem::load double:'" << value_double[ieph] <<
+		"' in column " << icol+1 << " (" << parmNames[ieph] << ")" << endl;
 
 	if (ieph == EPH_F) {
-	  int inul = 0;
-	  // special case for FF0:
+	  // special case for FF0: given in mHz
 	  // Assumes that IF0 is in the column preceding FF0
+
+          int inul = 0;
 	  fits_read_col (fptr, TINT, icol, row, firstelem, onelement,
 			 &inul, value_integer + ieph, &anynul, &status);
 
-	  // for now, this class represents F as a double
 	  value_double[ieph] += value_integer[ieph];
+          value_double[ieph] *= 1e-3;
 	  value_integer[ieph] = 0;
 	}
 
+        break;
       }
     case 2:  // h:m:s
       {
@@ -233,8 +240,9 @@ void psrephem::load (fitsfile* fptr, long row)
 	fits_read_col (fptr, TSTRING, icol+1, row, firstelem, onelement,
 		       nul, &strval, &anynul, &status);
 
-	if (verbose)
-	  cerr << "psrephem::load PSRFITS h:m:s=" << strval << endl;
+        if (verbose)
+          cerr << "psrephem::load h:m:s:'" << strval << "' in column "
+               << icol+1 << " (" << parmNames[ieph] << ")" << endl;
 
 	if (str2ra (value_double + ieph, strval) != 0) {
 	  if (verbose)
@@ -254,8 +262,9 @@ void psrephem::load (fitsfile* fptr, long row)
 	fits_read_col (fptr, TSTRING, icol+1, row, firstelem, onelement,
 		       nul, &strval, &anynul, &status);
 
-	if (verbose)
-	  cerr << "psrephem::load PSRFITS d:m:s=" << strval << endl;
+        if (verbose)
+          cerr << "psrephem::load d:m:s:'" << strval << "' in column "
+               << icol+1 << " (" << parmNames[ieph] << ")" << endl;
 
 	if (str2dec (value_double + ieph, strval) != 0) {
 	  if (verbose)
@@ -297,7 +306,8 @@ void psrephem::load (fitsfile* fptr, long row)
 	break;
       }
     default:
-      cerr << "psrephem::load PSRFITS invalid parmType" << endl;
+      throw Error (InvalidState, "psrephem::load",
+		   "invalid parmType[%d]", ieph);
 	break;
     }
 
@@ -305,7 +315,7 @@ void psrephem::load (fitsfile* fptr, long row)
       throw FITSError (status, "psrephem::load", 
 		       "error parsing %s", parmNames[ieph]);
 
-    if (anynul != 0)
+    if (anynul)
       parmStatus[ieph] = 0;
     else
       parmStatus[ieph] = 1;
@@ -362,15 +372,25 @@ void psrephem::unload (fitsfile* fptr, long row) const
 
   if (row < 1) {
     // row unspecified
+
     if (verbose)
-      cerr << "psrephem::unload adding new row to PSREPHEM hdu" << endl;
+      cerr << "psrephem::unload adding row " << nrows + 1
+           << " to PSREPHEM hdu" << endl;
+
+#if 0
+    fits_insert_rows (fptr, nrows, 1, &status);
+    if (status != 0)
+      throw FITSError (status, "psrephem::unload",
+			 "fits_insert_rows (%d)", nrows);
+#endif
+
     nrows ++;
     row = nrows;
   }
 
   if (verbose)
     cerr << "psrephem::unload PSRFITS nrows=" << nrows << " ncols=" 
-	 << ephind.size() << endl;
+	 << ephind.size() << " unload to row=" << row << endl;
 
   for (unsigned icol=0; icol<ephind.size() && status==0; icol++) {
 
@@ -382,11 +402,19 @@ void psrephem::unload (fitsfile* fptr, long row) const
     long onelement = 1;
  
     if (parmStatus[ieph] == 0) {
-      // NULLIFY entry, if any
+
+      // write null entry
+
+      if (verbose)
+	cerr << "psrephem::unload null in column " 
+	     << icol+1 <<  " (" << parmNames[ieph] << ")" << endl;
+
       fits_write_col_null (fptr, icol+1, row, firstelem, onelement, &status);
       if (status)
 	throw FITSError (status, "psrephem::unload", "fits_write_col_null");
+
       continue;
+
     }
 
     switch (parmTypes[ieph]) {
@@ -394,8 +422,14 @@ void psrephem::unload (fitsfile* fptr, long row) const
     case 0:  // string
       {
 	char* value = const_cast<char*>( value_str[ieph].c_str() );
+
+	if (verbose)
+	  cerr << "psrephem::unload string:'" << value << "' in column "
+	       << icol+1 << " (" << parmNames[ieph] << ")" << endl;
+
 	fits_write_col (fptr, TSTRING, icol+1, row, firstelem, onelement,
 			&value, &status);
+
 	break;
       }
 
@@ -404,8 +438,10 @@ void psrephem::unload (fitsfile* fptr, long row) const
 	double value = value_double[ieph];
 
 	if (ieph == EPH_F) {
-	  // special case for FF0:
+	  // special case for FF0: stored in mHz
 	  // Assumes that IF0 is in the column preceding FF0
+
+	  value *= 1e3;
 	  int intval = int (value);
 
 	  fits_write_col (fptr, TINT, icol, row, firstelem, onelement,
@@ -414,24 +450,39 @@ void psrephem::unload (fitsfile* fptr, long row) const
 	  value -= intval;
 	}
 
+	if (verbose)
+	  cerr << "psrephem::unload double:'" << value << "' in column "
+	       << icol+1 << " (" << parmNames[ieph] << ")" << endl;
+
 	fits_write_col (fptr, TDOUBLE, icol+1, row, firstelem, onelement,
 			&value, &status);
 	break;
       }
+
     case 2:  // h:m:s
       {
 	char value [64];
 	F772C(turnstohms) (value_double + ieph, value);
+
+	if (verbose)
+	  cerr << "psrephem::unload h:m:s:'" << value << "' in column "
+	       << icol+1 << " (" << parmNames[ieph] << ")" << endl;
+
 	fits_write_col (fptr, TSTRING, icol+1, row, firstelem, onelement,
-			&value, &status);
+			value, &status);
 	break;
       }
     case 3:  // d:m:s
       {
 	char value [64];
 	F772C(turnstodms) (value_double + ieph, value);
+
+	if (verbose)
+	  cerr << "psrephem::unload d:m:s:'" << value << "' in column "
+	       << icol+1 << " (" << parmNames[ieph] << ")" << endl;
+
 	fits_write_col (fptr, TSTRING, icol+1, row, firstelem, onelement,
-			&value, &status);
+			value, &status);
 	break;
       }
     case 4:  // MJD
@@ -448,12 +499,22 @@ void psrephem::unload (fitsfile* fptr, long row) const
 	  // add the integer
 	  value += value_integer[ieph];
 
+	if (verbose)
+	  cerr << "psrephem::unload double:'" << value << "' in column "
+	       << icol+1 << " (" << parmNames[ieph] << ")" << endl;
+
 	fits_write_col (fptr, TDOUBLE, icol+1, row, firstelem, onelement,
 			&value, &status);
 	break;
       }
     case 5:  // integer
       {
+
+	if (verbose)
+	  cerr << "psrephem::unload integer:'" <<  value_integer[ieph]
+	       << "' in column " << icol+1 << " (" << parmNames[ieph] << ")"
+	       << endl;
+
 	fits_write_col (fptr, TINT, icol+1, row, firstelem, onelement,
 			value_integer + ieph, &status);
 	break;
@@ -465,7 +526,7 @@ void psrephem::unload (fitsfile* fptr, long row) const
 
     }
     
-    if (status == 0)
+    if (status != 0)
       throw FITSError (status, "psrephem::unload", "fits_write_col");
   }
 }
