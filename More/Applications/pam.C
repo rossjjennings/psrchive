@@ -31,6 +31,7 @@ void usage()
   cout << "  -m               Modify the original files on disk"              << endl;
   cout << "  -a archive       Write new files using this archive class"       << endl;
   cout << "  -e extension     Write new files with this extension"            << endl;
+  cout << "  -u path          Write files to this location"                   << endl;
   cout << "  -T               Time scrunch to one subint"                     << endl;
   cout << "  -F               Frequency scrunch to one channel"               << endl;
   cout << "  -p               Polarisation scrunch to total intensity"        << endl;
@@ -71,6 +72,8 @@ int main (int argc, char *argv[]) {
   bool verbose = false;
   
   vector<string> archives;
+
+  string ulpath;
 
   bool save = false;
   string ext;
@@ -146,7 +149,7 @@ int main (int argc, char *argv[]) {
       {0, 0, 0, 0}
     };
     
-    c = getopt_long(argc, argv, "hvVima:e:E:TFpIt:f:b:d:s:r:w:D:SBLC",
+    c = getopt_long(argc, argv, "hvVima:e:E:TFpIt:f:b:d:s:r:u:w:D:SBLC",
 		    long_options, &options_index);
     
     if (c == -1)
@@ -165,7 +168,7 @@ int main (int argc, char *argv[]) {
       Pulsar::Archive::set_verbosity(3);
       break;
     case 'i':
-      cout << "$Id: pam.C,v 1.28 2004/02/17 03:48:35 ahotan Exp $" << endl;
+      cout << "$Id: pam.C,v 1.29 2004/03/03 01:01:07 ahotan Exp $" << endl;
       return 0;
     case 'm':
       save = true;
@@ -275,6 +278,11 @@ int main (int argc, char *argv[]) {
       }
       command += " -r ";
       command += optarg;
+      break;
+    case 'u':
+      ulpath = optarg;
+      if (ulpath.substr(ulpath.length()-1,1) != "/")
+	ulpath += "/";
       break;
     case 'w':
       reset_weights = true;
@@ -619,7 +627,11 @@ int main (int argc, char *argv[]) {
 	  string the_old = arch->get_filename();
 	  int index = the_old.find_last_of(".",the_old.length());
 	  string primary = the_old.substr(0, index);
-	  string the_new = primary + "." + ext;
+	  string the_new;
+	  if (!ulpath.empty())
+	    the_new = ulpath + primary + "." + ext;
+	  else
+	    the_new = primary + "." + ext;
           arch->unload(the_new);
           cout << "New file " << the_new << " written to disk" << endl;
 	}
