@@ -103,7 +103,7 @@ int main (int argc, char *argv[]) {
       Pulsar::Archive::set_verbosity(1);
       break;
     case 'i':
-      cout << "$Id: pac.C,v 1.35 2003/12/06 00:28:44 straten Exp $" << endl;
+      cout << "$Id: pac.C,v 1.36 2003/12/06 01:06:22 straten Exp $" << endl;
       return 0;
     case 'p':
       cals_are_here = optarg;
@@ -334,7 +334,9 @@ int main (int argc, char *argv[]) {
 	  
 	  cout << "Polarisation calibration complete" << endl;
 	  arch->set_poln_calibrated();
-	  pcal_file = (pcal_engine->get_Archive())->get_filename();
+
+	  pcal_file = pcal_engine->get_Archive()->get_filename();
+
 	}
       }
       
