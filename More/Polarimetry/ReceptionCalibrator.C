@@ -521,7 +521,7 @@ void Pulsar::ReceptionCalibrator::calibrate (Archive* data, bool solve_first)
 
     for (unsigned ichan=0; ichan<nchan; ichan++) {
       equation[ichan]->get_model()->set_path (path);
-      equation[ichan]->set_epoch (epoch);
+      parallactic.set_epoch (epoch);
       response[ichan] = inv( equation[ichan]->get_model()->get_Jones() );
     }
 
