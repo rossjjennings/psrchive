@@ -12,12 +12,15 @@
 
 #include "interpolate.h"
 #include "model_profile.h"
-//#include "GaussJordan.h"
 
-double Pulsar::Profile::GaussianShift (const Profile& std, float& ephase) const
+double Pulsar::Profile::GaussianShift (const Profile& std, float& ephase, 
+				       vector<float>& corr, Calibration::Gaussian& model,
+				       int& rise, int& fall, bool store) const
 {
   // This algorithm interpolates the time domain cross correlation
   // function by fitting a Gaussian.
+
+  bool verbose = false;
 
   // First compute the standard cross correlation function:
 
@@ -32,20 +35,28 @@ double Pulsar::Profile::GaussianShift (const Profile& std, float& ephase) const
 
   // Remove the baseline
   *ptr -= ptr->mean(ptr->find_min_phase(0.15));
-
+  
+  if (store) {
+    for (unsigned i = 0; i < ptr->get_nbin(); i++)
+      corr.push_back(ptr->get_amps()[i]);
+  }
+  
   // Find the peak
 
-  int rise = 0;
-  int fall = 0;
+  int brise = 0;
+  int bfall = 0;
 
-  ptr->find_peak_edges(rise, fall);
-  cerr << rise << ", " << fall << endl;
+  ptr->find_peak_edges(brise, bfall);
+  cerr << brise << ", " << bfall << endl;
 
-  if (rise > fall) {
-    rise = rise - get_nbin();
+  if (brise > bfall) {
+    brise = brise - get_nbin();
   }
 
-  cerr << rise << ", " << fall << endl;
+  if (store) {
+    rise = brise;
+    fall = bfall;
+  }
 
   try{
     
@@ -54,14 +65,10 @@ double Pulsar::Profile::GaussianShift (const Profile& std, float& ephase) const
     Calibration::Gaussian gm;
     
     gm.set_centre(ptr->find_max_bin());
-    gm.set_width(fall - rise);
+    gm.set_width(bfall - brise);
     gm.set_height(ptr->max());
     gm.set_cyclic(false);
     
-    cerr << "Centre: " << gm.get_centre() << endl;
-    cerr << "Width:  " << gm.get_width()  << endl;
-    cerr << "Height: " << gm.get_height() << endl;
-
     Calibration::Axis<double> argument;
     gm.set_argument (0, &argument);
     
@@ -69,7 +76,7 @@ double Pulsar::Profile::GaussianShift (const Profile& std, float& ephase) const
     vector< Estimate<double> > data_y;       // y-ordinate of data with error
     
     int index = 0;
-    for (int i = rise; i < fall; i++) {
+    for (int i = brise; i < bfall; i++) {
       data_x.push_back ( argument.get_Value(double(i)) );
       index = i;
       if (index < 0)
@@ -81,21 +88,25 @@ double Pulsar::Profile::GaussianShift (const Profile& std, float& ephase) const
     fit.verbose = Calibration::Model::verbose;
     
     float chisq = fit.init (data_x, data_y, gm);
-    cerr << "initial chisq = " << chisq << endl;
+    if (verbose)
+      cerr << "initial chisq = " << chisq << endl;
     
     unsigned iter = 1;
     unsigned not_improving = 0;
     while (not_improving < 25) {
-      cerr << "iteration " << iter << endl;
+      if (verbose)
+	cerr << "iteration " << iter << endl;
       float nchisq = fit.iter (data_x, data_y, gm);
-      cerr << "     chisq = " << nchisq << endl;
+      if (verbose)
+	cerr << "     chisq = " << nchisq << endl;
       
       if (nchisq < chisq) {
 	float diffchisq = chisq - nchisq;
 	chisq = nchisq;
 	not_improving = 0;
 	if (diffchisq/chisq < threshold && diffchisq > 0) {
-	  cerr << "no big diff in chisq = " << diffchisq << endl;
+	  if (verbose)
+	    cerr << "no big diff in chisq = " << diffchisq << endl;
 	  break;
 	}
       }
@@ -106,11 +117,16 @@ double Pulsar::Profile::GaussianShift (const Profile& std, float& ephase) const
     }
     
     double free_parms = data_x.size() + gm.get_nparam();
-    
-    cerr << "Chi-squared = " << chisq << " / " << free_parms << " = "
-	 << chisq / free_parms << endl;
+
+    if (verbose)
+      cerr << "Chi-squared = " << chisq << " / " << free_parms << " = "
+	   << chisq / free_parms << endl;
     
     ephase = chisq / (free_parms * ptr->get_nbin());
+    
+    if (store) {
+      model = gm;
+    }
     
     return gm.get_centre();
     
