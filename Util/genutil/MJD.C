@@ -359,6 +359,14 @@ MJD::MJD(int d, int s, double f) {
   *this = MJD((double)d,(double)s,f);
 }
 
+MJD::MJD(int intday, double fracday){
+  
+  int secs = (int)fracday*86400;
+  double fracsecs = fracday*86400 - secs;
+  
+  *this = MJD(intday, secs, fracsecs);
+}
+  
 // Converts a string containing utc fields yyyy ddd hh mm ss to internal format
 MJD::MJD (char* utc_string)
 {
