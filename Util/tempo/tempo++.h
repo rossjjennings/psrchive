@@ -4,12 +4,13 @@
 #include <vector>
 
 #include "MJD.h"
+#include "poly.h"
 
 class psrParams;
 class psrephem;
 class toa;
 class residual;
-class polyco;
+//class polyco;
 
 
 namespace Tempo {

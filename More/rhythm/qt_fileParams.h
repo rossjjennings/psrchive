@@ -2,8 +2,8 @@
 #define __QT_FILEEPH_H
 
 #include <string>
-
 #include <qfiledialog.h>
+#include "psr_cpp.h"
 
 class psrParams;
 

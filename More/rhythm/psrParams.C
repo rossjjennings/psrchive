@@ -1,4 +1,3 @@
-#include <iostream>
 #include <fstream>
 
 #include <sys/types.h>
@@ -150,6 +149,9 @@ void psrParams::create (const char* psr_name, bool use_cwd)
 
 void psrParams::load (const char* filename)
 {
+  if (filename == NULL)
+    return;
+
   if (verbose)
     cerr << "psrParams::load create ifstream (" << filename << ")" << endl;
 
@@ -161,6 +163,8 @@ void psrParams::load (const char* filename)
     throw (error);
   }
   load (istr);
+  // istr.close();
+  cerr << "psrParams::load(char* filename) EXITS" << endl;
 }
 
 void psrParams::load (istream& istr, size_t nbytes)
@@ -175,6 +179,8 @@ void psrParams::load (istream& istr, size_t nbytes)
     throw (error);
   }
   load (&total);
+
+  cerr << "psrParams::load(istream&) EXITS" << endl;
 }
 
 void psrParams::load (FILE* fptr, size_t nbytes)

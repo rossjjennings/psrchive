@@ -45,7 +45,7 @@ int qt_fileParams::open (psrParams* eph)
     cerr << "qt_fileParams::open '" << fileName << "'" << endl;
 
   eph -> load (fileName);
-  cerr << "RETURN FROM LOAD" << endl;
+  cerr << "RETURN FROM psrParms::load (string filename)" << endl;
 
   if (eph->empty())
     return 0;
