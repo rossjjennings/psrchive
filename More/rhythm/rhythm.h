@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/rhythm/rhythm.h,v $
-   $Revision: 1.27 $
-   $Date: 2003/05/23 05:46:56 $
+   $Revision: 1.28 $
+   $Date: 2003/05/29 00:01:24 $
    $Author: ahotan $ */
 
 // //////////////////////////////////////////////////////////////////////////
@@ -219,6 +219,7 @@ class Rhythm : public QMainWindow
   void fit_selected();
   void togledit();
   void toglauto();
+  void temposys();
 
   // Options->Verbosity menu callback
   void setVerbosity (int id);

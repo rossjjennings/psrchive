@@ -460,7 +460,7 @@ void Rhythm::fit (const psrephem& eph, bool load_new)
     
     psrephem pf_eph;
     
-    Tempo::fit (eph, toas, &pf_eph, true);
+    Tempo::fit (eph, toas, &pf_eph, false);
     
     if (load_new && fitpopup) {
       // set_psrephem will result in generation of newEph signal, 
@@ -560,7 +560,7 @@ void Rhythm::fit_selected (const psrephem& eph, bool load_new)
     
     psrephem pf_eph;
     
-    Tempo::fit (eph, subset, &pf_eph, true);
+    Tempo::fit (eph, subset, &pf_eph, false);
     
     if (load_new && fitpopup) {
       // set_psrephem will result in generation of newEph signal, 

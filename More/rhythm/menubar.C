@@ -9,6 +9,7 @@
 #include "qt_fileParams.h"
 #include "qt_editParams.h"
 #include "rhythm.h"
+#include "tempo++.h"
 
 void Rhythm::menubarConstruct ()
 {
@@ -51,6 +52,9 @@ void Rhythm::menubarConstruct ()
   // automatic fitting starts out disabled
   autofitID = tempo->insertItem( "Enable &Auto Fit",
 				 this, SLOT( toglauto() ));
+  tempo->insertSeparator();
+  autofitID = tempo->insertItem( "Tempo System Call",
+				 this, SLOT( temposys() ));
 
   // ///////////////////////////////////////////////////////////////////////
   // VERBOSITY menu options
@@ -112,6 +116,20 @@ void Rhythm::togledit()
     fitpopup->show();
     tempo->setItemEnabled (dispID, FALSE);
   }
+}
+
+void Rhythm::temposys()
+{
+  QString current = "The current tempo system call is:\n\n";
+  current += Tempo::get_system();
+  current += "\n\nPlease enter the new system call to use:";
+  
+  QString temp = QInputDialog::getText("Tempo System Call", current);
+  
+  if (temp.isEmpty())
+    return;
+  else
+    Tempo::set_system(temp.ascii());
 }
 
 void Rhythm::setDataPath()
