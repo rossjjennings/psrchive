@@ -45,10 +45,10 @@ void Pulsar::Archive::tscrunch (unsigned nscrunch)
 		    << nsub << " Integrations by " << nscrunch << endl;
   
   double dm = get_dispersion_measure();
-  double rm = get_rotation_measure();
-
   bool must_dedisperse = dm != 0 && !get_dedispersed();
-  bool must_defaraday = rm != 0 && !get_faraday_corrected();
+
+  double rm = get_rotation_measure();
+  bool must_defaraday = rm != 0 && !get_faraday_corrected() && get_npol() == 4;
 
   unsigned save_nscrunch = nscrunch;
 
