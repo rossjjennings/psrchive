@@ -8,15 +8,16 @@ void Pulsar::FITSArchive::unload (fitsfile* fptr,
   int status = 0;
 
   if (verbose == 3)
-    cerr << "FITSArchive::unload FluxCalibratorExtension entered" << endl;
+    cerr << "Pulsar::FITSArchive::unload FluxCalibratorExtension" << endl;
   
-  // Move to the FEEDPAR Binary Table
+  // Move to the FLUX_CAL Binary Table
   
-  fits_movnam_hdu (fptr, BINARY_TBL, "FEEDPAR", 0, &status);
+  fits_movnam_hdu (fptr, BINARY_TBL, "FLUX_CAL", 0, &status);
   
   if (status != 0)
-    throw FITSError (status, "FITSArchive::unload FluxCalibratorExtension", 
-		     "fits_movnam_hdu FEEDPAR");
+    throw FITSError (status, 
+                     "Pulsar::FITSArchive::unload FluxCalibratorExtension", 
+		     "fits_movnam_hdu FLUX_CAL");
   
   // Initialise a new row
   
@@ -24,8 +25,9 @@ void Pulsar::FITSArchive::unload (fitsfile* fptr,
   
   fits_insert_rows (fptr, 0, 1, &status);
   if (status != 0)
-    throw FITSError (status, "FITSArchive::unload FluxCalibratorExtension", 
-		     "fits_insert_rows FEEDPAR");
+    throw FITSError (status, 
+                     "Pulsar::FITSArchive::unload FluxCalibratorExtension", 
+		     "fits_insert_rows FLUX_CAL");
 
   char* comment = 0;
 
@@ -51,9 +53,9 @@ void Pulsar::FITSArchive::unload (fitsfile* fptr,
 
   }
   catch (Error& error) {
-    throw error += "Pulsar::FITSArchive::load_FluxCalibratorExtension";
+    throw error += "Pulsar::FITSArchive::unload FluxCalibratorExtension";
   }
 
   if (verbose == 3)
-    cerr << "FITSArchive::unload FluxCalibratorExtension exiting" << endl; 
+    cerr << "Pulsar::FITSArchive::unload FluxCalibratorExtension exiting" << endl; 
 }
