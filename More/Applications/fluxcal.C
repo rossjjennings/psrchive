@@ -43,7 +43,8 @@ void unload (Pulsar::FluxCalibrator* fluxcal) try {
   archive = fluxcal->new_solution (archive_class);
 
   string newname = fluxcal->get_filenames ();
-  newname = replace_extension( stringtok (&newname, ","), output_ext );
+  char* whitespace = " ,\t\n";
+  newname = replace_extension( stringtok (&newname, whitespace), output_ext );
 
   cerr << "fluxcal: unloading " << newname << endl;
   archive -> unload (newname);
