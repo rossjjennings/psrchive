@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ReceptionCalibrator.h,v $
-   $Revision: 1.36 $
-   $Date: 2003/09/04 10:20:54 $
+   $Revision: 1.37 $
+   $Date: 2003/09/05 15:07:27 $
    $Author: straten $ */
 
 #ifndef __ReceptionCalibrator_H
@@ -87,9 +87,6 @@ namespace Pulsar {
 
     //! Phenomenological decomposition of instrumental response (Britton)
     Reference::To<Calibration::InstrumentEstimate> physical;
-
-    //! Single-axis decomposition of backend
-    Reference::To<Calibration::SingleAxis> backend;
 
     //! The parallactic angle rotation
     Calibration::Parallactic parallactic;

@@ -7,6 +7,7 @@
 #include "Pulsar/Archive.h"
 
 #include "Calibration/SingleAxis.h"
+#include "Calibration/Feed.h"
 #include "Calibration/Boost.h"
 #include "Calibration/Gain.h"
 
@@ -75,16 +76,7 @@ Pulsar::StandardModel::StandardModel (Model _model)
   // initialize the signal path seen by the calibrator
   //
   
-  // allow the differential gain and phase of the backend to vary
-  // between pulsar and calibrator observations
-
-  backend = new Calibration::SingleAxis;
-
-  // disable fit for absolute Gain
-  backend->set_infit (0, false);
-  
   pcal_path = new Calibration::ProductTransformation;
-  // pcal_path->add_Transformation( backend );
   pcal_path->add_Transformation( instrument );
   
   equation->set_Transformation ( pcal_path );
@@ -302,7 +294,7 @@ void Pulsar::ReceptionCalibrator::add_calibrator (const Archive* data)
     polncal = new PolarCalibrator (data);
     
   }
-  else if (model_type == StandardModel::Hamaker) {
+  else if (model_type == StandardModel::Britton) {
 
     if (verbose)
       cerr << "Pulsar::ReceptionCalibrator::add_calibrator"
@@ -568,7 +560,7 @@ void Pulsar::ReceptionCalibrator::add_PolnCalibrator (const PolnCalibrator* p)
       }
 
       Jones< Estimate<double> > correct;
-      correct = inv ( p->get_response(ichan) );
+      correct = p->get_response(ichan);
 
       stokes = correct * stokes * herm(correct);
 
@@ -657,6 +649,19 @@ void Pulsar::ReceptionCalibrator::calibrate (Archive* data, bool solve_first)
 
 
     for (unsigned ichan=0; ichan<nchan; ichan++) {
+
+      if (!model[ichan]->valid) {
+
+	if (verbose)
+	  cerr << "Pulsar::ReceptionCalibrator::calibrate zero weight ichan=" 
+	       << ichan << endl;
+
+	integration->set_weight (ichan, 0.0);
+
+	response[ichan] = Jones<double>::identity();
+	continue;
+
+      }
 
       Calibration::Transformation* signal_path = 0;
 
@@ -753,7 +758,6 @@ void Pulsar::ReceptionCalibrator::solve (int only_ichan)
     cerr << "Pulsar::ReceptionCalibrator::solve failure ichan=" << ichan
          << error << endl;
     model[ichan]->valid = false;
-
   }
 
   is_fit = true;
