@@ -1,14 +1,14 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ReceptionCalibrator.h,v $
-   $Revision: 1.52 $
-   $Date: 2003/12/29 19:19:38 $
+   $Revision: 1.53 $
+   $Date: 2003/12/31 17:42:49 $
    $Author: straten $ */
 
-#ifndef __ReceptionCalibrator_H
-#define __ReceptionCalibrator_H
+#ifndef __Pulsar_ReceptionCalibrator_H
+#define __Pulsar_ReceptionCalibrator_H
 
-#include "Pulsar/PolnCalibrator.h"
+#include "Pulsar/SystemCalibrator.h"
 
 // Reception Model and its management
 #include "Calibration/ReceptionModel.h"
@@ -153,7 +153,7 @@ namespace Pulsar {
     constraints, which are provided in through the add_observation,
     add_ArtificialCalibrator, and add_FluxCalibrator methods.
   */
-  class ReceptionCalibrator : public PolnCalibrator {
+  class ReceptionCalibrator : public SystemCalibrator {
     
   public:
     
@@ -172,8 +172,8 @@ namespace Pulsar {
     //! Return the Calibrator information
     Calibrator::Info* get_Info () const;
 
-    //! Return a PolnCalibrator::get_solution with a CalibratorStokes Extension
-    Archive* get_solution (const string& archive_type, string ext=".pc") const;
+    //! Return the CalibratorStokesExtension
+    CalibratorStokes* get_calibrator_stokes () const;
 
     //! Allow the CAL Stokes V to vary (applies only if FluxCal observed)
     bool measure_cal_V;

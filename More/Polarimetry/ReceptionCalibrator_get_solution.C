@@ -1,10 +1,12 @@
 #include "Pulsar/ReceptionCalibrator.h"
 #include "Pulsar/CalibratorStokes.h"
 
-Pulsar::Archive*
-Pulsar::ReceptionCalibrator::get_solution (const string& archive_class,
-					   string filename_extension) const
+Pulsar::CalibratorStokes*
+Pulsar::ReceptionCalibrator::get_calibrator_stokes () const
 {
+  if (calibrator_stokes)
+    return calibrator_stokes;
+
   if (verbose) cerr << "Pulsar::ReceptionCalibrator::get_solution"
 		 " create CalibratorStokes Extension" << endl;
 
@@ -29,17 +31,13 @@ Pulsar::ReceptionCalibrator::get_solution (const string& archive_class,
       if (!valid)
 	continue;
 
-      Stokes<double> stokes = calibrator_estimate.source[ichan].evaluate();
-      ext->set_stokes (ichan, stokes);
-      
+      ext->set_stokes (ichan, calibrator_estimate.source[ichan].get_stokes());
+            
     }
-    
-    Reference::To<Archive> output;
-    output = PolnCalibrator::get_solution (archive_class, filename_extension);
-    
-    output -> add_extension (ext);
-    
-    return output.release();
+
+    const_cast<ReceptionCalibrator*>(this)->calibrator_stokes = ext;
+
+    return calibrator_stokes;
 
   }
   catch (Error& error) {
