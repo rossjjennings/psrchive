@@ -3,6 +3,7 @@
 #include "string_utils.h"
 
 #include <fstream>
+#include <math.h>
 
 bool Pulsar::FluxCalibratorDatabase::verbose = false;
 

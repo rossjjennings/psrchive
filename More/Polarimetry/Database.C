@@ -20,7 +20,7 @@
 
 #include "dirutil.h"
 #include <unistd.h> 
-
+#include <errno.h>
 
 bool Pulsar::Database::verbose = false;
 
