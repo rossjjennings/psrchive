@@ -18,9 +18,8 @@ Pulsar::Archive* Pulsar::Archive::load (const char* filename)
 
   if (!fptr) throw Error (FailedSys, "Pulsar::Archive::load",
 			  "cannot open '%s'", filename);
-
   fclose (fptr);
-
+  
   Agent::init ();
 
   if (Agent::registry.size() == 0)
@@ -38,7 +37,10 @@ Pulsar::Archive* Pulsar::Archive::load (const char* filename)
 	     << Agent::registry[agent]->get_name() << endl;
 
       archive = Agent::registry[agent]->new_Archive();
-
+      
+      // Set this here then allow derived classes to override
+      archive -> index_state = TimeOrder;
+      
       archive -> load_header (filename);
       archive -> set_filename (filename);
       archive -> __load_filename = filename;

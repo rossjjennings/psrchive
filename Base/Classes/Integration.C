@@ -79,6 +79,33 @@ Pulsar::Integration& Pulsar::Integration::operator= (const Integration& subint)
   return *this;
 }
 
+void Pulsar::Integration::operator+= (const Integration& subint)
+{
+  string reason;
+  
+  if (!mixable(&subint, reason))
+    throw Error(InvalidParam, "Integration operator +=",
+		reason);
+  
+  for (unsigned i = 0; i < get_nchan(); i++) {
+    for (unsigned j = 0; j < get_npol(); j++) {
+      *(get_Profile(j,i)) += *(subint.get_Profile(j,i));
+    } 
+  }
+  
+  double total = get_duration() + subint.get_duration();
+  double mine = get_duration() / total;
+  double yours = subint.get_duration() / total;
+  
+  set_epoch(get_epoch()*mine + subint.get_epoch()*yours);
+  set_duration(total);
+  
+  set_folding_period(get_folding_period()*mine + 
+		     subint.get_folding_period()*yours);
+  
+  return;
+}
+
 Pulsar::Integration::~Integration ()
 {
   if (verbose)

@@ -35,6 +35,8 @@ void Pulsar::Archive::resize (unsigned nsubint, unsigned npol,
     cerr << "Pulsar::Archive::resize subints" << endl;
   IntegrationManager::resize (nsubint);
 
+  indices.resize (nsubint);
+
   for (unsigned isub=0; isub<nsubint; isub++)
     get_Integration(isub) -> resize (npol, nchan, nbin);
 

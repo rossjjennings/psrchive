@@ -20,144 +20,164 @@ void Pulsar::Archive::tscrunch (unsigned nscrunch)
   if (nscrunch == 1 || nsub < 2)
     return;
 
-  // if nscrunch == 0, default is to scrunch all sub_ints
-  if (nscrunch == 0)
-    nscrunch = nsub;
+  switch (index_state) {
 
-  unsigned newsub = nsub / nscrunch;
-
-  // if there will be subints left over, scrunch them up
-  // and tack onto the end
-  
-  if (nsub % nscrunch)
-    newsub += 1;
-  
-  if (verbose) cerr << "Pulsar::Archive::tscrunch - scrunching " 
-		    << nsub << " Integrations by " << nscrunch << endl;
-
-  try {
-
-    for (unsigned isub=0; isub < newsub; isub++) {
-
-      if (verbose) cerr << "Pulsar::Archive::tscrunch resulting subint " 
-			<< isub+1 << "/" << newsub << endl;
-
-      unsigned start = isub * nscrunch;
-
-      for (unsigned ichan=0; ichan < get_nchan(); ichan++) {
-
-	if (verbose) cerr << "Pulsar::Archive::tscrunch weighted_frequency chan="
-			  << ichan << endl;
-
-	double cfreq = 0.0;
-	if (start+nscrunch <= nsub)
-	  cfreq = weighted_frequency (ichan, start, start+nscrunch);
-	else
-	  cfreq = weighted_frequency (ichan, start, 0);
-
-	if (verbose) 
-	  cerr << "Pulsar::Archive::tscrunch dedisperse cfreq=" << cfreq << endl;
+  case TimeOrder: {
+    
+    // if nscrunch == 0, default is to scrunch all sub_ints
+    if (nscrunch == 0)
+      nscrunch = nsub;
+    
+    unsigned newsub = nsub / nscrunch;
+    
+    // if there will be subints left over, scrunch them up
+    // and tack onto the end
+    
+    if (nsub % nscrunch)
+      newsub += 1;
+    
+    if (verbose) cerr << "Pulsar::Archive::tscrunch - scrunching " 
+		      << nsub << " Integrations by " << nscrunch << endl;
+    
+    try {
+      
+      for (unsigned isub=0; isub < newsub; isub++) {
 	
-	for (unsigned iadd=0; iadd < nscrunch; iadd++) {
-	  if (start+iadd >= nsub)
-	    break;
-	  get_Integration(start+iadd) -> dedisperse (cfreq, ichan);
-	}
-
-	if (verbose) 
-	  cerr <<  "Pulsar::Archive::tscrunch sum profiles" << endl;
+	if (verbose) cerr << "Pulsar::Archive::tscrunch resulting subint " 
+			  << isub+1 << "/" << newsub << endl;
 	
-	for (unsigned ipol=0; ipol < get_npol(); ++ipol) {
-
-	  Profile* avg = get_Profile (isub, ipol, ichan);
-	  Profile* add = get_Profile (start, ipol, ichan);
-
-	  *(avg) = *(add);
+	unsigned start = isub * nscrunch;
+	
+	for (unsigned ichan=0; ichan < get_nchan(); ichan++) {
 	  
-	  for (unsigned jsub=1; jsub<nscrunch; jsub++) {
-	    if (start+jsub >= nsub)
+	  if (verbose) cerr << "Pulsar::Archive::tscrunch weighted_frequency chan="
+			    << ichan << endl;
+	  
+	  double cfreq = 0.0;
+	  if (start+nscrunch <= nsub)
+	    cfreq = weighted_frequency (ichan, start, start+nscrunch);
+	  else
+	    cfreq = weighted_frequency (ichan, start, 0);
+	  
+	  if (verbose) 
+	    cerr << "Pulsar::Archive::tscrunch dedisperse cfreq=" << cfreq << endl;
+	  
+	  for (unsigned iadd=0; iadd < nscrunch; iadd++) {
+	    if (start+iadd >= nsub)
 	      break;
-	    add = get_Profile (start+jsub, ipol, ichan);
-	    *(avg) += *(add);
+	    get_Integration(start+iadd) -> dedisperse (cfreq, ichan);
 	  }
 	  
-	} // for each poln
-      } // for each channel
-    } // for each integrated result
-  } // end try block
-
-  catch (Error& err) {
-    throw err += "Pulsar::Archive::tscrunch";
-  }
-
-  for (unsigned isub=0; isub < newsub; isub++) {
-
-    unsigned start = isub * nscrunch;
-
-    MJD    mjd;
-    double duration = 0.0;
-    int count = 0;
-
-    for (unsigned iadd=0; iadd < nscrunch; iadd++) {
+	  if (verbose) 
+	    cerr <<  "Pulsar::Archive::tscrunch sum profiles" << endl;
+	  
+	  for (unsigned ipol=0; ipol < get_npol(); ++ipol) {
+	    
+	    Profile* avg = get_Profile (isub, ipol, ichan);
+	    Profile* add = get_Profile (start, ipol, ichan);
+	    
+	    *(avg) = *(add);
+	    
+	    for (unsigned jsub=1; jsub<nscrunch; jsub++) {
+	      if (start+jsub >= nsub)
+		break;
+	      add = get_Profile (start+jsub, ipol, ichan);
+	      *(avg) += *(add);
+	    }
+	    
+	  } // for each poln
+	} // for each channel
+      } // for each integrated result
+    } // end try block
+    
+    catch (Error& err) {
+      throw err += "Pulsar::Archive::tscrunch";
+    }
+    
+    for (unsigned isub=0; isub < newsub; isub++) {
       
-      if (start+iadd >= nsub)
-	break;
+      unsigned start = isub * nscrunch;
       
-      count++;
+      MJD    mjd;
+      double duration = 0.0;
+      int count = 0;
       
-      Integration* cur = get_Integration (start+iadd);
-
-      duration += cur->get_duration();
-      mjd      += cur->get_epoch();
-      
-      Integration* result = get_Integration(isub);
-      for (unsigned i = 0; i < result->get_nextension(); i++) {
-	Integration::Extension* ext = result->get_extension(i);
-	for (unsigned j = 0; j < cur->get_nextension(); j++) {
-	  ext->append(cur->get_extension(j));
+      for (unsigned iadd=0; iadd < nscrunch; iadd++) {
+	
+	if (start+iadd >= nsub)
+	  break;
+	
+	count++;
+	
+	Integration* cur = get_Integration (start+iadd);
+	
+	duration += cur->get_duration();
+	mjd      += cur->get_epoch();
+	
+	Integration* result = get_Integration(isub);
+	for (unsigned i = 0; i < result->get_nextension(); i++) {
+	  Integration::Extension* ext = result->get_extension(i);
+	  for (unsigned j = 0; j < cur->get_nextension(); j++) {
+	    ext->append(cur->get_extension(j));
+	  }
 	}
+	
+      }
+      
+      get_Integration(isub) -> set_duration (duration);
+      
+      mjd /= double (count);
+      
+      if (get_type() == Signal::Pulsar) {
+	
+	// ensure that the polyco includes the new integration time
+	update_model (mjd);
+	
+	if (!model)
+	  continue;
+	
+	// get the time of the first subint to be integrated into isub
+	MJD firstmjd = get_Integration (isub * nscrunch) -> get_epoch ();
+	// get the period at the time of the first subint
+	double first_period = model->period(firstmjd);
+	// get the phase at the time of the first subint
+	Phase first_phase = model->phase(firstmjd);
+	
+	// get the phase at the midtime of the result
+	Phase mid_phase = model->phase (mjd); 
+	
+	// calculate the phase difference
+	Phase dphase = mid_phase - first_phase;
+	
+	// Subtract one period times phase difference from mjd      
+	mjd -= dphase.fracturns() * first_period;
+	
+	get_Integration (isub)->set_epoch (mjd);
+	get_Integration (isub)->set_folding_period (model->period(mjd));
+	
+	// The original code did not include the number of 
+	// integer turns when computing the shift_time
       }
       
     }
-
-    get_Integration(isub) -> set_duration (duration);
-
-    mjd /= double (count);
-
-    if (get_type() == Signal::Pulsar) {
-
-      // ensure that the polyco includes the new integration time
-      update_model (mjd);
-
-      if (!model)
-	continue;
-
-      // get the time of the first subint to be integrated into isub
-      MJD firstmjd = get_Integration (isub * nscrunch) -> get_epoch ();
-      // get the period at the time of the first subint
-      double first_period = model->period(firstmjd);
-      // get the phase at the time of the first subint
-      Phase first_phase = model->phase(firstmjd);
-      
-      // get the phase at the midtime of the result
-      Phase mid_phase = model->phase (mjd); 
-
-      // calculate the phase difference
-      Phase dphase = mid_phase - first_phase;
-
-      // Subtract one period times phase difference from mjd      
-      mjd -= dphase.fracturns() * first_period;
-
-      get_Integration (isub)->set_epoch (mjd);
-      get_Integration (isub)->set_folding_period (model->period(mjd));
-      
-      // The original code did not include the number of 
-      // integer turns when computing the shift_time
-    }
-
+    
+    resize (newsub);
   }
+  break;
 
-  resize (newsub);
+  case BinaryPhase: {
+    throw Error(InvalidState, "Pulsar::Archive::tscrunch",
+		"Scrunching of BinaryPhase state not implimented");
+  }
+  break;
+
+  case LoAscNode: {
+    throw Error(InvalidState, "Pulsar::Archive::tscrunch",
+		"Scrunching of LoAscNode state not implimented");
+  }
+  break;
+  
+  }
 }
 
 /////////////////////////////////////////////////////////////////////////////

@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Integration.h,v $
-   $Revision: 1.50 $
-   $Date: 2003/11/08 23:34:07 $
+   $Revision: 1.51 $
+   $Date: 2003/11/27 04:58:48 $
    $Author: ahotan $ */
 
 /*
@@ -84,7 +84,7 @@ namespace Pulsar {
 
     //! operator =
     Integration& operator = (const Integration& subint);
-
+    
     //! Destructor deletes data area
     virtual ~Integration ();
 
@@ -93,6 +93,12 @@ namespace Pulsar {
 
     //! Return the pointer to a new fscrunched and pscrunched copy of self
     Integration* total () const;
+    
+    //! Maximum centre frequency difference in Integration::mixable
+    static double match_max_frequency_difference;
+    
+    //! Test if integ is mixable (enough for combination with +=)
+    virtual bool mixable (const Integration* integ, string& reason) const;
 
     //! Return the Stokes 4-vector for the frequency channel and phase bin
     Stokes<float> get_Stokes (unsigned ichan, unsigned ibin) const;
@@ -302,15 +308,26 @@ namespace Pulsar {
 
     //! Integrate profiles from single polarizations into one total intensity
     virtual void pscrunch ();
-
+    
+    //! operator +=
+    /*! This operator is provided for experimental purposes and should
+      not be used lightly. If the time spans of the two combined
+      subints are not contiguous, several parameters in the result are
+      no longer meaningful. Also, there is no way of knowing whether
+      the profiles are aligned in phase. Developers who use this
+      operator should perform the necessary rotations at the archive
+      level (where the polyco resides) before summing the data in the
+      Integrations. */
+    void operator += (const Integration& subint);
+    
     //! Append frequency channels from another Integration
-    //
-    //  Note that this is dangerous and only intended for use with instruments
-    //  whose band is split into adjoining segments (like cpsr2)
+    /*!  Note that this is dangerous and only intended for use with instruments 
+      whose band is split into adjoining segments (like cpsr2) */
     void fappend (Pulsar::Integration* integ, bool ignore_time_mismatch = false);
-   //! Transform from Stokes (I,Q,U,V) to the polarimetric invariant interval
-    virtual void invint ();
 
+    //! Transform from Stokes (I,Q,U,V) to the polarimetric invariant interval
+    virtual void invint ();
+    
     //! Perform the congruence transformation on each polarimetric profile
     void transform (const Jones<float>& response);
 
