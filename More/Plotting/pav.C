@@ -1,5 +1,5 @@
 //
-// $Id: pav.C,v 1.47 2003/06/16 16:49:14 straten Exp $
+// $Id: pav.C,v 1.48 2003/07/26 10:15:35 ahotan Exp $
 //
 // The Pulsar Archive Viewer
 //
@@ -26,6 +26,7 @@
 
 #include "dirutil.h"
 #include "string_utils.h"
+#include "genutil.h"
 
 void usage ()
 {
@@ -45,11 +46,12 @@ void usage ()
     "\n"
     "Selection options:\n"
     " -c map    Choose a colour map\n"
-    " -M meta   meta names a file containing the list of files\n"
+    " -M meta   Read a meta-file containing the list of filenames\n"
     " -P        Select which polarization to display\n"
     " -I        Select which subint to display\n"
     " -W        Change colour scheme to suite white background\n"
     " -z x1,x2  Zoom to this pulse phase range\n"
+    " -N x,y    Divide the window into x by y panels\n"
     "\n"
     "Plotting options:\n"
     " -A        Plot instrumental phase across the band\n"
@@ -60,7 +62,6 @@ void usage ()
     " -g        Display position angle profile\n"
     " -G        Plot frequency against pulse phase\n"
     " -l        Do not display labels outside of plotting area\n"
-    " -o        Plot the original passband (an Archive::Extension)\n"
     " -q        Plot a position angle frequency spectrum colour map\n"
     " -Q        Position angle frequency spectrum for on-pulse region\n"
     " -r phase  rotate the profiles by phase (in turns)\n"
@@ -69,7 +70,10 @@ void usage ()
     " -X        Plot cal amplitude and phase vs frequency channel\n"
     " -Y        Display all subints (time vs pulse phase)\n"
     "\n"
-    "Various options:\n"
+    "Archive::Extension options (file format specific):\n"
+    " -o        Plot the original passband\n"
+    "\n"
+    "Utility options:\n"
     " -a        Print available plugin information\n"
     " -h        Display this help page \n"
     " -i        Show revision information\n"
@@ -96,6 +100,9 @@ int main (int argc, char** argv)
   int tscrunch = -1;
   int pscrunch = -1;
   
+  int n1 = 1;
+  int n2 = 1;
+  
   float the_phase = 0.0;
   
   double phase = 0;
@@ -104,6 +111,7 @@ int main (int argc, char** argv)
   bool zoomed = false;
 
   bool display = false;
+  bool nesting = false;
   bool display_axis = false;
 
   bool baseline_spectrum = false;
@@ -130,7 +138,7 @@ int main (int argc, char** argv)
   Pulsar::Plotter::ColourMap colour_map = Pulsar::Plotter::Heat;
   
   int c = 0;
-  const char* args = "AaBb:Cc:DdEeFf:GghI:iHlm:M:Qq:opP:r:SsTt:VvwWXx:Yy:Zz:";
+  const char* args = "AaBb:Cc:DdEeFf:GghI:iHlm:M:N:Qq:opP:r:SsTt:VvwWXx:Yy:Zz:";
 
   while ((c = getopt(argc, argv, args)) != -1)
     switch (c) {
@@ -198,7 +206,7 @@ int main (int argc, char** argv)
       plotter.set_subint( atoi (optarg) );
       break;
     case 'i':
-      cout << "$Id: pav.C,v 1.47 2003/06/16 16:49:14 straten Exp $" << endl;
+      cout << "$Id: pav.C,v 1.48 2003/07/26 10:15:35 ahotan Exp $" << endl;
       return 0;
 
     case 'l':
@@ -293,6 +301,19 @@ int main (int argc, char** argv)
       zoomed = true;
       break;
     }
+    case 'N': {
+      char* separator = ",";
+      char* val1 = strtok (optarg, separator);
+      char* val2 = strtok (NULL, separator);
+      if (!val1 || !val2)  {
+        cerr << "Error parsing nest parameters" << endl;
+        return -1;
+      }
+      n1 = atoi(val1);
+      n2 = atoi(val2);
+      nesting = true;
+      break;
+    }
     case 'Z':
       hat = true;
       break;
@@ -317,7 +338,10 @@ int main (int argc, char** argv)
 
   cpgbeg (0, "?", 0, 0);
   cpgask(1);
-
+  
+  if (nesting)
+    cpgsubp(n1,n2);
+  
   plotter.set_colour_map (colour_map);
 
   //Smart pointer
@@ -466,7 +490,6 @@ int main (int argc, char** argv)
 
     if (orig_passband) {
 
-      // hacked in from bav
       const Pulsar::Passband* passband = 0;
 
       for (unsigned iext=0; iext < archive->get_nextension(); iext++) {
@@ -496,16 +519,45 @@ int main (int argc, char** argv)
 	pband[ip] = passband->get_passband (ip);
       }
     
-      unsigned nbin = passband->get_nchan ();
-      vector<float> xaxis (nbin);
-      for (unsigned ibin=0; ibin<nbin; ibin++)
-	xaxis [ibin] = float(ibin);
-    
+      unsigned nchan = passband->get_nchan ();
+      float* xaxis = new float[nchan];
+      for (unsigned int i = 0; i < nchan; i++) {
+	xaxis[i] = i;
+      }
+      
       cpg_next();
-#if 0
-      prettyplot (color, symbol, 1, xaxis, pband);
-#endif
-    
+      cpgsubp(1, npol);
+      
+      float min = 0;
+      float max = 0;
+      
+      float tempmin = 0;
+      float tempmax = 0;
+      
+      char* tempstr = new char[128];
+
+      for (unsigned ip=0; ip<npol; ip++) {
+	min = max = tempmin = tempmax = 0;
+	minmaxval(nchan, &(pband[ip].front()), &tempmin, &tempmax);
+	if (tempmin < min)
+	  min = tempmin;
+	if (tempmax > max)
+	  max = tempmax;
+	for (unsigned j=0; j<nchan; j++) {
+	  pband[ip][j] -= min;
+	}
+	max -= min;
+	cpgpanl(1,ip+1);
+	cpgsci(1);
+	cpgswin(0, nchan, 0, max);
+	cpgbox("ABCNT", 0.0, 0, "ABCNT", 0.0, 0);
+	sprintf(tempstr, "Original Bandpass: Polarisation %d", ip);
+	cpglab("Channel Number", "Level", tempstr);
+	cpgsci(color[ip]);
+	cpgline(nchan, xaxis, &(pband[ip].front()));
+      }
+
+      delete[] tempstr;
     }
 
 
