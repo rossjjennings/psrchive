@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Angle.h,v $
-   $Revision: 1.10 $
-   $Date: 2001/06/02 07:24:03 $
+   $Revision: 1.11 $
+   $Date: 2002/04/05 07:11:32 $
    $Author: straten $ */
 
 // redwards 17 Mar 99 -- Time for a definitive C++ suite of
@@ -148,6 +148,7 @@ class AnglePair
   AnglePair & operator*= (const double);
   AnglePair (const Angle &, const Angle &);
   AnglePair (const double = 0.0, const double = 0.0);
+  AnglePair (const char* astr) { setHMSDMS (astr); }
 
   friend AnglePair operator * (const AnglePair&, const double);
 
@@ -167,8 +168,5 @@ double tan(const Angle&);
 Angle arctan(double);
 Angle arctan(double y, double x); // returns atan y/x
 
-
-
-
-
 #endif //ANGLE_H
+
