@@ -1,0 +1,68 @@
+#include <stdio.h>
+
+#include "tempo++.h"
+
+// ////////////////////////////////////////////////////////////////////////
+// tempo_fit
+//
+// runs TEMPO on a vector of toa objects, using a given psrParams object.
+// returns a vector of residual objects, along with a new "post-fit"
+// psrParams object.
+//
+// model     - input TEMPO-style PSR ephemeris
+// toas      - input toas
+// postfit   - new PSR ephemeris output by TEMPO
+// residuals - vector of residual objects into which tempo output will 
+//             be loaded
+// ////////////////////////////////////////////////////////////////////////
+
+int Tempo::fit (const psrParams& model, const vector<toa>& toas,
+		psrParams* postfit, vector<residual>* residuals)
+{
+  char* tempo_tim = "arrival.tim";
+  char* tempo_par = "arrival.par";
+  // char* tempo_lis = "tempo.lis";
+  char* tempo_res = "resid2.tmp";
+  
+  int   r2flun = 32;
+
+  // unload the toas into a temporary file
+  FILE* fptr = fopen (tempo_tim, "w");
+  if (fptr==NULL) {
+    fprintf (stderr, "fit error opening %s:\n",tempo_tim);
+    perror (":");
+    throw ("fit() cannot open file");
+  }
+  int unloaded = 0;
+  for (unsigned iarr=0; iarr < toas.size(); iarr++)  {
+    if (!toas[iarr].is_deleted() && toas[iarr].is_selected()) {
+      toas[iarr].Tempo_unload (fptr);
+      unloaded ++;
+    }
+  }
+  fclose (fptr); 
+
+  // unload the ephemeris
+  model.unload(tempo_par);
+
+  // run TEMPO
+  char* tempo = "tempo ";
+  string runtempo = tempo;
+  runtempo += tempo_tim;
+  system (runtempo.data());
+
+  if (postfit) {
+    // load the new ephemeris (PSRNAME.par in current working directory)
+    char* dotpar = ".par";
+    string tpopar = model.psrname() + dotpar;
+    postfit->load( tpopar.data() );
+  }
+
+  if (residuals) {
+    // load the residuals from resid2.tmp
+    residuals->resize(unloaded);
+    return residual::load (r2flun, tempo_res, residuals);
+  }
+
+  return 0;
+}
