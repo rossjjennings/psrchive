@@ -13,6 +13,8 @@
 
 void Rhythm::menubarConstruct ()
 {
+  menuBar() -> setFixedHeight ( menuBar()->fontMetrics().height() * 2 );
+
   // ///////////////////////////////////////////////////////////////////////
   // FILE menu options
   //
@@ -38,7 +40,7 @@ void Rhythm::menubarConstruct ()
   tempo->setItemEnabled (dispID, false);
 
   tempo->insertSeparator();
-  tempo->insertItem( "Load Paremeters", fitpopup, SLOT( open() ));
+  tempo->insertItem( "Load Parameters", fitpopup, SLOT( open() ));
   saveParmsID = tempo->insertItem( "Save Parameters", fitpopup, SLOT(save()));
   tempo->setItemEnabled (saveParmsID, false);
 
@@ -50,12 +52,14 @@ void Rhythm::menubarConstruct ()
   // ///////////////////////////////////////////////////////////////////////
   // OPTIONS menu options
   //
-  verbosity = new QPopupMenu( menuBar() );  CHECK_PTR (verbosity);
-  quietID  = verbosity->insertItem( "Quiet", this, SLOT( quiet() ));
-  mediumID = verbosity->insertItem( "Verbose", this, SLOT( medium() ));
-  noisyID  = verbosity->insertItem( "Noisy", this, SLOT( noisy() ));
+  QPopupMenu* verbosity = new QPopupMenu( menuBar() );  CHECK_PTR (verbosity);
+  quietID  = verbosity->insertItem( "Quiet" );
+  mediumID = verbosity->insertItem( "Verbose" );
+  noisyID  = verbosity->insertItem( "Noisy" );
 
   verbosity->setItemChecked( quietID, true );
+  connect ( verbosity, SIGNAL( activated (int) ),
+	    this, SLOT( setVerbosity(int) ) );
 
   options = new QPopupMenu( menuBar() );  CHECK_PTR (options);
   options->insertSeparator();
@@ -72,11 +76,11 @@ void Rhythm::menubarConstruct ()
 
   menuBar() -> setSeparator ( QMenuBar::InWindowsStyle );
 
-  menuBar() -> insertItem   ( "&File",    file );
-  menuBar() -> insertItem   ( "&Tempo",   tempo );
-  menuBar() -> insertItem   ( "&Options", options );
+  menuBar() -> insertItem   ( "File",    file );
+  menuBar() -> insertItem   ( "Tempo",   tempo );
+  menuBar() -> insertItem   ( "Options", options );
   menuBar() -> insertSeparator();
-  menuBar() -> insertItem   ( "&Help", help );
+  menuBar() -> insertItem   ( "Help", help );
 
   if (verbose) cerr << "Rhythm::menubarConstruct () returns\n";
 }
@@ -158,44 +162,24 @@ void Rhythm::save_toas ()
   fprintf (stderr, "Rhythm::save_toas Not implemented.");
 }
 
-void Rhythm::quiet ()
+void Rhythm::setVerbosity ( int verbosityID )
 {
-  options->setItemChecked( quietID, true );
-  options->setItemChecked( mediumID, false );
-  options->setItemChecked( noisyID, false );
+  options->setItemChecked( quietID,  quietID  == verbosityID);
+  options->setItemChecked( mediumID, mediumID == verbosityID);
+  options->setItemChecked( noisyID,  noisyID  == verbosityID);
 
-  verbose = false;
-  vverbose = false;
-  qt_fileParams::verbose = 0;
-  qt_editParams::verbose = 0;
-  xmp_manager::verbose = 0;
-  pg_manager::verbose = 0;
-  xyplot::verbose = 0;
-  Tempo::verbose = 0;
-}
+  verbose = (mediumID == verbosityID || noisyID  == verbosityID);
+  vverbose = (noisyID  == verbosityID);
 
-void Rhythm::medium ()
-{
-  quiet ();
-  options->setItemChecked( quietID, false );
-  options->setItemChecked( mediumID, true );
-  verbose = true;
-  cerr << "rhythm: verbose on" << endl;
-}
+  qt_fileParams::verbose = vverbose;
+  qt_editParams::verbose = vverbose;
+  xmp_manager::verbose = vverbose;
+  pg_manager::verbose = vverbose;
+  xyplot::verbose = vverbose;
+  Tempo::verbose = vverbose;
 
-void Rhythm::noisy ()
-{
-  options->setItemChecked( quietID, false );
-  options->setItemChecked( mediumID, false );
-  options->setItemChecked( noisyID, true );
-
-  verbose = true;
-  vverbose = true;
-  qt_fileParams::verbose = 1;
-  qt_editParams::verbose = 1;
-  xmp_manager::verbose = 1;
-  pg_manager::verbose = 1;
-  xyplot::verbose = 1;
-  Tempo::verbose = 1;
-  cerr << "rhythm: very verbose on" << endl;
+  if (vverbose)
+    cerr << "rhythm: very verbose on" << endl;
+  esle if (verbose)
+    cerr << "rhythm: verbose on" << endl;
 }

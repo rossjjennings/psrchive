@@ -46,6 +46,10 @@ class Rhythm : public QMainWindow
   void labelPlot();            // labels the axis appropriately
 
   // /////////////////////////////////////////////////////////////////////////
+  // ToolBar and its constructor
+  void toolbarConstruct ();
+
+  // /////////////////////////////////////////////////////////////////////////
   // main menubar and its constructor
   void menubarConstruct ();    // construct the menubar along the top
 
@@ -62,7 +66,6 @@ class Rhythm : public QMainWindow
 
   // The OPTIONS popup menu and IDs of its individual options
   QPopupMenu *options;
-  QPopupMenu *verbosity;  // sub menu of options
   int quietID;
   int mediumID;
   int noisyID;
@@ -89,10 +92,8 @@ class Rhythm : public QMainWindow
   void togledit();
   void toglauto();
 
-  // Options menu callbacks
-  void quiet();
-  void medium();
-  void noisy();
+  // Options->Verbosity menu callbacks
+  void setVerbosity (int id);
 
   void undo() {fprintf (stderr, "Not implemented\n");};
   void redo() {fprintf (stderr, "Not implemented\n");};

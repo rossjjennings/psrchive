@@ -44,6 +44,7 @@ Rhythm::Rhythm (QWidget* parent, int argc, char** argv) :
 	    this, SLOT( set_Params(const psrParams&) ) );
 
   menubarConstruct(); 
+  // toolbarConstruct(); 
 
   setCentralWidget (&plot_manager);
 
