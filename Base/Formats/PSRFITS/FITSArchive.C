@@ -257,17 +257,17 @@ void Pulsar::FITSArchive::load_header (const char* filename)
   }
   else if (hdr_ext->coordmode == "Ecliptic") {
     if (verbose)
-      cerr << "WARNING: FITSArchive::load_header Ecliptic COORD_MD not implimented" 
+      cerr << "WARNING: FITSArchive::load_header Ecliptic COORD_MD not implemented" 
 	   << endl;
   }
   else if (hdr_ext->coordmode == "AZEL") {
     if (verbose)
-      cerr << "WARNING: FITSArchive::load_header AZEL COORD_MD not implimented"
+      cerr << "WARNING: FITSArchive::load_header AZEL COORD_MD not implemented"
 	   << endl;
   }
   else if (hdr_ext->coordmode == "HADEC") {
     if (verbose)
-      cerr << "WARNING: FITSArchive::load_header HADEC COORD_MD not implimented"
+      cerr << "WARNING: FITSArchive::load_header HADEC COORD_MD not implemented"
 	   << endl;
   }
   else
