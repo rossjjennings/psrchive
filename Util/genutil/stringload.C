@@ -8,11 +8,13 @@
 // error
 // //////////////////////////////////////////////////////////////////
 
+static const unsigned rdsize = 256;
+static char* rdline = NULL;
+
 ssize_t stringload (string* str, FILE* fptr, size_t nbytes)
 {
-  char rdline [101];
-
-  size_t eachread = 100;
+  if (rdline == NULL) rdline = new char [rdsize];
+  size_t eachread = rdsize;
   size_t bytesread = 0;
   while (!nbytes || bytesread<nbytes) {
     if (nbytes && eachread > (nbytes-bytesread))
@@ -27,6 +29,29 @@ ssize_t stringload (string* str, FILE* fptr, size_t nbytes)
   if (ferror (fptr))  {
     perror ("stringload: fread failed");
     return -1;
+  }
+  return bytesread;
+}
+
+ssize_t stringload (string* str, istream &istr, size_t nbytes)
+{
+  if (rdline == NULL) rdline = new char [rdsize];
+  streamsize eachread  = rdsize;
+  streamsize bytesread = 0;
+
+  streampos start_pos = istr.tellg();
+
+  while (!nbytes || bytesread<nbytes) {
+    if (nbytes && eachread > (nbytes-bytesread))
+      eachread = nbytes-bytesread;
+
+    istr.read (rdline, eachread);
+    streampos bytes = istr.tellg() - (bytesread + start_pos);
+    if (bytes < 1)
+      break;
+    rdline [bytes] = '\0';
+    *str += rdline;
+    bytesread += bytes;
   }
   return bytesread;
 }

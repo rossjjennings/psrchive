@@ -1,6 +1,6 @@
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Attic/string_utils.h,v $
-   $Revision: 1.5 $
-   $Date: 1999/12/10 04:43:06 $
+   $Revision: 1.6 $
+   $Date: 1999/12/21 04:51:45 $
    $Author: straten $ */
 
 #ifndef __STRING_UTILS_H
@@ -14,8 +14,14 @@
 #include "psr_cpp.h"
 
 // ///////////////////////////////////////////////////////////
+// reads up to 'nbytes' (or to eof) from 'istr', adding them 
+// to 'str'.  returns number of bytes read or -1 on error
+// ///////////////////////////////////////////////////////////
+ssize_t stringload (string* str, istream &istr, size_t nbytes=0);
+
+// ///////////////////////////////////////////////////////////
 // reads up to 'nbytes' (or to eof) from 'fptr', adding them 
-// to 'str'.  returns actual bytes read or -1 on error
+// to 'str'.  returns number bytes read or -1 on error
 // ///////////////////////////////////////////////////////////
 ssize_t stringload (string* str, FILE* fptr, size_t nbytes=0);
 
