@@ -26,6 +26,8 @@ libpsrutils_la_LIBADD   = units/libunits.la psrfft/libpsrfft.la \
 			genutil/libgenutil.la genutil++/libgenutilpp.la \
 			$(PGPLOT_LIBADD) $(QT_LIBADD) $(CFITSIO_LIBADD)
 
+all: intermediate-install
 
-# Dummy C++ source to cause C++ linking.
-# nodist_EXTRA_libpsrutils_la_SOURCES = dummy.C
+intermediate-install:
+	$(MAKE) prefix=.. install-data
+
