@@ -10,9 +10,6 @@
 //! files are big endian by default
 bool Pulsar::TimerArchive::big_endian = true;
 
-//! Register the TimerArchive Agent
-static Registry::List<Pulsar::Archive::Agent>::Enter<Pulsar::TimerAgent> entry;
-
 // null constructor
 Pulsar::TimerArchive::TimerArchive ()
 {

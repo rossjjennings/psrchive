@@ -39,7 +39,8 @@ DSO_NAME := Pulsar/TimerArchive.so
 
 DSO_SRCS := TimerArchive.C TimerArchive_load.C TimerArchive_unload.C \
 	TimerIntegration.C TimerIntegration_load.C TimerIntegration_unload.C \
-	TimerProfile_load.C TimerProfile_unload.C BasebandArchive.C
+	TimerProfile_load.C TimerProfile_unload.C BasebandArchive.C \
+	TimerAgent.C
 
 DSO_FLAGS := $(LDFLAGS) -larchive -ltimes -lgenutil $(LSLA)
 
