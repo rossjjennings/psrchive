@@ -379,7 +379,7 @@ void MJD::settle()
 
   // Everything should have the same sign.
   int sign = -1;
-  if (double(days) + (secs+fracsec)/86400.0 >= 0.0) 
+  if (double(days) + (secs+fracsec)/double(seconds_in_day) >= 0.0) 
     sign = 1;
 
   // check the sign on the fractional seconds
@@ -413,12 +413,12 @@ void MJD::settle()
 
 MJD::MJD (const char* mjdstring) {
   if (Construct (mjdstring) < 0)
-    throw ("MJD::MJD(char*) construct error");
+    throw string ("MJD::MJD(char*) construct error");
 }
 
 MJD::MJD (const string& mjd) {
   if (Construct (mjd.c_str()) < 0)
-    throw ("MJD::MJD(string&) construct error");
+    throw string ("MJD::MJD(string&) construct error");
 }
 
 MJD::MJD (int intday, double fracday)
@@ -426,6 +426,7 @@ MJD::MJD (int intday, double fracday)
   secs = 0;
   fracsec = 0.0;
   days = intday;
+
   add_day (fracday);
   settle();
 }
@@ -465,6 +466,11 @@ int MJD::gregorian (struct tm* gregdate, double* fsec) const
 
   if (fsec)
     *fsec = fracsec;
+
+  gregdate->tm_isdst = -1;
+  time_t date = mktime (gregdate);
+  if (date == (time_t)-1)
+    return -1;
 
   return 0;
 }
