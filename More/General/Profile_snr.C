@@ -22,6 +22,8 @@ catch (Error& error) {
   throw error += "Pulsar::Profile::snr";
 }
 
+// defined in Profile.C
+void nbinify (int& istart, int& iend, int nbin);
 
 /*! The default implementation of the Profile::snr method is taken
  from the old timer archive code.  Using Profile::find_min_phase and
@@ -47,15 +49,14 @@ double Pulsar::snr_phase (const Profile* profile)
 
   double power = profile->sum (rise, fall);
 
+  nbinify (rise, fall, profile->get_nbin());
+
   if (Profile::verbose)
     cerr << "Pulsar::snr_phase rise=" << rise << " fall=" << fall 
 	 << " power=" << power << endl;
 
   // subtract the total power due to the baseline
   power -= min_avg * double (fall - rise);
-
-  //double flux = power;
-  //double width = (double) (fall - rise);
 
   // divide by the sqrt of the number of bins
   power /= sqrt (double(fall-rise));
