@@ -152,6 +152,36 @@ bool h_frontchomp(string& ss, string gone){
   return false;
 }
 
+// Pop off a trailing word from the end of the line
+string pop_word(string& line){
+  vector<string> words = stringdecimate(line," \t");
+  string lastword = words.back();
+  words.pop_back();
+  line = stringdelimit(words,'\t');
+  return lastword;
+}
+
+// Push on a trailing word onto the end of the line
+string& push_word(string& line,string word){
+  line += '\t' + word;
+  return line;
+}
+
+// Pop off a leading word from the start of the line
+string frontpop_word(string& line){
+  vector<string> words = stringdecimate(line," \t");
+  string firstword = words.front();
+  words = vector<string>(words.begin()+1,words.end());
+  line = stringdelimit(words,'\t');
+  return firstword;
+}
+
+// Push on a leading word onto the start of the line
+string& frontpush_word(string& line,string word){
+  line = word + '\t' + line;
+  return line;
+}
+
 // Takes off a leading 'J' or a leading 'B'
 string no_JB(string pulsar){
   frontchomp(pulsar,'J');
