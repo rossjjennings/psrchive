@@ -38,8 +38,19 @@ float Pulsar::StandardSNR::get_morph_snr (const Profile* profile)
     scopy->bscrunch(scopy->get_nbin() / pcopy->get_nbin());
   }
 
+  float minphs = pcopy->find_min_phase(0.6);
+  *pcopy -= (pcopy->mean(minphs));
+
+  minphs = scopy->find_min_phase(0.6);
+  *scopy -= (scopy->mean(minphs));
+
+  double shift = 0.0;
+  double scale = 0.0;
+
   Reference::To<Pulsar::Profile> diff = 
-    pcopy->morphological_difference(*scopy);
+    pcopy->morphological_difference(*scopy, scale, shift);
+
+  pcopy->rotate(shift);
 
   double mean    = 0.0;
   double var     = 0.0;
@@ -50,15 +61,21 @@ float Pulsar::StandardSNR::get_morph_snr (const Profile* profile)
   diff->stats(&mean, &var, &varmean);
   double stddev1 = sqrt(var);
 
-  // Now it gets interesting... How exactly is S/N defined?
+  // Now it gets interesting...
 
-  double base_flux = pcopy->get_nbin() * stddev1;
-  double puls_flux = pcopy->sum();
+  int rise, fall;
 
-  if (base_flux < 0.0000001)
-    return 1000000.0;
+  scopy->find_peak_edges(rise, fall);
 
-  return (puls_flux / base_flux);
+  if (fall <= rise)
+    fall += ( (rise-fall)/scopy->get_nbin() + 1 ) * scopy->get_nbin();
+
+  double puls_flux = pcopy->sum(rise, fall)*scale - mean * double(fall-rise);
+
+  // divide by the sqrt of the number of bins
+  puls_flux /= sqrt (double(fall-rise));
+
+  return (puls_flux / stddev1);
 }
 
 

@@ -1,5 +1,5 @@
 //
-// $Id: pav.C,v 1.77 2004/04/26 08:42:41 hknight Exp $
+// $Id: pav.C,v 1.78 2004/05/06 09:00:42 ahotan Exp $
 //
 // The Pulsar Archive Viewer
 //
@@ -293,7 +293,7 @@ int main (int argc, char** argv)
       plotter.set_subint( atoi (optarg) );
       break;
     case 'i':
-      cout << "$Id: pav.C,v 1.77 2004/04/26 08:42:41 hknight Exp $" << endl;
+      cout << "$Id: pav.C,v 1.78 2004/05/06 09:00:42 ahotan Exp $" << endl;
       return 0;
 
     case 'j':
@@ -697,10 +697,11 @@ int main (int argc, char** argv)
     if (mdiff) {
       if (std_prof) {
 	cpg_next();
+        double scale, shift;
 	Pulsar::Profile* mdp = 
 	  archive->get_Profile(plotter.get_subint(),
 			       plotter.get_pol(),plotter.get_chan())->
-	  morphological_difference(*std_prof);
+	  morphological_difference(*std_prof, scale, shift);
 	mdp->display(0,0,1,0,1,1.0,false,true);
 	delete mdp;
       }

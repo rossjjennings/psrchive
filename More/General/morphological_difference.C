@@ -64,7 +64,8 @@ const Pulsar::Profile& Pulsar::Profile::average (const Profile& profile,
 */
 
 Pulsar::Profile*
-Pulsar::Profile::morphological_difference (const Profile& profile)
+Pulsar::Profile::morphological_difference (const Profile& profile,
+					   double& scale, double& shift)
 {
   if (get_nbin() != profile.get_nbin())
     throw Error (InvalidRange, "Pulsar::Profile::morphological_difference",
@@ -101,6 +102,7 @@ Pulsar::Profile::morphological_difference (const Profile& profile)
   // Perform the rotation in phase
 
   temp1->rotate(phase);
+  shift = phase;
   
   float minphs = 0.0;
 
@@ -116,13 +118,15 @@ Pulsar::Profile::morphological_difference (const Profile& profile)
   // possible schemes
   
   // This section scales the total flux under the profile to
-  // be (arbitrarily) 100 units for both the reference and
-  // the subject.
+  // be the same as under the standard
   
-  float ratio = 100.0 / temp1->sum();
+  float t2sum = temp2->sum();
+
+  float ratio = t2sum / temp1->sum();
+
   *temp1 *= ratio;
-  ratio = 100.0 / temp2->sum();
-  *temp2 *= ratio;
+
+  scale = ratio;
   
   // End section
   
