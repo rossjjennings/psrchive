@@ -5,7 +5,7 @@
 #include "Error.h"
 #include "Estimate.h"
 
-#include "GaussJordan.h"
+#include "MEAL/GaussJordan.h"
 
 double Pulsar::Profile::ParIntShift (const Profile& std, float& error,
 				     float* corr, float* fn) const
@@ -76,7 +76,7 @@ double Pulsar::Profile::ParIntShift (const Profile& std, float& error,
 
   // Invert the matrix
 
-  Numerical::GaussJordan (matrix, empty, 3);
+  MEAL::GaussJordan (matrix, empty, 3);
 
   // Solve for the coefficients of our parabola, in the form:
   // y = Ax^2 + Bx + C
