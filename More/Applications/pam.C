@@ -9,6 +9,12 @@
 #include "Pulsar/Profile.h"
 #include "Pulsar/getopt.h"
 
+#include "Pulsar/IntegrationOrder.h"
+#include "Pulsar/PeriastronOrder.h"
+#include "Pulsar/BinaryPhaseOrder.h"
+#include "Pulsar/BinLngAscOrder.h"
+#include "Pulsar/BinLngPeriOrder.h"
+
 #include "Error.h"
 
 // Extensions this program understands
@@ -42,6 +48,10 @@ void usage()
   cout << "  --setnsub        Time scrunch to this many subints"              << endl;
   cout << "  --setnchn        Frequency scrunch to this many channels"        << endl;
   cout << "  --setnbin        Bin scrunch to this many bins"                  << endl;
+  cout << "  --binphsperi     Convert to binary phase periastron order"       << endl;
+  cout << "  --binphsasc      Convert to binary phase asc node order"         << endl;
+  cout << "  --binlngperi     Convert to binary longitude periastron order"   << endl;
+  cout << "  --binlngasc      Convert to binary longitude asc node order"     << endl;
   cout << endl;
   cout << "The following options take floating point arguments"               << endl;
   cout << "  -d               Alter the header dispersion measure"            << endl;
@@ -111,6 +121,12 @@ int main (int argc, char *argv[]) {
   bool circ = false;
   bool lin = false;
 
+  unsigned ronsub = 0;
+  bool cbppo = false;
+  bool cbpao = false;
+  bool cblpo = false;
+  bool cblao = false;
+
   int c = 0;
   
   while (1) {
@@ -118,9 +134,13 @@ int main (int argc, char *argv[]) {
     int options_index = 0;
 
     static struct option long_options[] = {
-      {"setnchn", 1, 0, 200},
-      {"setnsub", 1, 0, 201},
-      {"setnbin", 1, 0, 202},
+      {"setnchn",    1, 0, 200},
+      {"setnsub",    1, 0, 201},
+      {"setnbin",    1, 0, 202},
+      {"binphsperi", 1, 0, 203},
+      {"binphsasc",  1, 0, 204},
+      {"binlngperi", 1, 0, 205},
+      {"binlngasc",  1, 0, 206},
       {0, 0, 0, 0}
     };
     
@@ -143,7 +163,7 @@ int main (int argc, char *argv[]) {
       Pulsar::Archive::set_verbosity(3);
       break;
     case 'i':
-      cout << "$Id: pam.C,v 1.25 2004/02/02 10:32:06 ahotan Exp $" << endl;
+      cout << "$Id: pam.C,v 1.26 2004/02/06 12:33:41 ahotan Exp $" << endl;
       return 0;
     case 'm':
       save = true;
@@ -307,6 +327,58 @@ int main (int argc, char *argv[]) {
       command += " --setnbin ";
       command += optarg;
       break;
+    case 203: {
+      if (cbpao || cblpo || cblao) {
+	cerr << "You can only specify one re-ordering scheme!"
+	     << endl;
+	return -1;
+      }
+      if (sscanf(optarg, "%ud", &ronsub) != 1) {
+	cerr << "Invalid nsub given" << endl;
+	return -1;
+      }
+      cbppo = true;
+      break;
+    } 
+    case 204: {
+      if (cbppo || cblpo || cblao) {
+	cerr << "You can only specify one re-ordering scheme!"
+	     << endl;
+	return -1;
+      }
+      if (sscanf(optarg, "%ud", &ronsub) != 1) {
+	cerr << "Invalid nsub given" << endl;
+	return -1;
+      }
+      cbpao = true;
+      break;
+    }      
+    case 205: {
+      if (cblao || cbppo || cbpao) {
+	cerr << "You can only specify one re-ordering scheme!"
+	     << endl;
+	return -1;
+      }
+      if (sscanf(optarg, "%ud", &ronsub) != 1) {
+	cerr << "Invalid nsub given" << endl;
+	return -1;
+      }
+      cblpo = true;
+      break;
+    } 
+    case 206: {
+      if (cblpo || cbppo || cbpao) {
+	cerr << "You can only specify one re-ordering scheme!"
+	     << endl;
+	return -1;
+      }
+      if (sscanf(optarg, "%ud", &ronsub) != 1) {
+	cerr << "Invalid nsub given" << endl;
+	return -1;
+      }
+      cblao = true;
+      break;
+    }
     default:
       cout << "Unrecognised option" << endl;
     }
@@ -402,6 +474,30 @@ int main (int argc, char *argv[]) {
 	arch->convert_state(Signal::Stokes);
 	if (verbose)
 	  cout << "Archive converted to Stokes parameters" << endl;
+      }
+
+      if (cbppo) {
+	Pulsar::IntegrationOrder* myio = new Pulsar::PeriastronOrder();
+	arch->add_extension(myio); 
+	myio->organise(arch, ronsub);
+      }
+      
+      if (cbpao) {
+	Pulsar::IntegrationOrder* myio = new Pulsar::BinaryPhaseOrder();
+	arch->add_extension(myio);
+	myio->organise(arch, ronsub);
+      }
+      
+      if (cblpo) {
+	Pulsar::IntegrationOrder* myio = new Pulsar::BinLngPeriOrder();
+	arch->add_extension(myio);
+	myio->organise(arch, ronsub);
+      }
+      
+      if (cblao) {
+	Pulsar::IntegrationOrder* myio = new Pulsar::BinLngAscOrder();
+	arch->add_extension(myio);
+	myio->organise(arch, ronsub);
       }
       
       if (tscr) {
