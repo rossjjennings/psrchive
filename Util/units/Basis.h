@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Basis.h,v $
-   $Revision: 1.5 $
-   $Date: 2004/11/22 19:58:44 $
+   $Revision: 1.6 $
+   $Date: 2004/11/22 20:35:01 $
    $Author: straten $ */
 
 #ifndef __Basis_H
@@ -23,7 +23,7 @@ public:
   Basis () { set_basis (Linear); }
 
   //! set basis to circular or linear
-  void set_basis (Basis basis);
+  void set_basis (Type basis);
 
   //! set basis to elliptical
   void set_basis (double orientation, double ellipticity);
@@ -87,7 +87,7 @@ void Basis<T>::set_basis (double _orientation, double _ellipticity)
 
 //! set basis to circular or linear
 template<typename T>
-void Basis<T>::set_basis (Basis _basis)
+void Basis<T>::set_basis (Type _basis)
 {
   basis = _basis;
 
