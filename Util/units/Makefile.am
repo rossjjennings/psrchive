@@ -19,8 +19,7 @@ nobase_include_HEADERS = Error.h HeapTracked.h ReferenceAble.h stringtok.h \
 	Traits.h Reference.h ReferenceTo.h Registry.h Functor.h \
         Callback.h Estimate.h Matrix.h Vector.h Jacobi.h \
         Quaternion.h Jones.h Pauli.h Basis.h Stokes.h Cloude.h  \
-        tostring.h random.h EstimatePlotter.h \
-	MEAL/Agent.h                     MEAL/Pauli.h \
+        tostring.h random.h EstimatePlotter.h MEAL/Agent.h \
 	MEAL/ArgumentBehaviour.h         MEAL/Phase.h \
 	MEAL/Argument.h                  MEAL/Polar.h \
 	MEAL/Axis.h                      MEAL/Polynomial.h \
