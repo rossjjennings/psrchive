@@ -47,6 +47,8 @@ void psrephem::size_dataspace()
 
   if (parmStatus != NULL)  {
     // the arrays have already been initialized.  zero them
+    if (verbose)
+      fprintf (stderr, "psrephem::size_dataspace zero\n");
     zero();
     return;
   }
@@ -62,8 +64,7 @@ void psrephem::size_dataspace()
 
 void psrephem::zero()
 {
-  char* tpo_safe = " ";
-  static string tempo_safe_string (tpo_safe);
+  static string tempo_safe_string (" ");
 
   for (int i=0;i<EPH_NUM_KEYS;i++) {
     parmStatus   [i] = 0;
@@ -88,6 +89,7 @@ void psrephem::destroy()
 
 psrephem::psrephem (const char* psr_name, int use_cwd)
 {
+  init();
   if (create (psr_name, use_cwd) < 0) {
     fprintf (stderr, "psrephem::error creating epemeris for %s.\n",
 	     psr_name);
@@ -97,6 +99,7 @@ psrephem::psrephem (const char* psr_name, int use_cwd)
 
 psrephem::psrephem (const char* filename)
 {
+  init();
   if (load (filename) < 0) {
     fprintf (stderr, "psrephem::error loading %s.\n", filename);
     throw ("psrephem::construction error");
@@ -111,6 +114,8 @@ int psrephem::create (const char* psr_name, int use_cwd)
 	     psr_name);
     return -1;
   }
+  if (verbose)
+    fprintf (stderr, "psrephem::create loading '%s'\n", filename.c_str());
   if (load (filename.c_str()) < 0) {
     fprintf (stderr, "psrephem::create error loading %s.\n", filename.c_str());
     return -1;
@@ -120,16 +125,24 @@ int psrephem::create (const char* psr_name, int use_cwd)
 
 int psrephem::load (const char* filename)
 {
+  if (verbose)  {
+    fprintf (stderr, "psrephem::load size_dataspace()\n");
+    fflush (stderr);
+  }
   tempo11 = 1;
   size_dataspace();
   
   // when Sun compilers catch up: const_cast<char*>(filename)
   // this got worse - 5.0 won't accept the const, and 4.2
   // won't accept the dynamic cast - MCB
-  char * fname = strdup(filename);
-  rd_eph (fname, parmStatus, ephemstr, value_double, 
+
+  if (verbose)  {
+    fprintf (stderr, "psrephem::load rd_eph (%s)\n", filename);
+    fflush (stderr);
+  }    
+
+  rd_eph (const_cast<char*>(filename), parmStatus, ephemstr, value_double, 
 	  value_integer, error_double);
-  free(fname);
   int all_zero = 1;
   for (int i=0;i<EPH_NUM_KEYS;i++)  {
     if (parmStatus[i] == 1) {
@@ -284,7 +297,8 @@ string psrephem::par_lookup (const char* name, int use_cwd)
     filename = tempo_pardir + psr_name + ".par";
     if (stat (filename.c_str(), &finfo) == 0) {
       if (verbose)
-	printf("psrephem:: Using %s from PARDIR\n", filename.c_str());
+	printf("psrephem:: Using %s from PARDIR:%s\n", filename.c_str(),
+		tempo_pardir);
       return filename;
     }
   }
