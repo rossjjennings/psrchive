@@ -30,9 +30,9 @@ class residual {
   static int load (int r2flun, char* filename, vector<residual>* residuals);
 };
 
-class psrephem;
+class psrParams;
 class toa;
-int tempo_fit (const psrephem& model, const vector<toa>& toas,
-	       psrephem* postfit, vector<residual>* residuals);
+int tempo_fit (const psrParams& model, const vector<toa>& toas,
+	       psrParams* postfit, vector<residual>* residuals);
 
 #endif
