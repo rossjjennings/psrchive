@@ -29,7 +29,7 @@ void usage ()
     "usage: pacv [options] file1 [file2 ...]\n"
     "where:\n"
     " -a archive set the output archive class name\n"
-    " -c ICHAN   mark ICHAN as bad\n"
+    " -c [i|j-k] mark channel or range of channels as bad\n"
     " -C         plot only calibrator Stokes\n"
     " -D dev     specify PGPLOT device\n"
     " -f         treat all archives as members of a fluxcal observation\n"
@@ -298,6 +298,8 @@ int main (int argc, char** argv)
     if (verbose)
       cerr << "pacv: Plotting Calibrated Spectrum" << endl;
     cpgpage ();
+
+    // input->convert_state (Signal::Stokes);
     archplot.calibrator_spectrum (input);
 
 
