@@ -43,3 +43,30 @@ void Pulsar::FluxCalibratorExtension::set_nchan (unsigned _nchan)
   T_sys.resize( _nchan );
 }
 
+using namespace Pulsar;
+
+void FluxCalibratorExtension::set_T_sys (unsigned ichan,
+					 const Estimate<double>& _T_sys)
+{
+  range_check (ichan, "Pulsar::FluxCalibratorExtension::set_T_sys");
+  T_sys[ichan] = _T_sys;
+}
+
+Estimate<double> FluxCalibratorExtension::get_T_sys (unsigned ichan) const
+{
+  range_check (ichan, "Pulsar::FluxCalibratorExtension::get_T_sys");
+  return T_sys[ichan];
+}
+
+void FluxCalibratorExtension::set_cal_flux (unsigned ichan,
+					    const Estimate<double>& _cal_flux)
+{
+  range_check (ichan, "Pulsar::FluxCalibratorExtension::set_cal_flux");
+  cal_flux[ichan] = _cal_flux;
+}
+
+Estimate<double> FluxCalibratorExtension::get_cal_flux (unsigned ichan) const
+{
+  range_check (ichan, "Pulsar::FluxCalibratorExtension::get_cal_flux");
+  return cal_flux[ichan];
+}

@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/FluxCalibratorExtension.h,v $
-   $Revision: 1.2 $
-   $Date: 2004/10/08 10:05:06 $
+   $Revision: 1.3 $
+   $Date: 2004/10/08 12:57:19 $
    $Author: straten $ */
 
 #ifndef __FluxCalibratorExtension_h
@@ -42,6 +42,16 @@ namespace Pulsar {
 
     //! Set the number of frequency channels
     void set_nchan (unsigned nchan);
+
+    //! Set the system temperature of the specified channel
+    void set_T_sys (unsigned ichan, const Estimate<double>& T_sys);
+    //! Get the system temperature of the specified channel
+    Estimate<double> get_T_sys (unsigned ichan) const;
+
+    //! Set the calibrator flux of the specified channel
+    void set_cal_flux (unsigned ichan, const Estimate<double>& cal_flux);
+    //! Get the calibrator flux of the specified channel
+    Estimate<double> get_cal_flux (unsigned ichan) const;
 
   protected:
 
