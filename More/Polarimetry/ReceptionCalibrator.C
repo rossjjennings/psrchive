@@ -13,9 +13,12 @@ Pulsar::ReceptionCalibrator::ReceptionCalibrator (const Archive* archive)
   ncoef = 0;
   ncoef_set = false;
  
+  Pulsar_path = 1;
   PolnCalibrator_path = 0;
   FluxCalibrator_path = 0;
+
   calibrator_state_index = 0;
+  pulsar_base_index = 1;
 
   PA_min = PA_max = 0.0;
 
@@ -84,7 +87,7 @@ void Pulsar::ReceptionCalibrator::initial_observation (const Archive* data)
 
   }
 
-  if (!PolnCalibrator_path && calibrator_filenames.size())
+  if (calibrator.size() == 0 && calibrator_filenames.size())
     load_calibrators ();
 
   // initialize any previously added states
@@ -166,11 +169,31 @@ void Pulsar::ReceptionCalibrator::init_estimate (SourceEstimate& estimate)
   estimate.state.resize (nchan);
 
   for (unsigned ichan=0; ichan<nchan; ichan++) {
-    equation[ichan]->get_model()->set_path(0);
+    equation[ichan]->get_model()->set_path( Pulsar_path );
     equation[ichan]->get_model()->add_state( &(estimate.state[ichan]) );
   }
 }
 
+//! Add a discontinuty at the specified parallactic angle
+void Pulsar::ReceptionCalibrator::add_discontinuity (float PA_radians)
+{
+  PA_jump.push_back (PA_radians);
+}
+
+void Pulsar::ReceptionCalibrator::add_discontinuity ()
+{
+  unsigned nchan = uncalibrated->get_nchan ();
+
+  for (unsigned ichan=0; ichan<nchan; ichan++) {
+    equation[ichan]->add_backend();
+
+    for (unsigned istate=0; istate<pulsar.size(); istate++)
+      equation[ichan]->get_model()->add_state(&(pulsar[istate].state[ichan]));
+  }
+
+  Pulsar_path ++;
+  pulsar_base_index += pulsar.size();
+}
 
 //! Get the number of pulsar phase bin input polarization states
 unsigned Pulsar::ReceptionCalibrator::get_nstate_pulsar () const
@@ -247,6 +270,12 @@ void Pulsar::ReceptionCalibrator::add_observation (const Archive* data)
     if (PA > PA_max)
       PA_max = PA;
 
+    if (PA_jump.size() && PA > PA_jump[0]) {
+      cerr << "Adding discontinuity at PA " << PA_jump[0]*180.0/M_PI << endl;
+      add_discontinuity ();
+      PA_jump.erase(PA_jump.begin());
+    }
+
     for (unsigned ichan=0; ichan<nchan; ichan++) {
 
       // the selected pulse phase bins
@@ -254,10 +283,10 @@ void Pulsar::ReceptionCalibrator::add_observation (const Archive* data)
 
       for (unsigned istate=0; istate < pulsar.size(); istate++) {
 	add_data (measurements, pulsar[istate], ichan, integration);
-	measurements.back().state_index = 1 + istate;
+	measurements.back().state_index = pulsar_base_index + istate;
       }
 
-      equation[ichan]->get_model()->set_path (0);
+      equation[ichan]->get_model()->set_path ( Pulsar_path );
       equation[ichan]->add_measurement (epoch, measurements);
     }
   }
@@ -339,7 +368,7 @@ void Pulsar::ReceptionCalibrator::add_PolnCalibrator (const PolnCalibrator* p)
   
   assert (npol == 4);
 
-  if (!PolnCalibrator_path) {
+  if (calibrator.size() == 0) {
 
     // this is the first calibrator observation
     calibrator.resize (nchan);
@@ -348,8 +377,7 @@ void Pulsar::ReceptionCalibrator::add_PolnCalibrator (const PolnCalibrator* p)
     Stokes<double> cal_state (1,0,1,0);
 
     // calibrator_state_index = get_nstate_pulsar ();
-
-    PolnCalibrator_path = equation[0]->get_model()->get_npath();
+    // PolnCalibrator_path = equation[0]->get_model()->get_npath();
 
     for (unsigned ichan=0; ichan<nchan; ichan++) {
 
@@ -357,13 +385,8 @@ void Pulsar::ReceptionCalibrator::add_PolnCalibrator (const PolnCalibrator* p)
       for (unsigned istokes=0; istokes<4; istokes++)
 	calibrator[ichan].set_infit (istokes, false);
     
-      // add the calibrator states to a new signal path
-      equation[ichan]->get_model()->add_path ();
-
-      Calibration::Polar* polar = equation[ichan]->get_receiver();
-
-      equation[ichan]->get_model()->add_transformation (polar);
-
+      // add the calibrator states to the first signal path
+      equation[ichan]->get_model()->set_path (0);
       equation[ichan]->get_model()->add_state( &(calibrator[ichan]) );
 
     }

@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ReceptionCalibrator.h,v $
-   $Revision: 1.21 $
-   $Date: 2003/05/23 13:33:37 $
-   $Author: pulsar $ */
+   $Revision: 1.22 $
+   $Date: 2003/05/23 14:54:44 $
+   $Author: straten $ */
 
 #ifndef __ReceptionCalibrator_H
 #define __ReceptionCalibrator_H
@@ -67,6 +67,12 @@ namespace Pulsar {
     //! Add the specified FluxCalibrator observation to the set of constraints
     void add_FluxCalibrator (const FluxCalibrator* fluxcal);
 
+    //! Add all subsequent Pulsar observations through a new signal path
+    void add_discontinuity ();
+
+    //! Add a discontinuty at the specified parallactic angle
+    void add_discontinuity (float PA_radians);
+
     //! Solve equation for each frequency
     void solve (int only_ichan = -1);
 
@@ -93,6 +99,9 @@ namespace Pulsar {
     //! The index by which calibrator observations are identified
     unsigned calibrator_state_index;
 
+    //! The index by which the first pulse phase bin is identified
+    unsigned pulsar_base_index;
+
     //! Best estimate of polar decomposition as a function of frequency
     vector<PolarEstimate> receiver;
 
@@ -101,6 +110,9 @@ namespace Pulsar {
 
     //! The calibrators to be loaded during initial_observation
     vector<string> calibrator_filenames;
+
+    //! Discontinuities
+    vector<float> PA_jump;
 
     //! The parallactic angle rotation
     Calibration::Parallactic parallactic;
@@ -122,6 +134,9 @@ namespace Pulsar {
 
     //! Minimum and maximum values of parallactic angle (informational)
     float PA_min, PA_max;
+
+    //! Signal path assigned to Pulsar data
+    unsigned Pulsar_path;
 
     //! Signal path assigned to PolnCalibrator
     unsigned PolnCalibrator_path;
