@@ -1,7 +1,5 @@
 #include "toaPlot.h"
-
 #include "Error.h"
-
 #include "minmax.h"
 
 wrapper::wrapper () {  
@@ -110,7 +108,8 @@ void toaPlot::plotter ()
 
 void toaPlot::handleEvent (float x, float y, char ch)
 { 
-  cerr << "toaPlot::handleEvent x=" << x << " y=" << y << " ch=" << ch << endl;
+  //cerr << "toaPlot::handleEvent x=" << x 
+  //     << " y=" << y << " ch=" << ch << endl;
   
   if (ch == '~') {
     clicks = 0;
@@ -140,7 +139,6 @@ void toaPlot::handleEvent (float x, float y, char ch)
 	    tempint = data[i].id;
 	  }
 	}
-	cerr << "Single Selecting: " << tempint << endl;
 	emit selected(tempint);
 	handleEvent(0,0,'~');
       }

@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/rhythm/rhythm.h,v $
-   $Revision: 1.18 $
-   $Date: 2003/04/23 07:36:14 $
+   $Revision: 1.19 $
+   $Date: 2003/04/24 03:32:13 $
    $Author: ahotan $ */
 
 // //////////////////////////////////////////////////////////////////////////
@@ -25,6 +25,7 @@
 #include <qpixmap.h>
 #include <qbuttongroup.h>
 #include <qradiobutton.h>
+#include <qinputdialog.h>
 
 #include "psrephem.h"
 #include "toaPlot.h"
@@ -32,6 +33,9 @@
 #include "residual.h"
 
 #include "Options.h"
+
+#include "Pulsar/Plotter.h"
+#include "Pulsar/Archive.h"
 
 class qt_editParams;
 
@@ -131,6 +135,9 @@ class Rhythm : public QMainWindow
   QPushButton* clearsel;
   QPushButton* undel;
   QPushButton* autoscl;
+  QPushButton* show_button;
+
+  string dataPath;
 
   int mode;
   
@@ -175,6 +182,9 @@ class Rhythm : public QMainWindow
   vector<double> give_me_errs (toaPlot::AxisQuantity);
 
  public slots:
+
+  void show_me ();
+
   // File menu callbacks
   void load_toas ();
   int prompt_save_toas ();
@@ -221,6 +231,8 @@ class Rhythm : public QMainWindow
   void deleteselection ();
 
   void undeleteall ();
+  
+  void setDataPath ();
 };
 
 #endif

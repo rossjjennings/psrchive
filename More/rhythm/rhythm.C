@@ -13,7 +13,7 @@
 #include "rhythm.h"
 #include "tempo++.h"
 
-bool Rhythm::verbose = true;
+bool Rhythm::verbose = false;
 bool Rhythm::vverbose = false;
 
 // /////////////////////////////////////////////////////////////////////
@@ -67,13 +67,17 @@ Rhythm::Rhythm (QWidget* parent, int argc, char** argv) :
   xq = toaPlot::TOA_MJD;
   yq = toaPlot::ResidualMicro;
 
+  toas.resize(0);
   toas_modified = false;
 
   mode = 1;
 
+  dataPath = ".";
+
   autofit = false;
   ignore_one_eph = false;
   
+  Error::verbose = true;
   setClassVerbose (vverbose);
 
   // Instantiate a box to hold all the stuff
@@ -89,7 +93,7 @@ Rhythm::Rhythm (QWidget* parent, int argc, char** argv) :
 
   plot_window = new toaPlot(0,0);
   plot_window -> show();
-  
+
   // Build the cursor control panel
 
   leftpanel = new QVBox(container);
@@ -141,6 +145,10 @@ Rhythm::Rhythm (QWidget* parent, int argc, char** argv) :
   undel = new QPushButton("Restore", controls);
   QObject::connect(undel, SIGNAL(clicked()),
 		   this, SLOT(undeleteall()));
+
+  show_button = new QPushButton("Profile", controls);
+  QObject::connect(show_button, SIGNAL(clicked()),
+		   this, SLOT(show_me()));
   
   // Instantiate the Axis selection panels
 
@@ -195,17 +203,17 @@ Rhythm::Rhythm (QWidget* parent, int argc, char** argv) :
 void Rhythm::load_toas (const char* fname)
 {
   if (verbose)
-    cerr << "Loading TOAs from '" << fname << "' ...";
+    cerr << "Loading TOAs from '" << fname << "'...";
   
   Tempo::toa::load (fname, &toas);
   
   if (verbose)
-    cerr << "  loaded " << toas.size() << ".\nSorting TOAS...";
+    cerr << "...loaded " << toas.size() << ".\nSorting...";
 
   sort (toas.begin(), toas.end());
 
   if (verbose)
-    cerr << "  sorted." << endl;
+    cerr << " done." << endl;
 
   tempo->setItemEnabled (fitID, true);
 
@@ -249,6 +257,54 @@ void Rhythm::set_Params (const psrephem& eph)
   }
   if (autofit)
     fit (eph, false);
+}
+
+void Rhythm::show_me ()
+{
+  int index = toa_text->currentItem();
+  
+  if (index < 0) {
+    QMessageBox::information (NULL, "Rhythm",
+			      "There is no selected TOA to plot!  \n");
+    return;
+  }
+  
+  if (verbose)
+    cerr << "The currently selected TOA is # " << index << endl;
+
+  char useful[80];
+  char filename[80];
+
+  toas[index].unload(useful);
+
+  sscanf(useful+1, "%s ", filename);
+
+  if (verbose)
+    cerr << "Attempting to load archive '" << filename << "'" << endl;
+  
+  string useful2 = dataPath + "/";
+  useful2 += filename;
+
+  try {
+    
+    Reference::To<Pulsar::Archive> data = Pulsar::Archive::load(useful2);
+
+    data->fscrunch();
+    data->tscrunch();
+    data->pscrunch();
+    data->centre();
+
+    cpgopen("/xs");
+    cpgsvp (0.1,0.9,0.1,0.9);
+    Pulsar::Plotter plotter;
+    plotter.singleProfile(data);
+    cpgclos();
+
+  }
+  catch (Error& error) {
+    cerr << error << endl;
+  }
+  
 }
 
 void Rhythm::fit()
@@ -324,6 +380,7 @@ void Rhythm::setClassVerbose (bool verbose)
 {
   qt_editParams::verbose = verbose;
   Tempo::verbose = verbose;
+  Tempo::toa::verbose = verbose;
 }
 
 vector<double> Rhythm::give_me_data (toaPlot::AxisQuantity q)

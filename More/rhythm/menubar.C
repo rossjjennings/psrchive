@@ -64,6 +64,7 @@ void Rhythm::menubarConstruct ()
   // PLOT menu options (probably redendant)
   //
   QPopupMenu* plotter = new QPopupMenu( menuBar() );  
+  plotter->insertItem( "Set Data Path", this, SLOT(setDataPath()));
 
   // ///////////////////////////////////////////////////////////////////////
   // OPTIONS menu options
@@ -107,6 +108,14 @@ void Rhythm::togledit()
     fitpopup->show();
     tempo->setItemEnabled (dispID, FALSE);
   }
+}
+
+void Rhythm::setDataPath()
+{
+  QString temp = QInputDialog::getText("Set Data Path",
+                                       "Please enter the path to your archives:");
+  if (!temp.isEmpty())
+    dataPath = temp.ascii();
 }
 
 void Rhythm::toglauto()
@@ -205,7 +214,7 @@ void Rhythm::setVerbosity ( int verbosityID )
   options->setItemChecked( noisyID,  noisyID  == verbosityID);
 
   verbose = (mediumID == verbosityID || noisyID  == verbosityID);
-  vverbose = (noisyID  == verbosityID);
+  vverbose = (noisyID == verbosityID);
 
   setClassVerbose (vverbose);
 
