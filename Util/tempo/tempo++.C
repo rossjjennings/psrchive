@@ -1,7 +1,11 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+
+#ifndef __FreeBSD__
 #include <wait.h>
+#endif
+
 #include <unistd.h>
 
 #include "tempo++.h"

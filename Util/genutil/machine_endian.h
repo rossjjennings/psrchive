@@ -1,7 +1,7 @@
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/machine_endian.h,v $
-   $Revision: 1.5 $
-   $Date: 2000/01/18 01:06:42 $
-   $Author: straten $ */
+   $Revision: 1.6 $
+   $Date: 2002/06/06 05:19:36 $
+   $Author: bjacoby $ */
 
 #ifndef __M_ENDIAN_H
 #define __M_ENDIAN_H
@@ -42,7 +42,7 @@ void array_changeEndian (int count, void *p, int element_size);
 #endif
 #endif
 
-#ifdef __linux
+#if defined(linux) || defined(__FreeBSD__)
 #define MACHINE_LITTLE_ENDIAN 1
 #endif
 
