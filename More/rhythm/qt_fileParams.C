@@ -2,7 +2,7 @@
 
 #include "qt_fileParams.h"
 
-#include "psrParams.h"
+#include "psrephem.h"
 #include "psr_cpp.h"
 
 bool qt_fileParams::verbose = false;
@@ -17,7 +17,7 @@ qt_fileParams::qt_fileParams ( const QString& startname, QWidget* parent )
 
   QStringList filter;
  
-  vector<string> ephext = psrParams::extensions ();
+  vector<string> ephext = psrephem::extensions ();
   for (vector<string>::iterator str = ephext.begin();
        str != ephext.end(); str ++)
     filter.append ( intro + QString( str->c_str() ) + close );
@@ -29,11 +29,8 @@ qt_fileParams::qt_fileParams ( const QString& startname, QWidget* parent )
 	    this, SLOT ( chosen (const QString&) ) );
 }
 
-int qt_fileParams::open (psrParams* eph)
+int qt_fileParams::open (psrephem& eph)
 {
-  if (eph == NULL)
-    return -1;
-
   if (verbose)
     cerr << "qt_fileParams::open exec" << endl;
 
@@ -44,15 +41,13 @@ int qt_fileParams::open (psrParams* eph)
   if (verbose)
     cerr << "qt_fileParams::open '" << fileName << "'" << endl;
 
-  eph -> load (fileName);
-  cerr << "RETURN FROM psrParms::load (string filename)" << endl;
+  eph.load (fileName.c_str());
+  cerr << "RETURN FROM psrephem::load (" << fileName << ")" << endl;
 
-  if (eph->empty())
-    return 0;
   return 1;
 }
 
-int qt_fileParams::save (const psrParams& eph)
+int qt_fileParams::save (const psrephem& eph)
 {
   setMode (QFileDialog::AnyFile);
   if ( exec () != 1 || fileName.empty() )
@@ -61,7 +56,7 @@ int qt_fileParams::save (const psrParams& eph)
   if (verbose)
     cerr << "qt_fileParams::save to '" << fileName << "'" << endl;
 
-  eph.unload (fileName);
+  eph.unload (fileName.c_str());
   return 1;
 }
 

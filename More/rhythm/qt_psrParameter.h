@@ -23,7 +23,7 @@
 
 class qt_psrParameter : public QHBox, public psrParameter
 {
-  friend class qt_psrParams;
+  friend class qt_psrephem;
 
  public:
   // constructor used by derived classes only
@@ -50,13 +50,15 @@ class qt_psrParameter : public QHBox, public psrParameter
   virtual void setString (const string&) { };
   virtual void setError  (double) { };
 
-  void setValue (psrParameter* parm);
+  void setValue (psrParameter* eph);
 
   // factory returns pointer to one of derived classes.
   static qt_psrParameter* factory (int ephio_index, QWidget* parent=0);
 
   static int v_precision;    // precision displayed in the value
   static int e_precision;    // precision displayed in the error
+
+  static bool verbose;
 
  protected:
   QCheckBox checkfit;  // the check-box

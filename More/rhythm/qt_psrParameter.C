@@ -1,7 +1,6 @@
 //#include <qhbox.h>
 //#include <qcheckbox.h>
 
-#include "qt_psrParams.h"
 #include "qt_psrParameter.h"
 #include "qt_double.h"
 #include "qt_MJD.h"
@@ -22,8 +21,9 @@
 // //////////////////////////////////////////////////////////////////////////
 // //////////////////////////////////////////////////////////////////////////
 
-int qt_psrParameter::v_precision = 16;
-int qt_psrParameter::e_precision = 3;
+int  qt_psrParameter::v_precision = 16;
+int  qt_psrParameter::e_precision = 3;
+bool qt_psrParameter::verbose = false;
 
 // //////////////////////////////////////////////////////////////////////////
 // Constructor checks that the eph_index is in ranges, so none of the
@@ -202,14 +202,14 @@ public:
     qt_psrParameter (ephind, parent),
     value (with_error, &body)
   {
-    if (parmTypes[getEphind()] == 2) {
-      if (qt_psrParams::verbose) cerr << "qt_psrAngle::setvalue HMS:" 
-				      << parmNames[getEphind()] << endl;
+    if (parmTypes[get_ephind()] == 2) {
+      if (verbose) cerr << "qt_psrAngle::setvalue HMS:" 
+			<< parmNames[get_ephind()] << endl;
       value.displayHMS ();
     }
     else {
-      if (qt_psrParams::verbose) cerr << "qt_psrAngle::setvalue DMS:" 
-				      << parmNames[getEphind()] << endl;
+      if (verbose) cerr << "qt_psrAngle::setvalue DMS:" 
+			<< parmNames[get_ephind()] << endl;
       value.displayDMS ();
     }
   };
@@ -268,10 +268,10 @@ qt_psrParameter* qt_psrParameter::factory (int ephind, QWidget* parent)
 
 void qt_psrParameter::setValue (psrParameter* parm)
 {
-  if (parm->getEphind() != ephio_index) {
+  if (parm->get_ephind() != ephio_index) {
     if (verbose)
       cerr << "qt_psrParameter::setValue invalid ephio index:" 
-	   << parm->getEphind() << " != " << ephio_index << endl;
+	   << parm->get_ephind() << " != " << ephio_index << endl;
     return;
   }
 

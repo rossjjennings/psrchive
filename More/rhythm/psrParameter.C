@@ -135,74 +135,6 @@ void psrParameter::setAngle (const Angle& val)
     me -> setAngle(val);
 }
 
-void psrParameter::unload (string* str)
-{
-  static const int buflen = 80;
-  static char* buffer = NULL;
-  static string newline ("\n");
-
-  if (ephio_index < 0 || ephio_index >= EPH_NUM_KEYS)
-    return;
-
-  if (buffer == NULL)
-    buffer = new char [buflen];
-
-  int    parmStatus = getFit() ? 2 : 1;
-  char   value_str [EPH_STR_LEN];
-  double value   = 0.0;
-  int    integer = 0;
-
-  MJD   mjd;
-
-  switch ( parmTypes[ephio_index] ) {
-
-  case 0:  // other strings (JNAME, TZRSITE, etc.)
-    if (verbose)
-      cerr << "psrParameter::unload String:" << parmNames[ephio_index];
-    strncpy (value_str, dynamic_cast<psrString*>(this) -> getString().c_str(),
-	     EPH_STR_LEN);
-    break;
-    
-  case 1:  // any double
-    if (verbose)
-      cerr << "psrParameter::unload Double:" << parmNames[ephio_index];
-    value = dynamic_cast<psrDouble*>(this) -> getDouble();
-    break;
-
-  case 2:  // RAs
-  case 3:  // DECs
-    if (verbose)
-      cerr << "psrParameter::unload Angle :" << parmNames[ephio_index];
-    value = dynamic_cast<psrAngle*>(this) 
-      -> getAngle().getradians() / (2.0 * M_PI);
-    break;
-
-  case 4:  // MJDs
-    if (verbose)
-      cerr << "psrParameter::unload MJD   :" << parmNames[ephio_index];
-    mjd = dynamic_cast<psrMJD*>(this) -> getMJD();
-    integer = mjd.intday();
-    value   = mjd.fracday();
-    break;
-
-  case 5:  // any integer
-    if (verbose)
-      cerr << "psrParameter::unload Integer:" << parmNames[ephio_index];
-    value = dynamic_cast<psrInteger*>(this) -> getInteger();
-    break;
-
-  default:
-    return;
-  }
-
-  wr_eph_str (buffer, buflen, ephio_index, parmStatus, 
-	      value_str, value, integer, error);
-
-  if (verbose)
-    cerr << "   '" << buffer << "'" << endl;
-  *str += buffer + newline;
-}
-
 psrParameter* psrParameter::duplicate ()
 {
   if (ephio_index < 0 || ephio_index >= EPH_NUM_KEYS)
@@ -228,43 +160,6 @@ psrParameter* psrParameter::duplicate ()
 
   default:
     return NULL;
-  }
-}
-
-bool psrParameter::equal (psrParameter* p1, psrParameter* p2)
-{
-  if ( (p1 -> ephio_index != p2 -> ephio_index) ||
-       (p1 -> error != p2 -> error) || (p1 -> infit != p2 -> infit) )
-    return false;
-
-  if (p1 -> ephio_index < 0 || p1 -> ephio_index >= EPH_NUM_KEYS)
-    return true;
-
-  switch ( parmTypes[p1 -> ephio_index] ) {
-
-  case 0:  // other strings (JNAME, TZRSITE, etc.)
-    return dynamic_cast<psrString*>(p1) -> getString()
-      == dynamic_cast<psrString*>(p2) -> getString();
-
-  case 1:  // any double
-    return dynamic_cast<psrDouble*>(p1) -> getDouble() 
-      == dynamic_cast<psrDouble*>(p2) -> getDouble();
-
-  case 2:  // RAs
-  case 3:  // DECs
-    return dynamic_cast<psrAngle*>(p1) -> getAngle() 
-      == dynamic_cast<psrAngle*>(p2) -> getAngle();
-
-  case 4:  // MJDs
-    return dynamic_cast<psrMJD*>(p1) -> getMJD()
-      == dynamic_cast<psrMJD*>(p2) -> getMJD();
-
-  case 5:  // any Integer
-    return dynamic_cast<psrInteger*>(p1) -> getInteger() 
-      == dynamic_cast<psrInteger*>(p2) -> getInteger();
-
-  default:
-    return false;
   }
 }
 

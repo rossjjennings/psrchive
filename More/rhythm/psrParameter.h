@@ -61,18 +61,10 @@ class psrParameter
   bool valid() const { return ephio_index != -1; }
 
   // return the index as in ephio.h
-  int  getEphind () const { return ephio_index; };
+  int  get_ephind () const { return ephio_index; };
 
   // set the fit flag to 'infit'
   void setFit (bool fit) { infit = fit && fitable(); };
-
-  // comparison for equality
-  static bool equal (psrParameter*, psrParameter*);
-
-  // THE FOLLOWING METHODS OPERATE ON THE THIS POINTER WITH DYNAMIC CASTS
-
-  // unload value into string (as in wr_eph)
-  void unload (string* str);
 
   // return the value
   string getString ();

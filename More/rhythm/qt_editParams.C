@@ -1,10 +1,10 @@
 
 /* PLANS:
-   1) qt_psrParams not a data member.  Instead, this object acts on its own
-   and has a method that points it at a qt_psrParams object (or something
+   1) qt_psrephem not a data member.  Instead, this object acts on its own
+   and has a method that points it at a qt_psrephem object (or something
    like that)
 
-   2) to protect against segfaults.  qt_psrParams will emit a signal when
+   2) to protect against segfaults.  qt_psrephem will emit a signal when
    destroyed.
 
    */
@@ -191,14 +191,14 @@ void qt_editParams::new_data (bool add_to_history)
 {
   if (verbose)
     cerr << "qt_editParams::new_data set display" << endl;
-  display.set_psrParams (data);
+  display.set_psrephem (data);
 
   if (add_to_history) {
     if (verbose)
       cerr << "qt_editParams::new_data add to history" << endl;
     current ++;
     data_history.resize (current + 1);
-    data_history [current] = data;
+    data_history[current].set_psrephem (data);
   }
 
   if (verbose)
@@ -217,7 +217,7 @@ void qt_editParams::open()
   if (!io_dialog)
     io_dialog = new qt_fileParams;
 
-  if (io_dialog -> open (&data))
+  if (io_dialog -> open (data))
     new_data ();
 }
 
@@ -225,7 +225,7 @@ void qt_editParams::save()
 {
   if (!hasdata())
     return;
-  display.get_psrParams (&data);
+  display.get_psrephem (data);
 
   if (!io_dialog)
     io_dialog = new qt_fileParams;
@@ -234,7 +234,7 @@ void qt_editParams::save()
 
 void qt_editParams::print()
 { 
-  display.get_psrParams (&data);
+  display.get_psrephem (data);
   data.unload (stderr);
 }
 
@@ -259,19 +259,19 @@ void qt_editParams::unload (const char* filename)
   if (!hasdata())
     return;
 
-  display.get_psrParams (&data);
+  display.get_psrephem (data);
   data.unload (filename);
 }
 
-void qt_editParams::set_psrParams (const psrParams& eph)
+void qt_editParams::set_psrephem (const psrephem& eph)
 {
   data = eph;
   new_data ();
 }
 
-void qt_editParams::get_psrParams (psrParams* eph)
+void qt_editParams::get_psrephem (psrephem& eph)
 {
-  display.get_psrParams (eph);
+  display.get_psrephem (eph);
 }
 
 void qt_editParams::forward()
@@ -280,7 +280,7 @@ void qt_editParams::forward()
     return;
 
   current ++;
-  data = data_history [current];
+  data_history[current].get_psrephem (data);
   new_data (false);
 }
 
@@ -290,7 +290,7 @@ void qt_editParams::backward()
     return;
 
   current --;
-  data = data_history [current];
+  data_history[current].get_psrephem (data);
   new_data (false);
 }
 

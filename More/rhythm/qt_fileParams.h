@@ -5,7 +5,7 @@
 #include <qfiledialog.h>
 #include "psr_cpp.h"
 
-class psrParams;
+class psrephem;
 
 class qt_fileParams : public QFileDialog
 {
@@ -16,8 +16,8 @@ class qt_fileParams : public QFileDialog
   qt_fileParams (const QString& startname = QString::null, QWidget* parent=0);
 
   // open() and save() return zero if the user cancels, 1 otherwise
-  int open ( psrParams* eph );       // also returns zero if no data is loaded
-  int save ( const psrParams& eph );
+  int open ( psrephem& eph );       // also returns zero if no data is loaded
+  int save ( const psrephem& eph );
 
   // string filename () { return string (fileName); };
  protected slots:

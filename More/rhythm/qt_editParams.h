@@ -1,6 +1,6 @@
 /* ///////////////////////////////////////////////////////////////////////
    The Qt editeph Widget
-      Manipulate Qt psrParams widget with this gui component
+      Manipulate Qt psrephem widget with this gui component
 
    Author: Willem van Straten 
    /////////////////////////////////////////////////////////////////////// */
@@ -10,7 +10,9 @@
 
 #include <vector>
 
-#include "qt_psrParams.h"
+#include "qt_psrephem.h"
+#include "psrephem.h"
+#include "psrParams.h"
 
 class qt_fileParams;
 
@@ -29,8 +31,8 @@ class qt_editParams : public QWidget
   void unload (const char* filename);
 
   // display the ephemeris given / get the epehemeris displayed
-  void set_psrParams (const psrParams& eph);
-  void get_psrParams (psrParams* eph);
+  void set_psrephem (const psrephem& eph);
+  void get_psrephem (psrephem& eph);
 
   // see fitall() and fitnone() slots
 
@@ -41,7 +43,7 @@ class qt_editParams : public QWidget
   // emitted when the user selects 'File/Close'
   void closed ();
   // emitted when new data has been loaded/set
-  void newParams ( const psrParams& );
+  void newParams ( const psrephem& );
 
  public slots:
   // File Menu Callbacks
@@ -64,10 +66,10 @@ class qt_editParams : public QWidget
  protected:
 
   // the psr parameters display widget
-  qt_psrParams display;
+  qt_psrephem display;
 
   // the parameters kept in the editor display
-  psrParams data;
+  psrephem data;
 
   // history of parameter sets as the user loads and modifies
   vector<psrParams> data_history;
