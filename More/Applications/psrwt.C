@@ -89,7 +89,8 @@ int main (int argc, char** argv)
   Pulsar::Smooth* smooth = 0;
 
   int c = 0;
-  const char* args = "b:c:DdFGhm:M:o:Pp:Ts:S:vVw:";
+  const char* args = "b:c:DdFGhm:M:o:Pp:TUs:S:vVw:";
+
   while ((c = getopt(argc, argv, args)) != -1)
     switch (c) {
       
@@ -158,8 +159,15 @@ int main (int argc, char** argv)
       char name[256];
       float duty_cycle;
 
-      if (sscanf (optarg, "%s:%f", name, &duty_cycle) != 2) {
-	cerr << "psrwt: smooth option -o requires name:duty_cycle" << endl;
+      char* sep = strpbrk (optarg, ":,");
+      if (sep) *sep = ' ';
+
+      int i = sscanf (optarg, "%s %f", name, &duty_cycle);
+
+      cerr << "scanned " << i << endl;
+
+      if (i != 2) {
+	cerr << "psrwt: smooth option -o requires name:duty_cycle not " << optarg << endl;
 	return -1;
       }
 
@@ -219,6 +227,10 @@ int main (int argc, char** argv)
 
     case 'T':
       tscrunch = 0;
+      break;
+
+    case 'U':
+      Pulsar::Profile::rotate_in_phase_domain = true;
       break;
 
     case 'w':
@@ -340,9 +352,9 @@ int main (int argc, char** argv)
 	    
 	  // find the maximum bin
 	  int maxbin = profile->find_max_bin();
-	  
+
 	  // get the maximum value
-	  float max = profile->get_amps()[maxbin];
+	  float max = profile->get_amps()[maxbin] - mean;
 	    
 	  double phase = double(maxbin) / double(subint->get_nbin());
 	  cerr << "phase=" << phase << endl;
@@ -352,13 +364,14 @@ int main (int argc, char** argv)
 	  // calculate the epoch of the maximum
 	  MJD epoch = subint->get_epoch() + seconds;
 	  
-	  cerr << filenames[ifile] << " epoch=" << epoch << " max/rms="
+	  cout << filenames[ifile] << " epoch=" << epoch << " max/rms="
 	       << max/rms << " rms=" << rms << " sum=" << snr;
 	  
 	  snr /= sqrt ( profile->get_nbin() * variance );
 	  
-	  cerr << " snr=" << snr << endl;
-	  
+	  cout << " snr=" << snr << endl;
+	  cout.flush();
+
 	}
 	
 	if (display) { // && snr == 0) {
