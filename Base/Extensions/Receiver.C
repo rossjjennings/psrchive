@@ -7,8 +7,6 @@ Pulsar::Receiver::Receiver () : Extension ("Receiver")
   name = "unknown";
   basis = Signal::Linear;
 
-  calibrator_orientation.setDegrees( 45.0 );
-
   feed_offset_corrected = false;
   vertical_offset_corrected = false;
 
@@ -17,8 +15,7 @@ Pulsar::Receiver::Receiver () : Extension ("Receiver")
 }
 
 //! Copy constructor
-Pulsar::Receiver::Receiver (const Receiver& ext)
-  : Extension ("Receiver")
+Pulsar::Receiver::Receiver (const Receiver& ext) : Extension ("Receiver")
 {
   operator = (ext);
 }
@@ -28,13 +25,15 @@ const Pulsar::Receiver&
 Pulsar::Receiver::operator= (const Receiver& ext)
 {
   mode = ext.mode;
+  tracking_angle = ext.tracking_angle;
+
   name = ext.name;
   basis = ext.basis;
 
   X_offset = ext.X_offset;
   Y_offset = ext.Y_offset;
 
-  calibrator_orientation = ext.calibrator_orientation;
+  calibrator_offset = ext.calibrator_offset;
 
   feed_offset_corrected = ext.feed_offset_corrected;
   vertical_offset_corrected = ext.vertical_offset_corrected;
@@ -63,3 +62,16 @@ string Pulsar::Receiver::get_tracking_mode_string() const
   return "unknown";
 }
 
+bool Pulsar::Receiver::match (const Receiver* receiver, string& reason) const
+{
+  bool result = true;
+
+  if (basis != receiver->basis) {
+    result = false;
+    reason += Archive::match_indent + "basis mismatch: "
+      + Signal::Basis2string(basis) + " != " 
+      + Signal::Basis2string(receiver->basis);
+  }
+
+  return result;
+}
