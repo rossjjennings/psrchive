@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/FluxCalibrator.h,v $
-   $Revision: 1.18 $
-   $Date: 2004/10/21 09:39:51 $
+   $Revision: 1.19 $
+   $Date: 2004/12/27 14:21:56 $
    $Author: straten $ */
 
 #ifndef __Pulsar_FluxCalibrator_H
@@ -62,16 +62,16 @@ namespace Pulsar {
     Reference::To<const FluxCalibratorDatabase> database;
 
     //! Calibrator flux in mJy as a function of frequency
-    vector< Estimate<double> > cal_flux;
+    std::vector< Estimate<double> > cal_flux;
 
     //! Temperature of system (+ sky) in mJy as a function of frequency
-    vector< Estimate<double> > T_sys;
+    std::vector< Estimate<double> > T_sys;
 
     //! Ratio of cal hi/lo on source
-    vector<Estimate<double> > ratio_on;
+    std::vector<Estimate<double> > ratio_on;
 
     //! Ratio of cal hi/lo off source
-    vector<Estimate<double> > ratio_off;
+    std::vector<Estimate<double> > ratio_off;
 
     //! Create the cal_flux spectrum at the requested resolution
     void create (unsigned nchan = 0);
@@ -83,16 +83,16 @@ namespace Pulsar {
     void calculate ();
 
     //! Compute cal_flux and T_sys, given the hi/lo ratios on and off source
-    void calculate (vector<Estimate<double> >& on,
-		    vector<Estimate<double> >& off);
+    void calculate (std::vector<Estimate<double> >& on,
+		    std::vector<Estimate<double> >& off);
 
     //! Calibrate a single sub-integration
     void calibrate (Integration* subint);
 
   private:
 
-    vector<MeanEstimate<double> > mean_ratio_on;
-    vector<MeanEstimate<double> > mean_ratio_off;
+    std::vector<MeanEstimate<double> > mean_ratio_on;
+    std::vector<MeanEstimate<double> > mean_ratio_off;
 
     //! Set true after call to calculate
     bool calculated;

@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ReceptionCalibrator.h,v $
-   $Revision: 1.60 $
-   $Date: 2004/11/22 21:32:30 $
+   $Revision: 1.61 $
+   $Date: 2004/12/27 14:21:56 $
    $Author: straten $ */
 
 #ifndef __Pulsar_ReceptionCalibrator_H
@@ -48,13 +48,13 @@ namespace Pulsar {
     void update_source();
 
     //! Model of Stokes parameters added to equation as a function of frequency
-    vector< MEAL::Coherency > source;
+    std::vector< MEAL::Coherency > source;
 
     //! Best guess of Stokes parameters
-    vector< Calibration::MeanCoherency > source_guess;
+    std::vector< Calibration::MeanCoherency > source_guess;
 
     //! Validity flags for each Coherency
-    vector< bool > valid;
+    std::vector< bool > valid;
 
     //! Phase bin from which pulsar polarization is derived
     unsigned phase_bin;
@@ -208,7 +208,7 @@ namespace Pulsar {
     unsigned get_nchan () const;
     
     //! Set the calibrator observations to be loaded during initial_observation
-    void set_calibrators (const vector<string>& filenames);
+    void set_calibrators (const std::vector<std::string>& filenames);
     
     //! Add the observation to the set of constraints
     void add_observation (const Archive* data);
@@ -234,7 +234,7 @@ namespace Pulsar {
     virtual void calculate_transformation ();
 
     //! The calibration model as a function of frequency
-    vector< Reference::To<StandardModel> > model;
+    std::vector< Reference::To<StandardModel> > model;
 
     //! The model specified on construction
     Calibrator::Type model_type;
@@ -246,10 +246,10 @@ namespace Pulsar {
     SourceEstimate flux_calibrator_estimate;
 
     //! Uncalibrated estimate of pulsar polarization as a function of phase
-    vector<SourceEstimate> pulsar;
+    std::vector<SourceEstimate> pulsar;
     
     //! The calibrators to be loaded during initial_observation
-    vector<string> calibrator_filenames;
+    std::vector<std::string> calibrator_filenames;
     
     //! Routine for normalizing the Stokes parameters
     MEAL::NormalizeStokes normalizer;
@@ -288,7 +288,7 @@ namespace Pulsar {
       \param data the Integration data
       \param variance the variance to be assigned to the measurement. 
     */
-    void add_data (vector<Calibration::CoherencyMeasurement>& bins,
+    void add_data (std::vector<Calibration::CoherencyMeasurement>& bins,
 		   SourceEstimate& estimate,
 		   unsigned ichan,
 		   const Integration* data,

@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PulsarCalibrator.h,v $
-   $Revision: 1.8 $
-   $Date: 2004/11/22 21:32:30 $
+   $Revision: 1.9 $
+   $Date: 2004/12/27 14:21:56 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PulsarCalibrator_H
@@ -63,7 +63,7 @@ namespace Pulsar {
     virtual void calculate_transformation ();
 
     //! The calibration model as a function of frequency
-    vector< Reference::To<PolnProfileFit> > model;
+    std::vector< Reference::To<PolnProfileFit> > model;
 
     //! The array of transformation Model instances
     // vector< Reference::To<MEAL::Complex2> > transformation;
@@ -71,7 +71,7 @@ namespace Pulsar {
     typedef MEAL::Mean< MEAL::Complex2 > MeanXform;
 
     //! The array of transformation Model instances
-    vector< Reference::To<MeanXform> > solution;
+    std::vector< Reference::To<MeanXform> > solution;
 
     //! The known instrumental corrections
     MEAL::Complex2Value corrections;

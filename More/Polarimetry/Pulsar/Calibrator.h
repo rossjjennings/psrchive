@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/Attic/Calibrator.h,v $
-   $Revision: 1.19 $
-   $Date: 2004/10/09 05:36:51 $
+   $Revision: 1.20 $
+   $Date: 2004/12/27 14:21:56 $
    $Author: straten $ */
 
 #ifndef __Calibrator_H
@@ -86,13 +86,13 @@ namespace Pulsar {
     virtual CalibratorExtension* new_Extension () const = 0;
 
     //! Return a new processed calibrator Archive with a CalibratorExtension
-    Archive* new_solution (const string& archive_class) const;
+    Archive* new_solution (const std::string& archive_class) const;
 
     //! Return the reference epoch of the calibration experiment
     virtual MJD get_epoch () const;
 
     //! Return a string containing the file information
-    virtual string get_filenames () const;
+    virtual std::string get_filenames () const;
 
     //! Return a const reference to the calibrator archive
     const Archive* get_Archive () const;
@@ -147,7 +147,7 @@ namespace Pulsar {
 
     //! Provide access to Integration::transform
     virtual void calibrate (Integration* integration,
-			    const vector< Jones<float> >& response);
+			    const std::vector< Jones<float> >& response);
 
     //! Provide access to Integration::transform
     virtual void calibrate (Integration* integration,
@@ -160,7 +160,7 @@ namespace Pulsar {
     Reference::To<const CalibratorExtension> extension;
 
     //! Filenames of Pulsar::Archives from which instance was created
-    vector<string> filenames;
+    std::vector<std::string> filenames;
 
   };
 

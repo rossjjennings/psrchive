@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PolnCalibrator.h,v $
-   $Revision: 1.32 $
-   $Date: 2004/11/22 21:32:30 $
+   $Revision: 1.33 $
+   $Date: 2004/12/27 14:21:56 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PolnCalibrator_H
@@ -72,10 +72,10 @@ namespace Pulsar {
     void set_transformation_invalid (unsigned ch);
 
     //! Return the transformation for the specified channel
-    const ::MEAL::Complex2* get_transformation (unsigned ichan) const;
+    const MEAL::Complex2* get_transformation (unsigned ichan) const;
 
     //! Return the transformation for the specified channel
-    ::MEAL::Complex2* get_transformation (unsigned ichan);
+    MEAL::Complex2* get_transformation (unsigned ichan);
 
     // ///////////////////////////////////////////////////////////////////
     //
@@ -140,13 +140,13 @@ namespace Pulsar {
   protected:
 
     //! The array of transformation Model instances
-    vector< Reference::To< ::MEAL::Complex2 > > transformation;
+    std::vector< Reference::To< MEAL::Complex2 > > transformation;
     
     //! Derived classes can create and fill the transformation array
     virtual void calculate_transformation ();
 
     //! The array of Jones matrices derived from the transformation array
-    vector< Jones<float> > response;
+    std::vector< Jones<float> > response;
 
     //! The PolnCalibratorExtension of the Archive passed during construction
     Reference::To<PolnCalibratorExtension> poln_extension;
