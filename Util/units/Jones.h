@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Jones.h,v $
-   $Revision: 1.25 $
-   $Date: 2004/12/22 13:32:15 $
+   $Revision: 1.26 $
+   $Date: 2005/04/06 20:17:45 $
    $Author: straten $ */
 
 #ifndef __Jones_H
@@ -119,11 +119,11 @@ public:
     { s.j00=-s.j00; s.j01=-s.j01; s.j10=-s.j10; s.j11=-s.j11; return s; }
 
   //! Returns reference to the value of the matrix at j(ir,ic)
-  std::complex<T>& j (unsigned ir, unsigned ic)
+  std::complex<T>& operator () (unsigned ir, unsigned ic)
   { std::complex<T>* val = &j00; return val[ir*2+ic]; }
   
   //! Returns const reference to the value of the matrix at j(ir,ic)
-  const std::complex<T>& j (unsigned ir, unsigned ic) const
+  const std::complex<T>& operator () (unsigned ir, unsigned ic) const
     { const std::complex<T>* val = &j00; return val[ir*2+ic]; }
 
   //! Alternative access to elements
