@@ -164,6 +164,8 @@ polyco Tempo::Predict::get_polyco (const MJD& m1, const MJD& m2) const
        either end)...  so: increase the range until TEMPO gets it right
        and satisfies the requirements of an otherwise frustrated end-user */
 
+    lock ();
+
     write_tzin();
 
     string ephname = get_directory() + "/" + ephem_filename;
@@ -183,8 +185,6 @@ polyco Tempo::Predict::get_polyco (const MJD& m1, const MJD& m2) const
     if (Tempo::verbose)
       cerr << "Tempo::predict calling 'tempo " << arguments << "'" << endl
 	   << "Tempo::predict input: '" << input << "'" << endl;
-
-    lock ();
 
     tempo (arguments, input);
 
