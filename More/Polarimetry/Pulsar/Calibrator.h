@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/Attic/Calibrator.h,v $
-   $Revision: 1.5 $
-   $Date: 2003/04/27 10:53:20 $
+   $Revision: 1.6 $
+   $Date: 2003/05/05 10:46:33 $
    $Author: straten $ */
 
 #ifndef __Calibrator_H
@@ -44,6 +44,9 @@ namespace Pulsar {
     //! Provide access to Integration::transform
     virtual void calibrate (Integration* integration,
 			    const vector< Jones<float> >& response);
+
+    //! Utility method ensures that Archive has full polarization information
+    void assert_full_poln (const Archive* data, const char* method);
 
   };
 
