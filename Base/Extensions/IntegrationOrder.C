@@ -9,7 +9,7 @@ Pulsar::IntegrationOrder::IntegrationOrder (const char* name)
 
 //! Copy constructor
 Pulsar::IntegrationOrder::IntegrationOrder (const IntegrationOrder& extension)
-  : Extension (extension.get_name().c_str())
+  : Extension (extension.get_extension_name().c_str())
 {
   IndexState = extension.IndexState;
   Unit       = extension.Unit;
