@@ -342,15 +342,7 @@ int main (int argc, char *argv[]) {
 	
 	// See if the archive contains a history that should be updated:
 	
-	Pulsar::ProcHistory* fitsext = 0;
-	for (unsigned i = 0; i < arch->get_nextension(); i++) {
-	  Pulsar::Archive::Extension* extension;
-	  extension = (Pulsar::Archive::Extension*)arch->get_extension (i);
-	  fitsext = dynamic_cast<Pulsar::ProcHistory*> (extension);
-	  if (fitsext) {
-	    break;
-	  }
-	}
+	Pulsar::ProcHistory* fitsext = arch->get<Pulsar::ProcHistory>();
 	
 	if (fitsext) {
 	  
