@@ -28,6 +28,8 @@ int main (int argc, char *argv[]) {
   
   bool simple = false;
   
+  string ext;
+
   int placeholder;
   
   int first;
@@ -37,19 +39,20 @@ int main (int argc, char *argv[]) {
   char* key = NULL;
   char whitespace[5] = " \n\t";
   
-  while ((gotc = getopt(argc, argv, "hvVDxz:Z:de:")) != -1) {
+  while ((gotc = getopt(argc, argv, "hvVDxe:z:Z:dE:")) != -1) {
     switch (gotc) {
     case 'h':
-      cout << "A program for zapping RFI in Pulsar::Archives"             << endl;
-      cout << "Usage: paz [options] filenames"                            << endl;
-      cout << "  -v               Verbose mode"                           << endl;
-      cout << "  -V               Very verbose mode"                      << endl;
-      cout << "  -D               Display results"                        << endl;
-      cout << "  -x               Test only, leaves files unchanged"      << endl;
-      cout << "  -z \"chanlist\"    Zap these particular channels"        << endl;
-      cout << "  -Z \"a b\"         Zap chans between a and b"            << endl;
-      cout << "  -e percent       Zap band edges"                         << endl; 
-      cout << "  -d               Simple mean offset rejection"           << endl;
+      cout << "A program for zapping RFI in Pulsar::Archives"               << endl;
+      cout << "Usage: paz [options] filenames"                              << endl;
+      cout << "  -v               Verbose mode"                             << endl;
+      cout << "  -V               Very verbose mode"                        << endl;
+      cout << "  -D               Display results"                          << endl;
+      cout << "  -x               Test only, leaves files unchanged"        << endl;
+      cout << "  -e               Unload to new files using this extension" << endl;
+      cout << "  -z \"chanlist\"    Zap these particular channels"          << endl;
+      cout << "  -Z \"a b\"         Zap chans between a and b"              << endl;
+      cout << "  -E percent       Zap band edges"                           << endl; 
+      cout << "  -d               Simple mean offset rejection"             << endl;
       return (-1);
       break;
     case 'v':
@@ -76,6 +79,9 @@ int main (int argc, char *argv[]) {
       }
       cerr << chans_to_zap.size() << endl;
       break;
+    case 'e':
+      ext = optarg;
+      break;
     case 'Z':
       manual_zap = true;
       if (sscanf(optarg, "%d %d", &first, &last) != 2) {
@@ -86,7 +92,7 @@ int main (int argc, char *argv[]) {
     case 'd':
       simple = true;
       break;
-    case 'e':
+    case 'E':
       edge_zap = true;
       if (sscanf(optarg, "%f", &percent) != 1) {
 	cerr << "Invalid parameter to option -e" << endl;
@@ -182,8 +188,18 @@ int main (int argc, char *argv[]) {
 	plotter.bandpass(arch);
       
       if (write) {
-	arch->unload();
-	cout << "Archive updated on disk" << endl;
+	if (ext.empty()) {
+	  arch->unload();
+	  cout << "Archive " << arch->get_filename() << " updated on disk" << endl;
+	}
+	else {
+	  string the_old = arch->get_filename();
+	  int index = the_old.find_last_of(".",the_old.length());
+	  string primary = the_old.substr(0, index);
+	  string the_new = primary + "." + ext;
+	  arch->unload(the_new);
+	  cout << "New file " << the_new << " written to disk" << endl;
+	}
       }
     }
     catch (Error& error) {
