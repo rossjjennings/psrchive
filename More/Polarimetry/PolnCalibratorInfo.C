@@ -2,7 +2,7 @@
 #include "Pulsar/PolarCalibrator.h"
 #include "Pulsar/InstrumentInfo.h"
 
-Pulsar::Calibrator::Info* 
+Pulsar::PolnCalibrator::Info* 
 Pulsar::PolnCalibrator::Info::create (const Pulsar::PolnCalibrator* calibrator)
 {
   if (verbose)
