@@ -1,9 +1,10 @@
 #include "Pulsar/SingleAxisCalibrator.h"
+#include "Pauli.h"
 #include "Estimate.h"
 
 //! Construct from an single PolnCal Pulsar::Archive
 Pulsar::SingleAxisCalibrator::SingleAxisCalibrator (const Archive* archive) 
-  : ArtificialCalibrator (archive)
+  : ReferenceCalibrator (archive)
 {
 }
 
@@ -15,19 +16,31 @@ Pulsar::SingleAxisCalibrator::~SingleAxisCalibrator ()
 
 //! Return the system response as determined by the SingleAxis
 ::Calibration::Complex2*
-Pulsar::SingleAxisCalibrator::solve (const vector<Estimate<double> >& hi,
-				     const vector<Estimate<double> >& lo)
+Pulsar::SingleAxisCalibrator::solve (const vector<Estimate<double> >& source,
+				     const vector<Estimate<double> >& sky)
 {
-  unsigned npol = hi.size();
+  Reference::To<Calibration::SingleAxis> model = new Calibration::SingleAxis;
 
-  vector<Estimate<double> > cal (npol);
-  for (unsigned ipol=0; ipol<npol; ++ipol) {
-    cal[ipol] = hi[ipol];
-    cal[ipol] -= lo[ipol];
+  if (!source_set) {
+    if (verbose)
+      cerr << "Pulsar::SingleAxisCalibrator::solve" << endl;
+    model->solve (source);
+    return model.release();
   }
 
-  Reference::To<Calibration::SingleAxis> model = new Calibration::SingleAxis;
-  model->solve (cal);
+  if ( source.size() != 4 )
+    throw Error (InvalidParam, "Pulsar::SingleAxisCalibrator::solve",
+                 "source.size=%d != 4", source.size());
+
+  if (verbose)
+    cerr << "Pulsar::SingleAxisCalibrator::solve reference source=" 
+         << reference_source << endl;
+
+  // Convert the coherency vectors into Stokes parameters.
+  Stokes< Estimate<double> > stokes_source = coherency( convert (source) );
+  stokes_source *= 2.0;
+
+  model->solve( reference_source, stokes_source );
 
   return model.release();
 }
@@ -81,7 +94,8 @@ float Pulsar::SingleAxisCalibrator::Info::get_scale (unsigned iclass) const
   return 1.0;
 }
 
-Pulsar::Calibrator::Info* Pulsar::SingleAxisCalibrator::get_Info () const
+Pulsar::SingleAxisCalibrator::Info* 
+Pulsar::SingleAxisCalibrator::get_Info () const
 {
   return new SingleAxisCalibrator::Info (this);
 }

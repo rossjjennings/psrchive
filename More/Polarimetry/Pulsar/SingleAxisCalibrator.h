@@ -1,20 +1,20 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/SingleAxisCalibrator.h,v $
-   $Revision: 1.12 $
-   $Date: 2003/12/26 08:44:11 $
+   $Revision: 1.13 $
+   $Date: 2004/07/12 09:27:55 $
    $Author: straten $ */
 
 #ifndef __Pulsar_SingleAxisCalibrator_H
 #define __Pulsar_SingleAxisCalibrator_H
 
-#include "Pulsar/ArtificialCalibrator.h"
+#include "Pulsar/ReferenceCalibrator.h"
 #include "Calibration/SingleAxis.h"
 
 namespace Pulsar {
 
   //! Uses SingleAxis to represent the system response
-  class SingleAxisCalibrator : public ArtificialCalibrator {
+  class SingleAxisCalibrator : public ReferenceCalibrator {
     
   public:
 
@@ -26,9 +26,6 @@ namespace Pulsar {
 
     //! Return Calibrator::SingleAxis
     Type get_type () const;
-
-    //! Return the SingleAxisCalibrator information
-    Calibrator::Info* get_Info () const;
 
     //! Communicates SingleAxis Model parameters
     class Info : public PolnCalibrator::Info {
@@ -52,11 +49,14 @@ namespace Pulsar {
 
     };
 
+    //! Return the SingleAxisCalibrator information
+    Info* get_Info () const;
+
   protected:
 
     // ///////////////////////////////////////////////////////////////////
     //
-    // Pulsar::ArtificialCalibrator implementation
+    // Pulsar::ReferenceCalibrator implementation
     //
     // ///////////////////////////////////////////////////////////////////
 
