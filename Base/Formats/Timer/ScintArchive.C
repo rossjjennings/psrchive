@@ -2,6 +2,7 @@
 #include "Pulsar/ScintArchive.h"
 #include "Pulsar/Profile.h"
 #include "Error.h"
+#include "ScintPowerEstimator.h"
 
 #include "compressed_io.h"
 #include "timer++.h"
@@ -13,6 +14,8 @@ Pulsar::ScintArchive::ScintArchive ()
 {
   if (verbose == 3)
     cerr << "ScintArchive default construct" << endl;
+
+  add_extension (new ScintPowerEstimator (this));
 }
 
 //
@@ -52,7 +55,7 @@ Pulsar::ScintArchive::operator = (const ScintArchive& arch)
 //
 //
 Pulsar::ScintArchive::ScintArchive (const Archive& arch,
-				const vector<unsigned>& subints)
+				    const vector<unsigned>& subints)
 {
   if (verbose == 3)
     cerr << "ScintArchive base extraction construct" << endl;
@@ -64,7 +67,7 @@ Pulsar::ScintArchive::ScintArchive (const Archive& arch,
 //
 //
 void Pulsar::ScintArchive::copy (const Archive& archive,
-				    const vector<unsigned>& subints)
+				 const vector<unsigned>& subints)
 {
   if (verbose == 3)
     cerr << "ScintArchive::copy" << endl;
