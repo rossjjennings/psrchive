@@ -1,21 +1,22 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/fft/interpolate.h,v $
-   $Revision: 1.3 $
-   $Date: 2001/08/05 05:37:39 $
+   $Revision: 1.4 $
+   $Date: 2001/08/09 06:42:59 $
    $Author: straten $*/
 
 #ifndef __fft_interpolate_h
 #define __fft_interpolate_h
 
 #include <string>
+#include "fftm.h"
 
 namespace fft {
 
   extern bool verbose;
 
   template <class T>
-    void interpolate (vector<T>& out, vector<T>& in) {
+    void interpolate (vector<T>& out, const vector<T>& in) {
     
     if (in.size() > out.size())
       throw string ("fft::interpolate out smaller than in.  just scrunch");
