@@ -12,6 +12,7 @@
 #define __QT_PSREPHEM_H
 
 #include <vector>
+#include <stdio.h>
 
 #include <qvbox.h>
 #include <qlabel.h>
