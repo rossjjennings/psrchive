@@ -4,8 +4,8 @@
 #include "sky_coord.h"
 
 
-extern "C" sla_galeq_(double *, double *, double *, double *);
-extern "C" sla_eqgal_(double *, double *, double *, double *);
+extern "C" double sla_galeq_(double *, double *, double *, double *);
+extern "C" double sla_eqgal_(double *, double *, double *, double *);
 
 sky_coord & sky_coord::operator= (const sky_coord & co)
 {
