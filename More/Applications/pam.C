@@ -15,8 +15,8 @@ int main (int argc, char *argv[]) {
   bool verbose = false;
   
   vector<string> archives;
-  
-  bool update = true;
+
+  bool save = false;
   string ext;
   
   bool tscr = false;
@@ -37,14 +37,14 @@ int main (int argc, char *argv[]) {
 
   int gotc = 0;
   
-  while ((gotc = getopt(argc, argv, "hvVxe:TFpt:f:b:s:z")) != -1) {
+  while ((gotc = getopt(argc, argv, "hvVme:TFpt:f:b:s:z")) != -1) {
     switch (gotc) {
     case 'h':
       cout << "A program for manipulating Pulsar::Archives"            << endl;
       cout << "Usage: pam [options] filenames"                         << endl;
       cout << "  -v               Verbose mode"                        << endl;
       cout << "  -V               Very verbose mode"                   << endl;
-      cout << "  -x               Test only, files are not changed"    << endl;
+      cout << "  -m               Modify the original data"            << endl;
       cout << "  -e [string]      Write new files with this extension" << endl;
       cout << endl;
       cout << "  -T               Time scrunch"                        << endl;
@@ -66,10 +66,11 @@ int main (int argc, char *argv[]) {
       Error::verbose = true;
       Pulsar::Archive::set_verbosity(1);
       break;
-    case 'x':
-      update = false;
+    case 'm':
+      save = true;
       break;
     case 'e':
+      save = true;
       ext = optarg;
       break;
     case 'T':
@@ -130,6 +131,10 @@ int main (int argc, char *argv[]) {
   } 
   
   Reference::To<Pulsar::Archive> arch;
+
+  if (!save) {
+    cout << "Changes will not be saved. Use -m or -e to write results to disk." << endl;
+  }
 
   for (unsigned i = 0; i < archives.size(); i++) {
     
@@ -197,7 +202,7 @@ int main (int argc, char *argv[]) {
 	}
       }
       
-      if (update) {
+      if (save) {
 	if (ext.empty()) {
 	  arch->unload();
 	  cout << arch->get_filename() << " updated on disk" << endl;
@@ -211,7 +216,7 @@ int main (int argc, char *argv[]) {
 	  cout << "New file " << the_new << " written to disk" << endl;
 	}
       }
-
+      
     }
     catch (Error& error) {
       cerr << error << endl;
