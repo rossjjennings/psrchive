@@ -7,7 +7,7 @@ COMMENT   Astrophysics Supplement Series v44/p363, v44/p371, v73/p359, v73/p365.
 COMMENT   Contact the NASA Science Office of Standards and Technology for the
 COMMENT   FITS Definition document #100 and other FITS information.
 COMMENT
-HDRVER  = '1.23            '   / Header version 
+HDRVER  = '1.25            '   / Header version 
 DATE    = '                '   / File creation date (YYYY-MM-DDThh:mm:ss UTC)
 OBSERVER= '                '   / Observer name(s)
 PROJID  = '                '   / Project name
@@ -62,14 +62,14 @@ NAXIS1  =                    * / width of table in bytes
 NAXIS2  =                    1 / number of rows
 PCOUNT  =                    0 / size of special data area
 GCOUNT  =                    1 / one data group (required keyword)
-TFIELDS =                   18 / number of fields per row
+TFIELDS =                   20 / number of fields per row
 EXTNAME = 'HISTORY'            / name of this binary table extension
 TTYPE1  = 'DATE_PRO'           / Processing date and time (UTC)
 TFORM1  = '24A     '           / 24-char string
 TTYPE2  = 'PROC_CMD'           / Processing program and command
 TFORM2  = '80A     '           / 80_char string
-TTYPE3 = 'SCALE'              / Units (FluxDen/RefFlux/Jansky)
-TFORM3 = '8A      '           / 8-char string
+TTYPE3  = 'SCALE'              / Units (FluxDen/RefFlux/Jansky)
+TFORM3  = '8A      '           / 8-char string
 TTYPE4  = 'POL_TYPE'           / Polarisation identifier
 TFORM4  = '8A      '           / 8-char string
 TTYPE5  = 'NPOL    '           / Number of polarisations
