@@ -1,3 +1,5 @@
+#include <float.h>
+
 #include "Pulsar/FITSArchive.h"
 #include "Pulsar/Integration.h"
 #include "Pulsar/Profile.h"
@@ -243,7 +245,7 @@ void Pulsar::FITSArchive::unload_integration (int row,
       scalefac = 1.0;
       
       // Test for dynamic range
-      if (fabs(min - max) < 0.000001) {
+      if (fabs(min - max) < (100.0 * FLT_MIN)) {
 	if (verbose == 3) {
 	  cerr << "FITSArchive::unload_integration WARNING no range in profile"
 	       << endl;
