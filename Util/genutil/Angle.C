@@ -12,18 +12,16 @@
 #include "Cartesian.h"
 #include "coord.h"
 
-#include "f772c.h"
-// SLA routine
-extern "C" double F772C(sla_dsep)(double *, double *, double *, double*);
-
 bool Angle::verbose = false;
 
 Angle::Angle (const double & rad) { init(); setradians(rad); }
 
 void Angle::wrap()
 {
-  while(radians>wrap_point) radians-=2.0*wrap_point;
-  while(radians<-wrap_point) radians+=2.0*wrap_point;
+  //while(radians>wrap_point) radians-=2.0*wrap_point;
+  //while(radians<-wrap_point) radians+=2.0*wrap_point;
+  while (radians>wrap_point) radians-=2.0*M_PI;
+  while (radians<wrap_point-2.0*M_PI) radians+=2.0*M_PI;
 }
 
 char * Angle::getHMS(char *str, int places) const

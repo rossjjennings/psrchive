@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Angle.h,v $
-   $Revision: 1.12 $
-   $Date: 2002/04/24 11:59:22 $
-   $Author: pulsar $ */
+   $Revision: 1.13 $
+   $Date: 2004/02/26 06:55:46 $
+   $Author: straten $ */
 
 // redwards 17 Mar 99 -- Time for a definitive C++ suite of
 // angle and sky coordinate functions
@@ -38,7 +38,9 @@ class Angle
 
   void setWrapPoint(double wp){wrap_point=wp; wrap();}
   double getWrapPoint() {return wrap_point;}
-  void makeArctangle() { setWrapPoint(0.5*M_PI); }
+
+  // WvS - this not only changes the wrap-point but also changes the scale
+  // void makeArctangle() { setWrapPoint(0.5*M_PI); }
 
   int     setHMS (const char *);
   char*   getHMS (char* str, int places=3) const;
@@ -109,9 +111,9 @@ inline ostream& operator<< (ostream & os, const Angle & angle)
 // More Arctangle stuff... NOTE: remember the Angle = operator
 // DOESN'T set wrap_point, so only use these to e.g. pass directly
 // to a function
-inline Angle Arctangle() {Angle a; a.makeArctangle(); return a;}
-inline Angle Arctangle(const Angle&a1) {Angle a(a1); a.makeArctangle(); return a;}
-inline Angle Arctangle(double rad) {Angle a(rad); a.makeArctangle(); return a;}
+//inline Angle Arctangle() {Angle a; a.makeArctangle(); return a;}
+//inline Angle Arctangle(const Angle&a1) {Angle a(a1); a.makeArctangle(); return a;}
+//inline Angle Arctangle(double rad) {Angle a(rad); a.makeArctangle(); return a;}
 
  
 // AnglePair class : useful for sky positions.
