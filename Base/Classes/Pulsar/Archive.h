@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Archive.h,v $
-   $Revision: 1.51 $
-   $Date: 2003/01/15 13:56:29 $
-   $Author: pulsar $ */
+   $Revision: 1.52 $
+   $Date: 2003/01/31 16:05:03 $
+   $Author: straten $ */
 
 /*! \mainpage 
  
@@ -165,7 +165,7 @@ namespace Pulsar {
     //! Classes derived from Archive are registered for use via an Agent
     /*! This abstract base class must be used to register derived classes
       with the Archive::load factory. */
-    class Agent {
+    class Agent : public Reference::Able {
 
     public:
       //! Advocate the use of the derived class to interpret filename
