@@ -27,7 +27,8 @@ void usage ()
     " -a archive set the output archive class name\n"
     " -c ICHAN   mark ICHAN as bad\n"
     " -f         treat all archives as members of a fluxcal observation\n"
-    " -q         use the single-axis model" << endl;
+    " -q         use the single-axis model\n"
+    " -P         produce publication-quality plots" << endl;
 }
 
 int main (int argc, char** argv) 
@@ -47,10 +48,13 @@ int main (int argc, char** argv)
   // vector of bad channels
   vector<unsigned> zapchan;
 
+  // produce publication quality plots
+  bool publication = false;
+
   // verbosity flag
   bool verbose = false;
   char c;
-  while ((c = getopt(argc, argv, "a:c:hfMqvV")) != -1)  {
+  while ((c = getopt(argc, argv, "a:c:hfMPqvV")) != -1)  {
 
     switch (c)  {
 
@@ -63,12 +67,22 @@ int main (int argc, char** argv)
       break;
 
     case 'c': {
-      unsigned ichan = 0;
-      if (sscanf (optarg, "%u", &ichan) != 1) {
-	cerr << "pacv: Error parsing " << optarg << " as a channel" << endl;
+
+      unsigned ichan1 = 0;
+      unsigned ichan2 = 0;
+
+      if (sscanf (optarg, "%u-%u", &ichan1, &ichan2) == 2)
+	for (unsigned ichan=ichan1; ichan<=ichan2; ichan++)
+	  zapchan.push_back(ichan);
+
+      else if (sscanf (optarg, "%u", &ichan1) == 1)
+	zapchan.push_back(ichan1);
+
+      else {
+	cerr << "pacv: Error parsing " << optarg << " as zap range" << endl;
 	return -1;
       }
-      zapchan.push_back(ichan);
+
       break;
     }
       
@@ -78,6 +92,10 @@ int main (int argc, char** argv)
 
     case 'M':
       metafile = optarg;
+      break;
+
+    case 'P':
+      publication = true;
       break;
 
     case 'q':
@@ -119,9 +137,16 @@ int main (int argc, char** argv)
   Reference::To<Pulsar::Archive> output;
  
   Reference::To<Pulsar::PolnCalibrator> calibrator;
-
   
   Pulsar::CalibratorPlotter plotter;
+
+  if (publication) {
+    plotter.npanel = 5;
+    plotter.between_panels = 0.08;
+    cpgsvp (.25,.75,.15,.95);
+    cpgslw (2);
+  }
+
   Pulsar::FluxCalibrator fluxcal;
   Pulsar::Plotter archplot;
 
@@ -136,6 +161,12 @@ int main (int argc, char** argv)
     if (input->get_type() == Signal::Calibrator) {
 
       calibrator = new Pulsar::PolnCalibrator (input);
+
+      cerr << "pacv: Archive Calibrator with nchan=" 
+	   << calibrator->get_nchan() << endl;
+
+      for (unsigned ichan=0; ichan<zapchan.size(); ichan++)
+	calibrator->set_Transformation_invalid (zapchan[ichan]);
 
       if (verbose)
 	cerr << "pacv: Plotting PolnCalibrator" << endl;
