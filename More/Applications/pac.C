@@ -72,6 +72,8 @@ int main (int argc, char *argv[]) {
   vector<string> exts;
 
   vector<string> archives;
+  
+  string pcal_file;
 
   int gotc = 0;
   char* key = NULL;
@@ -93,6 +95,7 @@ int main (int argc, char *argv[]) {
       verbose = true;
       Pulsar::Calibration::verbose = true;
       Pulsar::Calibrator::verbose = true;
+      Calibration::Model::verbose = true;
       Pulsar::Archive::set_verbosity(1);
       break;
     case 'p':
@@ -286,7 +289,8 @@ int main (int argc, char *argv[]) {
 	pcal_engine->calibrate(arch);
 	
 	cout << "Polarisation Calibration Complete" << endl;
-        arch->set_poln_calibrated();	
+        arch->set_poln_calibrated();
+	pcal_file = (pcal_engine->get_Archive())->get_filename();
 	if (display_params) {
 	  cerr << "not implemented; use pacv" << endl;
 	}	
@@ -347,6 +351,7 @@ int main (int argc, char *argv[]) {
 	    fitsext->set_cal_mthd("SelfCAL");
 	  if (m == Pulsar::Calibration::Database::Polar)
 	    fitsext->set_cal_mthd("Polar");
+	  fitsext->set_cal_file(pcal_file);
 	}
 	
 	if (command.length() > 80) {
