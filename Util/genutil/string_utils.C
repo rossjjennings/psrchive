@@ -116,15 +116,27 @@ string make_string(unsigned input){
   return string(dummy);
 }
 
-string make_string(int64 input){
+string make_string(long input){
   char dummy[50];
-  sprintf(dummy,I64,input);
+  sprintf(dummy,"%ld",input);
   return string(dummy);
 }
 
-string make_string(uint64 input){
+string make_string(unsigned long input){
   char dummy[50];
-  sprintf(dummy,UI64,input);
+  sprintf(dummy,"%ld",input);
+  return string(dummy);
+}
+
+string make_string(long long input){
+  char dummy[50];
+  sprintf(dummy,"%lld",input);
+  return string(dummy);
+}
+
+string make_string(unsigned long long input){
+  char dummy[50];
+  sprintf(dummy,"%lld",input);
   return string(dummy);
 }
 
@@ -134,10 +146,10 @@ string make_string(float input){
   return string(dummy);
 }
 
-string make_string(float input, int precision){
+string make_string(float input, int decimal_places){
   char dummy1[50];
   char dummy2[50];
-  sprintf(dummy1,"%%.%df",precision);
+  sprintf(dummy1,"%%.%df",decimal_places);
   sprintf(dummy2,dummy1,input);
   return string(dummy2);
 }
@@ -148,10 +160,10 @@ string make_string(double input){
   return string(dummy);
 }
 
-string make_string(double input, int precision){
+string make_string(double input, int decimal_places){
   char dummy1[50];
   char dummy2[50];
-  sprintf(dummy1,"%%.%df",precision);
+  sprintf(dummy1,"%%.%df",decimal_places);
   sprintf(dummy2,dummy1,input);
   return string(dummy2);
 }

@@ -1,7 +1,7 @@
 //-*-C++-*-
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Attic/string_utils.h,v $
-   $Revision: 1.14 $
-   $Date: 2002/10/29 04:36:38 $
+   $Revision: 1.15 $
+   $Date: 2002/10/29 04:53:50 $
    $Author: hknight $ */
 
 #ifndef __STRING_UTILS_H
@@ -16,8 +16,6 @@
 #include <vector>
 
 #include "psr_cpp.h"
-
-#include "environ.h"
 
 // Like perl chomp.  Returns true if successful.
 bool h_chomp(string& ss, char gone='\n');
@@ -102,6 +100,8 @@ string stringdelimit(const vector<string>& words, char delimiter);
 // useful for taking lists of files on the command line
 vector<string> cstrarray2vec(const char **vals, int nelem);
 
+/* BEWARE: THESE ARE KNOWN MEMORY LEAKERS: */
+
 template<class T>
 string form_string(T input){
   ostrstream ost;
@@ -114,7 +114,12 @@ string form_string(T input, int precision){
   ostrstream ost;
   ost << setprecision( precision );
   ost << input << ends;
-  return ost.str();
+  
+  string ss = ost.str();
+  int bla = 0;
+  if( bla==1 )
+    cout << ss;
+  return ss;
 }
 
 template<class T>
@@ -143,15 +148,19 @@ T convert_string(string ss, int precision){
 /* these use stdio- if you don't like the MEMORY LEAKING istrstreams */
 string make_string(int input);
 string make_string(unsigned input);
-string make_string(int64 input);
-string make_string(uint64 input);
+string make_string(long input);
+string make_string(unsigned long input);
+string make_string(long long input);
+string make_string(unsigned long long input);
 string make_string(float input);
-string make_string(float input, int precision);
+string make_string(float input, int decimal_places);
 string make_string(double input);
-string make_string(double input, int precision);
+string make_string(double input, int decimal_places);
 string make_string(void* input);
-string make_string(char input); // just incase someone is dumb enough...
-string make_string(unsigned char input); // just incase someone is dumb enough...
+// just incase someone is dumb enough...
+string make_string(char input);
+// just incase someone is CRAZY enough - writes as an int!
+string make_string(unsigned char input);
 
 
 #endif
