@@ -2,6 +2,7 @@
 #include "Archive.h"
 
 float Pulsar::Archive::default_baseline_window = 0.1;
+bool  Pulsar::Archive::verbose = false;
 
 void Pulsar::Archive::init ()
 {
