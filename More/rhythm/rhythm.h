@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/rhythm/rhythm.h,v $
-   $Revision: 1.37 $
-   $Date: 2003/09/18 07:21:53 $
+   $Revision: 1.38 $
+   $Date: 2003/10/19 23:59:55 $
    $Author: ahotan $ */
 
 // //////////////////////////////////////////////////////////////////////////
@@ -39,6 +39,7 @@
 #include "residual.h"
 
 #include "sky_coord.h"
+#include "coord.h"
 #include "MJD.h"
 
 #include "Options.h"

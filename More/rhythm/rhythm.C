@@ -946,8 +946,11 @@ vector<double> Rhythm::give_me_data (toaPlot::AxisQuantity q)
 	// Extract the lat and lon
 	char telid = myeph.value_str[EPH_TZRSITE][0];
 	
-	double lat = Pulsar::tzr_lat(telid);
-	double lon = Pulsar::tzr_lon(telid);
+	float lat = 0.0;
+	float lon = 0.0;
+	float ele = 0.0;
+
+	telescope_coords(telid, &lat, &lon, &ele);
 	
 	double answer = Pulsar::parallactic_angle(crd, mjd, lat, lon);
 	
