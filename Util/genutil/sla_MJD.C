@@ -1,8 +1,10 @@
+
+#include "MJD.h"
+
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
 
-#include "MJD.h"
 #include <math.h>
 
 #define SLA_gmst SLA_FUNC(sla_gmst,slaGmst)
