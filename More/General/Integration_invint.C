@@ -46,7 +46,7 @@ void Pulsar::Integration::invint ()
     }
 
     // prepare to reset Stokes I to the Invariant Interval
-    Profile* Sinv = (*this)[Signal::Si][ichan];
+    Profile* Sinv = get_Profile (0, ichan);
 
     // set the values
     Sinv->set_amps (invariant.begin());
