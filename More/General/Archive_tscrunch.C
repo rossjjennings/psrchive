@@ -100,8 +100,9 @@ void Pulsar::Archive::tscrunch (unsigned nscrunch)
 
     mjd /= double (nscrunch);
 
-    // ensure that the polyco includes the new integration time
-    update_model (mjd);
+    if (get_type() == Signal::Pulsar)
+      // ensure that the polyco includes the new integration time
+      update_model (mjd);
 
     if (get_type() == Signal::Pulsar) {
 
