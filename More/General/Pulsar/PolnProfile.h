@@ -10,16 +10,22 @@ namespace Pulsar {
 
   class Profile;
 
+  //! Implements polarimetric pulse profile operations.
+  /*! This class does not actually store its own profiles.  Rather, it
+    uses references to Reference::To<Profile> objects in order to
+    manipulate the polarimetric profiles stored external to the class.
+    In this sense, the PolnProfile class is currenlty used only as a
+    workhorse. */
   class PolnProfile : public Reference::Able {
     
   public:
     //! Null constructor
-    PolnProfile () { init(); }
+    PolnProfile ();
 
-    //! Construct from four profiles
+    //! Construct from four externally-managed Profile objects
     PolnProfile (Signal::Basis basis, Signal::State state,
-		 Profile* p0, Profile* p1,
-		 Profile* p2, Profile* p3, bool clone = false);
+		 Reference::To<Profile>& p0, Reference::To<Profile>& p1,
+		 Reference::To<Profile>& p2, Reference::To<Profile>& p3);
     
     //! Destructor
     ~PolnProfile();
@@ -32,10 +38,6 @@ namespace Pulsar {
 
     //! Get the State of the poln profile
     Signal::State get_state () const { return state; }
-
-    //! Get pointers to the Profile instances
-    void get_Profiles (Profile* &p0, Profile* &p1,
-		       Profile* &p2, Profile* &p3) const;
 
     //! Perform the congruence transformation on each bin of the profile
     template <typename T> void transform (const Jones<T>& response);
@@ -50,17 +52,18 @@ namespace Pulsar {
     //! The state of the polarimetric profiles
     Signal::State state;
 
-    //! The polarimetric profiles
-    Profile* data[4];
-
-    //! Flag that the Profiles are managed by this instance
-    bool mine;
+    //! References to the polarimetric profiles
+    Reference::To<Profile> &p0, &p1, &p2, &p3;
 
     //! Efficiently forms the inplace sum and difference of two profiles
     void sum_difference (Profile* sum, Profile* difference);
 
     //! Set everthing to null values
     void init ();
+
+  private:
+    //! Empty reference used for null constructor
+    static Reference::To<Profile> null;
   };
 
 }
@@ -68,7 +71,7 @@ namespace Pulsar {
 template <typename T>
 void Pulsar::PolnProfile::transform (const Jones<T>& response)
 {
-  unsigned nbin = data[0]->get_nbin();
+  unsigned nbin = p0->get_nbin();
   Jones<float> response_dagger = herm(response);
 
   for (unsigned ibin = 0; ibin < nbin; ibin++)
