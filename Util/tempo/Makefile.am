@@ -6,7 +6,7 @@ LIB_SRCS = psrephem.C ephio_c.c ephio.f rnd8.f
 
 PROGRAMS = ephtest.c keys2c.c keys2fort.c eph2upd.f psrephem_test.C
 
-LDFLAGS  += -leph -lpolyco -ltimes -lgenutil $(LIBGTKMM) $(F77LIBS) -lm
+LDFLAGS  += -leph -lpolyco -ltimes -lgenutil $(LGTKMM) $(F77LIBS) -lm
 
 ##########################################################################
 # optional GTK-- Widget set
@@ -15,7 +15,6 @@ ifeq ($(PSRGTKMM),yes)
 PROGRAMS += gtk_test.C
 LIB_SRCS += gtk_psrephem.C
 INCFLAGS += $(GTKMM_CCFLAGS)
-MDFLAGS  += -DGTK_MAJOR_VERSION=2
 endif
 
 include ${LOCAL_ROOT}/include/Makefile.extended
