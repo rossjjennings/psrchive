@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Archive.h,v $
-   $Revision: 1.78 $
-   $Date: 2003/06/16 16:49:06 $
-   $Author: straten $ */
+   $Revision: 1.79 $
+   $Date: 2003/07/26 07:34:24 $
+   $Author: sord $ */
 
 /*! \mainpage 
  
@@ -463,7 +463,7 @@ namespace Pulsar {
     //
     //  Note that this is dangerous and only intended for use with instruments
     //  whose band is split into adjoining segments (like cpsr2)
-    void fappend (Pulsar::Archive* arch);
+    void fappend (Pulsar::Archive* arch, bool ignore_time_mismatch = false);
 
     //! Return pointer to a new fscrunched, tscrunched and pscrunched clone
     Archive* total () const;

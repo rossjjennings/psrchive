@@ -2,7 +2,7 @@
 #include "Pulsar/Integration.h"
 #include "Pulsar/Profile.h"
 
-void Pulsar::Archive::fappend (Pulsar::Archive* arch)
+void Pulsar::Archive::fappend (Pulsar::Archive* arch, bool ignore_time_mismatch)
 {
   if (arch->get_nsubint() != get_nsubint())
     throw Error (InvalidParam, "Pular::Archive::fappend nsubint mismatch");
@@ -12,7 +12,7 @@ void Pulsar::Archive::fappend (Pulsar::Archive* arch)
   try {
     
     for (unsigned i = 0; i < get_nsubint(); i++) {
-      get_Integration(i)->fappend(arch->get_Integration(i));
+      get_Integration(i)->fappend(arch->get_Integration(i), ignore_time_mismatch);
     }
 
   }
