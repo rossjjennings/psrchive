@@ -20,7 +20,7 @@ c
       real*4 s,wrk(2048),al,an,sn,smax
 c
       snrmax=0.
-      if (nbin>1024) stop 'Increase dim of wrk in smooth_mw
+      if (nbin>1024) stop 'smooth.f Increase dim of wrk in smooth_mw'
 c---------------------------------------
 c  remove baseline
       ksm=nbin/2.5+0.5
