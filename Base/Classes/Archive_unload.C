@@ -18,15 +18,10 @@ mode_t getumask(void) {
   filename in the same path as the requested output file. */
 void Pulsar::Archive::unload (const char* filename)
 {
-  if (verbose == 3)
-    cerr << "Pulsar::Archive::unload\n  filename='" << filename << "'"
-      "\n  unload_filename='" << unload_filename << "'" << endl;
-  
   string unload_to_filename = unload_filename;
-
   if (filename)
     unload_to_filename = filename;
-  
+
   if (verbose == 3)
     cerr << "Pulsar::Archive::unload (" << unload_to_filename << ")" << endl;
 
