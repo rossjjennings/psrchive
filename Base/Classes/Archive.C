@@ -515,6 +515,7 @@ void Pulsar::Archive::defaraday (double rotation_measure)
   
   set_ism_rm_corrected(true);
   set_iono_rm_corrected(true);
+  set_state (get_Integration(0)->get_state());
 }
 
 /*! \param new_ephemeris the ephemeris to be installed
