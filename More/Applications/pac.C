@@ -10,6 +10,10 @@
 #include "PolnCalibrator.h"
 #include "FluxCalibrator.h"
 
+// Extensions this program understands
+
+#include "Pulsar/ProcHistory.h"
+
 // A command line tool for calibrating Pulsar::Archives
 
 void usage ()
@@ -73,6 +77,8 @@ int main (int argc, char *argv[]) {
   char* key = NULL;
   char whitespace[5] = " \n\t";
 
+  string command = "pac ";
+
   while ((gotc = getopt(argc, argv, "hvVp:e:u:d:wWcitfboDFPsSq")) != -1) {
     switch (gotc) {
     case 'h':
@@ -101,9 +107,11 @@ int main (int argc, char *argv[]) {
       break;
     case 'F':
       do_polncal = false;
+      command += "-F ";
       break;
     case 'P':
       do_fluxcal = false;
+      command += "-P ";
       break;
     case 'e':
       key = strtok (optarg, whitespace);
@@ -125,30 +133,39 @@ int main (int argc, char *argv[]) {
       break;
     case 'c':
       test_coords = false;
+      command += "-c ";
       break;
     case 'i':
       test_instr = false;
+      command += "-i ";
       break;
     case 't':
       test_times = false;
+      command += "-t ";
       break;
     case 'f':
       test_frequency = false;
+      command += "-f ";
       break;
     case 'b':
       test_bandwidth = false;
+      command += "-b ";
       break;
     case 'o':
       test_obstype = false;
+      command += "-o ";
       break;
     case 'S':
       do_selfcal = true;
+      command += "-S ";
       break;
     case 's':
       m = Pulsar::Calibration::Database::SingleAxis;
+      command += "-s ";
       break;
     case 'q':
       m = Pulsar::Calibration::Database::Polar;
+      command += "-q ";
       break;
 
     default:
@@ -304,6 +321,42 @@ int main (int argc, char *argv[]) {
 
       if (verbose)
         cerr << "pac: Calibrated Archive name '" << newname << "'" << endl;
+      
+      // See if the archive contains a history that should be updated:
+      
+      Pulsar::ProcHistory* fitsext = 0;
+      for (unsigned i = 0; i < arch->get_nextension(); i++) {
+	Pulsar::Archive::Extension* extension;
+	extension = (Pulsar::Archive::Extension*)arch->get_extension (i);
+	fitsext = dynamic_cast<Pulsar::ProcHistory*> (extension);
+	if (fitsext) {
+	  break;
+	}
+      }
+      
+      if (fitsext) {
+	
+	if (do_fluxcal) {
+	  fitsext->set_sc_mthd("PAC");
+	}
+	
+	if (do_polncal) {
+	  if (m == Pulsar::Calibration::Database::SingleAxis)
+	    fitsext->set_cal_mthd("SingleAxis");
+	  if (do_selfcal)
+	    fitsext->set_cal_mthd("SelfCAL");
+	  if (m == Pulsar::Calibration::Database::Polar)
+	    fitsext->set_cal_mthd("Polar");
+	}
+	
+	if (command.length() > 80) {
+	  cout << "WARNING: ProcHistory command string truncated to 80 chars" << endl;
+	  fitsext->set_command_str(command.substr(0, 80));
+	}
+	else {
+	  fitsext->set_command_str(command);
+	}
+      }
 
       arch->unload(newname);
       
