@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Profile.h,v $
-   $Revision: 1.19 $
-   $Date: 2002/08/19 10:13:27 $
+   $Revision: 1.20 $
+   $Date: 2002/08/19 16:37:15 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Profile_h
@@ -54,6 +54,12 @@ namespace Pulsar {
     //! calculates weighted average of profile and another profile
     virtual const Profile& operator += (const Profile& profile);
 
+    //! calculates weighted average difference of profile and another profile
+    virtual const Profile& operator -= (const Profile& profile);
+
+    //! calculates the weighted sum/difference
+    virtual const Profile& average (const Profile& profile, double sign);
+  
     //! adds offset to each bin of the profile
     virtual const Profile& operator += (float offset);
 
