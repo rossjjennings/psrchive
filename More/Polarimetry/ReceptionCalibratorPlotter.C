@@ -110,7 +110,7 @@ void Pulsar::ReceptionCalibratorPlotter::plot_constraints (unsigned ichan,
     const Calibration::Measurements& data
       = equation->get_data (imeas);
 
-    double xval = data.interval[0];
+    data.set_coordinates();
 
     unsigned mstate = data.size();
 
@@ -122,7 +122,6 @@ void Pulsar::ReceptionCalibratorPlotter::plot_constraints (unsigned ichan,
 	  stokes[ipol].back().var = data[jstate].var;
 	}
 
-	calibrator->parallactic.set_abscissa (0, xval);
 	para.push_back ( calibrator->parallactic.get_param(0) * 180.0/M_PI );
 
       }
@@ -183,7 +182,6 @@ void Pulsar::ReceptionCalibratorPlotter::plot_model (unsigned ichan,
 
   // extract the appropriate equation
   Calibration::ReceptionModel* equation = calibrator->equation[ichan];
-  Calibration::TimeManager* time = calibrator->time[ichan];
 
   equation->set_source (istate);
 
@@ -231,7 +229,7 @@ void Pulsar::ReceptionCalibratorPlotter::plot_model (unsigned ichan,
 
     MJD epoch = start + step * ipt;
 
-    time->set_epoch (epoch);
+    calibrator->time.send (epoch);
 
     para[ipt] = calibrator->parallactic.get_param(0);
 

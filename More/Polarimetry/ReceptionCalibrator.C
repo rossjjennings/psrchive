@@ -29,6 +29,9 @@ Pulsar::ReceptionCalibrator::ReceptionCalibrator (const Archive* archive)
 
   if (archive)
     initial_observation (archive);
+
+  time.connect (&parallactic, &Calibration::Parallactic::set_epoch);
+
 }
 
 void Pulsar::ReceptionCalibrator::set_calibrators (const vector<string>& names)
@@ -74,7 +77,6 @@ void Pulsar::ReceptionCalibrator::initial_observation (const Archive* data)
   unsigned nchan = uncalibrated->get_nchan();
 
   equation.resize (nchan);
-  time.resize (nchan);
   path.resize (nchan);
   polar.resize (nchan);
   backend.resize (nchan);
@@ -82,7 +84,6 @@ void Pulsar::ReceptionCalibrator::initial_observation (const Archive* data)
   for (unsigned ichan=0; ichan<nchan; ichan++) {
 
     equation[ichan] = new Calibration::ReceptionModel;
-    time[ichan] = new Calibration::TimeManager (equation[ichan]);
     path[ichan] = new Calibration::PathManager (equation[ichan]);
 
     polar[ichan] = new Calibration::PolarEstimate;
@@ -274,7 +275,7 @@ void Pulsar::ReceptionCalibrator::add_observation (const Archive* data)
     for (unsigned ichan=0; ichan<nchan; ichan++) {
 
       // the selected pulse phase bins
-      vector<Calibration::MeasuredState> measurements;
+      Calibration::Measurements measurements ( time.new_Value(epoch) );
 
       for (unsigned istate=0; istate < pulsar.size(); istate++)
 	add_data (measurements, pulsar[istate], ichan, integration);
@@ -282,7 +283,7 @@ void Pulsar::ReceptionCalibrator::add_observation (const Archive* data)
       path[ichan]->clone_path (Pulsar_path);
       path[ichan]->add_Transformation (new Calibration::Gain);
 
-      time[ichan]->add_data (epoch, measurements);
+      equation[ichan]->add_data (measurements);
     }
   }
 }
@@ -424,15 +425,13 @@ void Pulsar::ReceptionCalibrator::add_PolnCalibrator (const PolnCalibrator* p)
 
       state.source_index = calibrator.source_index;
 
-#if 0
-      boost    = new Calibration::Boost    (Vector<double, 3>::basis(0));
-      boost->name = "SingleAxis Boost";
-#endif
+      Calibration::Measurements measurements ( time.new_Value(epoch) );
+      measurements.push_back (state);
 
       path[ichan]->clone_path (PolnCalibrator_path);
       path[ichan]->add_Transformation (new Calibration::Gain);
 
-      time[ichan]->add_data (epoch, state);
+      equation[ichan]->add_data (measurements);
 
       if (polcal) {
 	Jones<double> caltor = inv (polcal->model[ichan].evaluate());
@@ -616,17 +615,8 @@ void Pulsar::ReceptionCalibrator::initialize ()
   for (unsigned istate=0; istate<pulsar.size(); istate++)
     pulsar[istate].update_source ();
 
-  MJD mid = 0.5 * (start_epoch + end_epoch);
-  parallactic.set_reference_epoch (mid);
-
-  unsigned nchan = equation.size();
-
-  for (unsigned ichan=0; ichan<nchan; ichan+=1) {
-
-    time[ichan]->set_reference_epoch (mid);
+  for (unsigned ichan=0; ichan<equation.size(); ichan++)
     polar[ichan]->update ();
-
-  }
 
   is_initialized = true;
 }

@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ReceptionCalibrator.h,v $
-   $Revision: 1.30 $
-   $Date: 2003/08/15 15:23:00 $
+   $Revision: 1.31 $
+   $Date: 2003/08/27 14:42:28 $
    $Author: straten $ */
 
 #ifndef __ReceptionCalibrator_H
@@ -13,7 +13,7 @@
 // Reception Model and its management
 #include "Calibration/ReceptionModel.h"
 #include "Calibration/PathManager.h"
-#include "Calibration/TimeManager.h"
+#include "Calibration/Axis.h"
 
 // Parameterizations of the instrument and source
 #include "Calibration/PolarEstimate.h"
@@ -114,9 +114,6 @@ namespace Pulsar {
     //! ReceptionModel as a function of frequency
     vector<Reference::To<Calibration::ReceptionModel> > equation;
 
-    //! TimeManager as a function of frequency
-    vector<Reference::To<Calibration::TimeManager> > time;
-
     //! PathManager as a function of frequency
     vector<Reference::To<Calibration::PathManager> > path;
 
@@ -129,7 +126,7 @@ namespace Pulsar {
     //! Single-axis decomposition of backend as a function of frequency
     vector<Reference::To<Calibration::SingleAxis> > backend;
 
-    //! Uncalibrated estimate of pulsar polarization as a function of phase
+    //! Uncalibrated estimate of calibrator polarization
     SourceEstimate calibrator;
 
     //! Uncalibrated estimate of pulsar polarization as a function of phase
@@ -140,6 +137,9 @@ namespace Pulsar {
 
     //! The parallactic angle rotation
     Calibration::Parallactic parallactic;
+
+    //! The time axis
+    Calibration::Axis<MJD> time;
 
     //! Uncalibrated best estimate of the average pulse profile
     Reference::To<const Archive> uncalibrated;
