@@ -1,5 +1,6 @@
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
+#include "Pulsar/IntegrationOrder.h"
 
 /*!
   If any current dimension is greater than that requested, the Profiles
@@ -34,6 +35,10 @@ void Pulsar::Archive::resize (unsigned nsubint, unsigned npol,
   if (verbose == 3)
     cerr << "Pulsar::Archive::resize subints" << endl;
   IntegrationManager::resize (nsubint);
+
+  if (get<Pulsar::IntegrationOrder>()) {
+    get<Pulsar::IntegrationOrder>()->resize(nsubint);
+  }
 
   for (unsigned isub=0; isub<nsubint; isub++)
     get_Integration(isub) -> resize (npol, nchan, nbin);
