@@ -1,5 +1,5 @@
 //
-// $Id: pav.C,v 1.56 2003/10/10 05:57:38 ahotan Exp $
+// $Id: pav.C,v 1.57 2003/10/11 11:50:38 ahotan Exp $
 //
 // The Pulsar Archive Viewer
 //
@@ -48,6 +48,7 @@ void usage ()
     " -K dev    Choose a plot device\n"
     " -c map    Choose a colour map\n"
     " -M meta   Read a meta-file containing the list of filenames\n"
+    " -s std    Select a standard profile\n"
     " -P        Select which polarization to display\n"
     " -I        Select which subint to display\n"
     " -W        Change colour scheme to suite white background\n"
@@ -69,13 +70,14 @@ void usage ()
     " -q        Plot a position angle frequency spectrum colour map\n"
     " -Q        Position angle frequency spectrum for on-pulse region\n"
     " -r phase  rotate the profiles by phase (in turns)\n"
-    " -s        Plot S/N against frequency\n"
+    " -n        Plot S/N against frequency\n"
     " -S        Plot Stokes parameters in the Manchester style\n"
     " -X        Plot cal amplitude and phase vs frequency channel\n"
     " -Y        Display all subints (time vs pulse phase)\n"
     " -L        Find the width of the pulse profile\n"
     " -j        Plot a simple dynamic spectrum\n"
     " -J        Plot a phase scrunched amplitude spectrum\n"
+    " -u        Morphological difference with the standard profile\n"
     "\n"
     "Archive::Extension options (file format specific):\n"
     " -o        Plot the original passband\n"
@@ -144,6 +146,11 @@ int main (int argc, char** argv)
   bool width = false;
   bool dynam = false;
   bool psas = false;
+  bool std_given = false;
+  bool mdiff = false;
+
+  Reference::To<Pulsar::Archive> std_arch;
+  Reference::To<Pulsar::Profile> std_prof;
 
   string plot_device = "?";
 
@@ -153,7 +160,7 @@ int main (int argc, char** argv)
   Pulsar::Plotter::ColourMap colour_map = Pulsar::Plotter::Heat;
   
   int c = 0;
-  const char* args = "AaBb:Cc:DdEeFf:GgHhI:iJjk:K:LlM:m:N:O:oP:pQq:r:SsTt:VvwWXx:Yy:Zz:";
+  const char* args = "AaBb:Cc:DdEeFf:GgHhI:iJjk:K:LlM:m:nN:O:oP:pQq:r:Ss:Tt:uVvwWXx:Yy:Zz:";
 
   while ((c = getopt(argc, argv, args)) != -1)
     switch (c) {
@@ -221,7 +228,7 @@ int main (int argc, char** argv)
       plotter.set_subint( atoi (optarg) );
       break;
     case 'i':
-      cout << "$Id: pav.C,v 1.56 2003/10/10 05:57:38 ahotan Exp $" << endl;
+      cout << "$Id: pav.C,v 1.57 2003/10/11 11:50:38 ahotan Exp $" << endl;
       return 0;
 
     case 'j':
@@ -279,8 +286,24 @@ int main (int argc, char** argv)
       plotter.set_phase (phase);
       break;
 
-    case 's':
+    case 'n':
       snrplot = true;
+      break;
+
+    case 's':
+      try {
+	std_arch = Pulsar::Archive::load(optarg);
+	std_arch->tscrunch();
+	std_arch->fscrunch();
+	std_arch->pscrunch();
+	std_prof = std_arch->get_Profile(0,0,0);
+	std_given = true;
+      }
+      catch (Error& error) {
+	cout << "Invalid standard profile:" << endl;
+	cout << error << endl;
+	std_given = false;
+      }
       break;
 
     case 'S':
@@ -293,7 +316,14 @@ int main (int argc, char** argv)
     case 'T':
       tscrunch = 0;
       break;
-
+      
+    case 'u':
+      if (!std_given)
+	cout << "For -u to be useful you must also specify a standard profile" << endl;
+      else
+	mdiff = true;
+      break;
+      
     case 'v':
       verbose = true;
       break;
@@ -460,6 +490,14 @@ int main (int argc, char** argv)
 
     if (centre)
       archive -> centre();
+
+    if (mdiff) {
+      if (std_prof) {
+	cpg_next();
+	(archive->get_Profile(plotter.get_subint(),plotter.get_pol(),plotter.get_chan())->
+	 morphological_difference(*std_prof)).display(0,0,1,0,1,1.0,false,true);
+      }
+    }      
 
     if (pa_spectrum) {
       cpg_next();

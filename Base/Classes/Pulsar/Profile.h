@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Profile.h,v $
-   $Revision: 1.34 $
-   $Date: 2003/08/31 07:36:31 $
-   $Author: straten $ */
+   $Revision: 1.35 $
+   $Date: 2003/10/11 11:50:37 $
+   $Author: ahotan $ */
 
 #ifndef __Pulsar_Profile_h
 #define __Pulsar_Profile_h
@@ -66,7 +66,11 @@ namespace Pulsar {
 
     //! calculates the weighted sum/difference
     virtual const Profile& average (const Profile& profile, double sign);
-  
+
+    //! calculates the difference of profile and another profile after
+    /*! normalising so that their maximum amplitudes are equal */
+    virtual const Profile& morphological_difference (const Profile& profile);
+    
     //! adds offset to each bin of the profile
     virtual const Profile& operator += (float offset);
 
@@ -144,7 +148,7 @@ namespace Pulsar {
     //! set the world coordinates of the pgplot window and draw the profile
     void display (float phase=0, float xmin=0, float xmax=1,
 		  float ymin=0, float ymax=1, float period=1.0,
-		  bool calibrated = false) const;
+		  bool calibrated = false, bool axes = false) const;
 
     //! draw the profile using pgplot
     void draw (float phase=0) const;
