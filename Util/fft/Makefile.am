@@ -10,11 +10,9 @@ libpsrfft_la_SOURCES = spectra.c psrfft.c noise.c running_median.c	 \
 	fccf.f ffft.f differentiate.C fftfit.f fftconv.f brent.f cprof.f \
 	cross_detect.ic stokes_detect.ic
 
-bin_PROGRAMS = test_optimize
+TESTS = test_normalization test_interpolate test_real_complex
 
-TESTS = test_normalization test_interpolate
-
-check_PROGRAMS = $(TESTS)
+check_PROGRAMS = $(TESTS) test_optimize
 
 test_normalization_SOURCES	= test_normalization.C
 test_interpolate_SOURCES	= test_interpolate.C
