@@ -51,25 +51,49 @@ int main ()
 {
   TextInterface::verbose = true;
 
-  {
+  try {
     int result[] = {-1};
     runtest ("variable", "variable", result);
   }
-  {
+  catch (Error& error) {
+    cerr << "Caught unexpected exception: " << error.get_message() << endl;
+    return -1;
+  }
+
+  try {
     int result[] = {3,-1};
     runtest ("[3]:", "", result);
   }
-  {
+  catch (Error& error) {
+    cerr << "Caught unexpected exception: " << error.get_message() << endl;
+    return -1;
+  }
+
+  try {
     int result[] = {3,5,-1};
     runtest ("[3,5]:remainder", "remainder", result);
   }
-  {
+  catch (Error& error) {
+    cerr << "Caught unexpected exception: " << error.get_message() << endl;
+    return -1;
+  }
+
+  try {
     int result[] = {3,4,5,6,-1};
     runtest ("[3-6]:text[6]:sub", "text[6]:sub", result);
   }
-  {
+  catch (Error& error) {
+    cerr << "Caught unexpected exception: " << error.get_message() << endl;
+    return -1;
+  }
+
+  try {
     int result[] = {0,8,9,10,11,3,4,5,6,-1};
     runtest ("[0,8-11,3-6]:text:sub", "text:sub", result);
+  }
+  catch (Error& error) {
+    cerr << "Caught unexpected exception: " << error.get_message() << endl;
+    return -1;
   }
 
   try {
