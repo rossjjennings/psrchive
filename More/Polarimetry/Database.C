@@ -28,8 +28,8 @@ bool Pulsar::Database::verbose = false;
 /*! By default, the long time scale is set to four weeks. */
 double Pulsar::Database::long_time_scale = 60.0 * 24.0 * 28.0;
 
-/*! By default, the short time scale is set to one hour. */
-double Pulsar::Database::short_time_scale = 60.0;
+/*! By default, the short time scale is set to two hours. */
+double Pulsar::Database::short_time_scale = 120.0;
 
 /*! By default, the maximum angular separation is 5 degrees */
 double Pulsar::Database::max_angular_separation = 5.0;
