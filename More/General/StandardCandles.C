@@ -3,6 +3,8 @@
 #include "string_utils.h"
 
 #include <fstream>
+#include <algorithm>
+
 #include <math.h>
 
 bool Pulsar::FluxCalibratorDatabase::verbose = false;
@@ -60,11 +62,19 @@ void Pulsar::FluxCalibratorDatabase::Entry::unload (string& str)
     str += "\naka " + source_name[iname];
 }
 
+bool close_enough (string A, string B)
+{
+  transform (A.begin(), A.end(), A.begin(), tolower);
+  transform (B.begin(), B.end(), B.begin(), tolower);
+
+  return A.find(B)!=string::npos || B.find(A)!=string::npos;
+}
+
 //! return true if the source name matches
 bool Pulsar::FluxCalibratorDatabase::Entry::matches (const string& name) const
 {
   for (unsigned iname=0; iname < source_name.size(); iname ++)
-    if (source_name[iname].find(name) != string::npos)
+    if (close_enough(source_name[iname], name))
       return true;
 
   return false;
