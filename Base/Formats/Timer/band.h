@@ -1,7 +1,7 @@
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/Timer/band.h,v $
-   $Revision: 1.3 $
-   $Date: 2002/08/11 23:15:44 $
-   $Author: pulsar $ */
+   $Revision: 1.4 $
+   $Date: 2004/07/24 07:26:34 $
+   $Author: straten $ */
 
 #ifndef __BAND_H
 #define __BAND_H
@@ -31,7 +31,7 @@ struct band {
   int npol;		      /* (T/Fixheader) npolarisations 1-4            */
 };
 
-/* defined in main_hdr.c not written by me - WvS */
+/* defined in timer++.C */
 void band_init (struct band * bd);
 
 #endif
