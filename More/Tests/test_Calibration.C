@@ -62,7 +62,8 @@ int main (int argc, char** argv)
 
     archive = Pulsar::Archive::load( filenames[ifile] );
 
-    Pulsar::PolnCalibrator* pcal = dbase.generatePolnCalibrator (archive);
+    Pulsar::PolnCalibrator* pcal = dbase.generatePolnCalibrator (archive,
+				Pulsar::Calibration::Database::SingleAxis);
     
     pcal->calibrate (archive);
     
