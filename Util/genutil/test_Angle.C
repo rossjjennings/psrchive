@@ -1,3 +1,6 @@
+#include "sky_coord.h"
+#include "coord.h"
+
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
@@ -6,10 +9,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <values.h>
-
-#include "sky_coord.h"
-#include "coord.h"
-#include "f772c.h"
 
 // redwards 10Aug99 function to compute angular separation of a pair
 // of spherical coordinates
