@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/rhythm/rhythm.h,v $
-   $Revision: 1.13 $
-   $Date: 2003/04/03 03:25:06 $
+   $Revision: 1.14 $
+   $Date: 2003/04/03 04:38:44 $
    $Author: ahotan $ */
 
 // //////////////////////////////////////////////////////////////////////////
@@ -20,6 +20,7 @@
 #include <qmainwindow.h>
 #include <qtextedit.h>
 #include <qhbox.h>
+#include <qvbox.h>
 #include <qbuttongroup.h>
 #include <qradiobutton.h>
 
@@ -100,6 +101,11 @@ class Rhythm : public QMainWindow
   AxisSelector* chooser;
   toaPlot::AxisQuantity xq;
   toaPlot::AxisQuantity yq;
+
+  QVBox* controls;
+  QPushButton* xzoom;
+  QPushButton* yzoom;
+  QPushButton* id;
   
   // /////////////////////////////////////////////////////////////////////////
   // Fit parameters Menu Widget

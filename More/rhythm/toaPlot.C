@@ -7,12 +7,6 @@
 toaPlot::toaPlot (QWidget *parent, const char *name )
   : QPgplot (parent, name)
 {
-  controls = new QHBox(this);
-  xzoom = new QPushButton("X Zoom", controls);
-  
-  QObject::connect(xzoom, SIGNAL(clicked()),
-		   this, SLOT(xzoomer()));
-  
   x.resize(0);
   y.resize(0);
   npts = 0;
@@ -85,7 +79,9 @@ void toaPlot::handleEvent (float x, float y, char ch)
   cerr << "toaPlot::handleEvent x=" << x << " y=" << y << " ch=" << ch << endl;
   
   if (ch == '~') {
-    // Do nothing, ie. skip an event
+    clicks = 0;
+    clearScreen();
+    drawPlot();
   }
   else {    
     switch (mode) {
@@ -102,15 +98,40 @@ void toaPlot::handleEvent (float x, float y, char ch)
 	drawPlot();
 	break;
       }
+    case 3:
+      if (clicks == 0) {
+	ymin = y;
+	clicks++;
+	break;
+      }
+      if (clicks == 1) {
+	ymax = y;
+	clicks = 0;
+	clearScreen();
+	drawPlot();
+	break;
+      }
     }
   }
   
   requestEvent(mode);
 }
 
+void toaPlot::ider ()
+{
+  mode = 0;
+  handleEvent(0,0,'~');
+}
+
 void toaPlot::xzoomer ()
 {
   mode = 4;
+  handleEvent(0,0,'~');
+}
+
+void toaPlot::yzoomer ()
+{
+  mode = 3;
   handleEvent(0,0,'~');
 }
 

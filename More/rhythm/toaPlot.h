@@ -19,7 +19,7 @@ class toaPlot: public QPgplot {
   enum AxisQuantity { None, ResidualMicro, ResidualMilliTurns, 
 		      TOA_MJD };
   
-  toaPlot (QWidget *parent=0, const char *name=0 );
+  toaPlot ( QWidget *parent=0, const char *name=0 );
   
   // define pure virtual methods of QtPgplot base class
   void plotter ();
@@ -31,7 +31,9 @@ class toaPlot: public QPgplot {
  public slots:
 
   void xzoomer ();
-  
+  void yzoomer ();
+  void ider ();
+
  protected:
 
   // Information about data display
@@ -44,11 +46,6 @@ class toaPlot: public QPgplot {
   AxisQuantity xq, yq;
   
   int mode;
-
-  // Controls
-
-  QHBox* controls;
-  QPushButton* xzoom;
 
   // Interactivity buffers
   unsigned clicks;

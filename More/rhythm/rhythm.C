@@ -60,6 +60,22 @@ Rhythm::Rhythm (QWidget* parent, int argc, char** argv) :
   container -> setFocus();
   setCentralWidget(container);
   
+  if (vverbose)
+    cerr << "Rhythm:: creating toaPlotter" << endl;
+  plot_window = new toaPlot(0,0);
+  plot_window -> show();
+  
+  controls = new QVBox(container);
+  id = new QPushButton("Select", controls);
+  QObject::connect(id, SIGNAL(clicked()),
+		   plot_window, SLOT(ider()));
+  xzoom = new QPushButton("X Zoom", controls);  
+  QObject::connect(xzoom, SIGNAL(clicked()),
+		   plot_window, SLOT(xzoomer()));
+  yzoom = new QPushButton("Y Zoom", controls);
+  QObject::connect(yzoom, SIGNAL(clicked()),
+		   plot_window, SLOT(yzoomer()));
+
   toa_text = new QTextEdit(container, "TOA_INFO");
   toa_text -> setText("Welcome to Rhythm");
   toa_text -> setReadOnly(true);
@@ -71,6 +87,7 @@ Rhythm::Rhythm (QWidget* parent, int argc, char** argv) :
 
   QObject::connect(chooser, SIGNAL(XChange(toaPlot::AxisQuantity)),
 		   this, SLOT(XChange(toaPlot::AxisQuantity)));
+
   
   autofit = true;
   ignore_one_eph = false;
@@ -96,11 +113,6 @@ Rhythm::Rhythm (QWidget* parent, int argc, char** argv) :
   if (vverbose)
     cerr << "Rhythm:: show qt_editParams" << endl;
   fitpopup -> show();
-
-  if (vverbose)
-    cerr << "Rhythm:: creating toaPlotter" << endl;
-  plot_window = new toaPlot(0,0);
-  plot_window -> show();
 
 }
 
