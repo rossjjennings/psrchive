@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/Faraday.h,v $
-   $Revision: 1.1 $
-   $Date: 2004/11/22 20:45:59 $
+   $Revision: 1.2 $
+   $Date: 2005/04/06 20:40:21 $
    $Author: straten $ */
 
 #ifndef __Faraday_H
@@ -13,7 +13,7 @@
 namespace Calibration {
 
   //! Faraday rotation transformation, parameterized by the rotation measure
-  class Faraday : public MEAL::OptimizedComplex2 {
+  class Faraday : public MEAL::Complex2 {
 
   public:
 
@@ -22,9 +22,6 @@ namespace Calibration {
 
     //! Return the name of the class
     std::string get_name () const;
-
-    //! Return the name of the specified parameter
-    std::string get_param_name (unsigned index) const;
 
     //! Set the rotation measure
     void set_rotation_measure (const Estimate<double>& rotation_measure);

@@ -23,7 +23,7 @@ void Calibration::MeasurementEquation::set_input (Complex2* _input)
       cerr << "Calibration::MeasurementEquation::set_input"
 	" unmap old input" << endl;
 
-    unmap (inputs[current_input], false);
+    composite.unmap (inputs[current_input], false);
   }
 
   inputs[current_input] = _input;
@@ -33,7 +33,7 @@ void Calibration::MeasurementEquation::set_input (Complex2* _input)
     cerr << "Calibration::MeasurementEquation::set_input"
       " map new input" << endl;
 
-  map (inputs[current_input]);
+  composite.map (inputs[current_input]);
   // inputs[current_input]->name = "MeasurementEquation::input";
 }
 
@@ -96,7 +96,7 @@ Calibration::MeasurementEquation::set_transformation (Complex2* _xform)
       cerr << "Calibration::MeasurementEquation::set_transformation"
 	" unmap old transformation" << endl;
 
-    unmap (xforms[current_xform], false);
+    composite.unmap (xforms[current_xform], false);
   }
 
   xforms[current_xform] = _xform;
@@ -106,7 +106,7 @@ Calibration::MeasurementEquation::set_transformation (Complex2* _xform)
     cerr << "Calibration::MeasurementEquation::set_transformation"
       " map new transformation" << endl;
 
-  map (xforms[current_xform]);
+  composite.map (xforms[current_xform]);
   // xforms[current_xform]->name = "MeasurementEquation::xform";
 }
 

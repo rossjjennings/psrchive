@@ -1,11 +1,14 @@
 #include "Calibration/Faraday.h"
+#include "MEAL/OneParameter.h"
 #include "Pauli.h"
 
 using namespace std;
 
 Calibration::Faraday::Faraday () 
-  : MEAL::OptimizedComplex2 (1)
 {
+  MEAL::OneParameter* parm = new MEAL::OneParameter (this);
+  parm->set_param_name (0, "RM");
+
   rotation.set_axis (Pauli::basis.get_basis_vector(2));
 
   reference_frequency = 0.0;
@@ -16,12 +19,6 @@ Calibration::Faraday::Faraday ()
 string Calibration::Faraday::get_name () const
 {
   return "Faraday";
-}
-
-//! Return the name of the specified parameter
-string Calibration::Faraday::get_param_name (unsigned index) const
-{
-  return "RM";
 }
 
 //! Set the rotation measure
