@@ -63,11 +63,11 @@ void Pulsar::Integration::copy (const Integration& subint,
   if (_nchan < 0)
     _nchan = subint.get_nchan();
 
-  if (_npol > subint.get_npol())
+  if (unsigned(_npol) > subint.get_npol())
     throw Error (InvalidRange, "Integration copy constructor",
 		 "requested npol=%d.  npol=%d", _npol, subint.get_npol());
-
-  if (_nchan > subint.get_nchan())
+  
+  if (unsigned(_nchan) > subint.get_nchan())
     throw Error (InvalidRange, "Integration copy constructor",
 		 "requested nchan=%d.  nchan=%d", _nchan, subint.get_nchan());
 
@@ -87,13 +87,14 @@ void Pulsar::Integration::copy (const Integration& subint,
   set_state ( subint.get_state() );
 }
 
-Pulsar::Profile* Pulsar::Integration::get_Profile (int ipol, int ichan)
+Pulsar::Profile*
+Pulsar::Integration::get_Profile (unsigned ipol, unsigned ichan)
 {
-  if (ipol < 0 || ipol>=get_npol())
+  if (ipol>=get_npol())
     throw Error (InvalidRange, "Integration::get_Profile",
 		 "ipol=%d npol=%d", ipol, get_npol());
 
-  if (ichan < 0 || ichan>=get_nchan())
+  if (ichan>=get_nchan())
     throw Error (InvalidRange, "Integration::get_Profile",
 		 "ichan=%d nchan=%d", ichan, get_nchan());
 
@@ -101,30 +102,32 @@ Pulsar::Profile* Pulsar::Integration::get_Profile (int ipol, int ichan)
 }
 
 const Pulsar::Profile*
-Pulsar::Integration::get_Profile (int ipol, int ichan) const
+Pulsar::Integration::get_Profile (unsigned ipol, unsigned ichan) const
 {
-  if (ipol < 0 || ipol>=get_npol())
+  if (ipol>=get_npol())
     throw Error (InvalidRange, "Integration::get_Profile",
 		 "ipol=%d npol=%d", ipol, get_npol());
 
-  if (ichan < 0 || ichan>=get_nchan())
+  if (ichan>=get_nchan())
     throw Error (InvalidRange, "Integration::get_Profile",
 		 "ichan=%d nchan=%d", ichan, get_nchan());
 
   return profiles[ipol][ichan];
 }
 
-void Pulsar::Integration::get_amps (float* data, int jpol, int jchan, int jbin)
-  const
+void Pulsar::Integration::get_amps (float* data,
+				    unsigned jpol,
+				    unsigned jchan,
+				    unsigned jbin) const
 {
-  int npol = get_npol();
-  int nchan = get_nchan();
+  unsigned npol = get_npol();
+  unsigned nchan = get_nchan();
 
   cerr << "int.npol=" << npol << " int.nchan=" << nchan << endl;
 
-  for (int ipol=0; ipol<npol; ipol++) {
+  for (unsigned ipol=0; ipol<npol; ipol++) {
     float* chandat = data + ipol * jpol;
-    for (int ichan=0; ichan<nchan; ichan++)
+    for (unsigned ichan=0; ichan<nchan; ichan++)
       profiles[ipol][ichan] -> get_amps (chandat + ichan * jchan, jbin);
   }
 }
@@ -134,7 +137,7 @@ void Pulsar::Integration::get_amps (float* data, int jpol, int jchan, int jbin)
   \param ichan the index of the channel to get
   \return the frequency of the given channel in MHz
 */
-double Pulsar::Integration::get_frequency (int ichan) const
+double Pulsar::Integration::get_frequency (unsigned ichan) const
 {
   if (ichan < 0 || ichan>=get_nchan() || get_npol() < 1)
     return 0;
@@ -147,13 +150,13 @@ double Pulsar::Integration::get_frequency (int ichan) const
   \param ichan the index of the channel to be set
   \param frequency the frequency of the given channel in MHz
 */
-void Pulsar::Integration::set_frequency (int ichan, double frequency)
+void Pulsar::Integration::set_frequency (unsigned ichan, double frequency)
 {
   if (ichan < 0 || ichan>=get_nchan())
     throw Error (InvalidRange, "Integration::set_frequency",
 		 "ichan=%d nchan=%d", ichan, get_nchan());
 
-  for (int ipol=0; ipol<get_npol(); ipol++)
+  for (unsigned ipol=0; ipol<get_npol(); ipol++)
     profiles[ipol][ichan]->set_centre_frequency (frequency);
 }
 
@@ -162,7 +165,7 @@ void Pulsar::Integration::set_frequency (int ichan, double frequency)
   \param ichan the index of the channel to get
   \return the weight of the given channel
 */
-float Pulsar::Integration::get_weight (int ichan) const
+float Pulsar::Integration::get_weight (unsigned ichan) const
 {
   if (ichan < 0 || ichan>=get_nchan() || get_npol() < 1)
     return 0;
@@ -175,20 +178,20 @@ float Pulsar::Integration::get_weight (int ichan) const
   \param ichan the index of the channel to be set
   \param weight the weight of the given channel
 */
-void Pulsar::Integration::set_weight (int ichan, float weight)
+void Pulsar::Integration::set_weight (unsigned ichan, float weight)
 {
   if (ichan < 0 || ichan>=get_nchan())
     throw Error (InvalidRange, "Integration::set_weight",
 		 "ichan=%d nchan=%d", ichan, get_nchan());
 
-  for (int ipol=0; ipol<get_npol(); ipol++)
+  for (unsigned ipol=0; ipol<get_npol(); ipol++)
     profiles[ipol][ichan]->set_weight (weight);
 }
 
 vector<Pulsar::Profile*>& 
 Pulsar::Integration::operator[] (Signal::Component poln)
 {
-  int index = Signal::get_ipol (get_state(), poln);
+  unsigned index = Signal::get_ipol (get_state(), poln);
 
   if (index < 0)
     throw Error (InvalidPolnState, "Integration::operator[]");
@@ -196,14 +199,14 @@ Pulsar::Integration::operator[] (Signal::Component poln)
   return profiles[index];
 }
 
-void Pulsar::Integration::fold (int nfold)
+void Pulsar::Integration::fold (unsigned nfold)
 {
   if (get_npol()<1 || get_nchan()<1)
     return;
 
   try {
-    for (int ipol=0; ipol<get_npol(); ipol++)
-      for (int ichan=0; ichan<get_nchan(); ichan++)
+    for (unsigned ipol=0; ipol<get_npol(); ipol++)
+      for (unsigned ichan=0; ichan<get_nchan(); ichan++)
 	profiles[ipol][ichan] -> fold (nfold);
 
     set_nbin( profiles[0][0] -> get_nbin() );
@@ -213,7 +216,7 @@ void Pulsar::Integration::fold (int nfold)
   }
 }
 
-void Pulsar::Integration::bscrunch (int nscrunch)
+void Pulsar::Integration::bscrunch (unsigned nscrunch)
 {
   if (get_npol()<1 || get_nchan()<1)
     return;
@@ -223,8 +226,8 @@ void Pulsar::Integration::bscrunch (int nscrunch)
 	 << " nchan=" << get_nchan() << endl;
 
   try {
-    for (int ipol=0; ipol<get_npol(); ipol++)
-      for (int ichan=0; ichan<get_nchan(); ichan++)
+    for (unsigned ipol=0; ipol<get_npol(); ipol++)
+      for (unsigned ichan=0; ichan<get_nchan(); ichan++)
 	profiles[ipol][ichan] -> bscrunch (nscrunch);
 
     set_nbin ( profiles[0][0] -> get_nbin() );
@@ -245,7 +248,7 @@ void Pulsar::Integration::pscrunch()
     if (get_npol() < 2)
       throw Error (InvalidState, "Integration::pscrunch", "npol < 2");
 
-    for (int ichan=0; ichan < get_nchan(); ichan++)
+    for (unsigned ichan=0; ichan < get_nchan(); ichan++)
       *(profiles[0][ichan]) += *(profiles[1][ichan]);
 
     set_state (Signal::Intensity);
@@ -266,8 +269,8 @@ void Pulsar::Integration::rotate (double time)
 		 "folding period=%lf", pfold);
 
   try {
-    for (int ipol=0; ipol<get_npol(); ipol++)
-      for (int ichan=0; ichan<get_nchan(); ichan++)
+    for (unsigned ipol=0; ipol<get_npol(); ipol++)
+      for (unsigned ichan=0; ichan<get_nchan(); ichan++)
 	profiles[ipol][ichan] -> rotate (time/pfold);
 
     set_mid_time (get_mid_time() + time);
@@ -289,7 +292,7 @@ MJD Pulsar::Integration::get_end_time () const
 
 void Pulsar::Integration::uniform_weight ()
 {
-  for (int ipol=0; ipol < get_npol(); ipol++)
-    for (int ichan=0; ichan < get_nchan(); ichan++)
+  for (unsigned ipol=0; ipol < get_npol(); ipol++)
+    for (unsigned ichan=0; ichan < get_nchan(); ichan++)
       profiles[ipol][ichan] -> set_weight (1.0);
 }

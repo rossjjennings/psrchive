@@ -36,9 +36,9 @@ void Pulsar::Integration::invint ()
   // Stokes 4-vector
   Stokes stokes;
 
-  for (int ichan=0; ichan<get_nchan(); ++ichan) {
+  for (unsigned ichan=0; ichan<get_nchan(); ++ichan) {
 
-    for (int ibin=0; ibin<get_nbin(); ++ibin) {
+    for (unsigned ibin=0; ibin<get_nbin(); ++ibin) {
       // get the Stokes 4-vector
       get_Stokes (stokes, ichan, ibin);
       // calculate \det\rho

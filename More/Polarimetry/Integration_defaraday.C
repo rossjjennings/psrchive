@@ -20,7 +20,7 @@ void Pulsar::Integration::defaraday (double rm, double rm_iono)
 
   vector<Angle> phases (get_nchan());
 
-  for (int ichan=0; ichan < get_nchan(); ichan++)
+  for (unsigned ichan=0; ichan < get_nchan(); ichan++)
   {
     double frequency = profiles[0][ichan]->get_centre_frequency();
     double inv_freq_sq = 1e-12 / (frequency * frequency);

@@ -12,7 +12,7 @@
   \param weighted_cfreq if true, calculate a new centre frequency for result
   \
  */
-void Pulsar::Integration::fscrunch (int nscrunch, bool weighted_cfreq)
+void Pulsar::Integration::fscrunch (unsigned nscrunch, bool weighted_cfreq)
 {
   if (verbose)
     cerr << "Pulsar::Integration::fscrunch"
@@ -30,14 +30,14 @@ void Pulsar::Integration::fscrunch (int nscrunch, bool weighted_cfreq)
 		 "nchan=%d %% nscrunch=%d = %d",
 		 get_nchan(), nscrunch, get_nchan()%nscrunch);
 
-  int newchan = get_nchan()/nscrunch;
+  unsigned newchan = get_nchan()/nscrunch;
 
   double dm = get_dispersion_measure();
   double pfold = get_folding_period();
 
-  for (int j=0; j < newchan; j++) try {
+  for (unsigned j=0; j < newchan; j++) try {
       
-    int stchan = j * nscrunch;
+    unsigned stchan = j * nscrunch;
     
     if (verbose)
       cerr << "Pulsar::Integration::fscrunch chan " << j << endl;
@@ -52,19 +52,19 @@ void Pulsar::Integration::fscrunch (int nscrunch, bool weighted_cfreq)
       if (newchan == 1)
 	set_centre_frequency (fcentre);
       
-      for (int ipol=0; ipol < get_npol(); ipol++)
-	for (int k=0; k<nscrunch; k++)
+      for (unsigned ipol=0; ipol < get_npol(); ipol++)
+	for (unsigned k=0; k<nscrunch; k++)
 	  profiles[ipol][stchan+k]->dedisperse (dm,fcentre,pfold);
       
     }
     
-    for (int ipol=0; ipol < get_npol(); ipol++)  {
+    for (unsigned ipol=0; ipol < get_npol(); ipol++)  {
       
       if (verbose)
 	cerr << "Pulsar::Integration::fscrunch pol " << ipol << endl;
       
       *(profiles[ipol][j]) = *(profiles[ipol][stchan]);
-      for (int k=1; k<nscrunch; k++)
+      for (unsigned k=1; k<nscrunch; k++)
 	*(profiles[ipol][j]) += *(profiles[ipol][stchan+k]);
       
     }

@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Integration.h,v $
-   $Revision: 1.26 $
-   $Date: 2002/10/10 08:00:58 $
+   $Revision: 1.27 $
+   $Date: 2002/10/12 23:34:44 $
    $Author: straten $ */
 
 /*
@@ -62,19 +62,19 @@ namespace Pulsar {
     Integration* total () const;
 
     //! Resizes the dimensions of the data area
-    virtual void resize (int npol=0, int nchan=0, int nbin=0);
+    virtual void resize (unsigned npol=0, unsigned nchan=0, unsigned nbin=0);
 
     //! Call Profile::fold on every profile
-    virtual void fold (int nfold);
+    virtual void fold (unsigned nfold);
 
     //! Call Profile::bsrunch on every profile
-    virtual void bscrunch (int nscrunch);
+    virtual void bscrunch (unsigned nscrunch);
     
     //! Rotate each profile by time (in seconds)
     virtual void rotate (double time);
 
     //! Integrate profiles from neighbouring chans
-    virtual void fscrunch (int nscrunch = 0, bool weighted_cfreq = true);
+    virtual void fscrunch (unsigned nscrunch = 0, bool weighted_cfreq = true);
 
     //! Integrate profiles from single polarizations into one total intensity
     virtual void pscrunch ();
@@ -86,7 +86,7 @@ namespace Pulsar {
     virtual void dedisperse (double frequency = 0.0);
 
     //! Dedisperse only the profiles in the given channel
-    virtual void dedisperse (double frequency, int chan);
+    virtual void dedisperse (double frequency, unsigned chan);
 
     //! Rotate all profiles about Stokes V axis to remove Faraday rotation
     virtual void defaraday (double rm = 0.0, double rm_iono = 0.0);
@@ -95,13 +95,13 @@ namespace Pulsar {
     virtual void convert_state (Signal::State state);
 
     //! Returns a single Stokes 4-vector for the given chan and phase bin
-    void get_Stokes (Stokes& S, int ichan, int ibin) const;
+    void get_Stokes (Stokes& S, unsigned ichan, unsigned ibin) const;
 
     //! Returns a vector of Stokes parameters along the specified dimension
-    void get_Stokes (vector<Stokes>& S, int iother,
+    void get_Stokes (vector<Stokes>& S, unsigned iother,
 		     Signal::Dimension abscissa = Signal::Phase ) const;
 
-    void get_amps (float* data, int jpol, int jchan, int jbin) const;
+    void get_amps (float* data, unsigned jpol, unsigned jchan, unsigned jbin) const;
 
     //! Find the transitions between high and low states in total intensity
     void find_transitions (int& hi2lo, int& lo2hi, int& buffer) const;
@@ -129,21 +129,21 @@ namespace Pulsar {
 			  vector<vector<double> >& mean_low) const;
 
     //! Computes the weighted centre frequency of an interval of sub-chans.
-    double weighted_frequency (int chan_start=0, int chan_end=0) const;
+    double weighted_frequency (unsigned chan_start=0, unsigned chan_end=0) const;
 
     void cal_levels (vector<Stokes>& hi, vector<Stokes>& lo) const;
     void psr_levels (vector<Stokes>& hi, vector<Stokes>& lo) const;
 
     //! Adds to a vector of tempo++ toa objects
     void toas (const Integration& std_subint,
-	       int nsite, const char* fname, int subint,
-	       vector<Tempo::toa>& toas, int nsubchan,
+	       int nsite, const char* fname, unsigned subint,
+	       vector<Tempo::toa>& toas, unsigned nsubchan,
 	       int mode=0, bool wt=false);
 
     //! Returns a toa from weighted-average over sub-channels
     Tempo::toa toa (const Integration& std_subint,
-		    int nsite, const char* fname, int subint,
-		    int nsubchan, int mode, bool wt);
+		    int nsite, const char* fname, unsigned subint,
+		    unsigned nsubchan, int mode, bool wt);
 
     //! Remove the baseline from all profiles
     virtual void remove_baseline (float phase = -1.0);
@@ -155,9 +155,9 @@ namespace Pulsar {
     void uniform_weight ();
 
     //! Returns a pointer to the Profile given by the specified indeces
-    Profile* get_Profile (int ipol, int ichan);
+    Profile* get_Profile (unsigned ipol, unsigned ichan);
 
-    const Profile* get_Profile (int ipol, int ichan) const;
+    const Profile* get_Profile (unsigned ipol, unsigned ichan) const;
 
     //! Returns a pointer to the vector of Profile objects for poln
     vector<Profile *>& operator[] (Signal::Component poln);
@@ -169,26 +169,26 @@ namespace Pulsar {
     MJD get_end_time () const;
 
     //! Get the frequency of the given channel
-    virtual double get_frequency (int ichan) const;
+    virtual double get_frequency (unsigned ichan) const;
     //! Set the frequency of the given channel
-    virtual void set_frequency (int ichan, double frequency);
+    virtual void set_frequency (unsigned ichan, double frequency);
 
     //! Get the weight of the given channel
-    virtual float get_weight (int ichan) const;
+    virtual float get_weight (unsigned ichan) const;
     //! Set the weight of the given channel
-    virtual void set_weight (int ichan, float weight);
+    virtual void set_weight (unsigned ichan, float weight);
     
     //! Get the number of chans
     /*! This attribute may be set only through Integration::resize */
-    virtual int get_nchan () const = 0;
+    virtual unsigned get_nchan () const = 0;
 
     //! Get the number of polarization measurements
     /*! This attribute may be set only through Integration::resize */
-    virtual int get_npol () const = 0;
+    virtual unsigned get_npol () const = 0;
 
     //! Get the number of bins in each profile
     /*! This attribute may be set only through Integration::resize */
-    virtual int get_nbin () const = 0;
+    virtual unsigned get_nbin () const = 0;
  
     //! Get the MJD at the beginning of the integration
     virtual MJD get_mid_time() const = 0;
@@ -235,15 +235,15 @@ namespace Pulsar {
 
     //! Set the number of pulsar phase bins
     /*! Called by Integration methods to update sub-class attribute */
-    virtual void set_nbin (int nbin) = 0;
+    virtual void set_nbin (unsigned nbin) = 0;
 
     //! Set the number of frequency channels
     /*! Called by Integration methods to update sub-class attribute */
-    virtual void set_nchan (int nchan) = 0;
+    virtual void set_nchan (unsigned nchan) = 0;
 
     //! Set the number of polarization measurements
     /*! Called by Integration methods to update sub-class attribute */
-    virtual void set_npol (int npol) = 0;
+    virtual void set_npol (unsigned npol) = 0;
 
     //! Data: npol by nchan profiles
     vector< vector<Profile*> > profiles;

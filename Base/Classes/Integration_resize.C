@@ -8,11 +8,11 @@
   will be constructed.  If any of the supplied paramaters is equal to zero,
   the dimension is left unchanged.
   */
-void Pulsar::Integration::resize (int new_npol, int new_nchan, int new_nbin)
+void Pulsar::Integration::resize (unsigned new_npol, unsigned new_nchan, unsigned new_nbin)
 {
-  int cur_npol = get_npol();
-  int cur_nchan = get_nchan();
-  int cur_nbin = get_nbin();
+  unsigned cur_npol = get_npol();
+  unsigned cur_nchan = get_nchan();
+  unsigned cur_nbin = get_nbin();
 
   if (new_npol == 0)
     new_npol = cur_npol;
@@ -27,7 +27,7 @@ void Pulsar::Integration::resize (int new_npol, int new_nchan, int new_nbin)
 	 << " old npol=" << cur_npol
 	 << " nchan=" << cur_nchan << " nbin=" << cur_nbin << endl;
 
-  int ipol=0, ichan=0;
+  unsigned ipol=0, ichan=0;
 
   for (ipol=0; ipol < cur_npol; ipol++) {
     for (ichan=new_nchan; ichan < cur_nchan; ichan++) {

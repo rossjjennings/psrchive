@@ -79,7 +79,7 @@ void Pulsar::Integration::poln_cycle (int direction)
   if (abs(direction) != 1)
     throw Error (InvalidParam, "Integration::poln_cycle", "bad direction");
 
-  for (int ichan=0; ichan < get_nchan(); ichan++) {
+  for (unsigned ichan=0; ichan < get_nchan(); ichan++) {
 
     Profile* Q = profiles[1][ichan];
     Profile* U = profiles[2][ichan];
@@ -104,7 +104,7 @@ void Pulsar::Integration::intensity_mix (int ipol, float fac)
 {
   static Profile temp;
 
-  for (int ichan=0; ichan < get_nchan(); ichan++) {
+  for (unsigned ichan=0; ichan < get_nchan(); ichan++) {
 
     temp = *(profiles[0][ichan]);
     temp *= fac;

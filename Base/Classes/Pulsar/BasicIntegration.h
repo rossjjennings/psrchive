@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/BasicIntegration.h,v $
-   $Revision: 1.3 $
-   $Date: 2002/10/10 08:00:58 $
+   $Revision: 1.4 $
+   $Date: 2002/10/12 23:34:44 $
    $Author: straten $ */
 
 #ifndef __BasicIntegration_h
@@ -30,15 +30,15 @@ namespace Pulsar {
 
     //! Get the number of chans
     /*! This attribute may be set only through Integration::resize */
-    virtual int get_nchan () const { return nchan; }
+    virtual unsigned get_nchan () const { return nchan; }
 
     //! Get the number of polarization measurements
     /*! This attribute may be set only through Integration::resize */
-    virtual int get_npol () const { return npol; }
+    virtual unsigned get_npol () const { return npol; }
 
     //! Get the number of bins in each profile
     /*! This attribute may be set only through Integration::resize */
-    virtual int get_nbin () const { return nbin; }
+    virtual unsigned get_nbin () const { return nbin; }
  
     //! Get the MJD at the beginning of the integration
     virtual MJD get_mid_time() const { return mid_time; }
@@ -85,24 +85,24 @@ namespace Pulsar {
 
     //! Set the number of pulsar phase bins
     /*! Called by Integration methods to update child attribute */
-    virtual void set_nbin (int numbins) { nbin = numbins; }
+    virtual void set_nbin (unsigned numbins) { nbin = numbins; }
 
     //! Set the number of frequency channels
     /*! Called by Integration methods to update child attribute */
-    virtual void set_nchan (int numchan) { nchan = numchan; }
+    virtual void set_nchan (unsigned numchan) { nchan = numchan; }
 
     //! Set the number of polarization measurements
     /*! Called by Integration methods to update child attribute */
-    virtual void set_npol (int numpol) { npol = numpol; }
+    virtual void set_npol (unsigned numpol) { npol = numpol; }
 
     //! number of polarization measurments
-    int npol;
+    unsigned npol;
 
     //! number of sub-chans
-    int nchan;
+    unsigned nchan;
     
     //! number of bins
-    int nbin;
+    unsigned nbin;
 
     //! time at the middle of the observation
     MJD mid_time;

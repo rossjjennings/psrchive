@@ -17,10 +17,10 @@
   get_state() must return either Signal::Stokes or Signal::Coherence.  An
   exception is thrown otherwise.
 */
-void Pulsar::Integration::get_Stokes ( Stokes& S, int ichan, int ibin ) const
+void Pulsar::Integration::get_Stokes ( Stokes& S, unsigned ichan, unsigned ibin ) const
 {
   if (get_state() == Signal::Stokes) {
-    for (int ipol=0; ipol<4; ++ipol)
+    for (unsigned ipol=0; ipol<4; ++ipol)
       S[ipol] = profiles[ipol][ichan]->get_amps()[ibin];
     return;
   }
@@ -68,11 +68,11 @@ void Pulsar::Integration::get_Stokes ( Stokes& S, int ichan, int ibin ) const
   get_nbin()/2, Axis::Frequency);"
 
 */
-void Pulsar::Integration::get_Stokes (vector<Stokes>& S, int iother,
+void Pulsar::Integration::get_Stokes (vector<Stokes>& S, unsigned iother,
 				      Signal::Dimension abscissa) const
 {
-  int ndim = 0;
-  int ndim_other = 0;
+  unsigned ndim = 0;
+  unsigned ndim_other = 0;
 
   if (!(get_state()==Signal::Stokes || get_state()==Signal::Coherence))
     throw Error (InvalidPolnState, "Integration::get_Stokes");
@@ -93,14 +93,14 @@ void Pulsar::Integration::get_Stokes (vector<Stokes>& S, int iother,
 
   S.resize(ndim);
 
-  int ibin=0, ichan=0;
+  unsigned ibin=0, ichan=0;
 
   if (abscissa == Signal::Frequency)
     ibin = iother;    // all Stokes values come from the same bin
   else // dim == Phase
     ichan = iother;   // all Stokes values come from the same chan
 
-  for (int idim=0; idim<ndim; idim++) {
+  for (unsigned idim=0; idim<ndim; idim++) {
 
     if (abscissa == Signal::Frequency)
       ichan = idim;

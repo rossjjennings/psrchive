@@ -32,13 +32,13 @@ void Pulsar::Integration::dedisperse (double frequency)
 	 <<" freq="<< frequency << endl;
 
   
-  for (int ipol=0; ipol < get_npol(); ipol++)
-    for (int ichan=0; ichan < get_nchan(); ichan++)
+  for (unsigned ipol=0; ipol < get_npol(); ipol++)
+    for (unsigned ichan=0; ichan < get_nchan(); ichan++)
       profiles[ipol][ichan] -> dedisperse (dm, frequency, pfold);
 
 }
 
-void Pulsar::Integration::dedisperse (double frequency, int chan)
+void Pulsar::Integration::dedisperse (double frequency, unsigned chan)
 {
   double dm = get_dispersion_measure();
   double pfold = get_folding_period();
@@ -63,7 +63,7 @@ void Pulsar::Integration::dedisperse (double frequency, int chan)
     cerr << "Integration::dedisperse chan=" 
 	 << chan << " npol=" << get_npol() << endl;
 
-  for (int ipol=0; ipol < get_npol(); ipol++)
+  for (unsigned ipol=0; ipol < get_npol(); ipol++)
     profiles[ipol][chan] -> dedisperse (dm, frequency, pfold);
   
   return;
@@ -80,18 +80,17 @@ void Pulsar::Integration::dedisperse (double frequency, int chan)
   \param  chan_start the first chan included in the calculation
   \param  chan_end one more than the index of the last chan
 */
-double Pulsar::Integration::weighted_frequency (int chan_start, int chan_end) 
+double Pulsar::Integration::weighted_frequency (unsigned chan_start, unsigned chan_end) 
   const
 {
   if (chan_end == 0)
     chan_end = get_nchan();
 
   // for now, ignore poln
-  int ipol = 0;
+  unsigned ipol = 0;
 
-  if (get_npol() < 1)
-    throw Error (InvalidRange, "Integration::weighted_frequency",
-		 "profiles.size() == 0");
+  if (get_npol() == 0)
+    throw Error (InvalidRange, "Integration::weighted_frequency", "npol==0");
 
   const vector<Profile*>& prof = profiles[ipol];
 
@@ -106,7 +105,7 @@ double Pulsar::Integration::weighted_frequency (int chan_start, int chan_end)
   double weightsum = 0.0;
   double freqsum = 0.0;
 
-  for (int ichan=chan_start; ichan < chan_end; ichan++) {
+  for (unsigned ichan=chan_start; ichan < chan_end; ichan++) {
     freqsum += prof[ichan]->get_centre_frequency() * prof[ichan]->get_weight();
     weightsum += prof[ichan]->get_weight();
   }
