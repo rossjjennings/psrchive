@@ -1,5 +1,5 @@
 //
-// $Id: pav.C,v 1.33 2003/04/08 14:49:18 ahotan Exp $
+// $Id: pav.C,v 1.34 2003/04/29 11:31:53 pulsar Exp $
 //
 // The Pulsar Archive Viewer
 //
@@ -18,9 +18,6 @@
 #include "Pulsar/Plotter.h"
 #include "Error.h"
 #include "RealTimer.h"
-#ifdef PSRFITS
-#include "FITSError.h"
-#endif
 
 #include "dirutil.h"
 #include "string_utils.h"
@@ -47,6 +44,7 @@ void usage ()
     " -g        Position angle across a profile\n"
     " -G        Greyscale of profiles in frequency and phase\n"
     //    " -H        Print ASCII of Integration 0, poln 0, chan 0 \n"
+    " -l        Do not plot labels outside of plotting area \n"
     " -M meta   meta names a file containing the list of files\n"
     " -p        add polarisations together \n"
     " -P        select polarization\n"
@@ -117,12 +115,12 @@ int main (int argc, char** argv)
   Pulsar::Plotter::ColourMap colour_map = Pulsar::Plotter::Heat;
   
   int c = 0;
-  const char* args = "ab:c:d:DGeE:f:FhiHm:M:pP:r:St:TvVwWx:y:RZCYz:AsgXBq:Q";
+  const char* args = "ab:c:d:DGeE:f:FhiHlm:M:pP:r:St:TvVwWx:y:RZCYz:AsgXBq:Q";
   while ((c = getopt(argc, argv, args)) != -1)
     switch (c) {
       
     case 'a':
-      Pulsar::Archive::Agent::report ();
+      Pulsar::Archive::plugin_report ();
       return 0;
     case 'A':
       calplot = true;
@@ -177,8 +175,12 @@ int main (int argc, char** argv)
       return 0;
 
     case 'i':
-      cout << "$Id: pav.C,v 1.33 2003/04/08 14:49:18 ahotan Exp $" << endl;
+      cout << "$Id: pav.C,v 1.34 2003/04/29 11:31:53 pulsar Exp $" << endl;
       return 0;
+
+    case 'l':
+      plotter.set_labels(false);
+      break;
 
     case 'm':
       // macro file
@@ -296,6 +298,8 @@ int main (int argc, char** argv)
 
     if (manchester)
       cpgsvp (0.1,.95,0.1,.95);
+    else if (periodplot)
+      cpgsvp (0.1,.95,0.1,.7);
     else if (greyfreq)
       cpgsvp (0.1,.95,0.1,.90);
     else
@@ -514,11 +518,6 @@ int main (int argc, char** argv)
   catch (Error& error) {
     cerr << error << endl;
   }
-#ifdef PSRFITS
-  catch (FITSError& error) {
-    cerr << error << endl;
-  }
-#endif
   catch (string& error) {
     cerr << error << endl;
   }
