@@ -8,7 +8,7 @@
 
 #include "machine_endian.h"
 #include "angle.h"
-#include "cartesian.h"
+#include "Cartesian.h"
 #include "coord.h"
 
 bool Angle::verbose = false;
