@@ -81,6 +81,15 @@ Pulsar::Integration& Pulsar::Integration::operator= (const Integration& subint)
 
 void Pulsar::Integration::operator+= (const Integration& subint)
 {
+  float total_weight = 0.0;
+  
+  for (unsigned i = 0; i < subint.get_nchan(); i++) {
+    total_weight += subint.get_weight(i);
+  }
+  
+  if (total_weight <= 0.0)
+    return;
+  
   string reason;
   
   if (!mixable(&subint, reason))
