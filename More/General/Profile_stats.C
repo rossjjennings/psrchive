@@ -123,19 +123,51 @@ vector<unsigned> Pulsar::Profile::get_mask () const
   }
 
   // Zap extraneous points
-
+  
   for (unsigned i = 0; i < mask.size(); i++) {
     if (mask[i] == 1) {
       if (i == 0) {
 	if (mask[1] == 0 && mask[get_nbin()-1] == 0)
-	  mask[0] = 0;
+	  mask[i] = 0;
       }
       else if (i == get_nbin()-1) {
 	if (mask[0] == 0 && mask[get_nbin()-2] == 0)
-	  mask[0] = 0;
+	  mask[i] = 0;
       }
       else if (mask[i-1] == 0 && mask[i+1] == 0)
-	mask[0] = 0;
+	mask[i] = 0;
+    }
+  }
+  
+  // Fill in gaps
+  
+  for (unsigned i = 0; i < mask.size(); i++) {
+    if (mask[i] == 0) {
+      if (i == 0) {
+	if (mask[1] == 1 && mask[get_nbin()-1] == 1)
+	  mask[i] = 1;
+      }
+      else if (i == get_nbin()-1) {
+	if (mask[0] == 1 && mask[get_nbin()-2] == 1)
+	  mask[i] = 1;
+      }
+      else if (mask[i-1] == 1 && mask[i+1] == 1)
+	mask[i] = 1;
+    }
+  }
+  
+  float pc = 5.0;
+
+  for (unsigned i = 0; i < mask.size(); i++) {
+    int  total = 0;
+    for (unsigned j = 0; j < float(get_nbin())*pc/100.0; j++) {
+      int start  = (i - j/2);
+      int curr   = (start+j) % get_nbin();
+      if (curr < 0)
+	curr += get_nbin();
+      total += mask[curr];
+      if (total >= 2)
+	mask[i] = 1;
     }
   }
 
