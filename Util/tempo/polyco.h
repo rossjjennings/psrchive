@@ -1,5 +1,10 @@
 //-*-C++-*-
-/* this file is part of the 'polyco' module */
+
+/* $Source: /cvsroot/psrchive/psrchive/Util/tempo/polyco.h,v $
+   $Revision: 1.10 $
+   $Date: 2001/02/24 03:49:41 $
+   $Author: straten $ */
+
 #ifndef __POLY_H
 #define __POLY_H
 
