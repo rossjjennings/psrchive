@@ -28,7 +28,7 @@ void Pulsar::TimerArchive::unload_file (const char* filename) const
   if (!fptr)
     throw Error (FailedSys, "TimerArchive::unload", "fopen");
 
-  if (verbose) 
+  if (verbose == 3) 
     cerr << "TimerArchive::unload opened '" << filename << "'" << endl;
   
   try {
@@ -44,6 +44,8 @@ void Pulsar::TimerArchive::unload_file (const char* filename) const
 
 void Pulsar::TimerArchive::unload (FILE* fptr) const
 {
+  pack_extensions ();
+
   hdr_unload (fptr);
 
   backend_unload (fptr);
@@ -57,7 +59,7 @@ void Pulsar::TimerArchive::unload (FILE* fptr) const
 
 void Pulsar::TimerArchive::subint_unload (FILE* fptr) const
 {
-  if (verbose) 
+  if (verbose == 3) 
     cerr << "TimerArchive::unload"
       " nsubint=" << hdr.nsub_int <<
       " nchan="   << hdr.nsub_band <<
@@ -66,7 +68,7 @@ void Pulsar::TimerArchive::subint_unload (FILE* fptr) const
  
   for (int isub=0; isub < hdr.nsub_int; isub++) { 
 
-    if (verbose)
+    if (verbose == 3)
       cerr << "TimerArchive::subint_unload " 
 	   << isub+1 << "/" << hdr.nsub_int << endl;
 
@@ -81,13 +83,13 @@ void Pulsar::TimerArchive::subint_unload (FILE* fptr) const
 
     subint -> unload (fptr);
 
-    if (verbose)
+    if (verbose == 3)
       cerr << "TimerArchive::subint_unload " 
 	   << isub+1 << "/" << hdr.nsub_int << " unloaded" << endl;
 
   }        
 
-  if (verbose) 
+  if (verbose == 3) 
     cerr << "TimerArchive::subint_unload exit\n";
 }
 
@@ -97,7 +99,7 @@ void Pulsar::TimerArchive::hdr_unload (FILE* fptr) const
   string text;
 
   if (!valid) {
-    if (verbose)
+    if (verbose == 3)
       cerr << "TimerArchive::hdr_unload correcting archive" << endl;
     const_cast<TimerArchive*>(this)->correct();
   }
@@ -110,13 +112,13 @@ void Pulsar::TimerArchive::hdr_unload (FILE* fptr) const
 
   else {
 
-    if (verbose) cerr << "TimerArchive::hdr_unload get polyco size" << endl;
+    if (verbose == 3) cerr << "TimerArchive::hdr_unload get polyco size" << endl;
 
     header->nbytespoly = model->unload (&text);
     if (hdr.nbytespoly < 0)
       throw Error (FailedCall, "TimerArchive::hdr_unload", "polyco::unload");
     
-    if (verbose) cerr << "TimerArchive::hdr_unload polyco size = " 
+    if (verbose == 3) cerr << "TimerArchive::hdr_unload polyco size = " 
 		      << hdr.nbytespoly << " bytes" << endl;
 
   }
@@ -126,13 +128,13 @@ void Pulsar::TimerArchive::hdr_unload (FILE* fptr) const
 
   else {
 
-    if (verbose) cerr << "TimerArchive::hdr_unload get psrephem size" << endl;
+    if (verbose == 3) cerr << "TimerArchive::hdr_unload get psrephem size" << endl;
     
     header->nbytesephem = ephemeris->unload (&text);
     if (hdr.nbytesephem < 0)
       throw Error (FailedCall, "TimerArchive::hdr_unload", "psrephem::unload");
     
-    if (verbose) cerr << "TimerArchive::hdr_unload psrephem size = " 
+    if (verbose == 3) cerr << "TimerArchive::hdr_unload psrephem size = " 
 		      << hdr.nbytesephem << " bytes" << endl;
 
   }
@@ -140,7 +142,7 @@ void Pulsar::TimerArchive::hdr_unload (FILE* fptr) const
   if (get_nsubint() == 1)
     header->sub_int_time = integration_length();
 
-  if (verbose)
+  if (verbose == 3)
     cerr << "TimerArchive::hdr_unload writing timer header" << endl;
 
   if (Timer::unload (fptr, hdr) < 0)
@@ -155,7 +157,7 @@ void Pulsar::TimerArchive::backend_unload (FILE* fptr) const
 void Pulsar::TimerArchive::psr_unload (FILE* fptr) const
 {
   if (model && hdr.nbytespoly > 0) {
-    if (verbose)
+    if (verbose == 3)
       cerr << "TimerArchive::psr_unload "
 	   << hdr.nbytespoly << " bytes in polyco" << endl;
 
@@ -165,7 +167,7 @@ void Pulsar::TimerArchive::psr_unload (FILE* fptr) const
   }
 
   if (ephemeris && hdr.nbytesephem > 0) {
-    if (verbose) 
+    if (verbose == 3) 
       cerr << "TimerArchive::psr_unload "
 	   << hdr.nbytesephem << " bytes in ephemeris" << endl;
 

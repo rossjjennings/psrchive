@@ -49,7 +49,7 @@ void Pulsar::TimerIntegration::load (FILE* fptr, int extra, bool big_endian)
 
   if (extra) {
 
-    if (verbose)
+    if (verbose == 3)
       cerr << "TimerIntegration::load in the new style" << endl;
 
     if ( fread (&(wts[0]),nchan*sizeof(float),1,fptr) != 1 )
@@ -77,7 +77,7 @@ void Pulsar::TimerIntegration::load (FILE* fptr, int extra, bool big_endian)
 	N_FromLittleEndian (nchan, &(bpass[i][0]));
     }
     /* new style */
-    if (verbose) cerr << "TimerIntegration::load loading profiles\n";
+    if (verbose == 3) cerr << "TimerIntegration::load loading profiles\n";
     // Read the array of profiles
     for(i=0; i<npol;i++)
       for(j=0; j<nchan;j++) 
@@ -85,7 +85,7 @@ void Pulsar::TimerIntegration::load (FILE* fptr, int extra, bool big_endian)
 
   } 
   else {
-    if (verbose)
+    if (verbose == 3)
       cerr << "TimerIntegration::load in the old style." << endl;
 
     // No weights available.
@@ -141,7 +141,7 @@ void Pulsar::TimerIntegration::load (FILE* fptr, int extra, bool big_endian)
       N_FromLittleEndian (npts, packed);
     }
 
-    if (verbose) 
+    if (verbose == 3) 
       fprintf (stderr, "TimerIntegration::load scale:%f offset:%f\n",
 			  scale, offset);
 

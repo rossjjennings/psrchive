@@ -20,7 +20,7 @@ void Pulsar::TimerIntegration::resize (unsigned _npol,
 				       unsigned _nchan,
 				       unsigned _nbin)
 {
-  if (verbose)
+  if (verbose == 3)
     cerr << "TimerIntegration::resize (npol=" << _npol 
 	 << ", nchan=" << _nchan << ", nbin=" << _nbin << ")" << endl;
 
@@ -38,7 +38,7 @@ void Pulsar::TimerIntegration::resize (unsigned _npol,
 
 Pulsar::TimerIntegration::~TimerIntegration ()
 {
-  if (verbose)
+  if (verbose == 3)
     cerr << "TimerIntegration destructor" << endl;
 }
 
@@ -46,7 +46,7 @@ Pulsar::TimerIntegration::~TimerIntegration ()
 Pulsar::TimerIntegration::TimerIntegration (const TimerIntegration& t_subint,
 					    int _npol, int _nchan)
 {
-  if (verbose)
+  if (verbose == 3)
     cerr << "TimerIntegration construct copy TimerIntegration" << endl;
 
   init();
@@ -57,7 +57,7 @@ Pulsar::TimerIntegration::TimerIntegration (const TimerIntegration& t_subint,
 Pulsar::TimerIntegration::TimerIntegration (const Integration& subint,
 					    int _npol, int _nchan)
 {
-  if (verbose)
+  if (verbose == 3)
     cerr << "TimerIntegration construct copy Integration" << endl;
 
   init();
@@ -67,7 +67,7 @@ Pulsar::TimerIntegration::TimerIntegration (const Integration& subint,
 void Pulsar::TimerIntegration::copy (const Integration& subint,
 				     int _npol, int _nchan)
 {
-  if (verbose)
+  if (verbose == 3)
     cerr << "TimerIntegration::copy" << endl;
 
   if (this == &subint)
@@ -81,7 +81,7 @@ void Pulsar::TimerIntegration::copy (const Integration& subint,
   if (!t_subint)
     return;
 
-  if (verbose)
+  if (verbose == 3)
     cerr << "TimerIntegration::copy another TimerIntegration" << endl;
 
   wts = t_subint->wts;
