@@ -53,11 +53,13 @@ int main (int argc, char *argv[]) {
 
   bool invint = false;
 
+  bool stokesify = false;
+
   string command = "pam";
 
   int gotc = 0;
   
-  while ((gotc = getopt(argc, argv, "hvVme:TFpit:f:b:d:s:r:w:D:")) != -1) {
+  while ((gotc = getopt(argc, argv, "hvVme:TFpit:f:b:d:s:r:w:D:S")) != -1) {
     switch (gotc) {
     case 'h':
       cout << "A program for manipulating Pulsar::Archives"            << endl;
@@ -79,6 +81,7 @@ int main (int argc, char *argv[]) {
       cout << "  -s [float c]     Smear with duty cycle c"             << endl;
       cout << "  -r [float p]     Rotate profiles by phase p"          << endl;
       cout << "  -w [float w]     Reset all profile weights to w"      << endl;
+      cout << "  -S               Convert to Stokes parameters"        << endl;
       return (-1);
       break;
     case 'v':
@@ -192,6 +195,9 @@ int main (int argc, char *argv[]) {
       command += " -w ";
       command += optarg;
       break;
+    case 'S':
+      stokesify = true;
+      break;
     default:
       cout << "Unrecognised option." << endl;
     }
@@ -244,6 +250,15 @@ int main (int argc, char *argv[]) {
 	arch->defaraday(rm, 0.0);
 	if (verbose)
 	  cout << "Archive corrected for a RM of " << rm << endl;
+      }
+
+      if (stokesify) {
+	if (arch->get_npol() != 4)
+	  throw Error(InvalidState, "Convert to Stokes",
+		      "Not enough polarisation information");
+	arch->convert_state(Signal::Stokes);
+	if (verbose)
+	  cout << "Archive converted to Stokes parameters" << endl;
       }
       
       if (tscr) {
