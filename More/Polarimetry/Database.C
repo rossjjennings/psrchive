@@ -188,12 +188,16 @@ void Pulsar::Database::Entry::unload (string& str)
 
 Pulsar::Database::Criterion::Criterion ()
 {
-  check_freq = true;
-  check_bw   = true;
-  check_time = true;
-  check_obst = true;
-  check_posn = true;
-  check_inst = true;
+  minutes_apart = 0.0;
+  RA_deg_apart  = 0.0;
+  DEC_deg_apart = 0.0;
+
+  check_instrument  = true;
+  check_frequency   = true;
+  check_bandwidth   = true;
+  check_obs_type    = true;
+  check_time        = true;
+  check_coordinates = true;
 }
 
 
@@ -203,7 +207,7 @@ bool Pulsar::Database::Criterion::match (const Entry& _entry) const
   if (verbose)
     cerr << "Pulsar::Database::Criterion::match" << endl;
  
-  if (check_obst) {
+  if (check_obs_type) {
 
     if (entry.obsType == _entry.obsType) {
       if (verbose)
@@ -231,7 +235,7 @@ bool Pulsar::Database::Criterion::match (const Entry& _entry) const
 
   }
 
-  if (check_bw) {
+  if (check_bandwidth) {
 
     if (entry.bandwidth==_entry.bandwidth) {
       if (verbose)
@@ -244,7 +248,7 @@ bool Pulsar::Database::Criterion::match (const Entry& _entry) const
     }
   }
 
-  if (check_freq) {
+  if (check_frequency) {
 
     if (entry.frequency==_entry.frequency) {
       if (verbose)
@@ -257,7 +261,7 @@ bool Pulsar::Database::Criterion::match (const Entry& _entry) const
     }
   }
 
-  if (check_inst) {
+  if (check_instrument) {
 
     if (entry.instrument==_entry.instrument) {
       if (verbose)
@@ -298,7 +302,7 @@ bool Pulsar::Database::Criterion::match (const Entry& _entry) const
 
   double diff;
 
-  if (check_posn) {
+  if (check_coordinates) {
 
     diff = _entry.position.ra().getDegrees()-entry.position.ra().getDegrees();
     if (fabs(diff) < RA_deg_apart) {
@@ -317,7 +321,7 @@ bool Pulsar::Database::Criterion::match (const Entry& _entry) const
     cerr << "  DEC this = " << entry.position.dec().getDMS() << endl;
   }
 
-  if (check_posn) {
+  if (check_coordinates) {
 
     diff= _entry.position.dec().getDegrees()-entry.position.dec().getDegrees();
     if (fabs(diff) < DEC_deg_apart) {
@@ -349,31 +353,15 @@ bool Pulsar::Database::Criterion::match (const Entry& _entry) const
 Pulsar::Database::Database ()
 {
   path = "unset";
-
-  // Test against everything by default
-  check_bw = true;
-  check_freq = true;
-  check_inst = true;
-  check_posn = true;
-  check_time = true;
-  check_obst = true;
-
 }
 
 Pulsar::Database::Database (const char* filename)
 {
   path = "unset";
 
-  // Test against everything by default
-  check_bw = true;
-  check_freq = true;
-  check_inst = true;
-  check_posn = true;
-  check_time = true;
-  check_obst = true;
-
   if (verbose)
     cerr << "Pulsar::Database load " << filename << endl;
+
   load (filename);
 }
 
@@ -382,7 +370,7 @@ Pulsar::Database::Database (const char* filename)
   ending in the extensions specified in the second argument.
 */      
 Pulsar::Database::Database (string _path,
-					 const vector<string>& extensions)
+			    const vector<string>& extensions)
 {
   char original[4096];
   getcwd(original, 4096);
@@ -508,35 +496,6 @@ void Pulsar::Database::unload (const char* dbase_filename)
 
 }
 
-void Pulsar::Database::test_freq (bool flag)
-{
-  check_freq = flag;
-}
-
-void Pulsar::Database::test_bw (bool flag)
-{
-  check_bw = flag;
-}
-
-void Pulsar::Database::test_inst (bool flag)
-{
-  check_inst = flag;
-}
-
-void Pulsar::Database::test_obst (bool flag)
-{
-  check_obst = flag;
-}
-
-void Pulsar::Database::test_posn (bool flag)
-{
-  check_posn = flag;
-}
-
-void Pulsar::Database::test_time (bool flag)
-{
-  check_time = flag;
-}
 
 //! returns a vector of Entry instances that match the criterion
 vector<Pulsar::Database::Entry> 
@@ -554,90 +513,78 @@ Pulsar::Database::all_matching (const Criterion& criterion) const
   return matches;
 }
 
-//! Initialize the criterion with the defaults
+static Pulsar::Database::Criterion default_criterion;
+
+//! Get the default matching criterion for PolnCal observations
 Pulsar::Database::Criterion
-Pulsar::Database::get_default_criterion () const
+Pulsar::Database::get_default_criterion ()
 {
-  Criterion criterion;
+  return default_criterion;
+}
 
-  criterion.check_freq = check_freq;
-  criterion.check_bw   = check_bw;
-  criterion.check_time = check_time;
-  criterion.check_obst = check_obst;
-  criterion.check_posn = check_posn;
-  criterion.check_inst = check_inst;
+void Pulsar::Database::set_default_criterion (const Criterion& criterion)
+{
+  default_criterion = criterion;
+}
 
+//! Get the default matching criterion for PolnCal observations
+Pulsar::Database::Criterion
+Pulsar::Database::get_default_PolnCal_criterion ()
+{
+  Criterion criterion = get_default_criterion ();
+  criterion.minutes_apart = 720.0;
+  criterion.RA_deg_apart  = 5.0;
+  criterion.DEC_deg_apart = 5.0;
   return criterion;
 }
 
-//! Convenience interface to the all_matching function
-vector<Pulsar::Database::Entry> 
-Pulsar::Database::all_matching (Pulsar::Archive* arch, 
-					     Signal::Source obsType, 
-					     double minutes_apart,
-					     double RA_deg_apart, 
-					     double DEC_deg_apart)
+//! Get the default matching criterion for FluxCal observations
+Pulsar::Database::Criterion
+Pulsar::Database::get_default_FluxCal_criterion ()
 {
-  Criterion criterion = get_default_criterion();
-  criterion.entry = Entry (*arch);
-  criterion.entry.obsType = obsType;
-
-  criterion.minutes_apart = minutes_apart;
-  criterion.RA_deg_apart = RA_deg_apart;
-  criterion.DEC_deg_apart = DEC_deg_apart;
-
-  return all_matching (criterion);
+  Criterion criterion = get_default_criterion ();
+  criterion.minutes_apart = 43200.0;
+  criterion.check_coordinates = false;
+  return criterion;
 }
 
-
-/*! This convenience interface to the all_matching function uses the
-  archive to get the observational parameters, but allows the epoch to
-  be separately specified. */
-vector<Pulsar::Database::Entry> 
-Pulsar::Database::all_matching (Pulsar::Archive* arch,
-					     const MJD& epoch, 
-					     Signal::Source obsType,
-					     double minutes_apart)
+//! Get the default matching criterion for Reception model solutions
+Pulsar::Database::Criterion
+Pulsar::Database::get_default_Reception_criterion ()
 {
-  Criterion criterion = get_default_criterion();
-  criterion.entry = Entry (*arch);
-  criterion.entry.time = epoch;
-  criterion.entry.obsType = obsType;
- 
-  criterion.minutes_apart = minutes_apart;
-  criterion.check_posn = false;
-
-  return all_matching (criterion);
+  Criterion criterion = get_default_criterion ();
+  criterion.minutes_apart = 43200.0;
+  criterion.check_coordinates = false;
+  return criterion;
 }
+
 
 //! Returns one Entry that matches the given parameters and is nearest in time.
 Pulsar::Database::Entry 
-Pulsar::Database::PolnCalibrator_match (Pulsar::Archive* arch,
-						     Calibrator::Type calType,
-						     double minutes_apart,
-						     double RA_deg_apart, 
-						     double DEC_deg_apart)
+Pulsar::Database::PolnCal_match (Pulsar::Archive* arch,
+				 Calibrator::Type calType,
+				 bool only_observations)
 {
-  Criterion criterion = get_default_criterion();
+  Criterion criterion = get_default_PolnCal_criterion();
+
   criterion.entry = Entry (*arch);
-
-  criterion.entry.obsType = Signal::Calibrator;
-  criterion.entry.calType = calType;
-
-  criterion.minutes_apart = minutes_apart;
-  criterion.RA_deg_apart = RA_deg_apart;
-  criterion.DEC_deg_apart = DEC_deg_apart;
-
-  vector<Pulsar::Database::Entry> matches;
-  matches = all_matching (criterion);
-
   criterion.entry.obsType = Signal::PolnCal;
-  vector<Pulsar::Database::Entry> matches2;
 
-  unsigned n = matches.size();
-  matches.resize( matches.size() + matches2.size() );
-  for (unsigned i=0; i<matches2.size(); i++)
-    matches[n+i] = matches2[i];
+  vector<Pulsar::Database::Entry> matches = all_matching (criterion);
+
+  if (!only_observations) {
+
+    criterion.entry.obsType = Signal::Calibrator;
+    criterion.entry.calType = calType;
+
+    vector<Pulsar::Database::Entry> matches2 = all_matching (criterion);
+
+    unsigned n = matches.size();
+    matches.resize( matches.size() + matches2.size() );
+    for (unsigned i=0; i<matches2.size(); i++)
+      matches[n+i] = matches2[i];
+
+  }
 
   if (matches.size() == 0)
     throw Error (InvalidParam,
@@ -649,64 +596,33 @@ Pulsar::Database::PolnCalibrator_match (Pulsar::Archive* arch,
 
 //! Returns one Entry that matches the given parameters and is nearest in time.
 Pulsar::Database::Entry 
-Pulsar::Database::single_match (Pulsar::Archive* arch,
-					     Calibrator::Type calType)
+Pulsar::Database::Reception_match (Pulsar::Archive* arch,
+				   Calibrator::Type calType)
 {
-  Criterion criterion = get_default_criterion();
+  Criterion criterion = get_default_Reception_criterion();
+
   criterion.entry = Entry (*arch);
 
   criterion.entry.obsType = Signal::Calibrator;
   criterion.entry.calType = calType;
-
-  criterion.check_time = false;
-  criterion.check_posn = false;
 
   vector<Pulsar::Database::Entry> matches;
   matches = all_matching (criterion);
 
   if (matches.size() == 0)
     throw Error (InvalidParam,
-		 "Pulsar::Database::single_match",
+		 "Pulsar::Database::Reception_match",
 		 "no %s Calibrator found", Calibrator::Type2str (calType));
 
   return closest_match (criterion, matches);
 }
 
 
-//! Returns one Entry that matches the given parameters and is nearest in time.
-Pulsar::Database::Entry 
-Pulsar::Database::single_match (Pulsar::Archive* arch,
-					     Signal::Source obsType, 
-					     double minutes_apart,
-					     double RA_deg_apart, 
-					     double DEC_deg_apart)
-{
-  Criterion criterion = get_default_criterion();
-  criterion.entry = Entry (*arch);
-  criterion.entry.obsType = obsType;
-
-  criterion.minutes_apart = minutes_apart;
-  criterion.RA_deg_apart = RA_deg_apart;
-  criterion.DEC_deg_apart = DEC_deg_apart;
-
-  if (verbose)
-    cerr << "Database::single_match entered" << endl;
-  
-  vector<Pulsar::Database::Entry> matches;
-  matches = all_matching (criterion);
-
-  if (matches.size() == 0)
-    throw Error (InvalidParam,
-		 "Pulsar::Database::single_match",
-		 "no %s Source found", Signal::source_string (obsType));
-
-  return closest_match (criterion, matches);
-}
 
 //! Returns one Entry that matches the given parameters and is nearest in time.
 Pulsar::Database::Entry 
 Pulsar::Database::closest_match (const Criterion& criterion,
-					      const vector<Entry>& entries)
+				 const vector<Entry>& entries)
 {
   if (entries.size() == 0)
     throw Error (InvalidParam, "Pulsar::Database::closest_match",
@@ -744,18 +660,19 @@ Pulsar::Database::closest_match (const Criterion& criterion,
 Pulsar::FluxCalibrator* 
 Pulsar::Database::generateFluxCalibrator (Pulsar::Archive* arch)
 {
-  vector<Pulsar::Database::Entry> oncals;
-  oncals = all_matching (arch, Signal::FluxCalOn, 
-			 43200.0, 360.0, 360.0);
+  Criterion criterion = get_default_criterion();
+  criterion.entry = Entry (*arch);
+
+  criterion.entry.obsType = Signal::FluxCalOn;
+  vector<Pulsar::Database::Entry> oncals = all_matching (criterion);
 
   if (!oncals.size())
     throw Error (InvalidState, 
                  "Pulsar::Database::generateFluxCalibrator",
                  "no FluxCalOn observations found to match observation");
 
-  vector<Pulsar::Database::Entry> offcals;
-  offcals = all_matching (arch, Signal::FluxCalOff, 
-			  43200.0, 360.0, 360.0);
+  criterion.entry.obsType = Signal::FluxCalOff;
+  vector<Pulsar::Database::Entry> offcals = all_matching (criterion);
 
   if (!offcals.size())
     throw Error (InvalidState,
@@ -791,28 +708,22 @@ Pulsar::Database::generateFluxCalibrator (Pulsar::Archive* arch)
   observation. */
 
 Pulsar::PolnCalibrator* 
-Pulsar::Database::generatePolnCalibrator (Archive* arch, 
-						       Calibrator::Type m)
+Pulsar::Database::generatePolnCalibrator (Archive* arch, Calibrator::Type m)
 {
   if (!arch)
     throw Error (InvalidParam, "Database::generatePolnCalibrator",
 		 "no Pulsar::Archive given");
   
-  Pulsar::Database::Entry entry;
-  
   if (verbose)
     cerr << "Attempting to find a matching cal file" << endl;
 
-  if (m == Pulsar::Calibrator::Hybrid)
-    // the Calibrator must contain measurements of the Reference source
-    entry = single_match (arch, Signal::PolnCal, 20.0, 5.0, 5.0);
-  else
-    // the Calibrator may also be any solved model
-    entry = PolnCalibrator_match (arch, m, 720.0, 5.0, 5.0);
+  // the Calibrator must contain an observation of the Reference source
+  bool only_observations = m == Pulsar::Calibrator::Hybrid;
+
+  Database::Entry entry = PolnCal_match (arch, m, only_observations);
   
   if (verbose)
-    cout << "Constructing PolnCalibrator from file "
-	 << entry.filename << endl;
+    cout << "Constructing PolnCalibrator from file " << entry.filename << endl;
   
   Reference::To<Pulsar::Archive> polcalarch;
   polcalarch = Pulsar::Archive::load(get_filename(entry));
@@ -868,7 +779,7 @@ Pulsar::Database::generateHybridCalibrator
 
     if (verbose)
       cerr << "  Attempting to find a matching Britton Model" << endl;
-    entry = single_match (arch, Calibrator::Britton);
+    entry = Reception_match (arch, Calibrator::Britton);
 
   }
   catch (Error& error) {
@@ -878,7 +789,7 @@ Pulsar::Database::generateHybridCalibrator
       if (verbose)
 	cerr << "  Attempting to find a matching Hamaker Model" << endl;
       
-      entry = single_match (arch, Calibrator::Hamaker);
+      entry = Reception_match (arch, Calibrator::Hamaker);
 
     }
     catch (Error& error) {

@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/Database.h,v $
-   $Revision: 1.1 $
-   $Date: 2004/07/21 04:03:39 $
+   $Revision: 1.2 $
+   $Date: 2004/07/21 05:27:41 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Calibration_Database_h
@@ -61,18 +61,7 @@ namespace Pulsar {
     
     //! Returns the number of entries in the database
     unsigned size () const { return entries.size(); }
-    
-    // Functions for activation and de-activation of tests
-    // for various criteria when matching CALs to observations
-    
-    void test_posn (bool);
-    void test_time (bool);
-    void test_obst (bool);
-    void test_bw (bool);
-    void test_freq (bool);
-    void test_inst (bool);
-    
-
+ 
     //! Pulsar Calibration Database Entry
     class Entry {
       
@@ -126,13 +115,13 @@ namespace Pulsar {
       
       double DEC_deg_apart;
       
-      bool check_freq;
+      bool check_instrument;
+      bool check_frequency;
+      bool check_bandwidth;
+      bool check_obs_type;
       bool check_time;
-      bool check_obst;
-      bool check_posn;
-      bool check_inst;
-      bool check_bw;
-      
+      bool check_coordinates;
+     
       Criterion ();
       
       //! Return true if entry matches within the criterion
@@ -141,42 +130,55 @@ namespace Pulsar {
     };
     
     
-    //! Return the default matching criterion
-    Criterion get_default_criterion () const;
-    
+    //! Get the default matching criterion for all observations
+    static Criterion get_default_criterion ();
+
+    //! Set the default matching criterion for all observations
+    static void set_default_criterion (const Criterion& criterion);
+
+    //! Get the default matching criterion for PolnCal observations
+    static Criterion get_default_PolnCal_criterion ();
+
+    //! Get the default matching criterion for FluxCal observations
+    static Criterion get_default_FluxCal_criterion ();
+
+    //! Get the default matching criterion for Reception model solutions
+    static Criterion get_default_Reception_criterion ();
+
+    //! Get the matching criterion for PolnCal observations
+    Criterion get_PolnCal_criterion () const;
+
+    //! Get the matching criterion for FluxCal observations
+    Criterion get_FluxCal_criterion () const;
+
+    //! Get the matching criterion for Reception model solutions
+    Criterion get_Reception_criterion () const;
+
+    //! Set the matching criterion for PolnCal observations
+    void set_PolnCal_criterion (const Criterion& criterion) const;
+
+    //! Set the matching criterion for FluxCal observations
+    void set_FluxCal_criterion (const Criterion& criterion) const;
+
+    //! Set the matching criterion for Reception model solutions
+    void set_Reception_criterion (const Criterion& criterion) const;
+
     //! Returns a vector of Entry objects that match the given parameters.
     vector<Entry> all_matching (const Criterion& criterion) const;
-    
-    //! Returns a vector of Entry objects that match the given archive
-    vector<Entry> all_matching (Archive* arch, Signal::Source obs_type,
-				double minutes_apart, 
-				double RA_deg_apart,
-				double DEC_deg_apart);
-    
-    //! All sky search for matches; useful for finding Calibrators
-    vector<Entry> all_matching (Pulsar::Archive* arch, const MJD& epoch, 
-				Signal::Source obs_type,
-				double minutes_apart);
-    
-    Entry PolnCalibrator_match (Pulsar::Archive* arch,
-				Calibrator::Type calType,
-				double minutes_apart,
-				double RA_deg_apart, 
-				double DEC_deg_apart);
-    
-    //! Returns the nearest (in time) Entry that matches the given parameters
-    Entry single_match (Archive* arch, Signal::Source obs_type,
-			double minutes_apart, 
-			double RA_deg_apart,
-			double DEC_deg_apart);
-    
-    //! Returns the nearest (in time) Entry with the given Calibrator Type
-    Entry single_match (Pulsar::Archive* arch, Calibrator::Type calType);
     
     //! Returns the nearest (in time) Entry that matches the Criterion
     Entry closest_match (const Criterion& criterion,
 			 const vector<Entry>& entries);
+
+    //! Return a match using the default_PolnCal_criterion
+    Entry PolnCal_match (Pulsar::Archive* arch,
+			 Calibrator::Type calType,
+			 bool only_observations = false);
     
+    //! Return a match using the default_Reception_criterion
+    Entry Reception_match (Pulsar::Archive* arch,
+			   Calibrator::Type calType);
+     
     //! Return a pointer to a new HybridCalibrator
     HybridCalibrator* 
     generateHybridCalibrator (ReferenceCalibrator* polcal, Archive* arch);
@@ -190,12 +192,6 @@ namespace Pulsar {
     vector<Entry> entries;   // list of entries in the database
     string path;
     
-    bool check_posn;
-    bool check_time;
-    bool check_obst;
-    bool check_bw;
-    bool check_freq;
-    bool check_inst;
     
   };
 

@@ -1,7 +1,7 @@
 #include <iostream>
 #include <algorithm>
 
-#include "Calibration.h"
+#include "Database.h"
 #include "string_utils.h"
 
 void usage ()
@@ -56,14 +56,14 @@ int main (int argc, char** argv)
   // the individual archive
   Reference::To<Pulsar::Archive> archive;
 
-  Pulsar::Calibration::Database dbase;
+  Pulsar::Database dbase;
  
   for (unsigned ifile=0; ifile<filenames.size(); ifile++) {  try {
 
     archive = Pulsar::Archive::load( filenames[ifile] );
 
     Pulsar::PolnCalibrator* pcal = dbase.generatePolnCalibrator (archive,
-				Pulsar::Calibration::Database::SingleAxis);
+				Pulsar::Database::SingleAxis);
     
     pcal->calibrate (archive);
     

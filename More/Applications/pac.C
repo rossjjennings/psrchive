@@ -6,7 +6,7 @@
 #include "Pulsar/getopt.h"
 #include "Pulsar/Integration.h"
 #include "Pulsar/BasicIntegration.h"
-#include "Pulsar/Calibration.h"
+#include "Pulsar/Database.h"
 #include "Pulsar/PolnCalibrator.h"
 #include "Pulsar/PolnProfile.h"
 #include "Pulsar/FluxCalibrator.h"
@@ -80,17 +80,13 @@ int main (int argc, char *argv[]) {
   bool do_polncal = true;
 
   bool write_database_file = false;
-
-  bool test_instr = true;
-  bool test_coords = true;
-  bool test_times = true;
-  bool test_frequency = true;
-  bool test_bandwidth = true;
-
   bool check_flags = true;
   
   Pulsar::Calibrator::Type pcal_type = Pulsar::Calibrator::SingleAxis;
-  
+
+  // default searching criterion
+  Pulsar::Database::Criterion criterion;
+
   string cals_are_here = "./";
   string unload_ext = "calib";
   string model_file;
@@ -119,13 +115,13 @@ int main (int argc, char *argv[]) {
       break;
     case 'V':
       verbose = true;
-      Pulsar::Calibration::verbose = true;
+      Pulsar::Database::verbose = true;
       Pulsar::Calibrator::verbose = true;
       //Calibration::Model::verbose = true;
       Pulsar::Archive::set_verbosity(3);
       break;
     case 'i':
-      cout << "$Id: pac.C,v 1.49 2004/07/16 16:05:25 straten Exp $" << endl;
+      cout << "$Id: pac.C,v 1.50 2004/07/21 05:27:41 straten Exp $" << endl;
       return 0;
 
     case 'n': {
@@ -186,23 +182,23 @@ int main (int argc, char *argv[]) {
       Pulsar::PolnProfile::correct_weights = false;
       break;
     case 'c':
-      test_coords = false;
+      criterion.check_coordinates = false;
       command += "-c ";
       break;
     case 'I':
-      test_instr = false;
+      criterion.check_instrument = false;
       command += "-I ";
       break;
     case 'T':
-      test_times = false;
+      criterion.check_time = false;
       command += "-T ";
       break;
     case 'F':
-      test_frequency = false;
+      criterion.check_frequency = false;
       command += "-F ";
       break;
     case 'b':
-      test_bandwidth = false;
+      criterion.check_bandwidth = false;
       command += "-b ";
       break;
     case 'S':
@@ -225,7 +221,9 @@ int main (int argc, char *argv[]) {
       return -1;
     }
   }
-  
+
+  Pulsar::Database::set_default_criterion (criterion);
+
   for (int ai=optind; ai<argc; ai++)
     dirglob (&archives, argv[ai]);
   
@@ -243,7 +241,7 @@ int main (int argc, char *argv[]) {
   Reference::To<Pulsar::PolnCalibrator> model_calibrator;
 
   // the database from which calibrators will be selected
-  Pulsar::Calibration::Database* dbase = 0;
+  Pulsar::Database* dbase = 0;
   
   if ( !model_file.empty() ) try {
 
@@ -274,14 +272,8 @@ int main (int argc, char *argv[]) {
 
       cout << "pac: Generating new calibrator database" << endl;
 	
-      dbase = new Pulsar::Calibration::Database (cals_are_here.c_str(), exts);
+      dbase = new Pulsar::Database (cals_are_here.c_str(), exts);
 	
-      dbase -> test_inst(test_instr);
-      dbase -> test_posn(test_coords);
-      dbase -> test_time(test_times);
-      dbase -> test_freq(test_frequency);
-      dbase -> test_bw(test_bandwidth);
-      
       if (dbase->size() <= 0) {
 	cout << "pac: No calibrators found in " << cals_are_here << endl;
 	return -1;
@@ -303,13 +295,7 @@ int main (int argc, char *argv[]) {
     else {
 
       cout << "pac: Reading from database summary file" << endl;
-      dbase = new Pulsar::Calibration::Database (cals_are_here.c_str());
-	
-      dbase -> test_inst(test_instr);
-      dbase -> test_posn(test_coords);
-      dbase -> test_time(test_times);
-      dbase -> test_freq(test_frequency);
-      dbase -> test_bw(test_bandwidth);
+      dbase = new Pulsar::Database (cals_are_here.c_str());
 
     }
   }

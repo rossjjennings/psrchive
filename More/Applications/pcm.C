@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pcm.C,v $
-   $Revision: 1.27 $
-   $Date: 2004/07/16 09:39:57 $
+   $Revision: 1.28 $
+   $Date: 2004/07/21 05:27:41 $
    $Author: straten $ */
 
 /*! \file pcm.C 
@@ -34,7 +34,7 @@
 #include "Pulsar/ReceptionCalibratorPlotter.h"
 #include "Pulsar/ReceptionCalibrator.h"
 #include "Pulsar/PulsarCalibrator.h"
-#include "Pulsar/Calibration.h"
+#include "Pulsar/Database.h"
 
 #include "Pulsar/Plotter.h"
 #include "Pulsar/Archive.h"
@@ -65,7 +65,7 @@ void usage ()
     "  -m model   model: Britton [default] or Hamaker \n"
     "\n"
     "  -C meta    filename with list of calibrator files \n"
-    "  -d dbase   filename of Calibration::Database \n"
+    "  -d dbase   filename of Calibration Database \n"
     "  -M meta    filename with list of pulsar files \n"
     "\n"
     "MODE A: Fit multiple observations of unknown source \n"
@@ -216,7 +216,7 @@ int main (int argc, char *argv[]) try {
   // name of file containing list of calibrator Archive filenames
   char* calfile = NULL;
 
-  // name of file containing a Calibration::Database
+  // name of file containing a Calibration Database
   char* dbfile = NULL;
 
   // name of file containing the calibrated standard
@@ -335,7 +335,7 @@ int main (int argc, char *argv[]) try {
         return -1;
       }
 
-      ::Calibration::ReceptionModel::set_nsolve (nthreads);
+      Calibration::ReceptionModel::set_nsolve (nthreads);
 
       cerr << "pcm: solving using " << nthreads << " threads" << endl;
       break;
@@ -456,7 +456,7 @@ int main (int argc, char *argv[]) try {
     cerr << "pcm: constructing Calibration::Database from\n" 
             "     " << dbfile << endl;
 
-    Pulsar::Calibration::Database dbase (dbfile);
+    Pulsar::Database dbase (dbfile);
 
     char buffer[256];
 
@@ -465,11 +465,16 @@ int main (int argc, char *argv[]) try {
     cerr << "pcm: midtime = "
          << mid.datestr (buffer, 256, "%Y-%m-%d-%H:%M:00") << endl;
 
-    double minutes = 0.5 * hours * 60.0;
+    Pulsar::Database::Criterion criterion;
+    criterion = Pulsar::Database::get_default_PolnCal_criterion ();
+    criterion.entry = Pulsar::Database::Entry (*archive);
+    criterion.entry.time = mid;
+    criterion.minutes_apart = 0.5 * hours * 60.0;
 
-    vector<Pulsar::Calibration::Entry> oncals;
+    vector<Pulsar::Database::Entry> oncals;
 
-    oncals = dbase.all_matching (archive, mid, Signal::PolnCal, minutes);
+    criterion.entry.obsType = Signal::PolnCal;
+    oncals = dbase.all_matching (criterion);
 
     if (oncals.size() == 0)  {
       cerr << "pcm: no PolnCal observations found" << endl;
@@ -485,7 +490,8 @@ int main (int argc, char *argv[]) try {
       cal_filenames.push_back (filename);
     }
 
-    oncals = dbase.all_matching (archive, mid, Signal::FluxCalOn, minutes);
+    criterion.entry.obsType = Signal::FluxCalOn;
+    oncals = dbase.all_matching (criterion);
 
     if (oncals.size() == 0)
       cerr << "pcm: no FluxCalOn observations found" << endl;
