@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.57)
-AC_INIT([PSRCHIVE],[3.0],[psrchive@astro.swin.edu.au])
+AC_INIT([PSRCHIVE],[3.1],[psrchive@astro.swin.edu.au])
 
 AC_CONFIG_AUX_DIR([config])
 AC_CONFIG_SRCDIR([utils/Makefile.am])
@@ -12,6 +12,7 @@ AC_DISABLE_SHARED
 
 # Disable the debugging information option, -g
 SWIN_DEBUG
+SWIN_PROG_FIND
 
 # Checks for programs.
 AC_PROG_CXX
@@ -46,6 +47,12 @@ SWIN_LIB_PGPLOT
 SWIN_LIB_CFITSIO
 SWIN_LIB_MPI
 BNV_HAVE_QT
+
+if test x"$have_fftw" = xno \
+-a test x"$have_fftw3" = xno \
+-a test x"$have_mkl" = xno; then
+  AC_MSG_ERROR([No FFTW-2, FFTW-3, nor MKL FFT libraries were found])
+fi
 
 AC_SUBST(FFT_LIBS)
 FFT_LIBS="$MKL_LIBS $FFTW_LIBS $FFTW3_LIBS"
