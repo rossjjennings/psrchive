@@ -75,45 +75,50 @@ AC_DEFUN([SWIN_LIB_MPI],
 
     CC=$ac_save_CC
 
-    ## Look for the library ##
-    cf_lib_path_list="$with_mpi_lib_dir .
-                      $PSRHOME/packages/$LOGIN_ARCH/lam/lib
-                      $PSRHOME/packages/$LOGIN_ARCH/mpich/lib
-                      /usr/local/lib
-                      /usr/local/mpi/lib"
+    if test x"$have_mpi" = xyes; then
 
-    ac_save_LIBS="$LIBS"
+      ## Look for the library ##
+      cf_lib_path_list="$with_mpi_lib_dir .
+                        $PSRHOME/packages/$LOGIN_ARCH/lam/lib
+                        $PSRHOME/packages/$LOGIN_ARCH/mpich/lib
+                        /usr/local/lib
+                        /usr/local/mpi/lib"
 
-    for cf_dir in $cf_lib_path_list; do
+      ac_save_LIBS="$LIBS"
 
-      LIBS="-L$cf_dir -lmpi -llam $ac_save_LIBS"
-      AC_TRY_LINK([#include <mpi.h>],[MPI_Init(0,0);],
-                  have_mpi=lam, have_mpi=no)
-      if test x"$have_mpi" != xno; then
-        if test x"$cf_dir" == x.; then
-          MPI_LIBS="-lmpi -llam"
-        else
-          MPI_LIBS="-L$cf_dir -lmpi -llam"
+      for cf_dir in $cf_lib_path_list; do
+
+        LIBS="-L$cf_dir -lmpi -llam $ac_save_LIBS"
+        AC_TRY_LINK([#include <mpi.h>],[MPI_Init(0,0);],
+                    have_mpi=lam, have_mpi=no)
+        if test x"$have_mpi" != xno; then
+          if test x"$cf_dir" == x.; then
+            MPI_LIBS="-lmpi -llam"
+          else
+            MPI_LIBS="-L$cf_dir -lmpi -llam"
+          fi
+          break
         fi
-        break
-      fi
 
 
-      LIBS="-L$cf_dir -lmpich $ac_save_LIBS"
-      AC_TRY_LINK([#include <mpi.h>],[MPI_Init(0,0);],
-                  have_mpi=mpich, have_mpi=no)
-      if test x"$have_mpi" != xno; then
-        if test x"$cf_dir" == x.; then
-          MPI_LIBS="-lmpich"
-        else
-          MPI_LIBS="-L$cf_dir -lmpich"
+        LIBS="-L$cf_dir -lmpich $ac_save_LIBS"
+        AC_TRY_LINK([#include <mpi.h>],[MPI_Init(0,0);],
+                    have_mpi=mpich, have_mpi=no)
+        if test x"$have_mpi" != xno; then
+          if test x"$cf_dir" == x.; then
+            MPI_LIBS="-lmpich"
+          else
+            MPI_LIBS="-L$cf_dir -lmpich"
+          fi
+          break
         fi
-        break
-      fi
 
-    done
+      done
 
-    LIBS="$ac_save_LIBS"
+      LIBS="$ac_save_LIBS"
+
+    fi
+
     CPPFLAGS="$ac_save_CPPFLAGS"
 
   fi
