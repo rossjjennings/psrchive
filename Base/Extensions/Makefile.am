@@ -15,7 +15,8 @@ nobase_include_HEADERS = \
 	Pulsar/FITSHdrExtension.h         Pulsar/TwoBitStats.h  \
 	Pulsar/FluxCalibratorExtension.h  Pulsar/WidebandCorrelator.h  \
 	Pulsar/ITRFExtension.h            Pulsar/dspReduction.h \
-	Pulsar/ReceiverTI.h              Pulsar/PointingTI.h
+	Pulsar/ReceiverTI.h               Pulsar/PointingTI.h \
+	Pulsar/PowerEstimator.h
 
 libExtension_la_SOURCES = \
 	BackendName.C                    ObsExtension.C  \
