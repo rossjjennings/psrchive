@@ -2,6 +2,7 @@
 #include <unistd.h>
 #include <cpgplot.h>
 
+#include "Reference.h"
 #include "Archive.h"
 #include "Integration.h"
 #include "Profile.h"
@@ -23,6 +24,7 @@ void usage ()
     //    " -d dm     Dedisperse data at a new dm \n"
     " -D        Plot Integration 0, poln 0, chan 0 \n"
     " -G        Greyscale of profiles in frequency and phase\n"
+    " -H        Use \"heat\" colour map\n"
     //    " -E f.eph  install new ephemeris given in file 'f.eph' \n"
     //    " -e xx     Output data to new file with ext xx \n"
     " -f scr    Fscrunch scr frequency channels together \n"
@@ -60,6 +62,7 @@ int main (int argc, char** argv)
   bool display = false;
   bool textinfo = false;
   bool greyfreq = false;
+  bool heat = false;
   bool stopwatch = false;
   bool hat = false;
   bool centre = false;
@@ -106,7 +109,7 @@ int main (int argc, char** argv)
       usage ();
       return 0;
     case 'H':
-      // ascii
+      heat = true;
       break;
     case 'm':
       // macro file
@@ -182,20 +185,19 @@ int main (int argc, char** argv)
   if (display) {
     cpgsvp (0.1, 0.9, 0.05, 0.85);
     cpgsch (1.0);
+
+    if (heat) {
+      float heat_l[] = {0.0, 0.2, 0.4, 0.6, 1.0};
+      float heat_r[] = {0.0, 0.5, 1.0, 1.0, 1.0};
+      float heat_g[] = {0.0, 0.0, 0.5, 1.0, 1.0};
+      float heat_b[] = {0.0, 0.0, 0.0, 0.3, 1.0};
+      
+      cpgctab(heat_l, heat_r, heat_g, heat_b, 4, 1.0, 0.5);
+    }
   }
 
-  //#ifdef HEAT
-
-  //float heat_l[] = {0.0, 0.2, 0.4, 0.6, 1.0};
-  //float heat_r[] = {0.0, 0.5, 1.0, 1.0, 1.0};
-  //float heat_g[] = {0.0, 0.0, 0.5, 1.0, 1.0};
-  //float heat_b[] = {0.0, 0.0, 0.0, 0.3, 1.0};
-  
-  //cpgctab(heat_l, heat_r, heat_g, heat_b, 4, 1.0, 0.5);
-
-  //#endif
-  
-  Pulsar::Archive* archive = 0;
+  // smart pointer
+  Reference::To<Pulsar::Archive> archive;
 
   Pulsar::Error::handle_signals ();
 
@@ -311,17 +313,12 @@ int main (int argc, char** argv)
 	   << endl;
     }
 
-    delete archive; archive = 0;
   }
   catch (Pulsar::Error& error) {
     cerr << error << endl;
-    if (archive)
-      delete archive; archive = 0;
   }
   catch (string& error) {
     cerr << error << endl;
-    if (archive)
-      delete archive; archive = 0;
   }
   
   if (display || greyfreq)
