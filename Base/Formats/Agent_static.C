@@ -1,8 +1,8 @@
+#include "Pulsar/Archive.h"
+
 #ifdef HAVE_CONFIG_H
 #include<config.h>
 #endif
-
-#include "Pulsar/Archive.h"
 
 Registry::List<Pulsar::Archive::Agent> Pulsar::Archive::Agent::registry;
 
