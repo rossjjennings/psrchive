@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/CalibratorExtension.h,v $
-   $Revision: 1.3 $
-   $Date: 2004/10/08 08:08:26 $
+   $Revision: 1.4 $
+   $Date: 2004/10/08 10:04:52 $
    $Author: straten $ */
 
 #ifndef __CalibratorExtension_h
@@ -45,7 +45,7 @@ namespace Pulsar {
     MJD get_epoch () const;
 
     //! Set the number of frequency channels
-    void set_nchan (unsigned nchan);
+    virtual void set_nchan (unsigned nchan);
     //! Get the number of frequency channels
     unsigned get_nchan () const;
 
