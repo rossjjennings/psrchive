@@ -646,6 +646,12 @@ float Pulsar::Profile::snr() const
   double min_avg = mean (min_ph);
   double min_rms = sigma (min_ph);
 
+  if (verbose)
+    cerr << "Profile::snr rms=" << min_rms << endl;
+
+  if (min_rms == 0.0)
+    return 0;
+
   // find the total power under the pulse
   int rise = 0, fall = 0;
   find_peak_edges (rise, fall);
