@@ -6,7 +6,7 @@
  * [to|from][Big|Little]Endian(void *object, int nbytes)
  *
  */
-#include "endian.h"
+#include "machine_endian.h"
 #include <string.h>
 #include <stdlib.h>
 
