@@ -1,5 +1,5 @@
 //
-// $Id: pav.C,v 1.43 2003/06/05 13:11:31 straten Exp $
+// $Id: pav.C,v 1.44 2003/06/05 14:09:37 straten Exp $
 //
 // The Pulsar Archive Viewer
 //
@@ -11,11 +11,14 @@
 #include <unistd.h>
 #include <cpgplot.h>
 
+#include "cpg_fns.h"
+
 #include "Reference.h"
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
 #include "Pulsar/Profile.h"
 #include "Pulsar/Plotter.h"
+#include "Pulsar/Passband.h"
 #include "Error.h"
 #include "RealTimer.h"
 
@@ -55,6 +58,7 @@ void usage ()
     " -g        Display position angle profile\n"
     " -G        Plot frequency against pulse phase\n"
     " -l        Do not display labels outside of plotting area\n"
+    " -o        Plot the original passband (an Archive::Extension)\n"
     " -q        Plot a position angle frequency spectrum colour map\n"
     " -Q        Position angle frequency spectrum for on-pulse region\n"
     " -r phase  rotate the profiles by phase (in turns)\n"
@@ -113,14 +117,15 @@ int main (int argc, char** argv)
   bool calinfo = false;
   bool pa_spectrum = false;
   bool pa_scatter = false;
-  
+  bool orig_passband = false;
+
   char* metafile = NULL;
   
   Pulsar::Plotter plotter;
   Pulsar::Plotter::ColourMap colour_map = Pulsar::Plotter::Heat;
   
   int c = 0;
-  const char* args = "AaBb:Cc:DdEeFf:GghI:iHlm:M:Qq:pP:r:SsTt:VvwWXx:Yy:Zz:";
+  const char* args = "AaBb:Cc:DdEeFf:GghI:iHlm:M:Qq:opP:r:SsTt:VvwWXx:Yy:Zz:";
 
   while ((c = getopt(argc, argv, args)) != -1)
     switch (c) {
@@ -187,7 +192,7 @@ int main (int argc, char** argv)
       plotter.set_subint( atoi (optarg) );
       break;
     case 'i':
-      cout << "$Id: pav.C,v 1.43 2003/06/05 13:11:31 straten Exp $" << endl;
+      cout << "$Id: pav.C,v 1.44 2003/06/05 14:09:37 straten Exp $" << endl;
       return 0;
 
     case 'l':
@@ -199,6 +204,10 @@ int main (int argc, char** argv)
       break;
     case 'M':
       metafile = optarg;
+      break;
+
+    case 'o':
+      orig_passband = true;
       break;
 
     case 'p':
@@ -445,6 +454,49 @@ int main (int argc, char** argv)
       cpg_next();
       plotter.phase_frequency (archive);
     }
+
+    if (orig_passband) {
+
+      // hacked in from bav
+      const Pulsar::Passband* passband = 0;
+
+      for (unsigned iext=0; iext < archive->get_nextension(); iext++) {
+
+	const Pulsar::Archive::Extension* extension;
+	extension = archive->get_extension (iext);
+
+	passband = dynamic_cast<const Pulsar::Passband*> (extension);
+
+	if (passband)
+	  break;
+      }
+
+      if (!passband) {
+	cerr << "pav: Archive does not contain the Passband Extension" << endl;
+	continue;
+      }
+
+      unsigned npol = passband->get_npol ();
+
+      vector<vector<float> > pband (npol);
+      vector<int> color (npol);
+      vector<int> symbol (npol, 1);
+    
+      for (unsigned ip=0; ip<npol; ip++) {
+	color[ip] = ip + 2;
+	pband[ip] = passband->get_passband (ip);
+      }
+    
+      unsigned nbin = passband->get_nchan ();
+      vector<float> xaxis (nbin);
+      for (unsigned ibin=0; ibin<nbin; ibin++)
+	xaxis [ibin] = float(ibin);
+    
+      cpg_next();
+      prettyplot (color, symbol, 1, xaxis, pband);
+    
+    }
+
 
   }
   catch (Error& error) {
