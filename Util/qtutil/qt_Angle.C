@@ -11,9 +11,6 @@ qt_Angle::qt_Angle (bool with_error, QWidget *parent, const char *name) :
 
 void qt_Angle::setAngle (const Angle& angle)
 {
-  if (hms)
-  cout << "Old: " << valset.getHMS(val_precision).c_str() << endl;
-
   valset = angle;
   
   if (hms) {
@@ -21,15 +18,10 @@ void qt_Angle::setAngle (const Angle& angle)
     if (angle.getradians() < 0){
 	valset.setradians(angle.getradians() + 2*M_PI);
     }
-    cout << "New: " << valset.getHMS(val_precision).c_str() << endl;
-    
     value.setText (valset.getHMS(val_precision).c_str());
   }
   else
-    value.setText (valset.getDMS(val_precision).c_str());
-
-   
-	
+    value.setText (valset.getDMS(val_precision).c_str());	
 }
 
 void qt_Angle::value_Entered_CB ()
