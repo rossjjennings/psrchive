@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/Receiver.h,v $
-   $Revision: 1.10 $
-   $Date: 2004/11/12 13:51:29 $
+   $Revision: 1.11 $
+   $Date: 2004/12/14 07:29:06 $
    $Author: straten $ */
 
 #ifndef __ReceiverExtension_h
@@ -210,6 +210,9 @@ namespace Pulsar {
     //! Attenuator, Poln B
     /*! The software currently does nothing with this value */
     float atten_b;
+
+    //! Get the tranformation arising from the handedness
+    Jones<double> get_hand_transformation () const;
 
   private:
 

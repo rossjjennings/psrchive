@@ -231,49 +231,49 @@ bool Pulsar::Receiver::match (const Receiver* receiver, string& reason) const
   return result;
 }
 
+//! Return the handedness correction matrix
+Jones<double> Pulsar::Receiver::get_hand_transformation () const
+{
+  if ( feed_corrected || get_right_handed() )
+    return 1.0;
+
+  if (Archive::verbose == 3)
+    cerr << "Pulsar::Receiver::get_transformation left-handed basis" << endl;
+
+  /* rotate the basis by 180 degrees about the Stokes 2 axis
+     in the linear basis: about the Stokes U axis
+     in the circular basis: about the Stokes Q axis
+     3-vector space is a subset of Stokes 4-vector space
+     Jones rotations effect twice the angle in Poincare space */
+
+  MEAL::Rotation rotation ( Vector<float, 3>::basis(1) );
+  rotation.set_phi ( 0.5 * M_PI );
+
+  return rotation.evaluate();
+
+}
+
 //! Return the feed correction matrix
 Jones<double> Pulsar::Receiver::get_transformation () const
 {
-  Jones<double> xform = Jones<double>::identity();
+  Jones<double> xform = get_hand_transformation ();
 
-  if ( feed_corrected )
+  if ( feed_corrected || get_orientation() == 0 )
     return xform;
 
   Pauli::basis.set_basis( (Basis<double>::Type)get_basis() );
 
-  if (! get_right_handed() ) {
+  if (Archive::verbose == 3)
+    cerr << "Pulsar::Receiver::get_transformation orientation="
+         << get_orientation().getDegrees() << " deg" << endl;
 
-    if (Archive::verbose == 3)
-      cerr << "Pulsar::Receiver::get_transformation left-handed basis" << endl;
-    
-    /* rotate the basis by 180 degrees about the Stokes 2 axis
-       in the linear basis: about the Stokes U axis
-       in the circular basis: about the Stokes Q axis
-       3-vector space is a subset of Stokes 4-vector space 
-       Jones rotations effect twice the angle in Poincare space */
+  // rotate the basis about the Stokes V axis
+  MEAL::Rotation rotation ( Pauli::basis.get_basis_vector(2) );
 
-    MEAL::Rotation rotation ( Vector<float, 3>::basis(1) );
-    rotation.set_phi ( 0.5 * M_PI );
+  // the sign of this rotation may depend on handedness
+  rotation.set_phi ( -get_orientation().getRadians() );
     
-    xform *= rotation.evaluate();
-    
-  }
-  
-  if ( get_orientation() != 0 ) {
-    
-    if (Archive::verbose == 3)
-      cerr << "Pulsar::Receiver::get_transformation orientation="
-	   << get_orientation().getDegrees() << " deg" << endl;
-
-    // rotate the basis about the Stokes V axis
-    MEAL::Rotation rotation ( Pauli::basis.get_basis_vector(2) );
-
-    // the sign of this rotation may depend on handedness
-    rotation.set_phi ( -get_orientation().getRadians() );
-    
-    xform *= rotation.evaluate();
-    
-  }
+  xform *= rotation.evaluate();
 
   return xform;
 
@@ -281,7 +281,7 @@ Jones<double> Pulsar::Receiver::get_transformation () const
 
 Stokes<double> Pulsar::Receiver::get_reference_source () const
 {
-  Jones<double> xform = get_transformation ();
+  Jones<double> xform = get_hand_transformation ();
 
   if (get_reference_source_phase() != 0) {
 
@@ -291,6 +291,7 @@ Stokes<double> Pulsar::Receiver::get_reference_source () const
 
     // rotate the basis about the Stokes 1 axis
     MEAL::Rotation rotation ( Vector<float,3>::basis(0) );
+
     rotation.set_phi ( 0.5*get_reference_source_phase().getRadians() );
 
     xform *= rotation.evaluate();
