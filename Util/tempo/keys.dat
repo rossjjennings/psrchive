@@ -172,3 +172,7 @@ GLF1_4 1 1
 GLF0D_4 1 1
 GLTD_4 1 1
 
+# Tempo parameters (rms residual in microsec, number of TOAs in fit)
+TRES 1 0
+NTOA 5 0
+
