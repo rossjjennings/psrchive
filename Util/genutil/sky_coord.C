@@ -2,10 +2,11 @@
 #include <math.h>
 
 #include "sky_coord.h"
+#include "f772c.h"
 
 
-extern "C" double sla_galeq_(double *, double *, double *, double *);
-extern "C" double sla_eqgal_(double *, double *, double *, double *);
+extern "C" double F772C2(sla_galeq)(double *, double *, double *, double *);
+extern "C" double F772C2(sla_eqgal)(double *, double *, double *, double *);
 
 sky_coord & sky_coord::operator= (const sky_coord & co)
 {
@@ -35,7 +36,7 @@ sky_coord::setGalactic(AnglePair &gal)
   l = gal.angle1.getradians();
   b = gal.angle2.getradians();
 
-  sla_galeq_(&l, &b, &ra, &dec);
+  F772C2(sla_galeq)(&l, &b, &ra, &dec);
 
   angle1.setradians(ra);
   angle2.setradians(dec);
@@ -52,7 +53,7 @@ sky_coord::getGalactic()
   ra = angle1.getradians();
   dec= angle2.getradians();
 
-  sla_eqgal_(&ra, &dec, &l, &b);
+  F772C2(sla_eqgal)(&ra, &dec, &l, &b);
 
   gal.angle1.setradians(l);
   gal.angle2.setradians(b);

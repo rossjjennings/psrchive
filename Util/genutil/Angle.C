@@ -13,20 +13,28 @@
 
 bool Angle::verbose = false;
 
-Angle::Angle(const double & d){
-  radians=d; 
-  while(radians>M_PI) radians-=2*M_PI;
-  while(radians<-M_PI) radians+=2*M_PI;
+
+Angle::Angle (const double & rad) {init(); setradians(rad);}
+
+
+void
+Angle::wrap()
+{
+  while(radians>wrap_point) radians-=2.0*wrap_point;
+  while(radians<-wrap_point) radians+=2.0*wrap_point;
 }
 
 char * Angle::getHMS(char *str, int places) const
 {
   int hours, minutes;
   double seconds;
+  double posradians = radians;
+  if (posradians < 0.0)
+     posradians += 2.0*M_PI;
 
-  hours = (int)floor(radians * 12.0/M_PI); 
-  minutes = (int)floor(radians * 720.0/M_PI) % 60;
-  seconds = radians * 43200.0/M_PI - ((hours*60.0)+minutes)*60.0;
+  hours = (int)floor(posradians * 12.0/M_PI); 
+  minutes = (int)floor(posradians * 720.0/M_PI) % 60;
+  seconds = posradians * 43200.0/M_PI - ((hours*60.0)+minutes)*60.0;
 
   sprintf(str, "%02d:%02d:%0*.*f", hours, minutes, 
 	  3+places, places, seconds);
@@ -78,11 +86,12 @@ string Angle::getDMS(int places) const
 Angle& Angle::operator= (const Angle & a)
 {
   radians = a.radians;
+  wrap();
   return *this;
 }
 
-Angle& Angle::operator= (const double & rad){
-  radians = rad;
+Angle& Angle::operator= (const double &rad){
+  setradians(rad);
   return *this;
 }
 
@@ -123,11 +132,19 @@ Angle& Angle::operator/= (const double & d)
 }
 
 const Angle operator + (const Angle &a1, const Angle &a2) {
-  double real = cos(a1.getradians())*cos(a2.getradians()) - 
-    sin(a1.getradians())*sin(a2.getradians());
-  double imag = cos(a1.getradians())*sin(a2.getradians()) +
-    sin(a1.getradians())*cos(a2.getradians());
-  return Angle(atan2(imag,real));
+
+  // what is this for ?? I think I mistakenly thought it was
+  // necessary to add in cartesian space.. only need this for means
+  //  double real = cos(a1.getradians())*cos(a2.getradians()) - 
+  //   sin(a1.getradians())*sin(a2.getradians());
+  //  double imag = cos(a1.getradians())*sin(a2.getradians()) +
+  ///   sin(a1.getradians())*cos(a2.getradians());
+  //  return Angle(atan2(imag,real));
+  Angle a;
+  a.setWrapPoint((a1.wrap_point > a2.wrap_point ? 
+		 a1.wrap_point: a2.wrap_point));
+  a.setradians(a1.radians+a2.radians);
+  return a;
 }
 
 const Angle operator - (const Angle &a1, const Angle &a2) {
@@ -136,15 +153,21 @@ const Angle operator - (const Angle &a1, const Angle &a2) {
 }
 
 const Angle operator + (const Angle &a1, double d) {
-  return Angle(a1.getradians()+d);
+  Angle a(a1);
+  a.setradians(a.radians+d);
+  return a;
 }
 
 const Angle operator - (const Angle &a1, double d) {
-  return Angle(a1.getradians()-d);
+  Angle a(a1);
+  a.setradians(a.radians-d);
+  return a;
 }
 
 const Angle operator * (const Angle &a1, double d) {
-  return Angle(a1.getradians()*d);
+  Angle a(a1);
+  a.setradians(a.radians*d);
+  return a;
 }
 
 // NOTE : this returns double, not angle, since angle^2 is not
@@ -155,7 +178,10 @@ double operator * (const Angle &a1, const Angle &a2) {
 }
 
 const Angle operator / (const Angle &a1, double d) {
-  return Angle(a1.getradians()/d);
+  Angle a(a1);
+  a.setradians(a.radians/d);
+  return a;
+  
 }
 
 int operator > (const Angle &a1, const Angle &a2) {
@@ -197,6 +223,7 @@ int operator != (const Angle &a1, const Angle &a2){
   else
       return (0);  
 }
+
 
 ostream& operator<< (ostream & os, const Angle & angle)
 {

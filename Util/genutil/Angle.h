@@ -1,6 +1,6 @@
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Angle.h,v $
-   $Revision: 1.6 $
-   $Date: 2000/08/21 07:15:53 $
+   $Revision: 1.7 $
+   $Date: 2001/02/06 05:19:27 $
    $Author: redwards $ */
 
 // redwards 17 Mar 99 -- Time for a definitive C++ suite of
@@ -23,14 +23,21 @@ class Angle
 
  protected:
   double radians;  // angle in radians
-
+  double wrap_point;
+  virtual void wrap(); // make sure angle is +- pi radians
+  void init() {radians=0.0;wrap_point=M_PI;}
  public:
 
   static bool verbose;
 
-  Angle(const Angle & a) {radians=a.radians;};
-  Angle(const double & d = 0.0);
+  Angle() {init();}
+  Angle(const Angle & a)  
+    {init(); radians=a.radians;wrap_point=a.wrap_point;}
+  Angle(const double & rad) ;
 
+  void setWrapPoint(double wp){wrap_point=wp; wrap();}
+  double getWrapPoint() {return wrap_point;}
+  void makeArctangle() { setWrapPoint(0.5*M_PI); }
   int     setHMS (const char *);
   char*   getHMS (char* str, int places=3) const;
   string  getHMS (int places = 3) const;
@@ -45,27 +52,28 @@ class Angle
     { return long(radians * MilliSecin12Hours / M_PI); };
 
   void setDegrees(double deg)
-    { radians = deg * M_PI/180.0;};
+    { //fprintf(stderr, "%f %f %p\n", wrap_point, deg, this);
+      radians = deg * M_PI/180.0; wrap();};
 
   double getDegrees() const
     { return radians * 180.0/M_PI; };
 
   void setradians(double rad)
-    { radians = rad; };
+    { radians = rad; wrap();};
 
   double getradians() const
     { return radians; };
 
   // Argh some capitalization consistency would be nice.... redwards.
   void setRadians(double rad)
-    { radians = rad; };
+    { setradians(rad); };
   double getRadians() const
     { return radians; };
   
 
 
   Angle & operator= (const Angle & a);
-  Angle & operator= (const double & val);
+  Angle & operator= (const double &val);
 
   Angle & operator+= (const Angle & a);
   Angle & operator-= (const Angle & a);
@@ -88,8 +96,18 @@ class Angle
   friend int operator == (const Angle &, const Angle &);
   friend int operator != (const Angle &, const Angle &);
 
+  inline friend double cast_double(const Angle &a) {return a.radians;}
+
   friend ostream& operator<< (ostream&, const Angle&);
 };
+
+// More Arctangle stuff... NOTE: remember the Angle = operator
+// DOESN'T set wrap_point, so only use these to e.g. pass directly
+// to a function
+inline Angle Arctangle() {Angle a; a.makeArctangle(); return a;}
+inline Angle Arctangle(const Angle&a1) {Angle a(a1); a.makeArctangle(); return a;}
+inline Angle Arctangle(double rad) {Angle a(rad); a.makeArctangle(); return a;}
+
  
 // AnglePair class : useful for sky positions.
 // Sign convention should be as per usual output, that is in general

@@ -1,7 +1,7 @@
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/MJD.h,v $
-   $Revision: 1.12 $
-   $Date: 2000/01/17 06:07:32 $
-   $Author: straten $ */
+   $Revision: 1.13 $
+   $Date: 2001/02/06 05:19:26 $
+   $Author: redwards $ */
 
 #ifndef __MJD_H
 #define __MJD_H
@@ -148,6 +148,8 @@ class MJD {
   friend bool equal (const MJD &m1, const MJD &m2);
 
 };
+
+static double cast_double(const MJD&m) {return m.in_days();}
 
 ostream& operator<< (ostream& ostr, const MJD& mjd);
 

@@ -4,6 +4,7 @@
 #include <math.h>
 
 #include "coord.h"
+#include "f772c.h"
 
 /* **********************************************************************
    str2coord - converts a string containing pulsar coordinates to
@@ -352,7 +353,7 @@ int telescope_coords (int telescope, float* latitude,
 
    ********************************************************************** */
 
-void sla_altaz_ (double*, double*, double*, double*, double*, double*,
+void F772C2(sla_altaz) (double*, double*, double*, double*, double*, double*,
 		 double*, double*, double*, double*, double*, double*);
 
 int az_zen_para (double ra, double dec, float lst, float latitude,
@@ -368,7 +369,7 @@ int az_zen_para (double ra, double dec, float lst, float latitude,
   if (lst < 0.0 || lst > 24.0)
     return -1;
 
-  sla_altaz_ (&HA, &dec, &dlat, 
+  F772C2(sla_altaz) (&HA, &dec, &dlat, 
 	      &azimuth, &ignore, &ignore,
 	      &altitude,  &ignore, &ignore,
 	      &PA,      &ignore, &ignore);
