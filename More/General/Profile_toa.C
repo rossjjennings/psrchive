@@ -131,7 +131,7 @@ double Pulsar::Profile::TimeShift (const Profile& std,
   
   double A = matrix[0][0]*y1 + matrix[0][1]*y2 + matrix[0][2]*y3;
   double B = matrix[1][0]*y1 + matrix[1][1]*y2 + matrix[1][2]*y3;
-  double C = matrix[2][0]*y1 + matrix[2][1]*y2 + matrix[2][2]*y3;
+  // double C = matrix[2][0]*y1 + matrix[2][1]*y2 + matrix[2][2]*y3;
 
   // Now calculate the equivalent coefficients for the form:
   // y = D - E(x - F)^2
@@ -146,8 +146,8 @@ double Pulsar::Profile::TimeShift (const Profile& std,
   //   B = 2EF      => F = -B/2A
   //   C = D - EF^2 => D = C - (B^2/4A)
 
-  double D = C - (B*B/(4.0*A));
-  double E = -1.0 * A;
+  // double D = C - (B*B/(4.0*A));
+  // double E = -1.0 * A;
   double F =  (-1.0 * B) / (2.0 * A);
 
   /*
@@ -189,15 +189,12 @@ double Pulsar::Profile::TimeShift (const Profile& std,
   error = (0.25 * (1.0 / sa)) / get_nbin();
 
   // The shift in phase units, wrapped to be between -0.5 and 0.5
-  if (F < -0.5) {
-    return (F + 1.0);
-  }
-  else if (F > 0.5) {
-    return (F - 1.0);
-  }
-  else {
-    return F;
-  }
+  if (F < -0.5)
+    F += 1.0;
+  else if (F > 0.5)
+    F -= 1.0;
+
+  return F;
 }
 
 double Pulsar::Profile::shift (const Profile& std, float& ephase,
