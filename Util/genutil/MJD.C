@@ -19,7 +19,6 @@
 #include "ieee.h"
 
 #include "MJD.h"
-#include "f772c.h"
 #include "Error.h"
 
 #define RINGBUFFER_SIZE 10
@@ -534,29 +533,6 @@ MJD::MJD (int intday, double fracday)
   if (verbose)
     cerr << "MJD this=" << *this << endl;
 }
-
-extern "C" double F772C(sla_gmst)(double * ut);
-
-double MJD::LST (float longitude) const
-{
-  double passed_MJD = this->in_days();
-  double gmst = F772C(sla_gmst)(&passed_MJD);
-  double lst = gmst/M_PI*180.0/15.0 + longitude/360.0*24.0;
-  while (lst<0.0) lst+=24.0;
-  while (lst>=24.0) lst-=24.0;
-  return lst;
-}
-
-double MJD::LST (double longitude) const
-{
-  double passed_MJD = this->in_days();
-  double gmst = F772C(sla_gmst)(&passed_MJD);
-  double lst = gmst/M_PI*180.0/15.0 + longitude/360.0*24.0;
-  while (lst<0.0) lst+=24.0;
-  while (lst>=24.0) lst-=24.0;
-  return lst;
-}
-
 
 int MJD::UTC (utc_t* utc, double* fsec) const
 {

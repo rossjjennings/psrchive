@@ -31,7 +31,7 @@ const double v_0 = 222;   // km/s
 // distance of sun from galactic centre
 const double R_0 = 7.7e3; // parsec
 
-#define F77_sla_eqgal F77_FUNC_(sla_eqgal,SLA_EQGAL)
+#define F77_sla_eqgal F77_SLA(sla_eqgal,SLA_EQGAL)
 extern "C" double F77_sla_eqgal(double *, double *, double *, double *);
 
 

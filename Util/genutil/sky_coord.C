@@ -2,10 +2,6 @@
 #include <math.h>
 
 #include "sky_coord.h"
-#include "f772c.h"
-
-extern "C" double F772C(sla_galeq)(double *, double *, double *, double *);
-extern "C" double F772C(sla_eqgal)(double *, double *, double *, double *);
 
 void sky_coord::init ()
 {
@@ -54,41 +50,6 @@ const sky_coord& sky_coord::setJRaDecMS(long int ra, long int dec)
   angle2 = double(dec) * M_PI / MilliSecin12Hours;
   return *this;
 }
-
-// redwards -- function to construct from Galactic coordinates
-const sky_coord&
-sky_coord::setGalactic(AnglePair &gal)
-{
-  double l, b;
-  double ra, dec;
-
-  l = gal.angle1.getradians();
-  b = gal.angle2.getradians();
-
-  F772C(sla_galeq)(&l, &b, &ra, &dec);
-
-  angle1.setradians(ra);
-  angle2.setradians(dec);
-  return *this;
-}
-
-AnglePair
-sky_coord::getGalactic() const
-{
-  double l, b;
-  double ra, dec;
-  AnglePair gal;
-
-  ra = angle1.getradians();
-  dec= angle2.getradians();
-
-  F772C(sla_eqgal)(&ra, &dec, &l, &b);
-
-  gal.angle1.setradians(l);
-  gal.angle2.setradians(b);
-  return gal;
-}
-
 
 #if 0
 void sky_coord::print (FILE* out) const
