@@ -340,8 +340,8 @@ void Pulsar::ReceptionCalibrator::add_observation (const Archive* data)
 
     // the noise power in the baseline is used to estimate the
     // variance in each Stokes parameter
-    vector< vector< Estimate<double> > > levels;
-    integration->baseline_levels (levels);
+    vector< vector< double > > baseline_variance;
+    integration->baseline_power (baseline_variance);
 
     for (unsigned ichan=0; ichan<nchan; ichan++) try {
 
@@ -356,11 +356,11 @@ void Pulsar::ReceptionCalibrator::add_observation (const Archive* data)
 
       for (unsigned istate=0; istate < pulsar.size(); istate++) {
 
-	Stokes< Estimate<float> > baseline;
-	for (unsigned ipol=0; ipol < baseline.size(); ipol++)
-	  baseline[ipol] = levels[ipol][ichan];
+	Stokes<float> variance;
+	for (unsigned ipol=0; ipol < variance.size(); ipol++)
+	  variance[ipol] = baseline_variance[ipol][ichan];
 
-	add_data (measurements, pulsar[istate], ichan, integration, baseline);
+	add_data (measurements, pulsar[istate], ichan, integration, variance);
 
       }
 
@@ -381,7 +381,7 @@ Pulsar::ReceptionCalibrator::add_data(vector<Calibration::MeasuredState>& bins,
 				      SourceEstimate& estimate,
 				      unsigned ichan,
 				      const Integration* data,
-				      Stokes< Estimate<float> >& baseline)
+				      Stokes<float>& variance)
 {
   unsigned nchan = data->get_nchan ();
 
@@ -395,12 +395,12 @@ Pulsar::ReceptionCalibrator::add_data(vector<Calibration::MeasuredState>& bins,
 
   Stokes<float> value = data->get_Stokes ( ichan, ibin );
 
-  // convert the value into an estimate, using the variance of the baseline
+  // convert the value into an estimate, using the variance supplied
   Stokes< Estimate<float> > stokes_estimate;
 
   for (unsigned ipol=0; ipol<stokes_estimate.size(); ipol++) {
     stokes_estimate[ipol].val = value[ipol];
-    stokes_estimate[ipol].var = baseline[ipol].var;
+    stokes_estimate[ipol].var = variance[ipol];
   }
 
   Estimate<float> invariant = det(stokes_estimate);

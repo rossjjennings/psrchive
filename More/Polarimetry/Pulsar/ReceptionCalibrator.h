@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ReceptionCalibrator.h,v $
-   $Revision: 1.34 $
-   $Date: 2003/09/03 09:29:37 $
+   $Revision: 1.35 $
+   $Date: 2003/09/03 13:52:10 $
    $Author: straten $ */
 
 #ifndef __ReceptionCalibrator_H
@@ -218,14 +218,13 @@ namespace Pulsar {
       \param estimate contains the bin number and a running mean estimate
       \param ichan the frequency channel
       \param data the Integration data
-      \param baseline the variance of the baseline is used as the variance
-                      in the MeasuredState. 
+      \param variance the variance to be assigned to the MeasuredState. 
     */
     void add_data (vector<Calibration::MeasuredState>& bins,
 		   SourceEstimate& estimate,
 		   unsigned ichan,
 		   const Integration* data,
-		   Stokes< Estimate<float> >& baseline);
+		   Stokes<float>& variance);
 
   private:
     //! Flag set after the solve method has been called
