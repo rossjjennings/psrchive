@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Estimate.h,v $
-   $Revision: 1.5 $
-   $Date: 2003/02/13 16:32:04 $
+   $Revision: 1.6 $
+   $Date: 2003/02/14 12:15:54 $
    $Author: straten $ */
 
 #ifndef __Estimate_h
@@ -95,9 +95,9 @@ class Estimate
 
   //! \f$ {\delta\over\delta x} \tan^-1 (x) = (1+x^2)^{-1} \f$
   friend const Estimate atan2 (const Estimate& s, const Estimate& c)
-  { Estimate tan = s/c; T d = 1.0 + tan.val*tan.val;
-    return Estimate (std::atan2 (s.val, c.val), tan.var/(d*d)); }
-
+  { T c2 = c.val*c.val;  T s2 = s.val*s.val;
+    return Estimate (std::atan2 (s.val, c.val), (c2*s.var+s2*c.var)/(c2+s2)); }
+  
   //! \f$ {\delta\over\delta x} x^\onehalf = \onehalf x^{-\onehalf} \f$
   friend const Estimate sqrt (const Estimate& u)
   { return Estimate (std::sqrt (u.val), 0.25*u.var/fabs(u.val)); }
