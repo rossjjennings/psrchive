@@ -5,7 +5,7 @@ AC_PREREQ(2.57)
 AC_INIT([PSRCHIVE],[3.0],[psrchive@astro.swin.edu.au])
 
 AC_CONFIG_AUX_DIR([config])
-AC_CONFIG_SRCDIR([utils/units/HeapTracked.C])
+AC_CONFIG_SRCDIR([utils/Makefile.am])
 
 AM_INIT_AUTOMAKE([subdir-objects])
 AC_DISABLE_SHARED
