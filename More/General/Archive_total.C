@@ -18,6 +18,9 @@ try {
   vector<unsigned> empty;
   Reference::To<Archive> copy = extract (empty);
 
+  copy->set_nchan( 1 );
+  copy->set_npol( 1 );
+
   if (verbose)
     cerr << "Pulsar::Archive::total adding " << get_nsubint()
          << "Integration::total copies" << endl;
