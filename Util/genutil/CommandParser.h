@@ -37,7 +37,7 @@ class CommandParser {
 
   //! derived types may add commands to the list using this method
   void add_command (int token, const char* command,
-		    const char* help, const char* detailed_help);
+		    const char* help, const char* detailed_help = 0);
 
   //! return a help string
   string help (const string& command);

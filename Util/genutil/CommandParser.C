@@ -122,17 +122,17 @@ string CommandParser::usage ()
 
 string CommandParser::help (const string& command)
 {
-  string help_str;
-
   if (command.empty()) {
     string help_str = "Available commands:\n\n";
 
     for (unsigned icmd=0; icmd < commands.size(); icmd++)
       help_str += commands[icmd].command + "\t " + commands[icmd].help + "\n";
 
-    help_str += "\nquit \t quit program\n";
-    help_str += "verbose\t toggle verbosity\n\n";
-    help_str += "Type \"help command\" to get detailed help on each command\n";
+    help_str += 
+      "\nquit \t quit program\n"
+      "verbose\t toggle verbosity\n\n"
+      "Type \"help command\" to get detailed help on each command\n";
+
     return help_str + "\n" + prompt;
   }
 
