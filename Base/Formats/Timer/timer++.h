@@ -1,7 +1,7 @@
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/Timer/timer++.h,v $
-   $Revision: 1.9 $
-   $Date: 2002/07/27 03:28:50 $
-   $Author: straten $ */
+   $Revision: 1.10 $
+   $Date: 2002/08/11 23:15:01 $
+   $Author: pulsar $ */
 
 #ifndef __TIMER_PLUSPLUS_H
 #define __TIMER_PLUSPLUS_H
@@ -56,9 +56,6 @@ namespace Timer {
 
   // sets the MJD in a mini struct
   void set_MJD (struct timer& hdr, const MJD& mjd);
-
-  // returns the poln_storage code from a timer struct
-  int poln_storage (const struct timer& hdr);
 
   // returns the number of polarizations
   int get_npol (const struct timer& hdr);
