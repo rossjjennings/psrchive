@@ -35,11 +35,11 @@ AC_DEFUN([SWIN_LIB_SLA],
   if test x"$have_sla" = xyes; then
     AC_MSG_RESULT(yes sla$sla_underscore)
     AC_DEFINE([HAVE_SLA], [1], [Define to 1 if you have the SLA library])
-    sla_def="\b(name,NAME) name"
+    sla_def="name"
     if test x"$sla_underscore" != x; then
       sla_def=$sla_def" ## "$sla_underscore
     fi
-    AC_DEFINE_UNQUOTED([F77_SLA], $sla_def,
+    AC_DEFINE_UNQUOTED([F77_SLA(name,NAME)],$sla_def,
                        [Fortran name mangling in libsla.a])
     [$1]
   else
