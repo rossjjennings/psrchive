@@ -279,81 +279,52 @@ int galactic (double ra, double dec, double* gl, double* gb)
    ********************************************************************** */
 
 int telescope_coords (int telescope, float* latitude, 
-		                     float* longitude, float* elevation) {
+		                     float* longitude, float* elevation)
+{
+  float latd=-999, longd=-999, elev=-1e9;
+  
+  switch (telescope) {
 
-  if (latitude != NULL) {
-    switch (telescope) {
-    case 2:
-      /* ATCA Narrabri */
-      *latitude = -30.31;
-      break;
-    case 3:
-      /* Arecibo */
-      *latitude = 18.345;
-    case 6:
-      /* Tidbinbilla */
-      *latitude = -35.4;
-      break;
-    case 7:
-      /* Parkes */
-      *latitude = -33.0;
-      break;
-    default:
-      fprintf (stderr, "telescope_coords: latitude unknown for code %d\n",
-	       telescope);
-      return -1;
-    }
+  case 2:
+    /* ATCA Narrabri */
+    latd = -30.31;
+    longd = 149.57;
+    elev = 217.0;
+    break;
+
+  case 3:
+    /* Arecibo */
+    latd = 18.345;
+    longd = 293.247;
+    elev = 496.0;
+    break;
+    
+  case 6:
+    /* Tidbinbilla */
+    latd = -35.4;
+    longd = 148.98;
+    elev = 670.0;
+    break;
+
+  case 7:
+    /* Parkes */
+    latd = -33.0;
+    longd = 148.2617;
+    elev = 392.0;
+    break;
+
+  default:
+    fprintf (stderr, "telescope_coords: latitude unknown for code %d\n",
+	     telescope);
+    return -1;
   }
 
-  if (longitude != NULL) {
-    switch (telescope) {
-    case 2:
-      /* ATCA Narrabri */
-      *longitude = 149.57;
-      break;
-    case 3:
-      /* Arecibo */
-      *longitude = 293.247;
-    case 6:
-      /* Tidbinbilla */
-      *longitude = 148.98;
-      break;
-    case 7:
-      /* Parkes */
-      *longitude = 148.2617;
-      break;
-
-    default:
-      fprintf (stderr, "telescope_coords: longitude unknown for code %d\n",
-	       telescope);
-      return -1;
-    }
-  }
-
-  if (elevation != NULL) {
-    switch (telescope) {
-    case 2:
-      /* ATCA Narrabri */
-      *elevation = 217.0;
-      break;
-    case 3:
-      /* Arecibo */
-      *elevation = 496.0;
-    case 6:
-      /* Tidbinbilla */
-      *elevation = 670.0;
-      break;
-    case 7:
-      /* Parkes */
-      *elevation = 392.0;
-      break;
-
-    default:
-      fprintf (stderr, "telescope_coords: elevation unknown for code %d\n",
-	       telescope);
-      return -1;
-    }
-  }
+  if (latitude)
+    *latitude = latd;
+  if (longitude)
+    *longitude = longd;
+  if (elevation)
+    *elevation = elev;
 
   return 0;
 }
