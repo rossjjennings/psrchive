@@ -1683,6 +1683,8 @@ try {
     
   // Move to the Processing History HDU and set more information
   
+  ((Pulsar::FITSArchive*)(this))->update_history();
+  
   unload_hist (myfptr);
   
   if (verbose) {
@@ -1809,6 +1811,53 @@ catch (Error& error) {
 // //////////////////////////////////////////
 // //////////////////////////////////////////
 
+void Pulsar::FITSArchive::update_history()
+{
+  // Construct the new final row
+  history.add_blank_row();
+  
+  time_t myt;
+  time(&myt);
+  history.get_last().date_pro = ctime(&myt);
+  history.get_last().proc_cmd = history.get_command_str();
+  
+  if (get_state() == Signal::PPQQ)
+    history.get_last().pol_type = "XXYY";
+  else if (get_state() == Signal::Stokes)
+    history.get_last().pol_type = "STOKE";
+  else if (get_state() == Signal::Coherence)
+    history.get_last().pol_type = "XXYYCRCI";
+  else if (get_state() == Signal::Intensity)
+    history.get_last().pol_type = "INTEN";
+  else if (get_state() == Signal::Invariant)
+    history.get_last().pol_type = "INVAR";
+  else
+    history.get_last().pol_type = "UNKNOWN";
+  
+  history.get_last().npol = get_npol();
+  history.get_last().nbin = get_nbin();
+  history.get_last().nbin_prd = get_nbin();
+  history.get_last().tbin = get_Integration(0)->get_folding_period() / get_nbin();
+  history.get_last().ctr_freq = get_centre_frequency();
+  history.get_last().nchan = get_nchan();
+  history.get_last().chanbw = get_bandwidth() / float(get_nchan());
+  history.get_last().par_corr = get_parallactic_corrected();
+  history.get_last().rm_corr = get_ism_rm_corrected();
+  history.get_last().dedisp = get_dedispersed();
+  
+  if (get_poln_calibrated())
+    history.get_last().cal_mthd = history.get_cal_mthd();
+  else
+    history.get_last().cal_mthd = "OFF";
+  
+  if (get_flux_calibrated())
+    history.get_last().sc_mthd = history.get_sc_mthd();
+  else
+    history.get_last().sc_mthd = "OFF";
+  
+  history.get_last().cal_file = history.get_cal_file();
+  history.get_last().rfi_mthd = history.get_rfi_mthd();;
+}
 
 // ////////////////////////////////////////////////////////////////////
 // ////////////////////////////////////////////////////////////////////
@@ -2047,7 +2096,7 @@ void Pulsar::FITSArchive::unload_integration (int row,
 
 string Pulsar::FITSArchive::Agent::get_description () 
 {
-  return "PSRFITS version 1.3";
+  return "PSRFITS version 1.4";
 }
 
 // /////////////////////////////////////////////////////////////////////

@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/PSRFITS/Pulsar/FITSArchive.h,v $
-   $Revision: 1.7 $
-   $Date: 2003/07/26 10:23:30 $
+   $Revision: 1.8 $
+   $Date: 2003/08/11 06:08:32 $
    $Author: ahotan $ */
 
 #include <fitsio.h>
@@ -74,7 +74,10 @@ namespace Pulsar {
 
     //! Return the number of extensions available
     unsigned get_nextension () const;
-
+    
+    //! Add a new row to the history, reflecting the current state
+    void update_history ();
+    
     //! Return a pointer to the specified extension
     const Extension* get_extension (unsigned iextension) const;
 
