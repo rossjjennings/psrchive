@@ -96,10 +96,10 @@ int main (int argc, char *argv[]) {
       break;
     case 'V':
       verbose = true;
-      Pulsar::Archive::set_verbosity(1);
+      Pulsar::Archive::set_verbosity(3);
       break;
     case 'i':
-      cout << "$Id: paz.C,v 1.21 2004/06/09 02:20:57 sord Exp $" << endl;
+      cout << "$Id: paz.C,v 1.22 2004/09/27 15:45:12 ahotan Exp $" << endl;
       return 0;
     case 'D':
       display = true;
