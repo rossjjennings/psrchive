@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Integration.h,v $
-   $Revision: 1.5 $
-   $Date: 2002/04/11 15:07:23 $
+   $Revision: 1.6 $
+   $Date: 2002/04/11 15:11:31 $
    $Author: straten $ */
 
 /*
@@ -17,7 +17,7 @@
 #include <vector>
 
 #include "MJD.h"
-#include "psrchive_types.h"
+#include "ArchiveTypes.h"
 
 class profile;
 

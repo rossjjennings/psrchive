@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Archive.h,v $
-   $Revision: 1.11 $
-   $Date: 2002/04/10 08:26:13 $
+   $Revision: 1.12 $
+   $Date: 2002/04/11 15:11:31 $
    $Author: straten $ */
 
 /*! \mainpage 
@@ -13,8 +13,9 @@
   C++ classes that may be used in the storage, manipulation, and
   analysis of the observational data used in pulsar experiments.
   Various levels of functionality are organized in a heirarchy of
-  inheritance with the base classes implementing a minimal set of
-  general, flexible routines.
+  inheritance; with the base classes implementing a minimal set of
+  general, flexible routines.  This work is still very much under
+  construction.
  
   \section profiles Pulse Profiles
  
@@ -123,7 +124,7 @@
 #include <string>
 
 #include "MJD.h"
-#include "psrchive_types.h"
+#include "ArchiveTypes.h"
 
 namespace Tempo {
   class toa;

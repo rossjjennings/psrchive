@@ -1,15 +1,15 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Profile.h,v $
-   $Revision: 1.5 $
-   $Date: 2002/04/11 14:21:19 $
+   $Revision: 1.6 $
+   $Date: 2002/04/11 15:11:31 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Profile_h
 #define __Pulsar_Profile_h
 
 #include "toa.h"
-#include "psrchive_types.h"
+#include "ArchiveTypes.h"
 
 namespace Pulsar {
 
