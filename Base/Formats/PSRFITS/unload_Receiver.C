@@ -11,14 +11,14 @@ void Pulsar::FITSArchive::unload (fitsfile* fptr, const Receiver* ext)
   char* comment = 0;
 
   fits_update_key (fptr, TSTRING, "FRONTEND", 
-  		   const_cast<char*>(name.c_str()), comment, &status);
+  		   const_cast<char*>(ext->name.c_str()), comment, &status);
   
   auto_ptr<char> tempstr ( new char[FLEN_VALUE] );
   
-  if (basis == Signal::Linear)
+  if (ext->basis == Signal::Linear)
     strcpy (tempstr.get(), "LIN");
   
-  else if (basis == Signal::Circular)
+  else if (ext->basis == Signal::Circular)
     strcpy (tempstr.get(), "CIRC");
   
   else
@@ -31,7 +31,7 @@ void Pulsar::FITSArchive::unload (fitsfile* fptr, const Receiver* ext)
   degrees = ext->X_offset.getDegrees();
   fits_update_key (fptr, TFLOAT, "XPOL_ANG", &degrees, comment, &status);
 
-  switch (basis) {
+  switch (ext->basis) {
   case Receiver::Feed:
     strcpy (tempstr.get(), "FA"); break;
   case Receiver::Celestial:
