@@ -12,12 +12,6 @@ extern "C" {
  void shiftbyfft_(float *, int *, float *);
 }
 
-/*! 
-  fractional pulse phase window (duty cycle) used to calculate the
-  transitions of the pulsed calibrator square wave.  This variable is
-  used by: Pulsar::Profile::find_cal_transition
- */
-float Pulsar::Profile::cal_transition_window = 0.15;
 
 /*! 
   fractional pulse phase window used by default to calculate the
@@ -83,7 +77,8 @@ void Pulsar::Profile::rotate (double phase)
 void Pulsar::Profile::zero()
 {
   weight = 0;
-  for (int k = 0; k < nbin; k++) amps[k] = 0;
+  for (int ibin = 0; ibin < nbin; ibin++)
+    amps[ibin] = 0;
 }
  
 void Pulsar::Profile::square_root()
@@ -150,11 +145,13 @@ float Pulsar::Profile::max (int istart, int iend) const
 {
   nbinify (istart, iend, nbin);
 
-  float highest = amps[istart];
-  for (int ibin=istart; ibin < iend; ibin++)
-    if (amps[ibin] > highest)
-      highest=amps[ibin];
-
+  float val = 0;
+  float highest = amps[istart%nbin];
+  for (int ibin=istart; ibin < iend; ibin++) {
+    val = amps[ibin%nbin];
+    if (val > highest)
+      highest = val;
+  }
   return highest;
 }
 
@@ -162,43 +159,49 @@ float Pulsar::Profile::min (int istart, int iend) const
 {
   nbinify (istart, iend, nbin);
 
-  float lowest = amps[istart];
-  for (int ibin=istart; ibin < iend; ibin++)
-    if (amps[ibin] < lowest)
-      lowest=amps[ibin];
+  float val = 0;
+  float lowest = amps[istart%nbin];
+  for (int ibin=istart; ibin < iend; ibin++) {
+    val = amps[ibin%nbin];
+    if (val < lowest)
+      lowest = val;
+  }
 
   return lowest;
 }
 
-float Pulsar::Profile::sum (int istart, int iend) const
+double Pulsar::Profile::sum (int istart, int iend) const
 {
   nbinify (istart, iend, nbin);
 
   double tot = 0;
   for (int ibin=istart; ibin < iend; ibin++)
-    tot += (double) amps[(ibin+nbin)%nbin];
+    tot += (double) amps[ibin%nbin];
 
-  return (float) tot;
+  return tot;
 }
 
-float Pulsar::Profile::mean (int istart, int iend) const
-{
-  return sum (istart, iend) / float(nbin);
-}
-
-float Pulsar::Profile::rms (int istart, int iend) const
+double Pulsar::Profile::mean (int istart, int iend) const
 {
   nbinify (istart, iend, nbin);
+  int totbin = iend - istart;
+  return sum (istart, iend) / double(totbin);
+}
+
+double Pulsar::Profile::rms (int istart, int iend) const
+{
+  nbinify (istart, iend, nbin);
+  int totbin = iend - istart;
 
   double sumsq = 0.0;
   float amp, mean_amp = mean (istart, iend);
 
   for (int ibin=istart; ibin < iend; ibin++) {
-    amp = amps[ibin] - mean_amp;
+    amp = amps[ibin%nbin] - mean_amp;
     sumsq += amp*amp;
   }
 
-  return sqrt(sumsq/nbin);
+  return sqrt(sumsq/totbin);
 }
 
 double Pulsar::Profile::mean (float phase, float duty_cycle,
@@ -310,81 +313,7 @@ float Pulsar::Profile::find_max_phase (float duty_cycle) const
 }
 
 
-/*! Finds the power transitions in a pulsed calibrator profile, which
-    is usually a square wave with 0.5 duty cycle.  Uses a window of
-    width given by "Pulsar::Profile::cal_transition_window" to detect
-    the the transition from high-to-low and vice-versa.
-
-    \retval hightolow bin at which the cal turns off (from left to right)
-    \retval lowtohigh bin at which the cal turns on (from left to right)
-    \retval width     number of bins in window used to find transition
-*/
-void Pulsar::Profile::find_cal_transitions (int& hightolow, int& lowtohigh,
-					    int& width) const
-{
-  int buffer = int (0.5 * cal_transition_window * float(nbin));
-  int box = 2*buffer+1;
-  float norm = double (box);
-
-  width = buffer;
-
-  if (verbose)
-    cerr << "Pulsar::Profile::find_cal_transitions nbin="<<nbin<<" box="<<box << endl;
-  int ibin = 0;
-  double avg = 0.0;
-  for (ibin=0;ibin<nbin;++ibin)
-    avg+=amps[ibin];
-  avg /= float(nbin);
-
-  double running_mean=0;
-  for (ibin=-buffer; ibin<=buffer; ++ibin)
-    running_mean += amps[(ibin+nbin)%nbin];
-  running_mean /= norm;
-
-  ibin += nbin;
-  if (running_mean>avg) {
-    while (running_mean>avg) {
-      running_mean += (amps[ibin%nbin] - amps[(ibin-box)%nbin])/norm;
-      ibin ++;
-    }
-    hightolow = (ibin-buffer-1)%nbin;
-    while(running_mean<=avg){
-      running_mean += (amps[ibin%nbin] - amps[(ibin-box)%nbin])/norm;
-      ibin ++;
-    }
-    lowtohigh = (ibin-buffer-1)%nbin;
-  }
-  else {
-    while(running_mean<=avg){
-      running_mean += (amps[ibin%nbin] - amps[(ibin-box)%nbin])/norm;
-      ibin ++;
-    }
-    lowtohigh = (ibin-buffer-1)%nbin;
-    while(running_mean>avg){
-      running_mean += (amps[ibin%nbin] - amps[(ibin-box)%nbin])/norm;
-      ibin ++;
-    }
-    hightolow = (ibin-buffer-1)%nbin;
-  }      
-  if (verbose) {
-    cerr << "Pulsar::Profile::find_cal_transitions"
-      " - high to low transition in bin " << hightolow << "/"<<nbin << endl
-	 << "Pulsar::Profile::find_cal_transitions"
-      " - low to high transition in bin " << lowtohigh << "/"<<nbin << endl;
-  }
-
-  /* this test is too restrictive when nbin is small
-  if ((hightolow-lowtohigh+nbin)%nbin > (1+cal_transition)*(nbin/2) ||
-     (hightolow-lowtohigh+nbin)%nbin < (1-cal_transition)*(nbin/2)) {
-    string error ("Pulsar::Profile::find_cal_transitions ERROR "
-		  "could not detect the cal pulse");
-    cerr << error << endl;
-    throw error;
-  } */
-}
-
-
-//! Returns the r.m.s. at the minimum of the profile
+//! Returns the r.m.s. at the 
 double Pulsar::Profile::sigma (float phase, float duty_cycle) const
 {
   int start_bin = int ((phase - 0.5 * duty_cycle) * nbin);
@@ -392,102 +321,37 @@ double Pulsar::Profile::sigma (float phase, float duty_cycle) const
 
   return rms (start_bin, stop_bin);
 }
- 
 
-/*****************************************************************************/
-float Pulsar::Profile::snr (float duty_cycle) const
+/////////////////////////////////////////////////////////////////////////////
+//
+// Pulsar::Profile::snr
+//
+/*!  
+  Using Profile::find_peak_edges(), this function finds 
+ */
+float Pulsar::Profile::snr() const
 {
-  float min_phase = find_min_phase (duty_cycle);
+  // find the mean and the r.m.s. of the baseline
+  float min_ph = find_min_phase ();
+  double min_avg = mean (min_ph);
+  double min_rms = sigma (min_ph);
 
-  float rms = sigma (min_phase, duty_cycle);
-  double maxval = max();
-  double min= mean (min_phase, duty_cycle);
+  // find the total power under the pulse
+  int rise = 0, fall = 0;
+  find_peak_edges (rise, fall);
 
-  double signal = maxval - min;
+  double power = sum (rise, fall);
 
-  if (verbose)
-    cerr << "Pulsar::Profile::snr - max " << maxval << " min " << min << " signal " 
-         << signal << " rms " << rms << " snr " << signal/rms << endl;
+  // subtract the total power due to the baseline
+  power -= min_avg * double (fall - rise);
 
-  if(rms>0.0)
-    return(signal/rms);
-  else
-    return (0.0);			 
+  // divide by the sqrt of the number of bins
+  power /= sqrt (fall-rise);
+
+  return power/min_rms;
 }
 
 #if 0
-/*****************************************************************************/
-// This routine works out the signal-to-noise ratio of a profile
-// by calculating the baseline, removing it, summing all the flux
-// above the baseline and dividing it by the rms and the square root
-// of the number of bins the profile remains wing_sigma above the
-// baseline.
-//
-float Pulsar::Profile::snr(float baseline_width, float wing_sigma) const
-{
-
-  int i;
-  float min_phase;
-  float min_amp = this->min(&min_phase, baseline_width);
-  float rms = this->sigma(min_phase, baseline_width);
-  if(rms>0.0){
-    // Form cumulative sum
-    float * cumu = new float[nbin*2];
-    cumu[0] = amps[0] - min_amp;
-    for (i=1;i<2*nbin;i++) cumu[i]=cumu[i-1]+amps[i % nbin]-min_amp;
-
-
-    // work out where cumulative sum falls below 10% of sum for the
-    // last time, and where it drops below 90% for the first time.
-    
-    int iten = 0;
-    int ininety = nbin-1;
- 
-    for (i=0;i<nbin;i++)
-      if (cumu[i]<wing_sigma * cumu[nbin-1]) 
-	iten = i;
-    for (i=nbin-1;i>=0;i--) 
-      if (cumu[i]>(1.0-wing_sigma) * cumu[nbin-1]) 
-	ininety = i;
-
- 
-    // work out where cumulative sum falls below 10% of sum for the
-    // last time, and where it drops below 90% for the first time this
-    // time starting half way along.
-    
-    int iten2,ininety2;
-    int izero = iten2 = nbin/2;
-    int ifull = ininety2 = nbin-1+nbin/2;
-    
-    for (i=izero;i<ifull;i++)
-      if (cumu[i]-cumu[izero]<wing_sigma * (cumu[ifull]-cumu[izero]))
-	iten2 = i;
-    for (i=ifull;i>=izero;i--)
-      if (cumu[i]-cumu[izero]>(1.0-wing_sigma) * (cumu[ifull]-cumu[izero]))
-	ininety2 = i;
- 
-    //  printf("Signal to noise ratio is %f   duty cycle is %5.2f \%\n",
-    //       (cumu[ininety2]-cumu[iten2])/sqrt(ininety2-iten2+1),
-    //        (float) (ininety2-iten2)/nbin * 100.0);
-    // Decide which one is better - ie narrower.
-    // rte & wvs -- in noisy data ininety can by < iten! In this case,
-    // panic! and return 0.
-    float ratio=0.0;
-    if (ininety2-iten2 < ininety-iten && ininety2 >= iten2) 
-      ratio = (cumu[ininety2]-cumu[iten2])/sqrt(ininety2-iten2+1)/rms;
-    else if (ininety >= iten)
-      ratio = (cumu[ininety]-cumu[iten])/sqrt(ininety-iten+1)/rms;
-    else
-      ratio=0.0;
-    delete [] cumu;
-
-    return ratio;
-  }
-  else 
-    return (0.0);
-}
-
-
 /**************************************************************/
 /* An adaption of the snr funtion above                       */
 /* Instead of calculating the rms using the sigma() function  */
