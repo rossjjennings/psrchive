@@ -1,5 +1,5 @@
 #include "Pulsar/ReceptionCalibrator.h"
-#include "Pulsar/PolnCalibrator.h"
+#include "Pulsar/PolarCalibrator.h"
 #include "Pulsar/Integration.h"
 #include "Pulsar/Archive.h"
 
@@ -148,6 +148,12 @@ unsigned Pulsar::ReceptionCalibrator::get_nstate () const
 void Pulsar::ReceptionCalibrator::add_observation (const Archive* data)
 {
   check_ready ("Pulsar::ReceptionCalibrator::add_observation", false);
+
+  if (data->get_type() == Signal::PolnCal) {
+    Reference::To<PolnCalibrator> p = new PolarCalibrator (data);
+    add_PolnCalibrator (p);
+    return;
+  }
 
   if (!uncalibrated)
     initial_observation (data);
