@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Jones.h,v $
-   $Revision: 1.21 $
-   $Date: 2004/10/26 13:06:19 $
+   $Revision: 1.22 $
+   $Date: 2004/10/26 13:08:37 $
    $Author: straten $ */
 
 #ifndef __Jones_H
@@ -168,12 +168,12 @@ const Jones<T>& Jones<T>::identity ()
 //! Enable the Jones class to be passed to certain template functions
 template<typename T> struct DatumTraits< Jones<T> >
 {
-  ElementTraits<complex<T>> element_traits;
+  ElementTraits< std::complex<T> > element_traits;
   static inline unsigned ndim () { return 4; }
-  static inline complex<T>& element (Jones<T>& t, unsigned idim) 
-  { return t[idim]; }
-  static inline const complex<T>& element (const Jones<T>& t, unsigned idim)
-  { return t[idim]; }
+  static inline std::complex<T>& element (Jones<T>& t, unsigned i) 
+  { return t[i]; }
+  static inline const std::complex<T>& element (const Jones<T>& t, unsigned i)
+  { return t[i]; }
 };
 
 //! Multiply another Jones<T> instance into this one (this=this*j)
