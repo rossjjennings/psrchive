@@ -49,17 +49,20 @@ void Tempo::fit (const psrephem& model, vector<toa>& toas,
   for (iarr=0; iarr < toas.size(); iarr++)  {
     
     if (toas[iarr].get_state() < min_state)
-      if (toas[iarr].get_format() != Tempo::toa::Command)
+      if ((toas[iarr].get_format() != Tempo::toa::Command) &&
+	  (toas[iarr].get_format() != Tempo::toa::Comment))
 	continue;
     
-    if (toas[iarr].get_format() != Tempo::toa::Command)
+    if ((toas[iarr].get_format() != Tempo::toa::Command) &&
+	(toas[iarr].get_format() != Tempo::toa::Comment))
       if (track && !toas[iarr].resid.valid) {
 	cerr << "Tempo::fit invalid residual for toa #" << unloaded + 1
 	     << " ... tracking disabled" << endl;
 	track = false;
       }
     
-    if (track && (toas[iarr].get_format() != Tempo::toa::Command)) {
+    if (track && ((toas[iarr].get_format() != Tempo::toa::Command) &&
+		  (toas[iarr].get_format() != Tempo::toa::Comment))) {
       
       if (unloaded == 0)
 	sumphase = toas[iarr].resid.turns;
@@ -70,7 +73,7 @@ void Tempo::fit (const psrephem& model, vector<toa>& toas,
 	 This is equivalent to standard tempo only: we can
 	 simulate tracking mode by making sure what is plotted is
 	 how tempo will interpret it. 
-	 */
+      */
       
       double current_phase = toas[iarr].resid.turns;
       float  sumout = 0.0;
@@ -124,17 +127,19 @@ void Tempo::fit (const psrephem& model, vector<toa>& toas,
   fortopen_ (&r2flun, tempo_res, (int) strlen(tempo_res));
 
   for (iarr=0; iarr < toas.size(); iarr++)  {
-
-    if (toas[iarr].get_state() < min_state)
-      continue;
-
-    if (toas[iarr].get_format() == Tempo::toa::Command) {
+    
+    if ((toas[iarr].get_format() == Tempo::toa::Command) ||
+	(toas[iarr].get_format() == Tempo::toa::Comment)) {
       unloaded --;
       continue;
     }
     
+    if (toas[iarr].get_state() < min_state)
+      continue;
+    
     if (unloaded == 0)
       throw Error (InvalidParam, "Tempo::fit error attempting to read more than unloaded");
+
     if (toas[iarr].resid.load (r2flun) != 0)
       throw Error (FailedCall, "Tempo::fit error reading residual file");
     unloaded --;

@@ -95,10 +95,13 @@ int Tempo::toa::Parkes_load (const char* instring)
 
   destroy ();
 
-  if ((instring[0]=='C') || (instring[0]=='c'))
+  if ((instring[0]=='C') || (instring[0]=='c')) {
     state = Deleted;
-
-  return parkes_parse (instring+25);
+    return parkes_parse (instring+27);
+  }
+  else {
+    return parkes_parse (instring+26);
+  }
 }
 
 int Tempo::toa::parkes_parse (const char* instring)
@@ -111,6 +114,18 @@ int Tempo::toa::parkes_parse (const char* instring)
     if (verbose) cerr << "Tempo::toa::parkes_parse(char*) Error scan:"
 		      << scanned << "/5 '" << instring << "'" << endl;
     return -1;
+  }
+  if (state == Deleted && scanned < 5) {
+    // The TOA line is probably a comment
+    frequency = 0.0;
+    arrival.Construct("0.0");
+    phs = 0.0;
+    error = 0.0;
+    telescope = 'z';
+    auxinfo += instring;
+    auxinfo = auxinfo.substr(0,auxinfo.length()-1);
+    format = Comment;
+    return 0;
   }
   if (arrival.Construct(datestr) < 0)  {
     if (verbose) cerr << "Tempo::toa::parkes_parse(char*) Error MJD parsing '" 
@@ -134,18 +149,23 @@ string Tempo::toa::Psrclock_unload () const
 
 int Tempo::toa::Parkes_unload (char* outstring) const
 {
-  if (state == Deleted)
+  if (state == Deleted) {
     outstring[0]='C';
-  else
+    outstring[1]=' ';
+    if (auxinfo.length())
+      strcpy (outstring+2, auxinfo.c_str()); 
+    for (int ic=auxinfo.length()+2; ic<27; ic++)
+      outstring [ic] = ' ';
+    return parkes_out (outstring+26);
+  }
+  else {
     outstring[0]=' ';
-
-  if (auxinfo.length())
-    strcpy (outstring+1, auxinfo.c_str());
-
-  for (int ic=auxinfo.length()+1; ic<26; ic++)
-    outstring [ic] = ' ';
-
-  return parkes_out (outstring+25);
+    if (auxinfo.length())
+      strcpy (outstring+1, auxinfo.c_str());
+    for (int ic=auxinfo.length()+1; ic<26; ic++)
+      outstring [ic] = ' ';
+    return parkes_out (outstring+25);
+  }
 }
 
 int Tempo::toa::parkes_out (char* outstring) const
@@ -242,21 +262,39 @@ int Tempo::toa::Psrclock_load (const char* instring)
   destroy ();
 
   string whitespace (" \n\t");
-
-  string parse = instring + 1;
-
-  auxinfo = stringtok (&parse, whitespace);
-    //+ " "+ stringtok (&parse, whitespace) + " " + stringtok (&parse, whitespace);
-
-  if ((instring[0]=='C') || (instring[0]=='c'))
+  
+  string parse;
+  if (instring[0] == 'C' || instring[0] == 'c') {
+    parse = instring + 2;
     state = Deleted;
-
+  }
+  else {
+    parse = instring + 1;
+  }  
+  
+  if (parse.length() < 25) {
+    auxinfo = parse;
+    auxinfo = auxinfo.substr(0,auxinfo.length()-1);
+    format = Comment;
+    cerr << "Parsing a comment" << endl;
+    return 0;
+  }
+  else
+    auxinfo = parse.substr(0,24);
+  
   if (verbose)
-    cerr << "Tempo::toa::Psrclock_load Parkes format = '" << parse << "'" << endl;
-
-  if (parkes_parse (instring+25) < 0)
-    return -1;
-
+    cerr << "Tempo::toa::Psrclock_load Parkes format = '" 
+	 << parse << "'" << endl;
+  
+  if (state == Deleted) {
+    if (parkes_parse (instring+26) < 0)
+      return -1;
+  }
+  else {
+    if (parkes_parse (instring+25) < 0)
+      return -1;
+  }
+  
   // LOAD AUX
   format = Psrclock;
 
@@ -269,22 +307,26 @@ int Tempo::toa::Psrclock_load (const char* instring)
 
 int Tempo::toa::Psrclock_unload (char* outstring) const
 {
-  if (state == Deleted)
+  if (state == Deleted) {
     outstring[0]='C';
-  else
+    outstring[1]=' ';
+    sprintf (outstring+2, "%s", auxinfo.c_str());
+    for (int ic=auxinfo.length()+2; ic<27; ic++)
+      outstring [ic] = ' ';
+    return parkes_out (outstring + 26);
+  }
+  else {
     outstring[0]=' ';
-
-  sprintf (outstring+1, "%s", auxinfo.c_str());
-
-  for (int ic=auxinfo.length()+1; ic<26; ic++)
-    outstring [ic] = ' ';
-
-  return parkes_out (outstring + 25);
+    sprintf (outstring+1, "%s", auxinfo.c_str());
+    for (int ic=auxinfo.length()+1; ic<26; ic++)
+      outstring [ic] = ' ';
+    return parkes_out (outstring + 25);
+  }
 }
 
 int Tempo::toa::Psrclock_unload (FILE* outstream) const
 {
-  sizebuf (81 + auxinfo.length());
+  sizebuf (82 + auxinfo.length());
   Psrclock_unload (buffer);
   fprintf (outstream, "%s\n", buffer);
   return 0;
@@ -323,6 +365,22 @@ int Tempo::toa::Command_unload (FILE* outstream) const
   return 0;
 }
 
+int Tempo::toa::Comment_unload (char* outstring) const
+{
+  if ( sprintf(outstring, "C %s", auxinfo.c_str()) > 1 )
+    return 0;
+  else
+    return -1;
+}
+
+int Tempo::toa::Comment_unload (FILE* outstream) const
+{
+  sizebuf (82 + auxinfo.length());
+  Comment_unload (buffer);
+  fprintf (outstream, "%s\n", buffer);
+  return 0;
+}
+
 // ////////////////////////////////////////////////////////////////////////
 //
 // generic load,unload - load/unload TOA in appropriate format
@@ -345,11 +403,11 @@ int Tempo::toa::load (const char* instring)
   else if ( isdigit( instring[0] ) )
     return Princeton_load( instring );
   
-  else if ( instring[1] != ' ' )
-    return Psrclock_load( instring );
-  
   else
-    return Parkes_load( instring );
+    return Psrclock_load( instring );
+
+  //else
+  //  return Parkes_load( instring );
 }
 
 // Return values:
@@ -397,6 +455,9 @@ int Tempo::toa::unload (FILE* outstream, Format fmt) const
     fmt = format;
 
   switch (fmt) {
+  case Comment:
+    if (verbose) cerr << "Unloading Comment Format" << endl;
+    return Comment_unload (outstream);
   case Command:
     if (verbose) cerr << "Unloading Command Format" << endl;
     return Command_unload (outstream);
@@ -421,6 +482,9 @@ int Tempo::toa::unload (char* outstring, Format fmt) const
     fmt = format;
 
   switch (fmt) {
+  case Comment:
+    if (verbose) cerr << "Unloading Comment Format" << endl;
+    return Comment_unload (outstring);
   case Command:
     if (verbose) cerr << "Unloading Command Format" << endl;
     return Command_unload (outstring);
@@ -448,6 +512,8 @@ int Tempo::toa::unload (char* outstring, Format fmt) const
 int Tempo::toa::Tempo_unload (FILE* outstream) const
 {
   switch (format) {
+  case Comment:
+    return Comment_unload (outstream);  
   case Command:
     return Command_unload (outstream);
   case Parkes:
@@ -466,6 +532,8 @@ int Tempo::toa::Tempo_unload (FILE* outstream) const
 int Tempo::toa::Tempo_unload (char* outstring) const
 {
   switch (format) {
+  case Comment:
+    return Comment_unload (outstring);
   case Command:
     return Command_unload (outstring);
   case Parkes:

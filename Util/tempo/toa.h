@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/toa.h,v $
-   $Revision: 1.15 $
-   $Date: 2003/06/30 04:53:39 $
+   $Revision: 1.16 $
+   $Date: 2003/11/06 07:09:20 $
    $Author: ahotan $ */
 
 #ifndef __TOA_H
@@ -36,7 +36,8 @@ namespace Tempo {
   public:
     
     enum Format { 
-      Unspecified, 
+      Unspecified,
+      Comment,
       Princeton, 
       Parkes, 
       ITOA, 
@@ -174,7 +175,10 @@ namespace Tempo {
     int    Command_load      (const char* instring);
     int    Command_unload    (FILE* outstream) const;
     int    Command_unload    (char* outstring) const;
-    
+
+    int    Comment_unload    (FILE* outstream) const;
+    int    Comment_unload    (char* outstring) const;
+
     int    Tempo_unload     (FILE* outstream) const;
     int    Tempo_unload     (char* outstring) const;
     
