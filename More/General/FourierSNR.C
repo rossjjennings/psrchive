@@ -7,7 +7,7 @@
 
 Pulsar::FourierSNR::FourierSNR ()
 {
-  baseline_extent = 0.5;
+  baseline_extent = 0.45;
 }
 
 //! Set the fractional number of high frequencies used to calculate noise
@@ -53,13 +53,23 @@ float Pulsar::FourierSNR::get_snr (const Profile* profile)
 
   double mean_noise = noise_power/noise_count;
 
-  if (Profile::verbose)
-    cerr << "Pulsar::FourierSNR::get_snr total_power=" << total_power
-	 << " mean_noise=" << mean_noise << endl;
-
   double pulse_power = total_power - mean_noise * total_count;
 
-  return sqrt(pulse_power/mean_noise);
+  if (Profile::verbose)
+    cerr << "Pulsar::FourierSNR::get_snr power\n"
+      "  total=" << total_power << endl <<
+      "  mean_noise=" << mean_noise << endl <<
+      "  pulse=" << pulse_power << endl;
+
+  if (pulse_power <= 0)
+    return 0;
+
+  double snr = sqrt(pulse_power/mean_noise);
+
+  if (Profile::verbose)
+    cerr << "Pulsar::FourierSNR::get_snr S/N=" << snr << endl;
+
+  return snr;
 
 }    
 
