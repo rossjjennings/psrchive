@@ -1,20 +1,20 @@
-#include "Calibration/ScalarHypSine.h"
+#include "MEPL/ScalarHypSine.h"
 #include <math.h>
 
 //! Return the name of the class
-string Calibration::ScalarHypSine::get_name () const
+string Model::ScalarHypSine::get_name () const
 {
   return "ScalarHypSine";
 }
 
 //! The function
-double Calibration::ScalarHypSine::function (double x) const
+double Model::ScalarHypSine::function (double x) const
 {
   return sinh(x); 
 }
 
 //! And its first derivative
-double Calibration::ScalarHypSine::dfdx (double x) const
+double Model::ScalarHypSine::dfdx (double x) const
 { 
   return cosh(x);
 }

@@ -1,16 +1,16 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/ScalarAbsolute.h,v $
-   $Revision: 1.1 $
-   $Date: 2004/11/22 11:17:16 $
+   $Revision: 1.2 $
+   $Date: 2004/11/22 16:00:09 $
    $Author: straten $ */
 
-#ifndef __Calibration_ScalarAbsolute_H
-#define __Calibration_ScalarAbsolute_H
+#ifndef __Model_ScalarAbsolute_H
+#define __Model_ScalarAbsolute_H
 
-#include "Calibration/UnaryScalar.h"
+#include "MEPL/UnaryScalar.h"
 
-namespace Calibration {
+namespace Model {
 
   //! The absolute value of a Scalar function
   class ScalarAbsolute : public UnaryScalar
@@ -32,7 +32,7 @@ namespace Calibration {
 
     // ///////////////////////////////////////////////////////////////////
     //
-    // Model implementation
+    // Function implementation
     //
     // ///////////////////////////////////////////////////////////////////
 

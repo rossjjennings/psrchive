@@ -1,16 +1,16 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Gain.h,v $
-   $Revision: 1.1 $
-   $Date: 2004/11/22 11:17:15 $
+   $Revision: 1.2 $
+   $Date: 2004/11/22 16:00:09 $
    $Author: straten $ */
 
-#ifndef __Calibration_Gain_H
-#define __Calibration_Gain_H
+#ifndef __Model_Gain_H
+#define __Model_Gain_H
 
-#include "Calibration/OptimizedComplex2.h"
+#include "MEPL/OptimizedComplex2.h"
 
-namespace Calibration {
+namespace Model {
 
   //! A gain transformation
   class Gain : public OptimizedComplex2 {
@@ -22,7 +22,7 @@ namespace Calibration {
 
     // ///////////////////////////////////////////////////////////////////
     //
-    // Model implementation
+    // Function implementation
     //
     // ///////////////////////////////////////////////////////////////////
 

@@ -1,16 +1,16 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/ScalarValue.h,v $
-   $Revision: 1.1 $
-   $Date: 2004/11/22 11:17:17 $
+   $Revision: 1.2 $
+   $Date: 2004/11/22 16:00:09 $
    $Author: straten $ */
 
 #ifndef __ScalarValue_H
 #define __ScalarValue_H
 
-#include "Calibration/OptimizedScalar.h"
+#include "MEPL/OptimizedScalar.h"
 
-namespace Calibration {
+namespace Model {
 
   //! Represents a scalar value, \f$ x \f$
   class ScalarValue : public OptimizedScalar {
@@ -31,7 +31,7 @@ namespace Calibration {
 
     // ///////////////////////////////////////////////////////////////////
     //
-    // Model implementation
+    // Function implementation
     //
     // ///////////////////////////////////////////////////////////////////
 
@@ -45,7 +45,7 @@ namespace Calibration {
 
     // ///////////////////////////////////////////////////////////////////
     //
-    // OptimizedModel implementation
+    // Optimized implementation
     //
     // ///////////////////////////////////////////////////////////////////
 

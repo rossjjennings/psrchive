@@ -1,29 +1,29 @@
-#include "Calibration/Parameters.h"
+#include "MEPL/Parameters.h"
 
 
 //! Default constructor
-Calibration::Parameters::Parameters (unsigned nparam)
+Model::Parameters::Parameters (unsigned nparam)
   : params(nparam), fit(nparam, true)
 {
 }
 
 
 //! Copy constructor
-Calibration::Parameters::Parameters (const Parameters& np)
+Model::Parameters::Parameters (const Parameters& np)
   : params(np.params), fit(np.fit)
 {
 }
 
 
 //! Equality operator
-Calibration::Parameters& 
-Calibration::Parameters::operator = (const Parameters& np)
+Model::Parameters& 
+Model::Parameters::operator = (const Parameters& np)
 {
   if (&np == this)
     return *this;
 
   if (very_verbose)
-    cerr << "Calibration::Parameters::operator= nparam=" << get_nparam()
+    cerr << "Model::Parameters::operator= nparam=" << get_nparam()
          << " new nparam=" << np.get_nparam() << endl;
 
   bool nparam_changed = np.params.size() != params.size();
@@ -41,11 +41,11 @@ Calibration::Parameters::operator = (const Parameters& np)
 
 
 //! Set the value of the specified parameter
-void Calibration::Parameters::set_param (unsigned index, double value)
+void Model::Parameters::set_param (unsigned index, double value)
 {
-  range_check (index, "Calibration::Parameters::set_param");
+  range_check (index, "Model::Parameters::set_param");
   
-  if (very_verbose) cerr << "Calibration::Parameters::set_param "
+  if (very_verbose) cerr << "Model::Parameters::set_param "
 		 "(" << index << "," << value << ")" << endl;
   
   if (params[index].val == value)
@@ -56,10 +56,10 @@ void Calibration::Parameters::set_param (unsigned index, double value)
 }
 
 
-void Calibration::Parameters::resize (unsigned nparam)
+void Model::Parameters::resize (unsigned nparam)
 {
   if (very_verbose)
-    cerr << "Calibration::Parameters::resize " << nparam << endl;
+    cerr << "Model::Parameters::resize " << nparam << endl;
   
   unsigned current = params.size();
   params.resize (nparam);

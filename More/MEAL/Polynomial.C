@@ -1,27 +1,27 @@
-#include "Polynomial.h"
+#include "MEPL/Polynomial.h"
 #include "stringtok.h"
 #include "tostring.h"
 
-Calibration::Polynomial::Polynomial (unsigned ncoef)
+Model::Polynomial::Polynomial (unsigned ncoef)
   : UnivariateOptimizedScalar (ncoef)
 {
   x_0 = 0;
 }
 
 //! Return the name of the class
-string Calibration::Polynomial::get_name () const
+string Model::Polynomial::get_name () const
 {
   return "Polynomial";
 }
 
 //! Return the name of the specified parameter
-string Calibration::Polynomial::get_param_name (unsigned index) const
+string Model::Polynomial::get_param_name (unsigned index) const
 {
   return "c_" + tostring (index);
 }
 
 
-void Calibration::Polynomial::parse (const string& line)
+void Model::Polynomial::parse (const string& line)
 {
   string temp = line;
 
@@ -30,14 +30,14 @@ void Calibration::Polynomial::parse (const string& line)
   string value = stringtok (temp, " \t\n");
 
   if (verbose)
-    cerr << "Calibration::Polynomial::parse key='" << key << "'"
+    cerr << "Model::Polynomial::parse key='" << key << "'"
       " value='" << value << "'" << endl;
 
   if (key == "ncoef" || key == "order") {
 
     unsigned nparam;
     if ( sscanf (value.c_str(), "%d", &nparam) != 1 )
-      throw Error (InvalidParam, "Calibration::Polynomial::parse",
+      throw Error (InvalidParam, "Model::Polynomial::parse",
                    "value='" + value + "' could not be parsed as an integer");
 
     if (key == "order")
@@ -51,26 +51,26 @@ void Calibration::Polynomial::parse (const string& line)
   else if (key == "x_0" ) {
 
     if ( sscanf (value.c_str(), "%lf", &x_0) != 1 )
-      throw Error (InvalidParam, "Calibration::Polynomial::parse",
+      throw Error (InvalidParam, "Model::Polynomial::parse",
                    "value='" + value + "' could not be parsed as a double");
     return;
 
   }
   
-  Model::parse (line);
+  Function::parse (line);
 
 }
 
 //! Prints the values of model parameters and fit flags to a string
-void Calibration::Polynomial::print_parameters (string& text,
+void Model::Polynomial::print_parameters (string& text,
 						const string& sep) const
 {
   text += sep + "ncoef " + tostring (get_nparam());
-  Model::print_parameters (text, sep);
+  Function::print_parameters (text, sep);
 }
 
 //! Return the value (and gradient, if requested) of the function
-void Calibration::Polynomial::calculate (double& result, vector<double>* grad)
+void Model::Polynomial::calculate (double& result, vector<double>* grad)
 {
   double x = abscissa - x_0;
 
@@ -89,10 +89,10 @@ void Calibration::Polynomial::calculate (double& result, vector<double>* grad)
   }
 
   if (verbose) {
-    cerr << "Calibration::Polynomial::calculate result\n"
+    cerr << "Model::Polynomial::calculate result\n"
 	 "   " << result << endl;
     if (grad) {
-      cerr << "Calibration::Polynomial::calculate gradient" << endl;
+      cerr << "Model::Polynomial::calculate gradient" << endl;
       for (unsigned i=0; i<grad->size(); i++)
 	cerr << "   " << i << ":" << get_infit(i) << "=" << (*grad)[i] << endl;
     }

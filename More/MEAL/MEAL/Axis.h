@@ -1,17 +1,17 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Axis.h,v $
-   $Revision: 1.1 $
-   $Date: 2004/11/22 11:17:14 $
+   $Revision: 1.2 $
+   $Date: 2004/11/22 16:00:08 $
    $Author: straten $ */
 
-#ifndef __Calibration_Axis_Header
-#define __Calibration_Axis_Header
+#ifndef __Model_Axis_Header
+#define __Model_Axis_Header
 
-#include "Calibration/Argument.h"
+#include "MEPL/Argument.h"
 #include "Callback.h"
 
-namespace Calibration {
+namespace Model {
 
   //! An argument of a specified type
   /*! This template class implements the Argument/Value interface by
@@ -52,7 +52,7 @@ namespace Calibration {
       //! Apply the value 
       void apply () const 
       { 
-	if (verbose) cerr << "Calibration::Axis<Type>::Value::apply value="
+	if (verbose) cerr << "Model::Axis<Type>::Value::apply value="
 			  << value << endl;
 	axis->set_value (value);
       }

@@ -1,24 +1,24 @@
-#include "Rotation.h"
+#include "MEPL/Rotation.h"
 #include "Pauli.h"
 
-Calibration::Rotation::Rotation () : OptimizedComplex2 (1)
+Model::Rotation::Rotation () : OptimizedComplex2 (1)
 {
 }
 
-Calibration::Rotation::Rotation (const Vector<double, 3>& _axis) 
+Model::Rotation::Rotation (const Vector<double, 3>& _axis) 
   : OptimizedComplex2 (1)
 {
   axis = _axis;
 }
 
 //! Return the name of the class
-string Calibration::Rotation::get_name () const
+string Model::Rotation::get_name () const
 {
   return "Rotation";
 }
 
 //! Return the name of the specified parameter
-string Calibration::Rotation::get_param_name (unsigned index) const
+string Model::Rotation::get_param_name (unsigned index) const
 {
   if (index == 0)
     return "rotation";
@@ -26,27 +26,27 @@ string Calibration::Rotation::get_param_name (unsigned index) const
     return "ERROR";
 }
 
-void Calibration::Rotation::set_phi (double radians)
+void Model::Rotation::set_phi (double radians)
 {
   if (verbose)
-    cerr << "Calibration::Rotation::set_phi " << radians << endl;
+    cerr << "Model::Rotation::set_phi " << radians << endl;
 
   set_param (0, radians);
 }
 
-double Calibration::Rotation::get_phi () const
+double Model::Rotation::get_phi () const
 {
   return get_param (0);
 }
 
 //! Calculate the Jones matrix and its gradient
-void Calibration::Rotation::calculate (Jones<double>& result,
+void Model::Rotation::calculate (Jones<double>& result,
 				       vector<Jones<double> >* grad)
 {
   double phi = get_param(0);
 
   if (verbose)
-    cerr << "Calibration::Rotation::calculate axis=" << axis 
+    cerr << "Model::Rotation::calculate axis=" << axis 
 	 << " phi=" << phi << endl;
 
   double sin_phi = sin (phi);
@@ -58,7 +58,7 @@ void Calibration::Rotation::calculate (Jones<double>& result,
     (*grad)[0] = convert (drotation_dphi);
 
     if (verbose)
-      cerr << "Calibration::Rotation::calculate gradient" << endl
+      cerr << "Model::Rotation::calculate gradient" << endl
 	   << "   " << (*grad)[0] << endl;
   }
 
@@ -66,7 +66,7 @@ void Calibration::Rotation::calculate (Jones<double>& result,
   result = convert (rotation);
 }
 
-void Calibration::Rotation::set_axis (const Vector<double, 3>& _axis)
+void Model::Rotation::set_axis (const Vector<double, 3>& _axis)
 {
   axis = _axis;
 }

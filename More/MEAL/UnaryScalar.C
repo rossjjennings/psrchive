@@ -1,21 +1,21 @@
-#include "Calibration/UnaryScalar.h"
+#include "MEPL/UnaryScalar.h"
 
-void Calibration::UnaryScalar::calculate (double& result,
+void Model::UnaryScalar::calculate (double& result,
 					  vector<double>* grad)
 {
   if (!model)
-    throw Error (InvalidState, "Calibration::UnaryScalar::calculate",
+    throw Error (InvalidState, "Model::UnaryScalar::calculate",
 		 "no model to evaluate");
 
   if (verbose)
-    cerr << "Calibration::UnaryScalar::calculate" << endl;
+    cerr << "Model::UnaryScalar::calculate" << endl;
 
   double x = model->evaluate (grad);
 
   result = function( x );
 
   if (verbose)
-    cerr << "Calibration::UnaryScalar::calculate result\n"
+    cerr << "Model::UnaryScalar::calculate result\n"
       "   " << result << endl;
 
   if (!grad)
@@ -27,7 +27,7 @@ void Calibration::UnaryScalar::calculate (double& result,
     (*grad)[igrad] *= dydx;
 
   if (verbose) {
-    cerr << "Calibration::UnaryScalar::calculate gradient\n";
+    cerr << "Model::UnaryScalar::calculate gradient\n";
     for (unsigned i=0; i<grad->size(); i++)
       cerr << "   " << i << ":" << get_infit(i) << "=" << (*grad)[i] << endl;
   }

@@ -1,19 +1,19 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Polar.h,v $
-   $Revision: 1.1 $
-   $Date: 2004/11/22 11:17:16 $
+   $Revision: 1.2 $
+   $Date: 2004/11/22 16:00:09 $
    $Author: straten $ */
 
-#ifndef __CalibrationPolar_H
-#define __CalibrationPolar_H
+#ifndef __ModelPolar_H
+#define __ModelPolar_H
 
-#include "Calibration/ProductRule.h"
-#include "Calibration/Complex2.h"
+#include "MEPL/ProductRule.h"
+#include "MEPL/Complex2.h"
 #include "Estimate.h"
 #include "Stokes.h"
 
-namespace Calibration {
+namespace Model {
 
   class Gain;
   class Boost;
@@ -65,7 +65,7 @@ namespace Calibration {
 
     // ///////////////////////////////////////////////////////////////////
     //
-    // Model implementation
+    // Function implementation
     //
     // ///////////////////////////////////////////////////////////////////
 

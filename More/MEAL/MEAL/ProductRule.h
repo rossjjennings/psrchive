@@ -1,16 +1,16 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/ProductRule.h,v $
-   $Revision: 1.1 $
-   $Date: 2004/11/22 11:17:16 $
+   $Revision: 1.2 $
+   $Date: 2004/11/22 16:00:09 $
    $Author: straten $ */
 
-#ifndef __Calibration_ProductRule_H
-#define __Calibration_ProductRule_H
+#ifndef __Model_ProductRule_H
+#define __Model_ProductRule_H
 
-#include "Calibration/GroupRule.h"
+#include "MEPL/GroupRule.h"
 
-namespace Calibration {
+namespace Model {
 
   //! Represents a product of models
   template<class MType>
@@ -26,7 +26,7 @@ namespace Calibration {
 
     // ///////////////////////////////////////////////////////////////////
     //
-    // Model implementation
+    // Function implementation
     //
     // ///////////////////////////////////////////////////////////////////
 

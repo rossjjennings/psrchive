@@ -1,19 +1,19 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/ProjectGradient.h,v $
-   $Revision: 1.1 $
-   $Date: 2004/11/22 11:17:16 $
+   $Revision: 1.2 $
+   $Date: 2004/11/22 16:00:09 $
    $Author: straten $ */
 
 #ifndef __ProjectProductGradient_H
 #define __ProjectProductGradient_H
 
-#include "Calibration/Projection.h"
+#include "MEPL/Projection.h"
 
-namespace Calibration {
+namespace Model {
 
-  template <class Model, class Grad>
-  void ProjectGradient (const Project<Model>& model, unsigned& igrad,
+  template <class Function, class Grad>
+  void ProjectGradient (const Project<Function>& model, unsigned& igrad,
 			const vector<Grad>& input, vector<Grad>& output)
   {
     unsigned nparam = model->get_nparam();
@@ -22,7 +22,7 @@ namespace Calibration {
 
       unsigned imap = model.get_map()->get_imap (iparam);
 
-      if (Model::verbose)
+      if (Function::verbose)
 	cerr << "ProjectGradient iparam=" << iparam << " imap=" << imap
 	     << " igrad=" << igrad << endl;
 
@@ -33,16 +33,16 @@ namespace Calibration {
     }
   }
 
-  template <class Model, class Grad>
-  void ProjectGradient (const Project<Model>& model,
+  template <class Function, class Grad>
+  void ProjectGradient (const Project<Function>& model,
 			const vector<Grad>& input, vector<Grad>& output)
   {
     unsigned igrad = 0;
     ProjectGradient (model, igrad, input, output);
   }
 
-  template <class Model, class Grad>
-  void ProjectGradient (const vector<Project<Model> >& model,
+  template <class Function, class Grad>
+  void ProjectGradient (const vector<Project<Function> >& model,
 			const vector<Grad>& input, vector<Grad>& output)
   {
     unsigned nparam = output.size();
@@ -56,7 +56,7 @@ namespace Calibration {
     
     for (unsigned imodel=0; imodel<nmodel; imodel++) {
 
-      if (Model::verbose)
+      if (Function::verbose)
 	cerr << "ProjectGradient imodel=" << imodel 
 	     << " igrad=" << igrad << endl;
 
@@ -66,7 +66,7 @@ namespace Calibration {
 
     // sanity check, ensure that all elements have been set
     if (igrad != input.size())
-      throw Error (InvalidState, "Calibration::ProjectProductGradient",
+      throw Error (InvalidState, "Model::ProjectProductGradient",
 		   "on completion igrad=%d != ngrad=%d",
 		   igrad, input.size());
   }

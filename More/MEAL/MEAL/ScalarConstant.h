@@ -1,20 +1,20 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/ScalarConstant.h,v $
-   $Revision: 1.1 $
-   $Date: 2004/11/22 11:17:16 $
+   $Revision: 1.2 $
+   $Date: 2004/11/22 16:00:09 $
    $Author: straten $ */
 
 #ifndef __ScalarConstant_H
 #define __ScalarConstant_H
 
-#include "Calibration/ConstantModel.h"
-#include "Calibration/Scalar.h"
+#include "MEPL/Constant.h"
+#include "MEPL/Scalar.h"
 
-namespace Calibration {
+namespace Model {
 
   //! Represents a constant scalar value
-  class ScalarConstant : public ConstantModel, public Scalar {
+  class ScalarConstant : public Constant, public Scalar {
 
   public:
 
@@ -32,7 +32,7 @@ namespace Calibration {
 
     // ///////////////////////////////////////////////////////////////////
     //
-    // Model implementation
+    // Function implementation
     //
     // ///////////////////////////////////////////////////////////////////
 

@@ -1,16 +1,16 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/InverseRule.h,v $
-   $Revision: 1.1 $
-   $Date: 2004/11/22 11:17:15 $
+   $Revision: 1.2 $
+   $Date: 2004/11/22 16:00:09 $
    $Author: straten $ */
 
-#ifndef __Calibration_InverseRule_H
-#define __Calibration_InverseRule_H
+#ifndef __Model_InverseRule_H
+#define __Model_InverseRule_H
 
-#include "Calibration/UnaryRule.h"
+#include "MEPL/UnaryRule.h"
 
-namespace Calibration {
+namespace Model {
 
   //! Computes the inverse of a model and its partial derivatives
   template<class MType>
@@ -23,7 +23,7 @@ namespace Calibration {
 
     // ///////////////////////////////////////////////////////////////////
     //
-    // Model implementation
+    // Function implementation
     //
     // ///////////////////////////////////////////////////////////////////
 
@@ -34,7 +34,7 @@ namespace Calibration {
 
     // ///////////////////////////////////////////////////////////////////
     //
-    // OptimizedModel implementation
+    // Optimized implementation
     //
     // ///////////////////////////////////////////////////////////////////
 
@@ -46,27 +46,27 @@ namespace Calibration {
 }
 
 template<class MType>
-string Calibration::InverseRule<MType>::get_name () const
+string Model::InverseRule<MType>::get_name () const
 {
   return "InverseRule<" + string(MType::Name)+ ">";
 }
 
 
 template<class MType>
-void Calibration::InverseRule<MType>::calculate (Result& result,
+void Model::InverseRule<MType>::calculate (Result& result,
 						 vector<Result>* grad)
 {
   if (!this->model)
-    throw Error (InvalidState, "Calibration::InverseRule::calculate",
+    throw Error (InvalidState, "Model::InverseRule::calculate",
 		 "no model to evaluate");
 
   if (MType::verbose)
-    cerr << "Calibration::InverseRule::calculate" << endl;
+    cerr << "Model::InverseRule::calculate" << endl;
 
   result = inv( this->model->evaluate (grad) );
   
   if (MType::verbose)
-    cerr << "Calibration::InverseRule::calculate result\n"
+    cerr << "Model::InverseRule::calculate result\n"
       "   " << result << endl;
 
   if (!grad)
@@ -76,7 +76,7 @@ void Calibration::InverseRule<MType>::calculate (Result& result,
     (*grad)[igrad] = - result * (*grad)[igrad] * result;
 
   if (MType::verbose) {
-    cerr << "Calibration::InverseRule::calculate gradient\n";
+    cerr << "Model::InverseRule::calculate gradient\n";
     for (unsigned i=0; i<grad->size(); i++)
       cerr << "   "
 	   << i << ":" << this->get_infit(i) << "=" << (*grad)[i] << endl;

@@ -1,16 +1,16 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/ScalarTangent.h,v $
-   $Revision: 1.1 $
-   $Date: 2004/11/22 11:17:17 $
+   $Revision: 1.2 $
+   $Date: 2004/11/22 16:00:09 $
    $Author: straten $ */
 
-#ifndef __Calibration_ScalarTangent_H
-#define __Calibration_ScalarTangent_H
+#ifndef __Model_ScalarTangent_H
+#define __Model_ScalarTangent_H
 
-#include "Calibration/UnaryScalar.h"
+#include "MEPL/UnaryScalar.h"
 
-namespace Calibration {
+namespace Model {
 
   //! The tangent of a Scalar function
   class ScalarTangent : public UnaryScalar
@@ -32,7 +32,7 @@ namespace Calibration {
 
     // ///////////////////////////////////////////////////////////////////
     //
-    // Model implementation
+    // Function implementation
     //
     // ///////////////////////////////////////////////////////////////////
 

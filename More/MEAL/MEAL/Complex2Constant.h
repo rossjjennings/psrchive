@@ -1,20 +1,20 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Complex2Constant.h,v $
-   $Revision: 1.1 $
-   $Date: 2004/11/22 11:17:14 $
+   $Revision: 1.2 $
+   $Date: 2004/11/22 16:00:08 $
    $Author: straten $ */
 
 #ifndef __Complex2Constant_H
 #define __Complex2Constant_H
 
-#include "Calibration/ConstantModel.h"
-#include "Calibration/Complex2.h"
+#include "MEPL/Constant.h"
+#include "MEPL/Complex2.h"
 
-namespace Calibration {
+namespace Model {
 
   //! Represents a constant complex 2x2 matrix value
-  class Complex2Constant : public ConstantModel, public Complex2 {
+  class Complex2Constant : public Constant, public Complex2 {
 
   public:
 
@@ -32,7 +32,7 @@ namespace Calibration {
 
     // ///////////////////////////////////////////////////////////////////
     //
-    // Model implementation
+    // Function implementation
     //
     // ///////////////////////////////////////////////////////////////////
 

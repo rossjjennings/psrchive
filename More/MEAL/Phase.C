@@ -1,17 +1,17 @@
-#include "Calibration/Phase.h"
+#include "MEPL/Phase.h"
 
-Calibration::Phase::Phase () : OptimizedComplex2 (1)
+Model::Phase::Phase () : OptimizedComplex2 (1)
 {
 }
 
 //! Return the name of the class
-string Calibration::Phase::get_name () const
+string Model::Phase::get_name () const
 {
   return "Phase";
 }
 
 //! Return the name of the specified parameter
-string Calibration::Phase::get_param_name (unsigned index) const
+string Model::Phase::get_param_name (unsigned index) const
 {
   if (index == 0)
     return "phase";
@@ -20,13 +20,13 @@ string Calibration::Phase::get_param_name (unsigned index) const
 }
 
 //! Calculate the Jones matrix and its gradient, as parameterized by gain
-void Calibration::Phase::calculate (Jones<double>& result,
+void Model::Phase::calculate (Jones<double>& result,
 				    vector<Jones<double> >* grad)
 {
   double phase = get_param(0);
 
   if (verbose)
-    cerr << "Calibration::Phase::calculate phase=" << phase << endl;
+    cerr << "Model::Phase::calculate phase=" << phase << endl;
 
   double cos_phase = cos(phase);
   double sin_phase = sin(phase);
@@ -37,7 +37,7 @@ void Calibration::Phase::calculate (Jones<double>& result,
     (*grad)[0] = complex<double>(-sin_phase, cos_phase);
     
     if (verbose)
-      cerr << "Calibration::Phase::calculate gradient" << endl
+      cerr << "Model::Phase::calculate gradient" << endl
 	   << "   " << (*grad)[0] << endl;
   }
   

@@ -1,20 +1,20 @@
-#include "Calibration/Coherency.h"
+#include "MEPL/Coherency.h"
 #include "Pauli.h"
 #include "Error.h"
 
-Calibration::Coherency::Coherency ()
+Model::Coherency::Coherency ()
   : OptimizedComplex2 (4)
 {
 }
 
 //! Return the name of the class
-string Calibration::Coherency::get_name () const
+string Model::Coherency::get_name () const
 {
   return "Coherency";
 }
 
 //! Return the name of the specified parameter
-string Calibration::Coherency::get_param_name (unsigned index) const
+string Model::Coherency::get_param_name (unsigned index) const
 {
   switch (index) {
   case 0:
@@ -31,7 +31,7 @@ string Calibration::Coherency::get_param_name (unsigned index) const
 }
 
 //! Calculate the Jones matrix and its gradient
-void Calibration::Coherency::calculate (Jones<double>& result,
+void Model::Coherency::calculate (Jones<double>& result,
 					vector<Jones<double> >* grad)
 {
 
@@ -54,10 +54,10 @@ void Calibration::Coherency::calculate (Jones<double>& result,
   }
 
   if (verbose) {
-    cerr << "Calibration::Coherency::get_stokes result\n"
+    cerr << "Model::Coherency::get_stokes result\n"
       "   " << result << endl;
     if (grad) {
-      cerr << "Calibration::Coherency::get_stokes gradient" << endl;
+      cerr << "Model::Coherency::get_stokes gradient" << endl;
       for (unsigned i=0; i<grad->size(); i++)
 	cerr << "   " << i << ":" << get_infit(i) << "=" << (*grad)[i] << endl;
     }
@@ -66,14 +66,14 @@ void Calibration::Coherency::calculate (Jones<double>& result,
 }
 
 //! Set the Stokes parameters of the model
-void Calibration::Coherency::set_stokes (const Stokes<double>& stokes)
+void Model::Coherency::set_stokes (const Stokes<double>& stokes)
 {
   for (unsigned i=0; i<4; i++)
     set_param (i, stokes[i]);
 }
 
 //! Set the Stokes parameters of the model
-void Calibration::Coherency::set_stokes (const Stokes<Estimate<double> >& s)
+void Model::Coherency::set_stokes (const Stokes<Estimate<double> >& s)
 {
   for (unsigned i=0; i<4; i++) {
     set_param (i, s[i].val);
@@ -82,7 +82,7 @@ void Calibration::Coherency::set_stokes (const Stokes<Estimate<double> >& s)
 }
 
 //! Set the Stokes parameters of the model
-Stokes< Estimate<double> > Calibration::Coherency::get_stokes () const
+Stokes< Estimate<double> > Model::Coherency::get_stokes () const
 {
   Stokes< Estimate<double> > stokes;
   for (unsigned i=0; i<4; i++)

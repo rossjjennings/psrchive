@@ -2,14 +2,14 @@
 
 // #include "Estimate.h"
 
-#include "Calibration/Complex2.h"
+#include "MEPL/Complex2.h"
 
 /*! The class name is used in the output of template classes and methods */
-const char* Calibration::Complex2::Name = "Complex2";
+const char* Model::Complex2::Name = "Complex2";
 
 static inline double sqr (double x) { return x*x; }
 
-void Calibration::Complex2::evaluate (Jones<Estimate<double> >& j) const
+void Model::Complex2::evaluate (Jones<Estimate<double> >& j) const
 {
   vector< Jones<double> > gradient;
 
@@ -18,7 +18,7 @@ void Calibration::Complex2::evaluate (Jones<Estimate<double> >& j) const
   unsigned nparam = get_nparam();
 
   if (gradient.size() != nparam)
-    throw Error (InvalidState, "Calibration::Complex2::evaluate",
+    throw Error (InvalidState, "Model::Complex2::evaluate",
 		 "gradient.size=%d != nparam=%d", gradient.size(), nparam);
 
   for (unsigned iparam=0; iparam<nparam; iparam++) {

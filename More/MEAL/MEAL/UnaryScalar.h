@@ -1,17 +1,17 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/UnaryScalar.h,v $
-   $Revision: 1.1 $
-   $Date: 2004/11/22 11:17:17 $
+   $Revision: 1.2 $
+   $Date: 2004/11/22 16:00:09 $
    $Author: straten $ */
 
-#ifndef __Calibration_UnaryScalar_H
-#define __Calibration_UnaryScalar_H
+#ifndef __Model_UnaryScalar_H
+#define __Model_UnaryScalar_H
 
-#include "Calibration/UnaryRule.h"
-#include "Calibration/Scalar.h"
+#include "MEPL/UnaryRule.h"
+#include "MEPL/Scalar.h"
 
-namespace Calibration {
+namespace Model {
 
   //! Abstract base class of unary functions of another Scalar function
   /*! The partial derivatives are calculated using the chain rule. */
@@ -30,7 +30,7 @@ namespace Calibration {
 
     // ///////////////////////////////////////////////////////////////////
     //
-    // OptimizedModel implementation
+    // Optimized implementation
     //
     // ///////////////////////////////////////////////////////////////////
 

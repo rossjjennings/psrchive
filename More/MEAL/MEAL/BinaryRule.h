@@ -1,21 +1,21 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/BinaryRule.h,v $
-   $Revision: 1.1 $
-   $Date: 2004/11/22 11:17:14 $
+   $Revision: 1.2 $
+   $Date: 2004/11/22 16:00:08 $
    $Author: straten $ */
 
-#ifndef __Calibration_BinaryRule_H
-#define __Calibration_BinaryRule_H
+#ifndef __Model_BinaryRule_H
+#define __Model_BinaryRule_H
 
-#include "Calibration/OptimizedModel.h"
-#include "Calibration/Composite.h"
+#include "MEPL/Optimized.h"
+#include "MEPL/Composite.h"
 
-namespace Calibration {
+namespace Model {
 
   //! Abstract base class of binary operators
   template<class MType>
-  class BinaryRule : public OptimizedModel<MType>, public Composite
+  class BinaryRule : public Optimized<MType>, public Composite
   {
 
   public:
@@ -51,8 +51,8 @@ namespace Calibration {
 }
 
 template<class MType>
-Calibration::BinaryRule<MType>&
-Calibration::BinaryRule<MType>::operator = (const BinaryRule& rule)
+Model::BinaryRule<MType>&
+Model::BinaryRule<MType>::operator = (const BinaryRule& rule)
 {
   if (this == &rule)
     return *this;
@@ -65,7 +65,7 @@ Calibration::BinaryRule<MType>::operator = (const BinaryRule& rule)
 
 
 template<class MType>
-void Calibration::BinaryRule<MType>::set_arg1 (MType* model)
+void Model::BinaryRule<MType>::set_arg1 (MType* model)
 {
   if (arg1)
     unmap (arg1, false);
@@ -76,13 +76,13 @@ void Calibration::BinaryRule<MType>::set_arg1 (MType* model)
     return;
 
   if (verbose)
-    cerr << "Calibration::BinaryRule::set_model map new model" << endl;
+    cerr << "Model::BinaryRule::set_model map new model" << endl;
 
   map (arg1);
 }
 
 template<class MType>
-void Calibration::BinaryRule<MType>::set_arg2 (MType* model)
+void Model::BinaryRule<MType>::set_arg2 (MType* model)
 {
   if (arg2)
     unmap (arg2, false);
@@ -93,7 +93,7 @@ void Calibration::BinaryRule<MType>::set_arg2 (MType* model)
     return;
 
   if (verbose)
-    cerr << "Calibration::BinaryRule::set_model map new model" << endl;
+    cerr << "Model::BinaryRule::set_model map new model" << endl;
 
   map (arg2);
 }

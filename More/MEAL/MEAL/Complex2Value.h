@@ -1,16 +1,16 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Complex2Value.h,v $
-   $Revision: 1.1 $
-   $Date: 2004/11/22 11:17:14 $
+   $Revision: 1.2 $
+   $Date: 2004/11/22 16:00:08 $
    $Author: straten $ */
 
 #ifndef __Complex2Value_H
 #define __Complex2Value_H
 
-#include "Calibration/OptimizedComplex2.h"
+#include "MEPL/OptimizedComplex2.h"
 
-namespace Calibration {
+namespace Model {
 
   //! Represents a complex 2x2 matrix value, \f$ J \f$
   class Complex2Value : public OptimizedComplex2 {
@@ -28,7 +28,7 @@ namespace Calibration {
 
     // ///////////////////////////////////////////////////////////////////
     //
-    // Model implementation
+    // Function implementation
     //
     // ///////////////////////////////////////////////////////////////////
 
@@ -42,7 +42,7 @@ namespace Calibration {
 
     // ///////////////////////////////////////////////////////////////////
     //
-    // OptimizedModel implementation
+    // Optimized implementation
     //
     // ///////////////////////////////////////////////////////////////////
 

@@ -1,16 +1,16 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/ScalarHypCosine.h,v $
-   $Revision: 1.1 $
-   $Date: 2004/11/22 11:17:16 $
+   $Revision: 1.2 $
+   $Date: 2004/11/22 16:00:09 $
    $Author: straten $ */
 
-#ifndef __Calibration_ScalarHypCosine_H
-#define __Calibration_ScalarHypCosine_H
+#ifndef __Model_ScalarHypCosine_H
+#define __Model_ScalarHypCosine_H
 
-#include "Calibration/UnaryScalar.h"
+#include "MEPL/UnaryScalar.h"
 
-namespace Calibration {
+namespace Model {
 
   //! The hyperbolic cosine of a Scalar function
   class ScalarHypCosine : public UnaryScalar
@@ -32,7 +32,7 @@ namespace Calibration {
 
     // ///////////////////////////////////////////////////////////////////
     //
-    // Model implementation
+    // Function implementation
     //
     // ///////////////////////////////////////////////////////////////////
 

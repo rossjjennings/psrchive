@@ -1,18 +1,18 @@
-#include "Calibration/Gain.h"
+#include "MEPL/Gain.h"
 
-Calibration::Gain::Gain () : OptimizedComplex2 (1)
+Model::Gain::Gain () : OptimizedComplex2 (1)
 {
   set_param (0, 1.0);
 }
 
 //! Return the name of the class
-string Calibration::Gain::get_name () const
+string Model::Gain::get_name () const
 {
   return "Gain";
 }
 
 //! Return the name of the specified parameter
-string Calibration::Gain::get_param_name (unsigned index) const
+string Model::Gain::get_param_name (unsigned index) const
 {
   if (index == 0)
     return "gain";
@@ -21,13 +21,13 @@ string Calibration::Gain::get_param_name (unsigned index) const
 }
 
 //! Calculate the Jones matrix and its gradient, as parameterized by gain
-void Calibration::Gain::calculate (Jones<double>& result,
+void Model::Gain::calculate (Jones<double>& result,
 				   vector<Jones<double> >* grad)
 {
   double gain = get_param(0);
 
   if (verbose)
-    cerr << "Calibration::Gain::calculate gain=" << gain << endl;
+    cerr << "Model::Gain::calculate gain=" << gain << endl;
 
   result = gain;
 
@@ -35,7 +35,7 @@ void Calibration::Gain::calculate (Jones<double>& result,
     (*grad)[0] = 1.0;
     
     if (verbose)
-      cerr << "Calibration::Gain::calculate gradient" << endl
+      cerr << "Model::Gain::calculate gradient" << endl
 	   << "   " << (*grad)[0] << endl;
   }
   

@@ -1,26 +1,26 @@
-#include "Calibration/ScalarLogarithm.h"
+#include "MEPL/ScalarLogarithm.h"
 #include <math.h>
 
 //! Return the name of the class
-string Calibration::ScalarLogarithm::get_name () const
+string Model::ScalarLogarithm::get_name () const
 {
   return "ScalarLogarithm";
 }
 
 //! The function
-double Calibration::ScalarLogarithm::function (double x) const
+double Model::ScalarLogarithm::function (double x) const
 {
   if (x < 0.0)
-    throw Error (InvalidState, "Calibration::ScalarLogarithm::function",
+    throw Error (InvalidState, "Model::ScalarLogarithm::function",
 		 "x < 0");
   return log(x); 
 }
 
 //! And its first derivative
-double Calibration::ScalarLogarithm::dfdx (double x) const
+double Model::ScalarLogarithm::dfdx (double x) const
 { 
   if (x < 0.0)
-    throw Error (InvalidState, "Calibration::ScalarLogarithm::dfdx",
+    throw Error (InvalidState, "Model::ScalarLogarithm::dfdx",
 		 "x < 0");
   return 1/x;
 }

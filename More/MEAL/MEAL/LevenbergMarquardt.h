@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/LevenbergMarquardt.h,v $
-   $Revision: 1.1 $
-   $Date: 2004/11/22 11:17:15 $
+   $Revision: 1.2 $
+   $Date: 2004/11/22 16:00:09 $
    $Author: straten $ */
 
 #ifndef __Levenberg_Marquardt_h
@@ -13,7 +13,7 @@
 #include "Error.h"
 #include "casts.h"
 
-namespace Calibration {
+namespace Model {
 
   //! Implements the Levenberg-Marquardt algorithm for non-linear least squares
   /*! This template class implements the nonlinear least squares
@@ -217,20 +217,20 @@ namespace Calibration {
 }
 
 template <class Grad>
-vector<vector<double> > Calibration::LevenbergMarquardt<Grad>::null_arg;
+vector<vector<double> > Model::LevenbergMarquardt<Grad>::null_arg;
 
 template <class Grad>
-unsigned Calibration::LevenbergMarquardt<Grad>::verbose = 0;
+unsigned Model::LevenbergMarquardt<Grad>::verbose = 0;
 
 template <class Grad>
 template <class Xt, class Yt, class Et, class Mt>
-float Calibration::LevenbergMarquardt<Grad>::init
+float Model::LevenbergMarquardt<Grad>::init
 (const vector< Xt >& x,
  const vector< Estimate<Yt,Et> >& y,
  Mt& model)
 {
   if (verbose > 2)
-    cerr << "Calibration::LevenbergMarquardt<Grad>::init" << endl;
+    cerr << "Model::LevenbergMarquardt<Grad>::init" << endl;
 
   // size all of the working space arrays
   alpha.resize  (model.get_nparam());
@@ -248,7 +248,7 @@ float Calibration::LevenbergMarquardt<Grad>::init
   lamda = 0.001;
 
   if (verbose > 0)
-    cerr << "Calibration::LevenbergMarquardt<Grad>::init chisq=" 
+    cerr << "Model::LevenbergMarquardt<Grad>::init chisq=" 
 	 << best_chisq << endl;
 
   return best_chisq;
@@ -309,7 +309,7 @@ void verify_orthogonal (const vector<vector<double > >& alpha, const T& model)
 }
 
 // /////////////////////////////////////////////////////////////////////////
-// Calibration::LevenbergMarquardt<Grad>::solve_delta
+// Model::LevenbergMarquardt<Grad>::solve_delta
 // /////////////////////////////////////////////////////////////////////////
 
 /*! Using the curvature matrix and gradient stored in the best_alpha
@@ -322,21 +322,21 @@ void verify_orthogonal (const vector<vector<double > >& alpha, const T& model)
 */
 template <class Grad>
 template <class Mt>
-void Calibration::LevenbergMarquardt<Grad>::solve_delta (const Mt& model)
+void Model::LevenbergMarquardt<Grad>::solve_delta (const Mt& model)
 {
   if (verbose > 2)
-    cerr << "Calibration::LevenbergMarquardt<Grad>::solve_delta" << endl;
+    cerr << "Model::LevenbergMarquardt<Grad>::solve_delta" << endl;
 
   if (alpha.size() != model.get_nparam())
     throw Error (InvalidState, 
-		 "Calibration::LevenbergMarquardt<Grad>::solve_delta",
+		 "Model::LevenbergMarquardt<Grad>::solve_delta",
 		  "alpha.size=%d != model.nparam=%d", 
 		 alpha.size(), model.get_nparam());
 
 #ifndef _DEBUG
   if (verbose > 2)
 #endif
-    cerr << "Calibration::LevenbergMarquardt<Grad>::solve_delta lamda="
+    cerr << "Model::LevenbergMarquardt<Grad>::solve_delta lamda="
 	 << lamda << " nparam=" << model.get_nparam() << endl;
 
   unsigned iinfit = 0;
@@ -359,11 +359,11 @@ void Calibration::LevenbergMarquardt<Grad>::solve_delta (const Mt& model)
 
   if (iinfit == 0)
     throw Error (InvalidState,
-		 "Calibration::LevenbergMarquardt<Grad>::solve_delta"
+		 "Model::LevenbergMarquardt<Grad>::solve_delta"
 		  "no parameters in fit");
 
   if (verbose > 2)
-    cerr << "Calibration::LevenbergMarquardt<Grad>::solve_delta for " << iinfit
+    cerr << "Model::LevenbergMarquardt<Grad>::solve_delta for " << iinfit
 	 << " parameters" << endl;
 
   //! curvature matrix
@@ -371,20 +371,20 @@ void Calibration::LevenbergMarquardt<Grad>::solve_delta (const Mt& model)
 
   try {
     // invert Equation 15.5.14
-    Calibration::GaussJordan (alpha, delta, iinfit, singular_threshold);
+    Model::GaussJordan (alpha, delta, iinfit, singular_threshold);
   }
   catch (Error& error)  {
     cerr << "Numerical::GaussJordan failed" << endl;
     verify_orthogonal (temp_copy, model);
-    throw error += "Calibration::LevenbergMarquardt<Grad>::solve_delta";
+    throw error += "Model::LevenbergMarquardt<Grad>::solve_delta";
   }
 
   if (verbose > 2)
-    cerr << "Calibration::LevenbergMarquardt<Grad>::solve_delta exit" << endl;
+    cerr << "Model::LevenbergMarquardt<Grad>::solve_delta exit" << endl;
 }
 
 // /////////////////////////////////////////////////////////////////////////
-// Calibration::LevenbergMarquardt<Grad>::iter
+// Model::LevenbergMarquardt<Grad>::iter
 // /////////////////////////////////////////////////////////////////////////
 
 /*! This method calls solve_delta to determine the change in model
@@ -406,13 +406,13 @@ void Calibration::LevenbergMarquardt<Grad>::solve_delta (const Mt& model)
 */
 template <class Grad>
 template <class Xt, class Yt, class Et, class Mt>
-float Calibration::LevenbergMarquardt<Grad>::iter
+float Model::LevenbergMarquardt<Grad>::iter
 (const vector< Xt >& x,
  const vector< Estimate<Yt,Et> >& y,
  Mt& model)
 {
   if (verbose > 2)
-    cerr << "Calibration::LevenbergMarquardt<Grad>::iter" << endl;
+    cerr << "Model::LevenbergMarquardt<Grad>::iter" << endl;
 
   solve_delta (model);
 
@@ -420,7 +420,7 @@ float Calibration::LevenbergMarquardt<Grad>::iter
   // parameters.  Update the model.
 
   if (verbose > 2)
-    cerr << "Calibration::LevenbergMarquardt<Grad>::iter update model" << endl;
+    cerr << "Model::LevenbergMarquardt<Grad>::iter update model" << endl;
 
   unsigned iinfit = 0;
   for (unsigned ifit=0; ifit<model.get_nparam(); ifit++) {
@@ -441,7 +441,7 @@ float Calibration::LevenbergMarquardt<Grad>::iter
   }
 
   if (verbose > 2)
-    cerr << "Calibration::LevenbergMarquardt<Grad>::iter"
+    cerr << "Model::LevenbergMarquardt<Grad>::iter"
       " calculate new chisq" << endl;
   float new_chisq = calculate_chisq (x, y, model);
 
@@ -450,7 +450,7 @@ float Calibration::LevenbergMarquardt<Grad>::iter
     lamda *= lamda_decrease_factor;
 
     if (verbose)
-      cerr << "Calibration::LevenbergMarquardt<Grad>::iter new chisq="
+      cerr << "Model::LevenbergMarquardt<Grad>::iter new chisq="
            << new_chisq << "\n  better fit; lamda=" << lamda << endl;
 
     best_chisq = new_chisq;
@@ -463,7 +463,7 @@ float Calibration::LevenbergMarquardt<Grad>::iter
     lamda *= lamda_increase_factor;
 
     if (verbose)
-      cerr << "Calibration::LevenbergMarquardt<Grad>::iter new chisq="
+      cerr << "Model::LevenbergMarquardt<Grad>::iter new chisq="
            << new_chisq << "\n  worse fit; lamda=" << lamda << endl;
 
     // restore the old model
@@ -476,7 +476,7 @@ float Calibration::LevenbergMarquardt<Grad>::iter
 }
 
 // /////////////////////////////////////////////////////////////////////////
-// Calibration::LevenbergMarquardt<Grad>::result
+// Model::LevenbergMarquardt<Grad>::result
 // /////////////////////////////////////////////////////////////////////////
 
 /* After a call to init or iter, best_alpha contains the last
@@ -489,12 +489,12 @@ float Calibration::LevenbergMarquardt<Grad>::iter
 template <class Grad>
 template <class Mt>
 void 
-Calibration::LevenbergMarquardt<Grad>::result (Mt& model,
+Model::LevenbergMarquardt<Grad>::result (Mt& model,
 					     vector<vector<double> >& covar,
 					     vector<vector<double> >& curve)
 {
   if (verbose > 2)
-    cerr << "Calibration::LevenbergMarquardt<Grad>::result" << endl;
+    cerr << "Model::LevenbergMarquardt<Grad>::result" << endl;
 
   if (&curve != &null_arg)
     curve = best_alpha;
@@ -530,7 +530,7 @@ Calibration::LevenbergMarquardt<Grad>::result (Mt& model,
 }
 
 // /////////////////////////////////////////////////////////////////////////
-// Calibration::LevenbergMarquardt<Grad>::chisq
+// Model::LevenbergMarquardt<Grad>::chisq
 // /////////////////////////////////////////////////////////////////////////
 
 /* Given a set of abscissa, ordinate, ordinate error, and a model,
@@ -546,21 +546,21 @@ Calibration::LevenbergMarquardt<Grad>::result (Mt& model,
 */ 
 template <class Grad>
 template <class Xt, class Yt, class Et, class Mt>
-float Calibration::LevenbergMarquardt<Grad>::calculate_chisq
+float Model::LevenbergMarquardt<Grad>::calculate_chisq
 (const vector< Xt >& x,
  const vector< Estimate<Yt,Et> >& y,
  Mt& model)
 {
   if (verbose > 2)
-    cerr << "Calibration::LevenbergMarquardt<Grad>::chisq" << endl;
+    cerr << "Model::LevenbergMarquardt<Grad>::chisq" << endl;
 
   if (alpha.size() != model.get_nparam())
-    throw Error (InvalidState, "Calibration::LevenbergMarquardt<Grad>::chisq",
+    throw Error (InvalidState, "Model::LevenbergMarquardt<Grad>::chisq",
 		 "alpha.size=%d != model.nparam=%d",
 		 alpha.size(), model.get_nparam());
 
   if (y.size() < x.size())
-    throw Error (InvalidParam, "Calibration::LevenbergMarquardt<Grad>::chisq",
+    throw Error (InvalidParam, "Model::LevenbergMarquardt<Grad>::chisq",
 		 "y.size=%d < x.size=%d", y.size(), x.size());
 
   // initialize sums
@@ -574,7 +574,7 @@ float Calibration::LevenbergMarquardt<Grad>::calculate_chisq
   for (unsigned ipt=0; ipt < x.size(); ipt++) {
 
     if (verbose > 2)
-      cerr << "Calibration::LevenbergMarquardt<Grad>::chisq lmcoff[" << ipt
+      cerr << "Model::LevenbergMarquardt<Grad>::chisq lmcoff[" << ipt
 	   << "/" << x.size() << "]" << endl;
 
     Chisq += lmcoff (model, x[ipt], y[ipt],
@@ -590,7 +590,7 @@ float Calibration::LevenbergMarquardt<Grad>::calculate_chisq
 }
 
 template <class Mt, class Xt, class Yt, class Et, class Grad>
-float Calibration::lmcoff (// input
+float Model::lmcoff (// input
 			   Mt& model,
 			   const Xt& abscissa,
 			   const Estimate<Yt,Et>& data,
@@ -601,7 +601,7 @@ float Calibration::lmcoff (// input
 			   vector<double>& beta)
 {
   if (LevenbergMarquardt<Grad>::verbose > 2)
-    cerr << "Calibration::lmcoff data val=" << data.val
+    cerr << "Model::lmcoff data val=" << data.val
 	 << " var=" << data.var << endl;
  
   abscissa.apply();
@@ -615,7 +615,7 @@ float Calibration::lmcoff (// input
 
 
 template <class Mt, class Yt, class Wt, class Grad>
-float Calibration::lmcoff1 (// input
+float Model::lmcoff1 (// input
 			  Mt& model,
 			  const Yt& delta_y,
 			  const Wt& weight,
@@ -625,7 +625,7 @@ float Calibration::lmcoff1 (// input
 			  vector<double>& beta)
 {
   if (LevenbergMarquardt<Grad>::verbose > 2)
-    cerr << "Calibration::lmcoff1 delta_y=" << delta_y << endl;
+    cerr << "Model::lmcoff1 delta_y=" << delta_y << endl;
 
   Yt w_delta_y = weight.get_weighted_conjugate (delta_y);
 
@@ -649,7 +649,7 @@ float Calibration::lmcoff1 (// input
   float chisq = weight.get_weighted_norm (delta_y);
 
   if (LevenbergMarquardt<Grad>::verbose > 2)
-    cerr << "Calibration::lmcoff1 chisq=" << chisq << endl;
+    cerr << "Model::lmcoff1 chisq=" << chisq << endl;
 
   return chisq;
 }

@@ -1,18 +1,18 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/ScalarArgument.h,v $
-   $Revision: 1.1 $
-   $Date: 2004/11/22 11:17:16 $
+   $Revision: 1.2 $
+   $Date: 2004/11/22 16:00:09 $
    $Author: straten $ */
 
 #ifndef __ScalarArgument_H
 #define __ScalarArgument_H
 
-#include "Calibration/Scalar.h"
-#include "Calibration/Univariate.h"
-#include "Calibration/NoParameters.h"
+#include "MEPL/Scalar.h"
+#include "MEPL/Univariate.h"
+#include "MEPL/NoParameters.h"
 
-namespace Calibration {
+namespace Model {
 
   //! Represents a constant scalar value
   class ScalarArgument : public Scalar,public Univariate,public NoParameters {
@@ -33,7 +33,7 @@ namespace Calibration {
 
     // ///////////////////////////////////////////////////////////////////
     //
-    // Model implementation
+    // Function implementation
     //
     // ///////////////////////////////////////////////////////////////////
 

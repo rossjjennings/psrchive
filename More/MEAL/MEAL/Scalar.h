@@ -1,17 +1,17 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Scalar.h,v $
-   $Revision: 1.1 $
-   $Date: 2004/11/22 11:17:16 $
+   $Revision: 1.2 $
+   $Date: 2004/11/22 16:00:09 $
    $Author: straten $ */
 
-#ifndef __Calibration_Scalar_H
-#define __Calibration_Scalar_H
+#ifndef __Model_Scalar_H
+#define __Model_Scalar_H
 
 #include <vector>
-#include "Calibration/EvaluationBehaviour.h"
+#include "MEPL/EvaluationBehaviour.h"
 
-namespace Calibration {
+namespace Model {
 
   //! Pure virtual base class of scalar functions
   /*! The Scalar class represents any scalar function with an

@@ -1,20 +1,20 @@
-#include "Calibration/ScalarSine.h"
+#include "MEPL/ScalarSine.h"
 #include <math.h>
 
 //! Return the name of the class
-string Calibration::ScalarSine::get_name () const
+string Model::ScalarSine::get_name () const
 {
   return "ScalarSine";
 }
 
 //! The function
-double Calibration::ScalarSine::function (double x) const
+double Model::ScalarSine::function (double x) const
 {
   return sin(x); 
 }
 
 //! And its first derivative
-double Calibration::ScalarSine::dfdx (double x) const
+double Model::ScalarSine::dfdx (double x) const
 { 
   return cos(x);
 }

@@ -1,16 +1,16 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/ExampleComplex2.h,v $
-   $Revision: 1.1 $
-   $Date: 2004/11/22 11:17:15 $
+   $Revision: 1.2 $
+   $Date: 2004/11/22 16:00:09 $
    $Author: straten $ */
 
 #ifndef __Example_H
 #define __Example_H
 
-#include "Calibration/OptimizedComplex2.h"
+#include "MEPL/OptimizedComplex2.h"
 
-namespace Calibration {
+namespace Model {
 
   //! A gain transformation
   class Example : public OptimizedComplex2 {

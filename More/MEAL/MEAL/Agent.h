@@ -1,19 +1,19 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Agent.h,v $
-   $Revision: 1.1 $
-   $Date: 2004/11/22 11:17:14 $
+   $Revision: 1.2 $
+   $Date: 2004/11/22 16:00:08 $
    $Author: straten $ */
 
-#ifndef __Calibration_Agent_H
-#define __Calibration_Agent_H
+#ifndef __Model_Agent_H
+#define __Model_Agent_H
 
 #include "Registry.h"
 #include "Reference.h"
 
-namespace Calibration {
+namespace Model {
 
-  class Model;
+  class Function;
 
   //! Pure virtual base class of Advocate template base class
   class Agent : public Reference::Able {
@@ -27,25 +27,25 @@ namespace Calibration {
     virtual string get_name () = 0;
 
     //! Return a null-constructed instance of the derived class
-    virtual Model* new_Model () = 0;
+    virtual Function* new_Function () = 0;
 
   protected:
 
-    //! Agents registered for creating derived classes in Model::load
+    //! Agents registered for creating derived classes in Function::load
     static Registry::List<Agent> registry;
       
     //! Declare friends with Registry::Entry<Agent> so it can access registry
     friend class Registry::Entry<Agent>;
 
-    //! Declare friends with Model so Model::load can access registry
-    friend class Model;
+    //! Declare friends with Function so Function::load can access registry
+    friend class Function;
 
   };
 
 
-  //! Classes derived from Model are registered for use via an Advocate
+  //! Classes derived from Function are registered for use via an Advocate
   /*! This abstract template base class may be used to register
-    Model-derived classes for use with the Model::load factory. */
+    Function-derived classes for use with the Function::load factory. */
 
   template<class Type>
     class Advocate : public Agent {
@@ -58,8 +58,8 @@ namespace Calibration {
     //! Return the name of the derived class
     string get_name () { return instance->get_name(); }
 
-    //! Return a new instance of the Model derived class
-    Model* new_Model () { return new Type; }
+    //! Return a new instance of the Function derived class
+    Function* new_Function () { return new Type; }
 
     private:
 

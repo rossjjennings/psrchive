@@ -1,21 +1,21 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/UnaryRule.h,v $
-   $Revision: 1.1 $
-   $Date: 2004/11/22 11:17:17 $
+   $Revision: 1.2 $
+   $Date: 2004/11/22 16:00:09 $
    $Author: straten $ */
 
-#ifndef __Calibration_UnaryRule_H
-#define __Calibration_UnaryRule_H
+#ifndef __Model_UnaryRule_H
+#define __Model_UnaryRule_H
 
-#include "Calibration/OptimizedModel.h"
-#include "Calibration/Composite.h"
+#include "MEPL/Optimized.h"
+#include "MEPL/Composite.h"
 
-namespace Calibration {
+namespace Model {
 
   //! Abstract base class of unary operators
   template<class MType>
-  class UnaryRule : public OptimizedModel<MType>, public Composite
+  class UnaryRule : public Optimized<MType>, public Composite
   {
 
   public:
@@ -32,12 +32,12 @@ namespace Calibration {
     //! Destructor
     ~UnaryRule () { }
 
-    //! Set the Model on which the operation will be performed
+    //! Set the Function on which the operation will be performed
     void set_model (MType* model);
 
   protected:
 
-    //! The Model on which the operation will be performed
+    //! The Function on which the operation will be performed
     Project<MType> model;
 
   };
@@ -45,8 +45,8 @@ namespace Calibration {
 }
 
 template<class MType>
-Calibration::UnaryRule<MType>&
-Calibration::UnaryRule<MType>::operator = (const UnaryRule& rule)
+Model::UnaryRule<MType>&
+Model::UnaryRule<MType>::operator = (const UnaryRule& rule)
 {
   if (this != &rule)
     set_model (rule.model);
@@ -56,7 +56,7 @@ Calibration::UnaryRule<MType>::operator = (const UnaryRule& rule)
 
 
 template<class MType>
-void Calibration::UnaryRule<MType>::set_model (MType* _model)
+void Model::UnaryRule<MType>::set_model (MType* _model)
 {
   if (model)
     unmap (model, false);
@@ -67,7 +67,7 @@ void Calibration::UnaryRule<MType>::set_model (MType* _model)
     return;
 
   if (verbose)
-    cerr << "Calibration::UnaryRule::set_model map " 
+    cerr << "Model::UnaryRule::set_model map " 
          << model->get_name() << endl;
 
   map (model);

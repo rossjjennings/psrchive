@@ -1,19 +1,19 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/RuleMath.h,v $
-   $Revision: 1.1 $
-   $Date: 2004/11/22 11:17:16 $
+   $Revision: 1.2 $
+   $Date: 2004/11/22 16:00:09 $
    $Author: straten $ */
 
-#ifndef __Calibration_RuleMath_H
-#define __Calibration_RuleMath_H
+#ifndef __Model_RuleMath_H
+#define __Model_RuleMath_H
 
-#include "Calibration/SumRule.h"
-#include "Calibration/NegationRule.h"
-#include "Calibration/ProductRule.h"
-#include "Calibration/InverseRule.h"
+#include "MEPL/SumRule.h"
+#include "MEPL/NegationRule.h"
+#include "MEPL/ProductRule.h"
+#include "MEPL/InverseRule.h"
 
-namespace Calibration {
+namespace Model {
 
   template<class Type> SumRule<Type>* Sum (Type* a, Type* b)
   {

@@ -1,26 +1,26 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/CongruenceTransformation.h,v $
-   $Revision: 1.1 $
-   $Date: 2004/11/22 11:17:14 $
+   $Revision: 1.2 $
+   $Date: 2004/11/22 16:00:08 $
    $Author: straten $ */
 
-#ifndef __Calibration_CongruenceTransformation_H
-#define __Calibration_CongruenceTransformation_H
+#ifndef __Model_CongruenceTransformation_H
+#define __Model_CongruenceTransformation_H
 
-#include "Calibration/OptimizedModel.h"
-#include "Calibration/Composite.h"
-#include "Calibration/Complex2.h"
+#include "MEPL/Optimized.h"
+#include "MEPL/Composite.h"
+#include "MEPL/Complex2.h"
 
-namespace Calibration {
+namespace Model {
 
-  //! Models the congruence transformation, \f$\rho^prime=J\rho J^\dagger\f$.
+  //! Functions the congruence transformation, \f$\rho^prime=J\rho J^\dagger\f$.
   /*! This class models the transformation of the matrix, \f$ \rho \f$ by
     a congruence transformation in \f$ J \f$.  The partial derivatives of the
     output, \f$ \rho^\prime \f$, are computed using the product rule
     and the partial derivatives of \f$ \rho \f$ and \f$ J \f$. */
   class CongruenceTransformation
-    : public OptimizedModel<Complex2>, public Composite 
+    : public Optimized<Complex2>, public Composite 
   {
 
   public:
@@ -45,7 +45,7 @@ namespace Calibration {
 
     // ///////////////////////////////////////////////////////////////////
     //
-    // OptimizedModel implementation
+    // Optimized implementation
     //
     // ///////////////////////////////////////////////////////////////////
 

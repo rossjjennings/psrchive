@@ -1,12 +1,12 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Attic/Factory.h,v $
-   $Revision: 1.1 $
-   $Date: 2004/11/22 11:17:15 $
+   $Revision: 1.2 $
+   $Date: 2004/11/22 16:00:09 $
    $Author: straten $ */
 
-#ifndef __Calibration_Factory_H
-#define __Calibration_Factory_H
+#ifndef __Model_Factory_H
+#define __Model_Factory_H
 
 #include "Functor.h"
 #include "stringtok.h"

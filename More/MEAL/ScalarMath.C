@@ -1,53 +1,53 @@
-#include "Calibration/ScalarMath.h"
-#include "Calibration/ScalarValue.h"
-#include "Calibration/ScalarRoot.h"
-#include "Calibration/ScalarSine.h"
-#include "Calibration/ScalarCosine.h"
-#include "Calibration/ScalarTangent.h"
-#include "Calibration/ScalarHypSine.h"
-#include "Calibration/ScalarHypCosine.h"
-#include "Calibration/ScalarHypTangent.h"
-#include "Calibration/ScalarExponential.h"
-#include "Calibration/ScalarLogarithm.h"
-#include "Calibration/ScalarAbsolute.h"
-#include "Calibration/ScalarInverseHypTangent.h"
-#include "Calibration/ScalarInverseTangent2.h"
-#include "Calibration/ScalarPower.h"
+#include "MEPL/ScalarMath.h"
+#include "MEPL/ScalarValue.h"
+#include "MEPL/ScalarRoot.h"
+#include "MEPL/ScalarSine.h"
+#include "MEPL/ScalarCosine.h"
+#include "MEPL/ScalarTangent.h"
+#include "MEPL/ScalarHypSine.h"
+#include "MEPL/ScalarHypCosine.h"
+#include "MEPL/ScalarHypTangent.h"
+#include "MEPL/ScalarExponential.h"
+#include "MEPL/ScalarLogarithm.h"
+#include "MEPL/ScalarAbsolute.h"
+#include "MEPL/ScalarInverseHypTangent.h"
+#include "MEPL/ScalarInverseTangent2.h"
+#include "MEPL/ScalarPower.h"
 
-#include "Calibration/SumRule.h"
-#include "Calibration/NegationRule.h"
-#include "Calibration/ProductRule.h"
-#include "Calibration/InverseRule.h"
-#include "Calibration/ChainRule.h"
-#include "Calibration/RuleMath.h"
+#include "MEPL/SumRule.h"
+#include "MEPL/NegationRule.h"
+#include "MEPL/ProductRule.h"
+#include "MEPL/InverseRule.h"
+#include "MEPL/ChainRule.h"
+#include "MEPL/RuleMath.h"
 
-Calibration::ScalarMath::ScalarMath (const Estimate<double>& value)
+Model::ScalarMath::ScalarMath (const Estimate<double>& value)
 {
   expression = new ScalarValue (value);
 }
     
-Calibration::ScalarMath::ScalarMath (double value)
+Model::ScalarMath::ScalarMath (double value)
 {
   expression = new ScalarValue (value);
 }
 
-Calibration::ScalarMath::ScalarMath (const ScalarMath& s)
+Model::ScalarMath::ScalarMath (const ScalarMath& s)
 {
   expression = s.expression;
 }
 
-Calibration::ScalarMath::ScalarMath (const Reference::To<Scalar>& s)
+Model::ScalarMath::ScalarMath (const Reference::To<Scalar>& s)
 {
   expression = s;
 }
 
-Calibration::ScalarMath::ScalarMath (Scalar& s)
+Model::ScalarMath::ScalarMath (Scalar& s)
 {
   expression = &s;
 }
 
-const Calibration::ScalarMath 
-Calibration::ScalarMath::operator = (const ScalarMath& s)
+const Model::ScalarMath 
+Model::ScalarMath::operator = (const ScalarMath& s)
 {
   if (&s != this)
     expression = s.expression;
@@ -55,26 +55,26 @@ Calibration::ScalarMath::operator = (const ScalarMath& s)
   return *this;
 }
  
-const Calibration::ScalarMath
-Calibration::ScalarMath::operator += (const ScalarMath& b)
+const Model::ScalarMath
+Model::ScalarMath::operator += (const ScalarMath& b)
 {
   return operator = (*this + b);
 }
 
-const Calibration::ScalarMath
-Calibration::ScalarMath::operator -= (const ScalarMath& b)
+const Model::ScalarMath
+Model::ScalarMath::operator -= (const ScalarMath& b)
 {
   return operator = (*this - b);
 }
     
-const Calibration::ScalarMath
-Calibration::ScalarMath::operator *= (const ScalarMath& b)
+const Model::ScalarMath
+Model::ScalarMath::operator *= (const ScalarMath& b)
 {
   return operator = (*this * b);
 }
     
-const Calibration::ScalarMath
-Calibration::ScalarMath::operator /= (const ScalarMath& b)
+const Model::ScalarMath
+Model::ScalarMath::operator /= (const ScalarMath& b)
 {
   return operator = (*this / b);
 }
@@ -82,58 +82,58 @@ Calibration::ScalarMath::operator /= (const ScalarMath& b)
 
 inline double inv (double x) { return 1.0/x; }
 
-const Calibration::ScalarMath
-Calibration::operator + (const ScalarMath& a, const ScalarMath& b)
+const Model::ScalarMath
+Model::operator + (const ScalarMath& a, const ScalarMath& b)
 {
   return *Sum<Scalar> (a.expression, b.expression);
 }
 
-const Calibration::ScalarMath
-Calibration::operator - (const ScalarMath& a, const ScalarMath& b)
+const Model::ScalarMath
+Model::operator - (const ScalarMath& a, const ScalarMath& b)
 {
   return *Difference<Scalar> (a.expression, b.expression);
 }
 
-const Calibration::ScalarMath
-Calibration::operator * (const ScalarMath& a, const ScalarMath& b)
+const Model::ScalarMath
+Model::operator * (const ScalarMath& a, const ScalarMath& b)
 {
   return *Product<Scalar> (a.expression, b.expression);
 }
 
-const Calibration::ScalarMath
-Calibration::operator / (const ScalarMath& a, const ScalarMath& b)
+const Model::ScalarMath
+Model::operator / (const ScalarMath& a, const ScalarMath& b)
 {
   return *Quotient<Scalar> (a.expression, b.expression);
 }
 
-const Calibration::ScalarMath
-Calibration::operator - (const ScalarMath& a)
+const Model::ScalarMath
+Model::operator - (const ScalarMath& a)
 {
   return *Negation<Scalar> (a.expression);
 }
 
-bool Calibration::operator == (const ScalarMath& a, const ScalarMath& b)
+bool Model::operator == (const ScalarMath& a, const ScalarMath& b)
 {
   return a.evaluate() == b.evaluate();
 }
 
-bool Calibration::operator != (const ScalarMath& a, const ScalarMath& b)
+bool Model::operator != (const ScalarMath& a, const ScalarMath& b)
 {
   return a.evaluate() != b.evaluate();
 }
 
-bool Calibration::operator < (const ScalarMath& a, const ScalarMath& b)
+bool Model::operator < (const ScalarMath& a, const ScalarMath& b)
 {
   return a.evaluate() < b.evaluate();
 }
 
-bool Calibration::operator > (const ScalarMath& a, const ScalarMath& b)
+bool Model::operator > (const ScalarMath& a, const ScalarMath& b)
 {
   return a.evaluate() > b.evaluate();
 }
 
-const Calibration::ScalarMath
-Calibration::sqrt (const ScalarMath& x)
+const Model::ScalarMath
+Model::sqrt (const ScalarMath& x)
 {
   ScalarRoot* result = new ScalarRoot;
   result->set_model( x.expression );
@@ -141,88 +141,88 @@ Calibration::sqrt (const ScalarMath& x)
 }
 
 
-const Calibration::ScalarMath
-Calibration::sin (const ScalarMath& x)
+const Model::ScalarMath
+Model::sin (const ScalarMath& x)
 {
   ScalarSine* result = new ScalarSine;
   result->set_model( x.expression );
   return *result;
 }
 
-const Calibration::ScalarMath
-Calibration::cos (const ScalarMath& x)
+const Model::ScalarMath
+Model::cos (const ScalarMath& x)
 {
   ScalarCosine* result = new ScalarCosine;
   result->set_model( x.expression );
   return *result;
 }
 
-const Calibration::ScalarMath
-Calibration::tan (const ScalarMath& x)
+const Model::ScalarMath
+Model::tan (const ScalarMath& x)
 {
   ScalarTangent* result = new ScalarTangent;
   result->set_model( x.expression );
   return *result;
 }
 
-const Calibration::ScalarMath
-Calibration::sinh (const ScalarMath& x)
+const Model::ScalarMath
+Model::sinh (const ScalarMath& x)
 {
   ScalarHypSine* result = new ScalarHypSine;
   result->set_model( x.expression );
   return *result;
 }
 
-const Calibration::ScalarMath
-Calibration::cosh (const ScalarMath& x)
+const Model::ScalarMath
+Model::cosh (const ScalarMath& x)
 {
   ScalarHypCosine* result = new ScalarHypCosine;
   result->set_model( x.expression );
   return *result;
 }
 
-const Calibration::ScalarMath
-Calibration::tanh (const ScalarMath& x)
+const Model::ScalarMath
+Model::tanh (const ScalarMath& x)
 {
   ScalarHypTangent* result = new ScalarHypTangent;
   result->set_model( x.expression );
   return *result;
 }
 
-const Calibration::ScalarMath
-Calibration::abs (const ScalarMath& x)
+const Model::ScalarMath
+Model::abs (const ScalarMath& x)
 {
   ScalarAbsolute* result = new ScalarAbsolute;
   result->set_model( x.expression );
   return *result;
 }
 
-const Calibration::ScalarMath
-Calibration::exp (const ScalarMath& x)
+const Model::ScalarMath
+Model::exp (const ScalarMath& x)
 {
   ScalarExponential* result = new ScalarExponential;
   result->set_model( x.expression );
   return *result;
 }
 
-const Calibration::ScalarMath
-Calibration::log (const ScalarMath& x)
+const Model::ScalarMath
+Model::log (const ScalarMath& x)
 {
   ScalarLogarithm* result = new ScalarLogarithm;
   result->set_model( x.expression );
   return *result;
 }
 
-const Calibration::ScalarMath
-Calibration::atanh (const ScalarMath& x)
+const Model::ScalarMath
+Model::atanh (const ScalarMath& x)
 {
   UnaryScalar* result = new ScalarInverseHypTangent;
   result->set_model( x.expression );
   return *result;
 }
 
-const Calibration::ScalarMath
-Calibration::atan2 (const ScalarMath& y, const ScalarMath& x)
+const Model::ScalarMath
+Model::atan2 (const ScalarMath& y, const ScalarMath& x)
 {
   BinaryScalar* result = new ScalarInverseTangent2;
   result->set_arg1( y.expression );
@@ -230,8 +230,8 @@ Calibration::atan2 (const ScalarMath& y, const ScalarMath& x)
   return *result;
 }
 
-const Calibration::ScalarMath
-Calibration::pow (const ScalarMath& x, const ScalarMath& y)
+const Model::ScalarMath
+Model::pow (const ScalarMath& x, const ScalarMath& y)
 {
   BinaryScalar* result = new ScalarPower;
   result->set_arg1( x.expression );
@@ -240,13 +240,13 @@ Calibration::pow (const ScalarMath& x, const ScalarMath& y)
 }
 
 //! Evaluate the expression
-double Calibration::ScalarMath::evaluate () const
+double Model::ScalarMath::evaluate () const
 {
   return expression->evaluate();
 }
 
 //! Evaluate the expression and its estimated error
-Estimate<double> Calibration::ScalarMath::get_Estimate () const
+Estimate<double> Model::ScalarMath::get_Estimate () const
 {
   Estimate<double> value;
   expression->evaluate( value );

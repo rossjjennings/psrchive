@@ -1,10 +1,10 @@
-#include "Calibration/ScalarRoot.h"
+#include "MEPL/ScalarRoot.h"
 #include <math.h>
 
 //
 //
 //
-string Calibration::ScalarRoot::get_name () const
+string Model::ScalarRoot::get_name () const
 {
   return "ScalarRoot";
 }
@@ -12,7 +12,7 @@ string Calibration::ScalarRoot::get_name () const
 //
 //
 //
-double Calibration::ScalarRoot::function (double x) const
+double Model::ScalarRoot::function (double x) const
 {
   return sqrt(x); 
 }
@@ -20,7 +20,7 @@ double Calibration::ScalarRoot::function (double x) const
 //
 //
 //
-double Calibration::ScalarRoot::dfdx (double x) const
+double Model::ScalarRoot::dfdx (double x) const
 { 
   return 0.5/sqrt(x);
 }

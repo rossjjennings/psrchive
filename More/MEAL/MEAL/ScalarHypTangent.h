@@ -1,16 +1,16 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/ScalarHypTangent.h,v $
-   $Revision: 1.1 $
-   $Date: 2004/11/22 11:17:16 $
+   $Revision: 1.2 $
+   $Date: 2004/11/22 16:00:09 $
    $Author: straten $ */
 
-#ifndef __Calibration_ScalarHypTangent_H
-#define __Calibration_ScalarHypTangent_H
+#ifndef __Model_ScalarHypTangent_H
+#define __Model_ScalarHypTangent_H
 
-#include "Calibration/UnaryScalar.h"
+#include "MEPL/UnaryScalar.h"
 
-namespace Calibration {
+namespace Model {
 
   //! The hyperbolic tangent of a Scalar function
   class ScalarHypTangent : public UnaryScalar
@@ -32,7 +32,7 @@ namespace Calibration {
 
     // ///////////////////////////////////////////////////////////////////
     //
-    // Model implementation
+    // Function implementation
     //
     // ///////////////////////////////////////////////////////////////////
 

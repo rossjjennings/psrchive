@@ -1,16 +1,16 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/NoParameters.h,v $
-   $Revision: 1.1 $
-   $Date: 2004/11/22 11:17:16 $
+   $Revision: 1.2 $
+   $Date: 2004/11/22 16:00:09 $
    $Author: straten $ */
 
 #ifndef __NoParameters_H
 #define __NoParameters_H
 
-#include "Calibration/ParameterBehaviour.h"
+#include "MEPL/ParameterBehaviour.h"
 
-namespace Calibration {
+namespace Model {
 
   //! Represents a model with no parameters
   class NoParameters : public ParameterBehaviour {
@@ -19,7 +19,7 @@ namespace Calibration {
 
     // ///////////////////////////////////////////////////////////////////
     //
-    // Model implementation
+    // Function implementation
     //
     // ///////////////////////////////////////////////////////////////////
  

@@ -1,17 +1,17 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Boost.h,v $
-   $Revision: 1.1 $
-   $Date: 2004/11/22 11:17:14 $
+   $Revision: 1.2 $
+   $Date: 2004/11/22 16:00:08 $
    $Author: straten $ */
 
-#ifndef __Calibration_Boost_H
-#define __Calibration_Boost_H
+#ifndef __Model_Boost_H
+#define __Model_Boost_H
 
-#include "Calibration/OptimizedComplex2.h"
+#include "MEPL/OptimizedComplex2.h"
 #include "Vector.h"
 
-namespace Calibration {
+namespace Model {
 
   //! Represents a boost (Hermitian, dichroic) transformation
   /*! This class represents the boost, \f$\beta\f$, along an arbitrary
@@ -42,7 +42,7 @@ namespace Calibration {
 
     // ///////////////////////////////////////////////////////////////////
     //
-    // Model implementation
+    // Function implementation
     //
     // ///////////////////////////////////////////////////////////////////
 

@@ -1,18 +1,18 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Complex2.h,v $
-   $Revision: 1.1 $
-   $Date: 2004/11/22 11:17:14 $
+   $Revision: 1.2 $
+   $Date: 2004/11/22 16:00:08 $
    $Author: straten $ */
 
-#ifndef __Calibration_Complex2_H
-#define __Calibration_Complex2_H
+#ifndef __Model_Complex2_H
+#define __Model_Complex2_H
 
-#include "Calibration/EvaluationBehaviour.h"
+#include "MEPL/EvaluationBehaviour.h"
 #include "Estimate.h"
 #include "Jones.h"
 
-namespace Calibration {
+namespace Model {
 
   //! Pure virtual base class of all complex 2x2 matrix functions
   /*! The Complex2 class represents any complex 2x2 matrix function with an

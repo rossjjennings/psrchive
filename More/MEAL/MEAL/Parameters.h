@@ -1,21 +1,21 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Parameters.h,v $
-   $Revision: 1.1 $
-   $Date: 2004/11/22 11:17:16 $
+   $Revision: 1.2 $
+   $Date: 2004/11/22 16:00:09 $
    $Author: straten $ */
 
 #ifndef __Parameters_H
 #define __Parameters_H
 
-#include "Calibration/ParameterBehaviour.h"
+#include "MEPL/ParameterBehaviour.h"
 
 #include "Estimate.h"
 #include "Error.h"
 
 #include <vector>
 
-namespace Calibration {
+namespace Model {
   
   //! Abstract base class implements parameter storage and access
   class Parameters : public ParameterBehaviour {
@@ -33,7 +33,7 @@ namespace Calibration {
 
     // ///////////////////////////////////////////////////////////////////
     //
-    // Model implementation
+    // Function implementation
     //
     // ///////////////////////////////////////////////////////////////////
  
@@ -46,7 +46,7 @@ namespace Calibration {
     //! Return the value of the specified parameter
     double get_param (unsigned index) const
     {
-      range_check (index, "Calibration::Parameters::get_param");
+      range_check (index, "Model::Parameters::get_param");
       return params[index].val;
     }
 
@@ -56,28 +56,28 @@ namespace Calibration {
     //! Return the variance of the specified parameter
     double get_variance (unsigned index) const
     {
-      range_check (index, "Calibration::Parameters::get_variance");
+      range_check (index, "Model::Parameters::get_variance");
       return params[index].var;
     }
 
     //! Set the variance of the specified parameter
     void set_variance (unsigned index, double value)
     {
-      range_check (index, "Calibration::Parameters::set_variance");
+      range_check (index, "Model::Parameters::set_variance");
       params[index].var = value;
     }
 
     //! Return true if parameter at index is to be fitted
     bool get_infit (unsigned index) const
     {
-      range_check (index, "Calibration::Parameters::get_infit");
+      range_check (index, "Model::Parameters::get_infit");
       return fit[index];
     }
 
     //! Set flag for parameter at index to be fitted
     void set_infit (unsigned index, bool flag)
     {
-      range_check (index, "Calibration::Parameters::set_infit");
+      range_check (index, "Model::Parameters::set_infit");
       fit[index] = flag;
     }
 

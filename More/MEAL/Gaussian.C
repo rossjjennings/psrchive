@@ -1,19 +1,19 @@
-#include "Calibration/Gaussian.h"
+#include "MEPL/Gaussian.h"
 
-Calibration::Gaussian::Gaussian ()
+Model::Gaussian::Gaussian ()
   : UnivariateOptimizedScalar (3)
 {
   cyclic = false;
 }
 
 //! Return the name of the class
-string Calibration::Gaussian::get_name () const
+string Model::Gaussian::get_name () const
 {
   return "Gaussian";
 }
 
 //! Return the name of the specified parameter
-string Calibration::Gaussian::get_param_name (unsigned index) const
+string Model::Gaussian::get_param_name (unsigned index) const
 {
   switch (index) {
   case 0:
@@ -28,55 +28,55 @@ string Calibration::Gaussian::get_param_name (unsigned index) const
 }
 
 //! Set the centre
-void Calibration::Gaussian::set_centre (double centre)
+void Model::Gaussian::set_centre (double centre)
 {
   set_param (0, centre);
 }
 
 //! Get the centre
-double Calibration::Gaussian::get_centre () const
+double Model::Gaussian::get_centre () const
 {
   return get_param (0);
 }
 
 //! Set the width
-void Calibration::Gaussian::set_width (double width)
+void Model::Gaussian::set_width (double width)
 {
   set_param (1, width);
 }
 
 //! Get the width
-double Calibration::Gaussian::get_width () const
+double Model::Gaussian::get_width () const
 {
   return get_param (1);
 }
 
 //! Set the height
-void Calibration::Gaussian::set_height (double height)
+void Model::Gaussian::set_height (double height)
 {
   set_param (2, height);
 }
 
 //! Get the height
-double Calibration::Gaussian::get_height () const
+double Model::Gaussian::get_height () const
 {
   return get_param (2);
 }
 
 //! Set the cyclic
-void Calibration::Gaussian::set_cyclic (bool _cyclic)
+void Model::Gaussian::set_cyclic (bool _cyclic)
 {
   cyclic = _cyclic;
 }
 
 //! Get the cyclic
-bool Calibration::Gaussian::get_cyclic () const
+bool Model::Gaussian::get_cyclic () const
 {
   return cyclic;
 }
 
 //! Return the value (and gradient, if requested) of the function
-void Calibration::Gaussian::calculate (double& result, vector<double>* grad)
+void Model::Gaussian::calculate (double& result, vector<double>* grad)
 {
   double centre   = get_centre ();
   double width    = get_width ();
@@ -132,10 +132,10 @@ void Calibration::Gaussian::calculate (double& result, vector<double>* grad)
   }
 
   if (verbose) {
-    cerr << "Calibration::Gaussian::calculate result\n"
+    cerr << "Model::Gaussian::calculate result\n"
 	 "   " << result << endl;
     if (grad) {
-      cerr << "Calibration::Gaussian::calculate gradient" << endl;
+      cerr << "Model::Gaussian::calculate gradient" << endl;
       for (unsigned i=0; i<grad->size(); i++)
 	cerr << "   " << i << ":" << get_infit(i) << "=" << (*grad)[i] << endl;
     }

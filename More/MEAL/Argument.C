@@ -1,17 +1,17 @@
-#include "Calibration/Argument.h"
+#include "MEPL/Argument.h"
 
-bool Calibration::Argument::verbose = false;
+bool Model::Argument::verbose = false;
 
-Calibration::Argument::~Argument ()
+Model::Argument::~Argument ()
 {
 #ifdef _DEBUG
-  cerr << "Calibration::Argument::~Argument" << endl;
+  cerr << "Model::Argument::~Argument" << endl;
 #endif
 }
 
-Calibration::Argument::Value::~Value ()
+Model::Argument::Value::~Value ()
 {
 #ifdef _DEBUG
-  cerr << "Calibration::Argument::Value::~Value" << endl;
+  cerr << "Model::Argument::Value::~Value" << endl;
 #endif
 }

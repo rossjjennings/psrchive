@@ -1,9 +1,9 @@
-#include "Calibration/Composite.h"
-#include "Calibration/ConstantModel.h"
+#include "MEPL/Composite.h"
+#include "MEPL/Constant.h"
 #include "Error.h"
 
 //! Default constructor
-Calibration::Composite::Composite ()
+Model::Composite::Composite ()
 {
   nparameters = 0;
   current_model = 0;
@@ -11,56 +11,56 @@ Calibration::Composite::Composite ()
 }
 
 //! Return the number of parameters
-unsigned Calibration::Composite::get_nparam () const
+unsigned Model::Composite::get_nparam () const
 {
   return nparameters;
 }
 
 //! Return the name of the specified parameter
-string Calibration::Composite::get_param_name (unsigned index) const
+string Model::Composite::get_param_name (unsigned index) const
 {
-  return get_Model(index)->get_param_name (index);
+  return get_Function(index)->get_param_name (index);
 }
 
 //! Return the value of the specified parameter
-double Calibration::Composite::get_param (unsigned index) const
+double Model::Composite::get_param (unsigned index) const
 {
-  return get_Model(index)->get_param (index);
+  return get_Function(index)->get_param (index);
 }
 
 //! Set the value of the specified parameter
-void Calibration::Composite::set_param (unsigned index, double value)
+void Model::Composite::set_param (unsigned index, double value)
 {
-  get_Model(index)->set_param (index, value);
+  get_Function(index)->set_param (index, value);
 }
 
 //! Return the variance of the specified parameter
-double Calibration::Composite::get_variance (unsigned index) const
+double Model::Composite::get_variance (unsigned index) const
 {
-  return get_Model(index)->get_variance (index);
+  return get_Function(index)->get_variance (index);
 }
 
 //! Set the variance of the specified parameter
-void Calibration::Composite::set_variance (unsigned index, double variance)
+void Model::Composite::set_variance (unsigned index, double variance)
 {
-  get_Model(index)->set_variance (index, variance);
+  get_Function(index)->set_variance (index, variance);
 }
 
 //! Return true if parameter at index is to be fitted
-bool Calibration::Composite::get_infit (unsigned index) const
+bool Model::Composite::get_infit (unsigned index) const
 {
-  return get_Model(index)->get_infit (index);
+  return get_Function(index)->get_infit (index);
 }
 
 //! Set flag for parameter at index to be fitted
-void Calibration::Composite::set_infit (unsigned index, bool flag)
+void Model::Composite::set_infit (unsigned index, bool flag)
 {
-  get_Model(index)->set_infit (index, flag);
+  get_Function(index)->set_infit (index, flag);
 }
 
 
 //! The most common abscissa type needs a simple interface
-void Calibration::Composite::set_argument (unsigned dimension, Argument* axis)
+void Model::Composite::set_argument (unsigned dimension, Argument* axis)
 {
   for (unsigned imodel=0; imodel < models.size(); imodel++)  {
     reference_check (imodel, "set_axis");
@@ -74,19 +74,19 @@ void Calibration::Composite::set_argument (unsigned dimension, Argument* axis)
 //
 // ///////////////////////////////////////////////////////////////////
 
-string Calibration::Composite::class_name() const
+string Model::Composite::class_name() const
 {
-  return "Calibration::Composite[" + get_name() + "]::";
+  return "Model::Composite[" + get_name() + "]::";
 }
 
 //! Get the number of Models
-unsigned Calibration::Composite::get_nmodel () const
+unsigned Model::Composite::get_nmodel () const
 {
   return models.size ();
 }
 
 
-void Calibration::Composite::map (Projection* modelmap, bool signal_changes)
+void Model::Composite::map (Projection* modelmap, bool signal_changes)
 {
 #ifdef _DEBUG
   cerr << class_name() + "map (Projection* = " << modelmap << ")" << endl;
@@ -114,7 +114,7 @@ void Calibration::Composite::map (Projection* modelmap, bool signal_changes)
   
   try {
 
-    Model* model = modelmap->get_Model();
+    Function* model = modelmap->get_Function();
     modelmap->imap.resize(0);
     add_component (model, modelmap->imap);
 
@@ -157,7 +157,7 @@ void Calibration::Composite::map (Projection* modelmap, bool signal_changes)
 
 
 //! Map the Model indeces
-void Calibration::Composite::add_component (Model* model,
+void Model::Composite::add_component (Function* model,
 					    vector<unsigned>& imap)
 {
   if (!model)
@@ -166,10 +166,10 @@ void Calibration::Composite::add_component (Model* model,
   if (very_verbose)
     cerr << class_name() + "add_component [" <<model->get_name()<< "]" << endl;
 
-  ConstantModel* constant = dynamic_cast<ConstantModel*>(model);
+  Constant* constant = dynamic_cast<Constant*>(model);
   if (constant) {
     if (very_verbose)
-      cerr << class_name() + "add_component ConstantModel" << endl;
+      cerr << class_name() + "add_component Constant" << endl;
     return;
   }
 
@@ -229,7 +229,7 @@ void Calibration::Composite::add_component (Model* model,
 
 }
 
-void Calibration::Composite::unmap (Projection* modelmap, bool signal_changes)
+void Model::Composite::unmap (Projection* modelmap, bool signal_changes)
 {
   if (!(modelmap->meta))
     throw Error (InvalidParam, class_name() + "unmap",
@@ -249,7 +249,7 @@ void Calibration::Composite::unmap (Projection* modelmap, bool signal_changes)
   maps.erase (maps.begin()+imap);
 
   // remove the component
-  Model* model = modelmap->get_Model();
+  Function* model = modelmap->get_Function();
   remove_component (model);
 
   // disconnect the callback
@@ -264,15 +264,15 @@ void Calibration::Composite::unmap (Projection* modelmap, bool signal_changes)
 
 
 //! Remove a Model from the list
-void Calibration::Composite::remove_component (Model* model)
+void Model::Composite::remove_component (Function* model)
 {
   if (very_verbose)
     cerr << class_name() + "remove_component" << endl;
 
-  ConstantModel* constant = dynamic_cast<ConstantModel*>(model);
+  Constant* constant = dynamic_cast<Constant*>(model);
   if (constant) {
     if (very_verbose)
-      cerr << class_name() + "remove_component no need to remove ConstantModel"
+      cerr << class_name() + "remove_component no need to remove Constant"
 	   << endl;
     return;
   }
@@ -291,7 +291,7 @@ void Calibration::Composite::remove_component (Model* model)
   }
   else {
     
-    unsigned imodel = find_Model(model);
+    unsigned imodel = find_Function(model);
 
     if (very_verbose)
       cerr << class_name() + "remove_component imodel=" << imodel << endl;
@@ -310,7 +310,7 @@ void Calibration::Composite::remove_component (Model* model)
 }
 
 //! Recount the number of parameters
-void Calibration::Composite::remap (bool signal_changes)
+void Model::Composite::remap (bool signal_changes)
 { 
   if (very_verbose)
     cerr << class_name() << "remap remap Projection instances" << endl;
@@ -346,7 +346,7 @@ void Calibration::Composite::remap (bool signal_changes)
     cerr << class_name() << "remap exit" << endl;
 }
 
-void Calibration::Composite::attribute_changed (Attribute attribute) 
+void Model::Composite::attribute_changed (Attribute attribute) 
 {
   if (very_verbose)
     cerr << class_name() << "attribute_changed" << endl;
@@ -367,14 +367,14 @@ void Calibration::Composite::attribute_changed (Attribute attribute)
 }
 
 //! Get the const Model that corresponds to the given index
-const Calibration::Model*
-Calibration::Composite::get_Model (unsigned& index) const
+const Model::Function*
+Model::Composite::get_Function (unsigned& index) const
 {
-  return const_cast<Composite*>(this)->get_Model (index);
+  return const_cast<Composite*>(this)->get_Function (index);
 }
 
 //! Get the Model that corresponds to the given index
-Calibration::Model* Calibration::Composite::get_Model (unsigned& index)
+Model::Function* Model::Composite::get_Function (unsigned& index)
 {
   unsigned imodel = current_model;
   
@@ -387,7 +387,7 @@ Calibration::Model* Calibration::Composite::get_Model (unsigned& index)
   
   while (imodel < models.size())  {
     
-    reference_check (imodel, "get_Model");
+    reference_check (imodel, "get_Function");
 
     unsigned nparam = models[imodel]->get_nparam();
     
@@ -401,13 +401,13 @@ Calibration::Model* Calibration::Composite::get_Model (unsigned& index)
     imodel ++;
   }
 
-  throw Error (InvalidRange, class_name() + "get_Model",
+  throw Error (InvalidRange, class_name() + "get_Function",
 	       "index=%d > nparam=%d", index, get_nparam());
 }
 
 
 //! Check the the reference to the specified model is still valid
-void Calibration::Composite::reference_check (unsigned i, char* method) const
+void Model::Composite::reference_check (unsigned i, char* method) const
 {
   if (!models[i])
     throw Error (InvalidState, class_name() + method, 
@@ -416,13 +416,13 @@ void Calibration::Composite::reference_check (unsigned i, char* method) const
 
 
 //! Return the index for the specified model
-unsigned Calibration::Composite::find_Model (Model* model) const
+unsigned Model::Composite::find_Function (Function* model) const
 {
-  if (very_verbose) cerr << class_name() + "find_Model nmodel="
+  if (very_verbose) cerr << class_name() + "find_Function nmodel="
 			 << models.size() << endl;
 
   for (unsigned imodel=0; imodel < models.size(); imodel++)  {
-    reference_check (imodel, "find_Model");
+    reference_check (imodel, "find_Function");
     if ((models[imodel])) {
       if ((models[imodel]).get() == model)
 	return imodel;
@@ -432,7 +432,7 @@ unsigned Calibration::Composite::find_Model (Model* model) const
 }
 
 //! Return the index for the specified map
-unsigned Calibration::Composite::find_Projection (Projection* modelmap) const
+unsigned Model::Composite::find_Projection (Projection* modelmap) const
 {
   if (very_verbose) cerr << class_name() + "find_Projection nmap="
 			 << maps.size() << endl;

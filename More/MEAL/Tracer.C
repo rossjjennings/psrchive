@@ -1,22 +1,22 @@
-#include "Calibration/Tracer.h"
-#include "Calibration/Model.h"
+#include "MEPL/Tracer.h"
+#include "MEPL/Function.h"
 
-Calibration::Tracer::Tracer (Model* _model, unsigned param)
+Model::Tracer::Tracer (Function* _model, unsigned param)
 {
   if (_model)
     watch (_model, param);
 }
 
-Calibration::Tracer::~Tracer ()
+Model::Tracer::~Tracer ()
 {
-  if (Model::verbose)
-    cerr << "Calibration::Tracer::~Tracer" << endl;
+  if (Function::verbose)
+    cerr << "Model::Tracer::~Tracer" << endl;
 
   if (model)
     model->changed.disconnect (this, &Tracer::attribute_changed);
 }
 
-void Calibration::Tracer::watch (Model* _model, unsigned param) try {
+void Model::Tracer::watch (Function* _model, unsigned param) try {
 
   if (model)
     model->changed.disconnect (this, &Tracer::attribute_changed);
@@ -32,14 +32,14 @@ void Calibration::Tracer::watch (Model* _model, unsigned param) try {
 
 }
 catch (Error& error) {
-  throw error += "Calibration::Tracer::watch";
+  throw error += "Model::Tracer::watch";
 }
 
 //! Method called when a Model attribute has changed
-void Calibration::Tracer::attribute_changed (Model::Attribute attribute) try {
+void Model::Tracer::attribute_changed (Function::Attribute attribute) try {
 
   if (!model)
-    throw Error (InvalidState, "Calibration::Tracer::attribute_changed",
+    throw Error (InvalidState, "Model::Tracer::attribute_changed",
 		 "method called with no model being watched");
 
   double latest = model->get_param (parameter);
@@ -50,17 +50,17 @@ void Calibration::Tracer::attribute_changed (Model::Attribute attribute) try {
   current_value = latest;
 }
 catch (Error& error) {
-  throw error += "Calibration::Tracer::attribute_changed";
+  throw error += "Model::Tracer::attribute_changed";
 }
 
-void Calibration::Tracer::report () try  {
+void Model::Tracer::report () try  {
 
-  cerr << "Calibration::Tracer " << model->get_name() << " "
+  cerr << "Model::Tracer " << model->get_name() << " "
        << model->get_param_name(parameter) << " " 
        << model->get_param(parameter) << endl;
 
 }
 catch (Error& error) {
-  throw error += "Calibration::Tracer::report";
+  throw error += "Model::Tracer::report";
 }
 

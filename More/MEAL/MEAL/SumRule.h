@@ -1,16 +1,16 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/SumRule.h,v $
-   $Revision: 1.1 $
-   $Date: 2004/11/22 11:17:17 $
+   $Revision: 1.2 $
+   $Date: 2004/11/22 16:00:09 $
    $Author: straten $ */
 
 #ifndef __SumRule_H
 #define __SumRule_H
 
-#include "Calibration/GroupRule.h"
+#include "MEPL/GroupRule.h"
 
-namespace Calibration {
+namespace Model {
 
   //! Represents a sum of models
   template<class MType>
@@ -26,7 +26,7 @@ namespace Calibration {
 
     // ///////////////////////////////////////////////////////////////////
     //
-    // Model implementation
+    // Function implementation
     //
     // ///////////////////////////////////////////////////////////////////
 

@@ -1,16 +1,16 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Univariate.h,v $
-   $Revision: 1.1 $
-   $Date: 2004/11/22 11:17:17 $
+   $Revision: 1.2 $
+   $Date: 2004/11/22 16:00:09 $
    $Author: straten $ */
 
-#ifndef __Calibration_Univariate_H
-#define __Calibration_Univariate_H
+#ifndef __Model_Univariate_H
+#define __Model_Univariate_H
 
-#include "Calibration/ArgumentBehaviour.h"
+#include "MEPL/ArgumentBehaviour.h"
 
-namespace Calibration {
+namespace Model {
 
   //! A function of one scalar variable
   class Univariate : public ArgumentBehaviour {

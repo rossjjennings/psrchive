@@ -1,16 +1,16 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Phase.h,v $
-   $Revision: 1.1 $
-   $Date: 2004/11/22 11:17:16 $
+   $Revision: 1.2 $
+   $Date: 2004/11/22 16:00:09 $
    $Author: straten $ */
 
-#ifndef __Calibration_Phase_H
-#define __Calibration_Phase_H
+#ifndef __Model_Phase_H
+#define __Model_Phase_H
 
-#include "Calibration/OptimizedComplex2.h"
+#include "MEPL/OptimizedComplex2.h"
 
-namespace Calibration {
+namespace Model {
 
   //! A gain transformation
   class Phase : public OptimizedComplex2 {
@@ -22,7 +22,7 @@ namespace Calibration {
 
     // ///////////////////////////////////////////////////////////////////
     //
-    // Model implementation
+    // Function implementation
     //
     // ///////////////////////////////////////////////////////////////////
 

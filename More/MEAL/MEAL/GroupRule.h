@@ -1,19 +1,19 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/GroupRule.h,v $
-   $Revision: 1.1 $
-   $Date: 2004/11/22 11:17:15 $
+   $Revision: 1.2 $
+   $Date: 2004/11/22 16:00:09 $
    $Author: straten $ */
 
 #ifndef __GroupRule_H
 #define __GroupRule_H
 
-#include "Calibration/ProjectGradient.h"
-#include "Calibration/OptimizedModel.h"
-#include "Calibration/Composite.h"
+#include "MEPL/ProjectGradient.h"
+#include "MEPL/Optimized.h"
+#include "MEPL/Composite.h"
 #include "stringtok.h"
 
-namespace Calibration {
+namespace Model {
 
   //! Abstract base class of closed, associative, binary operators
   /*! Because the binary operation is associative, this class is
@@ -24,7 +24,7 @@ namespace Calibration {
     binary operation, such as the product or sum. */
 
   template<class MType>
-  class GroupRule : public OptimizedModel<MType>, public Composite 
+  class GroupRule : public Optimized<MType>, public Composite 
   {
 
   public:
@@ -48,7 +48,7 @@ namespace Calibration {
 
     // ///////////////////////////////////////////////////////////////////
     //
-    // Model implementation
+    // Function implementation
     //
     // ///////////////////////////////////////////////////////////////////
 
@@ -57,7 +57,7 @@ namespace Calibration {
 
     // ///////////////////////////////////////////////////////////////////
     //
-    // OptimizedModel template implementation
+    // Optimized template implementation
     //
     // ///////////////////////////////////////////////////////////////////
 
@@ -71,13 +71,13 @@ namespace Calibration {
     // ///////////////////////////////////////////////////////////////////
 
     string class_name() const
-    { return "Calibration::GroupRule[" + get_name() + "]::"; }
+    { return "Model::GroupRule[" + get_name() + "]::"; }
 
   protected:
 
     // ///////////////////////////////////////////////////////////////////
     //
-    // Model implementation
+    // Function implementation
     //
     // ///////////////////////////////////////////////////////////////////
 
@@ -113,8 +113,8 @@ namespace Calibration {
 
 
 template<class MType>
-Calibration::GroupRule<MType>&
-Calibration::GroupRule<MType>:: operator = (const GroupRule& meta)
+Model::GroupRule<MType>&
+Model::GroupRule<MType>:: operator = (const GroupRule& meta)
 {
   if (this == &meta)
     return *this;
@@ -129,7 +129,7 @@ Calibration::GroupRule<MType>:: operator = (const GroupRule& meta)
 }
 
 template<class MType>
-void Calibration::GroupRule<MType>::print_parameters (string& text,
+void Model::GroupRule<MType>::print_parameters (string& text,
                                                       const string& sep) const
 {
   unsigned nmodel = model.size();
@@ -140,7 +140,7 @@ void Calibration::GroupRule<MType>::print_parameters (string& text,
 }
 
 template<class MType>
-void Calibration::GroupRule<MType>::parse (const string& line)
+void Model::GroupRule<MType>::parse (const string& line)
 {
   if (model.size()) try {
     model.back()->parse(line);
@@ -156,7 +156,7 @@ void Calibration::GroupRule<MType>::parse (const string& line)
   if (verbose)
     cerr << class_name() << "::parse key '" << key << "'" << endl;
 
-  Model* model = Model::new_Model (key);
+  Function* model = Function::new_Function (key);
 
   MType* mtype = dynamic_cast<MType*>(model);
   if (!mtype)
@@ -167,7 +167,7 @@ void Calibration::GroupRule<MType>::parse (const string& line)
 }
 
 template<class MType>
-void Calibration::GroupRule<MType>::add_model (MType* x)
+void Model::GroupRule<MType>::add_model (MType* x)
 {
   if (very_verbose)
     cerr << class_name() + "add_model" << endl;
@@ -177,7 +177,7 @@ void Calibration::GroupRule<MType>::add_model (MType* x)
 }
 
 template<class MType>
-void Calibration::GroupRule<MType>::initialize ()
+void Model::GroupRule<MType>::initialize ()
 {
   result = get_identity();
 
@@ -186,7 +186,7 @@ void Calibration::GroupRule<MType>::initialize ()
 }
 
 template<class MType>
-void Calibration::GroupRule<MType>::calculate (Result& retval,
+void Model::GroupRule<MType>::calculate (Result& retval,
 					       vector<Result>* grad)
 {
   unsigned nmodel = model.size();

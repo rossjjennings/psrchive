@@ -1,20 +1,20 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Coherency.h,v $
-   $Revision: 1.1 $
-   $Date: 2004/11/22 11:17:14 $
+   $Revision: 1.2 $
+   $Date: 2004/11/22 16:00:08 $
    $Author: straten $ */
 
-#ifndef __Calibration_Coherency_H
-#define __Calibration_Coherency_H
+#ifndef __Model_Coherency_H
+#define __Model_Coherency_H
 
-#include "Calibration/OptimizedComplex2.h"
-#include "Calibration/Parameters.h"
+#include "MEPL/OptimizedComplex2.h"
+#include "MEPL/Parameters.h"
 
 #include "Estimate.h"
 #include "Stokes.h"
 
-namespace Calibration {
+namespace Model {
 
   //! Represents a Hermitian coherency matrix
   /*! This class represents a source in which the four Stokes parameters
@@ -37,7 +37,7 @@ namespace Calibration {
 
     // ///////////////////////////////////////////////////////////////////
     //
-    // Model implementation
+    // Function implementation
     //
     // ///////////////////////////////////////////////////////////////////
 

@@ -1,17 +1,17 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/ScalarMath.h,v $
-   $Revision: 1.1 $
-   $Date: 2004/11/22 11:17:16 $
+   $Revision: 1.2 $
+   $Date: 2004/11/22 16:00:09 $
    $Author: straten $ */
 
 #ifndef __ScalarMath_H
 #define __ScalarMath_H
 
-#include "Calibration/Scalar.h"
+#include "MEPL/Scalar.h"
 
 
-namespace Calibration {
+namespace Model {
 
   class ScalarMath {
 
@@ -138,7 +138,7 @@ namespace Calibration {
 
 //! Useful for quickly printing the values
 inline std::ostream&
-operator << (std::ostream& o, const Calibration::ScalarMath& sm)
+operator << (std::ostream& o, const Model::ScalarMath& sm)
 {
   return o << sm.get_Estimate();
 }

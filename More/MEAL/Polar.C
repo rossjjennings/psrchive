@@ -1,7 +1,7 @@
-#include "Calibration/Polar.h"
-#include "Calibration/Gain.h"
-#include "Calibration/Boost.h"
-#include "Calibration/Rotation.h"
+#include "MEPL/Polar.h"
+#include "MEPL/Gain.h"
+#include "MEPL/Boost.h"
+#include "MEPL/Rotation.h"
 
 #include "Pauli.h"
 
@@ -9,27 +9,27 @@
 
 // #define _DEBUG 1
 
-void Calibration::Polar::init ()
+void Model::Polar::init ()
 {
 
 #ifdef _DEBUG
-  cerr << "Calibration::Polar::init" << endl;
+  cerr << "Model::Polar::init" << endl;
 #endif
 
   // name = "Polar";
 
   // Note, these objects will be destroyed during Reference::To destructor
-  gain  = new Calibration::Gain;
+  gain  = new Model::Gain;
   add_model (gain);
   // gain->name = "Polar::Gain";
 
-  boost = new Calibration::Boost;
+  boost = new Model::Boost;
   add_model (boost);
   // boost->name = "Polar::Boost";
 
   for (unsigned i=0; i<3; i++) {
 
-    rotation[i] = new Calibration::Rotation(Vector<double, 3>::basis(i));
+    rotation[i] = new Model::Rotation(Vector<double, 3>::basis(i));
     // rotation[i]->name = "Polar::Rotation " + string(1, char('0' + i));
 
     add_model (rotation[i]);
@@ -37,48 +37,48 @@ void Calibration::Polar::init ()
   }
 
 #ifdef _DEBUG
-  cerr << "Calibration::Polar::init exit" << endl;
+  cerr << "Model::Polar::init exit" << endl;
 #endif
 
 }
   
-Calibration::Polar::Polar ()
+Model::Polar::Polar ()
 {
   init ();
 }
 
-Calibration::Polar::~Polar ()
+Model::Polar::~Polar ()
 {
 #ifdef _DEBUG
-  cerr << "Calibration::Polar destructor" << endl;
+  cerr << "Model::Polar destructor" << endl;
 #endif
 }
 
-Calibration::Polar::Polar (const Polar& polar)
+Model::Polar::Polar (const Polar& polar)
 {
 
 #ifdef _DEBUG
-  cerr << "Calibration::Polar copy constructor" << endl;
+  cerr << "Model::Polar copy constructor" << endl;
 #endif
 
   init ();
   operator = (polar);
 
 #ifdef _DEBUG
-  cerr << "Calibration::Polar copy constructor exit" << endl;
+  cerr << "Model::Polar copy constructor exit" << endl;
 #endif
 
 }
 
 //! Equality Operator
-const Calibration::Polar& 
-Calibration::Polar::operator = (const Polar& polar)
+const Model::Polar& 
+Model::Polar::operator = (const Polar& polar)
 {
   if (&polar == this)
     return *this;
 
 #ifdef _DEBUG
-  cerr << "Calibration::Polar operator =" << endl;
+  cerr << "Model::Polar operator =" << endl;
 #endif
 
   *gain = *(polar.gain);
@@ -90,19 +90,19 @@ Calibration::Polar::operator = (const Polar& polar)
 }
 
 //! Return the name of the class
-string Calibration::Polar::get_name () const
+string Model::Polar::get_name () const
 {
   return "Polar";
 }
 
 
-Estimate<double> Calibration::Polar::get_gain () const
+Estimate<double> Model::Polar::get_gain () const
 {
   return gain->get_Estimate(0);
 }
 
 
-Estimate<double> Calibration::Polar::get_boostGibbs (unsigned i) const
+Estimate<double> Model::Polar::get_boostGibbs (unsigned i) const
 {
   assert (i < 3);
   assert (boost->get_nparam() == 3);
@@ -110,23 +110,23 @@ Estimate<double> Calibration::Polar::get_boostGibbs (unsigned i) const
   return boost->get_Estimate(i);
 }
 
-Estimate<double> Calibration::Polar::get_rotationEuler (unsigned i) const
+Estimate<double> Model::Polar::get_rotationEuler (unsigned i) const
 {
   return rotation[i]->get_Estimate(0);
 }
 
-void Calibration::Polar::set_gain (const Estimate<double>& g)
+void Model::Polar::set_gain (const Estimate<double>& g)
 {
   gain->set_Estimate (0, g);
 }
 
-void Calibration::Polar::set_boostGibbs (unsigned i, 
+void Model::Polar::set_boostGibbs (unsigned i, 
 					 const Estimate<double>& b)
 {
   boost->set_Estimate (i, b);
 }
    
-void Calibration::Polar::set_rotationEuler (unsigned i,
+void Model::Polar::set_rotationEuler (unsigned i,
 					    const Estimate<double>& phi_i)
 {
   rotation[i]->set_Estimate (0, phi_i);
@@ -142,7 +142,7 @@ void Calibration::Polar::set_rotationEuler (unsigned i,
 
   \post source and sky will be modified to represent the un-boosted
   Stokes parameters.  */
-void Calibration::Polar::solve (Quaternion<Estimate<double>, Hermitian>& source,
+void Model::Polar::solve (Quaternion<Estimate<double>, Hermitian>& source,
 				Quaternion<Estimate<double>, Hermitian>& sky)
 {
   // Assuming that the off pulse radiation is unpolarized, the boost

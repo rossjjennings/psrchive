@@ -1,9 +1,9 @@
-#include "Calibration/Scalar.h"
+#include "MEPL/Scalar.h"
 
 /*! The class name is used in the output of template classes and methods */
-const char* Calibration::Scalar::Name = "Scalar";
+const char* Model::Scalar::Name = "Scalar";
 
-void Calibration::Scalar::evaluate (Estimate<double>& value) const
+void Model::Scalar::evaluate (Estimate<double>& value) const
 {
   vector<double> gradient;
 
@@ -12,7 +12,7 @@ void Calibration::Scalar::evaluate (Estimate<double>& value) const
   unsigned nparam = get_nparam();
 
   if (gradient.size() != nparam)
-    throw Error (InvalidState, "Calibration::Scalar::evaluate",
+    throw Error (InvalidState, "Model::Scalar::evaluate",
 		 "gradient.size=%d != nparam=%d", gradient.size(), nparam);
 
   for (unsigned iparam=0; iparam<nparam; iparam++)

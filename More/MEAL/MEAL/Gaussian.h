@@ -1,16 +1,16 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Gaussian.h,v $
-   $Revision: 1.1 $
-   $Date: 2004/11/22 11:17:15 $
+   $Revision: 1.2 $
+   $Date: 2004/11/22 16:00:09 $
    $Author: straten $ */
 
 #ifndef __Gaussian_H
 #define __Gaussian_H
 
-#include "Calibration/UnivariateOptimizedScalar.h"
+#include "MEPL/UnivariateOptimizedScalar.h"
 
-namespace Calibration {
+namespace Model {
 
   //! Gaussian function 
   class Gaussian : public UnivariateOptimizedScalar {
@@ -45,7 +45,7 @@ namespace Calibration {
 
     // ///////////////////////////////////////////////////////////////////
     //
-    // Model implementation
+    // Function implementation
     //
     // ///////////////////////////////////////////////////////////////////
 
@@ -57,7 +57,7 @@ namespace Calibration {
 
     // ///////////////////////////////////////////////////////////////////
     //
-    // OptimizedModel implementation
+    // Optimized implementation
     //
     // ///////////////////////////////////////////////////////////////////
 

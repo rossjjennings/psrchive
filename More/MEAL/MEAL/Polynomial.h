@@ -1,16 +1,16 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Polynomial.h,v $
-   $Revision: 1.1 $
-   $Date: 2004/11/22 11:17:16 $
+   $Revision: 1.2 $
+   $Date: 2004/11/22 16:00:09 $
    $Author: straten $ */
 
 #ifndef __Polynomial_H
 #define __Polynomial_H
 
-#include "Calibration/UnivariateOptimizedScalar.h"
+#include "MEPL/UnivariateOptimizedScalar.h"
 
-namespace Calibration {
+namespace Model {
 
   //! Polynomial function with an arbitrary number of coefficients
   class Polynomial : public UnivariateOptimizedScalar {
@@ -22,7 +22,7 @@ namespace Calibration {
 
     // ///////////////////////////////////////////////////////////////////
     //
-    // Model implementation
+    // Function implementation
     //
     // ///////////////////////////////////////////////////////////////////
 
@@ -42,7 +42,7 @@ namespace Calibration {
 
     // ///////////////////////////////////////////////////////////////////
     //
-    // OptimizedModel implementation
+    // Optimized implementation
     //
     // ///////////////////////////////////////////////////////////////////
 

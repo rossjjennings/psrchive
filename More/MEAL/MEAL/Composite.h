@@ -1,18 +1,18 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Composite.h,v $
-   $Revision: 1.1 $
-   $Date: 2004/11/22 11:17:14 $
+   $Revision: 1.2 $
+   $Date: 2004/11/22 16:00:08 $
    $Author: straten $ */
 
 #ifndef __Composite_H
 #define __Composite_H
 
-#include "Calibration/ParameterBehaviour.h"
-#include "Calibration/ArgumentBehaviour.h"
-#include "Calibration/Projection.h"
+#include "MEPL/ParameterBehaviour.h"
+#include "MEPL/ArgumentBehaviour.h"
+#include "MEPL/Projection.h"
 
-namespace Calibration {
+namespace Model {
 
   //! Abstract base class representing a model composed of models
   class Composite : public ParameterBehaviour, public ArgumentBehaviour {
@@ -30,7 +30,7 @@ namespace Calibration {
 
     // ///////////////////////////////////////////////////////////////////
     //
-    // Model implementation
+    // Function implementation
     //
     // ///////////////////////////////////////////////////////////////////
  
@@ -91,7 +91,7 @@ namespace Calibration {
     void unmap (Projection* model, bool signal_changes = true);
 
     //! Return the index for the specified model
-    unsigned find_Model (Model* model) const;
+    unsigned find_Function (Function* model) const;
 
     //! Return the index for the specified model
     unsigned find_Projection (Projection* model) const;
@@ -101,10 +101,10 @@ namespace Calibration {
     //! References to Projection instances
     vector< Reference::To<Projection> > maps;
 
-    //! References to Model instances
-    vector< Reference::To<Model> > models;
+    //! References to Function instances
+    vector< Reference::To<Function> > models;
     
-    //! The total number of Model parameters
+    //! The total number of Function parameters
     unsigned nparameters;
     
     //! Optimization: keep track of the current model
@@ -113,23 +113,23 @@ namespace Calibration {
     //! Optimization: keep track of the base index of the current model
     unsigned current_index;
 
-    //! Method called when a Model attribute has changed
+    //! Method called when a Function attribute has changed
     void attribute_changed (Attribute attribute);
 
     //! Recursive function does the work for map
-    void add_component (Model* model, vector<unsigned>& imap);
+    void add_component (Function* model, vector<unsigned>& imap);
 
     //! Recursive function does the work for unmap
-    void remove_component (Model* model);
+    void remove_component (Function* model);
 
     //! Remap the parameter indeces
     void remap (bool signal_changes = true);
 
-    //! Get the const Model that corresponds to the given index
-    const Model* get_Model (unsigned& index) const;
+    //! Get the const Function that corresponds to the given index
+    const Function* get_Function (unsigned& index) const;
 
-    //! Get the Model that corresponds to the given index
-    Model* get_Model (unsigned& index);
+    //! Get the Function that corresponds to the given index
+    Function* get_Function (unsigned& index);
 
     //! Check the the reference to the specified model is still valid
     void reference_check (unsigned imodel, char* method) const;

@@ -1,19 +1,19 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/ChainRule.h,v $
-   $Revision: 1.1 $
-   $Date: 2004/11/22 11:17:14 $
+   $Revision: 1.2 $
+   $Date: 2004/11/22 16:00:08 $
    $Author: straten $ */
 
-#ifndef __Calibration_ChainRule_H
-#define __Calibration_ChainRule_H
+#ifndef __Model_ChainRule_H
+#define __Model_ChainRule_H
 
-#include "Calibration/ProjectGradient.h"
-#include "Calibration/OptimizedModel.h"
-#include "Calibration/Composite.h"
-#include "Calibration/Scalar.h"
+#include "MEPL/ProjectGradient.h"
+#include "MEPL/Optimized.h"
+#include "MEPL/Composite.h"
+#include "MEPL/Scalar.h"
 
-namespace Calibration {
+namespace Model {
 
   //! A parameter and its constraining Scalar instance
   class ConstrainedParameter {
@@ -25,7 +25,7 @@ namespace Calibration {
       parameter = iparam;
     }
 
-    //! The index of the Model parameter constrained by scalar
+    //! The index of the Function parameter constrained by scalar
     unsigned parameter;
 
     //! The constraining Scalar instance
@@ -36,9 +36,9 @@ namespace Calibration {
 
   };
 
-  //! Parameterizes a Model by one or more Scalar ordinates.
+  //! Parameterizes a Function by one or more Scalar ordinates.
 
-  /*! Given any Model, \f$ M({\bf a}) \f$, one or more parameters may
+  /*! Given any Function, \f$ M({\bf a}) \f$, one or more parameters may
     be constrained by a Scalar, \f$ f({\bf b}) \f$.  That is,
     \f$a_i=f({\bf b})\f$.  The fit flag for \f$a_i\f$ is set to false,
     and the partial derivatives of \f$ M \f$ with respect to the
@@ -47,7 +47,7 @@ namespace Calibration {
     a_i}{\partial f\over\partial b_k}\f$. */
 
   template<class MType>
-  class ChainRule : public OptimizedModel<MType>, public Composite
+  class ChainRule : public Optimized<MType>, public Composite
   {
 
   public:
@@ -63,7 +63,7 @@ namespace Calibration {
     //! Assignment operator
     ChainRule& operator = (const ChainRule& rule);
 
-    //! Set the Model to be constrained by Scalar ordinates
+    //! Set the Function to be constrained by Scalar ordinates
     void set_model (MType* model);
 
     //! Set the Scalar instance used to constrain the specified parameter
@@ -71,7 +71,7 @@ namespace Calibration {
 
     // ///////////////////////////////////////////////////////////////////
     //
-    // Model implementation
+    // Function implementation
     //
     // ///////////////////////////////////////////////////////////////////
 
@@ -82,7 +82,7 @@ namespace Calibration {
 
     // ///////////////////////////////////////////////////////////////////
     //
-    // OptimizedModel implementation
+    // Optimized implementation
     //
     // ///////////////////////////////////////////////////////////////////
 
@@ -92,7 +92,7 @@ namespace Calibration {
     //! Scalars used to constrain the parameters
     vector<ConstrainedParameter> constraints;
 
-    //! The Model to be constrained by Scalar ordinates
+    //! The Function to be constrained by Scalar ordinates
     Project<MType> model;
 
   };
@@ -100,14 +100,14 @@ namespace Calibration {
 }
 
 template<class MType>
-string Calibration::ChainRule<MType>::get_name () const
+string Model::ChainRule<MType>::get_name () const
 {
   return "ChainRule<" + string(MType::Name)+ ">";
 }
 
 template<class MType>
-Calibration::ChainRule<MType>&
-Calibration::ChainRule<MType>::operator = (const ChainRule& rule)
+Model::ChainRule<MType>&
+Model::ChainRule<MType>::operator = (const ChainRule& rule)
 {
   if (this == &rule)
     return *this;
@@ -123,11 +123,11 @@ Calibration::ChainRule<MType>::operator = (const ChainRule& rule)
 
 
 template<class MType>
-void Calibration::ChainRule<MType>::set_constraint (unsigned iparam, 
+void Model::ChainRule<MType>::set_constraint (unsigned iparam, 
 						    Scalar* scalar)
 {
   if (verbose) 
-    cerr << "Calibration::ChainRule::set_constraint iparam=" << iparam << endl;
+    cerr << "Model::ChainRule::set_constraint iparam=" << iparam << endl;
 
   if (!scalar)
     return;
@@ -138,7 +138,7 @@ void Calibration::ChainRule<MType>::set_constraint (unsigned iparam,
     if (constraints[ifunc].parameter == iparam) {
 
       if (verbose)
-	cerr << "Calibration::ChainRule::set_constraint"
+	cerr << "Model::ChainRule::set_constraint"
 	  " replace param=" << iparam << endl;
 
       unmap (constraints[ifunc].scalar, false);
@@ -159,14 +159,14 @@ void Calibration::ChainRule<MType>::set_constraint (unsigned iparam,
 }
 
 template<class MType>
-void Calibration::ChainRule<MType>::set_model (MType* _model)
+void Model::ChainRule<MType>::set_model (MType* _model)
 {
   if (!_model)
     return;
 
   if (model) {
     if (verbose)
-      cerr << "Calibration::ChainRule::set_model"
+      cerr << "Model::ChainRule::set_model"
 	" unmap old model" << endl;
     unmap (model, false);
   }
@@ -174,7 +174,7 @@ void Calibration::ChainRule<MType>::set_model (MType* _model)
   model = _model;
 
   if (verbose)
-    cerr << "Calibration::ChainRule::set_model"
+    cerr << "Model::ChainRule::set_model"
       " map new model" << endl;
 
   map (model);
@@ -184,19 +184,19 @@ void Calibration::ChainRule<MType>::set_model (MType* _model)
 }
 
 template<class MType>
-void Calibration::ChainRule<MType>::calculate (Result& result,
+void Model::ChainRule<MType>::calculate (Result& result,
 					       vector<Result>* grad)
 {
   if (!model)
-    throw Error (InvalidState, "Calibration::ChainRule::calculate","no model");
+    throw Error (InvalidState, "Model::ChainRule::calculate","no model");
 
   if (verbose)
-    cerr << "Calibration::ChainRule::calculate" << endl;
+    cerr << "Model::ChainRule::calculate" << endl;
 
   for (unsigned ifunc=0; ifunc<constraints.size(); ifunc++) {
 
     if (very_verbose)
-      cerr << "Calibration::ChainRule::calculate iconstraint="<< ifunc <<endl;
+      cerr << "Model::ChainRule::calculate iconstraint="<< ifunc <<endl;
 
     vector<double>* fgrad = 0;
     if (grad)
@@ -248,10 +248,10 @@ void Calibration::ChainRule<MType>::calculate (Result& result,
   }
 
   if (verbose) {
-    cerr << "Calibration::ChainRule::calculate result\n"
+    cerr << "Model::ChainRule::calculate result\n"
       "   " << result << endl;
     if (grad) {
-      cerr << "Calibration::ChainRule::calculate gradient\n";
+      cerr << "Model::ChainRule::calculate gradient\n";
       for (unsigned i=0; i<grad->size(); i++)
 	cerr << "   " << i << ":" << get_infit(i) << "=" << (*grad)[i] << endl;
     }

@@ -1,15 +1,15 @@
-#include "Calibration/BinaryScalar.h"
-#include "Calibration/ProjectGradient.h"
+#include "MEPL/BinaryScalar.h"
+#include "MEPL/ProjectGradient.h"
 
-void Calibration::BinaryScalar::calculate (double& result,
+void Model::BinaryScalar::calculate (double& result,
 					   vector<double>* grad)
 {
   if (!arg1 || !arg2)
-    throw Error (InvalidState, "Calibration::BinaryScalar::calculate",
+    throw Error (InvalidState, "Model::BinaryScalar::calculate",
 		 "both arguments are not set");
 
   if (verbose)
-    cerr << "Calibration::BinaryScalar::calculate" << endl;
+    cerr << "Model::BinaryScalar::calculate" << endl;
 
   vector<double> grad1;
   vector<double> grad2;
@@ -28,7 +28,7 @@ void Calibration::BinaryScalar::calculate (double& result,
   result = function( x1, x2 );
 
   if (verbose)
-    cerr << "Calibration::BinaryScalar::calculate result\n"
+    cerr << "Model::BinaryScalar::calculate result\n"
       "   " << result << endl;
 
   if (!grad)
@@ -55,7 +55,7 @@ void Calibration::BinaryScalar::calculate (double& result,
   ProjectGradient (arg2, grad2, *(grad));
 
   if (verbose) {
-    cerr << "Calibration::BinaryScalar::calculate gradient\n";
+    cerr << "Model::BinaryScalar::calculate gradient\n";
     for (unsigned i=0; i<grad->size(); i++)
       cerr << "   " << i << ":" << get_infit(i) << "=" << (*grad)[i] << endl;
   }

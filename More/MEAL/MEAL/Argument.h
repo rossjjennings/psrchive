@@ -1,22 +1,22 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Argument.h,v $
-   $Revision: 1.1 $
-   $Date: 2004/11/22 11:17:14 $
+   $Revision: 1.2 $
+   $Date: 2004/11/22 16:00:08 $
    $Author: straten $ */
 
-#ifndef __Calibration_Argument_Header
-#define __Calibration_Argument_Header
+#ifndef __Model_Argument_Header
+#define __Model_Argument_Header
 
 #include "Reference.h"
 
-namespace Calibration {
+namespace Model {
 
   //! Pure virtual base class of function arguments
   /*! The Argument class represents an independent variable of a
     function.  The values taken by this variable are represented by
     Argument::Value instances.  Nothing is known about the type of the
-    variable, enabling Model classes to be developed with an arbitrary
+    variable, enabling Function classes to be developed with an arbitrary
     number of independent variables of arbitrary type. */
 
   class Argument : public Reference::Able {

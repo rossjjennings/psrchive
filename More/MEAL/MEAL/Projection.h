@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Projection.h,v $
-   $Revision: 1.1 $
-   $Date: 2004/11/22 11:17:16 $
+   $Revision: 1.2 $
+   $Date: 2004/11/22 16:00:09 $
    $Author: straten $ */
 
 #ifndef __Projection_H
@@ -10,32 +10,32 @@
 
 #include "Reference.h"
 
-namespace Calibration {
+namespace Model {
 
-  class Model;
+  class Function;
 
-  //! Manages a Model and the mapping of its parameters into a Composite
+  //! Manages a Function and the mapping of its parameters into a Composite
   class Projection : public Reference::Able {
 
     friend class Composite;
 
   public:
     //! Default constructor
-    Projection (Model* model=0, Composite* meta=0);
+    Projection (Function* model=0, Composite* meta=0);
 
     //! Return the mapped index
     unsigned get_imap (unsigned index) const;
 
     //! Return the model
-    Model* get_Model();
+    Function* get_Function();
 
     //! Set the model
-    void set_Model (Model* _model);
+    void set_Function (Function* _model);
 
   protected:
 
-    //! The Model that is mapped into a Composite
-    Reference::To<Model> model;
+    //! The Function that is mapped into a Composite
+    Reference::To<Function> model;
 
     //! The parameter index mapping into Composite
     vector<unsigned> imap;
@@ -45,24 +45,24 @@ namespace Calibration {
   };
 
 
-  //! Template combines a reference to a Model type and its Projection
-  template<class Model>
-  class Project : public Reference::To<Model> {
+  //! Template combines a reference to a Function type and its Projection
+  template<class Function>
+  class Project : public Reference::To<Function> {
 
   public:
 
     //! Default constructor
-    Project (Model* model = 0)
+    Project (Function* model = 0)
     { 
-      Reference::To<Model>::operator = (model);
+      Reference::To<Function>::operator = (model);
       projection = new Projection (model);
     }
 
     //! Assignment operator
-    const Project& operator = (Model* model) 
+    const Project& operator = (Function* model) 
     {
-      Reference::To<Model>::operator = (model);
-      projection->set_Model (model);
+      Reference::To<Function>::operator = (model);
+      projection->set_Function (model);
       return *this; 
     }
 

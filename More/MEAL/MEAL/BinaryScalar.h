@@ -1,17 +1,17 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/BinaryScalar.h,v $
-   $Revision: 1.1 $
-   $Date: 2004/11/22 11:17:14 $
+   $Revision: 1.2 $
+   $Date: 2004/11/22 16:00:08 $
    $Author: straten $ */
 
-#ifndef __Calibration_BinaryScalar_H
-#define __Calibration_BinaryScalar_H
+#ifndef __Model_BinaryScalar_H
+#define __Model_BinaryScalar_H
 
-#include "Calibration/BinaryRule.h"
-#include "Calibration/Scalar.h"
+#include "MEPL/BinaryRule.h"
+#include "MEPL/Scalar.h"
 
-namespace Calibration {
+namespace Model {
 
   //! Abstract base class of binary functions of two other Scalar functions
   /*! The partial derivatives are calculated using the chain rule. */
@@ -33,7 +33,7 @@ namespace Calibration {
 
     // ///////////////////////////////////////////////////////////////////
     //
-    // OptimizedModel implementation
+    // Optimized implementation
     //
     // ///////////////////////////////////////////////////////////////////
 

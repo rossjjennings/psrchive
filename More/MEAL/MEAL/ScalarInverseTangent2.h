@@ -1,16 +1,16 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/ScalarInverseTangent2.h,v $
-   $Revision: 1.1 $
-   $Date: 2004/11/22 11:17:16 $
+   $Revision: 1.2 $
+   $Date: 2004/11/22 16:00:09 $
    $Author: straten $ */
 
-#ifndef __Calibration_ScalarInverseTangent2_H
-#define __Calibration_ScalarInverseTangent2_H
+#ifndef __Model_ScalarInverseTangent2_H
+#define __Model_ScalarInverseTangent2_H
 
-#include "Calibration/BinaryScalar.h"
+#include "MEPL/BinaryScalar.h"
 
-namespace Calibration {
+namespace Model {
 
   //! The tangent of a Scalar function
   class ScalarInverseTangent2 : public BinaryScalar
@@ -35,7 +35,7 @@ namespace Calibration {
 
     // ///////////////////////////////////////////////////////////////////
     //
-    // Model implementation
+    // Function implementation
     //
     // ///////////////////////////////////////////////////////////////////
 

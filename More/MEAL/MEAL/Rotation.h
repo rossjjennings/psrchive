@@ -1,17 +1,17 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Rotation.h,v $
-   $Revision: 1.1 $
-   $Date: 2004/11/22 11:17:16 $
+   $Revision: 1.2 $
+   $Date: 2004/11/22 16:00:09 $
    $Author: straten $ */
 
-#ifndef __Calibration_Rotation_H
-#define __Calibration_Rotation_H
+#ifndef __Model_Rotation_H
+#define __Model_Rotation_H
 
-#include "Calibration/OptimizedComplex2.h"
+#include "MEPL/OptimizedComplex2.h"
 #include "Vector.h"
 
-namespace Calibration {
+namespace Model {
 
   //! Represents a rotation (unitary, birefringent) transformation
   /*! This class represents the rotation, \f$\phi\f$, about an arbitrary
@@ -37,7 +37,7 @@ namespace Calibration {
 
     // ///////////////////////////////////////////////////////////////////
     //
-    // Model implementation
+    // Function implementation
     //
     // ///////////////////////////////////////////////////////////////////
 

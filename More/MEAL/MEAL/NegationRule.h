@@ -1,16 +1,16 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/NegationRule.h,v $
-   $Revision: 1.1 $
-   $Date: 2004/11/22 11:17:16 $
+   $Revision: 1.2 $
+   $Date: 2004/11/22 16:00:09 $
    $Author: straten $ */
 
-#ifndef __Calibration_NegationRule_H
-#define __Calibration_NegationRule_H
+#ifndef __Model_NegationRule_H
+#define __Model_NegationRule_H
 
-#include "Calibration/UnaryRule.h"
+#include "MEPL/UnaryRule.h"
 
-namespace Calibration {
+namespace Model {
 
   //! Computes the inverse of a model and its partial derivatives
   template<class MType>
@@ -23,7 +23,7 @@ namespace Calibration {
 
     // ///////////////////////////////////////////////////////////////////
     //
-    // Model implementation
+    // Function implementation
     //
     // ///////////////////////////////////////////////////////////////////
 
@@ -34,7 +34,7 @@ namespace Calibration {
 
     // ///////////////////////////////////////////////////////////////////
     //
-    // OptimizedModel implementation
+    // Optimized implementation
     //
     // ///////////////////////////////////////////////////////////////////
 
@@ -46,27 +46,27 @@ namespace Calibration {
 }
 
 template<class MType>
-string Calibration::NegationRule<MType>::get_name () const
+string Model::NegationRule<MType>::get_name () const
 {
   return "NegationRule<" + string(MType::Name)+ ">";
 }
 
 
 template<class MType>
-void Calibration::NegationRule<MType>::calculate (Result& result,
+void Model::NegationRule<MType>::calculate (Result& result,
 						  vector<Result>* grad)
 {
   if (!this->model)
-    throw Error (InvalidState, "Calibration::NegationRule::calculate",
+    throw Error (InvalidState, "Model::NegationRule::calculate",
 		 "no model to evaluate");
 
   if (MType::verbose)
-    cerr << "Calibration::NegationRule::calculate" << endl;
+    cerr << "Model::NegationRule::calculate" << endl;
 
   result = - this->model->evaluate (grad);
   
   if (MType::verbose)
-    cerr << "Calibration::NegationRule::calculate result\n"
+    cerr << "Model::NegationRule::calculate result\n"
       "   " << result << endl;
 
   if (!grad)
@@ -76,7 +76,7 @@ void Calibration::NegationRule<MType>::calculate (Result& result,
     (*grad)[igrad] *= -1.0;
 
   if (MType::verbose) {
-    cerr << "Calibration::NegationRule::calculate gradient\n";
+    cerr << "Model::NegationRule::calculate gradient\n";
     for (unsigned i=0; i<grad->size(); i++)
       cerr << "   "
 	   << i << ":" << this->get_infit(i) << "=" << (*grad)[i] << endl;
