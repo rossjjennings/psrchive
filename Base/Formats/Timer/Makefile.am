@@ -39,7 +39,7 @@ OTHER_SRCS      = align.C amps.C chanprep.C  \
 		  getcal.C crh.C psrhead.C autotadd.C \
 		  fakedat.C quik_cal.C plk.C \
 		  cal_arch.C fitmix.C calplt.C vargain.C \
-		  headsum.C tst_iono.C
+		  headsum.C iono_model.C
 
 NOT_WORKING     = bandpass.C detail.C xtoa.C bin_ph.C corflux.C flux.C
 
