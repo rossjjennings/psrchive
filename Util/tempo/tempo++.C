@@ -1,4 +1,6 @@
+
 #include <stdio.h>
+#include <stdlib.h>
 #include <wait.h>
 #include <unistd.h>
 
@@ -9,6 +11,7 @@
 // members of the Tempo namespace
 //
 bool   Tempo::verbose = false;
+bool   Tempo::debug = false;
 string Tempo::extension (".tpo");
 MJD    Tempo::unspecified;
 
@@ -49,7 +52,7 @@ static void get_system_version ()
   pclose (fptr);
 }
 
-int Tempo::get_version ()
+float Tempo::get_version ()
 {
   if (version < 0)
     get_system_version ();
@@ -57,12 +60,6 @@ int Tempo::get_version ()
 }
 
 void Tempo::set_system (const char* sys_call)
-{
-  system_call = sys_call;
-  get_system_version ();
-}
-
-void Tempo::set_system (const string& sys_call)
 {
   system_call = sys_call;
   get_system_version ();
@@ -78,16 +75,33 @@ void Tempo::set_directory (const char* dir)
   directory = dir;
 }
 
+
+// the shittest of shit
+// SUN CC 5.0 compiler cannot distinguish these overloaded functions
+// from the const char* version given above
+#if !defined (sun) 
+void Tempo::set_system (const string& sys_call)
+{
+  system_call = sys_call;
+  get_system_version ();
+}
+
 void Tempo::set_directory (const string& dir)
 {
   directory = dir;
 }
+#endif
+
 
 string Tempo::get_directory ()
 {
+  char* unknown = "unknown";
+
   if (!directory.length()) {
-    char userid [L_cuserid];
-    cuserid (userid);
+    char* userid = getenv ("USER");
+    if (userid)
+      userid = unknown;
+
     directory = string ("/tmp/tempo/") + userid;
     if (makedir (directory.c_str()) < 0)  {
       cerr << "Tempo::get_directory failure creating '" << directory 

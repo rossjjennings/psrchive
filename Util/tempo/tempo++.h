@@ -1,12 +1,12 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/tempo++.h,v $
-   $Revision: 1.6 $
-   $Date: 2001/01/08 11:25:59 $
+   $Revision: 1.7 $
+   $Date: 2001/02/15 04:15:29 $
    $Author: straten $ */
 
-#ifndef __TEMPOPLUSPLUS_H
-#define __TEMPOPLUSPLUS_H
+#ifndef __TEMPO_PP_H
+#define __TEMPO_PP_H
 
 #include <vector>
 
@@ -14,28 +14,30 @@
 #include "poly.h"
 #include "toa.h"
 
-class psrParams;
 class psrephem;
 
 namespace Tempo {
   
   // set the system call used to run tempo
   void   set_system (const char* system_call);
-  void   set_system (const string& system_call);
   // get the system call used to run tempo
   string get_system ();
 
   // get the tempo version
-  int    get_version ();
+  float  get_version ();
 
   // set the directory in which tempo system calls will be made
   void   set_directory (const char* directory);
-  void   set_directory (const string& directory);
   // get the directory in which tempo system calls will be made
   string get_directory ();
 
+  // convenience overloads
+  void   set_system (const string& system_call);
+  void   set_directory (const string& directory);
+
   // verbosity flag of functions working in the Tempo namespace
   extern bool verbose;
+  extern bool debug;
 
   // extension added to temporary Model filenames when working
   extern string extension;
@@ -56,10 +58,22 @@ namespace Tempo {
       { return ostr << error.msg; }
   };
 
+  // given a tempo ephemeris, generate toas over the range of MJD given
+  // with characteristics specififed by rms and error.
+  //   model      - tempo ephemeris
+  //   toas       - return value
+  //   start,end  - delimit epoch
+  //   interval   - separation between points in minutes
+  //   rms        - gaussian noise specified in microseconds
+  //   error      - width of normal distribution of errors (not implemented)
+  void fake (vector<toa>& toas, const psrephem& model,
+	     const MJD& start, const MJD& end, double interval,
+	     float rms = 0.0, float error = 0.0, float lst_range = 8.0);
+
   // given pulsar parameters and times of arrival, calls TEMPO to determine
   // the residual TOA.
-  void fit (const psrParams& model, vector<toa>& toas,
-	    psrParams* postfit = NULL, bool track=false,
+  void fit (const psrephem& model, vector<toa>& toas,
+	    psrephem* postfit = NULL, bool track=false,
 	    DataPoint::State min_state = DataPoint::Normal);
   
   // returns a polyco valid over the range in MJD specified by m1 and m2
@@ -74,7 +88,7 @@ namespace Tempo {
 		int tel=7, double centrefreq=1400.0);
   
   polyco poly_span (const polyco & first_poly, 
-		    const polyco & second_poly, const psrephem & pephem);
+		    const polyco & second_poly, const psrephem& pephem);
   
   // //////////////////////////////////////////////////////////////////////
   // Calculates the Lomb-Scargle periodogram from a set of residuals.
