@@ -1,4 +1,4 @@
-#define MPI
+#define ACTIVATE_MPI
 #include "Phase.h"
 
 int mpiPack_size (const Phase& ph, MPI_Comm comm, int* size)

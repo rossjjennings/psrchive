@@ -3,7 +3,7 @@
 
 #include <math.h>
 #include "environ.h"
-#ifdef MPI
+#ifdef ACTIVATE_MPI
 #include "mpi.h"
 #endif
 #include <string>
@@ -69,7 +69,7 @@ class Phase {
   double fracturns() const;
   string strprint(int precision) const;
 
-#ifdef MPI
+#ifdef ACTIVATE_MPI
   friend int mpiPack_size (const Phase&, MPI_Comm comm, int* size);
   friend int mpiPack   (const Phase&, void* outbuf, int outcount, 
 			int* position, MPI_Comm comm);

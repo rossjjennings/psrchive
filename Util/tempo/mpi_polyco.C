@@ -1,6 +1,6 @@
 //#include <assert.h>
 #include <iostream>
-#define MPI
+#define ACTIVATE_MPI
 #include "polyco.h"
 #include "stdmpi.h"
 

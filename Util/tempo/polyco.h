@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/polyco.h,v $
-   $Revision: 1.19 $
-   $Date: 2003/05/27 04:36:13 $
-   $Author: pulsar $ */
+   $Revision: 1.20 $
+   $Date: 2003/06/04 04:06:58 $
+   $Author: cwest $ */
 
 #ifndef __POLY_H
 #define __POLY_H
@@ -11,7 +11,7 @@
 #include <string>
 #include <vector>
 
-#ifdef MPI
+#ifdef ACTIVATE_MPI
 #include <mpi.h>
 #endif
 
@@ -148,7 +148,7 @@ public:
   friend int operator != (const polynomial &, const polynomial &);
 
   // MPI functions
-#ifdef MPI
+#ifdef ACTIVATE_MPI
   friend int mpiPack_size (const polynomial&, MPI_Comm comm, int* size);
   friend int mpiPack (const polynomial&, void* outbuf, int outcount,
 		      int* position, MPI_Comm comm);
@@ -261,7 +261,7 @@ class polyco : public Reference::Able {
   friend int operator == (const polyco &, const polyco &);
   friend int operator != (const polyco &, const polyco &);
 
-#ifdef MPI
+#ifdef ACTIVATE_MPI
   friend int mpiPack_size (const polyco&, MPI_Comm comm, int* size);
   friend int mpiPack   (const polyco&, void* outbuf, int outcount,
 			int* position, MPI_Comm comm);
