@@ -88,32 +88,52 @@ void Pulsar::ReceptionCalibrator::initial_observation (const Archive* data)
 
   }
 
+  // initialize any previously added states
+  for (unsigned istate=0; istate<pulsar.size(); istate++)
+    init_estimate ( pulsar[istate] );
+
   start_epoch = end_epoch = data->start_time ();
 }
 
 
 //! Add the specified pulse phase bin to the set of state constraints
-void Pulsar::ReceptionCalibrator::add_state (float phase)
+void Pulsar::ReceptionCalibrator::add_state (unsigned phase_bin)
 {
   check_ready ("Pulsar::ReceptionCalibrator::add_state");
 
-  unsigned nbin = uncalibrated->get_nbin ();
-  unsigned ibin = unsigned (phase * nbin) % nbin;
-
   if (verbose)
-    cerr << "Pulsar::ReceptionCalibrator::add_state phase=" << phase 
-	 << " bin=" << ibin << endl;
+    cerr << "Pulsar::ReceptionCalibrator::add_state phase bin=" 
+	 << phase_bin << endl;
 
   for (unsigned istate=0; istate<pulsar.size(); istate++)
-    if (pulsar[istate].phase_bin == ibin) {
-      cerr << "Pulsar::ReceptionCalibrator::add_state phase bin=" << ibin
+    if (pulsar[istate].phase_bin == phase_bin) {
+      cerr << "Pulsar::ReceptionCalibrator::add_state phase bin=" << phase_bin
 	   << " already in use" << endl;
       return;
     }
 
-  pulsar.push_back( PhaseEstimate (ibin) );
-  add_estimate( pulsar.back() );
+  pulsar.push_back( PhaseEstimate (phase_bin) );
+
+  if (uncalibrated)
+    init_estimate( pulsar.back() );
 }
+
+void Pulsar::ReceptionCalibrator::init_estimate (PhaseEstimate& estimate)
+{
+  unsigned nchan = uncalibrated->get_nchan ();
+  unsigned nbin = uncalibrated->get_nbin ();
+
+  if (estimate.phase_bin >= nbin)
+    throw Error (InvalidRange, "Pulsar::ReceptionCalibrator::init_estimate",
+		 "phase bin=%d >= nbin=%d", estimate.phase_bin, nbin);
+
+  estimate.mean.resize (nchan);
+  estimate.state.resize (nchan);
+
+  for (unsigned ichan=0; ichan<nchan; ichan++)
+    equation[ichan].model.add_state( &(estimate.state[ichan]) );
+}
+
 
 
 //! Get the number of pulse phase bin state constraints
@@ -133,8 +153,8 @@ void Pulsar::ReceptionCalibrator::add_observation (const Archive* data)
   string reason;
   if (!uncalibrated->mixable (data, reason))
     throw Error (InvalidParam, "Pulsar::ReceptionCalibrator",
-		 "Pulsar::Archive='" + data->get_filename() +
-		 "'\ndoes not match '" + uncalibrated->get_filename() + reason);
+		 "Archive='" + data->get_filename() + "'\ndoes not match '"
+		 + uncalibrated->get_filename() + reason);
 
   unsigned nsub = data->get_nsubint ();
   unsigned nchan = data->get_nchan ();
@@ -271,7 +291,6 @@ void Pulsar::ReceptionCalibrator::calibrate (Archive* data)
   data->set_parallactic_corrected (true);
   data->set_poln_calibrated (true);
 
-  // TODO: set calibrated flags
   if (includes_FluxCalibrator)
     data->set_flux_calibrated (true);
 }
@@ -308,16 +327,6 @@ void Pulsar::ReceptionCalibrator::solve ()
 }
 
 
-void Pulsar::ReceptionCalibrator::add_estimate (PhaseEstimate& estimate)
-{
-  unsigned nchan = uncalibrated->get_nchan ();
-
-  estimate.mean.resize (nchan);
-  estimate.state.resize (nchan);
-
-  for (unsigned ichan=0; ichan<nchan; ichan++)
-    equation[ichan].model.add_state( &(estimate.state[ichan]) );
-}
 
 void Pulsar::ReceptionCalibrator::check_ready (const char* method)
 {

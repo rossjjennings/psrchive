@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ReceptionCalibrator.h,v $
-   $Revision: 1.8 $
-   $Date: 2003/04/28 21:43:20 $
+   $Revision: 1.9 $
+   $Date: 2003/04/29 10:27:25 $
    $Author: straten $ */
 
 #ifndef __ReceptionCalibrator_H
@@ -36,14 +36,11 @@ namespace Pulsar {
     //! Construct with optional first pulsar archive
     ReceptionCalibrator (const Archive* archive = 0);
 
-    //! Destructor
-    ~ReceptionCalibrator ();
-
     //! Set the number of polynomial coefficients in SingleAxis(t)
     void set_ncoef (unsigned ncoef);
       
     //! Add the specified pulse phase bin to the set of state constraints
-    void add_state (float pulse_phase);
+    void add_state (unsigned pulse_phase_bin);
 
     //! Get the number of pulse phase bin state constraints
     unsigned get_nstate () const;
@@ -108,7 +105,7 @@ namespace Pulsar {
     void initial_observation (const Archive* data);
 
     //! Add the estimate to pulsar attribute
-    void add_estimate (PhaseEstimate& estimate);
+    void init_estimate (PhaseEstimate& estimate);
 
     //! Add Integration data to the MeasuredState vector
     /*! Data is taken from the specified frequency channel and phase bin.
