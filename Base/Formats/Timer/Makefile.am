@@ -27,7 +27,7 @@ PROGRAMS =    calinfo.C align.C amps.C chanprep.C  \
 	      plot_gry_diff.C pepoch.C freduce.C \
 	      cleanarch.C fixhdr.C crm.C  \
 	      crh.C psrhead.C autotadd.C \
-	      fakedat.C plk.C \
+	      fakedat.C plk.C stokes_plt.C \
 	      headsum.C treduce.C \
               tcombine2.C ratio.C fixprf.C 
 
