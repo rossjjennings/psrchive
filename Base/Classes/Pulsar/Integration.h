@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Integration.h,v $
-   $Revision: 1.64 $
-   $Date: 2004/07/16 07:29:05 $
-   $Author: straten $ */
+   $Revision: 1.65 $
+   $Date: 2004/08/25 06:14:21 $
+   $Author: sord $ */
 
 /*
   
@@ -78,7 +78,7 @@ namespace Pulsar {
     float flux (int _poln = 0, float dc = 0.15);
     
     //! Get polarized flux
-    float get_poln_flux (int _type = 0,  int startbin = 0, int stopbin = 0);
+    Estimate<float> get_poln_flux (int _type = 0,  int startbin = 0, int stopbin = 0);
 
     //! Find the transitions between high and low states in total intensity
     void find_transitions (int& hi2lo, int& lo2hi, int& buffer) const;

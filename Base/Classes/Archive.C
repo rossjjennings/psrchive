@@ -435,7 +435,7 @@ void Pulsar::Archive::invint ()
   set_state( Signal::Invariant );
 }
 
-float Pulsar::Archive::get_poln_flux (int _type)
+Estimate<float> Pulsar::Archive::get_poln_flux (int _type)
 {  
   return (get_Integration(0) -> get_poln_flux (_type,0,0)); 
 }
