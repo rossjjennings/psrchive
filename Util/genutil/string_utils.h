@@ -1,7 +1,7 @@
 //-*-C++-*-
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Attic/string_utils.h,v $
-   $Revision: 1.25 $
-   $Date: 2003/10/05 06:25:46 $
+   $Revision: 1.26 $
+   $Date: 2003/10/09 07:44:21 $
    $Author: hknight $ */
 
 #ifndef __STRING_UTILS_H
@@ -116,6 +116,10 @@ vector<string> stringlines(const string& str);
 // Stuff to turn an array of char *'s into a vector of strings
 // useful for taking lists of files on the command line
 vector<string> cstrarray2vec(const char **vals, int nelem);
+
+// Replaces 'bad' with 'good' for each occurence of 'bad'
+// Returns the modified string
+string replace_char(string ss,char bad,char good);
 
 template<class T>
 string form_string(T input){

@@ -150,6 +150,19 @@ cstrarray2vec(const char **vals, int nelem)
   return v;
 }
 
+string replace_char(string ss,char bad,char good){
+  if( ss.size()==0 || bad==good )
+    return ss;
+  
+  string::size_type i=ss.find(bad,0);
+
+  while( i!=string::npos ){
+    ss[i] = good;
+    i = ss.find(bad,i);
+  }
+
+  return ss;
+}
 
 string bool2string(bool mybool){
   if(mybool)
@@ -174,7 +187,10 @@ string make_string(int input, int places){
   char dummy2[50];
   sprintf(dummy1,"%%%dd",places);
   sprintf(dummy2,dummy1,input);
-  return string(dummy2);
+
+  string ss = dummy2;
+
+  return replace_char(ss,' ','0');
 }
 
 string make_string(unsigned input){
@@ -188,7 +204,10 @@ string make_string(unsigned input, int places){
   char dummy2[50];
   sprintf(dummy1,"%%%dd",places);
   sprintf(dummy2,dummy1,input);
-  return string(dummy2);
+  
+  string ss = dummy2;
+
+  return replace_char(ss,' ','0');
 }
 
 string make_string(long input){
