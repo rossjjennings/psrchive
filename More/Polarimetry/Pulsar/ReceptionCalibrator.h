@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ReceptionCalibrator.h,v $
-   $Revision: 1.40 $
-   $Date: 2003/09/12 18:24:14 $
+   $Revision: 1.41 $
+   $Date: 2003/09/23 14:08:34 $
    $Author: straten $ */
 
 #ifndef __ReceptionCalibrator_H
@@ -16,8 +16,11 @@
 
 // Parameterizations of the instrument and source
 #include "Calibration/PolarEstimate.h"
-#include "Calibration/InstrumentEstimate.h"
+#include "Calibration/SingleAxisEstimate.h"
 #include "Calibration/StokesEstimate.h"
+
+#include "Calibration/Instrument.h"
+#include "Calibration/Polar.h"
 
 // Extra transformations
 #include "Calibration/SingleAxis.h"
@@ -67,6 +70,9 @@ namespace Pulsar {
     //! Update the relevant estimate
     void update ();
 
+    //! Add a backend and return the path index
+    void add_fluxcal_backend ();
+
     //! ReceptionModel
     Reference::To<Calibration::ReceptionModel> equation;
 
@@ -79,22 +85,45 @@ namespace Pulsar {
     //! The instrumental model in use
     Reference::To<Calibration::Transformation> instrument;
 
+    // ////////////////////////////////////////////////////////////////////
+    //
     //! Polar decomposition of instrumental response (Hamaker)
-    Reference::To<Calibration::PolarEstimate> polar;
+    Reference::To<Calibration::Polar> polar;
 
+    //! The best estimate of the polar model
+    Calibration::PolarEstimate polar_estimate;
+
+    // ////////////////////////////////////////////////////////////////////
+    //
     //! Phenomenological decomposition of instrumental response (Britton)
-    Reference::To<Calibration::InstrumentEstimate> physical;
+    Reference::To<Calibration::Instrument> physical;
 
+    //! The best estimate of the physical model
+    Calibration::SingleAxisEstimate physical_estimate;
+
+    // ////////////////////////////////////////////////////////////////////
+    //
+    //! Additional backend required for flux calibrator signal path
+    Reference::To<Calibration::SingleAxis> fluxcal_backend;
+
+    //! The best estimate of the flux calibration backend
+    Calibration::SingleAxisEstimate fluxcal_backend_estimate;
+
+    // ////////////////////////////////////////////////////////////////////
+    //
     //! The parallactic angle rotation
     Calibration::Parallactic parallactic;
 
     //! The time axis
     Calibration::Axis<MJD> time;
 
-    //! The signal path of the ArtificialCalibrator sources
+    //! The signal path of the FluxCalibrator source
+    unsigned FluxCalibrator_path;
+
+    //! The signal path of the ArtificialCalibrator source
     unsigned ArtificialCalibrator_path;
 
-    //! The signal path of the Pulsar sources
+    //! The signal path of the Pulsar phase bin sources
     unsigned Pulsar_path;
 
   protected:
@@ -122,6 +151,8 @@ namespace Pulsar {
     ReceptionCalibrator (Calibrator::Type model,
 			 const Archive* archive = 0);
     
+    bool measure_cal_V;
+
     //! Add the specified pulse phase bin to the set of state constraints
     void add_state (unsigned pulse_phase_bin);
     
@@ -145,9 +176,6 @@ namespace Pulsar {
     
     //! Add the ArtificialCalibrator observation to the set of constraints
     void add_Calibrator (const ArtificialCalibrator* polncal);
-    
-    //! Add the specified FluxCalibrator observation to the set of constraints
-    void add_FluxCalibrator (const FluxCalibrator* fluxcal);
     
     //! Solve equation for each frequency
     void solve (int only_ichan = -1);
@@ -175,6 +203,9 @@ namespace Pulsar {
     //! Uncalibrated estimate of calibrator polarization
     SourceEstimate calibrator_estimate;
     
+    //! Uncalibrated estimate of calibrator polarization
+    SourceEstimate flux_calibrator_estimate;
+
     //! Uncalibrated estimate of pulsar polarization as a function of phase
     vector<SourceEstimate> pulsar;
     
@@ -220,6 +251,32 @@ namespace Pulsar {
 		   unsigned ichan,
 		   const Integration* data,
 		   Stokes<float>& variance);
+
+
+    //! Calibrator parameter communication
+    class CalInfo : public Calibrator::Info {
+      
+    public:
+      
+      CalInfo (ReceptionCalibrator* cal);
+      
+      //! Return the number of parameter classes
+      unsigned get_nclass () const;
+      
+    //! Return the name of the specified class
+      const char* get_name (unsigned iclass) const;
+
+      //! Return the number of parameters in the specified class
+      unsigned get_nparam (unsigned iclass) const;
+      
+      //! Return the estimate of the specified parameter
+      Estimate<float> get_param (unsigned ichan, unsigned iclass,
+				 unsigned iparam) const;
+      
+    protected:
+      Reference::To<const ReceptionCalibrator> calibrator;
+      
+    };
 
   private:
     //! Flag set after the solve method has been called

@@ -24,6 +24,8 @@ Pulsar::ReceptionCalibrator::ReceptionCalibrator (Calibrator::Type type,
   is_fit = false;
   is_initialized = false;
 
+  measure_cal_V = true;
+
   PA_min = PA_max = 0.0;
 
   if (archive)
@@ -52,14 +54,14 @@ Pulsar::StandardModel::StandardModel (Calibrator::Type _model)
   case Calibrator::Hamaker:
     if (ReceptionCalibrator::verbose)
       cerr << "Pulsar::StandardModel Hamaker" << endl;
-    polar = new Calibration::PolarEstimate;
+    polar = new Calibration::Polar;
     instrument = polar;
     break;
 
   case Calibrator::Britton:
     if (ReceptionCalibrator::verbose)
       cerr << "Pulsar::StandardModel Britton" << endl;
-    physical = new Calibration::InstrumentEstimate;
+    physical = new Calibration::Instrument;
     instrument = physical;
     break;
 
@@ -82,6 +84,8 @@ Pulsar::StandardModel::StandardModel (Calibrator::Type _model)
   equation->set_Transformation ( pcal_path );
   ArtificialCalibrator_path = equation->get_path ();
 
+  FluxCalibrator_path = 0;
+
   // ////////////////////////////////////////////////////////////////////
   //
   // initialize the signal path seen by the pulsar
@@ -98,20 +102,42 @@ Pulsar::StandardModel::StandardModel (Calibrator::Type _model)
 
 }
 
+void Pulsar::StandardModel::add_fluxcal_backend ()
+{
+  Calibration::ProductTransformation* path = 0;
+  path = new Calibration::ProductTransformation;
+
+  fluxcal_backend = new Calibration::SingleAxis;
+
+  path->add_Transformation( fluxcal_backend );
+
+  if (physical)
+    path->add_Transformation( physical->get_feed() );
+  else
+    path->add_Transformation( polar );
+
+  equation->add_path ( path );
+
+  FluxCalibrator_path = equation->get_path ();
+}
 
 void Pulsar::StandardModel::update ()
 {
   switch (model) {
   case Calibrator::Hamaker:
-    polar -> update ();
+    polar_estimate.update (polar);
     break;
   case Calibrator::Britton:
-    physical -> update();
+    physical_estimate.update (physical->get_backend());
     break;
   default:
     throw Error (InvalidState, "Pulsar::StandardModel::update",
 		 "unknown model");
   }
+
+  if (fluxcal_backend)
+    fluxcal_backend_estimate.update (fluxcal_backend);
+
 }
 
 void Pulsar::ReceptionCalibrator::initial_observation (const Archive* data)
@@ -186,13 +212,12 @@ void Pulsar::ReceptionCalibrator::load_calibrators ()
     
     try {
 
-      if (verbose)
-	cerr << "Pulsar::ReceptionCalibrator::load_calibrators loading "
-	     << calibrator_filenames[ifile] << endl;
+      cerr << "Pulsar::ReceptionCalibrator::load_calibrators loading "
+	   << calibrator_filenames[ifile] << endl;
 
       Reference::To<Archive> archive;
       archive = Pulsar::Archive::load(calibrator_filenames[ifile]);
-
+      
       add_calibrator (archive);
 
     }
@@ -510,6 +535,40 @@ void Pulsar::ReceptionCalibrator::add_Calibrator (const ArtificialCalibrator* p)
 
   }
 
+  bool flux_calibrator = cal->get_type() == Signal::FluxCalOn;
+
+  if (flux_calibrator)
+    cerr << "Pulsar::ReceptionCalibrator::add_Calibrator FluxCalOn" << endl;
+
+  if (flux_calibrator && flux_calibrator_estimate.source.size() == 0) { 
+
+    // add the flux calibrator states to the equations
+    init_estimate (flux_calibrator_estimate);
+
+    // set the initial guess and fit flags
+    Stokes<double> flux_cal_state (1,0,0,0);
+
+    for (unsigned ichan=0; ichan<nchan; ichan++) {
+      
+      flux_calibrator_estimate.source[ichan].set_stokes ( flux_cal_state );
+
+      if (measure_cal_V) {
+	// Stokes I of Hydra may vary
+	for (unsigned istokes=1; istokes<4; istokes++)
+	  flux_calibrator_estimate.source[ichan].set_infit (istokes, false);
+	
+	// Stokes V of the calibrator may vary!
+	calibrator_estimate.source[ichan].set_infit (3, true);
+      }
+
+      // Flux Calibrator observations are made through a different backend
+      model[ichan]->add_fluxcal_backend();
+
+    }
+
+  }
+
+
   const PolarCalibrator* polcal = 0;
   if (model_type == Calibrator::Hamaker)
     polcal = dynamic_cast<const PolarCalibrator*>(p);
@@ -539,24 +598,43 @@ void Pulsar::ReceptionCalibrator::add_Calibrator (const ArtificialCalibrator* p)
 
       // transpose [ipol][ichan] output of ArtificialCalibrator::get_levels
       vector< Estimate<double> > cal (npol);
-      for (ipol = 0; ipol<npol; ipol++)
+      vector< Estimate<double> > fcal (npol);
+
+      for (ipol = 0; ipol<npol; ipol++) {
 	cal[ipol] = cal_hi[ipol][ichan] - cal_lo[ipol][ichan];
+	fcal[ipol] = cal_lo[ipol][ichan];
+      }
 
       // convert to Stokes parameters
-      Stokes< Estimate<double> > stokes = convert (cal);
-      stokes *= 2.0;
+      Stokes< Estimate<double> > cal_stokes = convert (cal);
+      cal_stokes *= 2.0;
+
+      Stokes< Estimate<double> > fcal_stokes = convert (fcal);
+      fcal_stokes *= 2.0;
 
       try {
-        // convert to MeasuredState format
-        Calibration::MeasuredState state (stokes, calibrator_estimate.source_index);
 
 	Calibration::Abscissa* abscissa = model[ichan]->time.new_Value(epoch);
 	Calibration::Measurements measurements ( abscissa );
 
+        // convert to MeasuredState format
+        Calibration::MeasuredState state (cal_stokes, 
+					  calibrator_estimate.source_index);
         measurements.push_back (state);
-        measurements.path_index = model[ichan]->ArtificialCalibrator_path;
+
+	if (flux_calibrator) {
+	  // add the flux calibrator
+	  Calibration::MeasuredState fstate 
+	    (fcal_stokes, flux_calibrator_estimate.source_index);
+	  measurements.push_back (fstate);
+
+	  measurements.path_index = model[ichan]->FluxCalibrator_path;
+	}
+	else
+	  measurements.path_index = model[ichan]->ArtificialCalibrator_path;
 
         model[ichan]->equation->add_data (measurements);
+
       }
       catch (Error& error) {
         cerr << "Pulsar::ReceptionCalibrator::add_Calibrator"
@@ -566,16 +644,25 @@ void Pulsar::ReceptionCalibrator::add_Calibrator (const ArtificialCalibrator* p)
       Jones< Estimate<double> > correct;
       correct = p->get_response(ichan);
 
-      stokes = correct * stokes * herm(correct);
+      if (flux_calibrator) {
 
-      // add the observed
-      calibrator_estimate.source[ichan].mean += stokes;
+	fcal_stokes = correct * fcal_stokes * herm(correct);
+	flux_calibrator_estimate.source[ichan].mean += fcal_stokes;
+
+      }
+
+      else {
+
+	cal_stokes = correct * cal_stokes * herm(correct);
+	calibrator_estimate.source[ichan].mean += cal_stokes;
+
+      }
 
     }
   }
 
-
-  if (polcal && polcal->get_Transformation_nchan() == nchan)  {
+  if (polcal && !flux_calibrator &&
+      polcal->get_Transformation_nchan() == nchan)  {
 
     cerr << "Pulsar::ReceptionCalibrator::add_Calibrator add Polar Model" 
 	 << endl;
@@ -588,7 +675,7 @@ void Pulsar::ReceptionCalibrator::add_Calibrator (const ArtificialCalibrator* p)
       polar = dynamic_cast<const Calibration::Polar*>
 	( polcal->get_Transformation(ichan) );
       if (polar)
-	model[ichan]->polar->integrate( *polar );
+	model[ichan]->polar_estimate.integrate( *polar );
     }
 
   }
@@ -602,10 +689,17 @@ void Pulsar::ReceptionCalibrator::add_Calibrator (const ArtificialCalibrator* p)
     const Calibration::SingleAxis* sa;
 
     for (unsigned ichan = 0; ichan<nchan; ichan++) {
+
       sa = dynamic_cast<const Calibration::SingleAxis*>
 	( sacal->get_Transformation(ichan) );
-      if (sa)
-	model[ichan]->physical->integrate( *sa );
+
+      if (sa) {
+	if (flux_calibrator)
+	  model[ichan]->fluxcal_backend_estimate.integrate( *sa );
+	else
+	  model[ichan]->physical_estimate.integrate( *sa );
+      }
+
     }
 
   }
@@ -613,17 +707,6 @@ void Pulsar::ReceptionCalibrator::add_Calibrator (const ArtificialCalibrator* p)
 
 }
 
-
-//! Add the specified FluxCalibrator observation to the set of constraints
-void Pulsar::ReceptionCalibrator::add_FluxCalibrator (const FluxCalibrator* f)
-{
-  check_ready ("Pulsar::ReceptionCalibrator::add_FluxCalibrator");
-
-  cerr << "Pulsar::ReceptionCalibrator::add_FluxCalibrator unimplemented"
-       << endl;
-
-  // FluxCalibrator_path = true;
-}
 
 //! Calibrate the polarization of the given archive
 void Pulsar::ReceptionCalibrator::precalibrate (Archive* data)
@@ -725,7 +808,7 @@ bool Pulsar::ReceptionCalibrator::get_solved () const
 void Pulsar::ReceptionCalibrator::solve (int only_ichan)
 {
   if (!is_initialized)
-  check_ready ("Pulsar::ReceptionCalibrator::solve");
+    check_ready ("Pulsar::ReceptionCalibrator::solve");
 
   if (calibrator_estimate.source.size() == 0)
     throw Error (InvalidState, "Pulsar::ReceptionCalibrator::solve",
@@ -783,7 +866,8 @@ void Pulsar::ReceptionCalibrator::initialize ()
     " to " << PA_max << " degrees" << endl;
 
   calibrator_estimate.update_source();
-  
+  flux_calibrator_estimate.update_source();
+ 
   for (unsigned istate=0; istate<pulsar.size(); istate++)
     pulsar[istate].update_source ();
 

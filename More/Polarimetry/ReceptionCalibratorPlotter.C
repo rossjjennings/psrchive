@@ -234,54 +234,86 @@ void Pulsar::ReceptionCalibratorPlotter::plotcal ()
 		 "Pulsar::ReceptionCalibratorPlotter::plotcal",
                  "ReceptionCalibrator not set");
 
-  unsigned ipt = 0, npt = calibrator->get_nchan();
-
-  if (npt == 0) {
-    cerr << "Pulsar::ReceptionCalibratorPlotter::plot no points to plot"
-	 << endl;
-    return;
-  }
-
-  float xmin, xmax, ymin, ymax;
-  cpgqvp (0, &xmin, &xmax, &ymin, &ymax);
-
-  float ybottom = ymin;
-  float yrange = ymax - ymin;
-  float yspace = 0.1 * yrange;
-  float yheight = (yrange - yspace) / 3.0;
-
-  cpgsci(1);
-  cpgslw(1);
-  cpgsch(1);
-
-  // the plotting class
-  EstimatePlotter plotter;
-
-  // the data to be plotted
-  vector< Estimate<float> > data (npt);
-
-  unsigned ndim = 4;
-  unsigned idim = 0;
-
-  for (idim=0; idim<ndim; idim++) {
-    for (ipt=0; ipt<npt; ipt++)
-      data[ipt] = calibrator->calibrator_estimate.source[ipt].get_Estimate(idim);
-
-    plotter.add_plot (data);
-  }
-
-  cpgsvp(xmin, xmax, ybottom, ybottom + yheight);
-  for (idim=0; idim<ndim; idim++) {
-    cpgsci (idim+1);
-    plotter.plot (idim);
-  }
-
-  cpgsci (1);
-  cpgbox("bcst",0,0,"bcnvst",0,0);
-  cpgmtxt("L",2.5,.5,.5,"Stokes");
-
-  // restore the viewport
-  cpgsvp (xmin, xmax, ymin, ymax);
+  plot( new ReceptionCalibrator::CalInfo(calibrator),
+	calibrator->get_nchan(),
+	calibrator->get_Archive()->get_centre_frequency(),
+	calibrator->get_Archive()->get_bandwidth() );
 
 }
 
+Pulsar::ReceptionCalibrator::CalInfo::CalInfo (ReceptionCalibrator* cal)
+{
+  calibrator = cal; 
+}
+      
+//! Return the number of parameter classes
+unsigned Pulsar::ReceptionCalibrator::CalInfo::get_nclass () const
+{
+  if (calibrator->flux_calibrator_estimate.source.size() != 0) {
+    if (calibrator->measure_cal_V)
+      return 2; 
+    else
+      return 3;
+  }
+  else
+    return 1;
+}
+
+//! Return the name of the specified class
+const char*
+Pulsar::ReceptionCalibrator::CalInfo::get_name (unsigned iclass) const
+{
+  switch (iclass) {
+  case 0:
+    return "Calibrator";
+  case 1:
+    return "Flux Calibrator";
+  case 2:
+    return "Flux Stokes";
+  default:
+    return "";
+  }
+}
+
+//! Return the number of parameters in the specified class
+unsigned
+Pulsar::ReceptionCalibrator::CalInfo::get_nparam (unsigned iclass) const
+{
+  if (calibrator->measure_cal_V && iclass < 2)
+    return 4;
+
+  else if (!calibrator->measure_cal_V) {
+
+    switch (iclass) {
+    case 0:
+      return 4;
+    case 1:
+      return 1;
+    case 2:
+      return 3;
+    default:
+      return 0;
+    }
+
+  }
+    
+  return 0;
+}
+
+//! Return the estimate of the specified parameter
+Estimate<float>
+Pulsar::ReceptionCalibrator::CalInfo::get_param (unsigned ichan,
+						 unsigned iclass,
+						 unsigned iparam) const
+{
+  switch (iclass) {
+  case 0:
+    return calibrator->calibrator_estimate.source[ichan].get_Estimate(iparam);
+  case 1:
+    return calibrator->flux_calibrator_estimate.source[ichan].get_Estimate(iparam);
+  case 2:
+    return calibrator->flux_calibrator_estimate.source[ichan].get_Estimate(iparam+1);
+  default:
+    return 0.0;
+  }
+}
