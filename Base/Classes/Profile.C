@@ -22,6 +22,10 @@ bool Pulsar::Profile::legacy = false;
   When true, Profile methods will output debugging information on cerr
 */
 bool Pulsar::Profile::verbose = false;
+/*!
+  Default fraction of maximum amplitude a 'spike' is defined to have ended at
+*/
+float Pulsar::Profile::default_amplitude_dropoff = 0.2;
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -622,3 +626,127 @@ float Pulsar::Profile::snr_fortran(float rms){
   return(snrmax);
 }
 
+/////////////////////////////////////////////////////////////////////////////
+//
+// Pulsar::Profile::find_spike_edges
+//
+/*! Works out where the instantaneous flux drops to \param pc percent of
+the flux in \param spike_bin.  This routine is designed for use of single
+pulses where the duty cycle and hence integrated flux is low.
+ */
+void Pulsar::Profile::find_spike_edges(int& rise, int& fall, float pc,
+				       int spike_bin) const
+{
+  if( spike_bin < 0 )
+    spike_bin = find_max_bin();
+
+  int _nbin = get_nbin();
+
+  if( spike_bin < int(0) || spike_bin >= _nbin )
+    throw Error(InvalidParam,"Pulsar::Profile::find_spike_edges()",
+		"spike_bin=%d not a valid bin- must be in range [0,%d)",
+		spike_bin, _nbin);
+
+  const float* amps = get_amps();
+
+  float mean_level = mean(find_min_phase());
+  float relative_amp = amps[spike_bin] - mean_level;
+  float threshold = pc*relative_amp + mean_level;
+
+  //  fprintf(stderr,"\nPulsar::Profile::find_spike_edges() got spike_bin=%d/%d mean_level=%f amp=%f relative_amp=%f pc=%f threshold=%f\n",
+  //  spike_bin,_nbin,mean_level,amps[spike_bin],
+  //  relative_amp,pc,threshold);
+
+  bool found_spike_edge = false;
+
+  /////////////////////////////////////////////////
+  // Find where spike begins
+  for( int irise=spike_bin-1; irise>spike_bin-_nbin; irise--){
+    int jrise = irise;
+    if( jrise < 0 )
+      jrise += _nbin;
+
+    if( amps[jrise] < threshold ){
+      found_spike_edge = true;
+      rise = jrise+1;
+      break;
+    }
+  }
+
+  if( !found_spike_edge )
+    throw Error(InvalidState,"Pulsar::Profile::find_spike_edges()",
+		"Could not find spike edge for rise dropoff to %f of %f = %f.  Minimum=%f maximum=%f",
+		pc, amps[spike_bin], threshold,
+		min(), max());
+
+  found_spike_edge = false;
+
+  /////////////////////////////////////////////////
+  // Find where spike ends
+  for( int ifall=spike_bin+1; ifall<spike_bin+_nbin; ifall++){
+    int jfall = ifall;
+    if( jfall > _nbin )
+      jfall -= _nbin;
+
+    if( amps[jfall] < threshold ){
+      found_spike_edge = true;
+      fall = jfall;
+      break;
+    }
+  }
+
+  if( !found_spike_edge )
+    throw Error(InvalidState,"Pulsar::Profile::find_spike_edges()",
+		"Could not find spike edge for fall dropoff to %f of %f = %f.  Minimum=%f maximum=%f",
+		pc, amps[spike_bin], threshold,
+		min(), max());
+
+  //  fprintf(stderr,"\nPulsar::Profile::find_spike_edges() returning with rise=%d fall=%d\n",
+  //  rise,fall);
+}
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Pulsar::Profile::find_pulse_flux
+//
+/*! From the given pulse width this calculates the average flux contained
+within the pulse.  Useful for single pulse work where the pulse
+may be short in duration and therefore rise and fall times calculated
+by other flux calculators may not be valid.
+
+Default behaviour is to calculate a pulse width about the maximum bin
+ */
+
+//! Find the flux of the pulse
+float Pulsar::Profile::find_pulse_flux(float dropoff) const{
+  int rise = 0;
+  int fall = 0;
+  find_spike_edges(rise,fall,dropoff);
+
+  return find_pulse_flux(rise,fall);
+}
+
+//! Find the flux of the pulse
+float Pulsar::Profile::find_pulse_flux(int rise, int fall) const {
+  int nbin = get_nbin();
+
+  nbinify(rise,fall,nbin);
+
+  float spike_phase = 0.5*(fall+rise)/float(nbin);
+  float spike_antiphase = spike_phase + 0.5;
+  if( spike_antiphase > 1.0 )
+    spike_antiphase--;
+
+  //  fprintf(stderr,"\nPulsar::Profile::find_pulse_flux() got spike_phase=%f spike_antiphase=%f fall-rise=%d\n",
+  //  spike_phase, spike_antiphase, fall-rise);
+
+  float integrated_flux = 0.0;
+
+  const float* amps = get_amps();
+
+  for( int i=rise; i<fall; i++)
+    integrated_flux += amps[i%nbin];
+
+  return integrated_flux - mean(spike_antiphase)*(fall-rise);
+}
+  

@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Profile.h,v $
-   $Revision: 1.65 $
-   $Date: 2004/08/04 15:46:57 $
-   $Author: straten $ */
+   $Revision: 1.66 $
+   $Date: 2004/08/08 06:45:57 $
+   $Author: hknight $ */
 
 #ifndef __Pulsar_Profile_h
 #define __Pulsar_Profile_h
@@ -51,6 +51,9 @@ namespace Pulsar {
 
     //! Invoke legacy toa algorithm in shift
     static bool legacy;
+
+    //! Default fraction of maximum amplitude a 'spike' is defined to have ended at
+    static float default_amplitude_dropoff;
 
     //! null constructor produces an empty profile of zero size
     Profile () { init(); }
@@ -151,6 +154,15 @@ namespace Pulsar {
 
     //! Find the bin numbers at which the cumulative power crosses thresholds
     void find_peak_edges (int& rise, int& fall, bool choose = true) const;
+
+    //! Find the bin numbers at which the flux falls below a threshold
+    void find_spike_edges(int& rise, int& fall, float pc = default_amplitude_dropoff,
+			  int spike_bin = -1) const;
+
+    //! Find the flux of the pulse
+    float find_pulse_flux(int rise, int fall) const;
+    //! Find the flux of the pulse
+    float find_pulse_flux(float dropoff=default_amplitude_dropoff) const;
 
     //! Returns the bin number with the maximum amplitude
     int find_max_bin (int bin_start=0, int bin_end=0) const;
@@ -304,6 +316,7 @@ namespace Pulsar {
 
   //! Alternative implementation uses a fortran routine
   float snr_fortran (const Profile* profile);
+
 
 }
 
