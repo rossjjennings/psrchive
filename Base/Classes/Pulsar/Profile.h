@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Profile.h,v $
-   $Revision: 1.63 $
-   $Date: 2004/07/22 07:26:40 $
-   $Author: ahotan $ */
+   $Revision: 1.64 $
+   $Date: 2004/07/28 00:24:26 $
+   $Author: hknight $ */
 
 #ifndef __Pulsar_Profile_h
 #define __Pulsar_Profile_h
@@ -160,7 +160,8 @@ namespace Pulsar {
     //! Returns snr based upon baseline rms and width convolved with a boxcar
     float snr_fortran(float rms);
     //! Returns integrated flux divided by the number of bins == mean flux
-    float flux(float _baseline_fraction = Profile::default_duty_cycle);
+    float flux(float _baseline_fraction = Profile::default_duty_cycle,
+	       float min_phase = -1.0);
     //! Returns flux as above - but uses peak edges to find the profile region (and an abs value sum) ONLY HI SNR profiles applicable
     float flux_hi_snr(float _baseline_fraction = Profile::default_duty_cycle);
     /*! Returns the width of the pulse profile, at the percentage
