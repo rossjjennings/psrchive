@@ -1,5 +1,6 @@
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
+#include "Pulsar/IntegrationOrder.h"
 
 void Pulsar::Archive::copy (const Archive& archive)
 {
@@ -81,9 +82,20 @@ void Pulsar::Archive::copy (const Archive& archive,
 
     Reference::To<Extension> ext = archive.get_extension(iext)->clone();
     add_extension (ext);
-
   }
-
+  
+  // Resize the IntegrationOrder Extension (if there is one)
+  Pulsar::IntegrationOrder* tempio = get<Pulsar::IntegrationOrder>();
+  if (tempio) {
+    vector<double> tempvals(archive.get_nsubint(), 0);
+    for (unsigned i = 0; i < tempvals.size(); i++) {
+      tempvals[i] = tempio->get_Index(i);
+    }
+    tempio->resize(nsub);
+    for (unsigned i = 0; i < nsub; i++) {
+      tempio->set_Index(i, tempvals[selected[i]]);
+    }
+  } 
 }
 
 
