@@ -203,6 +203,10 @@ void Pulsar::ReceptionCalibratorPlotter::plot_model (unsigned ichan,
   unsigned nmeas = equation->get_nmeasurements ();
 
   unsigned nstate = calibrator->get_nstate_pulsar();
+  unsigned multiple = 1;
+
+  if (istate>0)
+    multiple = 1 + calibrator->PA_jump.size();
 
   for (unsigned imeas=0; imeas<nmeas; imeas++) {
 
@@ -210,29 +214,33 @@ void Pulsar::ReceptionCalibratorPlotter::plot_model (unsigned ichan,
     const Calibration::Measurements& measurements
       = equation->get_measurements (imeas);
 
-    if (!measurements.xform)
+    unsigned mstate = measurements.size();
+    bool was_measured = false;
+
+    for (unsigned jstate=0; jstate<mstate; jstate++)  {
+
+      unsigned check_state = istate;
+      for (unsigned itime=0; itime < multiple; itime++)
+        if (measurements[jstate].state_index == check_state)
+           was_measured = true;
+
+    }
+
+    if (!was_measured)
       continue;
 
-    Calibration::Gain* gain;
-    gain = dynamic_cast<Calibration::Gain*>(measurements.xform.get());
-
-    if (!gain)
-      continue;
-
-    float Gain = gain->get_param(0) * gain->get_param(0);
-
-    double xval = measurements.interval[0];
-
-    equation->get_model()->set_abscissa (0, xval);
+    equation->get_model()->set_measurements (measurements);
 
     float para = calibrator->parallactic.get_param(0) * 180.0/M_PI;
 
     vector<Jones<double> > grad;
     Stokes<float> stokes = equation->get_model()->evaluate (grad);
 
-    float intensity = stokes[0] * Gain;
+    for (unsigned ipol=0; ipol<4; ipol++) {
+      cpgsci (ipol+1);
+      cpgpt1 (para, stokes[ipol], 5);
+    }
 
-    cpgpt1 (para, intensity, 5);
   }
   
 
