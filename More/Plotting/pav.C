@@ -1,5 +1,5 @@
 //
-// $Id: pav.C,v 1.72 2004/04/01 04:41:35 rmanches Exp $
+// $Id: pav.C,v 1.73 2004/04/01 04:46:30 rmanches Exp $
 //
 // The Pulsar Archive Viewer
 //
@@ -96,7 +96,7 @@ void usage ()
     "\n"
     "Other plotting options: \n"
     " --degree  Plot the degree of polarisation profile\n"
-    " --publn   No top label\n"
+    " --publn   Publication quality plot\n"
     "\n"
     "Archive::Extension options (file format specific):\n"
     " -o        Plot the original bandpass\n"
@@ -277,7 +277,7 @@ int main (int argc, char** argv)
       plotter.set_subint( atoi (optarg) );
       break;
     case 'i':
-      cout << "$Id: pav.C,v 1.72 2004/04/01 04:41:35 rmanches Exp $" << endl;
+      cout << "$Id: pav.C,v 1.73 2004/04/01 04:46:30 rmanches Exp $" << endl;
       return 0;
 
     case 'j':
