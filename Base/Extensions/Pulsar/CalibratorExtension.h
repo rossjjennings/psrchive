@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/CalibratorExtension.h,v $
-   $Revision: 1.4 $
-   $Date: 2004/10/08 10:04:52 $
+   $Revision: 1.5 $
+   $Date: 2004/10/08 15:42:21 $
    $Author: straten $ */
 
 #ifndef __CalibratorExtension_h
@@ -50,7 +50,7 @@ namespace Pulsar {
     unsigned get_nchan () const;
 
     //! Set the weight of the specified channel
-    void set_weight (unsigned ichan, float weight);
+    virtual void set_weight (unsigned ichan, float weight);
     //! Get the weight of the specified channel
     float get_weight (unsigned ichan) const;
 
