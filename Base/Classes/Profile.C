@@ -26,6 +26,10 @@ bool Pulsar::Profile::verbose = false;
   Default fraction of maximum amplitude a 'spike' is defined to have ended at
 */
 float Pulsar::Profile::default_amplitude_dropoff = 0.2;
+/*!
+  Interpolate by this factor when using ZeroPadShift
+*/
+unsigned Pulsar::Profile::ZPSF = 64;
 
 /////////////////////////////////////////////////////////////////////////////
 //

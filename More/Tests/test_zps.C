@@ -122,8 +122,8 @@ int main(int argc, char** argv) {
   }
   else {
     bmrng mygen;
-    SyntheticProfile fakep(1024, 5.0, 40.0, 512 + (100.0*mygen.rand()));
-    SyntheticProfile fakes(1024, 10.0, 40.0, 512 + (100.0*mygen.rand()));
+    SyntheticProfile fakep(1024, 15.0, 40.0, 512 + (100.0*mygen.rand()));
+    SyntheticProfile fakes(1024, 30.0, 40.0, 512 + (100.0*mygen.rand()));
 
     fakep.build();
     fakep.add_noise();
@@ -175,7 +175,7 @@ int main(int argc, char** argv) {
       
       cpgsci(2);
       for (unsigned j = 0; j < interp.size(); j++) {
-	cpgpt1(bins[j]/4.0, interp[j], 1);
+	cpgpt1(float(j)/float(Pulsar::Profile::ZPSF*nbin), interp[j], 1);
       }
       cpgsci(1);
 
@@ -219,10 +219,20 @@ int main(int argc, char** argv) {
       }
 
       cpgsci(2);
-      for (int j = binmin*16; j < binmax*16; j++) {
-	cpgpt1(bins[j]/16.0, interp[j], 1);
+      for (unsigned j = binmin*Pulsar::Profile::ZPSF; 
+	   j < binmax*Pulsar::Profile::ZPSF; j++) {
+	cpgpt1(float(j)/float(Pulsar::Profile::ZPSF*nbin), interp[j], 1);
       }
+      cpgsci(5);
+      cpgsls(2);
+      // The shift is wrapped, have to undo
+      if (shift < 0.0)
+	shift += 1.0;
+      cpgmove(shift, ymax);
+      cpgdraw(shift, ymin);
+      cpgsls(1);
       cpgsci(1);
+
 
       // Draw the profiles
 

@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Profile.h,v $
-   $Revision: 1.71 $
-   $Date: 2004/09/19 06:49:52 $
+   $Revision: 1.72 $
+   $Date: 2004/09/21 04:50:48 $
    $Author: ahotan $ */
 
 #ifndef __Pulsar_Profile_h
@@ -54,6 +54,8 @@ namespace Pulsar {
 
     //! Default fraction of maximum amplitude a 'spike' is defined to have ended at
     static float default_amplitude_dropoff;
+
+    static unsigned ZPSF;
 
     //! null constructor produces an empty profile of zero size
     Profile () { init(); }

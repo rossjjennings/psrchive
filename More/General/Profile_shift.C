@@ -13,10 +13,13 @@ double Pulsar::Profile::ZeroPadShift (const Profile& std,
 				      float& ephase, vector<float>& corr,
 				      vector<float>& interp, bool store) const
 {
-  float SAMPLE_FACTOR = 4.0;
+  // This algorithm uses zero padding in the fourier domain to
+  // interpolate the cross correlation function in the time
+  // domain. The technique is described at:
+  //
+  // http://www.dspguru.com/howto/tech/zeropad2.htm
 
-  // First compute the standard cross correlation with single
-  // bin precision:
+  // First compute the standard cross correlation function:
 
   Reference::To<Pulsar::Profile> ptr = clone();
   Reference::To<Pulsar::Profile> stp = std.clone();
@@ -31,18 +34,16 @@ double Pulsar::Profile::ZeroPadShift (const Profile& std,
   *ptr -= ptr->mean(ptr->find_min_phase(0.15));
   
   vector< Estimate<float> > correlation;
-  correlation.resize(get_nbin());
   
   for (unsigned i = 0; i < get_nbin(); i++) {
-    correlation[i].val = ptr->get_amps()[i];
-    correlation[i].var = 0.0;
+    correlation.push_back(ptr->get_amps()[i]);
     if (store)
       corr.push_back(ptr->get_amps()[i]);
   }
   
   vector< Estimate<float> > interpolated;
   
-  interpolated.resize(correlation.size() * unsigned(SAMPLE_FACTOR));
+  interpolated.resize(correlation.size() * Pulsar::Profile::ZPSF);
   
   // Perform the zero-pad interpolation
   
@@ -58,14 +59,21 @@ double Pulsar::Profile::ZeroPadShift (const Profile& std,
       interp.push_back(interpolated[i].val);
     if (interpolated[i].val > maxval) {
       maxval = interpolated[i].val;
-      maxloc = float(i) / SAMPLE_FACTOR;
+      maxloc = float(i) / Pulsar::Profile::ZPSF;
     }
   }
   
-  // Error estimate?
-  ephase = 1.0 / SAMPLE_FACTOR;
+  // Error estimate? This needs more thought...
+  ephase = 1.0 / float(get_nbin());
   
-  return maxloc / double(get_nbin());
+  double shift = double(maxloc) / double(get_nbin());
+  
+  if (shift < -0.5)
+    shift += 1.0;
+  else if (shift > 0.5)
+    shift -= 1.0;
+  
+  return shift;
 }
 
 double Pulsar::Profile::ParIntShift (const Profile& std, float& error,
