@@ -117,6 +117,9 @@ void Pulsar::PulsarCalibrator::set_standard (const Archive* data)
 
   }
 
+  if (verbose)
+    cerr << "Pulsar::PulsarCalibrator::set_standard exit" << endl;
+
 }
 
 //! Add the observation to the set of constraints
@@ -183,7 +186,7 @@ void Pulsar::PulsarCalibrator::add_observation (const Archive* data)
       model[ichan]->fit( integration->new_PolnProfile (ichan) );
       solution[ichan]->integrate( transformation[ichan] );
 
-      if (ichan+1 < nchan)
+      if (ichan+1 < nchan && transformation[ichan+1])
         transformation[ichan+1]->copy( transformation[ichan] );
 
     }
