@@ -196,7 +196,7 @@ void load (fitsfile* fptr, Pulsar::ProcHistory::row* hrow)
                  &(hrow->fa_corr), &initflag, &status);
   
   if (status != 0) {
-    if (Pulsar::Archive::verbose)
+    if (Pulsar::Archive::verbose > 1)
       cerr << "load ProcHistory::row WARNING assuming uncorrected feed angle"
 	   << endl;
     hrow->fa_corr = 0;
@@ -212,7 +212,7 @@ void load (fitsfile* fptr, Pulsar::ProcHistory::row* hrow)
                  &(hrow->rm_corr), &initflag, &status);
   
   if (status != 0)  {
-    if (Pulsar::Archive::verbose)
+    if (Pulsar::Archive::verbose > 1)
       cerr << "load ProcHistory::row WARNING assuming uncorrected RM" << endl;
     hrow->rm_corr = 0;
     status = 0;
@@ -313,7 +313,7 @@ void load (fitsfile* fptr, Pulsar::ProcHistory::row* hrow)
 
   if (status != 0) {
 
-    if (Pulsar::Archive::verbose)
+    if (Pulsar::Archive::verbose > 1)
       cerr << "load ProcHistory::row WARNING assuming uncalibrated flux"<<endl;
     status = 0;
     hrow->scale = Signal::FluxDensity;

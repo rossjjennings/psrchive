@@ -172,10 +172,13 @@ void unload (fitsfile* fptr, const Pulsar::ProcHistory::row* hrow)
   tempint = hrow->fa_corr;
   fits_write_col (fptr, TINT, colnum, row, 1, 1, &tempint, &status);
   
-  if (status != 0)
+  if (status != 0) {
+    cerr << "Pulsar::FITSArchive Please cvs update " << getenv("PSRFITSDEFN")
+	 << endl;
     throw FITSError (status, "FITSArchive::unload_hist_row", 
                      "fits_write_col FA_CORR");
-  
+  }
+
   // Write RM_CORR
   
   colnum = 0;
