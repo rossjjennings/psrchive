@@ -1,5 +1,5 @@
 //
-// $Id: pav.C,v 1.20 2002/12/23 05:53:52 ahotan Exp $
+// $Id: pav.C,v 1.21 2003/01/23 07:39:20 cwest Exp $
 //
 // The Pulsar Archive Viewer
 //
@@ -127,7 +127,7 @@ int main (int argc, char** argv)
       usage ();
       return 0;
     case 'i':
-      cout << "$Id: pav.C,v 1.20 2002/12/23 05:53:52 ahotan Exp $" << endl;
+      cout << "$Id: pav.C,v 1.21 2003/01/23 07:39:20 cwest Exp $" << endl;
       return 0;
     case 'm':
       // macro file
@@ -215,7 +215,7 @@ int main (int argc, char** argv)
     return 0;
   }
 
-  if (display || greyfreq) {
+  if (display || greyfreq ) {
 
     cpgbeg (0, "?", 0, 0);
     cpgask(1);
@@ -293,6 +293,7 @@ int main (int argc, char** argv)
       cpgsvp (0.1, 0.9, 0.1, 0.9);
       cpgsch (1.0);
       cpgeras();
+      plotter.set_colour_map (colour_map);
       plotter.phase_time (archive);
       cpgend();
       exit(0);
