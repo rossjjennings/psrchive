@@ -7,7 +7,7 @@ COMMENT   Astrophysics Supplement Series v44/p363, v44/p371, v73/p359, v73/p365.
 COMMENT   Contact the NASA Science Office of Standards and Technology for the
 COMMENT   FITS Definition document #100 and other FITS information.
 COMMENT
-HDRVER  = '1.1             '   / Header version 
+HDRVER  = '1.2             '   / Header version 
 DATE    = '                '   / File creation date (YYYY-MM-DDThh:mm:ss UTC)
 ORIGIN  = '                '   / Output class
 OBSERVER= '                '   / Observer name(s)
@@ -20,7 +20,7 @@ FRONTEND= '                '   / Rx and feed ID
 BACKEND = '                '   / Backend ID
 BECONFIG= '                '   / Backend configuration file name
 NRCVR   = *                    / Number of receiver channels (I)
-OBSTYPE = '                '   / (PSR, CAL, SEARCH)
+OBSTYPE = '                '   / (PSR, SEARCH)
 SRC_NAME= '                '   / Source or scan ID 
 COORD_MD= '                '   / Coordinate mode (J2000, Gal, Ecliptic, AZEL, HADEC)
 STT_CRD1= '                '   / Start coord 1 (hh:mm:ss.sss or ddd.ddd)
@@ -130,7 +130,7 @@ TFORM1  = '1I      '           / Integer count
 TTYPE2  = 'CYCLE_MJD'          / MJD at cycle start
 TFORM2  = '1D      '           / Double
 TTYPE3  = 'STATS    '          / Digitiser statistics
-TFORM3  = '*E      '           / (NLEV+1)*NDIGR floats
+TFORM3  = 'E       '           / (NLEV+1)*NDIGR floats
 END
 XTENSION= 'BINTABLE'           / ***** Digitiser counts *****
 BITPIX  =                    8 / N/A
@@ -147,12 +147,12 @@ NPTHIST = *                    / Number of points in histogram (I)
 DIGLEV  = '                '   / Digitiser level-setting mode (AUTO, FIX)
 EXTNAME = 'DIG_CNTS'           / Name of this binary table extension
 TTYPE1  = 'DAT_OFFS'           / Data offset for each histogram
-TFORM1  = '*E      '           / NDIGR floats
+TFORM1  = 'E       '           / NDIGR floats
 TTYPE2  = 'DAT_SCL '           / Data scale factor for each histogram
-TFORM2  = '*E      '           / NDIGR floats
+TFORM2  = 'E       '           / NDIGR floats
 TTYPE3  = 'DATA    '           / Digitiser count data
 TDIM3   =  (*,*)               / Data table dimensions (NPTHIST,NDIGR)         
-TFORM3  = '*I      '           / NPTHIST*NDIGR integers
+TFORM3  = 'I       '           / NPTHIST*NDIGR integers
 END
 XTENSION= 'BINTABLE'           / ***** Original bandpasses *****
 BITPIX  =                    8 / N/A
@@ -164,13 +164,13 @@ GCOUNT  =                    1 / one data group (required keyword)
 TFIELDS =                    3 / number of fields per row
 EXTNAME = 'BANDPASS'           / name of this binary table extension
 TTYPE1  = 'DAT_OFFS'           / Data offset for each bandpass
-TFORM1  = '*E      '           / NPOL floats
+TFORM1  = 'E      '           / NPOL floats
 TTYPE2  = 'DAT_SCL '           / Data scale factor for each bandpass
-TFORM2  = '*E      '           / NPOL floats
+TFORM2  = 'E      '           / NPOL floats
 TTYPE3  = 'DATA    '           / Bandpass for each correlator product
 TDIM3   = (*,*)                / Data table dimensions = (NCHAN_original,NPOL)
 TUNIT3  = 'Jy      '           / Bandpass amplitude units
-TFORM3  = '*I      '           / NCHAN*NPOL integers
+TFORM3  = ' I      '           / NCHAN*NPOL integers
 END
 XTENSION= 'BINTABLE'           / ***** Pulsar ephemeris history *****
 BITPIX  =                    8 / N/A
@@ -200,7 +200,7 @@ TTYPE8  = 'PX      '           / [mas] Parallax
 TFORM8  = '1D      '           / Double
 TTYPE9  = 'POSEPOCH'           / Epoch at which the position is measured (MJD)
 TFORM9  = '1D      '           / Double
-TTYPE10 = 'IF0    '            / [mHz] Integer mHz barycentric rotation frequency 
+TTYPE10 = 'IF0     '            / [mHz] Integer mHz barycentric rotation frequency 
 TFORM10 = '1J      '           / Long integer
 TTYPE11 = 'FF0     '           / [mHz] Fractional mHz barycentric rotation frequency
 TFORM11 = '1D      '           / Double
@@ -342,13 +342,13 @@ CALFILE5= '        '           / Cal 5 filename
 TFIELDS =                    3 / Number of fields per row
 EXTNAME = 'FLUX_CAL'           / name of this binary table extension
 TTYPE1  = 'DAT_FREQ'           / [MHz] Centre frequency for each channel
-TFORM1  = '*E      '           / NCHAN floats
+TFORM1  = 'E       '           / NCHAN floats
 TTYPE2  = 'DAT_WTS '           / Weights for each channel
-TFORM2  = '*E      '           / NCHAN floats
+TFORM2  = 'E       '           / NCHAN floats
 TTYPE3  = 'DATA'
 TDIM3   = (2,*,*)              / Dimensions (2,NCHAN,NPOL)(cal, system equiv f.d.) 
 TUNIT3  = 'Jy      '
-TFORM3  = '*E      '           / 2*NCHAN*NPOL floats
+TFORM3  = 'E       '           / 2*NCHAN*NPOL floats
 END
 XTENSION= 'BINTABLE'           / ***** Feed Cross-Coupling parameters *****
 BITPIX  =                    8 / N/A 
@@ -363,12 +363,12 @@ DATE_PRO= '        '           /
 TFIELDS =                    3 / Number of fields per row
 EXTNAME = 'FEEDPAR '           / Name of this binary table extension
 TTYPE1  = 'DAT_FREQ'           / [MHz] Centre frequency for each channel
-TFORM1  = '*E      '           / NCHAN floats
+TFORM1  = 'E       '           / NCHAN floats
 TTYPE2  = 'DAT_WTS '           / Weights for each channel
-TFORM2  = '*E      '           / NCHAN floats
+TFORM2  = 'E       '           / NCHAN floats
 TTYPE3  = 'DATA    '           / Cross-coupling data
 TDIM3   = (*,*)                / Dimensions (NCHAN,NCPAR)
-TFORM3  = '*E      '           / NCHAN*NCPAR floats
+TFORM3  = 'E       '           / NCHAN*NCPAR floats
 END
 XTENSION= 'BINTABLE'           / ***** Subintegration data  *****
 BITPIX  =                    8 / N/A
@@ -406,15 +406,15 @@ TFORM12 = '1E      '           / Float
 TTYPE13 = 'TEL_ZEN '           / [deg] Telescope zenith angle at subint centre
 TFORM13 = '1E      '           / Float
 TTYPE14 = 'DAT_FREQ'           / [MHz] Centre frequency for each channel
-TFORM14 = '*E      '           / NCHAN floats
+TFORM14 = 'E       '           / NCHAN floats
 TTYPE15 = 'DAT_WTS '           / Weights for each channel
-TFORM15 = '*E      '           / NCHAN floats
+TFORM15 = 'E       '           / NCHAN floats
 TTYPE16 = 'DAT_OFFS'           / Data offset for each channel
-TFORM16 = '*E      '           / NCHAN*NPOL floats
+TFORM16 = 'E       '           / NCHAN*NPOL floats
 TTYPE17 = 'DAT_SCL '           / Data scale factor for each channel
-TFORM17 = '*E      '           / NCHAN*NPOL floats
+TFORM17 = 'E       '           / NCHAN*NPOL floats
 TTYPE18 = 'DATA    '           / Subint data table
 TDIM18  = (*,*,*)              / Dimensions of data table = (NBIN,NCHAN,NPOL)
 TUNIT18 = 'Jy      '           / Units of subint data
-TFORM18 = '*I      '           / NBIN*NCHAN*NPOL integers
+TFORM18 = 'I       '           / NBIN*NCHAN*NPOL integers
 END
