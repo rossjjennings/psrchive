@@ -85,20 +85,43 @@ double MJD::fracday() const {
     return((double)secs/86400.0 + fracsec/86400.0);
 }
 
-MJD operator + (const MJD &m1, const MJD &m2) {
-  MJD m3 = m1;
-  m3.days += m2.days;
-  m3.secs += m2.secs;
-  m3.fracsec += m2.fracsec; 
-  return MJD(m3.days,m3.secs,m3.fracsec);
+MJD& MJD::operator = (const MJD &in_mjd)
+{
+  if (this != &in_mjd) {
+    days = in_mjd.days;
+    secs = in_mjd.secs;
+    fracsec = in_mjd.fracsec;
+  }
+  return *this;
 }
 
-MJD operator - (const MJD &m1, const MJD &m2) {
-  MJD m3 = m1;
-  m3.days -= m2.days;
-  m3.secs -= m2.secs;
-  m3.fracsec -= m2.fracsec; 
-  return MJD(m3.days,m3.secs,m3.fracsec); // Let constructor do the dirty work.
+const MJD operator + (const MJD &m1, const MJD &m2) {
+  return MJD(m1.days + m2.days,
+	     m1.secs + m2.secs,
+	     m1.fracsec + m2.fracsec); // Let constructor do the dirty work.
+}
+
+const MJD operator - (const MJD &m1, const MJD &m2) {
+  return MJD(m1.days - m2.days,
+	     m1.secs - m2.secs,
+	     m1.fracsec - m2.fracsec); // Let constructor do the dirty work.
+}
+
+const MJD operator / (const MJD &m1, double divisor) {
+  double ddays = ((double) m1.days) / divisor;
+  double dsecs = ((double) m1.secs) /divisor; 
+  double dfracsec = m1.fracsec / divisor;
+  return MJD(ddays,dsecs,dfracsec);
+}
+
+const MJD operator + (const MJD &m1, double sss) {
+  double secs_add = m1.fracsec + sss;
+  return MJD((double)m1.days,(double)m1.secs,secs_add);
+}
+
+const MJD operator - (const MJD &m1, double sss) {
+  double secs_take = m1.fracsec - sss;
+  return MJD((double)m1.days,(double)m1.secs,secs_take);
 }
 
 int operator > (const MJD &m1, const MJD &m2) {
@@ -151,25 +174,6 @@ int operator != (const MJD &m1, const MJD &m2){
       return (1);
   else
       return (0);  
-}
-
-MJD operator / (const MJD &m1, double divisor) {
-  MJD m3 = m1;
-
-  double ddays = ((double) m1.days) / divisor;
-  double dsecs = ((double) m1.secs) /divisor; 
-  double dfracsec = m1.fracsec / divisor;
-  return MJD(ddays,dsecs,dfracsec);
-}
-
-MJD operator + (const MJD &m1, double sss) {
-  double secs_add = m1.fracsec + sss;
-  return MJD((double)m1.days,(double)m1.secs,secs_add);
-}
-
-MJD operator - (const MJD &m1, double sss) {
-  double secs_take = m1.fracsec - sss;
-  return MJD((double)m1.days,(double)m1.secs,secs_take);
 }
 
 int MJD::print (FILE *stream){
@@ -360,11 +364,14 @@ MJD::MJD(int d, int s, double f) {
 MJD::MJD (char* utc_string)
 {
   utc_t utc;
-  char temp [40];
   str2utc (&utc, utc_string);
 
-  //fprintf (stderr, "Passing %s to MJD(utc) constructor\n", 
-  //   utc2str (temp, utc, "yyyy-ddd-hh-mm-ss"));
+  /*
+char temp [40];
+fprintf (stderr, "Passing %s to MJD(utc) constructor\n", 
+	 utc2str (temp, utc, "yyyy-ddd-hh-mm-ss"));
+  */
+
   *this = MJD(utc);
 }
 
@@ -411,6 +418,13 @@ MJD::MJD (utc_t utc)
   cal_t greg;
 
   utc2cal (&greg, utc);
+
+  /*
+char temp [40];
+fprintf (stderr, "Passing %s to MJD(cal) constructor\n", 
+	 cal2str (temp, greg, "yyyy-MM-dd-hh-mm-ss"));
+  */
+
   MJD::MJD(greg);
 }
 
@@ -426,61 +440,3 @@ MJD::MJD (cal_t greg)
   secs = 3600.0 * greg.tm_hour + 60.0 * greg.tm_min + greg.tm_sec;
   fracsec = 0.0;
 }
-
-#if 0
-
-// Converts a string yyyydddhhmmss to internal format
-
-MJD::MJD(char * yyyydddhhmmss, int ignored){
-  int leapyr;
-  int month[13];
-
-  int year,ddd,hour,minute,second;
-
-  if (sscanf(yyyydddhhmmss,"%4d%3d%2d%2d%2d",
-             &year,&ddd,&hour,&minute,&second)!=5) {
-    fprintf(stderr,"MJD::MJD(char*) Error converting %s to MJD\n",
-            yyyydddhhmmss);
-    year = ddd = hour = minute = second = 0;
-  }
-
-  if(year%4==0){leapyr=1;}else{leapyr=0;}
-  if(year%100==0 && year%400!=0){leapyr=0;}
-
-  month[0]=0;
-  month[1]=31;
-  month[2]=28+leapyr;
-  month[3]=31;
-  month[4]=30;
-  month[5]=31;
-  month[6]=30;
-  month[7]=31;
-  month[8]=31;
-  month[9]=30;
-  month[10]=31;
-  month[11]=30;
-  month[12]=31;
-
-  // Work out integer days.
-
-  for(int i=0;i<13 && ddd>0;i++){
-
-     ddd -= month[i];
-
-           if(ddd<=0){
-
-           int Month = i;
-           days = ( (1461*(year-(12-Month)/10+4712))/4
-                       +(306*((Month+9)%12)+5)/10
-                       -(3*((year-(12-Month)/10+4900)/100))/4
-                       +ddd+month[i]-2399904  );
-           }
-  }
-
-  // Work out seconds, fracsecs always zero.
-
-  secs = 3600.0 * hour + 60.0 * minute + second;
-  fracsec = 0.0;
-}
-
-#endif
