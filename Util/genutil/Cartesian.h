@@ -1,6 +1,6 @@
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Cartesian.h,v $
-   $Revision: 1.1 $
-   $Date: 2000/02/25 00:36:41 $
+   $Revision: 1.2 $
+   $Date: 2000/02/29 07:40:52 $
    $Author: straten $ */
 
 #ifndef __CARTESIAN_H
@@ -10,10 +10,9 @@
 
 class Cartesian
 {
-protected:
+ public:
   double x, y, z;
 
-public:
   Cartesian ();
   Cartesian (double ux, double uy, double uz);
   Cartesian (const AnglePair& spherical);
