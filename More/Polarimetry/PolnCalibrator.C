@@ -106,8 +106,15 @@ void Pulsar::PolnCalibrator::build (unsigned nchan)
   response.resize( transformation.size() );
 
   for (unsigned ichan=0; ichan < response.size(); ichan++)
-    if (transformation[ichan])
-      response[ichan] = inv( transformation[ichan]->evaluate() );
+    if (transformation[ichan])  {
+      if ( norm(det( transformation[ichan]->evaluate() )) < 1e-9 ) {
+        cerr << "Pulsar::PolnCalibrator::build ichan=" << ichan <<
+                " faulty response" << endl;
+         response[ichan] = Jones<float>::identity();
+      }
+      else
+         response[ichan] = inv( transformation[ichan]->evaluate() );
+    }
     else
       response[ichan] = Jones<float>::identity();
 
