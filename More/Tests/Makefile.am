@@ -78,12 +78,18 @@ libpsrchive_la_SOURCES = plugins.csh Physical.h \
 	Integration_invint.C          pafit_get_PA.C  \
 	Integration_match.C
 
-SUBDIRS                 = Calibration Extension psrfits timer
+SUBDIRS                 = Calibration Extension timer
 
 libpsrchive_la_LIBADD   = Calibration/libCalibration.la \
 			Extension/libExtension.la \
-			psrfits/libpsrfits.la \
 			timer/libtimer.la
+
+if HAVE_CFITSIO
+
+SUBDIRS += psrfits
+libpsrchive_la_LIBADD += psrfits/libpsrfits.la
+
+endif
 
 # ######################################################################
 #
