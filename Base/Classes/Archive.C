@@ -2,6 +2,7 @@
 
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
+#include "Pulsar/IntegrationOrder.h"
 
 #include "Error.h"
 #include "typeutil.h"
@@ -122,8 +123,28 @@ Pulsar::Archive::get_extension (unsigned iext)
   implemented by the Archive base class simply calls this method. */
 void Pulsar::Archive::add_extension (Extension* ext)
 {
-  unsigned index = find( extension, typeid(ext) );
+  // Test to see if the archive has already had its Integrations
+  // re-ordered. At the moment the code only supports doing this
+  // once, otherwise each IntegrationOrder class would have to
+  // know how to convert from all of its fellows and this would
+  // get very complicated... AWH 29/12/2003
+  
+  bool has_alt_order = false;
+  
+  for (unsigned i = 0; i < extension.size(); i++) {
+    if (dynamic_cast<Pulsar::IntegrationOrder*>(extension[i].get()))
+      has_alt_order = true;
+  }
+  
+  if (dynamic_cast<Pulsar::IntegrationOrder*>(ext) && has_alt_order)
+    throw Error(InvalidState, "Archive::add_extension",
+		"Stacking IntegrationOrder Extensions is not supported");
+  
+  // If we reach here, there are no IntegrationOrder conflicts.
+  // Continue as normal... AWH 29/12/2003
 
+  unsigned index = find( extension, typeid(ext) );
+  
   if (index < extension.size())
     extension[index] = ext;
   else
