@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Stokes.h,v $
-   $Revision: 1.2 $
-   $Date: 2003/02/15 10:24:14 $
+   $Revision: 1.3 $
+   $Date: 2003/02/20 09:30:06 $
    $Author: straten $ */
 
 #ifndef __Stokes_H
@@ -46,6 +46,8 @@ class Stokes : public Quaternion<T, Hermitian>
   template <typename U>
     Stokes& operator = (const Jones<U>& j)
   { return operator = ( convert(j) ); }
+
+  T abs_vect () const { return sqrt (s1*s1 + s2*s2 + s3*s3); }
 
 };
 
