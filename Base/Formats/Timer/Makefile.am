@@ -26,3 +26,8 @@ INCLUDES = -I$(top_builddir)/utils/include -I$(top_builddir)/astro/include \
         -I$(top_srcdir)/psrchive -I$(top_srcdir)/psrchive/Calibration \
 	-I$(top_srcdir)/psrchive/Extension
 
+check_PROGRAMS = baseband_header_size timer_size
+TESTS = $(check_PROGRAMS)
+
+baseband_header_size_SOURCES = baseband_header_size.C
+
