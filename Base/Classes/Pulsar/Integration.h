@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Integration.h,v $
-   $Revision: 1.19 $
-   $Date: 2002/04/23 09:00:18 $
+   $Revision: 1.20 $
+   $Date: 2002/04/25 10:59:44 $
    $Author: pulsar $ */
 
 /*
@@ -18,6 +18,7 @@
 
 #include "MJD.h"
 #include "ArchiveTypes.h"
+
 
 namespace Tempo {
   class toa;
@@ -145,6 +146,8 @@ namespace Pulsar {
     //! Returns a pointer to the Profile given by the specified indeces
     Profile* get_Profile (int ipol, int ichan);
 
+    const Profile* get_Profile (int ipol, int ichan) const;
+
     //! Returns a pointer to the vector of Profile objects for poln
     vector<Profile *>& operator[] (Poln::Measure poln);
 
@@ -265,6 +268,8 @@ namespace Pulsar {
 
   };
 
+  void plot_greyscale (const Integration* my_integ, const string& str);
+  
 }
 
 #endif
