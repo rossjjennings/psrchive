@@ -3,6 +3,8 @@
 
 #include <stdlib.h>
 #include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 
 /*! To protect data, especially when writing the output archive to a
   file of the same name as the input archive, this method unloads data
@@ -53,6 +55,15 @@ void Pulsar::Archive::unload (const char* filename)
 
   if (ret < 0)
     throw Error (FailedSys, "Pulsar::Archive::unload", "failed rename");
+
+  ret = chmod (unload_to_filename.c_str(), 0666 & ~getumask());
+
+  if (ret < 0 && verbose)  {
+    char temp[8];
+    sprintf (temp, "%x", 0666 & ~getumask());
+    cerr << "Pulsar::Archive::unload WARNING failed chmod ("
+         << unload_to_filename << ", " << temp << ")" << endl;
+  }
 
   unload_filename = unload_to_filename;
   __load_filename = unload_to_filename;
