@@ -85,7 +85,7 @@ bool Pulsar::Archive::standard_match (const Archive* archive,
 
   if (get_source() != archive->get_source()) {
     reason += match_indent
-      + "source name mismatch: " + get_source() + " != " + archive->get_source();
+      + "source name mismatch: "+ get_source() +" != "+ archive->get_source();
     result = false;
   }
 
@@ -108,9 +108,9 @@ bool Pulsar::Archive::standard_match (const Archive* archive,
   The following are tested for equality:
   <UL>
   <LI> get_scale
-  <LI> get_type
-  <LI> get_source
-  <LI> get_nbin
+  <LI> get_faraday_corrected
+  <LI> get_dedispersed
+  <LI> get_nchan
   </UL>
   \param archive pointer to Archive to be compared with this
   \retval reason if match fails, describes why in English
@@ -121,28 +121,36 @@ bool Pulsar::Archive::processing_match (const Archive* archive,
 {
   bool result = true;
 
-  //! Data has been flux calibrated
+  // Data has been flux calibrated
   if (get_scale() != archive->get_scale()) {
     reason += match_indent
       + stringprintf ("scale mismatch");
     result = false;
   }
 
-  //! Data has been corrected for ISM faraday rotation
+  // Data has been corrected for ISM faraday rotation
   if (get_faraday_corrected() != archive->get_faraday_corrected()) {
     reason += match_indent
       + stringprintf ("faraday rotation correction mismatch");
     result = false;
   }
   
-  //! Inter-channel dispersion delay has been removed
+  // Inter-channel dispersion delay has been removed
   if (get_dedispersed() != archive->get_dedispersed()) {
     reason += match_indent
       + stringprintf ("dedispersion mismatch");
     result = false;
   }
 
-  
+  // number of frequency channels
+  if (get_nchan() != archive->get_nchan()) {
+    reason += match_indent
+      + stringprintf ("numbers of channels mismatch: %d != %d",
+		      get_nchan(), archive->get_nchan());
+    result = false;
+  }
+
+
   return result;
 }
 
@@ -155,6 +163,12 @@ bool Pulsar::Archive::processing_match (const Archive* archive,
 /*!  This function defines the minimum set of observing parameters
   that should be equal (within certain limits) before a calibrator may
   be applied to a pulsar observation.
+  The following are tested for equality:
+  <UL>
+  <LI> get<Receiver>::match
+  <LI> get_centre_frequency
+  <LI> get_bandwidth
+  </UL>
 
   \param archive pointer to Archive to be compared with this
   \retval reason if match fails, describes why in English
@@ -169,13 +183,6 @@ bool Pulsar::Archive::calibrator_match (const Archive* archive,
 
   if (receiver && ! receiver->match (archive->get<Receiver>(), reason))
     result = false;
-
-  if (get_nchan() != archive->get_nchan()) {
-    reason += match_indent
-      + stringprintf ("numbers of channels mismatch: %d != %d",
-		      get_nchan(), archive->get_nchan());
-    result = false;
-  }
 
   double cf1 = get_centre_frequency();
   double cf2 = archive->get_centre_frequency();
