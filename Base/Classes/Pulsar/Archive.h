@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Archive.h,v $
-   $Revision: 1.92 $
-   $Date: 2003/12/07 06:34:47 $
-   $Author: ahotan $ */
+   $Revision: 1.93 $
+   $Date: 2003/12/10 01:01:43 $
+   $Author: hknight $ */
 
 /*! \mainpage 
  
@@ -169,6 +169,8 @@
 
 #include <vector>
 #include <string>
+
+#include <stdio.h>
 
 #include "IntegrationManager.h"
 #include "polyco.h"
@@ -374,11 +376,13 @@ namespace Pulsar {
     }
 
     //! operator =
-    Archive& operator = (const Archive& a) { copy (a); return *this; }
+    virtual Archive& operator = (const Archive& a) { copy (a); return *this; }
+
+    virtual void copy (const Archive& archive);
 
     //! Copy the profiles and attributes through set_ get_ methods
     virtual void copy (const Archive& archive,
-		       const vector<unsigned>& only_subints = none_selected);
+		       const vector<unsigned>& only_subints);
 
 
     // //////////////////////////////////////////////////////////////////
@@ -637,6 +641,10 @@ namespace Pulsar {
     //! Returns the centre phase of the region with minimum total intensity
     float find_min_phase () const;
 
+    //! A dsp::Transformation into an Archive must be able to call this
+    //! This calls Signal::valid_state() to see if the state is consistent with the ndim, npol
+    virtual bool state_is_valid(string& reason) const;
+
     // //////////////////////////////////////////////////////////////////
     //
     // pure virtual methods - must be implemented by derived classes
@@ -750,7 +758,6 @@ namespace Pulsar {
     virtual bool get_flux_calibrated () const = 0;
     //! Set the value to be returned by get_flux_calibrated
     virtual void set_flux_calibrated (bool done = true) = 0;
-
 
   protected:
     

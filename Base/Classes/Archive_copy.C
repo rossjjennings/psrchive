@@ -1,6 +1,14 @@
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
 
+void Pulsar::Archive::copy (const Archive& archive){
+  vector<unsigned> all_subints(archive.get_nsubint());
+  for( unsigned i=0; i<all_subints.size(); i++)
+    all_subints[i] = i;
+
+  copy(archive,all_subints);
+}
+
 void Pulsar::Archive::copy (const Archive& archive,
 			    const vector<unsigned>& selected)
 {
@@ -9,26 +17,16 @@ void Pulsar::Archive::copy (const Archive& archive,
 
   if (this == &archive)
     return;
-
-  if (selected.size() == 0) {
-    // default: copy all subints
-    resize (archive.get_nsubint(), archive.get_npol(),
-	    archive.get_nchan(), archive.get_nbin());
-
-    for (unsigned isub=0; isub<archive.get_nsubint(); isub++)
-      get_Integration(isub) -> copy (*(archive.get_Integration(isub)));
+  
+  // copy only the selected subints
+  resize (selected.size(), archive.get_npol(),
+	  archive.get_nchan(), archive.get_nbin());
+  
+  for (unsigned isub=0; isub<selected.size(); isub++) {
+    const Integration* subint = archive.get_Integration( selected[isub] );
+    get_Integration(isub) -> copy (*(subint));
   }
-  else {
-    // copy only the selected subints
-    resize (selected.size(), archive.get_npol(),
-	    archive.get_nchan(), archive.get_nbin());
-
-    for (unsigned isub=0; isub<selected.size(); isub++) {
-      const Integration* subint = archive.get_Integration( selected[isub] );
-      get_Integration(isub) -> copy (*(subint));
-    }
-  }
-
+  
   if (archive.ephemeris)
     ephemeris = new psrephem (*(archive.ephemeris));
   else
