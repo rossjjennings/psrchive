@@ -1,6 +1,8 @@
 #include <iostream>
 #include <algorithm>
+
 #include <unistd.h>
+#include <math.h>
 
 #include "Pulsar/Archive.h"
 #include "Pulsar/Profile.h"
@@ -11,7 +13,7 @@
 #include "dirutil.h"
 #include "string_utils.h"
 
-static const char* psradd_args = "b:c:Ce:f:FG:hiI:M:p:PsS:tT:vV";
+static const char* psradd_args = "b:c:Ce:f:FG:hiI:M:p:Pr:sS:tT:vV";
 
 void usage () {
   cout <<
@@ -30,6 +32,7 @@ void usage () {
     " -M meta     Filename with list of files\n"
     " -p fname    Load new ephemeris from 'fname'\n"
     " -P          Correct for parallactic angle before tscrunch\n"
+    " -r freq     Disregard input files if they do not have this centre frequency\n"
     " -s          Tscrunch result after each new file (nice on RAM)\n"
     " -t          Make no changes to file system (testing mode)\n"
     " -T tempo    System call to tempo\n"
@@ -96,6 +99,9 @@ int main (int argc, char **argv)
   // name of the new ephemeris file
   string parname;
 
+  // The centre frequency to select upon
+  double centre_frequency = -1.0;
+
   int c;
 
   while ((c = getopt(argc, argv, psradd_args)) != -1)  {
@@ -106,7 +112,7 @@ int main (int argc, char **argv)
       return 0;
       
     case 'i':
-      cout << "$Id: psradd.C,v 1.14 2004/02/18 00:14:43 hknight Exp $" << endl;
+      cout << "$Id: psradd.C,v 1.15 2004/02/18 01:27:52 hknight Exp $" << endl;
       return 0;
       
     case 'b':
@@ -169,6 +175,10 @@ int main (int argc, char **argv)
 
     case 's':
       tscrunch_total = true;
+      break;
+
+    case 'r':
+      centre_frequency = atof(optarg);
       break;
 
     case 't':
@@ -252,6 +262,9 @@ int main (int argc, char **argv)
       cerr << "psradd: archive [" << filenames[ifile] << "] has no data\n";
       continue;
     }
+
+    if( centre_frequency > 0.0 && fabs(archive->get_centre_frequency()-centre_frequency) > 0.0001 )
+      continue;
 
     if (nbin)
       archive->bscrunch_to_nbin (nbin);
