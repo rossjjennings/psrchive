@@ -146,9 +146,20 @@ int Timer::load (FILE* fptr, struct timer* hdr, bool big_endian)
 
   // timer supplement - added 23 July 04
 
-  if (hdr->extra.supplement.version > 0)
-    throw Error (InvalidState, "Timer::load",
-		 "Cannot support timer archive with bandb in use");
+  if (hdr->extra.supplement.version > 0 
+      && hdr->extra.bandb.nlag > 0
+      && hdr->extra.bandb.flux_A > 0
+      && hdr->extra.bandb.flux_B > 0)  {
+    cerr << "Timer::load WARNING bandB apparently in use" << endl;
+    return 0;
+  }
+
+  if (hdr->extra.supplement.version < -2)  {
+    if (verbose)
+      cerr << "Timer::load WARNING bandB uninitialized npol=" 
+           << hdr->extra.bandb.npol << endl;
+    hdr->extra.bandb.npol = 0;
+  }
 
   // correct the Version -2 parameters
   if (hdr->extra.supplement.version > -2) {
