@@ -20,6 +20,11 @@ void Pulsar::Smooth::set_duty_cycle (float _duty_cycle)
   duty_cycle = _duty_cycle;
 }
 
+float Pulsar::Smooth::get_duty_cycle () const
+{
+  return duty_cycle;
+}
+
 void Pulsar::Smooth::smooth (Profile* profile)
 {
   unsigned nbin = profile->get_nbin();

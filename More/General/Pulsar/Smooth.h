@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/Smooth.h,v $
-   $Revision: 1.2 $
-   $Date: 2004/04/16 00:27:56 $
-   $Author: ahotan $ */
+   $Revision: 1.3 $
+   $Date: 2004/04/26 12:50:20 $
+   $Author: straten $ */
 
 #ifndef __Pulsar_Smooth_h
 #define __Pulsar_Smooth_h
@@ -29,6 +29,9 @@ namespace Pulsar {
 
     //! Set the width of the window used to smooth
     void set_duty_cycle (float duty_cycle);
+
+    //! Get the width of the window used to smooth
+    float get_duty_cycle () const;
 
     //! Smooth the given Profile
     void smooth (Profile* profile);
