@@ -1,10 +1,11 @@
 #include "Pulsar/BinaryPhaseOrder.h"
+#include "Pulsar/Calculator.h"
 
 //! Default constructor
 Pulsar::BinaryPhaseOrder::BinaryPhaseOrder ()
   : IntegrationOrder ()
 {
-  IndexState = "BinaryPhase";
+  IndexState =+ "Binary Phase (w.r.t. Ascending Node)";
 }
 
 //! Destructor
@@ -45,47 +46,64 @@ void Pulsar::BinaryPhaseOrder::organise (Archive* arch)
   */
   
   vector<float> phases;
+  float minphase = 1.0;
+  float maxphase = 0.0;
   for (unsigned i = 0; i < arch->get_nsubint(); i++) {
-    // phases.push_back(Binary_Phase(arch->get_Integration(i)->get_epoch()));
-    // Not sure how to make the BinaryPhase function yet
+    phases.push_back(get_binphs((arch->get_Integration(i)->get_epoch()).in_days(),
+				arch->get_ephemeris(), 
+				arch->get_Integration(i)->get_centre_frequency(),
+				arch->get_telescope_code()));
+    if (phases[i] > maxphase)
+      maxphase = phases[i];
+    
+    if (phases[i] < minphase)
+      minphase = phases[i];
   }
   
   Reference::To<Pulsar::Archive> copy = arch->clone();
+
+  float PhaseGap = 0.01;
   
-  float PhaseGap = 0.1;
-  
-  arch->resize(int(1.0/PhaseGap));
-  
-  unsigned tally = 0;
-  bool first = true;
+  arch->resize(int((maxphase - minphase)/PhaseGap));
+  indices.resize(int((maxphase - minphase)/PhaseGap));
   
   Reference::To<Pulsar::Integration> integ = 0;
   
-  for (float i = 0.0; i < 1.0; i += PhaseGap) {
-    first = true;
+  for (unsigned i = 0; i < arch->get_nsubint(); i++) {
+    // Initialise with a blank Integration
+    *(arch->get_Integration(i)) = *(arch->new_Integration());
+    bool first = true;
+    int tally = 0;
     for (unsigned j = 0; j < phases.size(); j++) {
-      if (phases[j] >= i && phases[j] < i + PhaseGap) {
+      if ((phases[j] >= (minphase + (i*PhaseGap))) && 
+	  (phases[j] < (minphase + ((i+1)*PhaseGap)))) {
 	if (first) {
 	  integ = arch->new_Integration(copy->get_Integration(j));
-	  *(arch->get_Integration(tally)) = *integ;
-	  set_Index(tally, Estimate<double>(i + PhaseGap/2.0, PhaseGap/2.0));
+	  *(arch->get_Integration(i)) = *integ;
+	  set_Index(i, Estimate<double>(phases[j], 0.0));
+	  tally += 1;
 	  first = false;
 	}
 	else {
-	  *(arch->get_Integration(tally)) += *(copy->get_Integration(j));
+	  *(arch->get_Integration(i)) += *(copy->get_Integration(j));
+	  indices[i] += Estimate<double>(phases[j], 0.0);
+	  tally += 1;
 	}
       }
     }
-    tally += 1;
+    indices[i] /= tally;
   }
+  
 }
 
 void Pulsar::BinaryPhaseOrder::append (Archive* thiz, const Archive* that)
 {
-  
+  throw Error(FailedCall, "BinaryPhaseOrder::append",
+	      "This method is not implemented");
 }
 
 void Pulsar::BinaryPhaseOrder::combine (Archive* arch, unsigned nscr)
 {
-
+  throw Error(FailedCall, "BinaryPhaseOrder::combine",
+	      "This method is not implemented");
 }
