@@ -15,12 +15,11 @@ int main () {
 	   "\n"
 	   "WARNING timer header struct has wrong size!\n"
 	   "\n"
-	   "****************************************************\n\n");
-
-  fprintf (stderr, "sizeof(timer) == %d\n", size);
-  fprintf (stderr, "TIMER_SIZE == %d\n", TIMER_SIZE);
-  fprintf (stderr, "\n"
-	   "****************************************************\n");
+	   "sizeof(timer) == %d\n"
+	   "TIMER_SIZE    == %d\n"
+	   "\n"
+	   "****************************************************\n",
+	   size, TIMER_SIZE);
 
   return -1;
 }
