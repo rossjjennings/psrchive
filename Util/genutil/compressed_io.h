@@ -14,7 +14,7 @@
 //    where:
 //            vals[N] = offset + elements[N] * ratio;
 
-int fwrite_compressed (FILE* fptr, vector<float>& vals);
+int fwrite_compressed (FILE* fptr, const vector<float>& vals);
 
 // ///////////////////////////////////////////////////////////////////////
 // fread_compressed

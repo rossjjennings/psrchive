@@ -5,10 +5,10 @@
 #include "compressed_io.h"
 #include "environ.h"
 
-int fwrite_compressed (FILE* fptr, vector<float>& vals)
+int fwrite_compressed (FILE* fptr, const vector<float>& vals)
 {
-  vector<float>::iterator minel = min_element(vals.begin(), vals.end());
-  vector<float>::iterator maxel = max_element(vals.begin(), vals.end());
+  vector<const float>::iterator minel = min_element(vals.begin(), vals.end());
+  vector<const float>::iterator maxel = max_element(vals.begin(), vals.end());
 
   if (minel == vals.end() || maxel == vals.end()) {
     cerr << "fwrite_compressed: empty range" << endl;
@@ -46,7 +46,8 @@ int fwrite_compressed (FILE* fptr, vector<float>& vals)
   }
 
   unsigned short value = 0;
-  for (vector<float>::iterator ind = vals.begin(); ind != vals.end(); ind++) {
+  vector<const float>::iterator ind;
+  for (ind = vals.begin(); ind != vals.end(); ind++) {
     value = (unsigned short) ((*ind - xmin) / ratio);
     writ = fwrite (&value, sizeof(unsigned short), 1, fptr);
     if (writ < 1) {
