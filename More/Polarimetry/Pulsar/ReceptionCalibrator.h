@@ -1,17 +1,17 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ReceptionCalibrator.h,v $
-   $Revision: 1.4 $
-   $Date: 2003/04/19 20:21:27 $
+   $Revision: 1.5 $
+   $Date: 2003/04/26 06:52:02 $
    $Author: straten $ */
 
 #ifndef __ReceptionCalibrator_H
 #define __ReceptionCalibrator_H
 
 #include "Calibrator.h"
-#include "Calibration/ReceptionModel.h"
-#include "Calibration/Polar.h"
-#include "Calibration/FunctionTransformation.h"
+#include "Calibration/SAtPEquation.h"
+#include "Calibration/Parallactic.h"
+#include "Calibration/StokesState.h"
 
 namespace Pulsar {
 
@@ -19,12 +19,13 @@ namespace Pulsar {
   class PolnCalibrator;
   class FluxCalibrator;
 
-  //! Uses ReceptionModel to represent and fit for the system response
-  /*! The ReceptionCalibrator implements the technique of single dish
-    polarimetric self-calibration.  This class requires a number of
-    constraints, which are provided in through the ReceptionSet
-    class. */
+  class PhaseEstimate;
 
+  //! Uses the SAtPEquation to represent and fit for the system response
+  /*! The ReceptionCalibrator implements a technique of single dish
+    polarimetric self-calibration.  This class requires a number of
+    constraints, which are provided in through the add_observation,
+    add_PolnCalibrator, and add_FluxCalibrator methods. */
   class ReceptionCalibrator : public Calibrator {
     
   public:
@@ -52,22 +53,52 @@ namespace Pulsar {
     //! Add the specified FluxCalibrator observation to the set of constraints
     void add_FluxCalibrator (const FluxCalibrator* fluxcal);
 
+    //! Return true if the model is fixed (no more data may be added)
+    bool is_fixed () const;
+
     //! Calibrate the polarization of the given archive
     virtual void calibrate (Archive* archive);
 
   protected:
 
-    //! Model of receiver and source states as a function of frequency
-    vector<Calibration::ReceptionModel> model;
+    //! SingleAxis(t)Polar Equation as a function of frequency
+    vector<Calibration::SAtPEquation> equation;
 
-    //! Model of receiver as a function of frequency
-    vector<Calibration::Polar> receiver;
+    //! Calibrator state as a function of frequency
+    vector<Calibration::StokesState> calibrator;
 
-    //! Model of backend as a function of frequency and time
-    vector<Calibration::FunctionTransformation> backend;
+    //! Uncalibrated estimate of pulsar polarization as a function of phase
+    vector<PhaseEstimate> pulsar;
 
-    //! Best, uncalibrated estimate of the average pulse profile
+    //! The parallactic angle rotation
+    Calibration::Parallactic parallactic;
+
+    //! First, uncalibrated estimate of the average pulse profile
     Reference::To<const Archive> uncalibrated;
+
+    //! Solve equation for each frequency
+    void fit ();
+
+    //! Check that the model is fixed
+    void check_fixed (const char* method);
+
+    //! Add the archive to the data
+    void add_data (PhaseEstimate& estimate, const Archive* data);
+
+  };
+
+  class PhaseEstimate {
+
+  public:
+
+    //! Construct with the specified bin from Archive
+    PhaseEstimate (unsigned ibin = 0) { phase_bin = ibin; }
+
+    //! Pulsar polarization as a function of frequency
+    vector< MeanEstimate<Stokes<double>, double> > states;
+
+    //! Phase bin from which
+    unsigned phase_bin;
   };
 
 }

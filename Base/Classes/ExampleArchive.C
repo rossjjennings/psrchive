@@ -56,7 +56,7 @@ Pulsar::ExampleArchive::ExampleArchive (const ExampleArchive& arch,
 }
 
 void Pulsar::ExampleArchive::copy (const Archive& archive, 
-				const vector<unsigned>& subints)
+				   const vector<unsigned>& subints)
 {
   if (verbose)
     cerr << "ExampleArchive::copy" << endl;
