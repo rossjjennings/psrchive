@@ -14,33 +14,36 @@
 void usage ()
 {
   cout << "program to look at Pulsar::Archive(s) in various ways \n"
-    "Usage: treduce [options] file1 [file2 ...] \n"
+    "Usage: pav [options] file1 [file2 ...] \n"
     "Where the options are as follows \n"
     " -h        This help page \n"
-    " -a        Calculate TOAs of every profile \n"
+    //    " -a        Calculate TOAs of every profile \n"
     " -b scr    Bscrunch scr phase bins together \n"
-    " -c        Correct data for bad ephemeris \n"
-    " -d dm     Dedisperse data at a new dm \n"
+    //    " -c        Correct data for bad ephemeris \n"
+    //    " -d dm     Dedisperse data at a new dm \n"
     " -D        Plot Integration 0, poln 0, chan 0 \n"
     " -G        Greyscale of profiles in frequency and phase\n"
-    " -E f.eph  install new ephemeris given in file 'f.eph' \n"
-    " -e xx     Output data to new file with ext xx \n"
+    //    " -E f.eph  install new ephemeris given in file 'f.eph' \n"
+    //    " -e xx     Output data to new file with ext xx \n"
     " -f scr    Fscrunch scr frequency channels together \n"
     " -F        Fscrunch all frequency channels \n"
-    " -H        Print ASCII of Integration 0, poln 0, chan 0 \n"
-    " -m macro  Process data using steps in macro \n"
+    //    " -H        Print ASCII of Integration 0, poln 0, chan 0 \n"
+    //    " -m macro  Process data using steps in macro \n"
     " -M meta   meta names a file containing the list of files\n"
     " -p        add polarisations together \n"
     " -r phase  rotate the profiles by phase (in turns)\n"
-    " -S        plot pulsar dynamic spectra:  frequency vs time. \n"
+    //    " -S        plot pulsar dynamic spectra:  frequency vs time. \n"
     " -t src    Tscrunch scr Integrations together \n"
     " -T        Tscrunch all Integrations \n"
     " -v        Verbose output \n"
     " -V        Very verbose output \n"
     " -w        time things \n"
-    " -x nx     plot nx profiles across screen \n"
-    " -y ny     plot ny profiles down screen\n"
+    //    " -x nx     plot nx profiles across screen \n"
+    //    " -y ny     plot ny profiles down screen\n"
     " -R        Display SNR information\n"
+    " -Z        Smear a profile by convolving with a hat function\n"
+    " -C        Centre the profile\n"
+    " -Y        Display all integrations in a time vs phase plot\n"
        << endl;
 }
 
@@ -58,11 +61,14 @@ int main (int argc, char** argv)
   bool textinfo = false;
   bool greyfreq = false;
   bool stopwatch = false;
+  bool hat = false;
+  bool centre = false;
+  bool timeplot = false;
 
   char* metafile = NULL;
 
   int c = 0;
-  const char* args = "ab:cd:DGe:E:f:FHm:M:pr:St:TvVwx:y:R";
+  const char* args = "ab:cd:DGe:E:f:FhHm:M:pr:St:TvVwx:y:RZCY";
   while ((c = getopt(argc, argv, args)) != -1)
     switch (c) {
 
@@ -142,6 +148,15 @@ int main (int argc, char** argv)
     case 'R':
       textinfo = true;
       break;
+    case 'Z':
+      hat = true;
+      break;
+    case 'C':
+      centre = true;
+      break;
+    case 'Y':
+      timeplot = true;
+      break;
     default:
       cerr << "invalid param '" << c << "'" << endl;
     }
@@ -165,8 +180,8 @@ int main (int argc, char** argv)
   }
 
   if (display) {
-    cpgsvp (0.05, 0.95, 0.0, 0.8);
-    cpgsch (2.0);
+    cpgsvp (0.1, 0.9, 0.05, 0.85);
+    cpgsch (1.0);
   }
 
   //#ifdef HEAT
@@ -179,7 +194,7 @@ int main (int argc, char** argv)
   //cpgctab(heat_l, heat_r, heat_g, heat_b, 4, 1.0, 0.5);
 
   //#endif
-
+  
   Pulsar::Archive* archive = 0;
 
   Pulsar::Error::handle_signals ();
@@ -230,6 +245,44 @@ int main (int argc, char** argv)
       }
     }
 
+    if (centre) {
+      archive -> centre();
+    }
+
+    if (timeplot) {
+      cpgbeg (0, "?", 0, 0);
+      cpgask(1);
+      cpgsvp (0.1, 0.9, 0.1, 0.9);
+      cpgsch (1.0);
+      cpgeras();
+      archive -> plot_time_vs_phase();
+      cpgend();
+      exit(0);
+    }
+    
+    if (hat) {
+      cpgbeg (0, "?", 0, 0);
+      cpgask(1);
+      cpgsvp (0.1, 0.9, 0.1, 0.9);
+      cpgsch (1.0);
+      archive -> get_Profile(0,0,0) -> display();
+      sleep(2);
+      cpgeras();
+      Pulsar::Profile my_profile;
+      Pulsar::Profile my_hat;
+      int temp1 = archive -> get_Profile(0,0,0) -> get_nbin();
+      int temp2 = archive -> get_Profile(0,0,0) -> get_nbin()/32;
+      cerr << "NBIN = " << temp1 << endl;
+      my_hat.hat_profile(temp1, temp2);
+      my_hat.display();
+      sleep(2);
+      cpgeras();
+      my_profile.fft_convolve(archive -> get_Profile(0,0,0), &my_hat);
+      my_profile.display();
+      cpgend();
+      exit(0);
+    }
+    
     if (display) {
       cpgpage();
       archive -> display(0,0,0,phase);
