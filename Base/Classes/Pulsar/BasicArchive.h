@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/BasicArchive.h,v $
-   $Revision: 1.3 $
-   $Date: 2002/04/16 15:52:02 $
+   $Revision: 1.4 $
+   $Date: 2002/04/17 02:09:29 $
    $Author: straten $ */
 
 #include "Archive.h"
@@ -12,17 +12,18 @@
 namespace Pulsar {
 
   //! A class that defines most of the pure virtual methods declared in Archive.h
-  /*!
-    This class is designed to make it easier to develop new objects of type Pulsar::Archive.
-    It is a minimal implimentation of the Pulsar::Archive class that defines a set of variables 
-    which can be used to store the important information required by the Pulsar::Archive class.
-    It also defines most of the pure virtual methods required.
-    If a user wishes to work with data from a new instrument, they can start with the BasicArchive
-    class and simply define the load and unload functions to perform file I/O. This should simply 
-    be a matter of reading from the file and plugging information into the variables defined in 
-    this class. It is possible for the user to add as many more features to their new class as 
-    required.
-  */
+  /*!  This class is designed to make it easier to develop new objects
+    of type Pulsar::Archive.  It is a minimal implimentation of the
+    Pulsar::Archive class that defines a set of variables which can be
+    used to store the important information required by the
+    Pulsar::Archive class.  It also defines most of the pure virtual
+    methods required.  If a user wishes to work with data from a new
+    instrument, they can start with the BasicArchive class and simply
+    define the load and unload functions to perform file I/O. This
+    should simply be a matter of reading from the file and plugging
+    information into the variables defined in this class. It is
+    possible for the user to add as many more features to their new
+    class as required.  */
 
   class BasicArchive : public Archive {
     
@@ -42,10 +43,12 @@ namespace Pulsar {
     //! The polarisation state of the data (XXYY, IQUV, etc.)
     Poln::State polstate;
 
+    Observation::Type obstype;
+
     //! The tempo ID character of the telescope used
     char        telcode;
 
-    string      psrname,telid,frontend,backend,obstype,datatype;
+    string      psrname,telid,frontend,backend,datatype;
     int         nbin,nchan,npol,nsubint;
     double      chanbw,bandwidth,cenfreq;
     float       calfreq,caldcyc,calphase;
@@ -64,7 +67,7 @@ namespace Pulsar {
     void load (const char * foo) { cerr << "Cannot load " << foo << endl; }
 
     //! Returns a pointer to a new copy of self
-    BasicArchive* clone () const { return new BasicArchive (*this); }
+    Archive* clone () const { return new BasicArchive (*this); }
 
     //! A null constructor to initialize the storage variables
     BasicArchive () { init(); }
@@ -105,10 +108,15 @@ namespace Pulsar {
       }
 
     //! Return the type of observation (psr, cal, etc.)
-    string get_obstype () const
+    Observation::Type get_observation_type () const
       {
 	return obstype;
       }
+
+    string get_source () const
+    {
+      return psrname;
+    }
 
     //! Set the name of the telescope use
     void set_tel_id (string name)
@@ -135,11 +143,16 @@ namespace Pulsar {
       }
 
     //! Set the observation type (psr, cal etc.)
-    void set_obstype (string ob_type)
+    void set_observation_type (Observation::Type ob_type)
       {
 	obstype = ob_type;
       }
     
+    void set_source (const string& src)
+    {
+      psrname = src;
+    }
+
     //! Return the bandwidth of the observation
     double get_bandwidth () const
       {

@@ -4,10 +4,11 @@ void Pulsar::BasicArchive::init ()
 {
   feedtype = Feed::invalid;
   polstate = Poln::invalid;
-    
+  obstype = Observation::Unknown;
+
   telcode = '\0';
     
-  psrname = telid = frontend = backend = obstype = datatype = "None";
+  psrname = telid = frontend = backend = datatype = "None";
   
   nbin = nchan = npol = nsubint = 0;
   
@@ -16,7 +17,7 @@ void Pulsar::BasicArchive::init ()
   calfreq = caldcyc = calphase = 0.0;
   
   facorr = pacorr = rm_ism = rm_iono = dedisp = true;
-};
+}
   
 const Pulsar::BasicArchive&
 Pulsar::BasicArchive::operator = (const BasicArchive& copy)

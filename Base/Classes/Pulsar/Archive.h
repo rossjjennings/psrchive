@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Archive.h,v $
-   $Revision: 1.14 $
-   $Date: 2002/04/16 15:52:02 $
+   $Revision: 1.15 $
+   $Date: 2002/04/17 02:09:29 $
    $Author: straten $ */
 
 /*! \mainpage 
@@ -277,8 +277,7 @@ namespace Pulsar {
       \param baseline_ph
       \exception string
     */
-    virtual void invint (bool square_root = true, // take sqrt(II-QQ-UU-VV)
-			 float baseline_ph=-1);   // phase of baseline window
+    virtual void invint ();
   
     //
     // remove_baseline - remove the baseline from all profiles
@@ -289,7 +288,7 @@ namespace Pulsar {
       \param phase
       \exception string
     */
-    virtual void remove_baseline (int poln = 0, float phase = -1.0);
+    virtual void remove_baseline ();
 
     //
     //! Rotate each profile by time seconds
@@ -426,35 +425,20 @@ namespace Pulsar {
     // get/set the observation vital statistics
     // ////////////////////////////////////////
 
-    //! Get the name of the telescope used
-    virtual string get_tel_id () const = 0;
-
     //! Get the tempo code of the telescope used
     virtual char get_tel_tempo_code () const = 0;
-
-    //! Get the name of the frontend system used
-    virtual string get_frontend_id () const = 0;
-
-    //! Get the name of the backend system used
-    virtual string get_backend_id () const =0;
-
-    //! Get the observation type (psr, cal)
-    virtual string get_obstype () const = 0;
-
-    //! Set the name of the telescope used
-    virtual void set_tel_id (string name) = 0;
-
     //! Set the tempo code of the telescope used
     virtual void set_tel_tempo_code (char id_char) = 0;
 
-    //! Set the name of the frontend system used
-    virtual void set_frontend_id (string fe_name) = 0;
-
-    //! Set the name of the backend system used
-    virtual void set_backend_id (string be_name) =0;
-
+    //! Get the observation type (psr, cal)
+    virtual Observation::Type get_observation_type () const = 0;
     //! Set the observation type (psr, cal)
-    virtual void set_obstype (string ob_type) = 0;
+    virtual void set_observation_type (Observation::Type type) = 0;
+
+    //! Get the source name
+    virtual string get_source () const = 0;
+    //! Set the source name
+    virtual void set_source (const string& source) = 0;
 
     // get/set the number of bins, bands, subints, etc
     // ///////////////////////////////////////////////
