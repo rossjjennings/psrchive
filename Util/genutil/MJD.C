@@ -372,7 +372,7 @@ MJD::MJD(float128 mjd) {
     throw (string("MJD conversion"));
   }
   
-  *this = MJD (ndays, fracdays);
+  *this = MJD ((int)ndays, fracdays);
 }
 
 #endif
@@ -680,6 +680,15 @@ int MJD::Construct (const char* mjdstr)
 
 ostream& operator << (ostream& ostr, const MJD& mjd)  {
   return ostr << mjd.printdays(MJD::ostream_precision); 
+}
+
+istream& operator >> (istream& istr, MJD& mjd)
+{
+  string parse;
+  istr >> parse;
+  if (mjd.Construct (parse.c_str()) < 0)
+    istr.setstate (ios::failbit);
+  return istr;
 }
 
 bool equal (const MJD &m1, const MJD &m2) {

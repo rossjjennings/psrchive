@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/MJD.h,v $
-   $Revision: 1.20 $
-   $Date: 2003/06/03 08:43:29 $
-   $Author: cwest $ */
+   $Revision: 1.21 $
+   $Date: 2004/12/20 10:11:44 $
+   $Author: straten $ */
 
 #ifndef __MJD_H
 #define __MJD_H
@@ -159,6 +159,7 @@ class MJD {
 inline double cast_double(const MJD&m) {return m.in_days();}
 
 ostream& operator<< (ostream& ostr, const MJD& mjd);
+istream& operator>> (istream& istr, MJD& mjd);
 
 #endif  /* not __MJD_H defined */
 
