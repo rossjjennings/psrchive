@@ -85,11 +85,12 @@ int FTransform::fftw_frc1d(unsigned ndat, float* dest, float* src){
   ///////////////////////////////////////
   // Set up the plan
   static unsigned ilib = get_ilib("FFTW");
-  FFTW_Plan* plan = 0;
+  FFTW_Plan* plan = (FFTW_Plan*)last_frc1d_plan;
 
-  if( last_frc1d_plan && last_frc1d_plan->ilib==ilib &&
-      last_frc1d_plan->ndat == ndat )
-    plan = (FFTW_Plan*)last_frc1d_plan;
+  if( !last_frc1d_plan || 
+      last_frc1d_plan->ilib != ilib || 
+      last_frc1d_plan->ndat != ndat )
+    plan = 0;
 
   if( !plan ){
     for( unsigned iplan=0; iplan<plans[ilib].size(); iplan++){
@@ -122,11 +123,12 @@ int FTransform::fftw_fcc1d(unsigned ndat, float* dest, float* src){
   ///////////////////////////////////////
   // Set up the plan
   static unsigned ilib = get_ilib("FFTW");
-  FFTW_Plan* plan = 0;
+  FFTW_Plan* plan = (FFTW_Plan*)last_frc1d_plan;
 
-  if( last_fcc1d_plan && last_fcc1d_plan->ilib==ilib &&
-      last_fcc1d_plan->ndat == ndat )
-    plan = (FFTW_Plan*)last_fcc1d_plan;
+  if( !last_frc1d_plan || 
+      last_frc1d_plan->ilib != ilib || 
+      last_frc1d_plan->ndat != ndat )
+    plan = 0;
 
   if( !plan ){
     for( unsigned iplan=0; iplan<plans[ilib].size(); iplan++){
@@ -154,11 +156,12 @@ int FTransform::fftw_bcc1d(unsigned ndat, float* dest, float* src){
   ///////////////////////////////////////
   // Set up the plan
   static unsigned ilib = get_ilib("FFTW");
-  FFTW_Plan* plan = 0;
+  FFTW_Plan* plan = (FFTW_Plan*)last_frc1d_plan;
 
-  if( last_bcc1d_plan && last_bcc1d_plan->ilib==ilib &&
-      last_bcc1d_plan->ndat == ndat )
-    plan = (FFTW_Plan*)last_bcc1d_plan;
+  if( !last_frc1d_plan || 
+      last_frc1d_plan->ilib != ilib || 
+      last_frc1d_plan->ndat != ndat )
+    plan = 0;
 
   if( !plan ){
     for( unsigned iplan=0; iplan<plans[ilib].size(); iplan++){

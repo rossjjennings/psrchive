@@ -82,13 +82,13 @@ int FTransform::ipp_frc1d(unsigned ndat, float* dest, float* src){
   ///////////////////////////////////////
   // Set up the plan
   static unsigned ilib =get_ilib("IPP");
-  IPP_Plan* plan = 0;
+  IPP_Plan* plan = (IPP_Plan*)last_frc1d_plan;
 
-  if(last_frc1d_plan && 
-     last_frc1d_plan->ilib==ilib &&
-     last_frc1d_plan->ndat == ndat )
-    plan = (IPP_Plan*)FTransform::last_frc1d_plan;
-
+  if( !last_frc1d_plan || 
+      last_frc1d_plan->ilib != ilib || 
+      last_frc1d_plan->ndat != ndat )
+    plan = 0;
+    
   if( !plan ){
     for( unsigned iplan=0; iplan<FTransform::plans[ilib].size(); iplan++){
       if(plans[ilib][iplan]->ndat == ndat && 
@@ -115,12 +115,12 @@ int FTransform::ipp_fcc1d(unsigned ndat, float* dest, float* src){
   ///////////////////////////////////////
   // Set up the plan
   static unsigned ilib =get_ilib("IPP");
-  IPP_Plan* plan = 0;
+  IPP_Plan* plan = (IPP_Plan*)last_frc1d_plan;
 
-  if(last_fcc1d_plan && 
-     last_fcc1d_plan->ilib==ilib &&
-     last_fcc1d_plan->ndat == ndat )
-    plan = (IPP_Plan*)FTransform::last_fcc1d_plan;
+  if( !last_frc1d_plan || 
+      last_frc1d_plan->ilib != ilib || 
+      last_frc1d_plan->ndat != ndat )
+    plan = 0;
 
   if( !plan ){
     for( unsigned iplan=0; iplan<FTransform::plans[ilib].size(); iplan++){
@@ -150,12 +150,12 @@ int FTransform::ipp_bcc1d(unsigned ndat, float* dest, float* src){
   ///////////////////////////////////////
   // Set up the plan
   static unsigned ilib =get_ilib("IPP");
-  IPP_Plan* plan = 0;
+  IPP_Plan* plan = (IPP_Plan*)last_frc1d_plan;
 
-  if(last_bcc1d_plan && 
-     last_bcc1d_plan->ilib==ilib &&
-     last_bcc1d_plan->ndat == ndat )
-    plan = (IPP_Plan*)FTransform::last_bcc1d_plan;
+  if( !last_frc1d_plan || 
+      last_frc1d_plan->ilib != ilib || 
+      last_frc1d_plan->ndat != ndat )
+    plan = 0;
 
   if( !plan ){
     for( unsigned iplan=0; iplan<FTransform::plans[ilib].size(); iplan++){

@@ -75,11 +75,12 @@ int FTransform::mkl_frc1d(unsigned ndat, float* dest, float* src){
   ///////////////////////////////////////
   // Set up the plan
   static unsigned ilib = get_ilib("MKL");
-  MKL_Plan* plan = 0;
+  MKL_Plan* plan = (MKL_Plan*)last_frc1d_plan;
 
-  if( last_frc1d_plan && last_frc1d_plan->ilib==ilib &&
-      last_frc1d_plan->ndat == ndat )
-    plan = (MKL_Plan*)last_frc1d_plan;
+  if( !last_frc1d_plan || 
+      last_frc1d_plan->ilib != ilib || 
+      last_frc1d_plan->ndat != ndat )
+    plan = 0;
 
   if( !plan ){
     for( unsigned iplan=0; iplan<plans[ilib].size(); iplan++){
@@ -109,12 +110,13 @@ int FTransform::mkl_fcc1d(unsigned ndat, float* dest, float* src){
   ///////////////////////////////////////
   // Set up the plan
   static unsigned ilib = get_ilib("MKL");
-  MKL_Plan* plan = 0;
+  MKL_Plan* plan = (MKL_Plan*)last_frc1d_plan;
 
-  if( last_fcc1d_plan && last_fcc1d_plan->ilib==ilib &&
-      last_fcc1d_plan->ndat == ndat )
-    plan = (MKL_Plan*)last_fcc1d_plan;
-
+  if( !last_frc1d_plan || 
+      last_frc1d_plan->ilib != ilib || 
+      last_frc1d_plan->ndat != ndat )
+    plan = 0;
+  
   if( !plan ){
     for( unsigned iplan=0; iplan<plans[ilib].size(); iplan++){
       if( plans[ilib][iplan]->ndat == ndat && 
@@ -145,11 +147,12 @@ int FTransform::mkl_bcc1d(unsigned ndat, float* dest, float* src){
   ///////////////////////////////////////
   // Set up the plan
   static unsigned ilib = get_ilib("MKL");
-  MKL_Plan* plan = 0;
+  MKL_Plan* plan = (MKL_Plan*)last_frc1d_plan;
 
-  if( last_bcc1d_plan && last_bcc1d_plan->ilib==ilib &&
-      last_bcc1d_plan->ndat == ndat )
-    plan = (MKL_Plan*)last_bcc1d_plan;
+  if( !last_frc1d_plan || 
+      last_frc1d_plan->ilib != ilib || 
+      last_frc1d_plan->ndat != ndat )
+    plan = 0;
 
   if( !plan ){
     for( unsigned iplan=0; iplan<plans[ilib].size(); iplan++){
