@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Archive.h,v $
-   $Revision: 1.45 $
-   $Date: 2003/01/06 22:36:08 $
-   $Author: straten $ */
+   $Revision: 1.46 $
+   $Date: 2003/01/07 05:04:55 $
+   $Author: ahotan $ */
 
 /*! \mainpage 
  
@@ -195,6 +195,9 @@ namespace Pulsar {
     //! Convenience interface
     static Archive* load (const string& filename)
     { return load (filename.c_str()); }
+
+    //! Clear the IntegrationManager and update the archive
+    void refresh();
 
     //! Copy the profiles and attributes through set_ get_ methods
     virtual void copy (const Archive& archive);

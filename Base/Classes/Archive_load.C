@@ -69,3 +69,18 @@ Pulsar::Archive* Pulsar::Archive::load (const char* filename)
   throw Error (InvalidParam, "Archive::load", 
 	       "'%s' not a recognized file format", filename);
 }
+
+void Pulsar::Archive::refresh()
+{
+  IntegrationManager::resize(0);
+  load(get_filename()); 
+}
+
+
+
+
+
+
+
+
+
