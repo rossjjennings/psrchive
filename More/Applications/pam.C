@@ -127,6 +127,8 @@ int main (int argc, char *argv[]) {
   bool cblpo = false;
   bool cblao = false;
 
+  Reference::To<Pulsar::IntegrationOrder> myio = 0;
+
   int c = 0;
   
   while (1) {
@@ -163,7 +165,7 @@ int main (int argc, char *argv[]) {
       Pulsar::Archive::set_verbosity(3);
       break;
     case 'i':
-      cout << "$Id: pam.C,v 1.26 2004/02/06 12:33:41 ahotan Exp $" << endl;
+      cout << "$Id: pam.C,v 1.27 2004/02/08 14:57:05 ahotan Exp $" << endl;
       return 0;
     case 'm':
       save = true;
@@ -477,25 +479,25 @@ int main (int argc, char *argv[]) {
       }
 
       if (cbppo) {
-	Pulsar::IntegrationOrder* myio = new Pulsar::PeriastronOrder();
-	arch->add_extension(myio); 
+	myio = new Pulsar::PeriastronOrder();
+	arch->add_extension(myio);
 	myio->organise(arch, ronsub);
       }
       
       if (cbpao) {
-	Pulsar::IntegrationOrder* myio = new Pulsar::BinaryPhaseOrder();
+	myio = new Pulsar::BinaryPhaseOrder();
 	arch->add_extension(myio);
 	myio->organise(arch, ronsub);
       }
       
       if (cblpo) {
-	Pulsar::IntegrationOrder* myio = new Pulsar::BinLngPeriOrder();
+	myio = new Pulsar::BinLngPeriOrder();
 	arch->add_extension(myio);
 	myio->organise(arch, ronsub);
       }
       
       if (cblao) {
-	Pulsar::IntegrationOrder* myio = new Pulsar::BinLngAscOrder();
+	myio = new Pulsar::BinLngAscOrder();
 	arch->add_extension(myio);
 	myio->organise(arch, ronsub);
       }
