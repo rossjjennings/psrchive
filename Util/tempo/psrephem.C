@@ -463,7 +463,8 @@ int psrephem::load (string* instr)
   }
   fclose (temp);
   int ret = this->load(psrephem::tmp_fname);
-  remove(psrephem::tmp_fname);
+  if (unlink(psrephem::tmp_fname))
+    perror("psrephem::load remove(temp file) failed:");
   return ret;
 }
 
@@ -503,7 +504,9 @@ int psrephem::unload (string* outstr) const
   int ret = (int) stringload (outstr, temp);
 
   fclose (temp);
-  remove (psrephem::tmp_fname);
+  if (remove (psrephem::tmp_fname))
+    perror("psrephem::unload remove(temp file) failed:");
+    
 
   return ret;
 }
