@@ -511,13 +511,13 @@ void Pulsar::Archive::rotate (double time)
   \param rotation_measure
   \param rm_iono
 */
-void Pulsar::Archive::defaraday (double rotation_measure, double rm_iono)
+void Pulsar::Archive::defaraday (double rotation_measure)
 {
   convert_state(Signal::Stokes);
   remove_baseline();
   
   for (unsigned i = 0; i < get_nsubint(); i++)
-    get_Integration(i)->defaraday(rotation_measure, rm_iono);
+    get_Integration(i)->defaraday (rotation_measure);
   
   set_ism_rm_corrected(true);
   set_iono_rm_corrected(true);

@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Integration.h,v $
-   $Revision: 1.61 $
-   $Date: 2004/05/05 06:47:43 $
-   $Author: ahotan $ */
+   $Revision: 1.62 $
+   $Date: 2004/06/17 09:16:04 $
+   $Author: straten $ */
 
 /*
   
@@ -352,7 +352,7 @@ namespace Pulsar {
     virtual void dedisperse (double frequency, unsigned chan);
 
     //! Rotate all profiles about Stokes V axis to remove Faraday rotation
-    virtual void defaraday (double rm = 0.0, double rm_iono = 0.0);
+    virtual void defaraday (double rm = 0.0);
 
     //! Convert polarimetric data to the specified state
     virtual void convert_state (Signal::State state);

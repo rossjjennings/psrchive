@@ -180,7 +180,7 @@ int main (int argc, char *argv[]) {
       Pulsar::Archive::set_verbosity(3);
       break;
     case 'i':
-      cout << "$Id: pam.C,v 1.32 2004/03/10 00:04:18 ahotan Exp $" << endl;
+      cout << "$Id: pam.C,v 1.33 2004/06/17 09:16:04 straten Exp $" << endl;
       return 0;
     case 'm':
       save = true;
@@ -514,7 +514,7 @@ int main (int argc, char *argv[]) {
       }
 
       if (defaraday) {
-	arch->defaraday(rm, 0.0);
+	arch->defaraday(rm);
 	if (verbose)
 	  cout << "Archive corrected for a RM of " << rm << endl;
       }
