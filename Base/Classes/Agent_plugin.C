@@ -8,18 +8,21 @@ void Pulsar::Archive::Agent::plugin_load ()
 {
   plugins.load (plugin_path ());
 
+  if (plugins.ok.size() == 0)
+    plugins.load (plugin_path ("PSRHOME"));
+
   loaded = true;
 }
 
 /*! constructs the plugin directory name from environment variables */
-string Pulsar::Archive::Agent::plugin_path ()
+string Pulsar::Archive::Agent::plugin_path (const char* environment_variable)
 {
   char* env = getenv ("PSRCHIVE_PLUGINS");
 
   if (env)
     return env;
 
-  env = getenv ("CVSHOME");
+  env = getenv (environment_variable);
 
   if (!env)
     return "./Pulsar";
