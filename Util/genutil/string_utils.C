@@ -168,10 +168,26 @@ string make_string(int input){
   return string(dummy);
 }
 
+string make_string(int input, int places){
+  char dummy1[50];
+  char dummy2[50];
+  sprintf(dummy1,"%%%dd",places);
+  sprintf(dummy2,dummy1,input);
+  return string(dummy2);
+}
+
 string make_string(unsigned input){
   char dummy[50];
   sprintf(dummy,"%d",input);
   return string(dummy);
+}
+
+string make_string(unsigned input, int places){
+  char dummy1[50];
+  char dummy2[50];
+  sprintf(dummy1,"%%%dd",places);
+  sprintf(dummy2,dummy1,input);
+  return string(dummy2);
 }
 
 string make_string(long input){

@@ -1,7 +1,7 @@
 //-*-C++-*-
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Attic/string_utils.h,v $
-   $Revision: 1.23 $
-   $Date: 2003/09/22 09:16:19 $
+   $Revision: 1.24 $
+   $Date: 2003/10/03 06:30:25 $
    $Author: hknight $ */
 
 #ifndef __STRING_UTILS_H
@@ -173,7 +173,9 @@ void* string2ptr(string ss);
 
 /* these use stdio- which doesn't use costly dynamic memory allocations */
 string make_string(int input);
+string make_string(int input, int places);
 string make_string(unsigned input);
+string make_string(unsigned input, int places);
 string make_string(long input);
 string make_string(unsigned long input);
 string make_string(long long input);
