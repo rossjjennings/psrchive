@@ -17,22 +17,31 @@ void usage ()
     "     psredit -c CMD [-c CMD ...] filenames\n"
     "Where:\n"
     "\n"
-    "CMDS is a string containing one or more commands, separated by commas.\n"
-    "     If any whitespace is required, then the string containing it must\n"
-    "     be enclosed in quotation marks.  Multiple commands may also be\n"
-    "     specified by using multiple -c options.\n"
+    "CMD is a string containing one or more commands, separated by commas.\n"
+    "    If any whitespace is required, then the string containing it must\n"
+    "    be enclosed in quotation marks.  Multiple commands may also be\n"
+    "    specified by using multiple -c options.\n"
     "\n"
-    "     A command can either get or a set a parameter value.\n"
-    "     A get command is simply the name of the parameter.\n"
-    "     A set command is a parameter assignment statement, e.g\n"
+    "    A command can either get or a set a parameter value.\n"
+    "    A get command is simply the name of the parameter.\n"
+    "    A set command is a parameter assignment statement, e.g\n"
     "\n"
-    "     psredit -c freq,NAME=\"Hydra A\"\n"
+    "    psredit -c freq,NAME=\"Hydra A\"\n"
     "\n"
-    "     will print the centre frequency and set the source name.\n"
-    "     Note that parameter names are case insensitive.\n"
-    "     For the full list of parameter names, type \"psredit -H\"\n"
+    "    will print the centre frequency and set the source name.\n"
+    "    Note that parameter names are case insensitive.\n"
+    "    For the list of parameter names, type \"psredit -H\"\n"
        << endl;
 }
+
+const char* vector_help =
+"These may be further specified using range notation.  For example:\n"
+"\n"
+"  psredit -c int[0,8-15]:mjd\n"
+"\n"
+"will print the epoch from sub-integrations 0 and 8 through 15 inclusive.\n"
+"Output values will be separated by a comma.  If a range is not specified,\n"
+"all values will be output.  Note that range indeces begin at zero.\n";
 
 string pad (unsigned length, string text)
 {
@@ -117,18 +126,24 @@ int main (int argc, char** argv) try {
     case 'H': {
 
       cout << 
-	"-------------------------------------------------\n"
-	"Attribute Name   Description\n"
-	"-------------------------------------------------"
-	   << endl;
-
+	  "-------------------------------------------------\n"
+	  "Attribute Name   Description\n"
+	  "-------------------------------------------------"
+	     << endl;
+  
       for (unsigned i=0; i<tui.get_nattribute(); i++)
-	cout << pad(16,tui.get_name(i)) <<" "<< tui.get_description(i) << endl;
-
+	cout << pad(16,tui.get_name(i)) 
+             << " " << tui.get_description(i) << endl;
+  
+      cout << "\nAttributes with a * following the name represent vectors.\n";
+      if (!verbose)
+        cout << "Type \"psredit -vH\" for more details.\n" << endl;
+      else
+        cout << vector_help << endl;
+  
       return 0;
 
     }
-
 
     case 'm':
       save = true;
