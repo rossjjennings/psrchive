@@ -15,7 +15,7 @@ bool Pulsar::Archive::weight_by_duration = true;
  */
 void Pulsar::Archive::tscrunch (unsigned nscrunch)
 {
-  unsigned nsub = subints.size();
+  unsigned nsub = get_nsubint();
 
   if (nscrunch == 1 || nsub < 2)
     return;
@@ -32,7 +32,7 @@ void Pulsar::Archive::tscrunch (unsigned nscrunch)
   unsigned newsub = nsub / nscrunch;
 
   if (verbose) cerr << "Archive::tscrunch - scrunching " 
-		    << nsub << " subints by " << nscrunch << endl;
+		    << nsub << " Integrations by " << nscrunch << endl;
 
   try {
 
@@ -54,20 +54,20 @@ void Pulsar::Archive::tscrunch (unsigned nscrunch)
 	  cerr << "Archive::tscrunch dedisperse cfreq=" << cfreq << endl;
 
 	for (unsigned iadd=0; iadd < nscrunch; iadd++)
-	  subints[start+iadd] -> dedisperse (cfreq, ichan);
+	  get_Integration(start+iadd) -> dedisperse (cfreq, ichan);
 
 	if (verbose) 
 	  cerr <<  "Archive::tscrunch sum profiles" << endl;
 	
 	for (unsigned ipol=0; ipol < get_npol(); ++ipol) {
 
-	  Profile* avg = subints[isub]  -> get_Profile (ipol, ichan);
-	  Profile* add = subints[start] -> get_Profile (ipol, ichan);
+	  Profile* avg = get_Profile (isub, ipol, ichan);
+	  Profile* add = get_Profile (start, ipol, ichan);
 
 	  *(avg) = *(add);
 
 	  for (unsigned jsub=1; jsub<nscrunch; jsub++) {
-	    add = subints[start+jsub] -> get_Profile (ipol, ichan);
+	    add = get_Profile (start+jsub, ipol, ichan);
 	    *(avg) += *(add);
 	  }
 
@@ -89,21 +89,21 @@ void Pulsar::Archive::tscrunch (unsigned nscrunch)
 
     for (unsigned iadd=0; iadd < nscrunch; iadd++) {
 
-      Integration* cur = subints [start+iadd];
+      Integration* cur = get_Integration (start+iadd);
 
       duration += cur->get_duration();
       mjd      += cur->get_mid_time();
 
     }
 
-    subints[isub]->set_duration (duration);
+    get_Integration(isub) -> set_duration (duration);
 
     mjd /= double (nscrunch);
 
     if (get_type() == Signal::Pulsar) {
 
       // get the time of the first subint to be integrated into isub
-      MJD firstmjd = subints[isub * nscrunch] -> get_mid_time();
+      MJD firstmjd = get_Integration (isub * nscrunch) -> get_mid_time();
       // get the period at the time of the first subint
       double first_period = model.period(firstmjd);
       // get the phase at the time of the first subint
@@ -118,8 +118,8 @@ void Pulsar::Archive::tscrunch (unsigned nscrunch)
       // Subtract one period times phase difference from mjd      
       mjd -= dphase.fracturns() * first_period;
 
-      subints[isub]->set_mid_time (mjd);
-      subints[isub]->set_folding_period (model.period(mjd));
+      get_Integration (isub)->set_mid_time (mjd);
+      get_Integration (isub)->set_folding_period (model.period(mjd));
       
       // The original code did not include the number of 
       // integer turns when computing the shift_time
@@ -142,7 +142,7 @@ double Pulsar::Archive::weighted_frequency (unsigned ichan,
 					    unsigned start, unsigned end) 
   const
 {
-  unsigned nsubint = subints.size();
+  unsigned nsubint = get_nsubint();
 
   if (end == 0)
     end = nsubint;
@@ -168,9 +168,9 @@ double Pulsar::Archive::weighted_frequency (unsigned ichan,
   double fend = 0.0;
 
   try {
-    for (unsigned isubint=start; isubint < end; isubint++){
+    for (unsigned isubint=start; isubint < end; isubint++) {
       
-      Profile* prof = subints[isubint]->get_Profile(ipol, ichan);
+      const Profile* prof = get_Profile (isubint, ipol, ichan);
       
       double freq   = prof->get_centre_frequency();
       double weight = prof->get_weight();
@@ -180,7 +180,7 @@ double Pulsar::Archive::weighted_frequency (unsigned ichan,
       //  " freq=" << freq << " wt=" << weight << endl;
 
       if (weight_by_duration)
-	weight *= subints[isubint]->get_duration();
+	weight *= get_Integration (isubint) -> get_duration();
       
       freqsum += freq * weight;
       weightsum += weight;

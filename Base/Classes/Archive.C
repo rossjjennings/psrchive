@@ -37,8 +37,11 @@ Pulsar::Archive::~Archive ()
   if (verbose)
     cerr << "Archive::destructor" << endl;
 
+#if FIXED
   for (unsigned isub=0; isub<subints.size(); isub++)
-    delete subints[isub];
+    if (subints[isub])
+      delete subints[isub];
+#endif
 }
 
 void Pulsar::Archive::copy (const Archive& archive)
@@ -49,12 +52,11 @@ void Pulsar::Archive::copy (const Archive& archive)
   if (this == &archive)
     return;
 
-  // set attributes
   resize (archive.get_nsubint(), archive.get_npol(),
 	  archive.get_nchan(), archive.get_nbin());
 
   for (unsigned isub=0; isub<archive.get_nsubint(); isub++)
-    subints[isub] -> copy (*(archive.subints[isub]));
+    get_Integration(isub) -> copy (*(archive.get_Integration(isub)));
 
   ephemeris = archive.ephemeris;
   model = archive.model;
@@ -76,28 +78,7 @@ void Pulsar::Archive::copy (const Archive& archive)
   set_parallactic_corrected( archive.get_parallactic_corrected() );
 }
 
-/*!
-  \param subint the index of the requested Integration
-  \return pointer to Integration instance
-*/
-Pulsar::Integration* Pulsar::Archive::get_Integration (unsigned subint)
-{
-  if (subint < subints.size())
-    return subints[subint];
 
-  throw Error (InvalidRange, "Archive::get_Integration",
-	       "isubint=%u nsubint=%u", subint, subints.size());
-}
-
-const Pulsar::Integration* 
-Pulsar::Archive::get_Integration (unsigned subint) const
-{
-  if (subint < subints.size())
-    return subints[subint];
-
-  throw Error (InvalidRange, "Archive::get_Integration",
-	       "isubint=%u nsubint=%u", subint, subints.size());
-}
 //! Return a pointer to the Profile
 /*!
   \param subint the index of the requested Integration
@@ -106,15 +87,15 @@ Pulsar::Archive::get_Integration (unsigned subint) const
   \return pointer to Profile instance
 */
 Pulsar::Profile* 
-Pulsar::Archive::get_Profile (unsigned subint, unsigned pol, unsigned chan)
+Pulsar::Archive::get_Profile (unsigned sub, unsigned pol, unsigned chan)
 {
-  return get_Integration (subint) -> get_Profile (pol, chan);
+  return get_Integration (sub) -> get_Profile (pol, chan);
 }
 
 const Pulsar::Profile* 
-Pulsar::Archive::get_Profile (unsigned subint, unsigned pol, unsigned chan) const
+Pulsar::Archive::get_Profile (unsigned sub, unsigned pol, unsigned chan) const
 {
-  return get_Integration (subint) -> get_Profile (pol, chan);
+  return get_Integration (sub) -> get_Profile (pol, chan);
 }
 
 /*!  
@@ -141,33 +122,33 @@ void Pulsar::Archive::bscrunch_to_nbin (unsigned new_nbin)
 }
 
 /*!
-  Simply calls Integration::bscrunch on each element of subints
+  Simply calls Integration::bscrunch for each Integration
   \param nscrunch the number of phase bins to add together
   */
 void Pulsar::Archive::bscrunch (unsigned nscrunch)
 {
-  if (subints.size() == 0)
+  if (get_nsubint() == 0)
     return;
 
-  for (unsigned isub=0; isub < subints.size(); isub++)
-    subints[isub] -> bscrunch (nscrunch);
+  for (unsigned isub=0; isub < get_nsubint(); isub++)
+    get_Integration(isub) -> bscrunch (nscrunch);
 
-  set_nbin (subints[0]->get_nbin());
+  set_nbin (get_Integration(0)->get_nbin());
 }
 
 /*!
-  Simply calls Integration::fscrunch on each element of subints
+  Simply calls Integration::fscrunch for each Integration
   \param nscrunch the number of frequency channels to add together
  */
 void Pulsar::Archive::fscrunch (unsigned nscrunch, bool weighted_cfreq)
 {
-  if (subints.size() == 0)
+  if (get_nsubint() == 0)
     return;
 
-  for (unsigned isub=0; isub < subints.size(); isub++)
-    subints[isub] -> fscrunch (nscrunch, weighted_cfreq);
+  for (unsigned isub=0; isub < get_nsubint(); isub++)
+    get_Integration(isub) -> fscrunch (nscrunch, weighted_cfreq);
 
-  set_nchan (subints[0]->get_nchan());
+  set_nchan (get_Integration(0)->get_nchan());
 }
 
 /*!
@@ -182,33 +163,33 @@ void Pulsar::Archive::fscrunch_to_nchan (unsigned new_chan)
 }
 
 /*!
-  Simply calls Integration::pscrunch on each element of subints
+  Simply calls Integration::pscrunch for each Integration
 */
 void Pulsar::Archive::pscrunch()
 {
-  if (subints.size() == 0)
+  if (get_nsubint() == 0)
     return;
 
-  for (unsigned isub=0; isub < subints.size(); isub++)
-    subints[isub] -> pscrunch ();
+  for (unsigned isub=0; isub < get_nsubint(); isub++)
+    get_Integration(isub) -> pscrunch ();
 
-  set_npol ( subints[0] -> get_npol() );
-  set_state ( subints[0] -> get_state() );
+  set_npol ( get_Integration(0) -> get_npol() );
+  set_state ( get_Integration(0) -> get_state() );
 }
 
 /*!
-  Simply calls Integration::convert_state on each element of subints
+  Simply calls Integration::convert_state for each Integration
 */
 void Pulsar::Archive::convert_state (Signal::State state)
 {
-  if (subints.size() == 0)
+  if (get_nsubint() == 0)
     return;
 
-  for (unsigned isub=0; isub < subints.size(); isub++)
-    subints[isub] -> convert_state (state);
+  for (unsigned isub=0; isub < get_nsubint(); isub++)
+    get_Integration(isub) -> convert_state (state);
 
-  set_npol ( subints[0] -> get_npol() );
-  set_state ( subints[0] -> get_state() );
+  set_npol ( get_Integration(0) -> get_npol() );
+  set_state ( get_Integration(0) -> get_state() );
 }
 
 /*!
@@ -225,7 +206,7 @@ void Pulsar::Archive::centre ()
 
   for (unsigned isub=0; isub < get_nsubint(); isub++)  {
 
-    Integration* subint = subints[isub];
+    Integration* subint = get_Integration(isub);
 
     // Rotate according to polyco prediction
     Phase phase = model.phase (subint -> get_mid_time(),
@@ -245,16 +226,16 @@ void Pulsar::Archive::centre ()
   \param frequency */
 void Pulsar::Archive::dedisperse (double dm, double frequency)
 {
-  if (subints.size() == 0)
+  if (get_nsubint() == 0)
     return;
 
   if (get_dedispersed())
     return;
 
-  for (unsigned isub=0; isub < subints.size(); isub++) {
+  for (unsigned isub=0; isub < get_nsubint(); isub++) {
     if (dm)
-      subints[isub] -> set_dispersion_measure (dm);
-    subints[isub] -> dedisperse (frequency);
+      get_Integration(isub) -> set_dispersion_measure (dm);
+    get_Integration(isub) -> dedisperse (frequency);
   }
 
   set_dedispersed();
@@ -265,13 +246,13 @@ void Pulsar::Archive::dedisperse (double dm, double frequency)
 */
 void Pulsar::Archive::fold (unsigned nfold)
 {
-  if (subints.size() == 0)
+  if (get_nsubint() == 0)
     return;
 
-  for (unsigned isub=0; isub < subints.size(); isub++)
-    subints[isub] -> fold (nfold);
+  for (unsigned isub=0; isub < get_nsubint(); isub++)
+    get_Integration(isub) -> fold (nfold);
 
-  set_nbin (subints[0]->get_nbin());
+  set_nbin (get_Integration(0)->get_nbin());
 }
 
 /*!
@@ -313,7 +294,7 @@ void Pulsar::Archive::remove_baseline (float phase)
       phase = find_min_phase ();
 
     for (unsigned isub=0; isub < get_nsubint(); isub++)
-      subints[isub] -> remove_baseline (phase);
+      get_Integration(isub) -> remove_baseline (phase);
 
   }
   catch (Error& error) {
@@ -359,9 +340,9 @@ void Pulsar::Archive::set_model (const polyco& new_model)
     if (verbose)
       cerr << "Archive::set_model correcting against the old model" << endl;
 
-    // correct the subints against the old model
-    for (unsigned isub = 0; isub < subints.size(); isub++)
-      apply_model (oldmodel, subints[isub]);
+    // correct Integrations against the old model
+    for (unsigned isub = 0; isub < get_nsubint(); isub++)
+      apply_model (oldmodel, get_Integration(isub));
   }
 
   // it may not be true the that supplied model was generated at runtime
@@ -376,18 +357,18 @@ void Pulsar::Archive::snr_weight ()
 
 MJD Pulsar::Archive::start_time() const
 {
-  if (subints.size() < 1)
-    throw Error (InvalidState, "Archive::start_time", "no subints");
+  if (get_nsubint() < 1)
+    throw Error (InvalidState, "Archive::start_time", "no Integrations");
 
-  return subints[0] -> get_start_time();
+  return get_Integration(0) -> get_start_time();
 }
 
 MJD Pulsar::Archive::end_time() const
 {
-  if (subints.size() < 1)
-    throw Error (InvalidState, "Archive::end_time", "no subints");
+  if (get_nsubint() < 1)
+    throw Error (InvalidState, "Archive::end_time", "no Integrations");
 
-  return subints[0] -> get_end_time();
+  return get_Integration(get_nsubint()-1) -> get_end_time();
 }
 
 /*!
@@ -421,6 +402,6 @@ Pulsar::Archive::telescope_coordinates
 void Pulsar::Archive::uniform_weight ()
 {
   for (unsigned isub=0; isub < get_nsubint(); isub++)
-    subints[isub] -> uniform_weight ();
+    get_Integration(isub) -> uniform_weight ();
 }
 

@@ -32,7 +32,7 @@ void Pulsar::Archive::append (const Archive* arch)
   if (!mixable (arch, reason))
     throw Error (InvalidState, "Archive::append", reason);
 
-  if (append_chronological && subints.size() > 0) {
+  if (append_chronological && get_nsubint() > 0) {
 
     if (verbose) 
       cerr << "Pulsar::Archive::append ensuring chronological order" << endl;
@@ -46,9 +46,11 @@ void Pulsar::Archive::append (const Archive* arch)
 
   }
 
-  unsigned old_nsubint = subints.size();
+  unsigned old_nsubint = get_nsubint();
 
+#if FIXED
   append (arch->subints);
+#endif
 
   // if observation is not a pulsar, no further checks required
   if (get_type() != Signal::Pulsar) {
@@ -65,18 +67,11 @@ void Pulsar::Archive::append (const Archive* arch)
     update_model (old_nsubint);
 
   // correct the new subints against their old model
-  for (unsigned isub=old_nsubint; isub < subints.size(); isub++)
-    apply_model (arch->model, subints[isub]);
+  for (unsigned isub=old_nsubint; isub < get_nsubint(); isub++)
+    apply_model (arch->model, get_Integration(isub));
 
 }
 
-void Pulsar::Archive::append (const vector<Integration*>& more_subints)
-{
-  for (unsigned isub=0; isub<more_subints.size(); isub++)
-    subints.push_back ( new_Integration(more_subints[isub]) );
-
-  set_nsubint (subints.size());
-}  
 
 // ///////////////////////////////////////////////////////////////////////
 //

@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Archive.h,v $
-   $Revision: 1.44 $
-   $Date: 2002/10/28 01:02:45 $
+   $Revision: 1.45 $
+   $Date: 2003/01/06 22:36:08 $
    $Author: straten $ */
 
 /*! \mainpage 
@@ -123,12 +123,12 @@
 #include <vector>
 #include <string>
 
+#include "IntegrationManager.h"
 #include "polyco.h"
 #include "psrephem.h"
 #include "sky_coord.h"
 
 #include "Types.h"
-#include "Reference.h"
 
 namespace Tempo {
   class toa;
@@ -151,12 +151,9 @@ namespace Pulsar {
     and each contains profiles that are aligned to start on the same pulse
     phase. */
 
-  class Archive : public Reference::Able {
+  class Archive : public IntegrationManager {
 
   public:
-
-    //! A verbosity flag that can be set for debugging purposes
-    static bool verbose;
 
     //! Flag that Archive::append should enforce chronological order
     static bool append_chronological;
@@ -188,6 +185,10 @@ namespace Pulsar {
     //! destructor
     virtual ~Archive ();
 
+    //! Resize the Integration vector with new_Integration instances
+    virtual void resize (unsigned nsubint, 
+			 unsigned npol=0, unsigned nchan=0, unsigned nbin=0);
+
     //! Dynamic constructor loads an Archive subclass from filename
     static Archive* load (const char* filename);
 
@@ -203,14 +204,6 @@ namespace Pulsar {
 
     //! Return a pointer to a new fscrunched, tscrunched and pscrunched copy
     Archive* total () const;
-
-    //! Resets the dimensions of the data area
-    virtual void resize (unsigned nsubint, 
-			 unsigned npol=0, unsigned nchan=0, unsigned nbin=0);
-
-    //! Return a pointer to the integration
-    Integration* get_Integration (unsigned subint);
-    const Integration* get_Integration (unsigned subint) const;
 
     //! Return a pointer to the profile
     Profile* get_Profile (unsigned subint, unsigned pol, unsigned chan);
@@ -293,7 +286,7 @@ namespace Pulsar {
     //! Test if arch is mixable (enough for append)
     virtual bool mixable (const Archive* arch, string& reason);
 
-    //! Computes the weighted channel frequency of an interval of subints.
+    //! Computes the weighted channel frequency over an Integration interval.
     double weighted_frequency (unsigned ichan,
 			       unsigned start, unsigned end) const;
 
@@ -417,10 +410,6 @@ namespace Pulsar {
     /*! This attribute may be set only through Archive::resize */
     virtual unsigned get_npol () const = 0;
 
-    //! Get the number of sub-integrations stored in the file
-    /*! This attribute may be set only through Archive::resize */
-    virtual unsigned get_nsubint () const = 0;
-
     //! Get the overall bandwidth of the observation
     virtual double get_bandwidth () const = 0;
     //! Set the overall bandwidth of the observation
@@ -485,12 +474,6 @@ namespace Pulsar {
     //! The pulsar phase model, as created using TEMPO
     polyco model;
 
-    //! The data storage area
-    vector<Integration*> subints;
-
-    //! All new Integration instances are created through this method
-    virtual Integration* new_Integration (Integration* subint = 0) = 0;
-
     //! Set the number of pulsar phase bins
     /*! Called by Archive methods to update child attribute */
     virtual void set_nbin (unsigned numbins) = 0;
@@ -503,18 +486,11 @@ namespace Pulsar {
     /*! Called by Archive methods to update child attribute */
     virtual void set_npol (unsigned numpol) = 0;
 
-    //! Set the number of sub-integrations
-    /*! Called by Archive methods to update child attribute */
-    virtual void set_nsubint (unsigned num_sub) { }
-
     //! Initialize an Integration to reflect Archive attributes.
     void init_Integration (Integration* subint);
 
     //! Set all values to null
     void init ();
-
-    //! Append clones of Integration objects to subints
-    void append (const vector<Integration*>& more_subints);
   
     //! Apply the current model to the Integration
     void apply_model (const polyco& old, Integration* subint);

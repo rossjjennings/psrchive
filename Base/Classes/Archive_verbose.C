@@ -5,8 +5,6 @@
 #include "polyco.h"
 #include "tempo++.h"
 
-bool Pulsar::Archive::verbose = false;
-
 void Pulsar::Archive::set_verbosity (unsigned level)
 {
   // level 3

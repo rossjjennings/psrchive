@@ -18,7 +18,7 @@
 void Pulsar::Archive::update_model() 
 {
   model_updated = false;
-  update_model (subints.size());
+  update_model (get_nsubint());
 }
 
 
@@ -36,7 +36,7 @@ void Pulsar::Archive::update_model()
   re-aligned using the difference between the old and new models.
   (see Archive::apply_model)
 
-  \param nsubint the number of subints to correct
+  \param nsubint the number of Integrations to correct
 */
 void Pulsar::Archive::update_model (unsigned nsubint)
 {
@@ -49,13 +49,13 @@ void Pulsar::Archive::update_model (unsigned nsubint)
   // if the model has not already been updated, create a completely new polyco
   create_updated_model (!model_updated);
 
-  // if previously updated, no need to correct the old subints
+  // if previously updated, no need to correct the old Integrations
   if (model_updated)
     return;
 
-  // correct the old subints with the old model
+  // correct the old Integrations with the old model
   for (unsigned isub = 0; isub < nsubint; isub++)
-    apply_model (oldmodel, subints[isub]);
+    apply_model (oldmodel, get_Integration(isub));
   
   model_updated = true;
 }
@@ -64,20 +64,17 @@ void Pulsar::Archive::update_model (unsigned nsubint)
 //
 // Archive::create_updated_model
 //
-/*!  
-  The polyco needs only describe the phase and period of every
-  Integration in the subints array.  When the Integrations are
-  separated by a large amount of time, the creation of a new polyco to
-  completely span this time results in a huge polyco.dat and a huge
-  waste of time.
+/*!  The polyco needs only describe the phase and period of every
+  Integration.  When the Integrations are separated by a large amount
+  of time, the creation of a new polyco to completely span this time
+  results in a huge polyco.dat and a huge waste of time.
 
   Therefore, this method attempts to create the minimum set of polyco
   polynomials required to describe the data.  If a match is not found
   in the current model, a single polynomial is created and appended to
   the current model.
 
-  \param clear_model delete the current model after copying its attributes 
-*/
+  \param clear_model delete the current model after copying its attributes */
 void Pulsar::Archive::create_updated_model (bool clear_model)
 {
   if (get_type() != Signal::Pulsar)
@@ -93,9 +90,9 @@ void Pulsar::Archive::create_updated_model (bool clear_model)
   if (clear_model)
     model = polyco();
 
-  for (unsigned isub = 0; isub < subints.size(); isub++) {
+  for (unsigned isub = 0; isub < get_nsubint(); isub++) {
 
-    MJD time = subints[isub]->get_mid_time();
+    MJD time = get_Integration(isub)->get_mid_time();
 
     if ( model.i_nearest (time) == -1 ) {
       // no match, create a new polyco for the Integration
@@ -188,19 +185,19 @@ void Pulsar::Archive::apply_model (const polyco& old, Integration* subint)
 bool Pulsar::Archive::good_model (const polyco& test_model) const
 {
   if (verbose)
-    cerr << "Archive::good_model testing polyco on " << subints.size()
+    cerr << "Archive::good_model testing polyco on " << get_nsubint()
 	 << " integrations" << endl;
 
   unsigned isub=0;
-  for (isub=0; isub < subints.size(); isub++) try {
-    if ( test_model.i_nearest (subints[isub]->get_mid_time()) == -1 )
+  for (isub=0; isub < get_nsubint(); isub++) try {
+    if ( test_model.i_nearest (get_Integration(isub)->get_mid_time()) == -1 )
       break;
   }
   catch (...) {
     break;
   }
   
-  if (isub < subints.size()) {
+  if (isub < get_nsubint()) {
     if (verbose)
       cerr << "Archive::good_model polyco failed on integration "
 	   << isub << endl;

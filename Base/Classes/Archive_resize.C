@@ -12,13 +12,11 @@
 void Pulsar::Archive::resize (unsigned nsubint, unsigned npol,
 			      unsigned nchan, unsigned nbin)
 {
-  unsigned cur_nsub = subints.size();
+  unsigned cur_nsub = get_nsubint();
   unsigned cur_npol = get_npol();
   unsigned cur_nchan = get_nchan();
   unsigned cur_nbin = get_nbin();
 
-  if (nsubint == 0)
-    nsubint = cur_nsub;
   if (npol == 0)
     npol = cur_npol;
   if (nchan == 0)
@@ -32,25 +30,17 @@ void Pulsar::Archive::resize (unsigned nsubint, unsigned npol,
 	 << " old nsub=" << cur_nsub << " npol=" << cur_npol
 	 << " nchan=" << cur_nchan << " nbin=" << cur_nbin << endl;
 
-  unsigned isub;
-  for (isub=nsubint; isub<cur_nsub; isub++)
-    delete subints[isub];
-
-  subints.resize (nsubint);
-
-  for (isub=cur_nsub; isub<nsubint; isub++)
-    subints[isub] = new_Integration ();
 
   if (verbose)
     cerr << "Pulsar::Archive::resize subints" << endl;
+  IntegrationManager::resize (nsubint);
 
-  for (isub=0; isub<nsubint; isub++)
-    subints[isub] -> resize (npol, nchan, nbin);
+  for (unsigned isub=0; isub<nsubint; isub++)
+    get_Integration(isub) -> resize (npol, nchan, nbin);
 
   if (verbose)
     cerr << "Pulsar::Archive::resize calling book-keeping functions" << endl;
 
-  set_nsubint (nsubint);
   set_npol (npol);
   set_nchan (nchan);
   set_nbin (nbin);
