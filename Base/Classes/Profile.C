@@ -44,7 +44,7 @@ void Pulsar::Profile::init()
 {
   nbin   = 0;
   state  = Signal::None;
-  weight = 0.0;
+  weight = 1.0;
   centrefreq = -1.0;
   amps = NULL;
 }
