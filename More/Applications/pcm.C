@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pcm.C,v $
-   $Revision: 1.4 $
-   $Date: 2003/10/13 13:57:53 $
+   $Revision: 1.5 $
+   $Date: 2003/10/16 14:19:47 $
    $Author: straten $ */
 
 /*! \file pcm.C 
@@ -133,8 +133,11 @@ void plot_constraints (Pulsar::ReceptionCalibratorPlotter& plotter,
       cpgbeg (0, filename, 0, 0);
     }
 
-    cpgsvp (.1,.9, .1,.9);
-    
+    if (plotter.use_colour)
+      cpgsvp (.15,.9, .15,.9);
+    else
+      cpgsvp (.25,.75,.15,.95);
+
     cerr << "pcm: nstate=" << nstate << endl;
     for (unsigned istate=0; istate<nstate; istate++) {
 
@@ -198,9 +201,10 @@ try {
   vector<unsigned> phase_bins;
 
   bool measure_cal_V = true;
+  bool publication_plots = false;
 
   int gotc = 0;
-  while ((gotc = getopt(argc, argv, "a:b:C:Df:M:m:n:p:huvV")) != -1) {
+  while ((gotc = getopt(argc, argv, "a:b:C:Df:M:m:n:Pp:huvV")) != -1) {
     switch (gotc) {
 
     case 'a':
@@ -245,6 +249,10 @@ try {
     case 'n':
       maxbins = atoi (optarg);
       cerr << "pcm: selecting a maximum of " << maxbins << " bins" << endl;
+      break;
+
+    case 'P':
+      publication_plots = true;
       break;
 
     case 'p':
@@ -382,7 +390,13 @@ try {
     }
   }
 
+  if (total)  {
+    cerr << "pcm: writing total uncalibrated pulsar archive" << endl;
+    total->unload ("first.ar");
+  }
+
   Pulsar::ReceptionCalibratorPlotter plotter (&model);
+  plotter.use_colour = !publication_plots;
 
   if (display && only_ichan < 0) {
 
@@ -396,16 +410,22 @@ try {
 
     cpgpage();
 
-    cerr << "pcm: plotting uncalibrated pulsar total stokes" << endl;
-    Pulsar::Plotter profile;
-    profile.Manchester (total);
-
-    cpgpage();
-
     cerr << "pcm: plotting uncalibrated CAL" << endl;
     plotter.plotcal();
 
     cpgend();
+
+    cpgbeg (0, "uncalibrated.ps/CPS", 0, 0);
+    cpgask(1);
+    cpgslw(2);
+    cpgsvp (.1,.9, .1,.9);
+
+    cerr << "pcm: plotting uncalibrated pulsar total stokes" << endl;
+    Pulsar::Plotter profile;
+    profile.spherical (total);
+
+    cpgend();
+
 
     cerr << "pcm: plotting pulsar constraints" << endl;
     plot_constraints (plotter, model.get_nchan(),
@@ -518,11 +538,12 @@ try {
 
     cpgbeg (0, "calibrated.ps/CPS", 0, 0);
     cpgask(1);
-    cpgsvp (0.1,.9, 0.1,.9);
+    cpgslw(2);
+    cpgsvp (.1,.9, .1,.9);
 
     cerr << "pcm: plotting calibrated pulsar total stokes" << endl;
     Pulsar::Plotter profile;
-    profile.Manchester (total);
+    profile.spherical (total);
 
     cpgend ();
   }
