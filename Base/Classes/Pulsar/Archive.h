@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Archive.h,v $
-   $Revision: 1.76 $
-   $Date: 2003/06/05 13:12:16 $
+   $Revision: 1.77 $
+   $Date: 2003/06/05 15:39:55 $
    $Author: straten $ */
 
 /*! \mainpage 
@@ -226,12 +226,6 @@ namespace Pulsar {
       //! Return the name of the plugins directory
       static string plugin_path (const char* environment_variable = "CVSHOME");
 
-      //! Load plugins from the plugin_path
-      static void plugin_load ();
-
-      //! Report to cerr on the status of the plugins
-      static void plugin_report ();
-
       //! Report to cerr on the status of the Registry (and plugins)
       static void report ();
 
@@ -247,6 +241,15 @@ namespace Pulsar {
 
       //! Flag that plugin_load has been called
       static bool loaded;
+
+      //! Initialization function calls plugin_load if dynamic linkage enabled
+      static void init ();
+
+      //! Load plugins from the plugin_path
+      static void plugin_load ();
+
+      //! Report to cerr on the status of the plugins
+      static void plugin_report ();
 
     };
 
