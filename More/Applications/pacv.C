@@ -5,7 +5,6 @@
 #include "Pulsar/PolarCalibrator.h"
 
 #include "Pulsar/CalibratorPlotter.h"
-#include "Pulsar/PolnCalibratorExtension.h"
 
 #include "Pulsar/Integration.h"
 #include "Pulsar/Archive.h"
@@ -89,7 +88,7 @@ int main (int argc, char** argv)
       Pulsar::Archive::set_verbosity (3);
       Pulsar::CalibratorPlotter::verbose = true;
       Pulsar::Calibrator::verbose = true;
-      Calibration::Model::verbose = true;
+      //Calibration::Model::verbose = true;
     case 'v':
       verbose = true;
       break;
@@ -120,18 +119,35 @@ int main (int argc, char** argv)
   Reference::To<Pulsar::Archive> output;
  
   Reference::To<Pulsar::PolnCalibrator> calibrator;
-  Reference::To<Pulsar::PolnCalibratorExtension> extension;
+
   
   Pulsar::CalibratorPlotter plotter;
   Pulsar::FluxCalibrator fluxcal;
   Pulsar::Plotter archplot;
 
-  for (unsigned ifile=0; ifile<filenames.size(); ifile++) {  try {
+  for (unsigned ifile=0; ifile<filenames.size(); ifile++) try {
 
     if (verbose)
       cerr << "pacv: Loading " << filenames[ifile] << endl;
 
     input = Pulsar::Archive::load( filenames[ifile] );
+
+
+    if (input->get_type() == Signal::Calibrator) {
+
+      calibrator = new Pulsar::PolnCalibrator (input);
+
+      if (verbose)
+	cerr << "pacv: Plotting PolnCalibrator" << endl;
+      
+      cpgpage ();
+      plotter.plot (calibrator);
+
+      continue;
+
+    }
+
+
 
     for (unsigned ichan=0; ichan<zapchan.size(); ichan++) {
       if (verbose)
@@ -183,17 +199,10 @@ int main (int argc, char** argv)
 
 
     if (!flux_cal) {
-      if (verbose)
-	cerr << "pacv: Creating new PolnCalibratorExtension" << endl;
 
-      extension = new Pulsar::PolnCalibratorExtension (calibrator);
-
-      cerr << "pacv: Creating Archive class name = " << archive_class << endl;
+      cerr << "pacv: Creating " << archive_class << endl;
   
-      output = Pulsar::Archive::new_Archive (archive_class);
-      output -> copy (*input);
-      output -> resize (0);
-      output -> add_extension (extension);
+      output = calibrator->get_solution (archive_class);
 
       int index = filenames[ifile].find_first_of(".", 0);
       string newname = filenames[ifile].substr(0, index) + ".pacv";
@@ -203,10 +212,10 @@ int main (int argc, char** argv)
 
     }
 
-  } catch (Error& error) {
-    cerr << "pacv: Error loading " << filenames[ifile] << error << endl;
-    return -1;
   }
+  catch (Error& error) {
+    cerr << "pacv: Error during " << filenames[ifile] << error << endl;
+    return -1;
   }
 
   if (flux_cal) {
