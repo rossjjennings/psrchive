@@ -66,6 +66,11 @@ string Pulsar::Receiver::get_tracking_mode_string() const
 
 bool Pulsar::Receiver::match (const Receiver* receiver, string& reason) const
 {
+  if (!receiver) {
+    reason += Archive::match_indent + "no Receiver";
+    return false;
+  }
+
   bool result = true;
 
   if (basis != receiver->basis) {

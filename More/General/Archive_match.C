@@ -165,7 +165,9 @@ bool Pulsar::Archive::calibrator_match (const Archive* archive,
 {
   bool result = true;
 
-  if (!get<Receiver>() -> match (archive->get<Receiver>(), reason))
+  const Receiver* receiver = get<Receiver>();
+
+  if (receiver && ! receiver->match (archive->get<Receiver>(), reason))
     result = false;
 
   if (get_nchan() != archive->get_nchan()) {
