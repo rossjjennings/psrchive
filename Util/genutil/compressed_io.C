@@ -1,4 +1,5 @@
 #include <iostream>
+#include <algorithm>
 
 #include "machine_endian.h"
 #include "compressed_io.h"
@@ -45,7 +46,7 @@ int fwrite_compressed (FILE* fptr, vector<float>& vals)
 
   unsigned short value = 0;
   for (vector<float>::iterator ind = vals.begin(); ind != vals.end(); ind++) {
-    value = (*ind - xmin) / ratio;
+    value = (unsigned short) ((*ind - xmin) / ratio);
     writ = fwrite (&value, sizeof(unsigned short), 1, fptr);
     if (writ < 1) {
       perror ("fwrite_compressed: error fwrite(value)\n");
