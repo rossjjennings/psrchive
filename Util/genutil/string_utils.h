@@ -1,7 +1,7 @@
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Attic/string_utils.h,v $
-   $Revision: 1.9 $
-   $Date: 2000/01/24 12:21:04 $
-   $Author: redwards $ */
+   $Revision: 1.10 $
+   $Date: 2000/06/02 07:24:01 $
+   $Author: straten $ */
 
 #ifndef __STRING_UTILS_H
 #define __STRING_UTILS_H
@@ -39,15 +39,18 @@ int stringload (vector<string>* lines, FILE* fptr);
 // characters in 'delimiters'.  the substring and any leading
 // delimiter characters are removed from 'instr'
 // ///////////////////////////////////////////////////////////
-string stringtok (string * instr, const string & delimiters);
+string stringtok (string * instr, const string & delimiters,
+			bool skip_leading_delimiters = true);
 
 // ///////////////////////////////////////////////////////////
 // other interfaces to overload stringtok()
-inline string stringtok (string* instr, char* delimiters)
-{ return stringtok (instr, string(delimiters)); }
+inline string stringtok (string* instr, char* delimiters,
+			bool skip_leading_delimiters = true)
+{ return stringtok (instr, string(delimiters), skip_leading_delimiters); }
 
-inline string stringtok (string* instr, char delimiter)
-{ return stringtok (instr, string(1, delimiter)); }
+inline string stringtok (string* instr, char delimiter,
+			bool skip_leading_delimiters = true)
+{ return stringtok (instr, string(1, delimiter), skip_leading_delimiters); }
 
 // ///////////////////////////////////////////////////////////
 // returns the first sub-string of 'instr' delimited by
