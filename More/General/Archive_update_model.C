@@ -225,13 +225,14 @@ bool Pulsar::Archive::good_model (const polyco& test_model) const
 	 << " integrations" << endl;
 
   unsigned isub=0;
-  for (isub=0; isub < get_nsubint(); isub++) try {
-    if ( test_model.i_nearest (get_Integration(isub)->get_epoch()) == -1 )
+  for (isub=0; isub < get_nsubint(); isub++)
+    try {
+      if ( test_model.i_nearest (get_Integration(isub)->get_epoch()) == -1 )
+	break;
+    }
+    catch (...) {
       break;
-  }
-  catch (...) {
-    break;
-  }
+    }
   
   if (isub < get_nsubint()) {
     if (verbose)
