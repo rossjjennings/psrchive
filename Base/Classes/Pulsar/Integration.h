@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Integration.h,v $
-   $Revision: 1.23 $
-   $Date: 2002/07/23 06:36:01 $
+   $Revision: 1.24 $
+   $Date: 2002/07/27 00:23:39 $
    $Author: straten $ */
 
 /*
@@ -42,6 +42,12 @@ namespace Pulsar {
 
     //! Null constructor simply intializes defaults
     Integration () { init(); }
+
+    //! Copy constructor
+    Integration (const Integration& subint);
+
+    //! operator =
+    Integration& operator = (const Integration& subint);
 
     //! Destructor deletes data area
     virtual ~Integration ();

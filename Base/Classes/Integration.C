@@ -11,6 +11,18 @@ void Pulsar::Integration::init()
   // currently no variables to initialize
 }
 
+Pulsar::Integration::Integration (const Integration& subint)
+{
+  throw Error (Undefined, "Integration copy constructor",
+	       "sub-classes must define copy constructor");
+}
+
+Pulsar::Integration& Pulsar::Integration::operator= (const Integration& subint)
+{
+  copy (subint);
+  return *this;
+}
+
 Pulsar::Integration::~Integration ()
 {
   if (verbose)
@@ -42,6 +54,9 @@ Pulsar::Profile* Pulsar::Integration::new_Profile ()
 void Pulsar::Integration::copy (const Integration& subint,
 				int _npol, int _nchan)
 {
+  if (this == &subint)
+    return;
+
   if (_npol < 0)
     _npol = subint.get_npol();
 
