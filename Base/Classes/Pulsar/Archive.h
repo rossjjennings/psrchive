@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Archive.h,v $
-   $Revision: 1.15 $
-   $Date: 2002/04/17 02:09:29 $
+   $Revision: 1.16 $
+   $Date: 2002/04/17 14:23:42 $
    $Author: straten $ */
 
 /*! \mainpage 
@@ -57,9 +57,9 @@
   to manipulate a set of Pulsar::Profile objects.  In addition to the simple
   nested calls of the above functions, these include:
   <UL>
-  <LI> dedisperse - rotates all profiles to remove dispersion delays between bands </LI>
-  <LI> defaraday - V_rotates all profiles to remove faraday rotation between bands </LI>
-  <LI> fscrunch - integrates profiles from neighbouring bands </LI>
+  <LI> dedisperse - rotates all profiles to remove dispersion delays between chans </LI>
+  <LI> defaraday - V_rotates all profiles to remove faraday rotation between chans </LI>
+  <LI> fscrunch - integrates profiles from neighbouring chans </LI>
   <LI> pscrunch - integrates profiles from two polarizations into one total intensity </LI>
   <LI> invint - transforms from Stokes (I,Q,U,V) to the polarimetric invariant interval </LI>
   <LI> [Q|U|V]_boost - perform Lorentz boost on Stokes (I,Q,U,V) </LI>
@@ -123,7 +123,9 @@
 #include <vector>
 #include <string>
 
-#include "MJD.h"
+#include "polyco.h"
+#include "psrephem.h"
+
 #include "ArchiveTypes.h"
 
 namespace Tempo {
@@ -153,8 +155,26 @@ namespace Pulsar {
     //! A verbosity flag that can be set for debugging purposes
     static bool verbose;
 
-    Archive () { init(); }
-    virtual ~Archive () { resize(0); }
+    //! Flag that Archive::append should enforce chronological order
+    static bool append_chronological;
+
+    //! Amount by which integration intervals may overlap in Archive::append
+    static double append_max_overlap;
+
+    //! Flag opposite sense of sideband (upper/lower) ok in Archive::match
+    static bool match_opposite_sideband;
+
+    //! Amount by which centre frequencies may differ in Archive::match
+    static double match_max_frequency_difference;
+
+    //! Weigh integrations by their integration length, or duration
+    static bool weight_by_duration;
+
+    //! null constructor
+    Archive ();
+
+    //! destructor
+    virtual ~Archive ();
 
     //! Loads an Archive-derived child class from a file.
     static Archive* factory (const char* filename);
@@ -175,14 +195,14 @@ namespace Pulsar {
     //! Integrate pulse profiles in phase
     virtual void bscrunch (int nscrunch);
 
+    //! Integrate profiles in polarization
+    virtual void pscrunch();
+
     //! Integrate profiles in frequency
     virtual void fscrunch (int nscrunch=0, bool weighted_cfreq=true);
 
     //! Integrate profiles in time
-    virtual void tscrunch (int nscrunch=0, bool poly=true, bool wt=true);
-
-    //! Integrate profiles in polarization
-    virtual void pscrunch();
+    virtual void tscrunch (unsigned nscrunch=0);
 
     // 
     //! Appends the sub-integrations from 'a' to 'this'
@@ -191,7 +211,7 @@ namespace Pulsar {
       \param check_ephemeris
       \exception string
     */
-    virtual void append (const Archive* a, bool check_ephemeris = true);
+    virtual void append (const Archive* a);
 
     //
     //! Rotates the profiles so that pulse phase 0 is in nbin/2
@@ -208,7 +228,7 @@ namespace Pulsar {
     virtual void correct();
 
     //
-    //! Rotates the profiles to remove dispersion delays b/w bands
+    //! Rotates the profiles to remove dispersion delays b/w chans
     /*!
       \param dm the dispersion measure
       \param frequency
@@ -363,27 +383,18 @@ namespace Pulsar {
 
     //! Call fscrunch with the appropriate value
     /*!
-      \param new_nband
+      \param new_nchan
       \exception string
     */
-    void fscrunch_nband (int new_nband);
+    void fscrunch_nchan (int new_nchan);
 
     //! Return the MJD at the beginning of the first sub-integration
-    /*!
-      \exception string
-    */
     MJD  start_time() const;
 
     //! Return the MJD at the end of the last sub-integration
-    /*!
-      \exception string
-    */
     MJD  end_time () const;
 
-    //! Returns the total time integrated into all sub-integrations (in seconds)
-    /*!
-      \exception string
-    */
+    //! Returns the total time integrated into all Integrations (in seconds)
     double integration_length() const;
 
     // //////////////////////////////////////////////////////////////////
@@ -440,33 +451,20 @@ namespace Pulsar {
     //! Set the source name
     virtual void set_source (const string& source) = 0;
 
-    // get/set the number of bins, bands, subints, etc
+    // get/set the number of bins, chans, subints, etc
     // ///////////////////////////////////////////////
 
     //! Get the number of pulsar phase bins used
     virtual int get_nbin () const = 0;
-    //! Set the number of pulsar phase bins used
-    virtual void set_nbin (int numbins) = 0;
 
     //! Get the number of frequency channels used
     virtual int get_nchan () const = 0;
-    //! Set the number of frequency channels used
-    virtual void set_nchan (int numchan) = 0;
 
     //! Get the number of frequency channels used
     virtual int get_npol () const = 0;
-    //! Set the number of frequency channels used
-    virtual void set_npol (int numpol) = 0;
 
     //! Get the number of sub-integrations stored in the file
-    virtual int get_nsubint () const = 0;
-    //! Set the number of sub-integrations stored in the file
-    virtual void set_nsubint (int num_sub) = 0;
-
-    //! Get the channel bandwidth
-    virtual double get_chanbw () const = 0;
-    //! Set the channel bandwidth
-    virtual void set_chanbw (double chan_width) = 0;
+    virtual int get_nsubint () const { return subints.size(); }
 
     //! Get the overall bandwidth of the observation
     virtual double get_bandwidth () const = 0;
@@ -516,44 +514,70 @@ namespace Pulsar {
     virtual void set_parallactic_corrected (bool done = true) = 0;
 
 
+    //! Test if arch matches (enough for a pulsar - calibrator match)
+    virtual bool match (const Archive* arch, string& reason);
+
+    //! Test if arch is mixable (enough for append)
+    virtual bool mixable (const Archive* arch, string& reason);
+
+    //! Computes the weighted channel frequency of an interval of subints.
+    double weighted_frequency (int ichan, int start, int end) const;
+
  protected:
 
-    //
+    //! The pulsar ephemeris, as used by TEMPO
+    psrephem ephemeris;
+
+    //! The pulsar phase model, as created using TEMPO
+    polyco model;
+
     //! The data storage area
-    //
     vector<Integration*> subints;
 
-    // //////////////////////////////////////////////////////////////////
-    //
-    // virtual methods - though implemented by Archive, should generally
-    //                   require redefinition
-    //
-    // //////////////////////////////////////////////////////////////////
+    //! All new Integration instances are created through this method
+    virtual Integration* new_Integration ();
 
-    //
-    //! Deletes all allocated memory resources
-    //
-    void destroy ();
+    //! Resets the dimensions of the data area
+    virtual void resize (int nsubint, int npol=0, int nchan=0, int nbin=0);
 
-    //
+    //! Set the number of pulsar phase bins used
+    virtual void set_nbin (int numbins) = 0;
+
+    //! Set the number of frequency channels used
+    virtual void set_nchan (int numchan) = 0;
+
+    //! Set the number of frequency channels used
+    virtual void set_npol (int numpol) = 0;
+
+    //! Set the number of sub-integrations stored in the file
+    virtual void set_nsubint (int num_sub) { }
+
     //! Sets all values to default
-    //
     void init ();
 
-    //
-    //! Resets the dimensions of the data area
-    //
-    virtual void resize (int nsubint, int nband=0, int npol=0, int nbin=0);
+    //! Append clones of Integration objects to subints
+    void append (const vector<Integration*>& more_subints);
+  
+    //! Apply the current model to the Integration
+    void apply_model (const polyco& old, Integration* subint);
 
-    //
-    // users should call ppqq and iquv to interface these routines
-    //
-    virtual void iq_xy();
-    virtual void xy_iq();
+    //! Update the polyco model and correct the Integration set
+    void update_model (unsigned old_nsubint);
 
-    virtual void iv_rl();
-    virtual void rl_iv();
+    //! Creates polynomials to span the Integration set
+    void create_updated_model (bool clear_old);
 
+    //! Returns true if the model does not apply to new Integration set
+    bool need_create_model () const;
+
+  private:
+
+    //! This flag may be raised only by Archive::update_model.
+    /*!
+      As it is set only during run-time, this flag makes it known that
+      the current Integration set has been aligned to a current polyco.
+    */
+    bool model_updated;
 
   };
 
