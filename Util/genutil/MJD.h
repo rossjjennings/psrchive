@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/MJD.h,v $
-   $Revision: 1.17 $
-   $Date: 2002/06/21 07:03:13 $
-   $Author: cwest $ */
+   $Revision: 1.18 $
+   $Date: 2003/01/31 10:29:51 $
+   $Author: straten $ */
 
 #ifndef __MJD_H
 #define __MJD_H
@@ -31,7 +31,7 @@ class MJD {
   void settle();
 
  public:
-  static MJD zero;
+  static const MJD zero;
 
   static double   precision;
   static unsigned ostream_precision;

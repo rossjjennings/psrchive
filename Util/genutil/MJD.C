@@ -20,7 +20,7 @@ int MJD::verbose = 0;
 
 double   MJD::precision = 2.0e-12;
 unsigned MJD::ostream_precision = 15;
-MJD      MJD::zero;
+const MJD MJD::zero;
 
 const int seconds_in_day = 86400;
 
