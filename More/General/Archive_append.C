@@ -27,6 +27,11 @@ void Pulsar::Archive::append (const Archive* arch)
 
   if (arch->get_nsubint() == 0)
     return;
+  
+  if( get_nsubint() == 0 ){
+    operator=( *arch );
+    return;
+  }
 
   string reason;
   if (append_must_match) {
