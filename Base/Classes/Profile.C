@@ -249,12 +249,20 @@ void Pulsar::Profile::logarithm (double base, double threshold)
     cerr << "Pulsar::Profile::logarithm" << endl;
   
   float log_threshold = log(threshold)/log(base);
-  
+
+  // cerr << "threshold = " << log_threshold << endl;
+
+  unsigned under = 0;
+
   for (unsigned ibin=0; ibin<nbin; ++ibin)
     if (amps[ibin] > threshold)
       amps[ibin] = log(amps[ibin])/log(base);
-    else
+    else {
       amps[ibin] = log_threshold;
+      under ++;
+    }
+
+  // cerr << "under = " << under << endl;
 
 }
 
@@ -537,12 +545,12 @@ void Pulsar::Profile::stats (double* mean, double* variance, double* varmean,
   double tot = 0;
   double totsq = 0;
 
-  if (verbose)
-    cerr << "Pulsar::Profile::stats"
-      " start:" << istart << 
-      " stop:" << iend << endl;
-
   nbinify (istart, iend, nbin);
+
+  if (verbose)
+    cerr << "Pulsar::Profile::stats "
+      " start:" << istart <<
+      " stop:" << iend << endl;
 
   for (int ibin=istart; ibin < iend; ibin++) {
     double value = amps[ibin%nbin];
@@ -568,6 +576,9 @@ void Pulsar::Profile::stats (double* mean, double* variance, double* varmean,
     *variance = var_x;
   if (varmean)
     *varmean = var_x / double(counts);
+
+  if (verbose)
+    cerr << "Pulsar::Profile::stats return" << endl;
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -677,49 +688,6 @@ float Pulsar::Profile::find_max_phase (float duty_cycle) const
     cerr << "Pulsar::Profile::find_max_phase" << endl;
   
   return find_phase (nbin, amps, true, duty_cycle);
-}
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// Pulsar::Profile::snr
-//
-/*!
-  Using Profile::find_min_phase and Profile::find_peak_edges, this
-  function finds the integrated power in the pulse profile and divides
-  this by the noise in the baseline.
-*/
-float Pulsar::Profile::snr() const
-{
-  if (verbose)
-    cerr << "Pulsar::Profile::snr" << endl;
-  
-  // find the mean and the r.m.s. of the baseline
-  double min_avg, min_var;
-  stats (find_min_phase(), &min_avg, &min_var);
-  double min_rms = sqrt (min_var);
-
-  if (verbose)
-    cerr << "Pulsar::Profile::snr rms=" << min_rms << endl;
-
-  if (min_rms == 0.0)
-    return 0;
-
-  // find the total power under the pulse
-  int rise = 0, fall = 0;
-  find_peak_edges (rise, fall);
-
-  double power = sum (rise, fall);
-
-  // subtract the total power due to the baseline
-  power -= min_avg * double (fall - rise);
-
-  //double flux = power;
-  //double width = (double) (fall - rise);
-
-  // divide by the sqrt of the number of bins
-  power /= sqrt (double(fall-rise));
-
-  return power/min_rms;
 }
 
 
