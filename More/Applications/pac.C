@@ -103,7 +103,7 @@ int main (int argc, char *argv[]) {
       Pulsar::Archive::set_verbosity(1);
       break;
     case 'i':
-      cout << "$Id: pac.C,v 1.32 2003/12/02 04:03:48 ahotan Exp $" << endl;
+      cout << "$Id: pac.C,v 1.33 2003/12/02 14:29:06 straten Exp $" << endl;
       return 0;
     case 'p':
       cals_are_here = optarg;
@@ -261,7 +261,9 @@ int main (int argc, char *argv[]) {
 	  //else
 	  //  temp = cals_are_here + "database.txt";
 	  
-	  cout << "Writing database summary file" << endl;
+	  cout << "Writing database summary file to " 
+               << dbase -> get_filename ("database.txt") << endl;
+
 	  dbase -> unload("database.txt");
 	  
 	  if (summary_only)
