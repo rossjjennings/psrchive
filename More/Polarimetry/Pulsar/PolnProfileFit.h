@@ -1,12 +1,14 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PolnProfileFit.h,v $
-   $Revision: 1.6 $
-   $Date: 2004/04/20 13:07:36 $
-   $Author: straten $ */
+   $Revision: 1.7 $
+   $Date: 2004/04/21 01:41:03 $
+   $Author: ahotan $ */
 
 #ifndef __Pulsar_PolnProfileFit_h
 #define __Pulsar_PolnProfileFit_h
+
+#include <memory>
 
 #include "Calibration/Axis.h"
 #include "Estimate.h"
