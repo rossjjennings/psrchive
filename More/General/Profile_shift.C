@@ -23,15 +23,15 @@
 
 #define WINDOW 0.0125
 
-Functor<double(const Pulsar::Profile&, float& ephase)>
-Pulsar::Profile::shift_functor (&PhaseGradShift);
-
 void wrap (int& binval, int nbin) {
   if (binval < 0)
     binval += nbin;
   else if (binval > nbin-1)
     binval -= nbin;
 }
+
+//Functor<double(const Pulsar::Profile&, float&)>
+//Pulsar::Profile::shift_functor (&Pulsar::Profile::PhaseGradShift);
 
 double Pulsar::Profile::GaussianShift (const Profile& std, float& ephase) const
 {
