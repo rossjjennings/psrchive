@@ -9,9 +9,12 @@ void Pulsar::Integration::transform (const Jones<float>& response)
     throw Error (InvalidState, "Pulsar::Integration::transform",
 		 "incomplete polarization information");
 
+  Signal::Basis basis = get_basis();
+  Signal::State state = get_state();
+
   for (unsigned ichan=0; ichan < get_nchan(); ichan++) try {
 
-    PolnProfile poln (get_basis(), get_state(), 
+    PolnProfile poln (basis, state, 
 		      profiles[0][ichan], profiles[1][ichan],
 		      profiles[2][ichan], profiles[3][ichan]);
 
@@ -39,9 +42,12 @@ void Pulsar::Integration::transform (const vector< Jones<float> >& response)
   if (verbose)
     cerr << "Pulsar::Integration::transform vector<Jones<float>>" << endl;
 
+  Signal::Basis basis = get_basis();
+  Signal::State state = get_state();
+
   for (unsigned ichan=0; ichan < get_nchan(); ichan++) try {
 
-    PolnProfile poln (get_basis(), get_state(), 
+    PolnProfile poln (basis, state, 
 		      profiles[0][ichan], profiles[1][ichan],
 		      profiles[2][ichan], profiles[3][ichan]);
 
