@@ -13,10 +13,10 @@ extern "C" {
   void F772C(fccf) (float *, float *, float *);
 }
 
-int model_profile (int npts, int narrays, float** prf, float** std,
-		   double* scale, double* sigma_scale, 
-		   double* shift, double* sigma_shift,
-		   double* chisq, int verbose)
+int Pulsar::model_profile (int npts, int narrays, float** prf, float** std,
+		           double* scale, double* sigma_scale, 
+		           double* shift, double* sigma_shift,
+		           double* chisq, int verbose)
 {
   float ** fft_std = new float*[narrays];
   float ** fft_prf = new float*[narrays];
@@ -182,11 +182,11 @@ int model_profile (int npts, int narrays, float** prf, float** std,
   return(0);
 }
 
-double zbrent(float low_tau, float high_tau,
-	      float low_deriv_chisq, float high_deriv_chisq, 
-	      float edtau, int narrays, 
-	      float ** xcorr_amps, float ** xcorr_phases, int nsum)
-{  
+double Pulsar::zbrent(float low_tau, float high_tau,
+	              float low_deriv_chisq, float high_deriv_chisq, 
+	              float edtau, int narrays, 
+	              float ** xcorr_amps, float ** xcorr_phases, int nsum)
+{
   int i_max = 100;
   double eps = .00000006;
   double a = low_tau;
