@@ -77,16 +77,18 @@ void Pulsar::TimerArchive::copy (const Archive& archive,
   if (this == &archive)
     return;
 
-  Archive::copy (archive, subints);
-
   const TimerArchive* tarchive = dynamic_cast<const TimerArchive*>(&archive);
   if (!tarchive)
     return;
 
+  hdr = tarchive->hdr;
+
+  Archive::copy (archive, subints);
+
+
   if (verbose)
     cerr << "TimerArchive::copy another TimerArchive" << endl;
 
-  hdr = tarchive->hdr;
   valid = tarchive->valid;
 }
 
