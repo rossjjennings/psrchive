@@ -153,16 +153,23 @@ int main (int argc, char *argv[]) {
 	cout << "Flux calibration complete" << endl;
       }
       
-      if (do_polncal) {      
+      if (do_polncal) {
+
+        if (verbose)
+          cerr << "pac: Finding PolnCalibrator" << endl;
+
 	Pulsar::PolnCalibrator* pcal_engine  = 0;
 	pcal_engine = dbase->generatePolnCalibrator(arch);
 	
 	if (display_params)	
 	  pcal_engine->store_parameters = true;
-	
+
+        if (verbose)
+          cerr << "pac: Calibrating Archive polarisation" << endl;
+
 	pcal_engine->calibrate(arch);
 	
-	cout << "Polarisation calibration complete" << endl;
+	cout << "pac: Archive polarisation calibrated" << endl;
 	
 	if (display_params) {
 	  //pcal_engine->model[0].display();
@@ -172,6 +179,10 @@ int main (int argc, char *argv[]) {
       int index = archives[i].find_first_of(".", 0);
       string newname = archives[i].substr(0, index);
       newname += ".calib";
+
+      if (verbose)
+        cerr << "pac: Calibrated Archive name '" << newname << "'" << endl;
+
       arch->unload(newname);
       
       cout << "New file " << newname << " unloaded" << endl;
