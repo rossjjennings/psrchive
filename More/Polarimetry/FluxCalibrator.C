@@ -105,7 +105,7 @@ void Pulsar::FluxCalibrator::add_observation (const Archive* archive)
 
     // Take the ratio of the total intensity
     Estimate<double> ratio = cal_hi[0][ichan]/cal_lo[0][ichan] - unity ;
-      
+    cerr << ratio << endl;      
     if (arch->get_type() == Signal::FluxCalOn)
       mean_ratio_on[ichan] += ratio;
     else if (arch->get_type() == Signal::FluxCalOff)
@@ -179,6 +179,10 @@ void Pulsar::FluxCalibrator::calculate (vector<Estimate<double> >& on,
   Pulsar::FluxCalibrator::source src = get_RefSrc(calibrator->get_source());
   
   switch (src) {
+  case Pulsar::FluxCalibrator::OFOS:
+    source_mJy = ofos_flux_mJy (calibrator->get_centre_frequency());
+    cout << "Pulsar::FluxCalibrator calibrating against the flux of 0407-658" << endl;
+      break;
   case Pulsar::FluxCalibrator::TCTFT:
     source_mJy = three_C_353_flux_mJy (calibrator->get_centre_frequency());
     cout << "Pulsar::FluxCalibrator calibrating against the flux of 3C353" << endl;
@@ -245,6 +249,12 @@ void Pulsar::FluxCalibrator::calibrate (Integration* subint)
 unsigned Pulsar::FluxCalibrator::get_nchan () const
 {
   return calibrator->get_nchan();
+}
+
+//! Given the observing frequency in MHz, returns the flux of 0407-658 in mJy
+double Pulsar::FluxCalibrator::ofos_flux_mJy (double cfreq)
+{
+  return pow (cfreq/1400.0, -1.189) * 14.4 * 1000;
 }
 
 //! Given the observing frequency in MHz, returns the flux of Virgo in mJy
@@ -334,6 +344,8 @@ Pulsar::Calibrator::Type Pulsar::FluxCalibrator::get_type () const
 
 Pulsar::FluxCalibrator::source Pulsar::FluxCalibrator::get_RefSrc(string name)
 {
+  if (name.find("0407-658",0) != string::npos)
+    return Pulsar::FluxCalibrator::OFOS;
   if (name.find("3C353",0) != string::npos)
     return Pulsar::FluxCalibrator::TCTFT;
   else if (name.find("HYDRA",0) != string::npos || name.find("Hydra",0) != string::npos ||

@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/FluxCalibrator.h,v $
-   $Revision: 1.10 $
-   $Date: 2003/10/30 11:29:45 $
+   $Revision: 1.11 $
+   $Date: 2003/11/01 06:40:10 $
    $Author: ahotan $ */
 
 #ifndef __Pulsar_FluxCalibrator_H
@@ -28,6 +28,8 @@ namespace Pulsar {
       Hydra,
       //! 3C353
       TCTFT,
+      //! 0407-658
+      OFOS,
       //! Undetermined
       Unknown
     };
@@ -46,6 +48,9 @@ namespace Pulsar {
 
     //! Return the FluxCalibrator information
     Info* get_Info () const;
+    
+    //! Return the flux of 0407-658 in mJy
+    double ofos_flux_mJy (double frequency_MHz);
     
     //! Return the flux of Virgo in mJy
     double virgo_flux_mJy (double frequency_MHz);
