@@ -75,12 +75,26 @@ void Pulsar::Integration::remove_baseline (float phase)
 //   noise = profile minus pulse
 //   find mean and var_mean of noise
 // 
-void 
-Pulsar::Integration::baseline_levels (vector<vector<Estimate<double> > >& mean)
-  const
+void Pulsar::Integration::baseline_levels
+(vector<vector<Estimate<double> > >& mean) const
+{
+  baseline_stats (&mean, 0);
+}
+
+//! Return the noise power in every profile baseline
+void Pulsar::Integration::baseline_power
+(vector< vector<double> >& variance) const
+{
+  baseline_stats (0, &variance);
+}
+
+//! Return the statistics of every profile baseline
+void
+Pulsar::Integration::baseline_stats (vector<vector<Estimate<double> > >* mean,
+				     vector< vector<double> >* variance) const
 {
   if (Pulsar::Integration::verbose)
-    cerr << "Pulsar::Integration::baseline_levels entered" << endl;
+    cerr << "Pulsar::Integration::baseline_stats entered" << endl;
 
   try {
 
@@ -92,19 +106,35 @@ Pulsar::Integration::baseline_levels (vector<vector<Estimate<double> > >& mean)
     unsigned npol = get_npol();
     unsigned nchan = get_nchan();
 
-    mean.resize (npol);
-  
+    if (mean)
+      mean->resize (npol);
+    if (variance)
+      variance->resize (npol);
+
+    double* meanval_ptr = 0;
+    double* meanvar_ptr = 0;
+    double* variance_ptr = 0;
+
     for (unsigned ipol=0; ipol<npol; ++ipol) {
 
-      mean[ipol].resize (nchan);
+      if (mean)
+	(*mean)[ipol].resize (nchan);
+      if (variance)
+	(*variance)[ipol].resize (nchan);
 
       for (unsigned ichan=0; ichan<nchan; ++ichan) {
 
 	float chanphase = phase + phases[ichan];
-	
-	profiles[ipol][ichan]->stats (chanphase,
-				      &(mean[ipol][ichan].val), 0,
-				      &(mean[ipol][ichan].var));
+
+	if (mean) {
+	  meanval_ptr = &((*mean)[ipol][ichan].val);
+	  meanvar_ptr = &((*mean)[ipol][ichan].var);
+	}
+	if (variance)
+	  variance_ptr = &((*variance)[ipol][ichan]);
+
+	profiles[ipol][ichan]->stats (chanphase, meanval_ptr,
+				      variance_ptr, meanvar_ptr);
 
       }
 

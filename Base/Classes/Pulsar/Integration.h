@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Integration.h,v $
-   $Revision: 1.47 $
-   $Date: 2003/09/03 09:16:45 $
+   $Revision: 1.48 $
+   $Date: 2003/09/03 13:51:22 $
    $Author: straten $ */
 
 /*
@@ -82,7 +82,14 @@ namespace Pulsar {
     float find_min_phase () const;
 
     //! Return the mean and variance of the mean in every profile baseline
-    void baseline_levels (vector< vector< Estimate<double> > >& levels) const;
+    void baseline_levels (vector< vector< Estimate<double> > >& mean) const;
+
+    //! Return the noise power in every profile baseline
+    void baseline_power (vector< vector<double> >& variance) const;
+
+    //! Return the statistics of every profile baseline
+    void baseline_stats (vector< vector< Estimate<double> > >* mean,
+			 vector< vector<double> >* variance) const;
 
     //! Returns the mean hi/lo and variance of the mean hi/lo of every profile
     virtual void cal_levels (vector< vector< Estimate<double> > >& hi,
