@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/Receiver.h,v $
-   $Revision: 1.5 $
-   $Date: 2004/07/03 07:38:34 $
+   $Revision: 1.6 $
+   $Date: 2004/07/12 07:34:18 $
    $Author: straten $ */
 
 #ifndef __ReceiverExtension_h
@@ -10,6 +10,7 @@
 
 #include "Pulsar/Archive.h"
 #include "Jones.h"
+#include "Stokes.h"
 #include "Angle.h"
 
 namespace Pulsar {
@@ -109,6 +110,9 @@ namespace Pulsar {
 
     //! Return the feed correction matrix
     Jones<double> get_correction () const;
+
+    //! Return the Stokes parameters of the reference source (e.g. noise diode)
+    Stokes<double> get_reference_source () const;
 
   protected:
 

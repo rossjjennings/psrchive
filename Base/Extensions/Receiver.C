@@ -90,7 +90,7 @@ Jones<double> Pulsar::Receiver::get_correction () const
 
   if (get_Y_offset().getDegrees() == 180.0) {
 
-    if (Archive::verbose)
+    if (Archive::verbose == 3)
       cerr << "Pulsar::Receiver::get_correction 180 phase shift in Y" << endl;
     
     // rotate the basis by 180 degrees about the Stokes Q axis
@@ -110,7 +110,7 @@ Jones<double> Pulsar::Receiver::get_correction () const
   
   if (get_X_offset() != 0) {
     
-    if (Archive::verbose)
+    if (Archive::verbose == 3)
       cerr << "Pulsar::Receiver::get_correction X axis offset" << endl;
 
     // rotate the basis about the Stokes V axis
@@ -123,4 +123,32 @@ Jones<double> Pulsar::Receiver::get_correction () const
 
   return xform;
 
+}
+
+Stokes<double> Pulsar::Receiver::get_reference_source () const
+{
+  Jones<double> xform = get_correction ();
+
+  if (get_calibrator_offset() != 0) {
+
+    if (Archive::verbose == 3)
+      cerr << "Pulsar::Receiver::get_reference_source calibrator offset="
+	   << get_calibrator_offset() << endl;
+
+    // rotate the basis about the Stokes V axis
+    Calibration::Rotation rotation ( Pauli::basis.get_basis_vector(2) );
+    rotation.set_phi ( get_calibrator_offset().getRadians() );
+
+    xform *= rotation.evaluate();
+
+  }
+
+  Stokes<double> noise_diode (1,0,1,0);
+  Stokes<double> output_diode = transform (noise_diode, xform);
+
+  if (Archive::verbose == 3)
+    cerr << "Pulsar::Receiver::get_reference_source noise diode="
+	 << output_diode << endl;
+
+  return output_diode;
 }
