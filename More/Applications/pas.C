@@ -21,7 +21,7 @@
 #include "dirutil.h"
 #include "string_utils.h"
 
-void plot_it(Reference::To<Pulsar::Archive>, Reference::To<Pulsar::Archive>, int, int, int, int, char *, char *, bool);
+void plot_it(Reference::To<Pulsar::Archive>, Reference::To<Pulsar::Archive>, int, int, int, int, char *, char *, bool, float, float);
 void coef (float *, float *, int, int, double *, int *, double *, bool);
 void cross_correlation(Reference::To<Pulsar::Profile>, Reference::To<Pulsar::Profile>, double *, int *, double *, bool);
 void smooth (Reference::To<Pulsar::Profile>, bool);
@@ -41,7 +41,7 @@ void usage ()
     " -V        Very verbose output \n\n"
 
     "This program works via keyboard interaction. To set baseline zero\n"
-    "you type 'z' to set the start point, move the cursor and type 'z'\n"
+    "you type '0' to set the start point, move the cursor and type '0'\n"
     "again to accept the region\n\n"
     "See http://astronomy.swin.edu.au/pulsar/software/manuals/pas.html"
        << endl;
@@ -55,7 +55,7 @@ int main (int argc, char** argv)
   char line[100];
   char plotdev[5];
   char opts;
-  float curs_x, curs_y, x, y, meantmp =0;
+  float curs_x, curs_y, x, y, meantmp =0, curs_x0;
   float stdphase=0;
   float ephase, snrfft, esnrfft;    
   unsigned int i;
@@ -70,6 +70,7 @@ int main (int argc, char** argv)
   int ci_std = 5;  //grey
   int ci_tex = 1;  //white
   int ci_dis = 15; //dark 
+  float xmin=0.0, xmax=1.0;
   const char* args = "hir:vV";
 
   while ((c = getopt(argc, argv, args)) != -1) {
@@ -80,7 +81,7 @@ int main (int argc, char** argv)
       return 0;
 
     case 'i':
-      cout << "$Id: pas.C,v 1.10 2004/03/23 06:48:36 nwang Exp $" << endl;
+      cout << "$Id: pas.C,v 1.11 2004/06/19 13:25:59 nwang Exp $" << endl;
       return 0;
 
     case 'r':
@@ -176,7 +177,7 @@ int main (int argc, char** argv)
   cout << "Input plot device : ";
   cin >> plotdev;
   //plot profiles
-  plot_it(refarch, stdarch, ci_ref, ci_std, ci_tex, ci_dis, line, plotdev, refflag);
+  plot_it(refarch, stdarch, ci_ref, ci_std, ci_tex, ci_dis, line, plotdev, refflag, xmin, xmax);
 
   opts = ' ';
   if (cpgcurs(&curs_x, &curs_y, &opts) == 1) {
@@ -263,12 +264,12 @@ int main (int argc, char** argv)
 	  cout << "Save: new standard profile " << the_new << " written to disk" << endl;
 	  break;	 
 
-	case 'z':   //Zero base line
+	case '0':   //Zero base line
 	  cout << "Zero baseline: start point set at:" << curs_x << endl;
 	  cout << "Zero baseline: move cursor and set the range" <<endl;
 	  opts = ' ';
 	  cpgband(2, 0, curs_x, curs_y, &x, &y, &opts);
-	  if (opts == 'z') {
+	  if (opts == '0') {
 	    cout << "Zero baseline: end point set at:" << x << endl;
 	    if(verbose) cout << "Zero baseline: zero the profile base line" << endl;
 	    float * tmpdata=stdarch->get_Profile(0, 0, 0)->get_amps();
@@ -303,7 +304,24 @@ int main (int argc, char** argv)
 	  }
 	  else cout << "Zero baseline: range not set" << endl;
 	  break;
+
+	case 'z':   //Zero base line
+	  curs_x0=curs_x;
+	  if(curs_x0<0.0)    curs_x0=0.0;
+	  if(curs_x0>1.0)    curs_x0=1.0;
+	  xmin=curs_x0-0.9*(curs_x0-xmin);
+	  if(xmin<0.0)   xmin=0.0;
+	  cout << "curs_x=" <<curs_x0 << " xmin=" <<xmin <<endl;
+	  xmax=curs_x0+0.9*(xmax-curs_x0);
+	  if(xmax>1.0)   xmax=1.0;
+	  cout << "curs_x=" <<curs_x0 << " xmax=" <<xmax <<endl;
+	  break;
 	  
+	case 'u':
+	  xmin=0.0;
+	  xmax=1.0;
+	  break;
+
 	default:
 	  cout << "Unrecognised option." << endl;
 	  break;
@@ -314,7 +332,7 @@ int main (int argc, char** argv)
 	  *refcorr=*refarch;
 	  cross(refcorr, stdcorr, verbose, verbose, line);
 	}
-	plot_it(refarch, stdarch, ci_ref, ci_std, ci_tex, ci_dis, line, plotdev, refflag);
+	plot_it(refarch, stdarch, ci_ref, ci_std, ci_tex, ci_dis, line, plotdev, refflag, xmin, xmax);
 	cout << "Waiting for option ...." << endl;
 	cpgcurs(&curs_x, &curs_y, &opts);
       }
@@ -332,7 +350,7 @@ int main (int argc, char** argv)
 }
 
 
-void plot_it(Reference::To<Pulsar::Archive> refarch, Reference::To<Pulsar::Archive> stdarch, int ci_ref, int ci_std, int ci_tex, int ci_dis, char line[100], char plotdev[5], bool refflag) {
+void plot_it(Reference::To<Pulsar::Archive> refarch, Reference::To<Pulsar::Archive> stdarch, int ci_ref, int ci_std, int ci_tex, int ci_dis, char line[100], char plotdev[5], bool refflag, float xmin, float xmax) {
   float x, y;
   char str[50];
   unsigned i;
@@ -343,7 +361,7 @@ void plot_it(Reference::To<Pulsar::Archive> refarch, Reference::To<Pulsar::Archi
   cpgswin (0, 100, 0, 100);
   cpgsch (0.8);
 
-  int step=11;
+  int step=10;
   for(i=0; i<10; i++) {
     cpgsci (ci_tex);
     x=5;
@@ -364,7 +382,9 @@ void plot_it(Reference::To<Pulsar::Archive> refarch, Reference::To<Pulsar::Archi
     else if(i==5)
       cpgtext (x, y, "q:  quit the program");
     else if(i==6)
-      cpgtext (x, y, "z:  set the range and zero the base line"); 
+      cpgtext (x, y, "0:  set the range and zero the base line"); 
+    else if(i==7)
+      cpgtext (x, y, "z:  zoom in"); 
     else    break;
   }
   if(refflag==true) {
@@ -394,6 +414,8 @@ void plot_it(Reference::To<Pulsar::Archive> refarch, Reference::To<Pulsar::Archi
       cpgtext (x, y, "g:  fine rotate 0.05 bin to the right");
     else if(i==6)
       cpgtext (x, y, "s:  save the standard profile");
+    else if(i==7)
+      cpgtext (x, y, "u:  unzoom");
     else  break;
   }
   cpgsci (ci_std);
@@ -409,12 +431,17 @@ void plot_it(Reference::To<Pulsar::Archive> refarch, Reference::To<Pulsar::Archi
     cpgtext (10, 10, line);
   }
 
-  //profiles window
+  //bottom scale
   cpgsvp (0.1, 0.9, 0.03, 0.05);
-  cpgswin (0, 1, 0, 1);
+  cpgswin (xmin, xmax, 0, 1);
   cpgsci(ci_tex);
-  cpgbox("BNTS", 0.1, 5, "", 0.0, 0);
+  cout << "xmax-xmin=" <<xmax-xmin <<endl;
+  if(xmax-xmin>0.2)
+    cpgbox("BNTS", 0.1, 5, "", 0.0, 0);
+  else
+    cpgbox("BNTS", 0.05, 5, "", 0.0, 0);
 
+  //profile window
   cpgsvp (0.1, 0.9, 0.05, 0.68);
   cpgswin (0, 1, 0, 1);
   
@@ -429,10 +456,10 @@ void plot_it(Reference::To<Pulsar::Archive> refarch, Reference::To<Pulsar::Archi
   cpgsls (1);
   if(refflag == true) {
     cpgsci (ci_ref);
-    refarch->get_Profile(0, 0, 0)->Pulsar::Profile::display (0, 0, 1, 0, 1, 1.0);
+    refarch->get_Profile(0, 0, 0)->Pulsar::Profile::display (0, xmin, xmax, 0, 1, 1.0);
   }
   cpgsci (ci_std);
-  stdarch->get_Profile(0, 0, 0)->Pulsar::Profile::display (0, 0, 1, 0, 1, 1.0);
+  stdarch->get_Profile(0, 0, 0)->Pulsar::Profile::display (0, xmin, xmax, 0, 1, 1.0);
 }
 
 
