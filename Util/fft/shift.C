@@ -16,7 +16,7 @@ int fft_shift(int npts, float * arr, double shift){
   double shiftrad;
 
   if(npts<=1){
-    fprintf(stderr, "fft_shift error - cannot fourier transform an array of %d points\n");
+    fprintf(stderr, "fft_shift error - cannot fourier transform an array of %d points\n", npts);
     return(-1);
   }  
 
