@@ -99,6 +99,7 @@ AC_CONFIG_FILES([utils/units/Makefile
 		astro/psrmath/Makefile
 		astro/tempo++/Makefile
 		astro/Makefile
+		psrchive/epn/Makefile
 		psrchive/timer/Makefile
 		psrchive/psrfits/Makefile
 		psrchive/Extension/Makefile
