@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ReceptionCalibrator.h,v $
-   $Revision: 1.54 $
-   $Date: 2004/01/01 12:09:05 $
+   $Revision: 1.55 $
+   $Date: 2004/01/02 18:11:05 $
    $Author: straten $ */
 
 #ifndef __Pulsar_ReceptionCalibrator_H
@@ -185,7 +185,7 @@ namespace Pulsar {
 
     bool normalize_by_invariant;
 
-   //! Add the specified pulse phase bin to the set of state constraints
+    //! Add the specified pulse phase bin to the set of state constraints
     void add_state (unsigned pulse_phase_bin);
     
     //! Get the number of pulsar phase bin input polarization states
@@ -207,7 +207,7 @@ namespace Pulsar {
     void add_calibrator (const Archive* data);
     
     //! Add the ArtificialCalibrator observation to the set of constraints
-    void add_Calibrator (const ArtificialCalibrator* polncal);
+    void add_calibrator (const ArtificialCalibrator* polncal);
     
     //! Solve equation for each frequency
     void solve (int only_ichan = -1);
