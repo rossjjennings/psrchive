@@ -1,5 +1,5 @@
 //
-// $Id: pav.C,v 1.70 2004/03/09 08:23:16 ahotan Exp $
+// $Id: pav.C,v 1.71 2004/03/28 02:47:19 sord Exp $
 //
 // The Pulsar Archive Viewer
 //
@@ -32,6 +32,8 @@
 #include "string_utils.h"
 #include "genutil.h"
 
+using namespace std;
+
 void usage ()
 {
   cout << "A program to look at Pulsar::Archive(s) in various ways\n"
@@ -55,7 +57,7 @@ void usage ()
     " --convert_binphsasc    nsub\n"
     " --convert_binlngperi   nsub\n"
     " --convert_binlngasc    nsub\n"
-    "\n"
+      "\n"
     "Selection & configuration options:\n"
     " -K dev    Manually specify a plot device\n"
     " -c map    Select a colour map for PGIMAG style plots\n"
@@ -91,6 +93,9 @@ void usage ()
     " -L        Find the width of the pulse profile\n"
     " -j        Display a simple dynamic spectrum image\n"
     " -u        Display morphological difference (requires a standard)\n"
+    "\n"
+    "Non standard plotting options: \n"
+    " --degree  Plot the degree of polarisation profile\n"
     "\n"
     "Archive::Extension options (file format specific):\n"
     " -o        Plot the original bandpass\n"
@@ -142,6 +147,7 @@ int main (int argc, char** argv)
   bool baseline_spectrum = false;
   bool dedisperse = false;
   bool manchester = false;
+  bool degree = false;
   bool mercator = false;
   bool greyfreq = false;
   bool stopwatch = false;
@@ -190,6 +196,7 @@ int main (int argc, char** argv)
       {"convert_binphsasc", 1, 0, 201},
       {"convert_binlngperi", 1, 0, 202},
       {"convert_binlngasc", 1, 0, 203},
+      {"degree",0,0,204},
       {0, 0, 0, 0}
     };
     
@@ -268,7 +275,7 @@ int main (int argc, char** argv)
       plotter.set_subint( atoi (optarg) );
       break;
     case 'i':
-      cout << "$Id: pav.C,v 1.70 2004/03/09 08:23:16 ahotan Exp $" << endl;
+      cout << "$Id: pav.C,v 1.71 2004/03/28 02:47:19 sord Exp $" << endl;
       return 0;
 
     case 'j':
@@ -506,7 +513,11 @@ int main (int argc, char** argv)
       cblao = true;
       break;
     }
-
+    case 204: {
+      degree = true;
+      cout << "Plotting degree of polarisation" << endl;
+      break;
+    }      
     default:
       return -1; 
     }
@@ -770,7 +781,11 @@ int main (int argc, char** argv)
       cpg_next();
       plotter.Manchester (archive);
     }
-
+    if (degree) {
+      cpg_next();
+      plotter.Manchester_degree (archive);
+      // plotter.Manchester(archive);
+    }
     if (mercator) {
       cpg_next();
       plotter.spherical (archive);
