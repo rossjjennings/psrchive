@@ -56,7 +56,7 @@ void Pulsar::BasebandArchive::init ()
 //
 Pulsar::BasebandArchive::BasebandArchive ()
 {
-  if (verbose)
+  if (verbose == 3)
     cerr << "BasebandArchive default construct" << endl;
 
  init ();
@@ -67,7 +67,7 @@ Pulsar::BasebandArchive::BasebandArchive ()
 //
 Pulsar::BasebandArchive::BasebandArchive (const BasebandArchive& archive)
 {
-  if (verbose)
+  if (verbose == 3)
     cerr << "BasebandArchive copy construct" << endl;
 
   init ();
@@ -79,7 +79,7 @@ Pulsar::BasebandArchive::BasebandArchive (const BasebandArchive& archive)
 //
 Pulsar::BasebandArchive::~BasebandArchive ()
 {
-  if (verbose)
+  if (verbose == 3)
     cerr << "BasebandArchive destructor" << endl;
 }
 
@@ -89,7 +89,7 @@ Pulsar::BasebandArchive::~BasebandArchive ()
 const Pulsar::BasebandArchive&
 Pulsar::BasebandArchive::operator = (const BasebandArchive& arch)
 {
-  if (verbose)
+  if (verbose == 3)
     cerr << "BasebandArchive assignment operator" << endl;
 
   Archive::copy (arch); // results in call to BasebandArchive::copy
@@ -101,7 +101,7 @@ Pulsar::BasebandArchive::operator = (const BasebandArchive& arch)
 //
 Pulsar::BasebandArchive::BasebandArchive (const Archive& archive)
 {
-  if (verbose)
+  if (verbose == 3)
     cerr << "BasebandArchive base copy construct" << endl;
 
   init ();
@@ -114,7 +114,7 @@ Pulsar::BasebandArchive::BasebandArchive (const Archive& archive)
 Pulsar::BasebandArchive::BasebandArchive (const Archive& arch,
 					  const vector<unsigned>& subints)
 {
-  if (verbose)
+  if (verbose == 3)
     cerr << "BasebandArchive base extraction construct" << endl;
   
   init ();
@@ -127,7 +127,7 @@ Pulsar::BasebandArchive::BasebandArchive (const Archive& arch,
 void Pulsar::BasebandArchive::copy (const Archive& archive,
 				    const vector<unsigned>& subints)
 {
-  if (verbose)
+  if (verbose == 3)
     cerr << "BasebandArchive::copy" << endl;
 
   if (this == &archive)
@@ -140,7 +140,7 @@ void Pulsar::BasebandArchive::copy (const Archive& archive,
   if (!barchive)
     return;
 
-  if (verbose)
+  if (verbose == 3)
     cerr << "BasebandArchive::copy another BasebandArchive" << endl;
 
   bhdr = barchive->bhdr;
@@ -153,7 +153,7 @@ void Pulsar::BasebandArchive::copy (const Archive& archive,
 //
 Pulsar::BasebandArchive* Pulsar::BasebandArchive::clone () const
 {
-  if (verbose)
+  if (verbose == 3)
     cerr << "BasebandArchive::clone" << endl;
   return new BasebandArchive (*this);
 }
@@ -164,7 +164,7 @@ Pulsar::BasebandArchive* Pulsar::BasebandArchive::clone () const
 Pulsar::BasebandArchive* 
 Pulsar::BasebandArchive::extract (const vector<unsigned>& subints) const
 {
-  if (verbose)
+  if (verbose == 3)
     cerr << "BasebandArchive::extract" << endl;
   return new BasebandArchive (*this, subints);
 }
@@ -278,7 +278,7 @@ void Pulsar::BasebandArchive::set_header ()
 {
   ::init (bhdr);
 
-  if (verbose)
+  if (verbose == 3)
     cerr << "Pulsar::BasebandArchive::set_header" << endl;
 
   const dspReduction* reduction = get<dspReduction>();
@@ -304,6 +304,14 @@ void Pulsar::BasebandArchive::set_header ()
     bhdr.f_resolution = reduction->get_freq_res ();
     bhdr.t_resolution = reduction->get_time_res ();
 
+    string software = reduction->get_software ();
+    if( software.length()+1 > SOFTWARE_STRLEN )
+      throw Error (InvalidParam, "Pulsar::BasebandArchive::set_header",
+		   "length of '%s'=%d > SOFTWARE_STRLEN=%d",
+		   software.c_str(), software.length()+1, SOFTWARE_STRLEN);
+    
+    strcpy( hdr.software, software.c_str() );
+
   }
 
   const TwoBitStats* twobit = get<TwoBitStats>();
@@ -321,7 +329,7 @@ void Pulsar::BasebandArchive::set_header ()
     bhdr.pband_resolution = passband->get_nchan() * passband->get_nband();
     bhdr.pband_channels = passband->get_npol ();
 
-    if (verbose) cerr << "Pulsar::BasebandArchive::set_header Passband"
+    if (verbose == 3) cerr << "Pulsar::BasebandArchive::set_header Passband"
 		   " nfreq=" << bhdr.pband_resolution <<
 		   " nchan=" << bhdr.pband_channels << endl;
 
@@ -342,10 +350,10 @@ void Pulsar::BasebandArchive::set_header ()
   baseband_header struct */
 void Pulsar::BasebandArchive::set_reduction ()
 {
-  if (verbose)
+  if (verbose == 3)
     cerr << "Pulsar::BasebandArchive::set_reduction" << endl;
 
-  dspReduction* reduction = get<dspReduction>();
+  dspReduction* reduction = getadd<dspReduction>();
 
   if (!reduction)
     return;
@@ -366,6 +374,9 @@ void Pulsar::BasebandArchive::set_reduction ()
 
   reduction->set_freq_res ( bhdr.f_resolution );
   reduction->set_time_res ( bhdr.t_resolution );
+
+  reduction->set_name ( hdr.machine_id );
+  reduction->set_software ( hdr.software );
 }
 
 
@@ -418,7 +429,7 @@ void Pulsar::BasebandArchive::backend_load (FILE* fptr)
 		 "fread baseband_header");
 
   if (bhdr.endian == BASEBAND_OPPOSITE_ENDIAN) {
-    if (verbose)
+    if (verbose == 3)
       cerr << "BasebandArchive::backend_load opposite_endian" << endl;
     convert_hdr_Endian();
     swap_endian = true;
@@ -488,7 +499,7 @@ void Pulsar::BasebandArchive::backend_load (FILE* fptr)
 
   if (bhdr.ppweight) {
 
-    if (verbose) cerr << "BasebandArchive::backend_load " 
+    if (verbose == 3) cerr << "BasebandArchive::backend_load " 
 		      << bhdr.analog_channels << " histograms.\n";
 
     Reference::To<TwoBitStats> twobit = new TwoBitStats;
@@ -508,7 +519,7 @@ void Pulsar::BasebandArchive::backend_load (FILE* fptr)
 
   if (bhdr.pband_resolution) {
 
-    if (verbose) 
+    if (verbose == 3) 
       cerr << "BasebandArchive::backend_load "
            << bhdr.pband_channels << " bandpasses with " 
            << bhdr.pband_resolution << " channels\n";
@@ -555,7 +566,7 @@ void Pulsar::BasebandArchive::backend_load (FILE* fptr)
 
 void Pulsar::BasebandArchive::backend_unload (FILE* fptr) const
 {
-  if (verbose) cerr << "BasebandArchive::backend_unload header size=" 
+  if (verbose == 3) cerr << "BasebandArchive::backend_unload header size=" 
                     << bhdr.size << endl;
 
   if (bhdr.size != hdr.be_data_size)
@@ -584,7 +595,7 @@ void Pulsar::BasebandArchive::backend_unload (FILE* fptr) const
       throw Error (InvalidState, "BasebandArchive::backend_unload",
 		   "no TwoBitStats Extension");
 
-    if (verbose) cerr << "BasebandArchive::backend_unload " 
+    if (verbose == 3) cerr << "BasebandArchive::backend_unload " 
                       << bhdr.analog_channels << " 2-bit histograms" << endl;
          
     for (int idc=0; idc<bhdr.analog_channels; idc++)
@@ -601,7 +612,7 @@ void Pulsar::BasebandArchive::backend_unload (FILE* fptr) const
       throw Error (InvalidState, "BasebandArchive::backend_unload",
 		   "no Passband Extension");
 
-    if (verbose) cerr << "BasebandArchive::backend_unload " 
+    if (verbose == 3) cerr << "BasebandArchive::backend_unload " 
                       << bhdr.pband_channels << " bandpasses with "
                       << bhdr.pband_resolution << " channels" << endl;
 
@@ -638,7 +649,7 @@ void Pulsar::BasebandArchive::backend_unload (FILE* fptr) const
 		 "unloaded %d bytes != %d bytes\n",
 		 file_end - file_start, hdr.be_data_size);
 
-  if (verbose)
+  if (verbose == 3)
     cerr << "BasebandArchive::backend_unload exit" << endl;
 }
 
