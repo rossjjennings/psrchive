@@ -31,3 +31,40 @@ ssize_t stringload (string* str, FILE* fptr, size_t nbytes)
   return bytesread;
 }
 
+// //////////////////////////////////////////////////////////////////
+// stringload
+// fills a vector of string with the first word from each line
+// in the file.  A line is delimited by \n or commented by #.
+// //////////////////////////////////////////////////////////////////
+
+int stringload (vector<string>* lines, const char* filename)
+{
+  FILE* fptr = fopen (filename, "r");
+  if (fptr == NULL) {
+    fprintf (stderr, "stringload:: Could not open %s", filename);
+    perror ("");
+    return -1;
+  }
+  int ret = stringload (lines, fptr);
+  fclose (fptr);
+  return ret;
+}
+
+int stringload (vector<string>* lines, FILE* fptr)
+{
+  static char* rdline = NULL;
+  if (!rdline) rdline = new char [FILENAME_MAX+1];
+
+  char* whitespace = " \t\n";
+  // load the lines from file
+  while (fgets (rdline, FILENAME_MAX, fptr) != NULL) {
+    char* eol = strchr (rdline, '#');
+    if (eol)
+      *eol = '\0';
+    char* line = strtok (rdline, whitespace);
+    if (line) {
+      lines->push_back (string(line));
+    }
+  }
+  return 0;
+}
