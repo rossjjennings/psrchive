@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pcm.C,v $
-   $Revision: 1.35 $
-   $Date: 2004/10/25 12:42:24 $
+   $Revision: 1.36 $
+   $Date: 2004/11/07 08:09:08 $
    $Author: straten $ */
 
 /*! \file pcm.C 
@@ -107,6 +107,25 @@ void auto_select (Pulsar::ReceptionCalibrator& model,
     cerr << "pcm: adding phase bin " << bins[ibin] << endl;
     model.add_state (bins[ibin]);
   }
+
+    cpgbeg (0, "chosen.ps/CPS", 0, 0);
+    cpgslw(2);
+    cpgsvp (.1,.9, .1,.9);
+  
+    cerr << "pcm: plotting chosen phase bins" << endl;
+    Pulsar::Plotter profile;
+    profile.spherical (archive);
+
+    cpgswin (0,1,0,1);
+    cpgsls (2);
+    for (unsigned ibin=0; ibin < bins.size(); ibin++) {
+      float phase = float(bins[ibin])/float(archive->get_nbin());
+      cpgmove (phase, 0);
+      cpgdraw (phase, 1);
+    }
+
+    cpgend();
+
 }
 
 
