@@ -1,6 +1,6 @@
-#include "Pulsar/BasicArchive.h"
+#include "Pulsar/Archive.h"
 
-Registry::List<Pulsar::Archive::Agent> Pulsar::Archive::Agent::registry;
+#define _PSRCHIVE_STATIC 1
 
 string Pulsar::Archive::Agent::plugin_path;
 
@@ -64,18 +64,16 @@ void Pulsar::Archive::Agent::verify_revisions ()
       agent ++;
 }
 
-
 bool Pulsar::Archive::Agent::init () try {
 
 #ifdef _PSRCHIVE_STATIC
 
   cerr << "Pulsar::Archive::Agent::init <static>" << endl;
+  static_load ();
 
 #else
 
   cerr << "Pulsar::Archive::Agent::init <dynamic>" << endl;
-
-  Pulsar::BasicArchive::ensure_linkage();
   plugin_load ();
 
 #endif
@@ -96,9 +94,4 @@ catch (...)
   return false;
 }
 
-#ifdef _PSRCHIVE_STATIC
-
-#include "static_plugins.code"
-
-#endif
 

@@ -29,7 +29,7 @@ nobase_include_HEADERS = \
 libpsrchive_la_SOURCES = plugins.csh Physical.h \
 	AdaptiveSNR.C                 Integration_new_PolnProfile.C  \
 	Agent.C                       Integration_remove_baseline.C  \
-	Integration_resize.C  \
+	Agent_static.C                Integration_resize.C  \
 	Archive.C                     Integration_toas.C  \
 	Archive_append.C              Integration_total.C  \
 	Archive_convert_state.C       Integration_transform.C  \
@@ -183,21 +183,6 @@ toatool_LDADD			= $(LDADD) @PGPLOT_LIBS@
 # psrsh_LDADD = -lreadline -ltermcap
 
 endif
-
-
-##############################################################################
-#
-# Rule to create plugins.h
-#
-
-static_plugins.code : plugins.csh 
-	@./plugins.csh TimerArchive BasebandArchive FITSArchive
-	@touch Archive.h
-
-Agent.C : static_plugins.code
-
-# this rule simply forces all code that #includes Archive.h to be recompiled
-Archive.h : Agent.C
 
 
 ##############################################################################
