@@ -74,7 +74,7 @@ int main (int argc, char *argv[]) {
       cout << "  -t [int f]       Time scrunch by a factor of f"       << endl;
       cout << "  -f [int f]       Frequency scrunch by a factor of f"  << endl;
       cout << "  -b [int f]       Bin scrunch by a factor of f"        << endl;
-      cout << "  -d [float dm]    Dedisperse to dm"                    << endl;
+      cout << "  -d [float dm]    Change the dispersion measure"       << endl;
       cout << "  -D [float rm]    Correct for ISM faraday rotation"    << endl;
       cout << "  -s [float c]     Smear with duty cycle c"             << endl;
       cout << "  -r [float p]     Rotate profiles by phase p"          << endl;
@@ -232,9 +232,12 @@ int main (int argc, char *argv[]) {
       }
       
       if (dedisperse) {
-	arch->dedisperse(dm,arch->get_centre_frequency());
+	for (unsigned isub=0; isub < arch->get_nsubint(); isub++)
+	  arch->get_Integration(isub)->set_dispersion_measure (dm);
+	
+	arch->set_dispersion_measure(dm);
 	if (verbose)
-	  cout << "Archive dedispersed to a DM of " << dm << endl;
+	  cout << "Archive dispersion measure set to " << dm << endl;
       }
 
       if (defaraday) {
