@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/Receiver.h,v $
-   $Revision: 1.9 $
-   $Date: 2004/11/11 09:19:00 $
+   $Revision: 1.10 $
+   $Date: 2004/11/12 13:51:29 $
    $Author: straten $ */
 
 #ifndef __ReceiverExtension_h
@@ -166,6 +166,8 @@ namespace Pulsar {
     Stokes<double> get_reference_source () const;
 
   protected:
+
+    friend ostream& operator<< (ostream& ostr, const Receiver&);
 
     //! The tracking mode of the receiver platform
     Tracking tracking_mode;

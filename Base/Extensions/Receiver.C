@@ -14,6 +14,7 @@ Pulsar::Receiver::Receiver () : Extension ("Receiver")
   feed_corrected = false;
   platform_corrected = false;
 
+  field_orientation = false;
   atten_a = 0.0;
   atten_b = 0.0;
 }
@@ -33,9 +34,9 @@ Pulsar::Receiver::operator= (const Receiver& ext)
 
   name = ext.name;
   basis = ext.basis;
+  right_handed = ext.right_handed;
 
   orientation = ext.orientation;
-  right_handed = ext.right_handed;
   reference_source_phase = ext.reference_source_phase;
 
   feed_corrected = ext.feed_corrected;
@@ -68,14 +69,6 @@ string Pulsar::Receiver::get_tracking_mode_string() const
   return "unknown";
 }
 
-const Angle Pulsar::Receiver::get_orientation () const
-{
-  Angle offset;
-  if (field_orientation && basis == Signal::Linear)
-    offset.setDegrees (-45);
-  return orientation + orientation_Y_offset + offset;
-}
-
 /*! If this method is called, then any previous changes due to
  set_X_offset, set_Y_offset, or set_field_orientation will be
  reset. */
@@ -84,6 +77,15 @@ void Pulsar::Receiver::set_orientation (const Angle& angle)
   orientation = angle;
   orientation_Y_offset = 0.0;
   field_orientation = false;
+}
+
+const Angle Pulsar::Receiver::get_orientation () const
+{
+  Angle offset;
+  if (field_orientation && basis == Signal::Linear)
+    offset.setDegrees (-45);
+
+  return orientation + orientation_Y_offset + offset;
 }
 
 //! Return true if the basis is right-handed
@@ -128,6 +130,7 @@ const Angle Pulsar::Receiver::get_field_orientation () const
   Angle offset = 0.0;
   if (!field_orientation && basis == Signal::Linear)
     offset.setDegrees (45.0);
+
   return get_orientation() + offset;
 }
 
@@ -142,7 +145,11 @@ void Pulsar::Receiver::set_X_offset (const Angle& offset)
 
 const Angle Pulsar::Receiver::get_X_offset () const
 {
-  return get_orientation() - orientation_Y_offset;
+  Angle offset = 0.0;
+  if (!get_right_handed())
+    offset.setDegrees (90.0);
+
+  return get_orientation() + offset;
 }
 
 
@@ -173,7 +180,6 @@ void Pulsar::Receiver::set_Y_offset (const Angle& offset)
     set_right_handed( false );
     orientation_Y_offset.setDegrees( -90 );
   }
-
   else
     throw Error (InvalidParam, "Pulsar::Receiver::set_Y_offset",
 		 "invalid offset = %lf deg", offset.getDegrees());
@@ -307,3 +313,11 @@ Stokes<double> Pulsar::Receiver::get_reference_source () const
   return output;
 }
 
+ostream& Pulsar::operator<< (ostream& ostr, const Pulsar::Receiver& recv)
+{
+  return ostr << endl <<
+    "  orientation=" << recv.orientation.getDegrees() << "deg.\n"
+    "  Y offset=" << recv.orientation_Y_offset.getDegrees() << "deg.\n"
+    "  hand=" << recv.right_handed << endl <<
+    "  field=" << recv.field_orientation << endl;
+}
