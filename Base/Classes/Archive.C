@@ -76,11 +76,10 @@ void Pulsar::Archive::agent_report ()
   Agent::report ();
 }
 
-void Pulsar::Archive::set_plugin_path (const char* path)
+void Pulsar::Archive::agent_list ()
 {
-  Agent::plugin_path = path;
+  Agent::print_list (stdout);
 }
-
 
 //! Return the number of extensions available
 unsigned Pulsar::Archive::get_nextension () const
