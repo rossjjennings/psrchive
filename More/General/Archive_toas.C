@@ -53,6 +53,11 @@ void Pulsar::Archive::toas (vector<Tempo::toa>& toas,
 	toas.push_back (toaset[itoa]);
       }
     }
+    else {
+      for (unsigned itoa=0; itoa < toaset.size(); itoa++) {
+        toas.push_back (toaset[itoa]);
+      }
+    }
 
   }
 }
