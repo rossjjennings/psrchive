@@ -10,7 +10,7 @@
 #include "dirutil.h"
 #include "string_utils.h"
 
-static const char* psradd_args = "b:Che:f:Fg:i:M:p:PtT:vV";
+static const char* psradd_args = "b:Ce:f:Fg:hi:M:p:PtT:vV";
 
 void usage () {
   cout <<
@@ -18,23 +18,27 @@ void usage () {
     "USAGE: psradd [" << psradd_args << "] filenames\n"
     " -b nbin     bin scrunch to nbin bins when each file is loaded\n"
     " -C          check that ephemerides are equal\n"
-    " -h          this help page \n"
-    " -f fname    output filename\n"
+    " -f fname    output result to 'fname'\n"
     " -F          force append despite mismatch of header parameters\n"
     " -M meta     filename with list of files\n"
-    " -p parfl    load new ephemeris from 'parfl'\n"
+    " -p fname    load new ephemeris from 'fname'\n"
+    " -P          correct for parallactic angle before tscrunch\n"
+    " -S          tscrunch result after each new file (nice on RAM)\n"
     " -t          make no changes to file system (testing mode)\n"
     " -T tempo    system call to tempo\n"
+    "\n"
+    " -h          this help page \n"
     " -v          verbose mode \n"
     " -V          very verbose (debugging) mode \n"
     "\n"
-    "AUTO ADD options\n"
+    "AUTO ADD options:\n"
     " -e ext   extension added to output filenames (default .it)\n"
     " -g sec   tscrunch+unload when time between archives > 'sec' seconds\n"
     " -i sec   tscrunch+unload when archive contains 'sec' seconds\n"
-    " -P       correct for parallactic angle before tscrunch\n"
     "\n"
-    "Note: If '-i' or '-g' is specified, '-f' is ignored.\n";
+    "Note:\n"
+    " AUTO ADD options, '-i' and '-g', are incompatible with '-S' and '-f'\n";
+
 }
 
 
@@ -55,6 +59,9 @@ int main (int argc, char **argv)
 
   // tscrunch+unload when certain limiting conditions are met
   bool auto_add = false; 
+
+  // tscrunch total after each new file is appended
+  bool tscrunch_total = false;
 
   // auto_add features:
   // maximum amount of data (in seconds) to integrate into one archive
@@ -130,6 +137,10 @@ int main (int argc, char **argv)
       deparallactify = true;
       break;
 
+    case 'S':
+      tscrunch_total = true;
+      break;
+
     case 't':
       testing = true;
       break;
@@ -159,8 +170,14 @@ int main (int argc, char **argv)
     return -1;
   }
 
+  if (auto_add && tscrunch_total) {
+    cerr << "psradd cannot both AUTO ADD (-i or -g) and scrunch (-S)\n";
+    return -1;
+  }
+
   if (auto_add && newname.length())
     cerr << "psradd ignores -f when AUTO ADD features, -g or -i, are used\n";
+
 
   psrephem neweph;
   if (!parname.empty()) {
@@ -209,6 +226,11 @@ int main (int argc, char **argv)
 
     if (nbin)
       archive->bscrunch_to_nbin (nbin);
+
+    if (deparallactify) {
+      if (verbose) cerr << "psradd: Correct parallactic angle" << endl;
+      archive->deparallactify();
+    }
 
     if (reset_total_next_load) {
       if (verbose) cerr << "psradd: Setting total" << endl;
@@ -294,15 +316,20 @@ int main (int argc, char **argv)
 	reset_total_next_load = true;
     }
 
+    if (tscrunch_total) {
+
+      if (verbose) cerr << "psradd: tscrunch total" << endl;
+
+      // tscrunch the archive
+      total->tscrunch();
+    }
+
     if (reset_total_next_load || reset_total_current) {
-      if (deparallactify)
-	total->deparallactify();
 
       if (verbose)
 	cerr << "psradd: Auto add - tscrunch and unload " 
 	     << total->integration_length() << " s archive" << endl;
 
-      // tscrunch the archive
       total->tscrunch();
 
       if (!testing)
@@ -323,10 +350,7 @@ int main (int argc, char **argv)
   }
 
   if (!reset_total_next_load) {
-    if (auto_add)  {
-      if (deparallactify)
-	total->deparallactify();
-      
+    if (auto_add)  {      
       if (verbose) cerr << "psradd: Auto add - tscrunching last " 
 			<< total->integration_length()
 			<< " seconds of data." << endl;
