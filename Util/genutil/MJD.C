@@ -16,6 +16,8 @@
 
 int MJD::verbose = 0;
 
+RCSID_CXX (MJD);
+
 int ss2hhmmss (int* hours, int* min, int* sec, int seconds)
 {
   *hours   = seconds/3600;

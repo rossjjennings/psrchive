@@ -9,9 +9,11 @@
 #include "mpi.h"
 #endif
 #include "psr_cpp.h"
-// using namespace std;
+#include "rcsid.h"
 
 class MJD {
+
+  RCSID_HXX;
 
  private:
   int    days;
