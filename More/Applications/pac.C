@@ -172,7 +172,7 @@ int main (int argc, char *argv[]) {
 	cout << "pac: Archive polarisation calibrated" << endl;
 	
 	if (display_params) {
-	  //pcal_engine->model[0].display();
+	  cerr << "not implemented; use pacv" << endl;
 	}	
       }
       
