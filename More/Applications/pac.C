@@ -199,16 +199,24 @@ int main (int argc, char *argv[]) {
       cout << "Loaded archive: " << archives[i] << endl;
       
       if (do_fluxcal) {
+
 	Pulsar::FluxCalibrator* fcal_engine = 0;
 	fcal_engine = dbase->generateFluxCalibrator(arch);
+
+	if (verbose) {
+	  cout << "Generated Flux Calibrator" << endl;
+	  cout << "Calibrating Archive Fluxes" << endl;
+	}
+
 	fcal_engine->calibrate(arch);
+
 	cout << "Flux calibration complete" << endl;
       }
       
       if (do_polncal) {
 
         if (verbose)
-          cerr << "pac: Finding PolnCalibrator" << endl;
+          cerr << "Finding PolnCalibrator" << endl;
 
 	Pulsar::PolnCalibrator* pcal_engine  = 0;
 	pcal_engine = dbase->generatePolnCalibrator(arch, m);
@@ -217,11 +225,11 @@ int main (int argc, char *argv[]) {
 	  pcal_engine->store_parameters = true;
 
         if (verbose)
-          cerr << "pac: Calibrating Archive polarisation" << endl;
+          cerr << "Calibrating Archive Polarisation" << endl;
 
 	pcal_engine->calibrate(arch);
 	
-	cout << "pac: Archive polarisation calibrated" << endl;
+	cout << "Polarisation Calibration Complete" << endl;
 	
 	if (display_params) {
 	  cerr << "not implemented; use pacv" << endl;
@@ -242,6 +250,11 @@ int main (int argc, char *argv[]) {
     }
     catch (Error& error) {
       cerr << error << endl;
+      exit(-1);
     }
   }
 }
+
+
+
+
