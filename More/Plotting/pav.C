@@ -1,5 +1,5 @@
 //
-// $Id: pav.C,v 1.51 2003/09/22 03:54:29 ahotan Exp $
+// $Id: pav.C,v 1.52 2003/09/30 06:29:45 ahotan Exp $
 //
 // The Pulsar Archive Viewer
 //
@@ -45,6 +45,7 @@ void usage ()
     " -Z        Smear profiles before plotting\n"
     "\n"
     "Selection options:\n"
+    " -K dev    Choose a plot device\n"
     " -c map    Choose a colour map\n"
     " -M meta   Read a meta-file containing the list of filenames\n"
     " -P        Select which polarization to display\n"
@@ -136,13 +137,15 @@ int main (int argc, char** argv)
   bool width = false;
   bool dynam = false;
 
+  string plot_device;
+
   char* metafile = NULL;
   
   Pulsar::Plotter plotter;
   Pulsar::Plotter::ColourMap colour_map = Pulsar::Plotter::Heat;
   
   int c = 0;
-  const char* args = "AaBb:Cc:DdEeFf:GghI:ijHlLm:M:N:Qq:opP:r:SsTt:VvwWXx:Yy:Zz:";
+  const char* args = "AaBb:Cc:DdEeFf:GghI:ijHK:lLm:M:N:Qq:opP:r:SsTt:VvwWXx:Yy:Zz:";
 
   while ((c = getopt(argc, argv, args)) != -1)
     switch (c) {
@@ -210,13 +213,17 @@ int main (int argc, char** argv)
       plotter.set_subint( atoi (optarg) );
       break;
     case 'i':
-      cout << "$Id: pav.C,v 1.51 2003/09/22 03:54:29 ahotan Exp $" << endl;
+      cout << "$Id: pav.C,v 1.52 2003/09/30 06:29:45 ahotan Exp $" << endl;
       return 0;
 
     case 'j':
       dynam = true;
       break;
 
+    case 'K':
+      plot_device = optarg;
+      break;
+      
     case 'l':
       plotter.set_labels(false);
       break;
@@ -344,8 +351,20 @@ int main (int argc, char** argv)
     usage ();
     return 0;
   }
-
-  cpgbeg (0, "?", 0, 0);
+  
+  if (plot_device.empty()){
+    if (cpgopen("?") < 0) {
+      cout << "Error: Could not open plot device" << endl;
+      return -1;
+    }
+  }
+  else {
+    if (cpgopen(plot_device.c_str()) < 0) {
+      cout << "Error: Could not open plot device" << endl;
+      return -1;
+    }
+  }
+  
   cpgask(1);
   
   if (nesting)
