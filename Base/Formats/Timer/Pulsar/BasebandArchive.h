@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/Timer/Pulsar/BasebandArchive.h,v $
-   $Revision: 1.8 $
-   $Date: 2003/10/08 14:20:12 $
+   $Revision: 1.9 $
+   $Date: 2003/12/22 14:06:07 $
    $Author: straten $ */
 
 #ifndef __Baseband_Archive_h
@@ -22,23 +22,37 @@ namespace Pulsar {
 
   public:
 
-    //! null constructor
+    //! Default constructor
     BasebandArchive ();
 
-    //! copy constructor
-    BasebandArchive (const Archive& archive);
-
-    //! copy constructor
+    //! Copy constructor
     BasebandArchive (const BasebandArchive& archive);
 
-    //! destructor
+    //! Destructor
     ~BasebandArchive ();
 
-    //! Copy the contents of an Archive into self
-    virtual void copy (const Archive& archive);
+    //! Assignment operator
+    const BasebandArchive& operator = (const BasebandArchive& archive);
+    
+    //! Base copy constructor
+    BasebandArchive (const Archive& archive);
 
-    //! Returns a pointer to a new copy of self
-    virtual Archive* clone () const;
+    //! Base extraction constructor
+    BasebandArchive (const Archive& archive, const vector<unsigned>& subint);
+
+    //! Copy all of the class attributes and the selected Integration data
+    void copy (const Archive& archive, const vector<unsigned>& subints);
+
+    //! Return a pointer to a new copy constructed instance equal to this
+    virtual BasebandArchive* clone () const;
+
+    //! Return a pointer to a new extraction constructed instance equal to this
+    virtual BasebandArchive* extract (const vector<unsigned>& subints) const;
+
+    // //////////////////////////////////////////////////////////////////
+    //
+    // BasebandArchive specific
+    //
 
     //! Return the number of passbands
     int get_npassband () const { return bhdr.pband_channels; };
@@ -83,7 +97,7 @@ namespace Pulsar {
         //! Advocate the use of BasebandArchive to interpret filename
         bool advocate (const char* filename);
 
-        //! Return the name of the TimerArchive plugin
+        //! Return the name of the BasebandArchive plugin
         string get_name () { return "BasebandArch"; }
 
         //! Return description of this plugin

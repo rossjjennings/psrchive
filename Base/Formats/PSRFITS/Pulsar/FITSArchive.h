@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/PSRFITS/Pulsar/FITSArchive.h,v $
-   $Revision: 1.19 $
-   $Date: 2003/12/16 10:04:31 $
-   $Author: ahotan $ */
+   $Revision: 1.20 $
+   $Date: 2003/12/22 14:04:46 $
+   $Author: straten $ */
 
 #ifndef __Pulsar_FITSArchive_h
 #define __Pulsar_FITSArchive_h
@@ -50,42 +50,42 @@ namespace Pulsar {
 
   public:
     
-    //! null constructor
+    //! Default constructor
     FITSArchive ();
 
-    //! copy constructor
-    FITSArchive (const Archive& archive);
-
-    //! copy constructor
+    //! Copy constructor
     FITSArchive (const FITSArchive& archive);
 
-    //! extraction constructor
-    FITSArchive (const Archive& archive, const vector<unsigned>& subints);
-
-    //! extraction constructor
-    FITSArchive (const FITSArchive& archive, const vector<unsigned>& subints);
-
-    //! operator =
-    FITSArchive& operator= (const FITSArchive& archive);
-
-    //! destructor
+    //! Destructor
     ~FITSArchive ();
 
-    //! Copy the entire contents of an Archive into self
-    virtual void copy(const Archive& archive);
-    
-    /*! Copy a subset of an Archive into self, where the
-      subset can contain anywhere between none and all of
-      integrations in the source Archive */
-    
-    virtual void copy (const Archive& archive,
-		       const vector<unsigned>& subints);
-    
-    //! Return a new copy-constructed FITSArchive instance
-    Archive* clone () const;
+    //! Assignment operator
+    const FITSArchive& operator= (const FITSArchive& archive);
 
-    //! Return a new select_copy-constructed FITSArchive instance
-    Archive* extract (const vector<unsigned>& subints) const;
+    //! Base copy constructor
+    FITSArchive (const Archive& archive);
+
+    //! Base extraction constructor
+    FITSArchive (const Archive& archive, const vector<unsigned>& subints);
+
+    //! Copy all of the class attributes and the selected Integration data
+    void copy (const Archive& archive, const vector<unsigned>& subints);
+
+    // //////////////////////////////////////////////////////////////////
+    //
+    // implement the pure virtual methods of the Archive base class
+    //
+
+    //! Return a pointer to a new copy constructed instance equal to this
+    FITSArchive* clone () const;
+
+    //! Return a pointer to a new extraction constructed instance equal to this
+    FITSArchive* extract (const vector<unsigned>& subints) const;
+
+    // //////////////////////////////////////////////////////////////////
+    //
+    // FITSArchive specific interface
+    //
 
     //! Add a new row to the history, reflecting the current state
     void update_history ();
@@ -138,10 +138,10 @@ namespace Pulsar {
       //! Default constructor (necessary even when empty)
       Agent () {}
       
-      //! Advocate the use of TimerArchive to interpret filename
+      //! Advocate the use of FITSArchive to interpret filename
       bool advocate (const char* filename);
       
-      //! Return the name of the TimerArchive plugin
+      //! Return the name of the FITSArchive plugin
       string get_name () { return "FITSArchive"; }
       
       //! Return description of this plugin

@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/Timer/Pulsar/TimerArchive.h,v $
-   $Revision: 1.8 $
-   $Date: 2003/12/10 00:54:17 $
-   $Author: hknight $ */
+   $Revision: 1.9 $
+   $Date: 2003/12/22 14:06:07 $
+   $Author: straten $ */
 
 #ifndef __Timer_Archive_h
 #define __Timer_Archive_h
@@ -19,44 +19,38 @@ namespace Pulsar {
 
     static bool big_endian;
 
-    //! null constructor
+    //! Default constructor
     TimerArchive ();
 
-    //! copy constructor
-    TimerArchive (const Archive& archive);
-
-    //! copy constructor
+    //! Copy constructor
     TimerArchive (const TimerArchive& archive);
 
-    //! extraction constructor
+    //! Destructor
+    ~TimerArchive ();
+
+    //! Assignment operator
+    const TimerArchive& operator = (const TimerArchive& archive);
+    
+    //! Base copy constructor
+    TimerArchive (const Archive& archive);
+
+    //! Base extraction constructor
     TimerArchive (const Archive& archive, const vector<unsigned>& subint);
 
-    //! extraction constructor
-    TimerArchive (const TimerArchive& archive, const vector<unsigned>& subint);
-
-    //! operator =
-    virtual TimerArchive& operator= (const TimerArchive& archive);
-
-    //! destructor
-    virtual ~TimerArchive ();
+    //! Copy all of the class attributes and the selected Integration data
+    void copy (const Archive& archive, const vector<unsigned>& subints);
 
     // //////////////////////////////////////////////////////////////////
     //
     // implement the pure virtual methods of the Archive base class
     //
 
-    void copy(const Archive& archive);
+    //! Return a pointer to a new copy constructed instance equal to this
+    TimerArchive* clone () const;
 
-    //! Copy the contents of an Archive into self
-    void copy (const Archive& archive, 
-	       const vector<unsigned>& subints);
+    //! Return a pointer to a new extraction constructed instance equal to this
+    TimerArchive* extract (const vector<unsigned>& subints) const;
 
-    //! Returns a pointer to a new copy of self
-    virtual Archive* clone () const;
-
-    //! Return a pointer to a new archive that contains a subset of self
-    virtual Archive* extract (const vector<unsigned>& subints) const;
-    
     //! Get the tempo code of the telescope used
     virtual char get_telescope_code () const;
     //! Set the tempo code of the telescope used

@@ -1,5 +1,3 @@
-#include <unistd.h>
-
 #include "TimerArchive.h"
 #include "TimerIntegration.h"
 #include "Error.h"
@@ -7,84 +5,86 @@
 #include "timer++.h"
 #include "coord.h"
 
+#include <unistd.h>
+
 //! files are big endian by default
 bool Pulsar::TimerArchive::big_endian = true;
 
-// null constructor
+//
+//
+//
 Pulsar::TimerArchive::TimerArchive ()
 {
   if (verbose)
-    cerr << "TimerArchive null constructor" << endl;
+    cerr << "TimerArchive default constructor" << endl;
 
   Timer::verbose = verbose;
   Timer::init (&hdr);
   valid = false;
 }
 
-// destructor
+//
+//
+//
+Pulsar::TimerArchive::TimerArchive (const TimerArchive& arch)
+{
+  if (verbose)
+    cerr << "TimerArchive copy construct" << endl;
+
+  Timer::init (&hdr);
+  Archive::copy (arch); // results in call to TimerArchive::copy
+}
+
+//
+//
+//
 Pulsar::TimerArchive::~TimerArchive ()
 {
   if (verbose)
     cerr << "TimerArchive destructor" << endl;
-
-  // let Archive destructor do all the work
 }
 
-Pulsar::TimerArchive::TimerArchive (const Archive& arch)
+//
+//
+//
+const Pulsar::TimerArchive&
+Pulsar::TimerArchive::operator = (const TimerArchive& arch)
 {
   if (verbose)
-    cerr << "TimerArchive construct copy Archive" << endl;
+    cerr << "TimerArchive assignment operator" << endl;
 
-  Timer::init (&hdr);
-  TimerArchive::copy (arch);
-}
-
-Pulsar::TimerArchive::TimerArchive (const TimerArchive& arch)
-{
-  if (verbose)
-    cerr << "TimerArchive construct copy TimerArchive" << endl;
-
-  Timer::init (&hdr);
-  TimerArchive::copy (arch);
-}
-
-Pulsar::TimerArchive& Pulsar::TimerArchive::operator=(const TimerArchive& archive){
-  if (verbose)
-    cerr << "TimerArchive operator =" << endl;
-
-  TimerArchive::copy (archive);
-
+  Archive::copy (arch); // results in call to TimerArchive::copy
   return *this;
 }
 
+//
+//
+//
+Pulsar::TimerArchive::TimerArchive (const Archive& arch)
+{
+  if (verbose)
+    cerr << "TimerArchive base copy construct" << endl;
+
+  Timer::init (&hdr);
+  Archive::copy (arch); // results in call to TimerArchive::copy
+}
+
+//
+//
+//
 Pulsar::TimerArchive::TimerArchive (const Archive& arch,
 				    const vector<unsigned>& subints)
 {
   if (verbose)
-    cerr << "TimerArchive construct extract Archive" << endl;
+    cerr << "TimerArchive base extraction construct " << endl;
   
   Timer::init (&hdr);
-
   TimerArchive::copy (arch, subints);
 }
 
-Pulsar::TimerArchive::TimerArchive (const TimerArchive& arch,
-				    const vector<unsigned>& subints)
-{
-  if (verbose)
-    cerr << "TimerArchive construct extract TimerArchive" << endl;
-
-  Timer::init (&hdr);
-  TimerArchive::copy (arch, subints);
-}
-
-void Pulsar::TimerArchive::copy (const Archive& archive) {
-  vector<unsigned> all_subints(archive.get_nsubint());
-  for( unsigned i=0; i<all_subints.size(); i++)
-    all_subints[i] = i;
-  copy(archive,all_subints);
-}
-
+//
+//
+//
 void Pulsar::TimerArchive::copy (const Archive& archive, 
 				 const vector<unsigned>& subints)
 {
@@ -94,14 +94,13 @@ void Pulsar::TimerArchive::copy (const Archive& archive,
   if (this == &archive)
     return;
 
+  Archive::copy (archive, subints);
+
   const TimerArchive* tarchive = dynamic_cast<const TimerArchive*>(&archive);
   if (!tarchive)
     return;
 
   hdr = tarchive->hdr;
-
-  if( !subints.empty() )
-    Archive::copy (archive, subints);
 
   if (verbose)
     cerr << "TimerArchive::copy another TimerArchive" << endl;
@@ -109,17 +108,20 @@ void Pulsar::TimerArchive::copy (const Archive& archive,
   valid = tarchive->valid;
 }
 
-
-//! Returns a pointer to a new copy of self
-Pulsar::Archive* Pulsar::TimerArchive::clone () const
+//
+//
+//
+Pulsar::TimerArchive* Pulsar::TimerArchive::clone () const
 {
   if (verbose)
     cerr << "TimerArchive::clone" << endl;
   return new TimerArchive (*this);
 }
 
-//! Return a pointer to a new archive that contains a subset of self
-Pulsar::Archive* 
+//
+//
+//
+Pulsar::TimerArchive* 
 Pulsar::TimerArchive::extract (const vector<unsigned>& subints) const
 {
   if (verbose)

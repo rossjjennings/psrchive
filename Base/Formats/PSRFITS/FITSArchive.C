@@ -31,62 +31,78 @@ void Pulsar::FITSArchive::init ()
   scale_cross_products = false;
 }
 
+//
+//
+//
 Pulsar::FITSArchive::FITSArchive()
 {
-  init ();
-}
-
-Pulsar::FITSArchive::~FITSArchive()
-{
-}
-
-Pulsar::FITSArchive::FITSArchive (const Archive& arch)
-{
   if (verbose)
-    cerr << "FITSArchive construct copy Archive" << endl;
-
+    cerr << "FITSArchive default construct" << endl;
   init ();
-  FITSArchive::copy (arch);
 }
 
+//
+//
+//
 Pulsar::FITSArchive::FITSArchive (const FITSArchive& arch)
 {
   if (verbose)
-    cerr << "FITSArchive construct copy FITSArchive" << endl;
+    cerr << "FITSArchive copy construct" << endl;
 
   init ();
-  FITSArchive::copy (arch);
+  Archive::copy (arch); // results in call to FITSArchive::copy
 }
 
+//
+//
+//
+Pulsar::FITSArchive::~FITSArchive()
+{
+  if (verbose)
+    cerr << "FITSArchive destruct" << endl;
+}
+
+//
+//
+//
+const Pulsar::FITSArchive&
+Pulsar::FITSArchive::operator = (const FITSArchive& arch)
+{
+  if (verbose)
+    cerr << "FITSArchive assignment operator" << endl;
+
+  Archive::copy (arch); // results in call to FITSArchive::copy
+  return *this;
+}
+
+//
+//
+//
+Pulsar::FITSArchive::FITSArchive (const Archive& arch)
+{
+  if (verbose)
+    cerr << "FITSArchive base copy construct" << endl;
+
+  init ();
+  Archive::copy (arch); // results in call to FITSArchive::copy
+}
+
+//
+//
+//
 Pulsar::FITSArchive::FITSArchive (const Archive& arch, 
 				  const vector<unsigned>& subints)
 {
   if (verbose)
-    cerr << "FITSArchive construct extract Archive" << endl;
-
-  init ();
-  FITSArchive::copy (arch, subints);
-}
-
-Pulsar::FITSArchive::FITSArchive (const FITSArchive& arch, 
-				  const vector<unsigned>& subints)
-{
-  if (verbose)
-    cerr << "FITSArchive construct extract FITSArchive" << endl;
+    cerr << "FITSArchive base extraction construct" << endl;
 
   init ();
   FITSArchive::copy (arch, subints);
 }
 
 
-void Pulsar::FITSArchive::copy (const Archive& archive){
-  vector<unsigned> all_subints(archive.get_nsubint());
-  for( unsigned i=0; i<all_subints.size(); i++)
-    all_subints[i] = i;
-
-  FITSArchive::copy(archive,all_subints);
-}
-
+/*! The Integration subset can contain anywhere between none and all of
+   integrations in the source Archive */
 void Pulsar::FITSArchive::copy (const Archive& archive, 
 				const vector<unsigned>& subints)
 {
@@ -116,7 +132,7 @@ void Pulsar::FITSArchive::copy (const Archive& archive,
 }
 
 //! Returns a pointer to a new copy-constructed FITSArchive instance
-Pulsar::Archive* Pulsar::FITSArchive::clone () const
+Pulsar::FITSArchive* Pulsar::FITSArchive::clone () const
 {
   if (verbose)
     cerr << "FITSArchive::clone" << endl;
@@ -125,7 +141,7 @@ Pulsar::Archive* Pulsar::FITSArchive::clone () const
 }
 
 //! Returns a pointer to a new select copy-constructed FITSArchive instance
-Pulsar::Archive* 
+Pulsar::FITSArchive* 
 Pulsar::FITSArchive::extract (const vector<unsigned>& subints) const
 {
   if (verbose)

@@ -51,37 +51,81 @@ void Pulsar::BasebandArchive::init ()
   ::init (bhdr);
 }
 
-
-
-//! null constructor
+//
+//
+//
 Pulsar::BasebandArchive::BasebandArchive ()
 {
-  init ();
+  if (verbose)
+    cerr << "BasebandArchive default construct" << endl;
+
+ init ();
 }
 
-//! copy constructor
-Pulsar::BasebandArchive::BasebandArchive (const Archive& archive)
-{
-  init ();
-  BasebandArchive::copy (archive);
-}
-
-//! copy constructor
+//
+//
+//
 Pulsar::BasebandArchive::BasebandArchive (const BasebandArchive& archive)
 {
+  if (verbose)
+    cerr << "BasebandArchive copy construct" << endl;
+
   init ();
-  BasebandArchive::copy (archive);
+  Archive::copy (archive); // results in call to BasebandArchive::copy
 }
 
-//! destructor
+//
+//
+//
 Pulsar::BasebandArchive::~BasebandArchive ()
 {
   if (verbose)
     cerr << "BasebandArchive destructor" << endl;
 }
 
-//! Copy the contents of an Archive into self
-void Pulsar::BasebandArchive::copy (const Archive& archive)
+//
+//
+//
+const Pulsar::BasebandArchive&
+Pulsar::BasebandArchive::operator = (const BasebandArchive& arch)
+{
+  if (verbose)
+    cerr << "BasebandArchive assignment operator" << endl;
+
+  Archive::copy (arch); // results in call to BasebandArchive::copy
+  return *this;
+}
+
+//
+//
+//
+Pulsar::BasebandArchive::BasebandArchive (const Archive& archive)
+{
+  if (verbose)
+    cerr << "BasebandArchive base copy construct" << endl;
+
+  init ();
+  Archive::copy (archive); // results in call to BasebandArchive::copy
+}
+
+//
+//
+//
+Pulsar::BasebandArchive::BasebandArchive (const Archive& arch,
+					  const vector<unsigned>& subints)
+{
+  if (verbose)
+    cerr << "BasebandArchive base extraction construct" << endl;
+  
+  init ();
+  BasebandArchive::copy (arch, subints);
+}
+
+//
+//
+//
+void Pulsar::BasebandArchive::copy (const Archive& archive,
+				    const vector<unsigned>& subints)
 {
   if (verbose)
     cerr << "BasebandArchive::copy" << endl;
@@ -89,7 +133,7 @@ void Pulsar::BasebandArchive::copy (const Archive& archive)
   if (this == &archive)
     return;
 
-  TimerArchive::copy (archive);
+  TimerArchive::copy (archive, subints);
 
   const BasebandArchive* barchive;
   barchive = dynamic_cast<const BasebandArchive*>(&archive);
@@ -102,12 +146,28 @@ void Pulsar::BasebandArchive::copy (const Archive& archive)
   bhdr = barchive->bhdr;
 }
 
-//! Returns a pointer to a new copy of self
-Pulsar::Archive* Pulsar::BasebandArchive::clone () const
+
+
+//
+//
+//
+Pulsar::BasebandArchive* Pulsar::BasebandArchive::clone () const
 {
+  if (verbose)
+    cerr << "BasebandArchive::clone" << endl;
   return new BasebandArchive (*this);
 }
 
+//
+//
+//
+Pulsar::BasebandArchive* 
+Pulsar::BasebandArchive::extract (const vector<unsigned>& subints) const
+{
+  if (verbose)
+    cerr << "BasebandArchive::extract" << endl;
+  return new BasebandArchive (*this, subints);
+}
 
 // /////////////////////////////////////////////////////////////////////////
 //
