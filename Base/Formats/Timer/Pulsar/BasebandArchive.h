@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/Timer/Pulsar/BasebandArchive.h,v $
-   $Revision: 1.2 $
-   $Date: 2003/03/08 11:06:57 $
+   $Revision: 1.3 $
+   $Date: 2003/03/08 11:24:46 $
    $Author: straten $ */
 
 #ifndef __Baseband_Archive_h
@@ -77,7 +77,7 @@ namespace Pulsar {
         bool advocate (const char* filename);
 
         //! Return the name of the TimerArchive plugin
-        string get_name () { return "BasebandArchive"; }
+        string get_name () { return "BasebandArch"; }
 
         //! Return description of this plugin
         string get_description ();
