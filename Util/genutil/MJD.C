@@ -1,7 +1,11 @@
 /* $Log: MJD.C,v $
-/* Revision 1.6  1998/09/08 13:03:35  straten
-/* put back nint with #ifdef sun solution
+/* Revision 1.7  1998/09/21 09:29:42  mbritton
+/* Added operator != and increased the precision printed by printfs to 15 digits,
+/* which is the precision of a double.
 /*
+ * Revision 1.6  1998/09/08  13:03:35  straten
+ * put back nint with #ifdef sun solution
+ *
  * Revision 1.5  1998/09/08 05:13:09  mbritton
  * removed nint from MJD.c and test_utc.c from Makefile
  *
@@ -54,7 +58,7 @@ char * MJD::printhhmmss(){
 char * MJD::printfs(){
   static char permanent[20];
   char temp[20];
-  sprintf(temp,"%14.12lf",fracsec);
+  sprintf(temp,"%.15lf",fracsec);
   strcpy(permanent,&temp[1]);   // Chomp off leading 0
   return (permanent);
 }
@@ -122,7 +126,16 @@ int operator < (const MJD &m1, const MJD &m2) {
 int operator == (const MJD &m1, const MJD &m2){
   if ((m1.days == m2.days) &&
       (m1.secs == m2.secs) &&
-      (m1.fracsec == m2.fracsec)) 
+      (m1.fracsec==m2.fracsec)) 
+      return (1);
+  else
+      return (0);  
+}
+
+int operator != (const MJD &m1, const MJD &m2){
+  if ((m1.days != m2.days) ||
+      (m1.secs != m2.secs) ||
+      (m1.fracsec!=m2.fracsec)) 
       return (1);
   else
       return (0);  
