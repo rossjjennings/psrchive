@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/MJD.h,v $
-   $Revision: 1.19 $
-   $Date: 2003/03/14 01:36:20 $
-   $Author: pulsar $ */
+   $Revision: 1.20 $
+   $Date: 2003/06/03 08:43:29 $
+   $Author: cwest $ */
 
 #ifndef __MJD_H
 #define __MJD_H
@@ -15,7 +15,7 @@
 
 #include "environ.h"
 #include "utc.h"
-#ifdef MPI
+#ifdef ACTIVATE_MPI
 #include "mpi.h"
 #endif
 #include "psr_cpp.h"
@@ -143,7 +143,7 @@ class MJD {
   // returns a string formatted as in 'strftime()'
   char* datestr (char* dstr, int len, const char* format) const;
 
-#ifdef MPI
+#ifdef ACTIVATE_MPI
   friend int mpiPack_size (const MJD&, MPI_Comm comm, int* size);
   friend int mpiPack   (const MJD&, void* outbuf, int outcount, 
 			int* position, MPI_Comm comm);
