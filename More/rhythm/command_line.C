@@ -2,18 +2,13 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-#include <algorithm>
-
 #include "rhythm.h"
-
+#include "qt_editeph.h"
 
 static char* cl_args = "hp:t:v";
 void Rhythm::command_line_parse (int argc, char** argv)
 {
-cerr << "begin parsing command line\n";
-for (int i=0; i<argc; i++)
-  fprintf (stderr, "%s ", argv[i]);
-cerr << endl;
+  string eph_filename;
 
   int optc;
   while ((optc = getopt (argc, argv, cl_args)) != -1)  {
@@ -79,39 +74,16 @@ cerr << endl;
     basename = argv[argi];
   }
 
-  if (!tim_filename.empty()) {
-    if (verbose)
-      fprintf (stderr, "Loading TOAs from '%s'...", tim_filename.c_str());
-    toa::load (tim_filename.c_str(), &arrival_times);
-    if (verbose)
-      fprintf (stderr, "  loaded\n");
-
-    if (verbose)
-      fprintf (stderr, "Sorting TOAS...");
-    sort (arrival_times.begin(), arrival_times.end());
-    if (verbose)
-      fprintf (stderr, "  sorted\n");
-  }
+  if (!tim_filename.empty())
+    load_toas (tim_filename.c_str());
 
   if (!eph_filename.empty()) {
     if (verbose)
       fprintf (stderr, "Loading ephemeris from '%s'\n", eph_filename.c_str());
-    psrephem model;
-    model.load (eph_filename.c_str());
-    if (verbose) {
-      cerr << "Ephemeris loaded:\n";
-      model.unload (stderr);
-    }
-    ephemerides.push_back (model);
+    fitpopup -> load (eph_filename.c_str());
   }
-
-  if (arrival_times.size() > 0 && ephemerides.size() > 0
-      && !ephemerides.back().psrname().empty()) {
-
-    if (verbose)
-      cerr << "Calculating residuals\n";
-    tempo_fit (ephemerides.back(), arrival_times, NULL, &residuals);
-
+  else {
+    fitpopup -> open ();
   }
 
 }

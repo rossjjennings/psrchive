@@ -7,6 +7,7 @@
 #include <qfiledialog.h>
 
 #include "rhythm.h"
+#include "qt_editeph.h"
 
 void Rhythm::menubarConstruct ()
 {
@@ -15,11 +16,10 @@ void Rhythm::menubarConstruct ()
   //
   QPopupMenu *file = new QPopupMenu( menuBar() );  CHECK_PTR( file );
 
-  file->insertItem( "Load toas",      this, SLOT(load_toas()), CTRL+Key_T );
-  file->insertItem( "Load ephemeris", this, SLOT(load_eph ()), CTRL+Key_E );
-  file->insertSeparator();
-  file->insertItem( "Save toas",      this, SLOT(save_toas()));
-  file->insertItem( "Save ephemeris", this, SLOT(save_eph ()));
+  file->insertItem( "&Load TOAs",      this, 
+		    SLOT( load_toas() ), ALT+Key_L );
+  file->insertItem( "&Save TOAs",      this, 
+		    SLOT( save_toas() ), ALT+Key_S );
 
   file->insertSeparator();
   file->insertItem( "&Close", this, SLOT(closeWin()), CTRL+Key_C );
@@ -35,16 +35,28 @@ void Rhythm::menubarConstruct ()
   // ///////////////////////////////////////////////////////////////////////
   // TEMPO menu options
   //
-  QPopupMenu *tempo = new QPopupMenu( menuBar() );  CHECK_PTR (tempo);
+  tempo = new QPopupMenu( menuBar() );  CHECK_PTR (tempo);
 
-  tempo->insertItem ("&Fit", this, SLOT(fit()) );
+  fitID = tempo->insertItem( "&Fit", this, SLOT( fit() ));
+  tempo->setItemEnabled (fitID, false);
+  dispID = tempo->insertItem( "&Display Parameters", this, SLOT( togledit() ));
+  tempo->setItemEnabled (dispID, false);
+
+  tempo->insertSeparator();
+  tempo->insertItem( "Load Paremeters", fitpopup, SLOT( open() ));
+  tempo->insertItem( "Save Parameters", fitpopup, SLOT( save() ));
+
+  tempo->insertSeparator();
+  // automatic fitting starts out enabled
+  autofitID = tempo->insertItem( "Disable &Auto Fit",
+				 this, SLOT( toglauto() ));
 
   // ///////////////////////////////////////////////////////////////////////
   // HELP menu options
   //
   QPopupMenu *help = new QPopupMenu( menuBar() );
   CHECK_PTR (help);
-  help->insertItem( "Usage", this, SLOT(about()), CTRL+Key_H );
+  help->insertItem( "&Usage", this, SLOT(about()), CTRL+Key_H );
   if (isTopLevel())
     help->insertItem( "About Qt", this, SLOT(aboutQt()), 0);
 
@@ -57,6 +69,37 @@ void Rhythm::menubarConstruct ()
   menuBar() -> insertItem   ( "&Help", help );
 
   if (verbose) cerr << "Rhythm::menubarConstruct () returns\n";
+}
+
+void Rhythm::togledit()
+{
+  if (!fitpopup)
+    return;
+
+  if (fitpopup->isVisible()) {
+    fitpopup->hide();
+    tempo->setItemEnabled (dispID, TRUE);
+  }
+  else {
+    fitpopup->show();
+    tempo->setItemEnabled (dispID, FALSE);
+  }
+}
+
+void Rhythm::toglauto()
+{
+  QString text;
+  if (autofit)
+    text = "Enable";
+  else
+    text = "Disable";
+  text += " &Auto Fit";
+
+  tempo->changeItem ( autofitID, text );
+  autofit = !autofit;
+
+  if (verbose)
+    cerr << "Rhythm: " << text << endl;
 }
 
 void Rhythm::about()
@@ -81,12 +124,12 @@ void Rhythm::load_toas ()
   if ( !tim_filename.empty() )
     startName = tim_filename.c_str();
 
-  QString fileName = QFileDialog::getOpenFileName ( startName,
-						    "*.rthm", this);
+  QString fileName (QFileDialog::getOpenFileName ( startName, "*.tim", this ));
 
-  if ( !fileName.isNull() ) {                 // got a file name
-    // DO SOMETHING with arrival_times
-  }
+  if ( fileName.isNull() )
+    return;
+
+  load_toas ( fileName.ascii() );
 }
 
 void Rhythm::prompt_save_toas ()
@@ -97,37 +140,4 @@ void Rhythm::prompt_save_toas ()
 void Rhythm::save_toas ()
 {
   fprintf (stderr, "Rhythm::save_toas Not implemented.");
-}
-
-void Rhythm::load_eph ()
-{
-  if (eph_modified) {
-    prompt_save_eph ();
-  }
-
-  QString startName = QString::null;
-  if ( !eph_filename.empty() )
-    startName = eph_filename.c_str();
-
-  QString fileName = QFileDialog::getOpenFileName ( startName,
-						    "*.eph", this);
-
-  if ( !fileName.isNull() ) {                 // got a file name
-    // DO SOMETHING with ephemerides
-  }
-}
-
-void Rhythm::prompt_save_eph ()
-{
-  fprintf (stderr, "Rhythm::prompt_save_eph Not implemented.");
-}
-
-void Rhythm::save_eph ()
-{
-  fprintf (stderr, "Rhythm::save_eph Not implemented.");
-}
-
-void Rhythm::fit()
-{
-  fprintf (stderr, "Rhythm::fit Not implemented.");
 }
