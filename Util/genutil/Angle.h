@@ -1,6 +1,6 @@
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Angle.h,v $
-   $Revision: 1.2 $
-   $Date: 1999/11/02 09:00:43 $
+   $Revision: 1.3 $
+   $Date: 2000/01/05 09:19:45 $
    $Author: straten $ */
 
 // redwards 17 Mar 99 -- Time for a definitive C++ suite of
@@ -76,7 +76,6 @@ class Angle
   friend int operator == (const Angle &, const Angle &);
   friend int operator != (const Angle &, const Angle &);
 
- private:
   friend ostream& operator<< (ostream&, const Angle&);
 };
  
@@ -120,7 +119,6 @@ class AnglePair
   friend int operator == (const AnglePair &, const AnglePair &);
   friend int operator != (const AnglePair &, const AnglePair &);
 
- private:
   friend ostream& operator<< (ostream&, const AnglePair&);
 };
 
