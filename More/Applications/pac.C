@@ -21,6 +21,13 @@ int main (int argc, char *argv[]) {
   bool do_polncal = true;
   bool write_database_file = false;
 
+  bool test_instr = true;
+  bool test_coords = true;
+  bool test_times = true;
+  bool test_frequency = true;
+  bool test_bandwidth = true;
+  bool test_obstype = true;
+  
   string cals_are_here;
   vector<string> exts;
 
@@ -30,7 +37,7 @@ int main (int argc, char *argv[]) {
   char* key = NULL;
   char whitespace[5] = " \n\t";
 
-  while ((gotc = getopt(argc, argv, "hvVp:e:wDFP")) != -1) {
+  while ((gotc = getopt(argc, argv, "hvVp:e:wcitfboDFP")) != -1) {
     switch (gotc) {
     case 'h':
       cout << "A program for calibrating Pulsar::Archives"  << endl;
@@ -43,6 +50,12 @@ int main (int argc, char *argv[]) {
       cout << "  -w   Write a new database summary file"    << endl;
       cout << "       if using -p"                          << endl;
       //cout << "  -d   Read ASCII summary (instead of -p)"   << endl;
+      cout << "  -c   Do not try to match sky coordinates"  << endl;
+      cout << "  -i   Do not try to match instruments"      << endl;
+      cout << "  -t   Do not try to match times"            << endl;
+      cout << "  -f   Do not try to match frequencies"      << endl;
+      cout << "  -b   Do not try to match bandwidths"       << endl;
+      cout << "  -o   Do not try to match obs types"        << endl;
       cout << "  -D   Display calibration model parameters" << endl;
       cout << "  -F   Calibrate fluxes only"                << endl;
       cout << "  -P   Calibrate polarisations only"         << endl;
@@ -81,6 +94,25 @@ int main (int argc, char *argv[]) {
     case 'w':
       write_database_file = true;
       break;
+    case 'c':
+      test_coords = false;
+      break;
+    case 'i':
+      test_instr = false;
+      break;
+    case 't':
+      test_times = false;
+      break;
+    case 'f':
+      test_frequency = false;
+      break;
+    case 'b':
+      test_bandwidth = false;
+      break;
+    case 'o':
+      test_obstype = false;
+      break;
+
     default:
       cout << "Unrecognised option" << endl;
     }
@@ -108,6 +140,13 @@ int main (int argc, char *argv[]) {
       cout << "Generating new database" << endl;
       
       dbase = new Pulsar::Calibration::Database (cals_are_here.c_str(), exts);
+
+      dbase -> test_inst(test_instr);
+      dbase -> test_posn(test_coords);
+      dbase -> test_time(test_times);
+      dbase -> test_freq(test_frequency);
+      dbase -> test_bw(test_bandwidth);
+      dbase -> test_obst(test_obstype);
 
       if (verbose)
 	cerr << dbase->size() << " Calibrator Archives found" << endl;
