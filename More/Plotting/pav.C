@@ -1,5 +1,5 @@
 //
-// $Id: pav.C,v 1.45 2003/06/10 08:29:11 straten Exp $
+// $Id: pav.C,v 1.46 2003/06/16 09:57:23 straten Exp $
 //
 // The Pulsar Archive Viewer
 //
@@ -11,7 +11,9 @@
 #include <unistd.h>
 #include <cpgplot.h>
 
+#if 0
 #include "cpg_fns.h"
+#endif
 
 #include "Reference.h"
 #include "Pulsar/Archive.h"
@@ -196,7 +198,7 @@ int main (int argc, char** argv)
       plotter.set_subint( atoi (optarg) );
       break;
     case 'i':
-      cout << "$Id: pav.C,v 1.45 2003/06/10 08:29:11 straten Exp $" << endl;
+      cout << "$Id: pav.C,v 1.46 2003/06/16 09:57:23 straten Exp $" << endl;
       return 0;
 
     case 'l':
@@ -500,7 +502,9 @@ int main (int argc, char** argv)
 	xaxis [ibin] = float(ibin);
     
       cpg_next();
+#if 0
       prettyplot (color, symbol, 1, xaxis, pband);
+#endif
     
     }
 
