@@ -5,6 +5,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <math.h>
+#include <iostream>
 
 #include "ephio.h"
 #include "psrephem.h"
@@ -415,13 +416,18 @@ int psrephem::load (string* instr)
 
 int psrephem::unload (string* outstr) const
 {
+  if(parmStatus == NULL){ 
+    *outstr = string();
+    return(0);
+  }
+
   if (!tempo11)  {
     *outstr += nontempo11;
     return 0;
   }
-  for (int i=0;i<EPH_NUM_KEYS;i++)
+  for (int i=0;i<EPH_NUM_KEYS;i++){
     strcpy (ephemstr[i], value_str[i].data());
-
+  }
   strcpy (psrephem::tmp_fname, PSREPHEM_TMP_FNAME);
   mktemp (psrephem::tmp_fname);
   int istat = wr_eph (psrephem::tmp_fname, parmStatus, ephemstr, value_double,
