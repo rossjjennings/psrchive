@@ -348,6 +348,34 @@ double psrephem::dm() const
   return -1.0;
 }
 
+double psrephem::jra() const
+{
+  if (!tempo11)
+    return -1;
+
+  if (parmStatus[EPH_RAJ])
+    return value_double[EPH_RAJ];
+
+  if (verbose)
+    fprintf(stderr, "psrephem::dm() DM not specified.\n");
+
+  return -99.0;
+}
+
+double psrephem::jdec() const
+{
+  if (!tempo11)
+    return -1;
+
+  if (parmStatus[EPH_DECJ])
+    return value_double[EPH_DECJ];
+
+  if (verbose)
+    fprintf(stderr, "psrephem::dm() DM not specified.\n");
+
+  return -99.0;
+}
+
 void psrephem::nofit()
 {
   if (!tempo11)
