@@ -29,28 +29,16 @@ void Pulsar::Integration::resize (unsigned new_npol, unsigned new_nchan, unsigne
 
   unsigned ipol=0, ichan=0;
 
-  for (ipol=0; ipol < cur_npol; ipol++) {
-    for (ichan=new_nchan; ichan < cur_nchan; ichan++) {
-      if (profiles[ipol][ichan])
-	delete profiles[ipol][ichan];  profiles[ipol][ichan]=0;
-    }
-    if (ipol < new_npol) {
-      profiles[ipol].resize(new_nchan);
-      for (ichan=cur_nchan; ichan < new_nchan; ichan++)
-	profiles[ipol][ichan] = new_Profile();
-    }
-  }
-
-  for (ipol=new_npol; ipol < cur_npol; ipol++)
-    for (ichan=0; ichan < cur_nchan; ichan++) {
-      if (profiles[ipol][ichan])
-	delete profiles[ipol][ichan];  profiles[ipol][ichan]=0;
-    }
-
   profiles.resize (new_npol);
 
+  for (ipol=0; ipol < cur_npol; ipol++) {
+    profiles[ipol].resize (new_nchan);
+    for (ichan=cur_nchan; ichan < new_nchan; ichan++)
+      profiles[ipol][ichan] = new_Profile();
+  }
+
   for (ipol=cur_npol; ipol < new_npol; ipol++) {
-    profiles[ipol].resize(new_nchan);
+    profiles[ipol].resize (new_nchan);
     for (ichan=0; ichan < new_nchan; ichan++)
       profiles[ipol][ichan] = new_Profile();
   }

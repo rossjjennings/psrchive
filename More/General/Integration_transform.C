@@ -17,9 +17,6 @@ void Pulsar::Integration::transform (const Jones<float>& response)
 
     poln.transform (response);
     
-    poln.get_Profiles (profiles[0][ichan], profiles[1][ichan],
-		       profiles[2][ichan], profiles[3][ichan]);
-
   }
 }
  
@@ -41,9 +38,6 @@ void Pulsar::Integration::transform (const vector< Jones<float> >& response)
 
     poln.transform (response[ichan]);
     
-    poln.get_Profiles (profiles[0][ichan], profiles[1][ichan],
-		       profiles[2][ichan], profiles[3][ichan]);
-
   }
 }
  

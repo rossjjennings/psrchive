@@ -56,7 +56,5 @@ void Pulsar::Integration::poln_convert (Signal::State out_state)
 
     poln.convert_state (out_state);
 
-    poln.get_Profiles (profiles[0][ichan], profiles[1][ichan],
-		       profiles[2][ichan], profiles[3][ichan]);
   }
 }

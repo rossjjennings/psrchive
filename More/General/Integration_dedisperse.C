@@ -92,7 +92,7 @@ double Pulsar::Integration::weighted_frequency (unsigned chan_start, unsigned ch
   if (get_npol() == 0)
     throw Error (InvalidRange, "Integration::weighted_frequency", "npol==0");
 
-  const vector<Profile*>& prof = profiles[ipol];
+  const vector< Reference::To<Profile> >& prof = profiles[ipol];
 
   if (chan_start >= get_nchan() || chan_start < 0)
     throw Error (InvalidRange, "Integration::weighted_frequency",
