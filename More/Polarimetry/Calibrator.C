@@ -26,6 +26,21 @@ void Pulsar::Calibrator::calibrate (Integration* integration,
   integration->transform (response);
 }
 
+//! Return a string containing the file information
+string Pulsar::Calibrator::get_filenames () const
+{
+  string names;
+
+  if (filenames.size())
+    names = filenames[0];
+
+  for (unsigned i=1; i<filenames.size(); i++)
+    names += ", " + filenames[i];
+
+  return names;
+
+}
+
 //! Return a const reference to the calibrator archive
 const Pulsar::Archive* Pulsar::Calibrator::get_Archive () const
 {

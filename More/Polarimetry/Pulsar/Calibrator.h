@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/Attic/Calibrator.h,v $
-   $Revision: 1.15 $
-   $Date: 2003/12/06 01:06:09 $
+   $Revision: 1.16 $
+   $Date: 2004/04/05 12:41:21 $
    $Author: straten $ */
 
 #ifndef __Calibrator_H
@@ -78,11 +78,11 @@ namespace Pulsar {
     //! Get the number of frequency channels in the calibrator
     virtual unsigned get_nchan () const = 0;
 
+    //! Return a string containing the file information
+    virtual string get_filenames () const;
+
     //! Return a const reference to the calibrator archive
     const Archive* get_Archive () const;
-
-    //! Filenames of Pulsar::Archives from which instance was created
-    vector<string> filenames;
 
     //! Pure virtual base class generalizes Calibrator parameter communication
     class Info : public Reference::Able {
@@ -138,6 +138,9 @@ namespace Pulsar {
 
     //! Reference to the Pulsar::Archive from which this instance was created
     Reference::To<const Archive> calibrator;
+
+    //! Filenames of Pulsar::Archives from which instance was created
+    vector<string> filenames;
 
   };
 
