@@ -1,6 +1,6 @@
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/Timer/timer.h,v $
-   $Revision: 1.6 $
-   $Date: 2001/02/24 07:59:36 $
+   $Revision: 1.7 $
+   $Date: 2001/06/02 09:10:36 $
    $Author: straten $ */
 
 /* include file for the main timer structure                            */
@@ -203,5 +203,7 @@ struct timer {
   char space[TIMER_SPACE];
 
 };
+
+#define TIMER_SIZE 1024
 
 #endif
