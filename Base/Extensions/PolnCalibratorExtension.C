@@ -38,7 +38,7 @@ Pulsar::PolnCalibratorExtension::operator=
     if ( copy.get_valid(ichan) )
       response[ichan]->copy(copy.response[ichan]);
     else
-      response[ichan] = 0;
+      set_valid (ichan, false);
 
   return *this;
 }
@@ -77,6 +77,14 @@ void Pulsar::PolnCalibratorExtension::set_nchan (unsigned _nchan)
   construct ();
 }
 
+//! Set the weight of the specified channel
+void Pulsar::PolnCalibratorExtension::set_weight (unsigned ichan, float weight)
+{
+  CalibratorExtension::set_weight (ichan, weight);
+  if (weight == 0)
+    set_valid (ichan, false);
+}
+
 bool Pulsar::PolnCalibratorExtension::get_valid (unsigned ichan) const
 {
   range_check (ichan, "Pulsar::PolnCalibratorExtension::get_valid");
@@ -87,8 +95,10 @@ void Pulsar::PolnCalibratorExtension::set_valid (unsigned ichan, bool valid)
 {
   range_check (ichan, "Pulsar::PolnCalibratorExtension::set_valid");
 
-  if (!valid)
+  if (!valid) {
     response[ichan] = 0;
+    weight[ichan] = 0;
+  }
   else if (!response[ichan])
     response[ichan] = new_transformation ();
 }

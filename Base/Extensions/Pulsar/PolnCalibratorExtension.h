@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/PolnCalibratorExtension.h,v $
-   $Revision: 1.11 $
-   $Date: 2004/10/08 10:27:54 $
+   $Revision: 1.12 $
+   $Date: 2004/10/08 15:42:28 $
    $Author: straten $ */
 
 #ifndef __PolnCalibratorExtension_h
@@ -49,6 +49,9 @@ namespace Pulsar {
 
     //! Set the number of frequency channels
     void set_nchan (unsigned nchan);
+
+    //! Set the weight of the specified channel
+    void set_weight (unsigned ichan, float weight);
 
     //! Return true if the transformation for the specified channel is valid
     bool get_valid (unsigned ichan) const;
