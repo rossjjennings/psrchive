@@ -3,13 +3,21 @@
 #ifndef _utils_psrfft_MKL_Transform_h_
 #define _utils_psrfft_MKL_Transform_h_
 
-#if HAVE_MKL
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
+#ifdef HAVE_MKL
 
 #include <vector>
 
-#include "Transform.h"
+namespace FTransform {
+  class MKL_Plan;
+}
 
-namespace Transform {
+#include "FTransform.h"
+
+namespace FTransform {
   int mkl_initialise();
 
   int mkl_frc1d(unsigned ndat, float* dest, float* src);
