@@ -3,11 +3,11 @@ include $(LOCAL_ROOT)/include/Makefile.standard
 
 NONMODULE := ephio.h ephio_def.c
 
-INCLUDES := psrephem.h ephio.h ephio_func.h
+INCLUDES := psrephem.h ephio.h ephio_func.h MatchingEphemeris.h
 
 LIBRARY  := libeph.a
 LIB_SRCS := ephio_c.c ephio_def.c ephio.f \
-	psrephem.C set_epoch.C tex.C derived.C
+	psrephem.C set_epoch.C tex.C derived.C MatchingEphemeris.C
 
 PROGRAMS := keys2c.c keys2fort.c ephaux.C ephepo.C ephtex.C
 
