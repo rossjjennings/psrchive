@@ -69,9 +69,6 @@ Pulsar::Profile* Pulsar::Profile::morphological_difference (const Profile& profi
     throw Error (InvalidRange, "Pulsar::Profile::morphological_difference",
 		 "incompatible number of phase bins");
 
-  float this_max = 0.0;
-  float that_max = 0.0;
-  
   Pulsar::Profile* temp1 = new Pulsar::Profile(*this);
   Pulsar::Profile* temp2 = new Pulsar::Profile(profile);
 
@@ -82,23 +79,17 @@ Pulsar::Profile* Pulsar::Profile::morphological_difference (const Profile& profi
 
   float minphs = 0.0;
 
-  minphs = temp1->find_min_phase();
+  minphs = temp1->find_min_phase(0.6);
   *temp1 -= (temp1->mean(minphs));
 
-  minphs = temp2->find_min_phase();
+  minphs = temp2->find_min_phase(0.6);
   *temp2 -= (temp2->mean(minphs));
+  
+  float maxphs = 0.0;
+  maxphs = temp1->find_max_phase();
+  float max = temp1->mean(maxphs);
 
-  //this_max = temp1->max();
-  //that_max = temp2->max()
-  
-  for (float i = 0.0; i <= 1.0; i += default_duty_cycle) {
-    if (temp1->mean(i) > this_max)
-      this_max = temp1->mean(i);
-    if (temp2->mean(i) > that_max)
-      that_max = temp2->mean(i);
-  }
-  
-  float ratio = that_max / this_max;
+  float ratio = temp2->sum() / temp1->sum();
   
   *temp1 *= ratio;
   
@@ -107,6 +98,7 @@ Pulsar::Profile* Pulsar::Profile::morphological_difference (const Profile& profi
 
   for (unsigned i = 0; i < temp1->get_nbin(); i++) {
     amps1[i] = amps1[i] - amps2[i];
+    amps1[i] /= max;
   }
 
   return temp1;
