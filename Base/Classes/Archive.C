@@ -171,10 +171,16 @@ void Pulsar::Archive::add_extension (Extension* ext)
   
   unsigned index = find_type (extension, ext);
 
-  if (index < extension.size())
+  if (index < extension.size())  {
+    if (verbose == 3)
+      cerr << "Pulsar::Archive::add_extension replacing" << endl;
     extension[index] = ext;
-  else
+  }
+  else {
+    if (verbose == 3)
+      cerr << "Pulsar::Archive::add_extension appending" << endl; 
     extension.push_back(ext);
+  }
 }
 
 void Pulsar::Archive::refresh()
