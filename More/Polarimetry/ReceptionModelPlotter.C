@@ -61,8 +61,8 @@ void Calibration::ReceptionModelPlotter::set_output (const char* filename)
 
 void Calibration::ReceptionModelPlotter::plot_observations ()
 {
-  vector< Estimate<float> > stokes[4];
-  vector< float > para;
+  std::vector< Estimate<float> > stokes[4];
+  std::vector< float > para;
 
   unsigned nmeas = model->get_ndata ();
   for (unsigned imeas=0; imeas<nmeas; imeas++) {
@@ -94,8 +94,9 @@ void Calibration::ReceptionModelPlotter::plot_observations ()
   }
 
   if (stokes[0].size() == 0) {
-    cerr << "Calibration::ReceptionModelPlotter::plot_observations "
-            "ipath=" << ipath << " isource=" << isource << " no data" << endl;
+    std::cerr << "Calibration::ReceptionModelPlotter::plot_observations "
+            "ipath=" << ipath << " isource=" << isource << " no data" 
+              << std::endl;
     return;
   }
 
