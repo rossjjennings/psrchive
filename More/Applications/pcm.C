@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pcm.C,v $
-   $Revision: 1.33 $
-   $Date: 2004/10/11 14:26:36 $
+   $Revision: 1.34 $
+   $Date: 2004/10/13 06:29:52 $
    $Author: straten $ */
 
 /*! \file pcm.C 
@@ -329,10 +329,6 @@ int main (int argc, char *argv[]) try {
       cerr << "pcm: using a maximum of " << maxbins << " bins or harmonics" 
 	   << endl;
       maxbins_set = true;
-      break;
-
-    case 'O':
-      Calibration::Model::signal_changed = false;
       break;
 
     case 'P':
