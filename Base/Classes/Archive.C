@@ -31,50 +31,6 @@ Pulsar::Archive::~Archive ()
     delete subints[isub];
 }
 
-void Pulsar::Archive::resize (int nsubint, int npol, int nchan, int nbin)
-{
-  if (verbose)
-    cerr << "Pulsar::Archive::resize nsub=" << nsubint << " npol=" << npol
-	 << " nchan=" << nchan << " nbin=" << nbin << endl;
-
-  int isub, nsub = (int) subints.size();
-
-  if (verbose)
-    cerr << "Pulsar::Archive::resize delete " 
-	 << nsubint << "->" << nsub << " old subints" << endl;
-
-  for (isub=nsubint; isub<nsub; isub++)
-    delete subints[isub];
-
-  subints.resize (nsubint);
-
-  if (verbose)
-    cerr << "Pulsar::Archive::resize create " 
-	 << nsub << "->" << nsubint << " new subints" << endl;
-
-  for (isub=nsub; isub<nsubint; isub++)
-    subints[isub] = new_Integration ();
-
-  if (verbose)
-    cerr << "Pulsar::Archive::resize subints" << endl;
-
-  for (isub=0; isub<nsubint; isub++)
-    subints[isub] -> resize (npol, nchan, nbin);
-
-  if (verbose)
-    cerr << "Pulsar::Archive::resize calling book-keeping functions" << endl;
-
-  set_nsubint (nsubint);
-  if (npol > 0)
-    set_npol (npol);
-  if (nchan > 0)
-    set_nchan (nchan);
-  if (nbin > 0)
-    set_nbin (nbin);
-
-  if (verbose)
-    cerr << "Pulsar::Archive::resize exit" << endl;
-}
 
 /*!
   \param subint the index of the requested Integration
@@ -136,13 +92,13 @@ void Pulsar::Archive::bscrunch (int nscrunch)
   Simply calls Integration::fscrunch on each element of subints
   \param nscrunch the number of frequency channels to add together
   */
-void Pulsar::Archive::fscrunch (int nscrunch)
+void Pulsar::Archive::fscrunch (int nscrunch, bool weighted_cfreq)
 {
   if (subints.size() == 0)
     return;
 
   for (unsigned isub=0; isub < subints.size(); isub++)
-    subints[isub] -> fscrunch (nscrunch);
+    subints[isub] -> fscrunch (nscrunch, weighted_cfreq);
 
   set_nchan (subints[0]->get_nchan());
 }
@@ -248,10 +204,29 @@ void Pulsar::Archive::invint ()
 
 }
 
-void Pulsar::Archive::remove_baseline ()
+/*!
+  If phase is not specified, this method calls
+  Archive::find_min_phase to find the phase at which the mean in a
+  region of the total intensity (as returned by Archive::total)
+  reaches a minimum.  This phase is then used to remove the baseline from
+  each of the Integrations.
+  */
+void Pulsar::Archive::remove_baseline (float phase)
 {
+  try {
 
+    if (phase == -1.0)
+      phase = find_min_phase ();
+
+    for (int isub=0; isub < get_nsubint(); isub++)
+      subints[isub] -> remove_baseline (phase);
+
+  }
+  catch (Error& error) {
+    throw error += "Archive::remove_baseline";
+  }
 }
+
 
 void Pulsar::Archive::rotate (double time)
 {
@@ -262,7 +237,6 @@ void Pulsar::Archive::rotate (double time)
 /*!
   \pre Archive polarimetric state must represent Stokes IQUV
   \pre The baseline must have been removed.
-/*!
   \param rotation_measure
   \param rm_iono
 */

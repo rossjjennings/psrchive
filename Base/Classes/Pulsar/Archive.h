@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Archive.h,v $
-   $Revision: 1.26 $
-   $Date: 2002/04/26 13:29:12 $
-   $Author: pulsar $ */
+   $Revision: 1.27 $
+   $Date: 2002/04/29 11:42:41 $
+   $Author: straten $ */
 
 /*! \mainpage 
  
@@ -185,8 +185,11 @@ namespace Pulsar {
     static Archive* factory (const string& filename)
     { return factory (filename.c_str()); }
 
-    //! Returns a pointer to a new copy of self
+    //! Return a pointer to a new copy of self
     virtual Archive* clone () const = 0;
+
+    //! Return a pointer to a new fscrunched, tscrunched and pscrunched copy
+    Archive* total () const;
 
     //! Resets the dimensions of the data area
     virtual void resize (int nsubint, int npol=0, int nchan=0, int nbin=0);
@@ -213,7 +216,7 @@ namespace Pulsar {
     virtual void pscrunch();
 
     //! Integrate profiles in frequency
-    virtual void fscrunch (int nscrunch=0);
+    virtual void fscrunch (int nscrunch=0, bool weighted_cfreq = true);
 
     //! Integrate profiles in time
     virtual void tscrunch (unsigned nscrunch=0);
@@ -252,7 +255,7 @@ namespace Pulsar {
     virtual void invint ();
   
     //! Remove the baseline from all profiles
-    virtual void remove_baseline ();
+    virtual void remove_baseline (float phase = -1.0);
 
     //! Install the given ephemeris and calls update_model
     virtual void set_ephemeris (const psrephem& ephemeris);
@@ -300,6 +303,18 @@ namespace Pulsar {
 		   Dimension::Axis x1 = Dimension::Phase,
 		   Dimension::Axis x2 = Dimension::Frequency,
 		   Dimension::Axis x3 = Dimension::Poln) const;
+
+    //! Find the transitions between high and low states in total intensity
+    void find_transitions (int& hi2lo, int& lo2hi, int& buffer) const;
+
+    //! Find the bins in which the total intensity exceeds a threshold
+    void find_peak_edges (int& rise, int& fall) const;
+
+    //! Returns the centre phase of the region with maximum total intensity
+    float find_max_phase () const;
+
+    //! Returns the centre phase of the region with minimum total intensity
+    float find_min_phase () const;
 
     // //////////////////////////////////////////////////////////////////
     //
