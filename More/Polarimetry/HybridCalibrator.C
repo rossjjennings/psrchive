@@ -1,7 +1,9 @@
 #include "Pulsar/HybridCalibrator.h"
 #include "Pulsar/ReferenceCalibrator.h"
 #include "Pulsar/CalibratorStokes.h"
+#include "Pulsar/Receiver.h"
 
+#include "Calibration/SingleAxisSolver.h"
 #include "Calibration/SingleAxis.h"
 #include "Pauli.h"
 
@@ -22,13 +24,14 @@ Pulsar::Calibrator::Type Pulsar::HybridCalibrator::get_type () const
 }
 
 //! Set the Stokes parameters of the reference signal
-void Pulsar::HybridCalibrator::set_reference_input (CalibratorStokes* reference)
+void Pulsar::HybridCalibrator::set_reference_input (CalibratorStokes* input)
 {
-  reference_input = reference;
+  reference_input = input;
 }
 
-//! Set the ReferenceCalibrator data from which to derive a SingleAxis
-void Pulsar::HybridCalibrator::set_reference_observation (ReferenceCalibrator* observation)
+//! Set the ReferenceCalibrator data from which to derive a SingleAxis model
+void Pulsar::HybridCalibrator::set_reference_observation (ReferenceCalibrator*
+							  observation)
 {
   reference_observation = observation;
 
@@ -36,7 +39,7 @@ void Pulsar::HybridCalibrator::set_reference_observation (ReferenceCalibrator* o
   filenames[1] = observation->get_filenames();
 }
     
-//! Set the PolnCalibrator to be supplemented
+//! Set the PolnCalibrator to be supplemented by the SingleAxis model
 void Pulsar::HybridCalibrator::set_precalibrator (PolnCalibrator* _calibrator)
 {
   precalibrator = _calibrator;
@@ -115,68 +118,56 @@ void Pulsar::HybridCalibrator::calculate_transformation ()
       continue;
     }
 
-    // S"  are the observed calibrator Stokes parameters
-    // S'  are the modeled calibrator Stokes parameters after precalibrator transformation
-    // S   are the ideal calibrator Stokes parameters, S=[1,0,1,0]
-    //
-    // M_1 is the SingleAxis Mueller matrix that converts observed to ideal
-    // M_0 is the SingleAxis Mueller matrix that converts modeled to ideal
-    //
-    // 1)  S" = M_1 S
-    // 2)  S' = M_0 S
-    // 3)  S" = M_1 M_0^-1 S' = M_s S'
-    //
-    // This method calculates M_s = M_1 M_0^-1 S'
-
-    // 1) solve S" = M_1 S
-
+    // get the coherency vector of the measured reference source
     for (unsigned ipol=0; ipol<npol; ++ipol) {
       cal[ipol] = cal_hi[ipol][ichan];
       cal[ipol] -= cal_lo[ipol][ichan];
     }
-    
-    correction = new Calibration::SingleAxis;
-    correction->solve (cal);
 
-    // 2) solve S' = M_0 S
- 
-    // pass the input Stokes parameters through the precalibrator transformation
+    // get the Stokes parameters of the reference source observation
+    Stokes< Estimate<double> > output_stokes = coherency( convert (cal) );
+    output_stokes *= 2.0;
 
-    Calibration::Complex2* xform;
-    xform = precalibrator->get_transformation (ichan);
+    // get the Stokes parameters of the reference source input
+    Stokes<Estimate<double> > cal_stokes = reference_input->get_stokes (ichan);
 
+    // get the precalibrator transformation
     Jones< Estimate<double> > response;
-    xform->evaluate (response);
+    precalibrator->get_transformation (ichan)->evaluate (response);
 
-    Stokes< Estimate<double> > stokes = reference_input->get_stokes (ichan);
-    Jones< Estimate<double> > rho = response * convert(stokes) * herm(response);
+    // get the Receiver correction, if any
+    if (precalibrator->has_Receiver()) {
+      const Receiver* receiver = precalibrator->get_Receiver();
+      response *= receiver->get_correction ();
+    }
 
-    cal[0] = 0.5 * rho.j(0,0).real();
-    cal[1] = 0.5 * rho.j(1,1).real();
-    cal[2] = 0.5 * rho.j(1,0).real();
-    cal[3] = 0.5 * rho.j(1,0).imag();
+    // pass the reference Stokes parameters through the instrument
+    Stokes<Estimate<double> > input_stokes = transform (cal_stokes, response);
 
-    pre_single_axis.solve (cal);
+    // solve for the SingleAxis model that relates input and output states
+    correction = new Calibration::SingleAxis;
 
-    // 3) calculate M_s = M_1 M_0^-1
+    if (!solver)
+      solver = new ::Calibration::SingleAxisSolver;
 
-    pre_single_axis.invert ();
-    *correction *= pre_single_axis;
+    solver->set_input (input_stokes);
+    solver->set_output (output_stokes);
+    solver->solve (correction);
 
-    // 4) produce the supplemented transformation, M_s M_B
+    // produce the supplemented transformation, 
 
     Calibration::ProductRule<Calibration::Complex2>* result;
     result = new Calibration::ProductRule<Calibration::Complex2>;
 
     *result *= correction;
-    *result *= xform;
+    *result *= precalibrator->get_transformation (ichan);
 
     transformation[ichan] = result;
 
   }
 
   if (verbose)
-    cerr << "Pulsar::HybridCalibrator::calculate_transformation exit"
-	 << endl;
+    cerr << "Pulsar::HybridCalibrator::calculate_transformation exit" << endl;
+
 }
 
