@@ -27,7 +27,7 @@ PROGRAMS = calinfo.C align.C amps.C chanprep.C crstd.C \
 	crh.C psrhead.C fakedat.C plk.C stokes_plt.C \
 	headsum.C treduce.C testbpass.C mel2.C invint.C \
 	tcombine2.C ratio.C fixprf.C xformprof.C archive_test.C \
-	h1_studies.C
+	h1_studies.C arch3d.C
 
 TESTS = timer_size.c
 
