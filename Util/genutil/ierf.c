@@ -27,11 +27,10 @@ double ierf (double erfx)
   for (gi=0; gi<gmax; gi++) {
     dx = (erf(guess) - erfx) / exp (-guess*guess);
     guess -= dx;
-    if (fabs (dx/guess) < 10e-10)
+    if (fabs (dx) <= fabs(guess)*1e-10)
       return guess;
   }
-  fprintf (stderr, "ierf: maximum iterations exceeded - %lf error\n",
-	   fabs (dx/guess));
+  fprintf (stderr, "ierf: maximum iterations exceeded - %lf error\n", dx);
   return guess;
 }
 
