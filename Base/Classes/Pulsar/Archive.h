@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Archive.h,v $
-   $Revision: 1.7 $
-   $Date: 2002/04/09 16:16:48 $
+   $Revision: 1.8 $
+   $Date: 2002/04/09 17:03:04 $
    $Author: straten $ */
 
 /*! \mainpage 
@@ -16,10 +16,11 @@
   The basic quantity observed in most pulsar experiments is the pulse
   profile, and is implemented by the Pulsar::Profile class.  The
   Pulsar::Integration class implements a two-dimensional array of
-  Pulsar::Profiles integrated over the same time interval.  The axis
-  of this array are polarimetric measure and observing frequency.  The
-  Pulsar::Archive class implements a one-dimensional array of
-  Pulsar::Integrations, each starting at the same pulse phase.
+  Pulsar::Profile objects, each integrated over the same time
+  interval.  The axis of the 2-D Profile array are polarimetric
+  measure and observing frequency.  The Pulsar::Archive class
+  implements a one-dimensional array of Pulsar::Integration objects,
+  each starting at the same pulse phase.
 
   The main class used in most high-level code is the Pulsar::Archive
   class, which implements various basic operations on sequences of
@@ -58,6 +59,7 @@ namespace Pulsar {
 
   class Integration;
 
+  //! Group of Pulsar::Integration observations with the same pulse phase
   class Archive {
 
   public:
@@ -68,25 +70,14 @@ namespace Pulsar {
     Archive ();
     virtual ~Archive ();
 
-    //
-    //! Dynamic constructor returns a new instantiation of an Archive-derived child class
-    /*
-      \param filename
-      \exception string
-    */
+    //! Loads an Archive-derived child class from a file.
     static Archive* factory (const char* filename);
 
     //! Convenience interface
-    /*
-      \param filename
-      \exception string
-    */
     static Archive* factory (const string& filename)
     { return factory (filename.c_str()); }
 
-    //
     //! Returns a pointer to a new copy of self
-    //
     virtual Archive* clone ();
 
 

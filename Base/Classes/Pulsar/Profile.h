@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Profile.h,v $
-   $Revision: 1.1 $
-   $Date: 2002/04/09 16:17:06 $
+   $Revision: 1.2 $
+   $Date: 2002/04/09 17:03:04 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Profile_h
@@ -55,6 +55,9 @@ namespace Pulsar {
     //! set all amplitudes to zero
     virtual void zero();
   
+    //! resize the data area
+    virtual void resize (int nbin);
+
     //! calls bscrunch with the appropriate argument
     void halvebins (int nhalve);
 

@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Integration.h,v $
-   $Revision: 1.1 $
-   $Date: 2002/04/08 08:04:09 $
+   $Revision: 1.2 $
+   $Date: 2002/04/09 17:03:04 $
    $Author: straten $ */
 
 /*
@@ -27,12 +27,12 @@ namespace Tempo {
 class Angle;
 class Phase;
 
-class Poincare;
 class Stokes;
 
 
 namespace Pulsar {
 
+  //! Group of Pulsar::Profile objects integrated over the same time interval
   class Integration  {
 
   public:
@@ -41,83 +41,49 @@ namespace Pulsar {
     Integration ();
     virtual ~Integration ();
 
-    //
-    // clone - dynamic copy constructor
-    //
-    virtual Integration* clone (const Integration* copy);
+    //! Return pointer to copy of self
+    virtual Integration* clone ();
 
-    // //////////////////////////////////////////////////////////////////
-    //
-    // virtual methods - implemented by Integration
-    //
-    // //////////////////////////////////////////////////////////////////
+    //! Call Profile::fold on every profile
+    virtual void fold (int nfold);
 
-    //
-    // bscrunch - integrate profiles in phase
-    //
+    //! Call Profile::bsrunch on every profile
     virtual void bscrunch (int nscrunch);
 
-    //
-    // fscrunch - integrate profiles in frequency
-    //
-    virtual void fscrunch (int nscrunch = 0, double dispersion_measure = 0.0);
+    //! Integrate profiles from neighbouring bands
+    virtual void fscrunch (double dispersion_measure = 0.0, int nscrunch = 0);
 
-    //
-    // pscrunch - integrate profiles in polarization
-    //
+    //! Integrate profiles from two polarizations into one total intensity
     virtual void pscrunch();
 
-    //
-    // baseline_levels - returns the mean and variance of the mean in the
-    //                   baseline.  uses find_min or something
-    //
-    virtual void baseline_levels (vector<vector<double> > & mean,
-				  vector<vector<double> > & varmean) const;
+    //! Transform from Stokes I,Q,U,V to the polarimetric invariant interval
+    virtual void invint (bool square_root = true,
+			 float baseline_ph=-1);
 
-    //
-    // dedisperse - rotates the profiles to remove dispersion delays b/w bands
-    //
+    //! Rotate all profiles to remove dispersion delays between bands
     virtual void dedisperse (double dm = 0.0, double frequency = 0.0);
 
 
-    //
-    // find_cal_transitions - finds the transitions between hi and low
-    //                        in a pulsed CAL (square wave)
-    //
-    virtual void find_cal_transitions (int& hightolow, int& lowtohigh,
-				       int& buffer);
+    //! Find the transitions between hi and low states in a pulsed CAL
+    void find_cal_transitions (int& hightolow, int& lowtohigh,
+				       int& buffer) const;
     
-    //
-    // find_cal_levels - returns the mean hi/lo and variance of the mean hi/lo
-    //                   for every band and poln
-    //
-    virtual void find_cal_levels(vector<vector<double> >&m_hi,
-				 vector<vector<double> >&var_m_hi, 
-				 vector<vector<double> >&m_lo, 
-				 vector<vector<double> >&var_m_lo);
+    //! Return the mean and variance of the mean in every profile baseline
+    void baseline_levels (vector<vector<double> > & mean,
+			  vector<vector<double> > & varmean) const;
 
-    virtual void find_psr_levels (vector<vector<double> >& mean_high,
-				  vector<vector<double> >& mean_low);
+    //! Returns the mean hi/lo and variance of the mean hi/lo of every profile
+    void find_cal_levels (vector<vector<double> >&m_hi,
+			  vector<vector<double> >&var_m_hi, 
+			  vector<vector<double> >&m_lo, 
+			  vector<vector<double> >&var_m_lo) const;
+
+    void find_psr_levels (vector<vector<double> >& mean_high,
+			  vector<vector<double> >& mean_low) const;
   
-    //
-    // these only work for npol == 4
-    //
-    void  cal_levels (vector<Stokes>& hi, vector<Stokes>& lo);
-    void  psr_levels (vector<Stokes>& hi, vector<Stokes>& lo);
-    void  getStokes  (vector<Stokes>& S, int chan=0);
-
-    //
-    // fold - fold profiles into 1/nfold (for use with pulsars that have 
-    //        more than one period across the profile)
-    //
-    virtual void fold (int nfold);
-
-    //
-    // invint - transforms Stokes I,Q,U,V into the polarimetric invariant 
-    //          interval, Inv, where Inv*Inv = II-QQ-UU-VV
-    //
-    virtual void invint (bool square_root = true, // take sqrt(II-QQ-UU-VV)
-			 float baseline_ph=-1);   // phase of baseline window
+    void  cal_levels (vector<Stokes>& hi, vector<Stokes>& lo) const;
+    void  psr_levels (vector<Stokes>& hi, vector<Stokes>& lo) const;
+    void  getStokes  (vector<Stokes>& S, int chan=0) const;
 
     //
     // adds to a vector of tempo++ toa objects

@@ -12,20 +12,26 @@ extern "C" {
  void shiftbyfft_(float *, int *, float *);
 }
 
-/*! fractional pulse phase window (duty cycle) used to calculate the
+/*! 
+  fractional pulse phase window (duty cycle) used to calculate the
   transitions of the pulsed calibrator square wave.  This variable is
-  used by: Pulsar::Profile::find_cal_transition */
+  used by: Pulsar::Profile::find_cal_transition
+ */
 float Pulsar::Profile::cal_transition_window = 0.15;
 
-/*! fractional pulse phase window used by default to calculate the
-  the minimum or maximum of the pulse profile */
+/*! 
+  fractional pulse phase window used by default to calculate the
+  the minimum or maximum of the pulse profile 
+ */
 float Pulsar::Profile::default_duty_cycle = 0.15;
 
-/*! for debugging.  Add the statement "Pulsar::Profile::verbose =
-  true;" in the calling program to have debug information output on stderr */
+/*! 
+  for debugging.  Add the statement "Pulsar::Profile::verbose =
+  true;" in the calling program to have debug information output on stderr 
+*/
 bool Pulsar::Profile::verbose = 0;
 
-//! utility for correcting the indeces for a range
+// utility for correcting the indeces for a range
 void nbinify (int& istart, int& iend, int nbin)
 {
   if (istart < 0)
@@ -48,7 +54,7 @@ Pulsar::Profile::~Profile()
 {
   if (amps != NULL) delete [] amps;  amps = NULL;
 }
- 
+
 void Pulsar::Profile::offset (float offset)
 {
   for (int i=0;i<nbin;i++)
@@ -61,16 +67,14 @@ void Pulsar::Profile::scale (float factor)
     amps[i]*=factor;
 }
  
-
- 
-
-/*!  Rotate profile by number of bins specified by shift.  The
+/*!  
+ Rotate profile by number of bins specified by shift.  The
  profile will be rotated such that the power in bin shift will be
  found in bin zero.  ie.
 
-    t' = t + shift * period / nbin
+    t' = t + shift * period / nbin.
 
- where:  t' is the new start time (rising edge of bin 0)
+ Where:  t' is the new start time (rising edge of bin 0)
          t  is the original start time
          and period is the period at the time of folding
 */
@@ -398,10 +402,7 @@ float Pulsar::Profile::sigma (float phase, float duty_cycle) const
   int start_bin = int ((phase - 0.5 * duty_cycle) * nbin);
   int stop_bin = int ((phase + 0.5 * duty_cycle) * nbin);
 
-  double rms = 0;
-  stats (0, &rms, 0, start_bin, stop_bin);
-
-  return rms;
+  return rms (start_bin, stop_bin);
 }
  
 
