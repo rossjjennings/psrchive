@@ -202,10 +202,10 @@ void Pulsar::PolnProfile::set_coherence (unsigned ibin,
     throw Error (InvalidRange, "PolnProfile::set_coherence",
                  "ibin=%d >= nbin=%d", ibin, profile[0]->get_nbin());
 
-  profile[0]->get_amps()[ibin] = new_amps.j(0,0).real();
-  profile[1]->get_amps()[ibin] = new_amps.j(1,1).real();
-  profile[2]->get_amps()[ibin] = new_amps.j(0,1).real();
-  profile[3]->get_amps()[ibin] = new_amps.j(1,0).imag();
+  profile[0]->get_amps()[ibin] = new_amps(0,0).real();
+  profile[1]->get_amps()[ibin] = new_amps(1,1).real();
+  profile[2]->get_amps()[ibin] = new_amps(0,1).real();
+  profile[3]->get_amps()[ibin] = new_amps(1,0).imag();
 
 }
 
