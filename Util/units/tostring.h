@@ -1,7 +1,7 @@
 //-*-C++-*-
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/tostring.h,v $
-   $Revision: 1.4 $
-   $Date: 2004/12/16 16:29:07 $
+   $Revision: 1.5 $
+   $Date: 2004/12/16 16:45:33 $
    $Author: straten $ */
 
 #ifndef __TOSTRING_H
@@ -40,13 +40,14 @@ T fromstring (const std::string& input)
 }
 
 // string class specializations
-std::string tostring (const std::string& input)
+template<>
+inline std::string tostring (const std::string& input)
 {
   return input;
 }
 
 template<>
-std::string fromstring<std::string> (const std::string& input)
+inline std::string fromstring<std::string> (const std::string& input)
 {
   return input;
 }
