@@ -67,7 +67,7 @@ PROGRAMS = calinfo.C align.C amps.C chanprep.C crstd.C \
 	tcombine2.C ratio.C fixprf.C xformprof.C archive_test.C \
 	h1_studies.C arch3d.C
 
-TESTS = timer_size.c
+TESTS = timer_size.c baseband_header_size.C
 
 LDFLAGS += -larchive -ltempo++ -lpolyco -leph -ltimes \
 	-lgenutil++ -lgenutil -lsla $(LFFT) $(LF77) -lm
