@@ -5,7 +5,7 @@ include_HEADERS = Cartesian.h Angle.h MJD.h CommandParser.h		\
 	PlotManager.h PlotVolume.h PlotEvent.h PlotState.h		\
 	DataManager.h DataSet.h DataPoint.h DataVector.h Poincare.h	\
 	datum.h xydatum.h smarthist.h datumcond.h kstest.h RealTimer.h	\
-	Ready.h sky_coord.h TextInterface.h \
+	Ready.h sky_coord.h \
 	PrimeFactoriser.h WindowArray.h StringTokenizer.h		\
 	Sortable.h Printable.h Header.h thread_utils.h GetPK.h		\
 	VectorInfo.h Plugin.h shell.h Cartesian.h Angle.h coord_parse.h \
@@ -33,8 +33,7 @@ xserve_summary_SOURCES		= xserve_summary.C
 #loopy_SOURCES			= loopy.C
 
 TESTS = test_coord test_Cartesian test_MJD test_Angle test_ReferenceFit \
-	test_Header test_VectorInfo test_CommandParser test_Sortable \
-	test_TextInterface
+	test_Header test_VectorInfo test_CommandParser test_Sortable
 
 check_PROGRAMS = $(TESTS)
 
@@ -46,8 +45,6 @@ test_Header_SOURCES		= test_Header.C
 test_VectorInfo_SOURCES		= test_VectorInfo.C 
 test_CommandParser_SOURCES      = test_CommandParser.C
 test_Sortable_SOURCES           = test_Sortable.C
-test_TextInterface_SOURCES	= test_TextInterface.C
-
 
 AM_CPPFLAGS = -D_REENTRANT=1
 
