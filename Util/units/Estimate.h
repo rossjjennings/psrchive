@@ -1,58 +1,125 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Estimate.h,v $
-   $Revision: 1.3 $
-   $Date: 2003/02/12 13:57:39 $
+   $Revision: 1.4 $
+   $Date: 2003/02/12 14:55:03 $
    $Author: straten $ */
 
 #ifndef __Estimate_H
 #define __Estimate_H
 
-#include "operators.h"
-
-//! Estimates have a value, \f$ x \f$, and a variance, \f$ \sigma_x^2 \f$
+//! Estimates have a value, \f$ x \f$, and a variance, \f$ \sigma^2 \f$
 /*!
   Where \f$ y = f (x_1, x_2, ... x_n) \f$, then
-  \f$ \sigma_y^2 = \sum_{i=1}^n ({\delta f \over \delta x_i })^2\sigma_i^2 \f$
+  \f$ \sigma_y^2 = \sum_{i=1}^n ({\delta f \over \delta x_i})^2\sigma_i^2 \f$
 */
 template <typename T>
 class Estimate
 {
  public:
+  //! The value, \f$ x \f$
   T val;
+  //! The variance of the value, \f$ \sigma_x^2 \f$
   T var;
 
-  //! Construct from a value and its estimated error, \f$ \sigma^2 \f$
+  //! Construct from a value, \f$ x \f$, and its variance, \f$ \sigma^2 \f$
   Estimate (T _val=0, T _var=0) { val=_val; var=_var; }
 
   //! Construct from another Estimate
   Estimate (const Estimate& d) { val=d.val; var=d.var; }
 
   //! Assignment operator
-  Estimate & operator= (const Estimate& d)
+  const Estimate& operator= (const Estimate& d)
   { val=d.val; var=d.var; return *this; }
 
-  Estimate & operator+= (const Estimate& d)
+  //! Addition operator
+  const Estimate& operator+= (const Estimate& d)
   { val += d.val; var += d.var; return *this; }
 
-  Estimate & operator-= (const Estimate& d)
+  //! Subtraction operator
+  const Estimate& operator-= (const Estimate& d)
   { val -= d.val; var += d.var; return *this; }
 
-  //! Multiply two estimates
+  //! Multiplication operator
   /*! Where \f$ r=x*y \f$, \f$ \sigma_r = y^2\sigma_x + x^2\sigma_y */
-  Estimate & operator*= (const Estimate& d)
+  const Estimate& operator*= (const Estimate& d)
   { T v=val; val*=d.val; var=v*v*d.var+d.val*d.val*var; return *this; }
 
-  //! Divide two estimates
-  Estimate & operator/= (const Estimate& d)
+  //! Division operator
+  const Estimate& operator/= (const Estimate& d)
   { return operator *= (d.inverse()); }
 
-  //! Invert an estimate
+  //! Equality operator
+  bool operator == (T _val) const
+  { return val == _val; }
+
+  //! Inversion operator
   /*! Where \f$ r=1/x \f$, \f$ \sigma_r = r^2\sigma_x/x^2 = sigma_x/x^4 */
   const Estimate inverse () const
   { T v=1.0/val; return Estimate (v,var*v*v*v*v); }
 
+  friend Estimate operator + (Estimate a, const Estimate& b)
+  { return a+=b; }
+
+  friend Estimate operator - (Estimate a, const Estimate& b)
+  { return a-=b; }
+  
+  friend Estimate operator * (Estimate a, const Estimate& b)
+  { return a*=b; }
+  
+  friend Estimate operator / (Estimate a, const Estimate& b)
+  { return a/=b; }
+
 };
+
+//! Useful for quickly printing the values
+template<typename T>
+ostream& operator<< (ostream& ostr, const Estimate<T>& estimate)
+{
+  return ostr << "(" << estimate.val << "\261" << estimate.var << ")";
+}
+
+
+/*!
+  \f$ {\bar{x} over \bar{\sigma}^2} = \sum_{i=1}^n {x_i \over \sigma_i^2} \f$
+*/
+template <typename T>
+class MeanEstimate
+{
+ public:
+  //! The value, normalized by its variance
+  T norm_val;
+  //! The inverse of its variance
+  T inv_var;
+
+  //! Construct from a value and its estimated error, \f$ \sigma^2 \f$
+  MeanEstimate (T _val=0, T _var=0) { norm_val=_val; inv_var=_var; }
+
+  //! Construct from another MeanEstimate
+  MeanEstimate (const MeanEstimate& d)
+  { norm_val=d.norm_val; inv_var=d.inv_var; }
+
+  //! Assignment operator
+  const MeanEstimate& operator= (const MeanEstimate& d)
+  { norm_val=d.norm_val; inv_var=d.inv_var; return *this; }
+
+  //! Addition operator
+  const MeanEstimate& operator+= (const MeanEstimate& d)
+  { norm_val += d.norm_val; inv_var += d.inv_var; return *this; }
+
+  //! Addition operator
+  const MeanEstimate& operator+= (const Estimate<T>& d)
+  { T iv=1.0/d.var; norm_val += d.val*iv; inv_var += iv; return *this; }
+
+  //! Equality operator
+  bool operator == (T _norm_val) const
+  { return norm_val == _norm_val; }
+
+  Estimate<T> get_Estimate () const
+  { T var=1.0/inv_var; return Estimate<T> (norm_val*var, var); }
+
+};
+
 
 #endif
 
