@@ -607,24 +607,6 @@ float Pulsar::Profile::find_max_phase (float duty_cycle) const
   return find_phase (nbin, amps, true, duty_cycle);
 }
 
-
-float Pulsar::Profile::snr (const Profile& std) const
-{
-  if (verbose)
-    cerr << "Pulsar::Profile::snr(const Profile& std)" << endl;
-
-  float ephase, snrfft, esnrfft;
-
-  try {
-    shift (std, ephase, snrfft, esnrfft);
-  }
-  catch (...) {
-    return 0.0;
-  }
-
-  return snrfft;
-}
-
 extern "C" {
   void F772C(smooth_mw) ( float * period, int * nbin, int * maxw, float * rms,
 		       int * kwmax, float * snrmax, float * smmax,
