@@ -29,16 +29,18 @@ void Pulsar::FITSArchive::unload (fitsfile* fptr, const Receiver* ext)
   
   float temp;
 
-  temp = ext->get_X_offset().getDegrees();
-  fits_update_key (fptr, TFLOAT, "XPOL_ANG", &temp, comment, &status);
+  temp = ext->get_field_orientation().getDegrees();
+  fits_update_key (fptr, TFLOAT, "FD_SANG", &temp, comment, &status);
 
-  temp = ext->get_Y_offset().getDegrees() + 90.0;
-  fits_update_key (fptr, TFLOAT, "YPOL_ANG", &temp, comment, &status);
+  int hand = -1;
+  if (ext->get_right_handed())
+    hand = 1;
+  fits_update_key (fptr, TINT, "FD_HAND", &hand, comment, &status);
 
-  temp = ext->get_calibrator_offset().getDegrees() + 45.0;
-  fits_update_key (fptr, TFLOAT, "CAL_ANG", &temp, comment, &status);
+  temp = ext->get_reference_source_phase().getDegrees();
+  fits_update_key (fptr, TFLOAT, "FD_XYPH", &temp, comment, &status);
 
-  switch (ext->get_basis()) {
+  switch (ext->get_tracking_mode()) {
   case Receiver::Feed:
     strcpy (tempstr.get(), "FA"); break;
   case Receiver::Celestial:

@@ -111,6 +111,64 @@ void Pulsar::FITSArchive::load_Receiver (fitsfile* fptr)
 
   ext->set_calibrator_offset (angle);
 
+  // Read angle of X-probe wrt platform zero
+
+  if (verbose == 3)
+    cerr << "FITSArchive::load_Receiver reading FD_SANG" << endl;
+  
+  fits_read_key (fptr, TFLOAT, "FD_SANG", &temp, comment, &status);
+  if (status != 0) {
+    if (verbose == 3)
+      cerr << FITSError (status, "FITSArchive::load_Receiver",
+			 "fits_read_key FD_SANG").warning() << endl;
+    status = 0;
+  }
+  else {
+    angle.setDegrees( temp );
+    ext->set_field_orientation( angle );
+  }
+
+  // Read angle of Y-probe wrt platform zero
+
+  if (verbose == 3)
+    cerr << "FITSArchive::load_Receiver reading FD_HAND" << endl;
+  
+  int hand;
+
+  fits_read_key (fptr, TINT, "FD_HAND", &hand, comment, &status);
+  if (status != 0) {
+    if (verbose == 3)
+      cerr << FITSError (status, "FITSArchive::load_Receiver",
+			 "fits_read_key FD_HAND").warning() << endl;
+    status = 0;
+  }
+  else switch (hand) {
+  case 1:
+    ext->set_right_handed ( true ); break;
+  case -1:
+    ext->set_right_handed ( false ); break;
+  default:
+    throw Error (InvalidParam, "FITSArchive::load_Receiver",
+		 "FD_HAND=%d", hand);
+  }
+
+  // Read angle of linear noise diode wrt platform zero
+
+  if (verbose == 3)
+    cerr << "FITSArchive::load_Receiver reading FD_XYPH" << endl;
+  
+  fits_read_key (fptr, TFLOAT, "FD_XYPH", &temp, comment, &status);
+  if (status != 0) {
+    if (verbose == 3)
+      cerr << FITSError (status, "FITSArchive::load_Receiver",
+			 "fits_read_key FD_XYPH").warning() << endl;
+    status = 0;
+  }
+  else {
+    angle.setDegrees( temp );
+    ext->set_reference_source_phase (angle);
+  }
+
   // Feed track mode
 
   if (verbose == 3)
