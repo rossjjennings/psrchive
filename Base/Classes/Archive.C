@@ -185,12 +185,19 @@ void Pulsar::Archive::init_Integration (Integration* subint)
   subint -> set_state ( get_state() );
 }
 
-//! Call bscrunch with the appropriate value
+/*!
+  Useful wrapper for Archive::bscrunch
+*/
 void Pulsar::Archive::bscrunch_to_nbin (unsigned new_nbin)
 {
-  unsigned scr = get_nbin() / new_nbin;
-  if (scr > 0)
-    bscrunch (scr);
+  if (new_nbin <= 0)
+    throw Error (InvalidParam, "Pulsar::Archive::bscrunch_to_nbin",
+		 "Invalid nbin request");
+  else if (get_nbin() < new_nbin)
+    throw Error (InvalidParam, "Pulsar::Archive::bscrunch_to_nbin",
+		 "Archive has too few bins");
+  else
+    bscrunch(get_nbin() / new_nbin);
 }
 
 /*!
@@ -229,7 +236,11 @@ void Pulsar::Archive::fscrunch (unsigned nscrunch, bool weighted_cfreq)
 void Pulsar::Archive::fscrunch_to_nchan (unsigned new_chan)
 {
   if (get_nchan() % new_chan != 0)
-    throw Error (InvalidParam, "Pulsar::Archive::fscrunch_to_nchan");
+    throw Error (InvalidParam, "Pulsar::Archive::fscrunch_to_nchan",
+		 "Invalid nchan request");
+  else if (get_nchan() < new_chan)
+    throw Error (InvalidParam, "Pulsar::Archive::fscrunch_to_nchan",
+		 "Archive has too few channels");
   else
     fscrunch(get_nchan() / new_chan);
 }
@@ -240,7 +251,11 @@ void Pulsar::Archive::fscrunch_to_nchan (unsigned new_chan)
 void Pulsar::Archive::tscrunch_to_nsub (unsigned new_nsub)
 {
   if (new_nsub <= 0)
-    throw Error (InvalidParam, "Pulsar::Archive::tscrunch_to_nsub");
+    throw Error (InvalidParam, "Pulsar::Archive::tscrunch_to_nsub",
+		 "Invalid nsub request");
+  else if (get_nsubint() < new_nsub)
+    throw Error (InvalidParam, "Pulsar::Archive::tscrunch_to_nsub",
+		 "Archive has too few subints");
   else
     tscrunch(get_nsubint() / new_nsub);
 }
