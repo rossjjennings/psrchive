@@ -229,7 +229,9 @@ c     Get the error/comment field
                   call upcase(tok)
                end if
             end if
+
 c     Set the "parameter status" for this thing.
+            
             if (fitThis) then
                parmStatus(keypos)=parmStatus(keypos)+2 !known and fit
             else
@@ -742,6 +744,10 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 
       if (intv .eq. 0) then
          s = "0"
+         return
+      end if
+      if (intv .eq. 1) then
+         s = "1"
          return
       end if
       len = int(log10(abs(float(intv))))
