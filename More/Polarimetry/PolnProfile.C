@@ -4,6 +4,11 @@
 
 Reference::To<Pulsar::Profile> Pulsar::PolnProfile::null;
 
+/*! When transforming Profile objects, the absolute gain of the
+  transformation may artificially inflate the weight of the Profile
+  and incorrectly skew mean results. */
+bool Pulsar::PolnProfile::correct_weights = true;
+
 Pulsar::PolnProfile::PolnProfile () :
   p0 (null), p1 (null), p2 (null), p3 (null)
 {

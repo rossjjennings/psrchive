@@ -19,6 +19,10 @@ namespace Pulsar {
   class PolnProfile : public Reference::Able {
     
   public:
+
+    //! Flag set when PolnProfile::transform should correct Profile::weight
+    static bool correct_weights;
+
     //! Null constructor
     PolnProfile ();
 
@@ -76,6 +80,18 @@ void Pulsar::PolnProfile::transform (const Jones<T>& response)
 
   for (unsigned ibin = 0; ibin < nbin; ibin++)
     set_Stokes (ibin, (response * get_Stokes(ibin)) * response_dagger);
+
+  if (correct_weights) {
+
+    float Gain = det(response).real();
+
+    p0->set_weight ( p0->get_weight() / Gain );
+    p1->set_weight ( p1->get_weight() / Gain );
+    p2->set_weight ( p2->get_weight() / Gain );
+    p3->set_weight ( p3->get_weight() / Gain );
+
+  }
+
 }
 
 #endif
