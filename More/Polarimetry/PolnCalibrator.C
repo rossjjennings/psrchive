@@ -19,6 +19,7 @@ Pulsar::PolnCalibrator::PolnCalibrator (Archive* archive)
   if (!archive)
     return;
 
+  calibrator = archive;
   extension = archive->get<PolnCalibratorExtension>();
 }
 
@@ -44,6 +45,9 @@ void Pulsar::PolnCalibrator::set_nchan (unsigned nchan)
 //! Get the number of frequency channels in the response array
 unsigned Pulsar::PolnCalibrator::get_nchan () const
 {
+  if (response.size() == 0)
+    const_cast<PolnCalibrator*>(this)->build();
+
   return response.size ();
 }
 
@@ -297,8 +301,11 @@ Estimate<float> Pulsar::PolnCalibrator::Info::get_param (unsigned ichan,
 							 unsigned iclass,
 							 unsigned iparam) const
 {
-  if (! calibrator->get_Transformation_valid(ichan) )
+  if (! calibrator->get_Transformation_valid(ichan) ) {
+    if (verbose) cerr << "Pulsar::PolnCalibrator::Info::get_param"
+		   " invalid ichan=" << ichan << endl;
     return 0;
+  }
 
   unsigned offset = 0;
   for (unsigned jclass=1; jclass<=iclass; jclass++)
