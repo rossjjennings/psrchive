@@ -1,5 +1,5 @@
 //
-// $Id: pav.C,v 1.90 2004/10/05 23:24:04 ahotan Exp $
+// $Id: pav.C,v 1.91 2004/10/21 06:39:46 straten Exp $
 //
 // The Pulsar Archive Viewer
 //
@@ -322,7 +322,7 @@ int main (int argc, char** argv)
       plotter.set_subint( atoi (optarg) );
       break;
     case 'i':
-      cout << "$Id: pav.C,v 1.90 2004/10/05 23:24:04 ahotan Exp $" << endl;
+      cout << "$Id: pav.C,v 1.91 2004/10/21 06:39:46 straten Exp $" << endl;
       return 0;
 
     case 'j':
@@ -631,11 +631,11 @@ int main (int argc, char** argv)
     }
   }
 
-  if (filenames.size() == 0) {
-    usage ();
-    return 0;
+  if (filenames.size() == 0) {          
+    cerr << "pav: please specify filename[s]" << endl;
+    return -1;
   }
-  
+
   if (cpgopen(plot_device.c_str()) < 0) {
     cout << "Error: Could not open plot device" << endl;
     return -1;
