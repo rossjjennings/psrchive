@@ -6,34 +6,62 @@
   guess for each pulse phase bin used to constrain the fit. */
 Pulsar::ReceptionCalibrator::ReceptionCalibrator (const Archive* archive)
 {
-  if (!archive)
-    throw Error (InvalidState, "ReceptionCalibrator::", "no Archive");
+  is_fit = false;
+  ncoef = 0;
+  ncoef_set = false;
+
+  includes_PolnCalibrator = false;
+  includes_FluxCalibrator = false;
+
+  if (archive)
+    initial_observation (archive);
+}
+
+void Pulsar::ReceptionCalibrator::set_ncoef (unsigned _ncoef)
+{
+  if (is_fit)
+    cerr << "Pulsar::ReceptionCalibrator::set_ncoef ignored." << endl;
+
+  ncoef = _ncoef;
+  ncoef_set = true;
+}
+
+void Pulsar::ReceptionCalibrator::initial_observation (const Archive* data)
+{
+  if (!data)
+    throw Error (InvalidState, "ReceptionCalibrator::initial_observation",
+		 "no Archive");
 
   if (verbose)
-    cerr << "Pulsar::ReceptionCalibrator" << endl;
+    cerr << "Pulsar::ReceptionCalibrator::initial_observation" << endl;
 
-  if (archive->get_type() != Signal::Pulsar)
-    throw Error (InvalidParam, "Pulsar::ReceptionCalibrator",
-		 "Pulsar::Archive='" + archive->get_filename() 
+  if (data->get_type() != Signal::Pulsar)
+    throw Error (InvalidParam,
+		 "Pulsar::ReceptionCalibrator::initial_observation",
+		 "Pulsar::Archive='" + data->get_filename() 
 		 + "' not a Pulsar observation");
   
-  // Here the decision is made about full stokes or dual band observations.
-  Signal::State state = archive->get_state();
-
+  // Check that the archive has full polarization information
+  Signal::State state = data->get_state();
   bool fullStokes = state == Signal::Stokes || state == Signal::Coherence;
 
   if (!fullStokes)
-    throw Error (InvalidParam, "Pulsar::ReceptionCalibrator",
-		 "Pulsar::Archive='" + archive->get_filename() + "'\n"
+    throw Error (InvalidParam,
+		 "Pulsar::ReceptionCalibrator::initial_observation",
+		 "Pulsar::Archive='" + data->get_filename() + "'\n"
 		 "invalid state=" + State2string(state));
 
-  if (state != Signal::Stokes) {
-    Archive* clone = archive->clone();
-    clone->convert_state (Signal::Stokes);
-    uncalibrated = clone;
-  }
-  else
-    uncalibrated = archive;
+  if (data->get_parallactic_corrected ())
+    throw Error (InvalidParam,"Pulsar::ReceptionCalibrator::initial_observation",
+		 "Pulsar::Archive='" + data->get_filename() + "'\n"
+		 "has been corrected for parallactic angle rotation");
+		 
+  if (!data->get_dedispersed ())
+    cerr << "Pulsar::ReceptionCalibrator WARNING archive not dedispersed\n"
+      "  Pulse phase will vary as a function of frequency channel" << endl;
+
+
+  uncalibrated = data;
 
   parallactic.set_source_coordinates( uncalibrated->get_coordinates() );
 
@@ -54,20 +82,20 @@ Pulsar::ReceptionCalibrator::ReceptionCalibrator (const Archive* archive)
     for (unsigned istokes=0; istokes<4; istokes++)
       calibrator[ichan].set_infit (istokes, false);
     
-    // add the calibrator state before the parallactic angle transformat
+    // add the calibrator state before the parallactic angle transformation
     equation[ichan].model.add_state( &(calibrator[ichan]) );
     equation[ichan].model.add_transformation( &parallactic );
 
   }
 
-  fixed = false;
+  start_epoch = end_epoch = data->start_time ();
 }
 
 
 //! Add the specified pulse phase bin to the set of state constraints
 void Pulsar::ReceptionCalibrator::add_state (float phase)
 {
-  check_fixed ("Pulsar::ReceptionCalibrator::add_state");
+  check_ready ("Pulsar::ReceptionCalibrator::add_state");
 
   unsigned nbin = uncalibrated->get_nbin ();
   unsigned ibin = unsigned (phase * nbin) % nbin;
@@ -97,15 +125,16 @@ unsigned Pulsar::ReceptionCalibrator::get_nstate () const
 //! Add the specified pulsar observation to the set of constraints
 void Pulsar::ReceptionCalibrator::add_observation (const Archive* data)
 {
-  check_fixed ("Pulsar::ReceptionCalibrator::add_observation");
+  if (!uncalibrated)
+    initial_observation (data);
+
+  check_ready ("Pulsar::ReceptionCalibrator::add_observation");
 
   string reason;
-
   if (!uncalibrated->mixable (data, reason))
     throw Error (InvalidParam, "Pulsar::ReceptionCalibrator",
 		 "Pulsar::Archive='" + data->get_filename() +
-		 "'\ndoes not mix with '" + uncalibrated->get_filename() + 
-		 "\n" + reason);
+		 "'\ndoes not match '" + uncalibrated->get_filename() + reason);
 
   unsigned nsub = data->get_nsubint ();
   unsigned nchan = data->get_nchan ();
@@ -116,6 +145,11 @@ void Pulsar::ReceptionCalibrator::add_observation (const Archive* data)
     MJD epoch = integration->get_epoch ();
 
     parallactic.set_epoch (epoch);
+
+    if (epoch < start_epoch)
+      start_epoch = epoch;
+    if (epoch > end_epoch)
+      end_epoch = epoch;
 
     for (unsigned ichan=0; ichan<nchan; ichan++) {
 
@@ -176,19 +210,23 @@ Pulsar::ReceptionCalibrator::add_data(vector<Calibration::MeasuredState>& bins,
 //! Add the specified PolnCalibrator observation to the set of constraints
 void Pulsar::ReceptionCalibrator::add_PolnCalibrator (const PolnCalibrator* p)
 {
-  check_fixed ("Pulsar::ReceptionCalibrator::add_PolnCalibrator");
+  check_ready ("Pulsar::ReceptionCalibrator::add_PolnCalibrator");
 
   cerr << "Pulsar::ReceptionCalibrator::add_PolnCalibrator unimplemented"
        << endl;
+
+  // includes_PolnCalibrator = true;
 }
 
 //! Add the specified FluxCalibrator observation to the set of constraints
 void Pulsar::ReceptionCalibrator::add_FluxCalibrator (const FluxCalibrator* f)
 {
-  check_fixed ("Pulsar::ReceptionCalibrator::add_FluxCalibrator");
+  check_ready ("Pulsar::ReceptionCalibrator::add_FluxCalibrator");
 
   cerr << "Pulsar::ReceptionCalibrator::add_FluxCalibrator unimplemented"
        << endl;
+
+  // includes_FluxCalibrator = true;
 }
 
 //! Calibrate the polarization of the given archive
@@ -196,15 +234,14 @@ void Pulsar::ReceptionCalibrator::calibrate (Archive* data)
 {
   cerr << "Pulsar::ReceptionCalibrator::calibrate" << endl;
 
-  if (!fixed)
+  if (!is_fit)
     fit ();
 
   string reason;
-  if (!uncalibrated->match (data, reason))
+  if (!uncalibrated->calibrator_match (data, reason))
     throw Error (InvalidParam, "Pulsar::ReceptionCalibrator::calibrate",
 		 "Pulsar::Archive='" + data->get_filename() +
-		 "'\ndoes not match '" + uncalibrated->get_filename() + 
-		 "\n" + reason);
+		 "'\ndoes not match '" + uncalibrated->get_filename() + reason);
 
   unsigned nsub = data->get_nsubint ();
   unsigned nchan = data->get_nchan ();
@@ -231,22 +268,43 @@ void Pulsar::ReceptionCalibrator::calibrate (Archive* data)
     
   }
 
+  data->set_parallactic_corrected (true);
+  data->set_poln_calibrated (true);
+
   // TODO: set calibrated flags
+  if (includes_FluxCalibrator)
+    data->set_flux_calibrated (true);
 }
 
 
 void Pulsar::ReceptionCalibrator::fit ()
 {
-  if (fixed)
+  if (is_fit) {
+    cerr << "Pulsar::ReceptionCalibrator::fit models already fit" << endl;
     return;
+  }
+
+  if (!ncoef_set) {
+    /* it might be nice to try and choose a good ncoef, based on the
+       timescale on which the backend is expected to change and the
+       amount of time spanned by the observations */
+  }
 
   for (unsigned istate=0; istate<pulsar.size(); istate++)
     pulsar[istate].update_state ();
 
-  for (unsigned ichan=0; ichan<equation.size(); ichan++)
-    equation[ichan].solve ();
+  MJD mid = 0.5 * (start_epoch + end_epoch);
 
-  fixed = true;
+  for (unsigned ichan=0; ichan<equation.size(); ichan++) {
+    if (ncoef)
+      equation[ichan].set_ncoef (ncoef);
+
+    equation[ichan].set_reference_epoch (mid);
+
+    equation[ichan].solve ();
+  }
+
+  is_fit = true;
 }
 
 
@@ -261,16 +319,15 @@ void Pulsar::ReceptionCalibrator::add_estimate (PhaseEstimate& estimate)
     equation[ichan].model.add_state( &(estimate.state[ichan]) );
 }
 
-void Pulsar::ReceptionCalibrator::check_fixed (const char* method)
+void Pulsar::ReceptionCalibrator::check_ready (const char* method)
 {
-  if (is_fixed())
+  if (is_fit)
     throw Error (InvalidState, method, "Model has been fit. Cannot add data.");
+
+  if (!uncalibrated)
+    throw Error (InvalidState, method, "Initial observation required.");
 }
 
-bool Pulsar::ReceptionCalibrator::is_fixed () const
-{
-  return fixed;
-}
 
 /*! Update the best guess of each unknown input state */
 void Pulsar::PhaseEstimate::update_state ()

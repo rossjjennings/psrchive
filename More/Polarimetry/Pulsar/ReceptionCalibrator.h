@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ReceptionCalibrator.h,v $
-   $Revision: 1.6 $
-   $Date: 2003/04/27 10:54:38 $
+   $Revision: 1.7 $
+   $Date: 2003/04/28 12:05:38 $
    $Author: straten $ */
 
 #ifndef __ReceptionCalibrator_H
@@ -33,12 +33,15 @@ namespace Pulsar {
 
     friend class ReceptionCalibratorPlotter;
 
-    //! Construct from the best estimate of the average pulse profile
-    ReceptionCalibrator (const Archive* archive);
+    //! Construct with optional first pulsar archive
+    ReceptionCalibrator (const Archive* archive = 0);
 
     //! Destructor
     ~ReceptionCalibrator ();
 
+    //! Set the number of polynomial coefficients in SingleAxis(t)
+    void set_ncoef (unsigned ncoef);
+      
     //! Add the specified pulse phase bin to the set of state constraints
     void add_state (float pulse_phase);
 
@@ -78,13 +81,34 @@ namespace Pulsar {
     Reference::To<const Archive> uncalibrated;
 
     //! Flag set after the fit method has been called
-    bool fixed;
+    bool is_fit;
+
+    //! The number of polynomial coefficients in SingleAxis(t)
+    unsigned ncoef;
+
+    //! Flag set after set_ncoef is called
+    bool ncoef_set;
+
+    //! Epoch of the first observation
+    MJD start_epoch;
+
+    //! Epoch of the last observation
+    MJD end_epoch;
+
+    //! Flag set after successful call to add_PolnCalibrator
+    bool includes_PolnCalibrator;
+
+    //! Flag set after successful call to add_FluxCalibrator
+    bool includes_FluxCalibrator;
 
     //! Solve equation for each frequency
     void fit ();
 
-    //! Check that the model is fixed
-    void check_fixed (const char* method);
+    //! Check that the model is ready 
+    void check_ready (const char* method);
+
+    //! Initialization performed using the first observation added
+    void initial_observation (const Archive* data);
 
     //! Add the estimate to pulsar attribute
     void add_estimate (PhaseEstimate& estimate);
