@@ -317,7 +317,7 @@ void Pulsar::Archive::invint ()
 
 float Pulsar::Archive::get_poln_flux (int _type) {
   
-  return (get_Integration(0) -> get_poln_flux (get_Integration(0),_type));
+  return (get_Integration(0) -> get_poln_flux (_type));
   
 }
 

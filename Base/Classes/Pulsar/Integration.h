@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Integration.h,v $
-   $Revision: 1.44 $
-   $Date: 2003/08/26 05:31:23 $
-   $Author: sord $ */
+   $Revision: 1.45 $
+   $Date: 2003/08/26 08:27:38 $
+   $Author: ahotan $ */
 
 /*
   
@@ -242,7 +242,7 @@ namespace Pulsar {
     void fappend (Pulsar::Integration* integ, bool ignore_time_mismatch = false);
     
     //! Get polarized flux
-    virtual float get_poln_flux (Integration* data, int _type = 0);
+    virtual float get_poln_flux (int _type = 0);
  
     //! Transform from Stokes (I,Q,U,V) to the polarimetric invariant interval
     virtual void invint ();
