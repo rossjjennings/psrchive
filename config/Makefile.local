@@ -1,0 +1,10 @@
+
+all: intermediate-install
+
+libs: install-libLTLIBRARIES
+
+include: install-data
+
+intermediate-install:
+	CPPROG="cp -p" $(MAKE) prefix=.. install-data
+
