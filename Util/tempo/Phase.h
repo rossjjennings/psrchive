@@ -54,8 +54,8 @@ class Phase {
   friend int operator == (const Phase &, const Phase &);
   friend int operator != (const Phase &, const Phase &);
 
-  friend Phase ceil  (const Phase &);
-  friend Phase floor (const Phase &);
+  Phase Ceil  ();
+  Phase Floor ();
 
   double in_turns() const;
   int64  intturns() const;

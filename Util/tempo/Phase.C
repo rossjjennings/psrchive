@@ -8,7 +8,6 @@
 
 #include "Phase.h"
 
-
 Phase::Phase(){
   turns = 0;
   fturns = 0;
@@ -215,12 +214,12 @@ int operator != (const Phase &p1, const Phase &p2) {
   return !(p1 == p2);
 }
 
-Phase ceil  (const Phase & p)
+Phase Phase::Ceil ()
 {
-  return Phase (p.turns + (int64) ceil (p.fturns), 0.0);
+  return Phase (turns + (int64) ceil(fturns), 0.0);
 }
 
-Phase floor (const Phase & p)
+Phase Phase::Floor ()
 {
-  return Phase (p.turns + (int64) floor (p.fturns), 0.0);
+  return Phase (turns + (int64) floor(fturns), 0.0);
 }
