@@ -1,5 +1,7 @@
 #include <stdio.h>
 
+#include "Reference.h"
+
 #include "RealTimer.h"
 
 const char* RealTimer::timeString (double time) 
@@ -18,7 +20,7 @@ const char* RealTimer::timeString (double time)
   return str;
 }
 
-RealTimer::RealTimer() 
+RealTimer::RealTimer() : Reference::Able()
 {
   reset();
   start(); 
