@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Matrix.h,v $
-   $Revision: 1.7 $
-   $Date: 2004/04/25 07:21:34 $
+   $Revision: 1.8 $
+   $Date: 2004/04/28 14:11:14 $
    $Author: straten $ */
 
 #ifndef __Matrix_H
@@ -207,6 +207,15 @@ const Matrix<T,Rows,Columns> outer (const Vector<T,Rows>& a,
   return result;
 }
 
+//! Useful for quickly printing the components
+template<typename T, unsigned R, unsigned C>
+ostream& operator<< (ostream& ostr, const Matrix<T,R,C>& m)
+{
+  ostr << "[" << m[0];
+  for (unsigned i=1; i<R; i++)
+    ostr << ",\n " << m[i];
+  return ostr << "]";
+}
 
 #endif  /* not __Matrix_H defined */
 
