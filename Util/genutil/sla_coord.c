@@ -5,8 +5,6 @@
 #include "coord.h"
 #include <math.h>
 
-#define F77_sla_altaz F77_SLA(sla_altaz,SLA_ALTAZ)
-
 /* **********************************************************************
 
    az_zen_para - given the J2000 ra and dec, local sidereal time, and
@@ -24,9 +22,9 @@
 
    ********************************************************************** */
 
-#define F77_sla_altaz F77_SLA(sla_altaz,SLA_ALTAZ)
+#define SLA_altaz SLA_FUNC(sla_altaz,slaAltaz)
 
-void F77_sla_altaz (double*, double*, double*, double*, double*, double*,
+void SLA_altaz (double*, double*, double*, double*, double*, double*,
 		 double*, double*, double*, double*, double*, double*);
 
 int az_zen_para (double ra, double dec, float lst, float latitude,
@@ -42,7 +40,7 @@ int az_zen_para (double ra, double dec, float lst, float latitude,
   if (lst < 0.0 || lst > 24.0)
     return -1;
 
-  F77_sla_altaz (&HA, &dec, &dlat, 
+  SLA_altaz (&HA, &dec, &dlat, 
 	      &azimuth, &ignore, &ignore,
 	      &altitude,  &ignore, &ignore,
 	      &PA,      &ignore, &ignore);

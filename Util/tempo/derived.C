@@ -1,5 +1,5 @@
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "ephio.h"
@@ -31,8 +31,8 @@ const double v_0 = 222;   // km/s
 // distance of sun from galactic centre
 const double R_0 = 7.7e3; // parsec
 
-#define F77_sla_eqgal F77_SLA(sla_eqgal,SLA_EQGAL)
-extern "C" double F77_sla_eqgal(double *, double *, double *, double *);
+#define SLA_eqgal SLA_FUNC(sla_eqgal,slaEqgal)
+extern "C" double SLA_eqgal(double *, double *, double *, double *);
 
 
 // ////////////////////////////////////////////////////////////////////////
@@ -49,7 +49,7 @@ int psrephem::galactic (double& l, double& b)
   double delta = value_double [EPH_DECJ] * 2*M_PI;
   // double delta_err  = error_double [EPH_DECJ];
 
-  F77_sla_eqgal (&alpha, &delta, &l, &b);
+  SLA_eqgal (&alpha, &delta, &l, &b);
 
   return 0;
 }
@@ -746,4 +746,28 @@ int psrephem::GR_gamma (double& gamma) const
 
   return 0;
 }
+
+#if 0
+
+int psrephem::Delta_t (double& delta_t) const
+{
+  delta_t = 0;
+
+  if (parmStatus[EPH_F] < 1 || parmStatus[EPH_F2] < 1)
+    return -1;
+
+  double rf = value_double [EPH_F];
+
+  double rf2 = value_double [EPH_F2];
+  double rf2_err = error_double [EPH_F2];
+
+  cerr << "f=" << rf << " f2=" << rf2 << " " << rf2_err << endl;
+
+  double use = fabs(rf2) + rf2_err;
+
+  delta_t = log10 (use*1e24/(6.0*rf));
+ return 0;
+}
+
+#endif
 

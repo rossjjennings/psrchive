@@ -21,31 +21,37 @@ AC_DEFUN([SWIN_LIB_SLA],
   for sla_trial in $sla_trial_list; do
     AC_TRY_LINK([double $sla_trial(double *);],
                 [double gmst = $sla_trial(0);],
-                have_sla=yes, have_sla=no)
-    if test x"$have_sla" = xyes; then
+                [have_sla="yes: fortran"$sla_underscore], [have_sla=no])
+    if test "$have_sla" != no; then
+      sla_def="name"
+      if test x"$sla_underscore" != x; then
+        sla_def="$sla_def ## $sla_underscore"
+      fi
       break
-    else
-      sla_underscore="$sla_underscore"_
     fi
+    sla_underscore="$sla_underscore"_
   done
+
+  if test "$have_sla" = no; then
+    SLA_LIBS="-lsla"
+    LIBS="$ac_save_LIBS $SLA_LIBS"
+    AC_TRY_LINK([double slaGmst(double *);],
+                [double gmst = slaGmst(0);],
+                [have_sla="yes: C"], [have_sla=no])
+    sla_def="Name"
+  fi
 
   LIBS="$ac_save_LIBS"
   CFLAGS="$ac_save_CFLAGS"
 
-  if test x"$have_sla" = xyes; then
-    AC_MSG_RESULT(yes sla$sla_underscore)
+  AC_MSG_RESULT([$have_sla])
+
+  if test "$have_sla" != no; then
     AC_DEFINE([HAVE_SLA], [1], [Define to 1 if you have the SLA library])
-    sla_def="name"
-    if test x"$sla_underscore" != x; then
-      sla_def=$sla_def" ## "$sla_underscore
-    fi
-
-    AH_TEMPLATE([F77_SLA], [Fortran name mangling in libsla])
-    AC_DEFINE_UNQUOTED([F77_SLA(name,NAME)],$sla_def)
-
+    AH_TEMPLATE([SLA_FUNC], [Fortran or C in libsla])
+    AC_DEFINE_UNQUOTED([SLA_FUNC(name,Name)],$sla_def)
     [$1]
   else
-    AC_MSG_RESULT(no)
     SLA_CFLAGS=""
     SLA_LIBS=""
     [$2]
