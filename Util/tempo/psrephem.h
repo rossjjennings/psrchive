@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/psrephem.h,v $
-   $Revision: 1.16 $
-   $Date: 2001/11/19 04:40:57 $
+   $Revision: 1.17 $
+   $Date: 2002/01/04 20:27:41 $
    $Author: straten $ */
 
 #ifndef __PSREPHEM_H
@@ -98,9 +98,11 @@ class psrephem
   //
   // return galactic latitude and longitude in radians (slalib)
   int galactic (double& l, double& b);
+  // return galactic height (z) in parsec
+  int galactic_z (double& z);
 
   // returns the acceleration along the line of sight arising
-  // from differential galactic rotation
+  // from differential galactic rotation in km/s
   int acc_diffrot (double& beta);
 
   // returns the sine of the inclination angle

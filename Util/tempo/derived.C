@@ -23,9 +23,9 @@ const double T_sol  = 4.925490947e-6; // seconds
 
 // K. Kuijken and G. Gilmore, 1989, MNRAS, 239, 571, Table 2
 // velocity of sun with respect to galactic centre
-const double v_0 = 220;   // km/s
+const double v_0 = 222;   // km/s
 // distance of sun from galactic centre
-const double R_0 = 7.8e3; // parsec
+const double R_0 = 7.7e3; // parsec
 
 extern "C" double F772C(sla_eqgal) (double* ra, double* dec, 
 				    double* l, double* b);
@@ -49,14 +49,40 @@ int psrephem::galactic (double& l, double& b)
   return 0;
 }
 
+// ////////////////////////////////////////////////////////////////////////
+//
+// returns galactic z-height in parsec
+//
+int psrephem::galactic_z (double& z)
+{
+  double l, b;
+  if (galactic (l, b) < 0)
+    return -1;
 
+  if (parmStatus[EPH_PX] < 1)
+    return -1;
+  double px = value_double [EPH_PX];
+  // double px_err = error_double [EPH_PX];
+
+  // distance in parsec
+  double d = 1e3/px;
+  z = d * sin(b);
+  return 0;
+}
+
+
+// ////////////////////////////////////////////////////////////////////////
+//
+// returns the acceleration along the line of sight arising
+// from differential galactic rotation in km/s
+//
 int psrephem::acc_diffrot (double& acc)
 {
   double l, b;
   if (galactic (l, b) < 0)
     return -1;
 
-  if (parmStatus[EPH_RAJ] < 1)
+  if (parmStatus[EPH_PX] < 1)
     return -1;
 
   double px = value_double [EPH_PX];
@@ -66,13 +92,12 @@ int psrephem::acc_diffrot (double& acc)
   double d = 1e3/px;
 
   // see Damour, T. and Taylor, J.H. 1991, ApJ, 366, 501
-  // first term of Equation 2.12 (R_0 and v_0 are const defined up top)
+  // first term of Equation 2.12 (R_0 and v_0 are consts, defined up top)
   double sinl = sin(l);
   double cosl = cos(l);
-  double delta = d/R_0;
-  double beta = delta - cosl;
-
+  double beta = d/R_0 - cosl;
   acc = -v_0*v_0/(R_0*parsec) * (cosl + beta / (sinl*sinl + beta*beta));
+  return 0;
 }
 
 // ////////////////////////////////////////////////////////////////////////
