@@ -85,6 +85,17 @@ bool Pulsar::PolnCalibratorExtension::get_valid (unsigned ichan) const
   return response[ichan];
 }
 
+void Pulsar::PolnCalibratorExtension::set_valid (unsigned ichan, bool valid)
+{
+  range_check (ichan, "Pulsar::PolnCalibratorExtension::set_valid");
+
+  if (!valid)
+    response[ichan] = 0;
+  else if (!response[ichan])
+    response[ichan] = new_Transformation ();
+}
+
+
 //! Get the transformation for the specified frequency channel
 ::Calibration::Transformation* 
 Pulsar::PolnCalibratorExtension::get_Transformation (unsigned ichan)
@@ -113,7 +124,7 @@ void Pulsar::PolnCalibratorExtension::construct ()
 }
 
 void Pulsar::PolnCalibratorExtension::range_check (unsigned ichan,
-					       const char* method) const
+						   const char* method) const
 {
   if (ichan >= response.size())
     throw Error (InvalidRange, method, "ichan=%d >= nchan=%d",

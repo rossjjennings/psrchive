@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/PolnCalibratorExtension.h,v $
-   $Revision: 1.6 $
-   $Date: 2003/10/08 14:17:38 $
+   $Revision: 1.7 $
+   $Date: 2003/10/22 10:31:19 $
    $Author: straten $ */
 
 #ifndef __PolnCalibratorExtension_h
@@ -54,6 +54,7 @@ namespace Pulsar {
 
     //! Return true if the transformation for the specified channel is valid
     bool get_valid (unsigned ichan) const;
+    void set_valid (unsigned ichan, bool valid);
 
     //! Get the transformation for the specified frequency channel
     ::Calibration::Transformation* get_Transformation (unsigned c);
