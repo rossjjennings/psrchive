@@ -1,5 +1,6 @@
 #include <string>
 #include <stdio.h>
+#include <math.h>
 
 #include "resio.h"
 #include "residual.h"
@@ -48,7 +49,7 @@ int Tempo::residual::load (int lun)
 int Tempo::residual::load (int r2flun, char* filename, 
 			   vector<residual>* residuals)
 {
-  resopen_ (&r2flun, filename, (int) strlen(filename));
+  fortopen_ (&r2flun, filename, (int) strlen(filename));
   if (verbose)
     fprintf (stderr, "residual::load (vector<residual>) '%s' opened\n", 
 	     filename);
@@ -59,6 +60,11 @@ int Tempo::residual::load (int r2flun, char* filename,
   while (res_rd.load (r2flun) == 0)
     residuals->push_back (res_rd);
 
-  resclose_ (&r2flun);
+  fortclose_ (&r2flun);
   return 0;
+}
+
+double Tempo::residual::dayofyear () const
+{
+  return fmod (mjd, 365.25);
 }

@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/residual.h,v $
-   $Revision: 1.8 $
-   $Date: 2000/06/01 13:52:03 $
+   $Revision: 1.9 $
+   $Date: 2001/02/24 04:04:09 $
    $Author: straten $ */
 
 #ifndef __RESIDUAL_H
@@ -29,7 +29,10 @@ namespace Tempo {
     double weight;      // --Weight of point in the fit
     double error;       // --Timing uncertainty (according to input file)
     double preres;      // --Prefit residual (micro-seconds)
-    
+
+    // returns day of year from mjd
+    double dayofyear () const;
+
     residual () { init(); };
     residual (int lun);
     ~residual () { };
