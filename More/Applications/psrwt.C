@@ -1,37 +1,47 @@
-#include <iostream>
-#include <unistd.h>
-#include <cpgplot.h>
-
-#include "Reference.h"
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
 #include "Pulsar/Profile.h"
 #include "Pulsar/Plotter.h"
+#include "Pulsar/FourierSNR.h"
+#include "Pulsar/StandardSNR.h"
+
 #include "Error.h"
 #include "RealTimer.h"
 
 #include "dirutil.h"
 #include "string_utils.h"
 
+#include <cpgplot.h>
+
+#include <iostream>
+#include <unistd.h>
+
 void usage ()
 {
   cout << "weight the profiles in Pulsar::Archive(s) in various ways\n"
     "Usage: psrwt [options] file1 [file2 ...] \n"
     "Where the options are as follows \n"
-    " -h        This help page \n"
-    " -b scr    Bscrunch scr phase bins together \n"
-    " -D        Plot each profile \n"
-    " -d        Display snr but do not output weighted result\n"
-    " -F        Fscrunch all frequency channels after weighting \n"
+    " -h        this help page \n"
+    " -v        verbose output \n"
+    " -V        very verbose output \n"
     " -M meta   meta names a file containing the list of files\n"
-    " -P        add polarisations together\n"
-    " -p phs    centre of the phase window used in special SNR calculation\n"
-    " -s snr    SNR threshold (weight zero below) default:10\n"
-    " -S std    specify the standard pulsar archive\n"
-    " -T        Tscrunch all Integrations after weighting \n"
-    " -w width  Width of the phase window used in conjunction with -p\n"
-    " -v        Verbose output \n"
-    " -V        Very verbose output \n"
+    "\n"
+    "Weighting options: \n"
+    " -s s/n    S/N threshold (weight zero below) default:10\n"
+    " -S std    calculate S/N using a standard pulsar archive\n"
+    " -m method calculate S/N using the named method: fourier or fortran\n"
+    "\n"
+    "Output options:\n"
+    " -b scr    add scr phase bins together \n"
+    " -F        add all frequency channels after weighting \n"
+    " -P        add polarisations together \n"
+    " -T        add all Integrations after weighting \n"
+    "\n"
+    "Display options:\n"
+    " -D        plot each profile \n"
+    " -d        display s/n but do not output weighted result\n"
+    " -p phs    phase centre of off-pulse baseline (giant-pulse search)\n"
+    " -w width  width of off-pulse baseline (used with -p)\n"
        << endl;
 }
 
@@ -53,10 +63,14 @@ int main (int argc, char** argv)
   char* metafile = NULL;
 
   double snr_threshold = 10.0;
-  char* stdfile = NULL;
+
+  Pulsar::FourierSNR fourier_snr;
+  Pulsar::StandardSNR standard_snr;
+
+  Reference::To<Pulsar::Archive> standard;
 
   int c = 0;
-  const char* args = "b:DdFhM:Pp:Ts:S:vVw:";
+  const char* args = "b:DdFhm:M:Pp:Ts:S:vVw:";
   while ((c = getopt(argc, argv, args)) != -1)
     switch (c) {
 
@@ -80,6 +94,22 @@ int main (int argc, char** argv)
       usage ();
       return 0;
 
+    case 'm':
+
+      if (strcasecmp (optarg, "fourier") == 0)
+	Pulsar::Profile::snr_functor.set (&fourier_snr,
+					  &Pulsar::FourierSNR::get_snr);
+      
+      else if (strcasecmp (optarg, "fortran") == 0)
+	Pulsar::Profile::snr_functor.set (&Pulsar::snr_fortran);
+      
+      else {
+	cerr << "psrwt: unrecognized S/N method '" << optarg << "'" << endl;
+	return -1;
+      }
+
+      break;
+
     case 'M':
       metafile = optarg;
       break;
@@ -92,6 +122,7 @@ int main (int argc, char** argv)
       snr_phase = atof (optarg);
       cerr << "psrwt: baseline phase window centre = " << snr_phase << endl;
       normal = false;
+      // unload_result = false;
       break;
 
     case 's':
@@ -99,7 +130,13 @@ int main (int argc, char** argv)
       break;
 
     case 'S':
-      stdfile = optarg;
+      Pulsar::Profile::snr_functor.set (&standard_snr,
+					&Pulsar::StandardSNR::get_snr);
+
+      cerr << "psrwt: loading standard from " << optarg << endl;
+      standard = Pulsar::Archive::load (optarg);
+      standard->convert_state (Signal::Intensity);
+
       break;
 
     case 'T':
@@ -143,22 +180,30 @@ int main (int argc, char** argv)
     cpgsch (1.0);
   }
 
-  // smart pointer automatically deletes instance when reference count
   Reference::To<Pulsar::Archive> archive, copy;
-
-  Pulsar::Profile* standard = NULL;
-
-  if (stdfile) {
-    archive = Pulsar::Archive::load (stdfile);
-    standard = new Pulsar::Profile (archive->get_Profile(0,0,0));
-    cerr << "Standard SNR:" << standard ->snr() << endl;
-  }
 
   Error::handle_signals ();
 
   for (unsigned ifile=0; ifile < filenames.size(); ifile++) try {
 
     archive = Pulsar::Archive::load (filenames[ifile]);
+
+    bool channel_standard = false;
+
+    if ( standard )  {
+
+      if ( standard->get_nchan() > 1 
+	   && standard->get_nchan() == archive->get_nchan() ) {
+	cerr << "psrwt: standard profile varies with frequency" << endl;
+	channel_standard = true;
+      }
+      else {
+	cerr << "psrwt: fscrunching standard" << endl;
+	copy = standard->total();
+	standard_snr.set_standard( copy->get_Profile (0,0,0) );
+      }
+
+    }
 
     copy = archive->clone();
     copy -> uniform_weight ();
@@ -167,63 +212,56 @@ int main (int argc, char** argv)
     for (unsigned isub=0; isub < copy->get_nsubint(); isub++)
       for (unsigned ichan=0; ichan < copy->get_nchan(); ichan++) {
 
+	if (channel_standard)
+	  standard_snr.set_standard( standard->get_Profile (0,0,ichan) );
+
 	Pulsar::Integration* subint = copy->get_Integration (isub);
 	Pulsar::Profile* profile = subint->get_Profile (0,ichan);
 
-	float snr = 0.0;
-	
-	if (standard)
-	  snr = profile->snr (standard);
-
-	else {
-
-	  if (normal)
-	    snr = profile->snr ();
-
-	  else {
-
-	    double mean, variance;
-
-	    // calculate the mean and variance at the specifed phase
-	    profile->stats (snr_phase, &mean, &variance, 0, duty_cycle);
-
-	    // subtract the mean
-	    *profile -= mean;
-
-	    // sum the remaining power and divide by the rms
-	    snr = profile->sum();
-
-            // calculate the rms
-            float rms = sqrt (variance);
-
-            // find the maximum bin
-            int maxbin = profile->find_max_bin();
-
-            // get the maximum value
-	    float max = profile->get_amps()[maxbin];
-
-            double phase = double(maxbin) / double(subint->get_nbin());
-            cerr << "phase=" << phase << endl;
-            double seconds = phase * subint->get_folding_period();
-            cerr << "seconds=" << seconds << endl;
-
-	    // calculate the epoch of the maximum
-	    MJD epoch = subint->get_epoch() + seconds;
-
-            cerr << filenames[ifile] << " epoch=" << epoch << " max/rms="
-		 << max/rms << " rms=" << rms << " sum=" << snr;
-
-            snr /= sqrt ( profile->get_nbin() * variance );
-
-            cerr << " snr=" << snr << endl;
-
-	  }
-
-	}
+	float snr = profile->snr ();
 
         if (normal)
-	  cerr << filenames[ifile] << "(" << isub << ", " << ichan << ")"
+	  cout << filenames[ifile] << "(" << isub << ", " << ichan << ")"
 	       << " snr=" << snr << endl;
+
+	else {
+	    
+	  double mean, variance;
+
+	  // calculate the mean and variance at the specifed phase
+	  profile->stats (snr_phase, &mean, &variance, 0, duty_cycle);
+	  
+	  // subtract the mean
+	  *profile -= mean;
+	  
+	  // sum the remaining power
+	  snr = profile->sum();
+	  
+	  // calculate the rms
+	  float rms = sqrt (variance);
+	  
+	  // find the maximum bin
+	  int maxbin = profile->find_max_bin();
+	  
+	  // get the maximum value
+	  float max = profile->get_amps()[maxbin];
+	  
+	  double phase = double(maxbin) / double(subint->get_nbin());
+	  cerr << "phase=" << phase << endl;
+	  double seconds = phase * subint->get_folding_period();
+	  cerr << "seconds=" << seconds << endl;
+	    
+	  // calculate the epoch of the maximum
+	  MJD epoch = subint->get_epoch() + seconds;
+	  
+	  cerr << filenames[ifile] << " epoch=" << epoch << " max/rms="
+	       << max/rms << " rms=" << rms << " sum=" << snr;
+	  
+	  snr /= sqrt ( profile->get_nbin() * variance );
+	  
+	  cerr << " snr=" << snr << endl;
+	  
+	}
 	
 	if (display) {
 	  cpgpage();
@@ -233,6 +271,9 @@ int main (int argc, char** argv)
 	  plotter.set_pol(0);
 	  plotter.singleProfile(copy);
 	}
+	
+	if (!normal)
+	  continue;
 	
 	if (snr < snr_threshold)
 	  snr = 0.0;
