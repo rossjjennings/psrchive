@@ -176,7 +176,7 @@ void Pulsar::Profile::get_amps (float* data, unsigned jbin) const
  
 /////////////////////////////////////////////////////////////////////////////
 //
-// Pulsar::Profile::
+// Pulsar::Profile::rotate
 //
 /*!  
   Rotate the profile by the specified phase.  The profile will be
@@ -203,7 +203,7 @@ void Pulsar::Profile::rotate (double phase)
 
 /////////////////////////////////////////////////////////////////////////////
 //
-// Pulsar::Profile::
+// Pulsar::Profile::dedisperse
 //
 /*!
   A convenience interface to Profile::rotate.  Rotates the profile in order
@@ -231,21 +231,27 @@ void Pulsar::Profile::dedisperse (double dm, double ref_freq, double pfold)
 
 /////////////////////////////////////////////////////////////////////////////
 //
-// Pulsar::Profile::
+// Pulsar::Profile::zero
 //
 void Pulsar::Profile::zero()
 {
+  if (verbose)
+    cerr << "Pulsar::Profile::zero" << endl;
+  
   weight = 0;
   for (unsigned ibin = 0; ibin < nbin; ibin++)
     amps[ibin] = 0;
 }
- 
+
 /////////////////////////////////////////////////////////////////////////////
 //
-// Pulsar::Profile::
+// Pulsar::Profile::square_root
 //
 void Pulsar::Profile::square_root()
 {
+  if (verbose)
+    cerr << "Pulsar::Profile::square_root" << endl;
+  
   for (unsigned ibin=0; ibin<nbin; ++ibin) {
     float sign = (amps[ibin]>0) ? 1.0 : -1.0;
     amps[ibin] = sign * sqrt(sign * amps[ibin]);
@@ -255,14 +261,17 @@ void Pulsar::Profile::square_root()
 
 /////////////////////////////////////////////////////////////////////////////
 //
-// Pulsar::Profile::
+// Pulsar::Profile::fold
 //
 void Pulsar::Profile::fold (unsigned nfold)
 {
+  if (verbose)
+    cerr << "Pulsar::Profile::fold" << endl;
+  
   if (nbin % nfold)
     throw Error (InvalidRange, "Pulsar::Profile::fold",
 		 "nbin=%d %% nfold=%d != 0", nbin, nfold);
-
+  
   unsigned newbin = nbin/nfold;
 
   for (unsigned i=0; i<newbin; i++)
@@ -281,6 +290,9 @@ void Pulsar::Profile::fold (unsigned nfold)
 //
 void Pulsar::Profile::bscrunch (unsigned nscrunch) { try
 {
+  if (verbose)
+    cerr << "Pulsar::Profile::bscrunch" << endl;
+  
   if (nscrunch < 1)
     throw Error (InvalidParam, 0, "nscrunch=%d", nscrunch);
   
@@ -311,6 +323,9 @@ catch (Error& error) {
 //
 void Pulsar::Profile::halvebins (unsigned nhalve)
 {
+  if (verbose)
+    cerr << "Pulsar::Profile::halvebins" << endl;
+  
   for (unsigned i=0; i<nhalve && nbin>1; i++) {
 
     if (nbin % 2)
@@ -356,6 +371,9 @@ void minmax (int nbin, const float* amps, int* mi, float* mv, bool max,
 //
 int Pulsar::Profile::bin_max (int istart, int iend) const
 {
+  if (verbose)
+    cerr << "Pulsar::Profile::bin_max" << endl;
+  
   int imax=0;
   minmax (nbin, amps, &imax, 0, true, istart, iend);
   return imax;
@@ -367,6 +385,9 @@ int Pulsar::Profile::bin_max (int istart, int iend) const
 //
 int Pulsar::Profile::bin_min (int istart, int iend) const
 {
+  if (verbose)
+    cerr << "Pulsar::Profile::bin_min" << endl;
+  
   int imin=0;
   minmax (nbin, amps, &imin, 0, false, istart, iend);
   return imin;
@@ -378,6 +399,9 @@ int Pulsar::Profile::bin_min (int istart, int iend) const
 //
 float Pulsar::Profile::max (int istart, int iend) const
 {
+  if (verbose)
+    cerr << "Pulsar::Profile::max" << endl;
+  
   float maxval=0;
   minmax (nbin, amps, 0, &maxval, true, istart, iend);
   return maxval;
@@ -389,6 +413,9 @@ float Pulsar::Profile::max (int istart, int iend) const
 //
 float Pulsar::Profile::min (int istart, int iend) const
 {
+  if (verbose)
+    cerr << "Pulsar::Profile::min" << endl;
+  
   float minval=0;
   minmax (nbin, amps, 0, &minval, false, istart, iend);
   return minval;
@@ -400,6 +427,9 @@ float Pulsar::Profile::min (int istart, int iend) const
 //
 double Pulsar::Profile::sum (int istart, int iend) const
 {
+  if (verbose)
+    cerr << "Pulsar::Profile::sum" << endl;
+
   nbinify (istart, iend, nbin);
 
   double tot = 0;
@@ -415,6 +445,9 @@ double Pulsar::Profile::sum (int istart, int iend) const
 //
 double Pulsar::Profile::mean (int istart, int iend) const
 {
+  if (verbose)
+    cerr << "Pulsar::Profile::mean" << endl;
+
   nbinify (istart, iend, nbin);
   int totbin = iend - istart;
   return sum (istart, iend) / double(totbin);
@@ -426,6 +459,9 @@ double Pulsar::Profile::mean (int istart, int iend) const
 //
 double Pulsar::Profile::rms (int istart, int iend) const
 {
+  if (verbose)
+    cerr << "Pulsar::Profile::rms" << endl;
+
   nbinify (istart, iend, nbin);
   int totbin = iend - istart;
 
@@ -453,6 +489,9 @@ double Pulsar::Profile::rms (int istart, int iend) const
 double Pulsar::Profile::mean (float phase, float duty_cycle,
 			      double* varmean) const
 {
+  if (verbose)
+    cerr << "Pulsar::Profile::mean" << endl;
+
   int start_bin = int ((phase - 0.5 * duty_cycle) * nbin);
   int stop_bin = int ((phase + 0.5 * duty_cycle) * nbin);
 
@@ -473,6 +512,9 @@ double Pulsar::Profile::mean (float phase, float duty_cycle,
   */
 double Pulsar::Profile::sigma (float phase, float duty_cycle) const
 {
+  if (verbose)
+    cerr << "Pulsar::Profile::sigma" << endl;
+  
   int start_bin = int ((phase - 0.5 * duty_cycle) * nbin);
   int stop_bin = int ((phase + 0.5 * duty_cycle) * nbin);
 
@@ -494,6 +536,9 @@ double Pulsar::Profile::sigma (float phase, float duty_cycle) const
 void Pulsar::Profile::stats (double* mean, double* variance, double* varmean,
 			     int istart, int iend) const
 {
+  if (verbose)
+    cerr << "Pulsar::Profile::stats" << endl;
+  
   unsigned counts = 0; 
   double tot = 0;
   double totsq = 0;
@@ -572,6 +617,9 @@ float find_phase (int nbin, float* amps, bool max, float duty_cycle)
  */
 float Pulsar::Profile::find_min_phase (float duty_cycle) const
 {
+  if (verbose)
+    cerr << "Pulsar::Profile::find_min_phase" << endl;
+  
   return find_phase (nbin, amps, false, duty_cycle);
 }
 
@@ -585,6 +633,9 @@ float Pulsar::Profile::find_min_phase (float duty_cycle) const
  */
 float Pulsar::Profile::find_max_phase (float duty_cycle) const
 {
+  if (verbose)
+    cerr << "Pulsar::Profile::find_max_phase" << endl;
+  
   return find_phase (nbin, amps, true, duty_cycle);
 }
 
@@ -599,6 +650,9 @@ float Pulsar::Profile::find_max_phase (float duty_cycle) const
 */
 float Pulsar::Profile::snr() const
 {
+  if (verbose)
+    cerr << "Pulsar::Profile::snr" << endl;
+  
   // find the mean and the r.m.s. of the baseline
   float min_ph = find_min_phase ();
   double min_avg = mean (min_ph);
@@ -628,6 +682,9 @@ float Pulsar::Profile::snr() const
 
 float Pulsar::Profile::snr (const Profile& std) const
 {
+  if (verbose)
+    cerr << "Pulsar::Profile::snr(const Profile& std)" << endl;
+
   float ephase, snrfft, esnrfft;
 
   try {
