@@ -1,5 +1,5 @@
 //
-// $Id: pav.C,v 1.71 2004/03/28 02:47:19 sord Exp $
+// $Id: pav.C,v 1.72 2004/04/01 04:41:35 rmanches Exp $
 //
 // The Pulsar Archive Viewer
 //
@@ -94,8 +94,9 @@ void usage ()
     " -j        Display a simple dynamic spectrum image\n"
     " -u        Display morphological difference (requires a standard)\n"
     "\n"
-    "Non standard plotting options: \n"
+    "Other plotting options: \n"
     " --degree  Plot the degree of polarisation profile\n"
+    " --publn   No top label\n"
     "\n"
     "Archive::Extension options (file format specific):\n"
     " -o        Plot the original bandpass\n"
@@ -197,6 +198,7 @@ int main (int argc, char** argv)
       {"convert_binlngperi", 1, 0, 202},
       {"convert_binlngasc", 1, 0, 203},
       {"degree",0,0,204},
+      {"publn",0,0,205},
       {0, 0, 0, 0}
     };
     
@@ -275,7 +277,7 @@ int main (int argc, char** argv)
       plotter.set_subint( atoi (optarg) );
       break;
     case 'i':
-      cout << "$Id: pav.C,v 1.71 2004/03/28 02:47:19 sord Exp $" << endl;
+      cout << "$Id: pav.C,v 1.72 2004/04/01 04:41:35 rmanches Exp $" << endl;
       return 0;
 
     case 'j':
@@ -293,6 +295,7 @@ int main (int argc, char** argv)
     case 'l':
       plotter.set_labels(false);
       break;
+
     case 'L':
       width = true;
       break;
@@ -516,6 +519,11 @@ int main (int argc, char** argv)
     case 204: {
       degree = true;
       cout << "Plotting degree of polarisation" << endl;
+      break;
+    }      
+    case 205: {
+      plotter.set_publn(true);
+      cout << "Publication quality" << endl;
       break;
     }      
     default:
