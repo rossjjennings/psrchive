@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Archive.h,v $
-   $Revision: 1.32 $
-   $Date: 2002/07/27 00:22:13 $
+   $Revision: 1.33 $
+   $Date: 2002/07/27 03:32:30 $
    $Author: straten $ */
 
 /*! \mainpage 
@@ -343,10 +343,10 @@ namespace Pulsar {
     virtual string get_filename () const = 0;
 
     //! Write archive to disk
-    virtual void unload (const char* filename) = 0;
+    virtual void unload (const char* filename) const = 0;
 
     //! Convenience interface to the unload function
-    void unload (const string& filename) { unload (filename.c_str()); }
+    void unload (const string& filename) const { unload (filename.c_str()); }
 
     // //////////////////////////////////////////////////////////////////
     //

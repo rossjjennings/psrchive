@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/BasicArchive.h,v $
-   $Revision: 1.11 $
-   $Date: 2002/07/27 00:23:07 $
+   $Revision: 1.12 $
+   $Date: 2002/07/27 03:32:49 $
    $Author: straten $ */
 
 #include "Archive.h"
@@ -60,9 +60,11 @@ namespace Pulsar {
   public:
 
     // while testing, an empty load and unload
-    void unload (const char * foo) { cerr << "Cannot unload " << foo << endl; }
+    void unload (const char * foo) const 
+    { cerr << "BasicArchive::unload Cannot unload " << foo << endl; }
 
-    void load (const char * foo) { cerr << "Cannot load " << foo << endl; }
+    void load (const char * foo)
+    { cerr << "BasicArchive::load Cannot load " << foo << endl; }
 
     //! Get the name of the thing from which the archive was loaded
     virtual string get_filename () const { return filename; }
