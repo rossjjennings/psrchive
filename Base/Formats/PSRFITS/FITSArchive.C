@@ -1315,9 +1315,31 @@ try {
   }
 
   {
+
     const Receiver* ext = get<Receiver>();
     if (ext) 
       unload (fptr, ext);
+
+    /* This is a temporary fix until the Receiver class is fully
+       implemented in every Archive-derived class */
+
+    auto_ptr<char> tempstr ( new char[FLEN_VALUE] );
+    
+    if (get_basis() == Signal::Linear)
+      strcpy (tempstr.get(), "LIN");
+    
+    else if (get_basis() == Signal::Circular)
+      strcpy (tempstr.get(), "CIRC");
+    
+    else
+      strcpy (tempstr.get(), "    ");
+      
+    fits_update_key (fptr, TSTRING, "FD_POLN", tempstr.get(), comment, &status);
+
+    if (status)
+      throw FITSError (status, "Pulsar::FITSArchive::unload", 
+                       "fits_update_key FD_POLN");
+
   }
 
   {
