@@ -562,6 +562,10 @@ int utc_f2LST (double* lst, utc_t timeutc, double fracsec, float longitude)
   double F1_YY, UT, GMST;
   double F1_96 = 6.5967564;     /* (hours) For 1996 see ASTRO ALMANAC pg B6 */
   double F1_97 = 6.6465521;     /* (hours) For 1997 see ASTRO ALMANAC pg B6 */
+  /* 99 6.6147239
+	98 6.6306380
+  */
+
   double F2 = 0.0657098244;     /* (hours) */
   double F3 = 1.00273791;       /* (hours) */
 
