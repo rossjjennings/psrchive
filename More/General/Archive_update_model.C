@@ -187,9 +187,25 @@ void Pulsar::Archive::apply_model (const polyco& old, Integration* subint)
  */
 bool Pulsar::Archive::good_model (const polyco& test_model) const
 {
-  for (unsigned isub=0; isub < subints.size(); isub++)
-    if ( test_model.i_nearest (subints[isub]->get_mid_time()) == -1 )
-      return false;
+  if (verbose)
+    cerr << "Archive::good_model testing polyco on " << subints.size()
+	 << " integrations" << endl;
 
+  unsigned isub=0;
+  for (isub=0; isub < subints.size(); isub++) try {
+    if ( test_model.i_nearest (subints[isub]->get_mid_time()) == -1 )
+      break;
+  }
+  catch (...) {
+    break;
+  }
+  
+  if (isub < subints.size()) {
+    if (verbose)
+      cerr << "Archive::good_model polyco failed on integration "
+	   << isub << endl;
+    return false;
+  }
+  
   return true;
 }

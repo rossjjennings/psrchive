@@ -4,8 +4,6 @@
 
 #include "coord.h"
 
-bool Pulsar::Archive::verbose = false;
-
 void Pulsar::Archive::init ()
 {
   if (verbose)
@@ -327,9 +325,14 @@ void Pulsar::Archive::set_model (const polyco& new_model)
   polyco oldmodel = model;
   model = new_model;
 
-  // correct the subints against the old model
-  for (unsigned isub = 0; isub < subints.size(); isub++)
-    apply_model (oldmodel, subints[isub]);
+  if ( oldmodel.pollys.size() ) {
+    if (verbose)
+      cerr << "Archive::set_model correcting against the old model" << endl;
+
+    // correct the subints against the old model
+    for (unsigned isub = 0; isub < subints.size(); isub++)
+      apply_model (oldmodel, subints[isub]);
+  }
 
   // it may not be true the that supplied model was generated at runtime
   model_updated = false; 

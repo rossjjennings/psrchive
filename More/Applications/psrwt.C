@@ -131,7 +131,7 @@ int main (int argc, char** argv)
     cerr << "Standard SNR:" << standard ->snr() << endl;
   }
 
-  Pulsar::Error::handle_signals ();
+  Error::handle_signals ();
 
   for (unsigned ifile=0; ifile < filenames.size(); ifile++) try {
 
@@ -141,8 +141,8 @@ int main (int argc, char** argv)
     copy -> uniform_weight ();
     copy -> pscrunch();
 
-    for (int isub=0; isub < copy->get_nsubint(); isub++)
-      for (int ichan=0; ichan < copy->get_nchan(); ichan++) {
+    for (unsigned isub=0; isub < copy->get_nsubint(); isub++)
+      for (unsigned ichan=0; ichan < copy->get_nchan(); ichan++) {
 	
 	Pulsar::Profile* profile = copy->get_Profile (isub,0,ichan);
 	float snr = 0.0;
@@ -163,7 +163,7 @@ int main (int argc, char** argv)
 	if (snr < snr_threshold)
 	  snr = 0.0;
 
-	for (int ipol=0; ipol < archive->get_npol(); ipol++)
+	for (unsigned ipol=0; ipol < archive->get_npol(); ipol++)
 	  archive->get_Profile (isub,ipol,ichan)->set_weight(snr*snr);
       }
 
@@ -182,7 +182,7 @@ int main (int argc, char** argv)
     archive -> unload (filenames[ifile] + ".wt");
 
   }
-  catch (Pulsar::Error& error) {
+  catch (Error& error) {
     cerr << error << endl;
   }
   catch (string& error) {

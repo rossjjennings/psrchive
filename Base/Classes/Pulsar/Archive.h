@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Archive.h,v $
-   $Revision: 1.39 $
-   $Date: 2002/10/11 04:51:05 $
+   $Revision: 1.40 $
+   $Date: 2002/10/11 07:08:57 $
    $Author: straten $ */
 
 /*! \mainpage 
@@ -171,6 +171,9 @@ namespace Pulsar {
 
     //! Weigh integrations by their integration length, or duration
     static bool weight_by_duration;
+
+    //! Set the verbosity level (0 to 3)
+    static void set_verbosity (unsigned level);
 
     //! null constructor
     Archive ();

@@ -209,7 +209,7 @@ int main (int argc, char** argv)
   // smart pointer
   Reference::To<Pulsar::Archive> archive;
 
-  Pulsar::Error::handle_signals ();
+  Error::handle_signals ();
 
   RealTimer clock;
 
@@ -327,7 +327,7 @@ int main (int argc, char** argv)
     }
 
   }
-  catch (Pulsar::Error& error) {
+  catch (Error& error) {
     cerr << error << endl;
   }
   catch (string& error) {

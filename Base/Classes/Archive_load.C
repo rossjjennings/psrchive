@@ -60,12 +60,12 @@ Pulsar::Archive* Pulsar::Archive::load (const char* filename)
   FILE* fptr = fopen (filename, "r");
 
   if (!fptr)
-    throw Pulsar::Error (Pulsar::FailedSys, "Archive::load",
-			 "cannot open '%s'", filename);
+    throw Error (FailedSys, "Archive::load",
+		 "cannot open '%s'", filename);
 
   // it can be opened, but it was not recognized
   fclose (fptr);
 
-  throw Pulsar::Error (Pulsar::InvalidParam, "Archive::load", 
-		       "'%s' not a recognized file format", filename);
+  throw Error (InvalidParam, "Archive::load", 
+	       "'%s' not a recognized file format", filename);
 }
