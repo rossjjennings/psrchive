@@ -21,16 +21,12 @@ Pulsar::SingleAxisCalibrator::solve (const vector<Estimate<double> >& source,
 {
   Reference::To<Calibration::SingleAxis> model = new Calibration::SingleAxis;
 
-  if (!source_set) {
+  if ( !source_set || source.size() != 4 ) {
     if (verbose)
       cerr << "Pulsar::SingleAxisCalibrator::solve" << endl;
     model->solve (source);
     return model.release();
   }
-
-  if ( source.size() != 4 )
-    throw Error (InvalidParam, "Pulsar::SingleAxisCalibrator::solve",
-                 "source.size=%d != 4", source.size());
 
   if (verbose)
     cerr << "Pulsar::SingleAxisCalibrator::solve reference source=" 

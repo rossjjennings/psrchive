@@ -122,7 +122,7 @@ int main (int argc, char *argv[]) {
       Pulsar::Archive::set_verbosity(3);
       break;
     case 'i':
-      cout << "$Id: pac.C,v 1.52 2004/07/21 15:25:10 straten Exp $" << endl;
+      cout << "$Id: pac.C,v 1.53 2004/08/04 15:47:41 straten Exp $" << endl;
       return 0;
 
     case 'n': {
@@ -350,10 +350,12 @@ int main (int argc, char *argv[]) {
 
       pcal_engine->calibrate (arch);
 
-      if (verbose)
-	cerr << "pac: Correcting platform" << endl;
+      if (arch->get_npol() == 4) {
+	if (verbose)
+	  cerr << "pac: Correcting platform" << endl;
 
-      arch->correct_instrument ();
+	arch->correct_instrument ();
+      }
 
       cout << "pac: Polarisation calibration complete" << endl;
 
@@ -493,7 +495,8 @@ int main (int argc, char *argv[]) {
     
   }
   catch (Error& error) {
-    cerr << "pac: Error while handling " << archives[i] << error << endl;
+    cerr << "pac: Error while handling " << archives[i] 
+	 << error.get_message() << endl;
   }
 
   cerr << "pac: Finished all files" << endl;
