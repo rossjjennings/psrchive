@@ -104,6 +104,7 @@ class polyco {
 
  public:
   static int verbose;
+  static double precision;
 
   vector<polynomial> pollys;
   // null initializer

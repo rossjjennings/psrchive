@@ -13,6 +13,9 @@ string polyco::anyPsr;       // an empty string
 MJD    polyco::today;        // MJD zero
 int    polyco::verbose = 0;  // default: non-verbose
 
+// not going to get > ns precision out of a routine based in minutes
+double polyco::precision = 1e-10;
+
 void polynomial::init(){
   dm = 0;
   doppler_shift = 0;
@@ -340,6 +343,8 @@ MJD polynomial::iphase(const Phase& p) const
   double converge_faster = 1.0;  // kludge!!
   double converge_factor = 0.5;
 
+  double lprecision = max (polyco::precision, MJD::precision);
+
   for (gi=0; gi<10000; gi++) {
     dt = (phase(guess) - p) / frequency(guess);
 
@@ -349,7 +354,7 @@ MJD polynomial::iphase(const Phase& p) const
     if (gi && !(gi % 6))
       converge_faster *= converge_factor;
 
-    if (fabs (dt.in_seconds())  < MJD::precision)
+    if (fabs (dt.in_seconds()) < lprecision)
       return guess;
   }
 
