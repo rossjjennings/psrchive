@@ -5,10 +5,6 @@
 #include "Stokes.h"
 #include "Jones.h"
 
-#ifdef sun
-#include <ieeefp.h>
-#endif
-
 namespace Pulsar {
 
   //! Implements polarimetric pulse profile operations.
@@ -77,12 +73,13 @@ namespace Pulsar {
     double sumsq (int bin_start=0, int bin_end=0) const;
 
     //! Perform the congruence transformation on each bin of the profile
-    template <typename T> void transform (const Jones<T>& response);
+    void transform (const Jones<double>& response);
 
     //! Convert to the specified state
     void convert_state (Signal::State output_state);
     
   protected:
+
     //! The basis in which the radiation is measured
     Signal::Basis basis;
 
@@ -105,27 +102,6 @@ namespace Pulsar {
 
 }
 
-template <typename T>
-void Pulsar::PolnProfile::transform (const Jones<T>& response)
-{
-  //  unsigned nbin = profile[0]->get_nbin();
-  unsigned nbin = get_Profile(0)->get_nbin();
-
-  float Gain = abs( det(response) );
-  if (!finite(Gain))
-    throw Error (InvalidParam, "Pulsar::PolnProfile::transform",
-                 "non-invertbile response.  det(J)=%f", Gain);
-
-  Jones<float> response_dagger = herm(response);
-
-  for (unsigned ibin = 0; ibin < nbin; ibin++)
-    set_coherence (ibin, (response * get_coherence(ibin)) * response_dagger);
-
-  if (correct_weights)
-    for (unsigned ipol=0; ipol < 4; ipol++)
-      get_profile(ipol)->set_weight ( get_Profile(ipol)->get_weight() / Gain );
-
-}
 
 #endif
 
