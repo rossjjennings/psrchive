@@ -20,7 +20,7 @@ int main ()
 	    coordinates.angle2.getradians(), &l, &b);
 
   printf ("COORDSTR: %s\n", coordstr);
-  printf ("(RA DEC) (%s)  l:%g   b:%g\n", coordinates.getHMSDMS().data(),
+  printf ("(RA DEC) (%s)  l:%g   b:%g\n", coordinates.getHMSDMS().c_str(),
 	  l*(180/M_PI), b*(180/M_PI));
 
   return 0;

@@ -27,7 +27,7 @@ int main ()
     return -1;
   }
   printf ("TM %s -> MJD %s -> TM %s\n", 
-	  tempstr1, mjd.printdays(5).data(), tempstr2);
+	  tempstr1, mjd.printdays(5).c_str(), tempstr2);
 
   if (strcmp (tempstr1, tempstr2))  {
     fprintf (stderr, "\nERROR!! TM1: %s does not match TM2: %s\n",
