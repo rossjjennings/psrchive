@@ -1,7 +1,7 @@
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/Timer/band.h,v $
-   $Revision: 1.2 $
-   $Date: 1999/11/02 09:58:20 $
-   $Author: straten $ */
+   $Revision: 1.3 $
+   $Date: 2002/08/11 23:15:44 $
+   $Author: pulsar $ */
 
 #ifndef __BAND_H
 #define __BAND_H
@@ -16,7 +16,11 @@ struct band {
   float flux_A;               /* (A) average flux value in mJy (poln 0)      */
   int inv_mode;               /* 1=Q inverted, 2=U inverted, 3=V inverted    */
   int auto_atten;             /* (T) 1=true, 0 =false                        */
-  int correlator_mode;        /* (T) 0=I,1=AA BB,2=AA,AB,BA,BB, 3=AA, 4=BB   */
+
+  /* this poln_storage_type thing has gone too far - WvS, 12 Aug, 2002 */
+  /* (T) 0=I, 1=AA BB, 2=AA AB BA BB, 3=AA, 4=BB, 5=Inv, 6=IQUV */
+  int correlator_mode;
+
   float f_atten_A;	      /* (T) New float attenuator values             */
   float f_atten_B;            /* (T) 0.0 - 31.5 db                           */
   int polar;                  /* (T) 0=circular (A=L,B=R),1=linear(A=0,B=90) */

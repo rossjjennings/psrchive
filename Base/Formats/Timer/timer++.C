@@ -152,33 +152,15 @@ int Timer::get_npol (const struct timer& hdr)
   case 0: return 1;
   case 1: return 2;
   case 2: return 4;
+  case 6: return 4;
   case 5: return 1;
   }
   throw string ("Timer::get_npol invalid correlator mode");
 }
 
-void Timer::set_npol (struct timer& hdr, int npol)
-{
-  hdr.banda.npol = npol;
-  switch (npol)  {
-    case 1: hdr.banda.correlator_mode = 0; break;
-    case 2: hdr.banda.correlator_mode = 1; break;
-    case 4: hdr.banda.correlator_mode = 2; break;
-    default: throw string ("Timer::set_npol invalid npol");
-  }
-}
-
-
-int Timer::poln_storage (const struct timer& hdr)
-{
-  string mch = hdr.machine_id;
-  if (mch=="S2" || mch=="CPSR") 
-    return IQ_POLN_STORAGE;
-  else 
-    return XY_POLN_STORAGE;
-}
 
 // ///////////////////////////////////////////////////////////////////////
+//
 // Timer::mixable
 //
 // returns true if the conditions are met that allow two archives to be
@@ -196,10 +178,6 @@ bool Timer::mixable (const timer& hdr1, const timer& hdr2,
   // Check headers - this is more or less a list of why we can't
   // store subints with different properties (e.g. nbin, sub_int_time...)
 
-  if (poln_storage (hdr1) != poln_storage (hdr1)) {
-    reason = "Archives have different polarization storage schemes";
-    return false;
-  }
   if (hdr1.obstype != hdr2.obstype ) {
     reason = "Archives have different observation type";
     return false;
