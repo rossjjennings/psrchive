@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Quaternion.h,v $
-   $Revision: 1.13 $
-   $Date: 2003/06/11 08:46:53 $
+   $Revision: 1.14 $
+   $Date: 2003/11/12 12:32:26 $
    $Author: straten $ */
 
 #ifndef __Quaternion_H
@@ -287,9 +287,13 @@ T trace (const Quaternion<T,B>& j)
 template<typename T>
 const Quaternion<T, Hermitian> sqrt (const Quaternion<T, Hermitian>& h)
 {
-  T mod = h.s1*h.s1 + h.s2*h.s2 + h.s3*h.s3;
-  T det = sqrt (h.s0*h.s0 - mod);
-  T scale = sqrt (0.5 * (h.s0 - det) / mod);
+  T modsq = h.s1*h.s1 + h.s2*h.s2 + h.s3*h.s3;
+  T det = sqrt (h.s0*h.s0 - modsq);
+
+  T scale = 0.0;
+
+  if (modsq > 0.0)
+    scale = sqrt (0.5 * (h.s0 - det) / modsq);
 
   return Quaternion<T, Hermitian>
     (sqrt (0.5 * (h.s0 + det)), h.s1 * scale, h.s2 * scale, h.s3 * scale);
