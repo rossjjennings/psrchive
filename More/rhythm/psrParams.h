@@ -48,6 +48,7 @@ class psrParams
   void unload (const string& filename) const
     { unload (filename.c_str()); };
 
+
   // Create TEMPO parameters, given the pulsar name
   void create (const char* psr_name, bool use_cwd);
  
@@ -65,10 +66,11 @@ class psrParams
   void load   (string* instr);
   void unload (string* outstr) const;
 
-  void   nofit();
-  void   fitall();
+  void nofit();
+  void fitall();
 
-  int index (int eph_index) const;
+  bool empty() const { return params.empty(); };
+
   const psrParameter& operator [] (int eph_index) const;
 
   // return some values
@@ -88,7 +90,6 @@ class psrParams
   static vector<string> extensions();
   static string par_lookup (const char* name, bool use_cwd);
 
-
  protected:
   static char* tempo_pardir;
 
@@ -97,6 +98,7 @@ class psrParams
 
   vector <psrParameter*> params;    // pulsar parameters
 
+  int index (int eph_index) const;
   psrParameter* element (int eph_index) const;
 };
 
