@@ -96,6 +96,14 @@ Rhythm::Rhythm (QApplication* master, QWidget* parent, int argc, char** argv) :
   QHBox* container = new QHBox(this);
   container -> setFocus();
   setCentralWidget(container);
+
+  // Build the cursor control panel
+
+  leftpanel = new QVBox(container);
+
+  // Set up the tab panel
+
+  tabs = new QTabWidget(container);
   
   if (vverbose)
     cerr << "Rhythm:: creating toaPlotter" << endl;
@@ -103,14 +111,10 @@ Rhythm::Rhythm (QApplication* master, QWidget* parent, int argc, char** argv) :
   // Instantiate the plotting window
 
   plot_window = new toaPlot(0,0);
-  plot_window -> show();
+  tabs->addTab(plot_window, "Display");
 
   QObject::connect(plot_window, SIGNAL(ineednewdata()),
 		   this, SLOT(request_update()));
-
-  // Build the cursor control panel
-
-  leftpanel = new QVBox(container);
   
   string banloc = getenv("PSRHOME");
   banloc += "/runtime/rhythm/banner.jpg";
@@ -118,10 +122,13 @@ Rhythm::Rhythm (QApplication* master, QWidget* parent, int argc, char** argv) :
   QPixmap* pretty_pic = new QPixmap(banloc.c_str());
   header = new QLabel(leftpanel);
   header->setFrameStyle( QFrame::Panel | QFrame::Sunken );
+  header-> setAlignment(Qt::AlignCenter);
+  header->setPaletteBackgroundColor(black);
   header->setPixmap(*pretty_pic);
 
   footer = new QLabel("Status Message Box", leftpanel);
-  footer->setMinimumHeight(30);
+  footer->setMinimumHeight(60);
+  footer->setMargin(5);
   footer->setAlignment(Qt::AlignCenter);
   footer->setFont (QFont( "Times", 10, QFont::Bold));
 
@@ -191,10 +198,6 @@ Rhythm::Rhythm (QApplication* master, QWidget* parent, int argc, char** argv) :
   QObject::connect(chooser, SIGNAL(XChange(toaPlot::AxisQuantity)),
 		   this, SLOT(XChange(toaPlot::AxisQuantity)));
 
-  // Set up the tab panel
-
-  tabs = new QTabWidget(container);
-
   // Instantiate the toa list box
   
   toa_text = new QListBox(container, "TOA_INFO");
@@ -213,16 +216,16 @@ Rhythm::Rhythm (QApplication* master, QWidget* parent, int argc, char** argv) :
   
   if (vverbose)
     cerr << "Rhythm:: new qt_editParams" << endl;
-
-  fitpopup = new qt_editParams(container);
-  tabs->insertTab(fitpopup, "Ephemeris");
-  tabs->showPage(fitpopup);
-
+  
+  fitpopup = new qt_editParams();
+  
   connect ( fitpopup, SIGNAL( closed() ),
 	    this, SLOT( togledit() ) );
   connect ( fitpopup, SIGNAL( newParams(const psrephem&) ),
 	    this, SLOT( set_Params(const psrephem&) ) );
-
+  
+  fitpopup->show();
+  
   if (vverbose)
     cerr << "Rhythm:: call menubarConstruct" << endl;
 
@@ -232,10 +235,11 @@ Rhythm::Rhythm (QApplication* master, QWidget* parent, int argc, char** argv) :
     cerr << "Rhythm:: call command_line_parse" << endl;
 
   command_line_parse (argc, argv);
-
-  if (vverbose)
-    cerr << "Rhythm:: show qt_editParams" << endl;
-
+  
+  tabs->showPage(plot_window);
+  
+  QObject::connect(tabs, SIGNAL(currentChanged(QWidget*)),
+		   this, SLOT(tabChange(QWidget*)));
 }
 
 void Rhythm::load_toas (const char* fname)
@@ -478,12 +482,16 @@ void Rhythm::fit()
       cerr << "Rhythm::fit No Arrival Times loaded" << endl;
     return;
   }
-
+  
+  footer->setText("Fitting...");
+  
+  myapp->processEvents();
+  
   update_mode();
 
   psrephem eph;
   fitpopup -> get_psrephem (eph);
-
+  
   fit (eph, true);
 
   if (verbose)
@@ -530,14 +538,28 @@ void Rhythm::fit (const psrephem& eph, bool load_new)
     
     char temp[128];
     
-    FILE* fptr = popen("tail -4 tempo.lis | grep residual", "r");
-    fgets(temp, 1024, fptr);
-    pclose(fptr);
-    
-    string temp2 = temp;
-    string temp3 = "Residual: " + temp2.substr(23, 54);
-
-    footer->setText(temp3.c_str());
+    if (!weights) {
+      FILE* fptr = popen("tail -1 tempo.lis", "r");
+      fgets(temp, 1024, fptr);
+      pclose(fptr);
+      
+      string temp2 = temp;
+      string temp3 = "Residual: " + temp2.substr(23, 54);
+      
+      footer->setText(temp3.c_str());
+    }
+    else {
+      FILE* fptr = popen("tail -2 tempo.lis", "r");
+      fgets(temp, 1024, fptr);
+      
+      string temp2 = temp;
+      fgets(temp, 1024, fptr);
+      temp2 += temp;
+      
+      pclose(fptr);
+      
+      footer->setText(temp2.c_str());
+    }
     
   } 
   catch (Error& error) {
@@ -560,6 +582,10 @@ void Rhythm::fit_selected()
 {
   if (!fitpopup || !fitpopup -> hasdata())
     return;
+
+  footer->setText("Fitting...");
+
+  myapp->processEvents();
 
   psrephem eph;
   fitpopup -> get_psrephem (eph);
@@ -680,8 +706,8 @@ vector<double> Rhythm::give_me_data (toaPlot::AxisQuantity q)
 
   case toaPlot::TOA_MJD:
     for ( unsigned i = 0; i < toas.size(); i++ ) {
-      progress.setProgress( i );
-      myapp->processEvents();
+      //progress.setProgress( i );
+      //myapp->processEvents();
 
       if (toas[i].get_format() == Tempo::toa::Command) {
 	retval.push_back(0.0);
@@ -689,15 +715,15 @@ vector<double> Rhythm::give_me_data (toaPlot::AxisQuantity q)
       }
       retval.push_back((toas[i].resid.mjd)-50000.0);
     }
-    progress.setProgress( toas.size() );
+    //progress.setProgress( toas.size() );
     
     return retval;
     break;
 
   case toaPlot::BinaryPhase:
     for ( unsigned i = 0; i < toas.size(); i++ ) {
-      progress.setProgress( i );
-      myapp->processEvents();
+      //progress.setProgress( i );
+      //myapp->processEvents();
 
       if (toas[i].get_format() == Tempo::toa::Command) {
 	retval.push_back(0.0);
@@ -705,15 +731,15 @@ vector<double> Rhythm::give_me_data (toaPlot::AxisQuantity q)
       }
       retval.push_back(toas[i].resid.binaryphase);
     }
-    progress.setProgress( toas.size() );
+    //progress.setProgress( toas.size() );
     
     return retval;
     break;
 
   case toaPlot::ObsFreq:
     for ( unsigned i = 0; i < toas.size(); i++ ) {
-      progress.setProgress( i );
-      myapp->processEvents();
+      //progress.setProgress( i );
+      //myapp->processEvents();
 
       if (toas[i].get_format() == Tempo::toa::Command) {
 	retval.push_back(0.0);
@@ -721,15 +747,15 @@ vector<double> Rhythm::give_me_data (toaPlot::AxisQuantity q)
       }
       retval.push_back(toas[i].resid.obsfreq);
     }
-    progress.setProgress( toas.size() );
+    //progress.setProgress( toas.size() );
     
     return retval;
     break;
     
   case toaPlot::DayOfYear:
     for ( unsigned i = 0; i < toas.size(); i++ ) {
-      progress.setProgress( i );
-      myapp->processEvents();
+      //progress.setProgress( i );
+      //myapp->processEvents();
 
       if (toas[i].get_format() == Tempo::toa::Command) {
 	retval.push_back(0.0);
@@ -737,15 +763,15 @@ vector<double> Rhythm::give_me_data (toaPlot::AxisQuantity q)
       }
       retval.push_back(fmod(toas[i].resid.mjd, 365.0));
     }
-    progress.setProgress( toas.size() );
+    //progress.setProgress( toas.size() );
     
     return retval;
     break;
 
   case toaPlot::ResidualMicro:
     for ( unsigned i = 0; i < toas.size(); i++ ) {
-      progress.setProgress( i );
-      myapp->processEvents();
+      //progress.setProgress( i );
+      //myapp->processEvents();
 
       if (toas[i].get_format() == Tempo::toa::Command) {
 	retval.push_back(0.0);
@@ -753,7 +779,7 @@ vector<double> Rhythm::give_me_data (toaPlot::AxisQuantity q)
       }
       retval.push_back(toas[i].resid.time);
     }
-    progress.setProgress( toas.size() );
+    //progress.setProgress( toas.size() );
     
     return retval;
     break;
@@ -788,8 +814,8 @@ vector<double> Rhythm::give_me_data (toaPlot::AxisQuantity q)
 
   case toaPlot::ResidualMilliTurns:
     for ( unsigned i = 0; i < toas.size(); i++ ) {
-      progress.setProgress( i );
-      myapp->processEvents();
+      //progress.setProgress( i );
+      //myapp->processEvents();
 
       if (toas[i].get_format() == Tempo::toa::Command) {
 	retval.push_back(0.0);
@@ -797,12 +823,28 @@ vector<double> Rhythm::give_me_data (toaPlot::AxisQuantity q)
       }
       retval.push_back((toas[i].resid.turns)*1000.0);
     }
-    progress.setProgress( toas.size() );
+    //progress.setProgress( toas.size() );
     
     return retval;
     break;
 
   case toaPlot::ErrorMicro:
+    for ( unsigned i = 0; i < toas.size(); i++ ) {
+      //progress.setProgress( i );
+      //myapp->processEvents();
+
+      if (toas[i].get_format() == Tempo::toa::Command) {
+	retval.push_back(0.0);
+	continue;
+      }
+      retval.push_back(toas[i].resid.error);
+    }
+    //progress.setProgress( toas.size() );
+    
+    return retval;
+    break;
+    
+  case toaPlot::PointNumber:
     for ( unsigned i = 0; i < toas.size(); i++ ) {
       progress.setProgress( i );
       myapp->processEvents();
@@ -811,13 +853,13 @@ vector<double> Rhythm::give_me_data (toaPlot::AxisQuantity q)
 	retval.push_back(0.0);
 	continue;
       }
-      retval.push_back(toas[i].resid.error);
+      retval.push_back(i);
     }
     progress.setProgress( toas.size() );
     
     return retval;
     break;
-    
+
   case toaPlot::SignalToNoise:
 
     for ( unsigned i = 0; i < toas.size(); i++ ) {
@@ -1005,6 +1047,12 @@ vector<double> Rhythm::give_me_errs (toaPlot::AxisQuantity q)
     return retval;
     break;
 
+  case toaPlot::PointNumber:
+    for (unsigned i = 0; i < toas.size(); i++)
+      retval.push_back(0.0);
+    return retval;
+    break;
+    
   case toaPlot::ResidualMilliTurns:
     // Need the pulsar period:
     if (fitpopup->hasdata()) {
@@ -1095,6 +1143,12 @@ void Rhythm::YChange (toaPlot::AxisQuantity q)
   yq = q;
   goplot ();
   plot_window->autoscale();
+}
+
+void Rhythm::tabChange(QWidget* ptr)
+{
+  if (ptr == plot_window)
+    goplot();
 }
 
 void Rhythm::goplot ()
@@ -1430,10 +1484,10 @@ void Rhythm::setseldot (int index)
 AxisSelector::AxisSelector (QWidget* parent)
   : QHBox(parent)
 {
-  Xgrp = new QButtonGroup(12, Qt::Vertical, "X Axis", this);
+  Xgrp = new QButtonGroup(13, Qt::Vertical, "X Axis", this);
   Xgrp -> setRadioButtonExclusive(true);
   
-  Ygrp = new QButtonGroup(12, Qt::Vertical, "Y Axis", this);
+  Ygrp = new QButtonGroup(13, Qt::Vertical, "Y Axis", this);
   Ygrp -> setRadioButtonExclusive(true);
 
   X1 = new QRadioButton("Residual (us)", Xgrp);
@@ -1448,6 +1502,7 @@ AxisSelector::AxisSelector (QWidget* parent)
   X10 = new QRadioButton("DM", Xgrp);
   X11 = new QRadioButton("Length", Xgrp);
   X12 = new QRadioButton("P.A.", Xgrp);
+  X13 = new QRadioButton("TOA Index", Xgrp);
 
   X3->setChecked(true);
 
@@ -1463,7 +1518,8 @@ AxisSelector::AxisSelector (QWidget* parent)
   Y10 = new QRadioButton("DM", Ygrp);
   Y11 = new QRadioButton("Length", Ygrp);
   Y12 = new QRadioButton("P.A.", Ygrp);
-  
+  Y13 = new QRadioButton("TOA Index", Ygrp);
+
   Y1->setChecked(true);
   
   Xgrp->insert(X1,1);
@@ -1478,6 +1534,7 @@ AxisSelector::AxisSelector (QWidget* parent)
   Xgrp->insert(X10,10);
   Xgrp->insert(X11,11);
   Xgrp->insert(X12,12);
+  Xgrp->insert(X13,13);
 
   Ygrp->insert(Y1,1);
   Ygrp->insert(Y2,2);
@@ -1491,6 +1548,7 @@ AxisSelector::AxisSelector (QWidget* parent)
   Ygrp->insert(Y10,10);
   Ygrp->insert(Y11,11);
   Ygrp->insert(Y12,12);
+  Ygrp->insert(Y13,13);
 
   QObject::connect(Xgrp, SIGNAL(clicked(int)),
 		   this, SLOT(Xuseful(int)));

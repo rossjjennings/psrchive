@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/rhythm/rhythm.h,v $
-   $Revision: 1.33 $
-   $Date: 2003/08/05 11:17:13 $
+   $Revision: 1.34 $
+   $Date: 2003/08/06 04:26:18 $
    $Author: ahotan $ */
 
 // //////////////////////////////////////////////////////////////////////////
@@ -74,6 +74,7 @@ class AxisSelector : public QHBox
   QRadioButton* X10;
   QRadioButton* X11;
   QRadioButton* X12;
+  QRadioButton* X13;
 
   QRadioButton* Y1;
   QRadioButton* Y2;
@@ -87,6 +88,7 @@ class AxisSelector : public QHBox
   QRadioButton* Y10;
   QRadioButton* Y11;
   QRadioButton* Y12;
+  QRadioButton* Y13;
   
  public slots:
 
@@ -297,6 +299,8 @@ class Rhythm : public QMainWindow
   
   void setDataPath ();
   void profileMovie ();
+
+  void tabChange(QWidget*);
 };
 
 #endif

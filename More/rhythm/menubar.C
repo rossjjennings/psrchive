@@ -36,11 +36,11 @@ void Rhythm::menubarConstruct ()
   //
   tempo = new QPopupMenu( menuBar() );  CHECK_PTR (tempo);
 
-  fitID = tempo->insertItem( "&Fit", this, SLOT( fit() ));
+  fitID = tempo->insertItem( "&Fit", this, SLOT( fit() ), CTRL+Key_F);
   tempo->setItemEnabled (fitID, false);
-  fitSelID = tempo->insertItem( "Fit &Selected", this, SLOT( fit_selected() ));
+  fitSelID = tempo->insertItem( "Fit &Selected", this, SLOT( fit_selected() ), CTRL+Key_S);
   tempo->setItemEnabled (fitSelID, false);
-  dispID = tempo->insertItem( "&Display Parameters", this, SLOT( togledit() ));
+  dispID = tempo->insertItem( "Display Parameters", this, SLOT( togledit() ));
   tempo->setItemEnabled (dispID, false);
 
   tempo->insertSeparator();
@@ -54,7 +54,7 @@ void Rhythm::menubarConstruct ()
 				 this, SLOT( toglauto() ));
   // weights disabled by default, state changes when TOAs are read in
   weightsID = tempo->insertItem( "Enable &Weights",
-				this, SLOT( toglweights() ));
+				this, SLOT( toglweights() ), CTRL+Key_W);
   tempo->insertSeparator();
   stdID = tempo->insertItem( "Use Standard TEMPO",
 			     this, SLOT( set_std_tempo() ));
@@ -172,7 +172,7 @@ void Rhythm::profileMovie()
   QProgressDialog progress( "Displaying Profiles...", "Abort", toa_text->count(),
 			    this, "progress", TRUE );
 
-  cpgopen("/xs");
+  cpgopen("9090/xs");
 
   for (unsigned i = 0; i < toa_text->count(); i++) {
     cpgbbuf();

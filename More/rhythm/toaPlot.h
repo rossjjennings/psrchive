@@ -36,7 +36,8 @@ class toaPlot: public QPgplot {
   enum AxisQuantity { None, ResidualMicro, ResidualMilliTurns, 
 		      TOA_MJD, BinaryPhase, ObsFreq, DayOfYear,
 		      ErrorMicro, SignalToNoise, Bandwidth,
-		      DispersionMeasure, Duration, ParallacticAngle };
+		      DispersionMeasure, Duration, ParallacticAngle,
+		      PointNumber };
   
   toaPlot ( QWidget *parent=0, const char *name=0 );
   

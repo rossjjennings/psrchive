@@ -82,6 +82,9 @@ void toaPlot::plotter ()
   case ParallacticAngle:
     xlab = "Parallactic Angle (degrees)";
     break;
+  case PointNumber:
+    xlab = "TOA List Index";
+    break;
   }
   
   switch (yq) {
@@ -123,6 +126,9 @@ void toaPlot::plotter ()
     break;
   case ParallacticAngle:
     ylab = "Parallactic Angle (degrees)";
+    break;
+  case PointNumber:
+    ylab = "TOA List Index";
     break;
   }
 
