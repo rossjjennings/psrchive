@@ -11,6 +11,7 @@
 Pulsar::PulsarCalibrator::PulsarCalibrator (Calibrator::Type model)
 {
   model_type = model;
+  maximum_harmonic = 0;
 }
 
 //! Constructor
@@ -39,6 +40,11 @@ Pulsar::Calibrator::Info* Pulsar::PulsarCalibrator::get_Info () const
 {
   throw Error (InvalidState, "Pulsar::PulsarCalibrator::get_Info",
 	       "not implemented");
+}
+
+void Pulsar::PulsarCalibrator::set_maximum_harmonic (unsigned max)
+{
+  maximum_harmonic = max;
 }
 
 void Pulsar::PulsarCalibrator::set_standard (const Archive* data)
@@ -113,6 +119,9 @@ void Pulsar::PulsarCalibrator::set_standard (const Archive* data)
     transformation[ichan] = new Calibration::Instrument;
     solution[ichan] = new Calibration::MeanInstrument;
     model[ichan] = new PolnProfileFit;
+
+    if (maximum_harmonic)
+      model[ichan]->set_maximum_harmonic( maximum_harmonic );
 
     model[ichan]->set_standard ( integration->new_PolnProfile (ichan) );
     model[ichan]->set_transformation ( transformation[ichan] * &parallactic );

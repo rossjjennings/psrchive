@@ -19,7 +19,6 @@
 #include <cpgplot.h>
 
 #include <string.h>
-// #include <libgen.h>
 
 void usage ()
 {
@@ -28,8 +27,13 @@ void usage ()
     "  -v               Verbose mode \n" 
     "  -V               Very verbose mode \n"
     "  -i               Show revision information \n"
+    "\n"
+    "Preprocessing options:\n"
     "  -F               Frequency scrunch before fitting \n"
     "  -T               Time scrunch before fitting \n"
+    "\n"
+    "Fitting options:\n"
+    "  -n harmonics     Use up to the specified number of harmonics\n"
     "  -p               Perform full polarimetric fit in Fourier domain \n"
     "  -s stdfile       Location of standard profile \n"
     "  -t               Fit in the time domain \n"
@@ -55,7 +59,9 @@ int main (int argc, char *argv[])
 
   int gotc = 0;
 
-  while ((gotc = getopt(argc, argv, "hvViFTps:t")) != -1) {
+  Pulsar::PolnProfileFit fit;
+
+  while ((gotc = getopt(argc, argv, "hiFn:ps:tTvV")) != -1) {
     switch (gotc) {
 
     case 'h':
@@ -68,16 +74,20 @@ int main (int argc, char *argv[])
 
     case 'V':
       verbose = true;
-      Pulsar::Archive::set_verbosity(1);
+      Pulsar::Archive::set_verbosity(3);
       Calibration::Model::verbose = true;
       break;
 
     case 'i':
-      cout << "$Id: pat.C,v 1.17 2004/01/06 19:04:05 straten Exp $" << endl;
+      cout << "$Id: pat.C,v 1.18 2004/04/20 13:07:36 straten Exp $" << endl;
       return 0;
 
     case 'F':
       fscrunch = true;
+      break;
+
+    case 'n':
+      fit.set_maximum_harmonic( atoi(optarg) );
       break;
 
     case 'T':
@@ -120,7 +130,6 @@ int main (int argc, char *argv[])
   Reference::To<Pulsar::Profile> prof;
 
   Reference::To<const Pulsar::PolnProfile> poln_profile;
-  Pulsar::PolnProfileFit fit;
 
   try {
     
@@ -130,6 +139,7 @@ int main (int argc, char *argv[])
 
     if (full_poln) {
 
+      cerr << "pat: full polarization fitting with " << std << endl;
       fit.set_standard( stdarch->get_Integration(0)->new_PolnProfile(0) );
       fit.set_transformation( new Calibration::Polar );
 
@@ -158,7 +168,7 @@ int main (int argc, char *argv[])
       if (tscrunch)
 	arch->tscrunch();
 
-      if (full_poln) {
+      if (full_poln) try {
 
 	Pulsar::Integration* integration = arch->get_Integration(0);
 	poln_profile = integration->new_PolnProfile(0);
@@ -174,10 +184,13 @@ int main (int argc, char *argv[])
 	toa.unload(stdout);
 
       }
+      catch (Error& error) {
+	cerr << "pat: Error while fitting " << error << endl;
+      }
       else {
 
-	arch->convert_state (Signal::Intensity);      
-	arch->toas(toas, stdarch, time_domain);
+	arch->convert_state (Signal::Intensity);
+        arch->toas(toas, stdarch, time_domain);
 
       }
 
@@ -191,7 +204,10 @@ int main (int argc, char *argv[])
       cerr << error << endl;
     }
   }
+
   fflush(stdout);
+  return 0;
+
 }
 
 

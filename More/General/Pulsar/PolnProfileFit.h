@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/Attic/PolnProfileFit.h,v $
-   $Revision: 1.5 $
-   $Date: 2004/01/05 19:40:20 $
+   $Revision: 1.6 $
+   $Date: 2004/04/20 13:07:36 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PolnProfileFit_h
@@ -23,6 +23,7 @@ namespace Calibration {
 namespace Pulsar {
 
   class PolnProfile;
+  class Profile;
 
   //! Implements polarimetric pulse profile template fitting
   /*! This class may be used to find the full polarimetric best-fit
@@ -46,7 +47,10 @@ namespace Pulsar {
 
     //! Destructor
     ~PolnProfileFit ();
-    
+
+    //! Set the maximum number of harmonics to include in fit
+    void set_maximum_harmonic (unsigned max);
+
     //! Set the standard to which observations will be fit
     void set_standard (const PolnProfile* standard);
 
@@ -60,7 +64,7 @@ namespace Pulsar {
     Estimate<double> get_phase () const;
 
     //! Set the phase offset between the observation and the standard
-    void set_phase (Estimate<double>& phase);
+    void set_phase (const Estimate<double>& phase);
 
     //! Get the arrival time estimate
     Tempo::toa get_toa (const PolnProfile* observation,
@@ -72,10 +76,22 @@ namespace Pulsar {
     //! Return the variance in each of the four Stokes parameters
     Stokes<float> get_variance (const PolnProfile* input) const;
 
+    //! Return the phase shift based on the cross correlation function
+    float ccf_max_phase (const Profile* std, const Profile* obs) const;
+
   protected:
+
+    //! The maximum number of harmonics to include in the fit
+    unsigned maximum_harmonic;
+
+    //! The number of harmonics in the fit
+    unsigned n_harmonic;
 
     //! The standard to which observations will be fit
     Reference::To<const PolnProfile> standard;
+
+    //! The fourier transform of the standard
+    Reference::To<const PolnProfile> standard_fourier;
 
     //! The transformation between the standard and observation
     Reference::To<Calibration::Complex2> transformation;

@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pcm.C,v $
-   $Revision: 1.20 $
-   $Date: 2004/01/06 19:04:11 $
+   $Revision: 1.21 $
+   $Date: 2004/04/20 13:07:36 $
    $Author: straten $ */
 
 /*! \file pcm.C 
@@ -85,6 +85,7 @@ void usage ()
     "MODE B: Fit single observations of known source \n"
     "\n"
     "  -S fname   filename of calibrated standard \n"
+    "  -n nbin    set the number of harmonics to use as input states \n"
        << endl;
 }
 
@@ -213,6 +214,12 @@ bool display = true;
 // verbosity flags
 bool verbose = false;
 
+//! The maximum number of bins to use
+unsigned maxbins = 16;
+
+//! Flag raised when the above value is set using -n
+bool maxbins_set = false;
+
 int main (int argc, char *argv[]) try {
 
   Error::verbose = false;
@@ -232,9 +239,6 @@ int main (int argc, char *argv[]) try {
   // number of hours over which CALs will be found from Database
   float hours = 24.0;
 
-
-  //! The maximum number of bins to use
-  unsigned maxbins = 16;
 
   //! The pulse phase window to use
   float phmin, phmax;
@@ -303,7 +307,9 @@ int main (int argc, char *argv[]) try {
 
     case 'n':
       maxbins = atoi (optarg);
-      cerr << "pcm: selecting a maximum of " << maxbins << " bins" << endl;
+      cerr << "pcm: using a maximum of " << maxbins << " bins or harmonics" 
+	   << endl;
+      maxbins_set = true;
       break;
 
     case 'P':
@@ -733,16 +739,20 @@ catch (Error& error) {
 int mode_B (const char* standard_filename,
 	    const vector<string>& filenames)
 {
-
   // the reception calibration class
   Pulsar::PulsarCalibrator model (model_name);
 
   Reference::To<Pulsar::Archive> standard;
+
   standard = Pulsar::Archive::load (standard_filename);
+  standard->convert_state (Signal::Stokes);
 
   RealTimer clock;
 
   clock.start();
+
+  if (maxbins_set)
+    model.set_maximum_harmonic (maxbins);
 
   model.set_standard (standard);
 
@@ -760,10 +770,9 @@ int mode_B (const char* standard_filename,
       cerr << "pcm: loading " << filenames[i] << endl;
     
     archive = Pulsar::Archive::load(filenames[i]);
+    archive->convert_state (Signal::Stokes);
 
     cout << "pcm: loaded archive: " << filenames[i] << endl;
-
-    archive->convert_state (Signal::Stokes);
 
     model.add_observation( archive );
 
@@ -771,6 +780,7 @@ int mode_B (const char* standard_filename,
 
     archive->deparallactify ();
 
+    archive->convert_state (Signal::Stokes);
     standard->append (archive);
 
     standard->tscrunch ();

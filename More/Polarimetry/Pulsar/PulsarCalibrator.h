@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PulsarCalibrator.h,v $
-   $Revision: 1.3 $
-   $Date: 2004/01/05 09:47:15 $
+   $Revision: 1.4 $
+   $Date: 2004/04/20 13:07:36 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PulsarCalibrator_H
@@ -42,6 +42,9 @@ namespace Pulsar {
     //! Return the Calibrator information
     Calibrator::Info* get_Info () const;
 
+    //! Set the maximum number of harmonics to include in fit
+    void set_maximum_harmonic (unsigned max);
+
     //! Set the standard to which pulsar profiles will be fit
     void set_standard (const Archive* data);
 
@@ -78,6 +81,9 @@ namespace Pulsar {
 
     //! The model specified on construction
     Calibrator::Type model_type;
+
+    //! The maximum number of harmonics to include in the fit
+    unsigned maximum_harmonic;
 
   };
 
