@@ -1,3 +1,8 @@
+/* $Source: /cvsroot/psrchive/psrchive/Util/genutil/ieee.h,v $
+   $Revision: 1.2 $
+   $Date: 1999/11/02 09:00:47 $
+   $Author: straten $ */
+
 #ifndef IEEE_H
 #define IEEE_H
 

@@ -1,3 +1,8 @@
+/* $Source: /cvsroot/psrchive/psrchive/Util/genutil/coord.h,v $
+   $Revision: 1.2 $
+   $Date: 1999/11/02 09:00:45 $
+   $Author: straten $ */
+
 #ifndef __COORD_H
 #define __COORD_H
 

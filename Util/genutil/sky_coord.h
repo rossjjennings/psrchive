@@ -1,3 +1,8 @@
+/* $Source: /cvsroot/psrchive/psrchive/Util/genutil/sky_coord.h,v $
+   $Revision: 1.2 $
+   $Date: 1999/11/02 09:00:50 $
+   $Author: straten $ */
+
 #ifndef __SKY_COORD_H
 #define __SKY_COORD_H
 

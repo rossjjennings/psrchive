@@ -1,3 +1,8 @@
+/* $Source: /cvsroot/psrchive/psrchive/Util/qtutil/qt_MJD.h,v $
+   $Revision: 1.2 $
+   $Date: 1999/11/02 09:00:49 $
+   $Author: straten $ */
+
 #ifndef __QT_MJD_H
 #define __QT_MJD_H
 

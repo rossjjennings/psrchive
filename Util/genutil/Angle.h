@@ -1,3 +1,8 @@
+/* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Angle.h,v $
+   $Revision: 1.2 $
+   $Date: 1999/11/02 09:00:43 $
+   $Author: straten $ */
+
 // redwards 17 Mar 99 -- Time for a definitive C++ suite of
 // angle and sky coordinate functions
 
