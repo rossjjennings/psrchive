@@ -49,7 +49,7 @@ void toaPlot::plotter ()
   else
     cpgbox ("bcnst",0.0,0,"bcnst",0.0,0);
   
-  string xlab, ylab;
+  std::string xlab, ylab;
   
   switch (xq) {
   case None:
@@ -253,7 +253,7 @@ void toaPlot::handleEvent (float x, float y, char ch)
 	    x2 = handy1;
 	    x1 = handy2;
 	  } 
-	  vector<int> mypts;
+	  std::vector<int> mypts;
 	  for (unsigned i = 0; i < data.size(); i++) {
 	    if ((data[i].x > x1) && (data[i].x < x2))
 	      mypts.push_back(data[i].id);
@@ -303,7 +303,7 @@ void toaPlot::handleEvent (float x, float y, char ch)
 	    y2 = handy1;
 	    y1 = handy2;
 	  } 
-	  vector<int> mypts;
+	  std::vector<int> mypts;
 	  for (unsigned i = 0; i < data.size(); i++) {
 	    if ((data[i].y > y1) && (data[i].y < y2))
 	      mypts.push_back(data[i].id);
@@ -372,7 +372,7 @@ void toaPlot::handleEvent (float x, float y, char ch)
 	    y2 = handy1;
 	    y1 = handy2;
 	  } 
-	  vector<int> mypts;
+	  std::vector<int> mypts;
 	  for (unsigned i = 0; i < data.size(); i++) {
 	    if ((data[i].y > y1) && (data[i].y < y2) && (data[i].x > x1) && (data[i].x < x2))
 	      mypts.push_back(data[i].id);
@@ -438,7 +438,7 @@ void toaPlot::boxselector ()
   handleEvent(0,0,'~');
 }
 
-void toaPlot::setPoints(AxisQuantity _xq, AxisQuantity _yq, vector<wrapper> _data,
+void toaPlot::setPoints(AxisQuantity _xq, AxisQuantity _yq, std::vector<wrapper> _data,
 			bool _logx, bool _logy)
 {
   if (_data.empty()) {
@@ -530,7 +530,9 @@ void toaPlot::autobin (int nbins)
   }
   rms = sqrt(wted_sum_sq/sum_wts);
 
-  cout << "Weighted RMS residual for autobin is " << rms << " us " << endl; 
+  std::cout << "Weighted RMS residual for autobin is " << rms << " us " 
+            << std::endl; 
+
   cpgsci(1);
   cpgsch(1.0);
   endDrawing();

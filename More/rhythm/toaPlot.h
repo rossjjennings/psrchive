@@ -45,7 +45,7 @@ class toaPlot: public QPgplot {
   void plotter ();
   void handleEvent (float x, float y, char ch);
   
-  void setPoints (AxisQuantity, AxisQuantity, vector<wrapper>, bool, bool);
+  void setPoints (AxisQuantity, AxisQuantity, std::vector<wrapper>, bool, bool);
 
   public slots:
 
@@ -63,14 +63,14 @@ class toaPlot: public QPgplot {
  signals:
 
   void selected (int);
-  void selected (vector<int>);
+  void selected (std::vector<int>);
   void ineednewdata ();
 
  protected:
 
   // Information about data display
 
-  vector<wrapper> data;
+  std::vector<wrapper> data;
   
   float xmin, xmax, ymin, ymax;
   AxisQuantity xq, yq;
