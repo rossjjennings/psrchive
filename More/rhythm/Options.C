@@ -71,6 +71,7 @@ void RhythmOptions::setupPlot()
 
   radbut = new QRadioButton( "MJD", xaxis );
   xaxis -> insert ( radbut, residual::Mjd );
+  radbut->setChecked( residual::xtype == residual::Mjd );
 
   radbut = new QRadioButton( "Binary Phase", xaxis );
   xaxis -> insert ( radbut, residual::BinaryPhase );
@@ -85,6 +86,7 @@ void RhythmOptions::setupPlot()
 
   radbut = new QRadioButton( "Seconds", yaxis );
   yaxis -> insert ( radbut, residual::Seconds );
+  radbut->setChecked( residual::ytype == residual::Seconds );
 
   radbut = new QRadioButton( "Turns", yaxis );
   yaxis -> insert ( radbut, residual::Turns );
