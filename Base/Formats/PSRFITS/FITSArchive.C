@@ -1772,7 +1772,7 @@ try {
   
   // Now write the actual integrations to file
 
-  // Move to the SUBINT Header Data Unit
+  // Move to the SUBINT Binary Table
   
   fits_movnam_hdu (myfptr, BINARY_TBL, "SUBINT", 0, &status);
   if (status != 0)
@@ -1785,9 +1785,7 @@ try {
   long oldrownum = 0;
 
   fits_get_num_rows (myfptr, &oldrownum, &status);
-
   fits_delete_rows (myfptr, 1, oldrownum, &status);
-
   fits_insert_rows (myfptr, 0, nsubint, &status);
 
   if (verbose) {
@@ -1799,6 +1797,10 @@ try {
 	   << endl;
     }
   }
+  
+  if (status != 0)
+    throw FITSError (status, "FITSArchive::unload_file", 
+		     "error clearing old subints");
 
   // Set the sizes of the columns which may have changed
   
@@ -1807,6 +1809,10 @@ try {
   fits_get_colnum (myfptr, CASEINSEN, "DAT_FREQ", &colnum, &status);
   fits_modify_vector_len (myfptr, colnum, nchan, &status);
   
+  if (status != 0)
+    throw FITSError (status, "FITSArchive::unload_file", 
+		     "error resizing DAT_FREQ");
+
   if (verbose)
     cerr << "FITSArchive::unload_file DAT_FREQ resized to "
 	 << nchan
@@ -1814,6 +1820,10 @@ try {
 
   fits_get_colnum (myfptr, CASEINSEN, "DAT_WTS", &colnum, &status);
   fits_modify_vector_len (myfptr, colnum, nchan, &status);
+
+  if (status != 0)
+    throw FITSError (status, "FITSArchive::unload_file", 
+		     "error resizing DAT_WTS");
 
   if (verbose)
     cerr << "FITSArchive::unload_file DAT_WTS resized to "
@@ -1823,6 +1833,10 @@ try {
   fits_get_colnum (myfptr, CASEINSEN, "DAT_OFFS", &colnum, &status);
   fits_modify_vector_len (myfptr, colnum, nchan*npol, &status);
 
+  if (status != 0)
+    throw FITSError (status, "FITSArchive::unload_file", 
+		     "error resizing DAT_OFFS");
+
   if (verbose)
     cerr << "FITSArchive::unload_file DAT_OFFS resized to "
 	 << nchan*npol
@@ -1830,6 +1844,10 @@ try {
 
   fits_get_colnum (myfptr, CASEINSEN, "DAT_SCL", &colnum, &status);
   fits_modify_vector_len (myfptr, colnum, nchan*npol, &status);
+
+  if (status != 0)
+    throw FITSError (status, "FITSArchive::unload_file", 
+		     "error resizing DAT_SCL");
 
   if (verbose)
     cerr << "FITSArchive::unload_file DAT_SCL resized to "
@@ -1932,60 +1950,99 @@ void Pulsar::FITSArchive::unload_integration (int row,
   int colnum = 0;
   fits_get_colnum (thefptr, CASEINSEN, "ISUBINT", &colnum, &status);
   
+  if (status != 0)
+    throw FITSError (status, "FITSArchive:unload_integration",
+		     "fits_get_colnum ISUBINT");
+  
   fits_write_col (thefptr, TINT, colnum, row, 1, 1, &row, &status);
+
+  if (status != 0)
+    throw FITSError (status, "FITSArchive:unload_integration",
+		     "fits_write_col ISUBINT");
   
   // Set the start time of the integration
 
   colnum = 0;
   fits_get_colnum (thefptr, CASEINSEN, "OFFS_SUB", &colnum, &status);
   
+  if (status != 0)
+    throw FITSError (status, "FITSArchive:unload_integration",
+		     "fits_get_colnum OFFS_SUB");
+
   double time = 0.0;
   time = (integ->get_epoch () - (hdr_ext->start_time)).in_seconds();
 
   fits_write_col (thefptr, TDOUBLE, colnum, row, 1, 1, &time, &status);
+
+  if (status != 0)
+    throw FITSError (status, "FITSArchive:unload_integration",
+		     "fits_write_col OFFS_SUB");
   
   if (verbose)
     cerr << "FITSArchive::unload_integration OFFS_SUB set" << endl;
-
 
   // Set the duration of the integration
   
   colnum = 0;
   fits_get_colnum (thefptr, CASEINSEN, "TSUBINT", &colnum, &status);
- 
+  
+  if (status != 0)
+    throw FITSError (status, "FITSArchive:unload_integration",
+		     "fits_get_colnum TSUBINT");
+
   double duration = integ->get_duration();
   
   fits_write_col (thefptr, TDOUBLE, colnum, row, 1, 1, &duration, &status);
   
-
+  if (status != 0)
+    throw FITSError (status, "FITSArchive:unload_integration",
+		     "fits_write_col TSUBINT");
+  
   // Write the profile weights
 
-  int counter = 1;
+  colnum = 0;
+  fits_get_colnum (thefptr, CASEINSEN, "DAT_WTS", &colnum, &status);
+  
+  if (status != 0)
+    throw FITSError (status, "FITSArchive:unload_integration",
+		     "fits_get_colnum DAT_WTS");
+
+  //fits_modify_vector_len (thefptr, colnum, nchan, &status);
+
   vector < float >  weights(nchan);
 
   for(unsigned j = 0; j < nchan; j++)
     weights[j] = integ->get_weight(j);
 
-  colnum = 0;
-  fits_get_colnum (thefptr, CASEINSEN, "DAT_WTS", &colnum, &status);
-  //fits_modify_vector_len (thefptr, colnum, nchan, &status);
   fits_write_col (thefptr, TFLOAT, colnum, row, 1, nchan, 
 		  &(weights[0]), &status);
 
+  if (status != 0)
+    throw FITSError (status, "FITSArchive:unload_integration",
+		     "fits_write_col DAT_WTS");
   
   // Write the channel centre frequencies
 
-  counter = 1;
+  colnum = 0;
+  fits_get_colnum (thefptr, CASEINSEN, "DAT_FREQ", &colnum, &status);
+  
+  if (status != 0)
+    throw FITSError (status, "FITSArchive:unload_integration",
+		     "fits_get_colnum DAT_FREQ");
+  
+  //fits_modify_vector_len (thefptr, colnum, nchan, &status);
+
   vector < float >  chan_freqs(nchan);
 
   for(unsigned j = 0; j < nchan; j++)
     chan_freqs[j] = integ->get_frequency(j);
 
-  colnum = 0;
-  fits_get_colnum (thefptr, CASEINSEN, "DAT_FREQ", &colnum, &status);
-  //fits_modify_vector_len (thefptr, colnum, nchan, &status);
   fits_write_col (thefptr, TFLOAT, colnum, row, 1, nchan, 
 		  &(chan_freqs[0]), &status);
+
+  if (status != 0)
+    throw FITSError (status, "FITSArchive:unload_integration",
+		     "fits_write_col DAT_FREQ");
 
   // Start writing profiles
   
@@ -2104,10 +2161,18 @@ void Pulsar::FITSArchive::unload_integration (int row,
 
       colnum = 0;
       fits_get_colnum (thefptr, CASEINSEN, "DAT_SCL", &colnum, &status);
-      
+
+      if (status != 0)
+	throw FITSError (status, "FITSArchive:unload_integration",
+			 "fits_get_colnum DAT_SCL");
+
       fits_write_col (thefptr, TFLOAT, colnum, row, counter1, 1, 
 		      &scalefac, &status);
-
+      
+      if (status != 0)
+	throw FITSError (status, "FITSArchive:unload_integration",
+			 "fits_write_col DAT_SCL");
+      
       // Write the offset to file
 
       if (verbose)
@@ -2116,8 +2181,16 @@ void Pulsar::FITSArchive::unload_integration (int row,
       colnum = 0;
       fits_get_colnum (thefptr, CASEINSEN, "DAT_OFFS", &colnum, &status);
 
+      if (status != 0)
+	throw FITSError (status, "FITSArchive:unload_integration",
+			 "fits_get_colnum DAT_OFFS");
+
       fits_write_col (thefptr, TFLOAT, colnum, row, counter1, 1, 
 		      &offset, &status);
+      
+      if (status != 0)
+	throw FITSError (status, "FITSArchive:unload_integration",
+			 "fits_write_col DAT_OFFS");
 
       counter1 ++;
 
@@ -2135,7 +2208,7 @@ void Pulsar::FITSArchive::unload_integration (int row,
 
       fits_write_col (thefptr, TSHORT, colnum, row, counter2, nbin, 
 		      temparray2, &status);
-      
+
       if (status != 0)
 	throw FITSError (status, "FITSArchive:unload_integration",
 			 "fits_write_col DATA");
