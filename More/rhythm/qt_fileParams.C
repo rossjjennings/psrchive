@@ -8,12 +8,9 @@
 bool qt_fileParams::verbose = false;
 
 qt_fileParams::qt_fileParams ( const QString& startname, QWidget* parent ) 
-  : QWidget (parent, "eph file dialog")
+  : QFileDialog (parent, "EphFileDialog", true )
 {
-  window = new QFileDialog (this, "EphFileDialog", true );
-
-  fileName = startname;
-  window -> setSelection (fileName);
+  setSelection (startname);
 
   QString intro ("TEMPO PSR Parameter Files (*");
   QString close (")");
@@ -24,34 +21,45 @@ qt_fileParams::qt_fileParams ( const QString& startname, QWidget* parent )
   for (vector<string>::iterator str = ephext.begin();
        str != ephext.end(); str ++)
     filter.append ( intro + QString( str->c_str() ) + close );
+  filter.append ( "Any File (*.*)" );
 
-  window -> setFilters ( filter );
+  setFilters ( filter );
 
-  connect ( window, SIGNAL ( fileSelected (const QString&) ), 
+  connect ( this, SIGNAL ( fileSelected (const QString&) ), 
 	    this, SLOT ( chosen (const QString&) ) );
 }
 
 int qt_fileParams::open (psrParams* eph)
 {
-  window -> setMode (QFileDialog::ExistingFile);
-  if ( window -> exec () != 1 || fileName.isEmpty() )
+  if (eph == NULL)
+    return -1;
+
+  if (verbose)
+    cerr << "qt_fileParams::open exec" << endl;
+
+  setMode (QFileDialog::ExistingFile);
+  if ( exec () != 1 || fileName.empty() )
     return 0;
 
   if (verbose)
-    cerr << "qt_fileParams::open " << fileName << endl;
+    cerr << "qt_fileParams::open '" << fileName << "'" << endl;
 
   eph -> load (fileName);
+  cerr << "RETURN FROM LOAD" << endl;
+
+  if (eph->empty())
+    return 0;
   return 1;
 }
 
 int qt_fileParams::save (const psrParams& eph)
 {
-  window -> setMode (QFileDialog::AnyFile);
-  if ( window -> exec () != 1 || fileName.isEmpty() )
+  setMode (QFileDialog::AnyFile);
+  if ( exec () != 1 || fileName.empty() )
     return 0;
 
   if (verbose)
-    cerr << "qt_fileParams::save to " << fileName << endl;
+    cerr << "qt_fileParams::save to '" << fileName << "'" << endl;
 
   eph.unload (fileName);
   return 1;
@@ -59,5 +67,7 @@ int qt_fileParams::save (const psrParams& eph)
 
 void qt_fileParams::chosen ( const QString& name )
 {
-  fileName = name;
+  fileName = name.ascii();
+  if (verbose)
+    cerr << "qt_fileParams::chosen '" << fileName << "'" << endl;
 }

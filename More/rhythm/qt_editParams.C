@@ -49,6 +49,7 @@ qt_editParams::qt_editParams (QWidget* parent, const char* name)
 
   parmboxConstruct ();
 
+  io_dialog = NULL;
   current = -1;
 }
 
@@ -67,8 +68,7 @@ void qt_editParams::menubarConstruct ()
   // the File Menu
   file = new QPopupMenu( menu );
   CHECK_PTR( file );
-  file->insertItem( "&Open",
-		    this, SLOT(open()), ALT+Key_O );
+  file->insertItem( "&Open", this, SLOT(open()), ALT+Key_O );
   saveID = file->insertItem( "&Save As",
 			     this, SLOT(save()), ALT+Key_S );
   file->setItemEnabled (saveID, false);

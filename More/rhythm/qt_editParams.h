@@ -38,6 +38,7 @@ class qt_editParams : public QWidget
  signals:
   // emitted when the user selects 'File/Close'
   void closed ();
+  // emitted when new data has been loaded/set
   void newParams ( const psrParams& );
 
  public slots:
@@ -78,7 +79,7 @@ class qt_editParams : public QWidget
   qt_fileParams* io_dialog;
 
   // performs various book-keeping tasks whenever
-  // a new TEMPO11 style psrParams is loaded
+  // a new TEMPO Parameter set is loaded/set
   void new_data (bool add_to_history = true);
 
   // ///////////////////////////////////////////////////////////////////
