@@ -31,6 +31,12 @@ int main (int argc, char *argv[]) {
   
   bool simple = false;
   
+  bool zap_ston = false;
+  double ston_cutoff = 0.0;
+  
+  bool std_given = false;
+  Reference::To<Pulsar::Profile> thestd;
+
   string ext;
 
   int placeholder;
@@ -42,21 +48,23 @@ int main (int argc, char *argv[]) {
   char* key = NULL;
   char whitespace[5] = " \n\t";
   
-  while ((gotc = getopt(argc, argv, "hvVDme:z:Z:dE:s:")) != -1) {
+  while ((gotc = getopt(argc, argv, "hvVDme:z:Z:dE:s:S:P:")) != -1) {
     switch (gotc) {
     case 'h':
-      cout << "A program for zapping RFI in Pulsar::Archives"               << endl;
-      cout << "Usage: paz [options] filenames"                              << endl;
-      cout << "  -v               Verbose mode"                             << endl;
-      cout << "  -V               Very verbose mode"                        << endl;
-      cout << "  -D               Display results"                          << endl;
-      cout << "  -m               Modify the original files on disk"        << endl;
-      cout << "  -e               Unload to new files using this extension" << endl;
-      cout << "  -z \"list\"        Zap these particular channels"          << endl;
-      cout << "  -Z \"a b\"         Zap chans between a and b"              << endl;
-      cout << "  -E percent       Zap band edges"                           << endl;
-      cout << "  -s \"list\"        Zap these sub-integrations"             << endl;
-      cout << "  -d               Simple mean offset spike rejection"       << endl;
+      cout << "A program for zapping RFI in Pulsar::Archives"                     << endl;
+      cout << "Usage: paz [options] filenames"                                    << endl;
+      cout << "  -v               Verbose mode"                                   << endl;
+      cout << "  -V               Very verbose mode"                              << endl;
+      cout << "  -D               Display results"                                << endl;
+      cout << "  -m               Modify the original files on disk"              << endl;
+      cout << "  -e               Unload to new files using this extension"       << endl;
+      cout << "  -z \"list\"        Zap these particular channels"                << endl;
+      cout << "  -Z \"a b\"         Zap chans between a and b"                    << endl;
+      cout << "  -E percent       Zap band edges"                                 << endl;
+      cout << "  -s \"list\"        Zap these sub-integrations"                   << endl;
+      cout << "  -d               Simple mean offset spike rejection"             << endl;
+      cout << "  -S cutoff        Zap channels based on S/N (using std if given)" << endl;
+      cout << "  -P               Use this standard profile"                      << endl;
       return (-1);
       break;
     case 'v':
@@ -115,6 +123,28 @@ int main (int argc, char *argv[]) {
 	  subs_to_zap.push_back(placeholder);
 	}
 	key = strtok (NULL, whitespace);
+      }
+      break;
+    case 'S':
+      zap_ston = true;
+      if (sscanf(optarg, "%lf", &ston_cutoff) != 1) {
+	cerr << "Invalid parameter to option -S" << endl;
+        return (-1);
+      }
+      break;
+    case 'P':
+      try {
+	Reference::To<Pulsar::Archive> data = Pulsar::Archive::load(optarg);
+	data->pscrunch();
+	data->fscrunch();
+	data->tscrunch();
+	thestd = data.release()->get_Profile(0,0,0);
+	std_given = true;
+      }
+      catch (Error& error) {
+	cout << error << endl;
+	cout << "Could not load given standard profile" << endl;
+	std_given = false;
       }
       break;
     default:
@@ -217,6 +247,30 @@ int main (int argc, char *argv[]) {
 	  mask[i] = 1.0;
 	}
 	zapper->zap_specific(arch, mask);
+      }
+      else if (zap_ston) {
+	double theston = 0.0;
+	arch->pscrunch();
+	for (unsigned isub = 0; isub < arch->get_nsubint(); isub++) {
+	  for (unsigned ichan = 0; ichan < arch->get_nchan(); ichan++) {
+	    theston = arch->get_Profile(isub,0,ichan)->snr();
+	    if (theston < ston_cutoff) {
+	      arch->get_Integration(isub)->set_weight(ichan, 0.0);
+	    } 
+	  }
+	}
+      }
+      else if (zap_ston && thestd) {
+	double theston = 0.0;
+	arch->pscrunch();
+	for (unsigned isub = 0; isub < arch->get_nsubint(); isub++) {
+	  for (unsigned ichan = 0; ichan < arch->get_nchan(); ichan++) {
+	    theston = arch->get_Profile(isub,0,ichan)->snr(thestd);
+	    if (theston < ston_cutoff) {
+	      arch->get_Integration(isub)->set_weight(ichan, 0.0);
+	    } 
+	  }
+	}
       }
       
       if (display)
