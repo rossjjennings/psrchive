@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Integration.h,v $
-   $Revision: 1.40 $
-   $Date: 2003/04/27 10:53:20 $
+   $Revision: 1.41 $
+   $Date: 2003/05/14 16:39:48 $
    $Author: straten $ */
 
 /*
@@ -88,8 +88,7 @@ namespace Pulsar {
     float find_min_phase () const;
 
     //! Return the mean and variance of the mean in every profile baseline
-    void baseline_levels (vector<vector<double> > & mean,
-			  vector<vector<double> > & varmean) const;
+    void baseline_levels (vector< vector< Estimate<double> > >& levels) const;
 
     //! Returns the mean hi/lo and variance of the mean hi/lo of every profile
     virtual void cal_levels (vector< vector< Estimate<double> > >& hi,
@@ -100,12 +99,6 @@ namespace Pulsar {
 
     //! Computes the weighted centre frequency of an interval of sub-chans.
     double weighted_frequency (unsigned ch_start=0, unsigned ch_end=0) const;
-
-    void cal_levels (vector< Stokes<float> >& hi,
-		     vector< Stokes<float> >& lo) const;
-
-    void psr_levels (vector< Stokes<float> >& hi,
-		     vector< Stokes<float> >& lo) const;
 
     //! Return a vector of tempo++ toa objects
     void toas (vector<Tempo::toa>& toas, const Integration& std_subint,

@@ -3,6 +3,31 @@
 #include "Physical.h"
 #include "Error.h"
 
+void dispersive_phases (const Pulsar::Integration* integration,
+		       vector<float>& phases)
+{
+  double dm = integration->get_dispersion_measure();
+  double pfold = integration->get_folding_period();
+  double centrefreq = integration->get_centre_frequency();
+
+  unsigned nchan = integration->get_nchan();
+
+  phases.resize (nchan);
+
+  for (unsigned ichan=0; ichan<nchan; ichan++) {
+
+    phases[ichan] = 0.0;
+
+    if (pfold==0 || dm==0)
+      return;
+
+    double freq = integration->get_Profile(0, ichan)->get_centre_frequency();
+
+    phases[ichan] = Pulsar::dispersion_delay (dm, centrefreq, freq) / pfold;
+    
+  }
+}
+
 /*!
   If phase is not specified, this method calls
   Integration::find_min_phase to find the phase at which the mean in a
@@ -23,19 +48,12 @@ void Pulsar::Integration::remove_baseline (float phase)
     if (phase == -1.0)
       phase = find_min_phase ();
 
-    double dm = get_dispersion_measure();
-    double pfold = get_folding_period();
-    double centrefreq = get_centre_frequency();
+    vector<float> phases;
+    dispersive_phases (this, phases);
 
     for (unsigned ichan=0; ichan<get_nchan(); ichan++) {
 
-      float chanphase = phase;
-
-      if (pfold && dm) {
-	double chanfreq = profiles[0][ichan]->get_centre_frequency();
-	double phase_off = dispersion_delay (dm, centrefreq, chanfreq) / pfold;
-	chanphase += phase_off;
-      }
+      float chanphase = phase + phases[ichan];
 	
       for (unsigned ipol=0; ipol<get_npol(); ipol++)
 	*(profiles[ipol][ichan]) -= profiles[ipol][ichan] -> mean (chanphase);
@@ -46,4 +64,56 @@ void Pulsar::Integration::remove_baseline (float phase)
   catch (Error& error) {
     throw error += "Integration::remove_baseline";
   }
+}
+
+
+// /////////////////////////////////////////////////////////////////////////
+// baseline_levels
+//
+// for each profile
+//   pulse = profile with baseline removed
+//   noise = profile minus pulse
+//   find mean and var_mean of noise
+// 
+void 
+Pulsar::Integration::baseline_levels (vector<vector<Estimate<double> > >& mean)
+  const
+{
+  if (Pulsar::Integration::verbose)
+    cerr << "Pulsar::Integration::baseline_levels entered" << endl;
+
+  try {
+
+    float phase = find_min_phase ();
+
+    vector<float> phases;
+    dispersive_phases (this, phases);
+
+    unsigned npol = get_npol();
+    unsigned nchan = get_nchan();
+
+    mean.resize (npol);
+  
+    for (unsigned ipol=0; ipol<npol; ++ipol) {
+
+      mean[ipol].resize (nchan);
+
+      for (unsigned ichan=0; ichan<nchan; ++ichan) {
+
+	float chanphase = phase + phases[ichan];
+	
+	profiles[ipol][ichan]->stats (chanphase,
+				      &(mean[ipol][ichan].val), 0,
+				      &(mean[ipol][ichan].var));
+
+      }
+
+    }
+
+  }
+  catch (Error& error) {
+    throw error += "Integration::baseline_levels";
+  }
+
+
 }

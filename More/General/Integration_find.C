@@ -244,49 +244,4 @@ void Pulsar::Integration::psr_levels (vector<Stokes>& hi,
 }
 
 
-// /////////////////////////////////////////////////////////////////////////
-// baseline_levels
-//
-// for each profile
-//   pulse = profile with baseline removed
-//   noise = profile minus pulse
-//   find mean and var_mean of noise
-// 
-void Pulsar::Integration::baseline_levels (vector<vector<double> > & mean,
-			       vector<vector<double> > & var_mean,
-			       float duty_cycle) const
-{
-  if (nbin==0)
-    throw Error (InvalidState, "Pulsar::Integration::baseline_levels",
-		 "nbin = 0");
-
-  if (npol==0)
-    throw Error (InvalidState, "Pulsar::Integration::baseline_levels",
-		 "npol = 0");
-
-  if (nsub==0)
-    throw Error (InvalidState, "Pulsar::Integration::baseline_levels",
-		 "nsub = 0");
-
-  mean.resize(npol);
-  var_mean.resize(npol);
-
-  for (int ipol=0; ipol<npol; ++ipol) {
-
-    mean[ipol].resize(nsub);
-    var_mean[ipol].resize(nsub);
-
-    for(int ichan=0; ichan<nsub; ++ichan) {
-
-      if (wts[ichan]==0) {
-	mean[ipol][ichan] = var_mean[ipol][ichan] = 0.0;
-	continue;
-      }
-      profiles[ipol][ichan]->baseline_levels (&mean[ipol][ichan],
-					      &var_mean[ipol][ichan],
-					      duty_cycle);
-    }  // for each frequency
-  }  // for each polarization
-}
-
 #endif
