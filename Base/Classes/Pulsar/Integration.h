@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Integration.h,v $
-   $Revision: 1.39 $
-   $Date: 2003/04/26 06:48:52 $
+   $Revision: 1.40 $
+   $Date: 2003/04/27 10:53:20 $
    $Author: straten $ */
 
 /*
@@ -219,6 +219,7 @@ namespace Pulsar {
     virtual void set_npol (unsigned npol) = 0;
 
     friend class Archive;
+    friend class Calibrator;
 
     //! Copy the profiles and attributes through set_ get_ methods
     virtual void copy (const Integration& subint, int npol=-1, int nchan=-1);

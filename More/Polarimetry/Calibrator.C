@@ -1,4 +1,5 @@
-#include "Calibrator.h"
+#include "Pulsar/Calibrator.h"
+#include "Pulsar/Integration.h"
 
 bool Pulsar::Calibrator::verbose = false;
 
@@ -10,4 +11,11 @@ Pulsar::Calibrator::~Calibrator ()
 {
   // destructors must be defined in .C file so that the Reference::To
   // desctructor can delete forward declared objects
+}
+
+//! Provide access to Integration::transform
+void Pulsar::Calibrator::calibrate (Integration* integration,
+				    const vector< Jones<float> >& response)
+{
+  integration->transform (response);
 }
