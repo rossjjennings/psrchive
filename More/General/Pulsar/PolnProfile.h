@@ -67,6 +67,12 @@ namespace Pulsar {
     //! Set the Stokes 4-vector for the specified bin
     void set_Stokes (unsigned ibin, const Stokes<float>& stokes);
 
+    //! Returns the sum of all amplitudes
+    double sum (int bin_start=0, int bin_end=0) const;
+
+    //! Returns the sum of all amplitudes squared
+    double sumsq (int bin_start=0, int bin_end=0) const;
+
     //! Perform the congruence transformation on each bin of the profile
     template <typename T> void transform (const Jones<T>& response);
 

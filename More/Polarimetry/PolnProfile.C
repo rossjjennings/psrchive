@@ -146,6 +146,28 @@ void Pulsar::PolnProfile::set_Stokes (unsigned ibin,
 //
 //
 //
+double Pulsar::PolnProfile::sum (int bin_start, int bin_end) const
+{
+  double sum = 0;
+  for (unsigned ipol=0; ipol < 4; ipol++)
+    sum += profile[ipol]->sum( bin_start, bin_end );
+  return sum;
+}
+
+//
+//
+//
+double Pulsar::PolnProfile::sumsq (int bin_start, int bin_end) const
+{
+  double sumsq = 0;
+  for (unsigned ipol=0; ipol < 4; ipol++)
+    sumsq += profile[ipol]->sumsq( bin_start, bin_end );
+  return sumsq;
+}
+
+//
+//
+//
 void Pulsar::PolnProfile::convert_state (Signal::State out_state)
 {
   if (out_state == state)
