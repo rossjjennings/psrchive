@@ -125,7 +125,7 @@ AC_DEFUN([SWIN_LIB_MPI],
 
   AC_SUBST(MPI_LIBS)
   AC_SUBST(MPI_CFLAGS)
-  AM_CONDITIONAL(HAVE_MPI,[test x"$have_mpi" != xno)
+  AM_CONDITIONAL(HAVE_MPI,[test x"$have_mpi" != xno])
 
 ])
 
