@@ -2,6 +2,8 @@
 #include "Pulsar/Integration.h"
 #include "Pulsar/Profile.h"
 
+#include "Pulsar/IntegrationOrder.h"
+
 /*!
   \param standard
   \retval toas
@@ -10,6 +12,11 @@ void Pulsar::Archive::toas (vector<Tempo::toa>& toas,
 			    const Archive* standard,
 			    bool time_domain) const
 {
+  if (get<IntegrationOrder>()) {
+    throw Error (InvalidState, "Pulsar::Archive::toas",
+		 "Archive not in time order");
+  }
+  
   toas.resize (0);
 
   string reason;
