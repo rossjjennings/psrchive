@@ -109,7 +109,15 @@ void Pulsar::Archive::tscrunch (unsigned nscrunch)
 
       duration += cur->get_duration();
       mjd      += cur->get_epoch();
-
+      
+      Integration* result = get_Integration(isub);
+      for (unsigned i = 0; i < result->get_nextension(); i++) {
+	Integration::Extension* ext = result->get_extension(i);
+	for (unsigned j = 0; j < cur->get_nextension(); j++) {
+	  ext->append(cur->get_extension(j));
+	}
+      }
+      
     }
 
     get_Integration(isub) -> set_duration (duration);

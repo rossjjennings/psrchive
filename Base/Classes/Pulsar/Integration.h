@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Integration.h,v $
-   $Revision: 1.49 $
-   $Date: 2003/10/15 12:56:11 $
-   $Author: straten $ */
+   $Revision: 1.50 $
+   $Date: 2003/11/08 23:34:07 $
+   $Author: ahotan $ */
 
 /*
   
@@ -34,8 +34,42 @@ namespace Pulsar {
 
   //! Group of Pulsar::Profile objects integrated over the same time interval
   class Integration : public Reference::Able {
-
+    
   public:
+    
+    //! Abstract base class of Integration::Extension objects
+    /* Integration derived classes may provide access to additional 
+       information through Extension-derived objects. */
+    class Extension : public Reference::Able {
+      
+    public:
+      
+      //! Construct with a name
+      Extension (const char* name);
+      
+      //! Destructor
+      virtual ~Extension ();
+      
+      //! Return a new copy-constructed instance identical to this instance
+      virtual Extension* clone () const = 0;
+      
+      //! Append another of self, combining data in a sensible way
+      /*! Derived classes should ensure that a dynamic cast is
+	performed to ensure that the two objects are of the same
+	type and return immediately if they are not.
+      */
+      virtual void append (Extension* ext) = 0;
+      
+      //! Return the name of the Extension
+      string get_name () const;
+      
+    protected:
+      
+      //! Extension name - useful when debugging
+      string name;
+      
+    };
+    
     //! flag controls the amount output to stderr by Integration methods
     static bool verbose;
 
@@ -197,9 +231,38 @@ namespace Pulsar {
     //! Get polarized flux
     virtual float get_poln_flux (int _type = 0);
  
- 
+     // //////////////////////////////////////////////////////////////////
+    //
+    // Extension access
+    //
+    // //////////////////////////////////////////////////////////////////
 
+    //! Return the number of extensions available
+    virtual unsigned get_nextension () const;
 
+    //! Return a pointer to the specified extension
+    virtual const Extension* get_extension (unsigned iextension) const;
+
+    //! Return a pointer to the specified extension
+    virtual Extension* get_extension (unsigned iextension);
+
+    //! Template method searches for an Extension of the specified type
+    template<class ExtensionType>
+    const ExtensionType* get () const;
+
+    //! Template method searches for an Extension of the specified type
+    template<class ExtensionType>
+    ExtensionType* get ();
+
+    //! Add an Extension to the Integration instance
+    /*! The derived class must ensure that only one instance of the Extension
+      type is stored.
+
+      \return On successful addition, this method should return the
+      pointer to the Extension, equal to the extension argument.  If the
+      Extension is not supported, this method should return a null pointer.
+    */
+    virtual void add_extension (Extension* extension);
 
   protected:
 
@@ -266,6 +329,8 @@ namespace Pulsar {
     //! Convert polarimetric data to the specified state
     virtual void convert_state (Signal::State state);
 
+    //! The Extensions added to this Integration instance
+    vector< Reference::To<Extension> > extension;
 
     //! Data: npol by nchan profiles
     vector< vector< Reference::To<Profile> > > profiles;
@@ -278,6 +343,36 @@ namespace Pulsar {
     void poln_convert (Signal::State out_state);
 
   };
+
+  /*! e.g. MyExtension* ext = integration->get<MyExtension>(); */
+  template<class ExtensionType>
+  const ExtensionType* Integration::get () const
+  {
+    const ExtensionType* extension = 0;
+
+    for (unsigned iext=0; iext<get_nextension(); iext++) {
+
+      const Extension* ext = get_extension (iext);
+
+      if (verbose)
+	cerr << "Pulsar::Integration::get<Ext> name=" << ext->get_name() << endl;
+
+      extension = dynamic_cast<const ExtensionType*>( ext );
+
+      if (extension)
+	break;
+
+    }
+
+    return extension;
+  }
+
+  template<class ExtensionType>
+  ExtensionType* Integration::get ()
+  {
+    const Integration* thiz = this;
+    return const_cast<ExtensionType*>( thiz->get<ExtensionType>() );
+  }
 
 }
 

@@ -3,9 +3,64 @@
 #include "Pulsar/Integration.h"
 #include "Pulsar/Profile.h"
 #include "Error.h"
+#include "typeutil.h"
 
 bool Pulsar::Integration::verbose = false;
 
+//! Return the number of extensions available
+unsigned Pulsar::Integration::get_nextension () const
+{
+  return extension.size ();
+}
+
+Pulsar::Integration::Extension::Extension (const char* _name)
+{
+  name = _name;
+}
+
+Pulsar::Integration::Extension::~Extension ()
+{
+}
+
+string Pulsar::Integration::Extension::get_name () const
+{
+  return name;
+}
+
+/*! Derived classes need only define this method, as the non-const version
+  implemented by the Integration base class simply calls this method. */
+const Pulsar::Integration::Extension*
+Pulsar::Integration::get_extension (unsigned iext) const
+{
+  if ( iext >= extension.size() )
+    throw Error (InvalidRange, "Pulsar::Integration::get_extension",
+		 "index=%d >= nextension=%d", iext, extension.size());
+
+  return extension[iext];
+}
+
+/*! Simply calls get_extension const */
+Pulsar::Integration::Extension*
+Pulsar::Integration::get_extension (unsigned iext)
+{
+  if ( iext >= extension.size() )
+    throw Error (InvalidRange, "Pulsar::Integration::get_extension",
+		 "index=%d >= nextension=%d", iext, extension.size());
+
+  return extension[iext];
+}
+
+/*! Derived classes need only define this method, as the non-const version
+  implemented by the Integration base class simply calls this method. */
+void Pulsar::Integration::add_extension (Extension* ext)
+{
+  unsigned index = find( extension, typeid(ext) );
+
+  if (index < extension.size())
+    extension[index] = ext;
+  else
+    extension.push_back(ext);
+}
 
 Pulsar::Integration::Integration ()
 {
@@ -76,6 +131,27 @@ void Pulsar::Integration::copy (const Integration& subint,
   for (int ipol=0; ipol<_npol; ipol++)
     for (int ichan=0; ichan<_nchan; ichan++)
       *(profiles[ipol][ichan]) = *(subint.profiles[ipol][ichan]);
+
+  // Using a Reference::To<Extension> ensures that the cloned
+  // Extension will be deleted if the derived class chooses not to
+  // manage it.
+
+  if (verbose)
+    cerr << "Pulsar::Integration::copy " << subint.get_nextension()
+	 << " Extensions" << endl;
+
+  extension.resize (0);
+
+  for (unsigned iext=0; iext < subint.get_nextension(); iext++) {
+
+    if (verbose)
+      cerr << "Pulsar::Integration::copy clone " 
+	   << subint.get_extension(iext)->get_name() << endl;
+
+    Reference::To<Extension> ext = subint.get_extension(iext)->clone();
+    add_extension (ext);
+
+  }
 
   set_epoch ( subint.get_epoch());
   set_duration ( subint.get_duration());
