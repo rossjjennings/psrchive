@@ -118,9 +118,19 @@ void Pulsar::Archive::update_model (const MJD& time, bool clear_model)
     ncoeff  = model.get_ncoeff();
     freq    = model.get_freq();
     nspan   = model.get_nspan();
+    if (verbose) {
+      cout << "Using nspan  = " << nspan << endl;
+      cout << "Using ncoeff = " << ncoeff << endl;
+      cout << "Using maxha  = " << maxha << endl;
+    }
   }
   else {
-    cout << "Warning: Using default values to build polyco" << endl;
+    cout << "Warning: using default values to build polyco" << endl;
+    if (verbose) {
+      cout << "Using nspan  = " << nspan << endl;
+      cout << "Using ncoeff = " << ncoeff << endl;
+      cout << "Using maxha  = " << maxha << endl;
+    }
     maxha   = 12;
     nsite   = ephemeris.value_str[EPH_TZRSITE][0];
     ncoeff  = 12;
