@@ -69,6 +69,8 @@ void Pulsar::FluxCalibrator::add_observation (const Archive* archive)
 		 "\n" + reason);
 
   unsigned nchan = archive->get_nchan ();
+  string filename = archive->get_filename ();
+  bool rename_calibrator = false;
 
   if (!calibrator) {
 
@@ -79,16 +81,30 @@ void Pulsar::FluxCalibrator::add_observation (const Archive* archive)
 
   }
   else if (calibrator->get_type() != Signal::FluxCalOn &&
-	   archive->get_type() == Signal::FluxCalOn)
+                 arch->get_type() == Signal::FluxCalOn)  {
+
     // Keep the FPTM naming convention in which the
     // Pulsar::FluxCalibrator is named for the first on-source
     // observation
     calibrator = archive->clone();
+    rename_calibrator = true;
+
+  }
 
   if (archive->get_state () != Signal::Intensity) {
+
+    if (verbose)
+      cerr << "Pulsar::FluxCalibrator::add_observation clone total intensity"
+           << endl;
+
     Pulsar::Archive* clone = arch->clone();
     clone->convert_state (Signal::Intensity);
+
+    /* If there was no other Reference::To the input Archive*, 
+       it will be deleted in the following step */
+
     arch = clone;
+
   }
 
   const Pulsar::Integration* integration = arch->get_Integration(0);
@@ -97,8 +113,7 @@ void Pulsar::FluxCalibrator::add_observation (const Archive* archive)
   vector<vector<Estimate<double> > > cal_lo;
 
   if (verbose) 
-    cerr << "Pulsar::FluxCalibrator call Pulsar::Integration::cal_levels "
-	   << archive->get_filename() << endl;
+    cerr << "Pulsar::FluxCalibrator call Integration::cal_levels" << endl;
 
   integration->cal_levels (cal_hi, cal_lo);
   Estimate<double> unity(1.0);
@@ -117,8 +132,13 @@ void Pulsar::FluxCalibrator::add_observation (const Archive* archive)
       
   }
 
-  filenames.push_back (archive->get_filename());
+  if (rename_calibrator)
+    filenames.insert (filenames.begin(), filename);
+  else
+    filenames.push_back (filename);
+
   calculated = false;
+
 }
 
 
