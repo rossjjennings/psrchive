@@ -304,13 +304,13 @@ int main (int argc, char** argv)
     input->convert_state (Signal::Stokes);
     archplot.calibrator_spectrum (input);
 
-
+    Pulsar::Calibrator* cal = calibrator;
     if (flux_cal)
-      calibrator = & flux_cal;
+      cal = &fluxcal;
 
     cerr << "pacv: Creating " << archive_class << " Archive" << endl;
   
-    output = calibrator->new_solution (archive_class);
+    output = cal->new_solution (archive_class);
 
     int index = filenames[ifile].find_first_of(".", 0);
     string newname = filenames[ifile].substr(0, index) + ".pacv";
@@ -323,6 +323,10 @@ int main (int argc, char** argv)
     cerr << "pacv: Error during " << filenames[ifile] << error << endl;
     return -1;
   }
+  catch (...)  {
+    cerr << "pacv: An unknown exception was thrown" << endl;
+  }
+
 
   if (flux_cal) try {
     cerr << "pacv: Plotting FluxCalibrator" << endl;
