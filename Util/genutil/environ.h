@@ -1,6 +1,6 @@
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Attic/environ.h,v $
-   $Revision: 1.2 $
-   $Date: 2000/01/06 04:22:33 $
+   $Revision: 1.3 $
+   $Date: 2001/08/01 03:50:26 $
    $Author: straten $ */
 
 /*
@@ -57,6 +57,7 @@ typedef struct {double f1; double f2;} float128;
 
 /* for parsing a long */
 #define I64 "%ld"
+#define I32 "%d"
 
 #endif
 
@@ -85,6 +86,7 @@ typedef long double    float128;
 
 /* for parsing a long */
 #define I64 "%lld"
+#define I32 "%ld"
 
 #endif
 
@@ -101,6 +103,7 @@ typedef struct {double f1; double f2;} float128;
 
 /* for parsing a long */
 #define I64 "%Ld"
+#define I32 "%ld"
 
 #endif
 
