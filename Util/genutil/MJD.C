@@ -148,13 +148,6 @@ const MJD operator - (const MJD &m1, const MJD &m2) {
 	     m1.get_fracsec() - m2.get_fracsec()); // Let constructor do the dirty work.
 }
 
-const MJD operator / (const MJD &m1, double divisor) {
-  double ddays = ((double) m1.intday()) / divisor;
-  double dsecs = ((double) m1.get_secs()) /divisor; 
-  double dfracsec = m1.get_fracsec() / divisor;
-  return MJD(ddays,dsecs,dfracsec);
-}
-
 const MJD operator + (const MJD &m1, double sss) {
   double secs_add = m1.get_fracsec() + sss;
   return MJD((double)m1.intday(),(double)m1.get_secs(),secs_add);
@@ -163,6 +156,20 @@ const MJD operator + (const MJD &m1, double sss) {
 const MJD operator - (const MJD &m1, double sss) {
   double secs_take = m1.fracsec - sss;
   return MJD((double)m1.intday(),(double)m1.get_secs(),secs_take);
+}
+
+const MJD operator * (const MJD &m1, double d) {
+  double ddays = ((double) m1.intday()) * d;
+  double dsecs = ((double) m1.get_secs()) * d; 
+  double dfracsec = m1.get_fracsec() * d;
+  return MJD(ddays,dsecs,dfracsec);
+}
+
+const MJD operator / (const MJD &m1, double divisor) {
+  double ddays = ((double) m1.intday()) / divisor;
+  double dsecs = ((double) m1.get_secs()) /divisor; 
+  double dfracsec = m1.get_fracsec() / divisor;
+  return MJD(ddays,dsecs,dfracsec);
 }
 
 MJD abs(const MJD & in_mjd) {
