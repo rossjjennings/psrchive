@@ -1,3 +1,12 @@
+//
+// $Id: pav.C,v 1.20 2002/12/23 05:53:52 ahotan Exp $
+//
+// The Pulsar Archive Viewer
+//
+// A program for manipulating and visualising the data contained
+// in Pulsar::Archive objects
+//
+
 #include <iostream>
 #include <unistd.h>
 #include <cpgplot.h>
@@ -22,6 +31,7 @@ void usage ()
     "Usage: pav [options] file1 [file2 ...] \n"
     "Where the options are as follows \n"
     " -h        This help page \n"
+    " -i        Revision information\n"
     //    " -a        Calculate TOAs of every profile \n"
     " -b scr    Bscrunch scr phase bins together \n"
     " -c map    Choose a different colour map \n"
@@ -79,7 +89,7 @@ int main (int argc, char** argv)
   Pulsar::Plotter::ColourMap colour_map = Pulsar::Plotter::Heat;
 
   int c = 0;
-  const char* args = "ab:c:d:DGe:E:f:FhHm:M:pP:r:St:TvVwWx:y:RZCYz:";
+  const char* args = "ab:c:d:DGe:E:f:FhiHm:M:pP:r:St:TvVwWx:y:RZCYz:";
   while ((c = getopt(argc, argv, args)) != -1)
     switch (c) {
 
@@ -115,6 +125,9 @@ int main (int argc, char** argv)
       break;
     case 'h':
       usage ();
+      return 0;
+    case 'i':
+      cout << "$Id: pav.C,v 1.20 2002/12/23 05:53:52 ahotan Exp $" << endl;
       return 0;
     case 'm':
       // macro file
