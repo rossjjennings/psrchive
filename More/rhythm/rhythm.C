@@ -848,6 +848,44 @@ void Rhythm::stride_fit()
 #endif
 }
 
+void Rhythm::advanceT0 () {
+
+  int temp = 0;
+  
+  temp = QInputDialog::getInteger("Rhythm Advance Epoch of Periastron",
+				  "Enter the number of orbits to advance: ");
+  if (temp <= 0)
+    return;
+
+  int step = 1;
+
+  step = QInputDialog::getInteger("Rhythm Advance Epoch of Periastron",
+				 "Enter the step size (in orbits): ");
+
+  if (step <= 0)
+    return;
+
+  psrephem eph;
+
+  for (int i = 0; i < (temp/step); i++) {
+    
+    fitpopup->get_psrephem(eph);
+    
+    MJD current = MJD (eph.value_integer[EPH_T0],
+		       eph.value_double [EPH_T0]);
+    
+    double period  = eph.value_double[EPH_PB]*24.0*60.0*60.0;
+    
+    current += period*(double)step;
+    
+    eph.value_integer[EPH_T0] = current.intday();
+    eph.value_double[EPH_T0] = current.fracday();
+    
+    fitpopup->set_psrephem(eph);
+    fit();
+  }
+}
+
 void Rhythm::setClassVerbose (bool verbose)
 {
   qt_editParams::verbose = verbose;
