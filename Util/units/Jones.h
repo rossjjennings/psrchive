@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Jones.h,v $
-   $Revision: 1.2 $
-   $Date: 2003/01/29 11:31:38 $
+   $Revision: 1.3 $
+   $Date: 2003/01/30 15:57:39 $
    $Author: straten $ */
 
 #ifndef __Jones_H
@@ -64,7 +64,7 @@ public:
 
   //! Divide this instance by complex<U>
   template<typename U> Jones& operator /= (const complex<U>& au)
-    { complex<T>a=1.0/au; j11*=a; j12*=a; j21*=a; j22*=a; return *this; }
+    { complex<T>a(1.0); a/=au; j11*=a; j12*=a; j21*=a; j22*=a; return *this; }
 
   //! Multiply this instance by T
   Jones& operator *= (T a)
@@ -163,7 +163,7 @@ Jones<T>& Jones<T>::operator *= (const Jones<T>& j)
 template<typename T>
 Jones<T> inv (const Jones<T>& j)
 {
-  complex<T> d=1.0/det(j);
+  complex<T> d(1.0); d/=det(j);
   return Jones<T>(d*j.j22, -d*j.j12,
 		  -d*j.j21, d*j.j11);
 }
