@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Archive.h,v $
-   $Revision: 1.35 $
-   $Date: 2002/08/19 10:11:57 $
+   $Revision: 1.36 $
+   $Date: 2002/08/19 16:38:44 $
    $Author: straten $ */
 
 /*! \mainpage 
@@ -256,11 +256,8 @@ namespace Pulsar {
     //! Un-correct receiver feed angle orientation
     virtual void parallactify();
 
-    //! Convert Stokes parameters to coherency products 
-    virtual void ppqq();
-
-    //! Convert coherency products to Stokes parameters 
-    virtual void iquv();
+    //! Convert polarimetric data to the specified state
+    virtual void convert_state (Poln::State state);
 
     //! Transform Stokes I,Q,U,V into the polarimetric invariant interval
     virtual void invint ();

@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Integration.h,v $
-   $Revision: 1.24 $
-   $Date: 2002/07/27 00:23:39 $
+   $Revision: 1.25 $
+   $Date: 2002/08/19 16:38:58 $
    $Author: straten $ */
 
 /*
@@ -90,6 +90,9 @@ namespace Pulsar {
 
     //! Rotate all profiles about Stokes V axis to remove Faraday rotation
     virtual void defaraday (double rm = 0.0, double rm_iono = 0.0);
+
+    //! Convert polarimetric data to the specified state
+    virtual void convert_state (Poln::State state);
 
     //! Returns a single Stokes 4-vector for the given chan and phase bin
     void get_Stokes (Stokes& S, int ichan, int ibin) const;
@@ -228,18 +231,18 @@ namespace Pulsar {
   protected:
 
     //! Set the number of pulsar phase bins
-    /*! Called by Integration methods to update child attribute */
+    /*! Called by Integration methods to update sub-class attribute */
     virtual void set_nbin (int nbin) = 0;
 
     //! Set the number of frequency channels
-    /*! Called by Integration methods to update child attribute */
+    /*! Called by Integration methods to update sub-class attribute */
     virtual void set_nchan (int nchan) = 0;
 
     //! Set the number of polarization measurements
-    /*! Called by Integration methods to update child attribute */
+    /*! Called by Integration methods to update sub-class attribute */
     virtual void set_npol (int npol) = 0;
 
-    //! The data area
+    //! Data: npol by nchan profiles
     vector< vector<Profile*> > profiles;
 
     //! initialize null values
@@ -248,28 +251,11 @@ namespace Pulsar {
     //! All new Profile instances are created through this method
     virtual Profile* new_Profile ();
 
-    // convert Stokes IQUV to XYUV, where X=.5(I+Q) and Y=.5(I-Q).
-    // Should only be called on data with linear feeds
-    void iq_xy();
-    // undoes the above
-    void xy_iq();
-    
-    // convert Stokes IQUV to RLQU, where R=.5(I+V) and L=.5(I-V).
-    // Should only be called on data with circular feeds
-    void iv_rl();
-    // undoes the above
-    void rl_iv();
-    
-    // these two functions do the work for the above four
-    void permute (int direction);
-    void convert (float fac);
-    
-    // sets the poln flag in the profiles appropriately
-    void iquv_flag();
-    void ppqq_flag();
-    
-    // reverse the sign of all bins, all channels, polarization = ipol
-    void flip (int ipol);
+    //! Performs a cyclic permutation of the polarization vector
+    void poln_cycle (int direction);
+
+    //! Mix the intensity with the specified polarization
+    void intensity_mix (int ipoln, float fac);
 
   };
 

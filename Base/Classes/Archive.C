@@ -181,6 +181,21 @@ void Pulsar::Archive::pscrunch()
 }
 
 /*!
+  Simply calls Integration::convert_state on each element of subints
+*/
+void Pulsar::Archive::convert_state (Poln::State state)
+{
+  if (subints.size() == 0)
+    return;
+
+  for (unsigned isub=0; isub < subints.size(); isub++)
+    subints[isub] -> convert_state (state);
+
+  set_npol ( subints[0] -> get_npol() );
+  set_poln_state ( subints[0] -> get_poln_state() );
+}
+
+/*!
   Uses the polyco model, as well as the centre frequency and mid-time of
   each Integration to determine the predicted pulse phase.
  */
@@ -246,16 +261,6 @@ void Pulsar::Archive::deparallactify()
 }
 
 void Pulsar::Archive::parallactify()
-{
-
-}
-
-void Pulsar::Archive::ppqq()
-{
-
-}
-
-void Pulsar::Archive::iquv()
 {
 
 }
