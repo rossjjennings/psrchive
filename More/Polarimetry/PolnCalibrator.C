@@ -177,11 +177,11 @@ void Pulsar::PolnCalibrator::calculate_transformation ()
       transformation[ichan] = 0;
 }
 
-void Pulsar::PolnCalibrator::build (unsigned nchan)
-{ try {
+void Pulsar::PolnCalibrator::build (unsigned nchan) try {
 
   if (verbose)
-    cerr << "Pulsar::PolnCalibrator::build" << endl;
+    cerr << "Pulsar::PolnCalibrator::build transformation size="
+	 << transformation.size() << " nchan=" << nchan << endl;
 
   if (transformation.size() == 0) {
     if (verbose) cerr << "Pulsar::PolnCalibrator::build"
@@ -209,10 +209,13 @@ void Pulsar::PolnCalibrator::build (unsigned nchan)
       unsigned nparam = transformation[ichan]->get_nparam();
       for (unsigned iparam=0; iparam < nparam; iparam++)
         if ( !finite(transformation[ichan]->get_param(iparam)) ) {
-          cerr << "Pulsar::PolnCalibrator::build ichan=" << ichan
-               << " " << transformation[ichan]->get_param_name(iparam)
-               << " not finite" << endl;
+
+	  if (verbose)
+	    cerr << "Pulsar::PolnCalibrator::build ichan=" << ichan
+		 << " " << transformation[ichan]->get_param_name(iparam)
+		 << " not finite" << endl;
           response[ichan] = Jones<float>::identity();
+
         }
 
       double normdet = norm(det( transformation[ichan]->evaluate() ));
@@ -275,15 +278,13 @@ void Pulsar::PolnCalibrator::build (unsigned nchan)
 	       "interpolating/averaging Jones matrices not yet implemented");
 }
 catch (Error& error) {
-  error += "Pulsar::PolnCalibrator::build";
-}
+  throw error += "Pulsar::PolnCalibrator::build";
 }
 
 /*! Upon completion, the flux of the archive will be normalized with
   respect to the flux of the calibrator, such that a FluxCalibrator
   simply scales the archive by the calibrator flux. */
-void Pulsar::PolnCalibrator::calibrate (Archive* arch)
-try {
+void Pulsar::PolnCalibrator::calibrate (Archive* arch) try {
 
   if (verbose)
     cerr << "Pulsar::PolnCalibrator::calibrate" << endl;
@@ -302,7 +303,8 @@ try {
     build( arch->get_nchan() );
 
   if (verbose)
-    cerr << "Pulsar::PolnCalibrator::calibrate call Archive::transform" << endl;
+    cerr << "Pulsar::PolnCalibrator::calibrate call Archive::transform" <<endl;
+
   arch->transform (response);
 
   arch->set_poln_calibrated (true);
@@ -321,7 +323,7 @@ try {
 
 }
 catch (Error& error) {
-  error += "Pulsar::PolnCalibrator::calibrate";
+  throw error += "Pulsar::PolnCalibrator::calibrate";
 }
 
 
