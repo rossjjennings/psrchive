@@ -5,6 +5,8 @@
 #include "Pulsar/PolarCalibrator.h"
 
 #include "Pulsar/CalibratorPlotter.h"
+#include "Pulsar/CalibratorStokes.h"
+#include "Pulsar/CalibratorStokesInfo.h"
 
 #include "Pulsar/Integration.h"
 #include "Pulsar/Archive.h"
@@ -137,6 +139,8 @@ int main (int argc, char** argv)
   Reference::To<Pulsar::Archive> output;
  
   Reference::To<Pulsar::PolnCalibrator> calibrator;
+
+  Reference::To<Pulsar::CalibratorStokes> calibrator_stokes;
   
   Pulsar::CalibratorPlotter plotter;
 
@@ -174,11 +178,23 @@ int main (int argc, char** argv)
       cpgpage ();
       plotter.plot (calibrator);
 
+      calibrator_stokes = input->get<Pulsar::CalibratorStokes>();
+
+      if (calibrator_stokes) {
+
+	cerr << "pacv: Plotting CalibratorStokes" << endl;
+
+	cpgpage ();
+	plotter.plot( new Pulsar::CalibratorStokesInfo (calibrator_stokes),
+		      calibrator->get_nchan(),
+		      calibrator->get_Archive()->get_centre_frequency(),
+		      calibrator->get_Archive()->get_bandwidth() );
+	
+      }
+
       continue;
 
     }
-
-
 
     for (unsigned ichan=0; ichan<zapchan.size(); ichan++) {
       if (verbose)
@@ -249,9 +265,13 @@ int main (int argc, char** argv)
     return -1;
   }
 
-  if (flux_cal) {
+  if (flux_cal) try {
     cerr << "pacv: Plotting FluxCalibrator" << endl;
     plotter.plot (&fluxcal);
+  }
+  catch (Error& error) {
+    cerr << "pacv: Error plotting FluxCalibrator" << error << endl;
+    return -1;
   }
 
   cpgend();
