@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Profile.h,v $
-   $Revision: 1.26 $
-   $Date: 2003/03/18 13:53:13 $
+   $Revision: 1.27 $
+   $Date: 2003/04/19 20:22:18 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Profile_h
@@ -146,7 +146,7 @@ namespace Pulsar {
 
     //! fit to the standard and return a Tempo::toa object
     Tempo::toa toa (const Profile& std, const MJD& mjd, 
-		    double period, char nsite);
+		    double period, char nsite) const;
 
     //! return the shift (in turns) after fitting to the standard
     double shift (const Profile& std, float& ephase,

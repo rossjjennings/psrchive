@@ -8,7 +8,7 @@
   Returns a basic Tempo::toa object
 */
 Tempo::toa Pulsar::Profile::toa (const Profile& std, const MJD& mjd, 
-				 double period, char nsite)
+				 double period, char nsite) const
 {
   Tempo::toa retval;
 
@@ -22,7 +22,7 @@ Tempo::toa Pulsar::Profile::toa (const Profile& std, const MJD& mjd,
   retval.set_telescope (nsite);
 
   if (verbose) {
-    fprintf (stderr, "toa created:\n");
+    fprintf (stderr, "Pulsar::Profile::toa created:\n");
     retval.unload (stderr);
   }
   return retval;
