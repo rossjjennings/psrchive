@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Matrix.h,v $
-   $Revision: 1.2 $
-   $Date: 2003/03/03 13:30:33 $
+   $Revision: 1.3 $
+   $Date: 2004/04/06 14:00:43 $
    $Author: straten $ */
 
 #ifndef __Matrix_H
@@ -165,6 +165,18 @@ const Matrix<T, RC, RC> inv (const Matrix<T, RC, RC>& m)
   GaussJordan (copy, inverse);
 
   return inverse;
+}
+
+template <typename T, unsigned Rows, unsigned Columns>
+const Matrix<T, Columns, Rows> transpose (const Matrix<T, Rows, Columns>& m)
+{
+  Matrix<T, Columns, Rows> result;
+
+  for (unsigned i=0; i<Rows; i++)
+    for (unsigned j=0; j<Columns; j++)
+      result[j][i] = m[i][j];
+
+  return result;
 }
 
 #endif  /* not __Matrix_H defined */
