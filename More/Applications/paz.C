@@ -113,7 +113,6 @@ int main (int argc, char *argv[]) {
       while (key) {
 	if (sscanf(key, "%d", &placeholder) == 1) {
 	  subs_to_zap.push_back(placeholder);
-	  cerr << placeholder << endl;
 	}
 	key = strtok (NULL, whitespace);
       }
@@ -167,16 +166,19 @@ int main (int argc, char *argv[]) {
 	for (unsigned i = 0; i < arch->get_nsubint(); i++) {
 	  ignore = false;
 	  for (unsigned j = 0; j < subs_to_zap.size(); j++)
-	    if (subs_to_zap[j] == i)
+	    if (subs_to_zap[j] == i) {
 	      ignore = true;
-	  
+	      if (verbose)
+		cout << "Zapping subint " << i << endl;
+	    }
 	  if (!ignore) {
 	    subs_to_keep.push_back(i);
-	    cerr << "Keeping " << i << endl;
 	  }
 	}
 	new_arch = arch->extract(subs_to_keep);
+	string useful = arch->get_filename();
 	arch = new_arch->clone();
+	arch->set_filename(useful);
       }
       
       if (simple) {
