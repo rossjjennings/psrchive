@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <iostream>
+#include <complex>
 #include <string>
 
 template <class Type1, class Type2, class Element>
@@ -33,6 +34,16 @@ void random (T& val)
   val = r1*r2;
 }
 
+template <class T>
+void random (complex<T>& val)
+{
+  T re, im;
+
+  random(re);
+  random(im);
+
+  val = complex<T> (re, im);
+}
 
 template <class T, class U>
 T max (const T& a, const U& b)

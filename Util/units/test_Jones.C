@@ -1,17 +1,6 @@
 #include "MatrixTest.h"
 #include "Jones.h"
 
-template <class T>
-void random (complex<T>& val)
-{
-  T re, im;
-
-  random(re);
-  random(im);
-
-  val = complex<T> (re, im);
-}
-
 int main () 
 {
   unsigned loops = RAND_MAX/1000;

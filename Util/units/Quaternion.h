@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Quaternion.h,v $
-   $Revision: 1.4 $
-   $Date: 2003/01/30 13:28:18 $
+   $Revision: 1.5 $
+   $Date: 2003/01/30 16:18:53 $
    $Author: straten $ */
 
 #ifndef __Quaternion_H
@@ -54,7 +54,7 @@ public:
 
   //! Scalar division
   Quaternion& operator /= (T a)
-    { T d=1.0/a; s0*=d; s1*=d; s2*=d; s3*=d; return *this; }
+    { T d(1.0); d/=a; s0*=d; s1*=d; s2*=d; s3*=d; return *this; }
 
   //! Equality
   bool operator == (const Quaternion& b) const
@@ -184,7 +184,7 @@ Quaternion<T, Unitary> herm (const Quaternion<T,Unitary>& j)
 template<typename T, Basis B>
 Quaternion<T, B> inv (const Quaternion<T,B>& j) 
 {
-  T d=-1.0/det(j);
+  T d (-1.0); d/=det(j);
   return Quaternion<T,B> (-d*j.s0, d*j.s1, d*j.s2, d*j.s3);
 }
 
