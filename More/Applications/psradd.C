@@ -14,19 +14,19 @@ static const char* psradd_args = "b:Che:f:Fg:i:M:p:PtT:vV";
 
 void usage () {
   cout <<
-    "psradd - add archives together\n"
-    "USAGE psradd [" << psradd_args << "]\n"
-    " -b nbin  bin scrunch to nbin bins when each file is loaded\n"
-    " -C       check that ephemerides are equal\n"
-    " -h       this help page \n"
-    " -f fname output filename\n"
-    " -F       force append despite mismatch of header parameters\n"
-    " -M meta  filename with list of files\n"
-    " -p parfl load new ephemeris from 'psrfl'\n"
-    " -t       make no changes to file system (testing mode)\n"
-    " -T tempo system call to tempo\n"
-    " -v       verbose mode \n"
-    " -V       very verbose (debugging) mode \n"
+    "A program for adding Pulsar::Archives together\n"
+    "USAGE: psradd [" << psradd_args << "] filenames\n"
+    " -b nbin     bin scrunch to nbin bins when each file is loaded\n"
+    " -C          check that ephemerides are equal\n"
+    " -h          this help page \n"
+    " -f fname    output filename\n"
+    " -F          force append despite mismatch of header parameters\n"
+    " -M meta     filename with list of files\n"
+    " -p parfl    load new ephemeris from 'parfl'\n"
+    " -t          make no changes to file system (testing mode)\n"
+    " -T tempo    system call to tempo\n"
+    " -v          verbose mode \n"
+    " -V          very verbose (debugging) mode \n"
     "\n"
     "AUTO ADD options\n"
     " -e ext   extension added to output filenames (default .it)\n"
@@ -73,7 +73,7 @@ int main (int argc, char **argv)
   // name of the output file
   string newname;
 
-  //
+  // name of the new ephemeris file
   string parname;
 
   int c;
@@ -140,10 +140,10 @@ int main (int argc, char **argv)
 
     case 'V':
       Pulsar::Archive::set_verbosity (3);
-      vverbose = 1;
+      vverbose = true;
     case 'v':
       Error::verbose = true;
-      verbose = 1;
+      verbose = true;
       break;
 
     } 
@@ -197,8 +197,9 @@ int main (int argc, char **argv)
 
   for (unsigned ifile=0; ifile < filenames.size(); ifile++) { try {
 
-    if (verbose) cerr << "psradd: Loading [" << filenames[ifile] << "]\n";
-
+    if (verbose) 
+      cerr << "psradd: Loading [" << filenames[ifile] << "]\n";
+    
     archive = Pulsar::Archive::load (filenames[ifile]);
     
     if (archive->integration_length() == 0) {
@@ -235,19 +236,19 @@ int main (int argc, char **argv)
     }
 
     bool reset_total_current = false;
-
+    
     if (interval != 0.0) {
-
+      
       // ///////////////////////////////////////////////////////////////
       //
       // auto_add -g: check the gap between the end of total
       // and the start of archive
-
+      
       double gap = (archive->start_time() - total->end_time()).in_seconds();
-
+      
       if (verbose)
 	cerr << "psradd: Auto add - gap = " << gap << " seconds" << endl;
-
+      
       if (gap > interval) {
 	if (verbose)
 	  cerr << "psradd: gap=" << gap << " greater than interval=" 
