@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Archive.h,v $
-   $Revision: 1.1 $
-   $Date: 2002/04/05 09:26:26 $
+   $Revision: 1.2 $
+   $Date: 2002/04/05 09:37:29 $
    $Author: straten $ */
 
 /*
@@ -19,7 +19,8 @@ namespace Pulsar {
   //
   // feeds - enumerated type for different feed configurations
   //
-  enum feeds { invalid=-1, circular=0, linear=1 };
+  enum Feeds { invalid=-1, circular=0, linear=1 };
+  enum PolnState { Stokes, Coherency, XXYY, Intensity, Invariant };
 
   class Archive {
 
@@ -195,17 +196,25 @@ namespace Pulsar {
     // convenience interface
     void load (const string& filename) { load (filename.c_str()); }
 
+    // get/set the number of bins, bands, subints, etc
 
-    // get the bandwidth of the observation (MHz)
+    ...
+
+    // get/set the bandwidth of the observation (MHz)
     virtual double get_bandwidth () const = 0;
     virtual void   set_bandwidth (double bw) const = 0;
 
-    // get the centre frequency of the observation (MHz)
+    // get/set the centre frequency of the observation (MHz)
     virtual double get_centre_frequency () const = 0;
     virtual void   set_centre_frequency (double cf) const = 0;
 
-    // get the feed configuration of the receiver
-    virtual feeds get_feed_type () const = 0;
+    // get/set the feed configuration of the receiver
+    virtual Feeds get_feed_type () const = 0;
+    virtual void  set_feed_type (Feeds feed) const = 0;
+
+    // get/set the state of the profiles
+    virtual PolnState get_poln_state () const = 0;
+    virtual void      set_poln_state (PolnState state) const = 0;
 
     // get the state of various corrected flags
     virtual bool get_feedangle_corrected () const = 0;
