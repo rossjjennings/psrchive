@@ -23,6 +23,8 @@ int bcrfft1dp(int npts, float *dest);
 
 int rfftw_sort(int npts, float *src, float *dest);
 
+void cross_correlate(float *data1, float *data2, float *res, int n);
+
 #ifdef __cplusplus
 }
 #endif
