@@ -248,9 +248,6 @@ void Pulsar::ReceptionCalibrator::add_PolnCalibrator (const PolnCalibrator* p)
 {
   check_ready ("Pulsar::ReceptionCalibrator::add_PolnCalibrator");
 
-  cerr << "Pulsar::ReceptionCalibrator::add_PolnCalibrator unimplemented"
-       << endl;
-
   const Archive* calibrator = p->get_Archive();
 
   if (calibrator->get_state() != Signal::Coherence)
@@ -312,10 +309,15 @@ void Pulsar::ReceptionCalibrator::add_PolnCalibrator (const PolnCalibrator* p)
     }
   }
 
+  includes_PolnCalibrator = true;
+
   const PolarCalibrator* polcal = dynamic_cast<const PolarCalibrator*>(p);
 
   if (polcal && polcal->model.size() == nchan)  {
-    cerr << "Pulsar::ReceptionCalibrator::add_PolnCalibrator add Polar Model";
+    cerr << "Pulsar::ReceptionCalibrator::add_PolnCalibrator"
+	" add Polar Model" << endl;
+
+    assert (receiver.size() == nchan);
 
     for (unsigned ichan = 0; ichan<nchan; ichan++)
       receiver[ichan].integrate( polcal->model[ichan] );
