@@ -3,8 +3,8 @@
 bool Pulsar::Calibrator::verbose = false;
 
 /* The size of the window used during median filtering is given by the number
-   of frequency channels, nchan, divided by median_smoothing_factor */
-float Pulsar::Calibrator::median_smoothing_bandwidth = 0.25;
+   of frequency channels, nchan, multiplied by median_smoothing */
+float Pulsar::Calibrator::median_smoothing = 0.05;
 
 Pulsar::Calibrator::~Calibrator ()
 {

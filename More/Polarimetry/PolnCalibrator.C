@@ -96,10 +96,9 @@ void Pulsar::PolnCalibrator::create (unsigned nchan)
   unsigned npol = cal_hi.size();
   unsigned ipol = 0;
 
-  float smoothing = calibrator->get_bandwidth() / median_smoothing_bandwidth;
-  unsigned window = unsigned (float(calibrator->get_nchan()) * smoothing);
+  unsigned window = unsigned (calibrator->get_nchan() * median_smoothing);
 
-  if (verbose)
+//  if (verbose)
     cerr << "Pulsar::PolnCalibrator::create median smoothing window width = "
 	 << window << " channels" << endl;
 
