@@ -27,7 +27,6 @@ testrnd8.LDFLAGS:= $(LDFLAGS) -leph
 ifeq (${PSRFITS},yes)
 
 LIB_SRCS += fitsio.C
-INCFLAGS += $(ICFITSIO)
 TESTS += test_psrephem_fitsio.C
 test_psrephem_fitsio.LDFLAGS := $(LDFLAGS) -leph $(LTIMES) $(LCFITSIO)
 
