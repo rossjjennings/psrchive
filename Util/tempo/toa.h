@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/toa.h,v $
-   $Revision: 1.8 $
-   $Date: 2001/02/25 06:20:02 $
+   $Revision: 1.9 $
+   $Date: 2002/10/12 01:14:54 $
    $Author: straten $ */
 
 #ifndef __TOA_H
@@ -33,7 +33,6 @@ namespace Tempo {
   public:
     
     enum Format { Unspecified, Princeton, Parkes, ITOA, Psrclock, Rhythm };
-
     enum DataType {
       // a null state
       Nothing,
@@ -52,14 +51,11 @@ namespace Tempo {
       BarycentreFrequency,
       Weight,
       PrefitResidualTime,
-      // and from any toaInfo derived types
-      
-      // and an error
-      FaultCode
+      // and a code to mark the last
+      Last
     };
 
     static bool verbose;
-    static bool load_aux_data;
 
   protected:
     
@@ -91,7 +87,7 @@ namespace Tempo {
     residual resid;
    
     toa (Format fmt = Rhythm);
-    ~toa () { destroy(); };
+    virtual ~toa () { destroy(); };
     
     // copy constructor
     toa (const toa & in_toa);
@@ -120,8 +116,14 @@ namespace Tempo {
     time_t get_when_calculated () const { return calculated; };
     string get_auxilliary_text () const { return auxinfo; };
 
-    double getData (DataType which) const;
-    const char* getDescriptor (DataType code) const;
+    // //////////////////////////////////////////////////////////////////
+    // these functions return information in a context-free fashion that
+    // allows inherited types to add to the class without changing
+    // high-level routines (such as ModelDataSet
+    //
+    // abstract interface for query
+    virtual double      getData (DataType which) const;
+    virtual const char* getDescriptor (DataType code) const;
 
     double shift (const polyco & poly) const;
 
