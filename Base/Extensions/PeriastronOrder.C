@@ -60,7 +60,7 @@ void Pulsar::PeriastronOrder::organise (Archive* arch, unsigned newsub)
 				       arch->get_ephemeris(), 
 				       arch->get_Integration(i)->get_centre_frequency(),
 				       arch->get_telescope_code()));
-    if (isnan(phases[i])) {
+    if (phases[i]!=phases[i]) {
       throw Error(FailedCall, "PeriastronOrder::organise",
 		  "get_binphs_peri returned nan");
     }

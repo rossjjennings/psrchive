@@ -61,7 +61,7 @@ void Pulsar::BinLngAscOrder::organise (Archive* arch, unsigned newsub)
 				  arch->get_ephemeris(), 
 				  arch->get_Integration(i)->get_centre_frequency(),
 				  arch->get_telescope_code()));
-    if (isnan(lngs[i])) {
+    if (lngs[i]!=lngs[i]) {
       throw Error(FailedCall, "PeriastronOrder::organise",
 		  "get_binlng_asc returned nan");
     }
