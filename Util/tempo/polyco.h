@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/polyco.h,v $
-   $Revision: 1.16 $
-   $Date: 2002/07/31 11:20:36 $
+   $Revision: 1.17 $
+   $Date: 2003/01/22 20:07:06 $
    $Author: straten $ */
 
 #ifndef __POLY_H
@@ -158,6 +158,7 @@ public:
 
 #ifdef PSRFITS
   void load (fitsfile* fptr, long row);
+  void unload (fitsfile* fptr, long row);
 #endif
 
 };
@@ -271,6 +272,7 @@ class polyco : public Reference::Able {
 
 #ifdef PSRFITS
   void load (fitsfile* fptr, int back=0);
+  void unload (fitsfile* fptr, int back=0);
 #endif
 
 };
