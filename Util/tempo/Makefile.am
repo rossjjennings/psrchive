@@ -45,4 +45,4 @@ depend: $(LOCAL_ROOT)/include/ephio.h
 # Dependency on constructed include files
 $(LOGIN_ARCH)/ephio.o: keyinfo.com
 $(LOGIN_ARCH)/ephio_c.o: $(LOCAL_ROOT)/include/ephio.h
-# DO NOT DELETE
+
