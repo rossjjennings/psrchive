@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ReceptionCalibrator.h,v $
-   $Revision: 1.45 $
-   $Date: 2003/10/28 08:47:52 $
+   $Revision: 1.46 $
+   $Date: 2003/11/04 15:29:02 $
    $Author: straten $ */
 
 #ifndef __ReceptionCalibrator_H
@@ -161,6 +161,9 @@ namespace Pulsar {
 
     //! Return the Calibrator information
     Calibrator::Info* get_Info () const;
+
+    //! Return a PolnCalibrator::get_solution with a CalibratorStokes Extension
+    Archive* get_solution (const string& archive_type, string ext=".pc") const;
 
     bool measure_cal_V;
 
