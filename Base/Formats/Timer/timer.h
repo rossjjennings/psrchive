@@ -1,6 +1,6 @@
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/Timer/timer.h,v $
-   $Revision: 1.15 $
-   $Date: 2004/08/13 12:59:43 $
+   $Revision: 1.16 $
+   $Date: 2004/09/06 09:05:50 $
    $Author: straten $ */
 
 /* include file for the main timer structure                            */
@@ -78,6 +78,7 @@
 #define POLN_CALIBRATED   0x0002  /* polarimetric calibration performed */
 #define FLUX_REFERENCE    0x0004  /* flux is in units of reference signal */
 #define FLUX_CALIBRATED   0x0008  /* flux is in Jansky */
+#define FB_CALIBRATED     0x0010  /* filterbank data have been rescaled */
 
 #define RCVR_ID_STRLEN 8
 

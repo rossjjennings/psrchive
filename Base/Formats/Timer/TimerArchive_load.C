@@ -337,7 +337,7 @@ void Pulsar::TimerArchive::subint_load (FILE* fptr)
 	    profile->set_weight( profile->get_weight() * tdmp );
 	  }
     }
-    if(hdr.calibrated == 0){
+    if(!(hdr.calibrated & FB_CALIBRATED)){
       if(verbose == 3) 
 	cerr << "Setting FB calibration" << endl;
       for(unsigned i=0;i<get_nsubint();i++)
@@ -352,7 +352,7 @@ void Pulsar::TimerArchive::subint_load (FILE* fptr)
 	cerr << "ndmp:" <<hdr.ndump_sub_int << " tsmp:" << hdr.tsmp 
 	     << " tsub_int:" << hdr.sub_int_time
 	     << " chbw: " << chbw << endl;
-      hdr.calibrated = 1;
+      hdr.calibrated &= FB_CALIBRATED;
     }
   }
   

@@ -119,7 +119,7 @@ int Timer::load (FILE* fptr, struct timer* hdr, bool big_endian)
   
   if (verbose) cerr << "Timer::load correct header" << endl;
 
-  if ( !strcmp (hdr->machine_id, "S2") && !strstr (hdr->software, "psrdisp"))  {
+  if (!strcmp (hdr->machine_id, "S2") && !strstr (hdr->software, "psrdisp")) {
     if (verbose) cerr << "Timer::load S2 version=" << hdr->version << ":" 
                       << hdr->minorversion << " reset to 5.0" << endl;
     hdr->version = 5.0;
@@ -134,13 +134,16 @@ int Timer::load (FILE* fptr, struct timer* hdr, bool big_endian)
     hdr->minorversion = 3.0;
   }
 
-  if (hdr->mjd < 51401 && !strcmp(hdr->machine_id,"CPSR") && version==10.0)  { 
+  if (hdr->mjd < 51401 && !strcmp(hdr->machine_id,"CPSR") && version==10.0) { 
     double seconds_per_file = 53.6870912;
     Timer::set_MJD (*hdr, Timer::get_MJD (*hdr) - seconds_per_file);
   }
 
   if (hdr->calibrated == 1)
-    hdr->calibrated = FLUX_CALIBRATED & POLN_CALIBRATED;
+    if(strcmp(hdr->machine_id, "FB")==0)
+      hdr->calibrated = FB_CALIBRATED;
+    else
+      hdr->calibrated = FLUX_CALIBRATED & POLN_CALIBRATED;
 
   // this is an old value that was used to initialize the RM
   if (hdr->rotm == -100000)
