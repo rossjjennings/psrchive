@@ -1,6 +1,6 @@
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/machine_endian.h,v $
-   $Revision: 1.3 $
-   $Date: 1999/11/02 09:18:12 $
+   $Revision: 1.4 $
+   $Date: 1999/12/10 04:41:36 $
    $Author: straten $ */
 
 #ifndef __M_ENDIAN_H
@@ -17,6 +17,9 @@ void array_changeEndian (int count, void *p, int element_size);
 #ifdef __cplusplus
 }
 #endif
+
+/* MACRO to save you some typing */
+#define ChangeEndian(p) changeEndian (&(p), sizeof(p))
 
 /* is it Big or Little endian?? */
 #ifdef __alpha
