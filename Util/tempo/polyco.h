@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/polyco.h,v $
-   $Revision: 1.11 $
-   $Date: 2001/02/27 05:37:52 $
+   $Revision: 1.12 $
+   $Date: 2002/03/27 14:16:43 $
    $Author: straten $ */
 
 #ifndef __POLY_H
@@ -11,15 +11,22 @@
 #include <string>
 #include <vector>
 
+#ifdef MPI
+#include <mpi.h>
+#endif
+
+#ifdef PSRFITS
+#include <fitsio.h>
+#endif
+
 #include "Phase.h"
 #include "MJD.h"
-#ifdef MPI
-#include "mpi.h"
-#endif
 
 class polynomial {
 
- public:
+  friend class polyco;
+
+ protected:
  
   string psrname;
   string date;
@@ -92,6 +99,10 @@ public:
 		      int* position, MPI_Comm comm);
   friend int mpiUnpack (void* inbuf, int insize, int* position, 
 			polynomial*, MPI_Comm comm);
+#endif
+
+#ifdef PSRFITS
+  void load (fitsfile* fptr, long row);
 #endif
 
 };
@@ -194,6 +205,10 @@ class polyco {
 			int* position, MPI_Comm comm);
   friend int mpiUnpack (void* inbuf, int insize, int* position, 
 			polyco*, MPI_Comm comm);
+#endif
+
+#ifdef PSRFITS
+  void load (fitsfile* fptr, long row=0);
 #endif
 
 };
