@@ -24,7 +24,7 @@ int main (int argc, char** argv)
       
     case 'a':
       Pulsar::Archive::agent_report ();
-      return 0;
+      break;
 
     case 'P':
       Pulsar::Archive::set_plugin_path (optarg);
