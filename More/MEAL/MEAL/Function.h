@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Function.h,v $
-   $Revision: 1.2 $
-   $Date: 2004/11/22 19:26:03 $
+   $Revision: 1.3 $
+   $Date: 2005/04/06 20:02:45 $
    $Author: straten $ */
 
 /*! \mainpage 
@@ -81,6 +81,8 @@
 #define __MEAL_Function_H
 
 #include "MEAL/Argument.h"
+#include "MEAL/ArgumentPolicy.h"
+#include "MEAL/ParameterPolicy.h"
 #include "Callback.h"
 #include "Estimate.h"
 
@@ -90,7 +92,7 @@
 /*! The MEAL namespace is documented in the introduction. */
 namespace MEAL {
 
-  //! Pure virtual base class of all models
+  //! Pure virtual base class of all functions
   /*! A Function may consist of an arbitrary number of parameters. Using
     the Abscissa class, a Function may also be constrained by one or more
     independent variables. The specification of the Function base class
@@ -145,31 +147,40 @@ namespace MEAL {
     virtual std::string get_name () const = 0;
 
     //! Return the number of parameters
-    virtual unsigned get_nparam () const = 0;
+    unsigned get_nparam () const
+    { return parameter_policy->get_nparam (); }
 
     //! Return the name of the specified parameter
-    virtual std::string get_param_name (unsigned index) const = 0;
+    std::string get_param_name (unsigned index) const
+    { return parameter_policy->get_param_name (index); }
 
     //! Return the value of the specified parameter
-    virtual double get_param (unsigned index) const = 0;
+    double get_param (unsigned index) const
+    { return parameter_policy->get_param (index); }
 
     //! Set the value of the specified parameter
-    virtual void set_param (unsigned index, double value) = 0;
+    void set_param (unsigned index, double value)
+    { parameter_policy->set_param (index,value); }
 
     //! Return the variance of the specified parameter
-    virtual double get_variance (unsigned index) const = 0;
+    double get_variance (unsigned index) const
+    { return parameter_policy->get_variance (index); }
 
     //! Set the variance of the specified parameter
-    virtual void set_variance (unsigned index, double value) = 0;
+    void set_variance (unsigned index, double value)
+    { parameter_policy->set_variance (index,value); }
 
     //! Return true if parameter at index is to be fitted
-    virtual bool get_infit (unsigned index) const = 0;
+    bool get_infit (unsigned index) const
+    { return parameter_policy->get_infit (index); }
     
     //! Set flag for parameter at index to be fitted
-    virtual void set_infit (unsigned index, bool flag) = 0;
-
+    void set_infit (unsigned index, bool flag)
+    { parameter_policy->set_infit (index,flag); }
+    
     //! Set the independent variable of the specified dimension
-    virtual void set_argument (unsigned dimension, Argument* axis) { }
+    void set_argument (unsigned dimension, Argument* axis)
+    { if (argument_policy) argument_policy->set_argument (dimension, axis); }
 
     //! Return an Estimate of the specified parameter
     Estimate<double> get_Estimate (unsigned index) const;
@@ -188,8 +199,6 @@ namespace MEAL {
     //! Callback executed when a Function Attribute has been changed
     Callback<Attribute> changed;
 
-   protected:
-
     //! Set true if the Function evaluation has changed
     void set_evaluation_changed (bool _changed = true) 
     {
@@ -201,9 +210,24 @@ namespace MEAL {
     //! Return true if the Function evaluation has changed
     bool get_evaluation_changed () const { return evaluation_changed; }
 
+   protected:
+
+    friend class ParameterPolicy;
+
+    //! The policy for managing function parameters
+    Reference::To< ParameterPolicy > parameter_policy;
+
+    friend class ArgumentPolicy;
+
+    //! The policy for managing function arguments
+    Reference::To< ArgumentPolicy > argument_policy;
+
     //! Copy the evaluation changed state of another model instance
     void copy_evaluation_changed (const Function& model) 
     { set_evaluation_changed (model.get_evaluation_changed()); }
+
+    //! Copy the parameter policy of another instance
+    void copy_parameter_policy (const Function*);
 
   private:
 

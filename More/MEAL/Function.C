@@ -18,6 +18,12 @@ MEAL::Function::Function (const Function& model)
 #ifdef _DEBUG
   cerr << "MEAL::Function copy constructor" << endl;
 #endif
+
+  parameter_policy = model.parameter_policy->clone (this);
+
+  if (model.argument_policy)
+    argument_policy = model.argument_policy->clone (this);
+
   evaluation_changed = true;
 }
 
@@ -62,6 +68,10 @@ void MEAL::Function::copy (const Function* model)
   set_evaluation_changed();
 }
 
+void MEAL::Function::copy_parameter_policy (const Function* function)
+{
+  parameter_policy = function->parameter_policy;
+}
 
 Estimate<double> MEAL::Function::get_Estimate (unsigned index) const
 {
@@ -69,7 +79,7 @@ Estimate<double> MEAL::Function::get_Estimate (unsigned index) const
 }
 
 void MEAL::Function::set_Estimate (unsigned index,
-				       const Estimate<double>& estimate)
+				   const Estimate<double>& estimate)
 {
   set_param( index, estimate.val );
   set_variance( index, estimate.var );
