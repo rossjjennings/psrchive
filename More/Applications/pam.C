@@ -2,6 +2,7 @@
 #include <unistd.h>
 #include <libgen.h>
 #include "dirutil.h"
+#include <time.h>
 
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
@@ -267,6 +268,73 @@ int main (int argc, char *argv[]) {
       }
       
       if (save) {
+	
+	// See if the archive contains a history that should be updated:
+	
+	Pulsar::FITSHistory* fitsext = 0;
+	for (unsigned i = 0; i < arch->get_nextension(); i++) {
+	  Pulsar::Archive::Extension* extension;
+	  extension = (Pulsar::Archive::Extension*)arch->get_extension (i);
+	  fitsext = dynamic_cast<Pulsar::FITSHistory*> (extension);
+	  if (fitsext) {
+	    break;
+	  }
+	}
+	
+	if (fitsext) {
+	  
+	  fitsext->add_blank_row();
+
+	  if (command.length() > 80) {
+	    cout << "WARNING: FITSHistory command string truncated to 80 chars" << endl;
+	    sprintf((fitsext->get_last()->proc_cmd), "%s", command.substr(0, 80).c_str());
+	  }
+	  else {
+	    sprintf((fitsext->get_last()->proc_cmd), "%s", command.c_str());
+	  }
+	  
+	  time_t myt;
+	  time(&myt);
+	  sprintf((fitsext->get_last()->date_pro), "%s", ctime(&myt));
+	  
+	  sprintf(fitsext->get_last()->pol_type, "%s", state_string(arch->get_state()));
+	  
+	  fitsext->get_last()->npol = arch->get_npol();
+	  fitsext->get_last()->nbin = arch->get_nbin();
+	  fitsext->get_last()->nbin_prd = arch->get_nbin();
+	  fitsext->get_last()->tbin = ((arch->get_Integration(0)->get_folding_period())/arch->get_nbin());
+	  fitsext->get_last()->ctr_freq = arch->get_centre_frequency();
+	  fitsext->get_last()->nchan = arch->get_nchan();
+	  fitsext->get_last()->chanbw = (arch->get_bandwidth())/float(arch->get_nchan());
+	  
+	  if (arch->get_parallactic_corrected()) {
+	    fitsext->get_last()->par_corr = 1;
+	  }
+	  else {
+	    fitsext->get_last()->par_corr = 0;
+	  }
+	  
+	  if (arch->get_iono_rm_corrected() && arch->get_ism_rm_corrected()) {
+	    fitsext->get_last()->rm_corr = 1;
+	  }
+	  else {
+	    fitsext->get_last()->rm_corr = 0;
+	  }
+	  
+	  if (arch->get_dedispersed()) {
+	    fitsext->get_last()->dedisp = 1;
+	  }
+	  else {
+	    fitsext->get_last()->dedisp = 0;
+	  }
+	  
+	  //sc_mthd
+	  //cal_mthd
+	  //cal_file
+	  //rfi_mthd
+	  
+	}
+	
 	if (ext.empty()) {
 	  arch->unload();
 	  cout << arch->get_filename() << " updated on disk" << endl;
@@ -276,44 +344,15 @@ int main (int argc, char *argv[]) {
 	  int index = the_old.find_last_of(".",the_old.length());
 	  string primary = the_old.substr(0, index);
 	  string the_new = primary + "." + ext;
-
-	  // See if the archive contains a history that should be updated:
-	  
-	  Pulsar::FITSHistory* ext = 0;
-	  for (unsigned i = 0; i < arch->get_nextension(); i++) {
-	    Pulsar::Archive::Extension* extension;
-	    extension = (Pulsar::Archive::Extension*)arch->get_extension (i);
-	    ext = dynamic_cast<Pulsar::FITSHistory*> (extension);
-	    if (ext) {
-	      break;
-	    }
-	  }
-	  if (ext) {
-	    
-	    ext->add_blank_row();
-	    if (command.length() > 80) {
-	      cout << "WARNING: FITSHistory command string truncated to 80 chars" << endl;
-	      sprintf((ext->get_last()->proc_cmd), "%s", command.substr(0, 80).c_str());
-	    }
-	    else {
-	      sprintf((ext->get_last()->proc_cmd), "%s", command.c_str());
-	      
-	      // gettimeofday, etc	      
-	      //ext->get_last()->date_pro
-	    }
-	  }
-	  arch->unload(the_new);
-	  cout << "New file " << the_new << " written to disk" << endl;
+          arch->unload(the_new);
+          cout << "New file " << the_new << " written to disk" << endl;
 	}
       }
-      
-    }
+    }  
     catch (Error& error) {
       cerr << error << endl;
-    }
-
+    } 
   }
-
 }
 
 
