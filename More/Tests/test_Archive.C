@@ -8,22 +8,21 @@ int main (int argc, char** argv)
   // trap C-style errors and throw Error exception
   Pulsar::Error::handle_signals ();
 
-  //Pulsar::Archive::verbose = true;
-  //Pulsar::Integration::verbose = true;
+  // Pulsar::Archive::verbose = true;
+  // Pulsar::Error::verbose = true;
+  // Pulsar::Integration::verbose = true;
 
   string filename ("test.ar");
 
   if (argc>1)
     filename = argv[1];
   
+  cerr << "load archive from " << filename << endl;
   Reference::To<Pulsar::Archive> archive;
-
   archive = Pulsar::Archive::load (filename);
 
-  Reference::To<Pulsar::Archive> clone;
-
   cerr << "clone archive for tscrunch" << endl;
-  clone = archive -> clone();
+  Reference::To<Pulsar::Archive> clone = archive -> clone();
 
   cerr << "tscrunch" << endl;
   clone -> tscrunch ();
@@ -37,10 +36,15 @@ int main (int argc, char** argv)
 
   cerr << "fscrunch" << endl;
   clone -> fscrunch ();
-  cerr << "fscrunch done" << endl;
 
   cerr << "fscrunch from " << archive->get_nchan() 
        << " to "  << clone->get_nchan() << " sub-channels" << endl;
+
+  cerr << "tscrunch" << endl; 
+  clone -> tscrunch ();
+
+  cerr << "unload out.ar" << endl;
+  clone -> unload ("out.ar");
 
 }
 catch (Pulsar::Error& error) {
