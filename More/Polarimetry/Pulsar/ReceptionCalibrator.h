@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ReceptionCalibrator.h,v $
-   $Revision: 1.12 $
-   $Date: 2003/05/02 11:31:53 $
+   $Revision: 1.13 $
+   $Date: 2003/05/06 11:24:48 $
    $Author: straten $ */
 
 #ifndef __ReceptionCalibrator_H
@@ -20,7 +20,8 @@ namespace Pulsar {
   class PolnCalibrator;
   class FluxCalibrator;
 
-  class PhaseEstimate;
+  class SourceEstimate;
+  class PolarEstimate;
 
   //! Uses the SAtPEquation to represent and fit for the system response
   /*! The ReceptionCalibrator implements a technique of single dish
@@ -68,8 +69,11 @@ namespace Pulsar {
     //! Calibrator state as a function of frequency
     vector<Calibration::StokesState> calibrator;
 
+    //! Best estimate of polar decomposition as a function of frequency
+    vector<PolarEstimate> receiver;
+
     //! Uncalibrated estimate of pulsar polarization as a function of phase
-    vector<PhaseEstimate> pulsar;
+    vector<SourceEstimate> pulsar;
 
     //! The parallactic angle rotation
     Calibration::Parallactic parallactic;
@@ -108,7 +112,7 @@ namespace Pulsar {
     void initial_observation (const Archive* data);
 
     //! Add the estimate to pulsar attribute
-    void init_estimate (PhaseEstimate& estimate);
+    void init_estimate (SourceEstimate& estimate);
 
     //! Add Integration data to the MeasuredState vector
     /*! Data is taken from the specified frequency channel and phase bin.
@@ -117,18 +121,18 @@ namespace Pulsar {
       \param ichan the frequency channel
       \param data the Integration data */
     void add_data (vector<Calibration::MeasuredState>& bins,
-		   PhaseEstimate& estimate,
+		   SourceEstimate& estimate,
 		   unsigned ichan,
 		   const Integration* data);
 
   };
 
-  class PhaseEstimate {
+  class SourceEstimate {
 
   public:
 
     //! Construct with the specified bin from Archive
-    PhaseEstimate (unsigned ibin = 0) { phase_bin = ibin; }
+    SourceEstimate (unsigned ibin = 0) { phase_bin = ibin; }
 
     //! Update each state with the mean
     void update_state();
@@ -136,11 +140,32 @@ namespace Pulsar {
     //! Best estimate of Stokes parameters as a function of frequency
     vector< MeanEstimate<Stokes<double>, double> > mean;
 
-    //! Model fit of added to equation as a function of frequency
+    //! Model of Stokes parameters added to equation as a function of frequency
     vector< Calibration::StokesState > state;
 
     //! Phase bin from which
     unsigned phase_bin;
+
+  };
+
+  class PolarEstimate {
+
+  public:
+
+    //! Best estimate of receiver gain
+    MeanEstimate<double> gain;
+
+    //! Best estimate of receiver boost
+    MeanEstimate<double> boostGibbs[3];
+
+    //! Best estimate of receiver rotations
+    MeanEstimate<double> rotationEuler[3];
+
+    //! Add the Polar Model to the current best estimate
+    void integrate (const Calibration::Polar& model);
+
+    //! Update the Polar Model with the currect best estimate
+    void update (Calibration::Polar* model);
 
   };
 
