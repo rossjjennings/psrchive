@@ -466,21 +466,17 @@ void Rhythm::plot_current ()
   useful2 += filename;
 
   try {
-    
     Reference::To<Pulsar::Archive> data = Pulsar::Archive::load(useful2);
-
     data->fscrunch();
     data->tscrunch();
     data->pscrunch();
     data->centre();
-
     cpgsvp (0.1,0.9,0.1,0.9);
     Pulsar::Plotter plotter;
     plotter.singleProfile(data);
-
   }
   catch (Error& error) {
-    footer->setText("Error processing archive on disk!");
+    footer->setText("Error processing archives on disk!");
     if (verbose)
       cerr << "Rhythm::show_me ERROR " << error << endl;
   }  
@@ -947,10 +943,17 @@ vector<double> Rhythm::give_me_data (toaPlot::AxisQuantity q)
 	  
 	  string useful2 = dataPath + "/";
 	  useful2 += filename;
-	  
-	  Reference::To<Pulsar::Archive> data = Pulsar::Archive::load(useful2);
-	  
-	  crd = data->get_coordinates();
+	  try {	  
+	    Reference::To<Pulsar::Archive> data = Pulsar::Archive::load(useful2);
+	    crd = data->get_coordinates();
+	  }
+	  catch (Error& error) {
+	    footer->setText("Error processing archives on disk!");
+	    if (verbose)
+	      cerr << error << endl;
+	    retval.resize(0);
+	    break;
+	  }
 	}
 	
 	// Extract the lat and lon
@@ -1051,14 +1054,21 @@ vector<double> Rhythm::give_me_data (toaPlot::AxisQuantity q)
 	string useful2 = dataPath + "/";
 	useful2 += filename;
 	
-	Reference::To<Pulsar::Archive> data = Pulsar::Archive::load(useful2);
-	
-	data->fscrunch();
-	data->tscrunch();
-	data->pscrunch();
-	
-	toas[i].set_StoN(data->get_Profile(0,0,0)->snr()); 
-	retval.push_back(toas[i].get_StoN());
+	try {
+	  Reference::To<Pulsar::Archive> data = Pulsar::Archive::load(useful2);	
+	  data->fscrunch();
+	  data->tscrunch();
+	  data->pscrunch();
+	  toas[i].set_StoN(data->get_Profile(0,0,0)->snr()); 
+	  retval.push_back(toas[i].get_StoN());
+	}
+	catch (Error& error) {
+	  footer->setText("Error processing archives on disk!");
+	  if (verbose)
+	    cerr << error << endl;
+	  retval.resize(0);
+	  break;
+	}
       }
     }
     progress.setProgress( toas.size() );
@@ -1093,10 +1103,18 @@ vector<double> Rhythm::give_me_data (toaPlot::AxisQuantity q)
 	string useful2 = dataPath + "/";
 	useful2 += filename;
 	
-	Reference::To<Pulsar::Archive> data = Pulsar::Archive::load(useful2);
-	
-	toas[i].set_bw(data->get_bandwidth());
-	retval.push_back(toas[i].get_bw());      
+	try {
+	  Reference::To<Pulsar::Archive> data = Pulsar::Archive::load(useful2);
+	  toas[i].set_bw(data->get_bandwidth());
+	  retval.push_back(toas[i].get_bw());     
+	}
+	catch (Error& error) {
+	  footer->setText("Error processing archives on disk!");
+	  if (verbose)
+	    cerr << error << endl;
+	  retval.resize(0);
+	  break;
+	}
       }
     }
     progress.setProgress( toas.size() );
@@ -1131,10 +1149,18 @@ vector<double> Rhythm::give_me_data (toaPlot::AxisQuantity q)
 	string useful2 = dataPath + "/";
 	useful2 += filename;
 	
-	Reference::To<Pulsar::Archive> data = Pulsar::Archive::load(useful2);
-	
-	toas[i].set_dm(data->get_dispersion_measure());
-	retval.push_back(toas[i].get_dm());
+	try {
+	  Reference::To<Pulsar::Archive> data = Pulsar::Archive::load(useful2);
+	  toas[i].set_dm(data->get_dispersion_measure());
+	  retval.push_back(toas[i].get_dm());
+	}
+	catch (Error& error) {
+	  footer->setText("Error processing archives on disk!");
+	  if (verbose)
+	    cerr << error << endl;
+	  retval.resize(0);
+	  break;
+	}
       }
     }
     progress.setProgress( toas.size() );
@@ -1169,10 +1195,18 @@ vector<double> Rhythm::give_me_data (toaPlot::AxisQuantity q)
 	string useful2 = dataPath + "/";
 	useful2 += filename;
 	
-	Reference::To<Pulsar::Archive> data = Pulsar::Archive::load(useful2);
-	
-	toas[i].set_dur(data->integration_length());
-	retval.push_back(toas[i].get_dur());     
+	try {
+	  Reference::To<Pulsar::Archive> data = Pulsar::Archive::load(useful2);
+	  toas[i].set_dur(data->integration_length());
+	  retval.push_back(toas[i].get_dur());     
+	}
+	catch (Error& error) {
+	  footer->setText("Error processing archives on disk!");
+	  if (verbose)
+	    cerr << error << endl;
+	  retval.resize(0);
+	  break;
+	}
       }
     }
     progress.setProgress( toas.size() );
@@ -1317,6 +1351,10 @@ void Rhythm::goplot ()
   vector<double> tempy = give_me_data(yq);
   vector<double> xerrs = give_me_errs(xq);
   vector<double> yerrs = give_me_errs(yq);
+  
+  if ( tempx.size() != toas.size() || tempy.size() != toas.size() ||
+       xerrs.size() != toas.size() || yerrs.size() != toas.size() )
+    return;
   
   vector<wrapper> useme;
   
