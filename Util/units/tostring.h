@@ -1,7 +1,7 @@
 //-*-C++-*-
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/tostring.h,v $
-   $Revision: 1.2 $
-   $Date: 2004/11/23 10:54:27 $
+   $Revision: 1.3 $
+   $Date: 2004/12/15 21:11:18 $
    $Author: straten $ */
 
 #ifndef __TOSTRING_H
@@ -27,6 +27,17 @@ std::string tostring (const T& input, unsigned precision)
   return ost.str();
 }
 
+template<class T>
+T fromstring (const std::string& ss)
+{
+  std::stringstream iost;
+  iost << ss;
+
+  T retval;
+  iost >> retval;
+
+  return retval;
+}
 
 #endif
 
