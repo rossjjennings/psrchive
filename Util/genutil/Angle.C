@@ -246,6 +246,15 @@ AnglePair::AnglePair(const double d1, const double d2){
   angle2 = d2;
 }
 
+AnglePair::AnglePair (const char *astr)
+{ 
+  if (str2coord (&angle1.radians, &angle2.radians, astr) < 0) {
+    string error ("AnglePair::AnglePair str2coord failure");
+    cerr << error;
+    throw error;
+  }
+}
+
 int AnglePair::setHMSDMS(const char *astr)
 { 
   return str2coord (&angle1.radians, &angle2.radians, astr);

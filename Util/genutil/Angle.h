@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Angle.h,v $
-   $Revision: 1.11 $
-   $Date: 2002/04/05 07:11:32 $
-   $Author: straten $ */
+   $Revision: 1.12 $
+   $Date: 2002/04/24 11:59:22 $
+   $Author: pulsar $ */
 
 // redwards 17 Mar 99 -- Time for a definitive C++ suite of
 // angle and sky coordinate functions
@@ -148,7 +148,7 @@ class AnglePair
   AnglePair & operator*= (const double);
   AnglePair (const Angle &, const Angle &);
   AnglePair (const double = 0.0, const double = 0.0);
-  AnglePair (const char* astr) { setHMSDMS (astr); }
+  AnglePair (const char* astr);
 
   friend AnglePair operator * (const AnglePair&, const double);
 
