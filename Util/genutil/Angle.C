@@ -5,6 +5,7 @@
 #include <math.h>
 #include <iostream>
 #include <limits.h>
+#include <float.h>
 
 #include "machine_endian.h"
 #include "angle.h"
