@@ -86,7 +86,7 @@ int MJD::intday() const {
 }
 
 double MJD::fracday() const {
-    return((double)secs/86400.0 + fracsec/86400.0);
+  return((double)secs/86400.0 + fracsec/86400.0);
 }
 
 MJD& MJD::operator = (const MJD &in_mjd)
@@ -368,21 +368,6 @@ MJD::MJD(int intday, double fracday){
   
   *this = MJD(intday, isecs, fracsecs);
 }
-  
-// Converts a string containing utc fields yyyy ddd hh mm ss to internal format
-MJD::MJD (char* utc_string)
-{
-  utc_t utc;
-  str2utc (&utc, utc_string);
-
-  /*
-char temp [40];
-fprintf (stderr, "Passing %s to MJD(utc) constructor\n", 
-	 utc2str (temp, utc, "yyyy-ddd-hh-mm-ss"));
-  */
-
-  *this = MJD(utc);
-}
 
 double MJD::LST (float longitude) const
 {
@@ -424,39 +409,54 @@ int MJD::gregorian (struct tm* gregdate, double* fsec) const
 // construct an MJD from a UTC
 MJD::MJD (const utc_t& utc)
 {
+  if (Construct (utc) < 0)
+    throw ("MJD::MJD(utc_t) construct error");
+}
+
+int MJD::Construct (const utc_t& utc)
+{
   struct tm greg;
-
-  utc2tm (&greg, utc);
-
-  /*
-char temp [40];
-fprintf (stderr, "Passing %s to MJD(cal) constructor\n", 
-	 cal2str (temp, greg, "yyyy-MM-dd-hh-mm-ss"));
-  */
-
-  Construct (greg);
+  if (utc2tm (&greg, utc) < 0)  {
+    fprintf (stderr, "MJD::Construct(utc_t) error converting to gregorian\n");
+    return -1;
+  }
+  return Construct (greg);
 }
 
 // construct an MJD from a gregorian
 MJD::MJD (const struct tm& greg)
 {
-  Construct (greg);
+  if (Construct (greg) < 0)
+    throw ("MJD::MJD(struct tm) construct error");
 }
+
+int MJD::Construct (const struct tm& greg)
+{
+  int year = greg.tm_year + 1900;
+  days = (1461*(year-(12-greg.tm_mon)/10+4712))/4
+    +(306*((greg.tm_mon+9)%12)+5)/10
+    -(3*((year-(12-greg.tm_mon)/10+4900)/100))/4
+    +greg.tm_mday-2399904;
+
+  // Work out seconds, fracsecs always zero.
+  secs = 3600.0 * greg.tm_hour + 60.0 * greg.tm_min + greg.tm_sec;
+  fracsec = 0.0;
+  return 0;
+}
+
 
 // parses a string of the form 51298.45034 ish
 int MJD::Construct (const char* mjdstr)
 {
-  int scanned = sscanf (mjdstr, "%d", &days);
-  if (scanned < 1)
+  if (sscanf (mjdstr, "%d", &days) < 1) {
+    fprintf (stderr, "MJD::Construct Could not parse '%s'\n", mjdstr);
     return -1;
-
+  }
   char* fracstr = strchr (mjdstr, '.');
   if (fracstr) {
     double fracday;
-    int scanned = sscanf (fracstr, "%lf", &fracday);
-    if (scanned < 1)
+    if (sscanf (fracstr, "%lf", &fracday) < 1)
       return -1;
-
     fracday *= 86400.0;
     secs = int (fracday);
     fracsec = fracday - double (secs);
@@ -465,19 +465,6 @@ int MJD::Construct (const char* mjdstr)
     fracsec = 0.0;
     secs = 0;
   }
-  return 0;
-}
-
-int MJD::Construct (const struct tm& greg)
-{
-  days = (1461*(greg.tm_year-(12-greg.tm_mon)/10+4712))/4
-    +(306*((greg.tm_mon+9)%12)+5)/10
-    -(3*((greg.tm_year-(12-greg.tm_mon)/10+4900)/100))/4
-    +greg.tm_mday-2399904;
-
-  // Work out seconds, fracsecs always zero.
-  secs = 3600.0 * greg.tm_hour + 60.0 * greg.tm_min + greg.tm_sec;
-  fracsec = 0.0;
   return 0;
 }
 

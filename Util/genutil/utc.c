@@ -275,13 +275,10 @@ int str2tm (struct tm* time, const char* str)
   time->tm_yday = 0;
   time->tm_isdst = -1;
 
-  /* a bug in DEC mktime makes these terrible assumptions necessary */
-  if (time->tm_year < 1900) {
-    if (time->tm_year < 30)
-      time->tm_year += 2000;
-    else
-      time->tm_year += 1900;
-  }
+  /* this may cause a Y3.8K bug */
+  if (time->tm_year > 1900)
+    time->tm_year -= 1900;
+
   mktime (time);
 
   return 0;
@@ -297,7 +294,7 @@ int tm2utc (utc_t *time, struct tm calendar)
     days_in_month[1] = 29;
   }
 
-  time->tm_year = calendar.tm_year;
+  time->tm_year = 1900 + calendar.tm_year;
   time->tm_yday = 0;
   for (month=1; month<calendar.tm_mon; month++) {
     time->tm_yday += days_in_month[month-1];
@@ -328,7 +325,7 @@ int utc2tm (struct tm *calendar, utc_t time)
   if (day_of_year > 0)
     return -1;
 
-  calendar->tm_year  = time.tm_year;
+  calendar->tm_year  = time.tm_year - 1900;
   calendar->tm_mon   = month;
   calendar->tm_mday  = day_of_year + days_in_month[month-1];
   calendar->tm_hour  = time.tm_hour;
