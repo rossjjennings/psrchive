@@ -11,6 +11,10 @@
 
 #include "fftm.h"
 
+#ifdef _DEBUG
+#include <cpgplot.h>
+#endif
+
 //! Default constructor
 Pulsar::PolnProfileFit::PolnProfileFit ()
 {
@@ -67,7 +71,8 @@ void Pulsar::PolnProfileFit::set_standard (const PolnProfile* _standard)
   unsigned nbin = standard->get_nbin();
   unsigned npol = 4;
 
-  standard = fourier_transform (standard);
+  standard_variance = get_variance (standard);
+  Reference::To<PolnProfile> fourier = fourier_transform (standard);
 
   // number of complex phase bins in Fourier domain
   nbin /= 2;
@@ -85,7 +90,7 @@ void Pulsar::PolnProfileFit::set_standard (const PolnProfile* _standard)
     Stokes< complex<double> > stokes;
 
     for (unsigned ipol=0; ipol<npol; ipol++) {
-      const float* amps = standard->get_amps(ipol) + ibin*2;
+      const float* amps = fourier->get_amps(ipol) + ibin*2;
       stokes[ipol] = complex<double>(amps[0], amps[1]);
     }
 
@@ -137,24 +142,33 @@ void Pulsar::PolnProfileFit::fit (const PolnProfile* observation)
 		 "observation nbin=%d != standard nbin=%d",
 		 observation->get_nbin(), nbin);
 
-  if (observation->get_state() != Signal::Stokes) {
-    cerr << "implement clone" << endl;
-    PolnProfile* temp = (PolnProfile*) observation;
-    temp->convert_state (Signal::Stokes);
-    observation = temp;
-  }
+  // first find the course fit in the time domain
+  Reference::To<Profile> clone = observation->get_Profile(0)->clone();
+  clone->correlate (standard->get_Profile(0));
 
-  Stokes< float > variance;
+#ifdef _DEBUG
+  cpgopen("?");
+  clone->display();
+  cpgsci(2);
+  observation->get_Profile(0)->display();
+  cpgend();
+#endif
 
-  float min_phase = observation->get_Profile(0)->find_min_phase ();
+  int ibin_max = clone->find_max_bin();
 
-  for (unsigned ipol=0; ipol<npol; ipol++) {
-    double mean, var;
-    observation->get_Profile(ipol)->stats (min_phase, &mean, &var);
+  if (ibin_max > (int)nbin/2)
+    ibin_max -= nbin;
+
+  Estimate<double> phase_offset (ibin_max);
+  phase_offset /= observation->get_nbin();
+
+  set_phase (phase_offset);
+
+  Stokes<float> variance = get_variance (observation);
+
+  for (unsigned ipol=0; ipol<npol; ipol++) 
     // the Fourier transform will inflate the variance
-    variance[ipol] = var * nbin;
-  }
-
+    variance[ipol] = (variance[ipol] + standard_variance[ipol]) * nbin;
 
   Reference::To<PolnProfile> fourier = fourier_transform (observation);
 
@@ -184,7 +198,7 @@ void Pulsar::PolnProfileFit::fit (const PolnProfile* observation)
     Calibration::CoherencyMeasurement measurement (ibin-1);
     measurement.set_stokes (stokes, variance);
 
-    double phase_shift = M_PI*double(ibin)/double(nbin);
+    double phase_shift = -2.0 * M_PI * double(ibin);
 
     Calibration::CoherencyMeasurementSet measurements;
     measurements.add_coordinate ( phase_axis.new_Value(phase_shift) );
@@ -204,6 +218,36 @@ Estimate<double> Pulsar::PolnProfileFit::get_phase () const
   return phase -> get_Estimate (1);
 }
 
+//! Get the phase offset between the observation and the standard
+void Pulsar::PolnProfileFit::set_phase (Estimate<double>& value)
+{
+  phase -> set_Estimate (1, value);
+}
+
+/*!
+  Calculates the shift between
+  Returns a basic Tempo::toa object
+*/
+Tempo::toa Pulsar::PolnProfileFit::get_toa (const PolnProfile* observation,
+					    const MJD& mjd, 
+					    double period, char nsite)
+{
+  fit (observation);
+
+  Estimate<double> pulse_phase = get_phase();
+
+  cerr << "pulse_phase=" << pulse_phase << endl;
+
+  Tempo::toa retval (Tempo::toa::Parkes);
+
+  retval.set_frequency (observation->get_Profile(0)->get_centre_frequency());
+  retval.set_arrival   (mjd + pulse_phase.val * period);
+  retval.set_error     (sqrt(pulse_phase.var) * period * 1e6);
+
+  retval.set_telescope (nsite);
+
+  return retval;
+}
 
 Pulsar::PolnProfile* 
 Pulsar::PolnProfileFit::fourier_transform (const PolnProfile* input) const
@@ -225,4 +269,27 @@ Pulsar::PolnProfileFit::fourier_transform (const PolnProfile* input) const
   fourier->convert_state (Signal::Stokes);
 
   return fourier.release();
+}
+
+Stokes<float> 
+Pulsar::PolnProfileFit::get_variance (const PolnProfile* input) const
+{
+  if (input->get_state() != Signal::Stokes) {
+    Reference::To<PolnProfile> temp = input->clone();
+    temp->convert_state (Signal::Stokes);
+    input = temp;
+  }
+
+  Stokes< float > variance;
+
+  float min_phase = input->get_Profile(0)->find_min_phase ();
+  unsigned npol = 4;
+
+  for (unsigned ipol=0; ipol<npol; ipol++) {
+    double mean, var;
+    input->get_Profile(ipol)->stats (min_phase, &mean, &var);
+    variance[ipol] = var;
+  }
+
+  return variance;
 }

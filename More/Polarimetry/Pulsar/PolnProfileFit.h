@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PolnProfileFit.h,v $
-   $Revision: 1.3 $
-   $Date: 2003/12/29 12:22:14 $
+   $Revision: 1.4 $
+   $Date: 2003/12/29 15:35:40 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PolnProfileFit_h
@@ -10,6 +10,8 @@
 
 #include "Calibration/Axis.h"
 #include "Estimate.h"
+#include "Stokes.h"
+#include "toa.h"
 
 // forward declarations
 namespace Calibration {
@@ -57,8 +59,18 @@ namespace Pulsar {
     //! Get the phase offset between the observation and the standard
     Estimate<double> get_phase () const;
 
+    //! Set the phase offset between the observation and the standard
+    void set_phase (Estimate<double>& phase);
+
+    //! Get the arrival time estimate
+    Tempo::toa get_toa (const PolnProfile* observation,
+			const MJD& mjd, double period, char nsite);
+
     //! Return the Fourier Transform of the PolnProfile
     PolnProfile* fourier_transform (const PolnProfile* input) const;
+    
+    //! Return the variance in each of the four Stokes parameters
+    Stokes<float> get_variance (const PolnProfile* input) const;
 
   protected:
 
@@ -79,6 +91,9 @@ namespace Pulsar {
 
     //! The phase axis
     Calibration::Axis<double> phase_axis;
+
+    //! The variance of the standard
+    Stokes<float> standard_variance;
 
     //! Construtor helper
     void init ();
