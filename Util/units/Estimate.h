@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Estimate.h,v $
-   $Revision: 1.16 $
-   $Date: 2003/05/07 15:51:28 $
+   $Revision: 1.17 $
+   $Date: 2003/05/22 08:49:12 $
    $Author: straten $ */
 
 #ifndef __Estimate_h
@@ -31,7 +31,7 @@ class Estimate
   //! The variance of the value, \f$ \sigma_x^2 \f$
   U var;
 
-  //! Construct from a value, \f$ x \f$, and its variance, \f$ \sigma^2 \f$
+  //! Construct from a value, \f$ x \f$, and its variance, \f$ \sigma_x^2 \f$
   Estimate (T _val=0, U _var=0) { val=_val; var=_var; }
 
   //! Construct from another Estimate
@@ -158,7 +158,7 @@ class MeanEstimate
   //! The inverse of its variance
   U inv_var;
 
-  //! Construct from a value and its estimated error, \f$ \sigma^2 \f$
+  //! Construct from a value (normalized by / and) the inverse of its variance
   MeanEstimate (T _val=0, U _var=0) { norm_val=_val; inv_var=_var; }
 
   //! Construct from another MeanEstimate
@@ -184,6 +184,31 @@ class MeanEstimate
   Estimate<T,U> get_Estimate () const
   { U var=0.0; if (inv_var != 0.0) var = 1.0/inv_var; 
     return Estimate<T,U> (norm_val*var, var); }
+
+};
+
+template <typename T, typename U=T>
+class MeanRadian
+{
+
+ public:
+  //! Addition operator
+  const MeanRadian& operator+= (const MeanRadian& d)
+  { cosine += d.cosine; sine += d.sine; return *this; }
+
+  //! Addition operator, Estimate represents a value in radians
+  const MeanRadian& operator+= (const Estimate<T,U>& d)
+  { cosine += cos(d); sine += sin(d); return *this; }
+
+  Estimate<T,U> get_Estimate () const
+  { return atan2 (sine.get_Estimate(), cosine.get_Estimate()); }
+  
+ protected:
+  //! The average cosine
+  MeanEstimate<T,U> cosine;
+
+  //! The average sine
+  MeanEstimate<T,U> sine;
 
 };
 
