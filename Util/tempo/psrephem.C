@@ -511,7 +511,7 @@ int psrephem::unload (string* outstr) const
   return ret;
 }
 
-double psrephem::p(void)
+double psrephem::p(void) const
 {
   if (!tempo11)
     return -1;

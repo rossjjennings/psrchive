@@ -51,7 +51,7 @@ class psrephem
 
   void   nofit();
   void   fitall();
-  double p();
+  double p() const;
   double p_err();
 
   // return some values
