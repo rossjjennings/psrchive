@@ -20,6 +20,7 @@ class Rhythm : public QMainWindow
 
  public:
   static bool verbose;
+  static bool vverbose;
   
   Rhythm (QWidget* parent, int argc, char** argv);
   ~Rhythm () {};
@@ -40,6 +41,7 @@ class Rhythm : public QMainWindow
 
   // the GUI bits
   qxmp_manager plot_manager;
+  xyplot       res_plot;
 
   // /////////////////////////////////////////////////////////////////////////
   // main menubar and its constructor
@@ -63,6 +65,7 @@ class Rhythm : public QMainWindow
   // /////////////////////////////////////////////////////////////////////////
   // Command line parsing and exit routines
   void exit (int value);
+  void command_line_help ();
   void command_line_parse (int argc, char** argv);
 
  public slots:
