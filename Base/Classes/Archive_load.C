@@ -26,6 +26,10 @@ Pulsar::Archive* Pulsar::Archive::load (const char* filename)
   // see if any of the derived classes recognize the file
   Reference::To<Archive> archive;
 
+  if (verbose)
+    cerr << "Pulsar::Archive::load with " << Agent::registry.size() 
+         << " Agents" << endl;
+
   for (unsigned agent=0; agent<Agent::registry.size(); agent++) try {
 
     if (Agent::registry[agent]->advocate (filename)) {
@@ -46,6 +50,8 @@ Pulsar::Archive* Pulsar::Archive::load (const char* filename)
 
   }
   catch (Error& error) {
+    if (verbose)
+      cerr << "Pulsar::Archive::load error " << error << endl;
     throw error += "Pulsar::Archive::load";
   }
   catch (string& error) {
