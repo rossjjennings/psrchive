@@ -57,6 +57,9 @@ class psrParameter
   // return true if the flag is set to fit for this element
   bool getFit () const { return infit; };
 
+  // return true if this psrParameter is valid
+  bool valid() const { return ephio_index != -1; }
+
   // return the index as in ephio.h
   int  getEphind () const { return ephio_index; };
 
