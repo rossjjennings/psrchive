@@ -23,11 +23,5 @@ INCLUDES = -I$(top_builddir) -I$(top_srcdir)/utils/units \
 LDADD = libpgutil.la ../genutil++/libgenutilpp.la ../genutil/libgenutil.la \
 	../units/libunits.la @PGPLOT_LIBS@ 
 
-
-
-
-
-
-
-
+libpgutil_la_LIBADD = @PGPLOT_LIBS@
 

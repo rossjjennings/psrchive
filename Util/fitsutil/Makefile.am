@@ -12,3 +12,5 @@ libfitsutil_la_SOURCES = FITSError.C fitsutil.C
 
 INCLUDES = -I$(top_srcdir)/utils/units @CFITSIO_CFLAGS@
 
+libfitsutil_la_LIBADD = @CFITSIO_LIBS@
+

@@ -67,3 +67,5 @@ INCLUDES = -I$(top_builddir) -I$(top_srcdir)/utils/units \
 
 LDADD = libgenutilpp.la ../genutil/libgenutil.la ../units/libunits.la
 
+libgenutilpp_la_LIBADD = @SLA_LIBS@
+

@@ -29,3 +29,5 @@ INCLUDES = -I$(top_builddir) -I$(top_srcdir)/utils/units \
 
 LDADD = libpsrfft.la ../units/libunits.la @FFT_LIBS@ 
 
+libpsrfft_la_LIBADD = @FFT_LIBS@
+
