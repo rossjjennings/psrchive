@@ -27,6 +27,9 @@ int main (int argc, char** argv)
   
   try {
     
+    // See which files are understood
+    Pulsar::Archive::Agent::report();
+    
     QStyle* mystyle = new QPlatinumStyle();
     QPalette mypalette(Qt::darkBlue, Qt::darkCyan);
 
@@ -885,7 +888,13 @@ vector<double> Rhythm::give_me_data (toaPlot::AxisQuantity q)
 	retval.push_back(0.0);
 	continue;
       }
-      retval.push_back(fmod(toas[i].resid.mjd, 365.0));
+      char* tempstr = new char[8];
+      int tempint = 0;
+      toas[i].get_arrival().datestr(tempstr, 8, "%j");
+      if (sscanf(tempstr, "%d", &tempint) != 1)
+	tempint = 999;
+      retval.push_back(double(tempint));
+      delete[] tempstr;
     }
     //progress.setProgress( toas.size() );
     
