@@ -4,6 +4,7 @@
 
 #include "resio.h"
 #include "residual.h"
+#include "MJD.h"
 
 bool Tempo::residual::verbose = 0;
 
@@ -67,4 +68,17 @@ int Tempo::residual::load (int r2flun, char* filename,
 double Tempo::residual::dayofyear () const
 {
   return fmod (mjd, 365.25);
+}
+
+double Tempo::residual::utcyear () const
+{
+  MJD mjd1 (mjd);
+  utc_t utc;
+  mjd1.UTC (&utc);
+
+  return double(utc.tm_year)
+    + (double(utc.tm_yday) 
+       + (double(utc.tm_hour)
+	  + (double(utc.tm_min)
+	     + double(utc.tm_sec)/60.0)/60.0)/24.0)/365.25;
 }

@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/residual.h,v $
-   $Revision: 1.9 $
-   $Date: 2001/02/24 04:04:09 $
+   $Revision: 1.10 $
+   $Date: 2001/11/22 21:25:56 $
    $Author: straten $ */
 
 #ifndef __RESIDUAL_H
@@ -32,6 +32,9 @@ namespace Tempo {
 
     // returns day of year from mjd
     double dayofyear () const;
+
+    // return UTC year, eg. 1995.67
+    double utcyear () const;
 
     residual () { init(); };
     residual (int lun);
