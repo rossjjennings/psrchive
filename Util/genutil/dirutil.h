@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <string>
+#include "psr_cpp.h"
 
 // in dirwith.C
 const string dirwith (double size, const vector<string>& disks,
