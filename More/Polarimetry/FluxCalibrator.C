@@ -36,10 +36,11 @@ void Pulsar::FluxCalibrator::add_observation (const Archive* archive)
 		 "is not a FluxCal");
 
   string reason;
-  if (calibrator && calibrator->calibrator_match (archive, reason))
+  if (calibrator && !calibrator->calibrator_match (archive, reason))
     throw Error (InvalidParam, "Pulsar::FluxCalibrator::add_observation",
 		 "Pulsar::Archive='" + calibrator->get_filename() + "'"
-		 "\ndoes not mix with '" + archive->get_filename() + reason);
+		 "\ndoes not mix with '" + archive->get_filename() + "'"
+		 "\n" + reason);
 
   unsigned nchan = archive->get_nchan ();
 
