@@ -34,7 +34,7 @@ void Pulsar::Integration::invint ()
   // space to calculate the result
   vector<float> invariant (get_nbin());
   // Stokes 4-vector
-  Stokes stokes;
+  Stokes<float> stokes;
 
   for (unsigned ichan=0; ichan<get_nchan(); ++ichan) {
 
@@ -42,7 +42,7 @@ void Pulsar::Integration::invint ()
       // get the Stokes 4-vector
       get_Stokes (stokes, ichan, ibin);
       // calculate \det\rho
-      invariant[ibin] = stokes.invariant_Squared();
+      invariant[ibin] = det (stokes);
     }
 
     // prepare to reset Stokes I to the Invariant Interval

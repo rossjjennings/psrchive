@@ -17,7 +17,7 @@
   get_state() must return either Signal::Stokes or Signal::Coherence.  An
   exception is thrown otherwise.
 */
-void Pulsar::Integration::get_Stokes ( Stokes& S, unsigned ichan, unsigned ibin ) const
+void Pulsar::Integration::get_Stokes ( Stokes<float>& S, unsigned ichan, unsigned ibin ) const
 {
   if (get_state() == Signal::Stokes) {
     for (unsigned ipol=0; ipol<4; ++ipol)
@@ -33,16 +33,16 @@ void Pulsar::Integration::get_Stokes ( Stokes& S, unsigned ichan, unsigned ibin 
     float ImPQ = profiles[3][ichan]->get_amps()[ibin];
 
     if (get_basis() == Signal::Circular) {
-      S.i = PP + QQ;
-      S.v = PP - QQ;
-      S.q = 2.0 * RePQ;
-      S.u = 2.0 * ImPQ;
+      S.s0 = PP + QQ;
+      S.s1 = PP - QQ;
+      S.s2 = 2.0 * RePQ;
+      S.s3 = 2.0 * ImPQ;
     }
     else {
-      S.i = PP + QQ;
-      S.q = PP - QQ;
-      S.u = 2.0 * RePQ;
-      S.v = 2.0 * ImPQ;
+      S.s0 = PP + QQ;
+      S.s1 = PP - QQ;
+      S.s2 = 2.0 * RePQ;
+      S.s3 = 2.0 * ImPQ;
     }
     return;
   }
@@ -68,7 +68,8 @@ void Pulsar::Integration::get_Stokes ( Stokes& S, unsigned ichan, unsigned ibin 
   get_nbin()/2, Axis::Frequency);"
 
 */
-void Pulsar::Integration::get_Stokes (vector<Stokes>& S, unsigned iother,
+void Pulsar::Integration::get_Stokes (vector< Stokes<float> >& S,
+				      unsigned iother,
 				      Signal::Dimension abscissa) const
 {
   unsigned ndim = 0;

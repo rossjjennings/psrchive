@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Integration.h,v $
-   $Revision: 1.30 $
-   $Date: 2003/01/06 11:03:35 $
+   $Revision: 1.31 $
+   $Date: 2003/02/10 10:22:39 $
    $Author: straten $ */
 
 /*
@@ -24,7 +24,7 @@ namespace Tempo {
   class toa;
 }
 
-class Stokes;
+template<typename T> class Stokes;
 
 namespace Pulsar {
 
@@ -95,10 +95,10 @@ namespace Pulsar {
     virtual void convert_state (Signal::State state);
 
     //! Returns a single Stokes 4-vector for the given chan and phase bin
-    void get_Stokes (Stokes& S, unsigned ichan, unsigned ibin) const;
+    void get_Stokes (Stokes<float>& S, unsigned ichan, unsigned ibin) const;
 
     //! Returns a vector of Stokes parameters along the specified dimension
-    void get_Stokes (vector<Stokes>& S, unsigned iother,
+    void get_Stokes (vector< Stokes<float> >& S, unsigned iother,
 		     Signal::Dimension abscissa = Signal::Phase ) const;
 
     void get_amps (float* data, unsigned jpol, unsigned jchan, unsigned jbin) const;
@@ -129,10 +129,13 @@ namespace Pulsar {
 			  vector<vector<double> >& mean_low) const;
 
     //! Computes the weighted centre frequency of an interval of sub-chans.
-    double weighted_frequency (unsigned chan_start=0, unsigned chan_end=0) const;
+    double weighted_frequency (unsigned ch_start=0, unsigned ch_end=0) const;
 
-    void cal_levels (vector<Stokes>& hi, vector<Stokes>& lo) const;
-    void psr_levels (vector<Stokes>& hi, vector<Stokes>& lo) const;
+    void cal_levels (vector< Stokes<float> >& hi,
+		     vector< Stokes<float> >& lo) const;
+
+    void psr_levels (vector< Stokes<float> >& hi,
+		     vector< Stokes<float> >& lo) const;
 
     //! Adds to a vector of tempo++ toa objects
     void toas (const Integration& std_subint,
@@ -255,14 +258,8 @@ namespace Pulsar {
     virtual Profile* new_Profile ();
 
   private:
-    //! Performs a cyclic permutation of the polarization vector
-    void poln_cycle (int direction);
-
     //! Converts between coherency products and Stokes parameters
     void poln_convert (Signal::State out_state);
-
-    //! Efficiently forms the inplace sum and difference of two profiles
-    void sum_difference (Profile* sum, Profile* difference);
 
   };
 
