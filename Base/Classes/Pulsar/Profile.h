@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Profile.h,v $
-   $Revision: 1.43 $
-   $Date: 2004/01/04 19:13:25 $
-   $Author: straten $ */
+   $Revision: 1.44 $
+   $Date: 2004/02/09 08:20:03 $
+   $Author: sord $ */
 
 #ifndef __Pulsar_Profile_h
 #define __Pulsar_Profile_h
@@ -143,6 +143,9 @@ namespace Pulsar {
 
     //! Returns the signal to noise ratio by comparison with a standard
     float snr (const Profile* standard) const { return snr (*standard); }
+
+    //! Returns integrated flux divided by the number of bins == mean flux
+    float flux(float _baseline_fraction);
 
     //! rotates the profile to remove dispersion delay
     void dedisperse (double dm, double ref_freq, double pfold);
