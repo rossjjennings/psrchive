@@ -49,15 +49,21 @@ void Pulsar::Profile::stats (double* mean, double* variance, double* varmean,
   double mean_xsq = totsq / double(counts);
   double var_x = (mean_xsq - mean_x*mean_x) * double(counts)/double(counts-1);
 
+  if (var_x < 0)
+    var_x = 0;
+
+  double var_mean = var_x / double(counts);
+
   if (mean)
     *mean = mean_x;
   if (variance)
     *variance = var_x;
   if (varmean)
-    *varmean = var_x / double(counts);
+    *varmean = var_mean;
 
   if (verbose)
-    cerr << "Pulsar::Profile::stats return" << endl;
+    cerr << "Pulsar::Profile::stats return mean=" << mean_x 
+	 << " var=" << var_x << " varmean=" << var_mean << endl;
 }
 
 /////////////////////////////////////////////////////////////////////////////
