@@ -50,11 +50,16 @@ endif
 check_PROGRAMS = test_copy test_Feed test_SingleAxis \
 	test_Parallactic test_ReceptionModel
 
+TESTS = $(check_PROGRAMS)
+
 test_Feed_SOURCES		= test_Feed.C
 test_Parallactic_SOURCES	= test_Parallactic.C
 test_ReceptionModel_SOURCES	= test_ReceptionModel.C
 test_SingleAxis_SOURCES		= test_SingleAxis.C
 test_copy_SOURCES		= test_copy.C
+
+test_Parallactic_LDADD		= $(LDADD) @SLA_LIBS@
+test_ReceptionModel_LDADD	= $(LDADD) @SLA_LIBS@
 
 #############################################################################
 #
