@@ -1,0 +1,117 @@
+\documentclass[12pt]{article}
+\usepackage{psfig}
+\usepackage{fullpage}
+
+% bold math italic font
+\newcommand{\mbf}[1]{\mbox{\boldmath $#1$}}
+
+% symbol used for sqrt(-1)
+\newcommand{\Ci}{\ensuremath{i}}
+
+\newcommand{\var}{{\rm var}}
+\newcommand{\trace}{{\rm tr}}
+
+\newcommand{\Rotation}{{\bf R}}
+\newcommand{\Boost}{{\bf B}}
+
+\newcommand{\vRotation}[1][n]{\ensuremath{\Rotation_{\mbfs{\hat #1}}}}
+\newcommand{\vBoost}[1][m]{\ensuremath{\Boost_{\mbfs{\hat #1}}}}
+
+\newcommand{\rotat}{\ensuremath{\vRotation(\phi)}}
+\newcommand{\boost}{\ensuremath{\vBoost(\beta)}}
+
+\newcommand{\pauli}[1]{\ensuremath{ {\mbf{\sigma}}_{#1} }}
+
+\begin{document}
+
+\section{Introduction}
+
+This is a quick reference for the Measurement and Error Analysis
+Library (MEAL), defined within the {\tt MEAL} namespace.  These
+classes implement a general-purpose library for performing non-linear
+least-squares and error propagation.
+
+\section{Function Behaviours}
+
+All functions are derived from the {\tt Function} class.  A {\tt Function}
+is a function of an arbitrary number of variables; a distinction is
+made between model parameters, ${\mbf a}=(a_0, a_1, ... , a_N)$ and
+independent variables, or arguments, ${\mbf x}=(x_0, x_1, ... , x_M)$.
+Each {\tt Function} class defines an evaluation function that returns a
+result, $M({\mbf x},{\mbf a})$, and the partial derivatives of this
+result with respect to each of the parameters, $\partial M/\partial
+a_i$.
+
+Function functionality is organized into three behaviours: parameter,
+argument, and evaluation, (as explained in the following
+sub-sections).  Behaviours are represented by three base classes, each
+of which virtually inherits the {\tt Function} base class.  As each
+behaviour is mutually exclusive, derived classes can incorporate
+pre-defined behaviours by multiple inheritance.
+
+\subsection{Parameter Behaviour}
+
+A {\tt Function} may have an arbitary number of parameters,
+$\mbf{a}=(a_0, a_1, ... , a_N)$.  The type of each parameter must be a
+scalar, and the {\tt Function} class currently implements
+double-precision floating point parameters.  Each parameter has an
+associated name, estimated variance, and a flag that indicates if the
+parameter is free or fixed.  The classes that implement the parameter
+management interface inherit the {\tt ParameterBehaviour} base class.
+
+\subsection{Argument Behaviour}
+
+A {\tt Function} may be further parameterized by an arbitrary number of
+independent variables, or arguments, ${\mbf x}=(x_0, x_1, ... , x_M)$.
+Unlike parameters, arguments have no specified type, no estimated
+variance, and can never be free.  Because they have no specified type,
+the interface between a {\tt Function} and its arguments is mediated
+through the {\tt Argument} and {\tt Argument::Value} abstract base
+classes.  Classes that may be parameterized by additional arguments
+inherit the {\tt ArgumentBehaviour} base class.
+
+\subsection{Evaluation Behaviour}
+
+The return type of a {\tt Function} is also unspecified in the base
+class.  Therefore, derived classes must inherit one of the children of
+the {\tt EvaluationBehaviour} base class.  There are currently two
+classes of children:
+\begin{itemize}
+\item {\tt Scalar} - returns a scalar value
+\item {\tt Complex2} - returns a complex $2\times2$ matrix
+\end{itemize}
+A number of evaluation behaviours have been implemented as
+templates, or Rules.
+
+\section{Modular Construction}
+
+TO DO: Show how new functions can be built up from basic components.
+
+\section{Example Usage}
+
+\subsection{Non-linear Least-Squares Estimation}
+
+TO DO: Document lmfit
+
+\subsection{Error Propagation}
+
+The computation of partial derivatives with respect to model
+parameters readily lends itself to the problem of error propagation.
+A simplified interface is implemented by the {\tt
+ScalarMath} class.  {\tt ScalarMath} objects may be
+conveniently initialized as a single parameter and its estimated
+variance using the Estimate template class.  Like float and double
+types, ScalarMath objects may be combined using normal arithmetic
+operations and basic mathematical functions, creating Scalar functions
+of any number of parameters.  For example:
+\begin{verbatim}
+  Calibration::ScalarMath x (Estimate<double> (0.9587, 0.00058));
+  Calibration::ScalarMath y (Estimate<double> (-0.283, 0.00034));
+  cerr << "Polar angle = " << atan2 (y, x) << endl;
+\end{verbatim}
+yields the output
+\begin{verbatim}
+  Polar angle = (-0.287039 +/- 0.0189612)
+\end{verbatim}
+
+\end{document}
