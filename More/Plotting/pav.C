@@ -1,5 +1,5 @@
 //
-// $Id: pav.C,v 1.82 2004/07/21 05:28:07 straten Exp $
+// $Id: pav.C,v 1.83 2004/08/11 12:18:03 straten Exp $
 //
 // The Pulsar Archive Viewer
 //
@@ -44,6 +44,7 @@ void usage ()
     "Preprocessing options:\n"
     " -b scr    Bscrunch scr phase bins together\n"
     " -C        Centre the profiles on phase zero\n"
+    " -c        Don't remove baseline before plotting\n"
     " -O ang    Rotate position angle (orientation) by ang degrees\n"
     " -d        Dedisperse all channels\n"
     " -r phase  Rotate all profiles by phase (in turns)\n"
@@ -208,7 +209,7 @@ int main (int argc, char** argv)
   int c = 0;
   
   const char* args = 
-    "AaBb:CDdEeFf:GgH:hI:iJjK:k:LlM:mN:nO:oP:pQq:Rr:Ss:Tt:UuVvwWXx:Yy:Zz:";
+    "AaBb:CcDdEeFf:GgH:hI:iJjK:k:LlM:mN:nO:oP:pQq:Rr:Ss:Tt:UuVvwWXx:Yy:Zz:";
 
   static struct option long_options[] = {
     { "convert_binphsperi", 1, 0, 200 },
@@ -248,6 +249,11 @@ int main (int argc, char** argv)
 
     case 'B':
       bandpass = true;
+      break;
+
+    case 'c':
+      cerr << "pav: not removing baseline" << endl;
+      plotter.set_remove_baseline (false);
       break;
 
     case 'C':
@@ -296,7 +302,7 @@ int main (int argc, char** argv)
       plotter.set_subint( atoi (optarg) );
       break;
     case 'i':
-      cout << "$Id: pav.C,v 1.82 2004/07/21 05:28:07 straten Exp $" << endl;
+      cout << "$Id: pav.C,v 1.83 2004/08/11 12:18:03 straten Exp $" << endl;
       return 0;
 
     case 'j':
