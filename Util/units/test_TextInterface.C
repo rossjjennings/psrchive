@@ -3,18 +3,40 @@
 #include <iostream>
 using namespace std;
 
+class extension : public Reference::Able {
+
+public:
+  extension () { text = "tui import failure"; }
+  void set_text (const std::string& _text) { text = _text; }
+  std::string get_text () const { return text; }
+protected:
+  std::string text;
+
+};
+
+class extensionTUI : public TextInterface::ClassGetSet<extension> {
+
+public:
+  extensionTUI () {
+   Generator<std::string> generator;
+   add (generator.named("text", &extension::get_text, &extension::set_text));
+  }
+
+};
+
 class tester : public Reference::Able {
 
 public:
   tester () { value = 0; }
   void set_value (double _value) { value = _value; }
   double get_value () const { return value; }
+  extension ext;
 protected:
   double value;
-
 };
 
-class testerTUI : public TextInterface::ClassGetSet<tester> {
+
+class testerTUI : public TextInterface::CompositeGetSet<tester> {
 
 public:
   testerTUI () {
@@ -24,8 +46,18 @@ public:
 
 };
 
-int main ()
+class glue : public TextInterface::ComponentGetSet<tester,extensionTUI>
 {
+public:
+  glue (extensionTUI* tui)
+    : TextInterface::ComponentGetSet<tester,extensionTUI> ("ext", tui) { }
+
+  void extract (tester* t) { part_interface->set_instance( &(t->ext) ); }
+};
+
+
+int main () try {
+
   tester test;
 
   TextInterface::Allocator<tester,double> allocate;
@@ -74,7 +106,32 @@ int main ()
     return -1;
   }
 
+  cerr << "testing import" << endl;
+
+  extensionTUI tui;
+  getset.import (new glue (&tui));
+
+  std::string teststring = "test of TextInterface::import passed";
+
+  getset.set_value ("text", teststring);
+
+  cerr << test.ext.get_text() << endl;
+
+  if (test.ext.get_text() != teststring) {
+    cerr << "test_TextInterface ERROR!" << endl;
+    return -1;
+  }
+
+  if (getset.get_value("text") != teststring) {
+    cerr << "test_TextInterface ERROR!" << endl;
+    return -1;
+  }
+
   cerr << "test_TextInterface SUCCESS!" << endl;
   return 0;
 }
-                  
+catch (Error& error) {
+  cerr << "test_TextInterface ERROR " << error << endl;
+  return -1;
+}
+
