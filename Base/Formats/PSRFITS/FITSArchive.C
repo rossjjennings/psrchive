@@ -18,10 +18,12 @@
 #include "Pulsar/BinaryPhaseOrder.h"
 #include "Pulsar/BinLngAscOrder.h"
 #include "Pulsar/BinLngPeriOrder.h"
+#include "Pulsar/Telescope.h"
 
 #include "FITSError.h"
 
 #include "Telescope.h"
+#include "string_utils.h"
 
 //! null constructor
 // //////////////////////////
@@ -284,8 +286,7 @@ void Pulsar::FITSArchive::load_header (const char* filename)
   }
   else {
     string mystr = tempstr.get();
-    obs_ext->telescope = mystr.substr(mystr.find_first_not_of(" ",0),
-				      mystr.length());
+    obs_ext->telescope = stringtok (&mystr, " ");
   }
 
   if (verbose == 3)
@@ -294,8 +295,11 @@ void Pulsar::FITSArchive::load_header (const char* filename)
   if ((obs_ext->telescope).length() == 1)
     set_telescope_code ( (obs_ext->telescope).at(0) );
   else
-    set_telescope_code ( Telescope::code((obs_ext->telescope).c_str()) );
-  
+    set_telescope_code ( ::Telescope::code((obs_ext->telescope).c_str()) );
+
+  Telescope* telescope = getadd<Telescope>();
+  telescope->set_coordinates (get_telescope_code());
+
   // Antenna ITRF coordinates
 
   load_ITRFExtension (fptr);
@@ -780,7 +784,7 @@ try {
 
   // Write the source name
 
-  char* telescope = const_cast<char*>( Telescope::name(get_telescope_code()) );
+  char* telescope = const_cast<char*>(::Telescope::name(get_telescope_code()));
 
   fits_update_key (fptr, TSTRING, "TELESCOP", telescope, comment, &status);
 
