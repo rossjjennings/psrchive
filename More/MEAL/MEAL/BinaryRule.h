@@ -1,30 +1,30 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/BinaryRule.h,v $
-   $Revision: 1.3 $
-   $Date: 2004/11/22 19:26:03 $
+   $Revision: 1.4 $
+   $Date: 2005/04/06 20:14:05 $
    $Author: straten $ */
 
 #ifndef __MEAL_BinaryRule_H
 #define __MEAL_BinaryRule_H
 
-#include "MEAL/Optimized.h"
+#include "MEAL/Projection.h"
 #include "MEAL/Composite.h"
 
 namespace MEAL {
 
   //! Abstract base class of binary operators
-  template<class MType>
-  class BinaryRule : public Optimized<MType>, public Composite
+  template<class T>
+  class BinaryRule : public T
   {
 
   public:
 
     //! Default constructor
-    BinaryRule () { }
+    BinaryRule () : composite(this)  { }
 
     //! Copy constructor
-    BinaryRule (const BinaryRule& rule) { operator = (rule); }
+    BinaryRule (const BinaryRule& rule) : composite(this) { operator=(rule); }
 
     //! Assignment operator
     BinaryRule& operator = (const BinaryRule& rule);
@@ -33,26 +33,31 @@ namespace MEAL {
     ~BinaryRule () { }
 
     //! Set the first argument to the binary operation
-    void set_arg1 (MType* model);
+    void set_arg1 (T* model);
 
     //! Set the second argument to the binary operation
-    void set_arg2 (MType* model);
+    void set_arg2 (T* model);
 
   protected:
 
     //! The first argument to the binary operation
-    Project<MType> arg1;
+    Project<T> arg1;
 
     //! The first argument to the binary operation
-    Project<MType> arg2;
+    Project<T> arg2;
+
+  private:
+
+    //! Composite parameter policy
+    Composite composite;
 
   };
 
 }
 
-template<class MType>
-MEAL::BinaryRule<MType>&
-MEAL::BinaryRule<MType>::operator = (const BinaryRule& rule)
+template<class T>
+MEAL::BinaryRule<T>&
+MEAL::BinaryRule<T>::operator = (const BinaryRule& rule)
 {
   if (this == &rule)
     return *this;
@@ -64,11 +69,11 @@ MEAL::BinaryRule<MType>::operator = (const BinaryRule& rule)
 }
 
 
-template<class MType>
-void MEAL::BinaryRule<MType>::set_arg1 (MType* model)
+template<class T>
+void MEAL::BinaryRule<T>::set_arg1 (T* model)
 {
   if (arg1)
-    unmap (arg1, false);
+    composite.unmap (arg1, false);
 
   arg1 = model;
 
@@ -78,14 +83,14 @@ void MEAL::BinaryRule<MType>::set_arg1 (MType* model)
   if (verbose)
     std::cerr << "MEAL::BinaryRule::set_model map new model" << std::endl;
 
-  map (arg1);
+  composite.map (arg1);
 }
 
-template<class MType>
-void MEAL::BinaryRule<MType>::set_arg2 (MType* model)
+template<class T>
+void MEAL::BinaryRule<T>::set_arg2 (T* model)
 {
   if (arg2)
-    unmap (arg2, false);
+    composite.unmap (arg2, false);
 
   arg2 = model;
 
@@ -95,7 +100,7 @@ void MEAL::BinaryRule<MType>::set_arg2 (MType* model)
   if (verbose)
     std::cerr << "MEAL::BinaryRule::set_model map new model" << std::endl;
 
-  map (arg2);
+  composite.map (arg2);
 }
 
 

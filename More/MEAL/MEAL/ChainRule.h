@@ -1,15 +1,14 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/ChainRule.h,v $
-   $Revision: 1.3 $
-   $Date: 2004/11/22 19:26:03 $
+   $Revision: 1.4 $
+   $Date: 2005/04/06 20:14:05 $
    $Author: straten $ */
 
 #ifndef __MEAL_ChainRule_H
 #define __MEAL_ChainRule_H
 
 #include "MEAL/ProjectGradient.h"
-#include "MEAL/Optimized.h"
 #include "MEAL/Composite.h"
 #include "MEAL/Scalar.h"
 
@@ -46,25 +45,25 @@ namespace MEAL {
     \f${\partial M\over\partial b_k} = {\partial M\over\partial
     a_i}{\partial f\over\partial b_k}\f$. */
 
-  template<class MType>
-  class ChainRule : public Optimized<MType>, public Composite
+  template<class T>
+  class ChainRule : public T
   {
 
   public:
 
-    typedef typename MType::Result Result;
+    typedef typename T::Result Result;
 
     //! Default constructor
-    ChainRule () { }
+    ChainRule () : composite (this) { }
 
     //! Copy constructor
-    ChainRule (const ChainRule& rule) { operator = (rule); }
+    ChainRule (const ChainRule& rule) : composite (this) { operator = (rule); }
 
     //! Assignment operator
     ChainRule& operator = (const ChainRule& rule);
 
     //! Set the Function to be constrained by Scalar ordinates
-    void set_model (MType* model);
+    void set_model (T* model);
 
     //! Set the Scalar instance used to constrain the specified parameter
     void set_constraint (unsigned iparam, Scalar* scalar);
@@ -80,12 +79,6 @@ namespace MEAL {
 
   protected:
 
-    // ///////////////////////////////////////////////////////////////////
-    //
-    // Optimized implementation
-    //
-    // ///////////////////////////////////////////////////////////////////
-
     //! Return the Result and its gradient
     void calculate (Result& result, std::vector<Result>* gradient);
 
@@ -93,21 +86,26 @@ namespace MEAL {
     std::vector<ConstrainedParameter> constraints;
 
     //! The Function to be constrained by Scalar ordinates
-    Project<MType> model;
+    Project<T> model;
+
+  private:
+
+    //! Composite parameter policy
+    Composite composite;
 
   };
 
 }
 
-template<class MType>
-std::string MEAL::ChainRule<MType>::get_name () const
+template<class T>
+std::string MEAL::ChainRule<T>::get_name () const
 {
-  return "ChainRule<" + std::string(MType::Name)+ ">";
+  return "ChainRule<" + std::string(T::Name)+ ">";
 }
 
-template<class MType>
-MEAL::ChainRule<MType>&
-MEAL::ChainRule<MType>::operator = (const ChainRule& rule)
+template<class T>
+MEAL::ChainRule<T>&
+MEAL::ChainRule<T>::operator = (const ChainRule& rule)
 {
   if (this == &rule)
     return *this;
@@ -122,9 +120,8 @@ MEAL::ChainRule<MType>::operator = (const ChainRule& rule)
 }
 
 
-template<class MType>
-void MEAL::ChainRule<MType>::set_constraint (unsigned iparam, 
-						    Scalar* scalar)
+template<class T>
+void MEAL::ChainRule<T>::set_constraint (unsigned iparam, Scalar* scalar)
 {
   if (verbose) 
     std::cerr << "MEAL::ChainRule::set_constraint iparam=" << iparam << std::endl;
@@ -141,9 +138,9 @@ void MEAL::ChainRule<MType>::set_constraint (unsigned iparam,
 	std::cerr << "MEAL::ChainRule::set_constraint"
 	  " replace param=" << iparam << std::endl;
 
-      unmap (constraints[ifunc].scalar, false);
+      composite.unmap (constraints[ifunc].scalar, false);
       constraints[ifunc].scalar = scalar;
-      map (constraints[ifunc].scalar);
+      composite.map (constraints[ifunc].scalar);
 
       return;
 
@@ -151,15 +148,15 @@ void MEAL::ChainRule<MType>::set_constraint (unsigned iparam,
   }
 
   constraints.push_back (ConstrainedParameter (iparam, scalar));
-  map (constraints.back().scalar);
+  composite.map (constraints.back().scalar);
 
   if (model)
     model->set_infit (iparam, false);
 
 }
 
-template<class MType>
-void MEAL::ChainRule<MType>::set_model (MType* _model)
+template<class T>
+void MEAL::ChainRule<T>::set_model (T* _model)
 {
   if (!_model)
     return;
@@ -168,7 +165,7 @@ void MEAL::ChainRule<MType>::set_model (MType* _model)
     if (verbose)
       std::cerr << "MEAL::ChainRule::set_model"
 	" unmap old model" << std::endl;
-    unmap (model, false);
+    composite.unmap (model, false);
   }
 
   model = _model;
@@ -177,15 +174,15 @@ void MEAL::ChainRule<MType>::set_model (MType* _model)
     std::cerr << "MEAL::ChainRule::set_model"
       " map new model" << std::endl;
 
-  map (model);
+  composite.map (model);
 
   for (unsigned ifunc=0; ifunc<constraints.size(); ifunc++)
     model->set_infit (constraints[ifunc].parameter, false);
 }
 
-template<class MType>
-void MEAL::ChainRule<MType>::calculate (Result& result,
-					       std::vector<Result>* grad)
+template<class T>
+void MEAL::ChainRule<T>::calculate (Result& result,
+				    std::vector<Result>* grad)
 {
   if (!model)
     throw Error (InvalidState, "MEAL::ChainRule::calculate","no model");

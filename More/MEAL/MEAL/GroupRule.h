@@ -1,15 +1,14 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/GroupRule.h,v $
-   $Revision: 1.3 $
-   $Date: 2004/11/22 19:26:04 $
+   $Revision: 1.4 $
+   $Date: 2005/04/06 20:14:05 $
    $Author: straten $ */
 
 #ifndef __GroupRule_H
 #define __GroupRule_H
 
 #include "MEAL/ProjectGradient.h"
-#include "MEAL/Optimized.h"
 #include "MEAL/Composite.h"
 #include "stringtok.h"
 
@@ -17,25 +16,25 @@ namespace MEAL {
 
   //! Abstract base class of closed, associative, binary operators
   /*! Because the binary operation is associative, this class is
-    implemented as a series of elements; that is, an arbitrary
-    number of models can be added.  By inheriting
-    this class and defining the initialize() and operate() pure
-    virtual methods, derived classes may define the closed, associative
-    binary operation, such as the product or sum. */
+    implemented as a series of elements; that is, an arbitrary number
+    of models can be added.  By inheriting this class and defining the
+    get_identity(),operate(), and partial() pure virtual methods,
+    derived classes may define the closed, associative binary
+    operation, such as the product or sum. */
 
-  template<class MType>
-  class GroupRule : public Optimized<MType>, public Composite 
+  template<class T>
+  class GroupRule : public T
   {
 
   public:
 
-    typedef typename MType::Result Result;
+    typedef typename T::Result Result;
 
     //! Default constructor
-    GroupRule () { }
+    GroupRule () : composite(this) { }
 
     //! Copy constructor
-    GroupRule (const GroupRule& meta) { operator = (meta); }
+    GroupRule (const GroupRule& meta) : composite(this) { operator = (meta); }
 
     //! Assignment operator
     GroupRule& operator = (const GroupRule& meta);
@@ -44,7 +43,7 @@ namespace MEAL {
     ~GroupRule () { }
 
     //! Add an element to the result
-    void add_model (MType* model);
+    void add_model (T* model);
 
     // ///////////////////////////////////////////////////////////////////
     //
@@ -54,15 +53,6 @@ namespace MEAL {
 
     //! Parse the values of model parameters and fit flags from a string
     void parse (const std::string& text);
-
-    // ///////////////////////////////////////////////////////////////////
-    //
-    // Optimized template implementation
-    //
-    // ///////////////////////////////////////////////////////////////////
-
-    //! Return the result and its gradient
-    void calculate (Result& result, std::vector<Result>* grad);
 
     // ///////////////////////////////////////////////////////////////////
     //
@@ -84,10 +74,13 @@ namespace MEAL {
     //! Prints the values of model parameters and fit flags to a string
     void print_parameters (std::string& text, const std::string& sep) const;
 
+    //! Return the result and its gradient
+    void calculate (Result& result, std::vector<Result>* grad);
+
     //! Return the group identity
     virtual const Result get_identity () const = 0;
 
-    //! Multiply the total by the element
+    //! Set the total equal to "total group operation element"
     virtual void operate (Result& total, const Result& element) = 0;
 
     //! Neighbouring terms stay in each other's partial derivatives
@@ -96,7 +89,7 @@ namespace MEAL {
   private:
 
     //! The models and their mappings
-    std::vector< Project<MType> > model;
+    std::vector< Project<T> > model;
 
     //! The result
     Result result;
@@ -107,14 +100,17 @@ namespace MEAL {
     //! Initialize the result and gradient attributes
     void initialize ();
 
+    //! Composite parameter policy
+    Composite composite;
+
   };
   
 }
 
 
-template<class MType>
-MEAL::GroupRule<MType>&
-MEAL::GroupRule<MType>:: operator = (const GroupRule& meta)
+template<class T>
+MEAL::GroupRule<T>&
+MEAL::GroupRule<T>:: operator = (const GroupRule& meta)
 {
   if (this == &meta)
     return *this;
@@ -128,9 +124,9 @@ MEAL::GroupRule<MType>:: operator = (const GroupRule& meta)
   return *this;
 }
 
-template<class MType>
-void MEAL::GroupRule<MType>::print_parameters (std::string& text,
-                                               const std::string& sep) const
+template<class T>
+void MEAL::GroupRule<T>::print_parameters (std::string& text,
+					   const std::string& sep) const
 {
   unsigned nmodel = model.size();
   for (unsigned imodel=0; imodel < nmodel; imodel++) {
@@ -139,8 +135,8 @@ void MEAL::GroupRule<MType>::print_parameters (std::string& text,
   }
 }
 
-template<class MType>
-void MEAL::GroupRule<MType>::parse (const std::string& line)
+template<class T>
+void MEAL::GroupRule<T>::parse (const std::string& line)
 {
   if (model.size()) try {
     model.back()->parse(line);
@@ -158,27 +154,27 @@ void MEAL::GroupRule<MType>::parse (const std::string& line)
 
   Function* model = Function::new_Function (key);
 
-  MType* mtype = dynamic_cast<MType*>(model);
+  T* mtype = dynamic_cast<T*>(model);
   if (!mtype)
     throw Error (InvalidParam, get_name()+"::parse",
 		 model->get_name() + " is not of type " + 
-                 std::string(MType::Name));
+                 std::string(T::Name));
 
   add_model (mtype);
 }
 
-template<class MType>
-void MEAL::GroupRule<MType>::add_model (MType* x)
+template<class T>
+void MEAL::GroupRule<T>::add_model (T* x)
 {
   if (very_verbose)
     std::cerr << class_name() + "add_model" << std::endl;
 
-  model.push_back (Project<MType>(x));
-  map (model.back());
+  model.push_back (Project<T>(x));
+  composite.map (model.back());
 }
 
-template<class MType>
-void MEAL::GroupRule<MType>::initialize ()
+template<class T>
+void MEAL::GroupRule<T>::initialize ()
 {
   result = get_identity();
 
@@ -186,9 +182,9 @@ void MEAL::GroupRule<MType>::initialize ()
     gradient[jgrad] = get_identity();
 }
 
-template<class MType>
-void MEAL::GroupRule<MType>::calculate (Result& retval,
-					       std::vector<Result>* grad)
+template<class T>
+void MEAL::GroupRule<T>::calculate (Result& retval,
+				    std::vector<Result>* grad)
 {
   unsigned nmodel = model.size();
 
@@ -294,7 +290,8 @@ void MEAL::GroupRule<MType>::calculate (Result& retval,
     if (grad) {
       std::cerr << class_name() + "calculate gradient" << std::endl;
       for (unsigned i=0; i<grad->size(); i++)
-	std::cerr << "   " << i << ":" << get_infit(i) << "=" << (*grad)[i] << std::endl;
+	std::cerr << "   " << i << ":" << get_infit(i) 
+		  << "=" << (*grad)[i] << std::endl;
     }
   }
 }
