@@ -8,11 +8,6 @@
 
 #include "Phase.h"
 
-Phase::Phase(){
-  turns = 0;
-  fturns = 0;
-}
-
 void Phase::settle ()
 {
   if (fturns<0 && turns>0) {
@@ -35,8 +30,11 @@ Phase::Phase (double tns)
 Phase::Phase (int64 tns, double ftns) 
 {
   int64 iturns = (int64) ftns;
+  cerr << "Phase 1:" << iturns;
   turns = tns + iturns;
+  cerr << " 2:" << turns;
   fturns = ftns - double (iturns);
+  cerr << " f:" << fturns << endl;
   settle ();
 }
 
@@ -59,17 +57,19 @@ string Phase::strprint(int precision) const
 	 << " exceeds that of a double" << endl;
     cerr << "- truncating to a precision of " << DBL_DIG << endl;
   }
-  
+
   char ftn[30];
-#ifdef sun
-  sprintf(ftn, "%lld", this->intturns());
-#else
-  sprintf(ftn, "%ld", this->intturns());
-#endif
+  // I64 is defined in environ.h.
+  sprintf(ftn, I64, turns);
+
   string s = ftn;
-  sprintf(ftn, "%.*lf", precision, this->fracturns());
-  if(this->fracturns()>=0) s += &(ftn[1]);
-  else s += &(ftn[2]);
+  sprintf(ftn, "%.*lf", precision, fturns);
+
+  if (fturns>=0)
+    s += &(ftn[1]);
+  else
+    s += &(ftn[2]);
+
   return s;
 }
 

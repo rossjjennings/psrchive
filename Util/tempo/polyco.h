@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/polyco.h,v $
-   $Revision: 1.10 $
-   $Date: 2001/02/24 03:49:41 $
+   $Revision: 1.11 $
+   $Date: 2001/02/27 05:37:52 $
    $Author: straten $ */
 
 #ifndef __POLY_H
@@ -197,6 +197,9 @@ class polyco {
 #endif
 
 };
+
+inline ostream& operator<< (ostream& ostr, const polyco& p) {
+  string out; p.unload(&out); return ostr << out; }
 
 #endif
 

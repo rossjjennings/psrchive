@@ -20,10 +20,9 @@ class Phase {
   void settle ();
 
  public:
-  Phase();
-  ~Phase(){turns=0; fturns=0.0;};
+  ~Phase(){}
   Phase (int64 tns, double ftns);
-  Phase (double turns);
+  Phase (double turns=0);
 
   Phase& operator= (const Phase &in_Phase);
   Phase& operator= (double turns);
