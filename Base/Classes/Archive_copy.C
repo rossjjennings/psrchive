@@ -1,0 +1,52 @@
+#include "Pulsar/Archive.h"
+#include "Pulsar/Integration.h"
+
+void Pulsar::Archive::copy (const Archive& archive,
+			    const vector<unsigned>& selected)
+{
+  if (verbose)
+    cerr << "Pulsar::Archive::copy" << endl;
+
+  if (this == &archive)
+    return;
+
+  if (selected.size() == 0) {
+    // default: copy all subints
+    resize (archive.get_nsubint(), archive.get_npol(),
+	    archive.get_nchan(), archive.get_nbin());
+
+    for (unsigned isub=0; isub<archive.get_nsubint(); isub++)
+      get_Integration(isub) -> copy (*(archive.get_Integration(isub)));
+  }
+  else {
+    // copy only the selected subints
+    resize (selected.size(), archive.get_npol(),
+	    archive.get_nchan(), archive.get_nbin());
+
+    for (unsigned isub=0; isub<selected.size(); isub++) {
+      const Integration* subint = archive.get_Integration( selected[isub] );
+      get_Integration(isub) -> copy (*(subint));
+    }
+  }
+
+  ephemeris = archive.ephemeris;
+  model = archive.model;
+
+  // set virtual attributes
+  set_telescope_code( archive.get_telescope_code() );
+  set_basis( archive.get_basis() );
+  set_type( archive.get_type() );
+  set_source( archive.get_source() );
+  set_receiver( archive.get_receiver() );
+  set_backend( archive.get_backend() );
+
+  set_bandwidth( archive.get_bandwidth() );
+  set_centre_frequency( archive.get_centre_frequency() );
+  set_state( archive.get_state() );
+  set_dispersion_measure( archive.get_dispersion_measure() );
+
+  set_feedangle_corrected( archive.get_feedangle_corrected() );
+  set_iono_rm_corrected( archive.get_iono_rm_corrected() );
+  set_ism_rm_corrected( archive.get_ism_rm_corrected() );
+  set_parallactic_corrected( archive.get_parallactic_corrected() );
+}
