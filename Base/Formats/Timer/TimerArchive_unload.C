@@ -2,8 +2,8 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
-#include "TimerArchive.h"
-#include "TimerIntegration.h"
+#include "Pulsar/TimerArchive.h"
+#include "Pulsar/TimerIntegration.h"
 #include "Pulsar/IntegrationOrder.h"
 #include "Pulsar/Profile.h"
 #include "Error.h"

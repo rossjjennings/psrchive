@@ -1,15 +1,15 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/Timer/Pulsar/BasebandArchive.h,v $
-   $Revision: 1.12 $
-   $Date: 2004/08/13 11:56:02 $
+   $Revision: 1.13 $
+   $Date: 2004/12/02 14:39:13 $
    $Author: straten $ */
 
 #ifndef __Baseband_Archive_h
 #define __Baseband_Archive_h
 
-#include "TimerArchive.h"
-#include "baseband_header.h"
+#include "Pulsar/TimerArchive.h"
+#include "Pulsar/baseband_header.h"
 
 #include "Pulsar/Passband.h"
 #include "Pulsar/dspReduction.h"

@@ -1,6 +1,6 @@
 #include <assert.h>
 
-#include "TimerIntegration.h"
+#include "Pulsar/TimerIntegration.h"
 #include "Pulsar/Profile.h"
 #include "mini++.h"
 

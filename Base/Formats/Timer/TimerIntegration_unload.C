@@ -1,4 +1,4 @@
-#include "TimerIntegration.h"
+#include "Pulsar/TimerIntegration.h"
 #include "Pulsar/Profile.h"
 #include "Error.h"
 

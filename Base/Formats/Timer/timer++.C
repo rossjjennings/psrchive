@@ -6,8 +6,6 @@
 #include "convert_endian.h"
 #include "Error.h"
 
-#include "archhdr.h"
-
 string Timer::reason;
 bool   Timer::verbose = false;
 
