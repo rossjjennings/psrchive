@@ -6,9 +6,6 @@
 #include "compressed_io.h"
 #include "timer++.h"
 
-//! Register the BasebandArchive Agent
-static Registry::List<Pulsar::Archive::Agent>::Enter<Pulsar::BasebandAgent> e;
-
 
 void Pulsar::BasebandArchive::init ()
 {
@@ -70,6 +67,22 @@ void Pulsar::BasebandArchive::copy (const Archive& archive)
 Pulsar::Archive* Pulsar::BasebandArchive::clone () const
 {
   return new BasebandArchive (*this);
+}
+
+
+// /////////////////////////////////////////////////////////////////////////
+//
+// /////////////////////////////////////////////////////////////////////////
+//
+// /////////////////////////////////////////////////////////////////////////
+
+
+//! Register the BasebandArchive Agent
+static Registry::List<Pulsar::Archive::Agent>::Enter<Pulsar::BasebandAgent> e;
+
+Pulsar::BasebandAgent::BasebandAgent ()
+  : Pulsar::Archive::Agent ("TIMER Archive with Baseband Extensions version 4")
+{
 }
 
 //! return true if filename refers to a timer archive
