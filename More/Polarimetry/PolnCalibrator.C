@@ -157,8 +157,14 @@ void Pulsar::PolnCalibrator::calculate_transformation ()
 void Pulsar::PolnCalibrator::build (unsigned nchan)
 { try {
 
-  if (transformation.size() == 0)
+  if (verbose)
+    cerr << "Pulsar::PolnCalibrator::build" << endl;
+
+  if (transformation.size() == 0) {
+    if (verbose) cerr << "Pulsar::PolnCalibrator::build"
+                         " call calculate_transformation" << endl;
     const_cast<PolnCalibrator*>(this)->calculate_transformation();
+  }
 
   if (!nchan)
     nchan = transformation.size();
@@ -172,10 +178,15 @@ void Pulsar::PolnCalibrator::build (unsigned nchan)
 
   response.resize( transformation.size() );
 
-  for (unsigned ichan=0; ichan < response.size(); ichan++)
+  for (unsigned ichan=0; ichan < response.size(); ichan++)  {
+
     if (transformation[ichan])  {
 
-      if ( norm(det( transformation[ichan]->evaluate() )) < 1e-9 ) {
+      double normdet = norm(det( transformation[ichan]->evaluate() ));
+
+cerr << "normdet=" << normdet << endl;
+
+      if ( normdet < 1e-9 || !finite(normdet) ) {
 
 	if (verbose)
 	  cerr << "Pulsar::PolnCalibrator::build ichan=" << ichan <<
@@ -184,12 +195,27 @@ void Pulsar::PolnCalibrator::build (unsigned nchan)
 	response[ichan] = Jones<float>::identity();
 
       }
-      else
-         response[ichan] = inv( transformation[ichan]->evaluate() );
+      else {
+
+        response[ichan] = inv( transformation[ichan]->evaluate() );
+
+        if (verbose)
+          cerr << "Pulsar::PolnCalibrator::build ichan=" << ichan <<
+            " response=\n" << response[ichan] << endl;
+
+      }
 
     }
-    else
+    else {
+
+      if (verbose) cerr << "Pulsar::PolnCalibrator::build ichan=" << ichan 
+                        << " no transformation" << endl;
+
       response[ichan] = Jones<float>::identity();
+
+    }
+
+  }
 
   if (median_smoothing)  {
 
@@ -225,7 +251,8 @@ catch (Error& error) {
 void Pulsar::PolnCalibrator::calibrate (Archive* arch)
 try {
 
-  cerr << "Pulsar::PolnCalibrator::calibrate" << endl;
+  if (verbose)
+    cerr << "Pulsar::PolnCalibrator::calibrate" << endl;
 
   if (!calibrator)
     throw Error (InvalidState, "Pulsar::PolnCalibrator::calibrate",
@@ -239,6 +266,9 @@ try {
 
   if (response.size() != arch->get_nchan())
     build( arch->get_nchan() );
+
+  if (verbose)
+    cerr << "Pulsar::PolnCalibrator::calibrate call Archive::transform" << endl;
 
   arch->transform (response);
 }
