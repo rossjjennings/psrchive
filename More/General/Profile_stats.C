@@ -77,8 +77,7 @@ void Pulsar::Profile::stats (double* mean, double* variance, double* varmean,
   \retval mean the mean of the interval
   \retval variance the variance of the interval
   \retval varmean the variance of the mean of the interval
-  \param istart the first bin of the interval
-  \param iend one greater than the last bin of the interval
+  \param phase centre of region over which statistics will be calculated
   \param duty_cycle width of region
   */
 void Pulsar::Profile::stats (float phase,

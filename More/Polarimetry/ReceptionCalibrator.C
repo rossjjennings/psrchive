@@ -53,7 +53,7 @@ void Pulsar::ReceptionCalibrator::set_calibrators (const vector<string>& names)
 
 
 /*! 
-  \param model the type of model used to represent the receiver
+  \param _model the type of model used to represent the receiver
   \param feed_corrections the known feed corrections transformation
 */
 Pulsar::StandardModel::StandardModel (Calibrator::Type _model,

@@ -96,8 +96,8 @@ void Pulsar::ReferenceCalibrator::set_nchan (unsigned nchan)
 }
 
 /*!
-  \param isubint the calibrator Integration from which to derive levels
-  \param nchan the desired frequency resolution
+  \param integration the calibrator Integration from which to derive levels
+  \param request_nchan the desired frequency resolution
   \retval cal_hi the mean levels of the calibrator hi state
   \retval cal_lo the mean levels of the calibrator lo state
 */

@@ -196,8 +196,9 @@ void Pulsar::Archive::tscrunch (unsigned nscrunch)
 //
 /*!
   \return the new weighted centre frequency (in MHz, to nearest kHz)
-  \param  subint_start the first subint included in the calculation
-  \param  subint_end one more than the index of the last subint
+  \param  ichan the index of the requested frequency channel
+  \param  start the index of the first Integration to include in the mean
+  \param  end one more than the index of the last Integration
 */
 double Pulsar::Archive::weighted_frequency (unsigned ichan,
 					    unsigned start, unsigned end) 

@@ -198,7 +198,7 @@ void Pulsar::Archive::update()
 
 //! Return a pointer to the Profile
 /*!
-  \param subint the index of the requested Integration
+  \param sub the index of the requested Integration
   \param pol the index of the requested polarization
   \param chan the index of the requested frequency channel
   \return pointer to Profile instance
