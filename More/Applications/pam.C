@@ -30,6 +30,8 @@ void usage()
   cout << "  -p               Polarisation scrunch to total intensity"        << endl;
   cout << "  -I               Transform to Invariant Interval"                << endl;
   cout << "  -S               Transform to Stokes parameters"                 << endl;
+  cout << "  -L               Set feed basis to Linear"                       << endl;
+  cout << "  -C               Set feed basis to Circular"                     << endl;
   cout << "  -B               Flip the sideband sense"                        << endl;
   cout << "  -E ephfile       Install a new ephemeris and update model"       << endl;
   cout << endl;
@@ -106,6 +108,9 @@ int main (int argc, char *argv[]) {
   int new_nsub = 0;
   int new_nbin = 0;
 
+  bool circ = false;
+  bool lin = false;
+
   int c = 0;
   
   while (1) {
@@ -119,7 +124,7 @@ int main (int argc, char *argv[]) {
       {0, 0, 0, 0}
     };
     
-    c = getopt_long(argc, argv, "hvVima:e:E:TFpIt:f:b:d:s:r:w:D:SB",
+    c = getopt_long(argc, argv, "hvVima:e:E:TFpIt:f:b:d:s:r:w:D:SBLC",
 		    long_options, &options_index);
     
     if (c == -1)
@@ -138,10 +143,16 @@ int main (int argc, char *argv[]) {
       Pulsar::Archive::set_verbosity(3);
       break;
     case 'i':
-      cout << "$Id: pam.C,v 1.24 2003/12/02 04:00:37 ahotan Exp $" << endl;
+      cout << "$Id: pam.C,v 1.25 2004/02/02 10:32:06 ahotan Exp $" << endl;
       return 0;
     case 'm':
       save = true;
+      break;
+    case 'L':
+      lin = true;
+      break;
+    case 'C':
+      circ = true;
       break;
     case 'a':
       archive_class = optarg;
@@ -323,6 +334,16 @@ int main (int argc, char *argv[]) {
 	cerr << "Loading " << archives[i] << endl;
       
       arch = Pulsar::Archive::load(archives[i]);
+
+      if (lin) {
+	arch->set_basis(Signal::Linear);
+	cout << "Feed basis set to Linear" << endl;
+      }
+
+      if (circ) {
+	arch->set_basis(Signal::Circular);
+	cout << "Feed basis set to Circular" << endl;
+      }
 
       if (new_eph) {
 	if (!eph_file.empty()) {
