@@ -1,0 +1,370 @@
+// redwards 17 Mar 99 -- Time for a definitive C++ suite of
+// angle and sky coordinate functions
+
+#include <string>
+#include <math.h>
+#include <iostream>
+
+#include "machine_endian.h"
+#include "angle.h"
+#include "coord.h"
+#include "f772c.h"
+
+
+// Fortran stuff from genutil... leave out of .h to discourage
+// direct use!
+extern "C" double F772C(hmstoturns)(const char *, double *, int);
+extern "C" double F772C(dmstoturns)(const char *, double *, int);
+// and from -lsla
+extern "C" double F772C(sla_dsep)(double *, double *, double *, double*);
+
+
+// Use Willem's angle parsing routines and do our own output
+Angle::Angle(const double & d){
+  radians=d; 
+  while(radians>M_PI) radians-=2*M_PI;
+  while(radians<-M_PI) radians+=2*M_PI;
+}
+
+
+char * Angle::getHMS(char *str, int places) const
+{
+  int hours, minutes;
+  double seconds;
+
+  hours = (int)floor(radians * 12.0/M_PI); 
+  minutes = (int)floor(radians * 720.0/M_PI) % 60;
+  seconds = radians * 43200.0/M_PI - ((hours*60.0)+minutes)*60.0;
+
+  sprintf(str, "%02d:%02d:%0*.*f", hours, minutes, 
+	  3+places, places, seconds);
+  return str;
+}
+
+static char angle_str [100];
+string Angle::getHMS (int places) const
+{
+  return string (getHMS (angle_str, places));
+}
+int Angle::setHMS(const char *str)
+{
+  double prec;
+ 
+  //  return str2ra(&radians, str);
+  radians = 2.0*M_PI*F772C(hmstoturns)(str, &prec, strlen(str));
+  return (radians < -10.0);
+}
+
+int Angle::setDMS(const char *str)
+{
+  double prec;
+  //  return str2dec(&radians, str);
+  radians = 2.0*M_PI*F772C(dmstoturns)(str, &prec, strlen(str));
+  return (radians < -10.0);
+}
+
+char * Angle::getDMS(char *str,int places) const
+{
+  int degrees, minutes;
+  double seconds;
+
+  degrees = (int)floor(fabs(radians) * 180.0/M_PI); 
+  minutes = (int)floor(fabs(radians) * 10800.0/M_PI) % 60;
+  seconds = fabs(radians) * 648000.0/M_PI - ((degrees*60.0)+minutes)*60.0;
+
+  if (radians < 0.0)
+    degrees *= -1;   // Set it up to print the sign
+
+  sprintf(str, "% 02d:%02d:%0*.*f", degrees, minutes, 
+	  3+places, places, seconds);
+//   fprintf(stderr, "%f %d %d %f %s\n", radians, degrees, minutes, seconds,str);
+//   //  exit(1);
+
+  return str;
+}
+
+string Angle::getDMS(int places) const
+{
+  return string (getDMS (angle_str, places));
+}
+
+
+Angle& Angle::operator= (const Angle & a)
+{
+  radians = a.radians;
+  return *this;
+}
+
+Angle& Angle::operator= (const double & rad){
+  radians = rad;
+  return *this;
+}
+
+Angle& Angle::operator+= (const Angle & a1)
+{
+  *this = *this + a1;
+  return(*this);
+}
+
+Angle& Angle::operator-= (const Angle & a1)
+{
+  *this = *this - a1;
+  return(*this);
+}
+
+Angle& Angle::operator+= (const double & d)
+{
+  *this = *this + d;
+  return(*this);
+}
+
+Angle& Angle::operator-= (const double & d)
+{
+  *this = *this - d;
+  return(*this);
+}
+
+Angle& Angle::operator*= (const double & d)
+{
+  *this = *this * d;
+  return(*this);
+}
+
+Angle& Angle::operator/= (const double & d)
+{
+  *this = *this / d;
+  return(*this);
+}
+
+const Angle operator + (const Angle &a1, const Angle &a2) {
+  double real = cos(a1.getradians())*cos(a2.getradians()) - 
+    sin(a1.getradians())*sin(a2.getradians());
+  double imag = cos(a1.getradians())*sin(a2.getradians()) +
+    sin(a1.getradians())*cos(a2.getradians());
+  return Angle(atan2(imag,real));
+}
+
+const Angle operator - (const Angle &a1, const Angle &a2) {
+  Angle a3 = a2*-1.0;
+  return (a1+a3);
+}
+
+const Angle operator + (const Angle &a1, double d) {
+  return Angle(a1.getradians()+d);
+}
+
+const Angle operator - (const Angle &a1, double d) {
+  return Angle(a1.getradians()-d);
+}
+
+const Angle operator * (const Angle &a1, double d) {
+  return Angle(a1.getradians()*d);
+}
+
+const Angle operator / (const Angle &a1, double d) {
+  return Angle(a1.getradians()/d);
+}
+
+int operator > (const Angle &a1, const Angle &a2) {
+  double precision_limit = 2*pow(10,-DBL_DIG);
+  if(fabs(a1.getradians()-a2.getradians())<precision_limit) return(0);
+  else return (a1.getradians()>a2.getradians());
+}
+
+int operator >= (const Angle &a1, const Angle &a2) {
+  double precision_limit = 2*pow(10,-DBL_DIG);
+  if(fabs(a1.getradians()-a2.getradians())<precision_limit) return(1);
+  else return (a1.getradians()>a2.getradians());
+}
+
+int operator < (const Angle &a1, const Angle &a2) {
+  double precision_limit = 2*pow(10,-DBL_DIG);
+  if(fabs(a1.getradians()-a2.getradians())<precision_limit) return(0);
+  else return (a1.getradians()<a2.getradians());
+}
+
+int operator <= (const Angle &a1, const Angle &a2) {
+  double precision_limit = 2*pow(10,-DBL_DIG);
+  if(fabs(a1.getradians()-a2.getradians())<precision_limit) return(1);
+  else return (a1.getradians()<a2.getradians());
+}
+
+int operator == (const Angle &a1, const Angle &a2){
+  double precision_limit = 2*pow(10,-DBL_DIG);
+  if ((fabs(a1.getradians()-a2.getradians())<precision_limit)) 
+      return (1);
+  else
+      return (0);  
+}
+
+int operator != (const Angle &a1, const Angle &a2){
+  double precision_limit = 2*pow(10,-DBL_DIG);
+  if ((fabs(a1.getradians()-a2.getradians())>precision_limit)) 
+      return (1);
+  else
+      return (0);  
+}
+
+ostream& operator<< (ostream & os, const Angle & angle)
+{
+  return os << angle.radians;
+}
+
+// AnglePair stuff for convenience
+
+AnglePair::AnglePair(const Angle & a1, const Angle & a2){
+  angle1 = a1;
+  angle2 = a2;
+}
+
+AnglePair::AnglePair(const double d1, const double d2){
+  angle1 = d1;
+  angle2 = d2;
+}
+
+int AnglePair::setHMSDMS(const char *astr)
+{ 
+  return str2coord (&angle1.radians, &angle2.radians, astr);
+}
+
+int AnglePair::setHMSDMS(const char *s1, const char *s2)
+{
+  if (angle1.setHMS(s1) < 0)
+    return -1;
+  return angle2.setDMS(s2);
+}
+
+void AnglePair::getHMSDMS(char *s1, char *s2, int places1, int places2) const
+{
+  s1 = angle1.getHMS(s1,places1);
+  s2 = angle2.getDMS(s2,places2);
+}
+
+string
+AnglePair::getHMSDMS(int places1, int places2) const
+{ 
+  return angle1.getHMS(places1) + ' ' + angle2.getDMS(places2);
+}
+
+void 
+AnglePair::setDegrees(double d1, double d2)
+{
+  angle1.setDegrees(d1);
+  angle2.setDegrees(d2);
+}
+
+void 
+AnglePair::getDegrees(double *d1, double *d2) const
+{
+  *d1 = angle1.getDegrees();
+  *d2 = angle2.getDegrees();
+}
+
+string AnglePair::getDegrees() const
+{
+  sprintf (angle_str, "(%8.4f,%8.4f)",
+	   angle1.getDegrees(), angle2.getDegrees());
+  return string (angle_str);
+}
+
+void 
+AnglePair:: setRadians(double r1, double r2)
+{
+  angle1.setradians(r1);
+  angle2.setradians(r2);
+}
+
+void 
+AnglePair:: getRadians(double *r1, double *r2) const
+{
+  *r1 = angle1.getradians();
+  *r2 = angle2.getradians();
+}
+
+string AnglePair::getRadians() const
+{
+  sprintf(angle_str,
+	  "(%8.4f,%8.4f)", angle1.getradians(),angle2.getradians());
+  return string (angle_str);
+}
+
+void
+AnglePair:: setRadMS(long int az, long int ze)
+{
+  angle1.setRadMS(az);
+  angle2.setRadMS(ze);
+}
+
+void
+AnglePair:: getRadMS(long int *az, long int *ze)
+{
+  *az = angle1.getRadMS();
+  *ze = angle2.getRadMS();
+}
+
+
+// redwards 10Aug99 function to compute angular separation of a pair
+// of spherical coordinates
+Angle
+AnglePair::angularSeparation(const AnglePair& other)
+{
+  Angle a;
+  double a1_1, a1_2, a2_1, a2_2;
+
+
+  a1_1=angle1.getradians();
+  a1_2=angle2.getradians();
+  a2_1=other.angle1.getradians();
+  a2_2=other.angle2.getradians();
+
+    a.setradians(F772C(sla_dsep)(&a1_1, &a1_2, &a2_1, &a2_2));
+
+  return a;
+}
+
+AnglePair & AnglePair::operator*= (const double mult){
+  angle1 *= mult;
+  angle2 *= mult;
+  return *this;
+}
+
+AnglePair operator* (const AnglePair & pair, const double mult){
+  return AnglePair(pair.angle1*mult, pair.angle2*mult);
+}
+
+AnglePair &
+AnglePair::operator= (const AnglePair & a)
+{
+  angle1 = a.angle1;
+  angle2 = a.angle2;
+
+  return *this;
+}
+
+ostream& operator<< (ostream & os, const AnglePair & pair)
+{
+  return os << "(" << pair.angle1 
+	    << "," << pair.angle2 << ")";
+}
+
+int operator == (const AnglePair &a1, const AnglePair &a2){
+  double precision_limit = 2*pow(10,-DBL_DIG);
+  double ra1, ra2, dec1, dec2;
+  a1.getRadians(&ra1, &dec1);
+  a2.getRadians(&ra2, &dec2);
+  if (fabs(ra1-ra2)<precision_limit && fabs(dec1-dec2)<precision_limit) 
+      return (1);
+  else
+      return (0);  
+}
+
+int operator != (const AnglePair &a1, const AnglePair &a2){
+  double precision_limit = 2*pow(10,-DBL_DIG);
+  double ra1, ra2, dec1, dec2;
+  a1.getRadians(&ra1, &dec1);
+  a2.getRadians(&ra2, &dec2);
+  if (fabs(ra1-ra2)>precision_limit || fabs(dec1-dec2)>precision_limit)
+      return (1);
+  else
+      return (0);  
+}
