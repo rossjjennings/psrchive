@@ -231,5 +231,5 @@ Phase Phase::Floor ()
 
 Phase Phase::Nint ()
 {
-  return Phase (turns + (int64) nint(fturns), 0.0);
+  return Phase (turns + (int64) floor(fturns+0.5), 0.0);
 }
