@@ -81,6 +81,12 @@ SWIN_LIB_PGPLOT
 BNV_HAVE_QT
 SWIN_LIB_QTDRIV
 
+#
+# Ensure that 64-bit file offsets are used under linux
+#
+# AC_DEFINE([_FILE_OFFSET_BITS], [64], [Turn off_t into a 64-bit type.])
+CPPFLAGS="$CPPFLAGS -D_FILE_OFFSET_BITS=64"
+
 # 
 # For developers: ensure that the config directory m4 macros are parsed
 #
