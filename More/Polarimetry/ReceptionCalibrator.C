@@ -367,10 +367,12 @@ void Pulsar::ReceptionCalibrator::init_estimate (SourceEstimate& estimate)
       throw Error (InvalidState, "Pulsar::ReceptionCalibrator::init_estimate",
 		   "isource=%d != nsource=%d", estimate.input_index, nsource);
 
+#if 0
     if (estimate.input_index == 8) {
       cerr << "Setting tracer" << endl;
       (void) new Calibration::Tracer (&(estimate.source[ichan]), 1);
     }
+#endif
 
     model[ichan]->equation->add_input( &(estimate.source[ichan]) );
   }
