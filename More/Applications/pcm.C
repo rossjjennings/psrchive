@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pcm.C,v $
-   $Revision: 1.19 $
-   $Date: 2004/01/05 12:11:57 $
+   $Revision: 1.20 $
+   $Date: 2004/01/06 19:04:11 $
    $Author: straten $ */
 
 /*! \file pcm.C 
@@ -213,7 +213,6 @@ bool display = true;
 // verbosity flags
 bool verbose = false;
 
-
 int main (int argc, char *argv[]) try {
 
   Error::verbose = false;
@@ -252,7 +251,7 @@ int main (int argc, char *argv[]) try {
   bool measure_cal_Q = true;
 
   bool normalize_by_invariant = true;
-
+  bool must_have_cals = true;
   bool publication_plots = false;
 
   int gotc = 0;
@@ -367,11 +366,10 @@ int main (int argc, char *argv[]) try {
       if (level > 2) 
         Calibration::Model::verbose = true;
 
-      if (level > 1) {
-        Pulsar::ReceptionCalibrator::verbose = true;
-        Pulsar::ReceptionCalibratorPlotter::verbose = true;
-        Pulsar::Archive::verbose = true;
-      }
+      if (level > 1)
+        Pulsar::Calibrator::verbose = true;
+
+      Pulsar::Archive::set_verbosity (level);
 
       break;
 
@@ -461,10 +459,16 @@ int main (int argc, char *argv[]) try {
     double minutes = 0.5 * hours * 60.0;
 
     vector<Pulsar::Calibration::Entry> oncals;
-    oncals = dbase.all_matching (archive, mid, Signal::FluxCalOn, minutes);
-  
-    if (oncals.size() == 0)
-      cerr << "pcm: no FluxCalOn observations found" << endl;
+
+    oncals = dbase.all_matching (archive, mid, Signal::PolnCal, minutes);
+
+    if (oncals.size() == 0)  {
+      cerr << "pcm: no PolnCal observations found" << endl;
+      if (must_have_cals && !calfile)  {
+        cerr << "pcm: giving up" << endl;
+        return -1;
+      }
+    }
 
     for (unsigned i = 0; i < oncals.size(); i++) {
       string filename = dbase.get_filename( oncals[i] );
@@ -472,10 +476,10 @@ int main (int argc, char *argv[]) try {
       cal_filenames.push_back (filename);
     }
 
-    oncals = dbase.all_matching (archive, mid, Signal::PolnCal, minutes);
+    oncals = dbase.all_matching (archive, mid, Signal::FluxCalOn, minutes);
 
     if (oncals.size() == 0)
-      cerr << "pcm: no PolnCal observations found" << endl;
+      cerr << "pcm: no FluxCalOn observations found" << endl;
 
     for (unsigned i = 0; i < oncals.size(); i++) {
       string filename = dbase.get_filename( oncals[i] );
@@ -734,7 +738,6 @@ int mode_B (const char* standard_filename,
   Pulsar::PulsarCalibrator model (model_name);
 
   Reference::To<Pulsar::Archive> standard;
-
   standard = Pulsar::Archive::load (standard_filename);
 
   RealTimer clock;
@@ -744,7 +747,10 @@ int mode_B (const char* standard_filename,
   model.set_standard (standard);
 
   clock.stop();
-  cerr << "set_standard toook " << clock << endl;
+  cerr << "pcm: set_standard completed in " << clock << endl;
+
+  if (verbose)
+    cerr << "pcm: loading " << filenames.size() << " files" << endl;
 
   Reference::To<Pulsar::Archive> archive;
 
@@ -762,6 +768,8 @@ int mode_B (const char* standard_filename,
     model.add_observation( archive );
 
     model.calibrate( archive );
+
+    archive->deparallactify ();
 
     standard->append (archive);
 
