@@ -239,14 +239,6 @@ void Pulsar::Archive::init_Integration (Integration* subint) try {
 catch (Error& error) {
   throw error += "Pulsar::Archive::init_Integration";
 }
-void Pulsar::Archive::set_basis (Signal::Basis _type) {
- 
- if (get_nsubint() == 0)
-    return;
-
-  for (unsigned isub=0; isub < get_nsubint(); isub++)
-    get_Integration(isub) -> set_basis (_type);
-}
 
 /*!
   Useful wrapper for Archive::bscrunch
