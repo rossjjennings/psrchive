@@ -361,5 +361,6 @@ void Timer::init (struct timer * hdr)
   hdr->obstype=-1;
   hdr->version=-1;
   hdr->minorversion=-1;
+  strcpy(hdr->rcvr_id,"unknown");
 }
 
