@@ -27,10 +27,10 @@ void Pulsar::FITSArchive::load_Receiver (fitsfile* fptr)
       cerr << FITSError (status, "FITSArchive::load_Receiver",
 			 "fits_read_key FRONTEND").warning() << endl;
     status = 0;
-    ext->name = "unknown";
+    ext->set_name ("unknown");
   }
   else
-    ext->name = tempstr.get();
+    ext->set_name (tempstr.get());
   
   // Read the feed configuration
 
@@ -46,9 +46,9 @@ void Pulsar::FITSArchive::load_Receiver (fitsfile* fptr)
   }
   else {
     if (strncasecmp(tempstr.get(),"LIN",3) == 0)
-      ext->basis = Signal::Linear;
+      ext->set_basis (Signal::Linear);
     else if (strncasecmp(tempstr.get(),"CIRC",4) == 0)
-      ext->basis = Signal::Circular;
+      ext->set_basis (Signal::Circular);
     else
       throw Error (InvalidParam, "FITSArchive::load_Receiver",
 	           "unknown FD_POLN: %s", tempstr.get());
@@ -59,57 +59,64 @@ void Pulsar::FITSArchive::load_Receiver (fitsfile* fptr)
   if (verbose)
     cerr << "FITSArchive::load_Receiver reading XPOL_ANG" << endl;
   
-  float degrees = 0.0;
+  float temp = 0.0;
+  Angle angle;
 
-  fits_read_key (fptr, TFLOAT, "XPOL_ANG", &degrees, comment, &status);
+  fits_read_key (fptr, TFLOAT, "XPOL_ANG", &temp, comment, &status);
   if (status != 0) {
     if (verbose)
       cerr << FITSError (status, "FITSArchive::load_Receiver",
 			 "fits_read_key XPOL_ANG").warning() << endl;
     status = 0;
-    ext->X_offset.setDegrees( 0 );
+    angle.setDegrees( 0 );
   }
   else
-    ext->X_offset.setDegrees( degrees );
+    angle.setDegrees( temp );
+
+  ext->set_X_offset (angle);
 
   // Read angle of Y-probe wrt platform zero
 
   if (verbose)
     cerr << "FITSArchive::load_Receiver reading YPOL_ANG" << endl;
   
-  fits_read_key (fptr, TFLOAT, "YPOL_ANG", &degrees, comment, &status);
+  fits_read_key (fptr, TFLOAT, "YPOL_ANG", &temp, comment, &status);
   if (status != 0) {
     if (verbose)
       cerr << FITSError (status, "FITSArchive::load_Receiver",
 			 "fits_read_key YPOL_ANG").warning() << endl;
     status = 0;
-    ext->Y_offset.setDegrees( 0 );
+    angle.setDegrees( 0 );
   }
   else
-    ext->Y_offset.setDegrees( degrees - 90.0 );
+    angle.setDegrees( temp - 90.0 );
+
+  ext->set_Y_offset (angle);
 
   // Read angle of linear noise diode wrt platform zero
 
   if (verbose)
     cerr << "FITSArchive::load_Receiver reading CAL_ANG" << endl;
   
-  fits_read_key (fptr, TFLOAT, "CAL_ANG", &degrees, comment, &status);
+  fits_read_key (fptr, TFLOAT, "CAL_ANG", &temp, comment, &status);
   if (status != 0) {
     if (verbose)
       cerr << FITSError (status, "FITSArchive::load_Receiver",
 			 "fits_read_key CAL_ANG").warning() << endl;
     status = 0;
-    ext->calibrator_offset.setDegrees( 0 );
+    angle.setDegrees( 0 );
   }
   else
-    ext->calibrator_offset.setDegrees( degrees - 45.0 );
+    angle.setDegrees( temp - 45.0 );
+
+  ext->set_calibrator_offset (angle);
 
   // Feed track mode
 
   if (verbose)
     cerr << "FITSArchive::load_Receiver reading feed track mode" << endl;
 
-  ext->mode = Receiver::Feed;
+  ext->set_tracking_mode (Receiver::Feed);
 
   fits_read_key (fptr, TSTRING, "FD_MODE", tempstr.get(), comment, &status);
   if (status != 0) {
@@ -120,11 +127,11 @@ void Pulsar::FITSArchive::load_Receiver (fitsfile* fptr)
   }
   else {
     if (strncasecmp(tempstr.get(),"FA",2) == 0)
-      ext->mode = Receiver::Feed;
+      ext->set_tracking_mode (Receiver::Feed);
     else if (strncasecmp(tempstr.get(),"CPA",3) == 0)
-      ext->mode = Receiver::Celestial;
+      ext->set_tracking_mode (Receiver::Celestial);
     else if (strncasecmp(tempstr.get(),"GPA",3) == 0)
-      ext->mode = Receiver::Galactic;
+      ext->set_tracking_mode (Receiver::Galactic);
     else if (verbose)
       cerr << "FITSArchive::load_Receiver unknown FD_MODE=" 
            << tempstr.get() << endl;
@@ -135,31 +142,38 @@ void Pulsar::FITSArchive::load_Receiver (fitsfile* fptr)
   if (verbose)
     cerr << "FITSArchive::load_Receiver reading requested feed angle" << endl;
   
-  fits_read_key (fptr, TFLOAT, "FA_REQ", &degrees, comment, &status);
+  fits_read_key (fptr, TFLOAT, "FA_REQ", &temp, comment, &status);
   if (status != 0) {
     if (verbose)
       cerr << FITSError (status, "FITSArchive::load_Receiver",
 			 "fits_read_key FA_REQ").warning() << endl;
     status = 0;
-    ext->tracking_angle.setDegrees( 0 );
+    angle.setDegrees( 0 );
   }
   else
-    ext->tracking_angle.setDegrees( degrees );
+    angle.setDegrees( temp );
+
+  ext->set_tracking_angle (angle);
 
   // Read attenuator settings
 
   if (verbose)
     cerr << "FITSArchive::load_Receiver reading attenuator settings" << endl;
 
-  fits_read_key (fptr, TFLOAT, "ATTEN_A", &(ext->atten_a),
-		 comment, &status);
-  fits_read_key (fptr, TFLOAT, "ATTEN_B", &(ext->atten_b),
-		 comment, &status);
+  fits_read_key (fptr, TFLOAT, "ATTEN_A", &temp, comment, &status);
+  ext->set_atten_a (temp);
+
+  fits_read_key (fptr, TFLOAT, "ATTEN_B", &temp, comment, &status);
+  ext->set_atten_b (temp);
 
   if (status != 0) {
     if (verbose)
       cerr << FITSError (status, "FITSArchive::load_Receiver",
 			 "fits_read_key ATTEN_A,B").warning() << endl;
+
+    ext->set_atten_a (0);
+    ext->set_atten_b (0);
+
     status = 0;
   }
 

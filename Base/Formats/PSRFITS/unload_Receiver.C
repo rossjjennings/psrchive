@@ -10,15 +10,16 @@ void Pulsar::FITSArchive::unload (fitsfile* fptr, const Receiver* ext)
   // no comment
   char* comment = 0;
 
-  fits_update_key (fptr, TSTRING, "FRONTEND", 
-  		   const_cast<char*>(ext->name.c_str()), comment, &status);
-  
+  // temporary string
   auto_ptr<char> tempstr ( new char[FLEN_VALUE] );
-  
-  if (ext->basis == Signal::Linear)
+
+  strncpy (tempstr.get(), ext->get_name().c_str(), FLEN_VALUE);
+  fits_update_key (fptr, TSTRING, "FRONTEND", tempstr.get(), comment, &status);
+    
+  if (ext->get_basis() == Signal::Linear)
     strcpy (tempstr.get(), "LIN");
   
-  else if (ext->basis == Signal::Circular)
+  else if (ext->get_basis() == Signal::Circular)
     strcpy (tempstr.get(), "CIRC");
   
   else
@@ -26,18 +27,18 @@ void Pulsar::FITSArchive::unload (fitsfile* fptr, const Receiver* ext)
   
   fits_update_key (fptr, TSTRING, "FD_POLN", tempstr.get(), comment, &status);
   
-  float degrees;
+  float temp;
 
-  degrees = ext->X_offset.getDegrees();
-  fits_update_key (fptr, TFLOAT, "XPOL_ANG", &degrees, comment, &status);
+  temp = ext->get_X_offset().getDegrees();
+  fits_update_key (fptr, TFLOAT, "XPOL_ANG", &temp, comment, &status);
 
-  degrees = ext->Y_offset.getDegrees() + 90.0;
-  fits_update_key (fptr, TFLOAT, "YPOL_ANG", &degrees, comment, &status);
+  temp = ext->get_Y_offset().getDegrees() + 90.0;
+  fits_update_key (fptr, TFLOAT, "YPOL_ANG", &temp, comment, &status);
 
-  degrees = ext->calibrator_offset.getDegrees() + 45.0;
-  fits_update_key (fptr, TFLOAT, "CAL_ANG", &degrees, comment, &status);
+  temp = ext->get_calibrator_offset().getDegrees() + 45.0;
+  fits_update_key (fptr, TFLOAT, "CAL_ANG", &temp, comment, &status);
 
-  switch (ext->basis) {
+  switch (ext->get_basis()) {
   case Receiver::Feed:
     strcpy (tempstr.get(), "FA"); break;
   case Receiver::Celestial:
@@ -50,14 +51,14 @@ void Pulsar::FITSArchive::unload (fitsfile* fptr, const Receiver* ext)
 
   fits_update_key (fptr, TSTRING, "FD_MODE", tempstr.get(), comment, &status);
   
-  degrees = ext->tracking_angle.getDegrees();
-  fits_update_key (fptr, TFLOAT, "FA_REQ", &degrees, comment, &status);
+  temp = ext->get_tracking_angle().getDegrees();
+  fits_update_key (fptr, TFLOAT, "FA_REQ", &temp, comment, &status);
 
-  fits_update_key (fptr, TFLOAT, "ATTEN_A",
-		   const_cast<float*>(&(ext->atten_a)), comment, &status);
+  temp = ext->get_atten_a();
+  fits_update_key (fptr, TFLOAT, "ATTEN_A", &temp, comment, &status);
 
-  fits_update_key (fptr, TFLOAT, "ATTEN_B",
-		   const_cast<float*>(&(ext->atten_b)), comment, &status);
+  temp = ext->get_atten_b();
+  fits_update_key (fptr, TFLOAT, "ATTEN_B", &temp, comment, &status);
 
   if (status)
     throw FITSError (status, "Pulsar::FITSArchive::unload Receiver");
