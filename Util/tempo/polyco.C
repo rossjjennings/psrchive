@@ -38,7 +38,7 @@ void polynomial::init() {
 }
 
 // Hack constructor for use on search data
-polynomial::polynomial(MJD _reftime, float _dm, double _f0, int _telescope=7){
+polynomial::polynomial(MJD _reftime, float _dm, double _f0, int _telescope){
   init();
 
   reftime = _reftime;
