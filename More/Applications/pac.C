@@ -37,7 +37,6 @@ void usage ()
     "  -b   Do not try to match bandwidths\n"
     "  -o   Do not try to match obs types\n"
     "  -D   Display calibration model parameters\n"
-    "  -F   Calibrate fluxes only\n"
     "  -P   Calibrate polarisations only\n"
     "\n"
     "  -S   Use the SingleAxis(t)Polar (SAtP selfcal) model\n"
@@ -81,7 +80,7 @@ int main (int argc, char *argv[]) {
 
   string command = "pac ";
 
-  while ((gotc = getopt(argc, argv, "hvVp:e:u:d:wWcitfboDFPsSq")) != -1) {
+  while ((gotc = getopt(argc, argv, "hvVp:e:u:d:wWcitfboDPsSq")) != -1) {
     switch (gotc) {
     case 'h':
       usage ();
@@ -107,10 +106,6 @@ int main (int argc, char *argv[]) {
       break;
     case 'D':
       display_params = true;
-      break;
-    case 'F':
-      do_polncal = false;
-      command += "-F ";
       break;
     case 'P':
       do_fluxcal = false;
@@ -187,7 +182,7 @@ int main (int argc, char *argv[]) {
   
   if (archives.empty()) {
     if (!summary_only) {
-      cerr << "No archives were specified!" << endl;
+      cout << "No archives were specified!" << endl;
       exit(-1);
     }
   } 
@@ -215,24 +210,24 @@ int main (int argc, char *argv[]) {
       dbase -> test_obst(test_obstype);
 
       if (dbase->size() <= 0) {
-	cerr << "No CAL files found!" << endl;
+	cout << "No CAL files found!" << endl;
 	return -1;
       }
 
       if (verbose)
-	cerr << dbase->size() << " Calibrator Archives found" << endl;
+	cout << dbase->size() << " Calibrator Archives found" << endl;
 
       if (write_database_file) {
 	
-	string temp;
+	//string temp;
 	
-	if (cals_are_here.find_last_of("/", 0) != cals_are_here.length()-1)
-	  temp = cals_are_here + "/database.txt";
-	else
-	  temp = cals_are_here + "database.txt";
+	//if (cals_are_here.find_last_of("/", 0) != cals_are_here.length()-1)
+	//  temp = cals_are_here + "/database.txt";
+	//else
+	//  temp = cals_are_here + "database.txt";
 	
-	cout << "Writing database summary file to: " << temp << endl;
-	dbase -> unload(temp.c_str());
+	cout << "Writing database summary file" << endl;
+	dbase -> unload("database.txt");
 	
 	if (summary_only)
 	  return (0);
@@ -240,7 +235,7 @@ int main (int argc, char *argv[]) {
       
     }
     else {
-      cerr << "Reading from database summary file" << endl;
+      cout << "Reading from database summary file" << endl;
       dbase = new Pulsar::Calibration::Database (cals_are_here.c_str());
 
       dbase -> test_inst(test_instr);
@@ -265,7 +260,7 @@ int main (int argc, char *argv[]) {
     try {
 
       if (verbose)
-	cerr << "Loading " << archives[i] << endl;
+	cout << "Loading " << archives[i] << endl;
 
       Pulsar::Archive* arch = Pulsar::Archive::load(archives[i]);
 
@@ -275,7 +270,7 @@ int main (int argc, char *argv[]) {
       if (do_polncal) {
 
         if (verbose)
-          cerr << "Finding PolnCalibrator" << endl;
+          cout << "Finding PolnCalibrator" << endl;
 
 	Pulsar::PolnCalibrator* pcal_engine  = 0;
 	pcal_engine = dbase->generatePolnCalibrator(arch, m);
@@ -284,7 +279,7 @@ int main (int argc, char *argv[]) {
 	  pcal_engine->store_parameters = true;
 
         if (verbose)
-          cerr << "Calibrating Archive Polarisation" << endl;
+          cout << "Calibrating Archive Polarisation" << endl;
 
 	pcal_engine->calibrate(arch);
 	
@@ -292,7 +287,7 @@ int main (int argc, char *argv[]) {
         arch->set_poln_calibrated();
 	pcal_file = (pcal_engine->get_Archive())->get_filename();
 	if (display_params) {
-	  cerr << "not implemented; use pacv" << endl;
+	  cout << "not implemented; use pacv" << endl;
 	}	
       }
 
@@ -324,7 +319,7 @@ int main (int argc, char *argv[]) {
       newname += unload_ext;
 
       if (verbose)
-        cerr << "pac: Calibrated Archive name '" << newname << "'" << endl;
+        cout << "pac: Calibrated Archive name '" << newname << "'" << endl;
       
       // See if the archive contains a history that should be updated:
       
