@@ -31,7 +31,7 @@ rmrot_SOURCES		= rmrot.C
 #
 if HAVE_PGPLOT
 
-libCalibration_la_SOURCES += ReceptionModelPlotter
+libCalibration_la_SOURCES += ReceptionModelPlotter.C
 
 bin_PROGRAMS += calsim pafit
 
@@ -39,7 +39,7 @@ calsim_SOURCES		= calsim.C
 calsim_LDADD		= $(LDADD) @PGPLOT_LIBS@
 
 pafit_SOURCES		= pafit.C 
-pafit_LDADD		= $(LDADD) @PGPLOT_LIBS@
+pafit_LDADD		= $(LDADD) @PGPLOT_LIBS@ @SLA_LIBS@
 
 endif
 
@@ -55,4 +55,13 @@ test_Parallactic_SOURCES	= test_Parallactic.C
 test_ReceptionModel_SOURCES	= test_ReceptionModel.C
 test_SingleAxis_SOURCES		= test_SingleAxis.C
 test_copy_SOURCES		= test_copy.C
+
+#############################################################################
+#
+# Dependencies should never be changed
+#
+
+INCLUDES = -I$(top_srcdir)/utils/include @PGPLOT_CFLAGS@
+
+LDADD = libCalibration.la $(top_srcdir)/utils/libpsrutils.la
 

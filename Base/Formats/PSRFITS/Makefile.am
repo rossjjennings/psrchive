@@ -25,3 +25,13 @@ check_PROGRAMS = test_template
 
 test_template_SOURCES = test_template.C
 
+#############################################################################
+#
+# Dependencies should never be changed
+#
+
+INCLUDES = -I$(top_srcdir)/utils/include -I$(top_srcdir)/astro/include \
+        -I.. -I../Calibration -I../Extension
+
+LDADD = $(top_srcdir)/utils/libpsrutils.la
+
