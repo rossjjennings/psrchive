@@ -57,7 +57,7 @@ Pulsar::Archive::operator = (const Archive& a)
 }
 
 //! Return a null-constructed instance of the derived class
-Pulsar::Archive* Pulsar::Archive::new_Archive (const string class_name)
+Pulsar::Archive* Pulsar::Archive::new_Archive (const string& class_name)
 {
   if (Agent::registry.size() == 0)
     throw Error (InvalidState, "Pulsar::Archive::new_Archive",
