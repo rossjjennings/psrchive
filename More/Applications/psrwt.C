@@ -166,8 +166,10 @@ int main (int argc, char** argv)
 
     for (unsigned isub=0; isub < copy->get_nsubint(); isub++)
       for (unsigned ichan=0; ichan < copy->get_nchan(); ichan++) {
-	
-	Pulsar::Profile* profile = copy->get_Profile (isub,0,ichan);
+
+	Pulsar::Integration* subint = copy->get_Integration (isub);
+	Pulsar::Profile* profile = subint->get_Profile (0,ichan);
+
 	float snr = 0.0;
 	
 	if (standard)
@@ -194,8 +196,22 @@ int main (int argc, char** argv)
             // calculate the rms
             float rms = sqrt (variance);
 
-            cerr << filenames[ifile] << " max/rms=" << profile->max()/rms
-                 << " rms=" << rms << " sum=" << snr;
+            // find the maximum bin
+            int maxbin = profile->find_max_bin();
+
+            // get the maximum value
+	    float max = profile->get_amps()[maxbin];
+
+            double phase = double(maxbin) / double(subint->get_nbin());
+            cerr << "phase=" << phase << endl;
+            double seconds = phase * subint->get_folding_period();
+            cerr << "seconds=" << seconds << endl;
+
+	    // calculate the epoch of the maximum
+	    MJD epoch = subint->get_epoch() + seconds;
+
+            cerr << filenames[ifile] << " epoch=" << epoch << " max/rms="
+		 << max/rms << " rms=" << rms << " sum=" << snr;
 
             snr /= sqrt ( profile->get_nbin() * variance );
 
