@@ -115,9 +115,18 @@ Pulsar::GaussianShift (const Profile& std, const Profile& obs)
       data_x.push_back ( argument.get_Value(double(i)) );
       index = i;
       index -= offset;
-      wrap(index,  ptr->get_nbin());
+      wrap(index, ptr->get_nbin());
+
+      float phs1 = ptr->find_min_phase();
+
+      double mean    = 0.0;
+      double var     = 0.0;
+      double varmean = 0.0;
+     
+      ptr->stats(phs1,&mean,&var,&varmean); 
+
       data_y.push_back( Estimate<double>(ptr->get_amps()[index], 
-					 ptr->get_amps()[index]/50.0) );
+					 sqrt(var)) );
     }
     
     MEAL::LevenbergMarquardt<double> fit;
