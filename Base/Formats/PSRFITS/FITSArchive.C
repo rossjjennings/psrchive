@@ -569,21 +569,21 @@ void Pulsar::FITSArchive::load_header (const char* filename)
     throw FITSError (status, "FITSArchive::load_header", 
 		     "fits_read_key OBSTYPE");
   
-  if (strcmp(tempstr1, "PSR") == 0 || strcmp(tempstr13, "LEVPSR") == 0) {
+  if (strcmp(tempstr13, "PSR") == 0 || strcmp(tempstr13, "LEVPSR") == 0) {
     set_type ( Signal::Pulsar );
     if (verbose)
       cerr << "FITSArchive::load_header using Signal::Pulsar" << endl;
   }
   else if (strcmp(tempstr13, "CAL") == 0 || strcmp(tempstr13, "LEVCAL") == 0) {
     
-    if (get_source() == "HYDRA_ON"  || 
-	get_source() == "VIRGO_ON") {
+    if (get_source() == "HYDRA_O"  || 
+	get_source() == "VIRGO_O") {
       set_type ( Signal::FluxCalOn );
       if (verbose)
 	cerr << "FITSArchive::load_header using Signal::FluxCalOn" << endl;
     }
-    else if (get_source() == "HYDRA_OFF" ||
-	     get_source() == "VIRGO_OFF") {
+    else if (get_source() == "HYDRA_N" || get_source() == "HYDRA_S" ||
+	     get_source() == "VIRGO_N" || get_source() == "VIRGO_S") {
       set_type ( Signal::FluxCalOff );
       if (verbose)
 	cerr << "FITSArchive::load_header using Signal::FluxCalOff" << endl;
@@ -811,6 +811,21 @@ void Pulsar::FITSArchive::load_header (const char* filename)
   
   chanbw = (history.get_last()).chanbw;
   
+  if ((history.get_last()).cal_mthd == "SingleAxis" || (history.get_last()).cal_mthd == "SelfCAL" ||
+      (history.get_last()).cal_mthd == "Polar" || (history.get_last()).cal_mthd == "Other") {
+    set_poln_calibrated(true);
+  }
+  else {
+    set_poln_calibrated(false);
+  }
+
+  if ((history.get_last()).sc_mthd == "PAC") {
+    set_flux_calibrated(true);
+  }
+  else {
+    set_flux_calibrated(false);
+  }
+
   string polstr = (history.get_last()).pol_type;
 
   if(polstr == "XXYY") {
