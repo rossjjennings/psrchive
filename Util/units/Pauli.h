@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Pauli.h,v $
-   $Revision: 1.10 $
-   $Date: 2003/12/26 11:27:08 $
+   $Revision: 1.11 $
+   $Date: 2004/04/06 11:44:57 $
    $Author: straten $ */
 
 #ifndef __Pauli_H
@@ -10,8 +10,16 @@
 
 #include "Jones.h"
 #include "Quaternion.h"
+#include "Basis.h"
 
 #include <vector>
+
+namespace Pauli {
+
+  //! The basis through which Stokes parameters are converted to Jones matrices
+  extern Basis<double> basis;
+
+}
 
 // convert Hermitian Quaternion to Jones matrix
 template<typename T>
@@ -100,21 +108,21 @@ void polar (complex<T>& d, Quaternion<T, Hermitian>& h,
 
 
 // multiply a Jones matrix by a Quaternion
-template<typename T, typename U, Basis B>
+template<typename T, typename U, QBasis B>
 const Jones<T> operator * (const Jones<T>& j, const Quaternion<U,B>& q)
 {
   return j * convert(q);
 }
 
 // multiply a Jones matrix by a Quaternion
-template<typename T, typename U, Basis B>
+template<typename T, typename U, QBasis B>
 const Jones<T> operator * (const Quaternion<T,B>& q, const Jones<U>& j)
 {
   return convert(q) * j;
 }
 
-// multiply Quaternions from different Basis
-template<typename T, typename U, Basis A, Basis B>
+// multiply Quaternions from different QBasis
+template<typename T, typename U, QBasis A, QBasis B>
 const Jones<T> operator * (const Quaternion<T,A>& q, const Quaternion<U,B>& u)
 {
   return convert(q) * convert(u);

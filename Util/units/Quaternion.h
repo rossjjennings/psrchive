@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Quaternion.h,v $
-   $Revision: 1.14 $
-   $Date: 2003/11/12 12:32:26 $
+   $Revision: 1.15 $
+   $Date: 2004/04/06 11:44:57 $
    $Author: straten $ */
 
 #ifndef __Quaternion_H
@@ -12,10 +12,10 @@
 #include "Vector.h"
 
 //! Quaternion algebra is isomorphic with either Hermitian or Unitary matrices
-enum Basis { Hermitian, Unitary };
+enum QBasis { Hermitian, Unitary };
 
 //! Quaternion
-template<typename T, Basis B = Unitary> class Quaternion {
+template<typename T, QBasis B = Unitary> class Quaternion {
   
 public:
   T s0,s1,s2,s3;
@@ -150,7 +150,7 @@ public:
 };
 
 //! The identity Quaternion
-template<typename T, Basis B>
+template<typename T, QBasis B>
 const Quaternion<T,B>& Quaternion<T,B>::identity ()
 {
   static Quaternion I (1,0,0,0);
@@ -203,7 +203,7 @@ const Quaternion<T, Unitary> operator * (const Quaternion<T,Unitary>& a,
 
 
 //! Returns the real component of a Biquaternion
-template<typename T, Basis B>
+template<typename T, QBasis B>
 Quaternion<T,B> real (const Quaternion<complex<T>,B>& j)
 {
   return Quaternion<T,B>
@@ -211,7 +211,7 @@ Quaternion<T,B> real (const Quaternion<complex<T>,B>& j)
 }
 
 //! Returns the imag component of a Biquaternion
-template<typename T, Basis B>
+template<typename T, QBasis B>
 Quaternion<T,B> imag (const Quaternion<complex<T>,B>& j)
 {
   return Quaternion<T,B>
@@ -254,7 +254,7 @@ Quaternion<T, Unitary> herm (const Quaternion<T,Unitary>& j)
 
 
 //! Returns the inverse of Quaternion, j
-template<typename T, Basis B>
+template<typename T, QBasis B>
 Quaternion<T, B> inv (const Quaternion<T,B>& j) 
 {
   T d (-1.0); d/=det(j);
@@ -276,7 +276,7 @@ T det (const Quaternion<T,Unitary>& j)
 
 
 //! Returns the trace of Quaternion, j
-template<typename T, Basis B>
+template<typename T, QBasis B>
 T trace (const Quaternion<T,B>& j)
 { 
   return 2.0 * j.s0;
@@ -301,20 +301,20 @@ const Quaternion<T, Hermitian> sqrt (const Quaternion<T, Hermitian>& h)
 
 
 //! Returns the square of the Frobenius norm of a Biquaternion
-template<typename T, Basis B>
+template<typename T, QBasis B>
 T norm (const Quaternion<complex<T>,B>& j)
 { 
   return 2.0 * (norm(j.s0) + norm(j.s1) + norm(j.s2) + norm(j.s3));
 }
 
 //! Returns the square of the Frobenius norm of a quaternion
-template<typename T, Basis B>
+template<typename T, QBasis B>
 T norm (const Quaternion<T,B>& j)
 { 
   return 2.0 * (j.s0*j.s0 + j.s1*j.s1 + j.s2*j.s2 + j.s3*j.s3);
 }
 
-template<typename T, Basis B>
+template<typename T, QBasis B>
 T fabs (const Quaternion<T,B>& j)
 { 
   return sqrt (norm(j));
