@@ -1,7 +1,10 @@
 /* $Log: MJD.C,v $
-/* Revision 1.5  1998/09/08 05:13:09  mbritton
-/* removed nint from MJD.c and test_utc.c from Makefile
+/* Revision 1.6  1998/09/08 13:03:35  straten
+/* put back nint with #ifdef sun solution
 /*
+ * Revision 1.5  1998/09/08 05:13:09  mbritton
+ * removed nint from MJD.c and test_utc.c from Makefile
+ *
  * Revision 1.4  1998/09/07 10:10:18  straten
  * removed the print statements and things that were left behind...
  *
@@ -26,7 +29,9 @@
  * */
 #include <string.h>
 #include <stdio.h>
-
+#ifdef sun
+#include <sunmath.h>
+#endif
 #include "MJD.h"
 #include "endian.h"
 
@@ -41,10 +46,7 @@ char * MJD::printhhmmss(){
   int hh = secs/3600;
   int mm = (secs-3600*hh)/60;
   double tmp = secs-3600*hh-60*mm;
-  int ss;
-  // solaris doesn't have nint in their standard library
-  if(fmod(tmp,1.0)<.5) ss = (int)tmp;
-  else ss = (int)tmp + 1;
+  int ss = nint (tmp);
   sprintf(permanent,"%2.2d%2.2d%2.2d",hh,mm,ss);
   return (permanent);
 }
