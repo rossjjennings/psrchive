@@ -26,6 +26,7 @@ class SyntheticProfile {
   void generate     ();
   void integrate    ();
   void integrate    (int numtimes);
+  void init_rand    ();
   void build        (Pulsar::Profile* _template = NULL);
 
   void set_height   (double _height)    { height = _height; }
