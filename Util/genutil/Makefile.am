@@ -21,6 +21,14 @@ libgenutilpp_la_SOURCES = CommandParser.C PlotEvent.C util_plus.C	\
 	coord_parse.c coord.c sla_coord.c psr2ar.c dual_parse_it.h	\
 	obsjoin.C
 
+if HAVE_SLA_FORTRAN
+
+# build the C wrappers to the Fortran SLALIB bindings
+include_HEADERS += slalib.h
+libgenutilpp_la_SOURCES += sla_wrap.c
+
+endif
+
 bin_PROGRAMS = getMJD tranScan bshead search_summary xserve_summary
 
 # broken: loopy.C timeconvert.c
