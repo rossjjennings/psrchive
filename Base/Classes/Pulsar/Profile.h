@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Profile.h,v $
-   $Revision: 1.41 $
-   $Date: 2003/12/28 14:02:48 $
+   $Revision: 1.42 $
+   $Date: 2003/12/29 15:38:54 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Profile_h
@@ -205,7 +205,13 @@ namespace Pulsar {
     double tdl_convolve(const Profile* p1, int bins_to_lag) const;
     
     //! convolves this with the given profile (using fft method)
-    void fft_convolve(Profile* p1); 
+    void fft_convolve (const Profile* profile); 
+
+    //! convolves this with the given profile in time domain
+    void convolve (const Profile* profile); 
+
+    //! cross-correlates this with the given profile in time domain
+    void correlate (const Profile* profile); 
 
     //! smears this by convolution with a hat function of given duty cycle
     void smear(float duty_cycle);
@@ -225,6 +231,9 @@ namespace Pulsar {
   protected:
 
     friend class PolnProfile;
+
+    //! does the work for convolve and correlate
+    void convolve (const Profile* profile, int direction);
 
     //! initializes all values to null
     void init ();
