@@ -74,6 +74,14 @@ double Pulsar::Profile::TimeShift (const Profile& std, float& error,
   vector<double> lags;
 
   Reference::To<Pulsar::Profile> ptr = clone();
+  Reference::To<Pulsar::Profile> stp = std.clone();
+
+  // Rotate everything so the maximum of the correlation function is
+  // more likely to lie in the centre of the series. This makes error
+  // estimates easier to compute.
+
+  double artificial_offset = 0.5 - ptr->find_max_phase();
+  ptr->rotate(artificial_offset);
 
   // Remove the baseline (done twice to minimise rounding error)
   *ptr -= ptr->mean(ptr->find_min_phase(0.15));
@@ -223,8 +231,7 @@ double Pulsar::Profile::TimeShift (const Profile& std, float& error,
   }
 
   // The error in phase units
-  float errwidth = (float(2.0 * sqrt((D - height)/E)))/2.0;
-
+  float errwidth = (float(2.0 * sqrt((D - height)/E))) / 2.0;
 
   // The above doesn't work either, it is too insensitive to
   // poor parabolic fits. The next method estimates the error
@@ -235,7 +242,7 @@ double Pulsar::Profile::TimeShift (const Profile& std, float& error,
   vector<float> real;
   vector<float> diff;
 
-  for (int i = -6; i < 6; i++) {
+  for (int i = -3; i < 3; i++) {
     real.push_back(ptr->get_amps()[(maxbin + i)%get_nbin()]);
     float x = float((maxbin + i)%get_nbin())/float(get_nbin());
     parb.push_back(D - E*(x-F)*(x-F));
@@ -252,9 +259,12 @@ double Pulsar::Profile::TimeShift (const Profile& std, float& error,
   // The real error is assumed to be a quadrature sum of the
   // width error and fit error.
 
-  error = sqrt(errfit*errfit + errwidth*errwidth);
+  error = sqrt(errfit*errfit + errwidth*errwidth) / 4.0;
 
   // The shift in phase units, wrapped to be between -0.5 and 0.5
+
+  F -= artificial_offset;
+
   if (F < -0.5)
     F += 1.0;
   else if (F > 0.5)
