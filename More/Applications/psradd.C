@@ -34,7 +34,7 @@ void usage () {
     " -i sec   tscrunch+unload when archive contains 'sec' seconds\n"
     " -P       correct for parallactic angle before tscrunch\n"
     "\n"
-    "If '-i sec' is specified, '-f fname' is ignored.\n";
+    "Note: If '-i' or '-g' is specified, '-f' is ignored.\n";
 }
 
 
@@ -54,9 +54,9 @@ int main (int argc, char **argv)
   int nbin = 0;
 
   // tscrunch+unload when certain limiting conditions are met
-  bool auto_unload = false; 
+  bool auto_add = false; 
 
-  // auto_unload features:
+  // auto_add features:
   // maximum amount of data (in seconds) to integrate into one archive
   float integrate = 0.0;
   // maximum interval (in seconds) across which integration should occur
@@ -70,36 +70,52 @@ int main (int argc, char **argv)
 
   string integrated_extension (".it");
 
+  // name of the output file
   string newname;
+
+  //
   string parname;
 
   int c;
 
   while ((c = getopt(argc, argv, psradd_args)) != -1)  {
     switch (c)  {
+
     case 'h':
       usage();
       return 0;
+
     case 'b':
       nbin = atoi (optarg);
       break;
+
     case 'e':
       integrated_extension = optarg;
       break;  
+
     case 'f':
       newname = optarg;
       break;
-    case 'g':
-      if (sscanf (optarg, "%f", &interval) != 1)
-	fprintf (stderr, "psradd could not parse maximum interval from '%s'\n",
-		 optarg);
-      auto_unload = true;
+
+    case 'F':
+      Pulsar::Archive::append_chronological = false;
+      Pulsar::Archive::append_must_match = false;
       break;
+
+    case 'g':
+      if (sscanf (optarg, "%f", &interval) != 1) {
+	cerr << "psradd error parsing '"<< optarg <<"' as maximum interval\n";
+	return -1;
+      }
+      auto_add = true;
+      break;
+
     case 'i':
-      if (sscanf (optarg, "%f", &integrate) != 1)
-	fprintf (stderr, "psradd could not parse integration total from '%s'\n",
-		 optarg);
-      auto_unload = true;
+      if (sscanf (optarg, "%f", &integrate) != 1) {
+	cerr << "psradd error parsing '"<< optarg <<"' as integration total\n";
+	return -1;
+      }
+      auto_add = true;
       break;
 
     case 'M':
@@ -138,10 +154,13 @@ int main (int argc, char **argv)
     return -1;
   }
 
-  if (!auto_unload && !newname.length()) {
+  if (!auto_add && !newname.length()) {
     cerr << "psradd requires a new filename on the command line (use -f)\n";
     return -1;
   }
+
+  if (auto_add && newname.length())
+    cerr << "psradd ignores -f when AUTO ADD features, -g or -i, are used\n";
 
   psrephem neweph;
   if (!parname.empty()) {
@@ -197,7 +216,10 @@ int main (int argc, char **argv)
     }
 
     if (correct_total) {
-      newname = total->get_filename() + integrated_extension;
+
+      if (auto_add)
+	newname = total->get_filename() + integrated_extension;
+
       if (verbose)
 	cerr << "psradd: New filename: '" << newname << "'" << endl;
 
@@ -218,13 +240,13 @@ int main (int argc, char **argv)
 
       // ///////////////////////////////////////////////////////////////
       //
-      // auto_unload -g: check the gap between the end of total
+      // auto_add -g: check the gap between the end of total
       // and the start of archive
 
       double gap = (archive->start_time() - total->end_time()).in_seconds();
 
       if (verbose)
-	cerr << "psradd: Auto unload - gap = " << gap << " seconds" << endl;
+	cerr << "psradd: Auto add - gap = " << gap << " seconds" << endl;
 
       if (gap > interval) {
 	if (verbose)
@@ -243,12 +265,12 @@ int main (int argc, char **argv)
       }
       catch (Error& error) {
 	cerr << "psradd: Archive::append exception:\n" << error << endl;
-	if (auto_unload)
+	if (auto_add)
 	  reset_total_current = true;
       }
       catch (...) {
         cerr << "psradd: Archive::append exception thrown" << endl;
-        if (auto_unload)
+        if (auto_add)
           reset_total_current = true;
       }
 
@@ -258,13 +280,13 @@ int main (int argc, char **argv)
 
       // ///////////////////////////////////////////////////////////////
       //
-      // auto_unload -i: check that amount of data integrated in total
+      // auto_add -i: check that amount of data integrated in total
       // is less than the limit
       
       double integration = total->integration_length();
 
       if (verbose)
-	cerr << "psradd: Auto unload - integration = " << integration
+	cerr << "psradd: Auto add - integration = " << integration
 	     << " seconds" << endl;
 
       if (integration > integrate)
@@ -276,7 +298,7 @@ int main (int argc, char **argv)
 	total->deparallactify();
 
       if (verbose)
-	cerr << "psradd: Auto unload - tscrunch and unload " 
+	cerr << "psradd: Auto add - tscrunch and unload " 
 	     << total->integration_length() << " s archive" << endl;
 
       // tscrunch the archive
@@ -287,7 +309,7 @@ int main (int argc, char **argv)
       
       if (reset_total_current) {
 	if (verbose)
-	  cerr << "psradd: Auto unload - reset total to current" << endl;
+	  cerr << "psradd: Auto add - reset total to current" << endl;
 	total = archive;
 	correct_total = true;
       }
@@ -300,11 +322,11 @@ int main (int argc, char **argv)
   }
 
   if (!reset_total_next_load) {
-    if (auto_unload)  {
+    if (auto_add)  {
       if (deparallactify)
 	total->deparallactify();
       
-      if (verbose) cerr << "psradd: Auto unload - tscrunching last " 
+      if (verbose) cerr << "psradd: Auto add - tscrunching last " 
 			<< total->integration_length()
 			<< " seconds of data." << endl;
       total->tscrunch();
