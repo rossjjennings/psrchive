@@ -1,6 +1,8 @@
-
+#include <iostream>
 #include <stdio.h>
 #include <string.h>
+#include <values.h>
+
 #include "sky_coord.h"
 #include "coord.h"
 #include "f772c.h"
@@ -27,6 +29,11 @@ Angle oldAngularSeparation(const AnglePair& a1, const AnglePair& a2)
 
 int main ()
 {
+  cerr << "If this process appears to hang, then fix Angle::wrap" << endl;
+  Angle big (MAXFLOAT*0.5);
+  cerr << "big=" << big << endl;
+  cerr << "Angle::wrap test passed" << endl;
+
   sky_coord coordinates;
 
   char coordstr [80];
