@@ -77,7 +77,7 @@ int main (int argc, char **argv)
   // name of file containing list of Archive filenames
   char* metafile = NULL;
 
-  string integrated_extension (".it");
+  string integrated_extension ("it");
 
   // name of the output file
   string newname;
@@ -95,7 +95,7 @@ int main (int argc, char **argv)
       return 0;
       
     case 'i':
-      cout << "$Id: psradd.C,v 1.10 2003/09/30 08:33:18 ahotan Exp $" << endl;
+      cout << "$Id: psradd.C,v 1.11 2003/11/24 07:39:25 ahotan Exp $" << endl;
       return 0;
       
     case 'b':
@@ -246,7 +246,7 @@ int main (int argc, char **argv)
     if (correct_total) {
 
       if (auto_add)
-	newname = total->get_filename() + integrated_extension;
+	newname = total->get_filename() + "." + integrated_extension;
 
       if (verbose)
 	cerr << "psradd: New filename: '" << newname << "'" << endl;
