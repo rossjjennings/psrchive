@@ -37,6 +37,9 @@ toa::toa (const toa & in_toa)
 
 int toa::Parkes_load (const char* instring)
 {
+  if (verbose)
+    cerr << "toa::Parkes_load" << endl;
+
   destroy ();
   if ((instring[0]=='C') || (instring[0]=='c'))
     deleted = 1;
@@ -49,14 +52,13 @@ int toa::parkes_parse (const char* instring)
  			&frequency, datestr, &phs, &error, &telescope);
   if (!deleted && scanned < 5) {
     // an invalid line was not commented out
-    fprintf (stderr, 
-	     "toa::parkes_parse(char*) Error scan:%d/5 '%s'\n",
-	     scanned, instring);
+    if (verbose) cerr << "toa::parkes_parse(char*) Error scan:"
+		      << scanned << "/5 '" << instring << "'" << endl;
     return -1;
   }
   if (arrival.Construct(datestr) < 0)  {
-    fprintf (stderr, "toa::parkes_parse(char*) Error MJD parsing '%s'.\n",
-	     datestr);
+    if (verbose) cerr << "toa::parkes_parse(char*) Error MJD parsing '" 
+		      << datestr << "'" << endl;
     return -1;
   }
 
@@ -82,8 +84,8 @@ int toa::parkes_out (char* outstring) const
 {
   // output the basic line
   sprintf (datestr, "%8.7lf", frequency);
-  sprintf (outstring, "%9.9s  %s   %4.2f%8.2f         %1d ",
- 	   datestr, arrival.printdays(13).data(), phs, error, telescope);
+  sprintf (outstring, "%8.8s   %s   %5.2f %7.2f        %1d ",
+ 	   datestr, arrival.printdays(13).c_str(), phs, error, telescope);
   return 0;
 }
 
@@ -111,6 +113,9 @@ int toa::Parkes_unload (FILE* outstream) const
 
 int toa::Princeton_load (const char* instring)
 {
+  if (verbose)
+    cerr << "toa::Princeton_load" << endl;
+
   destroy ();
 
   telescope = instring[0] - '0';
@@ -120,14 +125,13 @@ int toa::Princeton_load (const char* instring)
 
   if (scanned < 4) {
     // an invalid line was not commented out
-    fprintf (stderr, 
-	     "toa::Princeton_load(char*) Error scanning '%s'\n",
-	     instring);
+    if (verbose) cerr << "toa::Princeton_load(char*) Error scanning '"
+		      << instring << "'" << endl;
     return -1;
   }
   if (arrival.Construct(datestr) < 0)  {
-    fprintf (stderr, "toa::Princeton_load(char*) Error MJD parsing '%s'.\n",
-	     datestr);
+    if (verbose) cerr << "toa::Princeton_load(char*) Error MJD parsing '"
+		      << datestr << "'" << endl;
     return -1;
   }
 
@@ -144,7 +148,7 @@ int toa::Princeton_unload (char* outstring) const
   outstring[0] = char ('0' + telescope);
 
   sprintf (outstring+15, "%8.7g %13.13s %4.2f %8.2f",
- 	   frequency, arrival.printdays(13).data(), error, dmc);
+ 	   frequency, arrival.printdays(13).c_str(), error, dmc);
   return 0;
 }
 
@@ -164,28 +168,45 @@ int toa::Princeton_unload (FILE* outstream) const
 
 int toa::Psrclock_load (const char* instring)
 {
+  if (verbose)
+    cerr << "toa::Psrclock_load ";
+
   destroy ();
 
   char* whitespace = " \n\t";
   string parse = instring + 1;
   filename = stringtok (&parse, whitespace);
+  if (verbose)
+    cerr << "filename='" << filename << "'  ";
 
   if ((instring[0]=='C') || (instring[0]=='c'))
     deleted = 1;
 
-  if (sscanf (parse.data(), "%d %d", &subint, &subband) != 2) {
-    fprintf (stderr, "toa::Psrclock_load - error parsing '%s'\n", instring);
+  if (sscanf (parse.c_str(), "%d %d", &subint, &subband) != 2) {
+    if (verbose) cerr << "toa::Psrclock_load - error parsing '"
+		      << instring << "'" << endl;
     return -1;
   }
+  if (verbose)
+    cerr << "int=" << subint << " band=" << subband;
+
   // remove the subint and subband
   stringtok (&parse, whitespace);
   stringtok (&parse, whitespace);
 
-  if (parkes_parse (parse.data()) < 0)
+  if (verbose)
+    cerr << "  rest='" << parse << "'" << endl;
+
+  if (parkes_parse (parse.c_str()) < 0)
     return -1;
 
   guess_instrument();
   format = Psrclock;
+
+  if (verbose) {
+    cerr << "toa::Psrclock_loaded ";
+    unload (stderr);
+  }
   return 0;
 }
 
@@ -196,10 +217,9 @@ int toa::Psrclock_unload (char* outstring) const
   else
     outstring[0]=' ';
 
-  sprintf (outstring+1, "%s %3d %2d", filename.data(), subint, subband);
+  sprintf (outstring+1, "%s %3d %2d     ", filename.c_str(), subint, subband);
 
-  outstring [filename.length()+8] = ' ';
-  return parkes_out (outstring+filename.length()+10);
+  return parkes_out (outstring+filename.length()+9);
 }
 
 int toa::Psrclock_unload (FILE* outstream) const
@@ -218,6 +238,9 @@ int toa::Psrclock_unload (FILE* outstream) const
 
 int toa::Rhythm_load (const char* instring)
 {
+  if (verbose)
+    cerr << "toa::Rhythm_load" << endl;
+
   if (Parkes_load (instring) < 0)
     return -1;
 
@@ -228,8 +251,8 @@ int toa::Rhythm_load (const char* instring)
     struct tm date;
     extern long timezone; // defined in time.h
     if (str2tm (&date, datestr) < 0) {
-      fprintf (stderr, "toa::load(char*) Error parsing '%s' as UTC.\n",
-	       datestr);
+      if (verbose) cerr << "toa::load(char*) Error parsing '"
+			<< datestr << "' as UTC." << endl;
       return -1;
     }
     calculated = mktime (&date);
@@ -241,9 +264,8 @@ int toa::Rhythm_load (const char* instring)
 
   scanned = sscanf (instring+81, "%6d%6d%2d", &subint, &subband, &subpoln);
   if (scanned < 3) {
-    fprintf (stderr,
-	     "toa::Rhythm_load(char*) Error scanning '%s'\n",
-	     instring + 81);
+    if (verbose) cerr << "toa::Rhythm_load(char*) Error scanning '"
+		      << instring + 81 << "'" << endl;
     return -1;
   }
 
@@ -272,7 +294,7 @@ int toa::Rhythm_unload (char* outstring) const
   outstring[80] = 'R';
 
   sprintf (outstring+81, "%6d%6d%2d %s", 
-	   subint, subband, subpoln, filename.data());
+	   subint, subband, subpoln, filename.c_str());
   return 0;
 }
 
@@ -294,20 +316,20 @@ int toa::Rhythm_unload (FILE* outstream) const
 
 int toa::load (const char* instring)
 {
-  if (!instring)
+  if ( !instring )
     return -1;
 
-  if (instring[80] == 'R')
-    return Rhythm_load (instring);
+  if ( instring[80] == 'R' )
+    return Rhythm_load( instring );
 
-  else if (isdigit(instring[0]))
-    return Princeton_load (instring);
+  else if ( isdigit( instring[0] ) )
+    return Princeton_load( instring );
 
-  else if (instring[1] == ' ')
-    return Parkes_load (instring);
+  else if ( instring[17] != ' ' )
+    return Psrclock_load( instring );
 
   else
-    return Psrclock_load (instring);
+    return Parkes_load( instring );
 }
 
 // returns 0 if toa was loaded, 1 if end of file reached, -1 if error occurs
@@ -341,7 +363,7 @@ int toa::load (FILE * instream)
     return 1;
 
   if (verbose)
-    fprintf (stderr, "toa::load(FILE*) to parse '%s'\n", buffer);
+    cerr << "toa::load(FILE*) to parse '" << buffer << "'" << endl;
 
   return load (buffer);
 }
@@ -361,7 +383,7 @@ int toa::unload (FILE* outstream, Format fmt) const
   case Rhythm:
     return Rhythm_unload (outstream);
   default:
-    fprintf (stderr, "toa::unload undefined format\n");
+    if (verbose) cerr << "toa::unload undefined format" << endl;
     return -1;
   }
 }
@@ -381,7 +403,7 @@ int toa::unload (char* outstring, Format fmt) const
   case Rhythm:
     return Rhythm_unload (outstring);
   default:
-    fprintf (stderr, "toa::unload undefined format\n");
+    if (verbose) cerr << "toa::unload undefined format" << endl;
     return -1;
   }
 }
@@ -402,7 +424,7 @@ int toa::Tempo_unload (FILE* outstream) const
   case Princeton:
     return Princeton_unload (outstream);
   default:
-    fprintf (stderr, "Tempo_unload undefined format\n");
+    if (verbose) cerr << "toa::Tempo_unload undefined format" << endl;
     return -1;
   }
 }
@@ -417,7 +439,7 @@ int toa::Tempo_unload (char* outstring) const
   case Princeton:
     return Princeton_unload (outstring);
   default:
-    fprintf (stderr, "Tempo_unload undefined format\n");
+    if (verbose) cerr << "toa::Tempo_unload undefined format" << endl;
     return -1;
   }
 }
@@ -427,11 +449,11 @@ void toa::guess_instrument ()
   if (filename.empty())
     return;
 
-  const char* beg = strrchr (filename.data(), '/');
+  const char* beg = strrchr (filename.c_str(), '/');
   if (beg)
     beg ++;
   else
-    beg = filename.data();
+    beg = filename.c_str();
     
   switch (*beg) {
   case 'c':
@@ -561,7 +583,7 @@ void toa::sizebuf (size_t length)
   if (bufsz < length) {
     void* temp = realloc (buffer, length);
     if (temp == NULL) {
-      fprintf (stderr, "toa::sizebuf Cannot allocate buffer space\n");
+      cerr << "toa::sizebuf Cannot allocate buffer space" << endl;
       throw ("bad_alloc");
     }
     buffer = (char*) temp;
@@ -572,17 +594,18 @@ void toa::sizebuf (size_t length)
 bool toa::valid()
 {
   if (frequency < 20.0) {
-    fprintf (stderr, "toa::load(char*) Error: FREQUENCY:%lf is too small.\n",
- 	     frequency);
+    if (verbose) cerr << "toa::load(char*) Error: FREQUENCY=" << frequency
+		      << " is too small." << endl;
     return 0;
   }
   if (arrival < MJD (40000,0,0.0)) {
-    fprintf (stderr, "toa::load(char*) Error: MJD:%s is too small\n",
- 	     arrival.printall());
+    if (verbose) cerr << "toa::load(char*) Error: MJD=" << arrival 
+		      << " is too small" << endl;
     return 0;
   }
   if ((error <= 0.0) || (error > 999999999.0)) {
-    fprintf (stderr, "toa::load(char*) Error: ERROR:%f is weird.\n", error);
+    if (verbose) cerr << "toa::load(char*) Error: ERROR=" << error 
+		      << " is weird." << endl;
     return 0;
   }
 
