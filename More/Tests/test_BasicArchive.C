@@ -2,6 +2,8 @@
 
 int main ()  {
 
+  Pulsar::Archive::verbose = true;
+
   Pulsar::BasicArchive archive;
 
 }
