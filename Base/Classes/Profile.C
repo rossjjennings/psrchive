@@ -723,47 +723,36 @@ Default behaviour is to calculate a pulse width about the maximum bin
  */
 
 //! Sum the flux in the specified bins
-float Pulsar::Profile::sum_flux(float dropoff) const{
+float Pulsar::Profile::sum_flux(float dropoff,float min_phase,float dc) const{
   int rise = 0;
   int fall = 0;
   find_spike_edges(rise,fall,dropoff);
 
-  return sum_flux(rise,fall);
+  return sum_flux(rise,fall,min_phase,dc);
 }
 
 //! Finding the bin numbers at which the flux falls below a threshold, and sum the flux in those bins
-float Pulsar::Profile::sum_flux(int rise, int fall) const {
+float Pulsar::Profile::sum_flux(int rise, int fall, float min_phase, float dc) const {
   int nbin = get_nbin();
 
   nbinify(rise,fall,nbin);
 
-  float spike_phase = 0.5*(fall+rise)/float(nbin);
-  float spike_antiphase = spike_phase + 0.5;
-  if( spike_antiphase > 1.0 )
-    spike_antiphase--;
-
-  //fprintf(stderr,"\nPulsar::Profile::sum_flux() got spike_phase=%f spike_antiphase=%f fall-rise=%d\n",
-  //  spike_phase, spike_antiphase, fall-rise);
+  if( min_phase < 0.0 ){
+    float spike_phase = 0.5*(fall+rise)/float(nbin);
+    float spike_antiphase = spike_phase + 0.5;
+    if( spike_antiphase > 1.0 )
+      spike_antiphase--;
+    min_phase = spike_antiphase;
+  }
 
   float integrated_flux = 0.0;
 
   const float* amps = get_amps();
 
-  float mean_off_pulse = mean(spike_antiphase);
+  float mean_off_pulse = mean(min_phase,dc);
 
-  for( int i=rise; i<fall; i++){
-    //fprintf(stderr,"Pulsar::Profile::sum_flux() adding in %f\n",
-    //    amps[i%nbin]-mean_off_pulse);
+  for( int i=rise; i<fall; i++)
     integrated_flux += amps[i%nbin];
-  }
-
-  //  fprintf(stderr,"\nPulsar::Profile::sum_flux() returning integrated_flux - mean(spike_antiphase)*(fall-rise)\n"
-  //  " = %f - mean(%f) * (%d-%d)\n"
-  //  " = %f - %f * %f\n"
-  //  " = %f\n",
-  //  integrated_flux, spike_antiphase, fall, rise,
-  //  integrated_flux, mean_off_pulse, float(fall-rise),
-  //  integrated_flux - mean_off_pulse*(fall-rise));
 
   return integrated_flux - mean_off_pulse*(fall-rise);
 }

@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Profile.h,v $
-   $Revision: 1.68 $
-   $Date: 2004/08/24 04:26:49 $
-   $Author: ahotan $ */
+   $Revision: 1.69 $
+   $Date: 2004/09/10 03:00:20 $
+   $Author: hknight $ */
 
 #ifndef __Pulsar_Profile_h
 #define __Pulsar_Profile_h
@@ -160,9 +160,12 @@ namespace Pulsar {
 			  int spike_bin = -1) const;
 
     //! Sum the flux in the specified bins
-    float sum_flux(int rise, int fall) const;
+    float sum_flux(int rise, int fall,
+		   float min_phase = -1.0, float dc=default_duty_cycle) const;
     //! Finding the bin numbers at which the flux falls below a threshold, and sum the flux in those bins
-    float sum_flux(float dropoff=default_amplitude_dropoff) const;
+    //! Assumes profile is delta function
+    float sum_flux(float dropoff=default_amplitude_dropoff,
+		   float min_phase = -1.0, float dc=default_duty_cycle) const;
 
     //! Returns the bin number with the maximum amplitude
     int find_max_bin (int bin_start=0, int bin_end=0) const;
