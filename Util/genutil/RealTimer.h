@@ -1,6 +1,6 @@
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/RealTimer.h,v $
-   $Revision: 1.1 $
-   $Date: 2003/05/15 09:23:29 $
+   $Revision: 1.2 $
+   $Date: 2004/04/08 04:30:27 $
    $Author: hknight $ */
 
 #ifndef __RealTimer_H
@@ -12,10 +12,10 @@
 #include "Reference.h"
 #include "psr_cpp.h"
 
-class RealTimer : public Reference::Able{
+class RealTimer : public Reference::Able {
  public:
   RealTimer();
-  ~RealTimer();
+  virtual ~RealTimer();
 
   //! start the clock
   void start();
