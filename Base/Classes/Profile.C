@@ -126,7 +126,6 @@ const Pulsar::Profile& Pulsar::Profile::operator -= (const Profile& profile)
   return average (profile, -1.0);
 }
 
-
 /////////////////////////////////////////////////////////////////////////////
 //
 // Pulsar::Profile::operator +=
@@ -172,7 +171,6 @@ void Pulsar::Profile::get_amps (float* data, unsigned jbin) const
     aptr ++; dptr += jbin;
   }
 }
-
  
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -228,7 +226,6 @@ void Pulsar::Profile::dedisperse (double dm, double ref_freq, double pfold)
   set_centre_frequency (ref_freq);
 }
 
-
 /////////////////////////////////////////////////////////////////////////////
 //
 // Pulsar::Profile::zero
@@ -273,7 +270,6 @@ void Pulsar::Profile::logarithm (double base, double threshold)
       amps[ibin] = log_threshold;
 
 }
- 
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -298,7 +294,6 @@ void Pulsar::Profile::fold (unsigned nfold)
 
   operator *= (1.0/float(nfold));
 }
- 
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -306,16 +301,20 @@ void Pulsar::Profile::fold (unsigned nfold)
 //
 void Pulsar::Profile::bscrunch (unsigned nscrunch) { try
 {
-  if (verbose)
+  if (verbose) {
     cerr << "Pulsar::Profile::bscrunch" << endl;
+    cerr << "  Current nbin   = " << get_nbin() << endl;
+    cerr << "  Scrunch factor = " << nscrunch << endl;
+  }
   
   if (nscrunch < 1)
-    throw Error (InvalidParam, 0, "nscrunch=%d", nscrunch);
+    throw Error (InvalidParam, "",
+		 "nscrunch cannot be less than unity");
   
   if (nbin % nscrunch)
-    throw Error (InvalidRange, 0, 
-		 "nbin=%d %% nscrunch=%d != 0", nbin, nscrunch);
-
+    throw Error (InvalidRange, "",
+		 "Scrunch factor does not divide number of bins");
+  
   unsigned newbin = nbin/nscrunch;
 
   for (unsigned i=0; i<newbin; i++) {
@@ -409,6 +408,7 @@ int Pulsar::Profile::find_min_bin (int istart, int iend) const
   return imin;
 }
 
+
 /////////////////////////////////////////////////////////////////////////////
 //
 // Pulsar::Profile::max
@@ -455,45 +455,39 @@ double Pulsar::Profile::sum (int istart, int iend) const
   return tot;
 }
 
-#if 0
 /////////////////////////////////////////////////////////////////////////////
 //
-// Pulsar::Profile::mean
+// Pulsar::Profile::get_ascii
 //
-double Pulsar::Profile::mean (int istart, int iend) const
+string Pulsar::Profile::get_ascii (int bin_start=0, int bin_end=0) const
 {
-  if (verbose)
-    cerr << "Pulsar::Profile::mean" << endl;
-
-  nbinify (istart, iend, nbin);
-  int totbin = iend - istart;
-  return sum (istart, iend) / double(totbin);
-}
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// Pulsar::Profile::rms
-//
-double Pulsar::Profile::rms (int istart, int iend) const
-{
-  if (verbose)
-    cerr << "Pulsar::Profile::rms" << endl;
-
-  nbinify (istart, iend, nbin);
-  int totbin = iend - istart;
-
-  double sumsq = 0.0;
-  float amp, mean_amp = mean (istart, iend);
-
-  for (int ibin=istart; ibin < iend; ibin++) {
-    amp = amps[ibin%nbin] - mean_amp;
-    sumsq += amp*amp;
+  if (bin_start > bin_end)
+    throw Error(InvalidParam, "Pulsar::Profile::get_ascii",
+		"Start bin is greater than end bin");
+  
+  unsigned start = 0;
+  unsigned end   = get_nbin();
+  
+  if (bin_end > 0 && bin_end < int(get_nbin() - 1))
+    end = unsigned(bin_end);
+  
+  if (bin_start > 0 && bin_start < int(get_nbin() - 1))
+    start = unsigned(bin_start);
+  
+  string result;
+  
+  char* temp = new char[128];
+  
+  for (unsigned ibin=start; ibin < end; ibin++) {
+    sprintf(temp, "%f", get_amps()[ibin]);
+    result += temp;
+    result += "\n";
   }
 
-  return sqrt(sumsq/totbin);
+  delete[] temp;
+  
+  return result;
 }
-
-#endif
 
 /////////////////////////////////////////////////////////////////////////////
 //

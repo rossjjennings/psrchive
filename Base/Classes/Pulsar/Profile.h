@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Profile.h,v $
-   $Revision: 1.39 $
-   $Date: 2003/12/22 05:51:35 $
+   $Revision: 1.40 $
+   $Date: 2003/12/24 04:17:29 $
    $Author: ahotan $ */
 
 #ifndef __Pulsar_Profile_h
@@ -99,6 +99,9 @@ namespace Pulsar {
     float min  (int bin_start=0, int bin_end=0) const;
     //! Returns the sum of all amplitudes
     double sum (int bin_start=0, int bin_end=0) const;
+
+    //! Returns a string with an ASCII representation of the amplitudes
+    string get_ascii (int bin_start=0, int bin_end=0) const;
 
     //! Calculates the mean, variance, and variance of the mean
     void stats (double* mean, double* variance = 0, double* varmean = 0,
@@ -287,6 +290,5 @@ void Pulsar::Profile::get_amps (vector<T>& data) const
   for (unsigned ibin=0; ibin<nbin; ibin++)
     data[ibin] = static_cast<T>( amps[ibin] );
 }
-
 
 #endif // !defined __Pulsar_Profile_h
