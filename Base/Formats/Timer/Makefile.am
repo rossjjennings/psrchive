@@ -68,8 +68,7 @@ PROGRAMS = calinfo.C align.C amps.C chanprep.C crstd.C \
 
 TESTS = timer_size.c baseband_header_size.C
 
-LDFLAGS += -larchive -ltempo++ -lpolyco -leph -ltimes \
-	-lgenutil++ -lgenutil -lsla $(LFFT) $(LF77) -lm $(LPSRCHIVE)
+LDFLAGS += $(LARCHIVE)
 
 oneprof.LDFLAGS := $(LDFLAGS) $(LCPGPLOT)
 plotsub.LDFLAGS := $(LDFLAGS) $(LCPGPLOT)
