@@ -248,7 +248,7 @@ void Pulsar::Archive::apply_model (const polyco& old, Integration* subint)
 
 // ///////////////////////////////////////////////////////////////////////
 //
-// Archive::need_updated_model
+// Archive::good_model
 //
 /*!
   This method tests if the given model has a polynomial that applies
