@@ -14,7 +14,7 @@ LIB_F_SRCS = ffft.f fftfit.f brent.f fccf.f cprof.f shiftbyfft.f ionrm.f \
 
 LIB_SRCS   = ${LIB_C_SRCS} ${LIB_F_SRCS}
 
-LDFLAGS   += -larchive -lpolyco -ldialog -ltimes \
+LDFLAGS   += -larchive -lpolyco -ldialog -ltimes -lfptm\
              -lpsrinfo -leph -lsla -lpsrfft -lgenutil -lfftw -lm $(LIBNSL) \
 	     -lcpgplot $(LPGPLOT) 
 
@@ -36,4 +36,7 @@ PROGRAMS = align.C amps.C chanprep.C  \
 NOT_WORKING     = bandpass.C detail.C xtoa.C bin_ph.C corflux.C flux.C
 
 include $(LOCAL_ROOT)/include/Makefile.extended
+
+
+
 
