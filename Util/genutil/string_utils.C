@@ -50,3 +50,19 @@ stringdelimit(const vector<string>& words, char delimiter)
 
   return str;
 }
+
+// Stuff to turn an array of char *'s into a vector of strings
+// useful for taking lists of files on the command line
+vector<string> 
+cstrarray2vec(const char **vals, int nelem)
+{
+  vector<string> v;
+  int i;
+
+  for (i=0; i < nelem; i++)
+    v.push_back(string(vals[i]));
+
+  return v;
+}
+
+

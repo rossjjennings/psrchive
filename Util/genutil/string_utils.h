@@ -1,7 +1,8 @@
+//-*-C++-*-
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Attic/string_utils.h,v $
-   $Revision: 1.10 $
-   $Date: 2000/06/02 07:24:01 $
-   $Author: straten $ */
+   $Revision: 1.11 $
+   $Date: 2001/02/05 06:31:31 $
+   $Author: redwards $ */
 
 #ifndef __STRING_UTILS_H
 #define __STRING_UTILS_H
@@ -75,12 +76,15 @@ inline int stringlen (float val, unsigned precision = 6)
 
 string stringprintf(char *fmt ...);
 
+// Stuff to delimit a vector of strings and the reverse
 vector<string> 
    stringdecimate(const string& wordstr, const string& delimiters);
 string stringdelimit(const vector<string>& words, char delimiter);
 
-
-
+// Stuff to turn an array of char *'s into a vector of strings
+// useful for taking lists of files on the command line
+vector<string> cstrarray2vec(const char **vals, int nelem);
 
 #endif
+
 
