@@ -218,6 +218,9 @@ void Pulsar::BasebandArchive::set_header ()
 {
   ::init (bhdr);
 
+  if (verbose)
+    cerr << "Pulsar::BasebandArchive::set_header" << endl;
+
   const dspReduction* reduction = get<dspReduction>();
   if (reduction) {
 
@@ -255,9 +258,13 @@ void Pulsar::BasebandArchive::set_header ()
   const Passband* passband = get<Passband>();
   if (passband) {
 
-    bhdr.pband_resolution = passband->get_nchan ();
+    bhdr.pband_resolution = passband->get_nchan() * passband->get_nband();
     bhdr.pband_channels = passband->get_npol ();
-    
+
+    if (verbose) cerr << "Pulsar::BasebandArchive::set_header Passband"
+		   " nfreq=" << bhdr.pband_resolution <<
+		   " nchan=" << bhdr.pband_channels << endl;
+
   }
 
   bhdr.time_domain = 0;
@@ -441,8 +448,10 @@ void Pulsar::BasebandArchive::backend_load (FILE* fptr)
 
   if (bhdr.pband_resolution) {
 
-    if (verbose) cerr << "BasebandArchive::backend_load "
-		      << bhdr.pband_channels << " bandpasses.\n";
+    if (verbose) 
+      cerr << "BasebandArchive::backend_load "
+           << bhdr.pband_channels << " bandpasses with " 
+           << bhdr.pband_resolution << " channels\n";
 
     Reference::To<Passband> passband = new Passband;
     passband->resize (bhdr.pband_resolution, bhdr.pband_channels);
@@ -452,7 +461,6 @@ void Pulsar::BasebandArchive::backend_load (FILE* fptr)
       if (fread_compressed (fptr, &temp, swap_endian) < 0)
 	throw Error (FailedSys, "BasebandArchive::backend_load",
 		     "fread_compressed passband[%d]", ipb);
-
 
       if (swap_passband) {
 	unsigned nswap = bhdr.pband_resolution / 2;
@@ -487,6 +495,9 @@ void Pulsar::BasebandArchive::backend_load (FILE* fptr)
 
 void Pulsar::BasebandArchive::backend_unload (FILE* fptr) const
 {
+  if (verbose) cerr << "BasebandArchive::backend_unload header size=" 
+                    << bhdr.size << endl;
+
   if (bhdr.size != hdr.be_data_size)
     throw Error (InvalidState, "BasebandArchive::backend_unload",
 		 "invalid header size (timer:%d, bhdr:%d)\n", 
@@ -513,6 +524,9 @@ void Pulsar::BasebandArchive::backend_unload (FILE* fptr) const
       throw Error (InvalidState, "BasebandArchive::backend_unload",
 		   "no TwoBitStats Extension");
 
+    if (verbose) cerr << "BasebandArchive::backend_unload " 
+                      << bhdr.analog_channels << " 2-bit histograms" << endl;
+         
     for (int idc=0; idc<bhdr.analog_channels; idc++)
       if (fwrite_compressed (fptr, twobit->get_histogram(idc)) < 0)
 	throw Error (FailedSys, "BasebandArchive::backend_unload",
@@ -527,10 +541,33 @@ void Pulsar::BasebandArchive::backend_unload (FILE* fptr) const
       throw Error (InvalidState, "BasebandArchive::backend_unload",
 		   "no Passband Extension");
 
-    for (int ipb=0; ipb<bhdr.pband_channels; ipb++)
-      if (fwrite_compressed (fptr, passband->get_passband(ipb)) < 0)
+    if (verbose) cerr << "BasebandArchive::backend_unload " 
+                      << bhdr.pband_channels << " bandpasses with "
+                      << bhdr.pband_resolution << " channels" << endl;
+
+    vector<float> temp (bhdr.pband_resolution);
+
+    for (int ipb=0; ipb<bhdr.pband_channels; ipb++)  {
+
+      unsigned itemp = 0;
+
+      for (unsigned iband=0; iband<passband->get_nband(); iband++)  {
+        const vector<float>& pb = passband->get_passband (ipb, iband);
+        for (unsigned ichan=0; ichan < pb.size(); ichan++) {
+          temp[itemp] = pb[ichan];  itemp++;
+        }
+      }
+
+      if (itemp != unsigned(bhdr.pband_resolution))
+        throw Error (InvalidState, "BasebandArchive::backend_unload",
+                     "passband nband=%d*nchan=%d != resolution=%d",
+                     passband->get_nband(), passband->get_nband(),
+                     bhdr.pband_resolution);
+
+      if (fwrite_compressed (fptr, temp) < 0)
 	throw Error (FailedSys, "BasebandArchive::backend_unload",
 		     "fwrite_compressed passband[%d]", ipb);
+    }
 
   }
 
@@ -540,6 +577,9 @@ void Pulsar::BasebandArchive::backend_unload (FILE* fptr) const
     throw Error (InvalidState, "BasebandArchive::backend_unload",
 		 "unloaded %d bytes != %d bytes\n",
 		 file_end - file_start, hdr.be_data_size);
+
+  if (verbose)
+    cerr << "BasebandArchive::backend_unload exit" << endl;
 }
 
 const vector<float>& 
