@@ -7,7 +7,7 @@
 #include "model_profile.h"
 #include "f772c.h"
 
-#define SQR(x) (x)*(x)
+#define SQR(x) ((x)*(x))
 
 extern "C" {
   void F772C(fccf) (float *, float *, float *);
@@ -27,6 +27,7 @@ int model_profile (int npts, int narrays, float** prf, float** std,
 	  xcorr_amps!=0 && xcorr_phases!=0);
 
   int npt2 = npts/2;
+
   int i,j;
 
   for (i=0; i<narrays; ++i) {
@@ -124,7 +125,7 @@ int model_profile (int npts, int narrays, float** prf, float** std,
   }
 
   if (s1==0 || s2<=0 || s3<=0) {
-    cerr << "model_profile: partial sums <= 0" << endl;
+    cerr << "model_profile: partial sums s1=" << s1 << " s2=" << s2 << " s3=" << s3 << endl;
     return -1;
   }
 
@@ -178,24 +179,25 @@ double zbrent(float low_tau, float high_tau,
   double eps = .00000006;
   double a = low_tau;
   double b = high_tau;
+  double c = high_tau; 
+  double d = 0;
+  double e = 0;
   double fa = low_deriv_chisq; 
   double fb = high_deriv_chisq;
   double fc = fb;
 
   for (int i=1; i<i_max; ++i) {
 
-    double c=0, d=0, e=0;
-
     if(fb*fc>0){
-      c = a;
-      fc =fa;
-      d = b-a;
-      e = d;
+      c  = a;
+      fc = fa;
+      d  = b-a;
+      e  = d;
     }
     if(fabs(fc)<fabs(fb)){
-      a = b;
-      b = c;
-      c = a;
+      a  = b;
+      b  = c;
+      c  = a;
       fa = fb;
       fb = fc;
       fc = fa;
@@ -239,3 +241,8 @@ double zbrent(float low_tau, float high_tau,
   }
   return(b);
 }
+
+
+
+
+
