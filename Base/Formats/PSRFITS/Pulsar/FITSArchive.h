@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/PSRFITS/Pulsar/FITSArchive.h,v $
-   $Revision: 1.26 $
-   $Date: 2004/09/28 07:17:38 $
-   $Author: ahotan $ */
+   $Revision: 1.27 $
+   $Date: 2004/10/08 13:33:58 $
+   $Author: straten $ */
 
 #ifndef __Pulsar_FITSArchive_h
 #define __Pulsar_FITSArchive_h
@@ -31,6 +31,7 @@ namespace Pulsar {
   class Passband;
   class DigitiserStatistics;
   class PolnCalibratorExtension;
+  class FluxCalibratorExtension;
   class CalibratorStokes;
  
   //! Loads and unloads Pulsar FITS archives
@@ -125,6 +126,9 @@ namespace Pulsar {
     //! Unload PolnCalibratorExtension to the FEEDPAR HDU
     static void unload (fitsfile* fptr, const PolnCalibratorExtension* ext);
     
+    //! Unload FluxCalibratorExtension to the FLUX_CAL HDU
+    static void unload (fitsfile* fptr, const FluxCalibratorExtension* ext);
+
      //! Unload CalibratorStokes to the CAL_POLN HDU
     static void unload (fitsfile* fptr, const CalibratorStokes* ext);
     
@@ -179,6 +183,7 @@ namespace Pulsar {
     void load_DigitiserStatistics (fitsfile*);
     void load_Passband (fitsfile*);
     void load_PolnCalibratorExtension (fitsfile*);
+    void load_FluxCalibratorExtension (fitsfile*);
     void load_CalibratorStokes (fitsfile*);
     void load_Pointing (fitsfile* fptr, int row,
 				   Pulsar::Integration* integ);
