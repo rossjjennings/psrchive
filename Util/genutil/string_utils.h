@@ -1,7 +1,7 @@
 //-*-C++-*-
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Attic/string_utils.h,v $
-   $Revision: 1.21 $
-   $Date: 2003/07/11 12:24:42 $
+   $Revision: 1.22 $
+   $Date: 2003/07/20 14:21:27 $
    $Author: hknight $ */
 
 #ifndef __STRING_UTILS_H
@@ -14,11 +14,11 @@
 #include <iostream>
 #include <iomanip>
 #include <strstream>
+//#include <sstream>
+//#include <fstream>
+//#include <ostream>
 #include <string>
 #include <vector>
-
-#include <stdio.h>
-#include <stdlib.h>
 
 #include "psr_cpp.h"
 

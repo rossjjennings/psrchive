@@ -102,7 +102,7 @@ vector<string> stringlines(const string& str)
   if( str.size()==0 )
     return lines;
   
-  char* cptr = (char*)str.begin();
+  char* cptr = (char*)&*str.begin();
   char* dend = cptr + str.size();
   char* start = cptr;
 
