@@ -1,7 +1,7 @@
 //-*-C++-*-
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Attic/string_utils.h,v $
-   $Revision: 1.16 $
-   $Date: 2002/10/30 07:49:14 $
+   $Revision: 1.17 $
+   $Date: 2002/12/08 14:47:32 $
    $Author: hknight $ */
 
 #ifndef __STRING_UTILS_H
@@ -17,6 +17,9 @@
 #include <string>
 #include <vector>
 
+#include <stdio.h>
+#include <stdlib.h>
+
 #include "psr_cpp.h"
 
 // Like perl chomp.  Returns true if successful.
@@ -25,6 +28,9 @@ bool h_chomp(string& ss, string gone);
 
 // Like perl chop
 void h_chop(string& ss);
+
+// Like fscanf(fptr,"%s%s",ignore,answer) except it gets more than 1 word
+bool retrieve_cstring(FILE* fptr,string ignore,char* answer);
 
 // ///////////////////////////////////////////////////////////
 // reads up to 'nbytes' (or to eof) from 'istr', adding them 

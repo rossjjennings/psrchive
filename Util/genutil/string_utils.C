@@ -5,6 +5,7 @@
 #include <algorithm>
 
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "string_utils.h"
 
@@ -42,6 +43,20 @@ bool h_chomp(string& ss,string gone){
 void h_chop(string& ss){
   //fprintf(stderr,"2hiyo\n");
   ss.resize(ss.size()-1);
+}
+
+// Like fscanf(fptr,"%s%s",ignore,answer) except it gets more than 1 word
+bool retrieve_cstring(FILE* fptr,string ignore,char* answer){
+  char dummy[1024];
+  fgets(dummy,1023,fptr);
+  //  fprintf(stderr,"\n\nretrieve_cstring() got dummy='%s'\n",dummy);
+  string ss(dummy);
+  h_chomp(ss);
+  ss.replace(0,ignore.length(),"");
+  //fprintf(stderr,"retrieve_cstring() got ss='%s'\n",ss.c_str());
+  strcpy(answer,ss.c_str());
+  //fprintf(stderr,"retrieve_cstring() got answer='%s'\n",answer);
+  return true;
 }
 
 // redwards 24 Jan 00 
@@ -113,7 +128,7 @@ string bool2string(bool mybool){
 
 void* string2ptr(string ss){
   void* ptr;
-  sscanf(ss.c_str(),"%p",ptr);
+  sscanf(ss.c_str(),"%p",&ptr);
   return ptr;
 }
 
