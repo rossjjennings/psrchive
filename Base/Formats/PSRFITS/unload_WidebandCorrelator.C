@@ -10,15 +10,21 @@ void Pulsar::FITSArchive::unload (fitsfile* fptr,
   // no comment
   char* comment = 0;
 
+  fits_update_key (fptr, TSTRING, "BACKEND", 
+		   const_cast<char*>(ext->get_name().c_str()),
+		   comment, &status);
+  
   fits_update_key (fptr, TSTRING, "BECONFIG", 
 		   const_cast<char*>(ext->configfile.c_str()),
 		   comment, &status);
   
   fits_update_key (fptr, TINT, "NRCVR",
-		   const_cast<int*>(&(ext->nrcvr)), comment, &status);
+		   const_cast<int*>(&(ext->nrcvr)),
+		   comment, &status);
 
   fits_update_key (fptr, TDOUBLE, "TCYCLE",
-		   const_cast<double*>(&(ext->tcycle)), comment, &status);
+		   const_cast<double*>(&(ext->tcycle)),
+		   comment, &status);
 
   if (status)
     throw FITSError (status, "Pulsar::FITSArchive::unload WidebandCorrelator");

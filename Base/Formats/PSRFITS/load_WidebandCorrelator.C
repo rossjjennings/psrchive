@@ -23,7 +23,7 @@ void Pulsar::FITSArchive::load_WidebandCorrelator (fitsfile* fptr)
 
   fits_read_key (fptr, TSTRING, "BACKEND", tempstr.get(), comment, &status);
 
-  if (status == 0) {
+  if (status != 0) {
     if (verbose == 3)
       cerr << FITSError (status, "FITSArchive::load_WidebandCorrelator",
 			 "fits_read_key BACKEND").get_message() << endl;
@@ -40,7 +40,7 @@ void Pulsar::FITSArchive::load_WidebandCorrelator (fitsfile* fptr)
     cerr << "FITSArchive::load_header reading instrument config" << endl;
 
   fits_read_key (fptr, TSTRING, "BECONFIG", tempstr.get(), comment, &status);
-  if(status == 0) {
+  if (status == 0) {
     ext->configfile = tempstr.get();
   }
   else {
