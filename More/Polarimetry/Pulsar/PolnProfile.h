@@ -77,6 +77,9 @@ namespace Pulsar {
 
     //! Convert to the specified state
     void convert_state (Signal::State output_state);
+
+    //! Convert the Stokes parameters to the specified basis without changing the labels
+    void convert_basis (Signal::Basis to = Signal::Circular);
     
   protected:
 

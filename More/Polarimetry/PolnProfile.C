@@ -337,3 +337,45 @@ void Pulsar::PolnProfile::sum_difference (Profile* sum, Profile* difference)
     d[ibin] = temp - d[ibin];
   }
 }
+void Pulsar::PolnProfile::convert_basis (Signal::Basis to) {
+// The way this works is simple. If an archive has been formaed assuming a linear basis
+// and the true basis was actually circular - then the Stokes parameters in a full Stokes archvie will be misslabeled
+// I think ...
+//
+// linear basis
+// ============
+// S = |L|^2 + |R|^2
+// Q = |L|^2 - |R|^2
+// U = 2Re(L*R)
+// V = 2Im(L*R)
+//
+// Circular basis
+// ==============
+// S = |L|^2 + |R|^2
+// Q = 2Re(L*R)
+// U = 2Im(L*R)
+// V = |L|^2 - |R|^2
+//
+// Which means to go from one to the other - Say in the example that you somehow decided to produce Stokes 
+// assuming you had linear feeds but it later turns out that they were circular - well you have to
+// S->S
+// Q->V
+// U->Q
+// V->U
+// Then tyou make sure the basis label is Signal::Circular and robert's your mum's brother.
+//
+// 
+
+  if (state == Signal::Stokes) {
+    if (to == Signal::Circular) {
+      float* V = profile[1]->get_amps();
+      float* Q = profile[2]->get_amps();
+      float* U = profile[3]->get_amps();
+
+      profile[1]->amps = Q;
+      profile[2]->amps = U;
+      profile[3]->amps = V;
+    }  
+  } 
+}
+				      
