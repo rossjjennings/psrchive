@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Profile.h,v $
-   $Revision: 1.21 $
-   $Date: 2002/10/10 08:00:58 $
-   $Author: straten $ */
+   $Revision: 1.22 $
+   $Date: 2002/10/16 07:38:04 $
+   $Author: pulsar $ */
 
 #ifndef __Pulsar_Profile_h
 #define __Pulsar_Profile_h
@@ -169,7 +169,7 @@ namespace Pulsar {
     //! fills data by jumping jbin between each datum
     void get_amps (float* data, int jbin) const;
 
-#ifdef sun
+#if defined(sun) && !defined(__GNUC__)
     // SUN CC 5.0 is stupid
     void set_amps (const float* data);
     void set_amps (const double* data);
@@ -259,7 +259,7 @@ namespace Pulsar {
 
 }
 
-#ifndef sun
+#if !defined(sun) || defined(__GNUC__)
 
 /*! 
   \param data pointer to the data elements to be copied.

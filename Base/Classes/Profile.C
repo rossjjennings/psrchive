@@ -640,7 +640,7 @@ float Pulsar::Profile::snr (const Profile& std) const
   return snrfft;
 }
 
-#ifdef sun
+#if defined(sun) && !defined(__GNUC__)
 
 void Pulsar::Profile::set_amps (const float* data)
 {
@@ -650,77 +650,4 @@ void Pulsar::Profile::set_amps (const float* data)
 
 #endif
 
-#if 0
-
-/*****************************************************************************/
-/* This funtion is very much like fittempl but returns the snr of a profile  */
-/*****************************************************************************/
-float Pulsar::Profile::snr (const profile& std, float& noise, bool allow_rotate) const
-{
-  if (verbose)
-    cerr << "Pulsar::Profile::snr " << nbin << " bins." << endl;
-
-  if (std.nbin != nbin)
-    throw Error (InvalidRange, "Pulsar::Profile::snr",
-		 "std.nbin=%d != nbin=%d", std.nbin, nbin);
-
-  profile cpy = *this;
-
-  if (allow_rotate) {
-    try {
-      float junk1,junk2,junk3;
-      double shift = this->shift(std,&junk1,&junk2,&junk3);
-      if (shift == -2)
-	return -1.0;
-      if (verbose)
-	cerr << "Pulsar::Profile::snr rotate profile by " << shift << endl;
-      cpy.rotate (shift); 
-    }
-    catch (...) {
-      return 0.0;
-    }
-  }
-
-  // calculate the scale and offset where:
-  // cpy = offset + scale * std
-  // see derivation in Willem's thesis appendix, or do it yourself
-  double s_sum=0, ss_sum=0, p_sum=0, ps_sum=0;
-  int ibin;
-  for (ibin=0; ibin<nbin; ibin++) {
-    double s = std.amps[ibin];
-    double p = cpy.amps[ibin];
-    s_sum += s;
-    ss_sum += s * s;
-    p_sum += p;
-    ps_sum += p * s;
-  }
-  double s_avg = s_sum / nbin;
-  double scale  = (ps_sum - p_sum*s_avg) / (ss_sum - s_sum*s_avg);
-  double offset = (p_sum - scale * s_sum) / nbin;
-
-  if (verbose)
-    cerr << "Pulsar::Profile::snr scale:" << scale << " offset:" << offset << endl;
-
-  // determine the strength of the signal in the standard,
-  // (as returned when noise=1) and scale appropriately
-  float signal = std.std_snr (1.0, 0.10);
-  if (verbose)
-    cerr << "Pulsar::Profile::snr std signal " << signal << endl;
-
-  // calculate the residual (difference) profile
-  for (ibin=0; ibin < nbin; ibin++) {
-    cpy.amps[ibin] -= offset + scale * std.amps[ibin];
-    //    cout << ibin << " " << cpy.amps[ibin] << endl;
-  }
-
-  // determine RMS (noise) of residual profile 
-  noise = cpy.rms();
-  if (verbose)
-    cerr << "Pulsar::Profile::snr residual noise " << noise << endl;
-
-  return scale * signal / noise;
-}
-
-
-#endif
 
