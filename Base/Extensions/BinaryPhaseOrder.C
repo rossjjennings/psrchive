@@ -5,7 +5,7 @@
 Pulsar::BinaryPhaseOrder::BinaryPhaseOrder ()
   : IntegrationOrder ()
 {
-  IndexState =+ "Binary Phase (w.r.t. Ascending Node)";
+  IndexState = "Binary Phase (w.r.t. Ascending Node)";
 }
 
 //! Destructor
@@ -39,72 +39,78 @@ Pulsar::IntegrationOrder* Pulsar::BinaryPhaseOrder::clone () const
 
 void Pulsar::BinaryPhaseOrder::organise (Archive* arch, unsigned newsub) 
 {
-  /* Not sure how best to do this test yet...
-     if (arch ! binary)
-     throw Error(InvalidState, "Pulsar::Archive::convert_index_state",
-     "The polyco has no binary phase");
-  */
-  
-  // Note that this next test doesn't account for a scenario where we
-  // go from a progenitor archive with several wraps of binary
-  // phase. The intrinsic resolution of the archive in phase space is
-  // then less than the total number of subints and the result might
-  // not look as expected. I'll fix this at some point... 
-  //
-  // AWH 30/12/2003
-
-  if (newsub > arch->get_nsubint())
-    throw Error(InvalidParam, "BinaryPhaseOrder::organise",
-		"Requested more subints than in the original archive");
-  
+  // Define a vector to hold the binary phases
   vector<float> phases;
+  // Define a vector of flags to help avoid counting
+  // subints twice when re-ordering
+  vector<bool>  used;
+
   float minphs = 1.0;
   float maxphs = 0.0;
+
   for (unsigned i = 0; i < arch->get_nsubint(); i++) {
     phases.push_back(get_binphs_asc((arch->get_Integration(i)->get_epoch()).in_days(),
-				arch->get_ephemeris(), 
-				arch->get_Integration(i)->get_centre_frequency(),
-				arch->get_telescope_code()));
+				    arch->get_ephemeris(), 
+				    arch->get_Integration(i)->get_centre_frequency(),
+				    arch->get_telescope_code()));
+    used.push_back(false);
+
     if (phases[i] > maxphs)
       maxphs = phases[i];
     
     if (phases[i] < minphs)
       minphs = phases[i];
   }
+
+  // Interperate the newsub parameter as the number of integrations
+  // required across a full phase wrap. This must be adjusted depending
+  // on the phase coverage available in the archive
   
+  float    phs_coverage = maxphs - minphs;
+  unsigned mysub        = unsigned(phs_coverage * float(newsub));
+
+  // This is equivalent to 1.0 / newsub given the above condition
+  float PhaseGap = phs_coverage / float(mysub);
+
+  // The "used" vector will ensure that no subints are counted
+  // twice, but since they cannot be sub-divided, if you ask
+  // for more subints in the resulting archive than effectively
+  // exist in the original, the end result will include blank
+  // integrations.
+
   Reference::To<Pulsar::Archive> copy = arch->clone();
-  
-  arch->resize(newsub);
-  indices.resize(newsub);
-  
-  float phs_coverage = maxphs - minphs;
-  float PhaseGap = phs_coverage / float(newsub);
-  
   Reference::To<Pulsar::Integration> integ = 0;
   
-  for (unsigned i = 0; i < newsub; i++) {
-    // Initialise with a blank Integration
-    *(arch->get_Integration(i)) = *(arch->new_Integration());
+  // Blank all the old data out
+  arch->resize(0);
+  // Resize for the new configuration
+  arch->resize(mysub);
+  indices.resize(mysub);
+  
+  for (unsigned i = 0; i < mysub; i++) {
     bool first = true;
     int tally = 0;
     for (unsigned j = 0; j < phases.size(); j++) {
       if ((phases[j] >= (minphs + (i*PhaseGap))) && 
-	  (phases[j] < (minphs + ((i+1)*PhaseGap)))) {
+	  (phases[j] < (minphs + ((i+1)*PhaseGap))) && !used[j]) {
 	if (first) {
-	  integ = arch->new_Integration(copy->get_Integration(j));
-	  *(arch->get_Integration(i)) = *integ;
+	  *(arch->get_Integration(i)) = 
+	    *(arch->new_Integration(copy->get_Integration(j)));
 	  set_Index(i, Estimate<double>(phases[j], 0.0));
+	  used[j] = true;
 	  tally += 1;
 	  first = false;
 	}
 	else {
 	  *(arch->get_Integration(i)) += *(copy->get_Integration(j));
 	  indices[i] += Estimate<double>(phases[j], 0.0);
+	  used[j] = true;
 	  tally += 1;
 	}
       }
     }
-    indices[i] /= tally;
+    if (tally > 0)
+      indices[i] /= tally;
   }
   
 }
