@@ -51,6 +51,10 @@ void Pulsar::Profile::find_transitions (int& hi2lo, int& lo2hi, int& width)
     running_mean += amps[(ibin+nbin)%nbin];
   running_mean /= norm;
 
+  if (verbose)
+    cerr << "Pulsar::Profile::find_transitions "
+      "avg=" << avg << " running_mean=" << running_mean << endl;
+
   ibin += nbin;
   if (running_mean>avg) {
     while (running_mean>avg) {
@@ -58,14 +62,14 @@ void Pulsar::Profile::find_transitions (int& hi2lo, int& lo2hi, int& width)
       ibin ++;
     }
     hi2lo = (ibin-buffer-1)%nbin;
-    while(running_mean<=avg){
+    while(running_mean<avg){
       running_mean += (amps[ibin%nbin] - amps[(ibin-box)%nbin])/norm;
       ibin ++;
     }
     lo2hi = (ibin-buffer-1)%nbin;
   }
   else {
-    while(running_mean<=avg){
+    while(running_mean<avg){
       running_mean += (amps[ibin%nbin] - amps[(ibin-box)%nbin])/norm;
       ibin ++;
     }
