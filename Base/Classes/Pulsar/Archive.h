@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Archive.h,v $
-   $Revision: 1.65 $
-   $Date: 2003/04/09 06:47:29 $
-   $Author: pulsar $ */
+   $Revision: 1.66 $
+   $Date: 2003/04/17 22:40:19 $
+   $Author: straten $ */
 
 /*! \mainpage 
  
@@ -678,6 +678,9 @@ namespace Pulsar {
 
     //! Update the polyco model and correct the Integration set
     void update_model (unsigned old_nsubint);
+
+    //! Update the polyco to include the specifed MJD
+    void update_model (const MJD& time, bool clear_model = false);
 
     //! Creates polynomials to span the Integration set
     void create_updated_model (bool clear_old);

@@ -12,7 +12,7 @@
 //
 /*!  
   This method should be called when the ephemeris attribute is
-  modified.  It may also be called the tempo support files
+  modified.  It may also be called when the tempo support files
   (e.g. leap.sec, ut1.dat) change.
 */
 void Pulsar::Archive::update_model() 
@@ -81,6 +81,29 @@ void Pulsar::Archive::create_updated_model (bool clear_model)
     throw Error (InvalidState, "Archive::create_updated_model",
 		 "not a pulsar observation");
 
+  for (unsigned isub = 0; isub < get_nsubint(); isub++) {
+
+    MJD time = get_Integration(isub)->get_mid_time();
+    update_model (time, clear_model);
+
+    // only clear the model on the first loop
+    clear_model = false;
+
+  }
+}
+
+/* This method ensures the the specified time is described by the
+   polyco.  If a match is not found in the current model, a single
+   polynomial is created and appended to the current model.
+
+   \param clear_model delete the current model after copying its attributes
+ */
+void Pulsar::Archive::update_model (const MJD& time, bool clear_model)
+{
+  if (get_type() != Signal::Pulsar)
+    throw Error (InvalidState, "Archive::create_updated_model",
+		 "not a pulsar observation");
+
   int  maxha   = 12;
   char nsite   = model.get_telescope ();
   int  ncoeff  = model.get_ncoeff ();
@@ -90,19 +113,14 @@ void Pulsar::Archive::create_updated_model (bool clear_model)
   if (clear_model)
     model = polyco();
 
-  for (unsigned isub = 0; isub < get_nsubint(); isub++) {
-
-    MJD time = get_Integration(isub)->get_mid_time();
-
-    if ( model.i_nearest (time) == -1 ) {
-      // no match, create a new polyco for the Integration
-      polyco part = Tempo::get_polyco (ephemeris, time, time,
-				       nspan, ncoeff, maxha, nsite, freq);
-      model.append (part);
-    }
-
+  if ( model.i_nearest (time) == -1 ) {
+    // no match, create a new polyco for the specified time
+    polyco part = Tempo::get_polyco (ephemeris, time, time,
+				     nspan, ncoeff, maxha, nsite, freq);   
+    model.append (part);
   }
 }
+
 
 // ///////////////////////////////////////////////////////////////////////
 //
