@@ -52,6 +52,7 @@ AC_CHECK_LIB([m], [sin])
 SWIN_LIB_SLA([],AC_MSG_ERROR([Cannot continue without SLALIB]))
 SWIN_LIB_FFTW
 SWIN_LIB_MKL
+SWIN_LIB_IPP
 SWIN_LIB_PGPLOT
 SWIN_LIB_CFITSIO
 SWIN_LIB_MPI
@@ -65,7 +66,9 @@ if test x"$have_fftw" = xno -a x"$have_fftw3" = xno -a x"$have_mkl" = xno; then
 fi
 
 AC_SUBST(FFT_LIBS)
-FFT_LIBS="$MKL_LIBS $FFTW_LIBS $FFTW3_LIBS"
+FFT_LIBS="$MKL_LIBS $FFTW_LIBS $FFTW3_LIBS $IPP_LIBS"
+AC_SUBST(FFT_CFLAGS)
+FFT_CFLAGS="$MKL_CFLAGS $FFTW_CFLAGS $FFTW3_CFLAGS $IPP_CFLAGS"
 
 # 
 # For developers: ensure that the config directory m4 macros are parsed
