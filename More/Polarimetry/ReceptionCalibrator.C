@@ -10,10 +10,6 @@
 #include <algorithm>
 #include <assert.h>
 
-#if defined(__GNUC__) && (__GNUC__ < 3)
-#define WORK_AROUND_COMPILER
-#endif
-
 /*! The Archive passed to this constructor will be used to supply the first
   guess for each pulse phase bin used to constrain the fit. */
 Pulsar::ReceptionCalibrator::ReceptionCalibrator (const Archive* archive)
@@ -88,6 +84,9 @@ Pulsar::StandardModel::StandardModel (Model _model)
   pcal_path->add_Transformation( backend );
   pcal_path->add_Transformation( instrument );
   
+  equation->set_Transformation ( pcal_path );
+  PolnCalibrator_path = equation->get_path ();
+
   // ////////////////////////////////////////////////////////////////////
   //
   // initialize the signal path seen by the pulsar
@@ -95,6 +94,9 @@ Pulsar::StandardModel::StandardModel (Model _model)
 
   pulsar_path = new Calibration::ProductTransformation;
   pulsar_path->add_Transformation( instrument );
+
+  equation->add_path ( pulsar_path );
+  Pulsar_path = equation->get_path ();
 
 }
 
@@ -126,7 +128,12 @@ void Pulsar::ReceptionCalibrator::initial_observation (const Archive* data)
 		 "Pulsar::Archive='" + data->get_filename() 
 		 + "' not a Pulsar observation");
 
-  assert_full_poln (data, "Pulsar::ReceptionCalibrator::initial_observation");
+  if (data->get_state() != Signal::Stokes)
+    throw Error (InvalidParam,
+		 "Pulsar::ReceptionCalibrator::initial_observation",
+		 "Pulsar::Archive='%s' state=%s != Signal::Stokes",
+		 data->get_filename().c_str(),
+		 Signal::state_string(data->get_state()));
 
   if (data->get_parallactic_corrected ())
     throw Error (InvalidParam,
@@ -331,23 +338,41 @@ void Pulsar::ReceptionCalibrator::add_observation (const Archive* data)
     if (PA > PA_max)
       PA_max = PA;
 
-    for (unsigned ichan=0; ichan<nchan; ichan++) {
+    // the noise power in the baseline is used to estimate the
+    // variance in each Stokes parameter
+    vector< vector< Estimate<double> > > levels;
+    integration->baseline_levels (levels);
+
+    for (unsigned ichan=0; ichan<nchan; ichan++) try {
+
+      if (integration->get_weight (ichan) == 0) {
+	cerr << "Pulsar::ReceptionCalibrator::add_observation ichan="
+	     << ichan << " flagged invalid" << endl;
+	continue;
+      }
 
       // the selected pulse phase bins
       Calibration::Measurements measurements ( time.new_Value(epoch) );
 
-      for (unsigned istate=0; istate < pulsar.size(); istate++)
-	add_data (measurements, pulsar[istate], ichan, integration);
+      for (unsigned istate=0; istate < pulsar.size(); istate++) {
 
-      Calibration::ProductTransformation* new_path;
-      new_path = model[ichan]->pulsar_path->clone();
+	Stokes< Estimate<float> > baseline;
+	for (unsigned ipol=0; ipol < baseline.size(); ipol++)
+	  baseline[ipol] = levels[ipol][ichan];
 
-      new_path->add_Transformation (new Calibration::Gain);
+	add_data (measurements, pulsar[istate], ichan, integration, baseline);
 
-      model[ichan]->equation->add_path (new_path);
+      }
+
+      measurements.path_index = model[ichan]->Pulsar_path;
       model[ichan]->equation->add_data (measurements);
 
     }
+    catch (Error& error) {
+      cerr << "Pulsar::ReceptionCalibrator::add_observation ichan="
+	   << ichan << " error" << error << endl;
+    }
+
   }
 }
 
@@ -355,7 +380,8 @@ void
 Pulsar::ReceptionCalibrator::add_data(vector<Calibration::MeasuredState>& bins,
 				      SourceEstimate& estimate,
 				      unsigned ichan,
-				      const Integration* data)
+				      const Integration* data,
+				      Stokes< Estimate<float> >& baseline)
 {
   unsigned nchan = data->get_nchan ();
 
@@ -367,35 +393,49 @@ Pulsar::ReceptionCalibrator::add_data(vector<Calibration::MeasuredState>& bins,
 
   unsigned ibin = estimate.phase_bin;
 
-  Estimate<Stokes<float>, float> stokes;
+  Stokes<float> value = data->get_Stokes ( ichan, ibin );
 
-  // optimization: the variance is the same for all pulse phase bins
-  float* var = 0;
-  if (bins.size() == 0)
-    var = &(stokes.var);
-  else
-    stokes.var = bins[0].var;
+  // convert the value into an estimate, using the variance of the baseline
+  Stokes< Estimate<float> > stokes_estimate;
 
-  stokes.val = data->get_Stokes ( ichan, ibin, var );
+  for (unsigned ipol=0; ipol<stokes_estimate.size(); ipol++) {
+    stokes_estimate[ipol].val = value[ipol];
+    stokes_estimate[ipol].var = baseline[ipol].var;
+  }
 
-  // NOTE: the measured states are NOT corrected for PA
-  Calibration::MeasuredState state;
-  state.val = stokes.val;
-  state.var = stokes.var;
+  Estimate<float> invariant = det(stokes_estimate);
 
-  bins.push_back ( state );
-  bins.back().source_index = estimate.source_index;
+  if (invariant.val < invariant.var)  {
+    cerr << "BAD data ichan=" << ichan << " ibin=" << ibin 
+         << " stokes=" << stokes_estimate << " inv=" << invariant << endl;
+    return;
+  }
 
-  /* Correct the stokes parameters using the current best estimate of
-     the instrument and the parallactic angle rotation before adding
-     them to best estimate of the input state */
+  // normalize the estimate by square root of the invariant interval
+  stokes_estimate /= sqrt(invariant);
 
-  Jones<double> correct = inv( model[ichan]->pulsar_path->evaluate() );
+  try {
 
-  stokes.val = correct * stokes.val * herm(correct);
+    // NOTE: the measured states are NOT corrected for PA
+    Calibration::MeasuredState state (stokes_estimate, estimate.source_index);
+    bins.push_back ( state );
 
-  estimate.source[ichan].mean += stokes;
+    /* Correct the stokes parameters using the current best estimate of
+       the instrument and the parallactic angle rotation before adding
+       them to best estimate of the input state */
+    
+    Jones<Estimate<double> > correct;
+    correct = inv( model[ichan]->pulsar_path->evaluate() );
+    
+    stokes_estimate = correct * stokes_estimate * herm(correct);
+    
+    estimate.source[ichan].mean += stokes_estimate;
 
+  }
+  catch (Error& error) {
+    cerr << "Pulsar::ReceptionCalibrator::add_data ichan=" << ichan 
+	 << " ibin=" << ibin << error << endl;
+  }
 }
 
 //! Add the specified PolnCalibrator observation to the set of constraints
@@ -479,34 +519,30 @@ void Pulsar::ReceptionCalibrator::add_PolnCalibrator (const PolnCalibrator* p)
       Stokes< Estimate<double> > stokes = convert (cal);
       stokes *= 2.0;
 
-      // convert to MeasuredState format
-      Calibration::MeasuredState state;
-      for (ipol = 0; ipol<npol; ipol++)
-	state.val[ipol] = stokes[ipol].val;
-      state.var = stokes[0].var;
+      try {
+        // convert to MeasuredState format
+        Calibration::MeasuredState state (stokes, calibrator.source_index);
 
-      state.source_index = calibrator.source_index;
+        Calibration::Measurements measurements ( time.new_Value(epoch) );
+        measurements.push_back (state);
 
-      Calibration::Measurements measurements ( time.new_Value(epoch) );
-      measurements.push_back (state);
+        measurements.path_index = model[ichan]->PolnCalibrator_path;
 
-      Calibration::ProductTransformation* new_path = 0;
-
-      new_path = model[ichan]->pcal_path->clone();
-      new_path->add_Transformation (new Calibration::Gain);
-
-      model[ichan]->equation->add_path (new_path);
-      model[ichan]->equation->add_data (measurements);
+        model[ichan]->equation->add_data (measurements);
+      }
+      catch (Error& error) {
+        cerr << "Pulsar::ReceptionCalibrator::add_PolnCalibrator"
+                " error adding ichan=" << ichan << error << endl;
+      }
 
       if (polcal) {
-	Jones<double> caltor = inv (polcal->model[ichan].evaluate());
+	Jones< Estimate<double> > correct;
+	correct = inv (polcal->model[ichan].evaluate());
 
-	Estimate<Stokes<float>, float> calcal;
-	calcal.val = caltor * state.val * herm(caltor);
-	calcal.var = state.var;
+	stokes = correct * stokes * herm(correct);
 
 	// add the observed
-	calibrator.source[ichan].mean += calcal;
+	calibrator.source[ichan].mean += stokes;
       }
 
     }

@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ReceptionCalibrator.h,v $
-   $Revision: 1.33 $
-   $Date: 2003/08/31 07:36:25 $
+   $Revision: 1.34 $
+   $Date: 2003/09/03 09:29:37 $
    $Author: straten $ */
 
 #ifndef __ReceptionCalibrator_H
@@ -58,7 +58,7 @@ namespace Pulsar {
   class StandardModel : public Reference::Able {
 
   public:
-
+    
     friend class ReceptionCalibrator;
 
     //! The available representations of the instrumental response
@@ -91,6 +91,12 @@ namespace Pulsar {
     //! Single-axis decomposition of backend
     Reference::To<Calibration::SingleAxis> backend;
 
+    //! The signal path of the PolnCalibrator sources
+    unsigned PolnCalibrator_path;
+
+    //! The signal path of the Pulsar sources
+    unsigned Pulsar_path;
+
   protected:
     //! The model specified on construction
     Model model;
@@ -98,79 +104,79 @@ namespace Pulsar {
     //! validity flag
     bool valid;
   };
-
-
-//! Uses the ReceptionModel to represent and fit for the system response
-/*! The ReceptionCalibrator implements a technique of single dish
-  polarimetric self-calibration.  This class requires a number of
-  constraints, which are provided in through the add_observation,
-  add_PolnCalibrator, and add_FluxCalibrator methods.
- */
-class ReceptionCalibrator : public Calibrator {
+  
+  
+  //! Uses the ReceptionModel to represent and fit for the system response
+  /*! The ReceptionCalibrator implements a technique of single dish
+    polarimetric self-calibration.  This class requires a number of
+    constraints, which are provided in through the add_observation,
+    add_PolnCalibrator, and add_FluxCalibrator methods.
+  */
+  class ReceptionCalibrator : public Calibrator {
     
   public:
-
+    
     friend class ReceptionCalibratorPlotter;
-
+    
     //! Construct with optional first pulsar archive
     ReceptionCalibrator (const Archive* archive = 0);
-
+    
     //! Add the specified pulse phase bin to the set of state constraints
     void add_state (unsigned pulse_phase_bin);
-
+    
     //! Get the number of pulsar phase bin input polarization states
     unsigned get_nstate_pulsar () const;
-
+    
     //! Get the total number of input polarization states (pulsar and cal)
     unsigned get_nstate () const;
-
+    
     //! Get the number of frequency channels
     unsigned get_nchan () const;
-
+    
     //! Set the calibrator observations to be loaded during initial_observation
     void set_calibrators (const vector<string>& filenames);
-
+    
     //! Add the specified pulsar observation to the set of constraints
     void add_observation (const Archive* data);
-
+    
     //! Add the specified calibrator observation to the set of constraints
     void add_calibrator (const Archive* data);
-
+    
     //! Add the specified PolnCalibrator observation to the set of constraints
     void add_PolnCalibrator (const PolnCalibrator* polncal);
-
+    
     //! Add the specified FluxCalibrator observation to the set of constraints
     void add_FluxCalibrator (const FluxCalibrator* fluxcal);
-
+    
     //! Solve equation for each frequency
     void solve (int only_ichan = -1);
-
+    
     //! Get the status of the model
     bool get_solved () const;
-
+    
     //! Calibrate the polarization of the given archive
     virtual void calibrate (Archive* archive);
-
+    
     //! Pre-calibrate the polarization of the given archive
     virtual void precalibrate (Archive* archive);
-
+    
   protected:
-
+    
     //! Calibrate the polarization of the given archive
     void calibrate (Archive* archive, bool solve_first);
-
+    
     //! The calibration model as a function of frequency
     vector< Reference::To<StandardModel> > model;
-
+    
     //! Uncalibrated estimate of calibrator polarization
     SourceEstimate calibrator;
-
+    
     //! Uncalibrated estimate of pulsar polarization as a function of phase
     vector<SourceEstimate> pulsar;
-
+    
     //! The calibrators to be loaded during initial_observation
     vector<string> calibrator_filenames;
-
+    
     //! The parallactic angle rotation
     Calibration::Parallactic parallactic;
 
@@ -208,14 +214,18 @@ class ReceptionCalibrator : public Calibrator {
 
     //! Add Integration data to the MeasuredState vector
     /*! Data is taken from the specified frequency channel and phase bin.
-      \retval bins the measured states to which an entry will be appended
+      \retval bins the vector to which an new MeasuredState will be appended
       \param estimate contains the bin number and a running mean estimate
       \param ichan the frequency channel
-      \param data the Integration data */
+      \param data the Integration data
+      \param baseline the variance of the baseline is used as the variance
+                      in the MeasuredState. 
+    */
     void add_data (vector<Calibration::MeasuredState>& bins,
 		   SourceEstimate& estimate,
 		   unsigned ichan,
-		   const Integration* data);
+		   const Integration* data,
+		   Stokes< Estimate<float> >& baseline);
 
   private:
     //! Flag set after the solve method has been called
