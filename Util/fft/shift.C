@@ -3,7 +3,7 @@
 #include <math.h>
 #include <assert.h>
 
-#include "fftm.h"
+#include "fftm_c.h"
 
 /* Routine to shift an array                                       */
 /* Allows for arrays with npts that are not a power of 2           */
