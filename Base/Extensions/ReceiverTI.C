@@ -1,5 +1,9 @@
 #include "Pulsar/ReceiverTUI.h"
-#include "Pulsar/Receiver.h"
+
+Pulsar::ReceiverTUI::ReceiverTUI ()
+{
+  init ();
+}
 
 void Pulsar::ReceiverTUI::init ()
 {
