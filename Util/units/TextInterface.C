@@ -5,6 +5,7 @@
 using namespace std;
 
 bool TextInterface::verbose = false;
+bool TextInterface::label_elements = false;
 
 void TextInterface::parse_indeces (vector<unsigned>& index, string& name)
 {
@@ -41,7 +42,12 @@ void TextInterface::parse_indeces (vector<unsigned>& index, string& name)
   string backup = range;
 
   while (!range.empty()) {
+
     string sub = stringtok (range, ",", false, false);
+
+    if (range[0]==',')
+      range.erase(0,1);
+
     int start, end;
     char c;
 

@@ -380,6 +380,9 @@ namespace TextInterface {
   //! Verbosity flag
   extern bool verbose;
 
+  //! Label elements in ElementGetSet<C,E>::get_value
+  extern bool label_elements;
+
 }
 
 template<class C>
@@ -398,14 +401,21 @@ template<class C>
 TextInterface::Component<C>* 
 TextInterface::CompositeGetSet<C>::find_component (std::string& name) const
 {
-  std::string temp = name;
-  std::string cname = stringtok (temp, ": \t\n");
-  std::string aname = stringtok (temp, " \t\n");
+  if (verbose)
+    std::cerr << "TextInterface::CompositeGetSet<C>::find_component"
+                 " name=" << name << std::endl;
 
-  if (!aname.length())
+  std::string cname = stringtok (name, ":[", false, false);
+  
+  if (!name.length())
     return 0;
 
-  name = aname;
+  if (name[0]==':')
+    name.erase(0,1);
+
+  if (verbose)
+    std::cerr << "TextInterface::CompositeGetSet<C>::find_component"
+            " component name=" << cname << " remainder=" << name << std::endl;
 
   for (unsigned i=0; i<components.size(); i++)
     if (components[i]->matches(cname))
@@ -501,9 +511,12 @@ TextInterface::ElementGetSet<C,E>::get_value (const std::string& name) const
   std::ostringstream ost;
 
   for (unsigned i=0; i<ind.size(); i++) {
-    if (i) ost << ",";
-    element_interface->set_instance( extract_element(this->composite, ind[i]) );
-    ost << ind[i] << ")" << element_interface->get_value(sub_name);
+    if (i)
+      ost << ",";  // place a comma between elements
+    if (label_elements && ind.size() > 1)
+      ost << ind[i] << ")";  // label the elements
+    element_interface->set_instance( extract_element(this->composite,ind[i]) );
+    ost << element_interface->get_value(sub_name);
   }
 
   return ost.str();
@@ -527,8 +540,16 @@ std::string
 TextInterface::ElementGetSet<C,E>::get_indeces (std::vector<unsigned>& indeces,
 						const std::string& name) const
 {
+  if (verbose)
+    std::cerr << "TextInterface::ElementGetSet<C,E>::get_indeces"
+            " name=" << name << std::endl;
+
   std::string sub_name = name;
   parse_indeces (indeces, sub_name);
+
+  if (verbose)
+    std::cerr << "TextInterface::ElementGetSet<C,E>::get_indeces"
+            " sub_name=" << sub_name << std::endl;
 
   unsigned n = this->get_nelement(this->composite);
 
@@ -565,7 +586,9 @@ bool TextInterface::Component<C>::matches (const std::string& name) const
 template<class C,class E>
 bool TextInterface::ElementGetSet<C,E>::matches (const std::string& n) const
 {
-  return strcasecmp(n.c_str(), name.c_str()) == 0;
+  if (verbose)
+    std::cerr << "TextInterface::ElementGetSet<C,E>::matches" << std::endl;
+  return strncasecmp(n.c_str(), name.c_str(), name.length()) == 0;
 }
 
 #endif
