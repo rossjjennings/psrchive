@@ -81,7 +81,7 @@ Pulsar::StandardModel::StandardModel (Model _model)
   backend->set_infit (0, false);
   
   pcal_path = new Calibration::ProductTransformation;
-  pcal_path->add_Transformation( backend );
+  // pcal_path->add_Transformation( backend );
   pcal_path->add_Transformation( instrument );
   
   equation->set_Transformation ( pcal_path );
@@ -406,8 +406,9 @@ Pulsar::ReceptionCalibrator::add_data(vector<Calibration::MeasuredState>& bins,
   Estimate<float> invariant = det(stokes_estimate);
 
   if (invariant.val < invariant.var)  {
-    cerr << "BAD data ichan=" << ichan << " ibin=" << ibin 
-         << " stokes=" << stokes_estimate << " inv=" << invariant << endl;
+    cerr << "BAD data ichan=" << ichan << " ibin=" << ibin
+         << "\n   stokes=" << stokes_estimate
+         << "\n   inv=" << invariant << endl;
     return;
   }
 
