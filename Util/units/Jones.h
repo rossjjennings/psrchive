@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Jones.h,v $
-   $Revision: 1.7 $
-   $Date: 2003/02/25 09:48:20 $
+   $Revision: 1.8 $
+   $Date: 2003/08/19 21:45:40 $
    $Author: straten $ */
 
 #ifndef __Jones_H
@@ -83,10 +83,10 @@ public:
   }
 
   //! Equality
-  bool operator == (T scalar) const
-  { return 
-      j11 == scalar  &&  j12 == 0 && 
-      j21 == 0  &&  j22 == scalar;
+  bool operator == (const complex<T>& scalar) const
+  { complex<T> zero;
+    return j11 == scalar  &&  j12 == zero && 
+           j21 == zero  &&  j22 == scalar;
   }
 
   //! Inequality
