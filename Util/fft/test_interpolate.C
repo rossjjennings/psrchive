@@ -2,13 +2,13 @@
 
 int main () try {
 
-  vector< complex<float> > C_in (100);
-  vector< complex<float> > C_out (200);
+  vector< complex<float> > C_in (128);
+  vector< complex<float> > C_out (256);
 
   fft::interpolate (C_out, C_in);
 
-  vector< double > R_in (100);
-  vector< double > R_out (200);
+  vector< double > R_in (128);
+  vector< double > R_out (256);
 
   fft::interpolate (R_out, R_in);
 
