@@ -495,7 +495,7 @@ double psrephem::t0() const
   if (tempo11 && parmStatus[EPH_T0]) {
     MJD current_epoch = MJD (value_integer[EPH_T0],
 			     value_double [EPH_T0]);
-    return (current_epoch).in_days();
+    return current_epoch.in_days();
   }
   
   throw Error(InvalidParam, "psrephem::t0",
@@ -827,69 +827,96 @@ ostream& operator<< (ostream& ostr, const psrephem& eph)
   return ostr;
 }
 
-#if 0
 // ///////////////////////////////////////////////////////////////////////
 //
 // set/get functions
 //
 // ///////////////////////////////////////////////////////////////////////
 
-// get functions return the value and throw an 
-// Error exception on error. Looks like these
-// are still being written...
-
 string psrephem::get_string  (int ephind)
 {
-
+  if (parmTypes[ephind] != 0)
+    throw Error (InvalidParam, "psrephem::get_string",
+                 "%s is not a string", parmNames[ephind]);
+  return value_str[ephind];
 }
 
 double psrephem::get_double  (int ephind)
 {
-
+  if (parmTypes[ephind] != 1)
+    throw Error (InvalidParam, "psrephem::get_double",
+                 "%s is not a double", parmNames[ephind]);
+  return value_double[ephind];
 }
 
-MJD psrephem::get_MJD     (int ephind)
+MJD psrephem::get_MJD (int ephind)
 {
-
+  if (parmTypes[ephind] != 4)
+    throw Error (InvalidParam, "psrephem::get_MJD",
+                 "%s is not a MJD", parmNames[ephind]);
+  return MJD (value_integer[ephind], value_double[ephind]);
 }
 
-Angle psrephem::get_Angle   (int ephind)
+Angle psrephem::get_Angle (int ephind)
 {
-
+  if (parmTypes[ephind] != 2 && parmTypes[ephind] != 3)
+    throw Error (InvalidParam, "psrephem::get_Angle",
+                 "%s is not an  Angle", parmNames[ephind]);
+  Angle ret;
+  ret.setTurns (value_double[ephind]);
+  return ret;
 }
 
 int psrephem::get_integer (int ephind)
 {
-
+  if (parmTypes[ephind] != 5)
+    throw Error (InvalidParam, "psrephem::get_integer",
+                 "%s is not an integer", parmNames[ephind]);
+  return value_integer[ephind];
 }
 
 // set functions accept the value and throw an 
 // Error exception on error. Again, it seems
 // these have not been frinished...
 
-void psrephem::set_string (int ephind, const string&)
+void psrephem::set_string (int ephind, const string& value)
 {
-
+  if (parmTypes[ephind] != 0)
+    throw Error (InvalidParam, "psrephem::get_string",
+                 "%s is not a string", parmNames[ephind]);
+  value_str[ephind] = value;
 }
 
-void psrephem::set_double (int ephind, double)
+void psrephem::set_double (int ephind, double value)
 {
-
+  if (parmTypes[ephind] != 1)
+    throw Error (InvalidParam, "psrephem::get_double",
+                 "%s is not a double", parmNames[ephind]);
+  value_double[ephind] = value;
 }
 
-void psrephem::set_MJD (int ephind, const MJD&)
+void psrephem::set_MJD (int ephind, const MJD& value)
 {
-
+  if (parmTypes[ephind] != 4)
+    throw Error (InvalidParam, "psrephem::get_MJD",
+                 "%s is not a MJD", parmNames[ephind]);
+  value_integer[ephind] = value.intday();
+  value_double[ephind] = value.fracday();
 }
 
-void psrephem::set_Angle (int ephind, const Angle&)
+void psrephem::set_Angle (int ephind, const Angle& value)
 {
-
+  if (parmTypes[ephind] != 2 && parmTypes[ephind] != 3)
+    throw Error (InvalidParam, "psrephem::get_Angle",
+                 "%s is not an  Angle", parmNames[ephind]);
+  value_double[ephind] = value.getTurns();
 }
 
-void psrephem::set_Integer (int ephind, int)
+void psrephem::set_integer (int ephind, int value)
 {
-
+  if (parmTypes[ephind] != 5)
+    throw Error (InvalidParam, "psrephem::get_integer",
+                 "%s is not an integer", parmNames[ephind]);
+  value_integer[ephind] = value;
 }
 
-#endif
