@@ -1,8 +1,8 @@
 //-*-C++-*-
                                                                                 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/PeriastronOrder.h,v $
-   $Revision: 1.1 $
-   $Date: 2003/12/29 10:43:20 $
+   $Revision: 1.2 $
+   $Date: 2003/12/30 04:34:09 $
    $Author: ahotan $ */
                                                                                 
 #ifndef __PeriastronOrder_h
@@ -40,7 +40,7 @@ namespace Pulsar {
     //! Clone method
     IntegrationOrder* clone () const;
     
-    void organise (Archive*);
+    void organise (Archive*, unsigned);
     void append   (Archive*, const Archive*);    
     void combine  (Archive*, unsigned);
 

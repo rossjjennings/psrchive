@@ -1,5 +1,5 @@
 //
-// $Id: pav.C,v 1.63 2003/12/30 01:24:10 ahotan Exp $
+// $Id: pav.C,v 1.64 2003/12/30 04:34:31 ahotan Exp $
 //
 // The Pulsar Archive Viewer
 //
@@ -46,9 +46,9 @@ void usage ()
     " -p        Add all polarisations together\n"
     " -Z        Smear profiles before plotting\n"
     "\n"
-    "Integration re-ordering options:\n"
-    " --convert_periphs\n"
-    " --convert_binphs\n"
+    "Integration re-ordering (nsub = final # of subints):\n"
+    " --convert_periphs  nsub\n"
+    " --convert_binphs   nsub\n"
     "\n"
     "Selection & configuration options:\n"
     " -K dev    Manually specify a plot device\n"
@@ -120,9 +120,9 @@ int main (int argc, char** argv)
   int n1 = 1;
   int n2 = 1;
   
-  float the_phase = 0.0;
-  
-  double phase = 0;
+  float    the_phase = 0.0;  
+  double   phase = 0;
+  unsigned ronsub = 0;
   
   bool verbose = false;
   bool zoomed = false;
@@ -176,8 +176,8 @@ int main (int argc, char** argv)
   while (1) {
     
     static struct option long_options[] = {
-      {"convert_periphs", 0, 0, 200},
-      {"convert_binphs", 0, 0, 201},
+      {"convert_periphs", 1, 0, 200},
+      {"convert_binphs", 1, 0, 201},
       {0, 0, 0, 0}
     };
     
@@ -257,7 +257,7 @@ int main (int argc, char** argv)
       plotter.set_subint( atoi (optarg) );
       break;
     case 'i':
-      cout << "$Id: pav.C,v 1.63 2003/12/30 01:24:10 ahotan Exp $" << endl;
+      cout << "$Id: pav.C,v 1.64 2003/12/30 04:34:31 ahotan Exp $" << endl;
       return 0;
 
     case 'j':
@@ -427,13 +427,33 @@ int main (int argc, char** argv)
       hat = true;
       break;
 
-    case 200:
+    case 200: {
+      if (cbo) {
+	cerr << "You can only specify one re-ordering scheme!"
+	     << endl;
+	return -1;
+      }
+      if (sscanf(optarg, "%ud", &ronsub) != 1) {
+	cerr << "Invalid nsub given" << endl;
+	return -1;
+      }
       cpo = true;
       break;
+    }
       
-    case 201:
+    case 201: {
+      if (cpo) {
+	cerr << "You can only specify one re-ordering scheme!"
+	     << endl;
+	return -1;
+      }
+      if (sscanf(optarg, "%ud", &ronsub) != 1) {
+	cerr << "Invalid nsub given" << endl;
+	return -1;
+      }
       cbo = true;
       break;
+    }
       
     default:
       return -1; 
@@ -479,13 +499,13 @@ int main (int argc, char** argv)
     if (cbo) {
       Pulsar::IntegrationOrder* myio = new Pulsar::BinaryPhaseOrder();
       archive->add_extension(myio); 
-      myio->organise(archive);
+      myio->organise(archive, ronsub);
     }
     
     if (cpo) {
       Pulsar::IntegrationOrder* myio = new Pulsar::PeriastronOrder();
       archive->add_extension(myio);
-      myio->organise(archive);
+      myio->organise(archive, ronsub);
     }
 
     if (dedisperse) {

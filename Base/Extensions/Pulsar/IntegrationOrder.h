@@ -1,8 +1,8 @@
 //-*-C++-*-
                                                                                 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/IntegrationOrder.h,v $
-   $Revision: 1.2 $
-   $Date: 2003/12/30 01:23:01 $
+   $Revision: 1.3 $
+   $Date: 2003/12/30 04:34:09 $
    $Author: ahotan $ */
                                                                                 
 #ifndef __IntegrationOrder_h
@@ -54,7 +54,7 @@ namespace Pulsar {
     // These are the virtual base methods of the IntegrationOrder class:
 
     //! Re-order the Integrations into the desired state
-    virtual void organise (Archive*) = 0;
+    virtual void organise (Archive*, unsigned) = 0;
     
     //! Add two Archive instances that have the same IntegrationOrder
     virtual void append (Archive*, const Archive*) = 0;
