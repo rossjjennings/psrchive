@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Profile.h,v $
-   $Revision: 1.80 $
-   $Date: 2004/12/30 23:40:53 $
-   $Author: ahotan $ */
+   $Revision: 1.81 $
+   $Date: 2004/12/31 17:23:01 $
+   $Author: straten $ */
 
 #ifndef __Pulsar_Profile_h
 #define __Pulsar_Profile_h
@@ -207,21 +207,12 @@ namespace Pulsar {
     // in turns. In some cases, the routine supports the exporting of 
     // lower level information for use in debugging.
 
-    //! Functor that impliments shift algorithms
-    //static Functor<double(const Pulsar::Profile&, float&)> shift_functor;
+    //! The functor that implements the shift method
+    static Functor<Estimate<double>(Profile, Profile)> shift_functor;
 
-    /*! Parabolic interpolation in the time domain */
-    double ParIntShift (const Profile& std, float& ephase) const;
+    //! Returns the shift (in turns) between profile and standard
+    Estimate<double> shift (const Profile& std) const;
 
-    /*! Gaussian interpolation in the time domain */
-    double GaussianShift (const Profile& std, float& ephase) const;
-    
-    /*! Fourier domain zero-pad interpolation */
-    double ZeroPadShift (const Profile& std, float& ephase) const;
-    
-    /*! Fourier domain phase gradient fit */
-    double PhaseGradShift (const Profile& std, float& ephase) const;
-    
     //! fit to the standard and return a Tempo::toa object
     Tempo::toa toa (const Profile& std, const MJD& mjd, 
 		    double period, char nsite, string arguments = "",
@@ -297,6 +288,10 @@ namespace Pulsar {
     Pulsar::Profile * denoise(int fraction=8);
     void denoise_inplace(int fraction=8);
 
+    //! interface to model_profile used by Profile::shift
+    void fftconv (const Profile& std, double& shift, float& eshift,
+                  float& snrfft, float& esnrfft) const;
+
   protected:
 
     friend class PolnProfile;
@@ -323,9 +318,6 @@ namespace Pulsar {
     //! polarization measure of amplitude data
     Signal::Component state;
 
-    //! interface to model_profile used by Profile::shift
-    void fftconv (const Profile& std, double& shift, float& eshift, 
-		  float& snrfft, float& esnrfft) const;
   };
 
   //! Default implementation of Profile::snr method
@@ -334,6 +326,17 @@ namespace Pulsar {
   //! Alternative implementation uses a fortran routine
   float snr_fortran (const Profile* profile);
 
+  /*! Parabolic interpolation in the time domain */
+  Estimate<double> ParIntShift (const Profile& std, const Profile& ephase);
+
+  /*! Gaussian interpolation in the time domain */
+  Estimate<double> GaussianShift (const Profile& std, const Profile& ephase);
+
+  /*! Fourier domain zero-pad interpolation */
+  Estimate<double> ZeroPadShift (const Profile& std, const Profile& ephase);
+
+  /*! Fourier domain phase gradient fit */
+  Estimate<double> PhaseGradShift (const Profile& std, const Profile& ephase);
 
 }
 
