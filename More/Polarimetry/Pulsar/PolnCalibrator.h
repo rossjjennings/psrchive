@@ -1,19 +1,18 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PolnCalibrator.h,v $
-   $Revision: 1.12 $
-   $Date: 2003/09/04 10:18:03 $
+   $Revision: 1.13 $
+   $Date: 2003/09/11 21:15:41 $
    $Author: straten $ */
 
-#ifndef __PolnCalibrator_H
-#define __PolnCalibrator_H
+#ifndef __Pulsar_PolnCalibrator_H
+#define __Pulsar_PolnCalibrator_H
 
-#include <string>
-
-#include "Calibrator.h"
-#include "Estimate.h"
+#include "Pulsar/Calibrator.h"
+#include "Calibration/Transformation.h"
 #include "Jones.h"
-#include "Types.h"
+
+// #include "Types.h"
 
 namespace Pulsar {
 
@@ -28,79 +27,69 @@ namespace Pulsar {
   class PolnCalibrator : public Calibrator {
     
   public:
-    //! If true, then the human-readable parameters are kept
-    static bool store_parameters;
 
-    //! If true, then a median filter is run on the calibrator bandpass
-    static bool smooth_bandpass;
+    //! Constructor
+    PolnCalibrator ();
 
-    //! Construct from an vector of PolnCal Pulsar::Archives
-    PolnCalibrator (const vector<Archive*>& archives);
-
-    //! Construct from an single PolnCal Pulsar::Archive
-    PolnCalibrator (const Archive* archive);
+    //! Copy constructor
+    PolnCalibrator (const PolnCalibrator& calibrator);
 
     //! Destructor
     virtual ~PolnCalibrator ();
 
-    //! Calibrate the polarization of the given archive
-    virtual void calibrate (Archive* archive);
+    // ///////////////////////////////////////////////////////////////////
+    //
+    // useful for calibrating
+    //
 
-    //! Build the model at the native frequency resolution, or that specified
-    virtual void build (unsigned nchan = 0);
+    //! Set the number of frequency channels in the response array
+    virtual void set_nchan (unsigned nchan);
+    //! Get the number of frequency channels in the response array
+    virtual unsigned get_nchan () const;
 
     //! Return the system response for the specified channel
     virtual Jones<float> get_response (unsigned ichan) const;
 
-    //! Return the mean levels of the calibrator hi and lo states
-    void get_levels (unsigned isubint, unsigned nchan, 
-		     vector<vector<Estimate<double> > >& cal_hi,
-		     vector<vector<Estimate<double> > >& cal_lo) const;
+    // ///////////////////////////////////////////////////////////////////
+    //
+    // useful for unloading
+    //
 
-    //! Return a const reference to the calibrator archive
-    const Archive* get_Archive () const { return calibrator; }
+    //! Get the number of frequency channels in the transformation array
+    unsigned get_Transformation_nchan () const;
+
+    //! Return the transformation for the specified channel
+    virtual const ::Calibration::Transformation*
+    get_Transformation (unsigned ichan) const;
+
+    // ///////////////////////////////////////////////////////////////////
+    //
+    // Pulsar::Calibrator implementation
+    //
+    // ///////////////////////////////////////////////////////////////////
+
+    //! Calibrate the polarization of the given archive
+    virtual void calibrate (Archive* archive);
 
   protected:
 
-    //! Return the system response as determined by the output CAL states
-    /*! Given the coherency products (and cross-products) of the
-      calibrator hi and lo states, derived classes must return the
-      Jones matrix that represents the system response.  If the derived
-      class can store additional parameters, the ichan parameter may
-      be used. */
-    virtual Jones<double> solve (const vector<Estimate<double> >& hi,
-				 const vector<Estimate<double> >& lo,
-				 unsigned ichan) = 0;
+    //! The array of Transformation Model instances
+    vector< Reference::To< ::Calibration::Transformation > > transformation;
+    
+    //! Derived classes must create and fill the transformation array
+    virtual void calculate_transformation () = 0;
 
-    //! Resize the space used to store additional parameters
-    /*! If the derived class can store additional parameters, the space
-      should be resized here */
-    virtual void resize_parameters (unsigned nchan) {}
+    //! The array of Jones matrices derived from the transformation array
+    vector< Jones<float> > response;
 
-    //! Filenames of Pulsar::Archives from which instance was created
-    vector<string> filenames;
+  private:
 
-    //! Intensity of off-pulse (system + sky), in CAL flux units
-    vector< Estimate<double> > baseline;
-
-    //! Jones matrix frequency response of the instrument
-    vector< Jones<float> > jones;
-
-    //! Reference to the Pulsar::Archive from which this instance was created
-    Reference::To<const Archive> calibrator;
-
-    //! Create the Jones matrix frequency response at the requested resolution
-    void create (unsigned nchan);
-
-    //! Calculate the Jones matrix frequency response from the CAL hi and lo
-    void calculate (vector<vector<Estimate<double> > >& cal_hi,
-		    vector<vector<Estimate<double> > >& cal_lo);
-
-    //! Flag set after call to build
-    bool built;
+    //! Build the response array
+    void build (unsigned nchan = 0);
 
   };
 
 }
 
 #endif
+

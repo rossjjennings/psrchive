@@ -1,47 +1,44 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PolarCalibrator.h,v $
-   $Revision: 1.5 $
-   $Date: 2003/05/06 11:23:07 $
+   $Revision: 1.6 $
+   $Date: 2003/09/11 21:15:41 $
    $Author: straten $ */
 
 #ifndef __PolarCalibrator_H
 #define __PolarCalibrator_H
 
-#include "PolnCalibrator.h"
+#include "Pulsar/ArtificialCalibrator.h"
 #include "Calibration/Polar.h"
 
 namespace Pulsar {
 
   //! Uses PolarModel to represent the system response
-  class PolarCalibrator : public PolnCalibrator {
+  class PolarCalibrator : public ArtificialCalibrator {
     
   public:
 
-    friend class PolarCalibratorPlotter;
-    friend class ReceptionCalibrator;
-
-    //! Construct from an vector of PolnCal Pulsar::Archives
-    PolarCalibrator (const vector<Archive*>& a) : PolnCalibrator (a) {}
-
     //! Construct from an single PolnCal Pulsar::Archive
-    PolarCalibrator (const Archive* archive) : PolnCalibrator (archive) {}
+    PolarCalibrator (const Archive* archive);
 
     //! Destructor
     ~PolarCalibrator ();
 
+    //! Return the PolarAxisCalibrator information
+    Info* get_Info () const;
+
   protected:
 
-    //! Return the system response as determined by the PolarModel
-    virtual Jones<double> solve (const vector<Estimate<double> >& hi,
-				 const vector<Estimate<double> >& lo,
-				 unsigned ichan);
+    // ///////////////////////////////////////////////////////////////////
+    //
+    // Pulsar::ArtificialCalibrator implementation
+    //
+    // ///////////////////////////////////////////////////////////////////
 
-    //! Resize the space used to store PolarModel parameters
-    virtual void resize_parameters (unsigned nchan);
+    //! Return a new Calibration::Polar instance
+    ::Calibration::Transformation* solve (const vector<Estimate<double> >& hi,
+					  const vector<Estimate<double> >& lo);
 
-    //! PolarModel representation of the instrument
-    vector<Calibration::Polar> model;
 
   };
 

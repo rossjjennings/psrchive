@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ReceptionCalibrator.h,v $
-   $Revision: 1.37 $
-   $Date: 2003/09/05 15:07:27 $
+   $Revision: 1.38 $
+   $Date: 2003/09/11 21:15:41 $
    $Author: straten $ */
 
 #ifndef __ReceptionCalibrator_H
@@ -27,7 +27,7 @@ namespace Pulsar {
 
   class Archive;
   class Integration;
-  class PolnCalibrator;
+  class ArtificialCalibrator;
   class FluxCalibrator;
 
   class SourceEstimate {
@@ -94,8 +94,8 @@ namespace Pulsar {
     //! The time axis
     Calibration::Axis<MJD> time;
 
-    //! The signal path of the PolnCalibrator sources
-    unsigned PolnCalibrator_path;
+    //! The signal path of the ArtificialCalibrator sources
+    unsigned ArtificialCalibrator_path;
 
     //! The signal path of the Pulsar sources
     unsigned Pulsar_path;
@@ -113,7 +113,7 @@ namespace Pulsar {
   /*! The ReceptionCalibrator implements a technique of single dish
     polarimetric self-calibration.  This class requires a number of
     constraints, which are provided in through the add_observation,
-    add_PolnCalibrator, and add_FluxCalibrator methods.
+    add_ArtificialCalibrator, and add_FluxCalibrator methods.
   */
   class ReceptionCalibrator : public Calibrator {
     
@@ -140,14 +140,14 @@ namespace Pulsar {
     //! Set the calibrator observations to be loaded during initial_observation
     void set_calibrators (const vector<string>& filenames);
     
-    //! Add the specified pulsar observation to the set of constraints
+    //! Add the observation to the set of constraints
     void add_observation (const Archive* data);
     
-    //! Add the specified calibrator observation to the set of constraints
+    //! Add the calibrator observation to the set of constraints
     void add_calibrator (const Archive* data);
     
-    //! Add the specified PolnCalibrator observation to the set of constraints
-    void add_PolnCalibrator (const PolnCalibrator* polncal);
+    //! Add the ArtificialCalibrator observation to the set of constraints
+    void add_Calibrator (const ArtificialCalibrator* polncal);
     
     //! Add the specified FluxCalibrator observation to the set of constraints
     void add_FluxCalibrator (const FluxCalibrator* fluxcal);

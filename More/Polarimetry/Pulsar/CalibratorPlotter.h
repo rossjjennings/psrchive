@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/CalibratorPlotter.h,v $
-   $Revision: 1.3 $
-   $Date: 2003/05/23 08:51:48 $
+   $Revision: 1.4 $
+   $Date: 2003/09/11 21:15:41 $
    $Author: straten $ */
 
 #ifndef __CalibratorPlotter_H
@@ -28,7 +28,10 @@ namespace Pulsar {
     virtual ~CalibratorPlotter ();
 
     //! Plot the Pulsar::Calibrator
-    virtual void plot (const Calibrator* calibrator) = 0;
+    virtual void plot (const Calibrator* calibrator);
+
+    //! Number of panels (vertical)
+    unsigned npanel;
 
   };
 

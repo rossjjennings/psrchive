@@ -1,18 +1,14 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/FluxCalibrator.h,v $
-   $Revision: 1.6 $
-   $Date: 2003/05/23 10:28:28 $
-   $Author: pulsar $ */
+   $Revision: 1.7 $
+   $Date: 2003/09/11 21:15:41 $
+   $Author: straten $ */
 
-#ifndef __FluxCalibrator_H
-#define __FluxCalibrator_H
+#ifndef __Pulsar_FluxCalibrator_H
+#define __Pulsar_FluxCalibrator_H
 
-#include <string>
-
-#include "Calibrator.h"
-#include "Estimate.h"
-#include "Types.h"
+#include "Pulsar/Calibrator.h"
 
 namespace Pulsar {
 
@@ -20,7 +16,7 @@ namespace Pulsar {
 
   class FluxCalibrator : public Calibrator {
     
-    friend class FluxCalibratorPlotter;
+    friend class FluxCalibratorInfo;
 
   public:
     //! Self-calibrate flux calibrator archives before computing hi/lo ratios
@@ -41,19 +37,19 @@ namespace Pulsar {
     //! Calibrate the flux in the given archive
     void calibrate (Archive* archive);
 
-  protected:
+    //! Get the number of frequency channels in the calibrator
+    unsigned get_nchan () const;
 
-    //! Filenames of Pulsar::Archives from which instance was created
-    vector<string> filenames;
+    //! Return the FluxCalibrator information
+    Info* get_Info () const;
+
+  protected:
 
     //! Calibrator flux in mJy as a function of frequency
     vector< Estimate<double> > cal_flux;
 
     //! Temperature of system (+ sky) in mJy as a function of frequency
     vector< Estimate<double> > T_sys;
-
-    //! Reference to the Pulsar::Archive with which this instance associates
-    Reference::To<const Archive> calibrator;
 
     //! Ratio of cal hi/lo on hydra
     vector<Estimate<double> > ratio_on;
@@ -62,7 +58,7 @@ namespace Pulsar {
     vector<Estimate<double> > ratio_off;
 
     //! Create the cal_flux spectrum at the requested resolution
-    void create (unsigned nchan);
+    void create (unsigned nchan = 0);
 
     //! Calculate the ratio_on and ratio_off
     void calculate ();

@@ -1,13 +1,10 @@
 #define PGPLOT 1
 
 #include "Pulsar/FluxCalibrator.h"
-#include "Pulsar/FluxCalibratorPlotter.h"
-
 #include "Pulsar/SingleAxisCalibrator.h"
-#include "Pulsar/SingleAxisCalibratorPlotter.h"
-
 #include "Pulsar/PolarCalibrator.h"
-#include "Pulsar/PolarCalibratorPlotter.h"
+
+#include "Pulsar/CalibratorPlotter.h"
 
 #include "Pulsar/Integration.h"
 #include "Pulsar/Archive.h"
@@ -34,9 +31,6 @@ void usage ()
 
 int main (int argc, char** argv) 
 {
-  // ensure that parameters are stored for plotting
-  Pulsar::PolnCalibrator::store_parameters = true;
-
   // use the Single Axis model
   bool single_axis = false;
 
@@ -113,8 +107,8 @@ int main (int argc, char** argv)
   Reference::To<Pulsar::Archive> archive;
  
   Reference::To<Pulsar::PolnCalibrator> calibrator;
-  Reference::To<Pulsar::CalibratorPlotter> plotter;
-
+  
+  Pulsar::CalibratorPlotter plotter;
   Pulsar::FluxCalibrator fluxcal;
   Pulsar::Plotter archplot;
 
@@ -151,15 +145,11 @@ int main (int argc, char** argv)
     if (verbose)
       cerr << "pacv: Constructing PolnCalibrator" << endl;
 
-    if (single_axis) {
+    if (single_axis)
       calibrator = new Pulsar::SingleAxisCalibrator (archive);
-      plotter = new Pulsar::SingleAxisCalibratorPlotter;
-    }
-    else {
-      calibrator = new Pulsar::PolarCalibrator (archive);
-      plotter = new Pulsar::PolarCalibratorPlotter;
-    }
 
+    else
+      calibrator = new Pulsar::PolarCalibrator (archive);
     
     if (verbose)
       cerr << "pacv: Calibrating Archive" << endl;
@@ -170,7 +160,7 @@ int main (int argc, char** argv)
       cerr << "pacv: Plotting PolnCalibrator" << endl;
 
     cpgpage ();
-    plotter->plot (calibrator);
+    plotter.plot (calibrator);
 
     if (verbose)
       cerr << "pacv: Plotting Calibrated Spectrum" << endl;
@@ -186,8 +176,7 @@ int main (int argc, char** argv)
 
   if (flux_cal) {
     cerr << "pacv: Plotting FluxCalibrator" << endl;
-    plotter = new Pulsar::FluxCalibratorPlotter;
-    plotter->plot (&fluxcal);
+    plotter.plot (&fluxcal);
   }
 
   cpgend();

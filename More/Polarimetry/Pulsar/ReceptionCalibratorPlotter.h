@@ -1,21 +1,22 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/Attic/ReceptionCalibratorPlotter.h,v $
-   $Revision: 1.9 $
-   $Date: 2003/09/04 10:20:54 $
+   $Revision: 1.10 $
+   $Date: 2003/09/11 21:15:42 $
    $Author: straten $ */
 
 #ifndef __ReceptionCalibratorPlotter_H
 #define __ReceptionCalibratorPlotter_H
 
-#include "Pulsar/PolnCalibratorPlotter.h"
+#include "Pulsar/CalibratorPlotter.h"
+#include "Estimate.h"
 
 namespace Pulsar {
 
   class ReceptionCalibrator;
 
   //! Pulsar::ReceptionCalibrator plotter
-  class ReceptionCalibratorPlotter : public PolnCalibratorPlotter {
+  class ReceptionCalibratorPlotter : public CalibratorPlotter {
     
   public:
 

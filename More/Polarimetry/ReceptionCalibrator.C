@@ -80,7 +80,7 @@ Pulsar::StandardModel::StandardModel (Model _model)
   pcal_path->add_Transformation( instrument );
   
   equation->set_Transformation ( pcal_path );
-  PolnCalibrator_path = equation->get_path ();
+  ArtificialCalibrator_path = equation->get_path ();
 
   // ////////////////////////////////////////////////////////////////////
   //
@@ -283,7 +283,7 @@ void Pulsar::ReceptionCalibrator::add_calibrator (const Archive* data)
     throw Error (InvalidState, "Pulsar::ReceptionCalibrator::add_calibrator",
 		 "No Archive containing pulsar data has yet been added");
 
-  Reference::To<PolnCalibrator> polncal;
+  Reference::To<ArtificialCalibrator> polncal;
 
   if (model_type == StandardModel::Hamaker) {
 
@@ -308,8 +308,9 @@ void Pulsar::ReceptionCalibrator::add_calibrator (const Archive* data)
 		 "unknown StandardModel type");
 
 
-  polncal->build( uncalibrated->get_nchan() );
-  add_PolnCalibrator (polncal);
+  polncal->set_nchan( uncalibrated->get_nchan() );
+
+  add_Calibrator (polncal);
 
 }
 
@@ -455,26 +456,26 @@ Pulsar::ReceptionCalibrator::add_data(vector<Calibration::MeasuredState>& bins,
   }
 }
 
-//! Add the specified PolnCalibrator observation to the set of constraints
-void Pulsar::ReceptionCalibrator::add_PolnCalibrator (const PolnCalibrator* p)
+//! Add the specified ArtificialCalibrator observation to the set of constraints
+void Pulsar::ReceptionCalibrator::add_Calibrator (const ArtificialCalibrator* p)
 {
-  check_ready ("Pulsar::ReceptionCalibrator::add_PolnCalibrator");
+  check_ready ("Pulsar::ReceptionCalibrator::add_Calibrator");
 
   if (verbose)
-    cerr << "Pulsar::ReceptionCalibrator::add_PolnCalibrator" << endl;
+    cerr << "Pulsar::ReceptionCalibrator::add_Calibrator" << endl;
 
   const Archive* cal = p->get_Archive();
 
   if (cal->get_state() != Signal::Coherence)
     throw Error (InvalidParam, 
-		 "Pulsar::ReceptionCalibrator::add_PolnCalibrator",
+		 "Pulsar::ReceptionCalibrator::add_Calibrator",
 		 "Archive='" + cal->get_filename() + "' "
 		 "invalid state=" + State2string(cal->get_state()));
 
   string reason;
   if (!uncalibrated->calibrator_match (cal, reason))
     throw Error (InvalidParam,
-		 "Pulsar::ReceptionCalibrator::add_PolnCalibrator",
+		 "Pulsar::ReceptionCalibrator::add_Calibrator",
 		 "'" + cal->get_filename() + "' does not match "
 		 "'" + uncalibrated->get_filename() + reason);
 
@@ -533,7 +534,7 @@ void Pulsar::ReceptionCalibrator::add_PolnCalibrator (const PolnCalibrator* p)
 
       unsigned ipol = 0;
 
-      // transpose [ipol][ichan] output of PolnCalibrator::get_levels
+      // transpose [ipol][ichan] output of ArtificialCalibrator::get_levels
       vector< Estimate<double> > cal (npol);
       for (ipol = 0; ipol<npol; ipol++)
 	cal[ipol] = cal_hi[ipol][ichan] - cal_lo[ipol][ichan];
@@ -550,12 +551,12 @@ void Pulsar::ReceptionCalibrator::add_PolnCalibrator (const PolnCalibrator* p)
 	Calibration::Measurements measurements ( abscissa );
 
         measurements.push_back (state);
-        measurements.path_index = model[ichan]->PolnCalibrator_path;
+        measurements.path_index = model[ichan]->ArtificialCalibrator_path;
 
         model[ichan]->equation->add_data (measurements);
       }
       catch (Error& error) {
-        cerr << "Pulsar::ReceptionCalibrator::add_PolnCalibrator"
+        cerr << "Pulsar::ReceptionCalibrator::add_Calibrator"
                 " error adding ichan=" << ichan << error << endl;
       }
 
@@ -571,24 +572,39 @@ void Pulsar::ReceptionCalibrator::add_PolnCalibrator (const PolnCalibrator* p)
   }
 
 
-  if (polcal && polcal->model.size() == nchan)  {
-    cerr << "Pulsar::ReceptionCalibrator::add_PolnCalibrator"
-	" add Polar Model" << endl;
+  if (polcal && polcal->get_Transformation_nchan() == nchan)  {
+
+    cerr << "Pulsar::ReceptionCalibrator::add_Calibrator add Polar Model" 
+	 << endl;
 
     assert (model.size() == nchan);
 
-    for (unsigned ichan = 0; ichan<nchan; ichan++)
-      model[ichan]->polar->integrate( polcal->model[ichan] );
+    const Calibration::Polar* polar;
+
+    for (unsigned ichan = 0; ichan<nchan; ichan++) {
+      polar = dynamic_cast<const Calibration::Polar*>
+	( polcal->get_Transformation(ichan) );
+      if (polar)
+	model[ichan]->polar->integrate( *polar );
+    }
+
   }
 
-  if (sacal && sacal->model.size() == nchan)  {
-    cerr << "Pulsar::ReceptionCalibrator::add_PolnCalibrator"
-	" add Polar Model" << endl;
+  if (sacal && sacal->get_Transformation_nchan() == nchan)  {
+    cerr << "Pulsar::ReceptionCalibrator::add_Calibrator add SingleAxis Model"
+	 << endl;
 
     assert (model.size() == nchan);
 
-    for (unsigned ichan = 0; ichan<nchan; ichan++)
-      model[ichan]->physical->integrate( sacal->model[ichan] );
+    const Calibration::SingleAxis* sa;
+
+    for (unsigned ichan = 0; ichan<nchan; ichan++) {
+      sa = dynamic_cast<const Calibration::SingleAxis*>
+	( sacal->get_Transformation(ichan) );
+      if (sa)
+	model[ichan]->physical->integrate( *sa );
+    }
+
   }
 
 
@@ -710,20 +726,10 @@ void Pulsar::ReceptionCalibrator::solve (int only_ichan)
   if (!is_initialized)
   check_ready ("Pulsar::ReceptionCalibrator::solve");
 
-  bool degenerate_rotV = false;
-
-  if (calibrator.source.size() == 0) {
-
-    //if (!FluxCalibrator_path)
-    //throw Error (InvalidState, "Pulsar::ReceptionCalibrator::solve",
-    //	   "no PolnCalibrator or FluxCalibrator data available");
-
-    cerr << "Pulsar::ReceptionCalibrator::solve warning:\n"
-      " Without a PolnCalibrator, there remains a degeneracy"
-      " along the Stokes V axis" << endl;
-
-    degenerate_rotV = true;
-  }
+  if (calibrator.source.size() == 0)
+    throw Error (InvalidState, "Pulsar::ReceptionCalibrator::solve",
+		 "Without an ArtificialCalibrator observation, "
+		 "there remains a degeneracy along the Stokes V axis");
 
   initialize ();
 

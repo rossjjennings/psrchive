@@ -5,7 +5,7 @@
 #include "Error.h"
 
 /*! When true, the FluxCalibrator constructor will first calibrate the
-  the flux calibrator observations using their off-pulse polarization to
+  the flux calibrator observations using the off-pulse polarization to
   compute the arbitrary polarimetric boost.  Not yet implemented.  */
 bool Pulsar::FluxCalibrator::self_calibrate = false;
 
@@ -148,12 +148,6 @@ void Pulsar::FluxCalibrator::create (unsigned required_nchan)
   throw Error (InvalidState, "Pulsar::FluxCalibrator::create",
 	       "Cannot currently calibrate archives with different nchan");
 
-  vector<Estimate<double> > on;
-  vector<Estimate<double> > off;
-  
-  // make on and off the right size of ratio_on and ratio_off
-  
-  calculate (on, off);
 }
 
 
@@ -206,9 +200,76 @@ void Pulsar::FluxCalibrator::calibrate (Integration* subint)
       *(subint->get_Profile (ipol, ichan)) *= cal_flux[ichan].val;
 }
 
+//! Get the number of frequency channels in the calibrator
+unsigned Pulsar::FluxCalibrator::get_nchan () const
+{
+  return calibrator->get_nchan();
+}
+
 //! Given the observing frequency in MHz, returns the flux of Hydra in mJy
 double Pulsar::FluxCalibrator::hydra_flux_mJy (double cfreq)
 {
   return pow (cfreq/1400.0, -.91) * 43.1 * 1000;
 }
 
+namespace Pulsar {
+
+  //! FluxCalibrator parameter communication
+  class FluxCalibratorInfo : public Pulsar::Calibrator::Info {
+    
+  public:
+    //! Constructor
+    FluxCalibratorInfo (const Pulsar::FluxCalibrator* cal) 
+    { calibrator = cal; }
+    
+    //! Return the number of parameter classes
+    unsigned get_nclass () const { return 2; }
+    
+    //! Return the name of the specified class
+    const char* get_name (unsigned iclass)
+    {
+      switch (iclass) {
+      case 0:
+	return "Calibrator Flux (Jy)";
+      case 1:
+	return "System Temperature (Jy)";
+      default:
+	return "";
+      }
+    }
+    
+    //! Return the number of parameters in the specified class
+    unsigned get_nparam (unsigned iclass)
+    {
+      return 1;
+    }
+    
+    //! Return the estimate of the specified parameter
+    Estimate<float> get_param (unsigned ichan, unsigned iclass,
+			       unsigned iparam)
+    {
+      Estimate<float> retval;
+      
+      if (iclass == 0)
+	retval = calibrator->cal_flux[ichan];
+      else if (iclass == 1)
+	retval = calibrator->T_sys[ichan];
+      
+      // convert to Jy
+      retval *= 1e-3;
+      return retval;
+    }
+    
+  protected:
+    
+    Reference::To<const Pulsar::FluxCalibrator> calibrator;
+    
+  };
+
+}
+
+Pulsar::Calibrator::Info* Pulsar::FluxCalibrator::get_Info () const
+{
+  const_cast<FluxCalibrator*>(this)->create();
+  return new FluxCalibratorInfo (this);
+}

@@ -1,5 +1,11 @@
-#include "SingleAxisCalibrator.h"
+#include "Pulsar/SingleAxisCalibrator.h"
 #include "Estimate.h"
+
+//! Construct from an single PolnCal Pulsar::Archive
+Pulsar::SingleAxisCalibrator::SingleAxisCalibrator (const Archive* archive) 
+  : ArtificialCalibrator (archive)
+{
+}
 
 Pulsar::SingleAxisCalibrator::~SingleAxisCalibrator ()
 {
@@ -8,10 +14,9 @@ Pulsar::SingleAxisCalibrator::~SingleAxisCalibrator ()
 }
 
 //! Return the system response as determined by the SingleAxis
-Jones<double> 
+::Calibration::Transformation*
 Pulsar::SingleAxisCalibrator::solve (const vector<Estimate<double> >& hi,
-				     const vector<Estimate<double> >& lo,
-				     unsigned ichan)
+				     const vector<Estimate<double> >& lo)
 {
   unsigned npol = hi.size();
 
@@ -21,22 +26,58 @@ Pulsar::SingleAxisCalibrator::solve (const vector<Estimate<double> >& hi,
     cal[ipol] -= lo[ipol];
   }
 
-  Calibration::SingleAxis qm;
-  qm.solve (cal);
+  Reference::To<Calibration::SingleAxis> model = new Calibration::SingleAxis;
+  model->solve (cal);
 
-  if (store_parameters)
-    model[ichan] = qm;
-
-  return qm.evaluate();
+  return model.release();
 }
 
-//! Resize the space used to store SingleAxis parameters
-void Pulsar::SingleAxisCalibrator::resize_parameters (unsigned nchan)
+//! SingleAxisCalibrator parameter communication
+class SingleAxisCalibratorInfo : public Pulsar::Calibrator::Info {
+
+public:
+  //! Constructor
+  SingleAxisCalibratorInfo (const Pulsar::SingleAxisCalibrator* cal) 
+  { calibrator = cal; }
+
+  //! Return the number of parameter classes
+  unsigned get_nclass () const { return 3; }
+
+  //! Return the name of the specified class
+  const char* get_name (unsigned iclass)
+  {
+    switch (iclass) {
+    case 0:
+      return "Gain (C\\d0\\u)";
+    case 1:
+      return "Diff. Gain";
+    case 2:
+      return "Diff. Phase";
+    default:
+      return "";
+    }
+  }
+  
+  //! Return the number of parameters in the specified class
+  unsigned get_nparam (unsigned iclass)
+  {
+    return 1;
+  }
+  
+  //! Return the estimate of the specified parameter
+  Estimate<float> get_param (unsigned ichan, unsigned iclass,
+			     unsigned iparam)
+  {
+    return calibrator->get_Transformation(ichan)->get_Estimate(iclass);
+  }
+  
+protected:
+
+  Reference::To<const Pulsar::SingleAxisCalibrator> calibrator;
+
+};
+
+Pulsar::Calibrator::Info* Pulsar::SingleAxisCalibrator::get_Info () const
 {
-  if (verbose)
-    cerr << "Pulsar::SingleAxisCalibrator::resize_parameters "<< nchan <<endl;
-
-  model.resize (nchan);
+  return new SingleAxisCalibratorInfo (this);
 }
-
- 
