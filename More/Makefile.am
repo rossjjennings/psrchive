@@ -22,7 +22,7 @@ nobase_include_HEADERS = \
 	Pulsar/InstrumentInfo.h          Pulsar/SystemCalibrator.h \
 	Pulsar/Integration.h             Pulsar/Transposer.h \
 	Pulsar/IntegrationManager.h      Pulsar/Utilities.h \
-	Pulsar/PhaseWeight.h             \
+	Pulsar/PhaseWeight.h             Pulsar/ArchiveTI.h \
 	Pulsar/PhaseWeightFunction.h     model_profile.h \
 	Pulsar/Plotter.h
 
@@ -76,7 +76,7 @@ libpsrchive_la_SOURCES = plugins.csh getopt.h Physical.h \
 	Integration_get_PA.C          getopt1.c  \
 	Integration_get_Stokes.C      model_profile.C  \
 	Integration_invint.C          pafit_get_PA.C  \
-	Integration_match.C           ArchiveTUI.C
+	Integration_match.C           ArchiveTI.C
 
 SUBDIRS                 = Calibration Extension timer epn
 

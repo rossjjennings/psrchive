@@ -1,25 +1,25 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Attic/ArchiveTI.h,v $
-   $Revision: 1.3 $
-   $Date: 2004/12/16 21:09:45 $
+   $Revision: 1.4 $
+   $Date: 2004/12/19 18:53:09 $
    $Author: straten $ */
 
-#ifndef __Pulsar_ArchiveTUI_h
-#define __Pulsar_ArchiveTUI_h
+#ifndef __Pulsar_ArchiveTI_h
+#define __Pulsar_ArchiveTI_h
 
 #include "Pulsar/Archive.h"
-#include "Pulsar/ExtensionTUI.h"
+#include "Pulsar/ExtensionTI.h"
 
 namespace Pulsar {
 
   //! Smooths a pulse profile using the mean over a boxcar
-  class ArchiveTUI : public TextInterface::CompositeGetSet<Archive> {
+  class ArchiveTI : public TextInterface::CompositeGetSet<Archive> {
 
   public:
 
     //! Constructor
-    ArchiveTUI () { init(); }
+    ArchiveTI () { init(); }
 
     //! Process a command
     void process (const std::string& command);
@@ -39,11 +39,11 @@ namespace Pulsar {
 }
 
 template<class Ext>
-void Pulsar::ArchiveTUI::import (const std::string& name,
+void Pulsar::ArchiveTI::import (const std::string& name,
 				 TextInterface::ClassGetSet<Ext>* tui)
 {
   TextInterface::CompositeGetSet<Archive>::import 
-    ( new ExtensionTUI<Archive,Ext>(name, tui) );
+    ( new ExtensionTI<Archive,Ext>(name, tui) );
 }
 
 

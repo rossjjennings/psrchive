@@ -1,11 +1,11 @@
-#include "Pulsar/PointingTUI.h"
+#include "Pulsar/PointingTI.h"
 
-Pulsar::PointingTUI::PointingTUI ()
+Pulsar::PointingTI::PointingTI ()
 {
   init ();
 }
 
-void Pulsar::PointingTUI::init ()
+void Pulsar::PointingTI::init ()
 {
   {
     Generator<double> gen;

@@ -1,9 +1,9 @@
-#include "Pulsar/ArchiveTUI.h"
+#include "Pulsar/ArchiveTI.h"
 #include "Pulsar/Archive.h"
 #include "string_utils.h"
 
 //! Process a command
-void Pulsar::ArchiveTUI::process (const std::string& command)
+void Pulsar::ArchiveTI::process (const std::string& command)
 {
   string temp = command;
 
@@ -15,7 +15,7 @@ void Pulsar::ArchiveTUI::process (const std::string& command)
     cout << " " << param << "=" << get_value (param);
 }
 
-void Pulsar::ArchiveTUI::init ()
+void Pulsar::ArchiveTI::init ()
 {
   {
     Generator<unsigned> gen;

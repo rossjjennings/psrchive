@@ -1,11 +1,11 @@
-#include "Pulsar/ReceiverTUI.h"
+#include "Pulsar/ReceiverTI.h"
 
-Pulsar::ReceiverTUI::ReceiverTUI ()
+Pulsar::ReceiverTI::ReceiverTI ()
 {
   init ();
 }
 
-void Pulsar::ReceiverTUI::init ()
+void Pulsar::ReceiverTI::init ()
 {
   {
     Generator<bool> gen;
