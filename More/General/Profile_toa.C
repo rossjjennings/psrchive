@@ -167,8 +167,8 @@ double Pulsar::Profile::TimeShift (const Profile& std,
   // The error in phase units
   error = float(2.0 * sqrt((D - height)/E));
 
-  // The shift in phase units, wrapped to be between 0.0 and 1.0
-  if (F < 0.0) {
+  // The shift in phase units, wrapped to be between -1.0 and 1.0
+  if (F < -1.0) {
     return (F + 1.0);
   }
   else if (F > 1.0) {
