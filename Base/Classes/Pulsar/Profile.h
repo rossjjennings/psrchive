@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Profile.h,v $
-   $Revision: 1.28 $
-   $Date: 2003/04/26 06:50:46 $
+   $Revision: 1.29 $
+   $Date: 2003/04/29 09:45:21 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Profile_h
@@ -82,21 +82,29 @@ namespace Pulsar {
     //! calculate the signed sqrt of the absolute value of each bin 
     virtual void square_root();
 
-    //! returns the bin number with the maximum amplitude
-    int bin_max (int bin_start=0, int bin_end=0) const;
-    //! returns the bin number with the minimum amplitude
-    int bin_min (int bin_start=0, int bin_end=0) const;
+    //! Returns the maximum amplitude
+    float max  (int bin_start=0, int bin_end=0) const;
+    //! Returns the minimum amplitude
+    float min  (int bin_start=0, int bin_end=0) const;
+    //! Returns the sum of all amplitudes
+    double sum (int bin_start=0, int bin_end=0) const;
 
-    //! returns the maximum amplitude
-    float max (int bin_start=0, int bin_end=0) const;
-    //! returns the minimum amplitude
-    float min (int bin_start=0, int bin_end=0) const;
-    //! returns the sum of all amplitudes
-    double sum  (int bin_start=0, int bin_end=0) const;
-    //! returns the mean amplitude
-    double mean (int bin_start=0, int bin_end=0) const;
-    //! returns the root mean squared amplitude
-    double rms  (int bin_start=0, int bin_end=0) const;
+    //! Calculates the mean, variance, and variance of the mean
+    void stats (double* mean, double* variance = 0, double* varmean = 0,
+		int bin_start=0, int bin_end=0) const;
+
+    //! Convenience interface to stats (start_bin, end_bin)
+    void stats (float phase, 
+		double* mean, double* variance = 0, double* varmean = 0,
+		float duty_cycle = default_duty_cycle) const;
+
+    //! Convenience interface to stats, returns only the mean
+    double mean (float phase, float duty_cycle = default_duty_cycle) const;
+
+    //! Returns the phase of the centre of the region with maximum mean
+    float find_max_phase (float duty_cycle = default_duty_cycle) const;
+    //! Returns the phase of the centre of the region with minimum mean
+    float find_min_phase (float duty_cycle = default_duty_cycle) const;
 
     //! Find the bin numbers at which the mean power transits
     void find_transitions (int& highlow, int& lowhigh, int& width) const;
@@ -104,11 +112,10 @@ namespace Pulsar {
     //! Find the bin numbers at which the cumulative power crosses thresholds
     void find_peak_edges (int& rise, int& fall) const;
 
-    //! Returns the phase of the centre of the region with minimum mean
-    float find_min_phase (float duty_cycle = default_duty_cycle) const;
-
-    //! Returns the phase of the centre of the region with maximum mean
-    float find_max_phase (float duty_cycle = default_duty_cycle) const;
+    //! Returns the bin number with the maximum amplitude
+    int find_max_bin (int bin_start=0, int bin_end=0) const;
+    //! Returns the bin number with the minimum amplitude
+    int find_min_bin (int bin_start=0, int bin_end=0) const;
 
     //! Returns the signal to noise ratio of the profile
     float snr () const;
@@ -121,26 +128,6 @@ namespace Pulsar {
 
     //! rotates the profile to remove dispersion delay
     void dedisperse (double dm, double ref_freq, double pfold);
-
-    //! returns the signal to noise ratio of the profile
-    //float snr (float duty_cycle, float wing_sigma) const;
-
-    //float std_snr (float rms, float wing_sigma,int* st=0, int* end=0) const;
-
-    //float snr (const Profile& std,float*, bool allow_rotate=true) const;
-
-    //! calculates the mean, variance, and variance of the mean of the profile
-    void stats (double* mean, double* variance, double* varmean=0) const
-    { stats (mean, variance, varmean, 0, nbin); }
-
-    //! calculates the mean, variance, and variance of the mean a section
-    void stats (double* mean, double* variance, double* varmean,
-		int istart, int iend) const;
-
-    //! Convenience interface to stats (start_bin, end_bin)
-    void stats (float phase, 
-		double* mean, double* variance = 0, double* varmean = 0,
-		float duty_cycle = default_duty_cycle) const;
 
     //! fit to the standard and return a Tempo::toa object
     Tempo::toa toa (const Profile& std, const MJD& mjd, 

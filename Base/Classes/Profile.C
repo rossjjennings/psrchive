@@ -367,12 +367,12 @@ void minmax (int nbin, const float* amps, int* mi, float* mv, bool max,
 
 /////////////////////////////////////////////////////////////////////////////
 //
-// Pulsar::Profile::bin_max
+// Pulsar::Profile::find_max_bin
 //
-int Pulsar::Profile::bin_max (int istart, int iend) const
+int Pulsar::Profile::find_max_bin (int istart, int iend) const
 {
   if (verbose)
-    cerr << "Pulsar::Profile::bin_max" << endl;
+    cerr << "Pulsar::Profile::find_max_bin" << endl;
   
   int imax=0;
   minmax (nbin, amps, &imax, 0, true, istart, iend);
@@ -381,12 +381,12 @@ int Pulsar::Profile::bin_max (int istart, int iend) const
 
 /////////////////////////////////////////////////////////////////////////////
 //
-// Pulsar::Profile::bin_min
+// Pulsar::Profile::find_min_bin
 //
-int Pulsar::Profile::bin_min (int istart, int iend) const
+int Pulsar::Profile::find_min_bin (int istart, int iend) const
 {
   if (verbose)
-    cerr << "Pulsar::Profile::bin_min" << endl;
+    cerr << "Pulsar::Profile::find_min_bin" << endl;
   
   int imin=0;
   minmax (nbin, amps, &imin, 0, false, istart, iend);
@@ -439,6 +439,7 @@ double Pulsar::Profile::sum (int istart, int iend) const
   return tot;
 }
 
+#if 0
 /////////////////////////////////////////////////////////////////////////////
 //
 // Pulsar::Profile::mean
@@ -475,6 +476,8 @@ double Pulsar::Profile::rms (int istart, int iend) const
 
   return sqrt(sumsq/totbin);
 }
+
+#endif
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -537,8 +540,12 @@ void Pulsar::Profile::stats (double* mean, double* variance, double* varmean,
 //
 /*! 
   \param phase centre of region
+  \retval mean the mean of the interval
+  \retval variance the variance of the interval
+  \retval varmean the variance of the mean of the interval
+  \param istart the first bin of the interval
+  \param iend one greater than the last bin of the interval
   \param duty_cycle width of region
-  \return mean of region
   */
 void Pulsar::Profile::stats (float phase,
 			     double* mean, 
@@ -554,6 +561,23 @@ void Pulsar::Profile::stats (float phase,
 
   stats (mean, variance, varmean, start_bin, stop_bin);
 }
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Pulsar::Profile::mean
+//
+/*! 
+  \param phase centre of region
+  \param duty_cycle width of region
+  \return mean of region
+*/
+double Pulsar::Profile::mean (float phase, float duty_cycle) const
+{
+  double result;
+  stats (phase, &result, 0, 0, duty_cycle);
+  return result;
+}
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
