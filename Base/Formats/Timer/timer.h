@@ -1,3 +1,8 @@
+/* $Source: /cvsroot/psrchive/psrchive/Base/Formats/Timer/timer.h,v $
+   $Revision: 1.2 $
+   $Date: 1999/11/02 09:58:23 $
+   $Author: straten $ */
+
 /* include file for the main timer structure                            */
 
 /* This has to be compatable with fortran when written as binary to a file.

@@ -1,3 +1,8 @@
+/* $Source: /cvsroot/psrchive/psrchive/Base/Formats/Timer/convert_endian.h,v $
+   $Revision: 1.3 $
+   $Date: 1999/11/02 09:58:21 $
+   $Author: straten $ */
+
 #include "machine_endian.h"
 
 #include "timer.h"

@@ -1,3 +1,8 @@
+/* $Source: /cvsroot/psrchive/psrchive/Base/Formats/Timer/band.h,v $
+   $Revision: 1.2 $
+   $Date: 1999/11/02 09:58:20 $
+   $Author: straten $ */
+
 #ifndef __BAND_H
 #define __BAND_H
 

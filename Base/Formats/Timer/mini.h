@@ -1,3 +1,7 @@
+/* $Source: /cvsroot/psrchive/psrchive/Base/Formats/Timer/mini.h,v $
+   $Revision: 1.2 $
+   $Date: 1999/11/02 09:58:22 $
+   $Author: straten $ */
 
 /* include file for mini header */
 

@@ -1,3 +1,8 @@
+/* $Source: /cvsroot/psrchive/psrchive/Base/Formats/Timer/timer++.h,v $
+   $Revision: 1.2 $
+   $Date: 1999/11/02 09:58:22 $
+   $Author: straten $ */
+
 #ifndef __TIMER_PLUSPLUS_H
 #define __TIMER_PLUSPLUS_H
 
