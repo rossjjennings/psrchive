@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Quaternion.h,v $
-   $Revision: 1.23 $
-   $Date: 2004/10/26 12:40:31 $
+   $Revision: 1.24 $
+   $Date: 2004/10/27 11:54:08 $
    $Author: straten $ */
 
 #ifndef __Quaternion_H
@@ -291,52 +291,33 @@ template<typename T>
 T det (const Quaternion<T,Unitary>& j)
 { return j.s0*j.s0 + j.s1*j.s1 + j.s2*j.s2 + j.s3*j.s3; }
 
-
-
-
 //! Returns the trace of Quaternion, j
 template<typename T, QBasis B>
 T trace (const Quaternion<T,B>& j)
-{ 
-  return 2.0 * j.s0;
-}
-
-
-// Return the positive definite square root of a Hermitian Quaternion
-template<typename T>
-const Quaternion<T, Hermitian> sqrt (const Quaternion<T, Hermitian>& h)
-{
-  T modsq = h.s1*h.s1 + h.s2*h.s2 + h.s3*h.s3;
-  T det = sqrt (h.s0*h.s0 - modsq);
-
-  T scale = 0.0;
-
-  if (modsq > 0.0)
-    scale = sqrt (0.5 * (h.s0 - det) / modsq);
-
-  return Quaternion<T, Hermitian>
-    (sqrt (0.5 * (h.s0 + det)), h.s1 * scale, h.s2 * scale, h.s3 * scale);
-}
-
+{ return 2.0 * j.s0; }
 
 //! Returns the square of the Frobenius norm of a Biquaternion
 template<typename T, QBasis B>
 T norm (const Quaternion<std::complex<T>,B>& j)
-{ 
-  return 2.0 * (norm(j.s0) + norm(j.s1) + norm(j.s2) + norm(j.s3));
-}
+{ return 2.0 * (norm(j.s0) + norm(j.s1) + norm(j.s2) + norm(j.s3)); }
 
 //! Returns the square of the Frobenius norm of a quaternion
 template<typename T, QBasis B>
 T norm (const Quaternion<T,B>& j)
-{ 
-  return 2.0 * (j.s0*j.s0 + j.s1*j.s1 + j.s2*j.s2 + j.s3*j.s3);
-}
+{ return 2.0 * (j.s0*j.s0 + j.s1*j.s1 + j.s2*j.s2 + j.s3*j.s3); }
 
 template<typename T, QBasis B>
 T fabs (const Quaternion<T,B>& j)
-{ 
-  return sqrt (norm(j));
+{ return sqrt (norm(j)); }
+
+// Return the positive definite square root of a Hermitian Quaternion
+template<typename T, QBasis B>
+const Quaternion<T,B> sqrt (const Quaternion<T,B>& h)
+{
+  T root_det = sqrt( det(h) );
+  T scalar = sqrt( 0.5 * (h.s0 + root_det) );
+
+  return Quaternion<T,B> (scalar, h.get_vector()/(2*scalar));
 }
 
 // return a unitary matrix with rows equal to the eigenvectors of q
