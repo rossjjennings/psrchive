@@ -28,7 +28,11 @@ int main (int argc, char *argv[]) {
   bool bscr = false;
   int bscr_fac = 0;
 
+  bool dedisperse = false;
+  double dm = 0.0;
+
   bool reset_weights = false;
+  float new_weight = 1.0;
 
   bool smear = false;
   float smear_dc = 0.0;
@@ -37,7 +41,7 @@ int main (int argc, char *argv[]) {
 
   int gotc = 0;
   
-  while ((gotc = getopt(argc, argv, "hvVme:TFpt:f:b:s:z")) != -1) {
+  while ((gotc = getopt(argc, argv, "hvVme:TFpt:f:b:d:s:w:")) != -1) {
     switch (gotc) {
     case 'h':
       cout << "A program for manipulating Pulsar::Archives"            << endl;
@@ -45,16 +49,17 @@ int main (int argc, char *argv[]) {
       cout << "  -v               Verbose mode"                        << endl;
       cout << "  -V               Very verbose mode"                   << endl;
       cout << "  -m               Modify the original data"            << endl;
-      cout << "  -e [string]      Write new files with this extension" << endl;
+      cout << "  -e [string e]    Write new files with extension e"    << endl;
       cout << endl;
       cout << "  -T               Time scrunch"                        << endl;
       cout << "  -F               Frequency scrunch"                   << endl;
       cout << "  -p               Polarisation scrunch"                << endl;
-      cout << "  -t [int]         Time scrunch by this factor"         << endl;
-      cout << "  -f [int]         Frequency scrunch by this factor"    << endl;
-      cout << "  -b [int]         Bin scrunch by this factor"          << endl;
-      cout << "  -s [float]       Smear with this duty cycle"          << endl;
-      cout << "  -z               Reset all profile weights to 1.0"    << endl;
+      cout << "  -t [int f]       Time scrunch by a factor of f"       << endl;
+      cout << "  -f [int f]       Frequency scrunch by a factor of f"  << endl;
+      cout << "  -b [int f]       Bin scrunch by a factor of f"        << endl;
+      cout << "  -d [float dm]    Dedisperse to dm"                    << endl;
+      cout << "  -s [float c]     Smear with duty cycle c"             << endl;
+      cout << "  -w [float w]     Reset all profile weights to w"      << endl;
       return (-1);
       break;
     case 'v':
@@ -105,6 +110,13 @@ int main (int argc, char *argv[]) {
 	return -1;
       }
       break;
+    case 'd':
+      dedisperse = true;
+      if (sscanf(optarg, "%lf", &dm) != 1) {
+	cout << "That is not a valid dispersion measure." << endl;
+	return -1;
+      }
+      break;
     case 's':
       smear = true;
       if (sscanf(optarg, "%f", &smear_dc) != 1) {
@@ -112,11 +124,15 @@ int main (int argc, char *argv[]) {
 	return -1;
       }
       break;
-    case 'z':
+    case 'w':
       reset_weights = true;
+      if (sscanf(optarg, "%f", &new_weight) != 1) {
+	cout << "That is not a valid weight." << endl;
+	return -1;
+      }
       break;
     default:
-      cout << "Unrecognised option" << endl;
+      cout << "Unrecognised option." << endl;
     }
   }
   
@@ -144,9 +160,15 @@ int main (int argc, char *argv[]) {
       arch = Pulsar::Archive::load(archives[i]);
 
       if (reset_weights) {
-	arch->uniform_weight();
+	arch->uniform_weight(new_weight);
 	if (verbose)
-	  cout << "All profile weights set to 1.0" << endl;
+	  cout << "All profile weights set to " << new_weight << endl;
+      }
+
+      if (dedisperse) {
+	arch->dedisperse(dm,arch->get_centre_frequency());
+	if (verbose)
+	  cout << "Archive dedispersed to a DM of " << dm << endl;
       }
       
       if (tscr) {
