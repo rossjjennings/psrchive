@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <sys/time.h>
 
-#ifdef sun
+#if defined(sun) && !defined(__GNUC__)
 #include <float.h>
 #include <sunmath.h>
 #endif
@@ -581,7 +581,7 @@ int MJD::Construct (const char* mjdstr)
   return 0;
 }
 
-ostream& operator<< (ostream& ostr, const MJD& mjd)  {
+ostream& operator << (ostream& ostr, const MJD& mjd)  {
   return ostr << mjd.printdays(MJD::ostream_precision); 
 }
 
