@@ -26,6 +26,11 @@ AC_ARG_VAR(LOGIN_ARCH)
 CPPFLAGS="-I$PSRHOME/packages/$LOGIN_ARCH/include $CPPFLAGS"
 LDFLAGS="-L$PSRHOME/packages/$LOGIN_ARCH/lib $LDFLAGS"
 
+# For developers: ensure that the config directory m4 macros are parsed
+ACLOCAL="$ACLOCAL -I config"
+# For developers: preserve file modification times
+INSTALL_DATA="${INSTALL} -m 644 -p"
+
 # Checks for libraries
 AC_CHECK_LIB([m], [sin])
 SWIN_LIB_SLA([],AC_MSG_ERROR([Cannot link against SLALIB]))
