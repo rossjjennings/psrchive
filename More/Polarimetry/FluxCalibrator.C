@@ -5,6 +5,10 @@
 #include "Pulsar/Integration.h"
 #include "Pulsar/Profile.h"
 
+#include "Calibration/ScalarMath.h"
+#include "Calibration/ScalarValue.h"
+#include "Calibration/ScalarConstant.h"
+
 #include "Error.h"
 
 /*! When true, the FluxCalibrator constructor will first calibrate the
@@ -331,14 +335,20 @@ try {
 
   unsigned good_channels = 0;
 
+  // use the ScalarMath class to calculate the variances
+  Calibration::ScalarValue ratio_on;
+  Calibration::ScalarValue ratio_off;
+  Calibration::ScalarConstant unity (1.0);
+
+  Calibration::ScalarMath S_cal = unity / (unity/ratio_on - unity/ratio_off);
+  Calibration::ScalarMath S_sys = S_cal / ratio_off;
+
   for (unsigned ichan=0; ichan<nchan; ++ichan) {
 
     if (on[ichan]==0 || off[ichan]==0) {
       cal_flux[ichan] = T_sys[ichan] = 0;
       continue;
     }
-
-    Estimate<double> ratio_diff = 1.0/on[ichan] - 1.0/off[ichan];
 
     double frequency = subint->get_centre_frequency(ichan);
     double source_mJy = entry.get_flux_mJy (frequency);
@@ -347,9 +357,11 @@ try {
       cerr << "Pulsar::FluxCalibrator::calculate channel=" << ichan << 
 	" freq=" << frequency << " flux=" << source_mJy << endl;
 
-    cal_flux[ichan] = source_mJy/ratio_diff;
+    ratio_on.set_value (on[ichan]);
+    ratio_off.set_value (off[ichan]);
 
-    T_sys[ichan] = cal_flux[ichan]/off[ichan];
+    cal_flux[ichan] = source_mJy * S_cal.get_Estimate();
+    T_sys[ichan] = source_mJy * S_sys.get_Estimate();
 
     if (cal_flux[ichan].val < sqrt(cal_flux[ichan].var)
 	|| T_sys[ichan].val < sqrt(T_sys[ichan].var) ) {
