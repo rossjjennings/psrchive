@@ -48,6 +48,15 @@ Pulsar::TimerArchive::TimerArchive (const TimerArchive& arch)
   TimerArchive::copy (arch);
 }
 
+Pulsar::TimerArchive& Pulsar::TimerArchive::operator=(const TimerArchive& archive){
+  if (verbose)
+    cerr << "TimerArchive operator =" << endl;
+
+  TimerArchive::copy (archive);
+
+  return *this;
+}
+
 Pulsar::TimerArchive::TimerArchive (const Archive& arch,
 				    const vector<unsigned>& subints)
 {
@@ -55,6 +64,7 @@ Pulsar::TimerArchive::TimerArchive (const Archive& arch,
     cerr << "TimerArchive construct extract Archive" << endl;
   
   Timer::init (&hdr);
+
   TimerArchive::copy (arch, subints);
 }
 
@@ -66,6 +76,13 @@ Pulsar::TimerArchive::TimerArchive (const TimerArchive& arch,
 
   Timer::init (&hdr);
   TimerArchive::copy (arch, subints);
+}
+
+void Pulsar::TimerArchive::copy (const Archive& archive) {
+  vector<unsigned> all_subints(archive.get_nsubint());
+  for( unsigned i=0; i<all_subints.size(); i++)
+    all_subints[i] = i;
+  copy(archive,all_subints);
 }
 
 void Pulsar::TimerArchive::copy (const Archive& archive, 
@@ -83,8 +100,8 @@ void Pulsar::TimerArchive::copy (const Archive& archive,
 
   hdr = tarchive->hdr;
 
-  Archive::copy (archive, subints);
-
+  if( !subints.empty() )
+    Archive::copy (archive, subints);
 
   if (verbose)
     cerr << "TimerArchive::copy another TimerArchive" << endl;
