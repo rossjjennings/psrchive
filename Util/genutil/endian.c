@@ -24,3 +24,13 @@ changeEndian(void *num, int nbytes)
 	memcpy((void *)num, (void *)tmp, nbytes);
 }
 
+void array_changeEndian (int count, void *p, int element_size)
+{
+  unsigned char *Ptr = (unsigned char *) p;
+  int i;
+  for (i=0; i < count; i++)  {
+    changeEndian (Ptr, element_size);
+    Ptr += element_size;
+  }
+}
+
