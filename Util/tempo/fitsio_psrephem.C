@@ -3,6 +3,7 @@
 #include <algorithm>
 
 #include <assert.h>
+#include <math.h>
 
 #include <fitsio.h>
 
@@ -208,6 +209,9 @@ void psrephem::load (fitsfile* fptr, long row)
 	fits_read_col (fptr, TSTRING, icol+1, row, firstelem, onelement,
 		       &nul, &strval, &anynul, &status);
 
+        if (anynul)
+          break;
+
 	if (verbose)
 	  cerr << "psrephem::load string:'" << strval << "' in column "
 	       << icol+1 << " (" << parmNames[ieph] << ")" << endl;
@@ -218,9 +222,12 @@ void psrephem::load (fitsfile* fptr, long row)
 
     case 1:  // double
       {
-	double nul = 0.0;
+	double nul = NAN;
 	fits_read_col (fptr, TDOUBLE, icol+1, row, firstelem, onelement,
 		       &nul, value_double + ieph, &anynul, &status);
+
+        if (anynul)
+          break;
 
 	if (verbose)
 	  cerr << "psrephem::load double:'" << value_double[ieph] <<
@@ -235,6 +242,9 @@ void psrephem::load (fitsfile* fptr, long row)
 	  fits_read_col (fptr, TLONG, icol, row, firstelem, onelement,
 			 &lnul, &lval, &anynul, &status);
 
+          if (anynul)
+            break;
+
 	  value_double[ieph] += double (lval);
           value_double[ieph] *= 1e-3;
 	  value_integer[ieph] = 0;
@@ -247,6 +257,9 @@ void psrephem::load (fitsfile* fptr, long row)
 	char* nul = " ";
 	fits_read_col (fptr, TSTRING, icol+1, row, firstelem, onelement,
 		       nul, &strval, &anynul, &status);
+
+        if (anynul)
+          break;
 
         if (verbose)
           cerr << "psrephem::load h:m:s:'" << strval << "' in column "
@@ -270,6 +283,9 @@ void psrephem::load (fitsfile* fptr, long row)
 	fits_read_col (fptr, TSTRING, icol+1, row, firstelem, onelement,
 		       nul, &strval, &anynul, &status);
 
+        if (anynul)
+          break;
+
         if (verbose)
           cerr << "psrephem::load d:m:s:'" << strval << "' in column "
                << icol+1 << " (" << parmNames[ieph] << ")" << endl;
@@ -288,9 +304,12 @@ void psrephem::load (fitsfile* fptr, long row)
       }
     case 4:  // MJD
       {
-	double nul = 0.0;
+	double nul = NAN;
 	fits_read_col (fptr, TDOUBLE, icol+1, row, firstelem, onelement,
 		       &nul, value_double + ieph, &anynul, &status);
+
+        if (anynul)
+          break;
 
 	if (ieph == EPH_TZRMJD) {
 	  int inul = 0;
@@ -298,6 +317,9 @@ void psrephem::load (fitsfile* fptr, long row)
 	  // Assumes that TZRIMJD is in the column preceding TZRFMJD
 	  fits_read_col (fptr, TINT, icol, row, firstelem, onelement,
 			 &inul, value_integer + ieph, &anynul, &status);
+          if (anynul)
+            break;
+
 	}
 	else {
 	  // separate the integer
@@ -308,9 +330,17 @@ void psrephem::load (fitsfile* fptr, long row)
       }
     case 5:  // integer
       {
-	int nul = 0;
+	int nul = -1;
 	fits_read_col (fptr, TINT, icol+1, row, firstelem, onelement,
 		       &nul, value_integer + ieph, &anynul, &status);
+
+        if (anynul)
+          break;
+
+        if (verbose)
+          cerr << "psrephem::load integer:'" << value_integer[ieph] <<
+                "' in column " << icol+1 << " (" << parmNames[ieph] << ")" << endl;
+
 	break;
       }
     default:
@@ -325,8 +355,13 @@ void psrephem::load (fitsfile* fptr, long row)
 		       "error parsing %s", parmNames[ieph]);
     }
 
-    if (anynul)
+    if (anynul)  {
+      if (verbose)
+        cerr << "psrephem::load null in column " << icol+1 
+             << " (" << parmNames[ieph] << ")" << endl;
+
       parmStatus[ieph] = 0;
+    }
     else
       parmStatus[ieph] = 1;
 
@@ -337,6 +372,9 @@ void psrephem::load (fitsfile* fptr, long row)
   if (icol < ephind.size())
     cerr << "psrephem::load PSRFITS read " << icol <<"/" << ephind.size()
 	 << " elements" << endl;
+
+  if (verbose)
+    cerr << "psrephem::load PSRFITS\n" << *this << endl;
 
 }
 
