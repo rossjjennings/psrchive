@@ -297,55 +297,13 @@ int main (int argc, char *argv[]) {
 	
 	if (fitsext) {
 	  
-	  fitsext->add_blank_row();
-	  
 	  if (command.length() > 80) {
 	    cout << "WARNING: ProcHistory command string truncated to 80 chars" << endl;
-	    fitsext->get_last().proc_cmd = command.substr(0, 80);
+	    fitsext->set_command_str(command.substr(0, 80));
 	  }
 	  else {
-	    fitsext->get_last().proc_cmd = command;
+	    fitsext->set_command_str(command);
 	  }
-	  
-	  time_t myt;
-	  time(&myt);
-	  fitsext->get_last().date_pro = ctime(&myt);
-	  
-	  fitsext->get_last().pol_type = state_string(arch->get_state());
-	  
-	  fitsext->get_last().npol = arch->get_npol();
-	  fitsext->get_last().nbin = arch->get_nbin();
-	  fitsext->get_last().nbin_prd = arch->get_nbin();
-	  fitsext->get_last().tbin = ((arch->get_Integration(0)->get_folding_period())/arch->get_nbin());
-	  fitsext->get_last().ctr_freq = arch->get_centre_frequency();
-	  fitsext->get_last().nchan = arch->get_nchan();
-	  fitsext->get_last().chanbw = (arch->get_bandwidth())/float(arch->get_nchan());
-	  
-	  if (arch->get_parallactic_corrected()) {
-	    fitsext->get_last().par_corr = 1;
-	  }
-	  else {
-	    fitsext->get_last().par_corr = 0;
-	  }
-	  
-	  if (arch->get_iono_rm_corrected() && arch->get_ism_rm_corrected()) {
-	    fitsext->get_last().rm_corr = 1;
-	  }
-	  else {
-	    fitsext->get_last().rm_corr = 0;
-	  }
-	  
-	  if (arch->get_dedispersed()) {
-	    fitsext->get_last().dedisp = 1;
-	  }
-	  else {
-	    fitsext->get_last().dedisp = 0;
-	  }
-	  
-	  //sc_mthd
-	  //cal_mthd
-	  //cal_file
-	  //rfi_mthd
 	  
 	}
 	

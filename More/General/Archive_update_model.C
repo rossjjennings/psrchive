@@ -106,11 +106,11 @@ void Pulsar::Archive::update_model (const MJD& time, bool clear_model)
     throw Error (InvalidState, "Archive::create_updated_model",
 		 "not a pulsar observation");
   
-  int  maxha;
-  char nsite;
-  int  ncoeff;
-  double freq;
-  double nspan;
+  int    maxha  = 0;
+  char   nsite  = '!';
+  int    ncoeff = 0;
+  double freq   = 0.0;
+  double nspan  = 0.0;
   
   if (model.pollys.size() > 0) {
     maxha   = 12;
