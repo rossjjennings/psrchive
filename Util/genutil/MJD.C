@@ -1,8 +1,11 @@
 /* $Log: MJD.C,v $
-/* Revision 1.3  1998/09/02 05:22:53  straten
-/* modified the MJD::MJD(double, double, double) re-normalizer.
-/* It was not a serious problem, not even something I would call an error.
+/* Revision 1.4  1998/09/07 10:10:18  straten
+/* removed the print statements and things that were left behind...
 /*
+ * Revision 1.3  1998/09/02  05:22:53  straten
+ * modified the MJD::MJD(double, double, double) re-normalizer.
+ * It was not a serious problem, not even something I would call an error.
+ *
  * Revision 1.2  1998/08/24 16:16:21  straten
  * new MJD constructor (from long double)
  *
@@ -50,7 +53,6 @@ char * MJD::printfs(){
 
 char * MJD::printall(){
   static char permanent[40];
-  fprintf (stderr, "PRINTALL: %d %d %12.14f\n", days, secs, fracsec);
   sprintf(permanent,"%s:%s%s",printdays(),printhhmmss(),printfs());
   return (permanent);
 }
@@ -244,7 +246,6 @@ MJD::MJD(double dd, double ss, double fs){
       ss += sec_to_add;
     }
 
-
     // Make sure that there aren't too many seconds'
 
     days_to_add =0;
@@ -326,8 +327,9 @@ MJD::MJD(char* utc_string)
   utc_t utc;
   char temp [40];
   str2utc (&utc, utc_string);
-  fprintf (stderr, "Passing %s to MJD(utc) constructor\n", 
-	   utc2str (temp, utc, "yyyy-ddd-hh-mm-ss"));
+
+  //fprintf (stderr, "Passing %s to MJD(utc) constructor\n", 
+  //   utc2str (temp, utc, "yyyy-ddd-hh-mm-ss"));
   *this = MJD(utc);
 }
 
