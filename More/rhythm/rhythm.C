@@ -14,49 +14,67 @@
 #include "tempo++.h"
 
 bool Rhythm::verbose = true;
-bool Rhythm::vverbose = true;
+bool Rhythm::vverbose = false;
+
+// /////////////////////////////////////////////////////////////////////
+// Main procedure
+// /////////////////////////////////////////////////////////////////////
 
 int main (int argc, char** argv)
-{ try {
-  
-  QApplication app (argc, argv);
-  
-  Rhythm rhythm (0, argc, argv);
-  
-  if (Rhythm::vverbose)
-    cerr << "call QApplication::setMainWidget" << endl;
-  app.setMainWidget (&rhythm);
-  
-  if (Rhythm::vverbose)
-    cerr << "call Rhythm::show" << endl;
-  rhythm.show();
-  
-  if (Rhythm::vverbose)
-    cerr << "call QApplication::exec" << endl;
-  return app.exec();
+{ 
+
+  try {
+    
+    QApplication app (argc, argv);
+    
+    Rhythm rhythm (0, argc, argv);
+    
+    if (Rhythm::vverbose)
+      cerr << "call QApplication::setMainWidget" << endl;
+
+    app.setMainWidget (&rhythm);
+    
+    if (Rhythm::vverbose)
+      cerr << "call Rhythm::show" << endl;
+
+    rhythm.show();
+    
+    if (Rhythm::vverbose)
+      cerr << "call QApplication::exec" << endl;
+
+    return app.exec();
+
+  }
+  catch (Error& error) {
+    cerr << "rhythm: exception caught:" << error << endl;
+  }
+  catch (...) {
+    cerr << "rhythm: fatal exception unhandled" << endl;
+  }
 }
-catch (string error) {
-  cerr << "rhythm: exception caught:" << error << endl;
-}
-catch (char* error) {
-  cerr << "rhythm: exception caught:" << error << endl;
-}
-catch (Error& error) {
-  cerr << "rhythm: exception caught:" << error << endl;
-}
-catch (...) {
-  cerr << "rhythm: fatal exception unhandled" << endl;
-}
-}
+
+// /////////////////////////////////////////////////////////////////////
+// Class definitions
+// /////////////////////////////////////////////////////////////////////
+
 
 Rhythm::Rhythm (QWidget* parent, int argc, char** argv) :
   QMainWindow (parent, "Rhythm"),
   opts (0, "Options")
 {
-  xq = toaPlot::None;
-  yq = toaPlot::None;
+  // Initialise variables
+
+  xq = toaPlot::TOA_MJD;
+  yq = toaPlot::ResidualMicro;
 
   mode = 1;
+
+  autofit = false;
+  ignore_one_eph = false;
+  
+  setClassVerbose (vverbose);
+
+  // Instantiate a box to hold all the stuff
 
   QHBox* container = new QHBox(this);
   container -> setFocus();
@@ -64,9 +82,14 @@ Rhythm::Rhythm (QWidget* parent, int argc, char** argv) :
   
   if (vverbose)
     cerr << "Rhythm:: creating toaPlotter" << endl;
+  
+  // Instantiate the plotting window
+
   plot_window = new toaPlot(0,0);
   plot_window -> show();
   
+  // Build the cursor control panel
+
   controls = new QVBox(container);
   
   modechanger = new QButtonGroup(3, Qt::Vertical, "Mode", controls);
@@ -74,6 +97,8 @@ Rhythm::Rhythm (QWidget* parent, int argc, char** argv) :
   
   zoom = new QRadioButton("Zoom", modechanger);
   sel = new QRadioButton("Select", modechanger);
+
+  zoom->setChecked(true);
   
   modechanger->insert(zoom,1);
   modechanger->insert(sel,2);
@@ -106,14 +131,7 @@ Rhythm::Rhythm (QWidget* parent, int argc, char** argv) :
   QObject::connect(undel, SIGNAL(clicked()),
 		   this, SLOT(undeleteall()));
   
-  toa_text = new QListBox(container, "TOA_INFO");
-  toa_text -> setSelectionMode(QListBox::Multi);
-  
-  QObject::connect(toa_text, SIGNAL(selectionChanged()),
-		   this, SLOT(reselect()));
-  
-  QObject::connect(plot_window, SIGNAL(selected(int)),
-		   this, SLOT(select(int)));
+  // Instantiate the Axis selection panels
 
   chooser = new AxisSelector(container);
 
@@ -123,15 +141,24 @@ Rhythm::Rhythm (QWidget* parent, int argc, char** argv) :
   QObject::connect(chooser, SIGNAL(XChange(toaPlot::AxisQuantity)),
 		   this, SLOT(XChange(toaPlot::AxisQuantity)));
 
+  // Instantiate the toa list box
+
+  toa_text = new QListBox(container, "TOA_INFO");
+  toa_text -> setSelectionMode(QListBox::Multi);
   
-  autofit = false;
-  ignore_one_eph = false;
+  toa_text -> setMinimumSize(400,400);
+
+  QObject::connect(toa_text, SIGNAL(selectionChanged()),
+		   this, SLOT(reselect()));
   
-  setClassVerbose (vverbose);
+  QObject::connect(plot_window, SIGNAL(selected(int)),
+		   this, SLOT(select(int)));
   
   if (vverbose)
     cerr << "Rhythm:: new qt_editParams" << endl;
+
   fitpopup = new qt_editParams;
+
   connect ( fitpopup, SIGNAL( closed() ),
 	    this, SLOT( togledit() ) );
   connect ( fitpopup, SIGNAL( newParams(const psrephem&) ),
@@ -139,14 +166,17 @@ Rhythm::Rhythm (QWidget* parent, int argc, char** argv) :
 
   if (vverbose)
     cerr << "Rhythm:: call menubarConstruct" << endl;
+
   menubarConstruct(); 
 
   if (vverbose)
     cerr << "Rhythm:: call command_line_parse" << endl;
+
   command_line_parse (argc, argv);
 
   if (vverbose)
     cerr << "Rhythm:: show qt_editParams" << endl;
+
   fitpopup -> show();
 
 }
@@ -173,6 +203,7 @@ void Rhythm::load_toas (const char* fname)
   toa_text -> clear();
 
   char useful[256];
+
   for (unsigned i = 0; i < toas.size(); i++) {
     toas[i].unload(useful);
     toa_text -> insertItem(useful);
@@ -203,6 +234,15 @@ void Rhythm::fit()
   fitpopup -> get_psrephem (eph);
 
   fit (eph, true);
+
+  toa_text -> clear();
+
+  char useful[256];
+
+  for (unsigned i = 0; i < toas.size(); i++) {
+    toas[i].unload(useful);
+    toa_text -> insertItem(useful);
+  }
 }
 
 void Rhythm::fit (const psrephem& eph, bool load_new)
@@ -235,18 +275,16 @@ void Rhythm::fit (const psrephem& eph, bool load_new)
   if (verbose)
     cerr << "Rhythm::fit plotting residuals" << endl;
   
-  xq = toaPlot::TOA_MJD;
-  yq = toaPlot::ResidualMicro;
-  
   goplot ();
   plot_window->autoscale();
   
 } 
- catch (string error) {
+ catch (Error& error) {
    if (verbose)
      cerr << "Rhythm::fit ERROR " << error << endl;
    QMessageBox::critical (this, "Rhythm::fit",
-			  error.c_str(), "Dismiss");
+			  "They're all out to get you...", 
+			  "Dismiss");
  }
  catch (...) {
    if (verbose)
@@ -262,7 +300,7 @@ void Rhythm::setClassVerbose (bool verbose)
   Tempo::verbose = verbose;
 }
 
-vector<double> Rhythm::give_me_this (toaPlot::AxisQuantity q)
+vector<double> Rhythm::give_me_data (toaPlot::AxisQuantity q)
 {
   vector<double> retval;
   
@@ -271,35 +309,101 @@ vector<double> Rhythm::give_me_this (toaPlot::AxisQuantity q)
     for (unsigned i = 0; i < toas.size(); i++)
       retval.push_back((toas[i].resid.mjd)-50000.0);
     return retval;
+    break;
+  case toaPlot::BinaryPhase:
+    for (unsigned i = 0; i < toas.size(); i++)
+      retval.push_back(toas[i].resid.binaryphase);
+    return retval;
+    break;
+  case toaPlot::ObsFreq:
+    for (unsigned i = 0; i < toas.size(); i++)
+      retval.push_back(toas[i].resid.obsfreq);
+    return retval;
+    break;
+  case toaPlot::DayOfYear:
+    for (unsigned i = 0; i < toas.size(); i++)
+      retval.push_back(fmod(toas[i].resid.mjd, 365.0));
+    return retval;
+    break;
   case toaPlot::ResidualMicro:
     for (unsigned i = 0; i < toas.size(); i++)
       retval.push_back(toas[i].resid.time);
     return retval;
+    break;
   case toaPlot::ResidualMilliTurns:
     for (unsigned i = 0; i < toas.size(); i++)
       retval.push_back((toas[i].resid.turns)/1000.0);
     return retval;
+    break;
   default:
     return retval;
+    break;
   }
 }
  
+vector<double> Rhythm::give_me_errs (toaPlot::AxisQuantity q)
+{
+  vector<double> retval;
+  
+  // This will require adjustment! Find out what the error
+  // is stored as in Willem's residual class...
+
+  switch (q) {
+  case toaPlot::TOA_MJD:
+    for (unsigned i = 0; i < toas.size(); i++)
+      retval.push_back(0.0);
+    return retval;
+    break;
+  case toaPlot::ResidualMicro:
+    for (unsigned i = 0; i < toas.size(); i++)
+      retval.push_back(toas[i].resid.error);
+    return retval;
+    break;
+  case toaPlot::ResidualMilliTurns:
+    for (unsigned i = 0; i < toas.size(); i++)
+      retval.push_back(0.0);
+    return retval;
+    break;
+  case toaPlot::BinaryPhase:
+    for (unsigned i = 0; i < toas.size(); i++)
+      retval.push_back(0.0);
+    return retval;
+    break;
+  case toaPlot::ObsFreq:
+    for (unsigned i = 0; i < toas.size(); i++)
+      retval.push_back(0.0);
+    return retval;
+    break;
+  case toaPlot::DayOfYear:
+    for (unsigned i = 0; i < toas.size(); i++)
+      retval.push_back(0.0);
+    return retval;
+    break;
+  default:
+    return retval;
+    break;
+  }
+}
+
 void Rhythm::XChange (toaPlot::AxisQuantity q)
 {
   xq = q;
   goplot ();
+  plot_window->autoscale();
 }
 
 void Rhythm::YChange (toaPlot::AxisQuantity q)
 {
   yq = q;
   goplot ();
+  plot_window->autoscale();
 }
 
 void Rhythm::goplot ()
 {
-  vector<double> tempx = give_me_this(xq);
-  vector<double> tempy = give_me_this(yq);
+  vector<double> tempx = give_me_data(xq);
+  vector<double> tempy = give_me_data(yq);
+  vector<double> yerrs = give_me_errs(yq);
 
   vector<wrapper> useme;
 
@@ -308,6 +412,7 @@ void Rhythm::goplot ()
       wrapper tempw;
       tempw.x = tempx[i];
       tempw.y = tempy[i];
+      tempw.e = yerrs[i];
       if (toas[i].state == Tempo::toa::Selected)
 	tempw.ci = 2;
       tempw.id = i;
@@ -462,27 +567,43 @@ void Rhythm::clearselection ()
 AxisSelector::AxisSelector (QWidget* parent)
   : QHBox(parent)
 {
-  Xgrp = new QButtonGroup(3, Qt::Vertical, "X Axis", this);
+  Xgrp = new QButtonGroup(6, Qt::Vertical, "X Axis", this);
   Xgrp -> setRadioButtonExclusive(true);
   
-  Ygrp = new QButtonGroup(3, Qt::Vertical, "Y Axis", this);
+  Ygrp = new QButtonGroup(6, Qt::Vertical, "Y Axis", this);
   Ygrp -> setRadioButtonExclusive(true);
 
-  X1 = new QRadioButton("Res(us)", Xgrp);
-  X2 = new QRadioButton("Res(mt)", Xgrp);
-  X3 = new QRadioButton("TOA(MJD)", Xgrp);
+  X1 = new QRadioButton("Residual (us)", Xgrp);
+  X2 = new QRadioButton("Residual (mt)", Xgrp);
+  X3 = new QRadioButton("TOA (MJD)", Xgrp);
+  X4 = new QRadioButton("Binary Phase", Xgrp);
+  X5 = new QRadioButton("Obs Freq", Xgrp);
+  X6 = new QRadioButton("Day of Year", Xgrp);
 
-  Y1 = new QRadioButton("Res(us)", Ygrp);
-  Y2 = new QRadioButton("Res(mt)", Ygrp);
-  Y3 = new QRadioButton("TOA(MJD)", Ygrp);
+  X3->setChecked(true);
+
+  Y1 = new QRadioButton("Residual (us)", Ygrp);
+  Y2 = new QRadioButton("Residual (mt)", Ygrp);
+  Y3 = new QRadioButton("TOA (MJD)", Ygrp);
+  Y4 = new QRadioButton("Binary Phase", Ygrp);
+  Y5 = new QRadioButton("Obs Freq", Ygrp);
+  Y6 = new QRadioButton("Day of Year", Ygrp);
+
+  Y1->setChecked(true);
 
   Xgrp->insert(X1,1);
   Xgrp->insert(X2,2);
   Xgrp->insert(X3,3);
+  Xgrp->insert(X4,4);
+  Xgrp->insert(X5,5);
+  Xgrp->insert(X6,6);
 
   Ygrp->insert(Y1,1);
   Ygrp->insert(Y2,2);
   Ygrp->insert(Y3,3);
+  Ygrp->insert(Y4,4);
+  Ygrp->insert(Y5,5);
+  Ygrp->insert(Y6,6);
 
   QObject::connect(Xgrp, SIGNAL(clicked(int)),
 		   this, SLOT(Xuseful(int)));

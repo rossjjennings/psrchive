@@ -33,7 +33,7 @@ class toaPlot: public QPgplot {
  public:
   
   enum AxisQuantity { None, ResidualMicro, ResidualMilliTurns, 
-		      TOA_MJD };
+		      TOA_MJD, BinaryPhase, ObsFreq, DayOfYear};
   
   toaPlot ( QWidget *parent=0, const char *name=0 );
   
@@ -63,8 +63,7 @@ class toaPlot: public QPgplot {
 
   // Information about data display
 
-  vector<wrapper> v;
-  unsigned npts;
+  vector<wrapper> data;
   
   float xmin, xmax, ymin, ymax;
   AxisQuantity xq, yq;

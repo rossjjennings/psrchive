@@ -8,17 +8,16 @@ wrapper::wrapper () {
   x = 0.0;
   y = 0.0;
   e = 0.0; 
-  ci = 1;
-  dot = 1;
+  ci = 7;
+  dot = 0;
   id = 0;
 }
 
 toaPlot::toaPlot (QWidget *parent, const char *name )
   : QPgplot (parent, name)
 {
-  v.resize(0);
-  npts = 0;
-  
+  data.resize(0);
+
   xmin = ymin = 0.0;
   xmax = ymax = 1.0;
   
@@ -61,8 +60,17 @@ void toaPlot::plotter ()
   case TOA_MJD:
     xlab = "Arrival Time (Days Since MJD 50000)";
     break;
+  case BinaryPhase:
+    xlab = "Binary Phase";
+    break;
+  case ObsFreq:
+    xlab = "Observing Frequency";
+    break;
+  case DayOfYear:
+    xlab = "Day of Year";
+    break;
   }
-
+  
   switch (yq) {
   case None:
     ylab = " ";
@@ -76,16 +84,29 @@ void toaPlot::plotter ()
   case TOA_MJD:
     ylab = "Arrival Time (MJD)";
     break;
+  case BinaryPhase:
+    ylab = "Binary Phase";
+    break;
+  case ObsFreq:
+    ylab = "Observing Frequency";
+    break;
+  case DayOfYear:
+    ylab = "Day of Year";
+    break;
   }
 
   cpglab (xlab.c_str(), ylab.c_str(), "");
   
-  cpgsls (2);
-  cpgslw (4);
-  for (unsigned i = 0; i < npts; i++) {
-    cpgsci(v[i].ci);
-    cpgpt1 (float(v[i].x), float(v[i].y), v[i].dot);
+  for (unsigned i = 0; i < data.size(); i++) {
+
+    cpgsci  (data[i].ci);
+    cpgpt1  (float(data[i].x), float(data[i].y), data[i].dot);
+
+    if (data[i].e != 0.0)
+      cpgerr1 (6, float(data[i].x), float(data[i].y), float(data[i].e), 1.0);
+
   }
+
   cpgsci(1);
 }
 
@@ -105,14 +126,14 @@ void toaPlot::handleEvent (float x, float y, char ch)
 	//Do Nothing
       }
       else if (task == 2) {
-	if (v.empty()) 
+	if (data.empty()) 
 	  break;
-	min = sqrt(pow(fabs(x-float(v[0].x)),2.0) + pow(fabs(y-float(v[0].y)),2.0));
-	for (unsigned i = 1; i < v.size(); i++) {
-	  distance = sqrt(pow(fabs(x-float(v[i].x)),2.0) + pow(fabs(y-float(v[i].y)),2.0));
+	min = sqrt(pow(fabs(x-float(data[0].x)),2.0) + pow(fabs(y-float(data[0].y)),2.0));
+	for (unsigned i = 1; i < data.size(); i++) {
+	  distance = sqrt(pow(fabs(x-float(data[i].x)),2.0) + pow(fabs(y-float(data[i].y)),2.0));
 	  if (distance < min) {
 	    min = distance;
-	    tempint = v[i].id;
+	    tempint = data[i].id;
 	  }
 	}
 	emit selected(tempint);
@@ -156,8 +177,8 @@ void toaPlot::handleEvent (float x, float y, char ch)
 	    x2 = handy1;
 	    x1 = handy2;
 	  } 
-	  for (unsigned i = 0; i < v.size(); i++) {
-	    if ((v[i].x > x1) && (v[i].x < x2))
+	  for (unsigned i = 0; i < data.size(); i++) {
+	    if ((data[i].x > x1) && (data[i].x < x2))
 	      emit selected(int(i)); 
 	  }
 	  break;
@@ -201,8 +222,8 @@ void toaPlot::handleEvent (float x, float y, char ch)
 	    y2 = handy1;
 	    y1 = handy2;
 	  } 
-	  for (unsigned i = 0; i < v.size(); i++) {
-	    if ((v[i].y > y1) && (v[i].y < y2))
+	  for (unsigned i = 0; i < data.size(); i++) {
+	    if ((data[i].y > y1) && (data[i].y < y2))
 	      emit selected(int(i)); 
 	  }
 	  break;
@@ -266,8 +287,8 @@ void toaPlot::handleEvent (float x, float y, char ch)
 	    y2 = handy1;
 	    y1 = handy2;
 	  } 
-	  for (unsigned i = 0; i < v.size(); i++) {
-	    if ((v[i].y > y1) && (v[i].y < y2) && (v[i].x > x1) && (v[i].x < x2))
+	  for (unsigned i = 0; i < data.size(); i++) {
+	    if ((data[i].y > y1) && (data[i].y < y2) && (data[i].x > x1) && (data[i].x < x2))
 	      emit selected(int(i)); 
 	  }
 	  mode = 0;
@@ -328,16 +349,14 @@ void toaPlot::boxselector ()
   task = 2;
 }
 
-void toaPlot::setPoints(AxisQuantity _xq, AxisQuantity _yq, vector<wrapper> _v)
+void toaPlot::setPoints(AxisQuantity _xq, AxisQuantity _yq, vector<wrapper> _data)
 {
-  if (_v.size() == 0) return;
-  
-  npts = _v.size();
+  if (_data.empty()) return;
   
   xq = _xq;
   yq = _yq;
 
-  v = _v;
+  data = _data;
 
   clearScreen();
   drawPlot();
@@ -345,27 +364,27 @@ void toaPlot::setPoints(AxisQuantity _xq, AxisQuantity _yq, vector<wrapper> _v)
 
 void toaPlot::autoscale ()
 {
-  if (npts <= 0) return;
-
+  if (data.empty()) return;
+  
   vector<float> xpts;
   vector<float> ypts;
   
-  for (unsigned i = 0; i < npts; i++) {
-    xpts.push_back(float(v[i].x));
-    ypts.push_back(float(v[i].y));
+  for (unsigned i = 0; i < data.size(); i++) {
+    xpts.push_back(float(data[i].x));
+    ypts.push_back(float(data[i].y));
   }
   
   findminmax(&(xpts.front()), &(xpts.back()), xmin, xmax);
   findminmax(&(ypts.front()), &(ypts.back()), ymin, ymax);
   
-  xmin = xmin - fabs(xmin/20.0);
-  xmax = xmax + fabs(xmax/20.0);
-  ymin = ymin - fabs(ymin/20.0);
-  ymax = ymax + fabs(ymax/20.0);
-
   clearScreen();
   drawPlot();
 }
+
+
+
+
+
 
 
 

@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/rhythm/rhythm.h,v $
-   $Revision: 1.15 $
-   $Date: 2003/04/04 07:43:45 $
+   $Revision: 1.16 $
+   $Date: 2003/04/22 04:26:49 $
    $Author: ahotan $ */
 
 // //////////////////////////////////////////////////////////////////////////
@@ -45,12 +45,20 @@ class AxisSelector : public QHBox
 
   QButtonGroup* Xgrp;
   QButtonGroup* Ygrp;
+
   QRadioButton* X1;
   QRadioButton* X2; 
   QRadioButton* X3;
+  QRadioButton* X4;
+  QRadioButton* X5; 
+  QRadioButton* X6;
+
   QRadioButton* Y1;
   QRadioButton* Y2;
   QRadioButton* Y3;
+  QRadioButton* Y4;
+  QRadioButton* Y5;
+  QRadioButton* Y6;
   
  public slots:
 
@@ -157,8 +165,9 @@ class Rhythm : public QMainWindow
 
   // /////////////////////////////////////////////////////////////////////////
   // Data extraction routines
-  vector<double> give_me_this (toaPlot::AxisQuantity);
-  
+  vector<double> give_me_data (toaPlot::AxisQuantity);
+  vector<double> give_me_errs (toaPlot::AxisQuantity);
+
  public slots:
   // File menu callbacks
   void load_toas ();
