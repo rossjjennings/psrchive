@@ -5,7 +5,7 @@ include_HEADERS = ColourMap.h PlotData.h SuperPlotData.h PlotParams.h \
 	PlotSimpleData.h
 
 libpgutil_la_SOURCES = pgplot_smarthist.C PlotData.C PlotSimpleData.C \
-	SuperPlotData.C PlotParams.C
+	SuperPlotData.C PlotParams.C ColourMap.C
 
 bin_PROGRAMS = disthist
 
