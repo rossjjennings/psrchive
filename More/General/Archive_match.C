@@ -10,7 +10,7 @@ double Pulsar::Archive::match_max_frequency_difference = 0.1; // 100 kHz
 
 bool Pulsar::Archive::match_opposite_sideband = false;
 
-string Pulsar::Archive::match_indent = "\n    ";
+string Pulsar::Archive::match_indent = "\n\t";
 
 // ///////////////////////////////////////////////////////////////////////
 //
