@@ -56,22 +56,37 @@ int Timer::fload (const char* fname, struct timer* hdr, bool big_endian)
   return ret;
 }
 
-static bool is_timer (struct timer& hdr) 
+static bool is_timer (const struct timer& hdr) 
 {
-  if (hdr.nbin < 1)
+  if (hdr.nbin < 1) {
+    if (Timer::verbose)
+      cerr << "Timer::is_timer invalid nbin=" << hdr.nbin << endl;
     return false;
+  }
 
-  if (hdr.mjd < 2000 || hdr.mjd > 500000)
+  if (hdr.mjd < 2000 || hdr.mjd > 500000) {
+    if (Timer::verbose)
+      cerr << "Timer::is_timer invalid MJD=" << hdr.mjd << endl;
     return false;
+  }
 
-  if (hdr.nsub_int < 0)
+  if (hdr.nsub_int < 0) {
+    if (Timer::verbose)
+      cerr << "Timer::is_timer invalid nsub_int=" << hdr.nsub_int << endl;
     return false;
+  }
 
-  if (hdr.nsub_band < 0)
+  if (hdr.nsub_band < 0) {
+    if (Timer::verbose)
+      cerr << "Timer::is_timer invalid nsub_band=" << hdr.nsub_band << endl;
     return false;
+  }
 
-  if (hdr.obstype < 0 || hdr.obstype > 30)
+  if (hdr.obstype < 0 || hdr.obstype > 30) {
+    if (Timer::verbose)
+      cerr << "Timer::is_timer invalid obstype=" << hdr.obstype << endl;
     return false;
+  }
 
   return true;
 }
@@ -121,17 +136,25 @@ int Timer::load (FILE* fptr, struct timer* hdr, bool big_endian)
 // unloads a timer struct to a file (always big endian)
 int Timer::unload (FILE* fptr, const struct timer& hdr)
 {
+  // sanity check and return -1 on error
+  if (! is_timer (hdr) ) {
+    cerr << "Timer::unload invalid timer header" << endl;
+    return -1;
+  }
+
   struct timer* outhdr = const_cast<struct timer*>(&hdr);
 
   timer_toBigEndian (outhdr);
-  if (fwrite (outhdr, sizeof(struct timer), 1, fptr) < 1)  {
+  int retval = fwrite (outhdr, sizeof(struct timer), 1, fptr);
+  timer_fromBigEndian(outhdr);
+
+  if (retval < 1)  {
     if (verbose) {
       fprintf(stderr,"Timer::unload Cannot write timer struct to FILE*");
       perror ("");
     }
     return -1;
   }
-  timer_fromBigEndian(outhdr);
   return 0;
 }
 
@@ -281,7 +304,7 @@ void Timer::init (struct timer * hdr)
   hdr->pos_angle=-10000.0;        
   hdr->nbin=0;
   hdr->tsmp=-1.0;
-  hdr->narchive_int=-1;
+  hdr->narchive_int=1;
   hdr->nsub_int=-1;
   hdr->dump_time=0.0;
   hdr->wts_and_bpass= 0;
@@ -291,7 +314,7 @@ void Timer::init (struct timer * hdr)
   hdr->fold_true_ratio=1;
   hdr->nperiods_long = -1;  /* periods per profile */
   hdr->nperiods_short= 0;   /* periods in dead time */
-  hdr->ndump_sub_int=0;
+  hdr->ndump_sub_int=1;
   hdr->junk=0;
   hdr->junk2=0;
   hdr->nfreq=1;
