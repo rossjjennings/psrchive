@@ -37,7 +37,7 @@ void Pulsar::ScintPowerEstimator::set_archive (const ScintArchive* arch)
 void Pulsar::ScintPowerEstimator::get_power (unsigned isub, unsigned ipol,
 					     std::vector<float>& on_power,
 					     std::vector<float>& off_power)
-
+  const
 {
   unsigned nchan = archive->get_nchan();                                      
 
@@ -84,6 +84,7 @@ void Pulsar::ScintPowerEstimator::get_power (unsigned isub, unsigned ipol,
     on_power[ichan] = max;
     off_power[ichan] = min;
 
+    // cerr << "max=" << max << " min=" << min << endl;
   }
 
 }
