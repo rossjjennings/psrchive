@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Matrix.h,v $
-   $Revision: 1.6 $
-   $Date: 2004/04/23 13:27:12 $
+   $Revision: 1.7 $
+   $Date: 2004/04/25 07:21:34 $
    $Author: straten $ */
 
 #ifndef __Matrix_H
@@ -192,6 +192,21 @@ const Matrix<T, Columns, Rows> herm (const Matrix<T, Rows, Columns>& m)
 
   return result;
 }
+
+//! Vector direct (outer) product 
+template<typename T, typename U, unsigned Rows, unsigned Columns>
+const Matrix<T,Rows,Columns> outer (const Vector<T,Rows>& a,
+				    const Vector<U,Columns>& b)
+{
+  Matrix<T, Rows, Columns> result;
+
+  for (unsigned i=0; i<Rows; i++)
+    for (unsigned j=0; j<Columns; j++)
+      result[i][j] = a[i] * b[j];
+
+  return result;
+}
+
 
 #endif  /* not __Matrix_H defined */
 
