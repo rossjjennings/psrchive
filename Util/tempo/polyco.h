@@ -67,6 +67,7 @@ public:
   double get_nspan         () const {return (nspan_mins);};
   float  get_dm            () const {return (dm);};
   int    get_ncoeff        () const {return (int) coefs.size();};
+  double get_doppler_shift () const {return doppler_shift / 1e4;};
 
   MJD start_time () const
     { return reftime - nspan_mins * 60.0/2.0; };
@@ -92,7 +93,7 @@ class psrephem;
 class polyco {
 
  protected:
-  static string any_psr;
+  static string anyPsr;
   static MJD    today;
 
  public:
@@ -128,17 +129,27 @@ class polyco {
 
   void  prettyprint  () const;
   const polynomial* nearest (const MJD &t, 
-			     const string& psrname = any_psr) const;
-  polynomial  nearest_polly (const MJD &t, 
-			     const string& psrname = any_psr) const;
+			     const string& psrname = anyPsr) const;
 
-  int i_nearest (const MJD &t, const string& psrname = any_psr) const;
+  const polynomial& best (const MJD &t, 
+			  const string& psrname = anyPsr) const;
 
-  double      period (const MJD &t, const string& psrname = any_psr) const;
-  Phase       phase  (const MJD &t, const string& psrname = any_psr) const;
-  Phase       phase  (const MJD &t, float obs_frequency, 
-		      const string& psrname = any_psr) const;
-  double    frequency(const MJD &t, const string& psrname = any_psr) const;
+  int i_nearest (const MJD &t, const string& psrname = anyPsr) const;
+
+  double doppler_shift (const MJD& t, const string& psr = anyPsr) const
+    { return best(t, psr).get_doppler_shift(); };
+
+  Phase phase (const MJD& t, const string& psr = anyPsr) const
+    { return best(t, psr).phase(t); };
+
+  Phase phase (const MJD& t, float obs_freq, const string& psr = anyPsr) const
+    { return best(t, psr).phase(t, obs_freq); };
+
+  double period(const MJD& t, const string& psr = anyPsr) const
+    { return best(t, psr).period(t); };
+
+  double frequency(const MJD& t, const string& psr = anyPsr) const
+    { return best(t, psr).frequency(t); };
 
   // bool   is_tempov11   () const { return pollys.front().is_tempov11(); };
   int    get_telescope () const { return pollys.front().get_telescope(); };

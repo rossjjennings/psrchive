@@ -9,7 +9,7 @@
 #include "string_utils.h"
 #include "poly.h"
 
-string polyco::any_psr;      // an empty string
+string polyco::anyPsr;       // an empty string
 MJD    polyco::today;        // MJD zero
 int    polyco::verbose = 0;  // default: non-verbose
 
@@ -173,7 +173,7 @@ int polynomial::load(string* instr)
   int64 turns;
   double fracturns;
 
-  sscanf(refphstr.c_str(), I64" %lf\n", &turns, &fracturns);
+  sscanf (refphstr.c_str(), I64" %lf\n", &turns, &fracturns);
 
   if(turns>0) ref_phase = Phase(turns, fracturns);
   else ref_phase = Phase(turns, -fracturns);
@@ -582,12 +582,12 @@ const polynomial* polyco::nearest (const MJD &t, const string& in_psrname) const
   return &pollys[ipolly];
 }
 
-polynomial polyco::nearest_polly (const MJD &t, const string& in_psrname) const
+const polynomial& polyco::best (const MJD &t, const string& in_psrname) const
 {
   int ipolly = i_nearest (t, in_psrname);
 
   if (ipolly < 0)  {
-    string failed = "polyco::nearest_polly no polynomial";
+    string failed = "polyco::best no polynomial";
     throw(failed);
   }
   return pollys[ipolly];
@@ -599,7 +599,7 @@ int polyco::i_nearest (const MJD &t, const string& in_psr) const
   int imin = -1;
 
   for (int ipolly=0; ipolly<pollys.size(); ipolly ++)  {
-    if (in_psr==any_psr || pollys[ipolly].psrname==in_psr) {      
+    if (in_psr==anyPsr || pollys[ipolly].psrname==in_psr) {      
       float dist = fabs ( (pollys[ipolly].reftime - t).in_minutes() );
       if (dist < min_dist) {
 	imin = ipolly;
@@ -630,44 +630,6 @@ int polyco::i_nearest (const MJD &t, const string& in_psr) const
        << "\npolyco::i_nearest - range " << start_time().printdays(5) 
        << " - " << end_time().printdays(5) << endl;
   return -1;
-}
-
-Phase polyco::phase(const MJD& t, const string& in_psrname) const {
-  polynomial nearest_polly;
-  try{ nearest_polly = this->nearest_polly(t, in_psrname);}
-  catch(...) {
-    fprintf (stderr, "polyco::phase no polynomial for PSR:'%s'  MJD:'%s'\n",
-	in_psrname.data(), t.printdays());
-    throw("no polynomial");
-  }
-  return(nearest_polly.phase(t));
-}
-
-Phase polyco::phase(const MJD& t, float obs_freq, const string& in_psrname) const {
-  polynomial nearest_polly;
-  try{ nearest_polly = this->nearest_polly(t,in_psrname);}
-  catch(...) {
-    cerr << "polyco::phase - error finding polynomial\n";
-    throw("no polynomial");}
-  return(nearest_polly.phase(t, obs_freq));
-} 
-
-double polyco::period(const MJD& t, const string& in_psrname) const{
-  polynomial nearest_polly;
-  try{ nearest_polly = this->nearest_polly(t,in_psrname);}
-  catch(...) {
-    cerr << "polyco::period - error finding polynomial\n";
-    throw("no polynomial");}
-  return(nearest_polly.period(t));
-}
-
-double polyco::frequency(const MJD& t, const string& in_psrname) const {
-  polynomial nearest_polly;
-  try{ nearest_polly = this->nearest_polly(t,in_psrname);}
-  catch(...) {
-    cerr << "polyco::frequency - error finding polynomial\n";
-    throw("no polynomial");}  
-  return(nearest_polly.frequency(t));
 }
 
 bool polyco::is_tempov11() const {
