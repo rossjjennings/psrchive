@@ -34,8 +34,14 @@ void dirglob (vector<string>* filenames, const char* text)
     cerr << error << endl;
     throw (error);
   }
-  for (size_t ifile=0; ifile < rglob.gl_pathc; ifile++)
+
+  size_t ifile=0;
+
+  for (ifile=0; ifile < rglob.gl_pathc; ifile++)
     filenames->push_back (string(rglob.gl_pathv[ifile]));
+
+  if (ifile == 0)
+    cerr << "dirglob: '" << text << "' not found" << endl;
 
   globfree (&rglob);
 }
