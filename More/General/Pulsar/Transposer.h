@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/Transposer.h,v $
-   $Revision: 1.4 $
-   $Date: 2004/09/16 14:09:17 $
+   $Revision: 1.5 $
+   $Date: 2004/09/16 14:47:25 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Transposer_h
@@ -76,15 +76,15 @@ namespace Pulsar {
     //! Get the size of the specified dimension
     unsigned get_ndim (Signal::Dimension axis) const;
 
-    //! Set the size of the specified dimension
-    void set_ndim (Signal::Dimension axis, unsigned ndim);
-
   protected:
 
     friend class Transposer;
 
     //! Set the size of the remaining dimension
     void set_if_zero (unsigned ndim);
+
+    //! Set the size of the specified dimension
+    void set_ndim (Signal::Dimension axis, unsigned ndim);
 
     unsigned nsub;
     unsigned npol;
