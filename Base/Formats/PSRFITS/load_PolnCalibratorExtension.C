@@ -1,13 +1,9 @@
 #include "Pulsar/FITSArchive.h"
 #include "Pulsar/PolnCalibratorExtension.h"
-#include "FITSError.h"
+#include "Pulsar/CalibratorExtensionIO.h"
 
 #include <stdlib.h>
 #include <assert.h>
-
-#ifdef sun
-#include <ieeefp.h>
-#endif
 
 void Pulsar::FITSArchive::load_PolnCalibratorExtension (fitsfile* fptr)
 {
@@ -21,8 +17,9 @@ void Pulsar::FITSArchive::load_PolnCalibratorExtension (fitsfile* fptr)
   fits_movnam_hdu (fptr, BINARY_TBL, "FEEDPAR", 0, &status);
   
   if (status == BAD_HDU_NUM) {
-    if (verbose == 3) cerr << "Pulsar::FITSArchive::load_PolnCalibratorExtension"
-		   " no FEEDPAR HDU" << endl;
+    if (verbose == 3)
+      cerr << "Pulsar::FITSArchive::load_PolnCalibratorExtension"
+	" no FEEDPAR HDU" << endl;
     return;
   }
 
@@ -48,86 +45,39 @@ void Pulsar::FITSArchive::load_PolnCalibratorExtension (fitsfile* fptr)
   // Get NCPAR 
   int ncpar = 0;
   fits_read_key (fptr, TINT, "NCPAR", &ncpar, comment, &status);
-  
+  if (ncpar < 0)
+    ncpar = 0;
+
   // Get NCH_FDPR
   int nch_fdpr = 0;
   fits_read_key (fptr, TINT, "NCH_FDPR", &nch_fdpr, comment, &status);
   
-  if (status == 0)
+  if (status == 0 && nch_fdpr >= 0)
     pce->set_nchan(nch_fdpr);
 
-  // Get EPOCH
-  char* epoch = new char[80];
-  fits_read_key (fptr, TSTRING, "EPOCH", epoch, comment, &status);
+  Pulsar::load (fptr, pce);
 
-  if (status == 0) {
-    MJD mjd (epoch);
-    pce->set_epoch (mjd);
-  }
-
-  delete [] epoch;
-  status = 0;
-
-  long dimension = nch_fdpr * ncpar;  
-  auto_ptr<float> data ( new float[dimension] );
+  long dimension = pce->get_nchan() * ncpar;  
   
   if (dimension == 0) {
-    if (verbose == 3) {
+    if (verbose == 3)
       cerr << "FITSArchive::load_PolnCalibratorExtension FEEDPAR HDU"
 	   << " contains no data. PolnCalibratorExtension not loaded" << endl;
-    }
-    return;
+      return;
   }
-  
-  // Read the centre frequencies
-  
-  int colnum = 0;
-  int initflag = 0;
-  fits_get_colnum (fptr, CASEINSEN, "DAT_FREQ", &colnum, &status);
- 
-  #ifdef sun
-    float nullfloat = FP_QNAN;
-  #else
-    float nullfloat = strtod("NAN(n-charsequence)", (char**) NULL);
-  #endif
-  
-  fits_read_col (fptr, TFLOAT, colnum, 1, 1, nch_fdpr, &nullfloat,
-		 data.get(), &initflag, &status);
 
-  if (status)
-    throw FITSError (status, "FITSArchive::load PolnCalibratorExtension", 
-		     "fits_read_col DAT_FREQ");
-
-  if (verbose == 3) cerr << "FITSArchive::load_PolnCalibratorExtension"
-		 " channel frequencies read" << endl;
-  
-  // Read the data scale weights
-  
-  colnum = 0;
-  initflag = 0;
-  fits_get_colnum (fptr, CASEINSEN, "DAT_WTS", &colnum, &status);
-  
-  fits_read_col (fptr, TFLOAT, colnum, 1, 1, nch_fdpr, &nullfloat, 
-		 data.get(), &initflag, &status);
-
-  if (status)
-    throw FITSError (status, "FITSArchive::load PolnCalibratorExtension", 
-		     "fits_read_col DAT_WTS");
-
-  if (verbose == 3)
-    cerr << "FITSArchive::load_PolnCalibratorExtension weights read" << endl;
-  
   for (int ichan=0; ichan < nch_fdpr; ichan++)
-    if ( !finite(data.get()[ichan]) || data.get()[ichan]==0 )
+    if ( pce->get_weight (ichan) == 0 )
       pce->set_valid (ichan, false);
 
-  // Read the data itself
+  auto_ptr<float> data ( new float[dimension] );
   
-  colnum = 0;
-  initflag = 0;
+  // Read the data  
+  int colnum = 0;
+  int initflag = 0;
   fits_get_colnum (fptr, CASEINSEN, "DATA", &colnum, &status);
 
-  fits_read_col (fptr, TFLOAT, colnum, 1, 1, dimension, &nullfloat, 
+  fits_read_col (fptr, TFLOAT, colnum, 1, 1, dimension, &fits_nullfloat, 
 		 data.get(), &initflag, &status);
 
   if (status)
@@ -152,7 +102,7 @@ void Pulsar::FITSArchive::load_PolnCalibratorExtension (fitsfile* fptr)
 
   fits_get_colnum (fptr, CASEINSEN, "DATAERR", &colnum, &status);
 
-  fits_read_col (fptr, TFLOAT, colnum, 1, 1, dimension, &nullfloat, 
+  fits_read_col (fptr, TFLOAT, colnum, 1, 1, dimension, &fits_nullfloat, 
 		 data.get(), &initflag, &status);
 
   if (status)
