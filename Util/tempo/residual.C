@@ -26,8 +26,11 @@ int Tempo::residual::load (int lun)
   obsfreq = -20.0;
   resread_ (&lun, &mjd, &turns, &seconds, &binaryphase,
 	    &obsfreq, &weight, &error, &preres, &status);
-  if (status == 0)
+  if (status == 0) {
+    seconds *= 1e6;  // convert to micro-seconds
+    preres *= 1e6;
     valid = true;
+  }
   return status;
 }
 
