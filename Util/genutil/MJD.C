@@ -7,6 +7,7 @@
 #endif
 #include "MJD.h"
 #include "endian.h"
+#include "ieee.h"
 
 int ss2hhmmss (int* hours, int* min, int* sec, int seconds)
 {
@@ -221,16 +222,13 @@ MJD::MJD(float128 mjd) {
 #else
 
 MJD::MJD(float128 mjd) {
-  double ndays = 0.0, seconds = 0.0, fracseconds = 0.0;
+  double ndays = 0.0, fracdays = 0.0, seconds = 0.0, fracseconds = 0.0;
 
-  fprintf (stderr, "Not sure how to parse these bits!\n");
-
-  fprintf (stderr, "%lf ..  %lf\n", mjd.f1, mjd.f2);
-  /*
-  fromBigEndian ((void*)&(mjd.f1), sizeof (double));
-  fromBigEndian ((void*)&(mjd.f2), sizeof (double));
-  printf ("%lf ..  %lf\n", mjd.f1, mjd.f2);
-  */
+  /* Stuart's ieee.C function */
+  cnvrt_long_double ((u_char*) &mjd, &ndays, &fracdays);
+  seconds = fracdays * 86400;
+  fracseconds = fmod (seconds, 1.0);
+  seconds -= fracseconds;
   *this = MJD (ndays,seconds,fracseconds);
 }
 
