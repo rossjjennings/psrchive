@@ -9,6 +9,7 @@ AC_DEFUN([SWIN_LIB_MKL],
                              [Intel Math Kernel Library is in DIR]))
 
   MKL_LIBS=""
+  MKL_CFLAGS=""
 
   if test x"$with_mkl_dir" = xno; then
     # user disabled mkl. Leave cache alone.
@@ -24,8 +25,12 @@ AC_DEFUN([SWIN_LIB_MKL],
 
     ## Look for the library ##
     cf_lib_path_list="$with_mkl_lib_dir .
+                      /usr/local/intel/mkl72/lib/32
                       /usr/local/intel/mkl61/lib/32
-                      /opt/intel/mkl61/lib/32"
+                      /opt/intel/mkl61/lib/32
+		      /import/psr/intel/mkl61/lib/32
+		      /import/cluster/packages/linux/lib"
+			
 
     ac_save_LIBS="$LIBS"
     ac_test_LIBS="-lmkl_p4 -lguide -lpthread -lm"
@@ -61,6 +66,7 @@ AC_DEFUN([SWIN_LIB_MKL],
   fi
 
   AC_SUBST(MKL_LIBS)
+  AC_SUBST(MKL_CFLAGS)
   AM_CONDITIONAL(HAVE_MKL,[test x"$have_mkl" = xyes])
 
 ])
