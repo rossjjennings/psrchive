@@ -1,5 +1,5 @@
 //
-// $Id: pav.C,v 1.69 2004/02/06 03:50:18 ahotan Exp $
+// $Id: pav.C,v 1.70 2004/03/09 08:23:16 ahotan Exp $
 //
 // The Pulsar Archive Viewer
 //
@@ -40,7 +40,9 @@ void usage ()
     "Preprocessing options:\n"
     " -b scr    Bscrunch scr phase bins together\n"
     " -C        Centre the profiles on phase zero\n"
+    " -O ang    Rotate position angle (orientation) by ang degrees\n"
     " -d        Dedisperse all channels\n"
+    " -r phase  Rotate all profiles by phase (in turns)\n"
     " -f scr    Fscrunch scr frequency channels together\n"
     " -F        Fscrunch all frequency channels\n"
     " -t src    Tscrunch scr Integrations together\n"
@@ -80,9 +82,7 @@ void usage ()
     " -g        Display position angle as a function of phase\n"
     " -G        Plot an image of amplitude against frequency & phase\n"
     " -m        Plot Poincare vector in spherical coordinates\n"
-    " -O p.a.   Rotate position angle (orientation) by p.a. degrees\n"
     " -q        Plot an image of amplitude against p.a. & frequency\n"
-    " -r phase  Rotate all profiles by phase (in turns)\n"
     " -n        Plot S/N against frequency\n"
     " -S        Plot Stokes parameters in the Manchester style\n"
     " -X        Plot cal amplitude and phase vs frequency channel\n"
@@ -207,10 +207,9 @@ int main (int argc, char** argv)
       return 0;
 
     case 'A':
-      display_axis = true;
-      display = true;
+      calplot = true;
       break;
- 
+      
     case 'b':
       bscrunch = atoi (optarg);
       break;
@@ -269,7 +268,7 @@ int main (int argc, char** argv)
       plotter.set_subint( atoi (optarg) );
       break;
     case 'i':
-      cout << "$Id: pav.C,v 1.69 2004/02/06 03:50:18 ahotan Exp $" << endl;
+      cout << "$Id: pav.C,v 1.70 2004/03/09 08:23:16 ahotan Exp $" << endl;
       return 0;
 
     case 'j':
@@ -674,77 +673,62 @@ int main (int argc, char** argv)
     }
 
     if (width) {
+      // This routine still needs some work...
+
       Reference::To<Pulsar::Archive> copy = archive->total();
       copy->remove_baseline();
       
-      float max = 0.0;
-      unsigned risebin = 0;
-      unsigned fallbin = 0;
-      max = copy->get_Profile(0,0,0)->max();
+      float maxbin = float(copy->get_Profile(0,0,0)->find_max_bin());
+
+      float nbin  = float(copy->get_nbin());
+      float width = copy->get_Profile(0,0,0)->width(10.0,0.6);
+      width /= 2.0;
+
+      float period = copy->get_Integration(0)->get_folding_period();
+      period *= 1000.0;
+
+      cpg_next();
+      cpgsvp(0.1, 0.9, 0.3, 0.9);
+      plotter.single_period(copy);
       
-      max /= 2.0;
-      bool transition = false;
-      unsigned nbin = copy->get_nbin();
+      float risephs = (maxbin - nbin*width)/nbin;
+      float fallphs = (maxbin + nbin*width)/nbin;
       
-      for (unsigned i = 1; i < copy->get_nbin(); i++) {
-	if ((copy->get_Profile(0,0,0)->mean(float(i-1)/float(nbin),0.005) <= max)
-	    && (copy->get_Profile(0,0,0)->mean(float(i)/float(nbin),0.005) >= max))
-	  transition = true;
-	if (transition) {
-	  risebin = i-1;
-	  break;
-	}
-      }
+      if (risephs > 1.0)
+	risephs -= 1.0;
+      if (risephs < 0.0)
+	risephs += 1.0;
+      if (fallphs > 1.0)
+	fallphs -= 1.0;
+      if (fallphs < 0.0)
+	fallphs += 1.0;
       
-      transition = false;
+      float riseedge = risephs * period;
+      float falledge = fallphs * period;
+      cerr << falledge << ", " << riseedge << endl;
+      float x1 = 0.0;
+      float x2 = 0.0;
+      float y1 = 0.0;
+      float y2 = 0.0;
       
-      for (unsigned i = 1; i < nbin; i++) {
-	if ((copy->get_Profile(0,0,0)->mean(float(i-1)/float(nbin),0.005) >= max)
-	    && (copy->get_Profile(0,0,0)->mean(float(i)/float(nbin),0.005) <= max))
-	  transition = true;
-	if (transition) {
-	  fallbin = i-1;
-	  break;
-	}
-      }
+      cpgqwin(&x1, &x2, &y1, &y2);
+      cpgsci(2);
+      cpgmove(riseedge, y1);
+      cpgdraw(riseedge, y2);
+      cpgmove(falledge, y1);
+      cpgdraw(falledge, y2);
+      cpgsch(2.0);
       
-      if (risebin == 0 || fallbin == 0) {
-	cout << "Could not find full width at half maximum!" << endl;
-      }
-      else {
-	double period = copy->get_Integration(0)->get_folding_period();
-	
-	cpg_next();
-	cpgsvp(0.1, 0.9, 0.3, 0.9);
-	plotter.single_period(copy);
-	
-	double tbin = (period*1000.0) / double(copy->get_nbin());
-	double riseedge = double(risebin) * tbin;
-	double falledge = double(fallbin) * tbin;
-	
-	float x1 = 0.0;
-	float x2 = 0.0;
-	float y1 = 0.0;
-	float y2 = 0.0;
-	
-	cpgqwin(&x1, &x2, &y1, &y2);
-	cpgsci(2);
-	cpgmove(riseedge, y1);
-	cpgdraw(riseedge, y2);
-	cpgmove(falledge, y1);
-	cpgdraw(falledge, y2);
-	cpgsch(2.0);
-	
-	char useful[256];
-	sprintf(useful, "Pulse FWHM = %.3f ms", 
-		float(fabs(falledge-riseedge)));
-	
-	cpgmtxt("B", 4, 0.5, 0.5, useful);
-	cpgsch(1.0);
-	cpgsci(1);
-	cpgmtxt("T", 1, 0.5, 0.5, (copy->get_source()).c_str());
-      }
+      char useful[256];
+      sprintf(useful, "10 percent pulse width = %.3f ms", 
+	      width * 2.0 * period * 1000.0);
+      
+      cpgmtxt("B", 4, 0.5, 0.5, useful);
+      cpgsch(1.0);
+      cpgsci(1);
+      cpgmtxt("T", 1, 0.5, 0.5, (copy->get_source()).c_str());
     }
+
     if (PA) {
       cpg_next();
       plotter.pa_profile(archive);
