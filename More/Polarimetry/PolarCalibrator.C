@@ -11,7 +11,7 @@ Pulsar::PolarCalibrator::~PolarCalibrator ()
 }
 
 //! Return the system response as determined by the Polar Transformation
-::Calibration::Transformation*
+::Calibration::Complex2*
 Pulsar::PolarCalibrator::solve (const vector<Estimate<double> >& hi,
 				const vector<Estimate<double> >& lo)
 {

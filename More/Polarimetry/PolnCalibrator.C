@@ -64,41 +64,41 @@ Jones<float> Pulsar::PolnCalibrator::get_response (unsigned ichan) const
 }
 
 //! Get the number of frequency channels in the transformation array
-unsigned Pulsar::PolnCalibrator::get_Transformation_nchan () const
+unsigned Pulsar::PolnCalibrator::get_transformation_nchan () const
 {
   if (transformation.size() == 0)
     const_cast<PolnCalibrator*>(this)->calculate_transformation();
 
   if (verbose)
-    cerr << "Pulsar::PolnCalibrator::get_Transformation_nchan nchan="
+    cerr << "Pulsar::PolnCalibrator::get_transformation_nchan nchan="
          << transformation.size() << endl;
 
   return transformation.size();
 }
 
 //! Return the system response for the specified channel
-bool Pulsar::PolnCalibrator::get_Transformation_valid (unsigned ichan) const
+bool Pulsar::PolnCalibrator::get_transformation_valid (unsigned ichan) const
 {
   if (transformation.size() == 0)
     const_cast<PolnCalibrator*>(this)->calculate_transformation();
 
   if (ichan >= transformation.size())
     throw Error (InvalidParam,
-		 "Pulsar::PolnCalibrator::get_Transformation_valid",
+		 "Pulsar::PolnCalibrator::get_transformation_valid",
 		 "ichan=%d >= nchan=%d", ichan, transformation.size());
 
   return transformation[ichan];
 }
 
 //! Return the system response for the specified channel
-void Pulsar::PolnCalibrator::set_Transformation_invalid (unsigned ichan)
+void Pulsar::PolnCalibrator::set_transformation_invalid (unsigned ichan)
 {
   if (transformation.size() == 0)
     const_cast<PolnCalibrator*>(this)->calculate_transformation();
 
   if (ichan >= transformation.size())
     throw Error (InvalidParam,
-		 "Pulsar::PolnCalibrator::set_Transformation_invalid",
+		 "Pulsar::PolnCalibrator::set_transformation_invalid",
 		 "ichan=%d >= nchan=%d", ichan, transformation.size());
 
   transformation[ichan] = 0;
@@ -106,28 +106,28 @@ void Pulsar::PolnCalibrator::set_Transformation_invalid (unsigned ichan)
 }
 
 //! Return the system response for the specified channel
-const ::Calibration::Transformation*
-Pulsar::PolnCalibrator::get_Transformation (unsigned ichan) const
+const ::Calibration::Complex2*
+Pulsar::PolnCalibrator::get_transformation (unsigned ichan) const
 {
   if (transformation.size() == 0)
     const_cast<PolnCalibrator*>(this)->calculate_transformation();
 
   if (ichan >= transformation.size())
-    throw Error (InvalidParam, "Pulsar::PolnCalibrator::get_Transformation",
+    throw Error (InvalidParam, "Pulsar::PolnCalibrator::get_transformation",
 		 "ichan=%d >= nchan=%d", ichan, transformation.size());
 
   return transformation[ichan];
 }
 
 //! Return the system response for the specified channel
-::Calibration::Transformation*
-Pulsar::PolnCalibrator::get_Transformation (unsigned ichan)
+::Calibration::Complex2*
+Pulsar::PolnCalibrator::get_transformation (unsigned ichan)
 {
   if (transformation.size() == 0)
     calculate_transformation();
 
   if (ichan >= transformation.size())
-    throw Error (InvalidParam, "Pulsar::PolnCalibrator::get_Transformation",
+    throw Error (InvalidParam, "Pulsar::PolnCalibrator::get_transformation",
 		 "ichan=%d >= nchan=%d", ichan, transformation.size());
 
   return transformation[ichan];
@@ -149,7 +149,7 @@ void Pulsar::PolnCalibrator::calculate_transformation ()
 
   for (unsigned ichan=0; ichan < nchan; ichan++)
     if ( extension->get_valid(ichan) )
-      transformation[ichan] = extension->get_Transformation(ichan);
+      transformation[ichan] = extension->get_transformation(ichan);
     else
       transformation[ichan] = 0;
 }
@@ -333,13 +333,13 @@ Pulsar::PolnCalibrator::Info::Info (const PolnCalibrator* cal)
 
   calibrator = cal;
   
-  unsigned nchan = cal->get_Transformation_nchan ();
+  unsigned nchan = cal->get_transformation_nchan ();
 
   // find the first valid transformation
-  const Calibration::Transformation* xform = 0;
+  const Calibration::Complex2* xform = 0;
   for (unsigned ichan = 0; ichan < nchan; ichan++)
-    if ( cal->get_Transformation_valid (ichan) ) {
-      xform = cal->get_Transformation (ichan);
+    if ( cal->get_transformation_valid (ichan) ) {
+      xform = cal->get_transformation (ichan);
       break;
     }
 
@@ -372,7 +372,7 @@ Estimate<float> Pulsar::PolnCalibrator::Info::get_param (unsigned ichan,
 							 unsigned iclass,
 							 unsigned iparam) const
 {
-  if (! calibrator->get_Transformation_valid(ichan) ) {
+  if (! calibrator->get_transformation_valid(ichan) ) {
     if (verbose) cerr << "Pulsar::PolnCalibrator::Info::get_param"
 		   " invalid ichan=" << ichan << endl;
     return 0;
@@ -382,7 +382,7 @@ Estimate<float> Pulsar::PolnCalibrator::Info::get_param (unsigned ichan,
   for (unsigned jclass=1; jclass<=iclass; jclass++)
     offset += get_nparam (jclass-1);
 
-  return calibrator->get_Transformation(ichan)->get_Estimate(iparam+offset);
+  return calibrator->get_transformation(ichan)->get_Estimate(iparam+offset);
 }
 
 

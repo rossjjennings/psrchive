@@ -1,15 +1,15 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PolnCalibrator.h,v $
-   $Revision: 1.24 $
-   $Date: 2003/12/23 00:13:41 $
-   $Author: ahotan $ */
+   $Revision: 1.25 $
+   $Date: 2003/12/26 08:44:11 $
+   $Author: straten $ */
 
 #ifndef __Pulsar_PolnCalibrator_H
 #define __Pulsar_PolnCalibrator_H
 
 #include "Pulsar/Calibrator.h"
-#include "Calibration/Transformation.h"
+#include "Calibration/Complex2.h"
 #include "Jones.h"
 #include "MJD.h"
 
@@ -60,20 +60,19 @@ namespace Pulsar {
     //
 
     //! Get the number of frequency channels in the transformation array
-    unsigned get_Transformation_nchan () const;
+    unsigned get_transformation_nchan () const;
 
     //! Return true if the transformation for the specified channel is valid
-    bool get_Transformation_valid (unsigned ch) const;
+    bool get_transformation_valid (unsigned ch) const;
 
     //! Set the transformation invalid flag for the specified channel
-    void set_Transformation_invalid (unsigned ch);
+    void set_transformation_invalid (unsigned ch);
 
     //! Return the transformation for the specified channel
-    const ::Calibration::Transformation* 
-    get_Transformation (unsigned ichan) const;
+    const ::Calibration::Complex2* get_transformation (unsigned ichan) const;
 
     //! Return the transformation for the specified channel
-    ::Calibration::Transformation* get_Transformation (unsigned ichan);
+    ::Calibration::Complex2* get_transformation (unsigned ichan);
 
     // ///////////////////////////////////////////////////////////////////
     //
@@ -129,7 +128,7 @@ namespace Pulsar {
       //! The PolnCalibrator to be plotted
       Reference::To<const PolnCalibrator> calibrator;
 
-      //! The number of parameters in the PolnCalibrator Transformation
+      //! The number of parameters in the PolnCalibrator transformation
       unsigned nparam;
 
     };
@@ -141,8 +140,8 @@ namespace Pulsar {
 
   protected:
 
-    //! The array of Transformation Model instances
-    vector< Reference::To< ::Calibration::Transformation > > transformation;
+    //! The array of transformation Model instances
+    vector< Reference::To< ::Calibration::Complex2 > > transformation;
     
     //! Derived classes can create and fill the transformation array
     virtual void calculate_transformation ();

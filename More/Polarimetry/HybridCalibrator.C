@@ -57,7 +57,7 @@ void Pulsar::HybridCalibrator::calculate_transformation ()
 		 "Pulsar::HybridCalibrator::calculate_transformation",
 		 "no reference observation ArtificialCalibrator");
 
-  unsigned nchan = precalibrator->get_Transformation_nchan();
+  unsigned nchan = precalibrator->get_transformation_nchan();
 
   if (reference_input->get_nchan() != nchan)
     throw Error (InvalidState,
@@ -101,7 +101,7 @@ void Pulsar::HybridCalibrator::calculate_transformation ()
       continue;
     }
 
-    if (!precalibrator->get_Transformation_valid (ichan)) {
+    if (!precalibrator->get_transformation_valid (ichan)) {
       if (verbose)
 	cerr << "Pulsar::HybridCalibrator::calculate_transformation"
 	  " invalid precalibrator" << endl;
@@ -136,8 +136,8 @@ void Pulsar::HybridCalibrator::calculate_transformation ()
  
     // pass the input Stokes parameters through the precalibrator transformation
 
-    Calibration::Transformation* xform;
-    xform = precalibrator->get_Transformation (ichan);
+    Calibration::Complex2* xform;
+    xform = precalibrator->get_transformation (ichan);
 
     Jones< Estimate<double> > response;
     xform->evaluate (response);
@@ -161,11 +161,11 @@ void Pulsar::HybridCalibrator::calculate_transformation ()
 
     // 4) produce the supplemented transformation, M_s M_B
 
-    Calibration::ProductTransformation* result;
-    result = new Calibration::ProductTransformation;
+    Calibration::Complex2Product* result;
+    result = new Calibration::Complex2Product;
 
-    result->add_Transformation (correction);
-    result->add_Transformation (xform);
+    *result *= correction;
+    *result *= xform;
 
     transformation[ichan] = result;
 
