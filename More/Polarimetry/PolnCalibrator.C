@@ -74,6 +74,18 @@ Jones<float> Pulsar::PolnCalibrator::get_response (unsigned ichan) const
   return response[ichan];
 }
 
+//! Return true if the Receiver is set
+bool Pulsar::PolnCalibrator::has_Receiver () const
+{
+  return receiver;
+}
+
+//! Return the Receiver
+const Pulsar::Receiver* Pulsar::PolnCalibrator::get_Receiver () const
+{
+  return receiver;
+}
+
 //! Get the number of frequency channels in the transformation array
 unsigned Pulsar::PolnCalibrator::get_transformation_nchan () const
 {

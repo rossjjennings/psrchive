@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PolnCalibrator.h,v $
-   $Revision: 1.26 $
-   $Date: 2004/07/12 09:26:54 $
+   $Revision: 1.27 $
+   $Date: 2004/07/21 05:28:18 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PolnCalibrator_H
@@ -54,6 +54,13 @@ namespace Pulsar {
 
     //! Return the system response for the specified channel
     virtual Jones<float> get_response (unsigned ichan) const;
+
+    //! Return true if the Receiver is set
+    bool has_Receiver () const;
+
+    //! Return the Receiver
+    const Receiver* get_Receiver () const;
+
 
     // ///////////////////////////////////////////////////////////////////
     //
