@@ -270,9 +270,13 @@ int polynomial::unload (FILE* fptr) const
 Phase polynomial::phase(const MJD& t) const { 
 
    Phase p = Phase(0,0.0);
-   MJD dt = t - reftime;
+   MJD dt;
+   if(t>reftime) dt = t - reftime;
+   else {
+     dt = reftime-t;
+     dt = dt*-1.0;
+   }
    double tm = dt.in_minutes();
-
    double poweroft = 1.0;
    for (int i=0;i<coefs.size();i++) {
       p += (coefs[i]*poweroft);
@@ -331,6 +335,27 @@ void polynomial::prettyprint() const {
   for(int i=0; i<coefs.size(); ++i) 
     cout << "\tCoeff  " << i+1 << "\t\t" << coefs[i] << endl;
 }
+
+int operator == (const polynomial & p1, const polynomial & p2){
+  if(p1.dm != p2.dm ||
+     p1.doppler_shift != p2.doppler_shift ||
+     p1.log_rms_resid != p2.log_rms_resid ||
+     p1.f0 != p2.f0 ||
+     p1.telescope != p2.telescope ||
+     p1.nspan_mins != p2.nspan_mins ||
+     p1.freq != p2.freq ||
+     p1.binph != p2.binph ||
+     p1.binfreq != p2.binfreq ||
+     p1.binary != p2.binary ||
+     p1.tempov11 != p2.tempov11) return(0);
+  return(1);
+}
+
+int operator != (const polynomial & p1, const polynomial & p2){
+  if(p1==p2) return(0);
+  return(1);
+}
+
 
 /******************************************/
 
@@ -539,12 +564,14 @@ int polyco::i_nearest (const MJD &t, const string& in_psr) const
     MJD t2=pollys[ipolly].reftime + (double) pollys[ipolly].nspan_mins*60.0/2.0;
     
     if (t>=t1 && t<=t2 && 
-	(in_psr==any_psr || pollys[ipolly].psrname==in_psr)) {
+	(in_psr==any_psr || pollys[ipolly].psrname==in_psr)) {      
       return ipolly;
     }
   }
-  fprintf (stderr, "polyco::i_nearest - no polynomial for MJD %s\n", 
-	t.strtempo());
+  cerr << "polyco::i_nearest - no polynomial for MJD " << t.printdays(15)
+       << " in range " << (pollys[0].reftime - (double) pollys[0].nspan_mins*60.0/2.0).printdays(15)
+       << " - " << (pollys[pollys.size()-1].reftime +
+    (double) pollys[pollys.size()-1].nspan_mins*60.0/2.0).printdays(15) << endl;
   return -1;
 }
 
@@ -590,4 +617,16 @@ bool polyco::is_tempov11() const {
   for(int i=0; i<pollys.size(); ++i)
     if(!pollys[i].is_tempov11()) return(pollys[i].is_tempov11());
   return(pollys[0].is_tempov11());
+}
+
+int operator == (const polyco & p1, const polyco & p2){
+  if(p1.pollys.size()!=p2.pollys.size()) return(0);
+  for(int i=0; i<p1.pollys.size(); ++i)
+    if(p1.pollys[i]!=p2.pollys[i]) return(0);
+  return(1);
+}
+
+int operator != (const polyco & p1, const polyco & p2){
+  if(p1==p2) return(0);
+  return(1);
 }
