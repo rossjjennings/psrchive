@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Integration.h,v $
-   $Revision: 1.33 $
-   $Date: 2003/02/13 16:40:06 $
+   $Revision: 1.34 $
+   $Date: 2003/02/17 16:23:54 $
    $Author: straten $ */
 
 /*
@@ -18,7 +18,7 @@
 
 #include "MJD.h"
 #include "Types.h"
-
+#include "Reference.h"
 
 namespace Tempo {
   class toa;
@@ -33,7 +33,7 @@ namespace Pulsar {
   class Profile;
 
   //! Group of Pulsar::Profile objects integrated over the same time interval
-  class Integration  {
+  class Integration : public Reference::Able {
 
   public:
     //! flag controls the amount output to stderr by Integration methods
@@ -43,7 +43,7 @@ namespace Pulsar {
     static bool invint_square;
 
     //! Null constructor simply intializes defaults
-    Integration () { init(); }
+    Integration ();
 
     //! Copy constructor
     Integration (const Integration& subint);
@@ -168,9 +168,6 @@ namespace Pulsar {
 
     const Profile* get_Profile (unsigned ipol, unsigned ichan) const;
 
-    //! Returns a pointer to the vector of Profile objects for poln
-    vector<Profile *>& operator[] (Signal::Component poln);
-
     //! Get the MJD at the start of the integration (convenience interface)
     MJD get_start_time () const;
 
@@ -255,10 +252,7 @@ namespace Pulsar {
     virtual void set_npol (unsigned npol) = 0;
 
     //! Data: npol by nchan profiles
-    vector< vector<Profile*> > profiles;
-
-    //! initialize null values
-    void init ();
+    vector< vector< Reference::To<Profile> > > profiles;
 
     //! All new Profile instances are created through this method
     virtual Profile* new_Profile ();

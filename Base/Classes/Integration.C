@@ -6,9 +6,10 @@
 
 bool Pulsar::Integration::verbose = false;
 
-void Pulsar::Integration::init()
+
+Pulsar::Integration::Integration ()
 {
-  // currently no variables to initialize
+  // nothing to initialize
 }
 
 Pulsar::Integration::Integration (const Integration& subint)
@@ -192,16 +193,6 @@ void Pulsar::Integration::set_weight (unsigned ichan, float weight)
     profiles[ipol][ichan]->set_weight (weight);
 }
 
-vector<Pulsar::Profile*>& 
-Pulsar::Integration::operator[] (Signal::Component poln)
-{
-  unsigned index = Signal::get_ipol (get_state(), poln);
-
-  if (index < 0)
-    throw Error (InvalidPolnState, "Integration::operator[]");
-
-  return profiles[index];
-}
 
 void Pulsar::Integration::fold (unsigned nfold)
 {
