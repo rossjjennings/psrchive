@@ -9,8 +9,8 @@ LIB_C_SRCS = pg_plot_gnu.C profile.C sub_int.C archive.C                \
 	     xtproc.C xtlplt.C xtinplot.C xtshdr.C xtshst.C xtcopy.C    \
              xtswap.C xtunld.C xtgrey.C xtreduce.C profplot.C           \
 	     plot2profs.C scintplot.C misc.C heapsort.C calarsub.C      \
-             plotcalsub.C get_epoch_and_name.C mkarchive.C microhdr.C   \
-	     convert_endian.C main_hdr.C cal_fns.C cpg_fns.C
+             plotcalsub.C get_epoch_and_name.C microhdr.C               \
+	     convert_endian.C headers.C cal_fns.C cpg_fns.C
 
 LIB_F_SRCS = ffft.f fftfit.f brent.f fccf.f cprof.f shiftbyfft.f \
              convolve.f width.f tsky1.f newtreduce.f \
