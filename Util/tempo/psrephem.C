@@ -31,7 +31,8 @@ void psrephem::size_dataspace()
     return;
   }
 
-  if (parmStatus)  {
+  if (parmStatus != NULL)  {
+    // the arrays have already been initialized.  zero them
     zero();
     return;
   }
@@ -338,6 +339,16 @@ void psrephem::nofit()
 
   for (int i=0;i<EPH_NUM_KEYS;i++) {
     if (parmStatus[i]==2) parmStatus[i]=1;
+  }
+}
+
+void psrephem::fitall()
+{
+  if (!tempo11)
+    return;
+
+  for (int i=0;i<EPH_NUM_KEYS;i++) {
+    if (parmStatus[i]==1) parmStatus[i]=2;
   }
 }
 
