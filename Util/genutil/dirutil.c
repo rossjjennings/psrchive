@@ -20,6 +20,7 @@
 
 #include <dirent.h>
 
+#include "environ.h"
 #include "genutil.h"
 
 int file_exists (const char* filename)
@@ -53,18 +54,6 @@ int file_is_directory (const char* filename)
     return 0;
   }
   return S_ISDIR(statistics.st_mode);
-}
-
-off_t filesize (const char* filename)
-{
-  struct stat statistics;
-  if (stat (filename, &statistics) < 0) {
-    fprintf (stderr, "fsize() error stat (%s)",
-	     filename);
-    perror ("");
-    return 0;
-  }
-  return statistics.st_size;
 }
 
 /* makedir - function to create a new directory, creating whatever path is
