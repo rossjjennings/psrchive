@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pcm.C,v $
-   $Revision: 1.8 $
-   $Date: 2003/11/28 14:27:20 $
+   $Revision: 1.9 $
+   $Date: 2003/12/01 18:13:16 $
    $Author: straten $ */
 
 /*! \file pcm.C 
@@ -38,25 +38,26 @@ static string Hamaker = "Hamaker";
 
 void usage ()
 {
-  cout << "A program for performing self-calibration\n"
-    "Usage: pcm [options] filenames\n"
-    "  -a archive set the output archive class name\n"
-    "  -C meta    filename with list of calibrator files\n"
-    "  -f chan    solve for only the specified channel\n"
-    "  -m model   model: Britton [default] or Hamaker\n"
-    "  -M meta    filename with list of pulsar files\n"
-    "\n"
-    "  -b bin     add phase bin to constraints\n"
-    "  -n nbin    set the number of phase bins to use as input states\n"
-    "  -p pA,pB   set the phase window from which to take input states\n"
-    "\n"
-    "  -s         do not normalize Stokes parameters by invariant interval\n"
-    "\n"
-    "  -q         assume that CAL Stokes Q = 0\n"
-    "  -v         assume that CAL Stokes V = 0\n"
-    "\n"
-    "  -h         this help page\n"
-    "  -V         verbose mode\n"
+  cout << "A program for performing self-calibration \n"
+    "Usage: pcm [options] filenames \n"
+    "  -a archive set the output archive class name \n"
+    "  -c meta    filename with list of calibrator files \n"
+    "  -d dbase   Calibration::Database filename \n"
+    "  -f chan    solve for only the specified channel \n"
+    "  -m model   model: Britton [default] or Hamaker \n"
+    "  -M meta    filename with list of pulsar files \n"
+    " \n"
+    "  -b bin     add phase bin to constraints \n"
+    "  -n nbin    set the number of phase bins to choose as input states \n"
+    "  -p pA,pB   set the phase window from which to choose input states \n"
+    " \n"
+    "  -s         do not normalize Stokes parameters by invariant interval \n"
+    " \n"
+    "  -q         assume that CAL Stokes Q = 0 \n"
+    "  -v         assume that CAL Stokes V = 0 \n"
+    " \n"
+    "  -h         this help page \n"
+    "  -V         verbose mode \n"
        << endl;
 }
 
@@ -92,6 +93,8 @@ void auto_select (Pulsar::ReceptionCalibrator& model, Pulsar::Archive* archive,
     }
   }
 }
+
+
 void range_select (Pulsar::ReceptionCalibrator& model,
 		   Pulsar::Archive* archive,
 		   float phmin, float phmax, unsigned maxbins)
@@ -170,15 +173,21 @@ void plot_constraints (Pulsar::ReceptionCalibratorPlotter& plotter,
 
 
 
-int main (int argc, char *argv[]) 
-try {
+int main (int argc, char *argv[]) try {
+
   Error::verbose = false;
 
   // name of file containing list of Archive filenames
   char* metafile = NULL;
 
-  // name of file containing list of Archive filenames
+  // name of file containing list of calibrator Archive filenames
   char* calfile = NULL;
+
+  // name of file containing a Calibration::Database
+  char* dbfile = NULL;
+
+  // number of hours over which CALs will be found from Database
+  float hours = 24.0;
 
   // name of the default parameterization
   Pulsar::Calibrator::Type model_name = Pulsar::Calibrator::Britton;
@@ -214,7 +223,7 @@ try {
   bool publication_plots = false;
 
   int gotc = 0;
-  while ((gotc = getopt(argc, argv, "a:b:C:Df:hM:m:n:Pp:qsuvV")) != -1) {
+  while ((gotc = getopt(argc, argv, "a:b:c:d:Df:hM:m:n:Pp:qsuvV")) != -1) {
     switch (gotc) {
 
     case 'a':
@@ -228,8 +237,12 @@ try {
       break;
     }
 
-    case 'C':
+    case 'c':
       calfile = optarg;
+      break;
+
+    case 'd':
+      dbfile = optarg;
       break;
 
     case 'D':
@@ -316,6 +329,9 @@ try {
     return -1;
   } 
 
+  // assumes that sorting by filename also sorts by epoch
+  sort (filenames.begin(), filenames.end());
+
   // the reception calibration class
   Pulsar::ReceptionCalibrator model (model_name);
 
@@ -324,49 +340,88 @@ try {
   else
     cerr << "pcm: assuming that CAL Stokes V = 0" << endl;
 
+  model.measure_cal_V = measure_cal_V;
+
   if (measure_cal_Q)
     cerr << "pcm: allowing CAL Stokes Q to vary" << endl;
   else
     cerr << "pcm: assuming that CAL Stokes Q = 0" << endl;
+
+  model.measure_cal_Q = measure_cal_Q;
 
   if (normalize_by_invariant)
     cerr << "pcm: normalizing Stokes parameters by invariant interval" << endl;
   else
     cerr << "pcm: not normalizing Stokes parameters" << endl;
 
-  model.measure_cal_V = measure_cal_V;
-  model.measure_cal_Q = measure_cal_Q;
   model.normalize_by_invariant = normalize_by_invariant;
 
   // add the specified phase bins
   for (unsigned ibin=0; ibin<phase_bins.size(); ibin++)
     model.add_state (phase_bins[ibin]);
 
-
   // add the calibrators (to be loaded on first call to add_observation
   vector<string> cal_filenames;
+
   if (calfile) {
     stringfload (&cal_filenames, calfile);
     model.set_calibrators (cal_filenames);
   }
+
+  Reference::To<Pulsar::Archive> archive;
+
+  if (dbfile) {
+
+    archive = Pulsar::Archive::load(filenames.last());
+    MJD end = archive->end_time();
+
+    archive = Pulsar::Archive::load(filenames.first());
+    MJD start = archive->start_time();
+
+    MJD mid = 0.5 * (end + start);
+
+    cerr << "pcm: Constructing Calibration::Database" << endl;
+    Pulsar::Calibration::Database dbase (dbfile);
+
+    cerr << "pcm: Finding FluxCalOn observations within " << hours
+	 << " of midtime=" << mid << "\n(start=" << start
+	 << " and end=" << end << ")" << endl;
+
+    double minutes = 0.5 * hours * 60.0;
+
+    vector<Pulsar::Calibration::Entry> oncals = dbase.all_matching (archive, mid,
+								    Signal::FluxCalOn, 
+								    minutes);
   
+    if (oncals.size() == 0)
+      cerr << "pcm: No FluxCalOn observations found" << endl;
+
+    for (unsigned i = 0; i < oncals.size(); i++) {
+      cerr << "pcm: Adding " << oncals[i].filename << endl;
+      cal_filenames.push_back (oncals[i].filename);
+    }
+
+  }
   
   Reference::To<Pulsar::Archive> total;
-  Reference::To<Pulsar::Archive> archive;
   
   cerr << "pcm: loading archives" << endl;
   
   for (unsigned i = 0; i < filenames.size(); i++) {
     
     try {
+
+      if (!archive) {
+
+	if (verbose)
+	  cerr << "pcm: loading " << filenames[i] << endl;
+	
+	archive = Pulsar::Archive::load(filenames[i]);
+	
+	cout << "pcm: loaded archive: " << filenames[i] << endl;
       
-      if (verbose)
-	cerr << "pcm: loading " << filenames[i] << endl;
-      
-      archive = Pulsar::Archive::load(filenames[i]);
-      
-      cout << "pcm: loaded archive: " << filenames[i] << endl;
-      
+      }
+
       if (archive->get_type() == Signal::Pulsar)  {
 	
 	if (verbose)
@@ -389,8 +444,8 @@ try {
         cerr << "pcm: " << model.get_nstate_pulsar() << " states" << endl;
       }
 
-      model.add_observation( archive );
 
+      model.add_observation( archive );
 
       if (archive->get_type() == Signal::Pulsar && only_ichan < 0)  {
 
@@ -412,6 +467,8 @@ try {
 	  total->tscrunch ();
 	}
       }
+
+      archive = 0;
 
     }
     catch (Error& error) {
