@@ -44,6 +44,9 @@ void Pulsar::Integration::toas (vector<Tempo::toa>& toas,
 	toa = profile->toa (standard, epoch, folding_period, nsite, 
 			    arguments, fmt);
 
+      if (get_dedispersed())
+	toa.set_frequency (get_centre_frequency());
+
     }
     catch (Error& error)  {
       if (verbose)
