@@ -12,15 +12,14 @@
 #include "string_utils.h"
 #include "poly.h"
 
-string polyco::anyPsr;       // an empty string
-MJD    polyco::today;        // MJD zero
+string polyco::anyPsr;
 bool   polyco::verbose = false;
 bool   polyco::debug = false;
 
 // not going to get > ns precision out of a routine based in minutes
 double polyco::precision = 1e-10;
 
-void polynomial::init(){
+void polynomial::init() {
   dm = 0;
   doppler_shift = 0;
   log_rms_resid = 0;
@@ -34,31 +33,6 @@ void polynomial::init(){
   tempov11 = 0;
 }
 
-polynomial::polynomial()
-{
-  this->init();
-}
-
-polynomial::polynomial(const polynomial & in_poly)
-{  
-  psrname = in_poly.psrname;
-  date = in_poly.date;
-  utc = in_poly.utc;
-  reftime = in_poly.reftime;
-  dm = in_poly.dm;
-  doppler_shift = in_poly.doppler_shift;
-  log_rms_resid = in_poly.log_rms_resid;
-  ref_phase = in_poly.ref_phase;
-  f0 = in_poly.f0;
-  telescope = in_poly.telescope;
-  nspan_mins = in_poly.nspan_mins;
-  freq = in_poly.freq;
-  binph = in_poly.binph;
-  binfreq = in_poly.binfreq;
-  coefs = in_poly.coefs;
-  binary = in_poly.binary;
-  tempov11 = in_poly.tempov11;
-}
 
 polynomial & polynomial::operator = (const polynomial & in_poly)
 {
@@ -486,19 +460,14 @@ int operator != (const polynomial & p1, const polynomial & p2){
 
 /******************************************/
 
-polyco::polyco(){
-  pollys.clear();
-}
+polyco & polyco::operator = (const polyco & in_poly)
+{
+  if (this == &in_poly)
+    return *this;
 
-polyco::polyco(const polyco & in_poly){
   pollys = in_poly.pollys;
-}
 
-polyco & polyco::operator = (const polyco & in_poly){
-  if(this == &in_poly)
-    return(*this);
-  pollys = in_poly.pollys;
-  return(*this);
+  return *this;
 } 
 
 polyco::polyco (const string filename)
@@ -510,7 +479,7 @@ polyco::polyco (const string filename)
   }
 }
  
-polyco::polyco(const char * filename)
+polyco::polyco (const char * filename)
 {
   if (load (filename) < 1) {
     fprintf (stderr, "polyco::polyco - failed to construct from %s\n", filename);
@@ -613,7 +582,15 @@ int polyco::unload (FILE* fptr) const
   return bout;
 }
 
-void polyco::prettyprint() const {
+void polyco::append (const polyco& poly)
+{
+  for (unsigned i=0; i<poly.pollys.size(); ++i) 
+    pollys.push_back (poly.pollys[i]);
+}
+
+
+void polyco::prettyprint() const 
+{
   for(unsigned i=0; i<pollys.size(); ++i) 
     pollys[i].prettyprint();
 }
@@ -679,7 +656,7 @@ int polyco::i_nearest (const MJD &t, const string& in_psr) const
   if ( (t > pollys[imin].start_time()) && (t < pollys[imin].end_time()) )
     return imin;
 #else
-  // TEMPO sometimes leaves wholes between its polynomials.
+  // TEMPO sometimes leaves holes between its polynomials.
   // Let's just be happy if it is within the range of the polyco
   if ( (t > start_time()) && (t < end_time()) )
     return imin;
