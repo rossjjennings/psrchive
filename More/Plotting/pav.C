@@ -165,20 +165,20 @@ int main (int argc, char** argv)
   }
 
   if (display) {
-    cpgsvp (0.05, 0.95, 0.0, 0.8);
-    cpgsch (2.0);
+    cpgsvp (0.1, 0.9, 0.05, 0.85);
+    //cpgsch (2.0);
   }
 
-#ifdef HEAT
+  //#ifdef HEAT
 
-  float heat_l[] = {0.0, 0.2, 0.4, 0.6, 1.0};
-  float heat_r[] = {0.0, 0.5, 1.0, 1.0, 1.0};
-  float heat_g[] = {0.0, 0.0, 0.5, 1.0, 1.0};
-  float heat_b[] = {0.0, 0.0, 0.0, 0.3, 1.0};
+  //float heat_l[] = {0.0, 0.2, 0.4, 0.6, 1.0};
+  //float heat_r[] = {0.0, 0.5, 1.0, 1.0, 1.0};
+  //float heat_g[] = {0.0, 0.0, 0.5, 1.0, 1.0};
+  //float heat_b[] = {0.0, 0.0, 0.0, 0.3, 1.0};
   
-  cpgctab(heat_l, heat_r, heat_g, heat_b, 4, 1.0, 0.5);
+  //cpgctab(heat_l, heat_r, heat_g, heat_b, 4, 1.0, 0.5);
 
-#endif
+  //#endif
 
   Pulsar::Archive* archive = 0;
 
@@ -237,7 +237,7 @@ int main (int argc, char** argv)
     
     if (greyfreq) {
       string tempstr = archive -> get_source();
-      Pulsar::plot_greyscale (archive -> get_Integration (0), tempstr);
+      Pulsar::plot_color (archive -> get_Integration (0), tempstr);
     }
     
     if (textinfo) {
