@@ -59,10 +59,12 @@ int model_profile (int npts, int narrays, float** prf, float** std,
 
   // Compute an initial estimation of the shift based
   // on the cross-correlation function
+
   float xcorr_shift;
   F772C(fccf) (&(xcorr_amps[0][1]), &(xcorr_phases[0][1]), &xcorr_shift);
 
-cerr << "xcorr_shift=" << xcorr_shift << endl;
+  if (verbose)
+    cerr << "xcorr_shift=" << xcorr_shift << endl;
 
   // run through successively larger numbers of
   // frequency components finding the best-fitting
@@ -71,6 +73,7 @@ cerr << "xcorr_shift=" << xcorr_shift << endl;
   // continue up until npts/2 components
   // N.B. we do not include the DC component of 
   // the fourier transform in our sums.  
+
   double tau = (double) xcorr_shift;
   double dtau = 0, edtau = 0;
   double deriv_chisq = 0;
@@ -108,7 +111,8 @@ cerr << "xcorr_shift=" << xcorr_shift << endl;
 		  edtau, narrays, xcorr_amps, xcorr_phases, nsum);
   }
 
-  if (verbose) cerr << "model profile - best tau is " << tau << endl;
+  if (verbose) 
+    cerr << "model profile: best tau is " << tau << endl;
 
   // These relationships are discussed in Joe Taylor's paper 
   // in "Impact of Pulsar Timing on Relativity and Cosmology" 
@@ -118,6 +122,7 @@ cerr << "xcorr_shift=" << xcorr_shift << endl;
   // S   standard
   // N   noise
   // tau shift between profile and standard
+
   double s1=0, s2=0, s3=0;
   double cosfac;
   for(i=0; i<narrays; ++i){
@@ -129,8 +134,9 @@ cerr << "xcorr_shift=" << xcorr_shift << endl;
     }
   }
 
-  if (s1==0 || s2<=0 || s3<=0) {
-    cerr << "model_profile: partial sums s1=" << s1 << " s2=" << s2 << " s3=" << s3 << endl;
+  if ((s1==0 || s2<=0 || s3<=0) && verbose) {
+    cerr << "model_profile: partial sums s1=" << s1 << " s2=" << s2 
+	 << " s3=" << s3 << endl;
     return -1;
   }
 
@@ -155,6 +161,7 @@ cerr << "xcorr_shift=" << xcorr_shift << endl;
   // This defines the errors in scale and shift so 
   // that the reduced chisq is unity.  We subtract
   // 1 D.O.F. for tau.
+
   double rms = sqrt( *chisq / (float(narrays*(npt2-1)) - 1.0) );
   double fac = npts/(2.0*M_PI);
   *sigma_scale = rms/sqrt(2.0*s2);
