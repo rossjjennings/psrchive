@@ -15,6 +15,18 @@
 #include "Reference.h"
 #include "psr_cpp.h"
 
+/*!
+
+All outputs of frc1d must have N+2 floats allocated for output
+
+frc1d = forward real->complex 1D
+fcc1d = forward complex->complex 1D
+bcc1d = backward complex->complex 1D
+
+Call transforms as FUNC(ndat,dest,src);
+
+*/
+
 namespace FTransform {
 
   typedef int (*fft_call)(unsigned, float*, float*);
@@ -24,6 +36,13 @@ namespace FTransform {
   extern fft_call frc1d;
   extern fft_call fcc1d;
   extern fft_call bcc1d;
+
+  //! Inplace wrapper-function- performs a memcpy after FFTing
+  int inplace_frc1d(unsigned ndat, float* srcdest);
+  //! Inplace wrapper-function- performs a memcpy after FFTing
+  int inplace_fcc1d(unsigned ndat, float* srcdest);
+  //! Inplace wrapper-function- performs a memcpy after FFTing
+  int inplace_bcc1d(unsigned ndat, float* srcdest);
 
   //! Returns currently selected library
   string get_library();

@@ -168,3 +168,40 @@ void FTransform::Plan::initialise(unsigned _ndat, unsigned _ilib, string _fft_ca
 }
 
 FTransform::Plan::~Plan() { }
+
+//! Inplace wrapper-function- performs a memcpy after FFTing
+int FTransform::inplace_frc1d(unsigned ndat, float* srcdest){
+  static vector<float> dest;
+  if( dest.size() != ndat+2 )
+    dest.resize( ndat+2 );
+
+  float* pdest = &*dest.begin();
+
+  frc1d(ndat,pdest,srcdest);
+  memcpy(srcdest,pdest,(ndat+2)*sizeof(float));
+}
+
+//! Inplace wrapper-function- performs a memcpy after FFTing
+int FTransform::inplace_fcc1d(unsigned ndat, float* srcdest){
+  static vector<float> dest;
+  if( dest.size() != ndat*2 )
+    dest.resize( ndat*2 );
+
+  float* pdest = &*dest.begin();
+
+  fcc1d(ndat,pdest,srcdest);
+  memcpy(srcdest,pdest,ndat*2*sizeof(float));
+}
+
+//! Inplace wrapper-function- performs a memcpy after FFTing
+int FTransform::inplace_bcc1d(unsigned ndat, float* srcdest){
+  static vector<float> dest;
+  if( dest.size() != ndat*2 )
+    dest.resize( ndat*2 );
+
+  float* pdest = &*dest.begin();
+
+  bcc1d(ndat,pdest,srcdest);
+  memcpy(srcdest,pdest,ndat*2*sizeof(float));
+}
+
