@@ -66,17 +66,37 @@ void Pulsar::RFIMitigation::zap_specific (Pulsar::Archive* arch, vector<float> m
   }
 }
 
+// Apply a zap mask to an integration. Channels whose mask value is 1.0
+// are not changed, all other channels have their weights set to the
+// value in the mask vector
 void Pulsar::RFIMitigation::apply_mask (Pulsar::Integration* integ, vector<float> mask)
 {
   if (mask.size() != integ->get_nchan())
     throw Error(InvalidParam, "RFIMitigation::apply_mask incorrect length");
   
   for (unsigned i = 0; i < integ->get_nchan(); i++) {
-    integ->get_Profile(0,i)->set_weight(mask[i]);
+    for (unsigned j = 0; j < integ->get_npol(); j++) {
+      if (mask[i] != 1.0)
+	integ->get_Profile(j,i)->set_weight(mask[i]);
+    }
   }
 }
 
 void Pulsar::RFIMitigation::init () {
   // For now there is nothing to do...
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

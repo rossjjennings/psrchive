@@ -129,8 +129,7 @@ int main (int argc, char *argv[]) {
 	if (chans_to_zap.empty()) {
 	  vector<float> mask(nchan, 1.0);
 	  if ((last > nchan) || (first > last) || (first < 0)) {
-	    cerr << "YIKES" << endl;
-	    throw Error(InvalidParam, "Specified channels lie outside range");
+	    throw Error(InvalidParam, "Specified channels lie outside known range");
 	  }
 	  else {
 	    for (int i = first; i <= last; i++) {
