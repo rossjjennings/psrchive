@@ -1,5 +1,5 @@
 //
-// $Id: pav.C,v 1.25 2003/02/10 00:32:04 pulsar Exp $
+// $Id: pav.C,v 1.26 2003/02/16 00:52:20 pulsar Exp $
 //
 // The Pulsar Archive Viewer
 //
@@ -57,9 +57,10 @@ void usage ()
     " -Z        Smear a profile by convolving with a hat function\n"
     " -C        Centre the profile\n"
     " -Y        Display all integrations in a time vs phase plot\n"
-    " -A        Position angle spectrum plot\n"
+    " -A        Plot instrumental phase across the band\n"
     " -s        SNR frequency spectrum plot\n"
-    " -g        Plot instrumental phase across the band\n"
+    " -g        Position angle across a profile\n"
+    " -B        Off-pulse bandpass\n"
        << endl;
 }
 
@@ -89,14 +90,15 @@ int main (int argc, char** argv)
   bool calplot = false;
   bool snrplot = false;
   bool PA = false;
-
+  bool bandpass = false;
+  
   char* metafile = NULL;
   
   Pulsar::Plotter plotter;
   Pulsar::Plotter::ColourMap colour_map = Pulsar::Plotter::Heat;
   
   int c = 0;
-  const char* args = "ab:c:d:DGe:E:f:FhiHm:M:pP:r:St:TvVwWx:y:RZCYz:AsgX";
+  const char* args = "ab:c:d:DGe:E:f:FhiHm:M:pP:r:St:TvVwWx:y:RZCYz:AsgXB";
   while ((c = getopt(argc, argv, args)) != -1)
     switch (c) {
       
@@ -135,7 +137,7 @@ int main (int argc, char** argv)
       usage ();
       return 0;
     case 'i':
-      cout << "$Id: pav.C,v 1.25 2003/02/10 00:32:04 pulsar Exp $" << endl;
+      cout << "$Id: pav.C,v 1.26 2003/02/16 00:52:20 pulsar Exp $" << endl;
       return 0;
     case 'm':
       // macro file
@@ -215,6 +217,9 @@ int main (int argc, char** argv)
       break;
     case 'g':
       PA = true;
+      break;
+    case 'B':
+      bandpass = true;
       break;
       
     default:
@@ -314,6 +319,16 @@ int main (int argc, char** argv)
 
     if (centre) {
       archive -> centre();
+    }
+
+    if (bandpass) {
+      cpgbeg (0, "?", 0, 0);
+      cpgask(1);
+      cpgsvp (0.1, 0.9, 0.1, 0.9);
+      cpgeras();
+      plotter.bandpass(archive);
+      cpgend();
+      exit(0);
     }
     
     if (PA) {
