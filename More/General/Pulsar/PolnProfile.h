@@ -76,14 +76,18 @@ template <typename T>
 void Pulsar::PolnProfile::transform (const Jones<T>& response)
 {
   unsigned nbin = p0->get_nbin();
+
+  float Gain = abs( det(response) );
+  if (!finite(Gain))
+    throw Error (InvalidParam, "Pulsar::PolnProfile::transform",
+                 "non-invertbile response.  det(J)=%f", Gain);
+
   Jones<float> response_dagger = herm(response);
 
   for (unsigned ibin = 0; ibin < nbin; ibin++)
     set_Stokes (ibin, (response * get_Stokes(ibin)) * response_dagger);
 
   if (correct_weights) {
-
-    float Gain = abs( det(response) );
 
     p0->set_weight ( p0->get_weight() / Gain );
     p1->set_weight ( p1->get_weight() / Gain );

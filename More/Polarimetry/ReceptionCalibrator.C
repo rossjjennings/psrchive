@@ -716,6 +716,9 @@ void Pulsar::ReceptionCalibrator::add_Calibrator (const ArtificialCalibrator* p)
 
     for (unsigned ichan = 0; ichan<nchan; ichan++) {
 
+      if (!polcal->get_Transformation_valid (ichan))
+        continue;
+
       polar = dynamic_cast<const Calibration::Polar*>
 	( polcal->get_Transformation(ichan) );
 
@@ -735,6 +738,9 @@ void Pulsar::ReceptionCalibrator::add_Calibrator (const ArtificialCalibrator* p)
     const Calibration::SingleAxis* sa;
 
     for (unsigned ichan = 0; ichan<nchan; ichan++) {
+
+      if (!sacal->get_Transformation_valid (ichan))
+        continue;
 
       sa = dynamic_cast<const Calibration::SingleAxis*>
 	( sacal->get_Transformation(ichan) );
@@ -757,6 +763,7 @@ void Pulsar::ReceptionCalibrator::add_Calibrator (const ArtificialCalibrator* p)
 //! Calibrate the polarization of the given archive
 void Pulsar::ReceptionCalibrator::precalibrate (Archive* data)
 {
+  verbose = true;
   cerr << "Pulsar::ReceptionCalibrator::precalibrate" << endl;
 
   string reason;
@@ -814,8 +821,23 @@ void Pulsar::ReceptionCalibrator::precalibrate (Archive* data)
 		     "unknown Archive type for " + data->get_filename() );
       }
 
+
+      if (!signal_path) {
+        response[ichan] = Jones<float>::identity();
+        continue;
+      }
+
       model[ichan]->time.send( integration->get_epoch() );
-      response[ichan] = inv( signal_path->evaluate() );
+
+      response[ichan] = signal_path->evaluate();
+
+      if ( norm(det( response[ichan] )) < 1e-9 ) {
+        cerr << "Pulsar::ReceptionCalibrator::precalibrate ichan=" << ichan <<
+                " faulty response" << endl;
+         response[ichan] = Jones<float>::identity();
+      }
+      else
+         response[ichan] = inv( response[ichan] );
 
     }
 
@@ -826,9 +848,7 @@ void Pulsar::ReceptionCalibrator::precalibrate (Archive* data)
     
   }
 
-
   data->set_parallactic_corrected (parallactic_corrected);
-
   data->set_poln_calibrated (true);
 
 }
