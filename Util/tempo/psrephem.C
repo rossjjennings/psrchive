@@ -107,16 +107,20 @@ int psrephem::load (const char* filename)
 {
   tempo11 = 1;
   size_dataspace();
-  int istat = rd_eph (filename, parmStatus, ephemstr, value_double,
-		      value_integer, error_double);
-  
-  if (!istat) {
+
+  rd_eph (filename, parmStatus, ephemstr, value_double,value_integer,error_double);
+  int all_zero = 1;
+  for (int i=0;i<EPH_NUM_KEYS;i++)  {
+    if (parmStatus[i] == 1) {
+      value_str[i] = ephemstr [i];
+      all_zero = 0;
+    }
+  }
+  if (all_zero) {
     fprintf (stderr,
     "psrephem::load WARNING tempo11-style load of '%s' failed\n", filename);
     return old_load (filename);
   }
-  for (int i=0;i<EPH_NUM_KEYS;i++)
-    value_str[i] = ephemstr [i];
 
   if (verbose) {
     fprintf(stderr,"psrephem::load tempo11-style loaded '%s' ok\n", filename);
