@@ -20,7 +20,7 @@ void MEAL::GaussJordan (std::vector<std::vector<T> >& a, std::vector<std::vector
     nrow = a.size();
 
   if (nrow == 0) {
-    cerr << "MEAL::GaussJordan nrow=" << nrow << endl;
+    std::cerr << "MEAL::GaussJordan nrow=" << nrow << std::endl;
     return;
   }
 
@@ -35,7 +35,7 @@ void MEAL::GaussJordan (std::vector<std::vector<T> >& a, std::vector<std::vector
   }
 
 #ifdef _DEBUG
-  cerr << "MEAL::GaussJordan nrow=" << nrow << " ncol=" << ncol << endl;
+  std::cerr << "MEAL::GaussJordan nrow=" << nrow << " ncol=" << ncol << std::endl;
 #endif
 
   int irow = 0;
@@ -87,7 +87,7 @@ void MEAL::GaussJordan (std::vector<std::vector<T> >& a, std::vector<std::vector
     a[icol][icol]=1.0;
 
 #ifdef _DEBUG
-    cerr << "icol=" << icol << " irow=" << irow << " 1/piv=" << pivinv << endl;
+    std::cerr << "icol=" << icol << " irow=" << irow << " 1/piv=" << pivinv << std::endl;
 #endif
     
     for (j=0; j<nrow; j++)  a[icol][j] *= pivinv;

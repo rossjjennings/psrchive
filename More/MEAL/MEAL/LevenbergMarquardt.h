@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/LevenbergMarquardt.h,v $
-   $Revision: 1.5 $
-   $Date: 2004/11/23 11:25:43 $
+   $Revision: 1.6 $
+   $Date: 2004/11/23 11:32:01 $
    $Author: straten $ */
 
 #ifndef __Levenberg_Marquardt_h
@@ -11,6 +11,8 @@
 #include "MEAL/GaussJordan.h"
 #include "Estimate.h"
 #include "Error.h"
+
+#include <iostream>
 
 #ifdef sun
 #include <ieeefp.h>
@@ -231,7 +233,7 @@ float MEAL::LevenbergMarquardt<Grad>::init
  Mt& model)
 {
   if (verbose > 2)
-    cerr << "MEAL::LevenbergMarquardt<Grad>::init" << endl;
+    std::cerr << "MEAL::LevenbergMarquardt<Grad>::init" << std::endl;
 
   // size all of the working space arrays
   alpha.resize  (model.get_nparam());
@@ -249,8 +251,8 @@ float MEAL::LevenbergMarquardt<Grad>::init
   lamda = 0.001;
 
   if (verbose > 0)
-    cerr << "MEAL::LevenbergMarquardt<Grad>::init chisq=" 
-	 << best_chisq << endl;
+    std::cerr << "MEAL::LevenbergMarquardt<Grad>::init chisq=" 
+	 << best_chisq << std::endl;
 
   return best_chisq;
 }
@@ -295,14 +297,14 @@ void verify_orthogonal (const std::vector<std::vector<double > >& alpha, const T
       covar /= row_mod[krow] * row_mod[irow];
 
       if (!finite(covar)) {
-        cerr << "NaN or Inf in covariance matrix" << endl;
+        std::cerr << "NaN or Inf in covariance matrix" << std::endl;
         return;
       }
 
       if ( fabs( 1.0-fabs(covar) ) < 1e-3 )
-        cerr << model.get_param_name(kparam) << " (row " << krow << ") and "
+        std::cerr << model.get_param_name(kparam) << " (row " << krow << ") and "
 	     << model.get_param_name(iparam) << " (row " << irow << ")"
-	     " covar=" << covar << endl;
+	     " covar=" << covar << std::endl;
     }
 
   }
@@ -326,7 +328,7 @@ template <class Mt>
 void MEAL::LevenbergMarquardt<Grad>::solve_delta (const Mt& model)
 {
   if (verbose > 2)
-    cerr << "MEAL::LevenbergMarquardt<Grad>::solve_delta" << endl;
+    std::cerr << "MEAL::LevenbergMarquardt<Grad>::solve_delta" << std::endl;
 
   if (alpha.size() != model.get_nparam())
     throw Error (InvalidState, 
@@ -337,8 +339,8 @@ void MEAL::LevenbergMarquardt<Grad>::solve_delta (const Mt& model)
 #ifndef _DEBUG
   if (verbose > 2)
 #endif
-    cerr << "MEAL::LevenbergMarquardt<Grad>::solve_delta lamda="
-	 << lamda << " nparam=" << model.get_nparam() << endl;
+    std::cerr << "MEAL::LevenbergMarquardt<Grad>::solve_delta lamda="
+	 << lamda << " nparam=" << model.get_nparam() << std::endl;
 
   unsigned iinfit = 0;
   for (unsigned ifit=0; ifit<model.get_nparam(); ifit++)
@@ -364,8 +366,8 @@ void MEAL::LevenbergMarquardt<Grad>::solve_delta (const Mt& model)
 		  "no parameters in fit");
 
   if (verbose > 2)
-    cerr << "MEAL::LevenbergMarquardt<Grad>::solve_delta for " << iinfit
-	 << " parameters" << endl;
+    std::cerr << "MEAL::LevenbergMarquardt<Grad>::solve_delta for " << iinfit
+	 << " parameters" << std::endl;
 
   //! curvature matrix
   std::vector<std::vector<double> > temp_copy (alpha);
@@ -375,13 +377,13 @@ void MEAL::LevenbergMarquardt<Grad>::solve_delta (const Mt& model)
     MEAL::GaussJordan (alpha, delta, iinfit, singular_threshold);
   }
   catch (Error& error)  {
-    cerr << "Numerical::GaussJordan failed" << endl;
+    std::cerr << "Numerical::GaussJordan failed" << std::endl;
     verify_orthogonal (temp_copy, model);
     throw error += "MEAL::LevenbergMarquardt<Grad>::solve_delta";
   }
 
   if (verbose > 2)
-    cerr << "MEAL::LevenbergMarquardt<Grad>::solve_delta exit" << endl;
+    std::cerr << "MEAL::LevenbergMarquardt<Grad>::solve_delta exit" << std::endl;
 }
 
 // /////////////////////////////////////////////////////////////////////////
@@ -413,7 +415,7 @@ float MEAL::LevenbergMarquardt<Grad>::iter
  Mt& model)
 {
   if (verbose > 2)
-    cerr << "MEAL::LevenbergMarquardt<Grad>::iter" << endl;
+    std::cerr << "MEAL::LevenbergMarquardt<Grad>::iter" << std::endl;
 
   solve_delta (model);
 
@@ -421,7 +423,7 @@ float MEAL::LevenbergMarquardt<Grad>::iter
   // parameters.  Update the model.
 
   if (verbose > 2)
-    cerr << "MEAL::LevenbergMarquardt<Grad>::iter update model" << endl;
+    std::cerr << "MEAL::LevenbergMarquardt<Grad>::iter update model" << std::endl;
 
   unsigned iinfit = 0;
   for (unsigned ifit=0; ifit<model.get_nparam(); ifit++) {
@@ -436,14 +438,14 @@ float MEAL::LevenbergMarquardt<Grad>::iter
     backup[ifit] = model.get_param (ifit);
 
     if (verbose > 2)
-      cerr << "   delta[" << ifit << "]=" << change << endl;
+      std::cerr << "   delta[" << ifit << "]=" << change << std::endl;
 
     model.set_param (ifit, backup[ifit] + change);
   }
 
   if (verbose > 2)
-    cerr << "MEAL::LevenbergMarquardt<Grad>::iter"
-      " calculate new chisq" << endl;
+    std::cerr << "MEAL::LevenbergMarquardt<Grad>::iter"
+      " calculate new chisq" << std::endl;
   float new_chisq = calculate_chisq (x, y, model);
 
   if (new_chisq < best_chisq) {
@@ -451,8 +453,8 @@ float MEAL::LevenbergMarquardt<Grad>::iter
     lamda *= lamda_decrease_factor;
 
     if (verbose)
-      cerr << "MEAL::LevenbergMarquardt<Grad>::iter new chisq="
-           << new_chisq << "\n  better fit; lamda=" << lamda << endl;
+      std::cerr << "MEAL::LevenbergMarquardt<Grad>::iter new chisq="
+           << new_chisq << "\n  better fit; lamda=" << lamda << std::endl;
 
     best_chisq = new_chisq;
     best_alpha = alpha;
@@ -464,8 +466,8 @@ float MEAL::LevenbergMarquardt<Grad>::iter
     lamda *= lamda_increase_factor;
 
     if (verbose)
-      cerr << "MEAL::LevenbergMarquardt<Grad>::iter new chisq="
-           << new_chisq << "\n  worse fit; lamda=" << lamda << endl;
+      std::cerr << "MEAL::LevenbergMarquardt<Grad>::iter new chisq="
+           << new_chisq << "\n  worse fit; lamda=" << lamda << std::endl;
 
     // restore the old model
     for (unsigned iparm=0; iparm<model.get_nparam(); iparm++)
@@ -495,7 +497,7 @@ MEAL::LevenbergMarquardt<Grad>::result (Mt& model,
 					     std::vector<std::vector<double> >& curve)
 {
   if (verbose > 2)
-    cerr << "MEAL::LevenbergMarquardt<Grad>::result" << endl;
+    std::cerr << "MEAL::LevenbergMarquardt<Grad>::result" << std::endl;
 
   if (&curve != &null_arg)
     curve = best_alpha;
@@ -553,7 +555,7 @@ float MEAL::LevenbergMarquardt<Grad>::calculate_chisq
  Mt& model)
 {
   if (verbose > 2)
-    cerr << "MEAL::LevenbergMarquardt<Grad>::chisq" << endl;
+    std::cerr << "MEAL::LevenbergMarquardt<Grad>::chisq" << std::endl;
 
   if (alpha.size() != model.get_nparam())
     throw Error (InvalidState, "MEAL::LevenbergMarquardt<Grad>::chisq",
@@ -575,8 +577,8 @@ float MEAL::LevenbergMarquardt<Grad>::calculate_chisq
   for (unsigned ipt=0; ipt < x.size(); ipt++) {
 
     if (verbose > 2)
-      cerr << "MEAL::LevenbergMarquardt<Grad>::chisq lmcoff[" << ipt
-	   << "/" << x.size() << "]" << endl;
+      std::cerr << "MEAL::LevenbergMarquardt<Grad>::chisq lmcoff[" << ipt
+	   << "/" << x.size() << "]" << std::endl;
 
     Chisq += lmcoff (model, x[ipt], y[ipt],
 		     gradient, alpha, beta);
@@ -602,8 +604,8 @@ float MEAL::lmcoff (// input
 			   std::vector<double>& beta)
 {
   if (LevenbergMarquardt<Grad>::verbose > 2)
-    cerr << "MEAL::lmcoff data val=" << data.val
-	 << " var=" << data.var << endl;
+    std::cerr << "MEAL::lmcoff data val=" << data.val
+	 << " var=" << data.var << std::endl;
  
   abscissa.apply();
 
@@ -629,7 +631,7 @@ float MEAL::lmcoff1 (// input
   ElementTraits<Grad> traits;
 
   if (LevenbergMarquardt<Grad>::verbose > 2)
-    cerr << "MEAL::lmcoff1 delta_y=" << delta_y << endl;
+    std::cerr << "MEAL::lmcoff1 delta_y=" << delta_y << std::endl;
 
   Yt w_delta_y = weight.get_weighted_conjugate (delta_y);
 
@@ -653,7 +655,7 @@ float MEAL::lmcoff1 (// input
   float chisq = weight.get_weighted_norm (delta_y);
 
   if (LevenbergMarquardt<Grad>::verbose > 2)
-    cerr << "MEAL::lmcoff1 chisq=" << chisq << endl;
+    std::cerr << "MEAL::lmcoff1 chisq=" << chisq << std::endl;
 
   return chisq;
 }
