@@ -32,6 +32,11 @@ string Pulsar::IntegrationOrder::get_IndexState () const
   return IndexState;
 }
 
+string Pulsar::IntegrationOrder::get_Unit () const
+{
+  return Unit;
+}
+
 Estimate<double> Pulsar::IntegrationOrder::get_Index (unsigned subint) const
 {
   if (subint > indices.size())

@@ -1,8 +1,8 @@
 //-*-C++-*-
                                                                                 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/IntegrationOrder.h,v $
-   $Revision: 1.1 $
-   $Date: 2003/12/07 06:35:49 $
+   $Revision: 1.2 $
+   $Date: 2003/12/30 01:23:01 $
    $Author: ahotan $ */
                                                                                 
 #ifndef __IntegrationOrder_h
@@ -42,6 +42,9 @@ namespace Pulsar {
     //! Return a string describing the type of indexing used
     string get_IndexState () const;
     
+    //! Return a string describing the units of this state
+    string get_Unit () const;
+
     //! Set the custom index value associated with an Integration
     void set_Index (unsigned subint, Estimate<double> i);
     
@@ -64,6 +67,9 @@ namespace Pulsar {
 
     //! An index state identifier string
     string IndexState;
+
+    //! The units (if any) of this state
+    string Unit;
     
     //! Storage for the actual Integration indicies
     vector<Estimate<double> > indices;                                                    
