@@ -1,5 +1,5 @@
 //
-// $Id: pav.C,v 1.24 2003/02/08 16:17:59 pulsar Exp $
+// $Id: pav.C,v 1.25 2003/02/10 00:32:04 pulsar Exp $
 //
 // The Pulsar Archive Viewer
 //
@@ -59,7 +59,7 @@ void usage ()
     " -Y        Display all integrations in a time vs phase plot\n"
     " -A        Position angle spectrum plot\n"
     " -s        SNR frequency spectrum plot\n"
-    " -g        Plot a position angle profile\n"
+    " -g        Plot instrumental phase across the band\n"
        << endl;
 }
 
@@ -135,7 +135,7 @@ int main (int argc, char** argv)
       usage ();
       return 0;
     case 'i':
-      cout << "$Id: pav.C,v 1.24 2003/02/08 16:17:59 pulsar Exp $" << endl;
+      cout << "$Id: pav.C,v 1.25 2003/02/10 00:32:04 pulsar Exp $" << endl;
       return 0;
     case 'm':
       // macro file
@@ -251,7 +251,7 @@ int main (int argc, char** argv)
     plotter.set_colour_map (colour_map);
   }
 
-  // smart pointer
+  //Smart pointer
   Reference::To<Pulsar::Archive> archive;
 
   Error::handle_signals ();
@@ -341,7 +341,7 @@ int main (int argc, char** argv)
       cpgask(1);
       cpgsvp (0.1, 0.9, 0.1, 0.9);
       cpgeras();
-      plotter.pa_freq(archive, !zoomed);
+      plotter.instrument_phase(archive, !zoomed);
       cpgend();
       exit(0);
     }
