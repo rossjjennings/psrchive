@@ -177,7 +177,7 @@ int removedir (const char *path)
       continue;
     }
 
-    if (strlen(entry->d_name) + pathlength > NAME_MAX) {
+    if (strlen(entry->d_name) + pathlength > FILENAME_MAX) {
       fprintf (stderr, "removedir:: error filename too long: %s/%s\n",
 	       path, entry->d_name);
       return -1;
