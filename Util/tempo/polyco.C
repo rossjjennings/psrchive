@@ -166,13 +166,6 @@ const char *polynomial::pulsar () const
   return psrname;
 }
 
-/*
-polyco::polyco(char * psr, MJD m){
-  polyco * p = new polyco(psr,m-3600.0*12.0,m+3600*12.0,960,12,8,7);
-  this
-}
-*/
-
 polyco::polyco(){
   init ();
 }
@@ -185,61 +178,115 @@ void polyco::init()
   nbytes_in_polyco = nbytes_in_tztot = 0;
 }
 
+/* ************************************************************************
+   polyco constructor from user-specified pulsar name (and other catalogue
+                      parameters)
+   ************************************************************************ */
+
 polyco::polyco (const char* psr, const MJD& m1, const MJD& m2, 
 		int ns, int nc, int maxha, int tel)
 {
-  static char errstr[256];
+  static char* errstr = NULL;
   init ();
-  if (Construct (psr, m1, m2, ns, nc, maxha, tel) != 0) {
-    sprintf (errstr, "polyco::polyco - failed to construct\n");
+  if (Construct (psr, NULL, m1, m2, ns, nc, maxha, tel) != 0) {
+    if (errstr) free (errstr);
+    errstr = strdup ("polyco::polyco - failed to construct\n");
     throw (errstr);
   }
 }
 
-int polyco::Construct (const char* psr, const MJD& m1, const MJD& m2, 
+/* ************************************************************************
+   polyco constructor from user-specified .par or .eph file
+   ************************************************************************ */
+
+polyco::polyco (const char* psr, const char* parfile, 
+		const MJD& m1, const MJD& m2, 
+		int ns, int nc, int maxha, int tel)
+{
+  static char* errstr = NULL;
+  init ();
+  if (Construct (psr, parfile, m1, m2, ns, nc, maxha, tel) != 0) {
+    if (errstr) free (errstr);
+    errstr = strdup ("polyco::polyco - failed to construct\n");
+    throw (errstr);
+  }
+}
+
+
+int polyco::Construct (const char* psr, const char* parfile, 
+		       const MJD& m1, const MJD& m2, 
 		       int ns, int nc, int maxha, int tel)
 {
-  char syscom[120];
+  char  syscom[120];
+  char* ephfile = NULL;
+  int   rmeph = 0;
 
-  sprintf(syscom,"polyco %s %lf %lf %d %d %d %d > /dev/null",
-	  psr,m1.in_days(),
-	  m2.in_days(),ns,nc,maxha,tel);
+  if (parfile) {
+    sprintf(syscom,"polyco -f %s %lf %lf %d %d %d %d > /dev/null",
+	    parfile, m1.in_days(), m2.in_days(), ns, nc, maxha, tel);
+
+    ephfile = new char [strlen(parfile) + 1];
+    strcpy (ephfile, parfile);
+  }
+  else {
+    sprintf(syscom,"polyco %s %lf %lf %d %d %d %d > /dev/null",
+	    psr, m1.in_days(), m2.in_days(), ns, nc, maxha, tel);
+
+    ephfile = new char [strlen(psr) + 5];
+    if (psr[0] == 'J')
+      psr++;
+    sprintf (ephfile, "%s.eph",psr);
+    rmeph = 1;
+  }
 
   int status = system(syscom);
-
   if (status != 0) {
     fprintf (stderr, "polyco::polyco - failed %s ???\n", syscom);
+    delete [] ephfile;
     return -1;
   }
-  remove("dates.tmp");
-  remove("tz.in");
 
-  char polyname[120],tztotname[120];
-
-  strcpy  (polyname,  "polyco.dat");
-  if (psr[0] == 'J')
-    psr++;
-  sprintf (tztotname, "%s.eph",psr);
-
-  int retval = file_Construct (polyname, tztotname);
+  int retval = file_Construct ("polyco.dat", ephfile);
   if (retval != 0) {
     fprintf (stderr, "polyco::polyco - failed to construct from %s and %s\n",
-	     polyname, tztotname);
+	     "polyco.dat", ephfile);
   }
-  remove(tztotname);
-  remove("polyco.dat");
-  remove("tztot.dat");
+
+  if (rmeph)
+    remove (ephfile);
+  delete [] ephfile;
+  remove ("polyco.dat");
+  remove ("dates.tmp");
+  remove ("tz.in");
+  remove ("tz.tmp");
+  remove ("tztot.dat");
+  remove ("tempo.lis");
 
   return retval;
 }
 
-polyco::polyco(const char * id){
-  char polyname[FILENAME_MAX], tztotname[FILENAME_MAX];
+/* ************************************************************************
+   polyco constructor from user-specified .polyco and .tztot file
+   ************************************************************************ */
+
+polyco::polyco(const char * id)
+{
+  char* polyname;
+  char* tztotname;
+
+  int length = strlen (id) + 10;
+  polyname  = new char [length];
+  tztotname = new char [length];
 
   sprintf(polyname, "%s.polyco",id); 
   sprintf(tztotname,"%s.tztot", id);
 
-  if (file_Construct (polyname, tztotname) != 0) {
+  int retval = file_Construct (polyname, tztotname);
+
+  delete [] polyname;
+  delete [] tztotname;
+
+  if (retval != 0) {
     char errstr[256];
     sprintf (errstr, "polyco::polyco - failed to construct from %s and %s\n",
 	     polyname, tztotname);
@@ -247,96 +294,101 @@ polyco::polyco(const char * id){
   }
 }
 
+/* ************************************************************************
+   the guts of all constructors listed above
+   ************************************************************************ */
+
 int polyco::file_Construct (const char* polyco_filename, 
 			    const char* tztot_filename)
 {
-   FILE *polly, *tztot;
-   struct stat  file_info;
-   polynomial tst;
-
-   // first, simply count the number of polynomials in the polyco file
-   polly = fopen (polyco_filename, "r");
-   if (polly == NULL)  {
-     fprintf (stderr, "polyco::file_Construct - could not open %s\n",
-	      polyco_filename);
-     perror ("polyco::error");
-     fflush (stderr);
-     return -1;
-   }
-   npollys = 0;
-
-   while (tst.load(polly)==0){
-     npollys++;
-   }
-   pollys = new polynomial * [npollys];
-   assert (pollys != NULL);
-
-   // then, load all of the polynomials in the polyco file
-   if (fseek (polly, 0, SEEK_SET) < 0)  {
-     perror ("polyco::file_Construct - error fseek");
-     fclose(polly);
-     return -1;
-   }
-   for (int i=0;i<npollys;i++) {
-     pollys[i]=new polynomial(); 
-     pollys[i]->load(polly);
-   }
-
-   // then, load the raw file into the_polyco buffer
-   if (stat (polyco_filename, &file_info) < 0)  {
-     perror ("polyco::file_Construct - stat");
-     fclose(polly);
-     return -1;
-   }
-   if (fseek (polly, 0, SEEK_SET) < 0)  {
-     perror ("polyco::file_Construct - error fseek");
-     fclose(polly);
-     return -1;
-   }
-   int count=file_info.st_size;
-   the_polyco = new char [count+1];
-   assert (the_polyco != NULL);
-   fread(the_polyco,count,1,polly);
-   nbytes_in_polyco = count;
-   fclose(polly);
-
-   // then, load the raw tztot file into the_tztot buffer
-   if (stat (tztot_filename, &file_info) < 0)  {
-     fprintf (stderr, "polyco::file_Construct - err stat(%s)",tztot_filename);
-     perror ("");
-     return -1;
-   }
-   count=file_info.st_size;
-   the_tztot = new char [count+1];
-   assert (the_tztot != NULL);
-
-   tztot = fopen (tztot_filename, "r");
-   if (tztot == NULL)  {
-     fprintf (stderr, "polyco::file_Construct - could not open %s\n",
-	      tztot_filename);
-     perror ("polyco::error");
-     return -1;
-   }
-   fread(the_tztot,count,1,tztot);
-   nbytes_in_tztot = count;
-   fclose(tztot);
-
-   return 0;
+  FILE *polly, *tztot;
+  struct stat  file_info;
+  polynomial tst;
+  
+  // first, simply count the number of polynomials in the polyco file
+  polly = fopen (polyco_filename, "r");
+  if (polly == NULL)  {
+    fprintf (stderr, "polyco::file_Construct - could not open %s\n",
+	     polyco_filename);
+    perror ("polyco::error");
+    fflush (stderr);
+    return -1;
+  }
+  npollys = 0;
+  
+  while (tst.load(polly)==0){
+    npollys++;
+  }
+  pollys = new polynomial * [npollys];
+  assert (pollys != NULL);
+  
+  // then, load all of the polynomials in the polyco file
+  if (fseek (polly, 0, SEEK_SET) < 0)  {
+    perror ("polyco::file_Construct - error fseek");
+    fclose(polly);
+    return -1;
+  }
+  for (int i=0;i<npollys;i++) {
+    pollys[i]=new polynomial(); 
+    pollys[i]->load(polly);
+  }
+  
+  // then, load the raw file into the_polyco buffer
+  if (stat (polyco_filename, &file_info) < 0)  {
+    perror ("polyco::file_Construct - stat");
+    fclose(polly);
+    return -1;
+  }
+  if (fseek (polly, 0, SEEK_SET) < 0)  {
+    perror ("polyco::file_Construct - error fseek");
+    fclose(polly);
+    return -1;
+  }
+  int count=file_info.st_size;
+  the_polyco = new char [count+1];
+  assert (the_polyco != NULL);
+  fread(the_polyco,count,1,polly);
+  nbytes_in_polyco = count;
+  fclose(polly);
+  
+  // then, load the raw tztot file into the_tztot buffer
+  if (stat (tztot_filename, &file_info) < 0)  {
+    fprintf (stderr, "polyco::file_Construct - err stat(%s)",tztot_filename);
+    perror ("");
+    return -1;
+  }
+  count=file_info.st_size;
+  the_tztot = new char [count+1];
+  assert (the_tztot != NULL);
+  
+  tztot = fopen (tztot_filename, "r");
+  if (tztot == NULL)  {
+    fprintf (stderr, "polyco::file_Construct - could not open %s\n",
+	     tztot_filename);
+    perror ("polyco::error");
+    return -1;
+  }
+  fread(the_tztot,count,1,tztot);
+  nbytes_in_tztot = count;
+  fclose(tztot);
+  
+  return 0;
 }
 
 
-polyco::~polyco(){
-   if (npollys!=0) {
-     for (int i=0;i<npollys;i++) delete pollys[i];
-     delete [] pollys;
-   }
-   if (nbytes_in_polyco!=0) {
-     delete [] the_polyco;
-   }
-   if (nbytes_in_tztot!=0) {
-     delete [] the_tztot;
-   }
- }
+polyco::~polyco()
+{
+  if (npollys!=0) {
+    for (int i=0;i<npollys;i++) delete pollys[i];
+    delete [] pollys;
+  }
+  if (nbytes_in_polyco!=0) {
+    delete [] the_polyco;
+  }
+  if (nbytes_in_tztot!=0) {
+    delete [] the_tztot;
+  }
+}
 
 int polyco::telid () const
 {
@@ -347,16 +399,6 @@ int polyco::telid () const
   return pollys[0]->telid();
 }
 
-/*
-int polyco::fprintf(FILE* iof)
-{
-  fprintf (iof, "polyco::print\n");
-  fprintf (iof, "        total polynomials = %d\n",npollys);
-  for (int i=0; i<
-
-
-}
-*/
 
 /*
  * The reference frequency for polyco::phase is obtained from the tzpar
