@@ -1,0 +1,57 @@
+#ifndef UTC_H
+#define UTC_H
+
+#include "time.h"
+
+/* #define UTC_DEBUG */
+
+/* ******************
+   UTC time structure - a subset of 'struct tm' used when you don't know
+   or want to calculate neither the day of month nor month of year.
+   ****************** */
+typedef struct {
+   int tm_sec;
+   int tm_min;
+   int tm_hour;
+   int tm_yday;
+   int tm_year;
+} utc_t;
+
+#define UTC_INIT {0,0,0,0,0}
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+int    str2utc    (utc_t *time, const char* str);
+char*  utc2str    (char* str, utc_t time, const char* fmt);
+char*  utcstrfill (char* str, utc_t time, int fill_chars);
+int    utc_diff   (utc_t time1, utc_t time2);
+int    utc_inc    (utc_t *time, int seconds);
+int    utc_dec    (utc_t *time, int seconds);
+
+/* function to fill the fields of a C 'struct tm' - replaces str2cal */
+int    str2tm (struct tm* time, const char* str);
+/* cal2str has been removed - users should use std C 'strftime()' */
+/*
+  char*  cal2str    (char* str, cal_t date, const char* format);
+  char*  calstrfill (char* str, cal_t date, int fill_chars);
+ */
+
+int tm2utc (utc_t *time, struct tm caltime);
+int utc2tm (struct tm *caltim, utc_t time);
+
+int utc_f2LST (double* lst, utc_t timeutc, double fracsec, float longitude);
+int utc2LST (double* lst, utc_t timeutc, float east_longitude);
+
+
+#ifdef __cplusplus
+}
+#endif
+
+#define UTC_LEAPYEAR(year)   ( ((year)%4 == 0) && \
+			       (((year)%100 != 0) || ((year)%400 == 0)) )
+#define UTC_JULIANDAYS(year) ( 365 + ((UTC_LEAPYEAR(year))?1:0) )
+
+#endif
+
