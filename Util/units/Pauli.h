@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Pauli.h,v $
-   $Revision: 1.7 $
-   $Date: 2003/02/24 17:59:54 $
+   $Revision: 1.8 $
+   $Date: 2003/02/27 14:21:08 $
    $Author: straten $ */
 
 #ifndef __Pauli_H
@@ -38,6 +38,16 @@ const Quaternion<complex<T>, Hermitian> convert (const Jones<T>& j)
       T(0.5) * ci (j.j12 - j.j21) );
 }
 
+// convert Jones matrix to Hermitian Biquaternion
+template<typename T>
+const Quaternion<complex<T>, Unitary> unitary (const Jones<T>& j)
+{
+  return Quaternion<complex<T>, Unitary>
+    ( T(0.5) *     (j.j11 + j.j22),
+      T(-0.5) * ci (j.j11 - j.j22),
+      T(-0.5) * ci (j.j12 + j.j21),
+      T(0.5) *     (j.j12 - j.j21) );
+}
 
 // convert Jones matrix to Hermitian and Unitary Quaternion
 template<typename T>
@@ -53,6 +63,8 @@ void polar (complex<T>& d, Quaternion<T, Hermitian>& h,
 
   // take the hermitian component out of j
   j = inv(convert(h)) * j;
+
+  u = real ( unitary (j) );
 
   u.s0 = 0.5 * (j.j11 + j.j22).real();
   u.s1 = 0.5 * (j.j11 - j.j22).imag();
