@@ -106,8 +106,12 @@ void Pulsar::TimerArchive::copy (const Archive& archive,
   if (!tarchive)
     return;
 
+  unsigned good_nsubint = get_nsubint();
+
   if (verbose) cerr << "Pulsar::TimerArchive::copy copying headers " << endl;
   hdr = tarchive->hdr;
+
+  set_nsubint( good_nsubint );
 
   if (verbose)
     cerr << "TimerArchive::copy check validity" << endl;
