@@ -312,6 +312,58 @@ namespace TextInterface {
 
   };
 
+  //! Abstract base class for applying a text interface to multiple elements
+  /*! Derived classes need only define the extract_element and get_nelement
+    methods. */
+  template<class C,class E>
+  class ElementGetSet : public ClassGetSet<C> {
+
+  public:
+
+    //! Construct from name and component interface
+    ElementGetSet (const std::string& n, ClassGetSet<E>* part) 
+      { name = n; element_interface = part; }
+
+    //! Get the value(s) of the attribute
+    std::string get_value (const std::string& name) const;
+
+    //! Set the value(s) of the attribute
+    void set_value (const std::string& name, const std::string& value);
+
+    //! Get the number of attributes
+    unsigned get_nattribute () const
+      { return element_interface->get_nattribute(); }
+
+    //! Get the name of the attribute
+    std::string get_name (unsigned i) const
+      { return element_interface->get_name(i); }
+
+    //! Get the description of the attribute
+    std::string get_description (unsigned i) const
+      { return element_interface->get_description(i); }
+
+  protected:
+
+    //! Return a pointer to the element
+    virtual E* extract_element (C*, unsigned index) = 0;
+
+    //! Return the number of elements
+    virtual unsigned get_nelement () const = 0;
+
+    //! The interface with which this interfaces
+    Reference::To< ClassGetSet<E> > element_interface;
+
+    // Helper function
+    std::string get_indeces (std::vector<unsigned>&, const std::string& name);
+
+  };
+
+  //! Convert a parameter name into a range of indeces
+  void parse_indeces (std::vector<unsigned>& indeces, std::string& name);
+
+  //! Verbosity flag
+  extern bool verbose;
+
 }
 
 template<class C>
@@ -427,7 +479,59 @@ void TextInterface::CompositeGetSet<C>::set_instance (C* c)
 
 
 
+template<class C, class E>
+std::string
+TextInterface::ElementGetSet<C,E>::get_value (const std::string& name) const
+{
+  std::vector<unsigned> ind;
+  std::string sub_name = get_indeces (ind, name);
+  std::ostringstream ost;
 
+  for (unsigned i=0; i<ind.size(); i++) {
+    element_interface->set_instance( extract_element(this->instance, ind[i]) );
+    ost << "[" << i << "]:" << element_interface->get_value(sub_name);
+  }
+
+  return ost.str();
+}
+
+template<class C, class E>
+void TextInterface::ElementGetSet<C,E>::set_value (const std::string& name,
+						   const std::string& value)
+{
+  std::vector<unsigned> ind;
+  std::string sub_name = get_indeces (ind, name);
+
+  for (unsigned i=0; i<ind.size(); i++) {
+    element_interface->set_instance( extract_element(this->instance, ind[i]) );
+    element_interface->set_value(sub_name, value);
+  }
+}
+
+template<class C, class E>
+std::string
+TextInterface::ElementGetSet<C,E>::get_indeces (vector<unsigned>& indeces,
+						const string& name)
+{
+  std::string sub_name = name;
+  parse_indeces (indeces, sub_name);
+
+  unsigned n = this->get_nelement();
+
+  if (indeces.size() == 0) {
+    indeces.resize (n);
+    for (unsigned i=0; i<n; i++)
+      indeces[i] = i;
+  }
+  else {
+    for (unsigned i=0; i < indeces.size(); i++)
+      if (indeces[i] >= n)
+	throw Error (InvalidRange, "TextInterface::ElementGetSet::get_indeces",
+		     "%d >= %d", indeces[i], n);
+  }
+
+  return sub_name;
+}
 
 
 #include <string.h>
