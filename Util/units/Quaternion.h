@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Quaternion.h,v $
-   $Revision: 1.18 $
-   $Date: 2004/04/23 13:27:30 $
+   $Revision: 1.19 $
+   $Date: 2004/04/26 18:51:42 $
    $Author: straten $ */
 
 #ifndef __Quaternion_H
@@ -21,7 +21,7 @@ public:
   T s0,s1,s2,s3;
 
   //! Null constructor
-  Quaternion () { s0=s1=s2=s3=0; }
+  Quaternion () { s0=s1=s2=s3=0.0; }
 
   //! Construct from T
   Quaternion (T s0_, T s1_, T s2_, T s3_)
@@ -175,7 +175,7 @@ complex<T> ci (const complex<T>& c)
 template<typename T>
 complex<T> ci (const T& real)
 {
-  return complex<T> (0, real);
+  return complex<T> (0.0, real);
 }
 
 //! Return the conjugate of a real number
