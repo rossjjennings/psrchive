@@ -128,7 +128,9 @@ void polyco::load (fitsfile* fptr, long row)
     throw_str ("polynomial::load REF_MJD vector repeat count=%ld != NPBLK=%d",
 	       repeat, npoly);
 
-  for (int ipoly=0; ipoly<npoly; ipoly++) {
+  int ipoly = 0;
+
+  for (ipoly=0; ipoly<npoly; ipoly++) {
     double temp=0;
     firstelem = ipoly + 1;    
     fits_read_col (fptr, TDOUBLE, colnum, row, firstelem, onelement,
@@ -149,7 +151,7 @@ void polyco::load (fitsfile* fptr, long row)
     throw_str ("polynomial::load REF_PHS vector repeat count=%ld != NPBLK=%d",
 	       repeat, npoly);
   
-  for (int ipoly=0; ipoly<npoly; ipoly++) {
+  for (ipoly=0; ipoly<npoly; ipoly++) {
     double temp=0;
     firstelem = ipoly + 1;    
     fits_read_col (fptr, TDOUBLE, colnum, row, firstelem, onelement,
@@ -172,7 +174,7 @@ void polyco::load (fitsfile* fptr, long row)
 	       " vector repeat count=%ld != NCOEF*NPBLK=%d",
 	       repeat, ncoef * npoly);
 
-  for (int ipoly=0; ipoly<npoly; ipoly++) {
+  for (ipoly=0; ipoly<npoly; ipoly++) {
 
     pollys[ipoly].coefs.resize(ncoef);
 
@@ -183,7 +185,7 @@ void polyco::load (fitsfile* fptr, long row)
 
   }
 
-  for (int ipoly=0; ipoly<npoly; ipoly++) {
+  for (ipoly=0; ipoly<npoly; ipoly++) {
     pollys[ipoly].telescope = site[0];
     pollys[ipoly].freq = ref_freq;
     pollys[ipoly].nspan_mins = (double) nspan;
