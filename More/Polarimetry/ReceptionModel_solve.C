@@ -12,12 +12,6 @@ using namespace std;
 //
 // ///////////////////////////////////////////////////////////////////////////
 
-// enable matrix partial derivatives in LevenbergMarquardt template methods
-double cast_double (const Jones<double>& j)
-{
-  return trace(j).real();
-}
-
 // template specialization of Numerical::lmcoff
 float lmcoff (// input
 	      Calibration::ReceptionModel& model,
