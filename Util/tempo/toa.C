@@ -274,9 +274,12 @@ int Tempo::toa::Psrclock_unload (char* outstring) const
   else
     outstring[0]=' ';
 
-  sprintf (outstring+1, "%s    ", auxinfo.c_str());
+  sprintf (outstring+1, "%s", auxinfo.c_str());
 
-  return parkes_out (outstring + 1 + auxinfo.length() + 3);
+  for (int ic=auxinfo.length()+1; ic<26; ic++)
+    outstring [ic] = ' ';
+
+  return parkes_out (outstring + 25);
 }
 
 int Tempo::toa::Psrclock_unload (FILE* outstream) const
