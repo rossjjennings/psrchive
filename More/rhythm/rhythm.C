@@ -965,8 +965,8 @@ std::vector<double> Rhythm::give_me_data (toaPlot::AxisQuantity q)
 	if ( progress.wasCancelled() )
 	  break;
 	
-	if (toas[i].get_format() == Tempo::toa::Command) {
-	  retval.push_back(0.0);
+	if (toas[i].get_format() == Tempo::toa::Command ||
+	    toas[i].get_format() == Tempo::toa::Deleted) {
 	  continue;
 	}
 	
@@ -1086,7 +1086,7 @@ std::vector<double> Rhythm::give_me_data (toaPlot::AxisQuantity q)
 	continue;
       }
       
-      if (toas[i].get_StoN() >= -999.9) {
+      if (toas[i].get_StoN() != Tempo::toa::UNSET) {
 	retval.push_back(toas[i].get_StoN());
 	continue;
       }
@@ -1143,7 +1143,7 @@ std::vector<double> Rhythm::give_me_data (toaPlot::AxisQuantity q)
 	continue;
       }
       
-      if (toas[i].get_bw() != 0.0) {
+      if (toas[i].get_bw() != Tempo::toa::UNSET) {
 	retval.push_back(toas[i].get_bw());
 	continue;
       }
@@ -1192,7 +1192,7 @@ std::vector<double> Rhythm::give_me_data (toaPlot::AxisQuantity q)
 	continue;
       }
       
-      if (toas[i].get_dm() > 0.0) {
+      if (toas[i].get_dm() != Tempo::toa::UNSET) {
 	retval.push_back(toas[i].get_dm());
 	continue;
       }
@@ -1241,7 +1241,7 @@ std::vector<double> Rhythm::give_me_data (toaPlot::AxisQuantity q)
 	continue;
       }
       
-      if (toas[i].get_dur() > 0.0) {
+      if (toas[i].get_dur() != Tempo::toa::UNSET) {
 	retval.push_back(toas[i].get_dur());
 	continue;
       }
@@ -1554,10 +1554,6 @@ void Rhythm::freqsort ()
 	toas[i].ci = 9;
       else
 	toas[i].ci = 10;
-    }
-    else {
-      footer->setText("No frequency information available!");
-      return;
     }
   }
 }
