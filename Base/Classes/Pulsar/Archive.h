@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Archive.h,v $
-   $Revision: 1.94 $
-   $Date: 2003/12/10 16:00:37 $
+   $Revision: 1.95 $
+   $Date: 2003/12/22 14:02:21 $
    $Author: straten $ */
 
 /*! \mainpage 
@@ -357,32 +357,26 @@ namespace Pulsar {
     //
     // //////////////////////////////////////////////////////////////////
 
-    //! null constructor
+    //! Default constructor
     Archive ();
 
-    //! copy constructor
+    //! Copy constructor
     Archive (const Archive& archive);
     
-    //! destructor
+    //! Destructor
     virtual ~Archive ();
 
+    //! Operator =
+    Archive& operator = (const Archive& a);
+
+    //! Copy all of the base class attributes and Integration data
+    void copy (const Archive& archive);
+
+    //! Copy all of the base class attributes and the selected Integration data
+    virtual void copy (const Archive& archive, const vector<unsigned>& ints);
+
     //! Return a null-constructed instance of the derived class
-    static Archive* new_Archive (const char* class_name);
-
-    //! Convenience interface to new_Archive (const char*)
-    static Archive* new_Archive (const string& class_name)
-    {
-      return new_Archive (class_name.c_str());
-    }
-
-    //! operator =
-    virtual Archive& operator = (const Archive& a) { copy (a); return *this; }
-
-    virtual void copy (const Archive& archive);
-
-    //! Copy the profiles and attributes through set_ get_ methods
-    virtual void copy (const Archive& archive,
-		       const vector<unsigned>& only_subints);
+    static Archive* new_Archive (const string class_name);
 
 
     // //////////////////////////////////////////////////////////////////
@@ -655,10 +649,10 @@ namespace Pulsar {
     //
     // //////////////////////////////////////////////////////////////////
 
-    //! Return a pointer to a new, copy constructed instance equal to this
+    //! Return a pointer to a new copy constructed instance equal to this
     virtual Archive* clone () const = 0;
 
-    //! Return a pointer to a new copy containing only selected subints
+    //! Return a pointer to a new extraction constructed instance equal to this
     virtual Archive* extract (const vector<unsigned>& subints) const = 0;
 
     //! Get the number of pulsar phase bins used
