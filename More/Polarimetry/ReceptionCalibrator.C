@@ -13,6 +13,8 @@
 
 #include "Calibration/SingleAxisPolynomial.h"
 #include "Calibration/Polynomial.h"
+#include "Calibration/ScalarMath.h"
+#include "Calibration/ScalarValue.h"
 
 #include <algorithm>
 #include <assert.h>
@@ -471,24 +473,37 @@ Pulsar::ReceptionCalibrator::add_data(vector<Calibration::MeasuredState>& bins,
   Stokes<float> value = data->get_Stokes ( ichan, ibin );
 
   // convert the value into an estimate, using the variance supplied
-  Stokes< Estimate<float> > stokes_estimate;
+  Stokes< Reference::To<Calibration::Scalar> > stokes;
+  Stokes< Estimate<double> > stokes_estimate;
 
-  for (unsigned ipol=0; ipol<stokes_estimate.size(); ipol++) {
+  for (unsigned ipol=0; ipol<stokes.size(); ipol++) {
+
     stokes_estimate[ipol].val = value[ipol];
     stokes_estimate[ipol].var = variance[ipol];
+
+    stokes[ipol] = new Calibration::ScalarValue (stokes_estimate[ipol]);
+
   }
 
-  Estimate<float> invariant = det(stokes_estimate);
+  Reference::To<Calibration::Scalar> invariant = det( stokes );
+  Estimate<double> invariant_estimate;
 
-  if ( invariant.val < sqrt(invariant.var) )  {
+  invariant->evaluate( invariant_estimate );
+
+  if ( invariant_estimate.val < sqrt(invariant_estimate.var) )  {
     cerr << "BAD data ichan=" << ichan << " ibin=" << ibin
          << "\n   stokes=" << stokes_estimate
-         << "\n   inv=" << invariant << endl;
+         << "\n   inv=" << invariant_estimate << endl;
     return;
   }
 
-  // normalize the estimate by square root of the invariant interval
-  stokes_estimate /= sqrt(invariant);
+  invariant = sqrt( invariant );
+
+  Reference::To<Calibration::Scalar> normalized;
+  for (unsigned ipol=0; ipol<stokes.size(); ipol++) {
+    normalized = stokes[ipol] / invariant;
+    normalized->evaluate( stokes_estimate[ipol] );
+  }
 
   try {
 
