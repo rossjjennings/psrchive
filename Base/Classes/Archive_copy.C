@@ -31,22 +31,29 @@ void Pulsar::Archive::copy (const Archive& archive,
 
   ephemeris = archive.ephemeris;
   model = archive.model;
-
+  
   // set virtual attributes
+
+  set_nbin( archive.get_nbin() );
+  set_nchan( archive.get_nchan() );
+  set_npol( archive.get_npol() );
   set_telescope_code( archive.get_telescope_code() );
   set_basis( archive.get_basis() );
+  set_state( archive.get_state() );
   set_type( archive.get_type() );
   set_source( archive.get_source() );
   set_receiver( archive.get_receiver() );
   set_backend( archive.get_backend() );
-
+  set_coordinates( archive.get_coordinates() );
   set_bandwidth( archive.get_bandwidth() );
   set_centre_frequency( archive.get_centre_frequency() );
-  set_state( archive.get_state() );
   set_dispersion_measure( archive.get_dispersion_measure() );
-
+  
   set_feedangle_corrected( archive.get_feedangle_corrected() );
   set_iono_rm_corrected( archive.get_iono_rm_corrected() );
   set_ism_rm_corrected( archive.get_ism_rm_corrected() );
   set_parallactic_corrected( archive.get_parallactic_corrected() );
+  set_dedispersed( archive.get_dedispersed() );
+  set_poln_calibrated( archive.get_poln_calibrated() );
+  set_flux_calibrated( archive.get_flux_calibrated() );
 }
