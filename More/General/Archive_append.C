@@ -8,6 +8,8 @@
 
 bool Pulsar::Archive::append_chronological = false;
 
+bool Pulsar::Archive::append_must_match = true;
+
 /*!
   Maximum in seconds
 */
@@ -28,9 +30,11 @@ void Pulsar::Archive::append (const Archive* arch)
   if (arch->get_nsubint() == 0)
     return;
 
-  string reason;
-  if (!mixable (arch, reason))
-    throw Error (InvalidState, "Archive::append", reason);
+  if (append_must_match) {
+    string reason;
+    if (!mixable (arch, reason))
+      throw Error (InvalidState, "Archive::append", reason);
+  }
 
   if (append_chronological && get_nsubint() > 0) {
 

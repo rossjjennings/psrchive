@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Archive.h,v $
-   $Revision: 1.67 $
-   $Date: 2003/04/19 20:25:15 $
+   $Revision: 1.68 $
+   $Date: 2003/04/23 12:14:45 $
    $Author: straten $ */
 
 /*! \mainpage 
@@ -282,8 +282,11 @@ namespace Pulsar {
     };
 
 
-    //! Flag that Archive::append should enforce chronological order
+    //! Archive::append should enforce chronological order
     static bool append_chronological;
+
+    //! Archive::append should throw exception if Archive::match fails
+    static bool append_must_match;
 
     //! Amount by which integration intervals may overlap in Archive::append
     static double append_max_overlap;
