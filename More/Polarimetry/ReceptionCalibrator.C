@@ -584,9 +584,8 @@ void Pulsar::ReceptionCalibrator::add_Calibrator (const ArtificialCalibrator* p)
       flux_calibrator_estimate.source[ichan].set_stokes ( flux_cal_state );
 
       if (measure_cal_V) {
-	// Stokes I of Hydra may vary
-	for (unsigned istokes=1; istokes<4; istokes++)
-	  flux_calibrator_estimate.source[ichan].set_infit (istokes, false);
+	// Stokes V of Hydra may not vary
+	flux_calibrator_estimate.source[ichan].set_infit (3, false);
 	
 	// Stokes V of the calibrator may vary!
 	calibrator_estimate.source[ichan].set_infit (3, true);
