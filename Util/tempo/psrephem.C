@@ -407,8 +407,11 @@ double psrephem::ecc() const
 
 double psrephem::t0() const
 {
-  if (tempo11 && parmStatus[EPH_T0])
-    return value_double[EPH_T0];
+  if (tempo11 && parmStatus[EPH_T0]) {
+    MJD current_epoch = MJD (value_integer[EPH_T0],
+			     value_double [EPH_T0]);
+    return (current_epoch).in_days();
+  }
   
   throw Error(InvalidParam, "psrephem::t0",
 	      "Error determining pulsar T0");
