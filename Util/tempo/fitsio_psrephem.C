@@ -9,9 +9,9 @@
 #include "ephio.h"
 #include "genutil.h"
 #include "coord.h"
+#include "fitsutil.h"
 
-// some utility functions
-const char* fits_datatype_str (int datatype);
+// utility functions defined at the end of the file
 void datatype_match (int typecode, int ephind);
 
 // ///////////////////////////////////////////////////////////////////////
@@ -113,7 +113,7 @@ void psrephem::load (fitsfile* fptr, long row)
 
   }
 
-  char* strval = new char [maxstrlen];
+  char* strval = new char [maxstrlen+1];
 
   for (icol=0; icol<ncols && status==0; icol++) {
 
@@ -211,48 +211,6 @@ void psrephem::load (fitsfile* fptr, long row)
     cerr << "psrephem::load PSRFITS read " << icol <<"/" << ncols 
 	 << " elements" << endl;
 
-}
-
-
-const char* fits_datatype_str (int datatype)
-{
-  switch (datatype) {
-
-  case TBIT:
-    return "bit 'X'";
-  case TBYTE:
-    return "byte 'B'";
-  case TLOGICAL:
-    return "logical 'L'";
-  case TSTRING:
-    return "string 'A'";
-  case TSHORT:
-    return "short 'I'";
-  case TINT32BIT:
-    return "32-bit int 'J'";
-    //  case TLONG:
-    //  return "long";
-  case TFLOAT:
-    return "float 'E'";
-  case TDOUBLE:
-    return "double 'D'";
-  case TCOMPLEX:
-    return "complex 'C'";
-  case TDBLCOMPLEX:
-    return "double complex 'M'";
-  case TINT:
-    return "int";
-  case TUINT:
-    return "unsigned int";
-  case TUSHORT:
-    return "unsigned short";
-  case TULONG:
-    return "unsigned long";
-  default:
-    return "unknown";
-  }
-
-  return "unknown";
 }
 
 void datatype_match (int typecode, int ephind)

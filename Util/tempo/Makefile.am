@@ -27,8 +27,8 @@ ifeq (${PSRFITS},yes)
 
 LIB_SRCS += fitsio.C
 
-TESTS += test_fitsio.C
-test_fitsio.LDFLAGS := $(LDFLAGS) $(LTIMES) $(LCFITSIO)
+TESTS += test_psrephem_fitsio.C
+test_psrephem_fitsio.LDFLAGS := $(LDFLAGS) $(LTIMES) $(LCFITSIO)
 
 endif
 # ######################################################################
