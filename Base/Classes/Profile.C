@@ -267,7 +267,7 @@ void Pulsar::Profile::fold (int nfold)
 //
 // Pulsar::Profile::bscrunch
 //
-void Pulsar::Profile::bscrunch (int nscrunch) try
+void Pulsar::Profile::bscrunch (int nscrunch) { try
 {
   if (nscrunch < 1)
     throw Error (InvalidParam, 0, "nscrunch=%d", nscrunch);
@@ -291,6 +291,7 @@ void Pulsar::Profile::bscrunch (int nscrunch) try
 catch (Error& error) {
   throw error += "Profile::bscrunch";
 }
+} // end function
 
 /////////////////////////////////////////////////////////////////////////////
 //
