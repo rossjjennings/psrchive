@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ReceptionCalibrator.h,v $
-   $Revision: 1.55 $
-   $Date: 2004/01/02 18:11:05 $
+   $Revision: 1.56 $
+   $Date: 2004/01/06 19:03:57 $
    $Author: straten $ */
 
 #ifndef __Pulsar_ReceptionCalibrator_H
@@ -60,6 +60,8 @@ namespace Pulsar {
 
     //! The index of the source in the model
     unsigned input_index;
+
+    unsigned get_input_index() const { return input_index; }
 
   };
 
