@@ -21,8 +21,12 @@ namespace Pulsar {
   private:
     
     // Set the weights array in a Pulsar::Integration to zap strong birdies
-    void zap_chans (Pulsar::Integration* integ);
+    vector<float> zap_mask (Pulsar::Integration* integ);
     
+    // Apply a zap mask to an Integration
+    void apply_mask (Pulsar::Integration* integ, vector<float> mask);
+    
+    // Initialise the class
     void init ();
     
   };
