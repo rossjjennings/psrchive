@@ -7,10 +7,12 @@ void Pulsar::Archive::transform (const Jones<float>& jones)
 {
   try {
 
-    for (unsigned isub=0; isub < get_nsubint(); isub++)
+    unsigned nsub = get_nsubint ();
+
+    for (unsigned isub=0; isub < nsub; isub++)
       get_Integration (isub) -> transform (jones);
 
-    if (get_nsubint() > 0)
+    if (nsub > 0)
       set_state (get_Integration(0)->get_state());
 
   }
@@ -24,10 +26,12 @@ void Pulsar::Archive::transform (const vector<Jones<float> >& jones)
 {
   try {
 
-    for (unsigned isub=0; isub < get_nsubint(); isub++)
+    unsigned nsub = get_nsubint ();
+
+    for (unsigned isub=0; isub < nsub; isub++)
       get_Integration (isub) -> transform (jones);
     
-    if (get_nsubint() > 0)
+    if (nsub > 0)
       set_state (get_Integration(0)->get_state());
     
   }
@@ -41,10 +45,12 @@ void Pulsar::Archive::transform (const vector<vector<Jones<float> > >& jones)
 {
   try {
 
-    for (unsigned isub=0; isub < get_nsubint(); isub++)
+    unsigned nsub = get_nsubint ();
+
+    for (unsigned isub=0; isub < nsub; isub++)
       get_Integration (isub) -> transform (jones[isub]);
     
-    if (get_nsubint() > 0)
+    if (nsub > 0)
       set_state (get_Integration(0)->get_state());
 
   }
