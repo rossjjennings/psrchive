@@ -142,7 +142,7 @@ void Pulsar::TimerArchive::pack (const Receiver* receiver)
   if (verbose == 3)
     cerr << "Pulsar::TimerArchive::pack Receiver" << endl;
 
-  if (verbose && receiver->get_name().length()+1 >= RCVR_ID_STRLEN)
+  if (verbose && receiver->get_name().length() >= RCVR_ID_STRLEN)
     cerr << "Pulsar::TimerArchive::pack Receiver WARNING"
       " truncating receiver name " << receiver->get_name() <<
       " to " << RCVR_ID_STRLEN-1 << " characters" << endl;
