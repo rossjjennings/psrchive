@@ -83,6 +83,10 @@ int main ()
   if (backup != calculated)
     return -1;
 
+  printf ("\n**********************************************************\n");
+  printf ("                  TM operations test completed ok.");
+  printf ("\n**********************************************************\n");
+
   return 0;
 }
 

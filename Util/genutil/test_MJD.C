@@ -34,6 +34,9 @@ int main ()
 	     tempstr1, tempstr2);
     return -1;
   }
+  printf ("\n**********************************************************\n");
+  printf ("              MJD to TM operations test completed ok.");
+  printf ("\n**********************************************************\n");
 
   return 0;
 }
