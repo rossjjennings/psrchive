@@ -1,3 +1,8 @@
+//-*-C++-*-
+
+#ifndef __FITSError_h
+#define __FITSError_h
+
 #include "Error.h"
 
 class FITSError : public Error {
@@ -15,3 +20,4 @@ class FITSError : public Error {
 
 };
 
+#endif
