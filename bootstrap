@@ -1,20 +1,10 @@
 #! /bin/sh
 
-PREFIX=$PWD/../$LOGIN_ARCH
-
-if test x$1 != x; then
-  PREFIX=$1
-fi
-
-echo Bootstrapping with prefix=$PREFIX
-
 set -x
 aclocal -I config
 libtoolize --force --copy
 aclocal -I config
 autoheader
-automake --add-missing --copy
+automake --add-missing --copy -Woverride
 autoconf
-
-./configure --prefix=$PREFIX
 
