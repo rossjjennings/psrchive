@@ -1,15 +1,15 @@
-#include <stdio.h>
-#include <stdlib.h>
 #include <assert.h>
 
 #define MPI
-#include "mpi.h"
 #include "polyco.h"
 
 int polynomial::mpiPack_size (MPI_Comm comm)
 {
   int total_size = 0;
   int temp_size = 0;
+
+fprintf (stderr, "Inside polynomial::mpiPack_size\n");
+fflush (stdout);
 
   MPI_Pack_size (9,  MPI_CHAR,  comm, &temp_size);  // psrname
   total_size += temp_size;
@@ -92,59 +92,14 @@ int polynomial::mpiUnpack (void* inbuf, int insize, int* position,
   return MPI_SUCCESS;
 }
 
-int polynomial::mpiBcast (int root, MPI_Comm comm)
-{
-  static void* bcastbuf = NULL;
-  static int   bufsize  = 0;
-
-  int  self = 0;
-  int  reqdbufsize = 0;
-  int  mpi_err;
-  char mpi_errstr [MPI_MAX_ERROR_STRING];
-
-  MPI_Comm_rank (comm, &self);
-
-  if (self == root) {
-    reqdbufsize = mpiPack_size (comm);
-  }
-  mpi_err = MPI_Bcast (&reqdbufsize, 1, MPI_INT, root, comm);
-  if (mpi_err != MPI_SUCCESS) {
-    int len;
-    MPI_Error_string (mpi_err, mpi_errstr, &len);
-    fprintf (stderr, "observation::mpiBcast: err MPI_Bcast %s\n",
-             mpi_errstr);
-    return mpi_err;
-  }
-
-  if (bufsize < reqdbufsize) {
-    if (bcastbuf) free (bcastbuf);
-    bcastbuf = malloc (reqdbufsize);
-    assert (bcastbuf != NULL);
-    bufsize = reqdbufsize;
-  }
-
-  int position = 0;
-  if (self == root) {  
-    mpiPack (bcastbuf, reqdbufsize, &position, comm);
-  }
-  mpi_err = MPI_Bcast (bcastbuf, reqdbufsize, MPI_PACKED, root, comm);
-  if (mpi_err != MPI_SUCCESS) {
-    int len;
-    MPI_Error_string (mpi_err, mpi_errstr, &len);
-    fprintf (stderr, "observation::mpiBcast: err MPI_Bcast %s\n",
-             mpi_errstr);
-    return mpi_err;
-  }
-  if (self != root) {
-    mpiUnpack (bcastbuf, reqdbufsize, &position, comm);
-  }
-  return 0;
-}
 
 int polyco::mpiPack_size (MPI_Comm comm)
 {
   int total_size = 0;
   int temp_size = 0;
+
+fprintf (stderr, "Inside polyco::mpiPack_size\n");
+fflush (stdout);
 
   MPI_Pack_size (1,  MPI_INT,  comm, &temp_size);  // npollys
   total_size += temp_size;
@@ -190,53 +145,4 @@ int polyco::mpiUnpack (void* inbuf, int insize, int* position,
     pollys[i]->mpiUnpack (inbuf, insize, position, comm);
   }
   return MPI_SUCCESS;
-}
-
-int polyco::mpiBcast (int root, MPI_Comm comm)
-{
-  static void* bcastbuf = NULL;
-  static int   bufsize  = 0;
-
-  int  self = 0;
-  int  reqdbufsize = 0;
-  int  mpi_err;
-  char mpi_errstr [MPI_MAX_ERROR_STRING];
-
-  MPI_Comm_rank (comm, &self);
-
-  if (self == root) {
-    reqdbufsize = mpiPack_size (comm);
-  }
-  mpi_err = MPI_Bcast (&reqdbufsize, 1, MPI_INT, root, comm);
-  if (mpi_err != MPI_SUCCESS) {
-    int len;
-    MPI_Error_string (mpi_err, mpi_errstr, &len);
-    fprintf (stderr, "observation::mpiBcast: err MPI_Bcast %s\n",
-             mpi_errstr);
-    return mpi_err;
-  }
-
-  if (bufsize < reqdbufsize) {
-    if (bcastbuf) free (bcastbuf);
-    bcastbuf = malloc (reqdbufsize);
-    assert (bcastbuf != NULL);
-    bufsize = reqdbufsize;
-  }
-
-  int position = 0;
-  if (self == root) {  
-    mpiPack (bcastbuf, reqdbufsize, &position, comm);
-  }
-  mpi_err = MPI_Bcast (bcastbuf, reqdbufsize, MPI_PACKED, root, comm);
-  if (mpi_err != MPI_SUCCESS) {
-    int len;
-    MPI_Error_string (mpi_err, mpi_errstr, &len);
-    fprintf (stderr, "observation::mpiBcast: err MPI_Bcast %s\n",
-             mpi_errstr);
-    return mpi_err;
-  }
-  if (self != root) {
-    mpiUnpack (bcastbuf, reqdbufsize, &position, comm);
-  }
-  return 0;
 }
