@@ -1,5 +1,5 @@
-#include "Pulsar/ArchiveTUI.h"
-#include "Pulsar/ReceiverTUI.h"
+#include "Pulsar/ArchiveTI.h"
+#include "Pulsar/ReceiverTI.h"
 
 #include "dirutil.h"
 #include "string_utils.h"
@@ -46,9 +46,9 @@ int main (int argc, char** argv) try {
 
   vector <string> commands;
 
-  Pulsar::ArchiveTUI tui;
+  Pulsar::ArchiveTI tui;
 
-  Pulsar::ReceiverTUI receiver_tui;
+  Pulsar::ReceiverTI receiver_tui;
   tui.import( "rcvr", &receiver_tui );
 
   bool edit = false;
