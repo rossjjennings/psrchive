@@ -7,7 +7,7 @@ COMMENT   Astrophysics Supplement Series v44/p363, v44/p371, v73/p359, v73/p365.
 COMMENT   Contact the NASA Science Office of Standards and Technology for the
 COMMENT   FITS Definition document #100 and other FITS information.
 COMMENT
-HDRVER  = '1.12            '   / Header version 
+HDRVER  = '1.14            '   / Header version 
 DATE    = '                '   / File creation date (YYYY-MM-DDThh:mm:ss UTC)
 OBSERVER= '                '   / Observer name(s)
 PROJID  = '                '   / Project name
@@ -46,6 +46,13 @@ STT_SMJD= *                    / [s] Start time (sec past UTC 00h) (J)
 STT_OFFS= *                    / [s] Start time offset (D)   
 STT_LST = *                    / [s] Start LST (D)
 END
+#
+###############################################################################
+#
+# Processing History Binary Table Extension
+#
+###############################################################################
+#
 XTENSION= 'BINTABLE'           / ***** Processing history *****
 BITPIX  =                    8 / N/A
 NAXIS   =                    2 / 2-dimensional binary table
@@ -95,6 +102,13 @@ TFORM17 = '32A     '           / 32-char string
 TTYPE18 = 'RFI_MTHD'           / RFI excision method
 TFORM18 = '32A     '           / 32-char string
 END
+#
+###############################################################################
+#
+# Digitiser Statistics Binary Table Extension
+#
+###############################################################################
+#
 XTENSION= 'BINTABLE'           / ***** Digitiser statistics *****
 BITPIX  =                    8 / N/A
 NAXIS   =                    2 / 2-dimensional binary table
@@ -113,6 +127,13 @@ TTYPE1  = 'DATA    '           / Digitiser statistics
 TDIM1   =  (*,*,*)             / Data table dimensions (NLEV,NDIGR,NCYCSUB)
 TFORM1  = 'E       '           / NLEV*NDIGR*NCYCSUB floats
 END
+#
+###############################################################################
+#
+# Digitiser Counts Binary Table Extension
+#
+###############################################################################
+#
 XTENSION= 'BINTABLE'           / ***** Digitiser counts *****
 BITPIX  =                    8 / N/A
 NAXIS   =                    2 / 2-dimensional binary table
@@ -136,6 +157,13 @@ TTYPE3  = 'DATA    '           / Digitiser count data
 TDIM3   =  (*,*)               / Data table dimensions (NPTHIST,NDIGR)         
 TFORM3  = 'I       '           / NPTHIST*NDIGR integers
 END
+#
+###############################################################################
+#
+# Original Bandpass Binary Table Extension
+#
+###############################################################################
+#
 XTENSION= 'BINTABLE'           / ***** Original bandpasses *****
 BITPIX  =                    8 / N/A
 NAXIS   =                    2 / 2-dimensional binary table
@@ -156,6 +184,13 @@ TDIM3   = (*,*)                / Data table dimensions = (NCH_ORIG,BP_NPOL)
 TUNIT3  = 'Jy      '           / Bandpass amplitude units
 TFORM3  = ' I      '           / NCH_ORIG*BP_NPOL integers
 END
+#
+###############################################################################
+#
+# Coherent Dedispersion Parameters Binary Table Extension
+#
+###############################################################################
+#
 XTENSION= 'BINTABLE'           / ***** Coherent Dedispersion Parameters *****
 BITPIX  =                    8 / N/A
 NAXIS   =                    2 / 2-dimensional binary table
@@ -174,6 +209,13 @@ TTYPE3  = 'DATA    '           / Bandpass for autocorrelations
 TDIM3   = (*)                  / Data table dimension = (NCHIRP)
 TFORM3  = 'E       '           / NCHIRP floats
 END
+#
+###############################################################################
+#
+# Ephemeris History Binary Table Extension
+#
+###############################################################################
+#
 XTENSION= 'BINTABLE'           / ***** Pulsar ephemeris history *****
 BITPIX  =                    8 / N/A
 NAXIS   =                    2 / 2-dimensional binary table
@@ -299,6 +341,13 @@ TFORM55 = '1D      '           / Double
 TTYPE56 = 'GLF0D_1 '           / [Hz] Spin freq increment [Decaying Glitch 1]
 TFORM56 = '1D      '           / Double
 END
+#
+###############################################################################
+#
+# Polyco History Binary Table Extension
+#
+###############################################################################
+#
 XTENSION= 'BINTABLE'           / ***** Polyco history *****
 BITPIX  =                    8 / N/A 
 NAXIS   =                    2 / 2-dimensional binary table
@@ -464,7 +513,7 @@ PCOUNT  =                    0 / size of special data area
 GCOUNT  =                    1 / one data group (required keyword)
 TFIELDS =                   18 / Number of fields per row 
 NCH_FILE=                    * / Number of channels/sub-bands in this file
-NCH_STRT=                    * / Start channel/sub-band number for this file
+NCH_STRT=                    * / Start channel/sub-band number (0 to NCHAN-1)
 EXTNAME = 'SUBINT '            / name of this binary table extension
 TTYPE1  = 'ISUBINT '           / Subint number. If NAXIS=-1, 0 indicates EOD.
 TFORM1  = '1J      '           / Long integer
