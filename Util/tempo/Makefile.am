@@ -9,7 +9,10 @@ LIBRARY  := libeph.a
 LIB_SRCS := ephio_c.c ephio_def.c ephio.f \
 	psrephem.C set_epoch.C tex.C derived.C MatchingEphemeris.C
 
-PROGRAMS := keys2c.c keys2fort.c ephaux.C ephepo.C ephtex.C eph2upd.f
+PROGRAMS := keys2c.c keys2fort.c ephaux.C ephepo.C ephtex.C 
+
+# doesn't compile with g77
+# eph2upd.f
 
 LDFLAGS += $(F77LIBS) -lm
 
