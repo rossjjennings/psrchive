@@ -22,7 +22,7 @@ LDFLAGS   += -larchive -lpolyco -ldialog -lgenutil -ltimes \
              -lpsrinfo -leph -lsla -lpsrfft -lfftw -lm $(LIBNSL) \
 	     -lcpgplot $(LPGPLOT) 
 
-PROGRAMS =  = align.C amps.C chanprep.C  \
+PROGRAMS = align.C amps.C chanprep.C  \
 	      mel.C newname.C oneprof.C plotsub.C    \
 	      tadd.C calfbar.C modhead.C   \
 	      plot_gry_diff.C pepoch.C stokes_plt.C freduce.C \
