@@ -3,6 +3,7 @@
 #include "ephio.h"
 #include "psrephem.h"
 #include "orbital.h"
+#include "f772c.h"
 
 #define sqr(x) (x*x)
 #define cube(x) (x*x*x)
@@ -12,6 +13,7 @@ const double c    = 2.99792458e5;   // km/s
 const double day  = 24.0 * 3600.0;  // seconds
 const double year = 365.2422 * day; // seconds
 const double mas  = M_PI/(60.0*60.0*180.0*1000.0);  // radians
+const double parsec = 3.085678e13;  // km
 
 // I.H. Stairs et al. 1998, ApJ 505:352-357 use T_sol = G * M_sol / c^3
 // where G = Gravitational Constant
@@ -19,6 +21,59 @@ const double mas  = M_PI/(60.0*60.0*180.0*1000.0);  // radians
 //       c = speed of light
 const double T_sol  = 4.925490947e-6; // seconds
 
+// K. Kuijken and G. Gilmore, 1989, MNRAS, 239, 571, Table 2
+// velocity of sun with respect to galactic centre
+const double v_0 = 220;   // km/s
+// distance of sun from galactic centre
+const double R_0 = 7.8e3; // parsec
+
+extern "C" double F772C(sla_eqgal) (double* ra, double* dec, 
+				    double* l, double* b);
+
+// ////////////////////////////////////////////////////////////////////////
+//
+// returns galactic latitude and longitude in radians (slalib)
+//
+int psrephem::galactic (double& l, double& b)
+{
+  if (parmStatus[EPH_RAJ] < 1 || parmStatus[EPH_DECJ] < 1)
+    return -1;
+
+  double alpha = value_double [EPH_RAJ] * 2*M_PI;
+  // double alpha_err  = error_double [EPH_RAJ];
+  double delta = value_double [EPH_DECJ] * 2*M_PI;
+  // double delta_err  = error_double [EPH_DECJ];
+
+  F772C(sla_eqgal) (&alpha, &delta, &l, &b);
+
+  return 0;
+}
+
+
+int psrephem::acc_diffrot (double& acc)
+{
+  double l, b;
+  if (galactic (l, b) < 0)
+    return -1;
+
+  if (parmStatus[EPH_RAJ] < 1)
+    return -1;
+
+  double px = value_double [EPH_PX];
+  // double px_err = error_double [EPH_PX];
+
+  // distance in parsec
+  double d = 1e3/px;
+
+  // see Damour, T. and Taylor, J.H. 1991, ApJ, 366, 501
+  // first term of Equation 2.12 (R_0 and v_0 are const defined up top)
+  double sinl = sin(l);
+  double cosl = cos(l);
+  double delta = d/R_0;
+  double beta = delta - cosl;
+
+  acc = -v_0*v_0/(R_0*parsec) * (cosl + beta / (sinl*sinl + beta*beta));
+}
 
 // ////////////////////////////////////////////////////////////////////////
 //
@@ -156,6 +211,75 @@ int psrephem::phi (double& phi, double& phi_err) const
 
   phi_err = sqrt ( sqr(mu_alpha*mu_derr) + sqr(mu_delta*mu_aerr)
 		   + 2.0 * covar * mu_alpha * mu_delta ) / sqr_pm;
+  return 0;
+}
+
+// ////////////////////////////////////////////////////////////////////////
+//
+// returns the proper motion contribution to x-dot
+//
+// ////////////////////////////////////////////////////////////////////////
+int psrephem::pm_x_dot (double& xdot, double& xdot_err) const
+{
+  if (parmStatus[EPH_PMRA] < 1 || parmStatus[EPH_PMDEC] < 1)
+    return -1;
+
+  double mu_alpha = value_double [EPH_PMRA];
+  // double mu_aerr  = error_double [EPH_PMRA];
+
+  double mu_delta = value_double [EPH_PMDEC];
+  // double mu_derr  = error_double [EPH_PMDEC];
+
+  if (parmStatus[EPH_KIN] < 1 || parmStatus[EPH_KOM] < 1)
+    return -1;
+
+  double i     = value_double [EPH_KIN] * M_PI/180.0;
+  // double i_err = error_double [EPH_KIN] * M_PI/180.0;
+
+  double Om     = value_double [EPH_KOM] * M_PI/180.0;
+  // double Om_err = error_double [EPH_KOM] * M_PI/180.0;
+
+  if (parmStatus[EPH_A1] < 1)
+    return -1;
+
+  double x     = value_double [EPH_A1];
+  // double x_err = error_double [EPH_A1];
+
+  xdot = x * ( -mu_alpha * sin(Om) + mu_delta * cos(Om) ) / tan(i) * mas/year;
+  xdot_err = -1;
+
+  return 0;
+}
+
+
+// ////////////////////////////////////////////////////////////////////////
+//
+// returns the proper motion contribution to omdot in degrees per year
+//
+// ////////////////////////////////////////////////////////////////////////
+int psrephem::pm_omega_dot (double& omdot, double& omdot_err) const
+{
+  if (parmStatus[EPH_PMRA] < 1 || parmStatus[EPH_PMDEC] < 1)
+    return -1;
+
+  double mu_alpha = value_double [EPH_PMRA];
+  // double mu_aerr  = error_double [EPH_PMRA];
+
+  double mu_delta = value_double [EPH_PMDEC];
+  // double mu_derr  = error_double [EPH_PMDEC];
+
+  if (parmStatus[EPH_KIN] < 1 || parmStatus[EPH_KOM] < 1)
+    return -1;
+
+  double i = value_double [EPH_KIN] * M_PI/180.0;
+  // double i_err = error_double [EPH_KIN] * M_PI/180.0;
+
+  double Om = value_double [EPH_KOM] * M_PI/180.0;
+  // double Om_err = error_double [EPH_KOM] * M_PI/180.0;
+
+  omdot = ( mu_alpha * cos(Om) + mu_delta * sin(Om) ) / sin(i) * mas*180/M_PI;
+  omdot_err = -1;
+
   return 0;
 }
 
@@ -372,30 +496,20 @@ int psrephem::GR_x_dot (double& x_dot) const
   if (parmStatus[EPH_A1] < 1)
     return -1;
   double x = value_double [EPH_A1];
-  double x_err = error_double [EPH_A1];
+  // double x_err = error_double [EPH_A1];
 
-  if (parmStatus[EPH_M2] < 1 )
+  if (parmStatus[EPH_PB] < 1)
     return -1;
-  double m2     = value_double [EPH_M2];
-  double m2_err = error_double [EPH_M2];
+  double pb = value_double [EPH_PB] * day;
+  // double pb_err = error_double [EPH_PB] * day;
 
-  double si, si_err;
-  if (sini (si, si_err) < 0)
-    return -1;
-
-  double mp, mp_err;
-  if (m1 (mp, mp_err) < 0)
-    return -1;
-
-  double f_e;
-  GR_f_e (f_e);
-
-  double fac  = T_sol / x;
-  double totm = mp + m2;
-  double sisq = sqr(si);
+  double pb_dot_gr;
+  GR_Pb_dot (pb_dot_gr);
 
   // Kopeikin, 1996, ApJ 467:L93-L95 Eqn 15
-  x_dot = -64.0/5.0 * cube(fac)*pow(si,4) * f_e * mp * pow(m2,5) / cube(totm);
+  // and van Straten, PhD thesis
+  x_dot = 2.0/3.0 * x/pb * pb_dot_gr;
+
   return 0;
 }
 
@@ -409,12 +523,12 @@ int psrephem::GR_Pb_dot (double& Pb_dot) const
   if (parmStatus[EPH_PB] < 1)
     return -1;
   double pb = value_double [EPH_PB];
-  double pb_err = error_double [EPH_PB];
+  // double pb_err = error_double [EPH_PB];
 
   if (parmStatus[EPH_M2] < 1 )
     return -1;
   double m2     = value_double [EPH_M2];
-  double m2_err = error_double [EPH_M2];
+  // double m2_err = error_double [EPH_M2];
 
   double f_e;
   GR_f_e (f_e);
@@ -444,12 +558,12 @@ int psrephem::GR_omega_dot (double& w_dot) const
   if (parmStatus[EPH_PB] < 1)
     return -1;
   double pb = value_double [EPH_PB];
-  double pb_err = error_double [EPH_PB];
+  // double pb_err = error_double [EPH_PB];
 
   if (parmStatus[EPH_M2] < 1 )
     return -1;
   double m2     = value_double [EPH_M2];
-  double m2_err = error_double [EPH_M2];
+  // double m2_err = error_double [EPH_M2];
 
   double mp, mp_err;
   if (m1 (mp, mp_err) < 0)
@@ -535,12 +649,12 @@ int psrephem::GR_gamma (double& gamma) const
   if (parmStatus[EPH_PB] < 1)
     return -1;
   double pb = value_double [EPH_PB];
-  double pb_err = error_double [EPH_PB];
+  // double pb_err = error_double [EPH_PB];
 
   if (parmStatus[EPH_M2] < 1 )
     return -1;
   double m2     = value_double [EPH_M2];
-  double m2_err = error_double [EPH_M2];
+  // double m2_err = error_double [EPH_M2];
 
   double mp, mp_err;
   if (m1 (mp, mp_err) < 0)
@@ -549,8 +663,6 @@ int psrephem::GR_gamma (double& gamma) const
   double n = 2.0 * M_PI / (pb * 86400.0);
 
   // I.H. Stairs et al. 1998, ApJ 505:352-357 Eqn 3
-  double cube_root = sqr(T_sol) / (n*pow(mp+m2,4.0));
-
   gamma = ecc * pow(sqr(T_sol)/(n*pow(mp+m2,4.0)), 1.0/3.0) * m2*(mp + 2.0*m2);
 
   return 0;

@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/psrephem.h,v $
-   $Revision: 1.15 $
-   $Date: 2001/06/02 09:44:00 $
+   $Revision: 1.16 $
+   $Date: 2001/11/19 04:40:57 $
    $Author: straten $ */
 
 #ifndef __PSREPHEM_H
@@ -96,6 +96,13 @@ class psrephem
 
   // these functions return 0 if no error, -1 on error
   //
+  // return galactic latitude and longitude in radians (slalib)
+  int galactic (double& l, double& b);
+
+  // returns the acceleration along the line of sight arising
+  // from differential galactic rotation
+  int acc_diffrot (double& beta);
+
   // returns the sine of the inclination angle
   int sini (double& si, double& si_err) const;
   // returns the simple calculation based on Pb and x
@@ -109,6 +116,11 @@ class psrephem
   int pm (double& pm, double& pm_err) const;
   // returns the proper motion celestial position angle
   int phi (double& phi, double& phi_err) const;
+
+  // returns the proper motion contribution to xdot (Kopeikin 1996)
+  int pm_x_dot (double& xdot, double& xdot_err) const;
+  // returns the proper motion contribution to omdot in degrees per year
+  int pm_omega_dot (double& omdot, double& omdot_err) const;
 
   // returns the orbital period in seconds
   int P (double& p, double& p_err) const;
@@ -168,6 +180,8 @@ class psrephem
   // returns a LateX formatted string suitable for labelling the parameter
   static const char* tex_descriptor (int ephind);
 
+  // returns a block of LaTeX formatted text suitable for use in tables
+  static string tex (vector<psrephem>& vals, bool dots=false);
 
   string par_lookup (const char* name, int use_cwd);
   static char* tempo_pardir;
