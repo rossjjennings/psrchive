@@ -115,22 +115,35 @@ int main (int argc, char** argv) try {
     
     if (fluxcal) {
 
-      double gap = (archive->start_time() - last->end_time()).in_seconds();    
+      double gap = (archive->start_time() - last->end_time()).in_seconds();
+
       if (gap > interval) {
-
-	cerr << "fluxcal: gap=";
-	if (gap>3600)
-	  cerr << gap/3600 << " hours";
-	else
-	  cerr << gap/3600 << " min";
-	cerr << " > interval=" << interval/60 << " minutes" << endl;
-
-	unload (fluxcal);
-	fluxcal = 0;
+	cerr << "fluxcal: gap=" << time_string(gap)
+	     << " > interval=" << time_string(interval) << endl;
+        unload (fluxcal);
+        fluxcal = 0;
       }
-    
+
     }
 
+    if (fluxcal) {
+
+      if (Pulsar::Archive::verbose > 1)
+        cerr << "fluxcal: adding observation to FluxCalibrator" << endl;
+
+      try {
+        fluxcal->add_observation (archive);
+        cerr << "fluxcal: observation added to FluxCalibrator" << endl;
+      }
+      catch (Error& error) {
+        cerr << "fluxcal: failed to add observation\n\t" << error.get_message()
+             << endl;
+        unload (fluxcal);
+        fluxcal = 0;
+      }
+
+    }
+    
     if (!fluxcal) {
 
       cerr << "fluxcal: starting new FluxCalibrator" << endl;
@@ -139,18 +152,12 @@ int main (int argc, char** argv) try {
 	fluxcal->set_database (database);
 
     }
-    else {
-
-      cerr << "fluxcal: adding observation to FluxCalibrator" << endl;
-      fluxcal->add_observation (archive);
-
-    }
 
     last = archive;
 
   }
   catch (Error& error) {
-    cerr << "fluxcal: error handling" << filenames[ifile] << endl
+    cerr << "fluxcal: error handling " << filenames[ifile] << endl
 	 << error.get_message() << endl;
   }
 
