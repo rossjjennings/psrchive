@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Archive.h,v $
-   $Revision: 1.30 $
-   $Date: 2002/05/29 08:09:07 $
-   $Author: pulsar $ */
+   $Revision: 1.31 $
+   $Date: 2002/07/26 06:14:06 $
+   $Author: ahotan $ */
 
 /*! \mainpage 
  
@@ -320,6 +320,9 @@ namespace Pulsar {
 
     //! Plot the requested Profile with some header information
     void display (int isub=0, int ipol=0, int ichan=0, float phase=0) const;
+
+    //! Construct a plot of pulse phase vs time for multi-subint archives
+    void plot_time_vs_phase ();
 
     // //////////////////////////////////////////////////////////////////
     //
