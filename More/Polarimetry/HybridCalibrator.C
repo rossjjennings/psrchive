@@ -7,6 +7,7 @@
 Pulsar::HybridCalibrator::HybridCalibrator (PolnCalibrator* _calibrator)
 {
   precalibrator = _calibrator;
+  calibrator = precalibrator->get_Archive();
 }
 
 //! Destructor
@@ -36,6 +37,7 @@ void Pulsar::HybridCalibrator::set_reference_observation (ArtificialCalibrator* 
 void Pulsar::HybridCalibrator::set_precalibrator (PolnCalibrator* _calibrator)
 {
   precalibrator = _calibrator;
+  calibrator = precalibrator->get_Archive();
 }
 
 void Pulsar::HybridCalibrator::calculate_transformation ()
