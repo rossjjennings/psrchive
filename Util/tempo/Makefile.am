@@ -42,14 +42,10 @@ endif
 #
 
 $(srcdir)/keyinfo.com: $(srcdir)/keys.dat ./keys2fort
-	cp $(srcdir)/keys.dat .
-	./keys2fort
-	mv keyinfo.com $(srcdir)
+	cd $(srcdir) && $(top_builddir)/astro/psrephem/keys2fort
 
 $(srcdir)/ephio.h: $(srcdir)/keys.dat ./keys2c
-	cp $(srcdir)/keys.dat .
-	./keys2c
-	mv ephio.h $(srcdir)
+	cd $(srcdir) && $(top_builddir)/astro/psrephem/keys2c
 
 # Depend on constructed include files
 ephio.lo: $(srcdir)/keyinfo.com
