@@ -68,11 +68,20 @@ void Pulsar::FITSArchive::load_FluxCalibratorExtension (fitsfile* fptr)
   vector< Estimate<double> > temp (fce->get_nchan());
   unsigned ichan = 0;
 
-  load_Estimate_vector (fptr, temp, "T_SYS", 
-			"Pulsar::FITSArchive::load_FluxCalibratorExtension");
-  for (ichan=0; ichan < fce->get_nchan(); ichan++)
-    fce->set_T_sys (ichan, temp[ichan]);
+  try {
 
+    load_Estimates (fptr, temp, "T_SYS");
+    for (ichan=0; ichan < fce->get_nchan(); ichan++)
+      fce->set_T_sys (ichan, temp[ichan]);
+
+    load_Estimates (fptr, temp, "T_CAL");
+    for (ichan=0; ichan < fce->get_nchan(); ichan++)
+      fce->set_cal_flux (ichan, temp[ichan]);
+
+  }
+  catch (Error& error) {
+    throw error += "Pulsar::FITSArchive::load_FluxCalibratorExtension";
+  }
 
   add_extension (fce);
   
