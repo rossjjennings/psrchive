@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Integration.h,v $
-   $Revision: 1.34 $
-   $Date: 2003/02/17 16:23:54 $
+   $Revision: 1.35 $
+   $Date: 2003/02/20 10:33:05 $
    $Author: straten $ */
 
 /*
@@ -54,53 +54,11 @@ namespace Pulsar {
     //! Destructor deletes data area
     virtual ~Integration ();
 
-    //! Copy the profiles and attributes through set_ get_ methods
-    virtual void copy (const Integration& subint, int npol=-1, int nchan=-1);
-
     //! Return pointer to a new copy of self
     virtual Integration* clone (int npol=-1, int nchan=-1) const = 0;
 
     //! Return the pointer to a new fscrunched and pscrunched copy of self
     Integration* total () const;
-
-    //! Resizes the dimensions of the data area
-    virtual void resize (unsigned npol=0, unsigned nchan=0, unsigned nbin=0);
-
-    //! Call Profile::fold on every profile
-    virtual void fold (unsigned nfold);
-
-    //! Call Profile::bsrunch on every profile
-    virtual void bscrunch (unsigned nscrunch);
-    
-    //! Rotate each profile by time (in seconds)
-    virtual void rotate (double time);
-
-    //! Integrate profiles from neighbouring chans
-    virtual void fscrunch (unsigned nscrunch = 0, bool weighted_cfreq = true);
-
-    //! Integrate profiles from single polarizations into one total intensity
-    virtual void pscrunch ();
-
-    //! Transform from Stokes (I,Q,U,V) to the polarimetric invariant interval
-    virtual void invint ();
-
-    //! Perform the congruence transformation on each polarimetric profile
-    void transform (const Jones<float>& response);
-
-    //! Perform frequency response on each polarimetric profile
-    void transform (const vector< Jones<float> >& response);
-
-    //! Rotate all profiles in phase to remove dispersion delays between chans
-    virtual void dedisperse (double frequency = 0.0);
-
-    //! Dedisperse only the profiles in the given channel
-    virtual void dedisperse (double frequency, unsigned chan);
-
-    //! Rotate all profiles about Stokes V axis to remove Faraday rotation
-    virtual void defaraday (double rm = 0.0, double rm_iono = 0.0);
-
-    //! Convert polarimetric data to the specified state
-    virtual void convert_state (Signal::State state);
 
     //! Returns a single Stokes 4-vector for the given chan and phase bin
     void get_Stokes (Stokes<float>& S, unsigned ichan, unsigned ibin) const;
@@ -250,6 +208,51 @@ namespace Pulsar {
     //! Set the number of polarization measurements
     /*! Called by Integration methods to update sub-class attribute */
     virtual void set_npol (unsigned npol) = 0;
+
+    friend class Archive;
+
+    //! Copy the profiles and attributes through set_ get_ methods
+    virtual void copy (const Integration& subint, int npol=-1, int nchan=-1);
+
+    //! Resizes the dimensions of the data area
+    virtual void resize (unsigned npol=0, unsigned nchan=0, unsigned nbin=0);
+
+    //! Call Profile::fold on every profile
+    virtual void fold (unsigned nfold);
+
+    //! Call Profile::bsrunch on every profile
+    virtual void bscrunch (unsigned nscrunch);
+    
+    //! Rotate each profile by time (in seconds)
+    virtual void rotate (double time);
+
+    //! Integrate profiles from neighbouring chans
+    virtual void fscrunch (unsigned nscrunch = 0, bool weighted_cfreq = true);
+
+    //! Integrate profiles from single polarizations into one total intensity
+    virtual void pscrunch ();
+
+    //! Transform from Stokes (I,Q,U,V) to the polarimetric invariant interval
+    virtual void invint ();
+
+    //! Perform the congruence transformation on each polarimetric profile
+    void transform (const Jones<float>& response);
+
+    //! Perform frequency response on each polarimetric profile
+    void transform (const vector< Jones<float> >& response);
+
+    //! Rotate all profiles in phase to remove dispersion delays between chans
+    virtual void dedisperse (double frequency = 0.0);
+
+    //! Dedisperse only the profiles in the given channel
+    virtual void dedisperse (double frequency, unsigned chan);
+
+    //! Rotate all profiles about Stokes V axis to remove Faraday rotation
+    virtual void defaraday (double rm = 0.0, double rm_iono = 0.0);
+
+    //! Convert polarimetric data to the specified state
+    virtual void convert_state (Signal::State state);
+
 
     //! Data: npol by nchan profiles
     vector< vector< Reference::To<Profile> > > profiles;
