@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Profile.h,v $
-   $Revision: 1.67 $
-   $Date: 2004/08/09 01:34:19 $
-   $Author: hknight $ */
+   $Revision: 1.68 $
+   $Date: 2004/08/24 04:26:49 $
+   $Author: ahotan $ */
 
 #ifndef __Pulsar_Profile_h
 #define __Pulsar_Profile_h
@@ -193,7 +193,8 @@ namespace Pulsar {
     //! fit to the standard and return a Tempo::toa object
     Tempo::toa tdt (const Profile& std, const MJD& mjd, 
 		    double period, char nsite, string arguments = "",
-		    Tempo::toa::Format fmt = Tempo::toa::Parkes) const;
+		    Tempo::toa::Format fmt = Tempo::toa::Parkes,
+		    float* corr = 0, float* fn = 0) const;
     
     //! fit to the standard and return a Tempo::toa object
     Tempo::toa toa (const Profile& std, const MJD& mjd, 
@@ -203,7 +204,8 @@ namespace Pulsar {
     /*! return the shift (in turns) after fitting to the standard
       using a parabolic interpolation in the time domain to achieve 
       fractional bin resolution */
-    double TimeShift (const Profile& std, float& error) const;
+    double TimeShift (const Profile& std, float& error,
+		      float* corr = 0, float* fn = 0) const;
 
     /*! return the shift (in turns) after fitting to the standard
       using an FFT based phase rotation to achieve fractional bin

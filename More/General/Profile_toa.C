@@ -14,12 +14,14 @@
 
 Tempo::toa Pulsar::Profile::tdt (const Profile& std, 
 				 const MJD& mjd, 
-				 double period, char nsite, string arguments,
-				 Tempo::toa::Format fmt) const
+				 double period, char nsite, 
+				 string arguments,
+				 Tempo::toa::Format fmt,
+				 float* corr, float* fn) const
 {
   float error;
 
-  double shift = TimeShift(std, error);
+  double shift = TimeShift(std, error, corr, fn);
   
   Tempo::toa retval (fmt);
 
@@ -37,7 +39,7 @@ Tempo::toa Pulsar::Profile::tdt (const Profile& std,
   Calculates the shift between
   Returns a basic Tempo::toa object
 */
-Tempo::toa Pulsar::Profile::toa (const Profile& std, const MJD& mjd, 
+Tempo::toa Pulsar::Profile::toa (const Profile& std, const MJD& mjd,
 				 double period, char nsite, string arguments,
 				 Tempo::toa::Format fmt) const
 {
@@ -60,8 +62,8 @@ Tempo::toa Pulsar::Profile::toa (const Profile& std, const MJD& mjd,
   return retval;
 }
 
-double Pulsar::Profile::TimeShift (const Profile& std, 
-				   float& error) const
+double Pulsar::Profile::TimeShift (const Profile& std, float& error,
+				   float* corr, float* fn) const
 {
   // The Profile::correlate function creates a profile whose amps
   // are the values of the correlation function, starting at zero
@@ -80,7 +82,13 @@ double Pulsar::Profile::TimeShift (const Profile& std,
 
   // Remove the baseline
   *ptr -= ptr->mean(ptr->find_min_phase(0.15));
-  
+
+  if (corr != 0) {
+    for (unsigned i = 0; i < ptr->get_nbin(); i++) {
+      corr[i] = ptr->get_amps()[i];
+    }
+  }  
+
   // Find the point of best correlation
   
   int maxbin = ptr->find_max_bin();
@@ -95,9 +103,6 @@ double Pulsar::Profile::TimeShift (const Profile& std,
   y1 = ptr->get_amps()[(maxbin - 1)%get_nbin()];
   y2 = ptr->get_amps()[(maxbin)%get_nbin()];
   y3 = ptr->get_amps()[(maxbin + 1)%get_nbin()];
-
-  // Phases can be outside the 0->1 range here, 
-  // they get wrapped later
 
   x1 /= double(get_nbin());
   x2 /= double(get_nbin());
@@ -127,11 +132,11 @@ double Pulsar::Profile::TimeShift (const Profile& std,
   Numerical::GaussJordan (matrix, empty, 3);
 
   // Solve for the coefficients of our parabola, in the form:
-  // y = Ax^2 +Bx +C
+  // y = Ax^2 + Bx + C
   
   double A = matrix[0][0]*y1 + matrix[0][1]*y2 + matrix[0][2]*y3;
   double B = matrix[1][0]*y1 + matrix[1][1]*y2 + matrix[1][2]*y3;
-  // double C = matrix[2][0]*y1 + matrix[2][1]*y2 + matrix[2][2]*y3;
+  double C = matrix[2][0]*y1 + matrix[2][1]*y2 + matrix[2][2]*y3;
 
   // Now calculate the equivalent coefficients for the form:
   // y = D - E(x - F)^2
@@ -146,9 +151,15 @@ double Pulsar::Profile::TimeShift (const Profile& std,
   //   B = 2EF      => F = -B/2A
   //   C = D - EF^2 => D = C - (B^2/4A)
 
-  // double D = C - (B*B/(4.0*A));
-  // double E = -1.0 * A;
+  double D = C - (B*B/(4.0*A));
+  double E = -1.0 * A;
   double F =  (-1.0 * B) / (2.0 * A);
+
+  if (fn != 0) {
+    fn[0] = D;
+    fn[1] = E;
+    fn[2] = F;
+  }
 
   /*
 
@@ -177,16 +188,12 @@ double Pulsar::Profile::TimeShift (const Profile& std,
   //
   // Dy/Dx = 2Ax + B
   //
-  // We compute the average gradient of the two points either
-  // side of the maximum correlation bin and use their inverse
-  // as a measure of the uncertainty.
+  // We use the slope of the parabola a distance one bin
+  // away from the peak.
 
-  double s1 = fabs(2.0 * A * x1);
-  double s2 = fabs(2.0 * A * x3);
-
-  double sa = (s1 + s2) / 2.0;
-
-  error = (0.25 * (1.0 / sa)) / get_nbin();
+  double s1 = fabs(2.0 * A * (F-(1.0/get_nbin())));
+  
+  error = (1.0 / (s1*500.0));
 
   // The shift in phase units, wrapped to be between -0.5 and 0.5
   if (F < -0.5)

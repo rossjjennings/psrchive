@@ -54,6 +54,7 @@ int main(int argc, char** argv) {
     case 's':
       try {
 	stdarch = Pulsar::Archive::load(optarg);
+	stdarch->centre();
 	stdprof = new Pulsar::Profile(stdarch->total()->get_Profile(0,0,0));
 	stdflag = true;
       }
@@ -95,6 +96,7 @@ int main(int argc, char** argv) {
     try {
       
       data = Pulsar::Archive::load(archives[i]);
+      data->centre();
 
     }
     catch (Error& error) {
@@ -122,7 +124,8 @@ int main(int argc, char** argv) {
 
     for (unsigned i = 0; i < data->get_nbin(); i++) {
       bins[i] = float(i)/data->get_nbin();
-      parb[i] = fn[0]*bins[i]*bins[i] + fn[1]*bins[i] + fn[2];
+      parb[i] = fn[0] - fn[1]*(bins[i]-fn[2])*(bins[i]-fn[2]);
+      //parb[i] = fn[0]*bins[i]*bins[i] + fn[1]*bins[i] + fn[2];
     }
 
     if (display) {
@@ -138,6 +141,8 @@ int main(int argc, char** argv) {
       float ymax = 0.0;
 
       findminmax(corr, corr+data->get_nbin()-1, ymin, ymax);
+
+      ymax += (ymax-ymin)/10.0;
 
       cpgswin(0.0,1.0,ymin,ymax);
       cpgbox ("BCNST", 0.0, 0, "BCNST", 0.0, 0);
@@ -161,7 +166,7 @@ int main(int argc, char** argv) {
 	  maxphs = float(i)/float(data->get_nbin());
 	}
       }
-      
+
       int binmin = maxbin - 3;
       int binmax = maxbin + 3;
 
@@ -172,6 +177,8 @@ int main(int argc, char** argv) {
 	binmax = data->get_nbin()-1;
 
       findminmax(&corr[binmin], &corr[binmax], ymin, ymax);
+
+      ymax += (ymax-ymin)/10.0;
 
       float phsmin = bins[binmin];
       float phsmax = bins[binmax];
@@ -194,7 +201,28 @@ int main(int argc, char** argv) {
       cpgsci(2);
       cpgline(data->get_nbin(), bins, parb);
       cpgsci(3);
+      cpgsls(2);
+      cpgmove(fn[2], ymin);
+      cpgdraw(fn[2], ymax);
 
+      float err = toa.get_error() / 
+	(1e6 * data->get_Integration(0)->get_folding_period());
+
+      cpgsci(2);
+      cpgsls(1);
+      cpgerr1(5, fn[2], (ymin+ymax)/2.0, err, 2.0);
+
+      // Draw the profiles
+
+      cpgsci(3);
+
+      Pulsar::Plotter plotter;
+
+      cpgsvp(0.525,0.7,0.5,0.9);
+      plotter.plot(data->total()->get_Profile(0,0,0));
+
+      cpgsvp(0.725,0.9,0.5,0.9);
+      plotter.plot(stdprof);
     }
   }
 }
