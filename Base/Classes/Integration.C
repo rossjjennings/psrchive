@@ -61,14 +61,18 @@ void Pulsar::Integration::resize (int _npol, int _nchan, int _nbin)
   nbin = _nbin;
 }
 
-/*!  
-  All new profiles will be created through this function.  By
-  over-riding this funciton, inherited types may re-define the type of
-  Profile to which the elements of the profiles vector point.
+/*!
+  By over-riding this method, inherited types may re-define the type
+  of Profile to which the elements of the profiles vector point.
 */
 Pulsar::Profile* Pulsar::Integration::new_Profile ()
 {
-  return new Profile;
+  Profile* profile = new Profile;
+
+  if (!profile)
+    throw Error (BadAlloc, "Integration::new_Profile");
+
+  return profile;
 }
 
 /* not much to say here, either */
