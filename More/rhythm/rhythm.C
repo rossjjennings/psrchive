@@ -260,9 +260,6 @@ Rhythm::Rhythm (QApplication* master, QWidget* parent, int argc, char** argv) :
 
 Rhythm::~Rhythm () 
 {
-  for (unsigned i = 0; i < the_stds.size(); i++) {
-    delete the_stds[i];
-  }
 }
 
 void Rhythm::load_toas (const char* fname)
@@ -482,7 +479,7 @@ void Rhythm::plot_current ()
 
   toas[index].unload(useful);
 
-  if (sscanf(useful+1, "%s %d %d", filename, &chn, &sub) != 3) {
+  if (sscanf(useful+1, "%s %d %d", filename, &sub, &chn) != 3) {
     throw Error(FailedCall, "Information not available");
   }
 
@@ -1081,7 +1078,7 @@ vector<double> Rhythm::give_me_data (toaPlot::AxisQuantity q)
       
       toas[i].unload(useful);
       
-      if (sscanf(useful+1, "%s %d %d", filename, &chn, &sub) != 3) {
+      if (sscanf(useful+1, "%s %d %d", filename, &sub, &chn) != 3) {
 	throw Error(FailedCall, "Information not available");
       }
       else {
