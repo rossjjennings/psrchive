@@ -1,4 +1,5 @@
 #include "MEAL/RotatingVectorModel.h"
+#include "MEAL/ScalarMath.h"
 #include "MEAL/ScalarValue.h"
 #include "MEAL/ScalarArgument.h"
 
@@ -14,7 +15,15 @@ MEAL::RotatingVectorModel::RotatingVectorModel ()
   magnetic_axis = new ScalarValue;
   magnetic_meridian = new ScalarValue;
 
-  set_evaluation_subject (0);
+  ScalarMath longitude = *argument - *magnetic_meridian;
+
+  ScalarMath numerator = sin(*magnetic_axis) * sin(longitude);
+  ScalarMath denominator = cos(*magnetic_axis) * sin(*line_of_sight)
+    - sin(*magnetic_axis) * cos(*line_of_sight) * cos(longitude);  
+
+  ScalarMath result = atan2(numerator,denominator) + *reference_position_angle;
+
+  set_evaluation_subject( result.get_expression() );
 }
 
 MEAL::RotatingVectorModel::~RotatingVectorModel ()
