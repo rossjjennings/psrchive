@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Profile.h,v $
-   $Revision: 1.4 $
-   $Date: 2002/04/11 07:00:51 $
+   $Revision: 1.5 $
+   $Date: 2002/04/11 14:21:19 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Profile_h
@@ -70,14 +70,17 @@ namespace Pulsar {
     //! returns the minimum amplitude
     float min (int bin_start=0, int bin_end=0) const;
     //! returns the sum of all amplitudes
-    float sum (int bin_start=0, int bin_end=0) const;
+    double sum  (int bin_start=0, int bin_end=0) const;
     //! returns the mean amplitude
-    float mean (int bin_start=0, int bin_end=0) const;
+    double mean (int bin_start=0, int bin_end=0) const;
     //! returns the root mean squared amplitude
-    float rms (int bin_start=0, int bin_end=0) const;
+    double rms  (int bin_start=0, int bin_end=0) const;
 
-    //! find the bin numbers at which the pulsed CAL square wave switches
-    void find_cal_transitions (int& highlow, int& lowhigh, int& width) const;
+    //! Find the bin numbers at which the mean power transits
+    void find_transitions (int& highlow, int& lowhigh, int& width) const;
+
+    //! Find the bin numbers at which the cumulative power crosses thresholds
+    void find_peak_edges (int& rise, int& fall) const;
 
     //! Returns the phase of the centre of the region with minimum mean
     float find_min_phase (float duty_cycle = default_duty_cycle) const;
@@ -93,7 +96,7 @@ namespace Pulsar {
     double sigma (float phase, float duty_cycle = default_duty_cycle) const;
     
     //! returns the signal to noise ratio of the profile
-    float snr (float duty_cycle = default_duty_cycle) const;
+    float snr () const;
 
     //! returns the signal to noise ratio of the profile
     //float snr (float duty_cycle, float wing_sigma) const;
@@ -158,9 +161,14 @@ namespace Pulsar {
     void halvebins (int nhalve);
 
   private:
-    //! fractional phase window used to find rise and fall of CAL
-    static float cal_transition_window;
+    //! fractional phase window used to find rise and fall of running mean
+    static float transition_duty_cycle;
+
+    //! fractional phase window used in most functions
     static float default_duty_cycle;
+
+    //! fraction of total power used to find peak
+    static float peak_edge_threshold;
 
     //! number of bins in the profile
     int nbin;
