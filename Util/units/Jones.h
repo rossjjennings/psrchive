@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Jones.h,v $
-   $Revision: 1.4 $
-   $Date: 2003/02/05 13:23:09 $
+   $Revision: 1.5 $
+   $Date: 2003/02/24 17:59:15 $
    $Author: straten $ */
 
 #ifndef __Jones_H
@@ -37,6 +37,10 @@ public:
   //! Set this instance equal to another Jones<T> instance
   Jones& operator = (const Jones& s)
     { j11=s.j11; j12=s.j12; j21=s.j21; j22=s.j22; return *this; }
+
+  //! Set this instance equal to a scalar
+  Jones& operator = (T scalar)
+    { j11=scalar; j12=0; j21=0; j22=scalar; return *this; }
 
   //! Set this instance equal to another Jones<U> instance
   template<typename U> Jones& operator = (const Jones<U>& s)
@@ -75,6 +79,13 @@ public:
   { return 
       j11 == b.j11  &&  j12 == b.j12 && 
       j21 == b.j21  &&  j22 == b.j22;
+  }
+
+  //! Equality
+  bool operator == (T scalar) const
+  { return 
+      j11 == scalar  &&  j12 == 0 && 
+      j21 == 0  &&  j22 == scalar;
   }
 
   //! Inequality
@@ -132,6 +143,9 @@ public:
   //! The identity matrix
   static const Jones& identity();
 
+  //! Return a random Jones matrix
+  static const Jones random (T scale);
+
 };
 
 //! The identity matrix
@@ -141,6 +155,21 @@ const Jones<T>& Jones<T>::identity ()
   static Jones<T> I (1,0,
  	             0,1);
   return I;
+}
+
+
+inline double randouble (double scale)
+{
+  return ( double(rand()) - 0.5*double(RAND_MAX) ) * 2*scale / RAND_MAX;
+}
+
+template <class T>
+const Jones<T> Jones<T>::random (T scale)
+{
+  return Jones<T> (complex<T>(randouble(scale), randouble(scale)),
+		   complex<T>(randouble(scale), randouble(scale)),
+		   complex<T>(randouble(scale), randouble(scale)),
+		   complex<T>(randouble(scale), randouble(scale)));
 }
 
 //! Multiply another Jones<T> instance into this one (this=this*j)
@@ -194,6 +223,12 @@ T norm (const Jones<T>& j)
 { return
     norm(j.j11) + norm(j.j12) + 
     norm(j.j21) + norm(j.j22);
+}
+
+template<typename T>
+T fabs (const Jones<T>& j)
+{ 
+  return sqrt (norm(j));
 }
 
 //! Useful for quickly printing the values of matrix elements
