@@ -523,91 +523,6 @@ string Pulsar::Profile::get_ascii (int bin_start, int bin_end) const
   return result;
 }
 
-/////////////////////////////////////////////////////////////////////////////
-//
-// Pulsar::Profile::stats
-//
-/*! Returns the mean, variance, and variance of the mean over the specified
-  interval.
-  \retval mean the mean of the interval
-  \retval variance the variance of the interval
-  \retval varmean the variance of the mean of the interval
-  \param istart the first bin of the interval
-  \param iend one greater than the last bin of the interval
-*/
-void Pulsar::Profile::stats (double* mean, double* variance, double* varmean,
-			     int istart, int iend) const
-{
-  if (verbose)
-    cerr << "Pulsar::Profile::stats" << endl;
-  
-  unsigned counts = 0; 
-  double tot = 0;
-  double totsq = 0;
-
-  nbinify (istart, iend, nbin);
-
-  if (verbose)
-    cerr << "Pulsar::Profile::stats "
-      " start:" << istart <<
-      " stop:" << iend << endl;
-
-  for (int ibin=istart; ibin < iend; ibin++) {
-    double value = amps[ibin%nbin];
-    tot += value;
-    totsq += value*value;
-    counts ++;
-  }
-
-  if (counts<2)
-    throw Error (InvalidRange, "Pulsar::Profile::stats",
-		 "%d -> %d", istart, iend);
-
-  //
-  // variance(x) = <(x-<x>)^2> * N/(N-1) = (<x^2>-<x>^2) * N/(N-1)
-  //
-  double mean_x   = tot / double(counts);
-  double mean_xsq = totsq / double(counts);
-  double var_x = (mean_xsq - mean_x*mean_x) * double(counts)/double(counts-1);
-
-  if (mean)
-    *mean = mean_x;
-  if (variance)
-    *variance = var_x;
-  if (varmean)
-    *varmean = var_x / double(counts);
-
-  if (verbose)
-    cerr << "Pulsar::Profile::stats return" << endl;
-}
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// Pulsar::Profile::stats
-//
-/*! 
-  \param phase centre of region
-  \retval mean the mean of the interval
-  \retval variance the variance of the interval
-  \retval varmean the variance of the mean of the interval
-  \param istart the first bin of the interval
-  \param iend one greater than the last bin of the interval
-  \param duty_cycle width of region
-  */
-void Pulsar::Profile::stats (float phase,
-			     double* mean, 
-			     double* variance,
-			     double* varmean,
-			     float duty_cycle) const
-{
-  if (verbose)
-    cerr << "Pulsar::Profile::stats" << endl;
-
-  int start_bin = int ((phase - 0.5 * duty_cycle) * nbin);
-  int stop_bin = int ((phase + 0.5 * duty_cycle) * nbin);
-
-  stats (mean, variance, varmean, start_bin, stop_bin);
-}
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -634,11 +549,15 @@ float find_phase (int nbin, float* amps, bool max, float duty_cycle)
 {
   register int i, j;
 
-  int boxwidth = (int) (.5 * duty_cycle * nbin);
+  int boxwidth = int (.5 * duty_cycle * nbin);
   if (boxwidth >= nbin/2 || boxwidth <= 0)
     throw Error (InvalidParam, "Pulsar::Profile::find_[min|max]_phase",
-		 " invalid duty_cycle=%f.  This yielded a boxwidth of int(.5 * %f * %f) = %d.  Compare nbin/2 = %d\n",
-		 duty_cycle, duty_cycle,float(nbin),boxwidth,nbin/2);
+		 "invalid duty_cycle=%f yielded a boxwidth of %d (nbin= %d)\n",
+		 duty_cycle, boxwidth*2+1, nbin);
+
+  if (Pulsar::Profile::verbose)
+    cerr << "Pulsar::Profile::find_phase duty_cycle=" << duty_cycle
+	 << " boxwidth=" << boxwidth*2+1 << endl;
 
   double sum = 0.0;
   for (j=-boxwidth;j<=boxwidth;j++)
@@ -664,7 +583,6 @@ float find_phase (int nbin, float* amps, bool max, float duty_cycle)
 //
 /*! Returns the centre phase of the region with minimum mean
   \param duty_cycle width of the region over which the mean is calculated
-  \retval min_val returns the minimum mean
  */
 float Pulsar::Profile::find_min_phase (float duty_cycle) const
 {
@@ -680,7 +598,6 @@ float Pulsar::Profile::find_min_phase (float duty_cycle) const
 //
 /*! Returns the centre phase of the region with maximum mean
   \param duty_cycle width of the region over which the mean is calculated
-  \retval max_val returns the maximum mean
  */
 float Pulsar::Profile::find_max_phase (float duty_cycle) const
 {
@@ -724,15 +641,4 @@ float Pulsar::Profile::snr_fortran(float rms){
   delete [] workspace;
   return(snrmax);
 }
-
-#if defined(sun) && !defined(__GNUC__)
-
-void Pulsar::Profile::set_amps (const float* data)
-{
-  for (unsigned ibin=0; ibin<nbin; ibin++)
-    amps[ibin] = data[ibin];
-}
-
-#endif
-
 
