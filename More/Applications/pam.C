@@ -167,7 +167,7 @@ int main (int argc, char *argv[]) {
       if (update) {
 	if (ext.empty()) {
 	  arch->unload();
-	  cout << "Archive updated on disk" << endl;
+	  cout << "Archive " << arch->get_filename() << " updated on disk" << endl;
 	}
 	else {
 	  string the_old = arch->get_filename();
