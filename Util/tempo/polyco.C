@@ -96,8 +96,15 @@ int polynomial::load(string* instr)
   int scanned = sscanf (line.c_str(), "%d %lf %f %lf %lf\n",
 		&mjd_day_num, &frac_mjd, &dm, &doppler_shift, &log_rms_resid);
   if (scanned < 3)  {
-    fprintf (stderr, "polynomial::load(string*) error stage 1 parsing '%s'\n",
+    fprintf (stderr, "polynomial::load(string*) error stage 1 parsing '%s'",
 		line.c_str());
+    if (scanned < 1) {
+      perror ("::");
+    }
+    else {
+      fprintf (stderr, "\npolynomial::load(string*) scanned %d/5 values\n",
+	       scanned);
+    }
     return -1;
   }
   reftime = MJD(mjd_day_num, frac_mjd);
@@ -376,14 +383,14 @@ int polyco::load (istream &istr, size_t nbytes)
   while (!istr.eof())  {
     getline (istr, line, '\n');
     if (line.length())  {
-      total += line + "\n";
-      bytes += line.length() + 1;
+      line += "\n"; // put back the NEWLINE (useful delimiter)
+      total += line;
+      bytes += line.length();
     }
     if (nbytes && bytes>=nbytes)
       break;
   }
   if (nbytes) istr.seekg (start_pos+nbytes);
-
   return load (&total);
 }
 
