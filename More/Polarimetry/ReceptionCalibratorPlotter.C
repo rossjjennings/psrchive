@@ -345,44 +345,9 @@ void Pulsar::ReceptionCalibratorPlotter::plotcal ()
   // the data to be plotted
   vector< Estimate<float> > data (npt);
 
-  // ////////////////////////////////////////////////////////////////////
+  unsigned ndim = 4;
+  unsigned idim = 0;
 
-  for (ipt=0; ipt<npt; ipt++)
-    data[ipt] = calibrator->model[ipt]->backend->get_gamma();
-
-  cpgsvp (xmin, xmax, ybottom, ybottom + yheight);
-
-  plotter.plot (data);
-
-  cpgbox("bcst",0,0,"bcnvst",0,0);
-  cpgmtxt("L",2.5,.5,.5,"Boost");
-
-  ybottom += 0.5*yspace + yheight;
-
-
-  unsigned idim = 0, ndim = 0;
-
-  // ////////////////////////////////////////////////////////////////////
-
-  plotter.clear ();
-
-  for (ipt=0; ipt<npt; ipt++)
-    data[ipt] = calibrator->model[ipt]->backend->get_phi();
-
-  cpgsvp(xmin, xmax, ybottom, ybottom + yheight);
-
-  plotter.plot (data);
-
-  cpgbox("bcst",0,0,"bcnvst",0,0);
-  cpgmtxt("L",2.5,.5,.5,"Rotation");
-
-  ybottom += 0.5*yspace + yheight;
-
-  // ////////////////////////////////////////////////////////////////////
-
-  plotter.clear ();
-
-  ndim = 4;
   for (idim=0; idim<ndim; idim++) {
     for (ipt=0; ipt<npt; ipt++)
       data[ipt] = calibrator->calibrator.source[ipt].get_Estimate(idim);
