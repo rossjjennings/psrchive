@@ -1,3 +1,4 @@
+#include <sys/types.h>
 #include "string_utils.h"
 
 string stringtok (string* instr, const string& delimiters)
