@@ -199,7 +199,7 @@ int coord2str (char* coordstring, unsigned coordstrlen, double ra, double dec,
 
 /*! returns the number of fields successfully parsed into unit_string. */
 int unit2str (char* unit_string, unsigned unit_strlen,
-	      unsigned nfields,
+	      char sign, unsigned nfields,
 	      const int* field_width, const int* field_precision,
 	      const double* field_scale, char separator, double unit)
 {
@@ -218,6 +218,11 @@ int unit2str (char* unit_string, unsigned unit_strlen,
     *unit_string = '-';
     unit_string ++;
   }
+  else if (sign) {
+    *unit_string = '+';
+    unit_string ++;
+  }
+
 
   for (ifield=0; unit_string<end_string && ifield<nfields; ifield++) {
 
@@ -262,8 +267,8 @@ int unit2str (char* unit_string, unsigned unit_strlen,
 /* given a value in radians, returns a string parsed into either
    hh:mm:ss.sss or (-)dd:mm:ss.sss format, as determined by setting
    scale equal to either 24 or 360, respectively */
-int xms2str (char* xms_str, unsigned xms_strlen, double radians,
-	     double scale, unsigned places) 
+int xms2str (char* xms_str, unsigned xms_strlen, char sign,
+             double radians, double scale, unsigned places) 
 {
   int field_width[3] = {2, 2, 2};
   int field_precision[3] = {0, 0, 0};
@@ -273,18 +278,19 @@ int xms2str (char* xms_str, unsigned xms_strlen, double radians,
   field_scale[0] = scale;
 
   radians /= 2.0 * M_PI;
-  return unit2str (xms_str, xms_strlen, 3, field_width, field_precision,
+  return unit2str (xms_str, xms_strlen, sign,
+                   3, field_width, field_precision,
 		   field_scale, ':', radians);
 }
 
 int ra2str (char* rastring, unsigned rastrlen, double ra, unsigned places) 
 {
-  return xms2str (rastring, rastrlen, ra, 24.0, places);
+  return xms2str (rastring, rastrlen, 0, ra, 24.0, places);
 }
 
 int dec2str2 (char* dstring, unsigned dstrlen, double dec, unsigned places) 
 {
-  return xms2str (dstring, dstrlen, dec, 360.0, places);
+  return xms2str (dstring, dstrlen, 1, dec, 360.0, places);
 }
 
 
