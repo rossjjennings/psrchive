@@ -29,7 +29,7 @@ int dms2rad ( char * instr, double * radval)
 	instr = ++ptr;
     }
 
-    if ((nfound = sscanf (instr, "%d%*c%2d%*c%lf", &id, &im, &secs)) != NULL)
+    if ((nfound = sscanf (instr, "%d%*c%2d%*c%lf", &id, &im, &secs)) > 0)
     {
 	*radval = id;
 	if (--nfound)
@@ -89,7 +89,7 @@ int dmserr2rad ( char * instr, char * inerr, double * radval)
     double secs ;
     extern double errscale();
 
-    if ((nfound = sscanf (instr, "%d%*c%2d%*c%lf", &id, &im, &secs)) != NULL)
+    if ((nfound = sscanf (instr, "%d%*c%2d%*c%lf", &id, &im, &secs)) > 1)
       {
 	if (sscanf(inerr,"%lf",radval)!=1)
 	{
