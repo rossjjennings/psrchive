@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Profile.h,v $
-   $Revision: 1.24 $
-   $Date: 2003/01/06 11:59:40 $
+   $Revision: 1.25 $
+   $Date: 2003/02/17 14:24:00 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Profile_h
@@ -10,6 +10,7 @@
 
 #include "toa.h"
 #include "Types.h"
+#include "Reference.h"
 
 namespace Pulsar {
 
@@ -26,7 +27,7 @@ namespace Pulsar {
     contained.  The data in each Profile may still be manipulated through
     public methods.  This liberty may be removed in the near future.
   */
-  class Profile {
+  class Profile : public Reference::Able {
 
   public:
 
