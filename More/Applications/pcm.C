@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pcm.C,v $
-   $Revision: 1.17 $
-   $Date: 2004/01/04 10:20:42 $
+   $Revision: 1.18 $
+   $Date: 2004/01/05 09:47:24 $
    $Author: straten $ */
 
 /*! \file pcm.C 
@@ -619,7 +619,7 @@ int main (int argc, char *argv[]) try {
 
   Reference::To<Pulsar::Archive> solution = model.get_solution (archive_class);
 
-  cerr << "psc: unloading solution to " << solution->get_filename() << endl;
+  cerr << "pcm: unloading solution to " << solution->get_filename() << endl;
   solution->unload( "pcm.fits" );
 
   if (display) {
@@ -732,11 +732,13 @@ int mode_B (const char* standard_filename,
   // the reception calibration class
   Pulsar::PulsarCalibrator model (model_name);
 
+  Reference::To<Pulsar::Archive> standard;
+
+  standard = Pulsar::Archive::load (standard_filename);
+
+  model.set_standard (standard);
+
   Reference::To<Pulsar::Archive> archive;
-
-  archive = Pulsar::Archive::load (standard_filename);
-
-  model.set_standard (archive);
 
   for (unsigned i = 0; i < filenames.size(); i++) try {
 
@@ -751,15 +753,26 @@ int mode_B (const char* standard_filename,
 
     model.add_observation( archive );
 
+    model.calibrate( archive );
+
+    standard->append (archive);
+
+    standard->tscrunch ();
+
   }
   catch (Error& error) {
     cerr << error << endl;
   }
 
+  model.update_solution ();
+
   Reference::To<Pulsar::Archive> solution = model.get_solution (archive_class);
 
-  cerr << "psc: unloading solution to " << solution->get_filename() << endl;
+  cerr << "pcm: unloading solution to pcm.fits" << endl;
   solution->unload( "pcm.fits" );
+
+  cerr << "pcm: unloading updated standard to pcm.std" << endl;
+  standard->unload( "pcm.std" );
 
   return 0;
 }
