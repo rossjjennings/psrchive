@@ -344,18 +344,20 @@ void Pulsar::FITSArchive::load_header (const char* filename)
     }
     status = 0;
   }
-  else
-    obs_ext->telescope = tempstr.get();
-    
+  else {
+    string mystr = tempstr.get();
+    obs_ext->telescope = mystr.substr(mystr.find_first_not_of(" ",0),
+				      mystr.length());
+  }
+
   if (verbose)
-    cerr << "Got telescope: " << tempstr.get() << endl;
-
-  if (strlen(tempstr.get()) == 1)
-    set_telescope_code ( tempstr.get()[0] );
-
+    cerr << "Got telescope: " << obs_ext->telescope << endl;
+  
+  if ((obs_ext->telescope).length() == 1)
+    set_telescope_code ( (obs_ext->telescope).at(0) );
   else
-    set_telescope_code ( Telescope::code(tempstr.get()) );
-
+    set_telescope_code ( Telescope::code((obs_ext->telescope).c_str()) );
+  
   // Antenna ITRF coordinates
   load_ITRFExtension (fptr);
 
