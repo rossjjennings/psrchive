@@ -69,6 +69,22 @@ Pulsar::Archive* Pulsar::BasebandArchive::clone () const
   return new BasebandArchive (*this);
 }
 
+//! Return the number of extensions available
+unsigned Pulsar::BasebandArchive::get_nextension () const
+{
+  return 1;
+}
+
+//! Return a pointer to the specified extension
+const Pulsar::Archive::Extension*
+Pulsar::BasebandArchive::get_extension (unsigned iext) const
+{
+  if (iext != 0)
+    throw Error (InvalidRange, "Pulsar::BasebandArchive::get_extension",
+		 "iext=%d > next=1", iext);
+
+  return &passband;
+}
 
 // /////////////////////////////////////////////////////////////////////////
 //
@@ -255,21 +271,39 @@ void Pulsar::BasebandArchive::backend_load (FILE* fptr)
     if (verbose) cerr << "BasebandArchive::backend_load "
 		      << bhdr.pband_channels << " bandpasses.\n";
 
-    passband.resize (bhdr.pband_channels);
+    passband.resize (bhdr.pband_resolution, bhdr.pband_channels);
 
-    for (int ipb=0; ipb<bhdr.pband_channels; ipb++)
-      if (fread_compressed (fptr, &passband[ipb], swap_endian) < 0)
+    // temporary holding space
+    vector<float> pband;
+
+    for (int ipb=0; ipb<bhdr.pband_channels; ipb++) {
+
+      if (fread_compressed (fptr, &pband, swap_endian) < 0)
 	throw Error (FailedSys, "BasebandArchive::backend_load",
 		     "fread_compressed passband[%d]", ipb);
+
+      passband.set_passband (pband, ipb);
+
+    }
 
   }
 
   if (swap_passband) {
     int nswap = bhdr.pband_resolution / 2;
  
-    for (int ipb=0; ipb<bhdr.pband_channels; ipb++)
+    // temporary holding space
+    vector<float> pband;
+
+    for (int ipb=0; ipb<bhdr.pband_channels; ipb++) {
+
+      pband = passband.get_passband (ipb);
+
       for (int ipt=0; ipt<nswap; ipt++)
-	swap (passband[ipb][ipt], passband[ipb][nswap+ipt]);
+	swap (pband[ipt], pband[nswap+ipt]);
+
+      passband.set_passband (pband, ipb);
+
+    }
   }
 
 
@@ -323,7 +357,7 @@ void Pulsar::BasebandArchive::backend_unload (FILE* fptr) const
   if (bhdr.pband_resolution) {
 
     for (int ipb=0; ipb<bhdr.pband_channels; ipb++)
-      if (fwrite_compressed (fptr, passband[ipb]) < 0)
+      if (fwrite_compressed (fptr, passband.get_passband(ipb)) < 0)
 	throw Error (FailedSys, "BasebandArchive::backend_unload",
 		     "fwrite_compressed passband[%d]", ipb);
 
@@ -339,11 +373,10 @@ void Pulsar::BasebandArchive::backend_unload (FILE* fptr) const
 
 vector<float> Pulsar::BasebandArchive::empty (0);
 
-const vector<float>& Pulsar::BasebandArchive::get_passband (unsigned channel) const
+const vector<float>& 
+Pulsar::BasebandArchive::get_passband (unsigned channel) const
 {
-  if (channel >= passband.size ())
-    return empty;
-  return passband[channel];
+  return passband.get_passband (channel);
 }
 
 const vector<float>& Pulsar::BasebandArchive::get_histogram (unsigned channel) const

@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/Timer/Pulsar/BasebandArchive.h,v $
-   $Revision: 1.3 $
-   $Date: 2003/03/08 11:24:46 $
+   $Revision: 1.4 $
+   $Date: 2003/06/05 13:26:53 $
    $Author: straten $ */
 
 #ifndef __Baseband_Archive_h
@@ -10,6 +10,8 @@
 
 #include "TimerArchive.h"
 #include "baseband_header.h"
+
+#include "Pulsar/Passband.h"
 
 namespace Pulsar {
 
@@ -35,6 +37,18 @@ namespace Pulsar {
 
     //! Returns a pointer to a new copy of self
     virtual Archive* clone () const;
+
+    // //////////////////////////////////////////////////////////////////
+    //
+    // Extension access
+    //
+    // //////////////////////////////////////////////////////////////////
+
+    //! Return the number of extensions available
+    unsigned get_nextension () const;
+
+    //! Return a pointer to the specified extension
+    const Extension* get_extension (unsigned iextension) const;
 
     //! Return the number of passbands
     int get_npassband () const { return bhdr.pband_channels; };
@@ -90,8 +104,8 @@ namespace Pulsar {
     //! Digitization histograms
     vector< vector<float> > dls_histogram;
 
-    //! Average passbands
-    vector< vector<float> > passband;
+    //! Average passbands in Archive::Extension
+    Passband passband;
   
     //! Load BasebandArchive specific information
     void backend_load (FILE* fptr);
