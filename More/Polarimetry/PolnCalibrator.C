@@ -184,8 +184,6 @@ void Pulsar::PolnCalibrator::build (unsigned nchan)
 
       double normdet = norm(det( transformation[ichan]->evaluate() ));
 
-cerr << "normdet=" << normdet << endl;
-
       if ( normdet < 1e-9 || !finite(normdet) ) {
 
 	if (verbose)
