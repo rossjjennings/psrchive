@@ -626,10 +626,8 @@ catch (Error& error) {
 
 void Pulsar::TimerArchive::correct () try {
 
-  Telescope* telescope = get<Telescope>();
-  if (!telescope)
-    throw Error (InvalidState, "Pulsar::TimerArchive::correct",
-		 "no Telescope extension");
+  Telescope* telescope = getadd<Telescope>();
+  telescope->set_coordinates (get_telescope_code());
 
   MJD mjd = start_time();
 
