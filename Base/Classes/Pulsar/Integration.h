@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Integration.h,v $
-   $Revision: 1.14 $
-   $Date: 2002/04/19 08:12:55 $
+   $Revision: 1.15 $
+   $Date: 2002/04/19 12:45:09 $
    $Author: straten $ */
 
 /*
@@ -193,6 +193,17 @@ namespace Pulsar {
     //! Set the folding period (in seconds)
     virtual void set_folding_period (double seconds) { pfold = seconds; }
 
+    //! Get the feed configuration of the receiver
+    Feed::Type get_feed_type () const { return type; }
+    //! Set the feed configuration of the receiver
+    virtual void set_feed_type (Feed::Type _type) { type = _type; }
+
+    //! Get the polarimetric state of the profiles
+    Poln::State get_poln_state () const { return state; }
+    //! Set the polarimetric state of the profiles
+    virtual void set_poln_state (Poln::State _state) { state = _state; }
+
+
   protected:
 
     //! number of polarization measurments
@@ -224,6 +235,9 @@ namespace Pulsar {
 
     //! polarimetric state of profiles
     Poln::State state;
+
+    //! receiver feed type
+    Feed::Type type;
 
     //! The data area
     vector< vector<Profile*> > profiles;

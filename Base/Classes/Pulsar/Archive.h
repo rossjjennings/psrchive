@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Archive.h,v $
-   $Revision: 1.17 $
-   $Date: 2002/04/19 08:12:55 $
+   $Revision: 1.18 $
+   $Date: 2002/04/19 12:45:09 $
    $Author: straten $ */
 
 /*! \mainpage 
@@ -401,6 +401,11 @@ namespace Pulsar {
     //! Returns the total time integrated into all Integrations (in seconds)
     double integration_length() const;
 
+    //! Return the coordinates of the telescope at which observation was made
+    void telescope_coordinates (float* latitude = 0,
+				float* longitude = 0,
+				float* elevation = 0) const;
+    
     // //////////////////////////////////////////////////////////////////
     //
     // pure virtual methods - must be implemented by children

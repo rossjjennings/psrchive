@@ -17,6 +17,9 @@ void Pulsar::Integration::init ()
 
 Pulsar::Integration::~Integration ()
 {
+  if (verbose)
+    cerr << "Pulsar::Integration destructor" << endl;
+
   for (int ipol=0; ipol<npol; ipol++)
     for (int ichan=0; ichan<nchan; ichan++)
       delete profiles[ipol][ichan];
@@ -136,73 +139,12 @@ Pulsar::Profile* Pulsar::Integration::get_Profile (int ipol, int ichan)
 
 vector<Pulsar::Profile*>& Pulsar::Integration::operator[] (Poln::Measure poln)
 {
-  switch (state) 
-    {
+  int index = Poln::get_ipol (state, poln);
 
-    case Poln::Stokes:
-      switch (poln)
-	{
-	case Poln::Si:
-	  return profiles[0];
-	case Poln::Sq:
-	  return profiles[1];
-	case Poln::Su:
-	  return profiles[2];
-	case Poln::Sv:
-	  return profiles[3];
-	default:
-	  break;
-	}
-      break;
+  if (index < 0)
+    throw Error (InvalidPolnState, "Integration::operator[]");
 
-    case Poln::Coherence:
-      switch (poln) 	{
-	case Poln::RR:
-	case Poln::XX:
-	  return profiles[0];
-	case Poln::LL:
-	case Poln::YY:
-	  return profiles[1];
-	case Poln::ReRL:
-	case Poln::ReXY:
-	  return profiles[2];
-	case Poln::ImRL:
-	case Poln::ImXY:
-	  return profiles[3];
-	default:
-	  break;
-	}
-      break;
-  
-    case Poln::PPQQ:
-      switch (poln) 
-	{
-	case Poln::RR:
-	case Poln::XX:
-	  return profiles[0];
-	case Poln::LL:
-	case Poln::YY:
-	  return profiles[1];
-	default:
-	  break;
-	}
-      break;
-      
-    case Poln::Intensity:
-      if (poln == Poln::Si) 
-	return profiles[0];
-      break;
-
-    case Poln::Invariant:
-      if (poln == Poln::SInv || poln == Poln::DetRho) 
-	return profiles[0];
-      break;
-
-    default:
-      break;
-    }
-
-  throw Error (InvalidPolnState, "Integration::operator[]");
+  return profiles[index];
 }
 
 void Pulsar::Integration::fold (int nfold)

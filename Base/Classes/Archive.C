@@ -2,6 +2,8 @@
 #include "Integration.h"
 #include "Error.h"
 
+#include "coord.h"
+
 bool Pulsar::Archive::verbose = false;
 
 void Pulsar::Archive::init ()
@@ -227,4 +229,19 @@ MJD Pulsar::Archive::end_time() const
     throw Error (InvalidState, "Archive::end_time", "no subints");
 
   return subints[0] -> get_end_time();
+}
+
+/*!
+  \retval lat latitude in degrees
+  \retval lon longitude in degrees
+  \retval ele elevation in metres
+*/
+void
+Pulsar::Archive::telescope_coordinates 
+(float* lat, float* lon, float* ele) const
+{
+  int ret = telescope_coords (get_tel_tempo_code(), lat, lon, ele);
+  if (ret < 0)
+    throw Error (FailedCall, "Archive::telescope_coordinates",
+		 "tempo code=%c", get_tel_tempo_code ());
 }
