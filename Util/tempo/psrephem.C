@@ -6,6 +6,7 @@
 #include <math.h>
 
 #include "psrephem.h"
+#include "string_utils.h"
 
 char* psrephem::tempo_pardir = NULL;
 int   psrephem::verbose = 0;
@@ -233,45 +234,47 @@ void psrephem::nofit(){
   }
 }
 
-
-static char*  psre_buffer = NULL;
-static size_t psre_bufsz = 0;
-
-int psrephem::load (FILE* instream, size_t bytes)
+int psrephem::load (FILE* fptr, size_t nbytes)
 {
-  if (bytes < 1)
-    return -1;
-  if (!instream)
-    return -1;
-
-  if (psre_bufsz < bytes) {
-    if (psre_buffer) delete [] psre_buffer;
-    psre_buffer = new char [bytes];
-    if (psre_buffer == NULL) {
-      fprintf (stderr, "psrephem::load could not allocate %d bytes", bytes);
-      perror ("");
-      throw ("psrephem::load memory allocation error");
-    }
-    psre_bufsz = bytes;
-  }
-
-  size_t bio = fread (psre_buffer, 1, bytes, instream);
-  if (bio < bytes) {
-    if (ferror (instream) != 0)
-      perror ("psrephem::load error fread");
-    fprintf (stderr, "psrephem::load fread only %d/%d bytes\n", bio,bytes);
+  string total;
+  if (stringload (&total, fptr, nbytes) < 0)  {
+    fprintf (stderr, "polyco::load error\n");
     return -1;
   }
+  return load (&total);
+}
 
+int psrephem::unload (FILE* fptr) const
+{
+  string out;
+  if (unload(&out) < 0)
+    return -1;
+
+  int size = (int) out.length();
+  int bout = fprintf (fptr, out.c_str());
+  if (bout < size)  {
+    fprintf (stderr, "psrephem::unload(FILE*) ERROR fprintf only %d/%d",
+        bout, size);
+    perror ("");
+    return -1;
+  }
+  fflush (fptr);
+  return bout;
+}
+
+int psrephem::load (string* instr)
+{
   FILE* temp = fopen (psrephem_tmp_fname, "w");
   if (temp == NULL) {
     fprintf (stderr, "psrephem::load error fopen(%s)", psrephem_tmp_fname);
     perror ("");
     return -1;
   }
-  bio = fwrite (psre_buffer, 1, bytes, temp);
+  ssize_t bytes = instr->length();
+
+  ssize_t bio = fwrite (instr->c_str(), 1, bytes, temp);
   if (bio < bytes) {
-    if (ferror (instream) != 0)
+    if (ferror (temp) != 0)
       perror ("psrephem::load error fwrite");
     fprintf (stderr, "psrephem::load fwrite only %d/%d bytes\n", bio,bytes);
     remove (psrephem_tmp_fname);
@@ -289,9 +292,7 @@ int psrephem::load (FILE* instream, size_t bytes)
   return 0;
 }
 
-//int psrephem::load (FILE* instream, size_t bytes)
-
-int psrephem::unload (FILE* outstream, size_t* nbytes) const
+int psrephem::unload (string* outstr) const
 {
   int istat = wr_eph (psrephem_tmp_fname, parmStatus, value_str, value_double,
 		      value_integer, error_double);
@@ -309,60 +310,7 @@ int psrephem::unload (FILE* outstream, size_t* nbytes) const
     return -1;
   }
 
-  if (fseek (temp, 0L, SEEK_END) != 0) {
-    perror ("psrephem::unload error fseek()");
-    remove (psrephem_tmp_fname);
-    return -1;
-  }
-  size_t bytes = ftell (temp);
-  if (verbose)
-    fprintf (stderr, "psrephem::unload size of ephemeris: %d bytes\n", bytes);
-
-  if (psre_bufsz < bytes) {
-    if (psre_buffer) delete [] psre_buffer;
-    psre_buffer = new char [bytes];
-    if (psre_buffer == NULL) {
-      fprintf (stderr, "psrephem::unload could not allocate %d bytes", bytes);
-      perror ("");
-      remove (psrephem_tmp_fname);
-      throw ("psrephem::unload memory allocation error");
-    }
-    psre_bufsz = bytes;
-  }
-
-  if (fseek (temp, 0L, SEEK_SET) != 0) {
-    perror ("psrephem::unload error fseek()");
-    remove (psrephem_tmp_fname);
-    return -1;
-  }
-
-#ifdef _DEBUG
-  fprintf (stderr, "psrephem::unload fread %d bytes\n", bytes);
-#endif
-  size_t bio = fread (psre_buffer, 1, bytes, temp);
-  if (bio < bytes) {
-    if (ferror (outstream) != 0)
-      perror ("psrephem::unload error fread");
-    fprintf (stderr, "psrephem::unload fread only %d/%d bytes\n", bio,bytes);
-    remove (psrephem_tmp_fname);
-    return -1;
-  }
-
-  remove (psrephem_tmp_fname);
-
-#ifdef _DEBUG
-  fprintf (stderr, "psrephem::unload fwrite %d bytes\n", bytes);
-#endif
-  bio = fwrite (psre_buffer, 1, bytes, outstream);
-  if (bio < bytes) {
-    if (ferror (outstream) != 0)
-      perror ("psrephem::unload error fread");
-    fprintf (stderr, "psrephem::unload fwrite only %d/%d bytes\n", bio,bytes);
-    return -1;
-  }
-
-  *nbytes = bytes;
-  return 0;
+  return (int) stringload (outstr, temp);
 }
 
 double psrephem::p(void)
