@@ -40,7 +40,7 @@ void Pulsar::Archive::Agent::report ()
 void Pulsar::Archive::Agent::print_list (FILE* out)
 {
   for (unsigned agent=0; agent<registry.size(); agent++)
-    fprintf (out, " %16s %s\n", registry[agent]->get_name().c_str(),
+    fprintf (out, "%16s   %s\n", registry[agent]->get_name().c_str(),
 	     registry[agent]->get_description().c_str() );
 }
 
