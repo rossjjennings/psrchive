@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ReceptionCalibrator.h,v $
-   $Revision: 1.13 $
-   $Date: 2003/05/06 11:24:48 $
+   $Revision: 1.14 $
+   $Date: 2003/05/16 05:45:16 $
    $Author: straten $ */
 
 #ifndef __ReceptionCalibrator_H
@@ -45,6 +45,9 @@ namespace Pulsar {
 
     //! Get the number of pulse phase bin state constraints
     unsigned get_nstate () const;
+
+    //! Get the number of frequency channels
+    unsigned get_nchan () const;
 
     //! Add the specified pulsar observation to the set of constraints
     void add_observation (const Archive* data);
