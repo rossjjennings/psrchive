@@ -16,7 +16,10 @@ int main ()
 
   unsigned char equiv[4] = { 0x8f, 0x04, 0xc0, 0x14 };
 
-  printf ("uint64: %08x\n", data);
+  printf ("\nThe test starts with the following number:\n\n");
+  printf ("uint64: %08x\n\n", data);
+
+  printf ("The following bits are printed from highest to lowest order.\n");
 
   printf ("bits shifted right    : ");
   for (i=sizeof(uint32)*BITSPERBYTE-1; i>=0; i--) {
@@ -24,9 +27,16 @@ int main ()
     bit = (data >> i) & 0x0001;
     printf ("%d", bit);
   }
+  printf ("\n\n");
 
+  printf ("When the address is cast to an unsigned char*, the bytes will\n");
+#if MACHINE_LITTLE_ENDIAN
+  printf ("have the opposite ordering on a lower endian machine.\n");
+#else
+  printf ("have the same ordering on an uppper endian machine.\n");
+#endif
   x1 = (unsigned char*) &data;
-  printf ("\n\nunsigned char : ");
+  printf ("\nunsigned char : ");
   for (byte=0; byte<4; byte++)
     printf ("%02x ", x1[byte]);
   printf ("\n");
