@@ -51,6 +51,23 @@ void Pulsar::Archive::Agent::init ()
 
   if (!loaded)
     plugin_load ();
+
+  unsigned agent = 0;
+
+  while (agent < registry.size())
+
+    if ( registry[agent]->get_revision() != Archive::get_revision() )  {
+
+      cerr << "Pulsar::Archive::Agent::init " << registry[agent]->get_name() 
+ 	   << " revision=" << registry[agent]->get_revision() 
+ 	   << " != Archive::revision=" << Archive::get_revision() << endl;
+
+      registry.erase( agent );
+      
+    }
+    else
+      agent ++;
+
 }
 
 #endif  // not _PSRCHIVE_STATIC

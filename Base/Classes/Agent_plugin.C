@@ -29,29 +29,33 @@ void Pulsar::Archive::Agent::plugin_load ()
   }
 
   char* env = getenv ("PSRCHIVE_PLUGINS");
+
   if (env) {
+
     if (verbose)
       cerr << "Pulsar::Archive::Agent::plugin_load"
               " PSRCHIVE_PLUGINS=" << env <<endl;
+
     plugins.load (env);
+
+    if (plugins.ok.size())
+      loaded = true;
+
+  }
+  else {
+
+    string path = get_plugin_path ("PSRHOME");
+
+    if (verbose)
+      cerr << "Pulsar::Archive::Agent::plugin_load from " << path << endl;
+
+    plugins.load (path);
+
+    if (plugins.ok.size())
+      loaded = true;
+
   }
 
-  if (plugins.ok.size() != 0)
-    return;
-
-  plugins.load (get_plugin_path ("CVSHOME"));
-
-  if (plugins.ok.size() != 0)
-    return;
-
-  plugins.load (get_plugin_path ("PSRHOME"));
-
-  if (plugins.ok.size() != 0)
-    return;
-
-  plugins.load ("./Pulsar");
-
-  loaded = true;
 }
 
 void Pulsar::Archive::Agent::plugin_report ()
