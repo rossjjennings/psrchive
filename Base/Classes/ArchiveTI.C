@@ -16,7 +16,7 @@ void Pulsar::ArchiveTUI::process (const std::string& command)
   if (value.length())
     attribute->set_value (instance, value);
   else
-    cout << param << "=" << attribute->get_value (instance);
+    cout << " " << param << "=" << attribute->get_value (instance);
 }
 
 void Pulsar::ArchiveTUI::init ()

@@ -45,6 +45,8 @@ int main (int argc, char** argv) try {
       char whitespace[5] = " ,\n\t";
       char* cmd = strtok (optarg, whitespace);
       while (cmd) {
+        if (verbose)
+          cerr << "psredit: parsed command '" << cmd << "'" << endl;
         commands.push_back(cmd);
         cmd = strtok (NULL, whitespace);
       }
@@ -82,16 +84,22 @@ int main (int argc, char** argv) try {
     Reference::To<Pulsar::Archive> archive;
     archive = Pulsar::Archive::load(filenames[ifile]);
 
+    cout << archive->get_filename();
+
     tui.set_instance (archive);
 
-    for (unsigned j = 0; j < commands.size(); j++)
+    for (unsigned j = 0; j < commands.size(); j++)  {
+      if (verbose)
+        cerr << "psredit: processing command '" << commands[j] << "'" << endl;
       tui.process (commands[j]);
+    }
+
+    cout << endl;
 
   } // for each archive
 
   catch (Error& error) {
-    if (verbose)
-      cerr << error << endl;
+    cout << " " << error.get_message() << endl;
   }
 
   return 0;
