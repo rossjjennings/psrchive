@@ -1,6 +1,6 @@
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/Timer/timer.h,v $
-   $Revision: 1.11 $
-   $Date: 2004/03/05 19:41:23 $
+   $Revision: 1.12 $
+   $Date: 2004/07/12 11:55:57 $
    $Author: straten $ */
 
 /* include file for the main timer structure                            */
@@ -63,6 +63,21 @@
 #define PARA_CORRECTED    0x0004  /* parallactic angle */
 #define FEED_CORRECTED    0x0008  /* feed angle */
 #define DEDISPERSED       0x0010  /* dispersion delays removed */
+
+/* bit fields in timer.calibrated flag
+
+   This interpretation of the calibrated flag was introduced on
+   23-06-2004 by Willem van Straten.
+
+   IMPORTANT NOTE: the first bit is not used in order to distinguish
+   between old timer archives (in which calibrated == 1 implied
+   POLN_CALIBRATED && FLUX_CALIBRATED) and new timer archive (in which
+   one does not necessarily imply the other).
+
+*/
+#define POLN_CALIBRATED   0x0002  /* polarimetric calibration performed */
+#define FLUX_REFERENCE    0x0004  /* flux is in units of reference signal */
+#define FLUX_CALIBRATED   0x0008  /* flux is in Jansky */
 
 #define RCVR_ID_STRLEN 8
 

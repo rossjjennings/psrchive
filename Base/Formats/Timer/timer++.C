@@ -136,6 +136,9 @@ int Timer::load (FILE* fptr, struct timer* hdr, bool big_endian)
     Timer::set_MJD (*hdr, Timer::get_MJD (*hdr) - seconds_per_file);
   }
 
+  if (hdr->calibrated == 1)
+    hdr->calibrated = FLUX_CALIBRATED & POLN_CALIBRATED;
+
   return 0;
 }
 
