@@ -423,6 +423,18 @@ int MJD::Construct (const utc_t& utc)
   return Construct (greg);
 }
 
+MJD::MJD (time_t time)
+{
+  if (Construct (time) < 0)
+    throw ("MJD::MJD(time_t) construct error");
+}
+
+int MJD::Construct (time_t time)
+{
+  struct tm date = *gmtime(&time);
+  return Construct (date);
+}
+
 // construct an MJD from a gregorian
 MJD::MJD (const struct tm& greg)
 {
