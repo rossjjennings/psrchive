@@ -7,7 +7,7 @@ AC_DEFUN([SWIN_LIB_SLA],
 
   AC_MSG_CHECKING([for SLA installation])
 
-  SLA_CFLAGS=""
+  SLA_CFLAGS="-I/usr/local/src/include"
   SLA_LIBS="-lsla"
 
   ac_save_CFLAGS="$CFLAGS"
@@ -20,7 +20,7 @@ AC_DEFUN([SWIN_LIB_SLA],
               [have_sla="yes: C"], [have_sla=no])
   
   if test "$have_sla" = no; then
-
+    SLA_CFLAGS=""
     SLA_LIBS="-lsla $FLIBS"
     LIBS="$ac_save_LIBS $SLA_LIBS"
 
