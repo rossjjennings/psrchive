@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/tempo++.h,v $
-   $Revision: 1.12 $
-   $Date: 2002/10/12 01:09:09 $
+   $Revision: 1.13 $
+   $Date: 2003/01/10 14:23:36 $
    $Author: straten $ */
 
 #ifndef __TEMPO_PP_H
@@ -43,6 +43,21 @@ namespace Tempo {
 
   // default value passed to predict functions
   extern MJD unspecified;
+
+  // base directory in which tempo will work
+  extern string tmpdir;
+
+  // file to which tempo stderr output will be redirected
+  extern string stderr_filename;
+
+  // file to which tempo ephemeris files are written
+  extern string ephem_filename;
+
+  //! Run tempo using the given arguments and input
+  /*! tempo is run with a working directory given by
+    Tempo::get_directory, so input files should be written here and
+    output files (created by tempo) can be found here. */
+  void tempo (const string& arguments, const string& input);
 
   // given a tempo ephemeris, generate toas over the range of MJD given
   // with characteristics specififed by rms and error.
@@ -90,3 +105,4 @@ namespace Tempo {
 }
 
 #endif
+

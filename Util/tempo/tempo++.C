@@ -9,7 +9,10 @@
 #include <unistd.h>
 
 #include "tempo++.h"
+#include "Error.h"
 #include "genutil.h"
+#include "string_utils.h"
+#include "fsleep.h"
 
 // //////////////////////////////////////////////////////////////////////
 // members of the Tempo namespace
@@ -18,6 +21,15 @@ bool   Tempo::verbose = false;
 bool   Tempo::debug = false;
 string Tempo::extension (".tpo");
 MJD    Tempo::unspecified;
+
+// base directory in which TEMPO will work
+string Tempo::tmpdir = "/tmp/tempo/";
+
+// file to which tempo ephemeris will be written
+string Tempo::ephem_filename = "pulsar.eph";
+
+// file to which tempo stderr will be redirected
+string Tempo::stderr_filename = ".stderr";
 
 // //////////////////////////////////////////////////////////////////////
 // static storage of the tempo system call.
@@ -103,7 +115,7 @@ string Tempo::get_directory ()
 
   if (!directory.length()) {
     char* userid = getenv ("USER");
-    if (userid)
+    if (!userid)
       userid = unknown;
 
     directory = string ("/tmp/tempo/") + userid;
@@ -116,3 +128,49 @@ string Tempo::get_directory ()
   return directory;
 }
 
+
+// run tempo with the given arguments
+void Tempo::tempo (const string& arguments, const string& input)
+{
+  // start with a clean working directory
+  removedir (get_directory().c_str());
+  makedir (get_directory().c_str());
+
+  string runtempo = "cd " + get_directory() + "; "
+    + get_system() + " " + arguments;
+
+  if (!Tempo::verbose)
+    runtempo += " > /dev/null 2> " + stderr_filename;
+
+  if (!input.empty()) {
+    string tmp_input = input;
+    if (input[input.length()-1] != '\n')
+      tmp_input += '\n';
+    runtempo += " << EOD\n" + tmp_input + "EOD\n";
+  }
+
+  if (verbose)
+    cerr << "Tempo::tempo system (" << runtempo << ")" << endl;
+
+  int retries = 3;
+  string errstr;
+
+  while (retries) {    
+    int err = system (runtempo.c_str());
+    if (!err)
+      return;
+
+    // else an error occured
+    if (err < 0)
+      errstr = strerror (err);
+    else
+      errstr = stringprintf ("\n  Tempo returns err code %i", WIFEXITED(err));
+    
+    fsleep (5e-4);
+    retries --; 
+  }
+
+  // the above loop finished without a successful return
+  throw Error (FailedCall, "Tempo::tempo", "system (\"" + runtempo + "\")"
+	       " failed: " + errstr);
+}
