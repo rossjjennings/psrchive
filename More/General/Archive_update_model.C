@@ -147,11 +147,6 @@ void Pulsar::Archive::update_model (const MJD& time, bool clear_model)
   else {
 
     cout << "Warning: using default values to build polyco" << endl;
-    if (verbose) {
-      cout << "Using nspan  = " << nspan << endl;
-      cout << "Using ncoeff = " << ncoeff << endl;
-      cout << "Using maxha  = " << maxha << endl;
-    }
 
     model = new polyco;
 
@@ -160,6 +155,12 @@ void Pulsar::Archive::update_model (const MJD& time, bool clear_model)
     ncoeff  = 12;
     freq    = get_centre_frequency();
     nspan   = 960;
+
+    if (verbose) {
+      cout << "Using nspan  = " << nspan << endl;
+      cout << "Using ncoeff = " << ncoeff << endl;
+      cout << "Using maxha  = " << maxha << endl;
+    }
 
   }
 
