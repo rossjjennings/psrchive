@@ -1,6 +1,7 @@
 #include <math.h>
 
 #include "Pulsar/Profile.h"
+#include "Pulsar/Calculator.h"
 #include "Error.h"
 
 #include "model_profile.h"
@@ -163,14 +164,13 @@ double Pulsar::Profile::TimeShift (const Profile& std, float& error,
 
   /*
 
-  // The error estimate is somewhat speculative... It is
+  // This error estimate is somewhat speculative... It is
   // computed as the full width at half maximum of the
   // parabola, assuming the baseline is the average level
   // of the two bins either side the maximum bin in the 
   // correlation function.
 
-  double height = y2 - (y1 + y3) / 2.0;
-  height /= 2.0;
+  double height = ((y1 + y3) / 2.0);
 
   if ((D - height)/E < 0.0) {
     throw Error(FailedCall, "Profile::TimeShift",
@@ -178,9 +178,14 @@ double Pulsar::Profile::TimeShift (const Profile& std, float& error,
   }
   
   // The error in phase units
-  error = float(2.0 * sqrt((D - height)/E));
+  error = (float(2.0 * sqrt((D - height)/E)))/2.0;
+
+  // Essentially arbitrary scaling factor
+  error /= 2.0;
 
   */
+
+  /*
 
   // This estimate of the error uses the gradient of the
   // parabola as a measure of the goodness of fit. The
@@ -194,6 +199,60 @@ double Pulsar::Profile::TimeShift (const Profile& std, float& error,
   double s1 = fabs(2.0 * A * (F-(1.0/get_nbin())));
   
   error = (1.0 / (s1*500.0));
+
+  */
+
+  // This estimate of the error is even simpler... Hopefully
+  // it will overcome the limitations of the other two. The
+  // slope-based method suffers from problems in absolute
+  // offset... when the peak of the correlation function is
+  // very high, the slope is artificially overestimated.
+  // The width-based method doesn't scale properly because
+  // it is locked too firmly to the bin width.
+  //
+  // The estimate defined here simply involves calculating when
+  // the correlation function drops by a small fixed fraction
+  // of its own peak value.
+
+  float fracdrop = 1e-6;
+  float height = D - (D * fracdrop);
+
+  if ((D - height)/E < 0.0) {
+    throw Error(FailedCall, "Profile::TimeShift",
+		"aborting before floating exception");
+  }
+
+  // The error in phase units
+  float errwidth = (float(2.0 * sqrt((D - height)/E)))/2.0;
+
+
+  // The above doesn't work either, it is too insensitive to
+  // poor parabolic fits. The next method estimates the error
+  // by computing the standard deviation of the correlation
+  // function points companed to the parabolic model.
+
+  vector<float> parb;
+  vector<float> real;
+  vector<float> diff;
+
+  for (int i = -6; i < 6; i++) {
+    real.push_back(ptr->get_amps()[(maxbin + i)%get_nbin()]);
+    float x = float((maxbin + i)%get_nbin())/float(get_nbin());
+    parb.push_back(D - E*(x-F)*(x-F));
+  }
+
+  for (unsigned i = 0; i < parb.size(); i++) {
+    diff.push_back(real[i] - parb[i]);
+  }
+
+  // We divide by 6.0 in an unjustified manner...
+  float errfit = Pulsar::SampleStdDev(diff) / D;
+  errfit /= 6.0;
+
+  // The real error is assumed to be a quadrature sum of the
+  // width error and fit error.
+
+  error = sqrt(errfit*errfit + errwidth*errwidth);
 
   // The shift in phase units, wrapped to be between -0.5 and 0.5
   if (F < -0.5)

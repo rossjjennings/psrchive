@@ -11,6 +11,8 @@
 #include "Pulsar/Integration.h"
 #include "Pulsar/Profile.h"
 #include "Pulsar/Plotter.h"
+#include "Pulsar/SyntheticProfile.h"
+#include "Pulsar/box-muller.h"
 #include "toa.h"
 #include "Error.h"
 #include "minmax.h"
@@ -20,7 +22,8 @@ int main(int argc, char** argv) {
   bool display = false;
   bool verbose = false;
 
-  bool stdflag = false;
+  bool stdflag   = false;
+  bool synthetic = false;
 
   Reference::To<Pulsar::Archive> stdarch;
   Reference::To<Pulsar::Profile> stdprof;
@@ -29,7 +32,7 @@ int main(int argc, char** argv) {
   
   vector<string> archives;
   
-  while ((gotc = getopt(argc, argv, "hvVDs:")) != -1) {
+  while ((gotc = getopt(argc, argv, "hvVDs:S")) != -1) {
     switch (gotc) {
     case 'h':
       cout << "A program for testing the TimeDomain TOA algorithm" << endl;
@@ -39,6 +42,7 @@ int main(int argc, char** argv) {
       cout << "  -V               Very verbose mode"               << endl;
       cout << "  -D               Display results"                 << endl;
       cout << "  -s               Standard profile"                << endl;
+      cout << "  -S               Use synthetic profiles"          << endl;
       return (-1);
       break;
     case 'v':
@@ -63,6 +67,10 @@ int main(int argc, char** argv) {
 	return (-1);
       }
       break;
+    case 'S':
+      synthetic = true;
+      stdflag   = true;
+      break;
       
     default:
       cout << "Unrecognised option" << endl;
@@ -79,7 +87,7 @@ int main(int argc, char** argv) {
   for (int ai=optind; ai<argc; ai++)
     dirglob (&archives, argv[ai]);
   
-  if (archives.empty()) {
+  if (archives.empty() && !synthetic) {
     cerr << "No archives were specified" << endl;
     exit(-1);
   }
@@ -87,47 +95,63 @@ int main(int argc, char** argv) {
   if (display)
     cpgopen("?");
   
-  Reference::To<Pulsar::Archive> data;
+  vector<Reference::To<Pulsar::Profile> > profs;
 
-  for (unsigned i = 0; i < archives.size(); i++) {
+  if (!synthetic) {
     
-    // Load in a file
-
-    try {
+    Reference::To<Pulsar::Archive> data;
+    
+    for (unsigned i = 0; i < archives.size(); i++) {
+      // Load in a file
       
-      data = Pulsar::Archive::load(archives[i]);
-      data->centre();
+      try {
+	
+	data = Pulsar::Archive::load(archives[i]);
+	data->centre();
+	
+      }
+      catch (Error& error) {
+	cerr << error << endl;
+	continue;
+      }
+      
+      profs.push_back(new Pulsar::Profile(data->total()->get_Profile(0,0,0)));
+    }
+  }
+  else {
+    bmrng mygen;
+    SyntheticProfile fakep(1024, 10.0, 100.0, 512+(100.0*mygen.rand()));
+    SyntheticProfile fakes(1024, 10.0, 100.0, 512+(100.0*mygen.rand()));
 
-    }
-    catch (Error& error) {
-      cerr << error << endl;
-      continue;
-    }
+    fakep.build();
+    fakep.add_noise();
+    profs.push_back(new Pulsar::Profile(fakep.get_Profile()));
     
-    float* corr = new float[data->get_nbin()];
-    float* bins = new float[data->get_nbin()];
-    float* parb = new float[data->get_nbin()];
+    fakes.build();
+    fakes.add_noise();
+    stdprof = fakes.get_Profile().clone();
+  }
+    
+  for (unsigned i = 0; i < profs.size(); i++) {
+    
+    float* corr = new float[profs[i]->get_nbin()];
+    float* bins = new float[profs[i]->get_nbin()];
+    float* parb = new float[profs[i]->get_nbin()];
     float* fn   = new float[3];
 
-    string args;
+    double shift = 0.0;
+    float   error = 0.0;
+    
+    shift = profs[i]->TimeShift(*stdprof, error, corr, fn);
 
-    Tempo::toa toa = data->total()->
-      get_Profile(0,0,0)->tdt(*stdprof,
-			      data->get_Integration(0)->get_epoch(),
-			      data->get_Integration(0)->get_folding_period(),
-			      data->get_telescope_code(), 
-			      args, 
-			      Tempo::toa::Parkes,
-			      corr,
-			      fn);
-    toa.unload(stdout);
+    unsigned nbin = profs[i]->get_nbin();
 
-    for (unsigned i = 0; i < data->get_nbin(); i++) {
-      bins[i] = float(i)/data->get_nbin();
-      parb[i] = fn[0] - fn[1]*(bins[i]-fn[2])*(bins[i]-fn[2]);
-      //parb[i] = fn[0]*bins[i]*bins[i] + fn[1]*bins[i] + fn[2];
+    for (unsigned j = 0; j < nbin; j++) {
+      bins[j] = float(j)/float(nbin);
+      parb[j] = fn[0] - fn[1]*(bins[j]-fn[2])*(bins[j]-fn[2]);
+      //parb[j] = fn[0]*bins[j]*bins[j] + fn[1]*bins[j] + fn[2];
     }
-
+    
     if (display) {
 
       cpgsch(1.5);
@@ -140,16 +164,17 @@ int main(int argc, char** argv) {
       float ymin = 0.0;
       float ymax = 0.0;
 
-      findminmax(corr, corr+data->get_nbin()-1, ymin, ymax);
+      findminmax(corr, corr+nbin-1, ymin, ymax);
 
       ymax += (ymax-ymin)/10.0;
 
       cpgswin(0.0,1.0,ymin,ymax);
       cpgbox ("BCNST", 0.0, 0, "BCNST", 0.0, 0);
+      cpglab("", "", "Cross Correlation");
 
-      cpgline(data->get_nbin(), bins, corr);
+      cpgline(nbin, bins, corr);
       cpgsci(2);
-      cpgline(data->get_nbin(), bins, parb);
+      cpgline(nbin, bins, parb);
       cpgsci(1);
 
       cpgpanl(1,2);
@@ -159,11 +184,11 @@ int main(int argc, char** argv) {
       int   maxbin = 0;
       ymax = 0.0;
 
-      for (unsigned i = 0; i < data->get_nbin(); i++) {
-	if (corr[i] > ymax) {
-	  ymax = corr[i];
-	  maxbin = i;
-	  maxphs = float(i)/float(data->get_nbin());
+      for (unsigned j = 0; j < nbin; j++) {
+	if (corr[j] > ymax) {
+	  ymax = corr[j];
+	  maxbin = j;
+	  maxphs = float(j)/float(nbin);
 	}
       }
 
@@ -173,8 +198,8 @@ int main(int argc, char** argv) {
       if (binmin < 0)
 	binmin = 0;
 
-      if (binmax > int(data->get_nbin())-1)
-	binmax = data->get_nbin()-1;
+      if (binmax > int(nbin)-1)
+	binmax = nbin-1;
 
       findminmax(&corr[binmin], &corr[binmax], ymin, ymax);
 
@@ -185,32 +210,30 @@ int main(int argc, char** argv) {
 
       cpgswin(phsmin, phsmax, ymin, ymax);
       cpgbox ("BCNST", 0.0, 0, "BCNST", 0.0, 0);
+      cpglab("", "", "Interpolation Region");
       
-      for (int i = binmin; i < binmax; i++) {
-	cpgpt1(bins[i], corr[i], 0);
+      for (int j = binmin; j < binmax; j++) {
+	cpgpt1(bins[j], corr[j], 0);
       }
 
-      float stepsize = (phsmax-phsmin) / float(data->get_nbin());
+      float stepsize = (phsmax-phsmin) / float(nbin);
       
-      for (unsigned i = 0; i < data->get_nbin(); i++) {
-	bins[i] = phsmin + float(i)*stepsize;
-	parb[i] = fn[0] - fn[1]*(bins[i]-fn[2])*(bins[i]-fn[2]);
-	//parb[i] = fn[0]*bins[i]*bins[i] + fn[1]*bins[i] + fn[2];
+      for (unsigned j = 0; j < nbin; j++) {
+	bins[j] = phsmin + float(j)*stepsize;
+	parb[j] = fn[0] - fn[1]*(bins[j]-fn[2])*(bins[j]-fn[2]);
+	//parb[i] = fn[0]*bins[j]*bins[j] + fn[1]*bins[j] + fn[2];
       }
 
       cpgsci(2);
-      cpgline(data->get_nbin(), bins, parb);
+      cpgline(nbin, bins, parb);
       cpgsci(3);
       cpgsls(2);
       cpgmove(fn[2], ymin);
       cpgdraw(fn[2], ymax);
 
-      float err = toa.get_error() / 
-	(1e6 * data->get_Integration(0)->get_folding_period());
-
       cpgsci(2);
       cpgsls(1);
-      cpgerr1(5, fn[2], (ymin+ymax)/2.0, err, 2.0);
+      cpgerr1(5, fn[2], (ymin+ymax)/2.0, error, 2.0);
 
       // Draw the profiles
 
@@ -219,10 +242,35 @@ int main(int argc, char** argv) {
       Pulsar::Plotter plotter;
 
       cpgsvp(0.525,0.7,0.5,0.9);
-      plotter.plot(data->total()->get_Profile(0,0,0));
+      cpgsci(1);
+      cpgbox("BCT", 0.0, 0, "BCT", 0.0, 0);
+      cpglab("", "", "Observed Profile");
+      cpgsci(7);
+      plotter.plot(profs[i]);
 
       cpgsvp(0.725,0.9,0.5,0.9);
+      cpgsci(1);
+      cpgbox("BCT", 0.0, 0, "BCT", 0.0, 0);
+      cpglab("", "", "Standard Profile");
+      cpgsci(7);
       plotter.plot(stdprof);
+
+      cpgsvp(0.525,0.9,0.1,0.4);
+      cpgsci(1);
+      cpgsch(2.0);
+
+      char* useful = new char[64];
+      sprintf(useful, "%f", shift);
+
+      cpgmtxt("T", -2.0, 0.1, 0.0, "Shift = ");
+      cpgmtxt("T", -2.0, 0.275, 0.0, useful);
+      cpgmtxt("T", -2.0, 0.55, 0.0, "Phase Units");
+
+      sprintf(useful, "%f", error);
+      
+      cpgmtxt("T", -3.5, 0.1, 0.0, "Error = ");
+      cpgmtxt("T", -3.5, 0.275, 0.0, useful);
+      cpgmtxt("T", -3.5, 0.55, 0.0, "Phase Units");
     }
   }
 }
