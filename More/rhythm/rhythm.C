@@ -251,7 +251,13 @@ Rhythm::Rhythm (QApplication* master, QWidget* parent, int argc, char** argv) :
   FILE* fptr = popen("ls -1 *.std", "r");
   if (ferror(fptr)==0) {
     while(fscanf(fptr, "%s\n", temp) == 1) {
-      the_stds.push_back(new Pulsar::Profile(Pulsar::Archive::load(temp)->total()->get_Profile(0,0,0)));
+      try {
+	the_stds.push_back(new Pulsar::Profile(Pulsar::Archive::load(temp)
+					       ->total()->get_Profile(0,0,0)));
+      }
+      catch (Error& error) {
+	cerr << "Could not open " << temp << endl;
+      }
     }
   }
 

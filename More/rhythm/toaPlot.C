@@ -92,7 +92,7 @@ void toaPlot::plotter ()
     xlab += "Parallactic Angle (degrees)";
     break;
   case PointNumber:
-    xlab += "TOA List Index";
+    xlab += "Integration Number";
     break;
   }
   
