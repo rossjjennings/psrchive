@@ -91,6 +91,12 @@ void Pulsar::IntegrationManager::append (const IntegrationManager* more)
   set_nsubint (subints.size());
 }  
 
+void Pulsar::IntegrationManager::manage (Integration* integration)
+{
+  subints.push_back( integration );
+  set_nsubint( subints.size() );
+}
+
 /*!
   If any current dimension is greater than that requested, the Profiles
   will be destroyed and the dimension resized.  If any current dimension is
