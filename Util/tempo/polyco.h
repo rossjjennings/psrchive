@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/polyco.h,v $
-   $Revision: 1.20 $
-   $Date: 2003/06/04 04:06:58 $
-   $Author: cwest $ */
+   $Revision: 1.21 $
+   $Date: 2003/12/09 00:53:39 $
+   $Author: hknight $ */
 
 #ifndef __POLY_H
 #define __POLY_H
@@ -89,6 +89,9 @@ public:
 
   //! copy constructor
   polynomial (const polynomial& poly) { operator = (poly); }
+
+  //! Hack constructor for making a search-data polyco
+  polynomial(MJD _reftime, float _dm, double _f0, int _telescope=7);
 
   //! destructor
   ~polynomial() {}
@@ -181,12 +184,15 @@ class polyco : public Reference::Able {
   polyco () {}
   polyco (const polyco& poly) { operator = (poly); }
 
+  //! Hack constructor for use on search data
+  polyco::polyco(MJD _reftime, float _dm, double _f0, int _telescope=7){ pollys.push_back( polynomial(_reftime,_dm,_f0,_telescope) ); } 
+
   //! Load in polycos
   polyco (const char* id);
   polyco (const string& id);
   polyco& operator = (const polyco& poly);
 
-  ~polyco() {}
+  virtual ~polyco() {}
 
   //! these functions return the number of polynomials successfully loaded
   int load (const char* filename, size_t nbytes=0);
@@ -214,8 +220,8 @@ class polyco : public Reference::Able {
   const polynomial& best (const MJD &t, const string& psr = anyPsr) const;
   const polynomial& best (const Phase &p, const string& psr = anyPsr) const;
 
-  int i_nearest (const MJD &t,   const string& psrname = anyPsr) const;
-  int i_nearest (const Phase &p, const string& psrname = anyPsr) const;
+  virtual int i_nearest (const MJD &t,   const string& psrname = anyPsr) const;
+  virtual int i_nearest (const Phase &p, const string& psrname = anyPsr) const;
 
   double doppler_shift (const MJD& t, const string& psr = anyPsr) const
     { return best(t, psr).get_doppler_shift(); };
