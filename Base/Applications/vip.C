@@ -5,6 +5,8 @@
 #include "dirutil.h"
 #include "string_utils.h"
 
+#include <unistd.h>
+
 void usage ()
 {
   cout <<
