@@ -28,7 +28,8 @@ float Pulsar::Profile::peak_edge_threshold = 0.1;
   \retval rise bin at which the cummulative power last remains above threshold1
   \retval fall bin at which the cummulative power first falls below threshold2
 
-  \post On success, this method will return rise < fall */
+  \post On success, this method will return rise < fall
+*/
 void Pulsar::Profile::find_peak_edges (int& rise, int& fall) const
 {
   // the search for the edge is performed twice.
@@ -37,8 +38,9 @@ void Pulsar::Profile::find_peak_edges (int& rise, int& fall) const
   // the mean is removed from each amplitude
   float min_amp = mean ( find_min_phase() );
 
-  // set the thresholds
-  double tot_amp = sum ();
+  // the total power under the pulse
+  double tot_amp = sum() - double(min_amp) * double(nbin);
+  // set the thresholds for the search
   double rise_threshold = double(peak_edge_threshold) * tot_amp;
   double fall_threshold = double(1.0-peak_edge_threshold) * tot_amp;
 
@@ -72,6 +74,9 @@ void Pulsar::Profile::find_peak_edges (int& rise, int& fall) const
     for (ibin=nbin-1; ibin>=0; ibin--) 
       if (cumu[ibin] > fall_threshold) 
 	ifall[itry] = ibin;
+
+cerr << "iten=" << irise[itry] << " inin=" << ifall[itry] << endl;
+
 
     // do it again; this time starting half way along.
     istart = nbin/2;
