@@ -4,6 +4,8 @@
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
 #include "Pulsar/Profile.h"
+
+#include "templates.h"
 #include "Error.h"
 
 /*! When true, the FluxCalibrator constructor will first calibrate the
@@ -81,7 +83,8 @@ void Pulsar::FluxCalibrator::add_observation (const Archive* archive)
 		 "is not a FluxCal");
 
   string reason;
-  if (calibrator && !calibrator->calibrator_match (archive, reason))
+  if (calibrator && !(calibrator->calibrator_match (archive, reason) &&
+		      calibrator->processing_match (archive, reason)))
     throw Error (InvalidParam, "Pulsar::FluxCalibrator::add_observation",
 		 "mismatch between\n\t" + calibrator->get_filename() +
                  " and\n\t" + archive->get_filename() + reason);
@@ -179,9 +182,10 @@ void Pulsar::FluxCalibrator::calibrate (Archive* arch)
 
   string reason;
   if (!calibrator->calibrator_match (arch, reason))
-    throw Error (InvalidParam, "Pulsar::FluxCalibrator", "Pulsar::Archive='"
-		 + calibrator->get_filename() + "'\ndoes not mix with '"
-		 + arch->get_filename() + reason);
+    throw Error (InvalidParam, "Pulsar::FluxCalibrator::add_observation",
+		 "mismatch between calibrator\n\t" 
+		 + calibrator->get_filename() +
+                 " and\n\t" + arch->get_filename() + reason);
 
   create (arch->get_nchan());
 
@@ -219,21 +223,47 @@ void Pulsar::FluxCalibrator::create (unsigned required_nchan)
     throw Error (InvalidState, "Pulsar::FluxCalibrator::calibrate",
                  "no FluxCal-Off data");
 
-  ratio_on.resize (nchan);
-  ratio_off.resize (nchan);
-  
-  for (unsigned ichan=0; ichan<nchan; ++ichan) {
-    ratio_on[ichan] = mean_ratio_on[ichan].get_Estimate();
-    ratio_off[ichan] = mean_ratio_off[ichan].get_Estimate();
+  vector<MeanEstimate<double> > temp_ratio_on;
+  vector<MeanEstimate<double> > temp_ratio_off;
+
+  vector<MeanEstimate<double> >& use_ratio_on = mean_ratio_on;
+  vector<MeanEstimate<double> >& use_ratio_off = mean_ratio_off;
+
+  if (required_nchan < nchan) {
+
+    unsigned nscrunch = nchan / required_nchan;
+    if (nchan % required_nchan)
+      throw Error (InvalidState, "Pulsar::FluxCalibrator::calibrate",
+		   "non-integer scrunch factor not yet implemented");
+
+    if (verbose)
+      cerr << "Pulsar::FluxCalibrator::calibrate required nchan="
+	   << required_nchan << " < nchan=" << nchan 
+	   << " nscrunch=" << nscrunch << endl;
+
+    temp_ratio_on = mean_ratio_on;
+    scrunch (temp_ratio_on, nscrunch);
+    use_ratio_on = temp_ratio_on;
+
+    temp_ratio_off = mean_ratio_off;
+    scrunch (temp_ratio_off, nscrunch);
+    use_ratio_off = temp_ratio_off;
+
+  }
+  else if (required_nchan > nchan)
+    throw Error (InvalidState, "Pulsar::FluxCalibrator::create",
+		 "Cannot calibrate with required nchan=%d > nchan=%d",
+		 required_nchan, nchan);
+
+  ratio_on.resize (required_nchan);
+  ratio_off.resize (required_nchan);
+
+  for (unsigned ichan=0; ichan<required_nchan; ++ichan) {
+    ratio_on[ichan] = use_ratio_on[ichan].get_Estimate();
+    ratio_off[ichan] = use_ratio_off[ichan].get_Estimate();
   }
 
-  if (ratio_on.size() == required_nchan) {
-    calculate (ratio_on, ratio_off);
-    return;
-  }
-
-  throw Error (InvalidState, "Pulsar::FluxCalibrator::create",
-	       "Cannot currently calibrate archives with different nchan");
+  calculate (ratio_on, ratio_off);
 
 }
 
