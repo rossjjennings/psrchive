@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Vector.h,v $
-   $Revision: 1.7 $
-   $Date: 2004/04/23 13:27:40 $
+   $Revision: 1.8 $
+   $Date: 2004/04/28 14:12:04 $
    $Author: straten $ */
 
 #ifndef __Vector_H
@@ -53,12 +53,14 @@ public:
   */
 
   //! Scalar multiplication
-  Vector& operator *= (T a)
+  template<typename U>
+  Vector& operator *= (const U& a)
     { for (unsigned i=0; i<N; i++) x[i] *= a; return *this; }
 
   //! Scalar division
-  Vector& operator /= (T a)
-    { T d = 1.0; d/=a;  return operator *= (d); }
+  template<typename U>
+  Vector& operator /= (const U& a)
+    { for (unsigned i=0; i<N; i++) x[i] /= a; return *this; }
 
   //! Equality
   bool operator == (const Vector& b) const
