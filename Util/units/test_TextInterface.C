@@ -113,7 +113,7 @@ int main () try {
 
   std::string teststring = "test of TextInterface::import passed";
 
-  getset.set_value ("text", teststring);
+  getset.set_value ("ext:text", teststring);
 
   cerr << test.ext.get_text() << endl;
 
@@ -122,7 +122,7 @@ int main () try {
     return -1;
   }
 
-  if (getset.get_value("text") != teststring) {
+  if (getset.get_value("ext:text") != teststring) {
     cerr << "test_TextInterface ERROR!" << endl;
     return -1;
   }

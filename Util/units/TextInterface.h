@@ -239,7 +239,8 @@ namespace TextInterface {
     void set_instance (C* c);
 
     //! Import a new component interface
-    void import (Component<C>* c) { components.push_back (c); }
+    void import (Component<C>* c) 
+      { components.push_back (c); c->extract(instance); }
 
   protected:
 
@@ -269,9 +270,9 @@ template<class C>
 TextInterface::Component<C>* 
 TextInterface::CompositeGetSet<C>::find (std::string& name) const
 {
-  string temp = name;
-  string cname = stringtok (temp, ": \t\n");
-  string aname = stringtok (temp, " \t\n");
+  std::string temp = name;
+  std::string cname = stringtok (temp, ": \t\n");
+  std::string aname = stringtok (temp, " \t\n");
 
   if (!aname.length())
     return 0;
@@ -290,7 +291,7 @@ template<class C>
 std::string 
 TextInterface::CompositeGetSet<C>::get_value (const std::string& name) const
 {
-  string temp = name;
+  std::string temp = name;
   Component<C>* component = find (temp);
   if (component)
     return component->get_value (temp);
@@ -302,8 +303,9 @@ template<class C>
 void TextInterface::CompositeGetSet<C>::set_value (const std::string& name,
 						   const std::string& value)
 {
-  string temp = name;
+  std::string temp = name;
   Component<C>* component = find (temp);
+
   if (component)
     component->set_value (temp, value);
   else
