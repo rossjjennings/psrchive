@@ -47,8 +47,7 @@ void usage ()
 
 int main (int argc, char** argv) 
 {
-  //  char* refname = NULL;
-  string refname;
+  string refname, the_old, the_new;
   vector<string> stdname;
   char line[100];
   char plotdev[5];
@@ -78,7 +77,7 @@ int main (int argc, char** argv)
       return 0;
 
     case 'i':
-      cout << "$Id: pas.C,v 1.5 2003/09/07 07:15:12 nwang Exp $" << endl;
+      cout << "$Id: pas.C,v 1.6 2003/09/30 00:33:47 nwang Exp $" << endl;
       return 0;
 
     case 'r':
@@ -204,24 +203,24 @@ int main (int argc, char** argv)
 	  if( verbose ) cout << "Centre: Centre the profile, done" <<endl;
 	  break;
 
-	case 'l':
+	case 'f':
 	  stdarch->rotate (convt(stdarch, 0.05, verbose));
 	  if( verbose ) cout << "Delicate rotate profile: 0.05 bin to the left" << endl;
 	  break;
 
-	case 'r':
+	case 'g':
 	  stdarch->rotate (convt(stdarch, -0.05, verbose));
 	  if( verbose ) cout << "Delicate rotate profile: 0.05 bin to the right" << endl;
 	  break;
-	  
-	case 'f': //Fast rotate, to the right
-	  stdarch->rotate (convt(stdarch, -20.0, verbose));
-	  if( verbose ) cout << "Fast rotate profile: 20 bins to the right" <<endl;
-	  break;
-	  
-	case 'L':  //Left rotate
+
+	case 'l':  //Left rotate
 	  stdarch->rotate (convt(stdarch, 1.0, verbose));
 	  if( verbose ) cout << "Rotate profile: 1 bin to the left" << endl;
+	  break;
+
+	case 'L': //Fast rotate, to the left
+	  stdarch->rotate (convt(stdarch, 20.0, verbose));
+	  if( verbose ) cout << "Fast rotate profile: 20 bins to the left" <<endl;
 	  break;
 	
 	case 'm':   //smooth the profile
@@ -234,12 +233,33 @@ int main (int argc, char** argv)
 	  *stdcorr = *stdarch;
  	  if( verbose ) cout << "Back to original" << endl;
 	  break;
-	
-	case 'R':  //Right rotate
+
+	case 'q':
+	  return 0;
+
+	case 'r':  //Right rotate
 	  stdarch->rotate (convt(stdarch, -1.0, verbose));
 	  if( verbose ) cout << "Rotate profile: 1 bin to the right" << endl;
 	  break;
-	   
+
+	case 'R': //Fast rotate, to the right
+	  stdarch->rotate (convt(stdarch, -20.0, verbose));
+	  if( verbose ) cout << "Fast rotate profile: 20 bins to the right" <<endl;
+	  break;
+	  
+	case 's':  //Save
+	  the_old = stdarch->get_filename().c_str();
+	  the_new = " ";
+	  if(verbose) cout << "Save: present name is " << the_old <<endl;
+	  cout << "Save: the center freq is " << stdarch->get_centre_frequency() << "MHz, "<< (30/(1e-3* stdarch->get_centre_frequency()))<< "cm" <<endl;
+	  cout << "      new file name: ";
+	  cin >> the_new;
+	  stdarch->rotate(convt(stdarch, -0.5*stdarch->get_nbin(), verbose));
+	  stdarch->unload(the_new);
+	  stdarch->rotate(convt(stdarch, 0.5*stdarch->get_nbin(), verbose));
+	  cout << "Save: new standard profile " << the_new << " written to disk" << endl;
+	  break;	 
+
 	case 'z':   //Zero base line
 	  cout << "Zero baseline: start point set at:" << curs_x << endl;
 	  cout << "Zero baseline: move cursor and set the range" <<endl;
@@ -281,31 +301,20 @@ int main (int argc, char** argv)
 	  else cout << "Zero baseline: range not set" << endl;
 	  break;
 	  
-	case 's':  //Save
-	  string the_old = stdarch->get_filename().c_str();
-	  if(verbose) cout << "Save: the archive file is " << the_old <<endl;
-	  string the_new = " ";
-	  cout << "Save: the center freq is " << stdarch->get_centre_frequency() << "MHz, "<< (30/(1e-3* stdarch->get_centre_frequency()))<< "cm" <<endl;
-	  cout << "      new file name: ";
-	  cin >> the_new;
-	  stdarch->rotate(convt(stdarch, -0.5*stdarch->get_nbin(), verbose));
-	  stdarch->unload(the_new);
-	  stdarch->rotate(convt(stdarch, 0.5*stdarch->get_nbin(), verbose));
-	  cout << "Save: new standard profile " << the_new << " written to disk" << endl;
-	  break;	 
+	default:
+	  cout << "Unrecognised option." << endl;
+	  break;
 	}
 
 	*stdcorr=*stdarch;
 	if(refflag==true) {
 	  *refcorr=*refarch;
 	  cross(refcorr, stdcorr, verbose, verbose, line);
-	  //cross_correlation(refcorr->get_Profile(0, 0, 0), stdcorr->get_Profile(0, 0, 0), &rmax, &imax, &pcoef, vverbose);
 	}
 	plot_it(refarch, stdarch, ci_ref, ci_std, ci_tex, ci_dis, line, plotdev, refflag);
 	cout << "Waiting for option ...." << endl;
 	cpgcurs(&curs_x, &curs_y, &opts);
       }
-
       catch (Error& error) {
 	cerr << error << endl;
       } 
@@ -339,20 +348,20 @@ void plot_it(Reference::To<Pulsar::Archive> refarch, Reference::To<Pulsar::Archi
     if(i==0){
       if(refflag==false)
 	cpgsci (ci_dis);
-      cpgtext (x, y, "a:  Align with reference profile");
+      cpgtext (x, y, "a:  align with reference profile");
     }
     else if(i==1)
-      cpgtext (x, y, "b:  Bscrunch by factor 2");
+      cpgtext (x, y, "b:  bscrunch by factor 2");
     else if(i==2)
-      cpgtext (x, y, "c:  Center the profile");
+      cpgtext (x, y, "c:  center the profile");
     else if(i==3)
-      cpgtext (x, y, "f:  Fast rotate 20 bins to the right");
+      cpgtext (x, y, "m:  smooth the profile");
     else if(i==4)
-      cpgtext (x, y, "m: sMooth the profile");
+      cpgtext (x, y, "o:  back to origin");
     else if(i==5)
-      cpgtext (x, y, "o:  back to Origin");
+      cpgtext (x, y, "q:  quit the program");
     else if(i==6)
-      cpgtext (x, y, "q:  Quit the program");
+      cpgtext (x, y, "z:  set the range and zero the base line"); 
     else    break;
   }
   if(refflag==true) {
@@ -369,17 +378,19 @@ void plot_it(Reference::To<Pulsar::Archive> refarch, Reference::To<Pulsar::Archi
     x=60;
     y=100-i*step;
     if(i==0)
-      cpgtext (x, y, "L:  Left rotate profile, step:   1 bin");
+      cpgtext (x, y, "L:  fast rotate 20 bins to the Left");
     else if(i==1)
-      cpgtext (x, y, "R:  Right rotate profile, step: 1 bin");
+      cpgtext (x, y, "R:  fast rotate 20 bins to the Right");
     else if(i==2)
-      cpgtext (x, y, "l:   fine rotate 0.05 bin to the left");
+      cpgtext (x, y, "l:  left rotate profile by 1 bin");
     else if(i==3)
-      cpgtext (x, y, "r:  fine rotate 0.05 bin to the right");
+      cpgtext (x, y, "r:  right rotate profile by 1 bin  ");
     else if(i==4)
-      cpgtext (x, y, "s:  Save the standard profile");
+      cpgtext (x, y, "f:  fine rotate 0.05 bin to the left");
     else if(i==5)
-      cpgtext (x, y, "z:  set the range and Zero the base line"); 
+      cpgtext (x, y, "g:  fine rotate 0.05 bin to the right");
+    else if(i==6)
+      cpgtext (x, y, "s:  save the standard profile");
     else  break;
   }
   cpgsci (ci_std);
@@ -476,10 +487,10 @@ void cross(Reference::To<Pulsar::Archive> refcorr, Reference::To<Pulsar::Archive
   Reference::To<Pulsar::Archive> stdclone (stdcorr->clone());
   Reference::To<Pulsar::Profile> stdprof;
 
-  //original
+  //present, clone
   cross_correlation(refcorr->get_Profile(0, 0, 0), stdclone->get_Profile(0, 0, 0), &rmax, &imax, &pcoef, vverbose);
 
-  //max after rotate fractional phase bin
+  //  maximum, after rotate fractional phase bin
   stdprof=stdcorr->get_Profile(0, 0, 0);
   stdphase=stdprof->shift(refcorr->get_Profile(0, 0, 0), ephase, snrfft, esnrfft);
   fmax=float(stdphase)*stdcorr->get_Profile(0,0,0)->get_nbin();
@@ -498,14 +509,14 @@ void cross_correlation(Reference::To<Pulsar::Profile> refprof, Reference::To<Pul
   float fact_nbin;
   int corr_nbin=0;
   
-  if((fact_nbin = 1.0*stdprof->get_nbin()/refprof->get_nbin())>=1) 
+  if((fact_nbin = 1.0*stdprof->get_nbin()/refprof->get_nbin())>1) 
     stdprof->bscrunch(int(fact_nbin));
-  else
+  else if((fact_nbin = 1.0*stdprof->get_nbin()/refprof->get_nbin())<1)
     refprof->bscrunch(int(1/fact_nbin));
 
-    corr_nbin=stdprof->get_nbin();
-    if(vverbose) cout << "  cross correlation: " <<corr_nbin << " bins applied"<< endl;
-    if(vverbose) cout << "  bin fact stdprof/refprof: " <<fact_nbin <<endl;
+  corr_nbin=stdprof->get_nbin();
+  if(vverbose) cout << "  cross correlation: " <<corr_nbin << " bins applied"<< endl;
+  if(vverbose) cout << "  bin fact stdprof/refprof: " <<fact_nbin <<endl;
 
   //call coef
   float *ref = refprof->get_amps();
