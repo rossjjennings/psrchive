@@ -87,7 +87,9 @@ int main (int argc, char** argv)
 
     case 'V':
       Pulsar::Archive::set_verbosity (3);
+      Pulsar::CalibratorPlotter::verbose = true;
       Pulsar::Calibrator::verbose = true;
+      Calibration::Model::verbose = true;
     case 'v':
       verbose = true;
       break;
@@ -189,7 +191,7 @@ int main (int argc, char** argv)
       cerr << "pacv: Creating Archive class name = " << archive_class << endl;
   
       output = Pulsar::Archive::new_Archive (archive_class);
-      output -> copy (input);
+      output -> copy (*input);
       output -> resize (0);
       output -> add_extension (extension);
 
