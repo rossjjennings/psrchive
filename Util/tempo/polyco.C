@@ -8,7 +8,8 @@
 #include "string_utils.h"
 #include "poly.h"
 
-string polyco::any_psr; // the empty string!!
+string polyco::any_psr;   // an empty string!!
+int polyco::verbose = 0;
 
 void polynomial::init(){
   dm = 0;
