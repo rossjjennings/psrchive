@@ -1,4 +1,5 @@
 #include "SingleAxisCalibrator.h"
+#include "Estimate.h"
 
 Pulsar::SingleAxisCalibrator::~SingleAxisCalibrator ()
 {
@@ -15,8 +16,10 @@ Pulsar::SingleAxisCalibrator::solve (const vector<Estimate<double> >& hi,
   unsigned npol = hi.size();
 
   vector<Estimate<double> > cal (npol);
-  for (unsigned ipol=0; ipol<npol; ++ipol)
-    cal[ipol] = hi[ipol] - lo[ipol];
+  for (unsigned ipol=0; ipol<npol; ++ipol) {
+    cal[ipol] = hi[ipol];
+    cal[ipol] -= lo[ipol];
+  }
 
   Calibration::SingleAxis qm;
   qm.solve (cal);

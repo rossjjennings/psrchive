@@ -1,15 +1,16 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Estimate.h,v $
-   $Revision: 1.15 $
-   $Date: 2003/05/06 14:15:44 $
-   $Author: pulsar $ */
+   $Revision: 1.16 $
+   $Date: 2003/05/07 15:51:28 $
+   $Author: straten $ */
 
 #ifndef __Estimate_h
 #define __Estimate_h
 
 #include <iostream>
 #include <math.h>
+#include "psr_cpp.h"
 
 //! Estimates with a value, \f$ x \f$, and a variance, \f$ \sigma^2 \f$
 /*!
@@ -78,6 +79,9 @@ class Estimate
   bool operator < (const Estimate& d) const
   { return val < d.val; }
 
+  //! Comparison operator
+  bool operator > (const Estimate& d) const
+  { return val > d.val; }
 
   //! Inversion operator
   /*! Where \f$ r=1/x \f$, \f$ \sigma_r = r^2\sigma_x/x^2 = sigma_x/x^4 */

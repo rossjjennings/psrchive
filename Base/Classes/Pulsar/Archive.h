@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Archive.h,v $
-   $Revision: 1.73 $
-   $Date: 2003/05/05 02:53:55 $
-   $Author: ahotan $ */
+   $Revision: 1.74 $
+   $Date: 2003/05/07 15:41:54 $
+   $Author: straten $ */
 
 /*! \mainpage 
  
@@ -203,10 +203,11 @@ namespace Pulsar {
 
   class Archive : public IntegrationManager {
 
-  private:
+  public:
 
     //! Pure virtual base class of Archive::Advocate template base class
-    /* This class is private.  The Archive::Advocate template should be used. */
+    /* Though this class is public, only the Archive::Advocate template 
+       should be inherited. */
     class Agent : public Reference::Able {
 
     public:

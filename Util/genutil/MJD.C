@@ -64,7 +64,7 @@ string MJD::printdays (unsigned prec) const
 
 const char * MJD::printdays() const {
   static vector<string> ringbuffer(RINGBUFFER_SIZE);
-  static string* rb_ptr = ringbuffer.begin();
+  static vector<string>::iterator rb_ptr = ringbuffer.begin();
  
   rb_ptr++;
   if( rb_ptr==ringbuffer.end() )
@@ -79,7 +79,7 @@ const char * MJD::printdays() const {
 
 const char * MJD::printhhmmss() const {
   static vector<string> ringbuffer(RINGBUFFER_SIZE);
-  static string* rb_ptr = ringbuffer.begin();
+  static vector<string>::iterator rb_ptr = ringbuffer.begin();
 
   rb_ptr++;
   if( rb_ptr==ringbuffer.end() )
@@ -99,7 +99,7 @@ const char * MJD::printhhmmss() const {
 
 const char * MJD::printfs() const {
   static vector<string> ringbuffer(RINGBUFFER_SIZE);
-  static string* rb_ptr = ringbuffer.begin();
+  static vector<string>::iterator rb_ptr = ringbuffer.begin();
 
   rb_ptr++;
   if( rb_ptr==ringbuffer.end() )
@@ -117,7 +117,7 @@ const char * MJD::printfs() const {
 
 const char* MJD::printall() const {
   static vector<string> ringbuffer(RINGBUFFER_SIZE);
-  static string* rb_ptr = ringbuffer.begin();
+  static vector<string>::iterator rb_ptr = ringbuffer.begin();
 
   rb_ptr++;
   if( rb_ptr==ringbuffer.end() )
@@ -143,7 +143,7 @@ char* MJD::datestr (char* dstr, int len, const char* format) const
 
 const char * MJD::strtempo() const{
   static vector<string> ringbuffer(RINGBUFFER_SIZE);
-  static string* rb_ptr = ringbuffer.begin();
+  static vector<string>::iterator rb_ptr = ringbuffer.begin();
 
   rb_ptr++;
   if( rb_ptr==ringbuffer.end() )

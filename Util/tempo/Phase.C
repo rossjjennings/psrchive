@@ -180,7 +180,7 @@ Phase& Phase::operator -= (const Phase &p) {
   return *this = *this - p;
 }
 
-static const double precision_limit = 2 * pow (10,-DBL_DIG);
+static const double precision_limit = 2.0 * pow (10.0,-DBL_DIG);
 
 int operator > (const Phase &p1, const Phase &p2)
 {

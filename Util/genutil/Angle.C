@@ -195,31 +195,31 @@ const Angle operator / (const Angle &a1, double d) {
 }
 
 int operator > (const Angle &a1, const Angle &a2) {
-  double precision_limit = 2*pow(10,-DBL_DIG);
+  double precision_limit = 2*pow(10.0,-DBL_DIG);
   if(fabs(a1.getradians()-a2.getradians())<precision_limit) return(0);
   else return (a1.getradians()>a2.getradians());
 }
 
 int operator >= (const Angle &a1, const Angle &a2) {
-  double precision_limit = 2*pow(10,-DBL_DIG);
+  double precision_limit = 2*pow(10.0,-DBL_DIG);
   if(fabs(a1.getradians()-a2.getradians())<precision_limit) return(1);
   else return (a1.getradians()>a2.getradians());
 }
 
 int operator < (const Angle &a1, const Angle &a2) {
-  double precision_limit = 2*pow(10,-DBL_DIG);
+  double precision_limit = 2*pow(10.0,-DBL_DIG);
   if(fabs(a1.getradians()-a2.getradians())<precision_limit) return(0);
   else return (a1.getradians()<a2.getradians());
 }
 
 int operator <= (const Angle &a1, const Angle &a2) {
-  double precision_limit = 2*pow(10,-DBL_DIG);
+  double precision_limit = 2*pow(10.0,-DBL_DIG);
   if(fabs(a1.getradians()-a2.getradians())<precision_limit) return(1);
   else return (a1.getradians()<a2.getradians());
 }
 
 int operator == (const Angle &a1, const Angle &a2){
-  double precision_limit = 2*pow(10,-DBL_DIG);
+  double precision_limit = 2*pow(10.0,-DBL_DIG);
   if ((fabs(a1.getradians()-a2.getradians())<precision_limit)) 
       return (1);
   else
@@ -227,7 +227,7 @@ int operator == (const Angle &a1, const Angle &a2){
 }
 
 int operator != (const Angle &a1, const Angle &a2){
-  double precision_limit = 2*pow(10,-DBL_DIG);
+  double precision_limit = 2*pow(10.0,-DBL_DIG);
   if ((fabs(a1.getradians()-a2.getradians())>precision_limit)) 
       return (1);
   else
@@ -375,7 +375,7 @@ ostream& operator<< (ostream & os, const AnglePair & pair)
 }
 
 int operator == (const AnglePair &a1, const AnglePair &a2){
-  double precision_limit = 2*pow(10,-DBL_DIG);
+  double precision_limit = 2*pow(10.0,-DBL_DIG);
   double ra1, ra2, dec1, dec2;
   a1.getRadians(&ra1, &dec1);
   a2.getRadians(&ra2, &dec2);
@@ -386,7 +386,7 @@ int operator == (const AnglePair &a1, const AnglePair &a2){
 }
 
 int operator != (const AnglePair &a1, const AnglePair &a2){
-  double precision_limit = 2*pow(10,-DBL_DIG);
+  double precision_limit = 2*pow(10.0,-DBL_DIG);
   double ra1, ra2, dec1, dec2;
   a1.getRadians(&ra1, &dec1);
   a2.getRadians(&ra2, &dec2);

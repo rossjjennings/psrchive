@@ -25,8 +25,8 @@ void Pulsar::Profile::fft_convolve(Profile* p1)
   temp2.resize(bins);
   resultant.resize(bins);
 
-  rfftw_one(forward_plan, get_amps(), temp1.begin());
-  rfftw_one(forward_plan, p1->get_amps(), temp2.begin());
+  rfftw_one(forward_plan, get_amps(), &(temp1[0]));
+  rfftw_one(forward_plan, p1->get_amps(), &(temp2[0]));
 
   // Perform the frequency domain multiplication:
   // No complex part for the first element
@@ -52,12 +52,12 @@ void Pulsar::Profile::fft_convolve(Profile* p1)
 
   solution.resize(bins);
 
-  rfftw_one(backward_plan, resultant.begin(), solution.begin());
+  rfftw_one(backward_plan, &(resultant[0]), &(solution[0]));
 
   // Return the profile
 
-  resize(bins);
-  set_amps(solution.begin());
+  // resize(bins);
+  set_amps(solution);
 }
 
 

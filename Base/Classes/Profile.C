@@ -254,7 +254,7 @@ void Pulsar::Profile::square_root()
   
   for (unsigned ibin=0; ibin<nbin; ++ibin) {
     float sign = (amps[ibin]>0) ? 1.0 : -1.0;
-    amps[ibin] = sign * sqrt(sign * amps[ibin]);
+    amps[ibin] = sign * sqrt(float(sign * amps[ibin]));
   }
 }
 
@@ -677,7 +677,7 @@ float Pulsar::Profile::snr() const
   power -= min_avg * double (fall - rise);
 
   // divide by the sqrt of the number of bins
-  power /= sqrt (fall-rise);
+  power /= sqrt (double(fall-rise));
 
   return power/min_rms;
 }

@@ -52,29 +52,29 @@ void Pulsar::TimerIntegration::load (FILE* fptr, int extra, bool big_endian)
     if (verbose)
       cerr << "TimerIntegration::load in the new style" << endl;
 
-    if ( fread (wts.begin(),nchan*sizeof(float),1,fptr) != 1 )
+    if ( fread (&(wts[0]),nchan*sizeof(float),1,fptr) != 1 )
       throw Error (FailedSys, "TimerIntegration::load", "fread wts");
 
     if (big_endian)
-      N_FromBigEndian (nchan, wts.begin());
+      N_FromBigEndian (nchan, &(wts[0]));
     else
-      N_FromLittleEndian (nchan, wts.begin());
+      N_FromLittleEndian (nchan, &(wts[0]));
 
     for (i=0;i<npol;i++) {
-      if (fread(med[i].begin(),nchan*sizeof(float),1,fptr)!=1)
+      if (fread(&(med[i][0]),nchan*sizeof(float),1,fptr)!=1)
 	throw Error (FailedSys,"TimerIntegration::load", "fread medians");
       if (big_endian)
-	N_FromBigEndian (nchan, med[i].begin());
+	N_FromBigEndian (nchan, &(med[i][0]));
       else
-	N_FromLittleEndian (nchan, med[i].begin());
+	N_FromLittleEndian (nchan, &(med[i][0]));
     }
     for (i=0;i<npol;i++) {
-      if(fread(bpass[i].begin(),nchan*sizeof(float),1,fptr)!=1)
+      if(fread(&(bpass[i][0]),nchan*sizeof(float),1,fptr)!=1)
 	throw Error (FailedSys,"TimerIntegration::load", "fread bpass");
       if (big_endian)
-	N_FromBigEndian (nchan, bpass[i].begin());
+	N_FromBigEndian (nchan, &(bpass[i][0]));
       else
-	N_FromLittleEndian (nchan, bpass[i].begin());
+	N_FromLittleEndian (nchan, &(bpass[i][0]));
     }
     /* new style */
     if (verbose) cerr << "TimerIntegration::load loading profiles\n";

@@ -23,9 +23,9 @@ void Pulsar::TimerIntegration::unload (FILE* fptr) const
 
   try {
     if (verbose) cerr << "TimerIntegration::unload writing weights" << endl;
-    N_ToBigEndian (nchan, const_cast<float*>(wts.begin()));
-    fwrite(wts.begin(),nchan*sizeof(float),1,fptr);
-    N_FromBigEndian (nchan, const_cast<float*>(wts.begin()));
+    N_ToBigEndian (nchan, const_cast<float*>(&(wts[0])));
+    fwrite(&(wts[0]),nchan*sizeof(float),1,fptr);
+    N_FromBigEndian (nchan, const_cast<float*>(&(wts[0])));
   }
   catch (Error& error) {
     throw error += "TimerIntegration::unload wts";
@@ -34,9 +34,9 @@ void Pulsar::TimerIntegration::unload (FILE* fptr) const
   try {
     if (verbose) cerr << "TimerIntegration::unload writing med" << endl;
     for (unsigned ipol=0; ipol<npol; ipol++) {
-      N_ToBigEndian (nchan, const_cast<float*>(med[ipol].begin()));
-      fwrite(med[ipol].begin(),nchan*sizeof(float),1,fptr);
-      N_FromBigEndian (nchan, const_cast<float*>(med[ipol].begin()));
+      N_ToBigEndian (nchan, const_cast<float*>(&(med[ipol][0])));
+      fwrite(&(med[ipol][0]),nchan*sizeof(float),1,fptr);
+      N_FromBigEndian (nchan, const_cast<float*>(&(med[ipol][0])));
     }
   }
   catch (Error& error) {
@@ -47,9 +47,9 @@ void Pulsar::TimerIntegration::unload (FILE* fptr) const
   try {
     if (verbose) cerr << "TimerIntegration::unload writing bpass" << endl; 
     for (unsigned ipol=0; ipol<npol; ipol++) {
-      N_ToBigEndian (nchan, const_cast<float*>(bpass[ipol].begin()));
-      fwrite(bpass[ipol].begin(),nchan*sizeof(float),1,fptr);
-      N_FromBigEndian (nchan, const_cast<float*>(bpass[ipol].begin()));
+      N_ToBigEndian (nchan, const_cast<float*>(&(bpass[ipol][0])));
+      fwrite(&(bpass[ipol][0]),nchan*sizeof(float),1,fptr);
+      N_FromBigEndian (nchan, const_cast<float*>(&(bpass[ipol][0])));
     }
   }
   catch (Error& error) {

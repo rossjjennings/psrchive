@@ -49,7 +49,7 @@ void Pulsar::Integration::invint ()
     Profile* Sinv = get_Profile (0, ichan);
 
     // set the values
-    Sinv->set_amps (invariant.begin());
+    Sinv->set_amps (invariant);
     // remove the baseline
     *(Sinv) -= Sinv->mean( Sinv->find_min_phase() );
 
