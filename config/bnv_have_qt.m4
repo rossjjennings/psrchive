@@ -74,7 +74,7 @@ dnl variables are set to the empty string.
 dnl
 dnl Calls BNV_PATH_QT_DIRECT as a subroutine.
 dnl
-dnl @version $Id: bnv_have_qt.m4,v 1.1 2004/11/30 10:48:55 straten Exp $
+dnl @version $Id: bnv_have_qt.m4,v 1.2 2004/11/30 13:11:19 straten Exp $
 dnl @author Bastiaan N. Veelo <Bastiaan.N.Veelo@immtek.ntnu.no>
 dnl
 AC_DEFUN([BNV_HAVE_QT],
@@ -132,17 +132,30 @@ AC_DEFUN([BNV_HAVE_QT],
     if test x"$with_Qt_lib" != x; then
       bnv_qt_lib="$with_Qt_lib"
     fi
-    # Check whether we were supplied with an answer already
+
+    # Check whether QTDIR is defined
+    if test x"$QTDIR" != x; then
+      have_qt=yes
+      bnv_qt_dir="$QTDIR"
+      bnv_qt_include_dir="$QTDIR/include"
+      bnv_qt_bin_dir="$QTDIR/bin"
+      bnv_qt_lib_dir="$QTDIR/lib"
+    fi
+
+    # Check whether the user has over-ridden the default
     if test x"$with_Qt_dir" != x; then
       have_qt=yes
       bnv_qt_dir="$with_Qt_dir"
       bnv_qt_include_dir="$with_Qt_dir/include"
       bnv_qt_bin_dir="$with_Qt_dir/bin"
       bnv_qt_lib_dir="$with_Qt_dir/lib"
+    fi
+
+    if test x"$have_qt" = xyes; then
       # Only search for the lib if the user did not define one already
       if test x"$bnv_qt_lib" = x; then
         bnv_qt_lib="`ls $bnv_qt_lib_dir/libqt* | sed -n 1p |
-                     sed s@$bnv_qt_lib_dir/lib@@ | [sed s@[.].*@@] 2>/dev/null`"
+                     sed s@$bnv_qt_lib_dir/lib@@ | [sed s@[.].*@@]`"
       fi
       bnv_qt_LIBS="-L$bnv_qt_lib_dir -l$bnv_qt_lib $X_PRE_LIBS $X_LIBS -lX11 -lXext -lXmu -lXt -lXi $X_EXTRA_LIBS"
     else
@@ -329,8 +342,7 @@ AC_DEFUN(BNV_PATH_QT_DIRECT,
     # The following header file is expected to define QT_VERSION.
     qt_direct_test_header=qglobal.h
     # Look for the header file in a standard set of common directories.
-    bnv_include_path_list="
-      /usr/include
+    bnv_include_path_list="/usr/include
       `ls -dr /usr/include/qt* 2>/dev/null`
       `ls -dr /usr/lib/qt*/include 2>/dev/null`
       `ls -dr /usr/local/qt*/include 2>/dev/null`

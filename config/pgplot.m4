@@ -21,8 +21,8 @@ AC_DEFUN([SWIN_LIB_PGPLOT],
               have_pgplot=yes, have_pgplot=no)
 
   if test x"$have_pgplot" = xno; then
-    PGPLOT_LIBS="$PGPLOT_LIBS $X_LIBS"
-    LIBS="$LIBS $X_LIBS"
+    PGPLOT_LIBS="$PGPLOT_LIBS $X_LIBS -lX11"
+    LIBS="$ac_save_LIBS $PGPLOT_LIBS"
     AC_TRY_LINK([#include <cpgplot.h>],[cpgopen(""); cpgend();],
                 have_pgplot=yes, have_pgplot=no)
   fi
