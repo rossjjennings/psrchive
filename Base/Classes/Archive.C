@@ -379,12 +379,6 @@ void Pulsar::Archive::dedisperse (double dm, double frequency)
   if (get_nsubint() == 0)
     return;
   
-  if (get_dedispersed()) {
-    throw Error (InvalidState, "Archive::dedisperse",
-		 "Archive already de-dispersed");
-    return;
-  }
-  
   for (unsigned isub=0; isub < get_nsubint(); isub++) {
     if (dm)
       get_Integration(isub) -> set_dispersion_measure (dm);
