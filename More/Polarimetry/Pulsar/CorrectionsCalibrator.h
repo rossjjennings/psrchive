@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/Attic/CorrectionsCalibrator.h,v $
-   $Revision: 1.1 $
-   $Date: 2004/07/03 07:36:40 $
+   $Revision: 1.2 $
+   $Date: 2004/07/20 07:38:39 $
    $Author: straten $ */
 
 #ifndef __Pulsar_CorrectionsCalibrator_H
@@ -15,6 +15,7 @@ namespace Pulsar {
 
   class Telescope;
   class Receiver;
+  class Pointing;
 
   //! Corrects known instrumental effects
   class CorrectionsCalibrator : public Calibrator {
@@ -31,10 +32,10 @@ namespace Pulsar {
     ~CorrectionsCalibrator ();
 
     //! Return true if the archive needs to be corrected
-    bool needs_correction (const Archive* archive);
+    bool needs_correction (const Archive* archive, const Pointing* point=0);
 
     //! Return the correction matrix for the given epoch
-    Jones<double> get_transformation (const Archive* arch, const MJD& epoch);
+    Jones<double> get_transformation (const Archive* arch, unsigned isub);
 
     // ///////////////////////////////////////////////////////////////////
     //

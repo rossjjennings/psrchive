@@ -4,6 +4,7 @@
 
 #include "Pulsar/Telescope.h"
 #include "Pulsar/Receiver.h"
+#include "Pulsar/Pointing.h"
 
 #include "Calibration/Parallactic.h"
 #include "Pauli.h"
@@ -15,7 +16,8 @@ Pulsar::CorrectionsCalibrator::CorrectionsCalibrator () {}
 Pulsar::CorrectionsCalibrator::~CorrectionsCalibrator () {}
 
 //! Return true if the archive needs to be corrected
-bool Pulsar::CorrectionsCalibrator::needs_correction (const Archive* archive)
+bool Pulsar::CorrectionsCalibrator::needs_correction (const Archive* archive,
+						      const Pointing* pointing)
 {
   receiver = const_cast<Receiver*>( archive->get<Receiver>() );
 
@@ -31,11 +33,21 @@ bool Pulsar::CorrectionsCalibrator::needs_correction (const Archive* archive)
 
   // determine if if is necessary to correct for known platform projections
 
-  // a horizon mounted antenna that did not track equatorial PA
+  // a horizon mounted antenna that did not track equatorial PA ...
   should_correct_vertical = 
     telescope->get_mount() == Telescope::Horizon &&
     receiver->get_tracking_mode() != Receiver::Celestial;
-  
+
+  // ... or the angle tracked by the receiver is not zero
+  if (pointing) {
+    if (verbose)
+      cerr << "Pulsar::CorrectionsCalibrator::needs_correction"
+	" using Pointing::pos_ang=" << pointing->pos_ang << endl;
+    should_correct_vertical != pointing->pos_ang != 0.0;
+  }
+  else
+    should_correct_vertical != receiver->get_tracking_angle () != 0.0;
+
   // a fixed antenna, such as a dipole array (or Arecibo?)
   should_correct_projection = 
     telescope->get_mount() == Telescope::Fixed;
@@ -54,9 +66,9 @@ bool Pulsar::CorrectionsCalibrator::needs_correction (const Archive* archive)
     archive->type_is_cal() && receiver->get_calibrator_offset() != 0;
 
   must_correct_feed =
-    !receiver->get_feed_corrected() &&
-    (should_correct_receptors || should_correct_calibrator);
-  
+    !receiver->get_feed_corrected() && should_correct_receptors;
+
+  // return true if feed or platform needs correction
   return must_correct_feed || must_correct_platform;
 
 }
@@ -84,9 +96,8 @@ void Pulsar::CorrectionsCalibrator::calibrate (Archive* archive)
   for (unsigned isub=0; isub < nsub; isub++) {
 
     Integration* integration = archive->get_Integration (isub);
-    MJD epoch = integration->get_epoch ();
       
-    Jones<float> xform = inv( get_transformation (archive, epoch) );
+    Jones<float> xform = inv( get_transformation (archive, isub) );
       
     Calibrator::calibrate (integration, xform);
 
@@ -100,15 +111,46 @@ void Pulsar::CorrectionsCalibrator::calibrate (Archive* archive)
 
 }
 
+bool equal_pi (const Angle& a, const Angle& b, float tolerance = 0.01)
+{
+  // map 0->pi onto 0->1
+  double ar = a.getRadians()/M_PI;
+  double br = b.getRadians()/M_PI;
+
+  // periodic map onto 0->1
+  ar -= floor (ar);
+  br -= floor (br);
+
+  return fabs (ar - br) < tolerance;
+}
 
 //! Return the transformation matrix for the given epoch
 Jones<double> 
 Pulsar::CorrectionsCalibrator::get_transformation (const Archive* archive,
-						   const MJD& epoch)
+						   unsigned isub)
 {
-  Jones<double> xform = Jones<double>::identity();
+  // the identity matrix
+  Jones<double> xform = 1;
 
-  if (!needs_correction (archive)) {
+  const Integration* integration = archive->get_Integration (isub);
+
+  const Pointing* pointing = integration->get<Pointing>();
+
+  if (pointing && !equal_pi (pointing->pos_ang,
+			     pointing->fd_ang + pointing->par_ang) )  {
+
+    // verify self-consistency of attributes
+
+    if (Archive::verbose)
+      cerr << "Pulsar::CorrectionsCalibrator::get_transformation WARNING\n"
+	"  Pointing pos_ang=" << pointing->pos_ang << " != fd_ang+par_ang="
+	   << pointing->fd_ang + pointing->par_ang << endl;
+    
+    pointing = 0;
+    
+  }
+
+  if (!needs_correction( archive, pointing )) {
     if (Archive::verbose)
       cerr << "Pulsar::CorrectionsCalibrator no corrections required" << endl;
     return xform;
@@ -118,6 +160,23 @@ Pulsar::CorrectionsCalibrator::get_transformation (const Archive* archive,
 
   if (must_correct_feed)
     xform *= receiver->get_correction();
+
+  double feed_rotation = 0.0;
+
+  if (pointing)
+    feed_rotation = pointing->pos_ang.getRadians();
+  else
+    feed_rotation = receiver->get_tracking_angle().getRadians();
+
+  if (feed_rotation != 0.0) {
+
+    // rotate the basis about the Stokes V axis
+    Calibration::Rotation rotation ( Pauli::basis.get_basis_vector(2) );
+    rotation.set_phi ( -feed_rotation );
+    
+    xform *= rotation.evaluate();
+
+  }
 
   if (must_correct_platform && should_correct_projection)
     throw Error (InvalidState, "Pulsar::CorrectionsCalibrator::calibrate",
@@ -132,9 +191,22 @@ Pulsar::CorrectionsCalibrator::get_transformation (const Archive* archive,
 
     para.set_source_coordinates( archive->get_coordinates() );
 
-    para.set_epoch (epoch);
+    para.set_epoch( integration->get_epoch() );
 
-    xform *= para.evaluate();
+    if (pointing) {
+
+      // check that the para_ang is equal
+      if (!equal_pi( pointing->par_ang, -para.get_phi() ))
+	
+	if (Archive::verbose)
+	  cerr << "Pulsar::CorrectionsCalibrator::get_transformation WARNING\n"
+	    "  Pointing par_ang=" << pointing->par_ang << " != "
+	       << -para.get_phi() << " calculated for MJD="
+	       << integration->get_epoch() << endl;
+
+    }
+    else
+      xform *= para.evaluate();
      
   }
 
