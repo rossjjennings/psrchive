@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/BasicArchive.h,v $
-   $Revision: 1.21 $
-   $Date: 2003/02/15 13:03:48 $
-   $Author: pulsar $ */
+   $Revision: 1.22 $
+   $Date: 2003/02/17 16:19:49 $
+   $Author: straten $ */
 
 #include "Pulsar/Archive.h"
   
@@ -30,11 +30,9 @@ namespace Pulsar {
     //! null constructor
     BasicArchive ();
 
-    //! copy constructor
-    BasicArchive (const BasicArchive& archive);
-
-    //! extraction constructor
-    BasicArchive (const BasicArchive& archive, vector<unsigned> subints);
+    //! copy constructor, with option to select only some integrations
+    BasicArchive (const BasicArchive& archive,
+		  const vector<unsigned>& selected_subints = none_selected);
 
     //! copy constructor
     const BasicArchive& operator = (const BasicArchive& archive);
@@ -234,7 +232,7 @@ namespace Pulsar {
     bool dedispersed;
 
     //! Return a pointer to a new BasicIntegration
-    Integration* new_Integration (Integration* subint);
+    Integration* new_Integration (Integration* copy_this = 0);
     
   };
 

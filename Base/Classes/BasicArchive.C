@@ -32,21 +32,15 @@ Pulsar::BasicArchive::BasicArchive ()
   dedispersed = false;
 }
 
-Pulsar::BasicArchive::BasicArchive (const BasicArchive& copy)
+Pulsar::BasicArchive::BasicArchive (const BasicArchive& copy,
+				    const vector<unsigned>& subints)
 {
   if (verbose)
     cerr << "Pulsar::BasicArchive:: copy constructor" << endl;
 
-  Archive::copy (copy);
+  Archive::copy (copy, subints);
 }
 
-Pulsar::BasicArchive::BasicArchive (const BasicArchive& copy, vector<unsigned> subints)
-{
-  if (verbose)
-    cerr << "Pulsar::BasicArchive:: extraction constructor" << endl;
-
-  Archive::select_copy (copy, subints);
-}
 
 const Pulsar::BasicArchive&
 Pulsar::BasicArchive::operator = (const BasicArchive& copy)
