@@ -124,7 +124,7 @@ int main (int argc, char *argv[]) try {
 	    s += "N/A\t\t";
 	  else
 	    s += stringprintf("%.4f hours\t",
-			      pointing->get_local_sidereal_time()/86400);
+			      pointing->get_local_sidereal_time()/3600);
 	}
 	
 	else if( !strcasecmp (keys[j].c_str(), "ra") ) {
