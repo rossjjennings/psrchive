@@ -39,9 +39,11 @@ class Rhythm : public QMainWindow
   // an array of residuals corresponding to the above toas.  These are plotted
   vector<residual> residuals;
 
-  // the GUI bits
+  // /////////////////////////////////////////////////////////////////////////
+  // Main Plotting Window
   qxmp_manager plot_manager;
   xyplot       res_plot;
+  void labelPlot();            // labels the axis appropriately
 
   // /////////////////////////////////////////////////////////////////////////
   // main menubar and its constructor
@@ -52,10 +54,18 @@ class Rhythm : public QMainWindow
   int dispID;             // ID of the 'Display Parameters' menu item
   int fitID;              // ID of the 'Fit' menu item
   int autofitID;          // ID of the 'Autofit' menu item
+  int saveParmsID;
 
   bool autofit;           // fit whenever TOAs or TEMPO Parameters are loaded
   bool ignore_one_eph;    // ignore the newParams signal from qt_editeph ONCE
   bool toas_modified;     // the toas have been modified since loaded
+
+  // The OPTIONS popup menu and IDs of its individual options
+  QPopupMenu *options;
+  QPopupMenu *verbosity;  // sub menu of options
+  int quietID;
+  int mediumID;
+  int noisyID;
 
   // /////////////////////////////////////////////////////////////////////////
   // Fit parameters menu widgets/routines
@@ -78,6 +88,11 @@ class Rhythm : public QMainWindow
   void fit();
   void togledit();
   void toglauto();
+
+  // Options menu callbacks
+  void quiet();
+  void medium();
+  void noisy();
 
   void undo() {fprintf (stderr, "Not implemented\n");};
   void redo() {fprintf (stderr, "Not implemented\n");};

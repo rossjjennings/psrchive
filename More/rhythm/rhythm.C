@@ -29,12 +29,13 @@ int main (int argc, char** argv)
 Rhythm::Rhythm (QWidget* parent, int argc, char** argv) :
   QMainWindow (parent, "Rhythm"),
   plot_manager (this, 800, 700),
-  res_plot (pg_point(0.05,0.05),pg_point(0.95,0.95))
+  res_plot (pg_point(0.049,0.089),pg_point(0.98,0.98))
 {
   autofit = true;
   ignore_one_eph = false;
 
   plot_manager.manage (&res_plot);
+  labelPlot ();
 
   fitpopup = new qt_editParams;
   connect ( fitpopup, SIGNAL( closed() ),
@@ -77,6 +78,8 @@ void Rhythm::load_toas (const char* fname)
 
 void Rhythm::set_Params (const psrParams& eph)
 {
+  tempo->setItemEnabled (saveParmsID, true);
+
   if (ignore_one_eph) {
     ignore_one_eph = false;
     return;
@@ -125,13 +128,11 @@ void Rhythm::fit (const psrParams& eph, bool load_new)
   if (verbose)
     cerr << "Rhythm::fit plotting residuals" << endl;
 
-  res_plot.set_xlabel ("Residual (seconds)");
-  res_plot.set_ylabel ("MJD");
   res_plot.load_points (residuals);  // load new points
   plot_manager.pgplot();
   
 } 
- catch (const string& error)
+ catch (string error)
    {
      if (verbose)
        cerr << "Rhythm::fit ERROR" << error << endl;
@@ -145,4 +146,31 @@ void Rhythm::fit (const psrParams& eph, bool load_new)
      QMessageBox::critical (this, "Rhythm::fit",
 			    "An Unhandled Exception Occured", "Dismiss");
    }
+}
+
+void Rhythm::labelPlot()
+{
+  switch (residual::ytype)  {
+  case residual::Seconds:
+    res_plot.set_ylabel ("Residual (seconds)");
+    break;
+  case residual::Turns:
+    res_plot.set_ylabel ("Residual (seconds)");
+    break;
+  default:
+    cerr << "Rhythm::labelPlot unhandled case for y-axis" << endl;
+    break;
+  }
+
+  switch (residual::xtype)  {
+  case residual::Mjd:
+    res_plot.set_xlabel ("MJD");
+    break;
+  case residual::BinaryPhase:
+    res_plot.set_xlabel ("Binary Phase");
+    break;
+  default:
+    cerr << "Rhythm::labelPlot unhandled case for x-axis" << endl;
+    break;
+  }
 }

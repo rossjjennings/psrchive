@@ -6,8 +6,10 @@
 #include <qmessagebox.h>
 #include <qfiledialog.h>
 
-#include "rhythm.h"
+#include "qt_fileParams.h"
 #include "qt_editParams.h"
+#include "tempo++.h"
+#include "rhythm.h"
 
 void Rhythm::menubarConstruct ()
 {
@@ -22,15 +24,8 @@ void Rhythm::menubarConstruct ()
 		    SLOT( save_toas() ), ALT+Key_S );
 
   file->insertSeparator();
-  file->insertItem( "&Close", this, SLOT(closeWin()), CTRL+Key_C );
-  file->insertItem( "E&xit",  qApp, SLOT(quit()),     CTRL+Key_X );
-
-  // ///////////////////////////////////////////////////////////////////////
-  // OPTIONS menu options
-  //
-  QPopupMenu *options = new QPopupMenu( menuBar() );  CHECK_PTR (options);
-
-  options->insertItem ("None yet");
+  file->insertItem( "&Close", this, SLOT(closeWin()), ALT+Key_C );
+  file->insertItem( "E&xit",  qApp, SLOT(quit()),     ALT+Key_X );
 
   // ///////////////////////////////////////////////////////////////////////
   // TEMPO menu options
@@ -44,12 +39,27 @@ void Rhythm::menubarConstruct ()
 
   tempo->insertSeparator();
   tempo->insertItem( "Load Paremeters", fitpopup, SLOT( open() ));
-  tempo->insertItem( "Save Parameters", fitpopup, SLOT( save() ));
+  saveParmsID = tempo->insertItem( "Save Parameters", fitpopup, SLOT(save()));
+  tempo->setItemEnabled (saveParmsID, false);
 
   tempo->insertSeparator();
   // automatic fitting starts out enabled
   autofitID = tempo->insertItem( "Disable &Auto Fit",
 				 this, SLOT( toglauto() ));
+
+  // ///////////////////////////////////////////////////////////////////////
+  // OPTIONS menu options
+  //
+  verbosity = new QPopupMenu( menuBar() );  CHECK_PTR (verbosity);
+  quietID  = verbosity->insertItem( "Quiet", this, SLOT( quiet() ));
+  mediumID = verbosity->insertItem( "Verbose", this, SLOT( medium() ));
+  noisyID  = verbosity->insertItem( "Noisy", this, SLOT( noisy() ));
+
+  verbosity->setItemChecked( quietID, true );
+
+  options = new QPopupMenu( menuBar() );  CHECK_PTR (options);
+  options->insertSeparator();
+  options->insertItem( "&Verbosity", verbosity, ALT+Key_V);
 
   // ///////////////////////////////////////////////////////////////////////
   // HELP menu options
@@ -63,8 +73,8 @@ void Rhythm::menubarConstruct ()
   menuBar() -> setSeparator ( QMenuBar::InWindowsStyle );
 
   menuBar() -> insertItem   ( "&File",    file );
-  menuBar() -> insertItem   ( "&Options", options );
   menuBar() -> insertItem   ( "&Tempo",   tempo );
+  menuBar() -> insertItem   ( "&Options", options );
   menuBar() -> insertSeparator();
   menuBar() -> insertItem   ( "&Help", help );
 
@@ -98,8 +108,14 @@ void Rhythm::toglauto()
   tempo->changeItem ( autofitID, text );
   autofit = !autofit;
 
-  if (verbose)
-    cerr << "Rhythm: " << text << endl;
+  if (verbose) {
+    cerr << "Rhythm: Automatic Fitting ";
+    if (autofit)
+      cerr << "enabled.\n";
+    else
+      cerr << "disabled.\n";
+    cerr << endl;
+  }
 }
 
 void Rhythm::about()
@@ -140,4 +156,46 @@ void Rhythm::prompt_save_toas ()
 void Rhythm::save_toas ()
 {
   fprintf (stderr, "Rhythm::save_toas Not implemented.");
+}
+
+void Rhythm::quiet ()
+{
+  options->setItemChecked( quietID, true );
+  options->setItemChecked( mediumID, false );
+  options->setItemChecked( noisyID, false );
+
+  verbose = false;
+  vverbose = false;
+  qt_fileParams::verbose = 0;
+  qt_editParams::verbose = 0;
+  xmp_manager::verbose = 0;
+  pg_manager::verbose = 0;
+  xyplot::verbose = 0;
+  Tempo::verbose = 0;
+}
+
+void Rhythm::medium ()
+{
+  quiet ();
+  options->setItemChecked( quietID, false );
+  options->setItemChecked( mediumID, true );
+  verbose = true;
+  cerr << "rhythm: verbose on" << endl;
+}
+
+void Rhythm::noisy ()
+{
+  options->setItemChecked( quietID, false );
+  options->setItemChecked( mediumID, false );
+  options->setItemChecked( noisyID, true );
+
+  verbose = true;
+  vverbose = true;
+  qt_fileParams::verbose = 1;
+  qt_editParams::verbose = 1;
+  xmp_manager::verbose = 1;
+  pg_manager::verbose = 1;
+  xyplot::verbose = 1;
+  Tempo::verbose = 1;
+  cerr << "rhythm: very verbose on" << endl;
 }

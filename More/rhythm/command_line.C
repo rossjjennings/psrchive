@@ -2,9 +2,8 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-#include "rhythm.h"
 #include "qt_editParams.h"
-#include "tempo++.h"
+#include "rhythm.h"
 
 static char* cl_args = "ahp:t:vV";
 
@@ -22,8 +21,7 @@ void Rhythm::command_line_parse (int argc, char** argv)
     switch (optc) {
 
     case 'a':
-      cerr << "Rhythm: automatic fitting disabled" << endl;
-      autofit = false;
+      toglauto();
       break;
 
     case 'h':
@@ -39,20 +37,11 @@ void Rhythm::command_line_parse (int argc, char** argv)
       break;
 
     case 'v':
-      cerr << "rhythm: verbose on" << endl;
-      verbose = 1;
+      medium();
       break;
 
     case 'V':
-      cerr << "rhythm: very verbose on" << endl;
-      verbose = 1;
-      vverbose = 1;
-      qt_fileParams::verbose = 1;
-      qt_editParams::verbose = 1;
-      xmp_manager::verbose = 1;
-      xyplot::verbose = 1;
-      Tempo::verbose = 1;
-
+      noisy();
       break;
 
     default:
@@ -109,7 +98,8 @@ void Rhythm::command_line_parse (int argc, char** argv)
     if (verbose && !vverbose)
       cerr << "Loading TEMPO Parameters from '" << eph_filename << "'" << endl;
     fitpopup -> load (eph_filename.c_str());
-    cerr << "Parameters Loaded." << endl;
+    if (verbose && !vverbose)
+      cerr << "Parameters Loaded." << endl;
   }
   else {
     fitpopup -> open ();
