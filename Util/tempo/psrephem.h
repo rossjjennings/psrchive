@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/psrephem.h,v $
-   $Revision: 1.17 $
-   $Date: 2002/01/04 20:27:41 $
+   $Revision: 1.18 $
+   $Date: 2002/03/27 05:33:41 $
    $Author: straten $ */
 
 #ifndef __PSREPHEM_H
@@ -12,6 +12,10 @@
 
 #include <vector>
 #include <string>
+
+#ifdef PSRFITS
+#include <fitsio.h>
+#endif
 
 #include "MJD.h"
 #include "Angle.h"
@@ -58,6 +62,10 @@ class psrephem
 
   int load   (string* str);
   int unload (string* str) const;
+
+#ifdef PSRFITS
+  void load (fitsfile* fptr, long row=0);
+#endif
 
   void   nofit();
   void   fitall();
@@ -198,7 +206,6 @@ class psrephem
   int old_load (const char* filename);
   int old_unload (const char* filename) const;
 
-  // static char ephemstr [EPH_NUM_KEYS][EPH_STR_LEN];
 };
 
 ostream& operator<< (ostream& ostr, const psrephem& eph);
