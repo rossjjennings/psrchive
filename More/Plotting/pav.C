@@ -1,5 +1,5 @@
 //
-// $Id: pav.C,v 1.30 2003/03/06 16:28:00 straten Exp $
+// $Id: pav.C,v 1.31 2003/03/07 00:18:31 ahotan Exp $
 //
 // The Pulsar Archive Viewer
 //
@@ -65,6 +65,16 @@ void usage ()
     " -Y        Display all integrations in a time vs phase plot\n"
     " -z x1,x2  start and end phase \n"
     " -Z        Smear a profile by convolving with a hat function\n"
+    " -C        Centre the profile\n"
+    " -Y        Display all integrations in a time vs phase plot\n"
+    " -A        Plot instrumental phase across the band\n"
+    " -s        SNR frequency spectrum plot\n"
+    " -g        Position angle across a profile\n"
+    " -B        Off-pulse bandpass\n"
+    " -X        Plot cal amplitude and phase vs frequency channel\n"
+    " -W        Change colour scheme to suite white background\n"
+    " -q bin    Plot a position angle frequency spectrum for this bin\n"
+    " -Q        Position angle frequency spectrum for on-pulse region\n"
        << endl;
 }
 
@@ -98,14 +108,15 @@ int main (int argc, char** argv)
   bool bandpass = false;
   bool calinfo = false;
   bool pa_spectrum = false;
-
+  bool pa_scatter = false;
+  
   char* metafile = NULL;
   
   Pulsar::Plotter plotter;
   Pulsar::Plotter::ColourMap colour_map = Pulsar::Plotter::Heat;
   
   int c = 0;
-  const char* args = "ab:c:d:DGe:E:f:FhiHm:M:pP:r:St:TvVwWx:y:RZCYz:AsgXBq:";
+  const char* args = "ab:c:d:DGe:E:f:FhiHm:M:pP:r:St:TvVwWx:y:RZCYz:AsgXBq:Q";
   while ((c = getopt(argc, argv, args)) != -1)
     switch (c) {
       
@@ -145,7 +156,7 @@ int main (int argc, char** argv)
       usage ();
       return 0;
     case 'i':
-      cout << "$Id: pav.C,v 1.30 2003/03/06 16:28:00 straten Exp $" << endl;
+      cout << "$Id: pav.C,v 1.31 2003/03/07 00:18:31 ahotan Exp $" << endl;
       return 0;
     case 'm':
       // macro file
@@ -235,6 +246,9 @@ int main (int argc, char** argv)
     case 'q':
       sscanf(optarg, "%f", &the_phase);
       pa_spectrum = true;
+      break;
+    case 'Q':
+      pa_scatter = true;
       break;
       
     default:
@@ -346,6 +360,15 @@ int main (int argc, char** argv)
       exit(0);
     }
     
+    if (pa_scatter) {
+      cpgbeg (0, "?", 0, 0);
+      cpgask(1);
+      cpgsvp (0.1, 0.9, 0.1, 0.9);
+      cpgeras();
+      plotter.pa_scatter(archive);
+      cpgend();
+      exit(0);
+    }
 
     if (bandpass) {
       cpgbeg (0, "?", 0, 0);
