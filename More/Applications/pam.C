@@ -57,13 +57,16 @@ int main (int argc, char *argv[]) {
 
   bool flipsb = false;
 
+  bool new_eph = false;
+  string eph_file;
+
   string command = "pam";
 
   char* archive_class = 0;
 
   int gotc = 0;
   
-  while ((gotc = getopt(argc, argv, "hvVima:e:TFpIt:f:b:d:s:r:w:D:SB")) != -1) {
+  while ((gotc = getopt(argc, argv, "hvVima:e:E:TFpIt:f:b:d:s:r:w:D:SB")) != -1) {
     switch (gotc) {
     case 'h':
       cout << "A program for manipulating Pulsar::Archives"                       << endl;
@@ -80,6 +83,7 @@ int main (int argc, char *argv[]) {
       cout << "  -I               Transform to Invariant Interval"                << endl;
       cout << "  -S               Transform to Stokes parameters"                 << endl;
       cout << "  -B               Flip the sideband sense (DANGEROUS)"            << endl;
+      cout << "  -E ephfile       Install a new ephemeris"                        << endl;
       cout << endl;
       cout << "The following options take integer arguments"                      << endl;
       cout << "  -t tscr          Time scrunch by this factor"                    << endl;
@@ -104,7 +108,7 @@ int main (int argc, char *argv[]) {
       Pulsar::Archive::set_verbosity(3);
       break;
     case 'i':
-      cout << "$Id: pam.C,v 1.21 2003/10/10 12:34:41 straten Exp $" << endl;
+      cout << "$Id: pam.C,v 1.22 2003/10/16 08:12:29 ahotan Exp $" << endl;
       return 0;
     case 'm':
       save = true;
@@ -116,6 +120,10 @@ int main (int argc, char *argv[]) {
       save = true;
       ext = optarg;
       break;
+    case 'E':
+      new_eph = true;
+      eph_file = optarg;
+      command += " -E";
     case 'T':
       tscr = true;
       command += " -T";
@@ -246,6 +254,16 @@ int main (int argc, char *argv[]) {
 	cerr << "Loading " << archives[i] << endl;
       
       arch = Pulsar::Archive::load(archives[i]);
+
+      if (new_eph) {
+	if (!eph_file.empty()) {
+	  psrephem eph;
+	  if (eph.load(eph_file) == 0)
+	    arch->set_ephemeris(eph);
+	  else
+	    cerr << "Could not load new ephemeris" << endl;
+	}
+      }
 
       if (flipsb) {
 	for (unsigned i = 0; i < arch->get_nsubint(); i++) {
