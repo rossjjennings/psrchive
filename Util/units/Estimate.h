@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Estimate.h,v $
-   $Revision: 1.19 $
-   $Date: 2003/05/30 09:34:54 $
-   $Author: pulsar $ */
+   $Revision: 1.20 $
+   $Date: 2003/09/03 09:49:56 $
+   $Author: straten $ */
 
 #ifndef __Estimate_h
 #define __Estimate_h
@@ -11,6 +11,10 @@
 #include <iostream>
 #include <math.h>
 #include "psr_cpp.h"
+
+// forward declarations
+template <typename T, typename U=T> class MeanEstimate;
+template <typename T, typename U=T> class MeanRadian;
 
 //! Estimates with a value, \f$ x \f$, and a variance, \f$ \sigma^2 \f$
 /*!
@@ -22,6 +26,7 @@
 template <typename T, typename U=T>
 class Estimate
 {
+
  public:
   //! Enables vector< Estimate<T> > to be used in fft::interpolate template
   static unsigned ndim;
@@ -37,6 +42,14 @@ class Estimate
   //! Construct from another Estimate
   template <typename V, typename W>
   Estimate (const Estimate<V,W>& d) { val=d.val; var=d.var; }
+
+  //! Construct from MeanEstimate
+  template <typename V, typename W>
+  Estimate (const MeanEstimate<V,W>& m) { operator=( m.get_Estimate() ); }
+
+  //! Construct from MeanRadian
+  template <typename V, typename W>
+  Estimate (const MeanRadian<V,W>& m) { operator=( m.get_Estimate() ); }
 
   //! Assignment operator
   const Estimate& operator= (const Estimate& d)
@@ -149,7 +162,7 @@ ostream& operator<< (ostream& ostr, const Estimate<T,U>& estimate)
 
   See http://mathworld.wolfram.com/MaximumLikelihood.html (Eqs. 16 and 19)
 */
-template <typename T, typename U=T>
+template <typename T, typename U>
 class MeanEstimate
 {
  public:
@@ -161,9 +174,13 @@ class MeanEstimate
   //! Construct from a value (normalized by / and) the inverse of its variance
   MeanEstimate (T _val=0, U _var=0) { norm_val=_val; inv_var=_var; }
 
-  //! Construct from another MeanEstimate
+  //! Copy Constructor
   MeanEstimate (const MeanEstimate& d)
   { norm_val=d.norm_val; inv_var=d.inv_var; }
+
+  //! Construct from an Estimate
+  MeanEstimate (const Estimate<T,U>& d)
+  { norm_val = 0; inv_var = 0; operator += (d); }
 
   //! Assignment operator
   const MeanEstimate& operator= (const MeanEstimate& d)
@@ -187,7 +204,14 @@ class MeanEstimate
 
 };
 
-template <typename T, typename U=T>
+//! Useful for quickly printing the values
+template<typename T, typename U>
+ostream& operator<< (ostream& ostr, const MeanEstimate<T,U>& mean)
+{
+  return ostr << mean.get_Estimate();
+}
+
+template <typename T, typename U>
 class MeanRadian
 {
 
@@ -212,6 +236,13 @@ class MeanRadian
   MeanEstimate<T,U> sine;
 
 };
+
+//! Useful for quickly printing the values
+template<typename T, typename U>
+ostream& operator<< (ostream& ostr, const MeanRadian<T,U>& mean)
+{
+  return ostr << mean.get_Estimate();
+}
 
 #endif
 

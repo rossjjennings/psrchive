@@ -1,4 +1,5 @@
 #include "Estimate.h"
+#include "Stokes.h"
 
 int main ()
 {
@@ -30,7 +31,7 @@ int main ()
   radmean += rad1;
   radmean += rad2;
 
-  Estimate<double> rad3 = radmean.get_Estimate();
+  Estimate<double> rad3 (radmean);
 
   cerr << "test_Estimate: mean of rad1=" << rad1 << " and rad2=" << rad2 <<
     "\n  = " << rad3 << endl;
