@@ -479,7 +479,7 @@ polynomial polyco::nearest_polly(const MJD &t) const {
     MJD t1 = pollys[ipolly].reftime - (double) pollys[ipolly].nspan_mins*60.0/2.0;
     MJD t2 = pollys[ipolly].reftime + (double) pollys[ipolly].nspan_mins*60.0/2.0;
     
-    if (t>t1 && t<t2) {
+    if (t>=t1 && t<=t2) {
       return(pollys[ipolly]);
     }
     ipolly++;
@@ -495,7 +495,7 @@ polynomial polyco::nearest_polly(string in_psrname,const MJD &t) const {
     MJD t1 = pollys[ipolly].reftime - (double) pollys[ipolly].nspan_mins*60.0/2.0;
     MJD t2 = pollys[ipolly].reftime + (double) pollys[ipolly].nspan_mins*60.0/2.0;
     
-    if (t>t1 && t<t2 && pollys[ipolly].psrname==in_psrname) {
+    if (t>=t1 && t<=t2 && pollys[ipolly].psrname==in_psrname) {
       return(pollys[ipolly]);
     }
     ipolly++;
