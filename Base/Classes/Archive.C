@@ -462,30 +462,13 @@ double Pulsar::Archive::find_best_period (){
   // make sure appropriate scrunching
   scrunched_copy->fscrunch(0);
   scrunched_copy->pscrunch();
+  // Find out geometric mean rms of all sub_ints baseline
+  float rms = scrunched_copy->rms_baseline(0.4);
   for (double trial_p = p_l;trial_p<p_u;trial_p+=dp){
-    // Copy the archive into workspace
-
     Reference::To<Archive> acopy = scrunched_copy->clone();
     acopy->new_folding_period(trial_p);
-    //    cpgbbuf();
     acopy->tscrunch(0);
-    // find the edges and plot them in red.
-    int rise=0,fall=0;
-    acopy->get_Profile(0,0,0)->find_peak_edges(rise,fall);
-    /*    cpgbbuf();
-    cpgeras();
-    myplotter.singleProfile(acopy);
-    cpgsci(2);
-    rise = rise % get_nbin();
-    fall = fall % get_nbin();
-    cpgmove((float)rise/get_nbin(),0.0);
-    cpgdraw((float)rise/get_nbin(),1000000.0);
-    cpgsci(3);
-    cpgmove((float)fall/get_nbin(),0.0);
-    cpgdraw((float)fall/get_nbin(),1000000.0);
-    cpgebuf();
-    */
-    float trial_snr = acopy->get_Profile(0,0,0)->snr();
+    float trial_snr = acopy->get_Profile(0,0,0)->snr_fortran(rms);
     if (trial_snr>best_snr){
       best_period = trial_p;
       best_snr = trial_snr;
@@ -685,3 +668,26 @@ void Pulsar::Archive::new_folding_period(double trial_p){
     }
     // Doesn't work with   acopy->set_folding_period(trial_p);
 }
+
+/*!
+  Returns the geometric mean of the rms of the baseline
+  for the 0,0th profile in each Integration. MB Feb 2004.
+  */
+
+float Pulsar::Archive::rms_baseline (float baseline_width)
+{
+  if (get_nsubint() == 0)
+    return 0.0;
+  double sum_rms_sq;
+  sum_rms_sq = 0.0;
+  // find the mean and the r.m.s. of the baseline
+  double min_avg, min_var;
+  for (unsigned isub=0; isub < get_nsubint(); isub++){
+    get_Profile(isub,0,0)->stats (
+      get_Profile(isub,0,0)->find_min_phase(baseline_width), &min_avg, &min_var
+    );
+    sum_rms_sq += min_var;
+  }
+  return (float) sqrt(sum_rms_sq)/ sqrt((float) get_nsubint());
+}
+
