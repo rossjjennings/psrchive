@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Profile.h,v $
-   $Revision: 1.59 $
-   $Date: 2004/05/06 13:17:14 $
-   $Author: ahotan $ */
+   $Revision: 1.60 $
+   $Date: 2004/05/20 02:34:09 $
+   $Author: sord $ */
 
 #ifndef __Pulsar_Profile_h
 #define __Pulsar_Profile_h
@@ -267,6 +267,10 @@ namespace Pulsar {
 
     //! halves the number of bins like bscrunch(2^nhalve)
     virtual void halvebins (unsigned nhalve);
+    
+    //! returns a smoothed profile by whacking spectral components - takes fraction of spectrum to keep (8 == 1/8th)
+    Pulsar::Profile * denoise(int fraction=8);
+    void denoise_inplace(int fraction=8);
 
   protected:
 
