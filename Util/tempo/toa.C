@@ -592,7 +592,7 @@ double Tempo::toa::getData (DataType code) const
   // if (auxdata && code > PrefitResidualTime)
     // return auxdata -> getData (code);
   
-  throw string ("Tempo::toa::getData invalid code");
+  throw Error (InvalidParam, "Tempo::toa::getData invalid code");
 }
 
 const char* Tempo::toa::getDescriptor (DataType code) const

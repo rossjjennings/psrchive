@@ -5,6 +5,7 @@
 #include "resio.h"
 #include "residual.h"
 #include "MJD.h"
+#include "Error.h"
 
 bool Tempo::residual::verbose = 0;
 
@@ -12,7 +13,7 @@ Tempo::residual::residual (int lun)
 {
   init();
   if (load(lun) < 0)
-    throw string ("Tempo::residual load error");
+    throw Error (FailedCall, "Tempo::residual load error");
 }
 
 void Tempo::residual::init ()
