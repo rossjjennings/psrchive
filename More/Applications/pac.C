@@ -27,27 +27,46 @@ void usage ()
     "  -V                     Very verbose mode\n"
     "  -i                     Show revision information\n"
     "\n"
-    "  -p path                Set the CAL file directory\n"
-    "  -u ext1 ext2 ...       Add to recognized file extensions\n"
-    "                         (defaults: .cf .pcal .fcal .pfit\n"
-    "  -e extension           Use this extension when unloading results\n"
+    "Calibrator options: \n"
+    "  -A filename            Use the calibrator specified by filename \n"
+    "  -P                     Calibrate polarisations only \n"
+    "  -S                     Use the complete Reception model \n"
+    "  -s                     Use the Single Axis Model (default) \n"
+    "  -q                     Use the Polar Model \n"
+    "\n"
+    "Database options: \n"
+    "  -d database            Read ASCII summary (instead of -p)\n"   
+    "  -p path                Search for CAL files in the specified path \n"
+    "  -u ext1 ext2 ...       Add to file extensions recognized in search \n"
+    "                         (defaults: .cf .pcal .fcal .pfit)\n"
     "  -w                     Write a new database summary file if using -p\n"
     "  -W                     Same as -w but exit after writing summary\n"
-    "  -d database            Read ASCII summary (instead of -p)\n"   
+    "\n"
+    "Matching options: \n"
     "  -c                     Do not try to match sky coordinates\n"
     "  -I                     Do not try to match instruments\n"
     "  -T                     Do not try to match times\n"
     "  -F                     Do not try to match frequencies\n"
     "  -b                     Do not try to match bandwidths\n"
     "  -o                     Do not try to match obs types\n"
-    "  -P                     Calibrate polarisations only\n"
     "\n"
-    "  -S                     Use the complete Reception model \n"
-    "  -s                     Use the Single Axis Model (default) \n"
-    "  -q                     Use the Polar Model \n\n"
-    "  -A filename            Use the calibrator specified by filename \n\n"
+    "Output options: \n"
+    "  -e extension           Use this extension when unloading results\n"
+    "  -n [q|u|v]             Flip the sign of Stokes Q, U, or V \n"
+    "\n"
     "See http://astronomy.swin.edu.au/pulsar/software/manuals/pac.html"
        << endl;
+}
+
+#define Stokes_Q 0x01
+#define Stokes_U 0x02
+#define Stokes_V 0x04
+
+void sign_flip (Pulsar::Archive* archive, unsigned ipol)
+{
+  for (unsigned isub=0; isub<archive->get_nsubint(); isub++)
+    for (unsigned ichan=0; ichan<archive->get_nchan(); ichan++)
+      *(archive->get_Profile (isub, ipol, ichan)) *= -1.0;
 }
 
 int main (int argc, char *argv[]) {
@@ -84,7 +103,9 @@ int main (int argc, char *argv[]) {
 
   string command = "pac ";
 
-  while ((gotc = getopt(argc, argv, "hvVip:u:e:d:wWcITFboPsSqA:")) != -1) {
+  unsigned char flip_sign = 0x00;
+
+  while ((gotc = getopt(argc, argv, "A:bcd:e:FhiIn:op:PqsSTu:vVwW")) != -1) {
     switch (gotc) {
     case 'h':
       usage ();
@@ -100,8 +121,33 @@ int main (int argc, char *argv[]) {
       Pulsar::Archive::set_verbosity(1);
       break;
     case 'i':
-      cout << "$Id: pac.C,v 1.41 2004/04/05 12:41:48 straten Exp $" << endl;
+      cout << "$Id: pac.C,v 1.42 2004/04/06 16:52:56 straten Exp $" << endl;
       return 0;
+
+    case 'n': {
+
+      switch (optarg[0]) {
+
+      case 'Q':
+      case 'q':
+	flip_sign |= Stokes_Q;
+	break;
+
+      case 'U':
+      case 'u':
+	flip_sign |= Stokes_U;
+	break;
+
+      case 'V':
+      case 'v':
+	flip_sign |= Stokes_V;
+	break;
+
+      }
+
+      break;
+    }
+
     case 'p':
       cals_are_here = optarg;
       break;
@@ -394,7 +440,32 @@ int main (int argc, char *argv[]) {
     if (verbose)
       cout << "pac: Calibrated Archive name '" << newname << "'" << endl;
     
-    // See if the archive contains a history that should be updated:
+
+    if (flip_sign) {
+
+      cerr << "pac: Flipping the sign of Stokes";
+      arch->convert_state (Signal::Stokes);
+
+      if (flip_sign & Stokes_Q) {
+	cerr << " Q";
+	sign_flip (arch, 1);
+      }
+
+      if (flip_sign & Stokes_U) {
+	cerr << " U";
+	sign_flip (arch, 2);
+      }
+
+      if (flip_sign & Stokes_V) {
+	cerr << " V";
+	sign_flip (arch, 3);
+      }
+
+      cerr << endl;
+
+    }
+
+    // See if the archive contains a history that should be updated
     
     Pulsar::ProcHistory* fitsext = arch->get<Pulsar::ProcHistory>();
     
