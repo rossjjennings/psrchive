@@ -153,7 +153,7 @@ string psrephem::tex_val (int ephi, double fac, unsigned precision) const
     cerr << "psrephem::tex_val(" << ephi << ") entered" << endl;
 
   if (parmStatus[ephi] < 1)
-    return string();
+    return " \\nodata ";
 
   switch ( parmTypes[ephi] ) {
 
@@ -212,21 +212,24 @@ const char* psrephem::tex_descriptor (int ephind)
   case EPH_PEPOCH: return "$P$ epoch (MJD)";
   case EPH_RAJ:    return "Right ascension, $\\alpha$ (J2000.0)";
   case EPH_DECJ:   return "Declination, $\\delta$ (J2000.0)";
-  case EPH_PMRA:   return "Proper motion, $\\mu_\\alpha$ (mas yr$^{-1}$)";
-  case EPH_PMDEC:  return "Proper motion, $\\mu_\\delta$ (mas yr$^{-1}$)";
+  case EPH_PMRA:   return "$\\mu_\\alpha$ (mas yr$^{-1}$)";
+  case EPH_PMDEC:  return "$\\mu_\\delta$ (mas yr$^{-1}$)";
+  case EPH_PX:     return "Annual parallax, $\\pi$ (mas)";
+  case EPH_BINARY: return "Binary Model";
   case EPH_PB:     return "Orbital period, $P_{\\rm b}$ (days)";
   case EPH_A1:     return "Projected semi-major axis, $x$ (lt-s)";
-  case EPH_T0:     return "Epoch of periastron, $T_{0}$ (MJD)";
+  case EPH_T0:     return "Epoch of periastron, $T_0$ (MJD)";
   case EPH_OM:     return "Longitude of periastron, $\\omega$ (\\degr)";
   case EPH_E:      return "Orbital eccentricity, $e$";
+  case EPH_SINI:   return "$\\sin(i)$";
   case EPH_KIN:    return "Orbital inclination, $i$ (\\degr)";
   case EPH_KOM:    return "Longitude of ascension, $\\Omega$ (\\degr)";
-  case EPH_PX:     return "Annual parallax, $\\pi$ (mas)";
   case EPH_PBDOT:  return "$\\dot P_{\\rm b} (10^{-12})$"; 
   case EPH_OMDOT:  return "$\\dot \\omega$ (\\degr yr$^{-1}$)";
+  case EPH_XDOT:   return "$\\dot x (10^{-12})$"; 
   case EPH_M2:     return "Companion mass, m$_2$ (M$_{\\odot})$";
   default:
-    return NULL;
+    return "psrephem::tex_descriptor - no match";
   }
 }
 
@@ -235,79 +238,212 @@ const char* psrephem::tex_descriptor (int ephind)
 // feel free to add more as you see fit
 string psrephem::tex () const
 {
-  bool binary = parmStatus[EPH_BINARY] > 0;
+  vector<psrephem> vals (1);
+  vals[0] = *this;
 
-  string bw = " \t \\dotfill & ";
+  return tex (vals, true);
+}
+
+string psrephem::tex (vector<psrephem>& vals, bool dots)
+{
+  bool binary = false;
+  unsigned ip;
+
+  for (ip = 0; ip < vals.size(); ip++)
+    if (vals[ip].parmStatus[EPH_BINARY] > 0)
+      binary = true;
+  
+  string bw;
+  if (dots)
+    bw = " \t \\dotfill & ";
+  else
+    bw = " & ";
   string nl = " \\\\\n";
 
-  string retval =
-      + tex_descriptor(EPH_RAJ) +  bw + tex_val (EPH_RAJ) + nl
-      + tex_descriptor(EPH_DECJ) + bw + tex_val (EPH_DECJ) + nl;
+  // right ascenscion
+  string retval = tex_descriptor(EPH_RAJ);
+  for (ip=0; ip<vals.size(); ip++)
+    retval += bw + vals[ip].tex_val (EPH_RAJ);
+  retval += nl;
 
-  double mu, mu_err;
-  pm (mu, mu_err);
-  retval += "Composite proper motion, $\\mu$ (mas yr$^{-1}$)" + bw 
-       + tex_double(mu, mu_err) + nl;
+  // declination
+  retval += tex_descriptor(EPH_DECJ);
+  for (ip=0; ip<vals.size(); ip++)
+    retval += bw + vals[ip].tex_val (EPH_DECJ);
+  retval += nl;
 
-  double ph, ph_err;
-  phi (ph, ph_err);
-  retval += "Celestial position angle, $\\phi_\\mu (\\degr)$" + bw
-       + tex_double(ph*180.0/M_PI, ph_err*180.0/M_PI) + nl;
+  // proper motion, right ascenscion
+  retval += tex_descriptor(EPH_PMRA);
+  for (ip=0; ip<vals.size(); ip++)
+    retval += bw + vals[ip].tex_val (EPH_PMRA);
+  retval += nl;
 
-  retval += tex_descriptor(EPH_PX) + bw + tex_val (EPH_PX) + nl;
+  // proper motion, declination
+  retval += tex_descriptor(EPH_PMDEC);
+  for (ip=0; ip<vals.size(); ip++)
+    retval += bw + vals[ip].tex_val (EPH_PMDEC);
+  retval += nl;
 
-  double p, p_err;
-  P (p, p_err);
-  retval += "Pulse period, $P$ (ms)" + bw
-       + tex_double (p*1e3, p_err*1e3) + nl;
+  // composite proper motion
+  retval += "Composite proper motion, $\\mu$ (mas yr$^{-1}$)";
+  for (ip=0; ip<vals.size(); ip++) {
+    double mu, mu_err;
+    vals[ip].pm (mu, mu_err);
+    retval += bw + tex_double(mu, mu_err);
+  }
+  retval += nl;
 
-  retval += tex_descriptor(EPH_PEPOCH) + bw + tex_val (EPH_PEPOCH) + nl;
+  // celestial position angle
+  retval += "Celestial position angle, $\\phi_\\mu (\\degr)$";
+  for (ip=0; ip<vals.size(); ip++) {
+    double ph, ph_err;
+    vals[ip].phi (ph, ph_err);
+    retval += bw + tex_double(ph*180.0/M_PI, ph_err*180.0/M_PI);
+  }
+  retval += nl;
 
-  double p_dot, p_dot_err;
-  P_dot (p_dot, p_dot_err);
+  // parallax
+  retval += tex_descriptor(EPH_PX);
+  for (ip=0; ip<vals.size(); ip++)
+    retval += bw + vals[ip].tex_val (EPH_PX);
+  retval += nl;
 
-  retval += "Period derivative, $\\dot{P}$ (10$^{-20}$)" + bw
-       + tex_double (p_dot*1e20, p_dot_err*1e20) + nl;
+  // spin period
+  retval += "Pulse period, $P$ (ms)";
+  for (ip=0; ip<vals.size(); ip++) {
+    double p, p_err;
+    vals[ip].P (p, p_err);
+    retval += bw + tex_double (p*1e3, p_err*1e3);
+  }
+  retval += nl;
+
+  // reference ephoch
+  retval += tex_descriptor(EPH_PEPOCH);
+  for (ip=0; ip<vals.size(); ip++)
+    retval += bw + vals[ip].tex_val (EPH_PEPOCH);
+  retval += nl;
+  
+  // spin period derivative
+  retval += "Period derivative, $\\dot{P}$ (10$^{-20}$)";
+  for (ip=0; ip<vals.size(); ip++) {
+    double p_dot, p_dot_err;
+    vals[ip].P_dot (p_dot, p_dot_err);
+    retval += bw + tex_double (p_dot*1e20, p_dot_err*1e20);
+  }
+  retval += nl;
 
   if (binary)
   {
-    retval += tex_descriptor(EPH_PB)  + bw + tex_val (EPH_PB) + nl
-	 + tex_descriptor(EPH_A1)  + bw + tex_val (EPH_A1) + nl
-	 + tex_descriptor(EPH_E)   + bw + tex_val (EPH_E) + nl
-	 + tex_descriptor(EPH_T0)  + bw + tex_val (EPH_T0) + nl
-	 + tex_descriptor(EPH_OM)  + bw + tex_val (EPH_OM) + nl
-	 + tex_descriptor(EPH_KOM) + bw + tex_val (EPH_KOM) + nl
-	 + tex_descriptor(EPH_KIN) + bw + tex_val (EPH_KIN) + nl
-	 + tex_descriptor(EPH_M2)  + bw + tex_val (EPH_M2) + nl
-	 + tex_descriptor(EPH_PBDOT) + bw + tex_val (EPH_PBDOT) + nl
-	 + tex_descriptor(EPH_OMDOT) + bw + tex_val (EPH_OMDOT) + nl
-      ;
+    retval += tex_descriptor(EPH_BINARY);
+    for (ip=0; ip<vals.size(); ip++)
+      retval += bw + vals[ip].tex_val (EPH_BINARY);
+    
+    retval += nl + tex_descriptor(EPH_PB);
+    for (ip=0; ip<vals.size(); ip++)
+      retval += bw + vals[ip].tex_val (EPH_PB);
+
+    retval += nl + tex_descriptor(EPH_A1);
+    for (ip=0; ip<vals.size(); ip++)
+      retval += bw + vals[ip].tex_val (EPH_A1);
+
+    retval += nl + tex_descriptor(EPH_E);
+    for (ip=0; ip<vals.size(); ip++)
+      retval += bw + vals[ip].tex_val (EPH_E);
+
+    retval += nl + tex_descriptor(EPH_T0);
+    for (ip=0; ip<vals.size(); ip++)
+      retval += bw + vals[ip].tex_val (EPH_T0);
+
+    retval += nl + tex_descriptor(EPH_OM);
+    for (ip=0; ip<vals.size(); ip++)
+      retval += bw + vals[ip].tex_val (EPH_OM);
+
+    retval += nl + tex_descriptor(EPH_KOM);
+    for (ip=0; ip<vals.size(); ip++)
+      retval += bw + vals[ip].tex_val (EPH_KOM);
+
+    retval += nl + tex_descriptor(EPH_KIN);
+    for (ip=0; ip<vals.size(); ip++)
+      retval += bw + vals[ip].tex_val (EPH_KIN);
+
+    retval += nl + tex_descriptor(EPH_SINI);
+    for (ip=0; ip<vals.size(); ip++)
+      retval += bw + vals[ip].tex_val (EPH_SINI);
+
+    retval += nl + tex_descriptor(EPH_M2);
+    for (ip=0; ip<vals.size(); ip++)
+      retval += bw + vals[ip].tex_val (EPH_M2);
+
+    retval += nl + tex_descriptor(EPH_PBDOT);
+    for (ip=0; ip<vals.size(); ip++)
+      retval += bw + vals[ip].tex_val (EPH_PBDOT);
+
+    retval += nl + tex_descriptor(EPH_XDOT);
+    for (ip=0; ip<vals.size(); ip++)
+      retval += bw + vals[ip].tex_val (EPH_XDOT);
+
+    retval += nl + tex_descriptor(EPH_OMDOT);
+    for (ip=0; ip<vals.size(); ip++)
+      retval += bw + vals[ip].tex_val (EPH_OMDOT);
+
+    retval += nl;
   }
 
-  double mp, mp_err;
-  m1 (mp, mp_err);
-  retval += "Pulsar mass, m$_{\\rm p}$ (M$_{\\odot})$" + bw
-    + tex_double (mp, mp_err) + nl;
+  retval += "Pulsar mass, m$_{\\rm p}$ (M$_{\\odot})$";
+  for (ip=0; ip<vals.size(); ip++) {
+    double mp, mp_err;
+    vals[ip].m1 (mp, mp_err);
+    retval += bw + tex_double (mp, mp_err);
+  }
+  retval += nl;
 
-  double beta, beta_err;
-  quadratic_Doppler (beta, beta_err);
-  retval += "Quadratic Doppler shift, $\\beta$ (10$^{-20}$s$^{-1}$)" + bw
-    + tex_double (beta*1e20, beta_err*1e20) + nl;
+  retval += "Quadratic Doppler shift, $\\beta$ (10$^{-20}$s$^{-1}$)";
+  for (ip=0; ip<vals.size(); ip++) {
+    double beta, beta_err;
+    vals[ip].quadratic_Doppler (beta, beta_err);
+    retval += bw + tex_double (beta*1e20, beta_err*1e20);
+  }
+  retval += nl;
 
-  double p_dot_int = p_dot - p * beta;
-  double p_dot_int_err = p_dot_err 
-    + p * beta * sqrt(sqr(p_err/p)+sqr(beta_err/beta));
+  retval += "Intrinsic period derivative, $\\dot P_{\\rm int}$ (10$^{-20}$)";
+  for (ip=0; ip<vals.size(); ip++) {
+    double beta, beta_err;
+    vals[ip].quadratic_Doppler (beta, beta_err);
+    double p, p_err;
+    vals[ip].P (p, p_err);
+    double p_dot, p_dot_err;
+    vals[ip].P_dot (p_dot, p_dot_err);
 
-  retval += "Intrinsic period derivative, $\\dot P_{\\rm int}$ (10$^{-20}$)"
-    + bw + tex_double (p_dot_int*1e20, p_dot_int_err*1e20) + nl;
+    double p_dot_int = p_dot - p * beta;
+    double p_dot_int_err = p_dot_err 
+      + p * beta * sqrt(sqr(p_err/p)+sqr(beta_err/beta));
 
-  double char_age = 0.5 * p / p_dot_int / (86400.0e9 * 365.25);
-  double char_age_err = char_age
-    * sqrt(sqr(p_err/p)+sqr(p_dot_int_err/p_dot_int));
+    retval += bw + tex_double (p_dot_int*1e20, p_dot_int_err*1e20);
+  }
+  retval += nl;
 
-  retval += "Characteristic age, $\\tau_c$ (Gyr)"
-    + bw + tex_double (char_age, char_age_err) + nl;
+  retval += "Characteristic age, $\\tau_c$ (Gyr)";
+  for (ip=0; ip<vals.size(); ip++) {
+    double beta, beta_err;
+    vals[ip].quadratic_Doppler (beta, beta_err);
+    double p, p_err;
+    vals[ip].P (p, p_err);
+    double p_dot, p_dot_err;
+    vals[ip].P_dot (p_dot, p_dot_err);
 
+    double p_dot_int = p_dot - p * beta;
+    double p_dot_int_err = p_dot_err 
+      + p * beta * sqrt(sqr(p_err/p)+sqr(beta_err/beta));
+
+    double char_age = 0.5 * p / p_dot_int / (86400.0e9 * 365.25);
+    double char_age_err = char_age
+      * sqrt(sqr(p_err/p)+sqr(p_dot_int_err/p_dot_int));
+    
+    retval += bw + tex_double (char_age, char_age_err);
+  }
+  retval += nl;
+
+#if FIXED
   double pb = value_double [EPH_PB];
   double pb_err = error_double [EPH_PB];
 
@@ -355,6 +491,8 @@ string psrephem::tex () const
 	   sqrt(psrs[i]->pb.value * psrs[i]->pbdot.value*1e-15)*3.2e19);
   }
   printf("\\\\\n");
+#endif
+
 #endif
 
   return retval;

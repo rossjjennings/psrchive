@@ -50,15 +50,18 @@ int main (int argc, char** argv)
     cerr << "ephtex: provide a TEMPO parameter file as the last argument"
 	 << endl;
   
-  psrephem eph (argv[optind]);
-
-  if (efac > 0)
-    eph.efac (efac);
+  vector<psrephem> ephs;
+  for (int iarg=optind; iarg<argc; iarg++) {
+    psrephem eph (argv[iarg]);
+    if (efac > 0)
+      eph.efac (efac);
+    ephs.push_back (eph);
+  }
 
   if (aastex) {
     cout <<
       "\\begin{deluxetable}{lr}\n"
-      "\\tablecaption{Derived Parameters for " << eph.tex_name() << "}\n"
+      "\\tablecaption{Derived Parameters for " << ephs[0].tex_name() << "}\n"
       "\\tablecolumns{1}\n"
       "\\tablewidth{0pt}\n"
       "\\startdata\n"
@@ -66,17 +69,16 @@ int main (int argc, char** argv)
   }
   else {
     cout <<
-      "\\begin{table}\n"
-      "\\begin{tabular}{lr}\n"
-      "\\multicolumn{2}{c}{\\bf Derived Parameters for " 
-	 << eph.tex_name() << "} \\\\"
-	 << endl;
+      "\\begin{tabular}{l";
+    for (int ie=0; ie<ephs.size(); ie++)
+      cout << "r";
+    cout << "}\n";
 
     if (!nature)
       cout << " \\hline \\hline" << endl;
   }
 
-  cout << eph.tex() << endl;
+  cout << psrephem::tex(ephs) << endl;
 
   if (aastex) {
     cout <<
@@ -87,7 +89,6 @@ int main (int argc, char** argv)
   else {
     cout <<
       "\\end{tabular}\n"
-      "\\end{table}\n"
 	 << endl;
   }
 }
