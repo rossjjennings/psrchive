@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/Timer/Pulsar/TimerArchive.h,v $
-   $Revision: 1.10 $
-   $Date: 2004/06/17 09:10:17 $
+   $Revision: 1.11 $
+   $Date: 2004/07/12 11:54:46 $
    $Author: straten $ */
 
 #ifndef __Timer_Archive_h
@@ -56,10 +56,15 @@ namespace Pulsar {
     //! Set the tempo code of the telescope used
     virtual void set_telescope_code (char telescope_code);
 
-    //! Get the feed configuration of the receiver
-    virtual Signal::Basis get_basis () const;
-    //! Set the feed configuration of the receiver
-    virtual void set_basis (Signal::Basis type);
+    //! Get the state of the profiles
+    virtual Signal::State get_state () const;
+    //! Set the state of the profiles
+    virtual void set_state (Signal::State state);
+
+    //! Get the scale of the profiles
+    virtual Signal::Scale get_scale () const;
+    //! Set the scale of the profiles
+    virtual void set_scale (Signal::Scale scale);
 
     //! Get the observation type (psr, cal)
     virtual Signal::Source get_type () const;
@@ -70,16 +75,6 @@ namespace Pulsar {
     virtual string get_source () const;
     //! Set the source name
     virtual void set_source (const string& source);
-
-    //! Get the receiver name
-    virtual string get_receiver () const;
-    //! Set the receiver name
-    virtual void set_receiver (const string& rec);
-
-    //! Get the backend name
-    virtual string get_backend () const;
-    //! Set the backend name
-    virtual void set_backend (const string& bak);
 
     //! Get the coordinates of the source
     virtual sky_coord get_coordinates () const;
@@ -112,11 +107,6 @@ namespace Pulsar {
     //! Set the centre frequency of the observation
     virtual void set_centre_frequency (double cf);
 
-    //! Get the state of the profiles
-    virtual Signal::State get_state () const;
-    //! Set the state of the profiles
-    virtual void set_state (Signal::State state);
-
     //! Get the dispersion measure (in \f${\rm pc\, cm}^{-3}\f$)
     virtual double get_dispersion_measure () const;
     //! Set the dispersion measure (in \f${\rm pc\, cm}^{-3}\f$)
@@ -132,36 +122,15 @@ namespace Pulsar {
     //! Set true when the inter-channel dispersion delay has been removed
     virtual void set_dedispersed (bool done = true);
 
-    //! Data has been flux calibrated
-    virtual bool get_flux_calibrated () const;
-    //! Set the status of the flux calibrated flag
-    virtual void set_flux_calibrated (bool done = true);
+    //! Data has been corrected for ISM faraday rotation
+    virtual bool get_faraday_corrected () const;
+    //! Set the status of the ISM RM flag
+    virtual void set_faraday_corrected (bool done = true);
 
     //! Data has been poln calibrated
     virtual bool get_poln_calibrated () const;
     //! Set the status of the poln calibrated flag
     virtual void set_poln_calibrated (bool done = true);
-
-    //! Data has been corrected for feed angle errors
-    virtual bool get_feedangle_corrected () const;
-    //! Set the status of the feed angle flag
-    virtual void set_feedangle_corrected (bool done = true);
-
-    //! Data has been corrected for parallactic angle errors
-    virtual bool get_parallactic_corrected () const;
-    //! Set the status of the parallactic angle flag
-    virtual void set_parallactic_corrected (bool done = true);
-
-    //! Data has been corrected for ionospheric faraday rotation
-    virtual bool get_iono_rm_corrected () const;
-    //! Set the status of the ionospheric RM flag
-    virtual void set_iono_rm_corrected (bool done = true);
-
-    //! Data has been corrected for ISM faraday rotation
-    virtual bool get_ism_rm_corrected () const;
-    //! Set the status of the ISM RM flag
-    virtual void set_ism_rm_corrected (bool done = true);
-
 
     //! Returns the Hydra observation type, given the coordinates
     int hydra_obstype ();
@@ -230,6 +199,9 @@ namespace Pulsar {
     //! set code bit in hdr.corrected
     void set_corrected (int code, bool done);
 
+    //! set code bit in hdr.calibrated
+    void set_calibrated (int code, bool done);
+
     //! load the archive from an open file
     void load (FILE* fptr);
 
@@ -268,6 +240,18 @@ namespace Pulsar {
 
     //! Set the state of various redundant parameters in the mini headers
     void correct_Integrations ();
+
+    //! Unpack the Receiver and Telescope Extension classes (after loading)
+    void unpack_extensions ();
+
+    //! Pack the Receiver and Telescope Extension classes (before unloading)
+    void pack_extensions () const;
+
+    //! Unpack the Receiver extension
+    void unpack (Receiver* receiver);
+
+    //! Pack the Receiver extension
+    void pack (const Receiver* receiver) const;
 
   };
 

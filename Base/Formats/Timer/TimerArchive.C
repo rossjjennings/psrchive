@@ -1,5 +1,7 @@
-#include "TimerArchive.h"
-#include "TimerIntegration.h"
+#include "Pulsar/TimerArchive.h"
+#include "Pulsar/TimerIntegration.h"
+#include "Pulsar/Telescope.h"
+
 #include "Error.h"
 
 #include "timer++.h"
@@ -16,10 +18,11 @@ bool Pulsar::TimerArchive::big_endian = true;
 //
 Pulsar::TimerArchive::TimerArchive ()
 {
-  if (verbose)
-    cerr << "TimerArchive default constructor" << endl;
+  if (verbose == 3) {
+    cerr << "Pulsar::TimerArchive default constructor" << endl;
+    Timer::verbose = true;
+  }
 
-  Timer::verbose = verbose;
   Timer::init (&hdr);
   valid = false;
 }
@@ -29,8 +32,8 @@ Pulsar::TimerArchive::TimerArchive ()
 //
 Pulsar::TimerArchive::TimerArchive (const TimerArchive& arch)
 {
-  if (verbose)
-    cerr << "TimerArchive copy construct" << endl;
+  if (verbose == 3)
+    cerr << "Pulsar::TimerArchive copy construct" << endl;
 
   Timer::init (&hdr);
   Archive::copy (arch); // results in call to TimerArchive::copy
@@ -41,8 +44,8 @@ Pulsar::TimerArchive::TimerArchive (const TimerArchive& arch)
 //
 Pulsar::TimerArchive::~TimerArchive ()
 {
-  if (verbose)
-    cerr << "TimerArchive destructor" << endl;
+  if (verbose == 3)
+    cerr << "Pulsar::TimerArchive destructor" << endl;
 }
 
 //
@@ -51,8 +54,8 @@ Pulsar::TimerArchive::~TimerArchive ()
 const Pulsar::TimerArchive&
 Pulsar::TimerArchive::operator = (const TimerArchive& arch)
 {
-  if (verbose)
-    cerr << "TimerArchive assignment operator" << endl;
+  if (verbose == 3)
+    cerr << "Pulsar::TimerArchive assignment operator" << endl;
 
   Archive::copy (arch); // results in call to TimerArchive::copy
   return *this;
@@ -63,8 +66,8 @@ Pulsar::TimerArchive::operator = (const TimerArchive& arch)
 //
 Pulsar::TimerArchive::TimerArchive (const Archive& arch)
 {
-  if (verbose)
-    cerr << "TimerArchive base copy construct" << endl;
+  if (verbose == 3)
+    cerr << "Pulsar::TimerArchive base copy construct" << endl;
 
   Timer::init (&hdr);
   Archive::copy (arch); // results in call to TimerArchive::copy
@@ -76,8 +79,8 @@ Pulsar::TimerArchive::TimerArchive (const Archive& arch)
 Pulsar::TimerArchive::TimerArchive (const Archive& arch,
 				    const vector<unsigned>& subints)
 {
-  if (verbose)
-    cerr << "TimerArchive base extraction construct " << endl;
+  if (verbose == 3)
+    cerr << "Pulsar::TimerArchive base extraction construct " << endl;
   
   Timer::init (&hdr);
   TimerArchive::copy (arch, subints);
@@ -89,15 +92,15 @@ Pulsar::TimerArchive::TimerArchive (const Archive& arch,
 void Pulsar::TimerArchive::copy (const Archive& archive, 
 				 const vector<unsigned>& subints)
 {
-  if (verbose)
-    cerr << "TimerArchive::copy Entering" << endl;
+  if (verbose == 3)
+    cerr << "Pulsar::TimerArchive::copy Entering" << endl;
 
   if (this == &archive) {
-    if (verbose)
+    if (verbose == 3)
       cerr << "Returning from TimerArchive::copy early " << endl;
     return;
   } else {
-    if (verbose)
+    if (verbose == 3)
       cerr << "this == &archive passed test " << endl;
   }
   
@@ -109,13 +112,13 @@ void Pulsar::TimerArchive::copy (const Archive& archive,
 
   unsigned good_nsubint = get_nsubint();
 
-  if (verbose) cerr << "Pulsar::TimerArchive::copy copying headers " << endl;
+  if (verbose == 3) cerr << "Pulsar::TimerArchive::copy copying headers " << endl;
   hdr = tarchive->hdr;
 
   set_nsubint( good_nsubint );
 
-  if (verbose)
-    cerr << "TimerArchive::copy check validity" << endl;
+  if (verbose == 3)
+    cerr << "Pulsar::TimerArchive::copy check validity" << endl;
 
   valid = tarchive->valid;
 }
@@ -125,8 +128,8 @@ void Pulsar::TimerArchive::copy (const Archive& archive,
 //
 Pulsar::TimerArchive* Pulsar::TimerArchive::clone () const
 {
-  if (verbose)
-    cerr << "TimerArchive::clone" << endl;
+  if (verbose == 3)
+    cerr << "Pulsar::TimerArchive::clone" << endl;
   return new TimerArchive (*this);
 }
 
@@ -136,8 +139,8 @@ Pulsar::TimerArchive* Pulsar::TimerArchive::clone () const
 Pulsar::TimerArchive* 
 Pulsar::TimerArchive::extract (const vector<unsigned>& subints) const
 {
-  if (verbose)
-    cerr << "TimerArchive::extract" << endl;
+  if (verbose == 3)
+    cerr << "Pulsar::TimerArchive::extract" << endl;
   return new TimerArchive (*this, subints);
 }
 
@@ -148,8 +151,8 @@ Pulsar::TimerArchive::extract (const vector<unsigned>& subints) const
 Pulsar::Integration* 
 Pulsar::TimerArchive::new_Integration (Integration* subint)
 {
-  if (verbose)
-    cerr << "TimerArchive::new_Integration" << endl;
+  if (verbose == 3)
+    cerr << "Pulsar::TimerArchive::new_Integration" << endl;
 
   TimerIntegration* integration;
 
@@ -159,7 +162,7 @@ Pulsar::TimerArchive::new_Integration (Integration* subint)
     integration = new TimerIntegration;
 
   if (!integration)
-    throw Error (BadAllocation, "TimerArchive::new_Integration");
+    throw Error (BadAllocation, "Pulsar::TimerArchive::new_Integration");
   
   return integration;
 }
@@ -240,7 +243,7 @@ int Pulsar::TimerArchive::hydra_obstype ()
   else if ((dec <= -13.083) && (dec > -15.083))
     return SHYDRA;
 
-  throw Error (InvalidRange, "TimerArchive::hydra_obstype",
+  throw Error (InvalidRange, "Pulsar::TimerArchive::hydra_obstype",
 	       "invalid HYDRACAL dec=%lf", dec);
 }
 
@@ -261,7 +264,7 @@ void Pulsar::TimerArchive::set_type (Signal::Source type)
       hdr.obstype = FLUX_OFF;
       break;
     default:
-      cerr << "TimerArchive::set_type warning unrecognized type="
+      cerr << "Pulsar::TimerArchive::set_type warning unrecognized type="
 	   << type << endl;
       hdr.obstype = -1;
       break;
@@ -285,56 +288,7 @@ void Pulsar::TimerArchive::set_source (const string& source)
   hdr.psrname[PSRNAME_STRLEN-1]='\0';
 }
 
-string Pulsar::TimerArchive::get_receiver () const
-{
-  return "unknown";
-}
 
-void Pulsar::TimerArchive::set_receiver (const string& rec)
-{
-  // no where to store receiver!
-}
-
-string Pulsar::TimerArchive::get_backend () const
-{
-  return hdr.machine_id;
-}
-
-void Pulsar::TimerArchive::set_backend (const string& backend)
-{
-  string new_backend = backend;
-
-  if( backend.length() > MACHINE_ID_STRLEN ) {
-    string::size_type colon_pos = backend.find(':',0);
-    
-    if( colon_pos == string::npos )
-      throw Error (InvalidParam, "Pulsar::TimerArchive::set_backend",
-		   "length of '%s'=%d > MACHINE_ID_STRLEN=%d",
-		   backend.c_str(), backend.length()+1, MACHINE_ID_STRLEN);
-
-    string software = backend.substr(colon_pos+1,backend.size()-colon_pos-1);
-
-    if( software.size() > SOFTWARE_STRLEN )
-      throw Error (InvalidParam, "Pulsar::TimerArchive::set_backend",
-                   "length of '%s'=%d > SOFTWARE_STRLEN=%d",
-                   software.c_str(), software.length()+1, SOFTWARE_STRLEN);
-
-    strcpy(hdr.software, software.c_str() );
-        
-    new_backend = backend.substr(0,colon_pos);
-    
-    // Remove trailing spaces and tabs
-    while( h_chomp(new_backend,' ') );
-    while( h_chomp(new_backend,'\t') );
-
-    if( new_backend.length() > MACHINE_ID_STRLEN )
-      throw Error (InvalidParam, "Pulsar::TimerArchive::set_backend",
-                   "length of modified backend '%s'=%d > MACHINE_ID_STRLEN=%d",
-                   backend.c_str(), backend.length()+1, MACHINE_ID_STRLEN);
-  }
-
-  strcpy (hdr.machine_id, new_backend.c_str());
-}
 
 //! Get the coordinates of the source
 sky_coord Pulsar::TimerArchive::get_coordinates () const
@@ -347,8 +301,6 @@ sky_coord Pulsar::TimerArchive::get_coordinates () const
 }
 
 //! Set the coordinates of the source
-/*! This method calls the correct_Integrations method in order to update
-  the mini header in each sub-integration */
 void Pulsar::TimerArchive::set_coordinates (const sky_coord& coordinates)
 {
   hdr.dec = coordinates.dec().getradians();
@@ -357,8 +309,6 @@ void Pulsar::TimerArchive::set_coordinates (const sky_coord& coordinates)
   AnglePair galactic = coordinates.getGalactic();
   hdr.l = galactic.angle1.getDegrees();
   hdr.b = galactic.angle1.getDegrees();
-
-  correct_Integrations ();
 }
  
 unsigned Pulsar::TimerArchive::get_nbin () const
@@ -431,39 +381,6 @@ void Pulsar::TimerArchive::set_centre_frequency (double cf)
   hdr.banda.centrefreq = cf;
 }
 
-Signal::Basis Pulsar::TimerArchive::get_basis () const
-{
-  switch (hdr.banda.polar)
-    {
-    case 1:
-      return Signal::Linear;
-    case 0:
-      return Signal::Circular;
-    default:
-      return Signal::Linear;
-    }
-}
-
-void Pulsar::TimerArchive::set_basis (Signal::Basis type)
-{
-  switch (type)
-    {
-    case Signal::Linear:
-      if (verbose)
-	cerr << "Pulsar::TimerArchive::set_basis (Signal::Linear)" << endl;
-      hdr.banda.polar = 1;
-      break;
-    case Signal::Circular:
-      if (verbose)
-	cerr << "Pulsar::TimerArchive::set_basis (Signal::Circular)" << endl;
-      hdr.banda.polar = 0;
-      break;
-    default:
-      hdr.banda.polar = -1;
-      throw Error (InvalidParam, "Pulsar::TimerArchive::set_basis",
-		   "unrecognized Basis = %d", (int) type);
-    }
-}
 
 Signal::State Pulsar::TimerArchive::get_state () const
 {
@@ -526,10 +443,44 @@ void Pulsar::TimerArchive::set_state (Signal::State state)
 
     default:
       hdr.banda.correlator_mode = -1;
-      throw Error (InvalidParam, "TimerArchive::set_state",
+      throw Error (InvalidParam, "Pulsar::TimerArchive::set_state",
 		   "unrecognized state=" + State2string(state));
     }
 }
+
+//! Get the scale of the profiles
+Signal::Scale Pulsar::TimerArchive::get_scale () const
+{
+  if (hdr.calibrated & FLUX_CALIBRATED)
+    return Signal::Jansky;
+  else if (hdr.calibrated & FLUX_REFERENCE)
+    return Signal::ReferenceFluxDensity;
+  else
+    return Signal::FluxDensity;
+}
+
+//! Set the scale of the profiles
+void Pulsar::TimerArchive::set_scale (Signal::Scale scale)
+{
+  switch (scale) {
+    case Signal::FluxDensity:
+      set_calibrated (FLUX_REFERENCE, false);
+      set_calibrated (FLUX_CALIBRATED, false);
+      break;
+    case Signal::ReferenceFluxDensity:
+      set_calibrated (FLUX_REFERENCE, true);
+      set_calibrated (FLUX_CALIBRATED, false);
+      break;
+    case Signal::Jansky:
+      set_calibrated (FLUX_REFERENCE, false);
+      set_calibrated (FLUX_CALIBRATED, true);
+      break;
+    default:
+      throw Error (InvalidParam, "Pulsar::TimerArchive::set_scale",
+                   "unknown scale");
+  }
+}
+
 
 //! Get the centre frequency of the observation
 double Pulsar::TimerArchive::get_dispersion_measure () const
@@ -555,65 +506,28 @@ void Pulsar::TimerArchive::set_rotation_measure (double rm)
   hdr.rotm = rm;
 }
 
-bool Pulsar::TimerArchive::get_flux_calibrated () const
-{
-  return hdr.calibrated;
-}
-
-void Pulsar::TimerArchive::set_flux_calibrated (bool done)
-{
-  hdr.calibrated = done;
-}
 
 bool Pulsar::TimerArchive::get_poln_calibrated () const
 {
-  return hdr.calibrated;
+  return hdr.calibrated & POLN_CALIBRATED;
 }
 
 void Pulsar::TimerArchive::set_poln_calibrated (bool done)
 {
-  hdr.calibrated = done;
+  set_calibrated (POLN_CALIBRATED, done);
 }
 
-bool Pulsar::TimerArchive::get_feedangle_corrected () const
-{
-  return hdr.corrected & FEED_CORRECTED;
-}
 
-void Pulsar::TimerArchive::set_feedangle_corrected (bool done)
-{
-  set_corrected (FEED_CORRECTED, done);
-}
-
-bool Pulsar::TimerArchive::get_iono_rm_corrected () const
-{
-  return hdr.corrected & RM_IONO_CORRECTED;
-}
-
-void Pulsar::TimerArchive::set_iono_rm_corrected (bool done)
-{
-  set_corrected (RM_IONO_CORRECTED, done);
-}
-
-bool Pulsar::TimerArchive::get_ism_rm_corrected () const
+bool Pulsar::TimerArchive::get_faraday_corrected () const
 {
   return hdr.corrected & RM_ISM_CORRECTED;
 }
 
-void Pulsar::TimerArchive::set_ism_rm_corrected (bool done)
+void Pulsar::TimerArchive::set_faraday_corrected (bool done)
 {
   set_corrected (RM_ISM_CORRECTED, done);
 }
 
-bool Pulsar::TimerArchive::get_parallactic_corrected () const
-{
-  return hdr.corrected & PARA_CORRECTED;
-}
-
-void Pulsar::TimerArchive::set_parallactic_corrected (bool done)
-{
-  set_corrected (PARA_CORRECTED, done);
-}
 
 bool Pulsar::TimerArchive::get_dedispersed () const
 {
@@ -633,15 +547,23 @@ void Pulsar::TimerArchive::set_corrected (int code, bool done)
     hdr.corrected &= ~code;
 }
 
-void Pulsar::TimerArchive::correct_Integrations ()
-{ try {
+void Pulsar::TimerArchive::set_calibrated (int code, bool done)
+{
+  if (done)
+    hdr.calibrated |= code;
+  else
+    hdr.calibrated &= ~code;
+}
+
+void Pulsar::TimerArchive::correct_Integrations () try {
+
   if( get_nsubint()==0 )
     return;
 
-  float latitude;
-  float longitude;
-
-  telescope_coordinates (&latitude, &longitude);
+  Telescope* telescope = get<Telescope>();
+  if (!telescope)
+    cerr << "Pulsar::TimerArchive::correct_Integrations WARNING "
+            "no Telescope extension" << endl;
 
   TimerIntegration* subint;
 
@@ -649,32 +571,38 @@ void Pulsar::TimerArchive::correct_Integrations ()
 
     subint = dynamic_cast<TimerIntegration*>(get_Integration(isub));
     if (!subint)
-      throw Error (InvalidState, "TimerArchive::correct_Integrations",
+      throw Error (InvalidState, "Pulsar::TimerArchive::correct_Integrations",
 		   "Integration[%d] is not a TimerIntegration", isub);
 
     if (subint->get_duration () <= 0.0) {
-      if (verbose)
-	cerr << "TimerArchive::correct_Integrations"
+      if (verbose == 3)
+	cerr << "Pulsar::TimerArchive::correct_Integrations"
 	  " warning empty sub-int " << isub << endl;
       continue;
     }
 
-    // correct the mini header LST
-    subint->mini.lst_start = subint->get_epoch().LST (longitude);
+    if (telescope) {
 
-    // correct the mini header azimuth, zenith, and parallactic angles
-    float azimuth=0, zenith=0, parallactic=0;
-    if (az_zen_para (get_coordinates().ra().getRadians(),
-		     get_coordinates().dec().getRadians(),
-		     subint->mini.lst_start, latitude,
-		     &azimuth, &zenith, &parallactic) < 0)
+      // correct the mini header LST
+      subint->mini.lst_start = 
+        subint->get_epoch().LST (telescope->get_longitude().getDegrees());
+
+      // correct the mini header azimuth, zenith, and parallactic angles
+      float azimuth=0, zenith=0, parallactic=0;
+      if (az_zen_para (get_coordinates().ra().getRadians(),
+		       get_coordinates().dec().getRadians(),
+		       subint->mini.lst_start,
+		       telescope->get_latitude().getDegrees(),
+		       &azimuth, &zenith, &parallactic) < 0)
     
-      throw Error (FailedCall, "TimerArchive::correct_Integrations",
-		   "az_zen_para failed");
+        throw Error (FailedCall, "Pulsar::TimerArchive::correct_Integrations",
+		     "az_zen_para failed");
 
-    subint->mini.tel_az = azimuth;
-    subint->mini.tel_zen = zenith;
-    subint->mini.para_angle = parallactic;
+      subint->mini.tel_az = azimuth;
+      subint->mini.tel_zen = zenith;
+      subint->mini.para_angle = parallactic;
+
+    }
 
     // set the mini header version
     subint->mini.version = 1.1;
@@ -690,17 +618,15 @@ void Pulsar::TimerArchive::correct_Integrations ()
   }
 }
 catch (Error& error) {
-  throw error += "TimerArchive::correct_Integrations";
+  throw error += "Pulsar::TimerArchive::correct_Integrations";
 }
-}
 
-void Pulsar::TimerArchive::correct ()
-{ try {
+void Pulsar::TimerArchive::correct () try {
 
-  float latitude;
-  float longitude;
-
-  telescope_coordinates (&latitude, &longitude);
+  Telescope* telescope = get<Telescope>();
+  if (!telescope)
+    throw Error (InvalidState, "Pulsar::TimerArchive::correct",
+		 "no Telescope extension");
 
   MJD mjd = start_time();
 
@@ -712,7 +638,7 @@ void Pulsar::TimerArchive::correct ()
   mjd.datestr (hdr.utdate, 16, "%d-%m-%Y");
 
   // correct the LST
-  hdr.lst_start = mjd.LST (longitude);
+  hdr.lst_start = mjd.LST (telescope->get_longitude().getDegrees());
 
   // correct the folding period and integration length
   hdr.nominal_period = 0.0;
@@ -756,7 +682,8 @@ void Pulsar::TimerArchive::correct ()
   // data will be unloaded in the new style
   hdr.wts_and_bpass = 1;
   valid = true;
-} catch (Error& error) {
-  throw error += "TimerArchive::correct";
-}}
+}
+catch (Error& error) {
+  throw error += "Pulsar::TimerArchive::correct";
+}
 
