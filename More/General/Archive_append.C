@@ -86,6 +86,15 @@ void Pulsar::Archive::append (const Archive* arch)
 */
 bool Pulsar::Archive::mixable (const Archive* arch, string& reason) const
 {
+  if (!standard_match (arch, reason))
+    return false;
+
+  return match (arch, reason);
+}
+
+bool 
+Pulsar::Archive::standard_match (const Archive* arch, string& reason) const
+{
   if (get_state() != arch->get_state()) {
     reason = stringprintf ("polarimetric state mismatch: %s != %s",
 			   Signal::state_string(get_state()),
@@ -105,14 +114,22 @@ bool Pulsar::Archive::mixable (const Archive* arch, string& reason) const
     return false;
   }
 
+  double cf1 = get_centre_frequency();
+  double cf2 = arch->get_centre_frequency();
+  double dfreq = fabs (cf2 - cf1);
+
+  if (dfreq > 0.2 * cf1) {
+    reason = stringprintf ("centre frequency mismatch: %lf and %lf", cf1, cf2);
+    return false;
+  }
+
   if (get_nbin() != arch->get_nbin()) {
     reason = stringprintf ("numbers of bins mismatch: %d != %d",
 			   get_nbin(), arch->get_nbin());
     return false;
   }
 
-  // none of the above restrictions apply
-  return match (arch, reason);
+  return true;
 }
 
 /*!

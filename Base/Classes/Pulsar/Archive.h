@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Archive.h,v $
-   $Revision: 1.66 $
-   $Date: 2003/04/17 22:40:19 $
+   $Revision: 1.67 $
+   $Date: 2003/04/19 20:25:15 $
    $Author: straten $ */
 
 /*! \mainpage 
@@ -430,7 +430,7 @@ namespace Pulsar {
     virtual void defaraday (double rotation_measure = 0, double rm_iono = 0);
 
     //! Fit Profiles to the standard and return toas
-    virtual void toas (const Archive* std, vector<Tempo::toa>& toas);
+    virtual void toas (vector<Tempo::toa>& toas, const Archive* std) const;
 
     //! Correct receiver feed angle orientation
     virtual void deparallactify();
@@ -470,6 +470,9 @@ namespace Pulsar {
 
     //! Set the weight of each profile to one (1)
     virtual void uniform_weight ();
+
+    //! Test if arch matches (enough for a pulsar - standard match)
+    virtual bool standard_match (const Archive* arch, string& reason) const;
 
     //! Test if arch matches (enough for a pulsar - calibrator match)
     virtual bool match (const Archive* arch, string& reason) const;
