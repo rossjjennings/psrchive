@@ -234,11 +234,12 @@ int main (int argc, char** argv)
     return -1;
   }
 
-  if (plot) {
-    cpgbeg (0, "?", 0, 0);
-    cpgsvp (.25,.75,.15,.95);
-  }
+  if (!plot)
+    return 0;
 
+  cpgbeg (0, "?", 0, 0);
+  cpgsvp (.25,.75,.15,.95);
+  
   Calibration::ReceptionModelAxisPlotter<double> plotter;
 
   plotter.set_model( &model );
@@ -252,10 +253,8 @@ int main (int argc, char** argv)
 
   plotter.plot_observations ();
 
-  if (plot) 
-    cpgend ();
+  cpgend ();
 
   return 0;
 
 }
-
