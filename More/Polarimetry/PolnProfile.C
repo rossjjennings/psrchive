@@ -2,6 +2,10 @@
 #include "Pulsar/Profile.h"
 #include "Error.h"
 
+#ifdef sun
+#include <ieeefp.h>
+#endif
+
 /*! When transforming Profile objects, the absolute gain of the
   transformation may artificially inflate the weight of the Profile
   and incorrectly skew mean results. */
@@ -189,6 +193,32 @@ void Pulsar::PolnProfile::set_coherence (unsigned ibin,
   profile[1]->get_amps()[ibin] = new_amps.j(1,1).real();
   profile[2]->get_amps()[ibin] = new_amps.j(0,1).real();
   profile[3]->get_amps()[ibin] = new_amps.j(1,0).imag();
+
+}
+
+//
+//
+//
+void Pulsar::PolnProfile::transform (const Jones<double>& response)
+{
+  if (Profile::verbose)
+    cerr << "Pulsar::PolnProfile::transform response=" << response << endl;
+
+  unsigned nbin = get_Profile(0)->get_nbin();
+
+  float Gain = abs( det(response) );
+  if (!finite(Gain))
+    throw Error (InvalidParam, "Pulsar::PolnProfile::transform",
+                 "non-invertbile response.  det(J)=%f", Gain);
+
+  Jones<float> response_dagger = herm(response);
+
+  for (unsigned ibin = 0; ibin < nbin; ibin++)
+    set_coherence (ibin, (response * get_coherence(ibin)) * response_dagger);
+
+  if (correct_weights)
+    for (unsigned ipol=0; ipol < 4; ipol++)
+      get_profile(ipol)->set_weight ( get_Profile(ipol)->get_weight() / Gain );
 
 }
 
