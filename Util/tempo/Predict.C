@@ -157,9 +157,6 @@ polyco Tempo::Predict::get_polyco (const MJD& m1, const MJD& m2) const
 
   bool satisfied = false;
   
-  // start with a clean working directory
-  removedir (get_directory().c_str());
-
   while (!satisfied) {
     
     /* TEMPO will often return a polyco that does not span the range of
@@ -186,7 +183,9 @@ polyco Tempo::Predict::get_polyco (const MJD& m1, const MJD& m2) const
     if (Tempo::verbose)
       cerr << "Tempo::predict calling 'tempo " << arguments << "'" << endl
 	   << "Tempo::predict input: '" << input << "'" << endl;
-    
+
+    lock ();
+
     tempo (arguments, input);
 
     string stderr_name = get_directory() + "/" + stderr_filename;
@@ -207,8 +206,10 @@ polyco Tempo::Predict::get_polyco (const MJD& m1, const MJD& m2) const
       delete [] inbuf;
     }
 
-    if (error)
+    if (error) {
+      unlock ();
       throw Error (FailedSys, "Tempo::predict", "TEMPO Warnings detected");
+    }
 
     string polyco_dat = get_directory() + "/polyco.dat";
 
@@ -224,6 +225,8 @@ polyco Tempo::Predict::get_polyco (const MJD& m1, const MJD& m2) const
     if (cached->load(polyco_dat) < 1)
       throw Error (FailedSys, "Tempo::predict",
 		   "failed polyco::load(" + polyco_dat + ")");
+
+    unlock ();
 
     if (verbose)
       cerr << "Tempo::predict scanned " << cached->pollys.size() 

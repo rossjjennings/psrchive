@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/tempo++.h,v $
-   $Revision: 1.14 $
-   $Date: 2003/06/30 04:53:39 $
-   $Author: ahotan $ */
+   $Revision: 1.15 $
+   $Date: 2004/11/08 15:12:02 $
+   $Author: straten $ */
 
 #ifndef __TEMPO_PP_H
 #define __TEMPO_PP_H
@@ -29,6 +29,14 @@ namespace Tempo {
   void   set_directory (const char* directory);
   // get the directory in which tempo system calls will be made
   string get_directory ();
+
+  // get the name of the file used to lock the tempo directory
+  string get_lockfile ();
+
+  // lock the tempo working directory
+  void lock ();
+  // unlock the tempo working directory
+  void unlock ();
 
   // convenience overloads
   void   set_system (const string& system_call);

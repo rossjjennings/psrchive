@@ -1,6 +1,11 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <sys/file.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <unistd.h>
 
 #if defined(__FreeBSD__) || defined(__MACH__)
 #include <sys/wait.h>
@@ -8,7 +13,6 @@
 #include <wait.h>
 #endif
 
-#include <unistd.h>
 
 #include "tempo++.h"
 #include "Error.h"
@@ -141,9 +145,57 @@ string Tempo::get_directory ()
     if (makedir (directory.c_str()) < 0)
       throw Error (InvalidState, "Tempo::get_directory",
 		   "cannot create a temporary working directory");
+
   }
 
   return directory;
+}
+
+static int lock_fd = -1;
+static bool have_lock = false;
+
+static void open_lockfile ()
+{
+  if (lock_fd < 0)
+    lock_fd = open (Tempo::get_lockfile().c_str(), O_RDWR | O_CREAT);
+
+  if (lock_fd < 0)
+    throw Error (FailedSys, "Tempo::open_lockfile", "failed open(%s)",
+		 Tempo::get_lockfile().c_str());
+}
+
+// run tempo with the given arguments
+void Tempo::lock ()
+{
+  if (have_lock)
+    return;
+
+  open_lockfile ();
+
+  if (flock (lock_fd, LOCK_EX) < 0)
+    throw Error (FailedSys, "Tempo::lock", "failed flock(%s)",
+		 get_lockfile().c_str());
+
+  have_lock = true;
+}
+
+void Tempo::unlock ()
+{
+  if (!have_lock)
+    return;
+
+  open_lockfile ();
+
+  if (flock (lock_fd, LOCK_UN) < 0)
+    throw Error (FailedSys, "Tempo::unlock", "failed flock(%s)",
+		 get_lockfile().c_str());
+
+  have_lock = false;
+}
+
+string Tempo::get_lockfile () 
+{
+  return get_directory() + "/.lock";
 }
 
 
@@ -179,7 +231,11 @@ void Tempo::tempo (const string& arguments, const string& input)
       throw Error (FailedSys, "Tempo::tempo",
 		   "failed chdir(" + get_directory() + ")");
 
+    lock ();
+
     int err = system (runtempo.c_str());
+
+    unlock ();
 
     if (chdir (cwd) != 0)
       throw Error (FailedSys, "Tempo::tempo", "failed chdir(%s)", cwd);
