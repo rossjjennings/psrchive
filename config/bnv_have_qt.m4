@@ -74,7 +74,7 @@ dnl variables are set to the empty string.
 dnl
 dnl Calls BNV_PATH_QT_DIRECT as a subroutine.
 dnl
-dnl @version $Id: bnv_have_qt.m4,v 1.4 2004/12/10 13:05:57 straten Exp $
+dnl @version $Id: bnv_have_qt.m4,v 1.5 2005/02/07 15:40:32 straten Exp $
 dnl @author Bastiaan N. Veelo <Bastiaan.N.Veelo@immtek.ntnu.no>
 dnl
 AC_DEFUN([BNV_HAVE_QT],
@@ -342,7 +342,7 @@ AC_DEFUN([BNV_PATH_QT_DIRECT],
     # The following header file is expected to define QT_VERSION.
     qt_direct_test_header=qglobal.h
     # Look for the header file in a standard set of common directories.
-    bnv_include_path_list="/usr/include
+    bnv_include_path_list="$PSRHOME/packages/$LOGIN_ARCH/qt/include /usr/include
       `ls -dr /usr/include/qt* 2>/dev/null`
       `ls -dr /usr/lib/qt*/include 2>/dev/null`
       `ls -dr /usr/local/qt*/include 2>/dev/null`
