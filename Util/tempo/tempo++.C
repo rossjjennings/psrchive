@@ -119,12 +119,14 @@ string Tempo::get_directory ()
       userid = unknown;
 
     directory = string ("/tmp/tempo/") + userid;
-    if (makedir (directory.c_str()) < 0)  {
-      cerr << "Tempo::get_directory failure creating '" << directory 
-	   << "'" << endl;
-      directory.erase();
-    }
   }
+
+  if (makedir (directory.c_str()) < 0)  {
+    cerr << "Tempo::get_directory failure creating '" << directory 
+	 << "'" << endl;
+    directory = ".";
+  }
+
   return directory;
 }
 
@@ -132,10 +134,6 @@ string Tempo::get_directory ()
 // run tempo with the given arguments
 void Tempo::tempo (const string& arguments, const string& input)
 {
-  // start with a clean working directory
-  removedir (get_directory().c_str());
-  makedir (get_directory().c_str());
-
   string runtempo = "cd " + get_directory() + "; "
     + get_system() + " " + arguments;
 
