@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Quaternion.h,v $
-   $Revision: 1.12 $
-   $Date: 2003/04/10 11:55:26 $
+   $Revision: 1.13 $
+   $Date: 2003/06/11 08:46:53 $
    $Author: straten $ */
 
 #ifndef __Quaternion_H
@@ -52,11 +52,11 @@ public:
   const Quaternion& operator -= (T s)
     { s0-=s; return *this; }
 
-  //! Vector addition
+  //! Quaternion addition
   const Quaternion& operator += (const Quaternion& s)
     { s0+=s.s0; s1+=s.s1; s2+=s.s2; s3+=s.s3; return *this; }
 
-  //! Vector subtraction
+  //! Quaternion subtraction
   const Quaternion& operator -= (const Quaternion& s)
     { s0-=s.s0; s1-=s.s1; s2-=s.s2; s3-=s.s3; return *this; }
 
@@ -85,12 +85,12 @@ public:
     { return ! operator==(b); }
 
 
-  //! Vector addition
+  //! Quaternion addition
   template<typename U>
   const friend Quaternion operator + (Quaternion a, const Quaternion<U,B>& b)
     { a+=b; return a; }
 
-  //! Vector subtraction
+  //! Quaternion subtraction
   template<typename U> 
   const friend Quaternion operator - (Quaternion a, const Quaternion<U,B>& b)
     { a-=b; return a; }
@@ -133,6 +133,13 @@ public:
   //! Alternative access to elements 
   T operator [] (int n) const
     { return *(&s0+n); }
+
+  //! Access to scalar component
+  T get_scalar () const { return s0; }
+
+  //! Access to vector component
+  Vector<T,3> get_vector () const 
+    { Vector<T,3> ret; ret[0]=s1; ret[1]=s2; ret[2]=s3; return ret; }
 
   //! Identity (should be const, wait for gcc version 3)
   static const Quaternion& identity();
