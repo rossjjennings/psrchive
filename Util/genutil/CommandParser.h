@@ -25,6 +25,9 @@ class CommandParser : public Reference::Able {
   //! destructor
   virtual ~CommandParser () {}
 
+  //! Initialize GNU readline and enable command completion
+  void initialize_readline (const char*);
+
   //! return a help string
   string help (const string& command);
 
@@ -73,6 +76,10 @@ class CommandParser : public Reference::Able {
   //! the command index, used by usage()
   unsigned current_command;
   
+  static char** completion (const char *text, int start, int end);
+  
+  static char* command_generator (const char* text, int state);
+
 };
 
 //! Pure virtual base class of the template class Command
