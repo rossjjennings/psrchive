@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Archive.h,v $
-   $Revision: 1.9 $
-   $Date: 2002/04/09 17:20:55 $
-   $Author: straten $ */
+   $Revision: 1.10 $
+   $Date: 2002/04/10 01:19:07 $
+   $Author: ahotan $ */
 
 /*! \mainpage 
  
@@ -51,6 +51,7 @@ class Phase;
 class psrephem;
 class polyco;
 
+//! The root level namespace, containing everything pulsar related
 namespace Pulsar {
 
   //! Different receiver feed configuration states
@@ -397,19 +398,19 @@ namespace Pulsar {
     virtual string get_obstype () const = 0;
 
     //! Set the name of the telescope used
-    virtual string set_tel_id (string name) const = 0;
+    virtual void set_tel_id (string name) const = 0;
 
     //! Set the tempo code of the telescope used
-    virtual char set_tel_tempo_code (char id_char) const = 0;
+    virtual void set_tel_tempo_code (char id_char) const = 0;
 
     //! Set the name of the frontend system used
-    virtual string set_frontend_id (string fe_name) const = 0;
+    virtual void set_frontend_id (string fe_name) const = 0;
 
     //! Set the name of the backend system used
-    virtual string set_backend_id (string be_name) const =0;
+    virtual void set_backend_id (string be_name) const =0;
 
     //! Set the observation type (psr, cal)
-    virtual string set_obstype (string ob_type) const = 0;
+    virtual void set_obstype (string ob_type) const = 0;
 
     // get/set the number of bins, bands, subints, etc
     // ///////////////////////////////////////////////
@@ -427,16 +428,16 @@ namespace Pulsar {
     virtual int get_num_subints () const = 0;
 
     //! Set the number of pulsar phase bins used
-    virtual int set_nbins (int numbins) const = 0;
+    virtual void set_nbins (int numbins) const = 0;
 
     //! Set the number of frequency channels used
-    virtual int set_nchan (int numchan) const = 0;
+    virtual void set_nchan (int numchan) const = 0;
 
     //! Set the channel bandwidth
-    virtual double set_chanbw (double chan_width) const = 0;
+    virtual void set_chanbw (double chan_width) const = 0;
 
    //! Set the number of sub-integrations stored in the file
-    virtual int set_num_subints (int num_sub) const = 0;
+    virtual void set_num_subints (int num_sub) const = 0;
 
     //! Get the overall bandwidth of the observation
     virtual double get_bandwidth () const = 0;
