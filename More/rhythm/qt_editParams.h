@@ -54,6 +54,8 @@ class qt_editParams : public QWidget
   void print();
   void closeWin();
 
+  void save (string filename);
+
   // Edit Menu Callbacks
   void forward();          // go forward to newer parameter set
   void backward();         // go back to last parameter set

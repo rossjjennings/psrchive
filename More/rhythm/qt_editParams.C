@@ -234,6 +234,13 @@ void qt_editParams::save()
   io_dialog -> save (data);
 }
 
+void qt_editParams::save(string filename)
+{ 
+  display.get_psrephem (data);
+  data.unload (filename);
+}
+
+
 void qt_editParams::print()
 { 
   display.get_psrephem (data);
