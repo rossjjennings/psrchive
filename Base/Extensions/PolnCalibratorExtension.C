@@ -128,7 +128,8 @@ void Pulsar::PolnCalibratorExtension::construct ()
 {
   if (Archive::verbose)
     cerr << "Pulsar::PolnCalibratorExtension::construct nchan="
-         << response.size() << endl;
+         << response.size() << " type=" 
+         << Calibrator::Type2str (get_type()) << endl;
 
   for (unsigned ichan=0; ichan<response.size(); ichan++)
     response[ichan] = new_Transformation();
