@@ -16,6 +16,13 @@ Tempo::toa::toa (char* datastr)
   }
 }
 
+Tempo::toa::toa (Format fmt)
+{
+  init ();
+  if (fmt == Rhythm)
+    set_when_calculated (time(NULL));
+}
+
 Tempo::toa::toa (const toa & in_toa)
 {
   init ();
@@ -477,7 +484,7 @@ int Tempo::toa::unload(const char* filename, const vector<toa>& toas, Format fmt
 {
   FILE * fp;
   if((fp = fopen(filename, "w"))==NULL){
-    cerr << "toa_model::unload - error opening file " << filename << endl;
+    cerr << "Tempo::toa::unload - error opening file " << filename << endl;
     return -1;
   }
   int ret = unload (fp, toas, fmt);
@@ -569,33 +576,33 @@ bool Tempo::toa::valid()
 
 // ////////////////////////////////////////////////////////////////////////
 //
-// toa_model - a nice class for handling vectors of toas.
+// Model - a nice class for handling vectors of toas.
 // 
 // ////////////////////////////////////////////////////////////////////////
 
-int Tempo::toa_model::verbose = 0;
+int Tempo::Model::verbose = 0;
 
-Tempo::toa_model::toa_model (const toa_model & toamodel)
+Tempo::Model::Model (const Model& model)
 {
-  this->operator=(toamodel);
+  this->operator=(model);
 }
 
-Tempo::toa_model & Tempo::toa_model::operator = (const toa_model & toamodel)
+Tempo::Model& Tempo::Model::operator = (const Model& model)
 {
-  if (this != &toamodel)
-    toas = toamodel.toas;
-  return(*this);
+  if (this != &model)
+    toas = model.toas;
+  return *this;
 }
 
-void Tempo::toa_model::load (const char * filename)
+void Tempo::Model::load (const char * filename)
 {
   toas.clear();
   if (Tempo::toa::load (filename, &toas) < 0)
-    throw ("toa_model::load");
+    throw ("Model::load");
 }
 
-void Tempo::toa_model::unload (const char * filename)
+void Tempo::Model::unload (const char * filename)
 {
   if (Tempo::toa::unload (filename, toas) < 0)
-    throw ("Tempo::toa_model::load");
+    throw ("Tempo::Model::load");
 }

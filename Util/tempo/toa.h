@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/toa.h,v $
-   $Revision: 1.3 $
-   $Date: 2000/05/22 17:40:28 $
+   $Revision: 1.4 $
+   $Date: 2000/05/28 04:13:59 $
    $Author: straten $ */
 
 #ifndef __TOA_H
@@ -60,8 +60,8 @@ namespace Tempo {
   public:
     // residual for this toa as calculated by tempo
     residual resid;
-    
-    toa () { init(); };
+   
+    toa (Format fmt = Rhythm);
     ~toa () { destroy(); };
     
     // copy constructor
@@ -151,16 +151,16 @@ namespace Tempo {
     static char   datestr [25];
   };
   
-  class toa_model {
+  class Model {
   public:
     static int verbose;
     vector<toa> toas;
     
-    toa_model(){};
-    ~toa_model(){};
-    toa_model (const toa_model & toamodel);
+    Model(){};
+    ~Model(){};
+    Model (const Model & toamodel);
     
-    toa_model & operator=(const toa_model & toamodel);
+    Model & operator=(const Model & toamodel);
     
     void load(const char * filename);
     void unload(const char * filename);

@@ -124,7 +124,7 @@ void Tempo::fit (const psrParams& model, vector<toa>& toas,
   // load the residuals from resid2.tmp
   resopen_ (&r2flun, tempo_res, (int) strlen(tempo_res));
 
-  for (unsigned iarr=0; iarr < toas.size(); iarr++)  {
+  for (iarr=0; iarr < toas.size(); iarr++)  {
 
     if (!toas[iarr].is_selected())
       continue;
