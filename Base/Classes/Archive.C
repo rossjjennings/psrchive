@@ -1,12 +1,9 @@
-#include "Types.h"
-
-#include "unistd.h"
-
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
 #include "Pulsar/IntegrationOrder.h"
 #include "Pulsar/Profile.h"
 
+#include "Types.h"
 #include "Error.h"
 #include "typeutil.h"
 #include "coord.h"
