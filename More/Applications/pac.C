@@ -28,6 +28,9 @@ int main (int argc, char *argv[]) {
   bool test_bandwidth = true;
   bool test_obstype = true;
   
+  Pulsar::Calibration::Database::ModelTypes m;
+  m = Pulsar::Calibration::Database::SingleAxis;
+  
   string cals_are_here;
   vector<string> exts;
 
@@ -37,7 +40,7 @@ int main (int argc, char *argv[]) {
   char* key = NULL;
   char whitespace[5] = " \n\t";
 
-  while ((gotc = getopt(argc, argv, "hvVp:e:wcitfboDFP")) != -1) {
+  while ((gotc = getopt(argc, argv, "hvVp:e:wcitfboDFPsq")) != -1) {
     switch (gotc) {
     case 'h':
       cout << "A program for calibrating Pulsar::Archives"  << endl;
@@ -59,6 +62,8 @@ int main (int argc, char *argv[]) {
       cout << "  -D   Display calibration model parameters" << endl;
       cout << "  -F   Calibrate fluxes only"                << endl;
       cout << "  -P   Calibrate polarisations only"         << endl;
+      cout << "  -s   Use the Single Axis Model (default)"  << endl;
+      cout << "  -q   Use the Polar Model"                  << endl;
       break;
     case 'v':
       verbose = true;
@@ -111,6 +116,12 @@ int main (int argc, char *argv[]) {
       break;
     case 'o':
       test_obstype = false;
+      break;
+    case 's':
+      m = Pulsar::Calibration::Database::SingleAxis;
+      break;
+    case 'q':
+      m = Pulsar::Calibration::Database::Polar;
       break;
 
     default:
@@ -198,7 +209,7 @@ int main (int argc, char *argv[]) {
           cerr << "pac: Finding PolnCalibrator" << endl;
 
 	Pulsar::PolnCalibrator* pcal_engine  = 0;
-	pcal_engine = dbase->generatePolnCalibrator(arch);
+	pcal_engine = dbase->generatePolnCalibrator(arch, m);
 	
 	if (display_params)	
 	  pcal_engine->store_parameters = true;
