@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/Attic/Calibrator.h,v $
-   $Revision: 1.17 $
-   $Date: 2004/07/03 07:34:31 $
+   $Revision: 1.18 $
+   $Date: 2004/10/08 10:10:33 $
    $Author: straten $ */
 
 #ifndef __Calibrator_H
@@ -13,6 +13,7 @@
 #include "Reference.h"
 #include "Estimate.h"
 #include "Jones.h"
+#include "MJD.h"
 
 template<typename T> class Jones;
 
@@ -21,6 +22,7 @@ namespace Pulsar {
   //! Forward declarations
   class Archive;
   class Integration;
+  class CalibratorExtension;
 
   //! Pure virtual base class of Pulsar::Archive calibrators
   class Calibrator : public Reference::Able {
@@ -79,6 +81,9 @@ namespace Pulsar {
 
     //! Get the number of frequency channels in the calibrator
     virtual unsigned get_nchan () const = 0;
+
+    //! Return the reference epoch of the calibration experiment
+    virtual MJD get_epoch () const;
 
     //! Return a string containing the file information
     virtual string get_filenames () const;
@@ -144,6 +149,9 @@ namespace Pulsar {
 
     //! Reference to the Pulsar::Archive from which this instance was created
     Reference::To<const Archive> calibrator;
+
+    //! The CalibratorExtension of the Archive passed during construction
+    Reference::To<const CalibratorExtension> extension;
 
     //! Filenames of Pulsar::Archives from which instance was created
     vector<string> filenames;

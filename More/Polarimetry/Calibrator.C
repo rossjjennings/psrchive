@@ -1,4 +1,5 @@
 #include "Pulsar/Calibrator.h"
+#include "Pulsar/CalibratorExtension.h"
 #include "Pulsar/Integration.h"
 #include "Pulsar/Archive.h"
 
@@ -56,4 +57,12 @@ const Pulsar::Archive* Pulsar::Calibrator::get_Archive () const
 		 "no calibrator Archive");
 
   return calibrator; 
+}
+
+MJD Pulsar::Calibrator::get_epoch () const
+{
+  if (extension)
+    return extension->get_epoch ();
+
+  return 0.5 * (calibrator->start_time() + calibrator->end_time());
 }
