@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/Attic/Calibrator.h,v $
-   $Revision: 1.14 $
-   $Date: 2003/12/05 20:21:04 $
+   $Revision: 1.15 $
+   $Date: 2003/12/06 01:06:09 $
    $Author: straten $ */
 
 #ifndef __Calibrator_H
@@ -137,7 +137,7 @@ namespace Pulsar {
 			    const vector< Jones<float> >& response);
 
     //! Reference to the Pulsar::Archive from which this instance was created
-    Reference::To<Archive> calibrator;
+    Reference::To<const Archive> calibrator;
 
   };
 
