@@ -9,7 +9,7 @@ void unload (fitsfile* fptr, const Pulsar::ProcHistory::row* hrow)
 
   int row = hrow->index;
 
-  if (Pulsar::Archive::verbose)
+  if (Pulsar::Archive::verbose == 3)
     cerr << "unload Pulsar::ProcHistory::row row=" << row << endl;
 
   int status = 0;
@@ -164,6 +164,18 @@ void unload (fitsfile* fptr, const Pulsar::ProcHistory::row* hrow)
     throw FITSError (status, "FITSArchive::unload_hist_row", 
                      "fits_write_col PAR_CORR");
 
+  // Write FA_CORR
+  
+  colnum = 0;
+  fits_get_colnum (fptr, CASEINSEN, "FA_CORR", &colnum, &status);
+
+  tempint = hrow->fa_corr;
+  fits_write_col (fptr, TINT, colnum, row, 1, 1, &tempint, &status);
+  
+  if (status != 0)
+    throw FITSError (status, "FITSArchive::unload_hist_row", 
+                     "fits_write_col FA_CORR");
+  
   // Write RM_CORR
   
   colnum = 0;
@@ -247,7 +259,40 @@ void unload (fitsfile* fptr, const Pulsar::ProcHistory::row* hrow)
     //       "fits_write_col RFI_MTHD");
   }
 
-  if (Pulsar::Archive::verbose)
+
+
+  // Write SCALE
+
+  switch (hrow->scale) {
+    
+  case Signal::FluxDensity:
+    strcpy (tempstr, "FluxDen");
+    break;
+  case Signal::ReferenceFluxDensity:
+    strcpy (tempstr, "RefFlux");
+    break;
+  case Signal::Jansky:
+    strcpy (tempstr, "Jansky");
+    break;
+  default:
+    if (Pulsar::Archive::verbose)
+      cerr << "unload ProcHistory::row WARNING unrecognized SCALE" << endl;
+  }
+
+  colnum = 0;
+  fits_get_colnum (fptr, CASEINSEN, "SCALE", &colnum, &status);
+  
+  // Read the value from the specified row
+  
+  fits_write_col (fptr, TSTRING, colnum, row, 1, 1, &tempstr, &status);
+
+  if (status != 0) {
+    if (Pulsar::Archive::verbose)
+      cerr << "unload ProcHistory::row WARNING SCALE not found"<<endl;
+    status = 0;
+  }
+
+  if (Pulsar::Archive::verbose == 3)
     cerr << "FITSArchive::unload_hist_row exiting" << endl;
 }
 
@@ -256,7 +301,7 @@ void Pulsar::FITSArchive::unload (fitsfile* fptr, const ProcHistory* history)
 {
   unsigned numrows = history->rows.size();
 
-  if (verbose)
+  if (verbose == 3)
     cerr << "FITSArchive::unload ProcHistory rows=" << numrows << endl;
 
   // Move to the HISTORY HDU
@@ -280,6 +325,6 @@ void Pulsar::FITSArchive::unload (fitsfile* fptr, const ProcHistory* history)
   for (unsigned i = 0; i < numrows; i++) 
     ::unload (fptr, &(history->rows[i]));
   
-  if (verbose)
+  if (verbose == 3)
     cerr << "FITSArchive::unload ProcHistory exiting" << endl;
 }
