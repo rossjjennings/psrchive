@@ -24,13 +24,14 @@ void Pulsar::Archive::tscrunch (unsigned nscrunch)
   if (nscrunch == 0)
     nscrunch = nsub;
 
-  if (nsub % nscrunch)
-    throw Error (InvalidRange, "Archive::tscrunch",
-		 "nsubint=%d %% nscrunch=%d = %d",
-		 nsub, nscrunch, nsub%nscrunch);
-
   unsigned newsub = nsub / nscrunch;
 
+  // if there will be subints left over, scrunch them up
+  // and tack onto the end
+  
+  if (nsub % nscrunch)
+    newsub += 1;
+  
   if (verbose) cerr << "Archive::tscrunch - scrunching " 
 		    << nsub << " Integrations by " << nscrunch << endl;
 
@@ -48,13 +49,20 @@ void Pulsar::Archive::tscrunch (unsigned nscrunch)
 	if (verbose) cerr << "Archive::tscrunch weighted_frequency chan="
 			  << ichan << endl;
 
-	double cfreq = weighted_frequency (ichan, start, start+nscrunch);
+	double cfreq = 0.0;
+	if (start+nscrunch <= nsub)
+	  cfreq = weighted_frequency (ichan, start, start+nscrunch);
+	else
+	  cfreq = weighted_frequency (ichan, start, 0);
 
 	if (verbose) 
 	  cerr << "Archive::tscrunch dedisperse cfreq=" << cfreq << endl;
-
-	for (unsigned iadd=0; iadd < nscrunch; iadd++)
+	
+	for (unsigned iadd=0; iadd < nscrunch; iadd++) {
+	  if (start+iadd >= nsub)
+	    break;
 	  get_Integration(start+iadd) -> dedisperse (cfreq, ichan);
+	}
 
 	if (verbose) 
 	  cerr <<  "Archive::tscrunch sum profiles" << endl;
@@ -65,12 +73,14 @@ void Pulsar::Archive::tscrunch (unsigned nscrunch)
 	  Profile* add = get_Profile (start, ipol, ichan);
 
 	  *(avg) = *(add);
-
+	  
 	  for (unsigned jsub=1; jsub<nscrunch; jsub++) {
+	    if (start+jsub >= nsub)
+	      break;
 	    add = get_Profile (start+jsub, ipol, ichan);
 	    *(avg) += *(add);
 	  }
-
+	  
 	} // for each poln
       } // for each channel
     } // for each integrated result
@@ -86,9 +96,15 @@ void Pulsar::Archive::tscrunch (unsigned nscrunch)
 
     MJD    mjd;
     double duration = 0.0;
+    int count = 0;
 
     for (unsigned iadd=0; iadd < nscrunch; iadd++) {
-
+      
+      if (start+iadd >= nsub)
+	break;
+      
+      count++;
+      
       Integration* cur = get_Integration (start+iadd);
 
       duration += cur->get_duration();
@@ -98,7 +114,7 @@ void Pulsar::Archive::tscrunch (unsigned nscrunch)
 
     get_Integration(isub) -> set_duration (duration);
 
-    mjd /= double (nscrunch);
+    mjd /= double (count);
 
     if (get_type() == Signal::Pulsar)
       // ensure that the polyco includes the new integration time
