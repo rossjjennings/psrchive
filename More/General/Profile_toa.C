@@ -76,13 +76,6 @@ double Pulsar::Profile::TimeShift (const Profile& std, float& error,
   Reference::To<Pulsar::Profile> ptr = clone();
   Reference::To<Pulsar::Profile> stp = std.clone();
 
-  // Rotate everything so the maximum of the correlation function is
-  // more likely to lie in the centre of the series. This makes error
-  // estimates easier to compute.
-
-  double artificial_offset = 0.5 - ptr->find_max_phase();
-  ptr->rotate(artificial_offset);
-
   // Remove the baseline (done twice to minimise rounding error)
   *ptr -= ptr->mean(ptr->find_min_phase(0.15));
 
@@ -151,8 +144,8 @@ double Pulsar::Profile::TimeShift (const Profile& std, float& error,
   // y = D - E(x - F)^2
   //
   // Which has the physical interperatation:
-  //   D => no use
-  //   E => proportional to the TOA error
+  //   D => not much use
+  //   E => related to the TOA error
   //   F => the relative shift
 
   // Use the equations:
@@ -244,7 +237,8 @@ double Pulsar::Profile::TimeShift (const Profile& std, float& error,
 
   for (int i = -3; i < 3; i++) {
     real.push_back(ptr->get_amps()[(maxbin + i)%get_nbin()]);
-    float x = float((maxbin + i)%get_nbin())/float(get_nbin());
+    // Don't wrap x!
+    float x = float(maxbin + i)/float(get_nbin());
     parb.push_back(D - E*(x-F)*(x-F));
   }
 
@@ -256,14 +250,11 @@ double Pulsar::Profile::TimeShift (const Profile& std, float& error,
   float errfit = Pulsar::SampleStdDev(diff) / D;
   errfit /= 6.0;
 
-  // The real error is assumed to be a quadrature sum of the
-  // width error and fit error.
+  // The real error is assumed to be the combination of two effects:
 
-  error = sqrt(errfit*errfit + errwidth*errwidth) / 4.0;
+  error = sqrt(errfit*errfit + errwidth*errwidth) / 2.0;
 
   // The shift in phase units, wrapped to be between -0.5 and 0.5
-
-  F -= artificial_offset;
 
   if (F < -0.5)
     F += 1.0;
