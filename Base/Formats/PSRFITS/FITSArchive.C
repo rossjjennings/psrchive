@@ -1211,7 +1211,7 @@ Pulsar::FITSArchive::load_Integration (const char* filename, unsigned isubint)
   fits_get_colnum (sfptr, CASEINSEN, "DAT_FREQ", &colnum, &status);
   
   fits_read_col (sfptr, TFLOAT, colnum, row, counter, get_nchan(), &nullfloat, 
-		 chan_freqs.begin(), &initflag, &status);
+		 &(chan_freqs[0]), &initflag, &status);
   
   // Set the profile channel centre frequencies
   
@@ -1254,7 +1254,7 @@ Pulsar::FITSArchive::load_Integration (const char* filename, unsigned isubint)
   counter = 1;
   for (unsigned a = 0; a < get_npol(); a++) {
     fits_read_col (sfptr, TFLOAT, colnum, row, counter, get_nchan(), &nullfloat, 
-		   scales[a].begin(), &initflag, &status);
+		   &(scales[a][0]), &initflag, &status);
     counter += nchan;
   }
 
@@ -1272,7 +1272,7 @@ Pulsar::FITSArchive::load_Integration (const char* filename, unsigned isubint)
   counter = 1;
   for (unsigned a = 0; a < get_npol(); a++) {
     fits_read_col (sfptr, TFLOAT, colnum, row, counter, get_nchan(), &nullfloat, 
-		   offsets[a].begin(), &initflag, &status);
+		   &(offsets[a][0]), &initflag, &status);
     counter += nchan;
   }
 
@@ -1869,7 +1869,7 @@ void Pulsar::FITSArchive::unload_integration (int row,
   fits_get_colnum (thefptr, CASEINSEN, "DAT_WTS", &colnum, &status);
   //fits_modify_vector_len (thefptr, colnum, nchan, &status);
   fits_write_col (thefptr, TFLOAT, colnum, row, 1, nchan, 
-		  weights.begin(), &status);
+		  &(weights[0]), &status);
 
   
   // Write the channel centre frequencies
@@ -1884,7 +1884,7 @@ void Pulsar::FITSArchive::unload_integration (int row,
   fits_get_colnum (thefptr, CASEINSEN, "DAT_FREQ", &colnum, &status);
   //fits_modify_vector_len (thefptr, colnum, nchan, &status);
   fits_write_col (thefptr, TFLOAT, colnum, row, 1, nchan, 
-		  chan_freqs.begin(), &status);
+		  &(chan_freqs[0]), &status);
 
   // Start writing profiles
   
@@ -1937,9 +1937,9 @@ void Pulsar::FITSArchive::unload_integration (int row,
   float max_short;
 
   if (save_signed)
-    max_short = pow(2,15)-1.0;
+    max_short = pow(2.0,15.0)-1.0;
   else
-    max_short = pow(2,16)-1.0;
+    max_short = pow(2.0,16.0)-1.0;
 
   for(unsigned a = 0; a < npol; a++) {
     for(unsigned b = 0; b < nchan; b++) {
