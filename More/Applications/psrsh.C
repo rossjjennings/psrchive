@@ -6,16 +6,12 @@ int main (int argc, char** argv)
 {
   Pulsar::ArchiveProcessor processor (argc, argv);
 
-  // processor.verbose = true;
-  string command;
+  cout << processor.prompt;
 
   while (!processor.quit)  {
-
+    string command;
     getline (cin, command);
-
-    if ( processor.execute (command) < 0 )
-      cerr << processor.get_status() << endl;
-
+    cout << processor.parse (command);
   }
 
   return 0;
