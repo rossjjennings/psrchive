@@ -1,11 +1,11 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <sys/file.h>
+#include <unistd.h>
+
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-#include <unistd.h>
 
 #if defined(__FreeBSD__) || defined(__MACH__)
 #include <sys/wait.h>
@@ -174,8 +174,14 @@ void Tempo::lock ()
 
   open_lockfile ();
 
-  if (flock (lock_fd, LOCK_EX) < 0)
-    throw Error (FailedSys, "Tempo::lock", "failed flock(%s)",
+  flock lock;
+  lock.l_whence = SEEK_SET;
+  lock.l_type   = F_WRLCK;
+  lock.l_start  = 0;
+  lock.l_len    = 0;
+
+  if (fcntl (lock_fd, F_SETLKW, &lock) < 0)
+    throw Error (FailedSys, "Tempo::lock", "failed fcntl(%s,F_SETLKW F_WRLCK)",
 		 get_lockfile().c_str());
 
   have_lock = true;
@@ -188,8 +194,14 @@ void Tempo::unlock ()
 
   open_lockfile ();
 
-  if (flock (lock_fd, LOCK_UN) < 0)
-    throw Error (FailedSys, "Tempo::unlock", "failed flock(%s)",
+  flock lock;
+  lock.l_whence = SEEK_SET;
+  lock.l_type   = F_UNLCK;
+  lock.l_start  = 0;
+  lock.l_len    = 0;
+
+  if (fcntl (lock_fd, F_SETLK, &lock) < 0)
+    throw Error (FailedSys, "Tempo::unlock", "failed fcntl(%s,F_SETLK F_UNLCK)",
 		 get_lockfile().c_str());
 
   have_lock = false;
