@@ -27,7 +27,7 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       read(s(1:pos-1),*, err=120) tmp
       val = f1*tmp
 c     Get the sign of first field since it is actually sign of whole number
-      if (val .lt. 0.d0) then
+      if (s(1:1).eq.'-') then
          sgn = -1.d0
       else
          sgn = 1.d0
