@@ -28,7 +28,8 @@ Pulsar::PolnCalibratorExtension::operator=
     return *this;
 
   type = copy.get_type();
-  
+  epoch = copy.get_epoch();
+
   unsigned nchan = copy.get_nchan();
 
   set_nchan (nchan);
@@ -62,6 +63,17 @@ Pulsar::Calibrator::Type Pulsar::PolnCalibratorExtension::get_type () const
 {
   return type;
 }
+
+MJD Pulsar::PolnCalibratorExtension::get_epoch () const
+{
+  return epoch;
+}
+
+void Pulsar::PolnCalibratorExtension::set_epoch (const MJD& _epoch)
+{
+  epoch = _epoch;
+}
+
 
 //! Set the number of frequency channels
 void Pulsar::PolnCalibratorExtension::set_nchan (unsigned _nchan)
