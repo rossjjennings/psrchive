@@ -16,18 +16,15 @@
 #define WR_EPH_LUN wr_eph_lun_
 #endif
 
-/* only the DEC compilers complain if these forward declarations are not
-   made */
-
 int length_ (char *, int);  /* Fortan string length, in ephio.f */
-int rd_eph_ (char *, int *, char *, double *,
+int RD_EPH (char *, int *, char *, double *,
 	     int *, double *, long int, long int);
-int wr_eph_ (char *, int *, char *, double *,
+int WR_EPH (char *, int *, char *, double *,
 	     int *, double *, long int, long int);
-int rd_eph_lun_ (int *, int *, char *, double *,
-		 int *, double *, long int);
-int wr_eph_lun_ (int *, int *, char *, double *,
-		 int *, double *, long int);
+int RD_EPH_LUN (int *, int *, char *, double *,
+		int *, double *, long int);
+int WR_EPH_LUN (int *, int *, char *, double *,
+		int *, double *, long int);
 
 int rd_eph_wrap (int uselun, char *fname, int lun, 
 		 int parmStatus[EPH_NUM_KEYS], 

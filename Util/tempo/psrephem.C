@@ -6,14 +6,15 @@
 #include <sys/stat.h>
 #include <math.h>
 
+#include "ephio.h"
 #include "psrephem.h"
 #include "string_utils.h"
 
 char* psrephem::tempo_pardir = NULL;
 int   psrephem::verbose = 0;
-char  psrephem::ephemstr [EPH_NUM_KEYS][EPH_STR_LEN];
-
 char  psrephem::tmp_fname[25];
+
+static char ephemstr [EPH_NUM_KEYS][EPH_STR_LEN];
 
 void psrephem::init()
 {
