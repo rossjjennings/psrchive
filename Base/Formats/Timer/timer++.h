@@ -1,6 +1,6 @@
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/Timer/timer++.h,v $
-   $Revision: 1.13 $
-   $Date: 2004/12/27 14:09:49 $
+   $Revision: 1.14 $
+   $Date: 2005/02/13 08:14:26 $
    $Author: straten $ */
 
 #ifndef __TIMER_PLUSPLUS_H
@@ -73,7 +73,7 @@ namespace Timer {
   void init (struct timer * hdr);
 
   // return true if timer struct seems valid enough
-  bool Timer::is_timer (const struct timer& hdr, std::string* reason = 0);
+  bool is_timer (const struct timer& hdr, std::string* reason = 0);
 
 }
 
