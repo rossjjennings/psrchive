@@ -9,7 +9,7 @@
 #include "string_utils.h"
 
 char* psrephem::tempo_pardir = NULL;
-int   psrephem::verbose = 1;
+int   psrephem::verbose = 0;
 char  psrephem::ephemstr [EPH_NUM_KEYS][EPH_STR_LEN];
 
 static const char* psrephem_tmp_fname = "psrephem_tmp.eph";
