@@ -8,13 +8,16 @@
 #include <unistd.h>
 
 #include "psrephem.h"
+#include "Error.h"
 
 void usage()
 {
   cout << "\n"
     "ephepo: update the epoch in a TEMPO ephemeris\n"
     "\n"
-    "  -v        verbose\n"
+    "  -b      change the binary epoch, T0, to reflect MJD\n"
+    "  -m MJD  set PEPOCH to MJD and update period and position accordingly\n"
+    "  -v      verbose\n"
        << endl;
 }
 
@@ -48,7 +51,7 @@ int main (int argc, char ** argv)
   }
 
   if (optind >= argc) {
-    cerr << "Please provide pulsar .par as the last argument" << endl;
+    cerr << "Please provide pulsar .par/eph file as the last argument" << endl;
     return -1;
   }
 
@@ -57,11 +60,19 @@ int main (int argc, char ** argv)
     return -1;
   }
 
-  psrephem eph (argv[optind]);
+  try {
 
-  eph.set_epoch (mjd, binary);
+    psrephem eph (argv[optind]);
 
-  cout << eph << endl;
+    eph.set_epoch (mjd, binary);
+
+    cout << eph << endl;
+
+  }
+  catch (Error& error) {
+    cerr << "ephepo: error" << error << endl;
+    return -1;
+  }
 
   return 0;
 
