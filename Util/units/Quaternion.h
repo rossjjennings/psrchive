@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Quaternion.h,v $
-   $Revision: 1.19 $
-   $Date: 2004/04/26 18:51:42 $
+   $Revision: 1.20 $
+   $Date: 2004/04/27 06:51:51 $
    $Author: straten $ */
 
 #ifndef __Quaternion_H
@@ -25,7 +25,7 @@ public:
 
   //! Construct from T
   Quaternion (T s0_, T s1_, T s2_, T s3_)
-    { s0=s0_; s1=s1_; s2=s2_; s3=s3_; }
+    : s0(s0_), s1(s1_), s2(s2_), s3(s3_) {  }
 
   //! Construct from a scalar and vector
   template<typename U> Quaternion (T s, const Vector<U, 3>& v)

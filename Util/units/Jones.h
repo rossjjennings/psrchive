@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Jones.h,v $
-   $Revision: 1.11 $
-   $Date: 2004/04/26 18:51:30 $
+   $Revision: 1.12 $
+   $Date: 2004/04/27 06:51:51 $
    $Author: straten $ */
 
 #ifndef __Jones_H
@@ -25,11 +25,11 @@ public:
   //! Construct from complex<T>
   Jones (complex<T> j00_, complex<T> j01_,
 	 complex<T> j10_, complex<T> j11_)
-    { j00=j00_; j01=j01_; j10=j10_; j11=j11_; }
+    : j00(j00_), j01(j01_), j10(j10_), j11(j11_) {  }
 
   //! Construct from another Jones<T> matrix
   Jones (const Jones& s)
-    { operator=(s); }
+    : j00(s.j00), j01(s.j01), j10(s.j10), j11(s.j11) {  }
 
   //! Construct from another Jones<U> matrix
   template<typename U> Jones (const Jones<U>& s)
@@ -71,7 +71,8 @@ public:
 
   //! Divide this instance by complex<U>
   template<typename U> Jones& operator /= (const complex<U>& au)
-    { complex<T>a(T(1.0)); a/=au; j00*=a; j01*=a; j10*=a; j11*=a; return *this; }
+    { complex<T>a(T(1.0),T(0.0));
+      a/=au; j00*=a; j01*=a; j10*=a; j11*=a; return *this; }
 
   //! Multiply this instance by T
   Jones& operator *= (T a)
@@ -176,8 +177,7 @@ const Jones<T>& Jones<T>::identity ()
 template<typename T>
 Jones<T>& Jones<T>::operator *= (const Jones<T>& j)
 {
-  complex<T> temp;
-  temp = j00 * j.j00 + j01 * j.j10;
+  complex<T> temp (j00 * j.j00 + j01 * j.j10);
   j01  = j00 * j.j01 + j01 * j.j11; j00=temp;
   temp = j10 * j.j00 + j11 * j.j10;
   j11  = j10 * j.j01 + j11 * j.j11; j10=temp;
@@ -188,7 +188,7 @@ Jones<T>& Jones<T>::operator *= (const Jones<T>& j)
 template<typename T>
 Jones<T> inv (const Jones<T>& j)
 {
-  complex<T> d(1.0); d/=det(j);
+  complex<T> d(1.0,0.0); d/=det(j);
   return Jones<T>(d*j.j11, -d*j.j01,
 		  -d*j.j10, d*j.j00);
 }
