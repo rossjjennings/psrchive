@@ -1,17 +1,16 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/LevenbergMarquardt.h,v $
-   $Revision: 1.4 $
-   $Date: 2004/11/22 22:23:30 $
+   $Revision: 1.5 $
+   $Date: 2004/11/23 11:25:43 $
    $Author: straten $ */
 
 #ifndef __Levenberg_Marquardt_h
 #define __Levenberg_Marquardt_h
 
-#include "GaussJordan.h"
+#include "MEAL/GaussJordan.h"
 #include "Estimate.h"
 #include "Error.h"
-#include "casts.h"
 
 #ifdef sun
 #include <ieeefp.h>
@@ -60,8 +59,6 @@ namespace MEAL {
     //! a multiplication operator:
     const Gt operator * (const Yt &, const Gt &);
 
-    //! an explicit cast function to convert to double:
-    double cast_double (const Gt& grad);
     <\pre>
 
     The LevenbergMarquardt class is used in three stages:
@@ -628,6 +625,9 @@ float MEAL::lmcoff1 (// input
 			  std::vector<std::vector<double> >& alpha,
 			  std::vector<double>& beta)
 {
+  //! The traits of the gradient element
+  ElementTraits<Grad> traits;
+
   if (LevenbergMarquardt<Grad>::verbose > 2)
     cerr << "MEAL::lmcoff1 delta_y=" << delta_y << endl;
 
@@ -638,14 +638,14 @@ float MEAL::lmcoff1 (// input
     if (model.get_infit(ifit)) {
       
       // Equation 15.5.6 (with 15.5.8)
-      beta[ifit] += cast_double (w_delta_y * gradient[ifit]);
+      beta[ifit] += traits.to_real (w_delta_y * gradient[ifit]);
 
       Grad w_gradient = weight.get_weighted_conjugate (gradient[ifit]);
 
       // Equation 15.5.11
       for (unsigned jfit=0; jfit <= ifit; jfit++)
 	if (model.get_infit(jfit))
-	  alpha[ifit][jfit] += cast_double(w_gradient * gradient[jfit]);
+	  alpha[ifit][jfit] += traits.to_real (w_gradient * gradient[jfit]);
     }
   }
 

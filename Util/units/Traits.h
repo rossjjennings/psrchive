@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Traits.h,v $
-   $Revision: 1.1 $
-   $Date: 2004/10/26 12:45:43 $
+   $Revision: 1.2 $
+   $Date: 2004/11/23 11:25:43 $
    $Author: straten $ */
 
 /*
@@ -25,12 +25,17 @@
 #include <complex>
 
 //! Traits of an element type
-template< class E > struct ElementTraits
+template< class E > class ElementTraits
 {
+public:
   //! How to cast a complex type to the element type
   template< class T >
-  static inline E cast (const std::complex<T>& value)
+  static inline E from_complex (const std::complex<T>& value)
   { return value.real(); }
+
+  //! How to cast an element type to real
+  static inline double to_real (const E& element)
+  { return element; }
 };
 
 //! Partial specialization for complex elements
@@ -38,8 +43,13 @@ template< class E > struct ElementTraits< std::complex<E> >
 {
   //! How to cast a complex type to the complex element type
   template< class T >
-  static inline std::complex<E> cast (const std::complex<T>& value)
+  static inline std::complex<E> from_complex (const std::complex<T>& value)
   { return value; }
+
+  //! How to cast an element type to real
+  static inline double to_real (const std::complex<E>& element)
+  { return element.real(); }
+
 };
 
 //! Traits of the data type
@@ -54,3 +64,4 @@ template< class T, class E = ElementTraits<T> > struct DatumTraits
 };
 
 #endif
+

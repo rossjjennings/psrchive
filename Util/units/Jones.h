@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Jones.h,v $
-   $Revision: 1.23 $
-   $Date: 2004/11/22 19:26:04 $
+   $Revision: 1.24 $
+   $Date: 2004/11/23 11:25:43 $
    $Author: straten $ */
 
 #ifndef __Jones_H
@@ -174,6 +174,20 @@ template<typename T> struct DatumTraits< Jones<T> >
   { return t[i]; }
   static inline const std::complex<T>& element (const Jones<T>& t, unsigned i)
   { return t[i]; }
+};
+
+//! Partial specialization for Jones elements
+template< class E > struct ElementTraits< Jones<E> >
+{
+  //! How to cast a complex type to the Jones element type
+  template< class T >
+  static inline Jones<E> from_complex (const std::complex<T>& value)
+  { return value; }
+
+  //! How to cast an element type to real
+  static inline double to_real (const Jones<E>& element)
+  { return trace(element).real(); }
+
 };
 
 //! Multiply another Jones<T> instance into this one (this=this*j)
