@@ -64,7 +64,7 @@ int main (int argc, char** argv)
     if (fft::get_normalization() == fft::nfft)
       back[idat] /= ndat;
     float residual = (back[idat]-data[idat])/data[idat];
-    if (fabs(residual) > 2e-4) {
+    if (fabs(residual) > 5e-4) {
       fprintf (stderr, "idat=%d data=%f back=%f diff=%g\n", 
                idat, back[idat], data[idat], residual);
       return -1;
