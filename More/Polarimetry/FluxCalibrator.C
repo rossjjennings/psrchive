@@ -1,4 +1,5 @@
 #include "Pulsar/FluxCalibrator.h"
+#include "Pulsar/FluxCalibratorDatabase.h"
 #include "Pulsar/FluxCalibratorExtension.h"
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
@@ -164,6 +165,11 @@ void Pulsar::FluxCalibrator::add_observation (const Archive* archive)
 
 }
 
+//! Set the database containing flux calibrator information
+void Pulsar::FluxCalibrator::set_database (const FluxCalibratorDatabase* d)
+{
+  database = d;
+}
 
 //! Calibrate the flux in the given archive
 void Pulsar::FluxCalibrator::calibrate (Archive* arch)
@@ -230,37 +236,32 @@ void Pulsar::FluxCalibrator::create (unsigned required_nchan)
 
 void Pulsar::FluxCalibrator::calculate (vector<Estimate<double> >& on,
 					vector<Estimate<double> >& off)
-{
-  double source_mJy = 0.0;
+try {
   
-  Pulsar::FluxCalibrator::source src = get_RefSrc(calibrator->get_source());
-  
-  switch (src) {
-  case Pulsar::FluxCalibrator::OFOS:
-    source_mJy = ofos_flux_mJy (calibrator->get_centre_frequency());
-    cout << "Pulsar::FluxCalibrator calibrating against the flux of 0407-658" << endl;
-      break;
-  case Pulsar::FluxCalibrator::TCTFT:
-    source_mJy = three_C_353_flux_mJy (calibrator->get_centre_frequency());
-    cout << "Pulsar::FluxCalibrator calibrating against the flux of 3C353" << endl;
-    break;
-  case Pulsar::FluxCalibrator::Hydra:
-    source_mJy = hydra_flux_mJy (calibrator->get_centre_frequency());
-    cout << "Pulsar::FluxCalibrator calibrating against the flux of Hydra" << endl;
-    break;
-  case Pulsar::FluxCalibrator::Virgo:
-    source_mJy = virgo_flux_mJy (calibrator->get_centre_frequency());
-    cout << "Pulsar::FluxCalibrator calibrating against the flux of Virgo" << endl;
-    break;
-  default:
-    throw Error (InvalidParam, "Pulsar::FluxCalibrator::calculate",
-		 "Unknown flux calibrator source in file");
+  if (!database) {
+    if (verbose)
+      cerr << "Pulsar::FluxCalibrator::calculate using default database"<<endl;
+    database = new FluxCalibratorDatabase;
   }
-  
+
+  if (verbose)
+    cerr << "Pulsar::FluxCalibrator::calculate search for source=" 
+	 << calibrator->get_source() << endl;
+
+  FluxCalibratorDatabase::Entry entry;
+  entry = database->match (calibrator->get_source(),
+			   calibrator->get_centre_frequency());
+
+  if (verbose)
+    cerr << "Pulsar::FluxCalibrator::calculate found matching source=" 
+	 << entry.source_name[0]<< endl;
+
   unsigned nchan = on.size();
   
   cal_flux.resize (nchan);
   T_sys.resize (nchan);
+
+  const Integration* subint = calibrator->get_Integration(0);
 
   for (unsigned ichan=0; ichan<nchan; ++ichan) {
 
@@ -270,6 +271,13 @@ void Pulsar::FluxCalibrator::calculate (vector<Estimate<double> >& on,
     }
 
     Estimate<double> ratio_diff = 1.0/on[ichan] - 1.0/off[ichan];
+
+    double frequency = subint->get_centre_frequency(ichan);
+    double source_mJy = entry.get_flux_mJy (frequency);
+
+    if (verbose)
+      cerr << "Pulsar::FluxCalibrator::calculate channel=" << ichan << 
+	" freq=" << frequency << " flux=" << source_mJy << endl;
 
     cal_flux[ichan] = source_mJy/ratio_diff;
 
@@ -291,6 +299,9 @@ void Pulsar::FluxCalibrator::calculate (vector<Estimate<double> >& on,
 
   calculated = true;
 }
+catch (Error& error) {
+  throw error += "Pulsar::FluxCalibrator::calculate";
+}
 
 void Pulsar::FluxCalibrator::calibrate (Integration* subint)
 {
@@ -308,29 +319,6 @@ unsigned Pulsar::FluxCalibrator::get_nchan () const
   return calibrator->get_nchan();
 }
 
-//! Given the observing frequency in MHz, returns the flux of 0407-658 in mJy
-double Pulsar::FluxCalibrator::ofos_flux_mJy (double cfreq)
-{
-  return pow (cfreq/1400.0, -1.189) * 14.4 * 1000;
-}
-
-//! Given the observing frequency in MHz, returns the flux of Virgo in mJy
-double Pulsar::FluxCalibrator::virgo_flux_mJy (double cfreq)
-{
-  return pow (cfreq/1400.0, -.81) * 200.0 * 1000;
-}
-
-//! Given the observing frequency in MHz, returns the flux of Hydra in mJy
-double Pulsar::FluxCalibrator::hydra_flux_mJy (double cfreq)
-{
-  return pow (cfreq/1400.0, -.91) * 43.1 * 1000;
-}
-
-//! Given the observing frequency in MHz, returns the flux of 3C353 in mJy
-double Pulsar::FluxCalibrator::three_C_353_flux_mJy (double cfreq)
-{
-  return pow (cfreq/1400.0, -0.76) * 57.3 * 1000;
-}
 
 namespace Pulsar {
 
@@ -402,29 +390,7 @@ Pulsar::Calibrator::Type Pulsar::FluxCalibrator::get_type () const
 Pulsar::CalibratorExtension*
 Pulsar::FluxCalibrator::new_Extension () const
 {
+  const_cast<FluxCalibrator*>(this)->create();
   return new FluxCalibratorExtension (this);
 }
 
-Pulsar::FluxCalibrator::source Pulsar::FluxCalibrator::get_RefSrc(string name)
-{
-  if (verbose)
-    cerr << "Pulsar::FluxCalibrator::get_RefSrc name=" << name << endl;
-
-
-  if (name.find("0407-658",0) != string::npos)
-    return Pulsar::FluxCalibrator::OFOS;
-
-  if (name.find("3C353",0) != string::npos)
-    return Pulsar::FluxCalibrator::TCTFT;
-
-  if (strncasecmp(name.c_str(), "virgo", 5) == 0)
-    return Pulsar::FluxCalibrator::Virgo;
-
-  if ( strncasecmp(name.c_str(), "cal", 3) == 0 ||
-       strncasecmp(name.c_str(), "hydra", 5) == 0 ||
-       name.find("0918",0) != string::npos )
-    return Pulsar::FluxCalibrator::Hydra;
-
-  else
-    return Pulsar::FluxCalibrator::Unknown;
-}

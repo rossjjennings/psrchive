@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/FluxCalibrator.h,v $
-   $Revision: 1.14 $
-   $Date: 2004/10/09 05:37:03 $
+   $Revision: 1.15 $
+   $Date: 2004/10/11 11:23:37 $
    $Author: straten $ */
 
 #ifndef __Pulsar_FluxCalibrator_H
@@ -13,26 +13,13 @@
 namespace Pulsar {
 
   class Integration;
+  class FluxCalibratorDatabase;
 
   class FluxCalibrator : public Calibrator {
     
     friend class FluxCalibratorInfo;
 
   public:
-    
-    //! List of possible calibration standards
-    enum source {
-      //! Virgo A
-      Virgo,
-      //! Hydra A
-      Hydra,
-      //! 3C353
-      TCTFT,
-      //! 0407-658
-      OFOS,
-      //! Undetermined
-      Unknown
-    };
     
     //! Self-calibrate flux calibrator archives before computing hi/lo ratios
     static bool self_calibrate;
@@ -52,26 +39,17 @@ namespace Pulsar {
     //! Return a new FluxCalibratorExtension
     CalibratorExtension* new_Extension () const;
 
-    //! Return the flux of 0407-658 in mJy
-    double ofos_flux_mJy (double frequency_MHz);
-    
-    //! Return the flux of Virgo in mJy
-    double virgo_flux_mJy (double frequency_MHz);
-    
-    //! Return the flux of Hydra in mJy
-    double hydra_flux_mJy (double frequency_MHz);
-    
-    //! Return the flux of 3C353 in mJy
-    double three_C_353_flux_mJy (double frequency_MHz);
-    
     //! Return the system temperature in Kelvin
     double meanTsys ();
     
     //! Return the system temperature of a specific channel
     double Tsys (unsigned ichan);
     
-    //! Add an FluxCal Pulsar::Archive to the set of constraints
+    //! Add a FluxCal Pulsar::Archive to the set of constraints
     void add_observation (const Archive* archive);
+
+    //! Set the database containing flux calibrator information
+    void set_database (const FluxCalibratorDatabase* database);
 
     //! Calibrate the flux in the given archive
     void calibrate (Archive* archive);
@@ -83,9 +61,9 @@ namespace Pulsar {
 
     friend class FluxCalibratorExtension;
 
-    //! Return the FluxCalibrator::source corresponding to name
-    source get_RefSrc(string name);
-    
+    //! Flux calibrator database
+    Reference::To<const FluxCalibratorDatabase> database;
+
     //! Calibrator flux in mJy as a function of frequency
     vector< Estimate<double> > cal_flux;
 
