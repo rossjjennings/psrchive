@@ -14,7 +14,8 @@ nobase_include_HEADERS = \
 	Pulsar/ExampleExtension.h         Pulsar/Telescope.h  \
 	Pulsar/FITSHdrExtension.h         Pulsar/TwoBitStats.h  \
 	Pulsar/FluxCalibratorExtension.h  Pulsar/WidebandCorrelator.h  \
-	Pulsar/ITRFExtension.h            Pulsar/dspReduction.h
+	Pulsar/ITRFExtension.h            Pulsar/dspReduction.h \
+	Pulsar/ReceiverTUI.h
 
 libExtension_la_SOURCES = \
 	BackendName.C                    ObsExtension.C  \
@@ -31,7 +32,7 @@ libExtension_la_SOURCES = \
 	FluxCalibratorExtension.C        TwoBitStats.C  \
 	FluxCalibratorExtension_build.C  WidebandCorrelator.C  \
 	ITRFExtension.C                  dspReduction.C  \
-	IntegrationOrder.C
+	IntegrationOrder.C               ReceiverTUI.C
 
 ##check_PROGRAMS = test_Receiver
 ##test_Receiver_SOURCES = test_Receiver.C
