@@ -77,7 +77,7 @@ void Pulsar::Archive::select_copy (const Archive& archive, vector<unsigned> subi
 	  archive.get_nchan(), archive.get_nbin());
   
   for (unsigned isub=0; isub<subints.size(); isub++) {
-    if (subints[isub] > get_nsubint())
+    if (subints[isub] > archive.get_nsubint())
       throw Error(InvalidParam, "Pulsar::Archive::select_copy request too large");
     get_Integration(isub) -> copy (*(archive.get_Integration(subints[isub])));
   }
