@@ -245,7 +245,7 @@ namespace TextInterface {
   protected:
 
     //! If name is colon separated, extract component name and find it
-    Component<C>* find (std::string& name) const;
+    Component<C>* find_component (std::string& name) const;
 
     //! The named class attribute interfaces
     std::vector< Reference::To< Component<C> > > components;
@@ -268,7 +268,7 @@ TextInterface::ClassGetSet<C>::find (const std::string& name) const
 
 template<class C>
 TextInterface::Component<C>* 
-TextInterface::CompositeGetSet<C>::find (std::string& name) const
+TextInterface::CompositeGetSet<C>::find_component (std::string& name) const
 {
   std::string temp = name;
   std::string cname = stringtok (temp, ": \t\n");
@@ -283,7 +283,7 @@ TextInterface::CompositeGetSet<C>::find (std::string& name) const
     if (components[i]->matches(cname))
       return components[i];
 
-  throw Error (InvalidParam, "TextInterface::Class<C>::find",
+  throw Error (InvalidParam, "TextInterface::Class<C>::find_component",
 	       "no component named " + cname);
 }
 
@@ -292,7 +292,7 @@ std::string
 TextInterface::CompositeGetSet<C>::get_value (const std::string& name) const
 {
   std::string temp = name;
-  Component<C>* component = find (temp);
+  Component<C>* component = find_component (temp);
   if (component)
     return component->get_value (temp);
   else
@@ -304,7 +304,7 @@ void TextInterface::CompositeGetSet<C>::set_value (const std::string& name,
 						   const std::string& value)
 {
   std::string temp = name;
-  Component<C>* component = find (temp);
+  Component<C>* component = find_component (temp);
 
   if (component)
     component->set_value (temp, value);
