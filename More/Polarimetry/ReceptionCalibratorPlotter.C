@@ -1,5 +1,8 @@
 #include "ReceptionCalibratorPlotter.h"
 #include "ReceptionCalibrator.h"
+#include "EstimatePlotter.h"
+
+#include <cpgplot.h>
 
 Pulsar::ReceptionCalibratorPlotter::~ReceptionCalibratorPlotter ()
 {
@@ -8,12 +11,15 @@ Pulsar::ReceptionCalibratorPlotter::~ReceptionCalibratorPlotter ()
 //! PGPLOT the calibrator model parameters as a function of frequency
 void Pulsar::ReceptionCalibratorPlotter::init (const Calibrator* calib)
 {
-  calibrator = dynamic_cast<const ReceptionCalibrator*> (calib);
-  if (!calibrator) {
+  const ReceptionCalibrator* temp;
+  temp = dynamic_cast<const ReceptionCalibrator*> (calib);
+  if (!temp) {
     cerr << "Pulsar::ReceptionCalibratorPlotter::init"
       " Calibrator is not a ReceptionCalibrator" << endl;
     return;
   }
+
+  calibrator = const_cast<ReceptionCalibrator*> (temp);
 }
 
 //! Get the number of data points to plot
@@ -55,6 +61,21 @@ Pulsar::ReceptionCalibratorPlotter::get_rotation (unsigned idat, unsigned irot)
   return calibrator->equation[idat]->get_receiver()->get_rotationEuler(irot);
 }
 
+void Pulsar::ReceptionCalibratorPlotter::plot_constraints ()
+{
+  plot_constraints (calibrator->get_nchan()/2, calibrator->get_nstate()/2);
+}
+
+void Pulsar::ReceptionCalibratorPlotter::plot_cal_constraints ()
+{
+  plot_cal_constraints (calibrator->get_nchan()/2);
+}
+
+void Pulsar::ReceptionCalibratorPlotter::plot_cal_constraints (unsigned ichan)
+{
+  plot_constraints (ichan, calibrator->calibrator_state_index);
+}
+
 void Pulsar::ReceptionCalibratorPlotter::plot_constraints (unsigned ichan,
 							   unsigned istate)
 {
@@ -68,25 +89,57 @@ void Pulsar::ReceptionCalibratorPlotter::plot_constraints (unsigned ichan,
 		 "Pulsar::ReceptionCalibratorPlotter::plot_constraints",
 		 "ichan=%d >= nchan=%d", ichan, calibrator->get_nchan());
 
+  // extract the appropriate equation
+  const Calibration::SAtPEquation* equation = calibrator->equation[ichan];
+
+  unsigned nmeas = equation->get_nmeasurements ();
+
+  vector< Estimate<float> > stokes[4];
+  vector< float > para;
+
+  for (unsigned imeas=0; imeas<nmeas; imeas++) {
+
+    //! Get the specified Measurements
+    const Calibration::Measurements& measurements
+      = equation->get_measurements (imeas);
+
+    double xval = measurements.interval[0];
+
+    unsigned nstate = measurements.size();
+
+    for (unsigned jstate=0; jstate<nstate; jstate++)
+      if (measurements[jstate].state_index == istate) {
+
+	for (unsigned ipol=0; ipol<4; ipol++) {
+	  stokes[ipol].push_back (Estimate<float>());
+	  stokes[ipol].back().val = measurements[jstate].val[ipol];
+	  stokes[ipol].back().var = measurements[jstate].var;
+	}
+
+	calibrator->parallactic.set_abscissa (0, xval);
+	para.push_back ( calibrator->parallactic.get_param(0) * 180.0/M_PI );
+
+	break;
+      }
+  }
+
+  // the plotting class
+  EstimatePlotter plotter;
+  unsigned ipol;
+
+  for (ipol=0; ipol<4; ipol++)
+    plotter.add_plot (para, stokes[ipol]);
+
+  for (ipol=0; ipol<4; ipol++) {
+    cpgsci (ipol+1);
+    plotter.plot (ipol);
+  }
+
+  cpgsci (1);
+  cpgbox ("bcnst",0,0,"bcnst",0,0);
+
+  cpglab ("Parallactic Angle (degrees)",
+	  "Uncalibrated Stokes",
+	  "Self-Calibration Constraints");
+
 }
-
-#if 0
-  //! Polarimetric measurement, estimated error, and state identification code
-  class MeasuredState : public Estimate<Stokes<double>, double> {
-  public:
-    MeasuredState () { state_index = 0; }
-    unsigned state_index;
-  };
- 
-  //! A set of measurements made at the same abscissa interval
-  class Measurements : public vector<MeasuredState> {
-  public:
-
-    //! Construct measurement with single abscissa dimension
-    Measurements (double x0 = 0.0);
-
-    //! The coordinates of the measurement
-    vector<double> interval;
-  };
-#endif
-
