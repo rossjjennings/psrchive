@@ -11,7 +11,7 @@
 
 // Extensions this program understands
 
-#include "Pulsar/FITSHistory.h"
+#include "Pulsar/ProcHistory.h"
 
 
 // PAM: A command line tool for modifying archives
@@ -271,11 +271,11 @@ int main (int argc, char *argv[]) {
 	
 	// See if the archive contains a history that should be updated:
 	
-	Pulsar::FITSHistory* fitsext = 0;
+	Pulsar::ProcHistory* fitsext = 0;
 	for (unsigned i = 0; i < arch->get_nextension(); i++) {
 	  Pulsar::Archive::Extension* extension;
 	  extension = (Pulsar::Archive::Extension*)arch->get_extension (i);
-	  fitsext = dynamic_cast<Pulsar::FITSHistory*> (extension);
+	  fitsext = dynamic_cast<Pulsar::ProcHistory*> (extension);
 	  if (fitsext) {
 	    break;
 	  }
@@ -286,7 +286,7 @@ int main (int argc, char *argv[]) {
 	  fitsext->add_blank_row();
 
 	  if (command.length() > 80) {
-	    cout << "WARNING: FITSHistory command string truncated to 80 chars" << endl;
+	    cout << "WARNING: ProcHistory command string truncated to 80 chars" << endl;
 	    sprintf((fitsext->get_last()->proc_cmd), "%s", command.substr(0, 80).c_str());
 	  }
 	  else {
