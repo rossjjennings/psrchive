@@ -43,13 +43,36 @@ vector<float> Pulsar::RFIMitigation::zap_mask (Pulsar::Integration* integ) {
     global_mean += mean[i];
   }
   
+  vector<double> running;
+  running.resize(nchan);
+
   global_mean = global_mean / float(nchan);
-  
+
+  running[0] = (mean[0] + mean[1] + mean[2]) / 3.0;
+  running[1] = (mean[0] + mean[1] + mean[2] + mean[3]) / 4.0;
+
+  for (int i = 0; i < nchan; i++) {
+    int hbs = 7;
+    for (int j = 0; j < hbs; j++) {
+      int num = 0;
+      float val = 0.0;
+      if ((i-j) > 0) {
+	val += mean[i-j];
+	num++;
+      }
+      if ((i+j) < (nchan-1)) {
+	val += mean[i+j];
+	num++;
+      }
+      running[i] = val / float(num);
+    }
+  }
+
   // Define a vector to hold the mask
   vector<float> mask(nchan);
   
   for (int i = 0; i < nchan; i++) {
-    if ( fabs(mean[i] - global_mean) > global_mean )
+    if ( fabs(mean[i] - running[i]) > (global_mean / 2.0) )
       mask[i] = 0.0;
     else
       mask[i] = 1.0;
