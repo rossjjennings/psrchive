@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/polyco.h,v $
-   $Revision: 1.22 $
-   $Date: 2004/04/02 08:19:43 $
+   $Revision: 1.23 $
+   $Date: 2004/12/14 23:59:38 $
    $Author: hknight $ */
 
 #ifndef __POLY_H
@@ -134,6 +134,8 @@ public:
   int    get_ncoeff        () const {return (int) coefs.size(); }
   double get_doppler_shift () const {return doppler_shift / 1e4; }
   string get_psrname       () const {return psrname; }
+  bool   get_binary        () const {return binary; } 
+  double get_binph         () const {return binph; }
 
   static double flexibility;
 
