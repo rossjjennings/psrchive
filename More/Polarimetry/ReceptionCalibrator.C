@@ -404,6 +404,7 @@ void Pulsar::ReceptionCalibrator::add_PolnCalibrator (const PolnCalibrator* p)
 
       // convert to Stokes parameters
       Stokes< Estimate<double> > stokes = convert (cal);
+      stokes *= 2.0;
 
       // convert to MeasuredState format
       Calibration::MeasuredState state;
@@ -527,11 +528,8 @@ void Pulsar::ReceptionCalibrator::calibrate (Archive* data, bool solve_first)
     Integration* integration = data->get_Integration (isub);
     MJD epoch = integration->get_epoch ();
 
-    for (unsigned ichan=0; ichan<nchan; ichan++) {
-      equation[ichan]->get_model()->set_path (path);
-      parallactic.set_epoch (epoch);
-      response[ichan] = inv( equation[ichan]->get_model()->get_Jones() );
-    }
+    for (unsigned ichan=0; ichan<nchan; ichan++)
+      response[ichan] = inv( receiver[ichan]->evaluate() );
 
     Calibrator::calibrate (integration, response);
 
@@ -540,8 +538,10 @@ void Pulsar::ReceptionCalibrator::calibrate (Archive* data, bool solve_first)
     
   }
 
+#if FIXED
   if (path == Pulsar_path)
     data->set_parallactic_corrected (true);
+#endif
 
   data->set_poln_calibrated (true);
 
