@@ -114,7 +114,9 @@ void Pulsar::Profile::find_peak_edges (int& rise, int& fall) const
   }
   else if (diff1 > 0) {
     rise = irise[1] + nbin/2;
+    rise = rise%nbin;
     fall = ifall[1] + nbin/2;
+    fall = fall%nbin;
   }
   else {
     // In noisy data, ifall can be < irise!  In this case, just find
