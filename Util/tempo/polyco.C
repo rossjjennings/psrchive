@@ -19,6 +19,9 @@ bool   polyco::debug = false;
 // not going to get > ns precision out of a routine based in minutes
 double polyco::precision = 1e-10;
 
+// allow requested time to be about ten percent out of advertised span
+double polynomial::flexibility = 0.1;
+
 void polynomial::init() {
   dm = 0;
   doppler_shift = 0;
@@ -193,7 +196,6 @@ int polynomial::load(string* instr)
   else
     binary = 1;
 
-  coefs.clear();
   coefs.resize(ncoeftmp);  
   // Read in the coefficients 
   int i;
@@ -649,10 +651,15 @@ int polyco::i_nearest (const MJD &t, const string& in_psr) const
   }
   // check if any polynomial matched
   if (imin < 0) {
-    cerr << "polyco::i_nearest - no polynomial found for pulsar: '"
-	 << in_psr << "'\n";
+    if (verbose) {
+      cerr << "polyco::i_nearest - no polynomial found for pulsar: '"
+	   << in_psr << "'\n";
+    }
     return -1;
   }
+
+  // the use of polynomial::flexibility should mimic an ideal world
+#define IDEAL_WORLD 1
 
 #ifdef IDEAL_WORLD
   // return if the time is within the range of the matched polynomial
@@ -666,9 +673,12 @@ int polyco::i_nearest (const MJD &t, const string& in_psr) const
 #endif
 
   // the time is out of range of the nearest polynomial
-  cerr << "polyco::i_nearest - no polynomial for MJD " << t.printdays(15)
-       << "\npolyco::i_nearest - range " << start_time().printdays(5) 
-       << " - " << end_time().printdays(5) << endl;
+  if (verbose) {
+    cerr << "polyco::i_nearest - no polynomial for MJD " << t.printdays(15)
+	 << "\npolyco::i_nearest - range " << start_time().printdays(5) 
+	 << " - " << end_time().printdays(5) << endl;
+  }
+
   return -1;
 }
 
