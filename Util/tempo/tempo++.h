@@ -1,3 +1,4 @@
+//-*-C++-*-
 #ifndef __TEMPOPLUSPLUS_H
 #define __TEMPOPLUSPLUS_H
 
@@ -10,13 +11,22 @@ class psrParams;
 class psrephem;
 class toa;
 class residual;
-//class polyco;
-
 
 namespace Tempo {
 
   extern bool verbose;
   extern MJD  unspecified;
+
+  // exception thrown on error
+  class Error {
+  protected:
+    string msg;
+  public:
+    Error (const char*);
+    Error (const string&);
+
+    friend ostream& operator<< (ostream& ostr, const Error& error);
+  };
 
   // given pulsar parameters and times of arrival, calls TEMPO to determine
   // the residual TOA.
