@@ -4,7 +4,7 @@
 template <typename T> T sqr (T x) { return x*x; }
 
 
-template <typename T, Basis B>
+template <typename T, QBasis B>
 void test_det (const Quaternion<T, B>& q, float tolerance)
 {
   Jones<T> j = convert(q);
