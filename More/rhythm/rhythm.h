@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/rhythm/rhythm.h,v $
-   $Revision: 1.25 $
-   $Date: 2003/05/20 03:59:44 $
+   $Revision: 1.26 $
+   $Date: 2003/05/20 07:05:32 $
    $Author: ahotan $ */
 
 // //////////////////////////////////////////////////////////////////////////
@@ -153,6 +153,9 @@ class Rhythm : public QMainWindow
   QPushButton* autoscl;
   QPushButton* show_button;
 
+  QPushButton* colour;
+  QPushButton* dotify;
+
   string dataPath;
 
   int mode;
@@ -249,6 +252,12 @@ class Rhythm : public QMainWindow
   
   void clearselection ();
   void deleteselection ();
+
+  void colour_selector ();
+  void symbol_selector ();
+
+  void setselcol (int);
+  void setseldot (int);
 
   void undeleteall ();
   

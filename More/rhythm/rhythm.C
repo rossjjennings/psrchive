@@ -135,32 +135,38 @@ Rhythm::Rhythm (QWidget* parent, int argc, char** argv) :
   point = new QPushButton("Point", controls);
   QObject::connect(point, SIGNAL(clicked()),
 		   this, SLOT(point_slot()));
-  xrange = new QPushButton("X Range", controls);
+  xrange = new QPushButton("X-Range", controls);
   QObject::connect(xrange, SIGNAL(clicked()),
 		   this, SLOT(xrange_slot()));
-  yrange = new QPushButton("Yrange", controls);  
+  yrange = new QPushButton("Y-Range", controls);  
   QObject::connect(yrange, SIGNAL(clicked()),
 		   this, SLOT(yrange_slot()));
   box = new QPushButton("Box", controls);
   QObject::connect(box, SIGNAL(clicked()),
 		   this, SLOT(box_slot()));
-  autoscl = new QPushButton("Scale", controls);
+  autoscl = new QPushButton("Autoscale Axes", controls);
   QObject::connect(autoscl, SIGNAL(clicked()),
 		   plot_window, SLOT(autoscale()));
-  clearsel = new QPushButton("Clear", controls);
+  clearsel = new QPushButton("Clear Selected", controls);
   QObject::connect(clearsel, SIGNAL(clicked()),
 		   this, SLOT(clearselection()));
-  cut = new QPushButton("Delete", controls);
+  cut = new QPushButton("Delete Selected", controls);
   QObject::connect(cut, SIGNAL(clicked()),
 		   this, SLOT(deleteselection()));
-  undel = new QPushButton("Restore", controls);
+  undel = new QPushButton("Restore Deleted", controls);
   QObject::connect(undel, SIGNAL(clicked()),
 		   this, SLOT(undeleteall()));
-
-  show_button = new QPushButton("Profile", controls);
+  show_button = new QPushButton("Show Profile", controls);
   QObject::connect(show_button, SIGNAL(clicked()),
 		   this, SLOT(show_me()));
+  colour = new QPushButton("Change Colour", controls);
+  QObject::connect(colour, SIGNAL(clicked()),
+		   this, SLOT(colour_selector()));
+  dotify = new QPushButton("Change Symbol", controls);
+  QObject::connect(dotify, SIGNAL(clicked()),
+		   this, SLOT(symbol_selector()));
   
+
   // Instantiate the Axis selection panels
 
   chooser = new AxisSelector(bottompanel);
@@ -238,6 +244,11 @@ void Rhythm::load_toas (const char* fname)
   for (unsigned i = 0; i < toas.size(); i++) {
     toas[i].unload(useful);
     toa_text -> insertItem(useful);
+
+    if (toas[i].get_format() == Tempo::toa::Command) {
+      toas[i].ci = 4;
+      toas[i].di = 4;
+    }
   }
   
   toas_modified = false;
@@ -281,6 +292,11 @@ void Rhythm::add_toas (const char* fname)
   for (unsigned i = 0; i < toas.size(); i++) {
     toas[i].unload(useful);
     toa_text -> insertItem(useful);
+
+    if (toas[i].get_format() == Tempo::toa::Command) {
+      toas[i].ci = 4;
+      toas[i].di = 4;
+    }
   }
   
   toas_modified = true;
@@ -563,50 +579,90 @@ vector<double> Rhythm::give_me_data (toaPlot::AxisQuantity q)
   switch (q) {
 
   case toaPlot::TOA_MJD:
-    for (unsigned i = 0; i < toas.size(); i++)
+    for (unsigned i = 0; i < toas.size(); i++) {
+      if (toas[i].get_format() == Tempo::toa::Command) {
+	retval.push_back(0.0);
+	continue;
+      }
       retval.push_back((toas[i].resid.mjd)-50000.0);
+    }
     return retval;
     break;
 
   case toaPlot::BinaryPhase:
-    for (unsigned i = 0; i < toas.size(); i++)
+    for (unsigned i = 0; i < toas.size(); i++) {
+      if (toas[i].get_format() == Tempo::toa::Command) {
+	retval.push_back(0.0);
+	continue;
+      }
       retval.push_back(toas[i].resid.binaryphase);
+    }
     return retval;
     break;
 
   case toaPlot::ObsFreq:
-    for (unsigned i = 0; i < toas.size(); i++)
+    for (unsigned i = 0; i < toas.size(); i++) {
+      if (toas[i].get_format() == Tempo::toa::Command) {
+	retval.push_back(0.0);
+	continue;
+      }
       retval.push_back(toas[i].resid.obsfreq);
+    }
     return retval;
     break;
-
+    
   case toaPlot::DayOfYear:
-    for (unsigned i = 0; i < toas.size(); i++)
+    for (unsigned i = 0; i < toas.size(); i++) {
+      if (toas[i].get_format() == Tempo::toa::Command) {
+	retval.push_back(0.0);
+	continue;
+      }
       retval.push_back(fmod(toas[i].resid.mjd, 365.0));
+    }
     return retval;
     break;
 
   case toaPlot::ResidualMicro:
-    for (unsigned i = 0; i < toas.size(); i++)
+    for (unsigned i = 0; i < toas.size(); i++) {
+      if (toas[i].get_format() == Tempo::toa::Command) {
+	retval.push_back(0.0);
+	continue;
+      }
       retval.push_back(toas[i].resid.time);
+    }
     return retval;
     break;
 
   case toaPlot::ResidualMilliTurns:
-    for (unsigned i = 0; i < toas.size(); i++)
+    for (unsigned i = 0; i < toas.size(); i++) {
+      if (toas[i].get_format() == Tempo::toa::Command) {
+	retval.push_back(0.0);
+	continue;
+      }
       retval.push_back((toas[i].resid.turns)*1000.0);
+    }
     return retval;
     break;
 
   case toaPlot::ErrorMicro:
-    for (unsigned i = 0; i < toas.size(); i++)
+    for (unsigned i = 0; i < toas.size(); i++) {
+      if (toas[i].get_format() == Tempo::toa::Command) {
+	retval.push_back(0.0);
+	continue;
+      }
       retval.push_back(toas[i].resid.error);
+    }
     return retval;
     break;
 
   case toaPlot::SignalToNoise:
     for (unsigned i = 0; i < toas.size(); i++) {
       
+      if (toas[i].get_format() == Tempo::toa::Command) {
+	retval.push_back(0.0);
+	continue;
+      }
+    
       toas[i].unload(useful);
       
       sscanf(useful+1, "%s ", filename);
@@ -630,7 +686,12 @@ vector<double> Rhythm::give_me_data (toaPlot::AxisQuantity q)
 
   case toaPlot::Bandwidth:
     for (unsigned i = 0; i < toas.size(); i++) {
-      
+    
+      if (toas[i].get_format() == Tempo::toa::Command) {
+	retval.push_back(0.0);
+	continue;
+      }
+  
       toas[i].unload(useful);
       
       sscanf(useful+1, "%s ", filename);
@@ -650,6 +711,11 @@ vector<double> Rhythm::give_me_data (toaPlot::AxisQuantity q)
 
   case toaPlot::DispersionMeasure:
     for (unsigned i = 0; i < toas.size(); i++) {
+
+      if (toas[i].get_format() == Tempo::toa::Command) {
+	retval.push_back(0.0);
+	continue;
+      }
       
       toas[i].unload(useful);
       
@@ -671,6 +737,11 @@ vector<double> Rhythm::give_me_data (toaPlot::AxisQuantity q)
   case toaPlot::Duration:
     for (unsigned i = 0; i < toas.size(); i++) {
       
+      if (toas[i].get_format() == Tempo::toa::Command) {
+	retval.push_back(0.0);
+	continue;
+      }
+
       toas[i].unload(useful);
       
       sscanf(useful+1, "%s ", filename);
@@ -822,11 +893,14 @@ void Rhythm::goplot ()
 	  tempw.y = tempy[1];
 	  tempw.e = 0.0;
 	  
-	  tempw.dot = 4;
-	  
-	  tempw.ci = 4;
+	  tempw.dot = toas[i].di;
 	  tempw.id = 0;
 	  
+	  if (toas[i].state == Tempo::toa::Selected)
+	    tempw.ci = 2;
+	  else
+	    tempw.ci = toas[i].ci;
+
 	  useme.push_back(tempw);
 	}
 	else if (i == toas.size() - 1) {
@@ -837,11 +911,14 @@ void Rhythm::goplot ()
 	  tempw.y = tempy[ind];
 	  tempw.e = 0.0;
 	  
-	  tempw.dot = 4;
-	  
-	  tempw.ci = 4;
+	  tempw.dot = toas[i].di;
 	  tempw.id = toas.size() - 1;
 	  
+	  if (toas[i].state == Tempo::toa::Selected)
+	    tempw.ci = 2;
+	  else
+	    tempw.ci = toas[i].ci;
+
 	  useme.push_back(tempw);
 	}
 	else {
@@ -851,9 +928,13 @@ void Rhythm::goplot ()
 	  tempw.e = 0.0;
 	  
 	  tempw.id = i;
-	  tempw.ci = 4;
+
+	  if (toas[i].state == Tempo::toa::Selected)
+	    tempw.ci = 2;
+	  else
+	    tempw.ci = toas[i].ci;
 	  
-	  tempw.dot = 4;
+	  tempw.dot = toas[i].di;
 	  
 	  useme.push_back(tempw);
 	}
@@ -864,8 +945,13 @@ void Rhythm::goplot ()
 	tempw.y = tempy[i];
 	tempw.e = yerrs[i];
 	tempw.id = i;
+	
+	tempw.dot = toas[i].di;
+
 	if (toas[i].state == Tempo::toa::Selected)
 	  tempw.ci = 2;
+	else
+	  tempw.ci = toas[i].ci;
 	
 	useme.push_back(tempw);
       }
@@ -1018,6 +1104,50 @@ void Rhythm::clearselection ()
     
     toas[i].state = Tempo::toa::Normal;
     toa_text -> setSelected (i, false);
+  }
+  goplot ();
+}
+
+void Rhythm::colour_selector ()
+{
+  int temp = -1;
+  
+  temp = QInputDialog::getInteger("Rhythm",
+				  "Please enter the colour index: (0 -> 15)");
+  
+  if (temp >= 0 && temp < 16)
+    setselcol (temp);
+}
+
+void Rhythm::setselcol (int index)
+{
+  for (unsigned i = 0; i < toas.size(); i++) {
+    
+    if (toas[i].state == Tempo::toa::Selected)
+      toas[i].ci = index;
+    
+  }
+  goplot ();
+}
+
+void Rhythm::symbol_selector ()
+{
+  int temp = -1;
+  
+  temp = QInputDialog::getInteger("Rhythm",
+				  "Please enter the symbol index: (0 -> 127)");
+  
+  if (temp >= 0 && temp < 128)
+    setseldot (temp);
+}
+
+void Rhythm::setseldot (int index)
+{
+  for (unsigned i = 0; i < toas.size(); i++) {
+    
+    if (toas[i].state == Tempo::toa::Selected)
+      toas[i].di = index;
+    
   }
   goplot ();
 }
