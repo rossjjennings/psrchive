@@ -4,11 +4,13 @@
 #include "Error.h"
 
 /*!
-
   If phase is not specified, this method calls
   Integration::find_min_phase to find the phase at which the mean in a
-  region of the total intensity (as returned by Integration::total) 
-  reaches a minimum
+  region of the total intensity (as returned by Integration::total)
+  reaches a minimum.  This phase is then used to remove the baseline from
+  each of the profiles over all polarizations and frequencies.  If the
+  dispersion measure and folding period have been previously set, the
+  baseline phase is shifted according to the dispersion relation.
   */
 void Pulsar::Integration::remove_baseline (float phase)
 {
