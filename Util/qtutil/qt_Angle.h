@@ -1,13 +1,13 @@
 /* $Source: /cvsroot/psrchive/psrchive/Util/qtutil/qt_Angle.h,v $
-   $Revision: 1.4 $
-   $Date: 2004/02/28 06:58:48 $
+   $Revision: 1.5 $
+   $Date: 2004/12/05 19:39:37 $
    $Author: straten $ */
 
 #ifndef __QT_Angle_H
 #define __QT_Angle_H
 
 #include "qt_value.h"
-#include "angle.h"
+#include "Angle.h"
 
 class qt_Angle : public qt_value
 {
