@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Integration.h,v $
-   $Revision: 1.25 $
-   $Date: 2002/08/19 16:38:58 $
+   $Revision: 1.26 $
+   $Date: 2002/10/10 08:00:58 $
    $Author: straten $ */
 
 /*
@@ -17,7 +17,7 @@
 #include <vector>
 
 #include "MJD.h"
-#include "ArchiveTypes.h"
+#include "Types.h"
 
 
 namespace Tempo {
@@ -92,14 +92,14 @@ namespace Pulsar {
     virtual void defaraday (double rm = 0.0, double rm_iono = 0.0);
 
     //! Convert polarimetric data to the specified state
-    virtual void convert_state (Poln::State state);
+    virtual void convert_state (Signal::State state);
 
     //! Returns a single Stokes 4-vector for the given chan and phase bin
     void get_Stokes (Stokes& S, int ichan, int ibin) const;
 
     //! Returns a vector of Stokes parameters along the specified dimension
     void get_Stokes (vector<Stokes>& S, int iother,
-		     Dimension::Axis abscissa = Dimension::Phase ) const;
+		     Signal::Dimension abscissa = Signal::Phase ) const;
 
     void get_amps (float* data, int jpol, int jchan, int jbin) const;
 
@@ -151,13 +151,16 @@ namespace Pulsar {
     //! Set the weight of each profile to its snr squared
     void snr_weight ();
     
+    //! Set the weight of each profile to one (1)
+    void uniform_weight ();
+
     //! Returns a pointer to the Profile given by the specified indeces
     Profile* get_Profile (int ipol, int ichan);
 
     const Profile* get_Profile (int ipol, int ichan) const;
 
     //! Returns a pointer to the vector of Profile objects for poln
-    vector<Profile *>& operator[] (Poln::Measure poln);
+    vector<Profile *>& operator[] (Signal::Component poln);
 
     //! Get the MJD at the start of the integration (convenience interface)
     MJD get_start_time () const;
@@ -218,14 +221,14 @@ namespace Pulsar {
     virtual void set_folding_period (double seconds) = 0;
 
     //! Get the feed configuration of the receiver
-    virtual Feed::Type get_feed_type () const = 0;
+    virtual Signal::Basis get_basis () const = 0;
     //! Set the feed configuration of the receiver
-    virtual void set_feed_type (Feed::Type _type) = 0;
+    virtual void set_basis (Signal::Basis _type) = 0;
 
     //! Get the polarimetric state of the profiles
-    virtual Poln::State get_poln_state () const = 0;
+    virtual Signal::State get_state () const = 0;
     //! Set the polarimetric state of the profiles
-    virtual void set_poln_state (Poln::State _state) = 0;
+    virtual void set_state (Signal::State _state) = 0;
 
 
   protected:

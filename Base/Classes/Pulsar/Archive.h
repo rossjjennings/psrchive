@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Archive.h,v $
-   $Revision: 1.37 $
-   $Date: 2002/08/19 16:51:53 $
+   $Revision: 1.38 $
+   $Date: 2002/10/10 08:00:58 $
    $Author: straten $ */
 
 /*! \mainpage 
@@ -126,7 +126,7 @@
 #include "polyco.h"
 #include "psrephem.h"
 
-#include "ArchiveTypes.h"
+#include "Types.h"
 #include "Reference.h"
 
 namespace Tempo {
@@ -257,7 +257,7 @@ namespace Pulsar {
     virtual void parallactify();
 
     //! Convert polarimetric data to the specified state
-    virtual void convert_state (Poln::State state);
+    virtual void convert_state (Signal::State state);
 
     //! Transform Stokes I,Q,U,V into the polarimetric invariant interval
     virtual void invint ();
@@ -276,6 +276,9 @@ namespace Pulsar {
 
     //! Set the weight of each profile to its snr squared
     virtual void snr_weight ();
+
+    //! Set the weight of each profile to one (1)
+    virtual void uniform_weight ();
 
     // //////////////////////////////////////////////////////////////////
     //
@@ -308,9 +311,9 @@ namespace Pulsar {
 
     //! Returns a block of amplitudes ordered according to the specified axis
     void get_amps (vector<float>& amps,
-		   Dimension::Axis x1 = Dimension::Phase,
-		   Dimension::Axis x2 = Dimension::Frequency,
-		   Dimension::Axis x3 = Dimension::Poln) const;
+		   Signal::Dimension x1 = Signal::Phase,
+		   Signal::Dimension x2 = Signal::Frequency,
+		   Signal::Dimension x3 = Signal::Polarization) const;
 
     //! Find the transitions between high and low states in total intensity
     void find_transitions (int& hi2lo, int& lo2hi, int& buffer) const;
@@ -356,14 +359,14 @@ namespace Pulsar {
     virtual void set_telescope_code (char telescope_code) = 0;
 
     //! Get the feed configuration of the receiver
-    virtual Feed::Type get_feed_type () const = 0;
+    virtual Signal::Basis get_basis () const = 0;
     //! Set the feed configuration of the receiver
-    virtual void set_feed_type (Feed::Type type) = 0;
+    virtual void set_basis (Signal::Basis type) = 0;
 
     //! Get the observation type (psr, cal)
-    virtual Observation::Type get_observation_type () const = 0;
+    virtual Signal::Source get_observation_type () const = 0;
     //! Set the observation type (psr, cal)
-    virtual void set_observation_type (Observation::Type type) = 0;
+    virtual void set_observation_type (Signal::Source type) = 0;
 
     //! Get the source name
     virtual string get_source () const = 0;
@@ -402,9 +405,9 @@ namespace Pulsar {
     virtual void set_centre_frequency (double cf) = 0;
 
     //! Get the state of the profiles
-    virtual Poln::State get_poln_state () const = 0;
+    virtual Signal::State get_state () const = 0;
     //! Set the state of the profiles
-    virtual void set_poln_state (Poln::State state) = 0;
+    virtual void set_state (Signal::State state) = 0;
 
     //! Get the dispersion measure (in \f${\rm pc cm}^{-3}\f$)
     virtual double get_dispersion_measure () const = 0;

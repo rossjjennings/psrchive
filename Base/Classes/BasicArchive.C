@@ -4,9 +4,9 @@
 
 void Pulsar::BasicArchive::init ()
 {
-  feedtype = Feed::invalid;
-  polstate = Poln::invalid;
-  obstype = Observation::Unknown;
+  feedtype = Signal::Linear;
+  polstate = Signal::Intensity;
+  obstype = Signal::Unknown;
 
   telcode = '\0';
     

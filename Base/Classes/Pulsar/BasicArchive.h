@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/BasicArchive.h,v $
-   $Revision: 1.13 $
-   $Date: 2002/08/19 10:11:57 $
+   $Revision: 1.14 $
+   $Date: 2002/10/10 08:00:58 $
    $Author: straten $ */
 
 #include "Archive.h"
@@ -36,12 +36,12 @@ namespace Pulsar {
     MJD         endmjd;
 
     //! The type of feed used
-    Feed::Type feedtype;
+    Signal::Basis feedtype;
 
     //! The polarisation state of the data (XXYY, IQUV, etc.)
-    Poln::State polstate;
+    Signal::State polstate;
 
-    Observation::Type obstype;
+    Signal::Source obstype;
 
     //! The tempo ID character of the telescope used
     char        telcode;
@@ -116,7 +116,7 @@ namespace Pulsar {
       }
 
     //! Return the type of observation (psr, cal, etc.)
-    Observation::Type get_observation_type () const
+    Signal::Source get_observation_type () const
       {
 	return obstype;
       }
@@ -145,7 +145,7 @@ namespace Pulsar {
       }
 
     //! Set the observation type (psr, cal etc.)
-    void set_observation_type (Observation::Type ob_type)
+    void set_observation_type (Signal::Source ob_type)
       {
 	obstype = ob_type;
       }
@@ -204,25 +204,25 @@ namespace Pulsar {
     void set_nbin (int numbins);
     
     //! Return the type of feed used
-    Feed::Type get_feed_type () const
+    Signal::Basis get_basis () const
       {
 	return feedtype;
       }
 
     //! Set the type of feed used 
-    void set_feed_type (Feed::Type feed)
+    void set_basis (Signal::Basis feed)
       {
 	feedtype = feed;
       }
     
     //! Return the polarisation state of the data
-    Poln::State get_poln_state () const
+    Signal::State get_state () const
       {
 	return polstate;
       }
     
     //! Set the polarisation state of the data
-    void set_poln_state (Poln::State state)
+    void set_state (Signal::State state)
       {
 	polstate = state;
       }

@@ -14,25 +14,25 @@
   \param ibin the phase bin
 
   \pre The Integration must contain full polarimetric information.  That is,
-  get_poln_state() must return either Poln::Stokes or Poln::Coherence.  An
+  get_state() must return either Signal::Stokes or Signal::Coherence.  An
   exception is thrown otherwise.
 */
 void Pulsar::Integration::get_Stokes ( Stokes& S, int ichan, int ibin ) const
 {
-  if (get_poln_state() == Poln::Stokes) {
+  if (get_state() == Signal::Stokes) {
     for (int ipol=0; ipol<4; ++ipol)
       S[ipol] = profiles[ipol][ichan]->get_amps()[ibin];
     return;
   }
 
-  else if (get_poln_state() == Poln::Coherence) {
+  else if (get_state() == Signal::Coherence) {
 
     float PP   = profiles[0][ichan]->get_amps()[ibin];
     float QQ   = profiles[1][ichan]->get_amps()[ibin];
     float RePQ = profiles[2][ichan]->get_amps()[ibin];
     float ImPQ = profiles[3][ichan]->get_amps()[ibin];
 
-    if (get_feed_type() == Feed::Circular) {
+    if (get_basis() == Signal::Circular) {
       S.i = PP + QQ;
       S.v = PP - QQ;
       S.q = 2.0 * RePQ;
@@ -69,19 +69,19 @@ void Pulsar::Integration::get_Stokes ( Stokes& S, int ichan, int ibin ) const
 
 */
 void Pulsar::Integration::get_Stokes (vector<Stokes>& S, int iother,
-				      Dimension::Axis abscissa) const
+				      Signal::Dimension abscissa) const
 {
   int ndim = 0;
   int ndim_other = 0;
 
-  if (!(get_poln_state()==Poln::Stokes || get_poln_state()==Poln::Coherence))
+  if (!(get_state()==Signal::Stokes || get_state()==Signal::Coherence))
     throw Error (InvalidPolnState, "Integration::get_Stokes");
 
-  if (abscissa == Dimension::Frequency) {
+  if (abscissa == Signal::Frequency) {
     ndim = get_nchan();
     ndim_other = get_nbin();
   }
-  else if (abscissa == Dimension::Phase) {
+  else if (abscissa == Signal::Phase) {
     ndim = get_nbin();
     ndim_other = get_nchan();
   }
@@ -95,14 +95,14 @@ void Pulsar::Integration::get_Stokes (vector<Stokes>& S, int iother,
 
   int ibin=0, ichan=0;
 
-  if (abscissa == Dimension::Frequency)
+  if (abscissa == Signal::Frequency)
     ibin = iother;    // all Stokes values come from the same bin
-  else // dim == Dimension::Phase
+  else // dim == Phase
     ichan = iother;   // all Stokes values come from the same chan
 
   for (int idim=0; idim<ndim; idim++) {
 
-    if (abscissa == Dimension::Frequency)
+    if (abscissa == Signal::Frequency)
       ichan = idim;
     else
       ibin = idim;

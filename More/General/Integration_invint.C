@@ -19,7 +19,7 @@ bool Pulsar::Integration::invint_square = false;
 /*! 
   Forms the Stokes polarimetric invariant interval,
   \f$\det{P}=I^2-Q^2-U^2-V^2\f$, for every bin of each chan so that,
-  upon completion, npol == 1 and state == Poln::Invariant.
+  upon completion, npol == 1 and state == Signal::Invariant.
 
   If invint_square is true, this function calculates
   \f$\det\rho=I^2-Q^2-U^2-V^2\f$, otherwise \f$\sqrt{\det\rho}\f$ is
@@ -46,7 +46,7 @@ void Pulsar::Integration::invint ()
     }
 
     // prepare to reset Stokes I to the Invariant Interval
-    Profile* Sinv = (*this)[Poln::Si][ichan];
+    Profile* Sinv = (*this)[Signal::Si][ichan];
 
     // set the values
     Sinv->set_amps (invariant.begin());
@@ -54,14 +54,14 @@ void Pulsar::Integration::invint ()
     *(Sinv) += (-Sinv->mean (Sinv->find_min_phase()));
 
     if (invint_square)
-      Sinv->set_state (Poln::DetRho);
+      Sinv->set_state (Signal::DetRho);
     else {
-      Sinv->set_state (Poln::SInv);
+      Sinv->set_state (Signal::Inv);
       Sinv->square_root();
     }
     
   } // for each channel
 
   resize (1);
-  set_poln_state (Poln::Invariant);
+  set_state (Signal::Invariant);
 }

@@ -19,7 +19,7 @@ Pulsar::Integration* Pulsar::Integration::total () const
 		 "npol=%d nchan=%d", get_npol(), get_nchan());
 
   int npol_keep = 1;
-  if (get_poln_state() == Poln::Coherence || get_poln_state() == Poln::PPQQ)
+  if (get_state() == Signal::Coherence || get_state() == Signal::PPQQ)
     npol_keep = 2;
 
   Integration* copy = 0;

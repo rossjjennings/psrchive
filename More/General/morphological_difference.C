@@ -26,7 +26,7 @@ const Pulsar::Profile& Pulsar::Profile::average (const Profile& profile,
 
     // check if the addition will result in some undefined state
     if (state != profile.get_state())
-      state = Poln::None;
+      state = Signal::None;
     
     float* amps1 = amps;
     const float* amps2 = profile.get_amps();

@@ -63,13 +63,13 @@ void Pulsar::Archive::copy (const Archive& archive)
 
   // set virtual attributes
   set_telescope_code( archive.get_telescope_code() );
-  set_feed_type( archive.get_feed_type() );
+  set_basis( archive.get_basis() );
   set_observation_type( archive.get_observation_type() );
   set_source( archive.get_source() );
 
   set_bandwidth( archive.get_bandwidth() );
   set_centre_frequency( archive.get_centre_frequency() );
-  set_poln_state( archive.get_poln_state() );
+  set_state( archive.get_state() );
   set_dispersion_measure( archive.get_dispersion_measure() );
 
   set_feedangle_corrected( archive.get_feedangle_corrected() );
@@ -130,8 +130,8 @@ void Pulsar::Archive::init_Integration (Integration* subint)
   subint -> set_centre_frequency ( get_centre_frequency() );
   subint -> set_bandwidth ( get_bandwidth() );
   subint -> set_dispersion_measure ( get_dispersion_measure() );
-  subint -> set_feed_type ( get_feed_type() );
-  subint -> set_poln_state ( get_poln_state() );
+  subint -> set_basis ( get_basis() );
+  subint -> set_state ( get_state() );
 }
 
 /*!
@@ -177,13 +177,13 @@ void Pulsar::Archive::pscrunch()
     subints[isub] -> pscrunch ();
 
   set_npol ( subints[0] -> get_npol() );
-  set_poln_state ( subints[0] -> get_poln_state() );
+  set_state ( subints[0] -> get_state() );
 }
 
 /*!
   Simply calls Integration::convert_state on each element of subints
 */
-void Pulsar::Archive::convert_state (Poln::State state)
+void Pulsar::Archive::convert_state (Signal::State state)
 {
   if (subints.size() == 0)
     return;
@@ -192,7 +192,7 @@ void Pulsar::Archive::convert_state (Poln::State state)
     subints[isub] -> convert_state (state);
 
   set_npol ( subints[0] -> get_npol() );
-  set_poln_state ( subints[0] -> get_poln_state() );
+  set_state ( subints[0] -> get_state() );
 }
 
 /*!
@@ -202,7 +202,7 @@ void Pulsar::Archive::convert_state (Poln::State state)
 void Pulsar::Archive::centre ()
 {
   // this function doesn't work for things without polycos
-  if (get_observation_type () != Observation::Pulsar)
+  if (get_observation_type () != Signal::Pulsar)
     return;
 
   Phase half_turn (0.5);
@@ -384,3 +384,10 @@ Pulsar::Archive::telescope_coordinates
     throw Error (FailedCall, "Archive::telescope_coordinates",
 		 "tempo code=%c", get_telescope_code ());
 }
+
+void Pulsar::Archive::uniform_weight ()
+{
+  for (int isub=0; isub < get_nsubint(); isub++)
+    subints[isub] -> uniform_weight ();
+}
+

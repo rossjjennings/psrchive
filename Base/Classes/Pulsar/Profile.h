@@ -1,15 +1,15 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Profile.h,v $
-   $Revision: 1.20 $
-   $Date: 2002/08/19 16:37:15 $
+   $Revision: 1.21 $
+   $Date: 2002/10/10 08:00:58 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Profile_h
 #define __Pulsar_Profile_h
 
 #include "toa.h"
-#include "ArchiveTypes.h"
+#include "Types.h"
 
 namespace Pulsar {
 
@@ -41,6 +41,9 @@ namespace Pulsar {
 
     //! copy constructor
     Profile (const Profile& profile) { init(); operator = (profile); }
+
+    //! copy constructor
+    Profile (const Profile* profile) { init(); operator = (*profile); }
 
     //! destructor destroys the data area
     virtual ~Profile ();
@@ -113,8 +116,14 @@ namespace Pulsar {
     //! Returns the r.m.s. of the specified region
     double sigma (float phase, float duty_cycle = default_duty_cycle) const;
     
-    //! returns the signal to noise ratio of the profile
+    //! Returns the signal to noise ratio of the profile
     float snr () const;
+
+    //! Returns the signal to noise ratio by comparison with a standard
+    float snr (const Profile& standard) const;
+
+    //! Returns the signal to noise ratio by comparison with a standard
+    float snr (const Profile* standard) const { return snr (*standard); }
 
     //! rotates the profile to remove dispersion delay
     void dedisperse (double dm, double ref_freq, double pfold);
@@ -192,9 +201,9 @@ namespace Pulsar {
     virtual void set_weight (float wt) { weight = wt; }
 
     //! get the state of the polarization measurement
-    Poln::Measure get_state () const { return state; }
+    Signal::Component get_state () const { return state; }
     //! set the state of the polarization measurement
-    virtual void set_state (Poln::Measure _state) { state = _state; }
+    virtual void set_state (Signal::Component _state) { state = _state; }
 
     //! convolves two profiles (using fft methods)
     void fft_convolve(Profile* p1, Profile* p2); 
@@ -241,7 +250,7 @@ namespace Pulsar {
     float weight;
 
     //! polarization measure of amplitude data
-    Poln::Measure state;
+    Signal::Component state;
 
     //! interface to model_profile used by Profile::shift
     void fftconv (Profile& std, double& shift, float& eshift, 

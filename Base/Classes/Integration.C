@@ -83,8 +83,8 @@ void Pulsar::Integration::copy (const Integration& subint,
   set_bandwidth ( subint.get_bandwidth() );
   set_dispersion_measure ( subint.get_dispersion_measure() );
   set_folding_period ( subint.get_folding_period() );
-  set_feed_type ( subint.get_feed_type() );
-  set_poln_state ( subint.get_poln_state() );
+  set_basis ( subint.get_basis() );
+  set_state ( subint.get_state() );
 }
 
 Pulsar::Profile* Pulsar::Integration::get_Profile (int ipol, int ichan)
@@ -185,9 +185,10 @@ void Pulsar::Integration::set_weight (int ichan, float weight)
     profiles[ipol][ichan]->set_weight (weight);
 }
 
-vector<Pulsar::Profile*>& Pulsar::Integration::operator[] (Poln::Measure poln)
+vector<Pulsar::Profile*>& 
+Pulsar::Integration::operator[] (Signal::Component poln)
 {
-  int index = Poln::get_ipol (get_poln_state(), poln);
+  int index = Signal::get_ipol (get_state(), poln);
 
   if (index < 0)
     throw Error (InvalidPolnState, "Integration::operator[]");
@@ -236,10 +237,10 @@ void Pulsar::Integration::bscrunch (int nscrunch)
 void Pulsar::Integration::pscrunch()
 {
   if (verbose)
-    cerr << "Integration::pscrunch " << Poln::state_string(get_poln_state())
+    cerr << "Integration::pscrunch " << Signal::state_string(get_state())
 	 << endl;
 
-  if (get_poln_state() == Poln::Coherence || get_poln_state() == Poln::PPQQ) {
+  if (get_state() == Signal::Coherence || get_state() == Signal::PPQQ) {
 
     if (get_npol() < 2)
       throw Error (InvalidState, "Integration::pscrunch", "npol < 2");
@@ -247,11 +248,11 @@ void Pulsar::Integration::pscrunch()
     for (int ichan=0; ichan < get_nchan(); ichan++)
       *(profiles[0][ichan]) += *(profiles[1][ichan]);
 
-    set_poln_state (Poln::Intensity);
+    set_state (Signal::Intensity);
   }
 
-  else if (get_poln_state() == Poln::Stokes)
-    set_poln_state (Poln::Intensity);
+  else if (get_state() == Signal::Stokes)
+    set_state (Signal::Intensity);
 
   resize (1);
 } 
@@ -284,4 +285,11 @@ MJD Pulsar::Integration::get_start_time () const
 MJD Pulsar::Integration::get_end_time () const
 { 
   return get_mid_time() + .5 * get_duration();
+}
+
+void Pulsar::Integration::uniform_weight ()
+{
+  for (int ipol=0; ipol < get_npol(); ipol++)
+    for (int ichan=0; ichan < get_nchan(); ichan++)
+      profiles[ipol][ichan] -> set_weight (1.0);
 }

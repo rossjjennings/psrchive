@@ -6,8 +6,8 @@ void Pulsar::BasicIntegration::init ()
   npol = nchan = nbin = 0;
   duration = centrefreq = bw = pfold = dm = 0.0;
 
-  state = Poln::invalid;
-  type = Feed::invalid;
+  state = Signal::Intensity;
+  type = Signal::Linear;
 }
 
 Pulsar::BasicIntegration::BasicIntegration (const Integration& subint,

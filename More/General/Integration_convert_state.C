@@ -9,46 +9,46 @@
 /*!
 
 */
-void Pulsar::Integration::convert_state (Poln::State state)
+void Pulsar::Integration::convert_state (Signal::State state)
 { try {
 
-  if (get_poln_state() == state)
+  if (get_state() == state)
     return;
 
   //////////////////////////////////////////////////////////////////////////
   // convert from Coherence products to Stokes parameters
-  if (get_poln_state() == Poln::Coherence && state == Poln::Stokes) {
+  if (get_state() == Signal::Coherence && state == Signal::Stokes) {
 
     // take the sum and difference of PP and QQ
     intensity_mix (1, 2.0);
 
-    if (get_feed_type() == Feed::Circular)
+    if (get_basis() == Signal::Circular)
       // rotate Stokes VQU into QUV
       poln_cycle (1);
 
-    set_poln_state ( state );
+    set_state ( state );
     return;
   }
 
   //////////////////////////////////////////////////////////////////////////
   // convert from Stokes parameters to Coherence products
-  if (get_poln_state() == Poln::Stokes && state == Poln::Coherence) {
+  if (get_state() == Signal::Stokes && state == Signal::Coherence) {
 
-    if (get_feed_type() == Feed::Circular)
+    if (get_basis() == Signal::Circular)
       // rotate Stokes QUV into VQU
       poln_cycle (-1);
 
     // take the sum and difference of the total intensity and Q or V
     intensity_mix (1, 1.0);
 
-    set_poln_state ( state );
+    set_state ( state );
     return;
   }
 
-  if (state == Poln::Invariant) {
+  if (state == Signal::Invariant) {
     // form the invariant interval
   }
-  else if (state == Poln::Intensity) {
+  else if (state == Signal::Intensity) {
     // pscrunch
   }
 
@@ -59,8 +59,8 @@ catch (Error& error) {
   
  throw Error (InvalidPolnState, "Integration::convert_state",
 	      "cannot convert from %s to %s", 
-	      Poln::state_string (get_poln_state()),
-	      Poln::state_string (state));
+	      Signal::state_string (get_state()),
+	      Signal::state_string (state));
 }
 
 /*! 

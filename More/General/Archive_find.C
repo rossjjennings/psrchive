@@ -15,24 +15,13 @@
 */
 Pulsar::Archive* Pulsar::Archive::total () const
 {
-  if (get_nsubint()<1 || get_npol()<1 || get_nchan()<1)
-    throw Error (InvalidState, "Archive::total", "nsub=%d npol=%d nchan=%d",
-		 get_nsubint(), get_npol(), get_nchan());
+  Reference::To<Archive> copy = clone ();
   
-  Archive* copy = 0;
-
-  try {
-    copy = clone ();
-    copy->fscrunch (0, false);
-    copy->tscrunch ();
-    copy->pscrunch ();
-  }
-  catch (Error& err) {
-    if (copy) delete copy;
-    throw err += "Archive::total";
-  }
-  
-  return copy;
+  copy->fscrunch (0, false);
+  copy->tscrunch ();
+  copy->pscrunch ();
+    
+  return copy.release();
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -48,17 +37,8 @@ Pulsar::Archive* Pulsar::Archive::total () const
 void Pulsar::Archive::find_transitions (int& hi2lo, int& lo2hi, int& buf)
   const
 {
-  Archive* copy = 0;
-
-  try {
-    copy = total ();
-    copy->get_Profile(0,0,0)->find_transitions (hi2lo, lo2hi, buf);
-  }
-  catch (Error& err) {
-    if (copy) delete copy;
-    throw err += "Archive::find_transitions";
-  }
-  delete copy;
+  Reference::To<Archive> copy = total ();
+  copy->get_Profile(0,0,0)->find_transitions (hi2lo, lo2hi, buf);
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -73,17 +53,8 @@ void Pulsar::Archive::find_transitions (int& hi2lo, int& lo2hi, int& buf)
 */
 void Pulsar::Archive::find_peak_edges (int& rise, int& fall) const
 {
-  Archive* copy = 0;
-
-  try {
-    copy = total ();
-    copy->get_Profile(0,0,0)->find_peak_edges (rise, fall);
-  }
-  catch (Error& err) {
-    if (copy) delete copy;
-    throw err += "Archive::find_peak_edges";
-  }
-  delete copy;
+  Reference::To<Archive> copy = total ();
+  copy->get_Profile(0,0,0)->find_peak_edges (rise, fall);
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -98,20 +69,8 @@ void Pulsar::Archive::find_peak_edges (int& rise, int& fall) const
 */
 float Pulsar::Archive::find_min_phase () const
 {
-  Archive* copy = 0;
-  float min_phase = -1.0;
-
-  try {
-    copy = total ();
-    min_phase = copy->get_Profile(0,0,0)->find_min_phase ();
-  }
-  catch (Error& err) {
-    if (copy) delete copy;
-    throw err += "Archive::find_min_phase";
-  }
-  delete copy;
-
-  return min_phase;
+  Reference::To<Archive> copy = total ();
+  return copy->get_Profile(0,0,0)->find_min_phase ();
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -126,18 +85,6 @@ float Pulsar::Archive::find_min_phase () const
 */
 float Pulsar::Archive::find_max_phase () const
 {
-  Archive* copy = 0;
-  float max_phase = -1.0;
-
-  try {
-    copy = total ();
-    max_phase = copy->get_Profile(0,0,0)->find_max_phase ();
-  }
-  catch (Error& err) {
-    if (copy) delete copy;
-    throw err += "Archive::find_max_phase";
-  }
-  delete copy;
-
-  return max_phase;
+  Reference::To<Archive> copy = total ();
+  return copy->get_Profile(0,0,0)->find_max_phase ();
 }

@@ -39,7 +39,7 @@ void nbinify (int& istart, int& iend, int nbin)
 void Pulsar::Profile::init()
 {
   nbin   = 0;
-  state  = Poln::None;
+  state  = Signal::None;
   weight = 0.0;
   centrefreq = -1.0;
   amps = NULL;
@@ -624,6 +624,21 @@ float Pulsar::Profile::snr() const
   power /= sqrt (fall-rise);
 
   return power/min_rms;
+}
+
+
+float Pulsar::Profile::snr (const Profile& std) const
+{
+  float ephase, snrfft, esnrfft;
+
+  try {
+    shift (std, ephase, snrfft, esnrfft);
+  }
+  catch (...) {
+    return 0.0;
+  }
+
+  return snrfft;
 }
 
 #ifdef sun

@@ -51,7 +51,7 @@ void Pulsar::Archive::append (const Archive* arch)
   append (arch->subints);
 
   // if observation is not a pulsar, no further checks required
-  if (get_observation_type() != Observation::Pulsar) {
+  if (get_observation_type() != Signal::Pulsar) {
     // may need to check cal phase, if available
     return;
   }
@@ -93,7 +93,7 @@ void Pulsar::Archive::append (const vector<Integration*>& more_subints)
 */
 bool Pulsar::Archive::mixable (const Archive* arch, string& reason)
 {
-  if (get_poln_state() != arch->get_poln_state()) {
+  if (get_state() != arch->get_state()) {
     reason = "Archives have different polarimetric states";
     return false;
   }
@@ -139,7 +139,7 @@ bool Pulsar::Archive::match_opposite_sideband = false;
 */
 bool Pulsar::Archive::match (const Archive* arch, string& reason)
 {
-  if (get_feed_type() != arch->get_feed_type()) {
+  if (get_basis() != arch->get_basis()) {
     reason = "Archives have different feed types";
     return false;
   }

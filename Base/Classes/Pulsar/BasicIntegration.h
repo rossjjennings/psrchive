@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/BasicIntegration.h,v $
-   $Revision: 1.2 $
-   $Date: 2002/04/22 06:59:07 $
-   $Author: ahotan $ */
+   $Revision: 1.3 $
+   $Date: 2002/10/10 08:00:58 $
+   $Author: straten $ */
 
 #ifndef __BasicIntegration_h
 #define __BasicIntegration_h
@@ -71,14 +71,14 @@ namespace Pulsar {
     virtual void set_folding_period (double seconds) { pfold = seconds; }
 
     //! Get the feed configuration of the receiver
-    virtual Feed::Type get_feed_type () const { return type; }
+    virtual Signal::Basis get_basis () const { return type; }
     //! Set the feed configuration of the receiver
-    virtual void set_feed_type (Feed::Type _type) { type = _type; }
+    virtual void set_basis (Signal::Basis _type) { type = _type; }
 
     //! Get the polarimetric state of the profiles
-    virtual Poln::State get_poln_state () const { return state; }
+    virtual Signal::State get_state () const { return state; }
     //! Set the polarimetric state of the profiles
-    virtual void set_poln_state (Poln::State _state) { state = _state; }
+    virtual void set_state (Signal::State _state) { state = _state; }
 
 
   protected:
@@ -123,10 +123,10 @@ namespace Pulsar {
     double dm;
 
     //! polarimetric state of profiles
-    Poln::State state;
+    Signal::State state;
 
     //! receiver feed type
-    Feed::Type type;
+    Signal::Basis type;
 
     //! initialize all attributes to null
     void init();

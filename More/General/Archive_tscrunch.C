@@ -100,7 +100,7 @@ void Pulsar::Archive::tscrunch (unsigned nscrunch)
 
     mjd /= double (nscrunch);
 
-    if (get_observation_type() == Observation::Pulsar) {
+    if (get_observation_type() == Signal::Pulsar) {
 
       // get the time of the first subint to be integrated into isub
       MJD firstmjd = subints[isub * nscrunch] -> get_mid_time();
