@@ -55,6 +55,18 @@ void Pulsar::FITSArchive::load_PolnCalibratorExtension (fitsfile* fptr)
   if (status == 0)
     pce->set_nchan(nch_fdpr);
 
+  // Get EPOCH
+  char* epoch = new char[80];
+  fits_read_key (fptr, TSTRING, "EPOCH", epoch, comment, &status);
+
+  if (status == 0) {
+    MJD mjd (epoch);
+    pce->set_epoch (mjd);
+  }
+
+  delete [] epoch;
+  status = 0;
+
   long dimension = nch_fdpr * ncpar;  
   auto_ptr<float> data ( new float[dimension] );
   
