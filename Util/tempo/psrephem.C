@@ -326,7 +326,7 @@ double psrephem::dm() const
   if (!tempo11)
     return -1;
 
-  if (parmStatus[EPH_DM]==1)
+  if (parmStatus[EPH_DM])
     return value_double[EPH_DM];
 
   if (verbose)
