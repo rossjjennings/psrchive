@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/LevenbergMarquardt.h,v $
-   $Revision: 1.7 $
-   $Date: 2005/03/22 06:13:54 $
+   $Revision: 1.8 $
+   $Date: 2005/04/06 20:21:14 $
    $Author: straten $ */
 
 #ifndef __Levenberg_Marquardt_h
@@ -500,7 +500,7 @@ float MEAL::LevenbergMarquardt<Grad>::iter
 // MEAL::LevenbergMarquardt<Grad>::result
 // /////////////////////////////////////////////////////////////////////////
 
-/* After a call to init or iter, best_alpha contains the last
+/*! After a call to init or iter, best_alpha contains the last
    curvature matrix computed.  A call is made to solve_delta with
    lamda=0; member "alpha" will then contain the covariance matrix.
 
@@ -554,7 +554,7 @@ MEAL::LevenbergMarquardt<Grad>::result (Mt& model,
 // MEAL::LevenbergMarquardt<Grad>::chisq
 // /////////////////////////////////////////////////////////////////////////
 
-/* Given a set of abscissa, ordinate, ordinate error, and a model,
+/*! Given a set of abscissa, ordinate, ordinate error, and a model,
    compute the: - normalized squared difference "chi-squared" -
    chi-squared gradient "beta" - Hessian matrix "alpha"
 
