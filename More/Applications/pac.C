@@ -98,7 +98,7 @@ int main (int argc, char *argv[]) {
       Pulsar::Archive::set_verbosity(1);
       break;
     case 'i':
-      cout << "$Id: pac.C,v 1.28 2003/09/30 08:33:18 ahotan Exp $" << endl;
+      cout << "$Id: pac.C,v 1.29 2003/10/25 05:03:20 ahotan Exp $" << endl;
       return 0;
     case 'p':
       cals_are_here = optarg;
@@ -304,6 +304,8 @@ int main (int argc, char *argv[]) {
 
 	cout << "Flux calibration complete" << endl;
         arch->set_flux_calibrated();
+
+	cout << "Mean Tsys = " << fcal_engine->meanTsys() << endl;
       }
  
       int index = archives[i].find_first_of(".", 0);
