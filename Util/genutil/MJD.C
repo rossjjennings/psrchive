@@ -16,7 +16,7 @@
 
 int MJD::verbose = 0;
 
-RCSID_CXX (MJD,"$Id: MJD.C,v 1.38 1999/11/01 06:33:39 straten Exp $");
+RCSID_CXX (MJD,"$Revision: 1.39 $");
 
 int ss2hhmmss (int* hours, int* min, int* sec, int seconds)
 {
