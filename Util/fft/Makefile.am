@@ -25,7 +25,8 @@ test_interpolate_LDADD		= $(LDADD) ../units/libunits.la
 # Dependencies should never be changed
 #
 
-INCLUDES = -I$(top_srcdir) -I../units -I../genutil
+INCLUDES = -I$(top_srcdir) -I$(top_srcdir)/utils/units \
+	-I$(top_srcdir)/utils/genutil
 
 LDADD = libpsrfft.la @FFT_LIBS@ 
 

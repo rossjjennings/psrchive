@@ -54,7 +54,8 @@ AM_CPPFLAGS = -D_REENTRANT=1
 # Dependencies should never be changed
 #
 
-INCLUDES = -I$(top_srcdir) -I../units -I../genutil
+INCLUDES = -I$(top_srcdir) -I$(top_srcdir)/utils/units \
+	-I$(top_srcdir)/utils/genutil
 
 LDADD = libgenutilpp.la ../genutil/libgenutil.la ../units/libunits.la
 

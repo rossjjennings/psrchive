@@ -221,10 +221,13 @@ export:
 #
 
 INCLUDES = -I$(top_srcdir)/utils/include -I$(top_srcdir)/astro/include \
-        -ICalibration -IExtension -Itimer -Iepn -Ipsrfits @PGPLOT_CFLAGS@
+        -I$(top_srcdir)/psrchive/Calibration \
+	-I$(top_srcdir)/psrchive/Extension -I$(top_srcdir)/psrchive/timer \
+	-I$(top_srcdir)/psrchive/epn -I$(top_srcdir)/psrchive/psrfits \
+	@PGPLOT_CFLAGS@
 
-LDADD = libpsrchive.la $(top_srcdir)/astro/libpsrastro.la \
-        $(top_srcdir)/utils/libpsrutils.la \
+LDADD = libpsrchive.la $(top_builddir)/astro/libpsrastro.la \
+        $(top_builddir)/utils/libpsrutils.la \
 	@FFT_LIBS@ @CFITSIO_LIBS@ @SLA_LIBS@
 
 include $(top_srcdir)/config/Makefile.local

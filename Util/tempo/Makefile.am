@@ -41,10 +41,12 @@ endif
 # Assembly of include files
 #
 
-keyinfo.com: keys.dat ./keys2fort
+keyinfo.com: $(srcdir)/keys.dat ./keys2fort
+	cp $(srcdir)/keys.dat .
 	./keys2fort
 
-ephio.h: keys.dat ./keys2c
+ephio.h: $(srcdir)/keys.dat ./keys2c
+	cp $(srcdir)/keys.dat .
 	./keys2c
 
 # Depend on constructed include files
@@ -62,5 +64,5 @@ keys2c_LDADD =
 
 INCLUDES = -I$(top_srcdir)/utils/include @CFITSIO_CFLAGS@ @MPI_CFLAGS@
 
-LDADD = libpsrephem.la $(top_srcdir)/utils/libpsrutils.la @FLIBS@
+LDADD = libpsrephem.la $(top_builddir)/utils/libpsrutils.la @FLIBS@
 

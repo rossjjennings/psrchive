@@ -23,7 +23,6 @@ libtimer_la_SOURCES = BasebandArchive.C TimerArchive.C TimerArchive_Receiver.C \
 #
 
 INCLUDES = -I$(top_srcdir)/utils/include -I$(top_srcdir)/astro/include \
-        -I.. -I../Calibration -I../Extension
-
-## LDADD = $(top_srcdir)/utils/libpsrutils.la
+        -I$(top_srcdir)/psrchive -I$(top_srcdir)/psrchive/Calibration \
+	-I$(top_srcdir)/psrchive/Extension
 

@@ -10,5 +10,5 @@ libfitsutil_la_SOURCES = FITSError.C fitsutil.C
 # Dependencies should never be changed
 #
 
-INCLUDES = -I../units @CFITSIO_CFLAGS@
+INCLUDES = -I$(top_srcdir)/utils/units @CFITSIO_CFLAGS@
 

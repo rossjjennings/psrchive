@@ -44,7 +44,6 @@ libExtension_la_SOURCES = \
 #
 
 INCLUDES = -I$(top_srcdir)/utils/include -I$(top_srcdir)/astro/include \
-	-I.. -I../Calibration
+	-I$(top_srcdir)/psrchive -I$(top_srcdir)/psrchive/Calibration
 
-##LDADD = libExtension.la $(top_srcdir)/utils/libpsrutils.la
 

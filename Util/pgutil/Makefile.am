@@ -16,7 +16,8 @@ disthist_SOURCES = disthist.C
 # Dependencies should never be changed
 #
 
-INCLUDES = -I$(top_srcdir) -I../units -I../genutil -I../genutil++ \
+INCLUDES = -I$(top_srcdir) -I$(top_srcdir)/utils/units \
+	-I$(top_srcdir)/utils/genutil -I$(top_srcdir)/utils/genutil++ \
 	@PGPLOT_CFLAGS@
 
 LDADD = libpgutil.la ../genutil++/libgenutilpp.la ../genutil/libgenutil.la \

@@ -68,5 +68,5 @@ test_ReceptionModel_LDADD	= $(LDADD) @SLA_LIBS@
 
 INCLUDES = -I$(top_srcdir)/utils/include @PGPLOT_CFLAGS@
 
-LDADD = libCalibration.la $(top_srcdir)/utils/libpsrutils.la
+LDADD = libCalibration.la $(top_builddir)/utils/libpsrutils.la
 
