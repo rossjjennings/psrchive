@@ -70,11 +70,25 @@ Pulsar::Profile* Pulsar::Profile::morphological_difference (const Profile& profi
     throw Error (InvalidRange, "Pulsar::Profile::morphological_difference",
 		 "incompatible number of phase bins");
 
-  Reference::To<Pulsar::Profile> temp1 = this->clone();
+  Reference::To<Pulsar::Profile> temp1 = clone();
   Reference::To<Pulsar::Profile> temp2 = profile.clone();
 
   float ephase, snrfft, esnrfft; 
-  double phase = temp1->shift (*temp2, ephase, snrfft, esnrfft);
+  double phase;
+  
+  try {
+     phase = temp1->shift (*temp2, ephase, snrfft, esnrfft);
+  }
+  catch (Error& error) {
+    cerr << "Profile::morphological_difference FFT shift failed." << endl;
+    cerr << "  Trying simple cross correlation..." << endl;
+
+    Reference::To<Pulsar::Profile> ptr = clone();
+    
+    *ptr -= ptr->mean(ptr->find_min_phase(0.15));
+    ptr->correlate(temp2);
+    phase = ptr->find_max_phase(0.15);
+  }
 
   temp1->rotate(phase);
 
