@@ -3,13 +3,10 @@
 #define MPI
 #include "polyco.h"
 
-int polynomial::mpiPack_size (MPI_Comm comm)
+int polynomial::mpiPack_size (MPI_Comm comm, int* size)
 {
   int total_size = 0;
   int temp_size = 0;
-
-fprintf (stderr, "Inside polynomial::mpiPack_size\n");
-fflush (stdout);
 
   MPI_Pack_size (9,  MPI_CHAR,  comm, &temp_size);  // psrname
   total_size += temp_size;
@@ -37,9 +34,11 @@ fflush (stdout);
   MPI_Pack_size (ncoef, MPI_DOUBLE, comm, &temp_size); // ncoef doubles
   total_size += temp_size;
 
-  total_size += reftime.mpiPack_size (comm);
+  reftime.mpiPack_size (comm, &temp_size);
+  total_size += temp_size;
 
-  return total_size;
+  *size = total_size;
+  return 0; // no error, not dynamic
 }
 
 int polynomial::mpiPack (void* outbuf, int outcount, int* position, 
@@ -93,21 +92,20 @@ int polynomial::mpiUnpack (void* inbuf, int insize, int* position,
 }
 
 
-int polyco::mpiPack_size (MPI_Comm comm)
+int polyco::mpiPack_size (MPI_Comm comm, int* size)
 {
   int total_size = 0;
   int temp_size = 0;
-
-fprintf (stderr, "Inside polyco::mpiPack_size\n");
-fflush (stdout);
 
   MPI_Pack_size (1,  MPI_INT,  comm, &temp_size);  // npollys
   total_size += temp_size;
 
   for (int i=0; i<npollys; i++) {
-    total_size += pollys[i]->mpiPack_size (comm);
+    pollys[i]->mpiPack_size (comm, &temp_size);
+    total_size += temp_size;
   }
-  return total_size;
+  *size = total_size;
+  return 1; // no error, dynamic
 }
 
 int polyco::mpiPack (void* outbuf, int outcount, int* position, 
