@@ -1,7 +1,7 @@
 //-*-C++-*-
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/tostring.h,v $
-   $Revision: 1.3 $
-   $Date: 2004/12/15 21:11:18 $
+   $Revision: 1.4 $
+   $Date: 2004/12/16 16:29:07 $
    $Author: straten $ */
 
 #ifndef __TOSTRING_H
@@ -28,10 +28,10 @@ std::string tostring (const T& input, unsigned precision)
 }
 
 template<class T>
-T fromstring (const std::string& ss)
+T fromstring (const std::string& input)
 {
   std::stringstream iost;
-  iost << ss;
+  iost << input;
 
   T retval;
   iost >> retval;
@@ -39,5 +39,19 @@ T fromstring (const std::string& ss)
   return retval;
 }
 
+// string class specializations
+std::string tostring (const std::string& input)
+{
+  return input;
+}
+
+template<>
+std::string fromstring<std::string> (const std::string& input)
+{
+  return input;
+}
+
+
 #endif
+
 
