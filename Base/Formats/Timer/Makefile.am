@@ -1,10 +1,12 @@
 LOCAL_ROOT = ../../..
-include ${LOCAL_ROOT}/headers/Makefile.standard
+include ${LOCAL_ROOT}/include/Makefile.standard
 
 INCLUDES = superarchive.h archive.h sub_int.h profile.h archhdr.h headers.h \
         mini++.h timer++.h timer.h mini.h band.h archdefs.h \
 	timer.inc band.inc mini.inc convert_endian.h misc.h \
-	poln_profile.h TimerArchive.h TimerIntegration.h BasebandArchive.h
+	poln_profile.h Pulsar/TimerArchive.h Pulsar/TimerIntegration.h \
+	Pulsar/BasebandArchive.h Pulsar/baseband_header.h
+
 
 # ############################################################################
 #
@@ -36,15 +38,17 @@ endif
 # ############################################################################
 
 DSO_NAME := Pulsar/TimerArchive.so
+SUBINCDIR := Pulsar
 
-DSO_SRCS := TimerArchive.C TimerArchive_load.C TimerArchive_unload.C \
+DSO_SRCS := BasebandArchive.C TimerArchive.C \
+	TimerArchive_load.C TimerArchive_unload.C \
 	TimerIntegration.C TimerIntegration_load.C TimerIntegration_unload.C \
-	TimerProfile_load.C TimerProfile_unload.C BasebandArchive.C \
+	TimerProfile_load.C TimerProfile_unload.C \
 	TimerAgent.C
 
 LIB_SRCS += $(DSO_SRCS)
 
-DSO_FLAGS := $(LDFLAGS) -larchive -ltimes -lgenutil $(LSLA)
+DSO_FLAGS := $(LDFLAGS) -lpsrchive_Extension -larchive $(LTIMES)
 
 # TimerIntegration_cal_levels.C
 
@@ -89,5 +93,5 @@ treduce.srcs = xtinit.C xtmac.C xtproc.C xtlplt.C xtinplot.C xtshdr.C    \
 endif
 endif
 
-include $(LOCAL_ROOT)/headers/Makefile.extended
+include $(LOCAL_ROOT)/include/Makefile.extended
 INCLUDES += pg_plot_gnu.h
