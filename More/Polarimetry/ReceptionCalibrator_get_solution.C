@@ -8,7 +8,7 @@ Pulsar::ReceptionCalibrator::get_solution (const string& archive_class,
   if (verbose) cerr << "Pulsar::ReceptionCalibrator::get_solution"
 		 " create CalibratorStokes Extension" << endl;
 
-  unsigned nchan = get_Transformation_nchan();
+  unsigned nchan = get_transformation_nchan();
 
   if (nchan != calibrator_estimate.source.size())
     throw Error (InvalidState, "Pulsar::ReceptionCalibrator::get_solution",
@@ -23,16 +23,13 @@ Pulsar::ReceptionCalibrator::get_solution (const string& archive_class,
     
     for (unsigned ichan=0; ichan < nchan; ichan++) {
       
-      bool valid = get_Transformation_valid(ichan);
+      bool valid = get_transformation_valid(ichan);
       
       ext->set_valid (ichan, valid);
       if (!valid)
 	continue;
-      
-      Stokes< Estimate<double> > s;
-      calibrator_estimate.source[ichan].State::evaluate (s);
-      
-      ext->set_stokes (ichan, s);
+
+      ext->set_stokes (ichan, calibrator_estimate.source[ichan].evaluate());
       
     }
     

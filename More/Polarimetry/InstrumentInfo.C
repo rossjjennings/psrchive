@@ -6,13 +6,13 @@ Pulsar::InstrumentInfo::InstrumentInfo (const PolnCalibrator* calibrator) :
 {
   fixed_orientation = false;
 
-  unsigned nchan = calibrator->get_Transformation_nchan ();
+  unsigned nchan = calibrator->get_transformation_nchan ();
   
   // find the first valid transformation
-  const Calibration::Transformation* xform = 0;
+  const Calibration::Complex2* xform = 0;
   for (unsigned ichan = 0; ichan < nchan; ichan++)
-    if ( calibrator->get_Transformation_valid (ichan) ) {
-      xform = calibrator->get_Transformation (ichan);
+    if ( calibrator->get_transformation_valid (ichan) ) {
+      xform = calibrator->get_transformation (ichan);
       break;
     }
 
