@@ -1,7 +1,7 @@
 //-*-C++-*-
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/complex_promote.h,v $
-   $Revision: 1.2 $
-   $Date: 2004/12/22 22:27:58 $
+   $Revision: 1.3 $
+   $Date: 2005/01/30 09:08:11 $
    $Author: straten $ */
 
 #ifndef __complex_promote_H
@@ -10,10 +10,10 @@
 #include <complex>
 #include "PromoteTraits.h"
 
-#if __GNUC__ < 3
+#if defined(__ICC) || ( defined(__GNUC__) && __GNUC__ < 3 )
 
 template <class T, class U>
-class PromoteTraits< std::complex<T>, std::complex<U>, __promote_empty >
+class PromoteTraits< std::complex<T>, std::complex<U> >
 {
   public:
     typedef std::complex<typename PromoteTraits<T,U>::promote_type> 
