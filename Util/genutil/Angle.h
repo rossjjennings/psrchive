@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Angle.h,v $
-   $Revision: 1.15 $
-   $Date: 2004/10/12 09:40:04 $
+   $Revision: 1.16 $
+   $Date: 2004/12/14 14:45:38 $
    $Author: straten $ */
 
 // redwards 17 Mar 99 -- Time for a definitive C++ suite of
@@ -63,11 +63,16 @@ class Angle
     { return long(radians * MilliSecin12Hours / M_PI); };
 
   void setDegrees(double deg)
-    { //fprintf(stderr, "%f %f %p\n", wrap_point, deg, this);
-      radians = deg * M_PI/180.0; wrap();};
+    { radians = deg * M_PI/180.0; wrap();};
 
   double getDegrees() const
     { return radians * 180.0/M_PI; };
+
+  void setTurns(double turns)
+    { radians = turns * 2.0*M_PI; wrap();};
+
+  double getTurns() const
+    { return radians / (2.0*M_PI); };
 
   void setradians(double rad)
     { radians = rad; wrap();};
