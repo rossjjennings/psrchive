@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ReceptionCalibrator.h,v $
-   $Revision: 1.57 $
-   $Date: 2004/01/07 02:06:16 $
-   $Author: hknight $ */
+   $Revision: 1.58 $
+   $Date: 2004/07/12 09:27:36 $
+   $Author: straten $ */
 
 #ifndef __Pulsar_ReceptionCalibrator_H
 #define __Pulsar_ReceptionCalibrator_H
@@ -33,7 +33,7 @@ namespace Pulsar {
 
   class Archive;
   class Integration;
-  class ArtificialCalibrator;
+  class ReferenceCalibrator;
   class FluxCalibrator;
 
   class SourceEstimate {
@@ -72,8 +72,9 @@ namespace Pulsar {
     
     friend class ReceptionCalibrator;
 
-    //! Construct
-    StandardModel (Calibrator::Type model = Calibrator::Hamaker);
+    //! Constructor
+    StandardModel (Calibrator::Type model = Calibrator::Hamaker,
+                   Calibration::Complex2* feed_corrections = 0);
 
     //! Update the relevant estimate
     void update ();
@@ -137,18 +138,23 @@ namespace Pulsar {
     //! The signal path of the FluxCalibrator source
     unsigned FluxCalibrator_path;
 
-    //! The signal path of the ArtificialCalibrator source
-    unsigned ArtificialCalibrator_path;
+    //! The signal path of the ReferenceCalibrator source
+    unsigned ReferenceCalibrator_path;
 
     //! The signal path of the Pulsar phase bin sources
     unsigned Pulsar_path;
 
   protected:
+
     //! The model specified on construction
     Calibrator::Type model;
 
+    //! The feed correction transformation
+    Reference::To<Calibration::Complex2> feed_correction;
+
     //! validity flag
     bool valid;
+
   };
   
   
@@ -156,7 +162,7 @@ namespace Pulsar {
   /*! The ReceptionCalibrator implements a technique of single dish
     polarimetric self-calibration.  This class requires a number of
     constraints, which are provided in through the add_observation,
-    add_ArtificialCalibrator, and add_FluxCalibrator methods.
+    add_ReferenceCalibrator, and add_FluxCalibrator methods.
   */
   class ReceptionCalibrator : public SystemCalibrator {
     
@@ -176,7 +182,7 @@ namespace Pulsar {
     Type get_type () const;
 
     //! Return the Calibrator information
-    Calibrator::Info* get_Info () const;
+    Info* get_Info () const;
 
     //! Return the CalibratorStokesExtension
     CalibratorStokes* get_calibrator_stokes () const;
@@ -209,8 +215,8 @@ namespace Pulsar {
     //! Add the calibrator observation to the set of constraints
     void add_calibrator (const Archive* data);
     
-    //! Add the ArtificialCalibrator observation to the set of constraints
-    void add_calibrator (const ArtificialCalibrator* polncal);
+    //! Add the ReferenceCalibrator observation to the set of constraints
+    void add_calibrator (const ReferenceCalibrator* polncal);
     
     //! Solve equation for each frequency
     void solve (int only_ichan = -1);

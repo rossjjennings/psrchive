@@ -10,6 +10,7 @@
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
 
+#include "Calibration/Complex2Constant.h"
 #include "Calibration/SingleAxis.h"
 #include "Calibration/Feed.h"
 #include "Calibration/Boost.h"
@@ -17,6 +18,7 @@
 
 #include "Calibration/SingleAxisPolynomial.h"
 #include "Calibration/Polynomial.h"
+#include "Calibration/Tracer.h"
 
 #include "Pauli.h"
 
@@ -50,7 +52,12 @@ void Pulsar::ReceptionCalibrator::set_calibrators (const vector<string>& names)
 }
 
 
-Pulsar::StandardModel::StandardModel (Calibrator::Type _model)
+/*! 
+  \param model the type of model used to represent the receiver
+  \param feed_corrections the known feed corrections transformation
+*/
+Pulsar::StandardModel::StandardModel (Calibrator::Type _model,
+                                      Calibration::Complex2* feed_corrections)
 {
   // ////////////////////////////////////////////////////////////////////
   //
@@ -58,6 +65,7 @@ Pulsar::StandardModel::StandardModel (Calibrator::Type _model)
   //
 
   model = _model;
+
   valid = true;
 
   instrument = new Calibration::ProductRule<Calibration::Complex2>;
@@ -109,9 +117,14 @@ Pulsar::StandardModel::StandardModel (Calibrator::Type _model)
 
   }
 
+  if (feed_corrections) {
+    *instrument *= feed_corrections;
+    feed_correction = feed_corrections;
+  }
+
   equation = new Calibration::ReceptionModel;
 
-  ArtificialCalibrator_path = 0;
+  ReferenceCalibrator_path = 0;
   FluxCalibrator_path = 0;
 
   // ////////////////////////////////////////////////////////////////////
@@ -144,6 +157,9 @@ void Pulsar::StandardModel::add_fluxcal_backend ()
   *path *= fluxcal_backend;
   *path *= physical->get_feed();
 
+  if (feed_correction)
+    *path *= feed_correction;
+
   equation->add_transformation ( path );
   FluxCalibrator_path = equation->get_transformation_index ();
 }
@@ -154,7 +170,7 @@ void Pulsar::StandardModel::add_polncal_backend ()
   *pcal_path *= instrument;
 
   equation->add_transformation ( pcal_path );
-  ArtificialCalibrator_path = equation->get_transformation_index ();
+  ReferenceCalibrator_path = equation->get_transformation_index ();
 }
 
 void Pulsar::StandardModel::fix_orientation ()
@@ -227,6 +243,14 @@ void Pulsar::ReceptionCalibrator::initial_observation (const Archive* data)
       "  Pulse phase will vary as a function of frequency channel" << endl;
 
   calibrator = data->clone();
+  receiver = calibrator->get<Receiver>();
+
+  Calibration::Complex2* feed = 0;
+  if (receiver) {
+    feed = new Calibration::Complex2Constant (receiver->get_correction());
+    cerr << "Pulsar::ReceptionCalibrator adding correction transformation\n"
+	"\t" << feed->evaluate() << endl;
+  }
 
   float latitude = corrections.telescope->get_latitude().getDegrees();
   float longitude = corrections.telescope->get_longitude().getDegrees();
@@ -239,7 +263,7 @@ void Pulsar::ReceptionCalibrator::initial_observation (const Archive* data)
 
   for (unsigned ichan=0; ichan<nchan; ichan++) {
 
-    model[ichan] = new StandardModel (model_type);
+    model[ichan] = new StandardModel (model_type, feed);
 
     if (measure_cal_Q)
       model[ichan] -> fix_orientation ();
@@ -289,8 +313,13 @@ void Pulsar::ReceptionCalibrator::load_calibrators ()
   unsigned nchan = model.size();
 
   cerr << "Setting " << nchan << " channel receiver" << endl;
-  for (unsigned ichan=0; ichan<nchan; ichan+=1)
-    model[ichan]->update ();
+  try {
+    for (unsigned ichan=0; ichan<nchan; ichan+=1)
+      model[ichan]->update ();
+  }
+  catch (Error& error) {
+    throw error += "Pulsar::ReceptionCalibrator::load_calibrators";
+  }
 
 }
 
@@ -338,6 +367,11 @@ void Pulsar::ReceptionCalibrator::init_estimate (SourceEstimate& estimate)
       throw Error (InvalidState, "Pulsar::ReceptionCalibrator::init_estimate",
 		   "isource=%d != nsource=%d", estimate.input_index, nsource);
 
+    if (estimate.input_index == 8) {
+      cerr << "Setting tracer" << endl;
+      (void) new Calibration::Tracer (&(estimate.source[ichan]), 1);
+    }
+
     model[ichan]->equation->add_input( &(estimate.source[ichan]) );
   }
 
@@ -376,7 +410,7 @@ void Pulsar::ReceptionCalibrator::add_calibrator (const Archive* data)
     throw Error (InvalidState, "Pulsar::ReceptionCalibrator::add_calibrator",
 		 "No Archive containing pulsar data has yet been added");
 
-  Reference::To<ArtificialCalibrator> polncal;
+  Reference::To<ReferenceCalibrator> polncal;
 
   if (model_type == Calibrator::Hamaker) {
 
@@ -526,7 +560,7 @@ Pulsar::ReceptionCalibrator::add_data
     if (normalize_by_invariant) 
       normalizer.normalize (stokes);
 
-    // NOTE: the measured states are NOT corrected for PA
+    // NOTE: the measured states are not corrected
     Calibration::CoherencyMeasurement state (estimate.input_index);
     state.set_stokes( stokes );
     bins.push_back ( state );
@@ -535,7 +569,7 @@ Pulsar::ReceptionCalibrator::add_data
        the instrument and the parallactic angle rotation before adding
        them to best estimate of the input state */
     
-    Jones<Estimate<double> > correct;
+    Jones< Estimate<double> > correct;
     correct = inv( model[ichan]->pulsar_path->evaluate() );
     
     stokes = transform( stokes, correct );
@@ -549,9 +583,9 @@ Pulsar::ReceptionCalibrator::add_data
   }
 }
 
-//! Add the ArtificialCalibrator observation to the set of constraints
+//! Add the ReferenceCalibrator observation to the set of constraints
 void 
-Pulsar::ReceptionCalibrator::add_calibrator (const ArtificialCalibrator* p)
+Pulsar::ReceptionCalibrator::add_calibrator (const ReferenceCalibrator* p)
 try {
 
   check_ready ("Pulsar::ReceptionCalibrator::add_calibrator");
@@ -663,7 +697,7 @@ try {
 
     const Integration* integration = cal->get_Integration (isub);
 
-    ArtificialCalibrator::get_levels (integration, nchan, cal_hi, cal_lo);
+    ReferenceCalibrator::get_levels (integration, nchan, cal_hi, cal_lo);
 
     MJD epoch = integration->get_epoch ();
 
@@ -676,7 +710,7 @@ try {
 
       unsigned ipol = 0;
 
-      // transpose [ipol][ichan] output of ArtificialCalibrator::get_levels
+      // transpose [ipol][ichan] output of ReferenceCalibrator::get_levels
       vector< Estimate<double> > cal (npol);
       vector< Estimate<double> > fcal (npol);
 
@@ -717,12 +751,12 @@ try {
 	}
 	else {
 
-          if (!model[ichan]->ArtificialCalibrator_path)
+          if (!model[ichan]->ReferenceCalibrator_path)
             // Flux Calibrator observations are made through a different backend
             model[ichan]->add_polncal_backend();
 
 	  measurements.set_transformation_index
-	    ( model[ichan]->ArtificialCalibrator_path );
+	    ( model[ichan]->ReferenceCalibrator_path );
 
         }
 
@@ -956,7 +990,7 @@ void Pulsar::ReceptionCalibrator::solve (int only_ichan)
 
   if (calibrator_estimate.source.size() == 0)
     throw Error (InvalidState, "Pulsar::ReceptionCalibrator::solve",
-		 "Without an ArtificialCalibrator observation, "
+		 "Without an ReferenceCalibrator observation, "
 		 "there remains a degeneracy along the Stokes V axis");
 
   initialize ();
