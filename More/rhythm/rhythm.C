@@ -28,6 +28,7 @@ int main (int argc, char** argv)
 
 Rhythm::Rhythm (QWidget* parent, int argc, char** argv) :
   QMainWindow (parent, "Rhythm"),
+  opts (0, "Options"),
   plot_manager (this, 800, 700),
   res_plot (pg_point(0.049,0.089),pg_point(0.98,0.98))
 {

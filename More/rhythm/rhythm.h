@@ -2,7 +2,6 @@
 #define __RHYTHM_H
 
 #include <vector>
-
 #include <qmainwindow.h>
 
 #include "qxmp_manager.h"
@@ -11,6 +10,8 @@
 #include "toa.h"
 #include "residual.h"
 #include "psrParams.h"
+
+#include "Options.h"
 
 class qt_editParams;
 
@@ -30,6 +31,8 @@ class Rhythm : public QMainWindow
   void fit (const psrParams& eph, bool load_new);
  
  protected:
+  RhythmOptions opts;
+
   // an array of toas and the filename from which they were loaded
   vector<toa> arrival_times;
 
@@ -94,6 +97,7 @@ class Rhythm : public QMainWindow
 
   // Options->Verbosity menu callbacks
   void setVerbosity (int id);
+  void showOptions () { opts.show(); };
 
   void undo() {fprintf (stderr, "Not implemented\n");};
   void redo() {fprintf (stderr, "Not implemented\n");};

@@ -62,6 +62,7 @@ void Rhythm::menubarConstruct ()
 	    this, SLOT( setVerbosity(int) ) );
 
   options = new QPopupMenu( menuBar() );  CHECK_PTR (options);
+  options->insertItem( "Preferences", this, SLOT(showOptions()));
   options->insertSeparator();
   options->insertItem( "&Verbosity", verbosity, ALT+Key_V);
 
@@ -180,6 +181,6 @@ void Rhythm::setVerbosity ( int verbosityID )
 
   if (vverbose)
     cerr << "rhythm: very verbose on" << endl;
-  esle if (verbose)
+  else if (verbose)
     cerr << "rhythm: verbose on" << endl;
 }
