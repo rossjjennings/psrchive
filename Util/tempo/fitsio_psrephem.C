@@ -4,6 +4,7 @@
 
 #include <assert.h>
 #include <math.h>
+#include <stdlib.h>
 
 #ifdef sun
 #include <ieeefp.h>
@@ -227,10 +228,13 @@ void psrephem::load (fitsfile* fptr, long row)
     case 1:  // double
       {
 	#ifdef sun
-	  double nul = FP_QNAN;
+	double nul = FP_QNAN;
 	#else
-	  double nul = NAN;
+	// See: http://www.dbforums.com/archives/t317177.html
+	// The nan() function doesn't seem to exist for icc compiler but this works
+	double nul = strtod("NAN(n-charsequence)", (char**) NULL);
 	#endif
+	
 	fits_read_col (fptr, TDOUBLE, icol+1, row, firstelem, onelement,
 		       &nul, value_double + ieph, &anynul, &status);
 
@@ -312,11 +316,14 @@ void psrephem::load (fitsfile* fptr, long row)
       }
     case 4:  // MJD
       {
-	#ifdef sun
-	  double nul = FP_QNAN;
+        #ifdef sun
+	double nul = FP_QNAN;
 	#else
-	  double nul = NAN;
+	// See: http://www.dbforums.com/archives/t317177.html
+	// The nan() function doesn't seem to exist for icc compiler but this works
+	double nul = strtod("NAN(n-charsequence)", (char**) NULL);
 	#endif
+
 	fits_read_col (fptr, TDOUBLE, icol+1, row, firstelem, onelement,
 		       &nul, value_double + ieph, &anynul, &status);
 
