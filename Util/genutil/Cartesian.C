@@ -1,6 +1,7 @@
+#include <algorithm>
 #include <math.h>
 
-#include "cartesian.h"
+#include "Cartesian.h"
 #include "angle.h"
 
 Cartesian::Cartesian ()
@@ -34,7 +35,7 @@ Cartesian& Cartesian::operator = (const Cartesian& in_cart)
   if (this != &in_cart) {
     x = in_cart.x;
     y = in_cart.y;
-    x = in_cart.z;
+    z = in_cart.z;
   }
   return *this;
 }
@@ -123,6 +124,46 @@ int operator != (const Cartesian& cart1, const Cartesian& cart2)
 	   (cart1.z != cart2.z) );
 }
 
+Cartesian min (const Cartesian& cart1, const Cartesian& cart2)
+{
+  // cerr << "Cartesian min" << endl;
+  return Cartesian ( min(cart1.x, cart2.x),
+		     min(cart1.y, cart2.y),
+		     min(cart1.z, cart2.z) );
+}
+
+Cartesian max (const Cartesian& cart1, const Cartesian& cart2)
+{
+  // cerr << "Cartesian max" << endl;
+  return Cartesian ( max(cart1.x, cart2.x),
+		     max(cart1.y, cart2.y),
+		     max(cart1.z, cart2.z) );
+}
+
+double& Cartesian::operator [] (char dimension)
+{
+  switch (dimension) {
+  case 'x': return x;
+  case 'y': return y;
+  case 'z': return z;
+  default:
+    throw;
+  }
+}
+
+/*
+const double& Cartesian::operator [] (int dimension) const
+{
+  switch (char(dimension)) {
+  case 'x': return x;
+  case 'y': return y;
+  case 'z': return z;
+  default:
+    throw;
+  }
+}
+*/
+
 double Cartesian::modSquared () const
 {
   return (x*x + y*y + z*z);
@@ -136,4 +177,8 @@ double Cartesian::mod () const
 Angle Cartesian::angularSeparation (const Cartesian& c1, const Cartesian& c2)
 {
   return Angle (acos( (c1 * c2) / (c1.mod() * c2.mod()) ));
+}
+
+ostream& operator << (ostream& ostr, const Cartesian& coord) {
+  return ostr << "(" << coord.x << ", " << coord.y << ", " << coord.z << ")";
 }
