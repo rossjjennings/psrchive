@@ -511,6 +511,11 @@ vector<double> Rhythm::give_me_data (toaPlot::AxisQuantity q)
       retval.push_back((toas[i].resid.turns)*1000.0);
     return retval;
     break;
+  case toaPlot::ErrorMicro:
+    for (unsigned i = 0; i < toas.size(); i++)
+      retval.push_back(toas[i].resid.error);
+    return retval;
+    break;
   default:
     return retval;
     break;
@@ -563,6 +568,11 @@ vector<double> Rhythm::give_me_errs (toaPlot::AxisQuantity q)
     return retval;
     break;
   case toaPlot::DayOfYear:
+    for (unsigned i = 0; i < toas.size(); i++)
+      retval.push_back(0.0);
+    return retval;
+    break;
+  case toaPlot::ErrorMicro:
     for (unsigned i = 0; i < toas.size(); i++)
       retval.push_back(0.0);
     return retval;
@@ -765,10 +775,10 @@ void Rhythm::clearselection ()
 AxisSelector::AxisSelector (QWidget* parent)
   : QHBox(parent)
 {
-  Xgrp = new QButtonGroup(6, Qt::Vertical, "X Axis", this);
+  Xgrp = new QButtonGroup(7, Qt::Vertical, "X Axis", this);
   Xgrp -> setRadioButtonExclusive(true);
   
-  Ygrp = new QButtonGroup(6, Qt::Vertical, "Y Axis", this);
+  Ygrp = new QButtonGroup(7, Qt::Vertical, "Y Axis", this);
   Ygrp -> setRadioButtonExclusive(true);
 
   X1 = new QRadioButton("Residual (us)", Xgrp);
@@ -777,6 +787,7 @@ AxisSelector::AxisSelector (QWidget* parent)
   X4 = new QRadioButton("Binary Phase", Xgrp);
   X5 = new QRadioButton("Obs Freq", Xgrp);
   X6 = new QRadioButton("Day of Year", Xgrp);
+  X7 = new QRadioButton("Timing Error", Xgrp);
 
   X3->setChecked(true);
 
@@ -786,6 +797,7 @@ AxisSelector::AxisSelector (QWidget* parent)
   Y4 = new QRadioButton("Binary Phase", Ygrp);
   Y5 = new QRadioButton("Obs Freq", Ygrp);
   Y6 = new QRadioButton("Day of Year", Ygrp);
+  Y7 = new QRadioButton("Timing Error", Ygrp);
 
   Y1->setChecked(true);
 
@@ -795,6 +807,7 @@ AxisSelector::AxisSelector (QWidget* parent)
   Xgrp->insert(X4,4);
   Xgrp->insert(X5,5);
   Xgrp->insert(X6,6);
+  Xgrp->insert(X7,7);
 
   Ygrp->insert(Y1,1);
   Ygrp->insert(Y2,2);
@@ -802,6 +815,7 @@ AxisSelector::AxisSelector (QWidget* parent)
   Ygrp->insert(Y4,4);
   Ygrp->insert(Y5,5);
   Ygrp->insert(Y6,6);
+  Ygrp->insert(Y7,7);
 
   QObject::connect(Xgrp, SIGNAL(clicked(int)),
 		   this, SLOT(Xuseful(int)));

@@ -63,6 +63,9 @@ void toaPlot::plotter ()
   case DayOfYear:
     xlab = "Day of Year";
     break;
+  case ErrorMicro:
+    xlab = "Timing Error (Microseconds)";
+    break;
   }
   
   switch (yq) {
@@ -86,6 +89,9 @@ void toaPlot::plotter ()
     break;
   case DayOfYear:
     ylab = "Day of Year";
+    break;
+  case ErrorMicro:
+    ylab = "Timing Error (Microseconds)";
     break;
   }
 

@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/rhythm/rhythm.h,v $
-   $Revision: 1.21 $
-   $Date: 2003/04/24 06:36:40 $
+   $Revision: 1.22 $
+   $Date: 2003/04/24 07:19:49 $
    $Author: ahotan $ */
 
 // //////////////////////////////////////////////////////////////////////////
@@ -58,6 +58,7 @@ class AxisSelector : public QHBox
   QRadioButton* X4;
   QRadioButton* X5; 
   QRadioButton* X6;
+  QRadioButton* X7;
 
   QRadioButton* Y1;
   QRadioButton* Y2;
@@ -65,7 +66,8 @@ class AxisSelector : public QHBox
   QRadioButton* Y4;
   QRadioButton* Y5;
   QRadioButton* Y6;
-  
+  QRadioButton* Y7;
+
  public slots:
 
   void Xuseful(int);

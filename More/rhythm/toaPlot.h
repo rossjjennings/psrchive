@@ -33,7 +33,8 @@ class toaPlot: public QPgplot {
  public:
   
   enum AxisQuantity { None, ResidualMicro, ResidualMilliTurns, 
-		      TOA_MJD, BinaryPhase, ObsFreq, DayOfYear};
+		      TOA_MJD, BinaryPhase, ObsFreq, DayOfYear,
+		      ErrorMicro };
   
   toaPlot ( QWidget *parent=0, const char *name=0 );
   
