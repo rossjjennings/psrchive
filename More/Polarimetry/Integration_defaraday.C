@@ -79,7 +79,8 @@ catch (Error& error) {
 void Pulsar::Integration::defaraday (unsigned ichan, unsigned kchan,
                                      double rm, double f0, 
                                      const Jones<double>& r0)
-{
+try {
+
   if (verbose)
     cerr << "Pulsar::Integration::defaraday rm=" << rm << " f0=" << f0
          << " r0=" << r0 << endl;
@@ -110,4 +111,7 @@ void Pulsar::Integration::defaraday (unsigned ichan, unsigned kchan,
 
   }
 
+}
+catch (Error& error) {
+  throw error += "Pulsar::Integration::defaraday [private]";
 }

@@ -79,7 +79,8 @@ catch (Error& error) {
 
 void Pulsar::Integration::dedisperse (unsigned ichan, unsigned kchan,
                                       double dm, double f0, double t0)
-{
+try {
+
   if (verbose)
     cerr << "Integration::dedisperse dm=" << dm << " f0=" << f0 
          << " t0=" << t0 << endl;
@@ -111,5 +112,8 @@ void Pulsar::Integration::dedisperse (unsigned ichan, unsigned kchan,
 
   }
 
+}
+catch (Error& error) {
+  throw error += "Pulsar::Integration::dedisperse [private]";
 }
 
