@@ -8,7 +8,7 @@
 #include "Pulsar/ITRFExtension.h"
 #include "Pulsar/CalInfoExtension.h"
 #include "Pulsar/Receiver.h"
-#include "Pulsar/BackendExtension.h"
+#include "Pulsar/WidebandCorrelator.h"
 #include "Pulsar/DigitiserStatistics.h"
 #include "Pulsar/ProcHistory.h"
 #include "Pulsar/Passband.h"
@@ -41,7 +41,7 @@ void Pulsar::FITSArchive::init ()
 //
 Pulsar::FITSArchive::FITSArchive()
 {
-  if (verbose)
+  if (verbose == 3)
     cerr << "FITSArchive default construct" << endl;
   init ();
 }
@@ -51,7 +51,7 @@ Pulsar::FITSArchive::FITSArchive()
 //
 Pulsar::FITSArchive::FITSArchive (const FITSArchive& arch)
 {
-  if (verbose)
+  if (verbose == 3)
     cerr << "FITSArchive copy construct" << endl;
 
   init ();
@@ -63,7 +63,7 @@ Pulsar::FITSArchive::FITSArchive (const FITSArchive& arch)
 //
 Pulsar::FITSArchive::~FITSArchive()
 {
-  if (verbose)
+  if (verbose == 3)
     cerr << "FITSArchive destruct" << endl;
 }
 
@@ -73,7 +73,7 @@ Pulsar::FITSArchive::~FITSArchive()
 const Pulsar::FITSArchive&
 Pulsar::FITSArchive::operator = (const FITSArchive& arch)
 {
-  if (verbose)
+  if (verbose == 3)
     cerr << "FITSArchive assignment operator" << endl;
 
   Archive::copy (arch); // results in call to FITSArchive::copy
@@ -85,7 +85,7 @@ Pulsar::FITSArchive::operator = (const FITSArchive& arch)
 //
 Pulsar::FITSArchive::FITSArchive (const Archive& arch)
 {
-  if (verbose)
+  if (verbose == 3)
     cerr << "FITSArchive base copy construct" << endl;
 
   init ();
@@ -98,7 +98,7 @@ Pulsar::FITSArchive::FITSArchive (const Archive& arch)
 Pulsar::FITSArchive::FITSArchive (const Archive& arch, 
 				  const vector<unsigned>& subints)
 {
-  if (verbose)
+  if (verbose == 3)
     cerr << "FITSArchive base extraction construct" << endl;
 
   init ();
@@ -111,7 +111,7 @@ Pulsar::FITSArchive::FITSArchive (const Archive& arch,
 void Pulsar::FITSArchive::copy (const Archive& archive, 
 				const vector<unsigned>& subints)
 {
-  if (verbose)
+  if (verbose == 3)
     cerr << "FITSArchive::copy" << endl;
 
   if (this == &archive)
@@ -119,7 +119,7 @@ void Pulsar::FITSArchive::copy (const Archive& archive,
   
   Archive::copy (archive, subints);
 
-  if (verbose)
+  if (verbose == 3)
     cerr << "FITSArchive::copy dynamic cast call" << endl;
 
   reference_epoch = archive.start_time();
@@ -128,7 +128,7 @@ void Pulsar::FITSArchive::copy (const Archive& archive,
   if (!farchive)
     return;
   
-  if (verbose)
+  if (verbose == 3)
     cerr << "FITSArchive::copy another FITSArchive" << endl;
   
   chanbw = farchive->chanbw;
@@ -139,7 +139,7 @@ void Pulsar::FITSArchive::copy (const Archive& archive,
 //! Returns a pointer to a new copy-constructed FITSArchive instance
 Pulsar::FITSArchive* Pulsar::FITSArchive::clone () const
 {
-  if (verbose)
+  if (verbose == 3)
     cerr << "FITSArchive::clone" << endl;
 
   return new FITSArchive (*this);
@@ -149,7 +149,7 @@ Pulsar::FITSArchive* Pulsar::FITSArchive::clone () const
 Pulsar::FITSArchive* 
 Pulsar::FITSArchive::extract (const vector<unsigned>& subints) const
 {
-  if (verbose)
+  if (verbose == 3)
     cerr << "FITSArchive::extract" << endl;
   return new FITSArchive (*this, subints);
 }
@@ -171,7 +171,7 @@ void Pulsar::FITSArchive::load_header (const char* filename)
   char* comment = 0;
   
   // Open the data file  
-  if (verbose)
+  if (verbose == 3)
     cerr << "FITSArchive::load_header fits_open_file (" << filename << ")" 
 	 << endl;
   
@@ -185,11 +185,9 @@ void Pulsar::FITSArchive::load_header (const char* filename)
 
   add_extension (new ObsExtension);
   add_extension (new FITSHdrExtension);
-  add_extension (new BackendExtension);
 
   ObsExtension*      obs_ext  = get<ObsExtension>();
   FITSHdrExtension*  hdr_ext  = get<FITSHdrExtension>();
-  BackendExtension*  be_ext   = get<BackendExtension>();
 
   // /////////////////////////////////////////////////////////////////
   
@@ -198,23 +196,24 @@ void Pulsar::FITSArchive::load_header (const char* filename)
   long sec;
   double frac;
   
-  if (verbose)
+  if (verbose == 3)
     cerr << "FITSArchive::load_header reading MJDs" << endl;
   
   fits_read_key (fptr, TLONG, "STT_IMJD", &day, comment, &status);
   fits_read_key (fptr, TLONG, "STT_SMJD", &sec, comment, &status);
   fits_read_key (fptr, TDOUBLE, "STT_OFFS", &frac, comment, &status);
   
-  if (status != 0)
-    throw FITSError (status, "FITSArchive::load_header", 
-		     "fits_read_key STT_*");
-  
-  hdr_ext->start_time = reference_epoch = MJD ((int)day, (int)sec, frac);
-  
-  if (verbose)
-    cerr << "Got start time: " << hdr_ext->start_time.printall() << endl;
-  
-  if (verbose)
+  if (status != 0) {
+    cerr << "FITSArchive::load_header WARNING no STT_*MJD" << endl;
+    hdr_ext->start_time = reference_epoch = 0.0;
+  }
+  else  {
+    hdr_ext->start_time = reference_epoch = MJD ((int)day, (int)sec, frac);
+    if (verbose == 3)
+      cerr << "Got start time: " << hdr_ext->start_time.printall() << endl;
+  }
+ 
+  if (verbose == 3)
     cerr << "FITSArchive::load_header reading coordinates" << endl;
   
   // Read where the telescope was pointing
@@ -223,7 +222,7 @@ void Pulsar::FITSArchive::load_header (const char* filename)
   
   fits_read_key (fptr, TSTRING, "COORD_MD", tempstr, comment, &status);
   if (status != 0) {
-    if (verbose) {
+    if (verbose == 3) {
       fits_get_errstatus(status,error);
       cerr << "FITSArchive::load_header WARNING reading coord mode: " 
 	   << error << endl;
@@ -232,7 +231,7 @@ void Pulsar::FITSArchive::load_header (const char* filename)
   }
   
   hdr_ext->coordmode = tempstr;
-  if (verbose)
+  if (verbose == 3)
     cerr << "Got coordinate type: " << tempstr << endl;
 
   sky_coord coord;
@@ -254,28 +253,28 @@ void Pulsar::FITSArchive::load_header (const char* filename)
     coord.setGalactic(temp);
   }
   else if (hdr_ext->coordmode == "Ecliptic") {
-    if (verbose)
+    if (verbose == 3)
       cerr << "WARNING: FITSArchive::load_header Ecliptic COORD_MD not implemented" 
 	   << endl;
   }
   else if (hdr_ext->coordmode == "AZEL") {
-    if (verbose)
+    if (verbose == 3)
       cerr << "WARNING: FITSArchive::load_header AZEL COORD_MD not implemented"
 	   << endl;
   }
   else if (hdr_ext->coordmode == "HADEC") {
-    if (verbose)
+    if (verbose == 3)
       cerr << "WARNING: FITSArchive::load_header HADEC COORD_MD not implemented"
 	   << endl;
   }
   else
-    if (verbose)
+    if (verbose == 3)
       cerr << "WARNING: FITSArchive::load_header unknown COORD_MD"
 	   << endl;
   
   if (status != 0) {
     fits_get_errstatus(status,error);
-    if (verbose)
+    if (verbose == 3)
       cerr << "WARNING: FITSArchive::load_header error reading coordinate data "
 	   << error << endl;
     status = 0;
@@ -285,12 +284,12 @@ void Pulsar::FITSArchive::load_header (const char* filename)
   
   // Pulsar FITS header definiton version
 
-  if (verbose)
+  if (verbose == 3)
     cerr << "FITSArchive::load_header reading FITS header version" << endl;
   
   fits_read_key (fptr, TSTRING, "HDRVER", tempstr, comment, &status);
   if (status != 0) {
-    if (verbose) {
+    if (verbose == 3) {
       fits_get_errstatus(status,error);
       cerr << "FITSArchive::load_header WARNING reading HDRVER: " 
 	   << error << endl;
@@ -300,17 +299,17 @@ void Pulsar::FITSArchive::load_header (const char* filename)
   else 
     hdr_ext->hdrver = tempstr;
   
-  if (verbose)
+  if (verbose == 3)
     cerr << "Got: Version " << tempstr << endl;
   
   // File creation date
   
-  if (verbose)
+  if (verbose == 3)
     cerr << "FITSArchive::load_header reading file creation date" << endl;
 
   fits_read_key (fptr, TSTRING, "DATE", tempstr, comment, &status);
   if (status != 0) {
-    if (verbose) {
+    if (verbose == 3) {
       fits_get_errstatus(status,error);
       cerr << "FITSArchive::load_header WARNING reading DATE: " 
 	   << error << endl;
@@ -322,12 +321,12 @@ void Pulsar::FITSArchive::load_header (const char* filename)
 
   // Name of observer
   
-  if (verbose)
+  if (verbose == 3)
     cerr << "FITSArchive::load_header reading observer name" << endl;
   
   fits_read_key (fptr, TSTRING, "OBSERVER", tempstr, comment, &status);
   if (status != 0) {
-    if (verbose) {
+    if (verbose == 3) {
       fits_get_errstatus(status,error);
       cerr << "FITSArchive::load_header WARNING reading OBSERVER: " 
 	   << error << endl;
@@ -337,17 +336,17 @@ void Pulsar::FITSArchive::load_header (const char* filename)
   else
     obs_ext->observer = tempstr;
   
-  if (verbose)
+  if (verbose == 3)
     cerr << "Got observer: " << tempstr << endl;
   
   // Project ID
   
-  if (verbose)
+  if (verbose == 3)
     cerr << "FITSArchive::load_header reading project ID" << endl;
 
   fits_read_key (fptr, TSTRING, "PROJID", tempstr, comment, &status);
   if (status != 0) {
-    if (verbose) {
+    if (verbose == 3) {
       fits_get_errstatus(status,error);
       cerr << "FITSArchive::load_header WARNING reading PROJID: " 
 	   << error << endl;
@@ -357,17 +356,17 @@ void Pulsar::FITSArchive::load_header (const char* filename)
   else
     obs_ext->project_ID = tempstr;
 
-  if (verbose)
+  if (verbose == 3)
     cerr << "Got PID: " << tempstr << endl;
   
   // Telescope name
     
-  if (verbose)
+  if (verbose == 3)
     cerr << "FITSArchive::load_header reading telescope name" << endl;
     
   fits_read_key (fptr, TSTRING, "TELESCOP", tempstr, comment, &status);
   if (status != 0) {
-    if (verbose) {
+    if (verbose == 3) {
       fits_get_errstatus(status,error);
       cerr << "FITSArchive::load_header WARNING reading TELESCOP: " 
            << error << endl;
@@ -380,7 +379,7 @@ void Pulsar::FITSArchive::load_header (const char* filename)
 				      mystr.length());
   }
 
-  if (verbose)
+  if (verbose == 3)
     cerr << "Got telescope: " << obs_ext->telescope << endl;
   
   if ((obs_ext->telescope).length() == 1)
@@ -396,24 +395,11 @@ void Pulsar::FITSArchive::load_header (const char* filename)
 
   load_Receiver (fptr);
 
-  // Read the name of the instrument used
+  // WidebandCorrelator parameters
 
-  if (verbose)
-    cerr << "FITSArchive::load_header reading instrument name" << endl;
+  load_WidebandCorrelator (fptr);
 
-  fits_read_key (fptr, TSTRING, "BACKEND", tempstr, comment, &status);
-  if(status == 0) {
-    set_backend(tempstr);
-  }
-  else {
-    if (verbose) {
-      fits_get_errstatus(status,error);
-      cerr << "FITSArchive::load_header WARNING reading BACKEND: " 
-	   << error << endl;
-    }
-    status = 0;
-  }
-  
+
   /////////////////////////////////////////////////////////////////////////
   /*
     Prior to header version 1.14, the WBCORR backend at Parkes
@@ -434,50 +420,16 @@ void Pulsar::FITSArchive::load_header (const char* filename)
   if ((strcmp(tempstr, "WBCORR") == 0) && ((major_number == 1) &&
 						 (minor_number < 14))) {
     scale_cross_products = true;
-    if (verbose) {
+    if (verbose == 3) {
       cout << "Old WBCORR header version detected..." << endl;
       cout << "Scaling cross products to compensate" << endl;
     }
   }
 
-  /////////////////////////////////////////////////////////////////////////
 
-  // Read the name of the instrument configuration file (if any)
-
-  if (verbose)
-    cerr << "FITSArchive::load_header reading instrument config" << endl;
-
-  fits_read_key (fptr, TSTRING, "BECONFIG", tempstr, comment, &status);
-  if(status == 0) {
-    be_ext->configfile = tempstr;
-  }
-  else {
-    if (verbose) {
-      fits_get_errstatus(status,error);
-      cerr << "FITSArchive::load_header WARNING reading BECONFIG: " 
-	   << error << endl;
-    }
-    status = 0;
-  }
-  
-  // Read the number of receiver channels
-  
-  if (verbose)
-    cerr << "FITSArchive::load_header reading NRCVR" << endl;
-  
-  fits_read_key (fptr, TINT, "NRCVR", &(be_ext->nrcvr), comment, &status);
-  if (status != 0) {
-    if (verbose) {
-      fits_get_errstatus(status,error);
-      cerr << "FITSArchive::load_header WARNING reading NRCVR: " 
-	   << error << endl;
-    }
-    status = 0;
-  }
-  
   // Read the name of the source
 
-  if (verbose)
+  if (verbose == 3)
     cerr << "FITSArchive::load_header reading source name" << endl;
 
   fits_read_key (fptr, TSTRING, "SRC_NAME", tempstr, comment, &status);
@@ -489,7 +441,7 @@ void Pulsar::FITSArchive::load_header (const char* filename)
   
   // Figure out what kind of observation it was
 
-  if (verbose)
+  if (verbose == 3)
     cerr << "FITSArchive::load_header reading OBS_MODE" << endl;
 
   fits_read_key (fptr, TSTRING, "OBS_MODE", tempstr, comment, &status);
@@ -499,7 +451,7 @@ void Pulsar::FITSArchive::load_header (const char* filename)
   
   if (strcmp(tempstr, "PSR") == 0 || strcmp(tempstr, "LEVPSR") == 0) {
     set_type ( Signal::Pulsar );
-    if (verbose)
+    if (verbose == 3)
       cerr << "FITSArchive::load_header using Signal::Pulsar" << endl;
   }
   else if (strcmp(tempstr, "CAL") == 0 || strcmp(tempstr, "LEVCAL") == 0) {
@@ -507,7 +459,7 @@ void Pulsar::FITSArchive::load_header (const char* filename)
     if (get_source() == "HYDRA_O"  || get_source() == "VIRGO_O" ||
 	get_source() == "0918-1205_H" || get_source() == "3C353_O") {
       set_type ( Signal::FluxCalOn );
-      if (verbose)
+      if (verbose == 3)
 	cerr << "FITSArchive::load_header using Signal::FluxCalOn" << endl;
     }
     else if (get_source() == "HYDRA_N" || get_source() == "HYDRA_S" ||
@@ -515,12 +467,12 @@ void Pulsar::FITSArchive::load_header (const char* filename)
 	     get_source() == "0918-1005_N" || get_source() == "0918-1405_S" ||
 	     get_source() == "3C353_N" || get_source() == "3C353_S") {
       set_type ( Signal::FluxCalOff );
-      if (verbose)
+      if (verbose == 3)
 	cerr << "FITSArchive::load_header using Signal::FluxCalOff" << endl;
     }
     else {
       set_type ( Signal::PolnCal );
-      if (verbose)
+      if (verbose == 3)
 	cerr << "FITSArchive::load_header using Signal::PolnCal" << endl;
     }
   }
@@ -529,7 +481,7 @@ void Pulsar::FITSArchive::load_header (const char* filename)
   else if (strcmp (tempstr, "SEARCH") == 0)
     set_type ( Signal::Unknown );
   else {
-    if (verbose)
+    if (verbose == 3)
       cerr << "FITSArchive::load_header WARNING unknown OBSTYPE = " 
 	   << tempstr <<endl;
     set_type ( Signal::Unknown );
@@ -540,12 +492,12 @@ void Pulsar::FITSArchive::load_header (const char* filename)
 
   // Track mode
 
-  if (verbose)
+  if (verbose == 3)
     cerr << "FITSArchive::load_header reading track mode" << endl;
 
   fits_read_key (fptr, TSTRING, "TRK_MODE", tempstr, comment, &status);
   if (status != 0) {
-    if (verbose) {
+    if (verbose == 3) {
       fits_get_errstatus(status,error);
       cerr << "FITSArchive::load_header WARNING reading TRK_MODE: " 
 	   << error << endl;
@@ -556,30 +508,16 @@ void Pulsar::FITSArchive::load_header (const char* filename)
     hdr_ext->trk_mode = tempstr;
   
 
-  // Read correlator cycle time
 
-  if (verbose)
-    cerr << "FITSArchive::load_header reading cycle time" << endl;
-  
-  fits_read_key (fptr, TDOUBLE, "TCYCLE", &(be_ext->tcycle), comment, &status);
-  if (status != 0) {
-    if (verbose) {
-      fits_get_errstatus(status,error);
-      cerr << "FITSArchive::load_header WARNING reading TCYCLE: " 
-	   << error << endl;
-    }
-    status = 0;
-  }
-  
 
   // Read the start UT date
 
-  if (verbose)
+  if (verbose == 3)
     cerr << "FITSArchive::load_header reading start date" << endl;
 
   fits_read_key (fptr, TSTRING, "STT_DATE", tempstr, comment, &status);
   if (status != 0) {
-    if (verbose) {
+    if (verbose == 3) {
       fits_get_errstatus(status,error);
       cerr << "FITSArchive::load_header WARNING reading STT_DATE: " 
 	   << error << endl;
@@ -591,12 +529,12 @@ void Pulsar::FITSArchive::load_header (const char* filename)
   
   // Read the start UT
 
-  if (verbose)
+  if (verbose == 3)
     cerr << "FITSArchive::load_header reading start UT" << endl;
 
   fits_read_key (fptr, TSTRING, "STT_TIME", tempstr, comment, &status);
   if (status != 0) {
-    if (verbose) {
+    if (verbose == 3) {
       fits_get_errstatus(status,error);
       cerr << "FITSArchive::load_header WARNING reading STT_TIME: " 
 	   << error << endl;
@@ -608,12 +546,12 @@ void Pulsar::FITSArchive::load_header (const char* filename)
   
   // Read the start LST (in seconds)
 
-  if (verbose)
+  if (verbose == 3)
     cerr << "FITSArchive::load_header reading start LST" << endl;
 
   fits_read_key (fptr, TDOUBLE, "STT_LST", &(hdr_ext->stt_lst), comment, &status);
   if (status != 0) {
-    if (verbose) {
+    if (verbose == 3) {
       fits_get_errstatus(status,error);
       cerr << "FITSArchive::load_header WARNING reading STT_LST: " 
 	   << error << endl;
@@ -627,7 +565,7 @@ void Pulsar::FITSArchive::load_header (const char* filename)
   
   // ////////////////////////////////////////////////////////////////
   
-  if (verbose)
+  if (verbose == 3)
     cerr << "FITSArchive::load_header finished with primary HDU" 
 	 << endl;
   
@@ -661,7 +599,7 @@ void Pulsar::FITSArchive::load_header (const char* filename)
     ephemeris->load(fptr);
     dispersion_measure = ephemeris->get_dm();
 
-    if (verbose)
+    if (verbose == 3)
       cerr << "FITSArchive::load_header ephemeris loaded" << endl;
 
   }
@@ -679,7 +617,7 @@ void Pulsar::FITSArchive::load_header (const char* filename)
     model = new polyco;
     model->load(fptr);
   
-    if (verbose)
+    if (verbose == 3)
       cerr << "FITSArchive::load_header polyco loaded" << endl;
   
   }
@@ -691,15 +629,15 @@ void Pulsar::FITSArchive::load_header (const char* filename)
   fits_movnam_hdu (fptr, BINARY_TBL, "SUBINT", 0, &status);
 
   if (status == 0) {
-  
+
     // Get the number of rows (ie. the number of sub-ints)
     
     long numrows = 0;
     fits_get_num_rows (fptr, &numrows, &status);
-    
+
     set_nsubint(numrows);
     
-    if (verbose)
+    if (verbose == 3)
       cerr << "FITSArchive::load_header there are " << numrows << " subints"
 	   << endl;
     
@@ -736,7 +674,7 @@ void Pulsar::FITSArchive::load_header (const char* filename)
     throw FITSError (status, "Pulsar::FITSArchive::load_header",
 		     "fits_close_file");
 
-  if (verbose)
+  if (verbose == 3)
     cerr << "FITSArchive::load_header exit" << endl;
   
 
@@ -765,7 +703,7 @@ Pulsar::FITSArchive::load_Integration (const char* filename, unsigned isubint)
   
   int status = 0;  
 
-  if (verbose) {
+  if (verbose == 3) {
     cerr << "FITSArchive::load_Integration number " << isubint << endl;
   }
   
@@ -780,7 +718,7 @@ Pulsar::FITSArchive::load_Integration (const char* filename, unsigned isubint)
 
   fitsfile* sfptr = 0;
   
-  if (verbose)
+  if (verbose == 3)
     cerr << "FITSArchive::load_Integration fits_open_file (" 
 	 << filename << ")" << endl;
   
@@ -797,7 +735,7 @@ Pulsar::FITSArchive::load_Integration (const char* filename, unsigned isubint)
   // Read the feed configuration
   fits_read_key (sfptr, TSTRING, "FD_POLN", tempstr, comment, &status);
   if (status != 0) {
-    if (verbose) {
+    if (verbose == 3) {
       fits_get_errstatus(status,error);
       cerr << "FITSArchive::load_Integration WARNING reading FD_POLN: " 
 	   << error << endl;
@@ -810,7 +748,7 @@ Pulsar::FITSArchive::load_Integration (const char* filename, unsigned isubint)
     else if (strcmp(tempstr,"CIRC") == 0 || strcmp(tempstr,"CIRCULAR") == 0)
       integ->set_basis( Signal::Circular );
     else
-      if (verbose) {
+      if (verbose == 3) {
 	cerr << "FITSArchive::load_Integration unknown FD_POLN: " 
 	     << tempstr << endl;
       }
@@ -858,28 +796,28 @@ Pulsar::FITSArchive::load_Integration (const char* filename, unsigned isubint)
 
   if(polstr == "XXYY") {
     integ->set_state ( Signal::PPQQ );
-    if (verbose)
+    if (verbose == 3)
       cerr << "FITSArchive:load_Integration setting Signal::PPQQ" << endl;
   }
   else if(polstr == "STOKE") {
     integ->set_state ( Signal::Stokes );
-    if (verbose)
+    if (verbose == 3)
       cerr << "FITSArchive:load_Integration setting Signal::Stokes" << endl;
   }
   else if(polstr == "XXYYCRCI") {
     integ->set_state ( Signal::Coherence );
-    if (verbose)
+    if (verbose == 3)
       cerr << "FITSArchive:load_Integration setting Signal::Coherence" << endl;
   }
   else if(polstr == "INTEN") {
     integ->set_state ( Signal::Intensity );
-    if (verbose)
+    if (verbose == 3)
       cerr << "FITSArchive:load_Integration setting Signal::Intensity" << endl;
   }
   else if(polstr == "INVAR")
     integ->set_state ( Signal::Invariant );
   else {
-    if (verbose) {
+    if (verbose == 3) {
       cerr << "FITSArchive:load_Integration WARNING unknown POL_TYPE = " 
 	   << polstr <<endl;
       cerr << "FITSArchive:load_Integration setting Signal::Intensity" 
@@ -943,7 +881,7 @@ Pulsar::FITSArchive::load_Integration (const char* filename, unsigned isubint)
   
     integ->set_epoch (newmjd);
   
-    if (verbose)
+    if (verbose == 3)
       cerr << "Pulsar::FITSArchive::load_Integration set_epoch " 
 	   << newmjd << endl;
   }
@@ -986,7 +924,7 @@ Pulsar::FITSArchive::load_Integration (const char* filename, unsigned isubint)
 
   // Load the profile weights
 
-  if (verbose)
+  if (verbose == 3)
     cerr << "Pulsar::FITSArchive::load_Integration reading weights" 
 	 << endl;
   
@@ -1004,7 +942,7 @@ Pulsar::FITSArchive::load_Integration (const char* filename, unsigned isubint)
   
   // Set the profile weights
   
-  if (verbose)
+  if (verbose == 3)
     cerr << "Pulsar::FITSArchive::load_Integration setting weights" 
 	 << endl;
   
@@ -1013,7 +951,7 @@ Pulsar::FITSArchive::load_Integration (const char* filename, unsigned isubint)
   
   // Load the channel centre frequencies
   
-  if (verbose)
+  if (verbose == 3)
     cerr << "Pulsar::FITSArchive::load_Integration reading channel freqs" 
 	 << endl;
   
@@ -1028,7 +966,7 @@ Pulsar::FITSArchive::load_Integration (const char* filename, unsigned isubint)
   
   // Set the profile channel centre frequencies
   
-  if (verbose)
+  if (verbose == 3)
     cerr << "Pulsar::FITSArchive::load_Integration setting channel freqs" 
 	 << endl;
 
@@ -1040,7 +978,7 @@ Pulsar::FITSArchive::load_Integration (const char* filename, unsigned isubint)
   double chanbw = get_bandwidth() / get_nchan();
   
   if ( all_ones ) {
-    if (verbose)
+    if (verbose == 3)
       cerr << "FITSArchive::load_Integration all frequencies unity - reseting" << endl;
     for (unsigned j = 0; j < get_nchan(); j++) {
       integ->set_frequency (j, get_centre_frequency()
@@ -1055,7 +993,7 @@ Pulsar::FITSArchive::load_Integration (const char* filename, unsigned isubint)
   
   // Load the profile scale factors
   
-  if (verbose)
+  if (verbose == 3)
     cerr << "Pulsar::FITSArchive::load_Integration reading scale factors" 
 	 << endl;
 
@@ -1073,7 +1011,7 @@ Pulsar::FITSArchive::load_Integration (const char* filename, unsigned isubint)
 
   // Load the profile offsets
   
-  if (verbose)
+  if (verbose == 3)
     cerr << "Pulsar::FITSArchive::load_Integration reading offsets" 
 	 << endl;
   
@@ -1091,7 +1029,7 @@ Pulsar::FITSArchive::load_Integration (const char* filename, unsigned isubint)
 
   // Load the data
   
-  if (verbose)
+  if (verbose == 3)
     cerr << "Pulsar::FITSArchive::load_Integration reading profiles" 
 	 << endl;
   
@@ -1146,7 +1084,7 @@ Pulsar::FITSArchive::load_Integration (const char* filename, unsigned isubint)
   delete [] temparray; 
   delete [] fltarray;
   
-  if (verbose)
+  if (verbose == 3)
     cerr << "Pulsar::FITSArchive::load_Integration load complete" << endl;  
   
   // Finished with the file for now
@@ -1173,7 +1111,7 @@ void Pulsar::FITSArchive::unload_file (const char* filename) const
                  "filename unspecified");
 try {
 
-  if (verbose)
+  if (verbose == 3)
     cerr << "FITSArchive::unload_file (" << filename << ")" << endl
 	 << "  with " << get_nextension() << " Extensions" << endl;
 
@@ -1189,7 +1127,7 @@ try {
     throw Error (FailedCall,
   		 "FITSArchive::unload_file", "PSRFITSDEFN not defined");
  
-  if (verbose)
+  if (verbose == 3)
     cerr << "FITSArchive::unload_file creating file " 
 	 << filename << endl << "   using template " << template_file << endl;
 
@@ -1209,7 +1147,7 @@ try {
      except that they do not cause segmentation faults.
   */
 
-  if (verbose)
+  if (verbose == 3)
     cerr << "FITSArchive::unload_file call fits_create_file "
       "(" << clobbername << ")" << endl;
 
@@ -1218,7 +1156,7 @@ try {
     throw FITSError (status, "FITSArchive::unload_file",
 		     "fits_create_file (%s)", clobbername.c_str());
 
-  if (verbose)
+  if (verbose == 3)
     cerr << "FITSArchive::unload_file call fits_execute_template "
       "(" << template_file << ")" << endl;
 
@@ -1256,7 +1194,7 @@ try {
 
   if (hdr_ext) {
 
-    if (verbose)
+    if (verbose == 3)
       cerr << "Pulsar::FITSArchive::unload_file FITSHdrExtension" << endl;
 
     unload (fptr, hdr_ext);
@@ -1303,7 +1241,7 @@ try {
   }
 
   {
-    const BackendExtension* ext = get<BackendExtension>();
+    const WidebandCorrelator* ext = get<WidebandCorrelator>();
     if (ext) 
       unload (fptr, ext);
   }
@@ -1360,7 +1298,7 @@ try {
     throw FITSError (status, "FITSArchive::unload_file",
 		     "fits_update_key STT_MJD");
 
-  if (verbose)
+  if (verbose == 3)
     cerr << "FITSArchive::unload_file finished in primary header" << endl;
   
   // Finished with primary header information
@@ -1378,7 +1316,7 @@ try {
 
   unload (fptr, history);
   
-  if (verbose)
+  if (verbose == 3)
     cerr << "FITSArchive::unload_file finished with processing history" 
 	 << endl;
 
@@ -1389,7 +1327,7 @@ try {
     ephemeris->set_dm(dispersion_measure);
     ephemeris->unload(fptr);
 
-    if (verbose)
+    if (verbose == 3)
       cerr << "FITSArchive::unload_file ephemeris written" << endl;
 
   }
@@ -1403,7 +1341,7 @@ try {
 
    model->unload(fptr);
   
-   if (verbose)
+   if (verbose == 3)
      cerr << "FITSArchive::unload_file polyco written" << endl;
 
   }
@@ -1449,7 +1387,7 @@ try {
     throw FITSError (status, "Pulsar::FITSArchive::unload_file",
 		     "fits_close_file");
 
-  if (verbose)
+  if (verbose == 3)
     cerr << "FITSArchive::unload_file fits_close_file " << "(" << filename 
 	 << ")" << " complete" << endl;
 }
@@ -1478,9 +1416,9 @@ void Pulsar::FITSArchive::unload_integration (int row,
 
   if (get<Pulsar::IntegrationOrder>()) {
     has_alt_order = true;
-    if (verbose)
+    if (verbose == 3)
       cerr << "FITSArchive::unload_integration using " 
-	   << get<Pulsar::IntegrationOrder>()->get_name()
+	   << get<Pulsar::IntegrationOrder>()->get_extension_name()
 	   << endl;
   }
 
@@ -1517,7 +1455,7 @@ void Pulsar::FITSArchive::unload_integration (int row,
     throw FITSError (status, "FITSArchive:unload_integration",
 		     "fits_write_col OFFS_SUB");
   
-  if (verbose)
+  if (verbose == 3)
     cerr << "FITSArchive::unload_integration OFFS_SUB set" << endl;
   
   // Set the duration of the integration
@@ -1536,7 +1474,7 @@ void Pulsar::FITSArchive::unload_integration (int row,
     throw FITSError (status, "FITSArchive:unload_integration",
 		     "fits_write_col TSUBINT");
   
-  if (verbose)
+  if (verbose == 3)
     cerr << "FITSArchive::unload_integration TSUBINT set" << endl;
   
   // Write out the index values, if applicable
@@ -1606,7 +1544,7 @@ void Pulsar::FITSArchive::unload_integration (int row,
 
   // Start writing profiles
   
-  if (verbose)
+  if (verbose == 3)
     cerr << "FITSArchive::unload_integration writing profiles" << endl;
 
   // Resize the FITS column arrays
@@ -1672,7 +1610,7 @@ void Pulsar::FITSArchive::unload_integration (int row,
 	}
       }
       
-      if (verbose) {
+      if (verbose == 3) {
 	cerr << "FITSArchive::unload_integration got profile" << endl;
 	cerr << "nchan = " << b << endl;
 	cerr << "npol  = " << a << endl;
@@ -1685,7 +1623,7 @@ void Pulsar::FITSArchive::unload_integration (int row,
       else
 	offset = min;
 
-      if (verbose)
+      if (verbose == 3)
 	cerr << "FITSArchive::unload_integration offset = "
 	     << offset
 	     << endl;
@@ -1694,7 +1632,7 @@ void Pulsar::FITSArchive::unload_integration (int row,
       
       // Test for dynamic range
       if (fabs(min - max) < 0.000001) {
-	if (verbose) {
+	if (verbose == 3) {
 	  cerr << "FITSArchive::unload_integration WARNING no range in profile"
 	       << endl;
 	}
@@ -1703,7 +1641,7 @@ void Pulsar::FITSArchive::unload_integration (int row,
 	// Find the scale factor
 	scalefac = (max - min) / max_short;
       
-      if (verbose)
+      if (verbose == 3)
 	cerr << "FITSArchive::unload_integration scalefac = "
 	     << scalefac
 	     << endl;
@@ -1716,7 +1654,7 @@ void Pulsar::FITSArchive::unload_integration (int row,
 
       // Write the scale factor to file
 
-      if (verbose)
+      if (verbose == 3)
 	cerr << "FITSArchive::unload_integration writing scale fac" << endl;
 
       colnum = 0;
@@ -1735,7 +1673,7 @@ void Pulsar::FITSArchive::unload_integration (int row,
       
       // Write the offset to file
 
-      if (verbose)
+      if (verbose == 3)
 	cerr << "FITSArchive::unload_integration writing offset" << endl;
 
       colnum = 0;
@@ -1756,7 +1694,7 @@ void Pulsar::FITSArchive::unload_integration (int row,
 
       // Write the data
 
-      if (verbose)
+      if (verbose == 3)
 	cerr << "FITSArchive:unload_integration writing data" << endl;
 
       colnum = 0;
@@ -1775,7 +1713,7 @@ void Pulsar::FITSArchive::unload_integration (int row,
 
       counter2 = counter2 + nbin;
 	
-      if (verbose)
+      if (verbose == 3)
 	cerr << "FITSArchive:unload_integration looping" << endl;
       
       delete[] temparray1;
@@ -1784,7 +1722,7 @@ void Pulsar::FITSArchive::unload_integration (int row,
   
   delete[] temparray2;
   
-  if (verbose)
+  if (verbose == 3)
     cerr << "FITSArchive::unload_integration finished" << endl;
 }
 
@@ -1807,14 +1745,14 @@ bool Pulsar::FITSArchive::Agent::advocate (const char* filename)
   int status = 0;
   char error[FLEN_ERRMSG];
 
-  if (verbose)
+  if (verbose == 3)
     cerr << "Pulsar::FITSArchive::Agent::advocate test " << filename << endl;
 
   fits_open_file(&test_fptr, filename, READONLY, &status);
 
   if (status != 0) {
 
-    if (Archive::verbose) {
+    if (Archive::verbose == 3) {
       fits_get_errstatus (status, error);
       cerr << "FITSAgent::advocate fits_open_file: " << error << endl;
     }

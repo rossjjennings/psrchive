@@ -1,5 +1,8 @@
 #include "Pulsar/FITSArchive.h"
+#include "Pulsar/Integration.h"
 #include "Pulsar/ProcHistory.h"
+#include "Pulsar/Receiver.h"
+
 #include "string_utils.h"
 
 void Pulsar::FITSArchive::update_history()
@@ -19,6 +22,8 @@ void Pulsar::FITSArchive::update_history()
   
   history->get_last().proc_cmd = history->get_command_str();
   
+  history->get_last().scale = get_scale();
+
   if (get_state() == Signal::PPQQ)
     history->get_last().pol_type = "XXYY";
   else if (get_state() == Signal::Stokes)
@@ -44,20 +49,24 @@ void Pulsar::FITSArchive::update_history()
   history->get_last().ctr_freq = get_centre_frequency();
   history->get_last().nchan = get_nchan();
   history->get_last().chanbw = get_bandwidth() / float(get_nchan());
-  history->get_last().par_corr = get_parallactic_corrected();
-  history->get_last().rm_corr = get_ism_rm_corrected();
+  history->get_last().rm_corr = get_faraday_corrected();
   history->get_last().dedisp = get_dedispersed();
-  
+
+  Receiver* receiver = get<Receiver>();
+  if (!receiver) {
+    history->get_last().par_corr = false;
+    history->get_last().fa_corr = false;
+  }
+  else {
+    history->get_last().par_corr = receiver->get_platform_corrected();
+    history->get_last().fa_corr = receiver->get_feed_corrected();
+  }
+
   if (get_poln_calibrated())
     history->get_last().cal_mthd = history->get_cal_mthd();
   else
     history->get_last().cal_mthd = "NONE";
-  
-  if (get_flux_calibrated())
-    history->get_last().sc_mthd = history->get_sc_mthd();
-  else
-    history->get_last().sc_mthd = "NONE";
-  
+
   history->get_last().cal_file = history->get_cal_file();
   history->get_last().rfi_mthd = history->get_rfi_mthd();;
 }
