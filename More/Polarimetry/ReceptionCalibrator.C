@@ -276,7 +276,7 @@ void Pulsar::ReceptionCalibrator::calibrate (Archive* data)
   if (!uncalibrated->calibrator_match (data, reason))
     throw Error (InvalidParam, "Pulsar::ReceptionCalibrator::calibrate",
 		 "'" + data->get_filename() + "' does not match "
-		 "'" + uncalibrated->get_filename() "'" + reason);
+		 "'" + uncalibrated->get_filename() + "'" + reason);
 
   unsigned nsub = data->get_nsubint ();
   unsigned nchan = data->get_nchan ();
