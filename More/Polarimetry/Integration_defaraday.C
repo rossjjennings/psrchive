@@ -28,8 +28,7 @@ void Pulsar::Integration::defaraday (double rm, double rm_iono)
     double frequency = get_frequency(ichan);
     double inv_freq_sq = 1e-12 / (frequency * frequency);
     
-    phase = 2.0 * c_sq * (rm * (inv_cfreq_sq-inv_freq_sq)
-			  - rm_iono * inv_freq_sq);
+    phase = 2.0 * c_sq * (rm*(inv_cfreq_sq-inv_freq_sq)-rm_iono*inv_freq_sq);
     
     float sp = sin(phase.getradians());
     float cp = cos(phase.getradians());
@@ -37,31 +36,37 @@ void Pulsar::Integration::defaraday (double rm, double rm_iono)
     if(verbose) cerr << "Integration::defaraday rotating: " 
 		     << ichan << "\t" << cp << "  " << sp << endl;
     
-    Pulsar::Profile Qtemp;
-    Pulsar::Profile Utemp;
+    float Qtemp[get_nbin()];
+    float Utemp[get_nbin()];
+
+    float Qnew[get_nbin()];
     
-    Qtemp = *(profiles[1][ichan]);
-    Utemp = *(profiles[2][ichan]);
+    for (unsigned ibin = 0; ibin < get_nbin(); ibin++) {
+      Qtemp[ibin] = ((profiles[1][ichan])->get_amps())[ibin];
+      Utemp[ibin] = ((profiles[2][ichan]->get_amps()))[ibin];
+    }
+
+    for (unsigned ibin = 0; ibin < get_nbin(); ibin++) {
+      Qtemp[ibin] *= cp;
+      Utemp[ibin] *= sp;
+      
+      Qnew[ibin] = Qtemp[ibin] - Utemp[ibin];
+    }
     
-    Qtemp *= cp;
-    Utemp *= sp;
+    for (unsigned ibin = 0; ibin < get_nbin(); ibin++) {
+      Qtemp[ibin] = ((profiles[1][ichan])->get_amps())[ibin];
+      Utemp[ibin] = ((profiles[2][ichan]->get_amps()))[ibin];
+    }
+
+    for (unsigned ibin = 0; ibin < get_nbin(); ibin++) {
+      Qtemp[ibin] *= sp;
+      Utemp[ibin] *= cp;
+      
+      Utemp[ibin] += Qtemp[ibin];
+    }
     
-    Qtemp -= Utemp;
-    
-    Reference::To<Pulsar::Profile> Qnew = Qtemp.clone();
-    
-    Qtemp = *(profiles[1][ichan]);
-    Utemp = *(profiles[2][ichan]);
-    
-    Utemp *= cp;
-    Qtemp *= sp;
-    
-    Utemp += Qtemp;
-    
-    Reference::To<Pulsar::Profile> Unew = Utemp.clone();
-    
-    profiles[1][ichan] = Qnew;
-    profiles[2][ichan] = Unew;
+    (profiles[1][ichan])->set_amps(Qnew);
+    (profiles[2][ichan])->set_amps(Utemp);    
   }
 }
 
