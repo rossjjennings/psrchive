@@ -20,8 +20,8 @@ void EstimatePlotter::plot ()
 
 void EstimatePlotter::set_xrange (float xmin, float xmax)
 {
-  x_min = xmin;
-  x_max = xmax;
+  xrange_min = xmin;
+  xrange_max = xmax;
 }
 
 void EstimatePlotter::plot (unsigned index)
