@@ -12,7 +12,7 @@
 
 void Pulsar::FITSArchive::init ()
 {
-  history = new FITSHistory ();
+  history = new ProcHistory ();
 
   chanbw = 0.0;
   digitiser_statistics.resize(0);
@@ -698,7 +698,7 @@ void Pulsar::FITSArchive::load_header (const char* filename)
   
   // Load the processing history
   
-  history->load (fptr);
+  load_hist (fptr);
   
   set_nbin (history->get_last()->nbin);
   set_npol (history->get_last()->npol);
@@ -1599,7 +1599,7 @@ try {
     
   // Move to the Processing History HDU and set more information
   
-  history->unload (myfptr);
+  unload_hist (myfptr);
   
   if (verbose) {
     cerr << "FITSArchive::unload_file finished with processing history" 

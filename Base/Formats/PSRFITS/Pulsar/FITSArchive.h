@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/PSRFITS/Pulsar/FITSArchive.h,v $
-   $Revision: 1.5 $
-   $Date: 2003/06/14 01:53:31 $
+   $Revision: 1.6 $
+   $Date: 2003/06/19 03:46:08 $
    $Author: ahotan $ */
 
 #include <fitsio.h>
@@ -10,7 +10,7 @@
 #define PSRFITS 1
 #include "Pulsar/BasicArchive.h"
 #include "Pulsar/FITSHdrExtension.h"
-#include "Pulsar/FITSHistory.h"
+#include "Pulsar/ProcHistory.h"
 #include "Pulsar/CalInfoExtension.h"
 #include "Pulsar/ObsExtension.h"
 #include "Pulsar/ITRFExtension.h"
@@ -203,8 +203,13 @@ namespace Pulsar {
     //! Channel bandwidth
     double chanbw;
     
-    FITSHistory* history;
+    ProcHistory* history;
     
+    void load_hist (fitsfile* fptr);
+    void unload_hist (fitsfile* fptr) const;
+    void load_hist_row (fitsfile* fptr, int row);
+    void unload_hist_row (fitsfile* fptr, int row) const;
+			  
     vector<digistat*> digitiser_statistics;
     
     digicount* digitiser_counts;
