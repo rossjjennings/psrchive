@@ -45,19 +45,21 @@ void Tempo::fit (const psrephem& model, vector<toa>& toas,
   int      unloaded = 0;       // count of toas unloaded
   double   sumphase = 0.0;     // phase sum used for tracking mode
   unsigned iarr;
-
+  
   for (iarr=0; iarr < toas.size(); iarr++)  {
-
+    
     if (toas[iarr].get_state() < min_state)
-      continue;
-
-    if (track && !toas[iarr].resid.valid) {
-      cerr << "Tempo::fit invalid residual for toa #" << unloaded + 1
-	   << " ... tracking disabled" << endl;
-      track = false;
-    }
-
-    if (track)  {
+      if (toas[iarr].get_format() != Tempo::toa::Command)
+	continue;
+    
+    if (toas[iarr].get_format() != Tempo::toa::Command)
+      if (track && !toas[iarr].resid.valid) {
+	cerr << "Tempo::fit invalid residual for toa #" << unloaded + 1
+	     << " ... tracking disabled" << endl;
+	track = false;
+      }
+    
+    if (track && (toas[iarr].get_format() != Tempo::toa::Command)) {
       
       if (unloaded == 0)
 	sumphase = toas[iarr].resid.turns;

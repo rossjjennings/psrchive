@@ -299,21 +299,8 @@ int Tempo::toa::Command_load (const char* instring)
 
   format = Command;
 
-  if ( strstr(instring, "JUMP") ) {
-    auxinfo = "JUMP";
-    return 0;
-  }
+  auxinfo = instring;
   
-  if ( strstr(instring, "NOSKIP") ) {
-    auxinfo = "NOSKIP";
-    return 0;
-  }
-
-  if ( strstr(instring, "SKIP") ) {
-    auxinfo = "SKIP";
-    return 0;
-  }
-
   return -1;
 }
 
@@ -346,7 +333,10 @@ int Tempo::toa::load (const char* instring)
   if ( !instring )
     return -1;
   
-  if ( instring[0] == 'J' || instring[0] == 'S')
+  if ( instring[0] == 'J' || instring[0] == 'S' || instring[0] == 'M' || 
+       instring[0] == 'E' || instring[0] == 'D' || instring[0] == 'F' ||
+       instring[0] == 'I' || instring[0] == 'N' || instring[0] == 'P' ||
+       instring[0] == 'T' || instring[0] == 'Z' )
     return Command_load( instring );
   
   else if ( isdigit( instring[0] ) )
