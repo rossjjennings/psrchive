@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/FluxCalibrator.h,v $
-   $Revision: 1.11 $
-   $Date: 2003/11/01 06:40:10 $
-   $Author: ahotan $ */
+   $Revision: 1.12 $
+   $Date: 2004/07/22 07:08:22 $
+   $Author: straten $ */
 
 #ifndef __Pulsar_FluxCalibrator_H
 #define __Pulsar_FluxCalibrator_H
@@ -40,8 +40,8 @@ namespace Pulsar {
     //! Default constructor
     FluxCalibrator ();
 
-    //! Construct from an vector of FluxCal Pulsar::Archives
-    FluxCalibrator (const vector<Archive*>& archives);
+    //! Construct from a vector of FluxCal Pulsar::Archives
+    FluxCalibrator (const vector<const Archive*>& archives);
 
     //! Return Calibrator::Flux
     Type get_type () const;
