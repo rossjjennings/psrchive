@@ -87,17 +87,11 @@ void Pulsar::IntegrationManager::resize (unsigned nsubint, bool instances)
     cerr << "Pulsar::IntegrationManager::resize nsub=" << nsubint
 	 << "  old nsub=" << cur_nsub  << endl;
 
-  unsigned isub;
-  for (isub=nsubint; isub<cur_nsub; isub++)
-    delete subints[isub];
-
   subints.resize (nsubint);
 
-  for (isub=cur_nsub; isub<nsubint; isub++)
-    if (instances)
+  if (instances)
+    for (unsigned isub=cur_nsub; isub<nsubint; isub++)
       subints[isub] = new_Integration ();
-    else
-      subints[isub] = 0;
 
   set_nsubint (nsubint);
 
