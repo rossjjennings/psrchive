@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/MJD.h,v $
-   $Revision: 1.18 $
-   $Date: 2003/01/31 10:29:51 $
-   $Author: straten $ */
+   $Revision: 1.19 $
+   $Date: 2003/03/14 01:36:20 $
+   $Author: pulsar $ */
 
 #ifndef __MJD_H
 #define __MJD_H
@@ -134,11 +134,11 @@ class MJD {
 
   int print (FILE *stream);
   int println (FILE *stream);
-  char * printall()    const;
-  char * printdays()   const;
-  char * printhhmmss() const;
-  char * printfs()     const;
-  char * strtempo() const; 
+  const char* printall()    const;
+  const char * printdays()   const;
+  const char * printhhmmss() const;
+  const char * printfs()     const;
+  const char * strtempo() const; 
 
   // returns a string formatted as in 'strftime()'
   char* datestr (char* dstr, int len, const char* format) const;

@@ -1,4 +1,9 @@
 #include <iostream>
+#include <algorithm>
+#include <memory>
+#include <string>
+#include <vector>
+
 #include <string.h>
 #include <stdio.h>
 #include <sys/time.h>
@@ -15,6 +20,8 @@
 
 #include "MJD.h"
 #include "f772c.h"
+
+#define RINGBUFFER_SIZE 10
 
 int MJD::verbose = 0;
 
@@ -55,34 +62,72 @@ string MJD::printdays (unsigned prec) const
   return output;
 }
 
-char * MJD::printdays() const {
-  static char permanent[10];
-  sprintf(permanent, "%d",days);
-  return (permanent);
+const char * MJD::printdays() const {
+  static vector<string> ringbuffer(RINGBUFFER_SIZE);
+  static string* rb_ptr = ringbuffer.begin();
+ 
+  rb_ptr++;
+  if( rb_ptr==ringbuffer.end() )
+    rb_ptr = ringbuffer.begin();
+ 
+  char dummy[10];
+  sprintf(dummy, "%d",days);
+  *rb_ptr = dummy;
+
+  return rb_ptr->c_str();
 }
 
-char * MJD::printhhmmss() const {
-  static char permanent[10];
+const char * MJD::printhhmmss() const {
+  static vector<string> ringbuffer(RINGBUFFER_SIZE);
+  static string* rb_ptr = ringbuffer.begin();
+
+  rb_ptr++;
+  if( rb_ptr==ringbuffer.end() )
+    rb_ptr = ringbuffer.begin();
+
+  char dummy[10];
   int hh, mm, ss;
 
   ss2hhmmss (&hh, &mm, &ss, secs);
 
-  sprintf(permanent,"%2.2d%2.2d%2.2d",hh,mm,ss);
-  return (permanent);
+  sprintf(dummy,"%2.2d%2.2d%2.2d",hh,mm,ss);
+
+  *rb_ptr = dummy;
+
+  return rb_ptr->c_str();
 }
 
-char * MJD::printfs() const {
-  static char permanent[20];
+const char * MJD::printfs() const {
+  static vector<string> ringbuffer(RINGBUFFER_SIZE);
+  static string* rb_ptr = ringbuffer.begin();
+
+  rb_ptr++;
+  if( rb_ptr==ringbuffer.end() )
+    rb_ptr = ringbuffer.begin();
+
+  char dummy[20];
   char temp[20];
   sprintf(temp,"%.15lf",fracsec);
-  strcpy(permanent,&temp[1]);   // Chomp off leading 0
-  return (permanent);
+  strcpy(dummy,&temp[1]);   // Chomp off leading 0
+  
+  *rb_ptr = dummy;
+
+  return rb_ptr->c_str();
 }
 
-char * MJD::printall() const {
-  static char permanent[40];
-  sprintf(permanent,"%s:%s%s",printdays(),printhhmmss(),printfs());
-  return (permanent);
+const char* MJD::printall() const {
+  static vector<string> ringbuffer(RINGBUFFER_SIZE);
+  static string* rb_ptr = ringbuffer.begin();
+
+  rb_ptr++;
+  if( rb_ptr==ringbuffer.end() )
+    rb_ptr = ringbuffer.begin();
+
+  char dummy[40];
+  sprintf(dummy,"%s:%s%s",printdays(),printhhmmss(),printfs());
+  *rb_ptr = dummy;
+
+  return rb_ptr->c_str();
 }
 
 char* MJD::datestr (char* dstr, int len, const char* format) const
@@ -96,13 +141,23 @@ char* MJD::datestr (char* dstr, int len, const char* format) const
   return dstr;
 }
 
-char * MJD::strtempo() const{
-  static char permanent[40];
+const char * MJD::strtempo() const{
+  static vector<string> ringbuffer(RINGBUFFER_SIZE);
+  static string* rb_ptr = ringbuffer.begin();
+
+  rb_ptr++;
+  if( rb_ptr==ringbuffer.end() )
+    rb_ptr = ringbuffer.begin();
+
+  char dummy[40];
   char temp[20];
   sprintf(temp,"%14.11lf",fracday());
   char* period = strchr (temp, '.');
-  sprintf(&permanent[0],"%5d.%s",days,period+1);
-  return (permanent);
+  sprintf(&dummy[0],"%5d.%s",days,period+1);
+
+  *rb_ptr = dummy;
+
+  return rb_ptr->c_str();
 }
 
 double MJD::in_seconds() const {
