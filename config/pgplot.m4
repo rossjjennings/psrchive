@@ -32,6 +32,7 @@ AC_DEFUN([SWIN_LIB_PGPLOT],
   AC_PROVIDE([SWIN_LIB_PGPLOT])
   AC_REQUIRE([AC_F77_LIBRARY_LDFLAGS])
   AC_REQUIRE([SWIN_LIB_X11])
+  AC_REQUIRE([AC_F77_WRAPPERS])
 
   AC_ARG_WITH([pgplot-extra],
               AC_HELP_STRING([--with-pgplot-extra=LIBS],
@@ -64,6 +65,13 @@ AC_DEFUN([SWIN_LIB_PGPLOT],
 
   AC_MSG_RESULT($have_pgplot)
 
+  if test $have_pgplot = yes; then
+    AC_MSG_CHECKING([for Qt driver in PGPLOT library])
+    AC_TRY_LINK([char F77_FUNC(qtdriv,QTDRIV)();],[F77_FUNC(qtdriv,QTDRIV)();],
+                have_qtdriv=yes, have_qtdriv=no)
+    AC_MSG_RESULT($have_qtdriv)
+  fi
+
   LIBS="$ac_save_LIBS"
   CFLAGS="$ac_save_CFLAGS"
 
@@ -80,9 +88,16 @@ AC_DEFUN([SWIN_LIB_PGPLOT],
     [$2]
   fi
 
+  if test x"$have_qtdriv" = xyes; then
+    AC_DEFINE([HAVE_QTDRIV], [1], [Define if PGPLOT library has Qt driver])
+  else
+    AC_MSG_WARN([PSRCHIVE rhythm will not be compiled])
+  fi
+
   AC_SUBST(PGPLOT_CFLAGS)
   AC_SUBST(PGPLOT_LIBS)
   AM_CONDITIONAL(HAVE_PGPLOT, [test x"$have_pgplot" = xyes])
+  AM_CONDITIONAL(HAVE_QTDRIV, [test x"$have_qtdriv" = xyes])
 
 ])
 
