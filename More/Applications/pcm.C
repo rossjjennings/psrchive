@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pcm.C,v $
-   $Revision: 1.28 $
-   $Date: 2004/07/21 05:27:41 $
+   $Revision: 1.29 $
+   $Date: 2004/07/22 14:03:35 $
    $Author: straten $ */
 
 /*! \file pcm.C 
@@ -30,11 +30,12 @@
 
 */
 
-
-#include "Pulsar/ReceptionCalibratorPlotter.h"
 #include "Pulsar/ReceptionCalibrator.h"
 #include "Pulsar/PulsarCalibrator.h"
 #include "Pulsar/Database.h"
+
+#include "Pulsar/ReceptionCalibratorPlotter.h"
+#include "Pulsar/SourceInfo.h"
 
 #include "Pulsar/Plotter.h"
 #include "Pulsar/Archive.h"
@@ -131,6 +132,24 @@ void range_select (Pulsar::ReceptionCalibrator& model,
   }
 }
 
+void plot_pulsar (Pulsar::ReceptionCalibratorPlotter& plotter,
+		  Pulsar::ReceptionCalibrator& model)
+{
+  unsigned nstate = model.get_nstate_pulsar();
+  double centre_frequency = model.get_Archive()->get_centre_frequency();
+  double bandwidth = model.get_Archive()->get_bandwidth();
+
+  Reference::To<Pulsar::SourceInfo> info;
+
+  for (unsigned istate=0; istate<nstate; istate++) {
+
+    info = new Pulsar::SourceInfo (&model, istate);
+
+    cpgpage();
+    plotter.plot (info, model.get_nchan(), centre_frequency, bandwidth);
+
+  }
+}
 
 void plot_constraints (Pulsar::ReceptionCalibratorPlotter& plotter,
 		       unsigned nchan, unsigned nstate, unsigned nplot,
@@ -679,7 +698,6 @@ int main (int argc, char *argv[]) try {
   if (display) {
 
     cpgbeg (0, "result.ps/CPS", 0, 0);
-    cpgask(1);
     cpgsvp (0.1,.9, 0.1,.9);
 
     cerr << "pcm: plotting model receiver" << endl;
@@ -689,6 +707,14 @@ int main (int argc, char *argv[]) try {
 
     cerr << "pcm: plotting calibrated CAL" << endl;
     plotter.plotcal();
+
+    cpgend ();
+
+    cpgbeg (0, "source.ps/CPS", 0, 0);
+    cpgsvp (0.1,.9, 0.1,.9);
+
+    cerr << "pcm: plotting model pulsar states" << endl;
+    plot_pulsar (plotter, model);
 
     cpgend ();
 
