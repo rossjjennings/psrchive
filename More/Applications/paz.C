@@ -21,6 +21,7 @@ int main (int argc, char *argv[]) {
   vector<string> archives;
   
   bool manual_zap = false;
+  string killfile;
   vector<int> chans_to_zap;
 
   bool zap_subints = false;
@@ -36,9 +37,9 @@ int main (int argc, char *argv[]) {
   
   bool std_given = false;
   Reference::To<Pulsar::Profile> thestd;
-
+  
   string ext;
-
+  
   int placeholder;
   
   int first;
@@ -48,7 +49,7 @@ int main (int argc, char *argv[]) {
   char* key = NULL;
   char whitespace[5] = " \n\t";
   
-  while ((gotc = getopt(argc, argv, "hvVDme:z:Z:dE:s:S:P:")) != -1) {
+  while ((gotc = getopt(argc, argv, "hvVDme:z:k:Z:dE:s:S:P:")) != -1) {
     switch (gotc) {
     case 'h':
       cout << "A program for zapping RFI in Pulsar::Archives"                     << endl;
@@ -58,13 +59,17 @@ int main (int argc, char *argv[]) {
       cout << "  -D               Display results"                                << endl;
       cout << "  -m               Modify the original files on disk"              << endl;
       cout << "  -e               Unload to new files using this extension"       << endl;
-      cout << "  -z \"list\"        Zap these particular channels"                << endl;
+      cout << "  -z \"a b c ...\"   Zap these particular channels"                << endl;
+      cout << "  -k \"filename\"    Zap chans listed in filename"                 << endl;
       cout << "  -Z \"a b\"         Zap chans between a and b"                    << endl;
       cout << "  -E percent       Zap band edges"                                 << endl;
       cout << "  -s \"list\"        Zap these sub-integrations"                   << endl;
       cout << "  -d               Simple mean offset spike rejection"             << endl;
       cout << "  -S cutoff        Zap channels based on S/N (using std if given)" << endl;
       cout << "  -P               Use this standard profile"                      << endl;
+      cout << endl;
+      cout << "The format of the kill file used with the -k option is simply"    << endl;
+      cout << "a list of channel numbers, separated by spaces or newlines."  << endl;
       return (-1);
       break;
     case 'v':
@@ -80,6 +85,9 @@ int main (int argc, char *argv[]) {
     case 'm':
       write = true;
       break;
+    case 'k':
+      killfile = optarg;
+      manual_zap = true;
     case 'z':
       key = strtok (optarg, whitespace);
       manual_zap = true;
@@ -217,6 +225,24 @@ int main (int argc, char *argv[]) {
 	cout << "Zapping complete" << endl;
       }
       else if (manual_zap) {
+	if (!killfile.empty()) {
+	  vector<int> some_chans;
+	  char* useful = new char[4096];
+	  FILE* fptr = fopen(killfile.c_str(), "r");
+	  while (fgets(useful, 4096, fptr)) {
+	    key = strtok (useful, whitespace);
+	    while (key) {
+	      if (sscanf(key, "%d", &placeholder) == 1) {
+		some_chans.push_back(placeholder);
+	      }
+	      key = strtok (NULL, whitespace);
+	    }
+	    for (unsigned x = 0; x < some_chans.size(); x++)
+	      chans_to_zap.push_back(some_chans[x]);
+	    some_chans.resize(0);
+	  }
+	  delete[] useful;
+	}
 	if (chans_to_zap.empty()) {
 	  vector<float> mask(nchan, 1.0);
 	  if ((last > nchan) || (first > last) || (first < 0)) {
