@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/EstimatePlotter.h,v $
-   $Revision: 1.8 $
-   $Date: 2003/11/25 09:09:15 $
+   $Revision: 1.9 $
+   $Date: 2004/06/22 06:02:51 $
    $Author: straten $ */
 
 #ifndef __EstimatePlotter_h
@@ -142,7 +142,9 @@ void EstimatePlotter::add_plot (const vector< Estimate<T> >& data)
   vector<float>& y = yval.back();
   vector<float>& ye = yerr.back();
 
-  double xscale = double(xrange_max - xrange_min) / double(npt-1);
+  double xscale = 0.0;
+  if (npt > 1)
+    xscale = double(xrange_max - xrange_min) / double(npt-1);
 
   MeanEstimate<T> mean;
 

@@ -169,6 +169,11 @@ void EstimatePlotter::set_viewport (unsigned index)
       double scale = (vp_y2 - vp_y1) / total_size;
       cpgsvp (vp_x1, vp_x2, vp_y1+scale*start_size, vp_y1+scale*end_size);
       float xbuf = x_border * (data_xmax[index]-data_xmin[index]);
+      if (xbuf == 0)
+        xbuf = data_xmin[index] * 0.25;
+
+      // cerr << "xswin " << data_xmin[index]-xbuf << " " << data_xmax[index]+xbuf << " " << data_ymin[index]-buffer << " " << data_ymax[index]+buffer << endl;
+
       cpgswin (data_xmin[index]-xbuf, data_xmax[index]+xbuf, 
 	       data_ymin[index]-buffer, data_ymax[index]+buffer);
     }
@@ -176,6 +181,11 @@ void EstimatePlotter::set_viewport (unsigned index)
       double scale = (vp_x2 - vp_x1) / total_size;
       cpgsvp (vp_x1+scale*start_size, vp_x1+scale*end_size, vp_y1, vp_y2);
       float ybuf = y_border * (data_ymax[index]-data_ymin[index]);
+      if (ybuf == 0)
+        ybuf = data_ymin[index] * 0.25;
+
+      // cerr << "xswin " << data_xmin[index]-buffer << " " << data_xmax[index]+buffer << " " << data_ymin[index]-ybuf << " " << data_ymax[index]+ybuf << endl;
+
       cpgswin (data_xmin[index]-buffer, data_xmax[index]+buffer, 
 	       data_ymin[index]-ybuf, data_ymax[index]+ybuf);
     }
@@ -199,7 +209,14 @@ void EstimatePlotter::restore_viewport ()
 void EstimatePlotter::set_world (float x1, float x2, float y1, float y2)
 {
   float xbuf = x_border * (x2-x1);
+  if (xbuf == 0.0)
+    xbuf = 0.25 * x1;
   float ybuf = y_border * (y2-y1);
+  if (ybuf == 0.0)
+    ybuf = 0.25 * y1;
+
+  // cerr << "x1=" << x1 << " x2=" << x2 << endl;
+  // cerr << "swin " << x1-xbuf << " " <<  x2+xbuf << " " << y1-ybuf << " " << y2+ybuf << endl;
 
   cpgswin (x1-xbuf, x2+xbuf, y1-ybuf, y2+ybuf);
 }
@@ -288,7 +305,9 @@ void EstimatePlotter::minmax (bool& xrange, float& xmin, float& xmax,
     if (x[ipt] > xmax)
       xmax = x[ipt];
   }
-  
+
+  // cerr << "xmin=" << xmin << " xmax=" << xmax << endl;
+
 }
 
 void EstimatePlotter::clear ()
