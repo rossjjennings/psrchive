@@ -32,6 +32,7 @@ class Phase {
   friend Phase operator - (const Phase &, double); 
   friend Phase operator + (const Phase &, const Phase &);
   friend Phase operator - (const Phase &, const Phase &);
+  friend Phase operator - (const Phase &);
 
   // some may disagree with this usage of the operator
   friend MJD operator * (const Phase &, double period);
@@ -56,6 +57,7 @@ class Phase {
 
   Phase Ceil  ();
   Phase Floor ();
+  Phase Nint  ();
 
   double in_turns() const;
   int64  intturns() const;

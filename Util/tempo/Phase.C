@@ -98,6 +98,11 @@ Phase operator - (const Phase &p1, const Phase &p2) {
 	       p1.fturns - p2.fturns); 
 }
 
+Phase operator - (const Phase &p) {
+  return Phase( -p.turns, -p.fturns );
+}
+
+
 // period is assumed to be given in seconds
 MJD operator * (const Phase &p1, double period) 
 {
@@ -222,4 +227,9 @@ Phase Phase::Ceil ()
 Phase Phase::Floor ()
 {
   return Phase (turns + (int64) floor(fturns), 0.0);
+}
+
+Phase Phase::Nint ()
+{
+  return Phase (turns + (int64) nint(fturns), 0.0);
 }
