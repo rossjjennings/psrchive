@@ -112,9 +112,13 @@ const Cartesian operator / (const Cartesian& cart, double linear)
 }  
 
 // cross product
-const Cartesian operator % (const Cartesian &, const Cartesian &)
+const Cartesian operator % (const Cartesian& c1, const Cartesian& c2)
 {
-  throw ("Cartesian operator % not implemented\n");
+  Cartesian result;
+  result.x = c1.y * c2.z - c1.z * c2.y;
+  result.y = c1.z * c2.x - c1.x * c2.z;
+  result.z = c1.x * c2.y - c1.y * c2.x;
+  return result;
 }
 
 // scalar product
