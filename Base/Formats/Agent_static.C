@@ -10,12 +10,15 @@ Registry::List<Pulsar::Archive::Agent> Pulsar::Archive::Agent::registry;
 #include "Pulsar/BasebandArchive.h"
 #include "Pulsar/EPNArchive.h"
 
+template<>
 Registry::List<Pulsar::Archive::Agent>::Enter<Pulsar::TimerArchive::Agent>
 Pulsar::Archive::Advocate<Pulsar::TimerArchive>::entry;
 
+template<>
 Registry::List<Pulsar::Archive::Agent>::Enter<Pulsar::BasebandArchive::Agent>
 Pulsar::Archive::Advocate<Pulsar::BasebandArchive>::entry;
 
+template<>
 Registry::List<Pulsar::Archive::Agent>::Enter<Pulsar::EPNArchive::Agent>
 Pulsar::Archive::Advocate<Pulsar::EPNArchive>::entry;
 
@@ -23,6 +26,7 @@ Pulsar::Archive::Advocate<Pulsar::EPNArchive>::entry;
 
 #include "Pulsar/FITSArchive.h"
 
+template<>
 Registry::List<Pulsar::Archive::Agent>::Enter<Pulsar::FITSArchive::Agent>
 Pulsar::Archive::Advocate<Pulsar::FITSArchive>::entry;
 
