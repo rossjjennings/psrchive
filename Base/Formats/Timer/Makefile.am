@@ -1,7 +1,7 @@
 #############################################################################
 # include "Master" makefile which defines important parameters
 LOCAL_ROOT = ../../../
-include ${LOCAL_ROOT}/include/Makefile.${LOGIN_ARCH}
+include ${LOCAL_ROOT}/include/Makefile.standard
 
 LIBRARY    = libarchive.a
 LIB_C_SRCS = pg_plot_gnu.C profile.C sub_int.C archive.C                \

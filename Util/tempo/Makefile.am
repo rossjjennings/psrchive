@@ -1,5 +1,5 @@
 LOCAL_ROOT = ../../../
-include $(LOCAL_ROOT)include/Makefile.${LOGIN_ARCH}
+include $(LOCAL_ROOT)include/Makefile.standard
 
 # PWDIR = ${PSRHOME}/soft/models/eph
 # INCLUDES  = ephio.h
