@@ -60,8 +60,21 @@ void Rhythm::menubarConstruct ()
   connect ( verbosity, SIGNAL( activated (int) ),
 	    this, SLOT( setVerbosity(int) ) );
 
+  QPopupMenu* plotter = new QPopupMenu( menuBar() );  CHECK_PTR (plotter);
+
+  plot_id.resize (plot_descriptor.size());
+  for (unsigned iplt=0; iplt < plot_descriptor.size(); iplt++)
+    plot_id[iplt] = plotter->insertItem( plot_descriptor[iplt].c_str() );
+
+  if (plot_selected_id != 0)
+    plotter->setItemChecked( plot_id[plot_selected_id], true );
+
+  connect ( plotter, SIGNAL( activated (int) ),
+	    this, SLOT( setPlotter(int) ) );
+
   options = new QPopupMenu( menuBar() );  CHECK_PTR (options);
   options->insertItem( "Preferences", this, SLOT(showOptions()));
+  options->insertItem( "Plotter", plotter, ALT+Key_V);
   options->insertSeparator();
   options->insertItem( "&Verbosity", verbosity, ALT+Key_V);
 

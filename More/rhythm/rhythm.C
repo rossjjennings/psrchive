@@ -7,7 +7,10 @@
 #include <qmainwindow.h>
 #include <qmessagebox.h> 
 #include <qpopupmenu.h>
+
+#ifdef Rhythm2D
 #include <qxt.h>
+#endif
 
 #include "qt_editParams.h"
 #include "qt_ModelOptions.h"
@@ -24,7 +27,12 @@ bool Rhythm::vverbose = true;
 int main (int argc, char** argv)
 { try {
 
-  QXtApplication app (argc, argv, "RhythmApp");
+#ifdef Rhythm2D
+  QXtApplication app (argc, argv, "rhythm");
+#else
+  QApplication app (argc, argv);
+#endif
+
   Rhythm rhythm (0, argc, argv);
 
   if (Rhythm::vverbose)
@@ -64,13 +72,6 @@ Rhythm::Rhythm (QWidget* parent, int argc, char** argv) :
   setClassVerbose (vverbose);
   initializePlot ();
 
-  if (data_manager.size() > 0) {
-    if (vverbose)
-      cerr << "Rhythm:: first data_manager manage model" << endl;
-    data_manager[0]->manage (modelPlot);
-    setCentralWidget (plot_manager[0]);
-  }
-
   if (vverbose)
     cerr << "Rhythm:: data set model" << endl;
   modelPlot.setModel(model);
@@ -97,6 +98,14 @@ Rhythm::Rhythm (QWidget* parent, int argc, char** argv) :
   if (vverbose)
     cerr << "Rhythm:: show qt_editParams" << endl;
   fitpopup -> show();
+
+  if (plot_id.size() > 0) {
+    if (vverbose)
+      cerr << "Rhythm:: first data_manager manage model" << endl;
+
+    setPlotter (plot_id[0]);
+  }
+
 }
 
 void Rhythm::load_toas (const char* fname)

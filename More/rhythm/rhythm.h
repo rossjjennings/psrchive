@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/rhythm/rhythm.h,v $
-   $Revision: 1.10 $
-   $Date: 2000/05/30 18:29:35 $
+   $Revision: 1.11 $
+   $Date: 2000/05/31 15:06:34 $
    $Author: straten $ */
 
 // //////////////////////////////////////////////////////////////////////////
@@ -56,9 +56,13 @@ class Rhythm : public QMainWindow
 
   // /////////////////////////////////////////////////////////////////////////
   // Main Plotting Window(s)
-  vector<QWidget*> plot_manager;
+  vector<QWidget*> plot_manager;   // vector of plot manager widgets
+  vector<string> plot_descriptor;  // vector of strings for each manager
+  vector<int> plot_id;             // Options menu id for each manager
+
   vector<DataManager*> data_manager;
 
+  int plot_selected_id;
   void initializePlot ();            // defined in initializePlot.C
 
   // /////////////////////////////////////////////////////////////////////////
@@ -107,8 +111,11 @@ class Rhythm : public QMainWindow
   void togledit();
   void toglauto();
 
-  // Options->Verbosity menu callbacks
+  // Options->Verbosity menu callback
   void setVerbosity (int id);
+  // Options->Plotter menu callback
+  void setPlotter ( int plotterID );
+  // Options->Preferences
   void showOptions () { opts.show(); };
 
   void undo() {fprintf (stderr, "Not implemented\n");};
