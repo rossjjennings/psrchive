@@ -35,16 +35,16 @@ Pulsar::Pointing::operator= (const Pointing& extension)
 const Pulsar::Pointing&
 Pulsar::Pointing::operator += (const Pointing& extension)
 {
-  local_sidereal_time += local_sidereal_time;
-  right_ascension += right_ascension;
-  declination += declination;
-  galactic_longitude += galactic_longitude;
-  galactic_latitude += galactic_latitude;
-  feed_angle += feed_angle;
-  position_angle += position_angle;
-  parallactic_angle += parallactic_angle;
-  telescope_azimuth += telescope_azimuth;
-  telescope_zenith += telescope_zenith;
+  local_sidereal_time += extension.local_sidereal_time;
+  right_ascension += extension.right_ascension;
+  declination += extension.declination;
+  galactic_longitude += extension.galactic_longitude;
+  galactic_latitude += extension.galactic_latitude;
+  feed_angle += extension.feed_angle;
+  position_angle += extension.position_angle;
+  parallactic_angle += extension.parallactic_angle;
+  telescope_azimuth += extension.telescope_azimuth;
+  telescope_zenith += extension.telescope_zenith;
 
   return *this;
 }
@@ -178,8 +178,8 @@ Angle Pulsar::Pointing::get_telescope_zenith () const
 
 
 /*! Based on the epoch of the Integration, uses slalib to re-calculate
-  the following Pointing attributes: lst, par_ang, tel_az, and
-  tel_zen. */
+  the following Pointing attributes: lst, get_parallactic_angle(), get_telescope_azimuth(), and
+  get_telescope_zenith(). */
 void Pulsar::Pointing::update (const Integration* subint)
 {
   const Archive* archive = get_parent (subint);
@@ -193,6 +193,22 @@ void Pulsar::Pointing::update (const Integration* subint)
   if (!telescope)
     throw (InvalidState, "Pulsar::Pointing::update",
 	   "parent Archive has no telescope Extension");
+
+  if (Integration::verbose)
+    cerr << "Pulsar::Pointing::update before:\n"
+         "  lst=" << get_local_sidereal_time()/3600.0 << " hours\n"
+         "   az=" << get_telescope_azimuth().getDegrees() << " deg\n"
+         "  zen=" << get_telescope_zenith().getDegrees() << " deg\n"
+         " para=" << get_parallactic_angle().getDegrees() << " deg\n"
+         " posa=" << get_position_angle().getDegrees() << " deg\n"
+         "Pulsar::Pointing::update using:\n"
+         " r.a.=" << get_right_ascension().getDegrees() << " deg\n"
+         " dec.=" << get_declination().getDegrees() << " deg\n"
+         "Pulsar::Pointing::update parent:\n"
+         " r.a.=" << archive->get_coordinates().ra().getDegrees() << " deg\n"
+         " dec.=" << archive->get_coordinates().dec().getDegrees() << " deg"
+          << endl;
+
 
   double latitude = telescope->get_latitude().getDegrees();
   double longitude = telescope->get_longitude().getDegrees();
@@ -211,12 +227,23 @@ void Pulsar::Pointing::update (const Integration* subint)
   angle.setDegrees( parallactic );
   set_parallactic_angle( angle );
 
+  angle += get_feed_angle();
+  set_position_angle (angle);
+
   angle.setDegrees( azimuth );
   set_telescope_azimuth( angle );
 
   angle.setDegrees( zenith );
   set_telescope_zenith( angle );
 
+
+  if (Integration::verbose)
+    cerr << "Pulsar::Pointing::update after:\n"  
+         "  lst=" << get_local_sidereal_time()/3600.0 << " hours\n"
+         "   az=" << get_telescope_azimuth().getDegrees() << " deg\n"
+         "  zen=" << get_telescope_zenith().getDegrees() << " deg\n"
+         " para=" << get_parallactic_angle().getDegrees() << " deg\n"
+         " posa=" << get_position_angle().getDegrees() << " deg" << endl;
 
 }
 
@@ -231,6 +258,9 @@ void Pulsar::Pointing::integrate (const Integration* subint)
       cerr << "Pulsar::Pointing::integrate subint has no Pointing" << endl;
     return;
   }
+
+  if (Integration::verbose)
+    cerr << "Pulsar::Pointing::integrate other Pointing" << endl;
 
   operator += (*useful);
 }
