@@ -1,24 +1,23 @@
 #ifndef __RHYTHM_H
 #define __RHYTHM_H
 
-#include <qapplication.h>
-#include <qvbox.h>
-#include <qhbox.h>
-#include <qmenubar.h>
-
 #include <vector>
+
+#include <qmainwindow.h>
+
+#include "qxmp_manager.h"
+#include "pg_2dplot.h"
 
 #include "toa.h"
 #include "residual.h"
 #include "psrephem.h"
 
-#define TIM 1
-#define EPH 2
-
 class qt_psrephem_editor;
 
-class Rhythm : public QWidget
+class Rhythm : public QMainWindow
 {
+  Q_OBJECT
+
 protected:
 
   // an array of ephemerides and the filename of the last one loaded
@@ -33,9 +32,7 @@ protected:
   vector<residual> residuals;
 
   // the GUI bits
-  QVBox    main_window;
-  QMenuBar menu;
-  QHBox    plots;
+  qxmp_manager plot_manager;
 
   // /////////////////////////////////////////////////////////////////////////
   // main menubar and its constructor
@@ -67,11 +64,12 @@ public slots:
 
   void about();
   void aboutQt();
+  void closeWin() {fprintf (stderr, "Not implemented\n");};
 
 public:
   static int verbose;
 
-  Rhythm (int argc, char** argv);
+  Rhythm (QWidget* parent, int argc, char** argv);
   ~Rhythm () {};
 
 };

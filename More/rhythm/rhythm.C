@@ -2,39 +2,32 @@
 #include <stdlib.h>
 
 #include <qapplication.h>
+#include <qmainwindow.h>
 #include <qxt.h>
 
 #include "rhythm.h"
 
-int Rhythm::verbose = 1;
+int Rhythm::verbose = 0;
 
-
-Rhythm::Rhythm (int argc, char** argv) :
-  QWidget (0, "Rhythm"),
-  main_window (this,    "main window"),
-  menu   (&main_window, "menubar"),
-  plots  (&main_window, "plots")
+Rhythm::Rhythm (QWidget* parent, int argc, char** argv) :
+  QMainWindow (parent, "Rhythm"),
+  plot_manager (this, 800, 700)
 {
-  // save_tim = save_eph = NULL;
   fitpopup = NULL;
-
-  main_window.setMinimumSize (800, 700);
 
   menubarConstruct(); 
 
-  plots.setMinimumSize (880, 680);
+  setCentralWidget (&plot_manager);
+
+  command_line_parse (argc, argv);
 }
 
 int main (int argc, char** argv)
 {
-  QXtApplication app (argc, argv, "Rhythm");
-
-  Rhythm rhythm (argc, argv);
-
+  QXtApplication app (argc, argv, "RhythmApp");
+  Rhythm rhythm (0, argc, argv);
+  
   app.setMainWidget (&rhythm);
-
   rhythm.show();
-
   return app.exec();
 }
-
