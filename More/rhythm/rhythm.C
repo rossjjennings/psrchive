@@ -970,7 +970,7 @@ std::vector<double> Rhythm::give_me_data (toaPlot::AxisQuantity q)
 	  continue;
 	}
 	
-	if (toas[i].get_pa() != 999.0) {
+	if (toas[i].get_pa() != Tempo::toa::UNSET) {
 	  retval.push_back(toas[i].get_pa());
 	  continue;
 	}
