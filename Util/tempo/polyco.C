@@ -277,107 +277,20 @@ polyco & polyco::operator = (const polyco & in_poly){
 
 polyco::polyco(string filename)
 {
-  if(load (filename) != 0) { 
+  if(load (filename) < 1) { 
     fprintf (stderr, "polyco::polyco - failed to construct from %s\n", filename.c_str());
-    exit(-1);
+    string error = "polyco construct error";
+    throw(error);
   }
 }
  
 polyco::polyco(char * filename)
 {
   string s = filename;
-  if (load (s) != 0) {
+  if (load (s) < 1) {
     fprintf (stderr, "polyco::polyco - failed to construct from %s\n", filename);
-    exit(-1);
-  }
-}
-
-// Default arguments are those of polyco
-int polyco::Construct (char* psr, char* parfile, const MJD& m1, const MJD& m2, 
-	 	       double ns=960.0, int nc=12, int maxha=8, int tel=7, double centrefreq = 1400.0) { 
-  char  syscom[120]; 
-  string ephfile;
-  string polyfile = "polyco.dat";
-  int   rmeph = 0;
-
-  if (parfile) {
-    sprintf(syscom,"polyco -f %s %lf %lf %lf %d %d %d %lf > /tmp/polyco.stdout",
-	    parfile, m1.in_days(), m2.in_days(), ns, nc, maxha, tel, centrefreq);
-    
-    ephfile = parfile;
-  }
-  else {
-    sprintf(syscom,"polyco %s %lf %lf %lf %d %d %d %lf > /tmp/polyco.stdout",
-	    psr, m1.in_days(), m2.in_days(), ns, nc, maxha, tel, centrefreq);
-
-    if (psr[0] == 'J') ephfile = &(psr[1]);
-    else ephfile = psr;
-    ephfile += ".eph";
-    rmeph = 1;
-  }
-
-  int retries = 3;
-  while (retries > 0) {
-
-    errno = 0;
-    int status = system(syscom);
-    if (status == 0) break;
-
-    fprintf (stderr, "polyco::polyco - failed: %d\n", retries);
-    if (status == -1)
-      perror ("polyco::errno");
-    else {
-      fprintf (stderr, "polyco::status = %d ", status);
-      if (status == 127)
-	fprintf (stderr, 
-		 "(indicating that the shell could not be executed).\n");
-      else
-	fprintf (stderr,  "(a return value of %d from polyco)\n",
-		 WEXITSTATUS(status));
-    }
-    fprintf (stderr, "polyco::cmdline: %s\n", syscom);
-    fprintf (stderr, "polyco::stdout:\n");
-    system ("cat /tmp/polyco.stdout");
-    retries --;
-    
-    if (retries == 0) return -1;
-
-    if ((errno == EWOULDBLOCK) || (errno == EAGAIN)) {
-      sleep (5);
-    }
-  }
-
-  if (this->load(polyfile)<=0) {
-    fprintf (stderr, "polyco::polyco - failed to construct from %s and %s\n", 
-	     polyfile.c_str(), ephfile.c_str());
-  }
-  if (rmeph) remove (ephfile.c_str());
-  remove ("polyco.dat");
-  remove ("dates.tmp");
-  remove ("tz.in");
-  remove ("tz.tmp");
-  remove ("tztot.dat");
-  remove ("tempo.lis");
-  return 0;
-}
-
-polyco::polyco (char* psr, char* parfile, const MJD& m1, const MJD& m2,
-		double ns, int nc, int maxha, int tel, double centrefreq)
-{
-  string errstr;
-  if (Construct (psr, parfile, m1, m2, ns, nc, maxha, tel, centrefreq) != 0) {
-    errstr = "polyco::polyco - failed to construct\n";
-    throw (errstr);
-  }
-}
-
-polyco::polyco (char* psr, const MJD& m1, const MJD& m2,
-		double ns, int nc, int maxha, int tel, double centrefreq)
-{
-  string errstr;
-  if (Construct (psr, NULL, m1, m2, ns, nc, maxha, tel, centrefreq) != 0) {
-    errstr = "polyco::polyco - failed to construct\n";
-    throw (errstr);
+    string error = "polyco construct error";
+    throw(error);
   }
 }
 
