@@ -1,6 +1,6 @@
-#include "Composite.h"
-#include "Rotation.h"
-#include "Boost.h"
+#include "MEAL/Composite.h"
+#include "MEAL/Rotation.h"
+#include "MEAL/Boost.h"
 
 using namespace std;
 

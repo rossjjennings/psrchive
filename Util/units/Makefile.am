@@ -57,7 +57,40 @@ nobase_include_HEADERS = Error.h HeapTracked.h ReferenceAble.h stringtok.h \
 
 
 bin_PROGRAMS = lmfit
-lmfit_SOURCES = lmfit.C
+
+check_PROGRAMS = test_Error test_HeapTracked test_Reference \
+	test_circular_Reference test_Registry test_Functor test_Callback \
+	test_Estimate test_Vector test_Matrix test_Jacobi test_eigen \
+	test_Jones test_Quaternion test_Pauli test_Basis test_Stokes \
+	test_Axis test_Projection test_Composite test_Scalar \
+	test_Complex2Product
+	
+TESTS = $(check_PROGRAMS)
+
+test_Error_SOURCES		= test_Error.C
+test_HeapTracked_SOURCES	= test_HeapTracked.C
+test_Reference_SOURCES		= test_Reference.C
+test_circular_Reference_SOURCES	= test_circular_Reference.C
+test_Registry_SOURCES		= test_Registry.C
+test_Functor_SOURCES		= test_Functor.C
+test_Callback_SOURCES		= test_Callback.C
+test_Estimate_SOURCES		= test_Estimate.C
+test_Vector_SOURCES		= test_Vector.C
+test_Matrix_SOURCES		= test_Matrix.C
+test_Jacobi_SOURCES		= test_Jacobi.C
+test_eigen_SOURCES		= test_eigen.C
+test_Jones_SOURCES		= test_Jones.C
+test_Quaternion_SOURCES		= test_Quaternion.C
+test_Pauli_SOURCES		= test_Pauli.C
+test_Basis_SOURCES		= test_Basis.C
+test_Stokes_SOURCES		= test_Stokes.C
+test_Axis_SOURCES		= test_Axis.C
+test_Projection_SOURCES		= test_Projection.C
+test_Composite_SOURCES		= test_Composite.C
+test_Scalar_SOURCES		= test_Scalar.C
+test_Complex2Product_SOURCES	= test_Complex2Product.C
+
+lmfit_SOURCES 			= lmfit.C
 lmfit_LDADD = libunits.la @PGPLOT_LIBS@
 
 #############################################################################
@@ -77,4 +110,6 @@ endif
 #
 
 INCLUDES = @PGPLOT_CFLAGS@
+
+LDADD = libunits.la
 
