@@ -37,6 +37,22 @@ void polynomial::init() {
   tempov11 = 0;
 }
 
+// Hack constructor for use on search data
+polynomial::polynomial(MJD _reftime, float _dm, double _f0, int _telescope=7){
+  init();
+
+  reftime = _reftime;
+  dm = _dm;
+  f0 = _f0;
+  telescope = _telescope;
+
+  psrname = "0000+0000";
+  date = "dd-MMM-yy";
+  utc = "hhmmss.ss";
+  nspan_mins = 1440.0;
+
+  coefs.resize(12,0.0);
+}
 
 polynomial & polynomial::operator = (const polynomial & in_poly)
 {
@@ -749,12 +765,19 @@ int polyco::i_nearest (const MJD &t, const string& in_psr) const
   for (unsigned ipolly=0; ipolly<pollys.size(); ipolly ++)  {
     if (in_psr==anyPsr || pollys[ipolly].psrname==in_psr) {      
       float dist = fabs ( (pollys[ipolly].reftime - t).in_minutes() );
+      if( verbose )
+	fprintf(stderr,"ipolly=%d dist=%f min_dist=%f\n",
+		ipolly,dist,min_dist);
       if (dist < min_dist) {
 	imin = ipolly;
 	min_dist = dist;
       }
     }
   }
+
+  if( verbose )
+    fprintf(stderr,"polyco::i_nearest() initially got imin=%d\n",imin);
+
   // check if any polynomial matched
   if (imin < 0) {
     if (verbose) {
@@ -771,13 +794,13 @@ int polyco::i_nearest (const MJD &t, const string& in_psr) const
   // return if the time is within the range of the matched polynomial
   if ( (t > pollys[imin].start_time()) && (t < pollys[imin].end_time()) )
     return imin;
+
 #else
   // TEMPO sometimes leaves holes between its polynomials.
   // Let's just be happy if it is within the range of the polyco
   if ( (t > start_time()) && (t < end_time()) )
     return imin;
 #endif
-
   // the time is out of range of the nearest polynomial
   if (verbose) {
     cerr << "polyco::i_nearest - no polynomial for MJD " << t.printdays(15)
