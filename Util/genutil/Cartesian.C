@@ -2,7 +2,6 @@
 #include <math.h>
 
 #include "Cartesian.h"
-#include "angle.h"
 
 Cartesian::Cartesian (const AnglePair& spherical)
 {

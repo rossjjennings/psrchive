@@ -1,16 +1,16 @@
 // redwards 17 Mar 99 -- Time for a definitive C++ suite of
 // angle and sky coordinate functions
 
+#include "Angle.h"
+#include "Cartesian.h"
+#include "coord_parse.h"
+
 #include <string>
+#include <stdio.h>
 #include <math.h>
 #include <iostream>
 #include <limits.h>
 #include <float.h>
-
-#include "machine_endian.h"
-#include "angle.h"
-#include "Cartesian.h"
-#include "coord.h"
 
 bool Angle::verbose = false;
 

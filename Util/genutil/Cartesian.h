@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Cartesian.h,v $
-   $Revision: 1.8 $
-   $Date: 2002/04/24 11:57:30 $
+   $Revision: 1.9 $
+   $Date: 2004/11/30 16:31:06 $
    $Author: straten $ */
 
 #ifndef __CARTESIAN_H
@@ -10,7 +10,7 @@
 
 #include <iostream>
 #include <math.h>
-#include "angle.h"
+#include "Angle.h"
 
 class Cartesian
 {
