@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Archive.h,v $
-   $Revision: 1.62 $
-   $Date: 2003/03/08 10:52:49 $
+   $Revision: 1.63 $
+   $Date: 2003/03/08 11:00:47 $
    $Author: straten $ */
 
 /*! \mainpage 
@@ -134,9 +134,33 @@
   \subsection plugin File Format Plugins
 
   Classes that inherit Pulsar::Archive and implement the I/O routines
-  for a specific archive file format are loaded as plugins.  Plugins are
-  registered for use in applications by inheriting the 
-  Pulsar::Archive::Agent template base class.
+  for a specific archive file format are loaded as plugins.  Plugins
+  are registered for use in applications by inheriting the
+  Pulsar::Archive::Advocate template base class.  The Advocate class
+  specifies three pure virtual methods that must be implemented by a
+  sub-class of the Archive-derived class named "Agent".  For example:
+
+  <pre>
+  class ArchiveFormat : public Pulsar::Archive {
+
+    [...]
+
+    class Agent : public Pulsar::Archive::Advocate<ArchiveFormat>  {
+
+      //! Advocate the use of the derived class to interpret filename
+      virtual bool advocate (const char* filename);
+      
+      //! Return the name of the derived class
+      virtual string get_name () { return "ArchiveFormat"; }
+
+      //! Return a description of the derived class
+      virtual string get_description () { return "Version 0.1"; }
+
+    };
+
+  };
+
+  </pre>
 
  */
 
