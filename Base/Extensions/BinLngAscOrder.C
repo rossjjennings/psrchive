@@ -46,6 +46,7 @@ void Pulsar::BinLngAscOrder::organise (Archive* arch, unsigned newsub)
 {
   // Define a vector to hold the binary lngs
   vector<float> lngs;
+
   // Define a vector of flags to help avoid counting
   // subints twice when re-ordering
   vector<bool>  used;
@@ -61,7 +62,7 @@ void Pulsar::BinLngAscOrder::organise (Archive* arch, unsigned newsub)
 				  arch->get_ephemeris(), 
 				  arch->get_Integration(i)->get_centre_frequency(),
 				  arch->get_telescope_code()));
-    if (lngs[i]!=lngs[i]) {
+    if (lngs[i] != lngs[i]) {
       throw Error(FailedCall, "PeriastronOrder::organise",
 		  "get_binlng_asc returned nan");
     }
@@ -107,10 +108,9 @@ void Pulsar::BinLngAscOrder::organise (Archive* arch, unsigned newsub)
   
   // Resize for the new configuration
   arch->resize(mysub);
-  indices.resize(mysub);
   
   for (unsigned i = 0; i < mysub; i++) {
-    *(arch->get_Integration(i)) = *(arch->new_Integration());
+    arch->get_Integration(i)->zero();
     bool first = true;
     int tally = 0;
     for (unsigned j = 0; j < lngs.size(); j++) {
@@ -134,7 +134,6 @@ void Pulsar::BinLngAscOrder::organise (Archive* arch, unsigned newsub)
     if (tally > 0)
       indices[i] /= tally;
   }
-
 }
 
 void Pulsar::BinLngAscOrder::append (Archive* thiz, const Archive* that)

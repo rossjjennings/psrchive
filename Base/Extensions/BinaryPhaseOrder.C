@@ -68,12 +68,6 @@ void Pulsar::BinaryPhaseOrder::organise (Archive* arch, unsigned newsub)
 
     used.push_back(false);
 
-    // The problem with this section is that archives with gaps in the
-    // phase coverage have the total coverage mis-represented. This
-    // should just result in blank space in the end result, but I have
-    // noticed on several occasions that this does not work properly.
-    // AWH 9/1/2004
-
     if (phases[i] > maxphs)
       maxphs = phases[i];
     
@@ -107,10 +101,9 @@ void Pulsar::BinaryPhaseOrder::organise (Archive* arch, unsigned newsub)
   
   // Resize for the new configuration
   arch->resize(mysub);
-  indices.resize(mysub);
   
   for (unsigned i = 0; i < mysub; i++) {
-    *(arch->get_Integration(i)) = *(arch->new_Integration());
+    arch->get_Integration(i)->zero();
     bool first = true;
     int tally = 0;
     for (unsigned j = 0; j < phases.size(); j++) {
@@ -134,7 +127,6 @@ void Pulsar::BinaryPhaseOrder::organise (Archive* arch, unsigned newsub)
     if (tally > 0)
       indices[i] /= tally;
   }
-  
 }
 
 void Pulsar::BinaryPhaseOrder::append (Archive* thiz, const Archive* that)
