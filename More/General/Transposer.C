@@ -46,19 +46,22 @@ void Pulsar::Transposer::range_check (unsigned idim, const char* method) const
 
 Pulsar::Dimensions Pulsar::Transposer::get_stride () const
 {
-  Dimensions dims (archive);
+  return get_stride( Dimensions(archive) );
+}
 
+Pulsar::Dimensions Pulsar::Transposer::get_stride (const Dimensions& d) const
+{
   int increment = 1;
   Dimensions stride;
 
   stride.set_ndim (dim[0], increment);
-  increment *= dims.get_ndim (dim[0]);
+  increment *= d.get_ndim (dim[0]);
 
   stride.set_ndim (dim[1], increment);
-  increment *= dims.get_ndim (dim[1]);
+  increment *= d.get_ndim (dim[1]);
 
   stride.set_ndim (dim[2], increment);
-  increment *= dims.get_ndim (dim[2]);
+  increment *= d.get_ndim (dim[2]);
 
   stride.set_if_zero (increment);
 
