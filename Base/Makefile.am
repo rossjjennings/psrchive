@@ -73,13 +73,17 @@ libpsrchive_la_SOURCES = plugins.csh getopt.h Physical.h \
 	Integration_fappend.C         Transposer.C  \
 	Integration_find.C            Utilities.C  \
 	Integration_flux.C            choose.C  \
-	Integration_fscrunch.C        getopt.c  \
-	Integration_get_PA.C          getopt1.c  \
+	Integration_fscrunch.C        \
+	Integration_get_PA.C          \
 	Integration_get_Stokes.C      model_profile.C  \
 	Integration_invint.C          pafit_get_PA.C  \
 	Integration_match.C           ArchiveTI.C \
 	IntegrationTI.C               ArchiveTI_import.C \
 	PhaseGradShift.C
+
+if !HAVE_GETOPT_LONG
+libpsrchive_la_SOURCES += getopt.c getopt1.c
+endif
 
 SUBDIRS                 = Calibration Extension timer epn
 
