@@ -74,7 +74,7 @@ dnl variables are set to the empty string.
 dnl
 dnl Calls BNV_PATH_QT_DIRECT as a subroutine.
 dnl
-dnl @version $Id: bnv_have_qt.m4,v 1.2 2004/11/30 13:11:19 straten Exp $
+dnl @version $Id: bnv_have_qt.m4,v 1.3 2004/12/01 20:50:46 straten Exp $
 dnl @author Bastiaan N. Veelo <Bastiaan.N.Veelo@immtek.ntnu.no>
 dnl
 AC_DEFUN([BNV_HAVE_QT],
@@ -311,9 +311,9 @@ EOF
     ])dnl AC_CACHE_VAL bnv_cv_qt_test_result
     AC_MSG_RESULT([$bnv_cv_qt_test_result]);
     if test x"$bnv_cv_qt_test_result" = "xfailure"; then
-      AC_MSG_ERROR([Failed to find matching components of a complete
-                  Qt installation. Try using more options,
-                  see ./configure --help.])
+      echo "	Failed to compile Qt test program."
+      echo "	Perhaps Qt was compiled with a different compiler version."
+      have_qt="no"
     fi
 
     rm -f bnv_qt_test.h moc_bnv_qt_test.$ac_ext moc_bnv_qt_test.o \
