@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Quaternion.h,v $
-   $Revision: 1.22 $
-   $Date: 2004/10/26 12:37:07 $
+   $Revision: 1.23 $
+   $Date: 2004/10/26 12:40:31 $
    $Author: straten $ */
 
 #ifndef __Quaternion_H
@@ -152,7 +152,7 @@ public:
   static const Quaternion& identity();
 
   //! Dimension of data
-  unsigned size () const { return ndim; }
+  unsigned size () const { return 4; }
 
 };
 

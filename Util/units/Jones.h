@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Jones.h,v $
-   $Revision: 1.19 $
-   $Date: 2004/10/26 12:37:07 $
+   $Revision: 1.20 $
+   $Date: 2004/10/26 12:40:32 $
    $Author: straten $ */
 
 #ifndef __Jones_H
@@ -151,7 +151,7 @@ public:
   static const Jones& identity();
 
   //! Dimension of data
-  unsigned size () const { return ndim; }
+  unsigned size () const { return 4; }
 };
 
 //! The identity matrix
