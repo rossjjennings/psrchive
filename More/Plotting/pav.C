@@ -6,6 +6,7 @@
 #include "Archive.h"
 #include "Integration.h"
 #include "Profile.h"
+#include "Plotter.h"
 #include "Error.h"
 #include "RealTimer.h"
 
@@ -34,7 +35,7 @@ void usage ()
     " -M meta   meta names a file containing the list of files\n"
     " -p        add polarisations together \n"
     " -r phase  rotate the profiles by phase (in turns)\n"
-    //    " -S        plot pulsar dynamic spectra:  frequency vs time. \n"
+    " -S        plot Stokes parameters in the Manchester style\n"
     " -t src    Tscrunch scr Integrations together \n"
     " -T        Tscrunch all Integrations \n"
     " -v        Verbose output \n"
@@ -60,6 +61,7 @@ int main (int argc, char** argv)
 
   bool verbose = false;
   bool display = false;
+  bool manchester = false;
   bool textinfo = false;
   bool greyfreq = false;
   bool heat = false;
@@ -69,6 +71,8 @@ int main (int argc, char** argv)
   bool timeplot = false;
 
   char* metafile = NULL;
+
+  Pulsar::Plotter plotter;
 
   int c = 0;
   const char* args = "ab:cd:DGe:E:f:FhHm:M:pr:St:TvVwx:y:RZCY";
@@ -91,6 +95,7 @@ int main (int argc, char** argv)
       display = true;
       break;
     case 'G':
+      display = true;
       greyfreq = true;
       break;
     case 'e':
@@ -122,9 +127,11 @@ int main (int argc, char** argv)
       break;
     case 'r':
       phase = atof (optarg);
+      plotter.set_phase (phase);
       break;
     case 'S':
-      // dynamic spectra
+      display = true;
+      manchester = true;
       break;
     case 't':
       tscrunch = atoi (optarg);
@@ -177,13 +184,16 @@ int main (int argc, char** argv)
     return 0;
   }
 
-  if (display || greyfreq) {
+  if (display) {
+
     cpgbeg (0, "?", 0, 0);
     cpgask(1);
-  }
 
-  if (display) {
-    cpgsvp (0.1, 0.9, 0.05, 0.85);
+    if (manchester)
+      cpgsvp(0.1,.95,0.1,.95);
+    else
+      cpgsvp (0.1, 0.9, 0.05, 0.85);
+
     cpgsch (1.0);
 
     if (heat) {
@@ -287,7 +297,10 @@ int main (int argc, char** argv)
     
     if (display) {
       cpgpage();
-      archive -> display(0,0,0,phase);
+      if (manchester)
+	plotter.Manchester (archive);
+      else
+	archive -> display(0,0,0,phase);
     }
     
     if (greyfreq) {
