@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Matrix.h,v $
-   $Revision: 1.10 $
-   $Date: 2004/11/22 19:26:04 $
+   $Revision: 1.11 $
+   $Date: 2005/02/13 08:15:29 $
    $Author: straten $ */
 
 #ifndef __Matrix_H
@@ -145,7 +145,7 @@ void GaussJordan (Matrix<T,Rows,C1>& a, Matrix<U,Rows,C2>& b)
 }
 
 template <typename T, unsigned RC>
-void identity (Matrix<T, RC, RC>& m)
+void matrix_identity (Matrix<T, RC, RC>& m)
 {
   for (unsigned i=0; i<RC; i++)
     for (unsigned j=0; j<RC; j++)
@@ -161,7 +161,7 @@ const Matrix<T, RC, RC> inv (const Matrix<T, RC, RC>& m)
   Matrix<T, RC, RC> copy (m);
   
   Matrix<T, RC, RC> inverse;
-  identity (inverse);
+  matrix_identity (inverse);
 
   GaussJordan (copy, inverse);
 

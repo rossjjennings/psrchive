@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Jacobi.h,v $
-   $Revision: 1.5 $
-   $Date: 2004/11/22 19:26:04 $
+   $Revision: 1.6 $
+   $Date: 2005/02/13 08:15:29 $
    $Author: straten $ */
 
 #ifndef __Jacobi_H
@@ -166,7 +166,7 @@ void Jacobi (Matrix<T,RC,RC>& a, Matrix<T,RC,RC>& evec, Vector<U,RC>& eval)
     b[ip] = eval[ip] = real( a[ip][ip] );
 
   // start with the identity matrix
-  identity (evec);
+  matrix_identity (evec);
 
   for (unsigned iter=0; iter < 50; iter++) {
 
