@@ -120,7 +120,7 @@ void Pulsar::Archive::update_model (const MJD& time, bool clear_model)
     return;
   }
 
-  Tempo::Predict predict;
+  static Tempo::Predict predict;
 
   predict.set_frequency ( get_centre_frequency() );
   predict.set_parameters ( *ephemeris );
@@ -129,7 +129,7 @@ void Pulsar::Archive::update_model (const MJD& time, bool clear_model)
 
   if (model && model->pollys.size() > 0) {
 
-    predict.set_nspan ( model->get_nspan() );
+    predict.set_nspan ( (int) model->get_nspan() );
     predict.set_ncoef ( model->get_ncoeff() );
 
   }
