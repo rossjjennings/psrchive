@@ -21,29 +21,6 @@ void Pulsar::TimerArchive::unpack (Receiver* receiver)
   if (verbose == 3)
     cerr << "Pulsar::TimerArchive::unpack Receiver" << endl;
 
-  if (hdr.rcvr_id[0] == '\0')  {
-    if (verbose)
-      cerr << "Pulsar::TimerArchive::unpack Receiver "
-              "name not specified." << endl;
-    return;
-  }
-
-  // check that the receiver is a null-terminated string
-  if (!is_valid_string( hdr.rcvr_id, RCVR_ID_STRLEN )) {
-
-    if (verbose)
-      cerr << "Pulsar::TimerArchive::unpack Receiver name corrupted." << endl;
-
-    hdr.rcvr_id[0] = '\0';
-    return;
-  }
-
-  if (verbose == 3)
-      cerr << "Pulsar::TimerArchive::unpack Receiver name=" 
-           << hdr.rcvr_id << endl;
-
-  receiver->set_name (hdr.rcvr_id);
-
   if (hdr.banda.polar == 0)
     receiver->set_basis( Signal::Circular );
   else
@@ -77,6 +54,29 @@ void Pulsar::TimerArchive::unpack (Receiver* receiver)
 
   angle.setDegrees (hdr.banda.feed_offset); 
   receiver->set_tracking_angle (angle);
+
+  if (hdr.rcvr_id[0] == '\0')  {
+    if (verbose)
+      cerr << "Pulsar::TimerArchive::unpack Receiver "
+              "name not specified." << endl;
+    return;
+  }
+
+  // check that the receiver is a null-terminated string
+  if (!is_valid_string( hdr.rcvr_id, RCVR_ID_STRLEN )) {
+
+    if (verbose)
+      cerr << "Pulsar::TimerArchive::unpack Receiver name corrupted." << endl;
+
+    hdr.rcvr_id[0] = '\0';
+    return;
+  }
+
+  if (verbose == 3)
+      cerr << "Pulsar::TimerArchive::unpack Receiver name="
+           << hdr.rcvr_id << endl;
+
+  receiver->set_name (hdr.rcvr_id);
 
   // timer supplement - added 23 July 04
 
