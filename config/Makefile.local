@@ -2,11 +2,10 @@
 intermediate-install:
 	$(MAKE) prefix=.. install-data
 
-
 libs: intermediate-libs install-libLTLIBRARIES
 
 intermediate-libs:
-	AM_MAKEFLAGS="$(AM_MAKEFLAGS) PROGRAMS= HEADERS=" $(MAKE) all-am
+	AM_MAKEFLAGS="$(AM_MAKEFLAGS) PROGRAMS= HEADERS=" $(MAKE) all-recursive
 
 include: install-data
 
