@@ -5,7 +5,7 @@ include_HEADERS = fftm.h psrfft.h spectra.h interpolate.h median_smooth.h \
            cross_detect.h stokes_detect.h differentiate.h BandpassPlotter.h
 
 libpsrfft_la_SOURCES = spectra.c psrfft.c noise.c running_median.c	 \
-	local_medians.c optimize_fft.c fft_shift.c fftm.C correl.c	 \
+	local_medians.c optimize_fft.c fft_shift.C fftm.C correl.c	 \
 	cdetect.c rfftw_sort.c cross_detect.c stokes_detect.c		 \
 	fccf.f ffft.f differentiate.C fftfit.f fftconv.f brent.f cprof.f \
 	cross_detect.ic stokes_detect.ic
@@ -17,6 +17,7 @@ check_PROGRAMS = $(TESTS) test_optimize
 test_normalization_SOURCES	= test_normalization.C
 test_interpolate_SOURCES	= test_interpolate.C
 test_interpolate_LDADD		= $(LDADD) ../units/libunits.la
+test_real_complex_SOURCES	= test_real_complex.C
 
 #############################################################################
 #
