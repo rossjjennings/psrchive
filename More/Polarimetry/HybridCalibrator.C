@@ -65,8 +65,8 @@ void Pulsar::HybridCalibrator::calculate_transformation ()
 		 "reference input CalibratorStokes nchan=%d != %d",
 		 reference_input->get_nchan(), nchan);
   
-  if (verbose)
-    cerr << "Pulsar::HybridCalibrator::create nchan=" << nchan << endl;
+  if (verbose) cerr << "Pulsar::HybridCalibrator::calculate_transformation"
+                       " nchan=" << nchan << endl;
 
   // the calibrator hi and lo levels from the PolnCal archive
   vector<vector<Estimate<double> > > cal_hi;
@@ -109,20 +109,39 @@ void Pulsar::HybridCalibrator::calculate_transformation ()
       continue;
     }
 
-    // calculate how the measured Stokes parameters are interpreted
+    // S"  are the observed calibrator Stokes parameters
+    // S'  are the modeled calibrator Stokes parameters after precalibrator transformation
+    // S   are the ideal calibrator Stokes parameters, S=[1,0,1,0]
+    //
+    // M_1 is the SingleAxis Mueller matrix that converts observed to ideal
+    // M_0 is the SingleAxis Mueller matrix that converts modeled to ideal
+    //
+    // 1)  S" = M_1 S
+    // 2)  S' = M_0 S
+    // 3)  S" = M_1 M_0^-1 S' = M_s S'
+    //
+    // This method calculates M_s = M_1 M_0^-1 S'
+
+    // 1) solve S" = M_1 S
+
     for (unsigned ipol=0; ipol<npol; ++ipol)
       cal[ipol] = cal_hi[ipol][ichan] - cal_lo[ipol][ichan];
     
     correction = new Calibration::SingleAxis;
     correction->solve (cal);
+
+    // 2) solve S' = M_0 S
  
-    // pass the input Stokes parameters through the transformation
+    // pass the input Stokes parameters through the precalibrator transformation
+
+    Calibration::Transformation* xform;
+    xform = precalibrator->get_Transformation (ichan);
+
+    Jones< Estimate<double> > response;
+    xform->evaluate (response);
 
     Stokes< Estimate<float> > stokes = reference_input->get_stokes (ichan);
-    Jones< Estimate<double> > response = precalibrator->get_response (ichan);
     stokes = response * stokes * herm(response);
-
-    // calculate how the output Stokes parameters would be interpreted
 
     Jones< Estimate<float> > coherence = convert (stokes);
 
@@ -132,10 +151,13 @@ void Pulsar::HybridCalibrator::calculate_transformation ()
     cal[3] = 0.5 * coherence.j(1,0).imag();
 
     pre_single_axis.solve (cal);
-    correction->subtract( &pre_single_axis );
 
-    Calibration::Transformation* xform;
-    xform = precalibrator->get_Transformation (ichan);
+    // 3) calculate M_s = M_1 M_0^-1
+
+    pre_single_axis.invert ();
+    *correction *= pre_single_axis;
+
+    // 4) produce the supplemented transformation, M_s M_B
 
     Calibration::ProductTransformation* result;
     result = new Calibration::ProductTransformation;
