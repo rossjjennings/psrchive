@@ -31,7 +31,7 @@ PROGRAMS =    calinfo.C align.C amps.C chanprep.C  \
 	      headsum.C treduce.C \
               tcombine2.C ratio.C fixprf.C xformprof.C
 
-NOT_WORKING     = bandpass.C detail.C xtoa.C bin_ph.C corflux.C flux.C vargain.C \
-                  
+NOT_WORKING = bandpass.C detail.C xtoa.C bin_ph.C corflux.C flux.C vargain.C
+
 include $(LOCAL_ROOT)/include/Makefile.extended
 
