@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Types.h,v $
-   $Revision: 1.10 $
-   $Date: 2003/06/24 05:42:33 $
-   $Author: hknight $ */
+   $Revision: 1.11 $
+   $Date: 2003/10/21 08:33:36 $
+   $Author: straten $ */
 
 #ifndef __Types_h
 #define __Types_h
@@ -32,7 +32,20 @@ namespace Signal {
   enum Basis { Circular=0, Linear=1 };
 
   //! Sources of observed signals
-  enum Source { Unknown, Pulsar, PolnCal, FluxCalOn, FluxCalOff };
+  enum Source {
+    //! An unknown source
+    Unknown,
+    //! A pulsar
+    Pulsar,
+    //! A polarization calibrator, such as the linear noise diode
+    PolnCal,
+    //! A flux calibrator, such as Hydra A + the linear noise diode
+    FluxCalOn,
+    //! Near a flux calibrator, such as two degrees off Hydra A
+    FluxCalOff,
+    //! A calibrator solution
+    Calibrator
+  };
 
   //! Possible polarimetric states of the data
   enum State {

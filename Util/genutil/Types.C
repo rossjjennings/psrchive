@@ -223,6 +223,8 @@ const char* Signal::source_string(Source source)
     return "FluxCal-Off";
   case FluxCalOn:
     return "FluxCal-On";
+  case Calibrator:
+    return "Calibrator";
   default:
     return "Invalid";
   }
@@ -259,6 +261,8 @@ Signal::Source Signal::string2Source(string ss){
     return FluxCalOff;
   else if(ss=="FluxCal-On")
     return FluxCalOn;
+  else if(ss=="Calibrator")
+    return Calibrator;
   return Unknown;
 }
 
