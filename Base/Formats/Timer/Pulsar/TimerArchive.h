@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/Timer/Pulsar/TimerArchive.h,v $
-   $Revision: 1.4 $
-   $Date: 2003/05/13 12:03:17 $
+   $Revision: 1.5 $
+   $Date: 2003/06/05 15:38:28 $
    $Author: straten $ */
 
 #ifndef __Timer_Archive_h
@@ -172,7 +172,8 @@ namespace Pulsar {
     
       public:
 
-        Agent () { }
+        Agent () 
+        { if (verbose) cerr << "TimerArchive::Agent construct" << endl; }
 
         //! Advocate the use of TimerArchive to interpret filename
         bool advocate (const char* filename);
