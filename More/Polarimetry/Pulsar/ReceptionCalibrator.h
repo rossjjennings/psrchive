@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ReceptionCalibrator.h,v $
-   $Revision: 1.14 $
-   $Date: 2003/05/16 05:45:16 $
+   $Revision: 1.15 $
+   $Date: 2003/05/20 16:25:51 $
    $Author: straten $ */
 
 #ifndef __ReceptionCalibrator_H
@@ -72,6 +72,9 @@ namespace Pulsar {
     //! Calibrator state as a function of frequency
     vector<Calibration::StokesState> calibrator;
 
+    //! The index by which calibrator observations are identified
+    unsigned calibrator_state_index;
+
     //! Best estimate of polar decomposition as a function of frequency
     vector<PolarEstimate> receiver;
 
@@ -102,11 +105,11 @@ namespace Pulsar {
     //! Minimum and maximum values of parallactic angle (informational)
     float PA_min, PA_max;
 
-    //! Flag set after successful call to add_PolnCalibrator
-    bool includes_PolnCalibrator;
+    //! Signal path assigned to PolnCalibrator
+    unsigned PolnCalibrator_path;
 
-    //! Flag set after successful call to add_FluxCalibrator
-    bool includes_FluxCalibrator;
+    //! Signal path assigned to add_FluxCalibrator
+    unsigned FluxCalibrator_path;
 
     //! Check that the model is ready 
     void check_ready (const char* method, bool init = true);

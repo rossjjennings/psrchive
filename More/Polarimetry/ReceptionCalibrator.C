@@ -10,9 +10,10 @@ Pulsar::ReceptionCalibrator::ReceptionCalibrator (const Archive* archive)
   is_fit = false;
   ncoef = 0;
   ncoef_set = false;
-
-  includes_PolnCalibrator = false;
-  includes_FluxCalibrator = false;
+ 
+  PolnCalibrator_path = 0;
+  FluxCalibrator_path = 0;
+  calibrator_state_index = 0;
 
   PA_min = PA_max = 0.0;
 
@@ -145,13 +146,10 @@ unsigned Pulsar::ReceptionCalibrator::get_nstate () const
   return pulsar.size();
 }
 
-//! Get the number of frequency channels
 unsigned Pulsar::ReceptionCalibrator::get_nchan () const
 {
   return equation.size();
-} 
-
-
+}
 
 //! Add the specified pulsar observation to the set of constraints
 void Pulsar::ReceptionCalibrator::add_observation (const Archive* data)
@@ -202,7 +200,7 @@ void Pulsar::ReceptionCalibrator::add_observation (const Archive* data)
 
       for (unsigned istate=0; istate < pulsar.size(); istate++) {
 	add_data (measurements, pulsar[istate], ichan, integration);
-	measurements.back().state_index = istate + 1;
+	measurements.back().state_index = istate;
       }
 
       equation[ichan]->add_measurement (epoch, measurements);
@@ -256,26 +254,53 @@ void Pulsar::ReceptionCalibrator::add_PolnCalibrator (const PolnCalibrator* p)
 {
   check_ready ("Pulsar::ReceptionCalibrator::add_PolnCalibrator");
 
-  const Archive* calibrator = p->get_Archive();
+  const Archive* cal = p->get_Archive();
 
-  if (calibrator->get_state() != Signal::Coherence)
+  if (cal->get_state() != Signal::Coherence)
     throw Error (InvalidParam, 
 		 "Pulsar::ReceptionCalibrator::add_PolnCalibrator",
-		 "Archive='" + calibrator->get_filename() + "' "
-		 "invalid state=" + State2string(calibrator->get_state()));
+		 "Archive='" + cal->get_filename() + "' "
+		 "invalid state=" + State2string(cal->get_state()));
 
   string reason;
-  if (!uncalibrated->calibrator_match (calibrator, reason))
+  if (!uncalibrated->calibrator_match (cal, reason))
     throw Error (InvalidParam,
 		 "Pulsar::ReceptionCalibrator::add_PolnCalibrator",
-		 "'" + calibrator->get_filename() + "' does not match "
+		 "'" + cal->get_filename() + "' does not match "
 		 "'" + uncalibrated->get_filename() + reason);
 
   unsigned nchan = uncalibrated->get_nchan ();
-  unsigned nsub = calibrator->get_nsubint();
-  unsigned npol = calibrator->get_npol();
+  unsigned nsub = cal->get_nsubint();
+  unsigned npol = cal->get_npol();
   
   assert (npol == 4);
+
+  if (!PolnCalibrator_path) {
+
+    // this is the first calibrator observation
+    calibrator.resize (nchan);
+
+    // add the calibrator state
+    Stokes<double> cal_state (1,0,1,0);
+
+    calibrator_state_index = equation[0]->model.get_nstate ();
+
+    PolnCalibrator_path = equation[0]->get_nbackend();
+
+    for (unsigned ichan=0; ichan<nchan; ichan++) {
+
+      calibrator[ichan].set_stokes (cal_state);
+      for (unsigned istokes=0; istokes<4; istokes++)
+	calibrator[ichan].set_infit (istokes, false);
+    
+      // add the calibrator states to a new signal path
+      equation[ichan]->add_backend ();
+
+      equation[ichan]->model.add_state( &(calibrator[ichan]) );
+
+    }
+
+  }
 
   vector<vector<Estimate<double> > > cal_hi;
   vector<vector<Estimate<double> > > cal_lo;
@@ -284,7 +309,7 @@ void Pulsar::ReceptionCalibrator::add_PolnCalibrator (const PolnCalibrator* p)
 
     p->get_levels (isub, nchan, cal_hi, cal_lo);
 
-    const Integration* integration = calibrator->get_Integration (isub);
+    const Integration* integration = cal->get_Integration (isub);
     MJD epoch = integration->get_epoch ();
 
     if (epoch < start_epoch)
@@ -310,14 +335,12 @@ void Pulsar::ReceptionCalibrator::add_PolnCalibrator (const PolnCalibrator* p)
 	state.val[ipol] = stokes[ipol].val;
       state.var = stokes[0].var;
 
-      state.state_index = 0;
+      state.state_index = calibrator_state_index;
 
       equation[ichan]->add_measurement (epoch, state);
 
     }
   }
-
-  includes_PolnCalibrator = true;
 
   const PolarCalibrator* polcal = dynamic_cast<const PolarCalibrator*>(p);
 
@@ -361,7 +384,7 @@ void Pulsar::ReceptionCalibrator::add_FluxCalibrator (const FluxCalibrator* f)
   cerr << "Pulsar::ReceptionCalibrator::add_FluxCalibrator unimplemented"
        << endl;
 
-  // includes_FluxCalibrator = true;
+  // FluxCalibrator_path = true;
 }
 
 //! Calibrate the polarization of the given archive
@@ -406,7 +429,7 @@ void Pulsar::ReceptionCalibrator::calibrate (Archive* data)
   data->set_parallactic_corrected (true);
   data->set_poln_calibrated (true);
 
-  if (includes_FluxCalibrator)
+  if (FluxCalibrator_path)
     data->set_flux_calibrated (true);
 }
 
@@ -417,9 +440,9 @@ void Pulsar::ReceptionCalibrator::solve ()
 
   bool degenerate_rotV = false;
 
-  if (!includes_PolnCalibrator) {
+  if (!PolnCalibrator_path) {
 
-    if (!includes_FluxCalibrator)
+    if (!FluxCalibrator_path)
       throw Error (InvalidState, "Pulsar::ReceptionCalibrator::solve",
 		   "no PolnCalibrator or FluxCalibrator data available");
 
