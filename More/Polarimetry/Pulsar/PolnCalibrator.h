@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PolnCalibrator.h,v $
-   $Revision: 1.4 $
-   $Date: 2003/02/14 13:50:03 $
+   $Revision: 1.5 $
+   $Date: 2003/02/14 14:09:42 $
    $Author: straten $ */
 
 #ifndef __PolnCalibrator_H
@@ -36,6 +36,9 @@ namespace Pulsar {
 
     //! Construct from an single PolnCal Pulsar::Archive
     PolnCalibrator (const Archive* archives);
+
+    //! Destructor
+    virtual ~PolnCalibrator ();
 
     //! Calibrate the polarization of the given archive
     void calibrate (Archive* archive);

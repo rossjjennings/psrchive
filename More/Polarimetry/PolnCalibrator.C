@@ -6,6 +6,12 @@
 
 bool Pulsar::PolnCalibrator::store_parameters = false;
 
+Pulsar::PolnCalibrator::~PolnCalibrator ()
+{
+  // destructors must be defined in .C file so that the Reference::To
+  // desctructor can delete forward declared objects
+}
+
 Pulsar::PolnCalibrator::PolnCalibrator (const Archive* arch)
 {
   if (verbose)
