@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Integration.h,v $
-   $Revision: 1.68 $
-   $Date: 2004/12/14 12:33:57 $
-   $Author: straten $ */
+   $Revision: 1.69 $
+   $Date: 2004/12/30 11:04:01 $
+   $Author: ahotan $ */
 
 /*
   
@@ -112,7 +112,6 @@ namespace Pulsar {
     //! Return a vector of tempo++ toa objects
     void toas (vector<Tempo::toa>& toas, const Integration& std_subint,
 	       char nsite, string arguments = "", 
-	       bool time_domain = false, 
 	       Tempo::toa::Format fmt = Tempo::toa::Parkes,
 	       bool discard_bad = false) const;
     

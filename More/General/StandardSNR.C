@@ -13,10 +13,11 @@ float Pulsar::StandardSNR::get_snr (const Profile* profile)
   if (Pulsar::Profile::verbose)
     cerr << "Pulsar::StandardSNR::get_snr" << endl;
 
+  double shift;
   float ephase, snrfft, esnrfft;
 
   try {
-    profile->PhaseGradShift(*standard, ephase, snrfft, esnrfft);
+    profile->fftconv(*standard, shift, ephase, snrfft, esnrfft);
   }
   catch (...) {
     return 0.0;

@@ -30,11 +30,7 @@ void wrap (int& binval, int nbin) {
     binval -= nbin;
 }
 
-double Pulsar::Profile::GaussianShift (const Profile& std, float& ephase, 
-				       vector<float>& corr, 
-				       MEAL::Gaussian& model,
-				       int& rise, int& fall, int& ofs, 
-				       bool store) const
+double Pulsar::Profile::GaussianShift (const Profile& std, float& ephase) const
 {
   // This algorithm interpolates the time domain cross correlation
   // function by fitting a Gaussian.
@@ -54,11 +50,6 @@ double Pulsar::Profile::GaussianShift (const Profile& std, float& ephase,
 
   // Remove the baseline
   *ptr -= ptr->mean(ptr->find_min_phase(0.15));
-  
-  if (store) {
-    for (unsigned i = 0; i < ptr->get_nbin(); i++)
-      corr.push_back(ptr->get_amps()[i]);
-  }
   
   // Find the peak (can be done a number of ways, this is the simplest)
 
@@ -85,12 +76,6 @@ double Pulsar::Profile::GaussianShift (const Profile& std, float& ephase,
   wrap(brise,  ptr->get_nbin());
   wrap(bfall,  ptr->get_nbin());
   wrap(binmax, ptr->get_nbin());
-
-  if (store) {
-    rise = brise;
-    fall = bfall;
-    ofs  = offset;
-  }
 
   try{
     
@@ -158,10 +143,6 @@ double Pulsar::Profile::GaussianShift (const Profile& std, float& ephase,
       cerr << "Chi-squared = " << chisq << " / " << free_parms << " = "
 	   << chisq / free_parms << endl;
     
-    if (store) {
-      model = gm;
-    }
-    
     double shift = (gm.get_centre() - double(offset)) / 
       double(ptr->get_nbin());
 
@@ -198,9 +179,7 @@ double Pulsar::Profile::GaussianShift (const Profile& std, float& ephase,
   }
 }
 
-double Pulsar::Profile::ZeroPadShift (const Profile& std, 
-				      float& ephase, vector<float>& corr,
-				      vector<float>& interp, bool store) const
+double Pulsar::Profile::ZeroPadShift (const Profile& std, float& ephase) const
 {
   // This algorithm uses zero padding in the fourier domain to
   // interpolate the cross correlation function in the time
@@ -226,8 +205,6 @@ double Pulsar::Profile::ZeroPadShift (const Profile& std,
   
   for (unsigned i = 0; i < get_nbin(); i++) {
     correlation.push_back(ptr->get_amps()[i]);
-    if (store)
-      corr.push_back(ptr->get_amps()[i]);
   }
   
   vector< Estimate<float> > interpolated;
@@ -244,8 +221,6 @@ double Pulsar::Profile::ZeroPadShift (const Profile& std,
   float maxloc = 0.0;
   
   for (unsigned i = 0; i < interpolated.size(); i++) {
-    if (store)
-      interp.push_back(interpolated[i].val);
     if (interpolated[i].val > maxval) {
       maxval = interpolated[i].val;
       maxloc = float(i) / Pulsar::Profile::ZPSF;
@@ -265,16 +240,16 @@ double Pulsar::Profile::ZeroPadShift (const Profile& std,
   return shift;
 }
 
-double Pulsar::Profile::PhaseGradShift (const Profile& std, float& ephase,
-					float& snrfft, float& esnrfft) const 
+double Pulsar::Profile::PhaseGradShift (const Profile& std, float& ephase) const 
 {
   Profile stdcopy = std;
   Profile prfcopy = *this;
 
-  // set these in case something goes wrong
+  // set this in case something goes wrong
   ephase = 999;
-  snrfft = 0;
-  esnrfft = 999;
+
+  float snrfft = 0;
+  float esnrfft = 999;
 
   // max float is of order 10^{38} - check that we won't exceed this
   // limiting factor in the DC term of the fourier transform
@@ -319,9 +294,9 @@ double Pulsar::Profile::PhaseGradShift (const Profile& std, float& ephase,
   return shift / double(stdcopy.nbin);
 }
 
-void Pulsar::Profile::fftconv (Profile& std, 
+void Pulsar::Profile::fftconv (const Profile& std, 
 			       double& shift, float& eshift, 
-			       float& snrfft, float& esnrfft)
+			       float& snrfft, float& esnrfft) const
 {
   double scale, sigma_scale;
   double dshift, sigma_dshift;

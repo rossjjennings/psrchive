@@ -78,7 +78,7 @@ Pulsar::Profile::morphological_difference (const Profile& profile,
   // First it is essential to align the profiles in phase, so that our
   // subtraction occurs between the equivalent bins in both profiles.
   
-  float ephase, snrfft, esnrfft;
+  float ephase;
   double phase;
   
   // First try the FFT based shift routine and if it fails, revert
@@ -86,7 +86,7 @@ Pulsar::Profile::morphological_difference (const Profile& profile,
   // nearest bin.
   
   try {
-    phase = temp1->PhaseGradShift (*temp2, ephase, snrfft, esnrfft);
+    phase = temp1->PhaseGradShift (*temp2, ephase);
   }
   catch (Error& error) {
     cerr << "Pulsar::Profile::morphological_difference FFT shift failed" 

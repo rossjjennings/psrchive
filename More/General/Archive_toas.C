@@ -11,7 +11,6 @@
 void Pulsar::Archive::toas (vector<Tempo::toa>& toas,
 			    const Archive* standard,
 			    string arguments,
-			    bool time_domain,
 			    Tempo::toa::Format fmt) const
 {
   if (get<IntegrationOrder>()) {
@@ -40,8 +39,7 @@ void Pulsar::Archive::toas (vector<Tempo::toa>& toas,
   for (unsigned isub=0; isub<get_nsubint(); isub++) {
     
     vector<Tempo::toa> toaset;
-    get_Integration(isub)->toas (toaset, *std, nsite, arguments, 
-				 time_domain, fmt);
+    get_Integration(isub)->toas (toaset, *std, nsite, arguments, fmt);
     
     if (fmt == Tempo::toa::Parkes || fmt == Tempo::toa::Psrclock) {
       // some extra information to place in each toa

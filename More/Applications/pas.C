@@ -57,7 +57,7 @@ int main (int argc, char** argv)
   char opts;
   float curs_x, curs_y, x, y, meantmp =0, curs_x0;
   float stdphase=0;
-  float ephase, snrfft, esnrfft;    
+  float ephase;    
   unsigned int i;
   bool verbose = false;
   bool vverbose = false;
@@ -81,7 +81,7 @@ int main (int argc, char** argv)
       return 0;
 
     case 'i':
-      cout << "$Id: pas.C,v 1.17 2004/11/05 02:13:38 ahotan Exp $" << endl;
+      cout << "$Id: pas.C,v 1.18 2004/12/30 11:04:00 ahotan Exp $" << endl;
       return 0;
 
     case 'r':
@@ -185,7 +185,7 @@ int main (int argc, char** argv)
 	case 'a':   //Align
 	  if(refflag==true) {  
 	    stdprof=stdarch->get_Profile(0, 0, 0);
-	    stdphase=float(stdprof->PhaseGradShift(refarch->get_Profile(0, 0, 0), ephase, snrfft, esnrfft));
+	    stdphase=float(stdprof->PhaseGradShift(refarch->get_Profile(0, 0, 0), ephase));
 	    fmax=stdphase*stdarch->get_Profile(0,0,0)->get_nbin();
 	    stdarch->rotate(convt(stdarch, fmax, verbose));
 	    if(verbose) cout << "Align: rotated " <<stdphase << "phase, " 
@@ -548,7 +548,7 @@ void coef (float *x, float *y, int maxdelay, int n, double *rmax, int *imax, dou
 
 void cross(Reference::To<Pulsar::Archive> refcorr, Reference::To<Pulsar::Archive> stdcorr, bool verbose, bool vverbose, char line[100]) 
 {
-  float fmax, ephase, snrfft, esnrfft, stdphase;
+  float fmax, ephase, stdphase;
   int imax; 
   double rmax, pcoef, ppcoef;
   Reference::To<Pulsar::Archive> stdclone (stdcorr->clone());
@@ -559,8 +559,7 @@ void cross(Reference::To<Pulsar::Archive> refcorr, Reference::To<Pulsar::Archive
 
   //  maximum, after rotate fractional phase bin
   stdprof=stdcorr->get_Profile(0, 0, 0);
-  stdphase=stdprof->PhaseGradShift(refcorr->get_Profile(0, 0, 0), 
-				   ephase, snrfft, esnrfft);
+  stdphase=stdprof->PhaseGradShift(refcorr->get_Profile(0, 0, 0), ephase);
   fmax=float(stdphase)*stdcorr->get_Profile(0,0,0)->get_nbin();
   stdcorr->rotate(convt(stdcorr, fmax, verbose));
   cross_correlation(refcorr->get_Profile(0,0,0), stdcorr->get_Profile(0,0,0), 

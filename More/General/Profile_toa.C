@@ -8,19 +8,14 @@
 
 Tempo::toa Pulsar::Profile::toa (const Profile& std, const MJD& mjd,
 				 double period, char nsite, string arguments,
-				 Tempo::toa::Format fmt, bool td) const
+				 Tempo::toa::Format fmt) const
 {
   Tempo::toa retval (fmt);
 
-  float  ephase, snrfft, esnrfft;
+  float  ephase;
   double phase;
   
-  if (td) {
-    phase = ParIntShift(std, ephase);
-  }
-  else {
-    phase = PhaseGradShift (std, ephase, snrfft, esnrfft);
-  }
+  phase = PhaseGradShift (std, ephase);
 
   retval.set_frequency (centrefreq);
   retval.set_arrival   (mjd + phase * period);

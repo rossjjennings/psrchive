@@ -6,7 +6,6 @@
 void Pulsar::Integration::toas (vector<Tempo::toa>& toas,
 				const Integration& std_subint,
 				char nsite, string arguments,
-				bool time_domain,
 				Tempo::toa::Format fmt,
 				bool discard_bad) const
 {
@@ -38,7 +37,7 @@ void Pulsar::Integration::toas (vector<Tempo::toa>& toas,
     try {
       
       toa = profile->toa (standard, epoch, folding_period, nsite, 
-			  arguments, fmt, time_domain);
+			  arguments, fmt);
       
       if (get_dedispersed())
 	toa.set_frequency (get_centre_frequency());

@@ -7,8 +7,7 @@
 
 #include "MEAL/GaussJordan.h"
 
-double Pulsar::Profile::ParIntShift (const Profile& std, float& error,
-				     float* corr, float* fn) const
+double Pulsar::Profile::ParIntShift (const Profile& std, float& error) const
 {
   // The Profile::correlate function creates a profile whose amps
   // are the values of the correlation function, starting at zero
@@ -28,12 +27,6 @@ double Pulsar::Profile::ParIntShift (const Profile& std, float& error,
 
   // Remove the baseline
   *ptr -= ptr->mean(ptr->find_min_phase(0.15));
-
-  if (corr != 0) {
-    for (unsigned i = 0; i < ptr->get_nbin(); i++) {
-      corr[i] = ptr->get_amps()[i];
-    }
-  }  
 
   // Find the point of best correlation
   
@@ -101,12 +94,6 @@ double Pulsar::Profile::ParIntShift (const Profile& std, float& error,
   double D = C - (B*B/(4.0*A));
   double E = -1.0 * A;
   double F =  (-1.0 * B) / (2.0 * A);
-
-  if (fn != 0) {
-    fn[0] = D;
-    fn[1] = E;
-    fn[2] = F;
-  }
 
   /*
 

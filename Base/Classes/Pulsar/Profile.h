@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Profile.h,v $
-   $Revision: 1.78 $
-   $Date: 2004/11/22 21:32:30 $
-   $Author: straten $ */
+   $Revision: 1.79 $
+   $Date: 2004/12/30 11:04:01 $
+   $Author: ahotan $ */
 
 #ifndef __Pulsar_Profile_h
 #define __Pulsar_Profile_h
@@ -201,36 +201,33 @@ namespace Pulsar {
     //! Rotates the profile to remove dispersion delay
     void dedisperse (double dm, double ref_freq, double pfold);
     
-    //! fit to the standard and return a Tempo::toa object
-    Tempo::toa toa (const Profile& std, const MJD& mjd, 
-		    double period, char nsite, string arguments = "",
-		    Tempo::toa::Format fmt = Tempo::toa::Parkes,
-		    bool td = false) const;
-    
     // The following algorithms determin the shift between a profile
     // and a standard template (with fractional bin resolution) using 
     // a number of different methods. Shifts and errors are returned 
     // in turns. In some cases, the routine supports the exporting of 
     // lower level information for use in debugging.
 
+    //! Functor that impliments shift algorithms
+    static Functor<double(const Pulsar::Profile&, 
+			  float& ephase)> shift_functor;
+
     /*! Parabolic interpolation in the time domain */
-    double ParIntShift (const Profile& std, float& error,
-			float* corr = 0, float* fn = 0) const;
-    
+    double ParIntShift (const Profile& std, float& ephase) const;
+
     /*! Gaussian interpolation in the time domain */
-    double GaussianShift (const Profile& std, float& ephase, 
-			  vector<float>& corr, MEAL::Gaussian& model,
-			  int& _rise, int& _fall, int& ofs, bool store = false) const;
+    double GaussianShift (const Profile& std, float& ephase) const;
     
     /*! Fourier domain zero-pad interpolation */
-    double ZeroPadShift (const Profile& std, float& ephase,
-			 vector<float>& corr, vector<float>& interp,
-			 bool store = false) const;
+    double ZeroPadShift (const Profile& std, float& ephase) const;
     
     /*! Fourier domain phase gradient fit */
-    double PhaseGradShift (const Profile& std, float& ephase,
-			   float& snrfft, float& esnrfft) const;
+    double PhaseGradShift (const Profile& std, float& ephase) const;
     
+    //! fit to the standard and return a Tempo::toa object
+    Tempo::toa toa (const Profile& std, const MJD& mjd, 
+		    double period, char nsite, string arguments = "",
+		    Tempo::toa::Format fmt = Tempo::toa::Parkes) const;
+
     //! get the number of bins
     /*! Note that there is no set_nbin; this attribute may be set only
       through Profile::resize */
@@ -304,6 +301,7 @@ namespace Pulsar {
   protected:
 
     friend class PolnProfile;
+    friend class StandardSNR;
 
     //! does the work for convolve and correlate
     void convolve (const Profile* profile, int direction);
@@ -327,8 +325,8 @@ namespace Pulsar {
     Signal::Component state;
 
     //! interface to model_profile used by Profile::shift
-    void fftconv (Profile& std, double& shift, float& eshift, 
-		  float& snrfft, float& esnrfft);
+    void fftconv (const Profile& std, double& shift, float& eshift, 
+		  float& snrfft, float& esnrfft) const;
   };
 
   //! Default implementation of Profile::snr method

@@ -48,7 +48,6 @@ void usage ()
     "  -n harmonics     Use up to the specified number of harmonics\n"
     "  -p               Perform full polarimetric fit in Fourier domain \n"
     "  -s stdfile       Location of standard profile \n"
-    "  -t               Fit in the time domain \n"
     "  -D               Denoise standard \n"
     "\n"
     "Output options:\n"
@@ -66,7 +65,6 @@ int main (int argc, char *argv[])
   bool std_given = false;
   bool std_multiple = false;
   bool gaussian = false;
-  bool time_domain = false;
   bool full_poln = false;
 
   bool fscrunch = false;
@@ -107,7 +105,7 @@ int main (int argc, char *argv[])
       denoise = true;
       break;
     case 'i':
-      cout << "$Id: pat.C,v 1.32 2004/12/06 14:40:14 straten Exp $" << endl;
+      cout << "$Id: pat.C,v 1.33 2004/12/30 11:04:00 ahotan Exp $" << endl;
       return 0;
 
     case 'F':
@@ -151,10 +149,6 @@ int main (int argc, char *argv[])
     case 's':
       std_given = true;
       std = optarg;
-      break;
-
-    case 't':
-      time_domain = true;
       break;
 
     case 'f':
@@ -288,14 +282,14 @@ int main (int argc, char *argv[])
 	}
 	if (strcasecmp(outFormat.c_str(),"parkes")==0)
 	  {
-	    arch->toas(toas, stdarch, "", time_domain, Tempo::toa::Parkes); 
+	    arch->toas(toas, stdarch, "", Tempo::toa::Parkes); 
 	  }
 	else if (strcasecmp(outFormat.c_str(),"princeton")==0)
-	  arch->toas(toas, stdarch, "", time_domain, Tempo::toa::Princeton); 
+	  arch->toas(toas, stdarch, "", Tempo::toa::Princeton); 
 	else if (strcasecmp(outFormat.c_str(),"itoa")==0)
-	  arch->toas(toas, stdarch, "", time_domain, Tempo::toa::ITOA); 
+	  arch->toas(toas, stdarch, "", Tempo::toa::ITOA); 
 	else if (strcasecmp(outFormat.c_str(),"psrclock")==0)
-	  arch->toas(toas, stdarch, "", time_domain, Tempo::toa::Psrclock); 
+	  arch->toas(toas, stdarch, "", Tempo::toa::Psrclock); 
 	else if (strcasecmp(outFormat.c_str(),"tempo2")==0)
 	  {
 	    string args;
@@ -325,7 +319,7 @@ int main (int argc, char *argv[])
 		  args += " -o " + ext->observer;
 		}
 	      }
-	    arch->toas(toas, stdarch, args, time_domain, Tempo::toa::Tempo2); 
+	    arch->toas(toas, stdarch, args, Tempo::toa::Tempo2); 
 	  }
       }
       for (unsigned i = 0; i < toas.size(); i++)
