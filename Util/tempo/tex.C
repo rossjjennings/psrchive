@@ -9,6 +9,7 @@
 
 #include <vector>
 #include <math.h>
+#include <iostream>
 
 #include "psrephem.h"
 #include "ephio.h"

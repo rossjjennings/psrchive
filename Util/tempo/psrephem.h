@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/psrephem.h,v $
-   $Revision: 1.13 $
-   $Date: 2001/02/28 03:56:08 $
-   $Author: straten $ */
+   $Revision: 1.14 $
+   $Date: 2001/05/08 13:40:41 $
+   $Author: pulsar $ */
 
 #ifndef __PSREPHEM_H
 #define __PSREPHEM_H
@@ -17,8 +17,7 @@
 
 class psrephem 
 {
-  friend class gtk_psrephem;
-  friend class qt_psrephem;
+  friend class psrParams;
 
  public:
 
