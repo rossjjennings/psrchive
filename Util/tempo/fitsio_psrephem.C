@@ -456,7 +456,8 @@ void psrephem::unload (fitsfile* fptr, long row) const
 
     case 2:  // h:m:s
       {
-        ra2str (strval, maxstrlen, value_double[ieph], 10);
+	// convert from turns to radians
+        ra2str (strval, maxstrlen, value_double[ieph]*2.0*M_PI, 10);
 
 	if (verbose)
 	  cerr << "psrephem::unload h:m:s:'" << strval << "' in column "
@@ -468,7 +469,8 @@ void psrephem::unload (fitsfile* fptr, long row) const
       }
     case 3:  // d:m:s
       {
-        dec2str (strval, maxstrlen, value_double[ieph], 10);
+	// convert from turns to radians
+        dec2str (strval, maxstrlen, value_double[ieph]*2.0*M_PI, 10);
 
 	if (verbose)
 	  cerr << "psrephem::unload d:m:s:'" << strval << "' in column "
