@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/random.h,v $
-   $Revision: 1.1 $
-   $Date: 2003/02/25 09:48:20 $
+   $Revision: 1.2 $
+   $Date: 2003/03/03 09:56:15 $
    $Author: straten $ */
 
 #ifndef __random_H
@@ -35,6 +35,13 @@ void random_vector (T& array, U scale)
 {
   for (unsigned i=0; i<array.size(); i++)
     random_value (array[i], scale);
+}
+
+template <class T, class U>
+void random_matrix (T& array, U scale)
+{
+  for (unsigned i=0; i<array.size(); i++)
+    random_vector (array[i], scale);
 }
 
 #endif
