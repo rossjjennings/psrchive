@@ -13,9 +13,18 @@
 #include "interpolate.h"
 #include "model_profile.h"
 
+#define WINDOW 0.025
+
+void wrap (int& binval, int nbin) {
+  if (binval < 0)
+    binval += nbin;
+  else if (binval > nbin-1)
+    binval -= nbin;
+}
+
 double Pulsar::Profile::GaussianShift (const Profile& std, float& ephase, 
 				       vector<float>& corr, Calibration::Gaussian& model,
-				       int& rise, int& fall, bool store) const
+				       int& rise, int& fall, int& ofs, bool store) const
 {
   // This algorithm interpolates the time domain cross correlation
   // function by fitting a Gaussian.
@@ -41,25 +50,36 @@ double Pulsar::Profile::GaussianShift (const Profile& std, float& ephase,
       corr.push_back(ptr->get_amps()[i]);
   }
   
-  // Find the peak
-
-  int binmax = ptr->find_max_bin();
+  // Find the peak (can be done a number of ways, this is the simplest)
 
   int brise = 0;
   int bfall = 0;
-
-  ptr->find_peak_edges(brise, bfall);
   
-  if (brise > bfall) {
-    if (binmax > (ptr->get_nbin())/2.0)
-      bfall += ptr->get_nbin();
-    else
-      brise = brise - get_nbin();
+  int binmax = ptr->find_max_bin();
+  int offset = 0;
+
+  brise = binmax - int(WINDOW*float(ptr->get_nbin()));
+  bfall = binmax + int(WINDOW*float(ptr->get_nbin()));
+
+  if (brise < bfall) {
+    offset = int((ptr->get_nbin())/2.0) - binmax;
   }
+  else {
+    offset = binmax - int((ptr->get_nbin())/2.0);
+  }
+  
+  brise  += offset;
+  bfall  += offset;
+  binmax += offset;
+    
+  wrap(brise,  ptr->get_nbin());
+  wrap(bfall,  ptr->get_nbin());
+  wrap(binmax, ptr->get_nbin());
 
   if (store) {
     rise = brise;
     fall = bfall;
+    ofs  = offset;
   }
 
   try{
@@ -69,7 +89,7 @@ double Pulsar::Profile::GaussianShift (const Profile& std, float& ephase,
     Calibration::Gaussian gm;
     
     gm.set_centre(binmax);
-    gm.set_width(bfall - brise);
+    gm.set_width(abs(bfall - brise));
     gm.set_height(ptr->max());
     gm.set_cyclic(false);
     
@@ -84,11 +104,10 @@ double Pulsar::Profile::GaussianShift (const Profile& std, float& ephase,
     for (int i = brise; i < bfall; i++) {
       data_x.push_back ( argument.get_Value(double(i)) );
       index = i;
-      if (index < 0)
-	index += ptr->get_nbin();
-      if (index > int(ptr->get_nbin()))
-	index -= ptr->get_nbin();
-      data_y.push_back( Estimate<double>(ptr->get_amps()[index], 0.1) );
+      index -= offset;
+      wrap(index,  ptr->get_nbin());
+      data_y.push_back( Estimate<double>(ptr->get_amps()[index], 
+					 ptr->get_amps()[index]/10.0) );
     }
     
     Calibration::LevenbergMarquardt<double> fit;
@@ -113,7 +132,7 @@ double Pulsar::Profile::GaussianShift (const Profile& std, float& ephase,
 	not_improving = 0;
 	if (diffchisq/chisq < threshold && diffchisq > 0) {
 	  if (verbose)
-	    cerr << "no big diff in chisq = " << diffchisq << endl;
+	    cerr << "No big diff in chisq = " << diffchisq << endl;
 	  break;
 	}
       }
@@ -129,23 +148,27 @@ double Pulsar::Profile::GaussianShift (const Profile& std, float& ephase,
       cerr << "Chi-squared = " << chisq << " / " << free_parms << " = "
 	   << chisq / free_parms << endl;
     
-    ephase = chisq / (free_parms * ptr->get_nbin() * ptr->get_nbin() * 100.0);
+    ephase = chisq / (free_parms * ptr->get_nbin());
     
     if (store) {
       model = gm;
     }
     
-    double shift = gm.get_centre() / double(ptr->get_nbin());
-    
+    double shift = (gm.get_centre() - double(offset)) / 
+      double(ptr->get_nbin());
+
+    // Wrap the result so it is always withing +/- 0.5 phase units
+
     if (shift < -0.5)
       shift += 1.0;
     else if (shift > 0.5)
       shift -= 1.0;
+
     return shift;
-    
   }
   catch (Error& error) {
     cerr << error << endl;
+    ephase = 0.5;
     return (0.0);
   }
 }

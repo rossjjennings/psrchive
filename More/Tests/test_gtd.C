@@ -19,6 +19,13 @@
 
 #define ZOOM 6
 
+void gtd_wrap(int& index, int nbin) {
+  if (index < 0)
+    index += nbin;
+  if (index > int(nbin))
+    index -= nbin;
+}
+
 int main(int argc, char** argv) {
   
   bool display = false;
@@ -122,8 +129,8 @@ int main(int argc, char** argv) {
   }
   else {
     bmrng mygen;
-    SyntheticProfile fakep(1024, 10.0, 40.0, 512 + (100.0*mygen.rand()));
-    SyntheticProfile fakes(1024, 20.0, 40.0, 512 + (100.0*mygen.rand()));
+    SyntheticProfile fakep(1024, 2.0, 20.0, 512 + (100.0*mygen.rand()));
+    SyntheticProfile fakes(1024, 50.0, 20.0, 512 + (100.0*mygen.rand()));
 
     fakep.build();
     fakep.add_noise();
@@ -133,7 +140,7 @@ int main(int argc, char** argv) {
     fakes.add_noise();
     stdprof = fakes.get_Profile().clone();
   }
-    
+  
   for (unsigned i = 0; i < profs.size(); i++) {
     
     vector<float> corr;
@@ -141,11 +148,13 @@ int main(int argc, char** argv) {
 
     int rise = 0;
     int fall = 0;
+    int ofs  = 0;
 
     double shift = 0.0;
     float  error = 0.0;
-
-    shift = profs[i]->GaussianShift(*stdprof, error, corr, model, rise, fall, true);
+    
+    shift = profs[i]->GaussianShift(*stdprof, error, corr, model, 
+				    rise, fall, ofs, true);
     
     unsigned nbin = profs[i]->get_nbin();
     
@@ -177,24 +186,44 @@ int main(int argc, char** argv) {
       cpgsci(2);
       
       model.set_abscissa(double(rise));
-      
+
+      // Remember that RISE, FALL and the model GM have all been
+      // offset by the amount required to centre them.
+
       for (int j = rise; j < fall; j++) {
 	model.set_abscissa(double(j));
-	int index = int(j);
-	if (index < 0)
-	  index += nbin;
-	if (index > int(nbin))
-	  index -= nbin;
+	int index = int(j) - ofs;
+	gtd_wrap(index, nbin);
 	cpgpt1(float(index)/float(nbin), model.evaluate(), 1);
       }
 
+      cpgsci(5);
+      cpgsls(2);
+
+      int _rise = (rise-ofs);
+      gtd_wrap(_rise, nbin);
+      
+      int _fall = (fall-ofs);
+      gtd_wrap(_fall, nbin);
+
+      float _r = float(_rise)/float(nbin);
+      float _f = float(_fall)/float(nbin);
+
+      cpgmove(_r, ymin);
+      cpgdraw(_r, ymax);
+      
+      cpgmove(_f, ymin);
+      cpgdraw(_f, ymax);
+
       cpgsci(1);
+      cpgsls(1);
       
       cpgpanl(1,2);
       cpgsvp(0.1,0.5,0.1,0.9);
       
       float maxphs = 0.0;
       int   maxbin = 0;
+
       ymax = 0.0;
       
       for (unsigned j = 0; j < nbin; j++) {
@@ -231,23 +260,35 @@ int main(int argc, char** argv) {
 
       cpgsci(2);
       
-      for (float j = float(binmin); j < float(binmax); j+= 0.01) {
-	model.set_abscissa(j);
+      for (float j = float(binmin); j < float(binmax); j+= 0.001) {
+	float index = j+float(ofs);
+	if (index < 0.0)
+	  index += float(nbin);
+	if(index > float(nbin))
+	  index -= float(nbin);
+	model.set_abscissa(index);
 	cpgpt1(j/float(nbin), model.evaluate(), 1);
       }
       
       cpgsci(3);
       cpgsls(2);
-
-      cpgmove(model.get_centre()/float(nbin), ymin);
-      cpgdraw(model.get_centre()/float(nbin), ymax);
-
+      
+      float cent = model.get_centre()-float(ofs);
+      if (cent < 0.0)
+	cent += float(nbin);
+      if (cent > float(nbin))
+	cent -= float(nbin);
+      
+      cpgmove(cent/float(nbin), ymin);
+      cpgdraw(cent/float(nbin), ymax);
+      
       cpgsci(2);
       cpgsls(1);
-      cpgerr1(5, model.get_centre()/float(nbin), (ymin+ymax)/2.0, error, 2.0);
-
+      cpgerr1(5, (cent)/float(nbin), 
+	      (ymin+ymax)/2.0, error, 2.0);
+      
       // Draw the profiles
-
+      
       cpgsci(3);
 
       Pulsar::Plotter plotter;
