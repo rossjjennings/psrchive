@@ -5,7 +5,7 @@
 
 void Pulsar::StandardSNR::set_standard (const Profile* profile)
 {
-  standard = profile;
+  standard = profile->clone();
 }
 
 float Pulsar::StandardSNR::get_snr (const Profile* profile)
