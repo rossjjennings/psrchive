@@ -1,5 +1,5 @@
 //
-// $Id: pav.C,v 1.66 2004/01/05 01:53:00 ahotan Exp $
+// $Id: pav.C,v 1.67 2004/01/05 04:01:31 ahotan Exp $
 //
 // The Pulsar Archive Viewer
 //
@@ -65,6 +65,7 @@ void usage ()
     " -W        Change colour scheme to suite white background\n"
     " -z x1,x2  Zoom to this pulse phase range\n"
     " -k f1,f2  Zoom to this frequency range\n"
+    " -y s1,s2  Zoom to this subint range\n"
     " -l        Do not display labels outside of plotting area\n"
     " -N x,y    Divide the window into x by y panels\n"
     "\n"
@@ -132,6 +133,7 @@ int main (int argc, char** argv)
   bool verbose = false;
   bool zoomed = false;
   bool fzoomed = false;
+  bool szoomed = false;
 
   bool display = false;
   bool nesting = false;
@@ -267,7 +269,7 @@ int main (int argc, char** argv)
       plotter.set_subint( atoi (optarg) );
       break;
     case 'i':
-      cout << "$Id: pav.C,v 1.66 2004/01/05 01:53:00 ahotan Exp $" << endl;
+      cout << "$Id: pav.C,v 1.67 2004/01/05 04:01:31 ahotan Exp $" << endl;
       return 0;
 
     case 'j':
@@ -389,10 +391,6 @@ int main (int argc, char** argv)
       calinfo = true;
       break;
 
-    case 'y':
-      plotter.set_y_max (atof(optarg));
-      break;
-
     case 'Y':
       subint_plot = true;
       break;
@@ -420,6 +418,19 @@ int main (int argc, char** argv)
       }
       plotter.set_freq_zoom (atof(val1), atof(val2));
       fzoomed = true;
+      break;
+    }
+
+    case 'y': {
+      char* separator = ",";
+      char* val1 = strtok (optarg, separator);
+      char* val2 = strtok (NULL, separator);
+      if (!val1 || !val2)  {
+        cerr << "Error parsing frequencies" << endl;
+        return -1;
+      }
+      plotter.set_sub_range (atoi(val1), atoi(val2));
+      szoomed = true;
       break;
     }
 
