@@ -73,13 +73,13 @@ libpsrchive_la_SOURCES = plugins.csh getopt.h Physical.h \
 	Integration_fappend.C         Transposer.C  \
 	Integration_find.C            Utilities.C  \
 	Integration_flux.C            choose.C  \
-	Integration_fscrunch.C        \
-	Integration_get_PA.C          \
+	Integration_fscrunch.C        GaussianShift.C \
+	Integration_get_PA.C          ZeroPadShift.C \
 	Integration_get_Stokes.C      model_profile.C  \
 	Integration_invint.C          pafit_get_PA.C  \
 	Integration_match.C           ArchiveTI.C \
 	IntegrationTI.C               ArchiveTI_import.C \
-	PhaseGradShift.C
+	PhaseGradShift.C              Profile_fftconv.C
 
 if !HAVE_GETOPT_LONG
 libpsrchive_la_SOURCES += getopt.c getopt1.c
