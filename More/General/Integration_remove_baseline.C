@@ -17,7 +17,11 @@ void Pulsar::Integration::remove_baseline (float phase)
     if (phase == -1.0)
       phase = find_min_phase ();
 
-    for (int ichan=0; ichan<nchan; ichan++) {
+    double dm = get_dispersion_measure();
+    double pfold = get_folding_period();
+    double centrefreq = get_centre_frequency();
+
+    for (int ichan=0; ichan<get_nchan(); ichan++) {
 
       float chanphase = phase;
 
@@ -27,7 +31,7 @@ void Pulsar::Integration::remove_baseline (float phase)
 	chanphase += phase_off;
       }
 	
-      for (int ipol=0; ipol<npol; ipol++)
+      for (int ipol=0; ipol<get_npol(); ipol++)
 	*(profiles[ipol][ichan]) -= profiles[ipol][ichan] -> mean (chanphase);
 
     }

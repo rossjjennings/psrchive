@@ -1,5 +1,7 @@
 #include "Integration.h"
 #include "Profile.h"
+#include "Error.h"
+
 #include "Stokes.h"
 
 /////////////////////////////////////////////////////////////////////////////
@@ -12,27 +14,25 @@
   \param ibin the phase bin
 
   \pre The Integration must contain full polarimetric information.  That is,
-  get_state() must return either Poln::Stokes or Poln::Coherence.  An
+  get_poln_state() must return either Poln::Stokes or Poln::Coherence.  An
   exception is thrown otherwise.
 */
 void Pulsar::Integration::get_Stokes ( Stokes& S, int ichan, int ibin ) const
 {
-  if (state == Poln::Stokes) {
+  if (get_poln_state() == Poln::Stokes) {
     for (int ipol=0; ipol<4; ++ipol)
       S[ipol] = profiles[ipol][ichan]->get_amps()[ibin];
     return;
   }
 
-  else if (state == Poln::Coherence) {
+  else if (get_poln_state() == Poln::Coherence) {
 
     float PP   = profiles[0][ichan]->get_amps()[ibin];
     float QQ   = profiles[1][ichan]->get_amps()[ibin];
     float RePQ = profiles[2][ichan]->get_amps()[ibin];
     float ImPQ = profiles[3][ichan]->get_amps()[ibin];
 
-    bool circular = profiles[0][ichan]->get_state() == Poln::RR;
-
-    if (circular) {
+    if (get_feed_type() == Feed::Circular) {
       S.i = PP + QQ;
       S.v = PP - QQ;
       S.q = 2.0 * RePQ;
@@ -47,7 +47,7 @@ void Pulsar::Integration::get_Stokes ( Stokes& S, int ichan, int ibin ) const
     return;
   }
 
-  throw string ("Pulsar::Integration::get_Stokes invalid state");
+  throw Error (InvalidPolnState, "Integration::get_Stokes");
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -74,8 +74,8 @@ void Pulsar::Integration::get_Stokes (vector<Stokes>& S, int iother,
   int ndim = 0;
   int ndim_other = 0;
 
-  if (!(state == Poln::Stokes || state == Poln::Coherence))
-    throw string ("Pulsar::Integration::get_Stokes invalid state");
+  if (!(get_poln_state()==Poln::Stokes || get_poln_state()==Poln::Coherence))
+    throw Error (InvalidPolnState, "Integration::get_Stokes");
 
   if (abscissa == Dimension::Frequency) {
     ndim = get_nchan();
@@ -86,10 +86,10 @@ void Pulsar::Integration::get_Stokes (vector<Stokes>& S, int iother,
     ndim_other = get_nchan();
   }
   else
-    throw string ("Pulsar::Integration::get_Stokes invalid abscissa");
+    throw Error (InvalidParam, "Integration::get_Stokes", "invalid abscissa");
 
   if (iother<0 || iother>=ndim_other)
-    throw string ("Pulsar::Integration::get_Stokes invalid dimension");
+    throw Error (InvalidParam, "Integration::get_Stokes", "invalid dimension");
 
   S.resize(ndim);
 

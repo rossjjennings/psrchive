@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/BasicArchive.h,v $
-   $Revision: 1.6 $
-   $Date: 2002/04/17 14:27:00 $
+   $Revision: 1.7 $
+   $Date: 2002/04/20 10:35:27 $
    $Author: straten $ */
 
 #include "Archive.h"
@@ -220,6 +220,19 @@ namespace Pulsar {
 	polstate = state;
       }
     
+    //! Get the centre frequency of the observation
+    virtual double get_dispersion_measure () const
+    {
+      return ephemeris.get_dm();
+    }
+
+    //! Set the centre frequency of the observation
+    virtual void set_dispersion_measure (double dm)
+    {
+      ephemeris.set_dm (dm);
+    }
+
+
     //! Return whether or not the data has been corrected for feed angle errors
     bool get_feedangle_corrected () const
       {
@@ -280,8 +293,13 @@ namespace Pulsar {
       chanbw = chan_width;
     }
 
+  protected:
+    //! Return a pointer to a new BasicIntegration
+    Integration* new_Integration (Integration* subint);
+    
   };
   
+
 }
 
 

@@ -1,4 +1,6 @@
 #include "BasicArchive.h"
+#include "BasicIntegration.h"
+#include "Error.h"
 
 void Pulsar::BasicArchive::init ()
 {
@@ -36,6 +38,25 @@ Pulsar::BasicArchive::operator = (const BasicArchive& copy)
   // etc
 
   return *this;
+}
+
+/*!  
+  By over-riding this funciton, inherited types may re-define the type
+  of Integration to which the elements of the subints vector point.
+*/
+Pulsar::Integration* Pulsar::Archive::new_Integration (Integration* subint)
+{
+  Integration* integration;
+
+  if (subint)
+    integration = new BasicIntegration (*subint);
+  else
+    integration = new BasicIntegration;
+
+  if (!integration)
+    throw Error (BadAlloc, "Archive::new_Integration");
+  
+  return integration;
 }
 
 //! Get the number of sub-integrations in the archive

@@ -16,6 +16,9 @@
 */
 void Pulsar::Integration::dedisperse (double frequency)
 {
+  double dm = get_dispersion_measure();
+  double pfold = get_folding_period();
+
   if (dm == 0)
     return;
   if (pfold == 0)
@@ -25,30 +28,35 @@ void Pulsar::Integration::dedisperse (double frequency)
     frequency = weighted_frequency ();
 
   if (verbose)
-    cerr << "Integration::dedisperse DM="<< dm <<" freq="<< frequency << endl;
+    cerr << "Integration::dedisperse DM=" << dm
+	 <<" freq="<< frequency << endl;
 
-  for (int ipol=0; ipol < npol; ipol++)
-    for (int ichan=0; ichan < nchan; ichan++)
+  
+  for (int ipol=0; ipol < get_npol(); ipol++)
+    for (int ichan=0; ichan < get_nchan(); ichan++)
       profiles[ipol][ichan] -> dedisperse (dm, frequency, pfold);
 
 }
 
 void Pulsar::Integration::dedisperse (double frequency, int chan)
 {
+  double dm = get_dispersion_measure();
+  double pfold = get_folding_period();
+
   if (dm == 0)
     return;
   if (pfold == 0)
     return;
 
-  if (chan < 0 || chan >= nchan)
+  if (chan < 0 || chan >= get_nchan())
     throw Error (InvalidRange, "Integration::dedisperse",
-		 "chan=%d nchan=%d", chan, nchan);
+		 "chan=%d nchan=%d", chan, get_nchan());
 
   if (frequency == 0.0)
     throw Error (InvalidParam, "Integration::dedisperse",
 		 "frequency == 0.0");
 
-  for (int ipol=0; ipol < npol; ipol++)
+  for (int ipol=0; ipol < get_npol(); ipol++)
     profiles[ipol][chan] -> dedisperse (dm, frequency, pfold);
   
   return;
@@ -69,24 +77,24 @@ double Pulsar::Integration::weighted_frequency (int chan_start, int chan_end)
   const
 {
   if (chan_end == 0)
-    chan_end = nchan;
+    chan_end = get_nchan();
 
   // for now, ignore poln
   int ipol = 0;
 
-  if (npol < 1)
+  if (get_npol() < 1)
     throw Error (InvalidRange, "Integration::weighted_frequency",
 		 "profiles.size() == 0");
 
   const vector<Profile*>& prof = profiles[ipol];
 
-  if (chan_start >= nchan || chan_start < 0)
+  if (chan_start >= get_nchan() || chan_start < 0)
     throw Error (InvalidRange, "Integration::weighted_frequency",
-		 "chan_start=%d nchan=%d", chan_start, nchan);
+		 "chan_start=%d nchan=%d", chan_start, get_nchan());
 
-  if (chan_end > nchan || chan_end < 0)
+  if (chan_end > get_nchan() || chan_end < 0)
     throw Error (InvalidRange, "Integration::weighted_frequency",
-		 "chan_end=%d nchan=%d", chan_end, nchan);
+		 "chan_end=%d nchan=%d", chan_end, get_nchan());
 
   double weightsum = 0.0;
   double freqsum = 0.0;

@@ -6,13 +6,9 @@
 
 bool Pulsar::Integration::verbose = false;
 
-/* not much to say really */
-void Pulsar::Integration::init ()
+void Pulsar::Integration::init()
 {
-  npol = nchan = nbin = 0;
-  duration = centrefreq = bw = pfold = dm = 0.0;
-
-  state = Poln::invalid;
+  // currently no variables to initialize
 }
 
 Pulsar::Integration::~Integration ()
@@ -20,57 +16,67 @@ Pulsar::Integration::~Integration ()
   if (verbose)
     cerr << "Pulsar::Integration destructor" << endl;
 
-  for (int ipol=0; ipol<npol; ipol++)
-    for (int ichan=0; ichan<nchan; ichan++)
+  for (int ipol=0; ipol<profiles.size(); ipol++)
+    for (int ichan=0; ichan<profiles[ipol].size(); ichan++)
       delete profiles[ipol][ichan];
-
-  init();
 }
 
 /*!
   If any current dimension is greater than that requested, the Profiles
   will be deleted and the dimension resized.  If any current dimension is
   smaller than that requested, the dimension will be resized and new Profiles
-  will be constructed.  For instance, resize(0,0,0) will delete all profiles.
+  will be constructed.  If any of the supplied paramaters is equal to zero,
+  the dimension is left unchanged.
   */
-void Pulsar::Integration::resize (int _npol, int _nchan, int _nbin)
+void Pulsar::Integration::resize (int new_npol, int new_nchan, int new_nbin)
 {
+  int cur_npol = get_npol();
+  int cur_nchan = get_nchan();
+  int cur_nbin = get_nbin();
+
+  if (new_npol == 0)
+    new_npol = cur_npol;
+  if (new_nchan == 0)
+    new_nchan = cur_nchan;
+  if (new_nbin == 0)
+    new_nbin = cur_nbin;
+
   int ipol=0, ichan=0;
 
-  for (ipol=0; ipol < npol; ipol++) {
-    for (ichan=_nchan; ichan < nchan; ichan++) {
+  for (ipol=0; ipol < cur_npol; ipol++) {
+    for (ichan=new_nchan; ichan < cur_nchan; ichan++) {
       if (profiles[ipol][ichan])
 	delete profiles[ipol][ichan];  profiles[ipol][ichan]=0;
     }
-    if (ipol < _npol) {
-      profiles[ipol].resize(_nchan);
-      for (ichan=nchan; ichan < _nchan; ichan++)
+    if (ipol < new_npol) {
+      profiles[ipol].resize(new_nchan);
+      for (ichan=cur_nchan; ichan < new_nchan; ichan++)
 	profiles[ipol][ichan] = new_Profile();
     }
   }
 
-  for (ipol=_npol; ipol < npol; ipol++)
-    for (ichan=0; ichan < nchan; ichan++) {
+  for (ipol=new_npol; ipol < cur_npol; ipol++)
+    for (ichan=0; ichan < cur_nchan; ichan++) {
       if (profiles[ipol][ichan])
 	delete profiles[ipol][ichan];  profiles[ipol][ichan]=0;
     }
 
-  profiles.resize (_npol);
+  profiles.resize (new_npol);
 
-  for (ipol=npol; ipol < _npol; ipol++) {
-    profiles[ipol].resize(_nchan);
-    for (ichan=0; ichan < _nchan; ichan++)
+  for (ipol=cur_npol; ipol < new_npol; ipol++) {
+    profiles[ipol].resize(new_nchan);
+    for (ichan=0; ichan < new_nchan; ichan++)
       profiles[ipol][ichan] = new_Profile();
   }
 
-  npol = _npol;
-  nchan = _nchan;
+  for (ipol=0; ipol < new_npol; ipol++)
+    for (ichan=0; ichan < new_nchan; ichan++)
+      profiles[ipol][ichan] -> resize(new_nbin);
 
-  for (ipol=0; ipol < npol; ipol++)
-    for (ichan=0; ichan < nchan; ichan++)
-      profiles[ipol][ichan] -> resize(_nbin);
+  set_npol (new_npol);
+  set_nchan (new_nchan);
+  set_nbin (new_nbin);
 
-  nbin = _nbin;
 }
 
 /*!
@@ -87,59 +93,47 @@ Pulsar::Profile* Pulsar::Integration::new_Profile ()
   return profile;
 }
 
-/* not much to say here, either */
-Pulsar::Integration* Pulsar::Integration::clone (int _npol, int _nchan) const
-{
-  return new Integration (*this, _npol, _nchan);
-}
 
 Pulsar::Integration::Integration (const Integration& subint,
 				  int _npol, int _nchan)
 {
   if (_npol == 0)
-    _npol = subint.npol;
+    _npol = subint.get_npol();
 
   if (_nchan == 0)
-    _nchan = subint.nchan;
+    _nchan = subint.get_nchan();
 
-  if (_npol > subint.npol)
+  if (_npol > subint.get_npol())
     throw Error (InvalidRange, "Integration copy constructor",
-		 "requested npol=%d.  have npol=%d", _npol, subint.npol);
+		 "requested npol=%d.  npol=%d", _npol, subint.get_npol());
 
-  if (_nchan > subint.nchan)
+  if (_nchan > subint.get_nchan())
     throw Error (InvalidRange, "Integration copy constructor",
-		 "requested nchan=%d.  have nchan=%d", _nchan, subint.nchan);
+		 "requested nchan=%d.  nchan=%d", _nchan, subint.get_nchan());
 
-  set_mid_time (subint.mid_time);
-  set_duration (subint.duration);
-  set_centre_frequency (subint.centrefreq);
-  set_bandwidth (subint.bw);
-  set_dispersion_measure (subint.dm);
-  set_folding_period (subint.pfold);
+  resize (_npol, _nchan, subint.get_nbin());
 
-  resize (_npol, _nchan, subint.nbin);
-
-  for (int ipol=0; ipol<npol; ipol++)
-    for (int ichan=0; ichan<nchan; ichan++)
+  for (int ipol=0; ipol<_npol; ipol++)
+    for (int ichan=0; ichan<_nchan; ichan++)
       *(profiles[ipol][ichan]) = *(subint.profiles[ipol][ichan]);
 }
 
 Pulsar::Profile* Pulsar::Integration::get_Profile (int ipol, int ichan)
 {
-  if (ipol < 0 || ipol>=npol)
+  if (ipol < 0 || ipol>=get_npol())
     throw Error (InvalidRange, "Integration::get_Profile",
-		 "ipol=%d npol=%d", ipol, npol);
+		 "ipol=%d npol=%d", ipol, get_npol());
 
-  if (ichan < 0 || ichan>=nchan)
+  if (ichan < 0 || ichan>=get_nchan())
     throw Error (InvalidRange, "Integration::get_Profile",
-		 "ichan=%d nchan=%d", ichan, nchan);
+		 "ichan=%d nchan=%d", ichan, get_nchan());
 
   return profiles[ipol][ichan];
 }
 
 vector<Pulsar::Profile*>& Pulsar::Integration::operator[] (Poln::Measure poln)
 {
-  int index = Poln::get_ipol (state, poln);
+  int index = Poln::get_ipol (get_poln_state(), poln);
 
   if (index < 0)
     throw Error (InvalidPolnState, "Integration::operator[]");
@@ -149,15 +143,15 @@ vector<Pulsar::Profile*>& Pulsar::Integration::operator[] (Poln::Measure poln)
 
 void Pulsar::Integration::fold (int nfold)
 {
-  if (npol<1 || nchan<1)
+  if (get_npol()<1 || get_nchan()<1)
     return;
 
   try {
-    for (int ipol=0; ipol<npol; ipol++)
-      for (int ichan=0; ichan<nchan; ichan++)
+    for (int ipol=0; ipol<get_npol(); ipol++)
+      for (int ichan=0; ichan<get_nchan(); ichan++)
 	profiles[ipol][ichan] -> fold (nfold);
 
-    nbin = profiles[0][0] -> get_nbin();
+    set_nbin( profiles[0][0] -> get_nbin() );
   }
   catch (Error& error) {
     throw error += "Integration::fold";
@@ -166,15 +160,15 @@ void Pulsar::Integration::fold (int nfold)
 
 void Pulsar::Integration::bscrunch (int nscrunch)
 {
-  if (npol<1 || nchan<1)
+  if (get_npol()<1 || get_nchan()<1)
     return;
 
   try {
-    for (int ipol=0; ipol<npol; ipol++)
-      for (int ichan=0; ichan<nchan; ichan++)
+    for (int ipol=0; ipol<get_npol(); ipol++)
+      for (int ichan=0; ichan<get_nchan(); ichan++)
 	profiles[ipol][ichan] -> bscrunch (nscrunch);
 
-    nbin = profiles[0][0] -> get_nbin();
+    set_nbin ( profiles[0][0] -> get_nbin() );
   }
   catch (Error& error) {
     throw error += "Integration::bscrunch";
@@ -183,32 +177,34 @@ void Pulsar::Integration::bscrunch (int nscrunch)
     
 void Pulsar::Integration::pscrunch()
 {
-  if (state == Poln::Coherence || state == Poln::PPQQ) {
+  if (get_poln_state() == Poln::Coherence || get_poln_state() == Poln::PPQQ) {
 
-    if (npol != 2)
+    if (get_npol() != 2)
       throw Error (InvalidState, "Integration::pscrunch", "npol != 2");
 
-    for (int ichan=0; ichan < nchan; ichan++)
+    for (int ichan=0; ichan < get_nchan(); ichan++)
       *(profiles[0][ichan]) += *(profiles[1][ichan]);
 
-    state = Poln::Intensity;
+    set_poln_state (Poln::Intensity);
   }
 
-  else if (state == Poln::Stokes)
-    state = Poln::Intensity;
+  else if (get_poln_state() == Poln::Stokes)
+    set_poln_state (Poln::Intensity);
 
-  resize (1, nchan, nbin);
+  resize (1);
 } 
 
 void Pulsar::Integration::rotate (double time)
 {
+  double pfold = get_folding_period ();
+
   if (pfold <= 0.0)
     throw Error (InvalidParam, "Integration::rotate",
 		 "folding period=%lf", pfold);
 
   try {
-    for (int ipol=0; ipol<npol; ipol++)
-      for (int ichan=0; ichan<nchan; ichan++)
+    for (int ipol=0; ipol<get_npol(); ipol++)
+      for (int ichan=0; ichan<get_nchan(); ichan++)
 	profiles[ipol][ichan] -> rotate (time/pfold);
 
     set_mid_time (get_mid_time() + time);
@@ -216,4 +212,14 @@ void Pulsar::Integration::rotate (double time)
   catch (Error& error) {
     throw error += "Integration::rotate";
   }
+}
+
+MJD Pulsar::Integration::get_start_time () const
+{
+  return get_mid_time() - .5 * get_duration(); 
+}
+
+MJD Pulsar::Integration::get_end_time () const
+{ 
+  return get_mid_time() + .5 * get_duration();
 }

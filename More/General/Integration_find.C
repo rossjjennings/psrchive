@@ -14,19 +14,19 @@
 */
 Pulsar::Integration* Pulsar::Integration::total () const
 {
-  if (npol<1 || nchan<1)
+  if (get_npol()<1 || get_nchan()<1)
     throw Error (InvalidState, "Pulsar::Integration::total",
-		 "npol=%d nchan=%d", npol, nchan);
+		 "npol=%d nchan=%d", get_npol(), get_nchan());
 
   int npol_keep = 1;
-  if (state == Poln::Coherence || state == Poln::PPQQ)
+  if (get_poln_state() == Poln::Coherence || get_poln_state() == Poln::PPQQ)
     npol_keep = 2;
 
   Integration* copy = 0;
 
   try {
     copy = clone (npol_keep);
-    copy->fscrunch (nchan, false);
+    copy->fscrunch (0, false);
     copy->pscrunch ();
   }
   catch (Error& err) {

@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Integration.h,v $
-   $Revision: 1.15 $
-   $Date: 2002/04/19 12:45:09 $
+   $Revision: 1.16 $
+   $Date: 2002/04/20 10:35:27 $
    $Author: straten $ */
 
 /*
@@ -49,13 +49,13 @@ namespace Pulsar {
     Integration (const Integration& subint, int npol=0, int nchan=0);
 
     //! Return the pointer to a new copy of self
-    virtual Integration* clone (int npol=0, int nchan=0) const;
+    virtual Integration* clone (int npol=0, int nchan=0) const = 0;
 
     //! Return the pointer to a new fscrunched and pscrunched copy of self
     Integration* total () const;
 
     //! Resizes the dimensions of the data area
-    virtual void resize (int npol, int nchan, int nbin);
+    virtual void resize (int npol=0, int nchan=0, int nbin=0);
 
     //! Call Profile::fold on every profile
     virtual void fold (int nfold);
@@ -145,99 +145,78 @@ namespace Pulsar {
     //! Returns a pointer to the vector of Profile objects for poln
     vector<Profile *>& operator[] (Poln::Measure poln);
 
+    //! Get the MJD at the start of the integration (convenience interface)
+    MJD get_start_time () const;
+
+    //! Get the MJD at the end of the integration (convenience interface)
+    MJD get_end_time () const;
+
     //! Get the number of chans
     /*! This attribute may be set only through Integration::resize */
-    int get_nchan () const { return nchan; }
+    virtual int get_nchan () const = 0;
 
     //! Get the number of polarization measurements
     /*! This attribute may be set only through Integration::resize */
-    int get_npol () const { return npol; }
+    virtual int get_npol () const = 0;
 
     //! Get the number of bins in each profile
     /*! This attribute may be set only through Integration::resize */
-    int get_nbin () const { return nbin; }
+    virtual int get_nbin () const = 0;
  
     //! Get the MJD at the beginning of the integration
-    MJD get_mid_time() const { return mid_time; }
+    virtual MJD get_mid_time() const = 0;
     //! Set the MJD at the beginning of the integration
-    virtual void set_mid_time (const MJD& mjd) { mid_time = mjd; }
+    virtual void set_mid_time (const MJD& mjd) = 0;
 
     //! Get the total time integrated (in seconds)
-    double get_duration() const { return duration; }
+    virtual double get_duration() const =0;
     //! Set the total time integrated (in seconds)
-    virtual void set_duration (double seconds) { duration = seconds; }
+    virtual void set_duration (double seconds) = 0;
 
-    //! Get the MJD at the start of the integration (convenience interface)
-    MJD get_start_time () const { return mid_time - .5 * duration; }
-
-    //! Get the MJD at the end of the integration (convenience interface)
-    MJD get_end_time () const { return mid_time + .5 * duration; }
-
-    //! Get the centre frequency (in MHz)
-    double get_centre_frequency() const { return centrefreq; }
+   //! Get the centre frequency (in MHz)
+    virtual double get_centre_frequency() const = 0;
     //! Set the centre frequency (in MHz)
-    virtual void set_centre_frequency (double MHz) { centrefreq = MHz; }
+    virtual void set_centre_frequency (double MHz) = 0;
     
     //! Get the bandwidth (in MHz)
-    double get_bandwidth() const { return bw; }
+    virtual double get_bandwidth() const = 0;
     //! Set the bandwidth (in MHz)
-    virtual void set_bandwidth (double MHz) { bw = MHz; }
+    virtual void set_bandwidth (double MHz) = 0;
 
     //! Get the dispersion measure (in \f${\rm pc cm}^{-3}\f$)
-    double get_dispersion_measure () const { return dm; }
+    virtual double get_dispersion_measure () const = 0;
     //! Set the dispersion measure (in \f${\rm pc cm}^{-3}\f$)
-    virtual void set_dispersion_measure (double pc_cm3) { dm = pc_cm3; }
+    virtual void set_dispersion_measure (double pc_cm3) = 0;
     
     //! Get the folding period (in seconds)
-    double get_folding_period() const { return pfold; }
+    virtual double get_folding_period() const = 0;
     //! Set the folding period (in seconds)
-    virtual void set_folding_period (double seconds) { pfold = seconds; }
+    virtual void set_folding_period (double seconds) = 0;
 
     //! Get the feed configuration of the receiver
-    Feed::Type get_feed_type () const { return type; }
+    virtual Feed::Type get_feed_type () const = 0;
     //! Set the feed configuration of the receiver
-    virtual void set_feed_type (Feed::Type _type) { type = _type; }
+    virtual void set_feed_type (Feed::Type _type) = 0;
 
     //! Get the polarimetric state of the profiles
-    Poln::State get_poln_state () const { return state; }
+    virtual Poln::State get_poln_state () const = 0;
     //! Set the polarimetric state of the profiles
-    virtual void set_poln_state (Poln::State _state) { state = _state; }
+    virtual void set_poln_state (Poln::State _state) = 0;
 
 
   protected:
 
-    //! number of polarization measurments
-    int npol;
+    //! Set the number of pulsar phase bins
+    /*! Called by Integration methods to update child attribute */
+    virtual void set_nbin (int nbin) = 0;
 
-    //! number of sub-chans
-    int nchan;
-    
-    //! number of bins
-    int nbin;
+    //! Set the number of frequency channels
+    /*! Called by Integration methods to update child attribute */
+    virtual void set_nchan (int nchan) = 0;
 
-    //! time at the middle of the observation
-    MJD mid_time;
-
-    //! duration of integration
-    double duration;
-
-    //! centre frequency (in MHz)
-    double centrefreq;
-
-    //! bandwidth (in MHz)
-    double bw;
-
-    //! folding period (in seconds)
-    double pfold;
-
-    //! dispersion measure (in \f${\rm pc cm}^{-3}\f$)
-    double dm;
-
-    //! polarimetric state of profiles
-    Poln::State state;
-
-    //! receiver feed type
-    Feed::Type type;
+    //! Set the number of polarization measurements
+    /*! Called by Integration methods to update child attribute */
+    virtual void set_npol (int npol) = 0;
 
     //! The data area
     vector< vector<Profile*> > profiles;

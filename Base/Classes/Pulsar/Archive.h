@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Archive.h,v $
-   $Revision: 1.19 $
-   $Date: 2002/04/19 22:06:45 $
+   $Revision: 1.20 $
+   $Date: 2002/04/20 10:35:27 $
    $Author: straten $ */
 
 /*! \mainpage 
@@ -498,6 +498,12 @@ namespace Pulsar {
     //! Set the state of the profiles
     virtual void set_poln_state (Poln::State state) = 0;
 
+    //! Get the centre frequency of the observation
+    virtual double get_dispersion_measure () const = 0;
+    //! Set the centre frequency of the observation
+    virtual void set_dispersion_measure (double dm) = 0;
+
+
     // Get the state of various corrected flags
     // //////////////////////////////////////////
 
@@ -543,7 +549,7 @@ namespace Pulsar {
     vector<Integration*> subints;
 
     //! All new Integration instances are created through this method
-    virtual Integration* new_Integration (Integration* subint = 0);
+    virtual Integration* new_Integration (Integration* subint = 0) = 0;
 
     //! Set the number of pulsar phase bins
     /*! Called by Archive methods to update child attribute */
@@ -560,6 +566,9 @@ namespace Pulsar {
     //! Set the number of sub-integrations
     /*! Called by Archive methods to update child attribute */
     virtual void set_nsubint (int num_sub) { }
+
+    //! Initialize an Integration to reflect Archive attributes.
+    void init_Integration (Integration* subint);
 
     //! Set all values to null
     void init ();

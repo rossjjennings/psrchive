@@ -62,25 +62,6 @@ void Pulsar::Archive::resize (int nsubint, int npol, int nchan, int nbin)
     cerr << "Pulsar::Archive::resize exit" << endl;
 }
 
-/*!  
-  By over-riding this funciton, inherited types may re-define the type
-  of Integration to which the elements of the subints vector point.
-*/
-Pulsar::Integration* Pulsar::Archive::new_Integration (Integration* subint)
-{
-  Integration* integration;
-
-  if (subint)
-    integration = subint -> clone();
-  else
-    integration = new Integration;
-
-  if (!integration)
-    throw Error (BadAlloc, "Archive::new_Integration");
-  
-  return integration;
-}
-
 //! Return a pointer to the integration
 Pulsar::Integration* Pulsar::Archive::get_Integration (unsigned subint)
 {
@@ -96,6 +77,21 @@ Pulsar::Profile*
 Pulsar::Archive::get_Profile (unsigned subint, int pol, int chan)
 {
   return get_Integration (subint) -> get_Profile (pol, chan);
+}
+
+/*!  
+  This method may be useful during load.  This function assumes
+  that the Integration is totally uninitialized.  As the folding
+  period is unknown until the mid_time of the integration is known,
+  Integration::set_folding_period is not called by this method.  
+*/
+void Pulsar::Archive::init_Integration (Integration* subint)
+{
+  subint -> set_centre_frequency ( get_centre_frequency() );
+  subint -> set_bandwidth ( get_bandwidth() );
+  subint -> set_dispersion_measure ( get_dispersion_measure() );
+  subint -> set_feed_type ( get_feed_type() );
+  subint -> set_poln_state ( get_poln_state() );
 }
 
 /*!
