@@ -1,6 +1,6 @@
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Attic/environ.h,v $
-   $Revision: 1.7 $
-   $Date: 2003/06/16 10:08:35 $
+   $Revision: 1.8 $
+   $Date: 2004/03/05 19:42:12 $
    $Author: straten $ */
 
 /*
@@ -113,7 +113,12 @@ typedef struct {double f1; double f2;} float128;
 
 #endif
 
+/* By default, struct elements should be aligned on double memory addresses */
+#define MALIGN_DOUBLE 1
 
+#if defined(linux) || (defined (sun) && defined(__i386))
+#undef MALIGN_DOUBLE
+#endif
 
 /* For future reference */
 
