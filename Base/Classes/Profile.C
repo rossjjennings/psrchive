@@ -185,32 +185,6 @@ vector<float> Pulsar::Profile::get_weighted_amps () const
   return wamps;
 }
 
-/////////////////////////////////////////////////////////////////////////////
-//
-// Pulsar::Profile::rotate
-//
-/*!  
-  Rotate the profile by the specified phase.  The profile will be
-  rotated such that the power at phase will be found at phase zero. ie.
-
-  \f$t^\prime=t+\phi P\f$
-
-  where \f$t^\prime\f$ is the new start time (rising edge of bin 0),
-  \f$t\f$ is the original start time, \f$\phi\f$ is equal to phase,
-  and \f$P\f$ is the period at the time of folding.
-*/
-void Pulsar::Profile::rotate (double phase)
-{
-  if (verbose)
-    cerr << "Pulsar::Profile::rotate phase=" << phase << " nbin=" << nbin << endl;
-
-  if (phase == 0.0)
-    return;
-
-  if ( fft_shift (nbin, amps, phase*double(nbin)) !=0 )
-    throw Error (FailedCall, "Pulsar::Profile::rotate",
-		 "fft_shift(%lf) failure", phase);
-}
 
 /////////////////////////////////////////////////////////////////////////////
 //

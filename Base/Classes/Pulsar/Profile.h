@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Profile.h,v $
-   $Revision: 1.47 $
-   $Date: 2004/03/09 08:22:05 $
-   $Author: ahotan $ */
+   $Revision: 1.48 $
+   $Date: 2004/03/09 11:07:48 $
+   $Author: straten $ */
 
 #ifndef __Pulsar_Profile_h
 #define __Pulsar_Profile_h
@@ -36,7 +36,10 @@ namespace Pulsar {
 
     //! flag controls the amount output to stderr by Profile methods
     static bool verbose;
-    
+
+    //! When true, Profile::rotate shifts bins in the phase domain
+    static bool rotate_in_phase_domain;
+
     //! null constructor produces an empty profile of zero size
     Profile () { init(); }
 
