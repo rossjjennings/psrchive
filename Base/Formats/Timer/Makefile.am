@@ -15,7 +15,8 @@ LIB_SRCS = profile.C sub_int.C archive.C superarchive.C  \
 	timer++.C mini++.C profile_pgplot.C sub_int_pgplot.C archive_pgplot.C \
 	poln_profile.C faraday_course.C \
 	ffft.f fftfit.f brent.f fccf.f cprof.f shiftbyfft.f \
-	width.f tsky1.f fftconv.f scan_fort_val.f convolve.f 
+	width.f tsky1.f fftconv.f scan_fort_val.f convolve.f \
+	galrot.C getvel.C
 
 LDFLAGS += -larchive -ltempo++ -lpolyco -leph -ltimes \
 	-lgenutil -lsla $(LFFT) $(LF77) -lm
@@ -30,6 +31,7 @@ PROGRAMS = calinfo.C align.C amps.C chanprep.C crstd.C \
 
 TESTS = timer_size.c
 
+
 oneprof.LDFLAGS := $(LDFLAGS) $(LCPGPLOT)
 plotsub.LDFLAGS := $(LDFLAGS) $(LCPGPLOT)
 plot_gry_diff.LDFLAGS := $(LDFLAGS) $(LCPGPLOT)
@@ -39,7 +41,7 @@ stokes_plt.LDFLAGS := $(LDFLAGS) $(LCPGPLOT)
 testbpass.LDFLAGS := $(LDFLAGS) $(LCPGPLOT)
 ratio.LDFLAGS := $(LDFLAGS) $(LCPGPLOT)
 treduce.LDFLAGS := $(LDFLAGS) $(LCPGPLOT)
-h1_studies.LDFLAGS := $(LDFLAGS) $(LCPGPLOT)
+h1_studies.LDFLAGS := $(LDFLAGS) $(LCPGPLOT) $(LSLA)
 # ########################################################################
 # treduce dialog stuff is not for linux
 ifneq ($(LOGIN_ARCH),linux)
@@ -48,7 +50,6 @@ treduce.srcs = xtinit.C xtmac.C xtproc.C xtlplt.C xtinplot.C xtshdr.C    \
 	       xtshst.C xtcopy.C xtswap.C xtunld.C xtgrey.C xtreduce.C   \
                newtreduce.f
 endif
-
 
 include $(LOCAL_ROOT)/headers/Makefile.extended
 INCLUDES += pg_plot_gnu.h
