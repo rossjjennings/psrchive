@@ -518,7 +518,7 @@ INT_UNIT= '                  ' / Unit of time axis (SEC, PHS (0-1), DEG)
 NCH_FILE=                    * / Number of channels/sub-bands in this file
 NCH_STRT=                    * / Start channel/sub-band number (0 to NCHAN-1)
 EXTNAME = 'SUBINT  '           / name of this binary table extension
-TTYPE1  = 'ISUBINT '           / Subint number. If NAXIS2=-1, 0 indicates EOD.
+TTYPE1  = 'ISUBINT '           / Subint number
 TFORM1  = '1J      '           / Long integer
 TTYPE2  = 'INDEXVAL'           / Optionally used if INT_TYPE != TIME
 TFORM2  = '1D      '           / Double
