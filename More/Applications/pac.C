@@ -121,7 +121,7 @@ int main (int argc, char *argv[]) {
       Pulsar::Archive::set_verbosity(3);
       break;
     case 'i':
-      cout << "$Id: pac.C,v 1.50 2004/07/21 05:27:41 straten Exp $" << endl;
+      cout << "$Id: pac.C,v 1.51 2004/07/21 08:09:30 straten Exp $" << endl;
       return 0;
 
     case 'n': {
@@ -245,8 +245,7 @@ int main (int argc, char *argv[]) {
   
   if ( !model_file.empty() ) try {
 
-    if (verbose)
-      cerr << "pac: Loading calibrator from " << model_file << endl;
+    cerr << "pac: Loading calibrator from " << model_file << endl;
 
     model_arch = Pulsar::Archive::load(model_file);
     model_calibrator = new Pulsar::PolnCalibrator(model_arch);
@@ -345,10 +344,8 @@ int main (int argc, char *argv[]) {
       
       pcal_file = pcal_engine->get_filenames();
 
-      cout << "pac: Calibrator constructed from: " << pcal_file << endl;
-
       if (verbose)
-	cerr << "pac: Applying calibrator" << endl;
+	cout << "pac: Calibrator constructed from: " << pcal_file << endl;
 
       pcal_engine->calibrate (arch);
 
