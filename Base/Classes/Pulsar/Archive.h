@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Archive.h,v $
-   $Revision: 1.80 $
-   $Date: 2003/08/11 10:46:38 $
-   $Author: ahotan $ */
+   $Revision: 1.81 $
+   $Date: 2003/08/19 16:29:27 $
+   $Author: straten $ */
 
 /*! \mainpage 
  
@@ -223,7 +223,7 @@ namespace Pulsar {
       virtual Archive* new_Archive () = 0;
 
       //! Return the name of the plugins directory
-      static string plugin_path (const char* environment_variable = "CVSHOME");
+      static string get_plugin_path (const char* shell_variable = "CVSHOME");
 
       //! Report to cerr on the status of the Registry (and plugins)
       static void report ();
@@ -234,6 +234,9 @@ namespace Pulsar {
       
       //! Declare friends with Registry::Entry<Agent> so it can access registry
       friend class Registry::Entry<Agent>;
+
+      //! The path from which plugin code will be loaded
+      static string plugin_path;
 
       //! Declare friends with Archive so Archive::load can access registry
       friend class Archive;
@@ -301,6 +304,9 @@ namespace Pulsar {
 
     //! Public access to Agent::report
     static void agent_report ();
+
+    //! Set Agent::plugin_path
+    static void set_plugin_path (const char* path);
 
     //! Archive::append should enforce chronological order
     static bool append_chronological;

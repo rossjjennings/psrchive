@@ -58,6 +58,12 @@ void Pulsar::Archive::agent_report ()
   Agent::report ();
 }
 
+void Pulsar::Archive::set_plugin_path (const char* path)
+{
+  Agent::plugin_path = path;
+}
+
+
 //! Return the number of extensions available
 unsigned Pulsar::Archive::get_nextension () const
 {

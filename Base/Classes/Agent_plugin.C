@@ -4,12 +4,20 @@
 // load the plugins
 static Registry::Plugin plugins;
 
+string Pulsar::Archive::Agent::plugin_path;
+
 void Pulsar::Archive::Agent::plugin_load ()
 {
   if (verbose) {
     cerr << "Pulsar::Archive::Agent::plugin_load" << endl;
     Registry::Plugin::verbose = true;
   }
+
+  if (plugin_path.length() != 0)
+    plugins.load (plugin_path);
+
+  if (plugins.ok.size() != 0)
+    return;
 
   char* env = getenv ("PSRCHIVE_PLUGINS");
   if (env) {
@@ -19,14 +27,20 @@ void Pulsar::Archive::Agent::plugin_load ()
     plugins.load (env);
   }
 
-  if (plugins.ok.size() == 0)
-    plugins.load (plugin_path ("CVSHOME"));
+  if (plugins.ok.size() != 0)
+    return;
 
-  if (plugins.ok.size() == 0)
-    plugins.load (plugin_path ("PSRHOME"));
+  plugins.load (get_plugin_path ("CVSHOME"));
 
-  if (plugins.ok.size() == 0)
-    plugins.load ("./Pulsar");
+  if (plugins.ok.size() != 0)
+    return;
+
+  plugins.load (get_plugin_path ("PSRHOME"));
+
+  if (plugins.ok.size() != 0)
+    return;
+
+  plugins.load ("./Pulsar");
 
   loaded = true;
 }
@@ -58,9 +72,9 @@ void Pulsar::Archive::Agent::plugin_report ()
 }
 
 /*! constructs the plugin directory name from environment variables */
-string Pulsar::Archive::Agent::plugin_path (const char* environment_variable)
+string Pulsar::Archive::Agent::get_plugin_path (const char* shell_variable)
 {
-  char* env = getenv (environment_variable);
+  char* env = getenv (shell_variable);
 
   string path;
 
