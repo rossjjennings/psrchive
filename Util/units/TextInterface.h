@@ -31,6 +31,7 @@ namespace TextInterface {
 
   };
 
+  //! Pointer to attribute get method, Type C::Get()
   template<class C, class Type, class Get>
   class AttributeGet : public Attribute<C> {
 
@@ -71,6 +72,7 @@ namespace TextInterface {
 
   };
 
+  //! Pointers to attribute get and set methods, Type C::Get() and C::Set(Type)
   template<class C, class Type, class Get, class Set>
   class AttributeGetSet : public AttributeGet<C, Type, Get> {
 
@@ -91,6 +93,7 @@ namespace TextInterface {
 
   };
 
+  //! AttributeGet and AttributeGetSet factory
   template<class C, class Type>
   class Allocator {
 
@@ -128,6 +131,7 @@ namespace TextInterface {
 
   };
 
+  //! Abstract base class of class text interface
   class Class : public Reference::Able {
 
   public:
@@ -139,9 +143,19 @@ namespace TextInterface {
     virtual void set_value (const std::string& name, 
 			    const std::string& value) = 0;
 
+    //! Get the number of attributes
+    virtual unsigned get_nattribute () const = 0;
+
+    //! Get the name of the attribute
+    virtual std::string get_name (unsigned) const = 0;
+
+    //! Get the description of the attribute
+    virtual std::string get_description (unsigned) const = 0;
+
   };
 
 
+  //! Class text interface: an instance of C and a vector of Attribute<C>
   template<class C>
   class ClassGetSet : public Class {
 
@@ -150,19 +164,29 @@ namespace TextInterface {
     template<class Type> class Generator : public Allocator<C,Type> { };
 
     //! Get the value of the attribute
-    virtual std::string get_value (const std::string& name) const
+    std::string get_value (const std::string& name) const
       { return find(name)->get_value(instance); }
 
     //! Set the value of the attribute
-    virtual void set_value (const std::string& name, 
-				const std::string& value)
+    void set_value (const std::string& name, const std::string& value)
       { find(name)->set_value(instance, value); }
+
+    //! Get the number of attributes
+    unsigned get_nattribute () const { return attributes.size(); }
+
+    //! Get the name of the attribute
+    std::string get_name (unsigned i) const 
+      { return attributes[i]->get_name(); }
+
+    //! Get the description of the attribute
+    std::string get_description (unsigned i) const
+      { return attributes[i]->get_description(); }
 
     //! Return a pointer to the named class attribute interface
     Attribute<C>* find (const std::string& name) const;
 
     //! Set the instance
-    virtual void set_instance (C* c) { instance = c; }
+    void set_instance (C* c) { instance = c; }
 
   protected:
 
@@ -178,52 +202,76 @@ namespace TextInterface {
   };
 
 
-  //! Base class of component glue
-  template<class Whole>
+  //! Abstract base class of component text interface
+  /*! This class is used by the CompositeGetSet class in order to
+    incorporate component text interfaces. */
+  template<class C>
   class Component : public Class {
 
   public:
 
     //! Get the name of the component
-    virtual std::string get_name () const = 0;
+    virtual std::string get_component_name () const = 0;
 
     //! Return true if the name argument matches
     virtual bool matches (const std::string& name) const;
 
     //! Extract the component from the composite
-    virtual void extract (Whole* composite) = 0;
+    virtual void extract (C* composite) = 0;
 
   };
 
-  template<class Whole,class PartInterface>
-  class ComponentGetSet : public Component<Whole> {
+  //! Abstract base class for incorporating a component text interface
+  /*! Derived classes need only define the extract_component method. */
+  template<class C,class P>
+  class ComponentGetSet : public Component<C> {
 
   public:
 
     //! Construct from name and component interface
-    ComponentGetSet (const std::string& n, PartInterface* part) 
-      { name = n; part_interface = part; }
+    ComponentGetSet (const std::string& n, ClassGetSet<P>* part) 
+      { name = n; component_interface = part; }
 
     //! Get the name of the component
-    std::string get_name () const { return name; }
+    std::string get_component_name () const { return name; }
 
     std::string get_value (const std::string& name) const
-      { return part_interface->get_value(name); }
+      { return component_interface->get_value(name); }
 
     //! Set the value of the attribute
     void set_value (const std::string& name, const std::string& value)
-      { part_interface->set_value(name, value); }
+      { component_interface->set_value(name, value); }
+
+    unsigned get_nattribute () const
+      { return component_interface->get_nattribute(); }
+
+    std::string get_name (unsigned i) const
+      { return component_interface->get_name(i); }
+
+    std::string get_description (unsigned i) const
+      { return component_interface->get_description(i); }
+
+    //! Extract the component from the composite
+    void extract (C* composite)
+      { component_interface->set_instance (extract_component(composite)); }
 
   protected:
 
+    //! Return a pointer to the component
+    virtual P* extract_component (C*) = 0;
+
     //! The interface with which this interfaces
-    Reference::To<PartInterface> part_interface;
+    Reference::To< ClassGetSet<P> > component_interface;
 
     //! The component name
     std::string name;
 
   };
 
+  //! Composite text interface: a ClassGetSet with a vector of Component<C>
+  /*! When a class, C, is composed of other classes that define their
+   own text interface, it is useful to incorporate the component class
+   text interfaces into the composite class text interface. */
   template<class C>
   class CompositeGetSet : public ClassGetSet<C> {
 
@@ -235,12 +283,21 @@ namespace TextInterface {
     //! Set the value of the attribute
     void set_value (const std::string& name, const std::string& value);
  
+    //! Get the number of attributes
+    unsigned get_nattribute () const;
+
+    //! Get the name of the attribute
+    std::string get_name (unsigned i) const;
+
+    //! Get the description of the attribute
+    std::string get_description (unsigned i) const;
+
     //! Set the instance
     void set_instance (C* c);
 
     //! Import a new component interface
     void import (Component<C>* c) 
-      { components.push_back(c);if(this->instance)c->extract(this->instance); }
+    { components.push_back(c); if(this->instance) c->extract(this->instance); }
 
   protected:
 
@@ -249,6 +306,9 @@ namespace TextInterface {
 
     //! The named class attribute interfaces
     std::vector< Reference::To< Component<C> > > components;
+
+    //! Return the index of the component for attribute index i
+    unsigned get_component_index (unsigned& i) const;
 
   };
 
@@ -311,7 +371,51 @@ void TextInterface::CompositeGetSet<C>::set_value (const std::string& name,
   else
     ClassGetSet<C>::set_value (name, value);
 }
- 
+
+template<class C>
+unsigned TextInterface::CompositeGetSet<C>::get_nattribute () const
+{
+  unsigned nattribute = ClassGetSet<C>::get_nattribute ();
+  for (unsigned i=0; i<components.size(); i++)
+    nattribute += components[i]->get_nattribute ();
+  return nattribute;
+}
+
+template<class C>
+std::string 
+TextInterface::CompositeGetSet<C>::get_name (unsigned i) const
+{
+  if (i < ClassGetSet<C>::get_nattribute ())
+    return ClassGetSet<C>::get_name(i);
+
+  i -= ClassGetSet<C>::get_nattribute ();
+  unsigned j = get_component_index (i);
+  return components[j]->get_component_name() +":"+ components[j]->get_name(i);
+}
+
+template<class C>
+std::string 
+TextInterface::CompositeGetSet<C>::get_description (unsigned i) const
+{
+  if (i < ClassGetSet<C>::get_nattribute ())
+    return ClassGetSet<C>::get_description(i);
+
+  i -= ClassGetSet<C>::get_nattribute ();
+  return components[get_component_index (i)]->get_description(i);
+}
+
+template<class C>
+unsigned
+TextInterface::CompositeGetSet<C>::get_component_index (unsigned& i) const
+{
+  unsigned index = 0;
+  while (i >= components[index]->get_nattribute()) {
+    i -= components[index]->get_nattribute();
+    index ++;
+  }
+  return index;
+}
+
 template<class C>
 void TextInterface::CompositeGetSet<C>::set_instance (C* c)
 {
@@ -337,7 +441,7 @@ bool TextInterface::Attribute<C>::matches (const std::string& name) const
 template<class C>
 bool TextInterface::Component<C>::matches (const std::string& name) const
 {
-  return strcasecmp(name.c_str(), get_name().c_str()) == 0;
+  return strcasecmp(name.c_str(), get_component_name().c_str()) == 0;
 }
 
 #endif

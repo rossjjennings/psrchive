@@ -46,13 +46,13 @@ public:
 
 };
 
-class glue : public TextInterface::ComponentGetSet<tester,extensionTUI>
+class glue : public TextInterface::ComponentGetSet<tester,extension>
 {
 public:
   glue (extensionTUI* tui)
-    : TextInterface::ComponentGetSet<tester,extensionTUI> ("ext", tui) { }
+    : TextInterface::ComponentGetSet<tester,extension> ("ext", tui) { }
 
-  void extract (tester* t) { part_interface->set_instance( &(t->ext) ); }
+  extension* extract_component (tester* t) { return &(t->ext); }
 };
 
 
@@ -110,6 +110,19 @@ int main () try {
 
   extensionTUI tui;
   getset.import (new glue (&tui));
+
+  unsigned nattribute = getset.get_nattribute();
+
+  cerr << "CompositeGetSet has " << nattribute << " attributes after import"
+       << endl;
+
+  if (nattribute != 2) {
+    cerr << "test_TextInterface ERROR!" << endl;
+    return -1;
+  }
+
+  for (unsigned i=0; i < nattribute; i++)
+    cerr << "  " << getset.get_name (i) << endl;
 
   std::string teststring = "test of TextInterface::import passed";
 
