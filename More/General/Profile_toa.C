@@ -113,8 +113,6 @@ Tempo::toa Pulsar::Profile::tdt (const Profile& std,
   double E = -1.0 * A;
   double F =  (-1.0 * B) / (2.0 * A);
 
-  cerr << F << endl;
-
   // The error estimate is somewhat speculative... It is
   // computed as the full width at half maximum of the
   // parabola, assuming the baseline is the average level
@@ -133,13 +131,10 @@ Tempo::toa Pulsar::Profile::tdt (const Profile& std,
 
   double shift = F;
 
-  double bin_time = period / double(nbin);
-  double offset = shift * get_nbin() * bin_time;
-
   Tempo::toa retval (fmt);
 
   retval.set_frequency (centrefreq);
-  retval.set_arrival   (mjd + offset);
+  retval.set_arrival   (mjd + shift * period);
   retval.set_error     (error);
 
   retval.set_telescope (nsite);
