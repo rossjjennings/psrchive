@@ -29,7 +29,8 @@ Pulsar::ReceptionCalibrator::get_solution (const string& archive_class,
       if (!valid)
 	continue;
 
-      ext->set_stokes (ichan, calibrator_estimate.source[ichan].evaluate());
+      Stokes<double> stokes = calibrator_estimate.source[ichan].evaluate();
+      ext->set_stokes (ichan, stokes);
       
     }
     

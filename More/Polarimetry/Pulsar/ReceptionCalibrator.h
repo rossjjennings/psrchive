@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ReceptionCalibrator.h,v $
-   $Revision: 1.50 $
-   $Date: 2003/12/26 08:46:34 $
+   $Revision: 1.51 $
+   $Date: 2003/12/27 12:06:06 $
    $Author: straten $ */
 
 #ifndef __ReceptionCalibrator_H
@@ -19,6 +19,7 @@
 #include "Calibration/PolarEstimate.h"
 #include "Calibration/SingleAxisEstimate.h"
 #include "Calibration/CoherencyEstimate.h"
+#include "Calibration/CoherencyMeasurementSet.h"
 #include "Calibration/NormalizeStokes.h"
 
 #include "Calibration/Instrument.h"
@@ -55,7 +56,7 @@ namespace Pulsar {
     unsigned phase_bin;
 
     //! The index of the source in the model
-    unsigned source_index;
+    unsigned input_index;
 
   };
 
@@ -266,15 +267,15 @@ namespace Pulsar {
 
     void valid_mask (const SourceEstimate& src);
 
-    //! Add Integration data to the MeasuredState vector
+    //! Add Integration data to the CoherencyMeasurement vector
     /*! Data is taken from the specified frequency channel and phase bin.
-      \retval bins the vector to which a new MeasuredState will be appended
+      \retval bins the vector to which a new measurement will be appended
       \param estimate contains the bin number and a running mean estimate
       \param ichan the frequency channel
       \param data the Integration data
-      \param variance the variance to be assigned to the MeasuredState. 
+      \param variance the variance to be assigned to the measurement. 
     */
-    void add_data (vector<Calibration::MeasuredState>& bins,
+    void add_data (vector<Calibration::CoherencyMeasurement>& bins,
 		   SourceEstimate& estimate,
 		   unsigned ichan,
 		   const Integration* data,

@@ -320,10 +320,10 @@ void Pulsar::ReceptionCalibrator::init_estimate (SourceEstimate& estimate)
 
     unsigned nsource = model[ichan]->equation->get_num_input();
     if (ichan==0)
-      estimate.source_index = nsource;
-    else if (estimate.source_index != nsource)
+      estimate.input_index = nsource;
+    else if (estimate.input_index != nsource)
       throw Error (InvalidState, "Pulsar::ReceptionCalibrator::init_estimate",
-		   "isource=%d != nsource=%d", estimate.source_index, nsource);
+		   "isource=%d != nsource=%d", estimate.input_index, nsource);
 
     model[ichan]->equation->add_input( &(estimate.source[ichan]) );
   }
@@ -449,7 +449,10 @@ void Pulsar::ReceptionCalibrator::add_observation (const Archive* data)
 
       // the selected pulse phase bins
       Calibration::Abscissa* abscissa = model[ichan]->time.new_Value(epoch);
-      Calibration::Measurements measurements ( abscissa );
+
+      unsigned xform_index = model[ichan]->Pulsar_path;
+      Calibration::CoherencyMeasurementSet measurements (xform_index);
+      measurements.add_coordinate( abscissa );
 
       for (unsigned istate=0; istate < pulsar.size(); istate++) {
 
@@ -461,7 +464,6 @@ void Pulsar::ReceptionCalibrator::add_observation (const Archive* data)
 
       }
 
-      measurements.path_index = model[ichan]->Pulsar_path;
       model[ichan]->equation->add_data (measurements);
 
     }
@@ -474,11 +476,13 @@ void Pulsar::ReceptionCalibrator::add_observation (const Archive* data)
 }
 
 void
-Pulsar::ReceptionCalibrator::add_data(vector<Calibration::MeasuredState>& bins,
-				      SourceEstimate& estimate,
-				      unsigned ichan,
-				      const Integration* data,
-				      Stokes<float>& variance)
+Pulsar::ReceptionCalibrator::add_data
+( vector<Calibration::CoherencyMeasurement>& bins,
+  SourceEstimate& estimate,
+  unsigned ichan,
+  const Integration* data,
+  Stokes<float>& variance
+  )
 {
   unsigned nchan = data->get_nchan ();
 
@@ -492,7 +496,7 @@ Pulsar::ReceptionCalibrator::add_data(vector<Calibration::MeasuredState>& bins,
 
   Stokes<float> value = data->get_Stokes ( ichan, ibin );
 
-  Stokes< Estimate<float> > stokes;
+  Stokes< Estimate<double> > stokes;
 
   for (unsigned ipol=0; ipol<stokes.size(); ipol++) {
 
@@ -507,7 +511,8 @@ Pulsar::ReceptionCalibrator::add_data(vector<Calibration::MeasuredState>& bins,
       normalizer.normalize (stokes);
 
     // NOTE: the measured states are NOT corrected for PA
-    Calibration::MeasuredState state (stokes, estimate.source_index);
+    Calibration::CoherencyMeasurement state (estimate.input_index);
+    state.set_stokes( stokes );
     bins.push_back ( state );
 
     /* Correct the stokes parameters using the current best estimate of
@@ -665,20 +670,25 @@ void Pulsar::ReceptionCalibrator::add_Calibrator (const ArtificialCalibrator* p)
       try {
 
 	Calibration::Abscissa* abscissa = model[ichan]->time.new_Value(epoch);
-	Calibration::Measurements measurements ( abscissa );
+	Calibration::CoherencyMeasurementSet measurements;
+	measurements.add_coordinate( abscissa );
 
-        // convert to MeasuredState format
-        Calibration::MeasuredState state (cal_stokes, 
-					  calibrator_estimate.source_index);
+        // convert to CoherencyMeasurement format
+        Calibration::CoherencyMeasurement 
+	  state (calibrator_estimate.input_index);
+
+	state.set_stokes( cal_stokes );
         measurements.push_back (state);
 
 	if (flux_calibrator) {
 	  // add the flux calibrator
-	  Calibration::MeasuredState fstate 
-	    (fcal_stokes, flux_calibrator_estimate.source_index);
-	  measurements.push_back (fstate);
+	  Calibration::CoherencyMeasurement fstate 
+	    (flux_calibrator_estimate.input_index);
+	  fstate.set_stokes( fcal_stokes );
 
-	  measurements.path_index = model[ichan]->FluxCalibrator_path;
+	  measurements.push_back (fstate);
+	  measurements.set_transformation_index
+	    ( model[ichan]->FluxCalibrator_path );
 	}
 	else {
 
@@ -686,7 +696,8 @@ void Pulsar::ReceptionCalibrator::add_Calibrator (const ArtificialCalibrator* p)
             // Flux Calibrator observations are made through a different backend
             model[ichan]->add_polncal_backend();
 
-	  measurements.path_index = model[ichan]->ArtificialCalibrator_path;
+	  measurements.set_transformation_index
+	    ( model[ichan]->ArtificialCalibrator_path );
 
         }
 
