@@ -102,7 +102,7 @@ PB_3 1 1
 OM 1 1     # Longitude of periastron of 1st orbit. aka OM_1 
 OM_2 1 1 
 OM_3 1 1 
-
+ASCN 1 1   # Longitude of ascending node
 
 # Post-Keplerian binary parameters.  
 OMDOT 1 1    # Rate of periastron advance (deg/yr), 1st orbit
@@ -175,4 +175,7 @@ GLTD_4 1 1
 # Tempo parameters (rms residual in microsec, number of TOAs in fit)
 TRES 1 0
 NTOA 5 0
+
+# Number of iterations
+NITS 5 0
 
