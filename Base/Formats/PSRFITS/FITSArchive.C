@@ -821,6 +821,7 @@ void Pulsar::FITSArchive::load_header (const char* filename)
   if ((history.get_last()).cal_mthd == "SingleAxis" || (history.get_last()).cal_mthd == "SelfCAL" ||
       (history.get_last()).cal_mthd == "Polar" || (history.get_last()).cal_mthd == "Other") {
     set_poln_calibrated(true);
+    history.set_cal_mthd((history.get_last()).cal_mthd);
   }
   else {
     set_poln_calibrated(false);
@@ -828,11 +829,15 @@ void Pulsar::FITSArchive::load_header (const char* filename)
 
   if ((history.get_last()).sc_mthd == "PAC") {
     set_flux_calibrated(true);
+    history.set_sc_mthd("PAC");
   }
   else {
     set_flux_calibrated(false);
-  }
-
+  }  
+  
+  history.set_cal_file((history.get_last()).cal_file);
+  history.set_rfi_mthd((history.get_last()).rfi_mthd);
+  
   string polstr = (history.get_last()).pol_type;
 
   if(polstr == "XXYY") {
