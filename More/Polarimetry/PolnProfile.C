@@ -212,8 +212,6 @@ void Pulsar::PolnProfile::transform (const Jones<double>& response)
     throw Error (InvalidParam, "Pulsar::PolnProfile::transform",
                  "non-invertbile response.  det(J)=%f", Gain);
 
-  Jones<float> response_dagger = herm(response);
-
   if (state == Signal::Stokes)
     for (unsigned ibin = 0; ibin < nbin; ibin++)
       set_Stokes (ibin, ::transform (get_Stokes(ibin), response));
@@ -287,6 +285,8 @@ void Pulsar::PolnProfile::convert_state (Signal::State out_state)
 
   }
   else if (out_state == Signal::Coherence) {
+
+    cerr << "convert_state to Signal::Coherence" << endl;
 
     if (basis == Signal::Circular) {
       float* ReLR   = profile[1]->get_amps();
