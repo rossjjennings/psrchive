@@ -74,7 +74,7 @@ int crwepn ( const char* filename, int readwri, int recno, int padout,
              epn_data_block* data )
 {
   /* for dealing with filename string */
-  unsigned length = 0;;
+  unsigned length = 0;
   char* f77_filename = 0;
 
   /* for counting blocks */
