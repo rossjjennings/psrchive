@@ -1,6 +1,6 @@
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/machine_endian.h,v $
-   $Revision: 1.4 $
-   $Date: 1999/12/10 04:41:36 $
+   $Revision: 1.5 $
+   $Date: 2000/01/18 01:06:42 $
    $Author: straten $ */
 
 #ifndef __M_ENDIAN_H
@@ -21,27 +21,37 @@ void array_changeEndian (int count, void *p, int element_size);
 /* MACRO to save you some typing */
 #define ChangeEndian(p) changeEndian (&(p), sizeof(p))
 
-/* is it Big or Little endian?? */
-#ifdef __alpha
-#ifndef MACHINE_LITTLE_ENDIAN
-#define MACHINE_LITTLE_ENDIAN
-#endif
-#endif
-
-#ifdef sgi
+#ifdef MACHINE_LITTLE_ENDIAN
 #undef MACHINE_LITTLE_ENDIAN
 #endif
 
+/* is it Big or Little endian?? */
+#ifdef __alpha
+#define MACHINE_LITTLE_ENDIAN 1
+#endif
+
+#ifdef sgi
+#define MACHINE_LITTLE_ENDIAN 0
+#endif
+
 #ifdef sun
-#define MACHINE_BIG_ENDIAN
+#ifdef __i386
+#define MACHINE_LITTLE_ENDIAN 1
+#else
+#define MACHINE_LITTLE_ENDIAN 0
+#endif
 #endif
 
 #ifdef __linux
-#define MACHINE_LITTLE_ENDIAN
+#define MACHINE_LITTLE_ENDIAN 1
+#endif
+
+#ifndef MACHINE_LITTLE_ENDIAN
+#error Machine architecture not recognized in machine_endian.h
 #endif
 
 /* endian-ness macros */
-#ifdef MACHINE_LITTLE_ENDIAN
+#if MACHINE_LITTLE_ENDIAN
 
 #define toBigEndian(p,s) 	changeEndian(p,s)
 #define toLittleEndian(p,s)
@@ -81,4 +91,4 @@ void array_changeEndian (int count, void *p, int element_size);
 
 #endif
 
-#endif
+#endif  /* !def __M_ENDIAN_H */
