@@ -12,6 +12,7 @@
 #include "Pulsar/ProcHistory.h"
 #include "Pulsar/Passband.h"
 #include "Pulsar/PolnCalibratorExtension.h"
+#include "Pulsar/CalibratorStokes.h"
 
 #include "FITSError.h"
 #include "genutil.h"
@@ -689,6 +690,10 @@ void Pulsar::FITSArchive::load_header (const char* filename)
   // Load the original bandpass data
 
   load_Passband (fptr);
+
+  // Load the calibrator stokes parameters
+  
+  load_CalibratorStokes (fptr);
 
   // Load the calibration model description
   
@@ -1440,6 +1445,12 @@ try {
     unload (fptr, passband);
   else
     delete_hdu (fptr, "BANDPASS");
+
+  const CalibratorStokes* stokes = get<CalibratorStokes>();
+  if (stokes)
+    unload (fptr, stokes);
+  else
+    delete_hdu (fptr, "CAL_POLN");
 
   const PolnCalibratorExtension* pce = get<PolnCalibratorExtension>();
   if (pce)
