@@ -341,9 +341,19 @@ int telescope_coords (char telescope, float* latitude,
   float latd=-999, longd=-999, elev=-1e9;
   
   if (telescope < 10) /* if the char is < 10 then it was probably an int */
+    {
+      fprintf(stderr,"telescope_coords(.c): Warning code is %c\n",
+	      telescope);
      telescope = '0' + telescope;
-
+    }
   switch (telescope) {
+
+  case '1':
+    /* GBT NRAO */
+    latd = 38.433;
+    longd = 79.84;
+    elev = 807.43;
+    break;
 
   case '2':
     /* ATCA Narrabri */
