@@ -558,3 +558,30 @@ polyco psrephem::mkpolyco (MJD m1, MJD m2, double nspan, int ncoeff,
   return poly;
 }
 
+int operator == (const psrephem &e1, const psrephem &e2){
+
+  if(e1.parmStatus==NULL && e2.parmStatus==NULL) return(1);
+  if((e1.parmStatus==NULL && e2.parmStatus!=NULL) ||
+     (e1.parmStatus!=NULL && e2.parmStatus==NULL)) return(0);   
+  if(e1.tempo11!=e2.tempo11) return(0);
+
+  if (e1.tempo11) {
+    for (int i=0;i<EPH_NUM_KEYS;i++){
+      if(e1.parmStatus[i]!=e2.parmStatus[i] ||
+	 e1.value_double[i]!=e2.value_double[i] ||
+	 e1.value_integer[i]!=e2.value_integer[i] ||
+	 e1.error_double[i]!=e2.error_double[i] || 
+	 e1.value_str[i]!=e2.value_str[i]) 
+	return(0);
+    }
+    return(1);
+  } else {
+    return(e1.nontempo11==e2.nontempo11);
+  }
+}
+
+int operator != (const psrephem &e1, const psrephem &e2){
+  if(e1==e2) return(0);
+  else return(1);
+}
+
