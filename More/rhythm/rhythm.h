@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/rhythm/rhythm.h,v $
-   $Revision: 1.34 $
-   $Date: 2003/08/06 04:26:18 $
+   $Revision: 1.35 $
+   $Date: 2003/09/10 04:26:52 $
    $Author: ahotan $ */
 
 // //////////////////////////////////////////////////////////////////////////
@@ -204,10 +204,12 @@ class Rhythm : public QMainWindow
   int ddkID;
   int stdID;
   int weightsID;          // ID of the 'Weights' menu item
+  int trackID;            // ID of the 'Track' menu item
   int saveParmsID;
 
   bool autofit;           // fit whenever TOAs or TEMPO Parameters are loaded
   bool weights;           // use TEMPO mode 1
+  bool track;             // Attempt to track phase wraps
   bool ignore_one_eph;    // ignore the newParams signal from qt_editeph ONCE
   bool toas_modified;     // the toas have been modified since loaded
 
@@ -247,6 +249,7 @@ class Rhythm : public QMainWindow
   void togledit();
   void toglauto();
   void toglweights();
+  void togltrack();
   void temposys();
   void set_ddk();
   void set_std_tempo();

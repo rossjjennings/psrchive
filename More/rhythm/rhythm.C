@@ -86,6 +86,7 @@ Rhythm::Rhythm (QApplication* master, QWidget* parent, int argc, char** argv) :
 
   autofit = false;
   weights = false;
+  track = false;
   ignore_one_eph = false;
   
   Error::verbose = true;
@@ -523,7 +524,7 @@ void Rhythm::fit (const psrephem& eph, bool load_new)
     
     psrephem pf_eph;
     
-    Tempo::fit (eph, toas, &pf_eph, false);
+    Tempo::fit (eph, toas, &pf_eph, track);
     
     if (load_new && fitpopup) {
       // set_psrephem will result in generation of newEph signal, 
@@ -641,7 +642,7 @@ void Rhythm::fit_selected (const psrephem& eph, bool load_new)
     
     psrephem pf_eph;
     
-    Tempo::fit (eph, toas, &pf_eph, false, Tempo::toa::Selected);
+    Tempo::fit (eph, toas, &pf_eph, track, Tempo::toa::Selected);
     
     if (load_new && fitpopup) {
       // set_psrephem will result in generation of newEph signal, 

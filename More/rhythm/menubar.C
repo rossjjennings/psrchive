@@ -49,12 +49,15 @@ void Rhythm::menubarConstruct ()
   tempo->setItemEnabled (saveParmsID, false);
 
   tempo->insertSeparator();
-  // automatic fitting starts out disabled
+  // Automatic fitting starts out disabled
   autofitID = tempo->insertItem( "Enable &Auto Fit",
 				 this, SLOT( toglauto() ));
-  // weights disabled by default, state changes when TOAs are read in
+  // Weights disabled by default, state changes when TOAs are read in
   weightsID = tempo->insertItem( "Enable &Weights",
 				this, SLOT( toglweights() ), CTRL+Key_W);
+  // Tracking disabled by default
+  trackID = tempo->insertItem( "Enable &Tracking",
+			       this, SLOT( togltrack() ), CTRL+Key_T);
   tempo->insertSeparator();
   stdID = tempo->insertItem( "Use Standard TEMPO",
 			     this, SLOT( set_std_tempo() ));
@@ -215,6 +218,28 @@ void Rhythm::toglweights()
   }
 
   update_mode();
+}
+
+void Rhythm::togltrack()
+{
+  QString text;
+  if (track)
+    text = "Enable";
+  else
+    text = "Disable";
+  text += " &Tracking";
+  
+  tempo->changeItem ( trackID, text );
+  track = !track;
+  
+  if (verbose) {
+    cerr << "Rhythm: Phase tracking ";
+    if (track)
+      cerr << "enabled.\n";
+    else
+      cerr << "disabled.\n";
+    cerr << endl;
+  }
 }
 
 void Rhythm::toglauto()
