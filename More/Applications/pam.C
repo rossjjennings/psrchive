@@ -17,8 +17,6 @@
 #include "Pulsar/BinLngAscOrder.h"
 #include "Pulsar/BinLngPeriOrder.h"
 
-#include "Pulsar/TimerArchive.h"
-
 #include "Error.h"
 
 // Extensions this program understands
@@ -176,7 +174,7 @@ int main (int argc, char *argv[]) {
       Pulsar::Archive::set_verbosity(3);
       break;
     case 'i':
-      cout << "$Id: pam.C,v 1.30 2004/03/03 07:27:24 hknight Exp $" << endl;
+      cout << "$Id: pam.C,v 1.31 2004/03/03 23:36:40 ahotan Exp $" << endl;
       return 0;
     case 'm':
       save = true;
