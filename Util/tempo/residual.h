@@ -1,6 +1,7 @@
 #ifndef __RESIDUAL_H
 #define __RESIDUAL_H
 
+#include "psr_cpp.h"  // C++ standard work-arounds
 #include <vector>
 
 // values output by TEMPO (resid2.tmp)
