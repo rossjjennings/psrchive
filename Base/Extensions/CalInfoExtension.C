@@ -1,0 +1,36 @@
+#include "Pulsar/CalInfoExtension.h"
+
+//! Default constructor
+Pulsar::CalInfoExtension::CalInfoExtension ()
+{
+  cal_mode      = "UNSET";
+  cal_frequency = 0.0;
+  cal_dutycycle = 0.0;
+  cal_phase     = 0.0;
+}
+
+//! Copy constructor
+Pulsar::CalInfoExtension::CalInfoExtension (const CalInfoExtension& extension)
+{
+  cal_mode = extension.cal_mode;
+  cal_frequency = extension.cal_frequency;
+  cal_dutycycle = extension.cal_dutycycle;
+  cal_phase = extension.cal_phase;
+}
+
+//! Operator =
+const Pulsar::CalInfoExtension&
+Pulsar::CalInfoExtension::operator= (const CalInfoExtension& extension)
+{
+  cal_mode = extension.cal_mode;
+  cal_frequency = extension.cal_frequency;
+  cal_dutycycle = extension.cal_dutycycle;
+  cal_phase = extension.cal_phase;
+
+  return *this;
+}
+
+//! Destructor
+Pulsar::CalInfoExtension::~CalInfoExtension ()
+{
+}
