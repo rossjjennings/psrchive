@@ -32,7 +32,11 @@ void Pulsar::Archive::append (const Archive* arch)
     operator=( *arch );
     return;
   }
-
+  
+  if ( get_index_state() != arch->get_index_state() )
+    throw Error (InvalidState, "Archive::append",
+		 "Index state mismatch");
+  
   switch (index_state) {
     
   case TimeOrder: {
