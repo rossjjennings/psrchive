@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/polyco.h,v $
-   $Revision: 1.15 $
-   $Date: 2002/04/25 10:35:53 $
-   $Author: pulsar $ */
+   $Revision: 1.16 $
+   $Date: 2002/07/31 11:20:36 $
+   $Author: straten $ */
 
 #ifndef __POLY_H
 #define __POLY_H
@@ -21,6 +21,7 @@
 
 #include "Phase.h"
 #include "MJD.h"
+#include "ReferenceAble.h"
 
 class polynomial {
   
@@ -131,10 +132,12 @@ public:
   double get_doppler_shift () const {return doppler_shift / 1e4; }
   string get_psrname       () const {return psrname; }
 
+  static double flexibility;
+
   MJD start_time () const
-    { return reftime - nspan_mins * 60.0/2.0; };
+    { return reftime - nspan_mins * (1.0+flexibility) * 60.0/2.0; };
   MJD end_time () const 
-    { return reftime + nspan_mins * 60.0/2.0; };
+    { return reftime + nspan_mins * (1.0+flexibility) * 60.0/2.0; };
 
   Phase start_phase () const
     { return phase (start_time()); };
@@ -159,7 +162,7 @@ public:
 
 };
 
-class polyco {
+class polyco : public Reference::Able {
 
  protected:
   //! null value of pulsar name
@@ -203,6 +206,7 @@ class polyco {
   void append (const polyco& poly);
 
   void  prettyprint  () const;
+
   const polynomial* nearest (const MJD &t, 
 			     const string& psrname = anyPsr) const;
 
@@ -240,6 +244,7 @@ class polyco {
   char   get_telescope () const { return pollys.front().get_telescope(); }
   double get_freq      () const { return pollys.front().get_freq(); }
   MJD    get_reftime   () const { return pollys.front().get_reftime(); }
+  double get_refperiod () const { return 1.0/pollys.front().f0; }
   double get_nspan     () const { return pollys.front().get_nspan(); }
   float  get_dm        () const { return pollys.front().get_dm(); }
   int    get_ncoeff    () const { return pollys.front().get_ncoeff(); }
