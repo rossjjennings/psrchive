@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Profile.h,v $
-   $Revision: 1.29 $
-   $Date: 2003/04/29 09:45:21 $
-   $Author: straten $ */
+   $Revision: 1.30 $
+   $Date: 2003/04/30 07:09:04 $
+   $Author: ahotan $ */
 
 #ifndef __Pulsar_Profile_h
 #define __Pulsar_Profile_h
@@ -45,6 +45,9 @@ namespace Pulsar {
 
     //! copy constructor
     Profile (const Profile* profile) { init(); operator = (*profile); }
+
+    //! generates a profile containing a hat function
+    Pulsar::Profile* hat_profile(int nbin, float duty_cycle);
 
     //! destructor destroys the data area
     virtual ~Profile ();
@@ -191,11 +194,11 @@ namespace Pulsar {
     //! set the state of the polarization measurement
     virtual void set_state (Signal::Component _state) { state = _state; }
 
-    //! convolves two profiles (using fft methods)
-    void fft_convolve(Profile* p1, Profile* p2); 
+    //! convolves this with the given profile (using fft method)
+    void fft_convolve(Profile* p1); 
 
-    //! generates a profile containing a hat function
-    void hat_profile(int bin_number, int width);
+    //! smears this by convolution with a hat function of given duty cycle
+    void smear(float duty_cycle);
 
     //! integrate neighbouring phase bins in profile
     virtual void bscrunch (unsigned nscrunch);

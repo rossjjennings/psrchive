@@ -3,11 +3,11 @@
 #include "Pulsar/Profile.h"
 #include "Error.h"
 
-void Pulsar::Profile::fft_convolve(Profile* p1, Profile* p2)
+void Pulsar::Profile::fft_convolve(Profile* p1)
 {
-  unsigned int bins = p1 -> get_nbin();
+  unsigned bins = get_nbin();
 
-  if (p1 -> get_nbin() != p2 -> get_nbin()) {
+  if (bins != p1->get_nbin()) {
     throw Error (InvalidParam, "Profile::fft_convolve", "profile nbin values not equal");
   }
 
@@ -25,8 +25,8 @@ void Pulsar::Profile::fft_convolve(Profile* p1, Profile* p2)
   temp2.resize(bins);
   resultant.resize(bins);
 
-  rfftw_one(forward_plan, p1 -> get_amps(), temp1.begin());
-  rfftw_one(forward_plan, p2 -> get_amps(), temp2.begin());
+  rfftw_one(forward_plan, get_amps(), temp1.begin());
+  rfftw_one(forward_plan, p1->get_amps(), temp2.begin());
 
   // Perform the frequency domain multiplication:
   // No complex part for the first element
@@ -61,25 +61,59 @@ void Pulsar::Profile::fft_convolve(Profile* p1, Profile* p2)
 }
 
 
-void Pulsar::Profile::hat_profile(int bin_number, int width)
+Pulsar::Profile* Pulsar::Profile::hat_profile(int nbin, float duty_cycle)
 {
-  vector<float> new_amps(bin_number, 1);
+  if (duty_cycle >= 1.0 || duty_cycle <= 0.0)
+    throw Error (InvalidParam, "Pulsar::Profile::hat_profile invalid duty cycle");
+  
+  if (nbin <= 0)
+    throw Error (InvalidParam, "Pulsar::Profile::hat_profile invalid nbin");
+  
+  Pulsar::Profile* ptr = new Pulsar::Profile();
 
-  resize(bin_number);
-  set_amps(new_amps.begin());
+  ptr->set_centre_frequency(0.0);
+  ptr->set_weight(1.0);
+  ptr->set_state(Signal::None);
 
-  if (bin_number % 2 == 0 && width % 2 == 0) {
-    for (int i = (width/2); i < (bin_number)-(width/2); i++) 
-      amps[i] = 0.0;
+  ptr->resize(nbin);
+
+  for (int i = 0; i < nbin; i++) {
+    ptr->amps[i] = 0.0;
+  }
+
+  int width = int(float(nbin) * duty_cycle);
+
+  if (nbin % 2 == 0) {
+
+    if (width %2 != 0)
+      width += 1;
+    
+    int start_bin = (nbin / 2) - (width / 2);
+    int end_bin = start_bin + (width);
+
+    for (int i = start_bin; i < end_bin; i++) 
+      ptr->amps[i] = 1.0;
   }
   else {
-    throw Error (InvalidParam, "Profile::hat_profile",
-		 "Width not an even division of bins");
+    
+    if (width %2 == 0)
+      width += 1;
+    
+    int start_bin = ((nbin - 1) / 2) - ((width - 1) / 2);
+    int end_bin = start_bin + width;
+
+    for (int i = start_bin; i < end_bin; i++) 
+      ptr->amps[i] = 1.0;
   }
+
+  return ptr;
 }
 
 
-
+void Pulsar::Profile::smear (float duty_cycle)
+{
+  fft_convolve(hat_profile(get_nbin(), duty_cycle));
+}
 
 
 

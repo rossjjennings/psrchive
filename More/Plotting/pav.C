@@ -1,5 +1,5 @@
 //
-// $Id: pav.C,v 1.35 2003/04/29 13:29:43 straten Exp $
+// $Id: pav.C,v 1.36 2003/04/30 07:09:04 ahotan Exp $
 //
 // The Pulsar Archive Viewer
 //
@@ -166,7 +166,7 @@ int main (int argc, char** argv)
       return 0;
 
     case 'i':
-      cout << "$Id: pav.C,v 1.35 2003/04/29 13:29:43 straten Exp $" << endl;
+      cout << "$Id: pav.C,v 1.36 2003/04/30 07:09:04 ahotan Exp $" << endl;
       return 0;
 
     case 'l':
@@ -456,17 +456,8 @@ int main (int argc, char** argv)
       archive -> get_Profile(0,0,0) -> display();
       sleep(2);
       cpgeras();
-      Pulsar::Profile my_profile;
-      Pulsar::Profile my_hat;
-      int temp1 = archive -> get_Profile(0,0,0) -> get_nbin();
-      int temp2 = archive -> get_Profile(0,0,0) -> get_nbin()/32;
-      cerr << "NBIN = " << temp1 << endl;
-      my_hat.hat_profile(temp1, temp2);
-      my_hat.display();
-      sleep(2);
-      cpgeras();
-      my_profile.fft_convolve(archive -> get_Profile(0,0,0), &my_hat);
-      my_profile.display();
+      archive -> get_Profile(0,0,0) -> smear(0.05);
+      archive -> get_Profile(0,0,0) -> display();
       cpgend();
       exit(0);
     }
