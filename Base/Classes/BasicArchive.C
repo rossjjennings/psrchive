@@ -254,13 +254,13 @@ void Pulsar::BasicArchive::set_state (Signal::State _state)
 //! Get the centre frequency of the observation
 double Pulsar::BasicArchive::get_dispersion_measure () const
 {
-  return ephemeris.get_dm();
+  return dispersion_measure;
 }
 
 //! Set the centre frequency of the observation
 void Pulsar::BasicArchive::set_dispersion_measure (double dm)
 {
-  ephemeris.set_dm (dm);
+  dispersion_measure = dm;
 }
 
 //! Data has been poln calibrated
