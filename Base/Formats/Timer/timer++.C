@@ -10,7 +10,9 @@ std::string Timer::reason;
 bool   Timer::verbose = false;
 
 static char backends[Timer::nbackends][BACKEND_STRLEN+1] =
-{ "baseband" };
+{ "baseband",
+  "scint"
+};
 
 unsigned long Timer::backend_data_size (const struct timer& hdr)
 {

@@ -1,6 +1,6 @@
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/Timer/timer++.h,v $
-   $Revision: 1.14 $
-   $Date: 2005/02/13 08:14:26 $
+   $Revision: 1.15 $
+   $Date: 2005/02/17 10:07:27 $
    $Author: straten $ */
 
 #ifndef __TIMER_PLUSPLUS_H
@@ -22,7 +22,7 @@ namespace Timer {
 
   extern bool verbose;
 
-  const int nbackends = 1;
+  const int nbackends = 2;
 
   // returns the size of the additional backend information, or 0 if none
   unsigned long backend_data_size(const struct timer& hdr);
