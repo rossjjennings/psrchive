@@ -30,11 +30,8 @@ Phase::Phase (double tns)
 Phase::Phase (int64 tns, double ftns) 
 {
   int64 iturns = (int64) ftns;
-  cerr << "Phase 1:" << iturns;
   turns = tns + iturns;
-  cerr << " 2:" << turns;
   fturns = ftns - double (iturns);
-  cerr << " f:" << fturns << endl;
   settle ();
 }
 
