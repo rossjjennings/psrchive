@@ -1229,12 +1229,12 @@ vector<double> Rhythm::give_me_data (toaPlot::AxisQuantity q)
       }
       
       toas[i].unload(useful);
-      
-      if (sscanf(useful+1, "%s ", filename) != 1) {
-	throw Error(FailedCall, "No archive-derived info available");
+
+      if (sscanf(useful+1, "%s %d %d", filename, &sub, &chn) != 3) {
+	throw Error(FailedCall, "Information not available");
       }
       else {
-	if (verbose)
+      	if (verbose)
 	  cerr << "Attempting to load archive '" << filename << "'" << endl;
 	
 	string useful2 = dataPath + "/";
@@ -1242,7 +1242,7 @@ vector<double> Rhythm::give_me_data (toaPlot::AxisQuantity q)
 	
 	try {
 	  Reference::To<Pulsar::Archive> data = Pulsar::Archive::load(useful2);
-	  toas[i].set_dur(data->integration_length());
+	  toas[i].set_dur(data->get_Integration(sub)->get_duration());
 	  retval.push_back(toas[i].get_dur());     
 	}
 	catch (Error& error) {
