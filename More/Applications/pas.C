@@ -81,7 +81,7 @@ int main (int argc, char** argv)
       return 0;
 
     case 'i':
-      cout << "$Id: pas.C,v 1.15 2004/09/22 15:38:45 straten Exp $" << endl;
+      cout << "$Id: pas.C,v 1.16 2004/11/04 10:39:51 rmanches Exp $" << endl;
       return 0;
 
     case 'r':
@@ -126,6 +126,8 @@ int main (int argc, char** argv)
     exit(-1);
   } 
 
+
+  Error::handle_signals ();
 
   //open new standard profile
   Reference::To<Pulsar::Archive> stdarch = Pulsar::Archive::load(stdname[0]);
@@ -264,9 +266,40 @@ int main (int argc, char** argv)
 	  stdarch->rotate(convt(stdarch, 0.5*stdarch->get_nbin(), verbose));
 	  cout << "Save: new standard profile " << the_new << " written to disk" << endl;
 	  break;	 
+	  
+        case 'i':  // Interpolate
+          opts = ' ';
+	  cpgband(2, 0, curs_x, curs_y, &x, &y, &opts);
+	  if (opts == 'i') {
+	    float * tmpdata=stdarch->get_Profile(0, 0, 0)->get_amps();
+	    int istart, iend;
+	    if (curs_x > x) {float tmp=x; x=curs_x; curs_x=tmp;}
+	    istart = int(curs_x*stdarch->get_Profile(0, 0, 0)->get_nbin());
+	    if (istart<0) istart=0;
+	    fprintf(stderr, "istart = %d\n", istart);
+	    iend = int(x*stdarch->get_Profile(0, 0, 0)->get_nbin());
+	    if(unsigned(iend)>stdarch->get_Profile(0, 0, 0)->get_nbin()) 
+	      iend=stdarch->get_Profile(0, 0, 0)->get_nbin();
+	    if(verbose) cout << "Interpolate: start & end bin number: " <<istart << ", " <<iend<<endl;
 
-	case '0':   //Zero base line
-	  cout << "Zero baseline: start point set at:" << curs_x << endl;
+	    float firstVal,lastVal;
+	    firstVal = tmpdata[istart];
+	    lastVal = tmpdata[iend-1];
+	  
+	    for(i=unsigned(istart); i<unsigned(iend); i++) 
+	      tmpdata[i]=firstVal+(lastVal-firstVal)/(float)(iend-1-istart)*(i-istart);
+	    
+	    if (vverbose) 
+	      for(i=0; i<stdarch->get_Profile(0, 0, 0)->get_nbin(); i++) 
+		cout << "  " << i << ": " << tmpdata[i]<<"  ";
+	    
+	    stdarch->get_Profile(0, 0, 0)->set_amps(tmpdata);
+	    if (verbose) cout << "Interpolate: done" << endl;
+	  }
+	  break;
+
+	  case '0':   //Zero base line
+	    cout << "Zero baseline: start point set at:" << curs_x << endl;
 	  cout << "Zero baseline: move cursor and set the range" <<endl;
 	  opts = ' ';
 	  cpgband(2, 0, curs_x, curs_y, &x, &y, &opts);
@@ -385,6 +418,8 @@ void plot_it(Reference::To<Pulsar::Archive> refarch, Reference::To<Pulsar::Archi
     else if(i==6)
       cpgtext (x, y, "0:  set the range and zero the base line"); 
     else if(i==7)
+      cpgtext (x, y, "i:  set the range and interpolate"); 
+    else if(i==8)
       cpgtext (x, y, "z:  zoom in"); 
     else    break;
   }
