@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Profile.h,v $
-   $Revision: 1.10 $
-   $Date: 2002/04/18 08:53:21 $
-   $Author: straten $ */
+   $Revision: 1.11 $
+   $Date: 2002/04/19 02:07:42 $
+   $Author: ahotan $ */
 
 #ifndef __Pulsar_Profile_h
 #define __Pulsar_Profile_h
@@ -174,8 +174,8 @@ namespace Pulsar {
     //! resize the data area
     virtual void resize (int nbin);
 
-    //! calls bscrunch with the appropriate argument
-    void halvebins (int nhalve);
+    //! halves the number of bins like bscrunch(2^nhalve)
+    virtual void halvebins (int nhalve);
 
     //! initializes all values to null
     void init ();

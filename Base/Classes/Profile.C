@@ -46,9 +46,14 @@ void Pulsar::Profile::init()
   amps = NULL;
 }
 
+Pulsar::Profile::~Profile () 
+{
+  if (amps != NULL) delete [] amps;
+}
+
 /////////////////////////////////////////////////////////////////////////////
 //
-// Pulsar::Profile::
+// Pulsar::Profile::resize
 //
 void Pulsar::Profile::resize (int _nbin)
 {
@@ -69,9 +74,9 @@ void Pulsar::Profile::resize (int _nbin)
 
 /////////////////////////////////////////////////////////////////////////////
 //
-// Pulsar::Profile::
+// Pulsar::Profile::operator =
 //
-const Pulsar::Profile& Pulsar::Profile::operator= (const Profile& profile)
+const Pulsar::Profile& Pulsar::Profile::operator = (const Profile& profile)
 {
   if (this == &profile)
     return *this;
@@ -88,19 +93,30 @@ const Pulsar::Profile& Pulsar::Profile::operator= (const Profile& profile)
 
 /////////////////////////////////////////////////////////////////////////////
 //
-// Pulsar::Profile::
+// Pulsar::Profile::clone
 //
 Pulsar::Profile* Pulsar::Profile::clone ()
 {
-  Profile* retval = new Profile;
-  *(retval) = *(this);
+  Profile* retval = new Profile (*this);
+  if (!retval)
+    throw Error (BadAlloc, "Profile::clone");
   return retval;
 }
 
 /////////////////////////////////////////////////////////////////////////////
 //
-// Pulsar::Profile::
+// Pulsar::Profile::operator +=
 //
+/*!
+  It can be easily shown that a series of additions using this operator
+  preserves the simple relationship:
+
+  \f$ \bar{x} = \sum_{i=1}^N W(x_i) x_i / W(\bar{x}) \f$
+
+  where \f$ W(x_i) \f$ is the weight assigned to \f$ x_i \f$ and
+
+  \f$ W(\bar{x}) = \sum_{i=1}^N W(x_i) \f$
+*/
 const Pulsar::Profile& Pulsar::Profile::operator += (const Profile& profile)
 {
   if (nbin != profile.get_nbin())
