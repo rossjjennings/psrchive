@@ -1,5 +1,5 @@
 //
-// $Id: pav.C,v 1.57 2003/10/11 11:50:38 ahotan Exp $
+// $Id: pav.C,v 1.58 2003/10/16 14:18:54 straten Exp $
 //
 // The Pulsar Archive Viewer
 //
@@ -65,7 +65,7 @@ void usage ()
     " -g        Display position angle profile\n"
     " -G        Plot frequency against pulse phase\n"
     " -l        Do not display labels outside of plotting area\n"
-    " -m        Plot Poincare vector on Mercator projection\n"
+    " -m        Plot Poincare vector in spherical coordinates\n"
     " -O p.a.   Rotate position angle (orientation) by p.a. degrees\n"
     " -q        Plot a position angle frequency spectrum colour map\n"
     " -Q        Position angle frequency spectrum for on-pulse region\n"
@@ -160,7 +160,7 @@ int main (int argc, char** argv)
   Pulsar::Plotter::ColourMap colour_map = Pulsar::Plotter::Heat;
   
   int c = 0;
-  const char* args = "AaBb:Cc:DdEeFf:GgHhI:iJjk:K:LlM:m:nN:O:oP:pQq:r:Ss:Tt:uVvwWXx:Yy:Zz:";
+  const char* args = "AaBb:Cc:DdEeFf:GgHhI:iJjK:k:LlM:mN:nO:oP:pQq:r:Ss:Tt:uVvwWXx:Yy:Zz:";
 
   while ((c = getopt(argc, argv, args)) != -1)
     switch (c) {
@@ -228,7 +228,7 @@ int main (int argc, char** argv)
       plotter.set_subint( atoi (optarg) );
       break;
     case 'i':
-      cout << "$Id: pav.C,v 1.57 2003/10/11 11:50:38 ahotan Exp $" << endl;
+      cout << "$Id: pav.C,v 1.58 2003/10/16 14:18:54 straten Exp $" << endl;
       return 0;
 
     case 'j':
@@ -488,8 +488,10 @@ int main (int argc, char** argv)
       }
     }
 
-    if (centre)
+    if (centre) {
+      cerr << "pav centre archive" << endl;
       archive -> centre();
+    }
 
     if (mdiff) {
       if (std_prof) {
@@ -646,7 +648,7 @@ int main (int argc, char** argv)
 
     if (mercator) {
       cpg_next();
-      plotter.Mercator (archive);
+      plotter.spherical (archive);
     }
 
     if (periodplot) {
