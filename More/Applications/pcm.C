@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pcm.C,v $
-   $Revision: 1.18 $
-   $Date: 2004/01/05 09:47:24 $
+   $Revision: 1.19 $
+   $Date: 2004/01/05 12:11:57 $
    $Author: straten $ */
 
 /*! \file pcm.C 
@@ -40,6 +40,7 @@
 #include "Pulsar/Archive.h"
 #include "Pulsar/getopt.h"
 
+#include "RealTimer.h"
 #include "Error.h"
 #include "dirutil.h"
 #include "string_utils.h"
@@ -736,7 +737,14 @@ int mode_B (const char* standard_filename,
 
   standard = Pulsar::Archive::load (standard_filename);
 
+  RealTimer clock;
+
+  clock.start();
+
   model.set_standard (standard);
+
+  clock.stop();
+  cerr << "set_standard toook " << clock << endl;
 
   Reference::To<Pulsar::Archive> archive;
 
