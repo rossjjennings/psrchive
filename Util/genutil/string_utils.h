@@ -20,7 +20,7 @@ ssize_t stringload (string* str, FILE* fptr, size_t nbytes=0);
 // fills a vector of string with the first word from each line
 // in the file.  A line is delimited by \n or commented by #.
 // ///////////////////////////////////////////////////////////
-int stringload (vector<string>* lines, const char* filename);
+//int stringload (vector<string>* lines, const char* filename);
 int stringload (vector<string>* lines, FILE* fptr);
 
 // ///////////////////////////////////////////////////////////
