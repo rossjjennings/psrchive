@@ -28,8 +28,8 @@ void usage ()
     "  -i                     Show revision information\n"
     "\n"
     "  -p path                Set the CAL file directory\n"
-    "  -u ext1 ext2 ...       Scan for files with these extensions\n"
-    "                         uses .cf and .pcal as defaults\n"
+    "  -u ext1 ext2 ...       Add to recognized file extensions\n"
+    "                         (defaults: .cf .pcal .fcal .pfit\n"
     "  -e extension           Use this extension when unloading results\n"
     "  -w                     Write a new database summary file if using -p\n"
     "  -W                     Same as -w but exit after writing summary\n"
@@ -103,7 +103,7 @@ int main (int argc, char *argv[]) {
       Pulsar::Archive::set_verbosity(1);
       break;
     case 'i':
-      cout << "$Id: pac.C,v 1.37 2003/12/06 14:12:42 straten Exp $" << endl;
+      cout << "$Id: pac.C,v 1.38 2003/12/06 17:38:53 straten Exp $" << endl;
       return 0;
     case 'p':
       cals_are_here = optarg;
@@ -237,7 +237,9 @@ int main (int argc, char *argv[]) {
 	
 	exts.push_back("cf");
 	exts.push_back("pcal");
-	
+	exts.push_back("fcal");
+        exts.push_back("pfit");
+
 	cout << "Generating new CAL file database" << endl;
 	
 	dbase = new Pulsar::Calibration::Database (cals_are_here.c_str(), exts);
