@@ -1,6 +1,6 @@
 /* $Source: /cvsroot/psrchive/psrchive/Util/qtutil/qt_Angle.h,v $
-   $Revision: 1.2 $
-   $Date: 1999/11/02 09:00:48 $
+   $Revision: 1.3 $
+   $Date: 1999/12/23 02:05:46 $
    $Author: straten $ */
 
 #ifndef __QT_Angle_H
@@ -17,11 +17,11 @@ class qt_Angle : public qt_value
   qt_Angle (bool error=false, QWidget *parent=NULL, const char *name=NULL);
 
   // error given in days
-  int setAngle (const Angle& angle, double error=0.0);
-  int getAngle (Angle* angle, double* error);
+  void setAngle ( const Angle& angle = Angle() );
+  Angle getAngle () const { return valset; };
 
-  void displayHMS () { hms = true; };
-  void displayDMS () { hms = false; };
+  void displayHMS () { hms = true;  setAngle(valset); };
+  void displayDMS () { hms = false; setAngle(valset); };
 
  protected:
   bool   hms;

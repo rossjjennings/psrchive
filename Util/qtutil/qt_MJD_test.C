@@ -11,8 +11,7 @@ int main( int argc, char **argv )
   MJD today (time (NULL));
 
   qt_MJD display;
-  display.setMJD (today, 0.0001);
-  //display.resize( 100, 30 );
+  display.setMJD (today);
 
   a.setMainWidget( &display );
   display.show();

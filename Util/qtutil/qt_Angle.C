@@ -5,43 +5,18 @@
 qt_Angle::qt_Angle (bool with_error, QWidget *parent, const char *name) :
   qt_value (with_error, parent, name)
 {
+  setAngle ();
   connect (&value, SIGNAL(returnPressed()), this, SLOT(value_Entered_CB()));
 }
 
-int qt_Angle::setAngle (const Angle& angle, double err)
+void qt_Angle::setAngle (const Angle& angle)
 {
   if (hms)
-    value.setText (angle.getHMS(val_precision).data());
+    value.setText (angle.getHMS(val_precision).c_str());
   else
-    value.setText (angle.getDMS(val_precision).data());
+    value.setText (angle.getDMS(val_precision).c_str());
 
   valset = angle;
-
-  if (err != 0.0) {
-    if (!has_error) {
-      plusminus.show();
-      error.show();
-      has_error = true;
-    }
-    char str_data [80];
-    sprintf (str_data, "%.*le", err_precision, err);
-    error.setText (str_data);
-  }
-  return 0;
-}
-
-int qt_Angle::getAngle (Angle* angle, double* err)
-{
-  if (angle != NULL)
-    *angle = valset;
-
-  if (err != NULL) {
-    *err = 0.0;
-    if (has_error &&
-	sscanf (error.text().ascii(), "%lf", err) != 1)
-      *err = 0.0;
-  }
-  return 0;
 }
 
 void qt_Angle::value_Entered_CB ()
@@ -54,10 +29,10 @@ void qt_Angle::value_Entered_CB ()
   else
     retval = newval.setDMS (value.text().ascii());
 
-  if (retval < 0)
-    cerr << "gtk_Angle:: invalid angle:" << value.text() << endl;
-  else
-    valset = newval;
-  
-  setAngle (valset);
+  if (retval < 0) {
+    if (verbose)
+      cerr << "gtk_Angle:: invalid angle:" << value.text() << endl;
+    newval = valset;
+  }
+  setAngle (newval);
 }
