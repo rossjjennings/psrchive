@@ -13,32 +13,17 @@
 #include "coord.h"
 
 /*****************************************************************************/
-void Pulsar::TimerArchive::unload_file (const char* filename) const
-{
-  // TimerArchives do not support alternate ordering schemes
-  bool has_alt_order = false;
-  
-  for (unsigned i = 0; i < extension.size(); i++) {
-    if (dynamic_cast<Pulsar::IntegrationOrder*>(extension[i].get()))
-      has_alt_order = true;
-  }
-  
-  if (has_alt_order)
-    throw Error(InvalidState, "Archive::add_extension",
-		"The TimerArchive class does not support unloading of files with"
-		" alternate IntegrationOrder extensions");
+void Pulsar::TimerArchive::unload_file (const char* filename) const 
+try {
 
+  if (get<IntegrationOrder>())
+    throw Error (InvalidState, "Pulsar::TimerArchive::unload_file",
+		 "The TimerArchive class cannot unload files with"
+		 " alternate IntegrationOrder extensions");
   
   FILE* fptr = fopen (filename, "w");
   if (!fptr)
     throw Error (FailedSys, "TimerArchive::unload", "fopen");
-
-  int orig_umask = umask(0);
-  umask(orig_umask);
-
-  int perm = (S_IWUSR | S_IRUSR | S_IWGRP | S_IRGRP | S_IWOTH | S_IROTH) & ~orig_umask;
-
-  fchmod(fileno(fptr),perm);
 
   if (verbose == 3) 
     cerr << "TimerArchive::unload opened '" << filename << "'" << endl;
@@ -53,7 +38,9 @@ void Pulsar::TimerArchive::unload_file (const char* filename) const
   fclose (fptr);
   
 }
-
+catch (Error& error) {
+  throw error += "Pulsar::TimerArchive::unload_file";
+}
 
 void Pulsar::TimerArchive::unload (FILE* fptr) const
 {
