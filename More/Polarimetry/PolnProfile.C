@@ -49,7 +49,8 @@ Pulsar::PolnProfile::PolnProfile (Signal::Basis _basis, Signal::State _state,
 //
 Pulsar::PolnProfile::~PolnProfile ()
 {
-
+  if (Profile::verbose)
+    cerr << "Pulsar::PolnProfile destructor" << endl;
 }
 
 //
