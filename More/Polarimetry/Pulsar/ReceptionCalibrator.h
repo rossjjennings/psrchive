@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ReceptionCalibrator.h,v $
-   $Revision: 1.11 $
-   $Date: 2003/05/02 08:40:42 $
+   $Revision: 1.12 $
+   $Date: 2003/05/02 11:31:53 $
    $Author: straten $ */
 
 #ifndef __ReceptionCalibrator_H
@@ -91,6 +91,9 @@ namespace Pulsar {
 
     //! Epoch of the last observation
     MJD end_epoch;
+
+    //! Minimum and maximum values of parallactic angle (informational)
+    float PA_min, PA_max;
 
     //! Flag set after successful call to add_PolnCalibrator
     bool includes_PolnCalibrator;

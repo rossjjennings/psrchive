@@ -13,6 +13,8 @@ Pulsar::ReceptionCalibrator::ReceptionCalibrator (const Archive* archive)
   includes_PolnCalibrator = false;
   includes_FluxCalibrator = false;
 
+  PA_min = PA_max = 0.0;
+
   if (archive)
     initial_observation (archive);
 }
@@ -52,7 +54,8 @@ void Pulsar::ReceptionCalibrator::initial_observation (const Archive* data)
 		 "invalid state=" + State2string(state));
 
   if (data->get_parallactic_corrected ())
-    throw Error (InvalidParam,"Pulsar::ReceptionCalibrator::initial_observation",
+    throw Error (InvalidParam,
+		 "Pulsar::ReceptionCalibrator::initial_observation",
 		 "Pulsar::Archive='" + data->get_filename() + "'\n"
 		 "has been corrected for parallactic angle rotation");
 		 
@@ -95,6 +98,10 @@ void Pulsar::ReceptionCalibrator::initial_observation (const Archive* data)
     init_estimate ( pulsar[istate] );
 
   start_epoch = end_epoch = data->start_time ();
+
+  parallactic.set_epoch (start_epoch);
+  PA_max = PA_min = parallactic.get_param (0);
+
 }
 
 
@@ -155,8 +162,8 @@ void Pulsar::ReceptionCalibrator::add_observation (const Archive* data)
   string reason;
   if (!uncalibrated->mixable (data, reason))
     throw Error (InvalidParam, "Pulsar::ReceptionCalibrator",
-		 "Archive='" + data->get_filename() + "'\ndoes not match '"
-		 + uncalibrated->get_filename() + reason);
+		 "'" + data->get_filename() + "' does not match "
+		 "'" + uncalibrated->get_filename() + reason);
 
   unsigned nsub = data->get_nsubint ();
   unsigned nchan = data->get_nchan ();
@@ -166,12 +173,18 @@ void Pulsar::ReceptionCalibrator::add_observation (const Archive* data)
     const Integration* integration = data->get_Integration (isub);
     MJD epoch = integration->get_epoch ();
 
-    parallactic.set_epoch (epoch);
-
     if (epoch < start_epoch)
       start_epoch = epoch;
     if (epoch > end_epoch)
       end_epoch = epoch;
+
+    parallactic.set_epoch (epoch);
+    float PA = parallactic.get_param (0);
+
+    if (PA < PA_min)
+      PA_min = PA;
+    if (PA > PA_max)
+      PA_max = PA;
 
     for (unsigned ichan=0; ichan<nchan; ichan++) {
 
@@ -262,8 +275,8 @@ void Pulsar::ReceptionCalibrator::calibrate (Archive* data)
   string reason;
   if (!uncalibrated->calibrator_match (data, reason))
     throw Error (InvalidParam, "Pulsar::ReceptionCalibrator::calibrate",
-		 "Pulsar::Archive='" + data->get_filename() +
-		 "'\ndoes not match '" + uncalibrated->get_filename() + reason);
+		 "'" + data->get_filename() + "' does not match "
+		 "'" + uncalibrated->get_filename() "'" + reason);
 
   unsigned nsub = data->get_nsubint ();
   unsigned nchan = data->get_nchan ();
@@ -280,7 +293,7 @@ void Pulsar::ReceptionCalibrator::calibrate (Archive* data)
 
     for (unsigned ichan=0; ichan<nchan; ichan++) {
       equation[ichan]->set_epoch (epoch);
-      response[ichan] = equation[ichan]->model.get_Jones();
+      response[ichan] = inv( equation[ichan]->model.get_Jones() );
     }
 
     Calibrator::calibrate (integration, response);
@@ -307,6 +320,13 @@ void Pulsar::ReceptionCalibrator::solve ()
        timescale on which the backend is expected to change and the
        amount of time spanned by the observations */
   }
+
+  PA_min *= 180.0/M_PI;
+  PA_max *= 180.0/M_PI;
+
+  cerr << "Pulsar::ReceptionCalibrator::solve information:\n"
+    "  Parallactic angle ranges from " << PA_min <<
+    " to " << PA_max << " degrees" << endl;
 
   for (unsigned istate=0; istate<pulsar.size(); istate++)
     pulsar[istate].update_state ();
