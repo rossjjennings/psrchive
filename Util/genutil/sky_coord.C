@@ -35,7 +35,7 @@ sky_coord::setGalactic(AnglePair &gal)
   l = gal.angle1.getradians();
   b = gal.angle2.getradians();
 
-  F772C2(sla_galeq)(&l, &b, &ra, &dec);
+  F772C(sla_galeq)(&l, &b, &ra, &dec);
 
   angle1.setradians(ra);
   angle2.setradians(dec);
@@ -52,7 +52,7 @@ sky_coord::getGalactic()
   ra = angle1.getradians();
   dec= angle2.getradians();
 
-  F772C2(sla_eqgal)(&ra, &dec, &l, &b);
+  F772C(sla_eqgal)(&ra, &dec, &l, &b);
 
   gal.angle1.setradians(l);
   gal.angle2.setradians(b);

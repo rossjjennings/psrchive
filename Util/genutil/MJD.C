@@ -439,7 +439,7 @@ extern "C" double F772C(sla_gmst)(double * ut);
 double MJD::LST (float longitude) const
 {
   double passed_MJD = this->in_days();
-  double gmst = F772C2(sla_gmst)(&passed_MJD);
+  double gmst = F772C(sla_gmst)(&passed_MJD);
   double lst = gmst/M_PI*180.0/15.0 + longitude/360.0*24.0;
   while (lst<0.0) lst+=24.0;
   while (lst>=24.0) lst-=24.0;
