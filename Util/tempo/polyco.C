@@ -556,7 +556,7 @@ Phase polyco::phase(const MJD& t, const string& in_psrname) const {
   try{ nearest_polly = this->nearest_polly(t, in_psrname);}
   catch(...) {
     fprintf (stderr, "polyco::phase no polynomial for PSR:'%s'  MJD:'%s'\n",
-	in_psrname.data(), t.printdays(9).data());
+	in_psrname.data(), t.printdays());
     throw("no polynomial");
   }
   return(nearest_polly.phase(t));
