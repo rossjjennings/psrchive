@@ -117,7 +117,7 @@ void Pulsar::TimerArchive::subint_load (FILE* fptr)
 
   // Before psrdisp v.18.1, lower sideband data did not have their sign
   // of Stokes V properly flipped.
-  if (baseband && version<18.1 && hdr.banda.npol==4)  {
+  if (baseband && version<18.1 && hdr.banda.npol==4 && hdr.banda.bw < 0.0)  {
     hdr.version = 18.0;
     hdr.minorversion = 0.1;
     reverse_V = true;
