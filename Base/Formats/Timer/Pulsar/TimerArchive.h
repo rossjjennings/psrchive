@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/Timer/Pulsar/TimerArchive.h,v $
-   $Revision: 1.12 $
-   $Date: 2004/07/12 12:23:14 $
+   $Revision: 1.13 $
+   $Date: 2004/07/16 07:52:45 $
    $Author: straten $ */
 
 #ifndef __Timer_Archive_h
@@ -251,7 +251,7 @@ namespace Pulsar {
     void unpack (Receiver* receiver);
 
     //! Pack the Receiver extension
-    void pack (const Receiver* receiver) const;
+    void pack (const Receiver* receiver);
 
   };
 

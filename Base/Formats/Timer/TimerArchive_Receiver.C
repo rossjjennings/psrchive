@@ -24,7 +24,7 @@ void Pulsar::TimerArchive::unpack (Receiver* receiver)
   else {
 
     if (verbose) {
-      cerr << "Pulsar::TimerArchive::unpack WARNING Receiver ";
+      cerr << "Pulsar::TimerArchive::unpack Receiver WARNING Receiver ";
       if (hdr.rcvr_id[0] == '\0')
 	cerr << "not specified." << endl;
       else
@@ -35,8 +35,37 @@ void Pulsar::TimerArchive::unpack (Receiver* receiver)
       Parkes::guess (receiver, this);
 
     else if (verbose)
-      cerr << "  No guess for telescope=" << hdr.telid << endl;
+      cerr << "Pulsar::TimerArchive::unpack Receiver"
+	" WARNING No guess for telescope=" << hdr.telid << "." << endl;
 
   }
 
+}
+
+void Pulsar::TimerArchive::pack (const Receiver* receiver)
+{
+  switch (receiver->get_basis()) {
+  case Signal::Linear:
+    hdr.banda.polar = 1;
+    break;
+  case Signal::Circular:
+    hdr.banda.polar = 0;
+    break;
+  default:
+    hdr.banda.polar = -1;
+    throw Error (InvalidParam, "Pulsar::TimerArchive::pack_extensions",
+		 "unrecognized Basis=" 
+		 + Signal::Basis2string( receiver->get_basis() ));
+  }
+
+  set_corrected (FEED_CORRECTED, receiver->get_feed_corrected());
+  set_corrected (PARA_CORRECTED,  receiver->get_platform_corrected());
+
+  if (receiver->get_name().length()+1 >= RCVR_ID_STRLEN) {
+    if (verbose)
+      cerr << "Pulsar::TimerArchive::pack Receiver WARNING"
+	" truncating receiver name" << endl;
+  }
+
+  strncpy (hdr.rcvr_id, receiver->get_name().c_str(), RCVR_ID_STRLEN);
 }

@@ -30,34 +30,9 @@ void Pulsar::TimerArchive::pack_extensions () const
   struct timer* header = const_cast<struct timer*>( &hdr );
 
   const Receiver* receiver = get<Receiver>();
+  if (receiver)
+    const_cast<TimerArchive*>(this)->pack (receiver);
 
-  if (receiver) {
-
-    switch (receiver->get_basis()) {
-      case Signal::Linear:
-        header->banda.polar = 1;
-        break;
-      case Signal::Circular:
-        header->banda.polar = 0;
-        break;
-      default:
-        header->banda.polar = -1;
-        throw Error (InvalidParam, "Pulsar::TimerArchive::pack_extensions",
-                     "unrecognized Basis=" 
-                     + Signal::Basis2string( receiver->get_basis() ));
-    }
-
-    if (receiver->get_feed_corrected())
-      header->corrected |= FEED_CORRECTED;
-    else
-      header->corrected &= ~FEED_CORRECTED;
-
-    if (receiver->get_platform_corrected())
-      header->corrected |= PARA_CORRECTED;
-    else
-      header->corrected &= ~PARA_CORRECTED;
-
-  }
 
   // nothing done with Telescope Extension for now
 
