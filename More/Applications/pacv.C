@@ -305,19 +305,18 @@ int main (int argc, char** argv)
     archplot.calibrator_spectrum (input);
 
 
-    if (!flux_cal) {
+    if (flux_cal)
+      calibrator = & flux_cal;
 
-      cerr << "pacv: Creating " << archive_class << " Archive" << endl;
+    cerr << "pacv: Creating " << archive_class << " Archive" << endl;
   
-      output = calibrator->get_solution (archive_class);
+    output = calibrator->new_solution (archive_class);
 
-      int index = filenames[ifile].find_first_of(".", 0);
-      string newname = filenames[ifile].substr(0, index) + ".pacv";
-
-      cerr << "pacv: Unloading " << newname << endl;
-      output -> unload (newname);
-
-    }
+    int index = filenames[ifile].find_first_of(".", 0);
+    string newname = filenames[ifile].substr(0, index) + ".pacv";
+    
+    cerr << "pacv: Unloading " << newname << endl;
+    output -> unload (newname);
 
   }
   catch (Error& error) {

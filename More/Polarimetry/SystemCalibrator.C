@@ -41,21 +41,20 @@ Pulsar::SystemCalibrator::get_calibrator_stokes () const
 }
 
 Pulsar::Archive*
-Pulsar::SystemCalibrator::get_solution (const string& archive_class,
-					string filename_extension) const
+Pulsar::SystemCalibrator::new_solution (const string& archive_class) const
 {
   if (verbose) cerr << "Pulsar::SystemCalibrator::get_solution"
 		 " create CalibratorStokes Extension" << endl;
 
   try {
 
-    Reference::To<CalibratorStokes> ext = get_calibrator_stokes();
+    Reference::To<CalibratorStokes> stokes = get_calibrator_stokes();
 
     Reference::To<Archive> output;
 
-    output = PolnCalibrator::get_solution (archive_class, filename_extension);
+    output = Calibrator::new_solution (archive_class);
     
-    output -> add_extension (ext);
+    output -> add_extension (stokes);
     
     return output.release();
 

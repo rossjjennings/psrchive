@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PolnCalibrator.h,v $
-   $Revision: 1.29 $
-   $Date: 2004/10/08 10:27:48 $
+   $Revision: 1.30 $
+   $Date: 2004/10/09 05:36:51 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PolnCalibrator_H
@@ -94,9 +94,8 @@ namespace Pulsar {
     //! Return the Calibrator::Type of derived class
     virtual Type get_type () const;
 
-    //! Return an Archive with a PolnCalibratorExtension
-    virtual Archive* get_solution (const string& archive_class,
-				   string filename_extension = ".pc") const;
+    //! Return a new PolnCalibratorExtension
+    CalibratorExtension* new_Extension () const;
 
     //! Base class generalizes PolnCalibrator parameter communication
     class Info : public Calibrator::Info {

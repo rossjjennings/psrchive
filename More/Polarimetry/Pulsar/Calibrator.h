@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/Attic/Calibrator.h,v $
-   $Revision: 1.18 $
-   $Date: 2004/10/08 10:10:33 $
+   $Revision: 1.19 $
+   $Date: 2004/10/09 05:36:51 $
    $Author: straten $ */
 
 #ifndef __Calibrator_H
@@ -81,6 +81,12 @@ namespace Pulsar {
 
     //! Get the number of frequency channels in the calibrator
     virtual unsigned get_nchan () const = 0;
+
+    //! Return a new Calibrator Extension
+    virtual CalibratorExtension* new_Extension () const = 0;
+
+    //! Return a new processed calibrator Archive with a CalibratorExtension
+    Archive* new_solution (const string& archive_class) const;
 
     //! Return the reference epoch of the calibration experiment
     virtual MJD get_epoch () const;

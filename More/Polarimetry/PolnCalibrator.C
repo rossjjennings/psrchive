@@ -371,32 +371,10 @@ Pulsar::Calibrator::Type Pulsar::PolnCalibrator::get_type () const
 }
 
 
-Pulsar::Archive*
-Pulsar::PolnCalibrator::get_solution (const string& archive_class,
-				      string filename_extension) const
+Pulsar::CalibratorExtension*
+Pulsar::PolnCalibrator::new_Extension () const
 {
-  if (verbose) cerr << "Pulsar::PolnCalibrator::get_solution"
-		 " create PolnCalibratorExtension" << endl;
-
-  Reference::To<PolnCalibratorExtension> ext;
-  ext = new PolnCalibratorExtension (this);
-
-  if (verbose) cerr << "Pulsar::PolnCalibrator::get_solution"
-		 " create " << archive_class << endl;
-  
-  Reference::To<Archive> output = Pulsar::Archive::new_Archive (archive_class);
-  output -> copy (*calibrator);
-  output -> resize (0);
-  output -> set_type (Signal::Calibrator);
-  output -> add_extension (ext);
-  
-  string filename = calibrator->get_filename();
-  int index = filename.find_last_of(".", 0);
-  filename = filename.substr(0, index) + filename_extension;
-
-  output -> set_filename (filename);
-
-  return output.release();
+  return new PolnCalibratorExtension (this);
 }
 
 
