@@ -5,8 +5,6 @@
 #include <qlineedit.h>
 #include <qlabel.h>
 
-#include "psr_cpp.h"
-
 class qt_value : public QHBox
 {
   Q_OBJECT

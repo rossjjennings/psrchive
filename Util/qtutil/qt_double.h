@@ -2,7 +2,6 @@
 #define __QT_DOUBLE_H
 
 #include "qt_value.h"
-#include "psr_cpp.h"
 
 class qt_double : public qt_value
 {

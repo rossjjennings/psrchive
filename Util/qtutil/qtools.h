@@ -7,8 +7,6 @@
 #include <qobject.h>
 #include <qevent.h>
 
-#include "psr_cpp.h"
-
 //
 // a nice way of outputting QSize
 //
@@ -16,7 +14,7 @@
 // QSize size ( width, height );
 // cerr << "Size: " << size << endl;
 //
-ostream & operator<< (ostream & s, const QSize & sz);
+std::ostream & operator<< (std::ostream & s, const QSize & sz);
 
 //
 // a nice way to trace events as delivered to a widget
