@@ -109,21 +109,29 @@ int Timer::load (FILE* fptr, struct timer* hdr, bool big_endian)
     ChangeEndian (hdr->be_data_size);
     hdr->minorversion = 3.0;
   }
+
+  if (hdr->mjd < 51401 && !strcmp(hdr->machine_id,"CPSR") && version==10.0)  { 
+    double seconds_per_file = 53.6870912;
+    Timer::set_MJD (*hdr, Timer::get_MJD (*hdr) - seconds_per_file);
+  }
+
   return 0;
 }
 
 // unloads a timer struct to a file (always big endian)
-int Timer::unload (FILE* fptr, struct timer& hdr)
+int Timer::unload (FILE* fptr, const struct timer& hdr)
 {
-  timer_toBigEndian (&hdr);
-  if (fwrite (&hdr, sizeof(struct timer), 1, fptr) < 1)  {
+  struct timer* outhdr = const_cast<struct timer*>(&hdr);
+
+  timer_toBigEndian (outhdr);
+  if (fwrite (outhdr, sizeof(struct timer), 1, fptr) < 1)  {
     if (verbose) {
       fprintf(stderr,"Timer::unload Cannot write timer struct to FILE*");
       perror ("");
     }
     return -1;
   }
-  timer_fromBigEndian(&hdr);
+  timer_fromBigEndian(outhdr);
   return 0;
 }
 

@@ -1,6 +1,6 @@
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/Timer/timer++.h,v $
-   $Revision: 1.8 $
-   $Date: 2001/02/24 04:31:43 $
+   $Revision: 1.9 $
+   $Date: 2002/07/27 03:28:50 $
    $Author: straten $ */
 
 #ifndef __TIMER_PLUSPLUS_H
@@ -49,7 +49,7 @@ namespace Timer {
   int load (FILE* fptr, struct timer* hdr, bool big_endian=true);
 
   // unloads a timer struct to a file (always big endian)
-  int unload (FILE* fptr, struct timer& hdr);
+  int unload (FILE* fptr, const struct timer& hdr);
 
   // returns the MJD from a timer struct
   MJD get_MJD (const struct timer& hdr);
