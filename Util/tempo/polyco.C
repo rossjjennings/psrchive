@@ -8,9 +8,9 @@
 #include "string_utils.h"
 #include "poly.h"
 
-string polyco::any_psr;   // an empty string!!
-MJD polyco::today;        // MJD zero
-int polyco::verbose = 0;
+string polyco::any_psr;      // an empty string
+MJD    polyco::today;        // MJD zero
+int    polyco::verbose = 0;  // default: non-verbose
 
 void polynomial::init(){
   dm = 0;
@@ -18,7 +18,7 @@ void polynomial::init(){
   log_rms_resid = 0;
   f0 = 0;
   telescope = 0;
-  nspan_mins = 0;
+  nspan_mins = 0.0;
   freq = 0;
   binph = 0;
   binfreq = 0;
@@ -26,12 +26,13 @@ void polynomial::init(){
   tempov11 = 0;
 }
 
-polynomial::polynomial(){
+polynomial::polynomial()
+{
   this->init();
 }
 
-polynomial::polynomial(const polynomial & in_poly){
-  
+polynomial::polynomial(const polynomial & in_poly)
+{  
   psrname = in_poly.psrname;
   date = in_poly.date;
   utc = in_poly.utc;
@@ -51,10 +52,11 @@ polynomial::polynomial(const polynomial & in_poly){
   tempov11 = in_poly.tempov11;
 }
 
-polynomial & polynomial::operator = (const polynomial & in_poly) {
-
+polynomial & polynomial::operator = (const polynomial & in_poly)
+{
   if(this == &in_poly) 
     return(*this);
+
   psrname = in_poly.psrname;
   date = in_poly.date;
   utc = in_poly.utc;
@@ -72,8 +74,43 @@ polynomial & polynomial::operator = (const polynomial & in_poly) {
   coefs = in_poly.coefs; 
   binary = in_poly.binary;
   tempov11 = in_poly.tempov11;
+
   return(*this);
 }  
+
+/* ************************************************************************
+   polynomial::load
+
+   Loads from a string formatted as described below (taken from TEMPO
+   reference manual:
+
+   POLYCO.DAT
+   
+   The polynomial ephemerides are written to file 'polyco.dat'.  Entries
+   are listed sequentially within the file.  The file format is:
+   
+   Line  Columns     Item
+   ----  -------   -----------------------------------
+     1      1-10   Pulsar Name
+           11-19   Date (dd-mmm-yy)
+	   20-31   UTC (hhmmss.ss)
+	   32-51   TMID (MJD)
+	   52-72   DM
+	   74-79   Doppler shift due to earth motion (10^-4)
+	   80-86   Log_10 of fit rms residual in periods
+     2      1-20   Reference Phase (RPHASE)
+           21-38   Reference rotation frequency (F0)
+	   39-43   Observatory number 
+	   44-49   Data span (minutes)
+	   50-54   Number of coefficients
+	   55-75   Observing frequency (MHz)
+	   76-80   Binary phase
+     3*     1-25   Coefficient 1 (COEFF(1))
+           26-50   Coefficient 2 (COEFF(2))
+	   51-75   Coefficient 3 (COEFF(3))
+   
+   * Subsequent lines have three coefficients each, up to NCOEFF
+   ************************************************************************ */
 
 int polynomial::load(string* instr)
 {
@@ -134,11 +171,9 @@ int polynomial::load(string* instr)
 
   int64 turns;
   double fracturns;
-#ifdef sun
-  sscanf(refphstr.c_str(), "%lld %lf\n", &turns, &fracturns);
-#else
-  sscanf(refphstr.c_str(), "%ld %lf\n", &turns, &fracturns);
-#endif
+
+  sscanf(refphstr.c_str(), I64" %lf\n", &turns, &fracturns);
+
   if(turns>0) ref_phase = Phase(turns, fracturns);
   else ref_phase = Phase(turns, -fracturns);
 
@@ -559,19 +594,33 @@ polynomial polyco::nearest_polly (const MJD &t, const string& in_psrname) const
 
 int polyco::i_nearest (const MJD &t, const string& in_psr) const
 {
+  float min_dist = MAXFLOAT;
+  int imin = -1;
+
   for (int ipolly=0; ipolly<pollys.size(); ipolly ++)  {
-    MJD t1=pollys[ipolly].reftime - (double) pollys[ipolly].nspan_mins*60.0/2.0;
-    MJD t2=pollys[ipolly].reftime + (double) pollys[ipolly].nspan_mins*60.0/2.0;
-    
-    if (t>=t1 && t<=t2 && 
-	(in_psr==any_psr || pollys[ipolly].psrname==in_psr)) {      
-      return ipolly;
+    if (in_psr==any_psr || pollys[ipolly].psrname==in_psr) {      
+      float dist = fabs ( (pollys[ipolly].reftime - t).in_minutes() );
+      if (dist < min_dist) {
+	imin = ipolly;
+	min_dist = dist;
+      }
     }
   }
+  // check if any polynomial matched
+  if (imin < 0) {
+    cerr << "polyco::i_nearest - no polynomial found for pulsar: '"
+	 << in_psr << "'\n";
+    return -1;
+  }
+
+  // return if the time is within the range of the matched polynomial
+  if ( (t > pollys[imin].start_time()) && (t < pollys[imin].end_time()) )
+    return imin;
+
+  // the time is out of range of the nearest polynomial
   cerr << "polyco::i_nearest - no polynomial for MJD " << t.printdays(15)
-       << " in range " << (pollys[0].reftime - (double) pollys[0].nspan_mins*60.0/2.0).printdays(15)
-       << " - " << (pollys[pollys.size()-1].reftime +
-    (double) pollys[pollys.size()-1].nspan_mins*60.0/2.0).printdays(15) << endl;
+       << "\npolyco::i_nearest - range " << start_time().printdays(5) 
+       << " - " << end_time().printdays(5) << endl;
   return -1;
 }
 
