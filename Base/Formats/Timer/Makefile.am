@@ -42,6 +42,8 @@ DSO_SRCS := TimerArchive.C TimerArchive_load.C TimerArchive_unload.C \
 	TimerProfile_load.C TimerProfile_unload.C BasebandArchive.C \
 	TimerAgent.C
 
+LIB_SRCS += $(DSO_SRCS)
+
 DSO_FLAGS := $(LDFLAGS) -larchive -ltimes -lgenutil $(LSLA)
 
 # TimerIntegration_cal_levels.C
