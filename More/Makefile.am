@@ -78,6 +78,13 @@ libpsrchive_la_SOURCES = \
 	Integration_invint.C          pafit_get_PA.C  \
 	Integration_match.C
 
+SUBDIRS                 = Extension Calibration psrfits timer
+
+libpsrchive_la_LIBADD   = Extension/libExtension.la \
+			Calibration/libCalibration.la \
+			psrfits/libpsrfits.la
+			timer/libtimer.la
+
 # ######################################################################
 #
 # programs
@@ -113,6 +120,16 @@ test_Archive_SOURCES		= test_Archive.C
 test_denoise_SOURCES		= test_denoise.C
 test_Difference_SOURCES		= test_Difference.C
 
+#############################################################################
+#
+# Dependencies should never be changed
+#
+
+INCLUDES = -I$(top_srcdir)/utils/include -I$(top_srcdir)/astro/include \
+	@PGPLOT_CFLAGS@ 
+
+LDADD = libpsrchive.la $(top_srcdir)/utils/libpsrutils.la \
+	$(top_srcdir)/astro/libpsrastro.la
 
 # ######################################################################
 #
@@ -123,9 +140,9 @@ if HAVE_PGPLOT
 libpsrchive_la_SOURCES += ArchiveProcessor.C Plotter.C CalibratorPlotter.C
 	ReceptionCalibratorPlotter.C
 
-bin_PROGRAMS += pacv.C pcvar.C paz.C pav.C pas.C psrwt.C psrsh.C pcm.C pvt.C \
-	binphs_test.C toatool.C SimTiming.C pcm_chooser.C test_zps.C \
-	rmfit.C test_gtd.C psrband.C
+bin_PROGRAMS += pacv pcvar paz pav pas psrwt psrsh pcm pvt \
+	binphs_test toatool SimTiming pcm_chooser test_zps \
+	rmfit test_gtd psrband
 
 SimTiming_SOURCES		= SimTiming.C
 binphs_test_SOURCES		= binphs_test.C
@@ -167,7 +184,6 @@ Agent.C : static_plugins.code
 # this rule simply forces all code that #includes Archive.h to be recompiled
 Archive.h : Agent.C
 
-endif
 
 ##############################################################################
 #
