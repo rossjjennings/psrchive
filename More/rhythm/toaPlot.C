@@ -66,6 +66,9 @@ void toaPlot::plotter ()
   case ErrorMicro:
     xlab = "Timing Error (Microseconds)";
     break;
+  case SignalToNoise:
+    xlab = "Signal / Noise Ratio";
+    break;
   }
   
   switch (yq) {
@@ -92,6 +95,9 @@ void toaPlot::plotter ()
     break;
   case ErrorMicro:
     ylab = "Timing Error (Microseconds)";
+    break;
+  case SignalToNoise:
+    ylab = "Signal / Noise Ratio";
     break;
   }
 
@@ -365,7 +371,10 @@ void toaPlot::boxselector ()
 
 void toaPlot::setPoints(AxisQuantity _xq, AxisQuantity _yq, vector<wrapper> _data)
 {
-  if (_data.empty()) return;
+  if (_data.empty()) {
+    clearScreen();
+    return;
+  }
   
   xq = _xq;
   yq = _yq;

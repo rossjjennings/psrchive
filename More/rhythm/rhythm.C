@@ -7,6 +7,8 @@
 #include <qmainwindow.h>
 #include <qmessagebox.h> 
 #include <qpopupmenu.h>
+#include <qpalette.h>
+#include <qplatinumstyle.h>
 
 #include "qt_editParams.h"
 
@@ -22,11 +24,17 @@ bool Rhythm::vverbose = false;
 
 int main (int argc, char** argv)
 { 
-
+  
   try {
     
+    QStyle* mystyle = new QPlatinumStyle();
+    QPalette mypalette(Qt::darkBlue, Qt::darkCyan);
+
     QApplication app (argc, argv);
-    
+
+    app.setStyle(mystyle);
+    app.setPalette(mypalette);
+
     Rhythm rhythm (0, argc, argv);
     
     if (Rhythm::vverbose)
@@ -263,6 +271,13 @@ void Rhythm::set_Params (const psrephem& eph)
     fit (eph, false);
 }
 
+void Rhythm::close_toas ()
+{
+  toa_text -> clear();
+  toas.resize(0);
+  goplot();
+}
+
 void Rhythm::show_me ()
 {
   int index = toa_text->currentItem();
@@ -306,7 +321,13 @@ void Rhythm::show_me ()
 
   }
   catch (Error& error) {
-    cerr << error << endl;
+    if (verbose)
+      cerr << "Rhythm::show_me ERROR " << error << endl;
+    QMessageBox::critical (this, "Rhythm::show_me",
+			   "There you were, enjoying a nice relaxing   \n"
+			   "TOA fitting session when suddenly, WHAM!   \n"
+			   "    What can I say, that's life...         \n",
+			   "Sigh.");
   }
   
 }
@@ -369,14 +390,16 @@ void Rhythm::fit (const psrephem& eph, bool load_new)
    if (verbose)
      cerr << "Rhythm::fit ERROR " << error << endl;
    QMessageBox::critical (this, "Rhythm::fit",
-			  "They're all out to get you...", 
-			  "Dismiss");
+			  "They're all out to get you...  ",
+			  "Trust no one...");
  }
  catch (...) {
    if (verbose)
      cerr << "Rhythm::fit ERROR Unhandled Exception" << endl;
    QMessageBox::critical (this, "Rhythm::fit",
-			  "An Unhandled Exception Occured", "Dismiss");
+			  "If you are seeing this it is already too late.   \n"
+			  "Abandon all hope...                              \n",
+			  "Run Away!");
  }
 }
 
@@ -392,9 +415,6 @@ void Rhythm::fit_selected()
 
   fitpopup -> get_psrephem (eph);
   eph.nofit();
-
-  cerr << "I'm going to use this ephemeris now" << endl;
-  eph.unload(stdout);
 
   fit (eph, false);
 
@@ -414,59 +434,63 @@ void Rhythm::fit_selected()
 }
 
 void Rhythm::fit_selected (const psrephem& eph, bool load_new)
-{ try {
-    
-  if (toas.size() < 1) {
-    if (verbose)
-      cerr << "Rhythm::fit_selected No Arrival Times loaded" << endl;
-    return;
-  }
-  
-  vector<Tempo::toa> subset;
-  
-  for (unsigned i = 0; i < toas.size(); i++) {
-    if (toas[i].state == Tempo::toa::Selected)
-      subset.push_back(toas[i]);
-  }
-  
-  if (subset.size() < 1) {
-    if (verbose)
-      cerr << "Rhythm::fit_selected No Arrival Times selected" << endl;
-    return;
-  }
+{ 
 
-  if (verbose)
-    cerr << "Rhythm::fit_selected Calculating residuals" << endl;
-  
-  psrephem pf_eph;
-  
-  Tempo::fit (eph, subset, &pf_eph, true);
-  
-  if (load_new && fitpopup) {
-    // set_psrephem will result in generation of newEph signal, 
-    // which should be ignored since it was set from here.
-    ignore_one_eph = true;
+  try {
+    
+    if (toas.size() < 1) {
+      if (verbose)
+	cerr << "Rhythm::fit_selected No Arrival Times loaded" << endl;
+      return;
+    }
+    
+    vector<Tempo::toa> subset;
+    
+    for (unsigned i = 0; i < toas.size(); i++) {
+      if (toas[i].state == Tempo::toa::Selected)
+	subset.push_back(toas[i]);
+    }
+    
+    if (subset.size() < 1) {
+      if (verbose)
+	cerr << "Rhythm::fit_selected No Arrival Times selected" << endl;
+      return;
+    }
     
     if (verbose)
-      cerr << "Rhythm::fit_selected Displaying new ephemeris" << endl;
+      cerr << "Rhythm::fit_selected Calculating residuals" << endl;
     
-    fitpopup -> set_psrephem (pf_eph);
+    psrephem pf_eph;
+    
+    Tempo::fit (eph, subset, &pf_eph, true);
+    
+    if (load_new && fitpopup) {
+      // set_psrephem will result in generation of newEph signal, 
+      // which should be ignored since it was set from here.
+      ignore_one_eph = true;
+      
+      if (verbose)
+	cerr << "Rhythm::fit_selected Displaying new ephemeris" << endl;
+      
+      fitpopup -> set_psrephem (pf_eph);
+    }
+    
+  } 
+  catch (Error& error) {
+    if (verbose)
+      cerr << "Rhythm::fit_selected ERROR " << error << endl;
+    QMessageBox::critical (this, "Rhythm::fit_selected",
+			   "They're all out to get you...  ",
+			   "Trust no one...");
   }
-  
-} 
- catch (Error& error) {
-   if (verbose)
-     cerr << "Rhythm::fit_selected ERROR " << error << endl;
-   QMessageBox::critical (this, "Rhythm::fit_selected",
-			  "They're all out to get you...", 
-			  "Dismiss");
- }
- catch (...) {
-   if (verbose)
-     cerr << "Rhythm::fit_selected ERROR Unhandled Exception" << endl;
-   QMessageBox::critical (this, "Rhythm::fit_selected",
-			  "An Unhandled Exception Occured", "Dismiss");
- }
+  catch (...) {
+    if (verbose)
+      cerr << "Rhythm::fit_selected ERROR Unhandled Exception" << endl;
+    QMessageBox::critical (this, "Rhythm::fit_selected",
+			   "If you are seeing this it is already too late.   \n"
+			   "Abandon all hope...                              \n",
+			   "Run Away!");
+  }
 }
 
 void Rhythm::setClassVerbose (bool verbose)
@@ -514,6 +538,31 @@ vector<double> Rhythm::give_me_data (toaPlot::AxisQuantity q)
   case toaPlot::ErrorMicro:
     for (unsigned i = 0; i < toas.size(); i++)
       retval.push_back(toas[i].resid.error);
+    return retval;
+    break;
+  case toaPlot::SignalToNoise:
+    char useful[80];
+    char filename[80];
+    for (unsigned i = 0; i < toas.size(); i++) {
+      
+      toas[i].unload(useful);
+      
+      sscanf(useful+1, "%s ", filename);
+      
+      if (verbose)
+	cerr << "Attempting to load archive '" << filename << "'" << endl;
+      
+      string useful2 = dataPath + "/";
+      useful2 += filename;
+      
+      Reference::To<Pulsar::Archive> data = Pulsar::Archive::load(useful2);
+      
+      data->fscrunch();
+      data->tscrunch();
+      data->pscrunch();
+
+      retval.push_back(data->get_Profile(0,0,0)->snr());      
+    }
     return retval;
     break;
   default:
@@ -573,6 +622,11 @@ vector<double> Rhythm::give_me_errs (toaPlot::AxisQuantity q)
     return retval;
     break;
   case toaPlot::ErrorMicro:
+    for (unsigned i = 0; i < toas.size(); i++)
+      retval.push_back(0.0);
+    return retval;
+    break;
+  case toaPlot::SignalToNoise:
     for (unsigned i = 0; i < toas.size(); i++)
       retval.push_back(0.0);
     return retval;
@@ -775,10 +829,10 @@ void Rhythm::clearselection ()
 AxisSelector::AxisSelector (QWidget* parent)
   : QHBox(parent)
 {
-  Xgrp = new QButtonGroup(7, Qt::Vertical, "X Axis", this);
+  Xgrp = new QButtonGroup(8, Qt::Vertical, "X Axis", this);
   Xgrp -> setRadioButtonExclusive(true);
   
-  Ygrp = new QButtonGroup(7, Qt::Vertical, "Y Axis", this);
+  Ygrp = new QButtonGroup(8, Qt::Vertical, "Y Axis", this);
   Ygrp -> setRadioButtonExclusive(true);
 
   X1 = new QRadioButton("Residual (us)", Xgrp);
@@ -788,6 +842,7 @@ AxisSelector::AxisSelector (QWidget* parent)
   X5 = new QRadioButton("Obs Freq", Xgrp);
   X6 = new QRadioButton("Day of Year", Xgrp);
   X7 = new QRadioButton("Timing Error", Xgrp);
+  X8 = new QRadioButton("Signal / Noise", Xgrp);
 
   X3->setChecked(true);
 
@@ -798,6 +853,7 @@ AxisSelector::AxisSelector (QWidget* parent)
   Y5 = new QRadioButton("Obs Freq", Ygrp);
   Y6 = new QRadioButton("Day of Year", Ygrp);
   Y7 = new QRadioButton("Timing Error", Ygrp);
+  Y8 = new QRadioButton("Signal / Noise", Ygrp);
 
   Y1->setChecked(true);
 
@@ -808,6 +864,7 @@ AxisSelector::AxisSelector (QWidget* parent)
   Xgrp->insert(X5,5);
   Xgrp->insert(X6,6);
   Xgrp->insert(X7,7);
+  Xgrp->insert(X8,8);
 
   Ygrp->insert(Y1,1);
   Ygrp->insert(Y2,2);
@@ -816,6 +873,7 @@ AxisSelector::AxisSelector (QWidget* parent)
   Ygrp->insert(Y5,5);
   Ygrp->insert(Y6,6);
   Ygrp->insert(Y7,7);
+  Ygrp->insert(Y8,8);
 
   QObject::connect(Xgrp, SIGNAL(clicked(int)),
 		   this, SLOT(Xuseful(int)));

@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/rhythm/rhythm.h,v $
-   $Revision: 1.22 $
-   $Date: 2003/04/24 07:19:49 $
+   $Revision: 1.23 $
+   $Date: 2003/05/19 12:48:11 $
    $Author: ahotan $ */
 
 // //////////////////////////////////////////////////////////////////////////
@@ -36,6 +36,7 @@
 
 #include "Pulsar/Plotter.h"
 #include "Pulsar/Archive.h"
+#include "Pulsar/Profile.h"
 
 class qt_editParams;
 
@@ -59,6 +60,7 @@ class AxisSelector : public QHBox
   QRadioButton* X5; 
   QRadioButton* X6;
   QRadioButton* X7;
+  QRadioButton* X8;
 
   QRadioButton* Y1;
   QRadioButton* Y2;
@@ -67,6 +69,7 @@ class AxisSelector : public QHBox
   QRadioButton* Y5;
   QRadioButton* Y6;
   QRadioButton* Y7;
+  QRadioButton* Y8;
 
  public slots:
 
@@ -195,6 +198,7 @@ class Rhythm : public QMainWindow
 
   // File menu callbacks
   void load_toas ();
+  void close_toas ();
   int prompt_save_toas ();
   void save_toas ();
 
@@ -215,7 +219,6 @@ class Rhythm : public QMainWindow
   // Help menu callbacks
   void about();
   void aboutQt();
-  void closeWin() {fprintf (stderr, "Not implemented\n");};
 
   // callback connected to qt_editParams::newParams
   void set_Params (const psrephem&);

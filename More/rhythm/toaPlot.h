@@ -34,7 +34,7 @@ class toaPlot: public QPgplot {
   
   enum AxisQuantity { None, ResidualMicro, ResidualMilliTurns, 
 		      TOA_MJD, BinaryPhase, ObsFreq, DayOfYear,
-		      ErrorMicro };
+		      ErrorMicro, SignalToNoise };
   
   toaPlot ( QWidget *parent=0, const char *name=0 );
   

@@ -25,7 +25,7 @@ void Rhythm::menubarConstruct ()
 		    SLOT( save_toas() ), ALT+Key_S );
 
   file->insertSeparator();
-  file->insertItem( "&Close", this, SLOT(closeWin()), ALT+Key_C );
+  file->insertItem( "&Close", this, SLOT(close_toas()), ALT+Key_C );
   file->insertItem( "E&xit",  qApp, SLOT(quit()),     ALT+Key_X );
 
   // ///////////////////////////////////////////////////////////////////////
