@@ -42,6 +42,17 @@ int Timer::unload (FILE* fptr, struct timer& hdr)
   return 0;
 }
 
+MJD Timer::get_MJD (const struct timer& hdr)
+{ 
+  return MJD(hdr.mjd, hdr.fracmjd);
+}
+
+void Timer::set_MJD (struct timer& hdr, const MJD& mjd)
+{
+  hdr.mjd = mjd.intday();
+  hdr.fracmjd = mjd.fracday();
+}
+
 int Timer::poln_storage (const struct timer& hdr)
 {
   string mch = hdr.machine_id;
@@ -49,11 +60,6 @@ int Timer::poln_storage (const struct timer& hdr)
     return IQ_POLN_STORAGE;
   else 
     return XY_POLN_STORAGE;
-}
-
-MJD Timer::get_MJD (const struct timer& hdr)
-{ 
-  return MJD(hdr.mjd, hdr.fracmjd);
 }
 
 // ///////////////////////////////////////////////////////////////////////
