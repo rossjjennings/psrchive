@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Vector.h,v $
-   $Revision: 1.8 $
-   $Date: 2004/04/28 14:12:04 $
+   $Revision: 1.9 $
+   $Date: 2004/07/19 11:40:05 $
    $Author: straten $ */
 
 #ifndef __Vector_H
@@ -109,7 +109,7 @@ public:
     { return x[n]; }
 
   //! Dimension of data
-  unsigned size () { return N; }
+  unsigned size () const { return N; }
 
   //! Return the basis vector
   static const Vector basis (unsigned i)
