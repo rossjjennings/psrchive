@@ -43,10 +43,10 @@ bool Pulsar::CorrectionsCalibrator::needs_correction (const Archive* archive,
     if (verbose)
       cerr << "Pulsar::CorrectionsCalibrator::needs_correction"
 	" using Pointing::pos_ang=" << pointing->pos_ang << endl;
-    should_correct_vertical != pointing->pos_ang != 0.0;
+    should_correct_vertical = pointing->pos_ang != 0.0;
   }
   else
-    should_correct_vertical != receiver->get_tracking_angle () != 0.0;
+    should_correct_vertical = receiver->get_tracking_angle () != 0.0;
 
   // a fixed antenna, such as a dipole array (or Arecibo?)
   should_correct_projection = 
