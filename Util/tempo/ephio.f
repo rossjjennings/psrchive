@@ -215,7 +215,7 @@ c     Now, store the value in the way specified in parmTypes (see keys.dat)
                call realTo2part(tok, value_integer(keypos),
      +              value_double(keypos))
             else if (parmTypes(keypos) .eq. 5) then
-               read(tok,'(i)',err=64)value_integer(keypos)
+               read(tok,'(i10)',err=64)value_integer(keypos)
             end if
 c     Next token, if present.
             call citem(buffer, ll, tokpos, tok, toklen)
@@ -273,11 +273,11 @@ c     This is the general error handler for processling a line
       goto 69
  62   write (*,'("Error empty token.")')
       goto 69
- 63   write (*,'("Error parsing double.")')
+ 63   write (*,'("Error parsing double from ",a)')tok
       goto 69
- 64   write (*,'("Error parsing int.")')
+ 64   write (*,'("Error parsing int from ",a)')tok
       goto 69
- 65   write (*,'("Error parsing double error.")')
+ 65   write (*,'("Error parsing double error from ",a)')tok
       goto 69
  69   continue
 c     There was an error. If we parsed a keyword, flag it as unknown
