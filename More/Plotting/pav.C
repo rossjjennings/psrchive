@@ -1,5 +1,5 @@
 //
-// $Id: pav.C,v 1.58 2003/10/16 14:18:54 straten Exp $
+// $Id: pav.C,v 1.59 2003/10/25 05:04:15 ahotan Exp $
 //
 // The Pulsar Archive Viewer
 //
@@ -228,7 +228,7 @@ int main (int argc, char** argv)
       plotter.set_subint( atoi (optarg) );
       break;
     case 'i':
-      cout << "$Id: pav.C,v 1.58 2003/10/16 14:18:54 straten Exp $" << endl;
+      cout << "$Id: pav.C,v 1.59 2003/10/25 05:04:15 ahotan Exp $" << endl;
       return 0;
 
     case 'j':
@@ -496,11 +496,14 @@ int main (int argc, char** argv)
     if (mdiff) {
       if (std_prof) {
 	cpg_next();
-	(archive->get_Profile(plotter.get_subint(),plotter.get_pol(),plotter.get_chan())->
-	 morphological_difference(*std_prof)).display(0,0,1,0,1,1.0,false,true);
+	Pulsar::Profile* mdp = 
+	  archive->get_Profile(plotter.get_subint(),plotter.get_pol(),plotter.get_chan())->
+	  morphological_difference(*std_prof);
+	mdp->display(0,0,1,0,1,1.0,false,true);
+	delete mdp;
       }
     }      
-
+    
     if (pa_spectrum) {
       cpg_next();
       plotter.pa_vs_frequency(archive, the_phase);
