@@ -175,8 +175,8 @@ double Pulsar::Profile::GaussianShift (const Profile& std, float& ephase,
     // Compute the error based on how far you have to move the
     // centre of the Gaussian before the chi-sq doubles
 
-    float aim = (chisq / free_parms) * 2.0;
-    float cst = (chisq / free_parms);
+    float aim = chisq * 2.0;
+    float cst = chisq;
 
     double raw = gm.get_centre();
     double itr = 0.0;
