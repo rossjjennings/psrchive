@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Types.h,v $
-   $Revision: 1.15 $
-   $Date: 2004/06/21 09:07:01 $
-   $Author: straten $ */
+   $Revision: 1.16 $
+   $Date: 2004/07/29 04:26:00 $
+   $Author: hknight $ */
 
 #ifndef __Types_h
 #define __Types_h
@@ -116,10 +116,12 @@ namespace Signal {
   const string Source2string (Source source);
   const string State2string (State state);
   const string Basis2string (Basis basis);
+  const string Scale2string (Scale scale);
 
   Basis string2Basis(string ss);
   Source string2Source(string ss);
   State string2State(string ss);
+  Scale string2Scale(string ss);
 
   //! Tells you if your state is consistent with your npol and ndim
   bool valid_state(State state,unsigned ndim,unsigned npol, string& reason);

@@ -342,5 +342,54 @@ bool Signal::valid_state(Signal::State state,unsigned ndim,unsigned npol, string
   return true;
 }
 
+const string Signal::Scale2string (Scale scale){
+  switch( scale ) {
 
+    //! Uncalibrated voltage
+  case EMF:
+    return "EMF";
+    
+    //! Calibrated voltage
+  case Volts:
+    return "Volts";
+    
+      //! Uncalibrated energy
+  case Energy:
+    return "Energy";
+
+      //! Calibrated energy
+  case Joules:
+    return "Joules";
+
+      //! Uncalibrated flux density
+  case FluxDensity:
+    return "FluxDensity";
+    
+    //! Reference flux density
+  case ReferenceFluxDensity:
+    return "ReferenceFluxDensity";
+    
+    //! Calibrated flux density
+  case Jansky:
+    return "Jansky";
+
+  default:
+    return "Unknown";
+
+  }
+}
+
+Signal::Scale Signal::string2Scale(string ss){
+  if( ss=="EMF" ) return EMF;
+  else if( ss=="Volts" ) return Volts;
+  else if( ss=="Energy" ) return Energy;
+  else if( ss=="Joules" ) return Joules;
+  else if( ss=="FluxDensity" ) return FluxDensity;
+  else if( ss=="ReferenceFluxDensity" ) return ReferenceFluxDensity;
+  else if( ss=="Jansky" ) return Jansky;
+
+  throw Error(InvalidParam,"Signal::string2Scale()",
+	      "Could not parse '%s' as a Signal::Scale",
+	      ss.c_str());
+}
 
