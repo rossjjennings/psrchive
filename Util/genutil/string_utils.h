@@ -1,7 +1,7 @@
 //-*-C++-*-
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Attic/string_utils.h,v $
-   $Revision: 1.24 $
-   $Date: 2003/10/03 06:30:25 $
+   $Revision: 1.25 $
+   $Date: 2003/10/05 06:25:46 $
    $Author: hknight $ */
 
 #ifndef __STRING_UTILS_H
@@ -194,5 +194,10 @@ string make_string(string input);
 
 string to_upper_case(string input);
 string to_lower_case(string input);
+
+// Checks that all characters are digits
+bool is_unsigned_integer(const string ss);
+// Checks that all characters are digits, except the first one, which may be a '+' or a '-'
+bool is_signed_integer(const string ss);
 
 #endif

@@ -4,6 +4,7 @@
 #include <vector>
 #include <algorithm>
 
+#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -278,4 +279,29 @@ string to_lower_case(string input){
   for(unsigned int i=0; i < input.size(); i++)
     out[i] = tolower(input[i]);
   return out;
+}
+
+// Checks that all characters are digits
+bool is_unsigned_integer(const string ss){
+  if( ss.size()==0 )
+    return false;
+
+  for( unsigned i=0; i<ss.size(); i++)
+    if( !isdigit(ss[i]) )
+      return false;
+  return true;
+}
+
+// Checks that all characters are digits, except the first one, which may be a '+' or a '-'
+bool is_signed_integer(const string ss){
+  if( ss.size()==0 )
+    return false;
+
+  if( ss.size()==1 )
+    return isdigit(ss[0]);
+
+  if( ss[0]=='-' || ss[0]=='+' || isdigit(ss[0]) )
+    return is_unsigned_integer(ss.substr(1,ss.size()-1));
+
+  return false;
 }
