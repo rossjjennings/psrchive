@@ -10,6 +10,7 @@ int main (int argc, char** argv)
 
   int idat, ndat = 16 * 1024;  // 16kpt set of random, Gaussian noise
   float* data = new float [ndat];
+  float* copy = new float [ndat];
   float* fft1 = new float [ndat+2];
   float* back = new float [ndat];
 
@@ -19,7 +20,7 @@ int main (int argc, char** argv)
   fprintf (stderr, "Generating %d random numbers\n", ndat);
   gasdev (&idum);
   for (idat=0; idat<ndat; idat++)
-    data[idat] = dc_value + gasdev (&idum);
+    copy[idat] = data[idat] = dc_value + gasdev (&idum);
 
   // ensure that DC and Nyquist are properly set by frc1d
   fft1[0] = fft1[ndat] = 0.0;   // should be set to other than zero
@@ -27,6 +28,13 @@ int main (int argc, char** argv)
 
   fprintf (stderr, "Forward R->C FFT:%d\n", ndat);
   fft::frc1d (ndat, fft1, data);
+
+  for (unsigned j=0; j < ndat; j++)
+    if (copy[j] != data[j])  {
+      fprintf(stderr,"idat=%d before=%f after=%f\n", j, data[j], copy[j]);
+      fprintf(stderr,"Out-of-place transform does not preserve input!\n");
+      return -1;
+    }
 
   if (fft1[0] == 0.0) {
     fprintf (stderr, "Re[DC] = 0\n");
@@ -53,7 +61,8 @@ int main (int argc, char** argv)
   fft::bcr1d (ndat, back, fft1);
 
   for (idat=0; idat<ndat; idat++) {
-    back[idat] /= ndat;
+    if (fft::get_normalization() == fft::nfft)
+      back[idat] /= ndat;
     float residual = (back[idat]-data[idat])/data[idat];
     if (fabs(residual) > 2e-4) {
       fprintf (stderr, "idat=%d data=%f back=%f diff=%g\n", 
