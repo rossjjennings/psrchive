@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/IntegrationManager.h,v $
-   $Revision: 1.2 $
-   $Date: 2003/01/12 12:12:55 $
+   $Revision: 1.3 $
+   $Date: 2003/02/17 16:25:50 $
    $Author: straten $ */
 
 #ifndef __Pulsar_IntegrationManager_h
@@ -44,7 +44,7 @@ namespace Pulsar {
     const Integration* get_Integration (unsigned subint) const;
 
     //! Construct new Integration instance
-    virtual Integration* new_Integration (Integration* subint = 0) = 0;
+    virtual Integration* new_Integration (Integration* copy_this = 0) = 0;
 
     //! Load new Integration instance
     virtual Integration* load_Integration (unsigned isubint) = 0;
@@ -72,7 +72,7 @@ namespace Pulsar {
       Access to Integrations must be made through the
       Pulsar::IntegrationManager::get_Integration method
     */
-    vector<Integration*> subints;
+    vector< Reference::To<Integration> > subints;
 
   };
 
