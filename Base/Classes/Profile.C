@@ -457,6 +457,26 @@ double Pulsar::Profile::sum (int istart, int iend) const
 
 /////////////////////////////////////////////////////////////////////////////
 //
+// Pulsar::Profile::sumsq
+//
+double Pulsar::Profile::sumsq (int istart, int iend) const
+{
+  if (verbose)
+    cerr << "Pulsar::Profile::sumsq" << endl;
+  
+  nbinify (istart, iend, nbin);
+
+  double tot = 0;
+  for (int ibin=istart; ibin < iend; ibin++)  {
+    double val = amps[ibin%nbin];
+    tot += val * val;
+  }
+
+  return tot;
+}
+
+/////////////////////////////////////////////////////////////////////////////
+//
 // Pulsar::Profile::get_ascii
 //
 string Pulsar::Profile::get_ascii (int bin_start, int bin_end) const

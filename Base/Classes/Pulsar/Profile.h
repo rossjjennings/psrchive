@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Profile.h,v $
-   $Revision: 1.42 $
-   $Date: 2003/12/29 15:38:54 $
+   $Revision: 1.43 $
+   $Date: 2004/01/04 19:13:25 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Profile_h
@@ -97,8 +97,11 @@ namespace Pulsar {
     float max  (int bin_start=0, int bin_end=0) const;
     //! Returns the minimum amplitude
     float min  (int bin_start=0, int bin_end=0) const;
+
     //! Returns the sum of all amplitudes
     double sum (int bin_start=0, int bin_end=0) const;
+    //! Returns the sum of all amplitudes squared
+    double sumsq (int bin_start=0, int bin_end=0) const;
 
     //! Returns a string with an ASCII representation of the amplitudes
     string get_ascii (int bin_start=0, int bin_end=0) const;
