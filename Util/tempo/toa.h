@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/toa.h,v $
-   $Revision: 1.6 $
-   $Date: 2001/01/08 11:25:14 $
+   $Revision: 1.7 $
+   $Date: 2001/02/24 04:02:32 $
    $Author: straten $ */
 
 #ifndef __TOA_H
@@ -148,7 +148,8 @@ namespace Tempo {
     int    Psrclock_load    (const char* instring);
     int    Psrclock_unload  (FILE* outstream) const;
     int    Psrclock_unload  (char* outstring) const;
-    
+    string Psrclock_unload  () const;
+
     int    Rhythm_load      (const char* instring);
     int    Rhythm_unload    (FILE* outstream) const;
     int    Rhythm_unload    (char* outstring) const;

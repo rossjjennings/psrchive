@@ -122,6 +122,13 @@ int Tempo::toa::parkes_parse (const char* instring)
   return 0;
 }
 
+string Tempo::toa::Psrclock_unload () const
+{
+  sizebuf (128);
+  Parkes_unload (buffer);
+  return string(buffer);
+}
+
 int Tempo::toa::Parkes_unload (char* outstring) const
 {
   if (state == Deleted)
@@ -142,14 +149,14 @@ int Tempo::toa::parkes_out (char* outstring) const
 {
   // output the basic line
   sprintf (datestr, "%8.7lf", frequency);
-  sprintf (outstring, " %8.8s  %s   %5.2f %7.2f        %1d ",
+  sprintf (outstring, " %8.8s  %s   %5.2f %7.2f        %1d",
  	   datestr, arrival.printdays(13).c_str(), phs, error, telescope);
   return 0;
 }
 
 int Tempo::toa::Parkes_unload (FILE* outstream) const
 {
-  sizebuf (81);
+  sizebuf (128);
   Parkes_unload (buffer);
   fprintf (outstream, "%s\n", buffer);
   return 0;
@@ -212,7 +219,7 @@ int Tempo::toa::Princeton_unload (char* outstring) const
 
 int Tempo::toa::Princeton_unload (FILE* outstream) const
 {
-  sizebuf (81);
+  sizebuf (128);
   Princeton_unload (buffer);
   fprintf (outstream, "%s\n", buffer);
   return 0;
@@ -376,7 +383,7 @@ int Tempo::toa::load (const char* instring)
 int Tempo::toa::load (FILE * instream)
 {
   // start with a length of line
-  size_t chunk = 160;
+  size_t chunk = 128;
   sizebuf (chunk);
 
   buffer[0] = '\0';
