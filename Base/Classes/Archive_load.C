@@ -1,4 +1,4 @@
-#include "Archive.h"
+#include "Pulsar/BasicArchive.h"
 #include "Error.h"
 
 /* Dynamic constructor returns a pointer to a new instance of one of the
@@ -9,6 +9,8 @@
 */
 Pulsar::Archive* Pulsar::Archive::load (const char* filename)
 {
+  BasicArchive::ensure_linkage();
+
   // check if file can be opened for reading
   FILE* fptr = fopen (filename, "r");
 
@@ -16,6 +18,12 @@ Pulsar::Archive* Pulsar::Archive::load (const char* filename)
 			  "cannot open '%s'", filename);
 
   fclose (fptr);
+
+  if (Agent::registry.size() == 0)
+    Agent::plugin_load ();
+
+  if (Agent::registry.size() == 0)
+    throw Error (InvalidState, "Pulsar::Archive::load", "no Agents loaded");
 
   // see if any of the derived classes recognize the file
   Reference::To<Archive> archive;

@@ -2,6 +2,11 @@
 #include "Pulsar/BasicIntegration.h"
 #include "Error.h"
 
+void Pulsar::BasicArchive::ensure_linkage ()
+{
+}
+
+
 Pulsar::BasicArchive::BasicArchive () 
 { 
   telescope_code = -1;

@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/BasicArchive.h,v $
-   $Revision: 1.22 $
-   $Date: 2003/02/17 16:19:49 $
+   $Revision: 1.23 $
+   $Date: 2003/03/06 16:26:51 $
    $Author: straten $ */
 
 #include "Pulsar/Archive.h"
@@ -146,6 +146,8 @@ namespace Pulsar {
     //! Set the status of the parallactic angle flag
     virtual void set_dedispersed (bool done = true);
 
+    //! This trick is done only to ensure that BasicArchive code is linked
+    static void ensure_linkage ();
 
   protected:
 
