@@ -80,6 +80,7 @@ int main (int argc, char *argv[]) {
     total->fscrunch();
     total->tscrunch();
     total->centre();
+    total->convert_state(Signal::Intensity);
     stdp = total->get_Profile(0,0,0);
 
   }
@@ -100,6 +101,7 @@ int main (int argc, char *argv[]) {
       total->fscrunch();
       total->tscrunch();
       total->centre();
+      total->convert_state(Signal::Intensity);
 
       prof = total->get_Profile(0,0,0);
       start_time = arch->start_time();
