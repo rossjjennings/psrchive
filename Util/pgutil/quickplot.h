@@ -1,4 +1,5 @@
 #include <vector>
+#include <algorithm>
 #include <cpgplot.h>
 
 template<class T>
