@@ -25,12 +25,6 @@ fi
 CPPFLAGS="-I$PSRHOME/packages/$LOGIN_ARCH/include $CPPFLAGS"
 LDFLAGS="-L$PSRHOME/packages/$LOGIN_ARCH/lib $LDFLAGS"
 
-#
-# For developers: ensure that the config directory m4 macros are parsed
-ACLOCAL="$ACLOCAL -I config"
-# For developers: preserve file modification times
-INSTALL_DATA="${INSTALL} -m 644 -p"
-
 AM_INIT_AUTOMAKE([subdir-objects])
 AC_DISABLE_SHARED
 
@@ -63,6 +57,9 @@ SWIN_LIB_CFITSIO
 SWIN_LIB_MPI
 BNV_HAVE_QT
 
+#
+# Check that at least one FFT library is available
+#
 if test x"$have_fftw" = xno \
 -a test x"$have_fftw3" = xno \
 -a test x"$have_mkl" = xno; then
@@ -71,6 +68,14 @@ fi
 
 AC_SUBST(FFT_LIBS)
 FFT_LIBS="$MKL_LIBS $FFTW_LIBS $FFTW3_LIBS"
+
+# 
+# For developers: ensure that the config directory m4 macros are parsed
+#
+ACLOCAL="$ACLOCAL -I config"
+# For developers: preserve file modification times
+INSTALL_DATA="${INSTALL} -m 644 -p"
+
 
 #
 # Checks for header files.
