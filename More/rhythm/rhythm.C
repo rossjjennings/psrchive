@@ -1603,7 +1603,9 @@ void Rhythm::undeleteall ()
       break;
     
     if (toas[i].get_state() == Tempo::toa::Deleted) {
-      toas[i].set_state(Tempo::toa::Normal);
+      if (toas[i].get_format() != Tempo::toa::Comment) {
+	toas[i].set_state(Tempo::toa::Normal);
+      }
       toa_text -> setSelected (i, false);
     }
   }
