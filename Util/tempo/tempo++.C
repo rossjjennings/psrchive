@@ -122,9 +122,23 @@ string Tempo::get_directory ()
   }
 
   if (makedir (directory.c_str()) < 0)  {
-    cerr << "Tempo::get_directory failure creating '" << directory 
-	 << "'" << endl;
-    directory = ".";
+
+    if (verbose)
+      cerr << "Tempo::get_directory failure creating '" << directory 
+	   << "'" << endl;
+
+    char* home = getenv ("HOME");
+
+    if (home)
+      directory = home;
+    else
+      directory = ".";
+
+    directory += "/tempo.tmp";
+
+    if (makedir (directory.c_str()) < 0)
+      throw Error (InvalidState, "Tempo::get_directory",
+		   "cannot create a temporary working directory");
   }
 
   return directory;
