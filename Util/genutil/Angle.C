@@ -69,12 +69,11 @@ char * Angle::getDMS(char *str,int places) const
   seconds = fabs(radians) * 648000.0/M_PI - ((degrees*60.0)+minutes)*60.0;
 
   if (radians < 0.0)
-    degrees *= -1;   // Set it up to print the sign
-
-  sprintf(str, "% 02d:%02d:%0*.*f", degrees, minutes, 
+    sprintf(str, "-%02d:%02d:%0*.*f", degrees, minutes, 
 	  3+places, places, seconds);
-//   fprintf(stderr, "%f %d %d %f %s\n", radians, degrees, minutes, seconds,str);
-//   //  exit(1);
+  else 
+    sprintf(str, "+%02d:%02d:%0*.*f", degrees, minutes, 
+	    3+places, places, seconds);
 
   return str;
 }
