@@ -1,14 +1,20 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/PSRFITS/Pulsar/FITSArchive.h,v $
-   $Revision: 1.3 $
-   $Date: 2003/04/23 14:58:58 $
-   $Author: straten $ */
+   $Revision: 1.4 $
+   $Date: 2003/06/06 02:24:36 $
+   $Author: ahotan $ */
 
 #include <fitsio.h>
 
 #define PSRFITS 1
 #include "Pulsar/BasicArchive.h"
+#include "Pulsar/FITSHdrExtension.h"
+#include "Pulsar/CalInfoExtension.h"
+#include "Pulsar/ObsExtension.h"
+#include "Pulsar/ITRFExtension.h"
+#include "Pulsar/FrontendExtension.h"
+#include "Pulsar/BackendExtension.h"
 #include "MJD.h"
 
 namespace Pulsar {
@@ -62,6 +68,12 @@ namespace Pulsar {
 
     //! Return a new select_copy-constructed FITSArchive instance
     Archive* extract (const vector<unsigned>& subints) const;
+
+    //! Return the number of extensions available
+    unsigned get_nextension () const;
+
+    //! Return a pointer to the specified extension
+    const Extension* get_extension (unsigned iextension) const;
 
   protected:
 
@@ -212,86 +224,15 @@ namespace Pulsar {
     virtual void unload_file (const char* filename) const;
 
     // //////////////////////////////////////////////////////////////////////
-
-    // Read parameters that are specific to the pulsar FITS template
     
-    //! Header start time (as opposed to subint start time)
-    MJD start_time;
+    // Archive Extensions used by FITSArchive
     
-    //! Pulsar FITS header version information
-    string hdrver;
-    
-    //! File creation date
-    string creation_date;
-    
-    //! Observer name
-    string observer;
-
-    //! Project ID
-    string project_ID;
-
-    //! Name of the telescope
-    string telescope;
-
-    //! Antenna ITRF X-coordinate
-    double ant_x;
-    
-    //! Antenna ITRF Y-coordinate
-    double ant_y;
-    
-    //! Antenna ITRF Z-coordinate
-    double ant_z;
-
-    //! Angle of X-probe wrt platform zero
-    float xpol_ang;
-
-    //! Name of the backend configuration file used
-    string configfile;
-    
-    //! Number of receiver channels
-    int nrcvr;
-
-    //! Coordinate mode (J2000, Gal, Ecliptic, AZEL, HADEC)
-    string coordmode;
-    
-    //! Track mode (TRACK, SCANGC, SCANLAT)
-    string trk_mode;
-
-    //! Feed track mode - Const FA, CPA, GPA
-    string fd_mode;
-    
-    //! Feed/Posn angle requested 
-    float fa_req;
-
-    //! Fundamental correlator cycle time
-    double tcycle;
-    
-    //! Attenuator, Poln A
-    float atten_a;
-
-    //! Attenuator, Poln B
-    float atten_b;
-
-    //! Cal mode (OFF, SYNC, EXT1, EXT2)
-    string cal_mode;
-
-    //! Calibrator frequency
-    double cal_frequency;
-
-    //! Calibrator duty-cycle
-    double cal_dutycycle;
-
-    //! Calibrator phase
-    double cal_phase;
-
-    //! Start UT date (YYYY-MM-DD)
-    string stt_date;
-
-    //! Start UT (hh:mm:ss)
-    string stt_time;
-
-    //! Start LST
-    double stt_lst;
+    ObsExtension      obs_ext;
+    FITSHdrExtension  hdr_ext;
+    ITRFExtension     itrf_ext;
+    CalInfoExtension  cal_ext;
+    FrontendExtension fe_ext;
+    BackendExtension  be_ext;
     
     // Objects to contain the information in other HDU areas
     

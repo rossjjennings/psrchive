@@ -12,32 +12,6 @@
 
 void Pulsar::FITSArchive::init ()
 {
-  start_time.Construct("00000.00000");
-  hdrver = "unset";
-  creation_date = "unset";
-  observer = "unset";
-  project_ID = "unset";
-  telescope = "unset";
-  ant_x = 0.0;
-  ant_y = 0.0;
-  ant_z = 0.0;
-  xpol_ang = 0.0;
-  configfile = "unset";
-  nrcvr = 0;
-  coordmode = "unset";
-  trk_mode = "unset";
-  fd_mode = "unset";
-  fa_req = 0.0;
-  tcycle = 0.0;
-  atten_a = 0.0;
-  atten_b = 0.0;
-  cal_mode = "unset";
-  cal_frequency = 0.0;
-  cal_dutycycle = 0.0;
-  cal_phase = 0.0;
-  stt_date = "unset";
-  stt_time = "unset";
-  stt_lst = 0.0;
   chanbw = 0.0;
   history.resize(0);
   digitiser_statistics.resize(0);
@@ -113,21 +87,13 @@ void Pulsar::FITSArchive::copy (const Archive& archive,
   if (verbose)
     cerr << "FITSArchive::copy another FITSArchive" << endl;
   
-  start_time = farchive -> start_time;
+  hdr_ext  = farchive->hdr_ext;
+  obs_ext  = farchive->obs_ext;
+  itrf_ext = farchive->itrf_ext;
+  cal_ext  = farchive->cal_ext;
+  fe_ext   = farchive->fe_ext;
+  be_ext   = farchive->be_ext;
   
-  hdrver = farchive -> hdrver;
-  
-  creation_date = farchive -> creation_date;
-  observer = farchive -> observer;
-  project_ID = farchive -> project_ID;
-  
-  configfile = farchive -> configfile;
-  telescope = farchive -> telescope;
-  
-  cal_frequency = farchive -> cal_frequency;
-  cal_dutycycle = farchive -> cal_dutycycle;
-  cal_phase = farchive -> cal_phase;
-
   history = farchive -> history;    
   digitiser_statistics = farchive -> digitiser_statistics;
   digitiser_counts = farchive -> digitiser_counts;
@@ -151,7 +117,43 @@ Pulsar::FITSArchive::extract (const vector<unsigned>& subints) const
   return new FITSArchive (*this, subints);
 }
 
+//! Return the number of extensions available
+unsigned Pulsar::FITSArchive::get_nextension () const
+{
+  return 6;
+}
 
+//! Return a pointer to the specified extension
+const Pulsar::Archive::Extension*
+Pulsar::FITSArchive::get_extension (unsigned iext) const
+{
+  if (iext < 0 || iext > 5)
+    throw Error (InvalidRange, "Pulsar::FITSArchive::get_extension",
+		 "iext=%d > next=6", iext);
+  
+  switch (iext) {
+  case 0:
+    return &hdr_ext;
+    break;
+  case 1:
+    return &obs_ext;
+    break;
+  case 2:
+    return &itrf_ext;
+    break;
+  case 3:
+    return &cal_ext;
+    break;
+  case 4:
+    return &fe_ext;
+    break;
+  case 5:
+    return &be_ext;
+    break;
+  default:
+    return 0;
+  }
+}
 
 // ////////////////////////////////////////////////////////////////////////////
 // ////////////////////////////////////////////////////////////////////////////
@@ -198,11 +200,11 @@ void Pulsar::FITSArchive::load_header (const char* filename)
     throw FITSError (status, "FITSArchive::load_header", 
 		     "fits_read_key STT_*");
   
-  start_time = MJD ((int)day, (int)sec, frac);
+  hdr_ext.start_time = MJD ((int)day, (int)sec, frac);
   
   if (verbose)
     cerr << "FITSArchive::load_header reading coordinates" << endl;
-
+  
   // Read where the telescope was pointing
   fits_read_key (fptr, TSTRING, "COORD_MD", tempstr1, comment, &status);
   if (status != 0) {
@@ -214,16 +216,16 @@ void Pulsar::FITSArchive::load_header (const char* filename)
     status = 0;
   }
   
-  coordmode = tempstr1;
+  hdr_ext.coordmode = tempstr1;
   sky_coord coord;
   
-  if (coordmode == "J2000") {
+  if (hdr_ext.coordmode == "J2000") {
     char* tempstr2 = new char [FLEN_VALUE];
     fits_read_key (fptr, TSTRING, "STT_CRD1", tempstr1, comment, &status);
     fits_read_key (fptr, TSTRING, "STT_CRD2", tempstr2, comment, &status);
     coord.setHMSDMS(tempstr1,tempstr2);
   }     
-  else if (coordmode == "Gal") {
+  else if (hdr_ext.coordmode == "Gal") {
     double co_ord1, co_ord2;
     AnglePair temp;
     fits_read_key (fptr, TDOUBLE, "STT_CRD1", &co_ord1, comment, &status);
@@ -231,17 +233,17 @@ void Pulsar::FITSArchive::load_header (const char* filename)
     temp.setDegrees(co_ord1,co_ord2);
     coord.setGalactic(temp);
   }
-  else if (coordmode == "Ecliptic") {
+  else if (hdr_ext.coordmode == "Ecliptic") {
     if (verbose)
       cerr << "WARNING: FITSArchive::load_header Ecliptic COORD_MD not implimented" 
 	   << endl;
   }
-  else if (coordmode == "AZEL") {
+  else if (hdr_ext.coordmode == "AZEL") {
     if (verbose)
       cerr << "WARNING: FITSArchive::load_header AZEL COORD_MD not implimented"
 	   << endl;
   }
-  else if (coordmode == "HADEC") {
+  else if (hdr_ext.coordmode == "HADEC") {
     if (verbose)
       cerr << "WARNING: FITSArchive::load_header HADEC COORD_MD not implimented"
 	   << endl;
@@ -262,10 +264,10 @@ void Pulsar::FITSArchive::load_header (const char* filename)
     set_coordinates (coord);
   
   // Pulsar FITS header definiton version
-
+  
   if (verbose)
     cerr << "FITSArchive::load_header reading FITS header version" << endl;
-
+  
   fits_read_key (fptr, TSTRING, "HDRVER", tempstr1, comment, &status);
   if (status != 0) {
     if (verbose) {
@@ -276,10 +278,10 @@ void Pulsar::FITSArchive::load_header (const char* filename)
     status = 0;
   }
   else 
-    hdrver = tempstr1;
+    hdr_ext.hdrver = tempstr1;
   
   // File creation date
-
+  
   if (verbose)
     cerr << "FITSArchive::load_header reading file creation date" << endl;
 
@@ -293,7 +295,7 @@ void Pulsar::FITSArchive::load_header (const char* filename)
     status = 0;
   }
   else
-    creation_date = tempstr1;
+    hdr_ext.creation_date = tempstr1;
   
   // Name of observer
 
@@ -310,7 +312,7 @@ void Pulsar::FITSArchive::load_header (const char* filename)
     status = 0;
   }
   else
-    observer = tempstr1;
+    obs_ext.observer = tempstr1;
   
   // Project ID
 
@@ -327,7 +329,7 @@ void Pulsar::FITSArchive::load_header (const char* filename)
     status = 0;
   }
   else
-    project_ID = tempstr1;
+    obs_ext.project_ID = tempstr1;
   
   // Telescope name
 
@@ -344,16 +346,16 @@ void Pulsar::FITSArchive::load_header (const char* filename)
     status = 0;
   }
   else
-    telescope = tempstr1;
+    obs_ext.telescope = tempstr1;
   
   // Antenna ITRF coordinates
 
   if (verbose)
     cerr << "FITSArchive::load_header reading antenna location" << endl;
-
-  fits_read_key (fptr, TDOUBLE, "ANT_X", &ant_x, comment, &status);
-  fits_read_key (fptr, TDOUBLE, "ANT_Y", &ant_y, comment, &status);
-  fits_read_key (fptr, TDOUBLE, "ANT_Z", &ant_z, comment, &status);
+  
+  fits_read_key (fptr, TDOUBLE, "ANT_X", &(itrf_ext.ant_x), comment, &status);
+  fits_read_key (fptr, TDOUBLE, "ANT_Y", &(itrf_ext.ant_y), comment, &status);
+  fits_read_key (fptr, TDOUBLE, "ANT_Z", &(itrf_ext.ant_z), comment, &status);
   if (status != 0) {
     if (verbose) {
       fits_get_errstatus(status,error);
@@ -410,8 +412,8 @@ void Pulsar::FITSArchive::load_header (const char* filename)
 
   if (verbose)
     cerr << "FITSArchive::load_header reading XPLO_ANG" << endl;
-
-  fits_read_key (fptr, TFLOAT, "XPOL_ANG", &xpol_ang, comment, &status);
+  
+  fits_read_key (fptr, TFLOAT, "XPOL_ANG", &(fe_ext.xpol_ang), comment, &status);
   if (status != 0) {
     if (verbose) {
       fits_get_errstatus(status,error);
@@ -446,7 +448,7 @@ void Pulsar::FITSArchive::load_header (const char* filename)
 
   fits_read_key (fptr, TSTRING, "BECONFIG", tempstr1, comment, &status);
   if(status == 0) {
-    configfile = tempstr1;
+    be_ext.configfile = tempstr1;
   }
   else {
     if (verbose) {
@@ -458,11 +460,11 @@ void Pulsar::FITSArchive::load_header (const char* filename)
   }
   
   // Read the number of receiver channels
-
+  
   if (verbose)
     cerr << "FITSArchive::load_header reading NRCVR" << endl;
-
-  fits_read_key (fptr, TINT, "NRCVR", &nrcvr, comment, &status);
+  
+  fits_read_key (fptr, TINT, "NRCVR", &(be_ext.nrcvr), comment, &status);
   if (status != 0) {
     if (verbose) {
       fits_get_errstatus(status,error);
@@ -534,12 +536,12 @@ void Pulsar::FITSArchive::load_header (const char* filename)
     cerr << "FITSArchive::load_header reading CAL info" << endl;
   
   if (get_type() == Signal::Pulsar || get_type() == Signal::Unknown) {
-    cal_frequency = cal_dutycycle = cal_phase = 0;
+    cal_ext.cal_frequency = cal_ext.cal_dutycycle = cal_ext.cal_phase = 0;
   }
   else {
-    fits_read_key (fptr, TFLOAT, "CAL_FREQ", &cal_frequency, comment, &status);
-    fits_read_key (fptr, TFLOAT, "CAL_DCYC", &cal_dutycycle, comment, &status);
-    fits_read_key (fptr, TFLOAT, "CAL_PHS", &cal_phase, comment, &status);
+    fits_read_key (fptr, TFLOAT, "CAL_FREQ", &(cal_ext.cal_frequency), comment, &status);
+    fits_read_key (fptr, TFLOAT, "CAL_DCYC", &(cal_ext.cal_dutycycle), comment, &status);
+    fits_read_key (fptr, TFLOAT, "CAL_PHS", &(cal_ext.cal_phase), comment, &status);
     
     if(status != 0) {
       if (verbose) {
@@ -566,7 +568,7 @@ void Pulsar::FITSArchive::load_header (const char* filename)
     status = 0;
   }
   else
-    trk_mode = tempstr1;
+    hdr_ext.trk_mode = tempstr1;
   
   // Feed track mode
 
@@ -583,14 +585,14 @@ void Pulsar::FITSArchive::load_header (const char* filename)
     status = 0;
   }
   else
-    fd_mode = tempstr1;
+    fe_ext.fd_mode = tempstr1;
 
   // Read requested feed angle
 
   if (verbose)
     cerr << "FITSArchive::load_header reading requested feed angle" << endl;
-
-  fits_read_key (fptr, TFLOAT, "FA_REQ", &fa_req, comment, &status);
+  
+  fits_read_key (fptr, TFLOAT, "FA_REQ", &(fe_ext.fa_req), comment, &status);
   if (status != 0) {
     if (verbose) {
       fits_get_errstatus(status,error);
@@ -604,8 +606,8 @@ void Pulsar::FITSArchive::load_header (const char* filename)
 
   if (verbose)
     cerr << "FITSArchive::load_header reading cycle time" << endl;
-
-  fits_read_key (fptr, TDOUBLE, "TCYCLE", &tcycle, comment, &status);
+  
+  fits_read_key (fptr, TDOUBLE, "TCYCLE", &(be_ext.tcycle), comment, &status);
   if (status != 0) {
     if (verbose) {
       fits_get_errstatus(status,error);
@@ -620,8 +622,8 @@ void Pulsar::FITSArchive::load_header (const char* filename)
   if (verbose)
     cerr << "FITSArchive::load_header reading attenuator settings" << endl;
 
-  fits_read_key (fptr, TFLOAT, "ATTEN_A", &atten_a, comment, &status);
-  fits_read_key (fptr, TFLOAT, "ATTEN_B", &atten_b, comment, &status);
+  fits_read_key (fptr, TFLOAT, "ATTEN_A", &(fe_ext.atten_a), comment, &status);
+  fits_read_key (fptr, TFLOAT, "ATTEN_B", &(fe_ext.atten_b), comment, &status);
   if (status != 0) {
     if (verbose) {
       fits_get_errstatus(status,error);
@@ -632,7 +634,7 @@ void Pulsar::FITSArchive::load_header (const char* filename)
   }
   
   // Read the start UT date
-
+  
   if (verbose)
     cerr << "FITSArchive::load_header reading start date" << endl;
 
@@ -646,7 +648,7 @@ void Pulsar::FITSArchive::load_header (const char* filename)
     status = 0;
   }
   else
-    stt_date = tempstr1;
+    hdr_ext.stt_date = tempstr1;
   
   // Read the start UT
 
@@ -663,14 +665,14 @@ void Pulsar::FITSArchive::load_header (const char* filename)
     status = 0;
   }
   else
-    stt_time = tempstr1;
+    hdr_ext.stt_time = tempstr1;
   
   // Read the start LST (in seconds)
 
   if (verbose)
     cerr << "FITSArchive::load_header reading start LST" << endl;
 
-  fits_read_key (fptr, TDOUBLE, "STT_LST", &stt_lst, comment, &status);
+  fits_read_key (fptr, TDOUBLE, "STT_LST", &(hdr_ext.stt_lst), comment, &status);
   if (status != 0) {
     if (verbose) {
       fits_get_errstatus(status,error);
@@ -853,7 +855,7 @@ void Pulsar::FITSArchive::load_header (const char* filename)
   // Move to the BANDPASS Header Data Unit
   
   original_bandpass = new bandpass();
-  original_bandpass->load(fptr, nrcvr);
+  original_bandpass->load(fptr, be_ext.nrcvr);
   
   // Load the NSITE code from the polyco
 
@@ -1114,7 +1116,7 @@ Pulsar::FITSArchive::load_Integration (const char* filename, unsigned isubint)
     throw FITSError (status, "FITSArchive::load_Integration", 
 		     "fits_read_col OFFS_SUB");
   
-  newmjd = start_time + time;
+  newmjd = hdr_ext.start_time + time;
   
   // Set the folding period
 
@@ -1122,7 +1124,7 @@ Pulsar::FITSArchive::load_Integration (const char* filename, unsigned isubint)
 
   // Correct for a possible phase offset
 
-  Phase stt_phs = model.phase(start_time);
+  Phase stt_phs = model.phase(hdr_ext.start_time);
   Phase off_phs = model.phase(newmjd);
 
   double diff = off_phs.fracturns() - stt_phs.fracturns();
@@ -1411,11 +1413,11 @@ try {
   fits_update_key (myfptr, TSTRING, "SRC_NAME", (char*)source.c_str(), comment, &status);
 
   // Write MJD info
-      
-  long day = (long)start_time.intday();
-  long sec = (long)start_time.get_secs();
-  double frac = start_time.get_fracsec();
-
+  
+  long day = (long)(hdr_ext.start_time.intday());
+  long sec = (long)(hdr_ext.start_time.get_secs());
+  double frac = hdr_ext.start_time.get_fracsec();
+  
   fits_update_key (myfptr, TLONG, "STT_IMJD", &day, comment, &status);
   fits_update_key (myfptr, TLONG, "STT_SMJD", &sec, comment, &status);
   fits_update_key (myfptr, TDOUBLE, "STT_OFFS", &frac, comment, &status);
@@ -1429,12 +1431,12 @@ try {
   
   // Write pulsar position data
   
-  fits_update_key (myfptr, TSTRING, "COORD_MD", (char*)coordmode.c_str(), 
+  fits_update_key (myfptr, TSTRING, "COORD_MD", (char*)(hdr_ext.coordmode.c_str()), 
 		   comment, &status);
   
   AnglePair newcoord;
   
-  if (coordmode == "J2000") {
+  if (hdr_ext.coordmode == "J2000") {
     
     newcoord = get_coordinates().getRaDec();
     
@@ -1446,7 +1448,7 @@ try {
     fits_update_key (myfptr, TSTRING, "STT_CRD2", (char*)strDMS.c_str(), 
 		     comment, &status); 
   }
-  else if (coordmode == "Gal") {
+  else if (hdr_ext.coordmode == "Gal") {
     
     newcoord = get_coordinates().getGalactic();
     
@@ -1461,19 +1463,19 @@ try {
     fits_update_key (myfptr, TSTRING, "STT_CRD2", b_deg, 
 		     comment, &status); 
   }
-  else if (coordmode == "Ecliptic") {
+  else if (hdr_ext.coordmode == "Ecliptic") {
     if (verbose) {
       cerr << "WARNING: FITSArchive::unload_file Ecliptic COORD_MD not implimented"
 	   << endl;
     }
   }
-  else if (coordmode == "AZEL") {
+  else if (hdr_ext.coordmode == "AZEL") {
     if (verbose) {
       cerr << "WARNING: FITSArchive::unload_file AZEL COORD_MD not implimented"
 	   << endl;
     }
   }
-  else if (coordmode == "HADEC") {
+  else if (hdr_ext.coordmode == "HADEC") {
     if (verbose) {
       cerr << "WARNING: FITSArchive::unload_file HADEC COORD_MD not implimented"
 	   << endl;
@@ -1507,30 +1509,30 @@ try {
   }
   
   fits_update_key (myfptr, TSTRING, "HDRVER", 
-		   (char*)hdrver.c_str(), comment, &status);
+		   (char*)(hdr_ext.hdrver.c_str()), comment, &status);
 
   fits_update_key (myfptr, TSTRING, "DATE", 
-		   (char*)creation_date.c_str(), comment, &status);
+		   (char*)(hdr_ext.creation_date.c_str()), comment, &status);
   
   fits_update_key (myfptr, TSTRING, "OBSERVER", 
-		   (char*)observer.c_str(), comment, &status);
+		   (char*)(obs_ext.observer.c_str()), comment, &status);
 
   fits_update_key (myfptr, TSTRING, "PROJID", 
-		   (char*)project_ID.c_str(), comment, &status);
-
+		   (char*)(obs_ext.project_ID.c_str()), comment, &status);
+  
   fits_update_key (myfptr, TSTRING, "TELESCOP", 
-  		   (char*)telescope.c_str(), comment, &status);
+  		   (char*)(obs_ext.telescope.c_str()), comment, &status);
   
-  fits_update_key (myfptr, TDOUBLE, "ANT_X", (double*)&ant_x, 
+  fits_update_key (myfptr, TDOUBLE, "ANT_X", (double*)&(itrf_ext.ant_x), 
 		   comment, &status);
-  fits_update_key (myfptr, TDOUBLE, "ANT_Y", (double*)&ant_y, 
+  fits_update_key (myfptr, TDOUBLE, "ANT_Y", (double*)&(itrf_ext.ant_y), 
 		   comment, &status);
-  fits_update_key (myfptr, TDOUBLE, "ANT_Z", (double*)&ant_z, 
+  fits_update_key (myfptr, TDOUBLE, "ANT_Z", (double*)&(itrf_ext.ant_z),
 		   comment, &status);
   
-  fits_update_key (myfptr, TFLOAT, "XPOL_ANG", (float*)&xpol_ang, 
+  fits_update_key (myfptr, TFLOAT, "XPOL_ANG", (float*)&(fe_ext.xpol_ang), 
 		   comment, &status);
-
+  
   fits_update_key (myfptr, TSTRING, "FRONTEND", 
   		   (char*)get_receiver().c_str(), comment, &status);
   
@@ -1538,37 +1540,37 @@ try {
 		   (char*)get_backend().c_str(), comment, &status);
   
   fits_update_key (myfptr, TSTRING, "BECONFIG", 
-		   (char*)configfile.c_str(), comment, &status);
+		   (char*)(be_ext.configfile.c_str()), comment, &status);
   
-  fits_update_key (myfptr, TINT, "NRCVR", (int*)&nrcvr, comment, &status);
+  fits_update_key (myfptr, TINT, "NRCVR", (int*)&(be_ext.nrcvr), comment, &status);
   
   fits_update_key (myfptr, TSTRING, "TRK_MODE", 
-  		   (char*)trk_mode.c_str(), comment, &status);
+  		   (char*)(hdr_ext.trk_mode.c_str()), comment, &status);
   
   fits_update_key (myfptr, TSTRING, "FD_MODE", 
-  		   (char*)fd_mode.c_str(), comment, &status);
+  		   (char*)(fe_ext.fd_mode.c_str()), comment, &status);
   
-  fits_update_key (myfptr, TFLOAT, "FA_REQ", (float*)&fa_req, 
+  fits_update_key (myfptr, TFLOAT, "FA_REQ", (float*)&(fe_ext.fa_req), 
 		   comment, &status);
   
-  fits_update_key (myfptr, TDOUBLE, "TCYCLE", (double*)&tcycle, 
+  fits_update_key (myfptr, TDOUBLE, "TCYCLE", (double*)&(be_ext.tcycle), 
 		   comment, &status);
   
-  fits_update_key (myfptr, TFLOAT, "ATTEN_A", (float*)&atten_a, 
+  fits_update_key (myfptr, TFLOAT, "ATTEN_A", (float*)&(fe_ext.atten_a), 
 		   comment, &status);
-  fits_update_key (myfptr, TFLOAT, "ATTEN_B", (float*)&atten_b, 
+  fits_update_key (myfptr, TFLOAT, "ATTEN_B", (float*)&(fe_ext.atten_b), 
 		   comment, &status);
    
   fits_update_key (myfptr, TSTRING, "CAL_MODE", 
-  		   (char*)cal_mode.c_str(), comment, &status);
+  		   (char*)(cal_ext.cal_mode.c_str()), comment, &status);
   
   fits_update_key (myfptr, TSTRING, "STT_DATE", 
-  		   (char*)stt_date.c_str(), comment, &status);
-
-  fits_update_key (myfptr, TSTRING, "STT_TIME", 
-  		   (char*)stt_time.c_str(), comment, &status);
+  		   (char*)(hdr_ext.stt_date.c_str()), comment, &status);
   
-  fits_update_key (myfptr, TDOUBLE, "STT_LST", (double*)&stt_lst, 
+  fits_update_key (myfptr, TSTRING, "STT_TIME", 
+  		   (char*)(hdr_ext.stt_time.c_str()), comment, &status);
+  
+  fits_update_key (myfptr, TDOUBLE, "STT_LST", (double*)&(hdr_ext.stt_lst), 
 		   comment, &status);
   
   string tempstr3;
@@ -1588,19 +1590,19 @@ try {
 		   (char*)tempstr3.c_str(), comment, &status);
   
   float tempfloat = 0.0;
-
-  tempfloat = cal_frequency;
+  
+  tempfloat = cal_ext.cal_frequency;
   fits_update_key (myfptr, TFLOAT, "CAL_FREQ", 
 		   &tempfloat, comment, &status);
-
-  tempfloat = cal_dutycycle;
+  
+  tempfloat = cal_ext.cal_dutycycle;
   fits_update_key (myfptr, TFLOAT, "CAL_DCYC", 
 		   &tempfloat, comment, &status);
-
-  tempfloat = cal_phase;
+  
+  tempfloat = cal_ext.cal_phase;
   fits_update_key (myfptr, TFLOAT, "CAL_PHS", 
 		   &tempfloat, comment, &status);
-        
+  
   if (verbose)
     cerr << "FITSArchive::unload_file finished in primary header" << endl;
   
@@ -1727,7 +1729,7 @@ try {
   
   // Move to the BANDPASS Header Data Unit
   
-  original_bandpass->unload(myfptr, nrcvr);
+  original_bandpass->unload(myfptr, be_ext.nrcvr);
   
   // Now write the actual integrations to file
 
@@ -1844,7 +1846,7 @@ void Pulsar::FITSArchive::unload_integration (int row,
   fits_get_colnum (thefptr, CASEINSEN, "OFFS_SUB", &colnum, &status);
   
   double time = 0.0;
-  time = (integ -> get_epoch () - start_time).in_seconds();
+  time = (integ -> get_epoch () - (hdr_ext.start_time)).in_seconds();
 
   fits_write_col (thefptr, TDOUBLE, colnum, row, 1, 1, &time, &status);
   
