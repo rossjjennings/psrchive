@@ -34,7 +34,8 @@ int main () {
   for (unsigned i=0; i<types.size(); i++)
     for (unsigned j=0; j<types.size(); j++)
 
-      out << "class PromoteTraits< " <<types[i]<< ", " <<types[j]<< " > {\n"
+      out << "template<>\n"
+        "class PromoteTraits< " << types[i] << ", " << types[j] << " > {\n"
 	"public:\n"
 	"  typedef " << types[max(i,j)] << " promote_type;\n"
 	"};\n" << endl;
