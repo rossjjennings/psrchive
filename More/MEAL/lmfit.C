@@ -1,11 +1,11 @@
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #include <iostream>
 #include <algorithm>
 #include <unistd.h>
 #include <stdio.h>
-
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
 
 #ifdef HAVE_PGPLOT
 #include <cpgplot.h>
