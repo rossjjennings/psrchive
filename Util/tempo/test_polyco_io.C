@@ -2,6 +2,7 @@
 #include <unistd.h>
 
 #include "poly.h"
+#include "Error.h"
 
 int main (int argc, char** argv)
 {
@@ -23,6 +24,8 @@ int main (int argc, char** argv)
   if (optind < argc)
     filename = argv[optind];
 
+  try {
+
   polyco data;
 
   if (data.load (filename) < 0)
@@ -35,5 +38,10 @@ int main (int argc, char** argv)
     data.phase (test);
   }
 
+  }
+  catch (Error& error)  {
+    cerr << error << endl;
+    return -1;
+  }
   return 0;
 }
