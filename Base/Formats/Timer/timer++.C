@@ -6,6 +6,8 @@
 #include "convert_endian.h"
 #include "Error.h"
 
+#include "archhdr.h"
+
 string Timer::reason;
 bool   Timer::verbose = false;
 
@@ -151,6 +153,12 @@ int Timer::load (FILE* fptr, struct timer* hdr, bool big_endian)
       && hdr->extra.bandb.flux_A > 0
       && hdr->extra.bandb.flux_B > 0)  {
     cerr << "Timer::load WARNING bandB apparently in use" << endl;
+
+    if (verbose == 3)  {
+      archband B(hdr->extra.bandb);
+      B.print(cerr);
+    }
+
     return 0;
   }
 
