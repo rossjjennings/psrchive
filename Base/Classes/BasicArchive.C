@@ -12,7 +12,9 @@ Pulsar::BasicArchive::BasicArchive ()
   type = Signal::Pulsar;
 
   source = "unknown";
-
+  receiver = "unknown";
+  backend = "unknown";
+  
   nbin = 0;
   nchan = 1;
   npol = 1;
@@ -158,6 +160,16 @@ string Pulsar::BasicArchive::get_source () const
   return source;
 }
 
+string Pulsar::BasicArchive::get_receiver () const
+{
+  return receiver;
+}
+
+string Pulsar::BasicArchive::get_backend () const
+{
+  return backend;
+}
+
 //! Set the observation type (psr, cal etc.)
 void Pulsar::BasicArchive::set_type (Signal::Source ob_type)
 {
@@ -167,6 +179,16 @@ void Pulsar::BasicArchive::set_type (Signal::Source ob_type)
 void Pulsar::BasicArchive::set_source (const string& src)
 {
   source = src;
+}
+
+void Pulsar::BasicArchive::set_receiver (const string& rec)
+{
+  receiver = rec;
+}
+
+void Pulsar::BasicArchive::set_backend (const string& bak)
+{
+  backend = bak;
 }
 
 //! Get the coordinates of the source

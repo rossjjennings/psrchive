@@ -56,6 +56,8 @@ void Pulsar::Archive::copy (const Archive& archive)
   set_basis( archive.get_basis() );
   set_type( archive.get_type() );
   set_source( archive.get_source() );
+  set_receiver( archive.get_receiver() );
+  set_backend( archive.get_backend() );
 
   set_bandwidth( archive.get_bandwidth() );
   set_centre_frequency( archive.get_centre_frequency() );
@@ -89,6 +91,8 @@ void Pulsar::Archive::select_copy (const Archive& archive, vector<unsigned> subi
   set_basis( archive.get_basis() );
   set_type( archive.get_type() );
   set_source( archive.get_source() );
+  set_receiver( archive.get_receiver() );
+  set_backend( archive.get_backend() );
 
   set_bandwidth( archive.get_bandwidth() );
   set_centre_frequency( archive.get_centre_frequency() );

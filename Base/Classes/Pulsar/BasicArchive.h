@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/BasicArchive.h,v $
-   $Revision: 1.20 $
-   $Date: 2003/01/15 13:56:29 $
+   $Revision: 1.21 $
+   $Date: 2003/02/15 13:03:48 $
    $Author: pulsar $ */
 
 #include "Pulsar/Archive.h"
@@ -72,6 +72,16 @@ namespace Pulsar {
     //! Set the source name
     virtual void set_source (const string& source);
 
+    //! Get the receiver name
+    virtual string get_receiver () const;
+    //! Set the receiver name
+    virtual void set_receiver (const string& rec);
+    
+    //! Get the backend name
+    virtual string get_backend () const;
+    //! Set the backend name
+    virtual void set_backend (const string& bak);
+    
     //! Get the coordinates of the source
     virtual sky_coord get_coordinates () const;
     //! Set the coordinates of the source
@@ -171,7 +181,13 @@ namespace Pulsar {
 
     //! The source name
     string source;
- 
+
+    //! The receiver name
+    string receiver;
+
+    //! The backend name
+    string backend;
+
     //! The coordinates of the source
     sky_coord coordinates;
 
