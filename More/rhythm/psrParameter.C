@@ -44,9 +44,8 @@ int psrParameter::check (int ephind)
   return ephind;
 }
 
-bool psrParameter::fitable() { return parmTypes[ephio_index] != 0; };
-bool psrParameter::has_error() { return parmError[ephio_index] == 1; };
-
+bool psrParameter::fitable() { return parmTypes[ephio_index] != 0; }
+bool psrParameter::has_error() { return parmError[ephio_index] == 1; }
 
 // return the value
 string psrParameter::getString ()
