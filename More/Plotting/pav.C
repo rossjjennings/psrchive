@@ -1,5 +1,5 @@
 //
-// $Id: pav.C,v 1.46 2003/06/16 09:57:23 straten Exp $
+// $Id: pav.C,v 1.47 2003/06/16 16:49:14 straten Exp $
 //
 // The Pulsar Archive Viewer
 //
@@ -136,7 +136,7 @@ int main (int argc, char** argv)
     switch (c) {
       
     case 'a':
-      Pulsar::Archive::Agent::report ();
+      Pulsar::Archive::agent_report ();
       return 0;
 
     case 'A':
@@ -198,7 +198,7 @@ int main (int argc, char** argv)
       plotter.set_subint( atoi (optarg) );
       break;
     case 'i':
-      cout << "$Id: pav.C,v 1.46 2003/06/16 09:57:23 straten Exp $" << endl;
+      cout << "$Id: pav.C,v 1.47 2003/06/16 16:49:14 straten Exp $" << endl;
       return 0;
 
     case 'l':
