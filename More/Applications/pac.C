@@ -49,10 +49,11 @@ int main (int argc, char *argv[]) {
       break;
     case 'v':
       verbose = true;
+      Pulsar::Calibration::verbose = true;
       break;
     case 'V':
       verbose = true;
-      Pulsar::Archive::set_verbosity(2);
+      Pulsar::Archive::set_verbosity(1);
       break;
     case 'p':
       cals_are_here = optarg;
@@ -81,7 +82,7 @@ int main (int argc, char *argv[]) {
       write_database_file = true;
       break;
     default:
-      cerr << "Unrecognised option" << endl;
+      cout << "Unrecognised option" << endl;
     }
   }
   
@@ -104,24 +105,21 @@ int main (int argc, char *argv[]) {
 	exts.push_back("cf");
 	exts.push_back("pcal");
       }
-      if (verbose)
-	cerr << "Generating new database" << endl;
+      cout << "Generating new database" << endl;
       
       dbase = new Pulsar::Calibration::Database (cals_are_here.c_str(), exts);
       
       if (write_database_file) {
-	if (verbose)
-	  cerr << "Writing database summary file" << endl;
+	cout << "Writing database summary file" << endl;
 	
 	string temp = cals_are_here + "/database.txt";
 	dbase -> unload(temp.c_str());
       }
     }
     else {
-      if (verbose) {
-	cerr << "Reading from database summary file" << endl;
-	cerr << "Not implimented yet..." << endl;
-      }
+      cerr << "Reading from database summary file" << endl;
+      cerr << "Not implimented yet..." << endl;
+      
       //dbase = new Pulsar::Calibration::Database (cals_are_here.c_str());
     }
   }
@@ -139,33 +137,38 @@ int main (int argc, char *argv[]) {
     try {
       
       Pulsar::Archive* arch = Pulsar::Archive::load(archives[i]);
-      cerr << "Loaded archive: " << archives[i] << endl;
+      cout << "Loaded archive: " << archives[i] << endl;
       
       if (do_fluxcal) {
 	Pulsar::FluxCalibrator* fcal_engine = 0;
 	fcal_engine = dbase->generateFluxCalibrator(arch);
 	fcal_engine->calibrate(arch);
+	cout << "Flux calibration complete" << endl;
       }
       
       if (do_polncal) {      
 	Pulsar::PolnCalibrator* pcal_engine  = 0;
 	pcal_engine = dbase->generatePolnCalibrator(arch);
-
+	
 	if (display_params)	
 	  pcal_engine->store_parameters = true;
 	
 	pcal_engine->calibrate(arch);
 	
+	cout << "Polarisation calibration complete" << endl;
+	
 	if (display_params) {
 	  //pcal_engine->model[0].display();
-	}
-	
-	int index = archives[i].find_first_of(".", 0);
-	string newname = archives[i].substr(0, index);
-	newname += ".calib";
-	arch->unload(newname);
-	
+	}	
       }
+      
+      int index = archives[i].find_first_of(".", 0);
+      string newname = archives[i].substr(0, index);
+      newname += ".calib";
+      arch->unload(newname);
+      
+      cout << "New file " << newname << " unloaded" << endl;
+      
     }
     catch (Error& error) {
       cerr << error << endl;
