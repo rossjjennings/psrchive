@@ -6,12 +6,10 @@
 EstimatePlotter::EstimatePlotter ()
 {
   x_border = y_border = 0.05;
-  x_min = 0.0;
-  x_max = 1.0;
-  y_min = 0.0;
-  y_max = 1.0;
+  xrange_min = x_min = y_min = 0.0;
+  xrange_max = x_max = y_max = 1.0;
 
-  y_range = false;
+  range_set = false;
 }
 
 void EstimatePlotter::plot ()
@@ -48,5 +46,5 @@ void EstimatePlotter::clear ()
   xval.resize(0);
   yval.resize(0);
   yerr.resize(0);
-  y_range = false;
+  range_set = false;
 }
