@@ -1,5 +1,5 @@
 //
-// $Id: pav.C,v 1.27 2003/02/16 08:35:06 pulsar Exp $
+// $Id: pav.C,v 1.28 2003/02/26 00:20:28 ahotan Exp $
 //
 // The Pulsar Archive Viewer
 //
@@ -62,6 +62,7 @@ void usage ()
     " -g        Position angle across a profile\n"
     " -B        Off-pulse bandpass\n"
     " -X        Plot cal amplitude and phase vs frequency channel\n"
+    " -W        Change colour scheme to suite white background\n"
        << endl;
 }
 
@@ -139,7 +140,7 @@ int main (int argc, char** argv)
       usage ();
       return 0;
     case 'i':
-      cout << "$Id: pav.C,v 1.27 2003/02/16 08:35:06 pulsar Exp $" << endl;
+      cout << "$Id: pav.C,v 1.28 2003/02/26 00:20:28 ahotan Exp $" << endl;
       return 0;
     case 'm':
       // macro file
