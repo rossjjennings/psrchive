@@ -575,7 +575,7 @@ void Pulsar::Archive::set_ephemeris (const psrephem& new_ephemeris, bool update)
       change = temp2.substr(1,temp2.length()) != temp1;
 
     if (change) {
-      if (verbose)
+      if (verbose == 3)
         cerr << "Archive::set_ephemeris Informative Notice:\n" 
              << "   Source name will be updated to match new ephemeris\n"
              << "   New name: " << temp2 << endl;
@@ -584,10 +584,11 @@ void Pulsar::Archive::set_ephemeris (const psrephem& new_ephemeris, bool update)
   }
 
   if (get_dispersion_measure() != ephemeris->get_dm()) {
-    cerr << "Archive::set_ephemeris Informative Notice:\n" 
-	 << "   Dispersion measure will be updated to match new ephemeris\n"
-	 << "   Old DM = " << get_dispersion_measure() << endl
-	 << "   New DM = " << ephemeris->get_dm() << endl;
+    if (verbose == 3)
+      cerr << "Archive::set_ephemeris Informative Notice:\n" 
+	   << "   Dispersion measure will be updated to match new ephemeris\n"
+	   << "   Old DM = " << get_dispersion_measure() << endl
+	   << "   New DM = " << ephemeris->get_dm() << endl;
     set_dispersion_measure(ephemeris->get_dm());
   }
 
