@@ -11,7 +11,10 @@ int main (int argc, char** argv)  {
 
     Pulsar::Archive::verbose = true;
     Pulsar::Integration::verbose = true;
-   
+    Pulsar::Profile::verbose = true;
+
+    Pulsar::Error::handle_signals();
+
     Pulsar::TimerArchive archive;
     
     if (argc > 1)
@@ -20,6 +23,7 @@ int main (int argc, char** argv)  {
     archive.pscrunch();
     archive.fscrunch();
     archive.tscrunch();
+    archive.bscrunch(4);
 
     cpgbeg (0, "?", 0, 0);
     archive.get_Profile(0,0,0)->display();

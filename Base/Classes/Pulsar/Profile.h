@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Profile.h,v $
-   $Revision: 1.12 $
-   $Date: 2002/04/19 22:06:45 $
-   $Author: straten $ */
+   $Revision: 1.13 $
+   $Date: 2002/04/22 03:34:13 $
+   $Author: pulsar $ */
 
 #ifndef __Pulsar_Profile_h
 #define __Pulsar_Profile_h
@@ -151,9 +151,21 @@ namespace Pulsar {
     const float* get_amps () const { return amps; }
     float* get_amps () { return amps; }
 
+#ifdef sun
+    // SUN CC 5.0 is stupid
+    void set_amps (const float* data);
+    void set_amps (const double* data);
+    void set_amps (const int* data);
+    void set_amps (const unsigned* data);
+    void set_amps (const short* data);
+    void set_amps (const unsigned short* data);
+    void set_amps (const char* data);
+    void set_amps (const unsigned char* data);
+#else
     //! set the amplitudes array equal to the contents of the data array
     template <typename T>
     void set_amps (const T* data);
+#endif
 
     //! get the centre frequency (in MHz)
     double get_centre_frequency () const { return centrefreq; }
@@ -220,6 +232,8 @@ namespace Pulsar {
 
 }
 
+#ifndef sun
+
 /*! 
   \param data pointer to the data elements to be copied.
   \pre data must point to at least get_nbin() elements
@@ -231,4 +245,6 @@ void Pulsar::Profile::set_amps (const T* data)
     amps[ibin] = static_cast<float>( data[ibin] );
 }
 
-#endif
+#endif // bloody SUN CC 5.0 workaround
+
+#endif // !defined __Pulsar_Profile_h

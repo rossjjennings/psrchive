@@ -39,13 +39,24 @@ void Pulsar::Archive::resize (int nsubint, int npol, int nchan, int nbin)
 
   int isub, nsub = (int) subints.size();
 
+  if (verbose)
+    cerr << "Pulsar::Archive::resize delete " 
+	 << nsubint << "->" << nsub << " old subints" << endl;
+
   for (isub=nsubint; isub<nsub; isub++)
     delete subints[isub];
 
   subints.resize (nsubint);
 
+  if (verbose)
+    cerr << "Pulsar::Archive::resize create " 
+	 << nsub << "->" << nsubint << " new subints" << endl;
+
   for (isub=nsub; isub<nsubint; isub++)
     subints[isub] = new_Integration ();
+
+  if (verbose)
+    cerr << "Pulsar::Archive::resize subints" << endl;
 
   for (isub=0; isub<nsubint; isub++)
     subints[isub] -> resize (npol, nchan, nbin);

@@ -117,7 +117,7 @@ void Pulsar::Archive::tscrunch (unsigned nscrunch)
     }
   }
 
-  resize (newsub, get_npol(), get_nchan(), get_nbin());
+  resize (newsub);
 }
 
 /////////////////////////////////////////////////////////////////////////////

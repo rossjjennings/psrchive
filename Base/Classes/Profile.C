@@ -267,23 +267,29 @@ void Pulsar::Profile::fold (int nfold)
 //
 // Pulsar::Profile::bscrunch
 //
-void Pulsar::Profile::bscrunch (int nscrunch)
+void Pulsar::Profile::bscrunch (int nscrunch) try
 {
+  if (nscrunch < 1)
+    throw Error (InvalidParam, 0, "nscrunch=%d", nscrunch);
+  
   if (nbin % nscrunch)
-    throw Error (InvalidRange, "Profile::bscrunch",
+    throw Error (InvalidRange, 0, 
 		 "nbin=%d %% nscrunch=%d != 0", nbin, nscrunch);
 
   int newbin = nbin/nscrunch;
 
   for (int i=0; i<newbin; i++) {
-    amps[i] = amps[i*newbin];
+    amps[i] = amps[i*nscrunch];
     for (int j=1; j<nscrunch; j++)
-      amps[i] += amps[i*newbin+j];
+      amps[i] += amps[i*nscrunch+j];
   }
 
   nbin = newbin;
 
   operator *= (1.0/float(nscrunch));
+}
+catch (Error& error) {
+  throw error += "Profile::bscrunch";
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -600,6 +606,16 @@ float Pulsar::Profile::snr() const
 
   return power/min_rms;
 }
+
+#ifdef sun
+
+void Pulsar::Profile::set_amps (const float* data)
+{
+  for (int ibin=0; ibin<nbin; ibin++)
+    amps[ibin] = data[ibin];
+}
+
+#endif
 
 #if 0
 

@@ -41,6 +41,12 @@ void Pulsar::Integration::resize (int new_npol, int new_nchan, int new_nbin)
   if (new_nbin == 0)
     new_nbin = cur_nbin;
 
+  if (verbose)
+    cerr << "Integration::resize npol=" << new_npol
+	 << " nchan=" << new_nchan << " nbin=" << new_nbin << endl 
+	 << " old npol=" << cur_npol
+	 << " nchan=" << cur_nchan << " nbin=" << cur_nbin << endl;
+
   int ipol=0, ichan=0;
 
   for (ipol=0; ipol < cur_npol; ipol++) {
@@ -162,6 +168,10 @@ void Pulsar::Integration::bscrunch (int nscrunch)
 {
   if (get_npol()<1 || get_nchan()<1)
     return;
+
+  if (verbose)
+    cerr << "Integration::bscrunch npol=" << get_npol() 
+	 << " nchan=" << get_nchan() << endl;
 
   try {
     for (int ipol=0; ipol<get_npol(); ipol++)
