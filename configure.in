@@ -7,11 +7,37 @@ AC_INIT([PSRCHIVE],[3.1],[psrchive@astro.swin.edu.au])
 AC_CONFIG_AUX_DIR([config])
 AC_CONFIG_SRCDIR([utils/Makefile.am])
 
+AC_ARG_VAR([PSRHOME],[Standard pulsar home directory])
+AC_ARG_VAR([LOGIN_ARCH],[Architecture-dependent sub-directory of PSRHOME])
+AC_PREFIX_DEFAULT([${PSRHOME:-"/usr/local"}${PSRHOME:+"/$LOGIN_ARCH"}])
+
+if test x"$PSRHOME" = x; then
+  AC_MSG_WARN([The PSRHOME environment variable is not set])
+else
+  if test x"$LOGIN_ARCH" = x; then
+    AC_MSG_WARN([The LOGIN_ARCH environment variable is not set])
+  fi
+fi
+
+#
+# Set up for standard pulsar installation
+#
+CPPFLAGS="-I$PSRHOME/packages/$LOGIN_ARCH/include $CPPFLAGS"
+LDFLAGS="-L$PSRHOME/packages/$LOGIN_ARCH/lib $LDFLAGS"
+
+#
+# For developers: ensure that the config directory m4 macros are parsed
+ACLOCAL="$ACLOCAL -I config"
+# For developers: preserve file modification times
+INSTALL_DATA="${INSTALL} -m 644 -p"
+
 AM_INIT_AUTOMAKE([subdir-objects])
 AC_DISABLE_SHARED
 
 # Disable the debugging information option, -g
 SWIN_DEBUG
+
+# Ensure the SIGPROC find does not over-ride the standard
 SWIN_PROG_FIND
 
 # Checks for programs.
@@ -25,20 +51,9 @@ AC_PROG_LIBTOOL
 AC_PROG_FC
 _STAR_RESTFP_FIX
 
-AC_ARG_VAR([PSRHOME],[Standard pulsar home directory])
-AC_ARG_VAR([LOGIN_ARCH],[Architecture-dependent sub-directory of PSRHOME])
-AC_PREFIX_DEFAULT([$PSRHOME/$LOGIN_ARCH])
-
-# Set up for standard pulsar installation
-CPPFLAGS="-I$PSRHOME/packages/$LOGIN_ARCH/include $CPPFLAGS"
-LDFLAGS="-L$PSRHOME/packages/$LOGIN_ARCH/lib $LDFLAGS"
-
-# For developers: ensure that the config directory m4 macros are parsed
-ACLOCAL="$ACLOCAL -I config"
-# For developers: preserve file modification times
-INSTALL_DATA="${INSTALL} -m 644 -p"
-
+#
 # Checks for libraries
+#
 AC_CHECK_LIB([m], [sin])
 SWIN_LIB_SLA([],AC_MSG_ERROR([Cannot continue without SLALIB]))
 SWIN_LIB_FFTW
@@ -57,13 +72,17 @@ fi
 AC_SUBST(FFT_LIBS)
 FFT_LIBS="$MKL_LIBS $FFTW_LIBS $FFTW3_LIBS"
 
+#
 # Checks for header files.
+#
 AC_HEADER_DIRENT
 AC_HEADER_STDC
 AC_HEADER_SYS_WAIT
 AC_CHECK_HEADERS([arpa/inet.h fcntl.h float.h libintl.h limits.h malloc.h netdb.h netinet/in.h stddef.h stdlib.h string.h strings.h sys/ioctl.h sys/mount.h sys/param.h sys/socket.h sys/statvfs.h sys/time.h sys/vfs.h unistd.h utime.h values.h])
 
+#
 # Checks for typedefs, structures, and compiler characteristics.
+#
 AC_HEADER_STDBOOL
 AC_C_CONST
 AC_C_INLINE
@@ -77,7 +96,9 @@ AC_STRUCT_TM
 AC_C_VOLATILE
 AC_F77_WRAPPERS
 
+#
 # Checks for library functions.
+#
 AC_FUNC_CLOSEDIR_VOID
 AC_FUNC_ERROR_AT_LINE
 AC_PROG_GCC_TRADITIONAL
