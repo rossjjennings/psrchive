@@ -92,6 +92,14 @@ libpsrchive_la_LIBADD += psrfits/libpsrfits.la
 
 endif
 
+
+if HAVE_QT
+
+SUBDIRS += GUI
+
+endif
+
+
 # ######################################################################
 #
 # programs

@@ -106,6 +106,7 @@ AC_CONFIG_FILES([utils/units/Makefile
 		psrchive/psrfits/Makefile
 		psrchive/Extension/Makefile
 		psrchive/Calibration/Makefile
+                psrchive/GUI/Makefile
 		psrchive/Makefile
 		Makefile])
 
