@@ -1,3 +1,3 @@
 
-SUBDIRS	= utils astro
+SUBDIRS	= utils astro psrchive
 
