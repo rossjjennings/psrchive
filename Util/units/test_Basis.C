@@ -19,7 +19,7 @@ int main ()
     }
   }
 
-  cerr << "Basis<double>::Circular basis has expected orientation=ellipticity=pi/4"
+  cerr << "Basis::Circular basis has expected orientation=ellipticity=pi/4"
        << endl;
 
   return 0;
