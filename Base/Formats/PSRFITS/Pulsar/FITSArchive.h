@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/PSRFITS/Pulsar/FITSArchive.h,v $
-   $Revision: 1.9 $
-   $Date: 2003/08/14 19:11:08 $
+   $Revision: 1.10 $
+   $Date: 2003/08/15 07:50:48 $
    $Author: straten $ */
 
 #include <fitsio.h>
@@ -89,6 +89,9 @@ namespace Pulsar {
     class Agent : public Archive::Advocate<FITSArchive> {
 
       public:
+
+        //! Default constructor (necessary even when empty)
+        Agent () {}
 
         //! Advocate the use of TimerArchive to interpret filename
         bool advocate (const char* filename);
