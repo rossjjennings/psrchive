@@ -20,8 +20,9 @@ void Pulsar::TimerArchive::unpack_extensions ()
   }
 
   if (verbose == 3)
-    cerr << "Pulsar::TimerArchive::unpack_extensions using " 
-	 << backend->get_extension_name() << endl;
+    cerr << "Pulsar::TimerArchive::unpack_extensions " 
+	 << backend->get_extension_name() << " name="
+	 << backend->get_name() << endl;
 
 }
 

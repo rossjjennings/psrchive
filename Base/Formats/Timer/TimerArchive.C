@@ -297,6 +297,9 @@ sky_coord Pulsar::TimerArchive::get_coordinates () const
   coordinates.ra().setradians( hdr.ra );
   coordinates.dec().setradians( hdr.dec );
 
+  if (verbose == 3)
+    cerr << "Pulsar::TimerArchive::get_coordinates " << coordinates << endl;
+
   return coordinates;
 }
 
