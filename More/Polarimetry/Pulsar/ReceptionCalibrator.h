@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ReceptionCalibrator.h,v $
-   $Revision: 1.22 $
-   $Date: 2003/05/23 14:54:44 $
-   $Author: straten $ */
+   $Revision: 1.23 $
+   $Date: 2003/05/30 09:34:10 $
+   $Author: pulsar $ */
 
 #ifndef __ReceptionCalibrator_H
 #define __ReceptionCalibrator_H
@@ -88,7 +88,7 @@ namespace Pulsar {
   protected:
 
     //! Calibrate the polarization of the given archive
-    void calibrate (Archive* archive, unsigned path);
+    void calibrate (Archive* archive, bool solve_first);
 
     //! SingleAxis(t)Polar Equation as a function of frequency
     vector<Calibration::SAtPEquation*> equation;
@@ -113,6 +113,8 @@ namespace Pulsar {
 
     //! Discontinuities
     vector<float> PA_jump;
+    //! Current jump
+    unsigned current_jump;
 
     //! The parallactic angle rotation
     Calibration::Parallactic parallactic;

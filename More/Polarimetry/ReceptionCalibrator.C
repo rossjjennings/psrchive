@@ -3,6 +3,8 @@
 #include "Pulsar/Integration.h"
 #include "Pulsar/Archive.h"
 
+#include <algorithm>
+
 /*! The Archive passed to this constructor will be used to supply the first
   guess for each pulse phase bin used to constrain the fit. */
 Pulsar::ReceptionCalibrator::ReceptionCalibrator (const Archive* archive)
@@ -21,6 +23,7 @@ Pulsar::ReceptionCalibrator::ReceptionCalibrator (const Archive* archive)
   pulsar_base_index = 1;
 
   PA_min = PA_max = 0.0;
+  current_jump = 0;
 
   if (archive)
     initial_observation (archive);
@@ -83,6 +86,7 @@ void Pulsar::ReceptionCalibrator::initial_observation (const Archive* data)
   for (unsigned ichan=0; ichan<nchan; ichan++) {
 
     equation[ichan] = new Calibration::SAtPEquation;
+    equation[ichan]->add_backend();
     equation[ichan]->get_model()->add_transformation( &parallactic );
 
   }
@@ -178,6 +182,7 @@ void Pulsar::ReceptionCalibrator::init_estimate (SourceEstimate& estimate)
 void Pulsar::ReceptionCalibrator::add_discontinuity (float PA_radians)
 {
   PA_jump.push_back (PA_radians);
+  sort (PA_jump.begin(), PA_jump.end());
 }
 
 void Pulsar::ReceptionCalibrator::add_discontinuity ()
@@ -187,8 +192,16 @@ void Pulsar::ReceptionCalibrator::add_discontinuity ()
   for (unsigned ichan=0; ichan<nchan; ichan++) {
     equation[ichan]->add_backend();
 
+    unsigned nparam = equation[ichan]->get_model()->get_nparam ();
+
     for (unsigned istate=0; istate<pulsar.size(); istate++)
       equation[ichan]->get_model()->add_state(&(pulsar[istate].state[ichan]));
+
+    if ( equation[ichan]->get_model()->get_nparam () != nparam )
+      throw Error (InvalidState, 
+                   "Pulsar::ReceptionCalibrator::add_discontinuity",
+                   "Additional state error");
+
   }
 
   Pulsar_path ++;
@@ -270,10 +283,11 @@ void Pulsar::ReceptionCalibrator::add_observation (const Archive* data)
     if (PA > PA_max)
       PA_max = PA;
 
-    if (PA_jump.size() && PA > PA_jump[0]) {
-      cerr << "Adding discontinuity at PA " << PA_jump[0]*180.0/M_PI << endl;
+    if (current_jump < PA_jump.size() && PA > PA_jump[current_jump]) {
+      cerr << "Adding discontinuity at PA " 
+           << PA_jump[current_jump]*180.0/M_PI << endl;
       add_discontinuity ();
-      PA_jump.erase(PA_jump.begin());
+      current_jump ++;
     }
 
     for (unsigned ichan=0; ichan<nchan; ichan++) {
@@ -286,7 +300,6 @@ void Pulsar::ReceptionCalibrator::add_observation (const Archive* data)
 	measurements.back().state_index = pulsar_base_index + istate;
       }
 
-      equation[ichan]->get_model()->set_path ( Pulsar_path );
       equation[ichan]->add_measurement (epoch, measurements);
     }
   }
@@ -386,7 +399,7 @@ void Pulsar::ReceptionCalibrator::add_PolnCalibrator (const PolnCalibrator* p)
 	calibrator[ichan].set_infit (istokes, false);
     
       // add the calibrator states to the first signal path
-      equation[ichan]->get_model()->set_path (0);
+      equation[ichan]->get_model()->set_path ( PolnCalibrator_path );
       equation[ichan]->get_model()->add_state( &(calibrator[ichan]) );
 
     }
@@ -428,7 +441,6 @@ void Pulsar::ReceptionCalibrator::add_PolnCalibrator (const PolnCalibrator* p)
 
       state.state_index = calibrator_state_index;
 
-      equation[ichan]->get_model()->set_path (PolnCalibrator_path);
       equation[ichan]->add_measurement (epoch, state);
 
     }
@@ -483,23 +495,20 @@ void Pulsar::ReceptionCalibrator::add_FluxCalibrator (const FluxCalibrator* f)
 void Pulsar::ReceptionCalibrator::precalibrate (Archive* data)
 {
   cerr << "Pulsar::ReceptionCalibrator::precalibrate" << endl;
-  calibrate (data, 1);
+  calibrate (data, false);
 }
 
 //! Calibrate the polarization of the given archive
 void Pulsar::ReceptionCalibrator::calibrate (Archive* data)
 {
   cerr << "Pulsar::ReceptionCalibrator::calibrate" << endl;
-  calibrate (data, 0);
+  calibrate (data, true);
 }
 
 //! Calibrate the polarization of the given archive
-void Pulsar::ReceptionCalibrator::calibrate (Archive* data, unsigned path)
+void Pulsar::ReceptionCalibrator::calibrate (Archive* data, bool solve_first)
 {
-  if (verbose)
-    cerr << "Pulsar::ReceptionCalibrator::calibrate path=" << path << endl;
-
-  if (!is_fit && path == 0)
+  if (!is_fit && solve_first)
     solve ();
 
   string reason;
@@ -507,6 +516,15 @@ void Pulsar::ReceptionCalibrator::calibrate (Archive* data, unsigned path)
     throw Error (InvalidParam, "Pulsar::ReceptionCalibrator::calibrate",
 		 "'" + data->get_filename() + "' does not match "
 		 "'" + uncalibrated->get_filename() + "'" + reason);
+
+  unsigned path = 0;
+
+  if (data->get_type() == Signal::Pulsar)
+    path = Pulsar_path;
+  else if (data->get_type() == Signal::PolnCal)
+    path = PolnCalibrator_path;
+  else
+    cerr << "Warning: unknown Archive type" << endl;
 
   unsigned nsub = data->get_nsubint ();
   unsigned nchan = data->get_nchan ();
@@ -556,7 +574,7 @@ void Pulsar::ReceptionCalibrator::solve (int only_ichan)
 
   bool degenerate_rotV = false;
 
-  if (!PolnCalibrator_path) {
+  if (calibrator.size() == 0) {
 
     if (!FluxCalibrator_path)
       throw Error (InvalidState, "Pulsar::ReceptionCalibrator::solve",
@@ -579,13 +597,17 @@ void Pulsar::ReceptionCalibrator::solve (int only_ichan)
 
   unsigned nchan = equation.size();
 
-  unsigned start_chan = nchan/8;
+  unsigned start_chan = 0;
+
+//nchan/8;
 
   if (only_ichan >= 0)
     start_chan = only_ichan;
+#if 0
   else
     cerr << "Pulsar::ReceptionCalibrator::solve CPSR-II aliasing issue:\n"
           "WARNING not solving the first " << start_chan << " channels" <<endl;
+#endif
 
   for (unsigned ichan=start_chan; ichan<nchan; ichan+=1) try {
 
@@ -664,5 +686,6 @@ void Pulsar::SourceEstimate::update_state ()
   for (unsigned ichan=0; ichan < state.size(); ichan++) {
     Estimate<Stokes<double>, double> stokes = mean[ichan].get_Estimate();
     state[ichan].set_stokes( stokes.val, sqrt(stokes.var) );
+    state[ichan].set_infit (0, false);
   }
 }
