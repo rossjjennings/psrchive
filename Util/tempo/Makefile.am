@@ -1,57 +1,24 @@
 LOCAL_ROOT = ../../..
 include $(LOCAL_ROOT)/include/Makefile.standard
 
-INCLUDES = psrephem.h ephio.h
+INCLUDES = psrephem.h ephio.h ephio_func.h
 NONMODULE = ephio.h
 
 LIBRARY  = libeph.a
 LIB_SRCS = psrephem.C ephio_c.c ephio.f rnd8.f
 
-PROGRAMS = ephtest.c keys2c.c keys2fort.c eph2upd.f 
+PROGRAMS = keys2c.c keys2fort.c eph2upd.f 
 
-TESTS = psrephem_test.C
+TESTS = ephtest.c psrephem_test.C
 psrephem_test.args := 0437-4715
 
 ephtest.LDFLAGS := $(LDFLAGS) -leph -lgenutil $(F77LIBS) -lm
 
 LDFLAGS += -leph -lpolyco -ltimes -lgenutil $(F77LIBS) -lm
 
-##########################################################################
-# optional GTK-- Widget set
-##########################################################################
-ifeq (${PSRGTKMM},yes)
-
-INCLUDES += gtk_psrephem.h
-NOMD_SRCS = gtk_test.C gtk_psrephem.C
-
-LIB_SRCS += gtk_psrephem.C
-INCFLAGS += $(GTKMM_CCFLAGS)
-
-TESTS += gtk_test.C
-gtk_test.LDFLAGS := $(LDFLAGS) $(LGTKMM)
-
-endif
-
-
-##########################################################################
-# optional Qt Widget set
-##########################################################################
-ifeq (${PSRQT},yes)
-
-INCLUDES += qt_psrephem.h qt_editeph.h
-LIB_SRCS += qt_ephemVal.C qt_psrephem.C moc_qt_psrephem.C \
-	qt_editeph.C moc_qt_editeph.C \
-	qt_togleph.C moc_qt_togleph.C \
-	qt_fileeph.C moc_qt_fileeph.C
-
-INCFLAGS += $(IQT)
-
-TESTS += qt_psrephem_test.C
-qt_psrephem_test.LDFLAGS := $(LDFLAGS) $(LQT) -lqtutil
-
-endif
-
 include $(LOCAL_ROOT)/include/Makefile.extended
+
+ephtest : t.eph
 
 CLEAN += keyinfo.com $(LOCAL_ROOT)/include/ephio.h
 
