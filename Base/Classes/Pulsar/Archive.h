@@ -1,26 +1,32 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Archive.h,v $
-   $Revision: 1.8 $
-   $Date: 2002/04/09 17:03:04 $
+   $Revision: 1.9 $
+   $Date: 2002/04/09 17:20:55 $
    $Author: straten $ */
 
 /*! \mainpage 
  
   \section intro Introduction
  
-  The Pulsar Data Archival and Analysis Library 
+  The Pulsar Data Archival and Analysis Library contains a family of
+  C++ classes that may be used in the storage, manipulation, and
+  analysis of the observational data from most pulsar experiments.
+  The various levels of functionality are organized in a heirarchy of
+  inheritance with the base classes implementing a minimal set of
+  general, flexible routines.
  
   \section profiles Pulse Profiles
  
   The basic quantity observed in most pulsar experiments is the pulse
-  profile, and is implemented by the Pulsar::Profile class.  The
+  profile, which is implemented by the Pulsar::Profile class.  The
   Pulsar::Integration class implements a two-dimensional array of
   Pulsar::Profile objects, each integrated over the same time
   interval.  The axis of the 2-D Profile array are polarimetric
   measure and observing frequency.  The Pulsar::Archive class
   implements a one-dimensional array of Pulsar::Integration objects,
-  each starting at the same pulse phase.
+  each with similar observational parameters and each in "pulse phase"
+  with eachother.
 
   The main class used in most high-level code is the Pulsar::Archive
   class, which implements various basic operations on sequences of
