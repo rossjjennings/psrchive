@@ -220,7 +220,7 @@ export:
 # Dependencies should never be changed
 #
 
-INCLUDES = -I$(top_srcdir)/utils/include -I$(top_srcdir)/astro/include \
+INCLUDES = -I$(top_builddir)/utils/include -I$(top_builddir)/astro/include \
         -I$(top_srcdir)/psrchive/Calibration \
 	-I$(top_srcdir)/psrchive/Extension -I$(top_srcdir)/psrchive/timer \
 	-I$(top_srcdir)/psrchive/epn -I$(top_srcdir)/psrchive/psrfits \

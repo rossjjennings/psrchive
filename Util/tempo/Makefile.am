@@ -41,17 +41,19 @@ endif
 # Assembly of include files
 #
 
-keyinfo.com: $(srcdir)/keys.dat ./keys2fort
+$(srcdir)/keyinfo.com: $(srcdir)/keys.dat ./keys2fort
 	cp $(srcdir)/keys.dat .
 	./keys2fort
+	mv keyinfo.com $(srcdir)
 
-ephio.h: $(srcdir)/keys.dat ./keys2c
+$(srcdir)/ephio.h: $(srcdir)/keys.dat ./keys2c
 	cp $(srcdir)/keys.dat .
 	./keys2c
+	mv ephio.h $(srcdir)
 
 # Depend on constructed include files
-ephio.lo: keyinfo.com
-ephio_c.lo: ephio.h
+ephio.lo: $(srcdir)/keyinfo.com
+ephio_c.lo: $(srcdir)/ephio.h
 
 BUILT_SOURCES = ephio.h
 keys2fort_LDADD = 
@@ -62,7 +64,7 @@ keys2c_LDADD =
 # Dependencies should never be changed
 #
 
-INCLUDES = -I$(top_srcdir)/utils/include @CFITSIO_CFLAGS@ @MPI_CFLAGS@
+INCLUDES = -I. -I$(top_builddir)/utils/include @CFITSIO_CFLAGS@ @MPI_CFLAGS@
 
 LDADD = libpsrephem.la $(top_builddir)/utils/libpsrutils.la @FLIBS@
 

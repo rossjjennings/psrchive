@@ -7,5 +7,5 @@ libepn_la_SOURCES = EPNArchive.C epnio.c rwepn.f epnhdr.inc epnio.h
 
 #############################################################################
 
-INCLUDES = -I$(top_srcdir)/utils/include -I$(top_srcdir)/astro/include \
+INCLUDES = -I$(top_builddir)/utils/include -I$(top_builddir)/astro/include \
 	-I$(top_srcdir)/psrchive
