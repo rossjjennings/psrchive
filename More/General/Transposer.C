@@ -8,9 +8,9 @@ Pulsar::Transposer::Transposer (const Archive* _archive)
 {
   archive = _archive;
 
-  x1 = Signal::Phase;
-  x2 = Signal::Frequency;
-  x3 = Signal::Polarization;
+  dim[0] = Signal::Phase;
+  dim[1] = Signal::Frequency;
+  dim[2] = Signal::Polarization;
 
   verbose = false;
 }
@@ -24,47 +24,68 @@ void Pulsar::Transposer::set_Archive (const Pulsar::Archive* _archive)
   archive = _archive; 
 }
 
+void Pulsar::Transposer::set_dim (unsigned idim, Signal::Dimension _dim)
+{
+  range_check (idim, "Pulsar::Transposer::set_dim");
+  dim[idim] = _dim;
+}
+
+unsigned Pulsar::Transposer::get_ndim (unsigned idim)
+{
+  range_check (idim, "Pulsar::Transposer::get_ndim");
+
+  Dimensions dims (archive);
+  return dims.get_ndim( dim[idim] );
+}
+
+void Pulsar::Transposer::range_check (unsigned idim, const char* method) const
+{
+  if (idim > 3)
+    throw Error (InvalidRange, method, "idim=%d > 3", idim);
+}
+
 void Pulsar::Transposer::get_amps (vector<float>& amps) const
 {
   if (!archive)
     throw Error (InvalidState, "Pulsar::Transposer::get_amps",
 		 "no Archive set");
 
-  Dimensions dim (archive);
-  amps.resize ( dim.nsub * dim.npol * dim.nchan * dim.nbin );
+  Dimensions dims (archive);
+  amps.resize ( dims.nsub * dims.npol * dims.nchan * dims.nbin );
 
   // establish the pyramid
   int increment = 1;
-  Dimensions jump;
+  Dimensions stride;
 
-  jump.set_ndim (x1, increment);
-  increment *= dim.get_ndim (x1);
+  stride.set_ndim (dim[0], increment);
+  increment *= dims.get_ndim (dim[0]);
 
-  jump.set_ndim (x2, increment);
-  increment *= dim.get_ndim (x2);
+  stride.set_ndim (dim[1], increment);
+  increment *= dims.get_ndim (dim[1]);
  
-  jump.set_ndim (x3, increment);
-  increment *= dim.get_ndim (x3);
+  stride.set_ndim (dim[2], increment);
+  increment *= dims.get_ndim (dim[2]);
 
-  jump.set_if_zero (increment);
-
-  if (verbose)
-    cerr << "Transposer::get_amps nsub=" << dim.nsub << " npol=" << dim.npol 
-	 << " nchan=" << dim.nchan << " nbin=" << dim.nbin << endl;
+  stride.set_if_zero (increment);
 
   if (verbose)
-    cerr << "Transposer::get_amps jsub=" << jump.nsub << " jpol=" << jump.npol 
-	 << " jchan=" << jump.nchan << " jbin=" << jump.nbin << endl;
+    cerr << "Transposer::get_amps nsub=" << dims.nsub << " npol=" << dims.npol 
+	 << " nchan=" << dims.nchan << " nbin=" << dims.nbin << endl;
+
+  if (verbose)
+    cerr << "Transposer::get_amps jsub=" << stride.nsub 
+         << " jpol=" << stride.npol 
+	 << " jchan=" << stride.nchan << " jbin=" << stride.nbin << endl;
   
-  for (unsigned isub=0; isub < dim.nsub; isub++)
+  for (unsigned isub=0; isub < dims.nsub; isub++)
     get_amps (archive->get_Integration(isub), 
-	      &(amps[0]) + isub*jump.nsub,
-	      jump);
+	      &(amps[0]) + isub*stride.nsub,
+	      stride);
 
 }
 
 void Pulsar::Transposer::get_amps (const Integration* integration,
-				   float* amps, const Dimensions& dim) const
+				   float* amps, const Dimensions& dims) const
 {
   unsigned npol = integration->get_npol();
   unsigned nchan = integration->get_nchan();
@@ -73,11 +94,11 @@ void Pulsar::Transposer::get_amps (const Integration* integration,
     cerr << "int.npol=" << npol << " int.nchan=" << nchan << endl;
 
   for (unsigned ipol=0; ipol<npol; ipol++) {
-    float* chandat = amps + ipol * dim.npol;
+    float* chandat = amps + ipol * dims.npol;
     for (unsigned ichan=0; ichan<nchan; ichan++)
       get_amps (integration->get_Profile(ipol, ichan), 
-		chandat + ichan * dim.nchan,
-		dim.nbin);
+		chandat + ichan * dims.nchan,
+		dims.nbin);
   }
 }
 

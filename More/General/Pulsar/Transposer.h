@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/Transposer.h,v $
-   $Revision: 1.1 $
-   $Date: 2004/07/16 07:27:47 $
+   $Revision: 1.2 $
+   $Date: 2004/07/17 06:14:02 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Transposer_h
@@ -32,14 +32,11 @@ namespace Pulsar {
     //! Set the Archive from which data will be read
     void set_Archive (const Pulsar::Archive* archive);
 
-    //! Set the first dimension
-    void set_dim1 (Signal::Dimension dim1) { x1 = dim1; }
+    //! Set the specified dimension
+    void set_dim (unsigned idim, Signal::Dimension dim);
 
-    //! Set the second dimension
-    void set_dim2 (Signal::Dimension dim2) { x2 = dim2; }
-
-    //! Set the third dimension
-    void set_dim3 (Signal::Dimension dim3) { x3 = dim3; }
+    //! Get the size of the specified dimension
+    unsigned get_ndim (unsigned idim);
 
     //! Returns amplitude data; ordered according to the specified dimension
     void get_amps (vector<float>& amps) const;
@@ -51,11 +48,10 @@ namespace Pulsar {
 
     void get_amps (const Integration* , float* , const Dimensions& dim) const;
     void get_amps (const Profile* , float* , unsigned jbin) const;
+    void range_check (unsigned idim, const char* method) const;
 
     Reference::To<const Archive> archive;
-    Signal::Dimension x1;
-    Signal::Dimension x2;
-    Signal::Dimension x3;
+    Signal::Dimension dim[4];
 
   };
 
