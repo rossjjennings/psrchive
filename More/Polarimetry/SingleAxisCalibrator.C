@@ -47,8 +47,6 @@ Pulsar::SingleAxisCalibrator::solve (const vector<Estimate<double> >& source,
   solver->set_output (stokes_source);
   solver->solve (model);
 
-  // model->solve( reference_source, stokes_source );
-
   return model.release();
 }
 
