@@ -112,9 +112,14 @@ double Pulsar::FluxCalibratorDatabase::Entry::get_flux_mJy (double MHz)
     double ret = spectral_coeffs[0];
     double log_freq = log10f(MHz);
 
+    if( verbose )
+      fprintf(stderr,"Pulsar::FluxCalibratorDatabase::Entry::get_flux_mJy Got f=%f MHz and log(f)=%f and ret=%f\n",
+	      MHz, log_freq, ret);
+
     for( unsigned i=1; i<spectral_coeffs.size(); i++)
       ret += spectral_coeffs[i]*pow(log_freq,double(i));
-    return pow(10.0,ret);
+
+    return 1000.0*pow(10.0,ret);
   }
 
   return pow (MHz/reference_frequency, -spectral_index) * reference_flux * 1e3;
