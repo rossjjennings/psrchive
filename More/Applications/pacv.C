@@ -216,7 +216,7 @@ int main (int argc, char** argv)
       if (!plot_calibrator_stokes) {
 
 	for (unsigned ichan=0; ichan<zapchan.size(); ichan++)
-	  calibrator->set_Transformation_invalid (zapchan[ichan]);
+	  calibrator->set_transformation_invalid (zapchan[ichan]);
 	
 	if (verbose)
 	  cerr << "pacv: Plotting PolnCalibrator" << endl;
