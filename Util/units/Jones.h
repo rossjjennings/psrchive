@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Jones.h,v $
-   $Revision: 1.20 $
-   $Date: 2004/10/26 12:40:32 $
+   $Revision: 1.21 $
+   $Date: 2004/10/26 13:06:19 $
    $Author: straten $ */
 
 #ifndef __Jones_H
@@ -108,11 +108,13 @@ public:
     { a*=b; return a; }
 
   //! Binary multiplication of Jones<T> and complex<U>
-  template<typename U> const friend Jones operator * (Jones a, std::complex<U> c)
+  template<typename U> 
+  const friend Jones operator * (Jones a, std::complex<U> c)
     { a*=c; return a; }
 
   //! Binary multiplication of complex<U> and Jones<T>
-  template<typename U> const friend Jones operator * (std::complex<U> c, Jones a)
+  template<typename U>
+  const friend Jones operator * (std::complex<U> c, Jones a)
     { a*=c; return a; }
 
   //! Binary multiplication of Jones<T> and T
@@ -166,11 +168,11 @@ const Jones<T>& Jones<T>::identity ()
 //! Enable the Jones class to be passed to certain template functions
 template<typename T> struct DatumTraits< Jones<T> >
 {
-  ElementTraits<T> element_traits;
+  ElementTraits<complex<T>> element_traits;
   static inline unsigned ndim () { return 4; }
-  static inline T& element (Jones<T>& t, unsigned idim) 
+  static inline complex<T>& element (Jones<T>& t, unsigned idim) 
   { return t[idim]; }
-  static inline const T& element (const Jones<T>& t, unsigned idim)
+  static inline const complex<T>& element (const Jones<T>& t, unsigned idim)
   { return t[idim]; }
 };
 
