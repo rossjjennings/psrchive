@@ -443,9 +443,9 @@ int MJD::gregorian (struct tm* gregdate, double* fsec) const
   int n_four = 4  * (julian_day+((6*((4*julian_day-17918)/146097))/4+1)/2-37);
   int n_dten = 10 * (((n_four-237)%1461)/4) + 5;
 
-  gregdate->tm_year  = n_four/1461 - 4712 - 1900; // extra -1900 for C struct tm
-  gregdate->tm_mon   = (n_dten/306+2)%12 + 1;
-  gregdate->tm_mday  = (n_dten%306)/10 + 1;
+  gregdate->tm_year = n_four/1461 - 4712 - 1900; // extra -1900 for C struct tm
+  gregdate->tm_mon  = (n_dten/306+2)%12;         // struct tm mon 0->11
+  gregdate->tm_mday = (n_dten%306)/10 + 1;
 
   ss2hhmmss (&gregdate->tm_hour, &gregdate->tm_min, &gregdate->tm_sec, secs);
 

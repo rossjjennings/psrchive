@@ -255,6 +255,8 @@ int str2tm (struct tm* time, const char* str)
   if ((trav < 0) || !isdigit(temp[trav]))
     trav++;
   sscanf (temp+trav, "%2d", &(time->tm_mon));
+  /* month is stored 0->11 in struct tm */
+  time->tm_mon --;
 
   /* cut out minutes and extra characters */
   endstr = trav-1;
@@ -294,14 +296,13 @@ int tm2utc (utc_t *time, struct tm calendar)
   int days_in_month[12] = {31,28,31,30,31,30,31,31,30,31,30,31};
   int month;
 
-  if (UTC_LEAPYEAR(calendar.tm_year+1900)) {
+  time->tm_year = 1900 + calendar.tm_year;
+  if (UTC_LEAPYEAR(time->tm_year)) {
     days_in_month[1] = 29;
   }
-
-  time->tm_year = 1900 + calendar.tm_year;
   time->tm_yday = 0;
-  for (month=1; month<calendar.tm_mon; month++) {
-    time->tm_yday += days_in_month[month-1];
+  for (month=0; month<calendar.tm_mon; month++) {
+    time->tm_yday += days_in_month[month];
   }
   time->tm_yday += calendar.tm_mday;
   time->tm_hour = calendar.tm_hour;
@@ -356,6 +357,8 @@ int utc2tm (struct tm *calendar, utc_t time)
   calendar->tm_isdst = -1;
 
   date = mktime (calendar);
+  /* fprintf (stderr, 
+     "utc2tm: month b4:%d after:%d\n", month, calendar->tm_mon); */
   if (date == (time_t)-1)
     return -1;
   return 0;

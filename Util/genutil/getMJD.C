@@ -3,9 +3,6 @@
 #include <string.h>
 #include <time.h>
 
-// #include <iostream>
-
-#define MPI
 #include "MJD.h"
 
 int main (int argc, char* argv[]) 
