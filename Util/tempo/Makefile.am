@@ -10,6 +10,7 @@ LIB_SRCS = psrephem.C ephio_c.c ephio.f rnd8.f
 PROGRAMS = ephtest.c keys2c.c keys2fort.c eph2upd.f 
 
 TESTS = psrephem_test.C
+psrephem_test.args := 0437-4715
 
 ephtest.LDFLAGS := $(LDFLAGS) -leph -lgenutil $(F77LIBS) -lm
 
