@@ -58,8 +58,9 @@ int fwrite_compressed (FILE* fptr, vector<float>& vals)
   return 0;
 }
 
-int fread_compressed (FILE* fptr, vector<float>* vals, bool swapendian,
-		      bool correct_uint64_bug)
+bool correct_uint64_bug = false;
+
+int fread_compressed (FILE* fptr, vector<float>* vals, bool swapendian)
 {
   size_t red;
 
