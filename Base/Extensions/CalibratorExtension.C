@@ -36,6 +36,16 @@ CalibratorExtension::~CalibratorExtension ()
 {
 }
 
+void Pulsar::CalibratorExtension::set_type (Calibrator::Type _type)
+{
+  type = _type;
+}
+
+Pulsar::Calibrator::Type Pulsar::CalibratorExtension::get_type () const
+{
+  return type;
+}
+
 MJD CalibratorExtension::get_epoch () const
 {
   return epoch;

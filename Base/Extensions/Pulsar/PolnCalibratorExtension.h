@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/PolnCalibratorExtension.h,v $
-   $Revision: 1.12 $
-   $Date: 2004/10/08 15:42:28 $
+   $Revision: 1.13 $
+   $Date: 2004/10/11 14:26:44 $
    $Author: straten $ */
 
 #ifndef __PolnCalibratorExtension_h
@@ -10,7 +10,6 @@
 
 #include "Calibration/Complex2.h"
 #include "Pulsar/CalibratorExtension.h"
-#include "Pulsar/Calibrator.h"
 
 namespace Pulsar {
 
@@ -44,8 +43,6 @@ namespace Pulsar {
 
     //! Set the type of the instrumental response parameterization
     void set_type (Calibrator::Type type);
-    //! Get the type of the instrumental response parameterization
-    Calibrator::Type get_type () const;
 
     //! Set the number of frequency channels
     void set_nchan (unsigned nchan);
@@ -64,9 +61,6 @@ namespace Pulsar {
 
   protected:
 
-    //! Type of the instrumental response parameterization
-    Calibrator::Type type;
-    
     //! The instrumental response as a function of frequency
     vector< Reference::To< ::Calibration::Complex2 > > response;
 

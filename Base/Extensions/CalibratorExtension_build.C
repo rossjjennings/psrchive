@@ -14,6 +14,7 @@ void Pulsar::CalibratorExtension::build (const Calibrator* calibrator)
     if (Archive::verbose == 3)
       cerr << "Pulsar::CalibratorExtension::build" << endl;
 
+    set_type ( calibrator->get_type()  );
     set_epoch( calibrator->get_epoch() );
     set_nchan( calibrator->get_nchan() );
 

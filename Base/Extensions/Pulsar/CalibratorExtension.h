@@ -1,18 +1,17 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/CalibratorExtension.h,v $
-   $Revision: 1.5 $
-   $Date: 2004/10/08 15:42:21 $
+   $Revision: 1.6 $
+   $Date: 2004/10/11 14:26:44 $
    $Author: straten $ */
 
 #ifndef __CalibratorExtension_h
 #define __CalibratorExtension_h
 
 #include "Pulsar/Archive.h"
+#include "Pulsar/Calibrator.h"
 
 namespace Pulsar {
-
-  class Calibrator;
 
   //! Calibrator Extension
   /*! This base class Extension implements the storage of Calibrator data. */
@@ -39,8 +38,13 @@ namespace Pulsar {
     //! Construct from a Calibrator instance
     void build (const Calibrator*);
 
+    //! Set the type of the calibrator
+    virtual void set_type (Calibrator::Type type);
+    //! Get the type of the calibrator
+    Calibrator::Type get_type () const;
+
     //! Set the reference epoch of the calibration experiment
-    void set_epoch (const MJD& epoch);
+    virtual void set_epoch (const MJD& epoch);
     //! Get the reference epoch of the calibration experiment
     MJD get_epoch () const;
 
@@ -61,6 +65,9 @@ namespace Pulsar {
 
     protected:
 
+    //! Type of the calibrator
+    Calibrator::Type type;
+    
     //! The reference epoch of the calibration experiment
     MJD epoch;
 

@@ -58,12 +58,6 @@ void Pulsar::PolnCalibratorExtension::set_type (Calibrator::Type _type)
   construct ();
 }
 
-//! Get the type of the instrumental response parameterization
-Pulsar::Calibrator::Type Pulsar::PolnCalibratorExtension::get_type () const
-{
-  return type;
-}
-
 
 //! Set the number of frequency channels
 void Pulsar::PolnCalibratorExtension::set_nchan (unsigned _nchan)
