@@ -17,9 +17,10 @@ c
       real*4 pr(*),rmsp,snrmax,smmax
 c
       integer ksm,j,k,kw,nn,ja,jj
-      real*4 s,wrk(512),al,an,sn,smax
+      real*4 s,wrk(2048),al,an,sn,smax
 c
       snrmax=0.
+      if (nbin>1024) stop 'Increase dim of wrk in smooth_mw
 c---------------------------------------
 c  remove baseline
       ksm=nbin/2.5+0.5
@@ -81,4 +82,6 @@ C rte old interface
       
       call smooth_mw(pr,nbin,32, rmsp,kwmax,snrmax,smmax)
       end
+
+
 
