@@ -42,7 +42,7 @@ void Pulsar::Integration::defaraday (double rm, double rm_iono)
     
     Qtemp = *(profiles[1][ichan]);
     Utemp = *(profiles[2][ichan]);
-
+    
     Qtemp *= cp;
     Utemp *= sp;
     
@@ -51,7 +51,7 @@ void Pulsar::Integration::defaraday (double rm, double rm_iono)
     Reference::To<Pulsar::Profile> Qnew = Qtemp.clone();
     
     Qtemp = *(profiles[1][ichan]);
-    Utemp = *(profiles[1][ichan]);
+    Utemp = *(profiles[2][ichan]);
     
     Utemp *= cp;
     Qtemp *= sp;
