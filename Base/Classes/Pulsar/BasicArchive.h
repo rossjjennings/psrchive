@@ -1,13 +1,11 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/BasicArchive.h,v $
-   $Revision: 1.4 $
-   $Date: 2002/04/17 02:09:29 $
+   $Revision: 1.5 $
+   $Date: 2002/04/17 13:35:53 $
    $Author: straten $ */
 
 #include "Archive.h"
-#include "polyco.h"
-#include "psrephem.h"
   
 namespace Pulsar {
 
@@ -53,9 +51,6 @@ namespace Pulsar {
     double      chanbw,bandwidth,cenfreq;
     float       calfreq,caldcyc,calphase;
     bool        facorr,pacorr,rm_ism,rm_iono,dedisp;
-
-    psrephem    ephemeris;
-    polyco      model;
 
     void init();
 
