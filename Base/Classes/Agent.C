@@ -62,10 +62,13 @@ void Pulsar::Archive::Agent::verify_revisions ()
 
 bool Pulsar::Archive::Agent::init () try {
 
-  cerr << "Pulsar::Archive::Agent::init " 
-       << Registry::List<Archive>::mode << endl;
+#ifdef _PSRCHIVE_STATIC
 
-#ifndef _PSRCHIVE_STATIC
+  cerr << "Pulsar::Archive::Agent::init <static>" << endl;
+
+#else
+
+  cerr << "Pulsar::Archive::Agent::init <dynamic>" << endl;
 
   Pulsar::BasicArchive::ensure_linkage();
   plugin_load ();
