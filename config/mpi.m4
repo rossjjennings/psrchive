@@ -55,11 +55,14 @@ AC_DEFUN([SWIN_LIB_MPI],
                           /usr/local/mpi/include"
 
     ac_save_CPPFLAGS="$CPPFLAGS"
+    ac_save_CC="$CC"
+    CC=$CXX
 
     for cf_dir in $cf_include_path_list; do
       CPPFLAGS="-I$cf_dir $ac_save_CPPFLAGS"
       AC_TRY_COMPILE([#include <mpi.h>],[MPI_Init(0,0);],
                      have_mpi=yes, have_mpi=no)
+
       if test x"$have_mpi" = xyes; then
         if test x"$cf_dir" == x.; then
           MPI_CFLAGS=""
@@ -69,6 +72,8 @@ AC_DEFUN([SWIN_LIB_MPI],
         break
       fi
     done
+
+    CC=$ac_save_CC
 
     ## Look for the library ##
     cf_lib_path_list="$with_mpi_lib_dir .
