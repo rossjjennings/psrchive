@@ -156,8 +156,11 @@ int main (int argc, char *argv[]) {
     }
   }
   
-  char opath[128];
-  getcwd(opath, 128);
+  char tmppath[256];
+  char opath[256];
+  getcwd(tmppath, 256);
+ 
+  sprintf(opath,"%s/",tmppath);
   
   for (int ai=optind; ai<argc; ai++)
     dirglob (&archives, argv[ai]);
