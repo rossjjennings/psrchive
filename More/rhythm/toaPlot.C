@@ -160,10 +160,10 @@ void toaPlot::handleEvent (float x, float y, char ch)
 	int tempint = data[0].id;
 	float distance = 0.0;
 
-	float min = sqrt(pow(x-float(data[0].x),2.0) + pow(y-float(data[0].y),2.0));
+	float min = sqrt(pow(x-float(data[0].x), float(2.0)) + pow(y-float(data[0].y), float(2.0)));
 
 	for (unsigned i = 1; i < data.size(); i++) {
-	  distance = sqrt(pow(x-float(data[i].x),2.0) + pow(y-float(data[i].y),2.0));
+	  distance = sqrt(pow(x-float(data[i].x), float(2.0)) + pow(y-float(data[i].y), float(2.0)));
 	  if (distance < min) {
 	    min = distance;
 	    tempint = data[i].id;
