@@ -11,7 +11,6 @@
 #include "Error.h"
 
 #include "interpolate.h"
-#include "smooth.h"
 #include "templates.h"
 #include "median_smooth.h"
 
