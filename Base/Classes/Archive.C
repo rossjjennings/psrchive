@@ -462,7 +462,7 @@ void Pulsar::Archive::set_ephemeris (const psrephem& new_ephemeris)
   if (get_dispersion_measure() != ephemeris->get_dm()) {
     cerr << "Archive::set_ephemeris Informative Notice:\n" 
 	 << "   Dispersion measure will be updated to match new ephemeris\n"
-	 << "   Old DM = " << get_dispersion_measure() << endl;
+	 << "   Old DM = " << get_dispersion_measure() << endl
 	 << "   New DM = " << ephemeris->get_dm() << endl;
     set_dispersion_measure(ephemeris->get_dm());
   }
