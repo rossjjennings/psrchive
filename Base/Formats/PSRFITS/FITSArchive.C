@@ -704,8 +704,9 @@ void Pulsar::FITSArchive::load_header (const char* filename)
   }
   else
     ephemeris = 0;
-
-
+  
+  dispersion_measure = ephemeris->get_dm();
+  
   // Load the polyco from the FITS file
   
   fits_movnam_hdu (fptr, BINARY_TBL, "POLYCO", 0, &status);
@@ -721,7 +722,6 @@ void Pulsar::FITSArchive::load_header (const char* filename)
   }
   else
     model = 0;
-
 
   // Move to the SUBINT Header Data Unit
   
@@ -1392,7 +1392,9 @@ try {
 	 << endl;
 
   // Write the ephemeris to the FITS file
-
+  
+  ephemeris->set_dm(dispersion_measure);
+  
   if (ephemeris) {
 
    ephemeris->unload(fptr);
