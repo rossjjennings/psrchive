@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Estimate.h,v $
-   $Revision: 1.8 $
-   $Date: 2003/02/20 15:48:21 $
+   $Revision: 1.9 $
+   $Date: 2003/02/21 09:23:59 $
    $Author: straten $ */
 
 #ifndef __Estimate_h
@@ -22,6 +22,9 @@ template <typename T>
 class Estimate
 {
  public:
+  //! Enables vector< Estimate<T> > to be used in fft::interpolate template
+  static unsigned ndim;
+
   //! The value, \f$ x \f$
   T val;
   //! The variance of the value, \f$ \sigma_x^2 \f$
@@ -36,6 +39,14 @@ class Estimate
   //! Assignment operator
   const Estimate& operator= (const Estimate& d)
   { val=d.val; var=d.var; return *this; }
+
+  //! Array access to value
+  T& operator [] (unsigned n)
+  { return val; }
+
+  //! Array access to value
+  T operator [] (unsigned n) const
+  { return val; }
 
   //! Addition operator
   const Estimate& operator+= (const Estimate& d)
@@ -106,6 +117,11 @@ class Estimate
   { return Estimate (std::sqrt (u.val), 0.25*u.var/fabs(u.val)); }
 
 };
+
+
+template <typename T>
+unsigned Estimate<T>::ndim = 1;
+
 
 //! Useful for quickly printing the values
 template<typename T>
