@@ -20,10 +20,6 @@ Pulsar::IntegrationManager::~IntegrationManager ()
 { 
   if (verbose)
     cerr << "IntegrationManager::destructor" << endl;
-
-  for (unsigned isub=0; isub<subints.size(); isub++)
-    if (subints[isub])
-      delete subints[isub];
 }
 
 /*!
@@ -73,7 +69,7 @@ void Pulsar::IntegrationManager::append (const IntegrationManager* more)
 
 /*!
   If any current dimension is greater than that requested, the Profiles
-  will be deleted and the dimension resized.  If any current dimension is
+  will be destroyed and the dimension resized.  If any current dimension is
   smaller than that requested, the dimension will be resized and new Profiles
   will be constructed.  If any of the supplied paramaters is equal to zero,
   the dimension is left unchanged.

@@ -28,10 +28,6 @@ Pulsar::Integration::~Integration ()
 {
   if (verbose)
     cerr << "Pulsar::Integration destructor" << endl;
-
-  for (unsigned ipol=0; ipol<profiles.size(); ipol++)
-    for (unsigned ichan=0; ichan<profiles[ipol].size(); ichan++)
-      delete profiles[ipol][ichan];
 }
 
 
