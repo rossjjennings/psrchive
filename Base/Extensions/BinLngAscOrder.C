@@ -117,8 +117,7 @@ void Pulsar::BinLngAscOrder::organise (Archive* arch, unsigned newsub)
       if ((lngs[j] >= (minlng + (i*LngGap))) && 
 	  (lngs[j] <= (minlng + ((i+1)*LngGap))) && !used[j]) {
 	if (first) {
-	  *(arch->get_Integration(i)) = 
-	    *(arch->new_Integration(copy->get_Integration(j)));
+	  *(arch->get_Integration(i)) = *(copy->get_Integration(j));
 	  set_Index(i, lngs[j]);
 	  used[j] = true;
 	  tally += 1;

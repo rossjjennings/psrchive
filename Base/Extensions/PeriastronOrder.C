@@ -20,10 +20,7 @@ Pulsar::PeriastronOrder::PeriastronOrder (const PeriastronOrder& extension)
 {
   IndexState = extension.IndexState;
   Unit       = extension.Unit;
-  
-  indices.resize(extension.indices.size());
-  for (unsigned i = 0; i < indices.size(); i++)
-    indices[i] = extension.indices[i];
+  indices    = extension.indices;
 }
 
 //! Operator =
@@ -32,11 +29,7 @@ Pulsar::PeriastronOrder::operator= (const PeriastronOrder& extension)
 {
   IndexState = extension.IndexState;
   Unit       = extension.Unit;
-  
-  indices.resize(extension.indices.size());
-  for (unsigned i = 0; i < indices.size(); i++)
-    indices[i] = extension.indices[i];
-  
+  indices    = extension.indices;
   return *this;
 }
 
@@ -61,20 +54,18 @@ void Pulsar::PeriastronOrder::organise (Archive* arch, unsigned newsub)
   
   // Pad to avoid thorwing exceptions when get_Integration is called
   indices.resize(arch->get_nsubint());
-  phases.resize(arch->get_nsubint());
-  used.resize(arch->get_nsubint());
-
+  
   for (unsigned i = 0; i < arch->get_nsubint(); i++) {
-    phases[i] = get_binphs_peri((arch->get_Integration(i)->get_epoch()).in_days(),
-				arch->get_ephemeris(), 
-				arch->get_Integration(i)->get_centre_frequency(),
-				arch->get_telescope_code());
+    phases.push_back(get_binphs_peri((arch->get_Integration(i)->get_epoch()).in_days(),
+				       arch->get_ephemeris(), 
+				       arch->get_Integration(i)->get_centre_frequency(),
+				       arch->get_telescope_code()));
     if (isnan(phases[i])) {
       throw Error(FailedCall, "PeriastronOrder::organise",
 		  "get_binphs_peri returned nan");
     }
-
-    used[i] = false;
+    
+    used.push_back(false);
     
     // The problem with this section is that archives with gaps in the
     // phase coverage have the total coverage mis-represented. This
@@ -125,8 +116,7 @@ void Pulsar::PeriastronOrder::organise (Archive* arch, unsigned newsub)
       if ((phases[j] >= (minphs + (i*PhaseGap))) && 
 	  (phases[j] <= (minphs + ((i+1)*PhaseGap))) && !used[j]) {
 	if (first) {
-	  *(arch->get_Integration(i)) = 
-	    *(arch->new_Integration(copy->get_Integration(j)));
+	  *(arch->get_Integration(i)) = *(copy->get_Integration(j));
 	  set_Index(i, phases[j]);
 	  used[j] = true;
 	  tally += 1;
