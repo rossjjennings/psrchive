@@ -4,6 +4,7 @@
 #include "Pulsar/Profile.h"
 #include "Error.h"
 
+#include "fcomp.h"
 #include "convert_endian.h"
 
 int Pulsar::TimerProfile_poln (Signal::Component state)
@@ -48,9 +49,6 @@ int Pulsar::TimerProfile_poln (Signal::Component state)
     return -1;
   }
 }
-
-// defined in TimerProfile_load.C
-int fcompwrite (unsigned nvals, const float * vals, FILE * fptr);
 
 /*!
   \pre The Profile must have been resized before calling this function
