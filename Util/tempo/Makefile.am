@@ -6,7 +6,9 @@ INCLUDES = psrephem.h ephio.h
 LIBRARY  = libeph.a
 LIB_SRCS = psrephem.C ephio_c.c ephio.f rnd8.f
 
-PROGRAMS = ephtest.c keys2c.c keys2fort.c eph2upd.f psrephem_test.C
+PROGRAMS = ephtest.c keys2c.c keys2fort.c eph2upd.f 
+
+TESTS = psrephem_test.C
 
 LDFLAGS  += -leph -lpolyco -ltimes -lgenutil $(LGTKMM) $(F77LIBS) -lsla -lm
 

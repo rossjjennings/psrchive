@@ -111,10 +111,14 @@ int psrephem::load (const char* filename)
 {
   tempo11 = 1;
   size_dataspace();
-
+  
   // when Sun compilers catch up: const_cast<char*>(filename)
-  rd_eph (filename, parmStatus, ephemstr, value_double, 
+  // this got worse - 5.0 won't accept the const, and 4.2
+  // won't accept the dynamic cast - MCB
+  char * fname = strdup(filename);
+  rd_eph (fname, parmStatus, ephemstr, value_double, 
 	  value_integer, error_double);
+  free(fname);
   int all_zero = 1;
   for (int i=0;i<EPH_NUM_KEYS;i++)  {
     if (parmStatus[i] == 1) {
@@ -160,8 +164,10 @@ int psrephem::unload (const char* filename) const
     for (int i=0;i<EPH_NUM_KEYS;i++)
       strcpy (ephemstr[i], value_str[i].data());
     // when Sun compilers catch up: const_cast<char*>(filename)
-    int istat = wr_eph (filename, parmStatus, ephemstr, value_double,
+    char * fname = strdup(filename);
+    int istat = wr_eph (fname, parmStatus, ephemstr, value_double,
 		        value_integer, error_double);
+    free(fname);
     if (!istat) {
       fprintf(stderr,"psrephem::unload error wr_eph %s\n", filename);
       return -1;

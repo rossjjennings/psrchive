@@ -3,7 +3,7 @@
 
 #include <stdio.h>
 #include <string>
-
+#include "psr_cpp.h"
 #define PSREPHEM_TMP_FNAME ".psrephem_XXXXXX"
 
 class psrephem 

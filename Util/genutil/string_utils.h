@@ -6,6 +6,10 @@
 #include <string>
 #include <vector>
 
+#ifdef __cplusplus
+
+#include "psr_cpp.h"
+
 // ///////////////////////////////////////////////////////////
 // reads up to 'nbytes' (or to eof) from 'fptr', adding them 
 // to 'str'.  returns actual bytes read or -1 on error
@@ -24,7 +28,7 @@ int stringload (vector<string>* lines, FILE* fptr);
 // characters in 'delimiters'.  the substring and any leading
 // delimiter characters are removed from 'instr'
 // ///////////////////////////////////////////////////////////
-string stringtok (string* instr, const string& delimiters);
+string stringtok (string * instr, const string & delimiters);
 
 // ///////////////////////////////////////////////////////////
 // other interfaces to overload stringtok()
@@ -54,6 +58,8 @@ inline int stringlen (int val, unsigned precision = 0)
 
 inline int stringlen (float val, unsigned precision = 6)
 { return stringlen (double(val), precision); }
+
+#endif
 
 #endif
 

@@ -7,6 +7,7 @@
 #include "mpi.h"
 #endif
 #include <string>
+#include "psr_cpp.h"
 
 class Phase {
 
