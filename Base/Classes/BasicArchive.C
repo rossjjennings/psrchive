@@ -14,7 +14,7 @@ void Pulsar::BasicArchive::init ()
   
   nbin = nchan = npol = nsubint = 0;
   
-  chanbw = bandwidth = cenfreq = 0.0;
+  bandwidth = cenfreq = 0.0;
   
   calfreq = caldcyc = calphase = 0.0;
   

@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/BasicArchive.h,v $
-   $Revision: 1.8 $
-   $Date: 2002/04/23 09:08:46 $
+   $Revision: 1.9 $
+   $Date: 2002/04/26 06:01:18 $
    $Author: pulsar $ */
 
 #include "Archive.h"
@@ -48,9 +48,12 @@ namespace Pulsar {
 
     string      psrname,telid,frontend,backend,datatype;
     int         nbin,nchan,npol,nsubint;
-    double      chanbw,bandwidth,cenfreq;
+    double      bandwidth,cenfreq;
     float       calfreq,caldcyc,calphase;
     bool        facorr,pacorr,rm_ism,rm_iono,dedisp;
+
+    //! name of the file from which the archive was loaded
+    string filename;
 
     void init();
 
@@ -60,6 +63,9 @@ namespace Pulsar {
     void unload (const char * foo) { cerr << "Cannot unload " << foo << endl; }
 
     void load (const char * foo) { cerr << "Cannot load " << foo << endl; }
+
+    //! Get the name of the thing from which the archive was loaded
+    virtual string get_filename () { return filename; }
 
     //! Returns a pointer to a new copy of self
     Archive* clone () const { return new BasicArchive (*this); }
@@ -284,13 +290,16 @@ namespace Pulsar {
     //! Get the channel bandwidth
     double get_chanbw () const
     {
-      return chanbw;
+      if (nchan)
+	return bandwidth / nchan;
+      else
+	return 0;
     }
 
     //! Set the channel bandwidth
     void set_chanbw (double chan_width)
     {
-      chanbw = chan_width;
+      bandwidth = chan_width * nchan;
     }
 
   protected:
@@ -301,15 +310,4 @@ namespace Pulsar {
   
 
 }
-
-
-
-
-
-
-
-
-
-
-
 
