@@ -1,12 +1,11 @@
-#include <stdio.h>
-#include <assert.h>
-
 #include "Pulsar/TimerIntegration.h"
 #include "Pulsar/Profile.h"
 #include "Error.h"
 
 #include "convert_endian.h"
 #include "fcomp.h"
+
+#include <stdio.h>
 
 /*!
   \pre The Profile must have been resized before calling this function
@@ -51,11 +50,11 @@ void Pulsar::TimerProfile_load (FILE* fptr, Profile* profile,
 
   if (unsigned(nbin) != profile->get_nbin())
     throw Error (InvalidState, "TimerProfile_load",
-		 "nbin=%d Profile::nbin=%d", nbin, profile->get_nbin());
+		 "nbin=%d != Profile::nbin=%d", nbin, profile->get_nbin());
 
   if (Integration::verbose)
-    fprintf (stderr, "TimerProfile_load nbin:%d poln:%d wt:%f cfreq:%f\n",
-	     nbin, poln, wt, centrefreq);
+    cerr << "TimerProfile_load nbin=" << nbin << " poln=" << poln
+         << "wt=" << wt << " cfreq=" << centrefreq << endl;
 
   // uncompress the data and read in as 2byte integers
   if (fcompread (nbin,profile->get_amps(),fptr,big_endian)!=0)

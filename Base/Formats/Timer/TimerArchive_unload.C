@@ -112,7 +112,8 @@ void Pulsar::TimerArchive::hdr_unload (FILE* fptr) const
 
   else {
 
-    if (verbose == 3) cerr << "TimerArchive::hdr_unload get polyco size" << endl;
+    if (verbose == 3)
+      cerr << "TimerArchive::hdr_unload get polyco size" << endl;
 
     header->nbytespoly = model->unload (&text);
     if (hdr.nbytespoly < 0)
@@ -128,7 +129,8 @@ void Pulsar::TimerArchive::hdr_unload (FILE* fptr) const
 
   else {
 
-    if (verbose == 3) cerr << "TimerArchive::hdr_unload get psrephem size" << endl;
+    if (verbose == 3)
+      cerr << "TimerArchive::hdr_unload get psrephem size" << endl;
     
     header->nbytesephem = ephemeris->unload (&text);
     if (hdr.nbytesephem < 0)
@@ -180,15 +182,4 @@ void Pulsar::TimerArchive::psr_unload (FILE* fptr) const
 		   "psrephem::unload != %d bytes", hdr.nbytesephem);
   }
 }
-
-
-
-
-
-
-
-
-
-
-
 

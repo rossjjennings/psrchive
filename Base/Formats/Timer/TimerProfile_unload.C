@@ -1,11 +1,10 @@
-#include <stdio.h>
-
 #include "Pulsar/TimerIntegration.h"
 #include "Pulsar/Profile.h"
 #include "Error.h"
 
 #include "fcomp.h"
 #include "convert_endian.h"
+#include <stdio.h>
 
 int Pulsar::TimerProfile_poln (Signal::Component state)
 {
@@ -60,6 +59,16 @@ void Pulsar::TimerProfile_unload (FILE* fptr, const Profile* profile)
   int   poln       = TimerProfile_poln (profile -> get_state());
   float wt         = profile -> get_weight ();
 
+  if (nbin <= 0)
+    throw Error (InvalidParam, "Pulsar::TimerProfile_unload",
+		 "invalid nbin=%d", nbin);
+
+  const float* amps = profile->get_amps();
+  for (int ibin=0; ibin < nbin; ibin++)
+    if (!finite(amps[ibin]))
+      throw Error (InvalidParam, "Pulsar::TimerProfile_unload",
+                   "amps[%d]=%f is not finite", ibin, amps[ibin]);
+
   toBigEndian(&centrefreq, sizeof(centrefreq));
   toBigEndian(&nbin, sizeof(nbin));
   toBigEndian(&poln, sizeof(poln));
@@ -75,10 +84,11 @@ void Pulsar::TimerProfile_unload (FILE* fptr, const Profile* profile)
   if (fwrite (&wt,   sizeof(wt),   1,fptr) < 1)
     throw Error (FailedSys, "TimerProfile_unload", "fwrite wt");
 
-  if (TimerIntegration::verbose)
-    cerr << "TimerProfile_unload fcompwrite data\r";
-
   fromBigEndian(&nbin, sizeof(nbin));
+
+  if (TimerIntegration::verbose)
+    cerr << "TimerProfile_unload fcompwrite data nbin=" << nbin << "\r";
+
   // Compress the data and write out as 2byte integers
   if (fcompwrite (nbin,profile->get_amps(),fptr) != 0)
     throw Error (FailedCall, "TimerProfile_unload", "fcompwrite data");

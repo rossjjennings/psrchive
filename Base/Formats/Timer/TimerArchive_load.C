@@ -156,7 +156,7 @@ void Pulsar::TimerArchive::subint_load (FILE* fptr)
       // update the mini header with the integration time of the sub_int
       // added by WvS 24 Sep, 1999
       if (verbose == 3)
-	fprintf (stderr, "TimerArchive::subint_load - updating mini header version\n");
+	cerr << "TimerArchive::subint_load - updating mini header version\n";
       subint->mini.integration = hdr.sub_int_time;
       subint->mini.version = 1.1;
     }

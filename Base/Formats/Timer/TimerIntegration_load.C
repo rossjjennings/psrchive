@@ -1,10 +1,9 @@
-#include <assert.h>
-
 #include "Pulsar/TimerIntegration.h"
 #include "Pulsar/Profile.h"
 #include "Error.h"
 
 #include "convert_endian.h"
+#include <assert.h>
 
 /* assumes that all profiles have equal nbins */
 void unpackprofiles (vector<vector<Reference::To<Pulsar::Profile> > >& profs,
@@ -80,9 +79,13 @@ void Pulsar::TimerIntegration::load (FILE* fptr, int extra, bool big_endian)
     if (verbose) cerr << "TimerIntegration::load loading profiles\n";
     // Read the array of profiles
     for(i=0; i<npol;i++)
-      for(j=0; j<nchan;j++) 
+      for(j=0; j<nchan;j++) try {
 	TimerProfile_load (fptr, profiles[i][j], big_endian);
-
+      }
+      catch (Error& error) {
+	error << "\n\tprofile[ipol=" << i << "][ichan=" << j << "]";
+	throw error += "Pulsar::TimerIntegration::load";
+      }
   } 
   else {
     if (verbose)

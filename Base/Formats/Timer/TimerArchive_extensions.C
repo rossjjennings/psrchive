@@ -34,11 +34,16 @@ void Pulsar::TimerArchive::unpack_extensions ()
 
 void Pulsar::TimerArchive::pack_extensions () const
 {
+  if (verbose == 3)
+    cerr << "Pulsar::TimerArchive::pack_extensions" << endl;
+
   struct timer* header = const_cast<struct timer*>( &hdr );
 
   const Receiver* receiver = get<Receiver>();
   if (receiver)
     const_cast<TimerArchive*>(this)->pack (receiver);
+  else if (verbose == 3)
+    cerr << "Pulsar::TimerArchive::pack_extensions no Receiver" << endl;
 
 
   // nothing done with Telescope Extension for now
