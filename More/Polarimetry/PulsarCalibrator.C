@@ -144,6 +144,10 @@ void Pulsar::PulsarCalibrator::add_observation (const Archive* data)
     throw Error (InvalidParam, "Pulsar::PulsarCalibrator::add_observation",
                  "'" + data->get_filename() + "' does not match "
                  "'" + calibrator->get_filename() + reason);
+		 
+  if (data->get_poln_calibrated ())
+    cerr << "Pulsar::PulsarCalibrator::add_observation warning:\n"
+      "  data has alreayd been calibrated" << endl;
 
   unsigned nsub = data->get_nsubint ();
   unsigned nchan = data->get_nchan ();
@@ -151,9 +155,11 @@ void Pulsar::PulsarCalibrator::add_observation (const Archive* data)
   for (unsigned isub=0; isub<nsub; isub++) {
 
     const Integration* integration = data->get_Integration (isub);
-    MJD epoch = integration->get_epoch ();
 
-    parallactic.set_epoch (epoch);
+    if (!data->get_parallactic_corrected ())
+      parallactic.set_epoch( integration->get_epoch () );
+    else
+      parallactic.set_phi( 0 );
 
     // the noise power in the baseline is used to estimate the
     // variance in each Stokes parameter
