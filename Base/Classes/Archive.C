@@ -387,9 +387,9 @@ void Pulsar::Archive::telescope_coordinates (float* lat, float* lon,
 		 "tempo code=%c", get_telescope_code ());
 }
 
-void Pulsar::Archive::uniform_weight ()
+void Pulsar::Archive::uniform_weight (float new_weight)
 {
   for (unsigned isub=0; isub < get_nsubint(); isub++)
-    get_Integration(isub) -> uniform_weight ();
+    get_Integration(isub) -> uniform_weight (new_weight);
 }
 

@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Integration.h,v $
-   $Revision: 1.41 $
-   $Date: 2003/05/14 16:39:48 $
-   $Author: straten $ */
+   $Revision: 1.42 $
+   $Date: 2003/05/28 00:14:10 $
+   $Author: pulsar $ */
 
 /*
   
@@ -110,8 +110,8 @@ namespace Pulsar {
     //! Set the weight of each profile to its snr squared
     void snr_weight ();
     
-    //! Set the weight of each profile to one (1)
-    void uniform_weight ();
+    //! Set the weight of each profile to the given number
+    void uniform_weight (float new_weight = 1.0);
 
     //! Returns a pointer to the Profile given by the specified indeces
     Profile* get_Profile (unsigned ipol, unsigned ichan);

@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Archive.h,v $
-   $Revision: 1.74 $
-   $Date: 2003/05/07 15:41:54 $
-   $Author: straten $ */
+   $Revision: 1.75 $
+   $Date: 2003/05/28 00:14:10 $
+   $Author: pulsar $ */
 
 /*! \mainpage 
  
@@ -488,8 +488,8 @@ namespace Pulsar {
     //! Set the weight of each profile to its snr squared
     virtual void snr_weight ();
 
-    //! Set the weight of each profile to one (1)
-    virtual void uniform_weight ();
+    //! Set the weight of each profile to the given number
+    virtual void uniform_weight (float new_weight = 1.0);
 
     //! Test if arch matches (enough for a pulsar - standard match)
     virtual bool standard_match (const Archive* arch, string& reason) const;

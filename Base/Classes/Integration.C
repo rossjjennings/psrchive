@@ -281,9 +281,9 @@ MJD Pulsar::Integration::get_end_time () const
   return get_epoch() + .5 * get_duration();
 }
 
-void Pulsar::Integration::uniform_weight ()
+void Pulsar::Integration::uniform_weight (float new_weight)
 {
   for (unsigned ipol=0; ipol < get_npol(); ipol++)
     for (unsigned ichan=0; ichan < get_nchan(); ichan++)
-      profiles[ipol][ichan] -> set_weight (1.0);
+      profiles[ipol][ichan] -> set_weight (new_weight);
 }
