@@ -5,128 +5,128 @@ using namespace std;
 
 bool qevent_trace::eventFilter (QObject *k, QEvent *e)
 {
-  cerr << "QEventTrace: " << k->name() << " receives ";
+  std::cerr << "QEventTrace: " << k->name() << " receives ";
 
   switch (e->type()) {
   case QEvent::None:
-    cerr << "NONE" << endl;
+    std::cerr << "NONE" << std::endl;
     break;
   case QEvent::Timer:
-    cerr << "TIMER" << endl;
+    std::cerr << "TIMER" << std::endl;
     break;
   case QEvent::MouseButtonPress:
-    cerr << "MOUSE BUTTON PRESS" << endl;
+    std::cerr << "MOUSE BUTTON PRESS" << std::endl;
     break;
   case QEvent::MouseButtonRelease:
-    cerr << "MOUSE BUTTON RELEASE" << endl;
+    std::cerr << "MOUSE BUTTON RELEASE" << std::endl;
     break;
   case QEvent::MouseButtonDblClick:
-    cerr << "DOUBLE CLICK" << endl;
+    std::cerr << "DOUBLE CLICK" << std::endl;
     break;
   case QEvent::MouseMove:
-    cerr << "MOUSE MOVE" << endl;
+    std::cerr << "MOUSE MOVE" << std::endl;
     break;
   case QEvent::KeyPress:
-    cerr << "KEY PRESS" << endl;
+    std::cerr << "KEY PRESS" << std::endl;
     break;
   case QEvent::KeyRelease:
-    cerr << "KEY RELEASE" << endl;
+    std::cerr << "KEY RELEASE" << std::endl;
     break;
   case QEvent::FocusIn:
-    cerr << "FOCUS IN" << endl;
+    std::cerr << "FOCUS IN" << std::endl;
     break;
   case QEvent::FocusOut:
-    cerr << "FOCUS OUT" << endl;
+    std::cerr << "FOCUS OUT" << std::endl;
     break;  
   case QEvent::Enter:
-    cerr << "ENTER" << endl;
+    std::cerr << "ENTER" << std::endl;
     break;
   case QEvent::Leave:
-    cerr << "LEAVE" << endl;
+    std::cerr << "LEAVE" << std::endl;
     break;
   case QEvent::Paint:
-    cerr << "PAINT" << endl;
+    std::cerr << "PAINT" << std::endl;
     break;
   case QEvent::Move:
-    cerr << "MOVE" << endl;
+    std::cerr << "MOVE" << std::endl;
     break;
   case QEvent::Resize:
-    cerr << "RESIZE" << endl;
+    std::cerr << "RESIZE" << std::endl;
     break;
   case QEvent::Create:
-    cerr << "CREATE" << endl;
+    std::cerr << "CREATE" << std::endl;
     break;
   case QEvent::Destroy:
-    cerr << "DESTROY" << endl;
+    std::cerr << "DESTROY" << std::endl;
     break;
   case QEvent::Show:
-    cerr << "SHOW" << endl;
+    std::cerr << "SHOW" << std::endl;
     break;
   case QEvent::Hide:
-    cerr << "HIDE" << endl;
+    std::cerr << "HIDE" << std::endl;
     break;
   case QEvent::Close:
-    cerr << "CLOSE" << endl;
+    std::cerr << "CLOSE" << std::endl;
     break;
   case QEvent::Quit:
-    cerr << "QUIT" << endl;
+    std::cerr << "QUIT" << std::endl;
     break;
   case QEvent::Accel:
-    cerr << "ACCEL" << endl;
+    std::cerr << "ACCEL" << std::endl;
     break;
   case QEvent::Wheel:
-    cerr << "WHEEL" << endl;
+    std::cerr << "WHEEL" << std::endl;
     break;
   case QEvent::AccelAvailable:
-    cerr << "AccelAvailable" << endl;
+    std::cerr << "AccelAvailable" << std::endl;
     break;
   case QEvent::Clipboard:
-    cerr << "Clipboard" << endl;
+    std::cerr << "Clipboard" << std::endl;
     break;
   case QEvent::SockAct:
-    cerr << "SockAct" << endl;
+    std::cerr << "SockAct" << std::endl;
     break;
   case QEvent::DragEnter:
-    cerr << "DragEnter" << endl;
+    std::cerr << "DragEnter" << std::endl;
     break;
   case QEvent::DragMove:
-    cerr << "DragMove" << endl;
+    std::cerr << "DragMove" << std::endl;
     break;
   case QEvent::DragLeave:
-    cerr << "DragLeave" << endl;
+    std::cerr << "DragLeave" << std::endl;
     break;
   case QEvent::Drop:
-    cerr << "Drop" << endl;
+    std::cerr << "Drop" << std::endl;
     break;
   case QEvent::DragResponse:
-    cerr << "DragResponse" << endl;
+    std::cerr << "DragResponse" << std::endl;
     break;
   case QEvent::ChildInserted:
-    cerr << "CHILD INSERTED" << endl;
+    std::cerr << "CHILD INSERTED" << std::endl;
     break;
   case QEvent::ChildRemoved:
-    cerr << "CHILD REMOVED" << endl;
+    std::cerr << "CHILD REMOVED" << std::endl;
     break;
   case QEvent::LayoutHint:
-    cerr << "LAYOUT HINT" << endl;
+    std::cerr << "LAYOUT HINT" << std::endl;
     break;
   case QEvent::ActivateControl:
-    cerr << "ACTIVATE CONTROL" << endl;
+    std::cerr << "ACTIVATE CONTROL" << std::endl;
     break;
   case QEvent::DeactivateControl:
-    cerr << "DE-ACTIVATE CONTROL" << endl;
+    std::cerr << "DE-ACTIVATE CONTROL" << std::endl;
     break;
   case QEvent::User:
-    cerr << "USER" << endl;
+    std::cerr << "USER" << std::endl;
     break;
   default:
-    cerr << "INVALID!" << endl;
+    std::cerr << "INVALID!" << std::endl;
     break;
   }
   return false;  // standard event processing
 }
 
-ostream & operator<< (ostream & s, const QSize & sz) 
+std::ostream & operator<< (std::ostream & s, const QSize & sz) 
 {
   if (sz.isValid ())
     return s << "(" << sz.width() << "," << sz.height() << ")";
