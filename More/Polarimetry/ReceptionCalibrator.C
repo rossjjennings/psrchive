@@ -8,6 +8,7 @@
 #include "Calibration/SingleAxis.h"
 
 #include <algorithm>
+#include <assert.h>
 
 #if defined(__GNUC__) && (__GNUC__ < 3)
 #define WORK_AROUND_COMPILER
