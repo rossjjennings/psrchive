@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PolarCalibrator.h,v $
-   $Revision: 1.4 $
-   $Date: 2003/04/17 22:04:14 $
+   $Revision: 1.5 $
+   $Date: 2003/05/06 11:23:07 $
    $Author: straten $ */
 
 #ifndef __PolarCalibrator_H
@@ -19,6 +19,7 @@ namespace Pulsar {
   public:
 
     friend class PolarCalibratorPlotter;
+    friend class ReceptionCalibrator;
 
     //! Construct from an vector of PolnCal Pulsar::Archives
     PolarCalibrator (const vector<Archive*>& a) : PolnCalibrator (a) {}
