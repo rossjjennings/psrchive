@@ -129,13 +129,16 @@ int main(int argc, char** argv) {
   }
   else {
     bmrng mygen;
-    SyntheticProfile fakep(1024, 2.0, 20.0, 512 + (100.0*mygen.rand()));
-    SyntheticProfile fakes(1024, 50.0, 20.0, 512 + (100.0*mygen.rand()));
 
-    fakep.build();
-    fakep.add_noise();
-    profs.push_back(new Pulsar::Profile(fakep.get_Profile()));
-    
+    for (unsigned i = 0; i < 1; i++) {
+      SyntheticProfile fakep(1024, 2.0, 10.0, 512 + (100.0*mygen.rand()));
+      
+      fakep.build();
+      fakep.add_noise();
+      profs.push_back(new Pulsar::Profile(fakep.get_Profile())); 
+    }
+
+    SyntheticProfile fakes(1024, 50.0, 10.0, 512 + (100.0*mygen.rand()));
     fakes.build();
     fakes.add_noise();
     stdprof = fakes.get_Profile().clone();
@@ -159,12 +162,12 @@ int main(int argc, char** argv) {
     unsigned nbin = profs[i]->get_nbin();
     
     if (display) {
-
+      cpgeras();
       cpgsch(1.5);
 
       cpgsubp(1,2);
       cpgpanl(1,1);
-
+      cpgeras();
       cpgsvp(0.1,0.9,0.1,0.9);
       
       float ymin = 0.0;
@@ -260,7 +263,7 @@ int main(int argc, char** argv) {
 
       cpgsci(2);
       
-      for (float j = float(binmin); j < float(binmax); j+= 0.001) {
+      for (float j = float(binmin); j < float(binmax); j+= 0.01) {
 	float index = j+float(ofs);
 	if (index < 0.0)
 	  index += float(nbin);

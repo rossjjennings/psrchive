@@ -13,7 +13,15 @@
 #include "interpolate.h"
 #include "model_profile.h"
 
-#define WINDOW 0.025
+// The WINDOW size is used to set the region around the point of 
+// maximum correlation that will be used in the interpolation.
+// The find_peak_edges routine seems to get it wrong when the S/N 
+// is low, this simple method is more robust.
+
+// Experimentation with test_gtd.C suggests that the following value
+// works best in most situations:
+
+#define WINDOW 0.0125
 
 void wrap (int& binval, int nbin) {
   if (binval < 0)
@@ -23,8 +31,10 @@ void wrap (int& binval, int nbin) {
 }
 
 double Pulsar::Profile::GaussianShift (const Profile& std, float& ephase, 
-				       vector<float>& corr, Calibration::Gaussian& model,
-				       int& rise, int& fall, int& ofs, bool store) const
+				       vector<float>& corr, 
+				       Calibration::Gaussian& model,
+				       int& rise, int& fall, int& ofs, 
+				       bool store) const
 {
   // This algorithm interpolates the time domain cross correlation
   // function by fitting a Gaussian.
@@ -107,7 +117,7 @@ double Pulsar::Profile::GaussianShift (const Profile& std, float& ephase,
       index -= offset;
       wrap(index,  ptr->get_nbin());
       data_y.push_back( Estimate<double>(ptr->get_amps()[index], 
-					 ptr->get_amps()[index]/10.0) );
+					 ptr->get_amps()[index]/50.0) );
     }
     
     Calibration::LevenbergMarquardt<double> fit;
@@ -227,7 +237,7 @@ double Pulsar::Profile::ZeroPadShift (const Profile& std,
     }
   }
   
-  // Error estimate? This needs more thought...
+  // Error estimate (???)
   ephase = 1.0 / float(get_nbin());
   
   double shift = double(maxloc) / double(get_nbin());
