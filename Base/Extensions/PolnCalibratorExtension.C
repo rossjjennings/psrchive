@@ -178,9 +178,14 @@ const char* Pulsar::Calibrator::Type2str (Type type)
     return "Hamaker";
   case Britton:
     return "Britton";
-  default:
-    return "Invalid";
+  case Hybrid:
+    return "Hybrid";
+  case Corrections:
+    return "Corrections";
   }
+
+  return "Invalid";
+
 }
 
 
