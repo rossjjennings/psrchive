@@ -30,8 +30,16 @@ void wrap (int& binval, int nbin) {
     binval -= nbin;
 }
 
-//Functor<double(const Pulsar::Profile&, float&)>
-//Pulsar::Profile::shift_functor (&PhaseGradShift);
+Functor< Estimate<double>(Pulsar::Profile,Pulsar::Profile) > 
+Pulsar::Profile::shift_functor (&PhaseGradShift);
+
+Estimate<double> Pulsar::Profile::shift (const Profile& std) const
+{
+  return shift_functor (std, *this);
+}
+
+
+#if FIXED
 
 double Pulsar::Profile::GaussianShift (const Profile& std, float& ephase) const
 {
@@ -243,59 +251,7 @@ double Pulsar::Profile::ZeroPadShift (const Profile& std, float& ephase) const
   return shift;
 }
 
-double Pulsar::Profile::PhaseGradShift (const Profile& std, float& ephase) const 
-{
-  Profile stdcopy = std;
-  Profile prfcopy = *this;
-
-  // set this in case something goes wrong
-  ephase = 999;
-
-  float snrfft = 0;
-  float esnrfft = 999;
-
-  // max float is of order 10^{38} - check that we won't exceed this
-  // limiting factor in the DC term of the fourier transform
-
-  if (stdcopy.sum() > 1e18)
-    throw Error (InvalidState, "Profile::PhaseGradShift", 
-		 "standard DC=%lf > max float", stdcopy.sum());
-
-  if (prfcopy.sum() > 1e18)
-    throw Error (InvalidState, "Profile::PhaseGradShift", 
-		 "profile DC=%lf > max float", stdcopy.sum());
-
-  if (verbose)
-    cerr << "Profile::PhaseGradShift compare nbin="<< nbin 
-	 <<" "<< stdcopy.nbin <<endl;
-
-  if (nbin > stdcopy.nbin) {
-    if (nbin % stdcopy.nbin)
-      throw Error (InvalidState, "Profile::PhaseGradShift", 
-		   "profile nbin=%d standard nbin=%d", nbin, stdcopy.nbin);
-
-    unsigned nscrunch = nbin / stdcopy.nbin;
-    prfcopy.bscrunch (nscrunch);
-  }
-
-  if (nbin < stdcopy.nbin) {
-    if (stdcopy.nbin % nbin)
-      throw Error (InvalidState, "Profile::PhaseGradShift", 
-		   "profile nbin=%d standard nbin=%d", nbin, stdcopy.nbin);
-
-    unsigned nscrunch = stdcopy.nbin / nbin;
-    stdcopy.bscrunch (nscrunch);
-  }
-
-  double shift = 0.0;
-  float eshift = 0.0;
-
-  prfcopy.fftconv (stdcopy, shift, eshift, snrfft, esnrfft);
-  if (ephase) {
-    ephase = eshift / float(stdcopy.nbin);
-  }
-  return shift / double(stdcopy.nbin);
-}
+#endif
 
 void Pulsar::Profile::fftconv (const Profile& std, 
 			       double& shift, float& eshift, 
@@ -335,3 +291,4 @@ void Pulsar::Profile::fftconv (const Profile& std,
     esnrfft = snrfft * eshift / scale;
   }
 }
+
