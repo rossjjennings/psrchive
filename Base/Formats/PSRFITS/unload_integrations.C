@@ -17,7 +17,7 @@ void Pulsar::FITSArchive::unload_integrations (fitsfile* ffptr) const
   // Delete all information in the data HDU to ensure
   // no conflicts with the new state
 
-  if (verbose)
+  if (verbose == 3)
     cerr << "FITSArchive::unload_integrations nsubint=" << nsubint << endl;
 
   long oldrownum = 0;
@@ -26,10 +26,10 @@ void Pulsar::FITSArchive::unload_integrations (fitsfile* ffptr) const
   fits_delete_rows (ffptr, 1, oldrownum, &status);
   fits_insert_rows (ffptr, 0, nsubint, &status);
 
-  if (verbose) {
+  if (verbose == 3) {
     long newrownum = 0;
     fits_get_num_rows (ffptr, &newrownum, &status);
-    if (verbose) {
+    if (verbose == 3) {
       cerr << "FITSArchive::unload_integrations DATA row count = "
 	   << newrownum
 	   << endl;
@@ -48,7 +48,7 @@ void Pulsar::FITSArchive::unload_integrations (fitsfile* ffptr) const
 
   if (get<Pulsar::IntegrationOrder>()) {
     has_alt_order = true;
-    order_name = get<Pulsar::IntegrationOrder>()->get_name();
+    order_name = get<Pulsar::IntegrationOrder>()->get_extension_name();
     order_unit = get<Pulsar::IntegrationOrder>()->get_Unit();
   }
 
@@ -84,7 +84,7 @@ void Pulsar::FITSArchive::unload_integrations (fitsfile* ffptr) const
     throw FITSError (status, "FITSArchive::unload_integrations", 
 		     "error resizing DAT_FREQ");
 
-  if (verbose)
+  if (verbose == 3)
     cerr << "FITSArchive::unload_integrations DAT_FREQ resized to "
 	 << nchan
 	 << endl;
@@ -96,7 +96,7 @@ void Pulsar::FITSArchive::unload_integrations (fitsfile* ffptr) const
     throw FITSError (status, "FITSArchive::unload_integrations", 
 		     "error resizing DAT_WTS");
 
-  if (verbose)
+  if (verbose == 3)
     cerr << "FITSArchive::unload_integrations DAT_WTS resized to "
 	 << nchan
 	 << endl;
@@ -108,7 +108,7 @@ void Pulsar::FITSArchive::unload_integrations (fitsfile* ffptr) const
     throw FITSError (status, "FITSArchive::unload_integrations", 
 		     "error resizing DAT_OFFS");
 
-  if (verbose)
+  if (verbose == 3)
     cerr << "FITSArchive::unload_integrations DAT_OFFS resized to "
 	 << nchan*npol
 	 << endl;
@@ -120,7 +120,7 @@ void Pulsar::FITSArchive::unload_integrations (fitsfile* ffptr) const
     throw FITSError (status, "FITSArchive::unload_integrations", 
 		     "error resizing DAT_SCL");
 
-  if (verbose)
+  if (verbose == 3)
     cerr << "FITSArchive::unload_integrations DAT_SCL resized to "
 	 << nchan*npol
 	 << endl;
@@ -128,7 +128,7 @@ void Pulsar::FITSArchive::unload_integrations (fitsfile* ffptr) const
   fits_get_colnum (ffptr, CASEINSEN, "DATA", &colnum, &status);
   fits_modify_vector_len (ffptr, colnum, nchan*npol*nbin, &status);
 
-  if (verbose)
+  if (verbose == 3)
     cerr << "FITSArchive::unload_integrations DATA resized to "
 	 << nchan*npol*nbin
 	 << endl;
@@ -139,7 +139,7 @@ void Pulsar::FITSArchive::unload_integrations (fitsfile* ffptr) const
   for(unsigned i = 0; i < nsubint; i++)
     unload_integration(i+1, get_Integration(i), ffptr);
 
-  if (verbose)
+  if (verbose == 3)
     cerr << "FITSArchive::unload_integrations exit" << endl;
 
 }

@@ -9,7 +9,7 @@ void Pulsar::FITSArchive::load_ITRFExtension (fitsfile* fptr)
   // no comment
   char* comment = 0;
 
-  if (verbose)
+  if (verbose == 3)
     cerr << "FITSArchive::load_ITRFExtension" << endl;
   
   Reference::To<ITRFExtension> ext = new ITRFExtension;
@@ -23,7 +23,7 @@ void Pulsar::FITSArchive::load_ITRFExtension (fitsfile* fptr)
     return;
   }
 
-  if (verbose)
+  if (verbose == 3)
     cerr << FITSError (status, "FITSArchive::load_ITRFExtension",
 		       "fits_read_key ANT_X,Y,Z").warning() << endl;
 

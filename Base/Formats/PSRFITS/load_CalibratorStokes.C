@@ -13,7 +13,7 @@ void Pulsar::FITSArchive::load_CalibratorStokes (fitsfile* fptr)
 {
   int status = 0;
  
-  if (verbose)
+  if (verbose == 3)
     cerr << "FITSArchive::load_CalibratorStokes entered" << endl;
   
   // Move to the CAL_POLN HDU
@@ -21,7 +21,7 @@ void Pulsar::FITSArchive::load_CalibratorStokes (fitsfile* fptr)
   fits_movnam_hdu (fptr, BINARY_TBL, "CAL_POLN", 0, &status);
   
   if (status == BAD_HDU_NUM) {
-    if (verbose) cerr << "Pulsar::FITSArchive::load_CalibratorStokes"
+    if (verbose == 3) cerr << "Pulsar::FITSArchive::load_CalibratorStokes"
 		   " no CAL_POLN HDU" << endl;
     return;
   }
@@ -44,7 +44,7 @@ void Pulsar::FITSArchive::load_CalibratorStokes (fitsfile* fptr)
   long dimension = nch_poln * 3;  
   
   if (dimension == 0) {
-    if (verbose)
+    if (verbose == 3)
       cerr << "FITSArchive::load_CalibratorStokes CAL_POLN HDU"
 	   << " contains no data. CalibratorStokes not loaded" << endl;
     return;
@@ -71,7 +71,7 @@ void Pulsar::FITSArchive::load_CalibratorStokes (fitsfile* fptr)
     throw FITSError (status, "FITSArchive::load CalibratorStokes", 
 		     "fits_read_col DAT_WTS");
 
-  if (verbose)
+  if (verbose == 3)
     cerr << "FITSArchive::load_CalibratorStokes weights read" << endl;
   
   for (int ichan=0; ichan < nch_poln; ichan++) {
@@ -92,7 +92,7 @@ void Pulsar::FITSArchive::load_CalibratorStokes (fitsfile* fptr)
     throw FITSError (status, "FITSArchive::load CalibratorStokes", 
 		     "fits_read_col DATA");
 
-  if (verbose)
+  if (verbose == 3)
     cerr << "FITSArchive::load_CalibratorStokes data read" << endl;
   
   int count = 0;
@@ -125,7 +125,7 @@ void Pulsar::FITSArchive::load_CalibratorStokes (fitsfile* fptr)
     throw FITSError (status, "FITSArchive::load CalibratorStokes", 
 		     "fits_read_col DATAERR");
 
-  if (verbose)
+  if (verbose == 3)
     cerr << "FITSArchive::load_CalibratorStokes data error read" << endl;
   
   count = 0;
@@ -152,6 +152,6 @@ void Pulsar::FITSArchive::load_CalibratorStokes (fitsfile* fptr)
 
   add_extension (stokes);
   
-  if (verbose)
+  if (verbose == 3)
     cerr << "FITSArchive::load_CalibratorStokes exiting" << endl;
 }

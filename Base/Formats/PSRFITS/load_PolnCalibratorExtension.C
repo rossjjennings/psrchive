@@ -13,7 +13,7 @@ void Pulsar::FITSArchive::load_PolnCalibratorExtension (fitsfile* fptr)
 {
   int status = 0;
  
-  if (verbose)
+  if (verbose == 3)
     cerr << "FITSArchive::load_PolnCalibratorExtension entered" << endl;
   
   // Move to the FEEDPAR HDU
@@ -21,7 +21,7 @@ void Pulsar::FITSArchive::load_PolnCalibratorExtension (fitsfile* fptr)
   fits_movnam_hdu (fptr, BINARY_TBL, "FEEDPAR", 0, &status);
   
   if (status == BAD_HDU_NUM) {
-    if (verbose) cerr << "Pulsar::FITSArchive::load_PolnCalibratorExtension"
+    if (verbose == 3) cerr << "Pulsar::FITSArchive::load_PolnCalibratorExtension"
 		   " no FEEDPAR HDU" << endl;
     return;
   }
@@ -41,7 +41,7 @@ void Pulsar::FITSArchive::load_PolnCalibratorExtension (fitsfile* fptr)
   pce->set_type( Calibrator::str2Type (cal_mthd) );
   delete[] cal_mthd;
 
-  if (verbose)
+  if (verbose == 3)
     cerr << "FITSArchive::load_PolnCalibratorExtension Calibrator type=" 
 	 << Calibrator::Type2str (pce->get_type()) << endl;
 
@@ -72,7 +72,7 @@ void Pulsar::FITSArchive::load_PolnCalibratorExtension (fitsfile* fptr)
   auto_ptr<float> data ( new float[dimension] );
   
   if (dimension == 0) {
-    if (verbose) {
+    if (verbose == 3) {
       cerr << "FITSArchive::load_PolnCalibratorExtension FEEDPAR HDU"
 	   << " contains no data. PolnCalibratorExtension not loaded" << endl;
     }
@@ -98,7 +98,7 @@ void Pulsar::FITSArchive::load_PolnCalibratorExtension (fitsfile* fptr)
     throw FITSError (status, "FITSArchive::load PolnCalibratorExtension", 
 		     "fits_read_col DAT_FREQ");
 
-  if (verbose) cerr << "FITSArchive::load_PolnCalibratorExtension"
+  if (verbose == 3) cerr << "FITSArchive::load_PolnCalibratorExtension"
 		 " channel frequencies read" << endl;
   
   // Read the data scale weights
@@ -114,7 +114,7 @@ void Pulsar::FITSArchive::load_PolnCalibratorExtension (fitsfile* fptr)
     throw FITSError (status, "FITSArchive::load PolnCalibratorExtension", 
 		     "fits_read_col DAT_WTS");
 
-  if (verbose)
+  if (verbose == 3)
     cerr << "FITSArchive::load_PolnCalibratorExtension weights read" << endl;
   
   for (int ichan=0; ichan < nch_fdpr; ichan++)
@@ -134,7 +134,7 @@ void Pulsar::FITSArchive::load_PolnCalibratorExtension (fitsfile* fptr)
     throw FITSError (status, "FITSArchive::load PolnCalibratorExtension", 
 		     "fits_read_col DATA");
 
-  if (verbose)
+  if (verbose == 3)
     cerr << "FITSArchive::load_PolnCalibratorExtension data read" << endl;
   
   int count = 0;
@@ -159,7 +159,7 @@ void Pulsar::FITSArchive::load_PolnCalibratorExtension (fitsfile* fptr)
     throw FITSError (status, "FITSArchive::load PolnCalibratorExtension", 
 		     "fits_read_col DATAERR");
 
-  if (verbose)
+  if (verbose == 3)
     cerr << "FITSArchive::load_PolnCalibratorExtension dataerr read" << endl;
   
   count = 0;
@@ -178,6 +178,6 @@ void Pulsar::FITSArchive::load_PolnCalibratorExtension (fitsfile* fptr)
 
   add_extension (pce);
   
-  if (verbose)
+  if (verbose == 3)
     cerr << "FITSArchive::load_PolnCalibratorExtension exiting" << endl;
 }

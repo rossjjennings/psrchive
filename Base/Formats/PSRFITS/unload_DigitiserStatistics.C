@@ -60,7 +60,7 @@ Pulsar::FITSArchive::unload (fitsfile* fptr, const DigitiserStatistics* dstats)
 {
   int status = 0;
 
-  if (verbose)
+  if (verbose == 3)
     cerr << "FITSArchive::unload_digistat entered" << endl;
 
   // Move to the DIG_STAT HDU
@@ -96,6 +96,6 @@ Pulsar::FITSArchive::unload (fitsfile* fptr, const DigitiserStatistics* dstats)
     throw error += "FITSArchive::unload_digistat";
   }
 
-  if (verbose)
+  if (verbose == 3)
     cerr << "FITSArchive::unload_digistat exiting" << endl;
 }

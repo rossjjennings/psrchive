@@ -14,7 +14,7 @@ void Pulsar::FITSArchive::unload (fitsfile* fptr,
 {
   int status = 0;
 
-  if (verbose)
+  if (verbose == 3)
     cerr << "FITSArchive::unload CalibratorStokes entered" << endl;
   
   // Move to the CAL_POLN Binary Table
@@ -36,7 +36,7 @@ void Pulsar::FITSArchive::unload (fitsfile* fptr,
 
   int nch_poln = stokes->get_nchan();
 
-  if (verbose) cerr << "FITSArchive::unload CalibratorStokes nchan=" 
+  if (verbose == 3) cerr << "FITSArchive::unload CalibratorStokes nchan=" 
 		    << nch_poln << endl;
 
   char* comment = 0;
@@ -68,7 +68,7 @@ void Pulsar::FITSArchive::unload (fitsfile* fptr,
     throw FITSError (status, "FITSArchive::unload CalibratorStokes", 
 		     "fits_write_col DAT_WTS");
 
-  if (verbose) cerr << "FITSArchive::unload CalibratorStokes"
+  if (verbose == 3) cerr << "FITSArchive::unload CalibratorStokes"
 		 " weights written" << endl;
   
   // Write the model parameters
@@ -127,6 +127,6 @@ void Pulsar::FITSArchive::unload (fitsfile* fptr,
   if (status)
     throw FITSError (status, "FITSArchive::unload CalibratorStokes", 
 		     "fits_write_col DATAERR");
-  if (verbose)
+  if (verbose == 3)
     cerr << "FITSArchive::unload CalibratorStokes exiting" << endl; 
 }

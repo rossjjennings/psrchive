@@ -7,7 +7,7 @@ void Pulsar::FITSArchive::unload (fitsfile* fptr, const Passband* bandpass)
 {
   int status = 0;
 
-  if (verbose)
+  if (verbose == 3)
     cerr << "FITSArchive::unload_passband entered" << endl;
   
   // Move to the BANDPASS HDU
@@ -56,7 +56,7 @@ void Pulsar::FITSArchive::unload (fitsfile* fptr, const Passband* bandpass)
     data_scales[i] = (max - min) / max_int;
   }
   
-  if (verbose)
+  if (verbose == 3)
     cerr << "FITSArchive::unload_passband scales & offsets calculated" << endl;
   
   // Write the data offsets
@@ -66,7 +66,7 @@ void Pulsar::FITSArchive::unload (fitsfile* fptr, const Passband* bandpass)
   fits_modify_vector_len (fptr, colnum, npol, &status);
   fits_write_col (fptr, TFLOAT, colnum, 1, 1, npol,
 		  data_offsets, &status);
-  if (verbose)
+  if (verbose == 3)
     cerr << "FITSArchive::unload_passband offsets written" << endl;
 
   // Write the data scale factors
@@ -76,7 +76,7 @@ void Pulsar::FITSArchive::unload (fitsfile* fptr, const Passband* bandpass)
   fits_modify_vector_len (fptr, colnum, npol, &status);
   fits_write_col (fptr, TFLOAT, colnum, 1, 1, npol, 
 		  data_scales, &status);
-  if (verbose)
+  if (verbose == 3)
     cerr << "FITSArchive::unload_passband scales written" << endl;
   
   // Calculate the scaled numbers
@@ -93,7 +93,7 @@ void Pulsar::FITSArchive::unload (fitsfile* fptr, const Passband* bandpass)
     }
   }
 
-  if (verbose)
+  if (verbose == 3)
     cerr << "FITSArchive::unload_passband points calculated" << endl;
 
   // Write the data itself
@@ -110,7 +110,7 @@ void Pulsar::FITSArchive::unload (fitsfile* fptr, const Passband* bandpass)
   delete [] data_scales;
   delete [] data_offsets;
 
-  if (verbose)
+  if (verbose == 3)
     cerr << "FITSArchive::unload_passband exiting" << endl;
 }
 

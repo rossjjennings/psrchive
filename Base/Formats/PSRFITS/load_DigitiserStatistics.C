@@ -11,7 +11,7 @@ void load (fitsfile* fptr, Pulsar::DigitiserStatistics::row* drow)
     throw Error (InvalidParam, "load (Pulsar::DigitiserStatistics::row*)",
 		 "invalid row number=%d", row);
   
-  if (Pulsar::Archive::verbose) {
+  if (Pulsar::Archive::verbose == 3) {
     cerr << "FITSArchive::load_digistat_row entered" << endl;
     cerr << "loading row #" << row << endl;
   }
@@ -26,7 +26,7 @@ void load (fitsfile* fptr, Pulsar::DigitiserStatistics::row* drow)
   char* temp = new char[128];
   
   fits_read_key (fptr, TSTRING, "DIG_MODE", temp, comment, &status);
-  if (Pulsar::Archive::verbose)
+  if (Pulsar::Archive::verbose == 3)
     cerr << "Read DIG_MODE = " << temp << endl;
   drow->dig_mode = temp;
 
@@ -48,7 +48,7 @@ void load (fitsfile* fptr, Pulsar::DigitiserStatistics::row* drow)
   // Get DIGLEV
 
   fits_read_key (fptr, TSTRING, "DIGLEV", temp, comment, &status);
-  if (Pulsar::Archive::verbose)
+  if (Pulsar::Archive::verbose == 3)
     cerr << "Read DIGLEV = " << temp << endl;
   drow->diglev = temp;
   
@@ -67,7 +67,7 @@ void load (fitsfile* fptr, Pulsar::DigitiserStatistics::row* drow)
 
   delete[] temp;
 
-  if (Pulsar::Archive::verbose)
+  if (Pulsar::Archive::verbose == 3)
     cerr << "FITSArchive::load_digistat_row exiting" << endl;
 }
 
@@ -75,7 +75,7 @@ void Pulsar::FITSArchive::load_DigitiserStatistics (fitsfile* fptr)
 {
   int status = 0;
   
-  if (verbose)
+  if (verbose == 3)
     cerr << "FITSArchive::load_digistat entered" << endl;
 
   // Move to the DIG_STAT HDU
@@ -83,7 +83,7 @@ void Pulsar::FITSArchive::load_DigitiserStatistics (fitsfile* fptr)
   fits_movnam_hdu (fptr, BINARY_TBL, "DIG_STAT", 0, &status);
 
   if (status == BAD_HDU_NUM) {
-    if (verbose)
+    if (verbose == 3)
       cerr << "Pulsar::FITSArchive::load_digistat no DIG_STAT HDU" << endl;
 
     return;
@@ -113,6 +113,6 @@ void Pulsar::FITSArchive::load_DigitiserStatistics (fitsfile* fptr)
   
   add_extension (dstats);
 
-  if (verbose)
+  if (verbose == 3)
     cerr << "FITSArchive::load_digistat exiting" << endl;
 }

@@ -9,7 +9,7 @@ void Pulsar::FITSArchive::load_Receiver (fitsfile* fptr)
   // no comment
   char* comment = 0;
 
-  if (verbose)
+  if (verbose == 3)
     cerr << "FITSArchive::load_Receiver" << endl;
   
   Reference::To<Receiver> ext = new Receiver;
@@ -18,12 +18,12 @@ void Pulsar::FITSArchive::load_Receiver (fitsfile* fptr)
 
   // Receiver name
 
-  if (verbose)
+  if (verbose == 3)
     cerr << "FITSArchive::load_Receiver reading receiver" << endl;
 
   fits_read_key (fptr, TSTRING, "FRONTEND", tempstr.get(), comment, &status);
   if (status != 0) {
-    if (verbose)
+    if (verbose == 3)
       cerr << FITSError (status, "FITSArchive::load_Receiver",
 			 "fits_read_key FRONTEND").warning() << endl;
     status = 0;
@@ -34,12 +34,12 @@ void Pulsar::FITSArchive::load_Receiver (fitsfile* fptr)
   
   // Read the feed configuration
 
-  if (verbose)
+  if (verbose == 3)
     cerr << "FITSArchive::load_Receiver reading feed config" << endl;
 
   fits_read_key (fptr, TSTRING, "FD_POLN", tempstr.get(), comment, &status);
   if (status != 0) {
-    if (verbose)
+    if (verbose == 3)
       cerr << FITSError (status, "FITSArchive::load_Receiver",
 			 "fits_read_key FD_POLN").warning() << endl;
     status = 0;
@@ -56,7 +56,7 @@ void Pulsar::FITSArchive::load_Receiver (fitsfile* fptr)
   
   // Read angle of X-probe wrt platform zero
 
-  if (verbose)
+  if (verbose == 3)
     cerr << "FITSArchive::load_Receiver reading XPOL_ANG" << endl;
   
   float temp = 0.0;
@@ -64,7 +64,7 @@ void Pulsar::FITSArchive::load_Receiver (fitsfile* fptr)
 
   fits_read_key (fptr, TFLOAT, "XPOL_ANG", &temp, comment, &status);
   if (status != 0) {
-    if (verbose)
+    if (verbose == 3)
       cerr << FITSError (status, "FITSArchive::load_Receiver",
 			 "fits_read_key XPOL_ANG").warning() << endl;
     status = 0;
@@ -77,12 +77,12 @@ void Pulsar::FITSArchive::load_Receiver (fitsfile* fptr)
 
   // Read angle of Y-probe wrt platform zero
 
-  if (verbose)
+  if (verbose == 3)
     cerr << "FITSArchive::load_Receiver reading YPOL_ANG" << endl;
   
   fits_read_key (fptr, TFLOAT, "YPOL_ANG", &temp, comment, &status);
   if (status != 0) {
-    if (verbose)
+    if (verbose == 3)
       cerr << FITSError (status, "FITSArchive::load_Receiver",
 			 "fits_read_key YPOL_ANG").warning() << endl;
     status = 0;
@@ -95,12 +95,12 @@ void Pulsar::FITSArchive::load_Receiver (fitsfile* fptr)
 
   // Read angle of linear noise diode wrt platform zero
 
-  if (verbose)
+  if (verbose == 3)
     cerr << "FITSArchive::load_Receiver reading CAL_ANG" << endl;
   
   fits_read_key (fptr, TFLOAT, "CAL_ANG", &temp, comment, &status);
   if (status != 0) {
-    if (verbose)
+    if (verbose == 3)
       cerr << FITSError (status, "FITSArchive::load_Receiver",
 			 "fits_read_key CAL_ANG").warning() << endl;
     status = 0;
@@ -113,14 +113,14 @@ void Pulsar::FITSArchive::load_Receiver (fitsfile* fptr)
 
   // Feed track mode
 
-  if (verbose)
+  if (verbose == 3)
     cerr << "FITSArchive::load_Receiver reading feed track mode" << endl;
 
   ext->set_tracking_mode (Receiver::Feed);
 
   fits_read_key (fptr, TSTRING, "FD_MODE", tempstr.get(), comment, &status);
   if (status != 0) {
-    if (verbose)
+    if (verbose == 3)
       cerr << FITSError (status, "FITSArchive::load_Receiver",
 			 "fits_read_key FD_MODE").warning() << endl;
     status = 0;
@@ -132,19 +132,19 @@ void Pulsar::FITSArchive::load_Receiver (fitsfile* fptr)
       ext->set_tracking_mode (Receiver::Celestial);
     else if (strncasecmp(tempstr.get(),"GPA",3) == 0)
       ext->set_tracking_mode (Receiver::Galactic);
-    else if (verbose)
+    else if (verbose == 3)
       cerr << "FITSArchive::load_Receiver unknown FD_MODE=" 
            << tempstr.get() << endl;
   }
 
   // Read requested feed angle
   
-  if (verbose)
+  if (verbose == 3)
     cerr << "FITSArchive::load_Receiver reading requested feed angle" << endl;
   
   fits_read_key (fptr, TFLOAT, "FA_REQ", &temp, comment, &status);
   if (status != 0) {
-    if (verbose)
+    if (verbose == 3)
       cerr << FITSError (status, "FITSArchive::load_Receiver",
 			 "fits_read_key FA_REQ").warning() << endl;
     status = 0;
@@ -157,7 +157,7 @@ void Pulsar::FITSArchive::load_Receiver (fitsfile* fptr)
 
   // Read attenuator settings
 
-  if (verbose)
+  if (verbose == 3)
     cerr << "FITSArchive::load_Receiver reading attenuator settings" << endl;
 
   fits_read_key (fptr, TFLOAT, "ATTEN_A", &temp, comment, &status);
@@ -167,7 +167,7 @@ void Pulsar::FITSArchive::load_Receiver (fitsfile* fptr)
   ext->set_atten_b (temp);
 
   if (status != 0) {
-    if (verbose)
+    if (verbose == 3)
       cerr << FITSError (status, "FITSArchive::load_Receiver",
 			 "fits_read_key ATTEN_A,B").warning() << endl;
 

@@ -15,7 +15,7 @@ void Pulsar::FITSArchive::unload (fitsfile* fptr, const FITSHdrExtension* ext)
 
   if(status != 0) {
     fits_get_errstatus(status,error);
-    if (verbose)
+    if (verbose == 3)
       cerr << "WARNING: FITSArchive::unload_file MJD - " << error << endl;
     status = 0;
   }

@@ -19,6 +19,6 @@ void Pulsar::FITSArchive::delete_hdu (fitsfile* ffptr, char* hdu_name) const
     throw FITSError (status, "FITSArchive::delete_hdu", 
 		     "fits_delete_hdu %s", hdu_name);
 
-  if (verbose)
+  if (verbose == 3)
     cerr << "FITSArchive::delete_hdu " << hdu_name << " HDU deleted" << endl;
 }

@@ -12,7 +12,7 @@ void Pulsar::FITSArchive::load_CalInfoExtension (fitsfile* fptr)
 
   // Read detailed CAL information
 
-  if (verbose)
+  if (verbose == 3)
     cerr << "FITSArchive::load_CalInfoExtension" << endl;
   
   CalInfoExtension* ext = new CalInfoExtension;
@@ -29,7 +29,7 @@ void Pulsar::FITSArchive::load_CalInfoExtension (fitsfile* fptr)
  
   else {
 
-    if (verbose)
+    if (verbose == 3)
       cerr << FITSError (status, "FITSArchive::load_CalInfoExtension",
 			 "fits_read_key CAL_FREQ,DCYC,PHS").warning() << endl;
 
@@ -48,7 +48,7 @@ void Pulsar::FITSArchive::load_CalInfoExtension (fitsfile* fptr)
 
   delete tempstr;
 
-  if (status != 0 && verbose)
+  if (status != 0 && verbose == 3)
     cerr << FITSError (status, "FITSArchive::load_CalInfoExtension",
 		       "fits_read_key CAL_MODE").warning() << endl;
 }

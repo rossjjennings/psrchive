@@ -7,14 +7,14 @@ void Pulsar::FITSArchive::load_Passband (fitsfile* fptr)
   int status = 0;
   char* comment = 0;
 
-  if (verbose)
+  if (verbose == 3)
     cerr << "FITSArchive::load_Passband entered" << endl;
 
   // Move to the BANDPASS HDU
   fits_movnam_hdu (fptr, BINARY_TBL, "BANDPASS", 0, &status);
 
   if (status == BAD_HDU_NUM) {
-    if (verbose)
+    if (verbose == 3)
       cerr << "Pulsar::FITSArchive::load_Passband no BANDPASS HDU" << endl;
 
     return;
@@ -32,7 +32,7 @@ void Pulsar::FITSArchive::load_Passband (fitsfile* fptr)
   fits_read_key (fptr, TINT, "NCH_ORIG", &nch_orig, comment, &status);
   
   if (status != 0) {
-    if (verbose)
+    if (verbose == 3)
       cerr << FITSError (status, "FITSArchive::load_Passband", 
 			 "fits_read_key NCH_ORIG").warning() << endl;
     return;
@@ -41,7 +41,7 @@ void Pulsar::FITSArchive::load_Passband (fitsfile* fptr)
   int npol = 0;
   fits_read_key (fptr, TINT, "BP_NPOL", &npol, comment, &status);
   if (status != 0) {
-    if(verbose) {
+    if(verbose == 3) {
       cerr << FITSError (status, "FITSArchive::load_Passband", 
 			 "fits_read_key BP_NPOL").warning() << endl;
       cerr << "FITSArchive::load_Passband assuming BP_NPOL = 2" << endl;
@@ -64,13 +64,13 @@ void Pulsar::FITSArchive::load_Passband (fitsfile* fptr)
   fits_read_col (fptr, TFLOAT, colnum, 1, 1, npol, &nullfloat,
 		 data_offsets, &initflag, &status);
   if (status != 0) {
-    if (verbose)
+    if (verbose == 3)
       cerr << FITSError (status, "FITSArchive::load_Passband", 
 			 "fits_read_col DAT_OFFS").warning() << endl;
     return;
   }
 
-  if (verbose)
+  if (verbose == 3)
     cerr << "FITSArchive::load_Passband offsets read" << endl;
   
   // Read the data scale factors
@@ -84,13 +84,13 @@ void Pulsar::FITSArchive::load_Passband (fitsfile* fptr)
   fits_read_col (fptr, TFLOAT, colnum, 1, 1, npol, &nullfloat, 
 		 data_scales, &initflag, &status);
   if (status != 0) {
-    if (verbose)
+    if (verbose == 3)
       cerr << FITSError (status, "FITSArchive::load_Passband", 
 			 "fits_read_col DAT_SCL").warning() << endl;
     return;
   }
   
-  if (verbose)
+  if (verbose == 3)
     cerr << "FITSArchive::load_Passband scale factors read" << endl;
   
   // Read the data itself
@@ -106,13 +106,13 @@ void Pulsar::FITSArchive::load_Passband (fitsfile* fptr)
   fits_read_col (fptr, TINT, colnum, 1, 1, dimension, &nullfloat, 
 		 data, &initflag, &status);
   if (status != 0) {
-    if (verbose)
+    if (verbose == 3)
       cerr << FITSError (status, "FITSArchive::load_Passband", 
 			 "fits_read_col DATA").warning() << endl;
     return;
   }
   
-  if (verbose)
+  if (verbose == 3)
     cerr << "FITSArchive::load_Passband data read" << endl;
   
   vector<vector<float> > bandpasses;
@@ -136,6 +136,6 @@ void Pulsar::FITSArchive::load_Passband (fitsfile* fptr)
   if (status == 0)
     add_extension (bandpass);
 
-  if (verbose)
+  if (verbose == 3)
     cerr << "FITSArchive::load_Passband exiting" << endl;
 }

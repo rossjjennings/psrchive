@@ -13,7 +13,7 @@ void Pulsar::FITSArchive::unload (fitsfile* fptr,
 {
   int status = 0;
 
-  if (verbose)
+  if (verbose == 3)
     cerr << "FITSArchive::unload PolnCalibratorExtension entered" << endl;
   
   // Move to the FEEDPAR Binary Table
@@ -40,7 +40,7 @@ void Pulsar::FITSArchive::unload (fitsfile* fptr,
     if (pce->get_valid(i))
       ncpar = pce->get_transformation(i)->get_nparam(); 
 
-  if (verbose) cerr << "FITSArchive::unload PolnCalibratorExtension nchan=" 
+  if (verbose == 3) cerr << "FITSArchive::unload PolnCalibratorExtension nchan=" 
 		    << nch_fdpr <<  " nparam=" << ncpar << endl;
 
   char* comment = 0;
@@ -81,7 +81,7 @@ void Pulsar::FITSArchive::unload (fitsfile* fptr,
     throw FITSError (status, "FITSArchive::unload PolnCalibratorExtension", 
 		     "fits_write_col DAT_FREQ");
 
-  if (verbose) cerr << "FITSArchive::unload PolnCalibratorExtension"
+  if (verbose == 3) cerr << "FITSArchive::unload PolnCalibratorExtension"
 		 " frequencies written" << endl;
 
   // Write the weights
@@ -99,7 +99,7 @@ void Pulsar::FITSArchive::unload (fitsfile* fptr,
     throw FITSError (status, "FITSArchive::unload PolnCalibratorExtension", 
 		     "fits_write_col DAT_WTS");
 
-  if (verbose) cerr << "FITSArchive::unload PolnCalibratorExtension"
+  if (verbose == 3) cerr << "FITSArchive::unload PolnCalibratorExtension"
 		 " weights written" << endl;
   
   // Write the model parameters
@@ -158,6 +158,6 @@ void Pulsar::FITSArchive::unload (fitsfile* fptr,
   if (status)
     throw FITSError (status, "FITSArchive::unload PolnCalibratorExtension", 
 		     "fits_write_col DATAERR");
-  if (verbose)
+  if (verbose == 3)
     cerr << "FITSArchive::unload PolnCalibratorExtension exiting" << endl; 
 }
