@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Profile.h,v $
-   $Revision: 1.48 $
-   $Date: 2004/03/09 11:07:48 $
-   $Author: straten $ */
+   $Revision: 1.49 $
+   $Date: 2004/03/28 02:39:12 $
+   $Author: sord $ */
 
 #ifndef __Pulsar_Profile_h
 #define __Pulsar_Profile_h
@@ -105,7 +105,8 @@ namespace Pulsar {
     double sum (int bin_start=0, int bin_end=0) const;
     //! Returns the sum of all amplitudes squared
     double sumsq (int bin_start=0, int bin_end=0) const;
-
+    //! Returns the sum of the absolute value
+    double sumfabs (int bin_start=0, int bin_end=0) const;
     //! Returns a string with an ASCII representation of the amplitudes
     string get_ascii (int bin_start=0, int bin_end=0) const;
 
@@ -152,7 +153,8 @@ namespace Pulsar {
     float snr_fortran(float rms);
     //! Returns integrated flux divided by the number of bins == mean flux
     float flux(float _baseline_fraction = Profile::default_duty_cycle);
-    
+    //! Returns flux as above - but uses peak edges to find the profile region (and an abs value sum) ONLY HI SNR profiles applicable
+    float flux_hi_snr(float _baseline_fraction = Profile::default_duty_cycle);
     /*! Returns the width of the pulse profile, at the percentage
       of the peak given by pc, where the baseline is calculated
       using a duty cycle dc */
