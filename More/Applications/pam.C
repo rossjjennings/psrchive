@@ -98,8 +98,7 @@ void usage()
 
 // PAM: A command line tool for modifying archives
 
-int main (int argc, char *argv[]) {
-  try {
+int main (int argc, char *argv[]) try {
   
     bool verbose = false;
   
@@ -213,7 +212,7 @@ int main (int argc, char *argv[]) {
 	{0, 0, 0, 0}
       };
     
-      c = getopt_long(argc, argv, "hqvVima:e:E:TFpIt:f:b:d:o:s:r:u:w:D:SBLCx:R:",
+      c = getopt_long(argc, argv, "hqvVima:e:E:TFpIt:f:b:d:o:s:r:u:w:DSBLCx:R:",
 		      long_options, &options_index);
     
       if (c == -1)
@@ -236,7 +235,7 @@ int main (int argc, char *argv[]) {
 	Pulsar::Archive::set_verbosity(3);
 	break;
       case 'i':
-	cout << "$Id: pam.C,v 1.51 2005/03/04 07:14:09 hknight Exp $" << endl;
+	cout << "$Id: pam.C,v 1.52 2005/03/16 06:58:43 straten Exp $" << endl;
 	return 0;
       case 'm':
 	save = true;
@@ -525,7 +524,7 @@ int main (int argc, char *argv[]) {
 	cout << "Unrecognised option" << endl;
       }
     }
-  
+ 
     for (int ai=optind; ai<argc; ai++)
       dirglob (&archives, argv[ai]);
   
@@ -903,15 +902,32 @@ int main (int argc, char *argv[]) {
   
     return 0;
 
-  } catch(Error& er) { cerr << er << endl;
-  } catch (string& error){  cerr << "exception thrown: " << error << endl;
-  } catch (bad_alloc& ba){  cerr << "Caught a bad_alloc: '" << ba.what() << "'" << endl ;
-  } catch (exception& e) {  cerr << "caught an exception of type '" 
+}
+catch(Error& er) 
+{
+  cerr << er << endl;
+  return -1;
+}
+catch (string& error)
+{
+  cerr << "exception thrown: " << error << endl;
+  return -1;
+}
+catch (bad_alloc& ba)
+{
+  cerr << "Caught a bad_alloc: '" << ba.what() << "'" << endl ;
+  return -1;
+}
+catch (exception& e)
+{
+  cerr << "caught an exception of type '" 
 				 << typeid(e).name() << "'" << endl; 
-  } catch(...){ fprintf(stderr,"Unknown exception caught\n");
-
-  }
-  exit(-1);
+  return -1;
+}
+catch(...)
+{
+  fprintf(stderr,"Unknown exception caught\n");
+  return -1;
 }
 
 
