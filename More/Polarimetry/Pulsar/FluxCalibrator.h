@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/FluxCalibrator.h,v $
-   $Revision: 1.2 $
-   $Date: 2003/02/12 22:11:29 $
+   $Revision: 1.3 $
+   $Date: 2003/02/13 14:08:33 $
    $Author: straten $ */
 
 #ifndef __FluxCalibrator_H
@@ -10,26 +10,26 @@
 
 #include <string>
 
-#include "Reference.h"
+#include "Calibrator.h"
 #include "Estimate.h"
 #include "Types.h"
 
 namespace Pulsar {
 
-  //! Forward declaration
-  class Archive;
-
-  class FluxCalibrator : public Reference::Able {
+  class FluxCalibrator : public Calibrator {
     
   public:
-    //! Verbosity flag
-    static bool verbose;
+    //! Self-calibrate flux calibrator archives before computing hi/lo ratios
+    static bool self_calibrate;
 
     //! Construct from an vector of FluxCal Pulsar::Archives
-    FluxCalibrator (const vector<Pulsar::Archive*>& archives);
+    FluxCalibrator (const vector<Archive*>& archives);
 
     //! Return the flux of Hydra in mJy
     double hydra_flux_mJy (double frequency_MHz);
+
+    //! Calibrate the flux in the given archive
+    void calibrate (Archive* archive);
 
   protected:
 
@@ -45,6 +45,15 @@ namespace Pulsar {
     //! Reference to the Pulsar::Archive with which this instance associates
     Reference::To<Pulsar::Archive> archive;
 
+    //! Ratio of cal hi/lo on hydra
+    vector<Estimate<double> > ratio_on;
+
+    //! Ratio of cal hi/lo off hydra
+    vector<Estimate<double> > ratio_off;
+
+    //! Compute cal_flux and T_sys, given the hi/lo ratios on and off hydra
+    void calculate (vector<Estimate<double> >& on,
+		    vector<Estimate<double> >& off);
   };
 
 }

@@ -3,16 +3,12 @@
 #include "Pulsar/Integration.h"
 #include "Error.h"
 
-bool Pulsar::FluxCalibrator::verbose = false;
+/*! When true, the FluxCalibrator constructor will first calibrate the
+  the flux calibrator observations using their off-pulse polarization to
+  compute the arbitrary polarimetric boost.  Not yet implemented.  */
+bool Pulsar::FluxCalibrator::self_calibrate = false;
 
-//! Given the observing frequency in MHz, returns the flux of Hydra in mJy
-double Pulsar::FluxCalibrator::hydra_flux_mJy (double cfreq)
-{
-  return pow (cfreq/1400.0, -.91) * 43.1 * 1000;
-}
-
-
-Pulsar::FluxCalibrator::FluxCalibrator (const vector<Pulsar::Archive*>& archs)
+Pulsar::FluxCalibrator::FluxCalibrator (const vector<Archive*>& archs)
 {
   if (archs.size()==0)
     throw Error (InvalidParam, "Pulsar::FluxCalibrator",
@@ -48,9 +44,6 @@ Pulsar::FluxCalibrator::FluxCalibrator (const vector<Pulsar::Archive*>& archs)
 
   unsigned nchan = archive->get_nchan ();
   
-  cal_flux.resize (nchan);
-  T_sys.resize (nchan);
-    
   vector<MeanEstimate<double> > mean_ratio_on (nchan);
   vector<MeanEstimate<double> > mean_ratio_off (nchan);
 
@@ -88,37 +81,86 @@ Pulsar::FluxCalibrator::FluxCalibrator (const vector<Pulsar::Archive*>& archs)
     }
   }
 
+  ratio_on.resize (nchan);
+  ratio_off.resize (nchan);
+
+  for (unsigned ichan=0; ichan<nchan; ++ichan) {
+    ratio_on[ichan] = mean_ratio_on[ichan].get_Estimate();
+    ratio_off[ichan] = mean_ratio_off[ichan].get_Estimate();
+  }
+
+}
+
+//! Calibrate the flux in the given archive
+void Pulsar::FluxCalibrator::calibrate (Archive* arch)
+{
+  if (!archive)
+    throw Error (InvalidState, "Pulsar::FluxCalibrator::calibrate",
+		 "no FluxCal Archive");
+
+  string reason;
+  if (!archive->mixable (arch, reason))
+    throw Error (InvalidParam, "Pulsar::FluxCalibrator", "Pulsar::Archive='"
+		 + archive->get_filename() + "'\ndoes not mix with '"
+		 + arch->get_filename() + "\n" + reason);
+
+  if (cal_flux.size() != arch->get_nchan()) {
+
+    vector<Estimate<double> > on;
+    vector<Estimate<double> > off;
+
+    // make on and off the right size of ratio_on and ratio_off
+
+    calculate (on, off);
+
+  }
+
+
+}
+
+void Pulsar::FluxCalibrator::calculate (vector<Estimate<double> >& on,
+					vector<Estimate<double> >& off)
+{
+
   double hyd_mJy = hydra_flux_mJy (archive->get_centre_frequency());
+  unsigned nchan = on.size();
+
+  cal_flux.resize (nchan);
+  T_sys.resize (nchan);
 
   for (unsigned ichan=0; ichan<nchan; ++ichan) {
 
-    if (mean_ratio_on[ichan]==0 || mean_ratio_off[ichan]==0) {
+    if (on[ichan]==0 || off[ichan]==0) {
       cal_flux[ichan] = T_sys[ichan] = 0;
       continue;
     }
 
-    Estimate<double> ratio_on = mean_ratio_on[ichan].get_Estimate();
-    Estimate<double> ratio_off = mean_ratio_off[ichan].get_Estimate();
-
-    Estimate<double> ratio_diff = 1.0/ratio_on - 1.0/ratio_off;
+    Estimate<double> ratio_diff = 1.0/on[ichan] - 1.0/off[ichan];
 
     cal_flux[ichan] = hyd_mJy/ratio_diff;
 
-    T_sys[ichan] = cal_flux[ichan]/ratio_off;
+    T_sys[ichan] = cal_flux[ichan]/off[ichan];
 
     if (cal_flux[ichan].val < sqrt(cal_flux[ichan].var)
 	|| T_sys[ichan].val < sqrt(T_sys[ichan].var) ) {
       
       if (verbose)
 	cerr << "Pulsar::FluxCalibrator channel=" << ichan  << ": low signal"
-	  "\n\t\tratio on=" << ratio_on << " ratio off=" << ratio_off <<
+	  "\n\t\tratio on=" << on[ichan] << " ratio off=" << off[ichan] <<
 	  "\n\t\tcal flux=" << cal_flux[ichan] <<
 	  "\n\t\tsys flux=" << T_sys[ichan] << endl;
       
       cal_flux[ichan] = T_sys[ichan] = 0;
     }
     
-  }
+  }  // end for each chan
   
+}
+
+
+//! Given the observing frequency in MHz, returns the flux of Hydra in mJy
+double Pulsar::FluxCalibrator::hydra_flux_mJy (double cfreq)
+{
+  return pow (cfreq/1400.0, -.91) * 43.1 * 1000;
 }
 
