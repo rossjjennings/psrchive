@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/Transposer.h,v $
-   $Revision: 1.2 $
-   $Date: 2004/07/17 06:14:02 $
+   $Revision: 1.3 $
+   $Date: 2004/09/16 09:54:15 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Transposer_h
@@ -38,16 +38,23 @@ namespace Pulsar {
     //! Get the size of the specified dimension
     unsigned get_ndim (unsigned idim);
 
+    //! Get the stride
+    Dimensions get_stride () const;
+
     //! Returns amplitude data; ordered according to the specified dimension
     void get_amps (vector<float>& amps) const;
+
+    //! Fill the array according to the dimensions specified by stride
+    void get_amps (const Integration*, float*, const Dimensions& stride) const;
+
+    //! Fill the array according to the dimensions specified by stride, jbin
+    void get_amps (const Profile*, float*, unsigned jbin) const;
 
     //! verbosity flag
     bool verbose;
 
   protected:
 
-    void get_amps (const Integration* , float* , const Dimensions& dim) const;
-    void get_amps (const Profile* , float* , unsigned jbin) const;
     void range_check (unsigned idim, const char* method) const;
 
     Reference::To<const Archive> archive;

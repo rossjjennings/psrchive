@@ -44,6 +44,27 @@ void Pulsar::Transposer::range_check (unsigned idim, const char* method) const
     throw Error (InvalidRange, method, "idim=%d > 3", idim);
 }
 
+Pulsar::Dimensions Pulsar::Transposer::get_stride () const
+{
+  Dimensions dims (archive);
+
+  int increment = 1;
+  Dimensions stride;
+
+  stride.set_ndim (dim[0], increment);
+  increment *= dims.get_ndim (dim[0]);
+
+  stride.set_ndim (dim[1], increment);
+  increment *= dims.get_ndim (dim[1]);
+
+  stride.set_ndim (dim[2], increment);
+  increment *= dims.get_ndim (dim[2]);
+
+  stride.set_if_zero (increment);
+
+  return stride;
+}
+
 void Pulsar::Transposer::get_amps (vector<float>& amps) const
 {
   if (!archive)
@@ -53,27 +74,12 @@ void Pulsar::Transposer::get_amps (vector<float>& amps) const
   Dimensions dims (archive);
   amps.resize ( dims.nsub * dims.npol * dims.nchan * dims.nbin );
 
-  // establish the pyramid
-  int increment = 1;
-  Dimensions stride;
-
-  stride.set_ndim (dim[0], increment);
-  increment *= dims.get_ndim (dim[0]);
-
-  stride.set_ndim (dim[1], increment);
-  increment *= dims.get_ndim (dim[1]);
- 
-  stride.set_ndim (dim[2], increment);
-  increment *= dims.get_ndim (dim[2]);
-
-  stride.set_if_zero (increment);
+  Dimensions stride = get_stride ();
 
   if (verbose)
     cerr << "Transposer::get_amps nsub=" << dims.nsub << " npol=" << dims.npol 
-	 << " nchan=" << dims.nchan << " nbin=" << dims.nbin << endl;
-
-  if (verbose)
-    cerr << "Transposer::get_amps jsub=" << stride.nsub 
+	 << " nchan=" << dims.nchan << " nbin=" << dims.nbin << endl
+         << "Transposer::get_amps jsub=" << stride.nsub 
          << " jpol=" << stride.npol 
 	 << " jchan=" << stride.nchan << " jbin=" << stride.nbin << endl;
   
