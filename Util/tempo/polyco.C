@@ -2,7 +2,10 @@
 #include <stdio.h> 
 #include <stdlib.h>
 #include <sys/stat.h>
+#include <sys/wait.h>
+#include <unistd.h>
 #include <assert.h>
+#include <errno.h>
 #include <string.h>
 
 #include "MJD.h"
@@ -31,7 +34,11 @@ double polynomial::period(const MJD& tp) const
   MJD dt = tp - reftime;
   double t = dt.in_minutes();
   dp = coefs[1];
-  for (int i=2;i<ncoef;i++) dp+=(double)(i)*coefs[i]*pow(t,(double)(i-1));
+  double poweroft = t;
+  for (int i=2;i<ncoef;i++) {
+    dp+=(double)(i)*coefs[i]*poweroft;
+    poweroft *= t;
+  }
   dp /= (double) 60.0;          // Phase per second
   dp += f0;
   return(1.0/dp);               // Seconds per turn = period of pulsar
@@ -51,8 +58,10 @@ double polynomial::phase(const MJD& tp) const
 //   printf("polynomial::phase dt in minutes is %18.12lf\n",t);
    p = 0.0;
 
+   double poweroft = 1.0;
    for (int i=0;i<ncoef;i++) {
-      p+= coefs[i]*pow(t,(double)i);
+      p+= coefs[i]*poweroft;
+      poweroft *= t;
 //      printf("polynomial::phase coef[%d] is %lf\n",i,coefs[i]);
    }
    p += t*f0*60.0;
@@ -73,8 +82,10 @@ double polynomial::phi(const MJD& tp) const
 //   printf("polynomial::phase dt in minutes is %18.12lf\n",t);
    p = 0.0;
 
+   double poweroft = 1.0;
    for (int i=0;i<ncoef;i++) {
-      p+= fmod (coefs[i]*pow(t,(double)i), 1.0);
+      p+= fmod (coefs[i]*poweroft, 1.0);
+      poweroft *= t;
 //      printf("polynomial::phase coef[%d] is %lf\n",i,coefs[i]);
    }
    p += fmod (t*f0*60.0, 1.0);
@@ -222,14 +233,14 @@ int polyco::Construct (const char* psr, const char* parfile,
   int   rmeph = 0;
 
   if (parfile) {
-    sprintf(syscom,"polyco -f %s %lf %lf %d %d %d %d > /dev/null",
+    sprintf(syscom,"polyco -f %s %lf %lf %d %d %d %d > /tmp/polyco.stdout",
 	    parfile, m1.in_days(), m2.in_days(), ns, nc, maxha, tel);
 
     ephfile = new char [strlen(parfile) + 1];
     strcpy (ephfile, parfile);
   }
   else {
-    sprintf(syscom,"polyco %s %lf %lf %d %d %d %d > /dev/null",
+    sprintf(syscom,"polyco %s %lf %lf %d %d %d %d > /tmp/polyco.stdout",
 	    psr, m1.in_days(), m2.in_days(), ns, nc, maxha, tel);
 
     ephfile = new char [strlen(psr) + 5];
@@ -239,11 +250,38 @@ int polyco::Construct (const char* psr, const char* parfile,
     rmeph = 1;
   }
 
-  int status = system(syscom);
-  if (status != 0) {
-    fprintf (stderr, "polyco::polyco - failed %s ???\n", syscom);
-    delete [] ephfile;
-    return -1;
+  int retries = 3;
+  while (retries > 0) {
+
+    errno = 0;
+    int status = system(syscom);
+    if (status == 0)
+      break;
+
+    fprintf (stderr, "polyco::polyco - failed: %d\n", retries);
+    if (status == -1)
+      perror ("polyco::errno");
+    else {
+      fprintf (stderr, "polyco::status = %d ", status);
+      if (status == 127)
+	fprintf (stderr, 
+		 "(indicating that the shell could not be executed).\n");
+      else
+	fprintf (stderr,  "(a return value of %d from polyco)\n",
+		 WEXITSTATUS(status));
+    }
+    fprintf (stderr, "polyco::cmdline: %s\n", syscom);
+    fprintf (stderr, "polyco::stdout:\n");
+    system ("cat /tmp/polyco.stdout");
+    retries --;
+    
+    if (retries == 0) {
+      delete [] ephfile;
+      return -1;
+    }
+    if ((errno == EWOULDBLOCK) || (errno == EAGAIN)) {
+      sleep (5);
+    }
   }
 
   int retval = file_Construct ("polyco.dat", ephfile);
