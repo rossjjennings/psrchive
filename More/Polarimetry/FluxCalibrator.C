@@ -1,4 +1,5 @@
 #include "Pulsar/FluxCalibrator.h"
+#include "Pulsar/FluxCalibratorExtension.h"
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
 #include "Pulsar/Profile.h"
@@ -9,9 +10,31 @@
   compute the arbitrary polarimetric boost.  Not yet implemented.  */
 bool Pulsar::FluxCalibrator::self_calibrate = false;
 
-Pulsar::FluxCalibrator::FluxCalibrator ()
+/*! 
+  If a Pulsar::Archive is provided, and if it contains a
+  PolnCalibratorExtension, then the constructed instance can be
+  used to calibrate other Pulsar::Archive instances.
+*/
+Pulsar::FluxCalibrator::FluxCalibrator (const Archive* archive)
 {
   calculated = false;
+
+  if (!archive)
+    return;
+
+  const FluxCalibratorExtension* fe = archive->get<FluxCalibratorExtension>();
+  if (fe) {
+    // store the calibrator archive
+    calibrator = archive;
+    extension = fe;
+    filenames.push_back( archive->get_filename() );
+
+    cal_flux = fe->cal_flux;
+    T_sys = fe->T_sys;
+    calculated = true;
+  }
+  else
+    add_observation (archive);
 }
 
 Pulsar::FluxCalibrator::FluxCalibrator (const vector<const Archive*>& archs)
@@ -179,9 +202,13 @@ void Pulsar::FluxCalibrator::create (unsigned required_nchan)
   if (!required_nchan)
     required_nchan = nchan;
 
+  if (extension && extension->get_nchan() != required_nchan)
+    throw Error (InvalidState, "Pulsar::FluxCalibrator::create",
+		 "required nchan=%d != extension nchan=%d",
+		 required_nchan, extension->get_nchan());
+
   if (calculated && cal_flux.size() == required_nchan)
     return;
-
 
   ratio_on.resize (nchan);
   ratio_off.resize (nchan);
