@@ -187,11 +187,6 @@ int coord2str (char* coordstring, unsigned coordstrlen, double ra, double dec,
 
   decstart = strlen (coordstring);
 
-  if (dec >= 0) {
-    coordstring[decstart] = '+';
-    decstart ++;
-  }
-
   dec2str2 (coordstring+decstart, coordstrlen-decstart, dec, places);
 
   return 0;
