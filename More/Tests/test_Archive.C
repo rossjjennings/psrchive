@@ -2,6 +2,10 @@
 #include "Pulsar/Integration.h"
 #include "Error.h"
 #include "Reference.h"
+#include "dirutil.h"
+
+#include <unistd.h>
+
 
 int main (int argc, char** argv)
 { try {
@@ -12,14 +16,37 @@ int main (int argc, char** argv)
   // Error::verbose = true;
   // Pulsar::Integration::verbose = true;
 
-  string filename ("test.ar");
+  int c = 0;
+  const char* args = "aP:vV";
 
-  if (argc>1)
-    filename = argv[1];
-  
-  cerr << "load archive from " << filename << endl;
+  while ((c = getopt(argc, argv, args)) != -1)
+    switch (c) {
+      
+    case 'a':
+      Pulsar::Archive::agent_report ();
+      return 0;
+
+    case 'P':
+      Pulsar::Archive::set_plugin_path (optarg);
+      break;
+
+    case 'V':
+      Pulsar::Integration::verbose = true;
+    case 'v':
+      Pulsar::Archive::verbose = true;
+      break;
+
+    }
+ 
+  vector <string> filenames;
+  for (int ai=optind; ai<argc; ai++)
+    dirglob (&filenames, argv[ai]);
+
+  for (unsigned ifile=0; ifile < filenames.size(); ifile++) {
+ 
+  cerr << "load archive from " << filenames[ifile] << endl;
   Reference::To<Pulsar::Archive> archive;
-  archive = Pulsar::Archive::load (filename);
+  archive = Pulsar::Archive::load (filenames[ifile]);
 
   cerr << "clone archive for tscrunch" << endl;
   Reference::To<Pulsar::Archive> clone = archive -> clone();
@@ -46,6 +73,8 @@ int main (int argc, char** argv)
   cerr << "unload out.ar" << endl;
   clone -> unload ("out.ar");
 
+  }
+
 }
 catch (Error& error) {
   cerr << error << endl;
@@ -55,6 +84,10 @@ catch (string& error) {
   cerr << error << endl;
   return -1;
 }
- 
+catch (...) {
+  cerr << "An exception was thrown" << endl;
+  return -1;
+} 
+
  return 0;
 }
