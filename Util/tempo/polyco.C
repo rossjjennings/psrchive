@@ -185,8 +185,11 @@ int polynomial::load(string* instr)
     cerr << "polynomial::load Phase=" << ref_phase << endl;
 
   int ncoeftmp=0;
-  scanned = sscanf (line.c_str(), "%lf %c %lf %d %lf %lf %lf\n",
-  	    &f0, &telescope, &nspan_mins, &ncoeftmp, &freq, &binph, &binfreq);
+
+  char teletxt[8];
+  scanned = sscanf (line.c_str(), "%lf %s %lf %d %lf %lf %lf\n",
+  	    &f0, teletxt, &nspan_mins, &ncoeftmp, &freq, &binph, &binfreq);
+
   if (scanned < 5) {
     fprintf (stderr, "polynomial::load(string*) error stage 2 parsing '%s'\n",
                 line.c_str());
@@ -196,6 +199,18 @@ int polynomial::load(string* instr)
     binary = 0;
   else
     binary = 1;
+
+  if (strlen(teletxt) == 1)
+    telescope = teletxt[0];
+  else {
+    telescope = 'a';
+    int code = 0;
+    sscanf (teletxt, "%d", &code);
+    telescope += code-10;
+    if (polyco::verbose)
+      cerr << "polynomial::load telescope code=" << code << "->" 
+           << telescope << endl;
+  }
 
   coefs.resize(ncoeftmp);  
   // Read in the coefficients 
