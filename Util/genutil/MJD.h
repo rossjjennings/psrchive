@@ -1,6 +1,6 @@
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/MJD.h,v $
-   $Revision: 1.9 $
-   $Date: 1999/11/02 08:55:46 $
+   $Revision: 1.10 $
+   $Date: 1999/12/21 04:42:21 $
    $Author: straten $ */
 
 #ifndef __MJD_H
@@ -29,7 +29,7 @@ class MJD {
   MJD (int intday, double fracday);
 
   // construct from a string of the form "50312.4569"
-  MJD (char* mjdstring) {
+  MJD (const char* mjdstring) {
     if (Construct (mjdstring) < 0)
       throw ("MJD::MJD(char*) construct error");
   };
@@ -129,7 +129,8 @@ class MJD {
 
 };
 
-// MJD & fabs(const MJD &);
+inline ostream& operator<< (ostream& ostr, const MJD& sz) 
+{ return ostr << sz.printdays(8); }
 
 #endif  /* not __MJD_H defined */
 
