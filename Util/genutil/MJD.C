@@ -100,33 +100,62 @@ MJD& MJD::operator = (const MJD &in_mjd)
   return *this;
 }
 
+MJD& MJD::operator += (const MJD &in_mjd)
+{
+  *this = *this + in_mjd;
+  return *this;
+}
+
+MJD& MJD::operator -= (const MJD &in_mjd)
+{
+  *this = *this - in_mjd;
+  return *this;
+}
+
+MJD& MJD::operator += (const double & d)
+{
+  *this = *this + d;
+  return *this;
+}
+
+MJD& MJD::operator -= (const double & d)
+{
+  *this = *this - d;
+  return *this;
+}
+
 const MJD operator + (const MJD &m1, const MJD &m2) {
-  return MJD(m1.days + m2.days,
-	     m1.secs + m2.secs,
-	     m1.fracsec + m2.fracsec); // Let constructor do the dirty work.
+  return MJD(m1.intday() + m2.intday(),
+	     m1.get_secs() + m2.get_secs(),
+	     m1.get_fracsec() + m2.get_fracsec()); // Let constructor do the dirty work.
 }
 
 const MJD operator - (const MJD &m1, const MJD &m2) {
-  return MJD(m1.days - m2.days,
-	     m1.secs - m2.secs,
-	     m1.fracsec - m2.fracsec); // Let constructor do the dirty work.
+  return MJD(m1.intday() - m2.intday(),
+	     m1.get_secs() - m2.get_secs(),
+	     m1.get_fracsec() - m2.get_fracsec()); // Let constructor do the dirty work.
 }
 
 const MJD operator / (const MJD &m1, double divisor) {
-  double ddays = ((double) m1.days) / divisor;
-  double dsecs = ((double) m1.secs) /divisor; 
-  double dfracsec = m1.fracsec / divisor;
+  double ddays = ((double) m1.intday()) / divisor;
+  double dsecs = ((double) m1.get_secs()) /divisor; 
+  double dfracsec = m1.get_fracsec() / divisor;
   return MJD(ddays,dsecs,dfracsec);
 }
 
 const MJD operator + (const MJD &m1, double sss) {
-  double secs_add = m1.fracsec + sss;
-  return MJD((double)m1.days,(double)m1.secs,secs_add);
+  double secs_add = m1.get_fracsec() + sss;
+  return MJD((double)m1.intday(),(double)m1.get_secs(),secs_add);
 }
 
 const MJD operator - (const MJD &m1, double sss) {
   double secs_take = m1.fracsec - sss;
-  return MJD((double)m1.days,(double)m1.secs,secs_take);
+  return MJD((double)m1.intday(),(double)m1.get_secs(),secs_take);
+}
+
+MJD abs(const MJD & in_mjd) {
+  if(in_mjd.intday()>0) return(in_mjd);
+  else return(MJD(in_mjd.intday()*-1.0,in_mjd.fracday()*-1.0));
 }
 
 int operator > (const MJD &m1, const MJD &m2) {
