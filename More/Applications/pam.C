@@ -39,6 +39,7 @@ void usage()
     "  -T               Time scrunch to one subint \n"
     "  -F               Frequency scrunch to one channel \n"
     "  -p               Polarisation scrunch to total intensity \n"
+    "  -D               Dedisperse (but not fscrunch) \n"
     "  -I               Transform to Invariant Interval \n"
     "  -S               Transform to Stokes parameters \n"
     "  -x \"start end\"   Extract subints in this inclusive range \n"
@@ -56,8 +57,8 @@ void usage()
     "  --binlngasc      Convert to binary longitude asc node order \n"
     "\n"
     "The following options take floating point arguments \n"
-    "  -d               Alter the header dispersion measure \n"
-    "  -D RM            Correct for ISM faraday rotation \n"
+    "  -d DM            Alter the header dispersion measure \n"
+    "  -R RM            Correct for ISM faraday rotation \n"
     "  -s               Smear with this duty cycle \n"
     "  -r               Rotate profiles by this many turns \n" 
     "  -w               Reset profile weights to this value \n"
@@ -97,7 +98,7 @@ int main (int argc, char *argv[]) {
   bool bscr = false;
   int bscr_fac = 0;
 
-  bool dedisperse = false;
+  bool newdm = false;
   double dm = 0.0;
 
   bool defaraday = false;
@@ -111,6 +112,8 @@ int main (int argc, char *argv[]) {
 
   bool rotate = false;
   double rphase = 0.0;
+
+  bool dedisperse = false;
 
   bool pscr = false;
 
@@ -188,7 +191,7 @@ int main (int argc, char *argv[]) {
       Pulsar::Archive::set_verbosity(3);
       break;
     case 'i':
-      cout << "$Id: pam.C,v 1.36 2004/07/14 07:45:53 straten Exp $" << endl;
+      cout << "$Id: pam.C,v 1.37 2004/07/14 08:09:03 straten Exp $" << endl;
       return 0;
     case 'm':
       save = true;
@@ -269,7 +272,7 @@ int main (int argc, char *argv[]) {
       command += optarg;
       break;
     case 'd':
-      dedisperse = true;
+      newdm = true;
       if (sscanf(optarg, "%lf", &dm) != 1) {
 	cout << "That is not a valid dispersion measure" << endl;
 	return -1;
@@ -278,12 +281,16 @@ int main (int argc, char *argv[]) {
       command += optarg;
       break;
     case 'D':
+      dedisperse = true;
+      command += " -D ";
+      break;
+    case 'R':
       defaraday = true;
       if (sscanf(optarg, "%lf", &rm) != 1) {
 	cout << "That is not a valid rotation measure" << endl;
 	return -1;
       }
-      command += " -D ";
+      command += " -R ";
       command += optarg;
       break;
     case 's':
@@ -525,13 +532,19 @@ int main (int argc, char *argv[]) {
 	arch->rotate(period*rphase);
       }
       
-      if (dedisperse) {
+      if (newdm) {
 	for (unsigned isub=0; isub < arch->get_nsubint(); isub++)
 	  arch->get_Integration(isub)->set_dispersion_measure (dm);
 	
 	arch->set_dispersion_measure(dm);
 	if (verbose)
 	  cout << "Archive dispersion measure set to " << dm << endl;
+      }
+
+      if (dedisperse) {
+        arch->dedisperse();
+        if (verbose)
+          cout << "Archive dedipsersed" << endl;
       }
 
       if (defaraday) {
