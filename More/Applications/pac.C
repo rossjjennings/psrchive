@@ -128,12 +128,11 @@ int main (int argc, char *argv[]) {
       Pulsar::Database::verbose = true;
       Pulsar::Calibrator::verbose = true;
       Pulsar::Database::Criterion::match_verbose = true;
-      //Calibration::Model::verbose = true;
-      Pulsar::Archive::set_verbosity(2);
+      Pulsar::Archive::set_verbosity(3);
       break;
 
     case 'i':
-      cout << "$Id: pac.C,v 1.60 2004/12/06 14:40:14 straten Exp $" << endl;
+      cout << "$Id: pac.C,v 1.61 2004/12/15 15:58:32 straten Exp $" << endl;
       return 0;
 
     case 'A':

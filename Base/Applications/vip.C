@@ -144,6 +144,9 @@ int main (int argc, char *argv[]) try {
 	
 	const Pulsar::Pointing* pointing = subint->get<Pulsar::Pointing>();
 
+        if (verbose && !pointing)
+          cerr << "vip: Integration has no Pointing Extension" << endl;
+
 	if (!strcasecmp (keys[j].c_str(), "lst")) {
 	  if (!pointing)
 	    s += "N/A\t\t";
