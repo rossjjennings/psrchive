@@ -185,8 +185,8 @@ void Pulsar::Database::Entry::unload (string& retval)
   retval += " " + instrument + " " + receiver;
 }
 
-bool operator == (const Pulsar::Database::Entry& a, 
-		  const Pulsar::Database::Entry& b)
+bool Pulsar::operator == (const Database::Entry& a, 
+		          const Database::Entry& b)
 {
   return
     a.obsType == b.obsType &&
@@ -195,7 +195,7 @@ bool operator == (const Pulsar::Database::Entry& a,
     a.frequency == b.frequency &&
     a.instrument == b.instrument &&
     a.receiver == b.receiver &&
-    (a.time - b.time).in_seconds() < 10.0 &&
+    fabs( (a.time - b.time).in_seconds() ) < 10.0 &&
     a.position.angularSeparation(b.position).getDegrees() < 0.1;
 }
 
