@@ -66,169 +66,227 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       real*8 value_double(NUM_KEYS)
       integer value_integer(NUM_KEYS)
       real*8 error_double(NUM_KEYS)
-      integer toklen, keypos
-      integer lineNum
-      logical fitThis, isAlias
+      integer un
 
-      integer un, tokpos, ll, length, tmp
-      logical strmatch, found
-      character*80 buffer, tok
-      logical isOldEphem
-      real*8 hmstoturns, dmstoturns, prec
+      integer lineNum, isOldEphem, keypos
+      character*80 buffer
       integer convert(NUM_KEYS)
 
-      isOldEphem = .false.      ! flag for "this is an old ephemeris file"
+c     the function that does the parsing
+      integer rd_eph_str
+c     the function that corrects the units upon completion
+      integer convertUnits
+
+      isOldEphem = 0      ! flag for "this is an old ephemeris file"
 c     First, say we don't yet know any parameters
       do keypos=1, NUM_KEYS
          parmStatus(keypos) = 0
          error_double(keypos) = 0.0d0
          convert(keypos) = 0
       end do
+
 c     Loop over lines
       lineNum = 0
       do while (.true.)
-         keypos = 0
          lineNum = lineNum + 1
-         fitThis = .false.
          read(un, '(a80)', end=10)buffer ! read a line
-         ll = length(buffer)
-         tokpos = 1 
-         call citem(buffer, ll, tokpos, tok, toklen)
-         if (toklen.le.0) goto 50 ! Blank line. Skip
-         call upcase(tok)
 
-c     Is it a comment line?
-         if ((tok(1:1) .eq. '#') 
-     +        .or. (tok(1:2) .eq. 'C ')) goto 50 ! Ignore line.
-         if ((isOldEphem)       ! Expect possible fit flag first.
-     +        .and. (tok(2:2).eq.' ') ! Is it only 1 char long?
-     +        .and. (.not. (tok(1:1).eq.'P')) ! and not a keyword...
-     +        .and. (.not. (tok(1:1).eq.'E'))) then
-            fitThis = .true.    ! Was a fit flag. Get next token..
-            call citem(buffer, ll, tokpos, tok, toklen)
-            if (toklen.le.0) goto 60 ! Error...
-         end if
-         call upcase(tok)
-c     We now should have a key. Find it in the list
-         if (strmatch("NAME",tok)) then ! NAME is a special case!
-            isOldEphem = .true.
-            keypos = -1
-            found = .true.
-         else
-            found = .false.
-            keypos = 1
-         end if
-         do while ((keypos .le. NUM_KEYS) .and. .not. found)
-            if (strmatch(parmNames(keypos), tok)) 
-     +           found = .true.
-            keypos = keypos + 1
-         end do
-         keypos = keypos - 1
-         if (found .or. isAlias(tok,keypos, convert)) then
-            found = .true.
-            if (keypos .gt. -1) parmStatus(keypos) = 0 ! set this shortly
-         end if
-         if (found) then 
-c     We now know the key index. 
-            call citem(buffer, ll, tokpos, tok, toklen)
-            if (toklen.le.0) goto 60 ! Error...
-            if (tok(1:1).eq.'#')  then ! Comment. ignore the line
-               parmStatus(keypos) = 0
-            else
-c     keypos = -2 signifies NAME input parameter. Work out if it should be
-c     PSRJ or PSRB, and don't include any prefix letter in the value 
-               if (keypos.eq.-2) then
-                  if (tok(1:1).eq.'B') then
-                     keypos = EPH_PSRB 
-                  else
-                     keypos = EPH_PSRJ
-                  end if
-                  if ((tok(1:1).eq.'J').or.(tok(1:1).eq.'B')) then
-                     value_str(keypos)(1:) = tok(2:toklen)
-                  else
-                     value_str(keypos) = tok(1:toklen) 
-                  end if
-               else
-                  value_str(keypos) = tok(1:toklen) ! save ASCII format
-               end if
-c     Now, store the value in the way specified in parmTypes (see keys.dat)
-               if (parmTypes(keypos) .eq. 1) then
-                  read(tok,'(d)',err=61)value_double(keypos)
-               else if (parmTypes(keypos) .eq. 2) then !h:m:s
-                  value_double(keypos) = hmsToTurns(tok,prec)
-               else if (parmTypes(keypos) .eq. 3) then !d:m:s
-                  value_double(keypos) = dmsToTurns(tok,prec)
-               else if (parmTypes(keypos) .eq. 4) then
-                  call realTo2part(tok, value_integer(keypos),
-     +                 value_double(keypos))
-               else if (parmTypes(keypos) .eq. 5) then
-                  read(tok,'(i)',err=61)value_integer(keypos)
-               end if
-c     Next token, if present.
-               call citem(buffer, ll, tokpos, tok, toklen)
-               if ((toklen.gt.0).and.(tok(1:1).ne.'#')) then
-                  call upcase(tok)
-c     Get a fit flag if present, for new format files
-                  if ((.not. isOldEphem).and.(tok(2:2).eq.' ')) then  
-                     fitThis = (tok(1:1).ge.'1')
-c     Get the error/comment field
-                     call citem(buffer, ll, tokpos, tok, toklen)
-                     call upcase(tok)
-                  end if
-               end if
-c     Set the "parameter status" for this thing.
-               if (fitThis) then
-                  parmStatus(keypos)=parmStatus(keypos)+2 !known and fit
-               else
-                  parmStatus(keypos)=parmStatus(keypos)+1 !known but not fit
-               endif
-c     Process error value if allowed and present
-               if (parmError(keypos).and.(toklen.gt.0)
-     +              .and.(tok(1:1).ne.'#')) then
-c     Handle old ephemeris position values (RAJ and DECJ)
-                  if (isOldEphem .and. 
-     +                 ((keypos.eq.EPH_RAJ)
-     +                 .or.(keypos.eq.EPH_DECJ))) then
-                     read(tok(1:toklen),'(i)', err=61), tmp
-                     error_double(keypos) = dfloat(tmp)*prec
-                  else
-                     read(tok(1:toklen),'(d)', err=61)
-     +                    error_double(keypos)
-                  end if
-                  if (error_double(keypos).lt.0.0d0) ! invalid
-     +                 error_double(keypos) = 0.0d0
-                  if (isOldEphem 
-     +                 .and. (error_double(keypos).gt.0.0d0)) then
-                     fitThis = .true.
-                  end if
-               end if
-c     Ignore the line if there's no error value and the value is zero
-               if ((error_double(keypos).le.0.0d0)
-     +              .and.(parmTypes(keypos).eq.1)
-     +              .and.(value_double(keypos).eq.0.0d0)) then
-                  parmStatus(keypos) = 0
-               end if
-            end if              ! end of if value=comment then, else...
-         end if                 ! end of if keyword found then...
-         goto 50                ! no errors, skip over
-c     This is the general error handler for processling a line
- 60      write (*,'("Error citem ",i3,", skipping.")') lineNum
-         goto 62
- 61      write (*,'("Error parsing line ",i3,", skipping.")') lineNum
- 62      continue
-c     There was an error. If we parsed a keyword, flag it as unknown
-c     just in case
-         if (keypos .gt. 0) parmStatus(keypos) = 0  
- 50   end do                    ! end of file processing loop
+         rd_eph_lun = rd_eph_str (parmStatus,value_str,value_double,
+     +        value_integer, error_double, convert, isOldEphem,
+     +        buffer)
+
+      if (rd_eph_lun.eq.2) then
+         write (*,'("Error parsing line ",i3,", skipping.")') lineNum
+      endif
+
+      end do                    ! end of file processing loop
 
  10   continue                  ! read() jumps here at end of file
+
 c     Convert any units from old input files
-      call convertUnits(value_double, error_double, parmStatus, convert)
-      rd_eph_lun = 1
+      rd_eph_lun = convertUnits(value_double, error_double,
+     +     parmStatus, convert)
+
+ 20   continue
       return
 
       end
 
+
+cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+c
+c     rd_eph_str - reads a single string into appropriate place in
+c
+cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+
+      integer function rd_eph_str (parmStatus,value_str,
+     +        value_double, value_integer, error_double, convert, 
+     +        isOldEphem, buffer)
+      implicit none
+      include 'keyinfo.com'
+      integer parmStatus(NUM_KEYS)
+      character*32 value_str(NUM_KEYS)
+      real*8 value_double(NUM_KEYS)
+      integer value_integer(NUM_KEYS)
+      real*8 error_double(NUM_KEYS)
+      integer convert(NUM_KEYS)
+      integer isOldEphem
+      character*(*) buffer
+
+      integer toklen, keypos
+      logical fitThis, isAlias
+
+      integer tokpos, ll, length, tmp
+      logical strmatch, found
+      character*80 tok
+      real*8 hmstoturns, dmstoturns, prec
+
+      rd_eph_str = 1
+      fitThis = .false.
+      keypos = 0
+      ll = length(buffer)
+      tokpos = 1 
+      call citem(buffer, ll, tokpos, tok, toklen)
+      if (toklen.le.0) goto 70  ! Blank line. Skip
+      call upcase(tok)
+      
+c     Is it a comment line?
+      if ((tok(1:1) .eq. '#') 
+     +     .or. (tok(1:2) .eq. 'C ')) goto 70 ! Ignore line.
+      if ((isOldEphem.eq.1)          ! Expect possible fit flag first.
+     +     .and. (tok(2:2).eq.' ') ! Is it only 1 char long?
+     +     .and. (.not. (tok(1:1).eq.'P')) ! and not a keyword...
+     +     .and. (.not. (tok(1:1).eq.'E'))) then
+         fitThis = .true.       ! Was a fit flag. Get next token..
+         call citem(buffer, ll, tokpos, tok, toklen)
+         if (toklen.le.0) goto 62 ! Error...
+      end if
+      call upcase(tok)
+c     We now should have a key. Find it in the list
+      if (strmatch("NAME",tok)) then ! NAME is a special case!
+         isOldEphem = 1
+         keypos = -1
+         found = .true.
+      else
+         found = .false.
+         keypos = 1
+      end if
+      do while ((keypos .le. NUM_KEYS) .and. .not. found)
+         if (strmatch(parmNames(keypos), tok)) 
+     +        found = .true.
+         keypos = keypos + 1
+      end do
+      keypos = keypos - 1
+      if (found .or. isAlias(tok,keypos, convert)) then
+         found = .true.
+         if (keypos .gt. -1) parmStatus(keypos) = 0 ! set this shortly
+      end if
+      if (found) then 
+c     We now know the key index. 
+         call citem(buffer, ll, tokpos, tok, toklen)
+         if (toklen.le.0) goto 60 ! Error...
+         if (tok(1:1).eq.'#')  then ! Comment. ignore the line
+            parmStatus(keypos) = 0
+         else
+c     keypos = -2 signifies NAME input parameter. Work out if it should be
+c     PSRJ or PSRB, and don't include any prefix letter in the value 
+            if (keypos.eq.-2) then
+               if (tok(1:1).eq.'B') then
+                  keypos = EPH_PSRB 
+               else
+                  keypos = EPH_PSRJ
+               end if
+               if ((tok(1:1).eq.'J').or.(tok(1:1).eq.'B')) then
+                  value_str(keypos)(1:) = tok(2:toklen)
+               else
+                  value_str(keypos) = tok(1:toklen) 
+               end if
+            else
+               value_str(keypos) = tok(1:toklen) ! save ASCII format
+            end if
+c     Now, store the value in the way specified in parmTypes (see keys.dat)
+            if (parmTypes(keypos) .eq. 1) then
+               read(tok,*,err=63)value_double(keypos)
+            else if (parmTypes(keypos) .eq. 2) then !h:m:s
+               value_double(keypos) = hmsToTurns(tok,prec)
+            else if (parmTypes(keypos) .eq. 3) then !d:m:s
+               value_double(keypos) = dmsToTurns(tok,prec)
+            else if (parmTypes(keypos) .eq. 4) then
+               call realTo2part(tok, value_integer(keypos),
+     +              value_double(keypos))
+            else if (parmTypes(keypos) .eq. 5) then
+               read(tok,'(i)',err=64)value_integer(keypos)
+            end if
+c     Next token, if present.
+            call citem(buffer, ll, tokpos, tok, toklen)
+            if ((toklen.gt.0).and.(tok(1:1).ne.'#')) then
+               call upcase(tok)
+c     Get a fit flag if present, for new format files
+               if ((isOldEphem.eq.0).and.(tok(2:2).eq.' ')) then  
+                  fitThis = (tok(1:1).ge.'1')
+c     Get the error/comment field
+                  call citem(buffer, ll, tokpos, tok, toklen)
+                  call upcase(tok)
+               end if
+            end if
+c     Set the "parameter status" for this thing.
+            if (fitThis) then
+               parmStatus(keypos)=parmStatus(keypos)+2 !known and fit
+            else
+               parmStatus(keypos)=parmStatus(keypos)+1 !known but not fit
+            endif
+c     Process error value if allowed and present
+            if (parmError(keypos).and.(toklen.gt.0)
+     +           .and.(tok(1:1).ne.'#')) then
+c     Handle old ephemeris position values (RAJ and DECJ)
+               if ((isOldEphem.eq.1) .and. 
+     +              ((keypos.eq.EPH_RAJ)
+     +              .or.(keypos.eq.EPH_DECJ))) then
+                  read(tok(1:toklen),'(i)', err=61), tmp
+                  error_double(keypos) = dfloat(tmp)*prec
+               else
+                  read(tok(1:toklen),*, err=65)
+     +                 error_double(keypos)
+               end if
+               if (error_double(keypos).lt.0.0d0) ! invalid
+     +              error_double(keypos) = 0.0d0
+               if ((isOldEphem.eq.1) 
+     +              .and. (error_double(keypos).gt.0.0d0)) then
+                  fitThis = .true.
+               end if
+            end if
+c     Ignore the line if there's no error value and the value is zero
+            if ((error_double(keypos).le.0.0d0)
+     +           .and.(parmTypes(keypos).eq.1)
+     +           .and.(value_double(keypos).eq.0.0d0)) then
+               parmStatus(keypos) = 0
+            end if
+         end if                 ! end of if value=comment then, else...
+      end if                    ! end of if keyword found then...
+      goto 70                   ! no errors, skip over
+c     This is the general error handler for processling a line
+ 60   write (*,'("Error citem.")')
+      goto 69
+ 61   write (*,'("Error isOldEphem citem toklen.")')
+      goto 69
+ 62   write (*,'("Error empty token.")')
+      goto 69
+ 63   write (*,'("Error parsing double.")')
+      goto 69
+ 64   write (*,'("Error parsing int.")')
+      goto 69
+ 65   write (*,'("Error parsing double error.")')
+      goto 69
+ 69   continue
+c     There was an error. If we parsed a keyword, flag it as unknown
+c     just in case
+      if (keypos .gt. 0) parmStatus(keypos) = 0
+      rd_eph_str = 2
+
+ 70   continue
+      return
+
+      end
 
 cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 c
@@ -263,6 +321,80 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
      +     ' (error', i6,')')
       end
 
+
+cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+c
+c     wr_eph_str
+c
+cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+
+      integer function wr_eph_str (line, parNum, value_str,
+     +     value_double, value_integer, error_double, parmStatus)
+      implicit none 
+      include 'keyinfo.com'
+      character*(*) line
+      integer parNum
+      character*32 value_str
+      real*8 value_double
+      integer value_integer
+      real*8 error_double
+      integer parmStatus
+
+      integer linelen, wordlen
+      integer length
+      character*256 word 
+      character*256 word2
+      word = " "
+      word2 = " "
+
+c     Write keyword
+      write(line,"(a)") parmNames(parNum)(1:maxKeyLen)
+      linelen = maxKeyLen + 2
+
+c     Write value
+      if (parmTypes(parnum) .eq. 0) then
+         write(word(2:),'(a)')value_str
+      else if (parmTypes(parnum) .eq. 1) then
+         write(word,'(1p,d23.16)')value_double
+      else if (parmTypes(parnum) .eq. 2) then ! h:m:s
+         call turnsToHms(value_double,word)
+      else if (parmTypes(parnum) .eq. 3) then ! d:m:s
+         call turnsToDms(value_double,word)
+      else if (parmTypes(parnum) .eq. 4) then
+         call twoPartToReal(value_integer,
+     +        value_double, word(2:))
+      else if (parmTypes(parnum) .eq. 5) then
+         call intToStr(value_integer, word(2:))
+      end if
+
+c     Write fit (if any)
+      wordlen = length(word)
+      line(linelen:linelen+wordlen) = word(1:wordlen)
+      linelen = linelen + wordlen
+      if (parmStatus .eq. 2) then ! Fit flag
+         line(linelen+1:) = "1"
+         linelen = linelen + 2
+      endif
+
+c     Write error
+      if (parmError(parnum).and.(error_double.gt.0.0d0)) then
+
+c     if (parmTypes(parnum) .eq. EPH_RAJ) then ! h:m:s. turns-->sec
+c     write(line(linelen:),'(1p,d13.6)'),
+c     +             86400.0d0*error_double
+c     else if (parmTypes(parnum) .eq. EPH_DECJ) then ! turns-->arcsrc
+c     write(line(linelen:),'(1p,d13.6)'),
+c     +             1296000.0d0*error_double
+c     else
+         write(line(linelen:),'(1p,d13.6)')error_double
+c     end if 
+      end if
+
+      wr_eph_str = 1
+      return
+      end
+
+
 cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 c
 c     wr_eph_lun
@@ -278,60 +410,21 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       integer value_integer(NUM_KEYS)
       real*8 error_double(NUM_KEYS)
 
-
-      integer un, parnum, linelen, wordlen
+      integer un, parnum
       character*256 line 
-      character*256 word 
-      character*256 word2
       integer length
+      integer wr_eph_str
 
       line = " "
-      word = " "
-      word2 = " "
 
 c     For all parameters, write out info...
       do parnum=1,NUM_KEYS
          if (parmStatus(parnum) .gt. 0) then
-c     Write keyword
-            write(line,"(a)") parmNames(parNum)(1:maxKeyLen)
-            linelen = maxKeyLen + 2
-            word = " "
-            word2 = " "
-c     Write value
-            if (parmTypes(parnum) .eq. 0) then
-               write(word(2:),'(a)')value_str(parnum)
-            else if (parmTypes(parnum) .eq. 1) then
-               write(word,'(1p,d23.16)')value_double(parnum)
-            else if (parmTypes(parnum) .eq. 2) then ! h:m:s
-               call turnsToHms(value_double(parnum),word)
-            else if (parmTypes(parnum) .eq. 3) then ! d:m:s
-               call turnsToDms(value_double(parnum),word)
-            else if (parmTypes(parnum) .eq. 4) then
-               call twoPartToReal(value_integer(parnum),
-     +              value_double(parnum), word(2:))
-            else if (parmTypes(parnum) .eq. 5) then
-               call intToStr(value_integer(parnum), word(2:))
-            end if
-            wordlen = length(word)
-            line(linelen:linelen+wordlen) = word(1:wordlen)
-            linelen = linelen + wordlen
-            if (parmStatus(parNum) .eq. 2) then ! Fit flag
-               line(linelen+1:) = "1"
-               linelen = linelen + 2
-            endif
-c     write error
-            if (parmError(parnum).and.
-     +           (error_double(parnum).gt.0.0d0)) then ! error info req'd
-c     if (parmTypes(parnum) .eq. EPH_RAJ) then ! h:m:s. turns-->sec
-c     write(line(linelen:),'(1p,d13.6)'),
-c     +             86400.0d0*error_double(parnum)
-c     else if (parmTypes(parnum) .eq. EPH_DECJ) then ! turns-->arcsrc
-c     write(line(linelen:),'(1p,d13.6)'),
-c     +             1296000.0d0*error_double(parnum)
-c     else
-               write(line(linelen:),'(1p,d13.6)')error_double(parnum)
-c     end if 
-            end if
+
+            wr_eph_lun = wr_eph_str (line, parnum, value_str(parnum),
+     +           value_double(parnum), value_integer(parnum),
+     +           error_double(parnum), parmStatus(parnum))
+
 c     write to file
             write(un,"(a)") line(1:length(line)) 
          end if
@@ -379,8 +472,8 @@ c   (in a parameter-name-specific manner) into the desired ones.
 c Works only with real-valued parameters.
 c
 ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-      subroutine convertUnits(value_double, error_double, 
-     +     parmStatus, convert)
+      integer function convertUnits (value_double,
+     +     error_double, parmStatus, convert)
       implicit none
       include 'keyinfo.com'
       real*8 value_double(NUM_KEYS)
@@ -503,6 +596,9 @@ c     +        /(ln10*value_double(EPH_TAU))
 c         value_double(EPH_TAU) = log10(value_double(EPH_TAU) * 
 c     +        scat_factor)
 c      endif
+
+      convertUnits = 1
+      return
       end
 
 cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc

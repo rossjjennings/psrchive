@@ -1,52 +1,45 @@
 /* This file defines C wrappers to the fortran rd_eph and wr_eph. */
 
-#include "ephio.h"
+#include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 
-#ifdef __linux
-#define RD_EPH rd_eph__
-#define RD_EPH_LUN rd_eph_lun__
-#define WR_EPH wr_eph__
-#define WR_EPH_LUN wr_eph_lun__
-#else
-#define RD_EPH rd_eph_
-#define RD_EPH_LUN rd_eph_lun_
-#define WR_EPH wr_eph_
-#define WR_EPH_LUN wr_eph_lun_
-#endif
+#include "ephio.h"
+#include "f772c.h"
 
-int length_ (char *, int);  /* Fortan string length, in ephio.f */
-int RD_EPH (char *, int *, char *, double *,
-	     int *, double *, long int, long int);
-int WR_EPH (char *, int *, char *, double *,
-	     int *, double *, long int, long int);
-int RD_EPH_LUN (int *, int *, char *, double *,
-		int *, double *, long int);
-int WR_EPH_LUN (int *, int *, char *, double *,
-		int *, double *, long int);
+extern int F772C(rd_eph) (char *, int *, char *, double *,
+			  int *, double *, long int, long int);
+extern int F772C(wr_eph) (char *, int *, char *, double *,
+			  int *, double *, long int, long int);
+extern int F772C(rd_eph_lun) (int *, int *, char *, double *,
+			      int *, double *, long int);
+extern int F772C(wr_eph_lun) (int *, int *, char *, double *,
+			      int *, double *, long int);
 
-int rd_eph_wrap (int uselun, char *fname, int lun, 
-		 int parmStatus[EPH_NUM_KEYS], 
-		 char value_str[EPH_NUM_KEYS][EPH_STR_LEN], 
-		 double value_double[EPH_NUM_KEYS], 
-		 int value_integer[EPH_NUM_KEYS],
-		 double error_double[EPH_NUM_KEYS])
-{
-  char v_str[EPH_NUM_KEYS*EPH_STR_LEN];
-  int i,j, retval;
+extern int F772C(rd_eph_str) (int* status, char* str_val, double* double_val,
+			      int* int_val, double* error, int* convert,
+			      int* isOld, char* buffer,
+			      long int str_val_len,
+			      long int buffer_len);
 
-  if (uselun)
-    retval = RD_EPH_LUN (&lun, parmStatus, v_str, value_double, value_integer,
-		     error_double, EPH_STR_LEN);
-  else
-    retval = RD_EPH (fname, parmStatus, v_str, value_double, value_integer,
-		     error_double, strlen(fname), EPH_STR_LEN);
+extern int F772C(wr_eph_str) (char* string, int* ephind, char* str_val, 
+			      double* double_val, int* int_val,
+			      double* error, int* status, 
+			      long int string_len,
+			      long int str_val_len);
 
-  /* fix up the 2-d array. If C compilers would stick to standards we
-     could just column-major to row-major swap but these days compilers
-     seem to be using char x[A][B] --> char ** x. 
-     Also we need to convert the strings to '\0' terminated */
+/* Array passed to Fortran routines instead of two-D C array */
+
+static char v_str[EPH_NUM_KEYS*EPH_STR_LEN];
+
+/* parse information in v_str into a two-D C array.
+   Converts the strings to '\0' terminated */
+
+void eph_unpack (int  parmStatus[EPH_NUM_KEYS], 
+		 char value_str [EPH_NUM_KEYS][EPH_STR_LEN])
+{  
+  int i,j;
+
   for (i=0; i < EPH_NUM_KEYS; i++)
   {
     if (parmStatus[i])
@@ -56,7 +49,43 @@ int rd_eph_wrap (int uselun, char *fname, int lun,
       value_str[i][j] = '\0';
     }
   }
+}
 
+int rd_eph_wrap (int uselun, char *fname, int lun,
+		 int parmStatus[EPH_NUM_KEYS], 
+		 char value_str[EPH_NUM_KEYS][EPH_STR_LEN], 
+		 double value_double[EPH_NUM_KEYS], 
+		 int value_integer[EPH_NUM_KEYS],
+		 double error_double[EPH_NUM_KEYS])
+{
+  int retval;
+
+  if (uselun)
+    retval = F772C(rd_eph_lun) (&lun, parmStatus, v_str, value_double,
+				value_integer, error_double, EPH_STR_LEN);
+  else
+    retval = F772C(rd_eph) (fname, parmStatus, v_str, value_double,
+			    value_integer, error_double, 
+			    strlen(fname), EPH_STR_LEN);
+
+  eph_unpack (parmStatus, value_str);
+  return retval;
+}
+
+
+int rd_eph_str (int parmStatus[EPH_NUM_KEYS], 
+		char value_str[EPH_NUM_KEYS*EPH_STR_LEN], 
+		double value_double[EPH_NUM_KEYS], 
+		int value_integer[EPH_NUM_KEYS],
+		double error_double[EPH_NUM_KEYS],
+		int convert[EPH_NUM_KEYS],
+		int* isOldEphem,
+		char* parsethis)
+{
+  int retval = F772C(rd_eph_str) (parmStatus, value_str, value_double,
+				  value_integer, error_double, convert,
+				  isOldEphem, parsethis, EPH_STR_LEN,
+				  strlen(parsethis));
   return retval;
 }
 
@@ -80,6 +109,37 @@ int rd_eph_lun(int lun, int parmStatus[EPH_NUM_KEYS],
 }
 
 
+int wr_eph_str (char *buffer, int buflen, int ephind, int parmStatus, 
+		char* value_str, double value_double,
+		int value_integer, double error_double)
+{
+  int str_len = 0;
+  int retval = 0;
+  int c;
+
+  if ((ephind < 0) || (ephind > EPH_NUM_KEYS)) {
+    fprintf (stderr, "wr_eph_str:: invalid index=%d\n", ephind);
+    return -1;
+  }
+
+  /* initialize the buffer for call to Fortran */
+  for (c=0; c<buflen; c++)
+    buffer[c] = ' ';
+
+  if (parmTypes[ephind] == 0)
+    str_len = strlen (value_str);
+
+  ephind ++;  /* Fortran counts from 1; C from 0 */
+  retval = F772C(wr_eph_str) (buffer, &ephind, value_str, &value_double,
+			      &value_integer, &error_double, &parmStatus, 
+			      buflen, str_len);
+
+  str_len = length_(buffer, buflen);
+  buffer[str_len] = '\0';
+
+  return retval;
+}
+
 int wr_eph_wrap(int uselun, char *fname, int lun,
 		int parmStatus[EPH_NUM_KEYS], 
 		char value_str[EPH_NUM_KEYS][EPH_STR_LEN], 
@@ -87,7 +147,6 @@ int wr_eph_wrap(int uselun, char *fname, int lun,
 		int value_integer[EPH_NUM_KEYS],
 		double error_double[EPH_NUM_KEYS])
 {
-  char v_str[EPH_NUM_KEYS*EPH_STR_LEN];
   int i,j, retval;
 
   /* fix up the 2-d array. */
@@ -103,11 +162,12 @@ int wr_eph_wrap(int uselun, char *fname, int lun,
   }
 
   if (uselun)
-    retval = WR_EPH_LUN (&lun, parmStatus, v_str, value_double, value_integer,
-		   error_double, EPH_STR_LEN);
+    retval = F772C(wr_eph_lun) (&lun, parmStatus, v_str, value_double,
+				value_integer, error_double, EPH_STR_LEN);
   else
-    retval = WR_EPH (fname, parmStatus, v_str, value_double, value_integer,
-		   error_double, strlen(fname), EPH_STR_LEN);
+    retval = F772C(wr_eph) (fname, parmStatus, v_str, value_double,
+			    value_integer, error_double,
+			    strlen(fname), EPH_STR_LEN);
 
   return retval;
 }
