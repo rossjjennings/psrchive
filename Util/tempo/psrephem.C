@@ -110,7 +110,8 @@ int psrephem::load (const char* filename)
   tempo11 = 1;
   size_dataspace();
 
-  rd_eph (const_cast<char*>(filename), parmStatus, ephemstr, value_double, 
+  // when Sun compilers catch up: const_cast<char*>(filename)
+  rd_eph (filename, parmStatus, ephemstr, value_double, 
 	  value_integer, error_double);
   int all_zero = 1;
   for (int i=0;i<EPH_NUM_KEYS;i++)  {
@@ -155,7 +156,8 @@ int psrephem::unload (const char* filename) const
   if (tempo11)  {
     for (int i=0;i<EPH_NUM_KEYS;i++)
       strcpy (ephemstr[i], value_str[i].data());
-    int istat = wr_eph (const_cast<char*>(filename), parmStatus, ephemstr, value_double,
+    // when Sun compilers catch up: const_cast<char*>(filename)
+    int istat = wr_eph (filename, parmStatus, ephemstr, value_double,
 		        value_integer, error_double);
     if (!istat) {
       fprintf(stderr,"psrephem::unload error wr_eph %s\n", filename);
