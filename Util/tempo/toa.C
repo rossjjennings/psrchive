@@ -85,7 +85,7 @@ int Tempo::toa::Parkes_unload (char* outstring) const
   for (int ic=0; ic<25; ic++)
     outstring [ic] = ' ';
 
-  if (is_deleted())
+  if (state == Deleted)
     outstring[0]='C';
 
   return parkes_out (outstring+25);
@@ -212,7 +212,7 @@ int Tempo::toa::Psrclock_load (const char* instring)
 
 int Tempo::toa::Psrclock_unload (char* outstring) const
 {
-  if (is_deleted())
+  if (state == Deleted)
     outstring[0]='C';
   else
     outstring[0]=' ';
@@ -503,6 +503,92 @@ int Tempo::toa::unload(FILE* outstream, const vector<toa>& toas, Format fmt)
   return 0;
 }
 
+double Tempo::toa::getData (DataType code) const
+{
+  switch (code) {
+  case Frequency:
+    return frequency;
+  case Arrival:
+    return arrival.in_days();
+  case Error:
+    return error;
+  case Telescope:
+    return telescope;
+  case PhaseOffset:
+    return phs;
+  case DMCorrection:
+    return dmc;
+  default:
+    break;
+  }
+
+  if (resid.valid) {
+    switch (code) {
+    case BarycentreArrival:
+      return resid.mjd;
+    case ResidualPhase:
+      return resid.turns;
+    case ResidualTime:
+      return resid.seconds;
+    case BinaryPhase:
+      return resid.binaryphase;
+    case BarycentreFrequency:
+      return resid.obsfreq;
+    case Weight:
+      return resid.weight;
+    case PrefitResidualTime:
+      return resid.preres;
+    default:
+      break;
+    }
+  }
+
+  if (auxdata && code > PrefitResidualTime)
+    return auxdata -> getData (code);
+  
+  throw FaultCode;
+}
+
+const char* Tempo::toa::getDescriptor (DataType code) const
+{
+  switch (code) {
+  case Nothing:
+    return "Nothing";
+  case Frequency:
+    return "Frequency";
+  case Arrival:
+    return "Arrival";
+  case Error:
+    return "Error";
+  case Telescope:
+    return "Telescope";
+  case PhaseOffset:
+    return "Phase Offset";
+  case DMCorrection:
+    return "DM Correction";
+  case BarycentreArrival:
+    return "Barycentric Arrival";
+  case ResidualPhase:
+    return "Residual Phase";
+  case ResidualTime:
+    return "Residual Time";
+  case BinaryPhase:
+    return "Binary Phase";
+  case BarycentreFrequency:
+    return "Barycentric RF";
+  case Weight:
+    return "Fit Weight";
+  case PrefitResidualTime:
+    return "Prefit Residual";
+  default:
+    break;
+  }
+
+  if (auxdata)
+    return auxdata -> getDescriptor (code);
+  return NULL;
+}
+
 // ////////////////////////////////////////////////////////////////////////
 //
 // low-level toa stuff
@@ -518,6 +604,7 @@ void Tempo::toa::init()
 {
   format = Unspecified;
   auxdata = NULL;
+  resid.valid = false;
 
   frequency = 0.0;
   arrival = MJD (0.0,0.0,0.0);
@@ -574,35 +661,3 @@ bool Tempo::toa::valid()
   return 1;
 }
 
-// ////////////////////////////////////////////////////////////////////////
-//
-// Model - a nice class for handling vectors of toas.
-// 
-// ////////////////////////////////////////////////////////////////////////
-
-int Tempo::Model::verbose = 0;
-
-Tempo::Model::Model (const Model& model)
-{
-  this->operator=(model);
-}
-
-Tempo::Model& Tempo::Model::operator = (const Model& model)
-{
-  if (this != &model)
-    toas = model.toas;
-  return *this;
-}
-
-void Tempo::Model::load (const char * filename)
-{
-  toas.clear();
-  if (Tempo::toa::load (filename, &toas) < 0)
-    throw ("Model::load");
-}
-
-void Tempo::Model::unload (const char * filename)
-{
-  if (Tempo::toa::unload (filename, toas) < 0)
-    throw ("Tempo::Model::load");
-}

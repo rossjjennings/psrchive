@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/toa.h,v $
-   $Revision: 1.4 $
-   $Date: 2000/05/28 04:13:59 $
+   $Revision: 1.5 $
+   $Date: 2000/05/30 17:19:35 $
    $Author: straten $ */
 
 #ifndef __TOA_H
@@ -11,21 +11,52 @@
 #include <vector>
 #include <string>
 
-#include "MJD.h"
 #include "residual.h"
+#include "DataPoint.h"
+#include "MJD.h"
 
 class polyco;   // tempo-generated polynomial describing pulsar phase = f(MJD)
-class toaInfo;  // context specific pulsar information base class
 
 namespace Tempo {
 
-  class toa
+  class toaInfo;
+
+  // //////////////////////////////////////////////////////////////////////////
+  //
+  // toa - class that encapsulates TEMPO data format
+  //
+  // //////////////////////////////////////////////////////////////////////////
+
+  class toa : public DataPoint
   {
 
   public:
     
     enum Format { Unspecified, Princeton, Parkes, ITOA, Psrclock, Rhythm };
-    enum State { Normal, Selected, Deleted };
+
+    enum DataType {
+      // a null state
+      Nothing,
+      // from the toa class
+      Frequency,
+      Arrival,
+      Error,
+      Telescope,
+      PhaseOffset,
+      DMCorrection,
+      // from the residual
+      BarycentreArrival,
+      ResidualPhase,
+      ResidualTime,
+      BinaryPhase,
+      BarycentreFrequency,
+      Weight,
+      PrefitResidualTime,
+      // and from any toaInfo derived types
+      
+      // and an error
+      FaultCode
+    };
 
     static bool verbose;
     static bool load_aux_data;
@@ -54,8 +85,6 @@ namespace Tempo {
 
     // one of the available formats on loading
     Format format;
-    // state flag used when managing groups of toa objects
-    State  state;
 
   public:
     // residual for this toa as calculated by tempo
@@ -90,14 +119,11 @@ namespace Tempo {
     time_t get_when_calculated () const { return calculated; };
     string get_auxilliary_text () const { return auxinfo; };
 
-    bool is_deleted ()  const { return state == Deleted; };
-    bool is_selected () const { return state == Selected; };
+    double getData (DataType which) const;
+    const char* getDescriptor (DataType code) const;
 
-    void set_deleted (bool yup) { state = (yup) ? Deleted : Normal; };
-    void set_selected (bool yup) { state = (yup) ? Selected : Normal; };
-    
     double shift (const polyco & poly) const;
-    
+
     // loading and unloading to/from file and string
     int    load   (FILE* instream);
     int    load   (const char* instring);
@@ -128,8 +154,7 @@ namespace Tempo {
     // comparison operators
     friend int operator < (const toa& t1, const toa& t2)
     { return (t1.arrival < t2.arrival); };
-    
-    
+
     // operations on vectors of toas
     static int load (const char* filename, vector<toa>* toas);
     static int load (FILE* instream, vector<toa>* toas);
@@ -150,22 +175,27 @@ namespace Tempo {
     static size_t bufsz;
     static char   datestr [25];
   };
-  
-  class Model {
+    
+
+  // //////////////////////////////////////////////////////////////////////////
+  //
+  // toaInfo - abstract base class for context-specific information
+  //
+  // inherit this class when you wish to add additional information to the
+  // toa class in a generic way.
+  //
+  // //////////////////////////////////////////////////////////////////////////
+
+  class toaInfo {
+
   public:
-    static int verbose;
-    vector<toa> toas;
-    
-    Model(){};
-    ~Model(){};
-    Model (const Model & toamodel);
-    
-    Model & operator=(const Model & toamodel);
-    
-    void load(const char * filename);
-    void unload(const char * filename);
+    // the value of this object at serial number
+    virtual double getData (toa::DataType code) const = 0;
+    // the short descriptive string corresponding to the serial number
+    virtual const char* getDescriptor (toa::DataType code) const = 0;
+
   };
-  
+
 }
 
 #endif
