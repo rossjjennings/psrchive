@@ -1231,44 +1231,19 @@ Pulsar::FITSArchive::load_Integration (const char* filename, unsigned isubint)
 
   integ->set_folding_period (model.period(newmjd));
 
-  // Correct for a possible phase offset
+  // Set the toa epoch, correcting for phase offset
 
   Phase stt_phs = model.phase(hdr_ext->start_time);
   Phase off_phs = model.phase(newmjd);
 
-  double diff = off_phs.fracturns() - stt_phs.fracturns();
-
-  if (verbose) {
-    
-    cerr << "I think the phase of the start time is "
-	 << stt_phs.fracturns() << " fracturns" << endl;
-    
-    cerr << "I think the phase of the integration mid time is "
-	 << off_phs.fracturns() << " fracturns" << endl;
-    
-    cerr << "I think there is an offset of " << diff
-	 << " fractional turns between the phase of the start time"
-	 << " and the phase of the mid-time in integration " 
-	 << isubint << endl;
-
-  }
+  Phase dphase = off_phs - stt_phs;
   
-  newmjd -= diff * integ->get_folding_period();
+  newmjd -= dphase.fracturns() * integ->get_folding_period();
   
-  if (verbose) {
-    
-    cerr << "I think the folding period is " << integ->get_folding_period()
-	 << " seconds" << endl;
-    
-    cerr << "Subtracting an offset of " << diff * integ->get_folding_period()
-	 << " seconds to correct for the phase offset" << endl;
-    
-  }
-
   integ->set_epoch (newmjd);
   
   if (verbose)
-    cerr << "Pulsar::FITSArchive::load_Integration epoch " 
+    cerr << "Pulsar::FITSArchive::load_Integration set_epoch " 
 	 << newmjd << endl;
 
   // Set the duration of the integration
