@@ -22,6 +22,21 @@ int ss2hhmmss (int* hours, int* min, int* sec, int seconds)
   return 0;
 }
 
+// no static kludgeyness, no memory leaks
+string MJD::printdays (unsigned precision) const
+{
+  char* temp = new char [precision + 10];
+  sprintf (temp, "%d", days);
+  string output = temp;
+  if (precision > 0)  {
+    sprintf (temp, "%*.*lf", precision+3, precision, fracday());
+    char* period = strchr (temp, '.');
+    output += period;
+  }
+  delete [] temp;
+  return output;
+}
+
 char * MJD::printdays() const {
   static char permanent[10];
   sprintf(permanent, "%d",days);
@@ -66,8 +81,9 @@ char* MJD::datestr (char* dstr, int len, const char* format) const
 char * MJD::strtempo() const{
   static char permanent[40];
   char temp[20];
-  sprintf(temp,"%14.13lf",fracday());
-  sprintf(&permanent[0],"%5d%s",days,&temp[1]);
+  sprintf(temp,"%14.11lf",fracday());
+  char* period = strchr (temp, '.');
+  sprintf(&permanent[0],"%5d.%s",days,period+1);
   return (permanent);
 }
 
@@ -394,7 +410,7 @@ int MJD::gregorian (struct tm* gregdate, double* fsec) const
   int n_four = 4  * (julian_day+((6*((4*julian_day-17918)/146097))/4+1)/2-37);
   int n_dten = 10 * (((n_four-237)%1461)/4) + 5;
 
-  gregdate->tm_year  = n_four/1461 - 4712;
+  gregdate->tm_year  = n_four/1461 - 4712 - 1900; // extra -1900 for C struct tm
   gregdate->tm_mon   = (n_dten/306+2)%12 + 1;
   gregdate->tm_mday  = (n_dten%306)/10 + 1;
 
@@ -455,7 +471,6 @@ int MJD::Construct (const struct tm& greg)
   fracsec = 0.0;
   return 0;
 }
-
 
 // parses a string of the form 51298.45034 ish
 int MJD::Construct (const char* mjdstr)

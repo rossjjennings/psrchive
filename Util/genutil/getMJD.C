@@ -1,8 +1,9 @@
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+
+// #include <iostream>
 
 #define MPI
 #include "MJD.h"
@@ -48,6 +49,9 @@ int main (int argc, char* argv[])
     printf ("utc from MJD: %s\n", 
 	    utc2str (printhere, stuffback, "yyyy-ddd-hh:mm:ss"));
   }
+
+  // cerr << stuffit.printdays(15);
+
   return 0;
 }
 
