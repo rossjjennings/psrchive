@@ -447,12 +447,19 @@ double psrephem::p_err(void)
 
 psrephem::psrephem (const psrephem & p2)
 {
+  init ();
   *this = p2;
 }
 
 psrephem & psrephem::operator = (const psrephem & p2)
 {
-  if (this != &p2) {
+  if (this == &p2)
+    return *this;
+
+  tempo11 = p2.tempo11;
+  size_dataspace();
+  
+  if (tempo11) {
     for (int i=0;i<EPH_NUM_KEYS;i++){
       parmStatus[i]=p2.parmStatus[i];
       value_double[i]=p2.value_double[i];
@@ -460,6 +467,9 @@ psrephem & psrephem::operator = (const psrephem & p2)
       error_double[i]=p2.error_double[i];
       value_str[i]=p2.value_str[i];
     }
+  }
+  else {
+    nontempo11 = p2.nontempo11;
   }
   return *this;
 }
