@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pcm.C,v $
-   $Revision: 1.5 $
-   $Date: 2003/10/16 14:19:47 $
+   $Revision: 1.6 $
+   $Date: 2003/10/28 08:51:00 $
    $Author: straten $ */
 
 /*! \file pcm.C 
@@ -48,6 +48,7 @@ void usage ()
     "  -M meta    filename with list of pulsar files\n"
     "  -n nbin    set the number of phase bins to use as input states\n"
     "  -p pA,pB   set the phase window from which to take input states\n"
+    "  -s         do not normalize Stokes parameters by invariant interval\n"
     "  -u         assume that CAL Stokes V = 0\n"
     "  -v         verbose mode\n"
     "  -V         very verbose mode\n"
@@ -201,10 +202,12 @@ try {
   vector<unsigned> phase_bins;
 
   bool measure_cal_V = true;
+  bool normalize_by_invariant = true;
+
   bool publication_plots = false;
 
   int gotc = 0;
-  while ((gotc = getopt(argc, argv, "a:b:C:Df:M:m:n:Pp:huvV")) != -1) {
+  while ((gotc = getopt(argc, argv, "a:b:C:Df:hM:m:n:Pp:suvV")) != -1) {
     switch (gotc) {
 
     case 'a':
@@ -268,6 +271,10 @@ try {
       usage ();
       return 0;
 
+    case 's':
+      normalize_by_invariant = false;
+      break;
+
     case 'u':
       measure_cal_V = false;
       break;
@@ -306,8 +313,16 @@ try {
 
   if (measure_cal_V)
     cerr << "pcm: assuming that System + Hydra A Stokes V = 0" << endl;
+  else
+    cerr << "pcm: assuming that the CAL Stokes V = 0" << endl;
+
+  if (normalize_by_invariant)
+    cerr << "pcm: normalizing Stokes parameters by invariant interval" << endl;
+  else
+    cerr << "pcm: not normalizing Stokes parameters" << endl;
 
   model.measure_cal_V = measure_cal_V;
+  model.normalize_by_invariant = normalize_by_invariant;
 
   // add the specified phase bins
   for (unsigned ibin=0; ibin<phase_bins.size(); ibin++)

@@ -13,8 +13,6 @@
 
 #include "Calibration/SingleAxisPolynomial.h"
 #include "Calibration/Polynomial.h"
-#include "Calibration/ScalarMath.h"
-#include "Calibration/ScalarValue.h"
 
 #include <algorithm>
 #include <assert.h>
@@ -30,6 +28,7 @@ Pulsar::ReceptionCalibrator::ReceptionCalibrator (Calibrator::Type type,
   is_initialized = false;
 
   measure_cal_V = true;
+  normalize_by_invariant = true;
 
   PA_min = PA_max = 0.0;
 
@@ -472,43 +471,22 @@ Pulsar::ReceptionCalibrator::add_data(vector<Calibration::MeasuredState>& bins,
 
   Stokes<float> value = data->get_Stokes ( ichan, ibin );
 
-  // convert the value into an estimate, using the variance supplied
-  Stokes< Reference::To<Calibration::Scalar> > stokes;
-  Stokes< Estimate<double> > stokes_estimate;
+  Stokes< Estimate<float> > stokes;
 
   for (unsigned ipol=0; ipol<stokes.size(); ipol++) {
 
-    stokes_estimate[ipol].val = value[ipol];
-    stokes_estimate[ipol].var = variance[ipol];
+    stokes[ipol].val = value[ipol];
+    stokes[ipol].var = variance[ipol];
 
-    stokes[ipol] = new Calibration::ScalarValue (stokes_estimate[ipol]);
-
-  }
-
-  Reference::To<Calibration::Scalar> invariant = det( stokes );
-  Estimate<double> invariant_estimate;
-
-  invariant->evaluate( invariant_estimate );
-
-  if ( invariant_estimate.val < sqrt(invariant_estimate.var) )  {
-    cerr << "BAD data ichan=" << ichan << " ibin=" << ibin
-         << "\n   stokes=" << stokes_estimate
-         << "\n   inv=" << invariant_estimate << endl;
-    return;
-  }
-
-  invariant = sqrt( invariant );
-
-  Reference::To<Calibration::Scalar> normalized;
-  for (unsigned ipol=0; ipol<stokes.size(); ipol++) {
-    normalized = stokes[ipol] / invariant;
-    normalized->evaluate( stokes_estimate[ipol] );
   }
 
   try {
 
+    if (normalize_by_invariant) 
+      normalizer.normalize (stokes);
+
     // NOTE: the measured states are NOT corrected for PA
-    Calibration::MeasuredState state (stokes_estimate, estimate.source_index);
+    Calibration::MeasuredState state (stokes, estimate.source_index);
     bins.push_back ( state );
 
     /* Correct the stokes parameters using the current best estimate of
@@ -518,9 +496,9 @@ Pulsar::ReceptionCalibrator::add_data(vector<Calibration::MeasuredState>& bins,
     Jones<Estimate<double> > correct;
     correct = inv( model[ichan]->pulsar_path->evaluate() );
     
-    stokes_estimate = correct * stokes_estimate * herm(correct);
+    stokes = correct * stokes * herm(correct);
     
-    estimate.source[ichan].mean += stokes_estimate;
+    estimate.source[ichan].mean += stokes;
 
   }
   catch (Error& error) {

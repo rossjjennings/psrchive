@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ReceptionCalibrator.h,v $
-   $Revision: 1.44 $
-   $Date: 2003/10/02 07:32:07 $
+   $Revision: 1.45 $
+   $Date: 2003/10/28 08:47:52 $
    $Author: straten $ */
 
 #ifndef __ReceptionCalibrator_H
@@ -19,6 +19,7 @@
 #include "Calibration/PolarEstimate.h"
 #include "Calibration/SingleAxisEstimate.h"
 #include "Calibration/StokesEstimate.h"
+#include "Calibration/NormalizeStokes.h"
 
 #include "Calibration/Instrument.h"
 #include "Calibration/Polar.h"
@@ -163,7 +164,9 @@ namespace Pulsar {
 
     bool measure_cal_V;
 
-    //! Add the specified pulse phase bin to the set of state constraints
+    bool normalize_by_invariant;
+
+   //! Add the specified pulse phase bin to the set of state constraints
     void add_state (unsigned pulse_phase_bin);
     
     //! Get the number of pulsar phase bin input polarization states
@@ -219,6 +222,9 @@ namespace Pulsar {
     //! The calibrators to be loaded during initial_observation
     vector<string> calibrator_filenames;
     
+    //! Routine for normalizing the Stokes parameters
+    Calibration::NormalizeStokes normalizer;
+
     //! Epoch of the first observation
     MJD start_epoch;
 
