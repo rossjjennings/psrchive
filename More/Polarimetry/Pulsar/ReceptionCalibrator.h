@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ReceptionCalibrator.h,v $
-   $Revision: 1.32 $
-   $Date: 2003/08/28 07:44:01 $
+   $Revision: 1.33 $
+   $Date: 2003/08/31 07:36:25 $
    $Author: straten $ */
 
 #ifndef __ReceptionCalibrator_H
@@ -43,6 +43,9 @@ namespace Pulsar {
     //! Model of Stokes parameters added to equation as a function of frequency
     vector< Calibration::StokesEstimate > source;
 
+    //! Validity flags for each StokesEstimate
+    vector< bool > valid;
+
     //! Phase bin from which pulsar polarization is derived
     unsigned phase_bin;
 
@@ -55,6 +58,8 @@ namespace Pulsar {
   class StandardModel : public Reference::Able {
 
   public:
+
+    friend class ReceptionCalibrator;
 
     //! The available representations of the instrumental response
     enum Model { Hamaker, Britton };
@@ -90,15 +95,18 @@ namespace Pulsar {
     //! The model specified on construction
     Model model;
 
+    //! validity flag
+    bool valid;
   };
 
 
-  //! Uses the ReceptionModel to represent and fit for the system response
-  /*! The ReceptionCalibrator implements a technique of single dish
-    polarimetric self-calibration.  This class requires a number of
-    constraints, which are provided in through the add_observation,
-    add_PolnCalibrator, and add_FluxCalibrator methods. */
-  class ReceptionCalibrator : public Calibrator {
+//! Uses the ReceptionModel to represent and fit for the system response
+/*! The ReceptionCalibrator implements a technique of single dish
+  polarimetric self-calibration.  This class requires a number of
+  constraints, which are provided in through the add_observation,
+  add_PolnCalibrator, and add_FluxCalibrator methods.
+ */
+class ReceptionCalibrator : public Calibrator {
     
   public:
 
@@ -196,6 +204,8 @@ namespace Pulsar {
     //! Add the estimate to pulsar attribute
     void init_estimate (SourceEstimate& estimate);
 
+    void valid_mask (const SourceEstimate& src);
+
     //! Add Integration data to the MeasuredState vector
     /*! Data is taken from the specified frequency channel and phase bin.
       \retval bins the measured states to which an entry will be appended
@@ -211,7 +221,7 @@ namespace Pulsar {
     //! Flag set after the solve method has been called
     bool is_fit;
 
-     //! Flag set after the initialize method has been called
+    //! Flag set after the initialize method has been called
     bool is_initialized;
 
   };

@@ -45,16 +45,28 @@ Pulsar::StandardModel::StandardModel (Model _model)
   //
 
   model = _model;
+  valid = true;
 
   switch (model) {
+
   case Hamaker:
+    if (ReceptionCalibrator::verbose)
+      cerr << "Pulsar::StandardModel Hamaker" << endl;
     polar = new Calibration::PolarEstimate;
     instrument = polar;
     break;
+
   case Britton:
+    if (ReceptionCalibrator::verbose)
+      cerr << "Pulsar::StandardModel Britton" << endl;
     physical = new Calibration::InstrumentEstimate;
     instrument = physical;
     break;
+
+  default:
+    throw Error (InvalidParam, "Pulsar::StandardModel",
+		 "unknown model code=%d", int(_model));
+
   }
 
   equation = new Calibration::ReceptionModel;
@@ -267,6 +279,10 @@ void Pulsar::ReceptionCalibrator::add_calibrator (const Archive* data)
     throw Error (InvalidState, "Pulsar::ReceptionCalibrator::add_calibrator",
 		 "No Archive containing pulsar data has yet been added");
 
+  if (verbose)
+    cerr << "Pulsar::ReceptionCalibrator::add_calibrator"
+      " new PolarCalibrator" << endl;
+
   Reference::To<PolnCalibrator> polarcal = new PolarCalibrator (data);
 
   polarcal->build( uncalibrated->get_nchan() );
@@ -386,6 +402,9 @@ Pulsar::ReceptionCalibrator::add_data(vector<Calibration::MeasuredState>& bins,
 void Pulsar::ReceptionCalibrator::add_PolnCalibrator (const PolnCalibrator* p)
 {
   check_ready ("Pulsar::ReceptionCalibrator::add_PolnCalibrator");
+
+  if (verbose)
+    cerr << "Pulsar::ReceptionCalibrator::add_PolnCalibrator" << endl;
 
   const Archive* cal = p->get_Archive();
 
@@ -638,9 +657,14 @@ void Pulsar::ReceptionCalibrator::solve (int only_ichan)
           "WARNING not solving the first " << start_chan << " channels" <<endl;
 #endif
 
-  for (unsigned ichan=start_chan; ichan<nchan; ichan+=1) try {
+  for (unsigned ichan=start_chan; ichan<nchan; ichan++) try {
 
-    cerr << "Pulsar::ReceptionCalibrator::solve ichan=" << ichan << endl;
+    cerr << "Pulsar::ReceptionCalibrator::solve ichan=" << ichan;
+    if (!model[ichan]->valid) {
+      cerr << " flagged invalid" << endl;
+      continue;
+    }
+    cerr << endl;
 
     model[ichan]->equation->solve ();
 
@@ -649,7 +673,10 @@ void Pulsar::ReceptionCalibrator::solve (int only_ichan)
 
   }
   catch (Error& error) {
-    throw error += "Pulsar::ReceptionCalibrator::solve";
+    cerr << "Pulsar::ReceptionCalibrator::solve failure ichan=" << ichan
+         << error << endl;
+    model[ichan]->valid = false;
+
   }
 
   is_fit = true;
@@ -668,7 +695,7 @@ void Pulsar::ReceptionCalibrator::initialize ()
     " to " << PA_max << " degrees" << endl;
 
   calibrator.update_source();
-
+  
   for (unsigned istate=0; istate<pulsar.size(); istate++)
     pulsar[istate].update_source ();
 
@@ -693,10 +720,34 @@ void Pulsar::ReceptionCalibrator::check_ready (const char* method, bool unc)
 		 "Initial observation required.");
 }
 
+/*! Mask invalid SourceEstimate states */
+void Pulsar::ReceptionCalibrator::valid_mask (const Pulsar::SourceEstimate& src)
+{
+  if (src.valid.size () != model.size())
+    throw Error (InvalidParam, "Pulsar::ReceptionCalibrator::valid_mask",
+                 "Pulsar::SourceEstimate::valid.size=%d != model.size=%d",
+                 src.valid.size (), model.size());
+
+  for (unsigned ichan=0; ichan < model.size(); ichan++)
+    model[ichan]->valid &= src.valid[ichan];
+}
+
 
 /*! Update the best guess of each unknown input state */
 void Pulsar::SourceEstimate::update_source ()
 {
-  for (unsigned ichan=0; ichan < source.size(); ichan++)
+  valid.resize( source.size() );
+
+  unsigned ichan=0;
+  for (ichan=0; ichan < source.size(); ichan++)
+    valid[ichan] = true;
+
+  for (ichan=0; ichan < source.size(); ichan++) try {
     source[ichan].update();
+  }
+  catch (Error& error) {
+    cerr << "Pulsar::SourceEstimate::update_source error ichan=" << ichan
+         << error << endl;
+    valid[ichan] = false;
+  }
 }

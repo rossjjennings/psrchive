@@ -211,11 +211,11 @@ void Pulsar::PolnCalibrator::create (unsigned nchan)
 void Pulsar::PolnCalibrator::calculate (vector<vector<Estimate<double> > >& hi,
 					vector<vector<Estimate<double> > >& lo)
 {
-  if (verbose)
-    cerr << "Pulsar::PolnCalibrator::calculate" << endl;
-
   unsigned npol = hi.size();
   unsigned nchan = hi[0].size();
+
+  if (verbose) cerr << "Pulsar::PolnCalibrator::calculate"
+		 " npol=" << npol << " nchan=" << nchan << endl;
 
   baseline.resize (nchan);
   jones.resize (nchan);
@@ -228,6 +228,9 @@ void Pulsar::PolnCalibrator::calculate (vector<vector<Estimate<double> > >& hi,
   vector<Estimate<double> > cal_lo (npol);
 
   for (unsigned ichan=0; ichan<nchan; ++ichan) {
+
+    if (verbose)
+      cerr << "Pulsar::PolnCalibrator::calculate ichan=" << ichan << endl;
 
     for (unsigned ipol=0; ipol<npol; ++ipol) {
       cal_hi[ipol] = hi[ipol][ichan];
@@ -253,5 +256,8 @@ void Pulsar::PolnCalibrator::calculate (vector<vector<Estimate<double> > >& hi,
     jones[ichan] = inv( solve (cal_hi, cal_lo, ichan) );
 
   }
+
+  if (verbose)
+    cerr << "Pulsar::PolnCalibrator::calculate exit" << endl;
 }
 
