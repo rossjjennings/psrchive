@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Stokes.h,v $
-   $Revision: 1.13 $
-   $Date: 2004/07/03 07:21:31 $
+   $Revision: 1.14 $
+   $Date: 2005/01/20 06:50:02 $
    $Author: straten $ */
 
 #ifndef __Stokes_H
@@ -61,7 +61,7 @@ void random_value (Stokes<T>& val, U scale, float max_polarization = 1.0)
   for (i=1; i<4; i++)
     val[i] *= scale;
 
-  if (det(val) < 0.0)
+  if (det(val) < -1e-10)
     throw Error (InvalidState, "random_value (Stokes)",
 		 "det=%f<0", det(val));
 }
