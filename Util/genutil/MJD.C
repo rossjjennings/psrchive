@@ -1,3 +1,4 @@
+#include <iostream>
 
 #include <string.h>
 #include <stdio.h>
@@ -6,7 +7,6 @@
 #include <sunmath.h>
 #endif
 #include <math.h>
-#include <iostream>
 #include "MJD.h"
 #include "machine_endian.h"
 #include "ieee.h"
@@ -366,10 +366,11 @@ MJD::MJD(int d, int s, double f) {
   *this = MJD((double)d,(double)s,f);
 }
 
-MJD::MJD(int intday, double fracday){
-  
-  int isecs = (int)fracday*86400;
-  double fracsecs = fracday*86400 - double(isecs);
+MJD::MJD(int intday, double fracday)
+{
+  double secs_in_fracday = fracday * 86400.0;
+  int isecs = (int) secs_in_fracday;
+  double fracsecs = secs_in_fracday - double(isecs);
   
   *this = MJD(intday, isecs, fracsecs);
 }
