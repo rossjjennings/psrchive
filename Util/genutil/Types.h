@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Types.h,v $
-   $Revision: 1.13 $
-   $Date: 2004/04/05 16:41:52 $
-   $Author: straten $ */
+   $Revision: 1.14 $
+   $Date: 2004/04/19 06:39:13 $
+   $Author: hknight $ */
 
 #ifndef __Types_h
 #define __Types_h
@@ -63,7 +63,9 @@ namespace Signal {
     //! Stokes I,Q,U,V
     Stokes,
     //! Stokes invariant interval
-    Invariant
+    Invariant,
+    //! Other  (e.g. just PP)
+    Other
   };
   
   //! States of different polarization dimensions
