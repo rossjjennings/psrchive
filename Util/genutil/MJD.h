@@ -1,13 +1,16 @@
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/MJD.h,v $
-   $Revision: 1.10 $
-   $Date: 1999/12/21 04:42:21 $
+   $Revision: 1.11 $
+   $Date: 1999/12/23 02:03:37 $
    $Author: straten $ */
 
 #ifndef __MJD_H
 #define __MJD_H
 
-#include <stdio.h>
+#include <iostream>
 #include <string>
+
+#include <stdio.h>
+
 #include "environ.h"
 #include "utc.h"
 #ifdef MPI
