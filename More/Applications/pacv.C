@@ -29,6 +29,9 @@ void usage ()
 
 int main (int argc, char** argv) 
 {
+  // ensure that parameters are stored for plotting
+  Pulsar::PolnCalibrator::store_parameters = true;
+
   // use the Single Axis model
   bool single_axis = false;
 
@@ -87,7 +90,7 @@ int main (int argc, char** argv)
   cpgbeg (0, "?", 0, 0);
   cpgask(1);
 
-  cpgsvp (0.1,.95, 0.1,.95);
+  cpgsvp (.1,.9, .1,.9);
   
   // the calibrator archive
   Reference::To<Pulsar::Archive> archive;
