@@ -76,7 +76,9 @@ int main (int argc, char *argv[]) {
   try {
     
     arch = Pulsar::Archive::load(std);
-    total = arch->total();
+    total = arch->clone();
+    total->fscrunch();
+    total->tscrunch();
     total->centre();
     stdp = total->get_Profile(0,0,0);
 
@@ -86,8 +88,6 @@ int main (int argc, char *argv[]) {
     return -1;
   }
 
-  cerr << "WARNING: Program assumes the site is Parkes" << endl;
-
   for (unsigned i = 0; i < archives.size(); i++) {
     
     try {
@@ -96,14 +96,17 @@ int main (int argc, char *argv[]) {
 	cerr << "Loading " << archives[i] << endl;
       
       arch = Pulsar::Archive::load(archives[i]);
-      total = arch->total();
+      total = arch->clone();
+      total->fscrunch();
+      total->tscrunch();
       total->centre();
 
       prof = total->get_Profile(0,0,0);
       start_time = arch->start_time();
       period = arch->get_Integration(0)->get_folding_period();
-
-      toas[i] = prof->toa(stdp.get(), start_time, period, '7');
+      
+      toas[i] = prof->toa(stdp.get(), start_time, period,
+			  total->get_telescope_code());
     }
     catch (Error& error) {
       cerr << error << endl;
@@ -111,7 +114,7 @@ int main (int argc, char *argv[]) {
   }
 
   for (unsigned i = 0; i < toas.size(); i++)
-    toas[i].unload(stderr);
+    toas[i].unload(stdout);
   
 }
 
