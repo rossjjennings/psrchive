@@ -32,6 +32,11 @@ void Pulsar::ReceptionCalibrator::set_ncoef (unsigned _ncoef)
   ncoef_set = true;
 }
 
+void Pulsar::ReceptionCalibrator::set_calibrators (const vector<string>& names)
+{
+  calibrator_filenames = names;
+}
+
 void Pulsar::ReceptionCalibrator::initial_observation (const Archive* data)
 {
   if (!data)
@@ -59,7 +64,6 @@ void Pulsar::ReceptionCalibrator::initial_observation (const Archive* data)
     cerr << "Pulsar::ReceptionCalibrator WARNING archive not dedispersed\n"
       "  Pulse phase will vary as a function of frequency channel" << endl;
 
-
   uncalibrated = data->clone();
 
   parallactic.set_source_coordinates( uncalibrated->get_coordinates() );
@@ -80,6 +84,9 @@ void Pulsar::ReceptionCalibrator::initial_observation (const Archive* data)
 
   }
 
+  if (!PolnCalibrator_path && calibrator_filenames.size())
+    load_calibrators ();
+
   // initialize any previously added states
   for (unsigned istate=0; istate<pulsar.size(); istate++)
     init_estimate ( pulsar[istate] );
@@ -88,6 +95,37 @@ void Pulsar::ReceptionCalibrator::initial_observation (const Archive* data)
 
   parallactic.set_epoch (start_epoch);
   PA_max = PA_min = parallactic.get_param (0);
+
+}
+
+void Pulsar::ReceptionCalibrator::load_calibrators ()
+{
+
+  for (unsigned ifile = 0; ifile < calibrator_filenames.size(); ifile++) {
+    
+    try {
+
+      if (verbose)
+	cerr << "Pulsar::ReceptionCalibrator::load_calibrators loading "
+	     << calibrator_filenames[ifile] << endl;
+
+      Reference::To<Archive> archive;
+      archive = Pulsar::Archive::load(calibrator_filenames[ifile]);
+
+      add_calibrator (archive);
+
+    }
+    catch (Error& error) {
+      cerr << "Pulsar::ReceptionCalibrator::load_calibrators ERROR" 
+	   << error << endl;
+    }
+
+  }
+
+  unsigned nchan = equation.size();
+
+  for (unsigned ichan=0; ichan<nchan; ichan+=1)
+    receiver[ichan].update (equation[ichan]->get_receiver());
 
 }
 
@@ -152,14 +190,27 @@ unsigned Pulsar::ReceptionCalibrator::get_nchan () const
 }
 
 //! Add the specified pulsar observation to the set of constraints
+void Pulsar::ReceptionCalibrator::add_calibrator (const Archive* data)
+{
+  if (uncalibrated)
+    throw Error (InvalidState, "Pulsar::ReceptionCalibrator::add_calibrator",
+		 "No Archive containing pulsar data has yet been added");
+
+  Reference::To<PolnCalibrator> polarcal = new PolarCalibrator (data);
+
+  polarcal->build( uncalibrated->get_nchan() );
+
+  add_PolnCalibrator (polarcal);
+
+}
+
+//! Add the specified pulsar observation to the set of constraints
 void Pulsar::ReceptionCalibrator::add_observation (const Archive* data)
 {
   check_ready ("Pulsar::ReceptionCalibrator::add_observation", false);
 
   if (data->get_type() == Signal::PolnCal) {
-    Reference::To<PolnCalibrator> polarcal = new PolarCalibrator (data);
-    polarcal->build( uncalibrated->get_nchan() );
-    add_PolnCalibrator (polarcal);
+    add_calibrator (data);
     return;
   }
 
@@ -243,9 +294,18 @@ Pulsar::ReceptionCalibrator::add_data(vector<Calibration::MeasuredState>& bins,
 
   bins.push_back ( state );
 
-  // Correct for parallactic angle rotation before adding to best estimate
-  Jones<double> unpara = inv( parallactic.evaluate() );
-  stokes.val = unpara * stokes.val * herm(unpara);
+  /* Correct the stokes parameters using the current best estimate of
+     the receiver and the parallactic angle rotation before adding
+     them to best estimate of the input state */
+
+  // the receiver is updated every time a PolarCalibrator observation is added
+  Jones<double> rcvr = equation[ichan]->get_receiver()->evaluate();
+
+  // the parallactic transformation epoch is set in add_observation
+  Jones<double> para = parallactic.evaluate();
+
+  Jones<double> correct = inv( rcvr * para );
+  stokes.val = correct * stokes.val * herm(correct);
   estimate.mean[ichan] += stokes;
 
 }
@@ -364,7 +424,7 @@ void Pulsar::PolarEstimate::integrate (const Calibration::Polar& model)
 
   for (unsigned i=0; i<3; i++) {
     boostGibbs[i] += model.get_boostGibbs (i);
-    rotationEuler[i] += model.get_rotationEuler (i);
+    rotationEuler[i] += 2.0 * model.get_rotationEuler (i);
   }
 }
 
@@ -374,7 +434,7 @@ void Pulsar::PolarEstimate::update (Calibration::Polar* model)
 
   for (unsigned i=0; i<3; i++) {
     model->set_boostGibbs (i, boostGibbs[i].get_Estimate());
-    model->set_rotationEuler (i, rotationEuler[i].get_Estimate());
+    model->set_rotationEuler (i, 0.5 * rotationEuler[i].get_Estimate());
   }
 }
 
@@ -390,11 +450,23 @@ void Pulsar::ReceptionCalibrator::add_FluxCalibrator (const FluxCalibrator* f)
 }
 
 //! Calibrate the polarization of the given archive
+void Pulsar::ReceptionCalibrator::precalibrate (Archive* data)
+{
+  calibrate (data, 1);
+}
+
+//! Calibrate the polarization of the given archive
 void Pulsar::ReceptionCalibrator::calibrate (Archive* data)
+{
+  calibrate (data, 0);
+}
+
+//! Calibrate the polarization of the given archive
+void Pulsar::ReceptionCalibrator::calibrate (Archive* data, unsigned path)
 {
   cerr << "Pulsar::ReceptionCalibrator::calibrate" << endl;
 
-  if (!is_fit)
+  if (!is_fit && path == 0)
     solve ();
 
   string reason;
@@ -417,6 +489,7 @@ void Pulsar::ReceptionCalibrator::calibrate (Archive* data)
     MJD epoch = integration->get_epoch ();
 
     for (unsigned ichan=0; ichan<nchan; ichan++) {
+      equation[ichan]->set_backend (path);
       equation[ichan]->set_epoch (epoch);
       response[ichan] = inv( equation[ichan]->get_model()->get_Jones() );
     }
@@ -428,7 +501,9 @@ void Pulsar::ReceptionCalibrator::calibrate (Archive* data)
     
   }
 
-  data->set_parallactic_corrected (true);
+  if (path == 0)
+    data->set_parallactic_corrected (true);
+
   data->set_poln_calibrated (true);
 
   if (FluxCalibrator_path)

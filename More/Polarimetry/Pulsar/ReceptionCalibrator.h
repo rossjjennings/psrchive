@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ReceptionCalibrator.h,v $
-   $Revision: 1.18 $
-   $Date: 2003/05/22 06:47:12 $
-   $Author: pulsar $ */
+   $Revision: 1.19 $
+   $Date: 2003/05/22 14:41:43 $
+   $Author: straten $ */
 
 #ifndef __ReceptionCalibrator_H
 #define __ReceptionCalibrator_H
@@ -52,8 +52,14 @@ namespace Pulsar {
     //! Get the number of frequency channels
     unsigned get_nchan () const;
 
+    //! Set the calibrator observations to be loaded during initial_observation
+    void set_calibrators (const vector<string>& filenames);
+
     //! Add the specified pulsar observation to the set of constraints
     void add_observation (const Archive* data);
+
+    //! Add the specified calibrator observation to the set of constraints
+    void add_calibrator (const Archive* data);
 
     //! Add the specified PolnCalibrator observation to the set of constraints
     void add_PolnCalibrator (const PolnCalibrator* polncal);
@@ -67,7 +73,13 @@ namespace Pulsar {
     //! Calibrate the polarization of the given archive
     virtual void calibrate (Archive* archive);
 
+    //! Pre-calibrate the polarization of the given archive
+    virtual void precalibrate (Archive* archive);
+
   protected:
+
+    //! Calibrate the polarization of the given archive
+    void calibrate (Archive* archive, unsigned path);
 
     //! SingleAxis(t)Polar Equation as a function of frequency
     vector<Calibration::SAtPEquation*> equation;
@@ -83,6 +95,9 @@ namespace Pulsar {
 
     //! Uncalibrated estimate of pulsar polarization as a function of phase
     vector<SourceEstimate> pulsar;
+
+    //! The calibrators to be loaded during initial_observation
+    vector<string> calibrator_filenames;
 
     //! The parallactic angle rotation
     Calibration::Parallactic parallactic;
@@ -119,6 +134,9 @@ namespace Pulsar {
 
     //! Initialization performed using the first observation added
     void initial_observation (const Archive* data);
+
+    //! Load the set of calibrators set by set_calibrators
+    void load_calibrators ();
 
     //! Add the estimate to pulsar attribute
     void init_estimate (SourceEstimate& estimate);
@@ -175,7 +193,7 @@ namespace Pulsar {
     MeanEstimate<double> boostGibbs[3];
 
     //! Best estimate of receiver rotations
-    MeanEstimate<double> rotationEuler[3];
+    MeanRadian<double> rotationEuler[3];
 
     //! Add the Polar Model to the current best estimate
     void integrate (const Calibration::Polar& model);
