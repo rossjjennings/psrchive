@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Archive.h,v $
-   $Revision: 1.41 $
-   $Date: 2002/10/12 23:32:24 $
-   $Author: straten $ */
+   $Revision: 1.42 $
+   $Date: 2002/10/18 16:46:41 $
+   $Author: pulsar $ */
 
 /*! \mainpage 
  
@@ -348,9 +348,6 @@ namespace Pulsar {
     void display (unsigned isub=0, unsigned ipol=0, unsigned ichan=0,
 			  float phase=0) const;
 
-    //! Construct a plot of pulse phase vs time for multi-subint archives
-    void plot_time_vs_phase ();
-
     //! Convenience interface to the set_filename (const char*) method
     void set_filename (const string& filename) const
     { set_filename (filename.c_str()); }
@@ -541,13 +538,3 @@ namespace Pulsar {
 }
 
 #endif
-
-
-
-
-
-
-
-
-
-

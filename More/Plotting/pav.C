@@ -21,11 +21,10 @@ void usage ()
     " -h        This help page \n"
     //    " -a        Calculate TOAs of every profile \n"
     " -b scr    Bscrunch scr phase bins together \n"
-    //    " -c        Correct data for bad ephemeris \n"
+    " -c map    Choose a different colour map \n"
     //    " -d dm     Dedisperse data at a new dm \n"
     " -D        Plot Integration 0, poln 0, chan 0 \n"
     " -G        Greyscale of profiles in frequency and phase\n"
-    " -H        Use \"heat\" colour map\n"
     //    " -E f.eph  install new ephemeris given in file 'f.eph' \n"
     //    " -e xx     Output data to new file with ext xx \n"
     " -f scr    Fscrunch scr frequency channels together \n"
@@ -57,6 +56,8 @@ int main (int argc, char** argv)
   int tscrunch = -1;
   int pscrunch = -1;
 
+  unsigned poln = 0;
+
   double phase = 0;
 
   bool verbose = false;
@@ -64,7 +65,6 @@ int main (int argc, char** argv)
   bool manchester = false;
   bool textinfo = false;
   bool greyfreq = false;
-  bool heat = false;
   bool stopwatch = false;
   bool hat = false;
   bool centre = false;
@@ -73,9 +73,10 @@ int main (int argc, char** argv)
   char* metafile = NULL;
 
   Pulsar::Plotter plotter;
+  Pulsar::Plotter::ColourMap colour_map = Pulsar::Plotter::Heat;
 
   int c = 0;
-  const char* args = "ab:cd:DGe:E:f:FhHm:M:pr:St:TvVwWx:y:RZCYz:";
+  const char* args = "ab:c:d:DGe:E:f:FhHm:M:pP:r:St:TvVwWx:y:RZCYz:";
   while ((c = getopt(argc, argv, args)) != -1)
     switch (c) {
 
@@ -86,7 +87,7 @@ int main (int argc, char** argv)
       bscrunch = atoi (optarg);
       break;
     case 'c':
-      // correct
+      colour_map = (Pulsar::Plotter::ColourMap) atoi(optarg);
       break;
     case 'd':
       // parse dm
@@ -95,7 +96,6 @@ int main (int argc, char** argv)
       display = true;
       break;
     case 'G':
-      display = true;
       greyfreq = true;
       break;
     case 'e':
@@ -113,9 +113,6 @@ int main (int argc, char** argv)
     case 'h':
       usage ();
       return 0;
-    case 'H':
-      heat = true;
-      break;
     case 'm':
       // macro file
       break;
@@ -124,6 +121,9 @@ int main (int argc, char** argv)
       break;
     case 'p':
       pscrunch = 1;
+      break;
+    case 'P':
+      poln = atoi (optarg);
       break;
     case 'r':
       phase = atof (optarg);
@@ -179,8 +179,8 @@ int main (int argc, char** argv)
         return -1;
       }
       plotter.set_zoom (atof(val1), atof(val2));
-    }
       break;
+    }
 
     default:
       cerr << "invalid param '" << c << "'" << endl;
@@ -199,26 +199,21 @@ int main (int argc, char** argv)
     return 0;
   }
 
-  if (display) {
+  if (display || greyfreq) {
 
     cpgbeg (0, "?", 0, 0);
     cpgask(1);
 
     if (manchester)
-      cpgsvp(0.1,.95,0.1,.95);
+      cpgsvp (0.1,.95,0.1,.95);
+    else if (greyfreq)
+      cpgsvp (0.1,.95,0.1,.90);
     else
       cpgsvp (0.1, 0.9, 0.05, 0.85);
 
     cpgsch (1.0);
 
-    if (heat) {
-      float heat_l[] = {0.0, 0.2, 0.4, 0.6, 1.0};
-      float heat_r[] = {0.0, 0.5, 1.0, 1.0, 1.0};
-      float heat_g[] = {0.0, 0.0, 0.5, 1.0, 1.0};
-      float heat_b[] = {0.0, 0.0, 0.0, 0.3, 1.0};
-      
-      cpgctab(heat_l, heat_r, heat_g, heat_b, 4, 1.0, 0.5);
-    }
+    plotter.set_colour_map (colour_map);
   }
 
   // smart pointer
@@ -282,7 +277,7 @@ int main (int argc, char** argv)
       cpgsvp (0.1, 0.9, 0.1, 0.9);
       cpgsch (1.0);
       cpgeras();
-      archive -> plot_time_vs_phase();
+      plotter.phase_time (archive);
       cpgend();
       exit(0);
     }
@@ -318,11 +313,9 @@ int main (int argc, char** argv)
 	archive -> display(0,0,0,phase);
     }
     
-    if (greyfreq) {
-      string tempstr = archive -> get_source();
-      Pulsar::plot_color (archive -> get_Integration (0), tempstr);
-    }
-    
+    if (greyfreq)
+      plotter.phase_frequency (archive);
+
     if (textinfo) {
       archive -> pscrunch();
       archive -> tscrunch();
