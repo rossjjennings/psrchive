@@ -10,15 +10,44 @@
 #include "PolnCalibrator.h"
 #include "FluxCalibrator.h"
 
-// A simple command line tool for calibrating Pulsar::Archives
+// A command line tool for calibrating Pulsar::Archives
+
+void usage ()
+{
+  cout << "A program for calibrating Pulsar::Archives\n"
+    "Usage: pac [options] filenames\n"
+    "  -v   Verbose mode\n"
+    "  -V   Very verbose mode\n"
+    "\n"
+    "  -p   Path to CAL file directory\n"
+    "  -e   Scan for files with these extensions\n"
+    "       uses .cf and .pcal as defaults\n"
+    "  -w   Write a new database summary file if using -p\n"                      
+    // "  -d   Read ASCII summary (instead of -p)"   
+    "  -c   Do not try to match sky coordinates"
+    "  -i   Do not try to match instruments\n"
+    "  -t   Do not try to match times\n"
+    "  -f   Do not try to match frequencies\n"
+    "  -b   Do not try to match bandwidths\n"
+    "  -o   Do not try to match obs types\n"
+    "  -D   Display calibration model parameters"
+    "  -F   Calibrate fluxes only\n"
+    "  -P   Calibrate polarisations only\n"
+    "\n"
+    "  -S   Use the SingleAxis(t)Polar (SAtP selfcal) model\n"
+    "  -s   Use the Single Axis Model (default)\n"
+    "  -q   Use the Polar Model\n"
+       << endl;
+}
 
 int main (int argc, char *argv[]) {
-  
+    
   bool verbose = false;
   bool new_database = true;
   bool display_params = false;
   bool do_fluxcal = true;
   bool do_polncal = true;
+  bool do_selfcal = false;
   bool write_database_file = false;
 
   bool test_instr = true;
@@ -42,32 +71,11 @@ int main (int argc, char *argv[]) {
   char* key = NULL;
   char whitespace[5] = " \n\t";
 
-  while ((gotc = getopt(argc, argv, "hvVp:e:wcitfboDFPsq")) != -1) {
+  while ((gotc = getopt(argc, argv, "hvVp:e:wcitfboDFPsSq")) != -1) {
     switch (gotc) {
     case 'h':
-      cout << "A program for calibrating Pulsar::Archives"  << endl;
-      cout << "Usage: pac [options] filenames"              << endl;
-      cout << "  -v   Verbose mode"                         << endl;
-      cout << "  -V   Very verbose mode"                    << endl;
-      cout << "  -p   Path to CAL file directory"           << endl;
-      cout << "  -e   Scan for files with these extensions" << endl;
-      cout << "       uses .cf and .pcal as defaults"       << endl;
-      cout << "  -w   Write a new database summary file"    << endl;
-      cout << "       if using -p"                          << endl;
-      //cout << "  -d   Read ASCII summary (instead of -p)"   << endl;
-      cout << "  -c   Do not try to match sky coordinates"  << endl;
-      cout << "  -i   Do not try to match instruments"      << endl;
-      cout << "  -t   Do not try to match times"            << endl;
-      cout << "  -f   Do not try to match frequencies"      << endl;
-      cout << "  -b   Do not try to match bandwidths"       << endl;
-      cout << "  -o   Do not try to match obs types"        << endl;
-      cout << "  -D   Display calibration model parameters" << endl;
-      cout << "  -F   Calibrate fluxes only"                << endl;
-      cout << "  -P   Calibrate polarisations only"         << endl;
-      cout << "  -s   Use the Single Axis Model (default)"  << endl;
-      cout << "  -q   Use the Polar Model"                  << endl;
+      usage ();
       return 0;
-      break;
     case 'v':
       verbose = true;
       Pulsar::Calibration::verbose = true;
@@ -120,6 +128,9 @@ int main (int argc, char *argv[]) {
       break;
     case 'o':
       test_obstype = false;
+      break;
+    case 'S':
+      do_selfcal = true;
       break;
     case 's':
       m = Pulsar::Calibration::Database::SingleAxis;
@@ -205,21 +216,7 @@ int main (int argc, char *argv[]) {
 
       cout << "Loaded archive: " << archives[i] << endl;
       
-      if (do_fluxcal) {
-
-	Pulsar::FluxCalibrator* fcal_engine = 0;
-	fcal_engine = dbase->generateFluxCalibrator(arch);
-
-	if (verbose) {
-	  cout << "Generated Flux Calibrator" << endl;
-	  cout << "Calibrating Archive Fluxes" << endl;
-	}
-
-	fcal_engine->calibrate(arch);
-
-	cout << "Flux calibration complete" << endl;
-      }
-      
+     
       if (do_polncal) {
 
         if (verbose)
@@ -242,7 +239,28 @@ int main (int argc, char *argv[]) {
 	  cerr << "not implemented; use pacv" << endl;
 	}	
       }
-      
+
+      /* The PolnCalibrator classes normalize everything so that flux
+	 is given in units of the calibrator flux.  Unless the calibrator
+	 is flux calibrated, it will undo the flux calibration step.
+	 Therefore, the flux cal should take place after the poln cal */
+
+      if (do_fluxcal) {
+
+	Pulsar::FluxCalibrator* fcal_engine = 0;
+	fcal_engine = dbase->generateFluxCalibrator(arch);
+
+	if (verbose) {
+	  cout << "Generated Flux Calibrator" << endl;
+	  cout << "Calibrating Archive Fluxes" << endl;
+	}
+
+	fcal_engine->calibrate(arch);
+
+	cout << "Flux calibration complete" << endl;
+
+      }
+ 
       int index = archives[i].find_first_of(".", 0);
       string newname = archives[i].substr(0, index);
       newname += ".calib";
