@@ -5,13 +5,14 @@
 
 #include <cpgplot.h>
 
-#include "Calibration/LevenbergMarquardt.h"
-#include "Calibration/Gaussian.h"
-#include "Calibration/Polynomial.h"
-#include "Calibration/Axis.h"
+#include "MEAL/LevenbergMarquardt.h"
+#include "MEAL/Gaussian.h"
+#include "MEAL/Polynomial.h"
+#include "MEAL/Axis.h"
 
 #include "EstimatePlotter.h"
-#include "minmax.h"
+
+using namespace std;
 
 void usage ()
 {
@@ -30,8 +31,8 @@ void usage ()
        << endl;
 }
 
-void plot_model (Calibration::Axis<double>& argument,
-		 Calibration::Scalar* scalar,
+void plot_model (MEAL::Axis<double>& argument,
+		 MEAL::Scalar* scalar,
 		 unsigned npts, double xmin, double xmax);
 
 int main (int argc, char** argv) try {
@@ -74,7 +75,7 @@ int main (int argc, char** argv) try {
       break;
 
     case 'V':
-      Calibration::Model::verbose = true;
+      MEAL::Function::verbose = true;
     case 'v':
       verbose = true;
       break;
@@ -91,9 +92,9 @@ int main (int argc, char** argv) try {
   if (verbose)
     cerr << "lmfit: loading model from '" << model_filename << "'" << endl;
 
-  Calibration::Model* model = Calibration::Model::load (model_filename);
+  MEAL::Function* model = MEAL::Function::load (model_filename);
 
-  Calibration::Scalar* scalar = dynamic_cast<Calibration::Scalar*>(model);
+  MEAL::Scalar* scalar = dynamic_cast<MEAL::Scalar*>(model);
   if (!scalar) {
     cerr << "lmfit: loaded model is not Scalar" << endl;
     return -1;
@@ -104,7 +105,7 @@ int main (int argc, char** argv) try {
   scalar->print (model_text);
   cout << "INPUT:\n" << model_text << endl;
 
-  Calibration::Axis<double> argument; 
+  MEAL::Axis<double> argument; 
   scalar->set_argument (0, &argument);
 
   if (optind >= argc) {
@@ -122,8 +123,8 @@ int main (int argc, char** argv) try {
     return -1;
   }
 
-  vector< Calibration::Axis<double>::Value > data_x;  // x-ordinate of data
-  vector< Estimate<double> > data_y;       // y-ordinate of data with error
+  std::vector< MEAL::Axis<double>::Value > data_x;  // x-ordinate of data
+  std::vector< Estimate<double> > data_y;       // y-ordinate of data with error
 
   double x, y, e;
   while (fscanf (fptr, "%lf %lf %lf", &x, &y, &e) == 3) {
@@ -163,8 +164,8 @@ int main (int argc, char** argv) try {
   cpgsci(2);
   plot_model (argument, scalar, npts, xmin, xmax);
 
-  Calibration::LevenbergMarquardt<double> fit;
-  fit.verbose = Calibration::Model::verbose;
+  MEAL::LevenbergMarquardt<double> fit;
+  fit.verbose = MEAL::Function::verbose;
   
   float chisq = fit.init (data_x, data_y, *scalar);
   cerr << "initial chisq = " << chisq << endl;
@@ -196,7 +197,7 @@ int main (int argc, char** argv) try {
   cerr << "Chi-squared = " << chisq << " / " << free_parms << " = "
        << chisq / free_parms << endl;
 
-  vector<vector<double> > covariance;
+  std::vector<std::vector<double> > covariance;
   fit.result (*scalar, covariance);
 
   for (unsigned iparm=0; iparm < scalar->get_nparam(); iparm++) {
@@ -223,8 +224,8 @@ catch (...) {
   return -1;
 }
 
-void plot_model (Calibration::Axis<double>& argument,
-		 Calibration::Scalar* scalar,
+void plot_model (MEAL::Axis<double>& argument,
+		 MEAL::Scalar* scalar,
 		 unsigned npts, double xmin, double xmax)
 {
   double xdel = (xmax-xmin)/(npts-1);

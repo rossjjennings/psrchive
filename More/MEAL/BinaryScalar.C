@@ -1,21 +1,23 @@
-#include "MEPL/BinaryScalar.h"
-#include "MEPL/ProjectGradient.h"
+#include "MEAL/BinaryScalar.h"
+#include "MEAL/ProjectGradient.h"
 
-void Model::BinaryScalar::calculate (double& result,
-					   vector<double>* grad)
+using namespace std;
+
+void MEAL::BinaryScalar::calculate (double& result,
+					   std::vector<double>* grad)
 {
   if (!arg1 || !arg2)
-    throw Error (InvalidState, "Model::BinaryScalar::calculate",
+    throw Error (InvalidState, "MEAL::BinaryScalar::calculate",
 		 "both arguments are not set");
 
   if (verbose)
-    cerr << "Model::BinaryScalar::calculate" << endl;
+    cerr << "MEAL::BinaryScalar::calculate" << endl;
 
-  vector<double> grad1;
-  vector<double> grad2;
+  std::vector<double> grad1;
+  std::vector<double> grad2;
 
-  vector<double>* grad1_ptr = 0;
-  vector<double>* grad2_ptr = 0;
+  std::vector<double>* grad1_ptr = 0;
+  std::vector<double>* grad2_ptr = 0;
 
   if (grad)  {
     grad1_ptr = &grad1;
@@ -28,7 +30,7 @@ void Model::BinaryScalar::calculate (double& result,
   result = function( x1, x2 );
 
   if (verbose)
-    cerr << "Model::BinaryScalar::calculate result\n"
+    cerr << "MEAL::BinaryScalar::calculate result\n"
       "   " << result << endl;
 
   if (!grad)
@@ -55,7 +57,7 @@ void Model::BinaryScalar::calculate (double& result,
   ProjectGradient (arg2, grad2, *(grad));
 
   if (verbose) {
-    cerr << "Model::BinaryScalar::calculate gradient\n";
+    cerr << "MEAL::BinaryScalar::calculate gradient\n";
     for (unsigned i=0; i<grad->size(); i++)
       cerr << "   " << i << ":" << get_infit(i) << "=" << (*grad)[i] << endl;
   }

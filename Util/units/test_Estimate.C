@@ -1,6 +1,8 @@
 #include "Estimate.h"
 #include "Stokes.h"
 
+using namespace std;
+
 int main ()
 {
   // ///////////////////////////////////////////////////////////////////////

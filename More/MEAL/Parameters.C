@@ -1,29 +1,30 @@
-#include "MEPL/Parameters.h"
+#include "MEAL/Parameters.h"
 
+using namespace std;
 
 //! Default constructor
-Model::Parameters::Parameters (unsigned nparam)
+MEAL::Parameters::Parameters (unsigned nparam)
   : params(nparam), fit(nparam, true)
 {
 }
 
 
 //! Copy constructor
-Model::Parameters::Parameters (const Parameters& np)
+MEAL::Parameters::Parameters (const Parameters& np)
   : params(np.params), fit(np.fit)
 {
 }
 
 
 //! Equality operator
-Model::Parameters& 
-Model::Parameters::operator = (const Parameters& np)
+MEAL::Parameters& 
+MEAL::Parameters::operator = (const Parameters& np)
 {
   if (&np == this)
     return *this;
 
   if (very_verbose)
-    cerr << "Model::Parameters::operator= nparam=" << get_nparam()
+    cerr << "MEAL::Parameters::operator= nparam=" << get_nparam()
          << " new nparam=" << np.get_nparam() << endl;
 
   bool nparam_changed = np.params.size() != params.size();
@@ -41,11 +42,11 @@ Model::Parameters::operator = (const Parameters& np)
 
 
 //! Set the value of the specified parameter
-void Model::Parameters::set_param (unsigned index, double value)
+void MEAL::Parameters::set_param (unsigned index, double value)
 {
-  range_check (index, "Model::Parameters::set_param");
+  range_check (index, "MEAL::Parameters::set_param");
   
-  if (very_verbose) cerr << "Model::Parameters::set_param "
+  if (very_verbose) cerr << "MEAL::Parameters::set_param "
 		 "(" << index << "," << value << ")" << endl;
   
   if (params[index].val == value)
@@ -56,10 +57,10 @@ void Model::Parameters::set_param (unsigned index, double value)
 }
 
 
-void Model::Parameters::resize (unsigned nparam)
+void MEAL::Parameters::resize (unsigned nparam)
 {
   if (very_verbose)
-    cerr << "Model::Parameters::resize " << nparam << endl;
+    cerr << "MEAL::Parameters::resize " << nparam << endl;
   
   unsigned current = params.size();
   params.resize (nparam);

@@ -1,17 +1,17 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Scalar.h,v $
-   $Revision: 1.2 $
-   $Date: 2004/11/22 16:00:09 $
+   $Revision: 1.3 $
+   $Date: 2004/11/22 19:26:04 $
    $Author: straten $ */
 
-#ifndef __Model_Scalar_H
-#define __Model_Scalar_H
+#ifndef __MEAL_Scalar_H
+#define __MEAL_Scalar_H
 
 #include <vector>
-#include "MEPL/EvaluationBehaviour.h"
+#include "MEAL/EvaluationBehaviour.h"
 
-namespace Model {
+namespace MEAL {
 
   //! Pure virtual base class of scalar functions
   /*! The Scalar class represents any scalar function with an
@@ -27,7 +27,7 @@ namespace Model {
     typedef double Result;
 
     //! Return the scalar value (and its gradient, if requested)
-    virtual double evaluate (vector<double>* grad=0) const = 0;
+    virtual double evaluate (std::vector<double>* grad=0) const = 0;
 
     //! Return the scalar value and its variance
     virtual void evaluate (Estimate<double>& value) const;

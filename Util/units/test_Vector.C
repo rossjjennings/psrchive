@@ -1,6 +1,8 @@
 #include "Vector.h"
 #include "random.h"
 
+using namespace std;
+
 int main ()
 {
   Vector<float, 3> v1;

@@ -1,21 +1,23 @@
-#include "MEPL/ScalarInverseTangent2.h"
+#include "MEAL/ScalarInverseTangent2.h"
 #include <math.h>
 
+using namespace std;
+
 //! Return the name of the class
-string Model::ScalarInverseTangent2::get_name () const
+string MEAL::ScalarInverseTangent2::get_name () const
 {
   return "ScalarInverseTangent2";
 }
 
 //! The function
-double Model::ScalarInverseTangent2::function (double arg1,
+double MEAL::ScalarInverseTangent2::function (double arg1,
 						     double arg2) const
 {
   return atan2 (arg1, arg2); 
 }
 
 //! The partial derivative with respect to arg1
-double Model::ScalarInverseTangent2::partial_arg1 (double arg1,
+double MEAL::ScalarInverseTangent2::partial_arg1 (double arg1,
 							 double arg2) const
 {
   double z = arg1/arg2;
@@ -25,7 +27,7 @@ double Model::ScalarInverseTangent2::partial_arg1 (double arg1,
 }
 
 //! The partial derivative with respect to arg2
-double Model::ScalarInverseTangent2::partial_arg2 (double arg1,
+double MEAL::ScalarInverseTangent2::partial_arg2 (double arg1,
 							 double arg2) const
 {
   double z = arg1/arg2;

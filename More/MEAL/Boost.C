@@ -1,24 +1,24 @@
-#include "MEPL/Boost.h"
+#include "MEAL/Boost.h"
 #include "Pauli.h"
 
-Model::Boost::Boost () : OptimizedComplex2 (3)
+MEAL::Boost::Boost () : OptimizedComplex2 (3)
 {
 }
 
-Model::Boost::Boost (const Vector<double, 3>& _axis) 
+MEAL::Boost::Boost (const Vector<double, 3>& _axis) 
   : OptimizedComplex2 (1)
 {
   set_axis (_axis);
 }
 
 //! Return the name of the class
-string Model::Boost::get_name () const
+std::string MEAL::Boost::get_name () const
 {
   return "Boost";
 }
 
 //! Return the name of the specified parameter
-string Model::Boost::get_param_name (unsigned index) const
+std::string MEAL::Boost::get_param_name (unsigned index) const
 {
   if (index == 0)
     return "boost";
@@ -26,7 +26,7 @@ string Model::Boost::get_param_name (unsigned index) const
     return "ERROR";
 }
 
-void Model::Boost::set_axis (const Vector<double, 3>& _axis)
+void MEAL::Boost::set_axis (const Vector<double, 3>& _axis)
 {
   double norm = _axis * _axis;
   axis = _axis / sqrt(norm);
@@ -35,7 +35,7 @@ void Model::Boost::set_axis (const Vector<double, 3>& _axis)
 }
 
 //! Get the unit-vector along which the boost occurs
-Vector<double, 3> Model::Boost::get_axis (double* beta) const
+Vector<double, 3> MEAL::Boost::get_axis (double* beta) const
 {
   if (get_nparam() == 1) {
     if (beta)
@@ -60,7 +60,7 @@ Vector<double, 3> Model::Boost::get_axis (double* beta) const
   }
 }
 
-void Model::Boost::set_beta (double beta)
+void MEAL::Boost::set_beta (double beta)
 {
   if (get_nparam() == 1)
     set_param (0, beta);
@@ -76,7 +76,7 @@ void Model::Boost::set_beta (double beta)
   }
 }
 
-double Model::Boost::get_beta () const
+double MEAL::Boost::get_beta () const
 {
   double beta;
   get_axis (&beta);
@@ -84,7 +84,7 @@ double Model::Boost::get_beta () const
 }
 
 
-void Model::Boost::free_axis ()
+void MEAL::Boost::free_axis ()
 {
   if (get_nparam() == 3)
     return;
@@ -98,8 +98,8 @@ void Model::Boost::free_axis ()
 }
 
 //! Calculate the Jones matrix and its gradient
-void Model::Boost::calculate (Jones<double>& result,
-				    vector<Jones<double> >* grad)
+void MEAL::Boost::calculate (Jones<double>& result,
+				    std::vector<Jones<double> >* grad)
 {
   if (get_nparam() == 1)
     calculate_beta (result, grad);
@@ -108,13 +108,13 @@ void Model::Boost::calculate (Jones<double>& result,
 }
 
 //! Return the Jones matrix and its gradient
-void Model::Boost::calculate_beta (Jones<double>& result,
-					 vector<Jones<double> >* grad)
+void MEAL::Boost::calculate_beta (Jones<double>& result,
+					 std::vector<Jones<double> >* grad)
 {
   double beta = get_param(0);
 
   if (verbose)
-    cerr << "Model::Boost::calculate axis=" << axis 
+    cerr << "MEAL::Boost::calculate axis=" << axis 
 	 << " beta=" << beta << endl;
 
   double sinh_beta = sinh (beta);
@@ -125,7 +125,7 @@ void Model::Boost::calculate_beta (Jones<double>& result,
     (*grad)[0] = convert (dboost_dbeta);
 
     if (verbose) {
-      cerr << "Model::Boost::calculate gradient" << endl;
+      cerr << "MEAL::Boost::calculate gradient" << endl;
       cerr << "   " << (*grad)[0] << endl;
     }
   }
@@ -137,15 +137,15 @@ void Model::Boost::calculate_beta (Jones<double>& result,
 
 
 
-void Model::Boost::calculate_Gibbs (Jones<double>& result, 
-					  vector<Jones<double> >* grad)
+void MEAL::Boost::calculate_Gibbs (Jones<double>& result, 
+					  std::vector<Jones<double> >* grad)
 {
   Vector<double, 3> Gibbs;
   for (unsigned i=0; i<3; i++)
     Gibbs[i] = get_param(i);
 
   if (verbose)
-    cerr << "Model::Boost::calculate Gibbs=" << Gibbs << endl;
+    cerr << "MEAL::Boost::calculate Gibbs=" << Gibbs << endl;
 
   // calculate the Boost component
   double norm_Gibbs = Gibbs * Gibbs;
@@ -176,7 +176,7 @@ void Model::Boost::calculate_Gibbs (Jones<double>& result,
     }
 
     if (verbose) {
-      cerr << "Model::Boost::calculate gradient" << endl;
+      cerr << "MEAL::Boost::calculate gradient" << endl;
       for (unsigned i=0; i<3; i++)
 	cerr << "   " << (*grad)[i] << endl;
     }

@@ -1,19 +1,21 @@
-#include "MEPL/Gaussian.h"
+#include "MEAL/Gaussian.h"
 
-Model::Gaussian::Gaussian ()
+using namespace std;
+
+MEAL::Gaussian::Gaussian ()
   : UnivariateOptimizedScalar (3)
 {
   cyclic = false;
 }
 
 //! Return the name of the class
-string Model::Gaussian::get_name () const
+string MEAL::Gaussian::get_name () const
 {
   return "Gaussian";
 }
 
 //! Return the name of the specified parameter
-string Model::Gaussian::get_param_name (unsigned index) const
+string MEAL::Gaussian::get_param_name (unsigned index) const
 {
   switch (index) {
   case 0:
@@ -28,55 +30,55 @@ string Model::Gaussian::get_param_name (unsigned index) const
 }
 
 //! Set the centre
-void Model::Gaussian::set_centre (double centre)
+void MEAL::Gaussian::set_centre (double centre)
 {
   set_param (0, centre);
 }
 
 //! Get the centre
-double Model::Gaussian::get_centre () const
+double MEAL::Gaussian::get_centre () const
 {
   return get_param (0);
 }
 
 //! Set the width
-void Model::Gaussian::set_width (double width)
+void MEAL::Gaussian::set_width (double width)
 {
   set_param (1, width);
 }
 
 //! Get the width
-double Model::Gaussian::get_width () const
+double MEAL::Gaussian::get_width () const
 {
   return get_param (1);
 }
 
 //! Set the height
-void Model::Gaussian::set_height (double height)
+void MEAL::Gaussian::set_height (double height)
 {
   set_param (2, height);
 }
 
 //! Get the height
-double Model::Gaussian::get_height () const
+double MEAL::Gaussian::get_height () const
 {
   return get_param (2);
 }
 
 //! Set the cyclic
-void Model::Gaussian::set_cyclic (bool _cyclic)
+void MEAL::Gaussian::set_cyclic (bool _cyclic)
 {
   cyclic = _cyclic;
 }
 
 //! Get the cyclic
-bool Model::Gaussian::get_cyclic () const
+bool MEAL::Gaussian::get_cyclic () const
 {
   return cyclic;
 }
 
 //! Return the value (and gradient, if requested) of the function
-void Model::Gaussian::calculate (double& result, vector<double>* grad)
+void MEAL::Gaussian::calculate (double& result, std::vector<double>* grad)
 {
   double centre   = get_centre ();
   double width    = get_width ();
@@ -132,10 +134,10 @@ void Model::Gaussian::calculate (double& result, vector<double>* grad)
   }
 
   if (verbose) {
-    cerr << "Model::Gaussian::calculate result\n"
+    cerr << "MEAL::Gaussian::calculate result\n"
 	 "   " << result << endl;
     if (grad) {
-      cerr << "Model::Gaussian::calculate gradient" << endl;
+      cerr << "MEAL::Gaussian::calculate gradient" << endl;
       for (unsigned i=0; i<grad->size(); i++)
 	cerr << "   " << i << ":" << get_infit(i) << "=" << (*grad)[i] << endl;
     }

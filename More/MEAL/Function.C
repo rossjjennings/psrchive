@@ -1,43 +1,43 @@
-#include "MEPL/Function.h"
+#include "MEAL/Function.h"
 
-bool Model::Function::verbose = false;
-bool Model::Function::very_verbose = false;
-bool Model::Function::check_zero = false;
-bool Model::Function::check_variance = false;
+bool MEAL::Function::verbose = false;
+bool MEAL::Function::very_verbose = false;
+bool MEAL::Function::check_zero = false;
+bool MEAL::Function::check_variance = false;
 
-Model::Function::Function ()
+MEAL::Function::Function ()
 {
 #ifdef _DEBUG
-  cerr << "Model::Function default constructor" << endl;
+  cerr << "MEAL::Function default constructor" << endl;
 #endif
   evaluation_changed = true;
 }
 
-Model::Function::Function (const Function& model)
+MEAL::Function::Function (const Function& model)
 {
 #ifdef _DEBUG
-  cerr << "Model::Function copy constructor" << endl;
+  cerr << "MEAL::Function copy constructor" << endl;
 #endif
   evaluation_changed = true;
 }
 
-Model::Function::~Function ()
+MEAL::Function::~Function ()
 {
 #ifdef _DEBUG
-  cerr << "Model::Function::~Function" << endl;
+  cerr << "MEAL::Function::~Function" << endl;
 #endif
 }
 
-Model::Function& Model::Function::operator = (const Function& model)
+MEAL::Function& MEAL::Function::operator = (const Function& model)
 {
   copy (&model);
   return *this;
 }
 
-void Model::Function::copy (const Function* model)
+void MEAL::Function::copy (const Function* model)
 {
 #ifdef _DEBUG
-  cerr << "Model::Function::copy" << endl;
+  cerr << "MEAL::Function::copy" << endl;
 #endif
 
   if (this == model)
@@ -46,7 +46,7 @@ void Model::Function::copy (const Function* model)
   unsigned nparam = get_nparam ();
 
   if (nparam != model->get_nparam())
-    throw Error (InvalidParam, "Model::Function::operator =",
+    throw Error (InvalidParam, "MEAL::Function::operator =",
 		 "nparam=%d != copy.nparam=%d", nparam, model->get_nparam());
 
   for (unsigned iparam=0; iparam<nparam; iparam++) {
@@ -63,12 +63,12 @@ void Model::Function::copy (const Function* model)
 }
 
 
-Estimate<double> Model::Function::get_Estimate (unsigned index) const
+Estimate<double> MEAL::Function::get_Estimate (unsigned index) const
 {
   return Estimate<double> ( get_param(index), get_variance(index) );
 }
 
-void Model::Function::set_Estimate (unsigned index,
+void MEAL::Function::set_Estimate (unsigned index,
 				       const Estimate<double>& estimate)
 {
   set_param( index, estimate.val );

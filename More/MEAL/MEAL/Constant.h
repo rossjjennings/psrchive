@@ -1,16 +1,16 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Constant.h,v $
-   $Revision: 1.1 $
-   $Date: 2004/11/22 16:00:09 $
+   $Revision: 1.2 $
+   $Date: 2004/11/22 19:26:03 $
    $Author: straten $ */
 
 #ifndef __Constant_H
 #define __Constant_H
 
-#include "MEPL/NoParameters.h"
+#include "MEAL/NoParameters.h"
 
-namespace Model {
+namespace MEAL {
 
   //! Represents a constant model with no parameters
   /*! The Constant primarily serves as an optimization convention.

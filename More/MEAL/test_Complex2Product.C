@@ -1,8 +1,10 @@
-#include "Calibration/ProductRule.h"
-#include "Calibration/Rotation.h"
-#include "Calibration/Boost.h"
+#include "MEAL/ProductRule.h"
+#include "MEAL/Rotation.h"
+#include "MEAL/Boost.h"
 
-//! Template class provides public access to Model::get_evaluation_changed
+using namespace std;
+
+//! Template class provides public access to MEAL::get_evaluation_changed
 template <class T>
 class Test : public T
 {
@@ -17,11 +19,11 @@ public:
 
 int main (int argc, char** argv)
 {
-  Calibration::Model::verbose = true;
+  MEAL::Function::verbose = true;
 
-  Test< Calibration::ProductRule<Calibration::Complex2> > meta;
+  Test< MEAL::ProductRule<MEAL::Complex2> > meta;
 
-  Test< Calibration::Rotation > rotation (Vector<double, 3>::basis(0));
+  Test< MEAL::Rotation > rotation (Vector<double, 3>::basis(0));
 
   meta.add_model (&rotation);
   if (!meta.get_changed()) {
@@ -30,7 +32,7 @@ int main (int argc, char** argv)
     return -1;
   }
 
-  Test< Calibration::Boost > boost (Vector<double, 3>::basis(2));
+  Test< MEAL::Boost > boost (Vector<double, 3>::basis(2));
 
   meta.add_model (&boost);
 
@@ -102,8 +104,8 @@ int main (int argc, char** argv)
 
   //
   // Here is the main trick: After rotation has been re-computed, its
-  // get_changed method will return false.  However, OptimizedModel
-  // has been modified to emit the Model::changed signal, which is now
+  // get_changed method will return false.  However, OptimizedFunction
+  // has been modified to emit the MEAL::changed signal, which is now
   // connected to Composite::set_changed (true).
   //
 

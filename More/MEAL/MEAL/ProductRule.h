@@ -1,16 +1,16 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/ProductRule.h,v $
-   $Revision: 1.2 $
-   $Date: 2004/11/22 16:00:09 $
+   $Revision: 1.3 $
+   $Date: 2004/11/22 19:26:04 $
    $Author: straten $ */
 
-#ifndef __Model_ProductRule_H
-#define __Model_ProductRule_H
+#ifndef __MEAL_ProductRule_H
+#define __MEAL_ProductRule_H
 
-#include "MEPL/GroupRule.h"
+#include "MEAL/GroupRule.h"
 
-namespace Model {
+namespace MEAL {
 
   //! Represents a product of models
   template<class MType>
@@ -31,8 +31,8 @@ namespace Model {
     // ///////////////////////////////////////////////////////////////////
 
     //! Return the name of the class
-    string get_name () const
-    { return "ProductRule<" + string(MType::Name)+ ">"; }
+    std::string get_name () const
+    { return "ProductRule<" + std::string(MType::Name)+ ">"; }
 
   protected:
     

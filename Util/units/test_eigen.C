@@ -1,6 +1,8 @@
 #include "MatrixTest.h"
 #include "Pauli.h"
 
+using namespace std;
+
 template <typename T> T sqr (T x) { return x*x; }
 
 template <typename T>

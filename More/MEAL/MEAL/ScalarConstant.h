@@ -1,17 +1,17 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/ScalarConstant.h,v $
-   $Revision: 1.2 $
-   $Date: 2004/11/22 16:00:09 $
+   $Revision: 1.3 $
+   $Date: 2004/11/22 19:26:04 $
    $Author: straten $ */
 
 #ifndef __ScalarConstant_H
 #define __ScalarConstant_H
 
-#include "MEPL/Constant.h"
-#include "MEPL/Scalar.h"
+#include "MEAL/Constant.h"
+#include "MEAL/Scalar.h"
 
-namespace Model {
+namespace MEAL {
 
   //! Represents a constant scalar value
   class ScalarConstant : public Constant, public Scalar {
@@ -37,7 +37,7 @@ namespace Model {
     // ///////////////////////////////////////////////////////////////////
 
     //! Return the name of the class
-    string get_name () const;
+    std::string get_name () const;
 
     // ///////////////////////////////////////////////////////////////////
     //
@@ -46,7 +46,7 @@ namespace Model {
     // ///////////////////////////////////////////////////////////////////
 
     //! Return the value
-    double evaluate (vector<double>* gradient=0) const;
+    double evaluate (std::vector<double>* gradient=0) const;
     
   protected:
 

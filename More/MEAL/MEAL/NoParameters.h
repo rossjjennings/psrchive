@@ -1,16 +1,16 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/NoParameters.h,v $
-   $Revision: 1.2 $
-   $Date: 2004/11/22 16:00:09 $
+   $Revision: 1.3 $
+   $Date: 2004/11/22 19:26:04 $
    $Author: straten $ */
 
 #ifndef __NoParameters_H
 #define __NoParameters_H
 
-#include "MEPL/ParameterBehaviour.h"
+#include "MEAL/ParameterBehaviour.h"
 
-namespace Model {
+namespace MEAL {
 
   //! Represents a model with no parameters
   class NoParameters : public ParameterBehaviour {
@@ -27,7 +27,7 @@ namespace Model {
     unsigned get_nparam () const { return 0; }
 
     //! Return the name of the specified parameter
-    string get_param_name (unsigned index) const { return ""; }
+    std::string get_param_name (unsigned index) const { return ""; }
 
     //! Return the value of the specified parameter
     double get_param (unsigned index) const { return 0.0; }

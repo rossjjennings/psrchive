@@ -1,16 +1,16 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Tracer.h,v $
-   $Revision: 1.2 $
-   $Date: 2004/11/22 16:00:09 $
+   $Revision: 1.3 $
+   $Date: 2004/11/22 19:26:04 $
    $Author: straten $ */
 
-#ifndef __Model_Tracer_H
-#define __Model_Tracer_H
+#ifndef __MEAL_Tracer_H
+#define __MEAL_Tracer_H
 
-#include "MEPL/Function.h"
+#include "MEAL/Function.h"
 
-namespace Model {
+namespace MEAL {
 
   //! This class provides verbose output of changes to a single parameter
   class Tracer : public Reference::Able {

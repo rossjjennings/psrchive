@@ -1,6 +1,8 @@
 #include "Basis.h"
 #include <iostream>
 
+using namespace std;
+
 int main ()
 {
   Basis<double> basis1;

@@ -1,17 +1,17 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/UnaryScalar.h,v $
-   $Revision: 1.2 $
-   $Date: 2004/11/22 16:00:09 $
+   $Revision: 1.3 $
+   $Date: 2004/11/22 19:26:04 $
    $Author: straten $ */
 
-#ifndef __Model_UnaryScalar_H
-#define __Model_UnaryScalar_H
+#ifndef __MEAL_UnaryScalar_H
+#define __MEAL_UnaryScalar_H
 
-#include "MEPL/UnaryRule.h"
-#include "MEPL/Scalar.h"
+#include "MEAL/UnaryRule.h"
+#include "MEAL/Scalar.h"
 
-namespace Model {
+namespace MEAL {
 
   //! Abstract base class of unary functions of another Scalar function
   /*! The partial derivatives are calculated using the chain rule. */
@@ -35,7 +35,7 @@ namespace Model {
     // ///////////////////////////////////////////////////////////////////
 
     //! Return the result and its gradient
-    void calculate (double& result, vector<double>* gradient);
+    void calculate (double& result, std::vector<double>* gradient);
 
   };
 

@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Projection.h,v $
-   $Revision: 1.2 $
-   $Date: 2004/11/22 16:00:09 $
+   $Revision: 1.3 $
+   $Date: 2004/11/22 19:26:04 $
    $Author: straten $ */
 
 #ifndef __Projection_H
@@ -10,7 +10,7 @@
 
 #include "Reference.h"
 
-namespace Model {
+namespace MEAL {
 
   class Function;
 
@@ -38,7 +38,7 @@ namespace Model {
     Reference::To<Function> model;
 
     //! The parameter index mapping into Composite
-    vector<unsigned> imap;
+    std::vector<unsigned> imap;
 
     //! The Composite into which the model is mapped
     Reference::To<Composite, false> meta;

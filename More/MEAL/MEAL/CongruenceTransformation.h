@@ -1,18 +1,18 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/CongruenceTransformation.h,v $
-   $Revision: 1.2 $
-   $Date: 2004/11/22 16:00:08 $
+   $Revision: 1.3 $
+   $Date: 2004/11/22 19:26:03 $
    $Author: straten $ */
 
-#ifndef __Model_CongruenceTransformation_H
-#define __Model_CongruenceTransformation_H
+#ifndef __MEAL_CongruenceTransformation_H
+#define __MEAL_CongruenceTransformation_H
 
-#include "MEPL/Optimized.h"
-#include "MEPL/Composite.h"
-#include "MEPL/Complex2.h"
+#include "MEAL/Optimized.h"
+#include "MEAL/Composite.h"
+#include "MEAL/Complex2.h"
 
-namespace Model {
+namespace MEAL {
 
   //! Functions the congruence transformation, \f$\rho^prime=J\rho J^\dagger\f$.
   /*! This class models the transformation of the matrix, \f$ \rho \f$ by
@@ -50,7 +50,7 @@ namespace Model {
     // ///////////////////////////////////////////////////////////////////
 
     //! Returns \f$ \rho^\prime \f$ and its gradient
-    void calculate (Jones<double>& result, vector<Jones<double> >* grad = 0);
+    void calculate (Jones<double>& result, std::vector<Jones<double> >* grad = 0);
 
   protected:
 

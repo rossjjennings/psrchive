@@ -1,5 +1,7 @@
 #include <iostream>
 
+using namespace std;
+
 #include "Callback.h"
 
 // A class "klass" must inherit the Reference::Able base class

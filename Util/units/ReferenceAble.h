@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/ReferenceAble.h,v $
-   $Revision: 1.1 $
-   $Date: 2004/11/22 09:31:49 $
+   $Revision: 1.2 $
+   $Date: 2004/11/22 19:26:04 $
    $Author: straten $ */
 
 #ifndef __ReferenceAble_h
@@ -36,14 +36,14 @@ namespace Reference {
   public:
 
 #if _DEBUG
-    static vector<Able*> null_ables();
+    static std::vector<Able*> null_ables();
 
     //! Counts how many Reference::Able's are in existence
     static int instantiation_count;
     //! How many Able's have ever been in existence
     static int full_count;
     //! Stores pointers to every Able that has ever been in existence
-    static vector<Able*> ables;
+    static std::vector<Able*> ables;
 #endif
 
     //! Default constructor
@@ -73,7 +73,7 @@ namespace Reference {
   private:
 
     //! Addresses of all references to this instance
-    vector <Able**> __reference_list;
+    std::vector <Able**> __reference_list;
 
     //! Count of active references to this instance
     unsigned __reference_count;

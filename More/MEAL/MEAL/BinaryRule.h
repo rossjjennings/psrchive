@@ -1,17 +1,17 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/BinaryRule.h,v $
-   $Revision: 1.2 $
-   $Date: 2004/11/22 16:00:08 $
+   $Revision: 1.3 $
+   $Date: 2004/11/22 19:26:03 $
    $Author: straten $ */
 
-#ifndef __Model_BinaryRule_H
-#define __Model_BinaryRule_H
+#ifndef __MEAL_BinaryRule_H
+#define __MEAL_BinaryRule_H
 
-#include "MEPL/Optimized.h"
-#include "MEPL/Composite.h"
+#include "MEAL/Optimized.h"
+#include "MEAL/Composite.h"
 
-namespace Model {
+namespace MEAL {
 
   //! Abstract base class of binary operators
   template<class MType>
@@ -51,8 +51,8 @@ namespace Model {
 }
 
 template<class MType>
-Model::BinaryRule<MType>&
-Model::BinaryRule<MType>::operator = (const BinaryRule& rule)
+MEAL::BinaryRule<MType>&
+MEAL::BinaryRule<MType>::operator = (const BinaryRule& rule)
 {
   if (this == &rule)
     return *this;
@@ -65,7 +65,7 @@ Model::BinaryRule<MType>::operator = (const BinaryRule& rule)
 
 
 template<class MType>
-void Model::BinaryRule<MType>::set_arg1 (MType* model)
+void MEAL::BinaryRule<MType>::set_arg1 (MType* model)
 {
   if (arg1)
     unmap (arg1, false);
@@ -76,13 +76,13 @@ void Model::BinaryRule<MType>::set_arg1 (MType* model)
     return;
 
   if (verbose)
-    cerr << "Model::BinaryRule::set_model map new model" << endl;
+    std::cerr << "MEAL::BinaryRule::set_model map new model" << std::endl;
 
   map (arg1);
 }
 
 template<class MType>
-void Model::BinaryRule<MType>::set_arg2 (MType* model)
+void MEAL::BinaryRule<MType>::set_arg2 (MType* model)
 {
   if (arg2)
     unmap (arg2, false);
@@ -93,7 +93,7 @@ void Model::BinaryRule<MType>::set_arg2 (MType* model)
     return;
 
   if (verbose)
-    cerr << "Model::BinaryRule::set_model map new model" << endl;
+    std::cerr << "MEAL::BinaryRule::set_model map new model" << std::endl;
 
   map (arg2);
 }

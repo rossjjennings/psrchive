@@ -1,17 +1,17 @@
-#include "MEPL/Argument.h"
+#include "MEAL/Argument.h"
 
-bool Model::Argument::verbose = false;
+bool MEAL::Argument::verbose = false;
 
-Model::Argument::~Argument ()
+MEAL::Argument::~Argument ()
 {
 #ifdef _DEBUG
-  cerr << "Model::Argument::~Argument" << endl;
+  cerr << "MEAL::Argument::~Argument" << endl;
 #endif
 }
 
-Model::Argument::Value::~Value ()
+MEAL::Argument::Value::~Value ()
 {
 #ifdef _DEBUG
-  cerr << "Model::Argument::Value::~Value" << endl;
+  cerr << "MEAL::Argument::Value::~Value" << endl;
 #endif
 }

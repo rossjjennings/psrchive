@@ -1,10 +1,12 @@
-#include "MEPL/ScalarRoot.h"
+#include "MEAL/ScalarRoot.h"
 #include <math.h>
+
+using namespace std;
 
 //
 //
 //
-string Model::ScalarRoot::get_name () const
+string MEAL::ScalarRoot::get_name () const
 {
   return "ScalarRoot";
 }
@@ -12,7 +14,7 @@ string Model::ScalarRoot::get_name () const
 //
 //
 //
-double Model::ScalarRoot::function (double x) const
+double MEAL::ScalarRoot::function (double x) const
 {
   return sqrt(x); 
 }
@@ -20,7 +22,7 @@ double Model::ScalarRoot::function (double x) const
 //
 //
 //
-double Model::ScalarRoot::dfdx (double x) const
+double MEAL::ScalarRoot::dfdx (double x) const
 { 
   return 0.5/sqrt(x);
 }

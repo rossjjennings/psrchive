@@ -1,40 +1,40 @@
-#include "MEPL/Complex2Math.h"
+#include "MEAL/Complex2Math.h"
 
-#include "MEPL/SumRule.h"
-#include "MEPL/NegationRule.h"
-#include "MEPL/ProductRule.h"
-#include "MEPL/InverseRule.h"
-#include "MEPL/ChainRule.h"
-#include "MEPL/RuleMath.h"
+#include "MEAL/SumRule.h"
+#include "MEAL/NegationRule.h"
+#include "MEAL/ProductRule.h"
+#include "MEAL/InverseRule.h"
+#include "MEAL/ChainRule.h"
+#include "MEAL/RuleMath.h"
 
 //! Return a reference to a new SumRule instance representing a+b
-Reference::To<Model::Complex2>
-operator + (const Reference::To<Model::Complex2>& a,
-	    const Reference::To<Model::Complex2>& b)
+Reference::To<MEAL::Complex2>
+operator + (const Reference::To<MEAL::Complex2>& a,
+	    const Reference::To<MEAL::Complex2>& b)
 {
-  return Model::Sum<Model::Complex2> (a, b);
+  return MEAL::Sum<MEAL::Complex2> (a, b);
 }
 
 //! Return a reference to a new SumRule instance representing a-b
-Reference::To<Model::Complex2>
-operator - (const Reference::To<Model::Complex2>& a,
-	    const Reference::To<Model::Complex2>& b)
+Reference::To<MEAL::Complex2>
+operator - (const Reference::To<MEAL::Complex2>& a,
+	    const Reference::To<MEAL::Complex2>& b)
 {
-  return Model::Difference<Model::Complex2> (a, b);
+  return MEAL::Difference<MEAL::Complex2> (a, b);
 }
 
 //! Return a reference to a new ProductRule instance representing a*b
-Reference::To<Model::Complex2>
-operator * (const Reference::To<Model::Complex2>& a,
-	    const Reference::To<Model::Complex2>& b)
+Reference::To<MEAL::Complex2>
+operator * (const Reference::To<MEAL::Complex2>& a,
+	    const Reference::To<MEAL::Complex2>& b)
 {
-  return Model::Product<Model::Complex2> (a, b);
+  return MEAL::Product<MEAL::Complex2> (a, b);
 }
 
 //! Return a reference to a new ProductRule instance representing a/b
-Reference::To<Model::Complex2>
-operator / (const Reference::To<Model::Complex2>& a,
-	    const Reference::To<Model::Complex2>& b)
+Reference::To<MEAL::Complex2>
+operator / (const Reference::To<MEAL::Complex2>& a,
+	    const Reference::To<MEAL::Complex2>& b)
 {
-  return Model::Quotient<Model::Complex2> (a, b);
+  return MEAL::Quotient<MEAL::Complex2> (a, b);
 }

@@ -1,17 +1,17 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Agent.h,v $
-   $Revision: 1.2 $
-   $Date: 2004/11/22 16:00:08 $
+   $Revision: 1.3 $
+   $Date: 2004/11/22 19:26:03 $
    $Author: straten $ */
 
-#ifndef __Model_Agent_H
-#define __Model_Agent_H
+#ifndef __MEAL_Agent_H
+#define __MEAL_Agent_H
 
 #include "Registry.h"
 #include "Reference.h"
 
-namespace Model {
+namespace MEAL {
 
   class Function;
 

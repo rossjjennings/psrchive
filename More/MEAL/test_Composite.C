@@ -2,7 +2,9 @@
 #include "Rotation.h"
 #include "Boost.h"
 
-using namespace Calibration;
+using namespace std;
+
+using namespace MEAL;
 
 //! Tests the mapping function of the Composite class
 class CompositeTest: public Composite {
@@ -67,7 +69,7 @@ void CompositeTest::runtest ()
 
 int main (int argc, char** argv) try
 {
-  Model::verbose = true;
+  Function::verbose = true;
   CompositeTest test;
 
   test.runtest ();

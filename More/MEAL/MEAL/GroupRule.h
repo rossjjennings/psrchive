@@ -1,19 +1,19 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/GroupRule.h,v $
-   $Revision: 1.2 $
-   $Date: 2004/11/22 16:00:09 $
+   $Revision: 1.3 $
+   $Date: 2004/11/22 19:26:04 $
    $Author: straten $ */
 
 #ifndef __GroupRule_H
 #define __GroupRule_H
 
-#include "MEPL/ProjectGradient.h"
-#include "MEPL/Optimized.h"
-#include "MEPL/Composite.h"
+#include "MEAL/ProjectGradient.h"
+#include "MEAL/Optimized.h"
+#include "MEAL/Composite.h"
 #include "stringtok.h"
 
-namespace Model {
+namespace MEAL {
 
   //! Abstract base class of closed, associative, binary operators
   /*! Because the binary operation is associative, this class is
@@ -53,7 +53,7 @@ namespace Model {
     // ///////////////////////////////////////////////////////////////////
 
     //! Parse the values of model parameters and fit flags from a string
-    void parse (const string& text);
+    void parse (const std::string& text);
 
     // ///////////////////////////////////////////////////////////////////
     //
@@ -62,7 +62,7 @@ namespace Model {
     // ///////////////////////////////////////////////////////////////////
 
     //! Return the result and its gradient
-    void calculate (Result& result, vector<Result>* grad);
+    void calculate (Result& result, std::vector<Result>* grad);
 
     // ///////////////////////////////////////////////////////////////////
     //
@@ -70,8 +70,8 @@ namespace Model {
     //
     // ///////////////////////////////////////////////////////////////////
 
-    string class_name() const
-    { return "Model::GroupRule[" + get_name() + "]::"; }
+    std::string class_name() const
+    { return "MEAL::GroupRule[" + get_name() + "]::"; }
 
   protected:
 
@@ -82,7 +82,7 @@ namespace Model {
     // ///////////////////////////////////////////////////////////////////
 
     //! Prints the values of model parameters and fit flags to a string
-    void print_parameters (string& text, const string& sep) const;
+    void print_parameters (std::string& text, const std::string& sep) const;
 
     //! Return the group identity
     virtual const Result get_identity () const = 0;
@@ -96,13 +96,13 @@ namespace Model {
   private:
 
     //! The models and their mappings
-    vector< Project<MType> > model;
+    std::vector< Project<MType> > model;
 
     //! The result
     Result result;
 
     //! The gradient
-    vector<Result> gradient;
+    std::vector<Result> gradient;
 
     //! Initialize the result and gradient attributes
     void initialize ();
@@ -113,8 +113,8 @@ namespace Model {
 
 
 template<class MType>
-Model::GroupRule<MType>&
-Model::GroupRule<MType>:: operator = (const GroupRule& meta)
+MEAL::GroupRule<MType>&
+MEAL::GroupRule<MType>:: operator = (const GroupRule& meta)
 {
   if (this == &meta)
     return *this;
@@ -129,8 +129,8 @@ Model::GroupRule<MType>:: operator = (const GroupRule& meta)
 }
 
 template<class MType>
-void Model::GroupRule<MType>::print_parameters (string& text,
-                                                      const string& sep) const
+void MEAL::GroupRule<MType>::print_parameters (std::string& text,
+                                               const std::string& sep) const
 {
   unsigned nmodel = model.size();
   for (unsigned imodel=0; imodel < nmodel; imodel++) {
@@ -140,7 +140,7 @@ void Model::GroupRule<MType>::print_parameters (string& text,
 }
 
 template<class MType>
-void Model::GroupRule<MType>::parse (const string& line)
+void MEAL::GroupRule<MType>::parse (const std::string& line)
 {
   if (model.size()) try {
     model.back()->parse(line);
@@ -150,34 +150,35 @@ void Model::GroupRule<MType>::parse (const string& line)
   }
 
   // the key should be the name of a new class to be added
-  string temp = line;
-  string key = stringtok (temp, " \t");
+  std::string temp = line;
+  std::string key = stringtok (temp, " \t");
 
   if (verbose)
-    cerr << class_name() << "::parse key '" << key << "'" << endl;
+    std::cerr << class_name() << "::parse key '" << key << "'" << std::endl;
 
   Function* model = Function::new_Function (key);
 
   MType* mtype = dynamic_cast<MType*>(model);
   if (!mtype)
     throw Error (InvalidParam, get_name()+"::parse",
-		 model->get_name() + " is not of type " + string(MType::Name));
+		 model->get_name() + " is not of type " + 
+                 std::string(MType::Name));
 
   add_model (mtype);
 }
 
 template<class MType>
-void Model::GroupRule<MType>::add_model (MType* x)
+void MEAL::GroupRule<MType>::add_model (MType* x)
 {
   if (very_verbose)
-    cerr << class_name() + "add_model" << endl;
+    std::cerr << class_name() + "add_model" << std::endl;
 
   model.push_back (Project<MType>(x));
   map (model.back());
 }
 
 template<class MType>
-void Model::GroupRule<MType>::initialize ()
+void MEAL::GroupRule<MType>::initialize ()
 {
   result = get_identity();
 
@@ -186,22 +187,22 @@ void Model::GroupRule<MType>::initialize ()
 }
 
 template<class MType>
-void Model::GroupRule<MType>::calculate (Result& retval,
-					       vector<Result>* grad)
+void MEAL::GroupRule<MType>::calculate (Result& retval,
+					       std::vector<Result>* grad)
 {
   unsigned nmodel = model.size();
 
   if (very_verbose)
-    cerr << class_name() + "calculate nmodel=" << nmodel << endl;
+    std::cerr << class_name() + "calculate nmodel=" << nmodel << std::endl;
 
   // the result of each component
   Result comp_result;
 
   // the gradient of each component
-  vector<Result> comp_gradient;
+  std::vector<Result> comp_gradient;
 
   // the pointer to the above array, if grad != 0
-  vector<Result>* comp_gradient_ptr = 0;
+  std::vector<Result>* comp_gradient_ptr = 0;
   
   unsigned total_nparam = 0;
 
@@ -222,8 +223,8 @@ void Model::GroupRule<MType>::calculate (Result& retval,
 
   for (unsigned imodel=0; imodel < nmodel; imodel++) {
 
-    if (very_verbose) cerr << class_name() + "calculate evaluate " 
-			   << model[imodel]->get_name() << endl;
+    if (very_verbose) std::cerr << class_name() + "calculate evaluate " 
+			   << model[imodel]->get_name() << std::endl;
 
     try {
 
@@ -289,11 +290,11 @@ void Model::GroupRule<MType>::calculate (Result& retval,
   }
 
   if (very_verbose) {
-    cerr << class_name() + "calculate result\n   " << retval << endl;
+    std::cerr << class_name() + "calculate result\n   " << retval << std::endl;
     if (grad) {
-      cerr << class_name() + "calculate gradient" << endl;
+      std::cerr << class_name() + "calculate gradient" << std::endl;
       for (unsigned i=0; i<grad->size(); i++)
-	cerr << "   " << i << ":" << get_infit(i) << "=" << (*grad)[i] << endl;
+	std::cerr << "   " << i << ":" << get_infit(i) << "=" << (*grad)[i] << std::endl;
     }
   }
 }

@@ -1,22 +1,24 @@
-#include "MEPL/Tracer.h"
-#include "MEPL/Function.h"
+#include "MEAL/Tracer.h"
+#include "MEAL/Function.h"
 
-Model::Tracer::Tracer (Function* _model, unsigned param)
+using namespace std;
+
+MEAL::Tracer::Tracer (Function* _model, unsigned param)
 {
   if (_model)
     watch (_model, param);
 }
 
-Model::Tracer::~Tracer ()
+MEAL::Tracer::~Tracer ()
 {
   if (Function::verbose)
-    cerr << "Model::Tracer::~Tracer" << endl;
+    cerr << "MEAL::Tracer::~Tracer" << endl;
 
   if (model)
     model->changed.disconnect (this, &Tracer::attribute_changed);
 }
 
-void Model::Tracer::watch (Function* _model, unsigned param) try {
+void MEAL::Tracer::watch (Function* _model, unsigned param) try {
 
   if (model)
     model->changed.disconnect (this, &Tracer::attribute_changed);
@@ -32,14 +34,14 @@ void Model::Tracer::watch (Function* _model, unsigned param) try {
 
 }
 catch (Error& error) {
-  throw error += "Model::Tracer::watch";
+  throw error += "MEAL::Tracer::watch";
 }
 
-//! Method called when a Model attribute has changed
-void Model::Tracer::attribute_changed (Function::Attribute attribute) try {
+//! Method called when a Function attribute has changed
+void MEAL::Tracer::attribute_changed (Function::Attribute attribute) try {
 
   if (!model)
-    throw Error (InvalidState, "Model::Tracer::attribute_changed",
+    throw Error (InvalidState, "MEAL::Tracer::attribute_changed",
 		 "method called with no model being watched");
 
   double latest = model->get_param (parameter);
@@ -50,17 +52,17 @@ void Model::Tracer::attribute_changed (Function::Attribute attribute) try {
   current_value = latest;
 }
 catch (Error& error) {
-  throw error += "Model::Tracer::attribute_changed";
+  throw error += "MEAL::Tracer::attribute_changed";
 }
 
-void Model::Tracer::report () try  {
+void MEAL::Tracer::report () try  {
 
-  cerr << "Model::Tracer " << model->get_name() << " "
+  cerr << "MEAL::Tracer " << model->get_name() << " "
        << model->get_param_name(parameter) << " " 
        << model->get_param(parameter) << endl;
 
 }
 catch (Error& error) {
-  throw error += "Model::Tracer::report";
+  throw error += "MEAL::Tracer::report";
 }
 

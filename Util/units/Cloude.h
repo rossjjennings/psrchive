@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Cloude.h,v $
-   $Revision: 1.2 $
-   $Date: 2004/05/03 10:46:08 $
+   $Revision: 1.3 $
+   $Date: 2004/11/22 19:26:03 $
    $Author: straten $ */
 
 #ifndef __Cloude_H
@@ -19,14 +19,14 @@
    Optik, 75(1), 26-36
 */
 template<typename T>
-Matrix<complex<T>,4,4> coherence (const Jones<T>& jones)
+Matrix<std::complex<T>,4,4> coherence (const Jones<T>& jones)
 {
   // form the Hermitian biquaternion (Eq. 4.6)
-  Quaternion<complex<T>,Hermitian> q = convert(jones);
+  Quaternion<std::complex<T>,Hermitian> q = convert(jones);
 
   // convert to the equivalent complex vector and its Hermitian transpose
-  Vector<complex<T>,4> vect;
-  Vector<complex<T>,4> herm;
+  Vector<std::complex<T>,4> vect;
+  Vector<std::complex<T>,4> herm;
 
   for (unsigned i=0; i<4; i++) {
     vect[i] = q[i];
@@ -42,9 +42,9 @@ Matrix<complex<T>,4,4> coherence (const Jones<T>& jones)
    given by the hermitian transpose of the right (column)
    eigenvector. */
 template<typename T>
-Jones<T> system (const Vector<complex<T>,4>& left_eigen)
+Jones<T> system (const Vector<std::complex<T>,4>& left_eigen)
 {
-  Quaternion<complex<T>,Hermitian> q;
+  Quaternion<std::complex<T>,Hermitian> q;
   
   for (unsigned idim=0; idim<4; idim++)
     q[idim] = conj( left_eigen[idim] );

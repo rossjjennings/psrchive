@@ -1,53 +1,53 @@
-#include "MEPL/ScalarMath.h"
-#include "MEPL/ScalarValue.h"
-#include "MEPL/ScalarRoot.h"
-#include "MEPL/ScalarSine.h"
-#include "MEPL/ScalarCosine.h"
-#include "MEPL/ScalarTangent.h"
-#include "MEPL/ScalarHypSine.h"
-#include "MEPL/ScalarHypCosine.h"
-#include "MEPL/ScalarHypTangent.h"
-#include "MEPL/ScalarExponential.h"
-#include "MEPL/ScalarLogarithm.h"
-#include "MEPL/ScalarAbsolute.h"
-#include "MEPL/ScalarInverseHypTangent.h"
-#include "MEPL/ScalarInverseTangent2.h"
-#include "MEPL/ScalarPower.h"
+#include "MEAL/ScalarMath.h"
+#include "MEAL/ScalarValue.h"
+#include "MEAL/ScalarRoot.h"
+#include "MEAL/ScalarSine.h"
+#include "MEAL/ScalarCosine.h"
+#include "MEAL/ScalarTangent.h"
+#include "MEAL/ScalarHypSine.h"
+#include "MEAL/ScalarHypCosine.h"
+#include "MEAL/ScalarHypTangent.h"
+#include "MEAL/ScalarExponential.h"
+#include "MEAL/ScalarLogarithm.h"
+#include "MEAL/ScalarAbsolute.h"
+#include "MEAL/ScalarInverseHypTangent.h"
+#include "MEAL/ScalarInverseTangent2.h"
+#include "MEAL/ScalarPower.h"
 
-#include "MEPL/SumRule.h"
-#include "MEPL/NegationRule.h"
-#include "MEPL/ProductRule.h"
-#include "MEPL/InverseRule.h"
-#include "MEPL/ChainRule.h"
-#include "MEPL/RuleMath.h"
+#include "MEAL/SumRule.h"
+#include "MEAL/NegationRule.h"
+#include "MEAL/ProductRule.h"
+#include "MEAL/InverseRule.h"
+#include "MEAL/ChainRule.h"
+#include "MEAL/RuleMath.h"
 
-Model::ScalarMath::ScalarMath (const Estimate<double>& value)
+MEAL::ScalarMath::ScalarMath (const Estimate<double>& value)
 {
   expression = new ScalarValue (value);
 }
     
-Model::ScalarMath::ScalarMath (double value)
+MEAL::ScalarMath::ScalarMath (double value)
 {
   expression = new ScalarValue (value);
 }
 
-Model::ScalarMath::ScalarMath (const ScalarMath& s)
+MEAL::ScalarMath::ScalarMath (const ScalarMath& s)
 {
   expression = s.expression;
 }
 
-Model::ScalarMath::ScalarMath (const Reference::To<Scalar>& s)
+MEAL::ScalarMath::ScalarMath (const Reference::To<Scalar>& s)
 {
   expression = s;
 }
 
-Model::ScalarMath::ScalarMath (Scalar& s)
+MEAL::ScalarMath::ScalarMath (Scalar& s)
 {
   expression = &s;
 }
 
-const Model::ScalarMath 
-Model::ScalarMath::operator = (const ScalarMath& s)
+const MEAL::ScalarMath 
+MEAL::ScalarMath::operator = (const ScalarMath& s)
 {
   if (&s != this)
     expression = s.expression;
@@ -55,26 +55,26 @@ Model::ScalarMath::operator = (const ScalarMath& s)
   return *this;
 }
  
-const Model::ScalarMath
-Model::ScalarMath::operator += (const ScalarMath& b)
+const MEAL::ScalarMath
+MEAL::ScalarMath::operator += (const ScalarMath& b)
 {
   return operator = (*this + b);
 }
 
-const Model::ScalarMath
-Model::ScalarMath::operator -= (const ScalarMath& b)
+const MEAL::ScalarMath
+MEAL::ScalarMath::operator -= (const ScalarMath& b)
 {
   return operator = (*this - b);
 }
     
-const Model::ScalarMath
-Model::ScalarMath::operator *= (const ScalarMath& b)
+const MEAL::ScalarMath
+MEAL::ScalarMath::operator *= (const ScalarMath& b)
 {
   return operator = (*this * b);
 }
     
-const Model::ScalarMath
-Model::ScalarMath::operator /= (const ScalarMath& b)
+const MEAL::ScalarMath
+MEAL::ScalarMath::operator /= (const ScalarMath& b)
 {
   return operator = (*this / b);
 }
@@ -82,58 +82,58 @@ Model::ScalarMath::operator /= (const ScalarMath& b)
 
 inline double inv (double x) { return 1.0/x; }
 
-const Model::ScalarMath
-Model::operator + (const ScalarMath& a, const ScalarMath& b)
+const MEAL::ScalarMath
+MEAL::operator + (const ScalarMath& a, const ScalarMath& b)
 {
   return *Sum<Scalar> (a.expression, b.expression);
 }
 
-const Model::ScalarMath
-Model::operator - (const ScalarMath& a, const ScalarMath& b)
+const MEAL::ScalarMath
+MEAL::operator - (const ScalarMath& a, const ScalarMath& b)
 {
   return *Difference<Scalar> (a.expression, b.expression);
 }
 
-const Model::ScalarMath
-Model::operator * (const ScalarMath& a, const ScalarMath& b)
+const MEAL::ScalarMath
+MEAL::operator * (const ScalarMath& a, const ScalarMath& b)
 {
   return *Product<Scalar> (a.expression, b.expression);
 }
 
-const Model::ScalarMath
-Model::operator / (const ScalarMath& a, const ScalarMath& b)
+const MEAL::ScalarMath
+MEAL::operator / (const ScalarMath& a, const ScalarMath& b)
 {
   return *Quotient<Scalar> (a.expression, b.expression);
 }
 
-const Model::ScalarMath
-Model::operator - (const ScalarMath& a)
+const MEAL::ScalarMath
+MEAL::operator - (const ScalarMath& a)
 {
   return *Negation<Scalar> (a.expression);
 }
 
-bool Model::operator == (const ScalarMath& a, const ScalarMath& b)
+bool MEAL::operator == (const ScalarMath& a, const ScalarMath& b)
 {
   return a.evaluate() == b.evaluate();
 }
 
-bool Model::operator != (const ScalarMath& a, const ScalarMath& b)
+bool MEAL::operator != (const ScalarMath& a, const ScalarMath& b)
 {
   return a.evaluate() != b.evaluate();
 }
 
-bool Model::operator < (const ScalarMath& a, const ScalarMath& b)
+bool MEAL::operator < (const ScalarMath& a, const ScalarMath& b)
 {
   return a.evaluate() < b.evaluate();
 }
 
-bool Model::operator > (const ScalarMath& a, const ScalarMath& b)
+bool MEAL::operator > (const ScalarMath& a, const ScalarMath& b)
 {
   return a.evaluate() > b.evaluate();
 }
 
-const Model::ScalarMath
-Model::sqrt (const ScalarMath& x)
+const MEAL::ScalarMath
+MEAL::sqrt (const ScalarMath& x)
 {
   ScalarRoot* result = new ScalarRoot;
   result->set_model( x.expression );
@@ -141,88 +141,88 @@ Model::sqrt (const ScalarMath& x)
 }
 
 
-const Model::ScalarMath
-Model::sin (const ScalarMath& x)
+const MEAL::ScalarMath
+MEAL::sin (const ScalarMath& x)
 {
   ScalarSine* result = new ScalarSine;
   result->set_model( x.expression );
   return *result;
 }
 
-const Model::ScalarMath
-Model::cos (const ScalarMath& x)
+const MEAL::ScalarMath
+MEAL::cos (const ScalarMath& x)
 {
   ScalarCosine* result = new ScalarCosine;
   result->set_model( x.expression );
   return *result;
 }
 
-const Model::ScalarMath
-Model::tan (const ScalarMath& x)
+const MEAL::ScalarMath
+MEAL::tan (const ScalarMath& x)
 {
   ScalarTangent* result = new ScalarTangent;
   result->set_model( x.expression );
   return *result;
 }
 
-const Model::ScalarMath
-Model::sinh (const ScalarMath& x)
+const MEAL::ScalarMath
+MEAL::sinh (const ScalarMath& x)
 {
   ScalarHypSine* result = new ScalarHypSine;
   result->set_model( x.expression );
   return *result;
 }
 
-const Model::ScalarMath
-Model::cosh (const ScalarMath& x)
+const MEAL::ScalarMath
+MEAL::cosh (const ScalarMath& x)
 {
   ScalarHypCosine* result = new ScalarHypCosine;
   result->set_model( x.expression );
   return *result;
 }
 
-const Model::ScalarMath
-Model::tanh (const ScalarMath& x)
+const MEAL::ScalarMath
+MEAL::tanh (const ScalarMath& x)
 {
   ScalarHypTangent* result = new ScalarHypTangent;
   result->set_model( x.expression );
   return *result;
 }
 
-const Model::ScalarMath
-Model::abs (const ScalarMath& x)
+const MEAL::ScalarMath
+MEAL::abs (const ScalarMath& x)
 {
   ScalarAbsolute* result = new ScalarAbsolute;
   result->set_model( x.expression );
   return *result;
 }
 
-const Model::ScalarMath
-Model::exp (const ScalarMath& x)
+const MEAL::ScalarMath
+MEAL::exp (const ScalarMath& x)
 {
   ScalarExponential* result = new ScalarExponential;
   result->set_model( x.expression );
   return *result;
 }
 
-const Model::ScalarMath
-Model::log (const ScalarMath& x)
+const MEAL::ScalarMath
+MEAL::log (const ScalarMath& x)
 {
   ScalarLogarithm* result = new ScalarLogarithm;
   result->set_model( x.expression );
   return *result;
 }
 
-const Model::ScalarMath
-Model::atanh (const ScalarMath& x)
+const MEAL::ScalarMath
+MEAL::atanh (const ScalarMath& x)
 {
   UnaryScalar* result = new ScalarInverseHypTangent;
   result->set_model( x.expression );
   return *result;
 }
 
-const Model::ScalarMath
-Model::atan2 (const ScalarMath& y, const ScalarMath& x)
+const MEAL::ScalarMath
+MEAL::atan2 (const ScalarMath& y, const ScalarMath& x)
 {
   BinaryScalar* result = new ScalarInverseTangent2;
   result->set_arg1( y.expression );
@@ -230,8 +230,8 @@ Model::atan2 (const ScalarMath& y, const ScalarMath& x)
   return *result;
 }
 
-const Model::ScalarMath
-Model::pow (const ScalarMath& x, const ScalarMath& y)
+const MEAL::ScalarMath
+MEAL::pow (const ScalarMath& x, const ScalarMath& y)
 {
   BinaryScalar* result = new ScalarPower;
   result->set_arg1( x.expression );
@@ -240,13 +240,13 @@ Model::pow (const ScalarMath& x, const ScalarMath& y)
 }
 
 //! Evaluate the expression
-double Model::ScalarMath::evaluate () const
+double MEAL::ScalarMath::evaluate () const
 {
   return expression->evaluate();
 }
 
 //! Evaluate the expression and its estimated error
-Estimate<double> Model::ScalarMath::get_Estimate () const
+Estimate<double> MEAL::ScalarMath::get_Estimate () const
 {
   Estimate<double> value;
   expression->evaluate( value );

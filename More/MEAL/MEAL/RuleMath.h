@@ -1,19 +1,19 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/RuleMath.h,v $
-   $Revision: 1.2 $
-   $Date: 2004/11/22 16:00:09 $
+   $Revision: 1.3 $
+   $Date: 2004/11/22 19:26:04 $
    $Author: straten $ */
 
-#ifndef __Model_RuleMath_H
-#define __Model_RuleMath_H
+#ifndef __MEAL_RuleMath_H
+#define __MEAL_RuleMath_H
 
-#include "MEPL/SumRule.h"
-#include "MEPL/NegationRule.h"
-#include "MEPL/ProductRule.h"
-#include "MEPL/InverseRule.h"
+#include "MEAL/SumRule.h"
+#include "MEAL/NegationRule.h"
+#include "MEAL/ProductRule.h"
+#include "MEAL/InverseRule.h"
 
-namespace Model {
+namespace MEAL {
 
   template<class Type> SumRule<Type>* Sum (Type* a, Type* b)
   {

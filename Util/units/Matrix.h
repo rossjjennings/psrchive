@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Matrix.h,v $
-   $Revision: 1.9 $
-   $Date: 2004/06/17 09:53:13 $
-   $Author: hknight $ */
+   $Revision: 1.10 $
+   $Date: 2004/11/22 19:26:04 $
+   $Author: straten $ */
 
 #ifndef __Matrix_H
 #define __Matrix_H
@@ -12,7 +12,6 @@
 
 #include "Vector.h"
 #include "Error.h"
-#include "psr_cpp.h"
 
 //! Matrix is a column vector of row vectors
 template <typename T, unsigned Rows, unsigned Columns> 
@@ -209,7 +208,7 @@ const Matrix<T,Rows,Columns> outer (const Vector<T,Rows>& a,
 
 //! Useful for quickly printing the components
 template<typename T, unsigned R, unsigned C>
-ostream& operator<< (ostream& ostr, const Matrix<T,R,C>& m)
+std::ostream& operator<< (std::ostream& ostr, const Matrix<T,R,C>& m)
 {
   ostr << "[" << m[0];
   for (unsigned i=1; i<R; i++)

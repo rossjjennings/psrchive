@@ -1,17 +1,17 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Rotation.h,v $
-   $Revision: 1.2 $
-   $Date: 2004/11/22 16:00:09 $
+   $Revision: 1.3 $
+   $Date: 2004/11/22 19:26:04 $
    $Author: straten $ */
 
-#ifndef __Model_Rotation_H
-#define __Model_Rotation_H
+#ifndef __MEAL_Rotation_H
+#define __MEAL_Rotation_H
 
-#include "MEPL/OptimizedComplex2.h"
+#include "MEAL/OptimizedComplex2.h"
 #include "Vector.h"
 
-namespace Model {
+namespace MEAL {
 
   //! Represents a rotation (unitary, birefringent) transformation
   /*! This class represents the rotation, \f$\phi\f$, about an arbitrary
@@ -42,10 +42,10 @@ namespace Model {
     // ///////////////////////////////////////////////////////////////////
 
     //! Return the name of the class
-    string get_name () const;
+    std::string get_name () const;
 
     //! Return the name of the specified parameter
-    string get_param_name (unsigned index) const;
+    std::string get_param_name (unsigned index) const;
 
   protected:
 
@@ -59,7 +59,7 @@ namespace Model {
     // ///////////////////////////////////////////////////////////////////
 
     //! Calculate the Jones matrix and its gradient
-    void calculate (Jones<double>& result, vector<Jones<double> >* gradient);
+    void calculate (Jones<double>& result, std::vector<Jones<double> >* gradient);
 
   };
 

@@ -2,6 +2,8 @@
 #include "MatrixTest.h"
 #include "Jacobi.h"
 
+using namespace std;
+
 // specialize for complex matrices
 template <typename T, unsigned RC>
 void test_Jacobi (Matrix<T,RC,RC>& matrix, float tolerance)
@@ -80,7 +82,7 @@ int main () try {
   runtest<double,7> (loops, tolerance);
 
   cerr << "Testing Hermitian: ";
-  runtest<complex<double>,5> (loops, tolerance);
+  runtest<std::complex<double>,5> (loops, tolerance);
 
   cerr << "Successful tests" << endl;
   return 0;

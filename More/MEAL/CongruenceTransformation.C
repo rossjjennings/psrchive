@@ -1,24 +1,26 @@
-#include "MEPL/CongruenceTransformation.h"
-#include "MEPL/ProjectGradient.h"
+#include "MEAL/CongruenceTransformation.h"
+#include "MEAL/ProjectGradient.h"
 
-Model::CongruenceTransformation::CongruenceTransformation ()
+using namespace std;
+
+MEAL::CongruenceTransformation::CongruenceTransformation ()
 {
 }
 
-Model::CongruenceTransformation::~CongruenceTransformation ()
+MEAL::CongruenceTransformation::~CongruenceTransformation ()
 {
 }
 
 /*! This method unmaps the old transformation before mapping xform */
 void 
-Model::CongruenceTransformation::set_transformation (Complex2* xform)
+MEAL::CongruenceTransformation::set_transformation (Complex2* xform)
 {
   if (!xform)
     return;
 
   if (transformation) {
     if (verbose)
-      cerr << "Model::CongruenceTransformation::set_transformation"
+      cerr << "MEAL::CongruenceTransformation::set_transformation"
 	" unmap old transformation" << endl;
     unmap (transformation, false);
   }
@@ -26,15 +28,15 @@ Model::CongruenceTransformation::set_transformation (Complex2* xform)
   transformation = xform;
 
   if (verbose)
-    cerr << "Model::CongruenceTransformation::set_transformation"
+    cerr << "MEAL::CongruenceTransformation::set_transformation"
       " map new transformation" << endl;
 
   map (transformation);
 }
 
 //! Get the transformation, \f$ J \f$
-Model::Complex2* 
-Model::CongruenceTransformation::get_transformation ()
+MEAL::Complex2* 
+MEAL::CongruenceTransformation::get_transformation ()
 {
   return transformation;
 }
@@ -42,14 +44,14 @@ Model::CongruenceTransformation::get_transformation ()
 
 /*! This method unmaps the old input before mapping xform */
 void 
-Model::CongruenceTransformation::set_input (Complex2* xform)
+MEAL::CongruenceTransformation::set_input (Complex2* xform)
 {
   if (!xform)
     return;
 
   if (input) {
     if (verbose)
-      cerr << "Model::CongruenceTransformation::set_input"
+      cerr << "MEAL::CongruenceTransformation::set_input"
 	" unmap old input" << endl;
     unmap (input, false);
   }
@@ -57,15 +59,15 @@ Model::CongruenceTransformation::set_input (Complex2* xform)
   input = xform;
 
   if (verbose)
-    cerr << "Model::CongruenceTransformation::set_input"
+    cerr << "MEAL::CongruenceTransformation::set_input"
       " map new input" << endl;
 
   map (input);
 }
 
 //! Get the input, \f$ \rho \f$
-Model::Complex2* 
-Model::CongruenceTransformation::get_input ()
+MEAL::Complex2* 
+MEAL::CongruenceTransformation::get_input ()
 {
   return input;
 }
@@ -73,19 +75,19 @@ Model::CongruenceTransformation::get_input ()
 
 //! Returns \f$ \rho^\prime_j \f$ and its gradient
 void 
-Model::CongruenceTransformation::calculate (Jones<double>& result,
-						  vector<Jones<double> >* grad)
+MEAL::CongruenceTransformation::calculate (Jones<double>& result,
+						  std::vector<Jones<double> >* grad)
 {
   if (verbose)
-    cerr << "Model::CongruenceTransformation::calculate" << endl;
+    cerr << "MEAL::CongruenceTransformation::calculate" << endl;
 
   // gradient of transformation
-  vector<Jones<double> > xform_grad;
-  vector<Jones<double> > *xform_grad_ptr = 0;
+  std::vector<Jones<double> > xform_grad;
+  std::vector<Jones<double> > *xform_grad_ptr = 0;
 
   // gradient of input
-  vector<Jones<double> > input_grad;
-  vector<Jones<double> > *input_grad_ptr = 0;
+  std::vector<Jones<double> > input_grad;
+  std::vector<Jones<double> > *input_grad_ptr = 0;
 
   if (grad) {
 
@@ -105,7 +107,7 @@ Model::CongruenceTransformation::calculate (Jones<double>& result,
   result = xform_jones * input_jones * xform_herm;
 
   if (verbose)
-    cerr << "Model::CongruenceTransformation::evaluate result\n"
+    cerr << "MEAL::CongruenceTransformation::evaluate result\n"
 	 "   " << result << endl;
 
   if (!grad)
@@ -136,7 +138,7 @@ Model::CongruenceTransformation::calculate (Jones<double>& result,
   ProjectGradient (input, input_grad, *grad);
 
   if (verbose) {
-    cerr << "Model::CongruenceTransformation::evaluate gradient" << endl;
+    cerr << "MEAL::CongruenceTransformation::evaluate gradient" << endl;
     for (unsigned i=0; i<grad->size(); i++)
       cerr << "   " << i << ":" << get_infit(i) << " " << get_param_name(i)
 	   << "=" << (*grad)[i] << endl;

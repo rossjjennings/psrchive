@@ -1,28 +1,28 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Function.h,v $
-   $Revision: 1.1 $
-   $Date: 2004/11/22 15:00:51 $
+   $Revision: 1.2 $
+   $Date: 2004/11/22 19:26:03 $
    $Author: straten $ */
 
 /*! \mainpage 
  
   \section intro Introduction
  
-  The Polarimetric Model Library implements a set of classes
-  that may be used in the calibration of polarization data.  The
-  measurement model may be built by modular construction of source
-  states, signal paths, and the functional variation of these
-  components with any number or type of independent variables.
+  The Measurement and Error Analysis Library (MEAL) implements a set
+  of classes that may be used to perform non-linear least-squares and
+  error propagation.  Arbitrary functions are built by modular
+  construction of elementary functions, which may be parameterized by
+  any number or type of arguments.
 
   \section model Function Components
 
-  All model components that inherit the Model::Function abstract
+  All model components that inherit the MEAL::Function abstract
   base class represent functions of an arbitrary number of variables.
   A distinction is made between independent variables, or arguments,
   \f${\bf x}=(x_0, x_1, ... , x_M)\f$, and model parameters, \f${\bf
   a}=(a_0, a_1, ... , a_N)\f$.  Through use of the
-  Model::Argument and Model::Argument::Value abstract base
+  MEAL::Argument and MEAL::Argument::Value abstract base
   classes, model components may be constrained by one or more
   independent variables of arbitrary type.  The model parameters,
   \f${\bf a}\f$, represent double precision floating point values
@@ -34,11 +34,11 @@
   observing frequency and epoch, that may be used to further constrain
   a model.
 
-  The Model::Function class does not define the type of value that
+  The MEAL::Function class does not define the type of value that
   it represents.  This is defined by derived types, which must define
   a type named Result and a method named evaluate:
 
-  virtual Result evaluate (vector<Result>* gradient = 0) const = 0;
+  virtual Result evaluate (std::vector<Result>* gradient = 0) const = 0;
 
   The evaluate method returns a value of the type specified by Result
   and, if a pointer to a vector of Result is passed as the first
@@ -46,14 +46,14 @@
   with respect to the model parameters.
 
   The Return type and evaluate method are implemented by two main
-  classes of Model::Function derived components:
+  classes of MEAL::Function derived components:
 
   <UL> 
-  <LI> Model::Scalar - a scalar function, 
-  \f$f({\bf a}; {\bf x})\f$, such as the Model::Polynomial
-  <LI> Model::Complex2 - a complex 2x2 matrix function,
-  \f$J({\bf a}; {\bf x})\f$, such as the Model::Coherency matrix 
-  and the Model::Rotation transformation.
+  <LI> MEAL::Scalar - a scalar function, 
+  \f$f({\bf a}; {\bf x})\f$, such as the MEAL::Polynomial
+  <LI> MEAL::Complex2 - a complex 2x2 matrix function,
+  \f$J({\bf a}; {\bf x})\f$, such as the MEAL::Coherency matrix 
+  and the MEAL::Rotation transformation.
   </UL>
 
 
@@ -65,30 +65,30 @@
 
   <UL> 
 
-  <LI> Model::ChainRule - an arbitrary function in which
+  <LI> MEAL::ChainRule - an arbitrary function in which
   one or more parameters is set equal to the ordinate of a 
-  Model::Scalar function
+  MEAL::Scalar function
 
-  <LI> Model::BinaryRule - an associative binary operation, such
-  as the sum (Model::SumRule) or product
-  (Model::ProductRule).
+  <LI> MEAL::BinaryRule - an associative binary operation, such
+  as the sum (MEAL::SumRule) or product
+  (MEAL::ProductRule).
 
   </UL>
 
 */
 
-#ifndef __Model_Function_H
-#define __Model_Function_H
+#ifndef __MEAL_Function_H
+#define __MEAL_Function_H
 
-#include "MEPL/Argument.h"
+#include "MEAL/Argument.h"
 #include "Callback.h"
 #include "Estimate.h"
 
 #include <string>
 
 //! Namespace in which all modeling and calibration related code is declared
-/*! The Model namespace is documented in the introduction. */
-namespace Model {
+/*! The MEAL namespace is documented in the introduction. */
+namespace MEAL {
 
   //! Pure virtual base class of all models
   /*! A Function may consist of an arbitrary number of parameters. Using
@@ -112,10 +112,10 @@ namespace Model {
     static bool check_variance;
 
     //! Construct a new model instance from a file
-    static Function* load (const string& filename);
+    static Function* load (const std::string& filename);
 
     //! Construct a new model instance from a string
-    static Function* new_Function (const string& text);
+    static Function* new_Function (const std::string& text);
 
     //! Default constructor
     Function ();
@@ -133,22 +133,22 @@ namespace Model {
     virtual void copy (const Function* model);
 
     //! Parses the values of model parameters and fit flags from a string
-    virtual void parse (const string& text);
+    virtual void parse (const std::string& text);
 
     //! Prints the values of model parameters and fit flags to a string
-    virtual void print (string& text) const;
+    virtual void print (std::string& text) const;
 
     //! Prints the values of model parameters and fit flags to a string
-    virtual void print_parameters (string& text, const string& sep) const;
+    virtual void print_parameters (std::string& text, const std::string& sep) const;
 
     //! Return the name of the class
-    virtual string get_name () const = 0;
+    virtual std::string get_name () const = 0;
 
     //! Return the number of parameters
     virtual unsigned get_nparam () const = 0;
 
     //! Return the name of the specified parameter
-    virtual string get_param_name (unsigned index) const = 0;
+    virtual std::string get_param_name (unsigned index) const = 0;
 
     //! Return the value of the specified parameter
     virtual double get_param (unsigned index) const = 0;

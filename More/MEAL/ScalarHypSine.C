@@ -1,20 +1,22 @@
-#include "MEPL/ScalarHypSine.h"
+#include "MEAL/ScalarHypSine.h"
 #include <math.h>
 
+using namespace std;
+
 //! Return the name of the class
-string Model::ScalarHypSine::get_name () const
+string MEAL::ScalarHypSine::get_name () const
 {
   return "ScalarHypSine";
 }
 
 //! The function
-double Model::ScalarHypSine::function (double x) const
+double MEAL::ScalarHypSine::function (double x) const
 {
   return sinh(x); 
 }
 
 //! And its first derivative
-double Model::ScalarHypSine::dfdx (double x) const
+double MEAL::ScalarHypSine::dfdx (double x) const
 { 
   return cosh(x);
 }

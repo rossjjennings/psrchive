@@ -1,16 +1,16 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Complex2Value.h,v $
-   $Revision: 1.2 $
-   $Date: 2004/11/22 16:00:08 $
+   $Revision: 1.3 $
+   $Date: 2004/11/22 19:26:03 $
    $Author: straten $ */
 
 #ifndef __Complex2Value_H
 #define __Complex2Value_H
 
-#include "MEPL/OptimizedComplex2.h"
+#include "MEAL/OptimizedComplex2.h"
 
-namespace Model {
+namespace MEAL {
 
   //! Represents a complex 2x2 matrix value, \f$ J \f$
   class Complex2Value : public OptimizedComplex2 {
@@ -33,10 +33,10 @@ namespace Model {
     // ///////////////////////////////////////////////////////////////////
 
     //! Return the name of the class
-    string get_name () const;
+    std::string get_name () const;
 
     //! Return the name of the parameter
-    string get_param_name (unsigned i) const { return ""; }
+    std::string get_param_name (unsigned i) const { return ""; }
 
   protected:
 
@@ -47,7 +47,7 @@ namespace Model {
     // ///////////////////////////////////////////////////////////////////
 
     //! Return the value (and gradient, if requested) of the function
-    void calculate (Jones<double>& x, vector< Jones<double> >* grad=0);
+    void calculate (Jones<double>& x, std::vector< Jones<double> >* grad=0);
 
     //! The value
     Jones<double> value;

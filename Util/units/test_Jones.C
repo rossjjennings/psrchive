@@ -1,6 +1,8 @@
 #include "MatrixTest.h"
 #include "Jones.h"
 
+using namespace std;
+
 int main () 
 {
 #if (RAND_MAX > 9000000)
@@ -9,7 +11,7 @@ int main ()
   unsigned loops = RAND_MAX*10;
 #endif
 
-  MatrixTest <Jones<float>, Jones<double>, complex<float> > test;
+  MatrixTest <Jones<float>, Jones<double>, std::complex<float> > test;
 
   try {
     cerr << "Testing " << loops << " Jones matrix variations" << endl;

@@ -1,17 +1,17 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/BinaryScalar.h,v $
-   $Revision: 1.2 $
-   $Date: 2004/11/22 16:00:08 $
+   $Revision: 1.3 $
+   $Date: 2004/11/22 19:26:03 $
    $Author: straten $ */
 
-#ifndef __Model_BinaryScalar_H
-#define __Model_BinaryScalar_H
+#ifndef __MEAL_BinaryScalar_H
+#define __MEAL_BinaryScalar_H
 
-#include "MEPL/BinaryRule.h"
-#include "MEPL/Scalar.h"
+#include "MEAL/BinaryRule.h"
+#include "MEAL/Scalar.h"
 
-namespace Model {
+namespace MEAL {
 
   //! Abstract base class of binary functions of two other Scalar functions
   /*! The partial derivatives are calculated using the chain rule. */
@@ -38,7 +38,7 @@ namespace Model {
     // ///////////////////////////////////////////////////////////////////
 
     //! Return the result and its gradient
-    void calculate (double& result, vector<double>* gradient);
+    void calculate (double& result, std::vector<double>* gradient);
 
   };
 

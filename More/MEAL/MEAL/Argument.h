@@ -1,16 +1,16 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Argument.h,v $
-   $Revision: 1.2 $
-   $Date: 2004/11/22 16:00:08 $
+   $Revision: 1.3 $
+   $Date: 2004/11/22 19:26:03 $
    $Author: straten $ */
 
-#ifndef __Model_Argument_Header
-#define __Model_Argument_Header
+#ifndef __MEAL_Argument_Header
+#define __MEAL_Argument_Header
 
 #include "Reference.h"
 
-namespace Model {
+namespace MEAL {
 
   //! Pure virtual base class of function arguments
   /*! The Argument class represents an independent variable of a

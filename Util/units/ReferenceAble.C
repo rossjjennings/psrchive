@@ -6,14 +6,14 @@
 // #define _DEBUG 1
 
 #if _DEBUG
-vector<Reference::Able*> Reference::Able::null_ables(){
-  vector<Able*> nullie;
+std::vector<Reference::Able*> Reference::Able::null_ables(){
+  std::vector<Able*> nullie;
   return nullie;
 }
 
 int Reference::Able::instantiation_count = 0;
 int Reference::Able::full_count = 0;
-vector<Reference::Able*> Reference::Able::ables = Reference::Able::null_ables();
+std::vector<Reference::Able*> Reference::Able::ables = Reference::Able::null_ables();
 #endif
 
 //////////////////////////////////////////////////////////////////////////
@@ -57,7 +57,7 @@ Reference::Able::~Able ()
        << " references" <<endl;
 #endif
 
-  vector<Able**>::iterator it = __reference_list.begin();
+  std::vector<Able**>::iterator it = __reference_list.begin();
   while (it != __reference_list.end()) {
     *(*it) = 0;
     it ++;
@@ -111,7 +111,7 @@ void Reference::Able::__remove_reference (bool active, Able** ref_address,
   // function is declared const, but __reference_list must be modified
   Able* thiz = const_cast<Able*> (this);
 
-  vector<Able**>::iterator it = thiz->__reference_list.begin();
+  std::vector<Able**>::iterator it = thiz->__reference_list.begin();
   while (it != thiz->__reference_list.end())  {
     if (*it == ref_address) {
       thiz->__reference_list.erase(it);

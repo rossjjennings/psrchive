@@ -1,6 +1,8 @@
 #include "MatrixTest.h"
 #include "Pauli.h"
 
+using namespace std;
+
 template <typename T> T sqr (T x) { return x*x; }
 
 
@@ -23,7 +25,7 @@ template <typename T>
 void test_polar (const Jones<T>& j, float tolerance)
 {
   // pull the jones matrix apart into its Hermitian and Unitary components
-  complex<T> d;
+  std::complex<T> d;
   Quaternion<T, Hermitian> hq;
   Quaternion<T, Unitary> uq;
 
@@ -66,7 +68,7 @@ void test_polar (const Jones<T>& j, float tolerance)
 // specialize the test_matrix template function defined in MatrixTest.h
 template <typename T>
 void test_matrix (const Jones<T>& j1, const Jones<T>& j2,
-		  const Quaternion<T>& q, const complex<T>& c,
+		  const Quaternion<T>& q, const std::complex<T>& c,
 		  float scale, float tolerance, bool verbose)
 {
   if (verbose)
@@ -86,7 +88,7 @@ int main ()
   unsigned loops = RAND_MAX*10;
 #endif
 
-  MatrixTest <Jones<double>, Quaternion<double>, complex<double> > test;
+  MatrixTest <Jones<double>, Quaternion<double>, std::complex<double> > test;
 
   try {
     cerr << "Testing " << loops << " Pauli conversion variations" << endl;

@@ -1,17 +1,17 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Axis.h,v $
-   $Revision: 1.2 $
-   $Date: 2004/11/22 16:00:08 $
+   $Revision: 1.3 $
+   $Date: 2004/11/22 19:26:03 $
    $Author: straten $ */
 
-#ifndef __Model_Axis_Header
-#define __Model_Axis_Header
+#ifndef __MEAL_Axis_Header
+#define __MEAL_Axis_Header
 
-#include "MEPL/Argument.h"
+#include "MEAL/Argument.h"
 #include "Callback.h"
 
-namespace Model {
+namespace MEAL {
 
   //! An argument of a specified type
   /*! This template class implements the Argument/Value interface by
@@ -52,7 +52,7 @@ namespace Model {
       //! Apply the value 
       void apply () const 
       { 
-	if (verbose) cerr << "Model::Axis<Type>::Value::apply value="
+	if (verbose) cerr << "MEAL::Axis<Type>::Value::apply value="
 			  << value << endl;
 	axis->set_value (value);
       }

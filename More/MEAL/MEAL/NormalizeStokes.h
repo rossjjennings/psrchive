@@ -1,18 +1,18 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/NormalizeStokes.h,v $
-   $Revision: 1.2 $
-   $Date: 2004/11/22 16:00:09 $
+   $Revision: 1.3 $
+   $Date: 2004/11/22 19:26:04 $
    $Author: straten $ */
 
-#ifndef __Model_NormalizeStokes_h
-#define __Model_NormalizeStokes_h
+#ifndef __MEAL_NormalizeStokes_h
+#define __MEAL_NormalizeStokes_h
 
 #include "Stokes.h"
 #include "Estimate.h"
 #include "ScalarMath.h"
 
-namespace Model {
+namespace MEAL {
 
   class Scalar;
 

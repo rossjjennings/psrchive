@@ -1,9 +1,11 @@
-#include "MEPL/Composite.h"
-#include "MEPL/Constant.h"
+#include "MEAL/Composite.h"
+#include "MEAL/Constant.h"
 #include "Error.h"
 
+using namespace std;
+
 //! Default constructor
-Model::Composite::Composite ()
+MEAL::Composite::Composite ()
 {
   nparameters = 0;
   current_model = 0;
@@ -11,56 +13,56 @@ Model::Composite::Composite ()
 }
 
 //! Return the number of parameters
-unsigned Model::Composite::get_nparam () const
+unsigned MEAL::Composite::get_nparam () const
 {
   return nparameters;
 }
 
 //! Return the name of the specified parameter
-string Model::Composite::get_param_name (unsigned index) const
+string MEAL::Composite::get_param_name (unsigned index) const
 {
   return get_Function(index)->get_param_name (index);
 }
 
 //! Return the value of the specified parameter
-double Model::Composite::get_param (unsigned index) const
+double MEAL::Composite::get_param (unsigned index) const
 {
   return get_Function(index)->get_param (index);
 }
 
 //! Set the value of the specified parameter
-void Model::Composite::set_param (unsigned index, double value)
+void MEAL::Composite::set_param (unsigned index, double value)
 {
   get_Function(index)->set_param (index, value);
 }
 
 //! Return the variance of the specified parameter
-double Model::Composite::get_variance (unsigned index) const
+double MEAL::Composite::get_variance (unsigned index) const
 {
   return get_Function(index)->get_variance (index);
 }
 
 //! Set the variance of the specified parameter
-void Model::Composite::set_variance (unsigned index, double variance)
+void MEAL::Composite::set_variance (unsigned index, double variance)
 {
   get_Function(index)->set_variance (index, variance);
 }
 
 //! Return true if parameter at index is to be fitted
-bool Model::Composite::get_infit (unsigned index) const
+bool MEAL::Composite::get_infit (unsigned index) const
 {
   return get_Function(index)->get_infit (index);
 }
 
 //! Set flag for parameter at index to be fitted
-void Model::Composite::set_infit (unsigned index, bool flag)
+void MEAL::Composite::set_infit (unsigned index, bool flag)
 {
   get_Function(index)->set_infit (index, flag);
 }
 
 
 //! The most common abscissa type needs a simple interface
-void Model::Composite::set_argument (unsigned dimension, Argument* axis)
+void MEAL::Composite::set_argument (unsigned dimension, Argument* axis)
 {
   for (unsigned imodel=0; imodel < models.size(); imodel++)  {
     reference_check (imodel, "set_axis");
@@ -74,19 +76,19 @@ void Model::Composite::set_argument (unsigned dimension, Argument* axis)
 //
 // ///////////////////////////////////////////////////////////////////
 
-string Model::Composite::class_name() const
+string MEAL::Composite::class_name() const
 {
-  return "Model::Composite[" + get_name() + "]::";
+  return "MEAL::Composite[" + get_name() + "]::";
 }
 
-//! Get the number of Models
-unsigned Model::Composite::get_nmodel () const
+//! Get the number of Functions
+unsigned MEAL::Composite::get_nmodel () const
 {
   return models.size ();
 }
 
 
-void Model::Composite::map (Projection* modelmap, bool signal_changes)
+void MEAL::Composite::map (Projection* modelmap, bool signal_changes)
 {
 #ifdef _DEBUG
   cerr << class_name() + "map (Projection* = " << modelmap << ")" << endl;
@@ -124,7 +126,7 @@ void Model::Composite::map (Projection* modelmap, bool signal_changes)
 		   modelmap->imap.size(), model->get_nparam());
 
     if (very_verbose) {
-      cerr << class_name() + "map Model maps into" << endl;
+      cerr << class_name() + "map Function maps into" << endl;
       for (unsigned i=0; i<modelmap->imap.size(); i++)
 	cerr << "   " << i << ":" << modelmap->imap[i] << endl;
     }
@@ -156,9 +158,9 @@ void Model::Composite::map (Projection* modelmap, bool signal_changes)
 
 
 
-//! Map the Model indeces
-void Model::Composite::add_component (Function* model,
-					    vector<unsigned>& imap)
+//! Map the Function indeces
+void MEAL::Composite::add_component (Function* model,
+					    std::vector<unsigned>& imap)
 {
   if (!model)
     return;
@@ -219,7 +221,7 @@ void Model::Composite::add_component (Function* model,
       return;
 
     if (very_verbose)
-      cerr << class_name() + "add_component add new Model" << endl;
+      cerr << class_name() + "add_component add new Function" << endl;
 
     // add the new model
     nparameters += model->get_nparam();
@@ -229,7 +231,7 @@ void Model::Composite::add_component (Function* model,
 
 }
 
-void Model::Composite::unmap (Projection* modelmap, bool signal_changes)
+void MEAL::Composite::unmap (Projection* modelmap, bool signal_changes)
 {
   if (!(modelmap->meta))
     throw Error (InvalidParam, class_name() + "unmap",
@@ -263,8 +265,8 @@ void Model::Composite::unmap (Projection* modelmap, bool signal_changes)
 }
 
 
-//! Remove a Model from the list
-void Model::Composite::remove_component (Function* model)
+//! Remove a Function from the list
+void MEAL::Composite::remove_component (Function* model)
 {
   if (very_verbose)
     cerr << class_name() + "remove_component" << endl;
@@ -310,7 +312,7 @@ void Model::Composite::remove_component (Function* model)
 }
 
 //! Recount the number of parameters
-void Model::Composite::remap (bool signal_changes)
+void MEAL::Composite::remap (bool signal_changes)
 { 
   if (very_verbose)
     cerr << class_name() << "remap remap Projection instances" << endl;
@@ -346,7 +348,7 @@ void Model::Composite::remap (bool signal_changes)
     cerr << class_name() << "remap exit" << endl;
 }
 
-void Model::Composite::attribute_changed (Attribute attribute) 
+void MEAL::Composite::attribute_changed (Attribute attribute) 
 {
   if (very_verbose)
     cerr << class_name() << "attribute_changed" << endl;
@@ -366,15 +368,15 @@ void Model::Composite::attribute_changed (Attribute attribute)
 
 }
 
-//! Get the const Model that corresponds to the given index
-const Model::Function*
-Model::Composite::get_Function (unsigned& index) const
+//! Get the const Function that corresponds to the given index
+const MEAL::Function*
+MEAL::Composite::get_Function (unsigned& index) const
 {
   return const_cast<Composite*>(this)->get_Function (index);
 }
 
-//! Get the Model that corresponds to the given index
-Model::Function* Model::Composite::get_Function (unsigned& index)
+//! Get the Function that corresponds to the given index
+MEAL::Function* MEAL::Composite::get_Function (unsigned& index)
 {
   unsigned imodel = current_model;
   
@@ -407,7 +409,7 @@ Model::Function* Model::Composite::get_Function (unsigned& index)
 
 
 //! Check the the reference to the specified model is still valid
-void Model::Composite::reference_check (unsigned i, char* method) const
+void MEAL::Composite::reference_check (unsigned i, char* method) const
 {
   if (!models[i])
     throw Error (InvalidState, class_name() + method, 
@@ -416,7 +418,7 @@ void Model::Composite::reference_check (unsigned i, char* method) const
 
 
 //! Return the index for the specified model
-unsigned Model::Composite::find_Function (Function* model) const
+unsigned MEAL::Composite::find_Function (Function* model) const
 {
   if (very_verbose) cerr << class_name() + "find_Function nmodel="
 			 << models.size() << endl;
@@ -432,7 +434,7 @@ unsigned Model::Composite::find_Function (Function* model) const
 }
 
 //! Return the index for the specified map
-unsigned Model::Composite::find_Projection (Projection* modelmap) const
+unsigned MEAL::Composite::find_Projection (Projection* modelmap) const
 {
   if (very_verbose) cerr << class_name() + "find_Projection nmap="
 			 << maps.size() << endl;

@@ -1,17 +1,17 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/UnaryRule.h,v $
-   $Revision: 1.2 $
-   $Date: 2004/11/22 16:00:09 $
+   $Revision: 1.3 $
+   $Date: 2004/11/22 19:26:04 $
    $Author: straten $ */
 
-#ifndef __Model_UnaryRule_H
-#define __Model_UnaryRule_H
+#ifndef __MEAL_UnaryRule_H
+#define __MEAL_UnaryRule_H
 
-#include "MEPL/Optimized.h"
-#include "MEPL/Composite.h"
+#include "MEAL/Optimized.h"
+#include "MEAL/Composite.h"
 
-namespace Model {
+namespace MEAL {
 
   //! Abstract base class of unary operators
   template<class MType>
@@ -45,8 +45,8 @@ namespace Model {
 }
 
 template<class MType>
-Model::UnaryRule<MType>&
-Model::UnaryRule<MType>::operator = (const UnaryRule& rule)
+MEAL::UnaryRule<MType>&
+MEAL::UnaryRule<MType>::operator = (const UnaryRule& rule)
 {
   if (this != &rule)
     set_model (rule.model);
@@ -56,7 +56,7 @@ Model::UnaryRule<MType>::operator = (const UnaryRule& rule)
 
 
 template<class MType>
-void Model::UnaryRule<MType>::set_model (MType* _model)
+void MEAL::UnaryRule<MType>::set_model (MType* _model)
 {
   if (model)
     unmap (model, false);
@@ -67,8 +67,8 @@ void Model::UnaryRule<MType>::set_model (MType* _model)
     return;
 
   if (verbose)
-    cerr << "Model::UnaryRule::set_model map " 
-         << model->get_name() << endl;
+    std::cerr << "MEAL::UnaryRule::set_model map " 
+         << model->get_name() << std::endl;
 
   map (model);
 }

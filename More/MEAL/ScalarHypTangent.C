@@ -1,20 +1,22 @@
-#include "MEPL/ScalarHypTangent.h"
+#include "MEAL/ScalarHypTangent.h"
 #include <math.h>
 
+using namespace std;
+
 //! Return the name of the class
-string Model::ScalarHypTangent::get_name () const
+string MEAL::ScalarHypTangent::get_name () const
 {
   return "ScalarHypTangent";
 }
 
 //! The function
-double Model::ScalarHypTangent::function (double x) const
+double MEAL::ScalarHypTangent::function (double x) const
 {
   return tanh(x); 
 }
 
 //! And its first derivative
-double Model::ScalarHypTangent::dfdx (double x) const
+double MEAL::ScalarHypTangent::dfdx (double x) const
 { 
   double coshx = cosh(x);
   return 1.0/(coshx*coshx);

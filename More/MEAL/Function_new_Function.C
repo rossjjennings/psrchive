@@ -1,27 +1,27 @@
-#include "MEPL/Agent.h"
-#include "MEPL/Function.h"
+#include "MEAL/Agent.h"
+#include "MEAL/Function.h"
 
-Registry::List<Model::Agent> Model::Agent::registry;
+Registry::List<MEAL::Agent> MEAL::Agent::registry;
 
-#include "MEPL/Polynomial.h"
-static Model::Advocate<Model::Polynomial> polynomial;
+#include "MEAL/Polynomial.h"
+static MEAL::Advocate<MEAL::Polynomial> polynomial;
 
-#include "MEPL/Gaussian.h"
-static Model::Advocate<Model::Gaussian> gaussian;
+#include "MEAL/Gaussian.h"
+static MEAL::Advocate<MEAL::Gaussian> gaussian;
 
-#include "MEPL/SumRule.h"
-typedef Model::SumRule<Model::Scalar> ScalarSum;
-static Model::Advocate<ScalarSum> scalar_sum;
+#include "MEAL/SumRule.h"
+typedef MEAL::SumRule<MEAL::Scalar> ScalarSum;
+static MEAL::Advocate<ScalarSum> scalar_sum;
 
 //! Construct a new model instance from a string
-Model::Function* Model::Function::new_Function (const string& text)
+MEAL::Function* MEAL::Function::new_Function (const string& text)
 {
   for (unsigned agent=0; agent<Agent::registry.size(); agent++) {
 
     if (Agent::registry[agent]->get_name () == text) {
 
       if (verbose)
-        cerr << "Model::Function::new_Function using " 
+        cerr << "MEAL::Function::new_Function using " 
 	     << Agent::registry[agent]->get_name() << endl;
 
       return Agent::registry[agent]->new_Function();
@@ -30,7 +30,7 @@ Model::Function* Model::Function::new_Function (const string& text)
 
   }
 
-  throw Error (InvalidParam, "Model::Function::new_Function",
+  throw Error (InvalidParam, "MEAL::Function::new_Function",
 	       "no match for '%s' in %d agents", text.c_str(),
 	       Agent::registry.size());
 

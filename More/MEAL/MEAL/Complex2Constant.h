@@ -1,17 +1,17 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Complex2Constant.h,v $
-   $Revision: 1.2 $
-   $Date: 2004/11/22 16:00:08 $
+   $Revision: 1.3 $
+   $Date: 2004/11/22 19:26:03 $
    $Author: straten $ */
 
 #ifndef __Complex2Constant_H
 #define __Complex2Constant_H
 
-#include "MEPL/Constant.h"
-#include "MEPL/Complex2.h"
+#include "MEAL/Constant.h"
+#include "MEAL/Complex2.h"
 
-namespace Model {
+namespace MEAL {
 
   //! Represents a constant complex 2x2 matrix value
   class Complex2Constant : public Constant, public Complex2 {
@@ -37,7 +37,7 @@ namespace Model {
     // ///////////////////////////////////////////////////////////////////
 
     //! Return the name of the class
-    string get_name () const;
+    std::string get_name () const;
 
     // ///////////////////////////////////////////////////////////////////
     //
@@ -46,7 +46,7 @@ namespace Model {
     // ///////////////////////////////////////////////////////////////////
 
     //! Return the Jones matrix 
-    Jones<double> evaluate (vector<Jones<double> >* gradient=0) const;
+    Jones<double> evaluate (std::vector<Jones<double> >* gradient=0) const;
     
   protected:
 

@@ -1,16 +1,16 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/ExampleComplex2.h,v $
-   $Revision: 1.2 $
-   $Date: 2004/11/22 16:00:09 $
+   $Revision: 1.3 $
+   $Date: 2004/11/22 19:26:03 $
    $Author: straten $ */
 
 #ifndef __Example_H
 #define __Example_H
 
-#include "MEPL/OptimizedComplex2.h"
+#include "MEAL/OptimizedComplex2.h"
 
-namespace Model {
+namespace MEAL {
 
   //! A gain transformation
   class Example : public OptimizedComplex2 {
@@ -29,7 +29,7 @@ namespace Model {
     // ///////////////////////////////////////////////////////////////////
 
     //! Calculate the Jones matrix and its gradient
-    void calculate (Jones<double>& result, vector<Jones<double> >* gradient);
+    void calculate (Jones<double>& result, std::vector<Jones<double> >* gradient);
    
   };
 

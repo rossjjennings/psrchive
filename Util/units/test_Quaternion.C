@@ -1,6 +1,8 @@
 #include "MatrixTest.h"
 #include "Quaternion.h"
 
+using namespace std;
+
 // This must be defined for the MatrixTest
 float norm (float x)
 {
@@ -30,8 +32,8 @@ int main ()
 
 
 
-  MatrixTest <Quaternion<complex<float>,Hermitian>, 
-    Quaternion<complex<double>,Hermitian>, complex<float> > testh;
+  MatrixTest <Quaternion<std::complex<float>,Hermitian>, 
+    Quaternion<std::complex<double>,Hermitian>, std::complex<float> > testh;
 
   try {
     cerr 
@@ -44,8 +46,8 @@ int main ()
   }
 
 
-  MatrixTest <Quaternion<complex<float>, Unitary>, 
-    Quaternion<complex<double>, Unitary>, complex<float> > testub;
+  MatrixTest <Quaternion<std::complex<float>, Unitary>, 
+    Quaternion<std::complex<double>, Unitary>, std::complex<float> > testub;
 
   try {
     cerr 

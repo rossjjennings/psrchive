@@ -1,13 +1,15 @@
 #include "Projection.h"
 #include "Boost.h"
 
-using namespace Calibration;
+using namespace std;
+
+using namespace MEAL;
 
 int main (int argc, char** argv)
 { try {
 
   Error::verbose = true;
-  Calibration::Model::verbose = true;
+  MEAL::Function::verbose = true;
 
   cerr << "Instantiating Project<Boost>" << endl;
   Project<Boost> function;
@@ -19,8 +21,8 @@ int main (int argc, char** argv)
   Projection* mapped = function.get_map ();
   function = &boost;
 
-  if (mapped->get_Model() != &boost) {
-    cerr << "Projecton::get_Model()=" << mapped->get_Model()
+  if (mapped->get_Function() != &boost) {
+    cerr << "Projecton::get_Function()=" << mapped->get_Function()
 	 << " != &Boost=" << &boost << endl;
     return -1;
   }
@@ -30,6 +32,6 @@ int main (int argc, char** argv)
   return -1;
 }
 
-  cerr << "Projection::get_Model passes test" << endl;
+  cerr << "Projection::get_Function passes test" << endl;
   return 0;
 }

@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Vector.h,v $
-   $Revision: 1.9 $
-   $Date: 2004/07/19 11:40:05 $
+   $Revision: 1.10 $
+   $Date: 2004/11/22 19:26:04 $
    $Author: straten $ */
 
 #ifndef __Vector_H
@@ -10,8 +10,6 @@
 
 #include <iostream>
 #include <complex>
-
-#include "psr_cpp.h"
 
 //! Vector
 template <typename T, unsigned N> 
@@ -133,7 +131,7 @@ const Vector<T,3> cross (const Vector<T,3>& a, const Vector<T,3>& b)
 
 //! squared "length"/"norm"
 template <typename T, unsigned N>
-T normsq(const Vector<complex<T>, N> &v)
+T normsq(const Vector<std::complex<T>, N> &v)
 {
   T sum = norm(v[0]);
   for (unsigned i=1; i < N; i++)
@@ -160,7 +158,7 @@ T norm(const Vector<T, N> &v)
 
 //! Useful for quickly printing the components
 template<typename T, unsigned N>
-ostream& operator<< (ostream& ostr, const Vector<T,N>& v)
+std::ostream& operator<< (std::ostream& ostr, const Vector<T,N>& v)
 {
   ostr << "(" << v[0];
   for (unsigned i=1; i<N; i++)

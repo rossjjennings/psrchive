@@ -1,16 +1,16 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/InverseRule.h,v $
-   $Revision: 1.2 $
-   $Date: 2004/11/22 16:00:09 $
+   $Revision: 1.3 $
+   $Date: 2004/11/22 19:26:04 $
    $Author: straten $ */
 
-#ifndef __Model_InverseRule_H
-#define __Model_InverseRule_H
+#ifndef __MEAL_InverseRule_H
+#define __MEAL_InverseRule_H
 
-#include "MEPL/UnaryRule.h"
+#include "MEAL/UnaryRule.h"
 
-namespace Model {
+namespace MEAL {
 
   //! Computes the inverse of a model and its partial derivatives
   template<class MType>
@@ -28,7 +28,7 @@ namespace Model {
     // ///////////////////////////////////////////////////////////////////
 
     //! Return the name of the class
-    string get_name () const;
+    std::string get_name () const;
 
   protected:
 
@@ -39,35 +39,35 @@ namespace Model {
     // ///////////////////////////////////////////////////////////////////
 
     //! Return the Result and its gradient
-    void calculate (Result& result, vector<Result>* gradient);
+    void calculate (Result& result, std::vector<Result>* gradient);
 
   };
 
 }
 
 template<class MType>
-string Model::InverseRule<MType>::get_name () const
+std::string MEAL::InverseRule<MType>::get_name () const
 {
-  return "InverseRule<" + string(MType::Name)+ ">";
+  return "InverseRule<" + std::string(MType::Name)+ ">";
 }
 
 
 template<class MType>
-void Model::InverseRule<MType>::calculate (Result& result,
-						 vector<Result>* grad)
+void MEAL::InverseRule<MType>::calculate (Result& result,
+						 std::vector<Result>* grad)
 {
   if (!this->model)
-    throw Error (InvalidState, "Model::InverseRule::calculate",
+    throw Error (InvalidState, "MEAL::InverseRule::calculate",
 		 "no model to evaluate");
 
   if (MType::verbose)
-    cerr << "Model::InverseRule::calculate" << endl;
+    std::cerr << "MEAL::InverseRule::calculate" << std::endl;
 
   result = inv( this->model->evaluate (grad) );
   
   if (MType::verbose)
-    cerr << "Model::InverseRule::calculate result\n"
-      "   " << result << endl;
+    std::cerr << "MEAL::InverseRule::calculate result\n"
+      "   " << result << std::endl;
 
   if (!grad)
     return;
@@ -76,10 +76,10 @@ void Model::InverseRule<MType>::calculate (Result& result,
     (*grad)[igrad] = - result * (*grad)[igrad] * result;
 
   if (MType::verbose) {
-    cerr << "Model::InverseRule::calculate gradient\n";
+    std::cerr << "MEAL::InverseRule::calculate gradient\n";
     for (unsigned i=0; i<grad->size(); i++)
-      cerr << "   "
-	   << i << ":" << this->get_infit(i) << "=" << (*grad)[i] << endl;
+      std::cerr << "   "
+	   << i << ":" << this->get_infit(i) << "=" << (*grad)[i] << std::endl;
   }
 
 }

@@ -1,16 +1,16 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/ScalarHypTangent.h,v $
-   $Revision: 1.2 $
-   $Date: 2004/11/22 16:00:09 $
+   $Revision: 1.3 $
+   $Date: 2004/11/22 19:26:04 $
    $Author: straten $ */
 
-#ifndef __Model_ScalarHypTangent_H
-#define __Model_ScalarHypTangent_H
+#ifndef __MEAL_ScalarHypTangent_H
+#define __MEAL_ScalarHypTangent_H
 
-#include "MEPL/UnaryScalar.h"
+#include "MEAL/UnaryScalar.h"
 
-namespace Model {
+namespace MEAL {
 
   //! The hyperbolic tangent of a Scalar function
   class ScalarHypTangent : public UnaryScalar
@@ -37,7 +37,7 @@ namespace Model {
     // ///////////////////////////////////////////////////////////////////
 
     //! Return the name of the class
-    string get_name () const;
+    std::string get_name () const;
 
   };
 

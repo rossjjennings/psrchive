@@ -1,18 +1,20 @@
-#include "MEPL/Gain.h"
+#include "MEAL/Gain.h"
 
-Model::Gain::Gain () : OptimizedComplex2 (1)
+using namespace std;
+
+MEAL::Gain::Gain () : OptimizedComplex2 (1)
 {
   set_param (0, 1.0);
 }
 
 //! Return the name of the class
-string Model::Gain::get_name () const
+string MEAL::Gain::get_name () const
 {
   return "Gain";
 }
 
 //! Return the name of the specified parameter
-string Model::Gain::get_param_name (unsigned index) const
+string MEAL::Gain::get_param_name (unsigned index) const
 {
   if (index == 0)
     return "gain";
@@ -21,13 +23,13 @@ string Model::Gain::get_param_name (unsigned index) const
 }
 
 //! Calculate the Jones matrix and its gradient, as parameterized by gain
-void Model::Gain::calculate (Jones<double>& result,
-				   vector<Jones<double> >* grad)
+void MEAL::Gain::calculate (Jones<double>& result,
+				   std::vector<Jones<double> >* grad)
 {
   double gain = get_param(0);
 
   if (verbose)
-    cerr << "Model::Gain::calculate gain=" << gain << endl;
+    cerr << "MEAL::Gain::calculate gain=" << gain << endl;
 
   result = gain;
 
@@ -35,7 +37,7 @@ void Model::Gain::calculate (Jones<double>& result,
     (*grad)[0] = 1.0;
     
     if (verbose)
-      cerr << "Model::Gain::calculate gradient" << endl
+      cerr << "MEAL::Gain::calculate gradient" << endl
 	   << "   " << (*grad)[0] << endl;
   }
   

@@ -1,9 +1,11 @@
-#include "MEPL/Function.h"
+#include "MEAL/Function.h"
 #include "stringtok.h"
 #include "tostring.h"
 
+using namespace std;
+
 //! Prints the values of model parameters and fit flags to a string
-void Model::Function::print (string& text) const
+void MEAL::Function::print (string& text) const
 {
   text = get_name ();
   print_parameters (text, "\n ");
@@ -11,7 +13,7 @@ void Model::Function::print (string& text) const
 
 
 //! Prints the values of model parameters and fit flags to a string
-void Model::Function::print_parameters (string& text, const string& s) const
+void MEAL::Function::print_parameters (string& text, const string& s) const
 {
   for (unsigned iparam=0; iparam < get_nparam(); iparam++) {
     text += s + get_param_name(iparam)

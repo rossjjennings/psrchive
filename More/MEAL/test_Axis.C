@@ -1,28 +1,30 @@
-#include "Calibration/Axis.h"
-#include "Calibration/Polynomial.h"
+#include "MEAL/Axis.h"
+#include "MEAL/Polynomial.h"
+
+using namespace std;
 
 int main (int argc, char** argv)
 { try {
 
-  Calibration::Model::verbose = true;
+  MEAL::Function::verbose = true;
 
-  cerr << "Instantiating Calibration::Polynomial" << endl;
-  Calibration::Polynomial poly (2);
+  cerr << "Instantiating MEAL::Polynomial" << endl;
+  MEAL::Polynomial poly (2);
   poly.set_param (1, 1.0);
 
-  cerr << "Instantiating Calibration::Axis<double>" << endl;
-  Calibration::Axis<double> axis;
+  cerr << "Instantiating MEAL::Axis<double>" << endl;
+  MEAL::Axis<double> axis;
 
-  cerr << "Connecting Calibration::Polynomial::set_abscissa"
-    " to Calibration::Axis<double>" << endl;
+  cerr << "Connecting MEAL::Polynomial::set_abscissa"
+    " to MEAL::Axis<double>" << endl;
 
   poly.set_argument (0, &axis);
 
   double test_value = 3.4;
 
-  cerr << "Instantiating Calibration::Axis<double>::Value" << endl;
+  cerr << "Instantiating MEAL::Axis<double>::Value" << endl;
 
-  Calibration::Argument::Value* abscissa = axis.new_Value (test_value);
+  MEAL::Argument::Value* abscissa = axis.new_Value (test_value);
 
   if (poly.get_abscissa() != 0.0) {
     cerr << "Error Polynomial::get_abscissa=" << poly.get_abscissa() << " != 0"
@@ -30,7 +32,7 @@ int main (int argc, char** argv)
     return -1;
   }
 
-  cerr << "Calling Calibration::Axis<double>::apply" << endl;
+  cerr << "Calling MEAL::Axis<double>::apply" << endl;
   abscissa->apply();
 
   if (poly.get_abscissa() != test_value) {
@@ -46,6 +48,6 @@ int main (int argc, char** argv)
   return -1;
 }
 
-  cerr << "Calibration::Feed constructor passes test" << endl;
+  cerr << "MEAL::Feed constructor passes test" << endl;
   return 0;
 }

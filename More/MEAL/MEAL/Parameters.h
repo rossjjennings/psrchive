@@ -1,21 +1,21 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Parameters.h,v $
-   $Revision: 1.2 $
-   $Date: 2004/11/22 16:00:09 $
+   $Revision: 1.3 $
+   $Date: 2004/11/22 19:26:04 $
    $Author: straten $ */
 
 #ifndef __Parameters_H
 #define __Parameters_H
 
-#include "MEPL/ParameterBehaviour.h"
+#include "MEAL/ParameterBehaviour.h"
 
 #include "Estimate.h"
 #include "Error.h"
 
 #include <vector>
 
-namespace Model {
+namespace MEAL {
   
   //! Abstract base class implements parameter storage and access
   class Parameters : public ParameterBehaviour {
@@ -46,7 +46,7 @@ namespace Model {
     //! Return the value of the specified parameter
     double get_param (unsigned index) const
     {
-      range_check (index, "Model::Parameters::get_param");
+      range_check (index, "MEAL::Parameters::get_param");
       return params[index].val;
     }
 
@@ -56,28 +56,28 @@ namespace Model {
     //! Return the variance of the specified parameter
     double get_variance (unsigned index) const
     {
-      range_check (index, "Model::Parameters::get_variance");
+      range_check (index, "MEAL::Parameters::get_variance");
       return params[index].var;
     }
 
     //! Set the variance of the specified parameter
     void set_variance (unsigned index, double value)
     {
-      range_check (index, "Model::Parameters::set_variance");
+      range_check (index, "MEAL::Parameters::set_variance");
       params[index].var = value;
     }
 
     //! Return true if parameter at index is to be fitted
     bool get_infit (unsigned index) const
     {
-      range_check (index, "Model::Parameters::get_infit");
+      range_check (index, "MEAL::Parameters::get_infit");
       return fit[index];
     }
 
     //! Set flag for parameter at index to be fitted
     void set_infit (unsigned index, bool flag)
     {
-      range_check (index, "Model::Parameters::set_infit");
+      range_check (index, "MEAL::Parameters::set_infit");
       fit[index] = flag;
     }
 
@@ -99,10 +99,10 @@ namespace Model {
   private:
 
     //! The Estimates of the parameters
-    vector<Estimate<double> > params;
+    std::vector<Estimate<double> > params;
 
     //! Fit flag for each Stokes parameter
-    vector<bool> fit;
+    std::vector<bool> fit;
 
   };
 

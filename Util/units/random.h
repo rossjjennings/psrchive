@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/random.h,v $
-   $Revision: 1.2 $
-   $Date: 2003/03/03 09:56:15 $
+   $Revision: 1.3 $
+   $Date: 2004/11/22 19:26:04 $
    $Author: straten $ */
 
 #ifndef __random_H
@@ -11,8 +11,6 @@
 #include <complex>
 #include <stdlib.h>
 
-#include "psr_cpp.h"
-
 template <class T, class U>
 void random_value (T& value, U scale)
 {
@@ -20,14 +18,14 @@ void random_value (T& value, U scale)
 }
 
 template <class T, class U>
-void random_value (complex<T>& value, U scale)
+void random_value (std::complex<T>& value, U scale)
 {
   T real=0, imag=0;
 
   random_value (real, scale);
   random_value (imag, scale);
 
-  value = complex<T> (real, imag);
+  value = std::complex<T> (real, imag);
 }
 
 template <class T, class U>

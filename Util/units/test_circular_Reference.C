@@ -1,6 +1,8 @@
 #include "Reference.h"
 #include <iostream>
 
+using namespace std;
+
 class Manager;
 
 class ManageAble: public Reference::Able {
@@ -28,7 +30,7 @@ public:
     cerr << "Manager::manage return" << endl;
   }
   
-  vector< Reference::To<ManageAble> > my_managed;
+  std::vector< Reference::To<ManageAble> > my_managed;
 
   static unsigned instance_count;
 };

@@ -1,8 +1,8 @@
-#include "MEPL/Projection.h"
-#include "MEPL/Composite.h"
+#include "MEAL/Projection.h"
+#include "MEAL/Composite.h"
 
 //! Default constructor
-Model::Projection::Projection (Function* _model, Composite* _meta)
+MEAL::Projection::Projection (Function* _model, Composite* _meta)
 {
   model = _model;
 
@@ -11,30 +11,30 @@ Model::Projection::Projection (Function* _model, Composite* _meta)
 }
 
 //! Return the mapped index
-unsigned Model::Projection::get_imap (unsigned index) const
+unsigned MEAL::Projection::get_imap (unsigned index) const
 {
   if (!model)
-    throw Error (InvalidRange, "Model::Projection::get_imap",
-		 "no Model");
+    throw Error (InvalidRange, "MEAL::Projection::get_imap",
+		 "no Function");
 
   if (model->get_nparam() != imap.size())
-    throw Error (InvalidRange, "Model::Projection::get_imap",
-                 "Model::nparam=%d >= nmap=%d",
+    throw Error (InvalidRange, "MEAL::Projection::get_imap",
+                 "MEAL::nparam=%d >= nmap=%d",
 		 model->get_nparam(), imap.size());
 
   if (index >= imap.size())
-    throw Error (InvalidRange, "Model::Projection::get_imap",
+    throw Error (InvalidRange, "MEAL::Projection::get_imap",
 		 "index=%d >= nmap=%d", index, imap.size());
 
   return imap[index];
 }
 
-Model::Function* Model::Projection::get_Function ()
+MEAL::Function* MEAL::Projection::get_Function ()
 {
   return model;
 }
 
-void Model::Projection::set_Function (Function* _model)
+void MEAL::Projection::set_Function (Function* _model)
 {
   if (model.ptr() == _model)
     return;

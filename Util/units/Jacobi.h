@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Jacobi.h,v $
-   $Revision: 1.4 $
-   $Date: 2004/04/28 20:19:28 $
+   $Revision: 1.5 $
+   $Date: 2004/11/22 19:26:04 $
    $Author: straten $ */
 
 #ifndef __Jacobi_H
@@ -61,8 +61,8 @@ void calculate_Jacobi (const U& p, const U& q, const T& pq,
   
 // returns the correction factor for the diagonal
 template <typename T, typename U>
-void calculate_Jacobi (const U& p, const U& q, const complex<T>& pq,
-                       complex<T>& s, complex<T>& tau, U& correction)
+void calculate_Jacobi (const U& p, const U& q, const std::complex<T>& pq,
+                       std::complex<T>& s, std::complex<T>& tau, U& correction)
 {
   T Sq = 0.5 * (p-q);
   T Su = pq.real();
@@ -72,7 +72,7 @@ void calculate_Jacobi (const U& p, const U& q, const complex<T>& pq,
   Quaternion<T, Unitary> rotation = eigen (herm);
 
   T c = rotation.s0;
-  s = complex<T> (-rotation.s3, -rotation.s2);
+  s = std::complex<T> (-rotation.s3, -rotation.s2);
 
   // similar to Equation 11.1.18
   tau = conj(s)/(1.0+c);

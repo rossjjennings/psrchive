@@ -1,26 +1,28 @@
-#include "MEPL/ScalarLogarithm.h"
+#include "MEAL/ScalarLogarithm.h"
 #include <math.h>
 
+using namespace std;
+
 //! Return the name of the class
-string Model::ScalarLogarithm::get_name () const
+string MEAL::ScalarLogarithm::get_name () const
 {
   return "ScalarLogarithm";
 }
 
 //! The function
-double Model::ScalarLogarithm::function (double x) const
+double MEAL::ScalarLogarithm::function (double x) const
 {
   if (x < 0.0)
-    throw Error (InvalidState, "Model::ScalarLogarithm::function",
+    throw Error (InvalidState, "MEAL::ScalarLogarithm::function",
 		 "x < 0");
   return log(x); 
 }
 
 //! And its first derivative
-double Model::ScalarLogarithm::dfdx (double x) const
+double MEAL::ScalarLogarithm::dfdx (double x) const
 { 
   if (x < 0.0)
-    throw Error (InvalidState, "Model::ScalarLogarithm::dfdx",
+    throw Error (InvalidState, "MEAL::ScalarLogarithm::dfdx",
 		 "x < 0");
   return 1/x;
 }

@@ -1,16 +1,16 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/UnaryExample.h,v $
-   $Revision: 1.2 $
-   $Date: 2004/11/22 16:00:09 $
+   $Revision: 1.3 $
+   $Date: 2004/11/22 19:26:04 $
    $Author: straten $ */
 
-#ifndef __Model_UnaryExample_H
-#define __Model_UnaryExample_H
+#ifndef __MEAL_UnaryExample_H
+#define __MEAL_UnaryExample_H
 
-#include "MEPL/UnaryScalar.h"
+#include "MEAL/UnaryScalar.h"
 
-namespace Model {
+namespace MEAL {
 
   //! Example of a UnaryScalar child
   class UnaryExample : public UnaryScalar

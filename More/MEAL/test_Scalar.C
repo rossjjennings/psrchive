@@ -1,22 +1,24 @@
-#include "Calibration/ScalarMath.h"
-#include "Calibration/ScalarValue.h"
+#include "MEAL/ScalarMath.h"
+#include "MEAL/ScalarValue.h"
+
+using namespace std;
 
 #include <complex>
 
 int main (int argc, char** argv) try {
 
-  complex<Calibration::ScalarMath> w (1.2, 3.4);
-  complex<Calibration::ScalarMath> z (-5.6, 7.8);
+  std::complex<MEAL::ScalarMath> w (1.2, 3.4);
+  std::complex<MEAL::ScalarMath> z (-5.6, 7.8);
 
-  complex<Calibration::ScalarMath> product = w * z;
+  std::complex<MEAL::ScalarMath> product = w * z;
 
   Estimate<double> x (4.6, 0.09);
   Estimate<double> y (-0.5, 0.01);
   Estimate<double> z1, z2;
 
-  Calibration::ScalarMath xp = *(new Calibration::ScalarValue (x));
-  Calibration::ScalarMath yp = *(new Calibration::ScalarValue (y));
-  Calibration::ScalarMath result;
+  MEAL::ScalarMath xp = *(new MEAL::ScalarValue (x));
+  MEAL::ScalarMath yp = *(new MEAL::ScalarValue (y));
+  MEAL::ScalarMath result;
 
   cerr << "\nTesting with:" << endl;
   cerr << "x=" << x << " y=" << y << endl;
@@ -129,12 +131,12 @@ int main (int argc, char** argv) try {
   Estimate<double> V (-0.05, 0.00070);
   Estimate<double> inv;
 
-  Calibration::ScalarMath SI = I;
-  Calibration::ScalarMath SQ = Q;
-  Calibration::ScalarMath SU = U;
-  Calibration::ScalarMath SV = V;
+  MEAL::ScalarMath SI = I;
+  MEAL::ScalarMath SQ = Q;
+  MEAL::ScalarMath SU = U;
+  MEAL::ScalarMath SV = V;
 
-  Calibration::ScalarMath Sinv = sqrt (SI*SI -SQ*SQ -SU*SU -SV*SV);
+  MEAL::ScalarMath Sinv = sqrt (SI*SI -SQ*SQ -SU*SU -SV*SV);
 
   inv = Sinv.get_Estimate();
 

@@ -2,9 +2,10 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdarg.h>
-#include <signal.h>
 
 #include "Error.h"
+
+using namespace std;
 
 bool Error::verbose = false;
 bool Error::complete_abort = false;
@@ -53,7 +54,7 @@ void Error::construct (ErrorCode c, const string& func, const char* msg)
   if (verbose)
     cerr << *this << endl;
   if( complete_abort )
-    raise(SIGKILL);
+    abort ();
 }
 
 void Error::errno_check ()

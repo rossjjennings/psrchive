@@ -3,7 +3,7 @@
 
 // #define _DEBUG 1
 
-vector<const void*> Reference::HeapTracked::__heap_addresses;
+std::vector<const void*> Reference::HeapTracked::__heap_addresses;
 
 bool Reference::verbose = false;
 
@@ -70,7 +70,7 @@ bool Reference::HeapTracked::__is_on_heap ()
     throw Error (InvalidPointer, "Reference::HeapTracked::is_on_heap",
 		 "failed dynamic_cast<const void*>(%p)", this);
   
-  vector<const void*>::iterator it;
+  std::vector<const void*>::iterator it;
 
   for (it = __heap_addresses.begin(); it != __heap_addresses.end(); it++) {
 

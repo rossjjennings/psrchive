@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Pauli.h,v $
-   $Revision: 1.15 $
-   $Date: 2004/07/03 07:21:30 $
+   $Revision: 1.16 $
+   $Date: 2004/11/22 19:26:04 $
    $Author: straten $ */
 
 #ifndef __Pauli_H
@@ -23,7 +23,7 @@ namespace Pauli {
 
 // convert Hermitian Quaternion to Jones matrix
 template<typename T>
-const Jones<T> convert (const Quaternion<complex<T>,Hermitian>& q)
+const Jones<T> convert (const Quaternion<std::complex<T>,Hermitian>& q)
 {
   return Jones<T> (q.s0+q.s1, q.s2-ci(q.s3),
 		   q.s2+ci(q.s3), q.s0-q.s1);
@@ -31,7 +31,7 @@ const Jones<T> convert (const Quaternion<complex<T>,Hermitian>& q)
 
 // convert Unitary Quaternion to Jones matrix
 template<typename T>
-const Jones<T> convert (const Quaternion<complex<T>,Unitary>& q)
+const Jones<T> convert (const Quaternion<std::complex<T>,Unitary>& q)
 {
   return Jones<T> (q.s0+ci(q.s1), q.s3+ci(q.s2),
 		   -q.s3+ci(q.s2), q.s0-ci(q.s1));
@@ -41,8 +41,8 @@ const Jones<T> convert (const Quaternion<complex<T>,Unitary>& q)
 template<typename T>
 const Jones<T> convert (const Quaternion<T,Hermitian>& q)
 {
-  return Jones<T> ( complex<T>(q.s0+q.s1,0.0), complex<T>(q.s2,-q.s3),
-		    complex<T>(q.s2,q.s3), complex<T>(q.s0-q.s1,0.0) );
+  return Jones<T> ( std::complex<T>(q.s0+q.s1,0.0), std::complex<T>(q.s2,-q.s3),
+		    std::complex<T>(q.s2,q.s3), std::complex<T>(q.s0-q.s1,0.0) );
 }
 
 // convert Unitary Quaternion to Jones matrix
@@ -55,9 +55,9 @@ const Jones<T> convert (const Quaternion<T,Unitary>& q)
 
 // convert complex Stokes parameters to Jones matrix
 template<typename T>
-const Jones<T> convert (const Stokes< complex<T> >& stokes)
+const Jones<T> convert (const Stokes< std::complex<T> >& stokes)
 {
-  Quaternion<complex<T>,Hermitian> q;
+  Quaternion<std::complex<T>,Hermitian> q;
   q.set_scalar (stokes.get_scalar());
   q.set_vector (Pauli::basis.get_out(stokes.get_vector()));
   return convert (q);
@@ -74,21 +74,21 @@ const Jones<T> convert (const Stokes<T>& stokes)
 
 // convert coherency vector to Jones matrix
 template<typename T>
-const Jones<T> convert (const vector<T>& c)
+const Jones<T> convert (const std::vector<T>& c)
 {
   if (c.size() != 4)
-    throw Error (InvalidParam, "Jones<T> convert (vector<T>)",
+    throw Error (InvalidParam, "Jones<T> convert (std::vector<T>)",
 		 "vector.size=%d != 4", c.size());
 
-  return Jones<T> (c[0], complex<T> (c[2], -c[3]),
-		   complex<T> (c[2], c[3]), c[1]);
+  return Jones<T> (c[0], std::complex<T> (c[2], -c[3]),
+		   std::complex<T> (c[2], c[3]), c[1]);
 }
 
 // convert Jones matrix to Hermitian Biquaternion
 template<typename T>
-const Quaternion<complex<T>, Hermitian> convert (const Jones<T>& j)
+const Quaternion<std::complex<T>, Hermitian> convert (const Jones<T>& j)
 {
-  return Quaternion<complex<T>, Hermitian>
+  return Quaternion<std::complex<T>, Hermitian>
     ( T(0.5) * (j.j00 + j.j11),
       T(0.5) * (j.j00 - j.j11),
       T(0.5) * (j.j01 + j.j10),
@@ -97,9 +97,9 @@ const Quaternion<complex<T>, Hermitian> convert (const Jones<T>& j)
 
 // convert Jones matrix to Unitary Biquaternion
 template<typename T>
-const Quaternion<complex<T>, Unitary> unitary (const Jones<T>& j)
+const Quaternion<std::complex<T>, Unitary> unitary (const Jones<T>& j)
 {
-  return Quaternion<complex<T>, Unitary>
+  return Quaternion<std::complex<T>, Unitary>
     ( T(0.5) *     (j.j00 + j.j11),
       T(-0.5) * ci (j.j00 - j.j11),
       T(-0.5) * ci (j.j01 + j.j10),
@@ -110,13 +110,13 @@ const Quaternion<complex<T>, Unitary> unitary (const Jones<T>& j)
 template<typename T>
 const Stokes<T> coherency (const Jones<T>& j)
 {
-  Quaternion<complex<T>,Hermitian> h = convert (j);
+  Quaternion<std::complex<T>,Hermitian> h = convert (j);
   return coherency (h);
 }
 
 // convert a complex Hermitian Quaternion to Stokes parameters
 template<typename T>
-const Stokes<T> coherency (const Quaternion<complex<T>,Hermitian>& q)
+const Stokes<T> coherency (const Quaternion<std::complex<T>,Hermitian>& q)
 {
     Quaternion<T,Hermitian> realpart (real(q));
     Quaternion<T,Hermitian> imaginary (imag(q));
@@ -125,10 +125,10 @@ const Stokes<T> coherency (const Quaternion<complex<T>,Hermitian>& q)
     if (ni > 1e-5 * nr)
 #if THROW
       throw Error (InvalidParam,
-                   "Stokes::operator = Quaternion<complex<U>,Hermitian>",
+                   "Stokes::operator = Quaternion<std::complex<U>,Hermitian>",
                    "non-zero imaginary component");
 #else
-      cerr << "Stokes::operator = Quaternion<complex<U>,Hermitian> "
+      cerr << "Stokes::operator = Quaternion<std::complex<U>,Hermitian> "
               "non-zero imaginary component\n"
               "   norm(imag(q))=" << ni << " norm=" << nr << endl;
 #endif
@@ -151,7 +151,7 @@ const Stokes<T> transform (const Stokes<T>& input, const Jones<U>& jones)
 
 // convert Jones matrix to Hermitian and Unitary Quaternion
 template<typename T>
-void polar (complex<T>& d, Quaternion<T, Hermitian>& h,
+void polar (std::complex<T>& d, Quaternion<T, Hermitian>& h,
 	    Quaternion<T, Unitary>& u, Jones<T> j)
 {
   // make j unimodular

@@ -3,6 +3,8 @@
 #include <string>
 #include <math.h>
 
+using namespace std;
+
 class parent : public Reference::Able {
 
 public:

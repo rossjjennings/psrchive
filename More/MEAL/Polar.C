@@ -1,7 +1,7 @@
-#include "MEPL/Polar.h"
-#include "MEPL/Gain.h"
-#include "MEPL/Boost.h"
-#include "MEPL/Rotation.h"
+#include "MEAL/Polar.h"
+#include "MEAL/Gain.h"
+#include "MEAL/Boost.h"
+#include "MEAL/Rotation.h"
 
 #include "Pauli.h"
 
@@ -9,76 +9,76 @@
 
 // #define _DEBUG 1
 
-void Model::Polar::init ()
+void MEAL::Polar::init ()
 {
 
 #ifdef _DEBUG
-  cerr << "Model::Polar::init" << endl;
+  cerr << "MEAL::Polar::init" << endl;
 #endif
 
   // name = "Polar";
 
   // Note, these objects will be destroyed during Reference::To destructor
-  gain  = new Model::Gain;
+  gain  = new MEAL::Gain;
   add_model (gain);
   // gain->name = "Polar::Gain";
 
-  boost = new Model::Boost;
+  boost = new MEAL::Boost;
   add_model (boost);
   // boost->name = "Polar::Boost";
 
   for (unsigned i=0; i<3; i++) {
 
-    rotation[i] = new Model::Rotation(Vector<double, 3>::basis(i));
-    // rotation[i]->name = "Polar::Rotation " + string(1, char('0' + i));
+    rotation[i] = new MEAL::Rotation(Vector<double, 3>::basis(i));
+    // rotation[i]->name = "Polar::Rotation " + std::string(1, char('0' + i));
 
     add_model (rotation[i]);
 
   }
 
 #ifdef _DEBUG
-  cerr << "Model::Polar::init exit" << endl;
+  cerr << "MEAL::Polar::init exit" << endl;
 #endif
 
 }
   
-Model::Polar::Polar ()
+MEAL::Polar::Polar ()
 {
   init ();
 }
 
-Model::Polar::~Polar ()
+MEAL::Polar::~Polar ()
 {
 #ifdef _DEBUG
-  cerr << "Model::Polar destructor" << endl;
+  cerr << "MEAL::Polar destructor" << endl;
 #endif
 }
 
-Model::Polar::Polar (const Polar& polar)
+MEAL::Polar::Polar (const Polar& polar)
 {
 
 #ifdef _DEBUG
-  cerr << "Model::Polar copy constructor" << endl;
+  cerr << "MEAL::Polar copy constructor" << endl;
 #endif
 
   init ();
   operator = (polar);
 
 #ifdef _DEBUG
-  cerr << "Model::Polar copy constructor exit" << endl;
+  cerr << "MEAL::Polar copy constructor exit" << endl;
 #endif
 
 }
 
 //! Equality Operator
-const Model::Polar& 
-Model::Polar::operator = (const Polar& polar)
+const MEAL::Polar& 
+MEAL::Polar::operator = (const Polar& polar)
 {
   if (&polar == this)
     return *this;
 
 #ifdef _DEBUG
-  cerr << "Model::Polar operator =" << endl;
+  cerr << "MEAL::Polar operator =" << endl;
 #endif
 
   *gain = *(polar.gain);
@@ -90,19 +90,19 @@ Model::Polar::operator = (const Polar& polar)
 }
 
 //! Return the name of the class
-string Model::Polar::get_name () const
+std::string MEAL::Polar::get_name () const
 {
   return "Polar";
 }
 
 
-Estimate<double> Model::Polar::get_gain () const
+Estimate<double> MEAL::Polar::get_gain () const
 {
   return gain->get_Estimate(0);
 }
 
 
-Estimate<double> Model::Polar::get_boostGibbs (unsigned i) const
+Estimate<double> MEAL::Polar::get_boostGibbs (unsigned i) const
 {
   assert (i < 3);
   assert (boost->get_nparam() == 3);
@@ -110,23 +110,23 @@ Estimate<double> Model::Polar::get_boostGibbs (unsigned i) const
   return boost->get_Estimate(i);
 }
 
-Estimate<double> Model::Polar::get_rotationEuler (unsigned i) const
+Estimate<double> MEAL::Polar::get_rotationEuler (unsigned i) const
 {
   return rotation[i]->get_Estimate(0);
 }
 
-void Model::Polar::set_gain (const Estimate<double>& g)
+void MEAL::Polar::set_gain (const Estimate<double>& g)
 {
   gain->set_Estimate (0, g);
 }
 
-void Model::Polar::set_boostGibbs (unsigned i, 
+void MEAL::Polar::set_boostGibbs (unsigned i, 
 					 const Estimate<double>& b)
 {
   boost->set_Estimate (i, b);
 }
    
-void Model::Polar::set_rotationEuler (unsigned i,
+void MEAL::Polar::set_rotationEuler (unsigned i,
 					    const Estimate<double>& phi_i)
 {
   rotation[i]->set_Estimate (0, phi_i);
@@ -142,7 +142,7 @@ void Model::Polar::set_rotationEuler (unsigned i,
 
   \post source and sky will be modified to represent the un-boosted
   Stokes parameters.  */
-void Model::Polar::solve (Quaternion<Estimate<double>, Hermitian>& source,
+void MEAL::Polar::solve (Quaternion<Estimate<double>, Hermitian>& source,
 				Quaternion<Estimate<double>, Hermitian>& sky)
 {
   // Assuming that the off pulse radiation is unpolarized, the boost
@@ -157,7 +157,7 @@ void Model::Polar::solve (Quaternion<Estimate<double>, Hermitian>& source,
     b[i] = boost[i].val;
   Jones< double > j = convert (b);
 
-  complex<double > d;
+  std::complex<double > d;
   Quaternion<double, Hermitian> hq;
   Quaternion<double, Unitary> uq;
 

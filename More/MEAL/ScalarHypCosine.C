@@ -1,20 +1,22 @@
-#include "MEPL/ScalarHypCosine.h"
+#include "MEAL/ScalarHypCosine.h"
 #include <math.h>
 
+using namespace std;
+
 //! Return the name of the class
-string Model::ScalarHypCosine::get_name () const
+string MEAL::ScalarHypCosine::get_name () const
 {
   return "ScalarHypCosine";
 }
 
 //! The function
-double Model::ScalarHypCosine::function (double x) const
+double MEAL::ScalarHypCosine::function (double x) const
 {
   return cosh(x); 
 }
 
 //! And its first derivative
-double Model::ScalarHypCosine::dfdx (double x) const
+double MEAL::ScalarHypCosine::dfdx (double x) const
 { 
   return sinh(x);
 }

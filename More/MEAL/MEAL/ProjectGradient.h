@@ -1,20 +1,20 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/ProjectGradient.h,v $
-   $Revision: 1.2 $
-   $Date: 2004/11/22 16:00:09 $
+   $Revision: 1.3 $
+   $Date: 2004/11/22 19:26:04 $
    $Author: straten $ */
 
 #ifndef __ProjectProductGradient_H
 #define __ProjectProductGradient_H
 
-#include "MEPL/Projection.h"
+#include "MEAL/Projection.h"
 
-namespace Model {
+namespace MEAL {
 
   template <class Function, class Grad>
   void ProjectGradient (const Project<Function>& model, unsigned& igrad,
-			const vector<Grad>& input, vector<Grad>& output)
+			const std::vector<Grad>& input, std::vector<Grad>& output)
   {
     unsigned nparam = model->get_nparam();
     
@@ -23,8 +23,8 @@ namespace Model {
       unsigned imap = model.get_map()->get_imap (iparam);
 
       if (Function::verbose)
-	cerr << "ProjectGradient iparam=" << iparam << " imap=" << imap
-	     << " igrad=" << igrad << endl;
+	std::cerr << "ProjectGradient iparam=" << iparam << " imap=" << imap
+	     << " igrad=" << igrad << std::endl;
 
       output[imap] += input[igrad];
       
@@ -35,15 +35,15 @@ namespace Model {
 
   template <class Function, class Grad>
   void ProjectGradient (const Project<Function>& model,
-			const vector<Grad>& input, vector<Grad>& output)
+			const std::vector<Grad>& input, std::vector<Grad>& output)
   {
     unsigned igrad = 0;
     ProjectGradient (model, igrad, input, output);
   }
 
   template <class Function, class Grad>
-  void ProjectGradient (const vector<Project<Function> >& model,
-			const vector<Grad>& input, vector<Grad>& output)
+  void ProjectGradient (const std::vector<Project<Function> >& model,
+			const std::vector<Grad>& input, std::vector<Grad>& output)
   {
     unsigned nparam = output.size();
     unsigned nmodel = model.size();
@@ -57,8 +57,8 @@ namespace Model {
     for (unsigned imodel=0; imodel<nmodel; imodel++) {
 
       if (Function::verbose)
-	cerr << "ProjectGradient imodel=" << imodel 
-	     << " igrad=" << igrad << endl;
+	std::cerr << "ProjectGradient imodel=" << imodel 
+	     << " igrad=" << igrad << std::endl;
 
       ProjectGradient (model[imodel], igrad, input, output);
 
@@ -66,7 +66,7 @@ namespace Model {
 
     // sanity check, ensure that all elements have been set
     if (igrad != input.size())
-      throw Error (InvalidState, "Model::ProjectProductGradient",
+      throw Error (InvalidState, "MEAL::ProjectProductGradient",
 		   "on completion igrad=%d != ngrad=%d",
 		   igrad, input.size());
   }

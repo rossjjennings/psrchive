@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/EstimatePlotter.h,v $
-   $Revision: 1.9 $
-   $Date: 2004/06/22 06:02:51 $
+   $Revision: 1.10 $
+   $Date: 2004/11/22 19:26:03 $
    $Author: straten $ */
 
 #ifndef __EstimatePlotter_h
@@ -12,8 +12,6 @@
 #include "Error.h"
 
 #include <vector>
-
-#include "psr_cpp.h"
 
 class EstimatePlotter {
 
@@ -53,13 +51,13 @@ class EstimatePlotter {
   void restore_viewport ();
 
   //! Add a vector of Estimates to the current data set
-  template<class T> void add_plot (const vector< Estimate<T> >& data);
+  template<class T> void add_plot (const std::vector< Estimate<T> >& data);
 
   template<class Xt, class Yt>
-  void add_plot (const vector<Xt>& xdata, const vector< Estimate<Yt> >& ydata);
+  void add_plot (const std::vector<Xt>& xdata, const std::vector< Estimate<Yt> >& ydata);
 
   //! Plot the specified data set
-  template<class T> void plot (const vector< Estimate<T> >& data);
+  template<class T> void plot (const std::vector< Estimate<T> >& data);
 
   //! Plot the specified member of the current data set
   unsigned plot (unsigned index);
@@ -69,9 +67,9 @@ class EstimatePlotter {
 
   void minmax (bool& xrange_set, float& xmin, float& xmax,
 	       bool& yrange_set, float& ymin, float& ymax,
-	       const vector<float>& x,
-	       const vector<float>& y,
-	       const vector<float>& yerr);
+	       const std::vector<float>& x,
+	       const std::vector<float>& y,
+	       const std::vector<float>& yerr);
 
  protected:
 
@@ -100,16 +98,16 @@ class EstimatePlotter {
   //! PGPLOT Standard Graph Marker
   int graph_marker;
 
-  vector< vector<float> > xval;
-  vector< vector<float> > yval;
-  vector< vector<float> > yerr;
+  std::vector< std::vector<float> > xval;
+  std::vector< std::vector<float> > yval;
+  std::vector< std::vector<float> > yerr;
   
  private:
 
-  vector<float> data_xmin;
-  vector<float> data_xmax;
-  vector<float> data_ymin;
-  vector<float> data_ymax;
+  std::vector<float> data_xmin;
+  std::vector<float> data_xmax;
+  std::vector<float> data_ymin;
+  std::vector<float> data_ymax;
 
   float vp_x1, vp_x2, vp_y1, vp_y2;
 
@@ -120,7 +118,7 @@ class EstimatePlotter {
 };
 
 template<class T> 
-void EstimatePlotter::plot (const vector< Estimate<T> >& data)
+void EstimatePlotter::plot (const std::vector< Estimate<T> >& data)
 {
   clear ();
   add_plot (data);
@@ -128,19 +126,19 @@ void EstimatePlotter::plot (const vector< Estimate<T> >& data)
 }
 
 template<class T> 
-void EstimatePlotter::add_plot (const vector< Estimate<T> >& data)
+void EstimatePlotter::add_plot (const std::vector< Estimate<T> >& data)
 {
   unsigned ipt = 0, npt = data.size();
   if (npt == 0)
     return;
   
-  xval.push_back ( vector<float>(npt) );
-  yval.push_back ( vector<float>(npt) );
-  yerr.push_back ( vector<float>(npt) );
+  xval.push_back ( std::vector<float>(npt) );
+  yval.push_back ( std::vector<float>(npt) );
+  yerr.push_back ( std::vector<float>(npt) );
 
-  vector<float>& x = xval.back();
-  vector<float>& y = yval.back();
-  vector<float>& ye = yerr.back();
+  std::vector<float>& x = xval.back();
+  std::vector<float>& y = yval.back();
+  std::vector<float>& ye = yerr.back();
 
   double xscale = 0.0;
   if (npt > 1)
@@ -163,8 +161,8 @@ void EstimatePlotter::add_plot (const vector< Estimate<T> >& data)
 }
 
 template<class Xt, class Yt> 
-void EstimatePlotter::add_plot (const vector<Xt>& xdata,
-				const vector< Estimate<Yt> >& ydata)
+void EstimatePlotter::add_plot (const std::vector<Xt>& xdata,
+				const std::vector< Estimate<Yt> >& ydata)
 {
   unsigned ipt = 0, npt = xdata.size();
   if (npt == 0)
@@ -174,13 +172,13 @@ void EstimatePlotter::add_plot (const vector<Xt>& xdata,
     throw Error (InvalidParam, "EstimatePlotter::add_plot (Xt, Yt)",
 		 "xdata.size=%d != ydata.size=%d", npt, ydata.size());
 
-  xval.push_back ( vector<float>(npt) );
-  yval.push_back ( vector<float>(npt) );
-  yerr.push_back ( vector<float>(npt) );
+  xval.push_back ( std::vector<float>(npt) );
+  yval.push_back ( std::vector<float>(npt) );
+  yerr.push_back ( std::vector<float>(npt) );
 
-  vector<float>& x = xval.back();
-  vector<float>& y = yval.back();
-  vector<float>& ye = yerr.back();
+  std::vector<float>& x = xval.back();
+  std::vector<float>& y = yval.back();
+  std::vector<float>& ye = yerr.back();
 
   for (ipt=0; ipt<npt; ipt++) {
     ye[ipt] = sqrt (ydata[ipt].var);

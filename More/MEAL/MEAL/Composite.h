@@ -1,18 +1,18 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Composite.h,v $
-   $Revision: 1.2 $
-   $Date: 2004/11/22 16:00:08 $
+   $Revision: 1.3 $
+   $Date: 2004/11/22 19:26:03 $
    $Author: straten $ */
 
 #ifndef __Composite_H
 #define __Composite_H
 
-#include "MEPL/ParameterBehaviour.h"
-#include "MEPL/ArgumentBehaviour.h"
-#include "MEPL/Projection.h"
+#include "MEAL/ParameterBehaviour.h"
+#include "MEAL/ArgumentBehaviour.h"
+#include "MEAL/Projection.h"
 
-namespace Model {
+namespace MEAL {
 
   //! Abstract base class representing a model composed of models
   class Composite : public ParameterBehaviour, public ArgumentBehaviour {
@@ -26,7 +26,7 @@ namespace Model {
     unsigned get_nmodel () const;
 
     //! Get the name used in verbose output
-    string class_name() const;
+    std::string class_name() const;
 
     // ///////////////////////////////////////////////////////////////////
     //
@@ -38,7 +38,7 @@ namespace Model {
     unsigned get_nparam () const;
 
     //! Return the name of the specified parameter
-    string get_param_name (unsigned index) const;
+    std::string get_param_name (unsigned index) const;
 
     //! Return the value of the specified parameter
     double get_param (unsigned index) const;
@@ -71,7 +71,7 @@ namespace Model {
     void map (Project<Type>& model, bool signal_changes = true)
     {
       if (very_verbose)
-	cerr << class_name() + "map (Project<Type>)" << endl;
+	std::cerr << class_name() + "map (Project<Type>)" << std::endl;
       map (model.get_map(), signal_changes);
     }
 
@@ -80,7 +80,7 @@ namespace Model {
     void unmap (Project<Type>& model, bool signal_changes = true)
     {
       if (very_verbose)
-	cerr << class_name() + "unmap (Project<Type>)" << endl;
+	std::cerr << class_name() + "unmap (Project<Type>)" << std::endl;
       unmap (model.get_map(), signal_changes);
     }
 
@@ -99,10 +99,10 @@ namespace Model {
   private:
 
     //! References to Projection instances
-    vector< Reference::To<Projection> > maps;
+    std::vector< Reference::To<Projection> > maps;
 
     //! References to Function instances
-    vector< Reference::To<Function> > models;
+    std::vector< Reference::To<Function> > models;
     
     //! The total number of Function parameters
     unsigned nparameters;
@@ -117,7 +117,7 @@ namespace Model {
     void attribute_changed (Attribute attribute);
 
     //! Recursive function does the work for map
-    void add_component (Function* model, vector<unsigned>& imap);
+    void add_component (Function* model, std::vector<unsigned>& imap);
 
     //! Recursive function does the work for unmap
     void remove_component (Function* model);

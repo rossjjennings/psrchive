@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Callback.h,v $
-   $Revision: 1.1 $
-   $Date: 2004/11/22 09:31:49 $
+   $Revision: 1.2 $
+   $Date: 2004/11/22 19:26:03 $
    $Author: straten $ */
 
 /* *************************************************************************
@@ -39,8 +39,8 @@ public:
   {
     clean ();
     for (unsigned irecv=0; irecv < recipients.size(); irecv++) {
-      if (verbose) cerr << "Callback::send " << irecv 
-			<< "/" << recipients.size() << endl;
+      if (verbose) std::cerr << "Callback::send " << irecv 
+			     << "/" << recipients.size() << std::endl;
       recipients[irecv] -> call (data);
     }
   }
@@ -73,7 +73,7 @@ public:
   
 protected:
   
-  vector< Reference::To<typename Functor<void(Type)>::Base> > recipients;
+  std::vector< Reference::To<typename Functor<void(Type)>::Base> > recipients;
 
   
   template<class Class, typename Method>

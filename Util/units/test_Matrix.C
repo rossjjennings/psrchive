@@ -1,6 +1,8 @@
 #include "Matrix.h"
 #include "random.h"
 
+using namespace std;
+
 int main ()
 {
   Matrix<float, 3, 4> m1;

@@ -3,6 +3,8 @@
 #include <stdio.h>
 #include <cpgplot.h>
 
+using namespace std;
+
 void plot_and_label (EstimatePlotter& plotter,
 		     unsigned iplot, unsigned ipol, float spacing)
 {
@@ -43,8 +45,8 @@ int main (int argc, char** argv)
     return -1;
   }
 
-  vector< Estimate<float> > stokes[4];
-  vector< float > para;
+  std::vector< Estimate<float> > stokes[4];
+  std::vector< float > para;
 
   float p;
   float I,Q,U,V;

@@ -237,10 +237,15 @@ unsigned EstimatePlotter::plot (unsigned index)
     throw Error (InvalidRange, "EstimatePlotter::plot",
 		 "iplot=%d >= nplot=%d", index, xval.size());
 
-  if (!viewports_set)
+  if (!viewports_set) {
+    // cerr << "set_world xmin=" << x_min << " xmax=" << x_max 
+         // << " ymin=" << y_min << " ymax=" << y_max << endl;
     set_world (x_min, x_max, y_min, y_max);
-  else
+  }
+  else {
+    // cerr << "set_viewport" << endl;
     set_viewport (index);
+  }
 
   unsigned npt = xval[index].size();
   unsigned plotted = 0;
@@ -265,9 +270,9 @@ unsigned EstimatePlotter::plot (unsigned index)
 
 void EstimatePlotter::minmax (bool& xrange, float& xmin, float& xmax,
 			      bool& yrange, float& ymin, float& ymax,
-			      const vector<float>& x,
-			      const vector<float>& y,
-			      const vector<float>& ye)
+			      const std::vector<float>& x,
+			      const std::vector<float>& y,
+			      const std::vector<float>& ye)
 {
   unsigned npt = x.size();
 

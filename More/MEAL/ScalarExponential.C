@@ -1,20 +1,22 @@
-#include "MEPL/ScalarExponential.h"
+#include "MEAL/ScalarExponential.h"
 #include <math.h>
 
+using namespace std;
+
 //! Return the name of the class
-string Model::ScalarExponential::get_name () const
+string MEAL::ScalarExponential::get_name () const
 {
   return "ScalarExponential";
 }
 
 //! The function
-double Model::ScalarExponential::function (double x) const
+double MEAL::ScalarExponential::function (double x) const
 {
   return exp(x); 
 }
 
 //! And its first derivative
-double Model::ScalarExponential::dfdx (double x) const
+double MEAL::ScalarExponential::dfdx (double x) const
 { 
   return exp(x);
 }

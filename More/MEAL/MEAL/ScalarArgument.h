@@ -1,18 +1,18 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/ScalarArgument.h,v $
-   $Revision: 1.2 $
-   $Date: 2004/11/22 16:00:09 $
+   $Revision: 1.3 $
+   $Date: 2004/11/22 19:26:04 $
    $Author: straten $ */
 
 #ifndef __ScalarArgument_H
 #define __ScalarArgument_H
 
-#include "MEPL/Scalar.h"
-#include "MEPL/Univariate.h"
-#include "MEPL/NoParameters.h"
+#include "MEAL/Scalar.h"
+#include "MEAL/Univariate.h"
+#include "MEAL/NoParameters.h"
 
-namespace Model {
+namespace MEAL {
 
   //! Represents a constant scalar value
   class ScalarArgument : public Scalar,public Univariate,public NoParameters {
@@ -38,7 +38,7 @@ namespace Model {
     // ///////////////////////////////////////////////////////////////////
 
     //! Return the name of the class
-    string get_name () const;
+    std::string get_name () const;
 
     // ///////////////////////////////////////////////////////////////////
     //
@@ -47,7 +47,7 @@ namespace Model {
     // ///////////////////////////////////////////////////////////////////
 
     //! Return the argument
-    double evaluate (vector<double>* gradient=0) const;
+    double evaluate (std::vector<double>* gradient=0) const;
     
   };
 

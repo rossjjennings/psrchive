@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Jones.h,v $
-   $Revision: 1.22 $
-   $Date: 2004/10/26 13:08:37 $
+   $Revision: 1.23 $
+   $Date: 2004/11/22 19:26:04 $
    $Author: straten $ */
 
 #ifndef __Jones_H
@@ -20,7 +20,7 @@ public:
   Jones (T scalar = 0.0)
     : j00(scalar), j01(0.0), j10(0.0), j11(scalar) { }
 
-  //! Construct from complex<T>
+  //! Construct from std::complex<T>
   Jones (std::complex<T> j00_, std::complex<T> j01_,
 	 std::complex<T> j10_, std::complex<T> j11_)
     : j00(j00_), j01(j01_), j10(j10_), j11(j11_) {  }
@@ -63,11 +63,11 @@ public:
   //! Multiply another Jones<T> instance into this one (this=this*j)
   Jones& operator *= (const Jones& j);
 
-  //! Multiply this instance by complex<U>
+  //! Multiply this instance by std::complex<U>
   template<typename U> Jones& operator *= (const std::complex<U>& au)
     { std::complex<T>a(au); j00*=a; j01*=a; j10*=a; j11*=a; return *this; }
 
-  //! Divide this instance by complex<U>
+  //! Divide this instance by std::complex<U>
   template<typename U> Jones& operator /= (const std::complex<U>& au)
     { std::complex<T>a(T(1.0),T(0.0));
       a/=au; j00*=a; j01*=a; j10*=a; j11*=a; return *this; }
@@ -107,12 +107,12 @@ public:
   const friend Jones operator * (Jones a, const Jones<U>& b)
     { a*=b; return a; }
 
-  //! Binary multiplication of Jones<T> and complex<U>
+  //! Binary multiplication of Jones<T> and std::complex<U>
   template<typename U> 
   const friend Jones operator * (Jones a, std::complex<U> c)
     { a*=c; return a; }
 
-  //! Binary multiplication of complex<U> and Jones<T>
+  //! Binary multiplication of std::complex<U> and Jones<T>
   template<typename U>
   const friend Jones operator * (std::complex<U> c, Jones a)
     { a*=c; return a; }

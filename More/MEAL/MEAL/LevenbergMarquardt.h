@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/LevenbergMarquardt.h,v $
-   $Revision: 1.2 $
-   $Date: 2004/11/22 16:00:09 $
+   $Revision: 1.3 $
+   $Date: 2004/11/22 19:26:04 $
    $Author: straten $ */
 
 #ifndef __Levenberg_Marquardt_h
@@ -13,7 +13,7 @@
 #include "Error.h"
 #include "casts.h"
 
-namespace Model {
+namespace MEAL {
 
   //! Implements the Levenberg-Marquardt algorithm for non-linear least squares
   /*! This template class implements the nonlinear least squares
@@ -38,7 +38,7 @@ namespace Model {
       bool get_infit (unsigned index) const;
 
       //! Return the value and gradient (wrt model parameters) of model at x
-      Yt evaluate (vector<Gt>* gradient);
+      Yt evaluate (std::vector<Gt>* gradient);
 
     };
     </pre>
@@ -82,21 +82,21 @@ namespace Model {
     
     //! returns initial chi-squared
     template <class Xt, class Yt, class Et, class Mt>
-    float init (const vector< Xt >& x,
-		const vector< Estimate<Yt,Et> >& y,
+    float init (const std::vector< Xt >& x,
+		const std::vector< Estimate<Yt,Et> >& y,
 		Mt& model);
     
     //! returns next chi-squared (better or worse)
     template <class Xt, class Yt, class Et, class Mt>
-    float iter (const vector< Xt >& x,
-		const vector< Estimate<Yt,Et> >& y,
+    float iter (const std::vector< Xt >& x,
+		const std::vector< Estimate<Yt,Et> >& y,
 		Mt& model);
 
     //! returns the best-fit answers
     template <class Mt>
     void result (Mt& model,
-		 vector<vector<double> >& covariance = null_arg,
-		 vector<vector<double> >& curvature = null_arg);
+		 std::vector<std::vector<double> >& covariance = null_arg,
+		 std::vector<std::vector<double> >& curvature = null_arg);
 
     //! lamda determines the dominance of the steepest descent method
     float lamda;
@@ -116,36 +116,36 @@ namespace Model {
     
     //! returns chi-squared and calculates the Hessian matrix and gradient
     template <class Xt, class Yt, class Et, class Mt>
-    float calculate_chisq (const vector< Xt >& x,
-			   const vector< Estimate<Yt,Et> >& y,
+    float calculate_chisq (const std::vector< Xt >& x,
+			   const std::vector< Estimate<Yt,Et> >& y,
 			   Mt& model);
 
   private:
 
     //! gradient of model: partial derivatives wrt its parameters
-    vector<Grad> gradient;
+    std::vector<Grad> gradient;
 
     //! gradient of chi-squared wrt model parameters
-    vector<double> beta;
+    std::vector<double> beta;
 
     //! curvature matrix
-    vector<vector<double> > alpha;
+    std::vector<std::vector<double> > alpha;
 
     //! next change to model
-    vector<vector<double> > delta;
+    std::vector<std::vector<double> > delta;
 
     //! chi-squared of best fit
     float best_chisq;                     
 
     //! curvature matrix (one half of Hessian matrix) of best fit
-    vector<vector<double> > best_alpha;
+    std::vector<std::vector<double> > best_alpha;
     //! gradient of chi-squared of best fit
-    vector<double> best_beta;
+    std::vector<double> best_beta;
 
     //! The parameters of the current model
-    vector<double> backup;
+    std::vector<double> backup;
 
-    static vector<vector<double> > null_arg;
+    static std::vector<std::vector<double> > null_arg;
 
   };
 
@@ -197,10 +197,10 @@ namespace Model {
 		const Xt& abscissa,
 		const Estimate<Yt,Et>& data,
 		// storage
-		vector<Grad>& gradient,
+		std::vector<Grad>& gradient,
 		// output
-		vector<vector<double> >& alpha,
-		vector<double>& beta);
+		std::vector<std::vector<double> >& alpha,
+		std::vector<double>& beta);
   
   //! Calculates alpha and beta
   /*! Wt must be a weighting scheme */
@@ -209,28 +209,28 @@ namespace Model {
 		 Mt& model,
 		 const Yt& delta_data,
 		 const Wt& weighting_scheme,
-		 const vector<Grad>& gradient,
+		 const std::vector<Grad>& gradient,
 		 // output
-		 vector<vector<double> >& alpha,
-		 vector<double>& beta);
+		 std::vector<std::vector<double> >& alpha,
+		 std::vector<double>& beta);
   
 }
 
 template <class Grad>
-vector<vector<double> > Model::LevenbergMarquardt<Grad>::null_arg;
+std::vector<std::vector<double> > MEAL::LevenbergMarquardt<Grad>::null_arg;
 
 template <class Grad>
-unsigned Model::LevenbergMarquardt<Grad>::verbose = 0;
+unsigned MEAL::LevenbergMarquardt<Grad>::verbose = 0;
 
 template <class Grad>
 template <class Xt, class Yt, class Et, class Mt>
-float Model::LevenbergMarquardt<Grad>::init
-(const vector< Xt >& x,
- const vector< Estimate<Yt,Et> >& y,
+float MEAL::LevenbergMarquardt<Grad>::init
+(const std::vector< Xt >& x,
+ const std::vector< Estimate<Yt,Et> >& y,
  Mt& model)
 {
   if (verbose > 2)
-    cerr << "Model::LevenbergMarquardt<Grad>::init" << endl;
+    cerr << "MEAL::LevenbergMarquardt<Grad>::init" << endl;
 
   // size all of the working space arrays
   alpha.resize  (model.get_nparam());
@@ -248,21 +248,21 @@ float Model::LevenbergMarquardt<Grad>::init
   lamda = 0.001;
 
   if (verbose > 0)
-    cerr << "Model::LevenbergMarquardt<Grad>::init chisq=" 
+    cerr << "MEAL::LevenbergMarquardt<Grad>::init chisq=" 
 	 << best_chisq << endl;
 
   return best_chisq;
 }
 
 template<class T>
-void verify_orthogonal (const vector<vector<double > >& alpha, const T& model)
+void verify_orthogonal (const std::vector<std::vector<double > >& alpha, const T& model)
 {
   unsigned nrow = alpha.size();
 
   if (!nrow)
     return;
 
-  vector<double> row_mod (nrow, 0.0);
+  std::vector<double> row_mod (nrow, 0.0);
 
   // calculate the size of each row vector
   for (unsigned irow=0; irow<nrow; irow++) {
@@ -309,7 +309,7 @@ void verify_orthogonal (const vector<vector<double > >& alpha, const T& model)
 }
 
 // /////////////////////////////////////////////////////////////////////////
-// Model::LevenbergMarquardt<Grad>::solve_delta
+// MEAL::LevenbergMarquardt<Grad>::solve_delta
 // /////////////////////////////////////////////////////////////////////////
 
 /*! Using the curvature matrix and gradient stored in the best_alpha
@@ -322,21 +322,21 @@ void verify_orthogonal (const vector<vector<double > >& alpha, const T& model)
 */
 template <class Grad>
 template <class Mt>
-void Model::LevenbergMarquardt<Grad>::solve_delta (const Mt& model)
+void MEAL::LevenbergMarquardt<Grad>::solve_delta (const Mt& model)
 {
   if (verbose > 2)
-    cerr << "Model::LevenbergMarquardt<Grad>::solve_delta" << endl;
+    cerr << "MEAL::LevenbergMarquardt<Grad>::solve_delta" << endl;
 
   if (alpha.size() != model.get_nparam())
     throw Error (InvalidState, 
-		 "Model::LevenbergMarquardt<Grad>::solve_delta",
+		 "MEAL::LevenbergMarquardt<Grad>::solve_delta",
 		  "alpha.size=%d != model.nparam=%d", 
 		 alpha.size(), model.get_nparam());
 
 #ifndef _DEBUG
   if (verbose > 2)
 #endif
-    cerr << "Model::LevenbergMarquardt<Grad>::solve_delta lamda="
+    cerr << "MEAL::LevenbergMarquardt<Grad>::solve_delta lamda="
 	 << lamda << " nparam=" << model.get_nparam() << endl;
 
   unsigned iinfit = 0;
@@ -359,32 +359,32 @@ void Model::LevenbergMarquardt<Grad>::solve_delta (const Mt& model)
 
   if (iinfit == 0)
     throw Error (InvalidState,
-		 "Model::LevenbergMarquardt<Grad>::solve_delta"
+		 "MEAL::LevenbergMarquardt<Grad>::solve_delta"
 		  "no parameters in fit");
 
   if (verbose > 2)
-    cerr << "Model::LevenbergMarquardt<Grad>::solve_delta for " << iinfit
+    cerr << "MEAL::LevenbergMarquardt<Grad>::solve_delta for " << iinfit
 	 << " parameters" << endl;
 
   //! curvature matrix
-  vector<vector<double> > temp_copy (alpha);
+  std::vector<std::vector<double> > temp_copy (alpha);
 
   try {
     // invert Equation 15.5.14
-    Model::GaussJordan (alpha, delta, iinfit, singular_threshold);
+    MEAL::GaussJordan (alpha, delta, iinfit, singular_threshold);
   }
   catch (Error& error)  {
     cerr << "Numerical::GaussJordan failed" << endl;
     verify_orthogonal (temp_copy, model);
-    throw error += "Model::LevenbergMarquardt<Grad>::solve_delta";
+    throw error += "MEAL::LevenbergMarquardt<Grad>::solve_delta";
   }
 
   if (verbose > 2)
-    cerr << "Model::LevenbergMarquardt<Grad>::solve_delta exit" << endl;
+    cerr << "MEAL::LevenbergMarquardt<Grad>::solve_delta exit" << endl;
 }
 
 // /////////////////////////////////////////////////////////////////////////
-// Model::LevenbergMarquardt<Grad>::iter
+// MEAL::LevenbergMarquardt<Grad>::iter
 // /////////////////////////////////////////////////////////////////////////
 
 /*! This method calls solve_delta to determine the change in model
@@ -406,13 +406,13 @@ void Model::LevenbergMarquardt<Grad>::solve_delta (const Mt& model)
 */
 template <class Grad>
 template <class Xt, class Yt, class Et, class Mt>
-float Model::LevenbergMarquardt<Grad>::iter
-(const vector< Xt >& x,
- const vector< Estimate<Yt,Et> >& y,
+float MEAL::LevenbergMarquardt<Grad>::iter
+(const std::vector< Xt >& x,
+ const std::vector< Estimate<Yt,Et> >& y,
  Mt& model)
 {
   if (verbose > 2)
-    cerr << "Model::LevenbergMarquardt<Grad>::iter" << endl;
+    cerr << "MEAL::LevenbergMarquardt<Grad>::iter" << endl;
 
   solve_delta (model);
 
@@ -420,7 +420,7 @@ float Model::LevenbergMarquardt<Grad>::iter
   // parameters.  Update the model.
 
   if (verbose > 2)
-    cerr << "Model::LevenbergMarquardt<Grad>::iter update model" << endl;
+    cerr << "MEAL::LevenbergMarquardt<Grad>::iter update model" << endl;
 
   unsigned iinfit = 0;
   for (unsigned ifit=0; ifit<model.get_nparam(); ifit++) {
@@ -441,7 +441,7 @@ float Model::LevenbergMarquardt<Grad>::iter
   }
 
   if (verbose > 2)
-    cerr << "Model::LevenbergMarquardt<Grad>::iter"
+    cerr << "MEAL::LevenbergMarquardt<Grad>::iter"
       " calculate new chisq" << endl;
   float new_chisq = calculate_chisq (x, y, model);
 
@@ -450,7 +450,7 @@ float Model::LevenbergMarquardt<Grad>::iter
     lamda *= lamda_decrease_factor;
 
     if (verbose)
-      cerr << "Model::LevenbergMarquardt<Grad>::iter new chisq="
+      cerr << "MEAL::LevenbergMarquardt<Grad>::iter new chisq="
            << new_chisq << "\n  better fit; lamda=" << lamda << endl;
 
     best_chisq = new_chisq;
@@ -463,7 +463,7 @@ float Model::LevenbergMarquardt<Grad>::iter
     lamda *= lamda_increase_factor;
 
     if (verbose)
-      cerr << "Model::LevenbergMarquardt<Grad>::iter new chisq="
+      cerr << "MEAL::LevenbergMarquardt<Grad>::iter new chisq="
            << new_chisq << "\n  worse fit; lamda=" << lamda << endl;
 
     // restore the old model
@@ -476,7 +476,7 @@ float Model::LevenbergMarquardt<Grad>::iter
 }
 
 // /////////////////////////////////////////////////////////////////////////
-// Model::LevenbergMarquardt<Grad>::result
+// MEAL::LevenbergMarquardt<Grad>::result
 // /////////////////////////////////////////////////////////////////////////
 
 /* After a call to init or iter, best_alpha contains the last
@@ -489,12 +489,12 @@ float Model::LevenbergMarquardt<Grad>::iter
 template <class Grad>
 template <class Mt>
 void 
-Model::LevenbergMarquardt<Grad>::result (Mt& model,
-					     vector<vector<double> >& covar,
-					     vector<vector<double> >& curve)
+MEAL::LevenbergMarquardt<Grad>::result (Mt& model,
+					     std::vector<std::vector<double> >& covar,
+					     std::vector<std::vector<double> >& curve)
 {
   if (verbose > 2)
-    cerr << "Model::LevenbergMarquardt<Grad>::result" << endl;
+    cerr << "MEAL::LevenbergMarquardt<Grad>::result" << endl;
 
   if (&curve != &null_arg)
     curve = best_alpha;
@@ -530,7 +530,7 @@ Model::LevenbergMarquardt<Grad>::result (Mt& model,
 }
 
 // /////////////////////////////////////////////////////////////////////////
-// Model::LevenbergMarquardt<Grad>::chisq
+// MEAL::LevenbergMarquardt<Grad>::chisq
 // /////////////////////////////////////////////////////////////////////////
 
 /* Given a set of abscissa, ordinate, ordinate error, and a model,
@@ -546,21 +546,21 @@ Model::LevenbergMarquardt<Grad>::result (Mt& model,
 */ 
 template <class Grad>
 template <class Xt, class Yt, class Et, class Mt>
-float Model::LevenbergMarquardt<Grad>::calculate_chisq
-(const vector< Xt >& x,
- const vector< Estimate<Yt,Et> >& y,
+float MEAL::LevenbergMarquardt<Grad>::calculate_chisq
+(const std::vector< Xt >& x,
+ const std::vector< Estimate<Yt,Et> >& y,
  Mt& model)
 {
   if (verbose > 2)
-    cerr << "Model::LevenbergMarquardt<Grad>::chisq" << endl;
+    cerr << "MEAL::LevenbergMarquardt<Grad>::chisq" << endl;
 
   if (alpha.size() != model.get_nparam())
-    throw Error (InvalidState, "Model::LevenbergMarquardt<Grad>::chisq",
+    throw Error (InvalidState, "MEAL::LevenbergMarquardt<Grad>::chisq",
 		 "alpha.size=%d != model.nparam=%d",
 		 alpha.size(), model.get_nparam());
 
   if (y.size() < x.size())
-    throw Error (InvalidParam, "Model::LevenbergMarquardt<Grad>::chisq",
+    throw Error (InvalidParam, "MEAL::LevenbergMarquardt<Grad>::chisq",
 		 "y.size=%d < x.size=%d", y.size(), x.size());
 
   // initialize sums
@@ -574,7 +574,7 @@ float Model::LevenbergMarquardt<Grad>::calculate_chisq
   for (unsigned ipt=0; ipt < x.size(); ipt++) {
 
     if (verbose > 2)
-      cerr << "Model::LevenbergMarquardt<Grad>::chisq lmcoff[" << ipt
+      cerr << "MEAL::LevenbergMarquardt<Grad>::chisq lmcoff[" << ipt
 	   << "/" << x.size() << "]" << endl;
 
     Chisq += lmcoff (model, x[ipt], y[ipt],
@@ -590,18 +590,18 @@ float Model::LevenbergMarquardt<Grad>::calculate_chisq
 }
 
 template <class Mt, class Xt, class Yt, class Et, class Grad>
-float Model::lmcoff (// input
+float MEAL::lmcoff (// input
 			   Mt& model,
 			   const Xt& abscissa,
 			   const Estimate<Yt,Et>& data,
 			   // storage
-			   vector<Grad>& gradient,
+			   std::vector<Grad>& gradient,
 			   // output
-			   vector<vector<double> >& alpha,
-			   vector<double>& beta)
+			   std::vector<std::vector<double> >& alpha,
+			   std::vector<double>& beta)
 {
   if (LevenbergMarquardt<Grad>::verbose > 2)
-    cerr << "Model::lmcoff data val=" << data.val
+    cerr << "MEAL::lmcoff data val=" << data.val
 	 << " var=" << data.var << endl;
  
   abscissa.apply();
@@ -615,17 +615,17 @@ float Model::lmcoff (// input
 
 
 template <class Mt, class Yt, class Wt, class Grad>
-float Model::lmcoff1 (// input
+float MEAL::lmcoff1 (// input
 			  Mt& model,
 			  const Yt& delta_y,
 			  const Wt& weight,
-			  const vector<Grad>& gradient,
+			  const std::vector<Grad>& gradient,
 			  // output
-			  vector<vector<double> >& alpha,
-			  vector<double>& beta)
+			  std::vector<std::vector<double> >& alpha,
+			  std::vector<double>& beta)
 {
   if (LevenbergMarquardt<Grad>::verbose > 2)
-    cerr << "Model::lmcoff1 delta_y=" << delta_y << endl;
+    cerr << "MEAL::lmcoff1 delta_y=" << delta_y << endl;
 
   Yt w_delta_y = weight.get_weighted_conjugate (delta_y);
 
@@ -649,7 +649,7 @@ float Model::lmcoff1 (// input
   float chisq = weight.get_weighted_norm (delta_y);
 
   if (LevenbergMarquardt<Grad>::verbose > 2)
-    cerr << "Model::lmcoff1 chisq=" << chisq << endl;
+    cerr << "MEAL::lmcoff1 chisq=" << chisq << endl;
 
   return chisq;
 }

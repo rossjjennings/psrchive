@@ -1,18 +1,18 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Complex2.h,v $
-   $Revision: 1.2 $
-   $Date: 2004/11/22 16:00:08 $
+   $Revision: 1.3 $
+   $Date: 2004/11/22 19:26:03 $
    $Author: straten $ */
 
-#ifndef __Model_Complex2_H
-#define __Model_Complex2_H
+#ifndef __MEAL_Complex2_H
+#define __MEAL_Complex2_H
 
-#include "MEPL/EvaluationBehaviour.h"
+#include "MEAL/EvaluationBehaviour.h"
 #include "Estimate.h"
 #include "Jones.h"
 
-namespace Model {
+namespace MEAL {
 
   //! Pure virtual base class of all complex 2x2 matrix functions
   /*! The Complex2 class represents any complex 2x2 matrix function with an
@@ -28,7 +28,7 @@ namespace Model {
     typedef Jones<double> Result;
 
     //! Return the Jones matrix and its gradient wrt model parameters
-    virtual Result evaluate (vector<Result>* grad=0) const = 0;
+    virtual Result evaluate (std::vector<Result>* grad=0) const = 0;
 
     //! Return the Jones Estimate matrix
     virtual void evaluate (Jones< Estimate<double> >& jones) const;

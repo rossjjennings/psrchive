@@ -1,6 +1,8 @@
 #include <iostream>
 #include <vector>
 
+using namespace std;
+
 #define _DEBUG 1
 #include "Reference.h"
 

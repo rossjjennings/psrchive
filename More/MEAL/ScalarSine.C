@@ -1,20 +1,22 @@
-#include "MEPL/ScalarSine.h"
+#include "MEAL/ScalarSine.h"
 #include <math.h>
 
+using namespace std;
+
 //! Return the name of the class
-string Model::ScalarSine::get_name () const
+string MEAL::ScalarSine::get_name () const
 {
   return "ScalarSine";
 }
 
 //! The function
-double Model::ScalarSine::function (double x) const
+double MEAL::ScalarSine::function (double x) const
 {
   return sin(x); 
 }
 
 //! And its first derivative
-double Model::ScalarSine::dfdx (double x) const
+double MEAL::ScalarSine::dfdx (double x) const
 { 
   return cos(x);
 }

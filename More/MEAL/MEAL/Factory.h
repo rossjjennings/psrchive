@@ -1,12 +1,12 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Attic/Factory.h,v $
-   $Revision: 1.2 $
-   $Date: 2004/11/22 16:00:09 $
+   $Revision: 1.3 $
+   $Date: 2004/11/22 19:26:03 $
    $Author: straten $ */
 
-#ifndef __Model_Factory_H
-#define __Model_Factory_H
+#ifndef __MEAL_Factory_H
+#define __MEAL_Factory_H
 
 #include "Functor.h"
 #include "stringtok.h"
@@ -16,20 +16,21 @@
 namespace Factory {
 
   template< class T >
-  T* load (const string& filename, Functor< T*(string) >& constructor,
+  T* load (const std::string& filename,
+	   Functor< T*(std::string) >& constructor,
 	   bool verbose = false)
   {
-    ifstream input (filename.c_str());
+    std::ifstream input (filename.c_str());
     if (!input)
       throw Error (FailedSys, "Factory::load", "ifstream (" + filename + ")");
 
-    string line;
+    std::string line;
 
     T* instance = 0;
 
     while (!input.eof()) {
 
-      getline (input, line);
+      std::getline (input, line);
       line = stringtok (line, "#\n", false);  // get rid of comments
 
       if (!line.length())
@@ -38,10 +39,10 @@ namespace Factory {
       if (!instance) {
 
 	// the first key loaded should be the name of the instance
-	string key = stringtok (line, " \t");
+	std::string key = stringtok (line, " \t");
 
 	if (verbose)
-	  cerr << "Factory::load construct new " << key << endl;
+	  std::cerr << "Factory::load construct new " << key << std::endl;
 
 	instance = constructor (key);
 	
@@ -51,7 +52,7 @@ namespace Factory {
       }
 
       if (verbose)
-	cerr << "Factory::load parse line '" << line << "'" << endl;
+	std::cerr << "Factory::load parse line '" << line << "'" << std::endl;
       
       instance->parse (line);
 

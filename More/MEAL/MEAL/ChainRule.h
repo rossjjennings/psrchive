@@ -1,19 +1,19 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/ChainRule.h,v $
-   $Revision: 1.2 $
-   $Date: 2004/11/22 16:00:08 $
+   $Revision: 1.3 $
+   $Date: 2004/11/22 19:26:03 $
    $Author: straten $ */
 
-#ifndef __Model_ChainRule_H
-#define __Model_ChainRule_H
+#ifndef __MEAL_ChainRule_H
+#define __MEAL_ChainRule_H
 
-#include "MEPL/ProjectGradient.h"
-#include "MEPL/Optimized.h"
-#include "MEPL/Composite.h"
-#include "MEPL/Scalar.h"
+#include "MEAL/ProjectGradient.h"
+#include "MEAL/Optimized.h"
+#include "MEAL/Composite.h"
+#include "MEAL/Scalar.h"
 
-namespace Model {
+namespace MEAL {
 
   //! A parameter and its constraining Scalar instance
   class ConstrainedParameter {
@@ -32,7 +32,7 @@ namespace Model {
     Project<Scalar> scalar;
 
     //! The last calculated gradient of the Scalar
-    vector<double> gradient;
+    std::vector<double> gradient;
 
   };
 
@@ -76,7 +76,7 @@ namespace Model {
     // ///////////////////////////////////////////////////////////////////
 
     //! Return the name of the class
-    string get_name () const;
+    std::string get_name () const;
 
   protected:
 
@@ -87,10 +87,10 @@ namespace Model {
     // ///////////////////////////////////////////////////////////////////
 
     //! Return the Result and its gradient
-    void calculate (Result& result, vector<Result>* gradient);
+    void calculate (Result& result, std::vector<Result>* gradient);
 
     //! Scalars used to constrain the parameters
-    vector<ConstrainedParameter> constraints;
+    std::vector<ConstrainedParameter> constraints;
 
     //! The Function to be constrained by Scalar ordinates
     Project<MType> model;
@@ -100,14 +100,14 @@ namespace Model {
 }
 
 template<class MType>
-string Model::ChainRule<MType>::get_name () const
+std::string MEAL::ChainRule<MType>::get_name () const
 {
-  return "ChainRule<" + string(MType::Name)+ ">";
+  return "ChainRule<" + std::string(MType::Name)+ ">";
 }
 
 template<class MType>
-Model::ChainRule<MType>&
-Model::ChainRule<MType>::operator = (const ChainRule& rule)
+MEAL::ChainRule<MType>&
+MEAL::ChainRule<MType>::operator = (const ChainRule& rule)
 {
   if (this == &rule)
     return *this;
@@ -123,11 +123,11 @@ Model::ChainRule<MType>::operator = (const ChainRule& rule)
 
 
 template<class MType>
-void Model::ChainRule<MType>::set_constraint (unsigned iparam, 
+void MEAL::ChainRule<MType>::set_constraint (unsigned iparam, 
 						    Scalar* scalar)
 {
   if (verbose) 
-    cerr << "Model::ChainRule::set_constraint iparam=" << iparam << endl;
+    std::cerr << "MEAL::ChainRule::set_constraint iparam=" << iparam << std::endl;
 
   if (!scalar)
     return;
@@ -138,8 +138,8 @@ void Model::ChainRule<MType>::set_constraint (unsigned iparam,
     if (constraints[ifunc].parameter == iparam) {
 
       if (verbose)
-	cerr << "Model::ChainRule::set_constraint"
-	  " replace param=" << iparam << endl;
+	std::cerr << "MEAL::ChainRule::set_constraint"
+	  " replace param=" << iparam << std::endl;
 
       unmap (constraints[ifunc].scalar, false);
       constraints[ifunc].scalar = scalar;
@@ -159,23 +159,23 @@ void Model::ChainRule<MType>::set_constraint (unsigned iparam,
 }
 
 template<class MType>
-void Model::ChainRule<MType>::set_model (MType* _model)
+void MEAL::ChainRule<MType>::set_model (MType* _model)
 {
   if (!_model)
     return;
 
   if (model) {
     if (verbose)
-      cerr << "Model::ChainRule::set_model"
-	" unmap old model" << endl;
+      std::cerr << "MEAL::ChainRule::set_model"
+	" unmap old model" << std::endl;
     unmap (model, false);
   }
 
   model = _model;
 
   if (verbose)
-    cerr << "Model::ChainRule::set_model"
-      " map new model" << endl;
+    std::cerr << "MEAL::ChainRule::set_model"
+      " map new model" << std::endl;
 
   map (model);
 
@@ -184,21 +184,21 @@ void Model::ChainRule<MType>::set_model (MType* _model)
 }
 
 template<class MType>
-void Model::ChainRule<MType>::calculate (Result& result,
-					       vector<Result>* grad)
+void MEAL::ChainRule<MType>::calculate (Result& result,
+					       std::vector<Result>* grad)
 {
   if (!model)
-    throw Error (InvalidState, "Model::ChainRule::calculate","no model");
+    throw Error (InvalidState, "MEAL::ChainRule::calculate","no model");
 
   if (verbose)
-    cerr << "Model::ChainRule::calculate" << endl;
+    std::cerr << "MEAL::ChainRule::calculate" << std::endl;
 
   for (unsigned ifunc=0; ifunc<constraints.size(); ifunc++) {
 
     if (very_verbose)
-      cerr << "Model::ChainRule::calculate iconstraint="<< ifunc <<endl;
+      std::cerr << "MEAL::ChainRule::calculate iconstraint="<< ifunc <<std::endl;
 
-    vector<double>* fgrad = 0;
+    std::vector<double>* fgrad = 0;
     if (grad)
       fgrad = &(constraints[ifunc].gradient);
 
@@ -207,8 +207,8 @@ void Model::ChainRule<MType>::calculate (Result& result,
 
   }
 
-  vector<Result> model_grad;
-  vector<Result>* model_grad_ptr = 0;
+  std::vector<Result> model_grad;
+  std::vector<Result>* model_grad_ptr = 0;
   if (grad)
     model_grad_ptr = & model_grad;
 
@@ -227,7 +227,7 @@ void Model::ChainRule<MType>::calculate (Result& result,
     ProjectGradient (model, model_grad, *(grad));
 
     // map the scalar gradients
-    vector<Result> fgrad;
+    std::vector<Result> fgrad;
 
     for (unsigned ifunc=0; ifunc<constraints.size(); ifunc++) {
 
@@ -248,12 +248,12 @@ void Model::ChainRule<MType>::calculate (Result& result,
   }
 
   if (verbose) {
-    cerr << "Model::ChainRule::calculate result\n"
-      "   " << result << endl;
+    std::cerr << "MEAL::ChainRule::calculate result\n"
+      "   " << result << std::endl;
     if (grad) {
-      cerr << "Model::ChainRule::calculate gradient\n";
+      std::cerr << "MEAL::ChainRule::calculate gradient\n";
       for (unsigned i=0; i<grad->size(); i++)
-	cerr << "   " << i << ":" << get_infit(i) << "=" << (*grad)[i] << endl;
+	std::cerr << "   " << i << ":" << get_infit(i) << "=" << (*grad)[i] << std::endl;
     }
   }
 

@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Quaternion.h,v $
-   $Revision: 1.24 $
-   $Date: 2004/10/27 11:54:08 $
+   $Revision: 1.25 $
+   $Date: 2004/11/22 19:26:04 $
    $Author: straten $ */
 
 #ifndef __Quaternion_H
@@ -332,14 +332,14 @@ const Quaternion<T,Unitary> eigen (const Quaternion<T,Hermitian>& q)
 
 //! Useful for quickly printing the components
 template<typename T>
-ostream& operator<< (ostream& ostr, const Quaternion<T,Hermitian>& j)
+std::ostream& operator<< (std::ostream& ostr, const Quaternion<T,Hermitian>& j)
 {
   return ostr << "[h:" << j.s0 <<","<< j.s1 <<","<< j.s2 <<","<< j.s3 << "]";
 }
 
 //! Useful for quickly printing the components
 template<typename T>
-ostream& operator<< (ostream& ostr, const Quaternion<T,Unitary>& j)
+std::ostream& operator<< (std::ostream& ostr, const Quaternion<T,Unitary>& j)
 {
   return ostr << "[u:" << j.s0 <<","<< j.s1 <<","<< j.s2 <<","<< j.s3 << "]";
 }

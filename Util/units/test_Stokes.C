@@ -1,5 +1,7 @@
 #include "Pauli.h"
 
+using namespace std;
+
 int main ()
 {
   Jones<float> jones;

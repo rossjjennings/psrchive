@@ -1,16 +1,16 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Gaussian.h,v $
-   $Revision: 1.2 $
-   $Date: 2004/11/22 16:00:09 $
+   $Revision: 1.3 $
+   $Date: 2004/11/22 19:26:04 $
    $Author: straten $ */
 
 #ifndef __Gaussian_H
 #define __Gaussian_H
 
-#include "MEPL/UnivariateOptimizedScalar.h"
+#include "MEAL/UnivariateOptimizedScalar.h"
 
-namespace Model {
+namespace MEAL {
 
   //! Gaussian function 
   class Gaussian : public UnivariateOptimizedScalar {
@@ -50,10 +50,10 @@ namespace Model {
     // ///////////////////////////////////////////////////////////////////
 
     //! Return the name of the class
-    string get_name () const;
+    std::string get_name () const;
 
     //! Return the name of the specified parameter
-    string get_param_name (unsigned index) const;
+    std::string get_param_name (unsigned index) const;
 
     // ///////////////////////////////////////////////////////////////////
     //
@@ -62,7 +62,7 @@ namespace Model {
     // ///////////////////////////////////////////////////////////////////
 
     //! Return the value (and gradient, if requested) of the function
-    void calculate (double& x, vector<double>* grad=0);
+    void calculate (double& x, std::vector<double>* grad=0);
 
   protected:
 

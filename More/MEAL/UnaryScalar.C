@@ -1,21 +1,23 @@
-#include "MEPL/UnaryScalar.h"
+#include "MEAL/UnaryScalar.h"
 
-void Model::UnaryScalar::calculate (double& result,
-					  vector<double>* grad)
+using namespace std;
+
+void MEAL::UnaryScalar::calculate (double& result,
+					  std::vector<double>* grad)
 {
   if (!model)
-    throw Error (InvalidState, "Model::UnaryScalar::calculate",
+    throw Error (InvalidState, "MEAL::UnaryScalar::calculate",
 		 "no model to evaluate");
 
   if (verbose)
-    cerr << "Model::UnaryScalar::calculate" << endl;
+    cerr << "MEAL::UnaryScalar::calculate" << endl;
 
   double x = model->evaluate (grad);
 
   result = function( x );
 
   if (verbose)
-    cerr << "Model::UnaryScalar::calculate result\n"
+    cerr << "MEAL::UnaryScalar::calculate result\n"
       "   " << result << endl;
 
   if (!grad)
@@ -27,7 +29,7 @@ void Model::UnaryScalar::calculate (double& result,
     (*grad)[igrad] *= dydx;
 
   if (verbose) {
-    cerr << "Model::UnaryScalar::calculate gradient\n";
+    cerr << "MEAL::UnaryScalar::calculate gradient\n";
     for (unsigned i=0; i<grad->size(); i++)
       cerr << "   " << i << ":" << get_infit(i) << "=" << (*grad)[i] << endl;
   }

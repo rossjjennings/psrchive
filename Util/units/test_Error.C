@@ -1,5 +1,7 @@
 #include "Error.h"
 
+using namespace std;
+
 int throw1 ()  {
 
   try {

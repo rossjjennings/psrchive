@@ -1,20 +1,20 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Coherency.h,v $
-   $Revision: 1.2 $
-   $Date: 2004/11/22 16:00:08 $
+   $Revision: 1.3 $
+   $Date: 2004/11/22 19:26:03 $
    $Author: straten $ */
 
-#ifndef __Model_Coherency_H
-#define __Model_Coherency_H
+#ifndef __MEAL_Coherency_H
+#define __MEAL_Coherency_H
 
-#include "MEPL/OptimizedComplex2.h"
-#include "MEPL/Parameters.h"
+#include "MEAL/OptimizedComplex2.h"
+#include "MEAL/Parameters.h"
 
 #include "Estimate.h"
 #include "Stokes.h"
 
-namespace Model {
+namespace MEAL {
 
   //! Represents a Hermitian coherency matrix
   /*! This class represents a source in which the four Stokes parameters
@@ -42,10 +42,10 @@ namespace Model {
     // ///////////////////////////////////////////////////////////////////
 
     //! Return the name of the class
-    string get_name () const;
+    std::string get_name () const;
 
     //! Return the name of the specified parameter
-    string get_param_name (unsigned index) const;
+    std::string get_param_name (unsigned index) const;
 
   protected:
 
@@ -56,7 +56,7 @@ namespace Model {
     // ///////////////////////////////////////////////////////////////////
 
     //! Calculate the Jones matrix and its gradient
-    void calculate (Jones<double>& result, vector<Jones<double> >* gradient);
+    void calculate (Jones<double>& result, std::vector<Jones<double> >* gradient);
 
   };
 

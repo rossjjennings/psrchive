@@ -1,19 +1,14 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/HeapTracked.h,v $
-   $Revision: 1.1 $
-   $Date: 2004/11/22 09:31:49 $
+   $Revision: 1.2 $
+   $Date: 2004/11/22 19:26:04 $
    $Author: straten $ */
 
 #ifndef __ReferenceHeapTracked_h
 #define __ReferenceHeapTracked_h
 
-namespace Reference {
-  class HeapTracked;
-}
-
 #include <vector>
-#include "psr_cpp.h"
 
 namespace Reference {
 
@@ -82,7 +77,7 @@ namespace Reference {
     char __heap_state;
 
     //! Addresses of dynamically allocated Reference::HeapTracked instances
-    static vector <const void*> __heap_addresses;
+    static std::vector <const void*> __heap_addresses;
 
   };
 

@@ -1,8 +1,10 @@
-#include "MEPL/Function.h"
+#include "MEAL/Function.h"
 #include "stringtok.h"
 
+using namespace std;
+
 //! Parses the values of model parameters and fit flags from a string
-void Model::Function::parse (const string& line)
+void MEAL::Function::parse (const string& line)
 {
   string temp = line;
 
@@ -10,19 +12,19 @@ void Model::Function::parse (const string& line)
   string key = stringtok (temp, " \t");
 
   if (verbose)
-    cerr << "Model::Function::parse key '" << key << "'" << endl;
+    cerr << "MEAL::Function::parse key '" << key << "'" << endl;
 
   unsigned iparam=0;
   for (iparam=0; iparam < get_nparam(); iparam++) {
 
     if (verbose)
-      cerr << "Model::Function::parse param[" << iparam << "]='"
+      cerr << "MEAL::Function::parse param[" << iparam << "]='"
 	   << get_param_name(iparam) << "'" << endl;
 
     if ( key == get_param_name(iparam) ) {
 
       if (verbose)
-	cerr << "Model::Function::parse match" << endl;
+	cerr << "MEAL::Function::parse match" << endl;
 
       break;
 
@@ -31,18 +33,18 @@ void Model::Function::parse (const string& line)
   }
 
   if (iparam == get_nparam())
-    throw Error (InvalidParam, "Model::Function::parse",
+    throw Error (InvalidParam, "MEAL::Function::parse",
 		 "key='%s' does not match name of any %d parameters",
 		 key.c_str(), get_nparam());
 
   string value = stringtok (temp, " \t");
 
   if (verbose)
-    cerr << "Model::Function::parse value " << value << endl;
+    cerr << "MEAL::Function::parse value " << value << endl;
 
   double param_value;
   if ( sscanf (value.c_str(), "%lf", &param_value) != 1 )
-    throw Error (InvalidParam, "Model::Function::parse",
+    throw Error (InvalidParam, "MEAL::Function::parse",
 		 "value='" + value + "' could not be parsed as a double");
 
   set_param (iparam, param_value);
@@ -54,16 +56,16 @@ void Model::Function::parse (const string& line)
 
   if (value=="true" || value=="1") {
     if (verbose)
-      cerr << "Model::Function::parse fit " << key << endl;
+      cerr << "MEAL::Function::parse fit " << key << endl;
     set_infit (iparam, true);
   }
   else if (value=="false" || value=="0") {
     if (verbose)
-      cerr << "Model::Function::parse do not fit " << key << endl;
+      cerr << "MEAL::Function::parse do not fit " << key << endl;
     set_infit (iparam, false);
   }
   else
-    throw Error (InvalidParam, "Model::Function::parse",
+    throw Error (InvalidParam, "MEAL::Function::parse",
 		 "value='" + value + "' could not be parsed as a boolean");
 
   value = stringtok (temp, " \t");
@@ -72,10 +74,10 @@ void Model::Function::parse (const string& line)
     return;
 
   if (verbose)
-    cerr << "Model::Function::parse standard deviation " << value << endl;
+    cerr << "MEAL::Function::parse standard deviation " << value << endl;
 
   if ( sscanf (value.c_str(), "%lf", &param_value) != 1 )
-    throw Error (InvalidParam, "Model::Function::parse",
+    throw Error (InvalidParam, "MEAL::Function::parse",
 		 "sigma='" + value + "' could not be parsed as a double");
 
   set_variance (iparam, param_value*param_value);

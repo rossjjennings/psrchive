@@ -1,16 +1,16 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Univariate.h,v $
-   $Revision: 1.2 $
-   $Date: 2004/11/22 16:00:09 $
+   $Revision: 1.3 $
+   $Date: 2004/11/22 19:26:04 $
    $Author: straten $ */
 
-#ifndef __Model_Univariate_H
-#define __Model_Univariate_H
+#ifndef __MEAL_Univariate_H
+#define __MEAL_Univariate_H
 
-#include "MEPL/ArgumentBehaviour.h"
+#include "MEAL/ArgumentBehaviour.h"
 
-namespace Model {
+namespace MEAL {
 
   //! A function of one scalar variable
   class Univariate : public ArgumentBehaviour {

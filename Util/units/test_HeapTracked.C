@@ -3,6 +3,8 @@
 #include "HeapTracked.h"
 #include "Error.h"
 
+using namespace std;
+
 class grandparent : public Reference::HeapTracked {
 
 public:
@@ -106,7 +108,7 @@ int main ()
     return -1;
   }
 
-  vector<child1> child1_vector (13);
+  std::vector<child1> child1_vector (13);
 
   if (child1_vector[0].__is_on_heap() || child1_vector[3].__is_on_heap()){
     cerr << "ERROR: Cannot auto-delete objects in vectors" << endl;
