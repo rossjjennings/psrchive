@@ -106,18 +106,15 @@ void Pulsar::Integration::intensity_mix (int ipol, float fac)
 
   for (int ichan=0; ichan < get_nchan(); ichan++) {
 
-    // form the sum of the total intensity and the specified polarization
     temp = *(profiles[0][ichan]);
-    temp += *(profiles[ipol][ichan]);
     temp *= fac;
 
+    // form the sum
+    *(profiles[0][ichan]) += *(profiles[ipol][ichan]);
+    *(profiles[0][ichan]) *= fac;
+
     // form the difference
-    *(profiles[ipol][ichan]) = *(profiles[0][ichan]);
-    *(profiles[ipol][ichan]) -= *(profiles[ipol][ichan]);
-    *(profiles[ipol][ichan]) *= fac;
-
-    // store the sum
-    *(profiles[0][ichan]) = temp;
-
+    *(profiles[ipol][ichan]) *= -fac;
+    *(profiles[ipol][ichan]) += temp;
   }
 }
