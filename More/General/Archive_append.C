@@ -55,7 +55,12 @@ void Pulsar::Archive::append (const Archive* arch)
   else if (order_this && !order_that) {
     Reference::To<Pulsar::Archive> copy = arch->clone();
     copy->add_extension(order_this->clone());
-    copy->get<IntegrationOrder>()->organise(copy);
+    // This next line is a bit tricky... There are issues when the index
+    // you are using is cyclical and you have more than one wrap across
+    // which to define the subint resolution. In this case, the second
+    // argument to the organise function needs more thought.
+    // AWH 30/12/2003
+    copy->get<IntegrationOrder>()->organise(copy, copy->get_nsubint());
     order_this->append(this, copy);
     return;
   }
