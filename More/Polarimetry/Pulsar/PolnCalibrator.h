@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PolnCalibrator.h,v $
-   $Revision: 1.19 $
-   $Date: 2003/10/21 12:34:38 $
+   $Revision: 1.20 $
+   $Date: 2003/10/28 08:47:10 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PolnCalibrator_H
@@ -62,6 +62,9 @@ namespace Pulsar {
     //! Return true if the transformation for the specified channel is valid
     bool get_Transformation_valid (unsigned ch) const;
 
+    //! Set the transformation invalid flag for the specified channel
+    void set_Transformation_invalid (unsigned ch);
+
     //! Return the transformation for the specified channel
     const ::Calibration::Transformation* 
     get_Transformation (unsigned ichan) const;
@@ -85,6 +88,9 @@ namespace Pulsar {
     class Info : public Calibrator::Info {
 
     public:
+
+      //! Factory returns a suitable instance
+      static Calibrator::Info* create (const PolnCalibrator* calibrator);
 
       //! Constructor
       Info (const PolnCalibrator* calibrator);
