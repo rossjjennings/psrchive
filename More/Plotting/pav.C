@@ -148,8 +148,15 @@ int main (int argc, char** argv)
     return 0;
   }
 
-  if (display || greyfreq)
+  if (display || greyfreq) {
     cpgbeg (0, "?", 0, 0);
+    cpgask(1);
+  }
+
+  if (display) {
+    cpgsvp (0.05, 0.95, 0.0, 0.8);
+    cpgsch (2.0);
+  }
 
   Pulsar::Archive* archive = 0;
 
@@ -201,8 +208,10 @@ int main (int argc, char** argv)
       }
     }
 
-    if (display) 
-      archive -> get_Profile(0,0,0) -> display();
+    if (display) {
+      cpgpage();
+      archive -> display();
+    }
     
     if (greyfreq) {
       string tempstr = archive -> get_source();
