@@ -39,6 +39,24 @@ Pulsar::FluxCalibratorDatabase::Entry::~Entry ()
 void Pulsar::FluxCalibratorDatabase::Entry::load (const string& str) 
 {
   string temp = str;
+
+  if( h_frontchomp(temp,'&') ){
+    // Load-mode type II
+    // log(S) = a_0 + a_1*log(f) + a_2*(log(f))^2 + a_3*(log(f))^4 + ...
+    vector<string> words = stringdecimate(temp," \t");
+
+    if( words.size() < 3 )
+      throw Error(InvalidState,"Pulsar::FluxCalibratorDatabase::Entry::load",
+		  "Couldn't parse spectral coefficients as line '%s' didn't have enough words in it",
+		  str.c_str());
+
+    source_name.push_back( words[0] );
+
+    for( unsigned i=1; i<words.size(); i++)
+      spectral_coeffs.push_back( convert_string<double>(words[i]) );
+    return;
+  }
+
   source_name.push_back( stringtok (&temp, " \t\n") );
 
   int s = sscanf (temp.c_str(), "%lf %lf %lf",
@@ -54,10 +72,17 @@ void Pulsar::FluxCalibratorDatabase::Entry::load (const string& str)
 // unload to a string
 void Pulsar::FluxCalibratorDatabase::Entry::unload (string& str)
 {
-  str = source_name[0] + stringprintf (" %lf %lf %lf",
-				       reference_frequency,
-				       reference_flux, 
-				       spectral_index);
+  if( !spectral_coeffs.empty() ){
+    str = '&' + source_name[0];
+
+    for( unsigned i=0; i<spectral_coeffs.size(); i++)
+      str += ' ' + make_string(spectral_coeffs[i],6);
+  }
+  else
+    str = source_name[0] + stringprintf (" %lf %lf %lf",
+					 reference_frequency,
+					 reference_flux, 
+					 spectral_index);
 
   for (unsigned iname=1; iname < source_name.size(); iname ++)
     str += "\naka " + source_name[iname];
@@ -83,6 +108,15 @@ bool Pulsar::FluxCalibratorDatabase::Entry::matches (const string& name) const
 
 double Pulsar::FluxCalibratorDatabase::Entry::get_flux_mJy (double MHz)
 {
+  if( !spectral_coeffs.empty() ){
+    double ret = spectral_coeffs[0];
+    double log_freq = log10f(MHz);
+
+    for( unsigned i=1; i<spectral_coeffs.size(); i++)
+      ret += spectral_coeffs[i]*pow(log_freq,double(i));
+    return pow(10.0,ret);
+  }
+
   return pow (MHz/reference_frequency, -spectral_index) * reference_flux * 1e3;
 }
 
@@ -105,7 +139,6 @@ Pulsar::FluxCalibratorDatabase::FluxCalibratorDatabase (const std::string& f)
 
   load (f);
 }
-
 
 //! Loads an entire database from a file
 void Pulsar::FluxCalibratorDatabase::load (const std::string& filename)
@@ -149,7 +182,6 @@ void Pulsar::FluxCalibratorDatabase::load (const std::string& filename)
 
     }
     else {
-
       entries.push_back( Entry(line) );
 
       if (verbose)
@@ -192,9 +224,8 @@ Pulsar::FluxCalibratorDatabase::match (const string& source, double MHz) const
 	best_match = entries[ie];
       double diff = fabs(candidate.reference_frequency - MHz);
       double best_diff = fabs(best_match.reference_frequency - MHz);
-      if (diff < best_diff) {
+      if (diff < best_diff)
 	best_match = entries[ie];
-      }
     }
   }
 
