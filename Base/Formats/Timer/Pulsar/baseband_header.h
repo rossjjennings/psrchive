@@ -77,7 +77,11 @@ typedef struct baseband_header_t {
 
   // Version 5 addition
   // 
+  // # of time samples discarded from right hand side of convolution product
   int nsmear_neg;
+
+  // # number of filterbank channels used during reduction
+  int nchan;
 
 #if defined(linux) || (defined (sun) && defined(__i386))
   char __space[4];
@@ -88,7 +92,7 @@ typedef struct baseband_header_t {
 
 // //////////////////////////////////////////////////////////////////////
 // sizeof(baseband_header)
-#define BASEBAND_HEADER_SIZE 180
+#define BASEBAND_HEADER_SIZE 184
 
 // //////////////////////////////////////////////////////////////////////
 // Endian code
