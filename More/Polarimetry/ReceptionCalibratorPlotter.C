@@ -119,8 +119,7 @@ void Pulsar::ReceptionCalibratorPlotter::plot_constraints (unsigned ichan,
       if (data[jstate].source_index == istate) {
 	for (unsigned ipol=0; ipol<4; ipol++) {
 	  stokes[ipol].push_back (Estimate<float>());
-	  stokes[ipol].back().val = data[jstate].val[ipol];
-	  stokes[ipol].back().var = data[jstate].var;
+	  stokes[ipol].back() = data[jstate][ipol];
 	}
 
 	para.push_back ( calibrator->parallactic.get_param(0) * 180.0/M_PI );
@@ -203,7 +202,11 @@ void Pulsar::ReceptionCalibratorPlotter::plot_model (unsigned ichan,
     if (!was_measured)
       continue;
 
-    equation->initialize (data);
+    // set the independent variables for this set of measurements
+    data.set_coordinates();
+
+    // set the signal path through which these measurements were observed
+    equation->set_path (data.path_index);
 
     float para = calibrator->parallactic.get_param(0) * 180.0/M_PI;
 
