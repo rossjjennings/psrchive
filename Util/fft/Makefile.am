@@ -4,13 +4,13 @@ noinst_LTLIBRARIES = libpsrfft.la
 include_HEADERS = fftm.h psrfft.h spectra.h interpolate.h median_smooth.h \
            cross_detect.h stokes_detect.h differentiate.h BandpassPlotter.h \
 	   FTransform.h IPP_Transform.h MKL_Transform.h FFTW3_Transform.h \
-	   FFTW_Transform.h
+	   FFTW_Transform.h fftm_c.h
 
 libpsrfft_la_SOURCES = spectra.c noise.c running_median.c	 \
 	local_medians.c optimize_fft.c fft_shift.c fftm.C correl.c	 \
 	cdetect.c rfftw_sort.c cross_detect.c stokes_detect.c		 \
 	fccf.f ffft.f differentiate.C fftfit.f fftconv.f brent.f cprof.f \
-	cross_detect.ic stokes_detect.ic \
+	cross_detect.ic stokes_detect.ic fftm_c.C \
         FTransform.C IPP_Transform.C MKL_Transform.C FFTW3_Transform.C
 
 if HAVE_FFTW2
