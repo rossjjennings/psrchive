@@ -46,17 +46,13 @@ CPPFLAGS="-I$PSRHOME/packages/$LOGIN_ARCH/include $CPPFLAGS"
 LDFLAGS="-L$PSRHOME/packages/$LOGIN_ARCH/lib $LDFLAGS"
 
 #
-# Checks for libraries
+# Checks for essential libraries
 #
 AC_CHECK_LIB([m], [sin])
 SWIN_LIB_SLA([],AC_MSG_ERROR([Cannot continue without SLALIB]))
 SWIN_LIB_FFTW
 SWIN_LIB_MKL
 SWIN_LIB_IPP
-SWIN_LIB_PGPLOT
-SWIN_LIB_CFITSIO
-SWIN_LIB_MPI
-BNV_HAVE_QT
 
 #
 # Check that at least one FFT library is available
@@ -69,6 +65,19 @@ AC_SUBST(FFT_LIBS)
 FFT_LIBS="$MKL_LIBS $FFTW_LIBS $FFTW3_LIBS $IPP_LIBS"
 AC_SUBST(FFT_CFLAGS)
 FFT_CFLAGS="$MKL_CFLAGS $FFTW_CFLAGS $FFTW3_CFLAGS $IPP_CFLAGS"
+
+#
+# Checks for optional libraries
+#
+SWIN_LIB_CFITSIO
+SWIN_LIB_MPI
+
+#
+# Checks for graphics libraries
+#
+SWIN_LIB_PGPLOT
+BNV_HAVE_QT
+SWIN_LIB_QTDRIV
 
 # 
 # For developers: ensure that the config directory m4 macros are parsed
@@ -144,6 +153,7 @@ AC_CONFIG_FILES([utils/units/Makefile
 		psrchive/Extension/Makefile
 		psrchive/Calibration/Makefile
                 psrchive/GUI/Makefile
+		psrchive/rhythm/Makefile
 		psrchive/Makefile
 		Makefile])
 
