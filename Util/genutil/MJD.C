@@ -22,21 +22,6 @@ int ss2hhmmss (int* hours, int* min, int* sec, int seconds)
   return 0;
 }
 
-// no static kludgeyness, no memory leaks
-string MJD::printdays (unsigned precision) const
-{
-  char* temp = new char [precision + 10];
-  sprintf (temp, "%d", days);
-  string output = temp;
-  if (precision > 0)  {
-    sprintf (temp, "%*.*lf", precision+3, precision, fracday());
-    char* period = strchr (temp, '.');
-    output += period;
-  }
-  delete [] temp;
-  return output;
-}
-
 char * MJD::printdays() const {
   static char permanent[10];
   sprintf(permanent, "%d",days);
