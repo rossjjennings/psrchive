@@ -244,15 +244,6 @@ void Pulsar::Archive::fold (unsigned nfold)
   set_nbin (get_Integration(0)->get_nbin());
 }
 
-/*!
-  \param standard
-  \retval toas
-*/
-void Pulsar::Archive::toas (const Archive* standard, vector<Tempo::toa>& toas)
-{
-
-}
-
 void Pulsar::Archive::deparallactify()
 {
 
