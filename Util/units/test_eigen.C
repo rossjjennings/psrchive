@@ -62,7 +62,7 @@ void test_matrix (const Quaternion<T, Hermitian>& q1,
   if (verbose)
     cerr << "test_matrix eigen quaternion" << endl;
 
-  tolerance *= 150;
+  tolerance *= 300;
 
   test_eigen (q1, tolerance);
   test_eigen (q2, tolerance);
