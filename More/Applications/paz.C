@@ -43,41 +43,40 @@ int main (int argc, char *argv[]) {
   
   int placeholder;
   
-  int first;
-  int last;
-  
   int gotc = 0;
   char* key = NULL;
   char whitespace[5] = " \n\t";
   
-  while ((gotc = getopt(argc, argv, "hvViDme:z:k:Z:dE:s:w:S:P:")) != -1) {
+  while ((gotc = getopt(argc, argv, "hvViDme:z:k:Z:dE:s:w:W:C:S:P:")) != -1) {
     switch (gotc) {
     case 'h':
-      cout << "A program for zapping RFI in Pulsar::Archives"                     << endl;
-      cout << "Usage: paz [options] filenames"                                    << endl;
-      cout << "  -v               Verbose mode"                                   << endl;
-      cout << "  -V               Very verbose mode"                              << endl;
-      cout << "  -i               Show revision information"                      << endl;
-      cout << "  -D               Display resulting bandpass and weights"         << endl;
-      cout << "  -m               Modify the original files on disk"              << endl;
-      cout << "  -e               Unload to new files using this extension"       << endl;
-      cout << "  -z \"a b c ...\"   Zap these particular channels"                << endl;
-      cout << "  -k filename      Zap chans listed in this kill file"             << endl;
-      cout << "  -Z \"a b\"         Zap chans between a and b"                    << endl;
-      cout << "  -E percent       Zap this much of the band at the edges"         << endl;
-      cout << "  -s \"a b c ...\"   Delete these sub-integrations"                << endl;
-      cout << "  -w \"a b c ...\"   Zap (zero weight) these sub-integrations"     << endl;
-      cout << "  -d               Use simple mean offset spike zapping"           << endl;
-      cout << "  -S cutoff        Zap channels based on S/N (using std if given)" << endl;
-      cout << "  -P stdfile       Use this standard profile"                      << endl;
+      cout << "A program for zapping RFI in Pulsar::Archives"                      << endl;
+      cout << "Usage: paz [options] filenames"                                     << endl;
+      cout << "  -v               Verbose mode"                                    << endl;
+      cout << "  -V               Very verbose mode"                               << endl;
+      cout << "  -i               Show revision information"                       << endl;
+      cout << "  -D               Display resulting bandpass and weights"          << endl;
+      cout << "  -m               Modify the original files on disk"               << endl;
+      cout << "  -e               Unload to new files using this extension"        << endl;
+      cout << "  -z \"a b c ...\"   Zap these particular channels"                 << endl;
+      cout << "  -k filename      Zap chans listed in this kill file"              << endl;
+      cout << "  -Z \"a b\"         Zap chans between a and b inclusive"           << endl;
+      cout << "  -E percent       Zap this much of the band at the edges"          << endl;
+      cout << "  -s \"a b c ...\"   Zap these sub-integrations"                    << endl;
+      cout << "  -S \"a b\"         Zap sub-integrations between a and b inclusive"<< endl;
+      cout << "  -w \"a b c ...\"   Zap (zero weight) these sub-integrations"      << endl;
+      cout << "  -W \"a b\"         Zap (zero weight) sub-integrations in this inclusive range"      << endl;
+      cout << "  -d               Use simple mean offset spike zapping"            << endl;
+      cout << "  -C cutoff        Zap channels based on S/N (using std if given)"  << endl;
+      cout << "  -P stdfile       Use this standard profile"                       << endl;
       cout << endl;
-      cout << "The format of the kill file used with the -k option is simply"    << endl;
-      cout << "a list of channel numbers, separated by spaces or newlines"  << endl;
+      cout << "The format of the kill file used with the -k option is simply"      << endl;
+      cout << "a list of channel numbers, separated by spaces or newlines"         << endl;
       cout << endl;
-      cout << "The cutoff S/N value used with -S is largely arbitrary. You will" << endl;
-      cout << "need to experiment to find the best value for your archives" << endl;
+      cout << "The cutoff S/N value used with -S is largely arbitrary. You will"   << endl;
+      cout << "need to experiment to find the best value for your archives"        << endl;
       cout << endl;
-      cout << "See http://astronomy.swin.edu.au/pulsar/software/manuals/paz.html" << endl;
+      cout << "See http://astronomy.swin.edu.au/pulsar/software/manuals/paz.html"  << endl;
       return (-1);
       break;
     case 'v':
@@ -88,7 +87,7 @@ int main (int argc, char *argv[]) {
       Pulsar::Archive::set_verbosity(1);
       break;
     case 'i':
-      cout << "$Id: paz.C,v 1.14 2003/11/07 04:03:50 ahotan Exp $" << endl;
+      cout << "$Id: paz.C,v 1.15 2003/11/13 11:18:04 hknight Exp $" << endl;
       return 0;
     case 'D':
       display = true;
@@ -114,10 +113,18 @@ int main (int argc, char *argv[]) {
       ext = optarg;
       break;
     case 'Z':
-      manual_zap = true;
-      if (sscanf(optarg, "%d %d", &first, &last) != 2) {
-	cerr << "Invalid parameter to option -Z" << endl;
-        return (-1);
+      {
+	unsigned first = 1;
+	unsigned last = 0;
+
+	manual_zap = true;
+	if (sscanf(optarg, "%d %d", &first, &last) != 2) {
+	  cerr << "Invalid parameter to option -Z" << endl;
+	  return (-1);
+	}
+	
+	for( unsigned i=first; i<=last; i++)
+	  chans_to_zap.push_back( i );
       }
       break;
     case 'd':
@@ -144,6 +151,21 @@ int main (int argc, char *argv[]) {
 	key = strtok (NULL, whitespace);
       }
       break;
+    case 'S':
+      {
+	unsigned first = 1;
+	unsigned last = 0;
+
+	zap_subints = true;
+	if (sscanf(optarg, "%d %d", &first, &last) != 2) {
+	  cerr << "Invalid parameter to option -S" << endl;
+	  return (-1);
+	}
+	
+	for( unsigned i=first; i<=last; i++)
+	  subs_to_zap.push_back( i );
+      }
+      break;
     case 'w':
       key = strtok (optarg, whitespace);
       zero_subints = true;
@@ -154,7 +176,23 @@ int main (int argc, char *argv[]) {
 	key = strtok (NULL, whitespace);
       }
       break;
-    case 'S':
+    case 'W':
+      {
+	unsigned first = 1;
+	unsigned last = 0;
+
+	zero_subints = true;
+
+	if (sscanf(optarg, "%d %d", &first, &last) != 2) {
+	  cerr << "Invalid parameter to option -W" << endl;
+	  return (-1);
+	}
+
+	for( unsigned i=first; i<=last; i++)
+	  subs_to_zap.push_back( i );
+      }
+      break;
+    case 'C':
       zap_ston = true;
       if (sscanf(optarg, "%lf", &ston_cutoff) != 1) {
 	cerr << "Invalid parameter to option -S" << endl;
@@ -272,25 +310,11 @@ int main (int argc, char *argv[]) {
 	  }
 	  delete[] useful;
 	}
-	if (chans_to_zap.empty()) {
-	  vector<float> mask(nchan, 1.0);
-	  if ((last > nchan) || (first > last) || (first < 0)) {
-	    throw Error(InvalidParam, "Specified channels lie outside known range");
-	  }
-	  else {
-	    for (int i = first; i <= last; i++) {
-	      mask[i] = 0.0;
-	    }
-	  }
-	  zapper->zap_specific(arch, mask);
+	vector<float> mask(nchan, 1.0);
+	for (unsigned i = 0; i < chans_to_zap.size(); i++) {
+	  mask[chans_to_zap[i]] = 0.0;
 	}
-	else {
-	  vector<float> mask(nchan, 1.0);
-	  for (unsigned i = 0; i < chans_to_zap.size(); i++) {
-	    mask[chans_to_zap[i]] = 0.0;
-	  }
-	  zapper->zap_specific(arch, mask);
-	}
+	zapper->zap_specific(arch, mask);
       }
       else if (edge_zap) {
 	float fraction = percent / 100.0;
