@@ -45,7 +45,7 @@ int main (int argc, char *argv[]) try {
   }
   
   bool verbose = false;
-  bool all = false;
+  bool all_parameters = false;
 
   vector <string> keys;
 
@@ -54,7 +54,7 @@ int main (int argc, char *argv[]) try {
     switch (gotc) {
 
     case 'a':
-      all = true;
+      all_parameters = true;
       break;
 
     case 'c': {
@@ -93,8 +93,21 @@ int main (int argc, char *argv[]) try {
 
   ostream* ost = &cout;
 
+  if (all_parameters) {
+    keys.push_back("LST");
+    keys.push_back("RA");
+    keys.push_back("DEC");
+    keys.push_back("GLAT");
+    keys.push_back("GLONG");
+    keys.push_back("FDA");
+    keys.push_back("POSA");
+    keys.push_back("PARA");
+    keys.push_back("AZ");
+    keys.push_back("ZEN");
+  }
+
   string heading = "FILE\t\t\tSUBINT\t";
-         
+
   for (unsigned ikey = 0; ikey < keys.size(); ikey++)
     heading += keys[ikey] + "\t";
 
@@ -129,7 +142,7 @@ int main (int argc, char *argv[]) try {
 	
 	const Pulsar::Pointing* pointing = subint->get<Pulsar::Pointing>();
 
-	if ((all && pointing) || !strcasecmp (keys[j].c_str(), "lst")) {
+	if (!strcasecmp (keys[j].c_str(), "lst")) {
 	  if (!pointing)
 	    s += "N/A\t\t";
 	  else
@@ -137,7 +150,7 @@ int main (int argc, char *argv[]) try {
 			      pointing->get_local_sidereal_time()/3600);
 	}
 	
-	else if ((all && pointing) || !strcasecmp (keys[j].c_str(), "ra")) {
+	else if (!strcasecmp (keys[j].c_str(), "ra")) {
 	  if (!pointing)
 	    s += "N/A\t\t";
 	  else
@@ -145,7 +158,7 @@ int main (int argc, char *argv[]) try {
 			      pointing->get_right_ascension().getDegrees());
 	}
 	
-	else if ((all && pointing) || !strcasecmp (keys[j].c_str(), "dec")) {
+	else if (!strcasecmp (keys[j].c_str(), "dec")) {
 	  if (!pointing)
 	    s += "N/A\t\t";
 	  else
@@ -153,7 +166,7 @@ int main (int argc, char *argv[]) try {
 			      pointing->get_declination().getDegrees());
 	}
 	
-	else if ((all && pointing) || !strcasecmp (keys[j].c_str(), "glat")) {
+	else if (!strcasecmp (keys[j].c_str(), "glat")) {
 	  if (!pointing)
 	    s += "N/A\t\t";
 	  else
@@ -161,7 +174,7 @@ int main (int argc, char *argv[]) try {
 			      pointing->get_galactic_latitude().getDegrees());
 	}
 	
-	else if ((all && pointing) || !strcasecmp (keys[j].c_str(), "glong")) {
+	else if (!strcasecmp (keys[j].c_str(), "glong")) {
 	  if (!pointing)
 	    s += "N/A\t\t";
 	  else
@@ -169,7 +182,7 @@ int main (int argc, char *argv[]) try {
 			      pointing->get_galactic_longitude().getDegrees());
 	}
 	
-	else if ((all && pointing) || !strcasecmp (keys[j].c_str(), "fda")) {
+	else if (!strcasecmp (keys[j].c_str(), "fda")) {
 	  if (!pointing)
 	    s += "N/A\t\t";
 	  else
@@ -177,7 +190,7 @@ int main (int argc, char *argv[]) try {
 			      pointing->get_feed_angle().getDegrees());
 	}
 	
-	else if ((all && pointing) || !strcasecmp (keys[j].c_str(), "posa")) {
+	else if (!strcasecmp (keys[j].c_str(), "posa")) {
 	  if (!pointing)
 	    s += "N/A\t\t";
 	  else
@@ -185,7 +198,7 @@ int main (int argc, char *argv[]) try {
 			      pointing->get_position_angle().getDegrees());
 	}
 	
-	else if ((all && pointing) || !strcasecmp (keys[j].c_str(), "para")) {
+	else if (!strcasecmp (keys[j].c_str(), "para")) {
 	  if (!pointing)
 	    s += "N/A\t\t";
 	  else
@@ -193,7 +206,7 @@ int main (int argc, char *argv[]) try {
 			      pointing->get_parallactic_angle().getDegrees());
 	}
 	
-	else if ((all && pointing) || !strcasecmp (keys[j].c_str(), "az")) {
+	else if (!strcasecmp (keys[j].c_str(), "az")) {
 	  if (!pointing)
 	    s += "N/A\t\t";
 	  else
@@ -201,7 +214,7 @@ int main (int argc, char *argv[]) try {
 			      pointing->get_telescope_azimuth().getDegrees());
 	}
 	
-	else if ((all && pointing) || !strcasecmp (keys[j].c_str(), "zen")) {
+	else if (!strcasecmp (keys[j].c_str(), "zen")) {
 	  if (!pointing)
 	    s += "N/A\t\t";
 	  else
