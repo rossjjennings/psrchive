@@ -150,6 +150,62 @@ Pulsar::Profile* Pulsar::Integration::get_Profile (int ipol, int ichan)
   return profiles[ipol][ichan];
 }
 
+//! Get the frequency of the given channel
+/*!
+  \param ichan the index of the channel to get
+  \return the frequency of the given channel in MHz
+*/
+double Pulsar::Integration::get_frequency (int ichan) const
+{
+  if (ichan < 0 || ichan>=get_nchan() || get_npol() < 1)
+    return 0;
+
+  return profiles[0][ichan]->get_centre_frequency();
+}
+
+//! Set the frequency of the given channel
+/*!
+  \param ichan the index of the channel to be set
+  \param frequency the frequency of the given channel in MHz
+*/
+void Pulsar::Integration::set_frequency (int ichan, double frequency)
+{
+  if (ichan < 0 || ichan>=get_nchan())
+    throw Error (InvalidRange, "Integration::set_frequency",
+		 "ichan=%d nchan=%d", ichan, get_nchan());
+
+  for (int ipol=0; ipol<get_npol(); ipol++)
+    profiles[ipol][ichan]->set_centre_frequency (frequency);
+}
+
+//! Get the weight of the given channel
+/*!
+  \param ichan the index of the channel to get
+  \return the weight of the given channel
+*/
+float Pulsar::Integration::get_weight (int ichan) const
+{
+  if (ichan < 0 || ichan>=get_nchan() || get_npol() < 1)
+    return 0;
+
+  return profiles[0][ichan]->get_weight();
+}
+
+//! Set the weight of the given channel
+/*!
+  \param ichan the index of the channel to be set
+  \param weight the weight of the given channel
+*/
+void Pulsar::Integration::set_weight (int ichan, float weight)
+{
+  if (ichan < 0 || ichan>=get_nchan())
+    throw Error (InvalidRange, "Integration::set_weight",
+		 "ichan=%d nchan=%d", ichan, get_nchan());
+
+  for (int ipol=0; ipol<get_npol(); ipol++)
+    profiles[ipol][ichan]->set_weight (weight);
+}
+
 vector<Pulsar::Profile*>& Pulsar::Integration::operator[] (Poln::Measure poln)
 {
   int index = Poln::get_ipol (get_poln_state(), poln);

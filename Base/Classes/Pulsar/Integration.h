@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Integration.h,v $
-   $Revision: 1.17 $
-   $Date: 2002/04/22 06:59:36 $
-   $Author: ahotan $ */
+   $Revision: 1.18 $
+   $Date: 2002/04/23 08:48:03 $
+   $Author: pulsar $ */
 
 /*
   
@@ -176,7 +176,7 @@ namespace Pulsar {
     //! Set the total time integrated (in seconds)
     virtual void set_duration (double seconds) = 0;
 
-   //! Get the centre frequency (in MHz)
+    //! Get the centre frequency (in MHz)
     virtual double get_centre_frequency() const = 0;
     //! Set the centre frequency (in MHz)
     virtual void set_centre_frequency (double MHz) = 0;
@@ -221,6 +221,16 @@ namespace Pulsar {
     /*! Called by Integration methods to update child attribute */
     virtual void set_npol (int npol) = 0;
 
+    //! Get the frequency of the given channel
+    virtual double get_frequency (int ichan) const;
+    //! Set the frequency of the given channel
+    virtual void set_frequency (int ichan, double frequency);
+
+    //! Get the weight of the given channel
+    virtual float get_weight (int ichan) const;
+    //! Set the weight of the given channel
+    virtual void set_weight (int ichan, float weight);
+    
     //! The data area
     vector< vector<Profile*> > profiles;
 
