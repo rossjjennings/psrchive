@@ -1,24 +1,22 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/dspReduction.h,v $
-   $Revision: 1.4 $
-   $Date: 2003/10/08 14:17:38 $
+   $Revision: 1.5 $
+   $Date: 2004/07/12 07:34:44 $
    $Author: straten $ */
 
 #ifndef __dspReduction_h
 #define __dspReduction_h
 
-#include "Pulsar/Archive.h"
+#include "Pulsar/Backend.h"
 
 namespace Pulsar {
 
-  //! Example Pulsar::Archive Extension
-  /*! This dspReduction class provides an example of how to
-    inherit the Pulsar::Archive::Extension class. By copying the files
-    dspReduction.h and dspReduction.C and performing simple
-    text-substitution, the skeleton of a new Extension may be easily
-    developed. */
-  class dspReduction : public Pulsar::Archive::Extension {
+  //! Baseband data reduced using baseband/dsp
+  /*! The dspReduction class stores backend information specific to the
+    baseband recording and processing system implemented by baseband/dsp.
+   */
+  class dspReduction : public Pulsar::Backend {
 
   public:
     
@@ -36,6 +34,24 @@ namespace Pulsar {
 
     //! Clone method
     dspReduction* clone () const { return new dspReduction( *this ); }
+
+    //////////////////////////////////////////////////////////////////////
+    //
+    // Backend implementation
+    //
+    //////////////////////////////////////////////////////////////////////
+    
+    //! Get the name of the backend
+    string get_name () const { return name; }
+    
+    //! Set the name of the backend
+    void set_name (const string& _name) { name = _name; }
+
+    //! Get the software information
+    string get_software () const { return software; }
+
+    //! Set the software information
+    void set_software (const string& soft) { software = soft; }
 
     /** @name dsp::Input parameters
      *  These parameters describe the state of the dsp::Input from which the
@@ -153,6 +169,12 @@ namespace Pulsar {
 
 
   protected:
+
+    //! The name of the baseband recorder
+    string name;
+
+    //! The software information
+    string software;
 
     /** @name dsp::Input parameters
      *  These parameters describe the state of the dsp::Input from which the
