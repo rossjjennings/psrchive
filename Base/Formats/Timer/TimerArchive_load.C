@@ -352,7 +352,7 @@ void Pulsar::TimerArchive::subint_load (FILE* fptr)
 	cerr << "ndmp:" <<hdr.ndump_sub_int << " tsmp:" << hdr.tsmp 
 	     << " tsub_int:" << hdr.sub_int_time
 	     << " chbw: " << chbw << endl;
-      hdr.calibrated &= FB_CALIBRATED;
+      hdr.calibrated |= FB_CALIBRATED;
     }
   }
   
