@@ -1,4 +1,3 @@
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <strings.h>
@@ -562,19 +561,20 @@ int utc2LST (double* lst, utc_t timeutc, float longitude)
 
 int utc_f2LST (double* lst, utc_t timeutc, double fracsec, float longitude)
 {
-  double F1_YY, UT, GMST;
-
   /* Greenwich mean sidereal time (hours) at 12AM (UTC) day zero.
      see ASTRO ALMANAC pg B6 */
-  double gmst0[UTC2LST_TOTAL_YEARS] = { 6.5967564, /* 1996 */
-					6.6465521, /* 1997 */
-					6.6306380, /* 1998 */
-					6.6147239  /* 1999 */
+  double gmst0 [UTC2LST_TOTAL_YEARS] = { 6.5967564, /* 1996 */
+					 6.6465521, /* 1997 */
+					 6.6306380, /* 1998 */
+					 6.6147239  /* 1999 */
   };
-  double F1;
+  double F1 = 0.0;
   double F2 = 0.0657098244;     /* (hours) */
   double F3 = 1.00273791;       /* (hours) */
-  
+
+  double UT = 0.0;
+  double GMST = 0.0;
+
   /* convert longitude in degrees to east_long in hours */
   double east_long = longitude * (24.0 / 360.0);
   
@@ -590,7 +590,8 @@ int utc_f2LST (double* lst, utc_t timeutc, double fracsec, float longitude)
   
   UT = (double)timeutc.tm_hour + (double)timeutc.tm_min/60.0
     + ((double)timeutc.tm_sec + fracsec)/3600.0;
-  GMST = F1_YY+F2*(double)timeutc.tm_yday+F3*UT;
+
+  GMST = F1 + F2*(double)timeutc.tm_yday + F3*UT;
   
   *lst =  GMST + east_long;
   while (*lst<0.0) *lst+=24.0;
