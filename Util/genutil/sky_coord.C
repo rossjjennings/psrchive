@@ -7,6 +7,45 @@
 extern "C" double F772C(sla_galeq)(double *, double *, double *, double *);
 extern "C" double F772C(sla_eqgal)(double *, double *, double *, double *);
 
+void sky_coord::init ()
+{
+  angle1.setWrapPoint (2*M_PI);
+}
+
+sky_coord::sky_coord ()
+{
+  init ();
+}
+
+sky_coord::sky_coord (const char* astr) : AnglePair(astr)
+{
+  init ();
+}
+
+sky_coord::sky_coord (const sky_coord & co) 
+{ 
+  init ();
+  *this = co; 
+}
+
+// as long as sky_coord is empty, why not simply accept AnglePair?
+sky_coord::sky_coord (const AnglePair & co)
+{
+  init ();
+  AnglePair::operator=(co);
+}
+
+
+sky_coord::sky_coord (const Angle & a1, const Angle & a2) : AnglePair(a1,a2)
+{
+  init ();
+}
+
+sky_coord::sky_coord (const double d1, const double d2) : AnglePair(d1,d2)
+{
+  init ();
+}
+
 // ra and dec given in milliseconds of an hour
 // JRa and JDec are stored in radians
 const sky_coord& sky_coord::setJRaDecMS(long int ra, long int dec)
