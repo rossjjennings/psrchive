@@ -42,7 +42,8 @@ void usage ()
     "\n"
     "  -S   Use the SingleAxis(t)Polar (SAtP selfcal) model\n"
     "  -s   Use the Single Axis Model (default)\n"
-    "  -q   Use the Polar Model\n"
+    "  -q   Use the Polar Model\n\n"
+    "See http://astronomy.swin.edu.au/pulsar/software/manuals/pac.html"
        << endl;
 }
 
@@ -97,7 +98,7 @@ int main (int argc, char *argv[]) {
       Pulsar::Archive::set_verbosity(1);
       break;
     case 'i':
-      cout << "$Id: pac.C,v 1.27 2003/09/30 08:04:09 ahotan Exp $" << endl;
+      cout << "$Id: pac.C,v 1.28 2003/09/30 08:33:18 ahotan Exp $" << endl;
       return 0;
     case 'p':
       cals_are_here = optarg;

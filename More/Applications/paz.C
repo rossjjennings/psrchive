@@ -74,6 +74,8 @@ int main (int argc, char *argv[]) {
       cout << endl;
       cout << "The cutoff S/N value used with -S is largely arbitrary. You will" << endl;
       cout << "need to experiment to find the best value for your archives" << endl;
+      cout << endl;
+      cout << "See http://astronomy.swin.edu.au/pulsar/software/manuals/paz.html" << endl;
       return (-1);
       break;
     case 'v':
@@ -84,7 +86,7 @@ int main (int argc, char *argv[]) {
       Pulsar::Archive::set_verbosity(1);
       break;
     case 'i':
-      cout << "$Id: paz.C,v 1.12 2003/09/30 08:04:09 ahotan Exp $" << endl;
+      cout << "$Id: paz.C,v 1.13 2003/09/30 08:33:18 ahotan Exp $" << endl;
       return 0;
     case 'D':
       display = true;

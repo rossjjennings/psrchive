@@ -42,7 +42,8 @@ void usage ()
 
     "This program works via keyboard interaction. To set baseline zero\n"
     "you type 'z' to set the start point, move the cursor and type 'z'\n"
-    "again to accept the region."
+    "again to accept the region\n\n"
+    "See http://astronomy.swin.edu.au/pulsar/software/manuals/pas.html"
        << endl;
 }
 
@@ -79,7 +80,7 @@ int main (int argc, char** argv)
       return 0;
 
     case 'i':
-      cout << "$Id: pas.C,v 1.7 2003/09/30 08:04:09 ahotan Exp $" << endl;
+      cout << "$Id: pas.C,v 1.8 2003/09/30 08:33:18 ahotan Exp $" << endl;
       return 0;
 
     case 'r':

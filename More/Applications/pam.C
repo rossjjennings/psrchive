@@ -64,31 +64,33 @@ int main (int argc, char *argv[]) {
   while ((gotc = getopt(argc, argv, "hvVime:TFpIt:f:b:d:s:r:w:D:SB")) != -1) {
     switch (gotc) {
     case 'h':
-      cout << "A program for manipulating Pulsar::Archives"            << endl;
-      cout << "Usage: pam [options] filenames"                         << endl;
-      cout << "  -v               Verbose mode"                        << endl;
-      cout << "  -V               Very verbose mode"                   << endl;
-      cout << "  -i               Show revision information"           << endl;
-      cout << "  -m               Modify the original files on disk"   << endl;
-      cout << "  -e extension     Write new files with this extension" << endl;
-      cout << "  -T               Time scrunch"                        << endl;
-      cout << "  -F               Frequency scrunch"                   << endl;
-      cout << "  -p               Polarisation scrunch"                << endl;
-      cout << "  -I               Transform to Invariant Interval"     << endl;
-      cout << "  -S               Transform to Stokes parameters"      << endl;
-      cout << "  -B               Flip the sideband sense (DANGEROUS)" << endl;
+      cout << "A program for manipulating Pulsar::Archives"                       << endl;
+      cout << "Usage: pam [options] filenames"                                    << endl;
+      cout << "  -v               Verbose mode"                                   << endl;
+      cout << "  -V               Very verbose mode"                              << endl;
+      cout << "  -i               Show revision information"                      << endl;
+      cout << "  -m               Modify the original files on disk"              << endl;
+      cout << "  -e extension     Write new files with this extension"            << endl;
+      cout << "  -T               Time scrunch"                                   << endl;
+      cout << "  -F               Frequency scrunch"                              << endl;
+      cout << "  -p               Polarisation scrunch"                           << endl;
+      cout << "  -I               Transform to Invariant Interval"                << endl;
+      cout << "  -S               Transform to Stokes parameters"                 << endl;
+      cout << "  -B               Flip the sideband sense (DANGEROUS)"            << endl;
       cout << endl;
-      cout << "The following options take integer arguments"           << endl;
-      cout << "  -t tscr          Time scrunch by this factor"         << endl;
-      cout << "  -f fscr          Frequency scrunch by this factor"    << endl;
-      cout << "  -b bscr          Bin scrunch by this factor"          << endl;
+      cout << "The following options take integer arguments"                      << endl;
+      cout << "  -t tscr          Time scrunch by this factor"                    << endl;
+      cout << "  -f fscr          Frequency scrunch by this factor"               << endl;
+      cout << "  -b bscr          Bin scrunch by this factor"                     << endl;
       cout << endl;
-      cout << "The following options take floating point arguments"    << endl;
-      cout << "  -d dm            Alter the header dispersion measure" << endl;
-      cout << "  -D rm            Correct for ISM faraday rotation"    << endl;
-      cout << "  -s dc            Smear with this duty cycle"          << endl;
-      cout << "  -r phase         Rotate profiles by this many turns"  << endl;
-      cout << "  -w weight        Reset profile weights to this value" << endl;
+      cout << "The following options take floating point arguments"               << endl;
+      cout << "  -d dm            Alter the header dispersion measure"            << endl;
+      cout << "  -D rm            Correct for ISM faraday rotation"               << endl;
+      cout << "  -s dc            Smear with this duty cycle"                     << endl;
+      cout << "  -r phase         Rotate profiles by this many turns"             << endl;
+      cout << "  -w weight        Reset profile weights to this value"            << endl;
+      cout << endl;
+      cout << "See http://astronomy.swin.edu.au/pulsar/software/manuals/pam.html" << endl;
       return (-1);
       break;
     case 'v':
@@ -99,7 +101,7 @@ int main (int argc, char *argv[]) {
       Pulsar::Archive::set_verbosity(1);
       break;
     case 'i':
-      cout << "$Id: pam.C,v 1.19 2003/09/30 08:04:09 ahotan Exp $" << endl;
+      cout << "$Id: pam.C,v 1.20 2003/09/30 08:33:18 ahotan Exp $" << endl;
       return 0;
     case 'm':
       save = true;

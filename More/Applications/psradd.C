@@ -38,7 +38,8 @@ void usage () {
     " -I sec      Tscrunch+unload when archive contains 'sec' seconds\n"
     "\n"
     "Note:\n"
-    " AUTO ADD options, '-I' and '-G', are incompatible with '-S' and '-f'"
+    " AUTO ADD options, '-I' and '-G', are incompatible with '-S' and '-f'\n\n"
+    "See http://astronomy.swin.edu.au/pulsar/software/manuals/pam.html"
        << endl;
 }
 
@@ -94,7 +95,7 @@ int main (int argc, char **argv)
       return 0;
       
     case 'i':
-      cout << "$Id: psradd.C,v 1.9 2003/09/30 08:04:09 ahotan Exp $" << endl;
+      cout << "$Id: psradd.C,v 1.10 2003/09/30 08:33:18 ahotan Exp $" << endl;
       return 0;
       
     case 'b':

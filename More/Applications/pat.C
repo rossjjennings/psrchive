@@ -28,12 +28,14 @@ int main (int argc, char *argv[]) {
   while ((gotc = getopt(argc, argv, "hvVis:")) != -1) {
     switch (gotc) {
     case 'h':
-      cout << "A program for timing Pulsar::Archives"            << endl;
-      cout << "Usage: pat [options] filenames"                   << endl;
-      cout << "  -v               Verbose mode"                  << endl;
-      cout << "  -V               Very verbose mode"             << endl;
-      cout << "  -i               Show revision information"     << endl;
-      cout << "  -s stdfile       Location of standard profile"  << endl;
+      cout << "A program for timing Pulsar::Archives"                             << endl;
+      cout << "Usage: pat [options] filenames"                                    << endl;
+      cout << "  -v               Verbose mode"                                   << endl;
+      cout << "  -V               Very verbose mode"                              << endl;
+      cout << "  -i               Show revision information"                      << endl;
+      cout << "  -s stdfile       Location of standard profile"                   << endl;
+      cout << endl;
+      cout << "See http://astronomy.swin.edu.au/pulsar/software/manuals/pat.html" << endl;
       return (-1);
       break;
     case 'v':
@@ -44,7 +46,7 @@ int main (int argc, char *argv[]) {
       Pulsar::Archive::set_verbosity(1);
       break;
     case 'i':
-      cout << "$Id: pat.C,v 1.11 2003/09/30 08:04:09 ahotan Exp $" << endl;
+      cout << "$Id: pat.C,v 1.12 2003/09/30 08:33:18 ahotan Exp $" << endl;
       return 0;
     case 's':
       std_given = true;
