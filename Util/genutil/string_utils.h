@@ -1,7 +1,7 @@
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Attic/string_utils.h,v $
-   $Revision: 1.7 $
-   $Date: 1999/12/23 01:55:58 $
-   $Author: straten $ */
+   $Revision: 1.8 $
+   $Date: 2000/01/20 01:29:14 $
+   $Author: redwards $ */
 
 #ifndef __STRING_UTILS_H
 #define __STRING_UTILS_H
@@ -69,6 +69,9 @@ inline int stringlen (int val, unsigned precision = 0)
 
 inline int stringlen (float val, unsigned precision = 6)
 { return stringlen (double(val), precision); }
+
+string stringprintf(char *fmt ...);
+
 
 #endif
 
