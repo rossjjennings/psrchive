@@ -1,10 +1,10 @@
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
-
 #include "Calibration/Parallactic.h"
 #include "Pauli.h"
 #include "sky_coord.h"
+
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 
 #include <limits.h>
 
