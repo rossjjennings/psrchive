@@ -1,10 +1,10 @@
 LOCAL_ROOT = ../../..
-include ${LOCAL_ROOT}/include/Makefile.standard
+include ${LOCAL_ROOT}/headers/Makefile.standard
 
 INCLUDES = superarchive.h archive.h sub_int.h profile.h archhdr.h headers.h \
         mini++.h timer++.h timer.h mini.h band.h archdefs.h \
 	timer.inc band.inc mini.inc convert_endian.h misc.h \
-        poln_profile.h
+	poln_profile.h \
 
 LIBRARY = libarchive.a
 
@@ -26,6 +26,7 @@ PROGRAMS = calinfo.C align.C amps.C chanprep.C crstd.C \
 	crh.C psrhead.C fakedat.C plk.C stokes_plt.C \
 	headsum.C treduce.C testbpass.C mel2.C invint.C \
 	tcombine2.C ratio.C fixprf.C xformprof.C archive_test.C \
+	h1_studies.C
 
 TESTS = timer_size.c
 
@@ -38,7 +39,7 @@ stokes_plt.LDFLAGS := $(LDFLAGS) $(LCPGPLOT)
 testbpass.LDFLAGS := $(LDFLAGS) $(LCPGPLOT)
 ratio.LDFLAGS := $(LDFLAGS) $(LCPGPLOT)
 treduce.LDFLAGS := $(LDFLAGS) $(LCPGPLOT)
-
+h1_studies.LDFLAGS := $(LDFLAGS) $(LCPGPLOT)
 # ########################################################################
 # treduce dialog stuff is not for linux
 ifneq ($(LOGIN_ARCH),linux)
@@ -48,9 +49,6 @@ treduce.srcs = xtinit.C xtmac.C xtproc.C xtlplt.C xtinplot.C xtshdr.C    \
                newtreduce.f
 endif
 
-# ########################################################################
-# 
-NOT_WORKING = bandpass.C detail.C xtoa.C bin_ph.C corflux.C flux.C \
-	vargain.C pepoch.C wtplt.C calfbar.C autotadd.C
 
-include $(LOCAL_ROOT)/include/Makefile.extended
+include $(LOCAL_ROOT)/headers/Makefile.extended
+INCLUDES += pg_plot_gnu.h
