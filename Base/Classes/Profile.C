@@ -258,6 +258,22 @@ void Pulsar::Profile::square_root()
   }
 }
 
+//! calculate the logarithm of each bin with value greater than threshold
+void Pulsar::Profile::logarithm (double base, double threshold)
+{
+  if (verbose)
+    cerr << "Pulsar::Profile::logarithm" << endl;
+  
+  float log_threshold = log(threshold)/log(base);
+  
+  for (unsigned ibin=0; ibin<nbin; ++ibin)
+    if (amps[ibin] > threshold)
+      amps[ibin] = log(amps[ibin])/log(base);
+    else
+      amps[ibin] = log_threshold;
+
+}
+ 
 
 /////////////////////////////////////////////////////////////////////////////
 //

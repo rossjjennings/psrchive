@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Profile.h,v $
-   $Revision: 1.35 $
-   $Date: 2003/10/11 11:50:37 $
-   $Author: ahotan $ */
+   $Revision: 1.36 $
+   $Date: 2003/10/16 13:57:49 $
+   $Author: straten $ */
 
 #ifndef __Pulsar_Profile_h
 #define __Pulsar_Profile_h
@@ -89,6 +89,9 @@ namespace Pulsar {
     //! calculate the signed sqrt of the absolute value of each bin 
     virtual void square_root();
 
+    //! calculate the logarithm of each bin with value greater than threshold
+    virtual void logarithm (double base = 10.0, double threshold = 0.0);
+
     //! Returns the maximum amplitude
     float max  (int bin_start=0, int bin_end=0) const;
     //! Returns the minimum amplitude
@@ -171,7 +174,7 @@ namespace Pulsar {
     template <typename T> void set_amps (const vector<T>& data);
 
     //! set the amplitudes array equal to the contents of the data array
-    template <typename T> void get_amps (vector<T>& data);
+    template <typename T> void get_amps (vector<T>& data) const;
 
     //! get the centre frequency (in MHz)
     double get_centre_frequency () const { return centrefreq; }
@@ -269,7 +272,7 @@ void Pulsar::Profile::set_amps (const vector<T>& data)
   \param data vector of amps
 */
 template <typename T>
-void Pulsar::Profile::get_amps (vector<T>& data)
+void Pulsar::Profile::get_amps (vector<T>& data) const
 {
   data.resize (nbin);
   for (unsigned ibin=0; ibin<nbin; ibin++)
