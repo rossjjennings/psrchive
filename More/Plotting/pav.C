@@ -1,5 +1,5 @@
 //
-// $Id: pav.C,v 1.54 2003/10/08 05:52:08 ahotan Exp $
+// $Id: pav.C,v 1.55 2003/10/08 14:30:20 straten Exp $
 //
 // The Pulsar Archive Viewer
 //
@@ -63,6 +63,8 @@ void usage ()
     " -g        Display position angle profile\n"
     " -G        Plot frequency against pulse phase\n"
     " -l        Do not display labels outside of plotting area\n"
+    " -m        Plot Poincare vector on Mercator projection\n"
+    " -O p.a.   Rotate position angle (orientation) by p.a. degrees\n"
     " -q        Plot a position angle frequency spectrum colour map\n"
     " -Q        Position angle frequency spectrum for on-pulse region\n"
     " -r phase  rotate the profiles by phase (in turns)\n"
@@ -94,7 +96,7 @@ void cpg_next ()
   cpgsls (1);
   cpgslw (1);
   cpgsci (1);
-  cpgsvp (0.1, 0.9, 0.1, 0.9);
+  cpgsvp (0.1, 0.9, 0.15, 0.9);
   cpgpage ();
 }
 
@@ -122,6 +124,7 @@ int main (int argc, char** argv)
   bool baseline_spectrum = false;
   bool dedisperse = false;
   bool manchester = false;
+  bool mercator = false;
   bool greyfreq = false;
   bool stopwatch = false;
   bool hat = false;
@@ -140,7 +143,7 @@ int main (int argc, char** argv)
   bool dynam = false;
   bool psas = false;
 
-  string plot_device;
+  string plot_device = "?";
 
   char* metafile = NULL;
   
@@ -148,7 +151,7 @@ int main (int argc, char** argv)
   Pulsar::Plotter::ColourMap colour_map = Pulsar::Plotter::Heat;
   
   int c = 0;
-  const char* args = "AaBb:Cc:DdEeFf:GghI:ijJHK:lLm:M:N:Qq:opP:r:SsTt:VvwWXx:Yy:Zz:";
+  const char* args = "AaBb:Cc:DdEeFf:GgHhI:iJjK:LlM:m:N:O:oP:pQq:r:SsTt:VvwWXx:Yy:Zz:";
 
   while ((c = getopt(argc, argv, args)) != -1)
     switch (c) {
@@ -216,7 +219,7 @@ int main (int argc, char** argv)
       plotter.set_subint( atoi (optarg) );
       break;
     case 'i':
-      cout << "$Id: pav.C,v 1.54 2003/10/08 05:52:08 ahotan Exp $" << endl;
+      cout << "$Id: pav.C,v 1.55 2003/10/08 14:30:20 straten Exp $" << endl;
       return 0;
 
     case 'j':
@@ -239,14 +242,19 @@ int main (int argc, char** argv)
       break;
       
     case 'm':
-      // macro file
+      mercator = true;
       break;
+
     case 'M':
       metafile = optarg;
       break;
 
     case 'o':
       orig_passband = true;
+      break;
+
+    case 'O':
+      plotter.set_orientation( atof (optarg) );
       break;
 
     case 'p':
@@ -306,8 +314,9 @@ int main (int argc, char** argv)
       break;
 
     case 'y':
-      // y panel
+      plotter.set_y_max (atof(optarg));
       break;
+
     case 'Y':
       timeplot = true;
       break;
@@ -359,17 +368,9 @@ int main (int argc, char** argv)
     return 0;
   }
   
-  if (plot_device.empty()){
-    if (cpgopen("?") < 0) {
-      cout << "Error: Could not open plot device" << endl;
-      return -1;
-    }
-  }
-  else {
-    if (cpgopen(plot_device.c_str()) < 0) {
-      cout << "Error: Could not open plot device" << endl;
-      return -1;
-    }
+  if (cpgopen(plot_device.c_str()) < 0) {
+    cout << "Error: Could not open plot device" << endl;
+    return -1;
   }
   
   cpgask(1);
@@ -586,6 +587,11 @@ int main (int argc, char** argv)
     if (manchester) {
       cpg_next();
       plotter.Manchester (archive);
+    }
+
+    if (mercator) {
+      cpg_next();
+      plotter.Mercator (archive);
     }
 
     if (periodplot) {
