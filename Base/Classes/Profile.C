@@ -134,10 +134,9 @@ const Pulsar::Profile& Pulsar::Profile::operator -= (const Profile& profile)
 //
 // Pulsar::Profile::operator +=
 //
-const Pulsar::Profile& Pulsar::Profile::operator += (float offset)
+const Pulsar::Profile& Pulsar::Profile::operator += (float factor)
 {
-  for (unsigned i=0;i<nbin;i++)
-    amps[i]+=offset;
+  offset (factor);
   return *this;
 }
  
@@ -145,10 +144,9 @@ const Pulsar::Profile& Pulsar::Profile::operator += (float offset)
 //
 // Pulsar::Profile::operator -=
 //
-const Pulsar::Profile& Pulsar::Profile::operator -= (float offset)
+const Pulsar::Profile& Pulsar::Profile::operator -= (float factor)
 {
-  for (unsigned i=0;i<nbin;i++)
-    amps[i]-=offset;
+  offset (-factor);
   return *this;
 }
  
@@ -157,6 +155,19 @@ const Pulsar::Profile& Pulsar::Profile::operator -= (float offset)
 // Pulsar::Profile::operator *=
 //
 const Pulsar::Profile& Pulsar::Profile::operator *= (float factor)
+{
+  scale (factor);
+  return *this;
+}
+
+void Pulsar::Profile::offset (double factor)
+{
+  for (unsigned i=0;i<nbin;i++)
+    amps[i]+=factor;
+  return *this;
+}
+
+void Pulsar::Profile::scale (double factor)
 {
   for (unsigned i=0;i<nbin;i++)
     amps[i]*=factor;

@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Profile.h,v $
-   $Revision: 1.64 $
-   $Date: 2004/07/28 00:24:26 $
-   $Author: hknight $ */
+   $Revision: 1.65 $
+   $Date: 2004/08/04 15:46:57 $
+   $Author: straten $ */
 
 #ifndef __Pulsar_Profile_h
 #define __Pulsar_Profile_h
@@ -89,13 +89,19 @@ namespace Pulsar {
 					       float phs1 = 0, float phs2 = 1.0);
     
     //! adds offset to each bin of the profile
-    virtual const Profile& operator += (float offset);
+    const Profile& operator += (float offset);
 
     //! subtracts offset from each bin of the profile
-    virtual const Profile& operator -= (float offset);
+    const Profile& operator -= (float offset);
 
     //! multiplies each bin of the profile by scale
-    virtual const Profile& operator *= (float scale);
+    const Profile& operator *= (float scale);
+
+    //! multiplies each bin of the profile by scale
+    virtual void scale (double scale);
+
+    //! offsets each bin of the profile by offset
+    virtual void offset (double offset);
 
     //! rotates the profile by phase (in turns)
     virtual void rotate (double phase);
