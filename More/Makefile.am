@@ -227,8 +227,9 @@ INCLUDES = -I$(top_builddir)/utils/include -I$(top_builddir)/astro/include \
 	@PGPLOT_CFLAGS@ @CFITSIO_CFLAGS@
 
 LDADD = libpsrchive.la $(top_builddir)/astro/libpsrastro.la \
-        $(top_builddir)/utils/libpsrutils.la \
-	@FFT_LIBS@ @CFITSIO_LIBS@ @SLA_LIBS@ @FLIBS@
+        $(top_builddir)/utils/libpsrutils.la
+
+libpsrchive_la_LIBADD += @FFT_LIBS@ @CFITSIO_LIBS@ @SLA_LIBS@ @FLIBS@
 
 include $(top_srcdir)/config/Makefile.local
 
