@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/rhythm/rhythm.h,v $
-   $Revision: 1.47 $
-   $Date: 2005/04/01 04:49:22 $
+   $Revision: 1.48 $
+   $Date: 2005/04/04 01:54:57 $
    $Author: ahotan $ */
 
 // //////////////////////////////////////////////////////////////////////////
@@ -265,6 +265,7 @@ class Rhythm : public QMainWindow
   void save_toas ();
   void chc ();
   void hc ();
+  void all_done ();
 
   // Tempo menu callbacks
   void fit();

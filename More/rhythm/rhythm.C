@@ -101,17 +101,21 @@ Rhythm::Rhythm (QApplication* master, QWidget* parent, int argc, char** argv) :
   // Build the cursor control panel
 
   leftpanel = new QVBox(container);
-
-  if (vverbose)
-    cerr << "Rhythm:: creating toaPlotter" << endl;
   
   // Create a tab widget to hold different displays
   tabs = new QTabWidget(container);
+  tabs->setMinimumWidth(400);
 
   // Instantiate the plotting window
 
+  if (vverbose)
+    cerr << "Rhythm:: creating toaPlotter" << endl;
+
   plot_window = new toaPlot(tabs);
   tabs->addTab(plot_window, "Plot");
+
+  QObject::connect(plot_window, SIGNAL(ineednewdata()),
+		   this, SLOT(request_update()));
 
   show_list = true;
 
@@ -124,9 +128,6 @@ Rhythm::Rhythm (QApplication* master, QWidget* parent, int argc, char** argv) :
     lister->addColumn("Frequency", 100);
     lister->addColumn("Information", 175);
   }
-
-  QObject::connect(plot_window, SIGNAL(ineednewdata()),
-		   this, SLOT(request_update()));
   
   string banloc = getenv("PSRHOME");
   banloc += "/runtime/rhythm/banner.jpg";
@@ -134,7 +135,7 @@ Rhythm::Rhythm (QApplication* master, QWidget* parent, int argc, char** argv) :
   QPixmap* pretty_pic = new QPixmap(banloc.c_str());
   header = new QLabel(leftpanel);
   header->setFrameStyle( QFrame::Panel | QFrame::Sunken );
-  header-> setAlignment(Qt::AlignCenter);
+  header->setAlignment(Qt::AlignCenter);
   header->setPaletteBackgroundColor(black);
   header->setPixmap(*pretty_pic);
 
@@ -310,6 +311,9 @@ void Rhythm::load_toas (const char* fname)
     
     toa_filename = fname;
   }
+  else {
+    toas_modified = true;
+  }
 }
 
 void Rhythm::add_toas (std::vector<Tempo::toa> new_toas)
@@ -362,8 +366,6 @@ void Rhythm::add_toas (std::vector<Tempo::toa> new_toas)
 				      toas[i].get_auxilliary_text().c_str()));
   }
   
-  toas_modified = true;
-
   if (autofit)
     fit ();
 }
@@ -409,6 +411,11 @@ void Rhythm::set_Params (const psrephem& eph)
 
 void Rhythm::close_toas ()
 {
+  if (toas_modified) {
+    if (prompt_save_toas() != 0)
+      return;
+  }
+  
   toas.resize(0);
 
   tempo->setItemEnabled (fitID, false);
@@ -693,8 +700,6 @@ void Rhythm::fit_selected (const psrephem& eph, bool load_new)
 
 void Rhythm::stride_fit()
 {
-#if 0
-
   int temp = 0;
   
   temp = QInputDialog::getInteger("Rhythm Stride Fit",
@@ -747,8 +752,7 @@ void Rhythm::stride_fit()
     return;
   }
   
-  string useful = "Stride Fitting for ";
-  useful += parmNames[index];
+  string useful = "Stride Fitting...";
   footer->setText(useful.c_str());
   
   QProgressDialog progress( "Fitting to data... ", "Abort", temp,
@@ -772,8 +776,8 @@ void Rhythm::stride_fit()
     fitpopup -> get_psrephem (myeph);
     result.push_back(myeph.value_double[index]);
     cout.precision(16);
-    cout << parmNames[index] << 
-      " for block " << i << " = " << float(myeph.value_double[index]) << endl;
+    cout << "Value for block " << i << " = " 
+	 << float(myeph.value_double[index]) << endl;
   }
   clearselection();
 
@@ -797,19 +801,15 @@ void Rhythm::stride_fit()
     return;
   }
   
-  string label = parmNames[index];
-  
   cpgopen("9295/xs");
   cpgsvp(0.1, 0.9, 0.1, 0.9);
   cpgswin(0, temp, min, max);
   cpgbox("BCNST", 0.0, 0, "BCNST", 0.0, 0);
-  cpglab("Block Number", label.c_str(), "Stride Fit Result");
+  cpglab("Block Number", "Value", "Stride Fit Result");
   for (unsigned i = 0; i < result.size(); i++) {
     cpgpt1(i,result[i],0);
   }
   cpgclos();
-
-#endif
 }
 
 void Rhythm::advanceT0 () {
@@ -868,7 +868,7 @@ std::vector<double> Rhythm::give_me_data (toaPlot::AxisQuantity q)
   
   Pulsar::StandardSNR snrobj;
 
-  QProgressDialog progress( "Calculating Data...", "Abort", toas.size(),
+  QProgressDialog progress( "Calculating...", "Abort", toas.size(),
 			    this, "progress", TRUE );
   
   switch (q) {
@@ -970,8 +970,8 @@ std::vector<double> Rhythm::give_me_data (toaPlot::AxisQuantity q)
 	if ( progress.wasCancelled() )
 	  break;
 	
-	if (toas[i].get_format() == Tempo::toa::Command ||
-	    toas[i].get_state()  == Tempo::toa::Deleted) {
+	if (toas[i].get_format() == Tempo::toa::Command) {
+	  retval.push_back(0.0);
 	  continue;
 	}
 	
@@ -998,7 +998,8 @@ std::vector<double> Rhythm::give_me_data (toaPlot::AxisQuantity q)
 	  string useful2 = dataPath + "/";
 	  useful2 += filename;
 	  try {	  
-	    Reference::To<Pulsar::Archive> data = Pulsar::Archive::load(useful2);
+	    Reference::To<Pulsar::Archive> data = 
+	      Pulsar::Archive::load(useful2);
 	    crd = data->get_coordinates();
 	  }
 	  catch (Error& error) {
@@ -1020,7 +1021,7 @@ std::vector<double> Rhythm::give_me_data (toaPlot::AxisQuantity q)
 	telescope_coords(telid, &lat, &lon, &ele);
 	
 	double answer = Pulsar::parallactic_angle(crd, mjd, lat, lon);
-	
+
 	retval.push_back(answer);
 	toas[i].set_pa(answer);
       }
@@ -1415,8 +1416,10 @@ void Rhythm::goplot ()
   std::vector<double> yerrs = give_me_errs(yq);
   
   if ( tempx.size() != toas.size() || tempy.size() != toas.size() ||
-       xerrs.size() != toas.size() || yerrs.size() != toas.size() )
+       xerrs.size() != toas.size() || yerrs.size() != toas.size() ) {
+    footer->setText("Computation incomplete!");
     return;
+  }
   
   std::vector<wrapper> useme;
   
@@ -1694,7 +1697,7 @@ void Rhythm::colour_selector ()
   int temp = -1;
   
   temp = QInputDialog::getInteger("Rhythm",
-				  "Please enter the colour index: (0 -> 15)");
+				  "Please enter the colour index: (0-15)");
   if (temp >= 0 && temp < 16)
     setselcol (temp);
 }
@@ -1715,7 +1718,7 @@ void Rhythm::symbol_selector ()
   int temp = -1;
   
   temp = QInputDialog::getInteger("Rhythm",
-				  "Please enter the symbol index: (0 -> 127)");
+				  "Please enter the symbol index: (0-127)");
   
   if (temp >= 0 && temp < 128)
     setseldot (temp);

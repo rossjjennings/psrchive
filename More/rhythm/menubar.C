@@ -34,7 +34,7 @@ void Rhythm::menubarConstruct ()
 		    SLOT( chc() ));
   file->insertSeparator();
   file->insertItem( "&Close", this, SLOT(close_toas()), ALT+Key_C );
-  file->insertItem( "E&xit",  qApp, SLOT(quit()),     ALT+Key_X );
+  file->insertItem( "E&xit",  this, SLOT(all_done()), ALT+Key_X );
 
   // ///////////////////////////////////////////////////////////////////////
   // TEMPO menu options
@@ -43,7 +43,8 @@ void Rhythm::menubarConstruct ()
 
   fitID = tempo->insertItem( "&Fit", this, SLOT( fit() ), CTRL+Key_F);
   tempo->setItemEnabled (fitID, false);
-  fitSelID = tempo->insertItem( "Fit &Selected", this, SLOT( fit_selected() ), CTRL+Key_S);
+  fitSelID = tempo->insertItem( "Fit &Selected", this, 
+				SLOT( fit_selected() ), CTRL+Key_S);
   tempo->setItemEnabled (fitSelID, false);
   strideFitID = tempo->insertItem( "Stride Fit", this, SLOT( stride_fit() ));
   tempo->setItemEnabled (strideFitID, false);
@@ -287,12 +288,7 @@ void Rhythm::aboutQt()
 }
 
 void Rhythm::load_toas ()
-{
-  if (toas_modified) {
-    if (prompt_save_toas() != 0)
-      return;
-  }
-  
+{  
   QString startName = QString::null;
   if ( !toa_filename.empty() )
     startName = toa_filename.c_str();
@@ -308,8 +304,8 @@ void Rhythm::load_toas ()
 int Rhythm::prompt_save_toas ()
 {
   switch( QMessageBox::information( this, "Rhythm",
-				    "You have edited the TOAs\n"
-				    "Do you want to save the changes?",
+				    "You have edited the TOA list...\n"
+				    "Do you want to save your changes?",
 				    "&Save", "&Discard", "Cancel",
 				    0,      // Enter == button 0
 				    2 ) ) { // Escape == button 2
@@ -383,11 +379,12 @@ void Rhythm::setVerbosity ( int verbosityID )
     cerr << "rhythm: verbose on" << endl;
 }
 
+void Rhythm::all_done ()
+{
+  if (toas_modified) {
+    if (prompt_save_toas() != 0)
+      return;
+  }
 
-
-
-
-
-
-
-
+  qApp->quit();
+}

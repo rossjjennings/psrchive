@@ -9,7 +9,16 @@ static char* cl_args = "ahp:t:vV";
 
 void Rhythm::command_line_help ()
 {
-  cerr << "Command line help is not currently available" << endl;
+  cerr << "--------------------------------------------" << endl;
+  cerr << "Rhythm: A graphical user interface for TEMPO" << endl;
+  cerr << " Usage: rhythm [options] file.tim file.par"   << endl;
+  cerr << " Where the available options are:"            << endl;
+  cerr << "   -h   This help text"                       << endl;
+  cerr << "   -v   Verbose mode"                         << endl;
+  cerr << "   -V   Very verbose mode"                    << endl;
+  cerr << "   -a   Toggle autofit mode"                  << endl;
+  cerr << "--------------------------------------------" << endl;
+  cerr << endl;
 }
 
 void Rhythm::command_line_parse (int argc, char** argv)
