@@ -2,6 +2,8 @@
 #include "Pulsar/Integration.h"
 #include "Pulsar/Profile.h"
 
+#include "tempo++.h"
+
 void Pulsar::Archive::fappend (Pulsar::Archive* arch, bool ignore_time_mismatch)
 {
   if (arch->get_nsubint() != get_nsubint())
@@ -9,6 +11,39 @@ void Pulsar::Archive::fappend (Pulsar::Archive* arch, bool ignore_time_mismatch)
 
   int new_nchan = get_nchan() + arch->get_nchan();
   
+  float newcfr = ((arch->get_centre_frequency())+get_centre_frequency())/2.0;
+
+  // Correct the polycos in each archive so that they have the same reference
+  // sky frequency
+  
+  polyco newpol = Tempo::get_polyco(get_ephemeris(),
+				    start_time(),
+				    end_time(),
+				    get_model().get_nspan(),
+				    get_model().get_ncoeff(),
+				    12,
+				    get_model().get_telescope(),
+				    newcfr);
+  set_model(newpol);
+
+  polyco newpol2 = Tempo::get_polyco(arch->get_ephemeris(),
+				    arch->start_time(),
+				    arch->end_time(),
+				    arch->get_model().get_nspan(),
+				    arch->get_model().get_ncoeff(),
+				    12,
+				    arch->get_model().get_telescope(),
+				    newcfr);
+  arch->set_model(newpol2);
+
+  // Align the second archive with the epoch of the first, compensating for
+  // phase differences that arise from small offsets in the start times
+
+  MJD offset = get_Integration(0)->get_epoch() - 
+    arch->get_Integration(0)->get_epoch();
+
+  arch->rotate(offset.in_seconds());
+
   try {
     
     for (unsigned i = 0; i < get_nsubint(); i++) {
@@ -22,6 +57,6 @@ void Pulsar::Archive::fappend (Pulsar::Archive* arch, bool ignore_time_mismatch)
 
   set_nchan(new_nchan);
   set_bandwidth((arch->get_bandwidth())+get_bandwidth());
-  set_centre_frequency(((arch->get_centre_frequency())+get_centre_frequency())/2.0);
-
+  set_centre_frequency(newcfr);
+  
 }
