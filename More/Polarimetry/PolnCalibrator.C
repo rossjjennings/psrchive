@@ -1,8 +1,10 @@
 #include "Pulsar/PolnCalibrator.h"
 #include "Pulsar/PolnCalibratorExtension.h"
 #include "Pulsar/CorrectionsCalibrator.h"
+
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
+#include "Pulsar/Profile.h"
 #include "Pulsar/Receiver.h"
 
 #include "Pauli.h"
@@ -305,21 +307,46 @@ void Pulsar::PolnCalibrator::calibrate (Archive* arch) try {
   if (verbose)
     cerr << "Pulsar::PolnCalibrator::calibrate call Archive::transform" <<endl;
 
-  arch->transform (response);
+  if (arch->get_npol() == 4) {
 
-  arch->set_poln_calibrated (true);
-  arch->set_scale (Signal::ReferenceFluxDensity);
+    arch->transform (response);
+    arch->set_poln_calibrated (true);
 
-  if (receiver) {
-
-    Receiver* rcvr = arch->get<Receiver>();
-    if (!rcvr)
-      throw Error (InvalidState, "Pulsar::PolnCalibrator::calibrate",
-		   "Archive has no Receiver Extension");
-
-    rcvr->set_feed_corrected (true);
+    if (receiver) {
+      
+      Receiver* rcvr = arch->get<Receiver>();
+      if (!rcvr)
+	throw Error (InvalidState, "Pulsar::PolnCalibrator::calibrate",
+		     "Archive has no Receiver Extension");
+      
+      rcvr->set_feed_corrected (true);
+      
+    }
 
   }
+  else if (arch->get_npol() == 1) {
+
+    if (Archive::verbose)
+      cerr << "Pulsar::PolnCalibrator::calibrate WARNING"
+	" calibrating only absolute gain" << endl;
+
+    unsigned nsub = arch->get_nsubint ();
+    unsigned nchan = arch->get_nchan ();
+
+    for (unsigned isub=0; isub < nsub; isub++) {
+      Integration* subint = arch->get_Integration (isub);
+      for (unsigned ichan=0; ichan < nchan; ichan++) {
+	double gain = abs(det( response[ichan] ));
+	subint->get_Profile (0, ichan) -> scale (gain);
+      }
+    }
+
+  }
+  else
+    throw Error (InvalidParam, "Pulsar::PolnCalibrator::calibrate",
+		 "Archive::npol == %d not yet implemented", arch->get_npol());
+
+  arch->set_scale (Signal::ReferenceFluxDensity);
 
 }
 catch (Error& error) {
