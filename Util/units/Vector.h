@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Vector.h,v $
-   $Revision: 1.6 $
-   $Date: 2004/04/06 14:00:04 $
+   $Revision: 1.7 $
+   $Date: 2004/04/23 13:27:40 $
    $Author: straten $ */
 
 #ifndef __Vector_H
@@ -103,7 +103,7 @@ public:
     { return x[n]; }
   
   //! Alternative access to elements 
-  T operator [] (unsigned n) const
+  const T operator [] (unsigned n) const
     { return x[n]; }
 
   //! Dimension of data
@@ -134,8 +134,7 @@ template <typename T, unsigned N>
 T normsq(const Vector<complex<T>, N> &v)
 {
   T sum = norm(v[0]);
-  unsigned i;
-  for (i=1; i < N; i++)
+  for (unsigned i=1; i < N; i++)
     sum += norm(v[i]);
   return sum;
 }
@@ -145,8 +144,7 @@ template <typename T, unsigned N>
 T normsq(const Vector<T, N> &v)
 {
   T sum = v[0]*v[0];
-  unsigned i;
-  for (i=1; i < N; i++)
+  for (unsigned i=1; i < N; i++)
     sum += v[i]*v[i];
   return sum;
 }
