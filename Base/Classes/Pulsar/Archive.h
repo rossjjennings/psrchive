@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Archive.h,v $
-   $Revision: 1.84 $
-   $Date: 2003/09/12 08:36:34 $
+   $Revision: 1.85 $
+   $Date: 2003/09/12 18:20:31 $
    $Author: straten $ */
 
 /*! \mainpage 
@@ -381,11 +381,11 @@ namespace Pulsar {
 
     //! Template method searches for an Extension of the specified type
     template<class ExtensionType>
-    const ExtensionType* get_extension () const;
+    const ExtensionType* get () const;
 
     //! Template method searches for an Extension of the specified type
     template<class ExtensionType>
-    ExtensionType* get_extension ();
+    ExtensionType* get ();
 
     //! Add an Extension to the Archive instance
     virtual void add_extension (Extension* extension);
@@ -825,9 +825,9 @@ namespace Pulsar {
   template<class Type>
   void Archive::Advocate<Type>::ensure_linkage() { }
 
-  /*! e.g. MyExtension* ext = archive->get_extension<MyExtension>(); */
+  /*! e.g. MyExtension* ext = archive->get<MyExtension>(); */
   template<class ExtensionType>
-  const ExtensionType* Archive::get_extension () const
+  const ExtensionType* Archive::get () const
   {
     const ExtensionType* extension = 0;
     for (unsigned iext=0; iext<get_nextension(); iext++) {
@@ -839,10 +839,10 @@ namespace Pulsar {
   }
 
   template<class ExtensionType>
-  ExtensionType* Archive::get_extension ()
+  ExtensionType* Archive::get ()
   {
     const Archive* thiz = this;
-    return const_cast<ExtensionType*>( thiz->get_extension<ExtensionType>() );
+    return const_cast<ExtensionType*>( thiz->get<ExtensionType>() );
   }
 
 }
