@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/Timer/Pulsar/BasebandArchive.h,v $
-   $Revision: 1.1 $
-   $Date: 2003/03/06 16:29:01 $
+   $Revision: 1.2 $
+   $Date: 2003/03/08 11:06:57 $
    $Author: straten $ */
 
 #ifndef __Baseband_Archive_h
@@ -67,6 +67,23 @@ namespace Pulsar {
 
   protected:
 
+    class Agent : public Archive::Advocate<BasebandArchive> {
+
+      public:
+ 
+        Agent () { }
+ 
+        //! Advocate the use of BasebandArchive to interpret filename
+        bool advocate (const char* filename);
+
+        //! Return the name of the TimerArchive plugin
+        string get_name () { return "BasebandArchive"; }
+
+        //! Return description of this plugin
+        string get_description ();
+
+    };
+
     //! Baseband data reduction specific header information
     baseband_header bhdr;
 
@@ -89,22 +106,6 @@ namespace Pulsar {
 
   private:
     static vector<float> empty;
-  };
-
-
-  class BasebandAgent : public Archive::Agent {
-
-    public:
-
-    //! Constructor
-    BasebandAgent ();
-
-    //! Advocate the use of BasebandArchive to interpret filename
-    bool advocate (const char* filename);
-    
-    //! Return a null-constructed instance of a BasebandArchive
-    Archive* new_Archive ();
-
   };
 
 

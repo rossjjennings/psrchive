@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/Timer/Pulsar/TimerArchive.h,v $
-   $Revision: 1.1 $
-   $Date: 2003/03/06 16:29:01 $
+   $Revision: 1.2 $
+   $Date: 2003/03/08 11:06:57 $
    $Author: straten $ */
 
 #ifndef __Timer_Archive_h
@@ -174,6 +174,23 @@ namespace Pulsar {
     //! Unload the Archive (header and Integration data) to filename
     virtual void unload_file (const char* filename) const;
 
+    class Agent : public Archive::Advocate<TimerArchive> {
+
+      public:
+
+        Agent () { }
+
+        //! Advocate the use of TimerArchive to interpret filename
+        bool advocate (const char* filename);
+
+        //! Return the name of the TimerArchive plugin
+        string get_name () { return "TimerArchive"; }
+
+        //! Return description of this plugin
+        string get_description ();
+
+    };
+
     //! The original FPTM header information
     struct timer hdr;
 
@@ -244,20 +261,6 @@ namespace Pulsar {
   };
 
 
-  class TimerAgent : public Archive::Agent {
-
-    public:
-
-    //! Constructor
-    TimerAgent ();
-
-    //! Advocate the use of TimerArchive to interpret filename
-    bool advocate (const char* filename);
-    
-    //! Return a null-constructed instance of a TimerArchive
-    Archive* new_Archive ();
-
-  };
 
 }
 

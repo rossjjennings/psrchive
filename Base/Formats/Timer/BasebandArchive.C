@@ -77,16 +77,13 @@ Pulsar::Archive* Pulsar::BasebandArchive::clone () const
 // /////////////////////////////////////////////////////////////////////////
 
 
-//! Register the BasebandArchive Agent
-static Registry::List<Pulsar::Archive::Agent>::Enter<Pulsar::BasebandAgent> e;
-
-Pulsar::BasebandAgent::BasebandAgent ()
-  : Pulsar::Archive::Agent ("TIMER Archive with Baseband Extensions version 4")
+string Pulsar::BasebandArchive::Agent::get_description ()
 {
+  return "TIMER Archive with Baseband Extensions version 4";
 }
 
 //! return true if filename refers to a timer archive
-bool Pulsar::BasebandAgent::advocate (const char* filename)
+bool Pulsar::BasebandArchive::Agent::advocate (const char* filename)
 {
   struct timer hdr;
   if ( Timer::fload (filename, &hdr, TimerArchive::big_endian) < 0 )
@@ -98,10 +95,6 @@ bool Pulsar::BasebandAgent::advocate (const char* filename)
   return true;
 }
 
-Pulsar::Archive* Pulsar::BasebandAgent::new_Archive () 
-{
-  return new BasebandArchive;
-}
 
 // //////////////////////////////////////////////////////////////////////
 // Size of the baseband_header struct as a function of Version number
