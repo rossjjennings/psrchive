@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/PSRFITS/Pulsar/FITSArchive.h,v $
-   $Revision: 1.24 $
-   $Date: 2004/07/19 12:42:09 $
-   $Author: straten $ */
+   $Revision: 1.25 $
+   $Date: 2004/09/28 06:52:42 $
+   $Author: ahotan $ */
 
 #ifndef __Pulsar_FITSArchive_h
 #define __Pulsar_FITSArchive_h
@@ -197,14 +197,14 @@ namespace Pulsar {
 
     //! Unload Integration data to the SUBINT HDU of the specified FITS file
     void unload_integrations (fitsfile*) const;
-
-    
    
   private:
     
     int truthval (bool) const;
     void init ();
 
+    vector<string> fcal_on_sources;
+    vector<string> fcal_off_sources;
   };
 
 }
