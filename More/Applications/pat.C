@@ -22,8 +22,8 @@
 #include <math.h>
 #include <string.h>
 
-#include <fstream.h>
-#include <iostream.h>
+#include <fstream>
+#include <iostream>
 
 
 void loadGaussian(string file,  Reference::To<Pulsar::Archive> &stdarch,  Reference::To<Pulsar::Archive> arch);
@@ -107,7 +107,7 @@ int main (int argc, char *argv[])
       denoise = true;
       break;
     case 'i':
-      cout << "$Id: pat.C,v 1.30 2004/11/22 21:39:42 straten Exp $" << endl;
+      cout << "$Id: pat.C,v 1.31 2004/12/02 19:21:00 straten Exp $" << endl;
       return 0;
 
     case 'F':
