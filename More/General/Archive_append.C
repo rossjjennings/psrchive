@@ -75,7 +75,7 @@ void Pulsar::Archive::append (const vector<Integration*>& more_subints)
   for (unsigned isub=0; isub<more_subints.size(); isub++)
     subints.push_back ( new_Integration(more_subints[isub]) );
 
-  set_nsubint (int(subints.size()));
+  set_nsubint (subints.size());
 }  
 
 // ///////////////////////////////////////////////////////////////////////
@@ -94,19 +94,26 @@ void Pulsar::Archive::append (const vector<Integration*>& more_subints)
 bool Pulsar::Archive::mixable (const Archive* arch, string& reason)
 {
   if (get_state() != arch->get_state()) {
-    reason = "Archives have different polarimetric states";
+    reason = stringprintf ("polarimetric state mismatch: %s != %s",
+			   Signal::state_string(get_state()),
+			   Signal::state_string(arch->get_state()));
     return false;
   }
+  
   if (get_type() != arch->get_type()) {
-    reason = "Archives have different observation type";
+    reason = stringprintf ("observation type mismatch: %s != %s",
+			   Signal::source_string(get_type()),
+			   Signal::source_string(arch->get_type()));
     return false;
   }
+
   if (get_source() != arch->get_source()) {
-    reason = "Archives have different source names";
+    reason = "source name mismatch: "+get_source()+" != "+arch->get_source();
     return false;
   }
+
   if (get_nbin() != arch->get_nbin()) {
-    reason = stringprintf ("Archives have different numbers of bins (%d!=%d)",
+    reason = stringprintf ("numbers of bins mismatch: %d != %d",
 			   get_nbin(), arch->get_nbin());
     return false;
   }
@@ -140,11 +147,13 @@ bool Pulsar::Archive::match_opposite_sideband = false;
 bool Pulsar::Archive::match (const Archive* arch, string& reason)
 {
   if (get_basis() != arch->get_basis()) {
-    reason = "Archives have different feed types";
+    reason = stringprintf ("feed type mismatch: %d != %d", 
+			   get_basis(), arch->get_basis());
     return false;
   }
   if (get_nchan() != arch->get_nchan()) {
-    reason = "Archives have different numbers of channels";
+    reason = stringprintf ("numbers of channels mismatch: %d != %d",
+			   get_nchan(), arch->get_nchan());
     return false;
   }
 
@@ -153,8 +162,7 @@ bool Pulsar::Archive::match (const Archive* arch, string& reason)
   double dfreq = fabs (cf2 - cf1);
 
   if (dfreq > match_max_frequency_difference) {
-    reason = stringprintf ("Archives have too different center frequencies:"
-			   "%lf and %lf", cf1, cf2);
+    reason = stringprintf ("centre frequency mismatch: %lf and %lf", cf1, cf2);
     return false;
   }
 
@@ -162,11 +170,11 @@ bool Pulsar::Archive::match (const Archive* arch, string& reason)
   double bw2 = arch->get_bandwidth();
 
   if ( ( bw1 != bw2 ) && !( match_opposite_sideband && (bw1 != -bw2) ) ) {
-    reason = stringprintf ("Archives have different bandwidths:"
-			   "%lf and %lf", bw1, bw2);
+    reason = stringprintf ("bandwidth mismatch: %lf and %lf", bw1, bw2);
     return false;
   }
   
   // none of the above restrictions apply
   return true;
 }
+
