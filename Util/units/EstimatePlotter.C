@@ -204,13 +204,17 @@ void EstimatePlotter::set_world (float x1, float x2, float y1, float y2)
   cpgswin (x1-xbuf, x2+xbuf, y1-ybuf, y2+ybuf);
 }
 
-void EstimatePlotter::plot ()
+unsigned EstimatePlotter::plot ()
 {
+  unsigned plotted = 0;
+
   for (unsigned index=0; index<xval.size(); index++)
-    plot (index);
+    plotted += plot (index);
+
+  return plotted;
 }
 
-void EstimatePlotter::plot (unsigned index)
+unsigned EstimatePlotter::plot (unsigned index)
 {
   if (index >= xval.size())
     throw Error (InvalidRange, "EstimatePlotter::plot",
@@ -222,6 +226,7 @@ void EstimatePlotter::plot (unsigned index)
     set_viewport (index);
 
   unsigned npt = xval[index].size();
+  unsigned plotted = 0;
 
   for (unsigned ipt=0; ipt<npt; ipt++) {
 
@@ -234,8 +239,10 @@ void EstimatePlotter::plot (unsigned index)
     cpgerr1 (6, xval[index][ipt], yval[index][ipt], yerr[index][ipt], 1.0);
     cpgpt1 (xval[index][ipt], yval[index][ipt], graph_marker);
 
+    plotted ++;
   }
 
+  return plotted;
 }
 
 

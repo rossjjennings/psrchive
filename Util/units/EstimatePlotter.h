@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/EstimatePlotter.h,v $
-   $Revision: 1.7 $
-   $Date: 2003/10/16 13:38:50 $
+   $Revision: 1.8 $
+   $Date: 2003/11/25 09:09:15 $
    $Author: straten $ */
 
 #ifndef __EstimatePlotter_h
@@ -62,10 +62,10 @@ class EstimatePlotter {
   template<class T> void plot (const vector< Estimate<T> >& data);
 
   //! Plot the specified member of the current data set
-  void plot (unsigned index);
+  unsigned plot (unsigned index);
 
   //! Plot the current data set in one window
-  void plot ();
+  unsigned plot ();
 
   void minmax (bool& xrange_set, float& xmin, float& xmax,
 	       bool& yrange_set, float& ymin, float& ymax,
@@ -144,11 +144,18 @@ void EstimatePlotter::add_plot (const vector< Estimate<T> >& data)
 
   double xscale = double(xrange_max - xrange_min) / double(npt-1);
 
+  MeanEstimate<T> mean;
+
   for (ipt=0; ipt<npt; ipt++) {
     ye[ipt] = sqrt (data[ipt].var);
     x[ipt] = xrange_min + xscale * double(ipt);
     y[ipt] = data[ipt].val;
+
+    if (data[ipt].var)
+      mean += data[ipt];
   }
+
+  cerr << "Mean = " << mean << endl;
 
   minmax (xrange_set, x_min, x_max, yrange_set, y_min, y_max, x, y, ye);
 }
