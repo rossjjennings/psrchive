@@ -27,7 +27,7 @@ LDFLAGS += -leph $(LTIMES) -lgenutil++ -lgenutil $(LSLA)
 ifeq ($(has_CFITS),yes)
 
 LIB_SRCS += fitsio.C
-TESTS += test_psrephem_fitsio.C
+PROGRAMS += test_psrephem_fitsio.C
 test_psrephem_fitsio.LDFLAGS := $(LDFLAGS) -lfitsutil $(LCFITSIO)
 
 endif
