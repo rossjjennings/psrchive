@@ -7,7 +7,7 @@ NONMODULE = ephio.h
 LIBRARY  = libeph.a
 LIB_SRCS = psrephem.C ephio_c.c ephio.f rnd8.f set_epoch.C tex.C
 
-PROGRAMS = keys2c.c keys2fort.c eph2upd.f ephaux.C ephepo.C
+PROGRAMS = keys2c.c keys2fort.c eph2upd.f ephaux.C ephepo.C ephtex.C
 
 TESTS = ephtest.c psrephem_test.C
 psrephem_test.args := 0437-4715
@@ -15,6 +15,8 @@ psrephem_test.args := 0437-4715
 ephtest.LDFLAGS := $(LDFLAGS) -leph -lgenutil $(F77LIBS) -lm
 
 LDFLAGS += -leph -lpolyco $(LTIMES) -lgenutil $(F77LIBS) -lm
+
+ephtex.LDFLAGS := $(LDFLAGS) -lpsrinfo -leph
 
 include $(LOCAL_ROOT)/include/Makefile.extended
 

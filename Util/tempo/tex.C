@@ -1,3 +1,12 @@
+// //////////////////////////////////////////////////////////////////////////
+//
+// tex.C - code to output LaTeX formatted strings from a psrephem class
+//
+// code largely stolen from Russell's thesis work
+// modified by Willem van Straten
+//
+// //////////////////////////////////////////////////////////////////////////
+
 #include <vector>
 #include <math.h>
 
@@ -5,11 +14,15 @@
 #include "ephio.h"
 
 extern "C" {
-  char * crad2dms  ( double pos, int ra, char * name );
-  char * crad2dmse ( double pos, double err, int ra, char * name );
-  char * eoutchop2 ( double val, double err, char * fmt, char * outstr );
+  // routines from the psrinfo library used here
+  char* crad2dmse (double pos, double err, int ra, char * name);
+  char* eoutchop2 (double val, double err, char * fmt, char * outstr );
 }
 
+#define sqr(x) ((x)*(x))
+
+// receives a right ascension, as output by psrinfo
+// outputs a LaTeX formatted string
 string tex_ra (char* str)
 {
   char* s;
@@ -33,6 +46,8 @@ string tex_ra (char* str)
   return ret;
 }
 
+// receives a declination, as output by psrinfo
+// outputs a LaTeX formatted string
 string tex_dec (char* str)
 {
   char* s;
@@ -56,8 +71,9 @@ string tex_dec (char* str)
   return ret;
 }
 
+// receives any other value, as output by psrinfo
+// outputs a LaTeX formatted string
 static char buf [128];
-
 string tex_double (double val, double err)
 {
   if (val == 0.0)
@@ -89,48 +105,97 @@ string tex_double (double val, double err)
   return ret;
 }
 
-string tex_deg (const char* valstr)
+// replaces a character with a string
+string c2str (const char* instr, char c, const char* repstr)
 {
   string ret;
 
-  int len = strlen (valstr);
+  int len = strlen (instr);
   int pos;
   for (pos=0; pos<len; pos++) {
-    if (valstr[pos] == '.')
+    if (instr[pos] == c)
       break;
-    ret = ret + valstr[pos];
+    ret += instr[pos];
   }
-  ret += "\\degr";
+  ret += repstr;
 
   for (; pos<len; pos++)
-    ret = ret + valstr[pos];
+    ret += instr[pos];
 
   return ret;
 }
 
+string psrephem::tex_name ()
+{
+  string ret;
+
+  if (!tempo11)
+    return ret;
+
+  if (parmStatus[EPH_PSRJ]==1)
+    ret = "PSR J" + value_str[EPH_PSRJ];
+
+  else if (parmStatus[EPH_PSRB]==1)
+    ret = "PSR B" + value_str[EPH_PSRB];
+
+  else
+    return ret;
+
+  return c2str (ret.c_str(), '-', "$-$");
+}
+
+// outputs a LaTex formatted string for the value
+// indexed by 'ephi' (as in ephio.h)
 string psrephem::tex_val (int ephi, double fac, unsigned precision)
 {
+  if (verbose)
+    cerr << "psrephem::tex_val(" << ephi << ") entered" << endl;
+
   if (parmStatus[ephi] < 1)
     return string();
 
   switch ( parmTypes[ephi] ) {
+
   case 0:
+    if (verbose)
+      cerr << "psrephem::tex_val string" << endl;
     return value_str[ephi];
+
   case 1: 
+    if (verbose)
+      cerr << "psrephem::tex_val double" << endl;
     return tex_double (value_double[ephi]*fac, error_double[ephi]*fac);
-  case 2:  // RAs
+
+  case 2: { // RAs
+    if (verbose)
+      cerr << "psrephem::tex_val RA" << endl;
     crad2dmse (value_double[ephi] * 2.0*M_PI,
-	       error_double[ephi] * 2.0*M_PI, 1, buf);
+	       error_double[ephi] * 2.0*M_PI/(24.0*60.0*60.0), 1, buf);
+    if (verbose)
+      cerr << "psrephem::tex_val RA:" << buf << endl;
     return tex_ra (buf);
-  case 3:  // DECs
+  }
+  case 3: { // DECs
+    if (verbose)
+      cerr << "psrephem::tex_val DEC" << endl;
     crad2dmse (value_double[ephi] * 2.0*M_PI,
-	       error_double[ephi] * 2.0*M_PI, 0, buf);
-    return tex_ra (buf);
+	       error_double[ephi] * 2.0*M_PI/(360.0*60.0*60.0), 0, buf);
+    if (verbose)
+      cerr << "psrephem::tex_val DEC:" << buf << endl;
+    return tex_dec (buf);
+  }
   case 4: { // MJDs
-    MJD mjd (value_integer[ephi], value_double[ephi]);
-    return mjd.printdays (precision);
+    if (verbose)
+      cerr << "psrephem::tex_val MJD" << endl;
+    string frac = "  ";
+    if (value_double[ephi])
+      frac = tex_double (value_double[ephi], error_double[ephi]);
+    sprintf (buf, "%i%s", value_integer[ephi], frac.c_str()+1);
+    return string (buf);
   }
   case 5:  // integers
+    if (verbose)
+      cerr << "psrephem::tex_val integer" << endl;
     sprintf (buf, "%i", value_integer[ephi]);
     return string (buf);
   }
@@ -138,6 +203,8 @@ string psrephem::tex_val (int ephi, double fac, unsigned precision)
   return string();
 }
 
+// outputs a LaTex formatted string suitable for labelling the value
+// indexed by 'ephi' (as in ephio.h)
 const char* psrephem::tex_descriptor (int ephind)
 {
   switch (ephind) {
@@ -146,36 +213,32 @@ const char* psrephem::tex_descriptor (int ephind)
   case EPH_DECJ:  return "Declination, $\\delta$ (J2000.0)";
   case EPH_PMRA:  return "Proper motion, $\\mu_\\alpha$ (mas/yr)";
   case EPH_PMDEC: return "Proper motion, $\\mu_\\delta$ (mas/yr)";
-  case EPH_PB:    return "Orbital period, $P_{\\rm b}$ (d)";
-  case EPH_A1:    return "Projected semi-major axis, $x=a \\sin i$ (lt-s)";
+  case EPH_PB:    return "Orbital period, $P_{\\rm b}$ (days)";
+  case EPH_A1:    return "Projected semi-major axis, $x=a_p \\sin i$ (lt-s)";
   case EPH_T0:    return "Epoch of periastron, $T_{0}$ (MJD)";
   case EPH_OM:    return "Longitude of periastron, $\\omega$ (\\degr)";
   case EPH_E:     return "Orbital eccentricity, $e$";
   case EPH_KIN:   return "Orbital inclination, $i$ (\\degr)";
   case EPH_KOM:   return "Longitude of ascension, $\\Omega$ (\\degr)";
+  case EPH_PX:    return "Annual parallax, $\\pi$ (mas)";
+  case EPH_PBDOT: return "$\\dot P_{\\rm b} (10^{-12})$"; 
+  case EPH_OMDOT: return "$\\dot \\omega (\\degr/yr)$";
+  case EPH_M2:    return "Companion mass, m$_2$ M$_{\\odot}$";
   default:        return NULL;
   }
 }
 
-// func to actually produce a table for some pulsars
+// outputs a LaTex formatted string with table entries for
+// valid entries in the psrephem class.
+// feel free to add more as you see fit
 string psrephem::tex ()
 {
   bool binary = parmStatus[EPH_BINARY] > 0;
 
-  string bw = "\\dotfill & ";
-  string nl = "\\\\\n";
+  string bw = " \t \\dotfill & ";
+  string nl = " \\\\\n";
 
   string retval =
-    "\\begin{deluxetable}{lr}\n"
-    "\\tablecaption{Astrometric, Spin, Binary and Derived Parameters}\n"
-    "\\tablecolumns{%d}\n"
-    "\\tablewidth{0pt}\n"
-    "\\tablehead{\n"
-    "    \\colhead{} \n"
-    "      & \\colhead{" + psrname() + "}\n"
-    "}\n"
-    "\\startdata\n"
-
       + tex_descriptor(EPH_RAJ) +  bw + tex_val (EPH_RAJ) + nl
       + tex_descriptor(EPH_DECJ) + bw + tex_val (EPH_DECJ) + nl;
 
@@ -186,8 +249,8 @@ string psrephem::tex ()
 
   double ph, ph_err;
   phi (ph, ph_err);
-  retval += "Celestial position angle, $\\phi_\\mu$" + bw
-       + tex_double(ph, ph_err) + nl;
+  retval += "Celestial position angle, $\\phi_\\mu (\\degr)$" + bw
+       + tex_double(ph*180.0/M_PI, ph_err*180.0/M_PI) + nl;
 
   retval += tex_descriptor(EPH_PX) + bw + tex_val (EPH_PX) + nl;
 
@@ -202,7 +265,7 @@ string psrephem::tex ()
   P_dot (p_dot, p_dot_err);
 
   retval += "Period derivative, $\\dot{P}$ (10$^{-20}$)" + bw
-       + tex_double (p*1e-20, p_err*1e-20) + nl;
+       + tex_double (p_dot*1e20, p_dot_err*1e20) + nl;
 
   if (binary)
   {
@@ -212,19 +275,42 @@ string psrephem::tex ()
 	 + tex_descriptor(EPH_T0)  + bw + tex_val (EPH_T0) + nl
 	 + tex_descriptor(EPH_OM)  + bw + tex_val (EPH_OM) + nl
 	 + tex_descriptor(EPH_KOM) + bw + tex_val (EPH_KOM) + nl
-	 + tex_descriptor(EPH_KIN) + bw + tex_val (EPH_KIN) + nl;
+	 + tex_descriptor(EPH_KIN) + bw + tex_val (EPH_KIN) + nl
+	 + tex_descriptor(EPH_M2)  + bw + tex_val (EPH_M2) + nl
+	 + tex_descriptor(EPH_PBDOT) + bw + tex_val (EPH_PBDOT) + nl
+	 + tex_descriptor(EPH_OMDOT) + bw + tex_val (EPH_OMDOT) + nl
+      ;
   }
 
+  double beta, beta_err;
+  Shklovskii (beta, beta_err);
+  retval += "Quadratic Doppler shift, $\\beta$ (10$^{-20}$s$^{-1}$)" + bw
+    + tex_double (beta*1e20, beta_err*1e20) + nl;
+
+  double p_dot_int = p_dot - p * beta;
+  double p_dot_int_err = p_dot_err 
+    + p * beta * sqrt(sqr(p_err/p)+sqr(beta_err/beta));
+
+  retval += "Intrinsic period derivative, $\\dot P_{\\rm int}$ (10$^{-20}$)"
+    + bw + tex_double (p_dot_int*1e20, p_dot_int_err*1e20) + nl;
+
+  double char_age = 0.5 * p / p_dot_int / (86400.0e9 * 365.25);
+  double char_age_err = char_age
+    * sqrt(sqr(p_err/p)+sqr(p_dot_int_err/p_dot_int));
+
+  retval += "Characteristic age, $\\tau_c$ (Gyr)"
+    + bw + tex_double (char_age, char_age_err) + nl;
+
+  double pb = value_double [EPH_PB];
+  double pb_err = error_double [EPH_PB];
+
+  double SPb_dot = beta * (pb * 86400.0);
+  double SPb_dot_err = SPb_dot * sqrt (sqr(beta_err/beta) + sqr(pb_err/pb));
+
+  retval += "Expected $\\dot P_{\\rm b} (10^{-12})$"
+    + bw + tex_double (SPb_dot*1e12, SPb_dot_err*1e12) + nl;
+
 #if 0
-  printf("Characteristic age, $\\tau_c$ (Gyr)\\dotfill\n");
-  for (i=0 ; i < psrs.size(); i++)
-  {
-    if (psrs[i]->pbdot.value <= 0.0)
-	printf("    & \\nodata\n");
-      else
-	printf("    & %.2f\n", 0.5*365.25*86400.0*1.0e-9*
-	   psrs[i]->pb.value/psrs[i]->pbdot.value);
-  }
   printf("\\\\\n");
   printf("Surface magnetic field, $B_{\\rm surf}$ (10$^8$ Gauss)\\dotfill\n");
   for (i=0 ; i < psrs.size(); i++)
@@ -237,10 +323,6 @@ string psrephem::tex ()
   }
   printf("\\\\\n");
 #endif
-
-  retval += 
-    "\\enddata\n"
-    "\\end{deluxetable}\n";
 
   return retval;
 }

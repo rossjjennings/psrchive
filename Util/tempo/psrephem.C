@@ -475,7 +475,7 @@ string psrephem::psrname() const
   if (tempo11 && parmStatus[EPH_PSRJ]==1)
     return value_str[EPH_PSRJ];
   else if (tempo11 && parmStatus[EPH_PSRB]==1)
-    return value_str[EPH_PSRJ];
+    return value_str[EPH_PSRB];
 
   string error ("psrephem::psrname() Error determining pulsar name");
   cerr << error << endl;
