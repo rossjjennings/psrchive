@@ -18,7 +18,7 @@
 #include "Pulsar/ProcHistory.h"
 
 // A command line tool for calibrating Pulsar::Archives
-const char* args = "A:bcd:e:fFhiIn:op:PqsSt:Tu:vVwW";
+const char* args = "A:bcd:e:fFGhiIn:op:PqsSt:Tu:vVw";
 
 void usage ()
 {
@@ -52,7 +52,7 @@ void usage ()
     "\n"
     "Expert options: \n"
     "  -f                     Override flux calibration flag\n"
-    "  -W                     Normalize profile weights by absolute gain \n"
+    "  -G                     Normalize profile weights by absolute gain \n"
     "\n"
     "Output options: \n"
     "  -e extension           Use this extension when unloading results \n"
@@ -132,7 +132,7 @@ int main (int argc, char *argv[]) {
       break;
 
     case 'i':
-      cout << "$Id: pac.C,v 1.62 2005/03/10 06:25:06 straten Exp $" << endl;
+      cout << "$Id: pac.C,v 1.63 2005/03/10 06:54:07 straten Exp $" << endl;
       return 0;
 
     case 'A':
@@ -151,6 +151,10 @@ int main (int argc, char *argv[]) {
 
     case 'f':
       check_flags = false;
+      break;
+
+    case 'G':
+      Pulsar::PolnProfile::normalize_weight_by_absolute_gain = true;
       break;
 
     case 'n': {
@@ -213,10 +217,6 @@ int main (int argc, char *argv[]) {
 
     case 'w':
       write_database_file = true;
-      break;
-
-    case 'W':
-      Pulsar::PolnProfile::normalize_weight_by_absolute_gain = true;
       break;
 
     case 'b':
