@@ -813,13 +813,13 @@ void Pulsar::FITSArchive::load_header (const char* filename)
       }
       else {
 	if (strcmp(tempstr,"BINPHSPERI") == 0)
-	  add_extension(new Pulsar::PeriastronOrder());
+	  add_extension(new PeriastronOrder());
 	else if (strcmp(tempstr,"BINPHSASC") == 0)
-	  add_extension(new Pulsar::BinaryPhaseOrder());
+	  add_extension(new BinaryPhaseOrder());
 	else if (strcmp(tempstr,"BINLNGPERI") == 0)
-	  add_extension(new Pulsar::BinLngPeriOrder());
+	  add_extension(new BinLngPeriOrder());
 	else if (strcmp(tempstr,"BINLNGASC") == 0)
-	  add_extension(new Pulsar::BinLngAscOrder());
+	  add_extension(new BinLngAscOrder());
 	else
 	  throw Error(InvalidParam, "FITSArchive::load_header",
 		      "unknown ordering extension encountered");
@@ -1075,7 +1075,7 @@ Pulsar::FITSArchive::load_Integration (const char* filename, unsigned isubint)
       throw FITSError (status, "FITSArchive::load_Integration", 
 		       "fits_read_col INDEXVAL");
     
-    get<Pulsar::IntegrationOrder>()->set_Index(row,value);
+    get<Pulsar::IntegrationOrder>()->set_Index(row-1,value);
   }
   
   // Load other useful info
@@ -1572,21 +1572,15 @@ void Pulsar::FITSArchive::unload_integration (int row,
 					      fitsfile* thefptr) const
 {
   int status = 0;
-
+ 
   bool has_alt_order = false;
 
-  Pulsar::Archive::Extension* ext = 0;
-  Pulsar::IntegrationOrder* order = 0;
-  
-  for (unsigned i = 0; i < extension.size(); i++) {
-    ext   = extension[i].get();
-    order = dynamic_cast<Pulsar::IntegrationOrder*>(ext);
-    if (order) {
-      has_alt_order = true;
-      if (verbose)
-	cerr << "FITSArchive::unload_integration using " << order->get_name()
-	     << endl;
-    }
+  if (get<Pulsar::IntegrationOrder>()) {
+    has_alt_order = true;
+    if (verbose)
+      cerr << "FITSArchive::unload_integration using " 
+	   << get<Pulsar::IntegrationOrder>()->get_name()
+	   << endl;
   }
 
   // Set the subint number
@@ -1653,7 +1647,7 @@ void Pulsar::FITSArchive::unload_integration (int row,
       throw FITSError (status, "FITSArchive:unload_integration",
 		       "fits_get_colnum INDEXVAL");
     
-    double value = order->get_Index(row-1);
+    double value = get<Pulsar::IntegrationOrder>()->get_Index(row-1);
     fits_write_col (thefptr, TDOUBLE, colnum, row, 1, 1, &value, &status);
   }
 
@@ -1887,16 +1881,16 @@ void Pulsar::FITSArchive::unload_integration (int row,
     }	  
   }
   
+  delete[] temparray2;
+  
   if (verbose)
     cerr << "FITSArchive::unload_integration finished" << endl;
-  
 }
 
 //
 // End of unload_integration function
 // //////////////////////////////////
 // //////////////////////////////////
-
 
 string Pulsar::FITSArchive::Agent::get_description () 
 {

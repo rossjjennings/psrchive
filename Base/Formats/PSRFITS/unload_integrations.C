@@ -45,17 +45,11 @@ void Pulsar::FITSArchive::unload_integrations (fitsfile* ffptr) const
   bool   has_alt_order = false;
   string order_name    = "unknown";
   string order_unit    = "unknown";
-  Pulsar::Archive::Extension* ext = 0;
-  Pulsar::IntegrationOrder* order = 0;
 
-  for (unsigned i = 0; i < extension.size(); i++) {
-    ext = extension[i].get();
-    order = dynamic_cast<Pulsar::IntegrationOrder*>(ext);
-    if (order) {
-      has_alt_order = true;
-      order_name = order->get_name();
-      order_unit = order->get_Unit();
-    }
+  if (get<Pulsar::IntegrationOrder>()) {
+    has_alt_order = true;
+    order_name = get<Pulsar::IntegrationOrder>()->get_name();
+    order_unit = get<Pulsar::IntegrationOrder>()->get_Unit();
   }
 
   if (has_alt_order) {
