@@ -16,12 +16,16 @@ int main (int argc, char *argv[]) {
   
   bool verbose = false;
   bool display = false;
-  bool write = false;
+  bool write = true;
   
   vector<string> archives;
   
   bool manual_zap = false;
   vector<int> chans_to_zap;
+
+  bool edge_zap = false;
+  float percent = 0.0;
+  
   bool simple = false;
   
   int placeholder;
@@ -33,18 +37,19 @@ int main (int argc, char *argv[]) {
   char* key = NULL;
   char whitespace[5] = " \n\t";
   
-  while ((gotc = getopt(argc, argv, "hvVDwz:Z:d")) != -1) {
+  while ((gotc = getopt(argc, argv, "hvVDxz:Z:de:")) != -1) {
     switch (gotc) {
     case 'h':
-      cout << "A program for zapping RFI in Pulsar::Archives"    << endl;
-      cout << "Usage: paz [options] filenames"                   << endl;
-      cout << "  -v               Verbose mode"                  << endl;
-      cout << "  -V               Very verbose mode"             << endl;
-      cout << "  -D               Display results"               << endl;
-      cout << "  -w               Write changes to the file"     << endl;
-      cout << "  -z \"chanlist\"  Zap these particular channels" << endl;
-      cout << "  -Z \"a b\"        Zap chans between a and b"     << endl;
-      cout << "  -d               Simple mean offset rejection"  << endl;
+      cout << "A program for zapping RFI in Pulsar::Archives"             << endl;
+      cout << "Usage: paz [options] filenames"                            << endl;
+      cout << "  -v               Verbose mode"                           << endl;
+      cout << "  -V               Very verbose mode"                      << endl;
+      cout << "  -D               Display results"                        << endl;
+      cout << "  -x               Test only, leaves files unchanged"      << endl;
+      cout << "  -z \"chanlist\"    Zap these particular channels"        << endl;
+      cout << "  -Z \"a b\"         Zap chans between a and b"            << endl;
+      cout << "  -e percent       Zap band edges"                         << endl; 
+      cout << "  -d               Simple mean offset rejection"           << endl;
       return (-1);
       break;
     case 'v':
@@ -57,8 +62,8 @@ int main (int argc, char *argv[]) {
     case 'D':
       display = true;
       break;
-    case 'w':
-      write = true;
+    case 'x':
+      write = false;
       break;
     case 'z':
       key = strtok (optarg, whitespace);
@@ -80,6 +85,17 @@ int main (int argc, char *argv[]) {
       break;
     case 'd':
       simple = true;
+      break;
+    case 'e':
+      edge_zap = true;
+      if (sscanf(optarg, "%f", &percent) != 1) {
+	cerr << "Invalid parameter to option -e" << endl;
+        return (-1);
+      }
+      if (percent <= 0.0 || percent >= 100.0) {
+	cerr << "Invalid parameter to option -e" << endl;
+        return (-1);
+      }
       break;
     default:
       cout << "Unrecognised option" << endl;
@@ -145,6 +161,17 @@ int main (int argc, char *argv[]) {
 	  }
 	  zapper->zap_specific(arch, mask);
 	}
+      }
+      else if (edge_zap) {
+	float fraction = percent / 100.0;
+	int buffer = int(float(nchan) * fraction);
+	
+	vector<float> mask(nchan, 0.0);
+	
+	for (int i = (0 + buffer); i <= (nchan - buffer); i++) {
+	  mask[i] = 1.0;
+	}
+	zapper->zap_specific(arch, mask);
       }
       else {
 	cout << "No zapping scheme specified!" << endl;
