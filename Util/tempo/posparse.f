@@ -6,7 +6,7 @@ c     hours:minutes[:seconds] and degrees:m[:s] data. Also returns (prec) the
 c     value in /*turns*/ _sec_ of a unit in the least significant provided digit.
 c     xmsToDouble is a general function used by both, given co-efficients
 cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-      real*8 function xmsToDouble(s,f1,f2,f3, prec)
+      real*8 function xmstodouble(s,f1,f2,f3, prec)
       implicit none
       character*(*) s
       real*8 f1,f2,f3,val, tmp, sgn, prec
@@ -70,7 +70,7 @@ c     like 9.99999999999999999D...
  130  format ("Error: unable to decipher the following:",a)
       end
 
-      real*8 function hmsToTurns(s, prec)
+      real*8 function hmstoturns(s, prec)
       character*(*) s
       real*8 xmsToDouble, prec
       hmsToTurns = xmsToDouble(s, 1d0/24d0, 1d0/1440d0, 
@@ -78,7 +78,7 @@ c     like 9.99999999999999999D...
       return
       end
 
-      real*8 function dmsToTurns(s,prec)
+      real*8 function dmstoturns(s,prec)
       character*(*) s
       real*8 xmsToDouble, prec
       dmsToTurns = xmsToDouble(s, 1d0/360d0, 1d0/21600d0, 
