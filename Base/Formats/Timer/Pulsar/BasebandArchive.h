@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/Timer/Pulsar/BasebandArchive.h,v $
-   $Revision: 1.4 $
-   $Date: 2003/06/05 13:26:53 $
+   $Revision: 1.5 $
+   $Date: 2003/06/17 15:29:25 $
    $Author: straten $ */
 
 #ifndef __Baseband_Archive_h
@@ -12,6 +12,8 @@
 #include "baseband_header.h"
 
 #include "Pulsar/Passband.h"
+#include "Pulsar/dspReduction.h"
+#include "Pulsar/TwoBitStats.h"
 
 namespace Pulsar {
 
@@ -101,12 +103,21 @@ namespace Pulsar {
     //! Baseband data reduction specific header information
     baseband_header bhdr;
 
-    //! Digitization histograms
-    vector< vector<float> > dls_histogram;
+    //! Baseband data reduction Archive::Extension
+    dspReduction reduction;
+
+    //! Two-bit sampling statistics
+    TwoBitStats twobit;
 
     //! Average passbands in Archive::Extension
     Passband passband;
   
+    //! Update the baseband_header struct with the current state
+    void set_header ();
+
+    //! Update the reduction attribute with the current state
+    void set_reduction ();
+
     //! Load BasebandArchive specific information
     void backend_load (FILE* fptr);
 
@@ -116,10 +127,11 @@ namespace Pulsar {
     //! Convert the endian of baseband_header
     void convert_hdr_Endian ();
 
+    //! Over-ride TimerArchive::correct
+    void correct ();
+
     void init ();
 
-  private:
-    static vector<float> empty;
   };
 
 
