@@ -721,10 +721,10 @@ Pulsar::Database::generateFluxCalibrator (Pulsar::Archive* arch)
   vector<const Archive*> fluxcalarchs;
   
   for (unsigned i = 0; i < oncals.size(); i++)
-    fluxcalarchs.push_back(Pulsar::Archive::load(get_filename(oncals[i])));
+    fluxcalarchs.push_back( Pulsar::Archive::load(get_filename(oncals[i])) );
 			   
   for (unsigned i = 0; i < offcals.size(); i++)
-    fluxcalarchs.push_back(Pulsar::Archive::load(get_filename(offcals[i])));
+    fluxcalarchs.push_back( Pulsar::Archive::load(get_filename(offcals[i])) );
   
   if (verbose) {
     cout << "Constructing FluxCalibrator from these files:" << endl;
@@ -733,9 +733,11 @@ Pulsar::Database::generateFluxCalibrator (Pulsar::Archive* arch)
     for (unsigned i = 0; i < offcals.size(); i++)
       cout << get_filename(offcals[i]) << endl;
   }
-  
-  return new Pulsar::FluxCalibrator(fluxcalarchs);
+
+  FluxCalibrator* fcal = new FluxCalibrator(fluxcalarchs);
+  return fcal;
 }
+  
 
 /*! This routine is given a pointer to a Pulsar::Archive. It scans the
   database for all PolnCal observations from the same part of sky that
