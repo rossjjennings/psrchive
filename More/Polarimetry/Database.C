@@ -249,19 +249,19 @@ bool Pulsar::Database::Criterion::match (const Entry& have) const
 
   }
 
-  if (check_bandwidth) {
+  if (check_instrument) {
 
     if (match_verbose)
-      cerr << "  Seeking bandwidth=" << entry.bandwidth
-	   << " have bandwidth=" << have.bandwidth;
+      cerr << "  Seeking instrument=" << entry.instrument
+           << " have instrument=" << have.instrument;
 
-    if (entry.bandwidth==have.bandwidth) {
+    if (entry.instrument==have.instrument) {
       if (match_verbose)
-	cerr << " ... match found" << endl; 
+        cerr << " ... match found" << endl;
     }
     else {
       if (match_verbose)
-	cerr << "... no match" << endl;
+        cerr << "... no match" << endl;
       return false;
     }
   }
@@ -283,23 +283,23 @@ bool Pulsar::Database::Criterion::match (const Entry& have) const
     }
   }
 
-  if (check_instrument) {
+  if (check_bandwidth) {
 
     if (match_verbose)
-      cerr << "  Seeking instrument=" << entry.instrument
-	   << " have instrument=" << have.instrument;
+      cerr << "  Seeking bandwidth=" << entry.bandwidth
+           << " have bandwidth=" << have.bandwidth;
 
-    if (entry.instrument==have.instrument) {
+    if (entry.bandwidth==have.bandwidth) {
       if (match_verbose)
-	cerr << " ... match found" << endl;
+        cerr << " ... match found" << endl;
     }
     else {
       if (match_verbose)
-	cerr << "... no match" << endl;
+        cerr << "... no match" << endl;
       return false;
     }
   }
-  
+
   double diff;
 
   if (check_time) {
