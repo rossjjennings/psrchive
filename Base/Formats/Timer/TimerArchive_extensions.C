@@ -5,11 +5,17 @@
 
 void Pulsar::TimerArchive::unpack_extensions ()
 {
+  if (verbose == 3)
+    cerr << "Pulsar::TimerArchive::unpack_extensions" << endl;
+
   Receiver* receiver = getadd<Receiver>();
   unpack (receiver);
 
   Telescope* telescope = getadd<Telescope>();
   telescope->set_coordinates (get_telescope_code());
+
+  if (verbose == 3)
+    cerr << "Pulsar::TimerArchive::unpack_extensions set Backend" << endl;
 
   Backend* backend = get<Backend>();
 
