@@ -3,8 +3,13 @@
 
 #include <stdlib.h>
 #include <unistd.h>
-#include <sys/types.h>
 #include <sys/stat.h>
+
+mode_t getumask(void) {
+  mode_t mask = umask(0);
+  umask(mask);
+  return mask;
+}
 
 /*! To protect data, especially when writing the output archive to a
   file of the same name as the input archive, this method unloads data
