@@ -2,6 +2,7 @@
 
 #include "Registry.h"
 
+
 class A {
 
 public:
@@ -14,7 +15,7 @@ public:
       if (registry[ichild]->match (num))
 	return registry.create(ichild);
 
-    cerr << "A::factory no matching child" << endl;
+    std::cerr << "A::factory no matching child" << std::endl;
     return 0;
   }
 
@@ -50,10 +51,10 @@ Registry::List<A>::Enter<C> C_entry;
 int main ()
 {
   if (A::get_nchild() != 2) {
-    cerr << "A::children != 2!" << endl;
+    std::cerr << "A::children != 2!" << std::endl;
     return -1;
   }
 
-  cerr << "A::children=" << A::get_nchild() << endl;
+  std::cerr << "A::children=" << A::get_nchild() << std::endl;
   return 0;
 }
