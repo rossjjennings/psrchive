@@ -1,5 +1,5 @@
 #include "Pulsar/Receiver.h"
-#include "Calibration/Rotation.h"
+#include "MEAL/Rotation.h"
 #include "Pauli.h"
 
 //! Default constructor
@@ -239,7 +239,7 @@ Jones<double> Pulsar::Receiver::get_transformation () const
   if ( feed_corrected )
     return xform;
 
-  Pauli::basis.set_basis( get_basis() );
+  Pauli::basis.set_basis( (Basis<double>::Type)get_basis() );
 
   if (! get_right_handed() ) {
 
@@ -252,7 +252,7 @@ Jones<double> Pulsar::Receiver::get_transformation () const
        3-vector space is a subset of Stokes 4-vector space 
        Jones rotations effect twice the angle in Poincare space */
 
-    Calibration::Rotation rotation ( Vector<float, 3>::basis(1) );
+    MEAL::Rotation rotation ( Vector<float, 3>::basis(1) );
     rotation.set_phi ( 0.5 * M_PI );
     
     xform *= rotation.evaluate();
@@ -266,7 +266,7 @@ Jones<double> Pulsar::Receiver::get_transformation () const
 	   << get_orientation().getDegrees() << " deg" << endl;
 
     // rotate the basis about the Stokes V axis
-    Calibration::Rotation rotation ( Pauli::basis.get_basis_vector(2) );
+    MEAL::Rotation rotation ( Pauli::basis.get_basis_vector(2) );
 
     // the sign of this rotation may depend on handedness
     rotation.set_phi ( -get_orientation().getRadians() );
@@ -290,7 +290,7 @@ Stokes<double> Pulsar::Receiver::get_reference_source () const
 	   << get_reference_source_phase().getDegrees() << " deg" << endl;
 
     // rotate the basis about the Stokes 1 axis
-    Calibration::Rotation rotation ( Vector<float,3>::basis(0) );
+    MEAL::Rotation rotation ( Vector<float,3>::basis(0) );
     rotation.set_phi ( 0.5*get_reference_source_phase().getRadians() );
 
     xform *= rotation.evaluate();

@@ -159,8 +159,8 @@ void Pulsar::HybridCalibrator::calculate_transformation ()
 
     // produce the supplemented transformation, 
 
-    Calibration::ProductRule<Calibration::Complex2>* result;
-    result = new Calibration::ProductRule<Calibration::Complex2>;
+    MEAL::ProductRule<MEAL::Complex2>* result;
+    result = new MEAL::ProductRule<MEAL::Complex2>;
 
     *result *= correction;
     *result *= precalibrator->get_transformation (ichan);

@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Profile.h,v $
-   $Revision: 1.77 $
-   $Date: 2004/11/08 02:19:37 $
-   $Author: ahotan $ */
+   $Revision: 1.78 $
+   $Date: 2004/11/22 21:32:30 $
+   $Author: straten $ */
 
 #ifndef __Pulsar_Profile_h
 #define __Pulsar_Profile_h
@@ -12,7 +12,7 @@
 #include "Types.h"
 #include "Functor.h"
 
-#include "Calibration/Gaussian.h"
+#include "MEAL/Gaussian.h"
 
 namespace Pulsar {
 
@@ -219,7 +219,7 @@ namespace Pulsar {
     
     /*! Gaussian interpolation in the time domain */
     double GaussianShift (const Profile& std, float& ephase, 
-			  vector<float>& corr, Calibration::Gaussian& model,
+			  vector<float>& corr, MEAL::Gaussian& model,
 			  int& _rise, int& _fall, int& ofs, bool store = false) const;
     
     /*! Fourier domain zero-pad interpolation */

@@ -9,7 +9,7 @@ Pulsar::InstrumentInfo::InstrumentInfo (const PolnCalibrator* calibrator) :
   unsigned nchan = calibrator->get_transformation_nchan ();
   
   // find the first valid transformation
-  const Calibration::Complex2* xform = 0;
+  const MEAL::Complex2* xform = 0;
   for (unsigned ichan = 0; ichan < nchan; ichan++)
     if ( calibrator->get_transformation_valid (ichan) ) {
       xform = calibrator->get_transformation (ichan);

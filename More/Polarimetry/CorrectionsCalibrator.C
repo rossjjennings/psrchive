@@ -156,7 +156,7 @@ Pulsar::CorrectionsCalibrator::get_transformation (const Archive* archive,
     return xform;
   }
 
-  Pauli::basis.set_basis( receiver->get_basis() );
+  Pauli::basis.set_basis( (Basis<double>::Type) receiver->get_basis() );
 
   if (must_correct_feed)
     xform *= receiver->get_transformation();
@@ -171,7 +171,7 @@ Pulsar::CorrectionsCalibrator::get_transformation (const Archive* archive,
   if (feed_rotation != 0.0) {
 
     // rotate the basis about the Stokes V axis
-    Calibration::Rotation rotation ( Pauli::basis.get_basis_vector(2) );
+    MEAL::Rotation rotation ( Pauli::basis.get_basis_vector(2) );
     rotation.set_phi ( -feed_rotation );
     
     xform *= rotation.evaluate();

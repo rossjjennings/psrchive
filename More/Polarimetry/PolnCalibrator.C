@@ -136,7 +136,7 @@ void Pulsar::PolnCalibrator::set_transformation_invalid (unsigned ichan)
 }
 
 //! Return the system response for the specified channel
-const ::Calibration::Complex2*
+const ::MEAL::Complex2*
 Pulsar::PolnCalibrator::get_transformation (unsigned ichan) const
 {
   if (transformation.size() == 0)
@@ -150,7 +150,7 @@ Pulsar::PolnCalibrator::get_transformation (unsigned ichan) const
 }
 
 //! Return the system response for the specified channel
-::Calibration::Complex2*
+::MEAL::Complex2*
 Pulsar::PolnCalibrator::get_transformation (unsigned ichan)
 {
   if (transformation.size() == 0)
@@ -389,12 +389,14 @@ void Pulsar::PolnCalibrator::build (unsigned nchan) try {
   }
 
   for (ichan=0; ichan < nchan; ichan++) {
+
     // if known, add the receiver transformation
     if (receiver)
       response[ichan] *= receiver->get_transformation();
 
     // invert:  the response must undo the effect of the instrument
     response[ichan] = inv (response[ichan]);
+
   }
 
 }
@@ -511,7 +513,7 @@ Pulsar::PolnCalibrator::Info::Info (const PolnCalibrator* cal)
   unsigned nchan = cal->get_transformation_nchan ();
 
   // find the first valid transformation
-  const Calibration::Complex2* xform = 0;
+  const MEAL::Complex2* xform = 0;
   for (unsigned ichan = 0; ichan < nchan; ichan++)
     if ( cal->get_transformation_valid (ichan) ) {
       xform = cal->get_transformation (ichan);

@@ -2,8 +2,8 @@
 #include "Pulsar/ReceptionCalibrator.h"
 #include "Pulsar/Archive.h"
 
-#include "Calibration/Gain.h"
-#include "Calibration/Polar.h"
+#include "MEAL/Gain.h"
+#include "MEAL/Polar.h"
 
 #include "Calibration/ReceptionModelAxisPlotter.h"
 

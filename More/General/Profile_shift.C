@@ -5,10 +5,10 @@
 #include "Error.h"
 #include "Estimate.h"
 
-#include "Calibration/LevenbergMarquardt.h"
-#include "Calibration/Gaussian.h"
-#include "Calibration/Polynomial.h"
-#include "Calibration/Axis.h"
+#include "MEAL/LevenbergMarquardt.h"
+#include "MEAL/Gaussian.h"
+#include "MEAL/Polynomial.h"
+#include "MEAL/Axis.h"
 
 #include "interpolate.h"
 #include "model_profile.h"
@@ -32,7 +32,7 @@ void wrap (int& binval, int nbin) {
 
 double Pulsar::Profile::GaussianShift (const Profile& std, float& ephase, 
 				       vector<float>& corr, 
-				       Calibration::Gaussian& model,
+				       MEAL::Gaussian& model,
 				       int& rise, int& fall, int& ofs, 
 				       bool store) const
 {
@@ -96,17 +96,17 @@ double Pulsar::Profile::GaussianShift (const Profile& std, float& ephase,
     
     float threshold = 0.001;
     
-    Calibration::Gaussian gm;
+    MEAL::Gaussian gm;
     
     gm.set_centre(binmax);
     gm.set_width(abs(bfall - brise));
     gm.set_height(ptr->max());
     gm.set_cyclic(false);
     
-    Calibration::Axis<double> argument;
+    MEAL::Axis<double> argument;
     gm.set_argument (0, &argument);
     
-    vector< Calibration::Axis<double>::Value > data_x;  // x-ordinate of data
+    vector< MEAL::Axis<double>::Value > data_x;  // x-ordinate of data
     vector< Estimate<double> > data_y;       // y-ordinate of data with error
     
     int index = 0;
@@ -120,8 +120,8 @@ double Pulsar::Profile::GaussianShift (const Profile& std, float& ephase,
 					 ptr->get_amps()[index]/50.0) );
     }
     
-    Calibration::LevenbergMarquardt<double> fit;
-    fit.verbose = Calibration::Model::verbose;
+    MEAL::LevenbergMarquardt<double> fit;
+    fit.verbose = MEAL::Function::verbose;
     
     float chisq = fit.init (data_x, data_y, gm);
     if (verbose)

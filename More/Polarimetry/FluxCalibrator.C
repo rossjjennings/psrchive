@@ -5,9 +5,9 @@
 #include "Pulsar/Integration.h"
 #include "Pulsar/Profile.h"
 
-#include "Calibration/ScalarMath.h"
-#include "Calibration/ScalarValue.h"
-#include "Calibration/ScalarConstant.h"
+#include "MEAL/ScalarMath.h"
+#include "MEAL/ScalarValue.h"
+#include "MEAL/ScalarConstant.h"
 
 #include "Error.h"
 #include "interpolate.h"
@@ -349,12 +349,12 @@ try {
   unsigned good_channels = 0;
 
   // use the ScalarMath class to calculate the variances
-  Calibration::ScalarValue ratio_on;
-  Calibration::ScalarValue ratio_off;
-  Calibration::ScalarConstant unity (1.0);
+  MEAL::ScalarValue ratio_on;
+  MEAL::ScalarValue ratio_off;
+  MEAL::ScalarConstant unity (1.0);
 
-  Calibration::ScalarMath S_cal = unity / (unity/ratio_on - unity/ratio_off);
-  Calibration::ScalarMath S_sys = S_cal / ratio_off;
+  MEAL::ScalarMath S_cal = unity / (unity/ratio_on - unity/ratio_off);
+  MEAL::ScalarMath S_sys = S_cal / ratio_off;
 
   for (unsigned ichan=0; ichan<nchan; ++ichan) {
 

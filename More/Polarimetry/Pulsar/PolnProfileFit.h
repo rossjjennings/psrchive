@@ -1,24 +1,27 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PolnProfileFit.h,v $
-   $Revision: 1.7 $
-   $Date: 2004/04/21 01:41:03 $
-   $Author: ahotan $ */
+   $Revision: 1.8 $
+   $Date: 2004/11/22 21:32:30 $
+   $Author: straten $ */
 
 #ifndef __Pulsar_PolnProfileFit_h
 #define __Pulsar_PolnProfileFit_h
 
 #include <memory>
 
-#include "Calibration/Axis.h"
+#include "MEAL/Axis.h"
 #include "Estimate.h"
 #include "Stokes.h"
 #include "toa.h"
 
 // forward declarations
-namespace Calibration {
+namespace MEAL {
   class Complex2;
   class Polynomial;
+}
+
+namespace Calibration {
   class ReceptionModel;
 }
 
@@ -57,7 +60,7 @@ namespace Pulsar {
     void set_standard (const PolnProfile* standard);
 
     //! Set the transformation between the standard and observation
-    void set_transformation (Calibration::Complex2* xform);
+    void set_transformation (MEAL::Complex2* xform);
 
     //! Fit the specified observation to the standard
     void fit (const PolnProfile* observation);
@@ -96,19 +99,19 @@ namespace Pulsar {
     Reference::To<const PolnProfile> standard_fourier;
 
     //! The transformation between the standard and observation
-    Reference::To<Calibration::Complex2> transformation;
+    Reference::To<MEAL::Complex2> transformation;
 
     //! The measurement equation used to model the fit
     Reference::To<Calibration::ReceptionModel> model;
 
     //! The polynomial that describes linear phase in the Fourier domain
-    Reference::To<Calibration::Polynomial> phase;
+    Reference::To<MEAL::Polynomial> phase;
 
     //! The phase transformation in the Fourier domain
-    Reference::To<Calibration::Complex2> phase_xform;
+    Reference::To<MEAL::Complex2> phase_xform;
 
     //! The phase axis
-    Calibration::Axis<double> phase_axis;
+    MEAL::Axis<double> phase_axis;
 
     //! The variance of the standard
     Stokes<float> standard_variance;

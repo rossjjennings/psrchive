@@ -7,7 +7,7 @@
 
 #include "Calibration/Instrument.h"
 #include "Calibration/MeanInstrument.h"
-#include "Calibration/Complex2Math.h"
+#include "MEAL/Complex2Math.h"
 
 //! Constructor
 Pulsar::PulsarCalibrator::PulsarCalibrator (Calibrator::Type model)

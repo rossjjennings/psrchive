@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ReceptionCalibrator.h,v $
-   $Revision: 1.59 $
-   $Date: 2004/07/22 14:11:50 $
+   $Revision: 1.60 $
+   $Date: 2004/11/22 21:32:30 $
    $Author: straten $ */
 
 #ifndef __Pulsar_ReceptionCalibrator_H
@@ -13,17 +13,18 @@
 // Reception Model and its management
 #include "Calibration/ReceptionModel.h"
 #include "Calibration/ConvertMJD.h"
-#include "Calibration/Axis.h"
+#include "MEAL/Axis.h"
 
 // Parameterizations of the instrument and source
 #include "Calibration/MeanPolar.h"
 #include "Calibration/MeanSingleAxis.h"
 #include "Calibration/MeanCoherency.h"
 #include "Calibration/CoherencyMeasurementSet.h"
-#include "Calibration/NormalizeStokes.h"
-
 #include "Calibration/Instrument.h"
-#include "Calibration/Polar.h"
+
+#include "MEAL/NormalizeStokes.h"
+#include "MEAL/Polar.h"
+#include "MEAL/Coherency.h"
 
 // Extra transformations
 #include "Calibration/SingleAxis.h"
@@ -47,7 +48,7 @@ namespace Pulsar {
     void update_source();
 
     //! Model of Stokes parameters added to equation as a function of frequency
-    vector< Calibration::Coherency > source;
+    vector< MEAL::Coherency > source;
 
     //! Best guess of Stokes parameters
     vector< Calibration::MeanCoherency > source_guess;
@@ -74,7 +75,7 @@ namespace Pulsar {
 
     //! Constructor
     StandardModel (Calibrator::Type model = Calibrator::Hamaker,
-                   Calibration::Complex2* feed_corrections = 0);
+                   MEAL::Complex2* feed_corrections = 0);
 
     //! Update the relevant estimate
     void update ();
@@ -92,18 +93,18 @@ namespace Pulsar {
     Reference::To<Calibration::ReceptionModel> equation;
 
     //! The signal path experienced by the calibrator
-    Reference::To<Calibration::ProductRule<Calibration::Complex2> > pcal_path;
+    Reference::To<MEAL::ProductRule<MEAL::Complex2> > pcal_path;
 
     //! The signal path experienced by the pulsar
-    Reference::To<Calibration::ProductRule<Calibration::Complex2> > pulsar_path;
+    Reference::To<MEAL::ProductRule<MEAL::Complex2> > pulsar_path;
 
     //! The instrumental model and any additional transformations
-    Reference::To<Calibration::ProductRule<Calibration::Complex2> > instrument;
+    Reference::To<MEAL::ProductRule<MEAL::Complex2> > instrument;
 
     // ////////////////////////////////////////////////////////////////////
     //
     //! Polar decomposition of instrumental response (Hamaker)
-    Reference::To<Calibration::Polar> polar;
+    Reference::To<MEAL::Polar> polar;
 
     //! The best estimate of the polar model
     Calibration::MeanPolar polar_estimate;
@@ -130,7 +131,7 @@ namespace Pulsar {
     Calibration::Parallactic parallactic;
 
     //! The time axis
-    Calibration::Axis<MJD> time;
+    MEAL::Axis<MJD> time;
 
     //! Used to convert MJD to double
     Calibration::ConvertMJD convert;
@@ -150,7 +151,7 @@ namespace Pulsar {
     Calibrator::Type model;
 
     //! The feed correction transformation
-    Reference::To<Calibration::Complex2> feed_correction;
+    Reference::To<MEAL::Complex2> feed_correction;
 
     //! validity flag
     bool valid;
@@ -251,7 +252,7 @@ namespace Pulsar {
     vector<string> calibrator_filenames;
     
     //! Routine for normalizing the Stokes parameters
-    Calibration::NormalizeStokes normalizer;
+    MEAL::NormalizeStokes normalizer;
 
     //! Epoch of the first observation
     MJD start_epoch;

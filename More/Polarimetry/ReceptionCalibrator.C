@@ -10,15 +10,15 @@
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
 
-#include "Calibration/Complex2Constant.h"
+#include "MEAL/Complex2Constant.h"
 #include "Calibration/SingleAxis.h"
 #include "Calibration/Feed.h"
-#include "Calibration/Boost.h"
-#include "Calibration/Gain.h"
+#include "MEAL/Boost.h"
+#include "MEAL/Gain.h"
 
 #include "Calibration/SingleAxisPolynomial.h"
-#include "Calibration/Polynomial.h"
-#include "Calibration/Tracer.h"
+#include "MEAL/Polynomial.h"
+#include "MEAL/Tracer.h"
 
 #include "Pauli.h"
 
@@ -57,7 +57,7 @@ void Pulsar::ReceptionCalibrator::set_calibrators (const vector<string>& names)
   \param feed_corrections the known feed corrections transformation
 */
 Pulsar::StandardModel::StandardModel (Calibrator::Type _model,
-                                      Calibration::Complex2* feed_corrections)
+                                      MEAL::Complex2* feed_corrections)
 {
   // ////////////////////////////////////////////////////////////////////
   //
@@ -68,7 +68,7 @@ Pulsar::StandardModel::StandardModel (Calibrator::Type _model,
 
   valid = true;
 
-  instrument = new Calibration::ProductRule<Calibration::Complex2>;
+  instrument = new MEAL::ProductRule<MEAL::Complex2>;
 
 #if 0
   Calibration::SingleAxisPolynomial* backend;
@@ -77,15 +77,15 @@ Pulsar::StandardModel::StandardModel (Calibrator::Type _model,
   convert.connect (backend, &Calibration::SingleAxisPolynomial::set_abscissa);
 #else
 
-  Calibration::Complex2* operation;
-  operation = new Calibration::Rotation(Vector<double, 3>::basis(0));
+  MEAL::Complex2* operation;
+  operation = new MEAL::Rotation(Vector<double, 3>::basis(0));
 
-  Calibration::Polynomial* poly = new Calibration::Polynomial (4);
+  MEAL::Polynomial* poly = new MEAL::Polynomial (4);
   poly -> set_infit (0, false);
   poly -> set_argument (0, &convert);
 
-  Calibration::ChainRule<Calibration::Complex2>* backend;
-  backend = new Calibration::ChainRule<Calibration::Complex2>;
+  MEAL::ChainRule<MEAL::Complex2>* backend;
+  backend = new MEAL::ChainRule<MEAL::Complex2>;
 
   backend -> set_model ( operation );
   backend -> set_constraint (0, poly);
@@ -100,7 +100,7 @@ Pulsar::StandardModel::StandardModel (Calibrator::Type _model,
   case Calibrator::Hamaker:
     if (ReceptionCalibrator::verbose)
       cerr << "Pulsar::StandardModel Hamaker" << endl;
-    polar = new Calibration::Polar;
+    polar = new MEAL::Polar;
     *instrument *= polar;
     break;
 
@@ -132,7 +132,7 @@ Pulsar::StandardModel::StandardModel (Calibrator::Type _model,
   // initialize the signal path seen by the pulsar
   //
 
-  pulsar_path = new Calibration::ProductRule<Calibration::Complex2>;
+  pulsar_path = new MEAL::ProductRule<MEAL::Complex2>;
   *pulsar_path *= instrument;
   *pulsar_path *= &parallactic;
 
@@ -149,8 +149,8 @@ void Pulsar::StandardModel::add_fluxcal_backend ()
     throw Error (InvalidState, "Pulsar::StandardModel::add_fluxcal_backend",
 		 "Cannot model flux calibrator with Hamaker model");
 
-  Calibration::ProductRule<Calibration::Complex2>* path = 0;
-  path = new Calibration::ProductRule<Calibration::Complex2>;
+  MEAL::ProductRule<MEAL::Complex2>* path = 0;
+  path = new MEAL::ProductRule<MEAL::Complex2>;
 
   fluxcal_backend = new Calibration::SingleAxis;
 
@@ -166,7 +166,7 @@ void Pulsar::StandardModel::add_fluxcal_backend ()
 
 void Pulsar::StandardModel::add_polncal_backend ()
 {
-  pcal_path = new Calibration::ProductRule<Calibration::Complex2>;
+  pcal_path = new MEAL::ProductRule<MEAL::Complex2>;
   *pcal_path *= instrument;
 
   equation->add_transformation ( pcal_path );
@@ -245,9 +245,9 @@ void Pulsar::ReceptionCalibrator::initial_observation (const Archive* data)
   calibrator = data->clone();
   receiver = calibrator->get<Receiver>();
 
-  Calibration::Complex2* feed = 0;
+  MEAL::Complex2* feed = 0;
   if (receiver) {
-    feed = new Calibration::Complex2Constant (receiver->get_transformation());
+    feed = new MEAL::Complex2Constant (receiver->get_transformation());
     cerr << "Pulsar::ReceptionCalibrator known receiver transformation\n"
 	"\t" << feed->evaluate() << endl;
   }
@@ -500,7 +500,7 @@ void Pulsar::ReceptionCalibrator::add_observation (const Archive* data)
       }
 
       // the selected pulse phase bins
-      Calibration::Argument::Value* arg = model[ichan]->time.new_Value(epoch);
+      MEAL::Argument::Value* arg = model[ichan]->time.new_Value(epoch);
 
       unsigned xform_index = model[ichan]->Pulsar_path;
       Calibration::CoherencyMeasurementSet measurements (xform_index);
@@ -730,7 +730,7 @@ try {
 
       try {
 
-	Calibration::Argument::Value* arg = model[ichan]->time.new_Value(epoch);
+	MEAL::Argument::Value* arg = model[ichan]->time.new_Value(epoch);
 	Calibration::CoherencyMeasurementSet measurements;
 	measurements.add_coordinate( arg );
 
@@ -793,14 +793,14 @@ try {
 
     assert (model.size() == nchan);
 
-    const Calibration::Polar* polar;
+    const MEAL::Polar* polar;
 
     for (unsigned ichan = 0; ichan<nchan; ichan++) {
 
       if (!polcal->get_transformation_valid (ichan))
         continue;
 
-      polar = dynamic_cast<const Calibration::Polar*>
+      polar = dynamic_cast<const MEAL::Polar*>
 	( polcal->get_transformation(ichan) );
 
       if (polar)
@@ -885,7 +885,7 @@ void Pulsar::ReceptionCalibrator::precalibrate (Archive* data)
 
       }
 
-      Calibration::Complex2* signal_path = 0;
+      MEAL::Complex2* signal_path = 0;
       Calibration::ReceptionModel* equation = model[ichan]->equation;
 
       switch ( data->get_type() )  {

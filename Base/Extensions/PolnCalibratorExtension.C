@@ -2,7 +2,7 @@
 
 #include "Calibration/SingleAxis.h"
 #include "Calibration/Instrument.h"
-#include "Calibration/Polar.h"
+#include "MEAL/Polar.h"
 
 //! Default constructor
 Pulsar::PolnCalibratorExtension::PolnCalibratorExtension ()
@@ -99,7 +99,7 @@ void Pulsar::PolnCalibratorExtension::set_valid (unsigned ichan, bool valid)
 
 
 //! Get the transformation for the specified frequency channel
-::Calibration::Complex2* 
+::MEAL::Complex2* 
 Pulsar::PolnCalibratorExtension::get_transformation (unsigned ichan)
 {
   range_check (ichan, "Pulsar::PolnCalibratorExtension::get_transformation");
@@ -107,7 +107,7 @@ Pulsar::PolnCalibratorExtension::get_transformation (unsigned ichan)
 }
 
 //! Get the transformation for the specified frequency channel
-const ::Calibration::Complex2*
+const ::MEAL::Complex2*
 Pulsar::PolnCalibratorExtension::get_transformation (unsigned ichan) const
 {
   range_check (ichan, "Pulsar::PolnCalibratorExtension::get_transformation");
@@ -127,19 +127,19 @@ void Pulsar::PolnCalibratorExtension::construct ()
 }
 
 
-//! Return a new Calibration::Complex2 instance, based on type attribute
-::Calibration::Complex2* 
+//! Return a new MEAL::Complex2 instance, based on type attribute
+::MEAL::Complex2* 
 Pulsar::PolnCalibratorExtension::new_transformation ()
 {
   switch (type) {
   case Calibrator::SingleAxis:
-    return new ::Calibration::SingleAxis;
+    return new Calibration::SingleAxis;
   case Calibrator::Polar:
-    return new ::Calibration::Polar;
+    return new MEAL::Polar;
   case Calibrator::Hamaker:
-    return new ::Calibration::Polar;
+    return new MEAL::Polar;
   case Calibrator::Britton:
-    return new ::Calibration::Instrument;
+    return new Calibration::Instrument;
   default:
     throw Error (InvalidState,
 		 "Pulsar::PolnCalibratorExtension::new_transformation",

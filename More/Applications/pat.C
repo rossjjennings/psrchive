@@ -6,7 +6,7 @@
 
 #include "Pulsar/PolnProfile.h"
 #include "Pulsar/PolnProfileFit.h"
-#include "Calibration/Polar.h"
+#include "MEAL/Polar.h"
 
 #include "Pulsar/ObsExtension.h"
 #include "Pulsar/Backend.h"
@@ -107,7 +107,7 @@ int main (int argc, char *argv[])
       denoise = true;
       break;
     case 'i':
-      cout << "$Id: pat.C,v 1.28 2004/09/22 15:43:56 straten Exp $" << endl;
+      cout << "$Id: pat.C,v 1.29 2004/11/22 21:32:31 straten Exp $" << endl;
       return 0;
 
     case 'F':
@@ -200,7 +200,7 @@ int main (int argc, char *argv[])
 	  
 	  cerr << "pat: full polarization fitting with " << std << endl;
 	  fit.set_standard( stdarch->get_Integration(0)->new_PolnProfile(0) );
-	  fit.set_transformation( new Calibration::Polar );
+	  fit.set_transformation( new MEAL::Polar );
 	  
 	}
 	else
@@ -280,7 +280,7 @@ int main (int argc, char *argv[])
 	    
 	    cerr << "pat: full polarization fitting with " << std << endl;
 	    fit.set_standard( stdarch->get_Integration(0)->new_PolnProfile(0) );
-	    fit.set_transformation( new Calibration::Polar );
+	    fit.set_transformation( new MEAL::Polar );
 	    
 	  }
 	  else

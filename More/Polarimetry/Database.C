@@ -21,6 +21,7 @@
 
 #include "genutil.h"
 #include "dirutil.h"
+#include "string_utils.h"
 
 #include <unistd.h> 
 #include <errno.h>

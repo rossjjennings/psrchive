@@ -155,7 +155,7 @@ int main(int argc, char** argv) {
   for (unsigned i = 0; i < profs.size(); i++) {
     
     vector<float> corr;
-    Calibration::Gaussian model;
+    MEAL::Gaussian model;
 
     int rise = 0;
     int fall = 0;

@@ -15,7 +15,7 @@ Pulsar::SingleAxisCalibrator::~SingleAxisCalibrator ()
 }
 
 //! Return the system response as determined by the SingleAxis
-::Calibration::Complex2*
+::MEAL::Complex2*
 Pulsar::SingleAxisCalibrator::solve (const vector<Estimate<double> >& source,
 				     const vector<Estimate<double> >& sky)
 {

@@ -12,7 +12,7 @@ Pulsar::PolarCalibrator::~PolarCalibrator ()
 }
 
 //! Return the system response as determined by the Polar Transformation
-::Calibration::Complex2*
+::MEAL::Complex2*
 Pulsar::PolarCalibrator::solve (const vector<Estimate<double> >& source,
 				const vector<Estimate<double> >& sky)
 {
@@ -35,7 +35,7 @@ Pulsar::PolarCalibrator::solve (const vector<Estimate<double> >& source,
   stokes_source *= 2.0;
   stokes_sky *= 2.0;
 
-  Reference::To<Calibration::Polar> polar = new Calibration::Polar;
+  Reference::To<MEAL::Polar> polar = new MEAL::Polar;
 
   polar->solve (stokes_source, stokes_sky);
 

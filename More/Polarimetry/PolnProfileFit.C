@@ -3,12 +3,12 @@
 #include "Pulsar/Profile.h"
 
 #include "Calibration/ReceptionModel.h"
-#include "Calibration/Polynomial.h"
-#include "Calibration/Phase.h"
+#include "MEAL/Polynomial.h"
+#include "MEAL/Phase.h"
 
-#include "Calibration/ChainRule.h"
-#include "Calibration/Complex2Math.h"
-#include "Calibration/Complex2Constant.h"
+#include "MEAL/ChainRule.h"
+#include "MEAL/Complex2Math.h"
+#include "MEAL/Complex2Constant.h"
 #include "Calibration/CoherencyMeasurementSet.h"
 
 #include "RealTimer.h"
@@ -47,15 +47,15 @@ Pulsar::PolnProfileFit::~PolnProfileFit ()
 void Pulsar::PolnProfileFit::init ()
 {
   // create the linear phase relationship transformation
-  phase = new Calibration::Polynomial (2);
+  phase = new MEAL::Polynomial (2);
   phase -> set_param (0, 0.0);
   phase -> set_infit (0, false);
 
   phase -> set_argument (0, &phase_axis);
 
-  Calibration::ChainRule<Calibration::Complex2>* chain = 0;
-  chain = new Calibration::ChainRule<Calibration::Complex2>;
-  chain -> set_model (new Calibration::Phase);
+  MEAL::ChainRule<MEAL::Complex2>* chain = 0;
+  chain = new MEAL::ChainRule<MEAL::Complex2>;
+  chain -> set_model (new MEAL::Phase);
   chain -> set_constraint (0, phase);
 
   phase_xform = chain;
@@ -121,8 +121,8 @@ void Pulsar::PolnProfileFit::set_standard (const PolnProfile* _standard)
     }
 
     // each complex phase bin of the standard is treated as a known constant
-    Calibration::Complex2Constant* jones;
-    jones = new Calibration::Complex2Constant( convert(stokes) );
+    MEAL::Complex2Constant* jones;
+    jones = new MEAL::Complex2Constant( convert(stokes) );
 
 #ifdef _DEBUG
     cerr << "Pulsar::PolnProfileFit::set_standard ibin=" << ibin 
@@ -130,7 +130,7 @@ void Pulsar::PolnProfileFit::set_standard (const PolnProfile* _standard)
 #endif
 
     // each complex phase bin is phase related
-    Reference::To<Calibration::Complex2> input = jones;
+    Reference::To<MEAL::Complex2> input = jones;
 
     model->add_input( input * phase_xform );
 
@@ -143,7 +143,7 @@ void Pulsar::PolnProfileFit::set_standard (const PolnProfile* _standard)
 
 //! Set the transformation between the standard and observation
 void 
-Pulsar::PolnProfileFit::set_transformation (Calibration::Complex2* xform)
+Pulsar::PolnProfileFit::set_transformation (MEAL::Complex2* xform)
 {
   transformation = xform;
   if (model)
