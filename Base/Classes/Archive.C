@@ -419,8 +419,38 @@ void Pulsar::Archive::defaraday (double rotation_measure, double rm_iono)
 void Pulsar::Archive::set_ephemeris (const psrephem& new_ephemeris)
 {
   ephemeris = new psrephem (new_ephemeris);
-  set_source (ephemeris->psrname());
-  set_dispersion_measure (ephemeris->get_dm());
+  
+  if (get_source() != ephemeris->psrname()) {
+    if (ephemeris->psrname() != "CAL" && ephemeris->psrname() != "cal" &&
+	ephemeris->psrname() != "Cal" && ephemeris->psrname() != "JCAL" &&
+	ephemeris->psrname() != "jcal") {
+      string temp1 = get_source();
+      string temp2 = ephemeris->psrname();
+      if (temp1.length() > temp2.length()) {
+	if (temp1.substr(1,temp1.length()) != temp2) {
+	  cout << "Archive::set_ephemeris Informative Notice:\n" 
+	       << "   Source name will be updated to match new ephemeris\n"
+	       << "   New name: " << temp2 << endl;
+	  set_source(temp2);
+	}
+      }
+      else {
+	if (temp2.substr(1,temp2.length()) != temp1) {
+	  cout << "Archive::set_ephemeris Informative Notice:\n" 
+	       << "   Source name will be updated to match new ephemeris\n"
+	       << "   New name: " << temp2 << endl;
+	  set_source(temp2);
+	}
+      }
+    }
+    if (get_dispersion_measure() != ephemeris->get_dm()) {
+      cout << "Archive::set_ephemeris Informative Notice:\n" 
+	   << "   Dispersion measure will be updated to match new ephemeris\n"
+	   << "   New DM = " << ephemeris->get_dm() << endl;
+      set_dispersion_measure(ephemeris->get_dm());
+    }
+  }
+
   update_model ();
 }
 
