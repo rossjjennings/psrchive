@@ -7,7 +7,7 @@ COMMENT   Astrophysics Supplement Series v44/p363, v44/p371, v73/p359, v73/p365.
 COMMENT   Contact the NASA Science Office of Standards and Technology for the
 COMMENT   FITS Definition document #100 and other FITS information.
 COMMENT
-HDRVER  = '1.25            '   / Header version 
+HDRVER  = '1.26            '   / Header version 
 DATE    = '                '   / File creation date (YYYY-MM-DDThh:mm:ss UTC)
 OBSERVER= '                '   / Observer name(s)
 PROJID  = '                '   / Project name
@@ -33,7 +33,7 @@ TRK_MODE= '                '   / Track mode (TRACK, SCANGC, SCANLAT)
 STP_CRD1= '                '   / Stop coord 1 (hh:mm:ss.sss or ddd.ddd)
 STP_CRD2= '                '   / Stop coord 2 (-dd:mm:ss.sss or -dd.ddd) 
 SCANLEN = *                    / [s] Requested scan length (E)
-FD_MODE = '                '   / Feed track mode - Const FA, CPA, GPA
+FD_MODE = '                '   / Feed track mode - FA, CPA, SPA, TPA
 FA_REQ  = *                    / [deg] Feed/Posn angle requested (E)
 ATTEN_A = *                    / [db] Attenuator, Poln A (E)
 ATTEN_B = *                    / [db] Attenuator, Poln B (E)
@@ -63,7 +63,9 @@ NAXIS2  =                    1 / number of rows
 PCOUNT  =                    0 / size of special data area
 GCOUNT  =                    1 / one data group (required keyword)
 TFIELDS =                   20 / number of fields per row
+#
 EXTNAME = 'HISTORY'            / name of this binary table extension
+#
 TTYPE1  = 'DATE_PRO'           / Processing date and time (UTC)
 TFORM1  = '24A     '           / 24-char string
 TTYPE2  = 'PROC_CMD'           / Processing program and command
@@ -81,12 +83,12 @@ TFORM7  = '1I      '           / Integer
 TTYPE8  = 'TBIN    '           / Time per bin or sample
 TUNIT8  = 's       '           / units of field
 TFORM8  = '1D      '           / Double
-TTYPE9  = 'CTR_FREQ'           / Band centre frequency
+TTYPE9  = 'CTR_FREQ'           / [MHz] Band centre frequency
 TUNIT9  = 'MHz     '           / units of field
 TFORM9  = '1D      '           / Double
 TTYPE10 = 'NCHAN   '           / Number of frequency channels
 TFORM10 = '1I      '           / Integer
-TTYPE11 = 'CHAN_BW '           / Channel bandwidth
+TTYPE11 = 'CHAN_BW '           / [MHz] Channel bandwidth
 TFORM11 = '1D      '           / Double
 TUNIT11 = 'MHz     '           / units of field
 TTYPE12 = 'PAR_CORR'           / Parallactic angle correction applied
@@ -123,12 +125,14 @@ NAXIS2  =                    * / Number of rows in table (NSUBINT)
 PCOUNT  =                    0 / Size of special data area
 GCOUNT  =                    1 / One data group (required keyword)
 TFIELDS =                    1 / Number of fields per row
+#
 DIG_MODE= '                '   / Digitiser mode
 NDIGR   = *                    / Number of digitised channels (I)
 NLEV    = *                    / Number of digitiser levels
 NCYCSUB = *                    / Number of correlator cycles per subint
 DIGLEV  = '                '   / Digitiser level-setting mode (AUTO, FIX)
 EXTNAME = 'DIG_STAT'           / Name of this binary table extension
+#
 TTYPE1  = 'DATA    '           / Digitiser statistics
 TDIM1   =  (*,*,*)             / Data table dimensions (NLEV,NDIGR,NCYCSUB)
 TFORM1  = 'E       '           / NLEV*NDIGR*NCYCSUB floats
@@ -148,6 +152,7 @@ NAXIS2  =                    1 / Number of rows in table
 PCOUNT  =                    0 / Size of special data area
 GCOUNT  =                    1 / One data group (required keyword)
 TFIELDS =                    3 / Number of fields per row
+#
 DIG_MODE= '                '   / Digitiser mode
 DYN_LEVT= *                    / Timescale for dynamic leveling
 NDIGR   = *                    / Number of digitised channels (I)
@@ -155,6 +160,7 @@ NLEV    = *                    / Number of digitiser levels
 NPTHIST = *                    / Number of points in histogram (I)
 DIGLEV  = '                '   / Digitiser level-setting mode (AUTO, FIX)
 EXTNAME = 'DIG_CNTS'           / Name of this binary table extension
+#
 TTYPE1  = 'DAT_OFFS'           / Data offset for each histogram
 TFORM1  = 'E       '           / NDIGR floats
 TTYPE2  = 'DAT_SCL '           / Data scale factor for each histogram
@@ -178,9 +184,11 @@ NAXIS2  =                    1 / number of rows in table
 PCOUNT  =                    0 / size of special data area
 GCOUNT  =                    1 / one data group (required keyword)
 TFIELDS =                    3 / number of fields per row
+#
 NCH_ORIG= *                    / Number of channels in original bandpass
 BP_NPOL = *                    / Number of polarizations in bandpass
 EXTNAME = 'BANDPASS'           / name of this binary table extension
+#
 TTYPE1  = 'DAT_OFFS'           / Data offset for each bandpass
 TFORM1  = 'E       '           / NRCVR floats
 TTYPE2  = 'DAT_SCL '           / Data scale factor for each bandpass
@@ -205,8 +213,10 @@ NAXIS2  =                    1 / number of rows in table (NCHAN)
 PCOUNT  =                    0 / size of special data area
 GCOUNT  =                    1 / one data group (required keyword)
 TFIELDS =                    3 / number of fields per row
+#
 NFFT    =                    * / Size of forward FFT 
 EXTNAME = 'COHDDISP'           / name of this binary table extension
+#
 TTYPE1  = 'NOVERLAP'           / Number of overlap points for each sub-band
 TFORM1  = '1I      '           / Integer
 TTYPE2  = 'NCHIRP  '           / Number of points in chirp function
@@ -230,7 +240,9 @@ NAXIS2  =                    * / number of rows in table
 PCOUNT  =                    0 / size of special data area
 GCOUNT  =                    1 / one data group (required keyword)
 TFIELDS =                   56 / number of fields per row
+#
 EXTNAME = 'PSREPHEM'           / name of this binary table extension
+#
 TTYPE1  = 'DATE_PRO'           / Processing date and time (UTC)
 TFORM1  = '24A     '           / 24-char string
 TTYPE2  = 'PROC_CMD'           / Processing program and command
@@ -253,7 +265,6 @@ TTYPE10 = 'POSEPOCH'           / Epoch at which the position is measured (MJD)
 TFORM10 = '1D      '           / Double
 TTYPE11 = 'IF0     '           / [mHz] Integer mHz barycentric spin freq
 TFORM11 = '1J      '           / Long integer
-TNULL11 = -1                   / IF0 null
 TTYPE12 = 'FF0     '           / [mHz] Fractional mHz barycentric spin freq
 TFORM12 = '1D      '           / Double
 TTYPE13 = 'F1      '           / [s^-2] Time deriv of barycentric spin freq
@@ -262,21 +273,21 @@ TTYPE14 = 'F2      '           / [s^-3] 2nd time deriv of barycentric spin freq
 TFORM14 = '1D      '           / Double
 TTYPE15 = 'F3      '           / [s^-4] 3rd time deriv of barycentric spin freq
 TFORM15 = '1D      '           / Double
-TTYPE16 = 'PEPOCH  '           / Epoch of period/frequency determination (MJD)
+TTYPE16 = 'PEPOCH  '           / [MJD] Epoch of period/frequency determination
 TFORM16 = '1D      '           / Double
-TTYPE17 = 'DM      '           / Dispersion measure (cm**-3 pc)
+TTYPE17 = 'DM      '           / [cm^-3 pc] Dispersion measure
 TFORM17 = '1D      '           / Double
-TTYPE18 = 'DM1     '           / Time deriv of dispersion measure (DM yr^-1)
+TTYPE18 = 'DM1     '           / [cm^-3 pc/yr] Time deriv of dispersion measure
 TFORM18 = '1D      '           / Double
-TTYPE19 = 'RM      '           / Rotation measure (rad m**-2)
+TTYPE19 = 'RM      '           / [rad m^-2] Rotation measure
 TFORM19 = '1D      '           / Double
 TTYPE20 = 'BINARY  '           / Binary model
 TFORM20 = '8A      '           / 8-char string
-TTYPE21 = 'T0      '           / Epoch of periastron (MJD)
+TTYPE21 = 'T0      '           / [MJD] Epoch of periastron 
 TFORM21 = '1D      '           / Double
-TTYPE22 = 'PB      '           / Binary period of pulsar (days)
+TTYPE22 = 'PB      '           / [d] Binary period of pulsar 
 TFORM22 = '1D      '           / Double
-TTYPE23 = 'A1      '           / Projected semi-major axis of orbit (lt sec)
+TTYPE23 = 'A1      '           / [s] Projected semi-major axis of orbit
 TFORM23 = '1D      '           / Double
 TTYPE24 = 'OM      '           / [deg] Longitude of periastron
 TFORM24 = '1D      '           / Double
@@ -290,53 +301,51 @@ TTYPE28 = 'GAMMA   '           / [s] Post-Keplerian "gamma" term
 TFORM28 = '1D      '           / Double
 TTYPE29 = 'SINI    '           / Sine of inclination angle
 TFORM29 = '1D      '           / Double
-TTYPE30 = 'M2      '           / Companion mass (solar masses)
+TTYPE30 = 'M2      '           / [M_sun] Companion mass 
 TFORM30 = '1D      '           / Double
-TTYPE31 = 'T0_2    '           / Epoch of periastron [2nd orbit] (MJD)
+TTYPE31 = 'T0_2    '           / [MJD] Epoch of periastron [2nd orbit] 
 TFORM31 = '1D      '           / Double
-TTYPE32 = 'PB_2    '           / Binary period of pulsar [2nd orbit] (days)
+TTYPE32 = 'PB_2    '           / [d] Binary period of pulsar [2nd orbit]
 TFORM32 = '1D      '           / Double
-TTYPE33 = 'A1_2    '           / asin(i) of 2nd orbit (lt sec)
+TTYPE33 = 'A1_2    '           / [s] asin(i) of 2nd orbit
 TFORM33 = '1D      '           / Double
 TTYPE34 = 'OM_2    '           / [deg] Longitude of periastron [2nd orbit]
 TFORM34 = '1D      '           / Double
 TTYPE35 = 'ECC_2   '           / Eccentricity [2nd orbit]
 TFORM35 = '1D      '           / Double
-TTYPE36 = 'DTHETA  '           / Relativistic deformation of the orbit (-6)
+TTYPE36 = 'DTHETA  '           / Relativistic deformation of the orbit
 TFORM36 = '1D      '           / Double
-TTYPE37 = 'XDOT    '           / Rate of change of asin(i) (-12)
+TTYPE37 = 'A1DOT   '           / Rate of change of asin(i) 
 TFORM37 = '1D      '           / Double
-TTYPE38 = 'EDOT    '           / Rate of change of eccentricity (-12)
+TTYPE38 = 'ECCDOT    '         / [s^-1] Rate of change of eccentricity 
 TFORM38 = '1D      '           / Double
-TTYPE39 = 'TASC    '           / Epoch of ascending node (MJD)
+TTYPE39 = 'TASC    '           / [MJD] Epoch of ascending node
 TFORM39 = '1D      '           / Double
-TTYPE40 = 'EPS1    '           / Param for ELL1 binary model
+TTYPE40 = 'EPS1    '           / ECC sin(OM) (ELL1 binary model)
 TFORM40 = '1D      '           / Double
-TTYPE41 = 'EPS2    '           / Param for ELL1 binary model
+TTYPE41 = 'EPS2    '           / ECC cos(OM) (ELL1 binary model)
 TFORM41 = '1D      '           / Double
-TTYPE42 = 'START   '           / Epoch of start of fit (MJD)
+TTYPE42 = 'START   '           / [MJD] Epoch of start of fit
 TFORM42 = '1D      '           / Double
-TTYPE43 = 'FINISH  '           / Epoch of end of fit (MJD)
+TTYPE43 = 'FINISH  '           / [MJD] Epoch of end of fit
 TFORM43 = '1D      '           / Double
 TTYPE44 = 'TRES    '           / [usec] RMS timing residual
 TFORM44 = '1D      '           / Double
 TTYPE45 = 'NTOA    '           / Number of TOAs in timing fit
 TFORM45 = '1I      '           / Integer
-TNULL45 = -1                   / NTOA null
 TTYPE46 = 'CLK     '           / Terrestrial time standard
 TFORM46 = '12A     '           / 12-char string
 TTYPE47 = 'EPHEM   '           / Solar system ephemeris
 TFORM47 = '12A     '           / 12-char string
-TTYPE48 = 'TZRIMJD '           / Reference TOA (Integer days of MJD)
+TTYPE48 = 'TZRIMJD '           / [MJD] Reference TOA (Integer part)
 TFORM48 = '1J      '           / Long Integer
-TNULL48 = -1                   / TZRIMJD null
-TTYPE49 = 'TZRFMJD '           / Reference TOA (Fractional days of MJD)
+TTYPE49 = 'TZRFMJD '           / [d] Reference TOA (Fractional part)
 TFORM49 = '1D      '           / Double
 TTYPE50 = 'TZRFRQ  '           / [MHz] Frequency of reference TOA
 TFORM50 = '1D      '           / Double
-TTYPE51 = 'TZRSITE '           / One-letter observatory code of reference TOA
-TFORM51 = '1A      '           / 1-char string
-TTYPE52 = 'GLEP_1  '           / Epoch [Tempo Glitch 1]
+TTYPE51 = 'TZRSITE '           / Observatory code of reference TOA
+TFORM51 = '8A      '           / 8-char string
+TTYPE52 = 'GLEP_1  '           / [MJD] Epoch [Tempo Glitch 1]
 TFORM52 = '1D      '           / Double
 TTYPE53 = 'GLPH_1  '           / Phase increment [Tempo Glitch 1]
 TFORM53 = '1D      '           / Double
@@ -362,7 +371,9 @@ NAXIS2  =                    * / number of rows in table
 PCOUNT  =                    0 / size of special data area
 GCOUNT  =                    1 / one data group (required keyword)
 TFIELDS =                   13 / Number of fields per row
+#
 EXTNAME = 'POLYCO   '          / name of this binary table extension
+#
 TTYPE1  = 'DATE_PRO'           / Processing date and time (UTC)
 TFORM1  = '24A     '           / 24-char string
 TTYPE2  = 'POLYVER '           / Polyco version ID
@@ -373,8 +384,8 @@ TTYPE4  = 'NCOEF   '           / Nr of coefficients (<=15)
 TFORM4  = '1I      '           / Integer
 TTYPE5  = 'NPBLK   '           / Nr of blocks (rows) for this polyco
 TFORM5  = '1I      '           / Integer
-TTYPE6  = 'NSITE   '           / TEMPO site code
-TFORM6  = '1A      '           / 1 character
+TTYPE6  = 'NSITE   '           / Observatory code
+TFORM6  = '8A      '           / 8-char string
 TTYPE7  = 'REF_FREQ'           / [MHz] Reference frequency for phase
 TFORM7  = '1D      '           / Double
 TTYPE8  = 'PRED_PHS'           / Predicted pulse phase at obs start
@@ -410,32 +421,25 @@ EXTNAME = 'FLUX_CAL'           / name of this binary table extension
 CAL_MTHD= '        '           / Flux cal method
 SCALFILE= '        '           / Cal file(s) used to derive flux-cal data
 NCHAN   =                    * / Nr of channels in flux cal file
-EPOCH   = '                  ' / Epoch of calibration experiment (MJD)
+EPOCH   = '                  ' / [MJD] Epoch of calibration obs
 #
 TTYPE1  = 'DAT_FREQ'           / [MHz] Centre frequency for each channel
 TFORM1  = 'E       '           / NCHAN floats
-#
 TTYPE2  = 'DAT_WTS '           / Weights for each channel
 TFORM2  = 'E       '           / NCHAN floats
-#
 TTYPE3  = 'T_SYS   '           / System temperature
 TFORM3  = 'E       '           / NCHAN floats
 TUNIT3  = 'Jy      '
-#
 TTYPE4  = 'T_SYSERR'           / Estimated error of system temperature
 TFORM4  = 'E       '           / NCHAN floats
 TUNIT4  = 'Jy      '
-#
 TTYPE5  = 'T_CAL   '           / Calibrator flux
 TFORM5  = 'E       '           / NCHAN floats
 TUNIT5  = 'Jy      '
-#
 TTYPE6  = 'T_CALERR'           / Estimated error of calibrator flux
 TFORM6  = 'E       '           / NCHAN floats
 TUNIT6  = 'Jy      '
-#
 END
-#
 #
 ###############################################################################
 #
@@ -457,17 +461,13 @@ NCHAN   =                    * / Nr of channels in flux cal file
 #
 TTYPE1  = 'DAT_WTS '           / Weights for each channel
 TFORM1  = 'E       '           / NCHAN floats
-#
 TTYPE2  = 'DATA    '           / Stokes (Q,U,V) of calibrator
 TFORM2  = 'E       '           / 3*NCHAN floats
 TUNIT2  = 'C_0     '           / Calibrator flux
-#
 TTYPE3  = 'DATAERR '           / Estimated error of Stokes (Q,U,V)
 TFORM3  = 'E       '           / 3*NCHAN floats
 TUNIT3  = 'C_0     '           / Calibrator flux
-#
 END
-#
 #
 ###############################################################################
 #
@@ -492,18 +492,14 @@ EPOCH   = '                  ' / Epoch of calibration experiment (MJD)
 #
 TTYPE1  = 'DAT_FREQ'           / [MHz] Centre frequency for each channel
 TFORM1  = 'E       '           / NCHAN floats
-#
 TTYPE2  = 'DAT_WTS '           / Weights for each channel
 TFORM2  = 'E       '           / NCHAN floats
-#
 TTYPE3  = 'DATA    '           / Cross-coupling data
 TDIM3   = (*,*)                / Dimensions (NCHAN,NCPAR)
 TFORM3  = 'E       '           / NCHAN*NCPAR floats
-#
 TTYPE4  = 'DATAERR '           / Estimated error of cross-coupling data
 TDIM4   = (*,*)                / Dimensions (NCHAN,NCPAR)
 TFORM4  = 'E       '           / NCHAN*NCPAR floats
-#
 END
 #
 ###############################################################################
@@ -519,12 +515,14 @@ NAXIS1  =                    * / width of table in bytes
 NAXIS2  =                    * / Number of rows in table (NSUBINT)
 PCOUNT  =                    0 / size of special data area
 GCOUNT  =                    1 / one data group (required keyword)
-TFIELDS =                   19 / Number of fields per row 
+TFIELDS =                   19 / Number of fields per row
+# 
 INT_TYPE= '                  ' / Time axis (TIME, BINPHSPERI, BINLNGASC, etc)
 INT_UNIT= '                  ' / Unit of time axis (SEC, PHS (0-1), DEG)    
 NCH_FILE=                    * / Number of channels/sub-bands in this file
 NCH_STRT=                    * / Start channel/sub-band number (0 to NCHAN-1)
 EXTNAME = 'SUBINT  '           / name of this binary table extension
+#
 TTYPE1  = 'ISUBINT '           / Subint number
 TFORM1  = '1J      '           / Long integer
 TTYPE2  = 'INDEXVAL'           / Optionally used if INT_TYPE != TIME
@@ -566,3 +564,10 @@ TDIM19  = (*,*,*)              / Dimensions of data table = (NBIN,NCH_FILE,NPOL)
 TUNIT19 = 'Jy      '           / Units of subint data
 TFORM19 = 'I       '           / NBIN*NCH_FILE*NPOL integers
 END
+
+
+
+
+
+
+
