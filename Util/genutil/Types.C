@@ -219,8 +219,10 @@ const char* Signal::source_string(Source source)
     return "Pulsar";
   case PolCal:
     return "PolCal";
-  case FluxCal:
-    return "FluxCal";
+  case FluxCalOff:
+    return "FluxCal-Off";
+  case FluxCalOn:
+    return "FluxCal-On";
   default:
     return "Invalid";
   }
@@ -253,8 +255,10 @@ Signal::Source Signal::string2Source(string ss){
     return Pulsar;
   else if(ss=="PolCal")
     return PolCal;
-  else if(ss=="FluxCal")
-    return FluxCal;
+  else if(ss=="FluxCal-Off")
+    return FluxCalOff;
+  else if(ss=="FluxCal-On")
+    return FluxCalOn;
   return Unknown;
 }
 

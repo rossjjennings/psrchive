@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Types.h,v $
-   $Revision: 1.7 $
-   $Date: 2003/02/10 10:00:27 $
+   $Revision: 1.8 $
+   $Date: 2003/02/10 14:52:23 $
    $Author: straten $ */
 
 #ifndef __Types_h
@@ -32,7 +32,7 @@ namespace Signal {
   enum Basis { Circular=0, Linear=1 };
 
   //! Sources of observed signals
-  enum Source { Unknown, Pulsar, PolCal, FluxCal };
+  enum Source { Unknown, Pulsar, PolCal, FluxCalOn, FluxCalOff };
 
   //! Possible polarimetric states of the data
   enum State {
