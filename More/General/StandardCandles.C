@@ -118,3 +118,22 @@ void Pulsar::FluxCalibratorDatabase::unload (const std::string& filename)
   fclose (fptr);
 }
 
+Pulsar::FluxCalibratorDatabase::Entry
+Pulsar::FluxCalibratorDatabase::match (const std::string& source, double MHz)
+{
+  Entry best_match;
+
+  for (unsigned ie=0; ie<entries.size(); ie++)
+    if (entries[ie].source_name == source) {
+      double diff = fabs(entries[ie].reference_frequency - MHz);
+      double best_diff = fabs(best_match.referefreq - MHz);
+      if (diff < best_diff)
+	best_match = entries[ie];
+    }
+
+  if (best_match.reference_frequency == 0)
+    throw Error (InvalidParam, "Pulsar::FluxCalibratorDatabase::match",
+		 "No match for source=" + source);
+
+  return best_match;
+}

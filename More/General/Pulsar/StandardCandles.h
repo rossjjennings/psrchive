@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/StandardCandles.h,v $
-   $Revision: 1.1 $
-   $Date: 2004/10/07 15:58:07 $
+   $Revision: 1.2 $
+   $Date: 2004/10/11 06:15:25 $
    $Author: straten $ */
 
 #ifndef __Pulsar_FluxCalibratorDatabase_h
@@ -82,11 +82,12 @@ namespace Pulsar {
       
     };
 
-    Entry match (const std::string& source);
+    //! Returns the best match, given the source name and centre frequency
+    Entry match (const std::string& source, double MHz);
 
   protected:
     
-    // list of entries in the database
+    //! vector of entries in the database
     std::vector<Entry> entries;
     
   };
