@@ -4,6 +4,7 @@
 #include "timer++.h"
 #include "string_utils.h"
 #include "convert_endian.h"
+#include "Error.h"
 
 string Timer::reason;
 bool   Timer::verbose = false;
@@ -142,6 +143,20 @@ int Timer::load (FILE* fptr, struct timer* hdr, bool big_endian)
   // this is an old value that was used to initialize the RM
   if (hdr->rotm == -100000)
     hdr->rotm = 0.0;
+
+  // timer supplement - added 23 July 04
+
+  if (hdr->extra.supplement.version > -1)
+    throw Error (InvalidState, "Timer::load",
+		 "Cannot support timer archive with bandb in use");
+
+  // correct the Version -2 parameters
+  if (hdr->extra.supplement.version > -2) {
+    hdr->extra.supplement.X_offset = 0.0;
+    hdr->extra.supplement.Y_offset = 0.0;
+    hdr->extra.supplement.calibrator_offset = 0.0;
+    hdr->extra.supplement.version = -2;
+  }
 
   return 0;
 }
@@ -290,7 +305,7 @@ void band_init (struct band * bd)
 void Timer::init (struct timer * hdr)
 {
   band_init (&(hdr->banda));
-  band_init (&(hdr->bandb));
+  band_init (&(hdr->extra.bandb));
 
   /* nothing yet */
   strcpy(hdr->ram_boards," ");

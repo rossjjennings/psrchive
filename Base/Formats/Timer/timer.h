@@ -1,6 +1,6 @@
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/Timer/timer.h,v $
-   $Revision: 1.12 $
-   $Date: 2004/07/12 11:55:57 $
+   $Revision: 1.13 $
+   $Date: 2004/07/24 07:19:02 $
    $Author: straten $ */
 
 /* include file for the main timer structure                            */
@@ -99,6 +99,7 @@ that we get several dumps becoming a sub_int.
 */
 #include "environ.h"
 #include "band.h"
+#include "timer_supp.h"
 
 struct timer {
 
@@ -165,8 +166,11 @@ struct timer {
 /* Details of each band */
 
   struct band banda;				/* details of band a */
-  struct band bandb;				/*    "    "   "   b */
-		
+  union {
+    struct band bandb;				/*    "    "   "   b */
+    struct supp supplement;                     /* added 23 July 04  */
+  } extra;
+
 /* Misc */		  
 		
   float rotm;                   		/* Catalogue RM */
@@ -197,7 +201,7 @@ struct timer {
 
   char  software[SOFTWARE_STRLEN];   /* info on software that produced archive     */
 
-  char   backend [BACKEND_STRLEN];   /* 8-byte code checked for recognized backend */
+  char  backend[BACKEND_STRLEN];     /* 8-byte code checked for recognized backend */
 
   uint32 be_data_size;            /* if backend is recognized, this value is
 				     interpreted by archive::load as the number
