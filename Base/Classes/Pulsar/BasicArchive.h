@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/BasicArchive.h,v $
-   $Revision: 1.24 $
-   $Date: 2003/04/27 10:52:11 $
+   $Revision: 1.25 $
+   $Date: 2003/04/28 12:06:30 $
    $Author: straten $ */
 
 #include "Pulsar/Archive.h"
@@ -116,35 +116,40 @@ namespace Pulsar {
     //! Set the dispersion measure (in \f${\rm pc cm}^{-3}\f$)
     virtual void set_dispersion_measure (double dm);
 
-    //! Data has been flux calibrated
-    virtual bool get_flux_calibrated () const;
-    //! Set the status of the flux calibrated flag
-    virtual void set_flux_calibrated (bool done = true);
-
-    //! data has been corrected for feed angle errors
-    virtual bool get_feedangle_corrected () const;
-    //! Set the status of the feed angle flag
-    virtual void set_feedangle_corrected (bool done = true);
-
-    //! data has been corrected for ionospheric faraday rotation
-    virtual bool get_iono_rm_corrected () const;
-    //! Set the status of the ionospheric RM flag
-    virtual void set_iono_rm_corrected (bool done = true);
+    //! Inter-channel dispersion delay has been removed
+    virtual bool get_dedispersed () const;
+    //! Set the status of the parallactic angle flag
+    virtual void set_dedispersed (bool done = true);
 
     //! data has been corrected for ISM faraday rotation
     virtual bool get_ism_rm_corrected () const;
     //! Set the status of the ISM RM flag
     virtual void set_ism_rm_corrected (bool done = true);
 
+    //! data has been corrected for ionospheric faraday rotation
+    virtual bool get_iono_rm_corrected () const;
+    //! Set the status of the ionospheric RM flag
+    virtual void set_iono_rm_corrected (bool done = true);
+
     //! data has been corrected for parallactic angle errors
     virtual bool get_parallactic_corrected () const;
     //! Set the status of the parallactic angle flag
     virtual void set_parallactic_corrected (bool done = true);
 
-    //! Inter-channel dispersion delay has been removed
-    virtual bool get_dedispersed () const;
-    //! Set the status of the parallactic angle flag
-    virtual void set_dedispersed (bool done = true);
+    //! data has been corrected for feed angle errors
+    virtual bool get_feedangle_corrected () const;
+    //! Set the status of the feed angle flag
+    virtual void set_feedangle_corrected (bool done = true);
+
+    //! Data has been poln calibrated
+    virtual bool get_poln_calibrated () const;
+    //! Set the status of the poln calibrated flag
+    virtual void set_poln_calibrated (bool done = true);
+
+    //! Data has been flux calibrated
+    virtual bool get_flux_calibrated () const;
+    //! Set the status of the flux calibrated flag
+    virtual void set_flux_calibrated (bool done = true);
 
     //! Ensure that BasicArchive code is linked
     /*! This method is called in Archive::load only to ensure that the
@@ -220,6 +225,9 @@ namespace Pulsar {
 
     //! Data has been flux calibrated
     bool flux_calibrated;
+
+    //! Data has been poln calibrated
+    bool poln_calibrated;
 
     //! data has been corrected for feed angle errors
     bool feedangle_corrected;

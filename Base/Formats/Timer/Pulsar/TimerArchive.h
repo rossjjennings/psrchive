@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/Timer/Pulsar/TimerArchive.h,v $
-   $Revision: 1.2 $
-   $Date: 2003/03/08 11:06:57 $
+   $Revision: 1.3 $
+   $Date: 2003/04/28 12:07:11 $
    $Author: straten $ */
 
 #ifndef __Timer_Archive_h
@@ -126,15 +126,30 @@ namespace Pulsar {
     //! Set the dispersion measure (in \f${\rm pc cm}^{-3}\f$)
     virtual void set_dispersion_measure (double dm);
 
+    //! Inter-channel dispersion delay has been removed
+    virtual bool get_dedispersed () const;
+    //! Set true when the inter-channel dispersion delay has been removed
+    virtual void set_dedispersed (bool done = true);
+
     //! Data has been flux calibrated
     virtual bool get_flux_calibrated () const;
     //! Set the status of the flux calibrated flag
     virtual void set_flux_calibrated (bool done = true);
 
+    //! Data has been poln calibrated
+    virtual bool get_poln_calibrated () const;
+    //! Set the status of the poln calibrated flag
+    virtual void set_poln_calibrated (bool done = true);
+
     //! Data has been corrected for feed angle errors
     virtual bool get_feedangle_corrected () const;
     //! Set the status of the feed angle flag
     virtual void set_feedangle_corrected (bool done = true);
+
+    //! Data has been corrected for parallactic angle errors
+    virtual bool get_parallactic_corrected () const;
+    //! Set the status of the parallactic angle flag
+    virtual void set_parallactic_corrected (bool done = true);
 
     //! Data has been corrected for ionospheric faraday rotation
     virtual bool get_iono_rm_corrected () const;
@@ -146,15 +161,6 @@ namespace Pulsar {
     //! Set the status of the ISM RM flag
     virtual void set_ism_rm_corrected (bool done = true);
 
-    //! Data has been corrected for parallactic angle errors
-    virtual bool get_parallactic_corrected () const;
-    //! Set the status of the parallactic angle flag
-    virtual void set_parallactic_corrected (bool done = true);
-
-    //! Inter-channel dispersion delay has been removed
-    virtual bool get_dedispersed () const;
-    //! Set true when the inter-channel dispersion delay has been removed
-    virtual void set_dedispersed (bool done = true);
 
     //! Returns the Hydra observation type, given the coordinates
     int hydra_obstype ();

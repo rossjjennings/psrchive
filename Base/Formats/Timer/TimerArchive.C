@@ -485,6 +485,16 @@ void Pulsar::TimerArchive::set_flux_calibrated (bool done)
   hdr.calibrated = done;
 }
 
+bool Pulsar::TimerArchive::get_poln_calibrated () const
+{
+  return hdr.calibrated;
+}
+
+void Pulsar::TimerArchive::set_poln_calibrated (bool done)
+{
+  hdr.calibrated = done;
+}
+
 bool Pulsar::TimerArchive::get_feedangle_corrected () const
 {
   return hdr.corrected & FEED_CORRECTED;

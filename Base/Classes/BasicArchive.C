@@ -30,6 +30,7 @@ Pulsar::BasicArchive::BasicArchive ()
   dispersion_measure = 0.0;
 
   flux_calibrated = false;
+  poln_calibrated = false;
   feedangle_corrected = false;
   iono_rm_corrected = false;
   ism_rm_corrected = false;
@@ -262,17 +263,28 @@ void Pulsar::BasicArchive::set_dispersion_measure (double dm)
   ephemeris.set_dm (dm);
 }
 
+//! Data has been poln calibrated
+bool Pulsar::BasicArchive::get_poln_calibrated () const
+{
+  return poln_calibrated;
+}
+
+//! Set the status of the poln calibrated flag
+void Pulsar::BasicArchive::set_poln_calibrated (bool done)
+{
+  poln_calibrated = done;
+}
+
 //! Data has been flux calibrated
 bool Pulsar::BasicArchive::get_flux_calibrated () const
 {
-  cerr << "BasicArchive::get_flux_calibrated not implemented" << endl;
-  return false;
+  return flux_calibrated;
 }
 
 //! Set the status of the flux calibrated flag
 void Pulsar::BasicArchive::set_flux_calibrated (bool done)
 {
-  cerr << "BasicArchive::set_flux_calibrated not implemented" << endl;
+  flux_calibrated = done;
 }
 
 
@@ -287,7 +299,7 @@ void Pulsar::BasicArchive::set_feedangle_corrected (bool done)
 {
   feedangle_corrected = done;
 }
-    
+
 //! Return true when the data has been corrected for ionospheric Faraday rotation
 bool Pulsar::BasicArchive::get_iono_rm_corrected () const
 {
