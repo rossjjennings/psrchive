@@ -42,7 +42,7 @@ void Pulsar::Profile::rotate (double phase)
   else {
 
     // after using floor as above, phase is always greater than zero
-    unsigned binshift = unsigned (phase * double(nbin));
+    unsigned binshift = unsigned (phase * double(nbin) + 0.5);
 
     if (verbose)
       cerr << "Pulsar::Profile::rotate " << binshift << " bins" << endl;
