@@ -1,8 +1,8 @@
 //-*-C++-*-
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Attic/string_utils.h,v $
-   $Revision: 1.18 $
-   $Date: 2003/03/20 06:59:36 $
-   $Author: cwest $ */
+   $Revision: 1.19 $
+   $Date: 2003/05/02 00:52:35 $
+   $Author: hknight $ */
 
 #ifndef __STRING_UTILS_H
 #define __STRING_UTILS_H
@@ -27,7 +27,13 @@ bool h_chomp(string& ss, char gone='\n');
 bool h_chomp(string& ss, string gone);
 
 // Like perl chop
-void h_chop(string& ss);
+string& h_chop(string& ss);
+// Exactly the same as h_chop()
+string& chop(string& ss);
+
+// Returns ss instead of a boolean value
+string& chomp(string& ss, char gone='\n');
+string& chomp(string& ss, string gone);
 
 // Like fscanf(fptr,"%s%s",ignore,answer) except it gets more than 1 word
 bool retrieve_cstring(FILE* fptr,string ignore,char* answer);

@@ -19,7 +19,7 @@ bool h_chomp(string& ss,char gone){
 }
 
 bool h_chomp(string& ss,string gone){
-  if( ss.find( gone, ss.length()-gone.length()-1) != string::npos ){
+  if( ss.find( gone, ss.length()-gone.length()) != string::npos ){
     ss.resize(ss.size()-gone.size());
     return true;
   }
@@ -27,8 +27,26 @@ bool h_chomp(string& ss,string gone){
 }
 
 // Like perl chop
-void h_chop(string& ss){
+string& h_chop(string& ss){
   ss.resize(ss.size()-1);
+  return ss;
+}
+// Exactly the same as h_chop()
+string& chop(string& ss){
+  ss.resize(ss.size()-1);
+  return ss;
+}
+
+string& chomp(string& ss,char gone){
+  if(ss[ss.size()-1]==gone)
+    ss.resize(ss.size()-1);
+  return ss;
+}
+
+string& chomp(string& ss,string gone){
+  if( ss.find( gone, ss.length()-gone.length()) != string::npos )
+    ss.resize(ss.size()-gone.size());
+  return ss;
 }
 
 // Like fscanf(fptr,"%s%s",ignore,answer) except it gets more than 1 word
