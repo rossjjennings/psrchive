@@ -8,6 +8,8 @@
 #include "string_utils.h"
 #include "poly.h"
 
+string polyco::any_psr; // the empty string!!
+
 void polynomial::init(){
   dm = 0;
   doppler_shift = 0;
@@ -75,18 +77,24 @@ int polynomial::load(string* instr)
 {
   this->init();    
 
+  if (instr->length() < 160)
+    return -1;
+
   string whitespace (" \t\n");
   string line;
 
   line = stringtok (instr, "\n");
   if (line.length() < 1)
     return -1;
+
   psrname = stringtok (&line, whitespace);
   if (psrname.length() < 1)
     return -1;
+
   date = stringtok (&line, whitespace);
   if (date.length() < 1)
     return -1;
+
   utc = stringtok (&line, whitespace);
   if (utc.length() < 1)
     return -1;
@@ -206,6 +214,7 @@ int polynomial::unload (string* outstr) const
   int nrows = (int)(coefs.size()/3);
   if(nrows*3 < coefs.size()) nrows++;
 
+  char* newline = "\n";
   for(int i=0; i<nrows; ++i){
     for(int j=0; j<3 && (i*3+j)<coefs.size(); ++j){
       double ord = coefs[i*3+j];
@@ -219,7 +228,7 @@ int polynomial::unload (string* outstr) const
       bytes += sprintf(numstr, "%21.17lfD%+03d", ord, exp);
       *outstr += numstr;
     }
-    *outstr += "\n";
+    *outstr += newline;
     bytes += 1;
   }
   return bytes;
@@ -379,11 +388,12 @@ int polyco::load (istream &istr, size_t nbytes)
   string line;
   size_t bytes = 0;
 
+  char* newline = "\n";
   size_t start_pos = (int) istr.tellg();
   while (!istr.eof())  {
-    getline (istr, line, '\n');
+    getline (istr, line, newline[0]);
     if (line.length())  {
-      line += "\n"; // put back the NEWLINE (useful delimiter)
+      line += newline; // put back the NEWLINE (useful delimiter)
       total += line;
       bytes += line.length();
     }
@@ -503,7 +513,7 @@ void polyco::prettyprint() const {
 // returns a pointer to the best polynomial for use over the period
 // defined by t1 to t2
 
-const polynomial* polyco::nearest (const MJD &t, const string in_psrname) const
+const polynomial* polyco::nearest (const MJD &t, const string& in_psrname) const
 {
   int ipolly = i_nearest (t, in_psrname);
 
@@ -514,7 +524,7 @@ const polynomial* polyco::nearest (const MJD &t, const string in_psrname) const
   return &pollys[ipolly];
 }
 
-polynomial polyco::nearest_polly (const MJD &t, const string in_psrname) const
+polynomial polyco::nearest_polly (const MJD &t, const string& in_psrname) const
 {
   int ipolly = i_nearest (t, in_psrname);
 
@@ -525,14 +535,14 @@ polynomial polyco::nearest_polly (const MJD &t, const string in_psrname) const
   return pollys[ipolly];
 }
 
-int polyco::i_nearest (const MJD &t, const string in_psr) const
+int polyco::i_nearest (const MJD &t, const string& in_psr) const
 {
   for (int ipolly=0; ipolly<pollys.size(); ipolly ++)  {
     MJD t1=pollys[ipolly].reftime - (double) pollys[ipolly].nspan_mins*60.0/2.0;
     MJD t2=pollys[ipolly].reftime + (double) pollys[ipolly].nspan_mins*60.0/2.0;
     
     if (t>=t1 && t<=t2 && 
-	(in_psr=="any" || pollys[ipolly].psrname==in_psr)) {
+	(in_psr==any_psr || pollys[ipolly].psrname==in_psr)) {
       return ipolly;
     }
   }
@@ -541,28 +551,32 @@ int polyco::i_nearest (const MJD &t, const string in_psr) const
   return -1;
 }
 
-Phase polyco::phase(const MJD& t, const string in_psrname) const {
+Phase polyco::phase(const MJD& t, const string& in_psrname) const {
   polynomial nearest_polly;
-  try{ nearest_polly = this->nearest_polly(t,in_psrname);}
-  catch(...) {throw("no polynomial");}
+  try{ nearest_polly = this->nearest_polly(t, in_psrname);}
+  catch(...) {
+    fprintf (stderr, "polyco::phase no polynomial for PSR:'%s'  MJD:'%s'\n",
+	in_psrname.data(), t.printdays(9).data());
+    throw("no polynomial");
+  }
   return(nearest_polly.phase(t));
 }
 
-Phase polyco::phase(const MJD& t, float obs_freq, const string in_psrname) const {
+Phase polyco::phase(const MJD& t, float obs_freq, const string& in_psrname) const {
   polynomial nearest_polly;
   try{ nearest_polly = this->nearest_polly(t,in_psrname);}
   catch(...) {throw("no polynomial");}
   return(nearest_polly.phase(t, obs_freq));
 } 
 
-double polyco::period(const MJD& t, const string in_psrname) const{
+double polyco::period(const MJD& t, const string& in_psrname) const{
   polynomial nearest_polly;
   try{ nearest_polly = this->nearest_polly(t,in_psrname);}
   catch(...) {throw("no polynomial");}
   return(nearest_polly.period(t));
 }
 
-double polyco::frequency(const MJD& t, const string in_psrname) const {
+double polyco::frequency(const MJD& t, const string& in_psrname) const {
   polynomial nearest_polly;
   try{ nearest_polly = this->nearest_polly(t,in_psrname);}
   catch(...) { throw("no polynomial");}  
