@@ -83,8 +83,8 @@ void Pulsar::ReceptionCalibrator::initial_observation (const Archive* data)
     equation[ichan] = new Calibration::SAtPEquation;
 
     // add the calibrator state before the parallactic angle transformation
-    equation[ichan]->model.add_state( &(calibrator[ichan]) );
-    equation[ichan]->model.add_transformation( &parallactic );
+    equation[ichan]->get_model()->add_state( &(calibrator[ichan]) );
+    equation[ichan]->get_model()->add_transformation( &parallactic );
 
   }
 
@@ -135,7 +135,7 @@ void Pulsar::ReceptionCalibrator::init_estimate (SourceEstimate& estimate)
   estimate.state.resize (nchan);
 
   for (unsigned ichan=0; ichan<nchan; ichan++)
-    equation[ichan]->model.add_state( &(estimate.state[ichan]) );
+    equation[ichan]->get_model()->add_state( &(estimate.state[ichan]) );
 }
 
 
@@ -283,7 +283,7 @@ void Pulsar::ReceptionCalibrator::add_PolnCalibrator (const PolnCalibrator* p)
     // add the calibrator state
     Stokes<double> cal_state (1,0,1,0);
 
-    calibrator_state_index = equation[0]->model.get_nstate ();
+    calibrator_state_index = equation[0]->get_model()->get_nstate ();
 
     PolnCalibrator_path = equation[0]->get_nbackend();
 
@@ -296,7 +296,7 @@ void Pulsar::ReceptionCalibrator::add_PolnCalibrator (const PolnCalibrator* p)
       // add the calibrator states to a new signal path
       equation[ichan]->add_backend ();
 
-      equation[ichan]->model.add_state( &(calibrator[ichan]) );
+      equation[ichan]->get_model()->add_state( &(calibrator[ichan]) );
 
     }
 
@@ -416,7 +416,7 @@ void Pulsar::ReceptionCalibrator::calibrate (Archive* data)
 
     for (unsigned ichan=0; ichan<nchan; ichan++) {
       equation[ichan]->set_epoch (epoch);
-      response[ichan] = inv( equation[ichan]->model.get_Jones() );
+      response[ichan] = inv( equation[ichan]->get_model()->get_Jones() );
     }
 
     Calibrator::calibrate (integration, response);
