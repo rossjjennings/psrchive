@@ -125,8 +125,6 @@ fix_hydra_SOURCES		= fix_hydra.C
 fluxcal_SOURCES			= fluxcal.C
 
 pac_SOURCES			= pac.C
-pac_LDADD			= $(LDADD) @SLA_LIBS@
-
 pam_SOURCES			= pam.C
 pascii_SOURCES			= pascii.C
 pat_SOURCES			= pat.C
@@ -222,11 +220,11 @@ INCLUDES = -I$(top_builddir)/utils/include -I$(top_builddir)/astro/include \
         -I$(top_srcdir)/psrchive/Calibration \
 	-I$(top_srcdir)/psrchive/Extension -I$(top_srcdir)/psrchive/timer \
 	-I$(top_srcdir)/psrchive/epn -I$(top_srcdir)/psrchive/psrfits \
-	@PGPLOT_CFLAGS@
+	@PGPLOT_CFLAGS@ @CFITSIO_CFLAGS@
 
 LDADD = libpsrchive.la $(top_builddir)/astro/libpsrastro.la \
         $(top_builddir)/utils/libpsrutils.la \
-	@FFT_LIBS@ @CFITSIO_LIBS@ @SLA_LIBS@
+	@FFT_LIBS@ @CFITSIO_LIBS@ @SLA_LIBS@ @FLIBS@
 
 include $(top_srcdir)/config/Makefile.local
 
