@@ -1,4 +1,4 @@
-dnl @synopsis SWIN_LIB_MKL
+dnl @synopsis SWIN_DEBUG
 dnl 
 AC_DEFUN([SWIN_DEBUG],
 [
