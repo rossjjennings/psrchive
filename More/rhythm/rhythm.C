@@ -269,6 +269,7 @@ void Rhythm::load_toas (const char* fname)
 
   tempo->setItemEnabled (fitID, true);
   tempo->setItemEnabled (fitSelID, true);
+  tempo->setItemEnabled (strideFitID, true);
 
   toa_filename = fname;
   
@@ -340,6 +341,7 @@ void Rhythm::add_toas (const char* fname)
   
   tempo->setItemEnabled (fitID, true);
   tempo->setItemEnabled (fitSelID, true);
+  tempo->setItemEnabled (strideFitID, true);
 
   toa_filename = "newfile.tim";
   
@@ -399,6 +401,7 @@ void Rhythm::close_toas ()
 
   tempo->setItemEnabled (fitID, false);
   tempo->setItemEnabled (fitSelID, false);
+  tempo->setItemEnabled (strideFitID, false);
 
   goplot();
 }
@@ -681,6 +684,77 @@ void Rhythm::fit_selected (const psrephem& eph, bool load_new)
 			   "An unexpected exception occured",
 			   "Acknowledge");
   }
+}
+
+void Rhythm::stride_fit()
+{
+  int temp = 0;
+  
+  temp = QInputDialog::getInteger("Rhythm Stride Fit",
+				  "Enter the number of blocks to use: ");
+  if (temp <= 1) {
+    footer->setText("Invalid number of divisions!");
+    return;
+  }
+
+  clearselection();
+  
+  double first = toas[0].get_arrival().in_days();
+  double last  = toas[toas.size()-1].get_arrival().in_days();
+  
+  double span = last - first;
+  double strideval = span / double(temp);
+  
+  bool found = false;
+  int  index = 0;
+  
+  for (unsigned i = 0; i < EPH_NUM_KEYS; i++) {
+    if (fitpopup->query_fit_for(i)) {
+      if (found) {
+	QMessageBox::critical (this, "Rhythm Stride Fit",
+			       "Stride fit only supports a single parameter ");
+	return;
+      }
+      index = i;
+      found = true;
+    }
+  }
+  
+  if (!found) {
+    QMessageBox::critical (this, "Rhythm Stride Fit",
+			   "You must select something to fit for! ");
+    return;
+  }
+  
+  string useful = "Stride Fitting for ";
+  useful += parmNames[index];
+  footer->setText(useful.c_str());
+  
+  QProgressDialog progress( "Fitting to data... ", "Abort", temp,
+			    this, "progress", TRUE );
+  vector<double> result;
+
+  for (int i = 0; i < temp; i++) {
+    clearselection();
+    for (unsigned j = 0; j < toas.size(); j++) {
+      if ((toas[j].resid.mjd <= first+((i+1)*strideval)) &&
+	  (toas[j].resid.mjd >= first+(i*strideval))) {
+	select(j);
+      }
+    }
+    if ( progress.wasCancelled() )
+      break;
+    progress.setProgress(i);
+    myapp->processEvents();
+    fit_selected();
+    psrephem myeph;
+    fitpopup -> get_psrephem (myeph);
+    result.push_back(myeph.value_double[index]);
+    cout.precision(16);
+    cout << parmNames[index] << 
+      " for block " << i << " = " << myeph.value_double[index] << endl;
+  }
+  clearselection();
 }
 
 void Rhythm::setClassVerbose (bool verbose)

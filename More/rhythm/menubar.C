@@ -40,6 +40,8 @@ void Rhythm::menubarConstruct ()
   tempo->setItemEnabled (fitID, false);
   fitSelID = tempo->insertItem( "Fit &Selected", this, SLOT( fit_selected() ), CTRL+Key_S);
   tempo->setItemEnabled (fitSelID, false);
+  strideFitID = tempo->insertItem( "Stride Fit", this, SLOT( stride_fit() ));
+  tempo->setItemEnabled (strideFitID, false);
   dispID = tempo->insertItem( "Display Parameters", this, SLOT( togledit() ));
   tempo->setItemEnabled (dispID, false);
 

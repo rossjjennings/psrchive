@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/rhythm/rhythm.h,v $
-   $Revision: 1.35 $
-   $Date: 2003/09/10 04:26:52 $
+   $Revision: 1.36 $
+   $Date: 2003/09/15 09:21:31 $
    $Author: ahotan $ */
 
 // //////////////////////////////////////////////////////////////////////////
@@ -206,6 +206,7 @@ class Rhythm : public QMainWindow
   int weightsID;          // ID of the 'Weights' menu item
   int trackID;            // ID of the 'Track' menu item
   int saveParmsID;
+  int strideFitID;        // ID of the 'Stride Fit' menu item
 
   bool autofit;           // fit whenever TOAs or TEMPO Parameters are loaded
   bool weights;           // use TEMPO mode 1
@@ -253,6 +254,7 @@ class Rhythm : public QMainWindow
   void temposys();
   void set_ddk();
   void set_std_tempo();
+  void stride_fit();
 
   // Options->Verbosity menu callback
   void setVerbosity (int id);
