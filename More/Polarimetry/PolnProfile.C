@@ -13,6 +13,9 @@ Pulsar::PolnProfile::PolnProfile ()
   basis = Signal::Linear;
 }
 
+//
+//
+//
 Pulsar::PolnProfile::PolnProfile (Signal::Basis _basis, Signal::State _state, 
 				  Profile* _p0, Profile* _p1,
 				  Profile* _p2, Profile* _p3)
@@ -34,25 +37,46 @@ Pulsar::PolnProfile::PolnProfile (Signal::Basis _basis, Signal::State _state,
 		   profile[ipol]->get_nbin(), nbin);
 }
 
-
+//
+//
+//
 Pulsar::PolnProfile::~PolnProfile ()
 {
 
 }
 
+//
+//
+//
 void Pulsar::PolnProfile::resize (unsigned nbin)
 {
   for (unsigned ipol=0; ipol < 4; ipol++)
     profile[ipol]->resize (nbin);
 }
 
-//! Get the number of bins
+//
+//
+//
 unsigned Pulsar::PolnProfile::get_nbin () const
 {
   return profile[0]->get_nbin();
 }
 
-//! Returns a pointer to the start of the array of amplitudes
+//
+//
+//
+const Pulsar::Profile* Pulsar::PolnProfile::get_Profile (unsigned ipol) const
+{
+  if (ipol >= 4)
+    throw Error (InvalidRange, "PolnProfile::get_Profile",
+		 "ipol=%d >= npol=4", ipol);
+
+  return profile[ipol];
+}
+
+//
+//
+//
 const float* Pulsar::PolnProfile::get_amps (unsigned ipol) const
 {
   if (ipol >= 4)
@@ -62,6 +86,21 @@ const float* Pulsar::PolnProfile::get_amps (unsigned ipol) const
   return profile[ipol]->get_amps();
 }
 
+//
+//
+//
+float* Pulsar::PolnProfile::get_amps (unsigned ipol)
+{
+  if (ipol >= 4)
+    throw Error (InvalidRange, "PolnProfile::get_amps",
+		 "ipol=%d >= npol=4", ipol);
+
+  return profile[ipol]->get_amps();
+}
+
+//
+//
+//
 Stokes<float> Pulsar::PolnProfile::get_Stokes (unsigned ibin)
 {
   if (state != Signal::Stokes)
@@ -77,6 +116,9 @@ Stokes<float> Pulsar::PolnProfile::get_Stokes (unsigned ibin)
 			profile[3]->get_amps()[ibin]);
 }
 
+//
+//
+//
 void Pulsar::PolnProfile::set_Stokes (unsigned ibin, 
 				      const Stokes<float>& new_amps)
 {
@@ -94,7 +136,9 @@ void Pulsar::PolnProfile::set_Stokes (unsigned ibin,
 
 }
 
-
+//
+//
+//
 void Pulsar::PolnProfile::convert_state (Signal::State out_state)
 {
   if (out_state == state)

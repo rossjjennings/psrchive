@@ -43,8 +43,14 @@ namespace Pulsar {
     //! Get the number of bins
     unsigned get_nbin () const;
 
-    //! Returns a pointer to the start of the array of amplitudes
+    //! Get the specifed profile
+    const Profile* get_Profile (unsigned ipol) const;
+
+    //! Returns a const pointer to the start of the array of amplitudes
     const float* get_amps (unsigned ipol) const;
+
+    //! Returns a pointer to the start of the array of amplitudes
+    float* get_amps (unsigned ipol);
 
     //! Get the Basis of the poln profile
     Signal::Basis get_basis () const { return basis; }
