@@ -25,7 +25,7 @@ treduce.srcs = xtinit.C xtmac.C xtproc.C xtlplt.C xtinplot.C xtshdr.C    \
 	       xtshst.C xtcopy.C xtswap.C xtunld.C xtgrey.C xtreduce.C   \
                newtreduce.f
 
-PROGRAMS =    calinfo.C align.C amps.C chanprep.C  \
+PROGRAMS =    calinfo.C align.C amps.C chanprep.C crstd.C  \
 	      mel.C newname.C oneprof.C plotsub.C    \
 	      tadd.C calfbar.C modhead.C   \
 	      plot_gry_diff.C freduce.C \
