@@ -11,7 +11,6 @@
 #include <unistd.h>
 #include <cpgplot.h>
 #include <math.h>
-#include "Reference.h"
 #include "spectra.h"
 #include "Pulsar/Archive.h"
 #include "Pulsar/Profile.h"
@@ -73,7 +72,7 @@ int main (int argc, char** argv)
       return 0;
 
     case 'i':
-      cout << "$Id: pas.C,v 1.1 2003/05/27 00:52:22 pulsar Exp $" << endl;
+      cout << "$Id: pas.C,v 1.2 2003/05/27 01:04:03 pulsar Exp $" << endl;
       return 0;
 
     case 'r':
