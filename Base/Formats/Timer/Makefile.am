@@ -7,7 +7,7 @@ INCLUDES = archive.h archhdr.h headers.h mini++.h timer++.h timer.h mini.h band.
 LIBRARY    = libarchive.a
 LIB_C_SRCS = pg_plot_gnu.C profile.C sub_int.C archive.C superarchive.C  \
              toa.C profplot.C plot2profs.C scintplot.C misc.C heapsort.C \
-             get_epoch_and_name.C archhdr.C convert_endian.C headers.C \
+             get_epoch_and_name.C archhdr.C convert_endian.c headers.C \
              timer++.C mini++.C
 
 LIB_F_SRCS = ffft.f fftfit.f brent.f fccf.f cprof.f shiftbyfft.f \

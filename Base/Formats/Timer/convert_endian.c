@@ -58,8 +58,8 @@ void timerChangeEndian(struct timer * hdr){
 	changeEndian(&hdr->ncoeff,4);
 	changeEndian(&hdr->nbytespoly,4);
 	changeEndian(&hdr->nbytesephem,4);
-	bandchangeEndian(&hdr->banda);
-	bandchangeEndian(&hdr->bandb);
+	bandChangeEndian(&hdr->banda);
+	bandChangeEndian(&hdr->bandb);
 	changeEndian(&hdr->rotm,4);
 	changeEndian(&hdr->rmi,4);
 	changeEndian(&hdr->pnterr,4);

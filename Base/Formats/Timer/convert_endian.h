@@ -4,9 +4,15 @@
 #include "band.h"
 #include "mini.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 void timerChangeEndian (struct timer * hdr);
 void bandChangeEndian  (struct band *b);
 void miniChangeEndian  (struct mini * m);
+#ifdef __cplusplus
+}
+#endif
 
 #ifdef MACHINE_LITTLE_ENDIAN
 #define timer_toBigEndian(p)       timerChangeEndian(p)
