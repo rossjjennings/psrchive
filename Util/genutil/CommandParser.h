@@ -4,6 +4,8 @@
 #include <vector>
 #include <string>
 
+#include "ReferenceAble.h"
+
 class Command {
 
  public:
@@ -17,7 +19,7 @@ class Command {
 
 };
 
-class CommandParser {
+class CommandParser : public Reference::Able {
 
  public:
   //! verbose output from CommandParser methods
