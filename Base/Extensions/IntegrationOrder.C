@@ -48,7 +48,7 @@ void Pulsar::IntegrationOrder::resize (unsigned i)
 
 double Pulsar::IntegrationOrder::get_Index (unsigned subint) const
 {
-  if (subint > indices.size())
+  if (subint >= indices.size())
     throw Error (InvalidParam, "Pulsar::IntegrationOrder::get_Index",
 		 "Invalid index number");
   
@@ -57,7 +57,7 @@ double Pulsar::IntegrationOrder::get_Index (unsigned subint) const
 
 void Pulsar::IntegrationOrder::set_Index (unsigned subint, double i)
 {
-  if (subint > indices.size())
+  if (subint >= indices.size())
     throw Error (InvalidParam, "Pulsar::IntegrationOrder::set_Index",
 		 "Invalid index number");
 
