@@ -62,35 +62,35 @@ int Timer::fload (const char* fname, struct timer* hdr, bool big_endian)
   return ret;
 }
 
-static bool is_timer (const struct timer& hdr) 
+bool Timer::is_timer (const struct timer& hdr, string* reason) 
 {
   if (hdr.nbin < 1) {
-    if (Timer::verbose)
-      cerr << "Timer::is_timer invalid nbin=" << hdr.nbin << endl;
+    if (reason)
+      *reason = stringprintf ("Timer::is_timer invalid nbin=%d", hdr.nbin);
     return false;
   }
 
   if (hdr.mjd < 2000 || hdr.mjd > 500000) {
-    if (Timer::verbose)
-      cerr << "Timer::is_timer invalid MJD=" << hdr.mjd << endl;
+    if (reason)
+      *reason = stringprintf ("Timer::is_timer invalid MJD=%d", hdr.mjd);
     return false;
   }
 
   if (hdr.nsub_int < 0) {
-    if (Timer::verbose)
-      cerr << "Timer::is_timer invalid nsub_int=" << hdr.nsub_int << endl;
+    if (reason)
+      *reason = stringprintf ("Timer::is_timer invalid nsub_int=%d", hdr.nsub_int);
     return false;
   }
 
   if (hdr.nsub_band < 0) {
-    if (Timer::verbose)
-      cerr << "Timer::is_timer invalid nsub_band=" << hdr.nsub_band << endl;
+    if (reason)
+      *reason = stringprintf ("Timer::is_timer invalid nsub_band=%d", hdr.nsub_band);
     return false;
   }
 
   if (hdr.obstype < 0 || hdr.obstype > 40) {
-    if (Timer::verbose)
-      cerr << "Timer::is_timer invalid obstype=" << hdr.obstype << endl;
+    if (reason)
+      *reason = stringprintf ("Timer::is_timer invalid obstype=%d", hdr.obstype);
     return false;
   }
 

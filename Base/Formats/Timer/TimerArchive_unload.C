@@ -145,6 +145,10 @@ void Pulsar::TimerArchive::hdr_unload (FILE* fptr) const
   if (verbose == 3)
     cerr << "TimerArchive::hdr_unload writing timer header" << endl;
 
+  string reason;
+  if (!Timer::is_timer(hdr, &reason))
+    throw Error (FailedCall, "TimerArchive::hdr_unload", reason);
+
   if (Timer::unload (fptr, hdr) < 0)
     throw Error (FailedCall, "TimerArchive::hdr_unload", "Timer::unload");
 }

@@ -1,6 +1,6 @@
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/Timer/timer++.h,v $
-   $Revision: 1.11 $
-   $Date: 2003/05/20 16:50:13 $
+   $Revision: 1.12 $
+   $Date: 2004/10/15 12:11:22 $
    $Author: straten $ */
 
 #ifndef __TIMER_PLUSPLUS_H
@@ -71,6 +71,9 @@ namespace Timer {
 
   // a function to set most of timer struct to NULL values.
   void init (struct timer * hdr);
+
+  // return true if timer struct seems valid enough
+  bool Timer::is_timer (const struct timer& hdr, string* reason = 0);
 
 }
 
