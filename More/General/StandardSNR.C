@@ -23,3 +23,40 @@ float Pulsar::StandardSNR::get_snr (const Profile* profile)
   return snrfft;
 }    
 
+float Pulsar::StandardSNR::get_morph_snr (const Profile* profile)
+{
+  if (Pulsar::Profile::verbose)
+    cerr << "Pulsar::StandardSNR::get_morph_snr" << endl;
+
+  Reference::To<Pulsar::Profile> pcopy = profile->clone();
+  Reference::To<Pulsar::Profile> scopy = standard->clone();
+
+  if (pcopy->get_nbin() > scopy->get_nbin()) {
+    pcopy->bscrunch(pcopy->get_nbin() / scopy->get_nbin());
+  }
+  if (pcopy->get_nbin() < scopy->get_nbin()) {
+    scopy->bscrunch(scopy->get_nbin() / pcopy->get_nbin());
+  }
+
+  Reference::To<Pulsar::Profile> diff = 
+    pcopy->morphological_difference(*scopy);
+
+  double mean    = 0.0;
+  double var     = 0.0;
+  double varmean = 0.0;
+
+  diff->stats(&mean, &var, &varmean);
+
+  double stddev = sqrt(var);
+
+  double base_flux = pcopy->get_nbin() * stddev;
+  double puls_flux = pcopy->sum();
+
+  if (base_flux < 0.0000001)
+    return 1000000.0;
+
+  return (puls_flux / base_flux);
+}
+
+
+
