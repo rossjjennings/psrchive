@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Quaternion.h,v $
-   $Revision: 1.10 $
-   $Date: 2003/02/26 10:05:01 $
+   $Revision: 1.11 $
+   $Date: 2003/03/03 11:26:39 $
    $Author: straten $ */
 
 #ifndef __Quaternion_H
@@ -32,28 +32,40 @@ public:
     { operator=(s); }
 
   //! Set this instance equal to another Quaternion<U> instance
-  template<typename U> Quaternion& operator = (const Quaternion<U, B>& s)
+  template<typename U> const Quaternion& operator = (const Quaternion<U, B>& s)
     { s0=T(s.s0); s1=T(s.s1);
       s2=T(s.s2); s3=T(s.s3); return *this; }
 
+  //! Set this instance equal to a scalar
+  const Quaternion& operator = (T s)
+    { s0=s; s1=s2=s3=0; return *this; }
+
+  //! Scalar addition
+  const Quaternion& operator += (T s)
+    { s0+=s; return *this; }
+
+  //! Scalar subtraction
+  const Quaternion& operator -= (T s)
+    { s0-=s; return *this; }
+
   //! Vector addition
-  Quaternion& operator += (const Quaternion& s)
+  const Quaternion& operator += (const Quaternion& s)
     { s0+=s.s0; s1+=s.s1; s2+=s.s2; s3+=s.s3; return *this; }
 
   //! Vector subtraction
-  Quaternion& operator -= (const Quaternion& s)
+  const Quaternion& operator -= (const Quaternion& s)
     { s0-=s.s0; s1-=s.s1; s2-=s.s2; s3-=s.s3; return *this; }
 
   //! Quaternion multiplication
-  Quaternion& operator *= (const Quaternion& s)
+  const Quaternion& operator *= (const Quaternion& s)
     { *this = *this * s; return *this; }
 
   //! Scalar multiplication
-  Quaternion& operator *= (T a)
+  const Quaternion& operator *= (T a)
     { s0*=a; s1*=a; s2*=a; s3*=a; return *this; }
 
   //! Scalar division
-  Quaternion& operator /= (T a)
+  const Quaternion& operator /= (T a)
     { T d(1.0); d/=a; s0*=d; s1*=d; s2*=d; s3*=d; return *this; }
 
   //! Equality
