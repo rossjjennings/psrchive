@@ -7,6 +7,7 @@
 #include <sunmath.h>
 #endif
 #include <math.h>
+
 #include "MJD.h"
 #include "machine_endian.h"
 #include "ieee.h"
@@ -154,15 +155,17 @@ MJD& MJD::operator /= (const double & d)
 }
 
 const MJD operator + (const MJD &m1, const MJD &m2) {
-  return MJD(m1.intday() + m2.intday(),
-	     m1.get_secs() + m2.get_secs(),
-	     m1.get_fracsec() + m2.get_fracsec()); // Let constructor do the dirty work.
+  // Let constructor do the dirty work.
+  return MJD (m1.intday() + m2.intday(),
+	      m1.get_secs() + m2.get_secs(),
+	      m1.get_fracsec() + m2.get_fracsec());
 }
 
 const MJD operator - (const MJD &m1, const MJD &m2) {
-  return MJD(m1.intday() - m2.intday(),
-	     m1.get_secs() - m2.get_secs(),
-	     m1.get_fracsec() - m2.get_fracsec()); // Let constructor do the dirty work.
+  // Let constructor do the dirty work.
+  return MJD (m1.intday() - m2.intday(),
+	      m1.get_secs() - m2.get_secs(),
+	      m1.get_fracsec() - m2.get_fracsec());
 }
 
 const MJD operator + (const MJD &m1, double sss) {
@@ -451,9 +454,22 @@ int MJD::Construct (time_t time)
   return Construct (date);
 }
 
-int
-  // long long to get a 64-bit unsigned
-MJD::Construct(unsigned long long bat)
+MJD::MJD (const struct timeval& tp)
+{
+  if (Construct (tp) < 0)
+    throw ("MJD::MJD(struct timeval) construct error");
+}
+
+int MJD::Construct (const struct timeval& tp)
+{
+  time_t utcsecs = tp.tv_sec;
+  if (Construct (utcsecs) < 0)
+    return -1;
+  fracsec = tp.tv_usec * 1e-6;
+}
+
+// long long to get a 64-bit unsigned
+int MJD::Construct(unsigned long long bat)
 {
   // Not sure how to do 64-bit constants so let's construct it
   unsigned long long microsecPerDay;
@@ -467,7 +483,6 @@ MJD::Construct(unsigned long long bat)
   return 0;
 }
   
-
 // construct an MJD from a gregorian
 MJD::MJD (const struct tm& greg)
 {
