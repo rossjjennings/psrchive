@@ -588,9 +588,10 @@ void Pulsar::Archive::set_ephemeris (const psrephem& new_ephemeris, bool update)
       change = temp2.substr(1,temp2.length()) != temp1;
 
     if (change) {
-      cerr << "Archive::set_ephemeris Informative Notice:\n" 
-           << "   Source name will be updated to match new ephemeris\n"
-           << "   New name: " << temp2 << endl;
+      if (verbose)
+        cerr << "Archive::set_ephemeris Informative Notice:\n" 
+             << "   Source name will be updated to match new ephemeris\n"
+             << "   New name: " << temp2 << endl;
       set_source(temp2);
     }
   }

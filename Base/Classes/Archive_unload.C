@@ -19,8 +19,8 @@ mode_t getumask(void) {
 void Pulsar::Archive::unload (const char* filename)
 {
   if (verbose == 3)
-    cerr << "Pulsar::Archive::unload filename='" << filename << "'"
-      " and unload_filename='" << unload_filename << "'" << endl;
+    cerr << "Pulsar::Archive::unload\n  filename='" << filename << "'"
+      "\n  unload_filename='" << unload_filename << "'" << endl;
   
   string unload_to_filename = unload_filename;
 
