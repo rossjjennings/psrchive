@@ -88,14 +88,14 @@ AC_DEFUN([SWIN_LIB_MPI],
 
       for cf_dir in $cf_lib_path_list; do
 
-        LIBS="-L$cf_dir -lmpi -llam $ac_save_LIBS"
+        LIBS="-L$cf_dir -lmpi -llam -lpthread $ac_save_LIBS"
         AC_TRY_LINK([#include <mpi.h>],[MPI_Init(0,0);],
                     have_mpi=lam, have_mpi=no)
         if test x"$have_mpi" != xno; then
           if test x"$cf_dir" = x.; then
-            MPI_LIBS="-lmpi -llam"
+            MPI_LIBS="-lmpi -llam -lpthread"
           else
-            MPI_LIBS="-L$cf_dir -lmpi -llam"
+            MPI_LIBS="-L$cf_dir -lmpi -llam -lpthread"
           fi
           break
         fi
