@@ -1,6 +1,8 @@
 #include "MEAL/Rotation.h"
 #include "Pauli.h"
 
+using namespace std;
+
 MEAL::Rotation::Rotation () : OptimizedComplex2 (1)
 {
 }

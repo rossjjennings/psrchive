@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Pauli.h,v $
-   $Revision: 1.16 $
-   $Date: 2004/11/22 19:26:04 $
+   $Revision: 1.17 $
+   $Date: 2004/11/23 10:54:27 $
    $Author: straten $ */
 
 #ifndef __Pauli_H
@@ -128,9 +128,9 @@ const Stokes<T> coherency (const Quaternion<std::complex<T>,Hermitian>& q)
                    "Stokes::operator = Quaternion<std::complex<U>,Hermitian>",
                    "non-zero imaginary component");
 #else
-      cerr << "Stokes::operator = Quaternion<std::complex<U>,Hermitian> "
+      std::cerr << "Stokes::operator = Quaternion<std::complex<U>,Hermitian> "
               "non-zero imaginary component\n"
-              "   norm(imag(q))=" << ni << " norm=" << nr << endl;
+              "   norm(imag(q))=" << ni << " norm=" << nr << std::endl;
 #endif
     return coherency (realpart);
 }

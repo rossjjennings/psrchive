@@ -2,6 +2,8 @@
 #include "Pauli.h"
 #include "Error.h"
 
+using namespace std;
+
 MEAL::Coherency::Coherency ()
   : OptimizedComplex2 (4)
 {

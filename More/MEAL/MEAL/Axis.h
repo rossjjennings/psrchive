@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Axis.h,v $
-   $Revision: 1.3 $
-   $Date: 2004/11/22 19:26:03 $
+   $Revision: 1.4 $
+   $Date: 2004/11/23 10:54:27 $
    $Author: straten $ */
 
 #ifndef __MEAL_Axis_Header
@@ -10,6 +10,8 @@
 
 #include "MEAL/Argument.h"
 #include "Callback.h"
+
+#include <iostream>
 
 namespace MEAL {
 
@@ -52,8 +54,8 @@ namespace MEAL {
       //! Apply the value 
       void apply () const 
       { 
-	if (verbose) cerr << "MEAL::Axis<Type>::Value::apply value="
-			  << value << endl;
+	if (verbose) std::cerr << "MEAL::Axis<Type>::Value::apply value="
+			       << value << std::endl;
 	axis->set_value (value);
       }
 

@@ -1,7 +1,7 @@
 //-*-C++-*-
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/tostring.h,v $
-   $Revision: 1.1 $
-   $Date: 2004/11/22 11:18:33 $
+   $Revision: 1.2 $
+   $Date: 2004/11/23 10:54:27 $
    $Author: straten $ */
 
 #ifndef __TOSTRING_H
@@ -9,6 +9,7 @@
 
 #include <string>
 #include <sstream>
+#include <iomanip>
 
 template<class T>
 std::string tostring (const T& input)
