@@ -76,7 +76,7 @@ libpsrchive_la_SOURCES = plugins.csh getopt.h Physical.h \
 	Integration_get_PA.C          getopt1.c  \
 	Integration_get_Stokes.C      model_profile.C  \
 	Integration_invint.C          pafit_get_PA.C  \
-	Integration_match.C
+	Integration_match.C           ArchiveTUI.C
 
 SUBDIRS                 = Calibration Extension timer epn
 
@@ -95,7 +95,7 @@ endif
 #
 # programs
 #
-bin_PROGRAMS = pac vap vip psradd fadd pat pam fluxcal \
+bin_PROGRAMS = pac vap vip psredit psradd fadd pat pam fluxcal \
 	fix_coords test_Difference fix_hydra sesdiv \
         fix_3C353 archive_correct archive_denoise \
         fix_fluxcal archive_split psrconv pascii \
@@ -123,6 +123,7 @@ psrconv_SOURCES			= psrconv.C
 sesdiv_SOURCES			= sesdiv.C
 vap_SOURCES			= vap.C
 vip_SOURCES			= vip.C
+psredit_SOURCES			= psredit.C
 
 check_PROGRAMS = test_Archive test_denoise test_Difference
 
