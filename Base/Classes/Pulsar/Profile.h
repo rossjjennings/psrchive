@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Profile.h,v $
-   $Revision: 1.18 $
-   $Date: 2002/06/24 05:37:57 $
-   $Author: ahotan $ */
+   $Revision: 1.19 $
+   $Date: 2002/08/19 10:13:27 $
+   $Author: straten $ */
 
 #ifndef __Pulsar_Profile_h
 #define __Pulsar_Profile_h
@@ -166,8 +166,13 @@ namespace Pulsar {
     void set_amps (const unsigned char* data);
 #else
     //! set the amplitudes array equal to the contents of the data array
-    template <typename T>
-    void set_amps (const T* data);
+    template <typename T> void set_amps (const T* data);
+
+    //! set the amplitudes array equal to the contents of the data array
+    template <typename T> void set_amps (const vector<T>& data);
+
+    //! set the amplitudes array equal to the contents of the data array
+    template <typename T> void get_amps (vector<T>& data);
 #endif
 
     //! get the centre frequency (in MHz)
@@ -191,8 +196,6 @@ namespace Pulsar {
     //! generates a profile containing a hat function
     void hat_profile(int bin_number, int width);
 
-  protected:
-
     //! integrate neighbouring phase bins in profile
     virtual void bscrunch (int nscrunch);
 
@@ -205,10 +208,10 @@ namespace Pulsar {
     //! halves the number of bins like bscrunch(2^nhalve)
     virtual void halvebins (int nhalve);
 
+  protected:
+
     //! initializes all values to null
     void init ();
-
-  private:
 
     //! fractional phase window used to find rise and fall of running mean
     static float transition_duty_cycle;
@@ -253,6 +256,29 @@ void Pulsar::Profile::set_amps (const T* data)
   for (int ibin=0; ibin<nbin; ibin++)
     amps[ibin] = static_cast<float>( data[ibin] );
 }
+
+/*! 
+  \param data vector of amps
+*/
+template <typename T>
+void Pulsar::Profile::set_amps (const vector<T>& data)
+{
+  resize (data.size());
+  for (int ibin=0; ibin<nbin; ibin++)
+    amps[ibin] = static_cast<float>( data[ibin] );
+}
+
+/*! 
+  \param data vector of amps
+*/
+template <typename T>
+void Pulsar::Profile::get_amps (vector<T>& data)
+{
+  data.resize (nbin);
+  for (int ibin=0; ibin<nbin; ibin++)
+    data[ibin] = static_cast<T>( amps[ibin] );
+}
+
 
 #endif // bloody SUN CC 5.0 workaround
 
