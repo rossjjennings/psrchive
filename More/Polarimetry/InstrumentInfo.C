@@ -4,6 +4,28 @@
 Pulsar::InstrumentInfo::InstrumentInfo (const PolnCalibrator* calibrator) :
   SingleAxisCalibrator::Info (calibrator)
 {
+  fixed_orientation = false;
+
+  unsigned nchan = calibrator->get_Transformation_nchan ();
+  
+  // find the first valid transformation
+  const Calibration::Transformation* xform = 0;
+  for (unsigned ichan = 0; ichan < nchan; ichan++)
+    if ( calibrator->get_Transformation_valid (ichan) ) {
+      xform = calibrator->get_Transformation (ichan);
+      break;
+    }
+
+  if (!xform)
+    return;
+
+  // parameter 4 is the orientation of receptor 0
+  if (xform->get_Estimate(4).var == 0)  {
+    cerr << "Pulsar::InstrumentInfo orientation of receptor 0 set to zero" 
+         << endl;
+    fixed_orientation = true;
+  }
+
 }
     
 //! Return the number of parameter classes
@@ -23,8 +45,12 @@ const char* Pulsar::InstrumentInfo::get_name (unsigned iclass) const
   switch (iclass) {
   case 0:
     return "\\fi\\ge\\dk\\u\\fn (deg.)";
-  case 1:
-    return "\\fi\\gh\\dk\\u\\fn (deg.)";
+  case 1: {
+    if (fixed_orientation)
+      return "\\fi\\gh\\fn\\d1\\u (deg.)";
+    else
+      return "\\fi\\gh\\dk\\u\\fn (deg.)";
+  }
   default:
     return "";
   }

@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/Attic/InstrumentInfo.h,v $
-   $Revision: 1.1 $
-   $Date: 2003/10/28 08:45:03 $
+   $Revision: 1.2 $
+   $Date: 2003/12/03 18:14:45 $
    $Author: straten $ */
 
 #ifndef __Pulsar_InstrumentInfo_H
@@ -38,6 +38,11 @@ namespace Pulsar {
 			       unsigned iparam) const;
 
     int get_colour_index (unsigned iclass, unsigned iparam) const;
+
+  protected:
+
+    //! set true when the orientation of receptor 0 is set to zero
+    bool fixed_orientation;
 
   };
 
