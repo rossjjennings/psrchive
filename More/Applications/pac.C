@@ -197,11 +197,17 @@ int main (int argc, char *argv[]) {
 	cerr << dbase->size() << " Calibrator Archives found" << endl;
 
       if (write_database_file) {
-	cout << "Writing database summary file" << endl;
 	
-	string temp = cals_are_here + "database.txt";
+	string temp;
+	
+	if (cals_are_here.find_last_of("/", 0) != cals_are_here.length()-1)
+	  temp = cals_are_here + "/database.txt";
+	else
+	  temp = cals_are_here + "database.txt";
+	
+	cout << "Writing database summary file to: " << temp << endl;
 	dbase -> unload(temp.c_str());
-
+	
 	if (summary_only)
 	  return (0);
       }
