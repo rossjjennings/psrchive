@@ -41,7 +41,7 @@ void usage ()
 int main (int argc, char** argv) 
 {
   // use the Single Axis model
-  bool single_axis = false;
+  bool single_axis = true;
 
   // treat all of the Archives as one FluxCalibrator observation set
   bool flux_cal = false;
@@ -121,10 +121,6 @@ int main (int argc, char** argv)
       publication = true;
       break;
 
-    case 'q':
-      single_axis = true;
-      break;
-
     case 't':
       set_epoch = true;
       epoch.Construct( optarg );
@@ -134,9 +130,15 @@ int main (int argc, char** argv)
       Pulsar::Archive::set_verbosity (3);
       Pulsar::CalibratorPlotter::verbose = true;
       Pulsar::Calibrator::verbose = true;
-      //Calibration::Model::verbose = true;
-    case 'v':
+      Calibration::Model::verbose = true;
       verbose = true;
+      break;
+    case 'v':
+      Pulsar::Archive::set_verbosity (2);
+      verbose = true;
+      break;
+    case 'q':
+      Pulsar::Archive::set_verbosity (0);
       break;
 
     } 
@@ -299,7 +301,7 @@ int main (int argc, char** argv)
       cerr << "pacv: Plotting Calibrated Spectrum" << endl;
     cpgpage ();
 
-    // input->convert_state (Signal::Stokes);
+    input->convert_state (Signal::Stokes);
     archplot.calibrator_spectrum (input);
 
 
