@@ -23,8 +23,9 @@ void usage ()
     "  -e   Scan for files with these extensions\n"
     "       uses .cf and .pcal as defaults\n"
     "  -u   Use this extension when unloading results\n"
-    "  -w   Write a new database summary file if using -p\n"                      
-    // "  -d   Read ASCII summary (instead of -p)\n"   
+    "  -w   Write a new database summary file if using -p\n"
+    "  -W   Same as -w but exit after writing summary\n"
+    "  -d   Read ASCII summary (instead of -p)\n"   
     "  -c   Do not try to match sky coordinates\n"
     "  -i   Do not try to match instruments\n"
     "  -t   Do not try to match times\n"
@@ -50,6 +51,7 @@ int main (int argc, char *argv[]) {
   bool do_polncal = true;
   bool do_selfcal = false;
   bool write_database_file = false;
+  bool summary_only = false;
 
   bool test_instr = true;
   bool test_coords = true;
@@ -73,7 +75,7 @@ int main (int argc, char *argv[]) {
   char* key = NULL;
   char whitespace[5] = " \n\t";
 
-  while ((gotc = getopt(argc, argv, "hvVp:e:u:wcitfboDFPsSq")) != -1) {
+  while ((gotc = getopt(argc, argv, "hvVp:e:u:d:wWcitfboDFPsSq")) != -1) {
     switch (gotc) {
     case 'h':
       usage ();
@@ -116,7 +118,12 @@ int main (int argc, char *argv[]) {
       unload_ext = optarg;
       break;
     case 'w':
+      if (new_database)
+	write_database_file = true;
+      break;
+    case 'W':
       write_database_file = true;
+      summary_only = true;
       break;
     case 'c':
       test_coords = false;
@@ -147,7 +154,7 @@ int main (int argc, char *argv[]) {
       break;
 
     default:
-      cout << "Unrecognised option" << endl;
+      cout << "Unrecognised option!" << endl;
     }
   }
   
@@ -155,8 +162,10 @@ int main (int argc, char *argv[]) {
     dirglob (&archives, argv[ai]);
   
   if (archives.empty()) {
-    cerr << "No archives were specified" << endl;
-    exit(-1);
+    if (!summary_only) {
+      cerr << "No archives were specified!" << endl;
+      exit(-1);
+    }
   } 
 
   // Load or generate the CAL file database
@@ -194,13 +203,15 @@ int main (int argc, char *argv[]) {
 	
 	string temp = cals_are_here + "database.txt";
 	dbase -> unload(temp.c_str());
+
+	if (summary_only)
+	  return (0);
       }
+      
     }
     else {
       cerr << "Reading from database summary file" << endl;
-      cerr << "Not implimented yet..." << endl;
-      return -1;
-      //dbase = new Pulsar::Calibration::Database (cals_are_here.c_str());
+      dbase = new Pulsar::Calibration::Database (cals_are_here.c_str());
     }
   }
   catch (Error& error) {
