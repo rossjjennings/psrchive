@@ -1,4 +1,5 @@
 #include <iostream>
+#include <algorithm>
 #include <unistd.h>
 
 #include "Pulsar/Archive.h"
@@ -161,6 +162,9 @@ int main (int argc, char **argv)
 
   // sort the list of filenames by their MJD
   // sort_by_MJD (filenames);
+
+  // for now, sort by filename
+  sort (filenames.begin(), filenames.end());
 
   // the individual archive
   Reference::To<Pulsar::Archive> archive;
