@@ -613,9 +613,16 @@ int polyco::i_nearest (const MJD &t, const string& in_psr) const
     return -1;
   }
 
+#ifdef IDEAL_WORLD
   // return if the time is within the range of the matched polynomial
   if ( (t > pollys[imin].start_time()) && (t < pollys[imin].end_time()) )
     return imin;
+#else
+  // TEMPO sometimes leaves wholes between its polynomials.
+  // Let's just be happy if it is within the range of the polyco
+  if ( (t > start_time()) && (t < end_time()) )
+    return imin;
+#endif
 
   // the time is out of range of the nearest polynomial
   cerr << "polyco::i_nearest - no polynomial for MJD " << t.printdays(15)
