@@ -21,11 +21,13 @@ void usage ()
     " -h        This help page \n"
     " -b scr    Bscrunch scr phase bins together \n"
     " -D        Plot each profile \n"
+    " -d        Display snr but do not output weighted result\n"
     " -F        Fscrunch all frequency channels after weighting \n"
     " -M meta   meta names a file containing the list of files\n"
-    " -p        add polarisations together \n"
+    " -P        add polarisations together\n"
+    " -p phs    specify the phase window used in special SNR calculation\n"
     " -s snr    SNR threshold (weight zero below) default:10\n"
-    " -S std    specify the standard pulsar archive \n"
+    " -S std    specify the standard pulsar archive\n"
     " -T        Tscrunch all Integrations after weighting \n"
     " -v        Verbose output \n"
     " -V        Very verbose output \n"
@@ -41,6 +43,10 @@ int main (int argc, char** argv)
 
   bool verbose = false;
   bool display = false;
+  bool unload_result = true;
+  bool normal = true;
+
+  float snr_phase = 0.0;
 
   char* metafile = NULL;
 
@@ -48,7 +54,7 @@ int main (int argc, char** argv)
   char* stdfile = NULL;
 
   int c = 0;
-  const char* args = "b:DFhM:pTs:S:vV";
+  const char* args = "b:DdFhM:Pp:Ts:S:vV";
   while ((c = getopt(argc, argv, args)) != -1)
     switch (c) {
 
@@ -58,6 +64,10 @@ int main (int argc, char** argv)
 
     case 'D':
       display = true;
+      break;
+
+    case 'd':
+      unload_result = false;
       break;
 
     case 'F':
@@ -72,8 +82,13 @@ int main (int argc, char** argv)
       metafile = optarg;
       break;
 
-    case 'p':
+    case 'P':
       pscrunch = 1;
+      break;
+
+    case 'p':
+      snr_phase = atof (optarg);
+      normal = false;
       break;
 
     case 's':
@@ -149,9 +164,27 @@ int main (int argc, char** argv)
 	
 	if (standard)
 	  snr = profile->snr (standard);
-	else
-	  snr = profile->snr ();
-	
+
+	else {
+
+	  if (normal)
+	    snr = profile->snr ();
+
+	  else {
+
+	    double mean, variance;
+
+	    // calculate the mean and variance at the specifed phase
+	    profile->stats (snr_phase, &mean, &variance);
+	    // subtract the mean
+	    *profile -= mean;
+	    // sum the remaining power and divide by the rms
+	    snr = profile->sum() / sqrt(variance);
+
+	  }
+
+	}
+
 	cerr << filenames[ifile] << "(" << isub << ", " << ichan << ")"
 	     << " snr=" << snr << endl;
 	
@@ -183,7 +216,8 @@ int main (int argc, char** argv)
     if (pscrunch > 0)
       archive -> pscrunch ();
 
-    archive -> unload (filenames[ifile] + ".wt");
+    if (unload_result)
+      archive -> unload (filenames[ifile] + ".wt");
 
   }
   catch (Error& error) {
