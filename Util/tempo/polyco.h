@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/polyco.h,v $
-   $Revision: 1.21 $
-   $Date: 2003/12/09 00:53:39 $
+   $Revision: 1.22 $
+   $Date: 2004/04/02 08:19:43 $
    $Author: hknight $ */
 
 #ifndef __POLY_H
@@ -185,7 +185,7 @@ class polyco : public Reference::Able {
   polyco (const polyco& poly) { operator = (poly); }
 
   //! Hack constructor for use on search data
-  polyco::polyco(MJD _reftime, float _dm, double _f0, int _telescope=7){ pollys.push_back( polynomial(_reftime,_dm,_f0,_telescope) ); } 
+  polyco(MJD _reftime, float _dm, double _f0, int _telescope=7){ pollys.push_back( polynomial(_reftime,_dm,_f0,_telescope) ); } 
 
   //! Load in polycos
   polyco (const char* id);
