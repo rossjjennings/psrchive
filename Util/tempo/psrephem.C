@@ -117,8 +117,9 @@ int psrephem::load (const char* filename)
     }
   }
   if (all_zero) {
-    fprintf (stderr,
-    "psrephem::load WARNING tempo11-style load of '%s' failed\n", filename);
+    if(verbose)
+      fprintf (stderr,
+	       "psrephem::load WARNING tempo11-style load of '%s' failed\n", filename);
     return old_load (filename);
   }
 
