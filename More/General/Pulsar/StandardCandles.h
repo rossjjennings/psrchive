@@ -1,16 +1,18 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/StandardCandles.h,v $
-   $Revision: 1.3 $
-   $Date: 2004/10/11 11:23:47 $
-   $Author: straten $ */
+   $Revision: 1.4 $
+   $Date: 2005/03/03 03:28:31 $
+   $Author: hknight $ */
 
 #ifndef __Pulsar_FluxCalibratorDatabase_h
 #define __Pulsar_FluxCalibratorDatabase_h
 
-#include "ReferenceAble.h"
 #include <string>
 #include <vector>
+
+#include "ReferenceAble.h"
+#include "psr_cpp.h"
 
 namespace Pulsar {
 
@@ -45,6 +47,16 @@ namespace Pulsar {
  
 
     //! Flux Calibration Database Entry
+    /*! Entries have two modes of storage:
+      
+    I.  reference_frequency, reference_flux, spectral_index
+    II. log(S) = a_0 + a_1*log(f) + a_2*(log(f))^2 + a_3*(log(f))^4 + ...
+
+    If 'spectral_coeffs' is not empty, mode II is used
+
+    If the config file line starts with '&', then lines as parsed for mode II coefficients
+
+    */
     class Entry {
       
     public:
@@ -60,6 +72,9 @@ namespace Pulsar {
 
       //! Spectral index
       double spectral_index;
+
+      //! Stores coefficients
+      vector<double> spectral_coeffs;
 
       //! Null constructor
       Entry () { init(); }
