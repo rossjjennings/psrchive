@@ -17,10 +17,9 @@ void Pulsar::CalibratorExtension::build (const Calibrator* calibrator)
     set_epoch( calibrator->get_epoch() );
     set_nchan( calibrator->get_nchan() );
 
-    unsigned nchan = get_nchan();
-
     const Integration* subint = calibrator->get_Archive()->get_Integration(0);
 
+    unsigned nchan = get_nchan();
     for (unsigned ichan=0; ichan < nchan; ichan++) {
       weight[ichan] = subint->get_weight(ichan);
       centre_frequency[ichan] = subint->get_centre_frequency(ichan);
