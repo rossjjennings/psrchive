@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/Pointing.h,v $
-   $Revision: 1.1 $
-   $Date: 2004/07/19 12:43:20 $
+   $Revision: 1.2 $
+   $Date: 2004/12/14 12:23:43 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Pointing_h
@@ -33,8 +33,11 @@ namespace Pulsar {
     //! Clone method
     Pointing* clone () const { return new Pointing( *this ); }
 
-    //! If ext is a Pointing, set attributes to mean of this and ext
-    void append (Extension* ext);
+    //! Integrate information from another Integration
+    void integrate (const Integration* subint);
+
+    //! Update information based on the provided Integration
+    void update (const Integration* subint);
 
     //! LST (in seconds) at subint centre
     double lst_sub;

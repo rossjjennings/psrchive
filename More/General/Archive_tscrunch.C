@@ -61,7 +61,7 @@ void Pulsar::Archive::tscrunch (unsigned nscrunch)
       
       unsigned start = isub * nscrunch;
       
-      // the last Integration may not have nscrunch contributions
+      // the last Integration may have less than nscrunch contributions
       if (start+nscrunch >= nsub)
 	nscrunch = nsub - start;
 
@@ -124,11 +124,13 @@ void Pulsar::Archive::tscrunch (unsigned nscrunch)
     
     unsigned start = isub * nscrunch;
     
-    // the last Integration may not have nscrunch contributions
+    // the last Integration may have less than nscrunch contributions
     if (start+nscrunch >= nsub)
       nscrunch = nsub - start;
 
-    MJD    mjd;
+    Integration* result = get_Integration(isub);
+
+    MJD mjd;
     double duration = 0.0;
     int count = 0;
     
@@ -141,48 +143,53 @@ void Pulsar::Archive::tscrunch (unsigned nscrunch)
       duration += cur->get_duration();
       mjd      += cur->get_epoch();
       
-      Integration* result = get_Integration(isub);
-      for (unsigned i = 0; i < result->get_nextension(); i++) {
-	Integration::Extension* ext = result->get_extension(i);
-	for (unsigned j = 0; j < cur->get_nextension(); j++) {
-	  ext->append(cur->get_extension(j));
-	}
-      } 
+      for (unsigned iext = 0; iext < result->get_nextension(); iext++) {
+	Integration::Extension* ext = result->get_extension(iext);
+	ext->integrate (cur);
+      }
+
     }
-    
-    get_Integration(isub) -> set_duration (duration);
-    
+
     mjd /= double (count);
+    
+    result->set_duration (duration);
+    result->set_epoch (mjd);
     
     if (get_type() == Signal::Pulsar) {
       
       // ensure that the polyco includes the new integration time
       update_model (mjd);
       
-      if (!model)
-	continue;
+      if (model) {
+	
+	// get the time of the first subint to be integrated into isub
+	MJD firstmjd = get_Integration (start) -> get_epoch ();
+	  // get the period at the time of the first subint
+	double first_period = model->period(firstmjd);
+	// get the phase at the time of the first subint
+	Phase first_phase = model->phase(firstmjd);
+	
+	// get the phase at the midtime of the result
+	Phase mid_phase = model->phase (mjd); 
+	
+	// calculate the phase difference
+	Phase dphase = mid_phase - first_phase;
+	
+	// Subtract one period times phase difference from mjd      
+	mjd -= dphase.fracturns() * first_period;
+	
+	result->set_epoch (mjd);
+	result->set_folding_period (model->period(mjd));
+	
+	// The original code did not include the number of 
+	// integer turns when computing the shift_time
+      }
       
-      // get the time of the first subint to be integrated into isub
-      MJD firstmjd = get_Integration (start) -> get_epoch ();
-      // get the period at the time of the first subint
-      double first_period = model->period(firstmjd);
-      // get the phase at the time of the first subint
-      Phase first_phase = model->phase(firstmjd);
-      
-      // get the phase at the midtime of the result
-      Phase mid_phase = model->phase (mjd); 
-      
-      // calculate the phase difference
-      Phase dphase = mid_phase - first_phase;
-      
-      // Subtract one period times phase difference from mjd      
-      mjd -= dphase.fracturns() * first_period;
-      
-      get_Integration (isub)->set_epoch (mjd);
-      get_Integration (isub)->set_folding_period (model->period(mjd));
-      
-      // The original code did not include the number of 
-      // integer turns when computing the shift_time
+    }
+    
+    for (unsigned iext = 0; iext < result->get_nextension(); iext++) {
+      Integration::Extension* ext = result->get_extension(iext);
+      ext->update (result);
     }
     
   }
@@ -213,7 +220,8 @@ double Pulsar::Archive::weighted_frequency (unsigned ichan,
   unsigned ipol = 0;
 
   if (nsubint == 0)
-    throw Error (InvalidRange, "Pulsar::Archive::weighted_frequency", "nsubint == 0");
+    throw Error (InvalidRange, "Pulsar::Archive::weighted_frequency",
+                 "nsubint == 0");
 
   if (start >= nsubint)
     throw Error (InvalidRange, "Pulsar::Archive::weighted_frequency",

@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Integration.h,v $
-   $Revision: 1.66 $
-   $Date: 2004/09/28 02:12:02 $
-   $Author: ahotan $ */
+   $Revision: 1.67 $
+   $Date: 2004/12/14 12:23:43 $
+   $Author: straten $ */
 
 /*
   
@@ -316,13 +316,12 @@ namespace Pulsar {
       //! Return a new copy-constructed instance identical to this instance
       virtual Extension* clone () const = 0;
       
-      //! Append another of self, combining data in a sensible way
-      /*! Derived classes should ensure that a dynamic cast is
-	performed to ensure that the two objects are of the same
-	type and return immediately if they are not.
-      */
-      virtual void append (Extension* ext) = 0;
+      //! Integrate information from another Integration
+      virtual void integrate (const Integration* subint) { }
       
+      //! Update information based on the provided Integration
+      virtual void update (const Integration* subint) { }
+
       //! Return the name of the Extension
       string get_name () const;
       
@@ -331,6 +330,9 @@ namespace Pulsar {
       //! Extension name - useful when debugging
       string name;
       
+      //! Provide Extension derived classes with access to parent Archive
+      const Archive* get_parent (const Integration* subint) const;
+
     };
     
     //! Return the number of extensions available
