@@ -25,7 +25,10 @@ void Rhythm::menubarConstruct ()
   file->insertItem( "&Add TOAs",        this, 
 		    SLOT( add_toas() ), ALT+Key_A );
   file->insertItem( "&Save TOAs",       this, 
-		    SLOT( save_toas() ), ALT+Key_S );
+		    SLOT( save_toas() ) );
+  file->insertSeparator();
+  file->insertItem( "&Save All",       this, 
+		    SLOT( save_all() ), ALT+Key_S );
   file->insertSeparator();
   file->insertItem( "Write Postscript", this, 
 		    SLOT( hc() ));
@@ -358,6 +361,31 @@ void Rhythm::save_toas ()
     return;
 
   save_toas ( fileName.ascii() );
+}
+
+void Rhythm::save_all ()
+{
+  string toaName;
+  if ( !toa_filename.empty() )
+    toaName = toa_filename;
+  
+  if ( toaName.empty() )
+    return;
+  
+  save_toas ( toaName.c_str() );
+  
+  int index = toaName.find_first_of(".", 0);
+
+  string parName = toaName.substr(0, index);
+  parName += ".par";
+  
+  if (fitpopup) {
+    fitpopup->save(parName);
+  }
+
+  QString str = "TOAs and Ephemeris saved";
+  
+  footer->setText(str);
 }
 
 void Rhythm::setVerbosity ( int verbosityID )
