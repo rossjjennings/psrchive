@@ -14,20 +14,29 @@ void usage ()
     "     psredit -c CMD [-c CMD ...] filenames\n"
     "Where:\n"
     "\n"
-    "CMDS is a string containing one or more commands, separated by commas\n"
-    "     and/or whitespace.  If any whitespace is included, then the list\n"
-    "     of commands must be enclosed in quotation marks.\n"
-    "     Multiple commands may also be specified by multiple -c options.\n"
+    "CMDS is a string containing one or more commands, separated by commas.\n"
+    "     If any whitespace is required, then the string containing it must\n"
+    "     be enclosed in quotation marks.  Multiple commands may also be\n"
+    "     specified by using multiple -c options.\n"
     "\n"
-    "     A command can either get or a set a parameter value\n"
+    "     A command can either get or a set a parameter value.\n"
+    "     A get command is simply the name of the parameter.\n"
+    "     A set command is a parameter assignment statement, e.g\n"
     "\n"
-    "-------------------------------------------------\n"
-    "                    PARAMETERS                   \n"
-    "-------------------------------------------------\n"
+    "     psredit -c freq,NAME=\"Hydra A\"\n"
     "\n"
+    "     will print the centre frequency and set the source name.\n"
+    "     Note that parameter names are case insensitive.\n"
+    "     For the full list of parameter names, type \"psredit -H\"\n"
        << endl;
 }
 
+string pad (unsigned length, string text)
+{
+  while (text.length() < length)
+    text += " ";
+  return text;
+}
 
 int main (int argc, char** argv) try {  
   
@@ -62,9 +71,20 @@ int main (int argc, char** argv) try {
       usage ();
       return 0;
 
-    case 'H':
-      cerr << "psredit: parameter listing not yet implemented" << endl;
+    case 'H': {
+
+      cout << 
+	"-------------------------------------------------\n"
+	"Attribute Name   Description\n"
+	"-------------------------------------------------"
+	   << endl;
+
+      for (unsigned i=0; i<tui.get_nattribute(); i++)
+	cout << pad(16,tui.get_name(i)) <<" "<< tui.get_description(i) << endl;
+
       return 0;
+
+    }
 
     case 'v':
       verbose = true;
