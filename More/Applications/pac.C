@@ -212,6 +212,13 @@ int main (int argc, char *argv[]) {
     else {
       cerr << "Reading from database summary file" << endl;
       dbase = new Pulsar::Calibration::Database (cals_are_here.c_str());
+
+      dbase -> test_inst(test_instr);
+      dbase -> test_posn(test_coords);
+      dbase -> test_time(test_times);
+      dbase -> test_freq(test_frequency);
+      dbase -> test_bw(test_bandwidth);
+      dbase -> test_obst(test_obstype);
     }
   }
   catch (Error& error) {
