@@ -9,7 +9,7 @@ include_HEADERS = Cartesian.h Angle.h MJD.h CommandParser.h		\
 	PrimeFactoriser.h WindowArray.h StringTokenizer.h		\
 	Sortable.h Printable.h Header.h thread_utils.h GetPK.h		\
 	VectorInfo.h Plugin.h shell.h Cartesian.h Angle.h coord_parse.h \
-	coord.h anglevel.h
+	coord.h anglevel.h obsjoin.h
 
 libgenutilpp_la_SOURCES = CommandParser.C PlotEvent.C util_plus.C	\
 	PlotState.C datum.C smarthist.C datumcond.C kstest.C Ready.C	\
@@ -18,9 +18,8 @@ libgenutilpp_la_SOURCES = CommandParser.C PlotEvent.C util_plus.C	\
 	thread_utils.C GetPK.C completion.C Cartesian.C Angle.C MJD.C	\
 	sla_MJD.C PlotManager.C PlotVolume.C DataManager.C		\
 	DataSet.C Poincare.C DataVector.C Plugin.C shell.C		\
-	coord_parse.c coord.c sla_coord.c psr2ar.c dual_parse_it.h
-
-# needs a new home: obsjoin.[hC]
+	coord_parse.c coord.c sla_coord.c psr2ar.c dual_parse_it.h	\
+	obsjoin.C
 
 bin_PROGRAMS = getMJD tranScan bshead search_summary xserve_summary
 
