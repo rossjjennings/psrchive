@@ -1,5 +1,4 @@
 #include "Pulsar/PolnCalibratorExtension.h"
-#include "Pulsar/PolnCalibrator.h"
 
 #include "Calibration/SingleAxis.h"
 #include "Calibration/Instrument.h"
@@ -44,34 +43,6 @@ Pulsar::PolnCalibratorExtension::operator=
 //! Destructor
 Pulsar::PolnCalibratorExtension::~PolnCalibratorExtension ()
 {
-}
-
-//! Construct from a PolnCalibrator instance
-Pulsar::PolnCalibratorExtension::PolnCalibratorExtension 
-(const PolnCalibrator* calibrator)
-{
-  if (!calibrator)
-    throw Error (InvalidParam, "Pulsar::PolnCalibratorExtension",
-		 "null PolnCalibrator*");
-
-  try {
-
-    set_type( calibrator->get_type() );
-    set_nchan( calibrator->get_Transformation_nchan() );
-
-    unsigned nchan = get_nchan();
-
-    for (unsigned ichan=0; ichan < nchan; ichan++)
-      if ( calibrator->get_Transformation_valid(ichan) )
-	*(response[ichan]) = *(calibrator->get_Transformation(ichan));
-      else
-	response[ichan] = 0;
-
-  }
-  catch (Error& error) {
-    throw error += "Pulsar::PolnCalibratorExtension (PolnCalibrator*)";
-  }
-
 }
 
 //! Set the type of the instrumental response parameterization
