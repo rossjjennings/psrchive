@@ -1,5 +1,7 @@
-#include "ReceptionCalibratorPlotter.h"
-#include "ReceptionCalibrator.h"
+#include "Pulsar/ReceptionCalibratorPlotter.h"
+#include "Pulsar/ReceptionCalibrator.h"
+#include "Pulsar/Archive.h"
+
 #include "EstimatePlotter.h"
 
 #include <cpgplot.h>
@@ -145,4 +147,23 @@ void Pulsar::ReceptionCalibratorPlotter::plot_constraints (unsigned ichan,
 	  "Uncalibrated Stokes",
 	  "Self-Calibration Constraints");
 
+}
+
+void Pulsar::ReceptionCalibratorPlotter::plot_phase_constraints ()
+{
+  unsigned nbin = calibrator->uncalibrated->get_nbin();
+
+  unsigned nstate = calibrator->pulsar.size();
+
+  cpgswin (0,1,0,1);
+
+  for (unsigned istate=0; istate<nstate; istate++) {
+
+    float phase = calibrator->pulsar[istate].phase_bin;
+    phase /= nbin;
+
+    cpgmove (phase, 0.1);
+    cpgdraw (phase, 0.9);
+
+  }
 }
