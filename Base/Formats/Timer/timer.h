@@ -1,6 +1,6 @@
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/Timer/timer.h,v $
-   $Revision: 1.5 $
-   $Date: 2000/08/19 12:56:34 $
+   $Revision: 1.6 $
+   $Date: 2001/02/24 07:59:36 $
    $Author: straten $ */
 
 /* include file for the main timer structure                            */
@@ -61,6 +61,7 @@
 #define PARA_CORRECTED    0x0004  /* parallactic angle */
 #define FEED_CORRECTED    0x0008  /* feed angle */
 
+#define RCVR_ID_STRLEN 8
 
 /* 
 responsibilities
@@ -160,7 +161,7 @@ struct timer {
 
   char  schedule[SCHEDULE_STRLEN];   /* (T) schedule file used                     */
   char  comment[COMMENT_STRLEN];     /* (T) comment in schedule file               */
-  float pos_angle;                   /* (T?) ?? */
+  float pos_angle;                   /* (T) Feed angle or Posn angle */
   int   headerlength;                /* (T)  ?? */
 
   /* baseband backend addition:
@@ -179,6 +180,7 @@ struct timer {
   char  software[SOFTWARE_STRLEN];   /* info on software that produced archive     */
 
   char   backend [BACKEND_STRLEN];   /* 8-byte code checked for recognized backend */
+
   uint32 be_data_size;            /* if backend is recognized, this value is
 				     interpreted by archive::load as the number
 				     of bytes to skip immediately following the
@@ -188,10 +190,13 @@ struct timer {
 				     DEFINE recognized backend codes in
 				     timer++.C */
 
+
+  char rcvr_id[RCVR_ID_STRLEN];      /* (T) Rcvr ID from FCC */
+
 #if defined (sun) && defined(__i386)
-#define TIMER_SPACE 192
+#define TIMER_SPACE 184
 #else
-#define TIMER_SPACE 188
+#define TIMER_SPACE 180
 #endif
 
   /* NB! SPACE IS ALWAYS THE LAST THING */
