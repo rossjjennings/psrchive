@@ -1,6 +1,6 @@
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Angle.h,v $
-   $Revision: 1.3 $
-   $Date: 2000/01/05 09:19:45 $
+   $Revision: 1.4 $
+   $Date: 2000/02/02 03:59:15 $
    $Author: straten $ */
 
 // redwards 17 Mar 99 -- Time for a definitive C++ suite of
@@ -25,6 +25,8 @@ class Angle
   double radians;  // angle in radians
 
  public:
+
+  static bool verbose;
 
   Angle(const Angle & a) {radians=a.radians;};
   Angle(const double & d = 0.0);
