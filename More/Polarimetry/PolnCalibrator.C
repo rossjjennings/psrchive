@@ -66,9 +66,7 @@ void Pulsar::PolnCalibrator::calibrate (Archive* arch)
   if (jones.size() != arch->get_nchan())
     create (arch->get_nchan());
 
-  for (unsigned isub=0; isub < arch->get_nsubint(); isub++)
-    calibrate (arch->get_Integration(isub));
-
+  arch->transform (jones);
 }
 
 void Pulsar::PolnCalibrator::create (unsigned nchan)
@@ -138,11 +136,3 @@ void Pulsar::PolnCalibrator::calculate (vector<vector<Estimate<double> > >& hi,
   }
 }
 
-void Pulsar::PolnCalibrator::calibrate (Integration* subint)
-{
-  if (subint->get_npol() != 4)
-    throw Error (InvalidState, "Pulsar::PolnCalibrator::calibrate",
-		 "TODO: npol != 4 not implemented");
-
-  subint->transform (jones);
-}

@@ -54,15 +54,15 @@ Pulsar::FluxCalibrator::FluxCalibrator (const vector<Archive*>& archs)
       cerr << "Pulsar::FluxCalibrator call Pulsar::Integration::cal_levels "
 	   << archs[iarch]->get_filename() << endl;
 
-    const Pulsar::Integration* integration;
+    const Pulsar::Archive* arch = archs[iarch];
 
-    if (archs[iarch]->get_state () == Signal::Intensity)
-      integration = archs[iarch]->get_Integration(0);
-    else {
-      Pulsar::Integration* clone = archs[iarch]->get_Integration(0)->clone();
+    if (archs[iarch]->get_state () != Signal::Intensity) {
+      Pulsar::Archive* clone = arch->clone();
       clone->convert_state (Signal::Intensity);
-      integration = clone;
+      arch = clone;
     }
+
+    const Pulsar::Integration* integration = arch->get_Integration(0);
 
     vector<vector<Estimate<double> > > cal_hi;
     vector<vector<Estimate<double> > > cal_lo;
@@ -74,9 +74,9 @@ Pulsar::FluxCalibrator::FluxCalibrator (const vector<Archive*>& archs)
       // Take the ratio of the total intensity
       Estimate<double> ratio = cal_hi[0][ichan]/cal_lo[0][ichan] - 1.0;
       
-      if (archs[iarch]->get_type() == Signal::FluxCalOn)
+      if (arch->get_type() == Signal::FluxCalOn)
 	mean_ratio_on[ichan] += ratio;
-      else if (archs[iarch]->get_type() == Signal::FluxCalOff)
+      else if (arch->get_type() == Signal::FluxCalOff)
 	mean_ratio_off[ichan] += ratio;
       
     }

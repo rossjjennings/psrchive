@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PolnCalibrator.h,v $
-   $Revision: 1.5 $
-   $Date: 2003/02/14 14:09:42 $
+   $Revision: 1.6 $
+   $Date: 2003/02/20 10:34:06 $
    $Author: straten $ */
 
 #ifndef __PolnCalibrator_H
@@ -45,11 +45,12 @@ namespace Pulsar {
 
   protected:
 
-    //! Return the system response as determined by the calibrator states
-    /*! Given the coherency products of the calibrator hi and lo states,
-      derived classes must return the Jones matrix that represent the system
-      response.  If the derived class can store additional parameters,
-      the ichan parameter may be used. */
+    //! Return the system response as determined by the output CAL states
+    /*! Given the coherency products (and cross-products) of the
+      calibrator hi and lo states, derived classes must return the
+      Jones matrix that represents the system response.  If the derived
+      class can store additional parameters, the ichan parameter may
+      be used. */
     virtual Jones<double> solve (const vector<Estimate<double> >& hi,
 				 const vector<Estimate<double> >& lo,
 				 unsigned ichan) = 0;
@@ -78,8 +79,6 @@ namespace Pulsar {
     void calculate (vector<vector<Estimate<double> > >& cal_hi,
 		    vector<vector<Estimate<double> > >& cal_lo);
 
-    //! Calibrate a single sub-integration
-    void calibrate (Integration* subint);
   };
 
 }
