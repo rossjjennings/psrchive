@@ -159,7 +159,7 @@ void Pulsar::PolnCalibrator::create (unsigned nchan)
     get_levels (isub, nchan, cal_hi, cal_lo);
 
     if (nsub > 1) {
-      if (isub == 1) {
+      if (isub == 0) {
 	total_hi.resize (cal_hi.size());
 	total_lo.resize (cal_lo.size());
 	for (unsigned ipol=0; ipol<npol; ipol++) {
