@@ -58,6 +58,7 @@ void usage()
     "  -f               Frequency scrunch by this factor \n"
     "  -b               Bin scrunch by this factor \n"
     "  --setnsub        Time scrunch to this many subints \n"
+    "  --settsub        Time scrunch to this subint length \n"
     "  --setnchn        Frequency scrunch to this many channels \n"
     "  --setnbin        Bin scrunch to this many bins \n"
     "  --binphsperi     Convert to binary phase periastron order \n"
@@ -78,10 +79,13 @@ void usage()
     "  -C               Set feed basis to Circular \n"
     "  -E ephfile       Install a new ephemeris and update model \n"
     "  -B               Flip the sideband sense \n"
-    "  --reverse_freqs  Reverse the ordering of the frequency channels and change the bandwidth flag accordingly\n"
+    "  --reverse_freqs  Reverse the ordering of the frequency channels and\n"
+    "                   change the bandwidth flag accordingly\n"
     "  -o centre_freq   Change the frequency labels \n"
-    "  --type type      Change the 'type' parameter where 'type' is one of: 'Pulsar', 'PolnCal', 'FluxCalOn', 'FluxCalOff', 'Calibrator'\n"
-    "  --inst inst      Change the instrument name (Archive must have 'BackendName' extension for this to work)\n"
+    "  --type type      Change the 'type' parameter where 'type' is one of:\n"
+    "                   'Pulsar', 'PolnCal', 'FluxCalOn', 'FluxCalOff', 'Calibrator'\n"
+    "  --inst inst      Change the instrument name (Archive must have\n"
+    "                   'BackendName' extension for this to work)\n"
     "\n"
     "See http://astronomy.swin.edu.au/pulsar/software/manuals/pam.html"
        << endl;
@@ -148,6 +152,8 @@ int main (int argc, char *argv[]) {
     int new_nsub = 0;
     int new_nbin = 0;
 
+    float tsub = 0.0;
+
     bool circ = false;
     bool lin = false;
 
@@ -188,6 +194,7 @@ int main (int argc, char *argv[]) {
 	{"binlngperi", 1, 0, 205},
 	{"binlngasc",  1, 0, 206},
 	{"receiver",   1, 0, 207},
+	{"settsub",    1, 0, 208},
 	{"type",       1, 0, TYPE},
 	{"inst",       1, 0, INST},
 	{"reverse_freqs",no_argument,0,REVERSE_FREQS},
@@ -217,7 +224,7 @@ int main (int argc, char *argv[]) {
 	Pulsar::Archive::set_verbosity(3);
 	break;
       case 'i':
-	cout << "$Id: pam.C,v 1.46 2004/09/01 06:58:25 hknight Exp $" << endl;
+	cout << "$Id: pam.C,v 1.47 2004/09/23 05:15:03 ahotan Exp $" << endl;
 	return 0;
       case 'm':
 	save = true;
@@ -467,6 +474,15 @@ int main (int argc, char *argv[]) {
 	return -1;
       }
 
+      case 208: {
+	if (sscanf(optarg, "%f", &tsub) != 1) {
+	  cerr << "Invalid tsub given" << endl;
+	  return -1;
+	}
+	tscr = true;
+	break;
+      }
+
       case TYPE:
 	{
 	  string s = optarg;
@@ -699,7 +715,18 @@ int main (int argc, char *argv[]) {
       }
 
       if (tscr) {
-	if (new_nsub > 0) {
+	if (tsub > 0.0) {
+	  unsigned factor = unsigned (tsub) / 
+	    unsigned(arch->get_Integration(0)->get_duration());
+	  if (factor == 0) {
+	    throw Error(InvalidParam, "Subints already too long!");
+	  }
+	  arch->tscrunch(factor);
+	  if (verbose)
+	    cout << arch->get_filename() << " tscrunched by a factor of " 
+		 << factor << endl;
+	}
+	else if (new_nsub > 0) {
 	  arch->tscrunch_to_nsub(new_nsub);
 	  if (verbose)
 	    cout << arch->get_filename() << " tscrunched to " 
