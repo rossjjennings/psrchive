@@ -24,9 +24,9 @@ nobase_include_HEADERS = \
 	Pulsar/IntegrationManager.h      Pulsar/Utilities.h \
 	Pulsar/PhaseWeight.h             Pulsar/ArchiveTI.h \
 	Pulsar/PhaseWeightFunction.h     model_profile.h \
-	Pulsar/Plotter.h
+	Pulsar/Plotter.h                 Pulsar/IntegrationTI.h
 
-libpsrchive_la_SOURCES = plugins.csh getopt.h Physical.h \
+libpsrchive_la_SOURCES = plugins.csh getopt.h Physical.h plotJones.C \
 	AdaptiveSNR.C                 Integration_new_PolnProfile.C  \
 	Agent.C                       Integration_remove_baseline.C  \
 	Agent_static.C                Integration_resize.C  \
@@ -76,7 +76,8 @@ libpsrchive_la_SOURCES = plugins.csh getopt.h Physical.h \
 	Integration_get_PA.C          getopt1.c  \
 	Integration_get_Stokes.C      model_profile.C  \
 	Integration_invint.C          pafit_get_PA.C  \
-	Integration_match.C           ArchiveTI.C
+	Integration_match.C           ArchiveTI.C \
+	IntegrationTI.C               ArchiveTI_import.C
 
 SUBDIRS                 = Calibration Extension timer epn
 
@@ -204,6 +205,8 @@ export:
 	doxygen
 	rm -rf $(EXPORT)
 	mv doc/html $(EXPORT)
+	cp documentation/build/autotools.* $(EXPORT)
+	cp documentation/build/*.html $(EXPORT)
 	chmod -R a+r $(EXPORT)
 	chmod a+x $(EXPORT)
 

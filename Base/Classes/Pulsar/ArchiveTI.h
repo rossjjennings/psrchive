@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Attic/ArchiveTI.h,v $
-   $Revision: 1.4 $
-   $Date: 2004/12/19 18:53:09 $
+   $Revision: 1.5 $
+   $Date: 2004/12/20 13:29:30 $
    $Author: straten $ */
 
 #ifndef __Pulsar_ArchiveTI_h
@@ -28,6 +28,10 @@ namespace Pulsar {
     template<class Ext>
     void import (const std::string& name,
 		 TextInterface::ClassGetSet<Ext>* extension_tui);
+
+    //! Import the TextInterface of the Integration class
+    void import (const std::string& name,
+                 TextInterface::ClassGetSet<Integration>* integration_tui);
 
   private:
 
