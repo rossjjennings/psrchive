@@ -1,6 +1,6 @@
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/coord.h,v $
-   $Revision: 1.3 $
-   $Date: 2001/01/11 23:36:07 $
+   $Revision: 1.4 $
+   $Date: 2001/06/02 07:24:54 $
    $Author: straten $ */
 
 #ifndef __COORD_H
@@ -46,20 +46,6 @@ int str2ra  (double *ra,  const char* rastr);
 int str2dec (double *dec, const char* decstr);
 
 int coord2name (char* pulsar, double ra, double dec);
-
-/* ********************************************************************
-   B1950toJ2000 -
-        converts B1950 ra and dec (in degrees) 
-	to J2000 ra and dec (in radians)
-   ******************************************************************** */
-int B1950toJ2000 (double bra, double bdec, double* jra, double* jdec);
-
-/* ********************************************************************
-   galactic -
-        converts J2000 ra and dec (in radians) 
-	to galactic l and b (radians)
-   ******************************************************************** */
-int galactic (double ra, double dec, double* gl, double* gb);
 
 /* ********************************************************************
    telescope_coords -
