@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Archive.h,v $
-   $Revision: 1.95 $
-   $Date: 2003/12/22 14:02:21 $
-   $Author: straten $ */
+   $Revision: 1.96 $
+   $Date: 2003/12/23 03:18:31 $
+   $Author: ahotan $ */
 
 /*! \mainpage 
  
@@ -761,6 +761,7 @@ namespace Pulsar {
     
     // Classes that inherit from IntegrationOrder need low-level access
     friend class BinaryPhaseOrder;
+    friend class LANOrder;
     
     //! Set the number of pulsar phase bins
     /*! Called by Archive methods to update child attribute */
