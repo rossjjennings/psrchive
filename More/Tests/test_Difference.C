@@ -6,8 +6,6 @@
 
 int main (int argc, char** argv)
 { try {
-  // trap C-style errors and throw Error exception
-  Error::handle_signals ();
 
   // Pulsar::Archive::verbose = true;
   // Error::verbose = true;

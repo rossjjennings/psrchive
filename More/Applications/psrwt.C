@@ -278,8 +278,6 @@ int main (int argc, char** argv)
 
   Reference::To<Pulsar::Archive> archive, copy;
 
-  Error::handle_signals ();
-
   for (unsigned ifile=0; ifile < filenames.size(); ifile++) try {
 
     archive = Pulsar::Archive::load (filenames[ifile]);

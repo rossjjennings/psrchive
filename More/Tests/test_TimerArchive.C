@@ -13,8 +13,6 @@ int main (int argc, char** argv)  {
     Pulsar::Integration::verbose = true;
     Pulsar::Profile::verbose = true;
 
-    Pulsar::Error::handle_signals();
-
     Pulsar::TimerArchive archive;
     
     if (argc > 1)

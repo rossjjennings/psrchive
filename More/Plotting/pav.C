@@ -1,5 +1,5 @@
 //
-// $Id: pav.C,v 1.88 2004/09/19 06:49:53 ahotan Exp $
+// $Id: pav.C,v 1.89 2004/09/22 15:38:45 straten Exp $
 //
 // The Pulsar Archive Viewer
 //
@@ -322,7 +322,7 @@ int main (int argc, char** argv)
       plotter.set_subint( atoi (optarg) );
       break;
     case 'i':
-      cout << "$Id: pav.C,v 1.88 2004/09/19 06:49:53 ahotan Exp $" << endl;
+      cout << "$Id: pav.C,v 1.89 2004/09/22 15:38:45 straten Exp $" << endl;
       return 0;
 
     case 'j':
@@ -647,8 +647,6 @@ int main (int argc, char** argv)
     cpgsubp(n1,n2);
   
   plotter.set_colour_map (colour_map);
-
-  Error::handle_signals ();
 
   RealTimer clock;
 
