@@ -1,7 +1,7 @@
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/Timer/timer.h,v $
-   $Revision: 1.9 $
-   $Date: 2002/10/25 04:32:32 $
-   $Author: straten $ */
+   $Revision: 1.10 $
+   $Date: 2003/12/12 10:44:36 $
+   $Author: ahotan $ */
 
 /* include file for the main timer structure                            */
 
@@ -29,12 +29,14 @@
 
 /* Obstype definitions */
 
-#define HYDRA  20
-#define NHYDRA 21
-#define SHYDRA 22
-#define PULSAR 0
-#define CAL    1
-#define SCAL   2 
+#define FLUX_ON  30
+#define FLUX_OFF 31
+#define HYDRA    20
+#define NHYDRA   21
+#define SHYDRA   22
+#define PULSAR   0
+#define CAL      1
+#define SCAL     2 
 
 
 /* A central place for the lengths of the character arrays */

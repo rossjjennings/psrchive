@@ -201,6 +201,10 @@ Signal::Source Pulsar::TimerArchive::get_type () const
     case NHYDRA:
     case SHYDRA:
       return Signal::FluxCalOff;
+    case FLUX_ON:
+      return Signal::FluxCalOn;
+    case FLUX_OFF:
+      return Signal::FluxCalOff;
     default:
       return Signal::Unknown;
     }
@@ -233,8 +237,10 @@ void Pulsar::TimerArchive::set_type (Signal::Source type)
       hdr.obstype = CAL;
       break;
     case Signal::FluxCalOn:
+      hdr.obstype = FLUX_ON;
+      break;
     case Signal::FluxCalOff:
-      hdr.obstype = hydra_obstype ();
+      hdr.obstype = FLUX_OFF;
       break;
     default:
       cerr << "TimerArchive::set_type warning unrecognized type="

@@ -85,7 +85,7 @@ static bool is_timer (const struct timer& hdr)
     return false;
   }
 
-  if (hdr.obstype < 0 || hdr.obstype > 30) {
+  if (hdr.obstype < 0 || hdr.obstype > 40) {
     if (Timer::verbose)
       cerr << "Timer::is_timer invalid obstype=" << hdr.obstype << endl;
     return false;
