@@ -1,19 +1,19 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Univariate.h,v $
-   $Revision: 1.3 $
-   $Date: 2004/11/22 19:26:04 $
+   $Revision: 1.4 $
+   $Date: 2005/03/20 08:45:44 $
    $Author: straten $ */
 
 #ifndef __MEAL_Univariate_H
 #define __MEAL_Univariate_H
 
-#include "MEAL/ArgumentBehaviour.h"
+#include "MEAL/UnivariateBase.h"
 
 namespace MEAL {
 
   //! A function of one scalar variable
-  class Univariate : public ArgumentBehaviour {
+  class Univariate : public UnivariateBase {
 
   public:
 
@@ -34,9 +34,6 @@ namespace MEAL {
 
     //! Get the abscissa value
     double get_abscissa () const;
-
-    //! Connect the set_abscissa method to the axis value
-    void set_argument (unsigned dimension, Argument* axis);
 
   protected:
 
