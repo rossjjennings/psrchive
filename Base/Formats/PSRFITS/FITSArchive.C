@@ -17,6 +17,8 @@ void Pulsar::FITSArchive::init ()
   bandpass = Passband();
   
   chanbw = 0.0;
+  
+  scale_cross_products = false;
 }
 
 Pulsar::FITSArchive::FITSArchive()
@@ -501,6 +503,9 @@ void Pulsar::FITSArchive::load_header (const char* filename)
     }
     status = 0;
   }
+  
+  if (strcmp(tempstr10, "WBCORR") == 0)
+    scale_cross_products = true;
   
   delete[] tempstr10;
   
@@ -1404,11 +1409,17 @@ Pulsar::FITSArchive::load_Integration (const char* filename, unsigned isubint)
       
       for(unsigned j = 0; j < get_nbin(); j++) {
 	fltarray[j] = temparray[j] * scales[a][b] + offsets[a][b];
+	if (scale_cross_products) {
+	  if (integ->get_state() == Signal::Coherence) {
+	    if (a == 2 || a == 3)
+	      fltarray[j] *= 2;
+	  }
+	}
       }
-
+      
       p->set_amps(fltarray);
       p->set_state(polmeas);
-      
+
     }  
   }
   

@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/PSRFITS/Pulsar/FITSArchive.h,v $
-   $Revision: 1.10 $
-   $Date: 2003/08/15 07:50:48 $
-   $Author: straten $ */
+   $Revision: 1.11 $
+   $Date: 2003/08/18 07:36:06 $
+   $Author: ahotan $ */
 
 #include <fitsio.h>
 
@@ -131,7 +131,11 @@ namespace Pulsar {
     // Channel bandwidth
 
     double chanbw;
-
+    
+    // Instrumental peculiarities
+    
+    bool scale_cross_products;
+    
     // Extension I/O routines
 
     void load_hist (fitsfile*);
