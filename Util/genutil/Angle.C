@@ -4,18 +4,20 @@
 #include <string>
 #include <math.h>
 #include <iostream>
+#include <limits.h>
 
 #include "machine_endian.h"
 #include "angle.h"
 #include "cartesian.h"
 #include "coord.h"
 
+bool Angle::verbose = false;
+
 Angle::Angle(const double & d){
   radians=d; 
   while(radians>M_PI) radians-=2*M_PI;
   while(radians<-M_PI) radians+=2*M_PI;
 }
-
 
 char * Angle::getHMS(char *str, int places) const
 {
