@@ -4,7 +4,6 @@
 #include "MEAL/NegationRule.h"
 #include "MEAL/ProductRule.h"
 #include "MEAL/InverseRule.h"
-#include "MEAL/ChainRule.h"
 #include "MEAL/RuleMath.h"
 
 Reference::To<MEAL::Complex2>

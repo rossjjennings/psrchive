@@ -1,8 +1,9 @@
 #include "MEAL/Complex2Value.h"
+#include "MEAL/NoParameters.h"
 
 MEAL::Complex2Value::Complex2Value (const Jones<double>& _value)
-  : OptimizedComplex2 (0)
 {
+  parameter_policy = new NoParameters;
   value = _value;
 }
 
@@ -25,7 +26,7 @@ Jones<double> MEAL::Complex2Value::get_value () const
 
 //! Return the value (and gradient, if requested) of the function
 void MEAL::Complex2Value::calculate (Jones<double>& result, 
-					    std::vector< Jones<double> >* grad)
+				     std::vector< Jones<double> >* grad)
 {
   result = value;
 

@@ -1,15 +1,24 @@
 #include "MEAL/Rotation.h"
+#include "MEAL/OneParameter.h"
 #include "Pauli.h"
 
 using namespace std;
 
-MEAL::Rotation::Rotation () : OptimizedComplex2 (1)
+void MEAL::Rotation::init ()
 {
+  OneParameter* param = new OneParameter (this);
+  param->set_param_name (0, "rotation");
+}
+
+MEAL::Rotation::Rotation ()
+{
+  init ();
+  axis = Vector<double, 3> (1,0,0);
 }
 
 MEAL::Rotation::Rotation (const Vector<double, 3>& _axis) 
-  : OptimizedComplex2 (1)
 {
+  init ();
   axis = _axis;
 }
 
@@ -19,14 +28,6 @@ std::string MEAL::Rotation::get_name () const
   return "Rotation";
 }
 
-//! Return the name of the specified parameter
-std::string MEAL::Rotation::get_param_name (unsigned index) const
-{
-  if (index == 0)
-    return "rotation";
-  else
-    return "ERROR";
-}
 
 void MEAL::Rotation::set_phi (double radians)
 {
@@ -43,7 +44,7 @@ double MEAL::Rotation::get_phi () const
 
 //! Calculate the Jones matrix and its gradient
 void MEAL::Rotation::calculate (Jones<double>& result,
-				       std::vector<Jones<double> >* grad)
+				std::vector<Jones<double> >* grad)
 {
   double phi = get_param(0);
 

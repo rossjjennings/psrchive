@@ -4,6 +4,7 @@
 using namespace std;
 
 MEAL::CongruenceTransformation::CongruenceTransformation ()
+  : composite (this)
 {
 }
 
@@ -12,8 +13,7 @@ MEAL::CongruenceTransformation::~CongruenceTransformation ()
 }
 
 /*! This method unmaps the old transformation before mapping xform */
-void 
-MEAL::CongruenceTransformation::set_transformation (Complex2* xform)
+void MEAL::CongruenceTransformation::set_transformation (Complex2* xform)
 {
   if (!xform)
     return;
@@ -22,7 +22,7 @@ MEAL::CongruenceTransformation::set_transformation (Complex2* xform)
     if (verbose)
       cerr << "MEAL::CongruenceTransformation::set_transformation"
 	" unmap old transformation" << endl;
-    unmap (transformation, false);
+    composite.unmap (transformation, false);
   }
 
   transformation = xform;
@@ -31,20 +31,18 @@ MEAL::CongruenceTransformation::set_transformation (Complex2* xform)
     cerr << "MEAL::CongruenceTransformation::set_transformation"
       " map new transformation" << endl;
 
-  map (transformation);
+  composite.map (transformation);
 }
 
 //! Get the transformation, \f$ J \f$
-MEAL::Complex2* 
-MEAL::CongruenceTransformation::get_transformation ()
+MEAL::Complex2* MEAL::CongruenceTransformation::get_transformation ()
 {
   return transformation;
 }
 
 
 /*! This method unmaps the old input before mapping xform */
-void 
-MEAL::CongruenceTransformation::set_input (Complex2* xform)
+void MEAL::CongruenceTransformation::set_input (Complex2* xform)
 {
   if (!xform)
     return;
@@ -53,7 +51,7 @@ MEAL::CongruenceTransformation::set_input (Complex2* xform)
     if (verbose)
       cerr << "MEAL::CongruenceTransformation::set_input"
 	" unmap old input" << endl;
-    unmap (input, false);
+    composite.unmap (input, false);
   }
 
   input = xform;
@@ -62,7 +60,7 @@ MEAL::CongruenceTransformation::set_input (Complex2* xform)
     cerr << "MEAL::CongruenceTransformation::set_input"
       " map new input" << endl;
 
-  map (input);
+  composite.map (input);
 }
 
 //! Get the input, \f$ \rho \f$
@@ -76,7 +74,7 @@ MEAL::CongruenceTransformation::get_input ()
 //! Returns \f$ \rho^\prime_j \f$ and its gradient
 void 
 MEAL::CongruenceTransformation::calculate (Jones<double>& result,
-						  std::vector<Jones<double> >* grad)
+					   std::vector<Jones<double> >* grad)
 {
   if (verbose)
     cerr << "MEAL::CongruenceTransformation::calculate" << endl;

@@ -2,16 +2,17 @@
 noinst_LTLIBRARIES = libunits.la
 
 libunits_la_SOURCES = Error.C HeapTracked.C ReferenceAble.C stringtok.C	     \
-	Function.C Argument.C Parameters.C Projection.C Composite.C	     \
-	UnivariateBase.C Univariate.C UnivariateProxy.C Scalar.C	     \
-	ScalarConstant.C ScalarMath.C OptimizedScalar.C			     \
-	ScalarValue.C UnaryScalar.C ScalarRoot.C ScalarSine.C ScalarCosine.C \
+	Function.C ParameterPolicy.C OneParameter.C Parameters.C \
+	ArgumentPolicy.C Argument.C Composite.C Projection.C \
+	UnivariatePolicy.C \
+	Scalar.C ScalarConstant.C ScalarMath.C ScalarValue.C \
+	UnaryScalar.C ScalarRoot.C ScalarSine.C ScalarCosine.C \
 	ScalarTangent.C ScalarHypSine.C ScalarHypCosine.C ScalarHypTangent.C \
 	ScalarAbsolute.C ScalarExponential.C ScalarLogarithm.C		     \
 	ScalarInverseHypTangent.C BinaryScalar.C ScalarInverseTangent2.C     \
-	ScalarPower.C ScalarArgument.C UnivariateOptimizedScalar.C	     \
+	ScalarPower.C ScalarArgument.C 	     \
 	Polynomial.C Gaussian.C Complex2Value.C Complex2.C Complex2Math.C    \
-	OptimizedComplex2.C Complex2Constant.C Gain.C Phase.C Boost.C	     \
+	Complex2Constant.C Gain.C Phase.C Boost.C	     \
 	Rotation.C Polar.C Coherency.C NormalizeStokes.C Tracer.C	     \
 	CongruenceTransformation.C Function_load.C Function_parse.C	     \
 	Function_print.C Function_new_Function.C Pauli.C linchi2.C	     \
@@ -27,51 +28,51 @@ nobase_include_HEADERS = Error.h HeapTracked.h ReferenceAble.h stringtok.h \
         Quaternion.h Jones.h Pauli.h Basis.h Stokes.h Cloude.h  \
         tostring.h random.h EstimatePlotter.h complexPlotter.h linchi2.h \
         complex_promote.h \
-	MEAL/Agent.h                     MEAL/RotatingVectorModel.h \
-	MEAL/ArgumentBehaviour.h         MEAL/Phase.h \
-	MEAL/Argument.h                  MEAL/Polar.h \
+	MEAL/Agent.h                     MEAL/ParameterPolicy.h \
+	MEAL/Argument.h                  MEAL/Parameters.h \
+	MEAL/ArgumentPolicyAdapter.h     MEAL/Phase.h \
+	MEAL/ArgumentPolicy.h            MEAL/Polar.h \
 	MEAL/Axis.h                      MEAL/Polynomial.h \
 	MEAL/BinaryRule.h                MEAL/ProductRule.h \
 	MEAL/BinaryScalar.h              MEAL/ProjectGradient.h \
 	MEAL/Boost.h                     MEAL/Projection.h \
-	MEAL/ChainRule.h                 MEAL/Rotation.h \
-	MEAL/Coherency.h                 MEAL/RuleMath.h \
-	MEAL/Complex2Constant.h          MEAL/ScalarAbsolute.h \
-	MEAL/Complex2.h                  MEAL/ScalarArgument.h \
-	MEAL/Complex2Math.h              MEAL/ScalarConstant.h \
-	MEAL/Complex2Value.h             MEAL/ScalarCosine.h \
-	MEAL/Composite.h                 MEAL/ScalarExponential.h \
-	MEAL/CongruenceTransformation.h  MEAL/Scalar.h \
-	MEAL/Constant.h                  MEAL/ScalarHypCosine.h \
-	MEAL/EvaluationBehaviour.h       MEAL/ScalarHypSine.h \
-	MEAL/Factory.h                   MEAL/ScalarHypTangent.h \
-	MEAL/Function.h                  MEAL/ScalarInverseHypTangent.h \
-	MEAL/Gain.h                      MEAL/ScalarInverseTangent2.h \
-	MEAL/Gaussian.h                  MEAL/ScalarLogarithm.h \
-	MEAL/GaussJordan.h               MEAL/ScalarMath.h \
-	MEAL/GroupRule.h                 MEAL/ScalarPower.h \
-	MEAL/InverseRule.h               MEAL/ScalarRoot.h \
-	MEAL/LevenbergMarquardt.h        MEAL/ScalarSine.h \
-	MEAL/Mean.h                      MEAL/ScalarTangent.h \
-	MEAL/NegationRule.h              MEAL/ScalarValue.h \
-	MEAL/NoParameters.h              MEAL/SumRule.h \
-	MEAL/NormalizeStokes.h           MEAL/Tracer.h \
-	MEAL/OptimizedComplex2.h         MEAL/UnaryRule.h \
-	MEAL/Optimized.h                 MEAL/UnaryScalar.h \
-	MEAL/OptimizedScalar.h           MEAL/UnivariateBase.h \
-	MEAL/ParameterBehaviour.h        MEAL/Univariate.h \
-	MEAL/Parameters.h                MEAL/UnivariateProxy.h \
-	MEAL/UnivariateOptimizedScalar.h MEAL/UnivariateEvaluationProxy.h
-
+	MEAL/Cached.h                    MEAL/RotatingVectorModel.h \
+	MEAL/CalculatePolicy.h           MEAL/Rotation.h \
+	MEAL/ChainRule.h                 MEAL/RuleMath.h \
+	MEAL/Coherency.h                 MEAL/ScalarAbsolute.h \
+	MEAL/Complex2Constant.h          MEAL/ScalarArgument.h \
+	MEAL/Complex2.h                  MEAL/ScalarConstant.h \
+	MEAL/Complex2Math.h              MEAL/ScalarCosine.h \
+	MEAL/Complex2Value.h             MEAL/ScalarExponential.h \
+	MEAL/Composite.h                 MEAL/Scalar.h \
+	MEAL/CongruenceTransformation.h  MEAL/ScalarHypCosine.h \
+	MEAL/Constant.h                  MEAL/ScalarHypSine.h \
+	MEAL/EvaluationPolicy.h          MEAL/ScalarHypTangent.h \
+	MEAL/Factory.h                   MEAL/ScalarInverseHypTangent.h \
+	MEAL/Function.h                  MEAL/ScalarInverseTangent2.h \
+	MEAL/FunctionPolicy.h            MEAL/ScalarLogarithm.h \
+	MEAL/Gain.h                      MEAL/ScalarMath.h \
+	MEAL/Gaussian.h                  MEAL/ScalarPower.h \
+	MEAL/GaussJordan.h               MEAL/ScalarRoot.h \
+	MEAL/GroupRule.h                 MEAL/ScalarSine.h \
+	MEAL/InverseRule.h               MEAL/ScalarTangent.h \
+	MEAL/LevenbergMarquardt.h        MEAL/ScalarValue.h \
+	MEAL/Mean.h                      MEAL/SumRule.h \
+	MEAL/NegationRule.h              MEAL/Tracer.h \
+	MEAL/NoParameters.h              MEAL/UnaryRule.h \
+	MEAL/NormalizeStokes.h           MEAL/UnaryScalar.h \
+	MEAL/NotCached.h                 MEAL/Univariate.h \
+	MEAL/OneParameter.h              MEAL/UnivariatePolicy.h
 
 bin_PROGRAMS = lmfit
 
-check_PROGRAMS = test_Error test_HeapTracked test_Reference \
+check_PROGRAMS = test_Error test_HeapTracked test_Reference		 \
 	test_circular_Reference test_Registry test_Functor test_Callback \
-	test_Estimate test_Vector test_Matrix test_Jacobi test_eigen \
-	test_Jones test_Quaternion test_Pauli test_Basis test_Stokes \
-	test_Axis test_Projection test_Composite test_Scalar \
-	test_Complex2Product test_TextInterface test_parse_indeces
+	test_copy test_Axis test_Projection test_Composite test_Scalar	 \
+	test_Complex2Product test_Basis test_Stokes test_Polar		 \
+	test_TextInterface test_parse_indeces test_Estimate test_Vector	 \
+	test_Matrix test_Jacobi test_eigen test_Jones test_Quaternion \
+	test_Pauli 
 
 TESTS = $(check_PROGRAMS)
 
@@ -82,6 +83,7 @@ test_circular_Reference_SOURCES	= test_circular_Reference.C
 test_Registry_SOURCES		= test_Registry.C
 test_Functor_SOURCES		= test_Functor.C
 test_Callback_SOURCES		= test_Callback.C
+test_copy_SOURCES		= test_copy.C
 test_Estimate_SOURCES		= test_Estimate.C
 test_Vector_SOURCES		= test_Vector.C
 test_Matrix_SOURCES		= test_Matrix.C
@@ -90,6 +92,7 @@ test_eigen_SOURCES		= test_eigen.C
 test_Jones_SOURCES		= test_Jones.C
 test_Quaternion_SOURCES		= test_Quaternion.C
 test_Pauli_SOURCES		= test_Pauli.C
+test_Polar_SOURCES		= test_Polar.C
 test_Basis_SOURCES		= test_Basis.C
 test_Stokes_SOURCES		= test_Stokes.C
 test_Axis_SOURCES		= test_Axis.C

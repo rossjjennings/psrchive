@@ -21,7 +21,7 @@ void MEAL::Polar::init ()
   // name = "Polar";
 
   // Note, these objects will be destroyed during Reference::To destructor
-  gain  = new MEAL::Gain;
+  gain = new MEAL::Gain;
   add_model (gain);
   // gain->name = "Polar::Gain";
 
@@ -106,15 +106,12 @@ Estimate<double> MEAL::Polar::get_gain () const
 
 Estimate<double> MEAL::Polar::get_boostGibbs (unsigned i) const
 {
-  assert (i < 3);
-  assert (boost->get_nparam() == 3);
-
-  return boost->get_Estimate(i);
+  return boost->get_Estimate (i);
 }
 
 Estimate<double> MEAL::Polar::get_rotationEuler (unsigned i) const
 {
-  return rotation[i]->get_Estimate(0);
+  return rotation[i]->get_Estimate (0);
 }
 
 void MEAL::Polar::set_gain (const Estimate<double>& g)
@@ -122,14 +119,12 @@ void MEAL::Polar::set_gain (const Estimate<double>& g)
   gain->set_Estimate (0, g);
 }
 
-void MEAL::Polar::set_boostGibbs (unsigned i, 
-					 const Estimate<double>& b)
+void MEAL::Polar::set_boostGibbs (unsigned i, const Estimate<double>& b)
 {
   boost->set_Estimate (i, b);
 }
    
-void MEAL::Polar::set_rotationEuler (unsigned i,
-					    const Estimate<double>& phi_i)
+void MEAL::Polar::set_rotationEuler (unsigned i, const Estimate<double>& phi_i)
 {
   rotation[i]->set_Estimate (0, phi_i);
 }
@@ -145,7 +140,7 @@ void MEAL::Polar::set_rotationEuler (unsigned i,
   \post source and sky will be modified to represent the un-boosted
   Stokes parameters.  */
 void MEAL::Polar::solve (Quaternion<Estimate<double>, Hermitian>& source,
-				Quaternion<Estimate<double>, Hermitian>& sky)
+			 Quaternion<Estimate<double>, Hermitian>& sky)
 {
   // Assuming that the off pulse radiation is unpolarized, the boost
   // component of the system response is simply the square root of the

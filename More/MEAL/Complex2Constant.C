@@ -1,30 +1,22 @@
 #include "MEAL/Complex2Constant.h"
+#include "MEAL/Constant.h"
+#include "MEAL/NotCached.h"
 
 //! Default constructor
-MEAL::Complex2Constant::Complex2Constant (const Jones<double>& _jones)
+MEAL::Complex2Constant::Complex2Constant (const Jones<double>& jones)
 {
-  jones = _jones;
-  set_evaluation_changed (false);
-}
+  parameter_policy = new Constant;
+  evaluation_policy = new NotCached<Complex2> (this);
 
-//! Copy constructor
-MEAL::Complex2Constant::Complex2Constant (const Complex2Constant& other)
-{
-  jones = other.jones;
-  set_evaluation_changed (false);
+  value = jones;
 }
 
 //! Assignment operator
 const MEAL::Complex2Constant&
-MEAL::Complex2Constant::operator = (const Complex2Constant& other)
+MEAL::Complex2Constant::operator = (const Complex2Constant& scalar)
 {
-  jones = other.jones;
-  return *this;
-}
-
-//! Destructor
-MEAL::Complex2Constant::~Complex2Constant ()
-{
+  throw Error (InvalidState, "MEAL::Complex2Constant::operator =",
+	       "cannot assign new value to constant");
 }
 
 //! Return the name of the class
@@ -33,13 +25,11 @@ std::string MEAL::Complex2Constant::get_name () const
   return "Complex2Constant";
 }
 
-
-Jones<double>
-MEAL::Complex2Constant::evaluate (std::vector<Jones<double> >* grad)
-  const
+void MEAL::Complex2Constant::calculate (Jones<double>& result,
+                                        std::vector<Jones<double> >* grad)
 {
   if (grad)
     grad->resize(0);
 
-  return jones;
+  result = value;
 }

@@ -7,13 +7,15 @@ using namespace std;
 using namespace MEAL;
 
 // Tests the mapping function of the Composite class
-class CompositeTest: public Composite {
+class CompositeTest: public Function {
 
 public:
+  CompositeTest () : composite (this) { }
   void runtest ();
   void evaluate () { set_evaluation_changed (false); }
   bool get_changed () { return get_evaluation_changed(); }
   string get_name () const { return "CompositeTest"; }
+  Composite composite;
 };
 
 
@@ -28,15 +30,15 @@ void CompositeTest::runtest ()
   Project<Rotation> m1r (&rotation);
   Project<Rotation> m2r (&rotation);
 
-  Project<Composite> m1m (&m2);
+  Project<CompositeTest> m1m (&m2);
 
   Project<Boost> m2b (&boost);
 
   cerr << "********************* m1 map rotation" << endl;
-  m1.map (m1r);
+  m1.composite.map (m1r);
 
   cerr << "********************* m1 map m2" << endl;
-  m1.map (m1m);
+  m1.composite.map (m1m);
 
   if (!m1.get_changed())
     throw Error (InvalidState, "test_Composite", 
@@ -49,9 +51,9 @@ void CompositeTest::runtest ()
 		 "Composite changed after evaluate");
 
   cerr << "********************* m2 map boost" << endl;
-  m2.map (m2b);
+  m2.composite.map (m2b);
   cerr << "********************* m2 map rotation" << endl;
-  m2.map (m2r);
+  m2.composite.map (m2r);
     
   if (!m1.get_changed())
     throw Error (InvalidState, "test_Composite", 

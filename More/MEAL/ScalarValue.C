@@ -1,10 +1,11 @@
 #include "MEAL/ScalarValue.h"
+#include "MEAL/OneParameter.h"
 
 using namespace std;
 
 MEAL::ScalarValue::ScalarValue (Estimate<double> value)
-  : OptimizedScalar (1)
 {
+  new OneParameter (this);
   set_value (value);
   value_name = "value";
 }
@@ -13,15 +14,6 @@ MEAL::ScalarValue::ScalarValue (Estimate<double> value)
 string MEAL::ScalarValue::get_name () const
 {
   return "ScalarValue";
-}
-
-//! Return the name of the specified parameter
-string MEAL::ScalarValue::get_param_name (unsigned index) const
-{
-  if (index == 0)
-    return value_name;
-  else
-    return "ERROR";
 }
 
 void MEAL::ScalarValue::set_value (const Estimate<double>& value)

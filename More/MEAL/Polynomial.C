@@ -1,4 +1,5 @@
 #include "MEAL/Polynomial.h"
+
 #include "stringtok.h"
 #include "tostring.h"
 
@@ -7,9 +8,31 @@
 using namespace std;
 
 MEAL::Polynomial::Polynomial (unsigned ncoef)
-  : UnivariateOptimizedScalar (ncoef)
+  : parameters (this, ncoef)
 {
   x_0 = 0;
+
+  for (unsigned i=0; i<ncoef; i++)
+    parameters.set_param_name (i, "c_" + tostring(i));
+}
+
+//! Copy constructor
+MEAL::Polynomial::Polynomial (const Polynomial& copy)
+  : parameters (this)
+{
+  operator = (copy);
+}
+
+//! Assignment operator
+MEAL::Polynomial& MEAL::Polynomial::operator = (const Polynomial& copy)
+{
+  if (&copy == this)
+    return *this;
+
+  x_0 = copy.x_0;
+  parameters = copy.parameters;
+
+  return *this;
 }
 
 //! Return the name of the class
@@ -17,13 +40,6 @@ string MEAL::Polynomial::get_name () const
 {
   return "Polynomial";
 }
-
-//! Return the name of the specified parameter
-string MEAL::Polynomial::get_param_name (unsigned index) const
-{
-  return "c_" + tostring (index);
-}
-
 
 void MEAL::Polynomial::parse (const string& line)
 {
@@ -47,7 +63,7 @@ void MEAL::Polynomial::parse (const string& line)
     if (key == "order")
       nparam ++;
 
-    resize (nparam);
+    parameters.resize (nparam);
     return;
 
   }
@@ -67,7 +83,7 @@ void MEAL::Polynomial::parse (const string& line)
 
 //! Prints the values of model parameters and fit flags to a string
 void MEAL::Polynomial::print_parameters (string& text,
-						const string& sep) const
+					 const string& sep) const
 {
   text += sep + "ncoef " + tostring (get_nparam());
   Function::print_parameters (text, sep);
@@ -76,7 +92,7 @@ void MEAL::Polynomial::print_parameters (string& text,
 //! Return the value (and gradient, if requested) of the function
 void MEAL::Polynomial::calculate (double& result, std::vector<double>* grad)
 {
-  double x = abscissa - x_0;
+  double x = get_abscissa() - x_0;
 
   result = 0;
 

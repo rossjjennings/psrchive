@@ -3,9 +3,13 @@
 using namespace std;
 
 MEAL::Gaussian::Gaussian ()
-  : UnivariateOptimizedScalar (3)
+  : parameters (this, 3)
 {
   cyclic = false;
+
+  parameters.set_param_name (0, "centre");
+  parameters.set_param_name (1, "width");
+  parameters.set_param_name (2, "height");
 }
 
 //! Return the name of the class
@@ -14,20 +18,6 @@ string MEAL::Gaussian::get_name () const
   return "Gaussian";
 }
 
-//! Return the name of the specified parameter
-string MEAL::Gaussian::get_param_name (unsigned index) const
-{
-  switch (index) {
-  case 0:
-    return "centre";
-  case 1:
-    return "width";
-  case 2:
-    return "height";
-  default:
-    return "ERROR";
-  }
-}
 
 //! Set the centre
 void MEAL::Gaussian::set_centre (double centre)

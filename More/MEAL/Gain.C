@@ -2,9 +2,10 @@
 
 using namespace std;
 
-MEAL::Gain::Gain () : OptimizedComplex2 (1)
+MEAL::Gain::Gain () : parameters (this, 1)
 {
   set_param (0, 1.0);
+  parameters.set_param_name (0, "gain");
 }
 
 //! Return the name of the class
@@ -13,18 +14,9 @@ string MEAL::Gain::get_name () const
   return "Gain";
 }
 
-//! Return the name of the specified parameter
-string MEAL::Gain::get_param_name (unsigned index) const
-{
-  if (index == 0)
-    return "gain";
-  else
-    return "ERROR";
-}
-
 //! Calculate the Jones matrix and its gradient, as parameterized by gain
 void MEAL::Gain::calculate (Jones<double>& result,
-				   std::vector<Jones<double> >* grad)
+			    std::vector<Jones<double> >* grad)
 {
   double gain = get_param(0);
 

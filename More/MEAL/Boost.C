@@ -3,13 +3,17 @@
 
 using namespace std;
 
-MEAL::Boost::Boost () : OptimizedComplex2 (3)
+MEAL::Boost::Boost () : parameters (this, 3)
 {
+  parameters.set_param_name (0, "b_1");
+  parameters.set_param_name (1, "b_2");
+  parameters.set_param_name (2, "b_3");
 }
 
 MEAL::Boost::Boost (const Vector<double, 3>& _axis) 
-  : OptimizedComplex2 (1)
+  : parameters (this, 1)
 {
+  parameters.set_param_name (0, "boost");
   set_axis (_axis);
 }
 
@@ -19,21 +23,13 @@ string MEAL::Boost::get_name () const
   return "Boost";
 }
 
-//! Return the name of the specified parameter
-string MEAL::Boost::get_param_name (unsigned index) const
-{
-  if (index == 0)
-    return "boost";
-  else
-    return "ERROR";
-}
 
 void MEAL::Boost::set_axis (const Vector<double, 3>& _axis)
 {
   double norm = _axis * _axis;
   axis = _axis / sqrt(norm);
 
-  resize (1);
+  parameters.resize (1);
 }
 
 //! Get the unit-vector along which the boost occurs
@@ -94,7 +90,7 @@ void MEAL::Boost::free_axis ()
   double beta = get_param (0);
   Vector<double, 3> Gibbs = axis * sinh(beta);
 
-  resize (3);
+  parameters.resize (3);
   for (unsigned i=0; i<3; i++)
     set_param (i, Gibbs[i]);
 }
@@ -111,7 +107,7 @@ void MEAL::Boost::calculate (Jones<double>& result,
 
 //! Return the Jones matrix and its gradient
 void MEAL::Boost::calculate_beta (Jones<double>& result,
-					 vector<Jones<double> >* grad)
+				  vector<Jones<double> >* grad)
 {
   double beta = get_param(0);
 
@@ -140,7 +136,7 @@ void MEAL::Boost::calculate_beta (Jones<double>& result,
 
 
 void MEAL::Boost::calculate_Gibbs (Jones<double>& result, 
-					  vector<Jones<double> >* grad)
+				   vector<Jones<double> >* grad)
 {
   Vector<double, 3> Gibbs;
   for (unsigned i=0; i<3; i++)
@@ -156,6 +152,9 @@ void MEAL::Boost::calculate_Gibbs (Jones<double>& result,
   double beta = asinh (sinh_beta);
   double cosh_beta = cosh (beta);
   
+  if (verbose)
+    cerr << "MEAL::Boost::calculate Gibbs beta=" << beta << endl;
+
   // the Boost quaternion
   Quaternion<double, Hermitian> boost (cosh_beta, Gibbs);
 

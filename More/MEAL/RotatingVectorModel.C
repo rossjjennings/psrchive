@@ -5,10 +5,9 @@
 
 using namespace std;
 
-MEAL::RotatingVectorModel::RotatingVectorModel ()
+void MEAL::RotatingVectorModel::init ()
 {
   ScalarArgument* argument = new ScalarArgument; 
-  set_univariate_subject ( argument );
 
   reference_position_angle = new ScalarValue;
   line_of_sight = new ScalarValue;
@@ -23,7 +22,31 @@ MEAL::RotatingVectorModel::RotatingVectorModel ()
 
   ScalarMath result = atan2(numerator,denominator) + *reference_position_angle;
 
-  set_evaluation_subject( result.get_expression() );
+  expression = result.get_expression();
+
+  copy_parameter_policy  (expression);
+  copy_evaluation_policy (expression);
+  copy_univariate_policy (argument);
+}
+
+MEAL::RotatingVectorModel::RotatingVectorModel ()
+{
+  init ();
+}
+
+//! Copy constructor
+MEAL::RotatingVectorModel::RotatingVectorModel (const RotatingVectorModel& copy)
+{
+  init ();
+  operator = (copy);
+}
+
+//! Assignment operator
+MEAL::RotatingVectorModel&
+MEAL::RotatingVectorModel::operator = (const RotatingVectorModel& copy)
+{
+  Univariate<Scalar>::operator = (copy);
+  return *this;
 }
 
 MEAL::RotatingVectorModel::~RotatingVectorModel ()

@@ -1,7 +1,8 @@
 #include "MEAL/Phase.h"
 
-MEAL::Phase::Phase () : OptimizedComplex2 (1)
+MEAL::Phase::Phase () : parameters (this, 1)
 {
+  parameters.set_param_name (0, "phase");
 }
 
 //! Return the name of the class
@@ -10,18 +11,9 @@ std::string MEAL::Phase::get_name () const
   return "Phase";
 }
 
-//! Return the name of the specified parameter
-std::string MEAL::Phase::get_param_name (unsigned index) const
-{
-  if (index == 0)
-    return "phase";
-  else
-    return "ERROR";
-}
-
 //! Calculate the Jones matrix and its gradient, as parameterized by gain
 void MEAL::Phase::calculate (Jones<double>& result,
-				    std::vector<Jones<double> >* grad)
+			     std::vector<Jones<double> >* grad)
 {
   double phase = get_param(0);
 
