@@ -38,6 +38,7 @@ void usage ()
     "  -p               Perform full polarimetric fit in Fourier domain \n"
     "  -s stdfile       Location of standard profile \n"
     "  -t               Fit in the time domain \n"
+    "  -l               Legacy mode -- use old FFTCONV in toa calculator \n"
     "See http://astronomy.swin.edu.au/pulsar/software/manuals/pat.html"
        << endl;
 }
@@ -53,7 +54,6 @@ int main (int argc, char *argv[])
 
   bool fscrunch = false;
   bool tscrunch = false;
-
   string std;
 
   vector<string> archives;
@@ -63,7 +63,8 @@ int main (int argc, char *argv[])
   int gotc = 0;
 
   Pulsar::PolnProfileFit fit;
-  while ((gotc = getopt(argc, argv, "hiFn:ps:a:tTvV")) != -1) {
+
+  while ((gotc = getopt(argc, argv, "hiFln:ps:tTvV")) != -1) {
     switch (gotc) {
     case 'h':
       usage ();
@@ -80,13 +81,15 @@ int main (int argc, char *argv[])
       break;
 
     case 'i':
-      cout << "$Id: pat.C,v 1.20 2004/05/05 06:47:44 ahotan Exp $" << endl;
+      cout << "$Id: pat.C,v 1.21 2004/05/05 23:22:33 sord Exp $" << endl;
       return 0;
 
     case 'F':
       fscrunch = true;
       break;
-
+    case 'l':
+      Pulsar::Profile::legacy = true;
+      break;
     case 'n':
       fit.set_maximum_harmonic( atoi(optarg) );
       break;
