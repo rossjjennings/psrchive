@@ -505,6 +505,86 @@ polyco::polyco (const char * filename)
                 "polyco::load (%s)", filename);
 }
 
+char polyco::get_telescope () const
+{
+  if (pollys.empty()) {
+    return '\0';
+  }
+  else {
+    return pollys.front().get_telescope();
+  }
+}
+
+double polyco::get_freq () const 
+{ 
+  if (pollys.empty()) {
+    return 0.0;
+  }
+  else {
+    return pollys.front().get_freq();
+  }
+}
+
+MJD polyco::get_reftime () const
+{ 
+  if (pollys.empty()) {
+    return MJD();
+  }
+  else {
+    return pollys.front().get_reftime();
+  }
+}
+
+double polyco::get_refperiod () const 
+{
+  if (pollys.empty()) {
+    return 0.0;
+  }
+  else {
+    return 1.0/pollys.front().f0;
+  }
+}
+
+double polyco::get_nspan () const 
+{ 
+  if (pollys.empty()) {
+    return 0.0;
+  }
+  else {
+    return pollys.front().get_nspan();
+  }
+}
+
+float polyco::get_dm () const
+{
+  if (pollys.empty()) {
+    return 0.0;
+  }
+  else {
+    return pollys.front().get_dm();
+  }
+}
+
+int polyco::get_ncoeff () const
+{
+  if (pollys.empty()) {
+    return 0;
+  }
+  else {
+    return pollys.front().get_ncoeff();
+  }
+}
+
+string polyco::get_psrname () const
+{ 
+  if (pollys.empty()) {
+    return "";
+  }
+  else {
+    return pollys.front().get_psrname();
+  }
+}
+
 int polyco::load (const char* polyco_filename, size_t nbytes)
 {
   if (verbose)

@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/polyco.h,v $
-   $Revision: 1.18 $
-   $Date: 2003/01/23 10:22:22 $
-   $Author: straten $ */
+   $Revision: 1.19 $
+   $Date: 2003/05/27 04:36:13 $
+   $Author: pulsar $ */
 
 #ifndef __POLY_H
 #define __POLY_H
@@ -241,15 +241,14 @@ class polyco : public Reference::Able {
   double accel(const MJD& t, const string& psr = anyPsr) const
     { return best(t, psr).accel(t); };
 
-  // bool   is_tempov11   () const { return pollys.front().is_tempov11(); };
-  char   get_telescope () const { return pollys.front().get_telescope(); }
-  double get_freq      () const { return pollys.front().get_freq(); }
-  MJD    get_reftime   () const { return pollys.front().get_reftime(); }
-  double get_refperiod () const { return 1.0/pollys.front().f0; }
-  double get_nspan     () const { return pollys.front().get_nspan(); }
-  float  get_dm        () const { return pollys.front().get_dm(); }
-  int    get_ncoeff    () const { return pollys.front().get_ncoeff(); }
-  string get_psrname   () const { return pollys.front().get_psrname(); }
+  char   get_telescope () const;
+  double get_freq      () const;
+  MJD    get_reftime   () const;
+  double get_refperiod () const;
+  double get_nspan     () const;
+  float  get_dm        () const;
+  int    get_ncoeff    () const;
+  string get_psrname   () const;
 
   bool is_tempov11() const;
 
