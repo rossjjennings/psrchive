@@ -235,28 +235,14 @@ void Pulsar::Integration::bscrunch (int nscrunch)
     
 void Pulsar::Integration::pscrunch()
 {
-  if (verbose) {
+  if (verbose)
+    cerr << "Integration::pscrunch " << Poln::state_string(get_poln_state())
+	 << endl;
 
-    switch (get_poln_state()) {
-    case Poln::Coherence:
-      cerr << "Integration::pscrunch Coherency Products" << endl;
-      break;
-    case Poln::PPQQ:
-      cerr << "Integration::pscrunch Square Law Detected - 2 Polns" << endl;
-      break;
-    case Poln::Stokes:
-      cerr << "Integration::pscrunch Stokes Parameters" << endl;
-      break;
-    default:
-      cerr << "Integration::pscrunch something else" << endl;
-      break;
-    }
-
-  }
   if (get_poln_state() == Poln::Coherence || get_poln_state() == Poln::PPQQ) {
 
-    if (get_npol() != 2)
-      throw Error (InvalidState, "Integration::pscrunch", "npol != 2");
+    if (get_npol() < 2)
+      throw Error (InvalidState, "Integration::pscrunch", "npol < 2");
 
     for (int ichan=0; ichan < get_nchan(); ichan++)
       *(profiles[0][ichan]) += *(profiles[1][ichan]);
