@@ -103,7 +103,7 @@ int main (int argc, char *argv[]) {
       Pulsar::Archive::set_verbosity(1);
       break;
     case 'i':
-      cout << "$Id: pac.C,v 1.36 2003/12/06 01:06:22 straten Exp $" << endl;
+      cout << "$Id: pac.C,v 1.37 2003/12/06 14:12:42 straten Exp $" << endl;
       return 0;
     case 'p':
       cals_are_here = optarg;
@@ -362,8 +362,11 @@ int main (int argc, char *argv[]) {
 	
 	cout << "Mean Tsys = " << fcal_engine->meanTsys() << endl;
       }
- 
-      int index = archives[i].find_first_of(".", 0);
+
+      // find first of "." turns ./cal/poo.cfb info .unload_ext 
+      // int index = archives[i].find_first_of(".", 0);
+      int index = archives[i].find_last_of(".",archives[i].length());
+
       string newname = opath;
       newname += archives[i].substr(0, index);
       newname += ".";
