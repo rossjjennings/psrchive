@@ -1,6 +1,6 @@
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/Timer/timer++.h,v $
-   $Revision: 1.7 $
-   $Date: 2000/06/02 05:56:18 $
+   $Revision: 1.8 $
+   $Date: 2001/02/24 04:31:43 $
    $Author: straten $ */
 
 #ifndef __TIMER_PLUSPLUS_H
@@ -67,10 +67,12 @@ namespace Timer {
   // returns true if two archives can be mixed (tadded, for instance)
   // set max_freq_sep if you wish to alter the action of this function
   bool mixable (const timer& hdr1, const timer& arch2,
-		double max_freq_sep = 0.10 /* 100kHz */);
+		double max_freq_sep = 0.10 /* 100kHz */,
+		bool allow_opposite_sideband = false);
 
   bool cal_mixable (const timer& hdr1, const timer& arch2,
-		    double max_freq_sep = 0.10 /* 100kHz */);
+		    double max_freq_sep = 0.10 /* 100kHz */,
+		bool allow_opposite_sideband = false);
 
   // a function to set most of timer struct to NULL values.
   void init (struct timer * hdr);

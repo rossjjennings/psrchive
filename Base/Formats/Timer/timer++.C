@@ -2,6 +2,7 @@
 #include <math.h>
 
 #include "timer++.h"
+#include "string_utils.h"
 #include "convert_endian.h"
 
 string Timer::reason;
@@ -157,7 +158,8 @@ int Timer::poln_storage (const struct timer& hdr)
 // double Timer::default_max_freq_sep = 0.1;
 //string Timer::reason;
 
-bool Timer::mixable (const timer& hdr1, const timer& hdr2, double max_freq_sep)
+bool Timer::mixable (const timer& hdr1, const timer& hdr2, 
+			double max_freq_sep, bool allow_opposite_sideband)
 {
   // Check headers - this is more or less a list of why we can't
   // store subints with different properties (e.g. nbin, sub_int_time...)
@@ -183,14 +185,16 @@ bool Timer::mixable (const timer& hdr1, const timer& hdr2, double max_freq_sep)
     return false;
   }
   if (hdr1.nbin != hdr2.nbin) {
-    reason = "Archives have different numbers of bins";
+    reason = stringprintf ("Archives have different numbers of bins (%d!=%d)",
+	  hdr1.nbin, hdr2.nbin);
     return false;
   }
 
-  return cal_mixable (hdr1, hdr2, max_freq_sep);
+  return cal_mixable (hdr1, hdr2, max_freq_sep, allow_opposite_sideband);
 }
 
-bool Timer::cal_mixable (const timer& hdr1, const timer& hdr2, double maxfsep)
+bool Timer::cal_mixable (const timer& hdr1, const timer& hdr2,
+			double maxfsep, bool allow_opposite_sideband)
 {
   if (hdr1.nsub_band != hdr2.nsub_band) {
     reason = "Archives have different numbers of subbands";
@@ -200,7 +204,9 @@ bool Timer::cal_mixable (const timer& hdr1, const timer& hdr2, double maxfsep)
     reason = "Archives have too different center frequencies";
     return false;
   }
-  if (hdr1.banda.bw != hdr2.banda.bw) {
+  if (hdr1.banda.bw != hdr2.banda.bw &&
+	!(allow_opposite_sideband && (hdr1.banda.bw == -hdr2.banda.bw)) ) {
+cerr << "bw1=" << hdr1.banda.bw << " bw2=" << hdr2.banda.bw << endl;
     reason = "Archives have different bandwidths";
     return false;
   }
