@@ -1,5 +1,5 @@
 //
-// $Id: pav.C,v 1.91 2004/10/21 06:39:46 straten Exp $
+// $Id: pav.C,v 1.92 2004/11/07 08:08:59 straten Exp $
 //
 // The Pulsar Archive Viewer
 //
@@ -20,6 +20,7 @@
 #include "Pulsar/Profile.h"
 #include "Pulsar/Plotter.h"
 #include "Pulsar/Passband.h"
+#include "Physical.h"
 
 #include "Pulsar/BinaryPhaseOrder.h"
 #include "Pulsar/PeriastronOrder.h"
@@ -215,7 +216,7 @@ int main (int argc, char** argv)
   char* metafile = NULL;
   
   Pulsar::Plotter plotter;
-  Pulsar::Plotter::ColourMap colour_map = Pulsar::Plotter::Heat;
+  pgplot::ColourMap::Name colour_map = pgplot::ColourMap::Heat;
   
   Pulsar::FourierSNR fourier_snr;
 
@@ -322,7 +323,7 @@ int main (int argc, char** argv)
       plotter.set_subint( atoi (optarg) );
       break;
     case 'i':
-      cout << "$Id: pav.C,v 1.91 2004/10/21 06:39:46 straten Exp $" << endl;
+      cout << "$Id: pav.C,v 1.92 2004/11/07 08:08:59 straten Exp $" << endl;
       return 0;
 
     case 'j':
@@ -572,7 +573,7 @@ int main (int argc, char** argv)
     }      
 
     case 206: {
-      colour_map = (Pulsar::Plotter::ColourMap) atoi(optarg);
+      colour_map = (pgplot::ColourMap::Name) atoi(optarg);
       break;
     }
 
@@ -908,12 +909,23 @@ int main (int argc, char** argv)
       }
     
       if (hat) {
-	cpg_next();
-	plotter.plot (archive -> get_Profile(0,0,0));
-	sleep(2);
-	cpgeras();
-	archive -> get_Profile(0,0,0) -> smear(0.05);
-	plotter.plot (archive -> get_Profile(0,0,0));
+	//cpg_next();
+	//plotter.plot (archive -> get_Profile(0,0,0));
+	//sleep(2);
+	//cpgeras();
+
+	double freq = archive->get_centre_frequency ();
+	double bw = archive->get_bandwidth() / 32;
+	double dm = archive->get_dispersion_measure ();
+	double delay = Pulsar::dispersion_delay (dm, freq, freq+bw);
+	double period = archive->get_Integration(0)->get_folding_period();
+	double duty_cycle = fabs(delay/period);
+
+	cerr << "bw=" << bw << " freq=" << freq << " dm=" << dm << endl;
+	cerr << "delay=" << delay << " period=" << period << endl;
+	cerr << "duty cycle=" << duty_cycle << endl;
+	archive -> get_Profile(0,0,0) -> smear(duty_cycle);
+	//plotter.plot (archive -> get_Profile(0,0,0));
       }
     
       if (display) {
