@@ -1,0 +1,79 @@
+#include "MEAL/RotatingVectorModel.h"
+#include "MEAL/ScalarValue.h"
+#include "MEAL/ScalarArgument.h"
+
+using namespace std;
+
+MEAL::RotatingVectorModel::RotatingVectorModel ()
+{
+  ScalarArgument* argument = new ScalarArgument; 
+  set_univariate_subject ( argument );
+
+  reference_position_angle = new ScalarValue;
+  line_of_sight = new ScalarValue;
+  magnetic_axis = new ScalarValue;
+  magnetic_meridian = new ScalarValue;
+
+  set_evaluation_subject (0);
+}
+
+MEAL::RotatingVectorModel::~RotatingVectorModel ()
+{
+}
+
+void MEAL::RotatingVectorModel::set_reference_position_angle
+(const Estimate<double>& position_angle)
+{
+  reference_position_angle->set_value (position_angle);
+}
+
+Estimate<double> 
+MEAL::RotatingVectorModel::get_reference_position_angle () const
+{
+  return reference_position_angle->get_value ();
+}
+
+//! Set the latitude of the line of sight
+void MEAL::RotatingVectorModel::set_line_of_sight (const Estimate<double>& l)
+{
+  line_of_sight->set_value (l);
+}
+
+//! Get the latitude of the line of sight
+Estimate<double> MEAL::RotatingVectorModel::get_line_of_sight () const
+{
+  return line_of_sight->get_value ();
+}
+
+//! Set the latitude of the magnetic axis
+void MEAL::RotatingVectorModel::set_magnetic_axis (const Estimate<double>& m)
+{
+  magnetic_axis->set_value (m);
+}
+
+//! Get the latitude of the magnetic axis
+Estimate<double> MEAL::RotatingVectorModel::get_magnetic_axis () const
+{
+  return magnetic_axis->get_value ();
+}
+
+//! Set the longitude of the magnetic meridian
+void 
+MEAL::RotatingVectorModel::set_magnetic_meridian (const Estimate<double>& m)
+{
+  magnetic_meridian->set_value (m);
+}
+
+//! Get the longitude of the magnetic meridian
+Estimate<double> MEAL::RotatingVectorModel::get_magnetic_meridian () const
+{
+  return magnetic_meridian->get_value ();
+}
+
+
+//! Return the name of the class
+string MEAL::RotatingVectorModel::get_name () const
+{
+  return "RotatingVectorModel";
+}
+
