@@ -701,7 +701,7 @@ Pulsar::Database::closest_match (const Criterion& criterion,
 Pulsar::FluxCalibrator* 
 Pulsar::Database::generateFluxCalibrator (Pulsar::Archive* arch)
 {
-  Criterion criterion = get_default_criterion();
+  Criterion criterion = get_default_FluxCal_criterion();
   criterion.entry = Entry (*arch);
 
   criterion.entry.obsType = Signal::FluxCalOn;
@@ -720,7 +720,7 @@ Pulsar::Database::generateFluxCalibrator (Pulsar::Archive* arch)
                  "Pulsar::Database::generateFluxCalibrator",
                  "no FluxCalOff observations found to match observation");
 
-  vector<Pulsar::Archive*> fluxcalarchs;
+  vector<const Archive*> fluxcalarchs;
   
   for (unsigned i = 0; i < oncals.size(); i++)
     fluxcalarchs.push_back(Pulsar::Archive::load(get_filename(oncals[i])));
@@ -736,9 +736,7 @@ Pulsar::Database::generateFluxCalibrator (Pulsar::Archive* arch)
       cout << get_filename(offcals[i]) << endl;
   }
   
-  Pulsar::FluxCalibrator* retval = new Pulsar::FluxCalibrator(fluxcalarchs);
-  
-  return retval;
+  return new Pulsar::FluxCalibrator(fluxcalarchs);
 }
 
 /*! This routine is given a pointer to a Pulsar::Archive. It scans the
