@@ -1,7 +1,7 @@
 //-*-C++-*-
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Attic/string_utils.h,v $
-   $Revision: 1.32 $
-   $Date: 2004/10/13 14:10:58 $
+   $Revision: 1.33 $
+   $Date: 2004/10/14 11:56:45 $
    $Author: straten $ */
 
 #ifndef __STRING_UTILS_H
@@ -227,6 +227,9 @@ bool is_signed_integer(const string ss);
 
 //! a simple command for replacing the extension on a filename
 string replace_extension (string filename, const string& extension);
+
+//! a simple command for returning a user friendly time string
+string time_string (double seconds);
 
 #endif
 
