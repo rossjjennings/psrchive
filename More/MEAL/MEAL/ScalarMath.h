@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/ScalarMath.h,v $
-   $Revision: 1.4 $
-   $Date: 2004/11/23 12:14:35 $
+   $Revision: 1.5 $
+   $Date: 2005/02/09 14:09:32 $
    $Author: straten $ */
 
 #ifndef __ScalarMath_H
@@ -49,6 +49,9 @@ namespace MEAL {
 
     //! Negation operator
     friend const ScalarMath operator - (const ScalarMath& b);
+
+    //! Nothing operator
+    friend const ScalarMath operator + (const ScalarMath& b);
 
     //! Return a ScalarMath instance representing a+b
     friend const ScalarMath operator + (const ScalarMath& a,
@@ -125,6 +128,22 @@ namespace MEAL {
 
     //! Access the expression
     Scalar* get_expression () { return expression; }
+
+    //! Comparison operator
+    friend bool operator <= (const ScalarMath&, const ScalarMath&);
+
+    //! Comparison operator
+    friend bool operator < (const ScalarMath&, const ScalarMath&);
+
+    //! Comparison operator
+    friend bool operator >= (const ScalarMath&, const ScalarMath&);
+
+    //! Comparison operator
+    friend bool operator > (const ScalarMath&, const ScalarMath&);
+
+    //! Comparison operator
+    friend bool operator == (const ScalarMath&, const ScalarMath&);
+
 
   protected:
 

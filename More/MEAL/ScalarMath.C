@@ -112,6 +112,12 @@ MEAL::operator - (const ScalarMath& a)
   return *Negation<Scalar> (a.expression);
 }
 
+const MEAL::ScalarMath
+MEAL::operator + (const ScalarMath& a)
+{
+  return a;
+}
+
 bool MEAL::operator == (const ScalarMath& a, const ScalarMath& b)
 {
   return a.evaluate() == b.evaluate();
@@ -252,3 +258,21 @@ Estimate<double> MEAL::ScalarMath::get_Estimate () const
   expression->evaluate( value );
   return value;
 }
+
+using namespace MEAL;
+
+bool operator <= (const ScalarMath& a, const ScalarMath& b)
+{ return a.evaluate() <= b.evaluate(); }
+
+bool operator <  (const ScalarMath& a, const ScalarMath& b)
+{ return a.evaluate() < b.evaluate(); }
+
+bool operator >= (const ScalarMath& a, const ScalarMath& b)
+{ return a.evaluate() >= b.evaluate(); }
+
+bool operator >  (const ScalarMath& a, const ScalarMath& b)
+{ return a.evaluate() > b.evaluate(); }
+
+bool operator == (const ScalarMath& a, const ScalarMath& b)
+{ return a.evaluate() == b.evaluate(); }
+
