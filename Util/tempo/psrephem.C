@@ -10,6 +10,20 @@
 char* psrephem::tempo_pardir = NULL;
 int   psrephem::verbose = 0;
 
+#if 0
+void psrephem::init()
+{
+  int parmStatus     [EPH_NUM_KEYS];
+  char value_str     [EPH_NUM_KEYS][EPH_STR_LEN];
+  double value_double[EPH_NUM_KEYS];
+  int value_integer  [EPH_NUM_KEYS];
+  double error_double[EPH_NUM_KEYS];
+
+
+}
+#endif
+
+
 psrephem::~psrephem(){
 }
 
@@ -188,7 +202,7 @@ string psrephem::par_lookup (const char* name, int use_cwd)
   return filename;
 }
 
-string psrephem::psrname()
+string psrephem::psrname() const
 {
   string ret = "";
 
@@ -200,6 +214,17 @@ string psrephem::psrname()
     fprintf(stderr, "psrephem::psrname() Error determining pulsar name\n");
 
   return ret;
+}
+
+double psrephem::dm() const
+{
+  if (parmStatus[EPH_DM]==1)
+    return value_double[EPH_DM];
+
+  if (verbose)
+    fprintf(stderr, "psrephem::dm() DM not specified.\n");
+
+  return -1.0;
 }
 
 void psrephem::nofit(){
@@ -388,9 +413,8 @@ psrephem & psrephem::operator = (const psrephem & p2)
 
 #define PSREPHEM_OUT "psrephem_tmp.eph"
 
-//polyco psrephem::polyco (MJD m1=MJD(0.0,0.0,0.0), MJD m2=MJD(0.0,0.0,0.0), 
 polyco psrephem::mkpolyco (MJD m1, MJD m2, double nspan, int ncoeff, 
-			 int maxha, int tel, double centrefreq)
+			   int maxha, int tel, double centrefreq) const
 {
   // Write tz.in
   FILE* fptr = fopen ("tz.in","w");
