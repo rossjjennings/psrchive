@@ -4,6 +4,11 @@
 
 void usage ()
 {
+  cerr << 
+    "pascii [-p phase] filename\n" 
+    "outputs:\n"
+    "isub ichan ibin I Q U V" 
+       << endl;
 }
 
 int main (int argc, char** argv)
