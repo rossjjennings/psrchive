@@ -57,6 +57,16 @@ void parse_template (const char* template_file, bool verbose)
   
   while (fgets (templt, FLEN_CARD*2, fptr)) {
 
+    // CFITSIO User's Reference Guide
+    // 11.1 Detailed Template Line Format
+
+    /* "Any template line that begins with the pound '#' character is
+       ignored by the template parser and may be use to insert
+       comments into the template file itself." */
+
+    if (templt[0] == '#')
+      continue;
+
     char* newline = strchr (templt, '\n');
     if (newline)
       *newline = '\0';
