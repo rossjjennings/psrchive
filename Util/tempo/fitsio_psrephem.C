@@ -5,6 +5,10 @@
 #include <assert.h>
 #include <math.h>
 
+#ifdef sun
+#include <ieeefp.h>
+#endif
+
 #include <fitsio.h>
 
 #define PSRFITS 1
@@ -223,7 +227,7 @@ void psrephem::load (fitsfile* fptr, long row)
     case 1:  // double
       {
 	#ifdef sun
-	  double nul = 0.0;
+	  double nul = FP_QNAN;
 	#else
 	  double nul = NAN;
 	#endif
