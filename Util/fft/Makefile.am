@@ -11,11 +11,10 @@ libpsrfft_la_SOURCES = spectra.c noise.c running_median.c	 \
 	cdetect.c rfftw_sort.c cross_detect.c stokes_detect.c		 \
 	fccf.f ffft.f differentiate.C fftfit.f fftconv.f brent.f cprof.f \
 	cross_detect.ic stokes_detect.ic \
-        FTransform.C IPP_Transform.C MKL_Transform.C FFTW3_Transform.C \
-	FFTW_Transform.C
+        FTransform.C IPP_Transform.C MKL_Transform.C FFTW3_Transform.C
 
 if HAVE_FFTW2
-libpsrfft_la_SOURCES += psrfft.c
+libpsrfft_la_SOURCES += psrfft.c FFTW_Transform.C
 endif
 
 TESTS = test_normalization test_interpolate test_real_complex
