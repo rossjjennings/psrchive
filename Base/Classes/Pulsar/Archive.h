@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Archive.h,v $
-   $Revision: 1.20 $
-   $Date: 2002/04/20 10:35:27 $
-   $Author: straten $ */
+   $Revision: 1.21 $
+   $Date: 2002/04/22 13:14:19 $
+   $Author: pulsar $ */
 
 /*! \mainpage 
  
@@ -127,6 +127,7 @@
 #include "psrephem.h"
 
 #include "ArchiveTypes.h"
+#include "Reference.h"
 
 namespace Tempo {
   class toa;
@@ -149,7 +150,7 @@ namespace Pulsar {
     and each contains profiles that are aligned to start on the same pulse
     phase. */
 
-  class Archive {
+  class Archive : public Reference::Able {
 
   public:
 
