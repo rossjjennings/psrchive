@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/BasicArchive.h,v $
-   $Revision: 1.10 $
-   $Date: 2002/05/03 07:21:12 $
+   $Revision: 1.11 $
+   $Date: 2002/07/27 00:23:07 $
    $Author: straten $ */
 
 #include "Archive.h"
@@ -90,11 +90,16 @@ namespace Pulsar {
 	return telid;
       }
 
-    //! Return the tempo code of the telescope used
-    char get_tel_tempo_code () const
-      {
-	return telcode;
-      }
+    //! Get the tempo code of the telescope used
+    char get_telescope_code () const
+    {
+      return telcode;
+    }
+    //! Set the tempo code of the telescope used
+    void set_telescope_code (char telescope_code)
+    {
+      telcode = telescope_code;
+    }
 
     //! Return the name of the front-end system used
     string get_frontend_id () const
@@ -123,12 +128,6 @@ namespace Pulsar {
     void set_tel_id (string name)
       {
 	telid = name;
-      }
-
-    //! Set the tempo code of the telescope used
-    void set_tel_tempo_code (char id_char)
-      {
-	telcode = id_char;
       }
 
     //! Set the name of the front-end system used
