@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/toa.h,v $
-   $Revision: 1.18 $
-   $Date: 2005/02/08 09:24:10 $
-   $Author: straten $ */
+   $Revision: 1.19 $
+   $Date: 2005/03/08 10:00:40 $
+   $Author: ahotan $ */
 
 #ifndef __TOA_H
 #define __TOA_H
@@ -35,6 +35,8 @@ namespace Tempo {
     
   public:
     
+    static const float UNSET = -999.999;
+    
     enum Format { 
       Unspecified,
       Comment, 
@@ -47,18 +49,18 @@ namespace Tempo {
     };
     
     enum State { 
-      Undefined = -2,   // point will never be plotted or used
-      Deleted = -1,     // point will not be plotted unless an undelete happens
-      Hidden = 0,       // point is temporarily outside of viewing region
-      Normal = 1,       // point is in viewing region and plotted
-      Selected = 2      // like Normal, but highlighted selection
+      Undefined = -2,  // point will never be plotted or used
+      Deleted = -1,    // point will not be plotted unless an undelete happens
+      Hidden = 0,      // point is temporarily outside of viewing region
+      Normal = 1,      // point is in viewing region and plotted
+      Selected = 2     // like Normal, but highlighted selection
     };
     
     static bool verbose;
 
   protected:
     
-    // fundamental TOA LINE as on:
+    // Fundamental TOA LINE as described here:
     // http://pulsar.princeton.edu/tempo/ref_man_sections/toa.txt
 
     double frequency;      // Observing frequency (MHz)
@@ -158,8 +160,8 @@ namespace Tempo {
     int    unload (FILE* outstream, Format fmt = Unspecified) const;
     int    unload (char* outstring, Format fmt = Unspecified) const;
     
-    int    parkes_parse (const char* instring);
-    int    parkes_out   (char* outstring) const;
+    int    parkes_parse     (const char* instring);
+    int    parkes_out       (char* outstring) const;
     int    Parkes_load      (const char* instring);
     int    Parkes_unload    (FILE* outstream) const;
     int    Parkes_unload    (char* outstring) const;
@@ -171,6 +173,7 @@ namespace Tempo {
     int    Psrclock_load    (const char* instring);
     int    Psrclock_unload  (FILE* outstream) const;
     int    Psrclock_unload  (char* outstring) const;
+
     std::string Psrclock_unload  () const;
 
     int    Command_load      (const char* instring);
@@ -180,11 +183,11 @@ namespace Tempo {
     int    Comment_unload    (FILE* outstream) const;
     int    Comment_unload    (char* outstring) const;
 
-    int    Tempo2_unload    (FILE* outstream) const;
-    int    Tempo2_unload    (char* outstring) const;
+    int    Tempo2_unload     (FILE* outstream) const;
+    int    Tempo2_unload     (char* outstring) const;
 
-    int    Tempo_unload     (FILE* outstream) const;
-    int    Tempo_unload     (char* outstring) const;
+    int    Tempo_unload      (FILE* outstream) const;
+    int    Tempo_unload      (char* outstring) const;
     
     // comparison operators
     friend int operator < (const toa& t1, const toa& t2)

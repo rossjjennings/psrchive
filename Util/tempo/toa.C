@@ -673,18 +673,19 @@ void Tempo::toa::init()
   // auxdata = NULL;
   resid.valid = false;
 
-  frequency = 0.0;
-  arrival = MJD (0.0,0.0,0.0);
-  error = 0.0;
-  telescope = '0';
-  phs = 0.0;
-  dmc = 0.0;
+  frequency       = 0.0;
+  arrival         = MJD (0.0,0.0,0.0);
+  error           = 0.0;
+  telescope       = '0';
+  phs             = 0.0;
+  dmc             = 0.0;
   observatory [0] = '\0';
-  ston = -1000.0;
-  pa = 999.0;
-  bw = 0.0;
-  dur = 0.0;
-  dm = 0.0;
+
+  ston = UNSET;
+  pa   = UNSET;
+  bw   = UNSET;
+  dur  = UNSET;
+  dm   = UNSET;
 
   ci = 7;
   di = 0;
