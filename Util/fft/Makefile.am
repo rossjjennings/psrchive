@@ -27,5 +27,5 @@ test_real_complex_SOURCES	= test_real_complex.C
 INCLUDES = -I$(top_builddir) -I$(top_srcdir)/utils/units \
 	-I$(top_srcdir)/utils/genutil
 
-LDADD = libpsrfft.la @FFT_LIBS@ 
+LDADD = libpsrfft.la ../units/libunits.la @FFT_LIBS@ 
 
