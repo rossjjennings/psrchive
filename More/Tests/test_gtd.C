@@ -178,10 +178,14 @@ int main(int argc, char** argv) {
       
       model.set_abscissa(double(rise));
       
-      cpgmove(float(rise)/float(nbin), model.evaluate());
-      for (int j = rise+1; j < fall; j++) {
+      for (int j = rise; j < fall; j++) {
 	model.set_abscissa(double(j));
-	cpgdraw(float(j)/float(nbin), model.evaluate());
+	int index = int(j);
+	if (index < 0)
+	  index += nbin;
+	if (index > int(nbin))
+	  index -= nbin;
+	cpgpt1(float(index)/float(nbin), model.evaluate(), 1);
       }
 
       cpgsci(1);

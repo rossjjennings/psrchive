@@ -43,13 +43,18 @@ double Pulsar::Profile::GaussianShift (const Profile& std, float& ephase,
   
   // Find the peak
 
+  int binmax = ptr->find_max_bin();
+
   int brise = 0;
   int bfall = 0;
 
   ptr->find_peak_edges(brise, bfall);
-
+  
   if (brise > bfall) {
-    brise = brise - get_nbin();
+    if (binmax > (ptr->get_nbin())/2.0)
+      bfall += ptr->get_nbin();
+    else
+      brise = brise - get_nbin();
   }
 
   if (store) {
@@ -63,7 +68,7 @@ double Pulsar::Profile::GaussianShift (const Profile& std, float& ephase,
     
     Calibration::Gaussian gm;
     
-    gm.set_centre(ptr->find_max_bin());
+    gm.set_centre(binmax);
     gm.set_width(bfall - brise);
     gm.set_height(ptr->max());
     gm.set_cyclic(false);
@@ -75,11 +80,14 @@ double Pulsar::Profile::GaussianShift (const Profile& std, float& ephase,
     vector< Estimate<double> > data_y;       // y-ordinate of data with error
     
     int index = 0;
+
     for (int i = brise; i < bfall; i++) {
       data_x.push_back ( argument.get_Value(double(i)) );
       index = i;
       if (index < 0)
 	index += ptr->get_nbin();
+      if (index > int(ptr->get_nbin()))
+	index -= ptr->get_nbin();
       data_y.push_back( Estimate<double>(ptr->get_amps()[index], 0.1) );
     }
     
@@ -121,13 +129,19 @@ double Pulsar::Profile::GaussianShift (const Profile& std, float& ephase,
       cerr << "Chi-squared = " << chisq << " / " << free_parms << " = "
 	   << chisq / free_parms << endl;
     
-    ephase = chisq / (free_parms * ptr->get_nbin());
+    ephase = chisq / (free_parms * ptr->get_nbin() * ptr->get_nbin() * 100.0);
     
     if (store) {
       model = gm;
     }
     
-    return gm.get_centre() / double(ptr->get_nbin());
+    double shift = gm.get_centre() / double(ptr->get_nbin());
+    
+    if (shift < -0.5)
+      shift += 1.0;
+    else if (shift > 0.5)
+      shift -= 1.0;
+    return shift;
     
   }
   catch (Error& error) {
