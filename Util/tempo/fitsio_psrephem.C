@@ -11,7 +11,7 @@
 #include "coord.h"
 #include "fitsutil.h"
 
-// utility functions defined at the end of the file
+// utility function defined at the end of the file
 void datatype_match (int typecode, int ephind);
 
 // ///////////////////////////////////////////////////////////////////////
@@ -90,6 +90,9 @@ void psrephem::load (fitsfile* fptr, long row)
     if ( parstr == "PSR-NAME" )
       parstr = "PSRJ";
     
+    if ( parstr == "TZRFMJD" )
+      parstr = "TZRMJD";
+
     ephind[icol] = -1;
 
     for (int ieph=0; ieph<EPH_NUM_KEYS; ieph++) {
@@ -177,8 +180,18 @@ void psrephem::load (fitsfile* fptr, long row)
 	fits_read_col (fptr, TDOUBLE, icol+1, row, firstelem, onelement,
 		       &nul, value_double + ieph, &anynul, &status);
 
-	value_integer[ieph] = value_double[ieph];
-	value_double[ieph] -= value_integer[ieph];
+	if (ieph == EPH_TZRMJD) {
+	  int inul = 0;
+	  // special case for TZRMJD:
+	  // Assumes that TZRIMJD is in the column preceding TZRFMJD
+	  fits_read_col (fptr, TINT, icol, row, firstelem, onelement,
+			 &inul, value_integer + ieph, &anynul, &status);
+	}
+	else {
+	  // separate the integer
+	  value_integer[ieph] = value_double[ieph];
+	  value_double[ieph] -= value_integer[ieph];
+	}
 	break;
       }
     case 5:  // integer
