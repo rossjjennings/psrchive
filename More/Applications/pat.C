@@ -14,11 +14,12 @@
 #include "toa.h"
 #include "Error.h"
 #include "dirutil.h"
+#include "genutil.h"
 
 #include <cpgplot.h>
 
 #include <string.h>
-#include <libgen.h>
+// #include <libgen.h>
 
 void usage ()
 {
@@ -72,7 +73,7 @@ int main (int argc, char *argv[])
       break;
 
     case 'i':
-      cout << "$Id: pat.C,v 1.16 2003/12/29 15:53:45 straten Exp $" << endl;
+      cout << "$Id: pat.C,v 1.17 2004/01/06 19:04:05 straten Exp $" << endl;
       return 0;
 
     case 'F':
@@ -166,6 +167,10 @@ int main (int argc, char *argv[])
 				      integration->get_epoch(),
 				      integration->get_folding_period(),
 				      arch->get_telescope_code());
+
+        string aux = basename( arch->get_filename() );
+        toa.set_auxilliary_text (aux);
+
 	toa.unload(stdout);
 
       }
