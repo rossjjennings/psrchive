@@ -297,6 +297,14 @@ void Pulsar::Archive::set_ephemeris (const psrephem& new_ephemeris)
   update_model ();
 }
 
+const psrephem Pulsar::Archive::get_ephemeris ()
+{
+  psrephem retval;
+  retval = ephemeris;
+
+  return retval;
+}
+
 void Pulsar::Archive::set_model (const polyco& new_model)
 {
   if (!good_model (new_model))
@@ -318,6 +326,15 @@ void Pulsar::Archive::set_model (const polyco& new_model)
 
   // it may not be true the that supplied model was generated at runtime
   model_updated = false; 
+}
+
+const polyco Pulsar::Archive::get_model ()
+{
+  polyco retval;
+  retval = model;
+
+  return retval;
+
 }
 
 void Pulsar::Archive::snr_weight ()

@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Archive.h,v $
-   $Revision: 1.72 $
-   $Date: 2003/05/02 11:26:19 $
-   $Author: straten $ */
+   $Revision: 1.73 $
+   $Date: 2003/05/05 02:53:55 $
+   $Author: ahotan $ */
 
 /*! \mainpage 
  
@@ -472,8 +472,14 @@ namespace Pulsar {
     //! Install the given ephemeris and call update_model
     virtual void set_ephemeris (const psrephem& ephemeris);
 
+    //! Return a copy of the current archive ephemeris
+    const psrephem get_ephemeris();
+
     //! Install the given polyco and shift profiles to align
     virtual void set_model (const polyco& model);
+
+    //! Return a copy of the current archive polyco
+    const polyco get_model();
 
     //! Create a new polyco and align the Integrations to the new model
     virtual void update_model ();
