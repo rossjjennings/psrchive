@@ -1,11 +1,11 @@
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+#include <config.h>
 #endif
 
 #include "coord.h"
 #include <math.h>
 
-#define F77_sla_altaz F77_FUNC_(sla_altaz,SLA_ALTAZ)
+#define F77_sla_altaz F77_SLA(sla_altaz,SLA_ALTAZ)
 
 /* **********************************************************************
 
@@ -24,7 +24,7 @@
 
    ********************************************************************** */
 
-#define F77_sla_altaz F77_FUNC_(sla_altaz,SLA_ALTAZ)
+#define F77_sla_altaz F77_SLA(sla_altaz,SLA_ALTAZ)
 
 void F77_sla_altaz (double*, double*, double*, double*, double*, double*,
 		 double*, double*, double*, double*, double*, double*);
