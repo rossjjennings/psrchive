@@ -1,27 +1,3 @@
-/*
-
-Revision 1.7  1997/07/16 06:27:04  mbailes
-Placed check that time was within bounds in polyco::period.
-
-Revision 1.6  1997/01/13 23:58:13  jkempner
-corrected sign error in last line of phase(MJD,freq)
-
-Revision 1.5  1997/01/13 02:49:24  mbailes
-Added ability to allow for frequency when computing phase.
-
-Revision 1.4  1996/12/04 05:10:13  mbailes
-added new constructor to read in polyco from file.
-
-Revision 1.3  1996/09/13 23:35:04  mbailes
-more functions.
-
-Revision 1.2  1996/09/09 23:34:21  mbailes
-Added stdio.h so it compiles on raptor.
-
-Revision 1.1  1996/09/09 23:15:04  mbailes
-Initial revision
-
-*/
 
 #include <stdio.h> 
 #include <stdlib.h>
@@ -32,35 +8,37 @@ Initial revision
 #include "MJD.h"
 #include "polyco.h"
 
-extern "C" { int scan_fortran_(char *,double *,double *, double *, int );}
+extern "C" { int scan_fortran_(char *,double *,double *, double *, int ); }
 
- polynomial::polynomial(){
-   coefs = NULL;
-   ncoef = 0;
- }
+polynomial::polynomial(){
+  coefs = NULL;
+  ncoef = 0;
+}
 
- polynomial::~polynomial(){
-   if (ncoef!=0) delete [] coefs;
-   ncoef = 0;
- }
+polynomial::~polynomial(){
+  if (ncoef!=0) delete [] coefs;
+  ncoef = 0;
+}
 
-int polynomial::telid()
+int polynomial::telid() const
 {
   return telescope;
 }
 
-double polynomial::period(MJD tp){
-   double dp;                    // dphase/dt starts as phase per minute.
-   MJD dt = tp - reftime;
-   double t = dt.in_minutes();
-   dp = coefs[1];
-   for (int i=2;i<ncoef;i++) dp+=(double)(i)*coefs[i]*pow(t,(double)(i-1));
-   dp /= (double) 60.0;          // Phase per second
-   dp += f0;
-   return(1.0/dp);               // Seconds per turn = period of pulsar
- }
+double polynomial::period(MJD tp) const
+{
+  double dp;                    // dphase/dt starts as phase per minute.
+  MJD dt = tp - reftime;
+  double t = dt.in_minutes();
+  dp = coefs[1];
+  for (int i=2;i<ncoef;i++) dp+=(double)(i)*coefs[i]*pow(t,(double)(i-1));
+  dp /= (double) 60.0;          // Phase per second
+  dp += f0;
+  return(1.0/dp);               // Seconds per turn = period of pulsar
+}
 
-double polynomial::phase(MJD tp){
+double polynomial::phase(MJD tp) const
+{ 
    double p;
 
 //   printf("polynomial::phase input time is %s\n",tp.printall());
@@ -81,7 +59,8 @@ double polynomial::phase(MJD tp){
    return(p+ph0);
 }
 
-double polynomial::phi(MJD tp){
+double polynomial::phi(MJD tp) const
+{
    double p;
 
 //   printf("polynomial::phase input time is %s\n",tp.printall());
@@ -175,7 +154,8 @@ int polynomial::load(FILE * fptr){
    return(0);
 }
 
-char *polynomial::pulsar () {
+char *polynomial::pulsar () const
+{
   return psrname;
 }
 
@@ -334,7 +314,7 @@ polyco::~polyco(){
    }
  }
 
-int polyco::telid ()
+int polyco::telid () const
 {
   if (pollys == NULL)
     return -1;
@@ -358,7 +338,8 @@ int polyco::fprintf(FILE* iof)
  * The reference frequency for polyco::phase is obtained from the tzpar
  *   file for the pulsar.
  */
-double polyco::phase(MJD t, float obs_freq){
+double polyco::phase(MJD t, float obs_freq) const
+{
   /* This static tzrfrq is dangerous if there is more than one polyco instance
    *   with different reference frequencies.  This is rarely ever required,
    *   and there is a considerable speed increase from not having to
@@ -431,7 +412,7 @@ double polyco::phase(MJD t, float obs_freq){
   return (this->phase (t, obs_freq, tzrfrq));
 }
 
-double polyco::phase(MJD t, float obs_freq, float ref_freq){
+double polyco::phase(MJD t, float obs_freq, float ref_freq) const {
    float dm_delay_in_secs = pollys[0]->dm/2.41e-4*
         (1.0/(obs_freq*obs_freq)-1.0/(ref_freq*ref_freq));
    double current_period = this->period(t);
@@ -444,7 +425,7 @@ double polyco::phase(MJD t, float obs_freq, float ref_freq){
      return(0);
 }
 
-double polyco::phi(MJD t){
+double polyco::phi(MJD t) const {
   // Find correct polynomial and use it
   int ipolly=0;
   while (ipolly<npollys) {
@@ -467,7 +448,7 @@ double polyco::phi(MJD t){
   return(0.0);
 }
 
-double polyco::phase(MJD t){
+double polyco::phase(MJD t) const {
   // Find correct polynomial and use it
   int ipolly=0;
   while (ipolly<npollys) {
@@ -490,7 +471,7 @@ double polyco::phase(MJD t){
   return(0.0);
 }
 
-double polyco::period(MJD t){
+double polyco::period(MJD t) const {
   // Find correct polynomial and use it
      int ipolly=0;
      while (ipolly<npollys) {
@@ -512,7 +493,7 @@ double polyco::period(MJD t){
     return(-1.0);
 }
 
-int polyco::writepolyco(char * uni){
+int polyco::writepolyco(char * uni) const {
   char *name = new char[strlen(uni) + 8];
   FILE *fptr;
 
@@ -523,7 +504,7 @@ int polyco::writepolyco(char * uni){
   return(0);
 }
 
-int polyco::writetztot(char * uni){
+int polyco::writetztot(char * uni) const {
   char *name = new char[strlen(uni) + 7];
   FILE *fptr;
 
