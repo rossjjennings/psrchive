@@ -90,7 +90,7 @@ Pulsar::Integration* Pulsar::Archive::load_Integration (unsigned isubint)
 /*!  
   This method may be useful during load.  This function assumes
   that the Integration is totally uninitialized.  As the folding
-  period is unknown until the mid_time of the integration is known,
+  period is unknown until the epoch of the integration is known,
   Integration::set_folding_period is not called by this method.  
 */
 void Pulsar::Archive::init_Integration (Integration* subint)
@@ -198,7 +198,7 @@ void Pulsar::Archive::centre ()
     Integration* subint = get_Integration(isub);
 
     // Rotate according to polyco prediction
-    Phase phase = model.phase (subint -> get_mid_time(),
+    Phase phase = model.phase (subint -> get_epoch(),
 			       subint -> get_centre_frequency());
 
     if (verbose)

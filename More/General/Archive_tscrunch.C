@@ -92,7 +92,7 @@ void Pulsar::Archive::tscrunch (unsigned nscrunch)
       Integration* cur = get_Integration (start+iadd);
 
       duration += cur->get_duration();
-      mjd      += cur->get_mid_time();
+      mjd      += cur->get_epoch();
 
     }
 
@@ -106,7 +106,7 @@ void Pulsar::Archive::tscrunch (unsigned nscrunch)
     if (get_type() == Signal::Pulsar) {
 
       // get the time of the first subint to be integrated into isub
-      MJD firstmjd = get_Integration (isub * nscrunch) -> get_mid_time();
+      MJD firstmjd = get_Integration (isub * nscrunch) -> get_epoch ();
       // get the period at the time of the first subint
       double first_period = model.period(firstmjd);
       // get the phase at the time of the first subint
@@ -121,7 +121,7 @@ void Pulsar::Archive::tscrunch (unsigned nscrunch)
       // Subtract one period times phase difference from mjd      
       mjd -= dphase.fracturns() * first_period;
 
-      get_Integration (isub)->set_mid_time (mjd);
+      get_Integration (isub)->set_epoch (mjd);
       get_Integration (isub)->set_folding_period (model.period(mjd));
       
       // The original code did not include the number of 

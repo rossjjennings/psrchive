@@ -77,7 +77,7 @@ void Pulsar::Integration::copy (const Integration& subint,
     for (int ichan=0; ichan<_nchan; ichan++)
       *(profiles[ipol][ichan]) = *(subint.profiles[ipol][ichan]);
 
-  set_mid_time ( subint.get_mid_time());
+  set_epoch ( subint.get_epoch());
   set_duration ( subint.get_duration());
   set_centre_frequency ( subint.get_centre_frequency() );
   set_bandwidth ( subint.get_bandwidth() );
@@ -264,7 +264,7 @@ void Pulsar::Integration::rotate (double time)
       for (unsigned ichan=0; ichan<get_nchan(); ichan++)
 	profiles[ipol][ichan] -> rotate (time/pfold);
 
-    set_mid_time (get_mid_time() + time);
+    set_epoch (get_epoch() + time);
   }
   catch (Error& error) {
     throw error += "Integration::rotate";
@@ -273,12 +273,12 @@ void Pulsar::Integration::rotate (double time)
 
 MJD Pulsar::Integration::get_start_time () const
 {
-  return get_mid_time() - .5 * get_duration(); 
+  return get_epoch() - .5 * get_duration(); 
 }
 
 MJD Pulsar::Integration::get_end_time () const
 { 
-  return get_mid_time() + .5 * get_duration();
+  return get_epoch() + .5 * get_duration();
 }
 
 void Pulsar::Integration::uniform_weight ()

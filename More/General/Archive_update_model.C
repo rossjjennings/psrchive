@@ -83,7 +83,7 @@ void Pulsar::Archive::create_updated_model (bool clear_model)
 
   for (unsigned isub = 0; isub < get_nsubint(); isub++) {
 
-    MJD time = get_Integration(isub)->get_mid_time();
+    MJD time = get_Integration(isub)->get_epoch();
     update_model (time, clear_model);
 
     // only clear the model on the first loop
@@ -145,7 +145,7 @@ void Pulsar::Archive::apply_model (const polyco& old, Integration* subint)
       model.unload (stderr);
 
     // get the MJD of the rising edge of bin zero
-    MJD subint_mjd = subint -> get_mid_time();
+    MJD subint_mjd = subint -> get_epoch();
 
     // get the phase shift due to differing observing frequencies between
     // old and current polyco
@@ -179,7 +179,7 @@ void Pulsar::Archive::apply_model (const polyco& old, Integration* subint)
     subint -> rotate (shift_time);
     
     if (verbose) {
-      subint_mjd = subint -> get_mid_time();
+      subint_mjd = subint -> get_epoch();
       cerr << "Archive::apply_model"
 	   << " new MJD "   << subint_mjd
 	   << " new phase " << model.phase(subint_mjd)
@@ -208,7 +208,7 @@ bool Pulsar::Archive::good_model (const polyco& test_model) const
 
   unsigned isub=0;
   for (isub=0; isub < get_nsubint(); isub++) try {
-    if ( test_model.i_nearest (get_Integration(isub)->get_mid_time()) == -1 )
+    if ( test_model.i_nearest (get_Integration(isub)->get_epoch()) == -1 )
       break;
   }
   catch (...) {

@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/BasicIntegration.h,v $
-   $Revision: 1.5 $
-   $Date: 2002/10/28 01:02:45 $
+   $Revision: 1.6 $
+   $Date: 2003/04/19 20:21:09 $
    $Author: straten $ */
 
 #ifndef __BasicIntegration_h
@@ -40,10 +40,10 @@ namespace Pulsar {
     /*! This attribute may be set only through Integration::resize */
     virtual unsigned get_nbin () const { return nbin; }
  
-    //! Get the MJD at the beginning of the integration
-    virtual MJD get_mid_time() const { return mid_time; }
-    //! Set the MJD at the beginning of the integration
-    virtual void set_mid_time (const MJD& mjd) { mid_time = mjd; }
+    //! Get the epoch of the rising edge of bin zero
+    virtual MJD get_epoch() const { return epoch; }
+    //! Set the epoch of the rising edge of bin zero
+    virtual void set_epoch (const MJD& mjd) { epoch = mjd; }
 
     //! Get the total time integrated (in seconds)
     virtual double get_duration() const { return duration; }
@@ -104,8 +104,8 @@ namespace Pulsar {
     //! number of bins
     unsigned nbin;
 
-    //! time at the middle of the observation
-    MJD mid_time;
+    //! Epoch of the rising edge of bin zero
+    MJD epoch;
 
     //! duration of integration
     double duration;
