@@ -7,7 +7,7 @@ COMMENT   Astrophysics Supplement Series v44/p363, v44/p371, v73/p359, v73/p365.
 COMMENT   Contact the NASA Science Office of Standards and Technology for the
 COMMENT   FITS Definition document #100 and other FITS information.
 COMMENT
-HDRVER  = '1.2             '   / Header version 
+HDRVER  = '1.3             '   / Header version 
 DATE    = '                '   / File creation date (YYYY-MM-DDThh:mm:ss UTC)
 ORIGIN  = '                '   / Output class
 OBSERVER= '                '   / Observer name(s)
@@ -89,8 +89,9 @@ TFORM9  = '1I      '           / Integer
 TTYPE10 = 'CHAN_BW '           / Channel bandwidth
 TFORM10 = '1D      '           / Double
 TUNIT10 = 'MHz     '           / units of field
-TTYPE11 = 'FA_CORR '           / Feed angle correction applied
-TFORM11 = '1I      '           / Integer flag 
+TTYPE11 = 'TCYCLE  '           / Basic cycle time for integration
+TFORM11 = '1D      '           / Double
+TUNIT11 = 's       '           / units of field
 TTYPE12 = 'PAR_CORR'           / Parallactic angle correction applied
 TFORM12 = '1I      '           / Integer flag 
 TTYPE13 = 'RM_CORR '           / RM correction applied
@@ -116,21 +117,19 @@ XTENSION= 'BINTABLE'           / ***** Digitiser statistics *****
 BITPIX  =                    8 / N/A
 NAXIS   =                    2 / 2-dimensional binary table
 NAXIS1  =                    * / Width of table in bytes
-NAXIS2  =                    * / Number of rows in table
+NAXIS2  =                    * / Number of rows in table (NSUBINT)
 PCOUNT  =                    0 / Size of special data area
 GCOUNT  =                    1 / One data group (required keyword)
-TFIELDS =                    3 / Number of fields per row
+TFIELDS =                    1 / Number of fields per row
 DIG_MODE= '                '   / Digitiser mode
 NDIGR   = *                    / Number of digitised channels (I)
 NLEV    = *                    / Number of digitiser levels
+NCYCSUB = *                    / Number of correlator cycles per subint
 DIGLEV  = '                '   / Digitiser level-setting mode (AUTO, FIX)
 EXTNAME = 'DIG_STAT'           / Name of this binary table extension
-TTYPE1  = 'CYCLE'              / Correlator cycle count
-TFORM1  = '1I      '           / Integer count
-TTYPE2  = 'CYCLE_MJD'          / MJD at cycle start
-TFORM2  = '1D      '           / Double
-TTYPE3  = 'STATS    '          / Digitiser statistics
-TFORM3  = 'E       '           / (NLEV+1)*NDIGR floats
+TTYPE1  = 'DATA    '           / Digitiser statistics
+TDIM1   =  (*,*,*)             / Data table dimensions (NLEV,NDIGR,NCYCSUB)         
+TFORM1  = 'E       '           / NLEV*NDIGR*NCYCSUB floats
 END
 XTENSION= 'BINTABLE'           / ***** Digitiser counts *****
 BITPIX  =                    8 / N/A
