@@ -51,9 +51,9 @@ float Pulsar::FourierSNR::get_snr (const Profile* profile)
 
   double mean_noise = noise_power/noise_count;
 
-  // if (Profile::verbose)
-  cerr << "Pulsar::FourierSNR::get_snr total_power=" << total_power
-       << " mean_noise=" << mean_noise << endl;
+  if (Profile::verbose)
+    cerr << "Pulsar::FourierSNR::get_snr total_power=" << total_power
+	 << " mean_noise=" << mean_noise << endl;
 
   double pulse_power = total_power - mean_noise * total_count;
 
