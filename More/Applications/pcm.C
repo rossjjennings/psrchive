@@ -33,7 +33,7 @@ static string Hamaker = "Hamaker";
 void usage ()
 {
   cout << "A program for performing self-calibration\n"
-    "Usage: psc [options] filenames\n"
+    "Usage: pcm [options] filenames\n"
     "  -a archive set the output archive class name\n"
     "  -b bin     add phase bin to constraints\n"
     "  -C meta    filename with list of calibrator files\n"
@@ -42,7 +42,7 @@ void usage ()
     "  -M meta    filename with list of pulsar files\n"
     "  -n nbin    set the number of phase bins to use as input states\n"
     "  -p pA,pB   set the phase window from which to take input states\n"
-    "  -u         assume that Hydra is unpolarized\n"
+    "  -u         assume that CAL Stokes V = 0\n"
     "  -v         verbose mode\n"
     "  -V         very verbose mode\n"
        << endl;
@@ -65,7 +65,7 @@ void auto_select (Pulsar::ReceptionCalibrator& model, Pulsar::Archive* archive,
   
   unsigned nbin = archive->get_nbin();
   
-  cerr << "psc: selecting " << total_bins 
+  cerr << "pcm: selecting " << total_bins 
        << " phase bin constraints from " << rise << " to " << fall 
        << " (nbin=" << nbin << ")" << endl;
   
@@ -74,7 +74,7 @@ void auto_select (Pulsar::ReceptionCalibrator& model, Pulsar::Archive* archive,
   for (float bin = rise; bin<=fall; bin += increment) {
     unsigned ibin = unsigned(bin) % nbin;
     if (ibin != last_bin)  {
-      cerr << "psc: adding phase bin " << ibin << endl;
+      cerr << "pcm: adding phase bin " << ibin << endl;
       model.add_state (ibin%nbin);
       last_bin = ibin;
     }
@@ -95,7 +95,7 @@ void range_select (Pulsar::ReceptionCalibrator& model,
     unsigned ibin = unsigned (bin * nbin);
 
     if (ibin != last_bin)  {
-      cerr << "psc: adding phase bin " << ibin << endl;
+      cerr << "pcm: adding phase bin " << ibin << endl;
       model.add_state (ibin%nbin);
       last_bin = ibin;
     }
@@ -129,7 +129,7 @@ void plot_constraints (Pulsar::ReceptionCalibratorPlotter& plotter,
 
     cpgsvp (.1,.9, .1,.9);
     
-    cerr << "psc: nstate=" << nstate << endl;
+    cerr << "pcm: nstate=" << nstate << endl;
     for (unsigned istate=0; istate<nstate; istate++) {
       cerr << "ichan=" << ichan << " istate=" << istate+1 << endl;
       plotter.plot_constraints (ichan, istate+1);
@@ -188,7 +188,7 @@ int main (int argc, char *argv[])
   //! The phase bins to add to the model
   vector<unsigned> phase_bins;
 
-  bool measure_cal_V = false;
+  bool measure_cal_V = true;
 
   int gotc = 0;
   while ((gotc = getopt(argc, argv, "a:b:C:Df:M:m:n:p:huvV")) != -1) {
@@ -200,7 +200,7 @@ int main (int argc, char *argv[])
 
     case 'b': {
       unsigned bin = atoi (optarg);
-      cerr << "psc: adding phase bin " << bin << endl;
+      cerr << "pcm: adding phase bin " << bin << endl;
       phase_bins.push_back (bin);
       break;
     }
@@ -215,7 +215,7 @@ int main (int argc, char *argv[])
 
     case 'f':
       only_ichan = atoi (optarg);
-      cerr << "psc: solving only channel " << only_ichan << endl;
+      cerr << "pcm: solving only channel " << only_ichan << endl;
       break;
 
     case 'm':
@@ -224,7 +224,7 @@ int main (int argc, char *argv[])
       else if (optarg == Hamaker)
 	model_name = Pulsar::Calibrator::Hamaker;
       else {
-	cerr << "psc: unrecognized model name '" << optarg << "'" << endl;
+	cerr << "pcm: unrecognized model name '" << optarg << "'" << endl;
 	return -1;
       }
       break;
@@ -235,15 +235,15 @@ int main (int argc, char *argv[])
 
     case 'n':
       maxbins = atoi (optarg);
-      cerr << "psc: selecting a maximum of " << maxbins << " bins" << endl;
+      cerr << "pcm: selecting a maximum of " << maxbins << " bins" << endl;
       break;
 
     case 'p':
       if (sscanf (optarg, "%f,%f", &phmin, &phmax) != 2) {
-	cerr << "psc: error parsing " << optarg << " as phase window" << endl;
+	cerr << "pcm: error parsing " << optarg << " as phase window" << endl;
 	return -1;
       }
-      cerr << "psc: selecting input states from " << phmin << " to " << phmax
+      cerr << "pcm: selecting input states from " << phmin << " to " << phmax
 	   << endl;
       break;
 
@@ -252,7 +252,7 @@ int main (int argc, char *argv[])
       return 0;
 
     case 'u':
-      measure_cal_V = true;
+      measure_cal_V = false;
       break;
 
     case 'v':
@@ -280,7 +280,7 @@ int main (int argc, char *argv[])
     dirglob (&filenames, argv[ai]);
   
   if (filenames.empty()) {
-    cerr << "psc: no archives were specified" << endl;
+    cerr << "pcm: no archives were specified" << endl;
     return -1;
   } 
 
@@ -288,7 +288,7 @@ int main (int argc, char *argv[])
   Pulsar::ReceptionCalibrator model (model_name);
 
   if (measure_cal_V)
-    cerr << "psc: Assuming that Hydra is unpolarized" << endl;
+    cerr << "pcm: assuming that System + Hydra A Stokes V = 0" << endl;
 
   model.measure_cal_V = measure_cal_V;
 
@@ -308,23 +308,23 @@ int main (int argc, char *argv[])
   Reference::To<Pulsar::Archive> total;
   Reference::To<Pulsar::Archive> archive;
   
-  cerr << "psc: loading archives" << endl;
+  cerr << "pcm: loading archives" << endl;
   
   for (unsigned i = 0; i < filenames.size(); i++) {
     
     try {
       
       if (verbose)
-	cerr << "psc: loading " << filenames[i] << endl;
+	cerr << "pcm: loading " << filenames[i] << endl;
       
       archive = Pulsar::Archive::load(filenames[i]);
       
-      cout << "psc: loaded archive: " << filenames[i] << endl;
+      cout << "pcm: loaded archive: " << filenames[i] << endl;
       
       if (archive->get_type() == Signal::Pulsar)  {
 	
 	if (verbose)
-	  cerr << "psc: dedispersing and removing baseline from pulsar data"
+	  cerr << "pcm: dedispersing and removing baseline from pulsar data"
                << endl;
 	
         archive->dedisperse ();
@@ -340,7 +340,7 @@ int main (int argc, char *argv[])
 	else
 	  range_select (model, archive, phmin, phmax, maxbins);
 
-        cerr << "psc: " << model.get_nstate_pulsar() << " states" << endl;
+        cerr << "pcm: " << model.get_nstate_pulsar() << " states" << endl;
       }
 
       model.add_observation( archive );
@@ -349,12 +349,12 @@ int main (int argc, char *argv[])
       if (archive->get_type() == Signal::Pulsar && only_ichan < 0)  {
 
 	if (verbose)
-	  cerr << "psc: calibrate with current best guess" << endl;
+	  cerr << "pcm: calibrate with current best guess" << endl;
 
 	model.precalibrate (archive);
 
 	if (verbose)
-	  cerr << "psc: fscrunch, deparallactify, and add to total" << endl;
+	  cerr << "pcm: fscrunch, deparallactify, and add to total" << endl;
 
         archive->fscrunch ();
         archive->deparallactify ();
@@ -382,23 +382,23 @@ int main (int argc, char *argv[])
     cpgask(1);
     cpgsvp (.1,.9, .1,.9);
 
-    cerr << "psc: plotting initial guess of receiver" << endl;
+    cerr << "pcm: plotting initial guess of receiver" << endl;
     plotter.plot (&model);
 
     cpgpage();
 
-    cerr << "psc: plotting uncalibrated pulsar total stokes" << endl;
+    cerr << "pcm: plotting uncalibrated pulsar total stokes" << endl;
     Pulsar::Plotter profile;
     profile.Manchester (total);
 
     cpgpage();
 
-    cerr << "psc: plotting uncalibrated CAL" << endl;
+    cerr << "pcm: plotting uncalibrated CAL" << endl;
     plotter.plotcal();
 
     cpgend();
 
-    cerr << "psc: plotting pulsar constraints" << endl;
+    cerr << "pcm: plotting pulsar constraints" << endl;
     plot_constraints (plotter, model.get_nchan(),
 		      model.get_nstate_pulsar(), 12);
 
@@ -407,7 +407,7 @@ int main (int argc, char *argv[])
 
   total = 0;
 
-  cerr << "psc: solving model" << endl;
+  cerr << "pcm: solving model" << endl;
 
   try {
     model.solve (only_ichan);
@@ -428,17 +428,17 @@ int main (int argc, char *argv[])
     cpgask(1);
     cpgsvp (0.1,.9, 0.1,.9);
 
-    cerr << "psc: plotting model receiver" << endl;
+    cerr << "pcm: plotting model receiver" << endl;
     plotter.plot (&model);
 
     cpgpage();
 
-    cerr << "psc: plotting calibrated CAL" << endl;
+    cerr << "pcm: plotting calibrated CAL" << endl;
     plotter.plotcal();
 
     cpgend ();
 
-    cerr << "psc: plotting pulsar constraints with model" << endl;
+    cerr << "pcm: plotting pulsar constraints with model" << endl;
     plot_constraints (plotter, model.get_nchan(),
 		      model.get_nstate_pulsar(), 12);
 
@@ -447,18 +447,18 @@ int main (int argc, char *argv[])
   for (unsigned ical=0; ical < cal_filenames.size(); ical++)
     dirglob (&filenames, cal_filenames[ical]);
   
-  cerr << "psc: calibrating archives (PSR and CAL)" << endl;
+  cerr << "pcm: calibrating archives (PSR and CAL)" << endl;
 
   for (unsigned i = 0; i < filenames.size(); i++) {
     
     try {
 
       if (verbose)
-	cerr << "psc: loading " << filenames[i] << endl;
+	cerr << "pcm: loading " << filenames[i] << endl;
 
       archive = Pulsar::Archive::load(filenames[i]);
 
-      cout << "psc: loaded archive: " << filenames[i] << endl;
+      cout << "pcm: loaded archive: " << filenames[i] << endl;
       
       model.precalibrate( archive );
 
@@ -470,7 +470,7 @@ int main (int argc, char *argv[])
       newname += ".calib";
 
       if (verbose)
-        cerr << "psc: Calibrated Archive name '" << newname << "'" << endl;
+        cerr << "pcm: calibrated Archive name '" << newname << "'" << endl;
 
       archive->unload (newname);
       
@@ -479,7 +479,7 @@ int main (int argc, char *argv[])
       if (archive->get_type() == Signal::Pulsar)  {
 
         if (verbose)
-          cerr << "psc: Fscrunch and add to calibrated total" << endl;
+          cerr << "pcm: fscrunch and add to calibrated total" << endl;
 
         archive->fscrunch ();
         archive->deparallactify ();
@@ -499,7 +499,7 @@ int main (int argc, char *argv[])
   }
 
   if (total)  {
-    cerr << "psc: writing total integrated pulsar archive" << endl;
+    cerr << "pcm: writing total integrated pulsar archive" << endl;
     total->unload ("total.ar");
   }
 
@@ -509,7 +509,7 @@ int main (int argc, char *argv[])
     cpgask(1);
     cpgsvp (0.1,.9, 0.1,.9);
 
-    cerr << "psc: plotting calibrated pulsar total stokes" << endl;
+    cerr << "pcm: plotting calibrated pulsar total stokes" << endl;
     Pulsar::Plotter profile;
     profile.Manchester (total);
 
