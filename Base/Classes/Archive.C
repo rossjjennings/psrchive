@@ -601,7 +601,7 @@ void Pulsar::Archive::set_ephemeris (const psrephem& new_ephemeris, bool update)
     cerr << "Pulsar::Archive::set_ephemeris exit" << endl;
 }
 
-const psrephem Pulsar::Archive::get_ephemeris ()
+const psrephem Pulsar::Archive::get_ephemeris () const
 {
   if (!ephemeris)
     throw Error (InvalidState,"Pulsar::Archive::get_ephemeris","no ephemeris");
@@ -635,7 +635,7 @@ void Pulsar::Archive::set_model (const polyco& new_model)
   model_updated = false; 
 }
 
-const polyco Pulsar::Archive::get_model ()
+const polyco Pulsar::Archive::get_model () const
 {
   if (!model)
     throw Error (InvalidState, "Pulsar::Archive::get_model", "no model");
