@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/psrephem.h,v $
-   $Revision: 1.22 $
-   $Date: 2003/01/10 14:27:49 $
+   $Revision: 1.23 $
+   $Date: 2003/01/20 14:27:16 $
    $Author: straten $ */
 
 #ifndef __PSREPHEM_H
@@ -68,7 +68,10 @@ class psrephem : public Reference::Able
   int unload (string* str) const;
 
 #ifdef PSRFITS
-  void load (fitsfile* fptr, long row=0);
+  void load   (fitsfile* fptr, long row=0);
+  void unload (fitsfile* fptr, long row=0) const;
+
+  void fits_map (fitsfile* fptr, vector<int>& ephind, int& maxstrlen) const;
 #endif
 
   void   nofit();
