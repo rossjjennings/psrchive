@@ -245,8 +245,8 @@ int Tempo::toa::Psrclock_load (const char* instring)
 
   string parse = instring + 1;
 
-  auxinfo = stringtok (&parse, whitespace) + " "
-    + stringtok (&parse, whitespace) + " " + stringtok (&parse, whitespace);
+  auxinfo = stringtok (&parse, whitespace);
+    //+ " "+ stringtok (&parse, whitespace) + " " + stringtok (&parse, whitespace);
 
   if ((instring[0]=='C') || (instring[0]=='c'))
     state = Deleted;
@@ -254,7 +254,7 @@ int Tempo::toa::Psrclock_load (const char* instring)
   if (verbose)
     cerr << "Tempo::toa::Psrclock_load Parkes format = '" << parse << "'" << endl;
 
-  if (parkes_parse (parse.c_str()) < 0)
+  if (parkes_parse (instring+25) < 0)
     return -1;
 
   // LOAD AUX
