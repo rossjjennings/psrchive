@@ -12,7 +12,7 @@ endif
 
 if HAVE_CFITSIO
   CFITSIO_SUBDIRS = fitsutil
-  CFITSIO_LIBAD = fitsutil/libfitsutil.la
+  CFITSIO_LIBADD = fitsutil/libfitsutil.la
 endif
 
 
