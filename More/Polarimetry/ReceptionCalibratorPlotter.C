@@ -43,21 +43,22 @@ void Pulsar::ReceptionCalibratorPlotter::plot_constraints (unsigned ichan,
 		 "ichan=%d >= nchan=%d", ichan, calibrator->get_nchan());
 
   // extract the appropriate equation
-  const Calibration::ReceptionModel* equation;
+  Calibration::ReceptionModel* equation;
   equation = calibrator->model[ichan]->equation;
 
-  const Calibration::Parallactic* parallactic;
+  Calibration::Parallactic* parallactic;
   parallactic = &(calibrator->model[ichan]->parallactic);
 
   vector< Estimate<float> > stokes[4];
   vector< float > para;
 
   unsigned nmeas = equation->get_ndata ();
+  bool found = false;
+
   for (unsigned imeas=0; imeas<nmeas; imeas++) {
 
     // Get the specified Measurements
-    const Calibration::Measurements& data
-      = equation->get_data (imeas);
+    const Calibration::Measurements& data = equation->get_data (imeas);
 
     // Set the parallactic angle
     data.set_coordinates();
@@ -66,10 +67,18 @@ void Pulsar::ReceptionCalibratorPlotter::plot_constraints (unsigned ichan,
 
     for (unsigned jstate=0; jstate<mstate; jstate++)
       if (data[jstate].source_index == istate) {
+
 	for (unsigned ipol=0; ipol<4; ipol++)
 	  stokes[ipol].push_back (Estimate<float>(data[jstate][ipol]));
     
 	para.push_back ( parallactic->get_param(0) * 180.0/M_PI );
+
+	if (!found) {
+	  // set the data path and source
+	  equation->set_path (data.path_index);
+	  equation->set_source (istate);
+	  found = true;
+	}
 
       }
 
@@ -108,40 +117,68 @@ void Pulsar::ReceptionCalibratorPlotter::plot_constraints (unsigned ichan,
 
   // the plotting class
   EstimatePlotter plotter;
-  unsigned ipol;
-
-  for (ipol=0; ipol<4; ipol++)
-    plotter.add_plot (para, stokes[ipol]);
 
   if (!use_colour) {
-    plotter.separate_viewports();
+
+    float x1, x2, y1, y2;
+
+    // query the current size of the viewport in normalized device coordinates
+    cpgqvp (0, &x1, &x2, &y1, &y2);
     cpgslw (2);
+
+    float Ispace = 0.18;
+    float space = 0.02;
+    
+    float Iscale = 0.05;
+    float Sscale = 0.2;
+    
+    float xborder  = 0.03;
+    float Iyborder = 0.2;
+    float Syborder = 0.08;
+    
+    cpgsvp (x1, x2, y1, y1+(y2-y1)*Ispace);
+    
+    plotter.add_plot (para, stokes[0]);
+    plotter.set_border (xborder, Iyborder);
+    plot_stokes (plotter, 0, ichan, 0, Iscale);
+    
+    plotter.clear ();
+    plotter.set_border (xborder, Syborder);
+    
+    cpgsvp (x1, x2, y1+(y2-y1)*(Ispace+space), y2);
+    
+    for (unsigned ipol=1; ipol<4; ipol++)
+      plotter.add_plot (para, stokes[ipol]);
+    
+    plotter.separate_viewports();
+    
+    for (unsigned iplot=0; iplot<3; iplot++)
+      plot_stokes (plotter, iplot, ichan, iplot+1, Sscale);
+    
+    cpgsci (1);
+    cpgsls (1);
+    cpgsvp (x1, x2, y1, y2);
+    cpgbox ("bcnst",0,0,"",0,0);
+    cpgmtxt("B",3.0,.5,.5,"Parallactic Angle (degrees)");
+    
   }
 
-  char stokes_label[8] = "I'\\dn";
-  char* stokes_index = "IQUV";
+  else {
 
-  for (ipol=0; ipol<4; ipol++) {
-
-    if (use_colour)
+    unsigned ipol;
+    
+    for (ipol=0; ipol<4; ipol++)
+      plotter.add_plot (para, stokes[ipol]);
+    
+    for (ipol=0; ipol<4; ipol++) {
       cpgsci( ipol+1 );
-
-    plotter.plot (ipol);
-
-    if (!use_colour) {
-      stokes_label[0] = stokes_index[ipol];
-      cpgmtxt("L",2.7,.5,.5,stokes_label);
-      cpgbox ("bcst",0,0,"bcvnst",0.2,2);
+      plotter.plot (ipol);
     }
 
-  }
+    cpgsci (1);
+    cpgsls (1);
 
-  cpgsci (1);
-  cpgsls (1);
-
-  string label;
-
-  if (use_colour) {
+    string label;
 
     cpgbox ("bcnst",0,0,"bcnst",0,0);
 
@@ -164,94 +201,54 @@ void Pulsar::ReceptionCalibratorPlotter::plot_constraints (unsigned ichan,
 	     label.c_str());
 
   }
-  else {
-    plotter.restore_viewport ();
-    cpgbox ("bcnst",0,0,"",0,0);
-    cpgmtxt("B",2.5,.5,.5,"Parallactic Angle (degrees)");
-  }
 
-
-  if (!calibrator->get_solved())
-    return;
-
-  EstimatePlotter* p = 0;
-  if (!use_colour)
-    p = & plotter;
-
-  plot_model (ichan, istate, p);
-
-  if (!use_colour)
-    plotter.restore_viewport ();
-
-  cpgslw (1);
   cpgsci (1);
   cpgsls (1);
 
 }
 
-void Pulsar::ReceptionCalibratorPlotter::plot_model (unsigned ichan,
-						     unsigned istate,
-						     EstimatePlotter* plotter)
+void Pulsar::ReceptionCalibratorPlotter::plot_stokes (EstimatePlotter& plotter,
+						      unsigned iplot,
+						      unsigned ichan,
+						      unsigned ipol,
+						      float spacing)
 {
-  if (istate >= calibrator->get_nstate())
-    throw Error (InvalidRange,
-		 "Pulsar::ReceptionCalibratorPlotter::plot_constraints",
-		 "istate=%d >= nstate=%d", istate, calibrator->get_nstate());
+  char stokes_label[64] = "S'\\b\\dn";
+  int  position = strlen (stokes_label) - 1;
+  char* stokes_index = "0123";
 
-  if (ichan >= calibrator->get_nchan())
-    throw Error (InvalidRange,
-		 "Pulsar::ReceptionCalibratorPlotter::plot_constraints",
-		 "ichan=%d >= nchan=%d", ichan, calibrator->get_nchan());
+  plotter.plot (iplot);
 
-  // extract the appropriate equation
-  Calibration::ReceptionModel* equation = calibrator->model[ichan]->equation;
-  Calibration::Parallactic* para = &(calibrator->model[ichan]->parallactic);
+  if (calibrator->get_solved())
+    plot_model (ichan, ipol);
 
-  equation->set_source (istate);
+  cpgbox ("bcst",0,0,"bcvnst",spacing,2);
 
-  bool plot_model_points = false;
-
-  unsigned nmeas = equation->get_ndata ();
-  for (unsigned imeas=0; imeas<nmeas; imeas++) {
-
-    //! Get the specified Measurements
-    const Calibration::Measurements& data = equation->get_data (imeas);
-
-    unsigned mstate = data.size();
-    bool was_measured = false;
-
-    for (unsigned jstate=0; jstate<mstate; jstate++)
-      if (data[jstate].source_index == istate)
-        was_measured = true;
-
-    if (!was_measured)
-      continue;
-
-    // set the signal path through which these measurements were observed
-    equation->set_path (data.path_index);
-
-    if (!plot_model_points)
-      break;
-
-    // set the independent variables for this set of measurements
-    data.set_coordinates();
-
-    float parallactic = para->get_param(0) * 180.0/M_PI;
-
-    Stokes<float> stokes = equation->evaluate ();
-
-    for (unsigned ipol=0; ipol<4; ipol++) {
-      cpgsci (ipol+1);
-      cpgpt1 (parallactic, stokes[ipol], 5);
-    }
-
-  }
+  cerr << "stokes=" << stokes_index[ipol] << endl;
+  cerr << "label=" << stokes_label[0] << endl;
   
+  stokes_label[position] = stokes_index[ipol];
+  cerr << "poo" << endl;
+  cerr << "stokes label=" << stokes_label << endl;
+  
+  cpgmtxt("L",3.5,.5,.5,stokes_label);
 
-  unsigned npt = 100;
+  // possible circumflex, \\(0756,0832,2247)
+  cpgsch(1.05);
+  cpgmtxt("L",3.5,.5,.5,"\\u\\(2247)\\d \\(2197)");
+  cpgsch(1.0);
+}
 
-  vector<float> parallactic (npt);
-  vector<Stokes<float> > stokes (npt);
+void Pulsar::ReceptionCalibratorPlotter::plot_model (unsigned ichan,
+						     unsigned ipol,
+						     unsigned npt)
+{
+  // extract the appropriate equation
+  const Calibration::ReceptionModel* equation;
+  equation = calibrator->model[ichan]->equation;
+
+  const Calibration::Parallactic* para;
+  para = &(calibrator->model[ichan]->parallactic);
 
   MJD start = calibrator->start_epoch;
   MJD end = calibrator->end_epoch;
@@ -263,31 +260,15 @@ void Pulsar::ReceptionCalibratorPlotter::plot_model (unsigned ichan,
 
     calibrator->model[ichan]->time.send (epoch);
 
-    parallactic[ipt] = para->get_param(0);
+    float parallactic = para->get_param(0) * 180.0/M_PI;
+    Stokes<float> stokes = equation->evaluate ();
 
-    stokes[ipt] = equation->evaluate ();
-    parallactic[ipt] *= 180.0/M_PI;
-
-  }
-
-  for (unsigned ipol=0; ipol<4; ipol++) {
-
-    if (plotter)
-      plotter->set_viewport (ipol);
-    else if (use_colour)
-      cpgsci (ipol+1);
+    if (ipt == 0)
+      cpgmove (parallactic, stokes[ipol]);
     else
-      cpgsls (ipol+1);
-
-    cpgmove (parallactic[0], stokes[0][ipol]);
-    for (unsigned ipt=1; ipt<npt; ipt++)
-      cpgdraw (parallactic[ipt], stokes[ipt][ipol]);
+      cpgdraw (parallactic, stokes[ipol]);
     
   }
-
-  cpgsci (1);
-  cpgsls (1);
-
 }
 
 void Pulsar::ReceptionCalibratorPlotter::plot_phase_constraints ()
