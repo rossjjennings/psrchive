@@ -1,3 +1,5 @@
+#include <math.h>
+
 #include "Pulsar/AdaptiveSNR.h"
 #include "Pulsar/BaselineFunction.h"
 #include "Pulsar/PhaseWeight.h"
