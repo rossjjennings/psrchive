@@ -19,7 +19,7 @@ Pulsar::BasicIntegration::BasicIntegration (const Integration& subint,
 
 //! Return the pointer to a new copy of self
 Pulsar::Integration* 
-Pulsar::BasicIntegration::clone (int npol=0, int nchan=0) const
+Pulsar::BasicIntegration::clone (int npol, int nchan) const
 {
   return new BasicIntegration (*this, npol, nchan);
 }
