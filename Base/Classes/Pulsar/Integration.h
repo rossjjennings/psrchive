@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Integration.h,v $
-   $Revision: 1.65 $
-   $Date: 2004/08/25 06:14:21 $
-   $Author: sord $ */
+   $Revision: 1.66 $
+   $Date: 2004/09/28 02:12:02 $
+   $Author: ahotan $ */
 
 /*
   
@@ -54,6 +54,9 @@ namespace Pulsar {
     
     //! Destructor
     virtual ~Integration ();
+
+    //! Zero all the profiles, keeping all else the same
+    void zero ();
 
     //! Test if integ is mixable (enough for combination with +=)
     virtual bool mixable (const Integration* integ, string& reason) const;

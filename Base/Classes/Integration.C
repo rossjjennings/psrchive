@@ -118,6 +118,17 @@ void Pulsar::Integration::operator+= (const Integration& subint)
   return;
 }
 
+void Pulsar::Integration::zero ()
+{
+  vector<float> zeroes(get_nbin(), 0.0);
+
+  for (unsigned i = 0; i < get_nchan(); i++) {
+    for (unsigned j = 0; j < get_npol(); j++) {
+      get_Profile(j,i)->set_amps(zeroes);
+    }
+  }
+}
+
 Pulsar::Integration::~Integration ()
 {
   if (verbose)
