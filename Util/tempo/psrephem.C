@@ -23,9 +23,11 @@ const double day  = 24.0 * 3600.0;  // seconds
 const double year = 365.2422 * day; // seconds
 const double mas  = M_PI/(60.0*60.0*180.0*1000.0);  // radians
 
-// Gaussian Gravitational Constant
-const double gGc    = 0.01720209895;        // AU^3/2 / (day* M_s^1/2)
-const double GM_s   = sqr(gGc) * cube(au);  // km^3 / (day^2 * M_s)
+// I.H. Stairs et al. 1998, ApJ 505:352-357 use T_sol = G * M_sol / c^3
+// where G = Gravitational Constant
+//       M = Mass of Sun
+//       c = speed of light
+const double T_sol  = 4.925490947e-6; // seconds
 
 int psrephem::mass_function (double& mf, double& mf_err) const
 {
@@ -40,7 +42,9 @@ int psrephem::mass_function (double& mf, double& mf_err) const
   double pb = value_double [EPH_PB];
   double pb_err = error_double [EPH_PB];
 
-  mf = 4.0 * sqr(M_PI) * cube(x*c) / (sqr(pb) * GM_s);
+  double n = 2.0 * M_PI / (pb * 86400.0);
+
+  mf = sqr(n) * cube(x) / T_sol;
   mf_err = mf * sqrt( 9.0*sqr(x_err/x) + 4.0*sqr(pb_err/pb) );
 
   return 0;
@@ -198,6 +202,106 @@ int psrephem::Shklovskii (double& beta, double& beta_err) const
   beta = sqr(mu_radsec) * dist / c;
   beta_err = beta * sqrt (sqr(2.0*mu_err/mu) + sqr(dist_err/dist));
 
+  return 0;
+}
+
+int psrephem::GR_f_e (double& f_e) const
+{
+  f_e = 1.0;
+  if (parmStatus[EPH_E] > 0) {
+    double ecc2 = sqr(value_double [EPH_E]);
+    f_e = (1.0 + 73.0/24.0*ecc2 + 37.0/96.0*sqr(ecc2)) / pow(1.0-ecc2,3.5);
+  }
+  return 0;
+}
+
+// returns the intrinsic x_dot due to gravitational wave emission
+int psrephem::GR_x_dot (double& x_dot) const
+{
+  if (parmStatus[EPH_A1] < 1)
+    return -1;
+  double x = value_double [EPH_A1];
+  double x_err = error_double [EPH_A1];
+
+  if (parmStatus[EPH_M2] < 1 )
+    return -1;
+  double m2     = value_double [EPH_M2];
+  double m2_err = error_double [EPH_M2];
+
+  double si, si_err;
+  if (sini (si, si_err) < 0)
+    return -1;
+
+  double mp, mp_err;
+  if (m1 (mp, mp_err) < 0)
+    return -1;
+
+  double f_e;
+  GR_f_e (f_e);
+
+  double fac  = T_sol / x;
+  double totm = mp + m2;
+  double sisq = sqr(si);
+
+  // Kopeikin, 1996, ApJ 467:L93-L95 Eqn 15
+  x_dot = -64.0/5.0 * cube(fac)*pow(si,4) * f_e * mp * pow(m2,5) / cube(totm);
+  return 0;
+}
+
+// returns the intrinsic Pb_dot due to gravitational wave emission
+int psrephem::GR_Pb_dot (double& Pb_dot) const
+{
+  if (parmStatus[EPH_PB] < 1)
+    return -1;
+  double pb = value_double [EPH_PB];
+  double pb_err = error_double [EPH_PB];
+
+  if (parmStatus[EPH_M2] < 1 )
+    return -1;
+  double m2     = value_double [EPH_M2];
+  double m2_err = error_double [EPH_M2];
+
+  double f_e;
+  GR_f_e (f_e);
+
+  double mp, mp_err;
+  if (m1 (mp, mp_err) < 0)
+    return -1;
+  
+  double n = 2.0 * M_PI / (pb * 86400.0);
+  
+  // I.H. Stairs et al. 1998, ApJ 505:352-357 Eqn 10
+  Pb_dot = - 192.0 * M_PI / 5.0 * pow (n*T_sol, 5.0/3.0) * f_e * mp * m2 
+    / pow(mp+m2, 1.0/3.0);
+  return 0;
+}
+
+// returns the intrinsic omega_dot due to gravitational wave emission
+// in degrees per year
+int psrephem::GR_omega_dot (double& w_dot) const
+{
+  double ecc2 = sqr(value_double [EPH_E]);
+
+  if (parmStatus[EPH_PB] < 1)
+    return -1;
+  double pb = value_double [EPH_PB];
+  double pb_err = error_double [EPH_PB];
+
+  if (parmStatus[EPH_M2] < 1 )
+    return -1;
+  double m2     = value_double [EPH_M2];
+  double m2_err = error_double [EPH_M2];
+
+  double mp, mp_err;
+  if (m1 (mp, mp_err) < 0)
+    return -1;
+
+  double n = 2.0 * M_PI / (pb * 86400.0);
+
+  // I.H. Stairs et al. 1998, ApJ 505:352-357 Eqn 8
+  w_dot = 3.0 * pow(n, 5.0/3.0) * pow((mp+m2)*T_sol, 2.0/3.0) / (1.0-ecc2);
+
+  w_dot *= year * 180.0 / M_PI;
   return 0;
 }
 

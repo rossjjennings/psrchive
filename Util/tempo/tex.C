@@ -316,6 +316,28 @@ string psrephem::tex () const
   retval += "Induced $\\dot P_{\\rm b} (10^{-12})$"
     + bw + tex_double (SPb_dot*1e12, SPb_dot_err*1e12) + nl;
 
+  double GRPb_dot;
+  if (GR_Pb_dot (GRPb_dot) < 0)
+    cerr << "******* Error GR_Pb_dot!" << endl;
+  GRPb_dot *= 1e12;
+  retval += "$\\dot P_{\\rm b}^{\\rm GR} (10^{-12})$" + bw
+    + tex_double (GRPb_dot, 0) + nl;
+
+  double GRx_dot;
+  if (GR_x_dot (GRx_dot) < 0)
+    cerr << "******* Error GR_x_dot!" << endl;
+  GRx_dot *= 1e20;
+  retval += "$\\dot x^{\\rm GR} (10^{-20})$" + bw
+    + tex_double (GRx_dot, 0) + nl;
+
+  double GRw_dot;
+  if (GR_omega_dot (GRw_dot) < 0)
+    cerr << "******* Error GR_w_dot!" << endl;
+  // GRw_dot *= 1e12 * 180/M_PI;
+  retval += "$\\dot \\omega^{\\rm GR} (\\degr yr^{-1})$" + bw
+    + tex_double (GRw_dot, 0) + nl;
+
+
 #if 0
   printf("\\\\\n");
   printf("Surface magnetic field, $B_{\\rm surf}$ (10$^8$ Gauss)\\dotfill\n");

@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/psrephem.h,v $
-   $Revision: 1.10 $
-   $Date: 2001/02/15 05:15:28 $
+   $Revision: 1.11 $
+   $Date: 2001/02/19 12:18:40 $
    $Author: straten $ */
 
 #ifndef __PSREPHEM_H
@@ -96,9 +96,21 @@ class psrephem
   // returns the orbital period derivative in seconds
   int P_dot (double& p, double& p_err) const;
   
-  // returns the quadratic Doppler shift due to apparent acceleration along
-  // the line of sight that arises from proper motion
+  // returns the transverse quadratic Doppler shift due to the apparent
+  // acceleration along the line of sight that arises from proper motion
   int Shklovskii (double& beta, double& beta_err) const;
+
+  // returns the intrinsic x_dot due to gravitational wave emission
+  int GR_x_dot (double& x_dot) const;
+
+  // returns the intrinsic Pb_dot due to gravitational wave emission
+  int GR_Pb_dot (double& Pb_dot) const;
+
+  // returns the intrinsic Pb_dot due to gravitational wave emission
+  int GR_omega_dot (double& Pb_dot) const;
+
+  // used by the above
+  int GR_f_e (double& f_e) const;
 
   // //////////////////////////////////////////////////////////////////////
   // to use the following two functions, you will need to link with 
