@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/Database.h,v $
-   $Revision: 1.4 $
-   $Date: 2004/10/11 14:26:27 $
+   $Revision: 1.5 $
+   $Date: 2004/10/11 15:32:27 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Database_h
@@ -86,6 +86,7 @@ namespace Pulsar {
       double           frequency;    // Centre frequency of observation
       unsigned         nchan;        // Number of channels across bandwidth
       string           instrument;   // name of backend
+      string           receiver;     // name of receiver
       string           filename;     // relative path of file
       
       //! Null constructor
@@ -126,6 +127,7 @@ namespace Pulsar {
       
       double DEC_deg_apart;
       
+      bool check_receiver;
       bool check_instrument;
       bool check_frequency;
       bool check_bandwidth;

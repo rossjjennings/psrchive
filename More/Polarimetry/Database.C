@@ -6,8 +6,9 @@
 #include "Pulsar/FluxCalibrator.h"
 
 #include "Pulsar/PolnCalibratorExtension.h"
-#include "Pulsar/Backend.h"
 #include "Pulsar/CalibratorStokes.h"
+#include "Pulsar/Receiver.h"
+#include "Pulsar/Backend.h"
 
 #include "Pulsar/Archive.h"
 
@@ -38,14 +39,6 @@ double Pulsar::Database::short_time_scale = 60.0;
 // filename type posn MJD bandwidth cfrequency nchan instrument
 //
 
-static char buffer[512];
-static char mjdstr[64];
-static char instr[32];
-static char posnstr1[16];
-static char posnstr2[16];
-static char typestr[32];
-static char fnstr[256];
-
 //! Initialise all variables
 void Pulsar::Database::Entry::init ()
 {
@@ -61,8 +54,9 @@ void Pulsar::Database::Entry::init ()
   frequency = 0.0; 
   nchan = 0; 
   
+  receiver = "unset";
   instrument = "unset";
-  filename = "unset";     // relative path of file
+  filename = "unset";
 }
 
 //! Construct from a Pulsar::Archive
@@ -74,6 +68,11 @@ Pulsar::Database::Entry::Entry (const Pulsar::Archive& arch)
   if (!backend)
     throw Error (InvalidState, "Pulsar::Database::Entry",
 		 "Archive has no Backend Extension");
+
+  const Pulsar::Receiver* receiver_ext = arch.get<Receiver>();
+  if (!receiver_ext)
+    throw Error (InvalidState, "Pulsar::Database::Entry",
+		 "Archive has no Receiver Extension");
 
   if (obsType == Signal::Calibrator) {
 
@@ -98,7 +97,7 @@ Pulsar::Database::Entry::Entry (const Pulsar::Archive& arch)
   filename = arch.get_filename();
 
   instrument = backend->get_name();
-
+  receiver = receiver_ext->get_name();
 }
 
 //! Destructor
@@ -110,84 +109,78 @@ Pulsar::Database::Entry::~Entry ()
 // load from ascii string
 void Pulsar::Database::Entry::load (const char* str) 
 {
-  int s = sscanf (str, "%s %s %s %s %s %lf %lf %d %s", fnstr, typestr, 
-		  posnstr1, posnstr2, mjdstr, 
-                  &bandwidth, &frequency, &nchan, instr);
-  if (s != 9)
-    throw Error (FailedSys, "Pulsar::Database::Entry::load",
-                 "sscanf(%s) != 9", str);
+  const char* whitespace = " \t\n";
+  string line = str;
 
-  time.Construct(mjdstr);
-
-  string useful = posnstr1;
-  useful += " ";
-  useful += posnstr2;
-
-  sky_coord temp(useful.c_str());
-  position = temp;
+  // /////////////////////////////////////////////////////////////////
+  // filename
+  filename = stringtok (&line, whitespace);
   
-  if (strcmp(typestr,"Pulsar") == 0)
-    obsType = Signal::Pulsar;
-  else if (strcmp(typestr,"PolnCal") == 0)
-    obsType = Signal::PolnCal;
-  else if (strcmp(typestr,"FluxCalOn") == 0)
-    obsType = Signal::FluxCalOn;
-  else if (strcmp(typestr,"FluxCalOff") == 0)
-    obsType = Signal::FluxCalOff;
-  else {
+  // /////////////////////////////////////////////////////////////////
+  // type
+  string typestr = stringtok (&line, whitespace);
+
+  obsType = Signal::string2Source(typestr);
+  if (obsType == Signal::Unknown) {
     obsType = Signal::Calibrator;
-    calType = Calibrator::str2Type (typestr);
+    calType = Calibrator::str2Type (typestr.c_str());
   }
 
-  instrument = instr;
-  filename = fnstr;
-  
+  // /////////////////////////////////////////////////////////////////
+  // RA DEC
+  string coordstr = stringtok (&line, whitespace);
+  coordstr += " " + stringtok (&line, whitespace);
+  position = sky_coord (coordstr.c_str());
+
+  // /////////////////////////////////////////////////////////////////
+  // MJD
+  string mjdstr  = stringtok (&line, whitespace);
+  time = MJD (mjdstr);
+
+  // /////////////////////////////////////////////////////////////////
+  // bandwidth, frequency, number of channels
+  int s = sscanf (line.c_str(), "%lf %lf %d", &bandwidth, &frequency, &nchan);
+  if (s != 3)
+    throw Error (FailedSys, "Pulsar::Database::Entry::load",
+                 "sscanf(" + line + ") != 3");
+
+  stringtok (&line, whitespace);
+  stringtok (&line, whitespace);
+  stringtok (&line, whitespace);
+
+  // /////////////////////////////////////////////////////////////////
+  // instrument
+  instrument = stringtok (&line, whitespace);
+
+  // /////////////////////////////////////////////////////////////////
+  // receiver
+  receiver = stringtok (&line, whitespace);
+
+  if (receiver.length() == 0)
+    throw Error (InvalidParam, "Pulsar::Database::Entry::load",
+                 "Could not parse '%s'");
+
 }
 
 // unload to a string
-void Pulsar::Database::Entry::unload (string& str)
+void Pulsar::Database::Entry::unload (string& retval)
 {
-  string retval;
+  retval = filename + " ";
   
-  retval += filename + " ";
-  
-  switch (obsType) {
-  case Signal::Unknown:
-    retval += "Unknown ";
-    break;
-  case Signal::Pulsar:
-    retval += "Pulsar ";
-    break;
-  case Signal::PolnCal:
-    retval += "PolnCal ";
-    break;
-  case Signal::FluxCalOn:
-    retval += "FluxCalOn ";
-    break;
-  case Signal::FluxCalOff:
-    retval += "FluxCalOff ";
-    break;
-  case Signal::Calibrator:
-    {
-      retval += Calibrator::Type2str (calType);
-      retval += " ";
-    }
-    break;
-  }
+  if (obsType == Signal::Calibrator)
+    retval += Calibrator::Type2str (calType);
+  else
+    retval += Signal::Source2string (obsType);
 
+  retval += " ";
   retval += position.getRaDec().getHMSDMS();
-  retval += " ";
 
-  strcpy (mjdstr, time.printdays(15).c_str());
-  retval += mjdstr;
   retval += " ";
-  
-  sprintf (buffer, "%lf %lf %d %s", bandwidth, frequency,
-	   nchan, instrument.c_str());
-  
-  retval += buffer;
-  
-  str = retval;
+  retval += time.printdays(15);
+
+  retval += stringprintf (" %lf %lf %d", bandwidth, frequency, nchan);
+
+  retval += " " + instrument + " " + receiver;
 }
 
 bool Pulsar::Database::Criterion::match_verbose = false;
@@ -198,6 +191,7 @@ Pulsar::Database::Criterion::Criterion ()
   RA_deg_apart  = 5.0;
   DEC_deg_apart = 5.0;
 
+  check_receiver    = true;
   check_instrument  = true;
   check_frequency   = true;
   check_bandwidth   = true;
@@ -252,6 +246,23 @@ bool Pulsar::Database::Criterion::match (const Entry& have) const
 
     }
 
+  }
+
+  if (check_receiver) {
+
+    if (match_verbose)
+      cerr << "  Seeking receiver=" << entry.receiver
+           << " have receiver=" << have.receiver;
+
+    if (entry.receiver==have.receiver) {
+      if (match_verbose)
+        cerr << " ... match found" << endl;
+    }
+    else {
+      if (match_verbose)
+        cerr << "... no match" << endl;
+      return false;
+    }
   }
 
   if (check_instrument) {
@@ -425,10 +436,12 @@ Pulsar::Database::Database (string _path, const vector<string>& extensions)
   path = get_current_path ();
 
   vector<string> filenames;
-  for (unsigned i = 0; i < extensions.size(); i++) {
-    string glob = "*." + extensions[i];
-    dirglobtree (&filenames, "", glob);
-  } 
+  vector<string> patterns (extensions.size());
+
+  for (unsigned i = 0; i < extensions.size(); i++)
+    patterns[i] = "*." + extensions[i];
+
+  dirglobtree (&filenames, "", patterns);
 
   if (chdir(current.c_str()) != 0)
     throw Error (FailedSys, "Pulsar::Database", "chdir("+current+")");
