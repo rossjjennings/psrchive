@@ -7,7 +7,7 @@ COMMENT   Astrophysics Supplement Series v44/p363, v44/p371, v73/p359, v73/p365.
 COMMENT   Contact the NASA Science Office of Standards and Technology for the
 COMMENT   FITS Definition document #100 and other FITS information.
 COMMENT
-HDRVER  = '1.14            '   / Header version 
+HDRVER  = '1.15            '   / Header version 
 DATE    = '                '   / File creation date (YYYY-MM-DDThh:mm:ss UTC)
 OBSERVER= '                '   / Observer name(s)
 PROJID  = '                '   / Project name
@@ -481,6 +481,7 @@ EXTNAME = 'FEEDPAR '           / Name of this binary table extension
 CAL_MTHD= '        '           / Cross-coupling method
 NCPAR   =                    * / Number of coupling parameters
 NCH_FDPR=                    * / Nr of channels in Feed coupling data
+EPOCH   = '                  ' / Epoch of calibration experiment (MJD)
 #
 TTYPE1  = 'DAT_FREQ'           / [MHz] Centre frequency for each channel
 TFORM1  = 'E       '           / NCH_FDPR floats
