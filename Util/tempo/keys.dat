@@ -110,7 +110,7 @@ KIN 1 1   # Inclination angle (0 - 180)  [DDK-WvS]
 
 # Post-Keplerian binary parameters.  
 OMDOT 1 1    # Rate of periastron advance (deg/yr), 1st orbit
-OMDOT_2 1 1  #   "  "       "        "        "    2nd orbit
+OMDOT_2 1 1  #   "         "         "        "    2nd orbit
 OMDOT_3 1 1  
 GAMMA 1 1    # Time dilation and gravitational redshift (sec) 
 PBDOT 1 1    # Rate of change of orbital period (10^-12), 1st orbit
@@ -137,7 +137,7 @@ B0 1 0       # Aberration parameter (microsec) (not fit)
 BP 1 0       # Tensor multi-scalar parameter beta-prime (not fit)
 BPP 1 0      # Tensor multi-scalar parameter beta-prime-prime (not fit)
 EPS1 1 1     # ELL1 timing model param (dimensionless)
-EPS2 1 1     # "
+EPS2 1 1     #        "      "
 TASC 4 1     # Time of ascending node (MJD)
 
 # Glitches
