@@ -102,17 +102,12 @@ Rhythm::Rhythm (QApplication* master, QWidget* parent, int argc, char** argv) :
 
   leftpanel = new QVBox(container);
 
-  // Set up the tab panel
-
-  tabs = new QTabWidget(container);
-  
   if (vverbose)
     cerr << "Rhythm:: creating toaPlotter" << endl;
   
   // Instantiate the plotting window
 
-  plot_window = new toaPlot(0,0);
-  tabs->addTab(plot_window, "Display");
+  plot_window = new toaPlot(container);
 
   QObject::connect(plot_window, SIGNAL(ineednewdata()),
 		   this, SLOT(request_update()));
@@ -202,16 +197,6 @@ Rhythm::Rhythm (QApplication* master, QWidget* parent, int argc, char** argv) :
   QObject::connect(chooser, SIGNAL(XChange(toaPlot::AxisQuantity)),
 		   this, SLOT(XChange(toaPlot::AxisQuantity)));
 
-  // Instantiate the toa list box
-  
-  toa_text = new QListBox(container, "TOA_INFO");
-  toa_text -> setSelectionMode(QListBox::Multi);  
-
-  tabs->addTab(toa_text, "TOA List");
-
-  QObject::connect(toa_text, SIGNAL(selectionChanged()),
-		   this, SLOT(reselect()));
-  
   QObject::connect(plot_window, SIGNAL(selected(int)),
 		   this, SLOT(select(int)));
 
@@ -240,11 +225,6 @@ Rhythm::Rhythm (QApplication* master, QWidget* parent, int argc, char** argv) :
 
   command_line_parse (argc, argv);
   
-  tabs->showPage(plot_window);
-  
-  QObject::connect(tabs, SIGNAL(currentChanged(QWidget*)),
-		   this, SLOT(tabChange(QWidget*)));
-
   // Find standard profiles
   
   char temp[128];
@@ -303,8 +283,6 @@ void Rhythm::load_toas (const char* fname)
 
   toa_filename = fname;
   
-  toa_text -> clear();
-  
   if (toas[0].get_format() == Tempo::toa::Command) {
     char junk[80];
     int  themode = 0;
@@ -316,11 +294,7 @@ void Rhythm::load_toas (const char* fname)
 
   update_mode();
 
-  char useful[256];
-
   for (unsigned i = 0; i < toas.size(); i++) {
-    toas[i].unload(useful);
-    toa_text -> insertItem(useful);
 
     if (toas[i].get_format() == Tempo::toa::Command) {
       toas[i].ci = 4;
@@ -375,13 +349,7 @@ void Rhythm::add_toas (const char* fname)
 
   toa_filename = "newfile.tim";
   
-  toa_text -> clear();
-
-  char useful[256];
-
   for (unsigned i = 0; i < toas.size(); i++) {
-    toas[i].unload(useful);
-    toa_text -> insertItem(useful);
 
     if (toas[i].get_format() == Tempo::toa::Command) {
       toas[i].ci = 4;
@@ -436,7 +404,6 @@ void Rhythm::set_Params (const psrephem& eph)
 
 void Rhythm::close_toas ()
 {
-  toa_text -> clear();
   toas.resize(0);
 
   tempo->setItemEnabled (fitID, false);
@@ -472,7 +439,13 @@ void Rhythm::show_me ()
 
 void Rhythm::plot_current ()
 {
-  int index = toa_text->currentItem();
+  int index = -1;
+  
+  for (unsigned i = 0; i < toas.size(); i++)
+    if (toas[i].get_state() == Tempo::toa::Selected) {
+      index = i;
+      break;
+    }
   
   if (index < 0) {
     footer->setText("There is no selected TOA to plot!");
@@ -544,13 +517,6 @@ void Rhythm::fit()
 
   goplot();
   plot_window->autoscale();
-
-  toa_text -> clear();
-  char useful[256];
-  for (unsigned i = 0; i < toas.size(); i++) {
-    toas[i].unload(useful);
-    toa_text -> insertItem(useful);
-  }
 }
 
 void Rhythm::fit (const psrephem& eph, bool load_new)
@@ -647,13 +613,6 @@ void Rhythm::fit_selected()
 
   goplot();
   plot_window->autoscale();
-
-  toa_text -> clear();
-  char useful[256];
-  for (unsigned i = 0; i < toas.size(); i++) {
-    toas[i].unload(useful);
-    toa_text -> insertItem(useful);
-  }
 }
 
 void Rhythm::fit_selected (const psrephem& eph, bool load_new)
@@ -1431,12 +1390,6 @@ void Rhythm::YChange (toaPlot::AxisQuantity q)
   plot_window->autoscale();
 }
 
-void Rhythm::tabChange(QWidget* ptr)
-{
-  if (ptr == plot_window)
-    goplot();
-}
-
 void Rhythm::goplot ()
 {
   std::vector<double> tempx = give_me_data(xq);
@@ -1479,20 +1432,6 @@ void Rhythm::goplot ()
 			 chooser->isLogX(), chooser->isLogY());
 }
 
-void Rhythm::reselect ()
-{
-  for (unsigned i = 0; i < toas.size(); i++) {
-    
-    if (toas[i].get_state() == Tempo::toa::Deleted)
-      continue;
-    
-    if (toa_text->isSelected(i))
-      toas[i].set_state(Tempo::toa::Selected);
-    else
-      toas[i].set_state(Tempo::toa::Normal);
-  }
-}
-
 void Rhythm::deselect (int pt)
 {
   if (pt >= int(toas.size()))
@@ -1504,8 +1443,6 @@ void Rhythm::deselect (int pt)
     return;
   
   toas[pt].set_state(Tempo::toa::Normal);
-  toa_text -> setSelected (pt, false);
-  
 }
 
 void Rhythm::deselect (std::vector<int> pts)
@@ -1542,8 +1479,6 @@ void Rhythm::select (int pt)
     return;
   
   toas[pt].set_state(Tempo::toa::Selected);
-  toa_text -> setSelected (pt, true);
-  toa_text -> setCurrentItem (pt);
 }
 
 void Rhythm::select (std::vector<int> pts)
@@ -1581,7 +1516,7 @@ void Rhythm::freqsort ()
 	toas[i].ci = 3;
       else if (toas[i].resid.obsfreq < 800.0)
 	toas[i].ci = 4;
-      else if (toas[i].resid.obsfreq < 1600.0)
+      else if (toas[i].resid.obsfreq < 1400.0)
 	toas[i].ci = 5;
       else if (toas[i].resid.obsfreq < 2400.0)
 	toas[i].ci = 6;
@@ -1597,7 +1532,7 @@ void Rhythm::freqsort ()
 	toas[i].ci = 3;
       else if (toas[i].get_frequency() < 800.0)
 	toas[i].ci = 4;
-      else if (toas[i].get_frequency() < 1600.0)
+      else if (toas[i].get_frequency() < 1400.0)
 	toas[i].ci = 5;
       else if (toas[i].get_frequency() < 2400.0)
 	toas[i].ci = 6;
@@ -1695,7 +1630,8 @@ void Rhythm::deleteselection ()
 
 void Rhythm::undeleteall ()
 {
-  QProgressDialog progress( "Restoring Deleting Points...", "Abort", toas.size(),
+  QProgressDialog progress( "Restoring Deleting Points...", 
+			    "Abort", toas.size(),
 			    this, "progress", TRUE );
   for ( unsigned i = 0; i < toas.size(); i++ ) {
     progress.setProgress( i );
@@ -1705,10 +1641,8 @@ void Rhythm::undeleteall ()
       break;
     
     if (toas[i].get_state() == Tempo::toa::Deleted) {
-      if (toas[i].get_format() != Tempo::toa::Comment) {
+      if (toas[i].get_format() != Tempo::toa::Comment)
 	toas[i].set_state(Tempo::toa::Normal);
-      }
-      toa_text -> setSelected (i, false);
     }
   }
   progress.setProgress( toas.size() );
@@ -1733,7 +1667,6 @@ void Rhythm::clearselection ()
       continue;
     
     toas[i].set_state(Tempo::toa::Normal);
-    toa_text -> setSelected (i, false);
   }
   progress.setProgress( toas.size() );
   

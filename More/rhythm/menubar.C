@@ -98,8 +98,7 @@ void Rhythm::menubarConstruct ()
   // OPTIONS menu options
   //
   options = new QPopupMenu( menuBar() );
-  options->insertItem( "Preferences", this, SLOT(showOptions()));
-  options->insertItem( "Plotter", plotter, ALT+Key_V);
+  options->insertItem( "Plotter", plotter, ALT+Key_P);
   options->insertSeparator();
   options->insertItem( "&Verbosity", verbosity, ALT+Key_V);
 
@@ -181,37 +180,31 @@ void Rhythm::set_ddk()
 void Rhythm::setDataPath()
 {
   QString temp = QInputDialog::getText("Set Data Path",
-                                       "Please enter the path to your archives:");
+                                       "Please enter the archive path:");
   if (!temp.isEmpty())
     dataPath = temp.ascii();
 }
 
 void Rhythm::profileMovie()
 {
-  int save = toa_text->currentItem();
-  
-  QProgressDialog progress( "Displaying Profiles...", "Abort", toa_text->count(),
-			    this, "progress", TRUE );
-
+  QProgressDialog progress( "Displaying Profiles...", "Abort", 
+			    toas.size(), this, "progress", TRUE );
   cpgopen("9090/xs");
   
-  for (unsigned i = 0; i < toa_text->count(); i++) {
+  for (unsigned i = 0; i < toas.size(); i++) {
     if (toas[i].get_format() == Tempo::toa::Command)
       continue;
     cpgbbuf();
     cpgeras();
     progress.setProgress( i );
     myapp->processEvents();
-    toa_text->setCurrentItem(i);
     plot_current();
     cpgebuf();
     if ( progress.wasCancelled() )
       break;
   }
-  progress.setProgress( toa_text->count() );
+  progress.setProgress( toas.size() );
   cpgclos();
-
-  toa_text->setCurrentItem(save); 
 }
 
 void Rhythm::toglweights()
@@ -287,7 +280,7 @@ void Rhythm::about()
   QMessageBox::about (NULL, "Rhythm Pulsar Timing",
 		      "A graphical user interface to TEMPO.\n\n"
 		      "Written by: W. van Straten & A. W. Hotan\n\n"
-		      "See http://www.astronomy.swin.edu.au/pulsar/software/manuals/rhythm for more.\n");
+		      "http://www.astronomy.swin.edu.au/pulsar/software/manuals/rhythm\n");
 }
 
 void Rhythm::aboutQt()

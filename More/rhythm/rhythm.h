@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/rhythm/rhythm.h,v $
-   $Revision: 1.45 $
-   $Date: 2005/03/02 10:14:03 $
+   $Revision: 1.46 $
+   $Date: 2005/03/08 00:19:28 $
    $Author: ahotan $ */
 
 // //////////////////////////////////////////////////////////////////////////
@@ -139,18 +139,13 @@ class Rhythm : public QMainWindow
 
   QApplication* myapp;
 
-  QTabWidget* tabs;
-
   RhythmOptions opts;
   
-  // an array of toas
+  // The array of toas
   std::vector<Tempo::toa> toas;
-  // the file from which they were read
+  // The file from which they were read
   string toa_filename;
   
-  // the central display slate
-  QListBox* toa_text;
-
   void load_toas (const char* fname);
   void add_toas (const char* fname);
   void save_toas (const char* fname);
@@ -307,7 +302,6 @@ class Rhythm : public QMainWindow
   void select (std::vector<int>);
   void deselect (int);
   void deselect (std::vector<int>);
-  void reselect ();
   
   void clearselection ();
   void deleteselection ();
@@ -327,8 +321,6 @@ class Rhythm : public QMainWindow
   void profileMovie ();
 
   void simulateModel ();
-
-  void tabChange(QWidget*);
 };
 
 #endif
