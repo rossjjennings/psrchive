@@ -199,9 +199,6 @@ void Pulsar::Archive::apply_model (const polyco& old, Integration* subint)
 
   try {
 
-    if (verbose) 
-      model->unload (stderr);
-
     // get the MJD of the rising edge of bin zero
     MJD subint_mjd = subint -> get_epoch();
 
@@ -221,17 +218,17 @@ void Pulsar::Archive::apply_model (const polyco& old, Integration* subint)
     
     if (verbose)
       cerr << "Pulsar::Archive::apply_model"
-	   << " old MJD " << subint_mjd
-	   << " old polyco phase " << old.phase(subint_mjd)
-	   << " new polyco phase " << phase << endl
+	   << "\n  old MJD " << subint_mjd
+	   << "\n  old polyco phase " << old.phase(subint_mjd)
+	   << "\n  new polyco phase " << phase
 	
-	   << " old freq " << old.get_freq()
-	   << " new freq " << model->get_freq()
-	   << " freq phase shift " << freq_shift_phase << endl
+	   << "\n  old freq " << old.get_freq()
+	   << "\n  new freq " << model->get_freq()
+	   << "\n  freq phase shift " << freq_shift_phase
 	
-	   << " time shift      " << shift_time/86400.0
-	   << " days  " << shift_time << " seconds "
-	   << " total phase shift " << dphase.fracturns() << endl; 
+	   << "\n  time shift " << shift_time/86400.0 << " days" 
+           << "\n             " << shift_time << " seconds "
+	   << "\n  total phase shift " << dphase << endl; 
     
     subint -> set_folding_period (period);  
     subint -> rotate (shift_time);
@@ -239,8 +236,8 @@ void Pulsar::Archive::apply_model (const polyco& old, Integration* subint)
     if (verbose) {
       subint_mjd = subint -> get_epoch();
       cerr << "Pulsar::Archive::apply_model"
-	   << " new MJD "   << subint_mjd
-	   << " new phase " << model->phase(subint_mjd)
+	   << "\n  new MJD "   << subint_mjd
+	   << "\n  new phase " << model->phase(subint_mjd)
 	   << endl;
     }
   }
