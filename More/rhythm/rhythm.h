@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/rhythm/rhythm.h,v $
-   $Revision: 1.32 $
-   $Date: 2003/07/31 08:35:23 $
+   $Revision: 1.33 $
+   $Date: 2003/08/05 11:17:13 $
    $Author: ahotan $ */
 
 // //////////////////////////////////////////////////////////////////////////
@@ -28,6 +28,7 @@
 #include <qbuttongroup.h>
 #include <qradiobutton.h>
 #include <qinputdialog.h>
+#include <qtabwidget.h>
 #include "qprogressdialog.h"
 
 #include "psrephem.h"
@@ -124,6 +125,8 @@ class Rhythm : public QMainWindow
  protected:
 
   QApplication* myapp;
+
+  QTabWidget* tabs;
 
   RhythmOptions opts;
   
@@ -225,6 +228,7 @@ class Rhythm : public QMainWindow
 
  public slots:
 
+  void plot_current ();
   void show_me ();
   void request_update ();
 
@@ -292,6 +296,7 @@ class Rhythm : public QMainWindow
   void freqsort ();
   
   void setDataPath ();
+  void profileMovie ();
 };
 
 #endif

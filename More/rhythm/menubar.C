@@ -76,7 +76,7 @@ void Rhythm::menubarConstruct ()
 	    this, SLOT( setVerbosity(int) ) );
 
   // ///////////////////////////////////////////////////////////////////////
-  // PLOT menu options (probably redendant)
+  // PLOT menu options
   //
   QPopupMenu* plotter = new QPopupMenu( menuBar() );  
   plotter->insertItem( "Set Data Path", this, SLOT(setDataPath()));
@@ -89,6 +89,13 @@ void Rhythm::menubarConstruct ()
   options->insertItem( "Plotter", plotter, ALT+Key_V);
   options->insertSeparator();
   options->insertItem( "&Verbosity", verbosity, ALT+Key_V);
+
+  // ///////////////////////////////////////////////////////////////////////
+  // MOVIE menu options
+  //
+  QPopupMenu* movies = new QPopupMenu ( menuBar() );
+  CHECK_PTR (movies);
+  movies->insertItem( "Profile Movie", this, SLOT(profileMovie()));
 
   // ///////////////////////////////////////////////////////////////////////
   // HELP menu options
@@ -104,6 +111,7 @@ void Rhythm::menubarConstruct ()
   menuBar() -> insertItem   ( "File",    file );
   menuBar() -> insertItem   ( "Tempo",   tempo );
   menuBar() -> insertItem   ( "Options", options );
+  menuBar() -> insertItem   ( "Movies",  movies );
   menuBar() -> insertSeparator();
   menuBar() -> insertItem   ( "Help", help );
 
@@ -155,6 +163,32 @@ void Rhythm::setDataPath()
                                        "Please enter the path to your archives:");
   if (!temp.isEmpty())
     dataPath = temp.ascii();
+}
+
+void Rhythm::profileMovie()
+{
+  int save = toa_text->currentItem();
+  
+  QProgressDialog progress( "Displaying Profiles...", "Abort", toa_text->count(),
+			    this, "progress", TRUE );
+
+  cpgopen("/xs");
+
+  for (unsigned i = 0; i < toa_text->count(); i++) {
+    cpgbbuf();
+    cpgeras();
+    progress.setProgress( i );
+    myapp->processEvents();
+    toa_text->setCurrentItem(i);
+    plot_current();
+    cpgebuf();
+    if ( progress.wasCancelled() )
+      break;
+  }
+  progress.setProgress( toa_text->count() );
+  cpgclos();
+
+  toa_text->setCurrentItem(save); 
 }
 
 void Rhythm::toglweights()

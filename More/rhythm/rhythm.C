@@ -73,7 +73,7 @@ Rhythm::Rhythm (QApplication* master, QWidget* parent, int argc, char** argv) :
   // Initialise variables
 
   myapp = master;
-
+  
   xq = toaPlot::TOA_MJD;
   yq = toaPlot::ResidualMicro;
 
@@ -191,12 +191,16 @@ Rhythm::Rhythm (QApplication* master, QWidget* parent, int argc, char** argv) :
   QObject::connect(chooser, SIGNAL(XChange(toaPlot::AxisQuantity)),
 		   this, SLOT(XChange(toaPlot::AxisQuantity)));
 
-  // Instantiate the toa list box
+  // Set up the tab panel
 
-  toa_text = new QListBox(container, "TOA_INFO");
-  toa_text -> setSelectionMode(QListBox::Multi);
+  tabs = new QTabWidget(container);
+
+  // Instantiate the toa list box
   
-  toa_text -> setMinimumSize(500,400);
+  toa_text = new QListBox(container, "TOA_INFO");
+  toa_text -> setSelectionMode(QListBox::Multi);  
+
+  tabs->addTab(toa_text, "TOA List");
 
   QObject::connect(toa_text, SIGNAL(selectionChanged()),
 		   this, SLOT(reselect()));
@@ -210,7 +214,9 @@ Rhythm::Rhythm (QApplication* master, QWidget* parent, int argc, char** argv) :
   if (vverbose)
     cerr << "Rhythm:: new qt_editParams" << endl;
 
-  fitpopup = new qt_editParams;
+  fitpopup = new qt_editParams(container);
+  tabs->insertTab(fitpopup, "Ephemeris");
+  tabs->showPage(fitpopup);
 
   connect ( fitpopup, SIGNAL( closed() ),
 	    this, SLOT( togledit() ) );
@@ -229,8 +235,6 @@ Rhythm::Rhythm (QApplication* master, QWidget* parent, int argc, char** argv) :
 
   if (vverbose)
     cerr << "Rhythm:: show qt_editParams" << endl;
-
-  fitpopup -> show();
 
 }
 
@@ -413,11 +417,17 @@ void Rhythm::update_mode ()
 
 void Rhythm::show_me ()
 {
+  cpgopen("/xs");
+  plot_current();
+  cpgclos();
+}
+
+void Rhythm::plot_current ()
+{
   int index = toa_text->currentItem();
   
   if (index < 0) {
-    QMessageBox::information (NULL, "Rhythm",
-			      "There is no selected TOA to plot!  \n");
+    footer->setText("There is no selected TOA to plot!");
     return;
   }
   
@@ -446,21 +456,16 @@ void Rhythm::show_me ()
     data->pscrunch();
     data->centre();
 
-    cpgopen("/xs");
     cpgsvp (0.1,0.9,0.1,0.9);
     Pulsar::Plotter plotter;
     plotter.singleProfile(data);
-    cpgclos();
 
   }
   catch (Error& error) {
+    footer->setText("Error processing archive on disk!");
     if (verbose)
       cerr << "Rhythm::show_me ERROR " << error << endl;
-    QMessageBox::critical (this, "Rhythm Show Profile",
-			   "Error processing archive on disk.",
-			   "Sigh.");
-  }
-  
+  }  
 }
 
 void Rhythm::fit()
