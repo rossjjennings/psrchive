@@ -92,6 +92,7 @@ libpsrchive_la_LIBADD += psrfits/libpsrfits.la
 
 endif
 
+SUBDIRS += .
 
 if HAVE_QT
 
