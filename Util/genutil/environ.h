@@ -1,7 +1,7 @@
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Attic/environ.h,v $
-   $Revision: 1.10 $
-   $Date: 2004/09/02 04:54:25 $
-   $Author: redwards $ */
+   $Revision: 1.11 $
+   $Date: 2005/02/03 22:53:47 $
+   $Author: straten $ */
 
 /*
  * When sending packets back and forth between different architectures,
@@ -96,8 +96,9 @@ typedef long double    float128;
 
 /* ********************************************** LINUX */
 #ifdef linux
-typedef long           int32;
-typedef unsigned long  uint32;
+
+typedef int      int32;
+typedef unsigned uint32;
 
 typedef long long int64;
 typedef unsigned long long uint64;
