@@ -224,13 +224,7 @@ void Pulsar::ReceptionCalibratorPlotter::plot_stokes (EstimatePlotter& plotter,
 
   cpgbox ("bcst",0,0,"bcvnst",spacing,2);
 
-  cerr << "stokes=" << stokes_index[ipol] << endl;
-  cerr << "label=" << stokes_label[0] << endl;
-  
   stokes_label[position] = stokes_index[ipol];
-  cerr << "poo" << endl;
-  cerr << "stokes label=" << stokes_label << endl;
-  
   cpgmtxt("L",3.5,.5,.5,stokes_label);
 
   // possible circumflex, \\(0756,0832,2247)
@@ -299,6 +293,9 @@ void Pulsar::ReceptionCalibratorPlotter::plotcal ()
 		 "Pulsar::ReceptionCalibratorPlotter::plotcal",
                  "ReceptionCalibrator not set");
 
+  if (verbose)
+    cerr << "Pulsar::ReceptionCalibratorPlotter::plotcal call plot" << endl;
+
   plot( new ReceptionCalibrator::CalInfo(calibrator),
 	calibrator->get_nchan(),
 	calibrator->get_Archive()->get_centre_frequency(),
@@ -308,20 +305,37 @@ void Pulsar::ReceptionCalibratorPlotter::plotcal ()
 
 Pulsar::ReceptionCalibrator::CalInfo::CalInfo (ReceptionCalibrator* cal)
 {
-  calibrator = cal; 
+  calibrator = cal;
 }
-      
+
+//! Return the number of channels in the calibrator estimate
+unsigned Pulsar::ReceptionCalibrator::CalInfo::get_nchan () const
+{
+  return calibrator->calibrator_estimate.source.size();
+}
+
+//! Return the number of channels in the flux calibrator estimate
+unsigned Pulsar::ReceptionCalibrator::CalInfo::get_fcal_nchan () const
+{
+  return calibrator->flux_calibrator_estimate.source.size();
+}
+
 //! Return the number of parameter classes
 unsigned Pulsar::ReceptionCalibrator::CalInfo::get_nclass () const
 {
-  if (calibrator->flux_calibrator_estimate.source.size() != 0) {
+  unsigned classes = 0;
+
+  if (get_nchan())
+    classes = 1;
+
+  if (get_fcal_nchan()) {
     if (calibrator->measure_cal_V)
-      return 2; 
+      classes += 1; 
     else
-      return 3;
+      classes +=2;
   }
-  else
-    return 1;
+
+  return classes;
 }
 
 //! Return the name of the specified class
@@ -371,14 +385,27 @@ Pulsar::ReceptionCalibrator::CalInfo::get_param (unsigned ichan,
 						 unsigned iclass,
 						 unsigned iparam) const
 {
-  switch (iclass) {
-  case 0:
+  if (iclass == 0) {
+    if (ichan >= get_nchan())
+      throw Error (InvalidParam, 
+                   "Pulsar::ReceptionCalibrator::CalInfo::get_param",
+                   "ichan=%d >= nchan=%d", ichan, get_nchan());
+
     return calibrator->calibrator_estimate.source[ichan].get_Estimate(iparam);
-  case 1:
-    return calibrator->flux_calibrator_estimate.source[ichan].get_Estimate(iparam);
-  case 2:
-    return calibrator->flux_calibrator_estimate.source[ichan].get_Estimate(iparam+1);
-  default:
-    return 0.0;
   }
+
+  else {
+    if (ichan >= get_fcal_nchan())
+      throw Error (InvalidParam,
+                   "Pulsar::ReceptionCalibrator::CalInfo::get_param",
+                   "ichan=%d >= fcal_nchan=%d", ichan, get_fcal_nchan());
+
+    if (iclass == 1)
+      return calibrator->flux_calibrator_estimate.source[ichan].get_Estimate(iparam);
+    else if (iclass == 2)
+      return calibrator->flux_calibrator_estimate.source[ichan].get_Estimate(iparam+1);
+  }
+
+  return 0.0;
 }
+
