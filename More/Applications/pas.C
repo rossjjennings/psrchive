@@ -81,7 +81,7 @@ int main (int argc, char** argv)
       return 0;
 
     case 'i':
-      cout << "$Id: pas.C,v 1.12 2004/07/21 05:28:07 straten Exp $" << endl;
+      cout << "$Id: pas.C,v 1.13 2004/09/12 00:29:42 ahotan Exp $" << endl;
       return 0;
 
     case 'r':
@@ -177,7 +177,8 @@ int main (int argc, char** argv)
   cout << "Input plot device : ";
   cin >> plotdev;
   //plot profiles
-  plot_it(refarch, stdarch, ci_ref, ci_std, ci_tex, ci_dis, line, plotdev, refflag, xmin, xmax);
+  plot_it(refarch, stdarch, ci_ref, ci_std, ci_tex, ci_dis, line, 
+	  plotdev, refflag, xmin, xmax);
 
   opts = ' ';
   if (cpgcurs(&curs_x, &curs_y, &opts) == 1) {
@@ -187,17 +188,20 @@ int main (int argc, char** argv)
 	case 'a':   //Align
 	  if(refflag==true) {  
 	    stdprof=stdarch->get_Profile(0, 0, 0);
-	    stdphase=float(stdprof->shift(refarch->get_Profile(0, 0, 0), ephase, snrfft, esnrfft));
+	    stdphase=float(stdprof->FFTShift(refarch->get_Profile(0, 0, 0), 
+					     ephase, snrfft, esnrfft));
 	    fmax=stdphase*stdarch->get_Profile(0,0,0)->get_nbin();
 	    stdarch->rotate(convt(stdarch, fmax, verbose));
-	    if(verbose) cout << "Align: rotated " <<stdphase << "phase, " << fmax <<" bins" << endl;
+	    if(verbose) cout << "Align: rotated " <<stdphase << "phase, " 
+			     << fmax <<" bins" << endl;
 	  }
 	  else cout << "No specified ref. profile" << endl;
 	  break;
 
 	case 'b':  //Bscrunch
 	  stdarch->bscrunch(2);
-	  if( verbose ) cout << "Bscrunch: Profile is smoothed by factor 2" << endl;
+	  if( verbose ) cout << "Bscrunch: Profile is smoothed by factor 2" 
+			     << endl;
 	  break;
 	 
 	case 'c': {
@@ -526,13 +530,17 @@ void cross(Reference::To<Pulsar::Archive> refcorr, Reference::To<Pulsar::Archive
 
   //  maximum, after rotate fractional phase bin
   stdprof=stdcorr->get_Profile(0, 0, 0);
-  stdphase=stdprof->shift(refcorr->get_Profile(0, 0, 0), ephase, snrfft, esnrfft);
+  stdphase=stdprof->FFTShift(refcorr->get_Profile(0, 0, 0), 
+			     ephase, snrfft, esnrfft);
   fmax=float(stdphase)*stdcorr->get_Profile(0,0,0)->get_nbin();
   stdcorr->rotate(convt(stdcorr, fmax, verbose));
-  cross_correlation(refcorr->get_Profile(0, 0, 0), stdcorr->get_Profile(0, 0, 0), &rmax, &imax, &ppcoef, vverbose);
+  cross_correlation(refcorr->get_Profile(0,0,0), stdcorr->get_Profile(0,0,0), 
+		    &rmax, &imax, &ppcoef, vverbose);
 
-  if(verbose) cout << "Maximum cross correlation coeffecient: " << rmax << " at bin lag " << fmax <<endl;
-  if(verbose) cout << "Present cross correlation coeffecient: " << pcoef <<endl;
+  if(verbose) cout << "Maximum cross correlation coeffecient: " 
+		   << rmax << " at bin lag " << fmax <<endl;
+  if(verbose) cout << "Present cross correlation coeffecient: " 
+		   << pcoef <<endl;
   strncmp(line, "", 100);
   sprintf(line, "Maximum cross correlation coeffecient = %f at bin lag %f   Present = %f", ppcoef, fmax, pcoef);
 }

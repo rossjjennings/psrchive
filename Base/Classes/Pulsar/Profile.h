@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Profile.h,v $
-   $Revision: 1.69 $
-   $Date: 2004/09/10 03:00:20 $
-   $Author: hknight $ */
+   $Revision: 1.70 $
+   $Date: 2004/09/12 00:29:41 $
+   $Author: ahotan $ */
 
 #ifndef __Pulsar_Profile_h
 #define __Pulsar_Profile_h
@@ -192,17 +192,12 @@ namespace Pulsar {
     
     //! Rotates the profile to remove dispersion delay
     void dedisperse (double dm, double ref_freq, double pfold);
-
-    //! fit to the standard and return a Tempo::toa object
-    Tempo::toa tdt (const Profile& std, const MJD& mjd, 
-		    double period, char nsite, string arguments = "",
-		    Tempo::toa::Format fmt = Tempo::toa::Parkes,
-		    float* corr = 0, float* fn = 0) const;
     
     //! fit to the standard and return a Tempo::toa object
     Tempo::toa toa (const Profile& std, const MJD& mjd, 
 		    double period, char nsite, string arguments = "",
-		    Tempo::toa::Format fmt = Tempo::toa::Parkes) const;
+		    Tempo::toa::Format fmt = Tempo::toa::Parkes,
+		    bool td = false) const;
     
     /*! return the shift (in turns) after fitting to the standard
       using a parabolic interpolation in the time domain to achieve 
@@ -213,7 +208,7 @@ namespace Pulsar {
     /*! return the shift (in turns) after fitting to the standard
       using an FFT based phase rotation to achieve fractional bin
       resolution */
-    double shift (const Profile& std, float& ephase,
+    double FFTShift (const Profile& std, float& ephase,
 		  float& snrfft, float& esnrfft) const;
 
     //! get the number of bins

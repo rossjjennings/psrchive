@@ -16,7 +16,7 @@ float Pulsar::StandardSNR::get_snr (const Profile* profile)
   float ephase, snrfft, esnrfft;
 
   try {
-    profile->shift (*standard, ephase, snrfft, esnrfft);
+    profile->FFTShift(*standard, ephase, snrfft, esnrfft);
   }
   catch (...) {
     return 0.0;
