@@ -5,6 +5,9 @@
 #include "Pulsar/FourierSNR.h"
 #include "Pulsar/StandardSNR.h"
 
+#include "Pulsar/SmoothMedian.h"
+#include "Pulsar/SmoothMean.h"
+
 #include "Error.h"
 #include "RealTimer.h"
 
@@ -40,6 +43,7 @@ void usage ()
     "Display options:\n"
     " -D        plot each profile \n"
     " -d        display s/n but do not output weighted result\n"
+    " -o M:w    smooth profile using method, M, and window size, w \n"
     " -p phs    phase centre of off-pulse baseline (giant-pulse search)\n"
     " -w width  width of off-pulse baseline (used with -p)\n"
        << endl;
@@ -69,11 +73,13 @@ int main (int argc, char** argv)
 
   Reference::To<Pulsar::Archive> standard;
 
+  Pulsar::Smooth* smooth = 0;
+
   int c = 0;
-  const char* args = "b:DdFhm:M:Pp:Ts:S:vVw:";
+  const char* args = "b:DdFhm:M:o:Pp:Ts:S:vVw:";
   while ((c = getopt(argc, argv, args)) != -1)
     switch (c) {
-
+      
     case 'b':
       bscrunch = atoi (optarg);
       break;
@@ -113,6 +119,32 @@ int main (int argc, char** argv)
     case 'M':
       metafile = optarg;
       break;
+
+    case 'o': {
+
+      char name[256];
+      float duty_cycle;
+
+      if (sscanf (optarg, "%s:%f", name, &duty_cycle) != 2) {
+	cerr << "psrwt: smooth option -o requires name:duty_cycle" << endl;
+	return -1;
+      }
+
+      if (strcasecmp (name, "median") == 0)
+	smooth = new Pulsar::SmoothMedian;
+      else if (strcasecmp (name, "mean") == 0)
+	smooth = new Pulsar::SmoothMean;
+      else {
+	cerr << "psrwt: smooth " << name << " not recognized" << endl;
+	return -1;
+      }
+
+      smooth->set_duty_cycle (duty_cycle);
+
+      cerr << "psrwt: smooth duty_cycle= " << duty_cycle << endl;
+      break;
+
+    }
 
     case 'P':
       pscrunch = 1;
@@ -263,13 +295,29 @@ int main (int argc, char** argv)
 	  
 	}
 	
-	if (display) {
-	  cpgpage();
+	if (display) { // && snr == 0) {
+
 	  Pulsar::Plotter plotter;
 	  plotter.set_subint(isub);
 	  plotter.set_chan(ichan);
-	  plotter.set_pol(0);
+	  cpgpage();
+
+	  if (smooth) {
+
+	    float phase = profile->find_min_phase(smooth->get_duty_cycle());
+	    cerr << "psrwt: find_min_phase=" << phase << endl;
+
+	    smooth->smooth (profile);
+
+	    phase = float(profile->find_min_bin()) / profile->get_nbin();
+	    cerr << "psrwt: find_min_bin/nbin=" << phase << endl;
+
+	  }
+
 	  plotter.singleProfile(copy);
+	  cpgpage();
+	  plotter.phase_fourier(copy);
+
 	}
 	
 	if (!normal)
