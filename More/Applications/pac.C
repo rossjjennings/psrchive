@@ -56,7 +56,7 @@ int main (int argc, char *argv[]) {
   bool new_database = true;
   bool do_fluxcal = true;
   bool do_polncal = true;
-  bool do_selfcal = false;
+
   bool apply_model = false;
   bool write_database_file = false;
   bool summary_only = false;
@@ -68,7 +68,7 @@ int main (int argc, char *argv[]) {
   bool test_bandwidth = true;
   bool test_obstype = true;
   
-  Pulsar::Calibrator::Type m = Pulsar::Calibrator::SingleAxis;
+  Pulsar::Calibrator::Type pcal_type = Pulsar::Calibrator::SingleAxis;
   
   string cals_are_here = "./";
   string unload_ext = "calib";
@@ -103,7 +103,7 @@ int main (int argc, char *argv[]) {
       Pulsar::Archive::set_verbosity(1);
       break;
     case 'i':
-      cout << "$Id: pac.C,v 1.33 2003/12/02 14:29:06 straten Exp $" << endl;
+      cout << "$Id: pac.C,v 1.34 2003/12/05 23:22:54 straten Exp $" << endl;
       return 0;
     case 'p':
       cals_are_here = optarg;
@@ -159,15 +159,15 @@ int main (int argc, char *argv[]) {
       command += "-o ";
       break;
     case 'S':
-      do_selfcal = true;
+      pcal_type = Pulsar::Calibrator::Hybrid;
       command += "-S ";
       break;
     case 's':
-      m = Pulsar::Calibrator::SingleAxis;
+      pcal_type = Pulsar::Calibrator::SingleAxis;
       command += "-s ";
       break;
     case 'q':
-      m = Pulsar::Calibrator::Polar;
+      pcal_type = Pulsar::Calibrator::Polar;
       command += "-q ";
       break;
     case 'A':
@@ -213,15 +213,20 @@ int main (int argc, char *argv[]) {
     }
     
     try {
+
       model_arch = Pulsar::Archive::load(model_file);
+      model_calibrator = new Pulsar::PolnCalibrator(model_arch);
+      pcal_type = model_calibrator->get_type();
+
     }
     catch (Error& error) {
       cerr << "Could not load Archive containing calibration Model" << endl;
       cerr << error << endl;
       return -1;
     }
-    model_calibrator = new Pulsar::PolnCalibrator(model_arch);
+
   }
+
   else if (!apply_model || do_fluxcal) {
     
     // Load or generate the CAL file database
@@ -320,10 +325,10 @@ int main (int argc, char *argv[]) {
 	    cout << "Finding PolnCalibrator" << endl;
 	  
 	  Pulsar::PolnCalibrator* pcal_engine  = 0;
-	  pcal_engine = dbase->generatePolnCalibrator(arch, m);
+	  pcal_engine = dbase->generatePolnCalibrator(arch, pcal_type);
 	  
 	  if (verbose)
-	    cout << "Calibrating Archive polarisations" << endl;
+	    cout << "Calibrating Archive polarisation" << endl;
 	  
 	  pcal_engine->calibrate(arch);
 	  
@@ -371,19 +376,32 @@ int main (int argc, char *argv[]) {
       
       if (fitsext) {
 	
-	if (do_fluxcal) {
+	if (do_fluxcal)
 	  fitsext->set_sc_mthd("PAC");
-	}
 	
 	if (do_polncal) {
-	  if (m == Pulsar::Calibrator::SingleAxis)
+
+	  switch (pcal_type) {
+
+	  case Pulsar::Calibrator::SingleAxis:
 	    fitsext->set_cal_mthd("SingleAxis");
-	  if (do_selfcal)
-	    fitsext->set_cal_mthd("SelfCAL");
-	  if (apply_model)
-	    fitsext->set_cal_mthd("SelfCAL(pcm)");
-	  if (m == Pulsar::Calibrator::Polar)
+	    break;
+
+	  case Pulsar::Calibrator::Polar:
 	    fitsext->set_cal_mthd("Polar");
+	    break;
+
+	  case Pulsar::Calibrator::Britton:
+	  case Pulsar::Calibrator::Hybrid:
+	    fitsext->set_cal_mthd("FullCAL");
+	    break;
+
+	  default:
+	    fitsext->set_cal_mthd("unknown");
+	    break;
+
+	  }
+
 	  fitsext->set_cal_file(pcal_file);
 	}
 	
