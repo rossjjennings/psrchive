@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Profile.h,v $
-   $Revision: 1.60 $
-   $Date: 2004/05/20 02:34:09 $
-   $Author: sord $ */
+   $Revision: 1.61 $
+   $Date: 2004/07/16 07:33:54 $
+   $Author: straten $ */
 
 #ifndef __Pulsar_Profile_h
 #define __Pulsar_Profile_h
@@ -217,9 +217,6 @@ namespace Pulsar {
       array of amplitudes */
     vector<float> get_weighted_amps () const;
     
-    //! fills data by jumping jbin between each datum
-    void get_amps (float* data, unsigned jbin) const;
-
     //! set the amplitudes array equal to the contents of the data array
     template <typename T> void set_amps (const T* data);
 

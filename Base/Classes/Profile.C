@@ -164,19 +164,6 @@ const Pulsar::Profile& Pulsar::Profile::operator *= (float factor)
 }
 
 
-void Pulsar::Profile::get_amps (float* data, unsigned jbin) const
-{
-  register float* dptr = data;
-  register float* aptr = amps;
-  register unsigned ibin;
-
-  for (ibin=0; ibin<nbin; ibin++) {
-    *dptr = *aptr;
-    aptr ++; dptr += jbin;
-  }
-}
-
-
 vector<float> Pulsar::Profile::get_weighted_amps () const
 {
   vector<float> wamps;
@@ -196,10 +183,9 @@ vector<float> Pulsar::Profile::get_weighted_amps () const
 /*!
   A convenience interface to Profile::rotate.  Rotates the profile in order
   to remove the dispersion delay with respect to a reference frequency.
-  \param dm the dispersion measure (in \f${\rm pc cm}^{-3}\f$)
+  \param dm the dispersion measure (in \f${\rm pc\, cm}^{-3}\f$)
   \param ref_freq the reference frequency (in MHz)
   \param pfold the folding periond (in seconds)
-  \post centrefreq will be set to ref_freq
 */
 void Pulsar::Profile::dedisperse (double dm, double ref_freq, double pfold)
 {
@@ -210,10 +196,10 @@ void Pulsar::Profile::dedisperse (double dm, double ref_freq, double pfold)
   double delay = dispersion_delay (dm, ref_freq, centrefreq);
 
   if (verbose)
-    cerr << "Pulsar::Profile::dedisperse delay=" << delay << " seconds" << endl;
+    cerr << "Pulsar::Profile::dedisperse delay=" << delay*1e3 << " ms" << endl;
 
   rotate (delay / pfold);
-  set_centre_frequency (ref_freq);
+
 }
 
 /////////////////////////////////////////////////////////////////////////////
