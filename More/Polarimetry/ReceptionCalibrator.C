@@ -142,7 +142,7 @@ void Pulsar::ReceptionCalibrator::init_estimate (SourceEstimate& estimate)
 //! Get the number of pulse phase bin state constraints
 unsigned Pulsar::ReceptionCalibrator::get_nstate () const
 {
-  return 0;
+  return pulsar.size();
 }
 
 //! Add the specified pulsar observation to the set of constraints
@@ -440,7 +440,10 @@ void Pulsar::ReceptionCalibrator::solve ()
 
   MJD mid = 0.5 * (start_epoch + end_epoch);
 
-  for (unsigned ichan=0; ichan<equation.size(); ichan++) try {
+  unsigned nchan = equation.size();
+  unsigned incr = 1;
+
+  for (unsigned ichan=0; ichan<nchan; ichan+=incr) try {
 
     cerr << "Pulsar::ReceptionCalibrator::solve ichan=" << ichan << endl;
 
@@ -457,6 +460,7 @@ void Pulsar::ReceptionCalibrator::solve ()
     }
 
     equation[ichan]->solve ();
+
   }
   catch (Error& error) {
     throw error += "Pulsar::ReceptionCalibrator::solve";
@@ -480,6 +484,8 @@ void Pulsar::ReceptionCalibrator::check_ready (const char* method, bool unc)
 /*! Update the best guess of each unknown input state */
 void Pulsar::SourceEstimate::update_state ()
 {
-  for (unsigned ichan=0; ichan < state.size(); ichan++)
-    state[ichan].set_stokes( mean[ichan].get_Estimate().val );
+  for (unsigned ichan=0; ichan < state.size(); ichan++) {
+    Estimate<Stokes<double>, double> stokes = mean[ichan].get_Estimate();
+    state[ichan].set_stokes( stokes.val, sqrt(stokes.var) );
+  }
 }
