@@ -103,15 +103,23 @@ int main (int argc, char** argv)
   if (verbose)
     cout << "Parsed ephemeris\n" << eph;
 
-  string ephstr1, ephstr2;
+  FILE* cfptr = fopen (".test_fitsio.in", "w");
+  if (cfptr) {
+    perror ("test_fitsio: could not open .test_fitsio.in");
+    return -1;
+  }
+  eph.unload (cfptr);
+  fclose (cfptr);
 
-  eph.unload (&ephstr1);
-  eph2.unload (&ephstr2);
+  cfptr = fopen (".test_fitsio.out", "w");
+  if (cfptr) {
+    perror ("test_fitsio: could not open .test_fitsio.out");
+    return -1;
+  }
+  eph2.unload (cfptr);
+  fclose (cfptr);
 
-  if (ephstr1 != ephstr2)
-    cerr << "test_fitsio: FAIL written != read" << endl;
-
-  cerr << "Original\n" << ephstr1 << "\nWritten\n" << ephstr2 << endl;
+  cout << "Run: diff .test_fitsio.in .test_fitsio.out" << endl;
 
   return 0;
 }
