@@ -17,7 +17,7 @@
 #include "Error.h"
 #include "minmax.h"
 
-#define ZOOM 4
+#define ZOOM 6
 
 int main(int argc, char** argv) {
   
@@ -136,19 +136,17 @@ int main(int argc, char** argv) {
     
   for (unsigned i = 0; i < profs.size(); i++) {
     
-    float* corr = new float[profs[i]->get_nbin()];
-    float* bins = new float[profs[i]->get_nbin()];
-    float* parb = new float[profs[i]->get_nbin()];
-    float* fn   = new float[3];
+    vector<float> corr;
+    Calibration::Gaussian model;
+
+    int rise = 0;
+    int fall = 0;
 
     double shift = 0.0;
-    float   error = 0.0;
+    float  error = 0.0;
+
+    shift = profs[i]->GaussianShift(*stdprof, error, corr, model, rise, fall, true);
     
-    shift = profs[i]->GaussianShift(*stdprof, error);
-
-    cerr << shift << endl;
-    exit(0);
-
     unsigned nbin = profs[i]->get_nbin();
     
     if (display) {
@@ -163,26 +161,38 @@ int main(int argc, char** argv) {
       float ymin = 0.0;
       float ymax = 0.0;
 
-      findminmax(corr, corr+nbin-1, ymin, ymax);
+      findminmax(&(corr.front()), &(corr.back()), ymin, ymax);
 
       ymax += (ymax-ymin)/10.0;
 
       cpgswin(0.0,1.0,ymin,ymax);
       cpgbox ("BCNST", 0.0, 0, "BCNST", 0.0, 0);
       cpglab("", "", "Cross Correlation");
+      
+      cpgmove(0.0, corr[0]);
+      for (unsigned j = 1; j < nbin; j++) {
+	cpgdraw(float(j)/float(nbin), corr[j]);
+      }
 
-      cpgline(nbin, bins, corr);
       cpgsci(2);
-      cpgline(nbin, bins, parb);
-      cpgsci(1);
+      
+      model.set_abscissa(double(rise));
+      
+      cpgmove(float(rise)/float(nbin), model.evaluate());
+      for (int j = rise+1; j < fall; j++) {
+	model.set_abscissa(double(j));
+	cpgdraw(float(j)/float(nbin), model.evaluate());
+      }
 
+      cpgsci(1);
+      
       cpgpanl(1,2);
       cpgsvp(0.1,0.5,0.1,0.9);
-
+      
       float maxphs = 0.0;
       int   maxbin = 0;
       ymax = 0.0;
-
+      
       for (unsigned j = 0; j < nbin; j++) {
 	if (corr[j] > ymax) {
 	  ymax = corr[j];
@@ -202,36 +212,35 @@ int main(int argc, char** argv) {
 
       findminmax(&corr[binmin], &corr[binmax], ymin, ymax);
 
-      ymax += (ymax-ymin)/10.0;
+      ymax += (ymax-ymin)/2.0;
 
-      float phsmin = bins[binmin];
-      float phsmax = bins[binmax];
+      float phsmin = binmin/float(nbin);
+      float phsmax = binmax/float(nbin);
 
       cpgswin(phsmin, phsmax, ymin, ymax);
       cpgbox ("BCNST", 0.0, 0, "BCNST", 0.0, 0);
       cpglab("", "", "Interpolation Region");
       
       for (int j = binmin; j < binmax; j++) {
-	cpgpt1(bins[j], corr[j], 0);
-      }
-
-      float stepsize = (phsmax-phsmin) / float(nbin);
-      
-      for (unsigned j = 0; j < nbin; j++) {
-	bins[j] = phsmin + float(j)*stepsize;
-	parb[j] = fn[0] - fn[1]*(bins[j]-fn[2])*(bins[j]-fn[2]);
+	cpgpt1(float(j)/float(nbin), corr[j], 0);
       }
 
       cpgsci(2);
-      cpgline(nbin, bins, parb);
+      
+      for (float j = float(binmin); j < float(binmax); j+= 0.01) {
+	model.set_abscissa(j);
+	cpgpt1(j/float(nbin), model.evaluate(), 1);
+      }
+      
       cpgsci(3);
       cpgsls(2);
-      cpgmove(fn[2], ymin);
-      cpgdraw(fn[2], ymax);
+
+      cpgmove(model.get_centre()/float(nbin), ymin);
+      cpgdraw(model.get_centre()/float(nbin), ymax);
 
       cpgsci(2);
       cpgsls(1);
-      cpgerr1(5, fn[2], (ymin+ymax)/2.0, error, 2.0);
+      cpgerr1(5, model.get_centre()/float(nbin), (ymin+ymax)/2.0, error, 2.0);
 
       // Draw the profiles
 
