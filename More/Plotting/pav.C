@@ -1,5 +1,5 @@
 //
-// $Id: pav.C,v 1.32 2003/03/18 14:11:32 straten Exp $
+// $Id: pav.C,v 1.33 2003/04/08 14:49:18 ahotan Exp $
 //
 // The Pulsar Archive Viewer
 //
@@ -177,7 +177,7 @@ int main (int argc, char** argv)
       return 0;
 
     case 'i':
-      cout << "$Id: pav.C,v 1.32 2003/03/18 14:11:32 straten Exp $" << endl;
+      cout << "$Id: pav.C,v 1.33 2003/04/08 14:49:18 ahotan Exp $" << endl;
       return 0;
 
     case 'm':
@@ -503,11 +503,10 @@ int main (int argc, char** argv)
       duration = archive -> get_Integration(0) -> get_duration();
 
       tempsnr = tempsnr / sqrt(duration);
-
-      cout << "SNR= " << tempsnr
-	   << " CTR_FREQ= " << archive -> get_centre_frequency()
-	   << " StartMJD= " << archive -> get_Integration(0) -> get_start_time()
-	   << " BW= " << archive -> get_Integration(0) -> get_bandwidth()
+      
+      cout << "FILENAME: " << archive -> get_filename()
+	   << "  SNR: " << tempsnr
+	   << "  CTR_FREQ: " << archive -> get_centre_frequency()
 	   << endl;
     }
 
