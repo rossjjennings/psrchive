@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Stokes.h,v $
-   $Revision: 1.9 $
-   $Date: 2004/04/06 13:59:53 $
+   $Revision: 1.10 $
+   $Date: 2004/04/06 16:17:24 $
    $Author: straten $ */
 
 #ifndef __Stokes_H
@@ -22,6 +22,9 @@ class Stokes : public Quaternion<T, Hermitian>
   //! Construct from a scalar and vector
   template<typename U>
     Stokes (T s, const Vector<U, 3>& v) : Quaternion<T,Hermitian> (s, v) {}
+
+  template<typename U>
+    Stokes (const Stokes<U>& s) { s0=s.s0; s1=s.s1; s2=s.s2; s3=s.s3; }
 
   template <typename U>
     Stokes (const Quaternion<U,Hermitian>& q) 
@@ -107,8 +110,19 @@ void random_vector (Stokes<T>& val, U scale)
 template<typename T>
 const Jones<T> convert (const Stokes<T>& stokes)
 {
-  return convert (Quaternion<T,Hermitian>(get_scalar(),
-                                          Pauli::basis.get_out(get_vector())));
+  Quaternion<T,Hermitian> q (stokes.get_scalar(),
+                             Pauli::basis.get_out(stokes.get_vector()));
+  return convert (q);
+}
+
+// convert Stokes parameters to Jones matrix
+template<typename T>
+const Jones<T> convert (const Stokes< complex<T> >& stokes)
+{
+  Quaternion<complex<T>,Hermitian> q;
+  q.set_scalar (stokes.get_scalar());
+  q.set_vector (Pauli::basis.get_out(stokes.get_vector()));
+  return convert (q);
 }
 
 #endif
