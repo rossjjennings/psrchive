@@ -33,7 +33,7 @@ int main (int argc, char *argv[]) {
   char* key = NULL;
   char whitespace[5] = " \n\t";
   
-  while ((gotc = getopt(argc, argv, "hvVDwz:Z:")) != -1) {
+  while ((gotc = getopt(argc, argv, "hvVDwz:Z:d")) != -1) {
     switch (gotc) {
     case 'h':
       cout << "A program for zapping RFI in Pulsar::Archives"    << endl;
