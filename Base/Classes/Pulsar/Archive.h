@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Archive.h,v $
-   $Revision: 1.57 $
-   $Date: 2003/02/20 10:37:35 $
+   $Revision: 1.58 $
+   $Date: 2003/03/06 16:20:26 $
    $Author: straten $ */
 
 /*! \mainpage 
@@ -170,22 +170,43 @@ namespace Pulsar {
     class Agent : public Reference::Able {
 
     public:
+
+      //! Null constructor
+      Agent (const char* name);
+
+      //! Destructor
+      ~Agent ();
+
       //! Advocate the use of the derived class to interpret filename
       virtual bool advocate (const char* filename) = 0;
       
       //! Return a null-constructed instance of the derived class
       virtual Archive* new_Archive () = 0;
 
+      //! Return the name of the plugins directory
+      static string plugin_path ();
+
+      //! Report to cerr on the status of the Registry and plugins
+      static void report ();
+
     protected:
       //! Agents registered for creating derived classes in Archive::load
       static Registry::List<Agent> registry;
       
-      // Declare friends with Registry::Entry<Agent> so it can access registry
+      //! Declare friends with Registry::Entry<Agent> so it can access registry
       friend class Registry::Entry<Agent>;
 
-      // Declare friends with Archive so Archive::load can access registry
+      //! Declare friends with Archive so Archive::load can access registry
       friend class Archive;
 
+      //! Load plugins from the plugin_path
+      static void plugin_load ();
+
+      //! Flag that plugin_load has been called
+      static bool loaded;
+
+      //! The name of this Agent
+      string name;
     };
 
     //! Flag that Archive::append should enforce chronological order
