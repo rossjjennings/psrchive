@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PolnCalibrator.h,v $
-   $Revision: 1.30 $
-   $Date: 2004/10/09 05:36:51 $
+   $Revision: 1.31 $
+   $Date: 2004/10/28 06:19:08 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PolnCalibrator_H
@@ -11,11 +11,6 @@
 #include "Pulsar/Calibrator.h"
 #include "Calibration/Complex2.h"
 #include "Jones.h"
-#include "MJD.h"
-
-#ifdef sun
-#include <ieeefp.h>
-#endif
 
 namespace Pulsar {
 

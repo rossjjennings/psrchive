@@ -11,6 +11,8 @@
 #include "Error.h"
 
 #include "interpolate.h"
+#include "smooth.h"
+#include "templates.h"
 #include "median_smooth.h"
 
 /*! 
@@ -179,6 +181,28 @@ void Pulsar::PolnCalibrator::calculate_transformation ()
       transformation[ichan] = 0;
 }
 
+// Return the positive definite square root of a Hermitian Quaternion
+template<typename T, QBasis B>
+const Quaternion<T,B> mysqrt (const Quaternion<T,B>& h, float phase)
+{
+  T root_det = sqrt( det(h) );
+  Quaternion<T,B> out;
+
+  if (h.s0<0) {
+    T scalar = -sqrt( -0.5 * (h.s0 - root_det) );
+    T norm = 0.5/scalar;
+    out = Quaternion<T,B> (h.s1*norm, scalar, h.s3*norm, h.s2*norm);
+    // out = Quaternion<T,B> (scalar, h.get_vector()/(2*scalar));
+  }
+  else {
+    T scalar = sqrt( 0.5 * (h.s0 + root_det) );
+    out = Quaternion<T,B> (scalar, h.get_vector() * 0.5/scalar);
+  }
+
+  // cerr << phase << " in=" << h << "\n\tout=" << out << endl;
+  return out;
+}
+
 void Pulsar::PolnCalibrator::build (unsigned nchan) try {
 
   if (verbose)
@@ -198,12 +222,12 @@ void Pulsar::PolnCalibrator::build (unsigned nchan) try {
     cerr << "Pulsar::PolnCalibrator::build nchan=" << nchan 
 	 << " transformation.size=" << transformation.size() << endl;
 
-  if (!nchan || nchan == response.size())
-    return;
-
   response.resize( transformation.size() );
 
-  for (unsigned ichan=0; ichan < response.size(); ichan++)  {
+  vector<bool> bad ( transformation.size(), false );
+  unsigned ichan=0;
+
+  for (ichan=0; ichan < response.size(); ichan++)  {
 
     if (transformation[ichan])  {
 
@@ -216,7 +240,8 @@ void Pulsar::PolnCalibrator::build (unsigned nchan) try {
 	    cerr << "Pulsar::PolnCalibrator::build ichan=" << ichan
 		 << " " << transformation[ichan]->get_param_name(iparam)
 		 << " not finite" << endl;
-          response[ichan] = Jones<float>::identity();
+
+	  bad[ichan] = true;
 
         }
 
@@ -228,12 +253,12 @@ void Pulsar::PolnCalibrator::build (unsigned nchan) try {
 	  cerr << "Pulsar::PolnCalibrator::build ichan=" << ichan <<
 	    " faulty response" << endl;
 
-	response[ichan] = Jones<float>::identity();
+	bad[ichan] = true;
 
       }
       else {
 
-        response[ichan] = inv( transformation[ichan]->evaluate() );
+        response[ichan] = transformation[ichan]->evaluate();
 
         if (verbose)
           cerr << "Pulsar::PolnCalibrator::build ichan=" << ichan <<
@@ -247,12 +272,9 @@ void Pulsar::PolnCalibrator::build (unsigned nchan) try {
       if (verbose) cerr << "Pulsar::PolnCalibrator::build ichan=" << ichan 
                         << " no transformation" << endl;
 
-      response[ichan] = Jones<float>::identity();
+      bad[ichan] = true;
 
     }
-
-    if (receiver)
-      response[ichan] *= receiver->get_correction();
 
   }
 
@@ -272,12 +294,106 @@ void Pulsar::PolnCalibrator::build (unsigned nchan) try {
 		 "median smoothing of Jones matrices not yet implemented");
 
   }
+  else
+    for (ichan = 0; ichan < response.size(); ichan++)
 
-  if (response.size() == nchan)
-    return;
- 
-  throw Error (InvalidState, "Pulsar::PolnCalibrator::build",
-	       "interpolating/averaging Jones matrices not yet implemented");
+      if (bad[ichan]) {
+	
+	unsigned ifind;
+	
+	//if (verbose)
+	  cerr << "Pulsar::PolnCalibrator::build interpolating ichan="
+	       << ichan << endl;
+
+	// find preceding good
+	for (ifind=response.size()+ichan-1; ifind > ichan; ifind--)
+	  if (!bad[ifind%response.size()])
+	    break;
+	
+	if (ifind == ichan)
+	  throw Error (InvalidState, "Pulsar::PolnCalibrator::build",
+		       "no good data");
+	
+	Jones<float> left = response[ifind%response.size()];
+	
+	// find next good
+	for (ifind=ichan+1; ifind < nchan+ichan; ifind++)
+	  if (!bad[ifind%response.size()])
+	    break;
+	
+	if (ifind == ichan)
+	  throw Error (InvalidState, "Pulsar::PolnCalibrator::build",
+		       "no good data");
+	
+	Jones<float> right = response[ifind%response.size()];
+	
+	response[ichan] = float(0.5) * (left + right);
+	
+      }
+
+  if (nchan < response.size()) {
+
+    // TO-DO: It is probably more accurate to first form Mueller
+    // matrices and average these as a function of frequency, in order
+    // to describe any instrumental bandwidth depolarization.
+
+    unsigned factor = response.size() / nchan;
+    if (nchan * factor != response.size())
+      cerr << "Pulsar::PolnCalibrator::build WARNING calibrator nchan="
+	   << response.size() << " mod requested nchan=" << nchan << " != 0" 
+	   << endl;
+
+    scrunch (response, factor);
+
+    for (ichan=0; ichan<nchan; ichan++)
+      response[ichan] /= factor;
+
+  }
+
+  if (nchan > response.size()) {
+
+    if (verbose)
+      cerr << "Pulsar::PolnCalibrator::build interpolating from nchan="
+	   << response.size() << " to " << nchan << endl;
+    
+    complex<float> determinant;
+    Quaternion<float, Hermitian> hermitian;
+    Quaternion<float, Unitary> unitary;
+
+    vector< Jones<float> > backup = response;
+
+    for (ichan=0; ichan<response.size(); ichan++) {
+      polar (determinant, hermitian, unitary, response[ichan]);
+      unitary *= unitary;
+      response[ichan] = determinant * (hermitian * unitary);
+    }
+
+    vector< Jones<float> > out_response (nchan);
+    fft::interpolate (out_response, response);
+    
+    for (ichan=0; ichan<nchan; ichan++) {
+      polar (determinant, hermitian, unitary, out_response[ichan]);
+      unitary = sqrt(unitary);
+      if (unitary[0] < 0.05)  {
+        unsigned iback = (ichan * response.size()) / nchan;
+        polar (determinant, hermitian, unitary, backup[iback]);
+      }
+      out_response[ichan] = determinant * (hermitian * unitary);
+    }
+
+    response = out_response;
+
+  }
+
+  for (ichan=0; ichan < nchan; ichan++) {
+    // if known, add the receiver transformation
+    if (receiver)
+      response[ichan] *= receiver->get_transformation();
+
+    // invert:  the response must undo the effect of the instrument
+    // response[ichan] = inv (response[ichan]);
+  }
+
 }
 catch (Error& error) {
   throw error += "Pulsar::PolnCalibrator::build";
