@@ -24,6 +24,9 @@ Pulsar::PolnCalibrator::PolnCalibrator (const vector<Archive*>& archives)
 
 Pulsar::PolnCalibrator::PolnCalibrator (const Archive* arch)
 {
+  if (!arch)
+    throw Error (InvalidState, "PolnCalibrator::", "no Archive");
+
   if (verbose)
     cerr << "Pulsar::PolnCalibrator" << endl;
 
