@@ -115,16 +115,17 @@ void Pulsar::TimerArchive::subint_load (FILE* fptr)
       hdr.version = 17.0;
       hdr.minorversion = 0.1;
     }
+  }
 
-    // Before psrdisp v.18.1, lower sideband data did not have their sign
-    // of Stokes V properly flipped.
-    if (baseband && version<18.1 && hdr.banda.npol==4 && hdr.banda.bw < 0.0)  {
-      hdr.version = 18.0;
-      hdr.minorversion = 0.1;
-      reverse_V = true;
-    }
+  // Before psrdisp v.18.1, lower sideband data did not have their sign
+  // of Stokes V properly flipped.
+  // HSK: According to Willem all archives (psrdisp and baseband/dsp; Stokes and coherency) need reverse_v = true
+  if (baseband && version<18.1 && hdr.banda.npol==4 && hdr.banda.bw < 0.0)  {
+    hdr.version = 18.0;
+    hdr.minorversion = 0.1;
+    reverse_V = true;
   }    
-
+  
   for (unsigned isub=0; isub < get_nsubint(); isub++) { 
     if (verbose)
       cerr << "TimerArchive::subint_load " 
