@@ -176,10 +176,9 @@ void Pulsar::PulsarCalibrator::add_observation (const Archive* data)
 
       model[ichan]->fit( integration->new_PolnProfile (ichan) );
       solution[ichan]->integrate( transformation[ichan] );
-      solution[ichan]->update( transformation[ichan] );
 
       if (ichan+1 < nchan)
-        solution[ichan]->update( transformation[ichan+1] );
+        transformation[ichan+1]->copy( transformation[ichan] );
 
     }
     catch (Error& error) {
@@ -190,13 +189,22 @@ void Pulsar::PulsarCalibrator::add_observation (const Archive* data)
   }
 }
 
+void Pulsar::PulsarCalibrator::update_solution ()
+{
+  unsigned nchan = model.size ();
+  for (unsigned ichan=0; ichan < nchan; ichan++)
+    if (model[ichan])
+      solution[ichan]->update( transformation[ichan] );
+}
+
 //! Add the calibrator observation to the set of constraints
 void Pulsar::PulsarCalibrator::add_calibrator (const Archive* data)
 {
 }
     
 //! Add the ArtificialCalibrator observation to the set of constraints
-void Pulsar::PulsarCalibrator::add_Calibrator (const ArtificialCalibrator* polncal)
+void 
+Pulsar::PulsarCalibrator::add_calibrator (const ArtificialCalibrator* polncal)
 {
 }
    

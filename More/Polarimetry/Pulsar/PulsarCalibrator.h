@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PulsarCalibrator.h,v $
-   $Revision: 1.2 $
-   $Date: 2004/01/02 18:10:34 $
+   $Revision: 1.3 $
+   $Date: 2004/01/05 09:47:15 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PulsarCalibrator_H
@@ -52,7 +52,10 @@ namespace Pulsar {
     void add_calibrator (const Archive* data);
     
     //! Add the ArtificialCalibrator observation to the set of constraints
-    void add_Calibrator (const ArtificialCalibrator* polncal);
+    void add_calibrator (const ArtificialCalibrator* polncal);
+
+    //! Set the solution to the mean
+    void update_solution ();
 
   protected:
     
