@@ -1,4 +1,5 @@
 #include <math.h>
+#include <assert.h>
 
 #include <iostream>
 #include <string>
@@ -41,7 +42,23 @@ Pulsar::Profile::Profile()
 
 Pulsar::Profile::~Profile()
 {
-  if (amps != NULL) delete [] amps;  amps = NULL;
+  resize (0);
+}
+
+void Pulsar::Profile::resize (int _nbin)
+{
+  if (nbin == _nbin)
+    return;
+
+  if (amps != NULL) delete [] amps; amps = NULL;
+
+  nbin = _nbin;
+
+  if (nbin == 0)
+    return;
+
+  amps = new float [nbin];
+  assert (amps != 0);
 }
 
 const Pulsar::Profile& Pulsar::Profile::operator= (const Profile& profile)
@@ -57,6 +74,13 @@ const Pulsar::Profile& Pulsar::Profile::operator= (const Profile& profile)
   set_state ( profile.get_state() );
 
   return *this;
+}
+
+Pulsar::Profile* Pulsar::Profile::clone ()
+{
+  Profile* retval = new Profile;
+  *(retval) = *(this);
+  return retval;
 }
 
 const Pulsar::Profile& Pulsar::Profile::operator+= (const Profile& profile)
@@ -157,6 +181,12 @@ void Pulsar::Profile::fold (int nfold)
   operator *= (1.0/float(nfold));
 }
  
+
+void Pulsar::Profile::bscrunch (int scr)
+{
+  cerr << "Profile::bscrunch not implemented" << endl;
+}
+
 void Pulsar::Profile::halvebins (int nhalve)
 {
   /* only need to do if nhalve > 0 */

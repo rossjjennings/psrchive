@@ -1,11 +1,13 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/BasicArchive.h,v $
-   $Revision: 1.1 $
-   $Date: 2002/04/10 01:20:58 $
+   $Revision: 1.2 $
+   $Date: 2002/04/16 04:02:25 $
    $Author: ahotan $ */
 
-# include "Archive.h"
+#include "Archive.h"
+#include "polyco.h"
+#include "psrephem.h"
   
 namespace Pulsar {
 
@@ -49,6 +51,9 @@ namespace Pulsar {
     float       calfreq,caldcyc,calphase;
     bool        facorr,pacorr,rm_ism,rm_iono,dedisp;
 
+    psrephem    ephemeris;
+    polyco      model;
+
   public:
 
     //! A null constructor to initialize the storage variables
@@ -58,31 +63,31 @@ namespace Pulsar {
     // that are used to get/set the above variables
  
     //! Return the name of the telescope used
-    string get_tel_id ()
+    string get_tel_id () const
       {
 	return telid;
       }
 
     //! Return the tempo code of the telescope used
-    char get_tel_tempo_code ()
+    char get_tel_tempo_code () const
       {
 	return telcode;
       }
 
     //! Return the name of the front-end system used
-    string get_frontend_id ()
+    string get_frontend_id () const
       {
 	return frontend;
       }
 
     //! Return the name of the back-end system used
-    string get_backend_id ()
+    string get_backend_id () const
       {
 	return backend;
       }
 
     //! Return the type of observation (psr, cal, etc.)
-    string get_obstype ()
+    string get_obstype () const
       {
 	return obstype;
       }
@@ -118,7 +123,7 @@ namespace Pulsar {
       }
     
     //! Return the bandwidth of the observation
-    double get_bandwidth ()
+    double get_bandwidth () const
       {
 	return bandwidth;
       }
@@ -130,7 +135,7 @@ namespace Pulsar {
       }
     
     //! Return the centre frequency of the observation
-    double get_centre_frequency ()
+    double get_centre_frequency () const
       {
 	return cenfreq;
       }
@@ -141,8 +146,20 @@ namespace Pulsar {
 	cenfreq = cf;
       }
 
+    //! Get the number of sub-integrations in the archive
+    int get_num_subints () const
+    {
+      return nsubint;
+    }
+
+    //! Set the number of sub-integrations in the archive
+    void set_num_subints (int num_sub) 
+    {
+      nsubint = num_sub;
+    }
+
     //! Return the type of feed used
-    Feed::Type get_feed_type ()
+    Feed::Type get_feed_type () const
       {
 	return feedtype;
       }
@@ -154,7 +171,7 @@ namespace Pulsar {
       }
     
     //! Return the polarisation state of the data
-    Poln::State get_poln_state ()
+    Poln::State get_poln_state () const
       {
 	return polstate;
       }
@@ -166,25 +183,25 @@ namespace Pulsar {
       }
     
     //! Return whether or not the data has been corrected for feed angle errors
-    bool get_feedangle_corrected () 
+    bool get_feedangle_corrected () const
       {
 	return facorr;
       }
 
     //! Return whether or not the data has been corrected for ionospheric Faraday rotation
-    bool get_iono_rm_corrected ()
+    bool get_iono_rm_corrected () const
       {
 	return rm_iono;
       }
     
     //! Return whether or not the data has been corrected for ISM Faraday rotation
-    bool get_ism_rm_corrected ()
+    bool get_ism_rm_corrected () const
       {
 	return rm_ism;
       }
     
     //! Return whether or not the data has been corrected for parallactic angle errors
-    bool get_parallactic_corrected ()
+    bool get_parallactic_corrected () const
       {
 	return pacorr;
       } 
@@ -213,9 +230,46 @@ namespace Pulsar {
 	pacorr = done;
       }
     
-  };
+    //! Get the number of pulsar phase bins used
+    int get_nbins () const
+    {
+      return nbin;
+    }
+    
+    //! Get the number of frequency channels used
+    int get_nchan () const
+    {
+      return nchan;
+    }
+    
+    //! Get the channel bandwidth
+    double get_chanbw () const
+    {
+      return chanbw;
+    }
 
+    //! Set the number of pulsar phase bins used
+    void set_nbins (int numbins)
+    {
+      nbin = numbins;
+    }
+    
+    //! Set the number of frequency channels used
+    void set_nchan (int numchan)
+    {
+      nchan = numchan;
+    }
+    
+    //! Set the channel bandwidth
+    void set_chanbw (double chan_width)
+    {
+      chanbw = chan_width;
+    }
+
+  };
+  
 }
+
 
 
 

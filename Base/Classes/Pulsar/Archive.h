@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Archive.h,v $
-   $Revision: 1.12 $
-   $Date: 2002/04/11 15:11:31 $
-   $Author: straten $ */
+   $Revision: 1.13 $
+   $Date: 2002/04/16 04:02:25 $
+   $Author: ahotan $ */
 
 /*! \mainpage 
  
@@ -477,19 +477,19 @@ namespace Pulsar {
     virtual string get_obstype () const = 0;
 
     //! Set the name of the telescope used
-    virtual void set_tel_id (string name) const = 0;
+    virtual void set_tel_id (string name) = 0;
 
     //! Set the tempo code of the telescope used
-    virtual void set_tel_tempo_code (char id_char) const = 0;
+    virtual void set_tel_tempo_code (char id_char) = 0;
 
     //! Set the name of the frontend system used
-    virtual void set_frontend_id (string fe_name) const = 0;
+    virtual void set_frontend_id (string fe_name) = 0;
 
     //! Set the name of the backend system used
-    virtual void set_backend_id (string be_name) const =0;
+    virtual void set_backend_id (string be_name) =0;
 
     //! Set the observation type (psr, cal)
-    virtual void set_obstype (string ob_type) const = 0;
+    virtual void set_obstype (string ob_type) = 0;
 
     // get/set the number of bins, bands, subints, etc
     // ///////////////////////////////////////////////
@@ -507,38 +507,40 @@ namespace Pulsar {
     virtual int get_num_subints () const = 0;
 
     //! Set the number of pulsar phase bins used
-    virtual void set_nbins (int numbins) const = 0;
+    virtual void set_nbins (int numbins) = 0;
 
     //! Set the number of frequency channels used
-    virtual void set_nchan (int numchan) const = 0;
+    virtual void set_nchan (int numchan) = 0;
 
     //! Set the channel bandwidth
-    virtual void set_chanbw (double chan_width) const = 0;
+    virtual void set_chanbw (double chan_width) = 0;
 
    //! Set the number of sub-integrations stored in the file
-    virtual void set_num_subints (int num_sub) const = 0;
+    virtual void set_num_subints (int num_sub) = 0;
 
     //! Get the overall bandwidth of the observation
     virtual double get_bandwidth () const = 0;
 
     //! Set the overall bandwidth of the observation
-    virtual void set_bandwidth (double bw) const = 0;
+    virtual void set_bandwidth (double bw) = 0;
 
     //! Get the centre frequency of the observation
     virtual double get_centre_frequency () const = 0;
 
     //! Set the centre frequency of the observation
-    virtual void set_centre_frequency (double cf) const = 0;
+    virtual void set_centre_frequency (double cf) = 0;
 
     //! Get the feed configuration of the receiver
     virtual Feed::Type get_feed_type () const = 0;
+
     //! Set the feed configuration of the receiver
-    virtual void set_feed_type (Feed::Type feed) const = 0;
+    virtual void set_feed_type (Feed::Type feed) = 0;
 
     //! Get the state of the profiles
     virtual Poln::State get_poln_state () const = 0;
+
     //! Set the state of the profiles
-    virtual void set_poln_state (Poln::State state) const = 0;
+    virtual void set_poln_state (Poln::State state) = 0;
 
     // Get the state of various corrected flags
     // //////////////////////////////////////////

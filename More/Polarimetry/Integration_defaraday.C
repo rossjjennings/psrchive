@@ -29,5 +29,6 @@ void Pulsar::Integration::defaraday (double rm, double rm_iono)
 				  - rm_iono * inv_freq_sq);
   }
 
-  V_rotation (phases);
+  cerr << "Integration::defaraday incomplete" << endl;
+  //V_rotation (phases);
 }

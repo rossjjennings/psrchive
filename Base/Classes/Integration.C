@@ -2,6 +2,9 @@
 
 #include "Integration.h"
 #include "Profile.h"
+#include "Error.h"
+
+bool Pulsar::Integration::verbose = false;
 
 void Pulsar::Integration::resize (int _npol, int _nband, int _nbin)
 {
@@ -53,6 +56,17 @@ Pulsar::Profile* Pulsar::Integration::new_Profile ()
   return new Profile;
 }
 
+
+Pulsar::Integration::Integration ()
+{
+  cerr << "Integration null constructor" << endl;
+}
+
+Pulsar::Integration::~Integration ()
+{
+  resize (0,0,0);
+}
+
 Pulsar::Integration* Pulsar::Integration::clone (int _npol, int _nband) const
 {
   if (_npol == 0)
@@ -90,4 +104,17 @@ Pulsar::Integration* Pulsar::Integration::clone (int _npol, int _nband) const
     }
 
   return ptr;
+}
+
+Pulsar::Profile* Pulsar::Integration::get_Profile (int ipol, int iband)
+{
+  return profiles[ipol][iband];
+}
+
+vector<Pulsar::Profile*>& Pulsar::Integration::operator[] (Poln::Measure poln)
+{
+  if (state == Poln::Stokes)
+    return profiles[int(poln)];
+  else
+    throw Error (InvalidRange, "Pulsar::Integration::operator[]", "function incomplete");
 }

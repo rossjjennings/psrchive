@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Integration.h,v $
-   $Revision: 1.9 $
-   $Date: 2002/04/16 01:57:36 $
-   $Author: straten $ */
+   $Revision: 1.10 $
+   $Date: 2002/04/16 04:02:25 $
+   $Author: ahotan $ */
 
 /*
   
@@ -57,16 +57,16 @@ namespace Pulsar {
     virtual void resize (int npol, int nband, int nbin);
 
     //! Call Profile::fold on every profile
-    virtual void fold (int nfold);
+    // virtual void fold (int nfold);
 
     //! Call Profile::bsrunch on every profile
-    virtual void bscrunch (int nscrunch);
-
+    //virtual void bscrunch (int nscrunch);
+    
     //! Integrate profiles from neighbouring bands
     virtual void fscrunch (int nscrunch = 0, bool weighted_cfreq = true);
 
     //! Integrate profiles from single polarizations into one total intensity
-    virtual void pscrunch ();
+    //virtual void pscrunch ();
 
     //! Transform from Stokes (I,Q,U,V) to the polarimetric invariant interval
     virtual void invint ();
@@ -122,22 +122,22 @@ namespace Pulsar {
 		    int nsubchan, int mode, bool wt);
 
     //! Remove the baseline from all profiles
-    virtual void remove_baseline (int poln = 0, float phase = -1.0);
+    //virtual void remove_baseline (int poln = 0, float phase = -1.0);
 
     //! Rotate each profile by time (in seconds)
-    virtual void rotate (double time);
+    //virtual void rotate (double time);
 
     //
     // snr_weight - set the weight of each profile to its snr squared
     //
-    virtual void snr_weight ();
+    // virtual void snr_weight ();
     
-    virtual void Q_boost (const vector<double> & hphases);
-    virtual void U_boost (const vector<double> & hphases);
-    virtual void V_boost (const vector<double> & hphases);
-    virtual void Q_rotation (const vector<Angle> & phases);
-    virtual void U_rotation (const vector<Angle> & phases);
-    virtual void V_rotation (const vector<Angle> & phases);
+    //virtual void Q_boost (const vector<double> & hphases);
+    //virtual void U_boost (const vector<double> & hphases);
+    //virtual void V_boost (const vector<double> & hphases);
+    //virtual void Q_rotation (const vector<Angle> & phases);
+    //virtual void U_rotation (const vector<Angle> & phases);
+    //virtual void V_rotation (const vector<Angle> & phases);
 
     //! Returns a pointer to a Profile
     Profile* get_Profile (int ipol, int iband);
