@@ -156,6 +156,9 @@ int main (int argc, char *argv[]) {
     }
   }
   
+  char opath[128];
+  getcwd(opath, 128);
+  
   for (int ai=optind; ai<argc; ai++)
     dirglob (&archives, argv[ai]);
   
@@ -291,7 +294,8 @@ int main (int argc, char *argv[]) {
       }
  
       int index = archives[i].find_first_of(".", 0);
-      string newname = archives[i].substr(0, index);
+      string newname = opath;
+      newname += archives[i].substr(0, index);
       newname += ".";
       newname += unload_ext;
 
