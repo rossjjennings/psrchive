@@ -12,6 +12,7 @@ LDFLAGS  += -leph -lpolyco -ltimes -lgenutil $(LGTKMM) $(F77LIBS) -lm
 # optional GTK-- Widget set
 ##########################################################################
 ifeq ($(PSRGTKMM),yes)
+NOMD_SRCS = gtk_test.C gtk_psrephem.C
 PROGRAMS += gtk_test.C
 LIB_SRCS += gtk_psrephem.C
 INCFLAGS += $(GTKMM_CCFLAGS)
