@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/PSRFITS/Pulsar/FITSArchive.h,v $
-   $Revision: 1.25 $
-   $Date: 2004/09/28 06:52:42 $
+   $Revision: 1.26 $
+   $Date: 2004/09/28 07:17:38 $
    $Author: ahotan $ */
 
 #ifndef __Pulsar_FITSArchive_h
@@ -10,6 +10,8 @@
 
 #include <memory>
 #include <fitsio.h>
+
+#include <algorithm>
 
 #define PSRFITS 1
 #include "Pulsar/BasicArchive.h"
