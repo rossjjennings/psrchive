@@ -1,6 +1,6 @@
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/Timer/timer.h,v $
-   $Revision: 1.3 $
-   $Date: 1999/11/18 05:22:34 $
+   $Revision: 1.4 $
+   $Date: 2000/01/31 05:50:55 $
    $Author: straten $ */
 
 /* include file for the main timer structure                            */
@@ -165,17 +165,24 @@ struct timer {
   char  software[SOFTWARE_STRLEN];   /* info on software that produced archive     */
 
   char   backend [BACKEND_STRLEN];   /* 8-byte code checked for recognized backend */
-  uint32 be_data_size;               /* if backend is recognized, this value is
-					interpreted by archive::load as the number
-					of bytes to skip immediately following the
-					end of the timer header.  It is in this
-					space that derived classes of archive should
-					put additional information.
-				     DEFINE recognized backend codes in timer++.C */
+  uint32 be_data_size;            /* if backend is recognized, this value is
+				     interpreted by archive::load as the number
+				     of bytes to skip immediately following the
+				     end of the timer header.  It is in this
+				     space that derived classes of archive
+				     should put additional information.
+				     DEFINE recognized backend codes in
+				     timer++.C */
 
+#if defined (sun) && defined(__i386)
+#define TIMER_SPACE 192
+#else
 #define TIMER_SPACE 188
+#endif
+
   /* NB! SPACE IS ALWAYS THE LAST THING */
   char space[TIMER_SPACE];
+
 };
 
 #endif
