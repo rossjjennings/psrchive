@@ -1,14 +1,15 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Stokes.h,v $
-   $Revision: 1.3 $
-   $Date: 2003/02/20 09:30:06 $
+   $Revision: 1.4 $
+   $Date: 2003/02/25 12:46:13 $
    $Author: straten $ */
 
 #ifndef __Stokes_H
 #define __Stokes_H
 
 #include "Pauli.h"
+#include "random.h"
 #include "Error.h"
 
 template <typename T>
@@ -38,7 +39,7 @@ class Stokes : public Quaternion<T, Hermitian>
   { Quaternion<T,Hermitian>::operator = (real(q));
     Quaternion<T,Hermitian> imaginary (imag(q));
     if (norm(imaginary) > 1e-5 * norm(*this))
-      throw Error (InvalidParam,
+      throw Error (InvalidParam, 
 		   "Stokes::operator = Quaternion<complex<U>,Hermitian>",
 		   "non-zero imaginary component");
     return *this; }
@@ -50,5 +51,40 @@ class Stokes : public Quaternion<T, Hermitian>
   T abs_vect () const { return sqrt (s1*s1 + s2*s2 + s3*s3); }
 
 };
+
+// useful method for generating random source polarization
+template <class T, class U>
+void random_value (Stokes<T>& val, U scale)
+{
+  // total intensity is always equal to scale
+  val.s0 = scale;
+
+  // generate a random fractional polarization, from 0 to 1
+  T fraction_polarized;
+  random_value (fraction_polarized, 0.5);
+  fraction_polarized += 0.5;
+
+  unsigned i=0;
+  
+  for (i=1; i<4; i++)
+    random_value (val[i], scale);
+
+  T modp = val.abs_vect();
+  scale *= fraction_polarized / modp;
+
+  for (i=1; i<4; i++)
+    val[i] *= scale;
+
+  if (det(val) < 0.0)
+    throw Error (InvalidState, "random_value (Stokes)",
+		 "det=%f<0", det(val));
+}
+
+template <class T, class U>
+void random_vector (Stokes<T>& val, U scale)
+{
+  random_value (val, scale);
+}
+
 
 #endif
