@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pcm.C,v $
-   $Revision: 1.26 $
-   $Date: 2004/07/16 07:31:19 $
+   $Revision: 1.27 $
+   $Date: 2004/07/16 09:39:57 $
    $Author: straten $ */
 
 /*! \file pcm.C 
@@ -192,7 +192,7 @@ int mode_B (const char* standard_filename,
 Pulsar::Calibrator::Type model_name = Pulsar::Calibrator::Britton;
 
 // class name of the calibrator solution archives to be produced
-string archive_class = "FITSArchive";
+string archive_class = "PSRFITS";
 
 // plot the solution before calibrating with it
 bool display = true;

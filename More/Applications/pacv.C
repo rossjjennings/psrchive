@@ -50,7 +50,7 @@ int main (int argc, char** argv)
   char* metafile = NULL;
 
   // class name of the special calibrator solution archives to be produced
-  string archive_class = "FITSArchive";
+  string archive_class = "PSRFITS";
 
   // vector of bad channels
   vector<unsigned> zapchan;
@@ -307,7 +307,7 @@ int main (int argc, char** argv)
 
     if (!flux_cal) {
 
-      cerr << "pacv: Creating " << archive_class << endl;
+      cerr << "pacv: Creating " << archive_class << " Archive" << endl;
   
       output = calibrator->get_solution (archive_class);
 
