@@ -59,7 +59,7 @@ double Pulsar::Profile::shift (const Profile& std, float& ephase,
       throw Error (InvalidState, "Profile::shift", 
 		   "profile nbin=%d standard nbin=%d", nbin, stdcopy.nbin);
 
-    int nscrunch = nbin / stdcopy.nbin;
+    unsigned nscrunch = nbin / stdcopy.nbin;
     prfcopy.bscrunch (nscrunch);
   }
 
@@ -68,7 +68,7 @@ double Pulsar::Profile::shift (const Profile& std, float& ephase,
       throw Error (InvalidState, "Profile::shift", 
 		   "profile nbin=%d standard nbin=%d", nbin, stdcopy.nbin);
 
-    int nscrunch = stdcopy.nbin / nbin;
+    unsigned nscrunch = stdcopy.nbin / nbin;
     stdcopy.bscrunch (nscrunch);
   }
 
