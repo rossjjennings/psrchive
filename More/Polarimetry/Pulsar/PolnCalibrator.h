@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PolnCalibrator.h,v $
-   $Revision: 1.3 $
-   $Date: 2003/02/13 16:39:11 $
+   $Revision: 1.4 $
+   $Date: 2003/02/14 13:50:03 $
    $Author: straten $ */
 
 #ifndef __PolnCalibrator_H
@@ -19,13 +19,12 @@ namespace Pulsar {
 
   class Integration;
 
-  //! Implements differenctial gain and phase corrections
-  /*! This class implements the calibration of instrumental differential
-    gain and phase, as previously implemented by tcedar and cal_arch.
-    One major improvement: this calibration step no longer requires a flux
-    calibrator in order to work.  The calibrated archive will have its flux
-    normalized by the calibrator flux, such that the FluxCalibrator class
-    need only multiply the archive by the calibrator flux in mJy */
+  //! Abstract base class of polariation calibration objects.
+  /*! New convention: Polarimetric calibration no longer depends on a
+    flux calibrator in order to work.  The calibrated archive will
+    have its flux normalized by the calibrator flux, such that the
+    FluxCalibrator class need only multiply the archive by the
+    calibrator flux in mJy. */
   class PolnCalibrator : public Calibrator {
     
   public:
@@ -43,26 +42,31 @@ namespace Pulsar {
 
   protected:
 
+    //! Return the system response as determined by the calibrator states
+    /*! Given the coherency products of the calibrator hi and lo states,
+      derived classes must return the Jones matrix that represent the system
+      response.  If the derived class can store additional parameters,
+      the ichan parameter may be used. */
+    virtual Jones<double> solve (const vector<Estimate<double> >& hi,
+				 const vector<Estimate<double> >& lo,
+				 unsigned ichan) = 0;
+
+    //! Resize the space used to store additional parameters
+    /*! If the derived class can store additional parameters, the space
+      should be resized here */
+    virtual void resize_parameters (unsigned nchan) {}
+
     //! Filenames of Pulsar::Archives from which instance was created
     vector<string> filenames;
-
-    //! Differential gain, \f$ \beta \f$, as a function of frequency
-    vector< Estimate<double> > boost_q;
-
-    //! Differential phase, \f$ \Phi_I \f$, as a function of frequency
-    vector< Estimate<double> > rotation_q;
-
-    //! Instrumental gain, \f$ G \f$, in instrumental flux units
-    vector< Estimate<double> > gain;
 
     //! Intensity of off-pulse (system + sky), in CAL flux units
     vector< Estimate<double> > baseline;
 
-    //! Reference to the Pulsar::Archive from which this instance was created
-    Reference::To<const Archive> calibrator;
-
     //! Jones matrix frequency response of the instrument
     vector< Jones<float> > jones;
+
+    //! Reference to the Pulsar::Archive from which this instance was created
+    Reference::To<const Archive> calibrator;
 
     //! Create the Jones matrix frequency response at the requested resolution
     void create (unsigned nchan);

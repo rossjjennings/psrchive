@@ -80,114 +80,48 @@ void Pulsar::PolnCalibrator::create (unsigned nchan)
   vector<vector<Estimate<double> > > lo;
     
   calculate (hi, lo);
-
 }
 
-void
-Pulsar::PolnCalibrator::calculate (vector<vector<Estimate<double> > >& cal_hi,
-				   vector<vector<Estimate<double> > >& cal_lo)
+void Pulsar::PolnCalibrator::calculate (vector<vector<Estimate<double> > >& hi,
+					vector<vector<Estimate<double> > >& lo)
 {
-  unsigned npol = cal_hi.size();
-  unsigned nchan = cal_hi[0].size();
-  unsigned nprobes = 2;
-
-  bool full_polarization = npol == 4;
-
-  if (store_parameters) {
-    boost_q.resize (nchan);
-    gain.resize (nchan);
-
-    if (full_polarization)
-      rotation_q.resize (nchan);
-  }
-
-  else {
-    boost_q.clear ();
-    gain.clear ();
-    rotation_q.clear ();
-  }
+  unsigned npol = hi.size();
+  unsigned nchan = hi[0].size();
 
   baseline.resize (nchan);
   jones.resize (nchan);
 
+  if (store_parameters)
+    resize_parameters (nchan);
+
+  // coherency products in a single channel
+  vector<Estimate<double> > cal_hi (npol);
+  vector<Estimate<double> > cal_lo (npol);
+
   for (unsigned ichan=0; ichan<nchan; ++ichan) {
 
-    bool invalid = false;
-    for (unsigned ipol=0; ipol<nprobes; ++ipol)
-      if (cal_hi[ipol][ichan]==0 || cal_hi[ipol][ichan] <= cal_lo[ipol][ichan])
-	invalid = true;
-    
-    if (invalid) {
+    for (unsigned ipol=0; ipol<npol; ++ipol) {
+      cal_hi[ipol] = hi[ipol][ichan];
+      cal_lo[ipol] = lo[ipol][ichan];
+    }
+
+    Estimate<double> cal_AA = cal_hi[0] - cal_lo[0];
+    Estimate<double> cal_BB = cal_hi[1] - cal_lo[1];
+
+    if (cal_AA.val <= 0 || cal_BB.val <= 0) {
       if (verbose)
-	cerr << "Pulsar::PolnCalibrator channel " << ichan
-	     << ": invalid levels flagged" << endl;
-
-      boost_q[ichan] = 0;
-      rotation_q[ichan] = 0;
-
+	cerr << "Pulsar::PolnCalibrator::calculate ichan=" << ichan <<
+	  " bad calibrator levels" << endl;
+      baseline[ichan] = 0;
+      jones[ichan] = Jones<float>();
       continue;
     }
 
-    Estimate<double> cal_a = cal_hi[0][ichan] - cal_lo[0][ichan];
-    Estimate<double> cal_b = cal_hi[1][ichan] - cal_lo[1][ichan];
-
-    // note: there is an error in Britton 2000, following Equation (14):
-    // correction: \beta = 1/2 ln (g_a/g_b)
-
-    // note also: that this equation refers to the Jones matrix and, since
-    // we are dealing with detected coherency products:
-    //   cal_a = g_a^2 C
-    //   cal_b = g_b^2 C
-    // where C is the cal flux in each probe (assumed equal in this model)
-
-    Estimate<double> beta = 0.25 * log (cal_a / cal_b);
-    if (store_parameters)
-      boost_q[ichan] = beta;
-
-    // gain, G = g_a g_b C
-    Estimate<double> Gain = sqrt (cal_a * cal_b);
-    if (store_parameters)
-      gain[ichan] = Gain;
-
     // baseline intensity, normalized by cal flux, C
-    baseline[ichan] = cal_lo[0][ichan]/cal_a + cal_lo[1][ichan]/cal_b;
+    baseline[ichan] = cal_lo[0]/cal_AA + cal_lo[1]/cal_BB;
 
-    if (verbose)
-      cerr << "Pulsar::PolnCalibrator channel " << ichan <<
-	"\n  boost=" << beta << 
-	"\n  gain=" << Gain << 
-	"\n  baseline=" << baseline[ichan] << endl;
-
-    Quaternion<double, Hermitian> b_q (cosh(beta.val), sinh(beta.val), 0, 0);
-
-    Quaternion<double, Unitary> r_q = Quaternion<double, Unitary>::identity();
-
-    if (full_polarization) {
-      Estimate<double> cal_ab = cal_hi[2][ichan] - cal_lo[2][ichan];
-      Estimate<double> cal_ba = cal_hi[3][ichan] - cal_lo[3][ichan];
-
-      if (cal_ba == 0 && cal_ab == 0)  {
-	if (verbose) cerr << "Pulsar::PolnCalibrator channel " << ichan
-			  << ": invalid instrumental rotation" << endl;
-	if (store_parameters)
-	  rotation_q[ichan] = 0;
-      }
-
-      Estimate<double> phi = 0.5 * atan2 (cal_ba, cal_ab);
-
-      if (store_parameters)
-	rotation_q[ichan] = phi;
-
-      if (verbose)
-	cerr << "Pulsar::PolnCalibrator channel " << ichan << ":"
-	     << " differential phase=" << phi << endl;
-
-      r_q = Quaternion<double> (cos(phi.val), sin(phi.val), 0, 0);
-    }
-
-    Jones<double> response = sqrt(Gain.val) * b_q * r_q;
-
-    jones[ichan] = inv (response);
+    // store the Jones matrix appropriate for inverting the system response
+    jones[ichan] = inv( solve (cal_hi, cal_lo, ichan) );
 
   }
 }
