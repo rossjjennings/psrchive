@@ -8,8 +8,8 @@ LIB_C_SRCS = pg_plot_gnu.C profile.C sub_int.C archive.C superarchive.C  \
              toa.C profplot.C plot2profs.C scintplot.C misc.C heapsort.C \
              get_epoch_and_name.C archhdr.C convert_endian.C headers.C 
 
-LIB_F_SRCS = ffft.f fftfit.f brent.f fccf.f cprof.f shiftbyfft.f ionrm.f \
-             width.f tsky1.f fftconv.f scan_fort_val.f iono_rm.f convolve.f
+LIB_F_SRCS = ffft.f fftfit.f brent.f fccf.f cprof.f shiftbyfft.f \
+             width.f tsky1.f fftconv.f scan_fort_val.f convolve.f
 
 LIB_SRCS   = ${LIB_C_SRCS} ${LIB_F_SRCS}
 
