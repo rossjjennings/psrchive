@@ -40,7 +40,7 @@ ifeq (${PSRQT},yes)
 
 INCLUDES += qt_psrephem.h
 LIB_SRCS += qt_psrephem.C qt_ephembox.C qt_ephemVal.C \
-	moc_qt_psrephem.C moc_qt_ephembox.C moc_qt_ephemVal.C
+	moc_qt_ephembox.C moc_qt_ephemVal.C
 
 INCFLAGS += $(IQT)
 
