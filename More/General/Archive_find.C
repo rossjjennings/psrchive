@@ -5,27 +5,6 @@
 
 /////////////////////////////////////////////////////////////////////////////
 //
-// Pulsar::Archive::total
-//
-/*!
-  This method is primarily designed for use by the Archive::find_*
-  methods.  Archive::fscrunch is called with weighted_cfreq ==
-  false so that the phase of the total profile will always relate to
-  the centre frequency of the Archive.
-*/
-Pulsar::Archive* Pulsar::Archive::total () const
-{
-  Reference::To<Archive> copy = clone ();
-  
-  copy->fscrunch (0, false);
-  copy->tscrunch ();
-  copy->pscrunch ();
-    
-  return copy.release();
-}
-
-/////////////////////////////////////////////////////////////////////////////
-//
 // Pulsar::Archive::find_transitions
 //
 /*!
