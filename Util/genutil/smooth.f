@@ -1,18 +1,23 @@
-      subroutine smooth(pr,nbin,rmsp,kwmax,snrmax,smmax)
+
+
+
+      subroutine smooth_mw(pr,nbin,maxwidth, rmsp,kwmax,snrmax,smmax)
 c******************************************************************
 c
 c  convolves profile pr(nbin) with a boxcar of width kw.  it returns
 c    the width kwmax which gave the highest s/n ratio snrmax, and the
 c    corresponding pulse amplitude smmax.
 c
+c RTE 17 Feb 00, parameterized maximum boxcar witdth
+c
 c******************************************************************
 c
 
-      integer nbin,kwmax
+      integer nbin,kwmax, maxwidth
       real*4 pr(*),rmsp,snrmax,smmax
 c
       integer ksm,j,k,kw,nn,ja,jj
-      real*4 s,wrk(43),al,an,sn,smax
+      real*4 s,wrk(512),al,an,sn,smax
 c
       snrmax=0.
 c---------------------------------------
@@ -33,8 +38,9 @@ c  remove baseline
 c--------------------------------------
 c
 c
-      do 40 nn=1,6
+      do 40 nn=1,1000
         kw=2**(nn-1)
+        if (kw.gt.maxwidth) goto 70
         if(kw.gt.nbin/2) return
 	s=0.0
 	do 50 k=1,kw
@@ -63,4 +69,16 @@ c
         endif
    40 continue
 
+ 70   end
+
+
+
+
+C rte old interface
+      subroutine smooth(pr,nbin, rmsp,kwmax,snrmax,smmax)
+      integer nbin,kwmax, maxwidth
+      real*4 pr(*),rmsp,snrmax,smmax
+      
+      call smooth_mw(pr,nbin,32, rmsp,kwmax,snrmax,smmax)
       end
+
