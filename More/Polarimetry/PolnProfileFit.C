@@ -7,7 +7,7 @@
 #include "Calibration/Phase.h"
 
 #include "Calibration/ChainRule.h"
-#include "Calibration/ProductRule.h"
+#include "Calibration/Complex2Math.h"
 #include "Calibration/Complex2Constant.h"
 #include "Calibration/CoherencyMeasurementSet.h"
 
@@ -107,12 +107,9 @@ void Pulsar::PolnProfileFit::set_standard (const PolnProfile* _standard)
 #endif
 
     // each complex phase bin is phase related
-    Calibration::ProductRule<Calibration::Complex2>* product = 0;
-    product = new Calibration::ProductRule<Calibration::Complex2>;
-    *product *= jones;
-    *product *= phase_xform;
+    Reference::To<Calibration::Complex2> input = jones;
 
-    model->add_input( product );
+    model->add_input( input * phase_xform );
 
   }
 
@@ -172,7 +169,8 @@ void Pulsar::PolnProfileFit::fit (const PolnProfile* observation)
 
   for (unsigned ipol=0; ipol<npol; ipol++) 
     // the Fourier transform will inflate the variance
-    variance[ipol] = (variance[ipol] + standard_variance[ipol]) * nbin;
+    // variance[ipol] = (variance[ipol] + standard_variance[ipol]) * nbin;
+    variance[ipol] *= nbin;
 
   Reference::To<PolnProfile> fourier = fourier_transform (observation);
 
