@@ -367,8 +367,7 @@ AnglePair:: getRadMS(long int *az, long int *ze)
 // redwards 10Aug99 function to compute angular separation of a pair
 // of spherical coordinates
 // straten 05Oct99 got rid of references to slalib
-Angle
-AnglePair::angularSeparation(const AnglePair& other)
+Angle AnglePair::angularSeparation(const AnglePair& other) const
 {
   // convert the angles in spherical coordinates to unit Cartesian vectors
   Cartesian u1 (*this);

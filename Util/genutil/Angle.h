@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Angle.h,v $
-   $Revision: 1.14 $
-   $Date: 2004/07/06 14:57:54 $
+   $Revision: 1.15 $
+   $Date: 2004/10/12 09:40:04 $
    $Author: straten $ */
 
 // redwards 17 Mar 99 -- Time for a definitive C++ suite of
@@ -146,7 +146,7 @@ class AnglePair
   void   getRadians (double *, double *) const;
   string getRadians () const;
 
-  Angle angularSeparation(const AnglePair& other);
+  Angle angularSeparation (const AnglePair& other) const;
 
   // set the angles in radians from 
   // az and ze in milliseconds of an hour
