@@ -9,7 +9,7 @@ include_HEADERS = Cartesian.h Angle.h MJD.h CommandParser.h		\
 	PrimeFactoriser.h WindowArray.h StringTokenizer.h		\
 	Sortable.h Printable.h Header.h thread_utils.h GetPK.h		\
 	VectorInfo.h Plugin.h shell.h Cartesian.h Angle.h coord_parse.h \
-	coord.h anglevel.h obsjoin.h
+	coord.h anglevel.h obsjoin.h casts.h
 
 libgenutilpp_la_SOURCES = CommandParser.C PlotEvent.C util_plus.C	\
 	PlotState.C datum.C smarthist.C datumcond.C kstest.C Ready.C	\
