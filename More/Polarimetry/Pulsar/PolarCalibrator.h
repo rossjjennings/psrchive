@@ -1,15 +1,15 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PolarCalibrator.h,v $
-   $Revision: 1.2 $
-   $Date: 2003/04/04 08:44:44 $
+   $Revision: 1.3 $
+   $Date: 2003/04/05 11:12:14 $
    $Author: straten $ */
 
 #ifndef __PolarCalibrator_H
 #define __PolarCalibrator_H
 
 #include "PolnCalibrator.h"
-#include "PolarModel.h"
+#include "Calibration/BoostModel.h"
 
 namespace Pulsar {
 
@@ -40,7 +40,7 @@ namespace Pulsar {
     virtual void resize_parameters (unsigned nchan);
 
     //! PolarModel representation of the instrument
-    vector<Calibration::PolarModel> model;
+    vector<Calibration::BoostModel> model;
 
   };
 

@@ -12,7 +12,7 @@ Pulsar::PolarCalibrator::solve (const vector<Estimate<double> >& hi,
 				const vector<Estimate<double> >& lo,
 				unsigned ichan)
 {
-  Calibration::PolarModel qm;
+  Calibration::BoostModel qm;
   qm.solve (hi, lo);
   
   if (store_parameters)

@@ -1,15 +1,15 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/SingleAxisCalibrator.h,v $
-   $Revision: 1.3 $
-   $Date: 2003/04/04 08:44:44 $
+   $Revision: 1.4 $
+   $Date: 2003/04/05 11:12:14 $
    $Author: straten $ */
 
 #ifndef __SingleAxisCalibrator_H
 #define __SingleAxisCalibrator_H
 
 #include "PolnCalibrator.h"
-#include "SingleAxisModel.h"
+#include "Calibration/SingleAxisModel.h"
 
 namespace Pulsar {
 
