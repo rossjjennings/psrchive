@@ -1,8 +1,8 @@
 //-*-C++-*-
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Attic/string_utils.h,v $
-   $Revision: 1.31 $
-   $Date: 2004/06/14 04:06:40 $
-   $Author: hknight $ */
+   $Revision: 1.32 $
+   $Date: 2004/10/13 14:10:58 $
+   $Author: straten $ */
 
 #ifndef __STRING_UTILS_H
 #define __STRING_UTILS_H
@@ -224,6 +224,9 @@ string to_lower_case(string input);
 bool is_unsigned_integer(const string ss);
 // Checks that all characters are digits, except the first one, which may be a '+' or a '-'
 bool is_signed_integer(const string ss);
+
+//! a simple command for replacing the extension on a filename
+string replace_extension (string filename, const string& extension);
 
 #endif
 
