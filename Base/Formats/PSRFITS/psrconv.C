@@ -7,7 +7,6 @@
 
 #include "Pulsar/Archive.h"
 #include "Pulsar/FITSArchive.h"
-#include "Pulsar/TimerArchive.h"
 #include "Error.h"
 
 void usage() {
@@ -51,12 +50,12 @@ int main(int argc, char *argv[]) {
   }
 
   try {
-    
+   
+    cerr << "Loading " << argv[optind] << endl;
     arch = Pulsar::Archive::load(argv[optind]);
-    cerr << "Loaded " << argv[optind] << endl;
     
     fitsarch = new Pulsar::FITSArchive(*arch);
-    cerr << "Conversion complete." << endl;
+    cerr << "Conversion complete" << endl;
     
     if (verbose) {
       cerr << "Source: " << fitsarch -> get_source() << endl;
@@ -72,9 +71,9 @@ int main(int argc, char *argv[]) {
     int index = newname.find_last_of(".",newname.size());
 
     if (arch->type_is_cal())
-      newname.replace(index, 3, ".cf");
+      newname.replace(index, newname.size(), ".cf");
     else
-      newname.replace(index, 3, ".rf");
+      newname.replace(index, newname.size(), ".rf");
     
     cerr << "Unloading " << newname << endl;
     fitsarch ->Archive::unload(newname.c_str());
@@ -83,5 +82,3 @@ int main(int argc, char *argv[]) {
     cerr << error << endl;
   }
 }
-
-
