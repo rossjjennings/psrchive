@@ -77,10 +77,14 @@ void Pulsar::PolnCalibrator::calibrate (Archive* arch)
   arch->transform (jones);
 }
 
-void Pulsar::PolnCalibrator::build ()
+void Pulsar::PolnCalibrator::build (unsigned nchan)
 {
   store_parameters = true;
-  create (calibrator->get_nchan());
+
+  if (!nchan)
+    nchan = calibrator->get_nchan();
+
+  create (nchan);
 }
 
 /*!
