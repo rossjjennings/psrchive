@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ReceptionCalibrator.h,v $
-   $Revision: 1.26 $
-   $Date: 2003/05/31 07:49:39 $
+   $Revision: 1.27 $
+   $Date: 2003/06/02 14:18:32 $
    $Author: straten $ */
 
 #ifndef __ReceptionCalibrator_H
@@ -21,8 +21,31 @@ namespace Pulsar {
   class PolnCalibrator;
   class FluxCalibrator;
 
-  class SourceEstimate;
   class PolarEstimate;
+
+  class SourceEstimate {
+
+  public:
+
+    //! Construct with the specified bin from Archive
+    SourceEstimate (unsigned ibin = 0) { phase_bin = ibin; }
+
+    //! Update each state with the mean
+    void update_state();
+
+    //! Best estimate of Stokes parameters as a function of frequency
+    vector< MeanEstimate<Stokes<double>, double> > mean;
+
+    //! Model of Stokes parameters added to equation as a function of frequency
+    vector< Calibration::StokesState > state;
+
+    //! Phase bin from which pulsar polarization is derived
+    unsigned phase_bin;
+
+    //! The index of the state in the model
+    unsigned state_index;
+
+  };
 
   //! Uses the MultiPathEquation to represent and fit for the system response
   /*! The ReceptionCalibrator implements a technique of single dish
@@ -88,14 +111,8 @@ namespace Pulsar {
     //! Polar decomposition of receiver as a function of frequency
     vector<Reference::To<Calibration::Polar> > receiver;
 
-    //! Calibrator state as a function of frequency
-    vector<Calibration::StokesState> calibrator;
-
-    //! The index by which calibrator observations are identified
-    unsigned calibrator_state_index;
-
-    //! The index by which the first pulse phase bin is identified
-    unsigned pulsar_base_index;
+    //! Uncalibrated estimate of pulsar polarization as a function of phase
+    SourceEstimate calibrator;
 
     //! Best estimate of polar decomposition as a function of frequency
     vector<PolarEstimate> receiver_guess;
@@ -165,26 +182,6 @@ namespace Pulsar {
 
   };
 
-  class SourceEstimate {
-
-  public:
-
-    //! Construct with the specified bin from Archive
-    SourceEstimate (unsigned ibin = 0) { phase_bin = ibin; }
-
-    //! Update each state with the mean
-    void update_state();
-
-    //! Best estimate of Stokes parameters as a function of frequency
-    vector< MeanEstimate<Stokes<double>, double> > mean;
-
-    //! Model of Stokes parameters added to equation as a function of frequency
-    vector< Calibration::StokesState > state;
-
-    //! Phase bin from which
-    unsigned phase_bin;
-
-  };
 
   class PolarEstimate {
 

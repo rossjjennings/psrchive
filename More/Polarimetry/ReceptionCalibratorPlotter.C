@@ -76,7 +76,7 @@ void Pulsar::ReceptionCalibratorPlotter::plot_constraints (unsigned ichan)
 
 void Pulsar::ReceptionCalibratorPlotter::plot_cal_constraints (unsigned ichan)
 {
-  plot_constraints (ichan, calibrator->calibrator_state_index);
+  plot_constraints (ichan, calibrator->calibrator.state_index);
 }
 
 void Pulsar::ReceptionCalibratorPlotter::plot_constraints (unsigned ichan,

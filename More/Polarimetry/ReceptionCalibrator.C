@@ -20,9 +20,6 @@ Pulsar::ReceptionCalibrator::ReceptionCalibrator (const Archive* archive)
   PolnCalibrator_path = 0;
   FluxCalibrator_path = 0;
 
-  calibrator_state_index = 0;
-  pulsar_base_index = 1;
-
   PA_min = PA_max = 0.0;
 
   if (archive)
@@ -102,7 +99,7 @@ void Pulsar::ReceptionCalibrator::initial_observation (const Archive* data)
 
   }
 
-  if (calibrator.size() == 0 && calibrator_filenames.size())
+  if (calibrator.mean.size() == 0 && calibrator_filenames.size())
     load_calibrators ();
 
   // initialize any previously added states
@@ -183,8 +180,17 @@ void Pulsar::ReceptionCalibrator::init_estimate (SourceEstimate& estimate)
   estimate.mean.resize (nchan);
   estimate.state.resize (nchan);
 
-  for (unsigned ichan=0; ichan<nchan; ichan++)
+  for (unsigned ichan=0; ichan<nchan; ichan++) {
+
+    unsigned nstate = equation[ichan]->get_model()->get_nstate();
+    if (ichan==0)
+      estimate.state_index = nstate;
+    else if (estimate.state_index != nstate)
+      throw Error (InvalidState, "Pulsar::ReceptionCalibrator::init_estimate",
+		   "istate=%d != nstate=%d", estimate.state_index, nstate);
+
     equation[ichan]->get_model()->add_state( &(estimate.state[ichan]) );
+  }
 
 }
 
@@ -268,10 +274,8 @@ void Pulsar::ReceptionCalibrator::add_observation (const Archive* data)
       // the selected pulse phase bins
       vector<Calibration::MeasuredState> measurements;
 
-      for (unsigned istate=0; istate < pulsar.size(); istate++) {
+      for (unsigned istate=0; istate < pulsar.size(); istate++)
 	add_data (measurements, pulsar[istate], ichan, integration);
-	measurements.back().state_index = pulsar_base_index + istate;
-      }
 
       equation[ichan]->set_post_xform (new Calibration::Gain);
       equation[ichan]->add_measurement (epoch, Pulsar_path, measurements);
@@ -312,6 +316,7 @@ Pulsar::ReceptionCalibrator::add_data(vector<Calibration::MeasuredState>& bins,
   state.var = stokes.var;
 
   bins.push_back ( state );
+  bins.back().state_index = estimate.state_index;
 
   /* Correct the stokes parameters using the current best estimate of
      the receiver and the parallactic angle rotation before adding
@@ -355,26 +360,23 @@ void Pulsar::ReceptionCalibrator::add_PolnCalibrator (const PolnCalibrator* p)
   
   assert (npol == 4);
 
-  if (calibrator.size() == 0) {
+  if (calibrator.mean.size() == 0) {
 
-    // this is the first calibrator observation
-    calibrator.resize (nchan);
+    // add the calibrator states to the equations
+    init_estimate (calibrator);
 
-    // add the calibrator state
-    Stokes<double> cal_state (1,0,1,0);
-
-    // calibrator_state_index = get_nstate_pulsar ();
-    // PolnCalibrator_path = equation[0]->get_model()->get_npath();
+    // set the initial guess and fit flags
+    Stokes<double> cal_state (1,0,.5,0);
 
     for (unsigned ichan=0; ichan<nchan; ichan++) {
+      
+      calibrator.state[ichan].set_stokes ( cal_state );
 
-      calibrator[ichan].set_stokes (cal_state);
       for (unsigned istokes=0; istokes<4; istokes++)
-	calibrator[ichan].set_infit (istokes, false);
-    
-      // add the calibrator states to the first signal path
-      equation[ichan]->get_model()->set_path ( PolnCalibrator_path );
-      equation[ichan]->get_model()->add_state( &(calibrator[ichan]) );
+	calibrator.state[ichan].set_infit (istokes, false);
+
+      // Stokes U may vary
+      calibrator.state[ichan].set_infit (2, true);
 
     }
 
@@ -413,7 +415,7 @@ void Pulsar::ReceptionCalibrator::add_PolnCalibrator (const PolnCalibrator* p)
 	state.val[ipol] = stokes[ipol].val;
       state.var = stokes[0].var;
 
-      state.state_index = calibrator_state_index;
+      state.state_index = calibrator.state_index;
 
 #if 0
       boost    = new Calibration::Boost    (Vector<double, 3>::basis(0));
@@ -422,6 +424,15 @@ void Pulsar::ReceptionCalibrator::add_PolnCalibrator (const PolnCalibrator* p)
 
       equation[ichan]->set_post_xform (new Calibration::Gain);
       equation[ichan]->add_measurement (epoch, PolnCalibrator_path, state);
+
+      Jones<double> caltor = inv (receiver[ichan]->evaluate());
+
+      Estimate<Stokes<float>, float> calcal;
+      calcal.val = caltor * state.val * herm(caltor);
+      calcal.var = state.var;
+
+      // add the observed
+      calibrator.mean[ichan] += calcal;
 
     }
   }
@@ -554,7 +565,7 @@ void Pulsar::ReceptionCalibrator::solve (int only_ichan)
 
   bool degenerate_rotV = false;
 
-  if (calibrator.size() == 0) {
+  if (calibrator.mean.size() == 0) {
 
     if (!FluxCalibrator_path)
       throw Error (InvalidState, "Pulsar::ReceptionCalibrator::solve",
@@ -609,6 +620,8 @@ void Pulsar::ReceptionCalibrator::initialize ()
   cerr << "Pulsar::ReceptionCalibrator::solve information:\n"
     "  Parallactic angle ranges from " << PA_min <<
     " to " << PA_max << " degrees" << endl;
+
+  calibrator.update_state();
 
   for (unsigned istate=0; istate<pulsar.size(); istate++)
     pulsar[istate].update_state ();
