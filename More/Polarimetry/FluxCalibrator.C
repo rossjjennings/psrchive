@@ -143,6 +143,8 @@ void Pulsar::FluxCalibrator::calibrate (Archive* arch)
 
   for (unsigned isub=0; isub < arch->get_nsubint(); isub++)
     calibrate (arch->get_Integration(isub));
+
+  arch->set_scale(Signal::Jansky);
 }
 
 

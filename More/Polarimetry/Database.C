@@ -324,8 +324,6 @@ bool Pulsar::Database::Criterion::match (const Entry& have) const
     }
   }
 
-
-
   if (check_coordinates) {
 
     if (match_verbose)
@@ -693,7 +691,7 @@ Pulsar::Database::closest_match (const Criterion& criterion,
 
 
 /*! This routine is given a pointer to a Pulsar::Archive. It scans the
-  database for all FluxCal observations that were made within 24 hours
+  database for all FluxCal observations that were made within one month
   of the observation mid-time and uses these to construct a
   Pulsar::FluxCalibrator class which can then be used to perform a
   flux calibration of the original pulsar observation.
