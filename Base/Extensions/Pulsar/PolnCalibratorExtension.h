@@ -1,16 +1,16 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/PolnCalibratorExtension.h,v $
-   $Revision: 1.9 $
-   $Date: 2003/12/26 08:34:45 $
+   $Revision: 1.10 $
+   $Date: 2004/10/08 10:05:22 $
    $Author: straten $ */
 
 #ifndef __PolnCalibratorExtension_h
 #define __PolnCalibratorExtension_h
 
 #include "Calibration/Complex2.h"
+#include "Pulsar/CalibratorExtension.h"
 #include "Pulsar/Calibrator.h"
-#include "Pulsar/Archive.h"
 
 namespace Pulsar {
 
@@ -19,7 +19,7 @@ namespace Pulsar {
   //! PolnCalibrator Extension
   /*! This Extension implements the storage of PolnCalibrator data. */
   
-  class PolnCalibratorExtension : public Pulsar::Archive::Extension {
+  class PolnCalibratorExtension : public CalibratorExtension {
     
   public:
     
@@ -47,15 +47,8 @@ namespace Pulsar {
     //! Get the type of the instrumental response parameterization
     Calibrator::Type get_type () const;
 
-    //! Set the reference epoch of the calibration experiment
-    void set_epoch (const MJD& epoch);
-    //! Get the epoch of the instrumental response parameterization
-    MJD get_epoch () const;
-
     //! Set the number of frequency channels
     void set_nchan (unsigned nchan);
-    //! Get the number of frequency channels
-    unsigned get_nchan () const;
 
     //! Return true if the transformation for the specified channel is valid
     bool get_valid (unsigned ichan) const;
@@ -67,9 +60,6 @@ namespace Pulsar {
     const ::Calibration::Complex2* get_transformation (unsigned c) const;
 
   protected:
-
-    //! The reference epoch of the calibration experiment
-    MJD epoch;
 
     //! Type of the instrumental response parameterization
     Calibrator::Type type;

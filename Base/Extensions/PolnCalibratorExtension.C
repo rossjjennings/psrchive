@@ -6,7 +6,7 @@
 
 //! Default constructor
 Pulsar::PolnCalibratorExtension::PolnCalibratorExtension ()
-  : Extension ("PolnCalibratorExtension")
+  : CalibratorExtension ("PolnCalibratorExtension")
 {
   type = Calibrator::SingleAxis;
 }
@@ -14,7 +14,7 @@ Pulsar::PolnCalibratorExtension::PolnCalibratorExtension ()
 //! Copy constructor
 Pulsar::PolnCalibratorExtension::PolnCalibratorExtension
 (const PolnCalibratorExtension& copy)
-  : Extension ("PolnCalibratorExtension")
+  : CalibratorExtension (copy)
 {
   operator = (copy);
 }
@@ -64,31 +64,17 @@ Pulsar::Calibrator::Type Pulsar::PolnCalibratorExtension::get_type () const
   return type;
 }
 
-MJD Pulsar::PolnCalibratorExtension::get_epoch () const
-{
-  return epoch;
-}
-
-void Pulsar::PolnCalibratorExtension::set_epoch (const MJD& _epoch)
-{
-  epoch = _epoch;
-}
-
 
 //! Set the number of frequency channels
 void Pulsar::PolnCalibratorExtension::set_nchan (unsigned _nchan)
 {
+  CalibratorExtension::set_nchan( _nchan );
+
   if (response.size() == _nchan)
     return;
 
   response.resize( _nchan );
   construct ();
-}
-
-//! Get the number of frequency channels
-unsigned Pulsar::PolnCalibratorExtension::get_nchan () const
-{
-  return response.size();
 }
 
 bool Pulsar::PolnCalibratorExtension::get_valid (unsigned ichan) const
@@ -136,13 +122,6 @@ void Pulsar::PolnCalibratorExtension::construct ()
 
 }
 
-void Pulsar::PolnCalibratorExtension::range_check (unsigned ichan,
-						   const char* method) const
-{
-  if (ichan >= response.size())
-    throw Error (InvalidRange, method, "ichan=%d >= nchan=%d",
-		 ichan, response.size());
-}
 
 //! Return a new Calibration::Complex2 instance, based on type attribute
 ::Calibration::Complex2* 
