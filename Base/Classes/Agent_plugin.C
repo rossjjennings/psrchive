@@ -1,4 +1,4 @@
-#include "Pulsar/Archive.h"
+#include "Pulsar/BasicArchive.h"
 #include "Plugin.h"
 
 // the plugins loader
@@ -6,6 +6,8 @@ static Registry::Plugin plugins;
 
 void Pulsar::Archive::Agent::plugin_load ()
 {
+  Pulsar::BasicArchive::ensure_linkage();
+
   if (verbose == 3) {
     cerr << "Pulsar::Archive::Agent::plugin_load" << endl;
     Registry::Plugin::verbose = true;
