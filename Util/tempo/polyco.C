@@ -546,8 +546,8 @@ int polyco::i_nearest (const MJD &t, const string& in_psr) const
       return ipolly;
     }
   }
-  fprintf (stderr, "polyco::nearest_index - no polynomial for MJD %s\n", 
-	t.printall());
+  fprintf (stderr, "polyco::i_nearest - no polynomial for MJD %s\n", 
+	t.strtempo());
   return -1;
 }
 
@@ -565,21 +565,27 @@ Phase polyco::phase(const MJD& t, const string& in_psrname) const {
 Phase polyco::phase(const MJD& t, float obs_freq, const string& in_psrname) const {
   polynomial nearest_polly;
   try{ nearest_polly = this->nearest_polly(t,in_psrname);}
-  catch(...) {throw("no polynomial");}
+  catch(...) {
+    cerr << "polyco::phase - error finding polynomial\n";
+    throw("no polynomial");}
   return(nearest_polly.phase(t, obs_freq));
 } 
 
 double polyco::period(const MJD& t, const string& in_psrname) const{
   polynomial nearest_polly;
   try{ nearest_polly = this->nearest_polly(t,in_psrname);}
-  catch(...) {throw("no polynomial");}
+  catch(...) {
+    cerr << "polyco::period - error finding polynomial\n";
+    throw("no polynomial");}
   return(nearest_polly.period(t));
 }
 
 double polyco::frequency(const MJD& t, const string& in_psrname) const {
   polynomial nearest_polly;
   try{ nearest_polly = this->nearest_polly(t,in_psrname);}
-  catch(...) { throw("no polynomial");}  
+  catch(...) {
+    cerr << "polyco::frequency - error finding polynomial\n";
+    throw("no polynomial");}  
   return(nearest_polly.frequency(t));
 }
 
