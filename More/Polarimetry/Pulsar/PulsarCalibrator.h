@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PulsarCalibrator.h,v $
-   $Revision: 1.5 $
-   $Date: 2004/05/03 12:59:06 $
+   $Revision: 1.6 $
+   $Date: 2004/07/12 10:54:01 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PulsarCalibrator_H
@@ -10,14 +10,14 @@
 
 #include "Pulsar/PolnCalibrator.h"
 
-#include "Calibration/Parallactic.h"
+#include "Calibration/Complex2Constant.h"
 #include "Calibration/MeanModel.h"
 
 namespace Pulsar {
 
   class Archive;
   class PolnProfileFit;
-  class ArtificialCalibrator;
+  class ReferenceCalibrator;
 
   //! Uses PolnProfileFit to determine the system response
   /*! The PulsarCalibrator implements a technique of polarimetric
@@ -40,7 +40,7 @@ namespace Pulsar {
     Type get_type () const;
 
     //! Return the Calibrator information
-    Calibrator::Info* get_Info () const;
+    Info* get_Info () const;
 
     //! Set the maximum number of harmonics to include in fit
     void set_maximum_harmonic (unsigned max);
@@ -73,8 +73,8 @@ namespace Pulsar {
     //! The array of transformation Model instances
     vector< Reference::To<MeanXform> > solution;
 
-    //! The parallactic angle rotation
-    Calibration::Parallactic parallactic;
+    //! The known instrumental corrections
+    Calibration::Complex2Constant corrections;
 
     //! The model specified on construction
     Calibrator::Type model_type;
