@@ -1,5 +1,5 @@
 //
-// $Id: pav.C,v 1.36 2003/04/30 07:09:04 ahotan Exp $
+// $Id: pav.C,v 1.37 2003/05/14 16:36:41 straten Exp $
 //
 // The Pulsar Archive Viewer
 //
@@ -26,27 +26,29 @@ void usage ()
 {
   cout << "program to look at Pulsar::Archive(s) in various ways \n"
     "Usage: pav [options] file1 [file2 ...] \n"
-    "Where the options are as follows \n"
-    " -h        This help page \n"
-    " -i        Revision information\n"
-    //    " -a        Calculate TOAs of every profile \n"
-    " -A        Plot instrumental phase across the band\n"
+    "\n"
+    "Preprocessing options:\n"
     " -b scr    Bscrunch scr phase bins together \n"
-    " -B        Off-pulse bandpass\n"
-    " -c map    Choose a different colour map \n"
-    " -C        Centre the profile\n"
-    " -d dm     Dedisperse data to a new DM \n"
-    " -D        Plot Integration 0, poln 0, chan 0 \n"
-    //    " -E f.eph  install new ephemeris given in file 'f.eph' \n"
-    " -e        -D with abscissa equal to time in milliseconds \n"
+    " -C        Centre the profile before plotting\n"
+    " -d        Dedisperse before plotting \n"
     " -f scr    Fscrunch scr frequency channels together \n"
     " -F        Fscrunch all frequency channels \n"
+    " -t src    Tscrunch scr Integrations together \n"
+    " -T        Tscrunch all Integrations \n"
+    " -p        add polarisations together \n"
+    " -Z        Smear a profile by convolving with a hat function\n"
+    "\n"
+    "Plotting options:\n"
+    " -A        Plot instrumental phase across the band\n"
+    " -B        Off-pulse bandpass\n"
+    " -c map    Choose a different colour map \n"
+    " -D        Plot Integration 0, poln 0, chan 0 \n"
+    " -E        Baseline spectrum \n"
+    " -e        like -D with abscissa equal to time in milliseconds \n"
     " -g        Position angle across a profile\n"
     " -G        Greyscale of profiles in frequency and phase\n"
-    //    " -H        Print ASCII of Integration 0, poln 0, chan 0 \n"
     " -l        Do not plot labels outside of plotting area\n"
     " -M meta   meta names a file containing the list of files\n"
-    " -p        add polarisations together \n"
     " -P        select polarization\n"
     " -q        Plot a position angle frequency spectrum colour map\n"
     " -Q        Position angle frequency spectrum for on-pulse region\n"
@@ -54,17 +56,29 @@ void usage ()
     " -R        Display SNR information\n"
     " -s        SNR frequency spectrum plot\n"
     " -S        plot Stokes parameters in the Manchester style\n"
-    " -t src    Tscrunch scr Integrations together \n"
-    " -T        Tscrunch all Integrations \n"
-    " -v        Verbose output \n"
-    " -V        Very verbose output \n"
-    " -w        time things \n"
     " -W        Change colour scheme to suite white background\n"
     " -X        Plot cal amplitude and phase vs frequency channel\n"
     " -Y        Display all integrations in a time vs phase plot\n"
     " -z x1,x2  start and end phase \n"
-    " -Z        Smear a profile by convolving with a hat function\n"
+    "\n"
+    "Various options:\n"
+    " -a        Print plugin information\n"
+    " -h        This help page \n"
+    " -i        Revision information\n"
+    " -v        Verbose output \n"
+    " -V        Very verbose output \n"
+    " -w        time things \n"
        << endl;
+}
+
+void cpg_next ()
+{
+  cpgsch (1);
+  cpgsls (1);
+  cpgslw (1);
+  cpgsci (1);
+  cpgsvp (0.1, 0.9, 0.1, 0.9);
+  cpgpage ();
 }
 
 int main (int argc, char** argv) 
@@ -78,11 +92,11 @@ int main (int argc, char** argv)
   float the_phase = 0.0;
   
   double phase = 0;
-  double new_dm = 0.0;
   
   bool verbose = false;
   bool zoomed = false;
   bool display = false;
+  bool baseline_spectrum = false;
   bool dedisperse = false;
   bool manchester = false;
   bool textinfo = false;
@@ -106,13 +120,15 @@ int main (int argc, char** argv)
   Pulsar::Plotter::ColourMap colour_map = Pulsar::Plotter::Heat;
   
   int c = 0;
-  const char* args = "ab:c:d:DGeE:f:FhiHlm:M:pP:r:St:TvVwWx:y:RZCYz:AsgXBq:Q";
+  const char* args = "AaBb:Cc:DdE:eFf:GghiHlm:M:Qq:pP:Rr:SsTt:VvwWXx:Yy:Zz:";
+
   while ((c = getopt(argc, argv, args)) != -1)
     switch (c) {
       
     case 'a':
       Pulsar::Archive::plugin_report ();
       return 0;
+
     case 'A':
       calplot = true;
       break;
@@ -120,6 +136,7 @@ int main (int argc, char** argv)
     case 'b':
       bscrunch = atoi (optarg);
       break;
+
     case 'B':
       bandpass = true;
       break;
@@ -127,24 +144,25 @@ int main (int argc, char** argv)
     case 'c':
       colour_map = (Pulsar::Plotter::ColourMap) atoi(optarg);
       break;
+
     case 'C':
       centre = true;
       break;
 
     case 'd':
-      new_dm = atof(optarg);
       dedisperse = true;
       break;
+
     case 'D':
       display = true;
       break;
 
     case 'e':
-      display = true;
       periodplot = true;
       break;
+
     case 'E':
-      // parse eph file
+      baseline_spectrum = true;
       break;
 
     case 'f':
@@ -166,7 +184,7 @@ int main (int argc, char** argv)
       return 0;
 
     case 'i':
-      cout << "$Id: pav.C,v 1.36 2003/04/30 07:09:04 ahotan Exp $" << endl;
+      cout << "$Id: pav.C,v 1.37 2003/05/14 16:36:41 straten Exp $" << endl;
       return 0;
 
     case 'l':
@@ -203,11 +221,11 @@ int main (int argc, char** argv)
       textinfo = true;
       break;
 
-   case 's':
+    case 's':
       snrplot = true;
       break;
+
     case 'S':
-      display = true;
       manchester = true;
       break;
 
@@ -282,24 +300,10 @@ int main (int argc, char** argv)
     return 0;
   }
 
-  if (display || greyfreq) {
-
-    cpgbeg (0, "?", 0, 0);
-    cpgask(1);
-
-    if (manchester)
-      cpgsvp (0.1,.95,0.1,.95);
-    else if (periodplot)
-      cpgsvp (0.1,.95,0.1,.7);
-    else if (greyfreq)
-      cpgsvp (0.1,.95,0.1,.90);
-    else
-      cpgsvp (0.1, 0.9, 0.05, 0.85);
-
-    cpgsch (1.0);
-
-    plotter.set_colour_map (colour_map);
-  }
+  cpgbeg (0, "?", 0, 0);
+  cpgask(1);
+  
+  plotter.set_colour_map (colour_map);
 
   //Smart pointer
   Reference::To<Pulsar::Archive> archive;
@@ -315,7 +319,7 @@ int main (int argc, char** argv)
     if (dedisperse) {
       if (stopwatch)
 	clock.start();
-      archive -> dedisperse(new_dm, archive -> get_centre_frequency());
+      archive -> dedisperse();
       if (stopwatch) {
 	clock.stop();
 	cerr << "dedispersion toook " << clock << endl;
@@ -362,122 +366,88 @@ int main (int argc, char** argv)
       }
     }
 
-    if (centre) {
+    if (centre)
       archive -> centre();
-    }
-    
+
+    cpg_next();
+ 
     if (pa_spectrum) {
-      cpgbeg (0, "?", 0, 0);
-      cpgask(1);
-      cpgsvp (0.1, 0.9, 0.1, 0.9);
-      cpgeras();
+      cpg_next();
       plotter.pa_vs_frequency(archive, the_phase);
-      cpgend();
-      exit(0);
     }
-    
+
+    if (baseline_spectrum) {
+      cpg_next();
+      plotter.baseline_spectrum (archive);
+    }
+
     if (pa_scatter) {
-      cpgbeg (0, "?", 0, 0);
-      cpgask(1);
-      cpgsvp (0.1, 0.9, 0.1, 0.9);
-      cpgeras();
+      cpg_next();
       plotter.pa_scatter(archive);
-      cpgend();
-      exit(0);
     }
 
     if (bandpass) {
-      cpgbeg (0, "?", 0, 0);
-      cpgask(1);
-      cpgsvp (0.1, 0.9, 0.1, 0.9);
-      cpgeras();
+      cpg_next();
       plotter.bandpass(archive);
-      cpgend();
-      exit(0);
     }
 
     if (calinfo) {
-      cpgbeg (0, "?", 0, 0);
-      cpgask(1);
-      cpgsvp (0.1, 0.9, 0.1, 0.9);
-      cpgeras();
+      cpg_next();
       plotter.cal_plot(archive);
-      cpgend();
-      exit(0);
     }
     
     if (PA) {
-      cpgbeg (0, "?", 0, 0);
-      cpgask(1);
-      cpgsvp (0.1, 0.9, 0.1, 0.9);
-      cpgeras();
+      cpg_next();
       plotter.pa_profile(archive);
-      cpgend();
-      exit(0);
     }
 
     if (snrplot) {
-      cpgbeg (0, "?", 0, 0);
-      cpgask(1);
-      cpgsvp (0.1, 0.9, 0.1, 0.9);
-      cpgeras();
+      cpg_next();
       plotter.snrSpectrum(archive);
-      cpgend();
-      exit(0);
     }  
     
     if (calplot) {
-      cpgbeg (0, "?", 0, 0);
-      cpgask(1);
-      cpgsvp (0.1, 0.9, 0.1, 0.9);
-      cpgeras();
+      cpg_next();
       plotter.instrument_phase(archive, !zoomed);
-      cpgend();
-      exit(0);
     }
     
     if (timeplot) {
-      cpgbeg (0, "?", 0, 0);
-      cpgask(1);
-      cpgsvp (0.1, 0.9, 0.1, 0.9);
-      cpgsch (1.0);
-      cpgeras();
-      plotter.set_colour_map (colour_map);
+      cpg_next();
       plotter.phase_time (archive);
-      cpgend();
-      exit(0);
     }
     
     if (hat) {
-      cpgbeg (0, "?", 0, 0);
-      cpgask(1);
-      cpgsvp (0.1, 0.9, 0.1, 0.9);
-      cpgsch (1.0);
+      cpg_next();
       archive -> get_Profile(0,0,0) -> display();
       sleep(2);
       cpgeras();
       archive -> get_Profile(0,0,0) -> smear(0.05);
       archive -> get_Profile(0,0,0) -> display();
-      cpgend();
-      exit(0);
     }
     
     if (display) {
-      cpgpage();
-      if (manchester)
-	plotter.Manchester (archive);
-      else if (periodplot)
-	plotter.single_period (archive);
-      else {
-	plotter.set_subint(0);
-	plotter.set_pol(poln);
-	plotter.set_chan(0);
-	plotter.singleProfile (archive);
-      }
+      cpg_next();
+      plotter.set_subint(0);
+      plotter.set_pol(poln);
+      plotter.set_chan(0);
+      plotter.singleProfile (archive);
+    }
+
+    if (manchester) {
+      cpg_next();
+      plotter.Manchester (archive);
+    }
+
+    if (periodplot) {
+      cpg_next();
+      cpgsvp (0.1,.95,0.1,.7);
+      plotter.single_period (archive);
     }
     
-    if (greyfreq)
+    if (greyfreq) {
+      cpg_next();
       plotter.phase_frequency (archive);
+    }
 
     if (textinfo) {
       archive -> pscrunch();
@@ -504,8 +474,7 @@ int main (int argc, char** argv)
     cerr << error << endl;
   }
   
-  if (display || greyfreq)
-    cpgend();
+  cpgend();
   
   return 0;
 }
