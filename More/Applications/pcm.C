@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pcm.C,v $
-   $Revision: 1.22 $
-   $Date: 2004/05/03 12:59:25 $
+   $Revision: 1.23 $
+   $Date: 2004/06/19 11:19:42 $
    $Author: straten $ */
 
 /*! \file pcm.C 
@@ -64,7 +64,7 @@ void usage ()
     "  -a archive set the output archive class name \n"
     "  -m model   model: Britton [default] or Hamaker \n"
     "\n"
-    "  -c meta    filename with list of calibrator files \n"
+    "  -C meta    filename with list of calibrator files \n"
     "  -d dbase   filename of Calibration::Database \n"
     "  -M meta    filename with list of pulsar files \n"
     "\n"
@@ -76,6 +76,7 @@ void usage ()
     "  -b bin     add phase bin to constraints \n"
     "  -n nbin    set the number of phase bins to choose as input states \n"
     "  -p pA,pB   set the phase window from which to choose input states \n"
+    "  -c archive choose best input states from input archive \n"
     "\n"
     "  -s         do not normalize Stokes parameters by invariant interval \n"
     "\n"
@@ -89,36 +90,21 @@ void usage ()
        << endl;
 }
 
-void auto_select (Pulsar::ReceptionCalibrator& model, Pulsar::Archive* archive,
+void choose (vector<unsigned>& bins, Pulsar::Archive* archive);
+
+void auto_select (Pulsar::ReceptionCalibrator& model,
+		  Pulsar::Archive* archive,
 		  unsigned maxbins)
 {
-  int rise = 0, fall = 0;
-  archive->find_peak_edges (rise, fall);
-  
-  float increment = 1.0;
-  
-  unsigned total_bins = fall - rise;
-  
-  if (total_bins > maxbins)  {
-    increment = float(total_bins+1) / float (maxbins);
-    total_bins = maxbins;
-  }
-  
-  unsigned nbin = archive->get_nbin();
-  
-  cerr << "pcm: selecting " << total_bins 
-       << " phase bin constraints from " << rise << " to " << fall 
-       << " (nbin=" << nbin << ")" << endl;
-  
-  unsigned last_bin = fall;
-  
-  for (float bin = rise; bin<=fall; bin += increment) {
-    unsigned ibin = unsigned(bin) % nbin;
-    if (ibin != last_bin)  {
-      cerr << "pcm: adding phase bin " << ibin << endl;
-      model.add_state (ibin%nbin);
-      last_bin = ibin;
-    }
+  vector<unsigned> bins (maxbins);
+
+  choose (bins, archive);
+
+  sort (bins.begin(), bins.end());
+
+  for (unsigned ibin=0; ibin < bins.size(); ibin++) {
+    cerr << "pcm: adding phase bin " << ibin << endl;
+    model.add_state (ibin);
   }
 }
 
@@ -236,6 +222,9 @@ int main (int argc, char *argv[]) try {
   // name of file containing the calibrated standard
   char* stdfile = NULL;
 
+  // name of file from which phase bins will be chosen
+  char* binfile = NULL;
+
   // number of hours over which CALs will be found from Database
   float hours = 24.0;
 
@@ -273,8 +262,12 @@ int main (int argc, char *argv[]) try {
       break;
     }
 
-    case 'c':
+    case 'C':
       calfile = optarg;
+      break;
+
+    case 'c':
+      binfile = optarg;
       break;
 
     case 'd':
@@ -385,7 +378,15 @@ int main (int argc, char *argv[]) try {
       cout << "Unrecognised option" << endl;
     }
   }
-  
+
+  if (phmin == phmax && !binfile) {
+    cerr << "pcm: At least one of the following options must be specified:\n"
+      " -p min,max  Choose constraints from the specified pulse phase range \n"
+      " -c archive  Choose optimal constraints from the specified archive \n"
+	 << endl;
+    return -1;
+  }
+
   vector <string> filenames;
 
   if (metafile)
@@ -498,6 +499,18 @@ int main (int argc, char *argv[]) try {
   cerr << "pcm: set calibrators" << endl;
   model.set_calibrators (cal_filenames);
   
+
+  Reference::To<Pulsar::Archive> autobin;
+
+  if (binfile) try {
+    autobin = Pulsar::Archive::load (binfile);
+  }
+  catch (Error& error) {
+    cerr << "pcm: could not load constraint archive " << binfile << endl
+	 << error.warning() << endl;
+    return -1;
+  }
+
   Reference::To<Pulsar::Archive> total;
   
   cerr << "pcm: loading archives" << endl;
@@ -530,8 +543,18 @@ int main (int argc, char *argv[]) try {
 
       if (model.get_nstate_pulsar() == 0) {
 
-	if (phmin == phmax)
-	  auto_select (model, archive, maxbins);
+	if (autobin) {
+
+	  string reason;
+	  if ( ! archive->mixable (autobin, reason) ) {
+	    cerr << "pcm: cannot choose constraints from " << binfile
+		 << endl << reason << endl;
+	    return -1;
+	  }
+
+	  auto_select (model, autobin, maxbins);
+
+	}
 
 	else
 	  range_select (model, archive, phmin, phmax, maxbins);
