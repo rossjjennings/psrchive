@@ -283,7 +283,7 @@ int galactic (double ra, double dec, double* gl, double* gb)
    ********************************************************************** */
 
 int telescope_coords (int telescope, float* latitude, 
-		                     float* longitude, float* elevation)
+		      float* longitude, float* elevation)
 {
   float latd=-999, longd=-999, elev=-1e9;
   

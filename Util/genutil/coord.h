@@ -1,6 +1,6 @@
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/coord.h,v $
-   $Revision: 1.2 $
-   $Date: 1999/11/02 09:00:45 $
+   $Revision: 1.3 $
+   $Date: 2001/01/11 23:36:07 $
    $Author: straten $ */
 
 #ifndef __COORD_H
@@ -67,7 +67,7 @@ int galactic (double ra, double dec, double* gl, double* gb);
 	(in metres) for telescope given by its tempo code
    ******************************************************************** */
 int telescope_coords (int telescope, float* latitude, 
-		                     float* longitude, float* elevation);
+		      float* longitude, float* elevation);
 
 /* ********************************************************************
    az_zen_para -
