@@ -2,6 +2,8 @@
 #include "stringtok.h"
 #include "tostring.h"
 
+#include <stdio.h>
+
 using namespace std;
 
 MEAL::Polynomial::Polynomial (unsigned ncoef)

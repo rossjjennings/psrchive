@@ -1,6 +1,8 @@
 #include "MEAL/Function.h"
 #include "stringtok.h"
 
+#include <stdio.h>
+
 using namespace std;
 
 //! Parses the values of model parameters and fit flags from a string
