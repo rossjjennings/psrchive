@@ -7,6 +7,7 @@
 #include "Physical.h"
 #include "Error.h"
 #include "spectra.h"
+#include "f772c.h"
 
 /*! 
   Default fractional pulse phase window used to calculate statistics
@@ -732,6 +733,23 @@ float Pulsar::Profile::snr (const Profile& std) const
   }
 
   return snrfft;
+}
+
+extern "C" {
+  void F772C(smooth_mw) ( float * period, int * nbin, int * maxw, float * rms,
+		       int * kwmax, float * snrmax, float * smmax,
+			    float * workspace);
+}
+
+float Pulsar::Profile::snr_fortran(float rms){
+  int nb = get_nbin();
+  int kwmax;
+  float snrmax,smmax;
+  float * workspace = new float[nb];
+  int maxw = nb/2;
+  F772C(smooth_mw)(amps,&nb,&maxw,&rms,&kwmax,&snrmax,&smmax,workspace);
+  delete [] workspace;
+  return(snrmax);
 }
 
 #if defined(sun) && !defined(__GNUC__)

@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Profile.h,v $
-   $Revision: 1.45 $
-   $Date: 2004/02/10 05:41:11 $
-   $Author: ahotan $ */
+   $Revision: 1.46 $
+   $Date: 2004/02/18 23:41:39 $
+   $Author: mbailes $ */
 
 #ifndef __Pulsar_Profile_h
 #define __Pulsar_Profile_h
@@ -144,6 +144,9 @@ namespace Pulsar {
     //! Returns the signal to noise ratio by comparison with a standard
     float snr (const Profile* standard) const { return snr (*standard); }
     
+    //! Returns snr based upon rms of baseline rms and width convolved
+    //! with a boxcar
+    float snr_fortran(float rms);
     //! Returns integrated flux divided by the number of bins == mean flux
     float flux(float _baseline_fraction = Profile::default_duty_cycle);
     
