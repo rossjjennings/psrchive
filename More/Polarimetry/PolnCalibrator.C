@@ -1,4 +1,5 @@
 #include "Pulsar/PolnCalibrator.h"
+#include "Pulsar/PolnCalibratorExtension.h"
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
 
@@ -8,9 +9,17 @@
 #include "interpolate.h"
 #include "smooth.h"
 
-//! Constructor
-Pulsar::PolnCalibrator::PolnCalibrator ()
+/*! 
+  If a Pulsar::Archive is provided, and if it contains a
+  PolnCalibratorExtension, then the constructed instance can be
+  used to calibrate other Pulsar::Archive instances.
+*/
+Pulsar::PolnCalibrator::PolnCalibrator (Archive* archive)
 {
+  if (!archive)
+    return;
+
+  extension = archive->get<PolnCalibratorExtension>();
 }
 
 //! Copy constructor
@@ -91,6 +100,26 @@ Pulsar::PolnCalibrator::get_Transformation (unsigned ichan) const
 }
 
 
+//! Derived classes can create and fill the transformation array
+void Pulsar::PolnCalibrator::calculate_transformation ()
+{
+  if (verbose)
+    cerr << "Pulsar::PolnCalibrator::calculate_transformation" << endl;
+
+  if (!extension)
+    throw Error (InvalidState,
+		 "Pulsar::PolnCalibrator::calculate_transformation",
+		 "no PolnCalibratorExtension available");
+
+  unsigned nchan = extension->get_nchan();
+  transformation.resize (nchan);
+
+  for (unsigned ichan=0; ichan < nchan; ichan++)
+    if ( extension->get_valid(ichan) )
+      transformation[ichan] = extension->get_Transformation(ichan);
+    else
+      transformation[ichan] = 0;
+}
 
 void Pulsar::PolnCalibrator::build (unsigned nchan)
 { try {
@@ -151,9 +180,6 @@ catch (Error& error) {
 }
 }
 
-
-
-
 /*! Upon completion, the flux of the archive will be normalized with
   respect to the flux of the calibrator, such that a FluxCalibrator
   simply scales the archive by the calibrator flux. */
@@ -181,6 +207,34 @@ catch (Error& error) {
   error += "Pulsar::PolnCalibrator::calibrate";
 }
 }
+
+Pulsar::Archive*
+Pulsar::PolnCalibrator::get_solution (string archive_class,
+				      string filename_extension) const
+{
+  if (verbose) cerr << "Pulsar::PolnCalibrator::get_solution"
+		 " create PolnCalibratorExtension" << endl;
+
+  Reference::To<PolnCalibratorExtension> ext;
+  ext = new PolnCalibratorExtension (this);
+
+  if (verbose) cerr << "Pulsar::PolnCalibrator::get_solution"
+		 " create " << archive_class << endl;
+  
+  Reference::To<Archive> output = Pulsar::Archive::new_Archive (archive_class);
+  output -> copy (*calibrator);
+  output -> resize (0);
+  output -> add_extension (ext);
+  
+  string filename = calibrator->get_filename();
+  int index = filename.find_first_of(".", 0);
+  filename = filename.substr(0, index) + filename_extension;
+
+  output -> set_filename (filename);
+
+  return output.release();
+}
+
 
 //! Constructor
 Pulsar::PolnCalibrator::Info::Info (const PolnCalibrator* cal)
