@@ -203,10 +203,6 @@ void Pulsar::ReceptionCalibratorPlotter::plot_model (unsigned ichan,
   unsigned nmeas = equation->get_nmeasurements ();
 
   unsigned nstate = calibrator->get_nstate_pulsar();
-  unsigned multiple = 1;
-
-  if (istate>0)
-    multiple = 1 + calibrator->PA_jump.size();
 
   for (unsigned imeas=0; imeas<nmeas; imeas++) {
 
@@ -227,40 +223,18 @@ void Pulsar::ReceptionCalibratorPlotter::plot_model (unsigned ichan,
 
     double xval = measurements.interval[0];
 
-    unsigned mstate = measurements.size();
+    equation->get_model()->set_abscissa (0, xval);
 
-    for (unsigned jstate=0; jstate<mstate; jstate++)  {
+    float para = calibrator->parallactic.get_param(0) * 180.0/M_PI;
 
-      unsigned check_state = istate;
-      for (unsigned itime=0; itime < multiple; itime++)  {
-        if (measurements[jstate].state_index == check_state) {
+    vector<Jones<double> > grad;
+    Stokes<float> stokes = equation->get_model()->evaluate (grad);
 
-	  float yval = measurements[jstate].val[0] * Gain;
+    float intensity = stokes[0] * Gain;
 
-	  calibrator->parallactic.set_abscissa (0, xval);
-	  xval = calibrator->parallactic.get_param(0) * 180.0/M_PI;
-
-	  cpgpt1 (xval, yval, 5);
-        }
-        check_state += nstate;
-      }
-
-    }
+    cpgpt1 (para, intensity, 5);
   }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+  
 
   unsigned npt = 100;
 
