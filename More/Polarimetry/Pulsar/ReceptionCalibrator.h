@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ReceptionCalibrator.h,v $
-   $Revision: 1.49 $
-   $Date: 2003/12/08 15:58:44 $
+   $Revision: 1.50 $
+   $Date: 2003/12/26 08:46:34 $
    $Author: straten $ */
 
 #ifndef __ReceptionCalibrator_H
@@ -18,7 +18,7 @@
 // Parameterizations of the instrument and source
 #include "Calibration/PolarEstimate.h"
 #include "Calibration/SingleAxisEstimate.h"
-#include "Calibration/StokesEstimate.h"
+#include "Calibration/CoherencyEstimate.h"
 #include "Calibration/NormalizeStokes.h"
 
 #include "Calibration/Instrument.h"
@@ -46,9 +46,9 @@ namespace Pulsar {
     void update_source();
 
     //! Model of Stokes parameters added to equation as a function of frequency
-    vector< Calibration::StokesEstimate > source;
+    vector< Calibration::CoherencyEstimate > source;
 
-    //! Validity flags for each StokesEstimate
+    //! Validity flags for each CoherencyEstimate
     vector< bool > valid;
 
     //! Phase bin from which pulsar polarization is derived
@@ -85,13 +85,13 @@ namespace Pulsar {
     Reference::To<Calibration::ReceptionModel> equation;
 
     //! The signal path experienced by the calibrator
-    Reference::To<Calibration::ProductTransformation> pcal_path;
+    Reference::To<Calibration::Complex2Product> pcal_path;
 
     //! The signal path experienced by the pulsar
-    Reference::To<Calibration::ProductTransformation> pulsar_path;
+    Reference::To<Calibration::Complex2Product> pulsar_path;
 
     //! The instrumental model and any additional transformations
-    Reference::To<Calibration::ProductTransformation> instrument;
+    Reference::To<Calibration::Complex2Product> instrument;
 
     // ////////////////////////////////////////////////////////////////////
     //

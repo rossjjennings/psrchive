@@ -54,7 +54,7 @@ Pulsar::StandardModel::StandardModel (Calibrator::Type _model)
   model = _model;
   valid = true;
 
-  instrument = new Calibration::ProductTransformation;
+  instrument = new Calibration::Complex2Product;
 
 #if 0
   Calibration::SingleAxisPolynomial* backend;
@@ -63,22 +63,22 @@ Pulsar::StandardModel::StandardModel (Calibrator::Type _model)
   convert.connect (backend, &Calibration::SingleAxisPolynomial::set_abscissa);
 #else
 
-  Calibration::Transformation* operation;
+  Calibration::Complex2* operation;
   operation = new Calibration::Rotation(Vector<double, 3>::basis(0));
 
   Calibration::Polynomial* poly = new Calibration::Polynomial (4);
   poly -> set_infit(0, false);
   convert.connect (poly, &Calibration::Polynomial::set_abscissa);
 
-  Calibration::ChainTransformation* backend;
-  backend = new Calibration::ChainTransformation;
+  Calibration::Complex2Chain* backend;
+  backend = new Calibration::Complex2Chain;
 
   backend -> set_model ( operation );
   backend -> set_constraint (0, poly);
 
 #endif
 
-  instrument -> add_Transformation (backend);
+  *instrument *= backend;
   time.connect (&convert, &Calibration::ConvertMJD::set_epoch);
 
   switch (model) {
@@ -87,14 +87,14 @@ Pulsar::StandardModel::StandardModel (Calibrator::Type _model)
     if (ReceptionCalibrator::verbose)
       cerr << "Pulsar::StandardModel Hamaker" << endl;
     polar = new Calibration::Polar;
-    instrument -> add_Transformation( polar );
+    *instrument *= polar;
     break;
 
   case Calibrator::Britton:
     if (ReceptionCalibrator::verbose)
       cerr << "Pulsar::StandardModel Britton" << endl;
     physical = new Calibration::Instrument;
-    instrument -> add_Transformation( physical );
+    *instrument *= physical;
     break;
 
   default:
@@ -113,12 +113,12 @@ Pulsar::StandardModel::StandardModel (Calibrator::Type _model)
   // initialize the signal path seen by the pulsar
   //
 
-  pulsar_path = new Calibration::ProductTransformation;
-  pulsar_path->add_Transformation( instrument );
-  pulsar_path->add_Transformation( &parallactic );
+  pulsar_path = new Calibration::Complex2Product;
+  *pulsar_path *= instrument;
+  *pulsar_path *= &parallactic;
 
-  equation->set_Transformation ( pulsar_path );
-  Pulsar_path = equation->get_path ();
+  equation->add_transformation ( pulsar_path );
+  Pulsar_path = equation->get_transformation_index ();
 
   time.connect (&parallactic, &Calibration::Parallactic::set_epoch);
 
@@ -130,27 +130,25 @@ void Pulsar::StandardModel::add_fluxcal_backend ()
     throw Error (InvalidState, "Pulsar::StandardModel::add_fluxcal_backend",
 		 "Cannot model flux calibrator with Hamaker model");
 
-  Calibration::ProductTransformation* path = 0;
-  path = new Calibration::ProductTransformation;
+  Calibration::Complex2Product* path = 0;
+  path = new Calibration::Complex2Product;
 
   fluxcal_backend = new Calibration::SingleAxis;
 
-  path->add_Transformation( fluxcal_backend );
-  path->add_Transformation( physical->get_feed() );
+  *path *= fluxcal_backend;
+  *path *= physical->get_feed();
 
-  equation->add_path ( path );
-
-  FluxCalibrator_path = equation->get_path ();
+  equation->add_transformation ( path );
+  FluxCalibrator_path = equation->get_transformation_index ();
 }
 
 void Pulsar::StandardModel::add_polncal_backend ()
 {
-  pcal_path = new Calibration::ProductTransformation;
-  pcal_path->add_Transformation( instrument );
+  pcal_path = new Calibration::Complex2Product;
+  *pcal_path *= instrument;
 
-  equation->add_path ( pcal_path );
-
-  ArtificialCalibrator_path = equation->get_path ();
+  equation->add_transformation ( pcal_path );
+  ArtificialCalibrator_path = equation->get_transformation_index ();
 }
 
 void Pulsar::StandardModel::fix_orientation ()
@@ -320,14 +318,14 @@ void Pulsar::ReceptionCalibrator::init_estimate (SourceEstimate& estimate)
 
   for (unsigned ichan=0; ichan<nchan; ichan++) {
 
-    unsigned nsource = model[ichan]->equation->get_nsource();
+    unsigned nsource = model[ichan]->equation->get_num_input();
     if (ichan==0)
       estimate.source_index = nsource;
     else if (estimate.source_index != nsource)
       throw Error (InvalidState, "Pulsar::ReceptionCalibrator::init_estimate",
 		   "isource=%d != nsource=%d", estimate.source_index, nsource);
 
-    model[ichan]->equation->add_source( &(estimate.source[ichan]) );
+    model[ichan]->equation->add_input( &(estimate.source[ichan]) );
   }
 
 }
@@ -344,7 +342,7 @@ unsigned Pulsar::ReceptionCalibrator::get_nstate () const
   if (model.size() == 0)
     return 0;
 
-  return model[0]->equation->get_nsource ();
+  return model[0]->equation->get_num_input ();
 }
 
 unsigned Pulsar::ReceptionCalibrator::get_nchan () const
@@ -716,7 +714,7 @@ void Pulsar::ReceptionCalibrator::add_Calibrator (const ArtificialCalibrator* p)
     }
   }
 
-  if (polcal && polcal->get_Transformation_nchan() == nchan)  {
+  if (polcal && polcal->get_transformation_nchan() == nchan)  {
 
     cerr << "Pulsar::ReceptionCalibrator::add_Calibrator add Polar Model" 
 	 << endl;
@@ -727,11 +725,11 @@ void Pulsar::ReceptionCalibrator::add_Calibrator (const ArtificialCalibrator* p)
 
     for (unsigned ichan = 0; ichan<nchan; ichan++) {
 
-      if (!polcal->get_Transformation_valid (ichan))
+      if (!polcal->get_transformation_valid (ichan))
         continue;
 
       polar = dynamic_cast<const Calibration::Polar*>
-	( polcal->get_Transformation(ichan) );
+	( polcal->get_transformation(ichan) );
 
       if (polar)
 	model[ichan]->polar_estimate.integrate( *polar );
@@ -740,7 +738,7 @@ void Pulsar::ReceptionCalibrator::add_Calibrator (const ArtificialCalibrator* p)
 
   }
 
-  if (sacal && sacal->get_Transformation_nchan() == nchan)  {
+  if (sacal && sacal->get_transformation_nchan() == nchan)  {
     cerr << "Pulsar::ReceptionCalibrator::add_Calibrator add SingleAxis Model"
 	 << endl;
 
@@ -750,11 +748,11 @@ void Pulsar::ReceptionCalibrator::add_Calibrator (const ArtificialCalibrator* p)
 
     for (unsigned ichan = 0; ichan<nchan; ichan++) {
 
-      if (!sacal->get_Transformation_valid (ichan))
+      if (!sacal->get_transformation_valid (ichan))
         continue;
 
       sa = dynamic_cast<const Calibration::SingleAxis*>
-	( sacal->get_Transformation(ichan) );
+	( sacal->get_transformation(ichan) );
 
       if (sa) {
 	if (flux_calibrator)
@@ -813,7 +811,8 @@ void Pulsar::ReceptionCalibrator::precalibrate (Archive* data)
 
       }
 
-      Calibration::Transformation* signal_path = 0;
+      Calibration::Complex2* signal_path = 0;
+      Calibration::ReceptionModel* equation = model[ichan]->equation;
 
       switch ( data->get_type() )  {
       case Signal::Pulsar:
@@ -824,8 +823,8 @@ void Pulsar::ReceptionCalibrator::precalibrate (Archive* data)
 	signal_path = model[ichan]->pcal_path;
 	break;
       case Signal::FluxCalOn:
-        model[ichan]->equation->set_path (model[ichan]->FluxCalibrator_path);
-        signal_path = model[ichan]->equation->get_Transformation ();
+        equation->set_transformation_index (model[ichan]->FluxCalibrator_path);
+        signal_path = equation->get_transformation ();
         break;
       default:
 	throw Error (InvalidParam, "Pulsar::ReceptionCalibrator::calibrate",
