@@ -11,7 +11,7 @@
 #include "Error.h"
 
 #include "interpolate.h"
-#include "smooth.h"
+#include "median_smooth.h"
 
 /*! 
   If a Pulsar::Archive is provided, and if it contains a
