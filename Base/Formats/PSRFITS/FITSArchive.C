@@ -3,6 +3,7 @@
 #include "Pulsar/Profile.h"
 
 #include "Pulsar/FITSHdrExtension.h"
+#include "Pulsar/FITSSubintExtension.h"
 #include "Pulsar/ObsExtension.h"
 #include "Pulsar/ITRFExtension.h"
 #include "Pulsar/CalInfoExtension.h"
@@ -983,6 +984,10 @@ Pulsar::FITSArchive::load_Integration (const char* filename, unsigned isubint)
   
   integ->set_duration (duration);
   
+  // Load other useful info
+
+  load_FITSSubintExtension(sfptr,row,integ);
+
   // Set up the data vector, only Pulsar::Archive base class is friend
 
   resize_Integration (integ);
@@ -1548,6 +1553,12 @@ void Pulsar::FITSArchive::unload_integration (int row,
   if (status != 0)
     throw FITSError (status, "FITSArchive:unload_integration",
 		     "fits_write_col TSUBINT");
+
+  // Write other useful info
+  
+  const FITSSubintExtension* theExt = integ->get<FITSSubintExtension>();
+  if (theExt)
+    unload(thefptr,theExt,row);
   
   // Write the profile weights
 

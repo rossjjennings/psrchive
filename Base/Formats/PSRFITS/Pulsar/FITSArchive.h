@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/PSRFITS/Pulsar/FITSArchive.h,v $
-   $Revision: 1.17 $
-   $Date: 2003/11/04 15:30:29 $
-   $Author: straten $ */
+   $Revision: 1.18 $
+   $Date: 2003/11/08 23:35:11 $
+   $Author: ahotan $ */
 
 #ifndef __Pulsar_FITSArchive_h
 #define __Pulsar_FITSArchive_h
@@ -19,6 +19,7 @@
 namespace Pulsar {
 
   class FITSHdrExtension;
+  class FITSSubintExtension;
   class ObsExtension;
   class BackendExtension;
   class FrontendExtension;
@@ -86,6 +87,9 @@ namespace Pulsar {
     //! Unload FITSHdrExtension to the current HDU of the specified FITS file
     static void unload (fitsfile* fptr, const FITSHdrExtension* ext);
     
+    //! Unload FITSSubintExtension to the specified row of the subint table
+    static void unload (fitsfile* fptr, const FITSSubintExtension* ext, int row);
+
     //! Unload ObsExtension to the current HDU of the specified FITS file
     static void unload (fitsfile* fptr, const ObsExtension* ext);
     
@@ -168,7 +172,8 @@ namespace Pulsar {
     void load_Passband (fitsfile*);
     void load_PolnCalibratorExtension (fitsfile*);
     void load_CalibratorStokes (fitsfile*);
-   
+    void load_FITSSubintExtension (fitsfile* fptr, int row,
+				   Pulsar::Integration* integ);
     void load_ITRFExtension (fitsfile*);
     void load_CalInfoExtension (fitsfile*);
 
