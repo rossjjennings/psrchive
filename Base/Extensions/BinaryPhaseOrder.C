@@ -21,7 +21,6 @@ Pulsar::BinaryPhaseOrder::BinaryPhaseOrder (const BinaryPhaseOrder& extension)
   IndexState = extension.IndexState;
   Unit       = extension.Unit;
   indices    = extension.indices;
-
 }
 
 //! Operator =
@@ -60,6 +59,12 @@ void Pulsar::BinaryPhaseOrder::organise (Archive* arch, unsigned newsub)
 				    arch->get_telescope_code()));
     used.push_back(false);
 
+    // The problem with this section is that archives with gaps in the
+    // phase coverage have the total coverage mis-represented. This
+    // should just result in blank space in the end result, but I have
+    // noticed on several occasions that this does not work properly.
+    // AWH 9/1/2004
+
     if (phases[i] > maxphs)
       maxphs = phases[i];
     
@@ -72,7 +77,12 @@ void Pulsar::BinaryPhaseOrder::organise (Archive* arch, unsigned newsub)
   // on the phase coverage available in the archive
   
   float    phs_coverage = maxphs - minphs;
-  unsigned mysub        = unsigned(phs_coverage * float(newsub));
+  unsigned mysub        = 0;
+  
+  if (phs_coverage == 0.0)
+    mysub = 1;
+  else
+    mysub = unsigned(ceil(phs_coverage * float(newsub)));
 
   // This is equivalent to 1.0 / newsub given the above condition
   float PhaseGap = phs_coverage / float(mysub);
@@ -86,18 +96,17 @@ void Pulsar::BinaryPhaseOrder::organise (Archive* arch, unsigned newsub)
   Reference::To<Pulsar::Archive> copy = arch->clone();
   Reference::To<Pulsar::Integration> integ = 0;
   
-  // Blank all the old data out
-  arch->resize(0);
   // Resize for the new configuration
   arch->resize(mysub);
   indices.resize(mysub);
   
   for (unsigned i = 0; i < mysub; i++) {
+    *(arch->get_Integration(i)) = *(arch->new_Integration());
     bool first = true;
     int tally = 0;
     for (unsigned j = 0; j < phases.size(); j++) {
       if ((phases[j] >= (minphs + (i*PhaseGap))) && 
-	  (phases[j] < (minphs + ((i+1)*PhaseGap))) && !used[j]) {
+	  (phases[j] <= (minphs + ((i+1)*PhaseGap))) && !used[j]) {
 	if (first) {
 	  *(arch->get_Integration(i)) = 
 	    *(arch->new_Integration(copy->get_Integration(j)));
@@ -143,13 +152,13 @@ void Pulsar::BinaryPhaseOrder::combine (Archive* arch, unsigned nscr)
 
   unsigned count = 0;
   for (unsigned i = 0; i < newsub; i++) {
-    *(arch->get_Integration(i)) = *(arch->new_Integration(copy->get_Integration(count)));
+    *(arch->get_Integration(i)) = 
+      *(arch->new_Integration(copy->get_Integration(count)));
     count++;
     for (unsigned j = 1; j < nscr; j++) {
       if (count >= copy->get_nsubint())
 	return;
       *(arch->get_Integration(i)) += *(copy->get_Integration(count));
-      
       count++;
     }
   }

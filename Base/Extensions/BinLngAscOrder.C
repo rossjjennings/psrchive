@@ -12,6 +12,7 @@ Pulsar::BinLngAscOrder::BinLngAscOrder ()
 //! Destructor
 Pulsar::BinLngAscOrder::~BinLngAscOrder ()
 {
+
 }
 
 //! Copy constructor
@@ -58,6 +59,12 @@ void Pulsar::BinLngAscOrder::organise (Archive* arch, unsigned newsub)
 				  arch->get_Integration(i)->get_centre_frequency(),
 				  arch->get_telescope_code()));
     used.push_back(false);
+
+    // The problem with this section is that archives with gaps in the
+    // longitude coverage have the total coverage mis-represented. This
+    // should just result in blank space in the end result, but I have
+    // noticed on several occasions that this does not work properly.
+    // AWH 9/1/2004
     
     if (lngs[i] > maxlng)
       maxlng = lngs[i];
@@ -71,7 +78,12 @@ void Pulsar::BinLngAscOrder::organise (Archive* arch, unsigned newsub)
   // on the longitude coverage available in the archive
   
   float    lng_coverage = maxlng - minlng;
-  unsigned mysub        = unsigned(lng_coverage/360.0 * float(newsub));
+  unsigned mysub        = 0;
+  
+  if (lng_coverage == 0.0)
+    mysub = 1;
+  else
+    mysub = unsigned(ceil(lng_coverage/360.0 * float(newsub)));
 
   // This is equivalent to 360.0 / newsub given the above condition
   float LngGap = lng_coverage / float(mysub);
@@ -85,18 +97,17 @@ void Pulsar::BinLngAscOrder::organise (Archive* arch, unsigned newsub)
   Reference::To<Pulsar::Archive> copy = arch->clone();
   Reference::To<Pulsar::Integration> integ = 0;
   
-  // Blank all the old data out
-  arch->resize(0);
   // Resize for the new configuration
   arch->resize(mysub);
   indices.resize(mysub);
   
   for (unsigned i = 0; i < mysub; i++) {
+    *(arch->get_Integration(i)) = *(arch->new_Integration());
     bool first = true;
     int tally = 0;
     for (unsigned j = 0; j < lngs.size(); j++) {
       if ((lngs[j] >= (minlng + (i*LngGap))) && 
-	  (lngs[j] < (minlng + ((i+1)*LngGap))) && !used[j]) {
+	  (lngs[j] <= (minlng + ((i+1)*LngGap))) && !used[j]) {
 	if (first) {
 	  *(arch->get_Integration(i)) = 
 	    *(arch->new_Integration(copy->get_Integration(j)));
@@ -142,13 +153,13 @@ void Pulsar::BinLngAscOrder::combine (Archive* arch, unsigned nscr)
 
   unsigned count = 0;
   for (unsigned i = 0; i < newsub; i++) {
-    *(arch->get_Integration(i)) = *(arch->new_Integration(copy->get_Integration(count)));
+    *(arch->get_Integration(i)) = 
+      *(arch->new_Integration(copy->get_Integration(count)));
     count++;
     for (unsigned j = 1; j < nscr; j++) {
       if (count >= copy->get_nsubint())
 	return;
       *(arch->get_Integration(i)) += *(copy->get_Integration(count));
-      
       count++;
     }
   }
