@@ -5,7 +5,7 @@ void Pulsar::load (fitsfile* fptr, CalibratorExtension* ext)
   int status = 0;
  
   if (Archive::verbose == 3)
-    cerr << "Pulsar::load CalibratorExtension entered" << endl;
+    cerr << "Pulsar::load CalibratorExtension" << endl;
   
   char* comment = 0;
 
@@ -13,8 +13,12 @@ void Pulsar::load (fitsfile* fptr, CalibratorExtension* ext)
   int nchan = 0;
   fits_read_key (fptr, TINT, "NCHAN", &nchan, comment, &status);
 
-  if (status == 0 && nchan >= 0)
-    ext->set_nchan(nchan);
+  if (status == 0)  {
+    if (Archive::verbose == 3)
+      cerr << "Pulsar::load CalibratorExtension NCHAN=" << nchan << endl;
+    if (nchan >= 0)
+      ext->set_nchan(nchan);
+  }
 
   status = 0;
 
@@ -56,8 +60,8 @@ void Pulsar::load (fitsfile* fptr, CalibratorExtension* ext)
     throw FITSError (status, "Pulsar::load CalibratorExtension", 
 		     "fits_read_col DAT_FREQ");
 
-  if (Archive::verbose == 3) cerr << "Pulsar::load CalibratorExtension"
-		 " channel frequencies read" << endl;
+  if (Archive::verbose == 3) 
+    cerr << "Pulsar::load CalibratorExtension frequencies read" << endl;
 
   unsigned ichan = 0;
 
@@ -78,7 +82,7 @@ void Pulsar::load (fitsfile* fptr, CalibratorExtension* ext)
 		     "fits_read_col DAT_WTS");
 
   if (Archive::verbose == 3)
-    cerr << "Pulsar::load CalibratorExtension weights read." << endl;
+    cerr << "Pulsar::load CalibratorExtension weights read" << endl;
 
   for (int ichan=0; ichan < nchan; ichan++)
     if ( !finite(data.get()[ichan]) )

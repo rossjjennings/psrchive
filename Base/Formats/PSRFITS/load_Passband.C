@@ -24,6 +24,8 @@ void Pulsar::FITSArchive::load_Passband (fitsfile* fptr)
     throw FITSError (status, "FITSArchive::load_Passband", 
 		     "fits_movnam_hdu BANDPASS");
 
+  if (verbose == 3)
+    cerr << "FITSArchive::load_Passband BANDPASS HDU found" << endl;
 
   float nullfloat = 0.0;
   
@@ -49,7 +51,11 @@ void Pulsar::FITSArchive::load_Passband (fitsfile* fptr)
     npol = 2;
     status = 0;
   }
-  
+
+  if (verbose == 3)
+    cerr << "FITSArchive::load_Passband BANDPASS NCH_ORIG=" << nch_orig
+         << " BP_NPOL=" << npol << endl;
+
   Reference::To<Passband> bandpass = new Passband;
   bandpass->resize (nch_orig, npol);
   
