@@ -119,14 +119,21 @@ void MatrixTest<Type1, Type2, Element>::runtest (unsigned nloops)
     Type1 type1_2 (random_elements[0], random_elements[1],
 		   random_elements[2], random_elements[3]);
 
-    test (type1_1, type1_2);
+    try {
+      test (type1_1, type1_2);
+    }
+    catch (string& error) {
+      cerr << "MatrixTest::runtest error on loop "<< iloop <<"/"<< nloops 
+	   << endl;
+      throw error;
+    }
 
   }
 }
 
 template <class Type1, class Type2, class Element>
 void MatrixTest<Type1, Type2, Element>::test (const Type1& type1_1,
-						 const Type1& type1_2)
+					      const Type1& type1_2)
 {
   Type1 temp1;
   Type1 temp2;
@@ -181,29 +188,33 @@ void MatrixTest<Type1, Type2, Element>::test (const Type1& type1_1,
   if (verbose) cerr << "Type1 == Type2" << endl;
   if (type1_1 != type2_1)
     throw string ("MatrixTest::test "
-		 "Error adding and subtracting Type1 and Type2");
+		  "Error adding and subtracting Type1 and Type2");
 
 
 
   //
-  // test operator * and / double (implicitly tests operator*= and /=)
+  // test operator * and / Element (implicitly tests operator*= and /=)
   //
   if (verbose)
-    cerr << "\n*************** Testing operator * and / double" << endl;
-  double dfactor = 63.2;
+    cerr << "\n*************** Testing operator * and / Element" << endl;
+  Element dfactor;
+  random (dfactor);
 
   type2_1 = type1_1;
 
-  if (verbose) cerr << "double * Type2" << endl;
+  if (verbose) cerr << "Element * Type2" << endl;
   type2_2 = dfactor * type2_1;
 
-  if (verbose) cerr << "Type2 / double" << endl;
+  if (verbose) cerr << "Type2 / Element" << endl;
   type2_1 = type2_2 / dfactor;
 
   if (verbose) cerr << "Type1 == Type2" << endl;
-  if (type1_1 != type2_1)
-    throw string ("MatrixTest::test "
-		 "Error in Type1 and Type2 multiplication");
+  if (norm(type2_1 - type1_1)/norm(type2_1) > 1e-17) {
+    cerr << "Error Type2=" << type2_1 
+	 << " * / Element=" << dfactor
+	 << " != Type1=" << type1_1 << endl;
+    throw string ("MatrixTest::test Error in Type2 * / Element");
+  }
 
   //
   // test operator Type1 * Type1 (implicitly tests operator*=)
@@ -217,8 +228,7 @@ void MatrixTest<Type1, Type2, Element>::test (const Type1& type1_1,
 
   if (verbose) cerr << "Type1 == Type2" << endl;
   if (type1_1 != type2_1)
-    throw string ("MatrixTest::test "
-		 "Error Type1 * Type1::identity");
+    throw string ("MatrixTest::test Error Type1 * Type1::identity");
 
 
   //
@@ -234,8 +244,7 @@ void MatrixTest<Type1, Type2, Element>::test (const Type1& type1_1,
 
   if (verbose) cerr << "Type2 == Type2" << endl;
   if (type2_2 != type2_1)
-    throw string ("MatrixTest::test "
-		 "Error Conjugate");
+    throw string ("MatrixTest::test Error Conjugate");
   //
   // test Hermitian
   //
@@ -252,15 +261,14 @@ void MatrixTest<Type1, Type2, Element>::test (const Type1& type1_1,
 
   if (verbose) cerr << "Type2 == Type2" << endl;
 
-  if ( norm(temp2 - temp1) > 1e-10 ) {
+  if ( norm(temp2 - temp1)/norm(temp2) > 1e-17) {
     cerr << "Error Hermitian"
       "\n   M1=" << type1_1 <<
       "\n   M2=" << type1_2 <<
       "\n  herm(M1*M2)=" << temp1 <<
       "\n  herm(M2)*herm(M1)=" << temp2 << endl;
 
-    throw string ("MatrixTest::test "
-		 "Error Hermitian");
+    throw string ("MatrixTest::test Error Hermitian");
   }
 
   //
