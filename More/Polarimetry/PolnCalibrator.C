@@ -184,7 +184,7 @@ catch (Error& error) {
   respect to the flux of the calibrator, such that a FluxCalibrator
   simply scales the archive by the calibrator flux. */
 void Pulsar::PolnCalibrator::calibrate (Archive* arch)
-{ try {
+try {
 
   cerr << "Pulsar::PolnCalibrator::calibrate" << endl;
 
@@ -206,6 +206,17 @@ void Pulsar::PolnCalibrator::calibrate (Archive* arch)
 catch (Error& error) {
   error += "Pulsar::PolnCalibrator::calibrate";
 }
+
+
+
+Pulsar::Calibrator::Type Pulsar::PolnCalibrator::get_type () const
+{
+  if (!extension)
+    throw Error (InvalidState,
+		 "Pulsar::PolnCalibrator::get_type",
+		 "no PolnCalibratorExtension available");
+
+  return extension->get_type();
 }
 
 Pulsar::Archive*
@@ -224,7 +235,7 @@ Pulsar::PolnCalibrator::get_solution (string archive_class,
   Reference::To<Archive> output = Pulsar::Archive::new_Archive (archive_class);
   output -> copy (*calibrator);
   output -> resize (0);
-  output -> set_type (Signal::Unknown);
+  output -> set_type (Signal::Calibrator);
   output -> add_extension (ext);
   
   string filename = calibrator->get_filename();

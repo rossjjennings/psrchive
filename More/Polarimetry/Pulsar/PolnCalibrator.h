@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PolnCalibrator.h,v $
-   $Revision: 1.18 $
-   $Date: 2003/10/09 12:37:11 $
+   $Revision: 1.19 $
+   $Date: 2003/10/21 12:34:38 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PolnCalibrator_H
@@ -74,6 +74,9 @@ namespace Pulsar {
 
     //! Calibrate the polarization of the given archive
     virtual void calibrate (Archive* archive);
+
+    //! Return the Calibrator::Type of derived class
+    virtual Type get_type () const;
 
     virtual Archive* get_solution (string archive_class,
 				   string filename_extension = ".pc") const;
