@@ -98,7 +98,7 @@ void Pulsar::ReceptionCalibratorPlotter::plot_constraints (unsigned ichan,
 		 "ichan=%d >= nchan=%d", ichan, calibrator->get_nchan());
 
   // extract the appropriate equation
-  const Pulsar::TVMPModel* equation = calibrator->equation[ichan];
+  const Calibration::ReceptionModel* equation = calibrator->equation[ichan];
 
   vector< Estimate<float> > stokes[4];
   vector< float > para;
@@ -182,7 +182,8 @@ void Pulsar::ReceptionCalibratorPlotter::plot_model (unsigned ichan,
 		 "ichan=%d >= nchan=%d", ichan, calibrator->get_nchan());
 
   // extract the appropriate equation
-  Pulsar::TVMPModel* equation = calibrator->equation[ichan];
+  Calibration::ReceptionModel* equation = calibrator->equation[ichan];
+  Calibration::TimeManager* time = calibrator->time[ichan];
 
   equation->set_source (istate);
 
@@ -230,7 +231,7 @@ void Pulsar::ReceptionCalibratorPlotter::plot_model (unsigned ichan,
 
     MJD epoch = start + step * ipt;
 
-    equation->set_epoch (epoch);
+    time->set_epoch (epoch);
 
     para[ipt] = calibrator->parallactic.get_param(0);
 

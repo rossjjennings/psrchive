@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ReceptionCalibrator.h,v $
-   $Revision: 1.29 $
-   $Date: 2003/08/13 18:41:40 $
+   $Revision: 1.30 $
+   $Date: 2003/08/15 15:23:00 $
    $Author: straten $ */
 
 #ifndef __ReceptionCalibrator_H
@@ -11,6 +11,7 @@
 #include "Calibrator.h"
 
 // Reception Model and its management
+#include "Calibration/ReceptionModel.h"
 #include "Calibration/PathManager.h"
 #include "Calibration/TimeManager.h"
 
@@ -52,14 +53,7 @@ namespace Pulsar {
   };
 
 
-  //! Time-varying, multi-path model
-  class TVMPModel : public Calibration::TimeManager,
-		    public Calibration::PathManager 
-  {
-
-  };
-
-  //! Uses the TVMPModel to represent and fit for the system response
+  //! Uses the ReceptionModel to represent and fit for the system response
   /*! The ReceptionCalibrator implements a technique of single dish
     polarimetric self-calibration.  This class requires a number of
     constraints, which are provided in through the add_observation,
@@ -117,8 +111,14 @@ namespace Pulsar {
     //! Calibrate the polarization of the given archive
     void calibrate (Archive* archive, bool solve_first);
 
-    //! TVMPModel as a function of frequency
-    vector<Reference::To<TVMPModel> > equation;
+    //! ReceptionModel as a function of frequency
+    vector<Reference::To<Calibration::ReceptionModel> > equation;
+
+    //! TimeManager as a function of frequency
+    vector<Reference::To<Calibration::TimeManager> > time;
+
+    //! PathManager as a function of frequency
+    vector<Reference::To<Calibration::PathManager> > path;
 
     //! Polar decomposition of receiver as a function of frequency
     vector<Reference::To<Calibration::PolarEstimate> > polar;
