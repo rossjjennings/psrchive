@@ -14,7 +14,7 @@ Pulsar::FluxCalibrator::FluxCalibrator ()
   calculated = false;
 }
 
-Pulsar::FluxCalibrator::FluxCalibrator (const vector<Archive*>& archs)
+Pulsar::FluxCalibrator::FluxCalibrator (const vector<const Archive*>& archs)
 {
   if (archs.size()==0)
     throw Error (InvalidParam, "Pulsar::FluxCalibrator",
@@ -39,8 +39,6 @@ double Pulsar::FluxCalibrator::meanTsys ()
 
 double Pulsar::FluxCalibrator::Tsys (unsigned ichan)
 {
-  if (ichan < 0)
-    return 0.0;
   if (ichan > T_sys.size()-1)
     return 0.0;
   
@@ -49,6 +47,13 @@ double Pulsar::FluxCalibrator::Tsys (unsigned ichan)
 
 void Pulsar::FluxCalibrator::add_observation (const Archive* archive)
 {
+  if (!archive)
+    throw Error (InvalidParam, "Pulsar::FluxCalibrator::add_observation",
+                 "invalid Pulsar::Archive pointer");
+
+  // done as a first step to clean up archive on exit
+  Reference::To<const Archive> arch = archive;
+
   if ( archive->get_type() != Signal::FluxCalOn &&
        archive->get_type() != Signal::FluxCalOff )
 
@@ -79,9 +84,6 @@ void Pulsar::FluxCalibrator::add_observation (const Archive* archive)
     // Pulsar::FluxCalibrator is named for the first on-source
     // observation
     calibrator = archive->clone();
-
-
-  const Pulsar::Archive* arch = archive;
 
   if (archive->get_state () != Signal::Intensity) {
     Pulsar::Archive* clone = arch->clone();
@@ -126,6 +128,10 @@ void Pulsar::FluxCalibrator::calibrate (Archive* arch)
   if (!calibrator)
     throw Error (InvalidState, "Pulsar::FluxCalibrator::calibrate",
 		 "no FluxCal Archive");
+
+  if (arch->get_scale() != Signal::ReferenceFluxDensity)
+    throw Error (InvalidParam, "Pulsar::FluxCalibrator::calibrate", 
+                 "Archive scale != ReferenceFluxDensity");
 
   string reason;
   if (!calibrator->calibrator_match (arch, reason))
