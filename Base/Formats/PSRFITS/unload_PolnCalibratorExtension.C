@@ -66,8 +66,12 @@ void Pulsar::FITSArchive::unload (fitsfile* fptr,
 	data.get()[count] = pce->get_transformation(i)->get_param(j);
 	count++;
       }
-    else
+    else  {
+      if (verbose == 3)
+        cerr << "FITSArchive::unload PolnCalibratorExtension ichan="
+             << i << " flagged invalid" << endl;
       count += ncpar;
+    }
 
   assert (count == dimension);
 
