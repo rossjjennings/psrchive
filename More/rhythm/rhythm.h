@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/rhythm/rhythm.h,v $
-   $Revision: 1.48 $
-   $Date: 2005/04/04 01:54:57 $
+   $Revision: 1.49 $
+   $Date: 2005/04/06 01:46:49 $
    $Author: ahotan $ */
 
 // //////////////////////////////////////////////////////////////////////////
@@ -252,6 +252,7 @@ class Rhythm : public QMainWindow
 
  public slots:
 
+  void scan_selected ();
   void plot_current ();
   void show_me ();
   void request_update ();

@@ -123,6 +123,9 @@ Rhythm::Rhythm (QApplication* master, QWidget* parent, int argc, char** argv) :
     lister = new QListView(tabs);
     tabs->addTab(lister, "List");
 
+    QObject::connect(lister, SIGNAL(selectionChanged()),
+		     this, SLOT(scan_selected()));
+
     lister->setSelectionMode(QListView::Extended);
     lister->addColumn("Arrival Time", 130);
     lister->addColumn("Frequency", 100);
@@ -1644,6 +1647,17 @@ void Rhythm::deleteselection ()
   
   goplot ();
   plot_window->autoscale();
+}
+
+void Rhythm::scan_selected()
+{
+  for (unsigned i = 0; i < toas.size(); i++) {
+    if (toas[i].get_state() != Tempo::toa::Deleted)
+      if (ltoas[i]->isSelected())
+	toas[i].set_state(Tempo::toa::Selected);
+      else
+	toas[i].set_state(Tempo::toa::Normal);
+  }
 }
 
 void Rhythm::undeleteall ()
