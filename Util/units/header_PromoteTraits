@@ -11,21 +11,10 @@
 #ifndef __MEAL_PromoteTraits_h
 #define __MEAL_PromoteTraits_h
 
-#include <complex>
-
-// forward declaration
-namespace MEAL {
-  class ScalarMath;
-}
-
 class PromoteTraits_not_specialized_for_this_case { };
 
-// an empty type used to allow one template name
-template<typename T>
-class __promote_empty {};
-
 //! Empty template class requires specialization 
-template<typename A, typename B, template<typename> class C=__promote_empty>
+template<typename A, typename B>
 class PromoteTraits {
   typedef PromoteTraits_not_specialized_for_this_case promote_type;
 };
@@ -50,4 +39,11 @@ class PromoteTraits< C<A>, C<B> > {
 public:
   typedef C<typename PromoteTraits<A,B>::promote_type> promote_type;
 };
+
+#include <complex>
+
+// forward declaration
+namespace MEAL {
+  class ScalarMath;
+}
 
