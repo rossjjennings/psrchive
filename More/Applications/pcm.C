@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pcm.C,v $
-   $Revision: 1.31 $
-   $Date: 2004/08/13 13:06:19 $
+   $Revision: 1.32 $
+   $Date: 2004/10/09 05:53:58 $
    $Author: straten $ */
 
 /*! \file pcm.C 
@@ -707,7 +707,7 @@ int main (int argc, char *argv[]) try {
     return -1;
   }
 
-  Reference::To<Pulsar::Archive> solution = model.get_solution (archive_class);
+  Reference::To<Pulsar::Archive> solution = model.new_solution (archive_class);
 
   cerr << "pcm: unloading solution to " << solution->get_filename() << endl;
   solution->unload( "pcm.fits" );
@@ -870,7 +870,7 @@ int mode_B (const char* standard_filename,
     string filename = filenames[i] + ".fits";
     cerr << "pcm: unloading solution to " << filename << endl;
 
-    solution = model.get_solution (archive_class);
+    solution = model.new_solution (archive_class);
     solution->unload( filename );
 
     if (add_to_standard) {
@@ -894,7 +894,7 @@ int mode_B (const char* standard_filename,
   model.set_return_mean_solution (true);
   model.update_solution ();
 
-  solution = model.get_solution (archive_class);
+  solution = model.new_solution (archive_class);
 
   cerr << "pcm: unloading solution to pcm.fits" << endl;
   solution->unload( "pcm.fits" );
