@@ -6,7 +6,7 @@
 //! Default constructor
 Pulsar::PolnCalibratorExtension::PolnCalibratorExtension ()
 {
-  type = SingleAxis;
+  type = Calibrator::SingleAxis;
 }
 
 //! Copy constructor
@@ -42,7 +42,7 @@ Pulsar::PolnCalibratorExtension::~PolnCalibratorExtension ()
 }
 
 //! Set the type of the instrumental response parameterization
-void Pulsar::PolnCalibratorExtension::set_type (CalibratorType _type)
+void Pulsar::PolnCalibratorExtension::set_type (Calibrator::Type _type)
 {
   if (type == _type)
     return;
@@ -52,7 +52,7 @@ void Pulsar::PolnCalibratorExtension::set_type (CalibratorType _type)
 }
 
 //! Get the type of the instrumental response parameterization
-Pulsar::CalibratorType Pulsar::PolnCalibratorExtension::get_type () const
+Pulsar::Calibrator::Type Pulsar::PolnCalibratorExtension::get_type () const
 {
   return type;
 }
@@ -114,18 +114,18 @@ void Pulsar::PolnCalibratorExtension::range_check (unsigned ichan,
 Pulsar::PolnCalibratorExtension::new_Transformation ()
 {
   switch (type) {
-  case SingleAxis:
+  case Calibrator::SingleAxis:
     return new ::Calibration::SingleAxis;
-  case Polar:
+  case Calibrator::Polar:
     return new ::Calibration::Polar;
-  case Hamaker:
+  case Calibrator::Hamaker:
     return new ::Calibration::Polar;
-  case Britton:
+  case Calibrator::Britton:
     return new ::Calibration::Instrument;
   default:
     throw Error (InvalidState,
 		 "Pulsar::PolnCalibratorExtension::new_Transformation",
-		 "unrecognized CalibratorType = %d", (int) type);
+		 "unrecognized Calibrator::Type = %d", (int) type);
   }
 }
 

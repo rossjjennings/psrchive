@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/PolnCalibratorExtension.h,v $
-   $Revision: 1.3 $
-   $Date: 2003/09/12 18:24:15 $
+   $Revision: 1.4 $
+   $Date: 2003/09/12 18:43:55 $
    $Author: straten $ */
 
 #ifndef __PolnCalibratorExtension_h
@@ -34,9 +34,9 @@ namespace Pulsar {
     ~PolnCalibratorExtension ();
 
     //! Set the type of the instrumental response parameterization
-    void set_type (CalibratorType type);
+    void set_type (Calibrator::Type type);
     //! Get the type of the instrumental response parameterization
-    CalibratorType get_type () const;
+    Calibrator::Type get_type () const;
 
     //! Set the number of frequency channels
     void set_nchan (unsigned nchan);
@@ -54,7 +54,7 @@ namespace Pulsar {
   protected:
     
     //! Type of the instrumental response parameterization
-    CalibratorType type;
+    Calibrator::Type type;
     
     //! The instrumental response as a function of frequency
     vector< Reference::To< ::Calibration::Transformation > > response;
