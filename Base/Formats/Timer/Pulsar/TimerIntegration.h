@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/Timer/Pulsar/TimerIntegration.h,v $
-   $Revision: 1.1 $
-   $Date: 2003/03/06 16:29:39 $
+   $Revision: 1.2 $
+   $Date: 2003/04/19 20:27:00 $
    $Author: straten $ */
 
 /*
@@ -60,10 +60,10 @@ namespace Pulsar {
     /*! This attribute may be set only through Integration::resize */
     virtual unsigned get_nbin () const { return nbin; }
  
-    //! Get the MJD at the beginning of the integration
-    virtual MJD get_mid_time () const;
-    //! Set the MJD at the beginning of the integration
-    virtual void set_mid_time (const MJD& mjd);
+    //! Get the epoch of the rising edge of bin zero
+    virtual MJD get_epoch () const;
+    //! Set the epoch of the rising edge of bin zero
+    virtual void set_epoch (const MJD& mjd);
 
     //! Get the total time integrated (in seconds)
     virtual double get_duration () const;

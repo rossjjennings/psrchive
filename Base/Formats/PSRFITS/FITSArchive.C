@@ -989,10 +989,10 @@ Pulsar::FITSArchive::load_Integration (const char* filename, unsigned isubint)
   
   newmjd = start_time + time;
 
-  integ -> set_mid_time (newmjd);
+  integ -> set_epoch (newmjd);
   
   if (verbose)
-    cerr << "Pulsar::FITSArchive::load_Integration mid_time " 
+    cerr << "Pulsar::FITSArchive::load_Integration epoch " 
 	 << newmjd << endl;
 
   // Set the duration of the integration
@@ -1696,12 +1696,12 @@ void Pulsar::FITSArchive::unload_integration (int row,
   fits_get_colnum (thefptr, CASEINSEN, "OFFS_SUB", &colnum, &status);
   
   double time = 0.0;
-  time = (integ -> get_mid_time () - start_time).in_seconds();
+  time = (integ -> get_epoch () - start_time).in_seconds();
 
   fits_write_col (thefptr, TDOUBLE, colnum, row, 1, 1, &time, &status);
   
   if (verbose)
-    cerr << "FITSArchive::unload_integration mid_time set" << endl;
+    cerr << "FITSArchive::unload_integration epoch set" << endl;
 
 
   // Set the duration of the integration

@@ -568,7 +568,7 @@ void Pulsar::TimerArchive::correct_Integrations ()
     }
 
     // correct the mini header LST
-    subint->mini.lst_start = subint->get_mid_time().LST (longitude);
+    subint->mini.lst_start = subint->get_epoch().LST (longitude);
 
     // correct the mini header azimuth, zenith, and parallactic angles
     float azimuth=0, zenith=0, parallactic=0;

@@ -96,12 +96,12 @@ Pulsar::TimerIntegration::clone (int npol, int nchan) const
   return new TimerIntegration (*this, npol, nchan);
 }
 
-MJD Pulsar::TimerIntegration::get_mid_time () const
+MJD Pulsar::TimerIntegration::get_epoch () const
 {
   return Mini::get_MJD (mini);
 }
 
-void Pulsar::TimerIntegration::set_mid_time (const MJD& mjd)
+void Pulsar::TimerIntegration::set_epoch (const MJD& mjd)
 {
   Mini::set_MJD (mini, mjd);
 }
