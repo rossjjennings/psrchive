@@ -133,7 +133,7 @@ int main (int argc, char *argv[]) {
       Pulsar::Archive::set_verbosity(3);
       break;
     case 'i':
-      cout << "$Id: pac.C,v 1.56 2004/10/11 14:26:27 straten Exp $" << endl;
+      cout << "$Id: pac.C,v 1.57 2004/10/25 15:09:06 straten Exp $" << endl;
       return 0;
 
     case 'A':
@@ -306,11 +306,13 @@ int main (int argc, char *argv[]) {
 	cerr << "pac: " << dbase->size() << " calibrators found" << endl;
 	
       if (write_database_file) {
-	  
-	cout << "pac: Writing database summary file to " 
-	     << dbase->get_path() << "/database.txt" << endl;
 
-	dbase -> unload ("database.txt");
+	string output_filename = dbase->get_path() + "/database.txt";
+
+	cout << "pac: Writing database summary file to " 
+	     << output_filename << endl;
+
+	dbase -> unload (output_filename);
 	  
       }
 	
