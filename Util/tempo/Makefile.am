@@ -19,17 +19,17 @@ CLEAN += $(BINL)ephtest $(BINL)keys2fort $(BINL)keys2c keyinfo.com $(LOCAL_ROOT)
 # Assembly of include files
 #
 
-$(BINL)keys2c: keys.dat keys2c.c Makefile
+$(BINDIR)keys2c: keys2c.c Makefile
 	$(CC) -g -o $@ keys2c.c
 
-$(BINL)keys2fort: keys2fort.c Makefile
+$(BINDIR)keys2fort: keys2fort.c Makefile
 	$(CC) -g -o $@ keys2fort.c
 
-keyinfo.com: keys.dat $(BINL)keys2fort Makefile
-	$(BINL)keys2fort
+keyinfo.com: keys.dat $(BINDIR)keys2fort Makefile
+	$(BINDIR)keys2fort
 
-$(LOCAL_ROOT)/include/ephio.h: keys.dat $(BINL)keys2c
-	$(BINL)keys2c
+$(LOCAL_ROOT)include/ephio.h: keys.dat $(BINDIR)keys2c
+	$(BINDIR)keys2c
 	mv -f ephio.h $(LOCAL_ROOT)/include/ephio.h
 
 # force construction of that crazy ephio.h file
@@ -39,4 +39,4 @@ depend: $(LOCAL_ROOT)/include/ephio.h
 #
 # Dependency on constructed include files
 $(LOGIN_ARCH)/ephio.o: keyinfo.com
-$(LOGIN_ARCH)/ephio_c.o: $(LOCAL_ROOT)/include/ephio.h
+$(LOGIN_ARCH)/ephio_c.o: $(LOCAL_ROOT)include/ephio.h
