@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Pauli.h,v $
-   $Revision: 1.3 $
-   $Date: 2003/02/07 16:31:46 $
+   $Revision: 1.4 $
+   $Date: 2003/02/13 16:31:21 $
    $Author: straten $ */
 
 #ifndef __Pauli_H
@@ -81,5 +81,13 @@ const Jones<T> operator * (const Quaternion<T,B>& q, const Jones<U>& j)
 {
   return convert(q) * j;
 }
+
+// multiply Quaternions from different Basis
+template<typename T, typename U, Basis A, Basis B>
+const Jones<T> operator * (const Quaternion<T,A>& q, const Quaternion<U,B>& u)
+{
+  return convert(q) * convert(u);
+}
+
 
 #endif
