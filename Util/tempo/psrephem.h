@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/psrephem.h,v $
-   $Revision: 1.23 $
-   $Date: 2003/01/20 14:27:16 $
+   $Revision: 1.24 $
+   $Date: 2003/01/22 15:58:53 $
    $Author: straten $ */
 
 #ifndef __PSREPHEM_H
@@ -102,8 +102,8 @@ class psrephem : public Reference::Able
 
   // return some values
   string psrname() const;
-  friend int operator == (const psrephem &, const psrephem &);
-  friend int operator != (const psrephem &, const psrephem &);
+  friend bool operator == (const psrephem &, const psrephem &);
+  friend bool operator != (const psrephem &, const psrephem &);
 
   double get_dm() const;
   void set_dm (double dm);

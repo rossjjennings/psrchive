@@ -622,31 +622,69 @@ psrephem & psrephem::operator = (const psrephem & p2)
   return *this;
 }
 
-int operator == (const psrephem &e1, const psrephem &e2){
+bool operator == (const psrephem &e1, const psrephem &e2)
+{
+  if (e1.parmStatus==NULL && e2.parmStatus==NULL)
+    return 1;
 
-  if(e1.parmStatus==NULL && e2.parmStatus==NULL) return(1);
-  if((e1.parmStatus==NULL && e2.parmStatus!=NULL) ||
-     (e1.parmStatus!=NULL && e2.parmStatus==NULL)) return(0);   
-  if(e1.tempo11!=e2.tempo11) return(0);
+  if ((e1.parmStatus==NULL && e2.parmStatus!=NULL) ||
+      (e1.parmStatus!=NULL && e2.parmStatus==NULL))
+    return 0;
 
-  if (e1.tempo11) {
-    for (int i=0;i<EPH_NUM_KEYS;i++){
-      if(e1.parmStatus[i]!=e2.parmStatus[i] ||
-	 e1.value_double[i]!=e2.value_double[i] ||
-	 e1.value_integer[i]!=e2.value_integer[i] ||
-	 e1.error_double[i]!=e2.error_double[i] || 
-	 e1.value_str[i]!=e2.value_str[i]) 
-	return(0);
-    }
-    return(1);
-  } else {
-    return(e1.nontempo11==e2.nontempo11);
+  if (e1.tempo11 != e2.tempo11) {
+    if (psrephem::verbose)
+      cerr << "psrephem::operator== unequal tempo11 flags" << endl;
+    return 0;
   }
+
+  if (!e1.tempo11)
+    return e1.nontempo11 == e2.nontempo11;
+
+  for (int ieph=0;ieph<EPH_NUM_KEYS;ieph++) {
+
+    if (e1.parmStatus[ieph] != e2.parmStatus[ieph]) {
+      if (psrephem::verbose)
+	cerr << "psrephem::operator== unequal parmStatus["
+	     << parmNames[ieph] << "]" << endl;
+      return 0;
+    }
+    
+    if (e1.value_double[ieph] != e2.value_double[ieph]) {
+      if (psrephem::verbose)
+	cerr << "psrephem::operator== unequal value_double["
+	     << parmNames[ieph] << "]" << endl;
+      return 0;
+    }
+    
+    if (e1.value_integer[ieph] != e2.value_integer[ieph]) {
+      if (psrephem::verbose)
+	cerr << "psrephem::operator== unequal value_integer["
+	     << parmNames[ieph] << "]" << endl;
+      return 0;
+    }
+    
+    if (e1.error_double[ieph] != e2.error_double[ieph]) {
+      if (psrephem::verbose)
+	cerr << "psrephem::operator== unequal value_integer["
+	     << parmNames[ieph] << "]" << endl;
+      return 0;
+    }
+    
+    if (e1.value_str[ieph] != e2.value_str[ieph])  {
+      if (psrephem::verbose)
+	cerr << "psrephem::operator== unequal value_integer["
+	     << parmNames[ieph] << "]" << endl;
+      return 0;
+    }
+    
+  }
+
+  return true;
+
 }
 
-int operator != (const psrephem &e1, const psrephem &e2){
-  if(e1==e2) return(0);
-  else return(1);
+bool operator != (const psrephem &e1, const psrephem &e2) {
+  return ! operator == (e1,e2);
 }
 
 ostream& operator<< (ostream& ostr, const psrephem& eph)
