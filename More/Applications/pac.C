@@ -118,11 +118,12 @@ int main (int argc, char *argv[]) {
       verbose = true;
       Pulsar::Database::verbose = true;
       Pulsar::Calibrator::verbose = true;
+      Pulsar::Database::Criterion::match_verbose = true;
       //Calibration::Model::verbose = true;
       Pulsar::Archive::set_verbosity(3);
       break;
     case 'i':
-      cout << "$Id: pac.C,v 1.53 2004/08/04 15:47:41 straten Exp $" << endl;
+      cout << "$Id: pac.C,v 1.54 2004/08/08 06:34:51 hknight Exp $" << endl;
       return 0;
 
     case 'n': {
@@ -495,8 +496,8 @@ int main (int argc, char *argv[]) {
     
   }
   catch (Error& error) {
-    cerr << "pac: Error while handling " << archives[i] 
-	 << error.get_message() << endl;
+    cerr << "pac: Error while handling " << archives[i] << ":" << endl; 
+    cerr << error << endl;
   }
 
   cerr << "pac: Finished all files" << endl;
