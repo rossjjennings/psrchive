@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Integration.h,v $
-   $Revision: 1.46 $
-   $Date: 2003/08/27 00:44:29 $
-   $Author: sord $ */
+   $Revision: 1.47 $
+   $Date: 2003/09/03 09:16:45 $
+   $Author: straten $ */
 
 /*
   
@@ -60,14 +60,8 @@ namespace Pulsar {
     //! Return the pointer to a new fscrunched and pscrunched copy of self
     Integration* total () const;
 
-    //! Returns a single Stokes 4-vector for the given chan and phase bin
-    /*!
-      \param ichan index of the frequency channel
-      \param ibin  index of the phase bin
-      \retval variance variance of the estimate, based on noise in Stokes I
-    */
-    Stokes<float> get_Stokes (unsigned ichan, unsigned ibin,
-			      float* variance = 0) const;
+    //! Return the Stokes 4-vector for the frequency channel and phase bin
+    Stokes<float> get_Stokes (unsigned ichan, unsigned ibin) const;
 
     //! Returns a vector of Stokes parameters along the specified dimension
     void get_Stokes (vector< Stokes<float> >& S, unsigned iother,

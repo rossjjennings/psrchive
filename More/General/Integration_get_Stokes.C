@@ -9,67 +9,51 @@
 // Pulsar::Integration::get_Stokes
 //
 /*!  
-  \retval S Stokes 4-vector for the given chan and bin
-  \param ichan the frequency chan
+  \retval Stokes 4-vector for the given frequency channel and phase bin
+  \param ichan the frequency channel
   \param ibin the phase bin
 
-  \pre The Integration must contain full polarimetric information.  That is,
-  get_state() must return either Signal::Stokes or Signal::Coherence.  An
-  exception is thrown otherwise.
+  \pre The Integration must contain full polarimetric information.
+  That is, get_state must return either Signal::Stokes or
+  Signal::Coherence.  An exception is thrown otherwise. 
 */
-Stokes<float> Pulsar::Integration::get_Stokes (unsigned ichan, unsigned ibin,
-					       float* variance) const
+Stokes<float> Pulsar::Integration::get_Stokes (unsigned ichan,
+					       unsigned ibin) const
 {
+  if (verbose)
+    cerr << "Pulsar::Integration::get_Stokes";
+
   Stokes<float> S;
-  unsigned nvar = 0;
 
-  if (get_state() == Signal::Stokes) {
-    for (unsigned ipol=0; ipol<4; ++ipol)
-      S[ipol] = profiles[ipol][ichan]->get_amps()[ibin];
+  for (unsigned ipol=0; ipol<4; ++ipol)
+    S[ipol] = profiles[ipol][ichan]->get_amps()[ibin];
+  
+  if (get_state() == Signal::Stokes)
+    return S;
+  
+  if (get_state() != Signal::Coherence)
+    throw Error (InvalidPolnState, "Integration::get_Stokes",
+		 "Invalid state=" + State2string(get_state()));
+  
+  float PP   = S[0];
+  float QQ   = S[1];
+  float RePQ = S[2];
+  float ImPQ = S[3];
 
-    nvar = 1;
+  if (get_basis() == Signal::Linear) {
+    S.s0 = PP + QQ;
+    S.s1 = PP - QQ;
+    S.s2 = 2.0 * RePQ;
+    S.s3 = 2.0 * ImPQ;
   }
-
-  else if (get_state() == Signal::Coherence) {
-
-    float PP   = profiles[0][ichan]->get_amps()[ibin];
-    float QQ   = profiles[1][ichan]->get_amps()[ibin];
-    float RePQ = profiles[2][ichan]->get_amps()[ibin];
-    float ImPQ = profiles[3][ichan]->get_amps()[ibin];
-
-    if (get_basis() == Signal::Linear) {
-      S.s0 = PP + QQ;
-      S.s1 = PP - QQ;
-      S.s2 = 2.0 * RePQ;
-      S.s3 = 2.0 * ImPQ;
-    }
-    else {
-      S.s0 = PP + QQ;
-      S.s3 = PP - QQ;
-      S.s1 = 2.0 * RePQ;
-      S.s2 = 2.0 * ImPQ;
-    }
-
-    nvar = 2;
-  }
-  else
-    throw Error (InvalidPolnState, "Integration::get_Stokes");
-
-  if (variance) {
-
-    *variance = 0.0;
-
-    for (unsigned ipol=0; ipol<nvar; ipol++) {
-      double mean, var;
-      profiles[ipol][ichan]->stats (profiles[ipol][ichan]->find_min_phase(),
-				    &mean, &var);
-      *variance += var;
-    }
-
+  else {
+    S.s0 = PP + QQ;
+    S.s3 = PP - QQ;
+    S.s1 = 2.0 * RePQ;
+    S.s2 = 2.0 * ImPQ;
   }
 
   return S;
-
 }
 
 /////////////////////////////////////////////////////////////////////////////
