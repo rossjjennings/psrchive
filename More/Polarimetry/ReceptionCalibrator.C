@@ -12,9 +12,6 @@ Pulsar::ReceptionCalibrator::ReceptionCalibrator (const Archive* archive)
   is_fit = false;
   is_initialized = false;
 
-  ncoef = 0;
-  ncoef_set = false;
- 
   Pulsar_path = 1;
   PolnCalibrator_path = 0;
   FluxCalibrator_path = 0;
@@ -23,19 +20,9 @@ Pulsar::ReceptionCalibrator::ReceptionCalibrator (const Archive* archive)
   pulsar_base_index = 1;
 
   PA_min = PA_max = 0.0;
-  current_jump = 0;
 
   if (archive)
     initial_observation (archive);
-}
-
-void Pulsar::ReceptionCalibrator::set_ncoef (unsigned _ncoef)
-{
-  if (is_fit)
-    cerr << "Pulsar::ReceptionCalibrator::set_ncoef ignored." << endl;
-
-  ncoef = _ncoef;
-  ncoef_set = true;
 }
 
 void Pulsar::ReceptionCalibrator::set_calibrators (const vector<string>& names)
@@ -182,41 +169,6 @@ void Pulsar::ReceptionCalibrator::init_estimate (SourceEstimate& estimate)
   }
 }
 
-//! Add a discontinuty at the specified parallactic angle
-void Pulsar::ReceptionCalibrator::add_discontinuity (float PA_radians)
-{
-  PA_jump.push_back (PA_radians);
-  sort (PA_jump.begin(), PA_jump.end());
-}
-
-void Pulsar::ReceptionCalibrator::add_discontinuity ()
-{
-  unsigned nchan = uncalibrated->get_nchan ();
-
-  for (unsigned ichan=0; ichan<nchan; ichan++) {
-
-    Calibration::Polar* polar = equation[ichan]->get_receiver ();
-
-    equation[ichan]->get_model()->add_path();
-    equation[ichan]->get_model()->add_transformation( polar );
-    equation[ichan]->get_model()->add_transformation( &parallactic );
-
-    unsigned nparam = equation[ichan]->get_model()->get_nparam ();
-
-    for (unsigned istate=0; istate<pulsar.size(); istate++)
-      equation[ichan]->get_model()->add_state(&(pulsar[istate].state[ichan]));
-
-    if ( equation[ichan]->get_model()->get_nparam () != nparam )
-      throw Error (InvalidState, 
-                   "Pulsar::ReceptionCalibrator::add_discontinuity",
-                   "Additional state error");
-
-  }
-
-  Pulsar_path ++;
-  pulsar_base_index += pulsar.size();
-}
-
 //! Get the number of pulsar phase bin input polarization states
 unsigned Pulsar::ReceptionCalibrator::get_nstate_pulsar () const
 {
@@ -291,13 +243,6 @@ void Pulsar::ReceptionCalibrator::add_observation (const Archive* data)
       PA_min = PA;
     if (PA > PA_max)
       PA_max = PA;
-
-    if (current_jump < PA_jump.size() && PA > PA_jump[current_jump]) {
-      cerr << "Adding discontinuity at PA " 
-           << PA_jump[current_jump]*180.0/M_PI << endl;
-      add_discontinuity ();
-      current_jump ++;
-    }
 
     for (unsigned ichan=0; ichan<nchan; ichan++) {
 
@@ -561,7 +506,7 @@ void Pulsar::ReceptionCalibrator::calibrate (Archive* data, bool solve_first)
     
   }
 
-  if (path == 0)
+  if (path == Pulsar_path)
     data->set_parallactic_corrected (true);
 
   data->set_poln_calibrated (true);
@@ -596,19 +541,11 @@ void Pulsar::ReceptionCalibrator::solve (int only_ichan)
     degenerate_rotV = true;
   }
 
-  if (!ncoef_set) {
-    /* it might be nice to try and choose a good ncoef, based on the
-       timescale on which the backend is expected to change and the
-       amount of time spanned by the observations */
-  }
-
   initialize ();
 
   unsigned nchan = equation.size();
 
   unsigned start_chan = 0;
-
-//nchan/8;
 
   if (only_ichan >= 0)
     start_chan = only_ichan;
@@ -621,16 +558,6 @@ void Pulsar::ReceptionCalibrator::solve (int only_ichan)
   for (unsigned ichan=start_chan; ichan<nchan; ichan+=1) try {
 
     cerr << "Pulsar::ReceptionCalibrator::solve ichan=" << ichan << endl;
-
-#if 0
-    if (ncoef)
-      equation[ichan]->set_ncoef (ncoef);
-
-    if (degenerate_rotV) {
-      equation[ichan]->get_receiver()->set_param (6, 0.0);
-      equation[ichan]->get_receiver()->set_infit (6, false);
-    }
-#endif
 
     equation[ichan]->solve ();
 

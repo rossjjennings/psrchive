@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ReceptionCalibrator.h,v $
-   $Revision: 1.24 $
-   $Date: 2003/05/30 15:49:06 $
-   $Author: straten $ */
+   $Revision: 1.25 $
+   $Date: 2003/05/31 06:43:32 $
+   $Author: pulsar $ */
 
 #ifndef __ReceptionCalibrator_H
 #define __ReceptionCalibrator_H
@@ -37,9 +37,6 @@ namespace Pulsar {
     //! Construct with optional first pulsar archive
     ReceptionCalibrator (const Archive* archive = 0);
 
-    //! Set the number of polynomial coefficients in SingleAxis(t)
-    void set_ncoef (unsigned ncoef);
-      
     //! Add the specified pulse phase bin to the set of state constraints
     void add_state (unsigned pulse_phase_bin);
 
@@ -66,12 +63,6 @@ namespace Pulsar {
 
     //! Add the specified FluxCalibrator observation to the set of constraints
     void add_FluxCalibrator (const FluxCalibrator* fluxcal);
-
-    //! Add all subsequent Pulsar observations through a new signal path
-    void add_discontinuity ();
-
-    //! Add a discontinuty at the specified parallactic angle
-    void add_discontinuity (float PA_radians);
 
     //! Solve equation for each frequency
     void solve (int only_ichan = -1);
@@ -111,22 +102,11 @@ namespace Pulsar {
     //! The calibrators to be loaded during initial_observation
     vector<string> calibrator_filenames;
 
-    //! Discontinuities
-    vector<float> PA_jump;
-    //! Current jump
-    unsigned current_jump;
-
     //! The parallactic angle rotation
     Calibration::Parallactic parallactic;
 
     //! Uncalibrated best estimate of the average pulse profile
     Reference::To<const Archive> uncalibrated;
-
-    //! The number of polynomial coefficients in SingleAxis(t)
-    unsigned ncoef;
-
-    //! Flag set after set_ncoef is called
-    bool ncoef_set;
 
     //! Epoch of the first observation
     MJD start_epoch;

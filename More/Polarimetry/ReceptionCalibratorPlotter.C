@@ -100,17 +100,10 @@ void Pulsar::ReceptionCalibratorPlotter::plot_constraints (unsigned ichan,
   // extract the appropriate equation
   const Calibration::TimeEquation* equation = calibrator->equation[ichan];
 
-  unsigned nmeas = equation->get_nmeasurements ();
-
   vector< Estimate<float> > stokes[4];
   vector< float > para;
 
-  unsigned nstate = calibrator->get_nstate_pulsar();
-  unsigned multiple = 1;
-
-  if (istate>0)
-    multiple = 1 + calibrator->PA_jump.size();
-
+  unsigned nmeas = equation->get_nmeasurements ();
   for (unsigned imeas=0; imeas<nmeas; imeas++) {
 
     //! Get the specified Measurements
@@ -121,26 +114,18 @@ void Pulsar::ReceptionCalibratorPlotter::plot_constraints (unsigned ichan,
 
     unsigned mstate = measurements.size();
 
-    for (unsigned jstate=0; jstate<mstate; jstate++)  {
+    for (unsigned jstate=0; jstate<mstate; jstate++)
+      if (measurements[jstate].state_index == istate) {
+	for (unsigned ipol=0; ipol<4; ipol++) {
+	  stokes[ipol].push_back (Estimate<float>());
+	  stokes[ipol].back().val = measurements[jstate].val[ipol];
+	  stokes[ipol].back().var = measurements[jstate].var;
+	}
 
-      unsigned check_state = istate;
-      for (unsigned itime=0; itime < multiple; itime++)  {
-        if (measurements[jstate].state_index == check_state) {
+	calibrator->parallactic.set_abscissa (0, xval);
+	para.push_back ( calibrator->parallactic.get_param(0) * 180.0/M_PI );
 
-	  for (unsigned ipol=0; ipol<4; ipol++) {
-	    stokes[ipol].push_back (Estimate<float>());
-	    stokes[ipol].back().val = measurements[jstate].val[ipol];
-	    stokes[ipol].back().var = measurements[jstate].var;
-	  }
-
-	  calibrator->parallactic.set_abscissa (0, xval);
-	  para.push_back ( calibrator->parallactic.get_param(0) * 180.0/M_PI );
-
-        }
-        check_state += nstate;
       }
-
-    }
   }
 
   // the plotting class
@@ -202,13 +187,6 @@ void Pulsar::ReceptionCalibratorPlotter::plot_model (unsigned ichan,
   equation->get_model()->set_state (istate);
 
   unsigned nmeas = equation->get_nmeasurements ();
-
-  unsigned nstate = calibrator->get_nstate_pulsar();
-  unsigned multiple = 1;
-
-  if (istate>0)
-    multiple = 1 + calibrator->PA_jump.size();
-
   for (unsigned imeas=0; imeas<nmeas; imeas++) {
 
     //! Get the specified Measurements
@@ -218,14 +196,9 @@ void Pulsar::ReceptionCalibratorPlotter::plot_model (unsigned ichan,
     unsigned mstate = measurements.size();
     bool was_measured = false;
 
-    for (unsigned jstate=0; jstate<mstate; jstate++)  {
-
-      unsigned check_state = istate;
-      for (unsigned itime=0; itime < multiple; itime++)
-        if (measurements[jstate].state_index == check_state)
-           was_measured = true;
-
-    }
+    for (unsigned jstate=0; jstate<mstate; jstate++)
+      if (measurements[jstate].state_index == istate)
+        was_measured = true;
 
     if (!was_measured)
       continue;
@@ -254,8 +227,6 @@ void Pulsar::ReceptionCalibratorPlotter::plot_model (unsigned ichan,
   MJD end = calibrator->end_epoch;
   MJD step = (end-start)/npt;
 
-  unsigned current_jump = 0;
-
   for (unsigned ipt=0; ipt<npt; ipt++) {
 
     MJD epoch = start + step * ipt;
@@ -263,16 +234,6 @@ void Pulsar::ReceptionCalibratorPlotter::plot_model (unsigned ichan,
     equation->set_epoch (epoch);
 
     para[ipt] = calibrator->parallactic.get_param(0);
-
-    if (current_jump < calibrator->PA_jump.size() && 
-        para[ipt] > calibrator->PA_jump[current_jump]) {
-      cerr << "Including discontinuity at PA="
-           << calibrator->PA_jump[current_jump]*180.0/M_PI << endl;
-
-      current_jump++;
-      equation->get_model()->set_state (istate + current_jump*nstate);
-
-    }
 
     vector<Jones<double> > grad;
     stokes[ipt] = equation->get_model()->evaluate (grad);
