@@ -18,11 +18,12 @@ int wr_eph_lun_(int *, int *, char *, double *,
 /*}*/
 
 
-int
-rd_eph_wrap(int uselun, char *fname, int lun, int parmStatus[EPH_NUM_KEYS], 
-       char value_str[EPH_NUM_KEYS][EPH_STR_LEN], 
-       double value_double[EPH_NUM_KEYS], int value_integer[EPH_NUM_KEYS],
-       double error_double[EPH_NUM_KEYS])
+int rd_eph_wrap (int uselun, char *fname, int lun, 
+		 int parmStatus[EPH_NUM_KEYS], 
+		 char value_str[EPH_NUM_KEYS][EPH_STR_LEN], 
+		 double value_double[EPH_NUM_KEYS], 
+		 int value_integer[EPH_NUM_KEYS],
+		 double error_double[EPH_NUM_KEYS])
 {
   char v_str[EPH_NUM_KEYS*EPH_STR_LEN];
   int i,j, retval;
@@ -51,36 +52,35 @@ rd_eph_wrap(int uselun, char *fname, int lun, int parmStatus[EPH_NUM_KEYS],
   return retval;
 }
 
-int
-rd_eph(char *fname, int parmStatus[EPH_NUM_KEYS], 
-       char value_str[EPH_NUM_KEYS][EPH_STR_LEN], 
-       double value_double[EPH_NUM_KEYS], int value_integer[EPH_NUM_KEYS],
-       double error_double[EPH_NUM_KEYS])
+int rd_eph(char *fname, int parmStatus[EPH_NUM_KEYS], 
+	   char value_str[EPH_NUM_KEYS][EPH_STR_LEN], 
+	   double value_double[EPH_NUM_KEYS], int value_integer[EPH_NUM_KEYS],
+	   double error_double[EPH_NUM_KEYS])
 {
   return rd_eph_wrap(0, fname, 0, parmStatus, value_str,
 		     value_double, value_integer, error_double);
 }
 
-int
-rd_eph_lun(int lun, int parmStatus[EPH_NUM_KEYS], 
-       char value_str[EPH_NUM_KEYS][EPH_STR_LEN], 
-       double value_double[EPH_NUM_KEYS], int value_integer[EPH_NUM_KEYS],
-       double error_double[EPH_NUM_KEYS])
+int rd_eph_lun(int lun, int parmStatus[EPH_NUM_KEYS], 
+	       char value_str[EPH_NUM_KEYS][EPH_STR_LEN], 
+	       double value_double[EPH_NUM_KEYS],
+	       int value_integer[EPH_NUM_KEYS],
+	       double error_double[EPH_NUM_KEYS])
 {
   return rd_eph_wrap(1, NULL, lun, parmStatus, value_str,
 		     value_double, value_integer, error_double);
 }
 
 
-int
-wr_eph_wrap(int uselun, char *fname, int lun, int parmStatus[EPH_NUM_KEYS], 
-       char value_str[EPH_NUM_KEYS][EPH_STR_LEN], 
-       double value_double[EPH_NUM_KEYS], int value_integer[EPH_NUM_KEYS],
-       double error_double[EPH_NUM_KEYS])
+int wr_eph_wrap(int uselun, char *fname, int lun,
+		int parmStatus[EPH_NUM_KEYS], 
+		char value_str[EPH_NUM_KEYS][EPH_STR_LEN], 
+		double value_double[EPH_NUM_KEYS],
+		int value_integer[EPH_NUM_KEYS],
+		double error_double[EPH_NUM_KEYS])
 {
   char v_str[EPH_NUM_KEYS*EPH_STR_LEN];
   int i,j, retval;
-
 
   /* fix up the 2-d array. */
   for (i=0; i < EPH_NUM_KEYS; i++)
@@ -104,21 +104,22 @@ wr_eph_wrap(int uselun, char *fname, int lun, int parmStatus[EPH_NUM_KEYS],
   return retval;
 }
 
-int
-wr_eph(char *fname, int parmStatus[EPH_NUM_KEYS], 
-       char value_str[EPH_NUM_KEYS][EPH_STR_LEN], 
-       double value_double[EPH_NUM_KEYS], int value_integer[EPH_NUM_KEYS],
-       double error_double[EPH_NUM_KEYS])
+int wr_eph(char *fname, int parmStatus[EPH_NUM_KEYS], 
+	   char value_str[EPH_NUM_KEYS][EPH_STR_LEN], 
+	   double value_double[EPH_NUM_KEYS],
+	   int value_integer[EPH_NUM_KEYS],
+	   double error_double[EPH_NUM_KEYS])
 {
   return wr_eph_wrap(0, fname, 0, parmStatus, value_str,
 		     value_double, value_integer, error_double);
 }
 
-int
-wr_eph_lun(int lun, int parmStatus[EPH_NUM_KEYS], 
-       char value_str[EPH_NUM_KEYS][EPH_STR_LEN], 
-       double value_double[EPH_NUM_KEYS], int value_integer[EPH_NUM_KEYS],
-       double error_double[EPH_NUM_KEYS])
+int wr_eph_lun(int lun,
+	       int parmStatus[EPH_NUM_KEYS], 
+	       char value_str[EPH_NUM_KEYS][EPH_STR_LEN], 
+	       double value_double[EPH_NUM_KEYS],
+	       int value_integer[EPH_NUM_KEYS],
+	       double error_double[EPH_NUM_KEYS])
 {
   return wr_eph_wrap(1, NULL, lun, parmStatus, value_str,
 		     value_double, value_integer, error_double);
