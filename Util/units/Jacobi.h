@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Jacobi.h,v $
-   $Revision: 1.2 $
-   $Date: 2004/04/23 13:20:37 $
+   $Revision: 1.3 $
+   $Date: 2004/04/25 07:24:52 $
    $Author: straten $ */
 
 #ifndef __Jacobi_H
@@ -115,10 +115,6 @@ U JacobiRotation ( unsigned ip, unsigned iq,
 
   //cerr << "in: pp=" << a[ip][ip] << " qq=" << a[iq][iq] << endl;
 
-  // rotate the columns of the eigenvector matrix
-  for (j=0; j<RC; j++)
-    rotate_Jacobi (v,s,tau,j,ip,j,iq);
-
 #if 0
 
   for (j=0; j<ip; j++)
@@ -150,6 +146,9 @@ U JacobiRotation ( unsigned ip, unsigned iq,
 
 #endif
   
+  // rotate the rows of the eigenvector matrix
+  for (j=0; j<RC; j++)
+    rotate_Jacobi (v,s,tau,ip,j,iq,j);
 
   return correction;
 }

@@ -28,8 +28,8 @@ void test_Jacobi (Matrix<T,RC,RC>& matrix, float tolerance)
   //cerr << "vec=" << eigenvectors << endl;
   //cerr << "val=" << eigenvalues << endl;
 
-  temp = herm(eigenvectors) * matrix * eigenvectors;
-  //temp = eigenvectors * matrix * herm(eigenvectors);
+  //temp = herm(eigenvectors) * matrix * eigenvectors;
+  temp = eigenvectors * matrix * herm(eigenvectors);
 
   //cerr << "temp=" << temp << endl;
 
