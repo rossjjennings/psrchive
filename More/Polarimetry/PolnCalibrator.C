@@ -224,6 +224,7 @@ Pulsar::PolnCalibrator::get_solution (string archive_class,
   Reference::To<Archive> output = Pulsar::Archive::new_Archive (archive_class);
   output -> copy (*calibrator);
   output -> resize (0);
+  output -> set_type (Signal::Unknown);
   output -> add_extension (ext);
   
   string filename = calibrator->get_filename();
@@ -316,7 +317,7 @@ int Pulsar::PolnCalibrator::Info::get_graph_marker (unsigned iclass,
 
   iparam --;
 
-  int nice_markers[3] = { 16, 13, 17 };
+  int nice_markers[3] = { 2, 5, 4 };
 
   return nice_markers[iparam];
 }
