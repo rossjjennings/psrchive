@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/FluxCalibrator.h,v $
-   $Revision: 1.8 $
-   $Date: 2003/10/02 07:32:07 $
-   $Author: straten $ */
+   $Revision: 1.9 $
+   $Date: 2003/10/25 05:01:31 $
+   $Author: ahotan $ */
 
 #ifndef __Pulsar_FluxCalibrator_H
 #define __Pulsar_FluxCalibrator_H
@@ -36,7 +36,13 @@ namespace Pulsar {
 
     //! Return the flux of Hydra in mJy
     double hydra_flux_mJy (double frequency_MHz);
-
+    
+    //! Return the system temperature in Kelvin
+    double meanTsys ();
+    
+    //! Return the system temperature of a specific channel
+    double Tsys (unsigned ichan);
+    
     //! Add an FluxCal Pulsar::Archive to the set of constraints
     void add_observation (const Archive* archive);
 

@@ -26,6 +26,27 @@ Pulsar::FluxCalibrator::FluxCalibrator (const vector<Archive*>& archs)
     add_observation (archs[iarch]);
 }
 
+double Pulsar::FluxCalibrator::meanTsys ()
+{
+  double retval = 0.0;
+  
+  for (unsigned i = 0; i < T_sys.size(); i++) {
+    retval += T_sys[i].val;
+  }
+  
+  return (retval / T_sys.size());
+}
+
+double Pulsar::FluxCalibrator::Tsys (unsigned ichan)
+{
+  if (ichan < 0)
+    return 0.0;
+  if (ichan > T_sys.size()-1)
+    return 0.0;
+  
+  return (T_sys[ichan].val);
+}
+
 void Pulsar::FluxCalibrator::add_observation (const Archive* archive)
 {
   if ( archive->get_type() != Signal::FluxCalOn &&
