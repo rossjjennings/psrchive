@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Profile.h,v $
-   $Revision: 1.61 $
-   $Date: 2004/07/16 07:33:54 $
+   $Revision: 1.62 $
+   $Date: 2004/07/21 05:28:07 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Profile_h
@@ -190,14 +190,6 @@ namespace Pulsar {
       resolution */
     double shift (const Profile& std, float& ephase,
 		  float& snrfft, float& esnrfft) const;
-
-    //! set the world coordinates of the pgplot window and draw the profile
-    void display (float phase=0, float xmin=0, float xmax=1,
-		  float ymin=0, float ymax=1, float period=1.0,
-		  bool calibrated = false, bool axes = false) const;
-
-    //! draw the profile using pgplot
-    void draw (float phase=0) const;
 
     //! get the number of bins
     /*! Note that there is no set_nbin; this attribute may be set only
