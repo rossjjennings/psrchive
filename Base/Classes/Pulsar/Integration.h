@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Integration.h,v $
-   $Revision: 1.45 $
-   $Date: 2003/08/26 08:27:38 $
-   $Author: ahotan $ */
+   $Revision: 1.46 $
+   $Date: 2003/08/27 00:44:29 $
+   $Author: sord $ */
 
 /*
   
@@ -195,6 +195,15 @@ namespace Pulsar {
     virtual Signal::State get_state () const = 0;
     //! Set the polarimetric state of the profiles
     virtual void set_state (Signal::State _state) = 0;
+ 
+    //! Get  flux
+    virtual float flux (int _poln=0);
+     
+    //! Get polarized flux
+    virtual float get_poln_flux (int _type = 0);
+ 
+ 
+
 
 
   protected:
@@ -240,11 +249,7 @@ namespace Pulsar {
     //  Note that this is dangerous and only intended for use with instruments
     //  whose band is split into adjoining segments (like cpsr2)
     void fappend (Pulsar::Integration* integ, bool ignore_time_mismatch = false);
-    
-    //! Get polarized flux
-    virtual float get_poln_flux (int _type = 0);
- 
-    //! Transform from Stokes (I,Q,U,V) to the polarimetric invariant interval
+   //! Transform from Stokes (I,Q,U,V) to the polarimetric invariant interval
     virtual void invint ();
 
     //! Perform the congruence transformation on each polarimetric profile

@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Profile.h,v $
-   $Revision: 1.32 $
-   $Date: 2003/08/21 02:31:54 $
+   $Revision: 1.33 $
+   $Date: 2003/08/27 00:44:29 $
    $Author: sord $ */
 
 #ifndef __Pulsar_Profile_h
@@ -119,9 +119,6 @@ namespace Pulsar {
     int find_max_bin (int bin_start=0, int bin_end=0) const;
     //! Returns the bin number with the minimum amplitude
     int find_min_bin (int bin_start=0, int bin_end=0) const;
-
-    //! Returns the the integrated flux of the profile
-    float flux () const;
 
 
     //! Returns the signal to noise ratio of the profile

@@ -644,46 +644,6 @@ float Pulsar::Profile::find_max_phase (float duty_cycle) const
 
 /////////////////////////////////////////////////////////////////////////////
 //
-// Pulsar::Profile::flux
-//
-/*!
-  Using Profile::find_min_phase and Profile::find_peak_edges, this
-  function finds the integrated flux in the pulse profile
-*/
-float Pulsar::Profile::flux() const
-{
-  if (verbose)
-    cerr << "Pulsar::Profile::flux" << endl;
-  
-  // find the mean of the baseline
-  double min_avg, min_var;
-  stats (find_min_phase(), &min_avg, &min_var);
-
-  if (verbose)
-    cerr << "Pulsar::Profile::flux mean(off pulse) =" << min_avg << endl;
-
-  // find the total power under the pulse
-  int rise = 0, fall = 0;
-  find_peak_edges (rise, fall);
-
-  double flux = sum (rise, fall);
-  
-  // divide by the number of bins
-  flux /=  (double(fall-rise));
-  
-  // subtract the total power due to the baseline
-  flux -= min_avg ;
-
-
-  // multiply by onpulse fraction
-  flux *= (double (fall-rise))/(get_nbin());
-
-  return flux;
-}
-
-
-/////////////////////////////////////////////////////////////////////////////
-//
 // Pulsar::Profile::snr
 //
 /*!
