@@ -222,7 +222,11 @@ void psrephem::load (fitsfile* fptr, long row)
 
     case 1:  // double
       {
-	double nul = NAN;
+	#ifdef sun
+	  double nul = 0.0;
+	#else
+	  double nul = NAN;
+	#endif
 	fits_read_col (fptr, TDOUBLE, icol+1, row, firstelem, onelement,
 		       &nul, value_double + ieph, &anynul, &status);
 
@@ -304,7 +308,11 @@ void psrephem::load (fitsfile* fptr, long row)
       }
     case 4:  // MJD
       {
-	double nul = NAN;
+	#ifdef sun
+	  double nul = 0.0;
+	#else
+	  double nul = NAN;
+	#endif
 	fits_read_col (fptr, TDOUBLE, icol+1, row, firstelem, onelement,
 		       &nul, value_double + ieph, &anynul, &status);
 

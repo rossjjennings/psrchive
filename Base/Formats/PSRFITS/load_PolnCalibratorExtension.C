@@ -4,6 +4,10 @@
 
 #include <assert.h>
 
+#ifdef sun
+#include <ieeefp.h>
+#endif
+
 void Pulsar::FITSArchive::load_PolnCalibratorExtension (fitsfile* fptr)
 {
   int status = 0;
@@ -67,8 +71,12 @@ void Pulsar::FITSArchive::load_PolnCalibratorExtension (fitsfile* fptr)
   int colnum = 0;
   int initflag = 0;
   fits_get_colnum (fptr, CASEINSEN, "DAT_FREQ", &colnum, &status);
-  
-  float nullfloat = NAN;
+ 
+  #ifdef sun
+    float nullfloat = 0.0;
+  #else
+    float nullfloat = NAN;
+  #endif
   
   fits_read_col (fptr, TFLOAT, colnum, 1, 1, nch_fdpr, &nullfloat,
 		 data.get(), &initflag, &status);

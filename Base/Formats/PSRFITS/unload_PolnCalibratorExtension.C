@@ -95,9 +95,14 @@ void Pulsar::FITSArchive::unload (fitsfile* fptr,
   // Write the model parameters
     
   int count = 0;
-  for (count = 0; count < dimension; count++)
-    data.get()[count] = NAN;
-  
+  #ifdef sun
+    for (count = 0; count < dimension; count++)
+      data.get()[count] = 0.0;
+  #else
+    for (count = 0; count < dimension; count++)
+      data.get()[count] = NAN;
+  #endif
+
   count = 0;
   for (int i = 0; i < nch_fdpr; i++)
     if (pce->get_valid(i))
