@@ -49,7 +49,7 @@ void Pulsar::FITSArchive::load_Pointing (fitsfile* fptr, int row,
     throw FITSError (status, "FITSArchive::load_Pointing", 
 		     "fits_read_col RA_SUB");
 
-  angle.setDegrees (double_angle);  
+  angle.setTurns (double_angle);  
   ext->set_right_ascension (angle);
 
   initflag = 0;
@@ -66,7 +66,7 @@ void Pulsar::FITSArchive::load_Pointing (fitsfile* fptr, int row,
     throw FITSError (status, "FITSArchive::load_Pointing", 
 		     "fits_read_col DEC_SUB");
   
-  angle.setDegrees (double_angle);
+  angle.setTurns (double_angle);
   ext->set_declination (angle);
 
   initflag = 0;
