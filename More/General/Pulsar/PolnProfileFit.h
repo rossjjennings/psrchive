@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/Attic/PolnProfileFit.h,v $
-   $Revision: 1.1 $
-   $Date: 2003/12/28 13:03:21 $
+   $Revision: 1.2 $
+   $Date: 2003/12/29 07:18:13 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PolnProfileFit_h
@@ -23,11 +23,11 @@ namespace Pulsar {
   class PolnProfile;
 
   //! Implements polarimetric pulse profile template fitting
-  /*! This class may be find the full polarimetric best-fit between
-    observed and standard pulse profiles.  The fit yields both the
-    polarimetric transformation as well as the phase shift between the
-    two profiles, and may be used to calculate arrival time estimates
-    and to calibrate the instrumental response. */
+  /*! This class may be used to find the full polarimetric best-fit
+    between observed and standard pulse profiles.  The fit yields both
+    the polarimetric transformation as well as the phase shift between
+    the two profiles, and may be used both to calculate arrival time
+    estimates and to calibrate the instrumental response. */
 
   class PolnProfileFit : public Reference::Able {
     

@@ -1,10 +1,13 @@
 #include "Pulsar/PolnProfileFit.h"
 #include "Pulsar/PolnProfile.h"
+#include "Pulsar/Profile.h"
 
 #include "Calibration/ReceptionModel.h"
 #include "Calibration/Abbreviations.h"
 #include "Calibration/Polynomial.h"
 #include "Calibration/Phase.h"
+
+#include "fftm.h"
 
 //! Default constructor
 Pulsar::PolnProfileFit::PolnProfileFit ()
@@ -48,10 +51,31 @@ void Pulsar::PolnProfileFit::init ()
 }
 
 //! Set the standard to which observations will be fit
-void Pulsar::PolnProfileFit::set_standard (const PolnProfile* standard)
+void Pulsar::PolnProfileFit::set_standard (const PolnProfile* _standard)
 {
-  // make a new model and get rid of the old one.
+  standard = _standard;
 
+  // until greater resize functionality is added to ReceptionModel,
+  // best to just delete it and start fresh
+  model = 0;
+  
+  if (!standard)
+    return;
+
+  unsigned nbin = standard->get_nbin();
+  unsigned npol = 4;
+
+  PolnProfile* fourier = new PolnProfile (standard->get_basis(),
+					  standard->get_state(),
+					  new Profile, new Profile,
+					  new Profile, new Profile);
+
+  fourier->resize( nbin );
+
+  // for (unsigned ipol=0; ipol<npol; ipol++)
+    // fft::frc1d (nbin, fourier->get_amps(ipol), standard->get_amps(ipol));
+
+  model = new Calibration::ReceptionModel;
   model->add_transformation ();
 }
 
