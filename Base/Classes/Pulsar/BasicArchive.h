@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/BasicArchive.h,v $
-   $Revision: 1.18 $
-   $Date: 2002/10/28 01:02:45 $
-   $Author: straten $ */
+   $Revision: 1.19 $
+   $Date: 2003/01/13 11:18:56 $
+   $Author: pulsar $ */
 
 #include "Pulsar/Archive.h"
   
@@ -43,11 +43,6 @@ namespace Pulsar {
     //
     // implement the pure virtual methods of the Archive base class
     //
-
-    //! Get the name of the thing from which the archive was loaded
-    virtual string get_filename () const;
-    //! Set the name of the thing to which the archive will be unloaded
-    virtual void set_filename (const char* filename);
 
     //! Get the tempo code of the telescope used
     virtual char get_telescope_code () const;
@@ -158,9 +153,6 @@ namespace Pulsar {
     //! Get the number of sub-integrations stored in the file
     /*! This attribute may be set only through Archive::resize */
     virtual void set_nsubint (unsigned nsubint);
-
-    //! The name of the thing from which the archive was loaded
-    string filename;
 
     //! The tempo code of the telescope used
     char telescope_code;

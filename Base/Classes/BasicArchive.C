@@ -80,18 +80,6 @@ Pulsar::BasicArchive::new_Integration (Integration* subint)
   return integration;
 }
 
-    //! Get the name of the thing from which the archive was loaded
-string Pulsar::BasicArchive::get_filename () const
-{
-  return filename;
-}
-
-//! Set the name of the thing to which the archive will be unloaded
-void Pulsar::BasicArchive::set_filename (const char* _filename)
-{
-  filename = _filename;
-}
-
 //! Get the number of sub-integrations in the archive
 unsigned Pulsar::BasicArchive::get_nsubint () const
 {
