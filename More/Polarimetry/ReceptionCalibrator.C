@@ -124,6 +124,7 @@ void Pulsar::ReceptionCalibrator::load_calibrators ()
 
   unsigned nchan = equation.size();
 
+  cerr << "Setting " << nchan << " channel receiver" << endl;
   for (unsigned ichan=0; ichan<nchan; ichan+=1)
     receiver[ichan].update (equation[ichan]->get_receiver());
 
@@ -164,8 +165,10 @@ void Pulsar::ReceptionCalibrator::init_estimate (SourceEstimate& estimate)
   estimate.mean.resize (nchan);
   estimate.state.resize (nchan);
 
-  for (unsigned ichan=0; ichan<nchan; ichan++)
+  for (unsigned ichan=0; ichan<nchan; ichan++) {
+    equation[ichan]->set_backend(0);
     equation[ichan]->get_model()->add_state( &(estimate.state[ichan]) );
+  }
 }
 
 
@@ -192,7 +195,7 @@ unsigned Pulsar::ReceptionCalibrator::get_nchan () const
 //! Add the specified pulsar observation to the set of constraints
 void Pulsar::ReceptionCalibrator::add_calibrator (const Archive* data)
 {
-  if (uncalibrated)
+  if (!uncalibrated)
     throw Error (InvalidState, "Pulsar::ReceptionCalibrator::add_calibrator",
 		 "No Archive containing pulsar data has yet been added");
 
@@ -251,7 +254,7 @@ void Pulsar::ReceptionCalibrator::add_observation (const Archive* data)
 
       for (unsigned istate=0; istate < pulsar.size(); istate++) {
 	add_data (measurements, pulsar[istate], ichan, integration);
-	measurements.back().state_index = istate;
+	measurements.back().state_index = 1 + istate;
       }
 
       equation[ichan]->get_model()->set_path (0);
@@ -344,7 +347,7 @@ void Pulsar::ReceptionCalibrator::add_PolnCalibrator (const PolnCalibrator* p)
     // add the calibrator state
     Stokes<double> cal_state (1,0,1,0);
 
-    calibrator_state_index = get_nstate ();
+    // calibrator_state_index = get_nstate_pulsar ();
 
     PolnCalibrator_path = equation[0]->get_nbackend();
 
@@ -452,19 +455,22 @@ void Pulsar::ReceptionCalibrator::add_FluxCalibrator (const FluxCalibrator* f)
 //! Calibrate the polarization of the given archive
 void Pulsar::ReceptionCalibrator::precalibrate (Archive* data)
 {
+  cerr << "Pulsar::ReceptionCalibrator::precalibrate" << endl;
   calibrate (data, 1);
 }
 
 //! Calibrate the polarization of the given archive
 void Pulsar::ReceptionCalibrator::calibrate (Archive* data)
 {
+  cerr << "Pulsar::ReceptionCalibrator::calibrate" << endl;
   calibrate (data, 0);
 }
 
 //! Calibrate the polarization of the given archive
 void Pulsar::ReceptionCalibrator::calibrate (Archive* data, unsigned path)
 {
-  cerr << "Pulsar::ReceptionCalibrator::calibrate" << endl;
+  if (verbose)
+    cerr << "Pulsar::ReceptionCalibrator::calibrate path=" << path << endl;
 
   if (!is_fit && path == 0)
     solve ();
