@@ -45,6 +45,9 @@ void Pulsar::HybridCalibrator::set_precalibrator (PolnCalibrator* _calibrator)
   precalibrator = _calibrator;
   calibrator = precalibrator->get_Archive();
 
+  // store the Receiver Extension, if any
+  receiver = calibrator->get<Receiver>();
+
   filenames.resize (2);
   filenames[0] = precalibrator->get_filenames();
 }
