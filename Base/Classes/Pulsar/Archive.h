@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Archive.h,v $
-   $Revision: 1.34 $
-   $Date: 2002/08/19 05:38:12 $
+   $Revision: 1.35 $
+   $Date: 2002/08/19 10:11:57 $
    $Author: straten $ */
 
 /*! \mainpage 
@@ -419,6 +419,11 @@ namespace Pulsar {
     //
     // various state flags
     //
+
+    //! Data has been flux calibrated
+    virtual bool get_flux_calibrated () const = 0;
+    //! Set the status of the flux calibrated flag
+    virtual void set_flux_calibrated (bool done = true) = 0;
 
     //! Data has been corrected for feed angle errors
     virtual bool get_feedangle_corrected () const = 0;

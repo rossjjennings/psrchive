@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/BasicArchive.h,v $
-   $Revision: 1.12 $
-   $Date: 2002/07/27 03:32:49 $
+   $Revision: 1.13 $
+   $Date: 2002/08/19 10:11:57 $
    $Author: straten $ */
 
 #include "Archive.h"
@@ -237,6 +237,19 @@ namespace Pulsar {
     virtual void set_dispersion_measure (double dm)
     {
       ephemeris.set_dm (dm);
+    }
+
+    //! Data has been flux calibrated
+    bool get_flux_calibrated () const
+    {
+      cerr << "BasicArchive::get_flux_calibrated not implemented" << endl;
+      return false;
+    }
+
+    //! Set the status of the flux calibrated flag
+    void set_flux_calibrated (bool done = true)
+    {
+      cerr << "BasicArchive::set_flux_calibrated not implemented" << endl;
     }
 
 
