@@ -1,6 +1,8 @@
 #include "MEAL/Boost.h"
 #include "Pauli.h"
 
+using namespace std;
+
 MEAL::Boost::Boost () : OptimizedComplex2 (3)
 {
 }
@@ -12,13 +14,13 @@ MEAL::Boost::Boost (const Vector<double, 3>& _axis)
 }
 
 //! Return the name of the class
-std::string MEAL::Boost::get_name () const
+string MEAL::Boost::get_name () const
 {
   return "Boost";
 }
 
 //! Return the name of the specified parameter
-std::string MEAL::Boost::get_param_name (unsigned index) const
+string MEAL::Boost::get_param_name (unsigned index) const
 {
   if (index == 0)
     return "boost";
@@ -99,7 +101,7 @@ void MEAL::Boost::free_axis ()
 
 //! Calculate the Jones matrix and its gradient
 void MEAL::Boost::calculate (Jones<double>& result,
-				    std::vector<Jones<double> >* grad)
+				    vector<Jones<double> >* grad)
 {
   if (get_nparam() == 1)
     calculate_beta (result, grad);
@@ -109,7 +111,7 @@ void MEAL::Boost::calculate (Jones<double>& result,
 
 //! Return the Jones matrix and its gradient
 void MEAL::Boost::calculate_beta (Jones<double>& result,
-					 std::vector<Jones<double> >* grad)
+					 vector<Jones<double> >* grad)
 {
   double beta = get_param(0);
 
@@ -138,7 +140,7 @@ void MEAL::Boost::calculate_beta (Jones<double>& result,
 
 
 void MEAL::Boost::calculate_Gibbs (Jones<double>& result, 
-					  std::vector<Jones<double> >* grad)
+					  vector<Jones<double> >* grad)
 {
   Vector<double, 3> Gibbs;
   for (unsigned i=0; i<3; i++)
