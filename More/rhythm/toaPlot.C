@@ -34,7 +34,7 @@ void toaPlot::plotter ()
   cpgsci (1);
   cpgsls (1);
   cpgslw (1);
-  cpgsvp  (0.1,0.9,0.1,0.9);
+  cpgsvp (0.1,0.9,0.1,0.9);
   
   cpgswin (xmin, xmax, ymin, ymax);
   cpgbox ("bcnst",0.0,0,"bcnst",0.0,0);
@@ -69,6 +69,15 @@ void toaPlot::plotter ()
   case SignalToNoise:
     xlab = "Signal / Noise Ratio";
     break;
+  case Bandwidth:
+    xlab = "Observed Bandwidth";
+    break;
+  case DispersionMeasure:
+    xlab = "Dispersion Measure";
+    break;
+  case Duration:
+    xlab = "Observation Length (Seconds)";
+    break;
   }
   
   switch (yq) {
@@ -99,6 +108,15 @@ void toaPlot::plotter ()
   case SignalToNoise:
     ylab = "Signal / Noise Ratio";
     break;
+  case Bandwidth:
+    ylab = "Observed Bandwidth";
+    break;
+  case DispersionMeasure:
+    ylab = "Dispersion Measure";
+    break;
+  case Duration:
+    ylab = "Observation Length (Seconds)";
+    break;
   }
 
   cpgsci (3);
@@ -107,8 +125,8 @@ void toaPlot::plotter ()
 
   for (unsigned i = 0; i < data.size(); i++) {
 
-    cpgsci  (data[i].ci);
-    cpgpt1  (float(data[i].x), float(data[i].y), data[i].dot);
+    cpgsci (data[i].ci);
+    cpgpt1 (float(data[i].x), float(data[i].y), data[i].dot);
 
     if (data[i].e != 0.0)
       cpgerr1 (6, float(data[i].x), float(data[i].y), float(data[i].e), 1.0);
@@ -399,7 +417,27 @@ void toaPlot::autoscale ()
   
   findminmax(&(xpts.front()), &(xpts.back()), xmin, xmax);
   findminmax(&(ypts.front()), &(ypts.back()), ymin, ymax);
+
+  if (xmin < 10.0 && xmin > -10.0)
+    xmin -= fabs(xmin * 0.5);
+  else
+    xmin -= fabs(xmin * 0.05);
+
+  if (xmax < 10.0 && xmax > -10.0)
+    xmax += fabs(xmax * 0.5);
+  else
+    xmax += fabs(xmax * 0.05);
   
+  if (ymin < 10.0 && ymin > -10.0)
+    ymin -= fabs(ymin * 0.5);
+  else
+    ymin -= fabs(ymin * 0.05);
+  
+  if (ymax < 10.0 && ymax > -10.0)
+    ymax += fabs(ymax * 0.5);
+  else
+    ymax += fabs(ymax * 0.05);
+
   clearScreen();
   drawPlot();
 }

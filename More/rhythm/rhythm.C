@@ -504,45 +504,54 @@ vector<double> Rhythm::give_me_data (toaPlot::AxisQuantity q)
 {
   vector<double> retval;
   
+  char useful[80];
+  char filename[80];
+  
   switch (q) {
+
   case toaPlot::TOA_MJD:
     for (unsigned i = 0; i < toas.size(); i++)
       retval.push_back((toas[i].resid.mjd)-50000.0);
     return retval;
     break;
+
   case toaPlot::BinaryPhase:
     for (unsigned i = 0; i < toas.size(); i++)
       retval.push_back(toas[i].resid.binaryphase);
     return retval;
     break;
+
   case toaPlot::ObsFreq:
     for (unsigned i = 0; i < toas.size(); i++)
       retval.push_back(toas[i].resid.obsfreq);
     return retval;
     break;
+
   case toaPlot::DayOfYear:
     for (unsigned i = 0; i < toas.size(); i++)
       retval.push_back(fmod(toas[i].resid.mjd, 365.0));
     return retval;
     break;
+
   case toaPlot::ResidualMicro:
     for (unsigned i = 0; i < toas.size(); i++)
       retval.push_back(toas[i].resid.time);
     return retval;
     break;
+
   case toaPlot::ResidualMilliTurns:
     for (unsigned i = 0; i < toas.size(); i++)
       retval.push_back((toas[i].resid.turns)*1000.0);
     return retval;
     break;
+
   case toaPlot::ErrorMicro:
     for (unsigned i = 0; i < toas.size(); i++)
       retval.push_back(toas[i].resid.error);
     return retval;
     break;
+
   case toaPlot::SignalToNoise:
-    char useful[80];
-    char filename[80];
     for (unsigned i = 0; i < toas.size(); i++) {
       
       toas[i].unload(useful);
@@ -565,6 +574,67 @@ vector<double> Rhythm::give_me_data (toaPlot::AxisQuantity q)
     }
     return retval;
     break;
+
+  case toaPlot::Bandwidth:
+    for (unsigned i = 0; i < toas.size(); i++) {
+      
+      toas[i].unload(useful);
+      
+      sscanf(useful+1, "%s ", filename);
+      
+      if (verbose)
+	cerr << "Attempting to load archive '" << filename << "'" << endl;
+      
+      string useful2 = dataPath + "/";
+      useful2 += filename;
+      
+      Reference::To<Pulsar::Archive> data = Pulsar::Archive::load(useful2);
+      
+      retval.push_back(data->get_bandwidth());      
+    }
+    return retval;
+    break;
+
+  case toaPlot::DispersionMeasure:
+    for (unsigned i = 0; i < toas.size(); i++) {
+      
+      toas[i].unload(useful);
+      
+      sscanf(useful+1, "%s ", filename);
+      
+      if (verbose)
+	cerr << "Attempting to load archive '" << filename << "'" << endl;
+      
+      string useful2 = dataPath + "/";
+      useful2 += filename;
+      
+      Reference::To<Pulsar::Archive> data = Pulsar::Archive::load(useful2);
+
+      retval.push_back(data->get_dispersion_measure());
+    }
+    return retval;
+    break;
+
+  case toaPlot::Duration:
+    for (unsigned i = 0; i < toas.size(); i++) {
+      
+      toas[i].unload(useful);
+      
+      sscanf(useful+1, "%s ", filename);
+      
+      if (verbose)
+	cerr << "Attempting to load archive '" << filename << "'" << endl;
+      
+      string useful2 = dataPath + "/";
+      useful2 += filename;
+      
+      Reference::To<Pulsar::Archive> data = Pulsar::Archive::load(useful2);
+      
+      retval.push_back(data->integration_length());      
+    }
+    return retval;
+    break;
+
   default:
     return retval;
     break;
@@ -575,20 +645,23 @@ vector<double> Rhythm::give_me_errs (toaPlot::AxisQuantity q)
 {
   vector<double> retval;
   
-  // This will require adjustment! Find out what the error
+  // This may require adjustment! Find out what the error
   // is stored as in Willem's residual class...
 
   switch (q) {
+
   case toaPlot::TOA_MJD:
     for (unsigned i = 0; i < toas.size(); i++)
       retval.push_back(0.0);
     return retval;
     break;
+
   case toaPlot::ResidualMicro:
     for (unsigned i = 0; i < toas.size(); i++)
       retval.push_back(toas[i].resid.error);
     return retval;
     break;
+
   case toaPlot::ResidualMilliTurns:
     // Need the pulsar period:
     if (fitpopup->hasdata()) {
@@ -606,31 +679,55 @@ vector<double> Rhythm::give_me_errs (toaPlot::AxisQuantity q)
       return retval;
     }
     break;
+
   case toaPlot::BinaryPhase:
     for (unsigned i = 0; i < toas.size(); i++)
       retval.push_back(0.0);
     return retval;
     break;
+
   case toaPlot::ObsFreq:
     for (unsigned i = 0; i < toas.size(); i++)
       retval.push_back(0.0);
     return retval;
     break;
+
   case toaPlot::DayOfYear:
     for (unsigned i = 0; i < toas.size(); i++)
       retval.push_back(0.0);
     return retval;
     break;
+
   case toaPlot::ErrorMicro:
     for (unsigned i = 0; i < toas.size(); i++)
       retval.push_back(0.0);
     return retval;
     break;
+
   case toaPlot::SignalToNoise:
     for (unsigned i = 0; i < toas.size(); i++)
       retval.push_back(0.0);
     return retval;
     break;
+
+  case toaPlot::Bandwidth:
+    for (unsigned i = 0; i < toas.size(); i++)
+      retval.push_back(0.0);
+    return retval;
+    break;
+
+  case toaPlot::DispersionMeasure:
+    for (unsigned i = 0; i < toas.size(); i++)
+      retval.push_back(0.0);
+    return retval;
+    break;
+
+  case toaPlot::Duration:
+    for (unsigned i = 0; i < toas.size(); i++)
+      retval.push_back(0.0);
+    return retval;
+    break;
+
   default:
     return retval;
     break;
@@ -829,10 +926,10 @@ void Rhythm::clearselection ()
 AxisSelector::AxisSelector (QWidget* parent)
   : QHBox(parent)
 {
-  Xgrp = new QButtonGroup(8, Qt::Vertical, "X Axis", this);
+  Xgrp = new QButtonGroup(11, Qt::Vertical, "X Axis", this);
   Xgrp -> setRadioButtonExclusive(true);
   
-  Ygrp = new QButtonGroup(8, Qt::Vertical, "Y Axis", this);
+  Ygrp = new QButtonGroup(11, Qt::Vertical, "Y Axis", this);
   Ygrp -> setRadioButtonExclusive(true);
 
   X1 = new QRadioButton("Residual (us)", Xgrp);
@@ -843,6 +940,9 @@ AxisSelector::AxisSelector (QWidget* parent)
   X6 = new QRadioButton("Day of Year", Xgrp);
   X7 = new QRadioButton("Timing Error", Xgrp);
   X8 = new QRadioButton("Signal / Noise", Xgrp);
+  X9 = new QRadioButton("Bandwidth", Xgrp);
+  X10 = new QRadioButton("DM", Xgrp);
+  X11 = new QRadioButton("Length", Xgrp);
 
   X3->setChecked(true);
 
@@ -854,6 +954,9 @@ AxisSelector::AxisSelector (QWidget* parent)
   Y6 = new QRadioButton("Day of Year", Ygrp);
   Y7 = new QRadioButton("Timing Error", Ygrp);
   Y8 = new QRadioButton("Signal / Noise", Ygrp);
+  Y9 = new QRadioButton("Bandwidth", Ygrp);
+  Y10 = new QRadioButton("DM", Ygrp);
+  Y11 = new QRadioButton("Length", Ygrp);
 
   Y1->setChecked(true);
 
@@ -865,6 +968,9 @@ AxisSelector::AxisSelector (QWidget* parent)
   Xgrp->insert(X6,6);
   Xgrp->insert(X7,7);
   Xgrp->insert(X8,8);
+  Xgrp->insert(X9,9);
+  Xgrp->insert(X10,10);
+  Xgrp->insert(X11,11);
 
   Ygrp->insert(Y1,1);
   Ygrp->insert(Y2,2);
@@ -874,6 +980,9 @@ AxisSelector::AxisSelector (QWidget* parent)
   Ygrp->insert(Y6,6);
   Ygrp->insert(Y7,7);
   Ygrp->insert(Y8,8);
+  Ygrp->insert(Y9,9);
+  Ygrp->insert(Y10,10);
+  Ygrp->insert(Y11,11);
 
   QObject::connect(Xgrp, SIGNAL(clicked(int)),
 		   this, SLOT(Xuseful(int)));
