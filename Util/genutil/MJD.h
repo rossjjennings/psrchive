@@ -1,24 +1,23 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/MJD.h,v $
-   $Revision: 1.21 $
-   $Date: 2004/12/20 10:11:44 $
+   $Revision: 1.22 $
+   $Date: 2004/12/27 13:43:49 $
    $Author: straten $ */
 
-#ifndef __MJD_H
-#define __MJD_H
-
-#include <iostream>
-#include <string>
-
-#include <stdio.h>
+#ifndef __GENUTIL_MJD_H
+#define __GENUTIL_MJD_H
 
 #include "environ.h"
 #include "utc.h"
-#ifdef ACTIVATE_MPI
-#include "mpi.h"
+
+#include <iostream>
+#include <string>
+#include <stdio.h>
+
+#ifdef HAVE_MPI
+#include <mpi.h>
 #endif
-#include "psr_cpp.h"
 
 class MJD {
 
@@ -62,7 +61,7 @@ class MJD {
   MJD (const utc_t& utc);
 
   // construct from a C++ string
-  MJD (const string& mjd);
+  MJD (const std::string& mjd);
 
   // parses a string of the form 51298.45034 ish
   int Construct (const char* mjdstr);
@@ -130,7 +129,7 @@ class MJD {
   double LST (float longitude) const;
   double LST (double longitude) const;
 
-  string printdays (unsigned precision) const;
+  std::string printdays (unsigned precision) const;
 
   int print (FILE *stream);
   int println (FILE *stream);
@@ -143,7 +142,7 @@ class MJD {
   // returns a string formatted as in 'strftime()'
   char* datestr (char* dstr, int len, const char* format) const;
 
-#ifdef ACTIVATE_MPI
+#ifdef HAVE_MPI
   friend int mpiPack_size (const MJD&, MPI_Comm comm, int* size);
   friend int mpiPack   (const MJD&, void* outbuf, int outcount, 
 			int* position, MPI_Comm comm);
@@ -158,8 +157,8 @@ class MJD {
 
 inline double cast_double(const MJD&m) {return m.in_days();}
 
-ostream& operator<< (ostream& ostr, const MJD& mjd);
-istream& operator>> (istream& istr, MJD& mjd);
+std::ostream& operator<< (std::ostream& ostr, const MJD& mjd);
+std::istream& operator>> (std::istream& istr, MJD& mjd);
 
 #endif  /* not __MJD_H defined */
 
