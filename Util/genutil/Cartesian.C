@@ -4,11 +4,6 @@
 #include "Cartesian.h"
 #include "angle.h"
 
-Cartesian::Cartesian ()
-{
-  x = y = z = 0.0;
-}
-
 Cartesian::Cartesian (double ux, double uy, double uz)
 {
   x=ux; y=uy; z=uz;
@@ -68,6 +63,24 @@ Cartesian& Cartesian::operator /= (double linear)
 {
   this->operator*= (1.0/linear);
   return *this;
+}
+
+const Cartesian pdiv (const Cartesian& cart1, const Cartesian& cart2)
+{
+  Cartesian result (cart1);
+  result.x /= cart2.x;
+  result.y /= cart2.y;
+  result.z /= cart2.z;
+  return result;
+}
+
+const Cartesian pmult (const Cartesian& cart1, const Cartesian& cart2)
+{
+  Cartesian result (cart1);
+  result.x *= cart2.x;
+  result.y *= cart2.y;
+  result.z *= cart2.z;
+  return result;
 }
 
 const Cartesian operator + (const Cartesian& cart1, const Cartesian& cart2)
@@ -181,4 +194,15 @@ Angle Cartesian::angularSeparation (const Cartesian& c1, const Cartesian& c2)
 
 ostream& operator << (ostream& ostr, const Cartesian& coord) {
   return ostr << "(" << coord.x << ", " << coord.y << ", " << coord.z << ")";
+}
+
+// to create a window on the pgplot screen from bottom left to top right
+void diagonalize (Cartesian& bottom_left, Cartesian& upper_right)
+{
+  if (bottom_left.x > upper_right.x)
+    swap (upper_right.x, bottom_left.x);
+  if (bottom_left.y > upper_right.y)
+    swap (upper_right.y, bottom_left.y);
+  if (bottom_left.z > upper_right.z)
+    swap (upper_right.z, bottom_left.z);
 }
