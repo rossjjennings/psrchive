@@ -31,3 +31,33 @@ double histomean (vector<Klass>& vals)
   }
   return valcount/totcount;
 }
+
+// //////////////////////////////////////////////////////////////////////////
+// renew
+//   Much like realloc in C, will resize an array while retaining original
+//   information (up to the length of the new array).
+//
+// Willem van Straten, August 2000
+//
+template <class T>
+void renew (T* &ptr, unsigned neu_size, unsigned old_size)
+{
+  if (old_size == neu_size)
+    return;
+
+  if (neu_size == 0 && ptr != NULL) {
+    delete [] ptr;  ptr = NULL;
+  }
+
+  T* nptr = new T [neu_size];
+  assert (nptr != NULL);
+
+  if (ptr) {
+    unsigned cpt = min (neu_size, old_size);
+    for (unsigned ipt = 0; ipt < cpt; ipt++)
+      nptr[ipt] = ptr[ipt];
+    delete [] ptr;
+  }
+
+  ptr = nptr;
+}
