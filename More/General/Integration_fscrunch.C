@@ -48,9 +48,17 @@ void Pulsar::Integration::fscrunch (unsigned nscrunch, bool weighted_cfreq)
       
       if (weighted_cfreq)
 	fcentre = weighted_frequency (stchan, stchan+nscrunch);
-      
-      if (newchan == 1)
-	set_centre_frequency (fcentre);
+
+      // WvS - the centre_frequency of the Integration should be changed only
+      // by the Archive class.  This is because the Archive class expects to
+      // treat each Integration equally (e.g. in the calculation of relative
+      // phases).  It is then up to the Integration class to translate 
+      // frequency-dependent calculations using the centre frequency of each
+      // Profile.  If sparse Archive support is enabled in the future, each
+      // Integration may require a unique centre frequency.
+      //
+      // if (newchan == 1)
+      //   set_centre_frequency (fcentre);
       
       for (unsigned ipol=0; ipol < get_npol(); ipol++)
 	for (unsigned k=0; k<nscrunch; k++)
