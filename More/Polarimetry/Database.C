@@ -90,6 +90,10 @@ Pulsar::Database::Entry::Entry (const Pulsar::Archive& arch)
   else
     time = ( arch.start_time() + arch.end_time() ) / 2.0;
 
+  if (time == 0.0)
+    throw Error (InvalidParam, "Pulsar::Database::Entry",
+		 arch.get_filename() + " has epoch = 0 (MJD)");
+
   position = arch.get_coordinates();
   bandwidth = arch.get_bandwidth();
   frequency = arch.get_centre_frequency();
@@ -136,6 +140,10 @@ void Pulsar::Database::Entry::load (const char* str)
   // MJD
   string mjdstr  = stringtok (&line, whitespace);
   time = MJD (mjdstr);
+
+  if (time == 0.0)
+    throw Error (InvalidParam, "Pulsar::Database::Entry::load",
+		 filename + " has epoch = 0 (MJD)");
 
   // /////////////////////////////////////////////////////////////////
   // bandwidth, frequency, number of channels
@@ -556,13 +564,18 @@ void Pulsar::Database::add (const Pulsar::Archive* archive)
   if (!archive)
     throw Error (InvalidParam, "Pulsar::Database::add", "null Archive*");
 
-  Entry entry (*archive);
+  try {
+    Entry entry (*archive);
 
-  // strip the base path name off of the entry filename
-  if (entry.filename.substr(0, path.length()) == path)
-    entry.filename.erase (0, path.length()+1);
-
-  entries.push_back (entry);
+    // strip the base path name off of the entry filename
+    if (entry.filename.substr(0, path.length()) == path)
+      entry.filename.erase (0, path.length()+1);
+    
+    entries.push_back (entry);
+  }
+  catch (Error& error) {
+    throw error += "Pulsar::Database::add";
+  }
 }
 
 void Pulsar::Database::all_matching (const Criterion& criterion,
@@ -629,7 +642,8 @@ void Pulsar::Database::set_default_criterion (const Criterion& criterion)
 Pulsar::Database::Criterion
 Pulsar::Database::criterion (const Pulsar::Archive* arch,
 			     Signal::Source obsType) const
-{
+try {
+
   Criterion criterion = get_default_criterion();
 
   criterion.minutes_apart = short_time_scale;
@@ -643,12 +657,16 @@ Pulsar::Database::criterion (const Pulsar::Archive* arch,
 
   return criterion;
 }
+catch (Error& error) {
+  throw error += "Pulsar::Database::criterion Signal::Source";
+}
 
 //! Returns one Entry that matches the given parameters and is nearest in time.
 Pulsar::Database::Criterion
 Pulsar::Database::criterion (const Pulsar::Archive* arch, 
 			     Calibrator::Type calType) const
-{
+try {
+
   Criterion criterion = get_default_criterion();
 
   if (calType == Calibrator::Flux || 
@@ -671,6 +689,9 @@ Pulsar::Database::criterion (const Pulsar::Archive* arch,
   criterion.entry.calType = calType;
 
   return criterion;
+}
+catch (Error& error) {
+  throw error += "Pulsar::Database::criterion Calibrator::Type";
 }
 
 
