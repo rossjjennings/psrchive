@@ -7,7 +7,6 @@ INCLUDES = superarchive.h archive.h sub_int.h profile.h archhdr.h headers.h \
 	poln_profile.h Pulsar/TimerArchive.h Pulsar/TimerIntegration.h \
 	Pulsar/BasebandArchive.h Pulsar/baseband_header.h
 
-
 # ############################################################################
 #
 # The main timer archive library
@@ -48,7 +47,7 @@ DSO_SRCS := BasebandArchive.C TimerArchive.C \
 
 LIB_SRCS += $(DSO_SRCS)
 
-DSO_FLAGS := $(LDFLAGS) -lpsrchive_Extension -larchive $(LTIMES)
+DSO_FLAGS += $(LDFLAGS) -lpsrchive_Extension -larchive $(LTIMES)
 
 # TimerIntegration_cal_levels.C
 
