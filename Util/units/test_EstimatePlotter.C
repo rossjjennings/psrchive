@@ -1,5 +1,6 @@
 #include "EstimatePlotter.h"
 
+#include <stdio.h>
 #include <cpgplot.h>
 
 void plot_and_label (EstimatePlotter& plotter,
