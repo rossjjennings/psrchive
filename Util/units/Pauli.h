@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Pauli.h,v $
-   $Revision: 1.4 $
-   $Date: 2003/02/13 16:31:21 $
+   $Revision: 1.5 $
+   $Date: 2003/02/15 10:18:28 $
    $Author: straten $ */
 
 #ifndef __Pauli_H
@@ -38,6 +38,17 @@ const Quaternion<complex<T>, Hermitian> convert (const Jones<T>& j)
       0.5 * ci (j.j12 - j.j21) );
 }
 
+// Return the positive definite root of a Hermitian Quaternion
+template<typename T>
+const Quaternion<T, Hermitian> sqrt (const Quaternion<T, Hermitian>& h)
+{
+  T mod = h.s1*h.s1 + h.s2*h.s2 + h.s3*h.s3;
+  T det = sqrt (h.s0*h.s0 - mod);
+  T scale = sqrt (0.5 * (h.s0 - det) / mod);
+
+  return Quaternion<T, Hermitian>
+    (sqrt (0.5 * (h.s0 + det)), h.s1 * scale, h.s2 * scale, h.s3 * scale);
+}
 
 // convert Jones matrix to Hermitian and Unitary Quaternion
 template<typename T>
@@ -48,15 +59,8 @@ void polar (complex<T>& d, Quaternion<T, Hermitian>& h,
   d = sqrt (det(j));
   j /= d;
 
-  // calculate the square of h
-  h = real (convert (j*herm(j)));
-
-  T scale = sqrt (0.5 * (h.s0 - 1.0) / (h.s1*h.s1 + h.s2*h.s2 + h.s3*h.s3));
-
-  h.s0 = sqrt (0.5 * (h.s0 + 1.0));
-  h.s1 *= scale;
-  h.s2 *= scale;
-  h.s3 *= scale;
+  // calculate the hermitian
+  h = sqrt( real( convert( j*herm(j) ) ) );
 
   // take the hermitian component out of j
   j = inv(convert(h)) * j;
