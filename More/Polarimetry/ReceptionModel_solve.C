@@ -1,0 +1,276 @@
+#include "Calibration/ReceptionModel.h"
+#include "Calibration/CoherencyMeasurementSet.h"
+#include "MEAL/LevenbergMarquardt.h"
+
+using namespace std;
+
+// ///////////////////////////////////////////////////////////////////////////
+//
+// template specializations that enable the use of LevenbergMarquardt
+//
+// ///////////////////////////////////////////////////////////////////////////
+
+// enable matrix partial derivatives in LevenbergMarquardt template methods
+double cast_double (const Jones<double>& j)
+{
+  return trace(j).real();
+}
+
+// template specialization of Numerical::lmcoff
+float lmcoff (// input
+	      Calibration::ReceptionModel& model,
+	      const Calibration::CoherencyMeasurement& obs,
+	      const Estimate<char>& ignored,
+	      // storage
+	      vector<Jones<double> >& gradient,
+	      // output
+	      vector<vector<double> >& alpha,
+	      vector<double>& beta)
+{
+  if (MEAL::LevenbergMarquardt< Jones<double> >::verbose > 2 ||
+      Calibration::ReceptionModel::verbose)
+    cerr << "Calibration::ReceptionModel::lmcoff" << endl;
+
+  model.set_input_index (obs.get_input_index());
+
+  Jones<double> delta_y = obs.get_coherency() - model.evaluate (&gradient);
+
+  return MEAL::lmcoff1 (model, delta_y, obs, gradient, alpha, beta);
+
+}
+
+// template specialization of Numerical::lmcoff
+float lmcoff (// input
+	      Calibration::ReceptionModel& model,
+	      const Calibration::CoherencyMeasurementSet& data,
+	      const Estimate<char>& ignored,
+	      // storage
+	      vector<Jones<double> >& gradient,
+	      // output
+	      vector<vector<double> >& alpha,
+	      vector<double>& beta)
+{
+  if (Calibration::ReceptionModel::verbose)
+    cerr << "Calibration::ReceptionModel::lmcoff set abscissa" << endl;
+
+  // set the independent variables for this set of measurements
+  data.set_coordinates();
+  // set the signal path through which these measurements were observed
+  model.set_transformation_index (data.get_transformation_index());
+
+  double chisq = 0.0;
+  for (unsigned ist=0; ist<data.size(); ist++)
+    chisq += lmcoff (model, data[ist], ignored, gradient, alpha, beta);
+
+  return chisq;
+}
+
+/*! Uses the Levenberg-Marquardt algorithm of non-linear least-squares
+    minimization in order to find the best fit to the observed
+    polarizations.
+*/
+void Calibration::ReceptionModel::solve_work (bool solve_verbose)
+{
+  if (verbose)
+    cerr << "Calibration::ReceptionModel::solve count free parameters" << endl;
+
+  unsigned free_params = 0;
+  unsigned iparm=0;  
+  for (iparm=0; iparm < get_nparam(); iparm++) {
+    if (verbose) cerr << iparm  << " " << get_param(iparm) 
+				<< " " << get_infit(iparm) << endl;
+    if (get_infit(iparm))
+      free_params ++;
+  }
+
+
+  vector<bool> has_source (get_num_input(), false);
+
+  if (verbose)
+    cerr << "Calibration::ReceptionModel::solve count constraints" << endl;
+
+  unsigned fixed_params = 0;
+  for (unsigned idat=0; idat < data.size(); idat++) {
+    
+    // count the number of constraints provided by each CoherencyMeasurement
+    fixed_params += data[idat].size() * 4;
+       
+    // ensure that each source_index is valid and flag the input states
+    // that have at least one measurement to constrain them
+    for (unsigned isource=0; isource < data[idat].size(); isource++) {
+      
+      unsigned source_index = data[idat][isource].get_input_index();
+
+      if (source_index >= get_num_input())
+	throw Error (InvalidRange, "Calibration::ReceptionModel::solve",
+		     "isource=%d >= nsource=%d",
+		     source_index, get_num_input());
+      
+      has_source[source_index] = true;
+    }
+  }
+  
+  if (fixed_params <= free_params) {
+
+    for (iparm=0; iparm < get_nparam(); iparm++)
+      set_Estimate (iparm, 0.0);
+
+    throw Error (InvalidState, "Calibration::ReceptionModel::solve",
+		 "ndata=%d <= nfree=%d", fixed_params, free_params);
+
+  }
+
+  if (verbose)
+    cerr << "Calibration::ReceptionModel::solve check constraints" << endl;
+
+  // check that all inputs with unknown parameters have a CoherencyMeasurement
+  for (unsigned ipath=0; ipath < get_num_transformation(); ipath++) {
+    for (unsigned isource=0; isource < get_num_input(); isource++) {
+      
+      bool need_source = false;
+
+      set_input_index (isource);
+      const MEAL::Function* state = get_input ();
+      
+      for (unsigned iparam=0; iparam < state->get_nparam(); iparam++)
+	if( state->get_infit(iparam) )
+	  need_source = true;
+      
+      if (need_source && !has_source[isource]) {
+
+	for (iparm=0; iparm < get_nparam(); iparm++)
+	  set_Estimate (iparm, 0.0);
+
+	throw Error (InvalidRange, "Calibration::ReceptionModel::solve",
+		     "input source %d with free parameter(s) not observed",
+		     isource);
+
+      }
+
+    }
+  }
+
+  // the engine used to find the chi-squared minimum
+  MEAL::LevenbergMarquardt< Jones<double> > fit;
+  if (solve_verbose)
+    fit.verbose = 1;
+
+  // The abscissa, ordinate and ordinate error are contained in
+  // Calibration::CoherencyMeasurementSet
+  vector< Estimate<char> > fake (data.size());
+
+  if (verbose)
+    cerr << "Calibration::ReceptionModel::solve compute initial fit" << endl;
+
+  float best_chisq = fit.init (data, fake, *this);
+
+  unsigned close_to_min = 0;
+
+  fit.lamda = 1e-5;
+  fit.lamda_increase_factor = 10;
+  fit.lamda_decrease_factor = 0.5;
+
+  if (verbose)
+    cerr << "Calibration::ReceptionModel::solve chisq=" << best_chisq << endl;
+
+  unsigned iter = 1;
+  unsigned better = 0;
+  while (iter < maximum_iterations) {
+
+    float chisq = fit.iter (data, fake, *this);
+   
+    if (verbose)
+      cerr << "chisq=" << chisq << " lamda=" << fit.lamda << endl;
+
+    float delta_chisq = fabs(best_chisq - chisq);
+
+    if (chisq < best_chisq)  {
+      best_chisq = chisq;
+      better ++;
+    }
+ 
+    if (exact_solution) {
+      
+      if (chisq < convergence_threshold)
+	break;
+      
+    }
+    
+    else {
+
+      if (better > stay_at_minimum && delta_chisq/best_chisq < convergence_threshold)  {
+        close_to_min ++;
+        if (close_to_min == stay_at_minimum)
+          break;
+      }
+      else
+        close_to_min = 0;
+
+    }
+
+    iter ++;
+    
+  }
+  
+  if (iter >= maximum_iterations)
+    Error (InvalidState, "Calibration::ReceptionModel::solve",
+	   "maximum iterations=%d expired. best chi_sq=%f",
+	   maximum_iterations, best_chisq);
+
+  float constrained = fixed_params - free_params;
+
+  float reduced_chisq = best_chisq / constrained;
+
+  if (maximum_reduced && reduced_chisq > maximum_reduced) {
+
+    for (iparm=0; iparm < get_nparam(); iparm++)
+      set_Estimate (iparm, 0.0);
+
+    throw Error (InvalidState, "Calibration::ReceptionModel::solve",
+		 "bad solution reduced chisq=%f", reduced_chisq);
+
+  }
+
+  // if (verbose)
+  cerr << "Calibration::ReceptionModel::solve converged in " << iter
+       << " iterations. chi_sq=" << best_chisq << "/(" << fixed_params
+       << "-" << free_params << "=" << constrained << ")=" 
+       << reduced_chisq << endl;
+
+  vector<vector<double> > covariance;
+
+  try {
+    fit.result (*this, covariance);
+  }
+  catch (Error& error) {
+    for (iparm=0; iparm < get_nparam(); iparm++)
+      set_Estimate (iparm, 0.0);
+    throw error += "Calibration::ReceptionModel::solve";
+  }
+
+  // For data with normally-distributed errors, the variance of
+  // each model parameter is given by eqn. 15.6.4 NR
+
+  if (covariance.size() != get_nparam()) {
+
+    for (iparm=0; iparm < get_nparam(); iparm++)
+      set_Estimate (iparm, 0.0);
+
+    throw Error (InvalidState, "Calibration::ReceptionModel::solve",
+		 "MEAL::LevenbergMarquardt<Jones<double>>::result returns"
+		 "\n\tcovariance matrix dimension=%d != nparam=%d",
+		 covariance.size(), get_nparam());
+  }
+
+  for (iparm=0; iparm < get_nparam(); iparm++) {
+    if (verbose)
+      cerr << "Calibration::ReceptionModel::solve variance[" << iparm << "]="
+	   << covariance[iparm][iparm] << endl;
+
+    // Bi Qing has uncovered an error in our estimation of parameter error
+    // most likely due to an error in Numerical Recipes
+    set_variance (iparm, 2.0*covariance[iparm][iparm]);
+  }
+
+}
+
