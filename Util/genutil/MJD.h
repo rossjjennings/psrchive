@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/MJD.h,v $
-   $Revision: 1.22 $
-   $Date: 2004/12/27 13:43:49 $
+   $Revision: 1.23 $
+   $Date: 2005/01/26 12:07:28 $
    $Author: straten $ */
 
 #ifndef __GENUTIL_MJD_H
@@ -126,7 +126,6 @@ class MJD {
   double get_fracsec() const {return(fracsec);};
 
   // return LST in hours (longitude given in degrees)
-  double LST (float longitude) const;
   double LST (double longitude) const;
 
   std::string printdays (unsigned precision) const;
