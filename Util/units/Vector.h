@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Vector.h,v $
-   $Revision: 1.2 $
-   $Date: 2003/04/10 11:55:44 $
+   $Revision: 1.3 $
+   $Date: 2003/06/11 08:52:04 $
    $Author: straten $ */
 
 #ifndef __Vector_H
@@ -109,6 +109,20 @@ public:
     { Vector v;  v[i] = 1.0; return v; }
 
 };
+
+//! Cross product
+template <typename T> 
+const Vector<T,3> cross (const Vector<T,3>& a, const Vector<T,3>& b)
+{
+  Vector<T,3> result;
+  unsigned j, k;
+  for (unsigned i=0; i<3; i++) {
+    j = (i+1)%3;  k = (i+2)%3;
+    result[i] = a[j]*b[k] - a[k]*b[j];
+  }
+
+  return result;
+}
 
 //! Useful for quickly printing the components
 template<typename T, unsigned N>
