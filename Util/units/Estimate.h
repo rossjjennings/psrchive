@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Estimate.h,v $
-   $Revision: 1.29 $
-   $Date: 2005/01/30 09:08:11 $
+   $Revision: 1.30 $
+   $Date: 2005/02/13 08:15:21 $
    $Author: straten $ */
 
 #ifndef __Estimate_h
@@ -157,7 +157,7 @@ template <class T, class U> struct DatumTraits< Estimate<T,U> >
   { return t.val; }
 };
 
-#if defined(__ICC) || ( defined(__GNUC__) && __GNUC__ < 3 )
+#ifdef PROMOTE_TRAITS_SPECIALIZE
 
 template <class T, class U, class V, class W>
 class PromoteTraits< Estimate<T,U>, Estimate<V,W> >

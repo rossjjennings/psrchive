@@ -11,6 +11,10 @@
 
 */
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #include <fstream>
 #include <vector>
 #include <string>
@@ -39,6 +43,10 @@ int main () {
 	"public:\n"
 	"  typedef " << types[max(i,j)] << " promote_type;\n"
 	"};\n" << endl;
+
+#if !defined(HAVE_BEST_PARTIAL_SPECIALIZATION) | !defined(HAVE_DEFAULT_PARTIAL_SPECIALIZATION)
+  out << "#define PROMOTE_TRAITS_SPECIALIZE 1\n" << endl;
+#endif
 
   out << "#endif // !__MEAL_PromoteTraits_h\n" << endl;
 
