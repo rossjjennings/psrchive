@@ -1,6 +1,6 @@
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/Timer/timer.h,v $
-   $Revision: 1.14 $
-   $Date: 2004/07/28 15:58:30 $
+   $Revision: 1.15 $
+   $Date: 2004/08/13 12:59:43 $
    $Author: straten $ */
 
 /* include file for the main timer structure                            */
@@ -211,11 +211,7 @@ struct timer {
 
   char rcvr_id[RCVR_ID_STRLEN];      /* (T) Rcvr ID from FCC */
 
-#if !defined(MALIGN_DOUBLE)
 #define TIMER_SPACE 184
-#else
-#define TIMER_SPACE 180
-#endif
 
   /* NB! SPACE IS ALWAYS THE LAST THING */
   char space[TIMER_SPACE];
