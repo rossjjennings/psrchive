@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/tempo++.h,v $
-   $Revision: 1.10 $
-   $Date: 2001/11/08 04:10:25 $
-   $Author: cwest $ */
+   $Revision: 1.11 $
+   $Date: 2002/06/13 04:11:03 $
+   $Author: straten $ */
 
 #ifndef __TEMPO_PP_H
 #define __TEMPO_PP_H
@@ -78,24 +78,14 @@ namespace Tempo {
   
   // returns a polyco valid over the range in MJD specified by m1 and m2
   polyco get_polyco (const psrephem& eph,
-		  const MJD& m1=unspecified, const MJD& m2=unspecified, 
-		  double nspan=960, int ncoeff=12, int maxha=8, 
-		  int tel=7, double centrefreq=1400.0);
-  
-  polyco get_polyco (const psrephem& eph,
-		     const MJD& m1, const MJD& m2, 
-		     double nspan, int ncoeff, int maxha, 
-		     char tel, double centrefreq);
-
-  void set_polyco (polyco& poly, const psrephem& eph,
-		  const MJD& m1=unspecified, const MJD& m2=unspecified, 
-		  double nspan=960, int ncoeff=12, int maxha=8, 
-		  int tel=7, double centrefreq=1400.0);
+		     const MJD& m1=unspecified, const MJD& m2=unspecified, 
+		     double nspan=960, int ncoeff=12, int maxha=8, 
+		     char tel='7', double centrefreq=1400.0);
   
   void set_polyco (polyco& poly, const psrephem& eph,
-		   const MJD& m1, const MJD& m2, 
-		   double nspan, int ncoeff, int maxha, 
-		   char tel, double centrefreq);
+		   const MJD& m1=unspecified, const MJD& m2=unspecified, 
+		   double nspan=960, int ncoeff=12, int maxha=8, 
+		   char tel='7', double centrefreq=1400.0);
   
   polyco span (const polyco& first_poly, const polyco& second_poly,
 	       const psrephem& pephem);
