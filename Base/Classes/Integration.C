@@ -235,6 +235,24 @@ void Pulsar::Integration::bscrunch (int nscrunch)
     
 void Pulsar::Integration::pscrunch()
 {
+  if (verbose) {
+
+    switch (get_poln_state()) {
+    case Poln::Coherence:
+      cerr << "Integration::pscrunch Coherency Products" << endl;
+      break;
+    case Poln::PPQQ:
+      cerr << "Integration::pscrunch Square Law Detected - 2 Polns" << endl;
+      break;
+    case Poln::Stokes:
+      cerr << "Integration::pscrunch Stokes Parameters" << endl;
+      break;
+    default:
+      cerr << "Integration::pscrunch something else" << endl;
+      break;
+    }
+
+  }
   if (get_poln_state() == Poln::Coherence || get_poln_state() == Poln::PPQQ) {
 
     if (get_npol() != 2)
