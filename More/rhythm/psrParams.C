@@ -53,6 +53,13 @@ void psrParams::get_psrephem (psrephem& eph)
       break;
 
     case 2:  // RAs
+      if (verbose)
+	cerr << "psrParams::get_psrephem Angle (RA)" << endl;
+      if (p->getAngle().getradians() < 0.0)
+	eph.value_double[ieph] = (p->getAngle().getradians() + 2.0*M_PI)/(2.0*M_PI);
+      else
+        eph.value_double[ieph] = p->getAngle().getradians() / (2.0 * M_PI);
+      break;
     case 3:  // DECs
       if (verbose)
 	cerr << "psrParams::get_psrephem Angle :" << parmNames[ieph] << endl;

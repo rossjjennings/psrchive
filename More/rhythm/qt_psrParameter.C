@@ -213,7 +213,9 @@ public:
       value.displayDMS ();
     }
   };
-
+  // Added this to tell the qt_Angle what type it is  
+  void sethms(bool _hms) {value.sethms(_hms);};
+  
   Angle getAngle () const { return value.getAngle (); };
   void setAngle (const Angle& val) { value.setAngle (val); };
 
@@ -250,7 +252,12 @@ qt_psrParameter* qt_psrParameter::factory (int ephind, QWidget* parent)
   case 1:  // any double
     return new qt_psrDouble (ephind, parmError[ephind]==1, parent);
 
-  case 2:  // RAs
+  case 2:  {
+    qt_psrAngle *ang;
+    ang = new   qt_psrAngle (ephind, parmError[ephind]==1, parent); 
+    ang->sethms(true);
+    return ang;
+	   } // RAs
   case 3:  // DECs
     return new qt_psrAngle (ephind, parmError[ephind]==1, parent);
 
@@ -288,7 +295,7 @@ void qt_psrParameter::setValue (psrParameter* parm)
     setDouble ( parm->getDouble() );
     break;
 
-  case 2:  // RAs
+  case 2:   // RAs
   case 3:  // DECs
     setAngle ( parm->getAngle() );
     break;
@@ -324,6 +331,7 @@ psrParameter* qt_psrParameter::duplicate ()
     break;
 
   case 2:  // RAs
+    return new psrAngle ( ephio_index, getAngle(), getError(), getFit(), true );
   case 3:  // DECs
     return new psrAngle ( ephio_index, getAngle(), getError(), getFit() );
     break;

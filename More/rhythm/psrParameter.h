@@ -212,7 +212,7 @@ class psrMJD : public psrParameter
 class psrAngle : public psrParameter
 {
  public:
-  psrAngle (int ephind, const Angle& angle, double err=0, bool in_fit=false) :
+  psrAngle (int ephind, const Angle& angle, double err=0, bool in_fit=false, bool RA=false) :
     psrParameter (ephind, in_fit, err),
     value (angle) { };
 
@@ -225,7 +225,14 @@ class psrAngle : public psrParameter
     { value = val; error = err; };
   void   setAngle (const Angle& val)
     { value = val; };
-  
+ 
+  void is_RA () { 
+                cout << "Setting Angle to RA" << endl;
+                value.setWrapPoint(2*M_PI);
+   		if (value.getradians() < 0) {
+		   value.setradians(value.getradians()+2*M_PI);
+		};
+  };	
  protected:
   Angle value;
 };

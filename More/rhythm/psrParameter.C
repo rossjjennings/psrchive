@@ -148,7 +148,11 @@ psrParameter* psrParameter::duplicate ()
   case 1:  // any double
     return new psrDouble ( *dynamic_cast<psrDouble*>(this) );
 
-  case 2:  // RAs
+  case 2:  {
+	     psrAngle *pangle = new psrAngle (*dynamic_cast<psrAngle*>(this));
+	     pangle->is_RA();
+	     return pangle;
+	   }// RAs
   case 3:  // DECs
     return new psrAngle ( *dynamic_cast<psrAngle*>(this) );
 
