@@ -11,7 +11,7 @@
            E = eccentric_anomoly
            e = eccentricity
 
-   solves: M = E - e sin(E)     [ using:  d/dE(M) = 1 - e cos(E) ]
+   solves: M = E - e sin(E)     [ using:  dM/dE = 1 - e cos(E) ]
    ************************************************************************ */
 double eccentric_anomoly (double mean_anomoly, double eccentricity)
 {
