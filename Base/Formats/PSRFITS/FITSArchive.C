@@ -167,7 +167,9 @@ void Pulsar::FITSArchive::load_header (const char* filename)
   
   // do not return comments in fits_read_key
   char* comment = 0;
-  
+
+  auto_ptr<char> tempstr (new char[FLEN_VALUE]);
+
   // Open the data file  
   if (verbose == 3)
     cerr << "FITSArchive::load_header fits_open_file (" << filename << ")" 
@@ -187,105 +189,14 @@ void Pulsar::FITSArchive::load_header (const char* filename)
   ObsExtension*      obs_ext  = get<ObsExtension>();
   FITSHdrExtension*  hdr_ext  = get<FITSHdrExtension>();
 
-  // /////////////////////////////////////////////////////////////////
-  
-  // Read start MJD  
-  long day;
-  long sec;
-  double frac;
-  
-  if (verbose == 3)
-    cerr << "FITSArchive::load_header reading MJDs" << endl;
-  
-  fits_read_key (fptr, TLONG, "STT_IMJD", &day, comment, &status);
-  fits_read_key (fptr, TLONG, "STT_SMJD", &sec, comment, &status);
-  fits_read_key (fptr, TDOUBLE, "STT_OFFS", &frac, comment, &status);
-  
-  if (status != 0) {
-    cerr << "FITSArchive::load_header WARNING no STT_*MJD" << endl;
-    hdr_ext->start_time = reference_epoch = 0.0;
-  }
-  else  {
-    hdr_ext->start_time = reference_epoch = MJD ((int)day, (int)sec, frac);
-    if (verbose == 3)
-      cerr << "Got start time: " << hdr_ext->start_time.printall() << endl;
-  }
- 
-  if (verbose == 3)
-    cerr << "FITSArchive::load_header reading coordinates" << endl;
-  
-  // Read where the telescope was pointing
-  
-  char* tempstr = new char[FLEN_VALUE];
-  
-  fits_read_key (fptr, TSTRING, "COORD_MD", tempstr, comment, &status);
-  if (status != 0) {
-    if (verbose == 3) {
-      fits_get_errstatus(status,error);
-      cerr << "FITSArchive::load_header WARNING reading coord mode: " 
-	   << error << endl;
-    }
-    status = 0;
-  }
-  
-  hdr_ext->coordmode = tempstr;
-  if (verbose == 3)
-    cerr << "Got coordinate type: " << tempstr << endl;
 
-  sky_coord coord;
-  
-  if (hdr_ext->coordmode == "J2000") {
 
-    fits_read_key (fptr, TSTRING, "STT_CRD1", tempstr, comment, &status);
-    string hms = tempstr;
-
-    fits_read_key (fptr, TSTRING, "STT_CRD2", tempstr, comment, &status);
-    coord.setHMSDMS(hms.c_str(),tempstr);
-  }     
-  else if (hdr_ext->coordmode == "Gal") {
-    double co_ord1, co_ord2;
-    AnglePair temp;
-    fits_read_key (fptr, TDOUBLE, "STT_CRD1", &co_ord1, comment, &status);
-    fits_read_key (fptr, TDOUBLE, "STT_CRD2", &co_ord2, comment, &status);
-    temp.setDegrees(co_ord1,co_ord2);
-    coord.setGalactic(temp);
-  }
-  else if (hdr_ext->coordmode == "Ecliptic") {
-    if (verbose == 3)
-      cerr << "WARNING: FITSArchive::load_header Ecliptic COORD_MD not implemented" 
-	   << endl;
-  }
-  else if (hdr_ext->coordmode == "AZEL") {
-    if (verbose == 3)
-      cerr << "WARNING: FITSArchive::load_header AZEL COORD_MD not implemented"
-	   << endl;
-  }
-  else if (hdr_ext->coordmode == "HADEC") {
-    if (verbose == 3)
-      cerr << "WARNING: FITSArchive::load_header HADEC COORD_MD not implemented"
-	   << endl;
-  }
-  else
-    if (verbose == 3)
-      cerr << "WARNING: FITSArchive::load_header unknown COORD_MD"
-	   << endl;
-  
-  if (status != 0) {
-    fits_get_errstatus(status,error);
-    if (verbose == 3)
-      cerr << "WARNING: FITSArchive::load_header error reading coordinate data "
-	   << error << endl;
-    status = 0;
-  }
-  else
-    set_coordinates (coord);
-  
   // Pulsar FITS header definiton version
 
   if (verbose == 3)
     cerr << "FITSArchive::load_header reading FITS header version" << endl;
   
-  fits_read_key (fptr, TSTRING, "HDRVER", tempstr, comment, &status);
+  fits_read_key (fptr, TSTRING, "HDRVER", tempstr.get(), comment, &status);
   if (status != 0) {
     if (verbose == 3) {
       fits_get_errstatus(status,error);
@@ -295,17 +206,17 @@ void Pulsar::FITSArchive::load_header (const char* filename)
     status = 0;
   }
   else 
-    hdr_ext->hdrver = tempstr;
+    hdr_ext->hdrver = tempstr.get();
   
   if (verbose == 3)
-    cerr << "Got: Version " << tempstr << endl;
+    cerr << "Got: Version " << tempstr.get() << endl;
   
   // File creation date
   
   if (verbose == 3)
     cerr << "FITSArchive::load_header reading file creation date" << endl;
 
-  fits_read_key (fptr, TSTRING, "DATE", tempstr, comment, &status);
+  fits_read_key (fptr, TSTRING, "DATE", tempstr.get(), comment, &status);
   if (status != 0) {
     if (verbose == 3) {
       fits_get_errstatus(status,error);
@@ -315,14 +226,14 @@ void Pulsar::FITSArchive::load_header (const char* filename)
     status = 0;
   }
   else
-    hdr_ext->creation_date = tempstr;
+    hdr_ext->creation_date = tempstr.get();
 
   // Name of observer
   
   if (verbose == 3)
     cerr << "FITSArchive::load_header reading observer name" << endl;
   
-  fits_read_key (fptr, TSTRING, "OBSERVER", tempstr, comment, &status);
+  fits_read_key (fptr, TSTRING, "OBSERVER", tempstr.get(), comment, &status);
   if (status != 0) {
     if (verbose == 3) {
       fits_get_errstatus(status,error);
@@ -332,17 +243,17 @@ void Pulsar::FITSArchive::load_header (const char* filename)
     status = 0;
   }
   else
-    obs_ext->observer = tempstr;
+    obs_ext->observer = tempstr.get();
   
   if (verbose == 3)
-    cerr << "Got observer: " << tempstr << endl;
+    cerr << "Got observer: " << tempstr.get() << endl;
   
   // Project ID
   
   if (verbose == 3)
     cerr << "FITSArchive::load_header reading project ID" << endl;
 
-  fits_read_key (fptr, TSTRING, "PROJID", tempstr, comment, &status);
+  fits_read_key (fptr, TSTRING, "PROJID", tempstr.get(), comment, &status);
   if (status != 0) {
     if (verbose == 3) {
       fits_get_errstatus(status,error);
@@ -352,17 +263,17 @@ void Pulsar::FITSArchive::load_header (const char* filename)
     status = 0;
   }
   else
-    obs_ext->project_ID = tempstr;
+    obs_ext->project_ID = tempstr.get();
 
   if (verbose == 3)
-    cerr << "Got PID: " << tempstr << endl;
+    cerr << "Got PID: " << tempstr.get() << endl;
   
   // Telescope name
     
   if (verbose == 3)
     cerr << "FITSArchive::load_header reading telescope name" << endl;
     
-  fits_read_key (fptr, TSTRING, "TELESCOP", tempstr, comment, &status);
+  fits_read_key (fptr, TSTRING, "TELESCOP", tempstr.get(), comment, &status);
   if (status != 0) {
     if (verbose == 3) {
       fits_get_errstatus(status,error);
@@ -372,7 +283,7 @@ void Pulsar::FITSArchive::load_header (const char* filename)
     status = 0;
   }
   else {
-    string mystr = tempstr;
+    string mystr = tempstr.get();
     obs_ext->telescope = mystr.substr(mystr.find_first_not_of(" ",0),
 				      mystr.length());
   }
@@ -415,7 +326,7 @@ void Pulsar::FITSArchive::load_header (const char* filename)
   sscanf((hdr_ext->hdrver.substr(0,index)).c_str(), "%d", &major_number);
   sscanf((hdr_ext->hdrver.substr(index+1,hdr_ext->hdrver.length())).c_str(), 
 	 "%f", &minor_number);
-  if ((strcmp(tempstr, "WBCORR") == 0) && ((major_number == 1) &&
+  if ((strcmp(tempstr.get(), "WBCORR") == 0) && ((major_number == 1) &&
 						 (minor_number < 14))) {
     scale_cross_products = true;
     if (verbose == 3) {
@@ -425,34 +336,38 @@ void Pulsar::FITSArchive::load_header (const char* filename)
   }
 
 
-  // Read the name of the source
-
-  if (verbose == 3)
-    cerr << "FITSArchive::load_header reading source name" << endl;
-
-  fits_read_key (fptr, TSTRING, "SRC_NAME", tempstr, comment, &status);
-  if (status != 0)
-    throw FITSError (status, "FITSArchive::load_header", 
-		     "fits_read_key SRC_NAME");
-  
-  set_source ( tempstr );
-  
   // Figure out what kind of observation it was
 
   if (verbose == 3)
     cerr << "FITSArchive::load_header reading OBS_MODE" << endl;
 
-  fits_read_key (fptr, TSTRING, "OBS_MODE", tempstr, comment, &status);
+  fits_read_key (fptr, TSTRING, "OBS_MODE", tempstr.get(), comment, &status);
   if (status != 0)
     throw FITSError (status, "FITSArchive::load_header", 
 		     "fits_read_key OBSTYPE");
   
-  if (strcmp(tempstr, "PSR") == 0 || strcmp(tempstr, "LEVPSR") == 0) {
+  string obs_mode = tempstr.get();
+
+
+  // Read the name of the source
+
+  if (verbose == 3)
+    cerr << "FITSArchive::load_header reading source name" << endl;
+
+  fits_read_key (fptr, TSTRING, "SRC_NAME", tempstr.get(), comment, &status);
+  if (status != 0)
+    throw FITSError (status, "FITSArchive::load_header", 
+		     "fits_read_key SRC_NAME");
+  
+  set_source ( tempstr.get() );
+  
+
+  if (obs_mode == "PSR" || obs_mode == "LEVPSR") {
     set_type ( Signal::Pulsar );
     if (verbose == 3)
       cerr << "FITSArchive::load_header using Signal::Pulsar" << endl;
   }
-  else if (strcmp(tempstr, "CAL") == 0 || strcmp(tempstr, "LEVCAL") == 0) {
+  else if (obs_mode == "CAL" || obs_mode == "LEVCAL") {
     
     if (get_source() == "HYDRA_O"  || get_source() == "VIRGO_O" ||
 	get_source() == "0918-1205_H" || get_source() == "3C353_O") {
@@ -474,17 +389,89 @@ void Pulsar::FITSArchive::load_header (const char* filename)
 	cerr << "FITSArchive::load_header using Signal::PolnCal" << endl;
     }
   }
-  else if (strcmp (tempstr, "PCM") == 0)
+  else if (obs_mode == "PCM")
     set_type ( Signal::Calibrator );
-  else if (strcmp (tempstr, "SEARCH") == 0)
+  else if (obs_mode == "SEARCH")
     set_type ( Signal::Unknown );
   else {
     if (verbose == 3)
       cerr << "FITSArchive::load_header WARNING unknown OBSTYPE = " 
-	   << tempstr <<endl;
+	   << tempstr.get() <<endl;
     set_type ( Signal::Unknown );
   }
   
+
+  // Read where the telescope was pointing
+  
+  if (verbose == 3)
+    cerr << "FITSArchive::load_header reading coordinates" << endl;
+    
+  fits_read_key (fptr, TSTRING, "COORD_MD", tempstr.get(), comment, &status);
+  if (status != 0) {
+    if (verbose == 3) {
+      fits_get_errstatus(status,error);
+      cerr << "FITSArchive::load_header WARNING reading coord mode: " 
+	   << error << endl;
+    }
+    status = 0;
+  }
+  
+  hdr_ext->coordmode = tempstr.get();
+  if (verbose == 3)
+    cerr << "Got coordinate type: " << tempstr.get() << endl;
+
+  sky_coord coord;
+  
+  if (hdr_ext->coordmode == "J2000") {
+
+    fits_read_key (fptr, TSTRING, "STT_CRD1", tempstr.get(), comment, &status);
+    string hms = tempstr.get();
+
+    fits_read_key (fptr, TSTRING, "STT_CRD2", tempstr.get(), comment, &status);
+    coord.setHMSDMS(hms.c_str(),tempstr.get());
+  }     
+  else if (hdr_ext->coordmode == "Gal") {
+    double co_ord1, co_ord2;
+    AnglePair temp;
+    fits_read_key (fptr, TDOUBLE, "STT_CRD1", &co_ord1, comment, &status);
+    fits_read_key (fptr, TDOUBLE, "STT_CRD2", &co_ord2, comment, &status);
+    temp.setDegrees(co_ord1,co_ord2);
+    coord.setGalactic(temp);
+  }
+  else if (hdr_ext->coordmode == "Ecliptic") {
+    if (verbose == 3)
+      cerr << "WARNING: FITSArchive::load_header Ecliptic COORD_MD not implemented" 
+	   << endl;
+  }
+  else if (hdr_ext->coordmode == "AZEL") {
+    if (verbose == 3)
+      cerr << "WARNING: FITSArchive::load_header AZEL COORD_MD not implemented"
+	   << endl;
+  }
+  else if (hdr_ext->coordmode == "HADEC") {
+    if (verbose == 3)
+      cerr << "WARNING: FITSArchive::load_header HADEC COORD_MD not implemented"
+	   << endl;
+  }
+  else
+    if (verbose)
+      cerr << "FITSArchive::load_header WARNING unknown COORD_MD" << endl;
+  
+  if (status != 0) {
+    fits_get_errstatus(status,error);
+    if (verbose == 3)
+      cerr << "WARNING: FITSArchive::load_header error reading coordinate data "
+	   << error << endl;
+    status = 0;
+  }
+  else
+    set_coordinates (coord);
+  
+
+
+
+
+
   if (get_type() != Signal::Pulsar && get_type() != Signal::Unknown)
     load_CalInfoExtension (fptr);
 
@@ -493,7 +480,7 @@ void Pulsar::FITSArchive::load_header (const char* filename)
   if (verbose == 3)
     cerr << "FITSArchive::load_header reading track mode" << endl;
 
-  fits_read_key (fptr, TSTRING, "TRK_MODE", tempstr, comment, &status);
+  fits_read_key (fptr, TSTRING, "TRK_MODE", tempstr.get(), comment, &status);
   if (status != 0) {
     if (verbose == 3) {
       fits_get_errstatus(status,error);
@@ -503,7 +490,7 @@ void Pulsar::FITSArchive::load_header (const char* filename)
     status = 0;
   }
   else
-    hdr_ext->trk_mode = tempstr;
+    hdr_ext->trk_mode = tempstr.get();
   
 
 
@@ -513,7 +500,7 @@ void Pulsar::FITSArchive::load_header (const char* filename)
   if (verbose == 3)
     cerr << "FITSArchive::load_header reading start date" << endl;
 
-  fits_read_key (fptr, TSTRING, "STT_DATE", tempstr, comment, &status);
+  fits_read_key (fptr, TSTRING, "STT_DATE", tempstr.get(), comment, &status);
   if (status != 0) {
     if (verbose == 3) {
       fits_get_errstatus(status,error);
@@ -523,14 +510,14 @@ void Pulsar::FITSArchive::load_header (const char* filename)
     status = 0;
   }
   else
-    hdr_ext->stt_date = tempstr;
+    hdr_ext->stt_date = tempstr.get();
   
   // Read the start UT
 
   if (verbose == 3)
     cerr << "FITSArchive::load_header reading start UT" << endl;
 
-  fits_read_key (fptr, TSTRING, "STT_TIME", tempstr, comment, &status);
+  fits_read_key (fptr, TSTRING, "STT_TIME", tempstr.get(), comment, &status);
   if (status != 0) {
     if (verbose == 3) {
       fits_get_errstatus(status,error);
@@ -540,14 +527,41 @@ void Pulsar::FITSArchive::load_header (const char* filename)
     status = 0;
   }
   else
-    hdr_ext->stt_time = tempstr;
+    hdr_ext->stt_time = tempstr.get();
+
+  // /////////////////////////////////////////////////////////////////
   
+  // Read start MJD  
+
+  long day;
+  long sec;
+  double frac;
+  
+  if (verbose == 3)
+    cerr << "FITSArchive::load_header reading MJDs" << endl;
+  
+  fits_read_key (fptr, TLONG, "STT_IMJD", &day, comment, &status);
+  fits_read_key (fptr, TLONG, "STT_SMJD", &sec, comment, &status);
+  fits_read_key (fptr, TDOUBLE, "STT_OFFS", &frac, comment, &status);
+  
+  if (status != 0) {
+    cerr << "FITSArchive::load_header WARNING no STT_*MJD" << endl;
+    hdr_ext->start_time = reference_epoch = 0.0;
+  }
+  else  {
+    hdr_ext->start_time = reference_epoch = MJD ((int)day, (int)sec, frac);
+    if (verbose == 3)
+      cerr << "Got start time: " << hdr_ext->start_time.printall() << endl;
+  }
+
   // Read the start LST (in seconds)
 
   if (verbose == 3)
     cerr << "FITSArchive::load_header reading start LST" << endl;
 
-  fits_read_key (fptr, TDOUBLE, "STT_LST", &(hdr_ext->stt_lst), comment, &status);
+  fits_read_key (fptr, TDOUBLE, "STT_LST", &(hdr_ext->stt_lst),
+		 comment, &status);
+
   if (status != 0) {
     if (verbose == 3) {
       fits_get_errstatus(status,error);
@@ -639,20 +653,20 @@ void Pulsar::FITSArchive::load_header (const char* filename)
       cerr << "FITSArchive::load_header there are " << numrows << " subints"
 	   << endl;
     
-    fits_read_key (fptr, TSTRING, "INT_TYPE", tempstr, comment, &status);
+    fits_read_key (fptr, TSTRING, "INT_TYPE", tempstr.get(), comment, &status);
     
     if (status == 0) {
-      if (strcmp(tempstr,"TIME") == 0 || strcmp(tempstr,"") == 0) {
+      if (strcmp(tempstr.get(),"TIME") == 0 || strcmp(tempstr.get(),"") == 0) {
 	// Do nothing
       }
       else {
-	if (strcmp(tempstr,"BINPHSPERI") == 0)
+	if (strcmp(tempstr.get(),"BINPHSPERI") == 0)
 	  add_extension(new PeriastronOrder());
-	else if (strcmp(tempstr,"BINPHSASC") == 0)
+	else if (strcmp(tempstr.get(),"BINPHSASC") == 0)
 	  add_extension(new BinaryPhaseOrder());
-	else if (strcmp(tempstr,"BINLNGPERI") == 0)
+	else if (strcmp(tempstr.get(),"BINLNGPERI") == 0)
 	  add_extension(new BinLngPeriOrder());
-	else if (strcmp(tempstr,"BINLNGASC") == 0)
+	else if (strcmp(tempstr.get(),"BINLNGASC") == 0)
 	  add_extension(new BinLngAscOrder());
 	else
 	  throw Error(InvalidParam, "FITSArchive::load_header",
@@ -675,9 +689,8 @@ void Pulsar::FITSArchive::load_header (const char* filename)
   if (verbose == 3)
     cerr << "FITSArchive::load_header exit" << endl;
   
-
-  delete[] tempstr;
 }
+
 //
 // End of load_header function
 // /////////////////////////////////////////////////////////////////////
@@ -776,9 +789,6 @@ try {
   fits_update_key (fptr, TSTRING, "SRC_NAME",
 		   const_cast<char*>(source.c_str()), comment, &status);
     
-  fits_update_key (fptr, TSTRING, "BACKEND", 
-		   (char*)get_backend().c_str(), comment, &status);
-  
   string coord1, coord2;
 
   const FITSHdrExtension* hdr_ext = get<FITSHdrExtension>();
@@ -799,6 +809,10 @@ try {
     
     coord1 = radec.angle1.getHMS();
     coord2 = radec.angle2.getDMS();
+
+    // If no FITSHdrExtension is present, assume J2000
+    char* j2000 = "J2000";
+    fits_update_key (fptr, TSTRING, "COORD_MD", j2000, comment, &status);
 
   }
 
@@ -832,9 +846,29 @@ try {
   }
 
   {
+
     const WidebandCorrelator* ext = get<WidebandCorrelator>();
     if (ext) 
       unload (fptr, ext);
+
+    else {
+
+      const Backend* backend = get<Backend>();
+
+      if (backend) {
+
+	if (verbose == 3)
+	  cerr << "FITSArchive::unload " << backend->get_extension_name()
+	       << " name=" << backend->get_name() << endl;
+
+	fits_update_key (fptr, TSTRING, "BACKEND", 
+			 const_cast<char*>(backend->get_name().c_str()),
+			 comment, &status);
+
+      }
+
+    }
+
   }
 
   {
