@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Profile.h,v $
-   $Revision: 1.9 $
-   $Date: 2002/04/16 15:52:02 $
+   $Revision: 1.10 $
+   $Date: 2002/04/18 08:53:21 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Profile_h
@@ -39,8 +39,11 @@ namespace Pulsar {
     //! null constructor produces an empty profile of zero size
     Profile () { init(); }
 
+    //! copy constructor
+    Profile (const Profile& profile) { init(); operator = (profile); }
+
     //! destructor destroys the data area
-    virtual ~Profile () { resize(0); }
+    virtual ~Profile ();
     
     //! returns a pointer to a new copy of self
     virtual Profile* clone ();
@@ -125,15 +128,13 @@ namespace Pulsar {
     void stats (double* mean, double* variance, double* varmean,
 		int istart, int iend) const;
 
-    //! fit for the shift and return a Tempo::toa object
-    Tempo::toa toa (const Profile& std_prf,
-		    const MJD& prf_start_time, double period, int nsite,
-		    const char* fname, int isubint, int isubchan, int ipol);
+    //! fit to the standard and return a Tempo::toa object
+    Tempo::toa toa (const Profile& std, const MJD& mjd, 
+		    double period, char nsite);
 
-    static Tempo::toa toa (double phase, float ephase,
-			   const MJD& prf_start_time, double freq,
-			   double period, int nsite, const char* fname, 
-			   int isubint, int isubchan, int ipol);
+    //! return the shift (in turns) after fitting to the standard
+    double shift (const Profile& std, float& ephase,
+		  float& snrfft, float& esnrfft) const;
 
     //! get the number of bins
     /*! This attribute may be set only through Profile::resize */
@@ -180,6 +181,7 @@ namespace Pulsar {
     void init ();
 
   private:
+
     //! fractional phase window used to find rise and fall of running mean
     static float transition_duty_cycle;
 
@@ -191,15 +193,22 @@ namespace Pulsar {
 
     //! number of bins in the profile
     int nbin;
+
     //! amplitudes at each pulse phase
     float *amps;
+
     //! centre frequency of profile (in MHz)
     double centrefreq;
+
     //! weight of profile
     float weight;
+
     //! polarization measure of amplitude data
     Poln::Measure state;
 
+    //! interface to model_profile used by Profile::shift
+    void fftconv (Profile& std, double& shift, float& eshift, 
+		  float& snrfft, float& esnrfft);
   };
 
 }
