@@ -1,6 +1,6 @@
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Attic/environ.h,v $
-   $Revision: 1.6 $
-   $Date: 2002/05/29 10:06:36 $
+   $Revision: 1.7 $
+   $Date: 2003/06/16 10:08:35 $
    $Author: straten $ */
 
 /*
@@ -115,7 +115,7 @@ typedef struct {double f1; double f2;} float128;
 
 
 
-/* For future reference (heaven forbid) */
+/* For future reference */
 
 #ifdef WINDOWS
 typedef short int16;
