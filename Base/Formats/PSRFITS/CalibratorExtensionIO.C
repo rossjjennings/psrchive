@@ -1,4 +1,5 @@
 #include "Pulsar/CalibratorExtensionIO.h"
+#include <limits>
 
 void Pulsar::load_Estimates (fitsfile* fptr, vector< Estimate<double> >& data,
 			     char* column_name)
@@ -13,8 +14,10 @@ void Pulsar::load_Estimates (fitsfile* fptr, vector< Estimate<double> >& data,
   
   // Read the data values
   fits_get_colnum (fptr, CASEINSEN, column_name, &colnum, &status);
-  
-  fits_read_col (fptr, TFLOAT, colnum, 1, 1, dimension, &fits_nullfloat,
+
+  float nullfloat = std::numeric_limits<float>::infinity();
+
+  fits_read_col (fptr, TFLOAT, colnum, 1, 1, dimension, &nullfloat,
 		 temp.get(), &initflag, &status);
   
   if (status)
@@ -36,8 +39,8 @@ void Pulsar::load_Estimates (fitsfile* fptr, vector< Estimate<double> >& data,
   
   // Read the data errors
   fits_get_colnum (fptr, CASEINSEN, column_name, &colnum, &status);
-  
-  fits_read_col (fptr, TFLOAT, colnum, 1, 1, dimension, &fits_nullfloat, 
+
+  fits_read_col (fptr, TFLOAT, colnum, 1, 1, dimension, &nullfloat, 
 		 temp.get(), &initflag, &status);
   
   if (status)

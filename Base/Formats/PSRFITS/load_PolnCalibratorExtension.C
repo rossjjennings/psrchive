@@ -4,6 +4,7 @@
 
 #include <stdlib.h>
 #include <assert.h>
+#include <limits>
 
 void Pulsar::FITSArchive::load_PolnCalibratorExtension (fitsfile* fptr)
 {
@@ -85,7 +86,9 @@ void Pulsar::FITSArchive::load_PolnCalibratorExtension (fitsfile* fptr)
   int initflag = 0;
   fits_get_colnum (fptr, CASEINSEN, "DATA", &colnum, &status);
 
-  fits_read_col (fptr, TFLOAT, colnum, 1, 1, dimension, &fits_nullfloat, 
+  float nullfloat = std::numeric_limits<float>::infinity();
+
+  fits_read_col (fptr, TFLOAT, colnum, 1, 1, dimension, &nullfloat, 
 		 data.get(), &initflag, &status);
 
   if (status)
@@ -110,7 +113,7 @@ void Pulsar::FITSArchive::load_PolnCalibratorExtension (fitsfile* fptr)
 
   fits_get_colnum (fptr, CASEINSEN, "DATAERR", &colnum, &status);
 
-  fits_read_col (fptr, TFLOAT, colnum, 1, 1, dimension, &fits_nullfloat, 
+  fits_read_col (fptr, TFLOAT, colnum, 1, 1, dimension, &nullfloat, 
 		 data.get(), &initflag, &status);
 
   if (status)

@@ -2,6 +2,7 @@
 #include "Pulsar/PolnCalibratorExtension.h"
 #include "Pulsar/CalibratorExtensionIO.h"
 
+#include <limits>
 #include <assert.h>
 
 void Pulsar::FITSArchive::unload (fitsfile* fptr, 
@@ -55,9 +56,11 @@ void Pulsar::FITSArchive::unload (fitsfile* fptr,
   long dimension = nchan * ncpar;  
   auto_ptr<float> data ( new float[dimension] );
 
+  float nullfloat = std::numeric_limits<float>::infinity();
+
   int count = 0;
   for (count = 0; count < dimension; count++)
-    data.get()[count] = fits_nullfloat;
+    data.get()[count] = nullfloat;
 
   count = 0;
   for (int i = 0; i < nchan; i++)
