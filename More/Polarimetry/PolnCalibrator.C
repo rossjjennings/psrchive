@@ -98,12 +98,13 @@ void Pulsar::PolnCalibrator::create (unsigned nchan)
 
   unsigned window = unsigned (calibrator->get_nchan() * median_smoothing);
 
-//  if (verbose)
+  if (verbose)
     cerr << "Pulsar::PolnCalibrator::create median smoothing window width = "
 	 << window << " channels" << endl;
 
-  if (window < 2)
-    window = 2;
+  // even a 3-window sort can zap a single channel birdie
+  if (window < 3)
+    window = 3;
 
   for (ipol=0; ipol < npol; ipol++) {
     fft::median_smooth (cal_lo[ipol], window);
