@@ -375,7 +375,7 @@ int az_zen_para (double ra, double dec, float lst, float latitude,
   if (lst < 0.0 || lst > 24.0)
     return -1;
 
-  F772C2(sla_altaz) (&HA, &dec, &dlat, 
+  F772C(sla_altaz) (&HA, &dec, &dlat, 
 	      &azimuth, &ignore, &ignore,
 	      &altitude,  &ignore, &ignore,
 	      &PA,      &ignore, &ignore);
