@@ -82,13 +82,17 @@ void Pulsar::Archive::Agent::report ()
   for (ip=0; ip < plugins.ok.size(); ip++)
     cerr << "  " << plugins.ok[ip] << endl;
 
+  cerr << endl;
+
   if (plugins.fail.size() == 0)
     return;
 
-  cerr << "\nArchive::Agent::report Failed plugins:" << endl;
+  cerr << "Archive::Agent::report Failed plugins:" << endl;
 
   for (ip=0; ip < plugins.fail.size(); ip++)
     cerr << "##############################################################\n"
 	 << plugins.fail[ip] << endl;
+
+  cerr << endl;
 }
 
