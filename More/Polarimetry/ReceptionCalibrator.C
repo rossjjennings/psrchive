@@ -929,6 +929,8 @@ void Pulsar::ReceptionCalibrator::solve (int only_ichan)
     model[ichan]->valid = false;
   }
 
+  Calibration::ReceptionModel::solve_wait ();
+
   is_fit = true;
 }
 
