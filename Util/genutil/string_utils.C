@@ -114,6 +114,9 @@ vector<string> stringlines(const string& str)
     cptr++;
   }
 
+  if( start!=dend )
+    lines.push_back( string(start,dend) );
+
   return lines;
 }
 
