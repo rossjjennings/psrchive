@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Integration.h,v $
-   $Revision: 1.18 $
-   $Date: 2002/04/23 08:48:03 $
+   $Revision: 1.19 $
+   $Date: 2002/04/23 09:00:18 $
    $Author: pulsar $ */
 
 /*
@@ -154,6 +154,16 @@ namespace Pulsar {
     //! Get the MJD at the end of the integration (convenience interface)
     MJD get_end_time () const;
 
+    //! Get the frequency of the given channel
+    virtual double get_frequency (int ichan) const;
+    //! Set the frequency of the given channel
+    virtual void set_frequency (int ichan, double frequency);
+
+    //! Get the weight of the given channel
+    virtual float get_weight (int ichan) const;
+    //! Set the weight of the given channel
+    virtual void set_weight (int ichan, float weight);
+    
     //! Get the number of chans
     /*! This attribute may be set only through Integration::resize */
     virtual int get_nchan () const = 0;
@@ -221,16 +231,6 @@ namespace Pulsar {
     /*! Called by Integration methods to update child attribute */
     virtual void set_npol (int npol) = 0;
 
-    //! Get the frequency of the given channel
-    virtual double get_frequency (int ichan) const;
-    //! Set the frequency of the given channel
-    virtual void set_frequency (int ichan, double frequency);
-
-    //! Get the weight of the given channel
-    virtual float get_weight (int ichan) const;
-    //! Set the weight of the given channel
-    virtual void set_weight (int ichan, float weight);
-    
     //! The data area
     vector< vector<Profile*> > profiles;
 
