@@ -10,7 +10,7 @@
 /*! When transforming Profile objects, the absolute gain of the
   transformation may artificially inflate the weight of the Profile
   and incorrectly skew mean results. */
-bool Pulsar::PolnProfile::correct_weights = true;
+bool Pulsar::PolnProfile::normalize_weight_by_absolute_gain = false;
 
 Pulsar::PolnProfile::PolnProfile ()
 {
@@ -238,7 +238,7 @@ void Pulsar::PolnProfile::transform (const Jones<double>& response)
     throw Error (InvalidState, "Pulsar::PolnProfile::transform",
 		 "unknown state=" + Signal::State2string(state));
 
-  if (correct_weights)
+  if (normalize_weight_by_absolute_gain)
     for (unsigned ipol=0; ipol < 4; ipol++)
       get_profile(ipol)->set_weight ( get_Profile(ipol)->get_weight() / Gain );
 

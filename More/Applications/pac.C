@@ -52,10 +52,10 @@ void usage ()
     "\n"
     "Expert options: \n"
     "  -f                     Override flux calibration flag\n"
+    "  -W                     Normalize profile weights by absolute gain \n"
     "\n"
     "Output options: \n"
     "  -e extension           Use this extension when unloading results \n"
-    "  -W                     do not correct profile weights \n"
     "  -n [q|u|v]             Flip the sign of Stokes Q, U, or V \n"
     "\n"
     "See http://astronomy.swin.edu.au/pulsar/software/manuals/pac.html"
@@ -132,7 +132,7 @@ int main (int argc, char *argv[]) {
       break;
 
     case 'i':
-      cout << "$Id: pac.C,v 1.61 2004/12/15 15:58:32 straten Exp $" << endl;
+      cout << "$Id: pac.C,v 1.62 2005/03/10 06:25:06 straten Exp $" << endl;
       return 0;
 
     case 'A':
@@ -216,7 +216,7 @@ int main (int argc, char *argv[]) {
       break;
 
     case 'W':
-      Pulsar::PolnProfile::correct_weights = false;
+      Pulsar::PolnProfile::normalize_weight_by_absolute_gain = true;
       break;
 
     case 'b':

@@ -17,8 +17,8 @@ namespace Pulsar {
     
   public:
 
-    //! Flag set when PolnProfile::transform should correct Profile::weight
-    static bool correct_weights;
+    //! When set, PolnProfile::transform will normalize the Profile::weight
+    static bool normalize_weight_by_absolute_gain;
 
     //! Null constructor
     PolnProfile ();
