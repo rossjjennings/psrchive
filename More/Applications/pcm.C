@@ -1,26 +1,39 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pcm.C,v $
-   $Revision: 1.14 $
-   $Date: 2003/12/26 09:06:18 $
+   $Revision: 1.15 $
+   $Date: 2004/01/02 18:11:46 $
    $Author: straten $ */
 
 /*! \file pcm.C 
     \brief (Pulsar) Polarimetric Calibration Modelling (Package)
 
     This program may be used to model the polarimetric response of observatory
-    instrumentation using observations of:
+    instrumentation using two different techniques.
 
+    In Mode A, multiple observations of
     <UL>
-    <LI> a single pulsar at multiple parallactic angles
-    <LI> the amplitude modulated linear noise diode
-    <LI> an unpolarized flux calibrator, such as Hydra A
+    <LI> a single pulsar at multiple parallactic angles,
+    <LI> the amplitude modulated linear noise diode, and
+    <LI> an unpolarized flux calibrator, such as Hydra A,
     </UL>
+    are used to model the reception of all three signals as described
+    in van Straten (2004).
+
+    In Mode B, single observations of
+    <UL>
+    <LI> a calibrated pulsar with high signal-to-noise ratio,
+    <LI> the same pulsar, uncalibrated, and
+    <LI> the amplitude modulated linear noise diode
+    </UL>
+    are used to model the instrumental response.
 
 */
 
+
 #include "Pulsar/ReceptionCalibratorPlotter.h"
 #include "Pulsar/ReceptionCalibrator.h"
+#include "Pulsar/PulsarCalibrator.h"
 #include "Pulsar/Calibration.h"
 
 #include "Pulsar/Plotter.h"
@@ -357,6 +370,9 @@ int main (int argc, char *argv[]) try {
 
   // the reception calibration class
   Pulsar::ReceptionCalibrator model (model_name);
+
+  // the reception calibration class
+  Pulsar::PulsarCalibrator standard (model_name);
 
   if (measure_cal_V)
     cerr << "pcm: assuming that System + Hydra A Stokes V = 0" << endl;
