@@ -18,7 +18,7 @@
 #  along with this program; if not, write to the Free Software
 #  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #
-#  $Id: mpi.m4,v 1.1 2004/12/01 07:35:32 straten Exp $
+#  $Id: mpi.m4,v 1.2 2004/12/01 20:50:48 straten Exp $
 
 
 # lofar_MPI
@@ -62,6 +62,9 @@ AC_DEFINE(HAVE_MPI,dnl
    AC_DEFINE(HAVE_MPI_PROFILER,dnl
 	     1, [Define if MPI profiler should be enabled])
 [fi]
+
+AM_CONDITIONAL(HAVE_MPI, [test $enable_mpi -eq 1])
+
 ])
 
 
