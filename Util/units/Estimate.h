@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Estimate.h,v $
-   $Revision: 1.18 $
-   $Date: 2003/05/22 14:37:20 $
-   $Author: straten $ */
+   $Revision: 1.19 $
+   $Date: 2003/05/30 09:34:54 $
+   $Author: pulsar $ */
 
 #ifndef __Estimate_h
 #define __Estimate_h
@@ -201,7 +201,8 @@ class MeanRadian
   { cosine += cos(d); sine += sin(d); return *this; }
 
   Estimate<T,U> get_Estimate () const
-  { return atan2 (sine.get_Estimate(), cosine.get_Estimate()); }
+  { if (sine.norm_val==0 && cosine.norm_val==0) return Estimate<T,U>(0,0);
+    return atan2 (sine.get_Estimate(), cosine.get_Estimate()); }
   
  protected:
   //! The average cosine
