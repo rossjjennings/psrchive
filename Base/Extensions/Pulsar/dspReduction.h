@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/dspReduction.h,v $
-   $Revision: 1.5 $
-   $Date: 2004/07/12 07:34:44 $
+   $Revision: 1.6 $
+   $Date: 2004/07/16 16:06:13 $
    $Author: straten $ */
 
 #ifndef __dspReduction_h
@@ -26,14 +26,14 @@ namespace Pulsar {
     //! Copy constructor
     dspReduction (const dspReduction& extension);
 
-    //! Operator =
+    //! Assignment operator
     const dspReduction& operator= (const dspReduction& extension);
 
     //! Destructor
     ~dspReduction ();
 
     //! Clone method
-    dspReduction* clone () const { return new dspReduction( *this ); }
+    dspReduction* clone () const;
 
     //////////////////////////////////////////////////////////////////////
     //
@@ -42,10 +42,10 @@ namespace Pulsar {
     //////////////////////////////////////////////////////////////////////
     
     //! Get the name of the backend
-    string get_name () const { return name; }
+    string get_name () const { return recorder_name; }
     
     //! Set the name of the backend
-    void set_name (const string& _name) { name = _name; }
+    void set_name (const string& name) { recorder_name = name; }
 
     //! Get the software information
     string get_software () const { return software; }
@@ -171,7 +171,7 @@ namespace Pulsar {
   protected:
 
     //! The name of the baseband recorder
-    string name;
+    string recorder_name;
 
     //! The software information
     string software;

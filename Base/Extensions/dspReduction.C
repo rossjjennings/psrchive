@@ -4,6 +4,8 @@
 Pulsar::dspReduction::dspReduction ()
   : Backend ("dspReduction")
 {
+  recorder_name = "unknown";
+
   total_samples = 0;
   block_size = 0;
   overlap = 0;
@@ -27,13 +29,26 @@ Pulsar::dspReduction::dspReduction ()
 Pulsar::dspReduction::dspReduction (const dspReduction& extension)
   : Backend ("dspReduction")
 {
-  operator=(*this);
+  if (Archive::verbose == 3)
+    cerr << "Pulsar::dspReduction copy constructor" << endl; 
+
+  operator=(extension);
+}
+
+Pulsar::dspReduction* Pulsar::dspReduction::clone () const
+{ 
+  if (Archive::verbose == 3)
+    cerr << "Pulsar::dspReduction::clone" << endl;
+
+  return new dspReduction( *this );
 }
 
 //! Operator =
 const Pulsar::dspReduction&
 Pulsar::dspReduction::operator= (const dspReduction& dsp)
 {
+  recorder_name = dsp.recorder_name;
+
   total_samples = dsp.total_samples;
   block_size = dsp.block_size;
   overlap = dsp.overlap;

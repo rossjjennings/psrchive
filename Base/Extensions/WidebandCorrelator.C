@@ -4,6 +4,7 @@
 Pulsar::WidebandCorrelator::WidebandCorrelator ()
   : Backend ("WidebandCorrelator")
 {
+  name = "unknown";
   configfile = "UNSET";
   nrcvr = 0;
   tcycle = 0.0;
@@ -20,6 +21,7 @@ Pulsar::WidebandCorrelator::WidebandCorrelator (const WidebandCorrelator& ext)
 const Pulsar::WidebandCorrelator&
 Pulsar::WidebandCorrelator::operator= (const WidebandCorrelator& extension)
 {
+  name = extension.name;
   configfile = extension.configfile;
   nrcvr = extension.nrcvr;
   tcycle = extension.tcycle;
