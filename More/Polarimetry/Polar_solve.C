@@ -7,6 +7,10 @@
 
 using namespace std;;
 
+#if defined(__ICC)
+#include "icomplex.h"
+#endif
+
 complex<MEAL::ScalarMath> 
 ComplexScalar (const complex< Estimate<double> >& z)
 {
