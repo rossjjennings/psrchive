@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Types.h,v $
-   $Revision: 1.14 $
-   $Date: 2004/04/19 06:39:13 $
-   $Author: hknight $ */
+   $Revision: 1.15 $
+   $Date: 2004/06/21 09:07:01 $
+   $Author: straten $ */
 
 #ifndef __Types_h
 #define __Types_h
@@ -32,6 +32,24 @@ namespace Signal {
   //! The basis in which the electric field is represented
   enum Basis { Circular=0, Linear=1, Elliptical=2 };
 
+  //! The scale in which units are measured
+  enum Scale {
+    //! Uncalibrated voltage
+    EMF,
+    //! Calibrated voltage
+    Volts,
+    //! Uncalibrated energy
+    Energy,
+    //! Calibrated energy
+    Joules,
+    //! Uncalibrated flux density
+    FluxDensity,
+    //! Reference flux density
+    ReferenceFluxDensity,
+    //! Calibrated flux density
+    Jansky
+  };
+    
   //! Sources of observed signals
   enum Source {
     //! An unknown source
@@ -48,7 +66,7 @@ namespace Signal {
     Calibrator
   };
 
-  //! Possible polarimetric states of the data
+  //! Possible states of the data
   enum State {
     //! Nyquist sampled voltages (real)
     Nyquist,
@@ -78,6 +96,8 @@ namespace Signal {
     XX, YY, ReXY, ImXY,
     //! Coherency Products, Circular Basis
     LL, RR, ReLR, ImLR,
+    //! Coherency Products, Elliptical Basis
+    PP, QQ, RePQ, ImPQ,
     //! Stokes Invariant Interval
     Inv,
     //! Coherency Matrix Determinant
