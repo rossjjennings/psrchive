@@ -1,6 +1,4 @@
 
-all: intermediate-install
-
 intermediate-install:
 	CPPROG="cp -p" $(MAKE) prefix=.. install-data
 
