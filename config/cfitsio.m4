@@ -51,7 +51,8 @@ AC_DEFUN([SWIN_LIB_CFITSIO],
     ## Look for the header file ##
     cf_include_path_list="$with_cfitsio_include_dir .
                           /usr/local/include/cfitsio
-                          /usr/local/cfitsio/include"
+                          /usr/local/cfitsio/include
+                          /usr/local/src/cfitsio/include"
 
     ac_save_CPPFLAGS="$CPPFLAGS"
 
@@ -59,16 +60,20 @@ AC_DEFUN([SWIN_LIB_CFITSIO],
       CPPFLAGS="-I$cf_dir $ac_save_CPPFLAGS"
       AC_TRY_COMPILE([#include <fitsio.h>], [],
                      have_cfitsio=yes, have_cfitsio=no)
-      if test x"$have_cfitsio" = xyes; then
+      if test $have_cfitsio = yes; then
+        if test x"$cf_dir" != .; then
+          CFITSIO_CFLAGS="-I$cf_dir"
+        fi
         break
       fi
     done
 
     ## Look for the library ##
     cf_lib_path_list="$with_cfitsio_lib_dir .
+                      ${PSRHOME}/packages/${LOGIN_ARCH}/cfitsio
                       /usr/local/lib
                       /usr/local/cfitsio/lib
-                      ${PSRHOME}/packages/${LOGIN_ARCH}/cfitsio"
+                      /usr/local/src/cfitsio/lib"
 
     ac_save_LIBS="$LIBS"
 
@@ -76,7 +81,7 @@ AC_DEFUN([SWIN_LIB_CFITSIO],
       LIBS="-L$cf_dir -lcfitsio $SOCKET_LIBS $ac_save_LIBS"
       AC_TRY_LINK([#include <fitsio.h>], [fits_movnam_hdu(0,0,0,0,0);],
                   have_cfitsio=yes, have_cfitsio=no)
-      if test x"$have_cfitsio" = xyes; then
+      if test $have_cfitsio = yes; then
         if test x"$cf_dir" = x.; then
           CFITSIO_LIBS="-lcfitsio $SOCKET_LIBS"
         else
@@ -93,7 +98,7 @@ AC_DEFUN([SWIN_LIB_CFITSIO],
 
   AC_MSG_RESULT([$have_cfitsio])
 
-  if test x"$have_cfitsio" = xyes; then
+  if test $have_cfitsio = yes; then
     AC_DEFINE([HAVE_CFITSIO], [1], [Define if the CFITSIO library is present])
     [$1]
   else
@@ -103,7 +108,7 @@ AC_DEFUN([SWIN_LIB_CFITSIO],
 
   AC_SUBST(CFITSIO_LIBS)
   AC_SUBST(CFITSIO_CFLAGS)
-  AM_CONDITIONAL(HAVE_CFITSIO,[test x"$have_cfitsio" = xyes])
+  AM_CONDITIONAL(HAVE_CFITSIO,[test $have_cfitsio = yes])
 
 ])
 
