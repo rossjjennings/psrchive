@@ -1,5 +1,5 @@
 //
-// $Id: pav.C,v 1.50 2003/08/29 06:12:09 ahotan Exp $
+// $Id: pav.C,v 1.51 2003/09/22 03:54:29 ahotan Exp $
 //
 // The Pulsar Archive Viewer
 //
@@ -70,6 +70,7 @@ void usage ()
     " -X        Plot cal amplitude and phase vs frequency channel\n"
     " -Y        Display all subints (time vs pulse phase)\n"
     " -L        Find the width of the pulse profile\n"
+    " -j        Plot a simple dynamic spectrum\n"
     "\n"
     "Archive::Extension options (file format specific):\n"
     " -o        Plot the original passband\n"
@@ -133,6 +134,7 @@ int main (int argc, char** argv)
   bool pa_scatter = false;
   bool orig_passband = false;
   bool width = false;
+  bool dynam = false;
 
   char* metafile = NULL;
   
@@ -140,7 +142,7 @@ int main (int argc, char** argv)
   Pulsar::Plotter::ColourMap colour_map = Pulsar::Plotter::Heat;
   
   int c = 0;
-  const char* args = "AaBb:Cc:DdEeFf:GghI:iHlLm:M:N:Qq:opP:r:SsTt:VvwWXx:Yy:Zz:";
+  const char* args = "AaBb:Cc:DdEeFf:GghI:ijHlLm:M:N:Qq:opP:r:SsTt:VvwWXx:Yy:Zz:";
 
   while ((c = getopt(argc, argv, args)) != -1)
     switch (c) {
@@ -208,8 +210,12 @@ int main (int argc, char** argv)
       plotter.set_subint( atoi (optarg) );
       break;
     case 'i':
-      cout << "$Id: pav.C,v 1.50 2003/08/29 06:12:09 ahotan Exp $" << endl;
+      cout << "$Id: pav.C,v 1.51 2003/09/22 03:54:29 ahotan Exp $" << endl;
       return 0;
+
+    case 'j':
+      dynam = true;
+      break;
 
     case 'l':
       plotter.set_labels(false);
@@ -555,6 +561,11 @@ int main (int argc, char** argv)
       cpg_next();
       cpgsvp (0.1,.95,0.1,.7);
       plotter.single_period (archive);
+    }
+    
+    if (dynam) {
+      cpg_next();
+      plotter.simple_ds(archive);
     }
     
     if (greyfreq) {
