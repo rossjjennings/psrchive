@@ -7,17 +7,17 @@
 #include "coord.h"
 #include "f772c.h"
 
-/* **********************************************************************
-   str2coord - converts a string containing pulsar coordinates to
-               ra and dec in radians.  The string may be of the form:
+/*! Parses a string containing RA/DEC coordinates to produce ra and
+  dec in radians.  The string may be of the form:
 
 	       hhmm~ddmm    or  hhmmss~ddmmss
 	       hh:mm~dd:mm  or  hh:mm:ss~dd:mm:ss
 
-	       or any combination of mentalness, as long as each field
-	       contains exactly two characters; or, a ':' delimits a
-               maximum of two characters  (may contain one!
-	       so "h:mm-dd:mm" will work), where:
+   or many other combinations, as long as:
+
+   1) each field contains exactly two characters 
+   2) text delimits a maximum of two characters (may contain one, so
+      h:mm:ss works)
 
 	       hh  hour angle of ra
 	       dd  degrees of declination
@@ -25,9 +25,7 @@
 	       ss  seconds
 	       ~   + or - sign of the degrees of declination
 
-	       returns a -1 on error, zero on success
-   ********************************************************************** */
-
+   returns a -1 on error, zero on success */
 int str2coord (double *ra, double *dec, const char* coordstring) 
 {
   int retval = 0;
@@ -65,8 +63,26 @@ int str2coord (double *ra, double *dec, const char* coordstring)
 }
 
 
-/*! parses a string of the form xx:yy:zz or xxyyzz into unit.
-  returns the number of fields parsed from the string. */
+/*! parses a string containing fields into a unit value.
+
+  This function is particularly useful for parsing strings of the form
+  hh:mm:ss.sssss or dd:mm:ss.ssss
+
+  \retval unit        value parsed from the string
+  \retval nfields     the number of fields in the string
+  \retval field_width widths (number of characters) of each field
+  \retval field_scale values with which to normalize the value in each field
+  \param  unit_string string containing the value to be parsed
+
+  If the field_width for a given field is equal to zero, that field is
+  treated as a floating point number of an undetermined width (number of
+  characters).  Otherwise, only field_width characters will be parsed.
+
+  The number parsed from each field will be normalized by a scale factor
+  that grows with each field read.  ie. for the i'th field, the scale factor
+  will be equal to field_scale[i]*field_scale[i-1]*...*field_scale[0].
+
+  \return the number of fields parsed from the string. */
 int str2unit (double* unit, unsigned nfields,
 	      const int* field_width, const double* field_scale,
 	      const char* unit_string)
@@ -135,8 +151,6 @@ int str2unit (double* unit, unsigned nfields,
 
 } 
 
-
-
 int str2ra (double *ra, const char* rastring) 
 {
   int field_width[3] = {2, 2, 0};
@@ -162,16 +176,9 @@ int str2dec (double *dec, const char* decstring)
 }
 
 
-
-
-
-
-
-
-
-
-
-
+/*! Produces a string of the form hh:mm:ss.sss[+|-]dd:mm:ss.sss,
+  given ra and dec in radians.  The number of decimal places in ss.sss
+  is controlled by places.  */
 int coord2str (char* coordstring, unsigned coordstrlen, double ra, double dec,
 	       unsigned places) 
 {
@@ -191,15 +198,7 @@ int coord2str (char* coordstring, unsigned coordstrlen, double ra, double dec,
   return 0;
 }
 
-
-
-
-
-
-
-
-/*! parses a string of the form xx:yy:zz or xxyyzz into unit.
-  returns the number of fields parsed from the string. */
+/*! returns the number of fields successfully parsed into unit_string. */
 int unit2str (char* unit_string, unsigned unit_strlen,
 	      unsigned nfields,
 	      const int* field_width, const int* field_precision,
@@ -232,7 +231,7 @@ int unit2str (char* unit_string, unsigned unit_strlen,
 
     if (field_precision[ifield]) {
       field_value = unit;
-      printed = snprintf (unit_string, end_string-unit_string, "%0*.*lf",
+      printed = snprintf (unit_string, end_string-unit_string, "%0*.*f",
 			  field_width[ifield]+field_precision[ifield]+1,
 			  field_precision[ifield], field_value);
     }
@@ -261,32 +260,32 @@ int unit2str (char* unit_string, unsigned unit_strlen,
   return ifield;
 } 
 
-
-
-int ra2str (char* rastring, unsigned rastrlen, double ra, unsigned places) 
+/* given a value in radians, returns a string parsed into either
+   hh:mm:ss.sss or (-)dd:mm:ss.sss format, as determined by setting
+   scale equal to either 24 or 360, respectively */
+int xms2str (char* xms_str, unsigned xms_strlen, double radians,
+	     double scale, unsigned places) 
 {
   int field_width[3] = {2, 2, 2};
   int field_precision[3] = {0, 0, 0};
-  double field_scale[3] = {24.0, 60.0, 60.0};
+  double field_scale[3] = {0.0, 60.0, 60.0};
 
   field_precision[2] = places;
+  field_scale[0] = scale;
 
-  ra /= 2.0 * M_PI;
-  return unit2str (rastring, rastrlen, 3, 
-		   field_width, field_precision, field_scale, ':', ra);
+  radians /= 2.0 * M_PI;
+  return unit2str (xms_str, xms_strlen, 3, field_width, field_precision,
+		   field_scale, ':', radians);
+}
+
+int ra2str (char* rastring, unsigned rastrlen, double ra, unsigned places) 
+{
+  return xms2str (rastring, rastrlen, ra, 24.0, places);
 }
 
 int dec2str (char* dstring, unsigned dstrlen, double dec, unsigned places) 
 {
-  int field_width[3] = {2, 2, 2};
-  int field_precision[3] = {0, 0, 0};
-  double field_scale[3] = {360.0, 60.0, 60.0};
-
-  field_precision[2] = places;
-
-  dec /= 2.0 * M_PI;
-  return unit2str (dstring, dstrlen, 3,
-		   field_width, field_precision, field_scale, ':', dec);
+  return xms2str (dstring, dstrlen, dec, 360.0, places);
 }
 
 
