@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/Receiver.h,v $
-   $Revision: 1.2 $
-   $Date: 2004/06/18 16:58:42 $
+   $Revision: 1.3 $
+   $Date: 2004/06/18 17:35:41 $
    $Author: straten $ */
 
 #ifndef __ReceiverExtension_h
@@ -51,6 +51,8 @@ namespace Pulsar {
 
     //! The tracking mode of the receiver platform
     Tracking mode;
+
+    string get_tracking_mode_string() const;
 
     //////////////////////////////////////////////////////////////////////
     //

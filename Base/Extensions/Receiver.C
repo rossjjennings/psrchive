@@ -49,3 +49,17 @@ Pulsar::Receiver::operator= (const Receiver& ext)
 Pulsar::Receiver::~Receiver ()
 {
 }
+
+string Pulsar::Receiver::get_tracking_mode_string() const
+{
+  switch (mode) {
+  case Feed:
+    return "FA";
+  case Celestial:
+    return "CPA";
+  case Galactic:
+    return "GPA";
+  }
+  return "unknown";
+}
+
