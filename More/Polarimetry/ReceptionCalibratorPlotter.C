@@ -55,25 +55,49 @@ void Pulsar::ReceptionCalibratorPlotter::plot_constraints (unsigned ichan,
   unsigned nmeas = equation->get_ndata ();
   for (unsigned imeas=0; imeas<nmeas; imeas++) {
 
-    //! Get the specified Measurements
+    // Get the specified Measurements
     const Calibration::Measurements& data
       = equation->get_data (imeas);
 
+    // Set the parallactic angle
     data.set_coordinates();
 
     unsigned mstate = data.size();
 
     for (unsigned jstate=0; jstate<mstate; jstate++)
       if (data[jstate].source_index == istate) {
-	for (unsigned ipol=0; ipol<4; ipol++) {
-	  stokes[ipol].push_back (Estimate<float>());
-	  stokes[ipol].back() = data[jstate][ipol];
-	}
-
+	for (unsigned ipol=0; ipol<4; ipol++)
+	  stokes[ipol].push_back (Estimate<float>(data[jstate][ipol]));
+    
 	para.push_back ( parallactic->get_param(0) * 180.0/M_PI );
 
       }
+
   }
+
+  if (!calibrator->get_solved()) {
+
+    char buffer[256];
+    sprintf (buffer, "pcm_state%d_chan%d.dat", istate, ichan);
+
+    FILE* fptr = fopen (buffer, "w");
+    if (!fptr)
+      throw Error (FailedSys, "plot", "fopen (%s)", buffer);
+
+    for (unsigned ipt=0; ipt < para.size(); ipt++) {
+      fprintf (fptr, "%f ", para[ipt]);
+
+      for (unsigned ipol=0; ipol<4; ipol++)
+	fprintf (fptr, "%f %f ", stokes[ipol][ipt].val, stokes[ipol][ipt].var);
+
+      fprintf (fptr, "\n");
+
+    }
+
+    fclose (fptr);
+
+  }
+
 
   // the plotting class
   EstimatePlotter plotter;
@@ -82,41 +106,85 @@ void Pulsar::ReceptionCalibratorPlotter::plot_constraints (unsigned ichan,
   for (ipol=0; ipol<4; ipol++)
     plotter.add_plot (para, stokes[ipol]);
 
+  if (!use_colour) {
+    plotter.separate_viewports();
+    cpgslw (2);
+  }
+
+  char stokes_label[8] = "I'\\dn";
+  char* stokes_index = "IQUV";
+
   for (ipol=0; ipol<4; ipol++) {
-    cpgsci (ipol+1);
+
+    if (use_colour)
+      cpgsci( ipol+1 );
+
     plotter.plot (ipol);
+
+    if (!use_colour) {
+      stokes_label[0] = stokes_index[ipol];
+      cpgmtxt("L",2.7,.5,.5,stokes_label);
+      cpgbox ("bcst",0,0,"bcvnst",0.2,2);
+    }
+
   }
 
   cpgsci (1);
-  cpgbox ("bcnst",0,0,"bcnst",0,0);
+  cpgsls (1);
 
   string label;
-  char buffer [256];
 
-  if (istate == 0)
-    label = "Calibrator Constraints";
-  else {
-    label = "Pulsar Constraints";
-    unsigned phase_bin = calibrator->pulsar[istate-1].phase_bin;
-    sprintf (buffer, " phase bin %d", phase_bin);
+  if (use_colour) {
+
+    cpgbox ("bcnst",0,0,"bcnst",0,0);
+
+    char buffer [256];
+    
+    if (istate == 0)
+      label = "Calibrator Constraints";
+    else {
+      label = "Pulsar Constraints";
+      unsigned phase_bin = calibrator->pulsar[istate-1].phase_bin;
+      sprintf (buffer, " phase bin %d", phase_bin);
+      label += buffer;
+    }
+    
+    sprintf (buffer, " freq. channel %d", ichan);
     label += buffer;
+    
+    cpglab ( "Parallactic Angle (degrees)",
+	     "Normalized Stokes Parameters",
+	     label.c_str());
+
+  }
+  else {
+    plotter.restore_viewport ();
+    cpgbox ("bcnst",0,0,"",0,0);
+    cpgmtxt("B",2.5,.5,.5,"Parallactic Angle (degrees)");
   }
 
-  sprintf (buffer, " freq. channel %d", ichan);
-  label += buffer;
-
-  cpglab ("Parallactic Angle (degrees)", "Uncalibrated Stokes", label.c_str());
 
   if (!calibrator->get_solved())
     return;
 
-  plot_model (ichan, istate);
+  EstimatePlotter* p = 0;
+  if (!use_colour)
+    p = & plotter;
+
+  plot_model (ichan, istate, p);
+
+  if (!use_colour)
+    plotter.restore_viewport ();
+
+  cpgslw (1);
+  cpgsci (1);
+  cpgsls (1);
+
 }
 
-
-
 void Pulsar::ReceptionCalibratorPlotter::plot_model (unsigned ichan,
-						     unsigned istate)
+						     unsigned istate,
+						     EstimatePlotter* plotter)
 {
   if (istate >= calibrator->get_nstate())
     throw Error (InvalidRange,
@@ -196,13 +264,22 @@ void Pulsar::ReceptionCalibratorPlotter::plot_model (unsigned ichan,
   }
 
   for (unsigned ipol=0; ipol<4; ipol++) {
-    cpgsci (ipol+1);
-    
+
+    if (plotter)
+      plotter->set_viewport (ipol);
+    else if (use_colour)
+      cpgsci (ipol+1);
+    else
+      cpgsls (ipol+1);
+
     cpgmove (parallactic[0], stokes[0][ipol]);
     for (unsigned ipt=1; ipt<npt; ipt++)
       cpgdraw (parallactic[ipt], stokes[ipt][ipol]);
     
   }
+
+  cpgsci (1);
+  cpgsls (1);
 
 }
 

@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/Attic/ReceptionCalibratorPlotter.h,v $
-   $Revision: 1.11 $
-   $Date: 2003/09/12 18:25:05 $
+   $Revision: 1.12 $
+   $Date: 2003/10/16 13:59:49 $
    $Author: straten $ */
 
 #ifndef __ReceptionCalibratorPlotter_H
@@ -10,6 +10,8 @@
 
 #include "Pulsar/CalibratorPlotter.h"
 #include "Estimate.h"
+
+class EstimatePlotter;
 
 namespace Pulsar {
 
@@ -34,7 +36,8 @@ namespace Pulsar {
     void plot_constraints (unsigned ichan, unsigned istate);
 
     //! Overlay the model Stokes parameters versus parallactic angle
-    void plot_model (unsigned ichan, unsigned istate);
+    void plot_model (unsigned ichan, unsigned istate,
+		     EstimatePlotter* plotter = 0);
 
     //! Plot vertical lines over the phases used as pulsar constraints
     void plot_phase_constraints ();
