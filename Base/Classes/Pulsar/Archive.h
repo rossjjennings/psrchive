@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Archive.h,v $
-   $Revision: 1.82 $
-   $Date: 2003/08/26 05:31:23 $
-   $Author: sord $ */
+   $Revision: 1.83 $
+   $Date: 2003/09/11 20:56:40 $
+   $Author: straten $ */
 
 /*! \mainpage 
  
@@ -376,6 +376,19 @@ namespace Pulsar {
     //! Return a pointer to the specified extension
     virtual const Extension* get_extension (unsigned iextension) const;
 
+    //! Return a pointer to the specified extension
+    virtual Extension* get_extension (unsigned iextension);
+
+    //! Template method searches for an Extension of the specified type
+    template<class ExtensionType>
+    const ExtensionType* get_extension () const;
+
+    //! Template method searches for an Extension of the specified type
+    template<class ExtensionType>
+    ExtensionType* get_extension ();
+
+    //! Add an Extension to the Archive instance
+    virtual void add_extension (Extension* extension);
 
     // //////////////////////////////////////////////////////////////////
     //
@@ -573,6 +586,9 @@ namespace Pulsar {
 
     //! Returns the total time integrated into all Integrations (in seconds)
     double integration_length() const;
+
+    //! Return true if the observation is a calibrator
+    bool type_is_cal () const;
 
     //! Return the coordinates of the telescope at which observation was made
     /*!
@@ -808,6 +824,25 @@ namespace Pulsar {
 
   template<class Type>
   void Archive::Advocate<Type>::ensure_linkage() { }
+
+  /*! e.g. MyExtension* ext = archive->get_extension<MyExtension>(); */
+  template<class ExtensionType>
+  const ExtensionType* Archive::get_extension () const
+  {
+    ExtensionType* extension = 0;
+    for (unsigned iext=0; iext<archive->get_nextension(); iext++) {
+      extension = dynamic_cast<ExtensionType*>( archive->get_extension(iext) );
+      if (extension)
+	break;
+    }
+    return extension;
+  }
+
+  template<class ExtensionType>
+  ExtensionType* Archive::get_extension ()
+  {
+    return const_cast<ExtensionType*>( get_extension<ExtensionType>() );
+  }
 
 }
 

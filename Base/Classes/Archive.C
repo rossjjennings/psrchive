@@ -70,7 +70,8 @@ unsigned Pulsar::Archive::get_nextension () const
   return 0;
 }
 
-    //! Return a pointer to the specified extension
+/*! Derived classes need only define this method, as the non-const version
+  implemented by the Archive base class simply calls this method. */
 const Pulsar::Archive::Extension*
 Pulsar::Archive::get_extension (unsigned iextension) const
 {
@@ -78,6 +79,20 @@ Pulsar::Archive::get_extension (unsigned iextension) const
 	       "The Pulsar::Archive base class contains no extensions");
 }
 
+/*! Simply calls get_extension const */
+Pulsar::Archive::Extension*
+Pulsar::Archive::get_extension (unsigned iextension)
+{
+  return const_cast<Extension*>( get_extension(iextension) );
+}
+
+/*! Derived classes need only define this method, as the non-const version
+  implemented by the Archive base class simply calls this method. */
+void Pulsar::Archive::add_extension (Extension* extension)
+{
+  throw Error (InvalidState, "Pulsar::Archive::add_extension",
+	       "The Pulsar::Archive base class contains no extensions");
+}
 
 void Pulsar::Archive::refresh()
 {
@@ -454,6 +469,14 @@ double Pulsar::Archive::integration_length() const
 
   return total;
 
+}
+
+bool Pulsar::Archive::type_is_cal () const
+{
+  return
+    get_type() == Signal::PolnCal ||
+    get_type() == Signal::FluxCalOn ||
+    get_type() == Signal::FluxCalOff;
 }
 
 void Pulsar::Archive::telescope_coordinates (float* lat, float* lon, 
