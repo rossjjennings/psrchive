@@ -92,7 +92,7 @@ string Tempo::get_directory ()
     if (makedir (directory.c_str()) < 0)  {
       cerr << "Tempo::get_directory failure creating '" << directory 
 	   << "'" << endl;
-      directory.clear();
+      directory.erase();
     }
   }
   return directory;
