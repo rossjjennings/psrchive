@@ -1,19 +1,16 @@
-LOCAL_ROOT = ../../../
-include $(LOCAL_ROOT)include/Makefile.standard
-
-# PWDIR = ${PSRHOME}/soft/models/eph
-# INCLUDES  = ephio.h
+LOCAL_ROOT = ../../..
+include $(LOCAL_ROOT)/include/Makefile.standard
 
 LIBRARY   = libeph.a
-LIB_SRCS  = ephio_c.c psrmodel2.C ephio.f rnd8.f
+LIB_SRCS  = ephio_c.c psrephem.C ephio.f rnd8.f
 
-PROGRAMS  = ephtest.c keys2c.c keys2fort.c eph2upd.f
+PROGRAMS  = ephtest.c keys2c.c keys2fort.c eph2upd.f psrephem_test.C
 
-LDFLAGS  += -leph $(F77LIBS) -lm
+LDFLAGS  += -leph -lpolyco -ltimes -lgenutil $(F77LIBS) -lm
 
 include ${LOCAL_ROOT}/include/Makefile.extended
 
-CLEAN += $(BINDIR)/ephtest $(BINDIR)/keys2fort $(BINDIR)/keys2c keyinfo.com $(LOCAL_ROOT)/include/ephio.h
+CLEAN += keyinfo.com $(LOCAL_ROOT)/include/ephio.h
 
 #
 # Assembly of include files
@@ -28,15 +25,14 @@ $(BINDIR)/keys2fort: keys2fort.c Makefile
 keyinfo.com: keys.dat $(BINDIR)/keys2fort Makefile
 	$(BINDIR)/keys2fort
 
-$(LOCAL_ROOT)include/ephio.h: keys.dat $(BINDIR)/keys2c
+$(LOCAL_ROOT)/include/ephio.h: keys.dat $(BINDIR)/keys2c
 	$(BINDIR)/keys2c
 	mv -f ephio.h $(LOCAL_ROOT)/include/ephio.h
 
-# force construction of that crazy ephio.h file
+# force construction of ephio.h file
 depend: $(LOCAL_ROOT)/include/ephio.h
-#includes: $(LOCAL_ROOT)/include/ephio.h
 
 #
 # Dependency on constructed include files
 $(LOGIN_ARCH)/ephio.o: keyinfo.com
-$(LOGIN_ARCH)/ephio_c.o: $(LOCAL_ROOT)include/ephio.h
+$(LOGIN_ARCH)/ephio_c.o: $(LOCAL_ROOT)/include/ephio.h
