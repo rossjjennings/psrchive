@@ -1,128 +1,133 @@
+#include <iostream>
+
+#include <qapplication.h>
+#include <qmessagebox.h>
+#include <qfiledialog.h>
+
 #include "rhythm.h"
 
-void rhythm::menubarConstruct ()
+void Rhythm::menubarConstruct ()
 {
-  if (verbose) cerr << "rhythm::menubarConstruct () entered\n";
+  // ///////////////////////////////////////////////////////////////////////
+  // FILE menu options
+  //
+  QPopupMenu *file = new QPopupMenu( &menu );
+  CHECK_PTR( file );
+  file->insertItem( "Load toas",      this, SLOT(load_toas()), CTRL+Key_T );
+  file->insertItem( "Load ephemeris", this, SLOT(load_eph ()), CTRL+Key_E );
+  file->insertSeparator();
+  file->insertItem( "Save toas",      this, SLOT(save_toas()));
+  file->insertItem( "Save ephemeris", this, SLOT(save_eph ()));
 
-  Gtk_ItemFactory* itemf = new Gtk_ItemFactory_MenuBar("<Main>");
+  file->insertSeparator();
+  file->insertItem( "&Close", this, SLOT(closeWin()), CTRL+Key_C );
+  file->insertItem( "E&xit",  qApp, SLOT(quit()),     CTRL+Key_X );
 
-  // /////////////////////////////////////////////////////////////////////////
-  // create the main headings
-  GtkItemFactoryEntry menuf_items[] =
-  {
-    {"/File",              0, 0, 0, "<Branch>" },
-    {"/Options",           0, 0, 0, "<Branch>" },
-    {"/Fit",               0, 0, 0, "<Branch>" },
-    {"/Help",              0, 0, 0, "<LastBranch>" }
-  };
-  int nmenuf_items = sizeof(menuf_items)/sizeof(menuf_items[0]);
+  menu.insertItem   ( "&File",    file );
 
-  itemf->create_items (nmenuf_items, menuf_items, 0);
+  // ///////////////////////////////////////////////////////////////////////
+  // OPTIONS menu options
+  //
+  QPopupMenu *options = new QPopupMenu( &menu );
+  CHECK_PTR (options);
+  options->insertItem ("None yet");
 
-  // /////////////////////////////////////////////////////////////////////////
-  // create the File menu
+  menu.insertItem   ( "&Options", options );
 
-  itemf->create_item ("/File/Load toas", "Alt+O", "<Item>",
-		      ItemFactoryConnector<rhythm, int> (this,&fileload,TIM));
-  itemf->create_item ("/File/Load ephemeris", "Alt+P", "<Item>",
-		      ItemFactoryConnector<rhythm, int> (this,&fileload,EPH));
+  // ///////////////////////////////////////////////////////////////////////
+  // TEMPO menu options
+  //
+  QPopupMenu *tempo = new QPopupMenu( &menu );
+  CHECK_PTR (tempo);
+  tempo->insertItem ("&Fit", this, SLOT(fit()) );
 
-  itemf->create_item ("/File/", 0, "<Separator>", 0);
+  menu.insertItem   ( "&Tempo",   tempo );
 
-  // a pointer to the save-blah menu items is kept so that they may be
-  // enabled/disabled when appropriate
-  Gtk_Widget* menuitem = NULL;
-  menuitem = itemf->create_item ("/File/Save toas", "Alt+S", "<Item>",
-		      ItemFactoryConnector<rhythm, int> (this,&filesave,TIM));
+  // ///////////////////////////////////////////////////////////////////////
+  // HELP menu options
+  //
+  QPopupMenu *help = new QPopupMenu( &menu );
+  CHECK_PTR (help);
+  help->insertItem( "Usage", this, SLOT(about()), CTRL+Key_H );
+  if (isTopLevel())
+    help->insertItem( "About Qt", this, SLOT(aboutQt()), 0);
 
-  // save arrival times
-  save_tim = dynamic_cast <Gtk_MenuItem*> (menuitem);
-  if (save_tim == NULL) {
-    cerr << "rhythm::menubarConstruct error dynamic_cast save_tim\n";
-    throw ("dynamic_cast");
-  }
-  save_tim->deselect();
+  menu.insertSeparator();
+  menu.insertItem   ( "&Help", help );
+  menu.setSeparator ( QMenuBar::InWindowsStyle );
 
-  menuitem = itemf->create_item ("/File/Save ephemeris", "Alt+D", "<Item>",
-		      ItemFactoryConnector<rhythm, int> (this,&filesave,EPH));
-
-  // save ephemeris
-  save_eph = dynamic_cast <Gtk_MenuItem*> (menuitem);
-  if (save_tim == NULL) {
-    cerr << "rhythm::menubarConstruct error dynamic_cast save_tim\n";
-    throw ("dynamic_cast");
-  }
-  save_eph->deselect();
-
-  itemf->create_item ("/File/", 0, "<Separator>", 0);
-
-  itemf->create_item ("/File/Quit", "Alt+Q", "<Item>",
-		      ItemFactoryConnector<rhythm, int> (this, &exit, 1) );
-
-  menubar = itemf->get_menubar_widget("");
-  g_return_if_fail(menubar.get_object());
-  
-  if (verbose) cerr << "rhythm::menubarConstruct () returns\n";
+  if (verbose) cerr << "Rhythm::menubarConstruct () returns\n";
 }
 
-void rhythm::fileload (int type)
+void Rhythm::about()
 {
-  if (file_modified) {
-    prompt_save (type);
-  }
+  QMessageBox::about (NULL, "Rythm",
+		      "Future replacement of psrclock?\n"
+		      "A graphical user interface to TEMPO.");
+}
 
-  if (fileselect == NULL) {
-    fileselect = new Gtk_FileSelection ("Rhythm File Selection");
-    connect_to_method (fileselect->get_ok_button()->clicked,
-		       this, &fileselected);
-    connect_to_method (fileselect->get_cancel_button()->clicked, 
-		       this, &filecancel);
-    connect_to_method (fileselect->delete_event,
-		       this, &fileselect_deleted);
-    fileselect->hide_fileop_buttons();
+void Rhythm::aboutQt()
+{
+  QMessageBox::aboutQt (NULL, "Qt Information");
+}
+
+void Rhythm::load_toas ()
+{
+  if (toas_modified) {
+    prompt_save_toas ();
   }
 
-  fileio_code = type;
+  QString startName = QString::null;
+  if ( !tim_filename.empty() )
+    startName = tim_filename.c_str();
 
-  if (fileio_code == TIM)
-    fileselect->complete ("*.tim");
-  else if (fileio_code == EPH)
-    fileselect->complete ("*.eph");
-  
-  fileselect->show();
+  QString fileName = QFileDialog::getOpenFileName ( startName,
+						    "*.rthm", this);
+
+  if ( !fileName.isNull() ) {                 // got a file name
+    // DO SOMETHING with arrival_times
+  }
 }
 
-void rhythm::prompt_save (int type)
+void Rhythm::prompt_save_toas ()
 {
+  fprintf (stderr, "Rhythm::prompt_save_toas Not implemented.");
 }
 
-void rhythm::filesave (int type)
+void Rhythm::save_toas ()
 {
+  fprintf (stderr, "Rhythm::save_toas Not implemented.");
 }
 
-gint rhythm::fileselect_deleted (GdkEventAny*)
+void Rhythm::load_eph ()
 {
-  if (verbose) cerr << "rhythm::fileselect_deleted\n";
-  // fileselect = NULL;
-  return TRUE;
+  if (eph_modified) {
+    prompt_save_eph ();
+  }
+
+  QString startName = QString::null;
+  if ( !eph_filename.empty() )
+    startName = eph_filename.c_str();
+
+  QString fileName = QFileDialog::getOpenFileName ( startName,
+						    "*.eph", this);
+
+  if ( !fileName.isNull() ) {                 // got a file name
+    // DO SOMETHING with ephemerides
+  }
 }
 
-void rhythm::filecancel()
+void Rhythm::prompt_save_eph ()
 {
-  if (verbose) cerr << "rhythm::fileselect canceled\n";
-  fileselect->hide();
+  fprintf (stderr, "Rhythm::prompt_save_eph Not implemented.");
 }
 
-void rhythm::fileselected()
+void Rhythm::save_eph ()
 {
-  if (verbose) cerr << "rhythm::file selected" << 
-		 fileselect->get_filename() << endl;
-
-  fileselect->hide();
+  fprintf (stderr, "Rhythm::save_eph Not implemented.");
 }
 
-void rhythm::exit (int type)
+void Rhythm::fit()
 {
-  // TO-DO - prompt for saving files
-  Gtk_Main::instance()->quit();
+  fprintf (stderr, "Rhythm::fit Not implemented.");
 }

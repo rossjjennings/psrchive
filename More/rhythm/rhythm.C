@@ -1,37 +1,40 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include <gtk--/main.h>
+#include <qapplication.h>
+#include <qxt.h>
 
 #include "rhythm.h"
 
-int main (int argc, char** argv)
+int Rhythm::verbose = 1;
+
+
+Rhythm::Rhythm (int argc, char** argv) :
+  QWidget (0, "Rhythm"),
+  main_window (this,    "main window"),
+  menu   (&main_window, "menubar"),
+  plots  (&main_window, "plots")
 {
-  Gtk_Main gmain ( &argc, &argv );
+  // save_tim = save_eph = NULL;
+  fitpopup = NULL;
 
-  rhythm rmain ( argc, argv );
-
-  rmain.show_all();
-
-  gmain.run();
-  return 0;
-}
-
-int rhythm::verbose = 1;
-
-rhythm::rhythm (int argc, char** argv)
-{ 
-  save_tim = save_eph = NULL;
-  fileselect = NULL;
-
-  main_window.set_usize (800, 700);
-  add (&main_window);
+  main_window.setMinimumSize (800, 700);
 
   menubarConstruct(); 
-  main_window.add (menubar);
 
-  plots.set_usize (880, 680);
-  main_window.add (&plots);
-  
-  show_all();
+  plots.setMinimumSize (880, 680);
 }
+
+int main (int argc, char** argv)
+{
+  QXtApplication app (argc, argv, "Rhythm");
+
+  Rhythm rhythm (argc, argv);
+
+  app.setMainWidget (&rhythm);
+
+  rhythm.show();
+
+  return app.exec();
+}
+

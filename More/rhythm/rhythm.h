@@ -1,8 +1,12 @@
 #ifndef __RHYTHM_H
 #define __RHYTHM_H
 
+#include <qapplication.h>
+#include <qvbox.h>
+#include <qhbox.h>
+#include <qmenubar.h>
+
 #include <vector>
-#include <gtk--.h>
 
 #include "toa.h"
 #include "residual.h"
@@ -11,44 +15,38 @@
 #define TIM 1
 #define EPH 2
 
-class rhythm : public Gtk_Window
+class qt_psrephem_editor;
+
+class Rhythm : public QWidget
 {
 protected:
+
+  // an array of ephemerides and the filename of the last one loaded
+  string eph_filename;
   vector<psrephem> ephemerides;
-  vector<toa>      arrival_times;
+
+  // an array of toas and the filename from which they were loaded
+  string tim_filename;
+  vector<toa> arrival_times;
+
+  // an array of residuals corresponding to the above toas.  These are plotted
   vector<residual> residuals;
 
-  Gtk_VBox  main_window;
-  Gtk_HBox  plots;
+  // the GUI bits
+  QVBox    main_window;
+  QMenuBar menu;
+  QHBox    plots;
 
   // /////////////////////////////////////////////////////////////////////////
   // main menubar and its constructor
-  Gtk_ObjectHandle<Gtk_MenuBar> menubar;
   void menubarConstruct ();    // construct the menubar along the top
 
-  // /////////////////////////////////////////////////////////////////////////
-  // file loading/unloading menu widgets/routines
-  Gtk_MenuItem* save_eph;
-  Gtk_MenuItem* save_tim;
-  Gtk_FileSelection* fileselect;
-
-  int fileio_code;
-  bool file_modified;
-
-  string eph_filename;
-  string tim_filename;
-
-  void prompt_save (int type);
-  void fileload (int type);    // controls the file selection popup 
-  void filesave (int type);    // controls the file selection popup 
-  gint fileselect_deleted (GdkEventAny*);   // called when the popup is deleted
-  void filecancel();           // callback on cancel
-  void fileselected();         // callback on selection
+  bool eph_modified;
+  bool toas_modified;
 
   // /////////////////////////////////////////////////////////////////////////
   // Fit parameters menu widgets/routines
-  Gtk_Window* fitpopup;
-
+  qt_psrephem_editor* fitpopup;
   void fit_popup (int nothing);
 
   // /////////////////////////////////////////////////////////////////////////
@@ -56,11 +54,25 @@ protected:
   void exit (int value);
   void command_line_parse (int argc, char** argv);
 
+public slots:
+  void load_toas ();
+  void prompt_save_toas ();
+  void save_toas ();
+  void load_eph ();
+  void prompt_save_eph ();
+  void save_eph ();
+  void fit();
+  void undo() {fprintf (stderr, "Not implemented\n");};
+  void redo() {fprintf (stderr, "Not implemented\n");};
+
+  void about();
+  void aboutQt();
+
 public:
   static int verbose;
 
-  rhythm (int argc, char** argv);
-  ~rhythm () {};
+  Rhythm (int argc, char** argv);
+  ~Rhythm () {};
 
 };
 
