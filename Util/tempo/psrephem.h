@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/psrephem.h,v $
-   $Revision: 1.20 $
-   $Date: 2002/07/31 11:19:22 $
+   $Revision: 1.21 $
+   $Date: 2002/10/11 07:55:50 $
    $Author: straten $ */
 
 #ifndef __PSREPHEM_H
@@ -19,8 +19,9 @@
 
 #include "MJD.h"
 #include "Angle.h"
+#include "Reference.h"
 
-class psrephem 
+class psrephem : public Reference::Able
 {
   friend class psrParams;
 
