@@ -9,88 +9,91 @@
   compute the arbitrary polarimetric boost.  Not yet implemented.  */
 bool Pulsar::FluxCalibrator::self_calibrate = false;
 
+Pulsar::FluxCalibrator::FluxCalibrator ()
+{
+  calculated = false;
+}
+
 Pulsar::FluxCalibrator::FluxCalibrator (const vector<Archive*>& archs)
 {
   if (archs.size()==0)
     throw Error (InvalidParam, "Pulsar::FluxCalibrator",
 		 "error empty Pulsar::Archive vector");
   
-  unsigned iarch=0;
-  for (iarch=0; iarch<archs.size(); ++iarch) {
+  calculated = false;
 
-    if ( archs[iarch]->get_type() != Signal::FluxCalOn &&
-	 archs[iarch]->get_type() != Signal::FluxCalOff )
+  for (unsigned iarch=0; iarch<archs.size(); ++iarch)
+    add_observation (archs[iarch]);
+}
 
-      throw Error (InvalidParam, "Pulsar::FluxCalibrator", "Pulsar::Archive='"
-		   + archs[iarch]->get_filename() + "' not a FluxCal");
+void Pulsar::FluxCalibrator::add_observation (const Archive* archive)
+{
+  if ( archive->get_type() != Signal::FluxCalOn &&
+       archive->get_type() != Signal::FluxCalOff )
 
-    string reason;
-    if (iarch > 0 && !archs[0]->calibrator_match (archs[iarch], reason))
-      throw Error (InvalidParam, "Pulsar::FluxCalibrator", "Pulsar::Archive='"
-		   + archs[iarch]->get_filename() + "'\ndoes not mix with '"
-		   + archs[0]->get_filename() + reason);
+    throw Error (InvalidParam, "Pulsar::FluxCalibrator::add_observation",
+		 "Pulsar::Archive='" + archive->get_filename() + "'"
+		 "is not a FluxCal");
 
-    if (!calibrator && archs[iarch]->get_type() == Signal::FluxCalOn)
-      // Keep the FPTM naming convention in which the
-      // Pulsar::FluxCalibrator is named for the first on-source
-      // observation
-      calibrator = archs[iarch];
+  string reason;
+  if (calibrator && calibrator->calibrator_match (archive, reason))
+    throw Error (InvalidParam, "Pulsar::FluxCalibrator::add_observation",
+		 "Pulsar::Archive='" + calibrator->get_filename() + "'"
+		 "\ndoes not mix with '" + archive->get_filename() + reason);
 
-    filenames.push_back (archs[iarch]->get_filename());
+  unsigned nchan = archive->get_nchan ();
+
+  if (!calibrator) {
+
+    calibrator = archive->clone();
+
+    mean_ratio_on.resize (nchan);
+    mean_ratio_off.resize (nchan);
+
+  }
+  else if (calibrator->get_type() != Signal::FluxCalOn &&
+	   archive->get_type() == Signal::FluxCalOn)
+    // Keep the FPTM naming convention in which the
+    // Pulsar::FluxCalibrator is named for the first on-source
+    // observation
+    calibrator = archive->clone();
+
+
+  const Pulsar::Archive* arch = archive;
+
+  if (archive->get_state () != Signal::Intensity) {
+    Pulsar::Archive* clone = arch->clone();
+    clone->convert_state (Signal::Intensity);
+    arch = clone;
   }
 
-  if (!calibrator)
-    throw Error (InvalidState, "Pulsar::FluxCalibrator",
-		 "No FluxCal-On Observation Provided");
+  const Pulsar::Integration* integration = arch->get_Integration(0);
 
-  unsigned nchan = calibrator->get_nchan ();
-  
-  vector<MeanEstimate<double> > mean_ratio_on (nchan);
-  vector<MeanEstimate<double> > mean_ratio_off (nchan);
+  vector<vector<Estimate<double> > > cal_hi;
+  vector<vector<Estimate<double> > > cal_lo;
 
-  for (iarch=0; iarch<archs.size(); ++iarch) {
+  if (verbose) 
+    cerr << "Pulsar::FluxCalibrator call Pulsar::Integration::cal_levels "
+	   << archive->get_filename() << endl;
 
-    if (verbose) 
-      cerr << "Pulsar::FluxCalibrator call Pulsar::Integration::cal_levels "
-	   << archs[iarch]->get_filename() << endl;
-
-    const Pulsar::Archive* arch = archs[iarch];
-
-    if (archs[iarch]->get_state () != Signal::Intensity) {
-      Pulsar::Archive* clone = arch->clone();
-      clone->convert_state (Signal::Intensity);
-      arch = clone;
-    }
-
-    const Pulsar::Integration* integration = arch->get_Integration(0);
-
-    vector<vector<Estimate<double> > > cal_hi;
-    vector<vector<Estimate<double> > > cal_lo;
-
-    integration->cal_levels (cal_hi, cal_lo);
-
-    for (unsigned ichan=0; ichan<nchan; ++ichan) {
-
-      // Take the ratio of the total intensity
-      Estimate<double> ratio = cal_hi[0][ichan]/cal_lo[0][ichan] - 1.0;
-      
-      if (arch->get_type() == Signal::FluxCalOn)
-	mean_ratio_on[ichan] += ratio;
-      else if (arch->get_type() == Signal::FluxCalOff)
-	mean_ratio_off[ichan] += ratio;
-      
-    }
-  }
-
-  ratio_on.resize (nchan);
-  ratio_off.resize (nchan);
+  integration->cal_levels (cal_hi, cal_lo);
 
   for (unsigned ichan=0; ichan<nchan; ++ichan) {
-    ratio_on[ichan] = mean_ratio_on[ichan].get_Estimate();
-    ratio_off[ichan] = mean_ratio_off[ichan].get_Estimate();
+
+    // Take the ratio of the total intensity
+    Estimate<double> ratio = cal_hi[0][ichan]/cal_lo[0][ichan] - 1.0;
+      
+    if (arch->get_type() == Signal::FluxCalOn)
+      mean_ratio_on[ichan] += ratio;
+    else if (arch->get_type() == Signal::FluxCalOff)
+      mean_ratio_off[ichan] += ratio;
+      
   }
 
+  filenames.push_back (archive->get_filename());
+  calculated = false;
 }
+
 
 //! Calibrate the flux in the given archive
 void Pulsar::FluxCalibrator::calibrate (Archive* arch)
@@ -105,17 +108,37 @@ void Pulsar::FluxCalibrator::calibrate (Archive* arch)
 		 + calibrator->get_filename() + "'\ndoes not mix with '"
 		 + arch->get_filename() + reason);
 
-  if (cal_flux.size() != arch->get_nchan())
-    create (arch->get_nchan());
+  create (arch->get_nchan());
 
   for (unsigned isub=0; isub < arch->get_nsubint(); isub++)
     calibrate (arch->get_Integration(isub));
 }
 
 
-void Pulsar::FluxCalibrator::create (unsigned nchan)
+void Pulsar::FluxCalibrator::create (unsigned required_nchan)
 {
-  if (ratio_on.size() == ratio_off.size() && ratio_on.size() == nchan) {
+  if (!calibrator)
+    throw Error (InvalidState, "Pulsar::FluxCalibrator::calibrate",
+		 "no FluxCal Archive");
+
+  unsigned nchan = calibrator->get_nchan ();
+
+  if (!required_nchan)
+    required_nchan = nchan;
+
+  if (calculated && cal_flux.size() == required_nchan)
+    return;
+
+
+  ratio_on.resize (nchan);
+  ratio_off.resize (nchan);
+  
+  for (unsigned ichan=0; ichan<nchan; ++ichan) {
+    ratio_on[ichan] = mean_ratio_on[ichan].get_Estimate();
+    ratio_off[ichan] = mean_ratio_off[ichan].get_Estimate();
+  }
+
+  if (ratio_on.size() == required_nchan) {
     calculate (ratio_on, ratio_off);
     return;
   }
@@ -129,7 +152,6 @@ void Pulsar::FluxCalibrator::create (unsigned nchan)
   // make on and off the right size of ratio_on and ratio_off
   
   calculate (on, off);
-
 }
 
 
@@ -168,7 +190,8 @@ void Pulsar::FluxCalibrator::calculate (vector<Estimate<double> >& on,
     }
     
   }  // end for each chan
-  
+
+  calculated = true;
 }
 
 void Pulsar::FluxCalibrator::calibrate (Integration* subint)

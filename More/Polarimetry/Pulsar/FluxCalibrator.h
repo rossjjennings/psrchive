@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/FluxCalibrator.h,v $
-   $Revision: 1.4 $
-   $Date: 2003/02/13 16:35:03 $
+   $Revision: 1.5 $
+   $Date: 2003/05/23 09:06:33 $
    $Author: straten $ */
 
 #ifndef __FluxCalibrator_H
@@ -20,15 +20,23 @@ namespace Pulsar {
 
   class FluxCalibrator : public Calibrator {
     
+    friend class FluxCalibratorPlotter;
+
   public:
     //! Self-calibrate flux calibrator archives before computing hi/lo ratios
     static bool self_calibrate;
+
+    //! Default constructor
+    FluxCalibrator ();
 
     //! Construct from an vector of FluxCal Pulsar::Archives
     FluxCalibrator (const vector<Archive*>& archives);
 
     //! Return the flux of Hydra in mJy
     double hydra_flux_mJy (double frequency_MHz);
+
+    //! Add an FluxCal Pulsar::Archive to the set of constraints
+    void add_observation (const Archive* archive);
 
     //! Calibrate the flux in the given archive
     void calibrate (Archive* archive);
@@ -56,12 +64,24 @@ namespace Pulsar {
     //! Create the cal_flux spectrum at the requested resolution
     void create (unsigned nchan);
 
+    //! Calculate the ratio_on and ratio_off
+    void calculate ();
+
     //! Compute cal_flux and T_sys, given the hi/lo ratios on and off hydra
     void calculate (vector<Estimate<double> >& on,
 		    vector<Estimate<double> >& off);
 
     //! Calibrate a single sub-integration
     void calibrate (Integration* subint);
+
+  private:
+
+    vector<MeanEstimate<double> > mean_ratio_on;
+    vector<MeanEstimate<double> > mean_ratio_off;
+
+    //! Set true after call to calculate
+    bool calculated;
+
   };
 
 }
