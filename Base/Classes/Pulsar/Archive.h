@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Archive.h,v $
-   $Revision: 1.49 $
-   $Date: 2003/01/13 16:24:19 $
+   $Revision: 1.50 $
+   $Date: 2003/01/13 16:45:19 $
    $Author: straten $ */
 
 /*! \mainpage 
@@ -169,10 +169,10 @@ namespace Pulsar {
 
     public:
       //! Advocate the use of the derived class to interpret filename
-      bool advocate (const char* filename);
+      virtual bool advocate (const char* filename) = 0;
       
       //! Return a null-constructed instance of the derived class
-      Archive* new_Archive ();
+      virtual Archive* new_Archive () = 0;
 
     protected:
       //! Agents registered for creating derived classes in Archive::load
