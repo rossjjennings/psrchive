@@ -9,6 +9,7 @@
 #include "Calibration.h"
 #include "PolnCalibrator.h"
 #include "FluxCalibrator.h"
+#include "Calibration/Model.h"
 
 // Extensions this program understands
 
@@ -63,8 +64,7 @@ int main (int argc, char *argv[]) {
   bool test_bandwidth = true;
   bool test_obstype = true;
   
-  Pulsar::Calibration::Database::ModelTypes m;
-  m = Pulsar::Calibration::Database::SingleAxis;
+  Pulsar::CalibratorType m = Pulsar::SingleAxis;
   
   string cals_are_here = "./";
   string unload_ext = "calib";
@@ -158,11 +158,11 @@ int main (int argc, char *argv[]) {
       command += "-S ";
       break;
     case 's':
-      m = Pulsar::Calibration::Database::SingleAxis;
+      m = Pulsar::SingleAxis;
       command += "-s ";
       break;
     case 'q':
-      m = Pulsar::Calibration::Database::Polar;
+      m = Pulsar::Polar;
       command += "-q ";
       break;
 
@@ -275,9 +275,6 @@ int main (int argc, char *argv[]) {
 	Pulsar::PolnCalibrator* pcal_engine  = 0;
 	pcal_engine = dbase->generatePolnCalibrator(arch, m);
 	
-	if (display_params)	
-	  pcal_engine->store_parameters = true;
-
         if (verbose)
           cout << "Calibrating Archive Polarisation" << endl;
 
@@ -340,11 +337,11 @@ int main (int argc, char *argv[]) {
 	}
 	
 	if (do_polncal) {
-	  if (m == Pulsar::Calibration::Database::SingleAxis)
+	  if (m == Pulsar::SingleAxis)
 	    fitsext->set_cal_mthd("SingleAxis");
 	  if (do_selfcal)
 	    fitsext->set_cal_mthd("SelfCAL");
-	  if (m == Pulsar::Calibration::Database::Polar)
+	  if (m == Pulsar::Polar)
 	    fitsext->set_cal_mthd("Polar");
 	  fitsext->set_cal_file(pcal_file);
 	}
