@@ -32,10 +32,10 @@ int model_profile (int npts, int narrays, float** prf, float** std,
 
   for (i=0; i<narrays; ++i) {
 
-    fft_std[i] = new float[npts+2];
-    fft_prf[i] = new float[npts+2];
-    xcorr_amps[i] = new float[npts+2];
-    xcorr_phases[i] = new float[npts+2];
+    fft_std[i] = new float[npts];
+    fft_prf[i] = new float[npts];
+    xcorr_amps[i] = new float[npts];
+    xcorr_phases[i] = new float[npts];
 
     assert (fft_std[i]!=0 && fft_prf[i]!=0 && 
 	    xcorr_amps[i]!=0 && xcorr_phases[i]!=0);
@@ -43,14 +43,17 @@ int model_profile (int npts, int narrays, float** prf, float** std,
     fft::frc1d (npts, fft_std[i], std[i]);
     fft::frc1d (npts, fft_prf[i], prf[i]);
 
-    for (j=0; j<=npt2; ++j) {
+    // zap the Nyquist value
+    fft_std[i][1] = fft_prf[i][1] = 0.0;
+
+    for (j=0; j<npt2; ++j) {
 
       xcorr_amps[i][j] = sqrt( SQR(fft_std[i][2*j]) + SQR(fft_std[i][2*j+1]) )
 	* sqrt( SQR(fft_prf[i][2*j]) + SQR(fft_prf[i][2*j+1]) );
       
       xcorr_phases[i][j] = -atan2(fft_prf[i][2*j+1], fft_prf[i][2*j]) +
 	atan2(fft_std[i][2*j+1], fft_std[i][2*j]);
-      
+
     }
   }
 
@@ -58,6 +61,8 @@ int model_profile (int npts, int narrays, float** prf, float** std,
   // on the cross-correlation function
   float xcorr_shift;
   F772C(fccf) (&(xcorr_amps[0][1]), &(xcorr_phases[0][1]), &xcorr_shift);
+
+cerr << "xcorr_shift=" << xcorr_shift << endl;
 
   // run through successively larger numbers of
   // frequency components finding the best-fitting
@@ -72,7 +77,7 @@ int model_profile (int npts, int narrays, float** prf, float** std,
   double low_tau = 0, low_deriv_chisq = 0, high_tau = 0, high_deriv_chisq = 0;
   int start_bin = 32;
 
-  for(int nsum=start_bin; nsum<=npt2; nsum*=2){
+  for(int nsum=start_bin; nsum<npt2; nsum*=2){
     dtau = 2*M_PI/(float)(5.0*nsum);
     edtau = 1.0/(float)(2.0*nsum+1.0);
     if(nsum>npts/4.0) edtau = .00001;
@@ -116,7 +121,7 @@ int model_profile (int npts, int narrays, float** prf, float** std,
   double s1=0, s2=0, s3=0;
   double cosfac;
   for(i=0; i<narrays; ++i){
-    for(int j=1; j<=npt2; ++j){
+    for(int j=1; j<npt2; ++j){
       cosfac = cos(-xcorr_phases[i][j]+j*tau);
       s1 += xcorr_amps[i][j]*cosfac;
       s2 += SQR(fft_std[i][2*j]) + SQR(fft_std[i][2*j+1]);
@@ -133,7 +138,7 @@ int model_profile (int npts, int narrays, float** prf, float** std,
   *chisq = 0;
   float fft_prf_amp, fft_std_amp;
   for(i=0; i<narrays; ++i){
-    for(int j=1; j<=npt2; ++j){
+    for(int j=1; j<npt2; ++j){
       fft_prf_amp = sqrt( SQR(fft_prf[i][2*j]) + SQR(fft_prf[i][2*j+1]) );
       fft_std_amp = sqrt( SQR(fft_std[i][2*j]) + SQR(fft_std[i][2*j+1]) );
       *chisq += fft_prf_amp*fft_prf_amp - 
@@ -150,7 +155,7 @@ int model_profile (int npts, int narrays, float** prf, float** std,
   // This defines the errors in scale and shift so 
   // that the reduced chisq is unity.  We subtract
   // 1 D.O.F. for tau.
-  double rms = sqrt( *chisq / (float(narrays*npts)/2.0 - 1.0) );
+  double rms = sqrt( *chisq / (float(narrays*(npt2-1)) - 1.0) );
   double fac = npts/(2.0*M_PI);
   *sigma_scale = rms/sqrt(2.0*s2);
   *shift = fac*tau;
