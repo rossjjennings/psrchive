@@ -1,3 +1,13 @@
+//-*-C++-*-
+
+/* $Source: /cvsroot/psrchive/psrchive/Util/units/Cloude.h,v $
+   $Revision: 1.2 $
+   $Date: 2004/05/03 10:46:08 $
+   $Author: straten $ */
+
+#ifndef __Cloude_H
+#define __Cloude_H
+
 #include "Pauli.h"
 #include "Matrix.h"
 
@@ -28,8 +38,9 @@ Matrix<complex<T>,4,4> coherence (const Jones<T>& jones)
 }
 
 //! Return the Jones matrix of the target coherency matrix left eigenvector
-/* The left eigenvector is a row vector given by the hermitian transpose of
-   the right (column) eigenvector */
+/* The left eigenvector, as returned by Jacobi, is the row vector
+   given by the hermitian transpose of the right (column)
+   eigenvector. */
 template<typename T>
 Jones<T> system (const Vector<complex<T>,4>& left_eigen)
 {
@@ -40,3 +51,26 @@ Jones<T> system (const Vector<complex<T>,4>& left_eigen)
 
   return convert (q);
 }
+
+//! Return the target entropy, given the target coherency matrix eigenvalues
+/*! The eigenvalues are returned by Jacobi as a vector.  The target
+  entropy is defined at the end of Section 4 of Cloude (1986). */
+template<typename T, unsigned N>
+  double entropy (const Vector<T,N>& eigenvalues)
+{
+  unsigned i;
+  double total = 0;
+
+  for (i=0; i<N; i++)
+    total += eigenvalues[i];
+
+  double entropy = 0;
+  for (i=0; i<N; i++) {
+    double Pi = eigenvalues[i]/total;
+    entropy -= Pi * log(Pi)/log(double(N));
+  }
+
+  return entropy;
+}
+
+#endif
