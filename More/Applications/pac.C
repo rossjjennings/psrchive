@@ -28,6 +28,13 @@ void usage ()
     "  -V                     Very verbose mode\n"
     "  -i                     Show revision information\n"
     "\n"
+    "Database options: \n"
+    "  -d database            Read ASCII summary (instead of -p) \n"   
+    "  -p path                Search for CAL files in the specified path \n"
+    "  -u \"ext1 ext2 ...\"     Add to file extensions recognized in search \n"
+    "                         (defaults: .cf .pcal .fcal .pfit) \n"
+    "  -w                     Write a new database summary file \n"
+    "\n"
     "Calibrator options: \n"
     "  -A filename            Use the calibrator specified by filename \n"
     "  -P                     Calibrate polarisations only \n"
@@ -35,20 +42,12 @@ void usage ()
     "  -s                     Use the Single Axis Model (default) \n"
     "  -q                     Use the Polar Model \n"
     "\n"
-    "Database options: \n"
-    "  -d database            Read ASCII summary (instead of -p) \n"   
-    "  -p path                Search for CAL files in the specified path \n"
-    "  -u ext1 ext2 ...       Add to file extensions recognized in search \n"
-    "                         (defaults: .cf .pcal .fcal .pfit) \n"
-    "  -w                     Write a new database summary file \n"
-    "\n"
     "Matching options: \n"
     "  -c                     Do not try to match sky coordinates\n"
     "  -I                     Do not try to match instruments\n"
     "  -T                     Do not try to match times\n"
     "  -F                     Do not try to match frequencies\n"
     "  -b                     Do not try to match bandwidths\n"
-    "  -o                     Do not try to match obs types\n"
     "\n"
     "Expert options: \n"
     "  -f                     Override flux calibration flag\n"
@@ -87,7 +86,6 @@ int main (int argc, char *argv[]) {
   bool test_times = true;
   bool test_frequency = true;
   bool test_bandwidth = true;
-  bool test_obstype = true;
 
   bool check_flags = true;
   
@@ -126,7 +124,7 @@ int main (int argc, char *argv[]) {
       Pulsar::Archive::set_verbosity(1);
       break;
     case 'i':
-      cout << "$Id: pac.C,v 1.44 2004/06/05 09:58:52 ahotan Exp $" << endl;
+      cout << "$Id: pac.C,v 1.45 2004/06/09 12:46:17 straten Exp $" << endl;
       return 0;
 
     case 'n': {
@@ -167,6 +165,9 @@ int main (int argc, char *argv[]) {
     case 'u':
       key = strtok (optarg, whitespace);
       while (key) {
+	// remove the leading .
+	while (*key == '.')
+	  key ++;
         exts.push_back(key);
         key = strtok (NULL, whitespace);
       }
@@ -202,10 +203,6 @@ int main (int argc, char *argv[]) {
     case 'b':
       test_bandwidth = false;
       command += "-b ";
-      break;
-    case 'o':
-      test_obstype = false;
-      command += "-o ";
       break;
     case 'S':
       pcal_type = Pulsar::Calibrator::Hybrid;
@@ -275,7 +272,7 @@ int main (int argc, char *argv[]) {
       exts.push_back("fcal");
       exts.push_back("pfit");
 
-      cout << "pac: Generating new CAL file database" << endl;
+      cout << "pac: Generating new calibrator database" << endl;
 	
       dbase = new Pulsar::Calibration::Database (cals_are_here.c_str(), exts);
 	
@@ -284,7 +281,6 @@ int main (int argc, char *argv[]) {
       dbase -> test_time(test_times);
       dbase -> test_freq(test_frequency);
       dbase -> test_bw(test_bandwidth);
-      dbase -> test_obst(test_obstype);
       
       if (dbase->size() <= 0) {
 	cout << "pac: No calibrators found in " << cals_are_here << endl;
@@ -314,7 +310,6 @@ int main (int argc, char *argv[]) {
       dbase -> test_time(test_times);
       dbase -> test_freq(test_frequency);
       dbase -> test_bw(test_bandwidth);
-      dbase -> test_obst(test_obstype);
 
     }
   }
