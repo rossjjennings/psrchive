@@ -3,9 +3,11 @@
 #include "Pulsar/Profile.h"
 
 #include "Calibration/ReceptionModel.h"
-#include "Calibration/Abbreviations.h"
 #include "Calibration/Polynomial.h"
 #include "Calibration/Phase.h"
+
+#include "Calibration/ChainRule.h"
+#include "Calibration/ProductRule.h"
 #include "Calibration/Complex2Constant.h"
 #include "Calibration/CoherencyMeasurementSet.h"
 
@@ -49,7 +51,8 @@ void Pulsar::PolnProfileFit::init ()
 
   phase_axis.connect (phase, &Calibration::Polynomial::set_abscissa);
 
-  Calibration::Complex2Chain* chain = new Calibration::Complex2Chain;
+  Calibration::ChainRule<Calibration::Complex2>* chain = 0;
+  chain = new Calibration::ChainRule<Calibration::Complex2>;
   chain -> set_model (new Calibration::Phase);
   chain -> set_constraint (0, phase);
 
@@ -104,7 +107,8 @@ void Pulsar::PolnProfileFit::set_standard (const PolnProfile* _standard)
 #endif
 
     // each complex phase bin is phase related
-    Calibration::Complex2Product* product = new Calibration::Complex2Product;
+    Calibration::ProductRule<Calibration::Complex2>* product = 0;
+    product = new Calibration::ProductRule<Calibration::Complex2>;
     *product *= jones;
     *product *= phase_xform;
 

@@ -54,7 +54,7 @@ Pulsar::StandardModel::StandardModel (Calibrator::Type _model)
   model = _model;
   valid = true;
 
-  instrument = new Calibration::Complex2Product;
+  instrument = new Calibration::ProductRule<Calibration::Complex2>;
 
 #if 0
   Calibration::SingleAxisPolynomial* backend;
@@ -70,8 +70,8 @@ Pulsar::StandardModel::StandardModel (Calibrator::Type _model)
   poly -> set_infit(0, false);
   convert.connect (poly, &Calibration::Polynomial::set_abscissa);
 
-  Calibration::Complex2Chain* backend;
-  backend = new Calibration::Complex2Chain;
+  Calibration::ChainRule<Calibration::Complex2>* backend;
+  backend = new Calibration::ChainRule<Calibration::Complex2>;
 
   backend -> set_model ( operation );
   backend -> set_constraint (0, poly);
@@ -113,7 +113,7 @@ Pulsar::StandardModel::StandardModel (Calibrator::Type _model)
   // initialize the signal path seen by the pulsar
   //
 
-  pulsar_path = new Calibration::Complex2Product;
+  pulsar_path = new Calibration::ProductRule<Calibration::Complex2>;
   *pulsar_path *= instrument;
   *pulsar_path *= &parallactic;
 
@@ -130,8 +130,8 @@ void Pulsar::StandardModel::add_fluxcal_backend ()
     throw Error (InvalidState, "Pulsar::StandardModel::add_fluxcal_backend",
 		 "Cannot model flux calibrator with Hamaker model");
 
-  Calibration::Complex2Product* path = 0;
-  path = new Calibration::Complex2Product;
+  Calibration::ProductRule<Calibration::Complex2>* path = 0;
+  path = new Calibration::ProductRule<Calibration::Complex2>;
 
   fluxcal_backend = new Calibration::SingleAxis;
 
@@ -144,7 +144,7 @@ void Pulsar::StandardModel::add_fluxcal_backend ()
 
 void Pulsar::StandardModel::add_polncal_backend ()
 {
-  pcal_path = new Calibration::Complex2Product;
+  pcal_path = new Calibration::ProductRule<Calibration::Complex2>;
   *pcal_path *= instrument;
 
   equation->add_transformation ( pcal_path );

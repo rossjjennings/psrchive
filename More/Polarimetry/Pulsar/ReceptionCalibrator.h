@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ReceptionCalibrator.h,v $
-   $Revision: 1.51 $
-   $Date: 2003/12/27 12:06:06 $
+   $Revision: 1.52 $
+   $Date: 2003/12/29 19:19:38 $
    $Author: straten $ */
 
 #ifndef __ReceptionCalibrator_H
@@ -86,13 +86,13 @@ namespace Pulsar {
     Reference::To<Calibration::ReceptionModel> equation;
 
     //! The signal path experienced by the calibrator
-    Reference::To<Calibration::Complex2Product> pcal_path;
+    Reference::To<Calibration::ProductRule<Calibration::Complex2> > pcal_path;
 
     //! The signal path experienced by the pulsar
-    Reference::To<Calibration::Complex2Product> pulsar_path;
+    Reference::To<Calibration::ProductRule<Calibration::Complex2> > pulsar_path;
 
     //! The instrumental model and any additional transformations
-    Reference::To<Calibration::Complex2Product> instrument;
+    Reference::To<Calibration::ProductRule<Calibration::Complex2> > instrument;
 
     // ////////////////////////////////////////////////////////////////////
     //

@@ -159,8 +159,8 @@ void Pulsar::HybridCalibrator::calculate_transformation ()
 
     // 4) produce the supplemented transformation, M_s M_B
 
-    Calibration::Complex2Product* result;
-    result = new Calibration::Complex2Product;
+    Calibration::ProductRule<Calibration::Complex2>* result;
+    result = new Calibration::ProductRule<Calibration::Complex2>;
 
     *result *= correction;
     *result *= xform;
