@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Archive.h,v $
-   $Revision: 1.50 $
-   $Date: 2003/01/13 16:45:19 $
-   $Author: straten $ */
+   $Revision: 1.51 $
+   $Date: 2003/01/15 13:56:29 $
+   $Author: pulsar $ */
 
 /*! \mainpage 
  
@@ -216,6 +216,9 @@ namespace Pulsar {
     //! copy constructor
     Archive (const Archive& archive);
 
+    //! extraction constructor
+    Archive (const Archive& archive, vector<unsigned> subints);
+    
     //! destructor
     virtual ~Archive ();
 
@@ -224,6 +227,9 @@ namespace Pulsar {
 
     //! Copy the profiles and attributes through set_ get_ methods
     virtual void copy (const Archive& archive);
+
+    //! Similar to copy, using only a subset of the data
+    virtual void select_copy (const Archive& archive, vector<unsigned> subints);
 
 
     // //////////////////////////////////////////////////////////////////
@@ -416,6 +422,9 @@ namespace Pulsar {
 
     //! Return a pointer to a new, copy constructed instance equal to this
     virtual Archive* clone () const = 0;
+
+    //! Return a pointer to a new archive that contains a subset of the data in this
+    virtual Archive* extract (vector<unsigned> subints) const = 0;
 
     //! Get the number of pulsar phase bins used
     /*! This attribute may be set only through Archive::resize */

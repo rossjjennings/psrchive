@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/BasicArchive.h,v $
-   $Revision: 1.19 $
-   $Date: 2003/01/13 11:18:56 $
+   $Revision: 1.20 $
+   $Date: 2003/01/15 13:56:29 $
    $Author: pulsar $ */
 
 #include "Pulsar/Archive.h"
@@ -32,6 +32,9 @@ namespace Pulsar {
 
     //! copy constructor
     BasicArchive (const BasicArchive& archive);
+
+    //! extraction constructor
+    BasicArchive (const BasicArchive& archive, vector<unsigned> subints);
 
     //! copy constructor
     const BasicArchive& operator = (const BasicArchive& archive);

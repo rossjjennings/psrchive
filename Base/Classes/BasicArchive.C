@@ -38,6 +38,13 @@ Pulsar::BasicArchive::BasicArchive (const BasicArchive& copy)
   Archive::copy (copy);
 }
 
+Pulsar::BasicArchive::BasicArchive (const BasicArchive& copy, vector<unsigned> subints)
+{
+  if (verbose)
+    cerr << "Pulsar::BasicArchive:: extraction constructor" << endl;
+
+  Archive::select_copy (copy, subints);
+}
 
 const Pulsar::BasicArchive&
 Pulsar::BasicArchive::operator = (const BasicArchive& copy)

@@ -68,6 +68,38 @@ void Pulsar::Archive::copy (const Archive& archive)
   set_parallactic_corrected( archive.get_parallactic_corrected() );
 }
 
+void Pulsar::Archive::select_copy (const Archive& archive, vector<unsigned> subints)
+{
+  if (verbose)
+    cerr << "Pulsar::Archive::select_copy" << endl;
+  
+  resize (subints.size(), archive.get_npol(),
+	  archive.get_nchan(), archive.get_nbin());
+  
+  for (unsigned isub=0; isub<subints.size(); isub++) {
+    if (subints[isub] > get_nsubint())
+      throw Error(InvalidParam, "Pulsar::Archive::select_copy request too large");
+    get_Integration(isub) -> copy (*(archive.get_Integration(subints[isub])));
+  }
+  ephemeris = archive.ephemeris;
+  model = archive.model;
+  
+  // set virtual attributes
+  set_telescope_code( archive.get_telescope_code() );
+  set_basis( archive.get_basis() );
+  set_type( archive.get_type() );
+  set_source( archive.get_source() );
+
+  set_bandwidth( archive.get_bandwidth() );
+  set_centre_frequency( archive.get_centre_frequency() );
+  set_state( archive.get_state() );
+  set_dispersion_measure( archive.get_dispersion_measure() );
+
+  set_feedangle_corrected( archive.get_feedangle_corrected() );
+  set_iono_rm_corrected( archive.get_iono_rm_corrected() );
+  set_ism_rm_corrected( archive.get_ism_rm_corrected() );
+  set_parallactic_corrected( archive.get_parallactic_corrected() );
+}
 
 //! Return a pointer to the Profile
 /*!
