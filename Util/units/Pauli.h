@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Pauli.h,v $
-   $Revision: 1.8 $
-   $Date: 2003/02/27 14:21:08 $
+   $Revision: 1.9 $
+   $Date: 2003/05/05 10:39:10 $
    $Author: straten $ */
 
 #ifndef __Pauli_H
@@ -10,6 +10,8 @@
 
 #include "Jones.h"
 #include "Quaternion.h"
+
+#include <vector>
 
 // convert Hermitian Quaternion to Jones matrix
 template<typename T>
@@ -25,6 +27,18 @@ const Jones<T> convert (const Quaternion<T,Unitary>& q)
 {
   return Jones<T> (q.s0+ci(q.s1), q.s3+ci(q.s2),
 		   -q.s3+ci(q.s2), q.s0-ci(q.s1));
+}
+
+// convert coherency vector to Jones matrix
+template<typename T>
+const Jones<T> convert (const vector<T>& c)
+{
+  if (c.size() != 4)
+    throw Error (InvalidParam, "Jones<T> convert (vector<T>)",
+		 "vector.size=%d != 4", c.size());
+
+  return Jones<T> (c[0], complex<T> (c[2], -c[3]),
+		   complex<T> (c[2], c[3]), c[1]);
 }
 
 // convert Jones matrix to Hermitian Biquaternion
@@ -61,15 +75,11 @@ void polar (complex<T>& d, Quaternion<T, Hermitian>& h,
   // calculate the hermitian
   h = sqrt( real( convert( j*herm(j) ) ) );
 
-  // take the hermitian component out of j
+  // remove the hermitian component from j
   j = inv(convert(h)) * j;
 
+  // take the unitary component out of j
   u = real ( unitary (j) );
-
-  u.s0 = 0.5 * (j.j11 + j.j22).real();
-  u.s1 = 0.5 * (j.j11 - j.j22).imag();
-  u.s2 = 0.5 * (j.j12 + j.j21).imag();
-  u.s3 = 0.5 * (j.j12 - j.j21).real();
 }
 
 
