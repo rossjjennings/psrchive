@@ -3,7 +3,7 @@
 #include <libgen.h>
 #include "dirutil.h"
 
-#include "Pulsar/getopt.h"
+#include "getopt.h"
 #include "Pulsar/Integration.h"
 #include "Pulsar/BasicIntegration.h"
 #include "Pulsar/Database.h"
@@ -133,7 +133,7 @@ int main (int argc, char *argv[]) {
       break;
 
     case 'i':
-      cout << "$Id: pac.C,v 1.59 2004/11/22 21:39:42 straten Exp $" << endl;
+      cout << "$Id: pac.C,v 1.60 2004/12/06 14:40:14 straten Exp $" << endl;
       return 0;
 
     case 'A':

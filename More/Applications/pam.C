@@ -12,7 +12,7 @@
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
 #include "Pulsar/Profile.h"
-#include "Pulsar/getopt.h"
+#include "getopt.h"
 
 #include "Pulsar/Backend.h"
 #include "Pulsar/BackendName.h"
@@ -224,7 +224,7 @@ int main (int argc, char *argv[]) {
 	Pulsar::Archive::set_verbosity(3);
 	break;
       case 'i':
-	cout << "$Id: pam.C,v 1.48 2004/10/04 04:20:03 ahotan Exp $" << endl;
+	cout << "$Id: pam.C,v 1.49 2004/12/06 14:40:14 straten Exp $" << endl;
 	return 0;
       case 'm':
 	save = true;

@@ -2,7 +2,7 @@
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
 #include "Pulsar/Profile.h"
-#include "Pulsar/getopt.h"
+#include "getopt.h"
 
 #include "Pulsar/PolnProfile.h"
 #include "Pulsar/PolnProfileFit.h"
@@ -107,7 +107,7 @@ int main (int argc, char *argv[])
       denoise = true;
       break;
     case 'i':
-      cout << "$Id: pat.C,v 1.31 2004/12/02 19:21:00 straten Exp $" << endl;
+      cout << "$Id: pat.C,v 1.32 2004/12/06 14:40:14 straten Exp $" << endl;
       return 0;
 
     case 'F':

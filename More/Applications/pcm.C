@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pcm.C,v $
-   $Revision: 1.37 $
-   $Date: 2004/11/22 21:39:42 $
+   $Revision: 1.38 $
+   $Date: 2004/12/06 14:40:14 $
    $Author: straten $ */
 
 /*! \file pcm.C 
@@ -39,7 +39,7 @@
 
 #include "Pulsar/Plotter.h"
 #include "Pulsar/Archive.h"
-#include "Pulsar/getopt.h"
+#include "getopt.h"
 
 #include "RealTimer.h"
 #include "Error.h"

@@ -4,7 +4,7 @@
 
 #include "cpgplot.h"
 
-#include "Pulsar/getopt.h"
+#include "getopt.h"
 #include "Pulsar/Integration.h"
 #include "Pulsar/Plotter.h"
 #include "Pulsar/RFIMitigation.h"
@@ -99,7 +99,7 @@ int main (int argc, char *argv[]) {
       Pulsar::Archive::set_verbosity(3);
       break;
     case 'i':
-      cout << "$Id: paz.C,v 1.22 2004/09/27 15:45:12 ahotan Exp $" << endl;
+      cout << "$Id: paz.C,v 1.23 2004/12/06 14:40:14 straten Exp $" << endl;
       return 0;
     case 'D':
       display = true;
