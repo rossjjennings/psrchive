@@ -137,9 +137,11 @@ int polynomial::load(string* instr)
   //  psrname = stringtok (&line, whitespace);
   // if (psrname.length() < 1)
   //    return -1;
-  psrname = line.substr(0, 9);
+
+  // wvs: substr(0,9) didn't work on Sun :(
+  psrname = line.substr(0,10);
   psrname = stringtok(&psrname, whitespace);
-  line.erase(0,9);
+  line.erase(0,10);
 
   date = stringtok (&line, whitespace);
   if (date.length() < 1)
@@ -148,6 +150,10 @@ int polynomial::load(string* instr)
   utc = stringtok (&line, whitespace);
   if (utc.length() < 1)
     return -1;
+
+  if (polyco::verbose)
+    cerr << "polynomial::load scanned name='"<<psrname<<"' date="<<date
+         << " UTC:"<<utc<<endl;
 
   int mjd_day_num;
   double frac_mjd;
@@ -249,7 +255,7 @@ int polynomial::unload (string* outstr) const
   int bytes = 0;
 
   if(tempov11)
-    bytes += sprintf(numstr, "%-10.9s%9.9s%12.12s%22s%19f%7.3lf%7.3lf\n",
+    bytes += sprintf(numstr, "%-10.10s %9.9s%12.12s%22s%19f%7.3lf%7.3lf\n",
           psrname.c_str(), date.c_str(), utc.c_str(), reftime.strtempo(),
           dm, doppler_shift, log_rms_resid);
   else
@@ -497,6 +503,9 @@ polyco::polyco(const char * filename)
 
 int polyco::load (const char* polyco_filename, size_t nbytes)
 {
+  if (verbose)
+    cerr << "polyco::load '" << polyco_filename << "'" << endl;
+
   FILE* fptr = fopen (polyco_filename, "r");
   if (!fptr)  {
     cerr << "polyco::load cannot open '" << polyco_filename << "' - "
@@ -522,6 +531,9 @@ int polyco::load (FILE* fptr, size_t nbytes)
 
 int polyco::load (string* instr)
 {
+  if (verbose)
+    cerr << "polyco::load '\n" << *instr << "\n'" << endl;
+
   int npollys = 0;
   pollys.clear();
 

@@ -5,7 +5,7 @@
 
 int main (int argc, char** argv)
 {
-  string filename = "polyco.dat";
+  string filename = "test.polyco";
   bool verbose = false;
 
   int c;
@@ -25,7 +25,15 @@ int main (int argc, char** argv)
 
   polyco data;
 
-  data.load (filename);
+  if (data.load (filename) < 0)
+    return -1;
 
   cout << data << endl;
+
+  if (optind < argc)  {
+    MJD test ("52054.43");
+    data.phase (test);
+  }
+
+  return 0;
 }
