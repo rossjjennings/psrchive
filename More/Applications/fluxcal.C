@@ -33,7 +33,8 @@ void usage ()
 
 
 void unload (Pulsar::FluxCalibrator* fluxcal)
-{
+try {
+
   Reference::To<Pulsar::Archive> archive;
   cerr << "fluxcal: creating " << archive_class << " Archive" << endl;
   archive = fluxcal->new_solution (archive_class);
@@ -43,6 +44,10 @@ void unload (Pulsar::FluxCalibrator* fluxcal)
 
   cerr << "fluxcal: unloading " << newname << endl;
   archive -> unload (newname);
+}
+catch (Error& error) {
+  cerr << "fluxcal: error unloading solution\n\t"
+       << error.get_message() << endl;
 }
 
 int main (int argc, char** argv) try {
@@ -136,8 +141,8 @@ int main (int argc, char** argv) try {
         cerr << "fluxcal: observation added to FluxCalibrator" << endl;
       }
       catch (Error& error) {
-        cerr << "fluxcal: failed to add observation\n\t" << error.get_message()
-             << endl;
+        cerr << "fluxcal: failed to add observation\n\t" 
+             << error.get_message() << endl;
         unload (fluxcal);
         fluxcal = 0;
       }
