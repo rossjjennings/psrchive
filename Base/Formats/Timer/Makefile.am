@@ -2,7 +2,7 @@ LOCAL_ROOT = ../../..
 include ${LOCAL_ROOT}/include/Makefile.standard
 
 INCLUDES = superarchive.h archive.h sub_int.h profile.h archhdr.h headers.h \
-        mini++.h timer++.h timer.h mini.h band.h \
+        mini++.h timer++.h timer.h mini.h band.h archdefs.h \
 	timer.inc band.inc mini.inc convert_endian.h misc.h
 
 LIBRARY    = libarchive.a
