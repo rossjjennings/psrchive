@@ -357,6 +357,19 @@ MJD Pulsar::Archive::end_time() const
   \retval lon longitude in degrees
   \retval ele elevation in metres
 */
+
+double Pulsar::Archive::integration_length() const
+{
+  double total = 0.0;
+
+  for (int i = 0; i < get_nsubint(); i++) {
+    total = total + get_Integration(i) -> get_duration();
+  }
+
+  return total;
+
+}
+
 void
 Pulsar::Archive::telescope_coordinates 
 (float* lat, float* lon, float* ele) const
