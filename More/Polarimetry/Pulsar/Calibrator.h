@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/Attic/Calibrator.h,v $
-   $Revision: 1.10 $
-   $Date: 2003/10/02 07:32:07 $
+   $Revision: 1.11 $
+   $Date: 2003/10/08 14:24:08 $
    $Author: straten $ */
 
 #ifndef __Calibrator_H
@@ -88,6 +88,25 @@ namespace Pulsar {
       //! Return the estimate of the specified parameter
       virtual Estimate<float> get_param (unsigned ichan, unsigned iclass,
 					 unsigned iparam) const = 0;
+
+      /** @name Optional Graphing Features
+       *  These optional attributes make the graph look nice
+       */
+      //@{
+
+      //! Return the scale by which to multiply values
+      virtual float get_scale (unsigned iclass) const
+      { return 1.0; }
+
+      //! Return the colour index
+      virtual int get_colour_index (unsigned iclass, unsigned iparam) const
+      { return 1; }
+
+      //! Return the graph marker
+      virtual int get_graph_marker (unsigned iclass, unsigned iparam) const
+      { return -1; }
+
+      //@}
 
     };
 

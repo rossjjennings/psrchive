@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/CalibratorPlotter.h,v $
-   $Revision: 1.5 $
-   $Date: 2003/09/23 14:04:25 $
+   $Revision: 1.6 $
+   $Date: 2003/10/08 14:24:08 $
    $Author: straten $ */
 
 #ifndef __CalibratorPlotter_H
@@ -34,6 +34,9 @@ namespace Pulsar {
 
     //! Number of panels (vertical)
     unsigned npanel;
+
+    //! Use colour in plots
+    bool use_colour;
 
   };
 
