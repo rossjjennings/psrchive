@@ -162,7 +162,7 @@ void Pulsar::PulsarCalibrator::add_observation (const Archive* data)
     const Integration* integration = data->get_Integration (isub);
 
     Jones<double> jones;
-    jones = correct.get_transformation( data, integration->get_epoch() );
+    jones = correct.get_transformation( data, isub );
     corrections.set_Jones( jones );
 
     if (integrations_added)
