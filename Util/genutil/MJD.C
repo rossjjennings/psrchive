@@ -411,7 +411,7 @@ int MJD::gregorian (cal_t* gregdate, double* fsec) const
 }
 
 // construct an MJD from a UTC
-MJD::MJD (utc_t utc)
+MJD::MJD (const utc_t& utc)
 {
   cal_t greg;
 
@@ -423,11 +423,16 @@ fprintf (stderr, "Passing %s to MJD(cal) constructor\n",
 	 cal2str (temp, greg, "yyyy-MM-dd-hh-mm-ss"));
   */
 
-  MJD::MJD(greg);
+  Construct (greg);
 }
 
 // construct an MJD from a gregorian
-MJD::MJD (cal_t greg)
+MJD::MJD (const cal_t& greg)
+{
+  Construct (greg);
+}
+
+MJD::Construct (const cal_t& greg)
 {
   days = (1461*(greg.tm_year-(12-greg.tm_month)/10+4712))/4
     +(306*((greg.tm_month+9)%12)+5)/10
@@ -438,3 +443,4 @@ MJD::MJD (cal_t greg)
   secs = 3600.0 * greg.tm_hour + 60.0 * greg.tm_min + greg.tm_sec;
   fracsec = 0.0;
 }
+
