@@ -27,7 +27,7 @@ LDFLAGS   += -larchive -lpolyco -ldialog -lgenutil -ltimes \
 # analyzing Parkes data.
 
 ESSENTIAL_SRCS  = treduce.C tcedar.C archiver.C ar2scal.C plk.C plotcal.C \
-                  tcombine2.C plk10.C ratio.C xprofstd.C 
+                  tcombine2.C plk10.C ratio.C
 
 # These programs are not essential for analyzing Parkes data.
 # Add inessential programs here
