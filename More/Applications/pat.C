@@ -1,23 +1,51 @@
-#include <string.h>
-#include <libgen.h>
-#include "dirutil.h"
 
-#include "cpgplot.h"
-
-#include "Pulsar/getopt.h"
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
 #include "Pulsar/Plotter.h"
-#include "Error.h"
+#include "Pulsar/Plotter.h"
 #include "Pulsar/Profile.h"
+#include "Pulsar/getopt.h"
+
+#include "Pulsar/PolnProfile.h"
+#include "Pulsar/PolnProfileFit.h"
+#include "Calibration/Instrument.h"
+
 #include "Phase.h"
 #include "toa.h"
+#include "Error.h"
+#include "dirutil.h"
 
-int main (int argc, char *argv[]) {
+#include <cpgplot.h>
+
+#include <string.h>
+#include <libgen.h>
+
+void usage ()
+{
+  cout << "pat - Pulsar::Archive timing \n"
+    "Usage: pat [options] filenames \n"
+    "  -v               Verbose mode \n" 
+    "  -V               Very verbose mode \n"
+    "  -i               Show revision information \n"
+    "  -F               Frequency scrunch before fitting \n"
+    "  -T               Time scrunch before fitting \n"
+    "  -p               Perform full polarimetric fit in Fourier domain \n"
+    "  -s stdfile       Location of standard profile \n"
+    "  -t               Fit in the time domain \n"
+    "See http://astronomy.swin.edu.au/pulsar/software/manuals/pat.html"
+       << endl;
+}
+
+int main (int argc, char *argv[])
+{
   
   bool verbose = false;
   bool std_given = false;
   bool time_domain = false;
+  bool full_poln = false;
+
+  bool fscrunch = false;
+  bool tscrunch = false;
 
   string std;
 
@@ -26,39 +54,50 @@ int main (int argc, char *argv[]) {
 
   int gotc = 0;
 
-  while ((gotc = getopt(argc, argv, "hvVis:t")) != -1) {
+  while ((gotc = getopt(argc, argv, "hvViFTps:t")) != -1) {
     switch (gotc) {
+
     case 'h':
-      cout << "A program for timing Pulsar::Archives"                             << endl;
-      cout << "Usage: pat [options] filenames"                                    << endl;
-      cout << "  -v               Verbose mode"                                   << endl;
-      cout << "  -V               Very verbose mode"                              << endl;
-      cout << "  -i               Show revision information"                      << endl;
-      cout << "  -s stdfile       Location of standard profile"                   << endl;
-      cout << "  -t               Fit in the time domain"                         << endl;
-      cout << endl;
-      cout << "See http://astronomy.swin.edu.au/pulsar/software/manuals/pat.html" << endl;
-      return (-1);
-      break;
+      usage ();
+      return 0;
+
     case 'v':
       verbose = true;
       break;
+
     case 'V':
       verbose = true;
       Pulsar::Archive::set_verbosity(1);
+      Calibration::Model::verbose = true;
       break;
+
     case 'i':
-      cout << "$Id: pat.C,v 1.14 2003/12/03 07:54:53 ahotan Exp $" << endl;
+      cout << "$Id: pat.C,v 1.15 2003/12/29 15:39:50 straten Exp $" << endl;
       return 0;
+
+    case 'F':
+      fscrunch = true;
+      break;
+
+    case 'T':
+      tscrunch = true;
+      break;
+
+    case 'p':
+      full_poln = true;
+      break;
+
     case 's':
       std_given = true;
       std = optarg;
       break;
+
     case 't':
       time_domain = true;
       break;
+
     default:
-      cout << "Unrecognised option" << endl;
+      cout << "Unrecognised option " << gotc << endl;
     }
   }
   
@@ -79,12 +118,23 @@ int main (int argc, char *argv[]) {
   Reference::To<Pulsar::Archive> stdarch;
   Reference::To<Pulsar::Profile> prof;
 
+  Reference::To<const Pulsar::PolnProfile> poln_profile;
+  Pulsar::PolnProfileFit fit;
+
   try {
     
     stdarch = Pulsar::Archive::load(std);
     stdarch->fscrunch();
     stdarch->tscrunch();
-    stdarch->convert_state(Signal::Intensity);
+
+    if (full_poln) {
+
+      fit.set_standard( stdarch->get_Integration(0)->new_PolnProfile(0) );
+      fit.set_transformation( new Calibration::Instrument );
+
+    }
+    else
+      stdarch->convert_state(Signal::Intensity);
 
   }
   catch (Error& error) {
@@ -102,8 +152,32 @@ int main (int argc, char *argv[]) {
       
       arch = Pulsar::Archive::load(archives[i]);
 
-      arch->convert_state (Signal::Intensity);      
-      arch->toas(toas, stdarch, time_domain);
+      arch -> rotate (0.0025);
+
+      if (fscrunch)
+	arch->fscrunch();
+      if (tscrunch)
+	arch->tscrunch();
+
+      if (full_poln) {
+
+	Pulsar::Integration* integration = arch->get_Integration(0);
+	poln_profile = integration->new_PolnProfile(0);
+
+	Tempo::toa toa = fit.get_toa (poln_profile,
+				      integration->get_epoch(),
+				      integration->get_folding_period(),
+				      arch->get_telescope_code());
+	toa.unload(stdout);
+
+      }
+      else {
+
+	arch->convert_state (Signal::Intensity);      
+	arch->toas(toas, stdarch, time_domain);
+
+      }
+
 
       for (unsigned i = 0; i < toas.size(); i++)
 	toas[i].unload(stdout);
