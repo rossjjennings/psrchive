@@ -233,7 +233,6 @@ void polyco::unload (fitsfile* fptr, int back) const
     
     int colnum = 0;
     fits_get_colnum (fptr, CASEINSEN, "NPBLK", &colnum, &status);
-    cerr << "YIKES" << endl;
     fits_write_col (fptr, TINT, colnum, rows+ipol, 1, 1, &npoly, &status);
     if (status != 0)
       throw FITSError (status, "polyco::unload", "fits_write_col NPBLK");
