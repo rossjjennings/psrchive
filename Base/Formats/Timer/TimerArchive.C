@@ -89,10 +89,14 @@ void Pulsar::TimerArchive::copy (const Archive& archive,
 				 const vector<unsigned>& subints)
 {
   if (verbose)
-    cerr << "TimerArchive::copy" << endl;
+    cerr << "TimerArchive::copy Entering" << endl;
 
-  if (this == &archive)
+  if (this == &archive) {
+    cerr << "Returning from TimerArchive::copy early " << endl;
     return;
+  } else {
+    cerr << "this == &archive passed test " << endl;
+  }
 
   Archive::copy (archive, subints);
 
@@ -100,10 +104,11 @@ void Pulsar::TimerArchive::copy (const Archive& archive,
   if (!tarchive)
     return;
 
+  if (verbose) cerr << "Pulsar::TimerArchive::copy copying headers " << endl;
   hdr = tarchive->hdr;
 
   if (verbose)
-    cerr << "TimerArchive::copy another TimerArchive" << endl;
+    cerr << "TimerArchive::copy check validity" << endl;
 
   valid = tarchive->valid;
 }
@@ -172,6 +177,8 @@ char Pulsar::TimerArchive::get_telescope_code () const
 
   if (!strncmp (hdr.telid, "PARKES", 6))
     site = '7';
+  if (!strncmp (hdr.telid, "PKS", 3))
+    site = '7';
   else if (!strcmp (hdr.telid, "AAT"))
     site = '5';
   else if (!strcmp(hdr.telid, "UAO"))
@@ -180,6 +187,8 @@ char Pulsar::TimerArchive::get_telescope_code () const
     site = '2';
   else if (!strcmp (hdr.telid, "DSS43"))
     site = '6';
+  else if (!strcmp (hdr.telid, "GBT"))
+    site = '1';
 
   return site;
 }
