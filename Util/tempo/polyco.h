@@ -5,13 +5,7 @@
 
 #include <string>
 #include <vector>
-#include <fstream>
-#ifdef sun
-#include <strstream.h>
-#endif
-#ifdef __alpha
-#include <strstream>
-#endif
+
 #include "Phase.h"
 #include "MJD.h"
 #ifdef MPI
@@ -51,7 +45,6 @@ public:
 
   int load (string* instr);
   int unload (string *outstr) const;
-  int unload (ostream &ostr) const;
   int unload (FILE* fptr) const;
 
   void   prettyprint  () const;
@@ -98,8 +91,6 @@ public:
 
 };
 
-class psrephem;
-
 class polyco {
 
  protected:
@@ -124,19 +115,19 @@ class polyco {
   ~polyco(){};
 
   // these functions return the number of polynomials successfully loaded
-  int load   (const string filename, size_t nbytes=0);
-  int load   (const char* filename, size_t nbytes=0);
-  int load   (istream &istr, size_t nbytes=0);
-  int load   (FILE * fp, size_t nbytes=0);
-  int load   (string* instr);
+  int load (const char* filename, size_t nbytes=0);
+  int load (const string& filename, size_t nbytes=0)
+	{ return load (filename.c_str(), nbytes); }
+  int load (FILE * fp, size_t nbytes=0);
+  int load (string* instr);
 
   // these functions return -1 upon error
-  int unload (const string filename) const ;
   int unload (const char* filename) const ;
+  int unload (const string& filename) const
+        { return unload (filename.c_str()); }
 
   // these functions return the number of bytes unloaded (-1 on error)
   int unload (string *outstr) const;
-  int unload (ostream &ostr) const;
   int unload (FILE* fptr) const;
 
   void  prettyprint  () const;
@@ -191,20 +182,6 @@ class polyco {
 
   friend int operator == (const polyco &, const polyco &);
   friend int operator != (const polyco &, const polyco &);
-
-  // returns a polyco valid over the range in MJD specified by m1 and m2
-  friend polyco tempoz (const psrephem& eph,
-			const MJD& m1=today, const MJD& m2=today, 
-			double nspan=960, int ncoeff=12, int maxha=8, 
-			int tel=7, double centrefreq=1400.0);
-
-  friend  int tempoz (polyco* poly, const psrephem& eph,
-		      const MJD& m1=today, const MJD& m2=today, 
-		      double nspan=960, int ncoeff=12, int maxha=8, 
-		      int tel=7, double centrefreq=1400.0);
-
-  friend polyco span_poly(const polyco & first_poly, const polyco & second_poly, 
-			  const psrephem & pephem);
 
 #ifdef MPI
   friend int mpiPack_size (const polyco&, MPI_Comm comm, int* size);

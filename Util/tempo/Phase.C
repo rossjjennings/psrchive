@@ -2,9 +2,9 @@
 #include <stdio.h>
 #include <limits.h>
 
-#if defined (sun) && !defined(__GNUC__)
-#include <sunmath.h>
-#endif
+//#if defined (sun) && !defined(__GNUC__)
+//#include <sunmath.h>
+//#endif
 
 #include "Phase.h"
 
@@ -229,7 +229,7 @@ Phase Phase::Floor ()
   return Phase (turns + (int64) floor(fturns), 0.0);
 }
 
-Phase Phase::Nint ()
+Phase Phase::Rint ()
 {
-  return Phase (turns + (int64) floor(fturns+0.5), 0.0);
+  return Phase (turns + (int64) rint(fturns), 0.0);
 }

@@ -1,3 +1,5 @@
+#include <iostream>
+
 #include <stdio.h> 
 #include <stdlib.h>
 #include <values.h>
@@ -275,24 +277,6 @@ int polynomial::unload (string* outstr) const
   return bytes;
 }
 
-int polynomial::unload(ostream &ostr) const
-{
-  string out;
-  if (unload(&out) < 0)
-    return -1;
-
-  long int start_pos = ostr.tellp();
-  ostr << out;
-
-  if(!ostr.good()){
-    fprintf(stderr, "polynomial::unload error: bad stream state detected\n");
-    ostr.seekp(start_pos);
-    ostr.flush();
-    return(-1);
-  }
-  return(ostr.tellp() - start_pos);
-}
-
 int polynomial::unload (FILE* fptr) const
 {
   string out;
@@ -478,9 +462,9 @@ polyco & polyco::operator = (const polyco & in_poly){
   return(*this);
 } 
 
-polyco::polyco(const string filename)
+polyco::polyco (const string filename)
 {
-  if(load (filename) < 1) { 
+  if (load (filename) < 1) { 
     fprintf (stderr, "polyco::polyco - failed to construct from %s\n", filename.c_str());
     string error = "polyco construct error";
     throw(error);
@@ -489,58 +473,33 @@ polyco::polyco(const string filename)
  
 polyco::polyco(const char * filename)
 {
-  string s = filename;
-  if (load (s) < 1) {
+  if (load (filename) < 1) {
     fprintf (stderr, "polyco::polyco - failed to construct from %s\n", filename);
     string error = "polyco construct error";
     throw(error);
   }
 }
 
-int polyco::load(const string polyco_filename, size_t nbytes) {
-  return load (polyco_filename.c_str());
-}
-
-int polyco::load(const char * polyco_filename, size_t nbytes)
+int polyco::load (const char* polyco_filename, size_t nbytes)
 {
-  ifstream file(polyco_filename);
-  if (!file) {
-    cerr << "polyco::load Could not open " << polyco_filename << endl;
+  FILE* fptr = fopen (polyco_filename, "r");
+  if (!fptr)  {
+    cerr << "polyco::load cannot open '" << polyco_filename << "' - "
+	<< strerror (errno) << endl;
     return -1;
   }
-  return(this->load(file,nbytes));
-}
 
-int polyco::load (istream &istr, size_t nbytes)
-{
-  if (!istr)
-    return -1;
+  int ret = load (fptr, nbytes);
+  fclose (fptr);
 
-  string total;
-  string line;
-  size_t bytes = 0;
-
-  char* newline = "\n";
-  size_t start_pos = (int) istr.tellg();
-  while (!istr.eof())  {
-    getline (istr, line, newline[0]);
-    if (line.length())  {
-      line += newline; // put back the NEWLINE (useful delimiter)
-      total += line;
-      bytes += line.length();
-    }
-    if (nbytes && bytes>=nbytes)
-      break;
-  }
-  if (nbytes) istr.seekg (start_pos+nbytes);
-  return load (&total);
+  return ret;
 }
 
 int polyco::load (FILE* fptr, size_t nbytes)
 {
   string total;
   if (stringload (&total, fptr, nbytes) < 0)  {
-    fprintf (stderr, "polyco::load error\n");
+    fprintf (stderr, "polyco::load stringload error\n");
     return -1;
   }
   return load (&total);
@@ -559,13 +518,15 @@ int polyco::load (string* instr)
   return(npollys);
 }
 
-int polyco::unload(const string filename) const {
-  return(this->unload(filename.c_str()));
-}
-
-int polyco::unload(const char *filename) const {
-  ofstream ostr(filename);
-  return(this->unload(ostr));
+int polyco::unload (const char *filename) const
+{
+  FILE* fptr = fopen (filename, "w");
+  if (!fptr)  {
+    cerr << "polyco::unload cannot open '" << filename << "' - "
+        << strerror (errno) << endl;
+    return -1;
+  }
+  return unload (fptr);
 }
 
 // ///////////////////////////////////////////////////////////////////
@@ -581,24 +542,6 @@ int polyco::unload (string* outstr) const {
     bytes += pollys[i].unload(outstr);
   }
   return bytes;
-}
-
-int polyco::unload(ostream &ostr) const
-{
-  string outline;
-  if (unload(&outline) < 0)
-    return -1;
-
-  long int start_pos = ostr.tellp();
-  ostr << outline;
-
-  if(!ostr.good()){
-    fprintf(stderr, "polyco::unload error: bad stream state detected\n");
-    ostr.seekp(start_pos);
-    ostr.flush();
-    return(-1);
-  }
-  return(ostr.tellp() - start_pos);
 }
 
 int polyco::unload (FILE* fptr) const
@@ -618,24 +561,6 @@ int polyco::unload (FILE* fptr) const
   fflush (fptr);
   return bout;
 }
-
-// int polyco::print(char * chpolly) const{
-//   // Terrible terrible terrible
-//   // use stringstreams
-//   this->unload("polyco.dat.tmp");
-//   FILE * fp;
-//   if((fp=fopen("polyco.dat.tmp", "r"))==NULL){
-//     fprintf(stderr, "polyco::print error - could not open file\n");
-//     return(-1);
-//   }
-//   if(fread(chpolly, this->size_in_bytes(), 1, fp)!=1){
-//     fprintf(stderr, "polyco::print error reading file\n");
-//     return(-1);
-//   }
-//   fclose(fp);
-//   remove("polyco.dat.tmp");
-//   return(0);
-// } 
 
 void polyco::prettyprint() const {
   for(int i=0; i<pollys.size(); ++i) 
@@ -765,3 +690,14 @@ int operator != (const polyco & p1, const polyco & p2){
   if(p1==p2) return(0);
   return(1);
 }
+
+
+
+
+
+
+
+
+
+
+

@@ -57,7 +57,7 @@ class Phase {
 
   Phase Ceil  ();
   Phase Floor ();
-  Phase Nint  ();
+  Phase Rint  ();
 
   double in_turns() const;
   int64  intturns() const;
