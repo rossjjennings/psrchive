@@ -6,10 +6,12 @@
 #include <sunmath.h>
 #endif
 #include <math.h>
-
+#include <iostream>
 #include "MJD.h"
 #include "machine_endian.h"
 #include "ieee.h"
+
+int MJD::verbose = 0;
 
 int ss2hhmmss (int* hours, int* min, int* sec, int seconds)
 {
@@ -287,123 +289,62 @@ MJD::MJD(float128 mjd) {
 #endif
 
 MJD::MJD(double dd, double ss, double fs){
-  int sec_to_add, days_to_add;
-  int positive;
-
+  cerr.precision(15);
+  if(verbose) cerr << endl << "MJD::MJD - constructing with values " << dd << "\t" << ss << "\t" << fs << endl;
   // Everything should be positive - or everything should
   // be negative. If not modify accordingly.
-
-  if (dd + (ss+fs)/86400.0 > 0.0)
-    positive = 1;
-  else
-    positive = 0;
-
-  if (positive) {
-    if (fs < 0.0) {
-      sec_to_add = (int) (1.0-1.0 * fs);
-      ss -= sec_to_add;
-      fs += sec_to_add;
-    }
-
-    if (ss< 0.0) {
-      days_to_add = (int) (1.0 - ss/86400.0);
-      dd -= days_to_add;
-      ss += 86400.0 * days_to_add;
-    }
-
-    // Now, make dd and ss integers - give remainder
-    // to lower order members.
-    
-    if (fmod (dd,1.0)!=0.0){
-      ss += 86400.0 * (fmod(dd,1.0));
-      dd = (int) dd;
-    }
-
-    if (fmod (ss,1.0)!=0.0) {
-      fs += fmod(ss,1.0);
-      ss = (int) ss;
-    }
-
-    // Make sure fractional seconds are truly fractional
-    // round to the nearest fempto second
-    fs += 5e-16;
-    if (fs>=1.0) {
-      sec_to_add = (int) fs;
-      fs = fmod(fs,1.0);
-      ss += sec_to_add;
-    }
-    else {
-      fs -= 5e-16;
-    }
-    // Make sure that there aren't too many seconds'
-
-    days_to_add =0;
-    if (ss>(86400-1)) {
-      days_to_add = (int) (ss/86400);
-      ss = (int) fmod((double)ss,86400);
-    }
-    dd += days_to_add;
-
-    // install the values.
-
-    days = (int) (dd+0.5);
-    secs = (int) (ss+0.5);
-    fracsec = fs; 
+  int sign;
+  if (dd + (ss+fs)/86400.0 > 0.0) sign = 1;
+  else sign = -1;
+  int chsecs, chdays;
+  if(sign*fs<0.0){
+    chsecs = (int)fs - sign;
+    ss += chsecs;
+    fs -= chsecs;
+  }
+  if(verbose) cerr << "MJD::MJD - fracsec with sign " << sign << "\t" << dd << "\t" << ss << "\t" << fs << endl;
+  if(sign*ss<0.0){
+    chdays = (int)(ss/86400.0) - sign;
+    dd += chdays;
+    ss -= chdays*86400.0;
   }
 
-  /* If the whole thing is -ve act differently */
-
-  else {
-    if (fs <= -1.0) {
-      sec_to_add = (int) (0.0 - fs);
-      ss -= sec_to_add;
-      fs += sec_to_add;
-    }
-
-    if (ss< -86400.0) {
-      days_to_add = (int) (0.0-ss/86400.0);
-      dd -= days_to_add;
-      ss += 86400.0 * days_to_add;
-    }
-
-    // Now, make dd and ss integers - give remainder
-    // to lower order members.
-
-    if (fmod (-1.0*dd,1.0)!=0.0){
-      ss -= 86400.0 * (fmod(-1.0*dd,1.0));
-      dd = -1.0 * (int) (fabs(dd));
-    }
-
-    if (fmod (-1.0*ss,1.0)!=0.0) {
-      fs -= fmod(-1.0*ss,1.0);
-      ss = (int) (fabs(ss));
-    }
-
-    // Make sure fractional seconds are truly fractional
-
-    sec_to_add =0;
-    if (fs<= -1.0) {
-      sec_to_add = (int) (-1.0*fs);
-      fs = -1.0 * fmod(-1.0*fs,1.0);
-    }
-
-    ss -= sec_to_add;
-
-    // Make sure that there are not too many seconds
-
-    days_to_add =0;
-    if (ss<(-86399)) {
-      days_to_add = (int) (-1*ss/86400);
-      ss = -1 * (int) (fmod((double) -1.0*ss,86400));
-    }
-    dd -= days_to_add;
-
-    // install the values.
-
-    days = -1 * (int) (-1*dd+0.5);
-    secs = -1 * (int) (-1*ss+0.5);
-    fracsec = fs; 
+  if(verbose) cerr << "MJD::MJD - sec with sign " << sign << "\t" << dd << "\t" << ss << "\t" << fs << endl;
+  // Now, make dd and ss integers - give remainder
+  // to lower order members.
+  if (fmod (dd,1.0)!=0.0){
+    ss += sign * 86400.0 * (fmod(dd,1.0));
+    dd = (int) dd;
+  }  
+  if (fmod (ss,1.0)!=0.0) {
+    fs += sign*fmod(ss,1.0);
+    ss = (int) ss;
   }
+  
+  if(verbose) cerr << "MJD::MJD - integer days and secs " << dd << "\t" << ss << "\t" << fs << endl;
+  // Make sure fractional seconds are truly fractional
+  // round to the nearest fempto second
+  fs += sign*5e-16;
+  if (fabs(fs)>1.0) {
+    chsecs = (int) fs;
+    fs -= sign*chsecs;
+    ss += sign*chsecs;
+  } else fs -= sign*5e-16;
+
+  if(verbose) cerr << "MJD::MJD - modified fracsecs " << dd << "\t" << ss << "\t" << fs << endl;
+  // Make sure that there aren't too many seconds'
+  if (fabs(ss)>(86400-1)) {
+    chdays = (int) (ss/86400);
+    ss = (int) fmod((double)ss,86400);
+    dd += sign*chdays;
+  }
+  
+  if(verbose) cerr << "MJD::MJD - modified secs " << dd << "\t" << ss << "\t" << fs << endl;
+  // install the values.
+  days = (int) (dd+sign*0.5);
+  secs = (int) (ss+sign*0.5);
+  fracsec = fs; 
+  if(verbose) cerr << "MJD::MJD - final values " << days << "\t" << secs << "\t" << fracsec << endl << endl;
 }
 
 MJD::MJD(int d, int s, double f) {
