@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/PSRFITS/Pulsar/FITSArchive.h,v $
-   $Revision: 1.4 $
-   $Date: 2003/06/06 02:24:36 $
+   $Revision: 1.5 $
+   $Date: 2003/06/14 01:53:31 $
    $Author: ahotan $ */
 
 #include <fitsio.h>
@@ -10,6 +10,7 @@
 #define PSRFITS 1
 #include "Pulsar/BasicArchive.h"
 #include "Pulsar/FITSHdrExtension.h"
+#include "Pulsar/FITSHistory.h"
 #include "Pulsar/CalInfoExtension.h"
 #include "Pulsar/ObsExtension.h"
 #include "Pulsar/ITRFExtension.h"
@@ -96,7 +97,7 @@ namespace Pulsar {
     };
 
     // Class for holding a row of digitiser statistics
-
+    
     class digistat {
       
     public:
@@ -119,43 +120,6 @@ namespace Pulsar {
       string diglev;
 
       vector<float> data;
-      
-    };
-    
-    // Class for holding a row of processing history
-    
-    class proc_hist {
-      
-    public:
-      
-      proc_hist () { init(); }
-      
-      void load (fitsfile* fptr, int row);
-      void unload (fitsfile* fptr, int row);
-      
-      ~proc_hist ();
-      
-      char* date_pro;
-      char* proc_cmd;
-      char* pol_type;
-      int npol;
-      int nbin;
-      int nbin_prd;
-      double tbin;
-      double ctr_freq;
-      int nchan;
-      double chanbw;
-      int par_corr;
-      int rm_corr;
-      int dedisp;
-      char* sc_mthd;
-      char* cal_mthd;
-      char* cal_file;
-      char* rfi_mthd;
-
-    protected:
-      
-      void init ();
       
     };
 
@@ -239,7 +203,7 @@ namespace Pulsar {
     //! Channel bandwidth
     double chanbw;
     
-    vector<proc_hist*> history;
+    FITSHistory* history;
     
     vector<digistat*> digitiser_statistics;
     

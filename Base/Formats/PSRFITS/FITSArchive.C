@@ -12,8 +12,9 @@
 
 void Pulsar::FITSArchive::init ()
 {
+  history = new FITSHistory ();
+
   chanbw = 0.0;
-  history.resize(0);
   digitiser_statistics.resize(0);
   digitiser_counts = 0;
   original_bandpass = 0;
@@ -120,16 +121,16 @@ Pulsar::FITSArchive::extract (const vector<unsigned>& subints) const
 //! Return the number of extensions available
 unsigned Pulsar::FITSArchive::get_nextension () const
 {
-  return 6;
+  return 7;
 }
 
 //! Return a pointer to the specified extension
 const Pulsar::Archive::Extension*
 Pulsar::FITSArchive::get_extension (unsigned iext) const
 {
-  if (iext < 0 || iext > 5)
+  if (iext < 0 || iext > 6)
     throw Error (InvalidRange, "Pulsar::FITSArchive::get_extension",
-		 "iext=%d > next=6", iext);
+		 "invalid index");
   
   switch (iext) {
   case 0:
@@ -149,6 +150,9 @@ Pulsar::FITSArchive::get_extension (unsigned iext) const
     break;
   case 5:
     return &be_ext;
+    break;
+  case 6:
+    return history;
     break;
   default:
     return 0;
@@ -692,35 +696,18 @@ void Pulsar::FITSArchive::load_header (const char* filename)
     cerr << "FITSArchive::load_header finished with primary HDU" 
 	 << endl;
   
-  // Move to the Processing History HDU, where only values in the 
-  // last row (most recent) of each column are extracted
+  // Load the processing history
   
-  fits_movnam_hdu (fptr, BINARY_TBL, "HISTORY", 0, &status);
+  history->load (fptr);
   
-  if (status != 0)
-    throw FITSError (status, "FITSArchive::load_header", 
-		     "fits_movnam_hdu HISTORY");
+  set_nbin (history->get_last()->nbin);
+  set_npol (history->get_last()->npol);
+  set_centre_frequency (history->get_last()->ctr_freq);
+  set_nchan (history->get_last()->nchan);
   
-  // Get the number of rows in the binary table
+  chanbw = history->get_last()->chanbw;
   
-  long numrows = 0;
-  fits_get_num_rows (fptr, &numrows, &status);
-  
-  history.resize(numrows);
-  
-  for (int i = 0; i < numrows; i++) {
-    history[i] = new proc_hist();
-    history[i]->load(fptr, i+1);
-  }
-  
-  set_nbin (history[numrows-1]->nbin);
-  set_npol (history[numrows-1]->npol);
-  set_centre_frequency (history[numrows-1]->ctr_freq);
-  set_nchan (history[numrows-1]->nchan);
-
-  chanbw = history[numrows-1]->chanbw;
-  
-  string polstr = history[numrows-1]->pol_type;
+  string polstr = history->get_last()->pol_type;
   
   if(polstr == "XXYY") {
     set_state ( Signal::PPQQ );
@@ -756,11 +743,11 @@ void Pulsar::FITSArchive::load_header (const char* filename)
   
   set_bandwidth(get_nchan()*chanbw);
   
-  if(history[numrows-1]->rm_corr == 1) {
+  if(history->get_last()->rm_corr == 1) {
     set_ism_rm_corrected (true);
     set_iono_rm_corrected (true);
   }
-  else if(history[numrows-1]->rm_corr == 0) {
+  else if(history->get_last()->rm_corr == 0) {
     set_ism_rm_corrected (false);
     set_iono_rm_corrected (false);
   }
@@ -787,11 +774,11 @@ void Pulsar::FITSArchive::load_header (const char* filename)
   // Worth noting though.
   //  
 
-  if(history[numrows-1]->par_corr == 1) {
+  if(history->get_last()->par_corr == 1) {
     set_parallactic_corrected (true);
     set_feedangle_corrected (false);
   }
-  else if(history[numrows-1]->par_corr == 0) {
+  else if(history->get_last()->par_corr == 0) {
     set_feedangle_corrected (false);
     set_parallactic_corrected (false);
   }
@@ -808,9 +795,9 @@ void Pulsar::FITSArchive::load_header (const char* filename)
     cerr << "FITSArchive::load WARNING, assuming PA_CORR implies FA_CORR"
 	 << endl;
   
-  if(history[numrows-1]->dedisp == 1)
+  if(history->get_last()->dedisp == 1)
     set_dedispersed (true);
-  else if(history[numrows-1]->dedisp == 0)
+  else if(history->get_last()->dedisp == 0)
     set_dedispersed (false);
   else {
     if (verbose) {
@@ -833,7 +820,7 @@ void Pulsar::FITSArchive::load_header (const char* filename)
   
   // Get the number of rows (ie. the number of sub-ints)
   
-  numrows = 0;
+  long numrows = 0;
   fits_get_num_rows (fptr, &numrows, &status);
   
   digitiser_statistics.resize(numrows);
@@ -1612,77 +1599,10 @@ try {
     
   // Move to the Processing History HDU and set more information
   
-  fits_movnam_hdu (myfptr, BINARY_TBL, "HISTORY", 0, &status);
-  if (status != 0)
-    throw FITSError (status, "FITSArchive::unload_file",
-		     "fits_movnam_hdu HISTORY");
+  history->unload (myfptr);
   
-  proc_hist* latest = new proc_hist();
-  
-  latest->nbin = get_nbin();
-  latest->ctr_freq = get_centre_frequency();
-  latest->npol = get_npol();
-  latest->nchan = get_nchan();
-  latest->chanbw = get_bandwidth()/get_nchan();
-  
-  if(get_state() == Signal::PPQQ)
-    sprintf(latest->pol_type,"XXYY");
-  else if(get_state() == Signal::Stokes)
-    sprintf(latest->pol_type,"STOKE");
-  else if(get_state() == Signal::Coherence)
-    sprintf(latest->pol_type,"XXYYCRCI");
-  else if(get_state() == Signal::Intensity)
-    sprintf(latest->pol_type,"INTEN");
-  else if(get_state() == Signal::Invariant)
-    sprintf(latest->pol_type,"INVAR");
-  else {
-    if (verbose)
-      cerr << "WARNING: FITSArchive::unload_file unexpected poln state" 
-	   << endl;
-    sprintf(latest->pol_type,"INVAL");
-  }
-  
-  if (verbose)
-    cerr << "FITSArchive::unload_file setting flags" << endl;
-  
-  // Set some true/false flags
-      
-  if (verbose)
-    cerr << "FITSArchive::unload_file setting true/false flags" << endl;
-  
-  // WARNING! There is ambiguity here due to the different ways in which
-  // rotation measure correction flags are stored
-  
-  latest->rm_corr = truthval(get_ism_rm_corrected());
-  latest->par_corr = truthval(get_parallactic_corrected());
-  latest->dedisp = truthval (get_dedispersed());
-  
-  latest->nbin_prd = get_nbin();
-  latest->tbin = ((get_Integration(0)->get_folding_period())/(double(get_nbin())));
-  
-  time_t thetime;
-  time(&thetime);
-  
-  sprintf(latest->date_pro, "%s", asctime(gmtime(&thetime)));
-  sprintf(latest->proc_cmd, "%s", "PSRCHIVE SCHEME");
-  
-  // Add another row to the processing history
-  
-  fits_delete_rows (myfptr, 1, 1, &status);
-  
-  fits_insert_rows (myfptr, 0, history.size()+1, &status);
-  if (status != 0)
-    throw FITSError (status, "FITSArchive::unload_file", 
-		     "fits_insert_rows HISTORY");
-  
-  for (unsigned i = 0; i < history.size(); i++) {
-    history[i]->unload(myfptr, i+1);
-  }
-
-  latest->unload(myfptr, history.size()+1);
-
   if (verbose) {
-    cerr << "FITSArchive::unload_file finished in processing history" 
+    cerr << "FITSArchive::unload_file finished with processing history" 
 	 << endl;
   }
   
