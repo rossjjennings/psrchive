@@ -775,7 +775,7 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
       s = " "
       write(s,'(i3)') v1
 c This breaks -ve numbers!! :      call zeropad(s(2:3))      ! put leading 0's
-      if (s(2:2).eq." ") s(2:2) = "0" !Do this instead!
+      if (s(2:2).eq." ".or.s(2:2).eq."-") s(2:2) = "0" !Do this instead!
       if (d.lt.0.0) s(1:1) = "-" ! fixes -00: case  
       s(4:4) = ":"
       slen = slen + 1
