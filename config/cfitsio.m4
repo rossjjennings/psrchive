@@ -97,7 +97,7 @@ AC_DEFUN([SWIN_LIB_CFITSIO],
     AC_DEFINE([HAVE_CFITSIO], [1], [Define if the CFITSIO library is present])
     [$1]
   else
-    echo "	The PSRFITS code will not be compiled"
+    AC_MSG_WARN([The PSRFITS code will not be compiled])
    [$2]
   fi
 

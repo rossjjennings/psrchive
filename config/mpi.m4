@@ -129,7 +129,7 @@ AC_DEFUN([SWIN_LIB_MPI],
     AC_DEFINE([HAVE_MPI], [1], [Define if an MPI library is present])
     [$1]
   else
-    echo "	MPI-specific code will not be compiled"
+    AC_MSG_WARN([Message Passing Interface (MPI) code will not be compiled])
     [$2]
   fi
 
