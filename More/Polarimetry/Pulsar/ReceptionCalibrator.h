@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ReceptionCalibrator.h,v $
-   $Revision: 1.7 $
-   $Date: 2003/04/28 12:05:38 $
+   $Revision: 1.8 $
+   $Date: 2003/04/28 21:43:20 $
    $Author: straten $ */
 
 #ifndef __ReceptionCalibrator_H
@@ -57,8 +57,8 @@ namespace Pulsar {
     //! Add the specified FluxCalibrator observation to the set of constraints
     void add_FluxCalibrator (const FluxCalibrator* fluxcal);
 
-    //! Return true if the model is fixed (no more data may be added)
-    bool is_fixed () const;
+    //! Solve equation for each frequency
+    void solve ();
 
     //! Calibrate the polarization of the given archive
     virtual void calibrate (Archive* archive);
@@ -100,9 +100,6 @@ namespace Pulsar {
 
     //! Flag set after successful call to add_FluxCalibrator
     bool includes_FluxCalibrator;
-
-    //! Solve equation for each frequency
-    void fit ();
 
     //! Check that the model is ready 
     void check_ready (const char* method);

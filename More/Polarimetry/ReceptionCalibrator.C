@@ -235,7 +235,7 @@ void Pulsar::ReceptionCalibrator::calibrate (Archive* data)
   cerr << "Pulsar::ReceptionCalibrator::calibrate" << endl;
 
   if (!is_fit)
-    fit ();
+    solve ();
 
   string reason;
   if (!uncalibrated->calibrator_match (data, reason))
@@ -277,10 +277,10 @@ void Pulsar::ReceptionCalibrator::calibrate (Archive* data)
 }
 
 
-void Pulsar::ReceptionCalibrator::fit ()
+void Pulsar::ReceptionCalibrator::solve ()
 {
   if (is_fit) {
-    cerr << "Pulsar::ReceptionCalibrator::fit models already fit" << endl;
+    cerr << "Pulsar::ReceptionCalibrator::solve equation already fit" << endl;
     return;
   }
 
