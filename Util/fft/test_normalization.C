@@ -2,10 +2,7 @@
 #include <math.h>
 
 #include "fftm.h"
-
-extern "C" {
-float gasdev (int* idum); // from Numerical Recipes
-	   }
+#include "spectra.h"
 
 int main (int argc, char** argv)
 {
@@ -18,7 +15,7 @@ int main (int argc, char** argv)
 
   int ntests = 4;
   int nchan[4] = {8, 16, 32, 64};
-  int idum = -1;
+  long idum = -1;
 
   fprintf (stderr, "Generating %d random numbers\n", ndat);
   gasdev (&idum);
