@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pcm.C,v $
-   $Revision: 1.32 $
-   $Date: 2004/10/09 05:53:58 $
+   $Revision: 1.33 $
+   $Date: 2004/10/11 14:26:36 $
    $Author: straten $ */
 
 /*! \file pcm.C 
@@ -495,7 +495,7 @@ int main (int argc, char *argv[]) try {
          << mid.datestr (buffer, 256, "%Y-%m-%d-%H:%M:00") << endl;
 
     Pulsar::Database::Criterion criterion;
-    criterion = Pulsar::Database::get_default_PolnCal_criterion ();
+    criterion = Pulsar::Database::get_default_criterion ();
     criterion.entry = Pulsar::Database::Entry (*archive);
     criterion.entry.time = mid;
     criterion.minutes_apart = 0.5 * hours * 60.0;
