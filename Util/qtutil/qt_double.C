@@ -22,7 +22,8 @@ void qt_double::value_Entered_CB ()
 
   if (sscanf (value.text().ascii(), "%lf", &newval) != 1) {
     if (verbose)
-      cerr << "qt_double:: invalid value '" << value.text() << "'" << endl;
+      std::cerr << "qt_double:: invalid value '"
+                << value.text() << "'" << std::endl;
     newval = valset;
   }
   

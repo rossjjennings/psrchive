@@ -60,7 +60,8 @@ void qt_value::error_Entered_CB ()
 
   if (sscanf (error.text().ascii(), "%lf", &newval) != 1) {
     if (verbose)
-      cerr << "qt_value:: invalid value '" << error.text() << "'" << endl;
+      std::cerr << "qt_value:: invalid value '"
+                << error.text() << "'" << std::endl;
     // restore the old value
     newval = errset;
   }
