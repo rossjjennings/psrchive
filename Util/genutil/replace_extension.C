@@ -6,7 +6,7 @@ using namespace std;
 string replace_extension (string filename, const string& ext)
 {
   if (!(ext.length() && filename.length()))
-    return;
+    return filename;
 
   unsigned index = filename.find_last_of( ".", filename.length() );
   if (index == string::npos)
