@@ -1,16 +1,15 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/RotatingVectorModel.h,v $
-   $Revision: 1.1 $
-   $Date: 2005/03/20 08:41:32 $
+   $Revision: 1.2 $
+   $Date: 2005/04/06 20:23:36 $
    $Author: straten $ */
 
 #ifndef __RotatingVectorModel_H
 #define __RotatingVectorModel_H
 
 #include "MEAL/Scalar.h"
-#include "MEAL/UnivariateEvaluationProxy.h"
-#include "MEAL/ParameterProxy.h"
+#include "MEAL/Univariate.h"
 
 namespace MEAL {
 
@@ -18,14 +17,19 @@ namespace MEAL {
 
   //! The Rotating Vector Model (RVM) of Radhakrishnan & Cooke
   /*! The abscissa to this model is the pulsar rotational phase in radians */
-  class RotatingVectorModel : public UnivariateEvaluationProxy<Scalar>,
-			      public ParameterProxy
+  class RotatingVectorModel : public Univariate<Scalar>
   {
 
   public:
 
     //! Default constructor
     RotatingVectorModel ();
+
+    //! Copy constructor
+    RotatingVectorModel (const RotatingVectorModel& copy);
+
+    //! Assignment operator
+    RotatingVectorModel& operator = (const RotatingVectorModel& copy);
 
     //! Destructor
     ~RotatingVectorModel ();
@@ -69,6 +73,11 @@ namespace MEAL {
     ScalarValue* line_of_sight;
     ScalarValue* magnetic_axis;
     ScalarValue* magnetic_meridian;
+
+    void calculate (double&, std::vector<double>*) {}
+    void init ();
+
+    Reference::To<Scalar> expression;
 
   };
 

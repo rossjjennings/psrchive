@@ -1,19 +1,21 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Gaussian.h,v $
-   $Revision: 1.3 $
-   $Date: 2004/11/22 19:26:04 $
+   $Revision: 1.4 $
+   $Date: 2005/04/06 20:23:36 $
    $Author: straten $ */
 
 #ifndef __Gaussian_H
 #define __Gaussian_H
 
-#include "MEAL/UnivariateOptimizedScalar.h"
+#include "MEAL/Univariate.h"
+#include "MEAL/Scalar.h"
+#include "MEAL/Parameters.h"
 
 namespace MEAL {
 
   //! Gaussian function 
-  class Gaussian : public UnivariateOptimizedScalar {
+  class Gaussian : public Univariate<Scalar> {
 
   public:
 
@@ -52,22 +54,18 @@ namespace MEAL {
     //! Return the name of the class
     std::string get_name () const;
 
-    //! Return the name of the specified parameter
-    std::string get_param_name (unsigned index) const;
-
-    // ///////////////////////////////////////////////////////////////////
-    //
-    // Optimized implementation
-    //
-    // ///////////////////////////////////////////////////////////////////
+  protected:
 
     //! Return the value (and gradient, if requested) of the function
     void calculate (double& x, std::vector<double>* grad=0);
 
-  protected:
-
     //! Set true when the Gaussian is periodic
     bool cyclic;
+
+  private:
+
+    //! Parameter policy
+    Parameters parameters;
 
   };
 

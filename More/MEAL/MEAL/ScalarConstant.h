@@ -1,34 +1,27 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/ScalarConstant.h,v $
-   $Revision: 1.3 $
-   $Date: 2004/11/22 19:26:04 $
+   $Revision: 1.4 $
+   $Date: 2005/04/06 20:23:36 $
    $Author: straten $ */
 
 #ifndef __ScalarConstant_H
 #define __ScalarConstant_H
 
-#include "MEAL/Constant.h"
 #include "MEAL/Scalar.h"
 
 namespace MEAL {
 
   //! Represents a constant scalar value
-  class ScalarConstant : public Constant, public Scalar {
+  class ScalarConstant : public Scalar {
 
   public:
 
     //! Default constructor
     ScalarConstant (double value);
 
-    //! Copy constructor
-    ScalarConstant (const ScalarConstant& scalar);
-
     //! Assignment operator
     const ScalarConstant& operator = (const ScalarConstant& scalar);
-
-    //! Destructor
-    ~ScalarConstant ();
 
     // ///////////////////////////////////////////////////////////////////
     //
@@ -46,7 +39,7 @@ namespace MEAL {
     // ///////////////////////////////////////////////////////////////////
 
     //! Return the value
-    double evaluate (std::vector<double>* gradient=0) const;
+    void calculate (double& result, std::vector<double>* gradient);
     
   protected:
 

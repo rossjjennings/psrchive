@@ -1,53 +1,33 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/ScalarArgument.h,v $
-   $Revision: 1.4 $
-   $Date: 2004/11/23 12:14:35 $
+   $Revision: 1.5 $
+   $Date: 2005/04/06 20:23:36 $
    $Author: straten $ */
 
 #ifndef __ScalarArgument_H
 #define __ScalarArgument_H
 
-#include "MEAL/Scalar.h"
 #include "MEAL/Univariate.h"
-#include "MEAL/NoParameters.h"
+#include "MEAL/Scalar.h"
 
 namespace MEAL {
 
   //! Represents a scalar argument
-  class ScalarArgument : public Scalar,public Univariate,public NoParameters {
+  class ScalarArgument : public Univariate<Scalar> {
 
   public:
 
     //! Default constructor
     ScalarArgument ();
 
-    //! Copy constructor
-    ScalarArgument (const ScalarArgument& scalar);
-
-    //! Assignment operator
-    const ScalarArgument& operator = (const ScalarArgument& scalar);
-
-    //! Destructor
-    ~ScalarArgument ();
-
-    // ///////////////////////////////////////////////////////////////////
-    //
-    // Function implementation
-    //
-    // ///////////////////////////////////////////////////////////////////
-
     //! Return the name of the class
     std::string get_name () const;
 
-    // ///////////////////////////////////////////////////////////////////
-    //
-    // Scalar implementation
-    //
-    // ///////////////////////////////////////////////////////////////////
+  protected:
 
     //! Return the argument
-    double evaluate (std::vector<double>* gradient=0) const;
+    void calculate (double& result, std::vector<double>* gradient=0);
     
   };
 

@@ -1,16 +1,15 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/CongruenceTransformation.h,v $
-   $Revision: 1.4 $
-   $Date: 2004/11/23 12:17:50 $
+   $Revision: 1.5 $
+   $Date: 2005/04/06 20:23:36 $
    $Author: straten $ */
 
 #ifndef __MEAL_CongruenceTransformation_H
 #define __MEAL_CongruenceTransformation_H
 
-#include "MEAL/Optimized.h"
-#include "MEAL/Composite.h"
 #include "MEAL/Complex2.h"
+#include "MEAL/Composite.h"
 
 namespace MEAL {
 
@@ -19,8 +18,7 @@ namespace MEAL {
     a congruence transformation in \f$ J \f$.  The partial derivatives of the
     output, \f$ \rho^\prime \f$, are computed using the product rule
     and the partial derivatives of \f$ \rho \f$ and \f$ J \f$. */
-  class CongruenceTransformation
-    : public Optimized<Complex2>, public Composite 
+  class CongruenceTransformation : public Complex2
   {
 
   public:
@@ -43,22 +41,19 @@ namespace MEAL {
     //! Get the input, \f$ \rho \f$
     virtual Complex2* get_input ();
 
-    // ///////////////////////////////////////////////////////////////////
-    //
-    // Optimized implementation
-    //
-    // ///////////////////////////////////////////////////////////////////
+  protected:
 
     //! Returns \f$ \rho^\prime \f$ and its gradient
-    void calculate (Jones<double>& result, std::vector<Jones<double> >* grad = 0);
-
-  protected:
+    void calculate (Jones<double>& result, std::vector<Jones<double> >*);
 
     //! The input, \f$ \rho \f$
     Project<Complex2> input;
 
     //! The transformation, \f$ J \f$
     Project<Complex2> transformation;
+
+    //! Composite parameter policy
+    Composite composite;
 
   };
 

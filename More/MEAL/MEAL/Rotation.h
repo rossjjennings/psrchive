@@ -1,14 +1,14 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Rotation.h,v $
-   $Revision: 1.3 $
-   $Date: 2004/11/22 19:26:04 $
+   $Revision: 1.4 $
+   $Date: 2005/04/06 20:23:36 $
    $Author: straten $ */
 
 #ifndef __MEAL_Rotation_H
 #define __MEAL_Rotation_H
 
-#include "MEAL/OptimizedComplex2.h"
+#include "MEAL/Complex2.h"
 #include "Vector.h"
 
 namespace MEAL {
@@ -16,7 +16,7 @@ namespace MEAL {
   //! Represents a rotation (unitary, birefringent) transformation
   /*! This class represents the rotation, \f$\phi\f$, about an arbitrary
     axix, \f$\hat n\f$. */
-  class Rotation : public OptimizedComplex2 {
+  class Rotation : public Complex2 {
 
   public:
 
@@ -44,22 +44,15 @@ namespace MEAL {
     //! Return the name of the class
     std::string get_name () const;
 
-    //! Return the name of the specified parameter
-    std::string get_param_name (unsigned index) const;
-
   protected:
+
+    //! Calculate the Jones matrix and its gradient
+    void calculate (Jones<double>& result, std::vector<Jones<double> >*);
 
     //! The axis along which the rotation occurs
     Vector<double, 3> axis;
 
-    // ///////////////////////////////////////////////////////////////////
-    //
-    // OptimizedComplex2 implementation
-    //
-    // ///////////////////////////////////////////////////////////////////
-
-    //! Calculate the Jones matrix and its gradient
-    void calculate (Jones<double>& result, std::vector<Jones<double> >* gradient);
+    void init ();
 
   };
 

@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/BinaryScalar.h,v $
-   $Revision: 1.3 $
-   $Date: 2004/11/22 19:26:03 $
+   $Revision: 1.4 $
+   $Date: 2005/04/06 20:23:36 $
    $Author: straten $ */
 
 #ifndef __MEAL_BinaryScalar_H
@@ -30,12 +30,6 @@ namespace MEAL {
     virtual double partial_arg2 (double arg1, double arg2) const = 0;
 
   protected:
-
-    // ///////////////////////////////////////////////////////////////////
-    //
-    // Optimized implementation
-    //
-    // ///////////////////////////////////////////////////////////////////
 
     //! Return the result and its gradient
     void calculate (double& result, std::vector<double>* gradient);
