@@ -23,6 +23,7 @@ _STAR_RESTFP_FIX
 
 AC_ARG_VAR(PSRHOME)
 AC_ARG_VAR(LOGIN_ARCH)
+AC_PREFIX_DEFAULT([$PSRHOME/$LOGIN_ARCH])
 
 # Set up for standard pulsar installation
 CPPFLAGS="-I$PSRHOME/packages/$LOGIN_ARCH/include $CPPFLAGS"
@@ -35,8 +36,9 @@ INSTALL_DATA="${INSTALL} -m 644 -p"
 
 # Checks for libraries
 AC_CHECK_LIB([m], [sin])
-SWIN_LIB_SLA([],AC_MSG_ERROR([Cannot link against SLALIB]))
+SWIN_LIB_SLA([],AC_MSG_ERROR([Cannot continue without SLALIB]))
 SWIN_LIB_FFTW
+SWIN_LIB_MKL
 SWIN_LIB_PGPLOT
 SWIN_LIB_CFITSIO
 SWIN_LIB_MPI
