@@ -17,7 +17,7 @@ int main (int argc, char** argv)
   // Pulsar::Integration::verbose = true;
 
   int c = 0;
-  const char* args = "aP:vVF:";
+  const char* args = "avVF:";
   int denoise_fraction = 8;
   while ((c = getopt(argc, argv, args)) != -1)
     switch (c) {
@@ -27,9 +27,6 @@ int main (int argc, char** argv)
       break;
     case 'F':
       denoise_fraction = atoi(optarg);
-      break;
-    case 'P':
-      Pulsar::Archive::set_plugin_path (optarg);
       break;
 
     case 'V':

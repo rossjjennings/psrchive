@@ -17,17 +17,13 @@ int main (int argc, char** argv)
   // Pulsar::Integration::verbose = true;
 
   int c = 0;
-  const char* args = "aP:vV";
+  const char* args = "avV";
 
   while ((c = getopt(argc, argv, args)) != -1)
     switch (c) {
       
     case 'a':
       Pulsar::Archive::agent_report ();
-      break;
-
-    case 'P':
-      Pulsar::Archive::set_plugin_path (optarg);
       break;
 
     case 'V':
