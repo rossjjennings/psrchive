@@ -61,6 +61,7 @@ class toaPlot: public QPgplot {
  signals:
 
   void selected (int);
+  void selected (vector<int>);
   void ineednewdata ();
 
  protected:

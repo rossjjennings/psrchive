@@ -165,14 +165,30 @@ void toaPlot::handleEvent (float x, float y, char ch)
 
 	if (data.empty()) 
 	  break;
-
+	
 	int tempint = data[0].id;
 	float distance = 0.0;
 
-	float min = sqrt(pow(x-float(data[0].x), float(2.0)) + pow(y-float(data[0].y), float(2.0)));
+	float xmin = 0.0;
+	float xmax = 0.0;
+	float ymin = 0.0;
+	float ymax = 0.0;
+	
+	cpgqwin(&xmin, &xmax, &ymin, &ymax);
+	
+	float myx = x - xmin;
+	float myy = y - ymin;
+
+	float yscl = ymax - ymin;
+	float xscl = xmax - xmin;
+	
+	float min = sqrt(pow((myx-float(data[0].x-xmin))/xscl, float(2.0)) + 
+			 pow((myy-float(data[0].y-ymin))/yscl, float(2.0)));
 
 	for (unsigned i = 1; i < data.size(); i++) {
-	  distance = sqrt(pow(x-float(data[i].x), float(2.0)) + pow(y-float(data[i].y), float(2.0)));
+	  distance = sqrt(pow((myx-float(data[i].x-xmin))/xscl, float(2.0)) + 
+			  pow((myy-float(data[i].y-ymin))/yscl, float(2.0)));
+
 	  if (distance < min) {
 	    min = distance;
 	    tempint = data[i].id;
@@ -188,7 +204,8 @@ void toaPlot::handleEvent (float x, float y, char ch)
 	if (clicks == 0) {
 	  x1 = x;
 	  clicks++;
-	  break;
+	  requestEvent(mode,x,y);
+	  return;
 	}
 	if (clicks == 1) {
 	  x2 = x;
@@ -210,7 +227,8 @@ void toaPlot::handleEvent (float x, float y, char ch)
 	if (clicks == 0) {
 	  x1 = x;
 	  clicks++;
-	  break;
+	  requestEvent(mode,x,y);
+	  return;
 	}
 	if (clicks == 1) {
 	  x2 = x;
@@ -221,10 +239,12 @@ void toaPlot::handleEvent (float x, float y, char ch)
 	    x2 = handy1;
 	    x1 = handy2;
 	  } 
+	  vector<int> mypts;
 	  for (unsigned i = 0; i < data.size(); i++) {
 	    if ((data[i].x > x1) && (data[i].x < x2))
-	      emit selected(data[i].id); 
+	      mypts.push_back(data[i].id);
 	  }
+	  emit selected(mypts); 
 	  emit ineednewdata();
 	  break;
 	}
@@ -234,7 +254,8 @@ void toaPlot::handleEvent (float x, float y, char ch)
 	if (clicks == 0) {
 	  y1 = y;
 	  clicks++;
-	  break;
+	  requestEvent(mode,x,y);
+	  return;
 	}
 	if (clicks == 1) {
 	  y2 = y;
@@ -256,7 +277,8 @@ void toaPlot::handleEvent (float x, float y, char ch)
 	if (clicks == 0) {
 	  y1 = y;
 	  clicks++;
-	  break;
+	  requestEvent(mode,x,y);
+	  return;
 	}
 	if (clicks == 1) {
 	  y2 = y;
@@ -267,10 +289,12 @@ void toaPlot::handleEvent (float x, float y, char ch)
 	    y2 = handy1;
 	    y1 = handy2;
 	  } 
+	  vector<int> mypts;
 	  for (unsigned i = 0; i < data.size(); i++) {
 	    if ((data[i].y > y1) && (data[i].y < y2))
-	      emit selected(data[i].id);
+	      mypts.push_back(data[i].id);
 	  }
+	  emit selected(mypts);
 	  emit ineednewdata();
 	  break;
 	}
@@ -281,7 +305,8 @@ void toaPlot::handleEvent (float x, float y, char ch)
 	  x1 = x;
 	  y1 = y;
 	  clicks++;
-	  break;
+	  requestEvent(mode,x,y);
+	  return;
 	}
 	if (clicks == 1) {
 	  x2 = x;
@@ -305,7 +330,6 @@ void toaPlot::handleEvent (float x, float y, char ch)
 	  }
 	  clearScreen();
 	  drawPlot();
-	  mode = 0;
 	  handleEvent(0,0,'~');
 	  break;
 	}
@@ -315,7 +339,8 @@ void toaPlot::handleEvent (float x, float y, char ch)
 	  x1 = x;
 	  y1 = y;
 	  clicks++;
-	  break;
+	  requestEvent(mode,x,y);
+	  return;
 	}
 	if (clicks == 1) {
 	  x2 = x;
@@ -333,12 +358,13 @@ void toaPlot::handleEvent (float x, float y, char ch)
 	    y2 = handy1;
 	    y1 = handy2;
 	  } 
+	  vector<int> mypts;
 	  for (unsigned i = 0; i < data.size(); i++) {
 	    if ((data[i].y > y1) && (data[i].y < y2) && (data[i].x > x1) && (data[i].x < x2))
-	      emit selected(data[i].id); 
+	      mypts.push_back(data[i].id);
 	  }
+	  emit selected(mypts);
 	  emit ineednewdata();
-	  mode = 0;
 	  handleEvent(0,0,'~');
 	  break;
 	}
@@ -346,7 +372,7 @@ void toaPlot::handleEvent (float x, float y, char ch)
     }
   }
   
-  requestEvent(mode,x,y);
+  requestEvent(0,x,y);
 }
 
 void toaPlot::ptselector ()
@@ -374,6 +400,7 @@ void toaPlot::boxzoomer ()
 {
   mode = 2;
   task = 1;
+  handleEvent(0,0,'~');
 }
 
 void toaPlot::xselector ()
@@ -394,6 +421,7 @@ void toaPlot::boxselector ()
 {
   mode = 2;
   task = 2;
+  handleEvent(0,0,'~');
 }
 
 void toaPlot::setPoints(AxisQuantity _xq, AxisQuantity _yq, vector<wrapper> _data)

@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/rhythm/rhythm.h,v $
-   $Revision: 1.29 $
-   $Date: 2003/06/30 04:52:44 $
+   $Revision: 1.30 $
+   $Date: 2003/07/07 08:31:34 $
    $Author: ahotan $ */
 
 // //////////////////////////////////////////////////////////////////////////
@@ -17,6 +17,8 @@
 #define __RHYTHM_H
 
 #include <vector>
+
+#include <qapplication.h>
 #include <qmainwindow.h>
 #include <qlistbox.h>
 #include <qhbox.h>
@@ -26,6 +28,7 @@
 #include <qbuttongroup.h>
 #include <qradiobutton.h>
 #include <qinputdialog.h>
+#include "qprogressdialog.h"
 
 #include "psrephem.h"
 #include "ephio.h"
@@ -103,7 +106,7 @@ class Rhythm : public QMainWindow
   static bool verbose;
   static bool vverbose;
   
-  Rhythm (QWidget* parent, int argc, char** argv);
+  Rhythm (QApplication* master, QWidget* parent, int argc, char** argv);
   ~Rhythm () {};
 
   // fits the loaded toas using TEMPO with the given psrephem, 'eph'.
@@ -119,6 +122,9 @@ class Rhythm : public QMainWindow
   void setClassVerbose (bool verbose);
 
  protected:
+
+  QApplication* myapp;
+
   RhythmOptions opts;
   
   // an array of toas
@@ -257,7 +263,9 @@ class Rhythm : public QMainWindow
   void box_slot ();
   
   void select (int);
+  void select (vector<int>);
   void deselect (int);
+  void deselect (vector<int>);
   void reselect ();
   
   void clearselection ();

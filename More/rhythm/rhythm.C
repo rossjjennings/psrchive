@@ -3,7 +3,6 @@
 
 #include <algorithm>
 
-#include <qapplication.h>
 #include <qmainwindow.h>
 #include <qmessagebox.h> 
 #include <qpopupmenu.h>
@@ -36,7 +35,7 @@ int main (int argc, char** argv)
     app.setStyle(mystyle);
     app.setPalette(mypalette);
 
-    Rhythm rhythm (0, argc, argv);
+    Rhythm rhythm (&app, 0, argc, argv);
     
     if (Rhythm::vverbose)
       cerr << "call QApplication::setMainWidget" << endl;
@@ -67,11 +66,13 @@ int main (int argc, char** argv)
 // /////////////////////////////////////////////////////////////////////
 
 
-Rhythm::Rhythm (QWidget* parent, int argc, char** argv) :
+Rhythm::Rhythm (QApplication* master, QWidget* parent, int argc, char** argv) :
   QMainWindow (parent, "Rhythm"),
   opts (0, "Options")
 {
   // Initialise variables
+
+  myapp = master;
 
   xq = toaPlot::TOA_MJD;
   yq = toaPlot::ResidualMicro;
@@ -109,9 +110,9 @@ Rhythm::Rhythm (QWidget* parent, int argc, char** argv) :
   // Build the cursor control panel
 
   leftpanel = new QVBox(container);
-
-  string banloc = getenv("CVSHOME");
-  banloc += "/soft_swin/tas/rhythm/banner.jpg";
+  
+  string banloc = getenv("PSRHOME");
+  banloc += "/runtime/rhythm/banner.jpg";
 
   QPixmap* pretty_pic = new QPixmap(banloc.c_str());
   header = new QLabel(leftpanel);
@@ -201,6 +202,9 @@ Rhythm::Rhythm (QWidget* parent, int argc, char** argv) :
   
   QObject::connect(plot_window, SIGNAL(selected(int)),
 		   this, SLOT(select(int)));
+
+  QObject::connect(plot_window, SIGNAL(selected(vector<int>)),
+		   this, SLOT(select(vector<int>)));
   
   if (vverbose)
     cerr << "Rhythm:: new qt_editParams" << endl;
@@ -407,10 +411,8 @@ void Rhythm::show_me ()
   catch (Error& error) {
     if (verbose)
       cerr << "Rhythm::show_me ERROR " << error << endl;
-    QMessageBox::critical (this, "Rhythm::show_me",
-			   "There you were, enjoying a nice relaxing   \n"
-			   "TOA fitting session when suddenly, WHAM!   \n"
-			   "    What can I say, that's life...         \n",
+    QMessageBox::critical (this, "Rhythm Show Profile",
+			   "Error processing archive on disk.",
 			   "Sigh.");
   }
   
@@ -491,17 +493,16 @@ void Rhythm::fit (const psrephem& eph, bool load_new)
   catch (Error& error) {
     if (verbose)
       cerr << "Rhythm::fit ERROR " << error << endl;
-    QMessageBox::critical (this, "Rhythm::fit",
-			   "They're all out to get you...  ",
-			   "Trust no one...");
+    QMessageBox::critical (this, "Rhythm TOA Fitting Error",
+			   "An unexpected exception occured.",
+			   "Acknowledge");
   }
   catch (...) {
     if (verbose)
       cerr << "Rhythm::fit ERROR Unhandled Exception" << endl;
-    QMessageBox::critical (this, "Rhythm::fit",
-			   "If you are seeing this it is already too late.   \n"
-			   "Abandon all hope...                              \n",
-			   "Run Away!");
+    QMessageBox::critical (this, "Rhythm TOA Fitting Error",
+			   "An unexpected exception occured.",
+			   "Acknowledge");
   }
 }
 
@@ -592,17 +593,16 @@ void Rhythm::fit_selected (const psrephem& eph, bool load_new)
   catch (Error& error) {
     if (verbose)
       cerr << "Rhythm::fit_selected ERROR " << error << endl;
-    QMessageBox::critical (this, "Rhythm::fit_selected",
-			   "They're all out to get you...  ",
-			   "Trust no one...");
+    QMessageBox::critical (this, "Rhythm TOA Fitting Error",
+			   "An unexpected exception occured.  ",
+			   "Acknowledge...");
   }
   catch (...) {
     if (verbose)
       cerr << "Rhythm::fit_selected ERROR Unhandled Exception" << endl;
-    QMessageBox::critical (this, "Rhythm::fit_selected",
-			   "If you are seeing this it is already too late.   \n"
-			   "Abandon all hope...                              \n",
-			   "Run Away!");
+    QMessageBox::critical (this, "Rhythm TOA Fitting Error",
+			   "An unexpected exception occured",
+			   "Acknowledge");
   }
 }
 
@@ -623,65 +623,96 @@ vector<double> Rhythm::give_me_data (toaPlot::AxisQuantity q)
   psrephem eph;
   fitpopup -> get_psrephem (eph);
   
+  QProgressDialog progress( "Calculating Data...", "Abort", toas.size(),
+			    this, "progress", TRUE );
+  
   switch (q) {
 
   case toaPlot::TOA_MJD:
-    for (unsigned i = 0; i < toas.size(); i++) {
+    for ( unsigned i = 0; i < toas.size(); i++ ) {
+      progress.setProgress( i );
+      myapp->processEvents();
+
       if (toas[i].get_format() == Tempo::toa::Command) {
 	retval.push_back(0.0);
 	continue;
       }
       retval.push_back((toas[i].resid.mjd)-50000.0);
     }
+    progress.setProgress( toas.size() );
+    
     return retval;
     break;
 
   case toaPlot::BinaryPhase:
-    for (unsigned i = 0; i < toas.size(); i++) {
+    for ( unsigned i = 0; i < toas.size(); i++ ) {
+      progress.setProgress( i );
+      myapp->processEvents();
+
       if (toas[i].get_format() == Tempo::toa::Command) {
 	retval.push_back(0.0);
 	continue;
       }
       retval.push_back(toas[i].resid.binaryphase);
     }
+    progress.setProgress( toas.size() );
+    
     return retval;
     break;
 
   case toaPlot::ObsFreq:
-    for (unsigned i = 0; i < toas.size(); i++) {
+    for ( unsigned i = 0; i < toas.size(); i++ ) {
+      progress.setProgress( i );
+      myapp->processEvents();
+
       if (toas[i].get_format() == Tempo::toa::Command) {
 	retval.push_back(0.0);
 	continue;
       }
       retval.push_back(toas[i].resid.obsfreq);
     }
+    progress.setProgress( toas.size() );
+    
     return retval;
     break;
     
   case toaPlot::DayOfYear:
-    for (unsigned i = 0; i < toas.size(); i++) {
+    for ( unsigned i = 0; i < toas.size(); i++ ) {
+      progress.setProgress( i );
+      myapp->processEvents();
+
       if (toas[i].get_format() == Tempo::toa::Command) {
 	retval.push_back(0.0);
 	continue;
       }
       retval.push_back(fmod(toas[i].resid.mjd, 365.0));
     }
+    progress.setProgress( toas.size() );
+    
     return retval;
     break;
 
   case toaPlot::ResidualMicro:
-    for (unsigned i = 0; i < toas.size(); i++) {
+    for ( unsigned i = 0; i < toas.size(); i++ ) {
+      progress.setProgress( i );
+      myapp->processEvents();
+
       if (toas[i].get_format() == Tempo::toa::Command) {
 	retval.push_back(0.0);
 	continue;
       }
       retval.push_back(toas[i].resid.time);
     }
+    progress.setProgress( toas.size() );
+    
     return retval;
     break;
 
   case toaPlot::ParallacticAngle:
-    for (unsigned i = 0; i < toas.size(); i++) {
+    for ( unsigned i = 0; i < toas.size(); i++ ) {
+      progress.setProgress( i );
+      myapp->processEvents();
+
       if (toas[i].get_format() == Tempo::toa::Command) {
 	retval.push_back(0.0);
 	continue;
@@ -700,39 +731,57 @@ vector<double> Rhythm::give_me_data (toaPlot::AxisQuantity q)
       
       retval.push_back(Pulsar::parallactic_angle(crd, mjd, lat, lon));
     }
+    progress.setProgress( toas.size() );
+    
     return retval;
     break;
 
   case toaPlot::ResidualMilliTurns:
-    for (unsigned i = 0; i < toas.size(); i++) {
+    for ( unsigned i = 0; i < toas.size(); i++ ) {
+      progress.setProgress( i );
+      myapp->processEvents();
+
       if (toas[i].get_format() == Tempo::toa::Command) {
 	retval.push_back(0.0);
 	continue;
       }
       retval.push_back((toas[i].resid.turns)*1000.0);
     }
+    progress.setProgress( toas.size() );
+    
     return retval;
     break;
 
   case toaPlot::ErrorMicro:
-    for (unsigned i = 0; i < toas.size(); i++) {
+    for ( unsigned i = 0; i < toas.size(); i++ ) {
+      progress.setProgress( i );
+      myapp->processEvents();
+
       if (toas[i].get_format() == Tempo::toa::Command) {
 	retval.push_back(0.0);
 	continue;
       }
       retval.push_back(toas[i].resid.error);
     }
+    progress.setProgress( toas.size() );
+    
     return retval;
     break;
     
   case toaPlot::SignalToNoise:
-    for (unsigned i = 0; i < toas.size(); i++) {
+
+    for ( unsigned i = 0; i < toas.size(); i++ ) {
+      progress.setProgress( i );
+      myapp->processEvents();
+      
+      if ( progress.wasCancelled() )
+	break;
       
       if (toas[i].get_format() == Tempo::toa::Command) {
 	retval.push_back(0.0);
 	continue;
       }
-    
+      
       if (toas[i].get_StoN() >= 0.0) {
 	retval.push_back(toas[i].get_StoN());
 	continue;
@@ -760,12 +809,16 @@ vector<double> Rhythm::give_me_data (toaPlot::AxisQuantity q)
 	retval.push_back(toas[i].get_StoN());
       }
     }
+    progress.setProgress( toas.size() );
+    
     return retval;
     break;
-
-  case toaPlot::Bandwidth:
-    for (unsigned i = 0; i < toas.size(); i++) {
     
+  case toaPlot::Bandwidth:
+    for ( unsigned i = 0; i < toas.size(); i++ ) {
+      progress.setProgress( i );
+      myapp->processEvents();
+      
       if (toas[i].get_format() == Tempo::toa::Command) {
 	retval.push_back(0.0);
 	continue;
@@ -794,11 +847,15 @@ vector<double> Rhythm::give_me_data (toaPlot::AxisQuantity q)
 	retval.push_back(toas[i].get_bw());      
       }
     }
+    progress.setProgress( toas.size() );
+    
     return retval;
     break;
     
   case toaPlot::DispersionMeasure:
-    for (unsigned i = 0; i < toas.size(); i++) {
+    for ( unsigned i = 0; i < toas.size(); i++ ) {
+      progress.setProgress( i );
+      myapp->processEvents();
 
       if (toas[i].get_format() == Tempo::toa::Command) {
 	retval.push_back(0.0);
@@ -828,11 +885,15 @@ vector<double> Rhythm::give_me_data (toaPlot::AxisQuantity q)
 	retval.push_back(toas[i].get_dm());
       }
     }
+    progress.setProgress( toas.size() );
+    
     return retval;
     break;
 
   case toaPlot::Duration:
-    for (unsigned i = 0; i < toas.size(); i++) {
+    for ( unsigned i = 0; i < toas.size(); i++ ) {
+      progress.setProgress( i );
+      myapp->processEvents();
       
       if (toas[i].get_format() == Tempo::toa::Command) {
 	retval.push_back(0.0);
@@ -862,6 +923,8 @@ vector<double> Rhythm::give_me_data (toaPlot::AxisQuantity q)
 	retval.push_back(toas[i].get_dur());     
       }
     }
+    progress.setProgress( toas.size() );
+    
     return retval;
     break;
 
@@ -1090,8 +1153,6 @@ void Rhythm::reselect ()
     else
       toas[i].set_state(Tempo::toa::Normal);
   }
-  
-  goplot ();
 }
 
 void Rhythm::deselect (int pt)
@@ -1109,6 +1170,22 @@ void Rhythm::deselect (int pt)
   
 }
 
+void Rhythm::deselect (vector<int> pts)
+{
+  QProgressDialog progress( "De-Selecting Points...", "Abort", pts.size(),
+			    this, "progress", TRUE );
+  for ( unsigned i = 0; i < pts.size(); i++ ) {
+    progress.setProgress( i );
+    myapp->processEvents();
+    
+    if ( progress.wasCancelled() )
+      break;
+    
+    deselect(pts[i]);
+  }
+  progress.setProgress( pts.size() );
+}
+
 void Rhythm::request_update ()
 {
   goplot ();
@@ -1116,7 +1193,9 @@ void Rhythm::request_update ()
 
 void Rhythm::select (int pt)
 {
-  if (pt >= int(toas.size()))
+  int size = toas.size();
+  
+  if (pt >= size)
     return;
   if (pt < 0)
     return;
@@ -1127,6 +1206,22 @@ void Rhythm::select (int pt)
   toas[pt].set_state(Tempo::toa::Selected);
   toa_text -> setSelected (pt, true);
   toa_text -> setCurrentItem (pt);
+}
+
+void Rhythm::select (vector<int> pts)
+{
+  QProgressDialog progress( "Selecting Points...", "Abort", pts.size(),
+			    this, "progress", TRUE );
+  for ( unsigned i = 0; i < pts.size(); i++ ) {
+    progress.setProgress( i );
+    myapp->processEvents();
+    
+    if ( progress.wasCancelled() )
+      break;
+    
+    select(pts[i]);
+  }
+  progress.setProgress( pts.size() );
   
 }
 
@@ -1230,25 +1325,44 @@ void Rhythm::box_slot ()
 
 void Rhythm::deleteselection ()
 {
-  for (unsigned i = 0; i < toas.size(); i++) {
+  QProgressDialog progress( "Deleting Points...", "Abort", toas.size(),
+			    this, "progress", TRUE );
+  for ( unsigned i = 0; i < toas.size(); i++ ) {
+    progress.setProgress( i );
+    myapp->processEvents();
+    
+    if ( progress.wasCancelled() )
+      break;
+    
     if (toas[i].get_state() == Tempo::toa::Selected)
       toas[i].set_state(Tempo::toa::Deleted);
   }
-
+  progress.setProgress( toas.size() );
+  
   toas_modified = true;
-
+  
   goplot ();
   plot_window->autoscale();
 }
 
 void Rhythm::undeleteall ()
 {
-  for (unsigned i = 0; i < toas.size(); i++) {
+  QProgressDialog progress( "Restoring Deleting Points...", "Abort", toas.size(),
+			    this, "progress", TRUE );
+  for ( unsigned i = 0; i < toas.size(); i++ ) {
+    progress.setProgress( i );
+    myapp->processEvents();
+    
+    if ( progress.wasCancelled() )
+      break;
+    
     if (toas[i].get_state() == Tempo::toa::Deleted) {
       toas[i].set_state(Tempo::toa::Normal);
       toa_text -> setSelected (i, false);
     }
   }
+  progress.setProgress( toas.size() );
+  
   goplot ();
   plot_window->autoscale();
 }
@@ -1256,7 +1370,14 @@ void Rhythm::undeleteall ()
 
 void Rhythm::clearselection ()
 {
-  for (unsigned i = 0; i < toas.size(); i++) {
+  QProgressDialog progress( "Clearing Selection List...", "Abort", toas.size(),
+			    this, "progress", TRUE );
+  for ( unsigned i = 0; i < toas.size(); i++ ) {
+    progress.setProgress( i );
+    myapp->processEvents();
+    
+    if ( progress.wasCancelled() )
+      break;
     
     if (toas[i].get_state() == Tempo::toa::Deleted)
       continue;
@@ -1264,6 +1385,8 @@ void Rhythm::clearselection ()
     toas[i].set_state(Tempo::toa::Normal);
     toa_text -> setSelected (i, false);
   }
+  progress.setProgress( toas.size() );
+  
   goplot ();
 }
 
