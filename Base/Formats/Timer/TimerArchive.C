@@ -301,12 +301,34 @@ string Pulsar::TimerArchive::get_backend () const
 
 void Pulsar::TimerArchive::set_backend (const string& backend)
 {
-  if (backend.length() >= MACHINE_ID_STRLEN)
-    throw Error (InvalidParam, "Pulsar::TimerArchive::set_backend",
-		 "length of '%s'=%d > MACHINE_ID_STRLEN=%d",
-		 backend.c_str(), backend.length()+1, MACHINE_ID_STRLEN);
+  string new_backend = backend;
 
-  strcpy (hdr.machine_id, backend.c_str());
+  if( backend.length() > MACHINE_ID_STRLEN ) {
+    string::size_type colon_pos = backend.find(':',0);
+    
+    if( colon_pos == string::npos )
+      throw Error (InvalidParam, "Pulsar::TimerArchive::set_backend",
+		   "length of '%s'=%d > MACHINE_ID_STRLEN=%d",
+		   backend.c_str(), backend.length()+1, MACHINE_ID_STRLEN);
+
+    string software = backend.substr(colon_pos+1,backend.size()-colon_pos-1);
+
+    if( software.size() > SOFTWARE_STRLEN )
+      throw Error (InvalidParam, "Pulsar::TimerArchive::set_backend",
+                   "length of '%s'=%d > SOFTWARE_STRLEN=%d",
+                   software.c_str(), software.length()+1, SOFTWARE_STRLEN);
+
+    strcpy(hdr.software, software.c_str() );
+        
+    new_backend = backend.substr(0,colon_pos);
+    
+    if( new_backend.length() > MACHINE_ID_STRLEN )
+      throw Error (InvalidParam, "Pulsar::TimerArchive::set_backend",
+                   "length of modified backend '%s'=%d > MACHINE_ID_STRLEN=%d",
+                   backend.c_str(), backend.length()+1, MACHINE_ID_STRLEN);
+  }
+
+  strcpy (hdr.machine_id, new_backend.c_str());
 }
 
 //! Get the coordinates of the source
