@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Estimate.h,v $
-   $Revision: 1.22 $
-   $Date: 2004/06/17 09:53:26 $
-   $Author: hknight $ */
+   $Revision: 1.23 $
+   $Date: 2004/07/03 07:20:51 $
+   $Author: straten $ */
 
 #ifndef __Estimate_h
 #define __Estimate_h
@@ -138,7 +138,7 @@ class Estimate
   { T c2 = c.val*c.val;  T s2 = s.val*s.val;  T sc2 = c2+s2;
     return Estimate (::atan2 (s.val, c.val),(c2*s.var+s2*c.var)/(sc2*sc2)); }
   
-  //! \f$ {\partial\over\partial x} x^\onehalf = \onehalf x^{-\onehalf} \f$
+  //! \f$ {\partial\over\partial x} x^{1\over2} = {1\over2}x^{-{1\over2}} \f$
   friend const Estimate sqrt (const Estimate& u)
   { return Estimate (::sqrt (u.val), 0.25*u.var/fabs(u.val)); }
 
