@@ -59,16 +59,18 @@ void Pulsar::Archive::Agent::verify_revisions ()
       agent ++;
 }
 
-#ifndef _PSRCHIVE_STATIC
 
 bool Pulsar::Archive::Agent::init () try {
 
-  cerr << "Pulsar::Archive::Agent::init <dynamic>" << endl;
-  
-  Pulsar::BasicArchive::ensure_linkage();
+  cerr << "Pulsar::Archive::Agent::init " 
+       << Registry::List<Archive>::mode << endl;
 
-  if (!loaded)
-    plugin_load ();
+#ifndef _PSRCHIVE_STATIC
+
+  Pulsar::BasicArchive::ensure_linkage();
+  plugin_load ();
+
+#endif
 
   verify_revisions ();
 
@@ -86,9 +88,9 @@ catch (...)
   return false;
 }
 
-#else
+#ifdef _PSRCHIVE_STATIC
 
 #include "static_plugins.code"
 
-#endif  // not _PSRCHIVE_STATIC
+#endif
 
