@@ -288,7 +288,8 @@ polyco::polyco(char * filename)
 {
   string s = filename;
   if (load (s) < 1) {
-    fprintf (stderr, "polyco::polyco - failed to construct from %s\n", filename);
+    fprintf (stderr, "polyco::polyco - failed to construct from %s\n", 
+	     filename);
     string error = "polyco construct error";
     throw(error);
   }
@@ -301,7 +302,7 @@ int polyco::load(string polyco_filename){
 
 int polyco::load(char * polyco_filename)
 {
-  ifstream file(polyco_filename);
+  ifstream file (polyco_filename);
   return(this->load(file));
 }
 
