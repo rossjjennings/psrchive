@@ -25,6 +25,9 @@ AC_DISABLE_SHARED
 # Ensure the SIGPROC find does not over-ride the standard
 SWIN_PROG_FIND
 
+# Enable convenience compiler selection
+SWIN_COMPILER
+
 # Checks for programs.
 AC_PROG_CXX
 AC_PROG_CXXCPP
@@ -41,6 +44,7 @@ _STAR_RESTFP_FIX
 #
 SWIN_BEST_PARTIAL_SPECIALIZATION
 SWIN_DEFAULT_PARTIAL_SPECIALIZATION
+SWIN_COMPLEX_TEMPLATE
 
 #
 # Disable the debugging information option, -g
@@ -87,12 +91,6 @@ SWIN_LIB_PGPLOT
 BNV_HAVE_QT
 SWIN_LIB_QTDRIV
 
-#
-# Ensure that 64-bit file offsets are used under linux
-#
-# AC_DEFINE([_FILE_OFFSET_BITS], [64], [Turn off_t into a 64-bit type.])
-CPPFLAGS="$CPPFLAGS -D_FILE_OFFSET_BITS=64"
-
 # 
 # For developers: ensure that the config directory m4 macros are parsed
 #
@@ -128,6 +126,7 @@ AC_F77_WRAPPERS
 #
 # Checks for library functions.
 #
+SWIN_FUNC_GETOPT_LONG
 AC_FUNC_CLOSEDIR_VOID
 AC_FUNC_ERROR_AT_LINE
 AC_PROG_GCC_TRADITIONAL
