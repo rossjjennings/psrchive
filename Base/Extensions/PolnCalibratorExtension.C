@@ -57,21 +57,6 @@ Pulsar::CalibratorType Pulsar::PolnCalibratorExtension::get_type () const
   return type;
 }
 
-//! Set the name of the instrumental response parameterization
-void Pulsar::PolnCalibratorExtension::set_name (const string& name)
-{
-  throw Error (InvalidState, "Pulsar::PolnCalibratorExtension::set_name",
-	       "not implemented");
-}
-
-//! Get the name of the instrumental response parameterization
-string Pulsar::PolnCalibratorExtension::get_name () const
-{
-  throw Error (InvalidState, "Pulsar::PolnCalibratorExtension::get_name",
-	       "not implemented");
-}
-
-
 //! Set the number of frequency channels
 void Pulsar::PolnCalibratorExtension::set_nchan (unsigned _nchan)
 {
@@ -86,6 +71,12 @@ void Pulsar::PolnCalibratorExtension::set_nchan (unsigned _nchan)
 unsigned Pulsar::PolnCalibratorExtension::get_nchan () const
 {
   return response.size();
+}
+
+bool Pulsar::PolnCalibratorExtension::get_valid (unsigned ichan) const
+{
+  range_check (ichan, "Pulsar::PolnCalibratorExtension::get_valid");
+  return response[ichan];
 }
 
 //! Get the transformation for the specified frequency channel

@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/PolnCalibratorExtension.h,v $
-   $Revision: 1.1 $
-   $Date: 2003/09/12 11:50:34 $
+   $Revision: 1.2 $
+   $Date: 2003/09/12 14:24:48 $
    $Author: straten $ */
 
 #ifndef __PolnCalibratorExtension_h
@@ -38,15 +38,13 @@ namespace Pulsar {
     //! Get the type of the instrumental response parameterization
     CalibratorType get_type () const;
 
-    //! Set the name of the instrumental response parameterization
-    void set_name (const string& name);
-    //! Get the name of the instrumental response parameterization
-    string get_name () const;
-
     //! Set the number of frequency channels
     void set_nchan (unsigned nchan);
     //! Get the number of frequency channels
     unsigned get_nchan () const;
+
+    //! Return true if the transformation for the specified channel is valid
+    bool get_valid (unsigned ichan) const;
 
     //! Get the transformation for the specified frequency channel
     ::Calibration::Transformation* get_Transformation (unsigned c);
