@@ -55,11 +55,13 @@ int main (int argc, char *argv[]) {
 
   bool stokesify = false;
 
+  bool flipsb = false;
+
   string command = "pam";
 
   int gotc = 0;
   
-  while ((gotc = getopt(argc, argv, "hvVme:TFpit:f:b:d:s:r:w:D:S")) != -1) {
+  while ((gotc = getopt(argc, argv, "hvVme:TFpit:f:b:d:s:r:w:D:SB")) != -1) {
     switch (gotc) {
     case 'h':
       cout << "A program for manipulating Pulsar::Archives"            << endl;
@@ -82,6 +84,7 @@ int main (int argc, char *argv[]) {
       cout << "  -r [float p]     Rotate profiles by phase p"          << endl;
       cout << "  -w [float w]     Reset all profile weights to w"      << endl;
       cout << "  -S               Convert to Stokes parameters"        << endl;
+      cout << "  -B               Flip the sideband sense (DANGEROUS)" << endl;
       return (-1);
       break;
     case 'v':
@@ -198,6 +201,9 @@ int main (int argc, char *argv[]) {
     case 'S':
       stokesify = true;
       break;
+    case 'B':
+      flipsb = true;
+      break;
     default:
       cout << "Unrecognised option." << endl;
     }
@@ -225,6 +231,20 @@ int main (int argc, char *argv[]) {
 	cerr << "Loading " << archives[i] << endl;
       
       arch = Pulsar::Archive::load(archives[i]);
+
+      if (flipsb) {
+	for (unsigned i = 0; i < arch->get_nsubint(); i++) {
+	  vector<float> labels;
+	  labels.resize(arch->get_nchan());
+	  for (unsigned j = 0; j < arch->get_nchan(); j++) {
+	    labels[j] = arch->get_Integration(i)->get_frequency(j);
+	  }
+	  for (unsigned j = 0; j < arch->get_nchan(); j++) {
+	    arch->get_Integration(i)->set_frequency(j,labels[labels.size()-1-j]);
+	  }
+	}
+	arch->set_bandwidth(-1.0 * arch->get_bandwidth());
+      }
 
       if (reset_weights) {
 	arch->uniform_weight(new_weight);
