@@ -4,11 +4,6 @@
 #include "Cartesian.h"
 #include "angle.h"
 
-Cartesian::Cartesian (double ux, double uy, double uz)
-{
-  x=ux; y=uy; z=uz;
-}
-
 Cartesian::Cartesian (const AnglePair& spherical)
 {
   double theta, phi;
@@ -20,50 +15,6 @@ Cartesian::Cartesian (const AnglePair& spherical)
   z = sin (phi);
 }
 
-Cartesian::Cartesian (const Cartesian& in_cart)
-{
-  *this = in_cart;
-}
-
-Cartesian& Cartesian::operator = (const Cartesian& in_cart)
-{
-  if (this != &in_cart) {
-    x = in_cart.x;
-    y = in_cart.y;
-    z = in_cart.z;
-  }
-  return *this;
-}
-
-Cartesian& Cartesian::operator += (const Cartesian& cart)
-{
-  x += cart.x;
-  y += cart.y;
-  z += cart.z;
-  return *this;
-}
-
-Cartesian& Cartesian::operator -= (const Cartesian& cart)
-{
-  x -= cart.x;
-  y -= cart.y;
-  z -= cart.z;
-  return *this;
-}
-
-Cartesian& Cartesian::operator *= (double linear)
-{
-  x *= linear;
-  y *= linear;
-  z *= linear;
-  return *this;
-}
-
-Cartesian& Cartesian::operator /= (double linear)
-{
-  this->operator*= (1.0/linear);
-  return *this;
-}
 
 const Cartesian pdiv (const Cartesian& cart1, const Cartesian& cart2)
 {
@@ -83,33 +34,6 @@ const Cartesian pmult (const Cartesian& cart1, const Cartesian& cart2)
   return result;
 }
 
-const Cartesian operator + (const Cartesian& cart1, const Cartesian& cart2)
-{
-  Cartesian result (cart1);
-  result += cart2;
-  return result;
-}
-
-const Cartesian operator - (const Cartesian& cart1, const Cartesian& cart2)
-{
-  Cartesian result (cart1);
-  result -= cart2;
-  return result;
-}
-
-const Cartesian operator * (const Cartesian& cart, double linear)
-{
-  Cartesian result (cart);
-  result *= linear;
-  return result;
-}  
-
-const Cartesian operator / (const Cartesian& cart, double linear)
-{
-  Cartesian result (cart);
-  result /= linear;
-  return result;
-}  
 
 // cross product
 const Cartesian operator % (const Cartesian& c1, const Cartesian& c2)
@@ -157,39 +81,6 @@ Cartesian max (const Cartesian& cart1, const Cartesian& cart2)
 		     max(cart1.z, cart2.z) );
 }
 
-double& Cartesian::operator [] (char dimension)
-{
-  switch (dimension) {
-  case 'x': return x;
-  case 'y': return y;
-  case 'z': return z;
-  default:
-    throw;
-  }
-}
-
-/*
-const double& Cartesian::operator [] (int dimension) const
-{
-  switch (char(dimension)) {
-  case 'x': return x;
-  case 'y': return y;
-  case 'z': return z;
-  default:
-    throw;
-  }
-}
-*/
-
-double Cartesian::modSquared () const
-{
-  return (x*x + y*y + z*z);
-}
-
-double Cartesian::mod () const
-{
-  return sqrt (x*x + y*y + z*z);
-}
 
 void Cartesian::rotate (double& x1, double& x2, double radians)
 {
@@ -224,9 +115,9 @@ void Cartesian::rot (const Cartesian& v, const Angle& phi)
   double u = 1.0 - c;
 
   double R[3][3] =
-  { v.x*v.x*u + c    ,  v.y*v.x*u - v.z*s,  v.z*v.x*u + v.y*s,
-    v.x*v.y*u + v.z*s,  v.y*v.y*u + c    ,  v.z*v.y*u - v.x*s,
-    v.x*v.z*u - v.y*s,  v.y*v.z*u + v.x*s,  v.z*v.z*u + c };
+  { {v.x*v.x*u + c    ,  v.y*v.x*u - v.z*s,  v.z*v.x*u + v.y*s},
+    {v.x*v.y*u + v.z*s,  v.y*v.y*u + c    ,  v.z*v.y*u - v.x*s},
+    {v.x*v.z*u - v.y*s,  v.y*v.z*u + v.x*s,  v.z*v.z*u + c} };
 
   double tx=x, ty=y, tz=z;
   x = R[0][0]*tx + R[0][1]*ty + R[0][2]*tz;

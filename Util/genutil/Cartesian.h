@@ -1,14 +1,15 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Cartesian.h,v $
-   $Revision: 1.6 $
-   $Date: 2001/06/02 07:22:57 $
+   $Revision: 1.7 $
+   $Date: 2001/08/02 08:12:18 $
    $Author: straten $ */
 
 #ifndef __CARTESIAN_H
 #define __CARTESIAN_H
 
 #include <iostream>
+#include <math.h>
 #include "angle.h"
 
 class Cartesian
@@ -16,23 +17,50 @@ class Cartesian
  public:
   double x, y, z;
 
-  Cartesian (double ux = 0.0, double uy = 0.0, double uz = 0.0);
+  Cartesian (double ux = 0.0, double uy = 0.0, double uz = 0.0)
+    { x=ux; y=uy; z=uz; }
+
+  Cartesian (const Cartesian& u)
+    { x=u.x; y=u.y; z=u.z; }
+
   Cartesian (const AnglePair& spherical);
-  Cartesian (const Cartesian &);
 
-  Cartesian & operator =  (const Cartesian &);
-  Cartesian & operator += (const Cartesian &);
-  Cartesian & operator -= (const Cartesian &);
-  Cartesian & operator *= (double linear);
-  Cartesian & operator /= (double linear);
+  Cartesian & operator =  (const Cartesian& u)
+    { x=u.x; y=u.y; z=u.z; return *this; }
 
-  double& operator[] (char dimension);
-  // const double& operator [] (int dimension) const;
+  Cartesian & operator += (const Cartesian& u)
+    { x+=u.x; y+=u.y; z+=u.z; return *this; }
 
-  const friend Cartesian operator + (const Cartesian &, const Cartesian &);
-  const friend Cartesian operator - (const Cartesian &, const Cartesian &);
-  const friend Cartesian operator * (const Cartesian &, double);  
-  const friend Cartesian operator / (const Cartesian &, double);
+  Cartesian & operator -= (const Cartesian& u)
+    { x-=u.x; y-=u.y; z-=u.z; return *this; }
+
+  Cartesian & operator *= (double a)
+    { x*=a; y*=a; z*=a; return *this; }
+
+  Cartesian & operator /= (double a)
+    { return operator *= (1.0/a); }
+
+  double& operator[] (int d)
+    { return *(&x+d); }
+
+  const double& operator [] (int d) const
+    { return *(&x+d); }
+
+  const friend Cartesian operator + (Cartesian a, const Cartesian& b)
+    { return a+=b; }
+
+  const friend Cartesian operator - (Cartesian a, const Cartesian& b)
+    { return a-=b; }
+
+  const friend Cartesian operator - (const Cartesian& b)
+    { return Cartesian (-b.x, -b.y, -b.z); }
+
+  const friend Cartesian operator * (Cartesian a, double c)
+    { return a*=c; }
+
+  const friend Cartesian operator / (Cartesian a, double c)
+    { return a*=1.0/c; }
+
   const friend Cartesian operator * (double a, const Cartesian& v)
     { return v * a; }
 
@@ -40,6 +68,12 @@ class Cartesian
   const friend Cartesian pdiv (const Cartesian &, const Cartesian &);
   // just does a piece-wise multiplication (x*x, y*y, z*z)
   const friend Cartesian pmult (const Cartesian &, const Cartesian &);
+
+  // cross product
+  const friend Cartesian cross (const Cartesian& c1, const Cartesian& c2)
+    { return Cartesian ( c1.y * c2.z - c1.z * c2.y,
+			 c1.z * c2.x - c1.x * c2.z,
+			 c1.x * c2.y - c1.y * c2.x ); }
 
   // cross product
   const friend Cartesian operator % (const Cartesian &, const Cartesian &);
@@ -53,8 +87,11 @@ class Cartesian
   friend Cartesian max (const Cartesian& cart1, const Cartesian& cart2);
   friend void diagonalize (Cartesian& bottom_left, Cartesian& upper_right);
 
-  double modSquared () const;
-  double mod () const;
+  double modSquared () const
+    { return x*x + y*y + z*z; }
+
+  double mod () const
+    { return sqrt (x*x + y*y + z*z); }
 
   // rotates the point about the specifies axis
   void x_rot (const Angle& phi);
