@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Integration.h,v $
-   $Revision: 1.59 $
-   $Date: 2004/02/10 05:41:10 $
-   $Author: ahotan $ */
+   $Revision: 1.60 $
+   $Date: 2004/03/28 02:45:55 $
+   $Author: sord $ */
 
 /*
   
@@ -242,7 +242,7 @@ namespace Pulsar {
     float flux (int _poln = 0, float dc = 0.15);
     
     //! Get polarized flux
-    float get_poln_flux (int _type = 0);
+    float get_poln_flux (int _type = 0,  int startbin = 0, int stopbin = 0);
  
      // //////////////////////////////////////////////////////////////////
     //
