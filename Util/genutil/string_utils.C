@@ -50,6 +50,44 @@ string& chomp(string& ss,string gone){
   return ss;
 }
 
+// Like chomp, but takes the character off the front of the string
+string& frontchomp(string& ss, char gone){
+  if( ss.size()==0 )
+    return ss;
+  
+  if( ss[0]==gone )
+    ss = string(ss.begin()+1,ss.end());
+
+  return ss;
+}
+
+string& frontchomp(string& ss, string gone){
+  if( ss.size()==0 || gone.size()==0 )
+    return ss;
+
+  if( ss.substr(0,gone.size())==gone )
+    ss = string(ss.begin()+gone.size(),ss.end());
+
+  return ss;
+}
+
+string& frontchop(string& ss){
+  if( ss.size()==0 )
+    return ss;
+
+  ss = string(ss.begin()+1,ss.end());
+
+  return ss;
+}
+
+// Takes off a leading 'J' or a leading 'B'
+string no_JB(string pulsar){
+  frontchomp(pulsar,'J');
+  frontchomp(pulsar,'B');
+  return pulsar;
+}
+
+
 // Like fscanf(fptr,"%s%s",ignore,answer) except it gets more than 1 word
 bool retrieve_cstring(FILE* fptr,string ignore,char* answer){
   char dummy[1024];

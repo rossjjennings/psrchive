@@ -1,7 +1,7 @@
 //-*-C++-*-
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Attic/string_utils.h,v $
-   $Revision: 1.26 $
-   $Date: 2003/10/09 07:44:21 $
+   $Revision: 1.27 $
+   $Date: 2003/10/30 02:32:27 $
    $Author: hknight $ */
 
 #ifndef __STRING_UTILS_H
@@ -34,6 +34,15 @@ string& chop(string& ss);
 // Returns ss instead of a boolean value
 string& chomp(string& ss, char gone='\n');
 string& chomp(string& ss, string gone);
+
+// Like chomp, but takes the character off the front of the string
+string& frontchomp(string& ss, char gone);
+string& frontchomp(string& ss, string gone);
+
+string& frontchop(string& ss);
+
+// Takes off a leading 'J' or a leading 'B'
+string no_JB(string pulsar);
 
 // Like fscanf(fptr,"%s%s",ignore,answer) except it gets more than 1 word
 bool retrieve_cstring(FILE* fptr,string ignore,char* answer);
