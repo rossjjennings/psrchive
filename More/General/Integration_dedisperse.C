@@ -29,6 +29,12 @@ void Pulsar::Integration::dedisperse () try {
     return;
   }
 
+  if ( get_duration() == 0 )  {
+    if (verbose)
+      cerr << "Pulsar::Integration::dedisperse no data" << endl;
+    return;
+  }
+
   double pfold = get_folding_period();
   if (pfold == 0)
     throw Error (InvalidState, "Pulsar::Integration::dedisperse",
