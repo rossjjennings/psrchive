@@ -38,8 +38,10 @@ int str2coord (double *ra, double *dec, const char* coordstring)
     decstr = strchr (coordstr, '+');
     if (decstr == NULL)
       decstr = strchr (coordstr, ' ');
+    if (decstr == NULL)
+      decstr = strchr (coordstr, '\t');
     if (decstr == NULL) {
-      fprintf (stderr, "No +,-,or space in coordinate string '%s'\n",coordstr);
+      fprintf (stderr, "No +,-,or space or tab in coordinate string '%s'\n",coordstr);
       free (coordstr);
       return -1;
     }
