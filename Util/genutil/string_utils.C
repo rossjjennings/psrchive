@@ -76,6 +76,11 @@ string& frontchomp(string& ss, string gone){
   return ss;
 }
 
+string& midchomp(string& ss, string gone){
+  h_midchomp(ss,gone);
+  return ss;
+}
+
 bool h_chop(string& ss){
   if( ss.size()==0 )
     return false;
@@ -113,6 +118,27 @@ bool h_chomp(string& ss,string gone){
     return true;
   }
   return false;
+}
+
+bool h_midchomp(string& ss,string gone){
+  if( ss.size() < gone.size() )
+    return false;
+
+  string::size_type pos = ss.find(gone,0);
+
+  if( pos == string::npos )
+    return false;
+
+  string new_ss = ss.substr(0,pos);
+
+  string::size_type replace_end = pos+gone.size();
+
+  if( replace_end != ss.size() )
+    new_ss += ss.substr(replace_end,ss.size()-replace_end);
+
+  ss = new_ss;
+
+  return true;
 }
 
 bool h_frontchop(string& ss){

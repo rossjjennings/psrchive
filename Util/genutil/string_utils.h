@@ -1,7 +1,7 @@
 //-*-C++-*-
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Attic/string_utils.h,v $
-   $Revision: 1.30 $
-   $Date: 2004/03/02 00:56:16 $
+   $Revision: 1.31 $
+   $Date: 2004/06/14 04:06:40 $
    $Author: hknight $ */
 
 #ifndef __STRING_UTILS_H
@@ -34,6 +34,9 @@ string& frontchop(string& ss, unsigned chars);
 string& frontchomp(string& ss, char gone);
 string& frontchomp(string& ss, string gone);
 
+// Removes 1 instance from anywhere in the string- really should be called 'replace_first_of'
+string& midchomp(string& ss, string gone);
+
 // These return true on success
 bool h_chop(string& ss);
 bool h_chop(string& ss, unsigned chars);
@@ -46,6 +49,8 @@ bool h_frontchop(string& ss, unsigned chars);
 
 bool h_frontchomp(string& ss, char gone);
 bool h_frontchomp(string& ss, string gone);
+
+bool h_midchomp(string& ss, string gone);
 
 // These take off or add a leading or trailing word
 string pop_word(string& line);
