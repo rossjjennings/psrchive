@@ -939,12 +939,11 @@ void Pulsar::ReceptionCalibrator::precalibrate (Archive* data)
 
     Calibrator::calibrate (integration, response);
 
-    if (isub == 0)
-      data->set_state (integration->get_state());
     
   }
 
   data->set_poln_calibrated (true);
+  data->set_scale (Signal::ReferenceFluxDensity);
 
   Receiver* receiver = data->get<Receiver>();
 

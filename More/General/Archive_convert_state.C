@@ -14,9 +14,12 @@ void Pulsar::Archive::convert_state (Signal::State state)
          << Signal::state_string (get_state()) << " request="
          << Signal::state_string (state) << endl;
 
+  if (state == get_state())
+    return;
+
   for (unsigned isub=0; isub < get_nsubint(); isub++)
     get_Integration(isub) -> convert_state (state);
 
   set_npol ( get_Integration(0) -> get_npol() );
-  set_state ( get_Integration(0) -> get_state() );
+  set_state ( state );
 }

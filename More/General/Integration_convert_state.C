@@ -25,16 +25,15 @@ void Pulsar::Integration::convert_state (Signal::State state)
   // convert to Coherence products or Stokes parameters
   if (state == Signal::Coherence || state == Signal::Stokes) {
     poln_convert (state);
-    set_state ( state );
     return;
   }
 
   if (state == Signal::Invariant) {
-    // form the invariant interval
+    invint ();
+    return;
   }
   else if (state == Signal::Intensity) {
     pscrunch();
-    set_state ( state );
     return;
   }
 
