@@ -9,6 +9,9 @@
 #include "Pulsar/Plotter.h"
 #include "Error.h"
 #include "RealTimer.h"
+#ifdef PSRFITS
+#include "FITSError.h"
+#endif
 
 #include "dirutil.h"
 #include "string_utils.h"
@@ -338,6 +341,11 @@ int main (int argc, char** argv)
   catch (Error& error) {
     cerr << error << endl;
   }
+#ifdef PSRFITS
+  catch (FITSError& error) {
+    cerr << error << endl;
+  }
+#endif
   catch (string& error) {
     cerr << error << endl;
   }
