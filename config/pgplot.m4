@@ -37,13 +37,13 @@ AC_DEFUN([SWIN_LIB_PGPLOT],
     AC_DEFINE([HAVE_PGPLOT], [1], [Define to 1 if you have the PGPLOT library])
     [$1]
   else
-    AC_MSG_WARN([PGPLOT code will not be compiled]
+    AC_MSG_WARN([PGPLOT code will not be compiled])
     if test x"$PGPLOT_DIR" = x; then
       AC_MSG_WARN([Please set the PGPLOT_DIR environment variable])
     fi
     PGPLOT_CFLAGS=""
     PGPLOT_LIBS=""
-   [$2]
+    [$2]
   fi
 
   AC_SUBST(PGPLOT_CFLAGS)
