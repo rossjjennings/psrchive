@@ -414,12 +414,12 @@ void Rhythm::save_toas (const char* fname)
 
 void Rhythm::hc ()
 {
-  plot_window->hardcopy("rhythm.ps/ps");
+  plot_window->drawPlot("rhythm.ps/ps");
 }
 
 void Rhythm::chc ()
 {
-  plot_window->hardcopy("rhythm.ps/cps");
+  plot_window->drawPlot("rhythm.ps/cps");
 }
 
 void Rhythm::set_Params (const psrephem& eph)
