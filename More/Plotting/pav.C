@@ -1,5 +1,5 @@
 //
-// $Id: pav.C,v 1.64 2003/12/30 04:34:31 ahotan Exp $
+// $Id: pav.C,v 1.65 2004/01/02 00:10:50 ahotan Exp $
 //
 // The Pulsar Archive Viewer
 //
@@ -22,6 +22,8 @@
 
 #include "Pulsar/BinaryPhaseOrder.h"
 #include "Pulsar/PeriastronOrder.h"
+#include "Pulsar/BinLngPeriOrder.h"
+#include "Pulsar/BinLngAscOrder.h"
 
 #include "Error.h"
 #include "RealTimer.h"
@@ -47,8 +49,10 @@ void usage ()
     " -Z        Smear profiles before plotting\n"
     "\n"
     "Integration re-ordering (nsub = final # of subints):\n"
-    " --convert_periphs  nsub\n"
-    " --convert_binphs   nsub\n"
+    " --convert_binphsperi   nsub\n"
+    " --convert_binphsasc    nsub\n"
+    " --convert_binlngperi   nsub\n"
+    " --convert_binlngasc    nsub\n"
     "\n"
     "Selection & configuration options:\n"
     " -K dev    Manually specify a plot device\n"
@@ -155,8 +159,10 @@ int main (int argc, char** argv)
   bool psas = false;
   bool std_given = false;
   bool mdiff = false;
-  bool cpo = false;
-  bool cbo = false;
+  bool cbppo = false;
+  bool cbpao = false;
+  bool cblpo = false;
+  bool cblao = false;
 
   Reference::To<Pulsar::Archive> std_arch;
   Reference::To<Pulsar::Profile> std_prof;
@@ -176,8 +182,10 @@ int main (int argc, char** argv)
   while (1) {
     
     static struct option long_options[] = {
-      {"convert_periphs", 1, 0, 200},
-      {"convert_binphs", 1, 0, 201},
+      {"convert_binphsperi", 1, 0, 200},
+      {"convert_binphsasc", 1, 0, 201},
+      {"convert_binlngperi", 1, 0, 202},
+      {"convert_binlngasc", 1, 0, 203},
       {0, 0, 0, 0}
     };
     
@@ -257,7 +265,7 @@ int main (int argc, char** argv)
       plotter.set_subint( atoi (optarg) );
       break;
     case 'i':
-      cout << "$Id: pav.C,v 1.64 2003/12/30 04:34:31 ahotan Exp $" << endl;
+      cout << "$Id: pav.C,v 1.65 2004/01/02 00:10:50 ahotan Exp $" << endl;
       return 0;
 
     case 'j':
@@ -428,7 +436,7 @@ int main (int argc, char** argv)
       break;
 
     case 200: {
-      if (cbo) {
+      if (cbpao || cblpo || cblao) {
 	cerr << "You can only specify one re-ordering scheme!"
 	     << endl;
 	return -1;
@@ -437,12 +445,12 @@ int main (int argc, char** argv)
 	cerr << "Invalid nsub given" << endl;
 	return -1;
       }
-      cpo = true;
+      cbppo = true;
       break;
     }
       
     case 201: {
-      if (cpo) {
+      if (cbppo || cblpo || cblao) {
 	cerr << "You can only specify one re-ordering scheme!"
 	     << endl;
 	return -1;
@@ -451,15 +459,43 @@ int main (int argc, char** argv)
 	cerr << "Invalid nsub given" << endl;
 	return -1;
       }
-      cbo = true;
+      cbpao = true;
       break;
     }
       
+    case 202: {
+      if (cblao || cbppo || cbpao) {
+	cerr << "You can only specify one re-ordering scheme!"
+	     << endl;
+	return -1;
+      }
+      if (sscanf(optarg, "%ud", &ronsub) != 1) {
+	cerr << "Invalid nsub given" << endl;
+	return -1;
+      }
+      cblpo = true;
+      break;
+    }
+      
+    case 203: {
+      if (cblpo || cbppo || cbpao) {
+	cerr << "You can only specify one re-ordering scheme!"
+	     << endl;
+	return -1;
+      }
+      if (sscanf(optarg, "%ud", &ronsub) != 1) {
+	cerr << "Invalid nsub given" << endl;
+	return -1;
+      }
+      cblao = true;
+      break;
+    }
+
     default:
       return -1; 
     }
   }
-  
+
   vector <string> filenames;
   
   if (metafile)
@@ -496,14 +532,26 @@ int main (int argc, char** argv)
 
     archive = Pulsar::Archive::load (filenames[ifile]);
 
-    if (cbo) {
+    if (cbppo) {
       Pulsar::IntegrationOrder* myio = new Pulsar::BinaryPhaseOrder();
       archive->add_extension(myio); 
       myio->organise(archive, ronsub);
     }
     
-    if (cpo) {
+    if (cbpao) {
       Pulsar::IntegrationOrder* myio = new Pulsar::PeriastronOrder();
+      archive->add_extension(myio);
+      myio->organise(archive, ronsub);
+    }
+
+    if (cblpo) {
+      Pulsar::IntegrationOrder* myio = new Pulsar::BinLngPeriOrder();
+      archive->add_extension(myio);
+      myio->organise(archive, ronsub);
+    }
+
+    if (cblao) {
+      Pulsar::IntegrationOrder* myio = new Pulsar::BinLngAscOrder();
       archive->add_extension(myio);
       myio->organise(archive, ronsub);
     }
