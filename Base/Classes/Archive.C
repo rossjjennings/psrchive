@@ -317,6 +317,22 @@ void Pulsar::Archive::pscrunch()
   set_state ( get_Integration(0) -> get_state() );
 }
 
+/*! Rotate pulsar Integrations so that the bin of largest amplitude
+    is centred */
+void Pulsar::Archive::centre_max_bin ()
+{
+  Reference::To<Pulsar::Archive> arch = total();
+  double p = arch->get_Integration(0)->get_folding_period();
+
+  int bnum = arch->get_Profile(0,0,0)->find_max_bin();
+  bnum -= get_nbin()/2;
+
+  float frac = float(bnum)/float(get_nbin());
+  double extra_time = frac * p;
+
+  rotate(extra_time); 
+}
+
 /*!
   Uses the polyco model, as well as the centre frequency and mid-time of
   each Integration to determine the predicted pulse phase.
