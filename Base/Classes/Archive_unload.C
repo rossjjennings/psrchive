@@ -25,16 +25,30 @@ void Pulsar::Archive::unload (const char* filename)
   
   if (ephemeris) {
     if (get_source() != ephemeris->psrname()) {
-      cout << "Archive::unload Informative Notice:\n" 
-	   << "   Source name will be updated to match archive ephemeris"
-	   << endl;
-      set_source(ephemeris->psrname());
-    }
-    if (get_dispersion_measure() != ephemeris->get_dm()) {
-      cout << "Archive::unload Informative Notice:\n" 
-	   << "   Dispersion measure will be updated to match archive ephemeris"
-	   << endl;
-      set_dispersion_measure(ephemeris->get_dm());
+      string temp1 = get_source();
+      string temp2 = ephemeris->psrname();
+      if (temp1.length() > temp2.length()) {
+	if (temp1.substr(1,temp1.length()) != temp2) {
+	  cout << "Archive::unload Informative Notice:\n" 
+	       << "   Source name will be updated to match archive ephemeris\n"
+	       << "   New name: " << temp2 << endl;
+	  set_source(temp2);
+	}
+      }
+      else {
+	if (temp2.substr(1,temp2.length()) != temp1) {
+	  cout << "Archive::unload Informative Notice:\n" 
+	       << "   Source name will be updated to match archive ephemeris\n"
+	       << "   New name: " << temp2 << endl;
+	  set_source(temp2);
+	}
+      }
+      if (get_dispersion_measure() != ephemeris->get_dm()) {
+	cout << "Archive::unload Informative Notice:\n" 
+	     << "   Dispersion measure will be updated to match archive ephemeris"
+	     << endl;
+	set_dispersion_measure(ephemeris->get_dm());
+      }
     }
   }
 
