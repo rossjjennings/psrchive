@@ -62,7 +62,7 @@ int main (int argc, char *argv[])
   bool fscrunch = false;
   bool tscrunch = false;
 
-  bool denoise = true;
+  bool denoise = false;
   string std;
   string outFormat("parkes"),outFormatFlags;
 
@@ -92,7 +92,7 @@ int main (int argc, char *argv[])
       denoise = true;
       break;
     case 'i':
-      cout << "$Id: pat.C,v 1.23 2004/05/20 02:32:51 sord Exp $" << endl;
+      cout << "$Id: pat.C,v 1.24 2004/05/21 08:03:46 sord Exp $" << endl;
       return 0;
 
     case 'F':
