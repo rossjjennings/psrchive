@@ -1,10 +1,13 @@
 /* $Log: MJD.C,v $
-/* Revision 1.8  1998/09/23 02:09:46  mbritton
-/* Added operators >= <= and !=
-/* Placed a limit on the precision of these comparisons of 2*pow(10,-DBL_DIG)
-/* fracsecs, where DBL_DIG is defined in /usr/include/float.h as the max
-/* precision of a double
+/* Revision 1.9  1998/09/25 06:49:20  mbritton
+/* #included float.h for suns
 /*
+ * Revision 1.8  1998/09/23  02:09:46  mbritton
+ * Added operators >= <= and !=
+ * Placed a limit on the precision of these comparisons of 2*pow(10,-DBL_DIG)
+ * fracsecs, where DBL_DIG is defined in /usr/include/float.h as the max
+ * precision of a double
+ *
  * Revision 1.7  1998/09/21  09:29:42  mbritton
  * Added operator != and increased the precision printed by printfs to 15 digits,
  * which is the precision of a double.
@@ -40,6 +43,7 @@
 #include <string.h>
 #include <stdio.h>
 #ifdef sun
+#include <float.h>
 #include <sunmath.h>
 #endif
 #include "MJD.h"
