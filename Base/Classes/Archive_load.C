@@ -21,66 +21,84 @@
 */
 Pulsar::Archive* Pulsar::Archive::load (const char* filename)
 {
+  // check if file can be opened for reading
+  FILE* fptr = fopen (filename, "r");
+
+  if (!fptr) throw Error (FailedSys, "Pulsar::Archive::load",
+			  "cannot open '%s'", filename);
+
+  fclose (fptr);
+
+  // see if any of the derived classes recognize the file
+  Reference::To<Archive> archive;
+
   try {
 
 #ifdef PSRFITS
-    if (Pulsar::FITSArchive::recognises (filename)) {
-      Pulsar::FITSArchive* archive = new Pulsar::FITSArchive;
-      archive -> load (filename);
-      return archive;
-    }
+    if (Pulsar::FITSArchive::recognises (filename))
+      archive = new Pulsar::FITSArchive;
+    else
 #endif
   
 #ifdef PSRTIMER
-    if (Pulsar::BasebandArchive::recognises (filename)) {
-      Pulsar::BasebandArchive* archive = new Pulsar::BasebandArchive;
-      archive -> load (filename);
-      return archive;
-    }
+    if (Pulsar::BasebandArchive::recognises (filename))
+      archive = new Pulsar::BasebandArchive;
+    else
 
-    if (Pulsar::TimerArchive::recognises (filename)) {
-      Pulsar::TimerArchive* archive = new Pulsar::TimerArchive;
-      archive -> load (filename);
+    if (Pulsar::TimerArchive::recognises (filename))
+      archive = new Pulsar::TimerArchive;
+#endif
+
+    if (archive) {
+      // call the pure virtual load_header
+      archive -> load_header (filename);
+      // set the filename from which data for this instance can be loaded
+      archive -> __load_filename = filename;
       return archive;
     }
-#endif
 
   }
   catch (Error& error) {
-    throw error += "Archive::load";
+    throw error += "Pulsar::Archive::load";
   }
   catch (string& error) {
-    throw Error (FailedCall, "Archive::load", error);
+    throw Error (FailedCall, "Pulsar::Archive::load", error);
   }
 
   // none of the above formats recognises the file
-
-  // check if if can be opened for reading
-
-  FILE* fptr = fopen (filename, "r");
-
-  if (!fptr)
-    throw Error (FailedSys, "Archive::load",
-		 "cannot open '%s'", filename);
-
-  // it can be opened, but it was not recognized
-  fclose (fptr);
-
-  throw Error (InvalidParam, "Archive::load", 
+  throw Error (InvalidParam, "Pulsar::Archive::load", 
 	       "'%s' not a recognized file format", filename);
 }
 
 void Pulsar::Archive::refresh()
 {
+  if (verbose)
+    cerr << "Pulsar::Archive::refresh" << endl;
+
   IntegrationManager::resize(0);
-  load(get_filename()); 
+
+  load_header (__load_filename.c_str());
+}
+
+void Pulsar::Archive::update()
+{
+  if (verbose)
+    cerr << "Pulsar::Archive::update" << endl;
+
+  load_header (__load_filename.c_str());
 }
 
 
+Pulsar::Integration* Pulsar::Archive::load_Integration (unsigned isubint)
+{
+  if (verbose)
+    cerr << "Pulsar::Archive::load_Integration" << endl;
 
+  if (!__load_filename.length())
+    throw Error (InvalidState, "Pulsar::Archive::load_Integration",
+		 "internal error: instance not loaded from file");
 
-
-
-
+  return load_Integration (__load_filename.c_str(), isubint);
+}
 
 

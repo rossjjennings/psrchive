@@ -7,7 +7,7 @@
 void Pulsar::Archive::init ()
 {
   if (verbose)
-    cerr << "Archive::init" << endl;
+    cerr << "Pulsar::Archive::init" << endl;
 
   model_updated = false;
 }
@@ -15,33 +15,29 @@ void Pulsar::Archive::init ()
 Pulsar::Archive::Archive () 
 { 
   if (verbose)
-    cerr << "Archive::null constructor" << endl;
+    cerr << "Pulsar::Archive::null constructor" << endl;
 
   init(); 
 }
 
+//! The Archive copy constructor must never be called, call Archive::copy
 Pulsar::Archive::Archive (const Archive& archive)
 {
-  throw Error (Undefined, "Archive copy constructor",
+  throw Error (Undefined, "Pulsar::Archive copy constructor",
 	       "sub-classes must define copy constructor");
 }
 
-Pulsar::Archive& Pulsar::Archive::operator = (const Archive& archive)
-{
-  copy (archive);
-  return *this;
-}
 
 Pulsar::Archive::~Archive () 
 { 
   if (verbose)
-    cerr << "Archive::destructor" << endl;
+    cerr << "Pulsar::Archive::destructor" << endl;
 }
 
 void Pulsar::Archive::copy (const Archive& archive)
 {
   if (verbose)
-    cerr << "Archive::copy" << endl;
+    cerr << "Pulsar::Archive::copy" << endl;
 
   if (this == &archive)
     return;
@@ -151,7 +147,7 @@ void Pulsar::Archive::fscrunch (unsigned nscrunch, bool weighted_cfreq)
 void Pulsar::Archive::fscrunch_to_nchan (unsigned new_chan)
 {
   if (get_nchan() % new_chan != 0)
-    throw Error (InvalidParam, "Archive::fscrunch_to_nchan");
+    throw Error (InvalidParam, "Pulsar::Archive::fscrunch_to_nchan");
   else
     fscrunch(get_nchan() / new_chan);
 }
@@ -207,7 +203,7 @@ void Pulsar::Archive::centre ()
 			       subint -> get_centre_frequency());
 
     if (verbose)
-      cerr << "Archive::center phase=" << phase << endl;
+      cerr << "Pulsar::Archive::center phase=" << phase << endl;
 
     double fracturns = (half_turn - phase).fracturns();
     subint -> rotate ( fracturns * subint -> get_folding_period() );
@@ -292,7 +288,7 @@ void Pulsar::Archive::remove_baseline (float phase)
 
   }
   catch (Error& error) {
-    throw error += "Archive::remove_baseline";
+    throw error += "Pulsar::Archive::remove_baseline";
   }
 }
 
@@ -323,7 +319,7 @@ void Pulsar::Archive::set_ephemeris (const psrephem& new_ephemeris)
 void Pulsar::Archive::set_model (const polyco& new_model)
 {
   if (!good_model (new_model))
-    throw Error (InvalidParam, "Archive::set_model",
+    throw Error (InvalidParam, "Pulsar::Archive::set_model",
 		 "supplied model does not span Integrations");
 
   // swap the old with the new
@@ -332,7 +328,7 @@ void Pulsar::Archive::set_model (const polyco& new_model)
 
   if ( oldmodel.pollys.size() ) {
     if (verbose)
-      cerr << "Archive::set_model correcting against the old model" << endl;
+      cerr << "Pulsar::Archive::set_model correcting against the old model" << endl;
 
     // correct Integrations against the old model
     for (unsigned isub = 0; isub < get_nsubint(); isub++)
@@ -352,7 +348,7 @@ void Pulsar::Archive::snr_weight ()
 MJD Pulsar::Archive::start_time() const
 {
   if (get_nsubint() < 1)
-    throw Error (InvalidState, "Archive::start_time", "no Integrations");
+    throw Error (InvalidState, "Pulsar::Archive::start_time", "no Integrations");
 
   return get_Integration(0) -> get_start_time();
 }
@@ -360,7 +356,7 @@ MJD Pulsar::Archive::start_time() const
 MJD Pulsar::Archive::end_time() const
 {
   if (get_nsubint() < 1)
-    throw Error (InvalidState, "Archive::end_time", "no Integrations");
+    throw Error (InvalidState, "Pulsar::Archive::end_time", "no Integrations");
 
   return get_Integration(get_nsubint()-1) -> get_end_time();
 }
@@ -383,13 +379,12 @@ double Pulsar::Archive::integration_length() const
 
 }
 
-void
-Pulsar::Archive::telescope_coordinates 
-(float* lat, float* lon, float* ele) const
+void Pulsar::Archive::telescope_coordinates (float* lat, float* lon, 
+					     float* ele) const
 {
   int ret = telescope_coords (get_telescope_code(), lat, lon, ele);
   if (ret < 0)
-    throw Error (FailedCall, "Archive::telescope_coordinates",
+    throw Error (FailedCall, "Pulsar::Archive::telescope_coordinates",
 		 "tempo code=%c", get_telescope_code ());
 }
 

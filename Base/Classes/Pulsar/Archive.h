@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Archive.h,v $
-   $Revision: 1.46 $
-   $Date: 2003/01/07 05:04:55 $
-   $Author: ahotan $ */
+   $Revision: 1.47 $
+   $Date: 2003/01/13 10:38:21 $
+   $Author: straten $ */
 
 /*! \mainpage 
  
@@ -167,11 +167,17 @@ namespace Pulsar {
     //! Amount by which centre frequencies may differ in Archive::match
     static double match_max_frequency_difference;
 
-    //! Weigh integrations by their integration length, or duration
+    //! Weight integrations by their integration length, or duration
     static bool weight_by_duration;
 
     //! Set the verbosity level (0 to 3)
     static void set_verbosity (unsigned level);
+
+    // //////////////////////////////////////////////////////////////////
+    //
+    // constructors, destructor, operator =,
+    //
+    // //////////////////////////////////////////////////////////////////
 
     //! null constructor
     Archive ();
@@ -179,44 +185,80 @@ namespace Pulsar {
     //! copy constructor
     Archive (const Archive& archive);
 
-    //! operator =
-    Archive& operator = (const Archive& archive);
-
     //! destructor
     virtual ~Archive ();
+
+    //! operator =
+    Archive& operator = (const Archive& a) { copy (a); return *this; }
+
+    //! Copy the profiles and attributes through set_ get_ methods
+    virtual void copy (const Archive& archive);
+
+
+    // //////////////////////////////////////////////////////////////////
+    //
+    // Data access and resize
+    //
+    // //////////////////////////////////////////////////////////////////
+
+    //! Return pointer to the specified profile
+    Profile* get_Profile (unsigned subint, unsigned pol, unsigned chan);
+
+    //! Return pointer to the specified profile
+    const Profile*
+    get_Profile (unsigned subint, unsigned pol, unsigned chan) const;
+
+    // get_Integration implemented by the IntegrationManager base class
+
+    //! Returns a block of amplitudes ordered according to the specified axis
+    void get_amps (vector<float>& amps,
+		   Signal::Dimension x1 = Signal::Phase,
+		   Signal::Dimension x2 = Signal::Frequency,
+		   Signal::Dimension x3 = Signal::Polarization) const;
 
     //! Resize the Integration vector with new_Integration instances
     virtual void resize (unsigned nsubint, 
 			 unsigned npol=0, unsigned nchan=0, unsigned nbin=0);
 
+    // //////////////////////////////////////////////////////////////////
+    //
+    // File loading and unloading
+    //
+    // //////////////////////////////////////////////////////////////////
+
     //! Dynamic constructor loads an Archive subclass from filename
     static Archive* load (const char* filename);
 
-    //! Convenience interface
+    //! Convenience interface to Archive::load (const char*)
     static Archive* load (const string& filename)
     { return load (filename.c_str()); }
 
-    //! Clear the IntegrationManager and update the archive
-    void refresh();
+    //! Write the archive to filename
+    void unload (const char* filename = 0);
 
-    //! Copy the profiles and attributes through set_ get_ methods
-    virtual void copy (const Archive& archive);
+    //! Convenience interface to Archive::unload (const char*)
+    void unload (const string& filename)
+    { unload (filename.c_str()); }
 
-    //! Return a pointer to a new copy of self
-    virtual Archive* clone () const = 0;
+    //! Get the name of the file to which the archive will be unloaded
+    virtual string get_filename ();
 
-    //! Return a pointer to a new fscrunched, tscrunched and pscrunched copy
-    Archive* total () const;
+    //! Set the name of the file to which the archive will be unloaded
+    virtual void set_filename (const char* filename);
 
-    //! Return a pointer to the profile
-    Profile* get_Profile (unsigned subint, unsigned pol, unsigned chan);
+    //! Convenience interface to Archive::set_filename (const char*)
+    void set_filename (const string& filename) const
+    { set_filename (filename.c_str()); }
 
-    const Profile*
-    get_Profile (unsigned subint, unsigned pol, unsigned chan) const;
+    //! Update the current archive, saving current Integration data
+    void update ();
+
+    //! Completely reload the archive, deleting all data
+    void refresh ();
 
     // //////////////////////////////////////////////////////////////////
     //
-    // virtual methods - implemented by Archive
+    // basic algorithms implemented by Archive
     //
     // //////////////////////////////////////////////////////////////////
 
@@ -240,6 +282,9 @@ namespace Pulsar {
 
     //! Append the Integrations from 'archive' to 'this'
     virtual void append (const Archive* archive);
+
+    //! Return pointer to a new fscrunched, tscrunched and pscrunched clone
+    Archive* total () const;
 
     //! Rotate pulsar Integrations so that pulse phase zero is centred
     virtual void centre ();
@@ -293,12 +338,6 @@ namespace Pulsar {
     double weighted_frequency (unsigned ichan,
 			       unsigned start, unsigned end) const;
 
-    // //////////////////////////////////////////////////////////////////
-    //
-    // convenience interfaces
-    //
-    // //////////////////////////////////////////////////////////////////
-
     //! Call bscrunch with the appropriate value
     void bscrunch_to_nbin (unsigned new_nbin);
 
@@ -308,7 +347,7 @@ namespace Pulsar {
     //! Call fscrunch with the appropriate value
     void fscrunch_to_nchan (unsigned new_nchan);
 
-    //! Return the MJD at the beginning of the first sub-integration
+    //! Return the MJD at the start of the first sub-integration
     MJD  start_time () const;
 
     //! Return the MJD at the end of the last sub-integration
@@ -321,12 +360,6 @@ namespace Pulsar {
     void telescope_coordinates (float* latitude = 0,
 				float* longitude = 0,
 				float* elevation = 0) const;
-
-    //! Returns a block of amplitudes ordered according to the specified axis
-    void get_amps (vector<float>& amps,
-		   Signal::Dimension x1 = Signal::Phase,
-		   Signal::Dimension x2 = Signal::Frequency,
-		   Signal::Dimension x3 = Signal::Polarization) const;
 
     //! Find the transitions between high and low states in total intensity
     void find_transitions (int& hi2lo, int& lo2hi, int& buffer) const;
@@ -344,32 +377,26 @@ namespace Pulsar {
     void display (unsigned isub=0, unsigned ipol=0, unsigned ichan=0,
 			  float phase=0) const;
 
-    //! Convenience interface to the set_filename (const char*) method
-    void set_filename (const string& filename) const
-    { set_filename (filename.c_str()); }
-
-    //! Convenience interface to the unload (const char*) method
-    void unload (const string& filename) const
-    { unload (filename.c_str()); }
-
     // //////////////////////////////////////////////////////////////////
     //
-    // pure virtual methods - must be implemented by children
+    // pure virtual methods - must be implemented by derived classes
     //
     // //////////////////////////////////////////////////////////////////
 
-    //! Get the name of the thing from which the archive was loaded
-    virtual string get_filename () const = 0;
-    //! Set the name of the thing to which the archive will be unloaded
-    virtual void set_filename (const char* filename) = 0;
+    //! Return a pointer to a new, copy constructed instance equal to this
+    virtual Archive* clone () const = 0;
 
-    //! Write archive to disk
-    virtual void unload (const char* filename = 0) const = 0;
+    //! Get the number of pulsar phase bins used
+    /*! This attribute may be set only through Archive::resize */
+    virtual unsigned get_nbin () const = 0;
 
-    // //////////////////////////////////////////////////////////////////
-    //
-    // static facts about the archive
-    //
+    //! Get the number of frequency channels used
+    /*! This attribute may be set only through Archive::resize */
+    virtual unsigned get_nchan () const = 0;
+
+    //! Get the number of frequency channels used
+    /*! This attribute may be set only through Archive::resize */
+    virtual unsigned get_npol () const = 0;
 
     //! Get the tempo code of the telescope used
     virtual char get_telescope_code () const = 0;
@@ -380,6 +407,11 @@ namespace Pulsar {
     virtual Signal::Basis get_basis () const = 0;
     //! Set the feed configuration of the receiver
     virtual void set_basis (Signal::Basis type) = 0;
+
+    //! Get the state of the profiles
+    virtual Signal::State get_state () const = 0;
+    //! Set the state of the profiles
+    virtual void set_state (Signal::State state) = 0;
 
     //! Get the observation type (psr, cal)
     virtual Signal::Source get_type () const = 0;
@@ -396,48 +428,20 @@ namespace Pulsar {
     //! Set the coordinates of the source
     virtual void set_coordinates (const sky_coord& coordinates) = 0;
 
-    // //////////////////////////////////////////////////////////////////
-    //
-    // dynamic facts about the archive
-    //
-
-    //! Get the number of pulsar phase bins used
-    /*! This attribute may be set only through Archive::resize */
-    virtual unsigned get_nbin () const = 0;
-
-    //! Get the number of frequency channels used
-    /*! This attribute may be set only through Archive::resize */
-    virtual unsigned get_nchan () const = 0;
-
-    //! Get the number of frequency channels used
-    /*! This attribute may be set only through Archive::resize */
-    virtual unsigned get_npol () const = 0;
+    //! Get the centre frequency of the observation
+    virtual double get_centre_frequency () const = 0;
+    //! Set the centre frequency of the observation
+    virtual void set_centre_frequency (double cf) = 0;
 
     //! Get the overall bandwidth of the observation
     virtual double get_bandwidth () const = 0;
     //! Set the overall bandwidth of the observation
     virtual void set_bandwidth (double bw) = 0;
 
-    //! Get the centre frequency of the observation
-    virtual double get_centre_frequency () const = 0;
-    //! Set the centre frequency of the observation
-    virtual void set_centre_frequency (double cf) = 0;
-
-    //! Get the state of the profiles
-    virtual Signal::State get_state () const = 0;
-    //! Set the state of the profiles
-    virtual void set_state (Signal::State state) = 0;
-
     //! Get the dispersion measure (in \f${\rm pc cm}^{-3}\f$)
     virtual double get_dispersion_measure () const = 0;
     //! Set the dispersion measure (in \f${\rm pc cm}^{-3}\f$)
     virtual void set_dispersion_measure (double dm) = 0;
-
-
-    // //////////////////////////////////////////////////////////////////
-    //
-    // various state flags
-    //
 
     //! Data has been flux calibrated
     virtual bool get_flux_calibrated () const = 0;
@@ -471,12 +475,6 @@ namespace Pulsar {
 
   protected:
 
-    //! The pulsar ephemeris, as used by TEMPO
-    psrephem ephemeris;
-
-    //! The pulsar phase model, as created using TEMPO
-    polyco model;
-
     //! Set the number of pulsar phase bins
     /*! Called by Archive methods to update child attribute */
     virtual void set_nbin (unsigned numbins) = 0;
@@ -488,6 +486,31 @@ namespace Pulsar {
     //! Set the number of polarization measurements
     /*! Called by Archive methods to update child attribute */
     virtual void set_npol (unsigned numpol) = 0;
+
+    //! Load the header information from filename
+    virtual void load_header (const char* filename) = 0;
+
+    //! Load the specified Integration from filename, returning new instance
+    virtual Integration*
+    load_Integration (const char* filename, unsigned subint) = 0;
+
+    //! Unload the Archive (header and Integration data) to filename
+    virtual void unload_file (const char* filename) const = 0;
+
+    // //////////////////////////////////////////////////////////////////
+    //
+    // end of pure virtual methods 
+    //
+    // //////////////////////////////////////////////////////////////////
+
+    //! Name of file to which the archive will be written on call to unload()
+    string unload_filename;
+
+    //! The pulsar ephemeris, as used by TEMPO
+    psrephem ephemeris;
+
+    //! The pulsar phase model, as created using TEMPO
+    polyco model;
 
     //! Initialize an Integration to reflect Archive attributes.
     void init_Integration (Integration* subint);
@@ -516,6 +539,16 @@ namespace Pulsar {
       during run-time
     */
     bool model_updated;
+
+    //! Store the name of the file from which the current instance was loaded
+    /*! Although the logical name of the file may be changed with
+      Archive::set_filename, the base class must keep track of the
+      original file in order to read unloaded information from this
+      file when it is required. */
+    string __load_filename;
+
+    //! Load a new instance of the specified integration from __load_filename
+    Integration* load_Integration (unsigned isubint);
 
   };
 
