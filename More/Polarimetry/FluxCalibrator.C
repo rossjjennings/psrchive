@@ -21,13 +21,11 @@ Pulsar::FluxCalibrator::FluxCalibrator (const vector<Pulsar::Archive*>& archs)
     throw Error (InvalidParam, "Pulsar::FluxCalibrator",
 		 "error empty Pulsar::Archive vector");
   
-  archive = 0;
-
   unsigned iarch=0;
-  for (; iarch<archs.size(); ++iarch) {
+  for (iarch=0; iarch<archs.size(); ++iarch) {
 
     if ( archs[iarch]->get_type() != Signal::FluxCalOn &&
-	 archs[iarch]->get_type() != Signal::FluxCalOn )
+	 archs[iarch]->get_type() != Signal::FluxCalOff )
 
       throw Error (InvalidParam, "Pulsar::FluxCalibrator", "Pulsar::Archive='"
 		   + archs[iarch]->get_filename() + "' not a FluxCal");
@@ -56,30 +54,15 @@ Pulsar::FluxCalibrator::FluxCalibrator (const vector<Pulsar::Archive*>& archs)
   
   cal_flux.resize (npol);
   T_sys.resize (npol);
-  
-  
-  double hyd_mJy = hydra_flux_mJy (archive->get_centre_frequency());
-  
-  // WvS : some basic stuff on errors:
-  // Where:
-  //    y = f (x1, x2, ... xn)
-  // Then:
-  // V(y) = d(f,x1)^2 * V(x1) + ... + d(f,xn)^2 * V(xn)
-  // Where: V(x)   is variance of x
-  //        d(f,x) is partial derivative of f wrt x
-  
-  // ... the following loop forms the sums of x/var(x) and 1/var(x),
-  // where x is the ratio of the high and low cal states, for both on
-  // and off hydra
-
-  vector<vector<Estimate<double> > > ratio_on (npol);
-  vector<vector<Estimate<double> > > ratio_off (npol);
+    
+  vector<vector<MeanEstimate<double> > > mean_ratio_on (npol);
+  vector<vector<MeanEstimate<double> > > mean_ratio_off (npol);
 
   for (unsigned ipol=0; ipol<npol; ++ipol) {
     cal_flux[ipol].resize(nchan);
     T_sys[ipol].resize(nchan);
-    ratio_on.resize(nchan);
-    ratio_off.resize(nchan);
+    mean_ratio_on.resize(nchan);
+    mean_ratio_off.resize(nchan);
   }
   for (iarch=0; iarch<archs.size(); ++iarch) {
 
@@ -96,80 +79,45 @@ Pulsar::FluxCalibrator::FluxCalibrator (const vector<Pulsar::Archive*>& archs)
       
       for (unsigned ichan=0; ichan<nchan; ++ichan) {
 
-	double hi = cal_hi[ipol][ichan].val;
-	double var_hi = cal_hi[ipol][ichan].var;
-	double lo = cal_lo[ipol][ichan].val;
-	double var_lo = cal_lo[ipol][ichan].var;
+	Estimate<double> ratio = cal_hi[ipol][ichan]/cal_lo[ipol][ichan] - 1.0;
 
-	if (lo == 0){         // Bad channel
-	  if (verbose) cerr << "Pulsar::FluxCalibrator"
-			 " - levels flagged by find_cal_levels for channel " 
-			    << ichan << " probe " << ipol
-			    << " archive=" << archs[iarch]->get_filename() << endl;
-	  continue;  
-	}
+	if (archs[iarch]->get_type() == Signal::FluxCalOn)
+	  mean_ratio_on[ipol][ichan] += ratio;
+	else if (archs[iarch]->get_type() == Signal::FluxCalOff)
+	  mean_ratio_off[ipol][ichan] += ratio;
 
-	double r = hi/lo;
-	double ratio = r - 1.0;
-
-	if (ratio<0) {
-	  if (verbose) cerr << "Pulsar::FluxCalibrator::create"
-			 " - ratio < 0 for channel " << ichan << " probe " << ipol
-			    << " archive " << archs[iarch]->get_filename() << "\t" 
-			    << hi  << "\t" << lo << endl;
-	  continue;
-	}
-
-
-	double sigsq_ratio = r*r * ( var_hi/(hi*hi) + var_lo/(lo*lo) );
-
-	if (archs[iarch]->get_type() == Signal::FluxCalOn) {
-	  ratio_on[ipol][ichan].val += ratio/sigsq_ratio;
-	  ratio_on[ipol][ichan].var += 1/sigsq_ratio;
-	} else if (archs[iarch]->get_type() == Signal::FluxCalOff) {
-	  ratio_off[ipol][ichan].val += ratio/sigsq_ratio;
-	  ratio_off[ipol][ichan].var += 1/sigsq_ratio;
-	}
       }
     }
   }
 
+  double hyd_mJy = hydra_flux_mJy (archive->get_centre_frequency());
+
   for (unsigned ichan=0; ichan<nchan; ++ichan) {
     for (unsigned ipol=0; ipol<npol; ++ipol) {
-      if (ratio_on[ipol][ichan].val==0 || ratio_off[ipol][ichan].val==0) {
 
+      if (mean_ratio_on[ipol][ichan]==0 || mean_ratio_off[ipol][ichan]==0) {
 	for (unsigned lpol=0; lpol<npol; ++lpol)
 	  cal_flux[lpol][ichan] = T_sys[lpol][ichan] = 0;
-
 	break;
       }
 
-      double hi_var = 1.0/ratio_on[ipol][ichan].var;
-      double hi_val = ratio_on[ipol][ichan].val * hi_var;
+      Estimate<double> on = mean_ratio_on[ipol][ichan].get_Estimate();
 
-      double lo_var = 1.0/ratio_off[ipol][ichan].var;
-      double lo_val = ratio_off[ipol][ichan].val * lo_var;
+      Estimate<double> off = mean_ratio_off[ipol][ichan].get_Estimate();
 
-      double r_diff = 1/hi_val - 1/lo_val;
-      double r_on_4th = fourth_power (hi_val);
-      double r_off_4th = fourth_power (lo_val);
-      double r_diff_4th = fourth_power (r_diff);
+      Estimate<double> r_diff = 1.0/on - 1.0/off;
 
-      cal_flux[ipol][ichan].val = hyd_mJy/r_diff;
-      cal_flux[ipol][ichan].var = (hi_var/r_on_4th + lo_var/r_off_4th)
-	* hyd_mJy * hyd_mJy / r_diff_4th;
+      cal_flux[ipol][ichan] = hyd_mJy/r_diff;
 
-      T_sys[ipol][ichan].val = cal_flux[ipol][ichan].val/lo_val;
-      T_sys[ipol][ichan].var = cal_flux[ipol][ichan].var/(lo_val*lo_val) + 
-	sqr(cal_flux[ipol][ichan].val)*lo_var/r_off_4th;
-	
+      T_sys[ipol][ichan] = cal_flux[ipol][ichan]/off;
+
       if (cal_flux[ipol][ichan].val < sqrt(cal_flux[ipol][ichan].var)
 	  || T_sys[ipol][ichan].val < sqrt(T_sys[ipol][ichan].var) ) {
 
 	if (verbose)
 	  cerr << "Pulsar::FluxCalibrator"
 	    " channel=" << ichan  << " poln=" << ipol << ": low signal\n"
-	       << "\t\tratio on " << hi_val << " ratio off" << lo_val << endl
+	       << "\t\tratio on " << on << " ratio off" << off << endl
 	       << "\t\tcal flux " << cal_flux[ipol][ichan].val
 	       << " cal error " << cal_flux[ipol][ichan].var << endl
 	       << "\t\tsys flux " << T_sys[ipol][ichan].val
