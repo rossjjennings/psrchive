@@ -1,30 +1,37 @@
 #include "Pulsar/Telescope.h"
+#include "coord.h"
 
 //! Default constructor
 Pulsar::Telescope::Telescope ()
   : Extension ("Telescope")
 {
   name = "unknown";
+  elevation = 0;
   mount = Horizon;
   primary = Parabolic;
   focus = PrimeFocus;
 }
 
 //! Copy constructor
-Pulsar::Telescope::Telescope (const Telescope& extension)
+Pulsar::Telescope::Telescope (const Telescope& telescope)
   : Extension ("Telescope")
 {
-  operator = (extension);
+  operator = (telescope);
 }
 
 //! Operator =
 const Pulsar::Telescope&
-Pulsar::Telescope::operator= (const Telescope& extension)
+Pulsar::Telescope::operator= (const Telescope& telescope)
 {
-  name = extension.name;
-  mount = extension.mount;
-  primary = extension.primary;
-  focus = extension.focus;
+  name = telescope.name;
+
+  latitude = telescope.latitude;
+  longitude = telescope.longitude;
+  elevation = telescope.elevation;
+
+  mount = telescope.mount;
+  primary = telescope.primary;
+  focus = telescope.focus;
 
   return *this;
 }
@@ -32,4 +39,20 @@ Pulsar::Telescope::operator= (const Telescope& extension)
 //! Destructor
 Pulsar::Telescope::~Telescope ()
 {
+}
+
+//! Set the coordinates of the telescope based on known tempo codes
+void Pulsar::Telescope::set_coordinates (char tempo_isite)
+{
+
+  float lat, lon;
+
+  int ret = telescope_coords (tempo_isite, &lat, &lon, &elevation);
+  if (ret < 0)
+    throw Error (FailedCall, "Pulsar::Telescope::set_coordinates",
+		 "tempo code=%c", tempo_isite);
+
+  latitude.setDegrees( lat );
+  longitude.setDegrees( lon );
+
 }

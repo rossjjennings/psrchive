@@ -1,14 +1,16 @@
 #include "Pulsar/Receiver.h"
+#include "Calibration/Rotation.h"
+#include "Pauli.h"
 
 //! Default constructor
 Pulsar::Receiver::Receiver () : Extension ("Receiver")
 {
-  mode = Feed;
+  tracking_mode = Feed;
   name = "unknown";
   basis = Signal::Linear;
 
-  feed_offset_corrected = false;
-  vertical_offset_corrected = false;
+  feed_corrected = false;
+  platform_corrected = false;
 
   atten_a = 0.0;
   atten_b = 0.0;
@@ -24,7 +26,7 @@ Pulsar::Receiver::Receiver (const Receiver& ext) : Extension ("Receiver")
 const Pulsar::Receiver&
 Pulsar::Receiver::operator= (const Receiver& ext)
 {
-  mode = ext.mode;
+  tracking_mode = ext.tracking_mode;
   tracking_angle = ext.tracking_angle;
 
   name = ext.name;
@@ -35,8 +37,8 @@ Pulsar::Receiver::operator= (const Receiver& ext)
 
   calibrator_offset = ext.calibrator_offset;
 
-  feed_offset_corrected = ext.feed_offset_corrected;
-  vertical_offset_corrected = ext.vertical_offset_corrected;
+  feed_corrected = ext.feed_corrected;
+  platform_corrected = ext.platform_corrected;
 
   atten_a = ext.atten_a;
   atten_b = ext.atten_b;
@@ -51,7 +53,7 @@ Pulsar::Receiver::~Receiver ()
 
 string Pulsar::Receiver::get_tracking_mode_string() const
 {
-  switch (mode) {
+  switch (tracking_mode) {
   case Feed:
     return "FA";
   case Celestial:
@@ -74,4 +76,51 @@ bool Pulsar::Receiver::match (const Receiver* receiver, string& reason) const
   }
 
   return result;
+}
+
+//! Return the feed correction matrix
+Jones<double> Pulsar::Receiver::get_correction () const
+{
+  Jones<double> xform = Jones<double>::identity();
+
+  if ( feed_corrected )
+    return xform;
+
+  Pauli::basis.set_basis( get_basis() );
+
+  if (get_Y_offset().getDegrees() == 180.0) {
+
+    if (Archive::verbose)
+      cerr << "Pulsar::Receiver::get_correction 180 phase shift in Y" << endl;
+    
+    // rotate the basis by 180 degrees about the Stokes Q axis
+    Calibration::Rotation rotation ( Pauli::basis.get_basis_vector(0) );
+    rotation.set_phi ( 0.5 * M_PI );
+    
+    xform *= rotation.evaluate();
+    
+  }
+  else if (get_Y_offset() != 0) {
+    
+    Error error (InvalidState, "Pulsar::Receiver::get_correction");
+    error << "Cannot correct Y_offset=" << Y_offset.getDegrees() << " degrees";
+    throw error;
+      
+  }
+  
+  if (get_X_offset() != 0) {
+    
+    if (Archive::verbose)
+      cerr << "Pulsar::Receiver::get_correction X axis offset" << endl;
+
+    // rotate the basis about the Stokes V axis
+    Calibration::Rotation rotation ( Pauli::basis.get_basis_vector(2) );
+    rotation.set_phi ( -get_X_offset().getRadians() );
+    
+    xform *= rotation.evaluate();
+    
+  }
+
+  return xform;
+
 }
