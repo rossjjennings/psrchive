@@ -99,6 +99,8 @@ void Pulsar::FITSArchive::copy (const Archive& archive,
   history = farchive->history;    
   digitiser_statistics = farchive->digitiser_statistics;
   bandpass = farchive->bandpass;
+  
+  scale_cross_products  = farchive->scale_cross_products;
 }
 
 //! Returns a pointer to a new copy-constructed FITSArchive instance
@@ -1991,9 +1993,6 @@ void Pulsar::FITSArchive::unload_integration (int row,
 
   const Profile *p = 0;
 
-  // WvS memory leak found 25/10/02: temparray1 is re-assigned by get_amps
-  const float* temparray1 = 0;
-
   int16* temparray2 = new int16 [nbin];
 
   float min = 0.0;
@@ -2012,17 +2011,27 @@ void Pulsar::FITSArchive::unload_integration (int row,
 
   for(unsigned a = 0; a < npol; a++) {
     for(unsigned b = 0; b < nchan; b++) {
-     
+      
       p = integ->get_Profile(a,b);
-      temparray1 = p->get_amps();
-
+      float* temparray1 = new float[nbin];
+      for(unsigned j = 0; j < get_nbin(); j++)
+	temparray1[j] = (p->get_amps())[j];
+      
+      if (scale_cross_products) {
+	if (integ->get_state() == Signal::Coherence) {
+	  if (a == 2 || a == 3)
+	    for(unsigned j = 0; j < get_nbin(); j++)
+	      temparray1[j] /= 2.0;
+	}
+      }
+      
       if (verbose) {
 	cerr << "FITSArchive::unload_integration got profile" << endl;
 	cerr << "nchan = " << b << endl;
 	cerr << "npol  = " << a << endl;
       }
 
-      minmaxval(nbin, (float*)temparray1, &min, &max);
+      minmaxval(nbin, temparray1, &min, &max);
 
       if (save_signed)
 	offset = 0.5 * (max + min);
@@ -2105,10 +2114,11 @@ void Pulsar::FITSArchive::unload_integration (int row,
 	
       if (verbose)
 	cerr << "FITSArchive:unload_integration looping" << endl;
-  
+      
+      delete[] temparray1;
     }	  
   }
-
+  
   if (verbose)
     cerr << "FITSArchive::unload_integration finished" << endl;
   
