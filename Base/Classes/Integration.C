@@ -28,6 +28,12 @@ string Pulsar::Integration::Extension::get_name () const
   return name;
 }
 
+const Pulsar::Archive* 
+Pulsar::Integration::Extension::get_parent (const Integration* subint) const
+{
+  return subint->archive; 
+}
+
 /*! Derived classes need only define this method, as the non-const version
   implemented by the Integration base class simply calls this method. */
 const Pulsar::Integration::Extension*
