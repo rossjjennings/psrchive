@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PolnCalibrator.h,v $
-   $Revision: 1.10 $
-   $Date: 2003/05/06 11:23:32 $
-   $Author: straten $ */
+   $Revision: 1.11 $
+   $Date: 2003/06/02 12:18:45 $
+   $Author: pulsar $ */
 
 #ifndef __PolnCalibrator_H
 #define __PolnCalibrator_H
@@ -30,6 +30,9 @@ namespace Pulsar {
   public:
     //! If true, then the human-readable parameters are kept
     static bool store_parameters;
+
+    //! If true, then a median filter is run on the calibrator bandpass
+    static bool smooth_bandpass;
 
     //! Construct from an vector of PolnCal Pulsar::Archives
     PolnCalibrator (const vector<Archive*>& archives);

@@ -9,6 +9,8 @@
 #include "smooth.h"
 
 bool Pulsar::PolnCalibrator::store_parameters = false;
+bool Pulsar::PolnCalibrator::smooth_bandpass = false;
+
 
 Pulsar::PolnCalibrator::~PolnCalibrator ()
 {
@@ -108,19 +110,21 @@ Pulsar::PolnCalibrator::get_levels (unsigned isubint, unsigned nchan,
   unsigned npol = cal_hi.size();
   unsigned ipol = 0;
 
-  unsigned window = unsigned (calibrator->get_nchan() * median_smoothing);
+  if (smooth_bandpass)  {
+    unsigned window = unsigned (calibrator->get_nchan() * median_smoothing);
 
-  if (verbose)
-    cerr << "Pulsar::PolnCalibrator::get_levels median smoothing window = "
-	 << window << " channels" << endl;
+    if (verbose)
+      cerr << "Pulsar::PolnCalibrator::get_levels median smoothing window = "
+	   << window << " channels" << endl;
 
-  // even a 3-window sort can zap a single channel birdie
-  if (window < 3)
-    window = 3;
+    // even a 3-window sort can zap a single channel birdie
+    if (window < 3)
+      window = 3;
 
-  for (ipol=0; ipol < npol; ipol++) {
-    fft::median_smooth (cal_lo[ipol], window);
-    fft::median_smooth (cal_hi[ipol], window);
+    for (ipol=0; ipol < npol; ipol++) {
+      fft::median_smooth (cal_lo[ipol], window);
+      fft::median_smooth (cal_hi[ipol], window);
+    }
   }
 
   if (calibrator->get_nchan() == nchan)
