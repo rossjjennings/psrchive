@@ -2,7 +2,6 @@
 #include "Pulsar/Integration.h"
 #include "Pulsar/Profile.h"
 
-#include "Pulsar/Extension_fitsio.h"
 #include "Pulsar/FITSHdrExtension.h"
 #include "Pulsar/ObsExtension.h"
 #include "Pulsar/ITRFExtension.h"
