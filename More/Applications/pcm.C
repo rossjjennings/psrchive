@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pcm.C,v $
-   $Revision: 1.34 $
-   $Date: 2004/10/13 06:29:52 $
+   $Revision: 1.35 $
+   $Date: 2004/10/25 12:42:24 $
    $Author: straten $ */
 
 /*! \file pcm.C 
@@ -499,9 +499,11 @@ int main (int argc, char *argv[]) try {
     vector<Pulsar::Database::Entry> oncals;
 
     criterion.entry.obsType = Signal::PolnCal;
-    oncals = dbase.all_matching (criterion);
+    dbase.all_matching (criterion, oncals);
 
-    if (oncals.size() == 0)  {
+    unsigned poln_cals = oncals.size();
+
+    if (poln_cals == 0)  {
       cerr << "pcm: no PolnCal observations found" << endl;
       if (must_have_cals && !calfile)  {
         cerr << "pcm: giving up" << endl;
@@ -509,16 +511,10 @@ int main (int argc, char *argv[]) try {
       }
     }
 
-    for (unsigned i = 0; i < oncals.size(); i++) {
-      string filename = dbase.get_filename( oncals[i] );
-      cerr << "pcm: adding " << oncals[i].filename << endl;
-      cal_filenames.push_back (filename);
-    }
-
     criterion.entry.obsType = Signal::FluxCalOn;
-    oncals = dbase.all_matching (criterion);
+    dbase.all_matching (criterion, oncals);
 
-    if (oncals.size() == 0)
+    if (oncals.size() == poln_cals)
       cerr << "pcm: no FluxCalOn observations found" << endl;
 
     for (unsigned i = 0; i < oncals.size(); i++) {
