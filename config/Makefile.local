@@ -1,12 +1,12 @@
 
 intermediate-install:
-	CPPROG="cp -p" $(MAKE) prefix=.. install-data
+	$(MAKE) prefix=.. install-data
 
 
 libs: intermediate-libs install-libLTLIBRARIES
 
 intermediate-libs:
-	AM_MAKEFLAGS="$(AM_MAKEFLAGS) PROGRAMS=" $(MAKE) $(AM_MAKEFLAGS)
+	AM_MAKEFLAGS="$(AM_MAKEFLAGS) PROGRAMS= HEADERS=" $(MAKE) all-am
 
 include: install-data
 
