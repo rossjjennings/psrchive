@@ -31,7 +31,6 @@ void Pulsar::Integration::dedisperse (double frequency)
     cerr << "Integration::dedisperse DM=" << dm
 	 <<" freq="<< frequency << endl;
 
-  
   for (unsigned ipol=0; ipol < get_npol(); ipol++)
     for (unsigned ichan=0; ichan < get_nchan(); ichan++)
       profiles[ipol][ichan] -> dedisperse (dm, frequency, pfold);
@@ -71,54 +70,3 @@ void Pulsar::Integration::dedisperse (double frequency, unsigned chan)
 
   // else, dedisperse the lot
 
-/////////////////////////////////////////////////////////////////////////////
-//
-// Pulsar::Integration::weighted_frequency
-//
-/*!
-  \return the new weighted centre frequency (in MHz, to nearest kHz)
-  \param  chan_start the first chan included in the calculation
-  \param  chan_end one more than the index of the last chan
-*/
-double Pulsar::Integration::weighted_frequency (unsigned chan_start, unsigned chan_end) 
-  const
-{
-  if (chan_end == 0)
-    chan_end = get_nchan();
-
-  // for now, ignore poln
-  unsigned ipol = 0;
-
-  if (get_npol() == 0)
-    throw Error (InvalidRange, "Integration::weighted_frequency", "npol==0");
-
-  const vector< Reference::To<Profile> >& prof = profiles[ipol];
-
-  if (chan_start >= get_nchan() || chan_start < 0)
-    throw Error (InvalidRange, "Integration::weighted_frequency",
-		 "chan_start=%d nchan=%d", chan_start, get_nchan());
-
-  if (chan_end > get_nchan() || chan_end < 0)
-    throw Error (InvalidRange, "Integration::weighted_frequency",
-		 "chan_end=%d nchan=%d", chan_end, get_nchan());
-
-  double weightsum = 0.0;
-  double freqsum = 0.0;
-
-  for (unsigned ichan=chan_start; ichan < chan_end; ichan++) {
-    freqsum += prof[ichan]->get_centre_frequency() * prof[ichan]->get_weight();
-    weightsum += prof[ichan]->get_weight();
-  }
- 
-  double result = 0.0;
-
-  if (weightsum != 0.0)
-    result = freqsum / weightsum;
-  else
-    result = ( prof[chan_start]->get_centre_frequency() +
-	       prof[chan_end-1]->get_centre_frequency() ) / 2.0;
- 
-  // Nearest kHz
-  result = 1e-3 * double( int(result*1e3) );
-  return result;
-}
