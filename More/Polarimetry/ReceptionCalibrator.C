@@ -5,6 +5,7 @@
 
 #include "Calibration/Gain.h"
 #include "Calibration/Boost.h"
+#include "Calibration/SingleAxis.h"
 
 #include <algorithm>
 
@@ -79,15 +80,19 @@ void Pulsar::ReceptionCalibrator::initial_observation (const Archive* data)
     equation[ichan] = new Calibration::MultiPathEquation;
     receiver[ichan] = new Calibration::Polar;
 
+    // add differential gain and the receiver to the PolnCalibrator_path
+    Calibration::Transformation* backend;
+
 #if 0
-      boost    = new Calibration::Boost    (Vector<double, 3>::basis(0));
-      boost->name = "SingleAxis Boost";
+    // only differential gain
+    backend = new Calibration::Boost(Vector<double, 3>::basis(0));
+#else
+    // differential gain and phase
+    backend = new Calibration::SingleAxis;
+    backend->set_infit (0, false);  // disable fit for absolute Gain
 #endif
 
-    // add differential gain and the receiver to the PolnCalibrator_path
-    Calibration::Boost* boost;
-    boost = new Calibration::Boost(Vector<double, 3>::basis(0));
-    equation[ichan]->get_model()->add_transformation( boost );
+    equation[ichan]->get_model()->add_transformation( backend );
     equation[ichan]->get_model()->add_transformation( receiver[ichan] );
 
     // add the receiver and the feed rotation to the Pulsar_path
@@ -178,10 +183,9 @@ void Pulsar::ReceptionCalibrator::init_estimate (SourceEstimate& estimate)
   estimate.mean.resize (nchan);
   estimate.state.resize (nchan);
 
-  for (unsigned ichan=0; ichan<nchan; ichan++) {
-    equation[ichan]->get_model()->set_path( Pulsar_path );
+  for (unsigned ichan=0; ichan<nchan; ichan++)
     equation[ichan]->get_model()->add_state( &(estimate.state[ichan]) );
-  }
+
 }
 
 //! Get the number of pulsar phase bin input polarization states
@@ -269,7 +273,7 @@ void Pulsar::ReceptionCalibrator::add_observation (const Archive* data)
 	measurements.back().state_index = pulsar_base_index + istate;
       }
 
-      equation[ichan]->set_pre_xform (new Calibration::Gain);
+      equation[ichan]->set_post_xform (new Calibration::Gain);
       equation[ichan]->add_measurement (epoch, Pulsar_path, measurements);
     }
   }
@@ -416,7 +420,7 @@ void Pulsar::ReceptionCalibrator::add_PolnCalibrator (const PolnCalibrator* p)
       boost->name = "SingleAxis Boost";
 #endif
 
-      equation[ichan]->set_pre_xform (new Calibration::Gain);
+      equation[ichan]->set_post_xform (new Calibration::Gain);
       equation[ichan]->add_measurement (epoch, PolnCalibrator_path, state);
 
     }
