@@ -9,7 +9,7 @@ int Transform::ipp_initialise(){
   fcc1d_calls.push_back( &ipp_fcc1d );
   bcc1d_calls.push_back( &ipp_bcc1d );
 
-  norms.push_back( fft::nfft );
+  norms.push_back( nfft );
   valid_libraries.push_back( "IPP" );
 
   if( library==string() ){

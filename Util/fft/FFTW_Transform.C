@@ -9,7 +9,7 @@ int Transform::fftw_initialise(){
   fcc1d_calls.push_back( &fftw_fcc1d );
   bcc1d_calls.push_back( &fftw_bcc1d );
 
-  norms.push_back( fft::nfft );
+  norms.push_back( nfft );
   valid_libraries.push_back( "FFTW" );
 
   if( library==string() ){

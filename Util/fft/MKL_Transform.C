@@ -4,9 +4,9 @@
 
 extern "C" { 
   // complex to complex
-  void cfft1d_(float * data, int * nfft, int * isign, float * wsave);
+  void cfft1d_(float * data, int * ndat, int * isign, float * wsave);
   // real to complex
-  void scfft1d_(float * data, int * nfft, int * isign, float * wsave);
+  void scfft1d_(float * data, int * ndat, int * isign, float * wsave);
 }
 
 Transform::MKL_Plan::MKL_Plan() : Plan(){ 
@@ -18,7 +18,7 @@ int Transform::mkl_initialise(){
   fcc1d_calls.push_back( &mkl_fcc1d );
   bcc1d_calls.push_back( &mkl_bcc1d );
 
-  norms.push_back( fft::normal );
+  norms.push_back( normal );
   valid_libraries.push_back( "MKL" );
 
   if( library==string() ){
