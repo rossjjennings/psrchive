@@ -1072,8 +1072,14 @@ vector<double> Rhythm::give_me_data (toaPlot::AxisQuantity q)
 	try {
 	  Reference::To<Pulsar::Archive> data = Pulsar::Archive::load(useful2);	
 	  data->pscrunch();
-	  snrobj.set_standard(Pulsar::find_standard(data, "./"));
-	  toas[i].set_StoN(snrobj.get_morph_snr(data->get_Profile(sub,0,chn)));
+	  Pulsar::Profile* stdprof = Pulsar::find_standard(data, "./");
+	  if (stdprof) {
+	    snrobj.set_standard(stdprof);
+	    toas[i].set_StoN(snrobj.get_morph_snr(data->get_Profile(sub,0,chn)));
+	  }
+	  else {
+	    toas[i].set_StoN(data->get_Profile(sub,0,chn)->snr());
+	  }
 	  retval.push_back(toas[i].get_StoN());
 	}
 	catch (Error& error) {
