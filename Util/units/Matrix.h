@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Matrix.h,v $
-   $Revision: 1.4 $
-   $Date: 2004/04/06 16:14:58 $
+   $Revision: 1.5 $
+   $Date: 2004/04/06 16:35:48 $
    $Author: straten $ */
 
 #ifndef __Matrix_H
@@ -34,12 +34,13 @@ public:
 };
 
 //! Vector multiplication
-template<typename T, typename U, unsigned RC>
-const Vector<U,RC> operator * (const Matrix<T,RC,RC>& m, const Vector<U,RC>& b)
+template<typename T, typename U, unsigned Rows, unsigned Columns>
+const Vector<U,Rows> operator * (const Matrix<T,Rows,Columns>& m,
+                                 const Vector<U,Columns>& b)
 {
-  Vector<U,RC> r;
-  for (unsigned i=0; i<RC; i++)
-    r[i] = Vector<U,RC>(m[i]) * b;
+  Vector<U,Rows> r;
+  for (unsigned i=0; i<Rows; i++)
+    r[i] = Vector<U,Columns>(m[i]) * b;
   return r;
 }
 
