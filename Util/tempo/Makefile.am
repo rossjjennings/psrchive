@@ -13,7 +13,7 @@ LDFLAGS  += -leph $(F77LIBS) -lm
 
 include ${LOCAL_ROOT}/include/Makefile.extended
 
-CLEAN += $(BINL)ephtest $(BINL)keys2fort $(BINL)keys2c keyinfo.com $(LOCAL_ROOT)/include/ephio.h
+CLEAN += $(BINDIR)ephtest $(BINDIR)keys2fort $(BINDIR)keys2c keyinfo.com $(LOCAL_ROOT)/include/ephio.h
 
 #
 # Assembly of include files
