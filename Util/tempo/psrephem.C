@@ -396,6 +396,15 @@ double psrephem::omega() const
 	      "Error determining pulsar OMEGA");
 }
 
+double psrephem::omdot() const
+{
+  if (tempo11 && parmStatus[EPH_OMDOT])
+    return value_double[EPH_OMDOT];
+  
+  throw Error(InvalidParam, "psrephem::omdot",
+	      "Error determining pulsar OMDOT");
+}
+
 double psrephem::ecc() const
 {
   if (tempo11 && parmStatus[EPH_E])
@@ -417,13 +426,22 @@ double psrephem::t0() const
 	      "Error determining pulsar T0");
 }
 
-double psrephem::x() const
+double psrephem::a1() const
 {
-  if (tempo11 && parmStatus[EPH_A1] && parmStatus[EPH_SINI])
-    return (value_double[EPH_A1] * value_double[EPH_SINI]);
+  if (tempo11 && parmStatus[EPH_A1])
+    return (value_double[EPH_A1]);
   
-  throw Error(InvalidParam, "psrephem::x",
-	      "Error determining pulsar A1*SINI");
+  throw Error(InvalidParam, "psrephem::a1",
+	      "Error determining pulsar A1");
+}
+
+double psrephem::pb() const
+{
+  if (tempo11 && parmStatus[EPH_PB])
+    return (value_double[EPH_PB]);
+  
+  throw Error(InvalidParam, "psrephem::pb",
+	      "Error determining pulsar PB");
 }
 
 void psrephem::nofit()

@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/psrephem.h,v $
-   $Revision: 1.27 $
-   $Date: 2003/12/09 00:59:22 $
-   $Author: hknight $ */
+   $Revision: 1.28 $
+   $Date: 2003/12/29 06:03:58 $
+   $Author: rmanches $ */
 
 #ifndef __PSREPHEM_H
 #define __PSREPHEM_H
@@ -117,9 +117,11 @@ class psrephem : public Reference::Able
   double jra() const;
   double jdec() const;
   double omega() const;
+  double omdot() const;
   double ecc() const;
   double t0() const;
-  double x() const;  
+  double a1() const;  
+  double pb() const;  
 
   // these functions return 0 if no error, -1 on error
   //
