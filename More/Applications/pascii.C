@@ -2,6 +2,8 @@
 #include "Pulsar/Integration.h"
 #include "Pulsar/Profile.h"
 
+#include "Pulsar/getopt.h"
+
 void usage ()
 {
   cerr << 
