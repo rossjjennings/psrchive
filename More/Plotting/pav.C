@@ -1,5 +1,5 @@
 //
-// $Id: pav.C,v 1.87 2004/09/09 01:00:50 hknight Exp $
+// $Id: pav.C,v 1.88 2004/09/19 06:49:53 ahotan Exp $
 //
 // The Pulsar Archive Viewer
 //
@@ -36,7 +36,8 @@
 
 using namespace std;
 
-vector<Reference::To<Pulsar::Archive> > get_archives(string filename,bool breakup_archive);
+vector<Reference::To<Pulsar::Archive> > get_archives(string filename,
+						     bool breakup_archive);
 
 void usage ()
 {
@@ -127,7 +128,8 @@ void usage ()
     " -v               Verbose output \n"
     " -V               Very verbose output \n"
     " -w               Use stopwatch (for benchmarking)\n\n"
-    " --extra fname    Treat each subint in this archive as an extra archive to process\n"
+    " --extra fname    Treat each subint in this archive as an extra\n"
+    "                  archive to process\n"
     "See http://astronomy.swin.edu.au/pulsar/software/manuals/pav.html"
        << endl;
 }
@@ -155,57 +157,59 @@ int main (int argc, char** argv)
   int n2 = 1;
   
   float    the_phase = 0.0;  
-  double   phase = 0;
-  unsigned ronsub = 0;
+  double   phase     = 0.0;
+  unsigned ronsub    = 0;
   
-  bool verbose = false;
-  bool zoomed = false;
-  bool fzoomed = false;
+  bool verbose            = false;
+  bool zoomed             = false;
+  bool fzoomed            = false;
 
-  bool display = false;
-  bool nesting = false;
-  bool display_axis = false;
+  bool display            = false;
+  bool nesting            = false;
+  bool display_axis       = false;
 
-  bool baseline_spectrum = false;
-  bool dedisperse = false;
-  bool manchester = false;
-  bool spherical = false;
-  bool degree = false;
-  bool normalised_m = false;
-  bool phase_fourier = false;
-  bool greyfreq = false;
-  bool stopwatch = false;
-  bool hat = false;
-  bool centre = false;
-  bool periodplot = false;
-  bool subint_plot = false;
-  bool calplot = false;
-  bool snrplot = false;
-  bool PA = false;
-  bool bandpass = false;
-  bool calinfo = false;
-  bool pa_spectrum = false;
-  bool pa_scatter = false;
-  bool orig_passband = false;
-  bool width = false;
-  bool dynam = false;
-  bool psas = false;
-  bool std_given = false;
-  bool mdiff = false;
-  bool stacked = false;
-  bool cbppo = false;
-  bool cbpao = false;
-  bool cblpo = false;
-  bool cblao = false;
-  bool mask = false;
+  bool baseline_spectrum  = false;
+  bool dedisperse         = false;
+  bool manchester         = false;
+  bool spherical          = false;
+  bool degree             = false;
+  bool normalised_m       = false;
+  bool phase_fourier      = false;
+  bool greyfreq           = false;
+  bool stopwatch          = false;
+  bool hat                = false;
+  bool centre             = false;
+  bool periodplot         = false;
+  bool subint_plot        = false;
+  bool calplot            = false;
+  bool snrplot            = false;
+  bool PA                 = false;
+  bool bandpass           = false;
+  bool calinfo            = false;
+  bool pa_spectrum        = false;
+  bool pa_scatter         = false;
+  bool orig_passband      = false;
+  bool width              = false;
+  bool dynam              = false;
+  bool psas               = false;
+  bool std_given          = false;
+  bool mdiff              = false;
+  bool stacked            = false;
+  bool cbppo              = false;
+  bool cbpao              = false;
+  bool cblpo              = false;
+  bool cblao              = false;
+  bool mask               = false;
   bool plot_total_archive = false;
 
   Reference::To<Pulsar::Archive> std_arch;
   Reference::To<Pulsar::Profile> std_prof;
-
+  
   vector<string> filenames;
-  vector<int> breakup_archives; // bools of whether archive should be broken up into its subints
-
+  
+  // bools of whether archive should be broken up into its subints
+  vector<int> breakup_archives; 
+  
   string plot_device = "?";
 
   char* metafile = NULL;
@@ -235,9 +239,9 @@ int main (int argc, char** argv)
     { "snr",                1, 0, 207 },
     { "mask",               0, 0, 208 },
     { "normal",             0, 0, 209 },
-    { "total",              no_argument,      0,TOTAL},
-    { "extra",              required_argument,0,EXTRA},
-    { "nbin",               required_argument,0,NBIN},
+    { "total",              no_argument,       0, TOTAL},
+    { "extra",              required_argument, 0, EXTRA},
+    { "nbin",               required_argument, 0, NBIN},
     { 0, 0, 0, 0 }
   };
     
@@ -318,7 +322,7 @@ int main (int argc, char** argv)
       plotter.set_subint( atoi (optarg) );
       break;
     case 'i':
-      cout << "$Id: pav.C,v 1.87 2004/09/09 01:00:50 hknight Exp $" << endl;
+      cout << "$Id: pav.C,v 1.88 2004/09/19 06:49:53 ahotan Exp $" << endl;
       return 0;
 
     case 'j':
@@ -596,9 +600,16 @@ int main (int argc, char** argv)
       cout << "Plotting normalised Stokes" << endl;	  
       break;
     }
-    case TOTAL: plot_total_archive = true; break;
-    case EXTRA: filenames.push_back( optarg ); breakup_archives.push_back( true); break;
-    case NBIN: nbin_requested = atoi(optarg); break;
+    case TOTAL: 
+      plot_total_archive = true; 
+      break;
+    case EXTRA: 
+      filenames.push_back( optarg ); 
+      breakup_archives.push_back( true); 
+      break;
+    case NBIN: 
+      nbin_requested = atoi(optarg); 
+      break;
     default:
       cerr << "pav: unrecognized option" << endl;
       return -1; 
@@ -641,10 +652,11 @@ int main (int argc, char** argv)
 
   RealTimer clock;
 
-  for (unsigned ifile=0; ifile < filenames.size(); ifile++) try {
-    vector<Reference::To<Pulsar::Archive> > archives = get_archives(filenames[ifile],breakup_archives[ifile]);
+  for (unsigned ifile = 0; ifile < filenames.size(); ifile++) try {
+    vector<Reference::To<Pulsar::Archive> > archives = 
+      get_archives(filenames[ifile],breakup_archives[ifile]);
 
-    for( unsigned iarch=0; iarch<archives.size(); iarch++){
+    for( unsigned iarch = 0; iarch < archives.size(); iarch++){
       Reference::To<Pulsar::Archive> archive = archives[iarch];
 
       if( plot_total_archive ){
@@ -657,6 +669,10 @@ int main (int argc, char** argv)
 	plotter.singleProfile(total);
 	exit(0);
       }
+
+      if (centre) {
+	archive->centre();
+      }
       
       if (dedisperse) {
 	if (stopwatch)
@@ -667,29 +683,31 @@ int main (int argc, char** argv)
 	  cerr << "dedispersion toook " << clock << endl;
 	}
       }
-
-      if( nbin_requested > 0 ) {
-	bscrunch = -1;
-	if (stopwatch)
-	  clock.start();
-	archive -> bscrunch_to_nbin (nbin_requested);
-	if (stopwatch) {
-	  clock.stop();
-	  cerr << "bscrunch took " << clock << endl;
-	}
-	
-      }
-
-      if (bscrunch > 0) {
-	if (stopwatch)
-	  clock.start();
-	archive -> bscrunch (bscrunch);
-	if (stopwatch) {
-	  clock.stop();
-	  cerr << "bscrunch took " << clock << endl;
-	}
-      }
       
+      if (cbppo) {
+	Pulsar::IntegrationOrder* myio = new Pulsar::PeriastronOrder();
+	archive->add_extension(myio); 
+	myio->organise(archive, ronsub);
+      }
+    
+      if (cbpao) {
+	Pulsar::IntegrationOrder* myio = new Pulsar::BinaryPhaseOrder();
+	archive->add_extension(myio);
+	myio->organise(archive, ronsub);
+      }
+
+      if (cblpo) {
+	Pulsar::IntegrationOrder* myio = new Pulsar::BinLngPeriOrder();
+	archive->add_extension(myio);
+	myio->organise(archive, ronsub);
+      }
+
+      if (cblao) {
+	Pulsar::IntegrationOrder* myio = new Pulsar::BinLngAscOrder();
+	archive->add_extension(myio);
+	myio->organise(archive, ronsub);
+      }
+
       if (fscrunch >= 0) {
 	if (stopwatch)
 	  clock.start();
@@ -719,33 +737,27 @@ int main (int argc, char** argv)
 	  cerr << "pscrunch took " << clock.elapsedString () << endl;
 	}
       }
-      
-      if (centre) {
-	archive->centre();
-      }
-      
-      if (cbppo) {
-	Pulsar::IntegrationOrder* myio = new Pulsar::PeriastronOrder();
-	archive->add_extension(myio); 
-	myio->organise(archive, ronsub);
-      }
-    
-      if (cbpao) {
-	Pulsar::IntegrationOrder* myio = new Pulsar::BinaryPhaseOrder();
-	archive->add_extension(myio);
-	myio->organise(archive, ronsub);
+
+      if( nbin_requested > 0 ) {
+	bscrunch = -1;
+	if (stopwatch)
+	  clock.start();
+	archive -> bscrunch_to_nbin (nbin_requested);
+	if (stopwatch) {
+	  clock.stop();
+	  cerr << "bscrunch took " << clock << endl;
+	}
+	
       }
 
-      if (cblpo) {
-	Pulsar::IntegrationOrder* myio = new Pulsar::BinLngPeriOrder();
-	archive->add_extension(myio);
-	myio->organise(archive, ronsub);
-      }
-
-      if (cblao) {
-	Pulsar::IntegrationOrder* myio = new Pulsar::BinLngAscOrder();
-	archive->add_extension(myio);
-	myio->organise(archive, ronsub);
+      if (bscrunch > 0) {
+	if (stopwatch)
+	  clock.start();
+	archive -> bscrunch (bscrunch);
+	if (stopwatch) {
+	  clock.stop();
+	  cerr << "bscrunch took " << clock << endl;
+	}
       }
 
       if (stacked) {
@@ -968,7 +980,8 @@ int main (int argc, char** argv)
 	}
 
 	if (!passband) {
-	  cerr << "pav: Archive does not contain the Passband Extension" << endl;
+	  cerr << "pav: Archive does not contain the Passband Extension" 
+	       << endl;
 	  continue;
 	}
 
@@ -1027,7 +1040,8 @@ int main (int argc, char** argv)
 
   }
   catch (Error& error) {
-    cerr << "Caught Error on file '" << filenames[ifile] << "': " << error << endl;
+    cerr << "Caught Error on file '" << filenames[ifile] 
+	 << "': " << error << endl;
   }
   catch (string& error) {
     cerr << error << endl;
@@ -1038,7 +1052,8 @@ int main (int argc, char** argv)
   return 0;
 }
 
-vector<Reference::To<Pulsar::Archive> > get_archives(string filename,bool breakup_archive){
+vector<Reference::To<Pulsar::Archive> > get_archives(string filename,
+						     bool breakup_archive) {
   vector<Reference::To<Pulsar::Archive> > archives;
   Reference::To<Pulsar::Archive> arch( Pulsar::Archive::load(filename) );
   
@@ -1050,7 +1065,8 @@ vector<Reference::To<Pulsar::Archive> > get_archives(string filename,bool breaku
   for( unsigned isub=0; isub<arch->get_nsubint(); isub++){
     vector<unsigned> subints(1,isub);
     archives.push_back( arch->extract(subints) );
-    archives.back()->set_filename( arch->get_filename() + " subint " + make_string(isub) );
+    archives.back()->set_filename( arch->get_filename() + 
+				   " subint " + make_string(isub) );
   }
   
   return archives;

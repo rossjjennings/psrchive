@@ -3,12 +3,73 @@
 #include "Pulsar/Profile.h"
 #include "Pulsar/Calculator.h"
 #include "Error.h"
+#include "Estimate.h"
 
+#include "interpolate.h"
 #include "model_profile.h"
 #include "GaussJordan.h"
 
-double Pulsar::Profile::TimeShift (const Profile& std, float& error,
-				   float* corr, float* fn) const
+double Pulsar::Profile::ZeroPadShift (const Profile& std, 
+				      float& ephase, vector<float>& corr,
+				      vector<float>& interp, bool store) const
+{
+  float SAMPLE_FACTOR = 4.0;
+
+  // First compute the standard cross correlation with single
+  // bin precision:
+
+  Reference::To<Pulsar::Profile> ptr = clone();
+  Reference::To<Pulsar::Profile> stp = std.clone();
+
+  // Remove the baseline
+  *ptr -= ptr->mean(ptr->find_min_phase(0.15));
+
+  // Perform the correlation
+  ptr->correlate(&std);
+
+  // Remove the baseline
+  *ptr -= ptr->mean(ptr->find_min_phase(0.15));
+  
+  vector< Estimate<float> > correlation;
+  correlation.resize(get_nbin());
+  
+  for (unsigned i = 0; i < get_nbin(); i++) {
+    correlation[i].val = ptr->get_amps()[i];
+    correlation[i].var = 0.0;
+    if (store)
+      corr.push_back(ptr->get_amps()[i]);
+  }
+  
+  vector< Estimate<float> > interpolated;
+  
+  interpolated.resize(correlation.size() * unsigned(SAMPLE_FACTOR));
+  
+  // Perform the zero-pad interpolation
+  
+  fft::interpolate(interpolated, correlation);
+  
+  // Find the peak of the correlation function
+  
+  float maxval = 0.0;
+  float maxloc = 0.0;
+  
+  for (unsigned i = 0; i < interpolated.size(); i++) {
+    if (store)
+      interp.push_back(interpolated[i].val);
+    if (interpolated[i].val > maxval) {
+      maxval = interpolated[i].val;
+      maxloc = float(i) / SAMPLE_FACTOR;
+    }
+  }
+  
+  // Error estimate?
+  ephase = 1.0 / SAMPLE_FACTOR;
+  
+  return maxloc / double(get_nbin());
+}
+
+double Pulsar::Profile::ParIntShift (const Profile& std, float& error,
+				     float* corr, float* fn) const
 {
   // The Profile::correlate function creates a profile whose amps
   // are the values of the correlation function, starting at zero
@@ -75,6 +136,7 @@ double Pulsar::Profile::TimeShift (const Profile& std, float& error,
   matrix[2][2] = 1;
 
   // Invert the matrix
+
   Numerical::GaussJordan (matrix, empty, 3);
 
   // Solve for the coefficients of our parabola, in the form:
@@ -118,7 +180,7 @@ double Pulsar::Profile::TimeShift (const Profile& std, float& error,
   double height = ((y1 + y3) / 2.0);
 
   if ((D - height)/E < 0.0) {
-    throw Error(FailedCall, "Profile::TimeShift",
+    throw Error(FailedCall, "Profile::ParIntShift",
 		"aborting before floating exception");
   }
   
@@ -163,7 +225,7 @@ double Pulsar::Profile::TimeShift (const Profile& std, float& error,
   float height = D - (D * fracdrop);
 
   if ((D - height)/E < 0.0) {
-    throw Error(FailedCall, "Profile::TimeShift",
+    throw Error(FailedCall, "Profile::ParIntShift",
 		"aborting before floating exception");
   }
 
@@ -208,8 +270,8 @@ double Pulsar::Profile::TimeShift (const Profile& std, float& error,
   return F;
 }
 
-double Pulsar::Profile::FFTShift (const Profile& std, float& ephase,
-				  float& snrfft, float& esnrfft) const 
+double Pulsar::Profile::PhaseGradShift (const Profile& std, float& ephase,
+					float& snrfft, float& esnrfft) const 
 {
   Profile stdcopy = std;
   Profile prfcopy = *this;
@@ -223,19 +285,20 @@ double Pulsar::Profile::FFTShift (const Profile& std, float& ephase,
   // limiting factor in the DC term of the fourier transform
 
   if (stdcopy.sum() > 1e18)
-    throw Error (InvalidState, "Profile::shift", 
+    throw Error (InvalidState, "Profile::PhaseGradShift", 
 		 "standard DC=%lf > max float", stdcopy.sum());
 
   if (prfcopy.sum() > 1e18)
-    throw Error (InvalidState, "Profile::shift", 
+    throw Error (InvalidState, "Profile::PhaseGradShift", 
 		 "profile DC=%lf > max float", stdcopy.sum());
 
   if (verbose)
-    cerr << "Profile::shift compare nbin="<< nbin <<" "<< stdcopy.nbin <<endl;
+    cerr << "Profile::PhaseGradShift compare nbin="<< nbin 
+	 <<" "<< stdcopy.nbin <<endl;
 
   if (nbin > stdcopy.nbin) {
     if (nbin % stdcopy.nbin)
-      throw Error (InvalidState, "Profile::shift", 
+      throw Error (InvalidState, "Profile::PhaseGradShift", 
 		   "profile nbin=%d standard nbin=%d", nbin, stdcopy.nbin);
 
     unsigned nscrunch = nbin / stdcopy.nbin;
@@ -244,7 +307,7 @@ double Pulsar::Profile::FFTShift (const Profile& std, float& ephase,
 
   if (nbin < stdcopy.nbin) {
     if (stdcopy.nbin % nbin)
-      throw Error (InvalidState, "Profile::shift", 
+      throw Error (InvalidState, "Profile::PhaseGradShift", 
 		   "profile nbin=%d standard nbin=%d", nbin, stdcopy.nbin);
 
     unsigned nscrunch = stdcopy.nbin / nbin;
@@ -298,5 +361,4 @@ void Pulsar::Profile::fftconv (Profile& std,
     
     esnrfft = snrfft * eshift / scale;
   }
-}  
-
+}

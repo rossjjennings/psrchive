@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Profile.h,v $
-   $Revision: 1.70 $
-   $Date: 2004/09/12 00:29:41 $
+   $Revision: 1.71 $
+   $Date: 2004/09/19 06:49:52 $
    $Author: ahotan $ */
 
 #ifndef __Pulsar_Profile_h
@@ -202,15 +202,23 @@ namespace Pulsar {
     /*! return the shift (in turns) after fitting to the standard
       using a parabolic interpolation in the time domain to achieve 
       fractional bin resolution */
-    double TimeShift (const Profile& std, float& error,
-		      float* corr = 0, float* fn = 0) const;
-
+    double ParIntShift (const Profile& std, float& error,
+			float* corr = 0, float* fn = 0) const;
+    
+    /*! return the shift (in turns) after fitting to the standard
+      using an interpolation scheme that involves transforming into
+      the fourier domain, padding with zeroes and transfomring back
+      to a higher resolution profile */
+    double ZeroPadShift (const Profile& std, float& ephase,
+			 vector<float>& corr, vector<float>& interp,
+			 bool store = false) const;
+    
     /*! return the shift (in turns) after fitting to the standard
       using an FFT based phase rotation to achieve fractional bin
       resolution */
-    double FFTShift (const Profile& std, float& ephase,
-		  float& snrfft, float& esnrfft) const;
-
+    double PhaseGradShift (const Profile& std, float& ephase,
+			   float& snrfft, float& esnrfft) const;
+    
     //! get the number of bins
     /*! Note that there is no set_nbin; this attribute may be set only
       through Profile::resize */

@@ -81,7 +81,7 @@ int main (int argc, char** argv)
       return 0;
 
     case 'i':
-      cout << "$Id: pas.C,v 1.13 2004/09/12 00:29:42 ahotan Exp $" << endl;
+      cout << "$Id: pas.C,v 1.14 2004/09/19 06:49:53 ahotan Exp $" << endl;
       return 0;
 
     case 'r':
@@ -188,8 +188,7 @@ int main (int argc, char** argv)
 	case 'a':   //Align
 	  if(refflag==true) {  
 	    stdprof=stdarch->get_Profile(0, 0, 0);
-	    stdphase=float(stdprof->FFTShift(refarch->get_Profile(0, 0, 0), 
-					     ephase, snrfft, esnrfft));
+	    stdphase=float(stdprof->PhaseGradShift(refarch->get_Profile(0, 0, 0), ephase, snrfft, esnrfft));
 	    fmax=stdphase*stdarch->get_Profile(0,0,0)->get_nbin();
 	    stdarch->rotate(convt(stdarch, fmax, verbose));
 	    if(verbose) cout << "Align: rotated " <<stdphase << "phase, " 
@@ -530,8 +529,8 @@ void cross(Reference::To<Pulsar::Archive> refcorr, Reference::To<Pulsar::Archive
 
   //  maximum, after rotate fractional phase bin
   stdprof=stdcorr->get_Profile(0, 0, 0);
-  stdphase=stdprof->FFTShift(refcorr->get_Profile(0, 0, 0), 
-			     ephase, snrfft, esnrfft);
+  stdphase=stdprof->PhaseGradShift(refcorr->get_Profile(0, 0, 0), 
+				   ephase, snrfft, esnrfft);
   fmax=float(stdphase)*stdcorr->get_Profile(0,0,0)->get_nbin();
   stdcorr->rotate(convt(stdcorr, fmax, verbose));
   cross_correlation(refcorr->get_Profile(0,0,0), stdcorr->get_Profile(0,0,0), 

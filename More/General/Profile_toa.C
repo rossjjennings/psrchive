@@ -16,10 +16,10 @@ Tempo::toa Pulsar::Profile::toa (const Profile& std, const MJD& mjd,
   double phase;
   
   if (td) {
-    phase = TimeShift(std, ephase);
+    phase = ParIntShift(std, ephase);
   }
   else {
-    phase = FFTShift (std, ephase, snrfft, esnrfft);
+    phase = PhaseGradShift (std, ephase, snrfft, esnrfft);
   }
 
   retval.set_frequency (centrefreq);

@@ -144,7 +144,7 @@ int main(int argc, char** argv) {
     double shift = 0.0;
     float   error = 0.0;
     
-    shift = profs[i]->TimeShift(*stdprof, error, corr, fn);
+    shift = profs[i]->ParIntShift(*stdprof, error, corr, fn);
 
     unsigned nbin = profs[i]->get_nbin();
 

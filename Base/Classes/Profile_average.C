@@ -86,7 +86,7 @@ Pulsar::Profile::morphological_difference (const Profile& profile,
   // nearest bin.
   
   try {
-    phase = temp1->FFTShift (*temp2, ephase, snrfft, esnrfft);
+    phase = temp1->PhaseGradShift (*temp2, ephase, snrfft, esnrfft);
   }
   catch (Error& error) {
     cerr << "Pulsar::Profile::morphological_difference FFT shift failed" 
