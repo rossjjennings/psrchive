@@ -173,7 +173,7 @@ int psrephem::unload (const char* filename) const
 {
   if (tempo11)  {
     for (int i=0;i<EPH_NUM_KEYS;i++)
-      strcpy (ephemstr[i], value_str[i].data());
+      strcpy (ephemstr[i], value_str[i].c_str());
     // when Sun compilers catch up: const_cast<char*>(filename)
     char * fname = strdup(filename);
     int istat = wr_eph (fname, parmStatus, ephemstr, value_double,
@@ -204,7 +204,7 @@ int psrephem::old_unload (const char* filename) const
     perror (":");
     return -1;
   }
-  if (fwrite (nontempo11.data(), 1, nontempo11.length(), fptr) 
+  if (fwrite (nontempo11.c_str(), 1, nontempo11.length(), fptr) 
 	< nontempo11.length())  {
     perror ("psrephem::old_unload error");
     return -1;
@@ -387,7 +387,7 @@ int psrephem::unload (FILE* fptr) const
     return -1;
 
   size_t size = out.length();
-  size_t bout = fwrite (out.data(), 1, size, fptr);
+  size_t bout = fwrite (out.c_str(), 1, size, fptr);
   if (bout < size)  {
     fprintf (stderr, "psrephem::unload(FILE*) ERROR fprintf only %lu/%lu",
         bout, size);
@@ -437,7 +437,7 @@ int psrephem::unload (string* outstr) const
     return 0;
   }
   for (int i=0;i<EPH_NUM_KEYS;i++){
-    strcpy (ephemstr[i], value_str[i].data());
+    strcpy (ephemstr[i], value_str[i].c_str());
   }
   strcpy (psrephem::tmp_fname, PSREPHEM_TMP_FNAME);
   mktemp (psrephem::tmp_fname);
