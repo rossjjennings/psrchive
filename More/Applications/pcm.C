@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pcm.C,v $
-   $Revision: 1.7 $
-   $Date: 2003/11/24 09:53:25 $
+   $Revision: 1.8 $
+   $Date: 2003/11/28 14:27:20 $
    $Author: straten $ */
 
 /*! \file pcm.C 
@@ -41,18 +41,22 @@ void usage ()
   cout << "A program for performing self-calibration\n"
     "Usage: pcm [options] filenames\n"
     "  -a archive set the output archive class name\n"
-    "  -b bin     add phase bin to constraints\n"
     "  -C meta    filename with list of calibrator files\n"
     "  -f chan    solve for only the specified channel\n"
     "  -m model   model: Britton [default] or Hamaker\n"
     "  -M meta    filename with list of pulsar files\n"
+    "\n"
+    "  -b bin     add phase bin to constraints\n"
     "  -n nbin    set the number of phase bins to use as input states\n"
     "  -p pA,pB   set the phase window from which to take input states\n"
+    "\n"
     "  -s         do not normalize Stokes parameters by invariant interval\n"
-    "  -q         allow CAL Stokes Q to vary\n"
-    "  -u         assume that CAL Stokes V = 0\n"
-    "  -v         verbose mode\n"
-    "  -V         very verbose mode\n"
+    "\n"
+    "  -q         assume that CAL Stokes Q = 0\n"
+    "  -v         assume that CAL Stokes V = 0\n"
+    "\n"
+    "  -h         this help page\n"
+    "  -V         verbose mode\n"
        << endl;
 }
 
@@ -203,7 +207,8 @@ try {
   vector<unsigned> phase_bins;
 
   bool measure_cal_V = true;
-  bool measure_cal_Q = false;
+  bool measure_cal_Q = true;
+
   bool normalize_by_invariant = true;
 
   bool publication_plots = false;
@@ -269,25 +274,22 @@ try {
 	   << endl;
       break;
 
-    case 'h':
-      usage ();
-      return 0;
-
-    case 'q':
-      measure_cal_Q = true;
-      break;
-
     case 's':
       normalize_by_invariant = false;
       break;
 
-    case 'u':
-      measure_cal_V = false;
+    case 'q':
+      measure_cal_Q = false;
       break;
 
     case 'v':
-      verbose = true;
+      measure_cal_V = false;
       break;
+
+
+    case 'h':
+      usage ();
+      return 0;
 
     case 'V':
       verbose = true;
