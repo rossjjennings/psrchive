@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/Attic/PolnProfileFit.h,v $
-   $Revision: 1.2 $
-   $Date: 2003/12/29 07:18:13 $
+   $Revision: 1.3 $
+   $Date: 2003/12/29 12:22:14 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PolnProfileFit_h
@@ -57,13 +57,16 @@ namespace Pulsar {
     //! Get the phase offset between the observation and the standard
     Estimate<double> get_phase () const;
 
+    //! Return the Fourier Transform of the PolnProfile
+    PolnProfile* fourier_transform (const PolnProfile* input) const;
+
   protected:
 
     //! The standard to which observations will be fit
     Reference::To<const PolnProfile> standard;
 
     //! The transformation between the standard and observation
-    Reference::To<Calibration::Complex2> xform;
+    Reference::To<Calibration::Complex2> transformation;
 
     //! The measurement equation used to model the fit
     Reference::To<Calibration::ReceptionModel> model;
