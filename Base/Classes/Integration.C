@@ -1,9 +1,10 @@
-#include <assert.h>
 
+#include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
 #include "Pulsar/Profile.h"
 #include "Error.h"
 #include "typeutil.h"
+#include <assert.h>
 
 bool Pulsar::Integration::verbose = false;
 
@@ -64,7 +65,10 @@ void Pulsar::Integration::add_extension (Extension* ext)
 
 Pulsar::Integration::Integration ()
 {
-  // nothing to initialize
+  defaradayed_rotation_measure = 0.0;
+  defaradayed_centre_frequency = 0.0;
+  dedispersed_dispersion_measure = 0.0;
+  dedispersed_centre_frequency   = 0.0;
 }
 
 Pulsar::Integration::Integration (const Integration& subint)
@@ -190,12 +194,14 @@ void Pulsar::Integration::copy (const Integration& subint,
 
   set_epoch ( subint.get_epoch());
   set_duration ( subint.get_duration());
-  set_centre_frequency ( subint.get_centre_frequency() );
-  set_bandwidth ( subint.get_bandwidth() );
-  set_dispersion_measure ( subint.get_dispersion_measure() );
   set_folding_period ( subint.get_folding_period() );
-  set_basis ( subint.get_basis() );
-  set_state ( subint.get_state() );
+
+  archive = subint.archive;
+  defaradayed_rotation_measure = subint.defaradayed_rotation_measure;
+  defaradayed_centre_frequency = subint.defaradayed_centre_frequency;
+  dedispersed_dispersion_measure = subint.dedispersed_dispersion_measure;
+  dedispersed_centre_frequency   = subint.dedispersed_centre_frequency;
+
 }
 
 Pulsar::Profile*
@@ -226,30 +232,43 @@ Pulsar::Integration::get_Profile (unsigned ipol, unsigned ichan) const
   return profiles[ipol][ichan];
 }
 
-void Pulsar::Integration::get_amps (float* data,
-				    unsigned jpol,
-				    unsigned jchan,
-				    unsigned jbin) const
+
+
+#if 0
+//! Get the effective centre frequency of the given channel
+/*!
+  \param ichan the index of the channel to get
+
+  \param dim the effect under consideration.  If dim == Signal::Phase,
+  then the result will depend on if the data is dedispersed.  If dim
+  == Signal::Polarization, then the result will depend on if the data
+  has been corrected for Faraday rotation.
+
+  \return the frequency of the given channel in MHz
+*/
+double Pulsar::Integration::get_centre_frequency (unsigned ichan,
+						  Signal::Dimension dim) const
 {
-  unsigned npol = get_npol();
-  unsigned nchan = get_nchan();
+  if (ichan < 0 || ichan>=get_nchan() || get_npol() < 1)
+    throw Error (InvalidRange, "Pulsar::Integration::get_centre_frequency");
 
-  if (verbose)
-    cerr << "int.npol=" << npol << " int.nchan=" << nchan << endl;
+  if (dim == Signal::Phase && get_dedispersed())
+    return get_centre_frequency ();
 
-  for (unsigned ipol=0; ipol<npol; ipol++) {
-    float* chandat = data + ipol * jpol;
-    for (unsigned ichan=0; ichan<nchan; ichan++)
-      profiles[ipol][ichan] -> get_amps (chandat + ichan * jchan, jbin);
-  }
+  if (dim == Signal::Polarization && get_faraday_corrected())
+    return get_centre_frequency ();
+
+  return profiles[0][ichan]->get_centre_frequency();
 }
 
-//! Get the frequency of the given channel
+#endif
+
+//! Get the centre frequency of the given channel
 /*!
   \param ichan the index of the channel to get
   \return the frequency of the given channel in MHz
 */
-double Pulsar::Integration::get_frequency (unsigned ichan) const
+double Pulsar::Integration::get_centre_frequency (unsigned ichan) const
 {
   if (ichan < 0 || ichan>=get_nchan() || get_npol() < 1)
     return 0;
@@ -257,12 +276,13 @@ double Pulsar::Integration::get_frequency (unsigned ichan) const
   return profiles[0][ichan]->get_centre_frequency();
 }
 
-//! Set the frequency of the given channel
+//! Set the centre frequency of the given channel
 /*!
   \param ichan the index of the channel to be set
   \param frequency the frequency of the given channel in MHz
 */
-void Pulsar::Integration::set_frequency (unsigned ichan, double frequency)
+void Pulsar::Integration::set_centre_frequency (unsigned ichan,
+						double frequency)
 {
   if (ichan < 0 || ichan>=get_nchan())
     throw Error (InvalidRange, "Integration::set_frequency",
@@ -299,6 +319,82 @@ void Pulsar::Integration::set_weight (unsigned ichan, float weight)
   for (unsigned ipol=0; ipol<get_npol(); ipol++)
     profiles[ipol][ichan]->set_weight (weight);
 }
+
+
+//! Get the centre frequency (in MHz)
+double Pulsar::Integration::get_centre_frequency() const
+try {
+  return archive->get_centre_frequency ();
+}
+catch (Error& error) {
+  throw error += "Pulsar::Integration::get_centre_frequency";
+}
+
+//! Get the bandwidth (in MHz)
+double Pulsar::Integration::get_bandwidth() const
+try {
+  return archive->get_bandwidth ();
+}
+catch (Error& error) {
+  throw error += "Pulsar::Integration::get_bandwidth";
+}
+
+//! Get the dispersion measure (in \f${\rm pc\, cm}^{-3}\f$)
+double Pulsar::Integration::get_dispersion_measure () const
+try {
+  return archive->get_dispersion_measure ();
+}
+catch (Error& error) {
+  throw error += "Pulsar::Integration::get_dispersion_measure";
+}
+    
+//! Inter-channel dispersion delay has been removed
+bool Pulsar::Integration::get_dedispersed () const
+try {
+  return archive->get_dedispersed ();
+}
+catch (Error& error) {
+  throw error += "Pulsar::Integration::get_dedispersed";
+}
+
+//! Get the rotation measure (in \f${\rm rad\, m}^{-2}\f$)
+double Pulsar::Integration::get_rotation_measure () const
+try {
+  return archive->get_rotation_measure ();
+}
+catch (Error& error) {
+  throw error += "Pulsar::Integration::get_rotation_measure";
+}
+
+//! Data has been corrected for ISM faraday rotation
+bool Pulsar::Integration::get_faraday_corrected () const
+try {
+  return archive->get_faraday_corrected ();
+}
+catch (Error& error) {
+  throw error += "Pulsar::Integration::get_faraday_corrected";
+}
+
+//! Get the feed configuration of the receiver
+Signal::Basis Pulsar::Integration::get_basis () const
+try {
+  return archive->get_basis ();
+}
+catch (Error& error) {
+  throw error += "Pulsar::Integration::get_basis";
+}
+
+//! Get the polarimetric state of the profiles
+Signal::State Pulsar::Integration::get_state () const
+try {
+  return archive->get_state ();
+}
+catch (Error& error) {
+  throw error += "Pulsar::Integration::get_state";
+}
+
+
+
 
 
 void Pulsar::Integration::fold (unsigned nfold)
@@ -338,7 +434,11 @@ void Pulsar::Integration::bscrunch (unsigned nscrunch)
     throw error += "Integration::bscrunch";
   }
 }
-    
+
+/*
+  \pre  This method should only be called through the Archive class
+  \post The calling Archive method should update state to Signal::Intensity
+ */    
 void Pulsar::Integration::pscrunch()
 {
   if (verbose)
@@ -353,13 +453,10 @@ void Pulsar::Integration::pscrunch()
     for (unsigned ichan=0; ichan < get_nchan(); ichan++)
       *(profiles[0][ichan]) += *(profiles[1][ichan]);
 
-    set_state (Signal::Intensity);
   }
 
-  else if (get_state() == Signal::Stokes)
-    set_state (Signal::Intensity);
-
   resize (1);
+
 } 
 
 void Pulsar::Integration::rotate (double time)

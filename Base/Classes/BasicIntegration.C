@@ -4,10 +4,7 @@
 void Pulsar::BasicIntegration::init ()
 {
   npol = nchan = nbin = 0;
-  duration = centrefreq = bw = pfold = dm = 0.0;
-
-  state = Signal::Intensity;
-  type = Signal::Linear;
+  duration = pfold = 0.0;
 }
 
 Pulsar::BasicIntegration::BasicIntegration (const Integration& subint,

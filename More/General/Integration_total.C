@@ -30,8 +30,8 @@ Pulsar::Integration* Pulsar::Integration::total () const
   try {
     copy = clone (npol_keep);
     copy->pscrunch ();
+    copy->dedisperse();
     copy->fscrunch ();
-    copy->dedisperse( get_centre_frequency() );
   }
   catch (Error& err) {
     throw err += "Integration::total";
