@@ -60,7 +60,7 @@ keys2c_LDADD =
 # Dependencies should never be changed
 #
 
-INCLUDES = -I$(top_srcdir)/utils/include @CFITSIO_CFLAGS@
+INCLUDES = -I$(top_srcdir)/utils/include @CFITSIO_CFLAGS@ @MPI_CFLAGS@
 
 LDADD = libpsrephem.la $(top_srcdir)/utils/libpsrutils.la @FLIBS@
 
