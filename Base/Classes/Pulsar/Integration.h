@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Integration.h,v $
-   $Revision: 1.3 $
-   $Date: 2002/04/10 08:26:13 $
+   $Revision: 1.4 $
+   $Date: 2002/04/11 07:01:18 $
    $Author: straten $ */
 
 /*
@@ -30,7 +30,6 @@ class Phase;
 
 class Stokes;
 
-
 namespace Pulsar {
 
   class Profile;
@@ -43,7 +42,7 @@ namespace Pulsar {
     static bool verbose;
 
     //! flag controls the behaviour of the invint function
-    static bool default_invint_square;
+    static bool invint_square;
 
     //! Null constructor simply intializes defaults
     Integration ();
@@ -53,6 +52,9 @@ namespace Pulsar {
 
     //! Return pointer to copy of self
     virtual Integration* clone ();
+
+    //! Resizes the dimensions of the data area
+    virtual void resize (int npol=0, int nband=0, int nbin=0);
 
     //! Call Profile::fold on every profile
     virtual void fold (int nfold);
@@ -66,15 +68,22 @@ namespace Pulsar {
     //! Integrate profiles from two polarizations into one total intensity
     virtual void pscrunch ();
 
-    //! Transform from Stokes I,Q,U,V to the polarimetric invariant interval
-    virtual void invint (bool square = default_invint_square);
+    //! Transform from Stokes (I,Q,U,V) to the polarimetric invariant interval
+    virtual void invint ();
 
     //! Rotate all profiles to remove dispersion delays between bands
     virtual void dedisperse (double pfold, double dm, double frequency = 0.0);
 
+    //! Returns a single Stokes 4-vector for the given band and phase bin
+    void get_Stokes (Stokes& S, int iband, int ibin) const;
+
+    //! Returns a vector of Stokes parameters along the specified dimension
+    void get_Stokes (vector<Stokes>& S, int iother,
+		     Dimension::Axis abscissa = Dimension::Phase ) const;
+
     //! Find the transitions between hi and low states in a pulsed CAL
     void find_cal_transitions (int& hightolow, int& lowtohigh,
-				       int& buffer) const;
+			       int& buffer) const;
     
     //! Return the mean and variance of the mean in every profile baseline
     void baseline_levels (vector<vector<double> > & mean,
@@ -96,7 +105,6 @@ namespace Pulsar {
 
     void cal_levels (vector<Stokes>& hi, vector<Stokes>& lo) const;
     void psr_levels (vector<Stokes>& hi, vector<Stokes>& lo) const;
-    void getStokes  (vector<Stokes>& S, int chan=0) const;
 
     //! Adds to a vector of tempo++ toa objects
     void toas (const Integration& std_subint,
@@ -127,15 +135,6 @@ namespace Pulsar {
     //
     virtual void snr_weight ();
     
-    // return the MJD at the beginning of the integration
-    MJD  start_time() const;
-    // return the MJD at the end of the integration
-    MJD  end_time () const;
-
-    // returns the total time integrated (in seconds)
-    double get_integration_length() const;
-
-
     virtual void Q_boost (const vector<double> & hphases);
     virtual void U_boost (const vector<double> & hphases);
     virtual void V_boost (const vector<double> & hphases);
@@ -143,12 +142,48 @@ namespace Pulsar {
     virtual void U_rotation (const vector<Angle> & phases);
     virtual void V_rotation (const vector<Angle> & phases);
 
+    //! Returns a pointer to a Profile
+    Profile* get_profile (int ipol, int iband);
+
+    //! Returns a pointer to the vector of Profile objects for poln
     vector<Profile *>& operator[] (Poln::Measure poln);
 
-  protected:
+    //! Get the centre frequency (in MHz)
+    double get_centre_frequency() const { return centrefreq; }
+    //! Set the centre frequency (in MHz)
+    virtual void set_centre_frequency (double MHz) { centrefreq = MHz; }
+    
+    //! Get the bandwidth (in MHz)
+    double get_bandwidth() const { return bw; }
+    //! Set the bandwidth (in MHz)
+    virtual void set_bandwidth (double MHz) { bw = MHz; }
 
-    //! number of bins in each profile
-    int nbin;
+    //! Get the total time integrated (in seconds)
+    double get_duration() const { return duration; }
+    //! Set the total time integrated (in seconds)
+    virtual void set_duration (double seconds) { duration = seconds; }
+
+    //! Get the MJD at the beginning of the integration
+    MJD get_start_time() const { return start_time; }
+    //! Set the MJD at the beginning of the integration
+    virtual void set_start_time (const MJD& mjd) { start_time = mjd; }
+
+    //! Get the MJD at the end of the integration (convenience interface)
+    MJD get_end_time () const { return start_time + duration; }
+
+    //! Get the number of bands
+    /*! This attribute may be set only through Integration::resize */
+    int get_nband () const { return nband; }
+
+    //! Get the number of polarization measurements
+    /*! This attribute may be set only through Integration::resize */
+    int get_npol () const { return npol; }
+
+    //! Get the number of bins in each profile
+    /*! This attribute may be set only through Integration::resize */
+    int get_nbin () const { return nbin; }
+ 
+  protected:
 
     //! number of polarization measurments
     int npol;
@@ -156,6 +191,15 @@ namespace Pulsar {
     //! number of sub-bands
     int nband;
     
+    //! number of bins
+    int nbin;
+
+    //! start time of observation
+    MJD start_time;
+
+    //! duration of integration
+    double duration;
+
     //! centre frequency (in MHz)
     double centrefreq;
 
@@ -167,9 +211,6 @@ namespace Pulsar {
 
     //! The data area
     vector< vector<Profile*> > profiles;
-
-    //! Resizes the dimensions of the data area
-    virtual void resize (int nsubint, int nband=0, int npol=0, int nbin=0);
 
     // convert Stokes IQUV to XYUV, where X=.5(I+Q) and Y=.5(I-Q).
     // Should only be called on data with linear feeds

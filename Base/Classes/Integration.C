@@ -1,71 +1,155 @@
 
 #include "Integration.h"
 #include "Profile.h"
+#include "Stokes.h"
+
+//! Returns a single Stokes 4-vector for the given band and phase bin
+void Pulsar::Integration::get_Stokes ( Stokes& S, int iband, int ibin ) const
+{
+  if (state == Poln::Stokes) {
+    for (int ipol=0; ipol<4; ++ipol)
+      S[ipol] = profiles[ipol][iband]->get_amps()[ibin];
+  }
+
+  else if (state == Poln::Coherence) {
+
+    float PP   = profiles[0][iband]->get_amps()[ibin];
+    float QQ   = profiles[1][iband]->get_amps()[ibin];
+    float RePQ = profiles[2][iband]->get_amps()[ibin];
+    float ImPQ = profiles[3][iband]->get_amps()[ibin];
+
+    bool circular = profiles[0][iband]->get_state() == Poln::RR;
+
+    if (circular) {
+      S.i = PP + QQ;
+      S.v = PP - QQ;
+      S.q = 2.0 * RePQ;
+      S.u = 2.0 * ImPQ;
+    }
+    else {
+      S.i = PP + QQ;
+      S.q = PP - QQ;
+      S.u = 2.0 * RePQ;
+      S.v = 2.0 * ImPQ;
+    }
+  }
+}
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Pulsar::Integration::get_Stokes 
+//
+/*!  
+  The vector of Stokes parameters may be calculated with either pulse
+  phase or observing frequency as the abscissa.
+
+  \retval S a vector of Stokes parameters as a function of the given dimension
+  \param iother the index in the other dimension from which to draw S
+  \param abscissa the dimension of the vector abscissa
+
+  By default, "get_Stokes (S, iband);" will return the polarimetric
+  profile from band, iband.  To get the polarimetric spectra from the
+  middle of the pulse profile, for example, call "get_Stokes (S,
+  get_nbin()/2, Axis::Frequency);"
+
+*/
+void Pulsar::Integration::get_Stokes (vector<Stokes>& S, int iother,
+				      Dimension::Axis abscissa) const
+{
+  int ndim = 0;
+  int ndim_other = 0;
+
+  if (!(state == Poln::Stokes || state == Poln::Coherence))
+    throw string ("Pulsar::Integration::get_Stokes invalid state");
+
+  if (abscissa == Dimension::Frequency) {
+    ndim = get_nband();
+    ndim_other = get_nbin();
+  }
+  else if (abscissa == Dimension::Phase) {
+    ndim = get_nbin();
+    ndim_other = get_nband();
+  }
+  else
+    throw string ("Pulsar::Integration::get_Stokes invalid abscissa");
+
+  if (iother<0 || iother>=ndim_other)
+    throw string ("Pulsar::Integration::get_Stokes invalid dimension");
+
+  S.resize(ndim);
+
+  int ibin=0, iband=0;
+
+  if (abscissa == Dimension::Frequency)
+    ibin = iother;    // all Stokes values come from the same bin
+  else // dim == Dimension::Phase
+    iband = iother;   // all Stokes values come from the same band
+
+  for (int idim=0; idim<ndim; idim++) {
+
+    if (abscissa == Dimension::Frequency)
+      iband = idim;
+    else
+      ibin = idim;
+
+    get_Stokes (S[idim], iband, ibin);
+
+  }
+}
+
 
 /*! When this flag is true, Pulsar::Integration::invint will calculate
   the square of the polarimetric invariant interval (equal to the deteminant
   of the coherency matrix). */
-bool Pulsar::Integration::default_invint_square = false;
+bool Pulsar::Integration::invint_square = false;
 
-/*! Forms the Stokes polarimetric invariant interval,
+/*! 
+  Forms the Stokes polarimetric invariant interval,
   \f$\det{P}=I^2-Q^2-U^2-V^2\f$, for every bin of each band so that,
   upon completion, npol == 1 and state == Poln::Invariant.
 
-  \pre The baseline of each profile must have been removed [unchecked].
+  If invint_square is true, this function calculates
+  \f$\det\rho=I^2-Q^2-U^2-V^2\f$, otherwise \f$\sqrt{\det\rho}\f$ is
+  calcuated.
 
-  \param square if true, calculate \f$ \det P=I^2-Q^2-U^2-V^2 \f$,
-                otherwise calculate \f$ \sqrt{\det P} \f$
+  \pre The profile baselines must have been removed (unchecked).
 
-  \exception string thrown if state != Poln::Stokes
+  \exception string thrown if Stokes 4-vector cannot be formed
 */
-void Pulsar::Integration::invint (bool square)
+void Pulsar::Integration::invint ()
 {
   // space to calculate the result
-  vector<double> amps (nbin);
+  vector<float> invariant (get_nbin());
+  // Stokes 4-vector
+  Stokes stokes;
 
-  for (int iband=0; iband<nband; ++iband) {
+  for (int iband=0; iband<get_nband(); ++iband) {
 
-    int ibin;
-    float* poln_amps;
-    double val;
-
-    poln_amps = (*this)[Poln::Si][iband]->get_amps ();
-
-    for (ibin=0; ibin<nbin; ++ibin) {
-      val = poln_amps[ibin];
-      amps[ibin] = val * val;
-    }
-
-    for (int ipoln = 1; ipoln <= 3; ipoln++) {
-
-      poln_amps = profiles[ipoln][iband]->get_amps();
-
-      for (ibin=0; ibin<nbin; ++ibin) {
-	val = poln_amps[ibin];
-	amps[ibin] -= val * val;
-      }
-
+    for (int ibin=0; ibin<get_nbin(); ++ibin) {
+      // get the Stokes 4-vector
+      get_Stokes (stokes, iband, ibin);
+      // calculate \det\rho
+      invariant[ibin] = stokes.invariant_Squared();
     }
 
     // prepare to reset Stokes I to the Invariant Interval
     Profile* Sinv = (*this)[Poln::Si][iband];
 
     // set the values
-    Sinv->set_amps (amps);
+    Sinv->set_amps (invariant.begin());
     // remove the baseline
-    Sinv->offset ( -Sinv->mean (Sinv->find_min_phase()) );
+    Sinv->offset (-Sinv->mean (Sinv->find_min_phase()));
 
-    if (square)
-      // set the type
-      Sinv->set_Poln (Poln::Sinv_sq);
+    if (invint_square)
+      Sinv->set_state (Poln::Sinv_sq);
     else {
-      Sinv->set_Poln (Poln::Sinv);
+      Sinv->set_state (Poln::Sinv);
       Sinv->square_root();
     }
     
   } // for each channel
 
-  resize (1, nband);
+  resize (1, get_nband());
   state = Poln::Invariant;
 }
 
@@ -80,6 +164,8 @@ void Pulsar::Integration::invint (bool square)
 */
 double dispersion_delay (double dm, double reference_freq, double freq)
 {
+  if (reference_freq == 0 || freq == 0)
+    throw string ("dispersion_delay: invalid frequency");
   return (dm/2.41e-4)*(1.0/(freq*freq)-1.0/(reference_freq*reference_freq));
 }
 
@@ -98,8 +184,8 @@ void Pulsar::Integration::dedisperse
   if (verbose)
     cerr << "Integration::dedisperse DM="<< dm <<" freq="<< frequency << endl;
 
-  for (int ipol=0; ipol<npol; ipol++) {
-    for (int iband=0; iband<nband; iband++) {
+  for (int ipol=0; ipol<get_npol(); ipol++) {
+    for (int iband=0; iband<get_nband(); iband++) {
 
       double cfreq = profiles[ipol][iband] -> get_centre_frequency();
       double delay = dispersion_delay (dm, frequency, cfreq);
@@ -121,7 +207,7 @@ double Pulsar::Integration::weighted_frequency
 ( double* weight, Poln::Measure poln, int band_start, int band_end ) const
 {
   if (band_end == 0)
-    band_end = nband;
+    band_end = get_nband();
 
   // for now, ignore poln
   int ipol = 0;
