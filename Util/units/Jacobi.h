@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Jacobi.h,v $
-   $Revision: 1.3 $
-   $Date: 2004/04/25 07:24:52 $
+   $Revision: 1.4 $
+   $Date: 2004/04/28 20:19:28 $
    $Author: straten $ */
 
 #ifndef __Jacobi_H
@@ -22,7 +22,7 @@ T norm (T x) { return fabs(x); }
 /*! This template function calculates the Jacobi transformation parameters
   that minimize roundoff error, as described in Section 11.1 of NR */
 template <typename T, typename U>
-void calculate_Jacobi (U p, U q, T pq,
+void calculate_Jacobi (const U& p, const U& q, const T& pq,
                        T& s, T& tau, U& correction)
 {
   T h = q - p;
@@ -61,7 +61,7 @@ void calculate_Jacobi (U p, U q, T pq,
   
 // returns the correction factor for the diagonal
 template <typename T, typename U>
-void calculate_Jacobi (U p, U q, const complex<T>& pq,
+void calculate_Jacobi (const U& p, const U& q, const complex<T>& pq,
                        complex<T>& s, complex<T>& tau, U& correction)
 {
   T Sq = 0.5 * (p-q);
