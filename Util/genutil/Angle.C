@@ -147,6 +147,13 @@ const Angle operator * (const Angle &a1, double d) {
   return Angle(a1.getradians()*d);
 }
 
+// NOTE : this returns double, not angle, since angle^2 is not
+// limited to <pi radians as angle is
+// it returns the product of the angles.radians
+double operator * (const Angle &a1, const Angle &a2) {
+  return a1.getradians()*a2.getradians();
+}
+
 const Angle operator / (const Angle &a1, double d) {
   return Angle(a1.getradians()/d);
 }

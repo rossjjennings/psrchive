@@ -1,6 +1,6 @@
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Angle.h,v $
-   $Revision: 1.5 $
-   $Date: 2000/08/21 01:19:56 $
+   $Revision: 1.6 $
+   $Date: 2000/08/21 07:15:53 $
    $Author: redwards $ */
 
 // redwards 17 Mar 99 -- Time for a definitive C++ suite of
@@ -79,6 +79,8 @@ class Angle
   const friend Angle operator - (const Angle &, double);
   const friend Angle operator / (const Angle &, double);
   const friend Angle operator * (const Angle &, double);
+  friend double operator * (const Angle &, const Angle &);
+
   friend int operator > (const Angle &, const Angle &);
   friend int operator < (const Angle &, const Angle &);
   friend int operator >= (const Angle &, const Angle &);
