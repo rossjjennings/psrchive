@@ -159,13 +159,16 @@ int Pulsar::Integration::find_cal_levels(vector<vector<double> > & mean_high,
 			     vector<vector<double> > & var_mean_low)
 {
   if (nbin==0)
-    throw_str ("Pulsar::Integration::find_cal_levels ERROR nbin = 0");
+    throw Error (InvalidState, "Pulsar::Integration::find_cal_levels",
+		 "nbin = 0");
 
   if (npol==0)
-    throw_str ("Pulsar::Integration::find_cal_levels ERROR npol = 0");
+    throw Error (InvalidState, "Pulsar::Integration::find_cal_levels",
+		 "npol = 0");
 
   if (nsub==0)
-    throw_str ("Pulsar::Integration::find_cal_levels ERROR nsub = 0");
+    throw Error (InvalidState, "Pulsar::Integration::find_cal_levels",
+		 "nsub = 0");
 
   mean_high.resize(npol);
   var_mean_high.resize(npol);
@@ -262,11 +265,14 @@ void Pulsar::Integration::cal_levels (vector<Stokes>& hi,
 			  vector<Stokes>& lo)
 {
   if (nbin<1)
-    throw_str ("Pulsar::Integration::cal_levels ERROR nbin<1");
+    throw Error (InvalidState, "Pulsar::Integration::cal_levels",
+		 "nbin<1");
   if (npol!=4)
-    throw_str ("Pulsar::Integration::cal_levels ERROR npol!=4");
+    throw Error (InvalidState, "Pulsar::Integration::cal_levels",
+		 "npol!=4");
   if (nsub<1)
-    throw_str ("Pulsar::Integration::cal_levels ERROR nsub<1");
+    throw Error (InvalidState, "Pulsar::Integration::cal_levels",
+		 "nsub<1");
 
   hi.resize(nsub);
   lo.resize(nsub);
@@ -295,11 +301,14 @@ void Pulsar::Integration::psr_levels (vector<Stokes>& hi,
 			  vector<Stokes>& lo, float window)
 {
   if (nbin<1)
-    throw_str ("Pulsar::Integration::cal_levels ERROR nbin<1");
+    throw Error (InvalidState, "Pulsar::Integration::cal_levels",
+		 "nbin<1");
   if (npol!=4)
-    throw_str ("Pulsar::Integration::cal_levels ERROR npol!=4");
+    throw Error (InvalidState, "Pulsar::Integration::cal_levels",
+		 "npol!=4");
   if (nsub<1)
-    throw_str ("Pulsar::Integration::cal_levels ERROR nsub<1");
+    throw Error (InvalidState, "Pulsar::Integration::cal_levels",
+		 "nsub<1");
 
   hi.resize(nsub);
   lo.resize(nsub);
@@ -358,13 +367,16 @@ void Pulsar::Integration::baseline_levels (vector<vector<double> > & mean,
 			       float duty_cycle) const
 {
   if (nbin==0)
-    throw_str ("Pulsar::Integration::baseline_levels ERROR nbin = 0");
+    throw Error (InvalidState, "Pulsar::Integration::baseline_levels",
+		 "nbin = 0");
 
   if (npol==0)
-    throw_str ("Pulsar::Integration::baseline_levels ERROR npol = 0");
+    throw Error (InvalidState, "Pulsar::Integration::baseline_levels",
+		 "npol = 0");
 
   if (nsub==0)
-    throw_str ("Pulsar::Integration::baseline_levels ERROR nsub = 0");
+    throw Error (InvalidState, "Pulsar::Integration::baseline_levels",
+		 "nsub = 0");
 
   mean.resize(npol);
   var_mean.resize(npol);

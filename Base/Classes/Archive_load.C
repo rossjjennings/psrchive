@@ -50,7 +50,7 @@ Pulsar::Archive* Pulsar::Archive::load (const char* filename)
     throw error += "Archive::load";
   }
   catch (string& error) {
-    throw "Archive::load error: " + error;
+    throw Error (FailedCall, "Archive::load", error);
   }
 
   // none of the above formats recognises the file
