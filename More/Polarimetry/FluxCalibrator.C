@@ -38,17 +38,6 @@ Pulsar::FluxCalibrator::FluxCalibrator (const Archive* archive)
     add_observation (archive);
 }
 
-Pulsar::FluxCalibrator::FluxCalibrator (const vector<const Archive*>& archs)
-{
-  if (archs.size()==0)
-    throw Error (InvalidParam, "Pulsar::FluxCalibrator",
-		 "error empty Pulsar::Archive vector");
-  
-  calculated = false;
-
-  for (unsigned iarch=0; iarch<archs.size(); ++iarch)
-    add_observation (archs[iarch]);
-}
 
 double Pulsar::FluxCalibrator::meanTsys ()
 {
