@@ -6,14 +6,14 @@
 #include "toa.h"
 #include "residual.h"
 #include "resio.h"
-#include "psrParams.h"
+#include "psrephem.h"
 
 // ////////////////////////////////////////////////////////////////////////
 // Tempo::fit
 //
-// runs TEMPO on a vector of toa objects, using a given psrParams object.
+// runs TEMPO on a vector of toa objects, using a given psrephem object.
 // returns a vector of residual objects, along with a new "post-fit"
-// psrParams object.
+// psrephem object.
 //
 // model     - input TEMPO-style PSR ephemeris
 // toas      - input toas
@@ -22,8 +22,8 @@
 //             be loaded
 // ////////////////////////////////////////////////////////////////////////
 
-void Tempo::fit (const psrParams& model, vector<toa>& toas,
-		 psrParams* postfit, bool track, DataPoint::State min_state)
+void Tempo::fit (const psrephem& model, vector<toa>& toas,
+		 psrephem* postfit, bool track, DataPoint::State min_state)
 {
   char* tempo_tim = "arrival.tim";
   char* tempo_par = "arrival.par";
@@ -98,8 +98,7 @@ void Tempo::fit (const psrParams& model, vector<toa>& toas,
   model.unload(tempo_par);
 
   // run TEMPO
-  string runtempo ("tempo ");
-  runtempo += tempo_tim;
+  string runtempo = get_system() + " " + string(tempo_tim) + " > /dev/null";
 
   if (verbose)
     cerr << "Tempo::fit system (" << runtempo << ")" << endl;
@@ -117,10 +116,10 @@ void Tempo::fit (const psrParams& model, vector<toa>& toas,
 
   // load the new ephemeris (PSRNAME.par in current working directory)
   if (postfit)
-    postfit->load( model.psrname() + ".par" );
+    postfit->load( (model.psrname() + ".par").c_str() );
 
   // load the residuals from resid2.tmp
-  resopen_ (&r2flun, tempo_res, (int) strlen(tempo_res));
+  fortopen_ (&r2flun, tempo_res, (int) strlen(tempo_res));
 
   for (iarr=0; iarr < toas.size(); iarr++)  {
 
@@ -136,5 +135,5 @@ void Tempo::fit (const psrParams& model, vector<toa>& toas,
   if (unloaded != 0)
     throw string ("Tempo::fit error read fewer residuals than unloaded toas");
 
-  resclose_ (&r2flun);
+  fortclose_ (&r2flun);
 }
