@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/pgutil/Plot3D.h,v $
-   $Revision: 1.2 $
-   $Date: 2001/08/19 14:44:17 $
+   $Revision: 1.3 $
+   $Date: 2001/08/21 15:37:19 $
    $Author: straten $*/
 
 #ifndef __CurvePlotter2D3_H
@@ -33,16 +33,22 @@ namespace Plot2D {
     void move (const Cartesian& pt);
     void draw (const Cartesian& pt);
     void plot (const Cartesian& pt, int symbol);
-    void text (const Cartesian& pt, const char* text);
+    void text (const Cartesian& pt, const char* text, float align=.5);
 
     void arrow (const Cartesian& from, const Cartesian& to);
 
     void poly (const vector<Cartesian>& pts);
 
+    // make hatching run parallel to pp
+    void set_hatch (const Cartesian& hp);
+
     // set camera position - phi and theta in degrees
     void set_camera (double theta, double phi);
 
     void where (float& x, float& y, const Cartesian& pt);
+
+    const Cartesian& get_xaxis () { return vx_axis; };
+    const Cartesian& get_yaxis () { return vy_axis; };
 
   protected:
     Cartesian vx_axis;

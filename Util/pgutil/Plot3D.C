@@ -20,10 +20,7 @@ void Plot2D::CurvePlotter3::poly (const vector<Cartesian>& pts)
   for (unsigned ipt=0; ipt<pts.size(); ipt++) {
     x[ipt] = float(pts[ipt] * vx_axis);
     y[ipt] = float(pts[ipt] * vy_axis);
-    cerr << ipt << " " << pts[ipt] 
-	 << " x=" << x[ipt] << " y=" << y[ipt] << endl;
   }
-  // x[0]=y[0]=0;
 
   if (Plot2D::Volume::verbose)
     cerr << "Plot2D::CurvePlotter3::poly call cpgpoly npt=" 
@@ -50,6 +47,15 @@ void Plot2D::CurvePlotter3::draw (const Cartesian& pt)
   cpgdraw (x, y);
 }
 
+void Plot2D::CurvePlotter3::set_hatch (const Cartesian& hp)
+{
+  float x = hp * vx_axis;
+  float y = hp * vy_axis;
+  float angle = 180/M_PI * atan (y/x);
+
+  cpgshs (angle, 1, 0);
+}
+
 void Plot2D::CurvePlotter3::plot (const Cartesian& pt, int symbol)
 {
   if (Plot2D::Volume::verbose)
@@ -64,14 +70,15 @@ void Plot2D::CurvePlotter3::plot (const Cartesian& pt, int symbol)
   cpgpt1 (x, y, symbol);
 }
 
-void Plot2D::CurvePlotter3::text (const Cartesian& pt, const char* text)
+void Plot2D::CurvePlotter3::text (const Cartesian& pt, 
+				  const char* text, float align)
 {
   if (Plot2D::Volume::verbose)
     cerr << "Plot2D::CurvePlotter3::text " << pt << endl;
 
   float x = pt * vx_axis;
   float y = pt * vy_axis;
-  cpgtext (x, y, text);
+  cpgptxt (x, y, 0, align, text);
 
 }
 
@@ -161,9 +168,6 @@ void Plot2D::CurvePlotter3::drawPlot (DataSet* plot)
   bool xerror = plot->has_xerror();
   bool yerror = plot->has_yerror();
   bool plot_error = (xerror || yerror);
-
-  bool plot_symbols = plot->has_symbol();
-  bool plot_labels = plot->has_pt_label();
 
   float x, y;
 
