@@ -8,7 +8,7 @@
 
 #include "Pulsar/PolnProfile.h"
 #include "Pulsar/PolnProfileFit.h"
-#include "Calibration/Instrument.h"
+#include "Calibration/Polar.h"
 
 #include "Phase.h"
 #include "toa.h"
@@ -72,7 +72,7 @@ int main (int argc, char *argv[])
       break;
 
     case 'i':
-      cout << "$Id: pat.C,v 1.15 2003/12/29 15:39:50 straten Exp $" << endl;
+      cout << "$Id: pat.C,v 1.16 2003/12/29 15:53:45 straten Exp $" << endl;
       return 0;
 
     case 'F':
@@ -130,7 +130,7 @@ int main (int argc, char *argv[])
     if (full_poln) {
 
       fit.set_standard( stdarch->get_Integration(0)->new_PolnProfile(0) );
-      fit.set_transformation( new Calibration::Instrument );
+      fit.set_transformation( new Calibration::Polar );
 
     }
     else
@@ -151,8 +151,6 @@ int main (int argc, char *argv[])
 	cerr << "Loading " << archives[i] << endl;
       
       arch = Pulsar::Archive::load(archives[i]);
-
-      arch -> rotate (0.0025);
 
       if (fscrunch)
 	arch->fscrunch();
