@@ -388,6 +388,19 @@ int telescope_coords (char telescope, float* latitude,
     elev = 392.0;
     break;
 
+  case 'i':
+    /* Westerbork, from:
+
+       WSRT Site Information Form
+       International GPS Service for Geodynamics
+       http://igscb.jpl.nasa.gov/mail/igsmail/2000/msg00323.html
+
+     */
+    latd = 52.9146;
+    longd = 6.6045;
+    elev = 86.0000;
+    break;
+
   default:
     fprintf (stderr, "telescope_coords: unknown telescope code %d\n",
 	     telescope);
