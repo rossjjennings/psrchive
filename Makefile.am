@@ -1,7 +1,21 @@
 
 SUBDIRS	= utils astro psrchive
 
-libs:
+bin_SCRIPTS = psrchive_cflags psrchive_ldflags
+
+psrchive_ldflags: Makefile
+	@echo "#!/bin/csh" > psrchive_ldflags
+	@echo "echo -L${prefix}/lib -lpsrchive -lpsrastro -lpsrutils \
+		@FFT_LIBS@ @SLA_LIBS@ @CFITSIO_LIBS@ @MPI_LIBS@ \
+		@PGPLOT_LIBS@ @QT_LIBS@" > psrchive_ldflags
+	@chmod a+x psrchive_ldflags
+
+psrchive_cflags: Makefile
+	@echo "#!/bin/csh" > psrchive_cflags
+	@echo "echo -I${prefix}/include" > psrchive_cflags
+	@chmod a+x psrchive_cflags
+
+libs: install-binSCRIPTS
 	$(MAKE) RECURSIVE_TARGETS="all-recursive libs-recursive" libs-recursive
 
 libs-am:
