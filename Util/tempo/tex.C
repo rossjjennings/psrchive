@@ -290,7 +290,7 @@ string psrephem::tex () const
     + tex_double (mp, mp_err) + nl;
 
   double beta, beta_err;
-  Shklovskii (beta, beta_err);
+  quadratic_Doppler (beta, beta_err);
   retval += "Quadratic Doppler shift, $\\beta$ (10$^{-20}$s$^{-1}$)" + bw
     + tex_double (beta*1e20, beta_err*1e20) + nl;
 
