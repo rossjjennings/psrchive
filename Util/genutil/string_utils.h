@@ -1,7 +1,7 @@
 //-*-C++-*-
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Attic/string_utils.h,v $
-   $Revision: 1.29 $
-   $Date: 2004/01/19 05:34:35 $
+   $Revision: 1.30 $
+   $Date: 2004/03/02 00:56:16 $
    $Author: hknight $ */
 
 #ifndef __STRING_UTILS_H
@@ -133,6 +133,12 @@ string stringdelimit(const vector<string>& words, char delimiter);
 
 // Returns one line per element of return vector
 vector<string> stringlines(const string& str);
+
+// Returns the number of words in a line
+unsigned nwords(string line);
+
+// Returns a particular word in a line (0 = first word)
+string read_word(string line,unsigned iword);
 
 // Stuff to turn an array of char *'s into a vector of strings
 // useful for taking lists of files on the command line

@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "Error.h"
 #include "string_utils.h"
 
 string& chop(string& ss){
@@ -261,9 +262,23 @@ vector<string> stringlines(const string& str)
   return lines;
 }
 
-string
-stringdelimit(const vector<string>& words, char delimiter)
-{
+// Returns the number of words in a line
+unsigned nwords(string line){
+  vector<string> words = stringdecimate(line," \t");
+  return words.size();
+}
+
+// Returns a particular word in a line (0 = first word)
+string read_word(string line,unsigned iword){
+  vector<string> words = stringdecimate(line," \t");
+  if( words.size() <= iword )
+    throw Error(InvalidState,"read_word()",
+		"Only %d words in line '%s' and you wanted word %d",
+		words.size(), line.c_str(), iword);
+  return words[iword];
+}
+
+string stringdelimit(const vector<string>& words, char delimiter){
   string str;
   vector<string>::const_iterator i;
 
