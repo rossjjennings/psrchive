@@ -150,6 +150,8 @@ double Pulsar::Profile::TimeShift (const Profile& std,
   double E = -1.0 * A;
   double F =  (-1.0 * B) / (2.0 * A);
 
+  /*
+
   // The error estimate is somewhat speculative... It is
   // computed as the full width at half maximum of the
   // parabola, assuming the baseline is the average level
@@ -167,7 +169,26 @@ double Pulsar::Profile::TimeShift (const Profile& std,
   // The error in phase units
   error = float(2.0 * sqrt((D - height)/E));
 
-  // The shift in phase units, wrapped to be between -1.0 and 1.0
+  */
+
+  // This estimate of the error uses the gradient of the
+  // parabola as a measure of the goodness of fit. The
+  // equation of the derivative is simply:
+  //
+  // Dy/Dx = 2Ax + B
+  //
+  // We compute the average gradient of the two points either
+  // side of the maximum correlation bin and use their inverse
+  // as a measure of the uncertainty.
+
+  double s1 = fabs(2.0 * A * x1);
+  double s2 = fabs(2.0 * A * x3);
+
+  double sa = (s1 + s2) / 2.0;
+
+  error = 0.5 * (1.0 / sa);
+
+  // The shift in phase units, wrapped to be between -0.5 and 0.5
   if (F < -0.5) {
     return (F + 1.0);
   }
