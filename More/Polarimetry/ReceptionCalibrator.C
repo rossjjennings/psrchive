@@ -41,7 +41,6 @@ void Pulsar::ReceptionCalibrator::set_calibrators (const vector<string>& names)
 }
 
 
-
 Pulsar::StandardModel::StandardModel (Calibrator::Type _model)
 {
   // ////////////////////////////////////////////////////////////////////
@@ -68,11 +67,11 @@ Pulsar::StandardModel::StandardModel (Calibrator::Type _model)
   poly -> set_infit(0, false);
   convert.connect (poly, &Calibration::Polynomial::set_abscissa);
 
-  Calibration::FunctionTransformation* backend;
-  backend = new Calibration::FunctionTransformation;
+  Calibration::ChainTransformation* backend;
+  backend = new Calibration::ChainTransformation;
 
-  backend -> set_Transformation ( operation );
-  backend -> set_Function (0, poly);
+  backend -> set_model ( operation );
+  backend -> set_constraint (0, poly);
 
 #endif
 
@@ -416,7 +415,7 @@ void Pulsar::ReceptionCalibrator::add_observation (const Archive* data)
     // the noise power in the baseline is used to estimate the
     // variance in each Stokes parameter
     vector< vector< double > > baseline_variance;
-    integration->baseline_power (baseline_variance);
+    integration->baseline_stats (0, &baseline_variance);
 
     for (unsigned ichan=0; ichan<nchan; ichan++) try {
 
@@ -481,7 +480,7 @@ Pulsar::ReceptionCalibrator::add_data(vector<Calibration::MeasuredState>& bins,
 
   Estimate<float> invariant = det(stokes_estimate);
 
-  if (invariant.val < invariant.var)  {
+  if ( invariant.val < sqrt(invariant.var) )  {
     cerr << "BAD data ichan=" << ichan << " ibin=" << ibin
          << "\n   stokes=" << stokes_estimate
          << "\n   inv=" << invariant << endl;
