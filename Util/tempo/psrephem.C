@@ -11,6 +11,8 @@
 #include "ephio.h"
 #include "psrephem.h"
 #include "string_utils.h"
+#include "genutil.h"
+#include "dirutil.h"
 
 psrephem::~psrephem(){ destroy(); }
 
@@ -230,6 +232,42 @@ int psrephem::old_unload (const char* filename) const
   return 0;
 }
 
+static string directory;
+
+string psrephem::get_directory ()
+{
+  char* unknown = "unknown";
+
+  if (!directory.length()) {
+    char* userid = getenv ("USER");
+    if (!userid)
+      userid = unknown;
+
+    directory = string ("/tmp/tempo/") + userid;
+  }
+
+  if (makedir (directory.c_str()) < 0)  {
+
+    if (verbose)
+      cerr << "get_directory failure creating '" << directory << "'" << endl;
+
+    char* home = getenv ("HOME");
+
+    if (home)
+      directory = home;
+    else
+      directory = ".";
+
+    directory += "/tempo.tmp";
+
+    if (makedir (directory.c_str()) < 0)
+      throw Error (InvalidState, "Tempo::get_directory",
+		   "cannot create a temporary working directory");
+  }
+
+  return directory;
+}
+
 string psrephem::par_lookup (const char* name, int use_cwd)
 {
   string filename;
@@ -243,7 +281,6 @@ string psrephem::par_lookup (const char* name, int use_cwd)
 
   // these string literals are assigned to char* to work around a
   // bug in the Sun C4.2 compiler
-  char* cwd = "./";
   char* tempo_cfg = "/tempo.cfg";
   char* psrinfo_cmd = "psrinfo -e ";
 
@@ -251,7 +288,7 @@ string psrephem::par_lookup (const char* name, int use_cwd)
     vector <string> exts = extensions ();
     for (unsigned iext=0; iext < exts.size(); iext++) {
       /* Look for jname.ext in current directory */
-      filename = cwd + psr_name + exts[iext];
+      filename = psr_name + exts[iext];
       if (stat (filename.c_str(), &finfo) == 0) {
 	if (verbose)
 	  cerr << "psrephem::Using " << filename << " from cwd" << endl;
@@ -314,17 +351,45 @@ string psrephem::par_lookup (const char* name, int use_cwd)
   /* Create name.eph in local directory */ 
 
   filename = psrinfo_cmd + psr_name;
-  if (verbose)
-    fprintf (stderr, "psrephem:: Creating %s.eph using psrinfo.\n",
-	     psr_name.c_str());
 
-  if (system(filename.c_str()) != 0) {
-    fprintf (stderr, "psrephem:: Error executing system (%s)\n",
-	     filename.c_str());
+  if (verbose)
+    cerr << "psrephem:: Creating ephemeris by psrinfo -e " << psr_name <<endl;
+
+  // start with a clean working directory
+  removedir (get_directory().c_str());
+
+  char cwd[FILENAME_MAX];
+
+  if (getcwd (cwd, FILENAME_MAX) == NULL)
+    throw Error (FailedSys, "psrephem", "failed getcwd");
+  
+  if (chdir (get_directory().c_str()) != 0)
+    throw Error (FailedSys, "psrephem",
+		 "failed chdir(" + get_directory() + ")");
+
+
+  int retval = system(filename.c_str());
+
+  if (chdir (cwd) != 0)
+    throw Error (FailedSys, "psrephem", "failed chdir(%s)", cwd);
+
+  if (retval != 0) {
+
+    cerr << "psrephem:: Error executing system (" + filename + ")" << endl;
     filename.erase();
     return filename;
+
   }
-  filename = cwd + psr_name + ".eph";
+
+  vector<string> filenames;
+  dirglob (&filenames, get_directory() + "*.eph");
+
+  if (filenames.size() != 1)
+    throw Error (InvalidState, "psrephem", "psrinfo created %d files",
+		 filenames.size());
+
+  filename = filenames[0];
+
   if (stat (filename.c_str(), &finfo) == 0) {
     if (verbose)
       printf("psrephem:: Using '%s'\n", filename.c_str());
@@ -335,6 +400,7 @@ string psrephem::par_lookup (const char* name, int use_cwd)
     fprintf (stderr, "psrephem:: Cannot find %s after call to psrinfo.\n", 
 	     filename.c_str());
   }
+
   filename.erase();
   return filename;
 }

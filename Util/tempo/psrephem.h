@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/psrephem.h,v $
-   $Revision: 1.28 $
-   $Date: 2003/12/29 06:03:58 $
-   $Author: rmanches $ */
+   $Revision: 1.29 $
+   $Date: 2004/01/24 02:05:34 $
+   $Author: straten $ */
 
 #ifndef __PSREPHEM_H
 #define __PSREPHEM_H
@@ -157,8 +157,11 @@ class psrephem : public Reference::Able
   int P (double& p, double& p_err) const;
   // returns the orbital period derivative
   int P_dot (double& pdot, double& pdot_err) const;
-    // returns the second orbital period derivative in seconds^-1
+  // returns the second orbital period derivative in seconds^-1
   int P_ddot (double& pddot, double& pddot_err) const;
+
+  // stability parameter of antt94
+  int psrephem::Delta_t (double& delta_t) const;
 
   // returns the transverse quadratic Doppler shift due to the apparent
   // acceleration along the line of sight that arises from proper motion
@@ -219,6 +222,9 @@ class psrephem : public Reference::Able
 
   // returns a block of LaTeX formatted text suitable for use in tables
   static string tex (vector<psrephem>& vals, bool dots=false);
+
+  // returns the directory path in which psrinfo will be run
+  string get_directory ();
 
   string par_lookup (const char* name, int use_cwd);
   static char* tempo_pardir;
