@@ -24,6 +24,21 @@ int ss2hhmmss (int* hours, int* min, int* sec, int seconds)
   return 0;
 }
 
+// no static kludgeyness, no memory leaks
+string MJD::printdays (unsigned precision) const
+{
+  char* temp = new char [precision + 10];
+  sprintf (temp, "%d", days);
+  string output = temp;
+  if (precision > 0)  {
+    sprintf (temp, "%*.*lf", precision+3, precision, fracday());
+    char* period = strchr (temp, '.');
+    output += period;
+  }
+  delete [] temp;
+  return output;
+}
+
 char * MJD::printdays() const {
   static char permanent[10];
   sprintf(permanent, "%d",days);
@@ -403,6 +418,7 @@ MJD::MJD (const utc_t& utc)
     throw ("MJD::MJD(utc_t) construct error");
 }
 
+
 int MJD::Construct (const utc_t& utc)
 {
   struct tm greg;
@@ -433,6 +449,23 @@ int MJD::Construct (time_t time)
   struct tm date = *gmtime(&time);
   return Construct (date);
 }
+
+int
+  // long long to get a 64-bit unsigned
+MJD::Construct(unsigned long long bat)
+{
+  // Not sure how to do 64-bit constants so let's construct it
+  unsigned long long microsecPerDay;
+
+  microsecPerDay = 86400; microsecPerDay *= 1000000;
+
+  days = bat/microsecPerDay;
+  secs = (bat%microsecPerDay)/1000000;
+  fracsec = 1.0e-6 * (bat%100000);
+
+  return 0;
+}
+  
 
 // construct an MJD from a gregorian
 MJD::MJD (const struct tm& greg)
