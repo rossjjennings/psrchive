@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pcm.C,v $
-   $Revision: 1.21 $
-   $Date: 2004/04/20 13:07:36 $
+   $Revision: 1.22 $
+   $Date: 2004/05/03 12:59:25 $
    $Author: straten $ */
 
 /*! \file pcm.C 
@@ -742,6 +742,11 @@ int mode_B (const char* standard_filename,
   // the reception calibration class
   Pulsar::PulsarCalibrator model (model_name);
 
+  if (maxbins_set)
+    model.set_maximum_harmonic (maxbins);
+
+  model.set_return_mean_solution (false);
+
   Reference::To<Pulsar::Archive> standard;
 
   standard = Pulsar::Archive::load (standard_filename);
@@ -750,9 +755,6 @@ int mode_B (const char* standard_filename,
   RealTimer clock;
 
   clock.start();
-
-  if (maxbins_set)
-    model.set_maximum_harmonic (maxbins);
 
   model.set_standard (standard);
 
@@ -763,6 +765,9 @@ int mode_B (const char* standard_filename,
     cerr << "pcm: loading " << filenames.size() << " files" << endl;
 
   Reference::To<Pulsar::Archive> archive;
+  Reference::To<Pulsar::Archive> solution;
+
+  bool add_to_standard = false;
 
   for (unsigned i = 0; i < filenames.size(); i++) try {
 
@@ -776,29 +781,42 @@ int mode_B (const char* standard_filename,
 
     model.add_observation( archive );
 
-    model.calibrate( archive );
+    string filename = filenames[i] + ".fits";
+    cerr << "pcm: unloading solution to " << filename << endl;
 
-    archive->deparallactify ();
+    solution = model.get_solution (archive_class);
+    solution->unload( filename );
 
-    archive->convert_state (Signal::Stokes);
-    standard->append (archive);
+    if (add_to_standard) {
 
-    standard->tscrunch ();
+      model.calibrate( archive );
+
+      archive->deparallactify ();
+
+      archive->convert_state (Signal::Stokes);
+      standard->append (archive);
+
+      standard->tscrunch ();
+
+    }
 
   }
   catch (Error& error) {
     cerr << error << endl;
   }
 
+  model.set_return_mean_solution (true);
   model.update_solution ();
 
-  Reference::To<Pulsar::Archive> solution = model.get_solution (archive_class);
+  solution = model.get_solution (archive_class);
 
   cerr << "pcm: unloading solution to pcm.fits" << endl;
   solution->unload( "pcm.fits" );
 
-  cerr << "pcm: unloading updated standard to pcm.std" << endl;
-  standard->unload( "pcm.std" );
+  if (add_to_standard) {
+    cerr << "pcm: unloading updated standard to pcm.std" << endl;
+    standard->unload( "pcm.std" );
+  }
 
   return 0;
 }
