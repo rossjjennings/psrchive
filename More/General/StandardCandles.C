@@ -182,14 +182,21 @@ Pulsar::FluxCalibratorDatabase::Entry
 Pulsar::FluxCalibratorDatabase::match (const string& source, double MHz) const
 {
   Entry best_match;
+  Entry candidate;
 
-  for (unsigned ie=0; ie<entries.size(); ie++)
+  for (unsigned ie=0; ie<entries.size(); ie++) {
     if (entries[ie].matches(source)) {
-      double diff = fabs(entries[ie].reference_frequency - MHz);
-      double best_diff = fabs(best_match.reference_frequency - MHz);
-      if (diff < best_diff)
+      // Added this next "if" to ensure that a match is returned
+      // even if there is only one appropriate entry. AWH 28/2/05
+      if (best_match.reference_frequency == 0)
 	best_match = entries[ie];
+      double diff = fabs(candidate.reference_frequency - MHz);
+      double best_diff = fabs(best_match.reference_frequency - MHz);
+      if (diff < best_diff) {
+	best_match = entries[ie];
+      }
     }
+  }
 
   if (best_match.reference_frequency == 0)
     throw Error (InvalidParam, "Pulsar::FluxCalibratorDatabase::match",
