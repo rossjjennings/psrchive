@@ -9,6 +9,7 @@
 #include "poly.h"
 
 string polyco::any_psr;   // an empty string!!
+MJD polyco::today;        // MJD zero
 int polyco::verbose = 0;
 
 void polynomial::init(){
