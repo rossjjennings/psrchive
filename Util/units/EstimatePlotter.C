@@ -18,6 +18,12 @@ EstimatePlotter::EstimatePlotter ()
   viewports_set = false;
 }
 
+//! Set the border used when setting the world coordinates of the viewport
+void EstimatePlotter::set_border (float fraction_x, float fraction_y)
+{
+  x_border = fraction_x;
+  y_border = fraction_y;
+}
 
 void EstimatePlotter::set_xrange (float xmin, float xmax)
 {
