@@ -48,11 +48,13 @@ int main (int argc, char *argv[]) {
 
   bool pscr = false;
 
+  bool invint = false;
+
   string command = "pam";
 
   int gotc = 0;
   
-  while ((gotc = getopt(argc, argv, "hvVme:TFpt:f:b:d:s:r:w:")) != -1) {
+  while ((gotc = getopt(argc, argv, "hvVme:TFpit:f:b:d:s:r:w:")) != -1) {
     switch (gotc) {
     case 'h':
       cout << "A program for manipulating Pulsar::Archives"            << endl;
@@ -65,6 +67,7 @@ int main (int argc, char *argv[]) {
       cout << "  -T               Time scrunch"                        << endl;
       cout << "  -F               Frequency scrunch"                   << endl;
       cout << "  -p               Polarisation scrunch"                << endl;
+      cout << "  -i               Transform to Invariant Interval"     << endl;
       cout << "  -t [int f]       Time scrunch by a factor of f"       << endl;
       cout << "  -f [int f]       Frequency scrunch by a factor of f"  << endl;
       cout << "  -b [int f]       Bin scrunch by a factor of f"        << endl;
@@ -99,6 +102,11 @@ int main (int argc, char *argv[]) {
     case 'p':
       pscr = true;
       command += " -p";
+      break;
+    case 'i':
+      invint = true;
+      pscr = false;
+      command += " -i";
       break;
     case 'f':
       fscr = true;
@@ -230,6 +238,18 @@ int main (int argc, char *argv[]) {
 	}
       }
       
+      if (pscr) {
+	arch->pscrunch();
+	if (verbose)
+	  cout << arch->get_filename() << " pscrunched" << endl;
+      } 
+
+      if (invint) {
+	arch->invint();
+	if (verbose)
+	  cout << arch->get_filename() << " invinted" << endl;
+      }
+      
       if (fscr) {
 	if (fscr_fac > 0) {
 	  arch->fscrunch(fscr_fac);
@@ -249,13 +269,7 @@ int main (int argc, char *argv[]) {
 	if (verbose)
 	  cout << arch->get_filename() << " bscrunched by a factor of " 
 	       << bscr_fac << endl;
-      }
-      
-      if (pscr) {
-	arch->pscrunch();
-	if (verbose)
-	  cout << arch->get_filename() << " pscrunched" << endl;
-      }      
+      }     
 
       if (smear) {
 	for (unsigned i = 0; i < arch->get_nsubint(); i++) {

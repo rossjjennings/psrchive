@@ -283,7 +283,16 @@ void Pulsar::Archive::fold (unsigned nfold)
 
 void Pulsar::Archive::invint ()
 {
-
+  if (get_nsubint() == 0)
+    return;
+  
+  remove_baseline();
+  
+  for (unsigned isub=0; isub < get_nsubint(); isub++) {
+    get_Integration(isub) -> invint ();
+  }
+  
+  set_state(Signal::Invariant);
 }
 
 /*!
