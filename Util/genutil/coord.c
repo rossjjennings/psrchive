@@ -111,6 +111,10 @@ int str2dec (double *dec, const char* dectring)
 
   decsign = 1;
 
+  /* rte modif to skip leading spaces */
+  while (*decstr==' ')
+    decstr++;
+
   if (decstr[0] == '-') {
     decsign = -1;
     decstr ++;
