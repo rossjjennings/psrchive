@@ -110,7 +110,10 @@ Rhythm::Rhythm (QWidget* parent, int argc, char** argv) :
 
   leftpanel = new QVBox(container);
 
-  QPixmap* pretty_pic = new QPixmap("/home/cluster/ahotan/cvshome/soft_swin/tas/rhythm/banner.jpg");
+  string banloc = getenv("CVSHOME");
+  banloc += "/soft_swin/tas/rhythm/banner.jpg";
+
+  QPixmap* pretty_pic = new QPixmap(banloc.c_str());
   header = new QLabel(leftpanel);
   header->setFrameStyle( QFrame::Panel | QFrame::Sunken );
   header->setPixmap(*pretty_pic);
