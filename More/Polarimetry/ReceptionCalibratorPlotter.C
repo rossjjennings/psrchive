@@ -265,11 +265,11 @@ Pulsar::ReceptionCalibrator::CalInfo::get_name (unsigned iclass) const
 {
   switch (iclass) {
   case 0:
-    return "Calibrator";
+    return "Noise Diode";
   case 1:
-    return "Flux Calibrator";
+    return "System + Hydra A";
   case 2:
-    return "Flux Stokes";
+    return "Hydra A (Q,U,V)";
   default:
     return "";
   }
