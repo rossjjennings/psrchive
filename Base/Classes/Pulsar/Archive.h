@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Archive.h,v $
-   $Revision: 1.83 $
-   $Date: 2003/09/11 20:56:40 $
+   $Revision: 1.84 $
+   $Date: 2003/09/12 08:36:34 $
    $Author: straten $ */
 
 /*! \mainpage 
@@ -829,9 +829,9 @@ namespace Pulsar {
   template<class ExtensionType>
   const ExtensionType* Archive::get_extension () const
   {
-    ExtensionType* extension = 0;
-    for (unsigned iext=0; iext<archive->get_nextension(); iext++) {
-      extension = dynamic_cast<ExtensionType*>( archive->get_extension(iext) );
+    const ExtensionType* extension = 0;
+    for (unsigned iext=0; iext<get_nextension(); iext++) {
+      extension = dynamic_cast<const ExtensionType*>( get_extension(iext) );
       if (extension)
 	break;
     }
@@ -841,7 +841,8 @@ namespace Pulsar {
   template<class ExtensionType>
   ExtensionType* Archive::get_extension ()
   {
-    return const_cast<ExtensionType*>( get_extension<ExtensionType>() );
+    const Archive* thiz = this;
+    return const_cast<ExtensionType*>( thiz->get_extension<ExtensionType>() );
   }
 
 }

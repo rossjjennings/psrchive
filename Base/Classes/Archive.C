@@ -83,7 +83,8 @@ Pulsar::Archive::get_extension (unsigned iextension) const
 Pulsar::Archive::Extension*
 Pulsar::Archive::get_extension (unsigned iextension)
 {
-  return const_cast<Extension*>( get_extension(iextension) );
+  const Archive* thiz = this;
+  return const_cast<Extension*>( thiz->get_extension(iextension) );
 }
 
 /*! Derived classes need only define this method, as the non-const version
