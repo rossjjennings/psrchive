@@ -3,6 +3,7 @@
 
 #include "machine_endian.h"
 #include "compressed_io.h"
+#include "environ.h"
 
 int fwrite_compressed (FILE* fptr, vector<float>& vals)
 {
@@ -37,8 +38,8 @@ int fwrite_compressed (FILE* fptr, vector<float>& vals)
     return -1;
   }
 
-  unsigned long size = vals.size();
-  writ = fwrite (&size, sizeof(unsigned long), 1, fptr);
+  uint64 size = vals.size();
+  writ = fwrite (&size, sizeof(uint64), 1, fptr);
   if (writ < 1) {
     perror ("fwrite_compressed: error fwrite(size)\n");
     return -1;
@@ -57,7 +58,8 @@ int fwrite_compressed (FILE* fptr, vector<float>& vals)
   return 0;
 }
 
-int fread_compressed (FILE* fptr, vector<float>* vals, bool swapendian)
+int fread_compressed (FILE* fptr, vector<float>* vals, bool swapendian,
+		      bool correct_uint64_bug)
 {
   size_t red;
 
@@ -75,21 +77,33 @@ int fread_compressed (FILE* fptr, vector<float>* vals, bool swapendian)
     return -1;
   }
 
-  unsigned long size = 0;
-  red = fread (&size, sizeof(unsigned long), 1, fptr);
+  uint64 size = 0;
+
+  if (correct_uint64_bug) {
+    uint32 fix_size;
+    red = fread (&fix_size, sizeof(uint32), 1, fptr);
+    if (swapendian)
+      ChangeEndian (fix_size);
+    size = fix_size;
+  }
+  else {
+    red = fread (&size, sizeof(uint64), 1, fptr);
+    if (swapendian)
+      ChangeEndian (size);
+  }
+
   if (red < 1) {
     perror ("fread_compressed: error fread(size)\n");
     return -1;
   }
-
+  
   if (swapendian) {
     ChangeEndian (offset);
     ChangeEndian (ratio);
-    ChangeEndian (size);
   }
-
+  
   vals->resize (size);
-
+  
   unsigned short value = 0;
   for (vector<float>::iterator ind=vals->begin(); ind!=vals->end(); ind++) {
     red = fread (&value, sizeof(unsigned short), 1, fptr);

@@ -21,4 +21,5 @@ int fwrite_compressed (FILE* fptr, vector<float>& vals);
 //    reads in a vector of floats written by the above function...
 //    set 'swapendian' to true if the file was written on a machine of 
 //    opposite endian.
-int fread_compressed (FILE* fptr, vector<float>* vals, bool swapendian=false);
+int fread_compressed (FILE* fptr, vector<float>* vals, bool swapendian=false,
+		      bool correct_uint64_bug = false);
