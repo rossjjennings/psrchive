@@ -29,6 +29,7 @@
 
 #include "Telescope.h"
 #include "string_utils.h"
+#include "ephio.h"
 
 //! null constructor
 // //////////////////////////
@@ -637,7 +638,8 @@ void Pulsar::FITSArchive::load_header (const char* filename)
 
     ephemeris = new psrephem;
     ephemeris->load(fptr);
-    dispersion_measure = ephemeris->get_dm();
+    set_dispersion_measure( ephemeris->get_dm() );
+    set_rotation_measure( ephemeris->get_double(EPH_RM) );
 
     if (verbose == 3)
       cerr << "FITSArchive::load_header ephemeris loaded" << endl;
@@ -645,7 +647,8 @@ void Pulsar::FITSArchive::load_header (const char* filename)
   }
   else {
     ephemeris = 0;
-    dispersion_measure = 0;
+    set_dispersion_measure (0);
+    set_rotation_measure (0);
   }
 
   // Load the polyco from the FITS file
