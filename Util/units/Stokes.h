@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Stokes.h,v $
-   $Revision: 1.7 $
-   $Date: 2003/05/30 09:35:15 $
-   $Author: pulsar $ */
+   $Revision: 1.8 $
+   $Date: 2003/12/27 11:59:13 $
+   $Author: straten $ */
 
 #ifndef __Stokes_H
 #define __Stokes_H
@@ -38,9 +38,9 @@ class Stokes : public Quaternion<T, Hermitian>
     Stokes& operator = (const Quaternion<U,Hermitian>& q)
   { Quaternion<T,Hermitian>::operator = (q); return *this; }
   
-  template <typename U>
-    Stokes& operator = (const Quaternion<complex<U>,Hermitian>& q)
-  { Quaternion<T,Hermitian>::operator = (real(q));
+  Stokes& operator = (const Quaternion<complex<T>,Hermitian>& q)
+  { 
+    Quaternion<T,Hermitian>::operator = (real(q));
     Quaternion<T,Hermitian> imaginary (imag(q));
     T nr = norm(*this);
     T ni = norm(imaginary);
