@@ -14,21 +14,22 @@ int Phase::mpiPack_size (MPI_Comm comm, int* size) const
   total_size += temp_size;
 
   *size = total_size;
-  return(0);
+  return 0;
 }
 
 int Phase::mpiPack (void* outbuf, int outcount, int* position, 
-		    MPI_Comm comm) const {
-  MPI_Pack ((void*)&turns,        	   1, MPI_INT,    outbuf, outcount, position, comm);
-  MPI_Pack ((void*)&fturns,        	   1, MPI_DOUBLE,  outbuf, outcount, position, comm);
+		    MPI_Comm comm) const 
+{
+  MPI_Pack ((void*)&turns, 1, MPI_INT, outbuf, outcount, position, comm);
+  MPI_Pack ((void*)&fturns, 1, MPI_DOUBLE, outbuf, outcount, position, comm);
   return MPI_SUCCESS;
 }
 
 int Phase::mpiUnpack (void* inbuf, int insize, int* position, 
 		      MPI_Comm comm)
 {
-
-  MPI_Unpack (inbuf, insize, position, &turns, 	                 1, MPI_INT,    comm);
-  MPI_Unpack (inbuf, insize, position, &fturns,         	 1, MPI_DOUBLE,  comm);
+  MPI_Unpack (inbuf, insize, position, &turns, 1, MPI_INT, comm);
+  MPI_Unpack (inbuf, insize, position, &fturns, 1, MPI_DOUBLE,  comm);
   return MPI_SUCCESS;
 }
+
