@@ -1,8 +1,14 @@
 /* $Log: MJD.C,v $
-/* Revision 1.7  1998/09/21 09:29:42  mbritton
-/* Added operator != and increased the precision printed by printfs to 15 digits,
-/* which is the precision of a double.
+/* Revision 1.8  1998/09/23 02:09:46  mbritton
+/* Added operators >= <= and !=
+/* Placed a limit on the precision of these comparisons of 2*pow(10,-DBL_DIG)
+/* fracsecs, where DBL_DIG is defined in /usr/include/float.h as the max
+/* precision of a double
 /*
+ * Revision 1.7  1998/09/21  09:29:42  mbritton
+ * Added operator != and increased the precision printed by printfs to 15 digits,
+ * which is the precision of a double.
+ *
  * Revision 1.6  1998/09/08  13:03:35  straten
  * put back nint with #ifdef sun solution
  *
@@ -114,28 +120,50 @@ MJD operator - (const MJD &m1, const MJD &m2) {
 int operator > (const MJD &m1, const MJD &m2) {
   if (m1.days != m2.days) return (m1.days>m2.days);
   if (m1.secs != m2.secs) return (m1.secs>m2.secs);
-  return (m1.fracsec>m2.fracsec);
+  double precision_limit = 2*pow(10,-DBL_DIG);
+  if(fabs(m1.fracsec-m2.fracsec)<precision_limit) return(0);
+  else return (m1.fracsec>m2.fracsec);
+}
+
+int operator >= (const MJD &m1, const MJD &m2) {
+  if (m1.days != m2.days) return (m1.days>m2.days);
+  if (m1.secs != m2.secs) return (m1.secs>m2.secs);
+  double precision_limit = 2*pow(10,-DBL_DIG);
+  if(fabs(m1.fracsec-m2.fracsec)<precision_limit) return(1);
+  else return (m1.fracsec>m2.fracsec);
 }
 
 int operator < (const MJD &m1, const MJD &m2) {
   if (m1.days != m2.days) return (m1.days<m2.days);
   if (m1.secs != m2.secs) return (m1.secs<m2.secs);
-  return (m1.fracsec<m2.fracsec);
+  double precision_limit = 2*pow(10,-DBL_DIG);
+  if(fabs(m1.fracsec-m2.fracsec)<precision_limit) return(0);
+  else return (m1.fracsec<m2.fracsec);
+}
+
+int operator <= (const MJD &m1, const MJD &m2) {
+  if (m1.days != m2.days) return (m1.days<m2.days);
+  if (m1.secs != m2.secs) return (m1.secs<m2.secs);
+  double precision_limit = 2*pow(10,-DBL_DIG);
+  if(fabs(m1.fracsec-m2.fracsec)<precision_limit) return(1);
+  else return (m1.fracsec<m2.fracsec);
 }
 
 int operator == (const MJD &m1, const MJD &m2){
+  double precision_limit = 2*pow(10,-DBL_DIG);
   if ((m1.days == m2.days) &&
       (m1.secs == m2.secs) &&
-      (m1.fracsec==m2.fracsec)) 
+      (fabs(m1.fracsec-m2.fracsec)<precision_limit)) 
       return (1);
   else
       return (0);  
 }
 
 int operator != (const MJD &m1, const MJD &m2){
+  double precision_limit = 2*pow(10,-DBL_DIG);
   if ((m1.days != m2.days) ||
       (m1.secs != m2.secs) ||
-      (m1.fracsec!=m2.fracsec)) 
+      (fabs(m1.fracsec-m2.fracsec)>precision_limit)) 
       return (1);
   else
       return (0);  
