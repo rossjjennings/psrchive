@@ -12,7 +12,6 @@ void Pulsar::BasicIntegration::init ()
 
 Pulsar::BasicIntegration::BasicIntegration (const Integration& subint,
 					    int _npol, int _nchan)
-  : Integration (subint, _npol, _nchan)
 {
   Integration::copy (subint);
 }

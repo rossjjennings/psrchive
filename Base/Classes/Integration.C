@@ -36,14 +36,16 @@ Pulsar::Profile* Pulsar::Integration::new_Profile ()
   return profile;
 }
 
-
-Pulsar::Integration::Integration (const Integration& subint,
-				  int _npol, int _nchan)
+/*!
+  Copy the commonn information from another Integration
+*/
+void Pulsar::Integration::copy (const Integration& subint,
+				int _npol, int _nchan)
 {
-  if (_npol == 0)
+  if (_npol < 0)
     _npol = subint.get_npol();
 
-  if (_nchan == 0)
+  if (_nchan < 0)
     _nchan = subint.get_nchan();
 
   if (_npol > subint.get_npol())
@@ -59,11 +61,7 @@ Pulsar::Integration::Integration (const Integration& subint,
   for (int ipol=0; ipol<_npol; ipol++)
     for (int ichan=0; ichan<_nchan; ichan++)
       *(profiles[ipol][ichan]) = *(subint.profiles[ipol][ichan]);
-}
 
-//! copy the main information from another subint
-void Pulsar::Integration::copy (const Integration& subint)
-{
   set_mid_time ( subint.get_mid_time());
   set_duration ( subint.get_duration());
   set_centre_frequency ( subint.get_centre_frequency() );
