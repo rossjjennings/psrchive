@@ -44,8 +44,10 @@ string MJD::printdays (unsigned prec) const
   if (prec > 0)  {
     sprintf (temp, "%*.*lf", prec+3, prec, fracday());
     char* period = strchr (temp, '.');
-    if (!period)
-      output += "." + temp;
+    if (!period)  {
+      output += ".";
+      output += temp;
+    }
     else
       output += period;
   }
