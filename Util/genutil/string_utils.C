@@ -94,6 +94,29 @@ stringdecimate(const string& wordstr, string delimiters)
   return words;
 }
 
+// Returns one line per element of return vector
+vector<string> stringlines(const string& str)
+{
+  vector<string> lines;
+
+  if( str.size()==0 )
+    return lines;
+  
+  char* cptr = (char*)str.begin();
+  char* dend = cptr + str.size();
+  char* start = cptr;
+
+  while( cptr!=dend ){
+    if( *cptr=='\n' ){
+      lines.push_back( string(start,cptr) );
+      start = cptr+1;
+    }
+    cptr++;
+  }
+
+  return lines;
+}
+
 string
 stringdelimit(const vector<string>& words, char delimiter)
 {
