@@ -1,5 +1,5 @@
 //
-// $Id: pav.C,v 1.68 2004/01/05 11:09:10 ahotan Exp $
+// $Id: pav.C,v 1.69 2004/02/06 03:50:18 ahotan Exp $
 //
 // The Pulsar Archive Viewer
 //
@@ -269,7 +269,7 @@ int main (int argc, char** argv)
       plotter.set_subint( atoi (optarg) );
       break;
     case 'i':
-      cout << "$Id: pav.C,v 1.68 2004/01/05 11:09:10 ahotan Exp $" << endl;
+      cout << "$Id: pav.C,v 1.69 2004/02/06 03:50:18 ahotan Exp $" << endl;
       return 0;
 
     case 'j':
@@ -604,13 +604,13 @@ int main (int argc, char** argv)
     }
 
     if (cbppo) {
-      Pulsar::IntegrationOrder* myio = new Pulsar::BinaryPhaseOrder();
+      Pulsar::IntegrationOrder* myio = new Pulsar::PeriastronOrder();
       archive->add_extension(myio); 
       myio->organise(archive, ronsub);
     }
     
     if (cbpao) {
-      Pulsar::IntegrationOrder* myio = new Pulsar::PeriastronOrder();
+      Pulsar::IntegrationOrder* myio = new Pulsar::BinaryPhaseOrder();
       archive->add_extension(myio);
       myio->organise(archive, ronsub);
     }
