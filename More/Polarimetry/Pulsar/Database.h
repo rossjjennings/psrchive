@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/Database.h,v $
-   $Revision: 1.6 $
-   $Date: 2004/10/12 13:28:03 $
+   $Revision: 1.7 $
+   $Date: 2004/10/25 11:12:03 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Database_h
@@ -41,24 +41,30 @@ namespace Pulsar {
     //! The maximum angular separation between calibrator and pulsar
     static double max_angular_separation;
 
+    //! Pass this to the criterion methods to retrieve any or all matches
+    static const Pulsar::Archive* any;
+
     //! Null constructor
     Database ();
     
     //! Construct a database from archives in a directory
-    Database (string path, const vector<string>& extensions);
+    Database (const string& path, const vector<string>& extensions);
     
     //! Construct a database from a pre-built ascii file
-    Database (const char* filename);
+    Database (const string& filename);
     
     //! Destructor.
     ~Database ();
     
     //! Write a text file representing the database to disk for storage.
-    void unload (const char* dbase_filename);
+    void unload (const string& dbase_filename);
 
     //! Read a text file summary and construct a database
-    void load (const char* dbase_filename);
+    void load (const string& dbase_filename);
     
+    //! Add the given Archive to the database
+    void add (const Pulsar::Archive* archive);
+
     //! Return a pointer to a new PolnCalibrator for the given archive
     PolnCalibrator* generatePolnCalibrator (Archive*, Calibrator::Type m);
  
@@ -108,6 +114,9 @@ namespace Pulsar {
       // unload ascii string
       void unload (string& str);
       
+      friend bool operator < (const Entry& a, const Entry& b)
+      { return a.time < b.time; }
+
     protected:
       
       //! Clean slate
@@ -134,9 +143,13 @@ namespace Pulsar {
       bool check_obs_type;
       bool check_time;
       bool check_coordinates;
-     
+
+      //! Default constructor
       Criterion ();
       
+      //! Called when no observation parameters are to be matched
+      void no_data ();
+
       //! Return true if entry matches within the criterion
       bool match (const Entry& entry) const;
       
@@ -149,24 +162,24 @@ namespace Pulsar {
     static Criterion get_default_criterion ();
 
     //! Set the default matching criterion for all observations
-    static void set_default_criterion (const Criterion& criterion);
+    static void set_default_criterion (const Criterion&);
 
-    //! Returns a vector of Entry instances that match the given Criterion
-    vector<Entry> all_matching (const Criterion& criterion) const;
-    
     //! Returns the best Entry that matches the given Criterion
-    Entry best_match (const Criterion& criterion) const;
+    Entry best_match (const Criterion&) const;
 
+    //! Fills a vector with Entry instances that match the given Criterion
+    void all_matching (const Criterion&, vector<Entry>& matches) const;
+    
     //! Return the Criterion for the specified Pulsar::Archive
-    Criterion criterion (Pulsar::Archive* arch,
+    Criterion criterion (const Pulsar::Archive* arch,
 			 Signal::Source obsType) const;
     
     //! Return the Criterion for the specified Pulsar::Archive
-    Criterion criterion (Pulsar::Archive* archive,
+    Criterion criterion (const Pulsar::Archive* archive,
 			 Calibrator::Type calType) const;
 
     //! Returns the full pathname of the Entry filename
-    string get_filename (const Entry& entry) const;
+    string get_filename (const Entry&) const;
     
 
   protected:

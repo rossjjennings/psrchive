@@ -34,6 +34,9 @@ double Pulsar::Database::short_time_scale = 120.0;
 /*! By default, the maximum angular separation is 5 degrees */
 double Pulsar::Database::max_angular_separation = 5.0;
 
+/*! This null parameter is intended only to improve code readability */
+const Pulsar::Archive* Pulsar::Database::any = 0;
+
 // //////////////////////////////////////////////////////////////////////
 //
 // Pulsar::Database::Entry
@@ -196,6 +199,16 @@ Pulsar::Database::Criterion::Criterion ()
   check_coordinates = true;
 }
 
+void Pulsar::Database::Criterion::no_data ()
+{
+  check_obs_type    = true;
+  check_receiver    = false;
+  check_instrument  = false;
+  check_frequency   = false;
+  check_bandwidth   = false;
+  check_time        = false;
+  check_coordinates = false;
+}
 
 //! returns true if this matches observation parameters
 bool Pulsar::Database::Criterion::match (const Entry& have) const
@@ -376,7 +389,7 @@ Pulsar::Database::Database ()
   path = "unset";
 }
 
-Pulsar::Database::Database (const char* filename)
+Pulsar::Database::Database (const string& filename)
 {
   path = "unset";
 
@@ -409,7 +422,8 @@ string get_current_path ()
 /*! This constructor scans the given directory for calibrator files
   ending in the extensions specified in the second argument.
 */      
-Pulsar::Database::Database (string _path, const vector<string>& extensions)
+Pulsar::Database::Database (const string& _path, 
+			    const vector<string>& extensions)
 {
   string current = get_current_path ();
 
@@ -425,10 +439,6 @@ Pulsar::Database::Database (string _path, const vector<string>& extensions)
     patterns[i] = "*." + extensions[i];
 
   dirglobtree (&filenames, "", patterns);
-
-  if (chdir(current.c_str()) != 0)
-    throw Error (FailedSys, "Pulsar::Database", "chdir("+current+")");
-
 
   if (verbose)
     cerr << "Pulsar::Database " << filenames.size() 
@@ -447,8 +457,7 @@ Pulsar::Database::Database (string _path, const vector<string>& extensions)
     if (verbose)
       cerr << "Pulsar::Database create new Entry" << endl;
     
-    Entry new_entry(*newArch);
-    entries.push_back(new_entry);
+    add (newArch);
     
   }
   catch (Error& error) {
@@ -459,6 +468,9 @@ Pulsar::Database::Database (string _path, const vector<string>& extensions)
     cerr << "Pulsar::Database constructed with "
          << entries.size() << " Entries" << endl; 
   
+  if (chdir(current.c_str()) != 0)
+    throw Error (FailedSys, "Pulsar::Database", "chdir("+current+")");
+
 }
 
 //! Destructor
@@ -467,11 +479,12 @@ Pulsar::Database::~Database ()
 }
 
 //! Loads an entire database from a file
-void Pulsar::Database::load (const char* dbase_filename)
+void Pulsar::Database::load (const string& dbase_filename)
 {
-  FILE* fptr = fopen (dbase_filename, "r");
+  FILE* fptr = fopen (dbase_filename.c_str(), "r");
   if (!fptr)
-    throw Error (FailedCall, "Pulsar::Database::load fopen");
+    throw Error (FailedCall, "Pulsar::Database::load",
+		 "fopen (" + dbase_filename + ")");
 
   bool old_style = false;
 
@@ -484,7 +497,7 @@ void Pulsar::Database::load (const char* dbase_filename)
       cerr << "Pulsar::Database::load old database summmary file" << endl;
     else
       throw Error (InvalidParam, "Pulsar::Database::load",
-                   "%s is not a database file", dbase_filename);
+                   dbase_filename + " is not a database file");
     old_style = true;
   }
 
@@ -519,11 +532,8 @@ void Pulsar::Database::load (const char* dbase_filename)
 }
 
 //! Unloads entire database to file
-void Pulsar::Database::unload (const char* dbase_filename)
+void Pulsar::Database::unload (const string& filename)
 {
-  string filename = path + "/";
-  filename += dbase_filename;
-
   FILE* fptr = fopen (filename.c_str(), "w");
   if (!fptr)
     throw Error (FailedSys, "Pulsar::Database::unload" 
@@ -538,24 +548,33 @@ void Pulsar::Database::unload (const char* dbase_filename)
     fprintf (fptr, "%s\n", out.c_str());
   }
   fclose (fptr);
-
 }
 
+//! Add the given Archive to the database
+void Pulsar::Database::add (const Pulsar::Archive* archive)
+{
+  if (!archive)
+    throw Error (InvalidParam, "Pulsar::Database::add", "null Archive*");
 
-vector<Pulsar::Database::Entry> 
-Pulsar::Database::all_matching (const Criterion& criterion) const
+  Entry entry (*archive);
+
+  // strip the base path name off of the entry filename
+  if (entry.filename.substr(0, path.length()) == path)
+    entry.filename.erase (0, path.length()+1);
+
+  entries.push_back (entry);
+}
+
+void Pulsar::Database::all_matching (const Criterion& criterion,
+				     vector<Entry>& matches) const
 {
   if (verbose)
     cerr << "Pulsar::Database::all_matching " << entries.size()
          << " entries" << endl;
   
-  vector<Pulsar::Database::Entry> matches;
-  
   for (unsigned j = 0; j < entries.size(); j++)   
     if (criterion.match (entries[j]))
       matches.push_back(entries[j]);
-  
-  return matches;
 }
 
 Pulsar::Database::Entry 
@@ -608,14 +627,18 @@ void Pulsar::Database::set_default_criterion (const Criterion& criterion)
 
 
 Pulsar::Database::Criterion
-Pulsar::Database::criterion (Pulsar::Archive* arch,
+Pulsar::Database::criterion (const Pulsar::Archive* arch,
 			     Signal::Source obsType) const
 {
   Criterion criterion = get_default_criterion();
 
   criterion.minutes_apart = short_time_scale;
 
-  criterion.entry = Entry (*arch);
+  if (arch)
+    criterion.entry = Entry (*arch);
+  else
+    criterion.no_data ();
+
   criterion.entry.obsType = obsType;
 
   return criterion;
@@ -623,7 +646,7 @@ Pulsar::Database::criterion (Pulsar::Archive* arch,
 
 //! Returns one Entry that matches the given parameters and is nearest in time.
 Pulsar::Database::Criterion
-Pulsar::Database::criterion (Pulsar::Archive* arch, 
+Pulsar::Database::criterion (const Pulsar::Archive* arch, 
 			     Calibrator::Type calType) const
 {
   Criterion criterion = get_default_criterion();
@@ -639,7 +662,10 @@ Pulsar::Database::criterion (Pulsar::Archive* arch,
   else
     criterion.minutes_apart = short_time_scale;
 
-  criterion.entry = Entry (*arch);
+  if (arch)
+    criterion.entry = Entry (*arch);
+  else
+    criterion.no_data ();
 
   criterion.entry.obsType = Signal::Calibrator;
   criterion.entry.calType = calType;
@@ -689,7 +715,8 @@ Pulsar::Database::rawFluxCalibrator (Pulsar::Archive* arch)
 
   criterion.entry = Entry (*arch);
   criterion.entry.obsType = Signal::FluxCalOn;
-  vector<Pulsar::Database::Entry> oncals = all_matching (criterion);
+  vector<Pulsar::Database::Entry> oncals;
+  all_matching (criterion, oncals);
 
   if (!oncals.size())
     throw Error (InvalidState, 
@@ -697,7 +724,8 @@ Pulsar::Database::rawFluxCalibrator (Pulsar::Archive* arch)
                  "no FluxCalOn observations found to match observation");
 
   criterion.entry.obsType = Signal::FluxCalOff;
-  vector<Pulsar::Database::Entry> offcals = all_matching (criterion);
+  vector<Pulsar::Database::Entry> offcals;
+  all_matching (criterion, offcals);
 
   if (!offcals.size())
     throw Error (InvalidState,
