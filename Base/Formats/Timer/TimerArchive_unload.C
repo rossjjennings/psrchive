@@ -22,7 +22,7 @@ void Pulsar::TimerArchive::unload_file (const char* filename) const
   if (has_alt_order)
     throw Error(InvalidState, "Archive::add_extension",
 		"The TimerArchive class does not support unloading of files with"
-		"alternate IntegrationOrder extensions");
+		" alternate IntegrationOrder extensions");
   
   FILE* fptr = fopen (filename, "w");
   if (!fptr)
