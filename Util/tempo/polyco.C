@@ -1,4 +1,6 @@
-#include <iostream>
+#include "poly.h"
+#include "string_utils.h"
+#include "Error.h"
 
 #include <stdio.h> 
 #include <stdlib.h>
@@ -9,10 +11,6 @@
 #include <sys/stat.h>
 #include <sys/wait.h>
 #include <errno.h>
-
-#include "Error.h"
-#include "string_utils.h"
-#include "poly.h"
 
 string polyco::anyPsr;
 bool   polyco::verbose = false;

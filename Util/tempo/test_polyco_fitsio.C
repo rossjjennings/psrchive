@@ -2,12 +2,12 @@
 #include <config.h>
 #endif
 
-#include <iostream>
-#include <string>
-
-#include <fitsio.h>
 #include "polyco.h"
 #include "Error.h"
+
+#include <fitsio.h>
+
+using namespace std;
 
 int main (int argc, char** argv)
 {

@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/polyco.h,v $
-   $Revision: 1.24 $
-   $Date: 2004/12/27 13:06:37 $
+   $Revision: 1.25 $
+   $Date: 2004/12/27 13:57:11 $
    $Author: straten $ */
 
 #ifndef __POLY_H
@@ -30,13 +30,13 @@ class polynomial {
 protected:
   
   //! The pulsar name
-  string psrname;
+  std::string psrname;
   
   //! The calendar date string
-  string date;
+  std::string date;
 
   //! The UTC string
-  string utc;
+  std::string utc;
 
   //! The pulsar phase at reftime
   Phase ref_phase;
@@ -78,7 +78,7 @@ protected:
   double log_rms_resid;
 
   //! polynomial coefficients
-  vector<double> coefs;
+  std::vector<double> coefs;
 
   //! intializes all values to null
   void init();
@@ -98,8 +98,8 @@ public:
 
   polynomial& operator = (const polynomial& poly);
 
-  int load (string* instr);
-  int unload (string *outstr) const;
+  int load (std::string* instr);
+  int unload (std::string *outstr) const;
   int unload (FILE* fptr) const;
 
   void prettyprint  () const;
@@ -133,7 +133,7 @@ public:
   float  get_dm            () const {return dm; }
   int    get_ncoeff        () const {return (int) coefs.size(); }
   double get_doppler_shift () const {return doppler_shift / 1e4; }
-  string get_psrname       () const {return psrname; }
+  std::string get_psrname       () const {return psrname; }
   bool   get_binary        () const {return binary; } 
   double get_binph         () const {return binph; }
 
@@ -172,7 +172,7 @@ class polyco : public Reference::Able {
 
  protected:
   //! null value of pulsar name
-  static string anyPsr;
+  static std::string anyPsr;
 
  public:
   static bool verbose;
@@ -180,7 +180,7 @@ class polyco : public Reference::Able {
   static double precision;
 
   //! The polynomial sets
-  vector<polynomial> pollys;
+  std::vector<polynomial> pollys;
 
   //! null initializer
   polyco () {}
@@ -191,62 +191,65 @@ class polyco : public Reference::Able {
 
   //! Load in polycos
   polyco (const char* id);
-  polyco (const string& id);
+  polyco (const std::string& id);
   polyco& operator = (const polyco& poly);
 
   virtual ~polyco() {}
 
   //! these functions return the number of polynomials successfully loaded
   int load (const char* filename, size_t nbytes=0);
-  int load (const string& filename, size_t nbytes=0)
+  int load (const std::string& filename, size_t nbytes=0)
 	{ return load (filename.c_str(), nbytes); }
   int load (FILE * fp, size_t nbytes=0);
-  int load (string* instr);
+  int load (std::string* instr);
 
   // these functions return -1 upon error
   int unload (const char* filename) const ;
-  int unload (const string& filename) const
+  int unload (const std::string& filename) const
         { return unload (filename.c_str()); }
 
   // these functions return the number of bytes unloaded (-1 on error)
-  int unload (string *outstr) const;
+  int unload (std::string *outstr) const;
   int unload (FILE* fptr) const;
 
   void append (const polyco& poly);
 
   void  prettyprint  () const;
 
-  const polynomial* nearest (const MJD &t, 
-			     const string& psrname = anyPsr) const;
+  const polynomial* 
+  nearest (const MJD &t, const std::string& psrname=anyPsr) const;
 
-  const polynomial& best (const MJD &t, const string& psr = anyPsr) const;
-  const polynomial& best (const Phase &p, const string& psr = anyPsr) const;
+  const polynomial& best (const MJD &t, const std::string& psr=anyPsr) const;
+  const polynomial& best (const Phase &p, const std::string& psr=anyPsr) const;
 
-  virtual int i_nearest (const MJD &t,   const string& psrname = anyPsr) const;
-  virtual int i_nearest (const Phase &p, const string& psrname = anyPsr) const;
+  virtual int
+  i_nearest (const MJD &t, const std::string& psrname=anyPsr) const;
+  virtual int
+  i_nearest (const Phase &p, const std::string& psrname=anyPsr) const;
 
-  double doppler_shift (const MJD& t, const string& psr = anyPsr) const
+  double doppler_shift (const MJD& t, const std::string& psr=anyPsr) const
     { return best(t, psr).get_doppler_shift(); };
 
-  Phase phase (const MJD& t, const string& psr = anyPsr) const
+  Phase phase (const MJD& t, const std::string& psr = anyPsr) const
     { return best(t, psr).phase(t); };
 
-  Phase phase (const MJD& t, float obs_freq, const string& psr = anyPsr) const
+  Phase 
+  phase (const MJD& t, float obs_freq, const std::string& psr=anyPsr) const
     { return best(t, psr).phase(t, obs_freq); };
 
-  MJD iphase (const Phase& phase, const string& psr = anyPsr) const
+  MJD iphase (const Phase& phase, const std::string& psr = anyPsr) const
     { return best(phase, psr).iphase(phase); };
 
-  double period(const MJD& t, const string& psr = anyPsr) const
+  double period(const MJD& t, const std::string& psr = anyPsr) const
     { return best(t, psr).period(t); };
 
-  double frequency(const MJD& t, const string& psr = anyPsr) const
+  double frequency(const MJD& t, const std::string& psr = anyPsr) const
     { return best(t, psr).frequency(t); };
 
-  double chirp(const MJD& t, const string& psr = anyPsr) const
+  double chirp(const MJD& t, const std::string& psr = anyPsr) const
     { return best(t, psr).chirp(t); };
 
-  double accel(const MJD& t, const string& psr = anyPsr) const
+  double accel(const MJD& t, const std::string& psr = anyPsr) const
     { return best(t, psr).accel(t); };
 
   char   get_telescope () const;
@@ -256,7 +259,7 @@ class polyco : public Reference::Able {
   double get_nspan     () const;
   float  get_dm        () const;
   int    get_ncoeff    () const;
-  string get_psrname   () const;
+  std::string get_psrname   () const;
 
   bool is_tempov11() const;
 
@@ -284,8 +287,8 @@ class polyco : public Reference::Able {
 
 };
 
-inline ostream& operator<< (ostream& ostr, const polyco& p) {
-  string out; p.unload(&out); return ostr << out; }
+inline std::ostream& operator<< (std::ostream& ostr, const polyco& p) {
+  std::string out; p.unload(&out); return ostr << out; }
 
 #endif
 

@@ -49,19 +49,19 @@ double Phase::fracturns() const {
   return fturns;
 }
 
-string Phase::strprint(int precision) const
+std::string Phase::strprint(int precision) const
 {
   if (precision>DBL_DIG) {
-    cerr << "Phase::strprint warning: precision of " << precision 
-	 << " exceeds that of a double" << endl;
-    cerr << "- truncating to a precision of " << DBL_DIG << endl;
+    std::cerr << "Phase::strprint warning: precision of " << precision 
+	 << " exceeds that of a double" << std::endl;
+    std::cerr << "- truncating to a precision of " << DBL_DIG << std::endl;
   }
 
   char ftn[30];
   // I64 is defined in environ.h.
   sprintf(ftn, I64, turns);
 
-  string s = ftn;
+  std::string s = ftn;
   sprintf(ftn, "%.*lf", precision, fturns);
 
   if (fturns>=0)
