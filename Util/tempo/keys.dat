@@ -33,14 +33,16 @@
 
 # Commonly used parameters
 
-PSRJ 0 0       # Pulsar name (J2000)
+PSRJ 0 0      # Pulsar name (J2000)
 PSRB 0 0      # Pulsar name (B1950)
 RAJ 2 1       # Right Ascension (J2000) (turns) |hh:mm:ss.ssss... err in sec|
               #                        <hh:mm[:ssss....] err in last digit>
 DECJ 3 1      # Declination (J2000) (turns) |[-]dd:mm:ss.ssss... err in arcsec|
               #                        <[-/+]dd:mm[:ssss...] err in last digit>
+LAMBDA 1 1    # Ecliptic longitude (deg)
+BETA 1 1      # Ecliptic latitude (deg)
 PEPOCH 4 0    # Epoch of period [frequency] determination (MJD)
-F 1 1        # Barycentric frequency (s^-1)
+F 1 1         # Barycentric frequency (s^-1)
 F1 1 1        # Time derivative of barycentric frequency (s^-2)
               # <old files have Pdot in units of 10^-15>
 F2 1 1        # Second time derivative of barycentric freq. (s^-3)
@@ -54,14 +56,16 @@ F9 1 1
 FA 1 1
 FB 1 1
 FC 1 1
-PMDEC 1 1    # Proper motion in DEC (mas/yr)
-PMRA 1 1     # Proper motion in RA  (mas/yr)
-PMRV 1 1     # Radial 'proper motion' (mas/yr)
-POSEPOCH 4 0 # Epoch of position determination (MJD)
-PX 1 1       # Parallax (mas)
-DM 1 1       # Dispersion measure (pc cm^-3)
-DM1 1 1      # First time derivative of dispersion measure (pc cm^-3 yr^-1)
-DM2 1 1      # ....
+PMDEC 1 1     # Proper motion in DEC (mas/yr)
+PMRA 1 1      # Proper motion in RA  (mas/yr)
+PMLAMBDA 1 1  # Proper motion in ecliptic longitude (mas/yr)
+PMBETA 1 1    # Proper motion in ecliptic latitude (mas/yr)
+PMRV 1 1      # Radial 'proper motion' (mas/yr)
+POSEPOCH 4 0  # Epoch of position determination (MJD)
+PX 1 1        # Parallax (mas)
+DM 1 1        # Dispersion measure (pc cm^-3)
+DM1 1 1       # First time derivative of dispersion measure (pc cm^-3 yr^-1)
+DM2 1 1       # ....
 DM3 1 1
 DM4 1 1
 DM5 1 1
@@ -71,90 +75,90 @@ DM8 1 1
 DM9 1 1
 
 # RM has been removed as it is not a timing parameter
-# RM 1 1       # Rotation Measure (rad m^-2)
+# RM 1 1      # Rotation Measure (rad m^-2)
 
-START 4 0    # Epoch of start of fit (MJD)
-FINISH 4 0   # Epoch of end of fit (MJD)
+START 4 0     # Epoch of start of fit (MJD)
+FINISH 4 0    # Epoch of end of fit (MJD)
  
 # Tempo parameters
-CLK 0  0     # Terrestrial time standard
-EPHEM 0 0    # Solar system ephemeris
-TZRMJD 4 0   # Reference TOA (MJD)
-TZRFRQ 1 0   # Frequency of reference TOA (MHz)
-TZRSITE 0 0  # One-letter observatory code of reference TOA
+CLK 0  0      # Terrestrial time standard
+EPHEM 0 0     # Solar system ephemeris
+TZRMJD 4 0    # Reference TOA (MJD)
+TZRFRQ 1 0    # Frequency of reference TOA (MHz)
+TZRSITE 0 0   # One-letter observatory code of reference TOA
 
-#TAU 1 1   # LOG10 of the temporal broadening of pulses at 1 GHz (log10(s))
+#TAU 1 1      # LOG10 of the temporal broadening of pulses at 1 GHz (log10(s))
 
 # Binary information. Keplerian parameters.
-BINARY 0     # Binary model
-A1 1 1     # Projected pulsar semi-major axis of 1st orbit. aka A1_1.
-A1_2 1 1     #    "         "     "    "     "  "  2nd orbit
-A1_3 1 1     # ...
-E 1 1    # Eccentricity of 1st orbit. aka E_1
+BINARY 0      # Binary model
+A1 1 1        # Projected pulsar semi-major axis of 1st orbit. aka A1_1.
+A1_2 1 1      #    "         "     "    "     "  "  2nd orbit
+A1_3 1 1      # ...
+E 1 1         # Eccentricity of 1st orbit. aka E_1
 E_2 1 1    
 E_3 1 1    
-T0 4 1     # Epoch of periastron of 1st orbit. aka TO_1 
+T0 4 1        # Epoch of periastron of 1st orbit. aka TO_1 
 T0_2 4 1     
 T0_3 4 1     
-PB 1 1     # Period of 1st orbit. aka PB_1 
+PB 1 1        # Period of 1st orbit. aka PB_1 
 PB_2 1 1     
 PB_3 1 1     
-OM 1 1     # Longitude of periastron of 1st orbit. aka OM_1 
+OM 1 1        # Longitude of periastron of 1st orbit. aka OM_1 
 OM_2 1 1 
 OM_3 1 1 
 
-KOM 1 1   # Longitude of ascending node  [DDK-WvS]
-KIN 1 1   # Inclination angle (0 - 180)  [DDK-WvS]
+KOM 1 1       # Longitude of ascending node  [DDK-WvS]
+KIN 1 1       # Inclination angle (0 - 180)  [DDK-WvS]
 
 # Post-Keplerian binary parameters.  
-OMDOT 1 1    # Rate of periastron advance (deg/yr), 1st orbit
-OMDOT_2 1 1  #   "         "         "        "    2nd orbit
+OMDOT 1 1     # Rate of periastron advance (deg/yr), 1st orbit
+OMDOT_2 1 1   #   "         "         "        "    2nd orbit
 OMDOT_3 1 1  
-GAMMA 1 1    # Time dilation and gravitational redshift (sec) 
-PBDOT 1 1    # Rate of change of orbital period (10^-12), 1st orbit
+GAMMA 1 1     # Time dilation and gravitational redshift (sec) 
+PBDOT 1 1     # Rate of change of orbital period (10^-12), 1st orbit
 PBDOT_2 1 1  
 PBDOT_3 1 1  
 
 
-PPNGAMMA 1 1 # PPN parameter gamma
-SINI 1 1     # Sine of inclination angle
-SINI_2 1 1   # 
-SINI_3 1 1   # 
-MTOT 1 1     # Total system mass (solar masses)
-M2 1 1       # Companion mass (solar masses)
-M2_2 1 1     #   
-M2_3 1 1     # 
-DTHETA 1 1   # Relativistic deformation of the orbit (-6)
-XDOT 1 1     # Rate of change of projected semi-major axis (-12)
-EDOT 1 1     # Rate of change of eccentricity (-12)
-XOMDOT 1 1   # Rate of periastron advance minus GR prediction (deg/yr)
-XPBDOT 1 1   # Rate of change of orbital period minus GR prediction (10^-12)
-DR 1 0       # Relativistic deformation of the orbit (not fit)
-A0 1 0       # Aberration parameter (microsec) (not fit)
-B0 1 0       # Aberration parameter (microsec) (not fit)
-BP 1 0       # Tensor multi-scalar parameter beta-prime (not fit)
-BPP 1 0      # Tensor multi-scalar parameter beta-prime-prime (not fit)
-EPS1 1 1     # ELL1 timing model param (dimensionless)
-EPS2 1 1     #        "      "
-TASC 4 1     # Time of ascending node (MJD)
+PPNGAMMA 1 1  # PPN parameter gamma
+SINI 1 1      # Sine of inclination angle
+SINI_2 1 1    # 
+SINI_3 1 1    # 
+MTOT 1 1      # Total system mass (solar masses)
+M2 1 1        # Companion mass (solar masses)
+M2_2 1 1      #   
+M2_3 1 1      # 
+DTHETA 1 1    # Relativistic deformation of the orbit (-6)
+XDOT 1 1      # Rate of change of projected semi-major axis (-12)
+EDOT 1 1      # Rate of change of eccentricity (-12)
+XOMDOT 1 1    # Rate of periastron advance minus GR prediction (deg/yr)
+XPBDOT 1 1    # Rate of change of orbital period minus GR prediction (10^-12)
+DR 1 0        # Relativistic deformation of the orbit (not fit)
+A0 1 0        # Aberration parameter (microsec) (not fit)
+B0 1 0        # Aberration parameter (microsec) (not fit)
+BP 1 0        # Tensor multi-scalar parameter beta-prime (not fit)
+BPP 1 0       # Tensor multi-scalar parameter beta-prime-prime (not fit)
+EPS1 1 1      # ELL1 timing model param (dimensionless)
+EPS2 1 1      #        "      "
+TASC 4 1      # Time of ascending node (MJD)
 
 # Glitches
 
 # Jodrell format
-EXPA 1 1     # Phase exponential amplitude
-EXPA_2 1 1     # Phase exponential amplitude
-EXPA_3 1 1     # Phase exponential amplitude
-EXPT 1 1     # Phase exponential timescale
-EXPT_2 1 1     # Phase exponential timescale
-EXPT_3 1 1     # Phase exponential timescale
+EXPA 1 1      # Phase exponential amplitude
+EXPA_2 1 1    # Phase exponential amplitude
+EXPA_3 1 1    # Phase exponential amplitude
+EXPT 1 1      # Phase exponential timescale
+EXPT_2 1 1    # Phase exponential timescale
+EXPT_3 1 1    # Phase exponential timescale
 
 # Dick's format 
-GLEP_1 4 0   # Epoch of glitch num 1
-GLPH_1 1 1   # Glitch 1 phase increment
-GLF0_1 1 1  # Permanent glitch 1 pulse frequency increment (s^-1)
-GLF1_1 1 1  # Permanent glitch 1 frequency derivative increment (s^-2)
-GLF0D_1 1 1  # Decaying glitch 1 frequency increment (s^-1)
-GLTD_1 1 1   # Decay time constant for glitch 1 (days)
+GLEP_1 4 0    # Epoch of glitch num 1
+GLPH_1 1 1    # Glitch 1 phase increment
+GLF0_1 1 1    # Permanent glitch 1 pulse frequency increment (s^-1)
+GLF1_1 1 1    # Permanent glitch 1 frequency derivative increment (s^-2)
+GLF0D_1 1 1   # Decaying glitch 1 frequency increment (s^-1)
+GLTD_1 1 1    # Decay time constant for glitch 1 (days)
 GLEP_2 4 0
 GLPH_2 1 1
 GLF0_2 1 1
@@ -181,5 +185,5 @@ NTOA 5 0
 # Number of iterations
 NITS 5 0
 
-# special Kopeikin 96 flag takes out derivatives due to pm
+# Special Kopeikin 96 flag takes out derivatives due to proper motion
 K96 5 0
