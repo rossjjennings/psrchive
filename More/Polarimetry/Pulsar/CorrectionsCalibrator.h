@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/Attic/CorrectionsCalibrator.h,v $
-   $Revision: 1.2 $
-   $Date: 2004/07/20 07:38:39 $
+   $Revision: 1.3 $
+   $Date: 2004/10/09 05:41:22 $
    $Author: straten $ */
 
 #ifndef __Pulsar_CorrectionsCalibrator_H
@@ -52,6 +52,8 @@ namespace Pulsar {
     //! Get the number of frequency channels in the calibrator
     unsigned get_nchan () const { return 0; }
 
+    //! Returns a new CalibratorExtension
+    CalibratorExtension* new_Extension () const { return 0; }
 
   protected:
 
