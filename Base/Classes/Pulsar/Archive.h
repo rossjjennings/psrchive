@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Archive.h,v $
-   $Revision: 1.5 $
-   $Date: 2002/04/09 12:46:03 $
+   $Revision: 1.6 $
+   $Date: 2002/04/09 13:15:11 $
    $Author: ahotan $ */
 
 /*
@@ -32,13 +32,16 @@ namespace Pulsar {
   //
   //! Different receiver feed configuration states
   //
-  enum Feeds { invalid=-1, circular=0, linear=1 };
-
+  namespace Feed {
+    enum Type { invalid=-1, Circular=0, Linear=1 };
+  }
 
   //
   //! Different states of the integration data
   //
-  enum PolnState { Stokes, Coherency, XXYY, Intensity, Invariant };
+  namespace Poln {
+    enum State { invalid, Stokes, Coherency, XXYY, Intensity, Invariant };
+  }
 
   class Integration;
 
@@ -149,7 +152,6 @@ namespace Pulsar {
     //
     //! Fold profiles into 1/nfold 
     //  (for use with pulsars that have more than one period across the profile)
-    */
     /*!
       \param nfold
       \exception string
@@ -391,7 +393,7 @@ namespace Pulsar {
     virtual string set_backend_id (string be_name) const =0;
 
     //! Set the observation type (psr, cal)
-    virtual string set_obstype (string ob_type) const = 0
+    virtual string set_obstype (string ob_type) const = 0;
 
     // get/set the number of bins, bands, subints, etc
     // ///////////////////////////////////////////////
@@ -433,16 +435,16 @@ namespace Pulsar {
     virtual void set_centre_frequency (double cf) const = 0;
 
     //! Get the feed configuration of the receiver
-    virtual Feeds get_feed_type () const = 0;
+    virtual Feed::Type get_feed_type () const = 0;
 
     //! Set the feed configuration of the receiver
-    virtual void set_feed_type (Feeds feed) const = 0;
+    virtual void set_feed_type (Feed::Type feed) const = 0;
 
     //! Get the state of the profiles
-    virtual PolnState get_poln_state () const = 0;
+    virtual Poln::State get_poln_state () const = 0;
 
     //! Set the state of the profiles
-    virtual void set_poln_state (PolnState state) const = 0;
+    virtual void set_poln_state (Poln::State state) const = 0;
 
     // Get the state of various corrected flags
     // //////////////////////////////////////////
