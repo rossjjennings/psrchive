@@ -37,7 +37,7 @@ int main ()
   coord2str (str2, 256, ra1, dec1, places);
 
   if (strcmp (str1, str2) != 0) {
-    fprintf (stderr, "str1=%lf != str2=%lf\n", str1, str2);
+    fprintf (stderr, "str1=%s != str2=%s\n", str1, str2);
     return -1;
   }
 
