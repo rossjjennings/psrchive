@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Archive.h,v $
-   $Revision: 1.90 $
-   $Date: 2003/12/03 07:54:52 $
+   $Revision: 1.91 $
+   $Date: 2003/12/04 08:47:15 $
    $Author: ahotan $ */
 
 /*! \mainpage 
@@ -451,7 +451,7 @@ namespace Pulsar {
 			 unsigned npol=0, unsigned nchan=0, unsigned nbin=0);
     
     //! Return the Integration index state
-    IndexState get_index_state();
+    IndexState get_index_state() const;
     
     //! Set the custom index value associated with an Integration
     void set_Index (unsigned subint, Estimate<double> i);

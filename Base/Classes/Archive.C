@@ -569,7 +569,7 @@ void Pulsar::Archive::uniform_weight (float new_weight)
     get_Integration(isub) -> uniform_weight (new_weight);
 }
 
-Pulsar::Archive::IndexState Pulsar::Archive::get_index_state ()
+Pulsar::Archive::IndexState Pulsar::Archive::get_index_state () const
 {
   return index_state;
 }
