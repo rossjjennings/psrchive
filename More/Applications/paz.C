@@ -55,7 +55,6 @@ int main (int argc, char *argv[]) {
   char whitespace[5] = " \n\t";
   
   Pulsar::StandardSNR standard_snr;
-
   while ((gotc = getopt(argc, argv, "hvViDme:z:k:Z:x:X:dE:s:u:w:W:C:S:P:8")) != -1) {
     switch (gotc) {
     case 'h':
@@ -100,7 +99,7 @@ int main (int argc, char *argv[]) {
       Pulsar::Archive::set_verbosity(1);
       break;
     case 'i':
-      cout << "$Id: paz.C,v 1.20 2004/05/25 04:28:56 ghobbs Exp $" << endl;
+      cout << "$Id: paz.C,v 1.21 2004/06/09 02:20:57 sord Exp $" << endl;
       return 0;
     case 'D':
       display = true;
@@ -111,6 +110,7 @@ int main (int argc, char *argv[]) {
     case 'k':
       killfile = optarg;
       manual_zap = true;
+      break;
     case 'z':
       key = strtok (optarg, whitespace);
       manual_zap = true;
@@ -407,6 +407,7 @@ int main (int argc, char *argv[]) {
 	  vector<int> some_chans;
 	  char* useful = new char[4096];
 	  FILE* fptr = fopen(killfile.c_str(), "r");
+
 	  while (fgets(useful, 4096, fptr)) {
 	    key = strtok (useful, whitespace);
 	    while (key) {
@@ -415,8 +416,10 @@ int main (int argc, char *argv[]) {
 	      }
 	      key = strtok (NULL, whitespace);
 	    }
-	    for (unsigned x = 0; x < some_chans.size(); x++)
+	    for (unsigned x = 0; x < some_chans.size(); x++) {
 	      chans_to_zap.push_back(some_chans[x]);
+            }
+
 	    some_chans.resize(0);
 	  }
 	  delete[] useful;
