@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/Attic/SourceInfo.h,v $
-   $Revision: 1.1 $
-   $Date: 2004/07/22 13:43:05 $
+   $Revision: 1.2 $
+   $Date: 2004/07/22 14:16:14 $
    $Author: straten $ */
 
 #ifndef __Pulsar_SourceInfo_H
@@ -28,9 +28,6 @@ namespace Pulsar {
     //! Return the name of the specified class
     const char* get_name (unsigned iclass) const;
 
-    //! Return the name of the specified class
-    float get_scale (unsigned iclass) const;
-    
     //! Return the number of parameters in the specified class
     unsigned get_nparam (unsigned iclass) const;
     
