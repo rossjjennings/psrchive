@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/IntegrationManager.h,v $
-   $Revision: 1.3 $
-   $Date: 2003/02/17 16:25:50 $
-   $Author: straten $ */
+   $Revision: 1.4 $
+   $Date: 2003/09/18 01:51:48 $
+   $Author: ahotan $ */
 
 #ifndef __Pulsar_IntegrationManager_h
 #define __Pulsar_IntegrationManager_h
@@ -40,9 +40,21 @@ namespace Pulsar {
     //! Return pointer to the specified Integration
     Integration* get_Integration (unsigned subint);
 
+    //! Return a pointer to the last Integration
+    Integration* get_last_Integration ();
+
+    //! Return a pointer to the first Integration
+    Integration* get_first_Integration ();
+    
     //! Return const pointer to the specified Integration
     const Integration* get_Integration (unsigned subint) const;
-
+    
+    //! Return a const pointer to the last Integration
+    const Integration* get_last_Integration () const;
+    
+    //! Return a const pointer to the first Integration
+    const Integration* get_first_Integration () const;
+    
     //! Construct new Integration instance
     virtual Integration* new_Integration (Integration* copy_this = 0) = 0;
 

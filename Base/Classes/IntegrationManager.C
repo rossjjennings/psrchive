@@ -46,6 +46,18 @@ Pulsar::IntegrationManager::get_Integration (unsigned subint)
 
 }
 
+Pulsar::Integration* 
+Pulsar::IntegrationManager::get_first_Integration ()
+{  
+  return get_Integration(0);
+}
+
+Pulsar::Integration* 
+Pulsar::IntegrationManager::get_last_Integration ()
+{  
+  return get_Integration(get_nsubint()-1);
+}
+
 const Pulsar::Integration* 
 Pulsar::IntegrationManager::get_Integration (unsigned subint) const
 {
@@ -54,6 +66,18 @@ Pulsar::IntegrationManager::get_Integration (unsigned subint) const
 
   IntegrationManager* thiz = const_cast<IntegrationManager*> (this);
   return thiz->get_Integration (subint);
+}
+
+const Pulsar::Integration* 
+Pulsar::IntegrationManager::get_first_Integration () const
+{
+  return get_Integration(0);
+}
+
+const Pulsar::Integration* 
+Pulsar::IntegrationManager::get_last_Integration () const
+{
+  return get_Integration(get_nsubint()-1);
 }
 
 void Pulsar::IntegrationManager::append (const IntegrationManager* more)
