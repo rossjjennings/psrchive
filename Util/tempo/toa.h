@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/toa.h,v $
-   $Revision: 1.7 $
-   $Date: 2001/02/24 04:02:32 $
+   $Revision: 1.8 $
+   $Date: 2001/02/25 06:20:02 $
    $Author: straten $ */
 
 #ifndef __TOA_H
@@ -13,7 +13,6 @@
 
 #include "residual.h"
 #include "DataPoint.h"
-// #include "Reference.h"
 #include "MJD.h"
 
 class polyco;   // tempo-generated polynomial describing pulsar phase = f(MJD)
