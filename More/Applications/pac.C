@@ -130,10 +130,11 @@ int main (int argc, char *argv[]) {
       Pulsar::Calibrator::verbose = true;
       Pulsar::Database::Criterion::match_verbose = true;
       //Calibration::Model::verbose = true;
-      Pulsar::Archive::set_verbosity(3);
+      Pulsar::Archive::set_verbosity(2);
       break;
+
     case 'i':
-      cout << "$Id: pac.C,v 1.57 2004/10/25 15:09:06 straten Exp $" << endl;
+      cout << "$Id: pac.C,v 1.58 2004/10/28 06:19:15 straten Exp $" << endl;
       return 0;
 
     case 'A':
@@ -282,52 +283,52 @@ int main (int argc, char *argv[]) {
     return -1;
   }
 
-  else try {
+  else if (new_database) try {
     
-    // Load or generate the CAL file database
+    // Generate the CAL file database
     
-    if (new_database) {
-	
-      exts.push_back("cf");
-      exts.push_back("pcal");
-      exts.push_back("fcal");
-      exts.push_back("pfit");
-
-      cout << "pac: Generating new calibrator database" << endl;
-	
-      dbase = new Pulsar::Database (cals_are_here.c_str(), exts);
-	
-      if (dbase->size() <= 0) {
-	cout << "pac: No calibrators found in " << cals_are_here << endl;
-	return -1;
-      }
-	
-      if (verbose)
-	cerr << "pac: " << dbase->size() << " calibrators found" << endl;
-	
-      if (write_database_file) {
-
-	string output_filename = dbase->get_path() + "/database.txt";
-
-	cout << "pac: Writing database summary file to " 
-	     << output_filename << endl;
-
-	dbase -> unload (output_filename);
-	  
-      }
-	
+    exts.push_back("cf");
+    exts.push_back("pcal");
+    exts.push_back("fcal");
+    exts.push_back("pfit");
+    
+    cout << "pac: Generating new calibrator database" << endl;
+    
+    dbase = new Pulsar::Database (cals_are_here, exts);
+    
+    if (dbase->size() <= 0) {
+      cout << "pac: No calibrators found in " << cals_are_here << endl;
+      return -1;
     }
-    else {
-
-      cout << "pac: Reading from database summary file" << endl;
-      dbase = new Pulsar::Database (cals_are_here.c_str());
-
+    
+    if (verbose)
+      cerr << "pac: " << dbase->size() << " calibrators found" << endl;
+    
+    if (write_database_file) {
+      
+      string output_filename = dbase->get_path() + "/database.txt";
+      
+      cout << "pac: Writing database summary file to " 
+	   << output_filename << endl;
+      
+      dbase -> unload (output_filename);
+      
     }
+    
   }
   catch (Error& error) {
-    cerr << "Error generating CAL database" << endl;
-    cerr << error << endl;
-    cerr << "Aborting calibration attempt" << endl;
+    cerr << "pac: Error generating CAL database" << error << endl;
+    return -1;
+  }
+
+  else try {
+    
+    cout << "pac: Reading from database summary file" << endl;
+    dbase = new Pulsar::Database (cals_are_here);
+
+  }
+  catch (Error& error) {
+    cerr << "pac: Error loading CAL database" << error << endl;
     return -1;
   }
     
