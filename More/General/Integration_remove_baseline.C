@@ -6,13 +6,25 @@
 void dispersive_phases (const Pulsar::Integration* integration,
 		       vector<float>& phases)
 {
+  unsigned nchan = integration->get_nchan();
+  phases.resize (nchan);
+
+  if ( integration->get_dedispersed() ) {
+
+    if (Pulsar::Integration::verbose)
+      cerr << "dispersive_phases: data are dedispersed; no dispersive phases"
+	   << endl;
+
+    for (unsigned i=0; i<nchan; i++)
+      phases[i] = 0.0;
+
+    return;
+
+  }
+
   double dm = integration->get_dispersion_measure();
   double pfold = integration->get_folding_period();
   double centrefreq = integration->get_centre_frequency();
-
-  unsigned nchan = integration->get_nchan();
-
-  phases.resize (nchan);
 
   for (unsigned ichan=0; ichan<nchan; ichan++) {
 
@@ -21,7 +33,7 @@ void dispersive_phases (const Pulsar::Integration* integration,
     if (pfold==0 || dm==0)
       return;
 
-    double freq = integration->get_Profile(0, ichan)->get_centre_frequency();
+    double freq = integration->get_centre_frequency (ichan);
 
     if (Pulsar::Integration::verbose)
       cerr << "dispersive_phases: ichan=" << ichan << " nchan=" << nchan
