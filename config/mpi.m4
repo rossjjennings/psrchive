@@ -64,7 +64,7 @@ AC_DEFUN([SWIN_LIB_MPI],
                      have_mpi=yes, have_mpi=no)
 
       if test x"$have_mpi" = xyes; then
-        if test x"$cf_dir" == x.; then
+        if test x"$cf_dir" = x.; then
           MPI_CFLAGS=""
         else
           MPI_CFLAGS="-I$cf_dir"
@@ -92,7 +92,7 @@ AC_DEFUN([SWIN_LIB_MPI],
         AC_TRY_LINK([#include <mpi.h>],[MPI_Init(0,0);],
                     have_mpi=lam, have_mpi=no)
         if test x"$have_mpi" != xno; then
-          if test x"$cf_dir" == x.; then
+          if test x"$cf_dir" = x.; then
             MPI_LIBS="-lmpi -llam"
           else
             MPI_LIBS="-L$cf_dir -lmpi -llam"
@@ -105,7 +105,7 @@ AC_DEFUN([SWIN_LIB_MPI],
         AC_TRY_LINK([#include <mpi.h>],[MPI_Init(0,0);],
                     have_mpi=mpich, have_mpi=no)
         if test x"$have_mpi" != xno; then
-          if test x"$cf_dir" == x.; then
+          if test x"$cf_dir" = x.; then
             MPI_LIBS="-lmpich"
           else
             MPI_LIBS="-L$cf_dir -lmpich"
@@ -126,7 +126,8 @@ AC_DEFUN([SWIN_LIB_MPI],
   AC_MSG_RESULT([$have_mpi])
 
   if test x"$have_mpi" != xno; then
-    AC_DEFINE([HAVE_MPI], [1], [Define if an MPI library is present])
+    AC_DEFINE([HAVE_MPI],[1],
+              [Define if a Message Passing Interface library is present])
     [$1]
   else
     AC_MSG_WARN([Message Passing Interface (MPI) code will not be compiled])
