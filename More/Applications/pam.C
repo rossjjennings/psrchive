@@ -1,5 +1,6 @@
 #include <string.h>
 #include <unistd.h>
+#include <getopt.h>
 #include <libgen.h>
 #include "dirutil.h"
 #include <time.h>
@@ -13,6 +14,42 @@
 
 #include "Pulsar/ProcHistory.h"
 
+void usage()
+{
+  cout << "A program for manipulating Pulsar::Archives"                       << endl;
+  cout << "Usage: pam [options] filenames"                                    << endl;
+  cout << "  -v               Verbose mode"                                   << endl;
+  cout << "  -V               Very verbose mode"                              << endl;
+  cout << "  -i               Show revision information"                      << endl;
+  cout << "  -m               Modify the original files on disk"              << endl;
+  cout << "  -a archive       Write new files using this archive class"       << endl;
+  cout << "  -e extension     Write new files with this extension"            << endl;
+  cout << "  -T               Time scrunch to one subint"                     << endl;
+  cout << "  -F               Frequency scrunch to one channel"               << endl;
+  cout << "  -p               Polarisation scrunch to total intensity"        << endl;
+  cout << "  -I               Transform to Invariant Interval"                << endl;
+  cout << "  -S               Transform to Stokes parameters"                 << endl;
+  cout << "  -B               Flip the sideband sense"                        << endl;
+  cout << "  -E ephfile       Install a new ephemeris and update model"       << endl;
+  cout << endl;
+  cout << "The following options take integer arguments"                      << endl;
+  cout << "  -t               Time scrunch by this factor"                    << endl;
+  cout << "  -f               Frequency scrunch by this factor"               << endl;
+  cout << "  -b               Bin scrunch by this factor"                     << endl;
+  cout << "  --setnsub        Time scrunch to this many subints"              << endl;
+  cout << "  --setnchn        Frequency scrunch to this many channels"        << endl;
+  cout << "  --setnbin        Bin scrunch to this many bins"                  << endl;
+  cout << endl;
+  cout << "The following options take floating point arguments"               << endl;
+  cout << "  -d               Alter the header dispersion measure"            << endl;
+  cout << "  -D               Correct for ISM faraday rotation"               << endl;
+  cout << "  -s               Smear with this duty cycle"                     << endl;
+  cout << "  -r               Rotate profiles by this many turns"             << endl;
+  cout << "  -w               Reset profile weights to this value"            << endl;
+  cout << endl;
+  cout << "See http://astronomy.swin.edu.au/pulsar/software/manuals/pam.html" << endl;
+  return;
+}
 
 // PAM: A command line tool for modifying archives
 
@@ -64,41 +101,33 @@ int main (int argc, char *argv[]) {
 
   char* archive_class = 0;
 
-  int gotc = 0;
+  int new_nchn = 0;
+  int new_nsub = 0;
+  int new_nbin = 0;
+
+  int c = 0;
   
-  while ((gotc = getopt(argc, argv, "hvVima:e:E:TFpIt:f:b:d:s:r:w:D:SB")) != -1) {
-    switch (gotc) {
+  while (1) {
+
+    int options_index = 0;
+
+    static struct option long_options[] = {
+      {"setnchn", 1, 0, 200},
+      {"setnsub", 1, 0, 201},
+      {"setnbin", 1, 0, 202},
+      {0, 0, 0, 0}
+    };
+    
+    c = getopt_long(argc, argv, "hvVima:e:E:TFpIt:f:b:d:s:r:w:D:SB",
+		    long_options, &options_index);
+    
+    if (c == -1)
+      break;
+
+    switch (c) {
     case 'h':
-      cout << "A program for manipulating Pulsar::Archives"                       << endl;
-      cout << "Usage: pam [options] filenames"                                    << endl;
-      cout << "  -v               Verbose mode"                                   << endl;
-      cout << "  -V               Very verbose mode"                              << endl;
-      cout << "  -i               Show revision information"                      << endl;
-      cout << "  -m               Modify the original files on disk"              << endl;
-      cout << "  -a archive       Write new files using this archive class"       << endl;
-      cout << "  -e extension     Write new files with this extension"            << endl;
-      cout << "  -T               Time scrunch"                                   << endl;
-      cout << "  -F               Frequency scrunch"                              << endl;
-      cout << "  -p               Polarisation scrunch"                           << endl;
-      cout << "  -I               Transform to Invariant Interval"                << endl;
-      cout << "  -S               Transform to Stokes parameters"                 << endl;
-      cout << "  -B               Flip the sideband sense (DANGEROUS)"            << endl;
-      cout << "  -E ephfile       Install a new ephemeris"                        << endl;
-      cout << endl;
-      cout << "The following options take integer arguments"                      << endl;
-      cout << "  -t tscr          Time scrunch by this factor"                    << endl;
-      cout << "  -f fscr          Frequency scrunch by this factor"               << endl;
-      cout << "  -b bscr          Bin scrunch by this factor"                     << endl;
-      cout << endl;
-      cout << "The following options take floating point arguments"               << endl;
-      cout << "  -d dm            Alter the header dispersion measure"            << endl;
-      cout << "  -D rm            Correct for ISM faraday rotation"               << endl;
-      cout << "  -s dc            Smear with this duty cycle"                     << endl;
-      cout << "  -r phase         Rotate profiles by this many turns"             << endl;
-      cout << "  -w weight        Reset profile weights to this value"            << endl;
-      cout << endl;
-      cout << "See http://astronomy.swin.edu.au/pulsar/software/manuals/pam.html" << endl;
-      return (-1);
+      usage();
+      return (0);
       break;
     case 'v':
       verbose = true;
@@ -108,7 +137,7 @@ int main (int argc, char *argv[]) {
       Pulsar::Archive::set_verbosity(3);
       break;
     case 'i':
-      cout << "$Id: pam.C,v 1.22 2003/10/16 08:12:29 ahotan Exp $" << endl;
+      cout << "$Id: pam.C,v 1.23 2003/11/13 11:31:36 ahotan Exp $" << endl;
       return 0;
     case 'm':
       save = true;
@@ -227,6 +256,45 @@ int main (int argc, char *argv[]) {
     case 'B':
       flipsb = true;
       break;
+    case 200:
+      fscr = true;
+      if (sscanf(optarg, "%d", &new_nchn) != 1) {
+	cout << "That is not a valid number of channels" << endl;
+	return -1;
+      }
+      if (new_nchn <= 0) {
+	cout << "That is not a valid number of channels" << endl;
+	return -1;
+      }
+      command += " --setnchn ";
+      command += optarg;
+      break;
+    case 201:
+      tscr = true;
+      if (sscanf(optarg, "%d", &new_nsub) != 1) {
+	cout << "That is not a valid number of subints" << endl;
+	return -1;
+      }
+      if (new_nsub <= 0) {
+	cout << "That is not a valid number of subints" << endl;
+	return -1;
+      }
+      command += " --setnsub ";
+      command += optarg;
+      break;
+    case 202:
+      bscr = true;
+      if (sscanf(optarg, "%d", &new_nbin) != 1) {
+	cout << "That is not a valid number of bins" << endl;
+	return -1;
+      }
+      if (new_nbin <= 0) {
+	cout << "That is not a valid number of bins" << endl;
+	return -1;
+      }
+      command += " --setnbin ";
+      command += optarg;
+      break;
     default:
       cout << "Unrecognised option" << endl;
     }
@@ -315,7 +383,13 @@ int main (int argc, char *argv[]) {
       }
       
       if (tscr) {
-	if (tscr_fac > 0) {
+	if (new_nsub > 0) {
+	  arch->tscrunch_to_nsub(new_nsub);
+	  if (verbose)
+	    cout << arch->get_filename() << " tscrunched to " 
+		 << new_nsub << " subints" << endl;
+	}
+	else if (tscr_fac > 0) {
 	  arch->tscrunch(tscr_fac);
 	  if (verbose)
 	    cout << arch->get_filename() << " tscrunched by a factor of " 
@@ -341,7 +415,13 @@ int main (int argc, char *argv[]) {
       }
       
       if (fscr) {
-	if (fscr_fac > 0) {
+	if (new_nchn > 0) {
+	  arch->fscrunch_to_nchan(new_nchn);
+	  if (verbose)
+	    cout << arch->get_filename() << " fscrunched to " 
+		 << new_nchn << " channels" << endl;
+	}
+	else if (fscr_fac > 0) {
 	  arch->fscrunch(fscr_fac);
 	  if (verbose)
 	    cout << arch->get_filename() << " fscrunched by a factor of " 
@@ -355,10 +435,18 @@ int main (int argc, char *argv[]) {
       }
       
       if (bscr) {
-	arch->bscrunch(bscr_fac);
-	if (verbose)
-	  cout << arch->get_filename() << " bscrunched by a factor of " 
-	       << bscr_fac << endl;
+	if (new_nbin > 0) {
+	  arch->bscrunch_to_nbin(new_nbin);
+	  if (verbose)
+	    cout << arch->get_filename() << " bscrunched to " 
+		 << new_nbin << " bins" << endl;
+	}
+	else {
+	  arch->bscrunch(bscr_fac);
+	  if (verbose)
+	    cout << arch->get_filename() << " bscrunched by a factor of " 
+		 << bscr_fac << endl;
+	}
       }     
 
       if (smear) {
