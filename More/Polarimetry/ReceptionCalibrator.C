@@ -641,9 +641,10 @@ void Pulsar::ReceptionCalibrator::add_calibrator (const ArtificialCalibrator* p)
 
   for (unsigned isub=0; isub<nsub; isub++) {
 
-    p->get_levels (isub, nchan, cal_hi, cal_lo);
-
     const Integration* integration = cal->get_Integration (isub);
+
+    ArtificialCalibrator::get_levels (integration, nchan, cal_hi, cal_lo);
+
     MJD epoch = integration->get_epoch ();
 
     if (epoch < start_epoch)
