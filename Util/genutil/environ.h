@@ -1,7 +1,7 @@
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Attic/environ.h,v $
-   $Revision: 1.4 $
-   $Date: 2002/05/23 14:55:53 $
-   $Author: pulsar $ */
+   $Revision: 1.5 $
+   $Date: 2002/05/24 07:35:41 $
+   $Author: straten $ */
 
 /*
  * When sending packets back and forth between different architectures,
@@ -57,6 +57,7 @@ typedef struct {double f1; double f2;} float128;
 
 /* for parsing a long */
 #define I64 "%ld"
+#define UI64 "%lu"
 #define I32 "%d"
 
 #endif
@@ -104,6 +105,7 @@ typedef struct {double f1; double f2;} float128;
 
 /* for parsing a long */
 #define I64 "%Ld"
+#define UI64 "%Lu"
 #define I32 "%ld"
 
 #endif
