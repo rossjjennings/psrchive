@@ -583,14 +583,15 @@ void Pulsar::FITSArchive::load_header (const char* filename)
   }
   else if (strcmp(tempstr13, "CAL") == 0 || strcmp(tempstr13, "LEVCAL") == 0) {
     
-    if (get_source() == "HYDRA_O"  || 
-	get_source() == "VIRGO_O") {
+    if (get_source() == "HYDRA_O"  || get_source() == "VIRGO_O" ||
+	get_source() == "0918-1205_H") {
       set_type ( Signal::FluxCalOn );
       if (verbose)
 	cerr << "FITSArchive::load_header using Signal::FluxCalOn" << endl;
     }
     else if (get_source() == "HYDRA_N" || get_source() == "HYDRA_S" ||
-	     get_source() == "VIRGO_N" || get_source() == "VIRGO_S") {
+	     get_source() == "VIRGO_N" || get_source() == "VIRGO_S" ||
+	     get_source() == "0918-1005_N" || get_source() == "0918-1405_S") {
       set_type ( Signal::FluxCalOff );
       if (verbose)
 	cerr << "FITSArchive::load_header using Signal::FluxCalOff" << endl;
