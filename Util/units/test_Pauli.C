@@ -30,16 +30,19 @@ void test_matrix (const Jones<float>& j1, const Jones<float>& j2,
   Jones<float> oj2 = d2 * convert(hq2) * convert(uq2);
 
   // test that you get the same matrix back
-
-  if ( norm(oj1-j1)/norm(oj1) > 1e-15 ) {
+  double diff = norm(oj1-j1)/norm(oj1);
+  if ( diff > 1e-15 ) {
     cerr << "test_matrix polar recomposition=" << oj1 
-	 << " != Jones=" << j1 << endl;
+	 << " != Jones=" << j1 << endl
+	 << " by " << diff;
     throw string ("test_matrix polar decomposition error");
   }
 
-  if ( norm(oj2-j2)/norm(oj2) > 1e-15 ) {
+  diff = norm(oj2-j2)/norm(oj2);
+  if ( diff > 1e-15 ) {
     cerr << "test_matrix polar recomposition=" << oj2 
-	 << " != Jones=" << j2 << endl;
+	 << " != Jones=" << j2 << endl
+	 << " by " << diff;
     throw string ("test_matrix polar decomposition error");
   }
 
@@ -60,9 +63,11 @@ void test_matrix (const Jones<float>& j1, const Jones<float>& j2,
   Jones<float> pj1 = uj2 * uj1;
   Jones<float> pj2 = convert (uq2 * uq1);
 
-  if ( norm(pj2-pj1)/norm(pj2) > 1e-15 ) {
+  diff = norm(pj2-pj1)/norm(pj2);
+  if ( diff > 1e-15 ) {
     cerr << "test_matrix pj2=" << pj2 
-	 << " != pj1=" << pj1 << endl;
+	 << " != pj1=" << pj1 << endl
+	 << " by " << diff << endl;
     throw string ("test_matrix unequal Jones/Quaternion products");
   }
 
@@ -76,6 +81,32 @@ int main ()
 #else
   unsigned loops = RAND_MAX*10;
 #endif
+
+
+
+  Quaternion<float, Hermitian> hq0 (1,2,3,4);
+  Quaternion<float, Unitary> uq0 (5,6,7,8);
+
+  cerr << "hq=" << hq0 << " uq=" << uq0 << endl;
+
+  Jones<float> hj0 = convert(hq0);
+  Jones<float> uj0 = convert(uq0);
+
+  cerr << "hj=" << hj0 << " uj=" << uj0 << endl;
+
+  Jones<float> j0 = hj0 * uj0;
+  cerr << "IN j0=" << j0 << endl;
+
+  complex<float> d0;
+  polar (d0, hq0, uq0, j0);
+
+  hj0 = convert(hq0);
+  uj0 = convert(uq0);
+
+  j0 = d0 * hj0 * uj0;
+
+  cerr << "OUT j0=" << j0 << endl;
+
 
   MatrixTest <Jones<float>, Quaternion<float>, complex<float> > test;
 
