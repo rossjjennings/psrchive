@@ -165,7 +165,8 @@ namespace TextInterface {
 
     //! Get the value of the attribute
     std::string get_value (const std::string& name) const
-      { return find(name)->get_value(instance); }
+      { if (!instance) return "N/A"; 
+        else return find(name)->get_value(instance); }
 
     //! Set the value of the attribute
     void set_value (const std::string& name, const std::string& value)
