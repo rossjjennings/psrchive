@@ -5,7 +5,6 @@
 
 /*!
   \param rm rotation measure
-  \param rm_iono rotation measure due to ionosphere
 
   \pre baseline has been removed
   \pre archive has full polarimetric information
