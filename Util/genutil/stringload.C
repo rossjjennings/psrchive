@@ -13,6 +13,9 @@ static char* rdline = NULL;
 
 ssize_t stringload (string* str, FILE* fptr, size_t nbytes)
 {
+  if (fptr == NULL || str == NULL)
+    return -1;
+
   if (rdline == NULL) rdline = new char [rdsize];
   size_t eachread = rdsize;
   size_t bytesread = 0;
@@ -35,6 +38,9 @@ ssize_t stringload (string* str, FILE* fptr, size_t nbytes)
 
 ssize_t stringload (string* str, istream &istr, streamsize nbytes)
 {
+  if (!istr || !str)
+    return -1;
+
   if (rdline == NULL) rdline = new char [rdsize];
   streamsize eachread  = rdsize - 1;
   streamsize bytestoread = nbytes;
