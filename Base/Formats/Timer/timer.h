@@ -1,6 +1,6 @@
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/Timer/timer.h,v $
-   $Revision: 1.4 $
-   $Date: 2000/01/31 05:50:55 $
+   $Revision: 1.5 $
+   $Date: 2000/08/19 12:56:34 $
    $Author: straten $ */
 
 /* include file for the main timer structure                            */
@@ -54,6 +54,14 @@
 #define SOFTWARE_STRLEN 128
 #define BACKEND_STRLEN 8
 #define TLABEL_STRLEN 8
+
+/* bit fields in timer.corrected flag (baseband backends) */
+#define RM_ISM_CORRECTED  0x0001  /* interstellar medium rotation measure */
+#define RM_IONO_CORRECTED 0x0002  /* ionospheric rotation measure */
+#define PARA_CORRECTED    0x0004  /* parallactic angle */
+#define FEED_CORRECTED    0x0008  /* feed angle */
+
+
 /* 
 responsibilities
 (T) timer
@@ -154,7 +162,13 @@ struct timer {
   char  comment[COMMENT_STRLEN];     /* (T) comment in schedule file               */
   float pos_angle;                   /* (T?) ?? */
   int   headerlength;                /* (T)  ?? */
+
+  /* baseband backend addition:
+     'corrected' now contains a bitmask of corrections applied.
+     See *_CORRECTED above or access by archive::set/get_corrected()
+  */
   int   corrected;                   /* (A) 1 if archive is corrected for all bugs */
+
   int   calibrated;                  /* (C) 1 if archive is calibrated             */
   int   obstype;                     /* (T) see top of this file for list          */
   char  calfile[CALFILE_STRLEN];     /* (C) cal archive used for calibration       */
