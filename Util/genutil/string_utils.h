@@ -1,8 +1,8 @@
 //-*-C++-*-
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Attic/string_utils.h,v $
-   $Revision: 1.11 $
-   $Date: 2001/02/05 06:31:31 $
-   $Author: redwards $ */
+   $Revision: 1.12 $
+   $Date: 2002/06/03 05:05:14 $
+   $Author: pulsar $ */
 
 #ifndef __STRING_UTILS_H
 #define __STRING_UTILS_H
@@ -41,17 +41,24 @@ int stringload (vector<string>* lines, FILE* fptr);
 // delimiter characters are removed from 'instr'
 // ///////////////////////////////////////////////////////////
 string stringtok (string * instr, const string & delimiters,
-			bool skip_leading_delimiters = true);
+		  bool skip_leading_delimiters = true,
+		  bool strip_leading_delimiters_from_remainder = true);
 
 // ///////////////////////////////////////////////////////////
 // other interfaces to overload stringtok()
 inline string stringtok (string* instr, char* delimiters,
-			bool skip_leading_delimiters = true)
-{ return stringtok (instr, string(delimiters), skip_leading_delimiters); }
+			 bool skip_leading_delimiters = true,
+			 bool strip_leading_delimiters_from_remainder = true)
+{ return stringtok (instr, string(delimiters),
+		    skip_leading_delimiters, 
+		    strip_leading_delimiters_from_remainder); }
 
 inline string stringtok (string* instr, char delimiter,
-			bool skip_leading_delimiters = true)
-{ return stringtok (instr, string(1, delimiter), skip_leading_delimiters); }
+			 bool skip_leading_delimiters = true,
+			 bool strip_leading_delimiters_from_remainder = true)
+{ return stringtok (instr, string(1, delimiter),
+		    skip_leading_delimiters,
+		    strip_leading_delimiters_from_remainder); }
 
 // ///////////////////////////////////////////////////////////
 // returns the first sub-string of 'instr' delimited by
