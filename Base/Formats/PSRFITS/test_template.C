@@ -109,7 +109,7 @@ void test_template (const char* template_file, bool verbose)
   if (status)
     throw FITSError (status, "test_template", "fits_create_file");
 
-  fits_execute_template (fptr, template_file, &status);
+  fits_execute_template (fptr, const_cast<char*>(template_file), &status);
   if (status)
     throw FITSError (status, "test_template",
 		     "fits_execute_template (%s)", template_file);
