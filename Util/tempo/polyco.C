@@ -1,22 +1,4 @@
 /*
-$Log: polyco.C,v $
-Revision 1.2  1998/08/26 08:01:09  straten
-various fixes to get things running on SGI
-
-Revision 1.1.1.1  1998/08/03 05:42:02  redwards
-importing
-
-Revision 1.11  1997/12/19 02:26:30  mbritton
-*** empty log message ***
-
-Revision 1.10  1997/11/29 00:27:04  mbritton
-fixed warnings arising from raptor compiler upgrade
-
-Revision 1.9  1997/11/28 05:25:03  mbritton
-*** empty log message ***
-
-Revision 1.8  1997/09/21 03:09:27  mbailes
-*** empty log message ***
 
 Revision 1.7  1997/07/16 06:27:04  mbailes
 Placed check that time was within bounds in polyco::period.
@@ -40,6 +22,7 @@ Revision 1.1  1996/09/09 23:15:04  mbailes
 Initial revision
 
 */
+
 #include <stdio.h> 
 #include <stdlib.h>
 #include <sys/stat.h>
@@ -96,7 +79,48 @@ double polynomial::phase(MJD tp){
    }
    p += t*f0*60.0;
    return(p+ph0);
- }
+}
+
+double polynomial::phi(MJD tp){
+   double p;
+
+//   printf("polynomial::phase input time is %s\n",tp.printall());
+//   printf("polynomial::phase refer time is %s\n",reftime.printall());
+
+   MJD dt = tp - reftime;
+   double t = dt.in_minutes();
+
+//   printf("polynomial::phase dt in some easier is %s\n",dt.printall());
+//   printf("polynomial::phase dt in minutes is %18.12lf\n",t);
+   p = 0.0;
+
+   for (int i=0;i<ncoef;i++) {
+      p+= fmod (coefs[i]*pow(t,(double)i), 1.0);
+//      printf("polynomial::phase coef[%d] is %lf\n",i,coefs[i]);
+   }
+   p += fmod (t*f0*60.0, 1.0);
+
+   // NEW
+   //fprintf (stderr, "Phi not: %30.28lf, p: %30.28lf\n", ph0, p);
+   //fflush (stderr);
+
+   double phi = fmod (ph0, 1.0);
+
+   //fprintf (stderr, "Fractional turns in Phi not: %30.28lf\n", phi);
+   //fflush (stderr);
+
+   phi += p;
+
+   //fprintf (stderr, "Turns in phi: %d\n", (int)phi);
+   //fflush (stderr);
+
+   phi = fmod(phi,1.0);
+
+   //fprintf (stderr, "Phi: %30.28lf\n", phi);
+   //fflush (stderr);
+
+   return(phi);
+}
 
 int polynomial::load(FILE * fptr){
    static char aline[120];
@@ -120,7 +144,12 @@ int polynomial::load(FILE * fptr){
 
    //Grab second line
    if (fgets(aline,120,fptr)!='\0') {
-     sscanf(aline,"%lf %lf %d %d %d %f %f %f",&ph0,&f0,&telescope,
+     char* period = strchr (aline, '.');
+     if (period == NULL) {
+       fprintf (stderr, "polynomial::load no decimal found ?!?\n");
+       return -1;
+     }
+     sscanf(period,"%lf %lf %d %d %d %f %f %f",&ph0,&f0,&telescope,
      &nspan,&ncoeftmp,&freq,&binph,&binp);
    }
    else
@@ -415,27 +444,50 @@ double polyco::phase(MJD t, float obs_freq, float ref_freq){
      return(0);
 }
 
+double polyco::phi(MJD t){
+  // Find correct polynomial and use it
+  int ipolly=0;
+  while (ipolly<npollys) {
+    MJD t1 = pollys[ipolly]->reftime - (double) pollys[ipolly]->nspan*30.0;
+    MJD t2 = pollys[ipolly]->reftime + (double) pollys[ipolly]->nspan*30.0;
+
+    if (t<t1) {
+      fprintf(stderr,"MJD %s not found in polyco\n",t.printall());
+      fprintf(stderr,"lower b is %s\n",t1.printall());
+      fprintf(stderr,"reftime is %s\n",pollys[ipolly]->reftime.printall());
+      fprintf(stderr,"upper b is %s\n",t2.printall());
+      return(0);
+    }
+
+    if (t>t1 && t<t2) {
+      return(pollys[ipolly]->phi(t));
+    }
+    ipolly++;
+  }
+  return(0.0);
+}
+
 double polyco::phase(MJD t){
   // Find correct polynomial and use it
-     int ipolly=0;
-     while (ipolly<npollys) {
-       MJD t1 = pollys[ipolly]->reftime - (double) pollys[ipolly]->nspan*30.0;
-       MJD t2 = pollys[ipolly]->reftime + (double) pollys[ipolly]->nspan*30.0;
+  int ipolly=0;
+  while (ipolly<npollys) {
+    MJD t1 = pollys[ipolly]->reftime - (double) pollys[ipolly]->nspan*30.0;
+    MJD t2 = pollys[ipolly]->reftime + (double) pollys[ipolly]->nspan*30.0;
 
-       if (t<t1) {
-	 fprintf(stderr,"MJD %s not found in polyco\n",t.printall());
-         fprintf(stderr,"lower b is %s\n",t1.printall());
-         fprintf(stderr,"reftime is %s\n",pollys[ipolly]->reftime.printall());
-         fprintf(stderr,"upper b is %s\n",t2.printall());
-	 return(0);
-       }
+    if (t<t1) {
+      fprintf(stderr,"MJD %s not found in polyco\n",t.printall());
+      fprintf(stderr,"lower b is %s\n",t1.printall());
+      fprintf(stderr,"reftime is %s\n",pollys[ipolly]->reftime.printall());
+      fprintf(stderr,"upper b is %s\n",t2.printall());
+      return(0);
+    }
 
-       if (t>t1 && t<t2) {
-	 return(pollys[ipolly]->phase(t));
-       }
-       ipolly++;
-     }
-    return(0.0);
+    if (t>t1 && t<t2) {
+      return(pollys[ipolly]->phase(t));
+    }
+    ipolly++;
+  }
+  return(0.0);
 }
 
 double polyco::period(MJD t){
