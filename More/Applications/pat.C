@@ -104,6 +104,7 @@ int main (int argc, char *argv[])
 
     case 'v':
       Pulsar::Archive::set_verbosity(2);
+      Pulsar::Profile::verbose = true;
       verbose = true;
       break;
 
@@ -116,7 +117,7 @@ int main (int argc, char *argv[])
       denoise = true;
       break;
     case 'i':
-      cout << "$Id: pat.C,v 1.36 2005/02/13 08:13:59 straten Exp $" << endl;
+      cout << "$Id: pat.C,v 1.37 2005/02/16 04:33:39 ahotan Exp $" << endl;
       return 0;
 
     case 'F':
