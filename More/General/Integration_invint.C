@@ -4,16 +4,6 @@
 
 /////////////////////////////////////////////////////////////////////////////
 //
-/*! 
-  When this flag is true, Pulsar::Integration::invint will calculate
-  the square of the polarimetric invariant interval (equal to the deteminant
-  of the coherency matrix). 
-*/
-bool Pulsar::Integration::invint_square = false;
-
-
-/////////////////////////////////////////////////////////////////////////////
-//
 // Pulsar::Integration::invint
 //
 /*! 
@@ -53,15 +43,11 @@ void Pulsar::Integration::invint ()
     // remove the baseline
     *(Sinv) -= Sinv->mean( Sinv->find_min_phase() );
 
-    if (invint_square)
-      Sinv->set_state (Signal::DetRho);
-    else {
-      Sinv->set_state (Signal::Inv);
-      Sinv->square_root();
-    }
+    Sinv->set_state (Signal::Inv);
+    Sinv->square_root();
     
   } // for each channel
 
   resize (1);
-  set_state (Signal::Invariant);
+
 }
