@@ -1,4 +1,3 @@
- 
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
 #include "Pulsar/Profile.h"
@@ -26,8 +25,9 @@
 #include <iostream>
 
 
-void loadGaussian(string file,  Reference::To<Pulsar::Archive> &stdarch,  Reference::To<Pulsar::Archive> arch);
-
+void loadGaussian(string file,  
+		  Reference::To<Pulsar::Archive> &stdarch,  
+		  Reference::To<Pulsar::Archive> arch);
 
 void usage ()
 {
@@ -49,6 +49,14 @@ void usage ()
     "  -p               Perform full polarimetric fit in Fourier domain \n"
     "  -s stdfile       Location of standard profile \n"
     "  -D               Denoise standard \n"
+    "\n"
+    "Algorithm Selection:\n"
+    "  -A [PGS | GIS | PIS | ZPF] \n"
+    "                   Select shift algorithm (default PGS) \n"
+    "                      PGS = Fourier phase gradient \n"
+    "                      GIS = Gaussian interpolation \n"
+    "                      PIS = Parabolic interpolation \n"
+    "                      ZPF = Zero pad interpolation \n"
     "\n"
     "Output options:\n"
     "  -f \"format <flags>\"  Output format (parkes = default, tempo2, itoa, princeton ...)\n"
@@ -78,10 +86,14 @@ int main (int argc, char *argv[])
   vector<string> stdprofiles;
   vector<Tempo::toa> toas;
 
+  Reference::To<Pulsar::Archive> arch;
+  Reference::To<Pulsar::Archive> stdarch;
+  Reference::To<Pulsar::Profile> prof;
+
   int gotc = 0;
 
   Pulsar::PolnProfileFit fit;
-  while ((gotc = getopt(argc, argv, "hiDFn:ps:g:a:tTvV:f:q")) != -1) {
+  while ((gotc = getopt(argc, argv, "hiDFn:ps:g:a:A:tTvV:f:q")) != -1) {
     switch (gotc) {
     case 'h':
       usage ();
@@ -105,7 +117,7 @@ int main (int argc, char *argv[])
       denoise = true;
       break;
     case 'i':
-      cout << "$Id: pat.C,v 1.33 2004/12/30 11:04:00 ahotan Exp $" << endl;
+      cout << "$Id: pat.C,v 1.34 2005/01/03 23:09:08 ahotan Exp $" << endl;
       return 0;
 
     case 'F':
@@ -146,6 +158,25 @@ int main (int argc, char *argv[])
 	}
       break;
 
+    case 'A':
+
+      if (strcasecmp (optarg, "PGS") == 0)
+	Pulsar::Profile::shift_functor.set(&Pulsar::PhaseGradShift);
+      
+      else if (strcasecmp (optarg, "GIS") == 0)
+	Pulsar::Profile::shift_functor.set(&Pulsar::GaussianShift);
+      
+      else if (strcasecmp (optarg, "PIS") == 0)
+	Pulsar::Profile::shift_functor.set(&Pulsar::ParIntShift);
+
+      else if (strcasecmp (optarg, "ZPS") == 0)
+	Pulsar::Profile::shift_functor.set(&Pulsar::ZeroPadShift);
+      
+      else
+	cerr << "pat: unrecognized shift method '" << optarg << "'" << endl;
+
+      break;
+
     case 's':
       std_given = true;
       std = optarg;
@@ -173,10 +204,6 @@ int main (int argc, char *argv[])
     cerr << "You must specify the standard profile to use!" << endl;
     return -1;
   }
-
-  Reference::To<Pulsar::Archive> arch;
-  Reference::To<Pulsar::Archive> stdarch;
-  Reference::To<Pulsar::Profile> prof;
 
   Reference::To<const Pulsar::PolnProfile> poln_profile;
 
