@@ -82,6 +82,15 @@ const Pulsar::Profile* Pulsar::PolnProfile::get_Profile (unsigned ipol) const
   return profile[ipol];
 }
 
+Pulsar::Profile* Pulsar::PolnProfile::get_profile (unsigned ipol)
+{
+  if (ipol >= 4)
+    throw Error (InvalidRange, "PolnProfile::get_Profile",
+		 "ipol=%d >= npol=4", ipol);
+
+  return profile[ipol];
+}
+
 //
 //
 //

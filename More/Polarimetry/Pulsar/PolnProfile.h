@@ -98,6 +98,9 @@ namespace Pulsar {
     //! Set everthing to null values
     void init ();
 
+    //! Get the specifed profile (non-const version)
+    Profile* get_profile (unsigned ipol);
+
   };
 
 }
@@ -105,7 +108,8 @@ namespace Pulsar {
 template <typename T>
 void Pulsar::PolnProfile::transform (const Jones<T>& response)
 {
-  unsigned nbin = profile[0]->get_nbin();
+  //  unsigned nbin = profile[0]->get_nbin();
+  unsigned nbin = get_Profile(0)->get_nbin();
 
   float Gain = abs( det(response) );
   if (!finite(Gain))
@@ -119,7 +123,7 @@ void Pulsar::PolnProfile::transform (const Jones<T>& response)
 
   if (correct_weights)
     for (unsigned ipol=0; ipol < 4; ipol++)
-      profile[ipol]->set_weight ( profile[ipol]->get_weight() / Gain );
+      get_profile(ipol)->set_weight ( get_Profile(ipol)->get_weight() / Gain );
 
 }
 
