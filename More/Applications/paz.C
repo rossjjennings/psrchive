@@ -19,7 +19,7 @@ int main (int argc, char *argv[]) {
   bool verbose = false;
   bool display = false;
   bool write = false;
-  
+  bool eightBinZap = false;
   vector<string> archives;
 
   string ulpath;
@@ -56,7 +56,7 @@ int main (int argc, char *argv[]) {
   
   Pulsar::StandardSNR standard_snr;
 
-  while ((gotc = getopt(argc, argv, "hvViDme:z:k:Z:x:X:dE:s:u:w:W:C:S:P:")) != -1) {
+  while ((gotc = getopt(argc, argv, "hvViDme:z:k:Z:x:X:dE:s:u:w:W:C:S:P:8")) != -1) {
     switch (gotc) {
     case 'h':
       cout << "A program for zapping RFI in Pulsar::Archives"                      << endl;
@@ -81,6 +81,7 @@ int main (int argc, char *argv[]) {
       cout << "  -d               Zero weight chans using mean offset rejection"   << endl;
       cout << "  -C cutoff        Zero weight chans based on S/N (std optional)"   << endl;
       cout << "  -P stdfile       Use this standard profile"                       << endl;
+      cout << "  -8               Attempts to fix ATNF WBCORR 8 bin problem"       << endl;
       cout << endl;
       cout << "The format of the kill file used with the -k option is simply"      << endl;
       cout << "a list of channel numbers, separated by spaces or newlines"         << endl;
@@ -99,7 +100,7 @@ int main (int argc, char *argv[]) {
       Pulsar::Archive::set_verbosity(1);
       break;
     case 'i':
-      cout << "$Id: paz.C,v 1.19 2004/04/15 10:10:35 straten Exp $" << endl;
+      cout << "$Id: paz.C,v 1.20 2004/05/25 04:28:56 ghobbs Exp $" << endl;
       return 0;
     case 'D':
       display = true;
@@ -123,6 +124,9 @@ int main (int argc, char *argv[]) {
     case 'e':
       write = true;
       ext = optarg;
+      break;
+    case '8':  // The aim here is to zero every eight time bins starting from number 6
+      eightBinZap = true;
       break;
     case 'Z':
       {
@@ -301,6 +305,40 @@ int main (int argc, char *argv[]) {
       Reference::To<Pulsar::Archive> arch = Pulsar::Archive::load(archives[i]);
       
       cout << "Loaded archive: " << archives[i] << endl;
+
+      if (eightBinZap) {  // To fix early wide-band correlator problem
+	float *amps;
+	float amp1,amp2;
+	unsigned int subint,pol,chan;      
+	unsigned int i;
+	subint = 0;
+	Reference::To<Pulsar::Profile> prof;
+
+	for (pol = 0;pol < arch->get_npol();pol++)
+	  {
+	    for (chan=0;chan < arch->get_nchan();chan++) 
+	      {
+		for (subint = 0;subint < arch->get_nsubint();subint++)
+		  {
+		    prof = arch->get_Profile(subint,pol,chan);
+		    amps = prof->get_amps();
+		    for (i=5;i<arch->get_nbin();i+=8) 
+		      {
+			// Interpolate between previous and later point if possible
+			if (i==arch->get_nbin()-1)
+			  amps[i] = amps[i-1];
+			else
+			  {
+			    amp1 = amps[i-1];
+			    amp2 = amps[i+1];
+			    amps[i] = 0.5*(amp1+amp2);
+			  }
+		      }
+		    prof->set_amps(amps);
+		  }
+	      }
+	  }
+      }
       
       int nchan = arch->get_nchan();
 
@@ -413,10 +451,8 @@ int main (int argc, char *argv[]) {
 	}
       }
 
-      
       if (display)
 	plotter.bandpass(arch);
-      
       if (write) {
 	if (ext.empty()) {
 	  arch->unload();
