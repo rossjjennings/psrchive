@@ -390,7 +390,7 @@ void Pulsar::PolnCalibrator::build (unsigned nchan) try {
       response[ichan] *= receiver->get_transformation();
 
     // invert:  the response must undo the effect of the instrument
-    // response[ichan] = inv (response[ichan]);
+    response[ichan] = inv (response[ichan]);
   }
 
 }
