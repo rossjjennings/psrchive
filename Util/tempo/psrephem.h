@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/psrephem.h,v $
-   $Revision: 1.24 $
-   $Date: 2003/01/22 15:58:53 $
+   $Revision: 1.25 $
+   $Date: 2003/03/29 08:38:02 $
    $Author: straten $ */
 
 #ifndef __PSREPHEM_H
@@ -29,6 +29,9 @@ class psrephem : public Reference::Able
 
   // this string needs to be long enough to hold the above-defined MACRO
   static vector<string> extensions();
+
+  // makes tex_descriptor return short_tex_descriptor
+  static bool short_tex;
 
   int*    parmStatus;
   string* value_str;
@@ -185,6 +188,9 @@ class psrephem : public Reference::Able
   // used by the above
   int GR_f_e (double& f_e) const;
 
+  // returns spin-orbit coupling rate of precession
+  int GR_Omega_p (double& Omp) const;
+
   // //////////////////////////////////////////////////////////////////////
   // to use the following two functions, you will need to link with 
   // -lpsrinfo
@@ -198,6 +204,9 @@ class psrephem : public Reference::Able
 
   // returns a LateX formatted string suitable for labelling the parameter
   static const char* tex_descriptor (int ephind);
+
+  // returns a LateX formatted string suitable for short labels
+  static const char* short_tex_descriptor (int ephind);
 
   // returns a block of LaTeX formatted text suitable for use in tables
   static string tex (vector<psrephem>& vals, bool dots=false);
