@@ -1,6 +1,6 @@
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Attic/string_utils.h,v $
-   $Revision: 1.4 $
-   $Date: 1999/11/02 09:18:16 $
+   $Revision: 1.5 $
+   $Date: 1999/12/10 04:43:06 $
    $Author: straten $ */
 
 #ifndef __STRING_UTILS_H
@@ -10,8 +10,6 @@
 #include <stdio.h>
 #include <string>
 #include <vector>
-
-#ifdef __cplusplus
 
 #include "psr_cpp.h"
 
@@ -25,7 +23,7 @@ ssize_t stringload (string* str, FILE* fptr, size_t nbytes=0);
 // fills a vector of string with the first word from each line
 // in the file.  A line is delimited by \n or commented by #.
 // ///////////////////////////////////////////////////////////
-//int stringload (vector<string>* lines, const char* filename);
+int stringfload (vector<string>* lines, const char* filename);
 int stringload (vector<string>* lines, FILE* fptr);
 
 // ///////////////////////////////////////////////////////////
@@ -63,8 +61,6 @@ inline int stringlen (int val, unsigned precision = 0)
 
 inline int stringlen (float val, unsigned precision = 6)
 { return stringlen (double(val), precision); }
-
-#endif
 
 #endif
 
