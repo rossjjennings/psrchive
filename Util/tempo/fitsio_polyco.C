@@ -7,15 +7,23 @@
 #include "genutil.h"
 #include "fitsutil.h"
 
+// #define DEBUG 1
+
 // ///////////////////////////////////////////////////////////////////////
 //
-// load a polynomial from a PSRFITS file
+// load a polyco from a PSRFITS file
 //
 // fitsfile - points to an open PSRFITS archive
-// row      - if specified, the row in the binary table
+// row      - if specified, parse the row'th record in the binary table
+//            otherwise, parse the last (most recent) row
 //
+
 void polyco::load (fitsfile* fptr, long row)
 {
+#ifdef DEBUG
+  cerr << "polyco::load PSRFITS 1" << endl;
+#endif
+
   int status = 0;          // status returned by FITSIO routines
   char err[FLEN_STATUS];   // error message if status != 0
 
@@ -28,9 +36,7 @@ void polyco::load (fitsfile* fptr, long row)
 
   // ask for the number of rows in the binary table
   long nrows = 0;
-  int  ncols = 0;
   fits_get_num_rows (fptr, &nrows, &status);
-  fits_get_num_cols (fptr, &ncols, &status);
   if (status != 0) {
     fits_get_errstatus (status, err);
     throw_str ("polyco::load error fits_get_num_[row|col]s %s", err);
@@ -39,109 +45,148 @@ void polyco::load (fitsfile* fptr, long row)
   if (row > nrows || row < 1)
     row = nrows;
 
-  pollys.resize(1);
-
-  if (verbose)
-    cerr << "polyco::load PSRFITS call polynomial load" << endl;
-  pollys[0].load (fptr, row);
-}
-
-// ///////////////////////////////////////////////////////////////////////
-//
-// load a polynomial from a PSRFITS file
-//
-// fitsfile - points to an open PSRFITS archive
-// row      - the row in the binary table
-//
-// assumes that the CHDU is name POLYCO
-//
-void polynomial::load (fitsfile* fptr, long row)
-{
-  int status = 0;          // status returned by FITSIO routines
-  char err[FLEN_STATUS];   // error message if status != 0
-
-  tempov11 = false;
-
   // these are used to pull out the data from a cell
   long firstelem = 1;
   long onelement = 1;
   int colnum = 0;
   int anynul = 0;
+  char* nul = "-";
 
-  // these are used to query the nature of a column
+#ifdef DEBUG
+  cerr << "polyco::load PSRFITS 2" << endl;
+#endif
+
+  int nspan=0;
+  fits_get_colnum (fptr, CASEINSEN, "NSPAN", &colnum, &status);
+  fits_read_col (fptr, TINT, colnum, row, firstelem, onelement,
+		 NULL, &nspan, &anynul, &status);
+  if (anynul || status)
+    throw string ("polyco::load failed to parse NSPAN");
+
+#ifdef DEBUG
+  cerr << "polyco::load PSRFITS 2.3" << endl;
+#endif
+
+  int ncoef=0;
+  fits_get_colnum (fptr, CASEINSEN, "NCOEF", &colnum, &status);
+  fits_read_col (fptr, TINT, colnum, row, firstelem, onelement,
+		 NULL, &ncoef, &anynul, &status);
+  if (anynul || status)
+    throw string ("polyco::load failed to parse NCOEF");
+
+#ifdef DEBUG
+  cerr << "polyco::load PSRFITS 2.4" << endl;
+#endif
+
+  int npoly=0;
+  fits_get_colnum (fptr, CASEINSEN, "NPBLK", &colnum, &status);
+  fits_read_col (fptr, TINT, colnum, row, firstelem, onelement,
+		 NULL, &npoly, &anynul, &status);
+  if (anynul || status)
+    throw string ("polyco::load failed to parse NPBLK");
+
+#ifdef DEBUG
+  cerr << "polyco::load PSRFITS 2.5" << endl;
+#endif
+
+  char* site = new char[2];
+  fits_get_colnum (fptr, CASEINSEN, "NSITE", &colnum, &status);
+  fits_read_col (fptr, TSTRING, colnum, row, firstelem, onelement,
+		 nul, &site, &anynul, &status);
+  if (anynul || status)
+    throw string ("polyco::load failed to parse NSITE");
+
+#ifdef DEBUG
+  cerr << "polyco::load PSRFITS 2.6" << endl;
+#endif
+ 
+  double ref_freq=0;
+  fits_get_colnum (fptr, CASEINSEN, "REF_FREQ", &colnum, &status);
+  fits_read_col (fptr, TDOUBLE, colnum, row, firstelem, onelement,
+		 NULL, &ref_freq, &anynul, &status);
+  if (anynul || status)
+    throw string ("polyco::load failed to parse NSPAN");
+
+  if (verbose)
+    cerr << "polcy::load PSRFITS " << npoly << " polynomial blocks" << endl;
+
+#ifdef DEBUG
+  cerr << "polyco::load PSRFITS 3" << endl;
+#endif
+
+  // these are used to query the nature of the COEFF column
   int  typecode = 0;
   long repeat = 0;
   long width = 0;
 
-  fits_get_colnum (fptr, CASEINSEN, "NSPAN", &colnum, &status);
-  fits_read_col (fptr, TDOUBLE, colnum, row, firstelem, onelement,
-		 NULL, &nspan_mins, &anynul, &status);
-  if (anynul || status)
-    throw string ("polynomial::load failed to parse NSPAN");
+  pollys.resize(npoly);
 
-  int ncoefs;
-  fits_get_colnum (fptr, CASEINSEN, "NCOEFF", &colnum, &status);
-  fits_read_col (fptr, TINT, colnum, row, firstelem, onelement,
-		 NULL, &ncoefs, &anynul, &status);
-  if (anynul || status)
-    throw string ("polynomial::load failed to parse NCOEFF");
+  fits_get_colnum (fptr, CASEINSEN, "REF_MJD", &colnum, &status);
+  fits_get_coltype (fptr, colnum, &typecode, &repeat, &width, &status);  
+  if (repeat != npoly)
+    throw_str ("polynomial::load REF_MJD vector repeat count=%ld != NPBLK=%d",
+	       repeat, npoly);
 
-  coefs.resize(ncoefs);
-
-  char* site = new char[2];
-  char* nul = "-";
-
-  fits_get_colnum (fptr, CASEINSEN, "NSITE", &colnum, &status);
-
-  if (polyco::verbose) {
-    fits_get_coltype (fptr, colnum, &typecode, &repeat, &width, &status);
-    cerr << "polynomial::load PSRFITS NSITE repeat=" << repeat 
-	 << " width=" << width << " type=" << fits_datatype_str(typecode)
-	 << endl;
+  for (int ipoly=0; ipoly<npoly; ipoly++) {
+    double temp=0;
+    firstelem = ipoly + 1;    
+    fits_read_col (fptr, TDOUBLE, colnum, row, firstelem, onelement,
+		   NULL, &temp, &anynul, &status);
+    pollys[ipoly].reftime = MJD(temp);
   }
 
-  fits_read_col (fptr, TSTRING, colnum, row, firstelem, onelement,
-		 nul, &site, &anynul, &status);
-
-  if (anynul || status)
-    throw string ("polynomial::load failed to parse NSITE");
- 
-  telescope = site[0];
-  delete [] site;
-
-  double temp;
-  fits_get_colnum (fptr, CASEINSEN, "REF_MJD", &colnum, &status);
-  fits_read_col (fptr, TDOUBLE, colnum, row, firstelem, onelement,
-		 NULL, &temp, &anynul, &status);
   if (anynul || status)
     throw string ("polynomial::load failed to parse REF_MJD");
 
-  reftime = MJD(temp);
+#ifdef DEBUG
+  cerr << "polyco::load PSRFITS 4" << endl;
+#endif
 
   fits_get_colnum (fptr, CASEINSEN, "REF_PHS", &colnum, &status);
-  fits_read_col (fptr, TDOUBLE, colnum, row, firstelem, onelement,
-		 NULL, &temp, &anynul, &status);
+  fits_get_coltype (fptr, colnum, &typecode, &repeat, &width, &status);  
+  if (repeat != npoly)
+    throw_str ("polynomial::load REF_PHS vector repeat count=%ld != NPBLK=%d",
+	       repeat, npoly);
+  
+  for (int ipoly=0; ipoly<npoly; ipoly++) {
+    double temp=0;
+    firstelem = ipoly + 1;    
+    fits_read_col (fptr, TDOUBLE, colnum, row, firstelem, onelement,
+		   NULL, &temp, &anynul, &status);
+    pollys[ipoly].ref_phase = Phase(temp);
+  }
 
   if (anynul || status)
     throw string ("polynomial::load failed to parse REF_PHS");
 
-  ref_phase = Phase(temp);
+  
+#ifdef DEBUG
+  cerr << "polyco::load PSRFITS 5" << endl;
+#endif
 
   fits_get_colnum (fptr, CASEINSEN, "COEFF", &colnum, &status);
-  fits_get_coltype (fptr, colnum, &typecode, &repeat, &width, &status);
+  fits_get_coltype (fptr, colnum, &typecode, &repeat, &width, &status);  
+  if (repeat != ncoef * npoly)
+    throw_str ("polynomial::load COEFF"
+	       " vector repeat count=%ld != NCOEF*NPBLK=%d",
+	       repeat, ncoef * npoly);
 
-  if (polyco::verbose)
-    cerr << "polynomial::load PSRFITS COEFF repeat=" << repeat 
-	 << " width=" << width << " type=" << fits_datatype_str(typecode)
-	 << endl;
-  
-  if (repeat != ncoefs)
-    throw_str ("polynomial::load COEFF vector repeat count=%ld != NCOEFF=%d",
-	       repeat, ncoefs);
-  fits_read_col (fptr, TDOUBLE, colnum, row, firstelem, repeat,
-		 NULL, coefs.begin(), &anynul, &status);
-  
-  if (anynul || status)
-    throw_str ("polynomial::load failed to parse COEFF %ld vector", repeat);
+  for (int ipoly=0; ipoly<npoly; ipoly++) {
 
+    pollys[ipoly].coefs.resize(ncoef);
+
+    firstelem = ipoly*ncoef + 1;
+
+    fits_read_col (fptr, TDOUBLE, colnum, row, firstelem, ncoef,
+		   NULL, pollys[ipoly].coefs.begin(), &anynul, &status);
+
+  }
+
+  for (int ipoly=0; ipoly<npoly; ipoly++) {
+    pollys[ipoly].telescope = site[0];
+    pollys[ipoly].freq = ref_freq;
+    pollys[ipoly].nspan_mins = (double) nspan;
+  }
+
+  delete [] site;
 }
