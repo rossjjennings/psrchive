@@ -17,6 +17,7 @@ int fft_shift (int npts, float * arr, double shift)
   float * cmplx_arr = (float *) malloc(sizeof(float)*2*npts);
   float * fft_cmplx_arr = (float *) malloc(sizeof(float)*2*npts);
   double shiftrad;
+  float norm = 1.0;
 
   assert (fft_cmplx_arr != 0 && cmplx_arr != 0);
 
@@ -46,9 +47,12 @@ int fft_shift (int npts, float * arr, double shift)
   }
 
   fft_bcc1d(npts, cmplx_arr, fft_cmplx_arr);
-    
+
+  if (fft_get_normalization() == fft_nfft)
+    norm = (float) npts;
+
   for(i=0; i<npts; ++i)
-    arr[i] = cmplx_arr[2*i]/(float)npts;
+    arr[i] = cmplx_arr[2*i]/norm;
 
   free(cmplx_arr);
   free(fft_cmplx_arr);
