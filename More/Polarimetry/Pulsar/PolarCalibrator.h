@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PolarCalibrator.h,v $
-   $Revision: 1.13 $
-   $Date: 2004/11/22 21:32:30 $
+   $Revision: 1.14 $
+   $Date: 2005/03/22 06:13:36 $
    $Author: straten $ */
 
 #ifndef __PolarCalibrator_H
@@ -60,10 +60,9 @@ namespace Pulsar {
     //
     // ///////////////////////////////////////////////////////////////////
 
-    //! Return a new MEAL::Polar instance
-    ::MEAL::Complex2* solve (const vector<Estimate<double> >& hi,
-				    const vector<Estimate<double> >& lo);
-
+    //! Return a new Calibration::Polar instance
+    MEAL::Complex2* solve (const vector<Estimate<double> >& hi,
+                           const vector<Estimate<double> >& lo);
 
   };
 

@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ReferenceCalibrator.h,v $
-   $Revision: 1.2 $
-   $Date: 2004/11/22 21:32:31 $
+   $Revision: 1.3 $
+   $Date: 2005/03/22 06:13:36 $
    $Author: straten $ */
 
 #ifndef __Pulsar_ReferenceCalibrator_H
@@ -89,7 +89,7 @@ namespace Pulsar {
 		    vector<vector<Estimate<double> > >& lo);
 
     //! Derived classes must perform the actual solution
-    virtual ::MEAL::Complex2* 
+    virtual MEAL::Complex2* 
     solve (const vector<Estimate<double> >& hi,
 	   const vector<Estimate<double> >& lo) = 0;
 
