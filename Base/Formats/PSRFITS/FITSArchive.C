@@ -807,20 +807,25 @@ void Pulsar::FITSArchive::load_header (const char* filename)
     
     fits_read_key (fptr, TSTRING, "INT_TYPE", tempstr, comment, &status);
     
-    if ((status == 0) && (strcmp(tempstr,"TIME") != 0)) {
-      if (strcmp(tempstr,"BINPHSPERI") == 0)
-	add_extension(new Pulsar::PeriastronOrder());
-      else if (strcmp(tempstr,"BINPHSASC") == 0)
-	add_extension(new Pulsar::BinaryPhaseOrder());
-      else if (strcmp(tempstr,"BINLNGPERI") == 0)
-	add_extension(new Pulsar::BinLngPeriOrder());
-      else if (strcmp(tempstr,"BINLNGASC") == 0)
-	add_extension(new Pulsar::BinLngAscOrder());
-      else
-	throw Error(InvalidParam, "FITSArchive::load_header",
-		    "unknown ordering extension encountered");
-      
-      get<Pulsar::IntegrationOrder>()->resize(get_nsubint());
+    if (status == 0) {
+      if (strcmp(tempstr,"TIME") == 0 || strcmp(tempstr,"") == 0) {
+	// Do nothing
+      }
+      else {
+	if (strcmp(tempstr,"BINPHSPERI") == 0)
+	  add_extension(new Pulsar::PeriastronOrder());
+	else if (strcmp(tempstr,"BINPHSASC") == 0)
+	  add_extension(new Pulsar::BinaryPhaseOrder());
+	else if (strcmp(tempstr,"BINLNGPERI") == 0)
+	  add_extension(new Pulsar::BinLngPeriOrder());
+	else if (strcmp(tempstr,"BINLNGASC") == 0)
+	  add_extension(new Pulsar::BinLngAscOrder());
+	else
+	  throw Error(InvalidParam, "FITSArchive::load_header",
+		      "unknown ordering extension encountered");
+	
+	get<Pulsar::IntegrationOrder>()->resize(get_nsubint());
+      }
     }
   }
   
@@ -1343,26 +1348,22 @@ try {
   
   fits_update_key (fptr, TSTRING, "SRC_NAME",
 		   const_cast<char*>(source.c_str()), comment, &status);
-
-  {
-
-    char* useful = new char[4];
-
-    if (get_basis() == Signal::Linear)
-      sprintf(useful, "%s", "LIN");
-
-    else if (get_basis() == Signal::Circular)
-      sprintf(useful, "%s", "CIRC");
-
-    else
-      sprintf(useful, "%s", "    ");
-
-    fits_update_key (fptr, TSTRING, "FD_POLN", 
-		     useful, comment, &status);
-
-    delete[] useful;
-
-  }
+  
+  char* useful = new char[16];
+  
+  if (get_basis() == Signal::Linear)
+    sprintf(useful, "%s", "LIN");
+  
+  else if (get_basis() == Signal::Circular)
+    sprintf(useful, "%s", "CIRC");
+  
+  else
+    sprintf(useful, "%s", "    ");
+  
+  fits_update_key (fptr, TSTRING, "FD_POLN", 
+		   useful, comment, &status);
+  
+  delete[] useful;
   
   fits_update_key (fptr, TSTRING, "FRONTEND", 
   		   (char*)get_receiver().c_str(), comment, &status);
@@ -1573,6 +1574,7 @@ void Pulsar::FITSArchive::unload_integration (int row,
   int status = 0;
 
   bool has_alt_order = false;
+
   Pulsar::Archive::Extension* ext = 0;
   Pulsar::IntegrationOrder* order = 0;
   
@@ -1651,7 +1653,7 @@ void Pulsar::FITSArchive::unload_integration (int row,
       throw FITSError (status, "FITSArchive:unload_integration",
 		       "fits_get_colnum INDEXVAL");
     
-    double value = order->get_Index(row);
+    double value = order->get_Index(row-1);
     fits_write_col (thefptr, TDOUBLE, colnum, row, 1, 1, &value, &status);
   }
 
