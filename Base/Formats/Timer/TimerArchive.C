@@ -92,12 +92,14 @@ void Pulsar::TimerArchive::copy (const Archive& archive,
     cerr << "TimerArchive::copy Entering" << endl;
 
   if (this == &archive) {
-    cerr << "Returning from TimerArchive::copy early " << endl;
+    if (verbose)
+      cerr << "Returning from TimerArchive::copy early " << endl;
     return;
   } else {
-    cerr << "this == &archive passed test " << endl;
+    if (verbose)
+      cerr << "this == &archive passed test " << endl;
   }
-
+  
   Archive::copy (archive, subints);
 
   const TimerArchive* tarchive = dynamic_cast<const TimerArchive*>(&archive);
