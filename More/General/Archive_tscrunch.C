@@ -21,6 +21,10 @@ void Pulsar::Archive::tscrunch (unsigned nscrunch)
   if (nscrunch == 1 || nsub < 2)
     return;
   
+  // if nscrunch == 0, default is to scrunch all sub_ints
+  if (nscrunch == 0)
+    nscrunch = nsub;
+
   // Account for custom Integration ordering:
 
   IntegrationOrder* order = get<IntegrationOrder>();
@@ -28,10 +32,6 @@ void Pulsar::Archive::tscrunch (unsigned nscrunch)
     order->combine(this, nscrunch);
     return;
   }
-  
-  // if nscrunch == 0, default is to scrunch all sub_ints
-  if (nscrunch == 0)
-    nscrunch = nsub;
   
   unsigned newsub = nsub / nscrunch;
   
