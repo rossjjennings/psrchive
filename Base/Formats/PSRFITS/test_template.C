@@ -3,6 +3,8 @@
 
 #include "FITSError.h"
 
+using namespace std;
+
 void test_template (const char* template_file, bool verbose = true);
 void parse_template (const char* template_file, bool verbose = true);
 
