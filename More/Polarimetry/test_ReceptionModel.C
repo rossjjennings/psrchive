@@ -205,8 +205,8 @@ void observe (vector<Calibration::CoherencyMeasurementSet>& observations,
 
     Jones<double> xform = signal_path.evaluate ();
 
-    if (vverbose)
-      cerr << "iobs=" << iobs << " xform=" << xform << endl;
+    //if (vverbose)
+      //cerr << "iobs=" << iobs << " xform=" << xform << endl;
 
     for (unsigned istate = 0; istate < states.size(); istate++) {
 
@@ -341,8 +341,8 @@ int runtest (Calibration::Parallactic& parallactic)
 
     Jones<Estimate<double> > para = parallactic.evaluate ();
 
-    if (vverbose)
-      cerr << "iobs=" << iobs << " para=" << para << endl;
+    // if (vverbose)
+      // cerr << "iobs=" << iobs << " para=" << para << endl;
 
     for (unsigned istate = 0; istate < nstates; istate++) {
 
