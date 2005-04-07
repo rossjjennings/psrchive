@@ -29,7 +29,7 @@ void test_eigen(const Quaternion<T, Hermitian>& q, float tolerance)
 
   //cerr << "test_eigen: res=" << result << endl;
 
-  double off = norm(result.j(0,1)) + norm(result.j(1,0));
+  double off = norm(result(0,1)) + norm(result(1,0));
 
   if (sqrt(off) > tolerance){
     cerr << "tol=" << tolerance << endl;
@@ -40,7 +40,7 @@ void test_eigen(const Quaternion<T, Hermitian>& q, float tolerance)
   }
 
   double det1 = det(q);
-  double det2 = result.j(0,0).real() * result.j(1,1).real();
+  double det2 = result(0,0).real() * result(1,1).real();
 
   if ( sqr(det1 - det2) > tolerance ) {
     cerr << "tol=" << tolerance << endl;
