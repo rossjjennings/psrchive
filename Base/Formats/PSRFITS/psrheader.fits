@@ -7,7 +7,7 @@ COMMENT   Astrophysics Supplement Series v44/p363, v44/p371, v73/p359, v73/p365.
 COMMENT   Contact the NASA Science Office of Standards and Technology for the
 COMMENT   FITS Definition document #100 and other FITS information.
 COMMENT
-HDRVER  = '1.26            '   / Header version 
+HDRVER  = '1.27            '   / Header version 
 DATE    = '                '   / File creation date (YYYY-MM-DDThh:mm:ss UTC)
 OBSERVER= '                '   / Observer name(s)
 PROJID  = '                '   / Project name
@@ -333,6 +333,7 @@ TTYPE44 = 'TRES    '           / [usec] RMS timing residual
 TFORM44 = '1D      '           / Double
 TTYPE45 = 'NTOA    '           / Number of TOAs in timing fit
 TFORM45 = '1I      '           / Integer
+TNULL45 = -1                   / Null value used by fits_write_col_null
 TTYPE46 = 'CLK     '           / Terrestrial time standard
 TFORM46 = '12A     '           / 12-char string
 TTYPE47 = 'EPHEM   '           / Solar system ephemeris
