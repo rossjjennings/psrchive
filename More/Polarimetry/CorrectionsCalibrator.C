@@ -40,7 +40,7 @@ bool Pulsar::CorrectionsCalibrator::needs_correction (const Archive* archive,
 
   // ... or the angle tracked by the receiver is not zero
   if (pointing) {
-    if (Archive::verbose == 3)
+    if (verbose)
       cerr << "Pulsar::CorrectionsCalibrator::needs_correction\n"
 	"   Pointing::position_angle=" 
            << pointing->get_position_angle().getDegrees() << " deg" << endl;
@@ -140,10 +140,9 @@ Pulsar::CorrectionsCalibrator::get_transformation (const Archive* archive,
 
   const Pointing* pointing = integration->get<Pointing>();
 
-  if (pointing && Archive::verbose == 3)
+  if (pointing && verbose)
     cerr << "Pulsar::CorrectionsCalibrator::get_transformation"
             " Archive has Pointing" << endl;
-
 
   if (pointing && !equal_pi (pointing->get_position_angle(),
 			     pointing->get_feed_angle() 
@@ -154,15 +153,16 @@ Pulsar::CorrectionsCalibrator::get_transformation (const Archive* archive,
     if (Archive::verbose)
       cerr << "Pulsar::CorrectionsCalibrator::get_transformation WARNING\n"
 	"  Pointing position_angle=" << pointing->get_position_angle() 
-           << " != feed_angle+get_parallactic_angle()="
-	   << pointing->get_feed_angle() + pointing->get_parallactic_angle() << endl;
+           << " != feed_angle+parallactic_angle="
+	   << pointing->get_feed_angle() + pointing->get_parallactic_angle()
+	   << endl;
     
     pointing = 0;
     
   }
 
   if (!needs_correction( archive, pointing )) {
-    if (Archive::verbose == 3)
+    if (verbose)
       cerr << "Pulsar::CorrectionsCalibrator no corrections required" << endl;
     return xform;
   }
@@ -170,7 +170,7 @@ Pulsar::CorrectionsCalibrator::get_transformation (const Archive* archive,
   Pauli::basis.set_basis( (Basis<double>::Type) receiver->get_basis() );
 
   if (must_correct_feed)  {
-    if (Archive::verbose == 3)
+    if (verbose)
       cerr << "Pulsar::CorrectionsCalibrator::get_transformation"
               " adding Receiver transformation" << endl;
     xform *= receiver->get_transformation();
@@ -179,14 +179,14 @@ Pulsar::CorrectionsCalibrator::get_transformation (const Archive* archive,
   double feed_rotation = 0.0;
 
   if (pointing) {
-    if (Archive::verbose == 3)
+    if (verbose)
       cerr << "Pulsar::CorrectionsCalibrator::get_transformation\n"
         "   using Pointing::position_angle="
            << pointing->get_position_angle().getDegrees() << " deg" << endl;
     feed_rotation = pointing->get_position_angle().getRadians();
   }
   else {
-    if (Archive::verbose == 3)
+    if (verbose)
       cerr << "Pulsar::CorrectionsCalibrator::get_transformation\n"
         "   using Receiver::tracking_angle="
            << receiver->get_tracking_angle().getDegrees() << " deg" << endl;
