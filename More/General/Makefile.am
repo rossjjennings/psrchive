@@ -139,8 +139,10 @@ vap_SOURCES			= vap.C
 vip_SOURCES			= vip.C
 psredit_SOURCES			= psredit.C
 
-check_PROGRAMS = test_Archive test_denoise test_Difference
+TESTS = test_Receiver
+check_PROGRAMS = test_Archive test_denoise test_Difference $(TESTS)
 
+test_Receiver_SOURCES		= test_Receiver.C
 test_Archive_SOURCES		= test_Archive.C
 test_denoise_SOURCES		= test_denoise.C
 test_Difference_SOURCES		= test_Difference.C
