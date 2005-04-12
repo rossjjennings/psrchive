@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/Receiver.h,v $
-   $Revision: 1.11 $
-   $Date: 2004/12/14 07:29:06 $
+   $Revision: 1.12 $
+   $Date: 2005/04/12 06:44:28 $
    $Author: straten $ */
 
 #ifndef __ReceiverExtension_h
@@ -17,7 +17,7 @@ namespace Pulsar {
   
   //! Contains information about the receiver and receiver platform
 
-  class Receiver : public Pulsar::Archive::Extension {
+  class Receiver : public Archive::Extension {
 
   public:
     
@@ -61,7 +61,7 @@ namespace Pulsar {
     void set_tracking_mode (Tracking mode) { tracking_mode = mode; }
 
     //! Get the position angle tracked by the receiver
-    const Angle get_tracking_angle () const { return tracking_angle; }
+    Angle get_tracking_angle () const { return tracking_angle; }
     //! Get the position angle tracked by the receiver
     void set_tracking_angle (const Angle& angle) { tracking_angle = angle; }
 
@@ -71,9 +71,9 @@ namespace Pulsar {
     void set_name (const string& _name) { name = _name; }
 
     //! Get the basis of the feed receptors
-    Signal::Basis get_basis () const { return basis; }
+    Signal::Basis get_basis () const { return state->get_basis(); }
     //! Set the basis of the feed receptors
-    void set_basis (Signal::Basis _basis) { basis = _basis; }
+    void set_basis (Signal::Basis basis);
 
     /** @name General orthogonal basis interface
      *  These parameters describe the configuration of a receiver with
@@ -82,17 +82,18 @@ namespace Pulsar {
     //@{
 
     //! Get the orientation of the basis about the line of sight
-    const Angle get_orientation () const;
+    Angle get_orientation () const { return state->get_orientation(); }
     //! Set the orientation of the basis about the line of sight
     void set_orientation (const Angle& celestial_position_angle);
 
     //! Return true if the basis is right-handed
-    bool get_right_handed () const;
+    bool get_right_handed () const { return state->get_right_handed(); }
     //! Set true if the basis is right-handed
     void set_right_handed (bool right = true);
  
     //! Get the phase of the reference source
-    const Angle get_reference_source_phase () const;
+    Angle get_reference_source_phase () const
+    { return state->get_reference_source_phase(); }
     //! Set the phase of the reference source
     void set_reference_source_phase (const Angle& phase);
 
@@ -104,7 +105,7 @@ namespace Pulsar {
     //@{
 
     //! Get the orientation of the equal in-phase electric field vector
-    const Angle get_field_orientation () const;
+    Angle get_field_orientation () const;
     //! Set the orientation of the equal in-phase electric field vector
     void set_field_orientation (const Angle& celestial_position_angle);
 
@@ -117,17 +118,17 @@ namespace Pulsar {
     //@{
 
     //! Get the offset of the feed X axis with respect to the platform zero
-    const Angle get_X_offset () const;
+    Angle get_X_offset () const;
     //! Set the offset of the feed X axis with respect to the platform zero
     void set_X_offset (const Angle& offset);
 
     //! Get the offset of the feed Y axis from its nominal value
-    const Angle get_Y_offset () const;
+    Angle get_Y_offset () const;
     //! Set the offset of the feed Y axis from its nominal value
     void set_Y_offset (const Angle& offset);
 
     //! Get the offset of the feed calibrator axis from its nominal value
-    const Angle get_calibrator_offset () const;
+    Angle get_calibrator_offset () const;
     //! Set the offset of the feed calibrator axis from its nominal value
     void set_calibrator_offset (const Angle& offset);
 
@@ -138,9 +139,9 @@ namespace Pulsar {
     //! Set the flag set when the offset of the feed has been corrected
     void set_feed_corrected (bool val) { feed_corrected = val; }
 
-    //! Get the flag set when platform to sky transformation has been corrected
+    //! Get if platform to sky transformation has been corrected
     bool get_platform_corrected () const { return platform_corrected; }
-    //! Set the flag set when platform to sky transformation has been corrected
+    //! Set when platform to sky transformation has been corrected
     void set_platform_corrected (bool val) { platform_corrected = val; }
 
     //! Get the attenuator, Poln A
@@ -162,12 +163,39 @@ namespace Pulsar {
     //! Return the feed correction matrix
     Jones<double> get_transformation () const;
 
-    //! Return the Stokes parameters of the reference source (e.g. noise diode)
+    //! Return the Stokes parameters of the reference source
     Stokes<double> get_reference_source () const;
+
+    //! Pure virtual base class of Receiver class state
+    class State : public Reference::Able {
+    public:
+
+      //! Get the basis of the feed receptors
+      virtual Signal::Basis get_basis () const = 0;
+
+      //! Get the orientation of the basis about the line of sight
+      virtual Angle get_orientation () const = 0;
+
+      //! Return true if the basis is right-handed
+      virtual bool get_right_handed () const = 0;
+
+      //! Get the phase of the reference source
+      virtual Angle get_reference_source_phase () const = 0;
+
+      //! Copy the state from another
+      virtual void copy (const State*) = 0;
+
+    };
 
   protected:
 
-    friend ostream& operator<< (ostream& ostr, const Receiver&);
+    template<class StateType> StateType* get() const;
+
+    //! Name of the receiver
+    string name;
+
+    //! State of the receiver
+    Reference::To<State> state;
 
     //! The tracking mode of the receiver platform
     Tracking tracking_mode;
@@ -175,21 +203,6 @@ namespace Pulsar {
     //! The rotation angle tracked by the feed
     /*! The interpretation of this angle depends on the mode */
     Angle tracking_angle;
-
-    //! Name of the receiver
-    string name;
-
-    //! Basis of the feed receptors
-    Signal::Basis basis;
-
-    //! Set true if the basis forms a right-handed coordinate system
-    bool right_handed;
-
-    //! The orientation of the basis about the line of sight
-    Angle orientation;
-    
-    //! Phase of p^* q for reference source
-    Angle reference_source_phase;
 
     //! Flag set when the offset of the feed has been corrected
     /*! This flag should be set when the offset of the feed X and Y
@@ -213,14 +226,6 @@ namespace Pulsar {
 
     //! Get the tranformation arising from the handedness
     Jones<double> get_hand_transformation () const;
-
-  private:
-
-    //! The offset of the orientation due to set_Y_offset
-    Angle orientation_Y_offset;
-
-    //! Flag set when set_field_orientation is used
-    bool field_orientation;
 
   };
 

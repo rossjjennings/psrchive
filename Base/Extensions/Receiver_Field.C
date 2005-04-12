@@ -1,0 +1,40 @@
+#include "Pulsar/Receiver_Field.h"
+
+Pulsar::Receiver_Field::Receiver_Field ()
+{
+  field_orientation = false;
+}
+
+//! Get the orientation of the basis about the line of sight
+Angle Pulsar::Receiver_Field::get_orientation () const
+{
+  Angle offset;
+  if (field_orientation && basis == Signal::Linear)
+    offset.setDegrees (-45);
+
+  return orientation + offset;
+}
+
+//! Set the orientation of the basis about the line of sight
+void Pulsar::Receiver_Field::set_orientation (const Angle& angle)
+{
+  orientation = angle;
+  field_orientation = false;
+}
+
+//! Get the orientation of the equal in-phase electric field vector
+Angle Pulsar::Receiver_Field::get_field_orientation () const
+{
+  Angle offset = 0.0;
+  if (!field_orientation && basis == Signal::Linear)
+    offset.setDegrees (45.0);
+  
+  return orientation + offset;
+}
+
+//! Set the orientation of the equal in-phase electric field vector
+void Pulsar::Receiver_Field::set_field_orientation (const Angle& angle)
+{
+  orientation = angle;
+  field_orientation = true;
+}

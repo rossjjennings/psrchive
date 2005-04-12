@@ -1,6 +1,28 @@
 #include "Pulsar/Receiver.h"
+
+#include "Pulsar/Receiver_Native.h"
+#include "Pulsar/Receiver_Field.h"
+#include "Pulsar/Receiver_Linear.h"
+
 #include "MEAL/Rotation.h"
 #include "Pauli.h"
+
+/*! If the current state is not of the specified StateType, a new state
+  will be created, copied, and installed */
+template<class StateType>
+StateType* Pulsar::Receiver::get () const
+{
+  Receiver* thiz = const_cast<Receiver*>( this );
+  StateType* st = dynamic_cast<StateType*>( thiz->state.get() );
+
+  if (!st) {
+    st = new StateType;
+    st -> copy (state);
+    thiz->state = st;
+  }
+  
+  return st;  
+}
 
 //! Default constructor
 Pulsar::Receiver::Receiver () : Extension ("Receiver")
@@ -8,13 +30,11 @@ Pulsar::Receiver::Receiver () : Extension ("Receiver")
   tracking_mode = Feed;
   name = "unknown";
 
-  basis = Signal::Linear;
-  right_handed = true;
+  state = new Receiver_Native;
 
   feed_corrected = false;
   platform_corrected = false;
 
-  field_orientation = false;
   atten_a = 0.0;
   atten_b = 0.0;
 }
@@ -33,20 +53,14 @@ Pulsar::Receiver::operator= (const Receiver& ext)
   tracking_angle = ext.tracking_angle;
 
   name = ext.name;
-  basis = ext.basis;
-  right_handed = ext.right_handed;
-
-  orientation = ext.orientation;
-  reference_source_phase = ext.reference_source_phase;
+  state = new Receiver_Native;
+  state->copy(ext.state);
 
   feed_corrected = ext.feed_corrected;
   platform_corrected = ext.platform_corrected;
 
   atten_a = ext.atten_a;
   atten_b = ext.atten_b;
-
-  orientation_Y_offset = ext.orientation_Y_offset;
-  field_orientation = ext.field_orientation;
 
   return *this;
 }
@@ -69,128 +83,66 @@ string Pulsar::Receiver::get_tracking_mode_string() const
   return "unknown";
 }
 
+void Pulsar::Receiver::set_basis (Signal::Basis basis)
+{
+  get<Receiver_Native>()->set_basis (basis);
+}
+
 /*! If this method is called, then any previous changes due to
  set_X_offset, set_Y_offset, or set_field_orientation will be
  reset. */
 void Pulsar::Receiver::set_orientation (const Angle& angle)
 {
-  orientation = angle;
-  orientation_Y_offset = 0.0;
-  field_orientation = false;
-}
-
-const Angle Pulsar::Receiver::get_orientation () const
-{
-  Angle offset;
-  if (field_orientation && basis == Signal::Linear)
-    offset.setDegrees (-45);
-
-  return orientation + orientation_Y_offset + offset;
-}
-
-//! Return true if the basis is right-handed
-bool Pulsar::Receiver::get_right_handed () const
-{
-  return right_handed;
+  get<Receiver_Native>()->set_orientation (angle);
 }
 
 /*! If this method is called, then any changes due to set_Y_offset
   will be reset. */
 void Pulsar::Receiver::set_right_handed (bool right)
 {
-  right_handed = right;
-  orientation_Y_offset = 0.0;
-}
- 
-//! Get the phase of the reference source
-const Angle Pulsar::Receiver::get_reference_source_phase () const
-{
-  return reference_source_phase;
+  get<Receiver_Native>()->set_right_handed (right);
 }
 
 //! Set the phase of the reference source
 void Pulsar::Receiver::set_reference_source_phase (const Angle& angle)
 {
-  reference_source_phase = angle;
+  get<Receiver_Native>()->set_reference_source_phase (angle);
 }
 
-/*! The orientation of the electric field vector that induces equal and
-    in-phase responses in orthogonal receptors depends upon the basis.
-    In the linear basis, it has an orientation of 45 degrees.  In the
-    circular basis, 0 degrees.   Therefore, if this attribute is set,
-    the interpretation of the orientation will become basis dependent. */
 void Pulsar::Receiver::set_field_orientation (const Angle& angle)
 {
-  set_orientation (angle);
-  field_orientation = true;
+  get<Receiver_Field>()->set_field_orientation (angle);
 }
 
-const Angle Pulsar::Receiver::get_field_orientation () const
+Angle Pulsar::Receiver::get_field_orientation () const
 {
-  Angle offset = 0.0;
-  if (basis == Signal::Linear)
-    offset.setDegrees (45.0);
-
-  return get_orientation() + offset;
+  return get<Receiver_Field>()->get_field_orientation ();
 }
-
 
 /*! If this method is called, then any previous changes due to
   set_orientation or set_field_orientation will be reset. */
 void Pulsar::Receiver::set_X_offset (const Angle& offset)
 {
-  orientation = offset;
-  field_orientation = false;
+  get<Receiver_Linear>()->set_X_offset (offset);
 }
 
-const Angle Pulsar::Receiver::get_X_offset () const
+Angle Pulsar::Receiver::get_X_offset () const
 {
-  Angle offset = 0.0;
-  if (!get_right_handed())
-    offset.setDegrees (90.0);
-
-  return get_orientation() + offset;
+  return get<Receiver_Linear>()->get_X_offset ();
 }
 
 
-/*! In the right-handed basis, the Y axis points in the direction of
-  East.  However it is also common to encounter systems in which the Y
-  axis is offset by 180 degrees, pointing West.  This is equivalent to
-  switching the sign of the Y probe, which amounts to a 180 degree
-  rotation of the Stokes vector about the Q axis.  It is also equivalent
-  to the product of:
-  <OL>
-  <LI> switching the X and Y probes (a 180 degree rotation about the U axis,
-  as done when the right_handed attribute is false)
-  <LI> a -90 degree rotation about the line of sight (a 180 degree
-  rotation about the V axis, as done when the orientation_Y_offset = -90
-  </OL>
-  which is how the transformation is represented by this class.
-
+/*
   \param offset either 0 or +/- 180 degrees
-
 */
 void Pulsar::Receiver::set_Y_offset (const Angle& offset)
 { 
-  if (offset == 0.0)  {
-    set_right_handed( true );
-    orientation_Y_offset = 0;
-  }
-  else if (offset == M_PI || offset == -M_PI) {
-    set_right_handed( false );
-    orientation_Y_offset.setDegrees( -90 );
-  }
-  else
-    throw Error (InvalidParam, "Pulsar::Receiver::set_Y_offset",
-		 "invalid offset = %lf deg", offset.getDegrees());
+  get<Receiver_Linear>()->set_Y_offset (offset);
 }
 
-const Angle Pulsar::Receiver::get_Y_offset () const
+Angle Pulsar::Receiver::get_Y_offset () const
 {
-  if ( get_right_handed() )
-    return 0.0;
-  else
-    return M_PI;
+  return get<Receiver_Linear>()->get_Y_offset ();
 }
 
 /*! In the linear basis, the noise diode must illuminate both receptors
@@ -200,16 +152,12 @@ const Angle Pulsar::Receiver::get_Y_offset () const
 */
 void Pulsar::Receiver::set_calibrator_offset (const Angle& offset)
 {
-  if (offset == 0.0 || offset == 0.5*M_PI || offset == -0.5*M_PI)
-    reference_source_phase = 2.0 * offset;
-  else
-    throw Error (InvalidParam, "Pulsar::Receiver::set_calibrator_offset",
-                 "invalid offset = %lf deg", offset.getDegrees());
+  get<Receiver_Linear>()->set_calibrator_offset (offset);
 }
 
-const Angle Pulsar::Receiver::get_calibrator_offset () const
+Angle Pulsar::Receiver::get_calibrator_offset () const
 { 
-  return 0.5*reference_source_phase;
+  return get<Receiver_Linear>()->get_calibrator_offset ();
 }
 
 bool Pulsar::Receiver::match (const Receiver* receiver, string& reason) const
@@ -221,11 +169,11 @@ bool Pulsar::Receiver::match (const Receiver* receiver, string& reason) const
 
   bool result = true;
 
-  if (basis != receiver->basis) {
+  if (get_basis() != receiver->get_basis()) {
     result = false;
     reason += Archive::match_indent + "basis mismatch: "
-      + Signal::Basis2string(basis) + " != " 
-      + Signal::Basis2string(receiver->basis);
+      + Signal::Basis2string(get_basis()) + " != " 
+      + Signal::Basis2string(receiver->get_basis());
   }
 
   return result;
@@ -312,13 +260,4 @@ Stokes<double> Pulsar::Receiver::get_reference_source () const
 	 << output << endl;
 
   return output;
-}
-
-ostream& Pulsar::operator<< (ostream& ostr, const Pulsar::Receiver& recv)
-{
-  return ostr << endl <<
-    "  orientation=" << recv.orientation.getDegrees() << "deg.\n"
-    "  Y offset=" << recv.orientation_Y_offset.getDegrees() << "deg.\n"
-    "  hand=" << recv.right_handed << endl <<
-    "  field=" << recv.field_orientation << endl;
 }

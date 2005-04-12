@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/Receiver_Linear.h,v $
-   $Revision: 1.1 $
-   $Date: 2005/04/11 10:26:15 $
+   $Revision: 1.2 $
+   $Date: 2005/04/12 06:44:28 $
    $Author: straten $ */
 
 #ifndef __Receiver_Linear_h
@@ -52,18 +52,15 @@ namespace Pulsar {
 
   protected:
 
-    //! Basis of the feed receptors
-    Signal::Basis basis;
+    //! Set true if the Y-axis is offset by 180 degrees
+    bool y_offset;
 
-    //! Set true if the basis forms a right-handed coordinate system
-    bool right_handed;
+    //! Set true if the calibrator is offset by 90 degrees
+    bool calibrator_offset;
 
-    //! The orientation of the basis about the line of sight
-    Angle orientation;
+    //! The orientation of the x-asis about the line of sight
+    Angle x_offset;
     
-    //! Phase of p^* q for reference source
-    Angle reference_source_phase;
-
   };
 
 }

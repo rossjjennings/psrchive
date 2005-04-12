@@ -34,10 +34,8 @@ libExtension_la_SOURCES = \
 	FluxCalibratorExtension_build.C  WidebandCorrelator.C  \
 	ITRFExtension.C                  dspReduction.C  \
 	IntegrationOrder.C               ReceiverTI.C  \
-	PointingTI.C
-
-##check_PROGRAMS = test_Receiver
-##test_Receiver_SOURCES = test_Receiver.C
+	PointingTI.C                     Receiver_Native.C \
+	Receiver_Field.C                 Receiver_Linear.C
 
 #############################################################################
 #
@@ -46,5 +44,3 @@ libExtension_la_SOURCES = \
 
 INCLUDES = -I$(top_builddir)/utils/include -I$(top_builddir)/astro/include \
 	-I$(top_srcdir)/psrchive -I$(top_srcdir)/psrchive/Calibration
-
-
