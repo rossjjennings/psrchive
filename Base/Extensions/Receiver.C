@@ -229,35 +229,20 @@ Jones<double> Pulsar::Receiver::get_transformation () const
 
 Stokes<double> Pulsar::Receiver::get_reference_source () const
 {
-  Jones<double> xform = get_hand_transformation ();
+  if (Archive::verbose == 3)
+    cerr << "Pulsar::Receiver::get_reference_source phase="
+	 << get_reference_source_phase().getDegrees() << " deg" << endl;
 
-  if (get_reference_source_phase() != 0) {
+  /* The following line provides a basis-independent representation of a
+   reference source that illuminates both receptors equally and in phase. */
+  Quaternion<double,Hermitian> ideal (1,0,1,0);
 
-    if (Archive::verbose == 3)
-      cerr << "Pulsar::Receiver::get_reference_source phase="
-	   << get_reference_source_phase().getDegrees() << " deg" << endl;
-
-    // rotate the basis about the Stokes 1 axis
-    MEAL::Rotation rotation ( Vector<float,3>::basis(0) );
-
-    rotation.set_phi ( 0.5*get_reference_source_phase().getRadians() );
-
-    xform *= rotation.evaluate();
-
-  }
-
-  /* The conversion of a Stokes vector to a coherency matrix depends
-   upon the basis.  The following line provides a basis-independent
-   representation of a reference source that illuminates both
-   receptors equally and in phase. */
-
-  Quaternion<double,Hermitian> input (1,0,1,0);
-
-  Stokes<double> output = coherency (xform * convert(input) * herm(xform));
+  /* .. and the following is the reference source */
+  double phi = get_reference_source_phase().getRadians();
+  Quaternion<double,Hermitian> cal (1,0,cos(phi),sin(phi));
 
   if (Archive::verbose == 3)
-    cerr << "Pulsar::Receiver::get_reference_source output="
-	 << output << endl;
+    cerr << "Pulsar::Receiver::get_reference_source cal=" << cal << endl;
 
-  return output;
+  return coherency (cal);
 }
