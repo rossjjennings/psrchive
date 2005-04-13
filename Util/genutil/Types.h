@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Types.h,v $
-   $Revision: 1.17 $
-   $Date: 2004/10/17 04:59:34 $
-   $Author: hknight $ */
+   $Revision: 1.18 $
+   $Date: 2005/04/13 08:06:31 $
+   $Author: sord $ */
 
 #ifndef __Types_h
 #define __Types_h
@@ -74,6 +74,8 @@ namespace Signal {
     Analytic,
     //! Square-law detected total power
     Intensity,
+    //! Square-law detected nth power
+    NthPower,
     //! Square-law detected, two polarizations
     PPQQ,
     //! PP, QQ, Re[PQ], Im[PQ]

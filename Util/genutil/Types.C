@@ -81,6 +81,12 @@ Signal::get_Component (Basis basis, State state, int ipol)
       if (ipol == 0)
 	return Si; 
       break;
+    
+    case NthPower:
+      if (ipol == 0)
+	return Si; 
+      break;
+
 
     case Invariant:
       if (ipol == 0)
@@ -153,6 +159,12 @@ int Signal::get_ipol (State state, Component poln)
       if (poln == Si) 
 	return 0;
       break;
+   
+    case NthPower:
+      if (poln == Si) 
+	return 0;
+      break;
+
 
     case Invariant:
       if (poln == Inv || poln == DetRho) 
@@ -181,6 +193,8 @@ const char* Signal::state_string (State state)
     return "Polarimetric Intensity";
   case Intensity:
     return "Total Intensity";
+  case NthPower:
+    return "Stokes I to some power";
   case Invariant:
     return "Invariant Interval";
   default:
@@ -203,6 +217,8 @@ const string Signal::State2string (State state)
     return "PPQQ";
   case Intensity:
     return "Intensity";
+  case NthPower:
+    return "NthPower";
   case Invariant:
     return "Invariant";
   default:
@@ -279,6 +295,8 @@ Signal::State Signal::string2State(string ss){
     return Analytic;
   else if(ss=="Intensity")
     return Intensity;
+  else if (ss=="NthPower")
+    return NthPower;
   else if(ss=="PPQQ")
     return PPQQ;
   else if(ss=="Coherence")
@@ -303,6 +321,9 @@ unsigned Signal::State2npol(State s){
     return 4;
   if( s==Intensity )
     return 1;
+  if( s==NthPower )
+    return 1;
+
 
   throw Error(InvalidState,"Signal::State2npol()",
 	      "State unknown!");
@@ -330,6 +351,7 @@ bool Signal::valid_state(Signal::State state,unsigned ndim,unsigned npol, string
 
   case Signal::Invariant:
   case Signal::Intensity:
+  case Signal::NthPower:
     if (npol != 1) {
       reason = "state=" + string(state_string(state)) + " and npol!=1";
       return false;
