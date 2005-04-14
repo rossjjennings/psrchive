@@ -1,3 +1,7 @@
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #include "Pulsar/FITSArchive.h"
 #include "Pulsar/Integration.h"
 #include "Pulsar/Profile.h"
@@ -107,23 +111,39 @@ try {
 		     "fits_read_col OFFS_SUB");
 
   newmjd = reference_epoch + time;
-  
-  // Set the folding period
+ 
+  // Set a preliminary epoch to avoid problems loading the polyco
 
-  if (model && duration) {
+  integ->set_epoch(newmjd);
 
-    integ->set_folding_period (model->period(newmjd));
+  // Set the folding period, using the polyco from the file header
+  // just in case we are in the process of updating the model in RAM
+
+  Reference::To<polyco> hdr_model = new polyco;
+  hdr_model->load(sfptr);
+
+  fits_movnam_hdu (sfptr, BINARY_TBL, "SUBINT", 0, &status);
+    if (status != 0)
+      throw FITSError (status, "FITSArchive::load_Integration",
+			       "fits_movnam_hdu SUBINT");
+
+  // Ensure the new epoch of the integration is at the same phase
+  // as the archive start time
+
+  if (hdr_model && duration) {
+
+    integ->set_folding_period (hdr_model->period(newmjd));
 
     // Set the toa epoch, correcting for phase offset
 
-    Phase stt_phs = model->phase(reference_epoch);
-    Phase off_phs = model->phase(newmjd);
+    Phase stt_phs = hdr_model->phase(reference_epoch);
+    Phase off_phs = hdr_model->phase(newmjd);
 
     Phase dphase = off_phs - stt_phs;
   
-    newmjd -= dphase.fracturns() * integ->get_folding_period();
+    newmjd -= dphase.fracturns() * hdr_model->period(newmjd);
   
-    integ->set_epoch (newmjd);
+    integ->set_epoch(newmjd);
   
     if (verbose == 3)
       cerr << "Pulsar::FITSArchive::load_Integration set_epoch " 
