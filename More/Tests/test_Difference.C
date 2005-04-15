@@ -20,7 +20,7 @@ int main (int argc, char** argv)
   string filename2;
  
   if (argc == 1) {
-   cerr << "test_Difference <archive1> <archive2>" << endl;
+   cerr << "test_Difference <archive1 2nd moment> <archive2 1st moment>" << endl;
    exit(EXIT_SUCCESS);
   } 
 
@@ -50,39 +50,22 @@ int main (int argc, char** argv)
   float * amps1 = NULL;
   float * amps2 = NULL;
 
+  archive1->remove_baseline();
 
   for (int nchan = 0; nchan < archive2->get_nchan(); nchan++) {
       
       profile1 = archive1->get_Profile(0,0,nchan);
       profile2 = archive2->get_Profile(0,0,nchan);
-      max_val1 = profile1 -> max(0,profile1->get_nbin());
-      max_val2 = profile2 -> max(0,profile2->get_nbin());
-      cerr << "Before: " << max_val1 << ":" << max_val2 << endl;
-          
-      profile2->operator*=(float (max_val1/max_val2)); 
-      
-      amps1 = profile1->get_amps();
-      amps2 = profile2->get_amps();
- 
-      max_val1 = profile1 -> max(0,profile1->get_nbin());
-      max_val2 = profile2 -> max(0,profile2->get_nbin());
-      cerr << "During: " << max_val1 << ":" << max_val2 << endl;
 
-     
-      for (unsigned ibin=0; ibin<profile1->get_nbin(); ibin++) {
-        cout << *amps1 << " " << *amps2;
-	*amps1 = ( (double)*amps1 - (double)*amps2 );
-        cout << " " << *amps1 << endl;
-	
-	amps1 ++; amps2 ++;
-      }
-      // profile1->operator-=(profile2);      
-   
-      max_val1 = profile1 -> max(0,profile1->get_nbin());
-      max_val2 = profile2 -> max(0,profile2->get_nbin());
-      cerr << "After: " << max_val1 << ":" << max_val2 << endl;
+      float mean_baseline = profile2->mean(profile2->find_min_phase());
 
-  } 
+      *profile2 -=(mean_baseline);
+
+      profile2->operator*=(6*mean_baseline);
+
+      *profile1 -= *profile2;
+
+  }
   
   archive1 -> unload("difference.ar");
   
