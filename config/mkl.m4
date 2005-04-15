@@ -29,8 +29,8 @@ AC_DEFUN([SWIN_LIB_MKL],
                       /usr/local/intel/mkl61/lib/32
                       /opt/intel/mkl61/lib/32
 		      /import/psr/intel/mkl61/lib/32
-		      /import/cluster/packages/linux/lib"
-			
+		      /import/cluster/packages/linux/lib
+		      /import/psrspin1/ord/packages/intel/mkl721/lib/32"	
 
     ac_save_LIBS="$LIBS"
     ac_test_LIBS="-lmkl_p4 -lguide -lpthread -lm"
