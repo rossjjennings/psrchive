@@ -1,7 +1,7 @@
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Attic/environ.h,v $
-   $Revision: 1.11 $
-   $Date: 2005/02/03 22:53:47 $
-   $Author: straten $ */
+   $Revision: 1.12 $
+   $Date: 2005/04/19 09:39:10 $
+   $Author: ahotan $ */
 
 /*
  * When sending packets back and forth between different architectures,
@@ -128,9 +128,9 @@ typedef long long int64;
 typedef unsigned long long uint64;
 typedef struct {double f1; double f2;} float128;
 
-/* for parsing a long */
-#define I64 "%Ld"
-#define UI64 "%Lu"
+/* for parsing a long long */
+#define I64 "%lld"
+#define UI64 "%llu"
 #define I32 "%ld"
 
 #define ORDER_LITTLE_ENDIAN 0
