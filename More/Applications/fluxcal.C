@@ -17,7 +17,7 @@ static Pulsar::Database* database = 0;
 
 void usage ()
 {
-  cerr << endl <<
+  cout << endl <<
     "fluxcal - produces flux calibrator solutions from sets of observations\n"
     "\n"
     "fluxcal [options] filename[s]\n"
@@ -31,7 +31,9 @@ void usage ()
     "By default, standard candle information is read from \n" 
        << Pulsar::FluxCalibratorDatabase::default_filename << "\n"
     "and the maximum interval between archives in the same\n"
-    "flux calibrator set is " << interval/60 << " minutes.\n"
+    "flux calibrator set is " << interval/60 << " minutes.  See also:\n"
+    "\n"
+    "http://astronomy.swin.edu.au/pulsar/software/manuals/fluxcal.html\n"
        << endl;
 }
 
