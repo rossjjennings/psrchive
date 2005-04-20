@@ -11,13 +11,14 @@ nobase_include_HEADERS = Calibration/CoherencyMeasurement.h \
 	Calibration/ReceptionModelAxisPlotter.h \
 	Calibration/ReceptionModelPlotter.h Calibration/Simulation.h \
 	Calibration/SingleAxis.h Calibration/SingleAxisPolynomial.h \
-	Calibration/SingleAxisSolver.h
+	Calibration/SingleAxisSolver.h Calibration/StandardModel.h
 
-libCalibration_la_SOURCES = SingleAxis.C Feed.C Instrument.C		       \
-	SingleAxisPolynomial.C Parallactic.C Faraday.C MeanCoherency.C	       \
-	MeanPolar.C MeanSingleAxis.C MeanFeed.C MeanInstrument.C	       \
-	MeasurementEquation.C ReceptionModel.C CoherencyMeasurement.C	       \
-	CoherencyMeasurementSet.C ConvertMJD.C SingleAxisSolver.C Simulation.C \
+libCalibration_la_SOURCES = SingleAxis.C Feed.C Instrument.C		   \
+	SingleAxisPolynomial.C Parallactic.C Faraday.C MeanCoherency.C	   \
+	MeanPolar.C MeanSingleAxis.C MeanFeed.C MeanInstrument.C	   \
+	MeasurementEquation.C ReceptionModel.C CoherencyMeasurement.C	   \
+	CoherencyMeasurementSet.C ConvertMJD.C SingleAxisSolver.C	   \
+	Simulation.C StandardModel.C \
 	Polar_solve.C ReceptionModel_solve.C ReceptionModel_solve_thread.C
 
 bin_PROGRAMS = jones_entropy rmrot
