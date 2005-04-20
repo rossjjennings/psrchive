@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/FluxCalibrator.h,v $
-   $Revision: 1.20 $
-   $Date: 2005/02/09 14:48:47 $
+   $Revision: 1.21 $
+   $Date: 2005/04/20 07:35:30 $
    $Author: straten $ */
 
 #ifndef __Pulsar_FluxCalibrator_H
@@ -56,6 +56,12 @@ namespace Pulsar {
 
     //! Get the number of frequency channels in the calibrator
     unsigned get_nchan () const;
+
+    //! Return true if the flux scale for the specified channel is valid
+    bool get_valid (unsigned ch) const;
+
+    //! Set the flux scale invalid flag for the specified channel
+    void set_invalid (unsigned ch);
 
   protected:
 

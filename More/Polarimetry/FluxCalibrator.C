@@ -72,6 +72,18 @@ double Pulsar::FluxCalibrator::Tsys (unsigned ichan)
   return T_sys[ichan].val;
 }
 
+//! Return true if the flux scale for the specified channel is valid
+bool Pulsar::FluxCalibrator::get_valid (unsigned ch) const
+{
+  return T_sys[ch] != 0.0;
+}
+
+//! Set the flux scale invalid flag for the specified channel
+void Pulsar::FluxCalibrator::set_invalid (unsigned ch)
+{
+  cal_flux[ch] = T_sys[ch] = 0.0;
+}
+
 void Pulsar::FluxCalibrator::add_observation (const Archive* archive)
 {
   if (!archive)
@@ -459,7 +471,7 @@ namespace Pulsar {
 			       unsigned iparam) const
     {
       Estimate<float> retval;
-      
+
       if (iclass == 0)
 	retval = calibrator->cal_flux[ichan];
       else if (iclass == 1)
