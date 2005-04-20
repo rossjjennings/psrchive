@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/Attic/Calibrator.h,v $
-   $Revision: 1.20 $
-   $Date: 2004/12/27 14:21:56 $
+   $Revision: 1.21 $
+   $Date: 2005/04/20 07:34:46 $
    $Author: straten $ */
 
 #ifndef __Calibrator_H
@@ -66,6 +66,9 @@ namespace Pulsar {
 
     //! Fractional bandwidth of the window used in median filter
     static float median_smoothing;
+
+    //! Fractional bandwidth over which interpolation will be performed
+    static float interpolating;
 
     //! Default constructor
     Calibrator ();

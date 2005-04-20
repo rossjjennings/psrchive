@@ -289,7 +289,7 @@ void Pulsar::PolnCalibrator::build (unsigned nchan) try {
       cerr << "Pulsar::PolnCalibrator::build median smoothing window = "
 	   << window << " channels" << endl;
 
-    // even a 3-window sort can zap a single channel birdie
+    // even a 3-channel sort can zap a single channel birdie
     if (window < 3)
       window = 3;
 
@@ -297,42 +297,50 @@ void Pulsar::PolnCalibrator::build (unsigned nchan) try {
 		 "median smoothing of Jones matrices not yet implemented");
 
   }
-  else
-    for (ichan = 0; ichan < response.size(); ichan++)
+  else if (interpolating) {
 
-      if (bad[ichan]) {
-	
-	unsigned ifind;
-	
-	//if (verbose)
-	  cerr << "Pulsar::PolnCalibrator::build interpolating ichan="
-	       << ichan << endl;
+    for (ichan = 0; ichan < response.size(); ichan++) {
 
-	// find preceding good
-	for (ifind=response.size()+ichan-1; ifind > ichan; ifind--)
-	  if (!bad[ifind%response.size()])
-	    break;
+      if (!bad[ichan])
+	continue;
+
+      unsigned ifind;
 	
-	if (ifind == ichan)
-	  throw Error (InvalidState, "Pulsar::PolnCalibrator::build",
-		       "no good data");
-	
-	Jones<float> left = response[ifind%response.size()];
-	
-	// find next good
-	for (ifind=ichan+1; ifind < nchan+ichan; ifind++)
-	  if (!bad[ifind%response.size()])
-	    break;
-	
-	if (ifind == ichan)
-	  throw Error (InvalidState, "Pulsar::PolnCalibrator::build",
-		       "no good data");
-	
-	Jones<float> right = response[ifind%response.size()];
-	
-	response[ichan] = float(0.5) * (left + right);
-	
-      }
+      if (verbose)
+	cerr << "Pulsar::PolnCalibrator::build interpolating ichan="
+	     << ichan << endl;
+      
+      // find preceding good
+      for (ifind=response.size()+ichan-1; ifind > ichan; ifind--)
+	if (!bad[ifind%response.size()])
+	  break;
+      
+      if (ifind == ichan)
+	throw Error (InvalidState, "Pulsar::PolnCalibrator::build",
+		     "no good data");
+      
+      Jones<float> left = response[ifind%response.size()];
+      
+      // find next good
+      for (ifind=ichan+1; ifind < nchan+ichan; ifind++)
+	if (!bad[ifind%response.size()])
+	  break;
+      
+      if (ifind == ichan)
+	throw Error (InvalidState, "Pulsar::PolnCalibrator::build",
+		     "no good data");
+      
+      Jones<float> right = response[ifind%response.size()];
+      
+      // TO-DO: It is probably more accurate to first form Mueller
+      // matrices and average these as a function of frequency, in order
+      // to describe any instrumental bandwidth depolarization.
+
+      response[ichan] = float(0.5) * (left + right);
+      
+    }
+
+  }
 
   if (nchan < response.size()) {
 

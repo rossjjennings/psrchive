@@ -11,6 +11,9 @@ bool Pulsar::Calibrator::verbose = false;
    sensible value is around 0.05. */
 float Pulsar::Calibrator::median_smoothing = 0.0;
 
+/*! The maximum number of channels over which a linear interpolation will be
+  performed */
+float Pulsar::Calibrator::interpolating = 0.0;
 
 Pulsar::Calibrator::Calibrator ()
 {
