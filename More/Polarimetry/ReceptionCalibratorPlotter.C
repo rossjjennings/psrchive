@@ -2,9 +2,6 @@
 #include "Pulsar/ReceptionCalibrator.h"
 #include "Pulsar/Archive.h"
 
-#include "MEAL/Gain.h"
-#include "MEAL/Polar.h"
-
 #include "Calibration/ReceptionModelAxisPlotter.h"
 
 #include <cpgplot.h>
@@ -13,22 +10,23 @@ Pulsar::ReceptionCalibratorPlotter::ReceptionCalibratorPlotter
 (ReceptionCalibrator* cal)
 {
   calibrator = cal;
+  plot_residual = false;
 }
 
 Pulsar::ReceptionCalibratorPlotter::~ReceptionCalibratorPlotter ()
 {
 }
 
-void Pulsar::ReceptionCalibratorPlotter::plot_cal_constraints (unsigned ichan)
+void Pulsar::ReceptionCalibratorPlotter::plot_cal_constraints (unsigned chan)
 {
-  plot_constraints (ichan, calibrator->calibrator_estimate.input_index,
-		    calibrator->model[ichan]->ReferenceCalibrator_path);
+  plot_constraints (chan, calibrator->calibrator_estimate.input_index,
+		    calibrator->model[chan]->get_polncal_path());
 }
 
-void Pulsar::ReceptionCalibratorPlotter::plot_psr_constraints (unsigned ichan,
-							       unsigned istate)
+void Pulsar::ReceptionCalibratorPlotter::plot_psr_constraints (unsigned chan,
+							       unsigned state)
 {
-  plot_constraints (ichan, istate, calibrator->model[ichan]->Pulsar_path);
+  plot_constraints (chan, state, calibrator->model[chan]->get_pulsar_path());
 }
 
 void Pulsar::ReceptionCalibratorPlotter::plot_constraints (unsigned ichan,
@@ -52,8 +50,9 @@ void Pulsar::ReceptionCalibratorPlotter::plot_constraints (unsigned ichan,
 
   Calibration::ReceptionModelAxisPlotter<MJD> plotter;
 
-  plotter.set_model( calibrator->model[ichan]->equation );
+  plotter.set_model( calibrator->model[ichan]->get_equation() );
   plotter.set_model_solved( calibrator->get_solved() );
+  plotter.set_plot_residual( plot_residual );
   plotter.set_parallactic( &(calibrator->model[ichan]->parallactic) );
 
   plotter.set_isource (istate);
