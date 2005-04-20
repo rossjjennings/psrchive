@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/Attic/CorrectionsCalibrator.h,v $
-   $Revision: 1.3 $
-   $Date: 2004/10/09 05:41:22 $
+   $Revision: 1.4 $
+   $Date: 2005/04/20 07:35:08 $
    $Author: straten $ */
 
 #ifndef __Pulsar_CorrectionsCalibrator_H
@@ -34,8 +34,11 @@ namespace Pulsar {
     //! Return true if the archive needs to be corrected
     bool needs_correction (const Archive* archive, const Pointing* point=0);
 
-    //! Return the correction matrix for the given epoch
-    Jones<double> get_transformation (const Archive* arch, unsigned isub);
+    //! Return the transformation from sky to basis
+    Jones<double> get_transformation (const Archive*, unsigned isub);
+
+    //! Return the transformation from platform to feed
+    Jones<double> get_feed_transformation (const Archive*, unsigned isub);
 
     // ///////////////////////////////////////////////////////////////////
     //
@@ -56,6 +59,9 @@ namespace Pulsar {
     CalibratorExtension* new_Extension () const { return 0; }
 
   protected:
+
+    //! Return the transformation from platform to feed
+    Jones<double> get_feed_transformation (const Pointing*, const Receiver*);
 
     /** @name Correction Information
      *  These attributes are set during the call to needs_correction and

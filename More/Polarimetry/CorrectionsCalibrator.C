@@ -127,6 +127,59 @@ bool equal_pi (const Angle& a, const Angle& b, float tolerance = 0.01)
 
 //! Return the transformation matrix for the given epoch
 Jones<double> 
+Pulsar::CorrectionsCalibrator::get_feed_transformation (const Pointing* point,
+							const Receiver* rcvr)
+{
+  if (Archive::verbose == 3)
+    cerr << "Pulsar::CorrectionsCalibrator::get_feed_transformation" << endl;
+
+  double feed_rotation = 0.0;
+
+  if (point) {
+    if (verbose)
+      cerr << "Pulsar::CorrectionsCalibrator::get_feed_transformation\n"
+        "   using Pointing::feed_angle="
+           << point->get_feed_angle().getDegrees() << " deg" << endl;
+    feed_rotation = point->get_feed_angle().getRadians();
+  }
+  else if (rcvr) {
+    if (verbose)
+      cerr << "Pulsar::CorrectionsCalibrator::get_transformation\n"
+        "   using Receiver::tracking_angle="
+           << rcvr->get_tracking_angle().getDegrees() << " deg" << endl;
+    feed_rotation = rcvr->get_tracking_angle().getRadians();
+  }
+
+  if (feed_rotation == 0.0)
+    return Jones<double> (1.0);
+
+  // rotate the basis about the Stokes V axis
+  MEAL::Rotation rotation ( Pauli::basis.get_basis_vector(2) );
+  rotation.set_phi ( -feed_rotation );
+  return rotation.evaluate();
+
+}
+
+//! Return the transformation matrix for the given epoch
+Jones<double> 
+Pulsar::CorrectionsCalibrator::get_feed_transformation (const Archive* arch,
+							unsigned isub)
+{
+  const Integration* integration = arch->get_Integration (isub);
+  const Receiver* receiver = arch->get<Receiver>();
+  const Pointing* pointing = integration->get<Pointing>();
+
+  if (!receiver)
+    throw Error (InvalidState, "Pulsar::CorrectionsCalibrator",
+		 "no Receiver extension available");
+
+  Pauli::basis.set_basis( (Basis<double>::Type) receiver->get_basis() );
+
+  return get_feed_transformation (pointing, receiver);
+}
+
+//! Return the transformation matrix for the given epoch
+Jones<double> 
 Pulsar::CorrectionsCalibrator::get_transformation (const Archive* archive,
 						   unsigned isub)
 {
@@ -158,7 +211,7 @@ Pulsar::CorrectionsCalibrator::get_transformation (const Archive* archive,
 	   << endl;
     
     pointing = 0;
-    
+
   }
 
   if (!needs_correction( archive, pointing )) {
@@ -176,32 +229,7 @@ Pulsar::CorrectionsCalibrator::get_transformation (const Archive* archive,
     xform *= receiver->get_transformation();
   }
 
-  double feed_rotation = 0.0;
-
-  if (pointing) {
-    if (verbose)
-      cerr << "Pulsar::CorrectionsCalibrator::get_transformation\n"
-        "   using Pointing::position_angle="
-           << pointing->get_position_angle().getDegrees() << " deg" << endl;
-    feed_rotation = pointing->get_position_angle().getRadians();
-  }
-  else {
-    if (verbose)
-      cerr << "Pulsar::CorrectionsCalibrator::get_transformation\n"
-        "   using Receiver::tracking_angle="
-           << receiver->get_tracking_angle().getDegrees() << " deg" << endl;
-    feed_rotation = receiver->get_tracking_angle().getRadians();
-  }
-
-  if (feed_rotation != 0.0) {
-
-    // rotate the basis about the Stokes V axis
-    MEAL::Rotation rotation ( Pauli::basis.get_basis_vector(2) );
-    rotation.set_phi ( -feed_rotation );
-    
-    xform *= rotation.evaluate();
-
-  }
+  xform *= get_feed_transformation (pointing, receiver);
 
   if (must_correct_platform && should_correct_projection)
     throw Error (InvalidState, "Pulsar::CorrectionsCalibrator::calibrate",
@@ -221,17 +249,19 @@ Pulsar::CorrectionsCalibrator::get_transformation (const Archive* archive,
     if (pointing) {
 
       // check that the para_ang is equal
-      if (!equal_pi( pointing->get_parallactic_angle(), -para.get_phi() ))
+      if (Archive::verbose &&
+	  !equal_pi( pointing->get_parallactic_angle(), -para.get_phi() ))
 	
-	if (Archive::verbose)
-	  cerr << "Pulsar::CorrectionsCalibrator::get_transformation WARNING\n"
-	    " Pointing parallactic_angle=" << pointing->get_parallactic_angle()
-               << " != " << -para.get_phi() << " calculated for MJD="
-	       << integration->get_epoch() << endl;
+	cerr << "Pulsar::CorrectionsCalibrator::get_transformation WARNING\n"
+	  " Pointing parallactic_angle=" << pointing->get_parallactic_angle()
+	     << " != " << -para.get_phi() << " calculated for MJD="
+	     << integration->get_epoch() << endl;
+
+      para.set_phi( -pointing->get_parallactic_angle().getRadians() );
 
     }
-    else
-      xform *= para.evaluate();
+
+    xform *= para.evaluate();
      
   }
 
