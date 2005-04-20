@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pcm.C,v $
-   $Revision: 1.38 $
-   $Date: 2004/12/06 14:40:14 $
+   $Revision: 1.39 $
+   $Date: 2005/04/20 07:40:55 $
    $Author: straten $ */
 
 /*! \file pcm.C 
@@ -79,7 +79,7 @@ void usage ()
     "  -p pA,pB   set the phase window from which to choose input states \n"
     "  -c archive choose best input states from input archive \n"
     "\n"
-    "  -s         do not normalize Stokes parameters by invariant interval \n"
+    "  -s         normalize Stokes parameters by invariant interval \n"
     "\n"
     "  -q         assume that CAL Stokes Q = 0 \n"
     "  -v         assume that CAL Stokes V = 0 \n"
@@ -287,7 +287,7 @@ int main (int argc, char *argv[]) try {
   bool measure_cal_V = true;
   bool measure_cal_Q = true;
 
-  bool normalize_by_invariant = true;
+  bool normalize_by_invariant = false;
   bool must_have_cals = true;
   bool publication_plots = false;
 
@@ -364,7 +364,7 @@ int main (int argc, char *argv[]) try {
       break;
 
     case 's':
-      normalize_by_invariant = false;
+      normalize_by_invariant = true;
       break;
 
     case 'S':
@@ -469,7 +469,7 @@ int main (int argc, char *argv[]) try {
   model.measure_cal_Q = measure_cal_Q;
 
   if (normalize_by_invariant)
-    cerr << "pcm: normalizing Stokes parameters by invariant interval" << endl;
+    cerr << "pcm: normalizing Stokes parameters by invariant" << endl;
   else
     cerr << "pcm: not normalizing Stokes parameters" << endl;
 
@@ -745,6 +745,8 @@ int main (int argc, char *argv[]) try {
     plot_pulsar (plotter, model);
 
     cpgend ();
+
+    plotter.set_plot_residual (!normalize_by_invariant);
 
     cerr << "pcm: plotting pulsar constraints with model" << endl;
     plot_constraints (plotter, model.get_nchan(),
