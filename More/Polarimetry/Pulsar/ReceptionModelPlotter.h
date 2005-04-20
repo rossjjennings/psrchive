@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ReceptionModelPlotter.h,v $
-   $Revision: 1.1 $
-   $Date: 2004/11/22 20:45:59 $
+   $Revision: 1.2 $
+   $Date: 2005/04/20 07:42:06 $
    $Author: straten $ */
 
 #ifndef __Calibration_ReceptionModelPlotter_H
@@ -46,6 +46,9 @@ namespace Calibration {
     //! Set the model solved flag
     void set_model_solved (bool solved = true);
 
+    //! Set the plot residual flag
+    void set_plot_residual (bool residual = true);
+
     //! Set the name of the file to which text format will be written
     void set_output (const char* filename);
 
@@ -80,6 +83,9 @@ namespace Calibration {
 
     //! Flag set true when the model has been solved
     bool model_solved;
+
+    //! Flag set true when the data-model residual should be plotted
+    bool plot_residual;
 
   };
 

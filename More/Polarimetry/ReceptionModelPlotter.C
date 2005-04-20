@@ -4,6 +4,7 @@
 #include "Calibration/Parallactic.h"
 
 #include "EstimatePlotter.h"
+#include "Pauli.h"
 
 #include <cpgplot.h>
 #include <stdio.h>
@@ -12,6 +13,7 @@ Calibration::ReceptionModelPlotter::ReceptionModelPlotter ()
 {
   ipol = isource = ipath = 0;
   model_solved = false;
+  plot_residual = false;
 }
 
 Calibration::ReceptionModelPlotter::~ReceptionModelPlotter ()
@@ -54,6 +56,11 @@ void Calibration::ReceptionModelPlotter::set_model_solved (bool solved)
 }
 
 
+void Calibration::ReceptionModelPlotter::set_plot_residual (bool residual)
+{
+  plot_residual = residual;
+}
+
 void Calibration::ReceptionModelPlotter::set_output (const char* filename)
 {
   output_filename = filename;
@@ -64,35 +71,47 @@ void Calibration::ReceptionModelPlotter::plot_observations ()
   std::vector< Estimate<float> > stokes[4];
   std::vector< float > para;
 
-  unsigned nmeas = model->get_ndata ();
-  for (unsigned imeas=0; imeas<nmeas; imeas++) {
-
+  if (model_solved && plot_residual) {
+    model->set_transformation_index (ipath);
+    model->set_input_index (isource);
+  }
+  
+  unsigned ndat = model->get_ndata ();
+  for (unsigned idat=0; idat < ndat; idat++) {
+    
     // get the specified CoherencyMeasurementSet
-    const Calibration::CoherencyMeasurementSet& data = model->get_data (imeas);
-
+    const Calibration::CoherencyMeasurementSet& data = model->get_data (idat);
+    
     if (data.get_transformation_index() != ipath)
       continue;
-
+    
     // set the independent variables for this observation
     data.set_coordinates();
-
+    
     unsigned mstate = data.size();
-
+    
     for (unsigned jstate=0; jstate<mstate; jstate++) {
-
+      
       if (data[jstate].get_input_index() != isource)
 	continue;
-
-      for (unsigned ipol=0; ipol<4; ipol++)
-	stokes[ipol].push_back (data[jstate].get_stokes()[ipol]);
       
+      Stokes< Estimate<float> > datum = data[jstate].get_stokes();
+      
+      if (model_solved && plot_residual) {
+	Stokes<double> ms = coherency( model->evaluate() );
+	datum -= ms;
+      }
+      
+      for (unsigned ipol=0; ipol<4; ipol++)
+	stokes[ipol].push_back (datum[ipol]);
+	
       // get the parallactic angle for this observation
       para.push_back ( parallactic->get_param(0) * 180.0/M_PI );
-
+      
     }
-
+    
   }
-
+  
   if (stokes[0].size() == 0) {
     std::cerr << "Calibration::ReceptionModelPlotter::plot_observations "
             "ipath=" << ipath << " isource=" << isource << " no data" 
@@ -146,7 +165,7 @@ void Calibration::ReceptionModelPlotter::plot_observations ()
   set_ipol (0);
   plot_stokes (plotter, 0);
 
-  if (model_solved)
+  if (model_solved && !plot_residual)
     plot_model ();
 
   plotter.clear ();
@@ -164,7 +183,7 @@ void Calibration::ReceptionModelPlotter::plot_observations ()
     set_ipol (iplot + 1);
     plot_stokes (plotter, iplot);
 
-    if (model_solved)
+    if (model_solved && !plot_residual)
       plot_model ();
 
   }
@@ -184,14 +203,14 @@ void Calibration::ReceptionModelPlotter::plot_model ()
 {
 }
 
-void Calibration::ReceptionModelPlotter::plot_stokes (EstimatePlotter& plotter,
+void Calibration::ReceptionModelPlotter::plot_stokes (EstimatePlotter& plot,
 						      unsigned iplot)
 {
   char stokes_label[64] = "\\fiS'\\b\\d\\fnk";
   int  position = strlen (stokes_label) - 1;
   char* stokes_index = "0123";
 
-  plotter.plot (iplot);
+  plot.plot (iplot);
 
   cpgbox ("bcst",0,0,"bcvnst",0,0);
 

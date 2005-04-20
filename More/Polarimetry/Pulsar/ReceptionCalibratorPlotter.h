@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/Attic/ReceptionCalibratorPlotter.h,v $
-   $Revision: 1.15 $
-   $Date: 2003/12/26 09:05:52 $
+   $Revision: 1.16 $
+   $Date: 2005/04/20 07:42:06 $
    $Author: straten $ */
 
 #ifndef __ReceptionCalibratorPlotter_H
@@ -38,6 +38,9 @@ namespace Pulsar {
     //! Plot vertical lines over the phases used as pulsar constraints
     void plot_phase_constraints ();
 
+    //! Cause the above to plot the residual
+    void set_plot_residual (bool val) { plot_residual = val; }
+
   protected:
 
     //! Plot the observed Stokes parameters versus parallactic angle
@@ -45,6 +48,9 @@ namespace Pulsar {
 
     //! Reference stored on init
     Reference::To<ReceptionCalibrator> calibrator;
+
+    //! Plotting methods will plot the residual
+    bool plot_residual;
 
   };
 
