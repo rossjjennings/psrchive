@@ -226,6 +226,9 @@ int main (int argc, char** argv)
         cerr << "pacv: constructing FluxCalibrator from Extension" << endl;
         fluxcal = new Pulsar::FluxCalibrator (input);
 
+	for (unsigned ichan=0; ichan<zapchan.size(); ichan++)
+	  fluxcal->set_invalid (zapchan[ichan]);
+
         cerr << "pacv: Plotting FluxCalibrator" << endl;
 	cpgpage ();
         plotter.plot (fluxcal);
