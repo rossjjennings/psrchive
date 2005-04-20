@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/GroupRule.h,v $
-   $Revision: 1.4 $
-   $Date: 2005/04/06 20:14:05 $
+   $Revision: 1.5 $
+   $Date: 2005/04/20 08:03:06 $
    $Author: straten $ */
 
 #ifndef __GroupRule_H
@@ -61,7 +61,7 @@ namespace MEAL {
     // ///////////////////////////////////////////////////////////////////
 
     std::string class_name() const
-    { return "MEAL::GroupRule[" + get_name() + "]::"; }
+    { return "MEAL::GroupRule[" + this->get_name() + "]::"; }
 
   protected:
 
@@ -149,14 +149,14 @@ void MEAL::GroupRule<T>::parse (const std::string& line)
   std::string temp = line;
   std::string key = stringtok (temp, " \t");
 
-  if (verbose)
+  if (T::verbose)
     std::cerr << class_name() << "::parse key '" << key << "'" << std::endl;
 
   Function* model = Function::new_Function (key);
 
   T* mtype = dynamic_cast<T*>(model);
   if (!mtype)
-    throw Error (InvalidParam, get_name()+"::parse",
+    throw Error (InvalidParam, class_name()+"parse",
 		 model->get_name() + " is not of type " + 
                  std::string(T::Name));
 
@@ -166,7 +166,7 @@ void MEAL::GroupRule<T>::parse (const std::string& line)
 template<class T>
 void MEAL::GroupRule<T>::add_model (T* x)
 {
-  if (very_verbose)
+  if (T::very_verbose)
     std::cerr << class_name() + "add_model" << std::endl;
 
   model.push_back (Project<T>(x));
@@ -188,7 +188,7 @@ void MEAL::GroupRule<T>::calculate (Result& retval,
 {
   unsigned nmodel = model.size();
 
-  if (very_verbose)
+  if (T::very_verbose)
     std::cerr << class_name() + "calculate nmodel=" << nmodel << std::endl;
 
   // the result of each component
@@ -219,8 +219,9 @@ void MEAL::GroupRule<T>::calculate (Result& retval,
 
   for (unsigned imodel=0; imodel < nmodel; imodel++) {
 
-    if (very_verbose) std::cerr << class_name() + "calculate evaluate " 
-			   << model[imodel]->get_name() << std::endl;
+    if (T::very_verbose) 
+      std::cerr << class_name() + "calculate evaluate " 
+	        << model[imodel]->get_name() << std::endl;
 
     try {
 
@@ -278,19 +279,19 @@ void MEAL::GroupRule<T>::calculate (Result& retval,
 		   "after calculation igrad=%d != total_nparam=%d",
 		   igradient, total_nparam);
 
-    grad->resize (get_nparam());
+    grad->resize (this->get_nparam());
 
     // this verion of ProjectGradient initializes the gradient vector to zero
     ProjectGradient (model, gradient, *grad);
 
   }
 
-  if (very_verbose) {
+  if (T::very_verbose) {
     std::cerr << class_name() + "calculate result\n   " << retval << std::endl;
     if (grad) {
       std::cerr << class_name() + "calculate gradient" << std::endl;
       for (unsigned i=0; i<grad->size(); i++)
-	std::cerr << "   " << i << ":" << get_infit(i) 
+	std::cerr << "   " << i << ":" << this->get_infit(i) 
 		  << "=" << (*grad)[i] << std::endl;
     }
   }

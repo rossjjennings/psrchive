@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/BinaryRule.h,v $
-   $Revision: 1.4 $
-   $Date: 2005/04/06 20:14:05 $
+   $Revision: 1.5 $
+   $Date: 2005/04/20 08:03:06 $
    $Author: straten $ */
 
 #ifndef __MEAL_BinaryRule_H
@@ -80,7 +80,7 @@ void MEAL::BinaryRule<T>::set_arg1 (T* model)
   if (!model)
     return;
 
-  if (verbose)
+  if (T::verbose)
     std::cerr << "MEAL::BinaryRule::set_model map new model" << std::endl;
 
   composite.map (arg1);
@@ -97,7 +97,7 @@ void MEAL::BinaryRule<T>::set_arg2 (T* model)
   if (!model)
     return;
 
-  if (verbose)
+  if (T::verbose)
     std::cerr << "MEAL::BinaryRule::set_model map new model" << std::endl;
 
   composite.map (arg2);

@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Cached.h,v $
-   $Revision: 1.1 $
-   $Date: 2005/04/06 15:24:36 $
+   $Revision: 1.2 $
+   $Date: 2005/04/20 08:03:06 $
    $Author: straten $ */
 
 #ifndef __Cached_H
@@ -47,7 +47,7 @@ namespace MEAL {
 
     //! Return the name of the class for debugging
     std::string class_name() const
-    { return "MEAL::Cached[" + get_context()->get_name() + "]::"; }
+    { return "MEAL::Cached[" + this->get_context()->get_name() + "]::"; }
 
   protected:
 
@@ -59,7 +59,7 @@ namespace MEAL {
 
     void update (bool need_gradient)
     {
-      if (! (get_context()->get_evaluation_changed()
+      if (! (this->get_context()->get_evaluation_changed()
 	     || (need_gradient && !gradient_is_cached))) {
 	if (Function::very_verbose) 
 	  std::cerr << class_name() + "update no change" << std::endl;
@@ -69,14 +69,14 @@ namespace MEAL {
       std::vector<Result>* grad_ptr = 0;
 
       if (need_gradient) {
-	cached_gradient.resize (get_context()->get_nparam());
+	cached_gradient.resize (this->get_context()->get_nparam());
 	grad_ptr = &cached_gradient;
 	gradient_is_cached = true;  // well, it will be after calling calculate
       }
 
       calculate (cached_result, grad_ptr);
 
-      get_context()->set_evaluation_changed (false);
+      this->get_context()->set_evaluation_changed (false);
     }
 
     //! The result cached in the last call to calculate

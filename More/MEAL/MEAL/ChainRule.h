@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/ChainRule.h,v $
-   $Revision: 1.4 $
-   $Date: 2005/04/06 20:14:05 $
+   $Revision: 1.5 $
+   $Date: 2005/04/20 08:03:06 $
    $Author: straten $ */
 
 #ifndef __MEAL_ChainRule_H
@@ -123,8 +123,8 @@ MEAL::ChainRule<T>::operator = (const ChainRule& rule)
 template<class T>
 void MEAL::ChainRule<T>::set_constraint (unsigned iparam, Scalar* scalar)
 {
-  if (verbose) 
-    std::cerr << "MEAL::ChainRule::set_constraint iparam=" << iparam << std::endl;
+  if (T::verbose) 
+    std::cerr << "MEAL::ChainRule::set_constraint iprm=" << iparam << std::endl;
 
   if (!scalar)
     return;
@@ -134,7 +134,7 @@ void MEAL::ChainRule<T>::set_constraint (unsigned iparam, Scalar* scalar)
 
     if (constraints[ifunc].parameter == iparam) {
 
-      if (verbose)
+      if (T::verbose)
 	std::cerr << "MEAL::ChainRule::set_constraint"
 	  " replace param=" << iparam << std::endl;
 
@@ -162,7 +162,7 @@ void MEAL::ChainRule<T>::set_model (T* _model)
     return;
 
   if (model) {
-    if (verbose)
+    if (T::verbose)
       std::cerr << "MEAL::ChainRule::set_model"
 	" unmap old model" << std::endl;
     composite.unmap (model, false);
@@ -170,7 +170,7 @@ void MEAL::ChainRule<T>::set_model (T* _model)
 
   model = _model;
 
-  if (verbose)
+  if (T::verbose)
     std::cerr << "MEAL::ChainRule::set_model"
       " map new model" << std::endl;
 
@@ -187,12 +187,12 @@ void MEAL::ChainRule<T>::calculate (Result& result,
   if (!model)
     throw Error (InvalidState, "MEAL::ChainRule::calculate","no model");
 
-  if (verbose)
+  if (T::verbose)
     std::cerr << "MEAL::ChainRule::calculate" << std::endl;
 
   for (unsigned ifunc=0; ifunc<constraints.size(); ifunc++) {
 
-    if (very_verbose)
+    if (T::very_verbose)
       std::cerr << "MEAL::ChainRule::calculate iconstraint="<< ifunc <<std::endl;
 
     std::vector<double>* fgrad = 0;
@@ -213,7 +213,7 @@ void MEAL::ChainRule<T>::calculate (Result& result,
   
   if (grad) {
 
-    unsigned ngrad = get_nparam();
+    unsigned ngrad = this->get_nparam();
     grad->resize (ngrad);
 
     unsigned igrad;
@@ -244,13 +244,14 @@ void MEAL::ChainRule<T>::calculate (Result& result,
   
   }
 
-  if (verbose) {
+  if (T::verbose) {
     std::cerr << "MEAL::ChainRule::calculate result\n"
       "   " << result << std::endl;
     if (grad) {
       std::cerr << "MEAL::ChainRule::calculate gradient\n";
       for (unsigned i=0; i<grad->size(); i++)
-	std::cerr << "   " << i << ":" << get_infit(i) << "=" << (*grad)[i] << std::endl;
+	std::cerr << "   " << i << ":" << this->get_infit(i) << "=" 
+                  << (*grad)[i] << std::endl;
     }
   }
 

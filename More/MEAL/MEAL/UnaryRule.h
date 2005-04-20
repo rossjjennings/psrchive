@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/UnaryRule.h,v $
-   $Revision: 1.4 $
-   $Date: 2005/04/06 20:14:05 $
+   $Revision: 1.5 $
+   $Date: 2005/04/20 08:03:06 $
    $Author: straten $ */
 
 #ifndef __MEAL_UnaryRule_H
@@ -71,7 +71,7 @@ void MEAL::UnaryRule<T>::set_model (T* _model)
   if (!_model)
     return;
 
-  if (verbose)
+  if (T::verbose)
     std::cerr << "MEAL::UnaryRule::set_model map " 
          << model->get_name() << std::endl;
 

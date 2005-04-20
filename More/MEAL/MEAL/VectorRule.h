@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/VectorRule.h,v $
-   $Revision: 1.2 $
-   $Date: 2005/04/20 07:04:33 $
+   $Revision: 1.3 $
+   $Date: 2005/04/20 08:03:06 $
    $Author: straten $ */
 
 #ifndef __MEAL_VectorRule_H
@@ -91,7 +91,7 @@ MEAL::VectorRule<T>:: operator = (const VectorRule& copy)
 template<class T>
 void MEAL::VectorRule<T>::push_back (T* x)
 {
-  if (very_verbose)
+  if (T::very_verbose)
     std::cerr << get_name() + "push_back" << std::endl;
 
   model.push_back (Project<T>(x));
@@ -117,7 +117,7 @@ void MEAL::VectorRule<T>::calculate (Result& result,
 				     std::vector<Result>* grad)
 {
   unsigned nmodel = model.size();
-  if (very_verbose)
+  if (T::very_verbose)
     std::cerr << get_name() + "calculate nmodel=" << nmodel << std::endl;
 
   // the gradient of each component
@@ -129,7 +129,7 @@ void MEAL::VectorRule<T>::calculate (Result& result,
   if (grad)
     comp_gradient_ptr = &comp_gradient;
 
-  if (very_verbose) std::cerr << get_name() + "calculate evaluate " 
+  if (T::very_verbose) std::cerr << get_name() + "calculate evaluate " 
 			      << model[model_index]->get_name() << std::endl;
 
   try {
@@ -154,7 +154,7 @@ void MEAL::VectorRule<T>::calculate (Result& result,
     /* re-map the components of the gradient into the Composite space,
        summing duplicates implements both the sum and product rules. */
 
-    unsigned nparam = get_nparam();
+    unsigned nparam = this->get_nparam();
 
     grad->resize (nparam);
     // set each element of the gradient to zero
@@ -166,13 +166,13 @@ void MEAL::VectorRule<T>::calculate (Result& result,
 
   }
 
-  if (very_verbose) {
+  if (T::very_verbose) {
 
     std::cerr << get_name() + "calculate result\n   " << result << std::endl;
     if (grad) {
       std::cerr << get_name() + "calculate gradient" << std::endl;
       for (unsigned i=0; i<grad->size(); i++)
-	std::cerr << "   " << i << ":" << get_infit(i) 
+	std::cerr << "   " << i << ":" << this->get_infit(i) 
 		  << "=" << (*grad)[i] << std::endl;
     }
   }
