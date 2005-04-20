@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/VectorRule.h,v $
-   $Revision: 1.1 $
-   $Date: 2005/04/19 02:26:15 $
+   $Revision: 1.2 $
+   $Date: 2005/04/20 07:04:33 $
    $Author: straten $ */
 
 #ifndef __MEAL_VectorRule_H
@@ -37,6 +37,9 @@ namespace MEAL {
 
     //! Add an element to the array
     void push_back (T* model);
+
+    //! Get the size of the array
+    unsigned size () const { return model.size(); }
 
     //! Set the index of the array
     void set_index (unsigned index);
@@ -105,7 +108,7 @@ void MEAL::VectorRule<T>::set_index (unsigned index)
     throw Error (InvalidRange, "MEAL::"+get_name()+"::set_index",
 		 "index=%d >= nmodel=%d", index, model.size());
 
-  index = model_index;
+  model_index = index;
   this->set_evaluation_changed();
 }
 
