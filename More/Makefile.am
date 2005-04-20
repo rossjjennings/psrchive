@@ -79,7 +79,9 @@ libpsrchive_la_SOURCES = plugins.csh getopt.h Physical.h \
 	Integration_invint.C          pafit_get_PA.C  \
 	Integration_match.C           ArchiveTI.C \
 	IntegrationTI.C               ArchiveTI_import.C \
-	PhaseGradShift.C              Profile_fftconv.C
+	PhaseGradShift.C              Profile_fftconv.C \
+	ChannelZapMedian.C \
+	ChannelWeight.C               ChannelZapModulation.C
 
 if !HAVE_GETOPT_LONG
 libpsrchive_la_SOURCES += getopt.c getopt1.c
