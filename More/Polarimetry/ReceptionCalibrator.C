@@ -6,18 +6,16 @@
 
 #include "Pulsar/Telescope.h"
 #include "Pulsar/Receiver.h"
+#include "Pulsar/Pointing.h"
 
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
 
 #include "MEAL/Complex2Constant.h"
-#include "Calibration/SingleAxis.h"
-#include "Calibration/Feed.h"
-#include "MEAL/Boost.h"
+#include "MEAL/Complex2Value.h"
+#include "MEAL/ProductRule.h"
 #include "MEAL/Gain.h"
 
-#include "Calibration/SingleAxisPolynomial.h"
-#include "MEAL/Polynomial.h"
 #include "MEAL/Tracer.h"
 
 #include "Pauli.h"
@@ -38,7 +36,8 @@ Pulsar::ReceptionCalibrator::ReceptionCalibrator (Calibrator::Type type,
   measure_cal_V = true;
   measure_cal_Q = false;
 
-  normalize_by_invariant = true;
+  normalize_by_invariant = false;
+  unique = 0;
 
   PA_min = PA_max = 0.0;
 
@@ -46,164 +45,12 @@ Pulsar::ReceptionCalibrator::ReceptionCalibrator (Calibrator::Type type,
     initial_observation (archive);
 }
 
-void Pulsar::ReceptionCalibrator::set_calibrators (const vector<string>& names)
+void Pulsar::ReceptionCalibrator::set_calibrators (const vector<string>& n)
 {
-  calibrator_filenames = names;
+  calibrator_filenames = n;
 }
 
 
-/*! 
-  \param _model the type of model used to represent the receiver
-  \param feed_corrections the known feed corrections transformation
-*/
-Pulsar::StandardModel::StandardModel (Calibrator::Type _model,
-                                      MEAL::Complex2* feed_corrections)
-{
-  // ////////////////////////////////////////////////////////////////////
-  //
-  // initialize the model of the instrument
-  //
-
-  model = _model;
-
-  valid = true;
-
-  instrument = new MEAL::ProductRule<MEAL::Complex2>;
-
-#if 0
-  Calibration::SingleAxisPolynomial* backend;
-  backend = new Calibration::SingleAxisPolynomial (4);
-  backend -> set_infit(0, false);
-  convert.connect (backend, &Calibration::SingleAxisPolynomial::set_abscissa);
-#else
-
-  MEAL::Complex2* operation;
-  operation = new MEAL::Rotation(Vector<double, 3>::basis(0));
-
-  MEAL::Polynomial* poly = new MEAL::Polynomial (4);
-  poly -> set_infit (0, false);
-  poly -> set_argument (0, &convert);
-
-  MEAL::ChainRule<MEAL::Complex2>* backend;
-  backend = new MEAL::ChainRule<MEAL::Complex2>;
-
-  backend -> set_model ( operation );
-  backend -> set_constraint (0, poly);
-
-#endif
-
-  *instrument *= backend;
-  time.signal.connect (&convert, &Calibration::ConvertMJD::set_epoch);
-
-  switch (model) {
-
-  case Calibrator::Hamaker:
-    if (ReceptionCalibrator::verbose)
-      cerr << "Pulsar::StandardModel Hamaker" << endl;
-    polar = new MEAL::Polar;
-    *instrument *= polar;
-    break;
-
-  case Calibrator::Britton:
-    if (ReceptionCalibrator::verbose)
-      cerr << "Pulsar::StandardModel Britton" << endl;
-    physical = new Calibration::Instrument;
-    *instrument *= physical;
-    break;
-
-  default:
-    throw Error (InvalidParam, "Pulsar::StandardModel",
-		 "unknown model code=%d", int(_model));
-
-  }
-
-  if (feed_corrections) {
-    *instrument *= feed_corrections;
-    feed_correction = feed_corrections;
-  }
-
-  equation = new Calibration::ReceptionModel;
-
-  ReferenceCalibrator_path = 0;
-  FluxCalibrator_path = 0;
-
-  // ////////////////////////////////////////////////////////////////////
-  //
-  // initialize the signal path seen by the pulsar
-  //
-
-  pulsar_path = new MEAL::ProductRule<MEAL::Complex2>;
-  *pulsar_path *= instrument;
-  *pulsar_path *= &parallactic;
-
-  equation->add_transformation ( pulsar_path );
-  Pulsar_path = equation->get_transformation_index ();
-
-  time.signal.connect (&parallactic, &Calibration::Parallactic::set_epoch);
-
-}
-
-void Pulsar::StandardModel::add_fluxcal_backend ()
-{
-  if (!physical)
-    throw Error (InvalidState, "Pulsar::StandardModel::add_fluxcal_backend",
-		 "Cannot model flux calibrator with Hamaker model");
-
-  MEAL::ProductRule<MEAL::Complex2>* path = 0;
-  path = new MEAL::ProductRule<MEAL::Complex2>;
-
-  fluxcal_backend = new Calibration::SingleAxis;
-
-  *path *= fluxcal_backend;
-  *path *= physical->get_feed();
-
-  if (feed_correction)
-    *path *= feed_correction;
-
-  equation->add_transformation ( path );
-  FluxCalibrator_path = equation->get_transformation_index ();
-}
-
-void Pulsar::StandardModel::add_polncal_backend ()
-{
-  pcal_path = new MEAL::ProductRule<MEAL::Complex2>;
-  *pcal_path *= instrument;
-
-  equation->add_transformation ( pcal_path );
-  ReferenceCalibrator_path = equation->get_transformation_index ();
-}
-
-void Pulsar::StandardModel::fix_orientation ()
-{
-
-  if (physical)
-    // set the orientation of the first receptor
-    physical->set_infit (4, false);
-
-  if (polar)
-    // set the orientation of the last rotation
-    polar->set_infit (6, false);
-
-}
-
-void Pulsar::StandardModel::update ()
-{
-  switch (model) {
-  case Calibrator::Hamaker:
-    polar_estimate.update (polar);
-    break;
-  case Calibrator::Britton:
-    physical_estimate.update (physical->get_backend());
-    break;
-  default:
-    throw Error (InvalidState, "Pulsar::StandardModel::update",
-		 "unknown model");
-  }
-
-  if (fluxcal_backend)
-    fluxcal_backend_estimate.update (fluxcal_backend);
-
-}
 
 void Pulsar::ReceptionCalibrator::initial_observation (const Archive* data)
 {
@@ -245,12 +92,31 @@ void Pulsar::ReceptionCalibrator::initial_observation (const Archive* data)
   calibrator = data->clone();
   receiver = calibrator->get<Receiver>();
 
-  MEAL::Complex2* feed = 0;
+  MEAL::Complex2* to_receptor = 0;
   if (receiver) {
-    feed = new MEAL::Complex2Constant (receiver->get_transformation());
+    to_receptor = new MEAL::Complex2Constant (receiver->get_transformation());
     cerr << "Pulsar::ReceptionCalibrator known receiver transformation\n"
-	"\t" << feed->evaluate() << endl;
+	"\t" << to_receptor->evaluate() << endl;
   }
+
+  MEAL::Complex2* to_feed = 0;
+
+  MEAL::Complex2Value* platform = new MEAL::Complex2Value;
+  platform_axis.signal.connect (platform, &MEAL::Complex2Value::set_value);
+
+  to_feed = platform;
+
+  unique = new MEAL::VectorRule<MEAL::Complex2>;
+  unique_axis.signal.connect (unique,
+			      &MEAL::VectorRule<MEAL::Complex2>::set_index);
+
+  MEAL::ProductRule<MEAL::Complex2>* product;
+  product = new MEAL::ProductRule<MEAL::Complex2>;
+  
+  product->add_model (platform);
+  product->add_model (unique);
+
+  to_feed = product;
 
   float latitude = corrections.telescope->get_latitude().getDegrees();
   float longitude = corrections.telescope->get_longitude().getDegrees();
@@ -263,13 +129,17 @@ void Pulsar::ReceptionCalibrator::initial_observation (const Archive* data)
 
   for (unsigned ichan=0; ichan<nchan; ichan++) {
 
-    model[ichan] = new StandardModel (model_type, feed);
+    bool britton = model_type == Calibrator::Britton;
+    model[ichan] = new Calibration::StandardModel (britton);
+
+    model[ichan] -> set_feed_transformation (to_receptor);
+    model[ichan] -> set_platform_transformation (to_feed);
 
     if (measure_cal_Q)
       model[ichan] -> fix_orientation ();
 
-    model[ichan]->parallactic.set_source_coordinates (coordinates);
-    model[ichan]->parallactic.set_observatory_coordinates (latitude,longitude);
+    model[ichan]->parallactic.set_source_coordinates(coordinates);
+    model[ichan]->parallactic.set_observatory_coordinates(latitude,longitude);
 
   }
 
@@ -340,7 +210,7 @@ void Pulsar::ReceptionCalibrator::add_state (unsigned phase_bin)
       return;
     }
 
-  pulsar.push_back( SourceEstimate (phase_bin) );
+  pulsar.push_back( SourceEstimate(phase_bin) );
 
   if (calibrator)
     init_estimate( pulsar.back() );
@@ -360,7 +230,7 @@ void Pulsar::ReceptionCalibrator::init_estimate (SourceEstimate& estimate)
 
   for (unsigned ichan=0; ichan<nchan; ichan++) {
 
-    unsigned nsource = model[ichan]->equation->get_num_input();
+    unsigned nsource = model[ichan]->get_equation()->get_num_input();
     if (ichan==0)
       estimate.input_index = nsource;
     else if (estimate.input_index != nsource)
@@ -374,7 +244,7 @@ void Pulsar::ReceptionCalibrator::init_estimate (SourceEstimate& estimate)
     }
 #endif
 
-    model[ichan]->equation->add_input( &(estimate.source[ichan]) );
+    model[ichan]->get_equation()->add_input( &(estimate.source[ichan]) );
   }
 
 }
@@ -391,7 +261,7 @@ unsigned Pulsar::ReceptionCalibrator::get_nstate () const
   if (model.size() == 0)
     return 0;
 
-  return model[0]->equation->get_num_input ();
+  return model[0]->get_equation()->get_num_input ();
 }
 
 unsigned Pulsar::ReceptionCalibrator::get_nchan () const
@@ -443,6 +313,8 @@ void Pulsar::ReceptionCalibrator::add_calibrator (const Archive* data)
 
 }
 
+bool equal_pi (const Angle& a, const Angle& b, float tolerance = 0.01);
+
 //! Add the specified pulsar observation to the set of constraints
 void Pulsar::ReceptionCalibrator::add_observation (const Archive* data)
 {
@@ -458,6 +330,9 @@ void Pulsar::ReceptionCalibrator::add_observation (const Archive* data)
 
   if (!calibrator)
     initial_observation (data);
+
+  // use the CorrectionsCalibrator class to the feed transformation
+  CorrectionsCalibrator corrections;
 
   string reason;
   if (!calibrator->mixable (data, reason))
@@ -479,32 +354,75 @@ void Pulsar::ReceptionCalibrator::add_observation (const Archive* data)
       end_epoch = epoch;
 
     model[0]->parallactic.set_epoch (epoch);
-    float PA = model[0]->parallactic.get_param (0);
+    float PA = -model[0]->parallactic.get_param (0);
 
     if (PA < PA_min)
       PA_min = PA;
     if (PA > PA_max)
       PA_max = PA;
 
+    const Pointing* pointing = integration->get<Pointing>();
+
+    if (pointing &&
+	!equal_pi( pointing->get_parallactic_angle(), PA )) {
+      cerr << "Pulsar::ReceptionCalibrator::add_observation\n"
+	"Integration::pointing parallactic angle=" <<
+	pointing->get_parallactic_angle().getDegrees() << "deg != predicted="
+	   << PA * 180.0/M_PI << "deg" << endl;
+      continue;
+    }
+
     // the noise power in the baseline is used to estimate the
     // variance in each Stokes parameter
     vector< vector< double > > baseline_variance;
     integration->baseline_stats (0, &baseline_variance);
 
+    // the platform transformation "abscissa"
+    Jones<double> feed = corrections.get_feed_transformation (data, isub);
+
+    cerr << "feed transformation=" << feed << endl;
+
+    MEAL::Argument::Value* platform_arg = platform_axis.new_Value( feed );
+    MEAL::Argument::Value* unique_arg = 0;
+
+    if (unique) {
+
+      unique_arg = unique_axis.new_Value( unique->size() );
+      MEAL::Gain* unique_gain = new MEAL::Gain;
+
+#if 0
+      cerr << "TRACING GAIN" << endl;
+      (void) new MEAL::Tracer (unique_gain, 0);
+#endif
+
+      if (unique->size() == 0)
+	unique_gain->set_infit (0,false);
+
+      unique->push_back (unique_gain);
+
+    }
+
     for (unsigned ichan=0; ichan<nchan; ichan++) try {
 
       if (integration->get_weight (ichan) == 0) {
-	cerr << "Pulsar::ReceptionCalibrator::add_observation ichan="
-	     << ichan << " flagged invalid" << endl;
+	if (verbose)
+	  cerr << "Pulsar::ReceptionCalibrator::add_observation ichan="
+	       << ichan << " flagged invalid" << endl;
 	continue;
       }
 
-      // the selected pulse phase bins
+      // the epoch abscissa
       MEAL::Argument::Value* arg = model[ichan]->time.new_Value(epoch);
 
-      unsigned xform_index = model[ichan]->Pulsar_path;
+      unsigned xform_index = model[ichan]->get_pulsar_path();
       Calibration::CoherencyMeasurementSet measurements (xform_index);
+
       measurements.add_coordinate( arg );
+      measurements.add_coordinate( platform_arg );
+      if (unique_arg)
+	measurements.add_coordinate( unique_arg );
+
+      measurements.set_coordinates();
 
       for (unsigned istate=0; istate < pulsar.size(); istate++) {
 
@@ -516,7 +434,7 @@ void Pulsar::ReceptionCalibrator::add_observation (const Archive* data)
 
       }
 
-      model[ichan]->equation->add_data (measurements);
+      model[ichan]->get_equation()->add_data (measurements);
 
     }
     catch (Error& error) {
@@ -572,7 +490,11 @@ Pulsar::ReceptionCalibrator::add_data
        them to best estimate of the input state */
     
     Jones< Estimate<double> > correct;
-    correct = inv( model[ichan]->pulsar_path->evaluate() );
+
+    model[ichan]->get_equation()->set_transformation_index
+      (model[ichan]->get_pulsar_path());
+
+    correct = inv( model[ichan]->get_transformation()->evaluate() );
     
     stokes = transform( stokes, correct );
     
@@ -646,7 +568,6 @@ try {
 	// Stokes Q of the calibrator may vary!
 	calibrator_estimate.source[ichan].set_infit (1, true);
 
-
     }
 
   }
@@ -683,15 +604,6 @@ try {
 
   }
 
-
-  const PolarCalibrator* polcal = 0;
-  if (model_type == Calibrator::Hamaker)
-    polcal = dynamic_cast<const PolarCalibrator*>(p);
-
-  const SingleAxisCalibrator* sacal = 0;
-  if (model_type == Calibrator::Britton)
-    sacal = dynamic_cast<const SingleAxisCalibrator*>(p);
-
   vector<vector<Estimate<double> > > cal_hi;
   vector<vector<Estimate<double> > > cal_lo;
 
@@ -709,6 +621,13 @@ try {
       end_epoch = epoch;
 
     for (unsigned ichan=0; ichan<nchan; ichan++) {
+
+      if (integration->get_weight (ichan) == 0) {
+	if (verbose)
+	  cerr << "Pulsar::ReceptionCalibrator::add_calibrator ichan="
+	       << ichan << " flagged invalid" << endl;
+	continue;
+      }
 
       unsigned ipol = 0;
 
@@ -749,20 +668,21 @@ try {
 
 	  measurements.push_back (fstate);
 	  measurements.set_transformation_index
-	    ( model[ichan]->FluxCalibrator_path );
+	    ( model[ichan]->get_fluxcal_path() );
 	}
 	else {
 
-          if (!model[ichan]->ReferenceCalibrator_path)
-            // Flux Calibrator observations are made through a different backend
+	  // it may be necessary to remove this signal path if
+	  // the add_data step fails and no other calibrator succeeds
+          if (!model[ichan]->get_polncal_path())
             model[ichan]->add_polncal_backend();
 
 	  measurements.set_transformation_index
-	    ( model[ichan]->ReferenceCalibrator_path );
+	    ( model[ichan]->get_polncal_path() );
 
         }
 
-        model[ichan]->equation->add_data (measurements);
+        model[ichan]->get_equation()->add_data (measurements);
 
       }
       catch (Error& error) {
@@ -786,57 +706,23 @@ try {
     }
   }
 
-  if (polcal && polcal->get_transformation_nchan() == nchan)  {
-
-    cerr << "Pulsar::ReceptionCalibrator::add_calibrator add Polar Model" 
-	 << endl;
+  if (p->get_transformation_nchan() == nchan)  {
 
     assert (model.size() == nchan);
 
-    const MEAL::Polar* polar;
+    const MEAL::Complex2* xform;
 
-    for (unsigned ichan = 0; ichan<nchan; ichan++) {
+    for (unsigned ich = 0; ich<nchan; ich++) {
 
-      if (!polcal->get_transformation_valid (ichan))
+      if (!p->get_transformation_valid (ich))
         continue;
 
-      polar = dynamic_cast<const MEAL::Polar*>
-	( polcal->get_transformation(ichan) );
-
-      if (polar)
-	model[ichan]->polar_estimate.integrate( polar );
+      model[ich]->integrate_calibrator (p->get_transformation(ich), 
+					flux_calibrator);
 
     }
 
   }
-
-  if (sacal && sacal->get_transformation_nchan() == nchan)  {
-    cerr << "Pulsar::ReceptionCalibrator::add_calibrator add SingleAxis Model"
-	 << endl;
-
-    assert (model.size() == nchan);
-
-    const Calibration::SingleAxis* sa;
-
-    for (unsigned ichan = 0; ichan<nchan; ichan++) {
-
-      if (!sacal->get_transformation_valid (ichan))
-        continue;
-
-      sa = dynamic_cast<const Calibration::SingleAxis*>
-	( sacal->get_transformation(ichan) );
-
-      if (sa) {
-	if (flux_calibrator)
-	  model[ichan]->fluxcal_backend_estimate.integrate( sa );
-	else
-	  model[ichan]->physical_estimate.integrate( sa );
-      }
-
-    }
-
-  }
-
 
 }
 catch (Error& error) {
@@ -886,18 +772,20 @@ void Pulsar::ReceptionCalibrator::precalibrate (Archive* data)
       }
 
       MEAL::Complex2* signal_path = 0;
-      Calibration::ReceptionModel* equation = model[ichan]->equation;
+      Calibration::ReceptionModel* equation = model[ichan]->get_equation();
 
       switch ( data->get_type() )  {
       case Signal::Pulsar:
-	signal_path = model[ichan]->pulsar_path;
+        equation->set_transformation_index (model[ichan]->get_pulsar_path());
+        signal_path = equation->get_transformation ();
 	parallactic_corrected = true;
 	break;
       case Signal::PolnCal:
-	signal_path = model[ichan]->pcal_path;
+        equation->set_transformation_index (model[ichan]->get_polncal_path());
+        signal_path = equation->get_transformation ();
 	break;
       case Signal::FluxCalOn:
-        equation->set_transformation_index (model[ichan]->FluxCalibrator_path);
+        equation->set_transformation_index (model[ichan]->get_fluxcal_path());
         signal_path = equation->get_transformation ();
         break;
       default:
@@ -969,13 +857,9 @@ void Pulsar::ReceptionCalibrator::calculate_transformation ()
 
     transformation[ichan] = 0;
 
-    if (model[ichan]->valid)  {
-      if (model[ichan]->polar)
-        transformation[ichan] = model[ichan]->polar;
-      else if (model[ichan]->physical)
-        transformation[ichan] = model[ichan]->physical;
-    }
-
+    if (model[ichan]->valid)
+      transformation[ichan] = model[ichan]->get_transformation();
+      
   }
 }
 
@@ -991,7 +875,7 @@ void Pulsar::ReceptionCalibrator::solve (int only_ichan)
 
   if (calibrator_estimate.source.size() == 0)
     throw Error (InvalidState, "Pulsar::ReceptionCalibrator::solve",
-		 "Without an ReferenceCalibrator observation, "
+		 "Without a ReferenceCalibrator observation,\n\t"
 		 "there remains a degeneracy along the Stokes V axis");
 
   initialize ();
@@ -1017,7 +901,7 @@ void Pulsar::ReceptionCalibrator::solve (int only_ichan)
     }
     cerr << endl;
 
-    model[ichan]->equation->solve ();
+    model[ichan]->get_equation()->solve ();
 
     if (only_ichan >= 0)
       break;

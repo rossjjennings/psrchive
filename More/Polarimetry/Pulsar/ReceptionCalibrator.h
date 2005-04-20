@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ReceptionCalibrator.h,v $
-   $Revision: 1.61 $
-   $Date: 2004/12/27 14:21:56 $
+   $Revision: 1.62 $
+   $Date: 2005/04/20 07:38:26 $
    $Author: straten $ */
 
 #ifndef __Pulsar_ReceptionCalibrator_H
@@ -10,25 +10,14 @@
 
 #include "Pulsar/SystemCalibrator.h"
 
-// Reception Model and its management
-#include "Calibration/ReceptionModel.h"
-#include "Calibration/ConvertMJD.h"
-#include "MEAL/Axis.h"
-
 // Parameterizations of the instrument and source
-#include "Calibration/MeanPolar.h"
-#include "Calibration/MeanSingleAxis.h"
+#include "Calibration/StandardModel.h"
 #include "Calibration/MeanCoherency.h"
 #include "Calibration/CoherencyMeasurementSet.h"
-#include "Calibration/Instrument.h"
 
 #include "MEAL/NormalizeStokes.h"
-#include "MEAL/Polar.h"
 #include "MEAL/Coherency.h"
-
-// Extra transformations
-#include "Calibration/SingleAxis.h"
-#include "Calibration/Parallactic.h"
+#include "MEAL/VectorRule.h"
 
 namespace Pulsar {
 
@@ -66,98 +55,7 @@ namespace Pulsar {
 
   };
 
-  //! Stores the various elements related to the calibration model
-  class StandardModel : public Reference::Able {
 
-  public:
-    
-    friend class ReceptionCalibrator;
-
-    //! Constructor
-    StandardModel (Calibrator::Type model = Calibrator::Hamaker,
-                   MEAL::Complex2* feed_corrections = 0);
-
-    //! Update the relevant estimate
-    void update ();
-
-    //! Add a new signal path for the poln calibrator observations
-    void add_polncal_backend ();
-
-    //! Add a new signal path for the flux calibrator observations
-    void add_fluxcal_backend ();
-
-    //! Fix the rotation about the line of sight
-    void fix_orientation ();
-
-    //! ReceptionModel
-    Reference::To<Calibration::ReceptionModel> equation;
-
-    //! The signal path experienced by the calibrator
-    Reference::To<MEAL::ProductRule<MEAL::Complex2> > pcal_path;
-
-    //! The signal path experienced by the pulsar
-    Reference::To<MEAL::ProductRule<MEAL::Complex2> > pulsar_path;
-
-    //! The instrumental model and any additional transformations
-    Reference::To<MEAL::ProductRule<MEAL::Complex2> > instrument;
-
-    // ////////////////////////////////////////////////////////////////////
-    //
-    //! Polar decomposition of instrumental response (Hamaker)
-    Reference::To<MEAL::Polar> polar;
-
-    //! The best estimate of the polar model
-    Calibration::MeanPolar polar_estimate;
-
-    // ////////////////////////////////////////////////////////////////////
-    //
-    //! Phenomenological decomposition of instrumental response (Britton)
-    Reference::To<Calibration::Instrument> physical;
-
-    //! The best estimate of the physical model
-    Calibration::MeanSingleAxis physical_estimate;
-
-    // ////////////////////////////////////////////////////////////////////
-    //
-    //! Additional backend required for flux calibrator signal path
-    Reference::To<Calibration::SingleAxis> fluxcal_backend;
-
-    //! The best estimate of the flux calibration backend
-    Calibration::MeanSingleAxis fluxcal_backend_estimate;
-
-    // ////////////////////////////////////////////////////////////////////
-    //
-    //! The parallactic angle rotation
-    Calibration::Parallactic parallactic;
-
-    //! The time axis
-    MEAL::Axis<MJD> time;
-
-    //! Used to convert MJD to double
-    Calibration::ConvertMJD convert;
-
-    //! The signal path of the FluxCalibrator source
-    unsigned FluxCalibrator_path;
-
-    //! The signal path of the ReferenceCalibrator source
-    unsigned ReferenceCalibrator_path;
-
-    //! The signal path of the Pulsar phase bin sources
-    unsigned Pulsar_path;
-
-  protected:
-
-    //! The model specified on construction
-    Calibrator::Type model;
-
-    //! The feed correction transformation
-    Reference::To<MEAL::Complex2> feed_correction;
-
-    //! validity flag
-    bool valid;
-
-  };
-  
   
   //! Uses the ReceptionModel to represent and fit for the system response
   /*! The ReceptionCalibrator implements a technique of single dish
@@ -234,10 +132,19 @@ namespace Pulsar {
     virtual void calculate_transformation ();
 
     //! The calibration model as a function of frequency
-    std::vector< Reference::To<StandardModel> > model;
+    std::vector< Reference::To<Calibration::StandardModel> > model;
 
     //! The model specified on construction
     Calibrator::Type model_type;
+
+    //! The platform transformation "axis"
+    MEAL::Axis< Jones<double> > platform_axis;
+
+    //! The unique transformation for each observation
+    MEAL::VectorRule<MEAL::Complex2>* unique;
+
+    //! The unique transformation "axis"
+    MEAL::Axis< unsigned > unique_axis;
 
     //! Uncalibrated estimate of calibrator polarization
     SourceEstimate calibrator_estimate;
