@@ -1,6 +1,8 @@
 #include "Pulsar/Smooth.h"
 #include "Pulsar/Profile.h"
 
+#include <memory>
+
 Pulsar::Smooth::Smooth ()
 {
   duty_cycle = Pulsar::Profile::default_duty_cycle;

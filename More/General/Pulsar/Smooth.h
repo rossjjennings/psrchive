@@ -1,14 +1,12 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/Smooth.h,v $
-   $Revision: 1.3 $
-   $Date: 2004/04/26 12:50:20 $
+   $Revision: 1.4 $
+   $Date: 2005/04/20 07:39:22 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Smooth_h
 #define __Pulsar_Smooth_h
-
-#include <memory>
 
 #include "ReferenceAble.h"
 
@@ -48,7 +46,7 @@ namespace Pulsar {
     virtual void smooth_data (unsigned nbin, float* output,
 			      unsigned wbin, float* input) = 0;
 
-    //! The fractional number of high frequencies used to calculate noise
+    //! The width of the window used to smooth
     float duty_cycle;
 
   };
