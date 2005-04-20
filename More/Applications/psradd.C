@@ -113,7 +113,7 @@ int main (int argc, char **argv)
       return 0;
       
     case 'i':
-      cout << "$Id: psradd.C,v 1.18 2004/08/10 05:26:43 hknight Exp $" << endl;
+      cout << "$Id: psradd.C,v 1.19 2005/04/20 07:41:21 straten Exp $" << endl;
       return 0;
       
     case 'b':
@@ -264,7 +264,7 @@ int main (int argc, char **argv)
   bool reset_total_next_load = true;
   bool correct_total = false;
 
-  for (unsigned ifile=0; ifile < filenames.size(); ifile++) { try {
+  for (unsigned ifile=0; ifile < filenames.size(); ifile++) try {
 
     if (verbose) 
       cerr << "psradd: Loading [" << filenames[ifile] << "]\n";
@@ -432,9 +432,10 @@ int main (int argc, char **argv)
     cerr << "psradd: Error handling [" << filenames[ifile] << "]\n" 
 	 << error << endl;
   }
-  }
 
-  if (!reset_total_next_load) {
+
+  if (!reset_total_next_load) try {
+
     if (auto_add)  {      
       if (verbose) cerr << "psradd: Auto add - tscrunching last " 
 			<< total->integration_length()
@@ -447,6 +448,11 @@ int main (int argc, char **argv)
     
     if (!testing)
       total->unload (newname);
+
+  }
+  catch (Error& error) {
+    cerr << "psradd: Error unloading total\n" << error << endl;
+    return -1;
   }
 
   return 0;
