@@ -51,7 +51,10 @@ string pad (unsigned length, string text)
 }
 
 int main (int argc, char** argv) try {  
-  
+
+  // print in degrees
+  Angle::default_type = Angle::Degrees;
+
   // suppress warnings by default
   Pulsar::Archive::set_verbosity (0);
   bool verbose = false;
