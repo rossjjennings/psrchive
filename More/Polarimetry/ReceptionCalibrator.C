@@ -37,6 +37,7 @@ Pulsar::ReceptionCalibrator::ReceptionCalibrator (Calibrator::Type type,
   measure_cal_Q = false;
 
   normalize_by_invariant = false;
+  independent_gains = false;
   unique = 0;
 
   PA_min = PA_max = 0.0;
@@ -106,17 +107,21 @@ void Pulsar::ReceptionCalibrator::initial_observation (const Archive* data)
 
   to_feed = platform;
 
-  unique = new MEAL::VectorRule<MEAL::Complex2>;
-  unique_axis.signal.connect (unique,
+  if (independent_gains) {
+
+    unique = new MEAL::VectorRule<MEAL::Complex2>;
+    unique_axis.signal.connect (unique,
 			      &MEAL::VectorRule<MEAL::Complex2>::set_index);
 
-  MEAL::ProductRule<MEAL::Complex2>* product;
-  product = new MEAL::ProductRule<MEAL::Complex2>;
-  
-  product->add_model (platform);
-  product->add_model (unique);
+    MEAL::ProductRule<MEAL::Complex2>* product;
+    product = new MEAL::ProductRule<MEAL::Complex2>;
+    
+    product->add_model (platform);
+    product->add_model (unique);
 
-  to_feed = product;
+    to_feed = product;
+
+  }
 
   float latitude = corrections.telescope->get_latitude().getDegrees();
   float longitude = corrections.telescope->get_longitude().getDegrees();

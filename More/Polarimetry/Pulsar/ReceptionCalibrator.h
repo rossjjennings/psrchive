@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ReceptionCalibrator.h,v $
-   $Revision: 1.62 $
-   $Date: 2005/04/20 07:38:26 $
+   $Revision: 1.63 $
+   $Date: 2005/04/21 01:00:25 $
    $Author: straten $ */
 
 #ifndef __Pulsar_ReceptionCalibrator_H
@@ -92,6 +92,7 @@ namespace Pulsar {
     bool measure_cal_Q;
 
     bool normalize_by_invariant;
+    bool independent_gains;
 
     //! Add the specified pulse phase bin to the set of state constraints
     void add_state (unsigned pulse_phase_bin);

@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pcm.C,v $
-   $Revision: 1.39 $
-   $Date: 2005/04/20 07:40:55 $
+   $Revision: 1.40 $
+   $Date: 2005/04/21 01:00:25 $
    $Author: straten $ */
 
 /*! \file pcm.C 
@@ -288,11 +288,13 @@ int main (int argc, char *argv[]) try {
   bool measure_cal_Q = true;
 
   bool normalize_by_invariant = false;
+  bool independent_gains = false;
+
   bool must_have_cals = true;
   bool publication_plots = false;
 
   int gotc = 0;
-  const char* args = "a:b:c:C:d:Df:hM:m:n:OPp:qsS:t:uvV:";
+  const char* args = "a:b:c:C:d:Df:ghM:m:n:OPp:qsS:t:uvV:";
   while ((gotc = getopt(argc, argv, args)) != -1) {
     switch (gotc) {
 
@@ -328,6 +330,10 @@ int main (int argc, char *argv[]) try {
       cerr << "pcm: solving only channel " << only_ichan << endl;
       break;
 
+    case 'g':
+      independent_gains = true;
+      break;
+      
     case 'm':
       if (optarg == Britton)
 	model_name = Pulsar::Calibrator::Britton;
@@ -474,6 +480,11 @@ int main (int argc, char *argv[]) try {
     cerr << "pcm: not normalizing Stokes parameters" << endl;
 
   model.normalize_by_invariant = normalize_by_invariant;
+
+  if (independent_gains)
+    cerr << "pcm: each observation has a unique gain" << endl;
+
+  model.independent_gains = independent_gains;
 
   // add the specified phase bins
   for (unsigned ibin=0; ibin<phase_bins.size(); ibin++)
