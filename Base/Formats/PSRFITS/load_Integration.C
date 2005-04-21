@@ -150,7 +150,6 @@ try {
 
     if (verbose == 3)
       cerr << "Pulsar::FITSArchive::load_Integration"
-	"\n  PRED_PHS=" << extra_polyco.predicted_phase << 
 	"\n  phase(reference_epoch)=" << stt_phs <<
 	"\n  phase(epoch)=" << off_phs <<
 	"\n  diff=" << dphase << "=" << delta_t << "s" << endl;
