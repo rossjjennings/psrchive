@@ -110,8 +110,14 @@ try {
     throw FITSError (status, "FITSArchive::load_Integration", 
 		     "fits_read_col OFFS_SUB");
 
+
   newmjd = reference_epoch + time;
- 
+  
+  if (verbose == 3)
+    cerr << "Pulsar::FITSArchive::load_Integration reference_epoch=" 
+	 << reference_epoch << "\n  offset=" << time << "s epoch=" << newmjd
+	 << endl;
+
   // Set a preliminary epoch to avoid problems loading the polyco
 
   integ->set_epoch(newmjd);
@@ -123,9 +129,9 @@ try {
   hdr_model->load(sfptr);
 
   fits_movnam_hdu (sfptr, BINARY_TBL, "SUBINT", 0, &status);
-    if (status != 0)
-      throw FITSError (status, "FITSArchive::load_Integration",
-			       "fits_movnam_hdu SUBINT");
+  if (status != 0)
+    throw FITSError (status, "FITSArchive::load_Integration",
+		             "fits_movnam_hdu SUBINT");
 
   // Ensure the new epoch of the integration is at the same phase
   // as the archive start time
@@ -138,13 +144,20 @@ try {
 
     Phase stt_phs = hdr_model->phase(reference_epoch);
     Phase off_phs = hdr_model->phase(newmjd);
+    Phase dphase  = off_phs - stt_phs;
 
-    Phase dphase = off_phs - stt_phs;
-  
-    newmjd -= dphase.fracturns() * hdr_model->period(newmjd);
-  
-    integ->set_epoch(newmjd);
-  
+    double delta_t = dphase.fracturns() * integ->get_folding_period();
+
+    if (verbose == 3)
+      cerr << "Pulsar::FITSArchive::load_Integration"
+	"\n  PRED_PHS=" << extra_polyco.predicted_phase << 
+	"\n  phase(reference_epoch)=" << stt_phs <<
+	"\n  phase(epoch)=" << off_phs <<
+	"\n  diff=" << dphase << "=" << delta_t << "s" << endl;
+
+    newmjd -= delta_t;
+    integ->set_epoch (newmjd);
+   
     if (verbose == 3)
       cerr << "Pulsar::FITSArchive::load_Integration set_epoch " 
 	   << newmjd << endl;
