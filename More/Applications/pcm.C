@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pcm.C,v $
-   $Revision: 1.40 $
-   $Date: 2005/04/21 01:00:25 $
+   $Revision: 1.41 $
+   $Date: 2005/04/24 01:26:44 $
    $Author: straten $ */
 
 /*! \file pcm.C 
@@ -80,6 +80,7 @@ void usage ()
     "  -c archive choose best input states from input archive \n"
     "\n"
     "  -s         normalize Stokes parameters by invariant interval \n"
+    "  -g         allow absolute gain to vary in Pulsar observations\n"
     "\n"
     "  -q         assume that CAL Stokes Q = 0 \n"
     "  -v         assume that CAL Stokes V = 0 \n"
