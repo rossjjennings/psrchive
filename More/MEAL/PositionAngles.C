@@ -8,10 +8,10 @@ void MEAL::PositionAngles::init ()
   rotation_measure = new ScalarParameter;
   frequency = new ScalarValue;
 
-  // speed of light in m/s
-  double speed_of_light = 299792458;
+  // speed of light in Mm/s
+  double speed_of_light = 299.792458;
 
-  ScalarMath wavelength = 299792458*1e-6 / *frequency;
+  ScalarMath wavelength = speed_of_light / *frequency;
   ScalarMath delta_PA = wavelength * *rotation_measure;
   delta_pa = delta_PA.get_expression ();
 
