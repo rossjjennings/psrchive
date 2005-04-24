@@ -122,26 +122,14 @@ try {
 
   integ->set_epoch(newmjd);
 
-  // Set the folding period, using the polyco from the file header
-  // just in case we are in the process of updating the model in RAM
-
-  Reference::To<polyco> hdr_model = new polyco;
-  hdr_model->load(sfptr);
-
-  fits_movnam_hdu (sfptr, BINARY_TBL, "SUBINT", 0, &status);
-  if (status != 0)
-    throw FITSError (status, "FITSArchive::load_Integration",
-		             "fits_movnam_hdu SUBINT");
-
-  // Ensure the new epoch of the integration is at the same phase
-  // as the archive start time
-
   if (hdr_model && duration) {
 
+    // Set the folding period, using the polyco from the file header
     integ->set_folding_period (hdr_model->period(newmjd));
 
-    // Set the toa epoch, correcting for phase offset
-
+    // Set the toa epoch, correcting for phase offset, ensuring that the new
+    // epoch of the integration is at the same phase as the archive start
+    // time
     Phase stt_phs = hdr_model->phase(reference_epoch);
     Phase off_phs = hdr_model->phase(newmjd);
     Phase dphase  = off_phs - stt_phs;
@@ -150,6 +138,7 @@ try {
 
     if (verbose == 3)
       cerr << "Pulsar::FITSArchive::load_Integration"
+        "\n  PRED_PHS=" << extra_polyco.predicted_phase <<
 	"\n  phase(reference_epoch)=" << stt_phs <<
 	"\n  phase(epoch)=" << off_phs <<
 	"\n  diff=" << dphase << "=" << delta_t << "s" << endl;
