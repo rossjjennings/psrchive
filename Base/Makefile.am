@@ -25,7 +25,7 @@ nobase_include_HEADERS = \
 	Pulsar/PhaseWeight.h             Pulsar/ArchiveTI.h \
 	Pulsar/PhaseWeightFunction.h     model_profile.h \
 	Pulsar/Plotter.h                 Pulsar/IntegrationTI.h \
-	Pulsar/ExtensionTI.h
+	Pulsar/ExtensionTI.h             Pulsar/BaselineWindow.h
 
 libpsrchive_la_SOURCES = plugins.csh getopt.h Physical.h \
 	AdaptiveSNR.C                 Integration_new_PolnProfile.C  \
@@ -47,6 +47,7 @@ libpsrchive_la_SOURCES = plugins.csh getopt.h Physical.h \
 	Archive_toas.C                Profile_basic_shift.C  \
 	Archive_total.C               Profile_convolve.C  \
 	Archive_transform.C           Profile_denoise.C  \
+	Profile_find_minmax_phase.C \
 	Archive_tscrunch.C            Profile_find_peak_edges.C  \
 	Archive_unload.C              Profile_find_transitions.C  \
 	Archive_update_model.C        Profile_flux.C  \
@@ -80,7 +81,7 @@ libpsrchive_la_SOURCES = plugins.csh getopt.h Physical.h \
 	Integration_match.C           ArchiveTI.C \
 	IntegrationTI.C               ArchiveTI_import.C \
 	PhaseGradShift.C              Profile_fftconv.C \
-	ChannelZapMedian.C \
+	BaselineWindow.C              ChannelZapMedian.C \
 	ChannelWeight.C               ChannelZapModulation.C
 
 if !HAVE_GETOPT_LONG
@@ -113,7 +114,7 @@ endif
 #
 # programs
 #
-bin_PROGRAMS = pac vap vip psredit psradd fadd pat pam fluxcal \
+bin_PROGRAMS = pac paz vap vip psredit psradd fadd pat pam fluxcal \
 	fix_coords test_Difference fix_hydra sesdiv \
         fix_3C353 archive_correct archive_denoise \
         fix_fluxcal archive_split psrconv pascii \
@@ -130,6 +131,7 @@ fix_fluxcal_SOURCES		= fix_fluxcal.C
 fix_hydra_SOURCES		= fix_hydra.C
 fluxcal_SOURCES			= fluxcal.C
 
+paz_SOURCES			= paz.C
 pac_SOURCES			= pac.C
 pam_SOURCES			= pam.C
 pascii_SOURCES			= pascii.C
@@ -165,15 +167,14 @@ libpsrchive_la_SOURCES += ArchiveProcessor.C Plotter.C CalibratorPlotter.C  \
 	Plotter_phase_fourier.C        Plotter_spherical.C  \
 	Plotter_phase_frequency.C
 
-bin_PROGRAMS += pacv pcvar paz pav pas psrwt psrsh pcm pvt \
-	binphs_test pcm_chooser rmfit psrband SimTiming
+bin_PROGRAMS += pacv pcvar pav pas psrwt psrsh pcm pvt \
+	binphs_test pcm_chooser rmfit psrband SimTiming bin_clean
 
 SimTiming_SOURCES		= SimTiming.C
 binphs_test_SOURCES		= binphs_test.C
 pacv_SOURCES			= pacv.C
 pas_SOURCES			= pas.C
 pav_SOURCES			= pav.C
-paz_SOURCES			= paz.C
 pcm_SOURCES			= pcm.C
 pcm_chooser_SOURCES		= pcm_chooser.C
 pcvar_SOURCES			= pcvar.C
@@ -182,13 +183,13 @@ psrsh_SOURCES			= psrsh.C
 psrwt_SOURCES			= psrwt.C
 pvt_SOURCES			= pvt.C
 rmfit_SOURCES			= rmfit.C
+bin_clean_SOURCES		= bin_clean.C
 
 SimTiming_LDADD			= $(LDADD) @PGPLOT_LIBS@
 binphs_test_LDADD		= $(LDADD) @PGPLOT_LIBS@
 pacv_LDADD			= $(LDADD) @PGPLOT_LIBS@
 pas_LDADD			= $(LDADD) @PGPLOT_LIBS@
 pav_LDADD			= $(LDADD) @PGPLOT_LIBS@
-paz_LDADD			= $(LDADD) @PGPLOT_LIBS@
 pcm_LDADD			= $(LDADD) @PGPLOT_LIBS@ -lpthread
 pcm_chooser_LDADD		= $(LDADD) @PGPLOT_LIBS@
 pcvar_LDADD			= $(LDADD) @PGPLOT_LIBS@
@@ -197,6 +198,7 @@ psrsh_LDADD			= $(LDADD) @PGPLOT_LIBS@
 psrwt_LDADD			= $(LDADD) @PGPLOT_LIBS@
 pvt_LDADD			= $(LDADD) @PGPLOT_LIBS@
 rmfit_LDADD			= $(LDADD) @PGPLOT_LIBS@
+bin_clean_LDADD			= $(LDADD) @PGPLOT_LIBS@
 
 # future
 # psrsh_LDADD = -lreadline -ltermcap
