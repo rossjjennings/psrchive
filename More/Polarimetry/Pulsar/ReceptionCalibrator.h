@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ReceptionCalibrator.h,v $
-   $Revision: 1.63 $
-   $Date: 2005/04/21 01:00:25 $
+   $Revision: 1.64 $
+   $Date: 2005/04/24 01:28:07 $
    $Author: straten $ */
 
 #ifndef __Pulsar_ReceptionCalibrator_H
@@ -71,8 +71,7 @@ namespace Pulsar {
     friend class SourceInfo;
     
     //! Construct with optional first pulsar archive
-    ReceptionCalibrator (Calibrator::Type model,
-			 const Archive* archive = 0);
+    ReceptionCalibrator (Calibrator::Type model, const Archive* archive = 0);
 
     //! Return the reference epoch of the calibration experiment
     MJD get_epoch () const;
@@ -83,8 +82,8 @@ namespace Pulsar {
     //! Return the Calibrator information
     Info* get_Info () const;
 
-    //! Return the CalibratorStokesExtension
-    CalibratorStokes* get_calibrator_stokes () const;
+    //! Return the CalibratorStokes Extension
+    CalibratorStokes* get_CalibratorStokes () const;
 
     //! Allow the CAL Stokes V to vary (applies only if FluxCal observed)
     bool measure_cal_V;
@@ -93,6 +92,7 @@ namespace Pulsar {
 
     bool normalize_by_invariant;
     bool independent_gains;
+    bool check_pointing;
 
     //! Add the specified pulse phase bin to the set of state constraints
     void add_state (unsigned pulse_phase_bin);

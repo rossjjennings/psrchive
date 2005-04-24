@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/ScalarConstant.h,v $
-   $Revision: 1.4 $
-   $Date: 2005/04/06 20:23:36 $
+   $Revision: 1.5 $
+   $Date: 2005/04/24 01:28:07 $
    $Author: straten $ */
 
 #ifndef __ScalarConstant_H
@@ -12,7 +12,7 @@
 
 namespace MEAL {
 
-  //! Represents a constant scalar value
+  //! Represents a constant scalar value with no parameters or arguments
   class ScalarConstant : public Scalar {
 
   public:
