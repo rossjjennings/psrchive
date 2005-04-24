@@ -1,23 +1,25 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/fft/median_smooth.h,v $
-   $Revision: 1.1 $
-   $Date: 2004/09/02 03:04:04 $
-   $Author: redwards $*/
+   $Revision: 1.2 $
+   $Date: 2005/04/24 01:32:31 $
+   $Author: straten $*/
 
 #ifndef __fft_smooth_h
 #define __fft_smooth_h
 
 #include <algorithm>
+#include <vector>
+#include <iostream>
 
 namespace fft {
 
   extern bool verbose;
 
   template <class T> 
-  void median_smooth (vector<T>& data, unsigned ndim, unsigned wsize) {
+  void median_smooth (std::vector<T>& data, unsigned ndim, unsigned wsize) {
 
-    vector<typename T::type> temp (data.size());
+    std::vector<typename T::type> temp (data.size());
     for (unsigned idim=0; idim<ndim; idim++) {
       for (unsigned idat=0; idat<data.size(); idat++)
 	temp[idat] = data[idat][idim];
@@ -29,7 +31,7 @@ namespace fft {
   }
 
   template <class T> 
-    void median_smooth (vector<T>& data, unsigned wsize) {
+    void median_smooth (std::vector<T>& data, unsigned wsize) {
 
     if (data.size() < 4)
       return;
@@ -47,15 +49,16 @@ namespace fft {
     unsigned ipt = 0, jpt = 0;
 
     unsigned middle = wsize/2;
-    vector<T> window (wsize);
+    std::vector<T> window (wsize);
 
     unsigned rsize = data.size() - wsize + 1;
-    vector<T> result (data.size());
+    std::vector<T> result (data.size());
 
     unsigned truncated = 0;
 
     if (verbose)
-      cerr <<"fft::median_filter window="<< wsize <<"/"<< data.size() <<endl;
+      std::cerr << "fft::median_filter window=" << wsize 
+		<< "/" << data.size() << std::endl;
 
     // deal with leading edge
     for (ipt=0; ipt < middle; ipt++) {
