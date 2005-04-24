@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Estimate.h,v $
-   $Revision: 1.31 $
-   $Date: 2005/03/22 06:13:46 $
+   $Revision: 1.32 $
+   $Date: 2005/04/24 01:33:11 $
    $Author: straten $ */
 
 #ifndef __Estimate_h
@@ -190,7 +190,7 @@ class PromoteTraits< Estimate<T,U>, Estimate<V,W> >
 template<typename T, typename U>
 std::ostream& operator<< (std::ostream& ostr, const Estimate<T,U>& estimate)
 {
-  return ostr << "(" << estimate.val << "\261" << sqrt(estimate.var) << ")";
+  return ostr << "(" << estimate.val << "+-" << sqrt(estimate.var) << ")";
 }
 
 
