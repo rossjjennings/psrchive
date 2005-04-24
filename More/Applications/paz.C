@@ -115,7 +115,7 @@ int main (int argc, char *argv[]) {
       Pulsar::Archive::set_verbosity(3);
       break;
     case 'i':
-      cout << "$Id: paz.C,v 1.25 2005/04/20 07:40:30 straten Exp $" << endl;
+      cout << "$Id: paz.C,v 1.26 2005/04/24 01:26:24 straten Exp $" << endl;
       return 0;
 
     case 'm':
@@ -397,7 +397,7 @@ int main (int argc, char *argv[]) {
       }
       new_arch = arch->extract(subs_to_keep);
       string useful = arch->get_filename();
-      arch = new_arch->clone();
+      arch = new_arch;
       arch->set_filename(useful);
     }
       
