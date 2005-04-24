@@ -11,6 +11,7 @@
 #include "Pulsar/CalibratorStokes.h"
 #include "Pulsar/CalibratorStokesInfo.h"
 
+#include "Pulsar/Profile.h"
 #include "Pulsar/Integration.h"
 #include "Pulsar/Archive.h"
 #include "Pulsar/Plotter.h"
@@ -26,7 +27,7 @@
 
 void usage ()
 {
-  cerr << "pacv - Pulsar Archive Calibrator Viewer\n"
+  cout << "pacv - Pulsar Archive Calibrator Viewer\n"
     "usage: pacv [options] file1 [file2 ...]\n"
     "where:\n"
     " -a archive set the output archive class name\n"
@@ -34,10 +35,10 @@ void usage ()
     " -C         plot only calibrator Stokes\n"
     " -D dev     specify PGPLOT device\n"
     " -f         treat all archives as members of a fluxcal observation\n"
-    " -t mjd     set the epoch of the PolnCalibrator extension\n"
-    " -T tel     Set telescope ID to 'tel'\n"
     " -q         use the single-axis model\n"
-    " -P         produce publication-quality plots" << endl;
+    " -P         produce publication-quality plots\n"
+    " -2 m or d  multiply or divide cross products by factor of two\n"
+       << endl;
 }
 
 int main (int argc, char** argv) 
@@ -60,21 +61,30 @@ int main (int argc, char** argv)
   // produce publication quality plots
   bool publication = false;
 
-  // set the epoch of the PolnCalibratorExtension
-  bool set_epoch = false;
-  MJD epoch;
-
   bool plot_calibrator_stokes = false;
 
+  //
+  float cross_scale_factor = 1.0;
+
   string device = "?";
-  char telescope = 0;
 
   // verbosity flag
   bool verbose = false;
   char c;
-  while ((c = getopt(argc, argv, "a:c:CD:hfMPqt:T:vV")) != -1)  {
+  while ((c = getopt(argc, argv, "2:a:c:CD:hfMPqvV")) != -1)  {
 
     switch (c)  {
+
+    case '2':
+      if (optarg[0] == 'm')
+	cross_scale_factor = 2.0;
+      else if (optarg[0] == 'd')
+	cross_scale_factor = 0.5;
+      else {
+	cerr << " -2 " << optarg << " not recognized" << endl;
+	return -1;
+      }
+      break;
 
     case 'h':
       usage();
@@ -124,13 +134,6 @@ int main (int argc, char** argv)
       publication = true;
       break;
 
-    case 't':
-      set_epoch = true;
-      epoch.Construct( optarg );
-      break;
-
-    case 'T': telescope = optarg[0]; break;
-
     case 'V':
       Pulsar::Archive::set_verbosity (3);
       Pulsar::CalibratorPlotter::verbose = true;
@@ -160,11 +163,9 @@ int main (int argc, char** argv)
     for (int ai=optind; ai<argc; ai++)
       dirglob (&filenames, argv[ai]);
 
-  if (!set_epoch) {
-    cpgbeg (0, device.c_str(), 0, 0);
-    cpgask(1);
-    cpgsvp (.1,.9, .1,.9);
-  }
+  cpgbeg (0, device.c_str(), 0, 0);
+  cpgask(1);
+  cpgsvp (.1,.9, .1,.9);
   
   // the input calibrator archive
   Reference::To<Pulsar::Archive> input;
@@ -193,33 +194,10 @@ int main (int argc, char** argv)
 
     input = Pulsar::Archive::load( filenames[ifile] );
 
-    if( telescope != 0 ){
-      input->set_telescope_code( telescope );
-      fprintf(stderr,"set telescope code to '%c'\n",
-	      input->get_telescope_code());
-    }
-
     if (input->get_type() == Signal::Calibrator) {
 
       cerr << "pacv: " << filenames[ifile] << " is a processed Calibrator"
            << endl;
-
-      if (set_epoch)  {
-
-        cerr << "pacv: setting epoch in " << filenames[ifile]
-             << " to " << epoch << endl;
-
-        Pulsar::CalibratorExtension* ce;
-        ce = input->get<Pulsar::CalibratorExtension>();
-        ce -> set_epoch (epoch);
-
-        string newname = filenames[ifile] + ".pacv";
-
-        cerr << "pacv: Unloading " << newname << endl;
-        input -> unload (newname);
-        continue;
-
-      }
 
       if (input->get<Pulsar::FluxCalibratorExtension>()) {
 
@@ -280,9 +258,6 @@ int main (int argc, char** argv)
 
     }
 
-    if (set_epoch)
-      continue;
-
     for (unsigned ichan=0; ichan<zapchan.size(); ichan++) {
       if (verbose)
 	cerr << "pacv: Zapping channel " << zapchan[ichan] << endl;
@@ -292,6 +267,17 @@ int main (int argc, char** argv)
 
     }
 
+    if (cross_scale_factor != 1.0) {
+
+      cerr << "Scaling cross products by " << cross_scale_factor << endl;
+
+      for (unsigned isub=0; isub < input->get_nsubint(); isub++)
+	for (unsigned ichan=0; ichan < input->get_nchan(); ichan++) {
+	  input->get_Profile (isub, 2, ichan) -> scale (cross_scale_factor);
+	  input->get_Profile (isub, 3, ichan) -> scale (cross_scale_factor);
+	}
+
+    }
 
     if (fluxcal) {
       if (verbose)
@@ -373,8 +359,7 @@ int main (int argc, char** argv)
     return -1;
   }
 
-  if (!set_epoch)
-    cpgend();
+  cpgend();
 
   return 0;
 }
