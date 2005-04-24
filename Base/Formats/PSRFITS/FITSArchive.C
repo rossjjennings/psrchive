@@ -41,12 +41,15 @@ void Pulsar::FITSArchive::init ()
   chanbw = 0.0; 
   scale_cross_products = false;
   
+  fcal_on_sources.push_back("Hydra");
   fcal_on_sources.push_back("HYDRA_O");
   fcal_on_sources.push_back("VIRGO_O");
   fcal_on_sources.push_back("3C353_O");
   fcal_on_sources.push_back("0918-1205_H");
   fcal_on_sources.push_back("J0918-1205");
-
+  
+  fcal_off_sources.push_back("Hydra_N");
+  fcal_off_sources.push_back("Hydra_S");
   fcal_off_sources.push_back("HYDRA_N");
   fcal_off_sources.push_back("HYDRA_S");
   fcal_off_sources.push_back("VIRGO_N");
@@ -357,13 +360,16 @@ void Pulsar::FITSArchive::load_header (const char* filename)
   sscanf((hdr_ext->hdrver.substr(0,index)).c_str(), "%d", &major_number);
   sscanf((hdr_ext->hdrver.substr(index+1,hdr_ext->hdrver.length())).c_str(), 
 	 "%f", &minor_number);
+
   if ((strcmp(tempstr.get(), "WBCORR") == 0) && ((major_number == 1) &&
 						 (minor_number < 14))) {
+
     scale_cross_products = true;
     if (verbose == 3) {
       cout << "Old WBCORR header version detected..." << endl;
       cout << "Scaling cross products to compensate" << endl;
     }
+
   }
 
 
@@ -420,7 +426,12 @@ void Pulsar::FITSArchive::load_header (const char* filename)
 	cerr << "FITSArchive::load_header using Signal::PolnCal" << endl;
     }
 
-  }
+   }
+
+  else if (obs_mode == "FOF")
+    set_type ( Signal::FluxCalOff );
+  else if (obs_mode == "FON")
+    set_type ( Signal::FluxCalOn );
   else if (obs_mode == "PCM")
     set_type ( Signal::Calibrator );
   else if (obs_mode == "SEARCH")
@@ -432,7 +443,6 @@ void Pulsar::FITSArchive::load_header (const char* filename)
     set_type ( Signal::Unknown );
   }
   
-
   // Read where the telescope was pointing
   
   if (verbose == 3)
@@ -634,7 +644,7 @@ void Pulsar::FITSArchive::load_header (const char* filename)
   // Load the ephemeris from the FITS file
   fits_movnam_hdu (fptr, BINARY_TBL, "PSREPHEM", 0, &status);
 
-  if (status == 0) {
+  if (status == 0 && get_type() == Signal::Pulsar) {
 
     ephemeris = new psrephem;
     ephemeris->load(fptr);
@@ -649,26 +659,37 @@ void Pulsar::FITSArchive::load_header (const char* filename)
     ephemeris = 0;
     set_dispersion_measure (0);
     set_rotation_measure (0);
+
+    if (verbose == 3)
+      cerr << "FITSArchive::load_header no ephemeris" << endl;
   }
 
   // Load the polyco from the FITS file
-  
+
+  status = 0;
   fits_movnam_hdu (fptr, BINARY_TBL, "POLYCO", 0, &status);
 
   if (status == 0) {
 
     model = new polyco;
-    model->load(fptr);
-  
+    model->load (fptr, &extra_polyco);
+    hdr_model = new polyco (*model);
+
     if (verbose == 3)
       cerr << "FITSArchive::load_header polyco loaded" << endl;
-  
-  }
-  else
-    model = 0;
 
+  }
+  else {
+
+    hdr_model = model = 0;
+
+    if (verbose == 3)
+      cerr << "FITSArchive::load_header no polyco" << endl;
+
+  }
   // Move to the SUBINT Header Data Unit
-  
+
+  status = 0;
   fits_movnam_hdu (fptr, BINARY_TBL, "SUBINT", 0, &status);
 
   if (status == 0) {
@@ -707,7 +728,9 @@ void Pulsar::FITSArchive::load_header (const char* filename)
       }
     }
   }
-  
+  else if (verbose == 3)
+    cerr << "FITSArchive::load_header no sub-integrations" << endl;
+
   status = 0;
   
   // Finished with the file for now
@@ -811,7 +834,8 @@ try {
 
   // Write the source name
 
-  char* telescope = const_cast<char*>(::Telescope::name(get_telescope_code()));
+  char* telescope;
+  telescope = const_cast<char*>(::Telescope::name(get_telescope_code()));
 
   fits_update_key (fptr, TSTRING, "TELESCOP", telescope, comment, &status);
 
@@ -859,9 +883,9 @@ try {
   else if (get_type() == Signal::PolnCal)
     obs_mode = "CAL";
   else if (get_type() == Signal::FluxCalOn)
-    obs_mode = "CAL";
+    obs_mode = "FON";
   else if (get_type() == Signal::FluxCalOff)
-    obs_mode = "CAL";
+    obs_mode = "FOF";
   else if (get_type() == Signal::Calibrator)
     obs_mode = "PCM";
   else
