@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/PolnCalibratorExtension.h,v $
-   $Revision: 1.14 $
-   $Date: 2004/11/22 21:32:31 $
+   $Revision: 1.15 $
+   $Date: 2005/04/24 01:27:46 $
    $Author: straten $ */
 
 #ifndef __PolnCalibratorExtension_h
@@ -55,17 +55,17 @@ namespace Pulsar {
     void set_valid (unsigned ichan, bool valid);
 
     //! Get the transformation for the specified frequency channel
-    ::MEAL::Complex2* get_transformation (unsigned c);
+    MEAL::Complex2* get_transformation (unsigned c);
     //! Get the transformation for the specified frequency channel
-    const ::MEAL::Complex2* get_transformation (unsigned c) const;
+    const MEAL::Complex2* get_transformation (unsigned c) const;
 
   protected:
 
     //! The instrumental response as a function of frequency
-    vector< Reference::To< ::MEAL::Complex2 > > response;
+    vector< Reference::To<MEAL::Complex2> > response;
 
     //! Return a new MEAL::Complex2 instance, based on type attribute
-    ::MEAL::Complex2* new_transformation ();
+    MEAL::Complex2* new_transformation ();
 
     //! Construct the response array according to the current attributes
     void construct ();

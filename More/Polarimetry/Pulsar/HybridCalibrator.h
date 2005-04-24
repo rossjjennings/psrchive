@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/HybridCalibrator.h,v $
-   $Revision: 1.3 $
-   $Date: 2004/07/21 05:27:51 $
+   $Revision: 1.4 $
+   $Date: 2005/04/24 01:27:46 $
    $Author: straten $ */
 
 #ifndef __HybridCalibrator_H
@@ -57,7 +57,7 @@ namespace Pulsar {
     Reference::To<PolnCalibrator> precalibrator;
 
     //! The SingleAxis model solver
-    Reference::To< ::Calibration::SingleAxisSolver > solver;
+    Reference::To<Calibration::SingleAxisSolver> solver;
 
   };
 
