@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/PSRFITS/Pulsar/FITSArchive.h,v $
-   $Revision: 1.27 $
-   $Date: 2004/10/08 13:33:58 $
+   $Revision: 1.28 $
+   $Date: 2005/04/24 01:32:09 $
    $Author: straten $ */
 
 #ifndef __Pulsar_FITSArchive_h
@@ -204,7 +204,13 @@ namespace Pulsar {
 
     //! Unload Integration data to the SUBINT HDU of the specified FITS file
     void unload_integrations (fitsfile*) const;
-   
+
+    //! Extra polyco information
+    FITSPolyco extra_polyco;
+
+    //! The polyco parsed from the PSRFITS file
+    Reference::To<polyco> hdr_model;
+
   private:
     
     int truthval (bool) const;
