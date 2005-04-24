@@ -38,6 +38,8 @@ Pulsar::ReceptionCalibrator::ReceptionCalibrator (Calibrator::Type type,
 
   normalize_by_invariant = false;
   independent_gains = false;
+  check_pointing = false;
+
   unique = 0;
 
   PA_min = PA_max = 0.0;
@@ -336,7 +338,7 @@ void Pulsar::ReceptionCalibrator::add_observation (const Archive* data)
   if (!calibrator)
     initial_observation (data);
 
-  // use the CorrectionsCalibrator class to the feed transformation
+  // use the CorrectionsCalibrator class to calculate the feed transformation
   CorrectionsCalibrator corrections;
 
   string reason;
@@ -359,22 +361,28 @@ void Pulsar::ReceptionCalibrator::add_observation (const Archive* data)
       end_epoch = epoch;
 
     model[0]->parallactic.set_epoch (epoch);
-    float PA = -model[0]->parallactic.get_param (0);
+    Angle PA = -model[0]->parallactic.get_param (0);
+
+    cerr << "Pulsar::ReceptionCalibrator::add_observation parallactic angle="
+	 << PA.getDegrees() << "deg" << endl;
 
     if (PA < PA_min)
-      PA_min = PA;
+      PA_min = PA.getRadians();
     if (PA > PA_max)
-      PA_max = PA;
+      PA_max = PA.getRadians();
 
-    const Pointing* pointing = integration->get<Pointing>();
+    if (check_pointing) {
 
-    if (pointing &&
-	!equal_pi( pointing->get_parallactic_angle(), PA )) {
-      cerr << "Pulsar::ReceptionCalibrator::add_observation\n"
-	"Integration::pointing parallactic angle=" <<
-	pointing->get_parallactic_angle().getDegrees() << "deg != predicted="
-	   << PA * 180.0/M_PI << "deg" << endl;
-      continue;
+      const Pointing* pointing = integration->get<Pointing>();
+      
+      if (pointing &&
+	  !equal_pi( pointing->get_parallactic_angle(), PA )) {
+	cerr << "Pulsar::ReceptionCalibrator::add_observation\n"
+	  "Integration::pointing parallactic angle=" <<
+	  pointing->get_parallactic_angle().getDegrees() << "deg != predicted="
+	     << PA * 180.0/M_PI << "deg" << endl;
+      }
+
     }
 
     // the noise power in the baseline is used to estimate the
@@ -444,7 +452,7 @@ void Pulsar::ReceptionCalibrator::add_observation (const Archive* data)
     }
     catch (Error& error) {
       cerr << "Pulsar::ReceptionCalibrator::add_observation ichan="
-	   << ichan << " error" << error.get_message() << endl;
+	   << ichan << " error\n" << error.get_message() << endl;
     }
 
   }
