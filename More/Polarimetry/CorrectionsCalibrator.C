@@ -136,7 +136,7 @@ Pulsar::CorrectionsCalibrator::get_feed_transformation (const Pointing* point,
   double feed_rotation = 0.0;
 
   if (point) {
-    if (verbose)
+    //    if (verbose)
       cerr << "Pulsar::CorrectionsCalibrator::get_feed_transformation\n"
         "   using Pointing::feed_angle="
            << point->get_feed_angle().getDegrees() << " deg" << endl;
@@ -246,21 +246,19 @@ Pulsar::CorrectionsCalibrator::get_transformation (const Archive* archive,
 
     para.set_epoch( integration->get_epoch() );
 
-    if (pointing) {
+    Angle pa = -para.get_phi();
+ 
+    // check that the para_ang is equal
 
-      // check that the para_ang is equal
-      if (Archive::verbose &&
-	  !equal_pi( pointing->get_parallactic_angle(), -para.get_phi() ))
+    if (pointing &&Archive::verbose &&
+	!equal_pi( pointing->get_parallactic_angle(), pa ))
 	
-	cerr << "Pulsar::CorrectionsCalibrator::get_transformation WARNING\n"
-	  " Pointing parallactic_angle=" << pointing->get_parallactic_angle()
-	     << " != " << -para.get_phi() << " calculated for MJD="
-	     << integration->get_epoch() << endl;
-
-      para.set_phi( -pointing->get_parallactic_angle().getRadians() );
-
-    }
-
+      cerr << "Pulsar::CorrectionsCalibrator::get_transformation WARNING\n"
+	" Pointing parallactic_angle="
+	   << pointing->get_parallactic_angle().getDegrees() << "deg "
+	   << " != " << pa.getDegrees() << "deg calculated for MJD="
+	   << integration->get_epoch() << endl;
+    
     xform *= para.evaluate();
      
   }
