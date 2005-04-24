@@ -22,7 +22,7 @@
 // back     - if specified, go back in history  NOT IMPLEMENTED
 //
 
-void polyco::load (fitsfile* fptr, int back)
+void polyco::load (fitsfile* fptr, FITSPolyco* extra, int back)
 {
 #ifdef DEBUG
   cerr << "polyco::load PSRFITS 1" << endl;
@@ -59,6 +59,19 @@ void polyco::load (fitsfile* fptr, int back)
 
   for (int ipol=0; ipol<npoly; ipol++)
     pollys[ipol].load (fptr, row+ipol);
+
+  if (extra) {
+    double predicted_phase;
+    fits_get_colnum (fptr, CASEINSEN, "PRED_PHS", &colnum, &status);
+    fits_read_col (fptr, TDOUBLE, colnum, nrows, firstelem, onelement,
+		   NULL, &predicted_phase, &anynul, &status);
+
+    if (status == 0)
+      extra->predicted_phase = predicted_phase;
+    else
+      extra->predicted_phase = 0.0;
+  }
+
 }
 
 

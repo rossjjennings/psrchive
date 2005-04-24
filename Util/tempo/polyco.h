@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/polyco.h,v $
-   $Revision: 1.25 $
-   $Date: 2004/12/27 13:57:11 $
+   $Revision: 1.26 $
+   $Date: 2005/04/24 01:10:18 $
    $Author: straten $ */
 
 #ifndef __POLY_H
@@ -168,6 +168,13 @@ public:
 
 };
 
+//! The POLYCO HDU of the PSRFITS definition contains additional information
+class FITSPolyco {
+public:
+  //! The PRED_PHS column
+  double predicted_phase;
+};
+
 class polyco : public Reference::Able {
 
  protected:
@@ -281,7 +288,7 @@ class polyco : public Reference::Able {
 #endif
 
 #ifdef HAVE_CFITSIO
-  void load (fitsfile* fptr, int back=0);
+  void load (fitsfile* fptr, FITSPolyco* extra = 0, int back=0);
   void unload (fitsfile* fptr, int back=0) const;
 #endif
 
