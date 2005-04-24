@@ -194,27 +194,34 @@ void Calibration::ReceptionModel::solve_work (bool solve_verbose)
     
     else {
 
-      if (better > stay_at_minimum && delta_chisq/best_chisq < convergence_threshold)  {
-        close_to_min ++;
-        if (close_to_min == stay_at_minimum)
-          break;
-      }
+      if (better > stay_at_minimum 
+	  && delta_chisq/best_chisq < convergence_threshold)
+	{
+	  close_to_min ++;
+	  if (close_to_min == stay_at_minimum)
+	    break;
+	}
       else
         close_to_min = 0;
-
+      
     }
 
     iter ++;
     
   }
   
-  if (iter >= maximum_iterations)
-    Error (InvalidState, "Calibration::ReceptionModel::solve",
-	   "maximum iterations=%d expired. best chi_sq=%f",
-	   maximum_iterations, best_chisq);
+  if (iter >= maximum_iterations) {
+
+    for (iparm=0; iparm < get_nparam(); iparm++)
+      set_Estimate (iparm, 0.0);
+
+    throw Error (InvalidState, "Calibration::ReceptionModel::solve",
+		 "maximum iterations=%d expired. best chi_sq=%f",
+		 maximum_iterations, best_chisq);
+
+  }
 
   float constrained = fixed_params - free_params;
-
   float reduced_chisq = best_chisq / constrained;
 
   if (maximum_reduced && reduced_chisq > maximum_reduced) {
