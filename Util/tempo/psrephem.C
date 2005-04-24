@@ -155,7 +155,7 @@ int psrephem::load (const char* filename)
 
   int all_zero = 1;
   for (int i=0;i<EPH_NUM_KEYS;i++)  {
-    if (parmStatus[i] == 1) {
+    if (parmStatus[i]) {
       value_str[i] = ephemstr [i];
       all_zero = 0;
     }
@@ -417,9 +417,9 @@ string psrephem::par_lookup (const char* name, int use_cwd)
 
 string psrephem::psrname() const
 {
-  if (tempo11 && parmStatus[EPH_PSRJ]==1)
+  if (tempo11 && parmStatus[EPH_PSRJ])
     return value_str[EPH_PSRJ];
-  else if (tempo11 && parmStatus[EPH_PSRB]==1)
+  else if (tempo11 && parmStatus[EPH_PSRB])
     return value_str[EPH_PSRB];
   
   throw Error(InvalidParam, "psrephem::psrname",
@@ -838,7 +838,11 @@ string psrephem::get_string  (int ephind)
   if (parmTypes[ephind] != 0)
     throw Error (InvalidParam, "psrephem::get_string",
                  "%s is not a string", parmNames[ephind]);
-  return value_str[ephind];
+
+  if (tempo11 && parmStatus[ephind])
+    return value_str[ephind];
+  else
+    return "";
 }
 
 double psrephem::get_double  (int ephind)
@@ -846,7 +850,11 @@ double psrephem::get_double  (int ephind)
   if (parmTypes[ephind] != 1)
     throw Error (InvalidParam, "psrephem::get_double",
                  "%s is not a double", parmNames[ephind]);
-  return value_double[ephind];
+
+  if (tempo11 && parmStatus[ephind])
+    return value_double[ephind];
+  else
+    return 0.0;
 }
 
 MJD psrephem::get_MJD (int ephind)
@@ -854,7 +862,11 @@ MJD psrephem::get_MJD (int ephind)
   if (parmTypes[ephind] != 4)
     throw Error (InvalidParam, "psrephem::get_MJD",
                  "%s is not a MJD", parmNames[ephind]);
-  return MJD (value_integer[ephind], value_double[ephind]);
+
+  if (tempo11 && parmStatus[ephind])
+    return MJD (value_integer[ephind], value_double[ephind]);
+  else
+    return MJD::zero;
 }
 
 Angle psrephem::get_Angle (int ephind)
@@ -862,9 +874,14 @@ Angle psrephem::get_Angle (int ephind)
   if (parmTypes[ephind] != 2 && parmTypes[ephind] != 3)
     throw Error (InvalidParam, "psrephem::get_Angle",
                  "%s is not an  Angle", parmNames[ephind]);
-  Angle ret;
-  ret.setTurns (value_double[ephind]);
-  return ret;
+
+  if (tempo11 && parmStatus[ephind]) {
+    Angle ret;
+    ret.setTurns (value_double[ephind]);
+    return ret;
+  }
+  else
+    return Angle();
 }
 
 int psrephem::get_integer (int ephind)
@@ -872,19 +889,23 @@ int psrephem::get_integer (int ephind)
   if (parmTypes[ephind] != 5)
     throw Error (InvalidParam, "psrephem::get_integer",
                  "%s is not an integer", parmNames[ephind]);
-  return value_integer[ephind];
-}
 
-// set functions accept the value and throw an 
-// Error exception on error. Again, it seems
-// these have not been frinished...
+  if (tempo11 && parmStatus[ephind])
+    return value_integer[ephind];
+  else
+    return 0;
+}
 
 void psrephem::set_string (int ephind, const string& value)
 {
   if (parmTypes[ephind] != 0)
     throw Error (InvalidParam, "psrephem::get_string",
                  "%s is not a string", parmNames[ephind]);
+
   value_str[ephind] = value;
+
+  if (!parmStatus[ephind])
+    parmStatus[ephind] = 1;
 }
 
 void psrephem::set_double (int ephind, double value)
@@ -892,7 +913,11 @@ void psrephem::set_double (int ephind, double value)
   if (parmTypes[ephind] != 1)
     throw Error (InvalidParam, "psrephem::get_double",
                  "%s is not a double", parmNames[ephind]);
+
   value_double[ephind] = value;
+
+  if (!parmStatus[ephind])
+    parmStatus[ephind] = 1;
 }
 
 void psrephem::set_MJD (int ephind, const MJD& value)
@@ -900,8 +925,12 @@ void psrephem::set_MJD (int ephind, const MJD& value)
   if (parmTypes[ephind] != 4)
     throw Error (InvalidParam, "psrephem::get_MJD",
                  "%s is not a MJD", parmNames[ephind]);
+
   value_integer[ephind] = value.intday();
   value_double[ephind] = value.fracday();
+
+  if (!parmStatus[ephind])
+    parmStatus[ephind] = 1;
 }
 
 void psrephem::set_Angle (int ephind, const Angle& value)
@@ -909,7 +938,11 @@ void psrephem::set_Angle (int ephind, const Angle& value)
   if (parmTypes[ephind] != 2 && parmTypes[ephind] != 3)
     throw Error (InvalidParam, "psrephem::get_Angle",
                  "%s is not an  Angle", parmNames[ephind]);
+
   value_double[ephind] = value.getTurns();
+
+  if (!parmStatus[ephind])
+    parmStatus[ephind] = 1;
 }
 
 void psrephem::set_integer (int ephind, int value)
@@ -917,6 +950,10 @@ void psrephem::set_integer (int ephind, int value)
   if (parmTypes[ephind] != 5)
     throw Error (InvalidParam, "psrephem::get_integer",
                  "%s is not an integer", parmNames[ephind]);
+
   value_integer[ephind] = value;
+
+  if (!parmStatus[ephind])
+    parmStatus[ephind] = 1;
 }
 
