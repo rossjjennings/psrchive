@@ -10,41 +10,42 @@ Pulsar::Pointing::Pointing () : Extension ("Pointing")
 {
 }
 
-Pulsar::Pointing::Pointing (const Pointing& extension) : Extension ("Pointing")
+Pulsar::Pointing::Pointing (const Pointing& extension)
+  : Extension ("Pointing")
 {
   operator = (extension);
 }
 
 const Pulsar::Pointing&
-Pulsar::Pointing::operator= (const Pointing& extension)
+Pulsar::Pointing::operator= (const Pointing& pointing)
 {
-  local_sidereal_time = local_sidereal_time;
-  right_ascension = right_ascension;
-  declination = declination;
-  galactic_longitude = galactic_longitude;
-  galactic_latitude = galactic_latitude;
-  feed_angle = feed_angle;
-  position_angle = position_angle;
-  parallactic_angle = parallactic_angle;
-  telescope_azimuth = telescope_azimuth;
-  telescope_zenith = telescope_zenith;
-  
+  local_sidereal_time = pointing.local_sidereal_time;
+  right_ascension     = pointing.right_ascension;
+  declination         = pointing.declination;
+  galactic_longitude  = pointing.galactic_longitude;
+  galactic_latitude   = pointing.galactic_latitude;
+  feed_angle          = pointing.feed_angle;
+  position_angle      = pointing.position_angle;
+  parallactic_angle   = pointing.parallactic_angle;
+  telescope_azimuth   = pointing.telescope_azimuth;
+  telescope_zenith    = pointing.telescope_zenith;
+
   return *this;
 }
 
 const Pulsar::Pointing&
-Pulsar::Pointing::operator += (const Pointing& extension)
+Pulsar::Pointing::operator += (const Pointing& pointing)
 {
-  local_sidereal_time += extension.local_sidereal_time;
-  right_ascension += extension.right_ascension;
-  declination += extension.declination;
-  galactic_longitude += extension.galactic_longitude;
-  galactic_latitude += extension.galactic_latitude;
-  feed_angle += extension.feed_angle;
-  position_angle += extension.position_angle;
-  parallactic_angle += extension.parallactic_angle;
-  telescope_azimuth += extension.telescope_azimuth;
-  telescope_zenith += extension.telescope_zenith;
+  local_sidereal_time += pointing.local_sidereal_time;
+  right_ascension     += pointing.right_ascension;
+  declination         += pointing.declination;
+  galactic_longitude  += pointing.galactic_longitude;
+  galactic_latitude   += pointing.galactic_latitude;
+  feed_angle          += pointing.feed_angle;
+  position_angle      += pointing.position_angle;
+  parallactic_angle   += pointing.parallactic_angle;
+  telescope_azimuth   += pointing.telescope_azimuth;
+  telescope_zenith    += pointing.telescope_zenith;
 
   return *this;
 }
