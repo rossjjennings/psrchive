@@ -1,61 +1,40 @@
 #include "MEAL/ScalarValue.h"
-#include "MEAL/OneParameter.h"
+#include "MEAL/NoParameters.h"
+#include "MEAL/NotCached.h"
 
-using namespace std;
-
-MEAL::ScalarValue::ScalarValue (Estimate<double> value)
+MEAL::ScalarValue::ScalarValue (double _value)
 {
-  new OneParameter (this);
-  set_value (value);
-  value_name = "value";
+  parameter_policy = new NoParameters;
+  evaluation_policy = new NotCached<Scalar> (this);
+
+  value = _value;
 }
 
 //! Return the name of the class
-string MEAL::ScalarValue::get_name () const
+std::string MEAL::ScalarValue::get_name () const
 {
   return "ScalarValue";
 }
 
-void MEAL::ScalarValue::set_value (const Estimate<double>& value)
+void MEAL::ScalarValue::set_value (double _value)
 {
-  set_Estimate (0, value);
+  if (value == _value)
+    return;
+
+  value = _value;
+  set_evaluation_changed();
 }
 
-Estimate<double> MEAL::ScalarValue::get_value () const
+double MEAL::ScalarValue::get_value () const
 {
-  return get_Estimate (0);
-}
-
-string MEAL::ScalarValue::get_value_name () const
-{
-  return value_name;
-}
-
-void MEAL::ScalarValue::set_value_name (const string& name)
-{
-  value_name = name;
+  return value;
 }
 
 //! Return the value (and gradient, if requested) of the function
 void MEAL::ScalarValue::calculate (double& result, std::vector<double>* grad)
 {
-  result = get_param(0);
+  result = value;
 
-  if (verbose) 
-    cerr << "MEAL::ScalarValue::calculate result\n"
-         "   " << result << endl;
- 
-  if (!grad)
-    return;
-
-  grad->resize (1);
-  (*grad)[0] = 1.0;
-
-  if (verbose)  {
-    cerr << "MEAL::ScalarValue::calculate gradient" << endl;
-    for (unsigned i=0; i<grad->size(); i++)
-      cerr << "   " << i << ":" << get_infit(i) << "=" << (*grad)[i] << endl;
-  }
-
+  if (grad)
+    grad->resize (0);
 }
-

@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/RotatingVectorModel.h,v $
-   $Revision: 1.2 $
-   $Date: 2005/04/06 20:23:36 $
+   $Revision: 1.3 $
+   $Date: 2005/04/24 01:11:19 $
    $Author: straten $ */
 
 #ifndef __RotatingVectorModel_H
@@ -13,7 +13,7 @@
 
 namespace MEAL {
 
-  class ScalarValue;
+  class ScalarParameter;
 
   //! The Rotating Vector Model (RVM) of Radhakrishnan & Cooke
   /*! The abscissa to this model is the pulsar rotational phase in radians */
@@ -69,10 +69,10 @@ namespace MEAL {
 
   private:
 
-    ScalarValue* reference_position_angle;
-    ScalarValue* line_of_sight;
-    ScalarValue* magnetic_axis;
-    ScalarValue* magnetic_meridian;
+    ScalarParameter* reference_position_angle;
+    ScalarParameter* line_of_sight;
+    ScalarParameter* magnetic_axis;
+    ScalarParameter* magnetic_meridian;
 
     void calculate (double&, std::vector<double>*) {}
     void init ();

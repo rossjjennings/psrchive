@@ -1,5 +1,4 @@
 #include "Calibration/Instrument.h"
-// #include "Calibration/ScalarValue.h"
 #include "Calibration/SingleAxis.h"
 #include "Calibration/Feed.h"
 
@@ -139,7 +138,7 @@ void Calibration::Instrument::equal_ellipticities ()
   if (ellipticities)
     return;
 
-  ellipticities = new MEAL::ScalarValue;
+  ellipticities = new MEAL::ScalarParameter;
   chain->set_constraint (0, ellipticities);
   chain->set_constraint (2, ellipticities);
 }
@@ -149,7 +148,7 @@ void Calibration::Instrument::equal_orientations ()
   if (orientations)
     return;
 
-  orientations = new MEAL::ScalarValue;
+  orientations = new MEAL::ScalarParameter;
   chain->set_constraint (0, orientations);
   chain->set_constraint (2, orientations);
 }

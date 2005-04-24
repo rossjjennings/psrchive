@@ -1,5 +1,5 @@
 #include "MEAL/ScalarMath.h"
-#include "MEAL/ScalarValue.h"
+#include "MEAL/ScalarParameter.h"
 
 using namespace std;
 
@@ -16,8 +16,8 @@ int main (int argc, char** argv) try {
   Estimate<double> y (-0.5, 0.01);
   Estimate<double> z1, z2;
 
-  MEAL::ScalarMath xp = *(new MEAL::ScalarValue (x));
-  MEAL::ScalarMath yp = *(new MEAL::ScalarValue (y));
+  MEAL::ScalarMath xp = *(new MEAL::ScalarParameter (x));
+  MEAL::ScalarMath yp = *(new MEAL::ScalarParameter (y));
   MEAL::ScalarMath result;
 
   cerr << "\nTesting with:" << endl;

@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/Instrument.h,v $
-   $Revision: 1.1 $
-   $Date: 2004/11/22 20:45:59 $
+   $Revision: 1.2 $
+   $Date: 2005/04/24 01:11:19 $
    $Author: straten $ */
 
 #ifndef __CalibrationInstrument_H
@@ -11,7 +11,7 @@
 #include "MEAL/ProductRule.h"
 #include "MEAL/ChainRule.h"
 #include "MEAL/Complex2.h"
-#include "MEAL/ScalarValue.h"
+#include "MEAL/ScalarParameter.h"
 
 #include "Estimate.h"
 #include "Stokes.h"
@@ -105,11 +105,11 @@ namespace Calibration {
     //! ChainRule used to bind Feed parameters
     Reference::To< MEAL::ChainRule<MEAL::Complex2> > chain;
 
-    //! ScalarValue used to bind ellipticities
-    Reference::To<MEAL::ScalarValue> ellipticities;
+    //! ScalarParameter used to bind ellipticities
+    Reference::To<MEAL::ScalarParameter> ellipticities;
 
-    //! ScalarValue used to bind orientations
-    Reference::To<MEAL::ScalarValue> orientations;
+    //! ScalarParameter used to bind orientations
+    Reference::To<MEAL::ScalarParameter> orientations;
 
   private:
 

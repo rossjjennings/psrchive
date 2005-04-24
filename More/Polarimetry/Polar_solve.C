@@ -19,7 +19,7 @@ void MEAL::Polar::solve (Jones< Estimate<double> >& j)
 #include "MEAL/Polar.h"
 
 #include "MEAL/ScalarMath.h"
-#include "MEAL/ScalarValue.h"
+#include "MEAL/ScalarParameter.h"
 
 #include "Pauli.h"
 
@@ -29,8 +29,8 @@ complex<MEAL::ScalarMath>
 ComplexScalar (const complex< Estimate<double> >& z)
 {
   return complex<MEAL::ScalarMath>
-    ( *(new MEAL::ScalarValue( z.real() )),
-      *(new MEAL::ScalarValue( z.imag() )) );
+    ( *(new MEAL::ScalarParameter( z.real() )),
+      *(new MEAL::ScalarParameter( z.imag() )) );
 }
 
 //! Polar decompose the Jones matrix

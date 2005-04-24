@@ -1,5 +1,5 @@
 #include "MEAL/NormalizeStokes.h"
-#include "MEAL/ScalarValue.h"
+#include "MEAL/ScalarParameter.h"
 #include "MEAL/ScalarMath.h"
 
 void MEAL::NormalizeStokes::init ()
@@ -7,7 +7,7 @@ void MEAL::NormalizeStokes::init ()
   unsigned ipol = 0;
 
   for (ipol=0; ipol<input.size(); ipol++)
-    input[ipol] = *(new MEAL::ScalarValue);
+    input[ipol] = *(new MEAL::ScalarParameter);
 
   MEAL::ScalarMath invariant = sqrt( det(input) );
 

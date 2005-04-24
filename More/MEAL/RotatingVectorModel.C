@@ -1,6 +1,6 @@
 #include "MEAL/RotatingVectorModel.h"
 #include "MEAL/ScalarMath.h"
-#include "MEAL/ScalarValue.h"
+#include "MEAL/ScalarParameter.h"
 #include "MEAL/ScalarArgument.h"
 
 using namespace std;
@@ -9,10 +9,10 @@ void MEAL::RotatingVectorModel::init ()
 {
   ScalarArgument* argument = new ScalarArgument; 
 
-  reference_position_angle = new ScalarValue;
-  line_of_sight = new ScalarValue;
-  magnetic_axis = new ScalarValue;
-  magnetic_meridian = new ScalarValue;
+  reference_position_angle = new ScalarParameter;
+  line_of_sight = new ScalarParameter;
+  magnetic_axis = new ScalarParameter;
+  magnetic_meridian = new ScalarParameter;
 
   ScalarMath longitude = *argument - *magnetic_meridian;
 

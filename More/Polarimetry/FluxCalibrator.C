@@ -6,7 +6,7 @@
 #include "Pulsar/Profile.h"
 
 #include "MEAL/ScalarMath.h"
-#include "MEAL/ScalarValue.h"
+#include "MEAL/ScalarParameter.h"
 #include "MEAL/ScalarConstant.h"
 
 #include "Error.h"
@@ -365,8 +365,8 @@ try {
   unsigned good_channels = 0;
 
   // use the ScalarMath class to calculate the variances
-  MEAL::ScalarValue ratio_on;
-  MEAL::ScalarValue ratio_off;
+  MEAL::ScalarParameter ratio_on;
+  MEAL::ScalarParameter ratio_off;
   MEAL::ScalarConstant unity (1.0);
 
   MEAL::ScalarMath S_cal = unity / (unity/ratio_on - unity/ratio_off);

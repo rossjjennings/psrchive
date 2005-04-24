@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/ScalarValue.h,v $
-   $Revision: 1.4 $
-   $Date: 2005/04/06 20:23:36 $
+   $Revision: 1.5 $
+   $Date: 2005/04/24 01:11:19 $
    $Author: straten $ */
 
 #ifndef __ScalarValue_H
@@ -12,22 +12,19 @@
 
 namespace MEAL {
 
-  //! Represents a scalar value, \f$ x \f$
+  //! Represents a scalar value with no parameters
   class ScalarValue : public Scalar {
 
   public:
 
     //! Default constructor
-    ScalarValue (Estimate<double> value = 1.0);
+    ScalarValue (double value = 1.0);
 
-    void set_value (const Estimate<double>& value);
-    Estimate<double> get_value () const;
+    //! Set the value
+    void set_value (double value);
 
-    //! Get the name of the parameter
-    std::string get_value_name () const;
-
-    //! Set the name of the parameter
-    void set_value_name (const std::string& name);
+    //! Get the value
+    double get_value () const;
 
     // ///////////////////////////////////////////////////////////////////
     //
@@ -40,21 +37,14 @@ namespace MEAL {
 
   protected:
 
-    // ///////////////////////////////////////////////////////////////////
-    //
-    // Optimized implementation
-    //
-    // ///////////////////////////////////////////////////////////////////
-
     //! Return the value (and gradient, if requested) of the function
     void calculate (double& x, std::vector<double>* grad=0);
 
-    //! The name of the value
-    std::string value_name;
+    //! The value
+    double value;
 
   };
 
 }
 
 #endif
-

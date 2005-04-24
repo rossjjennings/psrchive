@@ -1,7 +1,7 @@
 #include "Calibration/SingleAxisSolver.h"
 #include "Calibration/SingleAxis.h"
 #include "MEAL/ScalarMath.h"
-#include "MEAL/ScalarValue.h"
+#include "MEAL/ScalarParameter.h"
 
 #include "Pauli.h"
 #include "Error.h"
@@ -68,12 +68,12 @@ void Calibration::SingleAxisSolver::solve (SingleAxis* model)
 void Calibration::SingleAxisSolver::init ()
 {
   for (unsigned ipol=0; ipol<input.size(); ipol++) {
-    input[ipol]  = *(new MEAL::ScalarValue);
-    output[ipol] = *(new MEAL::ScalarValue);
+    input[ipol]  = *(new MEAL::ScalarParameter);
+    output[ipol] = *(new MEAL::ScalarParameter);
   }
 
   for (unsigned i=0; i<3; i++)
-    axis[i] = *(new MEAL::ScalarValue);
+    axis[i] = *(new MEAL::ScalarParameter);
 
   // decompose the input unit vector
 

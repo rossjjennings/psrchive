@@ -1,5 +1,5 @@
 #include "MEAL/ScalarMath.h"
-#include "MEAL/ScalarValue.h"
+#include "MEAL/ScalarParameter.h"
 #include "MEAL/ScalarRoot.h"
 #include "MEAL/ScalarSine.h"
 #include "MEAL/ScalarCosine.h"
@@ -22,12 +22,12 @@
 
 MEAL::ScalarMath::ScalarMath (const Estimate<double>& value)
 {
-  expression = new ScalarValue (value);
+  expression = new ScalarParameter (value);
 }
     
 MEAL::ScalarMath::ScalarMath (double value)
 {
-  expression = new ScalarValue (value);
+  expression = new ScalarParameter (value);
 }
 
 MEAL::ScalarMath::ScalarMath (const ScalarMath& s)
