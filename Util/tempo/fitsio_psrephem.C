@@ -37,8 +37,8 @@ char* eph_tform (int ephind);
   \post fptr will be left set to the PSREPHEM hdu
 */
 
-void psrephem::fits_map (fitsfile* fptr, vector<int>& ephind, int& maxstrlen)
-  const
+void
+psrephem::fits_map (fitsfile* fptr, vector<int>& ephind, int& maxstrlen) const
 {
   int status = 0;          // status returned by FITSIO routines
 
@@ -119,8 +119,8 @@ void psrephem::fits_map (fitsfile* fptr, vector<int>& ephind, int& maxstrlen)
     //
     ephind[icol] = -1;
 
-    for (int ieph=0; ieph<EPH_NUM_KEYS; ieph++) {
-      
+    for (int ieph=0; ieph<EPH_NUM_KEYS; ieph++)
+
       if (parstr == parmNames[ieph]) {
 
 	// match found ... 
@@ -139,8 +139,12 @@ void psrephem::fits_map (fitsfile* fptr, vector<int>& ephind, int& maxstrlen)
 	  maxstrlen = repeat;
 	
 	break;
+
       }
-    }
+
+    if (ephind[icol] == -1)
+      cerr << "psrephem::fits_map unrecognized parameter='" << parstr << "'"
+           << endl;
 
   }
 
@@ -226,7 +230,7 @@ void psrephem::load (fitsfile* fptr, long row)
 	double nul = FP_QNAN;
 	#else
 	// See: http://www.dbforums.com/archives/t317177.html
-	// The nan() function doesn't seem to exist for icc compiler but this works
+	// The nan() function doesn't seem to exist for icc compiler
 	double nul = strtod("NAN(n-charsequence)", (char**) NULL);
 	#endif
 	
@@ -238,7 +242,8 @@ void psrephem::load (fitsfile* fptr, long row)
 
 	if (verbose)
 	  cerr << "psrephem::load double:'" << value_double[ieph] <<
-		"' in column " << icol+1 << " (" << parmNames[ieph] << ")" << endl;
+		"' in column " << icol+1 << " (" << parmNames[ieph] << ")"
+               << endl;
 
 	if (ieph == EPH_F) {
 	  // special case for F: given in mHz
@@ -315,7 +320,7 @@ void psrephem::load (fitsfile* fptr, long row)
 	double nul = FP_QNAN;
 	#else
 	// See: http://www.dbforums.com/archives/t317177.html
-	// The nan() function doesn't seem to exist for icc compiler but this works
+	// The nan() function doesn't seem to exist for icc compiler
 	double nul = strtod("NAN(n-charsequence)", (char**) NULL);
 	#endif
 
@@ -353,7 +358,8 @@ void psrephem::load (fitsfile* fptr, long row)
 
         if (verbose)
           cerr << "psrephem::load integer:'" << value_integer[ieph] <<
-                "' in column " << icol+1 << " (" << parmNames[ieph] << ")" << endl;
+                "' in column " << icol+1 << " (" << parmNames[ieph] << ")" 
+               << endl;
 
 	break;
       }
@@ -479,7 +485,8 @@ void psrephem::unload (fitsfile* fptr, long row) const
       fits_write_col_null (fptr, icol+1, row, firstelem, onelement, &status);
       if (status)
 	throw FITSError (status, "psrephem::unload",
-          "fits_write_col_null (col=%d=%s, row=%d)", icol+1, parmNames[ieph], row);
+          "fits_write_col_null (col=%d=%s, row=%d)",
+          icol+1, parmNames[ieph], row);
 
       continue;
 
