@@ -11,20 +11,22 @@
 
 */
 
-#include <iostream>
-#include <vector>
-
-#include <qapplication.h>
-#include <qlayout.h>
-#include <qmessagebox.h>
-#include <qpushbutton.h>
-#include <qmenubar.h>
 
 #include "qt_editParams.h"
 #include "qt_toglParams.h"
 #include "qt_fileParams.h"
 #include "qtools.h"
 #include "psr_cpp.h"
+
+#include <qapplication.h>
+#include <qlayout.h>
+#include <qmessagebox.h>
+#include <qpushbutton.h>
+#include <qmenubar.h>
+#include <qvbox.h>
+
+#include <iostream>
+#include <vector>
 
 // //////////////////////////////////////////////////////////////////////////
 //
