@@ -8,8 +8,8 @@
 /*! Returns the centre phase of the region with minimum mean
   \param duty_cycle width of the region over which the mean is calculated
  */
-float Pulsar::Profile::find_min_phase (float duty_cycle) const
-{
+float Pulsar::Profile::find_min_phase (float duty_cycle) const try {
+
   if (verbose)
     cerr << "Pulsar::Profile::find_min_phase" << endl;
 
@@ -18,6 +18,10 @@ float Pulsar::Profile::find_min_phase (float duty_cycle) const
   mean.set_find_minimum ();
   return mean.find_phase (nbin, amps);
 }
+catch (Error& error) {
+  throw error += "Pulsar::Profile::find_min_phase";
+}
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -26,8 +30,8 @@ float Pulsar::Profile::find_min_phase (float duty_cycle) const
 /*! Returns the centre phase of the region with maximum mean
   \param duty_cycle width of the region over which the mean is calculated
  */
-float Pulsar::Profile::find_max_phase (float duty_cycle) const
-{
+float Pulsar::Profile::find_max_phase (float duty_cycle) const try {
+
   if (verbose)
     cerr << "Pulsar::Profile::find_max_phase" << endl;
   
@@ -36,3 +40,7 @@ float Pulsar::Profile::find_max_phase (float duty_cycle) const
   mean.set_find_maximum ();
   return mean.find_phase (nbin, amps);
 }
+catch (Error& error) {
+  throw error += "Pulsar::Profile::find_max_phase";
+}
+
