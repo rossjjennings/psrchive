@@ -14,7 +14,7 @@
 #include <vector>
 #include <stdio.h>
 
-#include <qvbox.h>
+#include <qhbox.h>
 #include <qlabel.h>
 
 //#include "psrephem.h"
@@ -22,9 +22,10 @@
 class qt_psrParameter;  // implementation detail defined in qt_psrParameter.h
 class psrParameter;     // base class implementing item of psrephem
 class psrephem;         // class which this class reflects graphically
+class QVBox;
 
-class qt_psrephem : public QVBox
-{ 
+class qt_psrephem : public QHBox
+{
   Q_OBJECT
     
   friend class qt_toglParamsem;
@@ -72,9 +73,14 @@ class qt_psrephem : public QVBox
   void hide_item (int ephind);
 
  private:
+
   void commonConstruct ();
+
   QLabel* psrname;
 
+  QVBox* glitch;
+
+  unsigned shown_glitch_parameters;
 
 };
 

@@ -1,4 +1,3 @@
-#include <iostream>
 
 #include "psrephem.h"
 #include "ephio.h"
@@ -7,6 +6,9 @@
 #include "qt_psrephem.h"
 #include "qt_psrParameter.h"
 #include "qtools.h"
+
+#include <qvbox.h>
+#include <iostream>
 
 // //////////////////////////////////////////////////////////////////////////
 //
@@ -18,15 +20,15 @@
 bool qt_psrephem::verbose = false;
 
 qt_psrephem::qt_psrephem (const psrephem& eph,
-			    QWidget* parent, const char* name) :
-  QVBox (parent, name)
+			  QWidget* parent, const char* name) :
+  QHBox (parent, name)
 {
   commonConstruct ();
   set_psrephem (eph);
 }
 
 qt_psrephem::qt_psrephem (QWidget* parent, const char* name) :
-  QVBox (parent, name)
+  QHBox (parent, name)
 {
   commonConstruct ();
 }
@@ -38,15 +40,29 @@ void qt_psrephem::commonConstruct ()
   if (verbose)
     cerr << "qt_psrephem::commonConstruct" << endl;
 
-  psrname = new QLabel ("no ephemeris loaded", this);
+  QVBox* most = new QVBox (this);
+  psrname = new QLabel ("no ephemeris loaded", most);
   psrname->setAlignment (AlignHCenter | AlignTop);
+
+  glitch = new QVBox (this);
+  QLabel* glabel = new QLabel ("Glitch Parameters", glitch);
+  glabel->setAlignment (AlignHCenter | AlignTop);
+
+  shown_glitch_parameters = 0;
+  glitch->hide();
 
   for (int iparm=0; iparm < EPH_NUM_KEYS; iparm++) {
 
     if (verbose) cerr << "qt_psrephem::commonConstruct " << iparm << "/"
 		      << EPH_NUM_KEYS << "[" << parmNames[iparm] << "]" <<endl;
 
-    qt_psrParameter* ephitem = qt_psrParameter::factory (iparm, this);
+    qt_psrParameter* ephitem = 0;
+
+    if (strncmp(parmNames[iparm], "GL", 2) == 0)
+      ephitem = qt_psrParameter::factory (iparm, glitch);
+    else
+      ephitem = qt_psrParameter::factory (iparm, most);
+
     if (ephitem == NULL)
       throw ("bad_alloc");
 
@@ -57,6 +73,7 @@ void qt_psrephem::commonConstruct ()
 
   if (verbose)
     cerr << "qt_psrephem::commonConstruct prepare fonts" << endl;
+
   max_width = psrname->fontMetrics().maxWidth() * max_chars;
   psrname->setFixedHeight (psrname->fontMetrics().height());
   psrname->setFixedWidth (max_width);
@@ -70,9 +87,8 @@ qt_psrephem::~qt_psrephem ()
 
 bool qt_psrephem::item_shown (int ephind)
 {
-  if (params[ephind]->isVisible()) {
+  if (params[ephind]->isVisible())
     return true;
-  }
   
   return false;
 }
@@ -98,31 +114,53 @@ void qt_psrephem::show_item (int ephind)
       cerr << "qt_psrephem::show_item already visible:" << ephind << endl;
     return;
   }
+
+  if (strncmp(parmNames[ephind], "GL", 2) == 0)
+    shown_glitch_parameters ++;
+
+  if (shown_glitch_parameters == 1)
+    glitch->show();
+
   params[ephind]->show();
   emit item_shown (ephind, true);
+
   updateGeometry();
 
   if (qt_psrephem::verbose)
     cerr << "qt_psrephem::show_item return" << endl;
-  return;
 }
 
 void qt_psrephem::hide_item (int ephind)
 {
+  if (!params[ephind]->isVisible()) {
+    if (qt_psrephem::verbose)
+      cerr << "qt_psrephem::hide_item already hidden:" << ephind << endl;
+    return;
+  }
+
+  if (strncmp(parmNames[ephind], "GL", 2) == 0)
+    shown_glitch_parameters --;
+
+  if (shown_glitch_parameters == 0)
+    glitch->hide();
+
   params[ephind]->hide();
   emit item_shown (ephind, false);
+
   updateGeometry();
+
+  if (qt_psrephem::verbose)
+    cerr << "qt_psrephem::hide_item return" << endl;
 }
 
 // //////////////////////////////////////////////////////////////////////////
 // slot allows psrParameters to be toggled in and out of the picture
-void qt_psrephem::show_item (int ephind, bool shown)
+void qt_psrephem::show_item (int ephind, bool show)
 {
-  if (shown && !params[ephind]->isVisible())
-    params[ephind]->show ();
-  else if (!shown && params[ephind]->isVisible())
-    params[ephind]->hide ();
-  updateGeometry ();
+  if (show)
+    show_item (ephind);
+  else
+    hide_item (ephind);
 }
 
 QSize qt_psrephem::sizeHint () const
@@ -136,6 +174,9 @@ QSize qt_psrephem::sizeHint () const
       if (params[iparm]->sizeHint().width() > mwidth)
 	mwidth = params[iparm]->sizeHint().width();
     }
+
+  if (shown_glitch_parameters)
+    mwidth *= 2;
 
   if (verbose)
     cerr << "qt_psrephem::sizeHint = " << QSize (mwidth, height) << endl;
