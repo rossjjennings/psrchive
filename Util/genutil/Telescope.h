@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Attic/Telescope.h,v $
-   $Revision: 1.3 $
-   $Date: 2004/01/22 02:06:46 $
-   $Author: mbailes $ */
+   $Revision: 1.4 $
+   $Date: 2005/04/26 13:07:29 $
+   $Author: straten $ */
 
 #ifndef __Telescope_h
 #define __Telescope_h
@@ -17,6 +17,7 @@ namespace Telescope {
   const char Arecibo = '3';
   const char Hobart = '4';
   const char GreenBank = '1';
+  const char WSRT = 'i';
 
   //! Convert a telescope name to a code
   char code (const char* telescope_name);
