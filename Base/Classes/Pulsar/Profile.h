@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Profile.h,v $
-   $Revision: 1.82 $
-   $Date: 2005/03/30 13:19:51 $
+   $Revision: 1.83 $
+   $Date: 2005/04/27 10:09:17 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Profile_h
@@ -111,7 +111,7 @@ namespace Pulsar {
     virtual void offset (double offset);
 
     //! rotates the profile by phase (in turns)
-    virtual void rotate (double phase);
+    virtual void rotate_phase (double phase);
 
     //! set all amplitudes to zero
     virtual void zero();
