@@ -855,6 +855,42 @@ void Rhythm::advanceT0 () {
   }
 }
 
+void Rhythm::advancePEPOCH () {
+
+  int temp = 0;
+  
+  temp = QInputDialog::getInteger("Rhythm Advance Frequency Epoch",
+				  "Enter the number of days to advance: ");
+  if (temp <= 0)
+    return;
+
+  int step = 1;
+
+  step = QInputDialog::getInteger("Rhythm Advance Frequency Epoch",
+				 "Enter the step size (in days): ");
+
+  if (step <= 0)
+    return;
+
+  psrephem eph;
+
+  for (int i = 0; i < (temp/step); i++) {
+    
+    fitpopup->get_psrephem(eph);
+    
+    MJD current = MJD (eph.value_integer[EPH_PEPOCH],
+		       eph.value_double [EPH_PEPOCH]);
+    
+    current += (double)step * 86400.0;
+    
+    eph.value_integer[EPH_PEPOCH] = current.intday();
+    eph.value_double[EPH_PEPOCH] = current.fracday();
+    
+    fitpopup->set_psrephem(eph);
+    fit();
+  }
+}
+
 void Rhythm::setClassVerbose (bool verbose)
 {
   qt_editParams::verbose = verbose;

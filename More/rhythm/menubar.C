@@ -49,6 +49,8 @@ void Rhythm::menubarConstruct ()
   strideFitID = tempo->insertItem( "Stride Fit", this, SLOT( stride_fit() ));
   tempo->setItemEnabled (strideFitID, false);
   advanceT0ID = tempo->insertItem( "Advance T0", this, SLOT( advanceT0() ));
+  advancePEPOCHID = tempo->insertItem( "Advance PEPOCH", this, 
+				       SLOT( advancePEPOCH() ));
   dispID = tempo->insertItem( "Display Parameters", this, SLOT( togledit() ));
   tempo->setItemEnabled (dispID, false);
 

@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/rhythm/rhythm.h,v $
-   $Revision: 1.49 $
-   $Date: 2005/04/06 01:46:49 $
+   $Revision: 1.50 $
+   $Date: 2005/04/27 10:34:11 $
    $Author: ahotan $ */
 
 // //////////////////////////////////////////////////////////////////////////
@@ -224,6 +224,7 @@ class Rhythm : public QMainWindow
   int saveParmsID;
   int strideFitID;        // ID of the 'Stride Fit' menu item
   int advanceT0ID;        // ID of the 'Advance T0' menu item
+  int advancePEPOCHID;    // ID of the 'Advance PEPOCH' menu item
 
   bool autofit;           // fit whenever TOAs or TEMPO Parameters are loaded
   bool weights;           // use TEMPO mode 1
@@ -280,6 +281,7 @@ class Rhythm : public QMainWindow
   void set_std_tempo();
   void stride_fit();
   void advanceT0();
+  void advancePEPOCH();
 
   // Options->Verbosity menu callback
   void setVerbosity (int id);
