@@ -53,7 +53,7 @@ float Pulsar::StandardSNR::get_morph_snr (const Profile* profile)
   Reference::To<Pulsar::Profile> diff = 
     pcopy->morphological_difference(*scopy, scale, shift);
 
-  pcopy->rotate(shift);
+  pcopy->rotate_phase (shift);
 
   double mean    = 0.0;
   double var     = 0.0;

@@ -21,7 +21,7 @@ bool Pulsar::Profile::rotate_in_phase_domain = false;
   \f$t\f$ is the original start time, \f$\phi\f$ is equal to phase,
   and \f$P\f$ is the period at the time of folding.
 */
-void Pulsar::Profile::rotate (double phase)
+void Pulsar::Profile::rotate_phase (double phase)
 {
   if (verbose)
     cerr << "Pulsar::Profile::rotate phase=" << phase 

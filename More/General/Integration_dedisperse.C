@@ -114,7 +114,7 @@ try {
     double delay = t0 + dispersion_delay (dm, f0, frequency);
 
     for (unsigned ipol=0; ipol < get_npol(); ipol++)
-      profiles[ipol][jchan] -> rotate (delay / pfold);
+      profiles[ipol][jchan] -> rotate_phase (delay / pfold);
 
   }
 

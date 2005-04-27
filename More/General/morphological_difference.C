@@ -104,7 +104,7 @@ Pulsar::Profile::morphological_difference (const Profile& profile,
   
   // Perform the rotation in phase
 
-  temp1->rotate(phase);
+  temp1->rotate_phase (phase);
   shift = phase;
   
   float minphs = 0.0;
