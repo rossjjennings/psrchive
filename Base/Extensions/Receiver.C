@@ -160,10 +160,12 @@ Angle Pulsar::Receiver::get_calibrator_offset () const
   return get<Receiver_Linear>()->get_calibrator_offset ();
 }
 
+static std::string match_indent = "\n\t";
+
 bool Pulsar::Receiver::match (const Receiver* receiver, string& reason) const
 {
   if (!receiver) {
-    reason += Archive::match_indent + "no Receiver";
+    reason += match_indent + "no Receiver";
     return false;
   }
 
@@ -171,7 +173,7 @@ bool Pulsar::Receiver::match (const Receiver* receiver, string& reason) const
 
   if (get_basis() != receiver->get_basis()) {
     result = false;
-    reason += Archive::match_indent + "basis mismatch: "
+    reason += match_indent + "basis mismatch: "
       + Signal::Basis2string(get_basis()) + " != " 
       + Signal::Basis2string(receiver->get_basis());
   }
@@ -185,20 +187,13 @@ Jones<double> Pulsar::Receiver::get_hand_transformation () const
   if ( feed_corrected || get_right_handed() )
     return 1.0;
 
-  if (Archive::verbose == 3)
-    cerr << "Pulsar::Receiver::get_transformation left-handed basis" << endl;
+  if (Archive::verbose > 1)
+    cerr << "Pulsar::Receiver::get_hand_transformation left-handed" << endl;
 
-  /* rotate the basis by 180 degrees about the Stokes 2 axis
-     in the linear basis: about the Stokes U axis
-     in the circular basis: about the Stokes Q axis
-     3-vector space is a subset of Stokes 4-vector space
-     Jones rotations effect twice the angle in Poincare space */
-
-  MEAL::Rotation rotation ( Vector<float, 3>::basis(1) );
-  rotation.set_phi ( 0.5 * M_PI );
-
-  return rotation.evaluate();
-
+  /* Switch the two receptors.  Note that det(J)=1. */
+  complex<double> i (0,1);
+  return Jones<double> (0, i,
+                        i, 0);
 }
 
 //! Return the feed correction matrix
@@ -211,8 +206,9 @@ Jones<double> Pulsar::Receiver::get_transformation () const
 
   Pauli::basis.set_basis( (Basis<double>::Type)get_basis() );
 
-  if (Archive::verbose == 3)
-    cerr << "Pulsar::Receiver::get_transformation orientation="
+  if (Archive::verbose > 1)
+    cerr << "Pulsar::Receiver::get_transformation basis="
+         << Signal::basis_string(get_basis()) << " orientation="
          << get_orientation().getDegrees() << " deg" << endl;
 
   // rotate the basis about the Stokes V axis
@@ -220,7 +216,9 @@ Jones<double> Pulsar::Receiver::get_transformation () const
 
   // the sign of this rotation may depend on handedness
   rotation.set_phi ( -get_orientation().getRadians() );
-    
+
+cerr << "Orientation xform=" << rotation.evaluate() << endl;
+
   xform *= rotation.evaluate();
 
   return xform;
