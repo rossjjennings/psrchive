@@ -35,11 +35,13 @@ void usage ()
     " -C         plot only calibrator Stokes\n"
     " -D dev     specify PGPLOT device\n"
     " -f         treat all archives as members of a fluxcal observation\n"
-    " -q         use the single-axis model\n"
+    " -p         use the polar model\n"
     " -P         produce publication-quality plots\n"
     " -2 m or d  multiply or divide cross products by factor of two\n"
        << endl;
 }
+
+void plotJones (Pulsar::PolnCalibrator* calibrator, unsigned interpolate);
 
 int main (int argc, char** argv) 
 {
@@ -63,6 +65,10 @@ int main (int argc, char** argv)
 
   bool plot_calibrator_stokes = false;
 
+  unsigned test_interpolation = 0;
+
+  bool plot_calibrator_stokes = false;
+
   //
   float cross_scale_factor = 1.0;
 
@@ -71,7 +77,7 @@ int main (int argc, char** argv)
   // verbosity flag
   bool verbose = false;
   char c;
-  while ((c = getopt(argc, argv, "2:a:c:CD:hfMPqvV")) != -1)  {
+  while ((c = getopt(argc, argv, "2:a:c:CD:hi:fMPpqvV")) != -1)  {
 
     switch (c)  {
 
@@ -126,12 +132,20 @@ int main (int argc, char** argv)
       fluxcal = new Pulsar::FluxCalibrator;
       break;
 
+    case 'i':
+      test_interpolation = atoi(optarg);
+      break;
+
     case 'M':
       metafile = optarg;
       break;
 
     case 'P':
       publication = true;
+      break;
+
+    case 'p':
+      single_axis = false;
       break;
 
     case 'V':
@@ -234,6 +248,9 @@ int main (int argc, char** argv)
 	plotter.plot (calibrator);
 
         calibrator_stokes = 0;
+
+	if (test_interpolation)
+	  plotJones (calibrator,test_interpolation);
 
       }
       else
