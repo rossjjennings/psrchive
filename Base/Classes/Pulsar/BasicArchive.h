@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/BasicArchive.h,v $
-   $Revision: 1.30 $
-   $Date: 2004/08/05 09:19:14 $
+   $Revision: 1.31 $
+   $Date: 2005/04/27 10:09:11 $
    $Author: straten $ */
 
 #ifndef __BasicArchive_h
@@ -35,7 +35,7 @@ namespace Pulsar {
 
     //! copy constructor, with option to select only some integrations
     BasicArchive (const BasicArchive& archive,
-		  const vector<unsigned>& selected_subints = none_selected);
+		  const vector<unsigned>& selected_subints);
 
     //! copy constructor
     const BasicArchive& operator = (const BasicArchive& archive);
