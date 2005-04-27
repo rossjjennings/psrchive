@@ -198,7 +198,8 @@ vector<float> Pulsar::Profile::get_weighted_amps () const
 // Pulsar::Profile::dedisperse
 //
 /*!
-  A convenience interface to Profile::rotate.  Rotates the profile in order
+  A convenience interface to Profile::rotate_phase.  
+  Rotates the profile in order
   to remove the dispersion delay with respect to a reference frequency.
   \param dm the dispersion measure (in \f${\rm pc\, cm}^{-3}\f$)
   \param ref_freq the reference frequency (in MHz)
@@ -215,7 +216,7 @@ void Pulsar::Profile::dedisperse (double dm, double ref_freq, double pfold)
   if (verbose)
     cerr << "Pulsar::Profile::dedisperse delay=" << delay*1e3 << " ms" << endl;
 
-  rotate (delay / pfold);
+  rotate_phase (delay / pfold);
 
 }
 
