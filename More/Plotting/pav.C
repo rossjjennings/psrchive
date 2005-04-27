@@ -1,5 +1,5 @@
 //
-// $Id: pav.C,v 1.95 2005/03/30 13:19:51 straten Exp $
+// $Id: pav.C,v 1.96 2005/04/27 10:08:55 straten Exp $
 //
 // The Pulsar Archive Viewer
 //
@@ -223,11 +223,12 @@ int main (int argc, char** argv)
   int c = 0;
   
   const char* args = 
-    "AaBb:CcDdEeFf:GgH:hI:iJjK:k:LlM:mN:nO:oP:pQq:Rr:Ss:Tt:UuVvwWXx:Yy:Zz:";
+    "AaBb:CcDdEeFf:GgH:hI:iJjK:k:LlM:mN:nO:oP:pQq:Rr:Ss:Tt:UuVvWwXx:Yy:Zz:";
 
   const int TOTAL = 1010;
   const int EXTRA = 1011;
   const int NBIN  = 1012;
+  const int FMAX  = 1013;
 
   static struct option long_options[] = {
     { "convert_binphsperi", 1, 0, 200 },
@@ -243,6 +244,7 @@ int main (int argc, char** argv)
     { "total",              no_argument,       0, TOTAL},
     { "extra",              required_argument, 0, EXTRA},
     { "nbin",               required_argument, 0, NBIN},
+    { "fmax",               required_argument, 0, FMAX},
     { 0, 0, 0, 0 }
   };
     
@@ -323,7 +325,7 @@ int main (int argc, char** argv)
       plotter.set_subint( atoi (optarg) );
       break;
     case 'i':
-      cout << "$Id: pav.C,v 1.95 2005/03/30 13:19:51 straten Exp $" << endl;
+      cout << "$Id: pav.C,v 1.96 2005/04/27 10:08:55 straten Exp $" << endl;
       return 0;
 
     case 'j':
@@ -608,8 +610,11 @@ int main (int argc, char** argv)
       filenames.push_back( optarg ); 
       breakup_archives.push_back( true); 
       break;
-    case NBIN: 
+    case NBIN:
       nbin_requested = atoi(optarg); 
+      break;
+    case FMAX:
+      plotter.set_y_max( atof(optarg) );
       break;
     default:
       cerr << "pav: unrecognized option" << endl;
