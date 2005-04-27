@@ -493,13 +493,21 @@ void Pulsar::Integration::rotate (double time)
   try {
     for (unsigned ipol=0; ipol<get_npol(); ipol++)
       for (unsigned ichan=0; ichan<get_nchan(); ichan++)
-	profiles[ipol][ichan] -> rotate (time/pfold);
+	profiles[ipol][ichan] -> rotate_phase (time/pfold);
 
     set_epoch (get_epoch() + time);
   }
   catch (Error& error) {
     throw error += "Integration::rotate";
   }
+}
+
+void Pulsar::Integration::rotate_phase (double phase)
+try {
+  rotate (phase * get_folding_period ());
+}
+catch (Error& error) {
+  throw error += "Integration::rotate_phase";
 }
 
 MJD Pulsar::Integration::get_start_time () const

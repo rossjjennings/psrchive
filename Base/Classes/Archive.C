@@ -502,6 +502,11 @@ void Pulsar::Archive::rotate (double time)
     get_Integration(isub) -> rotate (time);
 }
 
+void Pulsar::Archive::rotate_phase (double phase)
+{
+  for (unsigned isub=0; isub < get_nsubint(); isub++)
+    get_Integration(isub) -> rotate_phase (phase);
+}
 
 /*!  
   The dedisperse method removes the dispersive delay between

@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Integration.h,v $
-   $Revision: 1.69 $
-   $Date: 2004/12/30 11:04:01 $
-   $Author: ahotan $ */
+   $Revision: 1.70 $
+   $Date: 2005/04/27 10:08:46 $
+   $Author: straten $ */
 
 /*
   
@@ -414,6 +414,9 @@ namespace Pulsar {
     
     //! Rotate each profile by time (in seconds)
     virtual void rotate (double time);
+
+    //! Rotate each profile by phase
+    virtual void rotate_phase (double phase);
 
     //! Integrate profiles from neighbouring chans
     virtual void fscrunch (unsigned nscrunch = 0);
