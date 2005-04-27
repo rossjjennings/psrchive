@@ -67,8 +67,6 @@ int main (int argc, char** argv)
 
   unsigned test_interpolation = 0;
 
-  bool plot_calibrator_stokes = false;
-
   //
   float cross_scale_factor = 1.0;
 
