@@ -142,7 +142,7 @@ psrephem::fits_map (fitsfile* fptr, vector<int>& ephind, int& maxstrlen) const
 
       }
 
-    if (ephind[icol] == -1)
+    if (verbose && ephind[icol] == -1)
       cerr << "psrephem::fits_map unrecognized parameter='" << parstr << "'"
            << endl;
 
