@@ -27,60 +27,73 @@
 \section{Introduction}
 
 This is a quick reference for the Measurement and Error Analysis
-Library (MEAL), as defined within the {\tt MEAL} namespace.  These
-classes implement a general-purpose library for performing non-linear
-least-squares and error propagation.
+Library (MEAL).  The classes defined within the {\tt MEAL} namespace
+implement a general-purpose library for performing non-linear
+least-squares and first-order error propagation.
 
-\section{Function Behaviours}
+\section{Function Characteristics}
 
-All mathematical expressions are derived from the {\tt Function} base
-class.  A {\tt Function} may have an arbitrary number of variables;
-however, a distinction is made between parameters, ${\mbf a}=(a_0,
-a_1, ... , a_N)$ and independent variables, or arguments, ${\mbf
-x}=(x_0, x_1, ... , x_M)$.  Each {\tt Function} class defines an
-evaluation method that returns a result, $M({\mbf x},{\mbf a})$, and
-the partial derivatives of this result with respect to each of the
-parameters, $\partial M/\partial a_i$.
+A mathematical function or expression is characterized by its return
+type and input variables; a distinction is made between function
+parameters, ${\mbf a}=(a_0, a_1, ... , a_N)$ and independent
+variables, or arguments, ${\mbf x}=(x_0, x_1, ... , x_M)$.  Parameters
+are double-precision floating point values that can vary freely during
+modeling.  Arguments have arbitrary type and cannot be treated as free
+variables during modeling.
 
-Functionality is organized into three behaviours: parameter, argument,
-and evaluation.  These behaviours are represented by three base
-classes, each of which virtually inherits the {\tt Function} base
-class.  As each behaviour is mutually exclusive, derived classes can
-incorporate pre-defined behaviours by multiple inheritance.
+The parameter and argument access interface is defined by the {\tt
+Function} base class, and the return type is defined by {\em
+evaluation base classes} that inherit {\tt Function}.  The evaluation
+base classes define an {\tt evaluate} method that returns a result,
+$f({\mbf x},{\mbf a})$, and the partial derivatives of this result
+with respect to each of the parameters, $\partial f/\partial a_i$.
 
-\subsection{Parameter Behaviour}
+The behaviour of function expression classes is organized into
+three categories: Parameter, Argument, and Evaluation.  These
+behaviours are implemented by the children of three base classes, 
+each of which inherits the {\tt FunctionPolicy} base class.  
+The behaviour policies are mutually exclusive, and derived classes can 
+incorporate pre-defined behaviours by setting the appropriate 
+policy attribute.
 
-A {\tt Function} may have an arbitary number of parameters,
-$\mbf{a}=(a_0, a_1, ... , a_N)$.  The type of each parameter must be a
-scalar, and the {\tt Function} class currently implements
-double-precision floating point parameters.  Each parameter has an
-associated name, estimated variance, and a flag that indicates if the
-parameter is free or fixed.  The classes that implement the parameter
-management interface inherit the {\tt ParameterBehaviour} base class.
+\subsection{Parameter Policy}
 
-\subsection{Argument Behaviour}
+A function expression may have an arbitary number of scalar parameters,
+$\mbf{a}=(a_0, a_1, ... , a_N)$.  Each parameter has an associated
+name, estimated variance, and a flag that indicates if the parameter
+is free or fixed.  Parameter management and access is implemented by
+children of the {\tt ParameterPolicy} base class.
 
-A {\tt Function} may be further parameterized by an arbitrary number of
-independent variables, or arguments, ${\mbf x}=(x_0, x_1, ... , x_M)$.
-Unlike parameters, arguments have no specified type, no estimated
-variance, and can never be free.  Because they have no specified type,
-the interface between a {\tt Function} and its arguments is mediated
-through the {\tt Argument} and {\tt Argument::Value} abstract base
-classes.  Classes that may be parameterized by additional arguments
-inherit the {\tt ArgumentBehaviour} base class.
+\subsection{Argument Policy}
 
-\subsection{Evaluation Behaviour}
+A function expression may be further parameterized by an arbitrary number
+of independent variables, or arguments, ${\mbf x}=(x_0, x_1, ... ,
+x_M)$.  Unlike parameters, arguments have no specified type, no
+estimated variance, and can never be free.  Because they have no
+specified type, the interface between a {\tt Function} and its
+arguments is mediated through the {\tt Argument} and {\tt
+Argument::Value} abstract base classes.  Argument management and
+behaviour is implemented by children of the {\tt ArgumentPolicy} base
+class.
 
-The return type of a {\tt Function} is also unspecified in the base
-class.  Therefore, derived classes must inherit one of the children of
-the {\tt EvaluationBehaviour} base class.  There are currently two
-classes of children:
+\subsection{Evaluation Policy}
+
+The return type of a function expression is unspecified in the 
+{\tt Function} base class definition.  Therefore, derived classes must 
+inherit an {\em evaluation base class}.  The evaluation base classes are 
+children of the {\tt Function} base class that define an {\tt evaluate} method
+and an evaluation policy.  There are currently two evaluation base
+classes:
 \begin{itemize}
-\item {\tt Scalar} - returns a scalar value
-\item {\tt Complex2} - returns a complex $2\times2$ matrix
+\item {\tt Scalar} - returns a scalar (double-precision) value
+\item {\tt Complex2} - returns a $2\times2$ complex (double-precision) matrix
 \end{itemize}
-A number of evaluation behaviours have been implemented as
-templates, or Rules.
+In addition, a number of template classes, known as {\tt Rules},
+implement basic rules of calculus that may be used to simplify the
+computation of more complicated expressions and their partial
+derivatives.  There are currently two policies for dealing with the
+evaluation of a evaluation base-derived class: {\tt Cached} and {\tt
+NotCached}.
 
 \section{Modular Construction}
 
@@ -134,7 +147,7 @@ yields the output
 \begin{verbatim}
   Polar angle = (-0.287039 +/- 0.0189612)
 \end{verbatim}
-\newpage
+
 \noindent
 As with any native type, the {\tt ScalarMath} class can be used as a
 template argument, e.g.
@@ -152,3 +165,62 @@ enabling error propagation through increasingly complex expressions.
 
 \end{document}
 
+  \section model Function Components
+
+  All model components that inherit the MEAL::Function abstract
+  base class represent functions of an arbitrary number of variables.
+  A distinction is made between independent variables, or arguments,
+  \f${\bf x}=(x_0, x_1, ... , x_M)\f$, and model parameters, \f${\bf
+  a}=(a_0, a_1, ... , a_N)\f$.  Through use of the
+  MEAL::Argument and MEAL::Argument::Value abstract base
+  classes, model components may be constrained by one or more
+  independent variables of arbitrary type.  The model parameters,
+  \f${\bf a}\f$, represent double precision floating point values
+  that may need to be constrained by some fitting technique.  Function
+  classes should define an evaluation function that returns a result,
+  \f$M\f$, and the partial derivative of this result with respect to
+  each of the model parameters, \f$\partial M/\partial a_i\f$.  The
+  independent variables,\f$\bf x\f$, represent known values, such as
+  observing frequency and epoch, that may be used to further constrain
+  a model.
+
+  The MEAL::Function class does not define the type of value that
+  it represents.  This is defined by derived types, which must define
+  a type named Result and a method named evaluate:
+
+  virtual Result evaluate (std::vector<Result>* gradient = 0) const = 0;
+
+  The evaluate method returns a value of the type specified by Result
+  and, if a pointer to a vector of Result is passed as the first
+  argument, the vector will return the gradient of the return value
+  with respect to the model parameters.
+
+  The Return type and evaluate method are implemented by two main
+  classes of MEAL::Function derived components:
+
+  <UL> 
+  <LI> MEAL::Scalar - a scalar function, 
+  \f$f({\bf a}; {\bf x})\f$, such as the MEAL::Polynomial
+  <LI> MEAL::Complex2 - a complex 2x2 matrix function,
+  \f$J({\bf a}; {\bf x})\f$, such as the MEAL::Coherency matrix 
+  and the MEAL::Rotation transformation.
+  </UL>
+
+
+  \subsection calculus Partial Derivatives
+
+  A number of template classes may be used to simplify the modular
+  construction of more complicated functions.  These templates
+  implement the following basic rules of differentiation:
+
+  <UL> 
+
+  <LI> MEAL::ChainRule - an arbitrary function in which
+  one or more parameters is set equal to the ordinate of a 
+  MEAL::Scalar function
+
+  <LI> MEAL::BinaryRule - an associative binary operation, such
+  as the sum (MEAL::SumRule) or product
+  (MEAL::ProductRule).
+
+  </UL>
