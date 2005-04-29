@@ -7,13 +7,17 @@
 
 using namespace std;
 
+void MEAL::Polynomial::init ()
+{
+  x_0 = 0;
+  for (unsigned i=0; i<get_nparam(); i++)
+    parameters.set_param_name (i, "c_" + tostring(i));
+}
+
 MEAL::Polynomial::Polynomial (unsigned ncoef)
   : parameters (this, ncoef)
 {
-  x_0 = 0;
-
-  for (unsigned i=0; i<ncoef; i++)
-    parameters.set_param_name (i, "c_" + tostring(i));
+  init ();
 }
 
 //! Copy constructor

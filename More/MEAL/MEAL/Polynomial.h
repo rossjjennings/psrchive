@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Polynomial.h,v $
-   $Revision: 1.4 $
-   $Date: 2005/04/06 20:23:36 $
+   $Revision: 1.5 $
+   $Date: 2005/04/29 08:53:28 $
    $Author: straten $ */
 
 #ifndef __Polynomial_H
@@ -27,6 +27,15 @@ namespace MEAL {
 
     //! Assignment operator
     Polynomial& operator = (const Polynomial&);
+
+    //! Construct from array of polynomial coefficients
+    template<class T>
+    Polynomial (const std::vector<T>& coefs) : parameters (this, coefs.size())
+    {
+      init ();
+      for (unsigned ic=0; ic < coefs.size(); ic++)
+        set_param (ic, coefs[ic]);
+    }
 
     // ///////////////////////////////////////////////////////////////////
     //
@@ -55,6 +64,9 @@ namespace MEAL {
 
     //! Parameter policy
     Parameters parameters;
+
+    //! Initialization
+    void init ();
 
   };
 
