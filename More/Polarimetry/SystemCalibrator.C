@@ -30,11 +30,11 @@ Pulsar::SystemCalibrator::~SystemCalibrator ()
 
 //! Return the CalibratorStokes Extension
 Pulsar::CalibratorStokes* 
-Pulsar::SystemCalibrator::get_calibrator_stokes () const
+Pulsar::SystemCalibrator::get_CalibratorStokes () const
 {
   if (!calibrator_stokes)
     throw Error (InvalidState,
-		 "Pulsar::SystemCalibrator::get_calibrator_stokes",
+		 "Pulsar::SystemCalibrator::get_CalibratorStokes",
 		 "no CalibratorStokesExtension");
 
   return calibrator_stokes;
@@ -48,7 +48,7 @@ Pulsar::SystemCalibrator::new_solution (const string& archive_class) const
 
   try {
 
-    Reference::To<CalibratorStokes> stokes = get_calibrator_stokes();
+    Reference::To<CalibratorStokes> stokes = get_CalibratorStokes();
 
     Reference::To<Archive> output;
 

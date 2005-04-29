@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/SystemCalibrator.h,v $
-   $Revision: 1.3 $
-   $Date: 2004/12/27 14:21:56 $
+   $Revision: 1.4 $
+   $Date: 2005/04/29 12:41:01 $
    $Author: straten $ */
 
 #ifndef __Pulsar_SystemCalibrator_H
@@ -34,7 +34,7 @@ namespace Pulsar {
     virtual ~SystemCalibrator ();
 
     //! Return the CalibratorStokesExtension
-    virtual CalibratorStokes* get_calibrator_stokes () const;
+    virtual CalibratorStokes* get_CalibratorStokes () const;
 
     //! Return a Calibrator::new_solution with a CalibratorStokesExtension
     virtual Archive* new_solution (const std::string& archive_class) const;
