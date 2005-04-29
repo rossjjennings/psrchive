@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/SumRule.h,v $
-   $Revision: 1.3 $
-   $Date: 2004/11/22 19:26:04 $
+   $Revision: 1.4 $
+   $Date: 2005/04/29 12:58:35 $
    $Author: straten $ */
 
 #ifndef __SumRule_H
@@ -13,16 +13,16 @@
 namespace MEAL {
 
   //! Represents a sum of models
-  template<class MType>
-  class SumRule : public GroupRule<MType>
+  template<class T>
+  class SumRule : public GroupRule<T>
   {
 
   public:
 
-    typedef typename MType::Result Result;
+    typedef typename T::Result Result;
 
     //! Add the model to the sum
-    void operator += (MType* model) { add_model (model); }
+    void operator += (T* model) { add_model (model); }
 
     // ///////////////////////////////////////////////////////////////////
     //
@@ -32,7 +32,7 @@ namespace MEAL {
 
     //! Return the name of the class
     std::string get_name () const
-    { return "SumRule<" + std::string(MType::Name)+ ">"; }
+    { return "SumRule<" + std::string(T::Name)+ ">"; }
 
   protected:
     

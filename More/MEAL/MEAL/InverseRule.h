@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/InverseRule.h,v $
-   $Revision: 1.3 $
-   $Date: 2004/11/22 19:26:04 $
+   $Revision: 1.4 $
+   $Date: 2005/04/29 12:58:35 $
    $Author: straten $ */
 
 #ifndef __MEAL_InverseRule_H
@@ -13,13 +13,13 @@
 namespace MEAL {
 
   //! Computes the inverse of a model and its partial derivatives
-  template<class MType>
-  class InverseRule : public UnaryRule<MType>
+  template<class T>
+  class InverseRule : public UnaryRule<T>
   {
 
   public:
 
-    typedef typename MType::Result Result;
+    typedef typename T::Result Result;
 
     // ///////////////////////////////////////////////////////////////////
     //
@@ -45,27 +45,27 @@ namespace MEAL {
 
 }
 
-template<class MType>
-std::string MEAL::InverseRule<MType>::get_name () const
+template<class T>
+std::string MEAL::InverseRule<T>::get_name () const
 {
-  return "InverseRule<" + std::string(MType::Name)+ ">";
+  return "InverseRule<" + std::string(T::Name)+ ">";
 }
 
 
-template<class MType>
-void MEAL::InverseRule<MType>::calculate (Result& result,
-						 std::vector<Result>* grad)
+template<class T>
+void MEAL::InverseRule<T>::calculate (Result& result,
+				      std::vector<Result>* grad)
 {
   if (!this->model)
     throw Error (InvalidState, "MEAL::InverseRule::calculate",
 		 "no model to evaluate");
 
-  if (MType::verbose)
+  if (T::verbose)
     std::cerr << "MEAL::InverseRule::calculate" << std::endl;
 
   result = inv( this->model->evaluate (grad) );
   
-  if (MType::verbose)
+  if (T::verbose)
     std::cerr << "MEAL::InverseRule::calculate result\n"
       "   " << result << std::endl;
 
@@ -75,7 +75,7 @@ void MEAL::InverseRule<MType>::calculate (Result& result,
   for (unsigned igrad=0; igrad<grad->size(); igrad++)
     (*grad)[igrad] = - result * (*grad)[igrad] * result;
 
-  if (MType::verbose) {
+  if (T::verbose) {
     std::cerr << "MEAL::InverseRule::calculate gradient\n";
     for (unsigned i=0; i<grad->size(); i++)
       std::cerr << "   "
