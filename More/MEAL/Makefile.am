@@ -142,14 +142,29 @@ generate_PromoteTraits_LDADD	=
 # Rule to install doxygen-generated documentation in $HOME/public_html/psrchive
 #
 
-EXPORT := ${HOME}/public_html/units
+EXPORT := ${HOME}/public_html/libraries/units
 
-export:
+export: MEAL.pdf
 	doxygen
 	rm -rf $(EXPORT)
 	mv doc/html $(EXPORT)
+	cp MEAL.pdf $(EXPORT)
 	chmod -R a+r $(EXPORT)
 	chmod a+x $(EXPORT)
+
+# convert Postscript to Abobe Acrobat Portable Document Format
+%.pdf: %.ps
+	ps2pdf $<
+
+# convert dvi file format to Postscript using Adobe safe ligatures
+%.ps: %.dvi
+	dvips -Ppdf -G0 -o $@ $<
+
+%.dvi: %.tex $(FIGS) $(TEXS)
+	latex $*
+	latex $* 
+
+doc: MEAL.pdf
 
 #############################################################################
 #
