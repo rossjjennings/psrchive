@@ -1,5 +1,5 @@
 //
-// $Id: pav.C,v 1.96 2005/04/27 10:08:55 straten Exp $
+// $Id: pav.C,v 1.97 2005/05/02 05:53:03 hknight Exp $
 //
 // The Pulsar Archive Viewer
 //
@@ -118,6 +118,7 @@ void usage ()
     "                    4 -> Plasma\n"
     "                    5 -> Forest\n"
     "                    6 -> Alien Glow\n"
+    " --ystretch y   Stretch y-axis limits by this factor [1.0]\n"
     "\n"
     "Archive::Extension options (file format specific):\n"
     " -o        Plot the original bandpass\n"
@@ -229,6 +230,7 @@ int main (int argc, char** argv)
   const int EXTRA = 1011;
   const int NBIN  = 1012;
   const int FMAX  = 1013;
+  const int YSTRETCH = 1014;
 
   static struct option long_options[] = {
     { "convert_binphsperi", 1, 0, 200 },
@@ -244,6 +246,7 @@ int main (int argc, char** argv)
     { "total",              no_argument,       0, TOTAL},
     { "extra",              required_argument, 0, EXTRA},
     { "nbin",               required_argument, 0, NBIN},
+    { "ystretch",           required_argument, 0, YSTRETCH},
     { "fmax",               required_argument, 0, FMAX},
     { 0, 0, 0, 0 }
   };
@@ -325,7 +328,7 @@ int main (int argc, char** argv)
       plotter.set_subint( atoi (optarg) );
       break;
     case 'i':
-      cout << "$Id: pav.C,v 1.96 2005/04/27 10:08:55 straten Exp $" << endl;
+      cout << "$Id: pav.C,v 1.97 2005/05/02 05:53:03 hknight Exp $" << endl;
       return 0;
 
     case 'j':
@@ -613,9 +616,13 @@ int main (int argc, char** argv)
     case NBIN:
       nbin_requested = atoi(optarg); 
       break;
+    case YSTRETCH:
+      plotter.set_yaxis_stretch( atof(optarg) );
+      break;
     case FMAX:
       plotter.set_y_max( atof(optarg) );
       break;
+
     default:
       cerr << "pav: unrecognized option" << endl;
       return -1; 
