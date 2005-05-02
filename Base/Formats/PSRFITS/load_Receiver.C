@@ -53,63 +53,67 @@ void Pulsar::FITSArchive::load_Receiver (fitsfile* fptr)
       throw Error (InvalidParam, "FITSArchive::load_Receiver",
 	           "unknown FD_POLN: %s", tempstr.get());
   }
-  
-  // Read angle of X-probe wrt platform zero
 
-  if (verbose == 3)
-    cerr << "FITSArchive::load_Receiver reading XPOL_ANG" << endl;
-  
   float temp = 0.0;
   Angle angle;
 
-  fits_read_key (fptr, TFLOAT, "XPOL_ANG", &temp, comment, &status);
-  if (status != 0) {
+  if (ext->get_basis () == Signal::Linear)  {
+
+    // Read angle of X-probe wrt platform zero
+
     if (verbose == 3)
-      cerr << FITSError (status, "FITSArchive::load_Receiver",
-			 "fits_read_key XPOL_ANG").warning() << endl;
-    status = 0;
-    angle.setDegrees( 0 );
-  }
-  else
-    angle.setDegrees( temp );
-
-  ext->set_X_offset (angle);
-
-  // Read angle of Y-probe wrt platform zero
-
-  if (verbose == 3)
-    cerr << "FITSArchive::load_Receiver reading YPOL_ANG" << endl;
+      cerr << "FITSArchive::load_Receiver reading XPOL_ANG" << endl;
   
-  fits_read_key (fptr, TFLOAT, "YPOL_ANG", &temp, comment, &status);
-  if (status != 0) {
-    if (verbose == 3)
-      cerr << FITSError (status, "FITSArchive::load_Receiver",
-			 "fits_read_key YPOL_ANG").warning() << endl;
-    status = 0;
-    angle.setDegrees( 0 );
-  }
-  else
-    angle.setDegrees( temp - 90.0 );
+    fits_read_key (fptr, TFLOAT, "XPOL_ANG", &temp, comment, &status);
+    if (status != 0) {
+      if (verbose == 3)
+        cerr << FITSError (status, "FITSArchive::load_Receiver",
+			   "fits_read_key XPOL_ANG").warning() << endl;
+      status = 0;
+      angle.setDegrees( 0 );
+    }
+    else
+      angle.setDegrees( temp );
 
-  ext->set_Y_offset (angle);
+    ext->set_X_offset (angle);
 
-  // Read angle of linear noise diode wrt platform zero
-
-  if (verbose == 3)
-    cerr << "FITSArchive::load_Receiver reading CAL_ANG" << endl;
+    // Read angle of Y-probe wrt platform zero
   
-  fits_read_key (fptr, TFLOAT, "CAL_ANG", &temp, comment, &status);
-  if (status != 0) {
     if (verbose == 3)
-      cerr << FITSError (status, "FITSArchive::load_Receiver",
-			 "fits_read_key CAL_ANG").warning() << endl;
-    status = 0;
-    angle.setDegrees( 0 );
-  }
-  else
-    angle.setDegrees( temp - 45.0 );
+      cerr << "FITSArchive::load_Receiver reading YPOL_ANG" << endl;
+  
+    fits_read_key (fptr, TFLOAT, "YPOL_ANG", &temp, comment, &status);
+    if (status != 0) {
+      if (verbose == 3)
+        cerr << FITSError (status, "FITSArchive::load_Receiver",
+			   "fits_read_key YPOL_ANG").warning() << endl;
+      status = 0;
+      angle.setDegrees( 0 );
+    }
+    else
+      angle.setDegrees( temp - 90.0 );
 
-  ext->set_calibrator_offset (angle);
+    ext->set_Y_offset (angle);
+  
+    // Read angle of linear noise diode wrt platform zero
+
+    if (verbose == 3)
+      cerr << "FITSArchive::load_Receiver reading CAL_ANG" << endl;
+  
+    fits_read_key (fptr, TFLOAT, "CAL_ANG", &temp, comment, &status);
+    if (status != 0) {
+      if (verbose == 3)
+        cerr << FITSError (status, "FITSArchive::load_Receiver",
+			   "fits_read_key CAL_ANG").warning() << endl;
+      status = 0;
+      angle.setDegrees( 0 );
+    }
+    else
+      angle.setDegrees( temp - 45.0 );
+
+    ext->set_calibrator_offset (angle);
+
+  }
 
   // Read angle of X-probe wrt platform zero
 
