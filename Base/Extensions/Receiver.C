@@ -217,8 +217,6 @@ Jones<double> Pulsar::Receiver::get_transformation () const
   // the sign of this rotation may depend on handedness
   rotation.set_phi ( -get_orientation().getRadians() );
 
-cerr << "Orientation xform=" << rotation.evaluate() << endl;
-
   xform *= rotation.evaluate();
 
   return xform;
