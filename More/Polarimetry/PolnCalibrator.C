@@ -396,11 +396,19 @@ void Pulsar::PolnCalibrator::build (unsigned nchan) try {
 
   }
 
+  Jones<double> rcvr_xform = 1.0;
+
+  // if known, add the receiver transformation
+  if (receiver) {
+    rcvr_xform = receiver->get_transformation();
+    cerr << "Pulsar::PolnCalibrator::build known receiver:\n"
+         << rcvr_xform << endl;
+  }
+
   for (ichan=0; ichan < nchan; ichan++) {
 
-    // if known, add the receiver transformation
-    if (receiver)
-      response[ichan] *= receiver->get_transformation();
+    // add the known receiver transformation
+    response[ichan] *= rcvr_xform;
 
     // invert:  the response must undo the effect of the instrument
     response[ichan] = inv (response[ichan]);
