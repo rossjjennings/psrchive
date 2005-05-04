@@ -61,7 +61,7 @@ bool Pulsar::CorrectionsCalibrator::needs_correction (const Archive* archive,
   // determine if it is necesary to correct for known receptor projections
   
   should_correct_receptors = 
-    receiver->get_X_offset() != 0 || receiver->get_Y_offset() != 0;
+    receiver->get_orientation() != 0 || receiver->get_right_handed() != 0;
 
   should_correct_calibrator =
     archive->type_is_cal() && receiver->get_calibrator_offset() != 0;
@@ -136,7 +136,7 @@ Pulsar::CorrectionsCalibrator::get_feed_transformation (const Pointing* point,
   double feed_rotation = 0.0;
 
   if (point) {
-    //    if (verbose)
+    if (verbose)
       cerr << "Pulsar::CorrectionsCalibrator::get_feed_transformation\n"
         "   using Pointing::feed_angle="
            << point->get_feed_angle().getDegrees() << " deg" << endl;
