@@ -342,37 +342,6 @@ void Pulsar::FITSArchive::load_header (const char* filename)
 
   load_WidebandCorrelator (fptr);
 
-
-  /////////////////////////////////////////////////////////////////////////
-  /*
-    Prior to header version 1.14, the WBCORR backend at Parkes
-    produced cross products that were out by a scale factor of
-    two. This little check applies the correction factor if it detects
-    an archive that was affected by this instrumentation bug.
-    
-    Although it is messy and highly specific, please do not remove
-    this block of code as it ensures data consistency.
-  */
-
-  int  major_number = 9;
-  float minor_number = 0.9;
-  int index = (hdr_ext->hdrver).find_first_of(".",0);
-  sscanf((hdr_ext->hdrver.substr(0,index)).c_str(), "%d", &major_number);
-  sscanf((hdr_ext->hdrver.substr(index+1,hdr_ext->hdrver.length())).c_str(), 
-	 "%f", &minor_number);
-
-  if ((strcmp(tempstr.get(), "WBCORR") == 0) && ((major_number == 1) &&
-						 (minor_number < 14))) {
-
-    scale_cross_products = true;
-    if (verbose == 3) {
-      cout << "Old WBCORR header version detected..." << endl;
-      cout << "Scaling cross products to compensate" << endl;
-    }
-
-  }
-
-
   // Figure out what kind of observation it was
 
   if (verbose == 3)

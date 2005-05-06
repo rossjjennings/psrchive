@@ -1,5 +1,6 @@
 #include "Pulsar/FITSArchive.h"
 #include "Pulsar/WidebandCorrelator.h"
+#include "Pulsar/FITSHdrExtension.h"
 #include "FITSError.h"
 
 void Pulsar::FITSArchive::load_WidebandCorrelator (fitsfile* fptr)
@@ -49,7 +50,41 @@ void Pulsar::FITSArchive::load_WidebandCorrelator (fitsfile* fptr)
 			 "fits_read_key BECONFIG").get_message() << endl;
     status = 0;
   }
-  
+
+  /////////////////////////////////////////////////////////////////////////
+  /*
+    Prior to header version 1.14, the WBCORR backend at Parkes
+    produced cross products that were out by a scale factor of
+    two. This little check applies the correction factor if it detects
+    an archive that was affected by this instrumentation bug.
+
+    Although it is messy and highly specific, please do not remove
+    this block of code as it ensures data consistency.
+  */
+
+  if (ext->get_name() == "WBCORR")  {
+
+    FITSHdrExtension* hdr_ext = get<FITSHdrExtension>();
+    if (!hdr_ext)
+      throw Error (InvalidParam, "FITSArchive::load_WidebandCorrelator",
+                   "no FITSHdrExtension extension");
+
+    float version = 0.9;
+    if (sscanf (hdr_ext->hdrver.c_str(), "%f", &version) != 1)
+      throw Error (InvalidParam, "FITSArchive::load_WidebandCorrelator",
+                   "could not parse header version from " + hdr_ext->hdrver);
+
+    if (version < 1.14)  {
+
+      scale_cross_products = true;
+      if (verbose == 3)
+        cerr << "Pulsar::FITSArchive::load_header "
+                "doubling cross products of old WBCORR data" << endl;
+
+    }
+
+  }
+
   // Read correlator cycle time
 
   if (verbose == 3)
