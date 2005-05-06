@@ -19,18 +19,20 @@ using namespace std;
 
 extern "C" {
   void F77_fccf (float *, float *, float *);
-  void F77_fftconv (int *,float *, float *, float *, float *, float *, float *);
+  void F77_fftconv (int *,float *, float *, float *, 
+		    float *, float *, float *);
 }
 
 int Pulsar::legacy_fftconv(int npts, const float * prf, const float * std, 
                            double * shift, double *eshift, 
                            float * snrfft, float * esnrfft) 
 {
-  // This introduced to investigate the behaviour of the pat-model_profile toa routines
-  // By invocation of the legacy fftconv routine - sorry for the kludge WvS - this can come out
+  // This introduced to investigate the behaviour of the
+  // pat-model_profile toa routines By invocation of the legacy
+  // fftconv routine - sorry for the kludge WvS - this can come out
   // when testing is complete -- steveo
 
-  float real_shift = 0, real_err = 0 ; // Required for fftconv .... darned real4....
+  float real_shift = 0, real_err = 0 ; // Required for fftconv ..darned real4..
   int number = npts;
 
   F77_fftconv (&number,const_cast<float*>(prf),
@@ -89,8 +91,8 @@ int Pulsar::model_profile (int npts, int narrays,
     }
   }
 
-  // Compute an initial estimation of the shift based
-  // on the cross-correlation function
+  // Compute an initial estimation of the shift based on the
+  // (discrete) cross-correlation function
 
   float xcorr_shift;
   F77_fccf (&(xcorr_amps[0][1]), &(xcorr_phases[0][1]), &xcorr_shift);
@@ -98,13 +100,13 @@ int Pulsar::model_profile (int npts, int narrays,
   if (verbose)
     cerr << "xcorr_shift=" << xcorr_shift << endl;
 
-  // run through successively larger numbers of
-  // frequency components finding the best-fitting
-  // shift between the two profiles.  
-  // We start at 32 frequency components and 
-  // continue up until npts/2 components
-  // N.B. we do not include the DC component of 
-  // the fourier transform in our sums.  
+  // Run through successively larger numbers of frequency components
+  // finding the best-fitting shift between the two profiles. We
+  // start at 32 frequency components and continue up until npts/2
+  // components.
+  //
+  // N.B. we do not include the DC component of the fourier transform
+  // in our sums.
 
   double tau = (double) xcorr_shift;
   double dtau = 0, edtau = 0;
@@ -112,8 +114,8 @@ int Pulsar::model_profile (int npts, int narrays,
   double low_tau = 0, low_deriv_chisq = 0, high_tau = 0, high_deriv_chisq = 0;
   int start_bin = 32;
 
-  // allow this loop index to go all the way up to npts/2, the second loop will
-  // ensure the that the old Nyquist index is not accessed
+  // Allow this loop index to go all the way up to npts/2, the second
+  // loop will ensure the that the old Nyquist index is not accessed
 
   for (int nsum=start_bin; nsum<=npt2; nsum*=2) {
     dtau = 2*M_PI/(float)(5.0*nsum);
@@ -149,14 +151,20 @@ int Pulsar::model_profile (int npts, int narrays,
   if (verbose) 
     cerr << "model profile: best tau is " << tau << endl;
 
-  // These relationships are discussed in Joe Taylor's paper 
-  // in "Impact of Pulsar Timing on Relativity and Cosmology" 
-  // The profile is related to the standard by
+  // These relationships are discussed in Joe Taylor's paper, "Pulsar
+  // Timing and Relativistic Gravity", Philosophical Transactions:
+  // Physical Sciences and Engineering, Vol. 341, No. 1660, "Pulsars
+  // as Physics Laboratories" (Oct 15, 1992), pages 117-134.
+
+  // The profile is related to the standard by:
+  //
   // P(t) = a + scale*S(t-tau) + N(t)
-  // P   profile
-  // S   standard
-  // N   noise
-  // tau shift between profile and standard
+  //
+  // where:
+  //   P = test profile 
+  //   S = standard template
+  //   N = noise 
+  // tau = shift between profile and template
 
   double s1=0, s2=0, s3=0;
   double cosfac;
@@ -198,9 +206,8 @@ int Pulsar::model_profile (int npts, int narrays,
     return -1;
   }
 
-  // This defines the errors in scale and shift so 
-  // that the reduced chisq is unity.  We subtract
-  // 1 D.O.F. for tau.
+  // This defines the errors in scale and shift so that the reduced
+  // chisq is unity.  We subtract 1 D.O.F. for tau.
 
   double rms = sqrt( *chisq / (float(narrays*(npt2-1)) - 1.0) );
   double fac = npts/(2.0*M_PI);
@@ -294,8 +301,3 @@ double Pulsar::zbrent(float low_tau, float high_tau,
   }
   return(b);
 }
-
-
-
-
-
