@@ -305,11 +305,11 @@ try {
       
       for(unsigned j = 0; j < get_nbin(); j++) {
 	fltarray[j] = temparray[j] * scales[a][b] + offsets[a][b];
-	if (scale_cross_products) {
-	  if (integ->get_state() == Signal::Coherence) {
-	    if (a == 2 || a == 3)
-	      fltarray[j] *= 2;
-	  }
+	if (integ->get_state() == Signal::Coherence) {
+	  if (scale_cross_products && (a == 2 || a == 3))
+	    fltarray[j] *= 2;
+          if (conjugate_cross_products && (a == 3))
+            fltarray[j] *= -1;
 	}
       }
       

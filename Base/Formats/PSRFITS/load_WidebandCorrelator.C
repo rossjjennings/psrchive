@@ -79,7 +79,20 @@ void Pulsar::FITSArchive::load_WidebandCorrelator (fitsfile* fptr)
       scale_cross_products = true;
       if (verbose == 3)
         cerr << "Pulsar::FITSArchive::load_header "
-                "doubling cross products of old WBCORR data" << endl;
+                "doubling cross products of WBCORR data with version " 
+             << version << endl;
+
+    }
+
+    if (ext->configfile == "wbb1024_512_1024_3p_b")  {
+
+      scale_cross_products = true;
+      conjugate_cross_products = true;
+
+      if (verbose == 3)
+        cerr << "Pulsar::FITSArchive::load_header "
+                "doubling/conjugating cross products of WBCORR data with" 
+                " config=" << ext->configfile << endl;
 
     }
 

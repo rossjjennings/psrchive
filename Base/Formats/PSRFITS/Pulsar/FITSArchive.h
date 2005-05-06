@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/PSRFITS/Pulsar/FITSArchive.h,v $
-   $Revision: 1.28 $
-   $Date: 2005/04/24 01:32:09 $
+   $Revision: 1.29 $
+   $Date: 2005/05/06 17:59:02 $
    $Author: straten $ */
 
 #ifndef __Pulsar_FITSArchive_h
@@ -172,9 +172,12 @@ namespace Pulsar {
     // Channel bandwidth
     double chanbw;
     
-    // Instrumental peculiarities
+    // Double cross coherence term
     bool scale_cross_products;
-    
+
+    // Complex conjugate cross coherence term
+    bool conjugate_cross_products;
+
     // Reference epoch
     MJD reference_epoch;
 
