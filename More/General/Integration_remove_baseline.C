@@ -113,6 +113,14 @@ try {
     
     for (unsigned ichan=0; ichan<nchan; ++ichan) {
 
+      if (get_weight(ichan) == 0) {
+        if (mean)
+          (*mean)[ipol][ichan] = 0;
+        if (variance)
+          (*variance)[ipol][ichan] = 0;
+        continue;
+      }
+
       float chanphase = phase + phases[ichan];
 
       if (mean) {
