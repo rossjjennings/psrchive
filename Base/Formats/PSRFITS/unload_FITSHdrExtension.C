@@ -25,9 +25,6 @@ void Pulsar::FITSArchive::unload (fitsfile* fptr, const FITSHdrExtension* ext)
   fits_update_key (fptr, TSTRING, "COORD_MD",
 		   (char*)(ext->coordmode.c_str()), comment, &status);
 
-  fits_update_key (fptr, TSTRING, "HDRVER", 
-		   (char*)(ext->hdrver.c_str()), comment, &status);
-
   fits_update_key (fptr, TSTRING, "DATE", 
 		   (char*)(ext->creation_date.c_str()), comment, &status);
   
