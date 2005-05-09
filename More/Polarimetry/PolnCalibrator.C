@@ -401,8 +401,9 @@ void Pulsar::PolnCalibrator::build (unsigned nchan) try {
   // if known, add the receiver transformation
   if (receiver) {
     rcvr_xform = receiver->get_transformation();
-    cerr << "Pulsar::PolnCalibrator::build known receiver:\n"
-         << rcvr_xform << endl;
+    if (verbose)
+      cerr << "Pulsar::PolnCalibrator::build known receiver:\n"
+           << rcvr_xform << endl;
   }
 
   for (ichan=0; ichan < nchan; ichan++) {
