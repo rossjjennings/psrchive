@@ -2,6 +2,7 @@
 #include "Pulsar/WidebandCorrelator.h"
 #include "Pulsar/FITSHdrExtension.h"
 #include "FITSError.h"
+#include "string_utils.h"
 
 void Pulsar::FITSArchive::load_WidebandCorrelator (fitsfile* fptr)
 {
@@ -80,19 +81,32 @@ void Pulsar::FITSArchive::load_WidebandCorrelator (fitsfile* fptr)
       if (verbose == 3)
         cerr << "Pulsar::FITSArchive::load_header "
                 "doubling cross products of WBCORR data with version " 
-             << version << endl;
+             << setprecision(2) << version << endl;
 
     }
 
-    if (ext->configfile == "wbb1024_512_1024_3p_b")  {
+    static char* bad_config = getenv ("WBCBADCFG");
+    static vector<string> bad_configs;
+    if (bad_config)  {
+      stringfload (&bad_configs, bad_config);
+      bad_config = 0; // load it only once
+      if (verbose==3 && bad_configs.size()) {
+        cerr << "WBCORR bad configurations:" << endl;
+        for (unsigned i=0; i < bad_configs.size(); i++)
+          cerr << bad_configs[i] << endl;
+      }
+    }
 
-      scale_cross_products = true;
+    if (version < 1.265 && 
+        find (bad_configs.begin(), bad_configs.end(), ext->configfile)
+		!= bad_configs.end())  {
+
       conjugate_cross_products = true;
 
       if (verbose == 3)
-        cerr << "Pulsar::FITSArchive::load_header "
-                "doubling/conjugating cross products of WBCORR data with" 
-                " config=" << ext->configfile << endl;
+        cerr << "Pulsar::FITSArchive::load_WidebandCorrelator\n"
+             "  correcting data with version=" << setprecision(2) << version
+             << " config=" << ext->configfile << endl;
 
     }
 
