@@ -6,9 +6,34 @@ using namespace std;
 class extension : public Reference::Able {
 
 public:
-  extension () { text = "tui import failure"; }
-  void set_text (const std::string& _text) { text = _text; }
-  std::string get_text () const { return text; }
+
+  extension () 
+  {
+    cerr << "extension::this=" << this << endl;
+    text = "tui import failure";
+  }
+  extension (const extension& ext) 
+  {
+    cerr << "copy extension::this=" << this << endl;
+    text = ext.text;
+  }
+  ~extension () 
+  {
+    cerr << "~extension::this=" << this << endl;
+  }
+
+  void set_text (const std::string& _text) 
+  {
+    cerr << "extension::set_text this=" << this << " text=" << _text << endl;
+    text = _text;
+  }
+
+  std::string get_text () const
+  {
+    cerr << "extension::get_text this=" << this << endl;
+    return text;
+  }
+
 protected:
   std::string text;
 
@@ -46,30 +71,53 @@ public:
 
 };
 
-class glue : public TextInterface::ComponentGetSet<tester,extension>
+class extension_glue : public TextInterface::ComponentGetSet<tester,extension>
 {
 public:
-  glue (extensionTUI* tui)
+  extension_glue (extensionTUI* tui)
     : TextInterface::ComponentGetSet<tester,extension> ("ext", tui) { }
 
   extension* extract_component (tester* t) { return &(t->ext); }
 };
 
+class tester_array : public Reference::Able {
+
+public:
+  tester_array (unsigned size) : array (size) { }
+  vector<tester> array;
+};
+
+class element_glue : public TextInterface::ElementGetSet<tester_array,tester>
+{
+public:
+  element_glue (const string& name, TextInterface::ClassGetSet<tester>* tui) 
+    : TextInterface::ElementGetSet<tester_array,tester> (name, tui) { }
+
+  tester* extract_element (tester_array* t, unsigned index) const
+  { 
+    cerr << "element_glue::extract_element index=" << index 
+	 << " tester*=" << &(t->array[index]) << endl;
+    return &(t->array[index]);
+  }
+  
+  unsigned get_nelement (tester_array* t) const
+  { return t->array.size(); }
+};
 
 int main () try {
 
-  tester test;
+  tester Test;
 
   TextInterface::Allocator<tester,double> allocate;
 
   TextInterface::Attribute<tester>* interface;
   interface = allocate.named ("value", &tester::get_value, &tester::set_value);
 
-  interface->set_value (&test, "3.456");
+  interface->set_value (&Test, "3.456");
 
-  cerr << "tester::get_value=" << test.get_value() << endl;
+  cerr << "tester::get_value=" << Test.get_value() << endl;
 
-  if (test.get_value() != 3.456) {
+  if (Test.get_value() != 3.456) {
     cerr << "test_TextInterface ERROR!" << endl;
     return -1;
   }
@@ -77,15 +125,15 @@ int main () try {
   TextInterface::Attribute<tester>* read_only;
   read_only = allocate.named ("value", &tester::get_value);
 
-  cerr << "AttributeGet::get_value=" << read_only->get_value(&test) << endl;
+  cerr << "AttributeGet::get_value=" << read_only->get_value(&Test) << endl;
 
-  if (read_only->get_value(&test) != "3.456") {
+  if (read_only->get_value(&Test) != "3.456") {
     cerr << "test_TextInterface ERROR!" << endl;
     return -1;
   }
 
   try {
-    read_only->set_value (&test, "0.789");
+    read_only->set_value (&Test, "0.789");
 
     cerr << "AttributeGet::set_value does not raise exception" << endl;
     cerr << "test_TextInterface ERROR!" << endl;
@@ -97,7 +145,7 @@ int main () try {
   }
 
   testerTUI getset;
-  getset.set_instance (&test);
+  getset.set_instance (&Test);
 
   cerr << "ClassGetSet::get_value=" << getset.get_value("value") << endl;
 
@@ -109,7 +157,7 @@ int main () try {
   cerr << "testing import" << endl;
 
   extensionTUI tui;
-  getset.import (new glue (&tui));
+  getset.import (new extension_glue (&tui));
 
   unsigned nattribute = getset.get_nattribute();
 
@@ -125,18 +173,62 @@ int main () try {
     cerr << "  " << getset.get_name (i) << endl;
 
   std::string teststring = "test of TextInterface::import passed";
+  std::string gotstring;
 
   getset.set_value ("ext:text", teststring);
 
-  cerr << test.ext.get_text() << endl;
+  cerr << Test.ext.get_text() << endl;
 
-  if (test.ext.get_text() != teststring) {
+  if (Test.ext.get_text() != teststring) {
     cerr << "test_TextInterface ERROR!" << endl;
     return -1;
   }
 
   if (getset.get_value("ext:text") != teststring) {
     cerr << "test_TextInterface ERROR!" << endl;
+    return -1;
+  }
+
+  tester_array Array (5);
+
+  Array.array[3] = Test;
+
+  TextInterface::CompositeGetSet<tester_array> array_getset;
+  array_getset.set_instance (&Array);
+  array_getset.import (new element_glue ("tester", &getset));
+
+  nattribute = array_getset.get_nattribute();
+
+  cerr << "CompositeGetSet<test_array> has " << nattribute 
+       << " attributes after import" << endl;
+
+  if (nattribute != 2) {
+    cerr << "test_TextInterface ERROR!" << endl;
+    return -1;
+  }
+
+  for (unsigned i=0; i < nattribute; i++)
+    cerr << "  " << array_getset.get_name (i) << endl;
+
+  gotstring = array_getset.get_value("tester[3]:ext:text");
+
+  cerr << "get_value tester[3]:ext:text=" << gotstring<< endl;
+
+  if (gotstring != teststring) {
+    cerr << "test_TextInterface ERROR!" << endl;
+    return -1;
+  }
+
+
+  array_getset.set_value ("tester[2]:ext:text", teststring);
+
+  gotstring = Array.array[2].ext.get_text();
+
+  cerr << "tester_array[2].ext.get_text=" << gotstring<< endl;
+
+  if (gotstring != teststring) {
+    cerr << "test_TextInterface ERROR! &(tester_array[2])=" 
+	 << &(Array.array[2]) << endl;
     return -1;
   }
 
@@ -147,4 +239,5 @@ catch (Error& error) {
   cerr << "test_TextInterface ERROR " << error << endl;
   return -1;
 }
+
 
