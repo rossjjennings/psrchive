@@ -9,28 +9,38 @@ public:
 
   extension () 
   {
+#ifdef _DEBUG
     cerr << "extension::this=" << this << endl;
+#endif
     text = "tui import failure";
   }
   extension (const extension& ext) 
   {
+#ifdef _DEBUG
     cerr << "copy extension::this=" << this << endl;
+#endif
     text = ext.text;
   }
   ~extension () 
   {
+#ifdef _DEBUG
     cerr << "~extension::this=" << this << endl;
+#endif
   }
 
   void set_text (const std::string& _text) 
   {
+#ifdef _DEBUG
     cerr << "extension::set_text this=" << this << " text=" << _text << endl;
+#endif
     text = _text;
   }
 
   std::string get_text () const
   {
+#ifdef _DEBUG
     cerr << "extension::get_text this=" << this << endl;
+#endif
     return text;
   }
 
@@ -95,8 +105,10 @@ public:
 
   tester* extract_element (tester_array* t, unsigned index) const
   { 
+#ifdef _DEBUG
     cerr << "element_glue::extract_element index=" << index 
 	 << " tester*=" << &(t->array[index]) << endl;
+#endif
     return &(t->array[index]);
   }
   
@@ -172,7 +184,7 @@ int main () try {
   for (unsigned i=0; i < nattribute; i++)
     cerr << "  " << getset.get_name (i) << endl;
 
-  std::string teststring = "test of TextInterface::import passed";
+  std::string teststring = "test of TextInterface::import Component passed";
   std::string gotstring;
 
   getset.set_value ("ext:text", teststring);
@@ -188,6 +200,9 @@ int main () try {
     cerr << "test_TextInterface ERROR!" << endl;
     return -1;
   }
+
+  teststring = "test of TextInterface::import Element passed";
+  Test.ext.set_text (teststring);
 
   tester_array Array (5);
 
@@ -224,7 +239,7 @@ int main () try {
 
   gotstring = Array.array[2].ext.get_text();
 
-  cerr << "tester_array[2].ext.get_text=" << gotstring<< endl;
+  cerr << "tester_array[2].ext.get_text=" << gotstring << endl;
 
   if (gotstring != teststring) {
     cerr << "test_TextInterface ERROR! &(tester_array[2])=" 
