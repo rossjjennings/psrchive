@@ -6,6 +6,8 @@
 #include "tostring.h"
 #include "stringtok.h"
 
+// #define _DEBUG 1
+
 namespace TextInterface {
 
   //! Abstract base class of attribute text interface
@@ -187,7 +189,13 @@ namespace TextInterface {
     Attribute<C>* find (const std::string& name) const;
 
     //! Set the instance
-    void set_instance (C* c) { instance = c; }
+    virtual void set_instance (C* c) 
+      {
+#ifdef _DEBUG
+  std::cerr << "ClassGetSet::set_instance " << c << std::endl;
+#endif
+	instance = c; 
+      }
 
   protected:
 
@@ -236,12 +244,22 @@ namespace TextInterface {
     //! Get the name of the component
     std::string get_component_name () const { return name; }
 
-    std::string get_value (const std::string& name) const
-      { return component_interface->get_value(name); }
+    std::string get_value (const std::string& n) const
+      {
+#ifdef _DEBUG
+	std::cerr << "ComponenGetSet[" << name << "] get " << n << std::endl;
+#endif
+	return component_interface->get_value (n);
+      }
 
     //! Set the value of the attribute
-    void set_value (const std::string& name, const std::string& value)
-      { component_interface->set_value(name, value); }
+    void set_value (const std::string& n, const std::string& value)
+      {
+#ifdef _DEBUG
+	std::cerr << "ComponenGetSet[" << name << "] set " << n << std::endl;
+#endif
+	component_interface->set_value (n, value);
+      }
 
     unsigned get_nattribute () const
       { return component_interface->get_nattribute(); }
@@ -254,7 +272,12 @@ namespace TextInterface {
 
     //! Extract the component from the composite
     void extract (C* composite)
-      { component_interface->set_instance (extract_component(composite)); }
+      {
+#ifdef _DEBUG
+	std::cerr << "ComponenGetSet[" << name << "] extract " << std::endl;
+#endif
+	component_interface->set_instance (extract_component (composite));
+      }
 
   protected:
 
@@ -298,7 +321,16 @@ namespace TextInterface {
 
     //! Import a new component interface
     void import (Component<C>* c) 
-    { components.push_back(c); if(this->instance) c->extract(this->instance); }
+    {
+      components.push_back(c);
+      if (this->instance) {
+#ifdef _DEBUG
+	std::cerr << "CompositeGetSet::import extract " 
+		  << this->instance.get() << std::endl;
+#endif
+	c->extract(this->instance);
+      }
+    }
 
   protected:
 
@@ -332,7 +364,13 @@ namespace TextInterface {
     bool matches (const std::string& name) const;
 
     //! Extract the component from the composite
-    void extract (C* c) { composite = c; }
+    void extract (C* c)
+      {
+#ifdef _DEBUG
+	std::cerr << "ElementGetSet::extract " << c << std::endl;
+#endif
+	composite = c;
+      }
 
     //! Get the value(s) of the attribute
     std::string get_value (const std::string& name) const;
@@ -378,9 +416,6 @@ namespace TextInterface {
   //! Convert a parameter name into a range of indeces
   void parse_indeces (std::vector<unsigned>& indeces, std::string& name);
 
-  //! Verbosity flag
-  extern bool verbose;
-
   //! Label elements in ElementGetSet<C,E>::get_value
   extern bool label_elements;
 
@@ -388,39 +423,60 @@ namespace TextInterface {
 
 template<class C>
 TextInterface::Attribute<C>* 
-TextInterface::ClassGetSet<C>::find (const std::string& name) const
-{ 
-  for (unsigned i=0; i<attributes.size(); i++)
-    if (attributes[i]->matches(name))
+TextInterface::ClassGetSet<C>::find (const std::string& param) const
+{
+#ifdef _DEBUG
+  std::cerr << "ClassGetSet::find (" << param << ") size=" 
+	    << attributes.size() << endl;
+#endif
+
+  for (unsigned i=0; i<attributes.size(); i++) {
+    if (attributes[i]->matches (param)) {
+#ifdef _DEBUG
+      std::cerr << "ClassGetSet::find attribute[" << i << "]=" 
+		<< attributes[i]->get_name() << " matches" << std::endl;
+#endif
       return attributes[i];
+    }
+  }
+
   throw Error (InvalidParam, "TextInterface::Class<C>::find",
-	       "no attribute named " + name);
+	       "no attribute named " + param);
 }
 
 
 template<class C>
 TextInterface::Component<C>* 
-TextInterface::CompositeGetSet<C>::find_component (std::string& name) const
+TextInterface::CompositeGetSet<C>::find_component (std::string& comp) const
 {
-  if (verbose)
-    std::cerr << "TextInterface::CompositeGetSet<C>::find_component"
-                 " name=" << name << std::endl;
+#ifdef _DEBUG
+  std::cerr << "CompositeGetSet::find_component " << comp << std::endl;
+#endif
 
-  std::string cname = stringtok (name, ":[", false, false);
+  std::string cname = stringtok (comp, ":[", false, false);
   
-  if (!name.length())
+  if (!comp.length())
     return 0;
 
-  if (name[0]==':')
-    name.erase(0,1);
+  if (comp[0] == ':')
+    comp.erase(0,1);
 
-  if (verbose)
-    std::cerr << "TextInterface::CompositeGetSet<C>::find_component"
-            " component name=" << cname << " remainder=" << name << std::endl;
+#ifdef _DEBUG
+  std::cerr << "CompositeGetSet::find_component name=" << cname
+	    << " remainder=" << comp << " size=" << components.size() 
+	    << std::endl;
+#endif
 
-  for (unsigned i=0; i<components.size(); i++)
-    if (components[i]->matches(cname))
+  for (unsigned i=0; i<components.size(); i++) {
+    if (components[i]->matches(cname)) {
+#ifdef _DEBUG
+      std::cerr << "CompositeGetSet::find_component  component[" << i << "]=" 
+		<< components[i]->get_component_name() <<  " matches"
+		<< std::endl;
+#endif
       return components[i];
+    }
+  }
 
   throw Error (InvalidParam, "TextInterface::Class<C>::find_component",
 	       "no component named " + cname);
@@ -428,27 +484,27 @@ TextInterface::CompositeGetSet<C>::find_component (std::string& name) const
 
 template<class C>
 std::string 
-TextInterface::CompositeGetSet<C>::get_value (const std::string& name) const
+TextInterface::CompositeGetSet<C>::get_value (const std::string& param) const
 {
-  std::string temp = name;
+  std::string temp = param;
   Component<C>* component = find_component (temp);
   if (component)
     return component->get_value (temp);
   else
-    return ClassGetSet<C>::get_value (name);
+    return ClassGetSet<C>::get_value (param);
 }
 
 template<class C>
-void TextInterface::CompositeGetSet<C>::set_value (const std::string& name,
+void TextInterface::CompositeGetSet<C>::set_value (const std::string& param,
 						   const std::string& value)
 {
-  std::string temp = name;
+  std::string temp = param;
   Component<C>* component = find_component (temp);
 
   if (component)
     component->set_value (temp, value);
   else
-    ClassGetSet<C>::set_value (name, value);
+    ClassGetSet<C>::set_value (param, value);
 }
 
 template<class C>
@@ -498,17 +554,23 @@ TextInterface::CompositeGetSet<C>::get_component_index (unsigned& i) const
 template<class C>
 void TextInterface::CompositeGetSet<C>::set_instance (C* c)
 {
+#ifdef _DEBUG
+  std::cerr << "CompositeGetSet::set_instance " << c 
+	    << " size=" << components.size() << std::endl;
+#endif
+
   ClassGetSet<C>::set_instance(c);
+
   for (unsigned i=0; i<components.size(); i++)
     components[i]->extract (c);
 }
 
 template<class C, class E>
 std::string
-TextInterface::ElementGetSet<C,E>::get_value (const std::string& name) const
+TextInterface::ElementGetSet<C,E>::get_value (const std::string& param) const
 {
   std::vector<unsigned> ind;
-  std::string sub_name = get_indeces (ind, name);
+  std::string sub_name = get_indeces (ind, param);
   std::ostringstream ost;
 
   for (unsigned i=0; i<ind.size(); i++) {
@@ -516,54 +578,79 @@ TextInterface::ElementGetSet<C,E>::get_value (const std::string& name) const
       ost << ",";  // place a comma between elements
     if (label_elements && ind.size() > 1)
       ost << ind[i] << ")";  // label the elements
-    element_interface->set_instance( extract_element(this->composite,ind[i]) );
-    ost << element_interface->get_value(sub_name);
+
+    E* element = extract_element (this->composite, ind[i]);
+#ifdef _DEBUG
+  std::cerr << "ElementGetSet[" << name << "]::get (" 
+	    << sub_name << ") element=" << element << std::endl;
+#endif
+    element_interface->set_instance (element);
+    ost << element_interface->get_value (sub_name);
   }
 
   return ost.str();
 }
 
 template<class C, class E>
-void TextInterface::ElementGetSet<C,E>::set_value (const std::string& name,
+void TextInterface::ElementGetSet<C,E>::set_value (const std::string& param,
 						   const std::string& value)
 {
   std::vector<unsigned> ind;
-  std::string sub_name = get_indeces (ind, name);
+  std::string sub_name = get_indeces (ind, param);
 
   for (unsigned i=0; i<ind.size(); i++) {
-    element_interface->set_instance( extract_element(this->composite, ind[i]) );
-    element_interface->set_value(sub_name, value);
+    E* element = extract_element (this->composite, ind[i]);
+#ifdef _DEBUG
+  std::cerr << "ElementGetSet[" << name << "]::set " 
+	    << sub_name << "=" << value << std::endl;
+#endif
+    element_interface->set_instance (element);
+    element_interface->set_value (sub_name, value);
   }
 }
 
 template<class C, class E>
 std::string
 TextInterface::ElementGetSet<C,E>::get_indeces (std::vector<unsigned>& indeces,
-						const std::string& name) const
+						const std::string& param) const
 {
-  if (verbose)
-    std::cerr << "TextInterface::ElementGetSet<C,E>::get_indeces"
-            " name=" << name << std::endl;
+#ifdef _DEBUG
+  std::cerr << "ElementGetSet::get_indeces " << param << std::endl;
+#endif
 
-  std::string sub_name = name;
+  std::string sub_name = param;
   parse_indeces (indeces, sub_name);
 
-  if (verbose)
-    std::cerr << "TextInterface::ElementGetSet<C,E>::get_indeces"
-            " sub_name=" << sub_name << std::endl;
+#ifdef _DEBUG
+  std::cerr << "ElementGetSet::get_indeces size=" << indeces.size()
+    << " name=" << sub_name << std::endl;
+#endif
 
-  unsigned n = this->get_nelement(this->composite);
+  unsigned num = this->get_nelement(this->composite);
 
   if (indeces.size() == 0) {
-    indeces.resize (n);
-    for (unsigned i=0; i<n; i++)
+#ifdef _DEBUG
+    std::cerr << "ElementGetSet::get_indeces select all" << std::endl;
+#endif
+    indeces.resize (num);
+    for (unsigned i=0; i<num; i++)
       indeces[i] = i;
   }
   else {
-    for (unsigned i=0; i < indeces.size(); i++)
-      if (indeces[i] >= n)
+#ifdef _DEBUG
+    std::cerr << "ElementGetSet::get_indeces select";
+#endif
+    for (unsigned i=0; i < indeces.size(); i++) {
+#ifdef _DEBUG
+      std::cerr << " " << indeces[i];
+#endif
+      if (indeces[i] >= num)
 	throw Error (InvalidRange, "TextInterface::ElementGetSet::get_indeces",
-		     "%d >= %d", indeces[i], n);
+		     "%d >= %d", indeces[i], num);
+    }
+#ifdef _DEBUG
+    std::cerr << endl;
+#endif
   }
 
   return sub_name;
@@ -587,8 +674,6 @@ bool TextInterface::Component<C>::matches (const std::string& name) const
 template<class C,class E>
 bool TextInterface::ElementGetSet<C,E>::matches (const std::string& n) const
 {
-  if (verbose)
-    std::cerr << "TextInterface::ElementGetSet<C,E>::matches" << std::endl;
   return strncasecmp(n.c_str(), name.c_str(), name.length()) == 0;
 }
 
