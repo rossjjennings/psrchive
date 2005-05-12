@@ -1,10 +1,10 @@
 #include "TextInterface.h"
 #include "stringtok.h"
+
 #include <stdio.h>
 
 using namespace std;
 
-bool TextInterface::verbose = false;
 bool TextInterface::label_elements = false;
 
 void TextInterface::parse_indeces (vector<unsigned>& index, string& name)
@@ -15,8 +15,9 @@ void TextInterface::parse_indeces (vector<unsigned>& index, string& name)
   if (name[0] != '[')
     return;
 
-  if (verbose)
-    cerr << "TextInterface::parse_indeces range started" << endl;
+#ifdef _DEBUG
+  cerr << "TextInterface::parse_indeces range started" << endl;
+#endif
 
   // look for the closing braces
   string::size_type pos = name.find("]:");
@@ -27,8 +28,9 @@ void TextInterface::parse_indeces (vector<unsigned>& index, string& name)
 
   string range = name.substr (1,pos-1);
 
-  if (verbose)
-    cerr << "TextInterface::parse_indeces range=" << range << endl;
+#ifdef _DEBUG
+  cerr << "TextInterface::parse_indeces range=" << range << endl;
+#endif
 
   if (range.empty())
     throw Error (InvalidParam, "TextInterface::parse_indeces",
@@ -59,9 +61,10 @@ void TextInterface::parse_indeces (vector<unsigned>& index, string& name)
         throw Error (InvalidParam, "TextInterface::parse_indeces",
                      "invalid sub-range '" + range + "'");
 
-      if (verbose)
-        cerr << "TextInterface::parse_indeces start=" << start 
-             << " end=" << end << endl;
+#ifdef _DEBUG
+      cerr << "TextInterface::parse_indeces start=" << start 
+	   << " end=" << end << endl;
+#endif
 
       if (start < 0)
         throw Error (InvalidRange, "TextInterface::parse_indeces",
@@ -83,8 +86,9 @@ void TextInterface::parse_indeces (vector<unsigned>& index, string& name)
 
     else if (scanned == 1)  {
 
-      if (verbose)
-        cerr << "TextInterface::parse_indeces index=" << start << endl;
+#ifdef _DEBUG
+      cerr << "TextInterface::parse_indeces index=" << start << endl;
+#endif
 
       if (start < 0)
         throw Error (InvalidRange, "TextInterface::parse_indeces",
@@ -102,8 +106,9 @@ void TextInterface::parse_indeces (vector<unsigned>& index, string& name)
   // satisfied that the range is valid, remove it from the qualified name
   name.erase (0, pos+2);
 
-  if (verbose)
-    cerr << "TextInterface::parse_indeces remaining name=" << name << endl;
+#ifdef _DEBUG
+  cerr << "TextInterface::parse_indeces remaining name=" << name << endl;
+#endif
 
 }
 
