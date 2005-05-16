@@ -114,8 +114,8 @@ endif
 #
 # programs
 #
-bin_PROGRAMS = pac paz vap vip psredit psradd fadd pat pam fluxcal \
-	fix_coords test_Difference fix_hydra sesdiv \
+bin_PROGRAMS = pac paz vap vip psredit psradd fadd pat pam paf \
+        fluxcal fix_coords test_Difference fix_hydra sesdiv \
         fix_3C353 archive_correct archive_denoise \
         fix_fluxcal archive_split psrconv pascii \
 	default_loader
@@ -134,6 +134,7 @@ fluxcal_SOURCES			= fluxcal.C
 paz_SOURCES			= paz.C
 pac_SOURCES			= pac.C
 pam_SOURCES			= pam.C
+paf_SOURCES                     = paf.C
 pascii_SOURCES			= pascii.C
 pat_SOURCES			= pat.C
 psradd_SOURCES			= psradd.C
