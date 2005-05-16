@@ -89,9 +89,6 @@ Rhythm::Rhythm (QApplication* master, QWidget* parent, int argc, char** argv) :
   track = false;
   ignore_one_eph = false;
   
-  Error::verbose = true;
-  setClassVerbose (vverbose);
-
   // Instantiate a box to hold all the stuff
 
   QHBox* container = new QHBox(this);
@@ -1153,7 +1150,9 @@ std::vector<double> Rhythm::give_me_data (toaPlot::AxisQuantity q)
 	try {
 	  Reference::To<Pulsar::Archive> data = Pulsar::Archive::load(useful2);
 	  data->pscrunch();
-	  Pulsar::Profile* stdprof = Pulsar::find_standard(data, the_stds);
+	  Pulsar::Profile* stdprof = 0;
+	  try { stdprof = Pulsar::find_standard(data, the_stds);
+	  } catch (Error& error) {}
 	  if (stdprof) {
 	    snrobj.set_standard(stdprof);
 	    toas[i].set_StoN(snrobj.get_morph_snr(data->get_Profile(sub,0,chn)));
