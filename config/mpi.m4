@@ -28,7 +28,10 @@ AC_DEFUN([SWIN_LIB_MPI],
      test x"$with_mpi_lib_dir" = x"no" ||
      test x"$with_mpi_link" = x"no"; then
     # user disabled mpi. Leave cache alone.
-    have_mpi="User disabled MPI."
+    AC_MSG_RESULT([User disabled MPI.])
+
+    have_mpi=no
+
   else
 
     # "yes" is not a specification
@@ -149,9 +152,9 @@ AC_DEFUN([SWIN_LIB_MPI],
 
     CPPFLAGS="$ac_save_CPPFLAGS"
 
-  fi
+    AC_MSG_RESULT([$have_mpi])
 
-  AC_MSG_RESULT([$have_mpi])
+  fi
 
   if test x"$have_mpi" != xno; then
     AC_DEFINE([HAVE_MPI],[1],
