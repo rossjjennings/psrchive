@@ -664,7 +664,15 @@ float Pulsar::Profile::sum_flux(int rise, int fall, float min_phase, float dc) c
 
   const float* amps = get_amps();
 
-  float mean_off_pulse = mean(min_phase,dc);
+  double mean_off_pulse = 0.0;
+  double var_off_pulse = 0.0;
+  double varmean = 0.0;
+  
+  stats (min_phase, 
+	 &mean_off_pulse, &var_off_pulse, &varmean,
+	 dc);
+  
+  fprintf(stderr,"Got sigma=%f\n",sqrt(var_off_pulse));
 
   for( int i=rise; i<fall; i++)
     integrated_flux += amps[i%nbin];
