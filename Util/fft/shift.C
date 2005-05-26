@@ -26,7 +26,7 @@ int fft_shift (int npts, float * arr, double shift)
     return(-1);
   }  
 
-  shiftrad = 2*M_PI*shift/(float)npts;
+  shiftrad = 2*M_PI*shift/(double)npts;
 
   for(i=0; i<npts; ++i){
     cmplx_arr[2*i] = arr[i];
@@ -49,12 +49,13 @@ int fft_shift (int npts, float * arr, double shift)
   fft_bcc1d(npts, cmplx_arr, fft_cmplx_arr);
 
   if (fft_get_normalization() == fft_nfft)
-    norm = (float) npts;
+    norm = 1.0 / (float) npts;
 
   for(i=0; i<npts; ++i)
-    arr[i] = cmplx_arr[2*i]/norm;
+    arr[i] = cmplx_arr[2*i]*norm;
 
   free(cmplx_arr);
   free(fft_cmplx_arr);
-  return(0);
+
+  return 0;
 }
