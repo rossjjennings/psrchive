@@ -216,14 +216,6 @@ void Pulsar::FITSArchive::unload_integration (int row,
       for(unsigned j = 0; j < get_nbin(); j++)
 	temparray1[j] = (p->get_amps())[j];
       
-      if (scale_cross_products) {
-	if (integ->get_state() == Signal::Coherence) {
-	  if (a == 2 || a == 3)
-	    for(unsigned j = 0; j < get_nbin(); j++)
-	      temparray1[j] /= 2.0;
-	}
-      }
-      
       if (verbose == 3) {
 	cerr << "FITSArchive::unload_integration got profile" << endl;
 	cerr << "nchan = " << b << endl;
