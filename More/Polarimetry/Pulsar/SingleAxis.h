@@ -1,12 +1,12 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/SingleAxis.h,v $
-   $Revision: 1.1 $
-   $Date: 2004/11/22 20:45:59 $
+   $Revision: 1.2 $
+   $Date: 2005/05/26 16:27:56 $
    $Author: straten $ */
 
-#ifndef __SingleAxis_H
-#define __SingleAxis_H
+#ifndef __Calibration_SingleAxis_H
+#define __Calibration_SingleAxis_H
 
 #include "MEAL/ProductRule.h"
 #include "MEAL/Complex2.h"
