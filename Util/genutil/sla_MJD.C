@@ -13,3 +13,27 @@ double MJD::LST (double longitude) const
   return lst;
 }
 
+#if 0
+
+int MJD::Construct (const struct tm& greg)
+{
+  int year = greg.tm_year + 1900;
+  int month = greg.tm_mon + 1;
+  int day = greg.tm_mday;
+
+  int status = 0;
+  double mjd = 0.0;
+
+  slaCldj (&year, &month, &day, &mjd, &status);
+
+  secs = 3600 * greg.tm_hour + 60 * greg.tm_min + greg.tm_sec;
+  days = 0;
+  fracsec = 0.0;
+
+  add_day (mjd);
+  settle ();
+
+  return 0;
+}
+
+#endif
