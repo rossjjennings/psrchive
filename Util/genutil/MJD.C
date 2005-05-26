@@ -139,7 +139,9 @@ char* MJD::datestr (char* dstr, int len, const char* format) const
   if (gregorian (&greg, NULL) < 0)
     return NULL;
 
-  strftime (dstr, len, format, &greg);
+  if (strftime (dstr, len, format, &greg) == 0)
+    return NULL;
+
   return dstr;
 }
 
