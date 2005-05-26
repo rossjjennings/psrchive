@@ -118,7 +118,7 @@ bin_PROGRAMS = pac paz vap vip psredit psradd fadd pat pam paf \
         fluxcal fix_coords test_Difference fix_hydra sesdiv \
         fix_3C353 archive_correct archive_denoise \
         fix_fluxcal archive_split psrconv pascii \
-	default_loader
+	default_loader 
 
 archive_correct_SOURCES		= archive_correct.C
 archive_denoise_SOURCES		= archive_denoise.C
@@ -168,7 +168,7 @@ libpsrchive_la_SOURCES += ArchiveProcessor.C Plotter.C CalibratorPlotter.C  \
 	Plotter_phase_fourier.C        Plotter_spherical.C  \
 	Plotter_phase_frequency.C
 
-bin_PROGRAMS += pacv pcvar pav pas psrwt psrsh pcm pvt \
+bin_PROGRAMS += pacv pcvar pav pas psrwt psrsh pcm pvt pad \
 	binphs_test pcm_chooser rmfit psrband SimTiming bin_clean
 
 SimTiming_SOURCES		= SimTiming.C
@@ -185,7 +185,7 @@ psrwt_SOURCES			= psrwt.C
 pvt_SOURCES			= pvt.C
 rmfit_SOURCES			= rmfit.C
 bin_clean_SOURCES		= bin_clean.C
-
+pad_SOURCES			= pad.C
 SimTiming_LDADD			= $(LDADD) @PGPLOT_LIBS@
 binphs_test_LDADD		= $(LDADD) @PGPLOT_LIBS@
 pacv_LDADD			= $(LDADD) @PGPLOT_LIBS@
