@@ -75,13 +75,13 @@ void Pulsar::FITSArchive::load_WidebandCorrelator (fitsfile* fptr)
       throw Error (InvalidParam, "FITSArchive::load_WidebandCorrelator",
                    "could not parse header version from " + hdr_ext->hdrver);
 
-    if (version < 1.14)  {
+    if (version < 1.135)  {
 
       scale_cross_products = true;
       if (verbose == 3)
         cerr << "Pulsar::FITSArchive::load_header "
                 "doubling cross products of WBCORR data with version " 
-             << setprecision(2) << version << endl;
+             << hdr_ext->hdrver << endl;
 
     }
 
@@ -103,10 +103,10 @@ void Pulsar::FITSArchive::load_WidebandCorrelator (fitsfile* fptr)
 
       conjugate_cross_products = true;
 
-      if (verbose == 3)
+      // if (verbose == 3)
         cerr << "Pulsar::FITSArchive::load_WidebandCorrelator\n"
-             "  correcting data with version=" << setprecision(2) << version
-             << " config=" << ext->configfile << endl;
+             "  correcting data with version=" << hdr_ext->hdrver
+             << " config=" << ext->configfile; // << endl;
 
     }
 
