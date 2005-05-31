@@ -123,11 +123,11 @@ Pulsar::Profile::morphological_difference (const Profile& profile,
   // This section scales the total flux under the profile to
   // be the same as under the standard
   
-  float t2sum = temp2->sum(phs1*(profile.get_nbin()),
-			   phs2*(profile.get_nbin()));
+  float t2sum = temp2->sum(int(phs1*(profile.get_nbin())),
+			   int(phs2*(profile.get_nbin())));
   
-  float ratio = t2sum / temp1->sum(phs1*(profile.get_nbin()),
-				   phs2*(profile.get_nbin()));
+  float ratio = t2sum / temp1->sum(int(phs1*(profile.get_nbin())),
+				   int(phs2*(profile.get_nbin())));
   
   *temp1 *= ratio;
 
