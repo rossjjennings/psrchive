@@ -102,7 +102,9 @@ endif
 SUBDIRS += .
 
 if HAVE_QT
+if HAVE_PGPLOT
 SUBDIRS += GUI
+endif
 endif
 
 if HAVE_QTDRIV
@@ -114,7 +116,7 @@ endif
 #
 # programs
 #
-bin_PROGRAMS = pac paz vap vip psredit psradd fadd pat pam paf \
+bin_PROGRAMS = pac paz vap vip psredit psradd fadd pat pam \
         fluxcal fix_coords test_Difference fix_hydra sesdiv \
         fix_3C353 archive_correct archive_denoise \
         fix_fluxcal archive_split psrconv pascii \
@@ -134,7 +136,6 @@ fluxcal_SOURCES			= fluxcal.C
 paz_SOURCES			= paz.C
 pac_SOURCES			= pac.C
 pam_SOURCES			= pam.C
-paf_SOURCES                     = paf.C
 pascii_SOURCES			= pascii.C
 pat_SOURCES			= pat.C
 psradd_SOURCES			= psradd.C
@@ -168,7 +169,7 @@ libpsrchive_la_SOURCES += ArchiveProcessor.C Plotter.C CalibratorPlotter.C  \
 	Plotter_phase_fourier.C        Plotter_spherical.C  \
 	Plotter_phase_frequency.C
 
-bin_PROGRAMS += pacv pcvar pav pas psrwt psrsh pcm pvt pad \
+bin_PROGRAMS += pacv pcvar pav pas psrwt psrsh pcm pvt pad paf \
 	binphs_test pcm_chooser rmfit psrband SimTiming bin_clean
 
 SimTiming_SOURCES		= SimTiming.C
@@ -186,6 +187,8 @@ pvt_SOURCES			= pvt.C
 rmfit_SOURCES			= rmfit.C
 bin_clean_SOURCES		= bin_clean.C
 pad_SOURCES			= pad.C
+paf_SOURCES                     = paf.C
+
 SimTiming_LDADD			= $(LDADD) @PGPLOT_LIBS@
 binphs_test_LDADD		= $(LDADD) @PGPLOT_LIBS@
 pacv_LDADD			= $(LDADD) @PGPLOT_LIBS@
