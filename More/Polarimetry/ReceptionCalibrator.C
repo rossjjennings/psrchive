@@ -160,7 +160,7 @@ void Pulsar::ReceptionCalibrator::initial_observation (const Archive* data)
   start_epoch = end_epoch = data->start_time ();
 
   model[0]->parallactic.set_epoch (start_epoch);
-  PA_max = PA_min = model[0]->parallactic.get_param (0);
+  PA_max = PA_min = model[0]->parallactic.get_parallactic_angle ();
 
 }
 
@@ -176,7 +176,7 @@ void Pulsar::ReceptionCalibrator::load_calibrators ()
 
       Reference::To<Archive> archive;
       archive = Pulsar::Archive::load(calibrator_filenames[ifile]);
-      
+      reflections.operate (archive);
       add_calibrator (archive);
 
     }
@@ -361,7 +361,7 @@ void Pulsar::ReceptionCalibrator::add_observation (const Archive* data)
       end_epoch = epoch;
 
     model[0]->parallactic.set_epoch (epoch);
-    Angle PA = -model[0]->parallactic.get_param (0);
+    Angle PA = model[0]->parallactic.get_parallactic_angle ();
 
     cerr << "Pulsar::ReceptionCalibrator::add_observation parallactic angle="
 	 << PA.getDegrees() << "deg" << endl;
