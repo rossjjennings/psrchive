@@ -1,9 +1,3 @@
-#include <string.h>
-#include <unistd.h>
-#include <libgen.h>
-#include "dirutil.h"
-
-#include "getopt.h"
 #include "Pulsar/Integration.h"
 #include "Pulsar/BasicIntegration.h"
 #include "Pulsar/Database.h"
@@ -11,14 +5,17 @@
 #include "Pulsar/PolnProfile.h"
 #include "Pulsar/FluxCalibrator.h"
 
-#include "Error.h"
-
 // Extensions this program understands
-
 #include "Pulsar/ProcHistory.h"
 
+#include "Error.h"
+#include "dirutil.h"
+#include "string_utils.h"
+
+#include <unistd.h>
+
 // A command line tool for calibrating Pulsar::Archives
-const char* args = "A:bcd:e:fFGhiIn:op:PqsSt:Tu:vVw";
+const char* args = "A:bcd:e:fFGhiIM:n:op:PqsSt:Tu:vVw";
 
 void usage ()
 {
@@ -54,7 +51,8 @@ void usage ()
     "  -f                     Override flux calibration flag\n"
     "  -G                     Normalize profile weights by absolute gain \n"
     "\n"
-    "Output options: \n"
+    "Input/Output options: \n"
+    "  -M meta                Specify file of files\n"
     "  -e extension           Use this extension when unloading results \n"
     "  -n [q|u|v]             Flip the sign of Stokes Q, U, or V \n"
     "\n"
@@ -82,6 +80,9 @@ int main (int argc, char *argv[]) {
 
   bool write_database_file = false;
   bool check_flags = true;
+
+  // name of file containing list of Archive filenames
+  char* metafile = NULL;
   
   Pulsar::Calibrator::Type pcal_type = Pulsar::Calibrator::SingleAxis;
 
@@ -93,8 +94,6 @@ int main (int argc, char *argv[]) {
   string model_file;
   vector<string> exts;
 
-  vector<string> archives;
-  
   string pcal_file;
 
   int gotc = 0;
@@ -132,7 +131,7 @@ int main (int argc, char *argv[]) {
       break;
 
     case 'i':
-      cout << "$Id: pac.C,v 1.63 2005/03/10 06:54:07 straten Exp $" << endl;
+      cout << "$Id: pac.C,v 1.64 2005/06/08 04:57:23 straten Exp $" << endl;
       return 0;
 
     case 'A':
@@ -155,6 +154,10 @@ int main (int argc, char *argv[]) {
 
     case 'G':
       Pulsar::PolnProfile::normalize_weight_by_absolute_gain = true;
+      break;
+
+    case 'M':
+      metafile = optarg;
       break;
 
     case 'n': {
@@ -247,10 +250,15 @@ int main (int argc, char *argv[]) {
 
   Pulsar::Database::set_default_criterion (criterion);
 
-  for (int ai=optind; ai<argc; ai++)
-    dirglob (&archives, argv[ai]);
-  
-  if (archives.empty()) {
+  vector <string> filenames;
+
+  if (metafile)
+    stringfload (&filenames, metafile);
+  else
+    for (int ai=optind; ai<argc; ai++)
+      dirglob (&filenames, argv[ai]);
+
+  if (filenames.empty()) {
     if (!write_database_file) {
       cout << "pac: No Archives were specified. Exiting" << endl;
       exit(-1);
@@ -332,21 +340,21 @@ int main (int argc, char *argv[]) {
     
   // Start calibrating archives
   
-  for (unsigned i = 0; i < archives.size(); i++) try {
+  for (unsigned i = 0; i < filenames.size(); i++) try {
 
     cout << endl;
 
     if (verbose)
-      cerr << "pac: Loading " << archives[i] << endl;
+      cerr << "pac: Loading " << filenames[i] << endl;
     
-    Reference::To<Pulsar::Archive> arch = Pulsar::Archive::load(archives[i]);
+    Reference::To<Pulsar::Archive> arch = Pulsar::Archive::load(filenames[i]);
     
-    cout << "pac: Loaded archive " << archives[i] << endl;
+    cout << "pac: Loaded archive " << filenames[i] << endl;
     
     bool successful_polncal = false;
 
     if (do_polncal && arch->get_poln_calibrated() )
-      cout << "pac: " << archives[i] << " already poln calibrated" << endl;
+      cout << "pac: " << filenames[i] << " already poln calibrated" << endl;
 
     else if (do_polncal && !arch->get_poln_calibrated()) {
       
@@ -396,7 +404,7 @@ int main (int argc, char *argv[]) {
     bool successful_fluxcal = false;
     
     if (do_fluxcal && arch->get_scale() == Signal::Jansky && check_flags)
-      cout << "pac: " << archives[i] << " already flux calibrated" << endl;
+      cout << "pac: " << filenames[i] << " already flux calibrated" << endl;
     
     else if (!dbase)
       cout << "pac: Not performing flux calibration (no database)." << endl;
@@ -432,19 +440,19 @@ int main (int argc, char *argv[]) {
 
     // find first of "." turns ./cal/poo.cfb info .unload_ext WvS
     //
-    // int index = archives[i].find_first_of(".", 0);
+    // int index = filenames[i].find_first_of(".", 0);
 
-    unsigned index = archives[i].find_last_of(".",archives[i].length());
+    unsigned index = filenames[i].find_last_of(".",filenames[i].length());
 
     if (index == string::npos)
-      index = archives[i].length();
+      index = filenames[i].length();
 
     // starting the output filename with the cwd causes a mess when 
     // full path names to input files are used.  WvS
     //  
     // string newname = opath;
     
-    string newname = archives[i].substr(0, index);
+    string newname = filenames[i].substr(0, index);
     
     newname += ".";
     newname += unload_ext;
@@ -530,7 +538,7 @@ int main (int argc, char *argv[]) {
     
   }
   catch (Error& error) {
-    cerr << "pac: Error while handling " << archives[i] << ":" << endl; 
+    cerr << "pac: Error while handling " << filenames[i] << ":" << endl; 
     cerr << error << endl;
   }
 
