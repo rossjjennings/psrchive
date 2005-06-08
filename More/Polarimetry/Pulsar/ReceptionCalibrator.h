@@ -1,14 +1,15 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ReceptionCalibrator.h,v $
-   $Revision: 1.64 $
-   $Date: 2005/04/24 01:28:07 $
+   $Revision: 1.65 $
+   $Date: 2005/06/08 04:33:13 $
    $Author: straten $ */
 
 #ifndef __Pulsar_ReceptionCalibrator_H
 #define __Pulsar_ReceptionCalibrator_H
 
 #include "Pulsar/SystemCalibrator.h"
+#include "Pulsar/ReflectStokes.h"
 
 // Parameterizations of the instrument and source
 #include "Calibration/StandardModel.h"
@@ -36,7 +37,7 @@ namespace Pulsar {
     //! Update each source with the mean
     void update_source();
 
-    //! Model of Stokes parameters added to equation as a function of frequency
+    //! Model of Stokes parameters as a function of frequency
     std::vector< MEAL::Coherency > source;
 
     //! Best guess of Stokes parameters
@@ -93,6 +94,8 @@ namespace Pulsar {
     bool normalize_by_invariant;
     bool independent_gains;
     bool check_pointing;
+
+    ReflectStokes reflections;
 
     //! Add the specified pulse phase bin to the set of state constraints
     void add_state (unsigned pulse_phase_bin);
