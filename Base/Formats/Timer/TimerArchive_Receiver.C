@@ -10,7 +10,7 @@ bool is_valid_string (const char* str, unsigned length)
   for (unsigned i=0; i < length; i++) {
     if (str[i] == '\0')
       return true;
-    if (!isalnum(str[i]))
+    if (!isalnum(str[i]) && str[i]!='_' && str[i]!='-')
       return false;
   }
   return false;
