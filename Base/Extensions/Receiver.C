@@ -215,7 +215,7 @@ Jones<double> Pulsar::Receiver::get_transformation () const
   MEAL::Rotation rotation ( Pauli::basis.get_basis_vector(2) );
 
   // the sign of this rotation may depend on handedness
-  rotation.set_phi ( -get_orientation().getRadians() );
+  rotation.set_phi ( get_orientation().getRadians() );
 
   xform *= rotation.evaluate();
 
