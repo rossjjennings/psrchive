@@ -155,7 +155,7 @@ Pulsar::CorrectionsCalibrator::get_feed_transformation (const Pointing* point,
 
   // rotate the basis about the Stokes V axis
   MEAL::Rotation rotation ( Pauli::basis.get_basis_vector(2) );
-  rotation.set_phi ( -feed_rotation );
+  rotation.set_phi ( feed_rotation );
   return rotation.evaluate();
 
 }
@@ -246,7 +246,7 @@ Pulsar::CorrectionsCalibrator::get_transformation (const Archive* archive,
 
     para.set_epoch( integration->get_epoch() );
 
-    Angle pa = -para.get_phi();
+    Angle pa = para.get_parallactic_angle();
  
     // check that the para_ang is equal
 

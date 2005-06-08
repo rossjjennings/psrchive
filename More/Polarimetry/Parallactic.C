@@ -87,13 +87,25 @@ void Calibration::Parallactic::set_hour_angle (double hour_angle)
 	    &elevation, &ignore, &ignore,
 	    &para,      &ignore, &ignore);
 
-  set_phi (-para);
+  // Rotate the basis about the line of sight by para
+  set_phi (para);
   current_hour_angle = hour_angle;
 }
 
 double Calibration::Parallactic::get_hour_angle () const
 {
   return current_hour_angle;
+}
+
+void Calibration::Parallactic::set_parallactic_angle (double para)
+{
+  set_phi (para);
+  current_hour_angle = 99;
+}
+
+double Calibration::Parallactic::get_parallactic_angle () const
+{
+  return get_phi();
 }
 
 void Calibration::Parallactic::reset ()

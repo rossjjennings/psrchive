@@ -89,7 +89,8 @@ double Calibration::Faraday::get_rotation () const
   // The Parameters base class stores the rotation measure
   double rotation_measure = get_param (0);
 
-  return rotation_measure * (lambda_0*lambda_0 - lambda*lambda);
+  // Longer wavelength -> greater rotation
+  return rotation_measure * (lambda*lambda - lambda_0*lambda_0);
 }
 
 //! Calculate the Jones matrix and its gradient
@@ -98,7 +99,8 @@ void Calibration::Faraday::calculate (Jones<double>& result,
 {
   // remember that Psi = .5 atan(U/Q)
   // (the rotation will be doubled in the Poincare space)
-  rotation.set_phi ( get_rotation() );
+  // Also, the Rotation transformation rotates the basis, so the angle is -ve
+  rotation.set_phi ( -get_rotation() );
   result = rotation.evaluate (grad);
 
   if (!grad)
