@@ -97,9 +97,9 @@ void Calibration::SingleAxisSolver::init ()
 
   // find the rotation
   MEAL::ScalarMath cos_2phi = input_perp * output_perp;
-  MEAL::ScalarMath sin_2phi = cross( output_perp, input_perp ) * axis;
+  MEAL::ScalarMath sin_2phi = cross( input_perp, output_perp ) * axis;
 
-  diff_phase = 0.5 * atan2 (sin_2phi, cos_2phi);
+  diff_phase = -0.5 * atan2 (sin_2phi, cos_2phi);
 
   // find the boost
   MEAL::ScalarMath input_p = input_vector * axis;
