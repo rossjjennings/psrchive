@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/Parallactic.h,v $
-   $Revision: 1.1 $
-   $Date: 2004/11/22 20:45:59 $
+   $Revision: 1.2 $
+   $Date: 2005/06/08 04:33:25 $
    $Author: straten $ */
 
 #ifndef __Calibration_Parallactic_H
@@ -73,6 +73,12 @@ namespace Calibration {
 
     //! Get the hour_angle in radians
     double get_hour_angle () const;
+
+    //! Set the parallactic angle in radians
+    void set_parallactic_angle (double pa);
+
+    //! Get the parallactic angle in radians
+    double get_parallactic_angle () const;
 
   protected:
 
