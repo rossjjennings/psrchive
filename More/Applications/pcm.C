@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pcm.C,v $
-   $Revision: 1.41 $
-   $Date: 2005/04/24 01:26:44 $
+   $Revision: 1.42 $
+   $Date: 2005/06/08 04:57:32 $
    $Author: straten $ */
 
 /*! \file pcm.C 
@@ -39,14 +39,20 @@
 
 #include "Pulsar/Plotter.h"
 #include "Pulsar/Archive.h"
-#include "getopt.h"
+#include "Pulsar/ReflectStokes.h"
 
 #include "RealTimer.h"
 #include "Error.h"
 #include "dirutil.h"
 #include "string_utils.h"
 
+#ifdef HAVE_CONFIG_H
+#include<config.h>
+#endif
+
+#if HAVE_PGPLOT
 #include <cpgplot.h>
+#endif
 
 #include <iostream>
 #include <algorithm>
@@ -109,24 +115,25 @@ void auto_select (Pulsar::ReceptionCalibrator& model,
     model.add_state (bins[ibin]);
   }
 
-    cpgbeg (0, "chosen.ps/CPS", 0, 0);
-    cpgslw(2);
-    cpgsvp (.1,.9, .1,.9);
-  
-    cerr << "pcm: plotting chosen phase bins" << endl;
-    Pulsar::Plotter profile;
-    profile.spherical (archive);
+#if HAVE_PGPLOT
+  cpgbeg (0, "chosen.ps/CPS", 0, 0);
+  cpgslw(2);
+  cpgsvp (.1,.9, .1,.9);
 
-    cpgswin (0,1,0,1);
-    cpgsls (2);
-    for (unsigned ibin=0; ibin < bins.size(); ibin++) {
-      float phase = float(bins[ibin])/float(archive->get_nbin());
-      cpgmove (phase, 0);
-      cpgdraw (phase, 1);
-    }
+  cerr << "pcm: plotting chosen phase bins" << endl;
+  Pulsar::Plotter profile;
+  profile.spherical (archive);
 
-    cpgend();
+  cpgswin (0,1,0,1);
+  cpgsls (2);
+  for (unsigned ibin=0; ibin < bins.size(); ibin++) {
+    float phase = float(bins[ibin])/float(archive->get_nbin());
+    cpgmove (phase, 0);
+    cpgdraw (phase, 1);
+  }
 
+  cpgend();
+#endif
 }
 
 
@@ -151,6 +158,8 @@ void range_select (Pulsar::ReceptionCalibrator& model,
     }
   }
 }
+
+#if HAVE_PGPLOT
 
 void plot_pulsar (Pulsar::ReceptionCalibratorPlotter& plotter,
 		  Pulsar::ReceptionCalibrator& model)
@@ -230,6 +239,8 @@ void plot_constraints (Pulsar::ReceptionCalibratorPlotter& plotter,
 
 }
 
+#endif // HAVE_PGPLOT
+
 int mode_B (const char* standard_filename,
 	    const vector<string>& filenames);
 
@@ -247,6 +258,9 @@ bool verbose = false;
 
 //! The maximum number of bins to use
 unsigned maxbins = 16;
+
+//! The Stokes parameters to be inverted
+Pulsar::ReflectStokes reflections;
 
 //! Flag raised when the above value is set using -n
 bool maxbins_set = false;
@@ -295,7 +309,7 @@ int main (int argc, char *argv[]) try {
   bool publication_plots = false;
 
   int gotc = 0;
-  const char* args = "a:b:c:C:d:Df:ghM:m:n:OPp:qsS:t:uvV:";
+  const char* args = "a:b:c:C:d:Df:ghM:m:N:n:OPp:qsS:t:uvV:";
   while ((gotc = getopt(argc, argv, args)) != -1) {
     switch (gotc) {
 
@@ -357,13 +371,17 @@ int main (int argc, char *argv[]) try {
       maxbins_set = true;
       break;
 
+    case 'N':
+      reflections.add_reflection (optarg[0]);
+      break;
+
     case 'P':
       publication_plots = true;
       break;
 
     case 'p':
       if (sscanf (optarg, "%f,%f", &phmin, &phmax) != 2) {
-	cerr << "pcm: error parsing " << optarg << " as phase window" << endl;
+	cerr << "pcm: error parsing " << optarg << " as window" << endl;
 	return -1;
       }
       cerr << "pcm: selecting input states from " << phmin << " to " << phmax
@@ -487,6 +505,8 @@ int main (int argc, char *argv[]) try {
 
   model.independent_gains = independent_gains;
 
+  model.reflections = reflections;
+
   // add the specified phase bins
   for (unsigned ibin=0; ibin<phase_bins.size(); ibin++)
     model.add_state (phase_bins[ibin]);
@@ -564,6 +584,7 @@ int main (int argc, char *argv[]) try {
 
   if (binfile) try {
     autobin = Pulsar::Archive::load (binfile);
+    reflections.operate (autobin);
     autobin->dedisperse ();
     autobin->fscrunch ();
     autobin->tscrunch ();
@@ -590,6 +611,7 @@ int main (int argc, char *argv[]) try {
 	  cerr << "pcm: loading " << filenames[i] << endl;
 	
 	archive = Pulsar::Archive::load(filenames[i]);
+        reflections.operate (archive);
 
         if (!archive) {
           cerr << "pcm: error loading " << filenames[i] << endl;
@@ -674,8 +696,9 @@ int main (int argc, char *argv[]) try {
   Pulsar::ReceptionCalibratorPlotter plotter (&model);
   plotter.use_colour = !publication_plots;
 
-  if (display && only_ichan < 0) {
+#if HAVE_PGPLOT
 
+  if (display && only_ichan < 0) {
 
     cpgbeg (0, "guess.ps/CPS", 0, 0);
     cpgask(1);
@@ -718,6 +741,8 @@ int main (int argc, char *argv[]) try {
 
   }
 
+#endif // HAVE_PGPLOT
+
   total = 0;
 
   cerr << "pcm: solving model" << endl;
@@ -734,6 +759,8 @@ int main (int argc, char *argv[]) try {
 
   cerr << "pcm: unloading solution to " << solution->get_filename() << endl;
   solution->unload( "pcm.fits" );
+
+#if HAVE_PGPLOT
 
   if (display) {
 
@@ -767,6 +794,8 @@ int main (int argc, char *argv[]) try {
 
   }
 
+#endif // HAVE_PGPLOT
+
   for (unsigned ical=0; ical < cal_filenames.size(); ical++)
     dirglob (&filenames, cal_filenames[ical]);
   
@@ -780,6 +809,7 @@ int main (int argc, char *argv[]) try {
 	cerr << "pcm: loading " << filenames[i] << endl;
 
       archive = Pulsar::Archive::load(filenames[i]);
+      reflections.operate (archive);
 
       cout << "pcm: loaded archive: " << filenames[i] << endl;
       
@@ -826,6 +856,8 @@ int main (int argc, char *argv[]) try {
     total->unload ("total.ar");
   }
 
+#if HAVE_PGPLOT
+
   if (display) {
 
     cpgbeg (0, "calibrated.ps/CPS", 0, 0);
@@ -839,6 +871,8 @@ int main (int argc, char *argv[]) try {
 
     cpgend ();
   }
+
+#endif // HAVE_PGPLOT
 
   return 0;
 }
@@ -862,6 +896,7 @@ int mode_B (const char* standard_filename,
 
   standard = Pulsar::Archive::load (standard_filename);
   standard->convert_state (Signal::Stokes);
+  reflections.operate (standard);
 
   RealTimer clock;
 
@@ -887,6 +922,7 @@ int mode_B (const char* standard_filename,
     
     archive = Pulsar::Archive::load(filenames[i]);
     archive->convert_state (Signal::Stokes);
+    reflections.operate (archive);
 
     cout << "pcm: loaded archive: " << filenames[i] << endl;
 
