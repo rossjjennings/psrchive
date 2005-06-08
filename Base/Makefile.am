@@ -25,7 +25,8 @@ nobase_include_HEADERS = \
 	Pulsar/PhaseWeight.h             Pulsar/ArchiveTI.h \
 	Pulsar/PhaseWeightFunction.h     model_profile.h \
 	Pulsar/Plotter.h                 Pulsar/IntegrationTI.h \
-	Pulsar/ExtensionTI.h             Pulsar/BaselineWindow.h
+	Pulsar/ExtensionTI.h             Pulsar/BaselineWindow.h \
+	Pulsar/ReflectStokes.h
 
 libpsrchive_la_SOURCES = plugins.csh getopt.h Physical.h \
 	AdaptiveSNR.C                 Integration_new_PolnProfile.C  \
@@ -47,7 +48,7 @@ libpsrchive_la_SOURCES = plugins.csh getopt.h Physical.h \
 	Archive_toas.C                Profile_basic_shift.C  \
 	Archive_total.C               Profile_convolve.C  \
 	Archive_transform.C           Profile_denoise.C  \
-	Profile_find_minmax_phase.C \
+	Profile_find_minmax_phase.C   ReflectStokes.C \
 	Archive_tscrunch.C            Profile_find_peak_edges.C  \
 	Archive_unload.C              Profile_find_transitions.C  \
 	Archive_update_model.C        Profile_flux.C  \
