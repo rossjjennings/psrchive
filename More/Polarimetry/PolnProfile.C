@@ -298,7 +298,7 @@ void Pulsar::PolnProfile::convert_state (Signal::State out_state)
   }
   else if (out_state == Signal::Coherence) {
 
-    cerr << "convert_state to Signal::Coherence" << endl;
+    // cerr << "convert_state to Signal::Coherence" << endl;
 
     if (basis == Signal::Circular) {
       float* ReLR   = profile[1]->get_amps();
