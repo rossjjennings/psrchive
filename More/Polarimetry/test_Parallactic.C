@@ -18,12 +18,13 @@ int main (int argc, char** argv) try {
   sky_coord coordinates ("00:00+45:00");
   para.set_source_coordinates( coordinates );
   para.set_hour_angle (0.0);
+  double pa = para.get_parallactic_angle() * 180/M_PI;
 
   cerr << "source coordinates=" << coordinates << endl;
   cerr << "hour angle=" << para.get_hour_angle() << endl;
-  cerr << "parallactic angle=" << -para.get_phi() * 180/M_PI << " deg" << endl;
+  cerr << "parallactic angle=" << pa << " deg" << endl;
 
-  if (-para.get_phi() != M_PI) {
+  if (para.get_parallactic_angle() != M_PI) {
     cerr << "Unexpected parallactic angle" << endl;
     return -1;
   }
@@ -37,12 +38,13 @@ int main (int argc, char** argv) try {
 
   para.set_source_coordinates( coordinates );
   para.set_hour_angle (1.0);
+  pa = para.get_parallactic_angle();
 
   cerr << "source coordinates=" << coordinates << endl;
   cerr << "hour angle=" << para.get_hour_angle() << endl;
-  cerr << "parallactic angle=" << -para.get_phi() * 180/M_PI << " deg" << endl;
+  cerr << "parallactic angle=" << pa * 180/M_PI << " deg" << endl;
 
-  if (-para.get_phi() < M_PI/2 || -para.get_phi() > M_PI) {
+  if (pa < M_PI/2 || pa > M_PI) {
     cerr << "Unexpected parallactic angle" << endl;
     return -1;
   }
@@ -57,16 +59,17 @@ int main (int argc, char** argv) try {
   coordinates = sky_coord ("00:00+00:00");
   para.set_source_coordinates( coordinates );
   para.set_hour_angle (2.0);
+  pa = para.get_parallactic_angle();
 
   cerr << "source coordinates=" << coordinates << endl;
   cerr << "hour angle=" << para.get_hour_angle() << endl;
-  cerr << "parallactic angle=" << -para.get_phi() * 180/M_PI << " deg" << endl;
+  cerr << "parallactic angle=" << pa * 180/M_PI << " deg" << endl;
 
   //
   //
   //
 
-  if (-para.get_phi() != M_PI/2) {
+  if (pa != M_PI/2) {
     cerr << "Unexpected parallactic angle" << endl;
     return -1;
   }
@@ -77,12 +80,13 @@ int main (int argc, char** argv) try {
   coordinates = sky_coord ("00:00-45:00");
   para.set_source_coordinates( coordinates );
   para.set_hour_angle (1.0);
+  pa = para.get_parallactic_angle();
 
   cerr << "source coordinates=" << coordinates << endl;
   cerr << "hour angle=" << para.get_hour_angle() << endl;
-  cerr << "parallactic angle=" << -para.get_phi() * 180/M_PI << " deg" << endl;
+  cerr << "parallactic angle=" << pa * 180/M_PI << " deg" << endl;
 
-  if (-para.get_phi() < 0 || -para.get_phi() > M_PI/2) {
+  if (pa < 0 || pa > M_PI/2) {
     cerr << "Unexpected parallactic angle" << endl;
     return -1;
   }
