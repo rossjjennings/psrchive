@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Projection.h,v $
-   $Revision: 1.4 $
-   $Date: 2005/02/13 08:33:03 $
-   $Author: straten $ */
+   $Revision: 1.5 $
+   $Date: 2005/06/11 05:12:07 $
+   $Author: redwards $ */
 
 #ifndef __Projection_H
 #define __Projection_H
@@ -13,6 +13,7 @@
 namespace MEAL {
 
   class Function;
+  class Composite;
 
   //! Manages a Function and the mapping of its parameters into a Composite
   class Projection : public Reference::Able {
