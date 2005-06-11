@@ -11,6 +11,8 @@
 #include "coord.h"
 #include "Error.h"
 
+const float Tempo::toa::UNSET = -999.0;
+
 void Tempo::toa::get_az_zen_para (double ra, double dec,
 				  float& az, float& zen, float& para) const
 {

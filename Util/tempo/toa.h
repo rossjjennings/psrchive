@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/toa.h,v $
-   $Revision: 1.19 $
-   $Date: 2005/03/08 10:00:40 $
-   $Author: ahotan $ */
+   $Revision: 1.20 $
+   $Date: 2005/06/11 18:39:21 $
+   $Author: redwards $ */
 
 #ifndef __TOA_H
 #define __TOA_H
@@ -35,7 +35,7 @@ namespace Tempo {
     
   public:
     
-    static const float UNSET = -999.999;
+    static const float UNSET;
     
     enum Format { 
       Unspecified,
