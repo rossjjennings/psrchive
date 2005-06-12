@@ -626,6 +626,27 @@ void Pulsar::Profile::find_spike_edges(int& rise, int& fall, float pc,
 
 /////////////////////////////////////////////////////////////////////////////
 //
+// Pulsar::Profile::zap_periodic_spikes
+/*! Interpolate over peaks of 1-bin wide modulation feature.
+
+  period and phase are both measured in bins 
+*/
+void Pulsar::Profile::zap_periodic_spikes(int period, int phase)
+{
+  int i, iprev, inext;
+  int nbin = get_nbin();
+
+  for (i=phase; i < nbin; i+=period)
+  {
+    iprev = (i > 0 ? i-1 : nbin);
+    inext = (i < nbin-1 ? i+1 : 0);
+    amps[i] = 0.5*(amps[iprev]+amps[inext]);
+  }
+}
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
 // Pulsar::Profile::sum_flux
 //
 /*! From the given pulse width this calculates the average flux contained

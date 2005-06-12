@@ -36,6 +36,7 @@ void usage ()
     "  -S \"a b\"         Delete sub-ints between a & b inclusive\n"
     "  -w \"a b c ...\"   Zero weight these sub-integrations\n"
     "  -W \"a b\"         Zero weight sub-ints between a & b inclusive\n"
+    "  -p \"p phi\"       Interpolate over every p-th phase bin, start phase phi (bins)\n"
     "\n"
     "Automatic zapping algorithms:\n"
     "  -n               Zap channels with excessive normalized rms\n"
@@ -44,7 +45,7 @@ void usage ()
     "  -C cutoff        Zero weight chans based on S/N (std optional)\n"
     "  -P stdfile       Use this standard profile\n"
     "  -R size          Set the size of the median smoothing window\n"
-    "  -8               Attempts to fix ATNF WBCORR 8 bin problem\n"
+    "  -8               Attempts to fix ATNF WBCORR 8 bin problem (see also -p)\n"
     "\n"
     "The format of the kill file used with the -k option is simply\n"
     "a list of channel numbers, separated by white space\n"        
@@ -86,6 +87,9 @@ int main (int argc, char *argv[]) {
   
   bool std_given = false;
   Reference::To<Pulsar::Profile> thestd;
+
+  bool periodic_zap = false;
+  int periodic_zap_period=8, periodic_zap_phase=0;
   
   string ext;
   
@@ -99,7 +103,7 @@ int main (int argc, char *argv[]) {
   Pulsar::ChannelZapMedian* median_zapper = 0;
   Pulsar::ChannelZapModulation* modulation_zapper = 0;
 
-  const char* args = "8C:dDe:E:hik:mnP:rR:s:S:u:vVw:W:x:X:z:Z:";
+  const char* args = "8C:dDe:E:hik:mnp:P:rR:s:S:u:vVw:W:x:X:z:Z:";
 
   while ((gotc = getopt(argc, argv, args)) != -1) {
     switch (gotc) {
@@ -115,7 +119,7 @@ int main (int argc, char *argv[]) {
       Pulsar::Archive::set_verbosity(3);
       break;
     case 'i':
-      cout << "$Id: paz.C,v 1.26 2005/04/24 01:26:24 straten Exp $" << endl;
+      cout << "$Id: paz.C,v 1.27 2005/06/12 02:30:38 redwards Exp $" << endl;
       return 0;
 
     case 'm':
@@ -148,6 +152,17 @@ int main (int argc, char *argv[]) {
       eightBinZap = true;
       break;
 
+    case 'p':
+      {
+      periodic_zap = true;
+
+	if (sscanf(optarg, "%d %d", &periodic_zap_period, 
+		   &periodic_zap_phase) != 2) {
+	  cerr << "Invalid parameter to option -Z" << endl;
+	  return (-1);
+	}
+	break;
+      }
     case 'Z':
       {
 	unsigned first = 1;
@@ -349,7 +364,22 @@ int main (int argc, char *argv[]) {
     Reference::To<Pulsar::Archive> arch = Pulsar::Archive::load(archives[i]);
     
     cout << "Loaded archive: " << archives[i] << endl;
-    
+ 
+
+    if (periodic_zap)
+    {
+      if (arch->get_nchan() == 1)
+      {
+	printf("Warning! Periodic spike zapping on frequency-scrunched dedispersed data may\n");
+	printf("not be what you intended! (spikes will wash out)\n");
+      }
+      for (unsigned pol = 0;pol < arch->get_npol();pol++) 
+	for (unsigned chan=0;chan < arch->get_nchan();chan++) 
+	  for (unsigned subint = 0;subint < arch->get_nsubint();subint++) 
+	    arch->get_Profile(subint,pol,chan)->zap_periodic_spikes
+	      (periodic_zap_period, periodic_zap_phase);
+    }
+   
     if (eightBinZap) {  // To fix early wide-band correlator problem
 
       for (unsigned pol = 0;pol < arch->get_npol();pol++) {
@@ -521,7 +551,7 @@ int main (int argc, char *argv[]) {
     cout << "Unloading " << the_new << " ..." << endl;
     arch->unload(the_new);
     cout << "New file " << the_new << " written to disk" << endl;
-  
+	  
   }
   catch (Error& error) {
     cerr << "paz: Error while handling " << archives[i] << error << endl;

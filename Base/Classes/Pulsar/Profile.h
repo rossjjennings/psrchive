@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Profile.h,v $
-   $Revision: 1.83 $
-   $Date: 2005/04/27 10:09:17 $
-   $Author: straten $ */
+   $Revision: 1.84 $
+   $Date: 2005/06/12 02:30:53 $
+   $Author: redwards $ */
 
 #ifndef __Pulsar_Profile_h
 #define __Pulsar_Profile_h
@@ -163,6 +163,9 @@ namespace Pulsar {
     void find_spike_edges(int& rise, int& fall, 
 			  float pc = default_amplitude_dropoff,
 			  int spike_bin = -1) const;
+
+    //! Interpolate over peaks of 1-bin wide modulation feature
+    void zap_periodic_spikes(int period, int phase);
     
     //! Sum the flux in the specified bins
     float sum_flux(int rise, int fall,
