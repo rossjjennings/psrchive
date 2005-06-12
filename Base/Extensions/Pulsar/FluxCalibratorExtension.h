@@ -1,17 +1,19 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/FluxCalibratorExtension.h,v $
-   $Revision: 1.3 $
-   $Date: 2004/10/08 12:57:19 $
-   $Author: straten $ */
+   $Revision: 1.4 $
+   $Date: 2005/06/12 00:01:11 $
+   $Author: redwards $ */
 
 #ifndef __FluxCalibratorExtension_h
 #define __FluxCalibratorExtension_h
 
 #include "Pulsar/CalibratorExtension.h"
 
+
 namespace Pulsar {
 
+  class FluxCalibrator;
   //! Flux Calibrator Extension
   /*! This Extension implements the storage of FluxCalibrator data. */
   
