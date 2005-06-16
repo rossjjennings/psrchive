@@ -482,6 +482,28 @@ void Pulsar::Integration::pscrunch()
 
 } 
 
+void Pulsar::Integration::get_profile_power_spectra(float gamma)
+{
+  if (get_npol()<1 || get_nchan()<1)
+    return;
+
+  if (verbose)
+    cerr << "Integration::get_profile_power_spectra" << endl;
+
+  try {
+    for (unsigned ipol=0; ipol<get_npol(); ipol++)
+      for (unsigned ichan=0; ichan<get_nchan(); ichan++)
+	profiles[ipol][ichan] -> get_power_spectrum(gamma);
+
+    set_nbin ( profiles[0][0] -> get_nbin() );
+  }
+  catch (Error& error) {
+    throw error += "Integration::get_profile_power_spectra()";
+  }
+}
+
+  
+
 void Pulsar::Integration::rotate (double time)
 {
   double pfold = get_folding_period ();

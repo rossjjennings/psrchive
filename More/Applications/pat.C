@@ -48,14 +48,16 @@ void usage ()
     "  -p               Perform full polarimetric fit in Fourier domain \n"
     "  -s stdfile       Location of standard profile \n"
     "  -D               Denoise standard \n"
+    "  -S period        Zap spectral components due to periodic spikes in profile (implies -A SIS)\n"
     "\n"
     "Algorithm Selection:\n"
-    "  -A [PGS | GIS | PIS | ZPF] \n"
+    "  -A [PGS | GIS | PIS | ZPF | SIS] \n"
     "                   Select shift algorithm (default PGS) \n"
     "                      PGS = Fourier phase gradient \n"
     "                      GIS = Gaussian interpolation \n"
     "                      PIS = Parabolic interpolation \n"
     "                      ZPF = Zero pad interpolation \n"
+    "                      SIS = Sinc interpolation of cross-corration function\n"
     "\n"
     "Output options:\n"
     "  -f \"format <flags>\"  Output format (parkes = default, tempo2, itoa, princeton ...)\n"
@@ -92,7 +94,7 @@ int main (int argc, char *argv[])
   int gotc = 0;
 
   Pulsar::PolnProfileFit fit;
-  while ((gotc = getopt(argc, argv, "hiDFn:ps:g:a:A:tTvV:f:q")) != -1) {
+  while ((gotc = getopt(argc, argv, "hiDFn:ps:g:a:A:tTvV:f:qS:")) != -1) {
     switch (gotc) {
     case 'h':
       usage ();
@@ -117,7 +119,7 @@ int main (int argc, char *argv[])
       denoise = true;
       break;
     case 'i':
-      cout << "$Id: pat.C,v 1.38 2005/03/30 13:19:50 straten Exp $" << endl;
+      cout << "$Id: pat.C,v 1.39 2005/06/16 07:07:20 redwards Exp $" << endl;
       return 0;
 
     case 'F':
@@ -172,9 +174,17 @@ int main (int argc, char *argv[])
       else if (strcasecmp (optarg, "ZPS") == 0)
 	Pulsar::Profile::shift_strategy.set(&Pulsar::ZeroPadShift);
       
+      else if (strcasecmp (optarg, "SIS") == 0)
+	Pulsar::Profile::shift_strategy.set(&Pulsar::SincInterpShift);
+      
       else
 	cerr << "pat: unrecognized shift method '" << optarg << "'" << endl;
 
+      break;
+
+    case 'S':
+      Pulsar::Profile::shift_strategy.set(&Pulsar::SincInterpShift);      
+      Pulsar::Profile::SIS_zap_period = atoi(optarg);
       break;
 
     case 's':

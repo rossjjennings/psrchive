@@ -1,5 +1,5 @@
 //
-// $Id: pav.C,v 1.98 2005/05/06 13:20:39 straten Exp $
+// $Id: pav.C,v 1.99 2005/06/16 07:07:20 redwards Exp $
 //
 // The Pulsar Archive Viewer
 //
@@ -59,6 +59,7 @@ void usage ()
     " -p        Add all polarisations together\n"
     " -Z        Smear profiles before plotting\n"
     " --nbin n  Bscrunch profiles to this many bins\n"
+    " --spec    Replace each profile with its power spectrum\n"
     "\n"
     "Integration re-ordering (nsub = final # of subints):\n"
     " --convert_binphsperi   nsub\n"
@@ -203,6 +204,8 @@ int main (int argc, char** argv)
   bool cblao              = false;
   bool mask               = false;
   bool plot_total_archive = false;
+  bool profile_spectrum   = false;
+  float spectrum_gamma = 1.0;
 
   Reference::To<Pulsar::Archive> std_arch;
   Reference::To<Pulsar::Profile> std_prof;
@@ -231,6 +234,8 @@ int main (int argc, char** argv)
   const int NBIN  = 1012;
   const int FMAX  = 1013;
   const int YSTRETCH = 1014;
+  const int PROFILE_SPECTRUM = 1015;
+  const int SPECTRUM_GAMMA = 1016;
 
   static struct option long_options[] = {
     { "convert_binphsperi", 1, 0, 200 },
@@ -248,6 +253,8 @@ int main (int argc, char** argv)
     { "nbin",               required_argument, 0, NBIN},
     { "ystretch",           required_argument, 0, YSTRETCH},
     { "fmax",               required_argument, 0, FMAX},
+    { "spec",               0, 0, PROFILE_SPECTRUM},
+    { "specgamma",          required_argument, 0, SPECTRUM_GAMMA},
     { 0, 0, 0, 0 }
   };
     
@@ -328,7 +335,7 @@ int main (int argc, char** argv)
       plotter.set_subint( atoi (optarg) );
       break;
     case 'i':
-      cout << "$Id: pav.C,v 1.98 2005/05/06 13:20:39 straten Exp $" << endl;
+      cout << "$Id: pav.C,v 1.99 2005/06/16 07:07:20 redwards Exp $" << endl;
       return 0;
 
     case 'j':
@@ -622,7 +629,12 @@ int main (int argc, char** argv)
     case FMAX:
       plotter.set_y_max( atof(optarg) );
       break;
-
+    case PROFILE_SPECTRUM:
+      profile_spectrum = true;
+      break;
+    case SPECTRUM_GAMMA:
+      spectrum_gamma = atof(optarg);
+      break;
     default:
       cerr << "pav: unrecognized option" << endl;
       return -1; 
@@ -768,6 +780,16 @@ int main (int argc, char** argv)
 	if (stopwatch) {
 	  clock.stop();
 	  cerr << "bscrunch took " << clock << endl;
+	}
+      }
+
+      if (profile_spectrum){
+	if (stopwatch)
+	  clock.start();
+	archive -> get_profile_power_spectra(spectrum_gamma);
+	if (stopwatch) {
+	  clock.stop();
+	  cerr << "--spec took " << clock << endl;
 	}
       }
 

@@ -7,6 +7,7 @@
 #include "Physical.h"
 #include "Error.h"
 #include "spectra.h"
+#include "fftm.h"
 
 /*! 
   Default fractional pulse phase window used to calculate statistics
@@ -354,6 +355,45 @@ void Pulsar::Profile::halvebins (unsigned nhalve)
 
   }
 }
+
+void Pulsar::Profile::get_power_spectrum(float gamma) { try
+{
+  if (verbose) {
+    cerr << "Pulsar::Profile::get_power_spectrum()" << endl;
+  }
+     
+  unsigned nby2 = nbin/2;
+  float *spec = new float [nbin+2];
+
+  fft::frc1d(nbin, spec, amps);
+
+  // form powers .. save nyquist for end
+//   float nyquist = amps[1];
+  amps[0] = 0.0; // zap DC component spec[0]*spec[0];
+
+  unsigned i, j=2;
+  for (i=1; i <= nby2; i++)
+  {
+    amps[i] = spec[j]*spec[j];
+    j++;
+    amps[i] += spec[j]*spec[j];
+    j++;
+    if (gamma!=1.0)
+      amps[i] = pow(amps[i], gamma);
+  }
+
+//   amps[nby2] = 0.0;
+
+  nbin = nby2+1;
+  delete [] spec;
+}
+
+catch (Error& error) {
+  throw error += "Pulsar::Profile::get_power_spectrum";
+}
+} // end function
+
+
 
 /////////////////////////////////////////////////////////////////////////////
 //

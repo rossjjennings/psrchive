@@ -703,6 +703,19 @@ bool Pulsar::Archive::state_is_valid(string& reason) const{
   return Signal::valid_state(get_state(),1,get_npol(),reason);
 }
 
+ 
+void Pulsar::Archive::get_profile_power_spectra (float gamma)
+{
+  if (get_nsubint() == 0)
+    return;
+
+  for (unsigned isub=0; isub < get_nsubint(); isub++)
+    get_Integration(isub) -> get_profile_power_spectra (gamma);
+
+  set_nbin (get_Integration(0)->get_nbin());
+}
+
+
 // Rotates subints as if a new period was being used.
 // Intended for use with non-polyco data.
 void Pulsar::Archive::new_folding_period(double trial_p){

@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Integration.h,v $
-   $Revision: 1.70 $
-   $Date: 2005/04/27 10:08:46 $
-   $Author: straten $ */
+   $Revision: 1.71 $
+   $Date: 2005/06/16 07:07:20 $
+   $Author: redwards $ */
 
 /*
   
@@ -424,6 +424,10 @@ namespace Pulsar {
     //! Integrate profiles from single polarizations into one total intensity
     virtual void pscrunch ();
     
+    //! Replaces each profile with its power spectrum
+    virtual void get_profile_power_spectra(float gamma=1.0);
+    
+
     //! operator +=
     /*! This operator is provided for experimental purposes and should
       not be used lightly. If the time spans of the two combined

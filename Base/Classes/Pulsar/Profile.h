@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Profile.h,v $
-   $Revision: 1.84 $
-   $Date: 2005/06/12 02:30:53 $
+   $Revision: 1.85 $
+   $Date: 2005/06/16 07:07:20 $
    $Author: redwards $ */
 
 #ifndef __Pulsar_Profile_h
@@ -58,6 +58,9 @@ namespace Pulsar {
     static float default_amplitude_dropoff;
 
     static unsigned ZPSF;
+
+    //! Fundamental period of spike sequence in profile, zap in SincInterpShift
+    static unsigned SIS_zap_period;
 
     //! null constructor produces an empty profile of zero size
     Profile () { init(); }
@@ -167,6 +170,9 @@ namespace Pulsar {
     //! Interpolate over peaks of 1-bin wide modulation feature
     void zap_periodic_spikes(int period, int phase);
     
+    //! Replace profile with its power spectrum
+    void get_power_spectrum(float gamma=1.0);
+
     //! Sum the flux in the specified bins
     float sum_flux(int rise, int fall,
 		   float min_phase = -1.0, float dc=default_duty_cycle) const;
@@ -334,6 +340,9 @@ namespace Pulsar {
 
   /*! Fourier domain phase gradient fit */
   Estimate<double> PhaseGradShift (const Profile& std, const Profile& ephase);
+
+  /*! Phase shift by sinc interpolation of CCF */
+  Estimate<double> SincInterpShift (const Profile& std, const Profile& ephase);
 
 }
 
