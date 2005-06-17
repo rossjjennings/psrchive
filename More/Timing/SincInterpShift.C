@@ -46,6 +46,42 @@ sinc_interp(float *f, double x, int n)
   return result * sin(M_PI*(x - 2.0*floor(0.5*x)))/n;
 }
 
+static float
+sinc_interp_second_derivative(float *f, double x, int n)
+{
+  while (x < 0.0)
+    x+= n;
+  while (x >= n)
+    x-= n;
+
+  if (x == floor(x))
+    return f[(int)floor(x)];
+ 
+  if (n%2)
+  {
+    fprintf(stderr, "Error, odd numbers of bins not implemented in sinc_interp!!\n"); // possible but uglier
+    exit(1);
+  }
+
+
+  // Derivative of sinc_interp(), obtained using Mathematica
+  int i;
+  double result = 0.0;
+  double sinpix = sin(M_PI*(x - 2.0*floor(0.5*x)));
+  double cospix = cos(M_PI*(x - 2.0*floor(0.5*x)));
+  for (i=0; i < n; i++)
+  {
+    double csc = 1.0/sin(M_PI*(x-i)/n);
+    double cscsq = csc*csc;
+    double cot = 1.0/tan(M_PI*(x-i)/n);
+    
+    result += (i%2 ? -1.0: 1.0) * -f[i]*M_PI*M_PI * 
+      (2.0*n*cospix*cscsq+cot*(1.0*n*n-2.0*cscsq)*sinpix)/(1.0*n*n*n);
+  }
+
+  return result ;
+}
+
 
 
 #define SHFT(a,b,c,d) (a)=(b);(b)=(c);(c)=(d);
@@ -85,7 +121,7 @@ find_peak(float *f, unsigned n,
     if (fabs(x-xm) <= (tol2-0.5*(b-a))) 
     {
       *xmax = x;
-      *ymax = fx;
+      *ymax = -fx;
       return ;
     }
     if (fabs(e) > tol1) {
@@ -131,7 +167,7 @@ find_peak(float *f, unsigned n,
   exit(1);
 }
 
-
+ 
   
 
 Estimate<double>
@@ -168,19 +204,44 @@ Pulsar::SincInterpShift (const Profile& std, const Profile& obs)
   double maxbin;
   float peakval;
   find_peak(ccf, nbin, &maxbin, &peakval);
+
+  // Get the RMS by a means analogous to Taylor's frequency domain method
+  // namely,  variance_noise = ACF_obs(0) + b^2ACF_std(0) - 2 b CCF(tau)
+  //  where b = CCF(tau) / ACF_std(0)
+  double variance_obs=0.0, variance_std=0.0;
  
+  for (i=1; i < ncoeff; i++)
+  {
+    variance_obs += norm(obs_spec[i]);
+    variance_std += norm(std_spec[i]);
+  }
+  double scale = 0.5*peakval / variance_std;
+  double rms = variance_obs + scale*scale*variance_std - scale * peakval;
+
+  rms *= 1.0/nbin;
+
+  // now we need the second derivative of the ccf to get an idea of the 
+  // error in its peak .. 
+  double second_deriv = sinc_interp_second_derivative(ccf, maxbin, nbin);
+
+  // the ccf in the vicinity of the peak is 
+  //    ccf = ccf(maxbin) + 1/2 second_deriv (m-maxbin)^2
+  // then, the change in maxbin needed to change the ccf by 1 sigma is
+  //  (m-maxbin)^2 = 2. rms / second_deriv
+  double sigma_maxbin = sqrt(2.0 * rms / -second_deriv);
+  
+     
+  double shift = maxbin / nbin;
+  double sigma_shift = sigma_maxbin / nbin;
+  if (shift >=0.5)
+    shift -= 1.0; 
+
 
   delete [] ccf;
   delete [] ccf_spec;
   delete [] std_spec;
   delete [] obs_spec;
 
-
-  // XXXX get proper error estimate
-  double shift = maxbin / nbin;
-  if (shift >=0.5)
-    shift -= 1.0; 
-
-  return Estimate<double>(shift, 1.0/nbin);
+  return Estimate<double>(shift, sigma_shift*sigma_shift);
 }
 
