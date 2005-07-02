@@ -29,7 +29,7 @@ libgenutilpp_la_SOURCES += sla_wrap.c
 
 endif
 
-bin_PROGRAMS = getMJD tranScan bshead search_summary xserve_summary
+bin_PROGRAMS = getMJD tranScan stats bshead search_summary xserve_summary
 
 # broken: loopy.C timeconvert.c
 
@@ -38,6 +38,7 @@ tranScan_SOURCES		= tranScan.C
 bshead_SOURCES			= bshead.C
 search_summary_SOURCES		= search_summary.C
 xserve_summary_SOURCES		= xserve_summary.C
+stats_SOURCES                   = stats.C
 #loopy_SOURCES			= loopy.C
 
 TESTS = test_coord test_Cartesian test_MJD test_Angle test_ReferenceFit \
