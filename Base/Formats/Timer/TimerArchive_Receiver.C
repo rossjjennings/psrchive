@@ -41,8 +41,12 @@ void Pulsar::TimerArchive::unpack (Receiver* receiver)
     break;
     
   default:
-    throw Error (InvalidParam, "Pulsar::TimerArchive::unpack Receiver",
-		 "unrecognized feedmode=%d", hdr.feedmode);
+    cerr << "Pulsar::TimerArchive::unpack Receiver"    << endl;
+    cerr << "  unrecognized feedmode=" << hdr.feedmode << endl;
+    // AWH 4/7/2005: Changed the exception to a warning in the hope that
+    // psrchive programs can then be used to correct old headers.
+    //throw Error (InvalidParam, "Pulsar::TimerArchive::unpack Receiver",
+    //		   "unrecognized feedmode=%d", hdr.feedmode);
     
   }
 
