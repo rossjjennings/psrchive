@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/ScalarParameter.h,v $
-   $Revision: 1.1 $
-   $Date: 2005/04/21 13:55:35 $
+   $Revision: 1.2 $
+   $Date: 2005/07/07 23:19:34 $
    $Author: straten $ */
 
 #ifndef __ScalarParameter_H
@@ -18,7 +18,7 @@ namespace MEAL {
   public:
 
     //! Default constructor
-    ScalarParameter (const Estimate<double>& value = 1.0);
+    ScalarParameter (const Estimate<double>& value = 0.0);
 
     void set_value (const Estimate<double>& value);
     Estimate<double> get_value () const;
