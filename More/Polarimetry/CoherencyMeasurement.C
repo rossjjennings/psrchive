@@ -73,7 +73,7 @@ float Calibration::CoherencyMeasurement::get_variance (unsigned ipol) const
 double Calibration::CoherencyMeasurement::get_weighted_norm
 (const Jones<double>& matrix) const
 {
-  Stokes< complex<double> > stokes = coherency( matrix );
+  Stokes< complex<double> > stokes = complex_coherency( matrix );
   double difference = 0.0;
 
   for (unsigned ipol=0; ipol<4; ipol++)
@@ -86,7 +86,7 @@ double Calibration::CoherencyMeasurement::get_weighted_norm
 Jones<double> Calibration::CoherencyMeasurement::get_weighted_conjugate
 (const Jones<double>& matrix) const
 {
-  Stokes< complex<double> > stokes = coherency( matrix );
+  Stokes< complex<double> > stokes = complex_coherency( matrix );
 
   for (unsigned ipol=0; ipol<4; ipol++)
     stokes[ipol] = complex<double>(inv_var[ipol]) * conj(stokes[ipol]);
