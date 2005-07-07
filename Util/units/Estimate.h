@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Estimate.h,v $
-   $Revision: 1.33 $
-   $Date: 2005/07/07 23:19:16 $
+   $Revision: 1.34 $
+   $Date: 2005/07/07 23:21:10 $
    $Author: straten $ */
 
 #ifndef __Estimate_h
@@ -218,15 +218,15 @@ std::istream& operator >> (std::istream& is, Estimate<T,U>& estimate)
   double value;
   is >> value;
 
-  if (!expect2(is, '+'))
+  if (!expect(is, '+'))
     return is;
-  if (!expect2(is, '-'))
+  if (!expect(is, '-'))
     return is;
 
   double error;
   is >> error;
 
-  if (!expect2(is, ')'))
+  if (!expect(is, ')'))
     return is;
 
   estimate.set_value (value);
