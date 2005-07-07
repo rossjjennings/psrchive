@@ -187,13 +187,9 @@ void Pulsar::PolnProfileFit::fit (const PolnProfile* observation) try
     variance[ipol] += gain * standard_variance[ipol] * standard->get_nbin();
   }
 
-    // variance[ipol] *= nbin;
-
   gain = sqrt(gain);
-  cerr << "gain=" << gain << endl;
 
   // calculate the rms in the baseline of each profile
-
 
   model->delete_data ();
 
@@ -231,7 +227,9 @@ void Pulsar::PolnProfileFit::fit (const PolnProfile* observation) try
   model->solve_work ();
   clock.stop();
 
+#ifdef _DEBUG
   cerr << "Pulsar::PolnProfileFit::fit solved in " << clock << endl;
+#endif
 
 }
 catch (Error& error) {
