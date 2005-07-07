@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Estimate.h,v $
-   $Revision: 1.32 $
-   $Date: 2005/04/24 01:33:11 $
+   $Revision: 1.33 $
+   $Date: 2005/07/07 23:19:16 $
    $Author: straten $ */
 
 #ifndef __Estimate_h
@@ -193,6 +193,46 @@ std::ostream& operator<< (std::ostream& ostr, const Estimate<T,U>& estimate)
   return ostr << "(" << estimate.val << "+-" << sqrt(estimate.var) << ")";
 }
 
+static bool expect (std::istream& is, char c)
+{
+  if (is.peek() != c) {
+    is.setstate (std::ios::failbit);
+    return false;
+  }
+  is.get();
+  return true;
+}
+
+template<typename T, typename U>
+std::istream& operator >> (std::istream& is, Estimate<T,U>& estimate)
+{
+  char open_brace;
+  is >> open_brace;
+
+  if (open_brace != '(') {
+    is.unget ();
+    is.setstate (std::ios::failbit);
+    return is;
+  }
+
+  double value;
+  is >> value;
+
+  if (!expect2(is, '+'))
+    return is;
+  if (!expect2(is, '-'))
+    return is;
+
+  double error;
+  is >> error;
+
+  if (!expect2(is, ')'))
+    return is;
+
+  estimate.set_value (value);
+  estimate.set_error (error);
+  return is;
+}
 
 /*!
   \f$ {\bar{x} over \bar{\sigma}^2} = \sum_{i=1}^n {x_i \over \sigma_i^2} \f$
