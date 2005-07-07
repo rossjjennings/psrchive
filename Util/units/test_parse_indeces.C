@@ -49,8 +49,6 @@ void runtest (const string& temp, const string& remainder,
 
 int main ()
 {
-  TextInterface::verbose = true;
-
   try {
     int result[] = {-1};
     runtest ("variable", "variable", result);
