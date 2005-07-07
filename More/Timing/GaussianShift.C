@@ -84,7 +84,6 @@ Pulsar::GaussianShift (const Profile& std, const Profile& obs)
     gm.set_centre(binmax);
     gm.set_width(abs(bfall - brise));
     gm.set_height(ptr->max());
-    gm.set_cyclic(false);
     
     MEAL::Axis<double> argument;
     gm.set_argument (0, &argument);

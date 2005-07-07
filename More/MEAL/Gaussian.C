@@ -5,7 +5,7 @@ using namespace std;
 MEAL::Gaussian::Gaussian ()
   : parameters (this, 3)
 {
-  cyclic = false;
+  period = 0.0;
 
   parameters.set_param_name (0, "centre");
   parameters.set_param_name (1, "width");
@@ -55,16 +55,16 @@ double MEAL::Gaussian::get_height () const
   return get_param (2);
 }
 
-//! Set the cyclic
-void MEAL::Gaussian::set_cyclic (bool _cyclic)
+//! Set the period
+void MEAL::Gaussian::set_period (double _period)
 {
-  cyclic = _cyclic;
+  period = _period;
 }
 
-//! Get the cyclic
-bool MEAL::Gaussian::get_cyclic () const
+//! Get the period
+double MEAL::Gaussian::get_period () const
 {
-  return cyclic;
+  return period;
 }
 
 //! Return the value (and gradient, if requested) of the function
@@ -74,7 +74,6 @@ void MEAL::Gaussian::calculate (double& result, std::vector<double>* grad)
   double width    = get_width ();
   double height   = get_height ();
   double abscissa = get_abscissa ();
-  bool   cyclic   = get_cyclic ();
 
   double current_centre = centre;
 
@@ -88,15 +87,12 @@ void MEAL::Gaussian::calculate (double& result, std::vector<double>* grad)
 
   int iter = 1;
 
-  if (cyclic) {
-    current_centre -= 1.0;
+  if (period) {
+    current_centre -= period;
     iter = 3;
   }
 
   for (int i=0; i<iter; i++) {
-
-    //cerr << " cyclic:" << cyclic << " i:" << i 
-    // << " c:" << current_centre << " x:" << x << " arg:" << arg << endl;
 
     double dist = abscissa - current_centre;
     double arg = dist / width;
@@ -119,7 +115,7 @@ void MEAL::Gaussian::calculate (double& result, std::vector<double>* grad)
     
     }
 
-    current_centre += 1.0;
+    current_centre += period;
     
   }
 

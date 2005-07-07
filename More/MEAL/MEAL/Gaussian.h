@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Gaussian.h,v $
-   $Revision: 1.4 $
-   $Date: 2005/04/06 20:23:36 $
+   $Revision: 1.5 $
+   $Date: 2005/07/07 23:18:49 $
    $Author: straten $ */
 
 #ifndef __Gaussian_H
@@ -39,11 +39,11 @@ namespace MEAL {
     //! Get the height
     double get_height () const;
 
-    //! Set the cyclic flag
-    void set_cyclic (bool cyclic);
+    //! Set the period
+    void set_period (double period);
 
-    //! Get the cyclic flag
-    bool get_cyclic () const;
+    //! Get the period
+    double get_period () const;
 
     // ///////////////////////////////////////////////////////////////////
     //
@@ -59,8 +59,8 @@ namespace MEAL {
     //! Return the value (and gradient, if requested) of the function
     void calculate (double& x, std::vector<double>* grad=0);
 
-    //! Set true when the Gaussian is periodic
-    bool cyclic;
+    //! Set to greater than zero if the Gaussian is periodic
+    double period;
 
   private:
 
