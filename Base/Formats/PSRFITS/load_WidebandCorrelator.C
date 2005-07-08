@@ -97,8 +97,7 @@ void Pulsar::FITSArchive::load_WidebandCorrelator (fitsfile* fptr)
       }
     }
 
-    if (version < 1.265 && 
-        find (bad_configs.begin(), bad_configs.end(), ext->configfile)
+    if (find (bad_configs.begin(), bad_configs.end(), ext->configfile)
 		!= bad_configs.end())  {
 
       conjugate_cross_products = true;
