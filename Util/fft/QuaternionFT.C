@@ -266,6 +266,35 @@ void QuaternionFT::ft (unsigned npts, const Quaternion<float>* in,
   unsigned ifr, it;
 
   float theta;
+
+  Quaternion<double> acc;
+  Quaternion<float> rot;
+
+  for (ifr=0; ifr < npts; ifr++)  {
+    acc = 0.0;
+    for (it=0; it < npts; it++)  {
+      theta = sign *2.0*M_PI *float(ifr)*it/float(npts);
+      rot = exp (mu[0],theta);
+      acc += rot * in[it];
+    }
+    out[ifr] = acc;
+  }
+}
+
+#if 0
+
+SPECIAL WAY OF DOING THINGS:
+
+//! Perform a slow quaternion fourier transform
+void QuaternionFT::ft (unsigned npts, const Quaternion<float>* in,
+                       Quaternion<float>* out)
+{
+  if (verbose)
+    cerr << "QuaternionFT::ft (Quaternion<float>*)" << endl;
+
+  unsigned ifr, it;
+
+  float theta;
   float scale = 1.0/npts; ///sqrt(npts);
 
   Quaternion<double> acc;
@@ -273,15 +302,15 @@ void QuaternionFT::ft (unsigned npts, const Quaternion<float>* in,
 
   float t;
   float powscale = 1.0/(power*extent); // so d/dit[t^power] ~= 1/npts
- 
+
   for (ifr=0; ifr < npts; ifr++)  {
     acc = 0.0;
     for (it=0; it < npts; it++)  {
-      t = 1.0 + extent*(it - 0.5*npts)/npts; 
-      theta = sign *2.0*M_PI 
-	* (float(ifr)-0.5*npts)// npts/2 : do -ve to +ve frqs
-	* (pow(t, float(power))-1.0) * powscale; // -1: ref phase to center
-//       cerr << it << " " << theta << " " << (pow(t, float(power))-1.0) * powscale	   << endl;
+      t = 1.0 + extent*(it - 0.5*npts)/npts;
+      theta = sign *2.0*M_PI
+        * (float(ifr)-0.5*npts)// npts/2 : do -ve to +ve frqs
+        * (pow(t, float(power))-1.0) * powscale; // -1: ref phase to center
+//       cerr << it << " " << theta << " " << (pow(t, float(power))-1.0) * powscale        << endl;
       rot = exp (mu[0],theta);
        acc += rot * in[it]; // * herm(rot);
 //       acc += exp (mu[0],0.5*theta) * in[it] * exp (mu[0],-0.5*theta);
@@ -290,3 +319,6 @@ void QuaternionFT::ft (unsigned npts, const Quaternion<float>* in,
     out[ifr] = acc * double(scale);
   }
 }
+
+#endif
+
