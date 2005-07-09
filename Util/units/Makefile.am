@@ -74,7 +74,7 @@ check_PROGRAMS = test_Error test_HeapTracked test_Reference		 \
 	test_Complex2Product test_Basis test_Stokes test_Polar		 \
 	test_TextInterface test_parse_indeces test_Estimate test_Vector	 \
 	test_Matrix test_Jacobi test_eigen test_Jones test_Quaternion \
-	test_Pauli 
+	test_Pauli test_Rotation
 
 TESTS = $(check_PROGRAMS)
 
