@@ -157,7 +157,7 @@ void Calibration::SingleAxis::solve (const vector<Estimate<double> >& cal)
   Estimate<double> cal_BB = cal[1];
 
   // note: there is an error in Britton 2000, following Equation (14):
-  // correction: \gamma = 1/2 ln (g_a/g_b)
+  // correction: \beta = 1/2 ln (g_a/g_b)
   
   // note also: that this equation refers to the Jones matrix and, since
   // we are dealing with detected coherency products:
