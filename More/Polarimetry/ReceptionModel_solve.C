@@ -169,61 +169,32 @@ void Calibration::ReceptionModel::solve_work (bool solve_verbose)
   if (verbose)
     cerr << "Calibration::ReceptionModel::solve chisq=" << best_chisq << endl;
 
-  unsigned iter = 1;
-  unsigned better = 0;
-  while (iter < maximum_iterations) {
+  unsigned not_better = 0;
+  unsigned iterations = 0;
+
+  while (not_better < 3) {
 
     float chisq = fit.iter (data, fake, *this);
    
     if (verbose)
       cerr << "chisq=" << chisq << " lamda=" << fit.lamda << endl;
 
-    float delta_chisq = fabs(best_chisq - chisq);
-
     if (chisq < best_chisq)  {
       best_chisq = chisq;
-      better ++;
+      not_better = 0;
     }
+    else
+      not_better ++;
  
-    if (exact_solution) {
+    if (exact_solution && chisq < convergence_threshold)
+      break;
       
-      if (chisq < convergence_threshold)
-	break;
-      
-    }
-    
-    else {
-
-      if (better > stay_at_minimum 
-	  && delta_chisq/best_chisq < convergence_threshold)
-	{
-	  close_to_min ++;
-	  if (close_to_min == stay_at_minimum)
-	    break;
-	}
-      else
-        close_to_min = 0;
-      
-    }
-
-    iter ++;
-    
+    iterations ++;    
   }
-  
-  if (iter >= maximum_iterations) {
-
-    for (iparm=0; iparm < get_nparam(); iparm++)
-      set_Estimate (iparm, 0.0);
-
-    throw Error (InvalidState, "Calibration::ReceptionModel::solve",
-		 "maximum iterations=%d expired. best chi_sq=%f",
-		 maximum_iterations, best_chisq);
-
-  }
-
+ 
   float constrained = fixed_params - free_params;
   float reduced_chisq = best_chisq / constrained;
-
+ 
   if (maximum_reduced && reduced_chisq > maximum_reduced) {
 
     for (iparm=0; iparm < get_nparam(); iparm++)
@@ -235,7 +206,7 @@ void Calibration::ReceptionModel::solve_work (bool solve_verbose)
   }
 
   // if (verbose)
-  cerr << "Calibration::ReceptionModel::solve converged in " << iter
+  cerr << "Calibration::ReceptionModel::solve converged in " << iterations
        << " iterations. chi_sq=" << best_chisq << "/(" << fixed_params
        << "-" << free_params << "=" << constrained << ")=" 
        << reduced_chisq << endl;
