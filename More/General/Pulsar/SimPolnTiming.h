@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/SimPolnTiming.h,v $
-   $Revision: 1.1 $
-   $Date: 2005/07/12 23:21:06 $
+   $Revision: 1.2 $
+   $Date: 2005/07/16 20:08:17 $
    $Author: straten $ */
 
 #ifndef __Pulsar_SimPolnTiming_h
@@ -13,9 +13,27 @@
 #include "MEAL/RotatingVectorModel.h"
 #include "MEAL/Gaussian.h"
 
+#include <iostream>
+
 namespace Pulsar {
 
   class Archive;
+
+  class Range {
+  public:
+    //! Constructor
+    Range (unsigned steps, double min, double max);
+
+    unsigned steps;
+    double min, max;
+    unsigned start, stop;
+
+    //! Get the current value in the range
+    double get_value (unsigned current);
+
+    //! Parse the range from a string
+    void parse (const std::string& txt);
+  };
 
   //! Simulates full-Stokes arrival time estimation
   class SimPolnTiming {
@@ -68,19 +86,15 @@ namespace Pulsar {
     bool vary_line_of_sight;
 
     //! Number of steps when varying the RVM orientation
-    unsigned slope_steps;
-    double slope_min, slope_max;
-    double slope;
+    Range slope;
+    double poln_slope;
 
     //! Number of steps when varying the Gaussian width
-    unsigned width_steps;
-    double width_min, width_max;
+    Range width;
+    double pulse_width;
 
     //! Number of steps when varying the differental gain
-    unsigned dgain_steps;
-    double dgain_min, dgain_max;
-
-    //! Differential gain to be applied to observations
+    Range dgain;
     double diff_gain;
 
     //! Run the simulation, outputting results to cout
@@ -91,6 +105,11 @@ namespace Pulsar {
 
     //! Output values using Estimate operator <<
     bool as_Estimate;
+
+    //! Output stream
+    std::ostream* output;
+
+    void extrapolate_benefit (unsigned steps);
 
   protected:
 
