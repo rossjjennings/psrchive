@@ -19,6 +19,7 @@ nobase_include_HEADERS = \
 	Pulsar/FluxCalibratorDatabase.h  Pulsar/SourceInfo.h \
 	Pulsar/FourierSNR.h              Pulsar/StandardSNR.h \
 	Pulsar/HybridCalibrator.h        Pulsar/SyntheticProfile.h \
+	Pulsar/SyntheticPolnProfile.h    Pulsar/SimPolnTiming.h \
 	Pulsar/InstrumentInfo.h          Pulsar/SystemCalibrator.h \
 	Pulsar/Integration.h             Pulsar/Transposer.h \
 	Pulsar/IntegrationManager.h      Pulsar/Utilities.h \
@@ -26,7 +27,8 @@ nobase_include_HEADERS = \
 	Pulsar/PhaseWeightFunction.h     model_profile.h \
 	Pulsar/Plotter.h                 Pulsar/IntegrationTI.h \
 	Pulsar/ExtensionTI.h             Pulsar/BaselineWindow.h \
-	Pulsar/ReflectStokes.h
+	Pulsar/ReflectStokes.h           Pulsar/ChannelZapMedian.h \
+	Pulsar/ChannelWeight.h           Pulsar/ChannelZapModulation.h
 
 libpsrchive_la_SOURCES = plugins.csh getopt.h Physical.h \
 	AdaptiveSNR.C                 Integration_new_PolnProfile.C  \
@@ -71,6 +73,7 @@ libpsrchive_la_SOURCES = plugins.csh getopt.h Physical.h \
 	Integration_cal_levels.C      SourceInfo.C  \
 	Integration_convert_state.C   StandardSNR.C  \
 	Integration_dedisperse.C      SyntheticProfile.C  \
+	SyntheticPolnProfile.C        SimPolnTiming.C \
 	Integration_defaraday.C       SystemCalibrator.C  \
 	Integration_fappend.C         Transposer.C  \
 	Integration_find.C            Utilities.C  \
@@ -118,7 +121,7 @@ endif
 #
 # programs
 #
-bin_PROGRAMS = pac paz vap vip psredit psradd fadd pat pam \
+bin_PROGRAMS = pac paz vap vip psredit psradd fadd pat pam pts \
         fluxcal fix_coords test_Difference fix_hydra sesdiv \
         fix_3C353 archive_correct archive_denoise \
         fix_fluxcal archive_split psrconv pascii \
@@ -135,6 +138,7 @@ fix_fluxcal_SOURCES		= fix_fluxcal.C
 fix_hydra_SOURCES		= fix_hydra.C
 fluxcal_SOURCES			= fluxcal.C
 
+pts_SOURCES			= pts.C
 paz_SOURCES			= paz.C
 pac_SOURCES			= pac.C
 pam_SOURCES			= pam.C
@@ -146,6 +150,8 @@ sesdiv_SOURCES			= sesdiv.C
 vap_SOURCES			= vap.C
 vip_SOURCES			= vip.C
 psredit_SOURCES			= psredit.C
+
+pts_LDADD			= $(LDADD) @PGPLOT_LIBS@
 
 TESTS = test_Receiver
 check_PROGRAMS = test_Archive test_denoise test_Difference $(TESTS)
@@ -171,8 +177,8 @@ libpsrchive_la_SOURCES += ArchiveProcessor.C Plotter.C CalibratorPlotter.C  \
 	Plotter_phase_fourier.C        Plotter_spherical.C  \
 	Plotter_phase_frequency.C
 
-bin_PROGRAMS += pacv pcvar pav pas psrwt psrsh pcm pvt pad paf \
-	binphs_test pcm_chooser rmfit psrband SimTiming bin_clean
+bin_PROGRAMS += pacv pcvar pav pas psrwt psrsh pcm pvt paf psrqft \
+	binphs_test pcm_chooser rmfit psrband SimTiming bin_clean pts_plot
 
 SimTiming_SOURCES		= SimTiming.C
 binphs_test_SOURCES		= binphs_test.C
@@ -188,8 +194,10 @@ psrwt_SOURCES			= psrwt.C
 pvt_SOURCES			= pvt.C
 rmfit_SOURCES			= rmfit.C
 bin_clean_SOURCES		= bin_clean.C
-pad_SOURCES			= pad.C
-paf_SOURCES                     = paf.C
+# pad_SOURCES			= pad.C
+paf_SOURCES			= paf.C
+pts_plot_SOURCES		= pts_plot.C
+psrqft_SOURCES			= psrqft.C
 
 SimTiming_LDADD			= $(LDADD) @PGPLOT_LIBS@
 binphs_test_LDADD		= $(LDADD) @PGPLOT_LIBS@
@@ -205,6 +213,8 @@ psrwt_LDADD			= $(LDADD) @PGPLOT_LIBS@
 pvt_LDADD			= $(LDADD) @PGPLOT_LIBS@
 rmfit_LDADD			= $(LDADD) @PGPLOT_LIBS@
 bin_clean_LDADD			= $(LDADD) @PGPLOT_LIBS@
+pts_plot_LDADD			= $(LDADD) @PGPLOT_LIBS@
+psrqft_LDADD			= $(LDADD) @PGPLOT_LIBS@
 
 # future
 # psrsh_LDADD = -lreadline -ltermcap
