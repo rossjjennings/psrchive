@@ -52,6 +52,18 @@ Pulsar::PolnProfile::PolnProfile (Signal::Basis _basis, Signal::State _state,
 //
 //
 //
+Pulsar::PolnProfile::PolnProfile (unsigned nbin)
+{
+  state = Signal::Stokes;
+  basis = Signal::Linear;
+
+  for (unsigned ipol=0; ipol < 4; ipol++)
+    profile[ipol] = new Profile (nbin);
+}
+
+//
+//
+//
 Pulsar::PolnProfile::~PolnProfile ()
 {
   if (Profile::verbose)
@@ -63,8 +75,11 @@ Pulsar::PolnProfile::~PolnProfile ()
 //
 void Pulsar::PolnProfile::resize (unsigned nbin)
 {
-  for (unsigned ipol=0; ipol < 4; ipol++)
+  for (unsigned ipol=0; ipol < 4; ipol++) {
+    if (!profile[ipol])
+      profile[ipol] = new Profile;
     profile[ipol]->resize (nbin);
+  }
 }
 
 //
@@ -79,6 +94,14 @@ unsigned Pulsar::PolnProfile::get_nbin () const
 //
 //
 const Pulsar::Profile* Pulsar::PolnProfile::get_Profile (unsigned ipol) const
+{
+  if (ipol >= 4)
+    throw Error (InvalidRange, "PolnProfile::get_Profile",
+		 "ipol=%d >= npol=4", ipol);
+
+  return profile[ipol];
+}
+Pulsar::Profile* Pulsar::PolnProfile::get_Profile (unsigned ipol)
 {
   if (ipol >= 4)
     throw Error (InvalidRange, "PolnProfile::get_Profile",

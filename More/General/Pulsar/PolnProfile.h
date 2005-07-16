@@ -20,8 +20,11 @@ namespace Pulsar {
     //! When set, PolnProfile::transform will normalize the Profile::weight
     static bool normalize_weight_by_absolute_gain;
 
-    //! Null constructor
+    //! Default constructor
     PolnProfile ();
+
+    //! Construct with the specified number of phase bins
+    PolnProfile (unsigned nbin);
 
     //! Construct from four externally-managed Profile objects
     PolnProfile (Signal::Basis basis, Signal::State state,
@@ -39,8 +42,11 @@ namespace Pulsar {
     //! Get the number of bins
     unsigned get_nbin () const;
 
-    //! Get the specifed profile
+    //! Get the specifed constant profile
     const Profile* get_Profile (unsigned ipol) const;
+
+    //! Get the specified profile
+    Profile* get_Profile (unsigned ipol);
 
     //! Returns a const pointer to the start of the array of amplitudes
     const float* get_amps (unsigned ipol) const;
