@@ -178,7 +178,7 @@ libpsrchive_la_SOURCES += ArchiveProcessor.C Plotter.C CalibratorPlotter.C  \
 	Plotter_phase_frequency.C
 
 bin_PROGRAMS += pacv pcvar pav pas psrwt psrsh pcm pvt paf psrqft \
-	binphs_test pcm_chooser rmfit psrband SimTiming bin_clean pts_plot
+	binphs_test pcm_chooser rmfit psrband SimTiming bin_clean
 
 SimTiming_SOURCES		= SimTiming.C
 binphs_test_SOURCES		= binphs_test.C
@@ -196,7 +196,6 @@ rmfit_SOURCES			= rmfit.C
 bin_clean_SOURCES		= bin_clean.C
 # pad_SOURCES			= pad.C
 paf_SOURCES			= paf.C
-pts_plot_SOURCES		= pts_plot.C
 psrqft_SOURCES			= psrqft.C
 
 SimTiming_LDADD			= $(LDADD) @PGPLOT_LIBS@
@@ -213,7 +212,6 @@ psrwt_LDADD			= $(LDADD) @PGPLOT_LIBS@
 pvt_LDADD			= $(LDADD) @PGPLOT_LIBS@
 rmfit_LDADD			= $(LDADD) @PGPLOT_LIBS@
 bin_clean_LDADD			= $(LDADD) @PGPLOT_LIBS@
-pts_plot_LDADD			= $(LDADD) @PGPLOT_LIBS@
 psrqft_LDADD			= $(LDADD) @PGPLOT_LIBS@
 
 # future
@@ -246,7 +244,7 @@ INCLUDES = -I$(top_builddir)/utils/include -I$(top_builddir)/astro/include \
         -I$(top_srcdir)/psrchive/Calibration \
 	-I$(top_srcdir)/psrchive/Extension -I$(top_srcdir)/psrchive/timer \
 	-I$(top_srcdir)/psrchive/epn -I$(top_srcdir)/psrchive/psrfits \
-	@PGPLOT_CFLAGS@ @CFITSIO_CFLAGS@
+	@PGPLOT_CFLAGS@ @CFITSIO_CFLAGS@ @MPI_CFLAGS@
 
 LDADD = libpsrchive.la $(top_builddir)/astro/libpsrastro.la \
         $(top_builddir)/utils/libpsrutils.la
