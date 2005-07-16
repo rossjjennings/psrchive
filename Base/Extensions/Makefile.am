@@ -35,7 +35,9 @@ libExtension_la_SOURCES = \
 	ITRFExtension.C                  dspReduction.C  \
 	IntegrationOrder.C               ReceiverTI.C  \
 	PointingTI.C                     Receiver_Native.C \
-	Receiver_Field.C                 Receiver_Linear.C
+	Receiver_Field.C                 Receiver_Linear.C \
+	Pulsar/Receiver_Field.h          Pulsar/Receiver_Linear.h \
+	Pulsar/Receiver_Native.h
 
 #############################################################################
 #

@@ -104,6 +104,7 @@ test_Scalar_SOURCES		= test_Scalar.C
 test_Complex2Product_SOURCES	= test_Complex2Product.C
 test_TextInterface_SOURCES	= test_TextInterface.C
 test_parse_indeces_SOURCES	= test_parse_indeces.C
+test_Rotation_SOURCES		= test_Rotation.C
 
 lmfit_SOURCES 			= lmfit.C
 lmfit_LDADD			= libunits.la @PGPLOT_LIBS@
