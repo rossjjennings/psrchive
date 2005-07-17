@@ -110,11 +110,11 @@ int FTransform::mkl_fcc1d(unsigned ndat, float* dest, float* src){
   ///////////////////////////////////////
   // Set up the plan
   static unsigned ilib = get_ilib("MKL");
-  MKL_Plan* plan = (MKL_Plan*)last_frc1d_plan;
+  MKL_Plan* plan = (MKL_Plan*)last_fcc1d_plan;
 
-  if( !last_frc1d_plan || 
-      last_frc1d_plan->ilib != ilib || 
-      last_frc1d_plan->ndat != ndat )
+  if( !last_fcc1d_plan || 
+      last_fcc1d_plan->ilib != ilib || 
+      last_fcc1d_plan->ndat != ndat )
     plan = 0;
   
   if( !plan ){
@@ -132,6 +132,7 @@ int FTransform::mkl_fcc1d(unsigned ndat, float* dest, float* src){
     plans[ilib].push_back( plan );
   }
 
+
   ///////////////////////////////////////
   // Do the transform
   int isign = -1;
@@ -147,11 +148,11 @@ int FTransform::mkl_bcc1d(unsigned ndat, float* dest, float* src){
   ///////////////////////////////////////
   // Set up the plan
   static unsigned ilib = get_ilib("MKL");
-  MKL_Plan* plan = (MKL_Plan*)last_frc1d_plan;
+  MKL_Plan* plan = (MKL_Plan*)last_bcc1d_plan;
 
-  if( !last_frc1d_plan || 
-      last_frc1d_plan->ilib != ilib || 
-      last_frc1d_plan->ndat != ndat )
+  if( !last_bcc1d_plan || 
+      last_bcc1d_plan->ilib != ilib || 
+      last_bcc1d_plan->ndat != ndat )
     plan = 0;
 
   if( !plan ){

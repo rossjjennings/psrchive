@@ -33,6 +33,7 @@ namespace FTransform {
   enum norm_type { normal, nfft };
 
   //! Pointers to the real functions- set by set_library()
+  //! Arguments are: (unsigned ndat, float* dest, float* src)
   extern fft_call frc1d;
   extern fft_call fcc1d;
   extern fft_call bcc1d;

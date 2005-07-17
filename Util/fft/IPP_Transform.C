@@ -50,6 +50,8 @@ FTransform::IPP_Plan::IPP_Plan(unsigned _ndat, unsigned _ilib, string _fft_call)
 }
 
 void FTransform::IPP_Plan::init(unsigned _ndat, unsigned _ilib, string _fft_call){
+  fprintf(stderr,"In FTransform::IPP_Plan::init()\n");
+
   initialise(_ndat,_ilib,_fft_call);
 
   int order = 0;
@@ -71,7 +73,7 @@ void FTransform::IPP_Plan::init(unsigned _ndat, unsigned _ilib, string _fft_call
   }
   else{
     ippsFFTInitAlloc_C_32fc( (IppsFFTSpec_C_32fc**)&Spec, order,
-			    IPP_FFT_NODIV_BY_ANY, ippAlgHintFast);
+			     IPP_FFT_NODIV_BY_ANY, ippAlgHintFast);
     ippsFFTGetBufSize_C_32fc( (IppsFFTSpec_C_32fc*)Spec, &pSize);
   }
 
@@ -115,11 +117,12 @@ int FTransform::ipp_fcc1d(unsigned ndat, float* dest, float* src){
   ///////////////////////////////////////
   // Set up the plan
   static unsigned ilib =get_ilib("IPP");
-  IPP_Plan* plan = (IPP_Plan*)last_frc1d_plan;
 
-  if( !last_frc1d_plan || 
+  IPP_Plan* plan = (IPP_Plan*)last_fcc1d_plan;
+
+  if( !last_fcc1d_plan || 
       last_frc1d_plan->ilib != ilib || 
-      last_frc1d_plan->ndat != ndat )
+      last_fcc1d_plan->ndat != ndat )
     plan = 0;
 
   if( !plan ){
@@ -134,7 +137,7 @@ int FTransform::ipp_fcc1d(unsigned ndat, float* dest, float* src){
 
   if( !plan ){
     plan = new IPP_Plan(ndat,ilib,"fcc1d");
-   plans[ilib].push_back( plan );
+    plans[ilib].push_back( plan );
   }
 
   ///////////////////////////////////////
@@ -142,7 +145,6 @@ int FTransform::ipp_fcc1d(unsigned ndat, float* dest, float* src){
   ippsFFTFwd_CToC_32fc( (const Ipp32fc*)src, (Ipp32fc*)dest,
 			(const IppsFFTSpec_C_32fc*)plan->Spec,
 			plan->pBuffer );
-
   return 0;
 }
 
@@ -150,11 +152,11 @@ int FTransform::ipp_bcc1d(unsigned ndat, float* dest, float* src){
   ///////////////////////////////////////
   // Set up the plan
   static unsigned ilib =get_ilib("IPP");
-  IPP_Plan* plan = (IPP_Plan*)last_frc1d_plan;
+  IPP_Plan* plan = (IPP_Plan*)last_bcc1d_plan;
 
-  if( !last_frc1d_plan || 
-      last_frc1d_plan->ilib != ilib || 
-      last_frc1d_plan->ndat != ndat )
+  if( !last_bcc1d_plan || 
+      last_bcc1d_plan->ilib != ilib || 
+      last_bcc1d_plan->ndat != ndat )
     plan = 0;
 
   if( !plan ){

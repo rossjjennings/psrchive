@@ -46,6 +46,8 @@ FTransform::FFTW3_Plan::FFTW3_Plan(unsigned _ndat, unsigned _ilib, string _fft_c
 
 void FTransform::FFTW3_Plan::init(unsigned _ndat, unsigned _ilib, string _fft_call)
 {
+  fprintf(stderr,"In FTransform::FFTW3_Plan::init()\n");
+
   initialise(_ndat,_ilib,_fft_call);
 
   int direction_flags = 0;
@@ -109,11 +111,11 @@ int FTransform::fftw3_fcc1d(unsigned ndat, float* dest, float* src){
   ///////////////////////////////////////
   // Set up the plan
   static unsigned ilib = get_ilib("FFTW3");
-  FFTW3_Plan* plan = (FFTW3_Plan*)last_frc1d_plan;
+  FFTW3_Plan* plan = (FFTW3_Plan*)last_fcc1d_plan;
 
-  if( !last_frc1d_plan || 
-      last_frc1d_plan->ilib != ilib || 
-      last_frc1d_plan->ndat != ndat )
+  if( !last_fcc1d_plan || 
+      last_fcc1d_plan->ilib != ilib || 
+      last_fcc1d_plan->ndat != ndat )
     plan = 0;
 
   if( !plan ){
@@ -142,11 +144,11 @@ int FTransform::fftw3_bcc1d(unsigned ndat, float* dest, float* src){
   ///////////////////////////////////////
   // Set up the plan
   static unsigned ilib = get_ilib("FFTW3");
-  FFTW3_Plan* plan = (FFTW3_Plan*)last_frc1d_plan;
+  FFTW3_Plan* plan = (FFTW3_Plan*)last_bcc1d_plan;
 
-  if( !last_frc1d_plan || 
-      last_frc1d_plan->ilib != ilib || 
-      last_frc1d_plan->ndat != ndat )
+  if( !last_bcc1d_plan || 
+      last_bcc1d_plan->ilib != ilib || 
+      last_bcc1d_plan->ndat != ndat )
     plan = 0;
 
   if( !plan ){
