@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/SimPolnTiming.h,v $
-   $Revision: 1.2 $
-   $Date: 2005/07/16 20:08:17 $
+   $Revision: 1.3 $
+   $Date: 2005/07/17 02:58:15 $
    $Author: straten $ */
 
 #ifndef __Pulsar_SimPolnTiming_h
@@ -97,6 +97,10 @@ namespace Pulsar {
     Range dgain;
     double diff_gain;
 
+    //! Number of steps when varying the parallactic angle
+    Range parallactic;
+    double parallactic_angle;
+
     //! Run the simulation, outputting results to cout
     void run_simulation ();
 
@@ -109,7 +113,9 @@ namespace Pulsar {
     //! Output stream
     std::ostream* output;
 
+    bool logarithmic;
     void extrapolate_benefit (unsigned steps);
+    void susceptibility ();
 
   protected:
 
