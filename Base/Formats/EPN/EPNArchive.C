@@ -443,6 +443,9 @@ Pulsar::EPNArchive::load_Integration (const char* filename, unsigned subint)
   epoch += sub_line1.tstart[0] * 1e-6;
   integration->set_epoch (epoch);
 
+  integration->set_folding_period (line2.pbar);
+  integration->set_duration (line2.pbar * line5.nint);
+
   for (unsigned ipol=0; ipol < get_npol(); ipol++) {
 
     double total_bw = 0.0;
@@ -464,7 +467,8 @@ Pulsar::EPNArchive::load_Integration (const char* filename, unsigned subint)
       double bw = sub_line1.df[iblock] * MHz_scale (sub_line1.dfu[iblock]);
 
       profile->set_centre_frequency (freq);
-      profile->set_weight (sub_line1.navg[iblock]);
+      // profile->set_weight (sub_line1.navg[iblock]);
+      profile->set_weight (1);
       profile->set_amps (data.rawdata[iblock]);
 
       total_freq += freq;
