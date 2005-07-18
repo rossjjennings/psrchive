@@ -125,7 +125,7 @@ bin_PROGRAMS = pac paz vap vip psredit psradd fadd pat pam pts \
         fluxcal fix_coords test_Difference fix_hydra sesdiv \
         fix_3C353 archive_correct archive_denoise \
         fix_fluxcal archive_split psrconv pascii \
-	default_loader 
+	default_loader parInfo
 
 archive_correct_SOURCES		= archive_correct.C
 archive_denoise_SOURCES		= archive_denoise.C
@@ -150,6 +150,7 @@ sesdiv_SOURCES			= sesdiv.C
 vap_SOURCES			= vap.C
 vip_SOURCES			= vip.C
 psredit_SOURCES			= psredit.C
+parInfo_SOURCES                 = parInfo.C
 
 pts_LDADD			= $(LDADD) @PGPLOT_LIBS@
 
