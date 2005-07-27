@@ -4,12 +4,15 @@ AC_DEFUN([SWIN_LIB_MPI],
 [
   AC_PROVIDE([SWIN_LIB_MPI])
 
+  AC_ARG_WITH([mpi],
+              AC_HELP_STRING([--with-mpi],
+                             [Compile Message Passing Interface (MPI) codes]))
   AC_ARG_WITH([mpi-dir],
               AC_HELP_STRING([--with-mpi-dir=DIR],
                              [MPI is in DIR]))
 
-  AC_ARG_WITH([mpi-include-dir],
-              AC_HELP_STRING([--with-mpi-include-dir=DIR],
+  AC_ARG_WITH([mpi-inc-dir],
+              AC_HELP_STRING([--with-mpi-inc-dir=DIR],
                              [MPI header files are in DIR]))
 
   AC_ARG_WITH([mpi-lib-dir],
@@ -23,13 +26,9 @@ AC_DEFUN([SWIN_LIB_MPI],
   MPI_CFLAGS=""
   MPI_LIBS=""
 
-  if test x"$with_mpi_dir" = x"no" ||
-     test x"$with_mpi_include-dir" = x"no" ||
-     test x"$with_mpi_lib_dir" = x"no" ||
-     test x"$with_mpi_link" = x"no"; then
-    # user disabled mpi. Leave cache alone.
-    AC_MSG_RESULT([User disabled MPI.])
+  if test x"$with_mpi" != x"yes"; then
 
+    AC_MSG_NOTICE([MPI not enabled.])
     have_mpi=no
 
   else
@@ -38,11 +37,11 @@ AC_DEFUN([SWIN_LIB_MPI],
     if test x"$with_mpi_dir" = xyes; then
       with_mpi_dir=
     fi
-    if test x"$with_mpi_include_dir" = xyes; then
+    if test x"$with_mpi_inc_dir" = xyes; then
       if test x"$with_mpi_dir" = xyes; then
-        with_mpi_include_dir=$with_mpi_dir/include
+        with_mpi_inc_dir=$with_mpi_dir/include
       else
-        with_mpi_include_dir=
+        with_mpi_inc_dir=
       fi
     fi
     if test x"$with_mpi_lib_dir" = xyes; then
@@ -59,7 +58,7 @@ AC_DEFUN([SWIN_LIB_MPI],
     AC_MSG_CHECKING([for MPI installation])
 
     ## Look for the header file ##
-    cf_include_path_list="$with_mpi_include_dir .
+    cf_include_path_list="$with_mpi_inc_dir .
                           $PSRHOME/packages/$LOGIN_ARCH/lam/include
                           $PSRHOME/packages/$LOGIN_ARCH/mpich/include
                           /usr/local/include/mpi
