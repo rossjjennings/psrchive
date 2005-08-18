@@ -180,7 +180,9 @@ libpsrchive_la_SOURCES += ArchiveProcessor.C Plotter.C CalibratorPlotter.C  \
 	Plotter_calibrator_spectrum.C  Plotter_set_colour_map.C  \
 	Plotter_draw_transitions.C     Plotter_simple_ds.C  \
 	Plotter_phase_fourier.C        Plotter_spherical.C  \
-	Plotter_phase_frequency.C      Plotter_pseudo_vector_correlation.C
+	Plotter_phase_frequency.C
+
+# Plotter_pseudo_vector_correlation.C
 
 bin_PROGRAMS += pacv pcvar pav pas psrwt psrsh pcm pvt paf psrqft \
 	binphs_test pcm_chooser rmfit psrband SimTiming bin_clean \
