@@ -5,7 +5,7 @@
 #include <iostream>
 using namespace std;
 
-#define _DEBUG 1
+// #define _DEBUG 1
 
 void Pulsar::GaussianBaseline::get_bounds (PhaseWeight& weight, 
 					   float& lower, float& upper)
