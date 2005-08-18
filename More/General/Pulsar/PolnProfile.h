@@ -64,7 +64,7 @@ namespace Pulsar {
     Signal::State get_state () const { return state; }
 
     //! Get the Stokes 4-vector for the specified bin
-    Stokes<float> get_Stokes (unsigned ibin);
+    Stokes<float> get_Stokes (unsigned ibin) const;
 
     //! Set the Stokes 4-vector for the specified bin
     void set_Stokes (unsigned ibin, const Stokes<float>& stokes);

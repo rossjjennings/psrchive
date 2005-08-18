@@ -158,10 +158,10 @@ void Pulsar::PolnProfile::set_amps (unsigned ipol, float* amps)
 //
 //
 //
-Stokes<float> Pulsar::PolnProfile::get_Stokes (unsigned ibin)
+Stokes<float> Pulsar::PolnProfile::get_Stokes (unsigned ibin) const
 {
   if (state != Signal::Stokes)
-    convert_state (Signal::Stokes);
+    const_cast<PolnProfile*>(this)->convert_state (Signal::Stokes);
 
   if (ibin >= profile[0]->get_nbin())
     throw Error (InvalidRange, "PolnProfile::get_Stokes",
