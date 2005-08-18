@@ -1,4 +1,6 @@
 #include "Pulsar/BaselineWindow.h"
+#include "Pulsar/PhaseWeight.h"
+#include "Pulsar/Profile.h"
 
 // #define _DEBUG 1
 
@@ -19,13 +21,30 @@ Pulsar::BaselineWindow::BaselineWindow ()
   find_max = false;
 }
 
-void Pulsar::BaselineWindow::set_Profile (const Profile* profile)
+void Pulsar::BaselineWindow::set_Profile (const Profile* _profile)
 {
+  profile = _profile;
 }
 
 //! Retrieve the PhaseWeight
 void Pulsar::BaselineWindow::get_weight (PhaseWeight& weight)
 {
+  if (!profile)
+    throw Error (InvalidState, "Pulsar::BaselineWindow::get_weight",
+		 "Profile not set");
+
+  unsigned nbin = profile->get_nbin();
+
+  float centre = find_phase (nbin, profile->get_amps());
+
+  unsigned ibin1 = unsigned (nbin * (1.0 + centre - 0.5 * duty_cycle));
+  unsigned ibin2 = unsigned (nbin * (1.0 + centre + 0.5 * duty_cycle));
+
+  weight.resize( nbin );
+  weight.set_all( 0.0 );
+
+  for (unsigned ibin=ibin1; ibin<ibin2; ibin++)
+    weight[ibin%nbin] = 1.0;
 }
 
 //! Set the duty cycle
@@ -65,7 +84,7 @@ void Pulsar::BaselineWindow::set_range (int start, int end)
 
 
 //! Return the phase at which minimum or maximum mean is found
-float Pulsar::BaselineWindow::find_phase (unsigned nbin, float* amps)
+float Pulsar::BaselineWindow::find_phase (unsigned nbin, const float* amps)
 {
   unsigned boxwidth = unsigned (.5 * duty_cycle * nbin);
   if (boxwidth >= nbin/2 || boxwidth == 0)

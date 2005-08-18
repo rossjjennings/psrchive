@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/BaselineWindow.h,v $
-   $Revision: 1.1 $
-   $Date: 2005/04/24 01:12:00 $
+   $Revision: 1.2 $
+   $Date: 2005/08/18 12:09:16 $
    $Author: straten $ */
 
 #ifndef __Pulsar_BaselineWindow_h
@@ -50,7 +50,7 @@ namespace Pulsar {
     void get_phase () const;
 
     //! Return the phase at which minimum or maximum mean is found
-    float find_phase (unsigned nbin, float* amps);
+    float find_phase (unsigned nbin, const float* amps);
 
   protected:
 
@@ -68,6 +68,9 @@ namespace Pulsar {
 
     //! Set true when range is specified
     bool range_specified;
+
+    //! The Profile from which the mask will be calculated
+    Reference::To<const Profile> profile;
 
   };
 
