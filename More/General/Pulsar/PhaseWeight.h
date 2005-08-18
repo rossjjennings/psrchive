@@ -1,14 +1,15 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/PhaseWeight.h,v $
-   $Revision: 1.2 $
-   $Date: 2004/11/22 21:28:56 $
+   $Revision: 1.3 $
+   $Date: 2005/08/18 12:09:38 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PhaseWeight_h
 #define __Pulsar_PhaseWeight_h
 
 #include "Reference.h"
+#include "Estimate.h"
 
 namespace Pulsar {
 
@@ -43,6 +44,12 @@ namespace Pulsar {
     //! Forms the product of this and weight
     const PhaseWeight& operator *= (const PhaseWeight& weight);
 
+    //! Array operator
+    float& operator [] (unsigned i) { return weight[i]; }
+
+    //! Resize the weights array
+    void resize (unsigned nbin) { weight.resize(nbin); }
+
     //! Set all weights to the specified value
     void set_all (float weight);
   
@@ -55,14 +62,39 @@ namespace Pulsar {
     //! Retrieve the weights
     void get_weights (std::vector<float>& weights) const;
 
+    //! Set the Profile to which the weights apply
+    void set_Profile (const Profile* profile);
+
+    //! Get the weighted mean of the Profile
+    Estimate<double> get_mean () const;
+
+    //! Get the weighted variance of the Profile
+    Estimate<double> get_variance () const;
+
     //! Get the statistics of the weighted phase bins
     void stats (const Profile* profile,
-		double* mean, double* variance=0, double* varmean=0);
+		double* mean, double* variance=0, 
+		double* varmean=0, double* varvar=0) const;
 
   protected:
 
     //! The weights
     std::vector<float> weight;
+
+    //! The Profile to which the weights apply
+    Reference::To<const Profile> profile;
+
+    //! Flag set when the statistics have been calculated
+    bool built;
+
+    //! The weighted mean of the Profile
+    Estimate<double> mean;
+
+    //! The weighted variance of the Profile
+    Estimate<double> variance;
+
+    //! Compute the mean and variance attributes
+    void build ();
 
   };
 

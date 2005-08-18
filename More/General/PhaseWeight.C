@@ -3,16 +3,19 @@
 
 Pulsar::PhaseWeight::PhaseWeight ()
 {
+  built = false;
 }
 
 Pulsar::PhaseWeight::PhaseWeight (const PhaseWeight& pm)
 {
   weight = pm.weight;
+  built = false;
 }
 
 Pulsar::PhaseWeight::PhaseWeight (const vector<float>& _weight)
 {
   weight = _weight;
+  built = false;
 }
 
 Pulsar::PhaseWeight::~PhaseWeight ()
@@ -83,16 +86,46 @@ double Pulsar::PhaseWeight::get_weight_max () const
   return max;
 }
 
+//! Set the Profile to which the weights apply
+void Pulsar::PhaseWeight::set_Profile (const Profile* _profile)
+{
+  if (profile && profile == _profile)
+    return;
+
+  profile = _profile;
+  built = false;
+}
+
+//! Get the weighted mean of the Profile
+Estimate<double> Pulsar::PhaseWeight::get_mean () const
+{
+  if (!built)
+    const_cast<PhaseWeight*>(this)->build();
+  return mean;
+}
+
+//! Get the weighted variance of the Profile
+Estimate<double> Pulsar::PhaseWeight::get_variance () const
+{
+  if (!built)
+    const_cast<PhaseWeight*>(this)->build();
+  return variance;
+}
+
+void Pulsar::PhaseWeight::build ()
+{
+  stats (profile, &(mean.val), &(variance.val), &(mean.var), &(variance.var));
+  built = true;
+}
+
 void Pulsar::PhaseWeight::stats (const Profile* profile,
-				 double* mean, double* var, double* varmean)
+				 double* mean, double* var,
+				 double* varmean, double* varvar) const
 {
   if (Profile::verbose) cerr << "Pulsar::PhaseWeight::stats" << endl;
   
-  double totwt = 0; 
-  double tot   = 0;
-  double totsq = 0;
-
   unsigned nbin = profile->get_nbin();
+  unsigned ibin = 0;
 
   if (nbin != weight.size())
     throw Error (InvalidState, "Pulsar::PhaseWeight::stats",
@@ -101,23 +134,46 @@ void Pulsar::PhaseWeight::stats (const Profile* profile,
 
   const float* amps = profile->get_amps();
 
-  for (unsigned ibin=0; ibin < nbin; ibin++) {
+  double totwt = 0; 
+  double mu   = 0;
+
+  for (ibin=0; ibin < nbin; ibin++) {
     double value = double(weight[ibin]) * double(amps[ibin]);
-    tot   += value;
-    totsq += value*value;
+    mu += value;
     totwt += weight[ibin];
   }
 
-  double mean_x   = tot / totwt;
-  double mean_xsq = totsq / totwt;
-  double var_x = (mean_xsq - mean_x*mean_x) * totwt/(totwt-1.0);
+  mu /= totwt;
+
+  double mu2  = 0;
+  double mu4  = 0;
+
+  for (ibin=0; ibin < nbin; ibin++) {
+    double value = double(weight[ibin]) * double(amps[ibin] - mu);
+    double value2 = value * value;
+    mu2  += value2;
+    mu4  += value2*value2;
+  }
+
+  mu2 /= totwt;
+  mu4 /= totwt;
+
+  double totwt_1 = totwt - 1.0;
+  double totwt3 = totwt * totwt * totwt;
+
+  // bias-corrected sample variance
+  double var_x = mu2 * totwt/totwt_1;
+  double var_var = (totwt_1*totwt_1*mu4 - totwt_1*(totwt-3)*mu2*mu2)/totwt3;
 
   if (mean)
-    *mean = mean_x;
+    *mean = mu;
   if (var)
     *var  = var_x;
+
   if (varmean)
     *varmean = var_x / totwt;
+  if (varvar)
+    *varvar = var_var;
 
   if (Profile::verbose) cerr << "Pulsar::PhaseWeight::stats return" << endl;
 }
