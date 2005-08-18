@@ -6,8 +6,7 @@
 // Pulsar::Profile::average
 //
 /*!
-  It can be easily shown that a series of additions using this operator
-  preserves the simple relationship:
+  A series of additions using this operator preserves the relationship:
 
   \f$ \bar{x} = \sum_{i=1}^N W(x_i) x_i / W(\bar{x}) \f$
 
@@ -15,24 +14,24 @@
 
   \f$ W(\bar{x}) = \sum_{i=1}^N W(x_i) \f$
 */
-const Pulsar::Profile& Pulsar::Profile::average (const Profile& profile, 
+const Pulsar::Profile& Pulsar::Profile::average (const Profile* profile, 
 						 double sign)
 {
-  if (nbin != profile.get_nbin())
+  if (nbin != profile->get_nbin())
     throw Error (InvalidRange, "Pulsar::Profile::average",
-		 "nbin=%d != profile.nbin=%d", nbin, profile.get_nbin());
+		 "nbin=%d != profile.nbin=%d", nbin, profile->get_nbin());
 
   try {
 
     // check if the addition will result in some undefined state
-    if (state != profile.get_state())
+    if (state != profile->get_state())
       state = Signal::None;
     
     float* amps1 = amps;
-    const float* amps2 = profile.get_amps();
+    const float* amps2 = profile->get_amps();
     
     double weight1 = weight;
-    double weight2 = profile.get_weight();
+    double weight2 = profile->get_weight();
     
     weight = weight1 + weight2;
     

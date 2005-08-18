@@ -65,6 +65,7 @@ Pulsar::Profile::Profile (unsigned nbin)
 {
   init();
   resize(nbin);
+  zero();
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -140,12 +141,12 @@ const Pulsar::Profile& Pulsar::Profile::operator = (const Profile& input)
 
 const Pulsar::Profile& Pulsar::Profile::operator += (const Profile& profile)
 {
-  return average (profile, 1.0);
+  return average (&profile, 1.0);
 }
 
 const Pulsar::Profile& Pulsar::Profile::operator -= (const Profile& profile)
 {
-  return average (profile, -1.0);
+  return average (&profile, -1.0);
 }
 
 /////////////////////////////////////////////////////////////////////////////
