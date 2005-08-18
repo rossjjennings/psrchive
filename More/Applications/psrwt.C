@@ -6,7 +6,8 @@
 #include "Pulsar/FourierSNR.h"
 #include "Pulsar/StandardSNR.h"
 #include "Pulsar/AdaptiveSNR.h"
-#include "Pulsar/BaselineMask.h"
+#include "Pulsar/GaussianBaseline.h"
+#include "Pulsar/BaselineWindow.h"
 #include "Pulsar/PhaseWeight.h"
 
 #include "Pulsar/SmoothMedian.h"
@@ -81,7 +82,7 @@ int main (int argc, char** argv)
   Pulsar::StandardSNR standard_snr;
   Pulsar::AdaptiveSNR adaptive_snr;
 
-  Pulsar::BaselineMask mask;
+  Pulsar::GaussianBaseline mask;
   adaptive_snr.set_baseline (&mask);
 
   Reference::To<Pulsar::Archive> standard;
@@ -233,16 +234,21 @@ int main (int argc, char** argv)
       Pulsar::Profile::rotate_in_phase_domain = true;
       break;
 
-    case 'w':
+    case 'w': {
 
       duty_cycle = atof(optarg);
       cerr << "psrwt: baseline phase window width = " << duty_cycle << endl;
 
       Pulsar::Profile::default_duty_cycle = duty_cycle;
-      mask.set_initial_window (duty_cycle);
       fourier_snr.set_baseline_extent (duty_cycle);
 
+      Pulsar::BaselineWindow* bw;
+      bw = dynamic_cast<Pulsar::BaselineWindow*>(mask.get_initial_baseline());
+      if (bw)
+	bw->set_duty_cycle (duty_cycle);
+
       break;
+    }
 
     case 'V':
       Pulsar::Archive::verbose = true;
@@ -393,7 +399,7 @@ int main (int argc, char** argv)
 
 	  plotter.singleProfile(copy);
 	  cpgpage();
-	  plotter.phase_fourier(copy);
+	  plotter.fourier(copy);
 
 	}
 	
