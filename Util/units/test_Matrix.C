@@ -5,9 +5,9 @@ using namespace std;
 
 int main ()
 {
-  Matrix<float, 3, 4> m1;
-  Matrix<float, 4, 5> m2;
-  Vector<float, 4> v;
+  Matrix<3, 4, float> m1;
+  Matrix<4, 5, float> m2;
+  Vector<4, float> v;
 
   random_matrix (m1, 10.0);
   random_matrix (m2, 10.0);
@@ -17,10 +17,10 @@ int main ()
 
   cerr << "v=" << v << " m1*v=" << m1*v << endl;
 
-  Matrix<double, 3, 3> test;
+  Matrix<3, 3, double> test;
   random_matrix (test, 10.0);
 
-  Matrix<double, 3, 3> inverse = inv (test);
+  Matrix<3, 3, double> inverse = inv (test);
 
   cerr << "M*inv(M)=" << test * inverse << endl;
 

@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Quaternion.h,v $
-   $Revision: 1.26 $
-   $Date: 2004/12/22 13:32:15 $
+   $Revision: 1.27 $
+   $Date: 2005/08/18 12:10:42 $
    $Author: straten $ */
 
 #ifndef __Quaternion_H
@@ -26,7 +26,7 @@ public:
     : s0(a), s1(b), s2(c), s3(d) { }
 
   //! Construct from a scalar and vector
-  template<typename U> Quaternion (T s, const Vector<U, 3>& v)
+  template<typename U> Quaternion (T s, const Vector<3, U>& v)
     : s0(s), s1(v[0]), s2(v[1]), s3(v[2]) { }
 
   //! Construct from another Quaternion<U> instance
@@ -100,12 +100,12 @@ public:
   void set_scalar (T s) { s0 = s; }
 
   //! Access to vector component
-  Vector<T,3> get_vector () const 
-    { Vector<T,3> ret; ret[0]=s1; ret[1]=s2; ret[2]=s3; return ret; }
+  Vector<3,T> get_vector () const 
+    { Vector<3,T> ret; ret[0]=s1; ret[1]=s2; ret[2]=s3; return ret; }
 
   //! Set the vector component
   template<typename U>
-  void set_vector (const Vector<U,3>& v) { s1=v[0]; s2=v[1]; s3=v[2]; }
+  void set_vector (const Vector<3,U>& v) { s1=v[0]; s2=v[1]; s3=v[2]; }
 
   //! Identity
   static const Quaternion& identity();

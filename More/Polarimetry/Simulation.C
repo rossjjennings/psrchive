@@ -116,7 +116,7 @@ void Calibration::Simulation::single_axis_calibrate ()
 
   // calculate the boost impact parameter
 
-  Vector<double,3> boost = H.get_vector ();
+  Vector<3,double> boost = H.get_vector ();
   double sinhbeta = sqrt (boost * boost);
   double beta = asinh (sinhbeta);
 
@@ -129,7 +129,7 @@ void Calibration::Simulation::single_axis_calibrate ()
 
   // calculate the rotation angle
 
-  Vector<double,3> rotation = U.get_vector ();
+  Vector<3,double> rotation = U.get_vector ();
   double sinphi = sqrt (rotation * rotation);
   double phi = atan2 (sinphi, U[0]);
 
@@ -196,7 +196,7 @@ double Calibration::Simulation::get_distortion (Measurable m,
     return out[3] - in[3];
     
   case StokesP: {
-    Vector<double,3> diff = out.get_vector() - in.get_vector();
+    Vector<3,double> diff = out.get_vector() - in.get_vector();
     return sqrt(diff*diff);
   }
   
@@ -205,20 +205,20 @@ double Calibration::Simulation::get_distortion (Measurable m,
 
   case Orientation: {
     // Project the observed polarization vector into the Q,U plane
-    Vector<double,3> vect_out = out.get_vector();
+    Vector<3,double> vect_out = out.get_vector();
     vect_out[2] = 0.0;
     // normalize it
     if (L_out > 0.0)
       vect_out /= L_out;
     
     // Project the observed polarization vector into the Q,U plane
-    Vector<double,3> vect_in = in.get_vector();
+    Vector<3,double> vect_in = in.get_vector();
     vect_in[2] = 0.0;
     // normalize it
     if (L_in > 0.0)
       vect_in /= L_in;
     
-    Vector<double,3> sT = cross (vect_in, vect_out);
+    Vector<3,double> sT = cross (vect_in, vect_out);
     
     double cos_dTheta = vect_out * vect_in;
     double sin_dTheta = sT*sT;

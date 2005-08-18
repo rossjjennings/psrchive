@@ -31,7 +31,7 @@ void MEAL::Polar::init ()
 
   for (unsigned i=0; i<3; i++) {
 
-    rotation[i] = new MEAL::Rotation(Vector<double, 3>::basis(i));
+    rotation[i] = new MEAL::Rotation(Vector<3,double>::basis(i));
     // rotation[i]->name = "Polar::Rotation " + std::string(1, char('0' + i));
 
     add_model (rotation[i]);

@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/Faraday.h,v $
-   $Revision: 1.2 $
-   $Date: 2005/04/06 20:40:21 $
+   $Revision: 1.3 $
+   $Date: 2005/08/18 12:10:41 $
    $Author: straten $ */
 
 #ifndef __Faraday_H
@@ -39,7 +39,7 @@ namespace Calibration {
     double get_frequency () const;
 
     //! Set the axis about which the rotation occurs
-    void set_axis (const Vector<double, 3>& axis);
+    void set_axis (const Vector<3, double>& axis);
 
     //! Get the Faraday rotation angle
     double get_rotation () const;

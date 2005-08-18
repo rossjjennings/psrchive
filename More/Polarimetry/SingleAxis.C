@@ -15,9 +15,9 @@ void Calibration::SingleAxis::init ()
   // Note, these objects will be destroyed during Reference::To destructor
   gain     = new MEAL::Gain;
   // gain->name = "SingleAxis::Gain";
-  boost    = new MEAL::Boost    (Vector<double, 3>::basis(0));
+  boost    = new MEAL::Boost    (Vector<3, double>::basis(0));
   // boost->set_param_name ("SingleAxis::boost");
-  rotation = new MEAL::Rotation (Vector<double, 3>::basis(0));
+  rotation = new MEAL::Rotation (Vector<3, double>::basis(0));
   // rotation->name = "SingleAxis::Rotation";
 
   add_model (gain);
@@ -97,14 +97,14 @@ void Calibration::SingleAxis::set_diff_phase (const Estimate<double>& phi)
 }
 
 //! Set the axis along which the boost and rotation occur
-void Calibration::SingleAxis::set_axis (const Vector<double, 3>& axis)
+void Calibration::SingleAxis::set_axis (const Vector<3, double>& axis)
 {
   boost->set_axis (axis);
   rotation->set_axis (axis);
 }
 
 //! Get the unit-vector along which the boost and rotation occur
-Vector<double, 3> Calibration::SingleAxis::get_axis () const
+Vector<3, double> Calibration::SingleAxis::get_axis () const
 {
   return boost->get_axis ();
 }

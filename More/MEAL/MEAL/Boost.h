@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Boost.h,v $
-   $Revision: 1.4 $
-   $Date: 2005/04/06 20:23:36 $
+   $Revision: 1.5 $
+   $Date: 2005/08/18 12:10:42 $
    $Author: straten $ */
 
 #ifndef __MEAL_Boost_H
@@ -24,13 +24,13 @@ namespace MEAL {
     Boost ();
 
     //! Construct with a fixed axis
-    Boost (const Vector<double, 3>& axis);
+    Boost (const Vector<3, double>& axis);
 
     //! Fix the axis along which the boost occurs
-    void set_axis (const Vector<double, 3>& axis);
+    void set_axis (const Vector<3, double>& axis);
 
     //! Get the unit-vector along which the boost occurs
-    Vector<double, 3> get_axis (double* beta = 0) const;
+    Vector<3, double> get_axis (double* beta = 0) const;
 
     //! Set the boost parameter, beta
     void set_beta (double beta);
@@ -53,13 +53,13 @@ namespace MEAL {
   protected:
 
     //! The axis along which the boost occurs
-    Vector<double, 3> axis;
+    Vector<3, double> axis;
 
     //! Calculate the Jones matrix and its gradient when axis is free
-    void calculate_Gibbs (Jones<double>& result, std::vector<Jones<double> >* grad);
+    void calculate_Gibbs (Jones<double>&, std::vector<Jones<double> >*);
 
     //! Calculate the Jones matrix and its gradient when axis is fixed
-    void calculate_beta (Jones<double>& result, std::vector<Jones<double> >* grad);
+    void calculate_beta (Jones<double>&, std::vector<Jones<double> >*);
 
     //! Calculate the Jones matrix and its gradient
     void calculate (Jones<double>& result, std::vector<Jones<double> >*);

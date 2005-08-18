@@ -21,8 +21,8 @@ public:
 
 void CompositeTest::runtest ()
 {
-  Rotation rotation (Vector<double, 3>::basis(0));
-  Boost boost (Vector<double, 3>::basis(2));
+  Rotation rotation (Vector<3,double>::basis(0));
+  Boost boost (Vector<3,double>::basis(2));
 
   CompositeTest m1;
   CompositeTest m2;

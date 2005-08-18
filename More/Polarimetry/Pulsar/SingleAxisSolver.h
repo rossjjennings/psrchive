@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/SingleAxisSolver.h,v $
-   $Revision: 1.1 $
-   $Date: 2004/11/22 20:45:59 $
+   $Revision: 1.2 $
+   $Date: 2005/08/18 12:10:42 $
    $Author: straten $ */
 
 #ifndef __Calibration_SingleAxisSolver_H
@@ -52,7 +52,7 @@ namespace Calibration {
     Stokes<MEAL::ScalarMath> output;
 
     //! The Axis about which the rotations take place
-    Vector<MEAL::ScalarMath, 3> axis;
+    Vector<3, MEAL::ScalarMath> axis;
 
     //! The gain solution
     MEAL::ScalarMath gain;

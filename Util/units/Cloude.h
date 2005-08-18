@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Cloude.h,v $
-   $Revision: 1.3 $
-   $Date: 2004/11/22 19:26:03 $
+   $Revision: 1.4 $
+   $Date: 2005/08/18 12:10:42 $
    $Author: straten $ */
 
 #ifndef __Cloude_H
@@ -19,14 +19,14 @@
    Optik, 75(1), 26-36
 */
 template<typename T>
-Matrix<std::complex<T>,4,4> coherence (const Jones<T>& jones)
+Matrix< 4,4, std::complex<T> > coherence (const Jones<T>& jones)
 {
   // form the Hermitian biquaternion (Eq. 4.6)
   Quaternion<std::complex<T>,Hermitian> q = convert(jones);
 
   // convert to the equivalent complex vector and its Hermitian transpose
-  Vector<std::complex<T>,4> vect;
-  Vector<std::complex<T>,4> herm;
+  Vector< 4, std::complex<T> > vect;
+  Vector< 4, std::complex<T> > herm;
 
   for (unsigned i=0; i<4; i++) {
     vect[i] = q[i];
@@ -42,7 +42,7 @@ Matrix<std::complex<T>,4,4> coherence (const Jones<T>& jones)
    given by the hermitian transpose of the right (column)
    eigenvector. */
 template<typename T>
-Jones<T> system (const Vector<std::complex<T>,4>& left_eigen)
+Jones<T> system (const Vector< 4,std::complex<T> >& left_eigen)
 {
   Quaternion<std::complex<T>,Hermitian> q;
   
@@ -55,8 +55,8 @@ Jones<T> system (const Vector<std::complex<T>,4>& left_eigen)
 //! Return the target entropy, given the target coherency matrix eigenvalues
 /*! The eigenvalues are returned by Jacobi as a vector.  The target
   entropy is defined at the end of Section 4 of Cloude (1986). */
-template<typename T, unsigned N>
-  double entropy (const Vector<T,N>& eigenvalues)
+template<unsigned N, typename T>
+  double entropy (const Vector<N,T>& eigenvalues)
 {
   unsigned i;
   double total = 0;

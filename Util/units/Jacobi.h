@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Jacobi.h,v $
-   $Revision: 1.6 $
-   $Date: 2005/02/13 08:15:29 $
+   $Revision: 1.7 $
+   $Date: 2005/08/18 12:10:42 $
    $Author: straten $ */
 
 #ifndef __Jacobi_H
@@ -84,8 +84,8 @@ void calculate_Jacobi (const U& p, const U& q, const std::complex<T>& pq,
 //! Perform the Jacobi rotation
 /*! This template function performs the Jacobi transformation that
   minimizes roundoff error, as described in Section 11.1 of NR */
-template <typename T, unsigned RC>
-inline void rotate_Jacobi (Matrix<T,RC,RC>& x, T s, T tau,
+template <unsigned RC, typename T>
+inline void rotate_Jacobi (Matrix<RC,RC,T>& x, T s, T tau,
 			   unsigned i, unsigned j, unsigned k, unsigned l)
 {
   T g=x[i][j];
@@ -98,9 +98,9 @@ inline void rotate_Jacobi (Matrix<T,RC,RC>& x, T s, T tau,
 }
 
 // returns the correction factor for the diagonal
-template <typename T, typename U, unsigned RC>
+template <unsigned RC, typename T, typename U>
 U JacobiRotation ( unsigned ip, unsigned iq, 
-		   Matrix<T,RC,RC>& a, Matrix<T,RC,RC>& v, Vector<U,RC>& d )
+		   Matrix<RC,RC,T>& a, Matrix<RC,RC,T>& v, Vector<RC,U>& d )
 {
   T s, tau;
   U correction;
@@ -156,9 +156,9 @@ U JacobiRotation ( unsigned ip, unsigned iq,
 
 
 template <typename T, typename U, unsigned RC>
-void Jacobi (Matrix<T,RC,RC>& a, Matrix<T,RC,RC>& evec, Vector<U,RC>& eval)
+void Jacobi (Matrix<RC,RC,T>& a, Matrix<RC,RC,T>& evec, Vector<RC,U>& eval)
 {
-  Vector<U,RC> b, z;
+  Vector<RC,U> b, z;
 
   // copy the diagonal elements into d and b
   unsigned ip, iq;

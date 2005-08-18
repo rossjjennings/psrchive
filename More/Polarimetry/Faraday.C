@@ -67,7 +67,7 @@ double Calibration::Faraday::get_frequency () const
   return frequency;
 }
 
-void Calibration::Faraday::set_axis (const Vector<double, 3>& axis)
+void Calibration::Faraday::set_axis (const Vector<3, double>& axis)
 {
   rotation.set_axis (axis);
   copy_evaluation_changed (rotation);

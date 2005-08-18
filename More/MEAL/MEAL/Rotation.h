@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Rotation.h,v $
-   $Revision: 1.4 $
-   $Date: 2005/04/06 20:23:36 $
+   $Revision: 1.5 $
+   $Date: 2005/08/18 12:10:42 $
    $Author: straten $ */
 
 #ifndef __MEAL_Rotation_H
@@ -24,10 +24,10 @@ namespace MEAL {
     Rotation ();
 
     //! Construct for the specified axis
-    Rotation (const Vector<double, 3>& axis);
+    Rotation (const Vector<3,double>& axis);
 
     //! Set the axis about which the rotation occurs
-    void set_axis (const Vector<double, 3>& axis);
+    void set_axis (const Vector<3,double>& axis);
 
     //! Set the rotation angle in radians
     void set_phi (double radians);
@@ -50,7 +50,7 @@ namespace MEAL {
     void calculate (Jones<double>& result, std::vector<Jones<double> >*);
 
     //! The axis along which the rotation occurs
-    Vector<double, 3> axis;
+    Vector<3,double> axis;
 
     void init ();
 

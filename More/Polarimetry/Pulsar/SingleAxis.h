@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/SingleAxis.h,v $
-   $Revision: 1.2 $
-   $Date: 2005/05/26 16:27:56 $
+   $Revision: 1.3 $
+   $Date: 2005/08/18 12:10:42 $
    $Author: straten $ */
 
 #ifndef __Calibration_SingleAxis_H
@@ -76,10 +76,10 @@ namespace Calibration {
     // Non-free parameters
 
     //! Set the axis along which the boost and rotation occur
-    void set_axis (const Vector<double, 3>& axis);
+    void set_axis (const Vector<3, double>& axis);
 
     //! Get the unit-vector along which the boost and rotation occur
-    Vector<double, 3> get_axis () const;
+    Vector<3, double> get_axis () const;
 
     //! Solve for gain, boost, and rotation given output cal state
     void solve (const std::vector< Estimate<double> >& output);

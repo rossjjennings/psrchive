@@ -32,7 +32,7 @@ QuaternionFT::QuaternionFT (double theta, double phi)
 }
 
 //! Set the imaginary axis
-void QuaternionFT::set_axis (Vector<float, 3> axis1)
+void QuaternionFT::set_axis (Vector<3, float> axis1)
 {
   // normalize the vector
   axis1 /= sqrt (axis1*axis1);
@@ -42,7 +42,7 @@ void QuaternionFT::set_axis (Vector<float, 3> axis1)
   float minimum_projection = 1.0;
   
   for (unsigned basis=0; basis<3; basis++) {
-    float projection = fabs(axis1 * Vector<float, 3>::basis(basis));
+    float projection = fabs(axis1 * Vector<3, float>::basis(basis));
     if (projection < minimum_projection) {
       minimum_projection = projection;
       best_basis = basis;
@@ -51,10 +51,10 @@ void QuaternionFT::set_axis (Vector<float, 3> axis1)
 
   cerr << "Most perpendicular basis = " << best_basis << endl;
 
-  Vector<float, 3> axis2 = cross (axis1, Vector<float, 3>::basis(best_basis));
+  Vector<3, float> axis2 = cross (axis1, Vector<3, float>::basis(best_basis));
   axis2 /= sqrt (axis2*axis2);
 
-  Vector<float, 3> axis3 = cross (axis1, axis2);
+  Vector<3, float> axis3 = cross (axis1, axis2);
   axis3 /= sqrt (axis3*axis3);
 
   // unit vectors defined by sperical coordinates theta and phi
@@ -82,7 +82,7 @@ void QuaternionFT::set_axis (double theta, double phi)
 }
 
 //! Get the imaginary axis
-Vector<float, 3> QuaternionFT::get_axis () const
+Vector<3, float> QuaternionFT::get_axis () const
 {
   return mu[0].get_vector();
 }
@@ -114,7 +114,7 @@ void QuaternionFT::set_xform ()
     cerr << "\n    mu[0]*mu[1]=" << mu[0]*mu[1] << endl;
   }
 
-  Matrix <float, 3, 3> inv_xform;
+  Matrix <3, 3, float> inv_xform;
 
   for (unsigned i=0; i<3; i++)
     for (unsigned j=0; j<3; j++)
@@ -160,8 +160,8 @@ void QuaternionFT::fft (unsigned npts, const float* input, float* output)
   float* h_bt = h_b;
 
   // convert i,j,k to mu[0], mu[1], mu[2]
-  Vector<float, 3> input_unreal;
-  Vector<float, 3> h_unreal;
+  Vector<3, float> input_unreal;
+  Vector<3, float> h_unreal;
 
   if (verbose)
     cerr << "QuaternionFT::fft xform=" << xform << endl;

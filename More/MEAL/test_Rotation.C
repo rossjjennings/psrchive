@@ -10,7 +10,7 @@ void test_Rotation (double theta, double phi, unsigned axis)
 {
   MEAL::Rotation rotation;
 
-  rotation.set_axis (Vector<float,3>::basis(axis));
+  rotation.set_axis (Vector<3,float>::basis(axis));
   rotation.set_param (0, phi);
 
   Jones<double> xform = rotation.evaluate();

@@ -13,10 +13,10 @@ void MEAL::Rotation::init ()
 MEAL::Rotation::Rotation ()
 {
   init ();
-  axis = Vector<double, 3> (1,0,0);
+  axis = Vector<3,double> (1,0,0);
 }
 
-MEAL::Rotation::Rotation (const Vector<double, 3>& _axis) 
+MEAL::Rotation::Rotation (const Vector<3,double>& _axis) 
 {
   init ();
   axis = _axis;
@@ -69,7 +69,7 @@ void MEAL::Rotation::calculate (Jones<double>& result,
   result = convert (rotation);
 }
 
-void MEAL::Rotation::set_axis (const Vector<double, 3>& _axis)
+void MEAL::Rotation::set_axis (const Vector<3,double>& _axis)
 {
   axis = _axis;
 }

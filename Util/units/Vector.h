@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Vector.h,v $
-   $Revision: 1.10 $
-   $Date: 2004/11/22 19:26:04 $
+   $Revision: 1.11 $
+   $Date: 2005/08/18 12:10:42 $
    $Author: straten $ */
 
 #ifndef __Vector_H
@@ -12,7 +12,7 @@
 #include <complex>
 
 //! Vector
-template <typename T, unsigned N> 
+template <unsigned N, typename T> 
 class Vector {
   
 public:
@@ -26,11 +26,11 @@ public:
   { x[0] = x0; x[1] = x1; x[2] = x2; }
 
   //! Construct from another Vector<U> instance
-  template<typename U> Vector (const Vector<U, N>& s)
+  template<typename U> Vector (const Vector<N, U>& s)
     { operator=(s); }
 
   //! Set this instance equal to another Vector<U> instance
-  template<typename U> Vector& operator = (const Vector<U, N>& s)
+  template<typename U> Vector& operator = (const Vector<N, U>& s)
     { for (unsigned i=0; i<N; i++) x[i] = T(s.x[i]); return *this; }
 
   //! Set this instance equal to a scalar
@@ -70,12 +70,12 @@ public:
 
   //! Vector addition
   template<typename U>
-  const friend Vector operator + (Vector a, const Vector<U,N>& b)
+  const friend Vector operator + (Vector a, const Vector<N,U>& b)
     { a+=b; return a; }
 
   //! Vector subtraction
   template<typename U> 
-  const friend Vector operator - (Vector a, const Vector<U,N>& b)
+  const friend Vector operator - (Vector a, const Vector<N,U>& b)
     { a-=b; return a; }
 
   //! Scalar multiplication
@@ -117,9 +117,9 @@ public:
 
 //! Cross product
 template <typename T> 
-const Vector<T,3> cross (const Vector<T,3>& a, const Vector<T,3>& b)
+const Vector<3,T> cross (const Vector<3,T>& a, const Vector<3,T>& b)
 {
-  Vector<T,3> result;
+  Vector<3,T> result;
   unsigned j, k;
   for (unsigned i=0; i<3; i++) {
     j = (i+1)%3;  k = (i+2)%3;
@@ -130,8 +130,8 @@ const Vector<T,3> cross (const Vector<T,3>& a, const Vector<T,3>& b)
 }
 
 //! squared "length"/"norm"
-template <typename T, unsigned N>
-T normsq(const Vector<std::complex<T>, N> &v)
+template <unsigned N, typename T>
+T normsq (const Vector< N, std::complex<T> >& v)
 {
   T sum = norm(v[0]);
   for (unsigned i=1; i < N; i++)
@@ -140,8 +140,8 @@ T normsq(const Vector<std::complex<T>, N> &v)
 }
 
 //! simpler version for scalar types
-template <typename T, unsigned N>
-T normsq(const Vector<T, N> &v)
+template <unsigned N, typename T>
+T normsq(const Vector<N, T> &v)
 {
   T sum = v[0]*v[0];
   for (unsigned i=1; i < N; i++)
@@ -150,15 +150,15 @@ T normsq(const Vector<T, N> &v)
 }
 
 //! and the norm itself; note, won't work for complex
-template <typename T, unsigned N>
-T norm(const Vector<T, N> &v)
+template <unsigned N, typename T>
+T norm(const Vector<N, T> &v)
 {
   return sqrt(normsq(v));
 }
 
 //! Useful for quickly printing the components
-template<typename T, unsigned N>
-std::ostream& operator<< (std::ostream& ostr, const Vector<T,N>& v)
+template<unsigned N, typename T>
+std::ostream& operator<< (std::ostream& ostr, const Vector<N,T>& v)
 {
   ostr << "(" << v[0];
   for (unsigned i=1; i<N; i++)

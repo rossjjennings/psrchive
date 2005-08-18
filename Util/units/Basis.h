@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Basis.h,v $
-   $Revision: 1.6 $
-   $Date: 2004/11/22 20:35:01 $
+   $Revision: 1.7 $
+   $Date: 2005/08/18 12:10:42 $
    $Author: straten $ */
 
 #ifndef __Basis_H
@@ -35,15 +35,15 @@ public:
   double get_ellipticity () const { return ellipticity; }
 
   //! get the basis vector
-  Vector<T, 3> get_basis_vector (unsigned iaxis) const { return into[iaxis]; }
+  Vector<3,T> get_basis_vector (unsigned iaxis) const { return into[iaxis]; }
 
   //! convert the input vector into the basis
   template<typename U>
-  Vector<U,3> get_in (const Vector<U,3>& vect) const { return into * vect; }
+  Vector<3,U> get_in (const Vector<3,U>& vect) const { return into * vect; }
 
   //! convert the input vector out of the basis
   template<typename U>
-  Vector<U,3> get_out (const Vector<U,3>& vect) const { return outof * vect; }
+  Vector<3,U> get_out (const Vector<3,U>& vect) const { return outof * vect; }
 
 protected:
 
@@ -57,10 +57,10 @@ protected:
   double ellipticity;
 
   //! The basis matrix
-  Matrix<T, 3, 3> into;
+  Matrix<3, 3, T> into;
 
   //! The transpose of the basis matrix
-  Matrix<T, 3, 3> outof;
+  Matrix<3, 3, T> outof;
 };
 
 /*! Given the orientation and ellipticity in radians, calculate the basis
@@ -76,9 +76,9 @@ void Basis<T>::set_basis (double _orientation, double _ellipticity)
   double cos_2e = cos (2.0*ellipticity);
   double sin_2e = sin (2.0*ellipticity);
 
-  into[0] = Vector<T,3> (cos_2o*cos_2e, sin_2o, -cos_2o*sin_2e);
-  into[1] = Vector<T,3> (-sin_2o*cos_2e, cos_2o, sin_2o*sin_2e);
-  into[2] = Vector<T,3> (sin_2e, 0, cos_2e);
+  into[0] = Vector<3,T> (cos_2o*cos_2e, sin_2o, -cos_2o*sin_2e);
+  into[1] = Vector<3,T> (-sin_2o*cos_2e, cos_2o, sin_2o*sin_2e);
+  into[2] = Vector<3,T> (sin_2e, 0, cos_2e);
 
   basis = Elliptical;
 
@@ -94,17 +94,17 @@ void Basis<T>::set_basis (Type _basis)
   switch (basis)  {
 
   case Linear:
-    into[0] = Vector<T, 3>::basis (0); // hat q
-    into[1] = Vector<T, 3>::basis (1); // hat u
-    into[2] = Vector<T, 3>::basis (2); // hat v
+    into[0] = Vector<3,T>::basis (0); // hat q
+    into[1] = Vector<3,T>::basis (1); // hat u
+    into[2] = Vector<3,T>::basis (2); // hat v
     orientation = 0;
     ellipticity = 0;
     break;
 
   case Circular:
-    into[0] = Vector<T, 3>::basis (1); // hat q
-    into[1] = Vector<T, 3>::basis (2); // hat u
-    into[2] = Vector<T, 3>::basis (0); // hat v
+    into[0] = Vector<3,T>::basis (1); // hat q
+    into[1] = Vector<3,T>::basis (2); // hat u
+    into[2] = Vector<3,T>::basis (0); // hat v
     orientation = 0.25*M_PI;
     ellipticity = 0.25*M_PI;
     break;

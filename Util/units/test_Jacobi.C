@@ -5,8 +5,8 @@
 using namespace std;
 
 // specialize for complex matrices
-template <typename T, unsigned RC>
-void test_Jacobi (Matrix<T,RC,RC>& matrix, float tolerance)
+template <unsigned RC, typename T>
+void test_Jacobi (Matrix<RC,RC,T>& matrix, float tolerance)
 {
   unsigned i,j;
 
@@ -20,10 +20,10 @@ void test_Jacobi (Matrix<T,RC,RC>& matrix, float tolerance)
   //cerr << "matrix = " << matrix << endl << endl;
 
   // make a copy
-  Matrix<T, RC, RC> temp = matrix;
+  Matrix<RC, RC, T> temp = matrix;
 
-  Matrix<T, RC, RC>  eigenvectors;
-  Vector<double, RC> eigenvalues;
+  Matrix<RC, RC, T>  eigenvectors;
+  Vector<RC, double> eigenvalues;
 
   Jacobi (temp, eigenvectors, eigenvalues);
 
@@ -65,7 +65,7 @@ void runtest (unsigned loops, float tolerance)
 
   for (unsigned iloop=0; iloop<loops; iloop++) {
 
-    Matrix<T,dim,dim> m1;
+    Matrix<dim,dim,T> m1;
     random_matrix (m1, 10.0);
 
     test_Jacobi (m1, tolerance);

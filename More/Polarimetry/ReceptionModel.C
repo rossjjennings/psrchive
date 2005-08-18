@@ -180,3 +180,11 @@ void Calibration::ReceptionModel::set_fit_convergence_threshold (float ct,
   convergence_threshold = ct;
   exact_solution = exact;
 }
+
+//! Get the covariance matrix of the last fit
+void 
+Calibration::ReceptionModel::get_fit_covariance (vector<vector<double> >& c)
+  const
+{
+  c = covariance;
+}

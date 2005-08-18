@@ -10,7 +10,7 @@ MEAL::Boost::Boost () : parameters (this, 3)
   parameters.set_param_name (2, "b_3");
 }
 
-MEAL::Boost::Boost (const Vector<double, 3>& _axis) 
+MEAL::Boost::Boost (const Vector<3, double>& _axis) 
   : parameters (this, 1)
 {
   parameters.set_param_name (0, "boost");
@@ -24,7 +24,7 @@ string MEAL::Boost::get_name () const
 }
 
 
-void MEAL::Boost::set_axis (const Vector<double, 3>& _axis)
+void MEAL::Boost::set_axis (const Vector<3, double>& _axis)
 {
   double norm = _axis * _axis;
   axis = _axis / sqrt(norm);
@@ -33,7 +33,7 @@ void MEAL::Boost::set_axis (const Vector<double, 3>& _axis)
 }
 
 //! Get the unit-vector along which the boost occurs
-Vector<double, 3> MEAL::Boost::get_axis (double* beta) const
+Vector<3, double> MEAL::Boost::get_axis (double* beta) const
 {
   if (get_nparam() == 1) {
     if (beta)
@@ -42,7 +42,7 @@ Vector<double, 3> MEAL::Boost::get_axis (double* beta) const
   }
   else {
 
-    Vector<double, 3> Gibbs;
+    Vector<3, double> Gibbs;
     for (unsigned i=0; i<3; i++)
       Gibbs[i] = get_param(i);
     double mod = sqrt (Gibbs * Gibbs);
@@ -65,7 +65,7 @@ void MEAL::Boost::set_beta (double beta)
  
   else {
 
-    Vector<double, 3> Gibbs = get_axis();
+    Vector<3, double> Gibbs = get_axis();
     Gibbs *= sinh (beta);
 
     for (unsigned i=0; i<3; i++)
@@ -88,7 +88,7 @@ void MEAL::Boost::free_axis ()
     return;
 
   double beta = get_param (0);
-  Vector<double, 3> Gibbs = axis * sinh(beta);
+  Vector<3, double> Gibbs = axis * sinh(beta);
 
   parameters.resize (3);
   for (unsigned i=0; i<3; i++)
@@ -138,7 +138,7 @@ void MEAL::Boost::calculate_beta (Jones<double>& result,
 void MEAL::Boost::calculate_Gibbs (Jones<double>& result, 
 				   vector<Jones<double> >* grad)
 {
-  Vector<double, 3> Gibbs;
+  Vector<3, double> Gibbs;
   for (unsigned i=0; i<3; i++)
     Gibbs[i] = get_param(i);
 

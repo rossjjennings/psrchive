@@ -29,7 +29,7 @@ void choose (vector<unsigned>& bins, Pulsar::Archive* archive)
 
   bins[0] = imax;
   chosen[imax] = true;
-  Vector<float,3> current_best = stokes[imax].get_vector ();
+  Vector<3,float> current_best = stokes[imax].get_vector ();
 
   cerr << "c:" << imax << endl;
 
@@ -40,7 +40,7 @@ void choose (vector<unsigned>& bins, Pulsar::Archive* archive)
     // choose the phase bin with the largest cross product with current best
     for (unsigned ibin=0; ibin<nbin; ibin++) {
 
-      Vector<float,3> x = cross( stokes[ibin].get_vector (), current_best );
+      Vector<3,float> x = cross( stokes[ibin].get_vector (), current_best );
       float ranking = x * x;
 
       if (ranking > maximum && !chosen[ibin]) {

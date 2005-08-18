@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/fft/QuaternionFT.h,v $
-   $Revision: 1.1 $
-   $Date: 2005/07/09 19:59:51 $
+   $Revision: 1.2 $
+   $Date: 2005/08/18 12:10:42 $
    $Author: straten $ */
 
 #ifndef __QuaternionFT_H
@@ -30,7 +30,7 @@ public:
   void set_axis (double theta, double phi);
 
   //! Set the imaginary axis
-  void set_axis (Vector<float, 3> axis);
+  void set_axis (Vector<3,float> axis);
 
   //! Experimental: set the power of the exponential used in ft
   void set_power (double power);
@@ -39,7 +39,7 @@ public:
   void set_extent (double extent);
 
   //! Get the imaginary axis
-  Vector<float, 3> get_axis () const;
+  Vector<3,float> get_axis () const;
 
   //! Set the direction of the Quaternion Fourier Transform
   void set_direction (Direction direction);
@@ -67,7 +67,7 @@ protected:
   Quaternion<float> mu[3];
 
   //! Transformation matrix for converting imaginary 3-vectors into basis
-  Matrix<float, 3, 3> xform;
+  Matrix<3,3,float> xform;
 
   //! Direction of transform
   float sign;

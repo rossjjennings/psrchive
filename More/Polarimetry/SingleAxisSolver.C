@@ -52,7 +52,7 @@ Calibration::SingleAxisSolver::set_output (const Stokes< Estimate<double> >& S)
 //! Set the SingleAxis parameters with the current solution
 void Calibration::SingleAxisSolver::solve (SingleAxis* model)
 {
-  Vector<double, 3> model_axis = model->get_axis();
+  Vector<3, double> model_axis = model->get_axis();
 
   for (unsigned i=0; i<3; i++)
     axis[i].get_expression()->set_param( 0, model_axis[i] );
@@ -77,23 +77,23 @@ void Calibration::SingleAxisSolver::init ()
 
   // decompose the input unit vector
 
-  Vector<MEAL::ScalarMath, 3> input_vector = input.get_vector();
+  Vector<3, MEAL::ScalarMath> input_vector = input.get_vector();
   MEAL::ScalarMath input_magnitude = sqrt(input_vector * input_vector);
 
-  Vector<MEAL::ScalarMath, 3> input_unit = input_vector/input_magnitude;
+  Vector<3, MEAL::ScalarMath> input_unit = input_vector/input_magnitude;
 
-  Vector<MEAL::ScalarMath, 3> input_parallel = (input_unit * axis) * axis;
-  Vector<MEAL::ScalarMath, 3> input_perp = input_unit - input_parallel;
+  Vector<3, MEAL::ScalarMath> input_parallel = (input_unit * axis) * axis;
+  Vector<3, MEAL::ScalarMath> input_perp = input_unit - input_parallel;
 
   // decompose the output unit vector
 
-  Vector<MEAL::ScalarMath, 3> output_vector = output.get_vector();
+  Vector<3, MEAL::ScalarMath> output_vector = output.get_vector();
   MEAL::ScalarMath output_magnitude = sqrt(output_vector * output_vector);
 
-  Vector<MEAL::ScalarMath, 3> output_unit = output_vector/output_magnitude;
+  Vector<3, MEAL::ScalarMath> output_unit = output_vector/output_magnitude;
 
-  Vector<MEAL::ScalarMath, 3> output_parallel = (output_unit * axis) * axis;
-  Vector<MEAL::ScalarMath, 3> output_perp = output_unit - output_parallel;
+  Vector<3, MEAL::ScalarMath> output_parallel = (output_unit * axis) * axis;
+  Vector<3, MEAL::ScalarMath> output_perp = output_unit - output_parallel;
 
   // find the rotation
   MEAL::ScalarMath cos_2phi = input_perp * output_perp;

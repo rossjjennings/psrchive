@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ReceptionModel.h,v $
-   $Revision: 1.1 $
-   $Date: 2004/11/22 20:45:59 $
+   $Revision: 1.2 $
+   $Date: 2005/08/18 12:10:42 $
    $Author: straten $ */
 
 #ifndef __ReceptionModel_H
@@ -84,6 +84,9 @@ namespace Calibration {
     //! Set the reduced chi-squared above which the fit is considered bad
     void set_fit_maximum_reduced (float maximum_reduced_chi_squared);
 
+    //! Get the covariance matrix of the last fit
+    void get_fit_covariance (std::vector< std::vector<double> >&) const;
+
     // ///////////////////////////////////////////////////////////////////
     //
     // OptimizedModel implementation
@@ -137,6 +140,10 @@ namespace Calibration {
     static void solve_wait (ReceptionModel* to_solve);
 
     bool top_calculate;
+
+    //! The covariance matrix set after fitting
+    std::vector< std::vector<double> > covariance;
+
   };
 
 

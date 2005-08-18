@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Stokes.h,v $
-   $Revision: 1.14 $
-   $Date: 2005/01/20 06:50:02 $
+   $Revision: 1.15 $
+   $Date: 2005/08/18 12:10:42 $
    $Author: straten $ */
 
 #ifndef __Stokes_H
@@ -22,7 +22,7 @@ class Stokes : public Quaternion<T, Hermitian>
 
   //! Construct from a scalar and vector
   template<typename U>
-    Stokes (T s, const Vector<U, 3>& v) : Quaternion<T,Hermitian> (s, v) {}
+    Stokes (T s, const Vector<3,U>& v) : Quaternion<T,Hermitian> (s, v) {}
 
   template<typename U>
     Stokes (const Stokes<U>& s)

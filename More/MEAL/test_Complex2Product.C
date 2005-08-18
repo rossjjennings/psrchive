@@ -23,7 +23,7 @@ int main (int argc, char** argv)
 
   Test< MEAL::ProductRule<MEAL::Complex2> > meta;
 
-  Test< MEAL::Rotation > rotation (Vector<double, 3>::basis(0));
+  Test< MEAL::Rotation > rotation (Vector<3,double>::basis(0));
 
   meta.add_model (&rotation);
   if (!meta.get_changed()) {
@@ -32,7 +32,7 @@ int main (int argc, char** argv)
     return -1;
   }
 
-  Test< MEAL::Boost > boost (Vector<double, 3>::basis(2));
+  Test< MEAL::Boost > boost (Vector<3,double>::basis(2));
 
   meta.add_model (&boost);
 
