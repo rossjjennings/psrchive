@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/Attic/PolnProfileFit.h,v $
-   $Revision: 1.8 $
-   $Date: 2004/11/22 21:32:30 $
+   $Revision: 1.9 $
+   $Date: 2005/08/18 12:10:00 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PolnProfileFit_h
@@ -11,6 +11,7 @@
 #include <memory>
 
 #include "MEAL/Axis.h"
+#include "Matrix.h"
 #include "Estimate.h"
 #include "Stokes.h"
 #include "toa.h"
@@ -56,6 +57,9 @@ namespace Pulsar {
     //! Set the maximum number of harmonics to include in fit
     void set_maximum_harmonic (unsigned max);
 
+    //! Choose the maximum_harmonic for the given standard
+    void choose_max_harmonic ();
+
     //! Set the standard to which observations will be fit
     void set_standard (const PolnProfile* standard);
 
@@ -78,11 +82,25 @@ namespace Pulsar {
     //! Return the Fourier Transform of the PolnProfile
     PolnProfile* fourier_transform (const PolnProfile* input) const;
     
+    //! Return the PSD of the Fourier Transform of the PolnProfile
+    PolnProfile* fourier_psd (const PolnProfile* fourier) const;
+    
     //! Return the variance in each of the four Stokes parameters
     Stokes<float> get_variance (const PolnProfile* input) const;
 
     //! Return the phase shift based on the cross correlation function
     float ccf_max_phase (const Profile* std, const Profile* obs) const;
+
+    //! Set true when set_standard should choose the maximum harmonic
+    bool choose_maximum_harmonic;
+
+    //! The covariances between the Jones matrix parameters
+    Matrix <7,7,double> cov_Jones;
+
+    //! The covariances between the phase and each Jones matrix parameter
+    Vector <7,double> cov_phase_Jones;
+    
+    unsigned iterations;
 
   protected:
 
@@ -97,6 +115,9 @@ namespace Pulsar {
 
     //! The fourier transform of the standard
     Reference::To<const PolnProfile> standard_fourier;
+
+    //! The power spectral density of the standard
+    Reference::To<const PolnProfile> standard_psd;
 
     //! The transformation between the standard and observation
     Reference::To<MEAL::Complex2> transformation;
@@ -118,6 +139,9 @@ namespace Pulsar {
 
     //! The power of the standard
     double standard_power;
+
+    //! The reduced chi-squared after fitting
+    double reduced_chisq;
 
     //! Construtor helper
     void init ();

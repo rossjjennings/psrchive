@@ -2,6 +2,9 @@
 #include "Pulsar/PolnProfile.h"
 #include "Pulsar/Profile.h"
 
+#include "Pulsar/ExponentialBaseline.h"
+#include "Pulsar/PhaseWeight.h"
+
 #include "Calibration/ReceptionModel.h"
 #include "MEAL/Polynomial.h"
 #include "MEAL/Phase.h"
@@ -14,6 +17,8 @@
 #include "RealTimer.h"
 #include "Pauli.h"
 #include "fftm.h"
+
+// #define _DEBUG 1
 
 #ifdef _DEBUG
 #include <cpgplot.h>
@@ -61,6 +66,9 @@ void Pulsar::PolnProfileFit::init ()
   phase_xform = chain;
 
   maximum_harmonic = n_harmonic = 0;
+
+  choose_maximum_harmonic = false;
+  iterations = 0;
 }
 
 void Pulsar::PolnProfileFit::set_maximum_harmonic (unsigned max)
@@ -80,14 +88,21 @@ void Pulsar::PolnProfileFit::set_standard (const PolnProfile* _standard)
   if (!standard)
     return;
 
-  standard_variance = get_variance (standard);
   standard_fourier = fourier_transform (standard);
-  standard_power = standard_fourier->sumsq (1);
+  standard_psd = fourier_psd (standard_fourier);
+  standard_variance = get_variance (standard_psd);
+  standard_power = standard_psd->sum (1);
 
   // number of complex phase bins in Fourier domain
   unsigned std_harmonic = standard->get_nbin() / 2;
 
-  if (maximum_harmonic && maximum_harmonic < std_harmonic) {
+  if (choose_maximum_harmonic) {
+    choose_max_harmonic ();
+    //if (Profile::verbose)
+    cerr << "Pulsar::PolnProfileFit::set_standard chose "
+	 << n_harmonic << " harmonics" << endl;
+  }
+  else if (maximum_harmonic && maximum_harmonic < std_harmonic) {
     //if (Profile::verbose)
       cerr << "Pulsar::PolnProfileFit::set_standard using " << maximum_harmonic
 	   << " out of " << std_harmonic << " harmonics" << endl;
@@ -95,8 +110,8 @@ void Pulsar::PolnProfileFit::set_standard (const PolnProfile* _standard)
   }
   else {
     //if (Profile::verbose)
-      cerr << "Pulsar::PolnProfileFit::set_standard using " << std_harmonic 
-	   << " harmonics" << endl;
+      cerr << "Pulsar::PolnProfileFit::set_standard using all "
+	   << std_harmonic << " harmonics" << endl;
     n_harmonic = std_harmonic;
   }
 
@@ -141,6 +156,41 @@ void Pulsar::PolnProfileFit::set_standard (const PolnProfile* _standard)
 
 }
 
+//! Choose the maximum_harmonic for the given standard
+void Pulsar::PolnProfileFit::choose_max_harmonic ()
+{
+  n_harmonic = standard_psd->get_nbin();
+
+  unsigned max_harmonic = 0;
+  unsigned npol = 4;
+  unsigned count = 0;
+
+  for (unsigned ipol=0; ipol<npol; ipol++) {
+
+    const float* amps = standard_psd->get_amps(ipol);
+
+    cerr << "THRESHOLD=" << standard_variance[ipol] * 10.0  << endl;
+
+    for (unsigned ibin=1; ibin<n_harmonic; ibin++) {
+
+      if (amps[ibin] > standard_variance[ipol] * 100000.0) {
+	cerr << "+ " << ibin << endl;
+	count ++;
+      }
+      else {
+	cerr << "0 " << ibin << endl;
+	count = 0;
+      }
+
+      if (count > 3)
+	max_harmonic = ibin;
+
+    }
+  }
+
+  n_harmonic = max_harmonic;
+}
+
 //! Set the transformation between the standard and observation
 void 
 Pulsar::PolnProfileFit::set_transformation (MEAL::Complex2* xform)
@@ -175,16 +225,16 @@ void Pulsar::PolnProfileFit::fit (const PolnProfile* observation) try
 
   set_phase (phase_guess);
 
-  Stokes<float> variance = get_variance (observation);
-  double power = fourier->sumsq (1);
+  Reference::To<PolnProfile> psd = fourier_psd (fourier);
+
+  Stokes<float> variance = get_variance (psd);
+  double power = psd->sum (1);
   double gain = power / standard_power;
 
   unsigned npol = 4;
   for (unsigned ipol=0; ipol<npol; ipol++) {
-    // the Fourier transform will inflate the variance
-    variance[ipol] *= observation->get_nbin();
-    // and the noise in the standard will contribute
-    variance[ipol] += gain * standard_variance[ipol] * standard->get_nbin();
+    // the noise in the standard will contribute
+    variance[ipol] += gain * standard_variance[ipol];
   }
 
   gain = sqrt(gain);
@@ -230,6 +280,44 @@ void Pulsar::PolnProfileFit::fit (const PolnProfile* observation) try
 #ifdef _DEBUG
   cerr << "Pulsar::PolnProfileFit::fit solved in " << clock << endl;
 #endif
+
+  vector< vector<double> > covariance;
+  model->get_fit_covariance (covariance);
+
+  Matrix <7,7,double> c_Jones;       // C_J in str05
+  Vector <7,double> c_phase_Jones;   // c_{\varphi J} in str05
+
+  unsigned i, j;
+
+  for (i=0; i < 7; i++) {
+
+    unsigned m = i + 3;
+    fprintf (stderr, "%12s", model->get_param_name(m).c_str());
+
+    c_phase_Jones[i] = covariance[m][2];
+    c_phase_Jones[i] /= sqrt(covariance[m][m]*covariance[2][2]);
+
+    fprintf (stderr, "\t%7.2g", c_phase_Jones[i]);
+
+    for (unsigned j=0; j < 7; j++) {
+
+      unsigned n = j + 3;
+      c_Jones[i][j] = covariance[m][n];
+      c_Jones[i][j] /= sqrt(covariance[m][m]*covariance[n][n]);
+
+      if (j > i)
+	continue;
+
+      fprintf (stderr, "\t%7.2g", c_Jones[i][j]);
+
+    }
+
+    fprintf (stderr, "\n");
+  }
+
+  cov_Jones += c_Jones;
+  cov_phase_Jones += c_phase_Jones;
+  iterations ++;
 
 }
 catch (Error& error) {
@@ -277,6 +365,36 @@ catch (Error& error) {
 }
 
 Pulsar::PolnProfile* 
+Pulsar::PolnProfileFit::fourier_psd (const PolnProfile* fourier) const try
+{
+  Reference::To<PolnProfile> psd;
+
+  psd = new PolnProfile (fourier->get_basis(), fourier->get_state(),
+			 new Profile, new Profile,
+			 new Profile, new Profile);
+
+  unsigned nbin = fourier->get_nbin()/2;
+  psd->resize( nbin );
+
+  unsigned npol = 4;
+  for (unsigned ipol=0; ipol<npol; ipol++)  {
+    const float* in = fourier->get_Profile(ipol)->get_amps();
+    float* out = psd->get_Profile(ipol)->get_amps();
+
+    for (unsigned ibin=0; ibin < nbin; ibin++) {
+      float re = in[ibin*2];
+      float im = in[ibin*2+1];
+      out[ibin] = re*re + im*im;
+    }
+  }
+
+  return psd.release();
+}
+catch (Error& error) {
+  throw error += "Pulsar::PolnProfileFit::fourier_psd";
+}
+   
+Pulsar::PolnProfile* 
 Pulsar::PolnProfileFit::fourier_transform (const PolnProfile* input) const try
 {
   Reference::To<PolnProfile> fourier;
@@ -315,15 +433,25 @@ Pulsar::PolnProfileFit::get_variance (const PolnProfile* input) const try
     input = temp;
   }
 
+  // initialize the mask
+  PhaseWeight mask;
+  unsigned nbin = input->get_nbin();
+  mask.resize (nbin);
+  for (unsigned ibin = nbin/2; ibin < nbin; ibin++)
+    mask[ibin] = 1.0;
+
+  ExponentialBaseline finder;
+  finder.set_initial_baseline (0);
+  finder.set_Profile (input->get_Profile(0));
+  finder.get_weight (mask);
+
   Stokes< float > variance;
-
-  float min_phase = input->get_Profile(0)->find_min_phase ();
-
   unsigned npol = 4;
   for (unsigned ipol=0; ipol<npol; ipol++) {
-    double mean, var;
-    input->get_Profile(ipol)->stats (min_phase, &mean, &var);
-    variance[ipol] = var;
+    mask.set_Profile (input->get_Profile(ipol));
+    variance[ipol] = mask.get_variance().get_value();
+    cerr << "Pulsar::PolnProfileFit::get_variance ipol=" << ipol 
+	 << " sigma=" << sqrt(mask.get_variance()) << endl;
   }
 
   return variance;
