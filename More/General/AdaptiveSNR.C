@@ -36,20 +36,20 @@ float Pulsar::AdaptiveSNR::get_snr (const Profile* profile)
 
   baseline->get_weight (weight);
 
-  // the mean, variance, and variance of the mean
-  double mean, var, var_mean;
+  weight.set_Profile (profile);
 
-  weight.stats (profile, &mean, &var, &var_mean);
+  Estimate<double> mean = weight.get_mean();
+  Estimate<double> variance = weight.get_variance();
 
-  double rms = sqrt (var);
+  double rms = sqrt (variance.val);
   unsigned nbin = profile->get_nbin();
-  double energy = profile->sum() - mean * nbin;
+  double energy = profile->sum() - mean.val * nbin;
 
   double total = weight.get_weight_sum();
   double max   = weight.get_weight_max();
 
   double on_pulse = nbin * max - total;
-  double snr = energy / sqrt(var*on_pulse);
+  double snr = energy / sqrt(variance.val*on_pulse);
 
   if (Profile::verbose) {
 
