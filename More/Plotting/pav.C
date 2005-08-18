@@ -1,5 +1,5 @@
 //
-// $Id: pav.C,v 1.99 2005/06/16 07:07:20 redwards Exp $
+// $Id: pav.C,v 1.100 2005/08/18 13:25:18 straten Exp $
 //
 // The Pulsar Archive Viewer
 //
@@ -335,7 +335,7 @@ int main (int argc, char** argv)
       plotter.set_subint( atoi (optarg) );
       break;
     case 'i':
-      cout << "$Id: pav.C,v 1.99 2005/06/16 07:07:20 redwards Exp $" << endl;
+      cout << "$Id: pav.C,v 1.100 2005/08/18 13:25:18 straten Exp $" << endl;
       return 0;
 
     case 'j':
@@ -991,7 +991,7 @@ int main (int argc, char** argv)
       if (phase_fourier) {
 	cpg_next();
 	cpgsvp (0.2, 0.9, 0.15, 0.9);
-	plotter.phase_fourier (archive);
+	plotter.fourier (archive);
       }
 
       if (periodplot) {
