@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/SimPolnTiming.h,v $
-   $Revision: 1.3 $
-   $Date: 2005/07/17 02:58:15 $
+   $Revision: 1.4 $
+   $Date: 2005/08/18 12:10:19 $
    $Author: straten $ */
 
 #ifndef __Pulsar_SimPolnTiming_h
@@ -34,6 +34,8 @@ namespace Pulsar {
     //! Parse the range from a string
     void parse (const std::string& txt);
   };
+
+  std::ostream& operator<< (std::ostream& ostr, const Range& r);
 
   //! Simulates full-Stokes arrival time estimation
   class SimPolnTiming {
@@ -121,6 +123,8 @@ namespace Pulsar {
 
     class Result {
     public:
+      Estimate<double> I_est_mean;
+      Estimate<double> S_est_mean;
       Estimate<double> I_mean;
       Estimate<double> S_mean;
       Estimate<double> I_err;
