@@ -211,8 +211,6 @@ void Calibration::ReceptionModel::solve_work (bool solve_verbose)
        << "-" << free_params << "=" << constrained << ")=" 
        << reduced_chisq << endl;
 
-  vector<vector<double> > covariance;
-
   try {
     fit.result (*this, covariance);
   }
@@ -243,7 +241,7 @@ void Calibration::ReceptionModel::solve_work (bool solve_verbose)
 
     // Bi Qing has uncovered an error in our estimation of parameter error
     // most likely due to an error in Numerical Recipes
-    set_variance (iparm, 2.0*covariance[iparm][iparm]);
+    set_variance (iparm, covariance[iparm][iparm]);
   }
 
 }
