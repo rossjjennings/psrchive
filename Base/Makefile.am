@@ -6,7 +6,8 @@ nobase_include_HEADERS = \
 	Pulsar/Archive.h                 Pulsar/PolnCalibrator.h \
 	Pulsar/ArchiveProcessor.h        Pulsar/PolnProfile.h \
 	Pulsar/BaselineFunction.h        Pulsar/PolnProfileFit.h \
-	Pulsar/BaselineMask.h            Pulsar/Profile.h \
+	Pulsar/ExponentialBaseline.h \
+	Pulsar/GaussianBaseline.h        Pulsar/Profile.h \
 	Pulsar/BasicArchive.h            Pulsar/PulsarCalibrator.h \
 	Pulsar/BasicIntegration.h        Pulsar/RFIMitigation.h \
 	Pulsar/Calibrator.h              Pulsar/ReceptionCalibrator.h \
@@ -23,6 +24,7 @@ nobase_include_HEADERS = \
 	Pulsar/InstrumentInfo.h          Pulsar/SystemCalibrator.h \
 	Pulsar/Integration.h             Pulsar/Transposer.h \
 	Pulsar/IntegrationManager.h      Pulsar/Utilities.h \
+	Pulsar/IterativeBaseline.h \
 	Pulsar/PhaseWeight.h             Pulsar/ArchiveTI.h \
 	Pulsar/PhaseWeightFunction.h     model_profile.h \
 	Pulsar/Plotter.h                 Pulsar/IntegrationTI.h \
@@ -55,7 +57,7 @@ libpsrchive_la_SOURCES = plugins.csh getopt.h Physical.h \
 	Archive_unload.C              Profile_find_transitions.C  \
 	Archive_update_model.C        Profile_flux.C  \
 	Archive_verbose.C             Profile_rotate.C  \
-	BaselineMask.C                Profile_shift.C  \
+	GaussianBaseline.C            Profile_shift.C  \
 	BasicArchive.C                Profile_snr.C  \
 	BasicIntegration.C            Profile_snr_fortran.C  \
 	Calibrator.C                  Profile_stats.C  \
@@ -63,6 +65,7 @@ libpsrchive_la_SOURCES = plugins.csh getopt.h Physical.h \
 	CorrectionsCalibrator.C       PulsarCalibrator.C  \
 	Database.C                    RFIMitigation.C  \
 	ExampleArchive.C              ReceptionCalibrator.C  \
+	ExponentialBaseline.C \
 	FluxCalibrator.C              ReceptionCalibrator_get_Info.C  \
 	FluxCalibratorDatabase.C      ReceptionCalibrator_get_solution.C  \
 	FourierSNR.C                  ReferenceCalibrator.C  \
@@ -84,6 +87,7 @@ libpsrchive_la_SOURCES = plugins.csh getopt.h Physical.h \
 	Integration_invint.C          pafit_get_PA.C  \
 	Integration_match.C           ArchiveTI.C \
 	IntegrationTI.C               ArchiveTI_import.C \
+	IterativeBaseline.C \
 	PhaseGradShift.C              Profile_fftconv.C \
 	BaselineWindow.C              ChannelZapMedian.C \
 	ChannelWeight.C               ChannelZapModulation.C \
@@ -176,10 +180,11 @@ libpsrchive_la_SOURCES += ArchiveProcessor.C Plotter.C CalibratorPlotter.C  \
 	Plotter_calibrator_spectrum.C  Plotter_set_colour_map.C  \
 	Plotter_draw_transitions.C     Plotter_simple_ds.C  \
 	Plotter_phase_fourier.C        Plotter_spherical.C  \
-	Plotter_phase_frequency.C
+	Plotter_phase_frequency.C      Plotter_pseudo_vector_correlation.C
 
 bin_PROGRAMS += pacv pcvar pav pas psrwt psrsh pcm pvt paf psrqft \
-	binphs_test pcm_chooser rmfit psrband SimTiming bin_clean
+	binphs_test pcm_chooser rmfit psrband SimTiming bin_clean \
+	pts_plot
 
 SimTiming_SOURCES		= SimTiming.C
 binphs_test_SOURCES		= binphs_test.C
@@ -198,6 +203,7 @@ bin_clean_SOURCES		= bin_clean.C
 # pad_SOURCES			= pad.C
 paf_SOURCES			= paf.C
 psrqft_SOURCES			= psrqft.C
+pts_plot_SOURCES		= pts_plot.C
 
 SimTiming_LDADD			= $(LDADD) @PGPLOT_LIBS@
 binphs_test_LDADD		= $(LDADD) @PGPLOT_LIBS@
@@ -214,6 +220,7 @@ pvt_LDADD			= $(LDADD) @PGPLOT_LIBS@
 rmfit_LDADD			= $(LDADD) @PGPLOT_LIBS@
 bin_clean_LDADD			= $(LDADD) @PGPLOT_LIBS@
 psrqft_LDADD			= $(LDADD) @PGPLOT_LIBS@
+pts_plot_LDADD			= $(LDADD) @PGPLOT_LIBS@
 
 # future
 # psrsh_LDADD = -lreadline -ltermcap
