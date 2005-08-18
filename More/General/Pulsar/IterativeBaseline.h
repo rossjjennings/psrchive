@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/IterativeBaseline.h,v $
-   $Revision: 1.1 $
-   $Date: 2005/08/16 23:52:06 $
+   $Revision: 1.2 $
+   $Date: 2005/08/18 12:09:26 $
    $Author: straten $ */
 
 #ifndef __Pulsar_IterativeBaseline_h
@@ -29,6 +29,7 @@ namespace Pulsar {
 
     //! Set the BaselineFunction used to find the initial baseline
     void set_initial_baseline (BaselineFunction*);
+    BaselineFunction* get_initial_baseline () const;
 
     //! Set the threshold below which samples are included in the baseline
     void set_threshold (float sigma);

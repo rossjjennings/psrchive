@@ -5,7 +5,7 @@
 
 #include <math.h>
 
-#define _DEBUG 1
+// #define _DEBUG 1
 
 Pulsar::IterativeBaseline::IterativeBaseline ()
 {
@@ -21,6 +21,12 @@ Pulsar::IterativeBaseline::IterativeBaseline ()
 void Pulsar::IterativeBaseline::set_initial_baseline (BaselineFunction* b)
 {
   initial_baseline = b;
+}
+
+Pulsar::BaselineFunction* 
+Pulsar::IterativeBaseline::get_initial_baseline () const
+{
+  return initial_baseline;
 }
 
 void Pulsar::IterativeBaseline::set_threshold (float sigma)
