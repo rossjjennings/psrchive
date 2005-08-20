@@ -1,15 +1,14 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/Attic/PolnProfileFit.h,v $
-   $Revision: 1.9 $
-   $Date: 2005/08/18 12:10:00 $
+   $Revision: 1.10 $
+   $Date: 2005/08/20 14:29:36 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PolnProfileFit_h
 #define __Pulsar_PolnProfileFit_h
 
-#include <memory>
-
+#include "Pulsar/PhaseWeight.h"
 #include "MEAL/Axis.h"
 #include "Matrix.h"
 #include "Estimate.h"
@@ -57,9 +56,6 @@ namespace Pulsar {
     //! Set the maximum number of harmonics to include in fit
     void set_maximum_harmonic (unsigned max);
 
-    //! Choose the maximum_harmonic for the given standard
-    void choose_max_harmonic ();
-
     //! Set the standard to which observations will be fit
     void set_standard (const PolnProfile* standard);
 
@@ -99,7 +95,10 @@ namespace Pulsar {
 
     //! The covariances between the phase and each Jones matrix parameter
     Vector <7,double> cov_phase_Jones;
-    
+
+    //! The variance of the phase
+    double var_phase;
+
     unsigned iterations;
 
   protected:
@@ -116,8 +115,8 @@ namespace Pulsar {
     //! The fourier transform of the standard
     Reference::To<const PolnProfile> standard_fourier;
 
-    //! The power spectral density of the standard
-    Reference::To<const PolnProfile> standard_psd;
+    //! The mask used to calculate the noise power
+    PhaseWeight noise_mask;
 
     //! The transformation between the standard and observation
     Reference::To<MEAL::Complex2> transformation;
@@ -145,6 +144,12 @@ namespace Pulsar {
 
     //! Construtor helper
     void init ();
+
+    //! Set noise mask based on power spectral density of standard
+    void set_noise_mask ();
+
+    //! Choose the maximum_harmonic for the given standard
+    void choose_max_harmonic (const PolnProfile* standard_psd);
 
   };
 
