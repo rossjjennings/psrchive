@@ -118,6 +118,22 @@ void Pulsar::PhaseWeight::build ()
   built = true;
 }
 
+//! Weigh the Profile amplitudes by the weights
+void Pulsar::PhaseWeight::weight_Profile (Profile* data)
+{
+  unsigned nbin = data->get_nbin();
+
+  if (nbin != weight.size())
+    throw Error (InvalidState, "Pulsar::PhaseWeight::stats",
+		 "weight size=%d != profile nbin=%d",
+		 weight.size(), nbin);
+
+  float* amps = data->get_amps();
+
+  for (unsigned ibin=0; ibin < nbin; ibin++)
+    amps[ibin] *= weight[ibin];
+}
+
 void Pulsar::PhaseWeight::stats (const Profile* profile,
 				 double* mean, double* var,
 				 double* varmean, double* varvar) const
