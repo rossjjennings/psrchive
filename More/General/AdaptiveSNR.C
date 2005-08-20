@@ -1,7 +1,7 @@
 #include <math.h>
 
 #include "Pulsar/AdaptiveSNR.h"
-#include "Pulsar/BaselineFunction.h"
+#include "Pulsar/BaselineEstimator.h"
 #include "Pulsar/PhaseWeight.h"
 #include "Pulsar/Profile.h"
 
@@ -17,7 +17,7 @@ Pulsar::AdaptiveSNR::~AdaptiveSNR ()
 
 
 //! Set the threshold below which samples are included in the baseline
-void Pulsar::AdaptiveSNR::set_baseline (BaselineFunction* function)
+void Pulsar::AdaptiveSNR::set_baseline (BaselineEstimator* function)
 {
   baseline = function;
 }
@@ -28,7 +28,7 @@ float Pulsar::AdaptiveSNR::get_snr (const Profile* profile)
 {
   if (!baseline)
     throw Error (InvalidState, "Pulsar::AdaptiveSNR::get_snr",
-		 "no BaselineFunction provided (use set_baseline)");
+		 "no BaselineEstimator provided (use set_baseline)");
 
   baseline->set_Profile( profile );
 

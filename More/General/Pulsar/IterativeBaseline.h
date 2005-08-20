@@ -1,25 +1,28 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/IterativeBaseline.h,v $
-   $Revision: 1.2 $
-   $Date: 2005/08/18 12:09:26 $
+   $Revision: 1.3 $
+   $Date: 2005/08/20 14:29:09 $
    $Author: straten $ */
 
 #ifndef __Pulsar_IterativeBaseline_h
 #define __Pulsar_IterativeBaseline_h
 
-#include "Pulsar/BaselineFunction.h"
+#include "Pulsar/BaselineEstimator.h"
 
 namespace Pulsar {
 
   //! Finds a baseline that contains gaussian white noise
 
-  class IterativeBaseline : public BaselineFunction {
+  class IterativeBaseline : public BaselineEstimator {
 
   public:
 
     //! Default constructor
     IterativeBaseline ();
+
+    //! Destructor
+    ~IterativeBaseline ();
 
     //! Retrieve the PhaseWeight
     void get_weight (PhaseWeight& weight);
@@ -27,9 +30,9 @@ namespace Pulsar {
     //! Set the Profile from which baseline PhaseWeight will be computed
     void set_Profile (const Profile* profile);
 
-    //! Set the BaselineFunction used to find the initial baseline
-    void set_initial_baseline (BaselineFunction*);
-    BaselineFunction* get_initial_baseline () const;
+    //! Set the BaselineEstimator used to find the initial baseline
+    void set_initial_baseline (BaselineEstimator*);
+    BaselineEstimator* get_initial_baseline () const;
 
     //! Set the threshold below which samples are included in the baseline
     void set_threshold (float sigma);
@@ -48,8 +51,8 @@ namespace Pulsar {
     //! The maximum number of iterations
     unsigned max_iterations;
 
-    //! The BaselineFunction used to find the initial baseline
-    Reference::To<BaselineFunction> initial_baseline;
+    //! The BaselineEstimator used to find the initial baseline
+    Reference::To<BaselineEstimator> initial_baseline;
 
     //! The Profile from which the mask will be calculated
     Reference::To<const Profile> profile;

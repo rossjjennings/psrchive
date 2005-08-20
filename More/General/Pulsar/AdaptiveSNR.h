@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/AdaptiveSNR.h,v $
-   $Revision: 1.2 $
-   $Date: 2004/04/27 15:26:29 $
+   $Revision: 1.3 $
+   $Date: 2005/08/20 14:29:09 $
    $Author: straten $ */
 
 #ifndef __Pulsar_AdaptiveSNR_h
@@ -13,7 +13,7 @@
 namespace Pulsar {
 
   class Profile;
-  class BaselineFunction;
+  class BaselineEstimator;
 
   //! Calculates the signal-to-noise ratio using a baseline computing function
   class AdaptiveSNR : public Reference::Able {
@@ -27,7 +27,7 @@ namespace Pulsar {
     ~AdaptiveSNR ();
 
     //! Set the function used to compute the baseline
-    void set_baseline (BaselineFunction* function);
+    void set_baseline (BaselineEstimator* function);
 
     //! Return the signal to noise ratio
     float get_snr (const Profile* profile);
@@ -35,7 +35,7 @@ namespace Pulsar {
   protected:
 
     //! The function used to compute the baseline
-    Reference::To<BaselineFunction> baseline;
+    Reference::To<BaselineEstimator> baseline;
 
   };
 

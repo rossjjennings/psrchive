@@ -1,14 +1,14 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/BaselineWindow.h,v $
-   $Revision: 1.2 $
-   $Date: 2005/08/18 12:09:16 $
+   $Revision: 1.3 $
+   $Date: 2005/08/20 14:29:09 $
    $Author: straten $ */
 
 #ifndef __Pulsar_BaselineWindow_h
 #define __Pulsar_BaselineWindow_h
 
-#include "Pulsar/BaselineFunction.h"
+#include "Pulsar/BaselineEstimator.h"
 
 namespace Pulsar {
 
@@ -18,7 +18,7 @@ namespace Pulsar {
   /*! The Pulsar::BaselineWindow class implements a useful set of methods
     required to create, store, and manipulate a weighted set of
     Pulsar::Profile phase bins. */
-  class BaselineWindow : public BaselineFunction {
+  class BaselineWindow : public BaselineEstimator {
 
   public:
 

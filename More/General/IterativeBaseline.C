@@ -18,12 +18,16 @@ Pulsar::IterativeBaseline::IterativeBaseline ()
   max_iterations = 100;
 }
 
-void Pulsar::IterativeBaseline::set_initial_baseline (BaselineFunction* b)
+Pulsar::IterativeBaseline::~IterativeBaseline ()
+{
+}
+
+void Pulsar::IterativeBaseline::set_initial_baseline (BaselineEstimator* b)
 {
   initial_baseline = b;
 }
 
-Pulsar::BaselineFunction* 
+Pulsar::BaselineEstimator* 
 Pulsar::IterativeBaseline::get_initial_baseline () const
 {
   return initial_baseline;
