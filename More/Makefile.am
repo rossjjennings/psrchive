@@ -5,7 +5,7 @@ nobase_include_HEADERS = \
 	Pulsar/AdaptiveSNR.h             Pulsar/PolarCalibrator.h \
 	Pulsar/Archive.h                 Pulsar/PolnCalibrator.h \
 	Pulsar/ArchiveProcessor.h        Pulsar/PolnProfile.h \
-	Pulsar/BaselineFunction.h        Pulsar/PolnProfileFit.h \
+	Pulsar/BaselineEstimator.h       Pulsar/PolnProfileFit.h \
 	Pulsar/ExponentialBaseline.h \
 	Pulsar/GaussianBaseline.h        Pulsar/Profile.h \
 	Pulsar/BasicArchive.h            Pulsar/PulsarCalibrator.h \
@@ -166,7 +166,6 @@ test_Archive_SOURCES		= test_Archive.C
 test_denoise_SOURCES		= test_denoise.C
 test_Difference_SOURCES		= test_Difference.C
 
-
 # ######################################################################
 #
 # PGPLOT specific code
@@ -185,7 +184,8 @@ libpsrchive_la_SOURCES += ArchiveProcessor.C Plotter.C CalibratorPlotter.C  \
 # Plotter_pseudo_vector_correlation.C
 
 bin_PROGRAMS += pacv pcvar pav pas psrwt psrsh pcm pvt paf psrqft \
-	binphs_test pcm_chooser rmfit psrband SimTiming bin_clean
+	binphs_test pcm_chooser rmfit psrband SimTiming bin_clean \
+	plot_baseline
 
 SimTiming_SOURCES		= SimTiming.C
 binphs_test_SOURCES		= binphs_test.C
@@ -204,6 +204,7 @@ bin_clean_SOURCES		= bin_clean.C
 # pad_SOURCES			= pad.C
 paf_SOURCES			= paf.C
 psrqft_SOURCES			= psrqft.C
+plot_baseline_SOURCES		= plot_baseline.C
 
 SimTiming_LDADD			= $(LDADD) @PGPLOT_LIBS@
 binphs_test_LDADD		= $(LDADD) @PGPLOT_LIBS@
@@ -220,6 +221,7 @@ pvt_LDADD			= $(LDADD) @PGPLOT_LIBS@
 rmfit_LDADD			= $(LDADD) @PGPLOT_LIBS@
 bin_clean_LDADD			= $(LDADD) @PGPLOT_LIBS@
 psrqft_LDADD			= $(LDADD) @PGPLOT_LIBS@
+plot_baseline_LDADD		= $(LDADD) @PGPLOT_LIBS@
 
 # future
 # psrsh_LDADD = -lreadline -ltermcap
