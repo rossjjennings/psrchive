@@ -513,7 +513,7 @@ void Pulsar::Integration::rotate (double time)
 		 "folding period=%lf", pfold);
 
   try {
-    rotate_phase (time/pfold, false);
+    rotate_phase (time/pfold);
     set_epoch (get_epoch() + time);
   }
   catch (Error& error) {
