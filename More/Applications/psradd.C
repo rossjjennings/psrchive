@@ -25,14 +25,15 @@ void usage () {
     " -V          Very verbose mode (debugging)\n"
     " -i          Show revision information\n"
     "\n"
-    " -b nbin     Bin scrunch to nbin bins when each file is loaded\n"
-    " -c nchan    Frequency scrunch to nchan chans when each file is loaded\n"
+    " -b nbin     Scrunch to nbin bins after loading archives\n"
+    " -c nchan    Scrunch to nchan frequency channels after loading archives\n"
     " -C          Check that ephemerides are equal\n"
     " -f fname    Output result to 'fname'\n"
     " -F          Force append despite mismatch of header parameters\n"
     " -M meta     Filename with list of files\n"
     " -p fname    Load new ephemeris from 'fname'\n"
-    " -r freq     Disregard input files if they do not have this centre frequency\n"
+    " -P          Phase align archive with total before adding\n"
+    " -r freq     Add archive only if it has this centre frequency\n"
     " -s          Tscrunch result after each new file (nice on RAM)\n"
     " -t          Make no changes to file system (testing mode)\n"
     " -T tempo    System call to tempo\n"
@@ -78,6 +79,9 @@ int main (int argc, char **argv)
   // tscrunch total after each new file is appended
   bool tscrunch_total = false;
 
+  // phase align each archive before appending to total
+  bool phase_align = false;
+
   // auto_add features:
   // maximum amount of data (in seconds) to integrate into one archive
   float integrate = 0.0;
@@ -113,7 +117,7 @@ int main (int argc, char **argv)
       return 0;
       
     case 'i':
-      cout << "$Id: psradd.C,v 1.19 2005/04/20 07:41:21 straten Exp $" << endl;
+      cout << "$Id: psradd.C,v 1.20 2005/08/22 21:27:46 straten Exp $" << endl;
       return 0;
       
     case 'b':
@@ -168,6 +172,10 @@ int main (int argc, char **argv)
 
     case 'p':
       parname = optarg;
+      break;
+
+    case 'P':
+      phase_align = true;
       break;
 
     case 'q':
@@ -283,8 +291,8 @@ int main (int argc, char **argv)
       continue;
     }
 
-
-    if( centre_frequency > 0.0 && fabs(archive->get_centre_frequency()-centre_frequency) > 0.0001 )
+    if( centre_frequency > 0.0 
+	&& fabs(archive->get_centre_frequency()-centre_frequency) > 0.0001 )
       continue;
 
     if (nbin)
@@ -352,7 +360,23 @@ int main (int argc, char **argv)
 	cerr << "psradd: appending archive to total" << endl;
 
       try {
+
+	if (phase_align) {
+
+	  Reference::To<Pulsar::Archive> standard;
+	  standard = total->total();
+	  Pulsar::Profile* std = standard->get_Profile(0,0,0);
+
+	  Reference::To<Pulsar::Archive> observation;
+	  observation = archive->total();
+	  Pulsar::Profile* obs = observation->get_Profile(0,0,0);
+
+	  archive->rotate_phase( obs->shift(std).get_value() );
+
+	}
+
 	total->append (archive);
+
       }
       catch (Error& error) {
 	cerr << "psradd: Archive::append exception:\n" << error << endl;
