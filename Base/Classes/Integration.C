@@ -513,10 +513,7 @@ void Pulsar::Integration::rotate (double time)
 		 "folding period=%lf", pfold);
 
   try {
-    for (unsigned ipol=0; ipol<get_npol(); ipol++)
-      for (unsigned ichan=0; ichan<get_nchan(); ichan++)
-	profiles[ipol][ichan] -> rotate_phase (time/pfold);
-
+    rotate_phase (time/pfold, false);
     set_epoch (get_epoch() + time);
   }
   catch (Error& error) {
@@ -526,7 +523,9 @@ void Pulsar::Integration::rotate (double time)
 
 void Pulsar::Integration::rotate_phase (double phase)
 try {
-  rotate (phase * get_folding_period ());
+  for (unsigned ipol=0; ipol<get_npol(); ipol++)
+    for (unsigned ichan=0; ichan<get_nchan(); ichan++)
+      profiles[ipol][ichan] -> rotate_phase (phase);
 }
 catch (Error& error) {
   throw error += "Integration::rotate_phase";
