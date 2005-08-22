@@ -237,12 +237,13 @@ void Pulsar::PolnProfileFit::fit (const PolnProfile* observation) try
 
   cerr << "FIX THE GAIN=" << gain << endl;
   // The gain calculation needs to be re-considered
-  gain = 1.0;
+  gain = 0.0;
 
   unsigned npol = 4;
   for (unsigned ipol=0; ipol<npol; ipol++) {
     // the noise in the standard will contribute
     variance[ipol] += gain * standard_variance[ipol];
+    variance[ipol] *= sqrt(.75);
   }
 
   model->delete_data ();
