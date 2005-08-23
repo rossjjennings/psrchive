@@ -35,7 +35,8 @@ test_QuaternionFT_SOURCES	= test_QuaternionFT.C
 #
 
 INCLUDES = -I$(top_builddir) -I$(top_srcdir)/utils/units \
-	-I$(top_srcdir)/utils/genutil @FFT_CFLAGS@
+	-I$(top_srcdir)/utils/genutil -I$(top_builddir)/utils/units \
+	@FFT_CFLAGS@
 
 LDADD = libpsrfft.la ../units/libunits.la @FFT_LIBS@ 
 
