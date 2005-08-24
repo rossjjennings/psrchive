@@ -2,7 +2,7 @@
 bin_PROGRAMS = rhythm
 
 rhythm_SOURCES = rhythm.C menubar.C toolbar.C command_line.C \
-	Options.C toaPlot.C
+	Options.C toaPlot.C Options.h rhythm.h toaPlot.h pulsar.xpm
 
 nodist_rhythm_SOURCES = moc_rhythm.C moc_Options.C moc_toaPlot.C
 
