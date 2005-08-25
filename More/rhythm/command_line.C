@@ -1,3 +1,5 @@
+#include <qstylefactory.h>
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -5,20 +7,22 @@
 #include "qt_editParams.h"
 #include "rhythm.h"
 
-static char* cl_args = "ahp:t:vV";
+static char* cl_args = "ahp:s:t:vV";
 
 void Rhythm::command_line_help ()
-{
-  cerr << "--------------------------------------------" << endl;
-  cerr << "Rhythm: A graphical user interface for TEMPO" << endl;
-  cerr << " Usage: rhythm [options] file.tim file.par"   << endl;
-  cerr << " Where the available options are:"            << endl;
-  cerr << "   -h   This help text"                       << endl;
-  cerr << "   -v   Verbose mode"                         << endl;
-  cerr << "   -V   Very verbose mode"                    << endl;
-  cerr << "   -a   Toggle autofit mode"                  << endl;
-  cerr << "--------------------------------------------" << endl;
-  cerr << endl;
+{ 
+  cout <<
+    "--------------------------------------------"
+    "Rhythm: A graphical user interface for TEMPO"
+    " Usage: rhythm [options] file.tim file.par"  
+    " Where the available options are:"           
+    "   -h   This help text"                      
+    "   -v   Verbose mode"                        
+    "   -V   Very verbose mode"                   
+    "   -a   Toggle autofit mode"                 
+    "   -s   Qt style"
+    "--------------------------------------------"
+       << endl;
 }
 
 void Rhythm::command_line_parse (int argc, char** argv)
@@ -44,6 +48,10 @@ void Rhythm::command_line_parse (int argc, char** argv)
 
     case 't':
       tim_filename = optarg;
+      break;
+
+    case 's':
+      myapp->setStyle( QStyleFactory::create(optarg) );
       break;
 
     case 'v':
