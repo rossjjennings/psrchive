@@ -10,56 +10,62 @@
 #include <qplatinumstyle.h>
 #include <qfont.h>
 
+// #define _DEBUG 1
+
 #include "qt_editParams.h"
 
 #include "rhythm.h"
 #include "tempo++.h"
 
+#ifdef _DEBUG
+bool Rhythm::verbose = true;
+bool Rhythm::vverbose = true;
+#else
 bool Rhythm::verbose = false;
 bool Rhythm::vverbose = false;
+#endif
+
 
 // /////////////////////////////////////////////////////////////////////
 // Main procedure
 // /////////////////////////////////////////////////////////////////////
 
-int main (int argc, char** argv)
-{ 
+int main (int argc, char** argv) try {
+ 
+  if (Rhythm::vverbose)
+    cerr << "construct QApplication" << endl;
+
+  // QApplication must be constructed before any other GUI-related object
+  QApplication app (argc, argv);
+
+  if (Rhythm::vverbose)
+    cerr << "construct Rhythm" << endl;
+
+  Rhythm rhythm (&app, 0, argc, argv);
   
-  try {
-    
-    QStyle* mystyle = new QPlatinumStyle();
-    QPalette mypalette(Qt::darkBlue, Qt::darkCyan);
+  if (Rhythm::vverbose)
+    cerr << "call QApplication::setMainWidget" << endl;
+  
+  app.setMainWidget (&rhythm);
+  
+  if (Rhythm::vverbose)
+    cerr << "call Rhythm::show" << endl;
+  
+  rhythm.show();
+  
+  if (Rhythm::vverbose)
+    cerr << "call QApplication::exec" << endl;
 
-    QApplication app (argc, argv);
-
-    app.setStyle(mystyle);
-    app.setPalette(mypalette);
-
-    Rhythm rhythm (&app, 0, argc, argv);
-    
-    if (Rhythm::vverbose)
-      cerr << "call QApplication::setMainWidget" << endl;
-
-    app.setMainWidget (&rhythm);
-    
-    if (Rhythm::vverbose)
-      cerr << "call Rhythm::show" << endl;
-
-    rhythm.show();
-    
-    if (Rhythm::vverbose)
-      cerr << "call QApplication::exec" << endl;
-
-    return app.exec();
-
-  }
-  catch (Error& error) {
-    cerr << "rhythm: exception caught:" << error << endl;
-  }
-  catch (...) {
-    cerr << "rhythm: fatal exception unhandled" << endl;
-  }
+  return app.exec();
+  
 }
+catch (Error& error) {
+  cerr << "rhythm: exception caught:" << error << endl;
+}
+catch (...) {
+  cerr << "rhythm: fatal exception unhandled" << endl;
+}
+
 
 // /////////////////////////////////////////////////////////////////////
 // Class definitions
@@ -74,6 +80,9 @@ Rhythm::Rhythm (QApplication* master, QWidget* parent, int argc, char** argv) :
 
   myapp = master;
   
+  myapp->setStyle( new QPlatinumStyle() );
+  myapp->setPalette( QPalette(Qt::darkBlue, Qt::darkCyan) );
+
   xq = toaPlot::TOA_MJD;
   yq = toaPlot::ResidualMicro;
 
@@ -109,6 +118,10 @@ Rhythm::Rhythm (QApplication* master, QWidget* parent, int argc, char** argv) :
     cerr << "Rhythm:: creating toaPlotter" << endl;
 
   plot_window = new toaPlot(tabs);
+
+  if (vverbose)
+    cerr << "Rhythm:: adding toaPlotter to QTabWidget" << endl;
+
   tabs->addTab(plot_window, "Plot");
 
   QObject::connect(plot_window, SIGNAL(ineednewdata()),
@@ -117,6 +130,10 @@ Rhythm::Rhythm (QApplication* master, QWidget* parent, int argc, char** argv) :
   show_list = true;
 
   if (show_list) {
+
+    if (vverbose)
+      cerr << "Rhythm:: constructing QListView" << endl;
+
     lister = new QListView(tabs);
     tabs->addTab(lister, "List");
 
@@ -128,16 +145,27 @@ Rhythm::Rhythm (QApplication* master, QWidget* parent, int argc, char** argv) :
     lister->addColumn("Frequency", 100);
     lister->addColumn("Information", 175);
   }
-  
-  string banloc = getenv("PSRHOME");
-  banloc += "/runtime/rhythm/banner.jpg";
 
-  QPixmap* pretty_pic = new QPixmap(banloc.c_str());
+  if (vverbose)
+    cerr << "Rhythm:: constructing header" << endl;
+
   header = new QLabel(leftpanel);
   header->setFrameStyle( QFrame::Panel | QFrame::Sunken );
   header->setAlignment(Qt::AlignCenter);
   header->setPaletteBackgroundColor(black);
-  header->setPixmap(*pretty_pic);
+ 
+  if (vverbose)
+    cerr << "Rhythm:: getenv PSRHOME" << endl;
+
+  char* psrhome = getenv("PSRHOME");
+  if (psrhome) {
+    string banloc = psrhome;
+    banloc += "/runtime/rhythm/banner.jpg";
+    header->setPixmap( QPixmap(banloc.c_str()) );
+  }
+
+  if (vverbose)
+    cerr << "Rhythm:: constructing footer" << endl;
 
   footer = new QLabel("Status Message Box", leftpanel);
   footer->setMinimumHeight(60);
@@ -241,6 +269,7 @@ Rhythm::Rhythm (QApplication* master, QWidget* parent, int argc, char** argv) :
     cerr << "Rhythm:: call command_line_parse" << endl;
 
   command_line_parse (argc, argv);
+
 
   // Find standard profiles
   
