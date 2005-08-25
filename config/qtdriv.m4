@@ -11,7 +11,7 @@
 #
 # This macro tries to link a test program using
 #
-#    -lQtPgplot $QT_LIBS $PGPLOT_LIBS
+#    -lqpgplot $QT_LIBS $PGPLOT_LIBS
 #
 # ----------------------------------------------------------
 AC_DEFUN([SWIN_LIB_QTDRIV],
@@ -23,7 +23,7 @@ AC_DEFUN([SWIN_LIB_QTDRIV],
   AC_REQUIRE([AC_F77_WRAPPERS])
 
   QTDRIV_CFLAGS="$QT_CXXFLAGS $PGPLOT_CFLAGS"
-  QTDRIV_LIBS="-lQtPgplot $QT_LIBS $PGPLOT_LIBS"
+  QTDRIV_LIBS="-lqpgplot $QT_LIBS $PGPLOT_LIBS"
 
   if test $have_pgplot = yes -a $have_qt = yes; then
 
@@ -41,7 +41,7 @@ AC_DEFUN([SWIN_LIB_QTDRIV],
 
     if test $have_qtdriv = yes; then
 
-      AC_MSG_CHECKING([for QtPgplot library])
+      AC_MSG_CHECKING([for Qt/PGPLOT library])
 
       AC_LANG_PUSH(C++)
 
