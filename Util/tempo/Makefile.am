@@ -28,7 +28,7 @@ if HAVE_CFITSIO
 
 libpsrephem_la_SOURCES += fitsio.C
 
-check_PROGRAMS = test_psrephem_fitsio
+check_PROGRAMS = test_psrephem_fitsio test_ephio
 
 test_psrephem_fitsio_SOURCES = test_psrephem_fitsio.C
 test_psrephem_fitsio_LDADD = $(LDADD) @CFITSIO_LIBS@
