@@ -127,6 +127,9 @@ int polynomial::load(string* instr)
   if (line.length() < 1)
     return -1;
 
+  if (polyco::verbose)
+    cerr << "polynomial::load line 1='" << line << "'" << endl;
+
   // rte: this doesn't work for pulsars with letter suffices
   //  psrname = stringtok (&line, whitespace);
   // if (psrname.length() < 1)
@@ -181,6 +184,9 @@ int polynomial::load(string* instr)
   if (line.length() < 1)
     return -1;
 
+  if (polyco::verbose)
+    cerr << "polynomial::load line 2='" << line << "'" << endl;
+
   string refphstr = stringtok (&line, whitespace);
   if (refphstr.length() < 1)
     return -1;
@@ -232,6 +238,7 @@ int polynomial::load(string* instr)
   int i;
   for (i = 0;i<ncoeftmp;i++){
     line = stringtok (instr, whitespace);
+
     size_t letterd = line.find('D');
     if (letterd != string::npos) line[letterd] = 'e';
     if (sscanf (line.c_str(), "%lf", &coefs[i]) != 1)  {
@@ -239,6 +246,11 @@ int polynomial::load(string* instr)
         line.c_str());
       return -1;
     }
+
+    if (polyco::verbose)
+      fprintf (stderr, "polynomial::load coeff %2d = '%s' = %e\n",
+	       i, line.c_str(), coefs[i]);
+
   }
 
 #if 0
@@ -266,16 +278,18 @@ int polynomial::unload (string* outstr) const
   int bytes = 0;
 
   if (tempov11)  {
-    if (polyco::verbose)
+#ifdef _DEBUG
       cerr << "polynomial::unload tempo11" << endl;
+#endif
 
     bytes += sprintf(numstr, "%-10.10s %9.9s%12.12s%22s%19f%7.3lf%7.3lf\n",
           psrname.c_str(), date.c_str(), utc.c_str(), reftime.strtempo(),
           dm, doppler_shift, log_rms_resid);
   }
   else  {
-    if (polyco::verbose)
+#ifdef _DEBUG
       cerr << "polynomial::unload not tempo11" << endl;
+#endif
     bytes += sprintf(numstr, "%-10.9s%9.9s%12.12s%22s%19f\n",
           psrname.c_str(), date.c_str(), utc.c_str(), reftime.strtempo(),dm); 
   }
@@ -284,8 +298,9 @@ int polynomial::unload (string* outstr) const
   
   if(binary)  {
 
-    if (polyco::verbose)
+#ifdef _DEBUG
       cerr << "polynomial::unload binary" << endl;
+#endif
 
     bytes += sprintf(numstr, "%20s%18.12lf    %c%5.0lf%5d%10.3f%7.4f%9.4f\n", 
 	    ref_phase.strprint(6).c_str(), f0, telescope, nspan_mins, 
@@ -301,15 +316,17 @@ int polynomial::unload (string* outstr) const
   unsigned nrows = (int)(coefs.size()/3);
   if(nrows*3 < coefs.size()) nrows++;
 
-  if (polyco::verbose)
+#ifdef _DEBUG
     cerr << "polynomial::unload nrows=" << nrows << endl;
+#endif
 
   char* newline = "\n";
 
   for (unsigned i=0; i<nrows; ++i){
 
-    if (polyco::verbose)
+#ifdef _DEBUG
       cerr << "polynomial::unload row=" << i << endl;
+#endif
 
     for (unsigned j=0; j<3 && (i*3+j)<coefs.size(); ++j) {
 
@@ -632,16 +649,13 @@ int polyco::load (FILE* fptr, size_t nbytes)
     return -1;
   }
 
-  if (verbose)
-    cerr << "polyco::load FILE* string='" << total << "'" << endl;
-
   return load (&total);
 }
 
 int polyco::load (string* instr)
 {
   if (verbose)
-    cerr << "polyco::load string* '" << *instr << "'" << endl;
+    cerr << "polyco::load string* '" << endl;
 
   int npollys = 0;
   pollys.clear();
@@ -682,11 +696,9 @@ int polyco::unload (string* outstr) const {
   if (verbose)
     cerr << "polyco::unload " << pollys.size() << " polynomials" << endl;
 
-  for (unsigned i=0; i<pollys.size(); ++i) {
-    if (verbose)
-      cerr << "polyco::unload " << i << endl;
+  for (unsigned i=0; i<pollys.size(); ++i)
     bytes += pollys[i].unload(outstr);
-  }
+
   return bytes;
 }
 
