@@ -231,97 +231,111 @@ try {
   
   // Load the profile offsets
   
-  if (verbose == 3)
-    cerr << "Pulsar::FITSArchive::load_Integration reading offsets" 
-	 << endl;
+  if (!Profile::no_amps)
+  {
+    if (verbose == 3)
+      cerr << "Pulsar::FITSArchive::load_Integration reading offsets" 
+	   << endl;
   
-  vector < vector < float > > offsets(get_npol(),vector<float>(get_nchan()));
+    vector < vector < float > > offsets(get_npol(),vector<float>(get_nchan()));
   
-  colnum = 0;
-  fits_get_colnum (sfptr, CASEINSEN, "DAT_OFFS", &colnum, &status);
+    colnum = 0;
+    fits_get_colnum (sfptr, CASEINSEN, "DAT_OFFS", &colnum, &status);
   
-  counter = 1;
-  for (unsigned a = 0; a < get_npol(); a++) {
-    fits_read_col (sfptr, TFLOAT, colnum, row, counter, get_nchan(), &nullfloat, 
-		   &(offsets[a][0]), &initflag, &status);
-    counter += nchan;
-  }
+    counter = 1;
+    for (unsigned a = 0; a < get_npol(); a++) {
+      fits_read_col (sfptr, TFLOAT, colnum, row, counter, get_nchan(), &nullfloat, 
+		     &(offsets[a][0]), &initflag, &status);
+      counter += nchan;
+    }
 
-  // Load the profile scale factors
+    // Load the profile scale factors
   
-  if (verbose == 3)
-    cerr << "Pulsar::FITSArchive::load_Integration reading scale factors" 
-	 << endl;
+    if (verbose == 3)
+      cerr << "Pulsar::FITSArchive::load_Integration reading scale factors" 
+	   << endl;
 
-  vector < vector < float > > scales(get_npol(),vector<float>(get_nchan()));
+    vector < vector < float > > scales(get_npol(),vector<float>(get_nchan()));
 
-  colnum = 0;
-  fits_get_colnum (sfptr, CASEINSEN, "DAT_SCL", &colnum, &status);
+    colnum = 0;
+    fits_get_colnum (sfptr, CASEINSEN, "DAT_SCL", &colnum, &status);
   
-  counter = 1;
-  for (unsigned a = 0; a < get_npol(); a++) {
-    fits_read_col (sfptr, TFLOAT, colnum, row, counter, get_nchan(), &nullfloat, 
-		   &(scales[a][0]), &initflag, &status);
-    counter += nchan;
-  }
+    counter = 1;
+    for (unsigned a = 0; a < get_npol(); a++) {
+      fits_read_col (sfptr, TFLOAT, colnum, row, counter, get_nchan(), &nullfloat, 
+		     &(scales[a][0]), &initflag, &status);
+      counter += nchan;
+    }
 
-  // Load the data
+    // Load the data
   
-  if (verbose == 3)
-    cerr << "Pulsar::FITSArchive::load_Integration reading profiles" 
-	 << endl;
+    if (verbose == 3)
+      cerr << "Pulsar::FITSArchive::load_Integration reading profiles" 
+	   << endl;
   
-  counter = 1;
-  Profile* p = 0;
-  int16* temparray = new int16 [get_nbin()];
-  float* fltarray = new float [get_nbin()];
-  Signal::Component polmeas = Signal::None;
+    counter = 1;
+    Profile* p = 0;
+    int16* temparray = new int16 [get_nbin()];
+    float* fltarray = new float [get_nbin()];
+    Signal::Component polmeas = Signal::None;
   
-  colnum = 0;
-  fits_get_colnum (sfptr, CASEINSEN, "DATA", &colnum, &status);
+    colnum = 0;
+    fits_get_colnum (sfptr, CASEINSEN, "DATA", &colnum, &status);
   
-  int typecode = 0;
-  long repeat = 0;
-  long width = 0;
+    int typecode = 0;
+    long repeat = 0;
+    long width = 0;
   
-  fits_get_coltype (sfptr, colnum, &typecode, &repeat, &width, &status);  
+    fits_get_coltype (sfptr, colnum, &typecode, &repeat, &width, &status);  
 
-  for (unsigned a = 0; a < get_npol(); a++) {
-    for (unsigned b = 0; b < get_nchan(); b++) {
+    for (unsigned a = 0; a < get_npol(); a++) {
+      for (unsigned b = 0; b < get_nchan(); b++) {
       
-      p = integ->get_Profile(a,b);
+	p = integ->get_Profile(a,b);
       
-      fits_read_col (sfptr, TSHORT, colnum, row, counter, get_nbin(), 
-		     &nullshort, temparray, &initflag, &status);
+	fits_read_col (sfptr, TSHORT, colnum, row, counter, get_nbin(), 
+		       &nullshort, temparray, &initflag, &status);
       
-      if (status != 0) {
-	throw FITSError (status, "FITSArchive::load_Integration",
-			 "Error reading subint data"
-			 " ipol=%d/%d ichan=%d/%d counter=%d",
-			 a, get_npol(), b, get_nchan(), counter);
-      }
-      
-      counter += get_nbin();
-      
-      for(unsigned j = 0; j < get_nbin(); j++) {
-	fltarray[j] = temparray[j] * scales[a][b] + offsets[a][b];
-	if (integ->get_state() == Signal::Coherence) {
-	  if (scale_cross_products && (a == 2 || a == 3))
-	    fltarray[j] *= 2;
-          if (conjugate_cross_products && (a == 3))
-            fltarray[j] *= -1;
+	if (status != 0) {
+	  throw FITSError (status, "FITSArchive::load_Integration",
+			   "Error reading subint data"
+			   " ipol=%d/%d ichan=%d/%d counter=%d",
+			   a, get_npol(), b, get_nchan(), counter);
 	}
-      }
       
-      p->set_amps(fltarray);
-      p->set_state(polmeas);
+	counter += get_nbin();
+      
+	for(unsigned j = 0; j < get_nbin(); j++) {
+	  fltarray[j] = temparray[j] * scales[a][b] + offsets[a][b];
+	  if (integ->get_state() == Signal::Coherence) {
+	    if (scale_cross_products && (a == 2 || a == 3))
+	      fltarray[j] *= 2;
+	    if (conjugate_cross_products && (a == 3))
+	      fltarray[j] *= -1;
+	  }
+	}
+      
+	p->set_amps(fltarray);
+	p->set_state(polmeas);
 
-    }  
+      }  
+    }
+  
+    delete [] temparray; 
+    delete [] fltarray;
   }
-  
-  delete [] temparray; 
-  delete [] fltarray;
-  
+  else // Profile::no_amps
+  {
+    // as far as I can tell this is all the above does if we're not
+    // interested in filling the profile amps -- redwards
+    Signal::Component polmeas = Signal::None;
+    for (unsigned a = 0; a < get_npol(); a++) {
+      for (unsigned b = 0; b < get_nchan(); b++) {
+	integ->get_Profile(a,b)->set_state(polmeas);
+      }
+    }
+  }
+
   if (verbose == 3)
     cerr << "Pulsar::FITSArchive::load_Integration load complete" << endl;  
   
