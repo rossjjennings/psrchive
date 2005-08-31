@@ -31,6 +31,11 @@ float Pulsar::Profile::default_amplitude_dropoff = 0.2;
 */
 unsigned Pulsar::Profile::ZPSF = 64;
 
+/*! 
+  Do not allocate memory for the amps
+*/
+bool Pulsar::Profile::no_amps = false;
+
 /////////////////////////////////////////////////////////////////////////////
 //
 // nbinify - utility for correcting the indeces of a range
@@ -94,9 +99,12 @@ void Pulsar::Profile::resize (unsigned _nbin)
   if (nbin == 0)
     return;
 
-  amps = new float [nbin];
-  if (!amps)
-    throw Error (BadAllocation, "Pulsar::Profile::resize");
+  if (!no_amps)
+  {
+    amps = new float [nbin];
+    if (!amps)
+      throw Error (BadAllocation, "Pulsar::Profile::resize");
+  }
 }
 
 /////////////////////////////////////////////////////////////////////////////

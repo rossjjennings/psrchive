@@ -175,7 +175,8 @@ void Pulsar::TimerIntegration::load_old (FILE* fptr, bool big_endian)
     throw Error (InvalidState, "TimerIntegration::load",
 		     "Corrupted scale factor");
 
-  unpackprofiles (profiles, npol, nchan, nbin, packed.get(), scale, offset);
+  if (!Profile::no_amps)
+    unpackprofiles (profiles, npol, nchan, nbin, packed.get(), scale, offset);
 
 }    // End old style loading
 

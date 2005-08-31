@@ -61,7 +61,9 @@ void Pulsar::TimerProfile_load (FILE* fptr, Profile* profile,
          << "wt=" << wt << " cfreq=" << centrefreq << "\r";
 
   // uncompress the data and read in as 2byte integers
-  if (fcompread (nbin,profile->get_amps(),fptr,big_endian)!=0)
+  if (Profile::no_amps)
+    fseek(fptr, sizeof(float)*2+sizeof(unsigned short int)*nbin, SEEK_CUR);
+  else if (fcompread (nbin,profile->get_amps(),fptr,big_endian)!=0)
     throw Error (FailedCall, "TimerProfile_load", "fcompread data");
 
   if (TimerIntegration::verbose)
