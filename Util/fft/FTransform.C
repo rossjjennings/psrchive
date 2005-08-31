@@ -28,6 +28,7 @@
 FTransform::fft_call FTransform::frc1d = 0;
 FTransform::fft_call FTransform::fcc1d = 0;
 FTransform::fft_call FTransform::bcc1d = 0;
+FTransform::fft_call FTransform::bcr1d = 0;
 
 bool FTransform::optimize = false;
 
@@ -37,11 +38,13 @@ vector<string> FTransform::valid_libraries;
 vector<FTransform::fft_call> FTransform::frc1d_calls;
 vector<FTransform::fft_call> FTransform::fcc1d_calls;
 vector<FTransform::fft_call> FTransform::bcc1d_calls;
+vector<FTransform::fft_call> FTransform::bcr1d_calls;
 vector<FTransform::norm_type> FTransform::norms;
 vector<vector<Reference::To<FTransform::Plan> > > FTransform::plans;
 FTransform::Plan* FTransform::last_frc1d_plan = 0;
 FTransform::Plan* FTransform::last_fcc1d_plan = 0;
 FTransform::Plan* FTransform::last_bcc1d_plan = 0;
+FTransform::Plan* FTransform::last_bcr1d_plan = 0;
 
 int FTransform::initialised = FTransform::initialise();
 
@@ -90,6 +93,7 @@ void FTransform::clean_plans(){
   last_frc1d_plan = 0;
   last_fcc1d_plan = 0;
   last_bcc1d_plan = 0;
+  last_bcr1d_plan = 0;
 }
 
 //! Returns index of library in use
@@ -139,6 +143,7 @@ void FTransform::set_library(string _library){
   frc1d = frc1d_calls[ilib];
   fcc1d = fcc1d_calls[ilib];
   bcc1d = bcc1d_calls[ilib];
+  bcr1d = bcr1d_calls[ilib];
 }
 
 FTransform::Plan::Plan() : Reference::Able() {
@@ -202,6 +207,18 @@ int FTransform::inplace_bcc1d(unsigned ndat, float* srcdest){
   float* pdest = &*dest.begin();
 
   bcc1d(ndat,pdest,srcdest);
+  memcpy(srcdest,pdest,ndat*2*sizeof(float));
+}
+
+//! Inplace wrapper-function- performs a memcpy after FFTing
+int FTransform::inplace_bcr1d(unsigned ndat, float* srcdest){
+  static vector<float> dest;
+  if( dest.size() != ndat*2 )
+    dest.resize( ndat*2 );
+
+  float* pdest = &*dest.begin();
+
+  bcr1d(ndat,pdest,srcdest);
   memcpy(srcdest,pdest,ndat*2*sizeof(float));
 }
 

@@ -23,6 +23,7 @@ namespace FTransform {
   int fftw_frc1d(unsigned ndat, float* dest, float* src);
   int fftw_fcc1d(unsigned ndat, float* dest, float* src);
   int fftw_bcc1d(unsigned ndat, float* dest, float* src);
+  int fftw_bcr1d(unsigned ndat, float* dest, float* src);
 
   class FFTW_Plan : public Plan {
   public:

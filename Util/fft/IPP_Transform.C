@@ -12,6 +12,7 @@ int FTransform::ipp_initialise(){
   frc1d_calls.push_back( &ipp_frc1d );
   fcc1d_calls.push_back( &ipp_fcc1d );
   bcc1d_calls.push_back( &ipp_bcc1d );
+  bcr1d_calls.push_back( &ipp_bcr1d );
   
   norms.push_back(nfft );
   valid_libraries.push_back( "IPP" );
@@ -21,6 +22,7 @@ int FTransform::ipp_initialise(){
     frc1d = &ipp_frc1d;
     fcc1d = &ipp_fcc1d;
     bcc1d = &ipp_bcc1d;
+    bcr1d = &ipp_bcr1d;
     norm =norms.back();
   }
   
@@ -31,7 +33,7 @@ FTransform::IPP_Plan::~IPP_Plan(){
   if( pBuffer )
     delete [] pBuffer;
   if( Spec ){
-    if( fft_call == "frc1d" )
+    if( fft_call == "frc1d" || fft_call == "bcr1d" )
       ippsFFTFree_R_32f( (IppsFFTSpec_R_32f*)Spec );
     else
       ippsFFTFree_C_32fc( (IppsFFTSpec_C_32fc*)Spec );
@@ -50,7 +52,8 @@ FTransform::IPP_Plan::IPP_Plan(unsigned _ndat, unsigned _ilib, string _fft_call)
 }
 
 void FTransform::IPP_Plan::init(unsigned _ndat, unsigned _ilib, string _fft_call){
-  fprintf(stderr,"In FTransform::IPP_Plan::init()\n");
+  fprintf(stderr,"In FTransform::IPP_Plan::init() _ndat=%d _ilib=%d _fft_call='%s'\n",
+	  _ndat,_ilib,_fft_call.c_str());
 
   initialise(_ndat,_ilib,_fft_call);
 
@@ -66,10 +69,10 @@ void FTransform::IPP_Plan::init(unsigned _ndat, unsigned _ilib, string _fft_call
     throw Error(InvalidState,"FTransform::IPP_Plan()::IPP_Plan()",
 		"Your ndat (%d) was not a power of 2",ndat);
 
-  if( fft_call == "frc1d" ){
-    ippsFFTInitAlloc_R_32f( (IppsFFTSpec_R_32f**)&Spec, order,
-			    IPP_FFT_NODIV_BY_ANY, ippAlgHintFast);
-    ippsFFTGetBufSize_R_32f( (IppsFFTSpec_R_32f*)Spec, &pSize);
+  if( fft_call == "frc1d" || fft_call == "bcr1d" ){
+    IppStatus ret = ippsFFTInitAlloc_R_32f( (IppsFFTSpec_R_32f**)&Spec, order,
+					    IPP_FFT_NODIV_BY_ANY, ippAlgHintFast);
+    ret = ippsFFTGetBufSize_R_32f( (IppsFFTSpec_R_32f*)Spec, &pSize);
   }
   else{
     ippsFFTInitAlloc_C_32fc( (IppsFFTSpec_C_32fc**)&Spec, order,
@@ -77,7 +80,10 @@ void FTransform::IPP_Plan::init(unsigned _ndat, unsigned _ilib, string _fft_call
     ippsFFTGetBufSize_C_32fc( (IppsFFTSpec_C_32fc*)Spec, &pSize);
   }
 
-  pBuffer = new Ipp8u[pSize];
+  if( _ndat == 131072 ) // For an unknown reason this seg faults if you don't give it this much room!
+    pBuffer = new Ipp8u[2*pSize];
+  else
+    pBuffer = new Ipp8u[pSize];
 }
 
 int FTransform::ipp_frc1d(unsigned ndat, float* dest, float* src){
@@ -90,7 +96,7 @@ int FTransform::ipp_frc1d(unsigned ndat, float* dest, float* src){
       last_frc1d_plan->ilib != ilib || 
       last_frc1d_plan->ndat != ndat )
     plan = 0;
-    
+
   if( !plan ){
     for( unsigned iplan=0; iplan<FTransform::plans[ilib].size(); iplan++){
       if(plans[ilib][iplan]->ndat == ndat && 
@@ -109,7 +115,6 @@ int FTransform::ipp_frc1d(unsigned ndat, float* dest, float* src){
   ippsFFTFwd_RToCCS_32f( (const Ipp32f*)src, (Ipp32f*)dest,
 			 (const IppsFFTSpec_R_32f*)plan->Spec,
 			 plan->pBuffer );
-
   return 0;
 }
 
@@ -180,6 +185,38 @@ int FTransform::ipp_bcc1d(unsigned ndat, float* dest, float* src){
 			(const IppsFFTSpec_C_32fc*)plan->Spec,
 			plan->pBuffer );
 
+  return 0;
+}
+
+int FTransform::ipp_bcr1d(unsigned ndat, float* dest, float* src){
+  ///////////////////////////////////////
+  // Set up the plan
+  static unsigned ilib =get_ilib("IPP");
+  IPP_Plan* plan = (IPP_Plan*)last_bcr1d_plan;
+
+  if( !last_bcr1d_plan || 
+      last_bcr1d_plan->ilib != ilib || 
+      last_bcr1d_plan->ndat != ndat )
+    plan = 0;
+
+  if( !plan ){
+    for( unsigned iplan=0; iplan<FTransform::plans[ilib].size(); iplan++){
+      if(plans[ilib][iplan]->ndat == ndat && 
+	 plans[ilib][iplan]->fft_call == "bcr1d"){
+	plan = (IPP_Plan*)FTransform::plans[ilib][iplan].ptr();
+	break;
+      }
+    }
+  }
+
+  if( !plan )
+    plan = new IPP_Plan(ndat,ilib,"bcr1d");
+
+  ///////////////////////////////////////
+  // Do the transform
+  ippsFFTInv_CCSToR_32f( (const Ipp32f*)src, (Ipp32f*)dest,
+			 (const IppsFFTSpec_R_32f*)plan->Spec,
+			 plan->pBuffer );
   return 0;
 }
 

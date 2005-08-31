@@ -14,6 +14,7 @@ int FTransform::fftw_initialise(){
   frc1d_calls.push_back( &fftw_frc1d );
   fcc1d_calls.push_back( &fftw_fcc1d );
   bcc1d_calls.push_back( &fftw_bcc1d );
+  bcr1d_calls.push_back( &fftw_bcr1d );
 
   norms.push_back( nfft );
   valid_libraries.push_back( "FFTW" );
@@ -23,6 +24,7 @@ int FTransform::fftw_initialise(){
     frc1d = &fftw_frc1d;
     fcc1d = &fftw_fcc1d;
     bcc1d = &fftw_bcc1d;
+    bcr1d = &fftw_bcr1d;
     norm = norms.back();
   }
 
@@ -31,7 +33,7 @@ int FTransform::fftw_initialise(){
 
 FTransform::FFTW_Plan::~FFTW_Plan(){
   if( plan ){
-    if ( fft_call == "frc1d" ){
+    if ( fft_call == "frc1d" || fft_call == "brc1d" ){
       rfftw_destroy_plan (*(rfftw_plan*) plan);
       delete (fftw_plan*)plan;
     }
@@ -73,7 +75,7 @@ void FTransform::FFTW_Plan::init(unsigned _ndat, unsigned _ilib, string _fft_cal
   if( optimized )
     flags = FFTW_MEASURE;
 
-  if( fft_call == "frc1d" ){
+  if( fft_call == "frc1d" || fft_call == "bcr1d" ){
     plan = (void*) new rfftw_plan;
     *(rfftw_plan*)plan = rfftw_create_plan (ndat, wdir, flags);
   }
@@ -183,6 +185,46 @@ int FTransform::fftw_bcc1d(unsigned ndat, float* dest, float* src){
   ///////////////////////////////////////
   // Do the transform
   fftw_one(*(fftw_plan*)plan->plan,(fftw_complex*)src,(fftw_complex*)dest);
+
+  return 0;
+}
+
+int FTransform::fftw_bcr1d(unsigned ndat, float* dest, float* src){
+  ///////////////////////////////////////
+  // Set up the plan
+  static unsigned ilib = get_ilib("FFTW");
+  FFTW_Plan* plan = (FFTW_Plan*)last_bcr1d_plan;
+
+  if( !last_bcr1d_plan || 
+      last_bcr1d_plan->ilib != ilib || 
+      last_bcr1d_plan->ndat != ndat )
+    plan = 0;
+
+  if( !plan ){
+    for( unsigned iplan=0; iplan<plans[ilib].size(); iplan++){
+      if( plans[ilib][iplan]->ndat == ndat && 
+	  plans[ilib][iplan]->fft_call == "bcr1d"){
+	plan = (FFTW_Plan*)plans[ilib][iplan].ptr();
+	break;
+      }
+    }
+  }
+
+  if( !plan )
+    plan = new FFTW_Plan(ndat,ilib,"bcr1d");
+
+  ///////////////////////////////////////
+  // Do the transform
+  if( !plan->tmp ){
+    plan->tmp = new float[ndat+2];
+    assert( plan->tmp != 0 );
+  }
+
+  throw Error(InvalidState,"FTransform::fftw_bcr1d()",
+	      "rfftw_antisort was never written!  What are you using FFTW 2 for anyway?  FFTW3 is out and it's free so use that!");
+  //rfftw_antisort(ndat, plan->tmp, dest);
+  rfftw_one (*(rfftw_plan*)plan->plan, (fftw_real*)src,
+	     (fftw_real*)plan->tmp);
 
   return 0;
 }

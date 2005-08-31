@@ -37,6 +37,7 @@ namespace FTransform {
   extern fft_call frc1d;
   extern fft_call fcc1d;
   extern fft_call bcc1d;
+  extern fft_call bcr1d; // Data must be hermitian; ndat floats are outputted
 
   //! Inplace wrapper-function- performs a memcpy after FFTing
   int inplace_frc1d(unsigned ndat, float* srcdest);
@@ -44,6 +45,8 @@ namespace FTransform {
   int inplace_fcc1d(unsigned ndat, float* srcdest);
   //! Inplace wrapper-function- performs a memcpy after FFTing
   int inplace_bcc1d(unsigned ndat, float* srcdest);
+  //! Inplace wrapper-function- performs a memcpy after FFTing
+  int inplace_bcr1d(unsigned ndat, float* srcdest);
 
   //! Returns currently selected library
   string get_library();
@@ -93,11 +96,13 @@ namespace FTransform {
   extern vector<fft_call> frc1d_calls;
   extern vector<fft_call> fcc1d_calls;
   extern vector<fft_call> bcc1d_calls;
+  extern vector<fft_call> bcr1d_calls;
   extern vector<norm_type> norms;
   extern vector<vector<Reference::To<Plan> > > plans;
   extern Plan* last_frc1d_plan;
   extern Plan* last_fcc1d_plan;
   extern Plan* last_bcc1d_plan;
+  extern Plan* last_bcr1d_plan;
 }
 
 #endif

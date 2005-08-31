@@ -23,6 +23,7 @@ namespace FTransform {
   int mkl_frc1d(unsigned ndat, float* dest, float* src);
   int mkl_fcc1d(unsigned ndat, float* dest, float* src);
   int mkl_bcc1d(unsigned ndat, float* dest, float* src);
+  int mkl_bcr1d(unsigned ndat, float* dest, float* src);
 
   class MKL_Plan : public Plan {
   public:

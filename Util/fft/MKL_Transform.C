@@ -15,6 +15,8 @@ extern "C" {
   void cfft1d_(float * data, int * ndat, int * isign, float * wsave);
   // real to complex
   void scfft1d_(float * data, int * ndat, int * isign, float * wsave);
+  // complex to real
+  void csfft1d_(float * data, int * ndat, int * isign, float * wsave);
 }
 
 FTransform::MKL_Plan::MKL_Plan() : Plan(){ 
@@ -27,6 +29,7 @@ int FTransform::mkl_initialise(){
   frc1d_calls.push_back( &mkl_frc1d );
   fcc1d_calls.push_back( &mkl_fcc1d );
   bcc1d_calls.push_back( &mkl_bcc1d );
+  bcr1d_calls.push_back( &mkl_bcr1d );
 
   norms.push_back( normal );
   valid_libraries.push_back( "MKL" );
@@ -36,6 +39,7 @@ int FTransform::mkl_initialise(){
     frc1d = &mkl_frc1d;
     fcc1d = &mkl_fcc1d;
     bcc1d = &mkl_bcc1d;
+    bcr1d = &mkl_bcr1d;
     norm = norms.back();
   }
 
@@ -67,6 +71,8 @@ void FTransform::MKL_Plan::init(unsigned _ndat, unsigned _ilib, string _fft_call
   int isign = 0;
   if( fft_call == "frc1d" )
     scfft1d_(mkl_plan, &signed_ndat, &isign, mkl_plan);
+  else if( fft_call == "bcr1d" )
+    csfft1d_(mkl_plan, &signed_ndat, &isign, mkl_plan);
   else
     cfft1d_(mkl_plan, &signed_ndat, &isign, mkl_plan);
 }
@@ -177,6 +183,41 @@ int FTransform::mkl_bcc1d(unsigned ndat, float* dest, float* src){
 
   memcpy (dest, src, ndat*2*sizeof(float));
   cfft1d_(dest, &signed_ndat, &isign, plan->mkl_plan);
+
+  return 0;
+}
+
+int FTransform::mkl_bcr1d(unsigned ndat, float* dest, float* src){
+  ///////////////////////////////////////
+  // Set up the plan
+  static unsigned ilib = get_ilib("MKL");
+  MKL_Plan* plan = (MKL_Plan*)last_bcr1d_plan;
+
+  if( !last_bcr1d_plan || 
+      last_bcr1d_plan->ilib != ilib || 
+      last_bcr1d_plan->ndat != ndat )
+    plan = 0;
+
+  if( !plan ){
+    for( unsigned iplan=0; iplan<plans[ilib].size(); iplan++){
+      if( plans[ilib][iplan]->ndat == ndat && 
+	  plans[ilib][iplan]->fft_call == "bcr1d"){
+	plan = (MKL_Plan*)plans[ilib][iplan].ptr();
+	break;
+      }
+    }
+  }
+
+  if( !plan )
+    plan = new MKL_Plan(ndat,ilib,"bcr1d");
+
+  ///////////////////////////////////////
+  // Do the transform
+  int isign = -1;
+  int signed_ndat = ndat;
+
+  memcpy (dest, src, ndat*sizeof(float));
+  csfft1d_(dest, &signed_ndat, &isign, plan->mkl_plan);
 
   return 0;
 }
