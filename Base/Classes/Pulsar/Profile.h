@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Profile.h,v $
-   $Revision: 1.87 $
-   $Date: 2005/08/18 12:10:05 $
-   $Author: straten $ */
+   $Revision: 1.88 $
+   $Date: 2005/08/31 06:33:08 $
+   $Author: redwards $ */
 
 #ifndef __Pulsar_Profile_h
 #define __Pulsar_Profile_h
@@ -61,6 +61,9 @@ namespace Pulsar {
 
     //! Fundamental period of spike sequence in profile, zap in SincInterpShift
     static unsigned SIS_zap_period;
+
+    //! When true, no memory is allocated for amps
+    static bool no_amps;
 
     //! Default constructor
     Profile (unsigned nbin = 0);
