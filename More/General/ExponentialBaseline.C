@@ -7,6 +7,11 @@ using namespace std;
 
 // #define _DEBUG 1
 
+Pulsar::ExponentialBaseline::ExponentialBaseline ()
+{
+  threshold = 3.0;
+}
+
 void Pulsar::ExponentialBaseline::get_bounds (PhaseWeight& weight, 
 					      float& lower, float& upper)
 {
