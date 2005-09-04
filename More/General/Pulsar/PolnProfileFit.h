@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/Attic/PolnProfileFit.h,v $
-   $Revision: 1.10 $
-   $Date: 2005/08/20 14:29:36 $
+   $Revision: 1.11 $
+   $Date: 2005/09/04 18:14:02 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PolnProfileFit_h
@@ -56,6 +56,9 @@ namespace Pulsar {
     //! Set the maximum number of harmonics to include in fit
     void set_maximum_harmonic (unsigned max);
 
+    //! Get the maximum number of harmonics to include in fit
+    unsigned get_maximum_harmonic () const { return maximum_harmonic; }
+
     //! Set the standard to which observations will be fit
     void set_standard (const PolnProfile* standard);
 
@@ -89,6 +92,9 @@ namespace Pulsar {
 
     //! Set true when set_standard should choose the maximum harmonic
     bool choose_maximum_harmonic;
+
+    //! Set true when only the total intensity should be used
+    bool emulate_scalar;
 
     //! The covariances between the Jones matrix parameters
     Matrix <7,7,double> cov_Jones;
