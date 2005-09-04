@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/PhaseWeight.h,v $
-   $Revision: 1.4 $
-   $Date: 2005/08/20 14:29:17 $
+   $Revision: 1.5 $
+   $Date: 2005/09/04 18:13:33 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PhaseWeight_h
@@ -45,7 +45,7 @@ namespace Pulsar {
     const PhaseWeight& operator *= (const PhaseWeight& weight);
 
     //! Array operator
-    float& operator [] (unsigned i) { return weight[i]; }
+    float& operator [] (unsigned i) { built = false; return weight[i]; }
 
     //! Array operator
     const float& operator [] (unsigned i) const { return weight[i]; }
@@ -69,7 +69,7 @@ namespace Pulsar {
     void get_weights (std::vector<float>& weights) const;
 
     //! Weight the Profile amplitudes by the weights
-    void weight_Profile (Profile* profile);
+    void weight_Profile (Profile* profile) const;
 
     //! Set the Profile from which statistics are calculated
     void set_Profile (const Profile* profile);

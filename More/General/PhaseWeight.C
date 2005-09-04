@@ -26,6 +26,7 @@ const Pulsar::PhaseWeight&
 Pulsar::PhaseWeight::operator = (const PhaseWeight& pm)
 {
   weight = pm.weight;
+  built = false;
   return *this;
 }
 
@@ -38,8 +39,9 @@ Pulsar::PhaseWeight::operator += (const PhaseWeight& pm)
 		 weight.size(), pm.weight.size());
 
   for (unsigned ipt=0; ipt<weight.size(); ipt++)
-    weight [ipt] += pm.weight [ipt];
+    weight[ipt] += pm.weight[ipt];
 
+  built = false;
   return *this;
 }
 
@@ -51,16 +53,20 @@ Pulsar::PhaseWeight::operator *= (const PhaseWeight& pm)
 		 "weight size=%d != other weight size=%d",
 		 weight.size(), pm.weight.size());
 
-  for (unsigned ipt=0; ipt<weight.size(); ipt++)
-    weight [ipt] *= pm.weight [ipt];
+  // cerr << "Pulsar::PhaseWeight::operator *=" << endl;
 
+  for (unsigned ipt=0; ipt<weight.size(); ipt++)
+    weight[ipt] *= pm.weight[ipt];
+
+  built = false;
   return *this;
 }
 
 void Pulsar::PhaseWeight::set_all (float value)
 {
   for (unsigned ipt=0; ipt<weight.size(); ipt++)
-    weight [ipt] *= value;
+    weight[ipt] = value;
+  built = false;
 }
  
 //! Retrieve the weights
@@ -89,8 +95,10 @@ double Pulsar::PhaseWeight::get_weight_max () const
 //! Set the Profile to which the weights apply
 void Pulsar::PhaseWeight::set_Profile (const Profile* _profile)
 {
-  if (profile && profile == _profile)
+  if (profile && profile == _profile) {
+    // cerr << "Pulsar::PhaseWeight::set_Profile same Profile" << endl;
     return;
+  }
 
   profile = _profile;
   built = false;
@@ -119,7 +127,7 @@ void Pulsar::PhaseWeight::build ()
 }
 
 //! Weigh the Profile amplitudes by the weights
-void Pulsar::PhaseWeight::weight_Profile (Profile* data)
+void Pulsar::PhaseWeight::weight_Profile (Profile* data) const
 {
   unsigned nbin = data->get_nbin();
 
@@ -158,6 +166,8 @@ void Pulsar::PhaseWeight::stats (const Profile* profile,
     mu += value;
     totwt += weight[ibin];
   }
+
+  // cerr << "weight=" << totwt << " sum=" << get_weight_sum() << endl;
 
   mu /= totwt;
 
