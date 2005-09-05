@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/ReferenceAble.h,v $
-   $Revision: 1.2 $
-   $Date: 2004/11/22 19:26:04 $
-   $Author: straten $ */
+   $Revision: 1.3 $
+   $Date: 2005/09/05 02:30:20 $
+   $Author: hknight $ */
 
 #ifndef __ReferenceAble_h
 #define __ReferenceAble_h
@@ -59,7 +59,10 @@ namespace Reference {
 
     //! Destructor
     /*! Invalidates all Reference::To references to this instance. */
-    ~Able();
+    virtual ~Able();
+    
+    //! Returns the number of references there are
+    unsigned get_reference_count() const { return __reference_count; }
 
   protected:
 
