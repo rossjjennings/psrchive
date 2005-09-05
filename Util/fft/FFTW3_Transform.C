@@ -48,6 +48,9 @@ FTransform::FFTW3_Plan::FFTW3_Plan(unsigned _ndat, unsigned _ilib, string _fft_c
 
 void FTransform::FFTW3_Plan::init(unsigned _ndat, unsigned _ilib, string _fft_call)
 {
+  fprintf(stderr,"In FTransform::FFTW3_Plan::init() _ndat=%d _ilib=%d _fft_call='%s'\n",
+	  _ndat,_ilib,_fft_call.c_str());
+
   initialise(_ndat,_ilib,_fft_call);
 
   int direction_flags = 0;

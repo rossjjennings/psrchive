@@ -59,7 +59,8 @@ FTransform::MKL_Plan::MKL_Plan(unsigned _ndat, unsigned _ilib, string _fft_call)
 
 void FTransform::MKL_Plan::init(unsigned _ndat, unsigned _ilib, string _fft_call)
 {
-  fprintf(stderr,"In FTransform::MKL_Plan::init()\n");
+  fprintf(stderr,"In FTransform::MKL_Plan::init() _ndat=%d _ilib=%d _fft_call='%s'\n",
+	  _ndat,_ilib,_fft_call.c_str());
 
   initialise(_ndat,_ilib,_fft_call);
 

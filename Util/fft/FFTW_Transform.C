@@ -58,8 +58,10 @@ FTransform::FFTW_Plan::FFTW_Plan(unsigned _ndat, unsigned _ilib, string _fft_cal
   init(ndat,ilib,fft_call);
 }
 
-void FTransform::FFTW_Plan::init(unsigned _ndat, unsigned _ilib, string _fft_call){
-  fprintf(stderr,"In FTransform::FFTW_Plan::init()\n");
+void FTransform::FFTW_Plan::init(unsigned _ndat, unsigned _ilib, string _fft_call)
+{
+  fprintf(stderr,"In FTransform::FFTW_Plan::init() _ndat=%d _ilib=%d _fft_call='%s'\n",
+	  _ndat,_ilib,_fft_call.c_str());
 
   initialise(_ndat,_ilib,_fft_call);
   tmp = 0;
