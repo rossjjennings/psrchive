@@ -110,6 +110,8 @@ int FTransform::ipp_frc1d(unsigned ndat, float* dest, float* src){
   if( !plan )
     plan = new IPP_Plan(ndat,ilib,"frc1d");
 
+  last_frc1d_plan = plan;
+
   ///////////////////////////////////////
   // Do the transform
   ippsFFTFwd_RToCCS_32f( (const Ipp32f*)src, (Ipp32f*)dest,
@@ -140,10 +142,10 @@ int FTransform::ipp_fcc1d(unsigned ndat, float* dest, float* src){
     }
   }
 
-  if( !plan ){
+  if( !plan )
     plan = new IPP_Plan(ndat,ilib,"fcc1d");
-    plans[ilib].push_back( plan );
-  }
+
+  last_fcc1d_plan = plan;
 
   ///////////////////////////////////////
   // Do the transform
@@ -174,10 +176,10 @@ int FTransform::ipp_bcc1d(unsigned ndat, float* dest, float* src){
     }
   }
 
-  if( !plan ){
+  if( !plan )
     plan = new IPP_Plan(ndat,ilib,"bcc1d");
-   plans[ilib].push_back( plan );
-  }
+
+  last_bcc1d_plan = plan;
 
   ///////////////////////////////////////
   // Do the transform
@@ -189,6 +191,9 @@ int FTransform::ipp_bcc1d(unsigned ndat, float* dest, float* src){
 }
 
 int FTransform::ipp_bcr1d(unsigned ndat, float* dest, float* src){
+  //  fprintf(stderr,"Hi from FTransform::ipp_bcr1d() with ndat=%d\n",
+  //  ndat);
+
   ///////////////////////////////////////
   // Set up the plan
   static unsigned ilib =get_ilib("IPP");
@@ -210,7 +215,9 @@ int FTransform::ipp_bcr1d(unsigned ndat, float* dest, float* src){
   }
 
   if( !plan )
-    plan = new IPP_Plan(ndat,ilib,"bcr1d");
+    plan = new IPP_Plan(ndat,ilib,"bcr1d");  
+
+  last_bcr1d_plan = plan;
 
   ///////////////////////////////////////
   // Do the transform

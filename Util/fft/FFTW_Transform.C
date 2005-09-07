@@ -111,6 +111,8 @@ int FTransform::fftw_frc1d(unsigned ndat, float* dest, float* src){
   if( !plan )
     plan = new FFTW_Plan(ndat,ilib,"frc1d");
 
+  last_frc1d_plan = plan;
+
   ///////////////////////////////////////
   // Do the transform
   if( !plan->tmp ){
@@ -146,10 +148,10 @@ int FTransform::fftw_fcc1d(unsigned ndat, float* dest, float* src){
     }
   }
 
-  if( !plan ){
+  if( !plan )
     plan = new FFTW_Plan(ndat,ilib,"fcc1d");
-    plans[ilib].push_back( plan );
-  }
+
+  last_fcc1d_plan = plan;
 
   ///////////////////////////////////////
   // Do the transform
@@ -179,10 +181,10 @@ int FTransform::fftw_bcc1d(unsigned ndat, float* dest, float* src){
     }
   }
 
-  if( !plan ){
+  if( !plan )
     plan = new FFTW_Plan(ndat,ilib,"bcc1d");
-    plans[ilib].push_back( plan );
-  }
+
+  last_bcc1d_plan = plan;
 
   ///////////////////////////////////////
   // Do the transform
@@ -214,6 +216,8 @@ int FTransform::fftw_bcr1d(unsigned ndat, float* dest, float* src){
 
   if( !plan )
     plan = new FFTW_Plan(ndat,ilib,"bcr1d");
+
+  last_bcr1d_plan = plan;
 
   ///////////////////////////////////////
   // Do the transform

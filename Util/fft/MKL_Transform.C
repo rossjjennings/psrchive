@@ -102,6 +102,8 @@ int FTransform::mkl_frc1d(unsigned ndat, float* dest, float* src){
   if( !plan )
     plan = new MKL_Plan(ndat,ilib,"frc1d");
 
+  last_frc1d_plan = plan;
+
   ///////////////////////////////////////
   // Do the transform
   int isign = -1;
@@ -134,11 +136,10 @@ int FTransform::mkl_fcc1d(unsigned ndat, float* dest, float* src){
     }
   }
 
-  if( !plan ){
+  if( !plan )
     plan = new MKL_Plan(ndat,ilib,"fcc1d");
-    plans[ilib].push_back( plan );
-  }
 
+  last_fcc1d_plan = plan;
 
   ///////////////////////////////////////
   // Do the transform
@@ -172,10 +173,10 @@ int FTransform::mkl_bcc1d(unsigned ndat, float* dest, float* src){
     }
   }
 
-  if( !plan ){
+  if( !plan )
     plan = new MKL_Plan(ndat,ilib,"bcc1d");
-    plans[ilib].push_back( plan );
-  }
+
+  last_bcc1d_plan = plan;
 
   ///////////////////////////////////////
   // Do the transform
@@ -211,6 +212,8 @@ int FTransform::mkl_bcr1d(unsigned ndat, float* dest, float* src){
 
   if( !plan )
     plan = new MKL_Plan(ndat,ilib,"bcr1d");
+
+  last_bcr1d_plan = plan;
 
   ///////////////////////////////////////
   // Do the transform
