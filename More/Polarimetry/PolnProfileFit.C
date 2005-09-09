@@ -175,7 +175,7 @@ void Pulsar::PolnProfileFit::choose_max_harmonic (const PolnProfile* psd)
   for (unsigned ipol=0; ipol<npol; ipol++) {
 
     const float* amps = psd->get_amps(ipol);
-    double threshold = standard_variance[ipol] * 9.0;
+    double threshold = standard_variance[ipol] * 3.0;
     unsigned count = 0;
 
     // cerr << "THRESHOLD=" << threshold  << endl;
@@ -189,7 +189,7 @@ void Pulsar::PolnProfileFit::choose_max_harmonic (const PolnProfile* psd)
 
       // cerr << count << " " << ibin << " " << amps[ibin]  <<endl;
 
-      if (count > 3 && ibin > max_harmonic)
+      if (count > 2 && ibin > max_harmonic)
 	max_harmonic = ibin;
 
     }
