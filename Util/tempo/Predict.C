@@ -9,6 +9,7 @@
 #include "genutil.h"
 
 #include <unistd.h>
+#include <ctype.h>
 
 Tempo::Predict::Predict ()
 {
@@ -77,7 +78,8 @@ void Tempo::Predict::set_parameters (const psrephem& _parameters)
     throw Error (InvalidParam, "Tempo::predict::set_parameters", 
 		 "psrephem::psrname is empty");
 
-  if (psrname[0] == 'J')
+  // remove all garbage from front of pulsar name (not just J)
+  while (psrname.length() && !isdigit(psrname[0]))
     psrname.erase (0,1);
 }
 
