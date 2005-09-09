@@ -45,7 +45,10 @@ int Pulsar::legacy_fftconv(int npts, const float * prf, const float * std,
    return (0);
   }
   return -1;
-} 
+}
+
+int Pulsar::max_harmonic = 0;
+
 int Pulsar::model_profile (int npts, int narrays, 
                            float* const * prf, float* const* std,
 		           double* scale, double* sigma_scale, 
@@ -61,6 +64,9 @@ int Pulsar::model_profile (int npts, int narrays,
 	  xcorr_amps!=0 && xcorr_phases!=0);
 
   int npt2 = npts/2;
+
+  if (max_harmonic)
+    npt2 = max_harmonic;
 
   int i,j;
 

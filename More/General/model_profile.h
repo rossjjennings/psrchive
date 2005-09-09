@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/model_profile.h,v $
-   $Revision: 1.4 $
-   $Date: 2004/12/31 17:22:55 $
+   $Revision: 1.5 $
+   $Date: 2005/09/09 23:49:45 $
    $Author: straten $ */
 
 #ifndef __model_profile_h
@@ -24,6 +24,7 @@ namespace Pulsar {
                       double * _shift, double *_eshift,
                       float *_snrfft, float *_esnrfft);
 
+  extern int max_harmonic;
 }
 
 #endif
