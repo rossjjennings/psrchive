@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/SimPolnTiming.h,v $
-   $Revision: 1.4 $
-   $Date: 2005/08/18 12:10:19 $
+   $Revision: 1.5 $
+   $Date: 2005/09/09 23:49:41 $
    $Author: straten $ */
 
 #ifndef __Pulsar_SimPolnTiming_h
@@ -103,6 +103,12 @@ namespace Pulsar {
     Range parallactic;
     double parallactic_angle;
 
+    //! Number of steps when varying the parallactic angle
+    Range boost_vector;
+    double B_orientation;
+    double B_ellipticity;
+    double beta;
+
     //! Run the simulation, outputting results to cout
     void run_simulation ();
 
@@ -118,6 +124,9 @@ namespace Pulsar {
     bool logarithmic;
     void extrapolate_benefit (unsigned steps);
     void susceptibility ();
+
+    //! Find the phase shift due to boosts of varying orientation
+    void boost_around ();
 
   protected:
 
