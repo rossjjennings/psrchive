@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PolnProfileFitAnalysis.h,v $
-   $Revision: 1.2 $
-   $Date: 2005/09/13 17:03:34 $
+   $Revision: 1.3 $
+   $Date: 2005/09/13 22:23:09 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PolnProfileFitAnalysis_h
@@ -15,7 +15,7 @@
 
 namespace Pulsar {
 
-  //! Analysis of the PolnProfileFit algorithm
+  //! Analysis of the matrix template matching algorithm
   class PolnProfileFitAnalysis {
 
   public:
@@ -83,6 +83,26 @@ namespace Pulsar {
 
     double efac;
 
+  };
+
+
+  //! Analysis of the scalar template matching algorithm
+  class ScalarProfileFitAnalysis {
+
+  public:
+
+    //! Set the PolnProfileFit that refers to the standard
+    void set_fit (PolnProfileFit*);
+
+    //! Get the curvature matrix
+    void get_curvature (Matrix<2,2,double>& curvature);
+
+  protected:
+
+    //! The PolnProfileFit algorithm to be analysed
+    Reference::To<PolnProfileFit> fit;
+
+    double mean_variance;
   };
 
 }

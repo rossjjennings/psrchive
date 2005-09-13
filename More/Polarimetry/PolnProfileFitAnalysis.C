@@ -1,7 +1,7 @@
 #include "Pulsar/PolnProfileFitAnalysis.h"
+#include "Pulsar/PolnProfile.h"
 
 #include "Calibration/ReceptionModel.h"
-#include "Calibration/CoherencyMeasurementSet.h"
 
 #include "Pauli.h"
 
@@ -142,12 +142,6 @@ Pulsar::PolnProfileFitAnalysis::delgradient_delS (unsigned i, unsigned k) const
       xform_result * sigma_k * herm(xform_gradient[i]) * phase_result );
 }
 
-//! Negation
-const Matrix<8,8,double> operator - (Matrix<8,8,double> s)
-{ for (unsigned i=0; i<8; i++) for (unsigned j=0; j<8; j++)
-  s[i][j] = -s[i][j]; return s; }
-
-
 //! Set the PolnProfileFit algorithm to be analysed
 void Pulsar::PolnProfileFitAnalysis::set_fit (PolnProfileFit* f)
 {
@@ -164,6 +158,9 @@ void Pulsar::PolnProfileFitAnalysis::set_fit (PolnProfileFit* f)
   // calculate the covariance matrix
   covariance = inv(curvature);
 
+  cerr << "curv=\n" << curvature << endl;
+  cerr << "cov=\n" << covariance << endl;
+
   // partition the covariance matrix
   conformal_partition (covariance, c_varphi, C_varphiJ, C_JJ);
 
@@ -172,6 +169,25 @@ void Pulsar::PolnProfileFitAnalysis::set_fit (PolnProfileFit* f)
 
   // the multiple correlation squared
   R2_varphiJ = C_varphiJ * (inv_C_JJ * C_varphiJ) / c_varphi;
+
+  // /////////////////////////////////////////////////////////////////////
+  //
+  // now do the same for scalar template matching
+  //
+  // /////////////////////////////////////////////////////////////////////
+
+  ScalarProfileFitAnalysis scalar;
+  scalar.set_fit (fit);
+
+  Matrix<2,2,double> I_curvature;
+  scalar.get_curvature (I_curvature);
+
+  Matrix<2,2,double> I_covariance = inv(I_curvature);
+
+  cerr << "I_curv=\n" << I_curvature << endl;
+  cerr << "I_cov=\n" << I_covariance << endl;
+    
+  cerr << "ratio = " << sqrt(covariance[0][0] / I_covariance[0][0]) << endl;
 
   // the variance of the unconditional phase shift variance
   double var_c_varphi = 0.0;
@@ -270,3 +286,59 @@ Pulsar::PolnProfileFitAnalysis::get_multiple_correlation () const
 {
   return multiple_correlation;
 }
+
+// /////////////////////////////////////////////////////////////////////
+//
+// the same for scalar template matching
+//
+// /////////////////////////////////////////////////////////////////////
+
+
+void Pulsar::ScalarProfileFitAnalysis::set_fit (PolnProfileFit* f)
+{
+  fit = f;
+}
+
+void
+Pulsar::ScalarProfileFitAnalysis::get_curvature (Matrix<2,2,double>& curvature)
+{
+  curvature = Matrix<2,2,double>();
+
+  complex<double> gradient[2];
+
+  const complex<float>* amps;
+  amps = reinterpret_cast<const complex<float>*>
+    (fit->standard_fourier->get_amps(0));
+
+  for (unsigned ih=0; ih < fit->model->get_num_input(); ih++) {
+
+    complex<double> delexp_delvarphi (0.0, -2.0 * M_PI * double(ih+1));
+    complex<double> Stokes_I (amps[ih+1]);
+
+#ifdef _DEBUG
+    double phase_shift = -2.0 * M_PI * double(ih+1);
+    fit->phase_axis.set_value (phase_shift);
+    fit->model->set_input_index (ih);
+    Jones<double> jones = fit->model->evaluate ();
+    cerr << "Quaternion=" << convert (jones) << endl;
+    cerr << "StokesI=" << Stokes_I << endl;
+#endif
+
+    // partial derivative with respect to phase
+    gradient[0] = Stokes_I * delexp_delvarphi;
+    // partial derivative with respect to gain
+    gradient[1] = Stokes_I;
+
+    for (unsigned ir=0; ir < 2; ir++)
+      for (unsigned is=0; is < 2; is ++)
+	curvature[ir][is] += 2.0 * (conj(gradient[ir]) * gradient[is]).real();
+    
+  }
+
+  mean_variance = 0.0;
+  for (unsigned i=0; i<4; i++)
+    mean_variance += fit->standard_variance[i] / 4.0;
+
+  curvature /= mean_variance;
+}
+
