@@ -19,6 +19,8 @@ Pulsar::PolnProfileFitAnalysis::set_harmonic (unsigned index)
 void
 Pulsar::PolnProfileFitAnalysis::get_curvature (Matrix<8,8,double>& curvature)
 {
+  curvature = Matrix<8,8,double>();
+
   for (unsigned ih=0; ih < fit->model->get_num_input(); ih++) {
 
     set_harmonic (ih);
@@ -118,11 +120,27 @@ Pulsar::PolnProfileFitAnalysis::del2R2_varphiJ_delS
 
   return
     delC_varphiJ_delS * (inv_C_JJ * C_varphiJ) / c_varphi
-    + C_varphiJ * (inv_C_JJ * delC_JJ_delS * inv_C_JJ * C_varphiJ) / c_varphi 
+    - C_varphiJ * (inv_C_JJ * delC_JJ_delS * inv_C_JJ * C_varphiJ) / c_varphi 
     + C_varphiJ * (inv_C_JJ * delC_varphiJ_delS) / c_varphi +
     - R2_varphiJ * delc_varphi_delS / c_varphi;
 }
 
+Jones<double> 
+Pulsar::PolnProfileFitAnalysis::delgradient_delS (unsigned i, unsigned k) const
+{
+  Quaternion<double,Hermitian> q;
+  q[k] = 1.0;
+  Jones<double> sigma_k = convert (q);
+
+  if (i == 0)
+    return 0.5 * xform_result *sigma_k* herm(xform_result) * phase_gradient[2];
+
+  i --;
+
+  return 0.5 *
+    ( xform_gradient[i] * sigma_k * herm(xform_result) * phase_result +
+      xform_result * sigma_k * herm(xform_gradient[i]) * phase_result );
+}
 
 //! Negation
 const Matrix<8,8,double> operator - (Matrix<8,8,double> s)
@@ -216,12 +234,14 @@ void Pulsar::PolnProfileFitAnalysis::set_fit (PolnProfileFit* f)
       var_R2_varphiJ += delR2_varphiJ_delSre * delR2_varphiJ_delSre * var_S;
       var_R2_varphiJ += delR2_varphiJ_delSre * delR2_varphiJ_delSre * var_S;
 
+#ifdef _DEBUG
       if (ip==3) {
 	Estimate<double> R2 (R2_varphiJ, var_R2_varphiJ);
 	multiple_correlation = sqrt(R2);
 
 	cerr << ih << " R2 " << multiple_correlation.get_error() << endl;
       }
+#endif
 
     }
 
@@ -236,19 +256,6 @@ void Pulsar::PolnProfileFitAnalysis::set_fit (PolnProfileFit* f)
   cerr << "sigma=" << normalized_error
        << " R=" << multiple_correlation << endl;
 
-}
-
-Jones<double> 
-Pulsar::PolnProfileFitAnalysis::delgradient_delS (unsigned i, unsigned k) const
-{
-  Quaternion<double,Hermitian> q;
-  q[k] = 1.0;
-  Jones<double> sigma_k = convert (q);
-
-  return 0.5 *
-    ( xform_gradient[i]  * sigma_k * herm(xform_result) * phase_result +
-      xform_result * sigma_k * herm(xform_gradient[i])  * phase_result +
-      xform_result * sigma_k * herm(xform_result) * phase_gradient[i] );
 }
 
 Estimate<double>
