@@ -7,26 +7,21 @@
 
 using namespace std;
 
-//! Set the PolnProfileFit algorithm to be analysed
-void Pulsar::PolnProfileFitAnalysis::set_fit (PolnProfileFit* f)
+void
+Pulsar::PolnProfileFitAnalysis::set_harmonic (unsigned index)
 {
-  fit = f;
+  double phase_shift = -2.0 * M_PI * double(index+1);
 
-  if (!fit)
-    return;
+  fit->phase_axis.set_value (phase_shift);
+  fit->model->set_input_index (index);
+}
 
-  // calculate the curvature matrix
-  Matrix<8,8,double> curvature;
+void
+Pulsar::PolnProfileFitAnalysis::get_curvature (Matrix<8,8,double>& curvature)
+{
+  for (unsigned ih=0; ih < fit->model->get_num_input(); ih++) {
 
-  unsigned ih = 0;
-
-  for (ih=0; ih < fit->model->get_num_input(); ih++) {
-
-    double phase_shift = -2.0 * M_PI * double(ih+1);
-
-    fit->phase_axis.set_value (phase_shift);
-    fit->model->set_input_index (ih);
-
+    set_harmonic (ih);
     model_result = fit->model->evaluate (&model_gradient);
 
 #ifdef _DEBUG
@@ -50,7 +45,7 @@ void Pulsar::PolnProfileFitAnalysis::set_fit (PolnProfileFit* f)
 
   }
 
-  double mean_variance = 0.0;
+  mean_variance = 0.0;
 
   cerr << "standard variance=" << fit->standard_variance << endl;
 
@@ -59,21 +54,116 @@ void Pulsar::PolnProfileFitAnalysis::set_fit (PolnProfileFit* f)
 
   cerr << "mean variance=" << mean_variance << endl;
 
-  // I think that this should be 2/mean_variance, but this matches the
-  // covariance matrix produced by PolnProfileFit ...  :-(
-  curvature *= 1.0 / mean_variance;
+  curvature /= mean_variance;
+}
 
-  cerr << "curvature=\n" << curvature << endl;
+void conformal_partition (const Matrix<8,8,double>& covariance,
+			  double& c_varphi,
+			  Vector <7,double>& C_varphiJ,
+			  Matrix <7,7,double>& C_JJ)
+{
+  c_varphi = covariance[0][0];
 
-  cerr << "covariance=\n" << inv(curvature) << endl;
+#define OUTPUT_COVARIANCE 0
+
+#if OUTPUT_COVARIANCE
+  fprintf (stderr, "%12s%12.3g\n", "phase", covariance[0][0]);
+#endif
+
+  for (unsigned i=0; i < 7; i++) {
+
+    C_varphiJ[i] = covariance[i+1][0];
+
+#if OUTPUT_COVARIANCE
+    unsigned m = i + 3;
+    fprintf (stderr, "%12s", fit->model->get_param_name(m).c_str());
+    fprintf (stderr, "%12.3g", C_varphiJ[i]);
+#endif
+
+    for (unsigned j=0; j < 7; j++) {
+
+      C_JJ[i][j] = covariance[i+1][j+1];
+
+      if (j > i)
+	continue;
+
+#if OUTPUT_COVARIANCE
+      fprintf (stderr, "%12.3g", C_JJ[i][j]);
+#endif
+
+    }
+
+#if OUTPUT_COVARIANCE
+    fprintf (stderr, "\n");
+#endif
+  }
+
+}
+
+/*! Return the partial derivative of the multiple correlation squared with
+  respect to the real or imaginary component of a Stokes parameter */
+
+double 
+Pulsar::PolnProfileFitAnalysis::del2R2_varphiJ_delS 
+(Matrix<8,8,double>& delC_delS) 
+{
+  // partial derivatives of conformal partition of covariance matrix
+  Matrix <7,7,double> delC_JJ_delS;
+  Vector <7,double> delC_varphiJ_delS;
+  double delc_varphi_delS = 0;
+      
+  // partition the partial derivative of the covariance matrix
+  conformal_partition (delC_delS, delc_varphi_delS,
+		       delC_varphiJ_delS, delC_JJ_delS);
+
+  return
+    delC_varphiJ_delS * (inv_C_JJ * C_varphiJ) / c_varphi
+    + C_varphiJ * (inv_C_JJ * delC_JJ_delS * inv_C_JJ * C_varphiJ) / c_varphi 
+    + C_varphiJ * (inv_C_JJ * delC_varphiJ_delS) / c_varphi +
+    - R2_varphiJ * delc_varphi_delS / c_varphi;
+}
 
 
-  for (ih=0; ih < fit->model->get_num_input(); ih++) {
+//! Negation
+const Matrix<8,8,double> operator - (Matrix<8,8,double> s)
+{ for (unsigned i=0; i<8; i++) for (unsigned j=0; j<8; j++)
+  s[i][j] = -s[i][j]; return s; }
 
-    double phase_shift = -2.0 * M_PI * double(ih+1);
 
-    fit->phase_axis.set_value (phase_shift);
-    fit->model->set_input_index (ih);
+//! Set the PolnProfileFit algorithm to be analysed
+void Pulsar::PolnProfileFitAnalysis::set_fit (PolnProfileFit* f)
+{
+  fit = f;
+
+  if (!fit)
+    return;
+
+  Matrix<8,8,double> curvature;
+
+  // calculate the curvature matrix
+  get_curvature (curvature);
+
+  // calculate the covariance matrix
+  covariance = inv(curvature);
+
+  // partition the covariance matrix
+  conformal_partition (covariance, c_varphi, C_varphiJ, C_JJ);
+
+  // calculate the inverse of the Jones parameter covariance matrix
+  inv_C_JJ = inv(C_JJ);
+
+  // the multiple correlation squared
+  R2_varphiJ = C_varphiJ * (inv_C_JJ * C_varphiJ) / c_varphi;
+
+  // the variance of the unconditional phase shift variance
+  double var_c_varphi = 0.0;
+
+  // the variance of the multiple correlation squared
+  double var_R2_varphiJ = 0.0;
+
+  for (unsigned ih=0; ih < fit->model->get_num_input(); ih++) {
+
+    set_harmonic (ih);
 
     model_result = fit->model->evaluate (&model_gradient);
     xform_result = fit->transformation->evaluate (&xform_gradient);
@@ -108,36 +198,43 @@ void Pulsar::PolnProfileFitAnalysis::set_fit (PolnProfileFit* f)
 
       }
 
-      delalpha_delSre *= 1.0 / mean_variance;
-      delalpha_delSim *= 1.0 / mean_variance;
+      delalpha_delSre /= mean_variance;
+      delalpha_delSim /= mean_variance;
+
+      Matrix<8,8,double> delC_delSre = -covariance*delalpha_delSre*covariance;
+      Matrix<8,8,double> delC_delSim = -covariance*delalpha_delSim*covariance;
+
+      // the variance of the real and imaginary parts of the Stokes parameters
+      double var_S = 0.5*mean_variance;
+
+      var_c_varphi += delC_delSre[0][0]*delC_delSre[0][0] * var_S;
+      var_c_varphi += delC_delSim[0][0]*delC_delSim[0][0] * var_S;
+
+      double delR2_varphiJ_delSre = del2R2_varphiJ_delS (delC_delSre);
+      double delR2_varphiJ_delSim = del2R2_varphiJ_delS (delC_delSim);
+
+      var_R2_varphiJ += delR2_varphiJ_delSre * delR2_varphiJ_delSre * var_S;
+      var_R2_varphiJ += delR2_varphiJ_delSre * delR2_varphiJ_delSre * var_S;
+
+      if (ip==3) {
+	Estimate<double> R2 (R2_varphiJ, var_R2_varphiJ);
+	multiple_correlation = sqrt(R2);
+
+	cerr << ih << " R2 " << multiple_correlation.get_error() << endl;
+      }
 
     }
 
   }
-#if 0
 
-    xform_result = fit->transformation->evaluate (&xform_gradient);
-    phase_result = fit->phase_xform->evaluate (&phase_gradient);
-    
-    if (!ih) {
-      cerr << "xform gradient size=" << xform_gradient.size() << endl;
-      cerr << "phase gradient size=" << phase_gradient.size() << endl;
-      cerr << "model gradient size=" << model_gradient.size() << endl;
-    }
+  Estimate<double> R2 (R2_varphiJ, var_R2_varphiJ);
+  multiple_correlation = sqrt(R2);
 
+  Estimate<double> var (c_varphi, var_c_varphi);
+  normalized_error = sqrt(var);
 
-    //! The transformation between the standard and observation
-    Reference::To<MEAL::Complex2> transformation;
-
-    //! The measurement equation used to model the fit
-    Reference::To<Calibration::ReceptionModel> model;
-
-    //! The phase transformation in the Fourier domain
-    Reference::To<MEAL::Complex2> phase_xform;
-
-    //! The variance of the standard
-    Stokes<float> standard_variance;
-#endif
+  cerr << "sigma=" << normalized_error
+       << " R=" << multiple_correlation << endl;
 
 }
 
