@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/Attic/PolnProfileFitAnalysis.h,v $
-   $Revision: 1.3 $
-   $Date: 2005/09/13 22:23:09 $
+   $Revision: 1.4 $
+   $Date: 2005/09/14 00:20:07 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PolnProfileFitAnalysis_h
@@ -97,11 +97,16 @@ namespace Pulsar {
     //! Get the curvature matrix
     void get_curvature (Matrix<2,2,double>& curvature);
 
+    void get_delC_delS ( Matrix<2,2,double>& delC_delSre,
+			 Matrix<2,2,double>& delC_delSim,
+			 unsigned index ) const;
+
   protected:
 
     //! The PolnProfileFit algorithm to be analysed
     Reference::To<PolnProfileFit> fit;
 
+    Matrix<2,2,double> covariance;
     double mean_variance;
   };
 
