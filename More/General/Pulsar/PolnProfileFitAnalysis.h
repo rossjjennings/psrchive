@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/Attic/PolnProfileFitAnalysis.h,v $
-   $Revision: 1.4 $
-   $Date: 2005/09/14 00:20:07 $
+   $Revision: 1.5 $
+   $Date: 2005/09/14 12:04:49 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PolnProfileFitAnalysis_h
@@ -44,8 +44,12 @@ namespace Pulsar {
     Jones<double> delgradient_delS (unsigned index, unsigned k) const;
 
     //! The partial derivative of the multiple correlation squared wrt S_k
-    double del2R2_varphiJ_delS (Matrix<8,8,double>& delC_delS);
-  
+    double delR2_varphiJ_delS (Matrix<8,8,double>& delC_delS);
+
+    //! The partial derivative of the covariance matrix wrt Re[S_k] and Im[S_k]
+    void delC_delS( Matrix<8,8,double>& delC_delSre,
+		    Matrix<8,8,double>& delC_delSim, unsigned k ) const;
+
     //! Get the curvature matrix
     void get_curvature (Matrix<8,8,double>& curvature);
 
@@ -97,9 +101,10 @@ namespace Pulsar {
     //! Get the curvature matrix
     void get_curvature (Matrix<2,2,double>& curvature);
 
-    void get_delC_delS ( Matrix<2,2,double>& delC_delSre,
-			 Matrix<2,2,double>& delC_delSim,
-			 unsigned index ) const;
+    //! The partial derivative of the covariance matrix wrt Re[S_0] and Im[S_0]
+    void delC_delS ( Matrix<2,2,double>& delC_delSre,
+		     Matrix<2,2,double>& delC_delSim,
+		     unsigned index ) const;
 
   protected:
 
