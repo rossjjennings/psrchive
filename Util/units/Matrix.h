@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Matrix.h,v $
-   $Revision: 1.12 $
-   $Date: 2005/08/18 12:10:42 $
+   $Revision: 1.13 $
+   $Date: 2005/09/21 13:21:44 $
    $Author: straten $ */
 
 #ifndef __Matrix_H
@@ -29,6 +29,11 @@ public:
   //! Set this instance equal to another Matrix<U> instance
   template<typename U> Matrix& operator = (const Matrix<Rows,Columns,U>& s)
   { for (unsigned i=0; i<Rows; i++) this->x[i] = s.x[i]; return *this; }
+  
+  //! Negation
+  const friend Matrix operator - (Matrix s)
+  { for (unsigned i=0; i<Rows; i++) for (unsigned j=0; j<Columns; j++)
+    s.x[i][j] = -s.x[i][j]; return s; }
   
 };
 
