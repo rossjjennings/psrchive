@@ -143,9 +143,10 @@ namespace FTransform {
     //! The normalization type
     norm_type norm;
 
+    //! List of all libraries
+    static std::vector< Reference::To<Agent2> > libraries;
   };
 
-  extern std::vector< Reference::To<Agent2> > twod_libraries;
 
   //! Template virtual base class of FFT library agents
   template <class PlanT>
@@ -176,9 +177,6 @@ namespace FTransform {
   template<class PlanT>
   PlanAgent2<PlanT>::PlanAgent2 (const std::string& _name, norm_type _norm)
   {
-    if (instances==0)
-      twod_libraries.push_back (this);
-
     name = _name;
     norm = _norm;
 
@@ -192,7 +190,7 @@ namespace FTransform {
       FTransform::bcc2d = PlanT::bcc2d;
 
     if (instances==0)
-      FTransform::twod_libraries.push_back (this);
+      Agent2::libraries.push_back (this);
 
     instances ++;
   }
