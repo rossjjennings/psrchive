@@ -4,11 +4,13 @@
 
 #if HAVE_FFTW3
 
+#include "FFTW3_Transform.h"
 #include "Error.h"
 
-#include "FFTW3_Transform.h"
+using namespace std;
 
-int FTransform::fftw3_initialise(){
+int FTransform::fftw3_initialise()
+{
   frc1d_calls.push_back( &fftw3_frc1d );
   fcc1d_calls.push_back( &fftw3_fcc1d );
   bcc1d_calls.push_back( &fftw3_bcc1d );
@@ -40,13 +42,13 @@ FTransform::FFTW3_Plan::FFTW3_Plan() : Plan() {
   plan = 0;
 }
 
-FTransform::FFTW3_Plan::FFTW3_Plan(unsigned _ndat, unsigned _ilib, string _fft_call)
+FTransform::FFTW3_Plan::FFTW3_Plan(unsigned _ndat, unsigned _ilib, const string& _fft_call)
   : Plan(_ndat,_ilib,_fft_call)
 {
   init(ndat,ilib,fft_call);
 }
 
-void FTransform::FFTW3_Plan::init(unsigned _ndat, unsigned _ilib, string _fft_call)
+void FTransform::FFTW3_Plan::init(unsigned _ndat, unsigned _ilib, const string& _fft_call)
 {
   fprintf(stderr,"In FTransform::FFTW3_Plan::init() _ndat=%d _ilib=%d _fft_call='%s'\n",
 	  _ndat,_ilib,_fft_call.c_str());
@@ -212,6 +214,84 @@ int FTransform::fftw3_bcr1d(unsigned ndat, float* dest, float* src){
   fftwf_execute_dft_c2r( *plan->plan, (fftwf_complex*)src, dest);
 
   return 0;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+FTransform::FFTW3_Plan2::Agent FTransform::FFTW3_Plan2::my_agent;
+
+FTransform::FFTW3_Plan2::FFTW3_Plan2 (unsigned n_x, unsigned n_y,
+				      const std::string& fft_call)
+{
+  int direction_flags = 0;
+  if( fft_call == "fcc2d" )
+    direction_flags |= FFTW_FORWARD;
+  else
+    direction_flags |= FFTW_BACKWARD;
+
+  int flags = FFTW_UNALIGNED;
+  if (optimized)
+    flags |= FFTW_MEASURE;
+  else
+    flags |= FFTW_ESTIMATE;
+
+  fftwf_complex* in = new fftwf_complex[n_x*n_y*2];
+  fftwf_complex* out = new fftwf_complex[n_x*n_y*2];
+
+  plan = fftwf_plan_dft_2d (n_x, n_y, in, out, direction_flags, flags);
+  nx = n_x;
+  ny = n_y;
+  call = fft_call;
+
+  delete [] in;
+  delete [] out;
+}
+
+FTransform::FFTW3_Plan2::~FFTW3_Plan2 ()
+{
+  fftw_destroy_plan ((fftw_plan)plan);
+}
+
+void FTransform::FFTW3_Plan2::fcc2d (unsigned nx, unsigned ny,
+				     float* dest, float* src)
+{
+  FFTW3_Plan2* plan = dynamic_cast<FFTW3_Plan2*>(last_fcc2d_plan);
+
+  if (!plan || plan->nx != nx || plan->ny != ny || plan->call != "fcc2d")
+    last_fcc2d_plan = plan = my_agent.get_plan (nx, ny, "fcc2d");
+
+  fftwf_execute_dft ((fftwf_plan)(plan->plan),
+		     (fftwf_complex*)src, (fftwf_complex*)dest);
+}
+
+
+void FTransform::FFTW3_Plan2::bcc2d (unsigned nx, unsigned ny,
+				     float* dest, float* src)
+{
+  FFTW3_Plan2* plan = dynamic_cast<FFTW3_Plan2*>(last_bcc2d_plan);
+
+  if (!plan || plan->nx != nx || plan->ny != ny || plan->call != "bcc2d")
+    last_bcc2d_plan = plan = my_agent.get_plan (nx, ny, "bcc2d");
+
+  fftwf_execute_dft ((fftwf_plan)(plan->plan),
+		     (fftwf_complex*)src, (fftwf_complex*)dest);
 }
 
 
