@@ -4,10 +4,13 @@
 
 #if HAVE_MKL
 
+#include "MKL_Transform.h"
+
 #include <string>
 #include <stdio.h>
+#include <assert.h>
 
-#include "MKL_Transform.h"
+using namespace std;
 
 extern "C" { 
   // complex to complex

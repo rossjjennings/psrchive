@@ -7,6 +7,8 @@
 #include "IPP_Transform.h"
 #include "Error.h"
 
+using namespace std;
+
 int FTransform::ipp_initialise()
 {
   frc1d_calls.push_back( &ipp_frc1d );

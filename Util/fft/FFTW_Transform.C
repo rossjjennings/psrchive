@@ -9,6 +9,9 @@
 #include "psrfft.h"
 
 #include <rfftw.h>
+#include <assert.h>
+
+using namespace std;
 
 int FTransform::fftw_initialise(){
   frc1d_calls.push_back( &fftw_frc1d );
@@ -52,13 +55,13 @@ FTransform::FFTW_Plan::FFTW_Plan() : Plan() {
   tmp = 0;
 }
 
-FTransform::FFTW_Plan::FFTW_Plan(unsigned _ndat, unsigned _ilib, string _fft_call)
+FTransform::FFTW_Plan::FFTW_Plan(unsigned _ndat, unsigned _ilib, const string& _fft_call)
   : Plan(_ndat,_ilib,_fft_call)
 {
   init(ndat,ilib,fft_call);
 }
 
-void FTransform::FFTW_Plan::init(unsigned _ndat, unsigned _ilib, string _fft_call)
+void FTransform::FFTW_Plan::init(unsigned _ndat, unsigned _ilib, const string& _fft_call)
 {
   fprintf(stderr,"In FTransform::FFTW_Plan::init() _ndat=%d _ilib=%d _fft_call='%s'\n",
 	  _ndat,_ilib,_fft_call.c_str());
@@ -261,13 +264,13 @@ FTransform::FFTW_Plan2::Agent FTransform::FFTW_Plan2::my_agent;
 FTransform::FFTW_Plan2::FFTW_Plan2 (unsigned n_x, unsigned n_y,
 				    const std::string& fft_call)
 {
-  int direction_flags = 0;
+  fftw_direction direction_flags;
   if( fft_call == "fcc2d" )
-    direction_flags |= FFTW_FORWARD;
+    direction_flags = FFTW_FORWARD;
   else
-    direction_flags |= FFTW_BACKWARD;
+    direction_flags = FFTW_BACKWARD;
 
-  int flags = FFTW_UNALIGNED;
+  int flags = 0;
   if (optimized)
     flags |= FFTW_MEASURE;
   else
@@ -282,7 +285,7 @@ FTransform::FFTW_Plan2::FFTW_Plan2 (unsigned n_x, unsigned n_y,
 
 FTransform::FFTW_Plan2::~FFTW_Plan2 ()
 {
-  fftw_destroy_plan ((fftwnd_plan)plan);
+  fftwnd_destroy_plan ((fftwnd_plan)plan);
 }
 
 void FTransform::FFTW_Plan2::fcc2d (unsigned nx, unsigned ny,
