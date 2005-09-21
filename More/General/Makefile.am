@@ -120,7 +120,6 @@ if HAVE_QTDRIV
 SUBDIRS += rhythm
 endif
 
-
 # ######################################################################
 #
 # programs
@@ -129,7 +128,7 @@ bin_PROGRAMS = pac paz vap vip psredit psradd fadd pat pam pts \
         fluxcal fix_coords test_Difference fix_hydra sesdiv \
         fix_3C353 archive_correct archive_denoise \
         fix_fluxcal archive_split psrconv pascii \
-	default_loader parInfo
+	default_loader parInfo 
 
 archive_correct_SOURCES		= archive_correct.C
 archive_denoise_SOURCES		= archive_denoise.C
@@ -141,7 +140,6 @@ fix_coords_SOURCES		= fix_coords.C
 fix_fluxcal_SOURCES		= fix_fluxcal.C
 fix_hydra_SOURCES		= fix_hydra.C
 fluxcal_SOURCES			= fluxcal.C
-
 pts_SOURCES			= pts.C
 paz_SOURCES			= paz.C
 pac_SOURCES			= pac.C
@@ -201,7 +199,6 @@ psrwt_SOURCES			= psrwt.C
 pvt_SOURCES			= pvt.C
 rmfit_SOURCES			= rmfit.C
 bin_clean_SOURCES		= bin_clean.C
-# pad_SOURCES			= pad.C
 paf_SOURCES			= paf.C
 psrqft_SOURCES			= psrqft.C
 plot_baseline_SOURCES		= plot_baseline.C
@@ -225,6 +222,18 @@ plot_baseline_LDADD		= $(LDADD) @PGPLOT_LIBS@
 
 # future
 # psrsh_LDADD = -lreadline -ltermcap
+
+if HAVE_CFITSIO
+if HAVE_FFTW2
+
+bin_PROGRAMS += pad
+
+pad_SOURCES 			= pad.C
+
+pad_LDADD 			= $(LDADD) @PGPLOT_LIBS@
+
+endif
+endif
 
 endif
 
