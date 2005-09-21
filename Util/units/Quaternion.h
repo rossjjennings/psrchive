@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Quaternion.h,v $
-   $Revision: 1.27 $
-   $Date: 2005/08/18 12:10:42 $
+   $Revision: 1.28 $
+   $Date: 2005/09/21 13:21:53 $
    $Author: straten $ */
 
 #ifndef __Quaternion_H
@@ -328,6 +328,9 @@ const Quaternion<T,B> sqrt (const Quaternion<T,B>& h)
 {
   T root_det = sqrt( det(h) );
   T scalar = sqrt( 0.5 * (h.s0 + root_det) );
+
+  if (scalar == 0.0)
+    return Quaternion<T,B> (0.0);
 
   return Quaternion<T,B> (scalar, h.get_vector()/(2*scalar));
 }
