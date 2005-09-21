@@ -13,6 +13,16 @@
   \param ref_freq the frequency (in MHz) to which the delay is referenced
   \param freq the frequency (in MHz) of the delayed band
 */
+
+/*! Although the value:
+
+  \f$ DM\,({\rm pc\,cm^{-3}})=2.410331(2)\times10^{-4}D\,({\rm s\,MHz^{2}}) \f$
+
+  has been derived from "fundamental and primary physical and
+  astronomical constants" (section 3 of Backer, Hama, van Hook and
+  Foster 1993. ApJ 404, 636-642), the rounded value is in standard 
+  use by pulsar astronomers (page 129 of Manchester and Taylor 1977).
+*/
 double Pulsar::dispersion_delay (double dm, double ref_freq, double freq)
 {
 
