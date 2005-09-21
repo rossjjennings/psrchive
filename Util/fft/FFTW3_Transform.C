@@ -266,7 +266,7 @@ FTransform::FFTW3_Plan2::FFTW3_Plan2 (unsigned n_x, unsigned n_y,
 
 FTransform::FFTW3_Plan2::~FFTW3_Plan2 ()
 {
-  fftw_destroy_plan ((fftw_plan)plan);
+  fftwf_destroy_plan ((fftwf_plan)plan);
 }
 
 void FTransform::FFTW3_Plan2::fcc2d (unsigned nx, unsigned ny,
