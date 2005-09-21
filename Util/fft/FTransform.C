@@ -1,11 +1,6 @@
-#include <string>
-#include <vector>
-
-#include <stdio.h>
-#include <stdlib.h>
-
-#include "psr_cpp.h"
-#include "Error.h"
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
 
 #include "FTransform.h"
 
@@ -15,15 +10,24 @@
 
 #ifdef HAVE_FFTW3
 #include "FFTW3_Transform.h"
-#else
+#endif
+
 #ifdef HAVE_FFTW
 #include "FFTW_Transform.h"
-#endif
 #endif
 
 #ifdef HAVE_IPP
 #include "IPP_Transform.h"
 #endif
+
+#include "Error.h"
+
+#include <string>
+#include <vector>
+
+#include <stdlib.h>
+
+using namespace std;
 
 FTransform::fft_call FTransform::frc1d = 0;
 FTransform::fft_call FTransform::fcc1d = 0;
@@ -46,11 +50,24 @@ FTransform::Plan* FTransform::last_fcc1d_plan = 0;
 FTransform::Plan* FTransform::last_bcc1d_plan = 0;
 FTransform::Plan* FTransform::last_bcr1d_plan = 0;
 
+// ////////////////////////////////////////////////////////////////////
+//
+// Global variables for two-dimensional FFT library interface
+//
+// ////////////////////////////////////////////////////////////////////
+
+FTransform::fft2_call FTransform::fcc2d = 0;
+FTransform::fft2_call FTransform::bcc2d = 0;
+
+FTransform::Plan2* FTransform::last_fcc2d_plan = 0;
+FTransform::Plan2* FTransform::last_bcc2d_plan = 0;
+
+std::vector< Reference::To<FTransform::Agent2> > FTransform::Agent2::libraries;
+
 int FTransform::initialised = FTransform::initialise();
 
-int FTransform::initialise(){
-  fprintf(stderr,"In FTransform::initialise()\n");
-
+int FTransform::initialise()
+{
   int ret = -1;
 
 #ifdef HAVE_MKL
@@ -58,17 +75,16 @@ int FTransform::initialise(){
 #endif
 #ifdef HAVE_FFTW3
   ret = fftw3_initialise();
-#else
+#endif
 #ifdef HAVE_FFTW
   ret =  fftw_initialise();
-#endif
 #endif
 #ifdef HAVE_IPP
   ret =   ipp_initialise();
 #endif
 
-  if( ret < 0 ){
-    fprintf(stderr,"\nFTransform::initialise(): ERROR: No FFT libraries installed!\n\n");
+  if (ret < 0) {
+    cerr << "\nFTransform::initialise: ERROR: No FFT libraries installed!\n\n";
     exit(-1);
   }
 
