@@ -6,7 +6,6 @@
 
 #include <string>
 #include <stdio.h>
-#include "psr_cpp.h"
 
 #include "MKL_Transform.h"
 
@@ -23,7 +22,8 @@ FTransform::MKL_Plan::MKL_Plan() : Plan(){
   mkl_plan = 0;
 }
 
-int FTransform::mkl_initialise(){
+int FTransform::mkl_initialise()
+{
   fprintf(stderr,"In FTransform::mkl_initialise()\n");
 
   frc1d_calls.push_back( &mkl_frc1d );
@@ -51,13 +51,13 @@ FTransform::MKL_Plan::~MKL_Plan(){
     delete [] mkl_plan;
 }
 
-FTransform::MKL_Plan::MKL_Plan(unsigned _ndat, unsigned _ilib, string _fft_call)
+FTransform::MKL_Plan::MKL_Plan(unsigned _ndat, unsigned _ilib, const string& _fft_call)
   : Plan(_ndat,_ilib,_fft_call)
 {
   init(ndat,ilib,fft_call);
 }
 
-void FTransform::MKL_Plan::init(unsigned _ndat, unsigned _ilib, string _fft_call)
+void FTransform::MKL_Plan::init(unsigned _ndat, unsigned _ilib, const string& _fft_call)
 {
   fprintf(stderr,"In FTransform::MKL_Plan::init() _ndat=%d _ilib=%d _fft_call='%s'\n",
 	  _ndat,_ilib,_fft_call.c_str());

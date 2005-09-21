@@ -4,11 +4,11 @@
 
 #if HAVE_IPP
 
+#include "IPP_Transform.h"
 #include "Error.h"
 
-#include "IPP_Transform.h"
-
-int FTransform::ipp_initialise(){
+int FTransform::ipp_initialise()
+{
   frc1d_calls.push_back( &ipp_frc1d );
   fcc1d_calls.push_back( &ipp_fcc1d );
   bcc1d_calls.push_back( &ipp_bcc1d );
@@ -29,7 +29,8 @@ int FTransform::ipp_initialise(){
   return 0;
 }
 
-FTransform::IPP_Plan::~IPP_Plan(){
+FTransform::IPP_Plan::~IPP_Plan()
+{
   if( pBuffer )
     delete [] pBuffer;
   if( Spec ){
@@ -40,18 +41,19 @@ FTransform::IPP_Plan::~IPP_Plan(){
   }
 }
 
-FTransform::IPP_Plan::IPP_Plan() :Plan() {
+FTransform::IPP_Plan::IPP_Plan() :Plan()
+{
   pBuffer = 0;
   Spec = 0;
 }
 
-FTransform::IPP_Plan::IPP_Plan(unsigned _ndat, unsigned _ilib, string _fft_call)
+FTransform::IPP_Plan::IPP_Plan(unsigned _ndat, unsigned _ilib, const string& _fft_call)
   :Plan(_ndat,_ilib,_fft_call)
 {
   init(ndat,ilib,fft_call);
 }
 
-void FTransform::IPP_Plan::init(unsigned _ndat, unsigned _ilib, string _fft_call){
+void FTransform::IPP_Plan::init(unsigned _ndat, unsigned _ilib, const string& _fft_call){
   fprintf(stderr,"In FTransform::IPP_Plan::init() _ndat=%d _ilib=%d _fft_call='%s'\n",
 	  _ndat,_ilib,_fft_call.c_str());
 

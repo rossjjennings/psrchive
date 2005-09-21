@@ -115,7 +115,8 @@ unsigned FTransform::get_ilib(){
 }
 
 //! Returns index of a particular library
-unsigned FTransform::get_ilib(string libstring){
+unsigned FTransform::get_ilib (const string& libstring)
+{
   for( unsigned ilib=0; ilib<valid_libraries.size(); ilib++)
     if( valid_libraries[ilib] == libstring )
       return ilib;
@@ -133,7 +134,8 @@ unsigned FTransform::get_ilib(string libstring){
 }
 
 //! Choose to use a different library
-void FTransform::set_library(string _library){
+void FTransform::set_library (const string& _library)
+{
   library = _library;
 
   unsigned ilib = get_ilib();
@@ -152,13 +154,13 @@ FTransform::Plan::Plan() : Reference::Able() {
   ilib = 0;
 }
 
-FTransform::Plan::Plan(unsigned _ndat, unsigned _ilib, string _fft_call)
-  : Reference::Able() 
+FTransform::Plan::Plan(unsigned _ndat, unsigned _ilib, const string& _fft_call)
 {
   initialise(_ndat,_ilib,_fft_call);
 }
 
-void FTransform::Plan::initialise(unsigned _ndat, unsigned _ilib, string _fft_call){
+void FTransform::Plan::initialise(unsigned _ndat, unsigned _ilib, 
+				  const string& _fft_call){
   optimized = optimize;
   ndat = _ndat;
   ilib = _ilib;
