@@ -3,7 +3,7 @@
 #include <cpgplot.h>
 
 template<class T>
-void quickplot (const vector<T>& vals)
+void quickplot (const std::vector<T>& vals)
 {
   float xmin = 0;
   float xmax = vals.size();
