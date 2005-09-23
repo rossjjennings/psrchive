@@ -87,10 +87,22 @@ void Pulsar::BaselineWindow::set_range (int start, int end)
 float Pulsar::BaselineWindow::find_phase (unsigned nbin, const float* amps)
 {
   unsigned boxwidth = unsigned (.5 * duty_cycle * nbin);
-  if (boxwidth >= nbin/2 || boxwidth == 0)
-    throw Error (InvalidParam, "Pulsar::BaselineWindow::find_phase",
-		 "invalid duty_cycle=%f -> boxwidth=%d (nbin= %d)\n",
-		 duty_cycle, boxwidth*2+1, nbin);
+  unsigned found_bin = 0;
+
+  if (boxwidth >= nbin/2 || boxwidth == 0) {
+
+    // quick and dirty minimum bin
+    float found_val = amps[0];
+    for (unsigned ibin=1; ibin < nbin; ibin++)
+      if ( (find_max && amps[ibin] > found_val) || 
+	   (!find_max && amps[ibin] < found_val) ) {
+	found_val = amps[ibin];
+	found_bin = ibin;
+      }
+    
+    return float(found_bin%nbin) / float(nbin);
+
+  }
 
 #ifdef _DEBUG
   cerr << "Pulsar::BaselineWindow::find_phase duty_cycle=" << duty_cycle
@@ -99,7 +111,6 @@ float Pulsar::BaselineWindow::find_phase (unsigned nbin, const float* amps)
   
   unsigned left = nbin-boxwidth;
   unsigned right = nbin+boxwidth+1;
-  unsigned found_bin = 0;
   
   if (range_specified) {
     nbinify (bin_start, bin_end, nbin);

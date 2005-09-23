@@ -40,19 +40,21 @@ void Pulsar::Profile::stats (double* mean, double* variance, double* varmean,
     counts ++;
   }
 
-  if (counts<2)
+  if (!counts)
     throw Error (InvalidRange, "Pulsar::Profile::stats",
-		 "%d -> %d", istart, iend);
+		 "no samples in %d -> %d", istart, iend);
 
   //
   // variance(x) = <(x-<x>)^2> * N/(N-1) = (<x^2>-<x>^2) * N/(N-1)
   //
   double mean_x   = tot / double(counts);
   double mean_xsq = totsq / double(counts);
-  double var_x = (mean_xsq - mean_x*mean_x) * double(counts)/double(counts-1);
 
-  if (var_x < 0)
-    var_x = 0;
+
+  double var_x = 0.0;
+
+  if (counts > 1)
+    var_x = (mean_xsq - mean_x*mean_x) * double(counts)/double(counts-1);
 
   double var_mean = var_x / double(counts);
 
