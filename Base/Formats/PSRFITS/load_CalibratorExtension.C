@@ -14,14 +14,16 @@ void Pulsar::load (fitsfile* fptr, CalibratorExtension* ext)
   char* comment = 0;
 
   // Get NCHAN
-  int nchan = 0;
-  fits_read_key (fptr, TINT, "NCHAN", &nchan, comment, &status);
-
-  if (status == 0)  {
-    if (Archive::verbose == 3)
-      cerr << "Pulsar::load CalibratorExtension NCHAN=" << nchan << endl;
-    if (nchan >= 0)
-      ext->set_nchan(nchan);
+  {
+    int nchan = 0;
+    fits_read_key (fptr, TINT, "NCHAN", &nchan, comment, &status);
+    
+    if (status == 0)  {
+      if (Archive::verbose == 3)
+	cerr << "Pulsar::load CalibratorExtension NCHAN=" << nchan << endl;
+      if (nchan >= 0)
+	ext->set_nchan(nchan);
+    }
   }
 
   status = 0;
@@ -57,15 +59,16 @@ void Pulsar::load (fitsfile* fptr, CalibratorExtension* ext)
   int initflag = 0;
   fits_get_colnum (fptr, CASEINSEN, "DAT_FREQ", &colnum, &status);
 
-  fits_read_col (fptr, TFLOAT, colnum, 1, 1, nchan, &fits_nullfloat,
-		 data.get(), &initflag, &status);
+  fits_read_col (fptr, TFLOAT, colnum, 1, 1, ext->get_nchan(),
+		 &fits_nullfloat, data.get(), &initflag, &status);
 
   if (status)
     throw FITSError (status, "Pulsar::load CalibratorExtension", 
 		     "fits_read_col DAT_FREQ");
 
   if (Archive::verbose == 3) 
-    cerr << "Pulsar::load CalibratorExtension frequencies read" << endl;
+    cerr << "Pulsar::load CalibratorExtension " << ext->get_nchan() 
+	 << " frequencies read" << endl;
 
   unsigned ichan = 0;
 
@@ -78,8 +81,8 @@ void Pulsar::load (fitsfile* fptr, CalibratorExtension* ext)
   initflag = 0;
   fits_get_colnum (fptr, CASEINSEN, "DAT_WTS", &colnum, &status);
   
-  fits_read_col (fptr, TFLOAT, colnum, 1, 1, nchan, &fits_nullfloat, 
-		 data.get(), &initflag, &status);
+  fits_read_col (fptr, TFLOAT, colnum, 1, 1, ext->get_nchan(),
+		 &fits_nullfloat, data.get(), &initflag, &status);
 
   if (status)
     throw FITSError (status, "Pulsar::load CalibratorExtension", 
@@ -88,7 +91,7 @@ void Pulsar::load (fitsfile* fptr, CalibratorExtension* ext)
   if (Archive::verbose == 3)
     cerr << "Pulsar::load CalibratorExtension weights read" << endl;
 
-  for (int ichan=0; ichan < nchan; ichan++)
+  for (ichan=0; ichan < ext->get_nchan(); ichan++)
     if ( !finite(data.get()[ichan]) )
       data.get()[ichan] = 0;
 
