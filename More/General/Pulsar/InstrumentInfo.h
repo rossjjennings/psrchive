@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/Attic/InstrumentInfo.h,v $
-   $Revision: 1.2 $
-   $Date: 2003/12/03 18:14:45 $
+   $Revision: 1.3 $
+   $Date: 2005/09/23 18:59:58 $
    $Author: straten $ */
 
 #ifndef __Pulsar_InstrumentInfo_H
@@ -29,9 +29,6 @@ namespace Pulsar {
     
     //! Return the number of parameters in the specified class
     unsigned get_nparam (unsigned iclass) const;
-    
-    //! Return the scale of parameters in the specified class
-    float get_scale (unsigned iclass) const;
     
     //! Return the estimate of the specified parameter
     Estimate<float> get_param (unsigned ichan, unsigned iclass,

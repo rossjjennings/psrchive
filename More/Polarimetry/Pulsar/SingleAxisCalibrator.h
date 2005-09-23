@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/SingleAxisCalibrator.h,v $
-   $Revision: 1.15 $
-   $Date: 2004/11/22 21:32:31 $
+   $Revision: 1.16 $
+   $Date: 2005/09/23 18:59:58 $
    $Author: straten $ */
 
 #ifndef __Pulsar_SingleAxisCalibrator_H
@@ -45,8 +45,9 @@ namespace Pulsar {
       //! Return the number of parameters in the specified class
       unsigned get_nparam (unsigned iclass) const;
 
-      //! Return the scale of parameters in the specified class
-      float get_scale (unsigned iclass) const;
+      Estimate<float> get_param (unsigned ichan, 
+				 unsigned iclass,
+				 unsigned iparam) const;
 
     };
 

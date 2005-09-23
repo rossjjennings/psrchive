@@ -120,11 +120,6 @@ void Pulsar::CalibratorPlotter::plot (const Calibrator::Info* info,
     if (verbose) cerr << "Pulsar::CalibratorPlotter::plot iplot=" << iplot
 		      << " nparam=" << nparam << endl;
 
-    float yscale = info->get_scale( iplot );
-
-    if (verbose) cerr << "Pulsar::CalibratorPlotter::plot iplot=" << iplot
-                      << " yscale=" << yscale << endl;
-
     unsigned iparam = 0;
 
     for (iparam=0; iparam<nparam; iparam++) {
@@ -133,7 +128,7 @@ void Pulsar::CalibratorPlotter::plot (const Calibrator::Info* info,
                       << " iparam=" << iparam << endl;
 
       for (unsigned ichan=0; ichan<nchan; ichan++)
-	data[ichan] = yscale * info->get_param (ichan, iplot, iparam);
+	data[ichan] = info->get_param (ichan, iplot, iparam);
 
       plotter.add_plot (data);
 

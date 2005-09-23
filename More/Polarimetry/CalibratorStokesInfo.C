@@ -17,11 +17,6 @@ unsigned Pulsar::CalibratorStokesInfo::get_nclass () const
     return 3;
 }
 
-float Pulsar::CalibratorStokesInfo::get_scale  (unsigned iclass) const
-{
-  return 100.0;
-}
-
 //! Return the name of the specified class
 const char* Pulsar::CalibratorStokesInfo::get_name (unsigned iclass) const
 {
@@ -61,7 +56,7 @@ Pulsar::CalibratorStokesInfo::get_param (unsigned ichan, unsigned iclass,
   else
     index = iclass;
 
-  return calibrator_stokes->get_stokes(ichan)[index+1];
+  return 100.0 * calibrator_stokes->get_stokes(ichan)[index+1];
 
 }
 

@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/Attic/Calibrator.h,v $
-   $Revision: 1.21 $
-   $Date: 2005/04/20 07:34:46 $
+   $Revision: 1.22 $
+   $Date: 2005/09/23 18:59:58 $
    $Author: straten $ */
 
 #ifndef __Calibrator_H
@@ -125,10 +125,6 @@ namespace Pulsar {
        *  These optional attributes make the graph look nice
        */
       //@{
-
-      //! Return the scale by which to multiply values
-      virtual float get_scale (unsigned iclass) const
-      { return 1.0; }
 
       //! Return the colour index
       virtual int get_colour_index (unsigned iclass, unsigned iparam) const

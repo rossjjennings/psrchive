@@ -63,7 +63,7 @@ const char* Pulsar::PolarCalibrator::Info::get_name (unsigned iclass) const
   case 1:
     return "Boost, sinh\\(2128)\\.m\\b\\u \\(0832)";
   case 2:
-    return "\\gf\\dk\\u (deg.)";
+    return "\\gf\\dk\\u (rad.)";
   default:
     return "";
   }
@@ -81,15 +81,6 @@ unsigned Pulsar::PolarCalibrator::Info::get_nparam (unsigned iclass) const
   default:
     return 0;
   }
-}
-
-//! Return the scale of parameters in the specified class
-float Pulsar::PolarCalibrator::Info::get_scale (unsigned iclass) const
-{
-  if (iclass == 2)
-    return 180.0 / M_PI;
-  
-  return 1.0;
 }
 
 

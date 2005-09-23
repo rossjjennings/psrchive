@@ -56,16 +56,6 @@ const char* Pulsar::InstrumentInfo::get_name (unsigned iclass) const
   }
 }
 
-//! Return the name of the specified class
-float Pulsar::InstrumentInfo::get_scale (unsigned iclass) const
-{
-  if (iclass < SingleAxisCalibrator::Info::get_nclass())
-    return SingleAxisCalibrator::Info::get_scale(iclass);
-  
-  iclass -= SingleAxisCalibrator::Info::get_nclass();
-  
-  return 180.0 / M_PI;
-}
 
 //! Return the number of parameters in the specified class
 unsigned Pulsar::InstrumentInfo::get_nparam (unsigned iclass) const
@@ -95,8 +85,8 @@ Pulsar::InstrumentInfo::get_param (unsigned ichan, unsigned iclass,
   iclass -= SingleAxisCalibrator::Info::get_nclass();
   iparam += SingleAxisCalibrator::Info::get_nclass();
   
-  return SingleAxisCalibrator::Info::get_param (ichan, iparam, iclass);
-  
+  return 180.0 / M_PI * 
+    PolnCalibrator::Info::get_param (ichan, iparam, iclass);
 }
 
 //! Return the colour index
