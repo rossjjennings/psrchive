@@ -19,7 +19,7 @@ Pulsar::ExampleArchive::~ExampleArchive()
 
 Pulsar::ExampleArchive::ExampleArchive (const Archive& arch)
 {
-  if (verbose)
+  if (verbose > 2)
     cerr << "Pulsar::ExampleArchive construct copy Archive" << endl;
 
   init ();
@@ -28,7 +28,7 @@ Pulsar::ExampleArchive::ExampleArchive (const Archive& arch)
 
 Pulsar::ExampleArchive::ExampleArchive (const ExampleArchive& arch)
 {
-  if (verbose)
+  if (verbose > 2)
     cerr << "Pulsar::ExampleArchive construct copy ExampleArchive" << endl;
 
   init ();
@@ -38,7 +38,7 @@ Pulsar::ExampleArchive::ExampleArchive (const ExampleArchive& arch)
 Pulsar::ExampleArchive::ExampleArchive (const Archive& arch, 
 					const vector<unsigned>& subints)
 {
-  if (verbose)
+  if (verbose > 2)
     cerr << "Pulsar::ExampleArchive construct extract Archive" << endl;
 
   init ();
@@ -49,7 +49,7 @@ Pulsar::ExampleArchive::ExampleArchive (const Archive& arch,
 void Pulsar::ExampleArchive::copy (const Archive& archive, 
 				   const vector<unsigned>& subints)
 {
-  if (verbose)
+  if (verbose > 2)
     cerr << "Pulsar::ExampleArchive::copy" << endl;
 
   if (this == &archive)
@@ -57,14 +57,14 @@ void Pulsar::ExampleArchive::copy (const Archive& archive,
 
   Archive::copy (archive, subints);
 
-  if (verbose)
+  if (verbose > 2)
     cerr << "Pulsar::ExampleArchive::copy dynamic cast call" << endl;
   
   const ExampleArchive* like_me = dynamic_cast<const ExampleArchive*>(&archive);
   if (!like_me)
     return;
   
-  if (verbose)
+  if (verbose > 2)
     cerr << "Pulsar::ExampleArchive::copy another ExampleArchive" << endl;
 
   // copy ExampleArchive attributes
@@ -72,7 +72,7 @@ void Pulsar::ExampleArchive::copy (const Archive& archive,
 
 Pulsar::ExampleArchive* Pulsar::ExampleArchive::clone () const
 {
-  if (verbose)
+  if (verbose > 2)
     cerr << "Pulsar::ExampleArchive::clone" << endl;
   return new ExampleArchive (*this);
 }
@@ -80,7 +80,7 @@ Pulsar::ExampleArchive* Pulsar::ExampleArchive::clone () const
 Pulsar::ExampleArchive* 
 Pulsar::ExampleArchive::extract (const vector<unsigned>& subints) const
 {
-  if (verbose)
+  if (verbose > 2)
     cerr << "Pulsar::ExampleArchive::extract" << endl;
   return new ExampleArchive (*this, subints);
 }
