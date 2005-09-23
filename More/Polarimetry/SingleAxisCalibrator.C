@@ -61,13 +61,14 @@ unsigned Pulsar::SingleAxisCalibrator::Info::get_nclass () const
 }
 
 //! Return the name of the specified class
-const char* Pulsar::SingleAxisCalibrator::Info::get_name (unsigned iclass) const
+const char* 
+Pulsar::SingleAxisCalibrator::Info::get_name (unsigned iclass) const
 {
   switch (iclass) {
   case 0:
     return "\\fiG\\fn (\\fic\\fn\\d0\\u)";
   case 1:
-    return "\\gg (\\x10)";
+    return "\\gg (%)";
   case 2:
     return "\\gf (deg.)";
   default:
@@ -83,17 +84,23 @@ unsigned Pulsar::SingleAxisCalibrator::Info::get_nparam (unsigned iclass) const
   return 0;
 }
 
-//! Return the scale of parameters in the specified class
-float Pulsar::SingleAxisCalibrator::Info::get_scale (unsigned iclass) const
+Estimate<float>
+Pulsar::SingleAxisCalibrator::Info::get_param (unsigned ichan, 
+					       unsigned iclass,
+					       unsigned iparam) const
 {
-  if (iclass == 1)
-    return 10.0;
+  if (iclass == 0)
+    return PolnCalibrator::Info::get_param (ichan, iclass, iparam);
 
-  if (iclass == 2)
-    return 180.0 / M_PI;
-  
-  return 1.0;
+  if (iclass == 1)
+    return 100.0 * 
+      ( exp( 2*PolnCalibrator::Info::get_param (ichan, iclass, iparam) ) - 1 );
+
+  // iclass == 2
+  return 180.0/M_PI * PolnCalibrator::Info::get_param (ichan, iclass, iparam);
 }
+
+
 
 Pulsar::SingleAxisCalibrator::Info* 
 Pulsar::SingleAxisCalibrator::get_Info () const
