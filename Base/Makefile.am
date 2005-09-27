@@ -226,12 +226,12 @@ plot_baseline_LDADD		= $(LDADD) @PGPLOT_LIBS@
 if HAVE_CFITSIO
 if HAVE_FFTW2
 
-bin_PROGRAMS += pad
+bin_PROGRAMS += pad plot_acf
 
 pad_SOURCES 			= pad.C
-
+plot_acf_SOURCES		= plot_acf.C
 pad_LDADD 			= $(LDADD) @PGPLOT_LIBS@
-
+plot_acf_LDADD			= $(LDADD) @PGPLOT_LIBS@
 endif
 endif
 
