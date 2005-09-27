@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/polyco.h,v $
-   $Revision: 1.26 $
-   $Date: 2005/04/24 01:10:18 $
+   $Revision: 1.27 $
+   $Date: 2005/09/27 08:17:13 $
    $Author: straten $ */
 
 #ifndef __POLY_H
@@ -178,55 +178,74 @@ public:
 class polyco : public Reference::Able {
 
  protected:
+
   //! null value of pulsar name
   static std::string anyPsr;
 
+  //! current polynomial
+  const polynomial* current;
+
  public:
+
   static bool verbose;
   static bool debug;
   static double precision;
 
-  //! The polynomial sets
+  //! The polynomials
   std::vector<polynomial> pollys;
 
-  //! null initializer
-  polyco () {}
+  //! Default constructor
+  polyco () { current = 0; }
+
+  //! Copy constructor
   polyco (const polyco& poly) { operator = (poly); }
 
-  //! Hack constructor for use on search data
-  polyco(MJD _reftime, float _dm, double _f0, int _telescope=7){ pollys.push_back( polynomial(_reftime,_dm,_f0,_telescope) ); } 
+  //! Load from file constructor
+  polyco (const std::string& filename);
 
-  //! Load in polycos
-  polyco (const char* id);
-  polyco (const std::string& id);
+  //! Assignment operator
   polyco& operator = (const polyco& poly);
 
+  //! Destructor
   virtual ~polyco() {}
 
-  //! these functions return the number of polynomials successfully loaded
-  int load (const char* filename, size_t nbytes=0);
-  int load (const std::string& filename, size_t nbytes=0)
-	{ return load (filename.c_str(), nbytes); }
+  //! Hack constructor for use on search data
+  polyco (const MJD& reftime, float dm, double f0, int telescope=7)
+  { current = 0; pollys.push_back(polynomial(reftime,dm,f0,telescope)); } 
+
+  //! Load the polyco from the named file
+  /*! \retval number of polynomials loaded */
+  int load (const std::string& filename, size_t nbytes=0);
+
+  //! Load the polyco from the open file
+  /*! \retval number of polynomials loaded */
   int load (FILE * fp, size_t nbytes=0);
+
+  //! Load the polyco from the string
+  /*! \retval number of polynomials loaded */
   int load (std::string* instr);
 
-  // these functions return -1 upon error
-  int unload (const char* filename) const ;
-  int unload (const std::string& filename) const
-        { return unload (filename.c_str()); }
+  //! Unload the polyco to the named file
+  /*! \retval number of bytes unloaded */
+  int unload (const std::string& filename) const;
 
-  // these functions return the number of bytes unloaded (-1 on error)
-  int unload (std::string *outstr) const;
+  //! Unload the polyco to the open file
+  /*! \retval number of bytes unloaded */
   int unload (FILE* fptr) const;
 
+  //! Unload the polyco to the string
+  /*! \retval number of bytes unloaded */
+  int unload (std::string *outstr) const;
+
+  //! Append the given polyco to the current one
   void append (const polyco& poly);
 
   void  prettyprint  () const;
 
-  const polynomial* 
-  nearest (const MJD &t, const std::string& psrname=anyPsr) const;
-
+  //! Return the best polynomial for the given time and pulsar
   const polynomial& best (const MJD &t, const std::string& psr=anyPsr) const;
+
+  //! Return the best polynomical for the given phase and pulsar
   const polynomial& best (const Phase &p, const std::string& psr=anyPsr) const;
 
   virtual int
