@@ -10,10 +10,10 @@ namespace FTransform {
 
   int ipp_initialise();
 
-  int ipp_frc1d(unsigned ndat, float* dest, float* src);
-  int ipp_fcc1d(unsigned ndat, float* dest, float* src);
-  int ipp_bcc1d(unsigned ndat, float* dest, float* src);
-  int ipp_bcr1d(unsigned ndat, float* dest, float* src);
+  int ipp_frc1d(unsigned ndat, float* dest, const float* src);
+  int ipp_fcc1d(unsigned ndat, float* dest, const float* src);
+  int ipp_bcc1d(unsigned ndat, float* dest, const float* src);
+  int ipp_bcr1d(unsigned ndat, float* dest, const float* src);
 
   class IPP_Plan : public FTransform::Plan {
   public:

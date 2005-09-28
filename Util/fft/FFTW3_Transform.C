@@ -84,7 +84,7 @@ void FTransform::FFTW3_Plan::init(unsigned _ndat, unsigned _ilib, const string& 
   delete [] out;
 }
 
-int FTransform::fftw3_frc1d(unsigned ndat, float* dest, float* src){
+int FTransform::fftw3_frc1d(unsigned ndat, float* dest, const float* src){
   ///////////////////////////////////////
   // Set up the plan
   static unsigned ilib = get_ilib("FFTW3");
@@ -112,12 +112,12 @@ int FTransform::fftw3_frc1d(unsigned ndat, float* dest, float* src){
 
   ///////////////////////////////////////
   // Do the transform
-  fftwf_execute_dft_r2c( *plan->plan, src, (fftwf_complex*)dest);
+  fftwf_execute_dft_r2c( *plan->plan, (float*)src, (fftwf_complex*)dest);
 
   return 0;
 }
 
-int FTransform::fftw3_fcc1d(unsigned ndat, float* dest, float* src){
+int FTransform::fftw3_fcc1d(unsigned ndat, float* dest, const float* src){
   ///////////////////////////////////////
   // Set up the plan
   static unsigned ilib = get_ilib("FFTW3");
@@ -150,7 +150,7 @@ int FTransform::fftw3_fcc1d(unsigned ndat, float* dest, float* src){
   return 0;
 }
 
-int FTransform::fftw3_bcc1d(unsigned ndat, float* dest, float* src){
+int FTransform::fftw3_bcc1d(unsigned ndat, float* dest, const float* src){
   ///////////////////////////////////////
   // Set up the plan
   static unsigned ilib = get_ilib("FFTW3");
@@ -183,7 +183,7 @@ int FTransform::fftw3_bcc1d(unsigned ndat, float* dest, float* src){
   return 0;
 }
 
-int FTransform::fftw3_bcr1d(unsigned ndat, float* dest, float* src){
+int FTransform::fftw3_bcr1d(unsigned ndat, float* dest, const float* src){
   ///////////////////////////////////////
   // Set up the plan
   static unsigned ilib = get_ilib("FFTW3");
@@ -270,7 +270,7 @@ FTransform::FFTW3_Plan2::~FFTW3_Plan2 ()
 }
 
 void FTransform::FFTW3_Plan2::fcc2d (unsigned nx, unsigned ny,
-				     float* dest, float* src)
+				     float* dest, const float* src)
 {
   FFTW3_Plan2* plan = dynamic_cast<FFTW3_Plan2*>(last_fcc2d_plan);
 
@@ -283,7 +283,7 @@ void FTransform::FFTW3_Plan2::fcc2d (unsigned nx, unsigned ny,
 
 
 void FTransform::FFTW3_Plan2::bcc2d (unsigned nx, unsigned ny,
-				     float* dest, float* src)
+				     float* dest, const float* src)
 {
   FFTW3_Plan2* plan = dynamic_cast<FFTW3_Plan2*>(last_bcc2d_plan);
 

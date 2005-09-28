@@ -26,12 +26,12 @@ Call transforms as FUNC(ndat,dest,src);
 namespace FTransform {
 
   //! Pointer to one-dimensional FFT
-  typedef int (*fft_call)(unsigned, float*, float*);
+  typedef int (*fft_call)(unsigned, float*, const float*);
 
   enum norm_type { normal, nfft };
 
   //! Pointers to the real functions- set by set_library()
-  //! Arguments are: (unsigned ndat, float* dest, float* src)
+  //! Arguments are: (unsigned ndat, float* dest, const float* src)
   extern fft_call frc1d;
   extern fft_call fcc1d;
   extern fft_call bcc1d;
@@ -47,13 +47,13 @@ namespace FTransform {
   int inplace_bcr1d(unsigned ndat, float* srcdest);
 
   //! Returns currently selected library
-  std::string get_library();
+  std::string get_library ();
   
   //! Choose to use a different library
-  void set_library(const std::string& _library);
+  void set_library (const std::string& _library);
 
   //! Returns currently selected normalization
-  norm_type get_norm();
+  norm_type get_norm ();
 
   //! Clears out the memory associated with the plans
   void clean_plans();
@@ -105,7 +105,7 @@ namespace FTransform {
 
 
   //! Pointer to two-dimensional FFT
-  typedef void (*fft2_call)(unsigned, unsigned, float*, float*);
+  typedef void (*fft2_call)(unsigned, unsigned, float*, const float*);
 
   extern fft2_call fcc2d;
   extern fft2_call bcc2d;

@@ -81,7 +81,7 @@ void FTransform::MKL_Plan::init(unsigned _ndat, unsigned _ilib, const string& _f
     cfft1d_(mkl_plan, &signed_ndat, &isign, mkl_plan);
 }
 
-int FTransform::mkl_frc1d(unsigned ndat, float* dest, float* src){
+int FTransform::mkl_frc1d(unsigned ndat, float* dest, const float* src){
   ///////////////////////////////////////
   // Set up the plan
   static unsigned ilib = get_ilib("MKL");
@@ -118,7 +118,7 @@ int FTransform::mkl_frc1d(unsigned ndat, float* dest, float* src){
   return 0;
 }
 
-int FTransform::mkl_fcc1d(unsigned ndat, float* dest, float* src){
+int FTransform::mkl_fcc1d(unsigned ndat, float* dest, const float* src){
   ///////////////////////////////////////
   // Set up the plan
   static unsigned ilib = get_ilib("MKL");
@@ -155,7 +155,7 @@ int FTransform::mkl_fcc1d(unsigned ndat, float* dest, float* src){
   return 0;
 }
 
-int FTransform::mkl_bcc1d(unsigned ndat, float* dest, float* src){
+int FTransform::mkl_bcc1d(unsigned ndat, float* dest, const float* src){
   ///////////////////////////////////////
   // Set up the plan
   static unsigned ilib = get_ilib("MKL");
@@ -192,7 +192,7 @@ int FTransform::mkl_bcc1d(unsigned ndat, float* dest, float* src){
   return 0;
 }
 
-int FTransform::mkl_bcr1d(unsigned ndat, float* dest, float* src){
+int FTransform::mkl_bcr1d(unsigned ndat, float* dest, const float* src){
   ///////////////////////////////////////
   // Set up the plan
   static unsigned ilib = get_ilib("MKL");

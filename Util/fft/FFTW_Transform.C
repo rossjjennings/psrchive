@@ -90,7 +90,7 @@ void FTransform::FFTW_Plan::init(unsigned _ndat, unsigned _ilib, const string& _
   }
 }
 
-int FTransform::fftw_frc1d(unsigned ndat, float* dest, float* src){
+int FTransform::fftw_frc1d(unsigned ndat, float* dest, const float* src){
   ///////////////////////////////////////
   // Set up the plan
   static unsigned ilib = get_ilib("FFTW");
@@ -130,7 +130,7 @@ int FTransform::fftw_frc1d(unsigned ndat, float* dest, float* src){
   return 0;
 }
 
-int FTransform::fftw_fcc1d(unsigned ndat, float* dest, float* src){
+int FTransform::fftw_fcc1d(unsigned ndat, float* dest, const float* src){
   ///////////////////////////////////////
   // Set up the plan
   static unsigned ilib = get_ilib("FFTW");
@@ -163,7 +163,7 @@ int FTransform::fftw_fcc1d(unsigned ndat, float* dest, float* src){
   return 0;
 }
 
-int FTransform::fftw_bcc1d(unsigned ndat, float* dest, float* src){
+int FTransform::fftw_bcc1d(unsigned ndat, float* dest, const float* src){
   ///////////////////////////////////////
   // Set up the plan
   static unsigned ilib = get_ilib("FFTW");
@@ -196,7 +196,7 @@ int FTransform::fftw_bcc1d(unsigned ndat, float* dest, float* src){
   return 0;
 }
 
-int FTransform::fftw_bcr1d(unsigned ndat, float* dest, float* src){
+int FTransform::fftw_bcr1d(unsigned ndat, float* dest, const float* src){
   ///////////////////////////////////////
   // Set up the plan
   static unsigned ilib = get_ilib("FFTW");
@@ -289,7 +289,7 @@ FTransform::FFTW_Plan2::~FFTW_Plan2 ()
 }
 
 void FTransform::FFTW_Plan2::fcc2d (unsigned nx, unsigned ny,
-				     float* dest, float* src)
+				     float* dest, const float* src)
 {
   FFTW_Plan2* plan = dynamic_cast<FFTW_Plan2*>(last_fcc2d_plan);
 
@@ -302,7 +302,7 @@ void FTransform::FFTW_Plan2::fcc2d (unsigned nx, unsigned ny,
 
 
 void FTransform::FFTW_Plan2::bcc2d (unsigned nx, unsigned ny,
-				     float* dest, float* src)
+				     float* dest, const float* src)
 {
   FFTW_Plan2* plan = dynamic_cast<FFTW_Plan2*>(last_bcc2d_plan);
 

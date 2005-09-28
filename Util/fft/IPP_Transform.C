@@ -90,7 +90,7 @@ void FTransform::IPP_Plan::init(unsigned _ndat, unsigned _ilib, const string& _f
     pBuffer = new Ipp8u[pSize];
 }
 
-int FTransform::ipp_frc1d(unsigned ndat, float* dest, float* src){
+int FTransform::ipp_frc1d(unsigned ndat, float* dest, const float* src){
   ///////////////////////////////////////
   // Set up the plan
   static unsigned ilib =get_ilib("IPP");
@@ -124,7 +124,7 @@ int FTransform::ipp_frc1d(unsigned ndat, float* dest, float* src){
   return 0;
 }
 
-int FTransform::ipp_fcc1d(unsigned ndat, float* dest, float* src){
+int FTransform::ipp_fcc1d(unsigned ndat, float* dest, const float* src){
   ///////////////////////////////////////
   // Set up the plan
   static unsigned ilib =get_ilib("IPP");
@@ -159,7 +159,7 @@ int FTransform::ipp_fcc1d(unsigned ndat, float* dest, float* src){
   return 0;
 }
 
-int FTransform::ipp_bcc1d(unsigned ndat, float* dest, float* src){
+int FTransform::ipp_bcc1d(unsigned ndat, float* dest, const float* src){
   ///////////////////////////////////////
   // Set up the plan
   static unsigned ilib =get_ilib("IPP");
@@ -194,7 +194,7 @@ int FTransform::ipp_bcc1d(unsigned ndat, float* dest, float* src){
   return 0;
 }
 
-int FTransform::ipp_bcr1d(unsigned ndat, float* dest, float* src){
+int FTransform::ipp_bcr1d(unsigned ndat, float* dest, const float* src){
   //  fprintf(stderr,"Hi from FTransform::ipp_bcr1d() with ndat=%d\n",
   //  ndat);
 

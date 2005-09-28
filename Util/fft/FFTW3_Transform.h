@@ -11,10 +11,10 @@ namespace FTransform {
 
   int fftw3_initialise();
 
-  int fftw3_frc1d(unsigned ndat, float* dest, float* src);
-  int fftw3_fcc1d(unsigned ndat, float* dest, float* src);
-  int fftw3_bcc1d(unsigned ndat, float* dest, float* src);
-  int fftw3_bcr1d(unsigned ndat, float* dest, float* src);
+  int fftw3_frc1d(unsigned ndat, float* dest, const float* src);
+  int fftw3_fcc1d(unsigned ndat, float* dest, const float* src);
+  int fftw3_bcc1d(unsigned ndat, float* dest, const float* src);
+  int fftw3_bcr1d(unsigned ndat, float* dest, const float* src);
 
   class FFTW3_Plan : public Plan {
   public:
@@ -34,8 +34,8 @@ namespace FTransform {
     ~FFTW3_Plan2 ();
     void init (unsigned nx, unsigned ny, const std::string& call);
 
-    static void fcc2d (unsigned nx, unsigned ny, float* dest, float* src);
-    static void bcc2d (unsigned nx, unsigned ny, float* dest, float* src);
+    static void fcc2d (unsigned nx, unsigned ny, float* dest, const float* src);
+    static void bcc2d (unsigned nx, unsigned ny, float* dest, const float* src);
 
   protected:
     void* plan;
