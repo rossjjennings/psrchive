@@ -7,14 +7,15 @@
 void usage ()
 {
   cerr << 
-    "pascii - pulsar archive ascii dump\n"
+    "pascii - pulsar archive ascii print\n"
     "\n"
     "pascii [options] filename\n"
     "options:\n"
     "  -b ibin    select a single phase bin, from 0 to nbin-1\n"
     "  -c ichan   select a single frequency channel, from 0 to nchan-1\n"
     "  -i isub    select a single integration, from 0 to nsubint-1\n"
-    "  -p phase   select a single phase, from 0 to 1 (overrides -b)\n"
+    "  -p phase   select a single phase, from 0.0 to 1.0 (overrides -b)\n"
+    "  -r phase   rotate the profiles by phase before printing\n"
     "\n"
     "Each row output by pascii contains:\n"
     "\n"
@@ -28,13 +29,14 @@ int main (int argc, char** argv)
 {
   bool phase_chosen = false;
   float phase = 0.0;
+  float rot_phase = 0.0;
 
   int cbin  = -1;
   int cchan = -1;
   int csub  = -1;
 
   char c;
-  while ((c = getopt(argc, argv, "b:c:i:p:hqvV")) != -1) 
+  while ((c = getopt(argc, argv, "b:c:i:p:r:hqvV")) != -1) 
 
     switch (c)  {
 
@@ -63,10 +65,13 @@ int main (int argc, char** argv)
       csub = atoi (optarg);
       break;
 
-
     case 'p':
       phase_chosen = true;
       phase = atof (optarg);
+      break;
+
+    case 'r':
+      rot_phase = atof (optarg);
       break;
 
     } 
@@ -80,7 +85,9 @@ int main (int argc, char** argv)
   Pulsar::Archive* archive = Pulsar::Archive::load( argv[optind] );
 
   archive->remove_baseline();
- 
+  if (rot_phase)
+    archive->rotate_phase (rot_phase);
+
   unsigned nsub = archive->get_nsubint();
   unsigned nchan = archive->get_nchan();
   unsigned npol = archive->get_npol();
