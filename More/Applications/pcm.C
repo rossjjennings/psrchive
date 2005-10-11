@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pcm.C,v $
-   $Revision: 1.42 $
-   $Date: 2005/06/08 04:57:32 $
+   $Revision: 1.43 $
+   $Date: 2005/10/11 20:26:18 $
    $Author: straten $ */
 
 /*! \file pcm.C 
@@ -85,8 +85,9 @@ void usage ()
     "  -p pA,pB   set the phase window from which to choose input states \n"
     "  -c archive choose best input states from input archive \n"
     "\n"
+    "  -r         risk physically unrealizable Stokes parameters \n"
     "  -s         normalize Stokes parameters by invariant interval \n"
-    "  -g         allow absolute gain to vary in Pulsar observations\n"
+    "  -g         allow absolute gain to vary in Pulsar observations \n"
     "\n"
     "  -q         assume that CAL Stokes Q = 0 \n"
     "  -v         assume that CAL Stokes V = 0 \n"
@@ -305,11 +306,13 @@ int main (int argc, char *argv[]) try {
   bool normalize_by_invariant = false;
   bool independent_gains = false;
 
+  bool physical_coherency = true;
+
   bool must_have_cals = true;
   bool publication_plots = false;
 
   int gotc = 0;
-  const char* args = "a:b:c:C:d:Df:ghM:m:N:n:OPp:qsS:t:uvV:";
+  const char* args = "a:b:c:C:d:Df:ghM:m:N:n:OPp:qrsS:t:uvV:";
   while ((gotc = getopt(argc, argv, args)) != -1) {
     switch (gotc) {
 
@@ -386,6 +389,10 @@ int main (int argc, char *argv[]) try {
       }
       cerr << "pcm: selecting input states from " << phmin << " to " << phmax
 	   << endl;
+      break;
+
+    case 'r':
+      physical_coherency = false;
       break;
 
     case 's':
@@ -504,6 +511,13 @@ int main (int argc, char *argv[]) try {
     cerr << "pcm: each observation has a unique gain" << endl;
 
   model.independent_gains = independent_gains;
+
+  if (physical_coherency)
+    cerr << "pcm: enforcing physically realizable Stokes parameters" << endl;
+  else
+    cerr << "pcm: risking physically unrealizable Stokes parameters" << endl;
+
+  model.physical_coherency = physical_coherency;
 
   model.reflections = reflections;
 

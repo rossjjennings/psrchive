@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ReceptionCalibrator.h,v $
-   $Revision: 1.65 $
-   $Date: 2005/06/08 04:33:13 $
+   $Revision: 1.66 $
+   $Date: 2005/10/11 20:26:18 $
    $Author: straten $ */
 
 #ifndef __Pulsar_ReceptionCalibrator_H
@@ -38,7 +38,7 @@ namespace Pulsar {
     void update_source();
 
     //! Model of Stokes parameters as a function of frequency
-    std::vector< MEAL::Coherency > source;
+    std::vector< Reference::To<MEAL::Coherency> > source;
 
     //! Best guess of Stokes parameters
     std::vector< Calibration::MeanCoherency > source_guess;
@@ -88,13 +88,23 @@ namespace Pulsar {
 
     //! Allow the CAL Stokes V to vary (applies only if FluxCal observed)
     bool measure_cal_V;
+
     //! Allow the CAL Stokes Q to vary
     bool measure_cal_Q;
 
+    //! Enforce that Stokes I > |p|, where p=(Q,U,V)
+    bool physical_coherency;
+
+    //! Normalize the Stokes parameters by the invariant interval
     bool normalize_by_invariant;
+
+    //! Allow the gain to vary independently from observation to observation
     bool independent_gains;
+
+    //! Print an error message if Pointing parameters are not as expected
     bool check_pointing;
 
+    //! Reflections performed on the calibrator data immediately after loading
     ReflectStokes reflections;
 
     //! Add the specified pulse phase bin to the set of state constraints

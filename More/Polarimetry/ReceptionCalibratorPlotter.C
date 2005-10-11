@@ -202,7 +202,7 @@ Pulsar::ReceptionCalibrator::CalInfo::get_param (unsigned ichan,
                    "Pulsar::ReceptionCalibrator::CalInfo::get_param",
                    "ichan=%d >= nchan=%d", ichan, get_nchan());
 
-    return calibrator->calibrator_estimate.source[ichan].get_Estimate(iparam);
+    return calibrator->calibrator_estimate.source[ichan]->get_Estimate(iparam);
   }
 
   else {
@@ -212,9 +212,11 @@ Pulsar::ReceptionCalibrator::CalInfo::get_param (unsigned ichan,
                    "ichan=%d >= fcal_nchan=%d", ichan, get_fcal_nchan());
 
     if (iclass == 1)
-      return calibrator->flux_calibrator_estimate.source[ichan].get_Estimate(iparam);
+      return calibrator->
+	flux_calibrator_estimate.source[ichan]->get_Estimate(iparam);
     else if (iclass == 2)
-      return calibrator->flux_calibrator_estimate.source[ichan].get_Estimate(iparam+1);
+      return calibrator->
+	flux_calibrator_estimate.source[ichan]->get_Estimate(iparam+1);
   }
 
   return 0.0;

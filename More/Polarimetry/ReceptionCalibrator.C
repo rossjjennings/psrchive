@@ -11,6 +11,7 @@
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
 
+#include "MEAL/PhysicalCoherency.h"
 #include "MEAL/Complex2Constant.h"
 #include "MEAL/Complex2Value.h"
 #include "MEAL/ProductRule.h"
@@ -39,6 +40,7 @@ Pulsar::ReceptionCalibrator::ReceptionCalibrator (Calibrator::Type type,
   normalize_by_invariant = false;
   independent_gains = false;
   check_pointing = false;
+  physical_coherency = false;
 
   unique = 0;
 
@@ -237,6 +239,11 @@ void Pulsar::ReceptionCalibrator::init_estimate (SourceEstimate& estimate)
 
   for (unsigned ichan=0; ichan<nchan; ichan++) {
 
+    if (physical_coherency)
+      estimate.source[ichan] = new MEAL::PhysicalCoherency;
+    else
+      estimate.source[ichan] = new MEAL::Coherency;
+
     unsigned nsource = model[ichan]->get_equation()->get_num_input();
     if (ichan==0)
       estimate.input_index = nsource;
@@ -247,11 +254,11 @@ void Pulsar::ReceptionCalibrator::init_estimate (SourceEstimate& estimate)
 #if 0
     if (estimate.input_index == 8) {
       cerr << "Setting tracer" << endl;
-      (void) new Calibration::Tracer (&(estimate.source[ichan]), 1);
+      (void) new Calibration::Tracer (estimate.source[ichan], 1);
     }
 #endif
 
-    model[ichan]->get_equation()->add_input( &(estimate.source[ichan]) );
+    model[ichan]->get_equation()->add_input( estimate.source[ichan] );
   }
 
 }
@@ -569,17 +576,17 @@ try {
 
     for (unsigned ichan=0; ichan<nchan; ichan++) {
       
-      calibrator_estimate.source[ichan].set_stokes ( cal_state );
+      calibrator_estimate.source[ichan]->set_stokes ( cal_state );
 
       for (unsigned istokes=0; istokes<4; istokes++)
-	calibrator_estimate.source[ichan].set_infit (istokes, false);
+	calibrator_estimate.source[ichan]->set_infit (istokes, false);
 
       // Stokes U may vary
-      calibrator_estimate.source[ichan].set_infit (2, true);
+      calibrator_estimate.source[ichan]->set_infit (2, true);
 
       if (measure_cal_Q)
 	// Stokes Q of the calibrator may vary!
-	calibrator_estimate.source[ichan].set_infit (1, true);
+	calibrator_estimate.source[ichan]->set_infit (1, true);
 
     }
 
@@ -600,14 +607,14 @@ try {
 
     for (unsigned ichan=0; ichan<nchan; ichan++) {
       
-      flux_calibrator_estimate.source[ichan].set_stokes ( flux_cal_state );
+      flux_calibrator_estimate.source[ichan]->set_stokes ( flux_cal_state );
 
       if (measure_cal_V) {
 	// Stokes V of Hydra may not vary
-	flux_calibrator_estimate.source[ichan].set_infit (3, false);
+	flux_calibrator_estimate.source[ichan]->set_infit (3, false);
 	
 	// Stokes V of the calibrator may vary!
-	calibrator_estimate.source[ichan].set_infit (3, true);
+	calibrator_estimate.source[ichan]->set_infit (3, true);
       }
 
       // Flux Calibrator observations are made through a different backend
@@ -998,7 +1005,7 @@ void Pulsar::SourceEstimate::update_source ()
     valid[ichan] = true;
 
   for (ichan=0; ichan < source.size(); ichan++) try {
-    source_guess[ichan].update( &(source[ichan]) );
+    source_guess[ichan].update( source[ichan] );
   }
   catch (Error& error) {
     cerr << "Pulsar::SourceEstimate::update_source error ichan=" << ichan

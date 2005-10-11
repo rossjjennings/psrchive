@@ -60,5 +60,5 @@ Pulsar::SourceInfo::get_param (unsigned ichan, unsigned iclass,
   else
     index = iclass;
 
-  return calibrator->pulsar[source_index].source[ichan].get_Estimate(index);
+  return calibrator->pulsar[source_index].source[ichan]->get_Estimate(index);
 }

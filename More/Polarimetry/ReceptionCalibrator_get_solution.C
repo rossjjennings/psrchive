@@ -30,7 +30,7 @@ Pulsar::ReceptionCalibrator::get_CalibratorStokes () const
     if (!valid)
       continue;
     
-    ext->set_stokes (ichan, calibrator_estimate.source[ichan].get_stokes());
+    ext->set_stokes (ichan, calibrator_estimate.source[ichan]->get_stokes());
     
   }
   catch (Error& error) {
