@@ -32,9 +32,9 @@ namespace FTransform {
     };
 
   protected:
+
     void* plan;
 
-    static Agent my_agent;
   };
 
 
@@ -51,9 +51,6 @@ namespace FTransform {
     static void fcc2d (unsigned nx, unsigned ny, float* , const float* );
     static void bcc2d (unsigned nx, unsigned ny, float* , const float* );
 
-  protected:
-    void* plan;
-
     class Agent : public PlanAgent2<FFTW3_Plan2> {
     public:
       Agent () : PlanAgent2<FFTW3_Plan2> ("FFTW3", nfft) { }
@@ -62,7 +59,11 @@ namespace FTransform {
       new_plan (unsigned nx, unsigned ny, const std::string& call);
     };
 
-    static Agent my_agent;
+  protected:
+
+    void* plan;
+
+
   };
 
 }

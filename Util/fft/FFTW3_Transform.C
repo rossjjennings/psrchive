@@ -109,7 +109,6 @@ int FTransform::FFTW3_Plan::bcr1d (unsigned nfft,
 
    *********************************************************************** */
 
-FTransform::FFTW3_Plan2::Agent FTransform::FFTW3_Plan2::my_agent;
 
 FTransform::FFTW3_Plan2::FFTW3_Plan2 (unsigned n_x, unsigned n_y,
 				      const std::string& fft_call)

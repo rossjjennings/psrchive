@@ -13,6 +13,12 @@
 
 using namespace std;
 
+/* ***********************************************************************
+
+   One-dimensional interface
+
+   *********************************************************************** */
+
 FTransform::FFTW_Plan::~FFTW_Plan()
 {
   if (plan) {
@@ -109,27 +115,12 @@ int FTransform::FFTW_Plan::bcr1d (unsigned ndat, float* dest, const float* src)
 }
 
 
+/* ***********************************************************************
 
+   Two-dimensional interface
 
+   *********************************************************************** */
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-FTransform::FFTW_Plan2::Agent FTransform::FFTW_Plan2::my_agent;
 
 FTransform::FFTW_Plan2::FFTW_Plan2 (unsigned n_x, unsigned n_y,
 				    const std::string& fft_call)

@@ -34,7 +34,6 @@ namespace FTransform {
     void* plan;
     float* tmp;
 
-    static Agent my_agent;
   };
 
   class FFTW_Plan2 : public Plan2 {
@@ -59,7 +58,6 @@ namespace FTransform {
       FFTW_Plan2* new_plan (unsigned nx, unsigned ny, const std::string& call);
     };
 
-    static Agent my_agent;
   };
 
 }

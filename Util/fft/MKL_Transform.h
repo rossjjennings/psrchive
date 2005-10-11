@@ -33,7 +33,6 @@ namespace FTransform {
 
     float* mkl_plan;
 
-    static Agent my_agent;
   };
 
 

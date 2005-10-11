@@ -32,8 +32,6 @@ namespace FTransform {
 
   protected:
 
-    static Agent my_agent;
-
     Ipp8u* pBuffer;
     void* Spec;
 

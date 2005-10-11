@@ -150,12 +150,17 @@ namespace FTransform {
     //! Add an instance of this class to the Agent::libraries attribute
     static void enlist ();
 
+    //! An instance of the agent for use by children
+    static typename PlanT::Agent my_agent;
+
   protected:
 
     //! The plans managed by the agent for this library
     std::vector< Reference::To<PlanT> > plans;
 
   };
+
+  template<class PlanT> typename PlanT::Agent PlanAgent<PlanT>::my_agent;
 
   template<class PlanT>
   PlanAgent<PlanT>::PlanAgent (const std::string& _name, norm_type _norm)
@@ -248,6 +253,9 @@ namespace FTransform {
     //! Return an appropriate plan from this library
     PlanT* get_plan (unsigned nx, unsigned ny, const std::string& call);
 
+    //! An instance of the agent for use by children
+    static typename PlanT::Agent my_agent;
+
   protected:
 
     //! The plans managed by the agent for this library
@@ -259,6 +267,8 @@ namespace FTransform {
     static unsigned instances;
 
   };
+
+  template<class PlanT> typename PlanT::Agent PlanAgent2<PlanT>::my_agent;
 
   template<class PlanT> unsigned PlanAgent2<PlanT>::instances = 0;
 
@@ -303,11 +313,11 @@ namespace FTransform {
 #define FT_SETUP(PLAN,TYPE) \
   PLAN* plan = dynamic_cast<PLAN*>( last_ ## TYPE ); \
   if (!plan || plan->ndat != nfft || plan->call != #TYPE) \
-    last_ ## TYPE = plan = my_agent.get_plan (nfft, #TYPE)
+    last_ ## TYPE = plan = Agent::my_agent.get_plan (nfft, #TYPE)
 
 #define FT_SETUP2(PLAN,TYPE) \
   PLAN* plan = dynamic_cast<PLAN*>( last_ ## TYPE ); \
   if (!plan || plan->nx != nx || plan->ny != ny || plan->call != #TYPE) \
-    last_ ## TYPE = plan = my_agent.get_plan (nx, ny, #TYPE);
+    last_ ## TYPE = plan = Agent::my_agent.get_plan (nx, ny, #TYPE);
 
 #endif
