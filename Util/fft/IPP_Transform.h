@@ -8,22 +8,35 @@
 
 namespace FTransform {
 
-  int ipp_initialise();
+  class IPP_Plan : public Plan {
 
-  int ipp_frc1d(unsigned ndat, float* dest, const float* src);
-  int ipp_fcc1d(unsigned ndat, float* dest, const float* src);
-  int ipp_bcc1d(unsigned ndat, float* dest, const float* src);
-  int ipp_bcr1d(unsigned ndat, float* dest, const float* src);
-
-  class IPP_Plan : public FTransform::Plan {
   public:
-    IPP_Plan();
-    IPP_Plan(unsigned _ndat, unsigned _ilib, const std::string& _fft_call);
-    ~IPP_Plan();
-    void init(unsigned _ndat, unsigned _ilib, const std::string& _fft_call);
+
+    //! Constructor
+    IPP_Plan (unsigned nfft, const std::string& _fft_call);
+
+    //! Destructor
+    ~IPP_Plan ();
+
+    static int fcc1d (unsigned nfft, float* dest, const float* src);
+    static int bcc1d (unsigned nfft, float* dest, const float* src);
+    static int frc1d (unsigned nfft, float* dest, const float* src);
+    static int bcr1d (unsigned nfft, float* dest, const float* src);
+
+    //! Agent class
+    class Agent : public PlanAgent<IPP_Plan> {
+    public:
+      Agent () : PlanAgent<IPP_Plan> ("IPP", nfft) { }
+      IPP_Plan* new_plan (unsigned nfft, const std::string& call);
+    };
+
+  protected:
+
+    static Agent my_agent;
 
     Ipp8u* pBuffer;
     void* Spec;
+
   };
 }
 

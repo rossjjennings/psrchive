@@ -21,56 +21,24 @@ extern "C" {
   void csfft1d_(float * data, int * ndat, int * isign, float * wsave);
 }
 
-FTransform::MKL_Plan::MKL_Plan() : Plan(){ 
-  mkl_plan = 0;
-}
 
-int FTransform::mkl_initialise()
+FTransform::MKL_Plan::~MKL_Plan()
 {
-  fprintf(stderr,"In FTransform::mkl_initialise()\n");
-
-  frc1d_calls.push_back( &mkl_frc1d );
-  fcc1d_calls.push_back( &mkl_fcc1d );
-  bcc1d_calls.push_back( &mkl_bcc1d );
-  bcr1d_calls.push_back( &mkl_bcr1d );
-
-  norms.push_back( normal );
-  valid_libraries.push_back( "MKL" );
-
-  if( library==string() ){
-    library = "MKL";
-    frc1d = &mkl_frc1d;
-    fcc1d = &mkl_fcc1d;
-    bcc1d = &mkl_bcc1d;
-    bcr1d = &mkl_bcr1d;
-    norm = norms.back();
-  }
-
-  return 0;
-}
-
-FTransform::MKL_Plan::~MKL_Plan(){
-  if( mkl_plan )
+  if (mkl_plan)
     delete [] mkl_plan;
 }
 
-FTransform::MKL_Plan::MKL_Plan(unsigned _ndat, unsigned _ilib, const string& _fft_call)
-  : Plan(_ndat,_ilib,_fft_call)
+FTransform::MKL_Plan::MKL_Plan (unsigned nfft, const string& fft_call)
 {
-  init(ndat,ilib,fft_call);
-}
+#ifdef _DEBUG
+  cerr << "FTransform::MKL_Plan nfft=" << nfft
+       << " call='" << fft_call << "'" << endl;
+#endif
 
-void FTransform::MKL_Plan::init(unsigned _ndat, unsigned _ilib, const string& _fft_call)
-{
-  fprintf(stderr,"In FTransform::MKL_Plan::init() _ndat=%d _ilib=%d _fft_call='%s'\n",
-	  _ndat,_ilib,_fft_call.c_str());
-
-  initialise(_ndat,_ilib,_fft_call);
-
-  mkl_plan = new float[ndat*4];
+  mkl_plan = new float[nfft*4];
   assert( mkl_plan != 0 );
 
-  int signed_ndat = ndat;
+  int signed_ndat = nfft;
 
   int isign = 0;
   if( fft_call == "frc1d" )
@@ -79,152 +47,69 @@ void FTransform::MKL_Plan::init(unsigned _ndat, unsigned _ilib, const string& _f
     csfft1d_(mkl_plan, &signed_ndat, &isign, mkl_plan);
   else
     cfft1d_(mkl_plan, &signed_ndat, &isign, mkl_plan);
+
+  ndat = nfft;
+  call = fft_call;
+  optimized = false;
+
 }
 
-int FTransform::mkl_frc1d(unsigned ndat, float* dest, const float* src){
-  ///////////////////////////////////////
-  // Set up the plan
-  static unsigned ilib = get_ilib("MKL");
-  MKL_Plan* plan = (MKL_Plan*)last_frc1d_plan;
-
-  if( !last_frc1d_plan || 
-      last_frc1d_plan->ilib != ilib || 
-      last_frc1d_plan->ndat != ndat )
-    plan = 0;
-
-  if( !plan ){
-    for( unsigned iplan=0; iplan<plans[ilib].size(); iplan++){
-      if( plans[ilib][iplan]->ndat == ndat && 
-	  plans[ilib][iplan]->fft_call == "frc1d"){
-	plan = (MKL_Plan*)plans[ilib][iplan].ptr();
-	break;
-      }
-    }
-  }
-
-  if( !plan )
-    plan = new MKL_Plan(ndat,ilib,"frc1d");
-
-  last_frc1d_plan = plan;
+int FTransform::MKL_Plan::frc1d (unsigned nfft, float* dest, const float* src)
+{
+  FT_SETUP (MKL_Plan, frc1d);
 
   ///////////////////////////////////////
   // Do the transform
   int isign = -1;
-  int signed_ndat = ndat;
+  int signed_nfft = nfft;
 
-  memcpy (dest, src, ndat*sizeof(float));
-  scfft1d_(dest, &signed_ndat, &isign, plan->mkl_plan);
+  memcpy (dest, src, nfft*sizeof(float));
+  scfft1d_(dest, &signed_nfft, &isign, plan->mkl_plan);
 
   return 0;
 }
 
-int FTransform::mkl_fcc1d(unsigned ndat, float* dest, const float* src){
-  ///////////////////////////////////////
-  // Set up the plan
-  static unsigned ilib = get_ilib("MKL");
-  MKL_Plan* plan = (MKL_Plan*)last_fcc1d_plan;
-
-  if( !last_fcc1d_plan || 
-      last_fcc1d_plan->ilib != ilib || 
-      last_fcc1d_plan->ndat != ndat )
-    plan = 0;
-  
-  if( !plan ){
-    for( unsigned iplan=0; iplan<plans[ilib].size(); iplan++){
-      if( plans[ilib][iplan]->ndat == ndat && 
-	  plans[ilib][iplan]->fft_call == "fcc1d"){
-	plan = (MKL_Plan*)plans[ilib][iplan].ptr();
-	break;
-      }
-    }
-  }
-
-  if( !plan )
-    plan = new MKL_Plan(ndat,ilib,"fcc1d");
-
-  last_fcc1d_plan = plan;
+int FTransform::MKL_Plan::fcc1d (unsigned nfft, float* dest, const float* src)
+{
+  FT_SETUP (MKL_Plan, fcc1d);
 
   ///////////////////////////////////////
   // Do the transform
   int isign = -1;
-  int signed_ndat = ndat;
+  int signed_nfft = nfft;
 
-  memcpy (dest, src, ndat*2*sizeof(float));
-  cfft1d_(dest, &signed_ndat, &isign, plan->mkl_plan);
+  memcpy (dest, src, nfft*2*sizeof(float));
+  cfft1d_(dest, &signed_nfft, &isign, plan->mkl_plan);
 
   return 0;
 }
 
-int FTransform::mkl_bcc1d(unsigned ndat, float* dest, const float* src){
-  ///////////////////////////////////////
-  // Set up the plan
-  static unsigned ilib = get_ilib("MKL");
-  MKL_Plan* plan = (MKL_Plan*)last_bcc1d_plan;
-
-  if( !last_bcc1d_plan || 
-      last_bcc1d_plan->ilib != ilib || 
-      last_bcc1d_plan->ndat != ndat )
-    plan = 0;
-
-  if( !plan ){
-    for( unsigned iplan=0; iplan<plans[ilib].size(); iplan++){
-      if( plans[ilib][iplan]->ndat == ndat && 
-	  plans[ilib][iplan]->fft_call == "bcc1d"){
-	plan = (MKL_Plan*)plans[ilib][iplan].ptr();
-	break;
-      }
-    }
-  }
-
-  if( !plan )
-    plan = new MKL_Plan(ndat,ilib,"bcc1d");
-
-  last_bcc1d_plan = plan;
+int FTransform::MKL_Plan::bcc1d (unsigned nfft, float* dest, const float* src)
+{
+  FT_SETUP (MKL_Plan, bcc1d);
 
   ///////////////////////////////////////
   // Do the transform
   int isign = 1;
-  int signed_ndat = ndat;
+  int signed_nfft = nfft;
 
-  memcpy (dest, src, ndat*2*sizeof(float));
-  cfft1d_(dest, &signed_ndat, &isign, plan->mkl_plan);
+  memcpy (dest, src, nfft*2*sizeof(float));
+  cfft1d_(dest, &signed_nfft, &isign, plan->mkl_plan);
 
   return 0;
 }
 
-int FTransform::mkl_bcr1d(unsigned ndat, float* dest, const float* src){
-  ///////////////////////////////////////
-  // Set up the plan
-  static unsigned ilib = get_ilib("MKL");
-  MKL_Plan* plan = (MKL_Plan*)last_bcr1d_plan;
-
-  if( !last_bcr1d_plan || 
-      last_bcr1d_plan->ilib != ilib || 
-      last_bcr1d_plan->ndat != ndat )
-    plan = 0;
-
-  if( !plan ){
-    for( unsigned iplan=0; iplan<plans[ilib].size(); iplan++){
-      if( plans[ilib][iplan]->ndat == ndat && 
-	  plans[ilib][iplan]->fft_call == "bcr1d"){
-	plan = (MKL_Plan*)plans[ilib][iplan].ptr();
-	break;
-      }
-    }
-  }
-
-  if( !plan )
-    plan = new MKL_Plan(ndat,ilib,"bcr1d");
-
-  last_bcr1d_plan = plan;
+int FTransform::MKL_Plan::bcr1d (unsigned nfft, float* dest, const float* src)
+{
+  FT_SETUP (MKL_Plan, bcr1d);
 
   ///////////////////////////////////////
   // Do the transform
   int isign = -1;
-  int signed_ndat = ndat;
+  int signed_nfft = nfft;
 
-  memcpy (dest, src, ndat*sizeof(float));
-  csfft1d_(dest, &signed_ndat, &isign, plan->mkl_plan);
+  memcpy (dest, src, nfft*sizeof(float));
+  csfft1d_(dest, &signed_nfft, &isign, plan->mkl_plan);
 
   return 0;
 }

@@ -25,17 +25,43 @@ Call transforms as FUNC(ndat,dest,src);
 
 namespace FTransform {
 
-  //! Pointer to one-dimensional FFT
-  typedef int (*fft_call)(unsigned, float*, const float*);
-
+  //! The normalization conventions
   enum norm_type { normal, nfft };
 
-  //! Pointers to the real functions- set by set_library()
-  //! Arguments are: (unsigned ndat, float* dest, const float* src)
+  //! Returns the normalization convention of the currently selected library
+  norm_type get_norm ();
+
+  //! Returns the name of the currently selected library
+  std::string get_library ();
+  
+  //! Set the library to the specified name
+  void set_library (const std::string& name);
+
+  //! Clears out the memory associated with the plans
+  void clean_plans();
+
+  //! Whether to optimize or not
+  extern bool optimize;
+
+  /* ////////////////////////////////////////////////////////////////////
+     
+  One-dimensional FFT library interface
+  
+  //////////////////////////////////////////////////////////////////// */
+
+  //! Pointer to one-dimensional FFT
+  /*! Arguments are: (unsigned ndat, float* dest, const float* src) */
+  typedef int (*fft_call) (unsigned, float*, const float*);
+
+  //! Pointer to the forward real-to-complex FFT
   extern fft_call frc1d;
+  //! Pointer to the forward complex-to-complex FFT
   extern fft_call fcc1d;
+  //! Pointer to the backward complex-to-complex FFT
   extern fft_call bcc1d;
-  extern fft_call bcr1d; // Data must be hermitian; ndat floats are outputted
+  //! Pointer to the backward complex-to-real FFT
+  /*! Data must be hermitian; ndat floats are output */
+  extern fft_call bcr1d;
 
   //! Inplace wrapper-function- performs a memcpy after FFTing
   int inplace_frc1d(unsigned ndat, float* srcdest);
@@ -46,63 +72,122 @@ namespace FTransform {
   //! Inplace wrapper-function- performs a memcpy after FFTing
   int inplace_bcr1d(unsigned ndat, float* srcdest);
 
-  //! Returns currently selected library
-  std::string get_library ();
-  
-  //! Choose to use a different library
-  void set_library (const std::string& _library);
 
-  //! Returns currently selected normalization
-  norm_type get_norm ();
-
-  //! Clears out the memory associated with the plans
-  void clean_plans();
-
-  //! Whether to optimize or not
-  extern bool optimize;
-
-  //! Virtual base class of one-dimensional Fast Fourier Transforms
+  //! Base class of two-dimensional Fast Fourier Transforms
   class Plan : public Reference::Able {
   public:
 
-    Plan();
-
-    Plan(unsigned _ndat, unsigned _ilib, const std::string& _fft_call);
-
-    virtual ~Plan();
-
-    virtual void init (unsigned _ndat, unsigned _ilib,
-		       const std::string& _fft_call) = 0;
-
-    void initialise (unsigned _ndat, unsigned _ilib,
-		     const std::string& _fft_call);
+    virtual ~Plan () { }
 
     bool optimized;
+    std::string call;
     unsigned ndat;
-    unsigned ilib;
-    std::string fft_call;
+
   };
 
-  unsigned get_ilib();
-  unsigned get_ilib(const std::string& libstring);
-  int initialise();
+  extern Plan* last_frc1d;
+  extern Plan* last_fcc1d;
+  extern Plan* last_bcc1d;
+  extern Plan* last_bcr1d;
 
-  extern int initialised;
+  //! Base class of one-dimensional FFT agents
+  class Agent : public Reference::Able {
 
-  extern norm_type norm;
-  extern std::string library;
-  extern std::vector<std::string> valid_libraries;
-  extern std::vector<fft_call> frc1d_calls;
-  extern std::vector<fft_call> fcc1d_calls;
-  extern std::vector<fft_call> bcc1d_calls;
-  extern std::vector<fft_call> bcr1d_calls;
-  extern std::vector<norm_type> norms;
-  extern std::vector<std::vector<Reference::To<Plan> > > plans;
-  extern Plan* last_frc1d_plan;
-  extern Plan* last_fcc1d_plan;
-  extern Plan* last_bcc1d_plan;
-  extern Plan* last_bcr1d_plan;
+  public:
 
+    //! Name of the transform library
+    std::string name;
+
+    //! Forward complex-to-complex one-dimensional FFT
+    fft_call fcc1d;
+
+    //! Backward complex-to-complex one-dimensional FFT
+    fft_call bcc1d;
+
+    //! The normalization type
+    norm_type norm;
+
+    //! Clean up the plans for this library
+    virtual void clean_plans () = 0;
+
+  protected:
+
+    //! Install this as the current library
+    void install ();
+
+    //! Add a pointer to this instance to the libraries attribute
+    void add ();
+
+  private:
+
+    //! List of all libraries
+    static std::vector< Reference::To<Agent> > libraries;
+
+    friend void set_library (const std::string& name);
+    friend void clean_plans();
+
+  };
+
+
+  //! Template virtual base class of FFT library agents
+  template <class PlanT>
+  class PlanAgent : public Agent {
+
+  public:
+
+    //! Default constructor
+    PlanAgent (const std::string& name, norm_type norm);
+
+    //! Return an appropriate plan from this library
+    PlanT* get_plan (unsigned ndat, const std::string& call);
+
+    //! Clean up the plans for this library
+    void clean_plans () { plans.resize (0); }
+
+    //! Add an instance of this class to the Agent::libraries attribute
+    static void enlist ();
+
+  protected:
+
+    //! The plans managed by the agent for this library
+    std::vector< Reference::To<PlanT> > plans;
+
+  };
+
+  template<class PlanT>
+  PlanAgent<PlanT>::PlanAgent (const std::string& _name, norm_type _norm)
+  {
+    name = _name;
+    norm = _norm;
+
+    this->fcc1d = PlanT::fcc1d;
+    this->bcc1d = PlanT::bcc1d;
+  }
+
+  template<class PlanT> PlanT* 
+  PlanAgent<PlanT>::get_plan (unsigned ndat, const std::string& cl)
+  {
+    for (unsigned iplan=0; iplan<plans.size(); iplan++)
+      if (plans[iplan]->ndat == ndat && plans[iplan]->call == cl)
+	return plans[iplan];
+    
+    plans.push_back( new PlanT (ndat, cl) );
+    return plans.back();
+  }
+
+  template<class PlanT>
+  void PlanAgent<PlanT>::enlist ()
+  {
+    PlanAgent<PlanT>* instance = new typename PlanT::Agent;
+    instance->add();
+  }
+
+
+  /* ////////////////////////////////////////////////////////////////////
+     
+  Two-dimensional FFT library interface
+  
+  //////////////////////////////////////////////////////////////////// */
 
   //! Pointer to two-dimensional FFT
   typedef void (*fft2_call)(unsigned, unsigned, float*, const float*);
@@ -123,8 +208,8 @@ namespace FTransform {
 
   };
 
-  extern Plan2* last_fcc2d_plan;
-  extern Plan2* last_bcc2d_plan;
+  extern Plan2* last_fcc2d;
+  extern Plan2* last_bcc2d;
 
   //! Base class of two-dimensional FFT agents
   class Agent2 : public Reference::Able {
@@ -210,5 +295,16 @@ namespace FTransform {
 
 
 }
+
+//! DEVELOPERS: Use of this macro greatly decreases the margin for error
+#define FT_SETUP(PLAN,TYPE) \
+  PLAN* plan = dynamic_cast<PLAN*>( last_ ## TYPE ); \
+  if (!plan || plan->ndat != nfft || plan->call != #TYPE) \
+    last_ ## TYPE = plan = my_agent.get_plan (nfft, #TYPE)
+
+#define FT_SETUP2(PLAN,TYPE) \
+  PLAN* plan = dynamic_cast<PLAN*>( last_ ## TYPE ); \
+  if (!plan || plan->nx != nx || plan->ny != ny || plan->call != #TYPE) \
+    last_ ## TYPE = plan = my_agent.get_plan (nx, ny, #TYPE);
 
 #endif

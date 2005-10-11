@@ -22,33 +22,29 @@
 
 #include "Error.h"
 
-#include <string>
-#include <vector>
-
 #include <stdlib.h>
 
 using namespace std;
+
+bool FTransform::optimize = false;
+
+// ////////////////////////////////////////////////////////////////////
+//
+// Global variables for one-dimensional FFT library interface
+//
+// ////////////////////////////////////////////////////////////////////
 
 FTransform::fft_call FTransform::frc1d = 0;
 FTransform::fft_call FTransform::fcc1d = 0;
 FTransform::fft_call FTransform::bcc1d = 0;
 FTransform::fft_call FTransform::bcr1d = 0;
 
-bool FTransform::optimize = false;
+FTransform::Plan* FTransform::last_frc1d = 0;
+FTransform::Plan* FTransform::last_fcc1d = 0;
+FTransform::Plan* FTransform::last_bcc1d = 0;
+FTransform::Plan* FTransform::last_bcr1d = 0;
 
-FTransform::norm_type FTransform::norm = FTransform::normal;
-string FTransform::library = string();
-vector<string> FTransform::valid_libraries;
-vector<FTransform::fft_call> FTransform::frc1d_calls;
-vector<FTransform::fft_call> FTransform::fcc1d_calls;
-vector<FTransform::fft_call> FTransform::bcc1d_calls;
-vector<FTransform::fft_call> FTransform::bcr1d_calls;
-vector<FTransform::norm_type> FTransform::norms;
-vector<vector<Reference::To<FTransform::Plan> > > FTransform::plans;
-FTransform::Plan* FTransform::last_frc1d_plan = 0;
-FTransform::Plan* FTransform::last_fcc1d_plan = 0;
-FTransform::Plan* FTransform::last_bcc1d_plan = 0;
-FTransform::Plan* FTransform::last_bcr1d_plan = 0;
+std::vector< Reference::To<FTransform::Agent> > FTransform::Agent::libraries;
 
 // ////////////////////////////////////////////////////////////////////
 //
@@ -59,28 +55,33 @@ FTransform::Plan* FTransform::last_bcr1d_plan = 0;
 FTransform::fft2_call FTransform::fcc2d = 0;
 FTransform::fft2_call FTransform::bcc2d = 0;
 
-FTransform::Plan2* FTransform::last_fcc2d_plan = 0;
-FTransform::Plan2* FTransform::last_bcc2d_plan = 0;
+FTransform::Plan2* FTransform::last_fcc2d = 0;
+FTransform::Plan2* FTransform::last_bcc2d = 0;
 
 std::vector< Reference::To<FTransform::Agent2> > FTransform::Agent2::libraries;
 
-int FTransform::initialised = FTransform::initialise();
 
-int FTransform::initialise()
+// ////////////////////////////////////////////////////////////////////
+//
+// Internal implementation initialization 
+//
+// ////////////////////////////////////////////////////////////////////
+
+static int initialise()
 {
   int ret = -1;
 
 #ifdef HAVE_MKL
-  ret =   mkl_initialise();
+  ret =    FTransform::mkl_initialise();
 #endif
 #ifdef HAVE_FFTW3
-  ret = fftw3_initialise();
+  FTransform::FFTW3_Plan::Agent::enlist ();
 #endif
 #ifdef HAVE_FFTW
-  ret =  fftw_initialise();
+  ret =   FTransform::fftw_initialise();
 #endif
 #ifdef HAVE_IPP
-  ret =   ipp_initialise();
+  ret =    FTransform::ipp_initialise();
 #endif
 
   if (ret < 0) {
@@ -88,112 +89,73 @@ int FTransform::initialise()
     exit(-1);
   }
 
-  plans.resize( valid_libraries.size() );
+  return 0;
+}
 
-  return 234;
+static int initialised = initialise();
+
+static FTransform::norm_type current_norm  = FTransform::normal;
+static FTransform::Agent*    current_agent = 0;
+
+void FTransform::Agent::install ()
+{
+  FTransform::fcc1d = this->fcc1d;
+  FTransform::bcc1d = this->bcc1d;
+
+  current_norm = this->norm;
+  current_agent = this;
+}
+
+void FTransform::Agent::add ()
+{ 
+  libraries.push_back (this);
+  if (!FTransform::fcc1d)
+    install ();
 }
 
 //! Returns currently selected library
-string FTransform::get_library(){
-  return library;
+string FTransform::get_library()
+{
+  return current_agent->name;
 }
 
 //! Returns currently selected normalization
-FTransform::norm_type FTransform::get_norm(){
-  return norm;
+FTransform::norm_type FTransform::get_norm()
+{
+  return current_norm;
 }
 
 //! Clears out the memory associated with the plans
-void FTransform::clean_plans(){
-  plans.resize(0);
-  last_frc1d_plan = 0;
-  last_fcc1d_plan = 0;
-  last_bcc1d_plan = 0;
-  last_bcr1d_plan = 0;
-}
-
-//! Returns index of library in use
-unsigned FTransform::get_ilib(){
-  for( unsigned ilib=0; ilib<valid_libraries.size(); ilib++)
-    if( valid_libraries[ilib] == library )
-      return ilib;
-
-  string s;
-
-  for( unsigned ilib=0; ilib<valid_libraries.size(); ilib++)
-    s += valid_libraries[ilib] + " ";
-  
-  throw Error(InvalidState,"FTransform::set_library()",
-	      "Library '%s' is not valid- valid libraries are: %s",
-	      library.c_str(), s.c_str());
-  
-  return 0;
-}
-
-//! Returns index of a particular library
-unsigned FTransform::get_ilib (const string& libstring)
+void FTransform::clean_plans()
 {
-  for( unsigned ilib=0; ilib<valid_libraries.size(); ilib++)
-    if( valid_libraries[ilib] == libstring )
-      return ilib;
+  for (unsigned ilib=0; ilib < FTransform::Agent::libraries.size(); ilib++)
+    FTransform::Agent::libraries[ilib]->clean_plans ();
 
-  string s;
-
-  for( unsigned ilib=0; ilib<valid_libraries.size(); ilib++)
-    s += valid_libraries[ilib] + " ";
-    
-  throw Error(InvalidState,"FTransform::set_library(string)",
-	      "Library '%s' is not valid- valid libraries are: %s",
-	      libstring.c_str(), s.c_str());
-
-  return 0;
+  last_frc1d = 0;
+  last_fcc1d = 0;
+  last_bcc1d = 0;
+  last_bcr1d = 0;
 }
 
 //! Choose to use a different library
-void FTransform::set_library (const string& _library)
+void FTransform::set_library (const string& name)
 {
-  library = _library;
+  for (unsigned ilib=0; ilib<FTransform::Agent::libraries.size(); ilib++)
+    if (FTransform::Agent::libraries[ilib]->name == name)
+      FTransform::Agent::libraries[ilib]->install ();
 
-  unsigned ilib = get_ilib();
+  string s;
 
-  norm = norms[ilib];
-
-  frc1d = frc1d_calls[ilib];
-  fcc1d = fcc1d_calls[ilib];
-  bcc1d = bcc1d_calls[ilib];
-  bcr1d = bcr1d_calls[ilib];
+  for (unsigned ilib=0; ilib<FTransform::Agent::libraries.size(); ilib++)
+    s += FTransform::Agent::libraries[ilib] + " ";
+    
+  throw Error (InvalidState, "FTransform::set_library",
+	       "Library '" + name + "' is not in valid libraries: " + s);
 }
-
-FTransform::Plan::Plan() : Reference::Able() {
-  optimized = optimize;
-  ndat = 0;
-  ilib = 0;
-}
-
-FTransform::Plan::Plan(unsigned _ndat, unsigned _ilib, const string& _fft_call)
-{
-  initialise(_ndat,_ilib,_fft_call);
-}
-
-void FTransform::Plan::initialise(unsigned _ndat, unsigned _ilib, 
-				  const string& _fft_call){
-  optimized = optimize;
-  ndat = _ndat;
-  ilib = _ilib;
-  fft_call = _fft_call;
-
-  if( ilib >= plans.size() )
-    throw Error(InvalidState,"FTransform::Plan::initialise()",
-		"input ilib (%d) is too big for number of plans stored! (%d)",
-		ilib, plans.size());
-
-  plans[ilib].push_back( this );
-}
-
-FTransform::Plan::~Plan() { }
 
 //! Inplace wrapper-function- performs a memcpy after FFTing
-int FTransform::inplace_frc1d(unsigned ndat, float* srcdest){
+int FTransform::inplace_frc1d (unsigned ndat, float* srcdest)
+{
   static vector<float> dest;
   if( dest.size() != ndat+2 )
     dest.resize( ndat+2 );
@@ -205,7 +167,8 @@ int FTransform::inplace_frc1d(unsigned ndat, float* srcdest){
 }
 
 //! Inplace wrapper-function- performs a memcpy after FFTing
-int FTransform::inplace_fcc1d(unsigned ndat, float* srcdest){
+int FTransform::inplace_fcc1d (unsigned ndat, float* srcdest)
+{
   static vector<float> dest;
   if( dest.size() != ndat*2 )
     dest.resize( ndat*2 );
@@ -217,7 +180,8 @@ int FTransform::inplace_fcc1d(unsigned ndat, float* srcdest){
 }
 
 //! Inplace wrapper-function- performs a memcpy after FFTing
-int FTransform::inplace_bcc1d(unsigned ndat, float* srcdest){
+int FTransform::inplace_bcc1d (unsigned ndat, float* srcdest)
+{
   static vector<float> dest;
   if( dest.size() != ndat*2 )
     dest.resize( ndat*2 );
@@ -229,7 +193,8 @@ int FTransform::inplace_bcc1d(unsigned ndat, float* srcdest){
 }
 
 //! Inplace wrapper-function- performs a memcpy after FFTing
-int FTransform::inplace_bcr1d(unsigned ndat, float* srcdest){
+int FTransform::inplace_bcr1d (unsigned ndat, float* srcdest)
+{
   static vector<float> dest;
   if( dest.size() != ndat*2 )
     dest.resize( ndat*2 );

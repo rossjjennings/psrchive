@@ -9,33 +9,47 @@
 
 namespace FTransform {
 
-  int fftw3_initialise();
-
-  int fftw3_frc1d(unsigned ndat, float* dest, const float* src);
-  int fftw3_fcc1d(unsigned ndat, float* dest, const float* src);
-  int fftw3_bcc1d(unsigned ndat, float* dest, const float* src);
-  int fftw3_bcr1d(unsigned ndat, float* dest, const float* src);
-
   class FFTW3_Plan : public Plan {
-  public:
-    FFTW3_Plan();
-    FFTW3_Plan(unsigned _ndat, unsigned _ilib, const std::string& _fft_call);
-    ~FFTW3_Plan();
-    void init(unsigned _ndat, unsigned _ilib, const std::string& _fft_call);
 
-    fftwf_plan* plan;
+  public:
+
+    //! Constructor
+    FFTW3_Plan (unsigned nfft, const std::string& call);
+
+    //! Destructor
+    ~FFTW3_Plan ();
+
+    static int fcc1d (unsigned nfft, float* dest, const float* src);
+    static int bcc1d (unsigned nfft, float* dest, const float* src);
+    static int frc1d (unsigned nfft, float* dest, const float* src);
+    static int bcr1d (unsigned nfft, float* dest, const float* src);
+
+    //! Agent class
+    class Agent : public PlanAgent<FFTW3_Plan> {
+    public:
+      Agent () : PlanAgent<FFTW3_Plan> ("FFTW3", nfft) { }
+      FFTW3_Plan* new_plan (unsigned nfft, const std::string& call);
+    };
+
+  protected:
+    void* plan;
+
+    static Agent my_agent;
   };
+
 
   class FFTW3_Plan2 : public Plan2 {
 
   public:
-    FFTW3_Plan2 ();
-    FFTW3_Plan2 (unsigned nx, unsigned ny, const std::string& _fft_call);
-    ~FFTW3_Plan2 ();
-    void init (unsigned nx, unsigned ny, const std::string& call);
 
-    static void fcc2d (unsigned nx, unsigned ny, float* dest, const float* src);
-    static void bcc2d (unsigned nx, unsigned ny, float* dest, const float* src);
+    //! Constructor
+    FFTW3_Plan2 (unsigned nx, unsigned ny, const std::string& call);
+
+    //! Destructor
+    ~FFTW3_Plan2 ();
+
+    static void fcc2d (unsigned nx, unsigned ny, float* , const float* );
+    static void bcc2d (unsigned nx, unsigned ny, float* , const float* );
 
   protected:
     void* plan;
@@ -43,7 +57,9 @@ namespace FTransform {
     class Agent : public PlanAgent2<FFTW3_Plan2> {
     public:
       Agent () : PlanAgent2<FFTW3_Plan2> ("FFTW3", nfft) { }
-      FFTW3_Plan2* new_plan (unsigned nx, unsigned ny, const std::string& cal);
+
+      FFTW3_Plan2*
+      new_plan (unsigned nx, unsigned ny, const std::string& call);
     };
 
     static Agent my_agent;
