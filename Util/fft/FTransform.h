@@ -110,6 +110,9 @@ namespace FTransform {
     //! Clean up the plans for this library
     virtual void clean_plans () = 0;
 
+    //! Get the number of available libraries
+    static unsigned get_num_libraries () { return libraries.size(); }
+
   protected:
 
     //! Install this as the current library
