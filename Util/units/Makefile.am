@@ -13,7 +13,8 @@ libunits_la_SOURCES = Error.C HeapTracked.C ReferenceAble.C stringtok.C	     \
 	ScalarPower.C ScalarArgument.C					     \
 	Polynomial.C Gaussian.C Complex2Value.C Complex2.C Complex2Math.C    \
 	Complex2Constant.C Gain.C Phase.C Boost.C			     \
-	Rotation.C Polar.C Coherency.C NormalizeStokes.C Tracer.C	     \
+	Rotation.C Polar.C Coherency.C PhysicalCoherency.C		     \
+	NormalizeStokes.C Tracer.C					     \
 	CongruenceTransformation.C Function_load.C Function_parse.C	     \
 	Function_print.C Function_new_Function.C Pauli.C linchi2.C	     \
 	TextInterface.C header_PromoteTraits MatrixTest.h		     \
