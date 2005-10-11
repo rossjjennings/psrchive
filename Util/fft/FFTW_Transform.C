@@ -17,7 +17,7 @@ FTransform::FFTW_Plan::~FFTW_Plan()
 {
   if (plan) {
 
-    if ( fft_call == "frc1d" || fft_call == "brc1d" )
+    if ( call == "frc1d" || call == "brc1d" )
       rfftw_destroy_plan ((rfftw_plan) plan);
 
     else
@@ -69,7 +69,7 @@ int FTransform::FFTW_Plan::frc1d (unsigned nfft,
 
   rfftw_one ((rfftw_plan)(plan->plan), 
 	     (fftw_real*)src, (fftw_real*)plan->tmp);
-  rfftw_sort (ndat, plan->tmp, dest);
+  rfftw_sort (nfft, plan->tmp, dest);
 
   return 0;
 }
@@ -159,12 +159,9 @@ FTransform::FFTW_Plan2::~FFTW_Plan2 ()
 }
 
 void FTransform::FFTW_Plan2::fcc2d (unsigned nx, unsigned ny,
-				     float* dest, const float* src)
+				    float* dest, const float* src)
 {
-  FFTW_Plan2* plan = dynamic_cast<FFTW_Plan2*>(last_fcc2d_plan);
-
-  if (!plan || plan->nx != nx || plan->ny != ny || plan->call != "fcc2d")
-    last_fcc2d_plan = plan = my_agent.get_plan (nx, ny, "fcc2d");
+  FT_SETUP2 (FFTW_Plan2, fcc2d);
 
   fftwnd_one ((fftwnd_plan)(plan->plan),
 	      (fftw_complex*)src, (fftw_complex*)dest);
@@ -174,10 +171,7 @@ void FTransform::FFTW_Plan2::fcc2d (unsigned nx, unsigned ny,
 void FTransform::FFTW_Plan2::bcc2d (unsigned nx, unsigned ny,
 				     float* dest, const float* src)
 {
-  FFTW_Plan2* plan = dynamic_cast<FFTW_Plan2*>(last_bcc2d_plan);
-
-  if (!plan || plan->nx != nx || plan->ny != ny || plan->call != "bcc2d")
-    last_bcc2d_plan = plan = my_agent.get_plan (nx, ny, "bcc2d");
+  FT_SETUP2 (FFTW_Plan2, bcc2d);
 
   fftwnd_one ((fftwnd_plan)(plan->plan),
 	      (fftw_complex*)src, (fftw_complex*)dest);

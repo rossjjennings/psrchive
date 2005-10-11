@@ -15,7 +15,7 @@ FTransform::IPP_Plan::~IPP_Plan()
   if( pBuffer )
     delete [] pBuffer;
   if( Spec ){
-    if( fft_call == "frc1d" || fft_call == "bcr1d" )
+    if( call == "frc1d" || call == "bcr1d" )
       ippsFFTFree_R_32f( (IppsFFTSpec_R_32f*)Spec );
     else
       ippsFFTFree_C_32fc( (IppsFFTSpec_C_32fc*)Spec );
@@ -66,7 +66,7 @@ FTransform::IPP_Plan::IPP_Plan (unsigned nfft, const string& fft_call)
 
 }
 
-int FTransform::IPP_Plan::_frc1d (unsigned nfft, float* dest, const float* src)
+int FTransform::IPP_Plan::frc1d (unsigned nfft, float* dest, const float* src)
 {
   FT_SETUP (IPP_Plan, frc1d);
 
@@ -78,7 +78,7 @@ int FTransform::IPP_Plan::_frc1d (unsigned nfft, float* dest, const float* src)
   return 0;
 }
 
-int FTransform::IPP_Plan::_fcc1d (unsigned nfft, float* dest, const float* src)
+int FTransform::IPP_Plan::fcc1d (unsigned nfft, float* dest, const float* src)
 {
   FT_SETUP (IPP_Plan, fcc1d);
 
@@ -90,7 +90,7 @@ int FTransform::IPP_Plan::_fcc1d (unsigned nfft, float* dest, const float* src)
   return 0;
 }
 
-int FTransform::IPP_Plan::_bcc1d (unsigned nfft, float* dest, const float* src)
+int FTransform::IPP_Plan::bcc1d (unsigned nfft, float* dest, const float* src)
 {
   FT_SETUP (IPP_Plan, bcc1d);
 
@@ -103,7 +103,7 @@ int FTransform::IPP_Plan::_bcc1d (unsigned nfft, float* dest, const float* src)
   return 0;
 }
 
-int FTransform::IPP_Plan::_bcr1d (unsigned nfft, float* dest, const float* src)
+int FTransform::IPP_Plan::bcr1d (unsigned nfft, float* dest, const float* src)
 {
   FT_SETUP (IPP_Plan, bcr1d);
 
