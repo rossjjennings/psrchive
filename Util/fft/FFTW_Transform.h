@@ -49,14 +49,15 @@ namespace FTransform {
     static void
     bcc2d (unsigned nx, unsigned ny, float* dest, const float* src);
 
-  protected:
-    void* plan;
-
     class Agent : public PlanAgent2<FFTW_Plan2> {
     public:
       Agent () : PlanAgent2<FFTW_Plan2> ("FFTW", nfft) { }
       FFTW_Plan2* new_plan (unsigned nx, unsigned ny, const std::string& call);
     };
+
+  protected:
+    void* plan;
+
 
   };
 
