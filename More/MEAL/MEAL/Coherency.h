@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Coherency.h,v $
-   $Revision: 1.4 $
-   $Date: 2005/04/06 20:23:36 $
+   $Revision: 1.5 $
+   $Date: 2005/10/11 21:44:50 $
    $Author: straten $ */
 
 #ifndef __MEAL_Coherency_H
@@ -25,13 +25,13 @@ namespace MEAL {
     Coherency ();
 
     //! Set the Stokes parameters of the model
-    void set_stokes (const Stokes<double>& stokes);
+    virtual void set_stokes (const Stokes<double>& stokes);
     
     //! Set the Stokes parameters and their estimated errors
-    void set_stokes (const Stokes< Estimate<double> >& stokes);
+    virtual void set_stokes (const Stokes< Estimate<double> >& stokes);
 
     //! Get the Stokes parameters and their estimated errors
-    Stokes< Estimate<double> > get_stokes () const;
+    virtual Stokes< Estimate<double> > get_stokes () const;
 
     // ///////////////////////////////////////////////////////////////////
     //
