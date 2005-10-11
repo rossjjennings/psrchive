@@ -69,23 +69,24 @@ std::vector< Reference::To<FTransform::Agent2> > FTransform::Agent2::libraries;
 
 static int initialise()
 {
-  int ret = -1;
-
 #ifdef HAVE_MKL
-  ret =    FTransform::mkl_initialise();
+  FTransform::MKL_Plan::Agent::enlist ();
 #endif
+
 #ifdef HAVE_FFTW3
   FTransform::FFTW3_Plan::Agent::enlist ();
 #endif
+
 #ifdef HAVE_FFTW
-  ret =   FTransform::fftw_initialise();
-#endif
-#ifdef HAVE_IPP
-  ret =    FTransform::ipp_initialise();
+  FTransform::FFTW_Plan::Agent::enlist ();
 #endif
 
-  if (ret < 0) {
-    cerr << "\nFTransform::initialise: ERROR: No FFT libraries installed!\n\n";
+#ifdef HAVE_IPP
+  FTransform::IPP_Plan::Agent::enlist ();
+#endif
+
+  if (FTransform::Agent::get_num_libraries() == 0) {
+    cerr << "\nFTransform: ERROR No FFT libraries installed!\n\n";
     exit(-1);
   }
 
