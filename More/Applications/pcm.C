@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pcm.C,v $
-   $Revision: 1.43 $
-   $Date: 2005/10/11 20:26:18 $
+   $Revision: 1.44 $
+   $Date: 2005/10/11 21:54:19 $
    $Author: straten $ */
 
 /*! \file pcm.C 
@@ -85,7 +85,7 @@ void usage ()
     "  -p pA,pB   set the phase window from which to choose input states \n"
     "  -c archive choose best input states from input archive \n"
     "\n"
-    "  -r         risk physically unrealizable Stokes parameters \n"
+    "  -r         enforce physically realizable Stokes parameters \n"
     "  -s         normalize Stokes parameters by invariant interval \n"
     "  -g         allow absolute gain to vary in Pulsar observations \n"
     "\n"
@@ -306,7 +306,7 @@ int main (int argc, char *argv[]) try {
   bool normalize_by_invariant = false;
   bool independent_gains = false;
 
-  bool physical_coherency = true;
+  bool physical_coherency = false;
 
   bool must_have_cals = true;
   bool publication_plots = false;
@@ -392,7 +392,7 @@ int main (int argc, char *argv[]) try {
       break;
 
     case 'r':
-      physical_coherency = false;
+      physical_coherency = true;
       break;
 
     case 's':
