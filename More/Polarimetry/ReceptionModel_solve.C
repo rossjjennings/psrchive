@@ -31,6 +31,8 @@ float lmcoff (// input
 
   Jones<double> delta_y = obs.get_coherency() - model.evaluate (&gradient);
 
+  /* Note that Calibration::CoherencyMeasurement implements the interface
+     of the WeightingScheme template class used by LevenbergMacquardt */
   return MEAL::lmcoff1 (model, delta_y, obs, gradient, alpha, beta);
 
 }
