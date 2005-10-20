@@ -68,7 +68,7 @@ bool Pulsar::Archive::Agent::init () try {
 
 #ifdef _PSRCHIVE_STATIC
 
-  cerr << "Pulsar::Archive::Agent::init <static>" << endl;
+  //  cerr << "Pulsar::Archive::Agent::init <static>" << endl;
   static_load ();
 
 #else
