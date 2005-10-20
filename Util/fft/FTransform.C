@@ -141,14 +141,17 @@ void FTransform::clean_plans()
 //! Choose to use a different library
 void FTransform::set_library (const string& name)
 {
-  for (unsigned ilib=0; ilib<FTransform::Agent::libraries.size(); ilib++)
-    if (FTransform::Agent::libraries[ilib]->name == name)
+  for (unsigned ilib=0; ilib<FTransform::Agent::libraries.size(); ilib++){
+    if (FTransform::Agent::libraries[ilib]->name == name){
       FTransform::Agent::libraries[ilib]->install ();
+      return;
+    }
+  }
 
   string s;
 
-  for (unsigned ilib=0; ilib<FTransform::Agent::libraries.size(); ilib++)
-    s += FTransform::Agent::libraries[ilib] + " ";
+  for (unsigned ilib=0; ilib<FTransform::Agent::get_num_libraries(); ilib++)
+    s += "'" + FTransform::Agent::libraries[ilib]->name + "' ";
     
   throw Error (InvalidState, "FTransform::set_library",
 	       "Library '" + name + "' is not in valid libraries: " + s);
