@@ -100,8 +100,10 @@ static FTransform::Agent*    current_agent = 0;
 
 void FTransform::Agent::install ()
 {
+  FTransform::frc1d = this->frc1d;
   FTransform::fcc1d = this->fcc1d;
   FTransform::bcc1d = this->bcc1d;
+  FTransform::bcr1d = this->bcr1d;
 
   current_norm = this->norm;
   current_agent = this;

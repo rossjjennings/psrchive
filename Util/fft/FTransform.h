@@ -15,6 +15,7 @@ All outputs of frc1d must have N+2 floats allocated for output
 frc1d = forward real->complex 1D
 fcc1d = forward complex->complex 1D
 bcc1d = backward complex->complex 1D
+bcr1d = backward complex->real 1D
 
 fcc2d = forward complex->complex 2D
 bcc2d = backward complex->complex 2D
@@ -104,6 +105,12 @@ namespace FTransform {
     //! Backward complex-to-complex one-dimensional FFT
     fft_call bcc1d;
 
+    //! Forward real-to-complex one-dimensional FFT
+    fft_call frc1d;
+
+    //! Backward complex-to-real one-dimensional FFT
+    fft_call bcr1d;
+
     //! The normalization type
     norm_type norm;
 
@@ -170,6 +177,8 @@ namespace FTransform {
 
     this->fcc1d = PlanT::fcc1d;
     this->bcc1d = PlanT::bcc1d;
+    this->frc1d = PlanT::frc1d;
+    this->bcr1d = PlanT::bcr1d;
   }
 
   template<class PlanT> PlanT* 
