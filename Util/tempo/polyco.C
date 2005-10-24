@@ -525,13 +525,18 @@ polyco & polyco::operator = (const polyco & in_poly)
 
 polyco::polyco (const string& filename)
 {
-  current = 0;
-
   if (load (filename) < 1)
     throw Error (FailedCall, "polyco::polyco(string)",
 		"polyco::load (" + filename + ")");
 }
  
+polyco::polyco (const char * filename)
+{
+  if (load (filename) < 1)  
+    throw Error (FailedCall, "polyco::polyco(string)",
+                "polyco::load (%s)", filename);
+}
+
 char polyco::get_telescope () const
 {
   if (pollys.empty()) {
@@ -612,12 +617,12 @@ string polyco::get_psrname () const
   }
 }
 
-int polyco::load (const string& polyco_filename, size_t nbytes)
+int polyco::load (const char* polyco_filename, size_t nbytes)
 {
   if (verbose)
     cerr << "polyco::load (" << polyco_filename << ")" << endl;
 
-  FILE* fptr = fopen (polyco_filename.c_str(), "r");
+  FILE* fptr = fopen (polyco_filename, "r");
   if (!fptr)  {
     cerr << "polyco::load cannot open '" << polyco_filename << "' - "
 	<< strerror (errno) << endl;
@@ -652,22 +657,24 @@ int polyco::load (string* instr)
   if (verbose)
     cerr << "polyco::load string* '" << endl;
 
+  int npollys = 0;
   pollys.clear();
 
   polynomial tst;
   while(instr->length() && tst.load(instr)==0){
     pollys.push_back(tst);      
+    npollys++;
   }
 
   if (verbose)
     cerr << "polyco::load (string*) return npollys" << endl;
 
-  return pollys.size();
+  return npollys;
 }
 
-int polyco::unload (const string& filename) const
+int polyco::unload (const char *filename) const
 {
-  FILE* fptr = fopen (filename.c_str(), "w");
+  FILE* fptr = fopen (filename, "w");
   if (!fptr)  {
     cerr << "polyco::unload cannot open '" << filename << "' - "
         << strerror (errno) << endl;
@@ -683,8 +690,7 @@ int polyco::unload (const string& filename) const
 // The text added is the tempo formatted text of this polynomial.  
 // Return value: the number of characters added (not including the \0)
 // ///////////////////////////////////////////////////////////////////
-int polyco::unload (string* outstr) const 
-{
+int polyco::unload (string* outstr) const {
   int bytes = 0;
 
   if (verbose)
@@ -727,35 +733,39 @@ void polyco::prettyprint() const
     pollys[i].prettyprint();
 }
 
-const polynomial& polyco::best (const MJD &t, const string& psr) const
+// returns a pointer to the best polynomial for use over the period
+// defined by t1 to t2
+const polynomial* polyco::nearest (const MJD &t, const string& psr) const
 {
-  if (current && t > current->start_time() && t < current->end_time() )
-    return *current;
-
   int ipolly = i_nearest (t, psr);
 
   if (ipolly < 0)
     throw Error (InvalidParam, "polyco::nearest",
                  "no polynomial for MJD=" + t.printdays(13) + " psr=" + psr);
 
-  const_cast<polyco*>(this)->current = &(pollys[ipolly]);
-  return *current;
+  return &pollys[ipolly];
 }
 
+const polynomial& polyco::best (const MJD &t, const string& psr) const
+{
+  int ipolly = i_nearest (t, psr);
+
+  if (ipolly < 0)
+    throw Error (InvalidParam, "polyco::best",
+                 "no polynomial for MJD=" + t.printdays(13) + " psr=" + psr);
+
+  return pollys[ipolly];
+}
 
 const polynomial& polyco::best (const Phase& p, const string& psr) const
 {
-  if (current && p > current->start_phase() && p < current->end_phase() )
-    return *current;
-
   int ipolly = i_nearest (p, psr);
 
   if (ipolly < 0)
     throw Error (InvalidParam, "polyco::best",
                  "no polynomial for Phase=" + p.strprint(13) + " psr=" + psr);
 
-  const_cast<polyco*>(this)->current = &(pollys[ipolly]);
-  return *current;
+  return pollys[ipolly];
 }
 
 int polyco::i_nearest (const MJD &t, const string& in_psr) const
