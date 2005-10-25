@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/BasicArchive.h,v $
-   $Revision: 1.31 $
-   $Date: 2005/04/27 10:09:11 $
-   $Author: straten $ */
+   $Revision: 1.32 $
+   $Date: 2005/10/25 04:44:35 $
+   $Author: ateoh $ */
 
 #ifndef __BasicArchive_h
 #define __BasicArchive_h
@@ -128,6 +128,18 @@ namespace Pulsar {
     virtual bool get_poln_calibrated () const;
     //! Set the status of the poln calibrated flag
     virtual void set_poln_calibrated (bool done = true);
+
+		//! Get file number for raw data (FB only)
+		virtual int get_file_number() const;
+
+		//! Set file number for raw data (FB only)
+		virtual void set_file_number(int file_number);
+				
+		//! Get tape label for raw data (FB only)
+		virtual string get_tape_label() const;
+		
+		//! Set tape label for raw data (FB only)
+		virtual void set_tape_label(string tape_label);
 
     //! Ensure that BasicArchive code is linked
     /*! This method is called in Archive::load only to ensure that the

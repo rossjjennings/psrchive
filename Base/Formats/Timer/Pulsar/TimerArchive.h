@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/Timer/Pulsar/TimerArchive.h,v $
-   $Revision: 1.13 $
-   $Date: 2004/07/16 07:52:45 $
-   $Author: straten $ */
+   $Revision: 1.14 $
+   $Date: 2005/10/25 04:44:36 $
+   $Author: ateoh $ */
 
 #ifndef __Timer_Archive_h
 #define __Timer_Archive_h
@@ -131,6 +131,18 @@ namespace Pulsar {
     virtual bool get_poln_calibrated () const;
     //! Set the status of the poln calibrated flag
     virtual void set_poln_calibrated (bool done = true);
+
+		//! Get file number for raw data (FB only)
+		virtual int get_file_number() const ;
+
+		//! Set file number for raw data (FB only)
+		virtual void set_file_number(int file_number);
+				
+		//! Get tape label for raw data (FB only)
+		virtual string get_tape_label() const;
+		
+		//! Set tape label for raw data (FB only)
+		virtual void set_tape_label(string tape_label);
 
     //! Returns the Hydra observation type, given the coordinates
     int hydra_obstype ();

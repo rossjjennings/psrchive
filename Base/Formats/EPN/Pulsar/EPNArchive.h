@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/EPN/Pulsar/EPNArchive.h,v $
-   $Revision: 1.5 $
-   $Date: 2004/11/13 08:17:40 $
-   $Author: straten $ */
+   $Revision: 1.6 $
+   $Date: 2005/10/25 04:44:36 $
+   $Author: ateoh $ */
 
 #ifndef __EPN_Archive_h
 #define __EPN_Archive_h
@@ -129,6 +129,18 @@ namespace Pulsar {
     bool get_poln_calibrated () const;
     //! Set the status of the poln calibrated flag
     void set_poln_calibrated (bool done = true);
+
+		//! Get file number for raw data (FB only)
+		int get_file_number() const;
+
+		//! Set file number for raw data (FB only)
+		void set_file_number(int file_number);
+				
+		//! Get tape label for raw data (FB only)
+		string get_tape_label() const;
+		
+		//! Set tape label for raw data (FB only)
+		void set_tape_label(string tape_label);
 
   protected:
 

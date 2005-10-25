@@ -286,3 +286,28 @@ void Pulsar::BasicArchive::set_dedispersed (bool done)
 {
   dedispersed = done;
 }
+
+//! Get file number for raw data (FB only)
+int Pulsar::BasicArchive::get_file_number() const 
+{
+	return -1;
+}
+
+//! Set file number for raw data (FB only)
+void Pulsar::BasicArchive::set_file_number(int file_number) 
+{
+	
+}
+
+//! Get tape label for raw data (FB only)
+string Pulsar::BasicArchive::get_tape_label()  const 
+{
+	return "";
+}
+
+
+//! Set tape label for raw data (FB only)
+void Pulsar::BasicArchive::set_tape_label(string tape_label) 
+{
+	
+}
