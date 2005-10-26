@@ -1,5 +1,5 @@
 //
-// $Id: pav.C,v 1.100 2005/08/18 13:25:18 straten Exp $
+// $Id: pav.C,v 1.101 2005/10/26 01:41:35 ateoh Exp $
 //
 // The Pulsar Archive Viewer
 //
@@ -120,6 +120,7 @@ void usage ()
     "                    5 -> Forest\n"
     "                    6 -> Alien Glow\n"
     " --ystretch y   Stretch y-axis limits by this factor [1.0]\n"
+    " --no_prof_axes Don't show the profile axes (for -D option only)\n"
     "\n"
     "Archive::Extension options (file format specific):\n"
     " -o        Plot the original bandpass\n"
@@ -205,6 +206,7 @@ int main (int argc, char** argv)
   bool mask               = false;
   bool plot_total_archive = false;
   bool profile_spectrum   = false;
+	bool show_profile_axes  = true;
   float spectrum_gamma = 1.0;
 
   Reference::To<Pulsar::Archive> std_arch;
@@ -236,6 +238,7 @@ int main (int argc, char** argv)
   const int YSTRETCH = 1014;
   const int PROFILE_SPECTRUM = 1015;
   const int SPECTRUM_GAMMA = 1016;
+	const int NO_PROFILE_AXES = 1017;
 
   static struct option long_options[] = {
     { "convert_binphsperi", 1, 0, 200 },
@@ -255,6 +258,7 @@ int main (int argc, char** argv)
     { "fmax",               required_argument, 0, FMAX},
     { "spec",               0, 0, PROFILE_SPECTRUM},
     { "specgamma",          required_argument, 0, SPECTRUM_GAMMA},
+		{ "no_prof_axes",       no_argument, 0, NO_PROFILE_AXES},
     { 0, 0, 0, 0 }
   };
     
@@ -335,7 +339,7 @@ int main (int argc, char** argv)
       plotter.set_subint( atoi (optarg) );
       break;
     case 'i':
-      cout << "$Id: pav.C,v 1.100 2005/08/18 13:25:18 straten Exp $" << endl;
+      cout << "$Id: pav.C,v 1.101 2005/10/26 01:41:35 ateoh Exp $" << endl;
       return 0;
 
     case 'j':
@@ -635,6 +639,9 @@ int main (int argc, char** argv)
     case SPECTRUM_GAMMA:
       spectrum_gamma = atof(optarg);
       break;
+		case NO_PROFILE_AXES:
+			show_profile_axes = false;
+			break;
     default:
       cerr << "pav: unrecognized option" << endl;
       return -1; 
@@ -965,6 +972,8 @@ int main (int argc, char** argv)
     
       if (display) {
 	cpg_next();
+	
+	plotter.set_axes(show_profile_axes);
 	plotter.singleProfile (archive);
 
 	if (display_axis)
