@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/psrephem.h,v $
-   $Revision: 1.32 $
-   $Date: 2005/03/09 16:27:33 $
-   $Author: straten $ */
+   $Revision: 1.33 $
+   $Date: 2005/10/31 07:16:20 $
+   $Author: ateoh $ */
 
 #ifndef __PSREPHEM_H
 #define __PSREPHEM_H
@@ -229,6 +229,15 @@ class psrephem : public Reference::Able
   string par_lookup (const char* name, int use_cwd);
   static char* tempo_pardir;
   static int   verbose;
+
+	// this is specifically for the older style ephemeris file
+	// inserts the ephemeris values into the val_str, val_double,
+	// and val_int depending on the type of each ephemeris value.
+	void read_old_ephem_str(vector<string> lines, 
+	                                int *pstatus,
+                                  string *val_str, 
+																	double *val_double, 
+																	int *val_int);
 
  protected:
 

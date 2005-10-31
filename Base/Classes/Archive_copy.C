@@ -64,6 +64,8 @@ void Pulsar::Archive::copy (const Archive& archive,
   set_dedispersed( archive.get_dedispersed() );
   set_poln_calibrated( archive.get_poln_calibrated() );
 
+	set_filename( archive.get_filename());
+
   // Using a Reference::To<Extension> ensures that the cloned
   // Extension will be deleted if the derived class chooses not to
   // manage it.

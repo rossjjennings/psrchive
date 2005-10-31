@@ -46,10 +46,10 @@ void psrephem::init()
 
 void psrephem::size_dataspace()
 {
-  if (!tempo11)  {
-    destroy ();
-    return;
-  }
+//   if (!tempo11)  {
+//     destroy ();
+//     return;
+//   }
 
   if (parmStatus != NULL)  {
     // the arrays have already been initialized.  zero them
@@ -193,8 +193,8 @@ int psrephem::old_load (const char* filename)
 
 int psrephem::unload (const char* filename) const
 {
-  if (!tempo11)
-    return old_unload (filename);
+//   if (!tempo11)
+//     return old_unload (filename);
 
   for (int ieph=0; ieph<EPH_NUM_KEYS; ieph++)
     strcpy (ephemstr[ieph], value_str[ieph].c_str());
@@ -417,10 +417,12 @@ string psrephem::par_lookup (const char* name, int use_cwd)
 
 string psrephem::psrname() const
 {
-  if (tempo11 && parmStatus[EPH_PSRJ])
+  if (parmStatus[EPH_PSRJ]==1) {
     return value_str[EPH_PSRJ];
-  else if (tempo11 && parmStatus[EPH_PSRB])
+	}
+  else if (parmStatus[EPH_PSRB]==1) {		
     return value_str[EPH_PSRB];
+	}
   
   throw Error(InvalidParam, "psrephem::psrname",
 	      "Error determining pulsar name");
@@ -428,7 +430,10 @@ string psrephem::psrname() const
 
 double psrephem::get_dm() const
 {
-  if (tempo11 && parmStatus[EPH_DM])
+	// Removed tempo11 check because it's now possible
+	// to obtain dm for pre-tempo11 ephemeris files
+//  if (tempo11 && parmStatus[EPH_DM])
+	if (parmStatus[EPH_DM])
     return value_double[EPH_DM];
 
   return 0;
@@ -436,8 +441,8 @@ double psrephem::get_dm() const
 
 void psrephem::set_dm( double dm )
 {
-  if (!tempo11)
-    return;
+//   if (!tempo11)
+//     return;
 
   if (!parmStatus[EPH_DM])
     parmStatus[EPH_DM] = 1;
@@ -447,7 +452,11 @@ void psrephem::set_dm( double dm )
 
 double psrephem::jra() const
 {
-  if (tempo11 && parmStatus[EPH_RAJ])
+	// Removed tempo11 check because it's now possible
+	// to obtain raj for pre-tempo11 ephemeris files
+//  if (tempo11 && parmStatus[EPH_RAJ])
+  
+	if (parmStatus[EPH_RAJ])
     return value_double[EPH_RAJ];
   
   throw Error(InvalidParam, "psrephem::jra",
@@ -456,7 +465,11 @@ double psrephem::jra() const
 
 double psrephem::jdec() const
 {
-  if (tempo11 && parmStatus[EPH_DECJ])
+	// Removed tempo11 check because it's now possible
+	// to obtain decj for pre-tempo11 ephemeris files
+//  if (tempo11 && parmStatus[EPH_DECJ])
+  
+	if (parmStatus[EPH_DECJ])
     return value_double[EPH_DECJ];
   
   throw Error(InvalidParam, "psrephem::jdec",
@@ -610,6 +623,8 @@ int psrephem::load (string* instr)
   nontempo11 = *instr;  // just in case parsing fails
   int old_ephem = 0;
 
+	vector<string> eph_lines;
+
   while (instr -> length() > 1) {
     // get the next line from the incoming text
     string line ( stringtok (instr, "\n") );
@@ -619,6 +634,9 @@ int psrephem::load (string* instr)
 
     if (line.length() < 1)
       continue;
+
+		// store the line in a vector for processing later
+		eph_lines.push_back(line);
 
     rd_eph_str (parmStatus, ephemblock, value_double, value_integer,
 		error_double, correct, &old_ephem, 
@@ -645,14 +663,204 @@ int psrephem::load (string* instr)
   }
   
   if (all_zero) {
-    if (verbose)
+    if (verbose) {
       cerr << "psrephem::load WARNING "
 	"tempo11-style load of '" << nontempo11 << "' failed" << endl;
-    tempo11 = 0;
+		}
+		
+		// From here, need to parse the older style ephem
+		read_old_ephem_str(eph_lines, parmStatus, value_str, value_double, value_integer);		
+		
+    tempo11 = false;
   }
 
   return 0;
 }
+
+void psrephem::read_old_ephem_str(vector<string> lines, 
+                                  int *pstatus,
+                                  string *val_str, 
+																	double * val_double, 
+																	int * val_int) {
+	
+	// Start at 1 because the first line is just a row of dashes -----
+	int i = 1;
+
+	////////////
+	// Line 1
+	
+	// Name
+	string psrname = lines[i].substr(0, 19);
+	
+	// get rid of white space
+	string::size_type start = psrname.find_first_not_of (" \t");
+	string::size_type end = psrname.find_last_not_of(" \t");
+	
+	if (start != string::npos && end != string::npos) {
+		psrname = psrname.substr(start, end-start+1);
+		pstatus[EPH_PSRB] = 1;
+		val_str[EPH_PSRB] = psrname;
+		
+		if (psrname.length() > 7) {
+			
+			pstatus[EPH_PSRJ] = 1;
+			val_str[EPH_PSRJ] = psrname;
+		}
+
+	}
+	
+	
+	// RAJ
+	string raj_str = lines[i].substr(19, 20);
+	string::size_type j = raj_str.find(".", 0);
+	
+	if (j != string::npos) {
+	
+		string raj_sec_str = raj_str.substr(j-2, raj_str.length() - (j-2));
+		string raj_min_str = raj_str.substr(j-4, 2);
+		string raj_hour_str = raj_str.substr(0, 
+		   raj_str.length() - (raj_sec_str.length() + raj_min_str.length()));
+
+		double raj_hour = atof(raj_hour_str.c_str());
+		double raj_min = atof(raj_min_str.c_str());
+		double raj_sec = atof(raj_sec_str.c_str());
+
+		raj_str = raj_hour_str + ":" + raj_min_str + ":" + raj_sec_str;
+		double raj = (raj_hour + raj_min/60 + raj_sec/3600)/24;
+
+		pstatus[EPH_RAJ] = 1;
+		val_str[EPH_RAJ] = raj_str;
+		val_double[EPH_RAJ] = raj;
+	
+	}
+	
+	// DECJ
+	string decj_str = lines[i].substr(40, 20);
+	j = decj_str.find(".", 0);
+	
+	if (j != string::npos) {
+		string decj_sec_str = decj_str.substr(j-2, decj_str.length() - (j-2));
+		string decj_min_str = decj_str.substr(j-4, 2);
+		string decj_deg_str = decj_str.substr(0, 
+		decj_str.length() - (decj_sec_str.length() + decj_min_str.length()));
+
+		double decj_deg = atof(decj_deg_str.c_str());
+		double decj_min = atof(decj_min_str.c_str());
+		double decj_sec = atof(decj_sec_str.c_str());
+
+		decj_str = decj_deg_str + ":" + decj_min_str + ":" + decj_sec_str;
+		double decj = (decj_deg + decj_min/60 + decj_sec/3600) / 360;
+
+		pstatus[EPH_DECJ] = 1;
+		val_str[EPH_DECJ] = decj_str;
+		val_double[EPH_DECJ] = decj;
+	}
+		
+	// PMRA / PMDEC
+	string pmra_str = lines[i].substr(60, 10);
+	start = pmra_str.find_first_of ("1234567890");
+	
+	if (start != string::npos) {
+		double pmra = atof(pmra_str.c_str());
+		pstatus[EPH_PMRA] = 1;
+		val_str[EPH_PMRA] = pmra_str;
+		val_double[EPH_PMRA] = pmra;
+		
+	}
+	
+	string pmdec_str = lines[i].substr(70, 10);
+	start = pmdec_str.find_first_of ("1234567890");
+	
+	if (start != string::npos) {
+		double pmdec = atof(pmdec_str.c_str());
+		pstatus[EPH_PMDEC] = 1;
+		val_str[EPH_PMDEC] = pmdec_str;
+		val_double[EPH_PMDEC] = pmdec;
+	}
+	
+	
+	
+	i++;
+	
+	//////////////
+	// Line 2
+	
+	string p0_str = lines[i].substr(1,19);
+	start = p0_str.find_first_of ("1234567890");
+	
+	double p0 = 0;
+	if (start != string::npos) {
+		p0 = atof(p0_str.c_str());
+		pstatus[EPH_F] = 1;
+		val_str[EPH_F] = p0_str;
+		val_double[EPH_F] = 1/p0;
+	}
+	
+	string p1_str = lines[i].substr(20, 20);
+	start = p1_str.find_first_of ("1234567890");
+	double p1 = 0;
+	if (start != string::npos) {
+		p1 = atof(p1_str.c_str());
+		pstatus[EPH_F1] = 1;
+		val_str[EPH_F1] = p1_str;
+		val_double[EPH_F1] = p1/pow(p0,2);
+		
+	}
+		
+	string pepoch_str = lines[i].substr(40, 20);
+	start = pepoch_str.find_first_of ("1234567890");
+	if (start != string::npos) {
+		int pepoch = atoi(pepoch_str.c_str());
+	
+		pstatus[EPH_PEPOCH] = 1;
+		val_str[EPH_PEPOCH] = pepoch_str;
+		val_int[EPH_PEPOCH] = pepoch;
+	}
+	
+	
+	string p2_str = lines[i].substr(60, 10);
+	start = p2_str.find_first_of ("1234567890");
+	double p2 = 0;
+	if (start != string::npos) {
+		p2 = atof(p2_str.c_str());
+		
+		pstatus[EPH_F2] = 1;
+		val_str[EPH_F2] = p2_str;
+		
+		
+		val_double[EPH_F2] = -p2/pow(p0,2) + 2*pow(p1,2)/pow(p0,3);
+		
+	}
+		
+	string px_str = lines[i].substr(70, 10);
+	start = px_str.find_first_of ("1234567890");
+	if (start != string::npos) {
+		double px = atof(px_str.c_str());
+		
+		pstatus[EPH_PX] = 1;
+		val_str[EPH_PX] = px_str;
+		val_double[EPH_PX] = px;
+				
+	}
+	i++;
+	
+	////////////
+	// Line 3
+	
+	
+	string dm_str = lines[i].substr(8,12);
+	start = dm_str.find_first_of ("1234567890");
+
+	if (start != string::npos) {
+		double dm = atof(dm_str.c_str());
+		
+		pstatus[EPH_DM] = 1;
+		val_str[EPH_DM] = dm_str;
+		val_double[EPH_DM] = dm;
+		
+	}
+}																
+
 
 int psrephem::unload (string* outstr) const
 {
@@ -733,13 +941,13 @@ psrephem & psrephem::operator = (const psrephem & p2)
 
   destroy();
   init();
-  if(!p2.parmStatus)
-    return(*this);
+//   if(!p2.parmStatus)
+//     return(*this);
 
   tempo11 = p2.tempo11;
   size_dataspace();
   
-  if (tempo11) {
+//  if (tempo11) {
     for (int i=0;i<EPH_NUM_KEYS;i++){
       parmStatus[i]=p2.parmStatus[i];
       value_double[i]=p2.value_double[i];
@@ -747,10 +955,10 @@ psrephem & psrephem::operator = (const psrephem & p2)
       error_double[i]=p2.error_double[i];
       value_str[i]=p2.value_str[i];
     }
-  }
-  else {
+//   }
+//   else {
     nontempo11 = p2.nontempo11;
-  }
+//  }
   return *this;
 }
 
