@@ -1,5 +1,5 @@
 //
-// $Id: pdmp.C,v 1.1 2005/11/01 22:16:38 ateoh Exp $
+// $Id: pdmp.C,v 1.2 2005/11/01 23:55:18 straten Exp $
 //
 // Searches over trial DM and Period ranges and obtains the optimal 
 // DM and Period giving the highest S/N, plots SNR vs Period vs DM, 
@@ -881,7 +881,7 @@ void solve_and_plot(const Archive* archive, double dmOffset, double dmStep, doub
 	
 	// PSRCHIVE normalises the amplitudes after scrunching
 	// so need to compensate for this
-	rms = rms / sqrt(nchan*nsub);
+	rms = rms / sqrt(float(nchan*nsub));
 	
 	//////////////
 	
