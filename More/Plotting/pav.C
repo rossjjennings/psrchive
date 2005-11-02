@@ -1,5 +1,5 @@
 //
-// $Id: pav.C,v 1.101 2005/10/26 01:41:35 ateoh Exp $
+// $Id: pav.C,v 1.102 2005/11/02 04:11:07 rmanches Exp $
 //
 // The Pulsar Archive Viewer
 //
@@ -339,7 +339,7 @@ int main (int argc, char** argv)
       plotter.set_subint( atoi (optarg) );
       break;
     case 'i':
-      cout << "$Id: pav.C,v 1.101 2005/10/26 01:41:35 ateoh Exp $" << endl;
+      cout << "$Id: pav.C,v 1.102 2005/11/02 04:11:07 rmanches Exp $" << endl;
       return 0;
 
     case 'j':
@@ -584,7 +584,6 @@ int main (int argc, char** argv)
     }
     case 205: {
       plotter.set_publn(true);
-      cout << "Publication quality" << endl;
       break;
     }      
 
@@ -671,6 +670,11 @@ int main (int argc, char** argv)
   if (cpgopen(plot_device.c_str()) < 0) {
     cout << "Error: Could not open plot device" << endl;
     return -1;
+  }
+
+  // Check the plot device being used begins with "x"
+  if (plot_device.find("x", 0) != string::npos) {
+    plotter.set_dark(true); 
   }
   
   cpgask(1);
