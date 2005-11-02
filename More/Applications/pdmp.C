@@ -1,5 +1,5 @@
 //
-// $Id: pdmp.C,v 1.2 2005/11/01 23:55:18 straten Exp $
+// $Id: pdmp.C,v 1.3 2005/11/02 05:21:25 ateoh Exp $
 //
 // Searches over trial DM and Period ranges and obtains the optimal 
 // DM and Period giving the highest S/N, plots SNR vs Period vs DM, 
@@ -76,25 +76,28 @@ void solve_and_plot(const Archive* archive, Plotter plotter);
 	
 // Gets the natural DM step if none was provided
 // Precondition: nchan > 1
+// Returns: Natural DM step
 double getNaturalDMStep(const Archive * archive, double dmHalfRange);
 
 // Gets the natural DM half range if none was provided
 // Precondition: nchan > 1
+// Returns: Natural DM half range 
 double getNaturalDMHalfRange(const Archive * archive, double dmStep);
 
 // Gets the natural Period step in microseconds if none was provided
 // Precondition: nsub > 1
+// Returns: Natural period step in microseconds
 double getNaturalPeriodStep(const Archive * archive, double periodHalfRange_us);
 
 // Gets the natural Period half range in microseconds if none was provided
 // Precondition: nsub > 1
+// Returns: Natural period half range in microseconds
 double getNaturalperiodHalfRange(const Archive * archive, double periodStep_us);
 
-// Places focus on various sections of the window to help with
-// placing plots and text
+// Places focus on the header section of the window for writing pgplot text
 void goToHeaderViewPort();
 
-// Sets the viewport to where the corrected phase vs. frequency plot 
+// Sets the viewport to where the phase vs. frequency plot 
 // should be displayed on the PGPLOT window
 void goToPhaseFreqViewPort();
 
@@ -106,7 +109,7 @@ void goToBestValuesViewPort();
 // should be displayed on the PGPLOT window
 void goToDMPViewPort();
 
-// Sets the viewport to where the corrected phase vs. time plot 
+// Sets the viewport to where the phase vs. time plot 
 // should be displayed on the PGPLOT window
 void goToPhaseTimeViewPort();
 
@@ -126,6 +129,7 @@ void scrunchPartially(Archive * scrunchedCopy);
 // Get the SNR for the archive.
 float getSNR(const Archive * archive, float rms);
 
+// Get the RMS of the archive
 float getRMS (const Archive * archive);
 
 // Parse the command line parameters and set the values passed through as arguments
@@ -151,9 +155,10 @@ void partialFrequencyScrunch(Archive * archive);
 // Checks if the string is a valid number (any of float, double, int, etc...)
 bool isNumber(char * str);
 
-// Returns the reference period in seconds
+// Returns the reference period of the central subint in seconds. 
 double getPeriod(const Archive * archive);
 
+// Returns the reference DM
 double getDM(const Archive * archive);
 
 // Gets the period error (milliseconds) based on the best pulse width
@@ -231,6 +236,7 @@ void printHeader(const Archive * archive,
 								 double dmStep,             // dm step
 								 double dmHalfRange);       // dm half range
 
+// Plots the profile of the first subint, channel and polarisation.
 void plotProfile(const Profile * profile, Plotter plotter);
 
 // Plots the original and corrected phase vs. time 
@@ -250,8 +256,11 @@ void drawBestFitPhaseTime(const Archive * archive, Plotter plotter);
 // These methods help to get the number after the decimal point
 // Obtained from http://www.merrymeet.com/minow/sunclock/Astro.java
 // Written by Martin Minow
+
+// Returns the integer part of value
 double TRUNC(double value);
 
+// Returns the fractional part of value
 double FRAC(double value);
 
 void drawBestValuesCrossHair( const Archive * archive,
@@ -274,7 +283,7 @@ void writeResultFiles(Archive * archive);
 ///
 //////////////////////////////////
 
-// This DM constant is in milliseconds. Otherwise, 
+// This DM constant is in milliseconds.
 const double DMCONST = 4.15 * pow((double)10, (double)6);
 
 const double MILLISEC = 1000;
@@ -318,12 +327,6 @@ const unsigned SHOW_EVERY_PERCENT_COMPLETE = 5;
 ///
 //////////////////////////////////
 
-// Original values of the archive
-// double origSNR;
-// unsigned origNBin;
-// unsigned origNSub;
-// unsigned origNChan;
-
 // The Barycentric period in seconds
 double dopplerFactor;
 
@@ -351,9 +354,9 @@ bool verbose = false;
 bool force = false;
 bool silent = false;
 
-// Maximum limits of frequency channels and subints (user specified)
 // If archive contains more than maxChannels and maxSubints, pdmp
 // will partially scrunch it to improve performance
+// These values are set by the -ms and -mc flags on command line
 int maxChannels = -1;
 int maxSubints = -1;
 
@@ -361,15 +364,13 @@ int maxSubints = -1;
 // The standard profile filename to compare against to compute SNR
 string standardProfileFilename = "";
 bool useStandardProfile = false;
+
 Reference::To<Pulsar::Profile> std_prof;
 Reference::To<StandardSNR> stdSNR;
-
-//bool isMultiEmission = false;
 
 int beginFilenamesIndex = -1;
 
 unsigned bestFitLineColour = DEFAULT_BEST_FIT_LINE_COLOUR;
-
 
 // The mappings between the site code and the array index used to get
 // the site's x,y,z coordinates and name
@@ -377,15 +378,6 @@ map<char, int> siteCode2Index;
 
 // A convenience type for the mapping
 typedef pair<char, int> entry;
-
-
-template<class T>
-void printVector(vector<T> v, int numElems) {
-	int i = 0;
-	for (typename vector<T>::iterator it = v.begin(); i < numElems && it < v.end(); i++, it++) {
-		cout << *it << ", ";
-	}
-}
 
 void usage (bool verbose_usage)
 {
@@ -689,6 +681,8 @@ int main (int argc, char** argv)
   vector<int> breakup_archives; 
 	  
   Pulsar::Plotter plotter;
+	
+	plotter.set_publn(false);
   pgplot::ColourMap::Name colour_map = pgplot::ColourMap::Heat;
   
 	// Get the command line parameters
@@ -744,10 +738,9 @@ int main (int argc, char** argv)
 			dopplerFactor = getDopplerFactor(archive);
 			
 			if (!silent) {
-				cout << endl << 
-				"Working on archive " << archive->get_source() << 
+				cout << "Working on archive " << archive->get_source() << 
 				": " << archive->get_filename() << 
-				endl << endl;
+				endl;
 			}
 
 			if (useStandardProfile) {
@@ -1105,8 +1098,7 @@ void scrunchPartially(Archive * scrunchedCopy) {
 				break;
 			}
 		}
-	}
-		
+	}		
 }
 
 
@@ -1405,7 +1397,7 @@ void partialTimeScrunch(Archive * archive) {
 
 	int afterSub = archive->get_nsubint();
 
-	if (!silent) cout << endl << "Time scrunched from " << nsub << " subints to " << afterSub << " subints." << endl;
+	if (!silent) cout << "Time scrunched from " << nsub << " subints to " << afterSub << " subints." << endl;
 }
 
 void partialFrequencyScrunch(Archive * archive) {
@@ -1425,7 +1417,7 @@ void partialFrequencyScrunch(Archive * archive) {
 
 	int afterChan = archive->get_nchan();
 
-	if (!silent) cout << endl << "Frequency scrunched from " << nchan << " channels to " << afterChan << " channels." << endl;
+	if (!silent) cout << "Frequency scrunched from " << nchan << " channels to " << afterChan << " channels." << endl;
 }
 
 double computePeriodError(const Archive * archive) {
@@ -1906,16 +1898,11 @@ double lmst(double mjd,double olong,double *tsid,double *tsid_der)
   nmjdu1 = (int)mjd;
   fmjdu1 = mjd - nmjdu1;
 
-	printf("nmjd = %d, fmjd = %3.10g\n", nmjdu1, fmjdu1, gmst0);
-
   tu0 = ((double)(nmjdu1-51545)+0.5)/3.6525e4;
   dtu  =fmjdu1/3.6525e4;
   tu = tu0+dtu;
   gmst0 = (a + tu0*(b+tu0*(c+tu0*d)))/86400.0;
   seconds_per_jc = 86400.0*36525.0;
-
-	printf("tu0 = %3.10g, dtu = %3.10g, tu = %3.10g, gmst0 = %3.10g\n", 
-	tu0, dtu, tu, gmst0);
 
   bprime = 1.0 + b/seconds_per_jc;
   cprime = 2.0 * c/seconds_per_jc;
@@ -1925,8 +1912,6 @@ double lmst(double mjd,double olong,double *tsid,double *tsid_der)
 
   gst = gmst0 + dtu*(seconds_per_jc + b + c*(tu+tu0) + d*(tu*tu+tu*tu0+tu0*tu0))/86400;
   xlst = gst - olong/360.0;
-	
-	printf("xlst = %3.10g\n", xlst);
 	
   xlst = fortran_mod(xlst,1.0);
 
@@ -2010,9 +1995,6 @@ void printHeader(const Archive * archive,
 
 	////////////////////////////////////////
 	/// Print the reference period and dm
-	
-	printf("newpdmp: (refP_us/1000) / dopplerFactor = %3.20g\n",
-	(refP_us/1000) / dopplerFactor);
 	
 	sprintf(temp, "Ref BC period (ms) = %3.9f%sRef TC period (ms) = %3.9f%sRef DM = %3.3f%sRAJ = %02d:%02d:%05.2f%sDecJ = %02d:%02d:%04.1f",
 		(refP_us/1000) / dopplerFactor, space.c_str(), 
@@ -2221,21 +2203,21 @@ void printResults(const Archive * archive) {
 		cout << endl << endl << "Results:" << endl << "--------" << endl;
 		cout << "Best SNR = " << bestSNR << endl << endl;
 		
-		printf("Ref BC Period (ms) = %3.15g\nRef TC Period (ms) =  %3.10g\nRef DM = %3.10g\n\n", 
+		printf("Ref BC Period (ms) = %3.15g  Ref TC Period (ms) =  %3.10g  Ref DM = %3.10g\n\n", 
 						bcPeriod_s * MILLISEC,	getPeriod(copy) * MILLISEC, getDM(copy)); 
 
-		printf("Best BC Period (ms) = %3.15g\nCorrection (ms) = %3.10g\nError (ms) = %3.10g\n\n", 
+		printf("Best BC Period (ms) = %3.15g  Correction (ms) = %3.10g  Error (ms) = %3.10g\n\n", 
 						bestPeriod_bc_us / MILLISEC,	(bestPeriod_bc_us-refP_us) / MILLISEC, periodError_ms / MILLISEC); 
 		
-		printf("Best TC Period (ms) = %3.15g\nCorrection (ms) = %3.10g\nError (ms) = %3.10g\n\n", 
+		printf("Best TC Period (ms) = %3.15g  Correction (ms) = %3.10g  Error (ms) = %3.10g\n\n", 
 						dopplerFactor * bestPeriod_bc_us / MILLISEC,	
 						(dopplerFactor * bestPeriod_bc_us / MILLISEC) - (getPeriod(copy) * MILLISEC), 
 						periodError_ms / MILLISEC); 
 		
-		printf("Best DM = %3.15g\nCorrection = %3.10g\nError = %3.10g\n\n", 
+		printf("Best DM = %3.15g  Correction = %3.10g  Error = %3.10g\n\n", 
 	        	bestDM, bestDM-refDM, dmError);
 		
-		printf("Best BC Frequency (Hz) = %3.15g\nError (Hz) = %3.10g\n", 
+		printf("Best BC Frequency (Hz) = %3.15g  Error (Hz) = %3.10g\n", 
 	        	bestFreq, freqError);
 		printf("Pulse width (bins) = %d\n", 
 	        	bestPulseWidth);
