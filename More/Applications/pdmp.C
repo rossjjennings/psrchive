@@ -1,5 +1,5 @@
 //
-// $Id: pdmp.C,v 1.3 2005/11/02 05:21:25 ateoh Exp $
+// $Id: pdmp.C,v 1.4 2005/11/04 05:07:17 ateoh Exp $
 //
 // Searches over trial DM and Period ranges and obtains the optimal 
 // DM and Period giving the highest S/N, plots SNR vs Period vs DM, 
@@ -1563,8 +1563,6 @@ void slaGeoc ( double p, double h, double *r, double *z )
    s = b * c;
    *r = ( a0 * c + h ) * cp / au;
    *z = ( a0 * s + h ) * sp / au;
-	 
-	 printf("geocentric = %3.10g, %3.10g\n", *r, *z);
 }
 
 

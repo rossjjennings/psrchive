@@ -122,33 +122,38 @@ try {
 
   integ->set_epoch(newmjd);
 
-  if (hdr_model && duration) {
 
-    // Set the folding period, using the polyco from the file header
-    integ->set_folding_period (hdr_model->period(newmjd));
+  if (hdr_model) {
 
-    // Set the toa epoch, correcting for phase offset, ensuring that the new
-    // epoch of the integration is at the same phase as the archive start
-    // time
-    Phase stt_phs = hdr_model->phase(reference_epoch);
-    Phase off_phs = hdr_model->phase(newmjd);
-    Phase dphase  = off_phs - stt_phs;
+  	// Set the folding period, using the polyco from the file header
+		// This was taken out of the condition clause below because period
+		// wasn't set when TSUB was 0
+  	integ->set_folding_period (hdr_model->period(newmjd));
 
-    double delta_t = dphase.fracturns() * integ->get_folding_period();
+		if (duration) {
+    	// Set the toa epoch, correcting for phase offset, ensuring that the new
+    	// epoch of the integration is at the same phase as the archive start
+    	// time
+    	Phase stt_phs = hdr_model->phase(reference_epoch);
+    	Phase off_phs = hdr_model->phase(newmjd);
+    	Phase dphase  = off_phs - stt_phs;
 
-    if (verbose == 3)
-      cerr << "Pulsar::FITSArchive::load_Integration"
-        "\n  PRED_PHS=" << extra_polyco.predicted_phase <<
-	"\n  phase(reference_epoch)=" << stt_phs <<
-	"\n  phase(epoch)=" << off_phs <<
-	"\n  diff=" << dphase << "=" << delta_t << "s" << endl;
+    	double delta_t = dphase.fracturns() * integ->get_folding_period();
 
-    newmjd -= delta_t;
-    integ->set_epoch (newmjd);
-   
-    if (verbose == 3)
-      cerr << "Pulsar::FITSArchive::load_Integration set_epoch " 
-	   << newmjd << endl;
+    	if (verbose == 3)
+      	cerr << "Pulsar::FITSArchive::load_Integration"
+        	"\n  PRED_PHS=" << extra_polyco.predicted_phase <<
+		"\n  phase(reference_epoch)=" << stt_phs <<
+		"\n  phase(epoch)=" << off_phs <<
+		"\n  diff=" << dphase << "=" << delta_t << "s" << endl;
+
+    	newmjd -= delta_t;
+    	integ->set_epoch (newmjd);
+
+    	if (verbose == 3)
+      	cerr << "Pulsar::FITSArchive::load_Integration set_epoch " 
+	  	 << newmjd << endl;
+		}
   }
 
 
