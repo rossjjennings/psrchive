@@ -67,7 +67,7 @@ c     like 9.99999999999999999D...
       return
  120  write(*,130) s(1:slen)    ! Error handler
       return
- 130  format ("Error: unable to decipher the following:",a)
+ 130  format ("Error: posparse.f: unable to decipher the following:",a)
       end
 
       real*8 function hmstoturns(s, prec)

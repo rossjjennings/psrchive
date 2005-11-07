@@ -1,5 +1,5 @@
 //
-// $Id: pdmp.C,v 1.4 2005/11/04 05:07:17 ateoh Exp $
+// $Id: pdmp.C,v 1.5 2005/11/07 05:44:18 ateoh Exp $
 //
 // Searches over trial DM and Period ranges and obtains the optimal 
 // DM and Period giving the highest S/N, plots SNR vs Period vs DM, 
@@ -137,7 +137,13 @@ void parseParameters(int argc, char **argv, double &periodOffset_us, double &per
 	                   double &dmOffset, double &dmStep, double &dmHalfRange, 
 									   string &plot_device, pgplot::ColourMap::Name &colour_map);
 
-// Parses a string to a number and checks if that value is a positive value										 
+// Parses a string to a number and checks if that value is a positive value
+// 
+// Given:
+//     optionName   The name of the option used over the command line. e.g. -ps
+//     numberString The input string accompanied with the option. e.g. -pr 20	
+//                  where 20 is the numberString
+//     value        The output value once the string has been parsed.
 void parseAndValidatePositiveDouble(string optionName, char * numberString, double &value);
 void parseAndValidatePositiveInt(string optionName, char * numberString, int &value);
 
@@ -738,13 +744,13 @@ int main (int argc, char** argv)
 			dopplerFactor = getDopplerFactor(archive);
 			
 			if (!silent) {
-				cout << "Working on archive " << archive->get_source() << 
+				cout << "\nWorking on archive " << archive->get_source() << 
 				": " << archive->get_filename() << 
 				endl;
 			}
 
 			if (useStandardProfile) {
-				if (!silent) cout << "Using standard profile: getting the standard profile filename = " << standardProfileFilename << endl;
+				if (!silent) cout << "Using standard profile: " << standardProfileFilename << endl;
 				Reference::To<Pulsar::Archive> std_arch( Pulsar::Archive::load(standardProfileFilename) );
 				std_arch->fscrunch();
 				std_arch->pscrunch();
@@ -818,7 +824,7 @@ int main (int argc, char** argv)
 	
 	elapsed = clock.get_elapsed();
 
-	if (!silent) printf ("\npdmp took %.2lf seconds to compute results.\n", elapsed  );	
+	if (!silent) printf ("\npdmp took %.2lf seconds\n", elapsed  );	
 	
   return 0;
 }
@@ -931,7 +937,7 @@ void solve_and_plot(const Archive* archive, double dmOffset, double dmStep, doub
 	
 	double maxP = minP + periodStep_us * periodBins;
 
-	if (!silent) cout << endl << "Searching for optimum DM and Period....";
+	if (!silent) cout << "Searching for optimum DM and Period...";
 	
 	// Begin the search for optimum DM and Period
 	// Foreach DM
@@ -941,10 +947,7 @@ void solve_and_plot(const Archive* archive, double dmOffset, double dmStep, doub
 
 		dmLoopCopy->set_dispersion_measure(currDM);
 		dmLoopCopy->dedisperse();
-		
-		//plotPhaseFreq(dmLoopCopy, plotter);			
-		//cpg_next();
-		
+				
 		dmLoopCopy->fscrunch();
 		
 		// Foreach Period (include one extra period bin at the end to scale with
@@ -2198,21 +2201,20 @@ void printResults(const Archive * archive) {
 
 	// Print out the results on the console
 	if (!silent) {
-		cout << endl << endl << "Results:" << endl << "--------" << endl;
-		cout << "Best SNR = " << bestSNR << endl << endl;
+		cout << "\n\nBest SNR = " << bestSNR << endl;
 		
-		printf("Ref BC Period (ms) = %3.15g  Ref TC Period (ms) =  %3.10g  Ref DM = %3.10g\n\n", 
+		printf("Ref BC Period (ms) = %3.15g  Ref TC Period (ms) =  %3.10g  Ref DM = %3.10g\n", 
 						bcPeriod_s * MILLISEC,	getPeriod(copy) * MILLISEC, getDM(copy)); 
 
-		printf("Best BC Period (ms) = %3.15g  Correction (ms) = %3.10g  Error (ms) = %3.10g\n\n", 
+		printf("Best BC Period (ms) = %3.15g  Correction (ms) = %3.10g  Error (ms) = %3.10g\n", 
 						bestPeriod_bc_us / MILLISEC,	(bestPeriod_bc_us-refP_us) / MILLISEC, periodError_ms / MILLISEC); 
 		
-		printf("Best TC Period (ms) = %3.15g  Correction (ms) = %3.10g  Error (ms) = %3.10g\n\n", 
+		printf("Best TC Period (ms) = %3.15g  Correction (ms) = %3.10g  Error (ms) = %3.10g\n", 
 						dopplerFactor * bestPeriod_bc_us / MILLISEC,	
 						(dopplerFactor * bestPeriod_bc_us / MILLISEC) - (getPeriod(copy) * MILLISEC), 
 						periodError_ms / MILLISEC); 
 		
-		printf("Best DM = %3.15g  Correction = %3.10g  Error = %3.10g\n\n", 
+		printf("Best DM = %3.15g  Correction = %3.10g  Error = %3.10g\n", 
 	        	bestDM, bestDM-refDM, dmError);
 		
 		printf("Best BC Frequency (Hz) = %3.15g  Error (Hz) = %3.10g\n", 

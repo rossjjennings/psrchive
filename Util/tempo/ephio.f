@@ -834,7 +834,7 @@ c     Otherwise
       return 
  210  write(*,220) tok(1:length(tok)) ! error handler
       return
- 220  format ("Error: unable to decipher the following:",a)
+ 220  format ("Error: ephio.f: unable to decipher the following:",a)
       end
 
 
