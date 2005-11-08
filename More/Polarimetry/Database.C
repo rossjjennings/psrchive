@@ -610,7 +610,7 @@ void Pulsar::Database::add (Pulsar::Database::Entry& entry)
     if (entries[ie] == entry) {
       cerr << "Pulsar::Database::add keeping newest of duplicate entries:\n\t"
            << entries[ie].filename << " and\n\t" << entry.filename << endl;
-      if ( file_mod_time (get_filename(entry).c_str()) <
+      if ( file_mod_time (get_filename(entry).c_str()) >
 	   file_mod_time (get_filename(entries[ie]).c_str()) )
 	entries[ie] = entry;
       return;
