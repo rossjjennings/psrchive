@@ -1,9 +1,9 @@
-# SWIN_LIB_CSLA([ACTION-IF-FOUND [,ACTION-IF-NOT-FOUND]])
+# SWIN_LIB_SLA([ACTION-IF-FOUND [,ACTION-IF-NOT-FOUND]])
 # ----------------------------------------------------------
 AC_DEFUN([SWIN_LIB_SLA],
 [
   AC_PROVIDE([SWIN_LIB_SLA])
-  AC_REQUIRE([AC_F77_LIBRARY_LDFLAGS])
+  AC_REQUIRE([SWIN_FMATH])
 
   AC_MSG_CHECKING([for SLA installation])
 
