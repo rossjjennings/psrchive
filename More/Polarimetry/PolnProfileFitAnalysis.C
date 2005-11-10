@@ -49,12 +49,12 @@ Pulsar::PolnProfileFitAnalysis::get_curvature (Matrix<8,8,double>& curvature)
 
   mean_variance = 0.0;
 
-  cerr << "standard variance=" << fit->standard_variance << endl;
+  // cerr << "standard variance=" << fit->standard_variance << endl;
 
   for (unsigned i=0; i<4; i++)
     mean_variance += fit->standard_variance[i] / 4.0;
 
-  cerr << "mean variance=" << mean_variance << endl;
+  // cerr << "mean variance=" << mean_variance << endl;
 
   curvature /= mean_variance;
 }
@@ -227,19 +227,19 @@ void Pulsar::PolnProfileFitAnalysis::set_fit (PolnProfileFit* f)
   //cerr << "I_curv=\n" << I_curvature << endl;
   //cerr << "I_cov=\n" << I_covariance << endl;
     
-  // the normalized unconditional phase shift variance
+  // the relative unconditional phase shift variance
   double hatvar_varphi = covariance[0][0] / I_covariance[0][0];
 
-  // the normalized conditional phase shift variance
+  // the relative conditional phase shift variance
   double hatvar_varphiJ = hatvar_varphi * (1-R2_varphiJ);
 
-  // the variance of the normalized unconditional phase shift variance
+  // the variance of the relative unconditional phase shift variance
   double var_hatvar_varphi = 0.0;
 
   // the variance of the multiple correlation squared
   double var_R2_varphiJ = 0.0;
 
-  // the variance of the normalized conditional phase shift variance
+  // the variance of the relative conditional phase shift variance
   double var_hatvar_varphiJ = 0.0;
 
   // the variance of the phase shift variance
@@ -317,20 +317,17 @@ void Pulsar::PolnProfileFitAnalysis::set_fit (PolnProfileFit* f)
   multiple_correlation = sqrt(R2);
 
   Estimate<double> hatvar (hatvar_varphi, var_hatvar_varphi);
-  normalized_error = sqrt(hatvar);
+  relative_error = sqrt(hatvar);
 
   Estimate<double> hatvarJ (hatvar_varphiJ, var_hatvar_varphiJ);
-
-  cerr << "sigma=" << normalized_error
-       << " R=" << multiple_correlation
-       << " cond=" << sqrt(hatvarJ) << endl;
+  relative_conditional_error = sqrt(hatvarJ);
 
 }
 
 Estimate<double>
-Pulsar::PolnProfileFitAnalysis::get_normalized_error () const
+Pulsar::PolnProfileFitAnalysis::get_relative_error () const
 {
-  return normalized_error;
+  return relative_error;
 }
 
 
@@ -338,6 +335,12 @@ Estimate<double>
 Pulsar::PolnProfileFitAnalysis::get_multiple_correlation () const
 {
   return multiple_correlation;
+}
+
+Estimate<double>
+Pulsar::PolnProfileFitAnalysis::get_relative_conditional_error () const
+{
+  return relative_conditional_error;
 }
 
 // /////////////////////////////////////////////////////////////////////
