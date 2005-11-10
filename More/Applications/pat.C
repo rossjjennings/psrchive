@@ -5,6 +5,7 @@
 
 #include "Pulsar/PolnProfile.h"
 #include "Pulsar/PolnProfileFit.h"
+#include "Pulsar/PolnProfileFitAnalysis.h"
 #include "MEAL/Polar.h"
 
 #include "Pulsar/ObsExtension.h"
@@ -22,7 +23,6 @@
 
 #include <fstream>
 #include <iostream>
-
 
 void loadGaussian(string file,  
 		  Reference::To<Pulsar::Archive> &stdarch,  
@@ -75,6 +75,7 @@ int main (int argc, char *argv[])
   bool std_multiple = false;
   bool gaussian = false;
   bool full_poln = false;
+  bool full_poln_analysis = false;
 
   bool fscrunch = false;
   bool tscrunch = false;
@@ -94,7 +95,7 @@ int main (int argc, char *argv[])
   int gotc = 0;
 
   Pulsar::PolnProfileFit fit;
-  while ((gotc = getopt(argc, argv, "hiDFn:ps:g:a:A:tTvV:f:qS:")) != -1) {
+  while ((gotc = getopt(argc, argv, "a:A:cDf:Fg:hin:pPqS:s:tTvV:")) != -1) {
     switch (gotc) {
     case 'h':
       usage ();
@@ -115,11 +116,17 @@ int main (int argc, char *argv[])
       Pulsar::Archive::set_verbosity(3);
       MEAL::Function::verbose = true;
       break;
+
+    case 'c':
+      fit.choose_maximum_harmonic = true;
+      break;
+
     case 'D':
       denoise = true;
       break;
+
     case 'i':
-      cout << "$Id: pat.C,v 1.39 2005/06/16 07:07:20 redwards Exp $" << endl;
+      cout << "$Id: pat.C,v 1.40 2005/11/10 23:14:30 straten Exp $" << endl;
       return 0;
 
     case 'F':
@@ -139,6 +146,8 @@ int main (int argc, char *argv[])
       gaussFile = optarg;
       break;
 
+    case 'P':
+      full_poln_analysis = true;
     case 'p':
       full_poln = true;
       break;
@@ -202,10 +211,11 @@ int main (int argc, char *argv[])
       cout << "Unrecognised option " << gotc << endl;
     }
   }
+
   for (int ai=optind; ai<argc; ai++)
     dirglob (&archives, argv[ai]);
   
-  if (archives.empty()) {
+  if (!full_poln_analysis && archives.empty()) {
     cerr << "No archives were specified" << endl;
     return -1;
   } 
@@ -217,33 +227,50 @@ int main (int argc, char *argv[])
 
   Reference::To<const Pulsar::PolnProfile> poln_profile;
 
-  if (!std_multiple && !gaussian) /* If only using one standard profile */
-    {
-      try {
-	stdarch = Pulsar::Archive::load(std);
-	stdarch->fscrunch();
-	stdarch->tscrunch();
-	
-        if (denoise)
-          stdarch->denoise();
-	
-	if (full_poln) {
-	  
-	  cerr << "pat: full polarization fitting with " << std << endl;
-	  fit.set_standard( stdarch->get_Integration(0)->new_PolnProfile(0) );
-	  fit.set_transformation( new MEAL::Polar );
-	  
-	}
-	else
-	  stdarch->convert_state(Signal::Intensity);
-	
-      }
-      catch (Error& error) {
-	cerr << "Error processing standard profile:" << endl;
-	cerr << error << endl;
-	return -1;
-      }
+
+  if (!std_multiple && !gaussian) try {
+
+    // If only using one standard profile ...
+
+    stdarch = Pulsar::Archive::load(std);
+    stdarch->fscrunch();
+    stdarch->tscrunch();
+    
+    if (denoise)
+      stdarch->denoise();
+    
+    if (full_poln) {
+      
+      cerr << "pat: using full polarization" << endl;
+      fit.set_standard( stdarch->get_Integration(0)->new_PolnProfile(0) );
+      fit.set_transformation( new MEAL::Polar );
+      
     }
+    else
+      stdarch->convert_state(Signal::Intensity);
+
+    if (full_poln_analysis) {
+
+      cerr << "pat: performing full polarization analysis" << endl;
+      Pulsar::PolnProfileFitAnalysis analysis;
+      analysis.set_fit (&fit);
+      
+      cerr << "Relative error = "
+	   << analysis.get_relative_error () << endl
+	   << "Multiple correlation = "
+	   << analysis.get_multiple_correlation() << endl
+	   << "Relative conditional error = "
+	   << analysis.get_relative_conditional_error () << endl;
+      
+    }
+
+  }
+  catch (Error& error) {
+    cerr << "Error processing standard profile:" << endl;
+    cerr << error << endl;
+    return -1;
+  }
+
   // Give format information for Tempo2 output 
   if (strcasecmp(outFormat.c_str(),"tempo2")==0)
     cout << "FORMAT 1" << endl;
