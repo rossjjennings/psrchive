@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/Attic/PolnProfileFitAnalysis.h,v $
-   $Revision: 1.5 $
-   $Date: 2005/09/14 12:04:49 $
+   $Revision: 1.6 $
+   $Date: 2005/11/10 23:14:41 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PolnProfileFitAnalysis_h
@@ -23,16 +23,22 @@ namespace Pulsar {
     //! Set the PolnProfileFit algorithm to be analysed
     void set_fit (PolnProfileFit*);
 
-    //! Get the normalized arrival time error
-    Estimate<double> get_normalized_error () const;
+    //! Get the relative arrival time error
+    Estimate<double> get_relative_error () const;
 
     //! Get the multiple correlation between phase shift and Jones parameters
     Estimate<double> get_multiple_correlation () const;
 
+    //! Get the relative conditional arrival time error
+    Estimate<double> get_relative_conditional_error () const;
+
   protected:
 
-    //! The normalized arrival time error
-    Estimate<double> normalized_error;
+    //! The relative arrival time error
+    Estimate<double> relative_error;
+
+    //! The relative conditional arrival time error
+    Estimate<double> relative_conditional_error;
 
     //! The multiple correlation between phase shift and Jones parameters
     Estimate<double> multiple_correlation;
