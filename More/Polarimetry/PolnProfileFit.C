@@ -72,8 +72,6 @@ void Pulsar::PolnProfileFit::init ()
   choose_maximum_harmonic = false;
   emulate_scalar = false;
 
-  var_phase = 0.0;
-  iterations = 0;
 }
 
 void Pulsar::PolnProfileFit::set_maximum_harmonic (unsigned max)
@@ -104,18 +102,18 @@ void Pulsar::PolnProfileFit::set_standard (const PolnProfile* _standard)
   unsigned std_harmonic = standard->get_nbin() / 2;
 
   if (choose_maximum_harmonic) {
-    //if (Profile::verbose)
-    cerr << "Pulsar::PolnProfileFit::set_standard chose "
-	 << n_harmonic << " harmonics" << endl;
+    if (Profile::verbose)
+      cerr << "Pulsar::PolnProfileFit::set_standard chose "
+	   << n_harmonic << " harmonics" << endl;
   }
   else if (maximum_harmonic && maximum_harmonic < std_harmonic) {
-    //if (Profile::verbose)
+    if (Profile::verbose)
       cerr << "Pulsar::PolnProfileFit::set_standard using " << maximum_harmonic
 	   << " out of " << std_harmonic << " harmonics" << endl;
     n_harmonic = maximum_harmonic;
   }
   else {
-    //if (Profile::verbose)
+    if (Profile::verbose)
       cerr << "Pulsar::PolnProfileFit::set_standard using all "
 	   << std_harmonic << " harmonics" << endl;
     n_harmonic = std_harmonic;
@@ -170,12 +168,28 @@ void Pulsar::PolnProfileFit::choose_max_harmonic (const PolnProfile* psd)
   n_harmonic = psd->get_nbin();
 
   unsigned max_harmonic = 0;
-  unsigned npol = 4;
+  unsigned ipol, npol = 4;
 
-  for (unsigned ipol=0; ipol<npol; ipol++) {
+  vector<float> S (n_harmonic, 0);
+  double S_variance = 0;
+
+  for (ipol=1; ipol<npol; ipol++)  {
+    const float* amps = psd->get_amps(ipol);
+    for (unsigned ibin=1; ibin<n_harmonic; ibin++)
+      S[ibin] += amps[ibin];
+    S_variance += standard_variance[ipol];
+  }
+
+  for (ipol=0; ipol<2; ipol++) {
 
     const float* amps = psd->get_amps(ipol);
+    if (ipol)
+      amps = &(S[0]);
+
     double threshold = standard_variance[ipol] * 3.0;
+    if (ipol)
+      threshold = S_variance * 3.0;
+
     unsigned count = 0;
 
     // cerr << "THRESHOLD=" << threshold  << endl;
@@ -195,6 +209,7 @@ void Pulsar::PolnProfileFit::choose_max_harmonic (const PolnProfile* psd)
     }
     
     // cerr << "max_harmonic = " << max_harmonic << endl;
+
   }
 
   n_harmonic = max_harmonic;
@@ -250,7 +265,7 @@ void Pulsar::PolnProfileFit::fit (const PolnProfile* observation) try
 
   for (unsigned ipol=0; ipol<npol; ipol++) {
     // the noise in the standard will contribute
-    variance[ipol] += standard_variance[ipol];
+    // variance[ipol] += standard_variance[ipol];
   }
 
   model->delete_data ();
@@ -292,66 +307,6 @@ void Pulsar::PolnProfileFit::fit (const PolnProfile* observation) try
 #ifdef _DEBUG
   cerr << "Pulsar::PolnProfileFit::fit solved in " << clock << endl;
 #endif
-
-  vector< vector<double> > covariance;
-  model->get_fit_covariance (covariance);
-
-  Matrix <7,7,double> c_Jones;       // C_J in str05
-  Vector <7,double> c_phase_Jones;   // c_{\varphi J} in str05
-
-  unsigned i, j;
-
-#define OUTPUT_COVARIANCE 1
-
-#if OUTPUT_COVARIANCE
-  fprintf (stderr, "%12s%12.3g\n", "phase", covariance[2][2]);
-#endif
-
-  for (i=0; i < 7; i++) {
-
-    unsigned m = i + 3;
-#if OUTPUT_COVARIANCE
-    fprintf (stderr, "%12s", model->get_param_name(m).c_str());
-#endif
-
-    c_phase_Jones[i] = covariance[m][2];
-    // c_phase_Jones[i] /= sqrt(covariance[m][m]*covariance[2][2]);
-
-#if OUTPUT_COVARIANCE
-    fprintf (stderr, "%12.3g", c_phase_Jones[i]);
-#endif
-
-    for (unsigned j=0; j < 7; j++) {
-
-      unsigned n = j + 3;
-      c_Jones[i][j] = covariance[m][n];
-      // c_Jones[i][j] /= sqrt(covariance[m][m]*covariance[n][n]);
-
-      if (j > i)
-	continue;
-
-#if OUTPUT_COVARIANCE
-      fprintf (stderr, "%12.3g", c_Jones[i][j]);
-#endif
-
-    }
-
-#if OUTPUT_COVARIANCE
-    fprintf (stderr, "\n");
-#endif
-  }
-
-#if SUM
-  var_phase += covariance[2][2];
-  cov_Jones += c_Jones;
-  cov_phase_Jones += c_phase_Jones;
-#else
-  var_phase = covariance[2][2];
-  cov_Jones = c_Jones;
-  cov_phase_Jones = c_phase_Jones;
-#endif
-
-  iterations ++;
 
 }
 catch (Error& error) {
