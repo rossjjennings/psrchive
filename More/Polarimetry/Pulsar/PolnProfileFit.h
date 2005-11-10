@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PolnProfileFit.h,v $
-   $Revision: 1.11 $
-   $Date: 2005/09/04 18:14:02 $
+   $Revision: 1.12 $
+   $Date: 2005/11/10 23:14:36 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PolnProfileFit_h
@@ -96,18 +96,10 @@ namespace Pulsar {
     //! Set true when only the total intensity should be used
     bool emulate_scalar;
 
-    //! The covariances between the Jones matrix parameters
-    Matrix <7,7,double> cov_Jones;
-
-    //! The covariances between the phase and each Jones matrix parameter
-    Vector <7,double> cov_phase_Jones;
-
-    //! The variance of the phase
-    double var_phase;
-
-    unsigned iterations;
-
   protected:
+
+    friend class PolnProfileFitAnalysis;
+    friend class ScalarProfileFitAnalysis;
 
     //! The maximum number of harmonics to include in the fit
     unsigned maximum_harmonic;
