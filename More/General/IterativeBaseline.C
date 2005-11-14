@@ -62,7 +62,9 @@ void Pulsar::IterativeBaseline::set_Profile (const Profile* _profile)
 
 void Pulsar::IterativeBaseline::get_weight (PhaseWeight& weight)
 {
+#ifndef _DEBUG
   if (Profile::verbose)
+#endif
     cerr << "Pulsar::IterativeBaseline::get_weight" << endl;
 
   if (!profile)
@@ -73,6 +75,11 @@ void Pulsar::IterativeBaseline::get_weight (PhaseWeight& weight)
   double mean, var, var_mean;
 
   if (initial_baseline) try {
+
+#ifndef _DEBUG
+    if (Profile::verbose)
+#endif
+      cerr << "Pulsar::IterativeBaseline::get_weight initial_baseline" << endl;
 
     initial_baseline->set_Profile (profile);
     initial_baseline->get_weight (weight);
@@ -93,17 +100,25 @@ void Pulsar::IterativeBaseline::get_weight (PhaseWeight& weight)
 
     get_bounds (weight, lower, upper);
 
-    if (lower == upper)
-      break;
+    if (lower == upper) {
+#ifndef _DEBUG
+      if (Profile::verbose)
+#endif
+	cerr << "Pulsar::IterativeBaseline::get_weight "
+	  "lower bound equals upper bound = " << upper << endl;
 
-    bool changed = false;
+      break;
+    }
+
+    unsigned added = 0;
+    unsigned subtracted = 0;
 
     for (unsigned ibin=0; ibin<nbin; ibin++) {
 
       if ( amps[ibin] > lower && amps[ibin] < upper )  {
 	
 	if (weight[ibin] == 0.0) {
-	  changed = true;
+	  added ++;
 #ifdef _DEBUG
 	  cerr << "+ ibin=" << ibin << " v=" << amps[ibin] << endl;
 #endif
@@ -115,7 +130,7 @@ void Pulsar::IterativeBaseline::get_weight (PhaseWeight& weight)
       else {
 	
 	if (weight[ibin] == 1.0) {
-	  changed = true;
+	  subtracted ++;
 #ifdef _DEBUG
 	  cerr << "- ibin=" << ibin << " v=" << amps[ibin] << endl;
 #endif
@@ -127,8 +142,16 @@ void Pulsar::IterativeBaseline::get_weight (PhaseWeight& weight)
       
     }
 
-    if (!changed)
+#ifdef _DEBUG
+    cerr << "added=" << added << " subtracted=" << subtracted << endl;
+#endif
+
+    if (!added && !subtracted) {
+#ifdef _DEBUG
+      cerr << "no change" << endl;
+#endif
       break;
+    }
 
   }
 
