@@ -247,6 +247,17 @@ void Pulsar::PolnProfile::transform (const Jones<double>& response)
     throw Error (InvalidParam, "Pulsar::PolnProfile::transform",
                  "non-invertbile response.  det(J)=%f", Gain);
 
+  if (Gain == 0) {
+
+    if (Profile::verbose)
+      cerr << "Pulsar::PolnProfile::transform zero response" << endl;
+
+    for (unsigned ipol=0; ipol < 4; ipol++)
+      get_profile(ipol)->set_weight ( 0.0 );
+
+    return;
+  }
+
   if (state == Signal::Stokes)
     for (unsigned ibin = 0; ibin < nbin; ibin++)
       set_Stokes (ibin, ::transform (get_Stokes(ibin), response));
