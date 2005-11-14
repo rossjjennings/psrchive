@@ -279,6 +279,9 @@ void Pulsar::PolnCalibrator::build (unsigned nchan) try {
 
     }
 
+    if (bad[ichan])
+      response[ichan] = 0.0;
+
   }
 
   if (median_smoothing)  {
@@ -361,6 +364,8 @@ void Pulsar::PolnCalibrator::build (unsigned nchan) try {
 
   }
 
+  complex<float> zero (0.0);
+
   if (nchan > response.size()) {
 
     if (verbose)
@@ -374,6 +379,8 @@ void Pulsar::PolnCalibrator::build (unsigned nchan) try {
     vector< Jones<float> > backup = response;
 
     for (ichan=0; ichan<response.size(); ichan++) {
+      if (det(response[ichan]) == zero)
+	continue;
       polar (determinant, hermitian, unitary, response[ichan]);
       unitary *= unitary;
       response[ichan] = determinant * (hermitian * unitary);
@@ -408,10 +415,13 @@ void Pulsar::PolnCalibrator::build (unsigned nchan) try {
 
   for (ichan=0; ichan < nchan; ichan++) {
 
+    if (det(response[ichan]) == zero)
+      continue;
+
     // add the known receiver transformation
     response[ichan] *= rcvr_xform;
 
-    // invert:  the response must undo the effect of the instrument
+    // invert: the response must undo the effect of the instrument
     response[ichan] = inv (response[ichan]);
 
   }
