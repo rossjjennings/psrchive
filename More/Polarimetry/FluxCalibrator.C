@@ -219,7 +219,7 @@ void Pulsar::FluxCalibrator::calibrate (Archive* arch)
   for (unsigned isub=0; isub < arch->get_nsubint(); isub++)
     calibrate (arch->get_Integration(isub));
 
-  arch->set_scale(Signal::Jansky);
+  arch->set_scale (Signal::Jansky);
 }
 
 
@@ -423,8 +423,12 @@ void Pulsar::FluxCalibrator::calibrate (Integration* subint)
   unsigned nchan = subint->get_nchan();
 
   for (unsigned ichan=0; ichan<nchan; ichan++)
-    for (unsigned ipol=0; ipol<npol; ipol++)
-      *(subint->get_Profile (ipol, ichan)) *= cal_flux[ichan].val;
+    if (cal_flux[ichan].val == 0)
+      subint->set_weight (ichan, 0.0);
+    else
+      for (unsigned ipol=0; ipol<npol; ipol++)
+	*(subint->get_Profile (ipol, ichan)) *= cal_flux[ichan].val;
+
 }
 
 //! Get the number of frequency channels in the calibrator
