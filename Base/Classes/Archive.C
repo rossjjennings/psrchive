@@ -408,8 +408,8 @@ void Pulsar::Archive::fold (unsigned nfold)
 }
 
 
-void Pulsar::Archive::invint ()
-{
+void Pulsar::Archive::invint () try {
+
   if (get_nsubint() == 0)
     return;
   
@@ -420,6 +420,9 @@ void Pulsar::Archive::invint ()
   
   set_state( Signal::Invariant );
   set_npol(1);
+}
+catch (Error& error) {
+  throw error += "Pulsar::Archive::invint";
 }
 
 Estimate<float> Pulsar::Archive::get_poln_flux (int _type)
@@ -435,20 +438,17 @@ Estimate<float> Pulsar::Archive::get_poln_flux (int _type)
   reaches a minimum.  This phase is then used to remove the baseline from
   each of the Integrations.
   */
-void Pulsar::Archive::remove_baseline (float phase, float dc)
-{
-  try {
-
-    if (phase < 0.0)
-      phase = find_min_phase (dc);
-    
-    for (unsigned isub=0; isub < get_nsubint(); isub++)
-      get_Integration(isub) -> remove_baseline (phase, dc);
-
-  }
-  catch (Error& error) {
-    throw error += "Pulsar::Archive::remove_baseline";
-  }
+void Pulsar::Archive::remove_baseline (float phase, float dc) try {
+  
+  if (phase < 0.0)
+    phase = find_min_phase (dc);
+  
+  for (unsigned isub=0; isub < get_nsubint(); isub++)
+    get_Integration(isub) -> remove_baseline (phase, dc);
+  
+}
+catch (Error& error) {
+  throw error += "Pulsar::Archive::remove_baseline";
 }
 
 double Pulsar::Archive::find_best_period (){
