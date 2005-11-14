@@ -119,7 +119,7 @@ int main (int argc, char *argv[]) {
       Pulsar::Archive::set_verbosity(3);
       break;
     case 'i':
-      cout << "$Id: paz.C,v 1.27 2005/06/12 02:30:38 redwards Exp $" << endl;
+      cout << "$Id: paz.C,v 1.28 2005/11/14 02:09:50 ahotan Exp $" << endl;
       return 0;
 
     case 'm':
@@ -505,7 +505,8 @@ int main (int argc, char *argv[]) {
       }
       zapper->zap_specific(arch, mask);
     }
-    else if (edge_zap) {
+    
+    if (edge_zap) {
       float fraction = percent / 100.0;
       int buffer = int(float(nchan) * fraction);
 	
@@ -516,7 +517,8 @@ int main (int argc, char *argv[]) {
       }
       zapper->zap_specific(arch, mask);
     }
-    else if (zap_ston) {
+    
+    if (zap_ston) {
       double theston = 0.0;
       arch->pscrunch();
       for (unsigned isub = 0; isub < arch->get_nsubint(); isub++) {
@@ -528,10 +530,10 @@ int main (int argc, char *argv[]) {
 	}
       }
     }
-
+    
     if (!write)
       continue;
-
+    
     if (ext.empty()) {
       cout << "Unloading " << arch->get_filename() << " ..." << endl;
       arch->unload();
@@ -559,5 +561,3 @@ int main (int argc, char *argv[]) {
 
   return 0;
 }
-
-
