@@ -117,7 +117,7 @@ int main (int argc, char **argv)
       return 0;
       
     case 'i':
-      cout << "$Id: psradd.C,v 1.20 2005/08/22 21:27:46 straten Exp $" << endl;
+      cout << "$Id: psradd.C,v 1.21 2005/11/15 03:34:38 ateoh Exp $" << endl;
       return 0;
       
     case 'b':
@@ -269,6 +269,11 @@ int main (int argc, char **argv)
   // the accumulated total
   Reference::To<Pulsar::Archive> total;
 
+	// This is needed to maintain the archive object's life while
+	// it is being appended to total
+	vector< Reference::To<Pulsar::Archive> > archive_vector;
+
+
   bool reset_total_next_load = true;
   bool correct_total = false;
 
@@ -278,7 +283,10 @@ int main (int argc, char **argv)
       cerr << "psradd: Loading [" << filenames[ifile] << "]\n";
     
     archive = Pulsar::Archive::load (filenames[ifile]);
-    
+
+		// Store copy of it to maintain reference
+		archive_vector.push_back(archive);
+
     if (check_has_data && archive->integration_length() == 0) {
       cerr << "psradd: archive [" << filenames[ifile] << "] has no data\n";
       continue;
