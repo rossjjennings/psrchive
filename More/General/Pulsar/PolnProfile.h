@@ -70,7 +70,7 @@ namespace Pulsar {
     void set_Stokes (unsigned ibin, const Stokes<float>& stokes);
 
     //! Get the coherency matrix for the specified bin
-    Jones<double> get_coherence (unsigned ibin);
+    Jones<double> get_coherence (unsigned ibin) const;
 
     //! Set the coherency matrix for the specified bin
     void set_coherence (unsigned ibin, const Jones<double>& coherency);
@@ -87,9 +87,12 @@ namespace Pulsar {
     //! Convert to the specified state
     void convert_state (Signal::State output_state);
 
-    //! Convert the Stokes parameters to the specified basis without changing the labels
+    //! Convert the Stokes parameters to the specified basis
     void convert_basis (Signal::Basis to = Signal::Circular);
-    
+
+    //! Return the invariant interval
+    void invint (Profile* invint) const;
+
   protected:
 
     //! The basis in which the radiation is measured

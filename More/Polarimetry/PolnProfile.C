@@ -196,10 +196,10 @@ void Pulsar::PolnProfile::set_Stokes (unsigned ibin,
 //
 //
 //
-Jones<double> Pulsar::PolnProfile::get_coherence (unsigned ibin)
+Jones<double> Pulsar::PolnProfile::get_coherence (unsigned ibin) const
 {
   if (state != Signal::Coherence)
-    convert_state (Signal::Coherence);
+    const_cast<PolnProfile*>(this)->convert_state (Signal::Coherence);
 
   if (ibin >= profile[0]->get_nbin())
     throw Error (InvalidRange, "PolnProfile::get_coherence",
@@ -426,3 +426,40 @@ void Pulsar::PolnProfile::convert_basis (Signal::Basis to) {
   } 
 }
 				      
+
+/*! 
+  Forms the Stokes polarimetric invariant interval,
+  \f$\det{P}=I^2-Q^2-U^2-V^2\f$, for every bin of each chan so that,
+  upon completion, npol == 1 and state == Signal::Invariant.
+
+  If invint_square is true, this function calculates
+  \f$\det\rho=I^2-Q^2-U^2-V^2\f$, otherwise \f$\sqrt{\det\rho}\f$ is
+  calcuated.
+
+  \pre The profile baselines must have been removed (unchecked).
+
+  \exception string thrown if Stokes 4-vector cannot be formed
+*/
+void Pulsar::PolnProfile::invint (Profile* invint) const
+{
+  unsigned nbin = get_nbin();
+
+  invint->resize (nbin);
+
+  if (state == Signal::Stokes)
+    for (unsigned ibin = 0; ibin < nbin; ibin++)
+      invint->get_amps()[ibin] = det( get_Stokes(ibin) );
+  
+  else if (state == Signal::Coherence)
+    for (unsigned ibin = 0; ibin < nbin; ibin++)
+      invint->get_amps()[ibin] = abs( det(get_coherence(ibin)) );
+
+  // remove the baseline
+  *(invint) -= invint->mean( invint->find_min_phase() );
+  // return to a second-order moment
+  invint->square_root();
+
+  invint->set_state (Signal::Inv);
+  invint->set_centre_frequency ( get_Profile(0)->get_centre_frequency() );
+  invint->set_weight ( get_Profile(0)->get_centre_frequency() );
+}
