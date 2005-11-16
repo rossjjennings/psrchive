@@ -49,12 +49,11 @@ Pulsar::PolnProfileFitAnalysis::get_curvature (Matrix<8,8,double>& curvature)
 
   mean_variance = 0.0;
 
-  // cerr << "standard variance=" << fit->standard_variance << endl;
-
+  // FACTOR OF TWO INCREASE IN VARIANCE - SEE OLD VERSION OF VAN STRATEN 2004
   for (unsigned i=0; i<4; i++)
-    mean_variance += fit->standard_variance[i] / 4.0;
+    mean_variance += fit->standard_variance[i] / 2.0;
 
-  // cerr << "mean variance=" << mean_variance << endl;
+  mean_variance = 2.0;
 
   curvature /= mean_variance;
 }
@@ -349,11 +348,31 @@ Pulsar::PolnProfileFitAnalysis::get_relative_conditional_error () const
 //
 // /////////////////////////////////////////////////////////////////////
 
-
-void Pulsar::ScalarProfileFitAnalysis::set_fit (PolnProfileFit* f)
+void Pulsar::ScalarProfileFitAnalysis::set_fit (const PolnProfileFit* fit)
 {
-  fit = f;
+  set_spectrum( fit->standard_fourier->get_Profile(0) );
+  set_max_harmonic( fit->model->get_num_input() );
+
+  mean_variance = fit->standard_variance[0];
+  mean_variance = 1.0;
 }
+
+void Pulsar::ScalarProfileFitAnalysis::set_spectrum (const Profile* p)
+{
+  spectrum = p;
+  amps = reinterpret_cast<const complex<float>*> (p->get_amps() + 2);
+}
+
+void Pulsar::ScalarProfileFitAnalysis::set_max_harmonic (unsigned n)
+{
+  max_harmonic = n;
+}
+
+void Pulsar::ScalarProfileFitAnalysis::set_variance (double v)
+{
+  mean_variance = v;
+}
+
 
 void
 Pulsar::ScalarProfileFitAnalysis::get_curvature (Matrix<2,2,double>& curvature)
@@ -362,23 +381,10 @@ Pulsar::ScalarProfileFitAnalysis::get_curvature (Matrix<2,2,double>& curvature)
 
   complex<double> gradient[2];
 
-  const complex<float>* amps;
-  amps = reinterpret_cast<const complex<float>*>
-    (fit->standard_fourier->get_amps(0));
-
-  for (unsigned ih=0; ih < fit->model->get_num_input(); ih++) {
+  for (unsigned ih=0; ih < max_harmonic; ih++) {
 
     complex<double> delexp_delvarphi (0.0, -2.0 * M_PI * double(ih+1));
-    complex<double> Stokes_I (amps[ih+1]);
-
-#ifdef _DEBUG
-    double phase_shift = -2.0 * M_PI * double(ih+1);
-    fit->phase_axis.set_value (phase_shift);
-    fit->model->set_input_index (ih);
-    Jones<double> jones = fit->model->evaluate ();
-    cerr << "Quaternion=" << convert (jones) << endl;
-    cerr << "StokesI=" << Stokes_I << endl;
-#endif
+    complex<double> Stokes_I (amps[ih]);
 
     // partial derivative with respect to phase
     gradient[0] = Stokes_I * delexp_delvarphi;
@@ -390,11 +396,6 @@ Pulsar::ScalarProfileFitAnalysis::get_curvature (Matrix<2,2,double>& curvature)
 	curvature[ir][is] += (conj(gradient[ir]) * gradient[is]).real();
     
   }
-
-  mean_variance = 0.0;
-  // FACTOR OF TWO FUDGE XXX
-  for (unsigned i=0; i<4; i++)
-    mean_variance += fit->standard_variance[i] / 8.0;
 
   curvature /= mean_variance;
 
@@ -409,10 +410,6 @@ Pulsar::ScalarProfileFitAnalysis::delC_delS
  unsigned index
  ) const
 {
-  const complex<float>* amps;
-  amps = reinterpret_cast<const complex<float>*>
-    (fit->standard_fourier->get_amps(0));
-
   complex<double> delexp_delvarphi (0.0, -2.0 * M_PI * double(index+1));
   complex<double> Stokes_I (amps[index+1]);
 

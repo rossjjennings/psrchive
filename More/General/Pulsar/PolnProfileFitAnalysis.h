@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/Attic/PolnProfileFitAnalysis.h,v $
-   $Revision: 1.6 $
-   $Date: 2005/11/10 23:14:41 $
+   $Revision: 1.7 $
+   $Date: 2005/11/16 00:43:40 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PolnProfileFitAnalysis_h
@@ -101,8 +101,17 @@ namespace Pulsar {
 
   public:
 
-    //! Set the PolnProfileFit that refers to the standard
-    void set_fit (PolnProfileFit*);
+    //! Set the PolnProfileFit algorithm to be analysed
+    void set_fit (const PolnProfileFit*);
+
+    //! Set the fluctuation spectrum of the Profile to be analyzed
+    void set_spectrum (const Profile*);
+
+    //! Set the maximum harmonic to be used from the fluctuation spectrum
+    void set_max_harmonic (unsigned max_harmonic);
+
+    //! Set the variance of the fluctuation spectrum
+    void set_variance (double v);
 
     //! Get the curvature matrix
     void get_curvature (Matrix<2,2,double>& curvature);
@@ -115,7 +124,13 @@ namespace Pulsar {
   protected:
 
     //! The PolnProfileFit algorithm to be analysed
-    Reference::To<PolnProfileFit> fit;
+    Reference::To<const Profile> spectrum;
+
+    //! The amps in the fluctation spectrum
+    const std::complex<float>* amps;
+
+    //! The maximum harmonic
+    unsigned max_harmonic;
 
     Matrix<2,2,double> covariance;
     double mean_variance;
