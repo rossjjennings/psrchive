@@ -213,17 +213,28 @@ find_peak(float *f, unsigned n,
 Estimate<double>
 Pulsar::SincInterpShift (const Profile& std, const Profile& obs)
 {
-  unsigned i, nbin = obs.get_nbin(), nby2 = nbin/2, ncoeff=nby2+2;
+  unsigned nbin_std = std.get_nbin(), nbin_obs = obs.get_nbin();
+  unsigned i, nbin = std::min(nbin_std, nbin_obs), nby2 = nbin/2, ncoeff=nby2+2;
+  double mismatch_shift=0.0;
+
+  if (nbin_std!=nbin_obs)
+  {
+    // if different numbers of bins, there is an extra offset equal to
+    // the offset between the centres of bin 0 of each profile, i.e.
+    mismatch_shift = 0.5/nbin_std - 0.5/nbin_obs;
+  }
 
   // compute the cross-correlation
-  std::complex<float> *obs_spec = new std::complex<float> [ncoeff];
-  std::complex<float> *std_spec = new std::complex<float> [ncoeff];
+  // Note, in case of number of bins mismatch, we compute the full FFT of
+  // each and only use those coefficients they have in common
+  std::complex<float> *obs_spec = new std::complex<float> [nbin_obs/2+2];
+  std::complex<float> *std_spec = new std::complex<float> [nbin_std/2+2];
   std::complex<float> *ccf_spec = new std::complex<float> [ncoeff];
   const std::complex<float> zero(0.0, 0.0); 
   float *ccf = new float [nbin];
 
-  fft::frc1d (nbin, (float*)obs_spec, obs.get_amps());
-  fft::frc1d (nbin, (float*)std_spec, std.get_amps());
+  fft::frc1d (nbin_obs, (float*)obs_spec, obs.get_amps());
+  fft::frc1d (nbin_std, (float*)std_spec, std.get_amps());
 
   // Zap harmonics of periodic spikes if necessary
   int nadd = nby2-1; //keep track of how many coefficients are used
@@ -341,7 +352,7 @@ Pulsar::SincInterpShift (const Profile& std, const Profile& obs)
 
   
      
-  double shift = maxbin / nbin;
+  double shift = maxbin / nbin - mismatch_shift;
   double sigma_shift = sigma_maxbin / nbin;
   if (shift >=0.5)
     shift -= 1.0; 
