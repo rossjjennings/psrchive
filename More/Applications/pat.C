@@ -42,30 +42,36 @@ void usage ()
     "  -T               Time scrunch before fitting \n"
     "\n"
     "Fitting options:\n"
-    "  -a stdfiles      Automatic selection of standard profiles from frequency \n"
+    "  -a stdfiles      Automatically select standard from specified group\n"
+    "  -c               Choose the maximum harmonic \n"
+    "  -D               Denoise standard \n"
     "  -g datafile      Gaussian model fitting \n"
     "  -n harmonics     Use up to the specified number of harmonics\n"
     "  -p               Perform full polarimetric fit in Fourier domain \n"
+    "  -P               Print a report on the polarimetric standard \n"
     "  -s stdfile       Location of standard profile \n"
-    "  -D               Denoise standard \n"
-    "  -S period        Zap spectral components due to periodic spikes in profile (implies -A SIS)\n"
+    "  -S period        Zap harmonics due to periodic spikes in profile \n"
+    "                   (use of this option implies SIS) \n"
     "\n"
     "Algorithm Selection:\n"
-    "  -A [PGS | GIS | PIS | ZPF | SIS] \n"
-    "                   Select shift algorithm (default PGS) \n"
-    "                      PGS = Fourier phase gradient \n"
-    "                      GIS = Gaussian interpolation \n"
-    "                      PIS = Parabolic interpolation \n"
-    "                      ZPF = Zero pad interpolation \n"
-    "                      SIS = Sinc interpolation of cross-corration function\n"
+    "  -A name          Select shift algorithm [default: PGS] \n"
+    "                   PGS = Fourier phase gradient \n"
+    "                   GIS = Gaussian interpolation \n"
+    "                   PIS = Parabolic interpolation \n"
+    "                   ZPF = Zero pad interpolation \n"
+    "                   SIS = Sinc interpolation of cross-corration function\n"
     "\n"
     "Output options:\n"
-    "  -f \"format <flags>\"  Output format (parkes = default, tempo2, itoa, princeton ...)\n"
-    "                       For tempo2 output the flags are i = display instrument \n"
-    "                                                       r = display receiver   \n"
+    "  -f \"fmt <flags>\"  Select output format [default: parkes]\n"
+    "                   Available formats: parkes tempo2, itoa, princeton \n"
+    "                   For tempo2, <flags> include i = display instrument \n"
+    "                                               r = display receiver   \n"
     "See http://astronomy.swin.edu.au/pulsar/software/manuals/pat.html"
        << endl;
 }
+
+// defined at the end of this file
+void full_polarization_analysis (Pulsar::PolnProfileFit& fit);
 
 int main (int argc, char *argv[])
 {
@@ -126,7 +132,7 @@ int main (int argc, char *argv[])
       break;
 
     case 'i':
-      cout << "$Id: pat.C,v 1.40 2005/11/10 23:14:30 straten Exp $" << endl;
+      cout << "$Id: pat.C,v 1.41 2005/11/16 00:43:45 straten Exp $" << endl;
       return 0;
 
     case 'F':
@@ -251,17 +257,12 @@ int main (int argc, char *argv[])
 
     if (full_poln_analysis) {
 
+      // for the invariant interval analysis
+      stdarch->remove_baseline();
+
       cerr << "pat: performing full polarization analysis" << endl;
-      Pulsar::PolnProfileFitAnalysis analysis;
-      analysis.set_fit (&fit);
-      
-      cerr << "Relative error = "
-	   << analysis.get_relative_error () << endl
-	   << "Multiple correlation = "
-	   << analysis.get_multiple_correlation() << endl
-	   << "Relative conditional error = "
-	   << analysis.get_relative_conditional_error () << endl;
-      
+      full_polarization_analysis (fit);
+
     }
 
   }
@@ -466,4 +467,45 @@ void loadGaussian(string file,  Reference::To<Pulsar::Archive> &stdarch,  Refere
     }
   prof->set_amps(amps);
   firstTime=false;
+}
+
+void full_polarization_analysis (Pulsar::PolnProfileFit& fit)
+{
+  Pulsar::PolnProfileFitAnalysis analysis;
+  analysis.set_fit (&fit);
+      
+  cout << "\nFull Polarization TOA (matrix template matching): "
+    "\n Relative error = "
+       << analysis.get_relative_error () <<
+    "\n Multiple correlation = "
+       << analysis.get_multiple_correlation() << 
+    "\n Relative conditional error = "
+       << analysis.get_relative_conditional_error () << endl;
+  
+  Pulsar::ScalarProfileFitAnalysis scalar;
+  scalar.set_fit (&fit);
+
+  Matrix<2,2,double> curvature;
+  scalar.get_curvature (curvature);
+
+  Matrix<2,2,double> covariance = inv(curvature);
+
+  // the phase shift variance of the total intensity scalar
+  double I_varphi = covariance[0][0];
+
+  Pulsar::Profile invariant;
+  fit.get_standard()->invint( &invariant );
+
+  scalar.set_spectrum ( fit.fourier_transform (&invariant) );
+  scalar.set_variance ( 2.0 );
+
+  scalar.get_curvature (curvature);
+  covariance = inv(curvature);
+
+  // the phase shift variance of the lorentz invariant scalar
+  double S_varphi = covariance[0][0];
+  
+  cout << "\nLorentz Invariant TOA: "
+    "\n Relative error = "
+       << sqrt(S_varphi/I_varphi) << endl << endl;
 }
