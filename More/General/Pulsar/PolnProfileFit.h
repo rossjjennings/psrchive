@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/Attic/PolnProfileFit.h,v $
-   $Revision: 1.12 $
-   $Date: 2005/11/10 23:14:36 $
+   $Revision: 1.13 $
+   $Date: 2005/11/16 00:43:35 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PolnProfileFit_h
@@ -62,6 +62,9 @@ namespace Pulsar {
     //! Set the standard to which observations will be fit
     void set_standard (const PolnProfile* standard);
 
+    //! Get the standard to which observations will be fit
+    const PolnProfile* get_standard () const;
+
     //! Set the transformation between the standard and observation
     void set_transformation (MEAL::Complex2* xform);
 
@@ -78,14 +81,20 @@ namespace Pulsar {
     Tempo::toa get_toa (const PolnProfile* observation,
 			const MJD& mjd, double period, char nsite);
 
+    //! Return the Fourier Transform of the Profile
+    Profile* fourier_transform (const Profile* input) const;
+
     //! Return the Fourier Transform of the PolnProfile
     PolnProfile* fourier_transform (const PolnProfile* input) const;
     
     //! Return the PSD of the Fourier Transform of the PolnProfile
     PolnProfile* fourier_psd (const PolnProfile* fourier) const;
     
+    //! Return the variance of the fluctuation power
+    double get_variance (const Profile* fourier) const;
+
     //! Return the variance in each of the four Stokes parameters
-    Stokes<float> get_variance (const PolnProfile* input) const;
+    Stokes<float> get_variance (const PolnProfile* fourier) const;
 
     //! Return the phase shift based on the cross correlation function
     float ccf_max_phase (const Profile* std, const Profile* obs) const;

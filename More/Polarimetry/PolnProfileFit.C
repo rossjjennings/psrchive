@@ -79,6 +79,12 @@ void Pulsar::PolnProfileFit::set_maximum_harmonic (unsigned max)
   maximum_harmonic = max;
 }
 
+//! Get the standard to which observations will be fit
+const Pulsar::PolnProfile* Pulsar::PolnProfileFit::get_standard () const
+{
+  return standard; 
+}
+
 //! Set the standard to which observations will be fit
 void Pulsar::PolnProfileFit::set_standard (const PolnProfile* _standard)
 {
@@ -90,7 +96,6 @@ void Pulsar::PolnProfileFit::set_standard (const PolnProfile* _standard)
   
   if (!standard)
     return;
-
 
   standard_fourier = fourier_transform (standard);
   set_noise_mask ();
@@ -411,6 +416,25 @@ catch (Error& error) {
   throw error += "Pulsar::PolnProfileFit::fourier_transform";
 }
 
+Pulsar::Profile* 
+Pulsar::PolnProfileFit::fourier_transform (const Profile* input) const try
+{
+  // copy the input
+  Reference::To<Profile> fourier = new Profile (*input);
+
+  unsigned nbin = input->get_nbin();
+
+  auto_ptr<float> amps( new float[nbin+2] );
+
+  fft::frc1d (nbin, amps.get(), input->get_amps());
+  fourier->set_amps (amps.get());
+
+  return fourier.release();
+}
+catch (Error& error) {
+  throw error += "Pulsar::PolnProfileFit::fourier_transform";
+}
+
 void Pulsar::PolnProfileFit::set_noise_mask () try
 {
   // calculate the power spectral density of the input
@@ -455,34 +479,12 @@ Pulsar::PolnProfileFit::get_variance (const PolnProfile* input) const try
 {
   Stokes<float> variance;
 
-  unsigned nbin = input->get_nbin()/2;
-  unsigned mbin = std::min(nbin, noise_mask.get_nbin());
-  unsigned ibin = 0;
   unsigned npol = 4;
-
-  if (Profile::verbose)
-    cerr << "Pulsar::PolnProfileFit::get_variance noise mask uses "
-	 << noise_mask.get_weight_sum() << " out of " << noise_mask.get_nbin()
-	 << " harmonics" << endl;
 
   for (unsigned ipol=0; ipol<npol; ipol++) {
 
-    const float* amps = input->get_amps(ipol);
-    unsigned count = 0;
-    double mean = 0;
-
-    for (ibin = 0; ibin < nbin; ibin++)
-      if (ibin > mbin || noise_mask[ibin]) {
-	float re = amps[ibin*2];
-	float im = amps[ibin*2+1];
-	mean += re*re + im*im;
-	count ++;
-      }
-
-    mean /= count;
-
     // The variance of the spectrum (with zero mean) is the mean of the PSD
-    variance[ipol] = mean;
+    variance[ipol] = get_variance ( input->get_Profile(ipol) );
 
     if (Profile::verbose)
       cerr << "Pulsar::PolnProfileFit::get_variance ipol=" << ipol 
@@ -495,6 +497,41 @@ Pulsar::PolnProfileFit::get_variance (const PolnProfile* input) const try
 catch (Error& error) {
   throw error += "Pulsar::PolnProfileFit::get_variance";
 }
+
+
+
+
+double Pulsar::PolnProfileFit::get_variance (const Profile* input) const try
+{
+  unsigned nbin = input->get_nbin()/2;
+  unsigned mbin = std::min(nbin, noise_mask.get_nbin());
+
+  if (Profile::verbose)
+    cerr << "Pulsar::PolnProfileFit::get_variance noise mask uses "
+	 << noise_mask.get_weight_sum() << " out of " << noise_mask.get_nbin()
+	 << " harmonics" << endl;
+
+  const float* amps = input->get_amps();
+  unsigned count = 0;
+  double total = 0;
+
+  for (unsigned ibin = 0; ibin < nbin; ibin++)
+    if (ibin > mbin || noise_mask[ibin]) {
+      float re = amps[ibin*2];
+      float im = amps[ibin*2+1];
+      total += re*re + im*im;
+      count ++;
+    }
+
+  // The variance of the spectrum (with zero mean) is the mean of the PSD
+  return total / count;
+
+}
+catch (Error& error) {
+  throw error += "Pulsar::PolnProfileFit::get_variance";
+}
+
+
 
 float Pulsar::PolnProfileFit::ccf_max_phase (const Profile* std,
 					     const Profile* obs) const try
