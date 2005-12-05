@@ -66,7 +66,7 @@ nobase_include_HEADERS = Error.h HeapTracked.h ReferenceAble.h stringtok.h \
 	MEAL/OneParameter.h              MEAL/UnivariatePolicy.h \
 	MEAL/VectorRule.h                MEAL/PositionAngles.h \
 	MEAL/ScalarValue.h               MEAL/VelocityModel.h \
-	MEAL/PhysicalCoherency.h
+	MEAL/PhysicalCoherency.h         MEAL/parse.h
 
 bin_PROGRAMS = lmfit
 
