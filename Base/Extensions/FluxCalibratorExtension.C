@@ -4,6 +4,7 @@
 Pulsar::FluxCalibratorExtension::FluxCalibratorExtension ()
   : CalibratorExtension ("FluxCalibratorExtension")
 {
+  type = Calibrator::Flux;
 }
 
 //! Copy constructor
@@ -11,20 +12,20 @@ Pulsar::FluxCalibratorExtension::FluxCalibratorExtension
 (const FluxCalibratorExtension& copy)
   : CalibratorExtension (copy)
 {
+  type = Calibrator::Flux;
   operator = (copy);
 }
 
 //! Operator =
 const Pulsar::FluxCalibratorExtension&
-Pulsar::FluxCalibratorExtension::operator= 
-(const FluxCalibratorExtension& copy)
+Pulsar::FluxCalibratorExtension::operator= (const FluxCalibratorExtension& fc)
 {
-  if (this == &copy)
+  if (this == &fc)
     return *this;
 
-  CalibratorExtension::operator= (copy);
-  cal_flux = copy.cal_flux;
-  T_sys = copy.T_sys;
+  CalibratorExtension::operator= (fc);
+  cal_flux = fc.cal_flux;
+  T_sys = fc.T_sys;
 
   return *this;
 }
