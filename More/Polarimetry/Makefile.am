@@ -18,7 +18,7 @@ libCalibration_la_SOURCES = SingleAxis.C Feed.C Instrument.C		   \
 	MeanPolar.C MeanSingleAxis.C MeanFeed.C MeanInstrument.C	   \
 	MeasurementEquation.C ReceptionModel.C CoherencyMeasurement.C	   \
 	CoherencyMeasurementSet.C ConvertMJD.C SingleAxisSolver.C	   \
-	Simulation.C StandardModel.C \
+	Simulation.C StandardModel.C Feed_load.C \
 	Polar_solve.C ReceptionModel_solve.C ReceptionModel_solve_thread.C
 
 bin_PROGRAMS = jones_entropy rmrot
