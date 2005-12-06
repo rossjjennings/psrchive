@@ -8,6 +8,8 @@
 // Extensions this program understands
 #include "Pulsar/ProcHistory.h"
 
+#include "Calibration/Feed.h"
+
 #include "Error.h"
 #include "dirutil.h"
 #include "string_utils.h"
@@ -15,7 +17,7 @@
 #include <unistd.h>
 
 // A command line tool for calibrating Pulsar::Archives
-const char* args = "A:bcd:e:fFGhiIM:n:op:PqsSt:Tu:vVw";
+const char* args = "A:bcDd:e:fFGhiIM:m:n:op:Pqr:sSt:Tu:vVw";
 
 void usage ()
 {
@@ -36,10 +38,13 @@ void usage ()
     "Calibrator options: \n"
     "  -A filename            Use the calibrator specified by filename \n"
     "  -P                     Calibrate polarisations only \n"
+    "  -r filename            Use the specified receiver parameters file \n"
     "  -S                     Use the complete Reception model \n"
     "  -s                     Use the Polar Model \n"
+    "  -D                     Use the DoP Model [not recommended] \n"
     "\n"
     "Matching options: \n"
+    "  -m [b|a]               Use only calibrator before|after observation\n"
     "  -c                     Do not try to match sky coordinates\n"
     "  -I                     Do not try to match instruments\n"
     "  -T                     Do not try to match times\n"
@@ -81,9 +86,12 @@ int main (int argc, char *argv[]) {
   bool write_database_file = false;
   bool check_flags = true;
 
-  // name of file containing list of Archive filenames
+  // name of the file containing the list of Archive filenames
   char* metafile = NULL;
-  
+
+  // known feed transformation
+  Calibration::Feed* feed = 0;
+
   Pulsar::Calibrator::Type pcal_type = Pulsar::Calibrator::SingleAxis;
 
   // default searching criterion
@@ -131,12 +139,17 @@ int main (int argc, char *argv[]) {
       break;
 
     case 'i':
-      cout << "$Id: pac.C,v 1.64 2005/06/08 04:57:23 straten Exp $" << endl;
+      cout << "$Id: pac.C,v 1.65 2005/12/06 12:01:51 straten Exp $" << endl;
       return 0;
 
     case 'A':
       model_file = optarg;
       command += "-A ";
+      break;
+
+    case 'D':
+      pcal_type = Pulsar::Calibrator::DoP;
+      command += "-D ";
       break;
 
     case 'd':
@@ -158,6 +171,17 @@ int main (int argc, char *argv[]) {
 
     case 'M':
       metafile = optarg;
+      break;
+
+    case 'm': 
+      if (optarg[0] == 'b')
+	criterion.policy = Pulsar::Database::CalibratorBefore;
+      else if (optarg[0] == 'a')
+	criterion.policy = Pulsar::Database::CalibratorAfter;
+      else {
+	cerr << "pac: unrecognized matching policy code" << endl;
+	return -1;
+      }
       break;
 
     case 'n': {
@@ -195,6 +219,21 @@ int main (int argc, char *argv[]) {
     case 'P':
       do_fluxcal = false;
       command += "-P ";
+      break;
+
+    case 'r':
+      feed = new Calibration::Feed;
+      feed -> load (optarg);
+      cerr << "pac: Feed parameters loaded:"
+	"\n  orientation 0 = "
+	   << feed->get_orientation(0).get_value() * 180/M_PI << " deg"
+	"\n  ellipticity 0 = "
+	   << feed->get_ellipticity(0).get_value() * 180/M_PI << " deg"
+	"\n  orientation 1 = "
+	   << feed->get_orientation(1).get_value() * 180/M_PI << " deg"
+	"\n  ellipticity 1 = "
+	   << feed->get_ellipticity(1).get_value() * 180/M_PI << " deg"
+	   << endl;
       break;
 
     case 's':
@@ -338,6 +377,9 @@ int main (int argc, char *argv[]) {
     return -1;
   }
     
+  if (feed)
+    dbase -> set_feed (feed);
+
   // Start calibrating archives
   
   for (unsigned i = 0; i < filenames.size(); i++) try {
@@ -372,7 +414,7 @@ int main (int argc, char *argv[]) {
 
 	if (verbose)
 	  cout << "pac: Finding PolnCalibrator" << endl;
-	  
+
 	pcal_engine = dbase->generatePolnCalibrator(arch, pcal_type);
 	
       }
@@ -380,7 +422,6 @@ int main (int argc, char *argv[]) {
       pcal_file = pcal_engine->get_filenames();
 
       cout << "pac: PolnCalibrator constructed from:\n\t" << pcal_file << endl;
-
       pcal_engine->calibrate (arch);
 
       if (arch->get_npol() == 4) {
