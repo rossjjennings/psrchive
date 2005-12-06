@@ -5,6 +5,7 @@
 
 #include "Pauli.h"
 
+#include <assert.h>
 
 //! Construct from an single PolnCal Pulsar::Archive
 Pulsar::DoPCalibrator::DoPCalibrator (const Archive* archive) 
