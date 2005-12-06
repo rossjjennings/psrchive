@@ -3,9 +3,12 @@
 #include "Pulsar/FluxCalibrator.h"
 #include "Pulsar/SingleAxisCalibrator.h"
 #include "Pulsar/PolarCalibrator.h"
+#include "Pulsar/DoPCalibrator.h"
 
 #include "Pulsar/PolnCalibratorExtension.h"
 #include "Pulsar/FluxCalibratorExtension.h"
+
+#include "Calibration/Feed.h"
 
 #include "Pulsar/CalibratorPlotter.h"
 #include "Pulsar/CalibratorStokes.h"
@@ -30,14 +33,16 @@ void usage ()
   cout << "pacv - Pulsar Archive Calibrator Viewer\n"
     "usage: pacv [options] file1 [file2 ...]\n"
     "where:\n"
-    " -a archive set the output archive class name\n"
-    " -c [i|j-k] mark channel or range of channels as bad\n"
-    " -C         plot only calibrator Stokes\n"
-    " -D dev     specify PGPLOT device\n"
-    " -f         treat all archives as members of a fluxcal observation\n"
-    " -p         use the polar model\n"
-    " -P         produce publication-quality plots\n"
-    " -2 m or d  multiply or divide cross products by factor of two\n"
+    " -a archive   set the output archive class name\n"
+    " -c [i|j-k]   mark channel or range of channels as bad\n"
+    " -C           plot only calibrator Stokes\n"
+    " -D dev       specify PGPLOT device\n"
+    " -d           use the Degree of Polarization Calibrator\n"
+    " -f           treat all archives as members of a fluxcal observation\n"
+    " -p           use the polar model\n"
+    " -P           produce publication-quality plots\n"
+    " -r feed.txt  set the feed transformation [not used]\n"
+    " -2 m or d    multiply or divide cross products by factor of two\n"
        << endl;
 }
 
@@ -47,6 +52,9 @@ int main (int argc, char** argv)
 {
   // use the Single Axis model
   bool single_axis = true;
+
+  // use the Degree of Polarization Calibrator
+  bool dop_calibrator = false;
 
   // treat all of the Archives as one FluxCalibrator observation set
   Reference::To<Pulsar::FluxCalibrator> fluxcal;
@@ -70,12 +78,15 @@ int main (int argc, char** argv)
   //
   float cross_scale_factor = 1.0;
 
+  // known feed transformation
+  Calibration::Feed* feed = 0;
+
   string device = "?";
 
   // verbosity flag
   bool verbose = false;
   char c;
-  while ((c = getopt(argc, argv, "2:a:c:CD:hi:fMPpqvV")) != -1)  {
+  while ((c = getopt(argc, argv, "2:a:c:CD:dfhi:MPr:pqvV")) != -1)  {
 
     switch (c)  {
 
@@ -126,6 +137,10 @@ int main (int argc, char** argv)
       device = optarg;
       break;
 
+    case 'd':
+      dop_calibrator = true;
+      break;
+
     case 'f':
       fluxcal = new Pulsar::FluxCalibrator;
       break;
@@ -144,6 +159,21 @@ int main (int argc, char** argv)
 
     case 'p':
       single_axis = false;
+      break;
+
+    case 'r':
+      feed = new Calibration::Feed;
+      feed -> load (optarg);
+      cerr << "pac: Feed parameters loaded:"
+	"\n  orientation 0 = "
+	   << feed->get_orientation(0).get_value() * 180/M_PI << " deg"
+	"\n  ellipticity 0 = "
+	   << feed->get_ellipticity(0).get_value() * 180/M_PI << " deg"
+	"\n  orientation 1 = "
+	   << feed->get_orientation(1).get_value() * 180/M_PI << " deg"
+	"\n  ellipticity 1 = "
+	   << feed->get_ellipticity(1).get_value() * 180/M_PI << " deg"
+	   << endl;
       break;
 
     case 'V':
@@ -310,9 +340,10 @@ int main (int argc, char** argv)
     if (verbose)
       cerr << "pacv: Constructing PolnCalibrator" << endl;
 
-    if (single_axis)
+    if (dop_calibrator)
+      calibrator = new Pulsar::DoPCalibrator (input);
+    else if (single_axis)
       calibrator = new Pulsar::SingleAxisCalibrator (input);
-
     else
       calibrator = new Pulsar::PolarCalibrator (input);
     
@@ -333,6 +364,9 @@ int main (int argc, char** argv)
 
     input->convert_state (Signal::Stokes);
     archplot.calibrator_spectrum (input);
+
+    if (dop_calibrator)
+      continue;
 
     cerr << "pacv: Creating " << archive_class << " Archive" << endl;
   
