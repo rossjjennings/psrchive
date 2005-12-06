@@ -18,20 +18,22 @@ Pulsar::ReferenceCalibrator::~ReferenceCalibrator ()
   // desctructor can delete forward declared objects
 }
 
-Pulsar::ReferenceCalibrator::ReferenceCalibrator (const Archive* arch)
+Pulsar::ReferenceCalibrator::ReferenceCalibrator (const Archive* archive)
+  : PolnCalibrator (archive)
 {
-  if (!arch)
+  if (!archive)
     throw Error (InvalidState, "Pulsar::ReferenceCalibrator", "no Archive");
 
   if (verbose)
     cerr << "Pulsar::ReferenceCalibrator" << endl;
 
-  if ( !arch->type_is_cal() )
+  if ( !archive->type_is_cal() )
     throw Error (InvalidParam, "Pulsar::ReferenceCalibrator",
-		 "Pulsar::Archive='" + arch->get_filename() + "' not a Cal");
+		 "Pulsar::Archive='" + archive->get_filename() 
+		 + "' is not a Cal");
   
   // Here the decision is made about full stokes or dual band observations.
-  Signal::State state = arch->get_state();
+  Signal::State state = archive->get_state();
 
   bool fullStokes = state == Signal::Stokes || state == Signal::Coherence;
 
@@ -39,21 +41,17 @@ Pulsar::ReferenceCalibrator::ReferenceCalibrator (const Archive* arch)
 
   if (!calibratable)
     throw Error (InvalidParam, "Pulsar::ReferenceCalibrator", 
-		 "Pulsar::Archive='" + arch->get_filename() + "'\n\t"
+		 "Pulsar::Archive='" + archive->get_filename() + "'\n\t"
 		 "invalid state=" + State2string(state));
 
-  Archive* clone = arch->clone();
-
+  Archive* clone = archive->clone();
+  
   if (fullStokes && state != Signal::Coherence)
     clone->convert_state (Signal::Coherence);
 
   calibrator = clone;
+  requested_nchan = calibrator->get_nchan();
 
-  requested_nchan = clone->get_nchan();
-
-  filenames.push_back( arch->get_filename() );
-
-  receiver = clone->get<Receiver>();
   if (receiver) {
     Stokes<double> cal = receiver->get_reference_source ();
     if (verbose)
@@ -279,6 +277,9 @@ void Pulsar::ReferenceCalibrator::calculate_transformation ()
 	  " ichan=" << ichan << " bad levels" << endl;
       baseline[ichan] = 0;
       transformation[ichan] = 0;
+
+      // enable derived classes to initialize bad values
+      extra (ichan, source, sky);
       continue;
     }
 
@@ -287,6 +288,9 @@ void Pulsar::ReferenceCalibrator::calculate_transformation ()
 
     // store the transformation appropriate for inverting the system response
     transformation[ichan] = solve (source, sky);
+
+    // enable derived classes to store extra information
+    extra (ichan, source, sky);
 
   }
 

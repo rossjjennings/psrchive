@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ReferenceCalibrator.h,v $
-   $Revision: 1.3 $
-   $Date: 2005/03/22 06:13:36 $
+   $Revision: 1.4 $
+   $Date: 2005/12/06 12:01:40 $
    $Author: straten $ */
 
 #ifndef __Pulsar_ReferenceCalibrator_H
@@ -39,18 +39,18 @@ namespace Pulsar {
 
     //! Return the mean levels of the calibrator hi and lo states
     void get_levels (unsigned nchan,
-                     vector<vector<Estimate<double> > >& cal_hi,
-                     vector<vector<Estimate<double> > >& cal_lo) const;
+                     std::vector<std::vector<Estimate<double> > >& hi,
+                     std::vector<std::vector<Estimate<double> > >& lo) const;
 
     //! Return the mean levels of the calibrator hi and lo states
     static void get_levels (const Archive* archive, unsigned nchan,
-		            vector<vector<Estimate<double> > >& cal_hi,
-		            vector<vector<Estimate<double> > >& cal_lo);
+		            std::vector<std::vector<Estimate<double> > >& hi,
+		            std::vector<std::vector<Estimate<double> > >& lo);
 
     //! Return the mean levels of the calibrator hi and lo states
     static void get_levels (const Integration* integration, unsigned nchan,
-		            vector<vector<Estimate<double> > >& cal_hi,
-		            vector<vector<Estimate<double> > >& cal_lo);
+		            std::vector<std::vector<Estimate<double> > >& hi,
+		            std::vector<std::vector<Estimate<double> > >& lo);
 
     // ///////////////////////////////////////////////////////////////////
     //
@@ -64,7 +64,7 @@ namespace Pulsar {
   protected:
 
     //! Intensity of off-pulse (system + sky), in CAL flux units
-    vector< Estimate<double> > baseline;
+    std::vector< Estimate<double> > baseline;
 
     //! The Stokes parameters of the reference source
     Stokes< Estimate<double> > reference_source;
@@ -85,13 +85,18 @@ namespace Pulsar {
     void calculate_transformation ();
 
     //! Does the calculation of the above
-    void calculate (vector<vector<Estimate<double> > >& hi,
-		    vector<vector<Estimate<double> > >& lo);
+    void calculate (std::vector<std::vector<Estimate<double> > >& hi,
+		    std::vector<std::vector<Estimate<double> > >& lo);
 
     //! Derived classes must perform the actual solution
     virtual MEAL::Complex2* 
-    solve (const vector<Estimate<double> >& hi,
-	   const vector<Estimate<double> >& lo) = 0;
+    solve (const std::vector<Estimate<double> >& hi,
+	   const std::vector<Estimate<double> >& lo) = 0;
+
+    //! Derived classes may also compute other things
+    virtual void extra (unsigned ichan,
+			const std::vector< Estimate<double> >& source,
+			const std::vector< Estimate<double> >& sky) { }
 
   };
 
