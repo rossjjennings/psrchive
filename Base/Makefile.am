@@ -6,6 +6,7 @@ nobase_include_HEADERS = \
 	Pulsar/Archive.h                 Pulsar/PolnCalibrator.h \
 	Pulsar/ArchiveProcessor.h        Pulsar/PolnProfile.h \
 	Pulsar/BaselineEstimator.h       Pulsar/PolnProfileFit.h \
+	Pulsar/DoPCalibrator.h \
 	Pulsar/ExponentialBaseline.h     Pulsar/PolnProfileFitAnalysis.h \
 	Pulsar/GaussianBaseline.h        Pulsar/Profile.h \
 	Pulsar/BasicArchive.h            Pulsar/PulsarCalibrator.h \
@@ -65,6 +66,7 @@ libpsrchive_la_SOURCES = plugins.csh getopt.h Physical.h \
 	CalibratorStokesInfo.C        Profile_toa.C  \
 	CorrectionsCalibrator.C       PulsarCalibrator.C  \
 	Database.C                    RFIMitigation.C  \
+	DoPCalibrator.C \
 	ExampleArchive.C              ReceptionCalibrator.C  \
 	ExponentialBaseline.C \
 	FluxCalibrator.C              ReceptionCalibrator_get_Info.C  \

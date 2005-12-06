@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/Attic/Calibrator.h,v $
-   $Revision: 1.22 $
-   $Date: 2005/09/23 18:59:58 $
+   $Revision: 1.23 $
+   $Date: 2005/12/06 12:01:07 $
    $Author: straten $ */
 
 #ifndef __Calibrator_H
@@ -43,8 +43,10 @@ namespace Pulsar {
       Hamaker,
       //! Phenomenological decomposition, (Britton 2000)
       Britton,
-      //! Hybrid composed of SingleAxis and any other Calibrator
-      Hybrid
+      //! Hybrid combines SingleAxis and Britton/Hamaker (Ord et al. 2004)
+      Hybrid,
+      //! Degree of Polarization Calibrator (P236)
+      DoP
     };
 
     
