@@ -12,10 +12,10 @@
 #include "FITSError.h"
 
 // //////////////////////////////////////////////////////////////////
-// //////////////////////////////////////////////////////////////////
+
 //! A function to read a single integration from a FITS file on disk.
-/*! This function assumes that the Integration will have the global attributes
-  of the file. */
+/*! This function assumes that the Integration will have the global
+  attributes of the file. */
 Pulsar::Integration* 
 Pulsar::FITSArchive::load_Integration (const char* filename, unsigned isubint)
 try {
@@ -101,8 +101,6 @@ try {
   fits_get_colnum (sfptr, CASEINSEN, "OFFS_SUB", &colnum, &status);
   
   double time = 0.0;
-  MJD newmjd;
-  
   fits_read_col (sfptr, TDOUBLE, colnum, row, 1, 1, &nulldouble,
 		 &time, &initflag, &status);
   
@@ -111,51 +109,49 @@ try {
 		     "fits_read_col OFFS_SUB");
 
 
-  newmjd = reference_epoch + time;
-  
+  MJD epoch = reference_epoch + time;
+
   if (verbose == 3)
     cerr << "Pulsar::FITSArchive::load_Integration reference_epoch=" 
-	 << reference_epoch << "\n  offset=" << time << "s epoch=" << newmjd
+	 << reference_epoch << "\n  offset=" << time << "s epoch=" << epoch
 	 << endl;
 
   // Set a preliminary epoch to avoid problems loading the polyco
-
-  integ->set_epoch(newmjd);
-
+  integ->set_epoch (epoch);
 
   if (hdr_model) {
 
-  	// Set the folding period, using the polyco from the file header
-		// This was taken out of the condition clause below because period
-		// wasn't set when TSUB was 0
-  	integ->set_folding_period (hdr_model->period(newmjd));
+    // Set the folding period, using the polyco from the file header
+    // This was taken out of the condition clause below because period
+    // wasn't set when TSUB was 0
+    integ->set_folding_period (hdr_model->period(epoch));
 
-		if (duration) {
-    	// Set the toa epoch, correcting for phase offset, ensuring that the new
-    	// epoch of the integration is at the same phase as the archive start
-    	// time
-    	Phase stt_phs = hdr_model->phase(reference_epoch);
-    	Phase off_phs = hdr_model->phase(newmjd);
-    	Phase dphase  = off_phs - stt_phs;
+    if (duration) {
 
-    	double delta_t = dphase.fracturns() * integ->get_folding_period();
+      // Set the toa epoch, correcting for phase offset, ensuring that the
+      // new epoch of the integration is at the same phase as the archive
+      // start time
+      Phase stt_phs = hdr_model->phase(reference_epoch);
+      Phase off_phs = hdr_model->phase(epoch);
+      Phase dphase  = off_phs - stt_phs;
+      
+      double dtime = dphase.fracturns() * integ->get_folding_period();
+      epoch -= dtime;
+      integ->set_epoch (epoch);
 
-    	if (verbose == 3)
-      	cerr << "Pulsar::FITSArchive::load_Integration"
-        	"\n  PRED_PHS=" << extra_polyco.predicted_phase <<
-		"\n  phase(reference_epoch)=" << stt_phs <<
-		"\n  phase(epoch)=" << off_phs <<
-		"\n  diff=" << dphase << "=" << delta_t << "s" << endl;
+      if (verbose == 3)
+      	cerr << "Pulsar::FITSArchive::load_Integration row=" << row <<
+	  "\n  PRED_PHS=" << extra_polyco.predicted_phase <<
+	  "\n  reference epoch=" << reference_epoch <<
+	  "\n  reference phase=" << stt_phs <<
+	  "\n      input phase=" << off_phs <<
+	  "\n     phase offset=" << dphase << " = " << dtime << "s" 
+	  "\n     subint epoch=" << epoch << 
+	  "\n     subint phase=" << hdr_model->phase(epoch) << endl;
 
-    	newmjd -= delta_t;
-    	integ->set_epoch (newmjd);
+    }
 
-    	if (verbose == 3)
-      	cerr << "Pulsar::FITSArchive::load_Integration set_epoch " 
-	  	 << newmjd << endl;
-		}
   }
-
 
   // Load other useful info
 
@@ -177,13 +173,13 @@ try {
   colnum = 0;
   fits_get_colnum (sfptr, CASEINSEN, "DAT_FREQ", &colnum, &status);
   
-  fits_read_col (sfptr, TFLOAT, colnum, row, counter, get_nchan(), &nullfloat, 
-		 &(chan_freqs[0]), &initflag, &status);
+  fits_read_col (sfptr, TFLOAT, colnum, row, counter, get_nchan(),
+		 &nullfloat, &(chan_freqs[0]), &initflag, &status);
   
   // Set the profile channel centre frequencies
   
   if (verbose == 3)
-    cerr << "Pulsar::FITSArchive::load_Integration setting channel freqs" 
+    cerr << "Pulsar::FITSArchive::load_Integration setting frequencies" 
 	 << endl;
 
   bool all_ones = true;

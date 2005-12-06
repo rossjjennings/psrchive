@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/PSRFITS/Pulsar/FITSArchive.h,v $
-   $Revision: 1.29 $
-   $Date: 2005/05/06 17:59:02 $
+   $Revision: 1.30 $
+   $Date: 2005/12/06 12:02:32 $
    $Author: straten $ */
 
 #ifndef __Pulsar_FITSArchive_h
@@ -52,7 +52,7 @@ namespace Pulsar {
   class FITSArchive : public BasicArchive {
 
   public:
-    
+
     //! Default constructor
     FITSArchive ();
 
@@ -167,8 +167,6 @@ namespace Pulsar {
     
     // //////////////////////////////////////////////////////////////////////
     
-    // Archive Extensions used by FITSArchive
-    
     // Channel bandwidth
     double chanbw;
     
@@ -181,6 +179,8 @@ namespace Pulsar {
     // Reference epoch
     MJD reference_epoch;
 
+    // Archive Extensions used by FITSArchive
+    
     // Extension I/O routines
     void load_ProcHistory (fitsfile*);
     void load_DigitiserStatistics (fitsfile*);
@@ -215,8 +215,14 @@ namespace Pulsar {
     Reference::To<polyco> hdr_model;
 
   private:
-    
-    int truthval (bool) const;
+
+    // Correct the reference epoch in WBC data taken during commissioning
+    void P236_reference_epoch_correction ();
+
+    // Correct the reference epoch in WBC data taken during commissioning
+    bool correct_P236_reference_epoch;
+
+   int truthval (bool) const;
     void init ();
 
     vector<string> fcal_on_sources;

@@ -52,17 +52,6 @@ void Pulsar::FITSArchive::load_WidebandCorrelator (fitsfile* fptr)
     status = 0;
   }
 
-  /////////////////////////////////////////////////////////////////////////
-  /*
-    Prior to header version 1.14, the WBCORR backend at Parkes
-    produced cross products that were out by a scale factor of
-    two. This little check applies the correction factor if it detects
-    an archive that was affected by this instrumentation bug.
-
-    Although it is messy and highly specific, please do not remove
-    this block of code as it ensures data consistency.
-  */
-
   if (ext->get_name() == "WBCORR")  {
 
     FITSHdrExtension* hdr_ext = get<FITSHdrExtension>();
@@ -70,19 +59,42 @@ void Pulsar::FITSArchive::load_WidebandCorrelator (fitsfile* fptr)
       throw Error (InvalidParam, "FITSArchive::load_WidebandCorrelator",
                    "no FITSHdrExtension extension");
 
-    float version = 0.9;
-    if (sscanf (hdr_ext->hdrver.c_str(), "%f", &version) != 1)
+    int major=-1, minor=-1;
+
+    if (sscanf (hdr_ext->hdrver.c_str(), "%d.%d", &major, &minor) != 2)
       throw Error (InvalidParam, "FITSArchive::load_WidebandCorrelator",
                    "could not parse header version from " + hdr_ext->hdrver);
 
-    if (version < 1.135)  {
+    if (major = 1 && minor < 10)  {
 
+      /*
+	Prior to header version 1.10, the WBCORR backend at Parkes did
+	not properly set the reference_epoch.
+      */
+      
+      correct_P236_reference_epoch = true;
+      // if (verbose == 3)
+        cerr << "Pulsar::FITSArchive::load_WidebandCorrelator\n"
+	  "  correcting reference epoch of P236 data with version " 
+             << hdr_ext->hdrver << endl;
+      
+    }
+
+    if (major = 1 && minor < 14 && minor > 9)  {
+
+      /*
+	Prior to header version 1.14, the WBCORR backend at Parkes
+	produced cross products that were out by a scale factor of
+	two. This little check applies the correction factor if it detects
+	an archive that was affected by this instrumentation bug.
+      */
+      
       scale_cross_products = true;
       if (verbose == 3)
         cerr << "Pulsar::FITSArchive::load_header "
-                "doubling cross products of WBCORR data with version " 
+	  "doubling cross products of WBCORR data with version " 
              << hdr_ext->hdrver << endl;
-
+      
     }
 
     static char* bad_config = getenv ("WBCBADCFG");

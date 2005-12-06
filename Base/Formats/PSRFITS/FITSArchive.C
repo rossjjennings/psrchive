@@ -39,9 +39,11 @@
 void Pulsar::FITSArchive::init ()
 {
   chanbw = 0.0; 
+
   scale_cross_products = false;
   conjugate_cross_products = false;
-  
+  correct_P236_reference_epoch = false;
+
   fcal_on_sources.push_back("Hydra");
   fcal_on_sources.push_back("HYDRA_O");
   fcal_on_sources.push_back("VIRGO_O");
@@ -223,8 +225,6 @@ void Pulsar::FITSArchive::load_header (const char* filename)
   ObsExtension*      obs_ext  = get<ObsExtension>();
   FITSHdrExtension*  hdr_ext  = get<FITSHdrExtension>();
 
-
-
   // Pulsar FITS header definiton version
 
   if (verbose == 3)
@@ -356,7 +356,6 @@ void Pulsar::FITSArchive::load_header (const char* filename)
   
   string obs_mode = tempstr.get();
 
-
   // Read the name of the source
 
   if (verbose == 3)
@@ -369,7 +368,6 @@ void Pulsar::FITSArchive::load_header (const char* filename)
   
   set_source ( tempstr.get() );
   
-
   if (obs_mode == "PSR" || obs_mode == "LEVPSR") {
     set_type ( Signal::Pulsar );
     if (verbose == 3)
@@ -480,11 +478,6 @@ void Pulsar::FITSArchive::load_header (const char* filename)
   else
     set_coordinates (coord);
   
-
-
-
-
-
   if (get_type() != Signal::Pulsar && get_type() != Signal::Unknown)
     load_CalInfoExtension (fptr);
 
@@ -504,9 +497,6 @@ void Pulsar::FITSArchive::load_header (const char* filename)
   }
   else
     hdr_ext->trk_mode = tempstr.get();
-  
-
-
 
   // Read the start UT date
 
@@ -627,12 +617,14 @@ void Pulsar::FITSArchive::load_header (const char* filename)
 
   }
   else {
+
     ephemeris = 0;
     set_dispersion_measure (0);
     set_rotation_measure (0);
 
     if (verbose == 3)
       cerr << "FITSArchive::load_header no ephemeris" << endl;
+
   }
 
   // Load the polyco from the FITS file
@@ -658,6 +650,10 @@ void Pulsar::FITSArchive::load_header (const char* filename)
       cerr << "FITSArchive::load_header no polyco" << endl;
 
   }
+
+  if (correct_P236_reference_epoch)
+    P236_reference_epoch_correction ();
+
   // Move to the SUBINT Header Data Unit
 
   status = 0;
@@ -678,26 +674,22 @@ void Pulsar::FITSArchive::load_header (const char* filename)
     
     fits_read_key (fptr, TSTRING, "INT_TYPE", tempstr.get(), comment, &status);
     
-    if (status == 0) {
-      if (strcmp(tempstr.get(),"TIME") == 0 || strcmp(tempstr.get(),"") == 0) {
-	// Do nothing
-      }
-      else {
-	if (strcmp(tempstr.get(),"BINPHSPERI") == 0)
-	  add_extension(new PeriastronOrder());
-	else if (strcmp(tempstr.get(),"BINPHSASC") == 0)
-	  add_extension(new BinaryPhaseOrder());
-	else if (strcmp(tempstr.get(),"BINLNGPERI") == 0)
-	  add_extension(new BinLngPeriOrder());
-	else if (strcmp(tempstr.get(),"BINLNGASC") == 0)
-	  add_extension(new BinLngAscOrder());
-	else
-	  throw Error(InvalidParam, "FITSArchive::load_header",
-		      "unknown ordering extension encountered");
-	
-	get<Pulsar::IntegrationOrder>()->resize(get_nsubint());
-      }
+    if (!status && strcmp(tempstr.get(),"TIME") && strcmp(tempstr.get(),"")) {
+      if (strcmp(tempstr.get(),"BINPHSPERI") == 0)
+	add_extension(new PeriastronOrder());
+      else if (strcmp(tempstr.get(),"BINPHSASC") == 0)
+	add_extension(new BinaryPhaseOrder());
+      else if (strcmp(tempstr.get(),"BINLNGPERI") == 0)
+	add_extension(new BinLngPeriOrder());
+      else if (strcmp(tempstr.get(),"BINLNGASC") == 0)
+	add_extension(new BinLngAscOrder());
+      else
+	throw Error(InvalidParam, "FITSArchive::load_header",
+		    "unknown ordering extension encountered");
+      
+      get<Pulsar::IntegrationOrder>()->resize(get_nsubint());
     }
+
   }
   else if (verbose == 3)
     cerr << "FITSArchive::load_header no sub-integrations" << endl;
@@ -721,12 +713,34 @@ void Pulsar::FITSArchive::load_header (const char* filename)
 // /////////////////////////////////////////////////////////////////////
 // /////////////////////////////////////////////////////////////////////
 
+/* This correction applies only to pulsar observations made during the
+   commissioning of the WBC.  As far as I know, this affects only P236.  
 
+   Symptom: The pulses from different archives line up, despite the fact
+   that the phases predicted by the polyco for the reference epochs do not.
+   Consequently, if you try to line them up using the polyco, they do not.
 
-//
-// End of load_Integration function
-// ////////////////////////////////
-// ////////////////////////////////
+   Remedy: Truncate the phase of the reference epoch to zero.
+*/
+
+void Pulsar::FITSArchive::P236_reference_epoch_correction ()
+{
+  if (!model || get_type() != Signal::Pulsar)
+    return;
+
+  MJD original_reference_epoch = reference_epoch;
+  Phase original_phase = model->phase(reference_epoch);
+
+  reference_epoch = model->iphase( original_phase.Floor() );
+
+  cerr << "Pulsar::FITSArchive::P236_reference_epoch_correction"
+    "\n   original reference epoch=" << original_reference_epoch <<
+    "\n                      phase=" << original_phase <<
+    "\n  corrected reference epoch=" << reference_epoch <<
+    "\n                      phase=" << model->phase(reference_epoch)
+	 << endl;  
+}
+
 
 // /////////////////////////////////////////////////////////////////////
 // /////////////////////////////////////////////////////////////////////
