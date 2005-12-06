@@ -1,11 +1,13 @@
 #include "Pulsar/PolnCalibrator.h"
-#include "Pulsar/PolnCalibratorExtension.h"
 #include "Pulsar/CorrectionsCalibrator.h"
+
+#include "Pulsar/PolnCalibratorExtension.h"
+#include "Pulsar/Receiver.h"
+#include "Pulsar/FeedExtension.h"
 
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
 #include "Pulsar/Profile.h"
-#include "Pulsar/Receiver.h"
 
 #include "Pauli.h"
 #include "Error.h"
@@ -23,7 +25,7 @@
   PolnCalibratorExtension, then the constructed instance can be
   used to calibrate other Pulsar::Archive instances.
 */
-Pulsar::PolnCalibrator::PolnCalibrator (Archive* archive)
+Pulsar::PolnCalibrator::PolnCalibrator (const Archive* archive)
 {
   if (!archive)
     return;
@@ -32,10 +34,15 @@ Pulsar::PolnCalibrator::PolnCalibrator (Archive* archive)
   calibrator = archive;
 
   // store the related Extension, if any
-  extension = poln_extension = archive->get<PolnCalibratorExtension>();
+  poln_extension = archive->get<PolnCalibratorExtension>();
+  if (poln_extension)
+    extension = poln_extension;
 
   // store the Receiver Extension, if any
   receiver = archive->get<Receiver>();
+
+  // store the Feed Extension, if any
+  feed = archive->get<FeedExtension>();
 
   filenames.push_back( archive->get_filename() );
 
@@ -150,7 +157,7 @@ Pulsar::PolnCalibrator::get_transformation (unsigned ichan) const
 }
 
 //! Return the system response for the specified channel
-::MEAL::Complex2*
+MEAL::Complex2*
 Pulsar::PolnCalibrator::get_transformation (unsigned ichan)
 {
   if (transformation.size() == 0)
@@ -179,7 +186,9 @@ void Pulsar::PolnCalibrator::calculate_transformation ()
 
   for (unsigned ichan=0; ichan < nchan; ichan++)
     if ( poln_extension->get_valid(ichan) )
-      transformation[ichan] = poln_extension->get_transformation(ichan);
+      transformation[ichan] = 
+	const_cast<MEAL::Complex2*>
+	(poln_extension->get_transformation(ichan));
     else
       transformation[ichan] = 0;
 }
@@ -403,6 +412,16 @@ void Pulsar::PolnCalibrator::build (unsigned nchan) try {
 
   }
 
+  Jones<double> feed_xform = 1.0;
+
+  // if known, add the feed transformation
+  if (feed) {
+    feed_xform = feed->get_transformation();
+    if (verbose)
+      cerr << "Pulsar::PolnCalibrator::build known feed:\n"
+           << feed_xform << endl;
+  }
+
   Jones<double> rcvr_xform = 1.0;
 
   // if known, add the receiver transformation
@@ -418,6 +437,9 @@ void Pulsar::PolnCalibrator::build (unsigned nchan) try {
     if (det(response[ichan]) == zero)
       continue;
 
+    // add the known feed transformation
+    response[ichan] *= feed_xform;
+
     // add the known receiver transformation
     response[ichan] *= rcvr_xform;
 
@@ -431,14 +453,9 @@ catch (Error& error) {
   throw error += "Pulsar::PolnCalibrator::build";
 }
 
-/*! Upon completion, the flux of the archive will be normalized with
-  respect to the flux of the calibrator, such that a FluxCalibrator
-  simply scales the archive by the calibrator flux. */
-void Pulsar::PolnCalibrator::calibrate (Archive* arch) try {
 
-  if (verbose)
-    cerr << "Pulsar::PolnCalibrator::calibrate" << endl;
-
+void Pulsar::PolnCalibrator::calibration_setup (Archive* arch) 
+{
   if (!calibrator)
     throw Error (InvalidState, "Pulsar::PolnCalibrator::calibrate",
 		 "no PolnCal Archive");
@@ -452,11 +469,22 @@ void Pulsar::PolnCalibrator::calibrate (Archive* arch) try {
 
   if (response.size() != arch->get_nchan())
     build( arch->get_nchan() );
+}
+
+/*! Upon completion, the flux of the archive will be normalized with
+  respect to the flux of the calibrator, such that a FluxCalibrator
+  simply scales the archive by the calibrator flux. */
+void Pulsar::PolnCalibrator::calibrate (Archive* arch) try {
 
   if (verbose)
-    cerr << "Pulsar::PolnCalibrator::calibrate call Archive::transform" <<endl;
+    cerr << "Pulsar::PolnCalibrator::calibrate" << endl;
+
+  calibration_setup (arch);
 
   if (arch->get_npol() == 4) {
+
+    if (verbose)
+      cerr << "Pulsar::PolnCalibrator::calibrate Archive::transform" <<endl;
 
     arch->transform (response);
     arch->set_poln_calibrated (true);

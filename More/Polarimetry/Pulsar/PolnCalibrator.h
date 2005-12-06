@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PolnCalibrator.h,v $
-   $Revision: 1.33 $
-   $Date: 2004/12/27 14:21:56 $
+   $Revision: 1.34 $
+   $Date: 2005/12/06 12:01:26 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PolnCalibrator_H
@@ -16,6 +16,7 @@ namespace Pulsar {
 
   class Integration;
   class PolnCalibratorExtension;
+  class FeedExtension;
   class Receiver;
 
   //! Base class of polarization calibration objects.
@@ -29,7 +30,7 @@ namespace Pulsar {
   public:
 
     //! Construct with optional processed calibrator Archive
-    PolnCalibrator (Archive* archive = 0);
+    PolnCalibrator (const Archive* archive = 0);
 
     //! Copy constructor
     PolnCalibrator (const PolnCalibrator& calibrator);
@@ -145,14 +146,20 @@ namespace Pulsar {
     //! Derived classes can create and fill the transformation array
     virtual void calculate_transformation ();
 
+    //! Set up done before calibrating an archive
+    void calibration_setup (Archive* arch);
+
     //! The array of Jones matrices derived from the transformation array
     std::vector< Jones<float> > response;
 
     //! The PolnCalibratorExtension of the Archive passed during construction
-    Reference::To<PolnCalibratorExtension> poln_extension;
+    Reference::To<const PolnCalibratorExtension> poln_extension;
 
     //! The Receiver Extension of the Archive passed during construction
     Reference::To<const Receiver> receiver;
+
+    //! The FeedExtension of the Archive passed during construction
+    Reference::To<const FeedExtension> feed;
 
   private:
 
