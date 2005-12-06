@@ -4,9 +4,11 @@
 #include "Pulsar/HybridCalibrator.h"
 #include "Pulsar/PolarCalibrator.h"
 #include "Pulsar/FluxCalibrator.h"
+#include "Pulsar/DoPCalibrator.h"
 
 #include "Pulsar/PolnCalibratorExtension.h"
 #include "Pulsar/CalibratorStokes.h"
+#include "Pulsar/FeedExtension.h"
 #include "Pulsar/Receiver.h"
 #include "Pulsar/Backend.h"
 
@@ -207,6 +209,8 @@ Pulsar::Database::Criterion::Criterion ()
   minutes_apart = short_time_scale;
   deg_apart  = max_angular_separation;
 
+  policy = NoPolicy;
+
   check_receiver    = true;
   check_instrument  = true;
   check_frequency   = true;
@@ -346,7 +350,20 @@ bool Pulsar::Database::Criterion::match (const Entry& have) const
 
   if (check_time) {
 
-    diff = fabs( (have.time - entry.time).in_minutes() );
+    diff = (have.time - entry.time).in_minutes();
+
+    switch (policy) {
+    case NoPolicy:
+    default:
+      diff = fabs( diff );
+      break;
+    case CalibratorBefore:
+      // do nothing
+      break;
+    case CalibratorAfter:
+      diff = -diff;
+      break;
+    }
 
     if (match_verbose) {
       cerr << "  Seeking time=" << entry.time
@@ -355,7 +372,7 @@ bool Pulsar::Database::Criterion::match (const Entry& have) const
 	"(max=" << minutes_apart << ")";
     }
 
-    if (fabs( (have.time - entry.time).in_minutes() ) < minutes_apart) {
+    if (diff < minutes_apart && diff >= 0) {
       if (match_verbose)
 	cerr << " ... match found" << endl;
     }
@@ -687,7 +704,16 @@ try {
 
   Criterion criterion = get_default_criterion();
 
-  criterion.minutes_apart = short_time_scale;
+  if (obsType == Signal::FluxCalOn ||
+      obsType == Signal::FluxCalOff) {
+
+    criterion.minutes_apart = long_time_scale;
+    criterion.check_coordinates = false;
+    criterion.policy = NoPolicy;
+
+  }
+  else
+    criterion.minutes_apart = short_time_scale;
 
   if (arch)
     criterion.entry = Entry (*arch);
@@ -697,6 +723,7 @@ try {
   criterion.entry.obsType = obsType;
 
   return criterion;
+
 }
 catch (Error& error) {
   throw error += "Pulsar::Database::criterion Signal::Source";
@@ -714,8 +741,9 @@ try {
       calType == Calibrator::Britton ||
       calType == Calibrator::Hamaker) {
 
-    criterion.check_coordinates = false;
     criterion.minutes_apart = long_time_scale;
+    criterion.check_coordinates = false;
+    criterion.policy = NoPolicy;
 
   }
   else
@@ -771,23 +799,16 @@ catch (Error& error) {
 Pulsar::FluxCalibrator* 
 Pulsar::Database::rawFluxCalibrator (Pulsar::Archive* arch)
 {
-  Criterion criterion = get_default_criterion();
-  criterion.check_coordinates = false;
-  criterion.minutes_apart = long_time_scale;
-
-  criterion.entry = Entry (*arch);
-  criterion.entry.obsType = Signal::FluxCalOn;
-  vector<Pulsar::Database::Entry> oncals;
-  all_matching (criterion, oncals);
+   vector<Pulsar::Database::Entry> oncals;
+  all_matching (criterion (arch, Signal::FluxCalOn), oncals);
 
   if (!oncals.size())
     throw Error (InvalidState, 
                  "Pulsar::Database::generateFluxCalibrator",
                  "no FluxCalOn observations found to match observation");
 
-  criterion.entry.obsType = Signal::FluxCalOff;
   vector<Pulsar::Database::Entry> offcals;
-  all_matching (criterion, offcals);
+  all_matching (criterion (arch, Signal::FluxCalOff), offcals);
 
   if (!offcals.size())
     throw Error (InvalidState,
@@ -855,31 +876,38 @@ Pulsar::Database::generatePolnCalibrator (Archive* arch, Calibrator::Type m)
     }
   }
 
-  
   if (verbose)
     cout << "Constructing PolnCalibrator from file " << entry.filename << endl;
-  
   Reference::To<Pulsar::Archive> polcalarch;
   polcalarch = Pulsar::Archive::load(get_filename(entry));
+
+  if (feed) {
+    FeedExtension* feed_ext = polcalarch->getadd<FeedExtension>();
+    feed_ext -> set_transformation ( feed->evaluate() );
+  }
 
   if (entry.obsType == Signal::Calibrator)
     // if a solved model, return the solution
     return new Pulsar::PolnCalibrator (polcalarch);
 
   // otherwise, construct a solution
-  Reference::To<Pulsar::ReferenceCalibrator> artificial_cal;
+  Reference::To<Pulsar::ReferenceCalibrator> ref_cal;
 
   switch (m) {
     
   case Pulsar::Calibrator::Hybrid:
   case Pulsar::Calibrator::SingleAxis:
-    artificial_cal = new Pulsar::SingleAxisCalibrator (polcalarch);
+    ref_cal = new Pulsar::SingleAxisCalibrator (polcalarch);
     break;
     
   case Pulsar::Calibrator::Polar:
-    artificial_cal = new Pulsar::PolarCalibrator (polcalarch);
+    ref_cal = new Pulsar::PolarCalibrator (polcalarch);
     break;
-    
+
+  case Pulsar::Calibrator::DoP:
+    ref_cal = new Pulsar::DoPCalibrator (polcalarch);
+    break;
+
   default:
     cerr << "Pulsar::Database::generatePolnCalibrator"
       " unknown type" << endl;
@@ -888,9 +916,11 @@ Pulsar::Database::generatePolnCalibrator (Archive* arch, Calibrator::Type m)
   }
   
   if (m == Pulsar::Calibrator::Hybrid)
-    return generateHybridCalibrator (artificial_cal, arch);
+    return generateHybridCalibrator (ref_cal, arch);
 
-  return artificial_cal.release();
+
+
+  return ref_cal.release();
 }
 
 Pulsar::HybridCalibrator* 

@@ -1,14 +1,15 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/Database.h,v $
-   $Revision: 1.8 $
-   $Date: 2004/10/25 20:02:40 $
+   $Revision: 1.9 $
+   $Date: 2005/12/06 12:00:36 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Database_h
 #define __Pulsar_Database_h
 
 #include "Pulsar/Calibrator.h"
+#include "MEAL/Complex2.h"
 
 #include "ReferenceAble.h"
 #include "sky_coord.h"
@@ -44,6 +45,35 @@ namespace Pulsar {
     //! Pass this to the criterion methods to retrieve any or all matches
     static const Pulsar::Archive* any;
 
+    //! Supported matching policies
+    /*! Different level-setting strategies may dictate the policy
+      for matching an observation with the right calibrator */
+    enum Policy {
+      //! Use the nearest calibrator (default)
+      NoPolicy,
+      //! Use only calibrators recorded before the observation
+      CalibratorBefore,
+      //! Use only calibrators recorded after the observation
+      CalibratorAfter
+    };
+
+    enum Type {
+      //! Flux calibrator
+      Flux,
+      //! Instrumental corrections
+      Corrections,
+      //! Gain, differential gain and differential phase
+      SingleAxis,
+      //! Gain, 3-D boost, and two rotations (van Straten 2002)
+      Polar,
+      //! Polar decomposition (Hamaker 2000)
+      Hamaker,
+      //! Phenomenological decomposition, (Britton 2000)
+      Britton,
+      //! Hybrid combines SingleAxis and Britton/Hamaker (Ord et al. 2004)
+      Hybrid
+    };
+
     //! Null constructor
     Database ();
     
@@ -73,6 +103,9 @@ namespace Pulsar {
     
     //! Return a pointer to a new HybridCalibrator
     HybridCalibrator* generateHybridCalibrator (ReferenceCalibrator*,Archive*);
+
+    //! Set the feed transformation to be incorporated into PolnCalibrator
+    void set_feed (MEAL::Complex2* xform) { feed = xform; }
 
     //! Returns the full path to the database summary file
     string get_path () const;
@@ -134,7 +167,10 @@ namespace Pulsar {
 
       //! The parameters to match
       Entry entry;
-      
+
+      //! The matching policy
+      Policy policy;
+
       double minutes_apart;
       double deg_apart;
       
@@ -194,7 +230,9 @@ namespace Pulsar {
     //! Return a pointer to a new FluxCalibrator for the given archive
     FluxCalibrator* rawFluxCalibrator (Archive* a);
 
-  
+    //! If set, this model of the feed is incorporated into all solutions
+    Reference::To<MEAL::Complex2> feed;
+
   };
 
 
