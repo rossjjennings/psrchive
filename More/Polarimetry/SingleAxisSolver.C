@@ -50,18 +50,20 @@ Calibration::SingleAxisSolver::set_output (const Stokes< Estimate<double> >& S)
 }
 
 //! Set the SingleAxis parameters with the current solution
-void Calibration::SingleAxisSolver::solve (SingleAxis* model)
-{
+void Calibration::SingleAxisSolver::solve (SingleAxis* model) try {
+
   Vector<3, double> model_axis = model->get_axis();
 
   for (unsigned i=0; i<3; i++)
     axis[i].get_expression()->set_param( 0, model_axis[i] );
 
   model->set_diff_phase( diff_phase.get_Estimate() );
-
   model->set_diff_gain( diff_gain.get_Estimate() );
-
   model->set_gain( gain.get_Estimate() );
+
+}
+catch (Error& error) {
+  throw error += "Calibration::SingleAxisSolver::solve";
 }
 
 //! Solve for gain, boost, and rotation given input and output states

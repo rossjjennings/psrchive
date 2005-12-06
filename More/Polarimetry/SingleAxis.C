@@ -78,21 +78,32 @@ Estimate<double> Calibration::SingleAxis::get_diff_phase () const
   return rotation->get_Estimate(0);
 }
 
+void check (const char* name, const Estimate<double>& g)
+{
+  if (!finite (g.val))
+    throw Error (InvalidParam, name, "Estimate value = %lf", g.val);
+  if (!finite (g.var))
+    throw Error (InvalidParam, name, "Estimate variance = %lf", g.val);
+}
+
 //! Set the instrumental gain, \f$ G \f$, in calibrator flux units
 void Calibration::SingleAxis::set_gain (const Estimate<double>& g)
 {
+  check ("Calibration::SingleAxis::set_gain", g);
   gain->set_Estimate (0, g);
 }
 
 //! Set the differential gain, \f$ \gamma \f$, in hyperbolic radians
 void Calibration::SingleAxis::set_diff_gain (const Estimate<double>& gamma)
 {
+  check ("Calibration::SingleAxis::set_diff_gain", gamma);
   boost->set_Estimate (0, gamma);
 }
    
 //! Set the differential phase, \f$ \phi \f$, in radians
 void Calibration::SingleAxis::set_diff_phase (const Estimate<double>& phi)
 {
+  check ("Calibration::SingleAxis::set_diff_phase", phi);
   rotation->set_Estimate (0, phi);
 }
 
