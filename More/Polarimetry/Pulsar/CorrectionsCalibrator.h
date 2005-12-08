@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/Attic/CorrectionsCalibrator.h,v $
-   $Revision: 1.4 $
-   $Date: 2005/04/20 07:35:08 $
+   $Revision: 1.5 $
+   $Date: 2005/12/08 03:04:02 $
    $Author: straten $ */
 
 #ifndef __Pulsar_CorrectionsCalibrator_H
@@ -79,14 +79,12 @@ namespace Pulsar {
     bool should_correct_vertical;
     //! Flag set when the receiver projection should be corrected
     bool should_correct_projection;
-    //! Flag set when either of the above corrections must be performed
+    //! Flag set when either of the above corrections have not been performed
     bool must_correct_platform;
 
     //! Flag set when the receptor offsets need to be corrected
     bool should_correct_receptors;
-    //! Flag set when the calibrator offset needs to be corrected
-    bool should_correct_calibrator;
-    //! Flag set when either of the above corrections must be performed
+    //! Flag set when the above correction has not been performed
     bool must_correct_feed;
 
     //@}

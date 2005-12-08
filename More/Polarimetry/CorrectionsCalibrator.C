@@ -63,9 +63,6 @@ bool Pulsar::CorrectionsCalibrator::needs_correction (const Archive* archive,
   should_correct_receptors = 
     receiver->get_orientation() != 0 || receiver->get_right_handed() != 0;
 
-  should_correct_calibrator =
-    archive->type_is_cal() && receiver->get_calibrator_offset() != 0;
-
   must_correct_feed =
     !receiver->get_feed_corrected() && should_correct_receptors;
 
