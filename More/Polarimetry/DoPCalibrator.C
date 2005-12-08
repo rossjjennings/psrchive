@@ -37,8 +37,7 @@ void Pulsar::DoPCalibrator::extra (unsigned ichan,
   obs_cal *= 2.0;
 
   // Evaluate
-  Jones< Estimate<double> > response;
-  transformation[ichan] -> evaluate (response);
+  Jones<double> response = transformation[ichan] -> evaluate ();
 
   // Calibrate the observed Stokes parameters
   Stokes<Estimate<double> > cal = transform (obs_cal, inv(response));
