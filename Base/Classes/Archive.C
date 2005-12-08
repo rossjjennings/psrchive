@@ -754,3 +754,4 @@ float Pulsar::Archive::rms_baseline (float baseline_width)
   return (float) sqrt(sum_rms_sq)/ sqrt((float) get_nsubint());
 }
 
+bool Pulsar::range_checking_enabled = true;
