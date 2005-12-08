@@ -1,5 +1,5 @@
 //
-// $Id: pav.C,v 1.102 2005/11/02 04:11:07 rmanches Exp $
+// $Id: pav.C,v 1.103 2005/12/08 03:04:54 straten Exp $
 //
 // The Pulsar Archive Viewer
 //
@@ -170,7 +170,6 @@ int main (int argc, char** argv)
 
   bool display            = false;
   bool nesting            = false;
-  bool display_axis       = false;
 
   bool baseline_spectrum  = false;
   bool dedisperse         = false;
@@ -339,7 +338,7 @@ int main (int argc, char** argv)
       plotter.set_subint( atoi (optarg) );
       break;
     case 'i':
-      cout << "$Id: pav.C,v 1.102 2005/11/02 04:11:07 rmanches Exp $" << endl;
+      cout << "$Id: pav.C,v 1.103 2005/12/08 03:04:54 straten Exp $" << endl;
       return 0;
 
     case 'j':
@@ -979,9 +978,6 @@ int main (int argc, char** argv)
 	
 	plotter.set_axes(show_profile_axes);
 	plotter.singleProfile (archive);
-
-	if (display_axis)
-	  cpgbox("bcnst",0,0,"bcnst",0,0);
       }
 
       if (manchester) {
