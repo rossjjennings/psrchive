@@ -4,7 +4,11 @@
 
 #include "fcomp.h"
 #include "convert_endian.h"
+
 #include <stdio.h>
+#ifdef sun
+#include <ieeefp.h>
+#endif
 
 int Pulsar::TimerProfile_poln (Signal::Component state)
 {
