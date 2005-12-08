@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/FrequencyIntegrate.h,v $
-   $Revision: 1.1 $
-   $Date: 2005/12/08 11:08:52 $
+   $Revision: 1.2 $
+   $Date: 2005/12/08 11:29:55 $
    $Author: straten $ */
 
 #ifndef __Pulsar_FrequencyIntegrate_h
@@ -10,6 +10,7 @@
 
 #include "Pulsar/Transformation.h"
 #include "Reference.h"
+#include <vector>
 
 namespace Pulsar {
 
@@ -87,7 +88,7 @@ namespace Pulsar {
 
   public:
 
-    //! Initialize for the specified parameters
+    //! Initialize ranges for the specified parameters
     virtual void initialize (FrequencyIntegrate*, Integration*) = 0;
     
     //! Return the number of output frequency channel ranges
@@ -97,6 +98,53 @@ namespace Pulsar {
     virtual void get_range (unsigned irange, 
 			    unsigned& ichan_start,
 			    unsigned& ichan_stop) = 0;
+
+  };
+
+  /*! Evenly spaced frequency channel ranges have a constant number
+    of input frequency channels per output frequency channel. */
+  class FrequencyIntegrate::EvenlySpaced : public RangePolicy {
+
+  public:
+
+    //! Initialize ranges for the specified parameters
+    void initialize (FrequencyIntegrate* freqint, Integration* integration);
+
+    //! Return the number of output frequency channel ranges
+    unsigned get_nrange () { return nrange; }
+
+     //! Return the frequency channels indeces for the specified range
+   void get_range (unsigned irange, unsigned& start, unsigned& stop);
+
+  protected:
+
+    //! The number of frequency channels in the input Integration
+    unsigned subint_nchan;
+    //! The number of frequency ranges (channels) in the output Integration
+    unsigned nrange;
+    //! The number of input channels in each output range
+    unsigned spacing;
+
+  };
+
+
+  /*! Evenly distributed frequency channel ranges have the same number of
+    valid input frequency channels integrated into each output frequency
+    channel. */
+  class FrequencyIntegrate::EvenlyDistributed : public RangePolicy {
+
+  public:
+
+    void initialize (FrequencyIntegrate* freqint, Integration* integration);
+
+    unsigned get_nrange () { return stop_indeces.size(); }
+
+    void get_range (unsigned irange, unsigned& start, unsigned& stop);
+
+  protected:
+
+    //! The input frequency channel index at the end of each range
+    std::vector<unsigned> stop_indeces;
 
   };
 

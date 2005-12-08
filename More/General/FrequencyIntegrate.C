@@ -1,5 +1,4 @@
 #include "Pulsar/FrequencyIntegrate.h"
-#include "Pulsar/FrequencyIntegrate_EvenlySpaced.h"
 #include "Pulsar/Integration.h"
 #include "Pulsar/Profile.h"
 
@@ -119,6 +118,12 @@ unsigned Pulsar::FrequencyIntegrate::get_nscrunch () const
   return nscrunch;
 }
 
+void Pulsar::FrequencyIntegrate::set_range_policy (RangePolicy* policy)
+{
+  range_policy = policy;
+}
+
+
 void Pulsar::FrequencyIntegrate::divide (unsigned div_nchan,
 					 unsigned& nrange,
 					 unsigned& spacing) const
@@ -142,7 +147,83 @@ void Pulsar::FrequencyIntegrate::divide (unsigned div_nchan,
   }
 }
 
-void Pulsar::FrequencyIntegrate::set_range_policy (RangePolicy* policy)
+
+using namespace Pulsar;
+
+/* ***********************************************************************
+
+   Evenly Spaced Frequency Channels Policy
+
+   ************************************************************************ */
+
+void FrequencyIntegrate::EvenlySpaced::initialize (FrequencyIntegrate* freq,
+						   Integration* integration)
 {
-  range_policy = policy;
+  freq->divide (integration->get_nchan(), nrange, spacing);
+}
+
+void FrequencyIntegrate::EvenlySpaced::get_range (unsigned irange, 
+						  unsigned& start, 
+						  unsigned& stop)
+{
+  if (irange >= nrange)
+    throw Error (InvalidParam, 
+		 "Pulsar::FrequencyIntegrate::EvenlySpaced::get_range",
+		 "irange=%u >= nrange=%u", irange, nrange);
+  
+  start = irange * spacing;
+  stop = start + spacing;
+  
+  if (stop > subint_nchan)
+    stop = subint_nchan;
+}
+
+/* ***********************************************************************
+
+   Evenly Distributed Frequency Channels Policy
+
+   ************************************************************************ */
+
+void 
+FrequencyIntegrate::EvenlyDistributed::initialize (FrequencyIntegrate* freq,
+						   Integration* integration)
+{
+  unsigned subint_nchan = integration->get_nchan();
+  unsigned good_nchan = 0;
+
+  // count the number of good channels
+  for (unsigned ichan=0; ichan < subint_nchan; ichan++)
+    if (integration->get_weight(ichan) != 0)
+      good_nchan ++;
+
+  // divide them up
+  unsigned nrange = 0;
+  unsigned spacing = 0;
+  freq->divide (good_nchan, nrange, spacing);
+  stop_indeces.resize (nrange);
+
+  // and count off 'spacing' good channels per range
+  unsigned curchan = 0;
+  for (unsigned irange=0; irange < nrange; irange++)
+    for (good_nchan=0; good_nchan < spacing; curchan++)
+      if (integration->get_weight(curchan) != 0)
+	good_nchan ++;
+
+}
+
+void FrequencyIntegrate::EvenlyDistributed::get_range (unsigned irange, 
+						       unsigned& start, 
+						       unsigned& stop)
+{
+  if (irange >= stop_indeces.size())
+    throw Error (InvalidParam, 
+		 "Pulsar::FrequencyIntegrate::EvenlyDistributed::get_range",
+		 "irange=%u >= nrange=%u", irange, stop_indeces.size());
+
+  if (irange == 0)
+    start = 0;
+  else
+    start = stop_indeces[irange-1];
+
+  stop = stop_indeces[irange];
 }
