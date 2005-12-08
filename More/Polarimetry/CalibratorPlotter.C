@@ -40,7 +40,7 @@ catch (Error& error) {
 
 void Pulsar::CalibratorPlotter::plot (const Calibrator::Info* info,
 				      unsigned nchan, double cfreq, double bw)
-{ try {
+try {
 
   if (!info) {
     cerr << "Pulsar::CalibratorPlotter::plot no Calibrator::Info" << endl;
@@ -180,5 +180,4 @@ void Pulsar::CalibratorPlotter::plot (const Calibrator::Info* info,
 }
 catch (Error& error) {
   throw error += "Pulsar::CalibratorPlotter::plot(Calibrator::Info*)";
-}
 }
