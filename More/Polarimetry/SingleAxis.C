@@ -6,6 +6,10 @@
 #include "Pauli.h"
 #include "Error.h"
 
+#ifdef sun
+#include <ieeefp.h>
+#endif
+
 using namespace std;
 
 void Calibration::SingleAxis::init ()
