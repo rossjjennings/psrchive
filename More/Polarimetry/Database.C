@@ -4,7 +4,9 @@
 #include "Pulsar/HybridCalibrator.h"
 #include "Pulsar/PolarCalibrator.h"
 #include "Pulsar/FluxCalibrator.h"
+
 #include "Pulsar/DoPCalibrator.h"
+#include "Pulsar/OffPulseCalibrator.h"
 
 #include "Pulsar/PolnCalibratorExtension.h"
 #include "Pulsar/CalibratorStokes.h"
@@ -906,6 +908,10 @@ Pulsar::Database::generatePolnCalibrator (Archive* arch, Calibrator::Type m)
 
   case Pulsar::Calibrator::DoP:
     ref_cal = new Pulsar::DoPCalibrator (polcalarch);
+    break;
+
+  case Pulsar::Calibrator::OffPulse:
+    ref_cal = new Pulsar::OffPulseCalibrator (polcalarch);
     break;
 
   default:

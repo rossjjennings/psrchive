@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/Attic/Calibrator.h,v $
-   $Revision: 1.23 $
-   $Date: 2005/12/06 12:01:07 $
+   $Revision: 1.24 $
+   $Date: 2005/12/08 03:04:43 $
    $Author: straten $ */
 
 #ifndef __Calibrator_H
@@ -46,7 +46,9 @@ namespace Pulsar {
       //! Hybrid combines SingleAxis and Britton/Hamaker (Ord et al. 2004)
       Hybrid,
       //! Degree of Polarization Calibrator (P236)
-      DoP
+      DoP,
+      //! Off-pulse Calibrator (P236)
+      OffPulse
     };
 
     

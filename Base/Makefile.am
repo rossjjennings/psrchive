@@ -25,7 +25,7 @@ nobase_include_HEADERS = \
 	Pulsar/InstrumentInfo.h          Pulsar/SystemCalibrator.h \
 	Pulsar/Integration.h             Pulsar/Transposer.h \
 	Pulsar/IntegrationManager.h      Pulsar/Utilities.h \
-	Pulsar/IterativeBaseline.h \
+	Pulsar/IterativeBaseline.h       Pulsar/OffPulseCalibrator.h \
 	Pulsar/PhaseWeight.h             Pulsar/ArchiveTI.h \
 	Pulsar/PhaseWeightFunction.h     model_profile.h \
 	Pulsar/Plotter.h                 Pulsar/IntegrationTI.h \
@@ -48,7 +48,7 @@ libpsrchive_la_SOURCES = plugins.csh getopt.h Physical.h \
 	Archive_get_PA.C              PolnCalibratorInfo.C  \
 	Archive_load.C                PolnProfile.C  \
 	Archive_match.C               PolnProfileFit.C  \
-        PolnProfileFitAnalysis.C \
+        PolnProfileFitAnalysis.C      OffPulseCalibrator.C \
 	Archive_resize.C              Profile.C  \
 	Archive_split_method.C        Profile_average.C  \
 	Archive_toas.C                Profile_basic_shift.C  \

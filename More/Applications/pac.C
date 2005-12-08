@@ -17,7 +17,7 @@
 #include <unistd.h>
 
 // A command line tool for calibrating Pulsar::Archives
-const char* args = "A:bcDd:e:fFGhiIM:m:n:op:Pqr:sSt:Tu:vVw";
+const char* args = "A:BbcDd:e:fFGhiIM:m:n:op:Pqr:sSt:Tu:vVw";
 
 void usage ()
 {
@@ -41,7 +41,10 @@ void usage ()
     "  -r filename            Use the specified receiver parameters file \n"
     "  -S                     Use the complete Reception model \n"
     "  -s                     Use the Polar Model \n"
-    "  -D                     Use the DoP Model [not recommended] \n"
+    "\n"
+    "Rough Alignment options [not recommended]: \n"
+    "  -B                     Fix the off-pulse baseline statistics \n"
+    "  -D                     Fix the reference degree of polarization \n"
     "\n"
     "Matching options: \n"
     "  -m [b|a]               Use only calibrator before|after observation\n"
@@ -139,12 +142,17 @@ int main (int argc, char *argv[]) {
       break;
 
     case 'i':
-      cout << "$Id: pac.C,v 1.65 2005/12/06 12:01:51 straten Exp $" << endl;
+      cout << "$Id: pac.C,v 1.66 2005/12/08 03:04:43 straten Exp $" << endl;
       return 0;
 
     case 'A':
       model_file = optarg;
       command += "-A ";
+      break;
+
+    case 'B':
+      pcal_type = Pulsar::Calibrator::OffPulse;
+      command += "-B ";
       break;
 
     case 'D':
