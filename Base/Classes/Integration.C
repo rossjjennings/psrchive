@@ -220,8 +220,8 @@ void Pulsar::Integration::copy (const Integration& subint,
   set_folding_period ( subint.get_folding_period() );
 
   archive = subint.archive;
-  defaradayed_rotation_measure = subint.defaradayed_rotation_measure;
-  defaradayed_centre_frequency = subint.defaradayed_centre_frequency;
+  defaradayed_rotation_measure   = subint.defaradayed_rotation_measure;
+  defaradayed_centre_frequency   = subint.defaradayed_centre_frequency;
   dedispersed_dispersion_measure = subint.dedispersed_dispersion_measure;
   dedispersed_centre_frequency   = subint.dedispersed_centre_frequency;
 
@@ -230,13 +230,15 @@ void Pulsar::Integration::copy (const Integration& subint,
 Pulsar::Profile*
 Pulsar::Integration::get_Profile (unsigned ipol, unsigned ichan)
 {
-  if (ipol>=get_npol())
-    throw Error (InvalidRange, "Integration::get_Profile",
-		 "ipol=%d npol=%d", ipol, get_npol());
-
-  if (ichan>=get_nchan())
-    throw Error (InvalidRange, "Integration::get_Profile",
-		 "ichan=%d nchan=%d", ichan, get_nchan());
+  if (range_checking_enabled) {
+    if (ipol>=get_npol())
+      throw Error (InvalidRange, "Integration::get_Profile",
+		   "ipol=%d npol=%d", ipol, get_npol());
+    
+    if (ichan>=get_nchan())
+      throw Error (InvalidRange, "Integration::get_Profile",
+		   "ichan=%d nchan=%d", ichan, get_nchan());
+  }
 
   return profiles[ipol][ichan];
 }
@@ -244,13 +246,15 @@ Pulsar::Integration::get_Profile (unsigned ipol, unsigned ichan)
 const Pulsar::Profile*
 Pulsar::Integration::get_Profile (unsigned ipol, unsigned ichan) const
 {
-  if (ipol>=get_npol())
-    throw Error (InvalidRange, "Integration::get_Profile",
-		 "ipol=%d npol=%d", ipol, get_npol());
-
-  if (ichan>=get_nchan())
-    throw Error (InvalidRange, "Integration::get_Profile",
-		 "ichan=%d nchan=%d", ichan, get_nchan());
+  if (range_checking_enabled) {
+    if (ipol>=get_npol())
+      throw Error (InvalidRange, "Integration::get_Profile",
+		   "ipol=%d npol=%d", ipol, get_npol());
+    
+    if (ichan>=get_nchan())
+      throw Error (InvalidRange, "Integration::get_Profile",
+		   "ichan=%d nchan=%d", ichan, get_nchan());
+  }
 
   return profiles[ipol][ichan];
 }
