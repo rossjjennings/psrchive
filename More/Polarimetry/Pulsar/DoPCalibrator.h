@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/DoPCalibrator.h,v $
-   $Revision: 1.1 $
-   $Date: 2005/12/06 12:01:07 $
+   $Revision: 1.2 $
+   $Date: 2005/12/08 07:29:03 $
    $Author: straten $ */
 
 #ifndef __Pulsar_DoPCalibrator_H
@@ -70,6 +70,8 @@ namespace Pulsar {
     Info* get_Info () const;
 
   protected:
+
+    friend class Info;
 
     //! The scale factor as a function of frequency
     std::vector< Estimate<double> > dop_scale;
