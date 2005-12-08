@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Integration.h,v $
-   $Revision: 1.71 $
-   $Date: 2005/06/16 07:07:20 $
-   $Author: redwards $ */
+   $Revision: 1.72 $
+   $Date: 2005/12/08 11:48:45 $
+   $Author: straten $ */
 
 /*
   
@@ -14,15 +14,16 @@
 #ifndef __Pulsar_Integration_h
 #define __Pulsar_Integration_h
 
-#include <vector>
+#include "Pulsar/Pulsar.h"
 
 #include "MJD.h"
 #include "Types.h"
 #include "Reference.h"
 #include "Estimate.h"
 #include "Jones.h"
-
 #include "toa.h"
+
+#include <vector>
 
 template<typename T> class Stokes;
 
@@ -478,10 +479,7 @@ namespace Pulsar {
     //! The Archive that manages this integration
     Reference::To<const Archive, false> archive;
 
-  private:
-
-    //! Converts between coherency products and Stokes parameters
-    void poln_convert (Signal::State out_state);
+    friend class FrequencyIntegrate;
 
     //! Dedispersion worker function
     void dedisperse (unsigned ichan, unsigned kchan,
@@ -490,6 +488,11 @@ namespace Pulsar {
     //! Defaraday worker function
     void defaraday (unsigned ichan, unsigned kchan,
                     double rm, double f0, const Jones<double>& r0 = 1);
+
+  private:
+
+    //! Converts between coherency products and Stokes parameters
+    void poln_convert (Signal::State out_state);
 
     //! Record the rotation measure applied in defaraday
     double defaradayed_rotation_measure;
