@@ -125,7 +125,7 @@ void Pulsar::Receiver_Linear::set_calibrator_offset (const Angle& offset)
 
 Angle Pulsar::Receiver_Linear::get_calibrator_offset () const
 { 
-  if (!y_offset)
+  if (!calibrator_offset)
     return 0.0;
   else
     return 0.5*M_PI;
