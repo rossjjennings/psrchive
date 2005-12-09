@@ -1,11 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Physical.h,v $
-   $Revision: 1.1 $
-   $Date: 2002/04/16 01:57:36 $
+   $Revision: 1.2 $
+   $Date: 2005/12/09 16:39:54 $
    $Author: straten $ */
-
-//! \file This file defines various physical constants and relations
 
 #ifndef __Pulsar_Physical_h
 #define __Pulsar_Physical_h
