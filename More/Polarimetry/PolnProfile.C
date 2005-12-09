@@ -190,7 +190,6 @@ void Pulsar::PolnProfile::set_Stokes (unsigned ibin,
   profile[1]->get_amps()[ibin] = new_amps.s1;
   profile[2]->get_amps()[ibin] = new_amps.s2;
   profile[3]->get_amps()[ibin] = new_amps.s3;
-
 }
 
 //
@@ -462,4 +461,55 @@ void Pulsar::PolnProfile::invint (Profile* invint) const
   invint->set_state (Signal::Inv);
   invint->set_centre_frequency ( get_Profile(0)->get_centre_frequency() );
   invint->set_weight ( get_Profile(0)->get_centre_frequency() );
+}
+
+void Pulsar::PolnProfile::get_PA (vector< Estimate<double> >& posang,
+				  float threshold) const
+{
+  if (state != Signal::Stokes)
+    throw Error (InvalidState, "Pulsar::PolnProfile::get_PA",
+		 "must first convert to Stokes parameters");
+
+  const float *q = get_Profile(1)->get_amps();
+  const float *u = get_Profile(2)->get_amps(); 
+
+  unsigned nbin = get_nbin();
+  
+  Profile linear (nbin);
+  
+  for (unsigned ibin=0; ibin<nbin; ibin++)
+    linear.get_amps()[ibin] = sqrt (q[ibin]*q[ibin] + u[ibin]*u[ibin]);
+
+  float min_phase = linear.find_min_phase();
+  linear -= linear.mean (min_phase);
+ 
+  double mean = 0;
+
+  double Q_var = 0;
+  get_Profile(1)->stats (min_phase, &mean, &Q_var);
+  if (abs(mean) > sqrt(Q_var))
+    cerr << "Pulsar::PolnProfile::get_PA WARNING off-pulse Q mean="
+	 << mean << " > rms=" << sqrt(Q_var) << endl;
+
+  double U_var = 0;
+  get_Profile(2)->stats (min_phase, &mean, &U_var);
+  if (abs(mean) > sqrt(U_var))
+    cerr << "Pulsar::PolnProfile::get_PA WARNING off-pulse U mean="
+	 << mean << " > rms=" << sqrt(U_var) << endl;
+
+  float sigma = sqrt (0.5*(Q_var + U_var));
+
+  posang.resize (nbin);
+
+  for (unsigned ibin=0; ibin<nbin; ibin++) {
+    if (!threshold || linear.get_amps()[ibin] > threshold*sigma) {
+      Estimate<double> U (u[ibin], U_var);
+      Estimate<double> Q (q[ibin], Q_var);
+
+      posang[ibin] = 90.0/M_PI * atan2 (u[ibin], q[ibin]);
+    }
+    else
+      posang[ibin] = 0.0;
+  }
+
 }
