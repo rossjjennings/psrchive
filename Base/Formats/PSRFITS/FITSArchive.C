@@ -968,6 +968,8 @@ try {
   if (ephemeris) {
 
     ephemeris->set_dm(dispersion_measure);
+    ephemeris->set_double (EPH_RM, rotation_measure);
+
     ephemeris->unload(fptr);
 
     if (verbose == 3)
