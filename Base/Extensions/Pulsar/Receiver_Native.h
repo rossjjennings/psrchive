@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/Receiver_Native.h,v $
-   $Revision: 1.1 $
-   $Date: 2005/04/11 10:26:15 $
+   $Revision: 1.2 $
+   $Date: 2005/12/09 16:41:06 $
    $Author: straten $ */
 
 #ifndef __Receiver_Native_h
@@ -12,13 +12,13 @@
 
 namespace Pulsar {
 
-  //! Directly implements Receiver State
-  class Receiver_Native : public Receiver::State {
+  //! Stores receptor basis, hand, and orientation, and calibrator phase
+  class Receiver::Native : public Receiver::State {
 
   public:
 
     //! Default constructor
-    Receiver_Native ();
+    Native ();
 
     //! Get the basis of the feed receptors
     Signal::Basis get_basis () const

@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/Attic/Calibrator.h,v $
-   $Revision: 1.24 $
-   $Date: 2005/12/08 03:04:43 $
+   $Revision: 1.25 $
+   $Date: 2005/12/09 16:41:07 $
    $Author: straten $ */
 
 #ifndef __Calibrator_H
@@ -15,16 +15,13 @@
 #include "Jones.h"
 #include "MJD.h"
 
-template<typename T> class Jones;
-
 namespace Pulsar {
 
-  //! Forward declarations
   class Archive;
   class Integration;
   class CalibratorExtension;
 
-  //! Pure virtual base class of Pulsar::Archive calibrators
+  //! Polarization and flux calibrators
   class Calibrator : public Reference::Able {
     
   public:
@@ -104,7 +101,7 @@ namespace Pulsar {
     //! Return a const reference to the calibrator archive
     const Archive* get_Archive () const;
 
-    //! Pure virtual base class generalizes Calibrator parameter communication
+    //! Communicates Calibrator parameters to plotting routines
     class Info : public Reference::Able {
 
     public:

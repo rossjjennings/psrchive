@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Integration.h,v $
-   $Revision: 1.73 $
-   $Date: 2005/12/09 03:56:01 $
+   $Revision: 1.74 $
+   $Date: 2005/12/09 16:41:07 $
    $Author: straten $ */
 
 /*
@@ -33,7 +33,9 @@ namespace Pulsar {
   class PolnProfile;
   class Archive;
 
-  //! Group of Pulsar::Profile objects integrated over the same time interval
+  //! Array of Profiles integrated over the same time interval
+  /*! This class stores a two-dimensional array of pulse Profile
+    instances as a function of polarization and frequency. */
   class Integration : public Container {
     
   public:
@@ -125,6 +127,11 @@ namespace Pulsar {
     //! Set the weight of each profile to the given number
     void uniform_weight (float new_weight = 1.0);
     
+    //! Remove dispersion delays with respect to centre frequency
+    virtual void dedisperse ();
+
+    //! Remove Faraday rotation with respect to centre frequency
+    virtual void defaraday ();
 
     // //////////////////////////////////////////////////////////////////
     //
@@ -300,7 +307,7 @@ namespace Pulsar {
      */
     //@{
     
-    //! Abstract base class of Integration::Extension objects
+    //! Adds features or data to Integration instances
     /* Integration-derived classes may provide access to additional 
        information through Extension-derived objects. */
     class Extension : public Reference::Able {
@@ -445,12 +452,6 @@ namespace Pulsar {
       whose band is split into adjoining segments (like cpsr2) */
     void fappend (Pulsar::Integration* integ, bool ignore_time_mismatch = false);
 
-    //! Remove inter-channel dispersion delays with respect to centre frequency
-    virtual void dedisperse ();
-
-    //! Remove Faraday rotation with respect to centre frequency
-    virtual void defaraday ();
-    
     //! Transform from Stokes (I,Q,U,V) to the polarimetric invariant interval
     virtual void invint ();
     

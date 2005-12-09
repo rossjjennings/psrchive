@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PolarCalibrator.h,v $
-   $Revision: 1.15 $
-   $Date: 2005/09/23 18:59:58 $
+   $Revision: 1.16 $
+   $Date: 2005/12/09 16:41:07 $
    $Author: straten $ */
 
 #ifndef __PolarCalibrator_H
@@ -13,7 +13,7 @@
 
 namespace Pulsar {
 
-  //! Uses PolarModel to represent the system response
+  //! Represents the system as a polar decomposition
   class PolarCalibrator : public ReferenceCalibrator {
     
   public:
@@ -27,7 +27,7 @@ namespace Pulsar {
     //! Return Calibrator::Polar
     Type get_type () const;
 
-    //! Communicates Polar Model parameters
+    //! Communicates PolarCalibrator parameters to plotting routines
     class Info : public PolnCalibrator::Info {
 
     public:

@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/CalibratorStokes.h,v $
-   $Revision: 1.1 $
-   $Date: 2003/11/04 11:00:19 $
+   $Revision: 1.2 $
+   $Date: 2005/12/09 16:41:06 $
    $Author: straten $ */
 
 #ifndef __CalibratorStokes_h
@@ -14,10 +14,9 @@
 
 namespace Pulsar {
   
-  //! CalibratorStokes
-  /*! This class provides a simple container for storing the Stokes
-   parameters of the artificial calibrator source. */
-  
+  //! Stores the Stokes parameters of the reference source
+  /*! This Archive::Extension class provides a simple container for storing
+   the Stokes parameters of the artificial (reference) calibrator source. */
   class CalibratorStokes : public Pulsar::Archive::Extension {
     
   public:

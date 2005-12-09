@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Attic/ArchiveTI.h,v $
-   $Revision: 1.5 $
-   $Date: 2004/12/20 13:29:30 $
+   $Revision: 1.6 $
+   $Date: 2005/12/09 16:41:07 $
    $Author: straten $ */
 
 #ifndef __Pulsar_ArchiveTI_h
@@ -13,7 +13,7 @@
 
 namespace Pulsar {
 
-  //! Smooths a pulse profile using the mean over a boxcar
+  //! Provides a text interface to get and set Archive attributes
   class ArchiveTI : public TextInterface::CompositeGetSet<Archive> {
 
   public:

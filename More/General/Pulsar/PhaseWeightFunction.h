@@ -1,21 +1,24 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/PhaseWeightFunction.h,v $
-   $Revision: 1.1 $
-   $Date: 2004/04/27 15:28:58 $
+   $Revision: 1.2 $
+   $Date: 2005/12/09 16:41:07 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PhaseWeightFunction_h
 #define __Pulsar_PhaseWeightFunction_h
 
-#include "Reference.h"
+#include "Pulsar/Algorithm.h"
 
 namespace Pulsar {
 
   class PhaseWeight;
 
-  //! Pure virtual base class of Phase weight function producers
-  class PhaseWeightFunction : public Reference::Able {
+  //! Algorithms that produce PhaseWeight objects
+  /*! This pure virtual base class of PhaseWeight algorithms defines the
+      interface by which various routines, such as baseline estimators
+      can be accessed */
+  class PhaseWeightFunction : public Algorithm {
 
   public:
 

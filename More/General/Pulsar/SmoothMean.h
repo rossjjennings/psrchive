@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/SmoothMean.h,v $
-   $Revision: 1.1 $
-   $Date: 2004/04/15 15:44:07 $
+   $Revision: 1.2 $
+   $Date: 2005/12/09 16:41:07 $
    $Author: straten $ */
 
 #ifndef __Pulsar_SmoothMean_h
@@ -12,7 +12,7 @@
 
 namespace Pulsar {
 
-  //! Smooths a pulse profile using the mean over a boxcar
+  //! Smooths a Profile using the mean over a boxcar
   class SmoothMean : public Smooth {
 
   protected:

@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PolnCalibrator.h,v $
-   $Revision: 1.34 $
-   $Date: 2005/12/06 12:01:26 $
+   $Revision: 1.35 $
+   $Date: 2005/12/09 16:41:07 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PolnCalibrator_H
@@ -19,12 +19,11 @@ namespace Pulsar {
   class FeedExtension;
   class Receiver;
 
-  //! Base class of polarization calibration objects.
-  /*! New convention: Polarimetric calibration no longer depends on a
-    flux calibrator in order to work.  The calibrated archive will
-    have its flux normalized by the calibrator flux, such that the
-    FluxCalibrator class need only multiply the archive by the
-    calibrator flux in mJy. */
+  //! Polarimetric calibrators
+  /*! The calibrated archive will have its flux normalized by the calibrator
+    flux, such that the FluxCalibrator class need only multiply the archive
+    by the calibrator flux.  Polarimetric calibration does not require a
+    flux calibrator in order to work.  */
   class PolnCalibrator : public Calibrator {
 
   public:
@@ -93,7 +92,7 @@ namespace Pulsar {
     //! Return a new PolnCalibratorExtension
     CalibratorExtension* new_Extension () const;
 
-    //! Base class generalizes PolnCalibrator parameter communication
+    //! Communicates PolnCalibrator parameters to plotting routines
     class Info : public Calibrator::Info {
 
     public:

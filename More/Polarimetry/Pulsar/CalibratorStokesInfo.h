@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/CalibratorStokesInfo.h,v $
-   $Revision: 1.3 $
-   $Date: 2005/09/23 18:59:58 $
+   $Revision: 1.4 $
+   $Date: 2005/12/09 16:41:07 $
    $Author: straten $ */
 
 #ifndef __Pulsar_CalibratorStokesInfo_H
@@ -14,7 +14,7 @@ namespace Pulsar {
 
   class CalibratorStokes;
 
-  //! Communicates Calibrator Stokes parameters
+  //! Communicates CalibratorStokes parameters to plotting routines
   class CalibratorStokesInfo : public Calibrator::Info {
 
   public:

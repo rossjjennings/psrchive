@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/CalibratorPlotter.h,v $
-   $Revision: 1.7 $
-   $Date: 2003/10/27 12:20:13 $
+   $Revision: 1.8 $
+   $Date: 2005/12/09 16:41:07 $
    $Author: straten $ */
 
 #ifndef __CalibratorPlotter_H
@@ -12,7 +12,7 @@
 
 namespace Pulsar {
 
-  //! Pure virtual base class of Pulsar::Calibrator plotters
+  //! Plots Calibrator parameters
   class CalibratorPlotter : public Reference::Able {
     
   public:

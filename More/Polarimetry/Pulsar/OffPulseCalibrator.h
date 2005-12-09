@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/OffPulseCalibrator.h,v $
-   $Revision: 1.1 $
-   $Date: 2005/12/08 03:04:43 $
+   $Revision: 1.2 $
+   $Date: 2005/12/09 16:41:07 $
    $Author: straten $ */
 
 #ifndef __Pulsar_OffPulseCalibrator_H
@@ -12,7 +12,7 @@
 
 namespace Pulsar {
 
-  //! Off-pulse Calibrator (P236)
+  //! Uses the off-pulse noise statistics to scale the polarization
   /*! This calibrator should probably never be used.  It was developed to
     deal with Wideband Correlator data observed during a period of heavy
     testing and development (P236).  It was observed that the system does

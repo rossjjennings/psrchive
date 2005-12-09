@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/FeedExtension.h,v $
-   $Revision: 1.1 $
-   $Date: 2005/12/06 12:01:26 $
+   $Revision: 1.2 $
+   $Date: 2005/12/09 16:41:06 $
    $Author: straten $ */
 
 #ifndef __FeedExtension_h
@@ -13,7 +13,7 @@
 
 namespace Pulsar {
 
-  //! Feed Pulsar::Archive Extension
+  //! Stores a known feed transformation
   /*! The FeedExtension class is used to add an arbitrary transformation to
     a PolnCalibrator instance.  The transformation is included between the
     backend and the receiver platform. */

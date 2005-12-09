@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/HybridCalibrator.h,v $
-   $Revision: 1.4 $
-   $Date: 2005/04/24 01:27:46 $
+   $Revision: 1.5 $
+   $Date: 2005/12/09 16:41:07 $
    $Author: straten $ */
 
 #ifndef __HybridCalibrator_H
@@ -19,7 +19,7 @@ namespace Pulsar {
   class ReferenceCalibrator;
   class CalibratorStokes;
 
-  //! Uses a SingleAxisModel to supplement another system response
+  //! Supplements a SystemCalibrator with a SingleAxisCalibrator
   class HybridCalibrator : public PolnCalibrator {
     
   public:

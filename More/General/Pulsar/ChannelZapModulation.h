@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/ChannelZapModulation.h,v $
-   $Revision: 1.1 $
-   $Date: 2005/04/20 07:37:13 $
+   $Revision: 1.2 $
+   $Date: 2005/12/09 16:41:07 $
    $Author: straten $ */
 
 #ifndef _Pulsar_ChannelZapModulation_H
@@ -12,7 +12,7 @@
 
 namespace Pulsar {
   
-  //! Weights each frequency channel using normalized r.m.s. total intensity
+  //! Weights each channel using normalized r.m.s. total intensity
   class ChannelZapModulation : public ChannelWeight {
     
   public:

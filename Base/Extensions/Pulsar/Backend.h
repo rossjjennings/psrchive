@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/Backend.h,v $
-   $Revision: 1.1 $
-   $Date: 2004/07/12 07:33:49 $
+   $Revision: 1.2 $
+   $Date: 2005/12/09 16:41:06 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Backend_h
@@ -12,12 +12,11 @@
 
 namespace Pulsar {
   
-  //! Pure virtual base class of backend information Extensions
-  /*! The Backend Extension is an abstract base for classes that
+  //! Stores information about the instrument backend
+  /*! This Archive::Extension is an abstract base for classes that
     contain information specific to the backend instrument used for
     the observation. */
-
-  class Backend : public Pulsar::Archive::Extension {
+  class Backend : public Archive::Extension {
 
   public:
     

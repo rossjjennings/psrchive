@@ -1,21 +1,21 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/Smooth.h,v $
-   $Revision: 1.4 $
-   $Date: 2005/04/20 07:39:22 $
+   $Revision: 1.5 $
+   $Date: 2005/12/09 16:41:07 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Smooth_h
 #define __Pulsar_Smooth_h
 
-#include "ReferenceAble.h"
+#include "Pulsar/Transformation.h"
 
 namespace Pulsar {
 
   class Profile;
 
-  //! Abstract base class of cyclical smoothing algorithms
-  class Smooth : public Reference::Able {
+  //! Profile smoothing algorithms
+  class Smooth : public Transformation<Profile> {
 
   public:
 
@@ -32,7 +32,7 @@ namespace Pulsar {
     float get_duty_cycle () const;
 
     //! Smooth the given Profile
-    void smooth (Profile* profile);
+    void transform (Profile* profile);
 
   protected:
 

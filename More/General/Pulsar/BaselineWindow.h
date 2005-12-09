@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/BaselineWindow.h,v $
-   $Revision: 1.3 $
-   $Date: 2005/08/20 14:29:09 $
+   $Revision: 1.4 $
+   $Date: 2005/12/09 16:41:07 $
    $Author: straten $ */
 
 #ifndef __Pulsar_BaselineWindow_h
@@ -14,10 +14,7 @@ namespace Pulsar {
 
   class Profile;
 
-  //! A simple tool for independently weighting pulse phase bins
-  /*! The Pulsar::BaselineWindow class implements a useful set of methods
-    required to create, store, and manipulate a weighted set of
-    Pulsar::Profile phase bins. */
+  //! Finds the phase window in which the Profile mean is an extremum
   class BaselineWindow : public BaselineEstimator {
 
   public:

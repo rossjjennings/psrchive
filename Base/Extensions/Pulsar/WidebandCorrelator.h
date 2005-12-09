@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/WidebandCorrelator.h,v $
-   $Revision: 1.1 $
-   $Date: 2004/07/12 07:34:36 $
+   $Revision: 1.2 $
+   $Date: 2005/12/09 16:41:07 $
    $Author: straten $ */
 
 #ifndef __Pulsar_WideBandCorrelator_h
@@ -12,9 +12,9 @@
 
 namespace Pulsar {
   
-  //! Wideband Correlator Extension
-  /*! The WidebandCorrelator class stores information specific to the
-    Wideband Correlator at Parkes */
+  //! Stores Parkes Wideband Correlator parameters
+  /*! This class stores information specific to the Wideband Correlator at
+    Parkes */
   class WidebandCorrelator : public Pulsar::Backend {
 
   public:

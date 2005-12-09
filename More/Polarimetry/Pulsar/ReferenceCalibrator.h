@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ReferenceCalibrator.h,v $
-   $Revision: 1.4 $
-   $Date: 2005/12/06 12:01:40 $
+   $Revision: 1.5 $
+   $Date: 2005/12/09 16:41:07 $
    $Author: straten $ */
 
 #ifndef __Pulsar_ReferenceCalibrator_H
@@ -17,7 +17,7 @@ namespace Pulsar {
 
   class Integration;
 
-  //! Abstract base class of Calibrators based on a single reference source
+  //! Calibrators derived from reference source observations
   class ReferenceCalibrator : public PolnCalibrator {
     
   public:

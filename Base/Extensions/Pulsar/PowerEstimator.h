@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/PowerEstimator.h,v $
-   $Revision: 1.4 $
-   $Date: 2005/03/22 06:13:26 $
+   $Revision: 1.5 $
+   $Date: 2005/12/09 16:41:06 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PowerEstimator_h
@@ -13,7 +13,7 @@
 
 namespace Pulsar {
 
-  //! Pure virtual base class of power estimation Archive::Extension classes
+  //! Produces on-pulse and off-pulse power spectra
   class PowerEstimator : public Archive::Extension {
 
   public:

@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ReceptionModelAxisPlotter.h,v $
-   $Revision: 1.3 $
-   $Date: 2005/04/20 07:42:27 $
+   $Revision: 1.4 $
+   $Date: 2005/12/09 16:41:06 $
    $Author: straten $ */
 
 #ifndef __Calibration_ReceptionModelAxisPlotter_H
@@ -16,7 +16,7 @@
 
 namespace Calibration {
 
-  //! Plots model Stokes parameters as a parallactic angle function of Type
+  //! Plots model Stokes parameters as a function of parallactic angle
   template<class Type>
   class ReceptionModelAxisPlotter : public ReceptionModelPlotter
   {

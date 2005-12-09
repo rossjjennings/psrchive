@@ -1,22 +1,22 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/AdaptiveSNR.h,v $
-   $Revision: 1.3 $
-   $Date: 2005/08/20 14:29:09 $
+   $Revision: 1.4 $
+   $Date: 2005/12/09 16:41:07 $
    $Author: straten $ */
 
 #ifndef __Pulsar_AdaptiveSNR_h
 #define __Pulsar_AdaptiveSNR_h
 
-#include "Reference.h"
+#include "Algorithm.h"
 
 namespace Pulsar {
 
   class Profile;
   class BaselineEstimator;
 
-  //! Calculates the signal-to-noise ratio using a baseline computing function
-  class AdaptiveSNR : public Reference::Able {
+  //! Calculates the signal-to-noise ratio using a BaselineEstimator
+  class AdaptiveSNR : public Algorithm {
 
   public:
 

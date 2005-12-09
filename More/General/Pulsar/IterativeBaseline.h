@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/IterativeBaseline.h,v $
-   $Revision: 1.3 $
-   $Date: 2005/08/20 14:29:09 $
+   $Revision: 1.4 $
+   $Date: 2005/12/09 16:41:07 $
    $Author: straten $ */
 
 #ifndef __Pulsar_IterativeBaseline_h
@@ -12,8 +12,7 @@
 
 namespace Pulsar {
 
-  //! Finds a baseline that contains gaussian white noise
-
+  //! Finds a Profile baseline using an interative bounding method
   class IterativeBaseline : public BaselineEstimator {
 
   public:

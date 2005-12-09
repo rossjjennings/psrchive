@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/PhaseWeight.h,v $
-   $Revision: 1.5 $
-   $Date: 2005/09/04 18:13:33 $
+   $Revision: 1.6 $
+   $Date: 2005/12/09 16:41:07 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PhaseWeight_h
@@ -15,10 +15,9 @@ namespace Pulsar {
 
   class Profile;
 
-  //! A simple tool for independently weighting pulse phase bins
-  /*! The Pulsar::PhaseWeight class implements a useful set of methods
-    required to create, store, and manipulate a weighted set of
-    Pulsar::Profile phase bins. */
+  //! Stores a weight for each Profile phase bin
+  /*! This class implements a useful set of methods required to create,
+    store, and manipulate a weighted set of Profile phase bins. */
   class PhaseWeight : public Reference::Able {
 
   public:

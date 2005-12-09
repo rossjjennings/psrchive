@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/EPN/Pulsar/EPNArchive.h,v $
-   $Revision: 1.7 $
-   $Date: 2005/12/09 03:56:02 $
+   $Revision: 1.8 $
+   $Date: 2005/12/09 16:41:07 $
    $Author: straten $ */
 
 #ifndef __EPN_Archive_h
@@ -147,7 +147,7 @@ namespace Pulsar {
 
     friend class Archive::Advocate<EPNArchive>;
 
-    //! Represents the interests of the EPNArchive
+    //! Advocates the use of the EPNArchive plugin
     class Agent : public Archive::Advocate<EPNArchive> {
     
       public:

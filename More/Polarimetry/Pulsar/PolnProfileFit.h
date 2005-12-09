@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PolnProfileFit.h,v $
-   $Revision: 1.13 $
-   $Date: 2005/11/16 00:43:35 $
+   $Revision: 1.14 $
+   $Date: 2005/12/09 16:41:07 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PolnProfileFit_h
@@ -30,7 +30,7 @@ namespace Pulsar {
   class PolnProfile;
   class Profile;
 
-  //! Implements polarimetric pulse profile template fitting
+  //! The matrix template matching algorithm
   /*! This class may be used to find the full polarimetric best-fit
     between observed and standard pulse profiles.  The fit yields both
     the polarimetric transformation as well as the phase shift between

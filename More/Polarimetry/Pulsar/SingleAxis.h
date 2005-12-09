@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/SingleAxis.h,v $
-   $Revision: 1.3 $
-   $Date: 2005/08/18 12:10:42 $
+   $Revision: 1.4 $
+   $Date: 2005/12/09 16:41:06 $
    $Author: straten $ */
 
 #ifndef __Calibration_SingleAxis_H
@@ -22,7 +22,7 @@ namespace MEAL {
 
 namespace Calibration {
 
-  //! Represents absoulte gain, differential gain, and differential phase
+  //! Instrumental gain, differential gain, and differential phase
   /*! The SingleAxis class may be used to represent three commonly
     encountered instrumental transformations: absolute gain,
     differential gain, and differential phase.  Differential gain and

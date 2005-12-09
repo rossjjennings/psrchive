@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/Receiver.h,v $
-   $Revision: 1.12 $
-   $Date: 2005/04/12 06:44:28 $
+   $Revision: 1.13 $
+   $Date: 2005/12/09 16:41:06 $
    $Author: straten $ */
 
 #ifndef __ReceiverExtension_h
@@ -166,7 +166,7 @@ namespace Pulsar {
     //! Return the Stokes parameters of the reference source
     Stokes<double> get_reference_source () const;
 
-    //! Pure virtual base class of Receiver class state
+    //! The internal state of the Receiver Extension class
     class State : public Reference::Able {
     public:
 
@@ -182,10 +182,14 @@ namespace Pulsar {
       //! Get the phase of the reference source
       virtual Angle get_reference_source_phase () const = 0;
 
-      //! Copy the state from another
+      //! Copy from another State
       virtual void copy (const State*) = 0;
 
     };
+
+    class Native;
+    class Linear;
+    class Field;
 
   protected:
 

@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/Feed.h,v $
-   $Revision: 1.2 $
-   $Date: 2005/12/05 03:06:30 $
+   $Revision: 1.3 $
+   $Date: 2005/12/09 16:41:06 $
    $Author: straten $ */
 
 #ifndef __Calibration_Feed_H
@@ -15,10 +15,11 @@
 
 namespace Calibration {
 
-  //! Represents the feed as a non-ideal combination of two ideal receptors
-  /*! This model of the receiver feed is described by Equation 16 of van
-    Straten (2004) which is equivalent to the transformation in
-    Equation 16 of Britton (2000). */
+  //! Phenomenological description of the receiver feed
+  /*! This model represents the receiver feed as a non-ideal combination of
+    two ideal receptors, as described by Equation 16 of van Straten (2004)
+    which is equivalent to the transformation in Equation 16 of Britton
+    (2000). */
 
   class Feed : public MEAL::SumRule<MEAL::Complex2> {
 

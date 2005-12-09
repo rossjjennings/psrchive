@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/DoPCalibrator.h,v $
-   $Revision: 1.2 $
-   $Date: 2005/12/08 07:29:03 $
+   $Revision: 1.3 $
+   $Date: 2005/12/09 16:41:07 $
    $Author: straten $ */
 
 #ifndef __Pulsar_DoPCalibrator_H
@@ -38,7 +38,7 @@ namespace Pulsar {
     //! Calibrate the polarization of the given archive
     void calibrate (Archive* archive);
 
-    //! Communicates DoP Model parameters
+    //! Communicates DoPCalibrator parameters
     class Info : public SingleAxisCalibrator::Info {
 
     public:

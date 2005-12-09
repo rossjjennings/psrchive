@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/PolnCalibratorExtension.h,v $
-   $Revision: 1.15 $
-   $Date: 2005/04/24 01:27:46 $
+   $Revision: 1.16 $
+   $Date: 2005/12/09 16:41:06 $
    $Author: straten $ */
 
 #ifndef __PolnCalibratorExtension_h
@@ -15,9 +15,9 @@ namespace Pulsar {
 
   class PolnCalibrator;
 
-  //! PolnCalibrator Extension
-  /*! This Extension implements the storage of PolnCalibrator data. */
-  
+  //! Stores PolnCalibrator parameters in an Archive instance
+  /*! This Archive::Extension implements the storage of PolnCalibrator
+    data. */  
   class PolnCalibratorExtension : public CalibratorExtension {
     
   public:

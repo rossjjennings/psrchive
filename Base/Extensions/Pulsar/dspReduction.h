@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/dspReduction.h,v $
-   $Revision: 1.6 $
-   $Date: 2004/07/16 16:06:13 $
+   $Revision: 1.7 $
+   $Date: 2005/12/09 16:41:07 $
    $Author: straten $ */
 
 #ifndef __dspReduction_h
@@ -12,9 +12,9 @@
 
 namespace Pulsar {
 
-  //! Baseband data reduced using baseband/dsp
-  /*! The dspReduction class stores backend information specific to the
-    baseband recording and processing system implemented by baseband/dsp.
+  //! Stores baseband/dsp data reduction parameters
+  /*! This class stores backend information specific to the baseband
+    recording and processing system implemented by baseband/dsp.
    */
   class dspReduction : public Pulsar::Backend {
 

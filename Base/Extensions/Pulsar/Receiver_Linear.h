@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/Receiver_Linear.h,v $
-   $Revision: 1.2 $
-   $Date: 2005/04/12 06:44:28 $
+   $Revision: 1.3 $
+   $Date: 2005/12/09 16:41:06 $
    $Author: straten $ */
 
 #ifndef __Receiver_Linear_h
@@ -12,13 +12,13 @@
 
 namespace Pulsar {
 
-  //! Directly implements Receiver State
-  class Receiver_Linear : public Receiver::State {
+  //! Stores the X and Y receptor and calibrator orientations
+  class Receiver::Linear : public Receiver::State {
 
   public:
 
     //! Default constructor
-    Receiver_Linear ();
+    Linear ();
 
     //! Get the basis of the feed receptors
     Signal::Basis get_basis () const;

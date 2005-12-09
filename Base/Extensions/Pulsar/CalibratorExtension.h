@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/CalibratorExtension.h,v $
-   $Revision: 1.6 $
-   $Date: 2004/10/11 14:26:44 $
+   $Revision: 1.7 $
+   $Date: 2005/12/09 16:41:06 $
    $Author: straten $ */
 
 #ifndef __CalibratorExtension_h
@@ -13,8 +13,9 @@
 
 namespace Pulsar {
 
-  //! Calibrator Extension
-  /*! This base class Extension implements the storage of Calibrator data. */
+  //! Stores Calibrator parameters in an Archive
+  /*! This Archive::Extension class implements the storage of Calibrator
+    data, enabling a calibrator to be constructed from file. */
   class CalibratorExtension : public Pulsar::Archive::Extension {
     
   public:

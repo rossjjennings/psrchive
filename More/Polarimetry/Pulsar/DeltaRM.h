@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/DeltaRM.h,v $
-   $Revision: 1.1 $
-   $Date: 2005/12/08 11:48:37 $
+   $Revision: 1.2 $
+   $Date: 2005/12/09 16:41:07 $
    $Author: straten $ */
 
 #ifndef __Pulsar_DeltaRM_h
@@ -15,7 +15,7 @@ namespace Pulsar {
 
   class Archive;
 
-  //! This class refines an RM estimate using two halves of the band
+  //! Refines an RM estimate using two halves of the band
   class DeltaRM  {
 
   public:

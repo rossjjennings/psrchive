@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/Algorithm.h,v $
-   $Revision: 1.2 $
-   $Date: 2005/12/09 02:57:58 $
+   $Revision: 1.3 $
+   $Date: 2005/12/09 16:41:07 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Algorithm_h
@@ -12,7 +12,7 @@
 
 namespace Pulsar {
 
-  //! Template base class of algorithm implementations
+  //! Data manipulation implementations
   class Algorithm : public Reference::Able {
 
   };

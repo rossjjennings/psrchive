@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/PSRFITS/Pulsar/FITSArchive.h,v $
-   $Revision: 1.30 $
-   $Date: 2005/12/06 12:02:32 $
+   $Revision: 1.31 $
+   $Date: 2005/12/09 16:41:07 $
    $Author: straten $ */
 
 #ifndef __Pulsar_FITSArchive_h
@@ -34,19 +34,16 @@ namespace Pulsar {
   class FluxCalibratorExtension;
   class CalibratorStokes;
  
-  //! Loads and unloads Pulsar FITS archives
+  //! Loads and unloads PSRFITS archives
 
-  /*!  This class definition provides an example of how to use the
-    BasicArchive class as a building block upon which extra
-    functionality can be added. It inherits the BasicArchive class and
-    impliments load and unload functions to read/write data from FITS
-    format files into a Pulsar::Archive class. It also defines variables 
-    to store some of the extra information provided by the pulsar FITS 
-    file format.
+  /*!  This class implements load and unload functions to read/write data
+    from PSRFITS files into an Archive class. It also defines variables to
+    store some of the extra information provided by the PSRFITS file
+    format.
     
-    The pulsar specific FITS template was developed by Dick Manchester 
-    at the ATNF is used primarily with the wideband pulsar correlator at 
-    the Parkes radio telescope.    
+    PSRFITS template was developed by Dick Manchester and collaborators at
+    the ATNF, ASTRON, and Swinburne.  It is used primarily with the wideband
+    pulsar correlator at the Parkes radio telescope.
   */
   
   class FITSArchive : public BasicArchive {
@@ -136,7 +133,7 @@ namespace Pulsar {
     
     friend class Archive::Advocate<FITSArchive>;
     
-    //! This class registers the FITSArchive plugin class for use
+    //! Advocates the use of the FITSArchive plugin
     class Agent : public Archive::Advocate<FITSArchive> {
       
     public:

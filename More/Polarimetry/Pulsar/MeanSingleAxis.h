@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/MeanSingleAxis.h,v $
-   $Revision: 1.1 $
-   $Date: 2004/11/22 20:45:59 $
+   $Revision: 1.2 $
+   $Date: 2005/12/09 16:41:06 $
    $Author: straten $ */
 
 #ifndef __Calibration_MeanSingleAxis_H
@@ -15,7 +15,7 @@ namespace Calibration {
 
   class SingleAxis;
 
-  //! Implements a running mean of the SingleAxis model parameters
+  //! A weighted mean of SingleAxis parameter estimates
   class MeanSingleAxis : public MEAL::Mean<MEAL::Complex2> {
 
   public:

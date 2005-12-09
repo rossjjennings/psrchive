@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/FITSHdrExtension.h,v $
-   $Revision: 1.4 $
-   $Date: 2003/10/08 14:17:38 $
+   $Revision: 1.5 $
+   $Date: 2005/12/09 16:41:06 $
    $Author: straten $ */
 
 #ifndef __FITSHdrExtension_h
@@ -12,8 +12,7 @@
 
 namespace Pulsar {
   
-  //! FITSArchive specific seader extensions
-  
+  //! Stores PSRFITS header extensions
   class FITSHdrExtension : public Pulsar::Archive::Extension {
     
   public:

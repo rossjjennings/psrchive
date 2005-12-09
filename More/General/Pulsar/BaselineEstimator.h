@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/BaselineEstimator.h,v $
-   $Revision: 1.1 $
-   $Date: 2005/08/20 14:29:09 $
+   $Revision: 1.2 $
+   $Date: 2005/12/09 16:41:07 $
    $Author: straten $ */
 
 #ifndef __Pulsar_BaselineFunction_h
@@ -14,7 +14,9 @@ namespace Pulsar {
 
   class Profile;
 
-  //! Pure virtual base class of baseline phase weighting functions
+  //! PhaseWeight algorithms that compute profile baselines
+  /*! This pure virtual base class defines the interface through which
+      various baseline finding algorithms are accessed */
   class BaselineEstimator : public PhaseWeightFunction {
 
   public:

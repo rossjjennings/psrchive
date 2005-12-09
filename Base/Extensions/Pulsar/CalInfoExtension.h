@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/CalInfoExtension.h,v $
-   $Revision: 1.2 $
-   $Date: 2003/10/08 14:17:38 $
+   $Revision: 1.3 $
+   $Date: 2005/12/09 16:41:06 $
    $Author: straten $ */
 
 #ifndef __CalInfoExtension_h
@@ -12,11 +12,11 @@
 
 namespace Pulsar {
   
-  //! CalInfoExtension
-  /*! This class provides a simple container for storing the
-    information used by the ATNF Telescope Control System
-    when defining the state of a CAL observation */
-  
+  //! Stores information about the reference source (ATNF)
+  /*! This Archive::Extension class provides a simple container for storing
+    the information used by the ATNF Telescope Control System when defining
+    the state of a CAL observation
+  */
   class CalInfoExtension : public Pulsar::Archive::Extension {
     
   public:

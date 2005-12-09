@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/Faraday.h,v $
-   $Revision: 1.3 $
-   $Date: 2005/08/18 12:10:41 $
+   $Revision: 1.4 $
+   $Date: 2005/12/09 16:41:06 $
    $Author: straten $ */
 
 #ifndef __Faraday_H
@@ -12,7 +12,8 @@
 
 namespace Calibration {
 
-  //! Faraday rotation transformation, parameterized by the rotation measure
+  //! Faraday rotation transformation
+  /*! This transformation is parameterized by the rotation measure */
   class Faraday : public MEAL::Complex2 {
 
   public:

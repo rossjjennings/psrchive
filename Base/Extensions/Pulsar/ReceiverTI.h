@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/Attic/ReceiverTI.h,v $
-   $Revision: 1.3 $
-   $Date: 2004/12/19 18:53:09 $
+   $Revision: 1.4 $
+   $Date: 2005/12/09 16:41:06 $
    $Author: straten $ */
 
 #ifndef __Pulsar_ReceiverTI_h
@@ -13,7 +13,7 @@
 
 namespace Pulsar {
 
-  //! Smooths a pulse profile using the mean over a boxcar
+  //! Provides a text interface to get and set Receiver attributes
   class ReceiverTI : public TextInterface::ClassGetSet<Receiver> {
 
   public:

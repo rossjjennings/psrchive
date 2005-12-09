@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/FluxCalibrator.h,v $
-   $Revision: 1.22 $
-   $Date: 2005/12/09 03:56:01 $
+   $Revision: 1.23 $
+   $Date: 2005/12/09 16:41:07 $
    $Author: straten $ */
 
 #ifndef __Pulsar_FluxCalibrator_H
@@ -15,7 +15,7 @@ namespace Pulsar {
   class Integration;
   class FluxCalibratorDatabase;
 
-  //! Calibrates the flux scale using standard candles and artificial sources
+  //! Calibrates flux using standard candles and artificial sources
   class FluxCalibrator : public Calibrator {
     
     friend class FluxCalibratorInfo;

@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/Instrument.h,v $
-   $Revision: 1.2 $
-   $Date: 2005/04/24 01:11:19 $
+   $Revision: 1.3 $
+   $Date: 2005/12/09 16:41:06 $
    $Author: straten $ */
 
 #ifndef __CalibrationInstrument_H
@@ -21,10 +21,9 @@ namespace Calibration {
   class SingleAxis;
   class Feed;
 
-  //! Represents the classical instrumental response
+  //! Phenomenological description of the instrument
   /*! The transformation is represented by the product of a SingleAxis
     transformation and Feed transformation. */
-
   class Instrument : public MEAL::ProductRule<MEAL::Complex2> {
 
   public:

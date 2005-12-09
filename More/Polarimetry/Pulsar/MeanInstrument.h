@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/MeanInstrument.h,v $
-   $Revision: 1.1 $
-   $Date: 2004/11/22 20:45:59 $
+   $Revision: 1.2 $
+   $Date: 2005/12/09 16:41:06 $
    $Author: straten $ */
 
 #ifndef __Calibration_MeanInstrument_H
@@ -16,7 +16,7 @@ namespace Calibration {
   class MeanSingleAxis;
   class MeanFeed;
 
-  //! Implements a running mean of the Stokes parameters
+  //! A weighted mean of Instrument parameter estimates
   class MeanInstrument : public MEAL::Mean<MEAL::Complex2> {
 
   public:

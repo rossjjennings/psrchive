@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/FrequencyIntegrate.h,v $
-   $Revision: 1.2 $
-   $Date: 2005/12/08 11:29:55 $
+   $Revision: 1.3 $
+   $Date: 2005/12/09 16:41:07 $
    $Author: straten $ */
 
 #ifndef __Pulsar_FrequencyIntegrate_h
@@ -83,7 +83,9 @@ namespace Pulsar {
   };
 
 
-  /*! Pure virtual base class of frequency channel range selection policies */
+  //! Policies for dividing frequency channels into ranges
+  /*! This pure virtual base class defines the interface to the various
+    frequency channel range selection policies. */
   class FrequencyIntegrate::RangePolicy : public Reference::Able {
 
   public:
@@ -101,6 +103,7 @@ namespace Pulsar {
 
   };
 
+  //! Policy for producing evenly spaced frequency channel ranges
   /*! Evenly spaced frequency channel ranges have a constant number
     of input frequency channels per output frequency channel. */
   class FrequencyIntegrate::EvenlySpaced : public RangePolicy {
@@ -128,6 +131,7 @@ namespace Pulsar {
   };
 
 
+  //! Policy for producing evenly distributed frequency channel ranges
   /*! Evenly distributed frequency channel ranges have the same number of
     valid input frequency channels integrated into each output frequency
     channel. */

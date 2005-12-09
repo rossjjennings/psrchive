@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/SingleAxisSolver.h,v $
-   $Revision: 1.2 $
-   $Date: 2005/08/18 12:10:42 $
+   $Revision: 1.3 $
+   $Date: 2005/12/09 16:41:06 $
    $Author: straten $ */
 
 #ifndef __Calibration_SingleAxisSolver_H
@@ -17,7 +17,7 @@ namespace Calibration {
 
   class SingleAxis;
 
-  //! Solves for SingleAxis parameters given input and output states
+  //! Derives SingleAxis parameters from input and output states
   class SingleAxisSolver : public Reference::Able {
 
   public:

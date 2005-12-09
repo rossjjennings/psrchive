@@ -1,21 +1,22 @@
 //-*-C++-*-
                                                                                 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/IntegrationOrder.h,v $
-   $Revision: 1.6 $
-   $Date: 2004/09/27 17:15:56 $
-   $Author: ahotan $ */
+   $Revision: 1.7 $
+   $Date: 2005/12/09 16:41:06 $
+   $Author: straten $ */
                                                                                 
 #ifndef __IntegrationOrder_h
 #define __IntegrationOrder_h
-                                                                                
+
 #include "Pulsar/Archive.h"
 
 namespace Pulsar {
   
-  /*! This IntegrationOrder class provides a means for developers to
-    re-index the way Integrations are stored. It is a virtual base class
-    that must be inherited by developers who wish to define a new way to
-    index the Integrations in their Archive */
+  //! Alternative ways of ordering Integration instances
+  /*! This class provides a means for developers to re-index the way
+    Integrations are stored. It is a virtual base class that must be
+    inherited by developers who wish to define a new way to index the
+    Integrations in their Archive */
   
   class IntegrationOrder : public Pulsar::Archive::Extension {
                                                                                 

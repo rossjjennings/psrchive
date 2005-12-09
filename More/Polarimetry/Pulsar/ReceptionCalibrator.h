@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ReceptionCalibrator.h,v $
-   $Revision: 1.66 $
-   $Date: 2005/10/11 20:26:18 $
+   $Revision: 1.67 $
+   $Date: 2005/12/09 16:41:07 $
    $Author: straten $ */
 
 #ifndef __Pulsar_ReceptionCalibrator_H
@@ -58,7 +58,7 @@ namespace Pulsar {
 
 
   
-  //! Uses the ReceptionModel to represent and fit for the system response
+  //! Models the variation of Stokes parameters with parallactic angle
   /*! The ReceptionCalibrator implements a technique of single dish
     polarimetric self-calibration.  This class requires a number of
     constraints, which are provided in through the add_observation,
@@ -216,9 +216,8 @@ namespace Pulsar {
 		   Stokes<float>& variance);
 
 
-    //! Calibrator parameter communication
+    //! Communicates flux and reference calibrator parameters
     class CalInfo : public Calibrator::Info {
-      //friend class CalInfo : public Calibrator::Info {
       
     public:
       
