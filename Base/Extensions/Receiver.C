@@ -30,7 +30,7 @@ Pulsar::Receiver::Receiver () : Extension ("Receiver")
   tracking_mode = Feed;
   name = "unknown";
 
-  state = new Receiver_Native;
+  state = new Native;
 
   feed_corrected = false;
   platform_corrected = false;
@@ -53,7 +53,7 @@ Pulsar::Receiver::operator= (const Receiver& ext)
   tracking_angle = ext.tracking_angle;
 
   name = ext.name;
-  state = new Receiver_Native;
+  state = new Native;
   state->copy(ext.state);
 
   feed_corrected = ext.feed_corrected;
@@ -85,7 +85,7 @@ string Pulsar::Receiver::get_tracking_mode_string() const
 
 void Pulsar::Receiver::set_basis (Signal::Basis basis)
 {
-  get<Receiver_Native>()->set_basis (basis);
+  get<Native>()->set_basis (basis);
 }
 
 /*! If this method is called, then any previous changes due to
@@ -93,42 +93,42 @@ void Pulsar::Receiver::set_basis (Signal::Basis basis)
  reset. */
 void Pulsar::Receiver::set_orientation (const Angle& angle)
 {
-  get<Receiver_Native>()->set_orientation (angle);
+  get<Native>()->set_orientation (angle);
 }
 
 /*! If this method is called, then any changes due to set_Y_offset
   will be reset. */
 void Pulsar::Receiver::set_right_handed (bool right)
 {
-  get<Receiver_Native>()->set_right_handed (right);
+  get<Native>()->set_right_handed (right);
 }
 
 //! Set the phase of the reference source
 void Pulsar::Receiver::set_reference_source_phase (const Angle& angle)
 {
-  get<Receiver_Native>()->set_reference_source_phase (angle);
+  get<Native>()->set_reference_source_phase (angle);
 }
 
 void Pulsar::Receiver::set_field_orientation (const Angle& angle)
 {
-  get<Receiver_Field>()->set_field_orientation (angle);
+  get<Field>()->set_field_orientation (angle);
 }
 
 Angle Pulsar::Receiver::get_field_orientation () const
 {
-  return get<Receiver_Field>()->get_field_orientation ();
+  return get<Field>()->get_field_orientation ();
 }
 
 /*! If this method is called, then any previous changes due to
   set_orientation or set_field_orientation will be reset. */
 void Pulsar::Receiver::set_X_offset (const Angle& offset)
 {
-  get<Receiver_Linear>()->set_X_offset (offset);
+  get<Linear>()->set_X_offset (offset);
 }
 
 Angle Pulsar::Receiver::get_X_offset () const
 {
-  return get<Receiver_Linear>()->get_X_offset ();
+  return get<Linear>()->get_X_offset ();
 }
 
 
@@ -137,12 +137,12 @@ Angle Pulsar::Receiver::get_X_offset () const
 */
 void Pulsar::Receiver::set_Y_offset (const Angle& offset)
 { 
-  get<Receiver_Linear>()->set_Y_offset (offset);
+  get<Linear>()->set_Y_offset (offset);
 }
 
 Angle Pulsar::Receiver::get_Y_offset () const
 {
-  return get<Receiver_Linear>()->get_Y_offset ();
+  return get<Linear>()->get_Y_offset ();
 }
 
 /*! In the linear basis, the noise diode must illuminate both receptors
@@ -152,12 +152,12 @@ Angle Pulsar::Receiver::get_Y_offset () const
 */
 void Pulsar::Receiver::set_calibrator_offset (const Angle& offset)
 {
-  get<Receiver_Linear>()->set_calibrator_offset (offset);
+  get<Linear>()->set_calibrator_offset (offset);
 }
 
 Angle Pulsar::Receiver::get_calibrator_offset () const
 { 
-  return get<Receiver_Linear>()->get_calibrator_offset ();
+  return get<Linear>()->get_calibrator_offset ();
 }
 
 static std::string match_indent = "\n\t";

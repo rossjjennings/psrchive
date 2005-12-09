@@ -1,19 +1,19 @@
 #include "Pulsar/Receiver_Linear.h"
 
 //! Default constructor
-Pulsar::Receiver_Linear::Receiver_Linear ()
+Pulsar::Receiver::Linear::Linear ()
 {
   y_offset = calibrator_offset = false;
 }
 
 //! Get the basis of the feed receptors
-Signal::Basis Pulsar::Receiver_Linear::get_basis () const
+Signal::Basis Pulsar::Receiver::Linear::get_basis () const
 {
   return Signal::Linear;
 }
     
 //! Get the orientation of the basis about the line of sight
-Angle Pulsar::Receiver_Linear::get_orientation () const
+Angle Pulsar::Receiver::Linear::get_orientation () const
 {
   Angle offset;
   if (y_offset)
@@ -23,13 +23,13 @@ Angle Pulsar::Receiver_Linear::get_orientation () const
 }
     
 //! Return true if the basis is right-handed
-bool Pulsar::Receiver_Linear::get_right_handed () const
+bool Pulsar::Receiver::Linear::get_right_handed () const
 {
   return !y_offset;
 }
     
 //! Get the phase of the reference source
-Angle Pulsar::Receiver_Linear::get_reference_source_phase () const
+Angle Pulsar::Receiver::Linear::get_reference_source_phase () const
 {
   if (y_offset ^ calibrator_offset)
     return M_PI;
@@ -38,10 +38,10 @@ Angle Pulsar::Receiver_Linear::get_reference_source_phase () const
 }
     
 //! Copy the state from another
-void Pulsar::Receiver_Linear::copy (const State* state)
+void Pulsar::Receiver::Linear::copy (const State* state)
 {
   if (state->get_basis() != Signal::Linear)
-    throw Error (InvalidParam, "Pulsar::Receiver_Linear::copy",
+    throw Error (InvalidParam, "Pulsar::Receiver::Linear::copy",
 		 "input State::get_basis != Signal::Linear");
 
   set_calibrator_offset( 0.5 * state->get_reference_source_phase() );
@@ -58,13 +58,13 @@ void Pulsar::Receiver_Linear::copy (const State* state)
 }
 
 //! Get the offset of the feed X axis with respect to the platform zero
-Angle Pulsar::Receiver_Linear::get_X_offset () const
+Angle Pulsar::Receiver::Linear::get_X_offset () const
 {
   return x_offset;
 }
 
 //! Set the offset of the feed X axis with respect to the platform zero
-void Pulsar::Receiver_Linear::set_X_offset (const Angle& offset)
+void Pulsar::Receiver::Linear::set_X_offset (const Angle& offset)
 {
   x_offset = offset;
 }
@@ -86,7 +86,7 @@ void Pulsar::Receiver_Linear::set_X_offset (const Angle& offset)
   \param offset either 0 or +/- 180 degrees
 
 */
-void Pulsar::Receiver_Linear::set_Y_offset (const Angle& offset)
+void Pulsar::Receiver::Linear::set_Y_offset (const Angle& offset)
 { 
   if (offset == 0.0)
     y_offset = false;
@@ -94,11 +94,11 @@ void Pulsar::Receiver_Linear::set_Y_offset (const Angle& offset)
     y_offset = true;
   else
     throw Error (InvalidParam,
-		 "Pulsar::Receiver_Linear::set_Y_offset",
+		 "Pulsar::Receiver::Linear::set_Y_offset",
 		 "invalid offset = %lf deg", offset.getDegrees());
 }
 
-Angle Pulsar::Receiver_Linear::get_Y_offset () const
+Angle Pulsar::Receiver::Linear::get_Y_offset () const
 {
   if (!y_offset)
     return 0.0;
@@ -111,7 +111,7 @@ Angle Pulsar::Receiver_Linear::get_Y_offset () const
 
     \param offset either 0 or +/- 90 degrees
 */
-void Pulsar::Receiver_Linear::set_calibrator_offset (const Angle& offset)
+void Pulsar::Receiver::Linear::set_calibrator_offset (const Angle& offset)
 {
   if (offset == 0.0)
     calibrator_offset = false;
@@ -119,11 +119,11 @@ void Pulsar::Receiver_Linear::set_calibrator_offset (const Angle& offset)
     calibrator_offset = true;
   else
     throw Error (InvalidParam,
-		 "Pulsar::Receiver_Linear::set_calibrator_offset",
+		 "Pulsar::Receiver::Linear::set_calibrator_offset",
                  "invalid offset = %lf deg", offset.getDegrees());
 }
 
-Angle Pulsar::Receiver_Linear::get_calibrator_offset () const
+Angle Pulsar::Receiver::Linear::get_calibrator_offset () const
 { 
   if (!calibrator_offset)
     return 0.0;

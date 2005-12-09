@@ -1,13 +1,13 @@
 #include "Pulsar/Receiver_Native.h"
 
-Pulsar::Receiver_Native::Receiver_Native ()
+Pulsar::Receiver::Native::Native ()
 {
   basis = Signal::Linear;
   right_handed = true;
 }
 
 //! Copy the state from another
-void Pulsar::Receiver_Native::copy (const State* state)
+void Pulsar::Receiver::Native::copy (const State* state)
 {
   set_basis (state->get_basis());
   set_orientation (state->get_orientation());
