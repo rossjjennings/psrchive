@@ -390,7 +390,7 @@ int main (int argc, char** argv)
 	    float phase = profile->find_min_phase(smooth->get_duty_cycle());
 	    cerr << "psrwt: find_min_phase=" << phase << endl;
 
-	    smooth->smooth (profile);
+	    smooth->transform (profile);
 
 	    phase = float(profile->find_min_bin()) / profile->get_nbin();
 	    cerr << "psrwt: find_min_bin/nbin=" << phase << endl;

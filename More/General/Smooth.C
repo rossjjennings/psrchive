@@ -27,7 +27,7 @@ float Pulsar::Smooth::get_duty_cycle () const
   return duty_cycle;
 }
 
-void Pulsar::Smooth::smooth (Profile* profile)
+void Pulsar::Smooth::transform (Profile* profile)
 {
   unsigned nbin = profile->get_nbin();
 
@@ -38,12 +38,12 @@ void Pulsar::Smooth::smooth (Profile* profile)
   const unsigned width = 2*halfwidth + 1;
 
   if (halfwidth == 0)
-    throw Error (InvalidParam, "Pulsar::Smooth::smooth",
+    throw Error (InvalidParam, "Pulsar::Smooth::transform",
 		 "duty_cycle=%f and nbin=%d results in width=%d",
 		 duty_cycle, width, nbin);
 
   if (Pulsar::Profile::verbose)
-    cerr << "Pulsar::Smooth::smooth duty_cycle=" << duty_cycle
+    cerr << "Pulsar::Smooth::transform duty_cycle=" << duty_cycle
 	 << " width=" << width << endl;
 
   auto_ptr<float> temp( new float [nbin + 2*halfwidth] );
