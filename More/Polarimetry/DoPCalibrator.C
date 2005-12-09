@@ -7,7 +7,6 @@
 
 #include <assert.h>
 
-//! Construct from an single PolnCal Pulsar::Archive
 Pulsar::DoPCalibrator::DoPCalibrator (const Archive* archive) 
   : SingleAxisCalibrator (archive)
 {
@@ -55,23 +54,22 @@ void Pulsar::DoPCalibrator::calibrate (Archive* archive)
   unsigned nchan = archive->get_nchan();
   unsigned npol  = archive->get_npol();
 
-  if (npol == 4) {
+  assert (nchan == dop_scale.size());
 
-    assert (nchan == dop_scale.size());
+  if (npol != 4)
+    throw Error (InvalidState, "Pulsar::DoPCalibrator::calibrate",
+		 "npol != 4");
+
+  for (unsigned isub=0; isub < nsub; isub++) {
+    Integration* subint = archive->get_Integration (isub);
     
-    for (unsigned isub=0; isub < nsub; isub++) {
-      Integration* subint = archive->get_Integration (isub);
-      
-      for (unsigned ichan=0; ichan < nchan; ichan++) {
-	subint->get_Profile (2, ichan) -> scale (dop_scale[ichan].val);
-	subint->get_Profile (3, ichan) -> scale (dop_scale[ichan].val);
-      }
+    for (unsigned ichan=0; ichan < nchan; ichan++) {
+      subint->get_Profile (2, ichan) -> scale (dop_scale[ichan].val);
+      subint->get_Profile (3, ichan) -> scale (dop_scale[ichan].val);
     }
-
   }
 
   SingleAxisCalibrator::calibrate (archive);
-
 }
 
 
