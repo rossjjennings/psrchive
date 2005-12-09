@@ -1,5 +1,5 @@
 //
-// $Id: pav.C,v 1.103 2005/12/08 03:04:54 straten Exp $
+// $Id: pav.C,v 1.104 2005/12/09 16:40:12 straten Exp $
 //
 // The Pulsar Archive Viewer
 //
@@ -37,9 +37,6 @@
 
 using namespace std;
 
-vector<Reference::To<Pulsar::Archive> > get_archives(string filename,
-						     bool breakup_archive);
-
 void usage ()
 {
   cout << "A program to look at Pulsar::Archive(s) in various ways\n"
@@ -70,10 +67,13 @@ void usage ()
     "Functor options:\n"
     " --snr [fourier|fortran]  Calculate S/N using specified method\n"
     "\n"
-    "Selection & configuration options:\n"
+    "Configuration options:\n"
     " -K dev    Manually specify a plot device\n"
     " -M meta   Read a meta-file containing the files to use\n"
     " -s std    Select a standard profile (where applicable)\n"
+    "\n"
+    "Selection options:\n"
+    " --all     Plot all sub-integrations\n"
     " -H chan   Select which frequency channel to display\n"
     " -P pol    Select which polarization to display\n"
     " -I subint Select which sub-integration to display\n"
@@ -132,8 +132,7 @@ void usage ()
     " -v               Verbose output \n"
     " -V               Very verbose output \n"
     " -w               Use stopwatch (for benchmarking)\n\n"
-    " --extra fname    Treat each subint in this archive as an extra\n"
-    "                  archive to process\n"
+    " --extra          Plot each subint in this archive [syn: all]\n"
     "See http://astronomy.swin.edu.au/pulsar/software/manuals/pav.html"
        << endl;
 }
@@ -205,16 +204,12 @@ int main (int argc, char** argv)
   bool mask               = false;
   bool plot_total_archive = false;
   bool profile_spectrum   = false;
-	bool show_profile_axes  = true;
+  bool all_subints        = false;
+  bool show_profile_axes  = true;
   float spectrum_gamma = 1.0;
 
   Reference::To<Pulsar::Archive> std_arch;
   Reference::To<Pulsar::Profile> std_prof;
-  
-  vector<string> filenames;
-  
-  // bools of whether archive should be broken up into its subints
-  vector<int> breakup_archives; 
   
   string plot_device = "?";
 
@@ -231,7 +226,7 @@ int main (int argc, char** argv)
     "AaBb:CcDdEeFf:GgH:hI:iJjK:k:LlM:mN:nO:oP:pQq:Rr:Ss:Tt:UuVvWwXx:Yy:Zz:";
 
   const int TOTAL = 1010;
-  const int EXTRA = 1011;
+  const int ALL_SUBINTS = 1011;
   const int NBIN  = 1012;
   const int FMAX  = 1013;
   const int YSTRETCH = 1014;
@@ -251,13 +246,14 @@ int main (int argc, char** argv)
     { "mask",               0, 0, 208 },
     { "normal",             0, 0, 209 },
     { "total",              no_argument,       0, TOTAL},
-    { "extra",              required_argument, 0, EXTRA},
+    { "all",                no_argument,       0, ALL_SUBINTS},
+    { "extra",              no_argument,       0, ALL_SUBINTS},
     { "nbin",               required_argument, 0, NBIN},
     { "ystretch",           required_argument, 0, YSTRETCH},
     { "fmax",               required_argument, 0, FMAX},
     { "spec",               0, 0, PROFILE_SPECTRUM},
     { "specgamma",          required_argument, 0, SPECTRUM_GAMMA},
-		{ "no_prof_axes",       no_argument, 0, NO_PROFILE_AXES},
+    { "no_prof_axes",       no_argument, 0, NO_PROFILE_AXES},
     { 0, 0, 0, 0 }
   };
     
@@ -338,7 +334,7 @@ int main (int argc, char** argv)
       plotter.set_subint( atoi (optarg) );
       break;
     case 'i':
-      cout << "$Id: pav.C,v 1.103 2005/12/08 03:04:54 straten Exp $" << endl;
+      cout << "$Id: pav.C,v 1.104 2005/12/09 16:40:12 straten Exp $" << endl;
       return 0;
 
     case 'j':
@@ -618,9 +614,8 @@ int main (int argc, char** argv)
     case TOTAL: 
       plot_total_archive = true; 
       break;
-    case EXTRA: 
-      filenames.push_back( optarg ); 
-      breakup_archives.push_back( true); 
+    case ALL_SUBINTS: 
+      all_subints = true;
       break;
     case NBIN:
       nbin_requested = atoi(optarg); 
@@ -646,21 +641,14 @@ int main (int argc, char** argv)
     }
   }
  
-  {
-    vector<string> extra_filenames;
-    
-    if (metafile)
-      stringfload (&extra_filenames, metafile);
-    else
-      for (int ai=optind; ai<argc; ai++)
-	dirglob (&extra_filenames, argv[ai]);
-
-    for( unsigned i=0; i<extra_filenames.size(); i++){
-      filenames.push_back( extra_filenames[i] );
-      breakup_archives.push_back( false );
-    }
-  }
-
+  vector<string> filenames;
+  
+  if (metafile)
+    stringfload (&filenames, metafile);
+  else
+    for (int ai=optind; ai<argc; ai++)
+      dirglob (&filenames, argv[ai]);
+  
   if (filenames.size() == 0) {          
     cerr << "pav: please specify filename[s]" << endl;
     return -1;
@@ -685,122 +673,137 @@ int main (int argc, char** argv)
 
   RealTimer clock;
 
+  cerr << "pav: reading " << filenames.size() << " files" << endl;
+
   for (unsigned ifile = 0; ifile < filenames.size(); ifile++) try {
-    vector<Reference::To<Pulsar::Archive> > archives = 
-      get_archives(filenames[ifile],breakup_archives[ifile]);
 
-    for( unsigned iarch = 0; iarch < archives.size(); iarch++){
-      Reference::To<Pulsar::Archive> archive = archives[iarch];
+    Reference::To<Pulsar::Archive> archive;
+    archive = Pulsar::Archive::load (filenames[ifile]);
 
-      if( plot_total_archive ){
-	for(unsigned ichan=0; ichan<archive->get_nchan(); ichan++)
-	  fprintf(stderr,"%d\t%f\n",
-		  ichan,archive->get_Integration(0)->get_weight(ichan));
-	
-	Reference::To<Pulsar::Archive> total(archive->total());
-	total->centre();
-	plotter.singleProfile(total);
-	exit(0);
-      }
+    unsigned nsubint = 1;
+    if (all_subints)
+      nsubint = archive->get_nsubint();
 
-      if (centre) {
-	archive->centre();
-      }
+    if (plot_total_archive) {
+      for(unsigned ichan=0; ichan<archive->get_nchan(); ichan++)
+	fprintf(stderr,"%d\t%f\n",
+		ichan,archive->get_Integration(0)->get_weight(ichan));
       
-      if (dedisperse) {
-	if (stopwatch)
-	  clock.start();
-	archive -> dedisperse();
-	if (stopwatch) {
-	  clock.stop();
-	  cerr << "dedispersion toook " << clock << endl;
-	}
-      }
-      
-      if (cbppo) {
-	Pulsar::IntegrationOrder* myio = new Pulsar::PeriastronOrder();
-	archive->add_extension(myio); 
-	myio->organise(archive, ronsub);
-      }
+      Reference::To<Pulsar::Archive> total(archive->total());
+      total->centre();
+      plotter.singleProfile(total);
+      exit(0);
+    }
+
+    if (centre) {
+      archive->centre();
+    }
     
-      if (cbpao) {
-	Pulsar::IntegrationOrder* myio = new Pulsar::BinaryPhaseOrder();
-	archive->add_extension(myio);
-	myio->organise(archive, ronsub);
+    if (dedisperse) {
+      if (stopwatch)
+	clock.start();
+      archive -> dedisperse();
+      if (stopwatch) {
+	clock.stop();
+	cerr << "dedispersion toook " << clock << endl;
       }
-
-      if (cblpo) {
-	Pulsar::IntegrationOrder* myio = new Pulsar::BinLngPeriOrder();
-	archive->add_extension(myio);
-	myio->organise(archive, ronsub);
+    }
+    
+    if (cbppo) {
+      Pulsar::IntegrationOrder* myio = new Pulsar::PeriastronOrder();
+      archive->add_extension(myio); 
+      myio->organise(archive, ronsub);
+    }
+    
+    if (cbpao) {
+      Pulsar::IntegrationOrder* myio = new Pulsar::BinaryPhaseOrder();
+      archive->add_extension(myio);
+      myio->organise(archive, ronsub);
+    }
+    
+    if (cblpo) {
+      Pulsar::IntegrationOrder* myio = new Pulsar::BinLngPeriOrder();
+      archive->add_extension(myio);
+      myio->organise(archive, ronsub);
+    }
+    
+    if (cblao) {
+      Pulsar::IntegrationOrder* myio = new Pulsar::BinLngAscOrder();
+      archive->add_extension(myio);
+      myio->organise(archive, ronsub);
+    }
+    
+    if (fscrunch >= 0) {
+      if (stopwatch)
+	clock.start();
+      archive -> fscrunch (fscrunch);
+      if (stopwatch) {
+	clock.stop();
+	cerr << "fscrunch took " << clock << endl;
       }
-
-      if (cblao) {
-	Pulsar::IntegrationOrder* myio = new Pulsar::BinLngAscOrder();
-	archive->add_extension(myio);
-	myio->organise(archive, ronsub);
+    }
+    
+    if (tscrunch >= 0) {
+      if (stopwatch)
+	clock.start();
+      archive -> tscrunch (tscrunch);
+      if (stopwatch) {
+	clock.stop();
+	cerr << "tscrunch took " << clock << endl;
       }
-
-      if (fscrunch >= 0) {
-	if (stopwatch)
-	  clock.start();
-	archive -> fscrunch (fscrunch);
-	if (stopwatch) {
-	  clock.stop();
-	  cerr << "fscrunch took " << clock << endl;
-	}
+    }
+    
+    if (pscrunch > 0) {
+      if (stopwatch)
+	clock.start();
+      archive -> pscrunch ();
+      if (stopwatch) {
+	clock.stop();
+	cerr << "pscrunch took " << clock.elapsedString () << endl;
+      }
+    }
+    
+    if( nbin_requested > 0 ) {
+      bscrunch = -1;
+      if (stopwatch)
+	clock.start();
+      archive -> bscrunch_to_nbin (nbin_requested);
+      if (stopwatch) {
+	clock.stop();
+	cerr << "bscrunch took " << clock << endl;
       }
       
-      if (tscrunch >= 0) {
-	if (stopwatch)
-	  clock.start();
-	archive -> tscrunch (tscrunch);
-	if (stopwatch) {
-	  clock.stop();
-	  cerr << "tscrunch took " << clock << endl;
-	}
+    }
+    
+    if (bscrunch > 0) {
+      if (stopwatch)
+	clock.start();
+      archive -> bscrunch (bscrunch);
+      if (stopwatch) {
+	clock.stop();
+	cerr << "bscrunch took " << clock << endl;
       }
-      
-      if (pscrunch > 0) {
-	if (stopwatch)
-	  clock.start();
-	archive -> pscrunch ();
-	if (stopwatch) {
-	  clock.stop();
-	  cerr << "pscrunch took " << clock.elapsedString () << endl;
-	}
+    }
+    
+    if (profile_spectrum){
+      if (stopwatch)
+	clock.start();
+      archive -> get_profile_power_spectra(spectrum_gamma);
+      if (stopwatch) {
+	clock.stop();
+	cerr << "--spec took " << clock << endl;
       }
+    }
 
-      if( nbin_requested > 0 ) {
-	bscrunch = -1;
-	if (stopwatch)
-	  clock.start();
-	archive -> bscrunch_to_nbin (nbin_requested);
-	if (stopwatch) {
-	  clock.stop();
-	  cerr << "bscrunch took " << clock << endl;
-	}
-	
-      }
+    string archive_filename = archive->get_filename();
 
-      if (bscrunch > 0) {
-	if (stopwatch)
-	  clock.start();
-	archive -> bscrunch (bscrunch);
-	if (stopwatch) {
-	  clock.stop();
-	  cerr << "bscrunch took " << clock << endl;
-	}
-      }
+    for (unsigned isub = 0; isub < nsubint; isub++) {
 
-      if (profile_spectrum){
-	if (stopwatch)
-	  clock.start();
-	archive -> get_profile_power_spectra(spectrum_gamma);
-	if (stopwatch) {
-	  clock.stop();
-	  cerr << "--spec took " << clock << endl;
-	}
+      if (all_subints) {
+	plotter.set_subint (isub);
+
+	archive->set_filename( archive_filename +
+			       " subint " + make_string(isub) );
       }
 
       if (mask) {
@@ -1106,24 +1109,3 @@ int main (int argc, char** argv)
   
   return 0;
 }
-
-vector<Reference::To<Pulsar::Archive> > get_archives(string filename,
-						     bool breakup_archive) {
-  vector<Reference::To<Pulsar::Archive> > archives;
-  Reference::To<Pulsar::Archive> arch( Pulsar::Archive::load(filename) );
-  
-  if( !breakup_archive ){
-    archives.push_back( arch );
-    return archives;
-  }
-  
-  for( unsigned isub=0; isub<arch->get_nsubint(); isub++){
-    vector<unsigned> subints(1,isub);
-    archives.push_back( arch->extract(subints) );
-    archives.back()->set_filename( arch->get_filename() + 
-				   " subint " + make_string(isub) );
-  }
-  
-  return archives;
-}
-
