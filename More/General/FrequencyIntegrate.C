@@ -2,20 +2,19 @@
 #include "Pulsar/Integration.h"
 #include "Pulsar/Profile.h"
 
+#include "ModifyRestore.h"
 #include "Error.h"
 
 void Pulsar::FrequencyIntegrate::transform (Integration* integration)
 {
-  if (Integration::verbose)
-    cerr << "Pulsar::FrequencyIntegrate::transform"
-      " nscrunch=" << nscrunch << " nchan=" << nchan 
-	 << " dm=" << integration->get_dispersion_measure() << endl;
-
   unsigned subint_nchan = integration->get_nchan();
   unsigned subint_npol  = integration->get_npol();
 
-  if (nscrunch == 1 || subint_nchan == 1 || nchan >= subint_nchan)
-    return;    // nothing to scrunch
+  if (nscrunch == 1 || subint_nchan <= 1 || nchan >= subint_nchan) {
+    if (Integration::verbose) 
+      cerr << "Pulsar::FrequencyIntegrate::transform nothing to do" << endl;
+   return;
+  }
 
   range_policy->initialize (this, integration);
   unsigned output_nchan = range_policy->get_nrange();
@@ -27,20 +26,25 @@ void Pulsar::FrequencyIntegrate::transform (Integration* integration)
   bool must_defaraday = subint_npol == 4 &&
     rm != 0 && !integration->get_faraday_corrected();
 
+  if (Integration::verbose)
+    cerr << "Pulsar::FrequencyIntegrate::transform"
+      " nscrunch=" << nscrunch << " nchan=" << nchan 
+	 << " dm=" << dm << " rm=" << rm << endl;
+
   unsigned start = 0;
   unsigned stop = 0;
 
-  bool was_range_checking = range_checking_enabled;
-  range_checking_enabled = false;
+  ModifyRestore<bool> mod (range_checking_enabled, false);
 
   for (unsigned ichan=0; ichan < output_nchan; ichan++) try {
       
     range_policy->get_range (ichan, start, stop);
     
-    if (Integration::verbose)
-      cerr << "Pulsar::FrequencyIntegrate::transform ichan=" << ichan << endl;
-    
     double reference_frequency = integration->weighted_frequency (start,stop);
+
+    if (Integration::verbose)
+      cerr << "Pulsar::FrequencyIntegrate::transform ichan=" << ichan 
+	   << " freq=" << reference_frequency << endl;
 
     if (must_dedisperse)
       integration->dedisperse (start, stop, dm, reference_frequency);
@@ -69,11 +73,8 @@ void Pulsar::FrequencyIntegrate::transform (Integration* integration)
 
   }
   catch (Error& error) {
-   range_checking_enabled = was_range_checking;
    throw error += "FrequencyIntegrate::transform";
   }
-
-  range_checking_enabled = was_range_checking;
 
   if (Integration::verbose)
     cerr << "Pulsar::FrequencyIntegrate::transform resize" << endl;
@@ -82,6 +83,7 @@ void Pulsar::FrequencyIntegrate::transform (Integration* integration)
 
   if (Integration::verbose) 
     cerr << "Pulsar::FrequencyIntegrate::transform finish" << endl;
+
 } 
 
 //! Default constructor
@@ -128,23 +130,41 @@ void Pulsar::FrequencyIntegrate::divide (unsigned div_nchan,
 					 unsigned& nrange,
 					 unsigned& spacing) const
 {
+  nrange = 1;
+  spacing = div_nchan;
+
   if (nchan) {
+
+    if (Integration::verbose)
+      cerr << "Pulsar::FrequencyIntegrate::divide nchan=" << nchan << endl;
+
     // the number of output frequency channel ranges was specified
     nrange = nchan;
     // calculate the spacing
     spacing = div_nchan / nrange;
     if (div_nchan % nrange)
       spacing ++;
+
   }
-  
-  if (nscrunch) {
+  else if (nscrunch) {
+
+    if (Integration::verbose)
+      cerr << "Pulsar::FrequencyIntegrate::divide nscrunch=" << nscrunch
+	   << endl; 
+
     // the spacing of frequency channels (scrunch) was specified
     spacing = nscrunch;
     // calculate the number of output frequency channel ranges
     nrange = div_nchan / spacing;
     if (div_nchan % spacing)
       nrange ++;
+
   }
+
+  if (Integration::verbose)
+    cerr << "Pulsar::FrequencyIntegrate::divide into " << nrange 
+	 << " ranges with " << spacing << " channels per range" << endl;
+
 }
 
 
@@ -160,6 +180,7 @@ void FrequencyIntegrate::EvenlySpaced::initialize (FrequencyIntegrate* freq,
 						   Integration* integration)
 {
   freq->divide (integration->get_nchan(), nrange, spacing);
+  subint_nchan = integration->get_nchan();
 }
 
 void FrequencyIntegrate::EvenlySpaced::get_range (unsigned irange, 
@@ -170,12 +191,19 @@ void FrequencyIntegrate::EvenlySpaced::get_range (unsigned irange,
     throw Error (InvalidParam, 
 		 "Pulsar::FrequencyIntegrate::EvenlySpaced::get_range",
 		 "irange=%u >= nrange=%u", irange, nrange);
-  
+
   start = irange * spacing;
   stop = start + spacing;
   
   if (stop > subint_nchan)
     stop = subint_nchan;
+
+  if (Integration::verbose)
+    cerr << "Pulsar::FrequencyIntegrate::EvenlySpaced::get_range\n "
+      " irange=" << irange << " spacing=" << spacing <<
+      " subint_nchan=" << subint_nchan <<
+      " start=" << start << " stop=" << stop << endl;
+
 }
 
 /* ***********************************************************************
@@ -204,10 +232,15 @@ FrequencyIntegrate::EvenlyDistributed::initialize (FrequencyIntegrate* freq,
 
   // and count off 'spacing' good channels per range
   unsigned curchan = 0;
-  for (unsigned irange=0; irange < nrange; irange++)
-    for (good_nchan=0; good_nchan < spacing; curchan++)
+  for (unsigned irange=0; irange < nrange; irange++) {
+
+    for (good_nchan=0; good_nchan<spacing && curchan<subint_nchan; curchan++)
       if (integration->get_weight(curchan) != 0)
 	good_nchan ++;
+
+    stop_indeces[irange] = curchan;
+
+  }
 
 }
 
@@ -220,10 +253,11 @@ void FrequencyIntegrate::EvenlyDistributed::get_range (unsigned irange,
 		 "Pulsar::FrequencyIntegrate::EvenlyDistributed::get_range",
 		 "irange=%u >= nrange=%u", irange, stop_indeces.size());
 
-  if (irange == 0)
-    start = 0;
-  else
+  if (irange > 0)
     start = stop_indeces[irange-1];
+  else
+    start = 0;
 
   stop = stop_indeces[irange];
 }
+
