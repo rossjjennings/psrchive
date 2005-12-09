@@ -36,7 +36,8 @@ void usage ()
     "  -S \"a b\"         Delete sub-ints between a & b inclusive\n"
     "  -w \"a b c ...\"   Zero weight these sub-integrations\n"
     "  -W \"a b\"         Zero weight sub-ints between a & b inclusive\n"
-    "  -p \"p phi\"       Interpolate over every p-th phase bin, start phase phi (bins)\n"
+    "  -I               Zero weight the intersection of -[wW] and -[sSk]\n"
+    "  -p \"p i\"         Interpolate over every p-th phase bin, starting at i\n"
     "\n"
     "Automatic zapping algorithms:\n"
     "  -n               Zap channels with excessive normalized rms\n"
@@ -65,15 +66,18 @@ int main (int argc, char *argv[]) {
   vector<string> archives;
 
   string ulpath;
-  
-  bool manual_zap = false;
+
   string killfile;
+  
+  bool zero_channels = false;
   vector<int> chans_to_zap;
 
-  bool zap_subints = false;
   bool zero_subints = false;
   vector<unsigned> subs_to_zap;
 
+  bool zero_intersection = false;
+
+  bool zap_subints = false;
   bool nozap_subints = false;
   vector<unsigned> subs_nozap;
 
@@ -103,7 +107,7 @@ int main (int argc, char *argv[]) {
   Pulsar::ChannelZapMedian* median_zapper = 0;
   Pulsar::ChannelZapModulation* modulation_zapper = 0;
 
-  const char* args = "8C:dDe:E:hik:mnp:P:rR:s:S:u:vVw:W:x:X:z:Z:";
+  const char* args = "8C:dDe:E:hIik:mnp:P:rR:s:S:u:vVw:W:x:X:z:Z:";
 
   while ((gotc = getopt(argc, argv, args)) != -1) {
     switch (gotc) {
@@ -119,21 +123,25 @@ int main (int argc, char *argv[]) {
       Pulsar::Archive::set_verbosity(3);
       break;
     case 'i':
-      cout << "$Id: paz.C,v 1.28 2005/11/14 02:09:50 ahotan Exp $" << endl;
+      cout << "$Id: paz.C,v 1.29 2005/12/09 16:40:22 straten Exp $" << endl;
       return 0;
 
     case 'm':
       write = true;
       break;
 
+    case 'I':
+      zero_intersection = true;
+      break;
+
     case 'k':
       killfile = optarg;
-      manual_zap = true;
+      zero_channels = true;
       break;
 
     case 'z':
       key = strtok (optarg, whitespace);
-      manual_zap = true;
+      zero_channels = true;
       while (key) {
 	if (sscanf(key, "%d", &placeholder) == 1) {
 	  chans_to_zap.push_back(placeholder);
@@ -168,7 +176,7 @@ int main (int argc, char *argv[]) {
 	unsigned first = 1;
 	unsigned last = 0;
 
-	manual_zap = true;
+	zero_channels = true;
 	if (sscanf(optarg, "%d %d", &first, &last) != 2) {
 	  cerr << "Invalid parameter to option -Z" << endl;
 	  return (-1);
@@ -337,7 +345,12 @@ int main (int argc, char *argv[]) {
       cout << "Unrecognised option" << endl;
     }
   }
-  
+
+  if (zero_intersection && !(zero_channels && zero_subints)) {
+    cerr << "paz: cannot use -I with both -s|S|k *and* -w|W" << endl;
+    return -1;
+  }
+
   for (int ai=optind; ai<argc; ai++)
     dirglob (&archives, argv[ai]);
   
@@ -456,11 +469,6 @@ int main (int argc, char *argv[]) {
       arch->set_filename(useful);
     }
       
-    if (zero_subints) {
-      vector<float> mask(nchan, 0.0);
-      zapper->zap_very_specific(arch,mask,subs_to_zap);
-    }
-      
     if (median_zapper) {
       cout << "Using median smoothed difference zapper" << endl;
       median_zapper->ChannelWeight::weight (arch);
@@ -477,7 +485,12 @@ int main (int argc, char *argv[]) {
       cout << "Zapping complete" << endl;
     }
 
-    if (manual_zap) {
+    if (zero_subints && !zero_intersection) {
+      vector<float> mask(nchan, 0.0);
+      zapper->zap_very_specific(arch,mask,subs_to_zap);
+    }
+      
+    if (zero_channels) {
       if (!killfile.empty()) {
 	vector<int> some_chans;
 	char* useful = new char[4096];
@@ -503,7 +516,11 @@ int main (int argc, char *argv[]) {
       for (unsigned i = 0; i < chans_to_zap.size(); i++) {
 	mask[chans_to_zap[i]] = 0.0;
       }
-      zapper->zap_specific(arch, mask);
+
+      if (zero_intersection)
+	zapper->zap_very_specific(arch,mask,subs_to_zap);
+      else
+	zapper->zap_specific(arch, mask);
     }
     
     if (edge_zap) {
