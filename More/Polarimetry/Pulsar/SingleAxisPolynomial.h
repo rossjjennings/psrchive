@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/SingleAxisPolynomial.h,v $
-   $Revision: 1.1 $
-   $Date: 2004/11/22 20:45:59 $
+   $Revision: 1.2 $
+   $Date: 2005/12/09 16:46:34 $
    $Author: straten $ */
 
 #ifndef __SingleAxisPolynomial_H
@@ -16,7 +16,7 @@ namespace Calibration {
 
   class SingleAxis;
 
-  //! A SingleAxis Complex2 parameterized by Polynomial ordinates
+  //! A SingleAxis parameterized by Polynomial ordinates
   /*! This class provides an example use of the ChainRule class.  The
     SingleAxis Complex2 is used so that the gain, differential
     gain, and differential phase vary separately as polynomial
