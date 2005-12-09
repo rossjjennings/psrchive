@@ -224,6 +224,10 @@ FrequencyIntegrate::EvenlyDistributed::initialize (FrequencyIntegrate* freq,
     if (integration->get_weight(ichan) != 0)
       good_nchan ++;
 
+#ifdef _DEBUG
+  cerr << "EvenlyDistributed::initialize good_nchan=" << good_nchan << endl;
+#endif
+
   // divide them up
   unsigned nrange = 0;
   unsigned spacing = 0;
@@ -237,6 +241,10 @@ FrequencyIntegrate::EvenlyDistributed::initialize (FrequencyIntegrate* freq,
     for (good_nchan=0; good_nchan<spacing && curchan<subint_nchan; curchan++)
       if (integration->get_weight(curchan) != 0)
 	good_nchan ++;
+
+#ifdef _DEBUG
+    cerr << "  stop[" << irange << "] = " << curchan << endl;
+#endif
 
     stop_indeces[irange] = curchan;
 
