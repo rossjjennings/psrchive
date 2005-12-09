@@ -42,6 +42,12 @@ void Pulsar::DeltaRM::refine ()
   fscr.set_range_policy (new FrequencyIntegrate::EvenlyDistributed);
   fscr.transform (clone);
 
+  /*
+    remove the remaining Faraday rotation, so that residual delta_PA
+    to be measured is (hopefully) less than 2pi 
+  */
+  clone->defaraday ();
+
   if (clone->get_nchan() != 2)
     throw Error (InvalidState, "Pulsar::DeltaRM::refine",
 		 "nchan != 2 after FrequencyIntegrate");
@@ -85,9 +91,12 @@ void Pulsar::DeltaRM::refine ()
     "  ->  lambda_1 = " << lambda_1 << " m" << endl;
 
   Estimate<double> delta_PA = mean_delta_PA.get_Estimate() / 2.0;
-  Estimate<double> RM = delta_PA/(lambda_1*lambda_1-lambda_0*lambda_0);
+  Estimate<double> delta_RM = delta_PA/(lambda_1*lambda_1-lambda_0*lambda_0);
+
+  rotation_measure = delta_RM + data->get_rotation_measure();
 
   cerr << "delta PA = <PA_1 - PA_0> = " << 180.0/M_PI * delta_PA << " deg.\n"
-       << "RM = " << RM << endl;
+       << "delta RM = " << delta_RM << endl
+       << "final RM = " << rotation_measure << endl;
 
 }
