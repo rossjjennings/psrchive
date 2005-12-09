@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/ChannelZapMedian.h,v $
-   $Revision: 1.1 $
-   $Date: 2005/04/20 07:37:13 $
+   $Revision: 1.2 $
+   $Date: 2005/12/09 03:56:01 $
    $Author: straten $ */
 
 #ifndef _Pulsar_ChannelZapMedian_H
@@ -12,6 +12,7 @@
 
 namespace Pulsar {
   
+  //! Uses a median smoothed spectrum to find birdies and zap them
   class ChannelZapMedian : public ChannelWeight {
     
   public:

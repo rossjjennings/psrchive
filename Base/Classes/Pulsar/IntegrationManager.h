@@ -1,14 +1,14 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/IntegrationManager.h,v $
-   $Revision: 1.7 $
-   $Date: 2004/11/22 21:28:56 $
+   $Revision: 1.8 $
+   $Date: 2005/12/09 03:56:01 $
    $Author: straten $ */
 
 #ifndef __Pulsar_IntegrationManager_h
 #define __Pulsar_IntegrationManager_h
 
-#include "Reference.h"
+#include "Pulsar/Container.h"
 
 namespace Pulsar {
 
@@ -18,7 +18,7 @@ namespace Pulsar {
   /*! This pure virtual base class implements the storage and manipulation
     of a vector of Pulsar::Integration objects.  */
 
-  class IntegrationManager : public Reference::Able {
+  class IntegrationManager : public Container {
 
   public:
 

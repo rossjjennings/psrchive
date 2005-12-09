@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/Timer/Pulsar/TimerArchive.h,v $
-   $Revision: 1.14 $
-   $Date: 2005/10/25 04:44:36 $
-   $Author: ateoh $ */
+   $Revision: 1.15 $
+   $Date: 2005/12/09 03:56:02 $
+   $Author: straten $ */
 
 #ifndef __Timer_Archive_h
 #define __Timer_Archive_h
@@ -13,6 +13,7 @@
 
 namespace Pulsar {
 
+  //! Reads and writes the timer archive file format
   class TimerArchive : public Archive {
 
   public:

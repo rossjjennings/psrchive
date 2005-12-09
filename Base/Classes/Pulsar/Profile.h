@@ -1,18 +1,18 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Profile.h,v $
-   $Revision: 1.88 $
-   $Date: 2005/08/31 06:33:08 $
-   $Author: redwards $ */
+   $Revision: 1.89 $
+   $Date: 2005/12/09 03:56:01 $
+   $Author: straten $ */
 
 #ifndef __Pulsar_Profile_h
 #define __Pulsar_Profile_h
 
+#include "Pulsar/Container.h"
 #include "toa.h"
 #include "Types.h"
 #include "Functor.h"
-
-#include "MEAL/Gaussian.h"
+#include "Estimate.h"
 
 namespace Pulsar {
 
@@ -27,9 +27,9 @@ namespace Pulsar {
     This arrangement protects the size of each Profile object from
     becoming unsynchronized with the Integration in which it is
     contained.  The data in each Profile may still be manipulated through
-    public methods.  This liberty may be removed in the near future.
+    public methods.
   */
-  class Profile : public Reference::Able {
+  class Profile : public Container {
 
   public:
 

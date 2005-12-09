@@ -1,13 +1,14 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/Transposer.h,v $
-   $Revision: 1.5 $
-   $Date: 2004/09/16 14:47:25 $
+   $Revision: 1.6 $
+   $Date: 2005/12/09 03:56:02 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Transposer_h
 #define __Pulsar_Transposer_h
 
+#include "Algorithm.h"
 #include "Reference.h"
 #include "Types.h"
 
@@ -19,7 +20,7 @@ namespace Pulsar {
   class Dimensions;
 
   //! Provides access to transposed Archive data
-  class Transposer {
+  class Transposer : public Algorithm {
 
   public:
 

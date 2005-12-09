@@ -7,13 +7,10 @@
 
 namespace Pulsar {
 
-  //! Implements polarimetric pulse profile operations.
-  /*! This class does not actually store its own profiles.  Rather, it
-    uses references to Reference::To<Profile> objects in order to
-    manipulate the polarimetric profiles stored external to the class.
-    In this sense, the PolnProfile class is currenlty used only as a
-    workhorse. */
-  class PolnProfile : public Reference::Able {
+  //! Polarimetric pulse profile transformations and derivations
+  /*! This class uses references to Profile objects in order to manipulate
+    externally stored polarimetric profiles. */
+  class PolnProfile : public Container {
     
   public:
 
@@ -92,6 +89,9 @@ namespace Pulsar {
 
     //! Return the invariant interval
     void invint (Profile* invint) const;
+
+    //! Return the position angle and its estimated error for each pulse phase
+    void get_PA (vector< Estimate<double> >& PA, float threshold = 0.0) const;
 
   protected:
 

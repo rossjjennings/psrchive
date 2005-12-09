@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/EPN/Pulsar/EPNArchive.h,v $
-   $Revision: 1.6 $
-   $Date: 2005/10/25 04:44:36 $
-   $Author: ateoh $ */
+   $Revision: 1.7 $
+   $Date: 2005/12/09 03:56:02 $
+   $Author: straten $ */
 
 #ifndef __EPN_Archive_h
 #define __EPN_Archive_h
@@ -13,6 +13,7 @@
 
 namespace Pulsar {
 
+  //! Reads the European Pulsar Network (EPN) file format
   class EPNArchive : public Archive {
 
   public:

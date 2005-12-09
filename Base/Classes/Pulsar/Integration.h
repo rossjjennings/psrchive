@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Integration.h,v $
-   $Revision: 1.72 $
-   $Date: 2005/12/08 11:48:45 $
+   $Revision: 1.73 $
+   $Date: 2005/12/09 03:56:01 $
    $Author: straten $ */
 
 /*
@@ -15,10 +15,10 @@
 #define __Pulsar_Integration_h
 
 #include "Pulsar/Pulsar.h"
+#include "Pulsar/Container.h"
 
 #include "MJD.h"
 #include "Types.h"
-#include "Reference.h"
 #include "Estimate.h"
 #include "Jones.h"
 #include "toa.h"
@@ -34,7 +34,7 @@ namespace Pulsar {
   class Archive;
 
   //! Group of Pulsar::Profile objects integrated over the same time interval
-  class Integration : public Reference::Able {
+  class Integration : public Container {
     
   public:
     
