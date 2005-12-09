@@ -485,28 +485,30 @@ void Pulsar::PolnProfile::get_PA (vector< Estimate<double> >& posang,
  
   double mean = 0;
 
-  double Q_var = 0;
-  get_Profile(1)->stats (min_phase, &mean, &Q_var);
-  if (abs(mean) > sqrt(Q_var))
+  double var_Q = 0;
+  get_Profile(1)->stats (min_phase, &mean, &var_Q);
+  if (abs(mean) > sqrt(var_Q))
     cerr << "Pulsar::PolnProfile::get_PA WARNING off-pulse Q mean="
-	 << mean << " > rms=" << sqrt(Q_var) << endl;
+	 << mean << " > rms=" << sqrt(var_Q) << endl;
 
-  double U_var = 0;
-  get_Profile(2)->stats (min_phase, &mean, &U_var);
-  if (abs(mean) > sqrt(U_var))
+  double var_U = 0;
+  get_Profile(2)->stats (min_phase, &mean, &var_U);
+  if (abs(mean) > sqrt(var_U))
     cerr << "Pulsar::PolnProfile::get_PA WARNING off-pulse U mean="
-	 << mean << " > rms=" << sqrt(U_var) << endl;
+	 << mean << " > rms=" << sqrt(var_U) << endl;
 
-  float sigma = sqrt (0.5*(Q_var + U_var));
+  float sigma = sqrt (0.5*(var_Q + var_U));
 
   posang.resize (nbin);
 
+  cerr << "var_Q=" << var_Q << " var_U=" << var_U << endl;
+
   for (unsigned ibin=0; ibin<nbin; ibin++) {
     if (!threshold || linear.get_amps()[ibin] > threshold*sigma) {
-      Estimate<double> U (u[ibin], U_var);
-      Estimate<double> Q (q[ibin], Q_var);
+      Estimate<double> U (u[ibin], var_U);
+      Estimate<double> Q (q[ibin], var_Q);
 
-      posang[ibin] = 90.0/M_PI * atan2 (u[ibin], q[ibin]);
+      posang[ibin] = 90.0/M_PI * atan2 (U, Q);
     }
     else
       posang[ibin] = 0.0;
