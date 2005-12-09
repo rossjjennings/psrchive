@@ -1,6 +1,7 @@
 #include "Calibration/Feed.h"
 #include "MEAL/parse.h"
 #include "Angle.h"
+#include <stdio.h>
 
 using namespace std;
 
