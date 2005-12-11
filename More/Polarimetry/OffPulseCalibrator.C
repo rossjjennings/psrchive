@@ -7,6 +7,7 @@
 #include "Calibration/SingleAxis.h"
 #include "tostring.h"
 #include <stdio.h>
+#include <assert.h>
 
 Pulsar::OffPulseCalibrator::OffPulseCalibrator (const Archive* archive) 
   : SingleAxisCalibrator (archive)
