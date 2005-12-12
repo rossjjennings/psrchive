@@ -1,4 +1,13 @@
-      subroutine IRI2RM(Glong,Glati,year,mmdd,ut,az,el,RM)
+      subroutine IRI2RM(Glong,Glati,year,mmdd,UT,az,el,RM)
+C-----------------------------------------------------------------
+C
+C INPUT:  Glong         Geographic Longitude East in degrees
+C         Glati         Geographic Latitude North in degrees
+C         year          Year, e.g. 1985
+C         mmdd (-ddd)   Date (or Day of Year as a negative number)
+C         UT            Universal Time in decimal hours
+C         az            Azimuth in degrees
+C         el            Elevation in degrees
       implicit none
 
       integer idate, iyyyy, mmdd
@@ -7,7 +16,7 @@
 
       real GlongObs,GlatObs,GlongX,GlatX ! in deg
       real Ud,Ue,Un,lst,lst1,Aza,Ela,freq
-      real hiX,   X, Xlimit , deltaX ! in km
+      real hiX, X, Xlimit , deltaX ! in km
       real pi
 
       real RM0, dRM, PA_f, f0
