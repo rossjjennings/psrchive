@@ -1,0 +1,10 @@
+noinst_LTLIBRARIES = libiri.la
+
+libiri_la_SOURCES = cira.for irisubne.for irifun.for iritecne.for igrf.for \
+	iri2rm.f
+
+check_PROGRAMS = test_iri
+
+LDADD = libiri.la
+
+libiri_la_LIBADD = @SLA_LIBS@ @FLIBS@
