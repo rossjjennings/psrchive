@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/ProjectGradient.h,v $
-   $Revision: 1.3 $
-   $Date: 2004/11/22 19:26:04 $
+   $Revision: 1.4 $
+   $Date: 2005/12/12 13:35:02 $
    $Author: straten $ */
 
 #ifndef __ProjectProductGradient_H
@@ -14,7 +14,8 @@ namespace MEAL {
 
   template <class Function, class Grad>
   void ProjectGradient (const Project<Function>& model, unsigned& igrad,
-			const std::vector<Grad>& input, std::vector<Grad>& output)
+			const std::vector<Grad>& input,
+			std::vector<Grad>& output)
   {
     unsigned nparam = model->get_nparam();
     
@@ -35,7 +36,8 @@ namespace MEAL {
 
   template <class Function, class Grad>
   void ProjectGradient (const Project<Function>& model,
-			const std::vector<Grad>& input, std::vector<Grad>& output)
+			const std::vector<Grad>& input,
+			std::vector<Grad>& output)
   {
     unsigned igrad = 0;
     ProjectGradient (model, igrad, input, output);
@@ -43,7 +45,8 @@ namespace MEAL {
 
   template <class Function, class Grad>
   void ProjectGradient (const std::vector<Project<Function> >& model,
-			const std::vector<Grad>& input, std::vector<Grad>& output)
+			const std::vector<Grad>& input,
+			std::vector<Grad>& output)
   {
     unsigned nparam = output.size();
     unsigned nmodel = model.size();

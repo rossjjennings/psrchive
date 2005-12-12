@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Cached.h,v $
-   $Revision: 1.2 $
-   $Date: 2005/04/20 08:03:06 $
+   $Revision: 1.3 $
+   $Date: 2005/12/12 13:35:02 $
    $Author: straten $ */
 
 #ifndef __Cached_H
@@ -71,7 +71,7 @@ namespace MEAL {
       if (need_gradient) {
 	cached_gradient.resize (this->get_context()->get_nparam());
 	grad_ptr = &cached_gradient;
-	gradient_is_cached = true;  // well, it will be after calling calculate
+	gradient_is_cached = true;
       }
 
       calculate (cached_result, grad_ptr);

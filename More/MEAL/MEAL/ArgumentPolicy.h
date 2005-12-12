@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/ArgumentPolicy.h,v $
-   $Revision: 1.1 $
-   $Date: 2005/04/06 15:30:56 $
+   $Revision: 1.2 $
+   $Date: 2005/12/12 13:35:02 $
    $Author: straten $ */
 
 #ifndef __MEAL_ArgumentPolicy_H
@@ -14,7 +14,7 @@ namespace MEAL {
 
   class Argument;
 
-  //! Abstract base class of Function argument policies
+  //! Managers of Function arguments
   class ArgumentPolicy : public FunctionPolicy {
 
   public:

@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/ParameterPolicy.h,v $
-   $Revision: 1.1 $
-   $Date: 2005/04/06 20:20:54 $
+   $Revision: 1.2 $
+   $Date: 2005/12/12 13:35:02 $
    $Author: straten $ */
 
 #ifndef __MEAL_ParameterPolicy_H
@@ -12,7 +12,7 @@
 
 namespace MEAL {
 
-  //! Abstract base class of Function parameter policies
+  //! Managers of Function parameters
   class ParameterPolicy : public FunctionPolicy {
 
   protected:
