@@ -240,7 +240,8 @@ C*****************************************************************
       INTEGER       DAYNR,DDO,DO2,SEASON,SEADAY
       REAL       LATI,LONGI,MO2,MO,MODIP,NMF2,MAGBR,INVDIP   
      &      NMF1,NME,NMD,MM,MLAT,MLONG,NOBO2
-      CHARACTER  FILNAM*12
+      CHARACTER  IRIDIR*80
+      CHARACTER  FILNAM*80
 c      CHARACTER FILNAM*53
 
       DIMENSION  ARIG(3),RZAR(3),F(3),RIF(4),E(4),XDELS(4),DNDS(4),
@@ -705,14 +706,20 @@ C
           IF(sam_mon) GOTO 4293
           endif
 c
+c the program can now find the input files in an arbitrary directory
+        call getenv('IDIDIR',IRIDIR)
+        if (IRIDIR(1:1).eq.' ') then
+           IRIDIR(1:1) = '.'
+        end if
+c
 c the program expects the coefficients files in ASCII format; if you
 C want to use the binary version of the coefficients, please use the
 C the statements that are commented-out below and comment-out the
 C ASCII-related statements.
 c
 7797    URSIFO=URSIF2
-        WRITE(FILNAM,104) MONTH+10
-104         FORMAT('ccir',I2,'.asc')
+        WRITE(FILNAM,104) IRIDIR,MONTH+10
+104         FORMAT(A,'/ccir',I2,'.asc')
 c-binary- if binary files than use:
 c-binary-104   FORMAT('ccir',I2,'.bin')
 c-web- special for web-version:
@@ -734,8 +741,8 @@ C
 C then URSI if chosen ....................................
 C
         if(URSIF2) then
-          WRITE(FILNAM,1144) MONTH+10
-1144          FORMAT('ursi',I2,'.asc')
+          WRITE(FILNAM,1144) IRIDIR,MONTH+10
+1144          FORMAT(A,'/ursi',I2,'.asc')
 c-web- special for web-version:
 c1144 FORMAT('/usr/local/etc/httpd/cgi-bin/models/IRI/ursi',I2,'.asc')
 c-binary- if binary files than use:
@@ -764,7 +771,7 @@ c
 c first CCIR ..............................................
 c
 
-        WRITE(FILNAM,104) NMONTH+10
+        WRITE(FILNAM,104) IRIDIR,NMONTH+10
         OPEN(IUCCIR,FILE=FILNAM,STATUS='OLD',ERR=8448,
      &          FORM='FORMATTED')
 c-binary- if binary files than use:
@@ -780,7 +787,7 @@ C
 C then URSI if chosen .....................................
 C
         if(URSIF2) then
-          WRITE(FILNAM,1144) NMONTH+10
+          WRITE(FILNAM,1144) IRIDIR,NMONTH+10
           OPEN(IUCCIR,FILE=FILNAM,STATUS='OLD',ERR=8448,
      &         FORM='FORMATTED')
 c-binary- if binary files than use:

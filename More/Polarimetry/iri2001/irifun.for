@@ -3565,6 +3565,7 @@ c----------------------------------------------------------------
            integer      imst,iymend
            real         ionoindx(602),indrz(602)
            real         ig(3),rz(3)
+           CHARACTER    FILNAM*80
 
            common /iounit/konsol,monito
 
@@ -3601,8 +3602,16 @@ c the file) and onward the indices are therefore based on indices
 c predictions.
 c
         if(iflag.eq.0) then
-      
-          open(unit=12,file='ig_rz.dat',status='old')
+
+c
+c the program can now find the input files in an arbitrary directory
+          call getenv('IDIDIR',FILNAM)
+          if (FILNAM(1:1).eq.' ') then
+             FILNAM(1:1) = '.'
+          end if
+          WRITE(FILNAM,'(A,"/ig_rz.dat")') FILNAM
+
+          open(unit=12,file=FILNAM,status='old')
 c-web- special for web version
 c          open(unit=12,file=
 c     *'/usr/local/etc/httpd/cgi-bin/models/IRI/ig_rz.dat',
