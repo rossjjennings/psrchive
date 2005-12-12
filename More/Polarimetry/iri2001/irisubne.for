@@ -241,6 +241,7 @@ C*****************************************************************
       REAL       LATI,LONGI,MO2,MO,MODIP,NMF2,MAGBR,INVDIP   
      &      NMF1,NME,NMD,MM,MLAT,MLONG,NOBO2
       CHARACTER  IRIDIR*80
+      INTEGER    IRILEN
       CHARACTER  FILNAM*80
 c      CHARACTER FILNAM*53
 
@@ -274,6 +275,13 @@ c      CHARACTER FILNAM*53
 
         save
 
+c
+c this function can now find the input files in an arbitrary directory
+        call getenv('IRIDIR',IRIDIR)
+        if (IRIDIR(1:1).eq.' ') then
+           IRIDIR(1:1) = '.'
+        end if
+        IRILEN = index(IRIDIR,' ')-1
 
 ccccc special version: new D-region and Te models turned off
       jf(23)=.true.
@@ -554,6 +562,7 @@ C
                 IDAY=MMDD-MONTH*100
                 call MODA(0,iyear,MONTH,IDAY,DAYNR,nrdaym)
         endif
+
 c
 c lyear,lmonth,lday,ldaynre,lnrday related to LT
 c
@@ -648,6 +657,7 @@ c        COVSAT=63.75+rlimit*(0.728+rlimit*0.00089)
         if(covsat.gt.188.) covsat=188
         f107d=cov
         if(.not.jf(25)) f107d=oarr(41)
+
 C
 C CALCULATION OF SOLAR ZENITH ANGLE (XHI/DEG).........................
 C NOON VALUE (XHINON).................................................
@@ -705,12 +715,7 @@ C
           IF(sam_mon.AND.(nmonth.EQ.nmono).and.sam_yea) GOTO 4292
           IF(sam_mon) GOTO 4293
           endif
-c
-c the program can now find the input files in an arbitrary directory
-        call getenv('IDIDIR',IRIDIR)
-        if (IRIDIR(1:1).eq.' ') then
-           IRIDIR(1:1) = '.'
-        end if
+
 c
 c the program expects the coefficients files in ASCII format; if you
 C want to use the binary version of the coefficients, please use the
@@ -718,7 +723,7 @@ C the statements that are commented-out below and comment-out the
 C ASCII-related statements.
 c
 7797    URSIFO=URSIF2
-        WRITE(FILNAM,104) IRIDIR,MONTH+10
+        WRITE(FILNAM,104) IRIDIR(1:IRILEN),MONTH+10
 104         FORMAT(A,'/ccir',I2,'.asc')
 c-binary- if binary files than use:
 c-binary-104   FORMAT('ccir',I2,'.bin')
@@ -741,7 +746,7 @@ C
 C then URSI if chosen ....................................
 C
         if(URSIF2) then
-          WRITE(FILNAM,1144) IRIDIR,MONTH+10
+          WRITE(FILNAM,1144) IRIDIR(1:IRILEN),MONTH+10
 1144          FORMAT(A,'/ursi',I2,'.asc')
 c-web- special for web-version:
 c1144 FORMAT('/usr/local/etc/httpd/cgi-bin/models/IRI/ursi',I2,'.asc')
@@ -759,7 +764,6 @@ c-binary-          READ(IUCCIR) F2
 
           CLOSE(IUCCIR)
         endif
-
 C
 C READ CCIR AND URSI COEFFICIENT SET FOR NMONTH, i.e. previous 
 c month if day is less than 15 and following month otherwise 
@@ -771,7 +775,7 @@ c
 c first CCIR ..............................................
 c
 
-        WRITE(FILNAM,104) IRIDIR,NMONTH+10
+        WRITE(FILNAM,104) IRIDIR(1:IRILEN),NMONTH+10
         OPEN(IUCCIR,FILE=FILNAM,STATUS='OLD',ERR=8448,
      &          FORM='FORMATTED')
 c-binary- if binary files than use:
@@ -787,7 +791,7 @@ C
 C then URSI if chosen .....................................
 C
         if(URSIF2) then
-          WRITE(FILNAM,1144) IRIDIR,NMONTH+10
+          WRITE(FILNAM,1144) IRIDIR(1:IRILEN),NMONTH+10
           OPEN(IUCCIR,FILE=FILNAM,STATUS='OLD',ERR=8448,
      &         FORM='FORMATTED')
 c-binary- if binary files than use:
@@ -860,12 +864,11 @@ C
 c
 c stormtime updating
 c
-
       stormcorr=-1.
       if(jf(26)) then
             if(.not.sam_date.or..not.sam_ut)  
      &          call apf(iyear,month,iday,ut,indap)
-            if(indap(1).gt.-2) then
+           if(indap(1).gt.-2) then
                 icoord=1
                 kut=int(ut)
                 call STORM(indap,lati,longi,icoord,cglat,kut,

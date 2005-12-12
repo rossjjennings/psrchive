@@ -3565,7 +3565,7 @@ c----------------------------------------------------------------
            integer      imst,iymend
            real         ionoindx(602),indrz(602)
            real         ig(3),rz(3)
-           CHARACTER    FILNAM*80
+           CHARACTER    IRIDIR*80
 
            common /iounit/konsol,monito
 
@@ -3605,13 +3605,13 @@ c
 
 c
 c the program can now find the input files in an arbitrary directory
-          call getenv('IDIDIR',FILNAM)
-          if (FILNAM(1:1).eq.' ') then
-             FILNAM(1:1) = '.'
+          call getenv('IRIDIR',IRIDIR)
+          if (IRIDIR(1:1).eq.' ') then
+             IRIDIR(1:1) = '.'
           end if
-          WRITE(FILNAM,'(A,"/ig_rz.dat")') FILNAM
+          IRIDIR = IRIDIR(1:index(IRIDIR,' ')-1)//'/ig_rz.dat'
 
-          open(unit=12,file=FILNAM,status='old')
+          open(unit=12,file=IRIDIR,status='old')
 c-web- special for web version
 c          open(unit=12,file=
 c     *'/usr/local/etc/httpd/cgi-bin/models/IRI/ig_rz.dat',
@@ -4192,12 +4192,21 @@ c If date is outside the range of the ap indices file than iap(1)=-5
 c--------------------------------------------------------------------
 
         DIMENSION iiap(8),iap(13),apt(24),lm(12)
+        CHARACTER IRIDIR*80
 
         common /iounit/konsol,monito
 
         DATA LM/31,28,31,30,31,30,31,31,30,31,30,31/
 
-        Open(13,FILe='ap.dat',
+c
+c the program can now find the input files in an arbitrary directory
+        call getenv('IRIDIR',IRIDIR)
+        if (IRIDIR(1:1).eq.' ') then
+           IRIDIR(1:1) = '.'
+        end if
+        IRIDIR = IRIDIR(1:index(IRIDIR,' ')-1)//'/ap.dat'
+
+        Open(13,FILE=IRIDIR,
 c-web-sepcial vfor web version
 C      OPEN(13,FILE='/usr/local/etc/httpd/cgi-bin/models/IRI/ap.dat',
      *    ACCESS='DIRECT',RECL=39,FORM='FORMATTED',STATUS='OLD')
