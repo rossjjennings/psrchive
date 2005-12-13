@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/Timer/Pulsar/ScintArchive.h,v $
-   $Revision: 1.1 $
-   $Date: 2005/02/17 10:07:27 $
+   $Revision: 1.2 $
+   $Date: 2005/12/13 07:02:38 $
    $Author: straten $ */
 
 #ifndef __Scint_Archive_h
@@ -17,7 +17,7 @@
 
 namespace Pulsar {
 
-  //! Pulsar Archive produced by psrdisp
+  //! A TimerArchive with transposed phase and frequency axis
   class ScintArchive : public TimerArchive {
 
   public:
@@ -64,7 +64,7 @@ namespace Pulsar {
 
     friend class Archive::Advocate<ScintArchive>;
 
-    //! Represents the interests of the ScintArchive
+    //! Advocates the use of the ScintArchive plugin
     class Agent : public Archive::Advocate<ScintArchive> {
 
       public:
