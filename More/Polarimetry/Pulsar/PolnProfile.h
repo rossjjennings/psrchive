@@ -1,3 +1,10 @@
+//-*-C++-*-
+
+/* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PolnProfile.h,v $
+   $Revision: 1.25 $
+   $Date: 2005/12/13 07:01:29 $
+   $Author: straten $ */
+
 #ifndef __Pulsar_PolnProfile_h
 #define __Pulsar_PolnProfile_h
 
@@ -89,6 +96,12 @@ namespace Pulsar {
 
     //! Return the invariant interval
     void invint (Profile* invint) const;
+
+    //! Return the linear polarization profile
+    void get_linear (Profile* linear) const;
+
+    //! Return the total polarization profile
+    void get_polarized (Profile* polarized) const;
 
     //! Return the position angle and its estimated error for each pulse phase
     void get_PA (vector< Estimate<double> >& PA, float threshold = 0.0) const;

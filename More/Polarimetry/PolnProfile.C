@@ -463,8 +463,50 @@ void Pulsar::PolnProfile::invint (Profile* invint) const
   invint->set_weight ( get_Profile(0)->get_centre_frequency() );
 }
 
-void Pulsar::PolnProfile::get_PA (vector< Estimate<double> >& posang,
-				  float threshold) const
+/*!
+
+  \pre The PolnProfile must contain Stokes parameters; so as to reduce the
+  amount of behind the scenes cloning and state conversion
+
+  \pre The Profile baselines should have been removed; so as not to
+  interfere with any baseline removal algorithms already applied
+
+  \post The polarized Profile baseline will not have been removed; so as to
+  enable the application of specialized baseline removal algorithms
+
+ */
+void Pulsar::PolnProfile::get_polarized (Profile* polarized) const
+{
+  if (state != Signal::Stokes)
+    throw Error (InvalidState, "Pulsar::PolnProfile::get_PA",
+		 "must first convert to Stokes parameters");
+
+  const float *q = get_Profile(1)->get_amps();
+  const float *u = get_Profile(2)->get_amps(); 
+  const float *v = get_Profile(3)->get_amps();
+
+  unsigned nbin = get_nbin();
+  
+  polarized->resize (nbin);
+  
+  for (unsigned ibin=0; ibin<nbin; ibin++)
+    polarized->get_amps()[ibin] 
+      = sqrt (q[ibin]*q[ibin] + u[ibin]*u[ibin] + v[ibin]*v[ibin]);
+}
+
+/*!
+
+  \pre The PolnProfile must contain Stokes parameters; so as to reduce the
+  amount of behind the scenes cloning and state conversion
+
+  \pre The Profile baselines should have been removed; so as not to
+  interfere with any baseline removal algorithms already applied
+
+  \post The linear Profile baseline will not have been removed; so as to
+  enable the application of specialized baseline removal algorithms
+
+ */
+void Pulsar::PolnProfile::get_linear (Profile* linear) const
 {
   if (state != Signal::Stokes)
     throw Error (InvalidState, "Pulsar::PolnProfile::get_PA",
@@ -475,16 +517,25 @@ void Pulsar::PolnProfile::get_PA (vector< Estimate<double> >& posang,
 
   unsigned nbin = get_nbin();
   
-  Profile linear (nbin);
+  linear->resize (nbin);
   
   for (unsigned ibin=0; ibin<nbin; ibin++)
-    linear.get_amps()[ibin] = sqrt (q[ibin]*q[ibin] + u[ibin]*u[ibin]);
+    linear->get_amps()[ibin] = sqrt (q[ibin]*q[ibin] + u[ibin]*u[ibin]);
+}
 
+void Pulsar::PolnProfile::get_PA (vector< Estimate<double> >& posang,
+				  float threshold) const
+{
+  if (state != Signal::Stokes)
+    throw Error (InvalidState, "Pulsar::PolnProfile::get_PA",
+		 "must first convert to Stokes parameters");
+   
+  Profile linear;
+  get_linear (&linear);
   float min_phase = linear.find_min_phase();
   linear -= linear.mean (min_phase);
- 
-  double mean = 0;
 
+  double mean = 0;
   double var_Q = 0;
   get_Profile(1)->stats (min_phase, &mean, &var_Q);
   if (abs(mean) > sqrt(var_Q))
@@ -498,6 +549,11 @@ void Pulsar::PolnProfile::get_PA (vector< Estimate<double> >& posang,
 	 << mean << " > rms=" << sqrt(var_U) << endl;
 
   float sigma = sqrt (0.5*(var_Q + var_U));
+
+  unsigned nbin = get_nbin();
+
+  const float *q = get_Profile(1)->get_amps();
+  const float *u = get_Profile(2)->get_amps(); 
 
   posang.resize (nbin);
 
