@@ -11,22 +11,24 @@ C         el            Elevation in degrees
       implicit none
 
       integer idate, iyyyy, mmdd
-      real*8 ra, dec, Glong, Glati, year, UT, az, el, RM
-      real mez,az0,el0,freq0,ra0,dec0
+      real*8 ra, dec, Glong, Glati,UT
+      real mez,az0,el0,freq0,ra0,dec0,az,el
 
       real GlongObs,GlatObs,GlongX,GlatX ! in deg
       real Ud,Ue,Un,lst,lst1,Aza,Ela,freq
-      real hiX, X, Xlimit , deltaX ! in km
+      real hiX,   X, Xlimit , deltaX ! in km
       real pi
 
-      real RM0, dRM, PA_f, f0
+      real RM0, dRM, PA_f, f0, RM
 
       real OUTF(20,100),OARR(50)
       real ALATI,ALONG,DHOUR
-      real lati, longi, height, Bn, Be, Bd, Babs, DIMO
+      real lati, longi, height, Bn, Be, Bd, Babs, DIMO, year
       integer i, j
       integer JMAG
       LOGICAL jf(30)
+
+c      write(*,*) Glong,Glati,year,mmdd,UT,az,el,RM
 
       pi=4.*atan(1.0)
 
@@ -63,7 +65,7 @@ c         write(*,*) i, X, GlongX,GlatX,hiX,year,mmdd,dhour
      &        hiX,hiX,1.,OUTF,OARR)
 c         write(*,*) i, outf(1,1)
          dRM=0.
-         if(outf(1,1).gt.1) then 
+         if(outf(1,1).gt.1) then
             call initize
             CALL FELDCOF(YEAR,DIMO)
 c            write(*,*) YEAR,DIMO
