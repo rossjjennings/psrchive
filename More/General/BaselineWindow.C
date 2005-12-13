@@ -21,16 +21,11 @@ Pulsar::BaselineWindow::BaselineWindow ()
   find_max = false;
 }
 
-void Pulsar::BaselineWindow::set_Profile (const Profile* _profile)
-{
-  profile = _profile;
-}
-
 //! Retrieve the PhaseWeight
-void Pulsar::BaselineWindow::get_weight (PhaseWeight& weight)
+void Pulsar::BaselineWindow::calculate (PhaseWeight& weight)
 {
   if (!profile)
-    throw Error (InvalidState, "Pulsar::BaselineWindow::get_weight",
+    throw Error (InvalidState, "Pulsar::BaselineWindow::calculate",
 		 "Profile not set");
 
   unsigned nbin = profile->get_nbin();

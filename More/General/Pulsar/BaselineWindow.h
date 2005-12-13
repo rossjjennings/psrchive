@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/BaselineWindow.h,v $
-   $Revision: 1.4 $
-   $Date: 2005/12/09 16:41:07 $
+   $Revision: 1.5 $
+   $Date: 2005/12/13 07:01:02 $
    $Author: straten $ */
 
 #ifndef __Pulsar_BaselineWindow_h
@@ -21,12 +21,6 @@ namespace Pulsar {
 
     //! Default constructor
     BaselineWindow ();
-
-    //! Set the Profile from which the baseline PhaseWeight will be derived
-    void set_Profile (const Profile* profile);
-
-    //! Retrieve the PhaseWeight
-    void get_weight (PhaseWeight& weight);
 
     //! Set the duty cycle
     void set_duty_cycle (float duty_cycle);
@@ -51,6 +45,9 @@ namespace Pulsar {
 
   protected:
 
+    //! Calculate the PhaseWeight
+    void calculate (PhaseWeight& weight);
+
     //! The width of the window over which the mean is computed
     float duty_cycle;
 
@@ -65,9 +62,6 @@ namespace Pulsar {
 
     //! Set true when range is specified
     bool range_specified;
-
-    //! The Profile from which the mask will be calculated
-    Reference::To<const Profile> profile;
 
   };
 

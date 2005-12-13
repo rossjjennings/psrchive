@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/IterativeBaseline.h,v $
-   $Revision: 1.4 $
-   $Date: 2005/12/09 16:41:07 $
+   $Revision: 1.5 $
+   $Date: 2005/12/13 07:01:02 $
    $Author: straten $ */
 
 #ifndef __Pulsar_IterativeBaseline_h
@@ -23,9 +23,6 @@ namespace Pulsar {
     //! Destructor
     ~IterativeBaseline ();
 
-    //! Retrieve the PhaseWeight
-    void get_weight (PhaseWeight& weight);
-
     //! Set the Profile from which baseline PhaseWeight will be computed
     void set_Profile (const Profile* profile);
 
@@ -41,6 +38,9 @@ namespace Pulsar {
 
   protected:
 
+    //! Calculate the PhaseWeight
+    void calculate (PhaseWeight& weight);
+
     //! Derived classes must define the bounds
     virtual void get_bounds (PhaseWeight&, float& lower, float& upper) = 0;
 
@@ -52,9 +52,6 @@ namespace Pulsar {
 
     //! The BaselineEstimator used to find the initial baseline
     Reference::To<BaselineEstimator> initial_baseline;
-
-    //! The Profile from which the mask will be calculated
-    Reference::To<const Profile> profile;
 
   };
 

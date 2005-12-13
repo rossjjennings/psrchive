@@ -60,15 +60,15 @@ void Pulsar::IterativeBaseline::set_Profile (const Profile* _profile)
 }
 
 
-void Pulsar::IterativeBaseline::get_weight (PhaseWeight& weight)
+void Pulsar::IterativeBaseline::calculate (PhaseWeight& weight)
 {
 #ifndef _DEBUG
   if (Profile::verbose)
 #endif
-    cerr << "Pulsar::IterativeBaseline::get_weight" << endl;
+    cerr << "Pulsar::IterativeBaseline::calculate" << endl;
 
   if (!profile)
-    throw Error (InvalidState, "Pulsar::IterativeBaseline::get_weight",
+    throw Error (InvalidState, "Pulsar::IterativeBaseline::calculate",
 		 "no Profile supplied (use set_Profile)");
 
   // the mean, variance, and variance of the mean
@@ -79,7 +79,7 @@ void Pulsar::IterativeBaseline::get_weight (PhaseWeight& weight)
 #ifndef _DEBUG
     if (Profile::verbose)
 #endif
-      cerr << "Pulsar::IterativeBaseline::get_weight initial_baseline" << endl;
+      cerr << "Pulsar::IterativeBaseline::calculate initial_baseline" << endl;
 
     initial_baseline->set_Profile (profile);
     initial_baseline->get_weight (weight);
