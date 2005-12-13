@@ -701,16 +701,25 @@ C       USGS, MS 964, Box 25046 Federal Center, Denver, CO  80225
 C                                                                               
 C ===============================================================               
                                                                                 
-        CHARACTER  FSPEC*(*), FOUT*55                                    
+        CHARACTER  FSPEC*(*), FOUT*80                                    
         DIMENSION       GH(*)                                        
+       CHARACTER  IRIDIR*80
+
 C ---------------------------------------------------------------               
 C       Open coefficient file. Read past first header record.        
 C       Read degree and order of model and Earth's radius.           
 C ---------------------------------------------------------------               
-       WRITE(FOUT,667) FSPEC
+        call getenv('IRIDIR',IRIDIR)
+        if (IRIDIR(1:1).eq.' ') then
+           IRIDIR(1:1) = '.'
+        end if
+        IRILEN = index(IRIDIR,' ')-1
+
+       WRITE(FOUT,667) IRIDIR(1:IRILEN), FSPEC
+
 c special for IRIWeb version
 c 667  FORMAT('/usr/local/etc/httpd/cgi-bin/models/IRI/',A12)
-667    FORMAT(A12)
+667    FORMAT(A,'/',A12)
        OPEN (IU, FILE=FOUT, STATUS='OLD', IOSTAT=IER, ERR=999)     
      
        READ (IU, *, IOSTAT=IER, ERR=999)                            
