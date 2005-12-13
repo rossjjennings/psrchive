@@ -95,13 +95,31 @@ double Pulsar::PhaseWeight::get_weight_max () const
 //! Set the Profile to which the weights apply
 void Pulsar::PhaseWeight::set_Profile (const Profile* _profile)
 {
-  if (profile && profile == _profile) {
-    // cerr << "Pulsar::PhaseWeight::set_Profile same Profile" << endl;
-    return;
-  }
-
   profile = _profile;
   built = false;
+}
+
+//! Get the weighted total of the Profile amplitudes
+double Pulsar::PhaseWeight::get_weighted_sum () const
+{
+  if (!profile)
+    throw Error (InvalidState, "Pulsar::PhaseWeight::get_weighted_sum",
+		 "Profile not set");
+
+  unsigned nbin = profile->get_nbin();
+
+  if (nbin != weight.size())
+    throw Error (InvalidState, "Pulsar::PhaseWeight::stats",
+		 "weight size=%d != profile nbin=%d",
+		 weight.size(), nbin);
+
+  const float* amps = profile->get_amps();
+
+  double total = 0.0;
+  for (unsigned ibin=0; ibin<weight.size(); ibin++)
+    total += weight[ibin] * amps[ibin];
+
+  return total;
 }
 
 //! Get the weighted mean of the Profile
@@ -122,6 +140,10 @@ Estimate<double> Pulsar::PhaseWeight::get_variance () const
 
 void Pulsar::PhaseWeight::build ()
 {
+  if (!profile)
+    throw Error (InvalidState, "Pulsar::PhaseWeight::build",
+		 "Profile not set");
+
   stats (profile, &(mean.val), &(variance.val), &(mean.var), &(variance.var));
   built = true;
 }

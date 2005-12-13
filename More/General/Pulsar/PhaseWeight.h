@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/PhaseWeight.h,v $
-   $Revision: 1.6 $
-   $Date: 2005/12/09 16:41:07 $
+   $Revision: 1.7 $
+   $Date: 2005/12/13 07:01:20 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PhaseWeight_h
@@ -72,6 +72,9 @@ namespace Pulsar {
 
     //! Set the Profile from which statistics are calculated
     void set_Profile (const Profile* profile);
+
+    //! Get the weighted total of the amplitudes
+    double get_weighted_sum () const;
 
     //! Get the weighted mean of the Profile amplitudes
     Estimate<double> get_mean () const;
