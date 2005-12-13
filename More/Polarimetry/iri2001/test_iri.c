@@ -2,24 +2,27 @@
 #include <config.h>
 #endif
 
+#include <stdio.h>
+
 void F77_FUNC(iri2rm,IRI2RM) (double* Glong, double* Glati, 
-			      double* year, int* mmdd, double* ut, 
-			      double* az, double* el, double* RM);
+			      float* year, int* mmdd, double* ut, 
+			      float* az, float* el, float* RM);
 
 int main ()
 {
-  double Glong = 110;
+  double Glong = 150;
   double Glati = -33;
-  double year = 1995;
-  int mmdd = 1213;
-  double ut = 7.34;
-  double az = 34;
-  double el = 34;
-  double RM = 0;
+  float year = 2003;
+  int mmdd = 220;
+  double ut = 13.4;
+  float az = -118;
+  float el = 69;
+  float RM = 0;
   
   F77_FUNC(iri2rm,IRI2RM) (&Glong, &Glati, 
 			   &year, &mmdd, &ut, 
 			   &az, &el, &RM);
 
+  printf ("RM=%lf\n", RM);
   return 0;
 }
