@@ -86,7 +86,7 @@ double Calibration::Faraday::get_rotation () const
   if (frequency != 0.0)
     lambda = speed_of_light / (frequency * 1e6);
 
-  // The Parameters base class stores the rotation measure
+  // The OneParameter policy stores the rotation measure
   double rotation_measure = get_param (0);
 
   // Longer wavelength -> greater rotation
@@ -97,9 +97,9 @@ double Calibration::Faraday::get_rotation () const
 void Calibration::Faraday::calculate (Jones<double>& result,
 				      vector<Jones<double> >* grad)
 {
-  // remember that Psi = .5 atan(U/Q)
-  // (the rotation will be doubled in the Poincare space)
-  // Also, the Rotation transformation rotates the basis, so the angle is -ve
+  /* remember that the Rotation transformation rotates the basis, so the
+     effect on the coherency matrix is negative */
+
   rotation.set_phi ( -get_rotation() );
   result = rotation.evaluate (grad);
 

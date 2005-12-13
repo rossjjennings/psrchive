@@ -1,19 +1,20 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/Faraday.h,v $
-   $Revision: 1.4 $
-   $Date: 2005/12/09 16:41:06 $
+   $Revision: 1.5 $
+   $Date: 2005/12/13 07:02:12 $
    $Author: straten $ */
 
-#ifndef __Faraday_H
-#define __Faraday_H
+#ifndef __Calibration_Faraday_H
+#define __Calibration_Faraday_H
 
 #include "MEAL/Rotation.h"
 
 namespace Calibration {
 
   //! Faraday rotation transformation
-  /*! This transformation is parameterized by the rotation measure */
+  /*! This class computes the Faraday rotation between two frequencies, as
+    parameterized by the rotation measure. */
   class Faraday : public MEAL::Complex2 {
 
   public:
@@ -58,7 +59,7 @@ namespace Calibration {
 
     // ///////////////////////////////////////////////////////////////////
     //
-    // OptimizedComplex2 implementation
+    // MEAL::Complex2 implementation
     //
     // ///////////////////////////////////////////////////////////////////
 
