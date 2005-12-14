@@ -29,7 +29,7 @@ void usage ()
     "  -i                     Show revision information\n"
     "\n"
     "Database options: \n"
-    "  -d database            Read ASCII summary (instead of -p) \n"   
+    "  -d database            Read calibration database summary \n"   
     "  -p path                Search for CAL files in the specified path \n"
     "  -u \"ext1 ext2 ...\"     Add to file extensions recognized in search \n"
     "                         (defaults: .cf .pcal .fcal .pfit) \n"
@@ -142,7 +142,7 @@ int main (int argc, char *argv[]) {
       break;
 
     case 'i':
-      cout << "$Id: pac.C,v 1.66 2005/12/08 03:04:43 straten Exp $" << endl;
+      cout << "$Id: pac.C,v 1.67 2005/12/14 16:15:30 straten Exp $" << endl;
       return 0;
 
     case 'A':

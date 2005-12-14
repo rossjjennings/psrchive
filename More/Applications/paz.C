@@ -26,8 +26,9 @@ void usage ()
     "  -u path          Write new files to this location\n"
     "\n"
     "Manual zapping options:\n"
-    "  -z \"a b c ...\"   Zero weight these particular channels\n"
+    "  -I               Zero weight the intersection of -[wW] and -[zZk]\n"
     "  -k filename      Zero weight chans listed in this kill file\n"
+    "  -z \"a b c ...\"   Zero weight these particular channels\n"
     "  -Z \"a b\"         Zero weight chans between a & b inclusive\n"
     "  -x \"a b c ...\"   Delete all sub-integrations except these\n"
     "  -X \"a b\"         Delete all sub-ints except a to b inclusive\n"
@@ -36,7 +37,6 @@ void usage ()
     "  -S \"a b\"         Delete sub-ints between a & b inclusive\n"
     "  -w \"a b c ...\"   Zero weight these sub-integrations\n"
     "  -W \"a b\"         Zero weight sub-ints between a & b inclusive\n"
-    "  -I               Zero weight the intersection of -[wW] and -[sSk]\n"
     "  -p \"p i\"         Interpolate over every p-th phase bin, starting at i\n"
     "\n"
     "Automatic zapping algorithms:\n"
@@ -123,7 +123,7 @@ int main (int argc, char *argv[]) {
       Pulsar::Archive::set_verbosity(3);
       break;
     case 'i':
-      cout << "$Id: paz.C,v 1.29 2005/12/09 16:40:22 straten Exp $" << endl;
+      cout << "$Id: paz.C,v 1.30 2005/12/14 16:15:30 straten Exp $" << endl;
       return 0;
 
     case 'm':
