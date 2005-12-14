@@ -37,3 +37,10 @@ double Pulsar::dispersion_delay (double dm, double ref_freq, double freq)
   return (dm/2.41e-4) * ( 1.0/(freq*freq) - 1.0/(ref_freq*ref_freq) );
 
 }
+
+double Pulsar::dispersion_smear (double dm, double reference_freq, double bw)
+{
+  return fabs (dispersion_delay (dm, reference_freq-0.5*bw,
+                                     reference_freq+0.5*bw));
+}
+
