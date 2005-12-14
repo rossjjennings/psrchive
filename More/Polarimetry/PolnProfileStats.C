@@ -83,17 +83,31 @@ Estimate<double> Pulsar::PolnProfileStats::get_total_circular () const
   return get_total_on_pulse ();
 }
 
-Estimate<double> Pulsar::PolnProfileStats::get_total_on_pulse () const
-{
-  return Estimate<double> (on_pulse.get_weighted_sum(),
-			   baseline.get_variance().get_value()
-			   * sqrt (on_pulse.get_weight_sum()) );
-}
-
 //! Returns the total absolute value of circularly polarized flux
 Estimate<double> Pulsar::PolnProfileStats::get_total_abs_circular () const
 {
+  Profile abs_circular (*(profile->get_Profile(3)));
+  abs_circular.absolute ();
+
+  setup (&abs_circular);
+  abs_circular -= baseline.get_mean().get_value();
+
+  return get_total_on_pulse ();
 }
+
+Estimate<double> Pulsar::PolnProfileStats::get_total_on_pulse () const
+{
+  double variance = baseline.get_variance().get_value ();
+  double navg = on_pulse.get_weight_sum();
+
+  if (Profile::verbose)
+    cerr << "Pulsar::PolnProfileStats::get_total_on_pulse navg=" << navg
+	 << " var=" << variance << endl;
+
+  return Estimate<double> (on_pulse.get_weighted_sum(), 
+			   variance * sqrt(navg));
+}
+
 
 void Pulsar::PolnProfileStats::build ()
 try {
@@ -108,9 +122,10 @@ try {
   baseline_estimator->set_Profile (profile->get_Profile(0));
   baseline_estimator->get_weight (baseline);
 
-  cerr << "Pulsar::PolnProfileStats::build nbin=" << profile->get_nbin()
-       << " on-pulse=" << on_pulse.get_weight_sum()
-       << " baseline=" << baseline.get_weight_sum() << endl;
+  if (Profile::verbose)
+    cerr << "Pulsar::PolnProfileStats::build nbin=" << profile->get_nbin()
+	 << " on-pulse=" << on_pulse.get_weight_sum()
+	 << " baseline=" << baseline.get_weight_sum() << endl;
 
 }
 catch (Error& error) {
