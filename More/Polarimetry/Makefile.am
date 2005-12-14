@@ -3,7 +3,8 @@ noinst_LTLIBRARIES = libCalibration.la
 
 nobase_include_HEADERS = Calibration/CoherencyMeasurement.h \
 	Calibration/CoherencyMeasurementSet.h Calibration/ConvertMJD.h \
-	Calibration/Faraday.h Calibration/Feed.h Calibration/Instrument.h \
+	Calibration/Faraday.h Calibration/IRIonosphere.h \
+	Calibration/Feed.h Calibration/Instrument.h \
 	Calibration/MeanCoherency.h Calibration/MeanFeed.h \
 	Calibration/MeanInstrument.h Calibration/MeanPolar.h \
 	Calibration/MeanSingleAxis.h Calibration/MeasurementEquation.h \
@@ -14,12 +15,16 @@ nobase_include_HEADERS = Calibration/CoherencyMeasurement.h \
 	Calibration/SingleAxisSolver.h Calibration/StandardModel.h
 
 libCalibration_la_SOURCES = SingleAxis.C Feed.C Instrument.C		   \
-	SingleAxisPolynomial.C Parallactic.C Faraday.C MeanCoherency.C	   \
-	MeanPolar.C MeanSingleAxis.C MeanFeed.C MeanInstrument.C	   \
-	MeasurementEquation.C ReceptionModel.C CoherencyMeasurement.C	   \
-	CoherencyMeasurementSet.C ConvertMJD.C SingleAxisSolver.C	   \
-	Simulation.C StandardModel.C Feed_load.C \
+	SingleAxisPolynomial.C Parallactic.C Faraday.C IRIonosphere.C	   \
+	MeanCoherency.C MeanPolar.C MeanSingleAxis.C MeanFeed.C		   \
+	MeanInstrument.C MeasurementEquation.C ReceptionModel.C		   \
+	CoherencyMeasurement.C CoherencyMeasurementSet.C ConvertMJD.C	   \
+	SingleAxisSolver.C Simulation.C StandardModel.C Feed_load.C	   \
 	Polar_solve.C ReceptionModel_solve.C ReceptionModel_solve_thread.C
+
+SUBDIRS = iri2001
+
+libCalibration_la_LIBADD = iri2001/libiri.la
 
 bin_PROGRAMS = jones_entropy rmrot
 
@@ -49,7 +54,7 @@ endif
 # programs
 #
 check_PROGRAMS = test_copy test_Feed test_SingleAxis \
-	test_Parallactic test_ReceptionModel
+	test_Parallactic test_ReceptionModel test_IRIonosphere
 
 TESTS = $(check_PROGRAMS)
 
@@ -58,6 +63,7 @@ test_Parallactic_SOURCES	= test_Parallactic.C
 test_ReceptionModel_SOURCES	= test_ReceptionModel.C
 test_SingleAxis_SOURCES		= test_SingleAxis.C
 test_copy_SOURCES		= test_copy.C
+test_IRIonosphere_SOURCES	= test_IRIonosphere.C
 
 test_Parallactic_LDADD		= $(LDADD) @SLA_LIBS@
 test_ReceptionModel_LDADD	= $(LDADD) @SLA_LIBS@
