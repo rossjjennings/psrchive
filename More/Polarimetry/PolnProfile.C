@@ -428,16 +428,10 @@ void Pulsar::PolnProfile::convert_basis (Signal::Basis to) {
 
 /*! 
   Forms the Stokes polarimetric invariant interval,
-  \f$\det{P}=I^2-Q^2-U^2-V^2\f$, for every bin of each chan so that,
+  \f$\sqrt{I^2-Q^2-U^2-V^2}\f$, for every phase bin so that,
   upon completion, npol == 1 and state == Signal::Invariant.
 
-  If invint_square is true, this function calculates
-  \f$\det\rho=I^2-Q^2-U^2-V^2\f$, otherwise \f$\sqrt{\det\rho}\f$ is
-  calcuated.
-
   \pre The profile baselines must have been removed (unchecked).
-
-  \exception string thrown if Stokes 4-vector cannot be formed
 */
 void Pulsar::PolnProfile::invint (Profile* invint) const
 {
