@@ -1,5 +1,5 @@
 //
-// $Id: pav.C,v 1.104 2005/12/09 16:40:12 straten Exp $
+// $Id: pav.C,v 1.105 2005/12/14 16:14:58 straten Exp $
 //
 // The Pulsar Archive Viewer
 //
@@ -73,7 +73,7 @@ void usage ()
     " -s std    Select a standard profile (where applicable)\n"
     "\n"
     "Selection options:\n"
-    " --all     Plot all sub-integrations\n"
+    " --all     Plot all sub-integrations; one by one\n"
     " -H chan   Select which frequency channel to display\n"
     " -P pol    Select which polarization to display\n"
     " -I subint Select which sub-integration to display\n"
@@ -107,6 +107,9 @@ void usage ()
     "\n"
     "Other plotting options: \n"
     " -W             Change colour scheme to suite white background\n"
+    " --zoom buf     Zoom onto the on-pulse with buf*width off-pulse\n"
+    " --ld           Label the pulse phase axis in degrees\n"
+    " --err          Include a resolution/error box in the plot\n"
     " --mask         Display a profile with mask\n"
     " --degree       Plot the degree of polarisation profile\n"
     " --publn        Publication quality plot\n"
@@ -164,6 +167,12 @@ int main (int argc, char** argv)
   unsigned ronsub    = 0;
   
   bool verbose            = false;
+
+  bool  auto_zoom         = false;
+  float auto_zoom_buffer  = 0.0;
+
+  bool include_error      = false;
+  bool longitude_degrees  = false;
   bool zoomed             = false;
   bool fzoomed            = false;
 
@@ -232,7 +241,11 @@ int main (int argc, char** argv)
   const int YSTRETCH = 1014;
   const int PROFILE_SPECTRUM = 1015;
   const int SPECTRUM_GAMMA = 1016;
-	const int NO_PROFILE_AXES = 1017;
+  const int NO_PROFILE_AXES = 1017;
+  const int AUTO_ZOOM = 1018;
+  const int LONGITUDE_DEGREES = 1019;
+  const int ERROR_BOX = 1020;
+  const int PA_AND_HALF = 1021;
 
   static struct option long_options[] = {
     { "convert_binphsperi", 1, 0, 200 },
@@ -248,6 +261,10 @@ int main (int argc, char** argv)
     { "total",              no_argument,       0, TOTAL},
     { "all",                no_argument,       0, ALL_SUBINTS},
     { "extra",              no_argument,       0, ALL_SUBINTS},
+    { "zoom",               required_argument, 0, AUTO_ZOOM},
+    { "ld",                 no_argument,       0, LONGITUDE_DEGREES},
+    { "err",                no_argument,       0, ERROR_BOX},
+    { "pa",                 no_argument,       0, PA_AND_HALF},
     { "nbin",               required_argument, 0, NBIN},
     { "ystretch",           required_argument, 0, YSTRETCH},
     { "fmax",               required_argument, 0, FMAX},
@@ -334,7 +351,7 @@ int main (int argc, char** argv)
       plotter.set_subint( atoi (optarg) );
       break;
     case 'i':
-      cout << "$Id: pav.C,v 1.104 2005/12/09 16:40:12 straten Exp $" << endl;
+      cout << "$Id: pav.C,v 1.105 2005/12/14 16:14:58 straten Exp $" << endl;
       return 0;
 
     case 'j':
@@ -611,12 +628,32 @@ int main (int argc, char** argv)
       cout << "Plotting normalised Stokes" << endl;	  
       break;
     }
+
     case TOTAL: 
       plot_total_archive = true; 
       break;
+
     case ALL_SUBINTS: 
       all_subints = true;
       break;
+
+    case AUTO_ZOOM:
+      auto_zoom = true;
+      auto_zoom_buffer = atof(optarg);
+      break;
+
+    case LONGITUDE_DEGREES:
+      plotter.set_longitude_degrees();
+      break;
+
+    case ERROR_BOX:
+      plotter.set_plot_error_box ();
+      break;
+
+    case PA_AND_HALF:
+      plotter.set_pa_and_half ();
+      break;
+
     case NBIN:
       nbin_requested = atoi(optarg); 
       break;
@@ -679,6 +716,9 @@ int main (int argc, char** argv)
 
     Reference::To<Pulsar::Archive> archive;
     archive = Pulsar::Archive::load (filenames[ifile]);
+
+    if (plotter.get_plot_error_box())
+      plotter.compute_x_error (archive);
 
     unsigned nsubint = 1;
     if (all_subints)
@@ -805,6 +845,9 @@ int main (int argc, char** argv)
 	archive->set_filename( archive_filename +
 			       " subint " + make_string(isub) );
       }
+
+      if (auto_zoom)
+	plotter.auto_zoom (archive, auto_zoom_buffer);
 
       if (mask) {
 	Reference::To<Pulsar::Profile> prof =
