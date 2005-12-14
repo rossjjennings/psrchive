@@ -9,7 +9,7 @@ include_HEADERS = Cartesian.h Angle.h MJD.h CommandParser.h		\
 	PrimeFactoriser.h WindowArray.h StringTokenizer.h		\
 	Sortable.h Printable.h Header.h thread_utils.h GetPK.h		\
 	VectorInfo.h Plugin.h shell.h Cartesian.h Angle.h coord_parse.h \
-	coord.h anglevel.h obsjoin.h casts.h
+	coord.h anglevel.h obsjoin.h casts.h Horizon.h
 
 libgenutilpp_la_SOURCES = CommandParser.C PlotEvent.C util_plus.C	\
 	PlotState.C datum.C smarthist.C datumcond.C kstest.C Ready.C	\
@@ -19,7 +19,7 @@ libgenutilpp_la_SOURCES = CommandParser.C PlotEvent.C util_plus.C	\
 	sla_MJD.C PlotManager.C PlotVolume.C DataManager.C		\
 	DataSet.C Poincare.C DataVector.C Plugin.C shell.C		\
 	coord_parse.c coord.c sla_coord.c psr2ar.c dual_parse_it.h	\
-	obsjoin.C
+	obsjoin.C Horizon.C
 
 if HAVE_SLA_FORTRAN
 
