@@ -5,6 +5,7 @@
 #include <math.h>
 
 #include "Pulsar/Archive.h"
+#include "Pulsar/Integration.h"
 #include "Pulsar/Profile.h"
 #include "tempo++.h"
 #include "Error.h"
@@ -13,7 +14,7 @@
 #include "dirutil.h"
 #include "string_utils.h"
 
-static const char* psradd_args = "b:c:Ce:f:FG:hiI:M:p:Pqr:sS:tT:vVZ:";
+static const char* psradd_args = "ab:c:Ce:f:FG:hiI:LM:p:Pqr:sS:tT:vVZ:";
 
 void usage () {
   cout <<
@@ -24,7 +25,9 @@ void usage () {
     " -v          Verbose mode (informational)\n"
     " -V          Very verbose mode (debugging)\n"
     " -i          Show revision information\n"
+    " -L          Log results in source.log\n"
     "\n"
+    " -a          Do not rephase data \n"
     " -b nbin     Scrunch to nbin bins after loading archives\n"
     " -c nchan    Scrunch to nchan frequency channels after loading archives\n"
     " -C          Check that ephemerides are equal\n"
@@ -46,7 +49,8 @@ void usage () {
     " -S sec      Tscrunch+unload when archive has this S/N\n"
     "\n"
     "Note:\n"
-    " AUTO ADD options, -I, -S and -G, are incompatible with -s and -f\n\n"
+    " AUTO ADD options, -I, -S and -G, are incompatible with -s and -f\n"
+    "\n"
     "See http://astronomy.swin.edu.au/pulsar/software/manuals/pam.html"
        << endl;
 }
@@ -63,6 +67,9 @@ int main (int argc, char **argv)
 
   // very verbose output
   bool vverbose = false;
+
+  // log the results
+  bool log_results = false;
 
   // if specified, bscrunch each archive to nbin
   int nbin = 0;
@@ -117,9 +124,13 @@ int main (int argc, char **argv)
       return 0;
       
     case 'i':
-      cout << "$Id: psradd.C,v 1.21 2005/11/15 03:34:38 ateoh Exp $" << endl;
+      cout << "$Id: psradd.C,v 1.22 2005/12/14 16:15:42 straten Exp $" << endl;
       return 0;
-      
+
+    case 'a':
+      Pulsar::Archive::append_phase_zero = true;
+      break;
+
     case 'b':
       nbin = atoi (optarg);
       break;
@@ -165,7 +176,11 @@ int main (int argc, char **argv)
       }
       auto_add = true;
       break;
-      
+
+    case 'L':
+      log_results = true;
+      break;
+
     case 'M':
       metafile = optarg;
       break;
@@ -269,13 +284,11 @@ int main (int argc, char **argv)
   // the accumulated total
   Reference::To<Pulsar::Archive> total;
 
-	// This is needed to maintain the archive object's life while
-	// it is being appended to total
-	vector< Reference::To<Pulsar::Archive> > archive_vector;
-
-
   bool reset_total_next_load = true;
   bool correct_total = false;
+
+  FILE* log_file = 0;
+  string log_filename;
 
   for (unsigned ifile=0; ifile < filenames.size(); ifile++) try {
 
@@ -284,20 +297,25 @@ int main (int argc, char **argv)
     
     archive = Pulsar::Archive::load (filenames[ifile]);
 
-		// Store copy of it to maintain reference
-		archive_vector.push_back(archive);
+    if (vverbose)
+      for (unsigned isub=0; isub < archive->get_nsubint(); isub++)
+	cerr << isub << ": " 
+	     << archive->get_model()
+	  .phase( archive->get_Integration(isub)->get_epoch() ) << endl;
 
     if (check_has_data && archive->integration_length() == 0) {
       cerr << "psradd: archive [" << filenames[ifile] << "] has no data\n";
       continue;
     }
 
-    if( required_archive_length > 0 && fabs(archive->integration_length()-required_archive_length) > 0.5 ){
-      fprintf(stderr,"psradd: archive [%s] not %f seconds long- it was %f seconds long\n",
-	      filenames[ifile].c_str(), required_archive_length,
-	      archive->integration_length());
-      continue;
-    }
+    if (required_archive_length > 0
+	&& fabs(archive->integration_length()-required_archive_length) > 0.5)
+      {
+	fprintf(stderr,"psradd: archive [%s] not %f seconds long- it was %f seconds long\n",
+		filenames[ifile].c_str(), required_archive_length,
+		archive->integration_length());
+	continue;
+      }
 
     if( centre_frequency > 0.0 
 	&& fabs(archive->get_centre_frequency()-centre_frequency) > 0.0001 )
@@ -319,6 +337,24 @@ int main (int argc, char **argv)
 
       if (auto_add)
 	newname = total->get_filename() + "." + integrated_extension;
+
+      if (log_results) {
+
+	string log_name = total->get_source() + ".log";
+
+	if (log_name != log_filename)  {
+	  if (log_file) {
+	    cerr << "psradd: Closing log file " << log_filename << endl;
+	    fclose (log_file);
+	  }
+	  cerr << "psradd: Opening log file " << log_name << endl;
+	  log_file = fopen (log_name.c_str(), "a");
+	  if (!log_file)
+	    throw Error (FailedSys, "psradd", "fopen (" + log_name + ")");
+	}
+
+	fprintf (log_file, "\npsradd %s: ", newname.c_str());
+      }
 
       if (verbose)
 	cerr << "psradd: New filename: '" << newname << "'" << endl;
@@ -396,6 +432,9 @@ int main (int argc, char **argv)
         if (auto_add)
           reset_total_current = true;
       }
+
+      if (log_file)
+	fprintf (log_file, "%s ", archive->get_filename().c_str());
 
     }
 
@@ -485,6 +524,11 @@ int main (int argc, char **argv)
   catch (Error& error) {
     cerr << "psradd: Error unloading total\n" << error << endl;
     return -1;
+  }
+
+  if (log_file) {
+    fprintf (log_file, "\n");
+    fclose (log_file);
   }
 
   return 0;
