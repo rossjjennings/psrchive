@@ -234,7 +234,8 @@ void Pulsar::Profile::dedisperse (double dm, double ref_freq, double pfold)
   double delay = dispersion_delay (dm, ref_freq, centrefreq);
 
   if (verbose)
-    cerr << "Pulsar::Profile::dedisperse delay=" << delay*1e3 << " ms" << endl;
+    cerr << "Pulsar::Profile::dedisperse delay="
+	 << delay*1e3 << " ms" << endl;
 
   rotate_phase (delay / pfold);
 
@@ -258,7 +259,7 @@ void Pulsar::Profile::zero()
 //
 // Pulsar::Profile::square_root
 //
-void Pulsar::Profile::square_root()
+void Pulsar::Profile::square_root ()
 {
   if (verbose)
     cerr << "Pulsar::Profile::square_root" << endl;
@@ -267,6 +268,20 @@ void Pulsar::Profile::square_root()
     float sign = (amps[ibin]>0) ? 1.0 : -1.0;
     amps[ibin] = sign * sqrt(float(sign * amps[ibin]));
   }
+}
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Pulsar::Profile::absolute
+//
+void Pulsar::Profile::absolute ()
+{
+  if (verbose)
+    cerr << "Pulsar::Profile::absolute" << endl;
+  
+  for (unsigned ibin=0; ibin<nbin; ++ibin)
+    amps[ibin] = fabs(amps[ibin]);
+
 }
 
 //! calculate the logarithm of each bin with value greater than threshold

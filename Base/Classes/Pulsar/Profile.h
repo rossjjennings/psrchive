@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Profile.h,v $
-   $Revision: 1.89 $
-   $Date: 2005/12/09 03:56:01 $
+   $Revision: 1.90 $
+   $Date: 2005/12/14 16:17:31 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Profile_h
@@ -120,10 +120,13 @@ namespace Pulsar {
     virtual void rotate_phase (double phase);
 
     //! set all amplitudes to zero
-    virtual void zero();
+    virtual void zero ();
   
     //! calculate the signed sqrt of the absolute value of each bin 
-    virtual void square_root();
+    virtual void square_root ();
+
+    //! calculare the absolute value of each phase bin
+    virtual void absolute ();
 
     //! calculate the logarithm of each bin with value greater than threshold
     virtual void logarithm (double base = 10.0, double threshold = 0.0);
