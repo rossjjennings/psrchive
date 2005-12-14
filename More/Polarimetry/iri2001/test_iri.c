@@ -1,12 +1,5 @@
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
-
+#include "iri2rm.h"
 #include <stdio.h>
-
-void F77_FUNC(iri2rm,IRI2RM) (double* Glong, double* Glati, 
-			      float* year, int* mmdd, double* ut, 
-			      float* az, float* el, float* RM);
 
 int main ()
 {
@@ -19,9 +12,7 @@ int main ()
   float el = 69;
   float RM = 0;
   
-  F77_FUNC(iri2rm,IRI2RM) (&Glong, &Glati, 
-			   &year, &mmdd, &ut, 
-			   &az, &el, &RM);
+  iri2rm (&Glong, &Glati, &year, &mmdd, &ut, &az, &el, &RM);
 
   printf ("RM=%lf\n", RM);
   return 0;

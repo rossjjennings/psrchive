@@ -1,98 +1,96 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Horizon.h,v $
-   $Revision: 1.1 $
-   $Date: 2005/12/14 05:43:40 $
+   $Revision: 1.2 $
+   $Date: 2005/12/14 16:16:18 $
    $Author: straten $ */
 
 #ifndef __Horizon_H
 #define __Horizon_H
 
 #include "MJD.h"
+#include "sky_coord.h"
 
-class sky_coord;
+//! Calculates horizon pointing parameters using SLALIB
 
-namespace Calibration {
+class Horizon  {
+  
+public:
+  
+  //! Default constructor
+  Horizon ();
+  
+  //! Set the coordinates of the source
+  void set_source_coordinates (const sky_coord& coords);
+  
+  //! Set the latitude of the observatory in radians
+  void set_observatory_latitude (double latitude);
+  double get_observatory_latitude () const;
 
-  //! Calculates horizon pointing parameters using SLALIB
+  //! Set the longitude of the observator in radians
+  void set_observatory_longitude (double longitude);
+  double get_observatory_longitude () const;
 
-  class Horizon  {
+  //! Set the epoch in Modified Julian Days
+  void set_epoch (const MJD& epoch);
+  MJD get_epoch () const;
 
-  public:
+  //! Get the hour_angle in radians
+  double get_hour_angle () const;
 
-    //! Default constructor
-    Horizon ();
+  //! Get the parallactic angle in radians
+  double get_parallactic_angle () const;
 
-    //! Set the coordinates of the source
-    void set_source_coordinates (const sky_coord& coords);
+  //! Get the azimuth angle in radians
+  double get_azimuth () const;
 
-    //! Set the latitude and longitude of the observatory in degrees
-    void set_observatory_coordinates (double latitude, double longitude);
+  //! Get the elevation angle in radians
+  double get_elevation () const;
 
-    //! Set the epoch in Modified Julian Days
-    void set_epoch (const MJD& epoch);
+  //! Get the zenith angle in radians
+  double get_zenith () const;
 
-    //! Get the epoch in Modified Julian Days
-    MJD get_epoch () const;
+protected:
 
-    //! Get the hour_angle in radians
-    double get_hour_angle () const;
+  //! The declination of the source in radians
+  double declination;
 
-    //! Get the parallactic angle in radians
-    double get_parallactic_angle () const;
+  //! The right ascension of the source in radians
+  double right_ascension;
 
-    //! Get the azimuth angle in radians
-    double get_azimuth () const;
+  //! The latitude of the observatory in radians
+  double latitude;
 
-    //! Get the elevation angle in radians
-    double get_elevation () const;
+  //! The latitude of the observatory in radians
+  double longitude;
 
-    //! Get the zenith angle in radians
-    double get_zenith () const;
+  //! The epoch
+  MJD epoch;
 
-  protected:
+  //! Flag set when return values have been computed
+  bool built;
 
-    //! The declination of the source in radians
-    double declination;
+  //! Recomputes, when necessary, the following values
+  void build () const {
+    if (!built)
+      const_cast<Horizon*>(this)->do_build();
+  }
 
-    //! The right ascension of the source in radians
-    double right_ascension;
+  //! Recomputes the following values
+  void do_build ();
 
-    //! The latitude of the observatory in degrees
-    double latitude;
+  //! The hour angle in radians
+  double hour_angle;
 
-    //! The latitude of the observatory in degrees
-    double longitude;
+  //! The parallactic angle in radians
+  double parallactic_angle;
 
-    //! The epoch
-    MJD epoch;
+  //! The telescope azimuth in radians
+  double azimuth;
 
-    //! Flag set when return values have been computed
-    bool built;
+  //! The telescope elevation in radians
+  double elevation;
 
-    //! Recomputes, when necessary, the following values
-    void build () const {
-      if (!built)
-	const_cast<Horizon*>(this)->do_build();
-    }
-
-    //! Recomputes the following values
-    void do_build ();
-
-    //! The hour angle in radians
-    double hour_angle;
-
-    //! The parallactic angle in radians
-    double parallactic_angle;
-
-    //! The telescope azimuth in radians
-    double azimuth;
-
-    //! The telescope elevation in radians
-    double elevation;
-
-  };
-
-}
+};
 
 #endif

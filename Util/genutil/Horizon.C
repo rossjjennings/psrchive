@@ -3,18 +3,14 @@
 
 #include <slalib.h>
 
-Calibration::Horizon::Horizon ()
+Horizon::Horizon ()
 {
   declination = right_ascension = 0;
-
   longitude = latitude = 0;
-
   built = false;
 }
 
-//! Set the coordinates of the source
-void
-Calibration::Horizon::set_source_coordinates (const sky_coord& pos)
+void Horizon::set_source_coordinates (const sky_coord& pos)
 {
   declination = pos.dec().getRadians();
   right_ascension = pos.ra().getRadians();
@@ -22,17 +18,29 @@ Calibration::Horizon::set_source_coordinates (const sky_coord& pos)
   built = false;
 }
 
-//! Set the coordinates of the observatory
-void 
-Calibration::Horizon::set_observatory_coordinates (double lat, double lon)
+void Horizon::set_observatory_latitude (double lat)
 {
   latitude = lat;
-  longitude = lon;
-
   built = false;
 }
 
-void Calibration::Horizon::set_epoch (const MJD& _epoch)
+double Horizon::get_observatory_latitude () const
+{
+  return latitude;
+}
+
+void Horizon::set_observatory_longitude (double longi)
+{
+  longitude = longi;
+  built = false;
+}
+
+double Horizon::get_observatory_longitude () const
+{
+  return longitude;
+}
+
+void Horizon::set_epoch (const MJD& _epoch)
 {
   if (epoch == _epoch)
     return;
@@ -41,58 +49,56 @@ void Calibration::Horizon::set_epoch (const MJD& _epoch)
   built = false;
 }
 
-MJD Calibration::Horizon::get_epoch () const
+MJD Horizon::get_epoch () const
 {
   return epoch;
 }
 
 //! Get the hour_angle in radians
-double Calibration::Horizon::get_hour_angle () const
+double Horizon::get_hour_angle () const
 {
   build ();
   return hour_angle;
 }
 
 //! Get the parallactic angle in radians
-double Calibration::Horizon::get_parallactic_angle () const
+double Horizon::get_parallactic_angle () const
 {
   build ();
   return parallactic_angle;
 }
 
 //! Get the azimuth angle in radians
-double Calibration::Horizon::get_azimuth () const
+double Horizon::get_azimuth () const
 {
   build ();
   return azimuth;
 }
 
 //! Get the elevation angle in radians
-double Calibration::Horizon::get_elevation () const
+double Horizon::get_elevation () const
 {
   build ();
   return elevation;
 }
 
 //! Get the zenith angle in radians
-double Calibration::Horizon::get_zenith () const
+double Horizon::get_zenith () const
 {
   build ();
   return M_PI - elevation;
 }
 
-void Calibration::Horizon::do_build ()
+void Horizon::do_build ()
 {
   // MJD::LST receives longitude in degrees and returns LST in hours
-  double lst = epoch.LST (longitude);
+  double lst = epoch.LST (longitude * 180/M_PI);
 
   // compute hour angle in radians
   hour_angle = lst * M_PI/12.0 - right_ascension;
 
   double ignore;
-
-  // declination stored in radians; latitude stored in degrees
-  slaAltaz (hour_angle, declination, latitude * M_PI/180, 
+  slaAltaz (hour_angle, declination, latitude, 
 	    &azimuth,                &ignore, &ignore,
 	    &elevation,              &ignore, &ignore,
 	    &parallactic_angle,      &ignore, &ignore);

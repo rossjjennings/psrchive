@@ -1,14 +1,15 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/IRIonosphere.h,v $
-   $Revision: 1.1 $
-   $Date: 2005/12/12 13:41:06 $
+   $Revision: 1.2 $
+   $Date: 2005/12/14 16:16:18 $
    $Author: straten $ */
 
 #ifndef __Calibration_IRIonosphere_H
 #define __Calibration_IRIonosphere_H
 
 #include "Calibration/Faraday.h"
+#include "Horizon.h"
 
 namespace Calibration {
 
@@ -35,22 +36,26 @@ namespace Calibration {
     //! Get the frequency in MHz
     double get_frequency () const;
 
-    //! Get the Faraday rotation angle
-    double get_rotation () const;
+    //! Set the Horizon pointing parameters
+    void set_horizon (const Horizon&);
+
+    //! Get the Faraday rotation measure
+    double get_rotation_measure () const;
 
   protected:
 
     //! The Faraday rotation transformation
     Calibration::Faraday faraday;
 
-    // ///////////////////////////////////////////////////////////////////
-    //
-    // OptimizedComplex2 implementation
-    //
-    // ///////////////////////////////////////////////////////////////////
+    //! The Horizon pointing paramters
+    Horizon horizon;
+
+    //! Compute the rotation measure
+    void build ();
 
     //! Calculate the Jones matrix and its gradient
-    void calculate (Jones<double>& result, std::vector<Jones<double> >* grad);
+    void calculate (Jones<double>& result,
+      std::vector<Jones<double> >*) {}
 
   };
 
