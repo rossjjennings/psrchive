@@ -124,7 +124,7 @@ int main (int argc, char **argv)
       return 0;
       
     case 'i':
-      cout << "$Id: psradd.C,v 1.22 2005/12/14 16:15:42 straten Exp $" << endl;
+      cout << "$Id: psradd.C,v 1.23 2005/12/14 17:06:34 straten Exp $" << endl;
       return 0;
 
     case 'a':
@@ -353,7 +353,8 @@ int main (int argc, char **argv)
 	    throw Error (FailedSys, "psradd", "fopen (" + log_name + ")");
 	}
 
-	fprintf (log_file, "\npsradd %s: ", newname.c_str());
+	fprintf (log_file, "\npsradd %s: %s", newname.c_str(),
+		 total->get_filename().c_str());
       }
 
       if (verbose)
@@ -434,7 +435,7 @@ int main (int argc, char **argv)
       }
 
       if (log_file)
-	fprintf (log_file, "%s ", archive->get_filename().c_str());
+	fprintf (log_file, " %s", archive->get_filename().c_str());
 
     }
 
