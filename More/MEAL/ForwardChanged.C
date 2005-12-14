@@ -3,6 +3,12 @@
 #include <iostream>
 using namespace std;
 
+
+MEAL::ForwardChanged::ForwardChanged (Function* context)
+  : FunctionPolicy (context)
+{
+}
+
 void MEAL::ForwardChanged::manage (Function* model)
 {
   model->changed.connect (this, &ForwardChanged::attribute_changed);
