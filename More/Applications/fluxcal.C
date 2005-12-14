@@ -1,5 +1,9 @@
 #include "Pulsar/FluxCalibratorDatabase.h"
 #include "Pulsar/FluxCalibrator.h"
+
+#include "Pulsar/SingleAxisCalibrator.h"
+#include "Pulsar/OffPulseCalibrator.h"
+
 #include "Pulsar/Database.h"
 #include "Pulsar/Archive.h"
 #include "string_utils.h"
@@ -24,6 +28,8 @@ void usage ()
     "options:\n"
     "  -a class     Pulsar::Archive class used to represent output\n"
     "  -c file.cfg  name of file containing standard candle information\n"
+    "  -B           fix the off-pulse baseline statistics \n"
+    "  -C           calibrate flux calibrator observation with itself \n"
     "  -d database  get FluxCal archives from database and file solutions\n"
     "  -e extension filename extension added to output archives\n"
     "  -i minutes   maximum number of minutes between archives in same set\n"
@@ -65,11 +71,14 @@ catch (Error& error) {
 
 int main (int argc, char** argv) try {
 
+  bool offpulse_calibrator = false;
+  bool self_calibrate = false;
+
   Pulsar::FluxCalibratorDatabase* standards = 0;
   string database_filename;
 
   char c;
-  while ((c = getopt(argc, argv, "hqvVa:c:d:e:i:")) != -1) 
+  while ((c = getopt(argc, argv, "hqvVa:BCc:d:e:i:")) != -1) 
 
     switch (c)  {
 
@@ -89,6 +98,14 @@ int main (int argc, char** argv) try {
     case 'a':
       archive_class = optarg;
       cerr << "fluxcal: will write to " << archive_class << " files" << endl;
+      break;
+
+    case 'B':
+      offpulse_calibrator = true;
+      break;
+
+    case 'C':
+      self_calibrate = true;
       break;
 
     case 'c':
@@ -175,7 +192,20 @@ int main (int argc, char** argv) try {
     cerr << "fluxcal: loading " << filenames[ifile] << endl;
     
     archive = Pulsar::Archive::load(filenames[ifile]);
-    
+
+    if (self_calibrate) {
+
+      Reference::To<Pulsar::PolnCalibrator> pcal;
+
+      if (offpulse_calibrator)
+	pcal = new Pulsar::OffPulseCalibrator (archive);
+      else
+	pcal = new Pulsar::SingleAxisCalibrator (archive);
+
+      pcal->calibrate (archive);
+
+    }
+
     if (fluxcal) {
 
       double gap = (archive->start_time() - last->end_time()).in_seconds();
