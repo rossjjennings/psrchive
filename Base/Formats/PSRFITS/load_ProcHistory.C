@@ -299,6 +299,26 @@ void load (fitsfile* fptr, Pulsar::ProcHistory::row* hrow)
     //       "fits_read_col RFI_MTHD");
   }
 
+  // Get IFR_MTHD
+  
+  fits_get_colnum (fptr, CASEINSEN, "IFR_MTHD", &colnum, &status);
+  
+  // Read the value from the specified row
+  
+  fits_read_col (fptr, TSTRING, colnum, row, 1, 1, &nullstr, 
+                 &temp_ptr, &initflag, &status);
+  if (Pulsar::Archive::verbose == 3)
+    cerr << "Read IFR_MTHD = " << temp.get() << endl;
+  hrow->ifr_mthd = temp.get();
+
+  if (status != 0) {
+    if (Pulsar::Archive::verbose == 3)
+      cerr << "load ProcHistory::row WARNING IFR_MTHD not found" << endl;
+    status = 0;
+    //throw FITSError (status, "load ProcHistory::row", 
+    //       "fits_read_col IFR_MTHD");
+  }
+
   // Get SCALE
   
   fits_get_colnum (fptr, CASEINSEN, "SCALE", &colnum, &status);
@@ -410,6 +430,7 @@ void Pulsar::FITSArchive::load_ProcHistory (fitsfile* fptr)
   history->set_sc_mthd (history->get_last().sc_mthd);
   history->set_cal_file(history->get_last().cal_file);
   history->set_rfi_mthd(history->get_last().rfi_mthd);
+  history->set_ifr_mthd(history->get_last().ifr_mthd);
 
   set_scale ( history->get_last().scale );
   string polstr = (history->get_last()).pol_type;

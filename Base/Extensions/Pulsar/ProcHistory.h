@@ -60,6 +60,7 @@ namespace Pulsar {
       string cal_mthd;
       string cal_file;
       string rfi_mthd;
+      string ifr_mthd;
       Signal::Scale scale;
 
       //Destructor
@@ -78,6 +79,7 @@ namespace Pulsar {
     string the_sc_mthd;
     string the_cal_file;
     string the_rfi_mthd;
+    string the_ifr_mthd;
 
     ProcHistory::row& get_last ();
 
@@ -91,7 +93,9 @@ namespace Pulsar {
     string get_cal_file ();
     void   set_rfi_mthd (string str);
     string get_rfi_mthd ();
-    
+    void   set_ifr_mthd (string str);
+    string get_ifr_mthd ();
+
     void   add_blank_row ();
     
   private:

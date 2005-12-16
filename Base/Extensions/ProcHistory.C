@@ -32,6 +32,7 @@ Pulsar::ProcHistory::operator= (const ProcHistory& extension)
   the_sc_mthd = extension.the_sc_mthd;
   the_cal_file = extension.the_cal_file;
   the_rfi_mthd = extension.the_rfi_mthd;
+  the_ifr_mthd = extension.the_ifr_mthd;
   return *this;
 }
 
@@ -47,6 +48,7 @@ void Pulsar::ProcHistory::init ()
   the_sc_mthd  = "NONE";
   the_cal_file = "NONE";
   the_rfi_mthd = "NONE";
+  the_ifr_mthd = "NONE";
 }
 
 Pulsar::ProcHistory::row& Pulsar::ProcHistory::get_last ()
@@ -104,6 +106,16 @@ string Pulsar::ProcHistory::get_rfi_mthd()
   return the_rfi_mthd;
 }
 
+void Pulsar::ProcHistory::set_ifr_mthd(string str)
+{
+  the_ifr_mthd = str;
+}
+
+string Pulsar::ProcHistory::get_ifr_mthd()
+{
+  return the_ifr_mthd;
+}
+
 void Pulsar::ProcHistory::add_blank_row ()
 {
   rows.push_back(row());
@@ -127,6 +139,7 @@ void Pulsar::ProcHistory::row::init ()
   cal_mthd = "NONE";
   cal_file = "NONE";
   rfi_mthd = "NONE";
+  ifr_mthd = "NONE";
   
   npol     = 0;
   nbin     = 0;

@@ -262,6 +262,22 @@ void unload (fitsfile* fptr, const Pulsar::ProcHistory::row* hrow)
     //       "fits_write_col RFI_MTHD");
   }
 
+  // Write IFR_MTHD
+  
+  colnum = 0;
+  fits_get_colnum (fptr, CASEINSEN, "IFR_MTHD", &colnum, &status);
+  
+  // Write the value from the specified row
+  
+  tempstr = const_cast<char*>( hrow->ifr_mthd.c_str() );
+  fits_write_col (fptr, TSTRING, colnum, row, 1, 1, &tempstr, &status);
+  
+  if (status != 0) {
+    cerr << "WARNING: FITSArchive::unload_hist_row IFR_MTHD not found" << endl;
+    status = 0;
+    //throw FITSError (status, "FITSArchive::unload_hist_row", 
+    //       "fits_write_col IFR_MTHD");
+  }
 
 
   // Write SCALE
