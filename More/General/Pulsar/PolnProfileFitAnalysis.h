@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/Attic/PolnProfileFitAnalysis.h,v $
-   $Revision: 1.7 $
-   $Date: 2005/11/16 00:43:40 $
+   $Revision: 1.8 $
+   $Date: 2005/12/16 23:31:49 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PolnProfileFitAnalysis_h
@@ -112,6 +112,12 @@ namespace Pulsar {
 
     //! Set the variance of the fluctuation spectrum
     void set_variance (double v);
+
+    //! Get the variance of the fluctuation spectrum
+    double get_variance () const { return mean_variance; }
+
+    //! Get the estimated phase shift error for the fluctuation spectrum
+    Estimate<double> get_error () const;
 
     //! Get the curvature matrix
     void get_curvature (Matrix<2,2,double>& curvature);
