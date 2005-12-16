@@ -132,7 +132,7 @@ int main (int argc, char *argv[])
       break;
 
     case 'i':
-      cout << "$Id: pat.C,v 1.41 2005/11/16 00:43:45 straten Exp $" << endl;
+      cout << "$Id: pat.C,v 1.42 2005/12/16 23:25:21 straten Exp $" << endl;
       return 0;
 
     case 'F':
@@ -485,27 +485,18 @@ void full_polarization_analysis (Pulsar::PolnProfileFit& fit)
   Pulsar::ScalarProfileFitAnalysis scalar;
   scalar.set_fit (&fit);
 
-  Matrix<2,2,double> curvature;
-  scalar.get_curvature (curvature);
-
-  Matrix<2,2,double> covariance = inv(curvature);
-
-  // the phase shift variance of the total intensity scalar
-  double I_varphi = covariance[0][0];
+  // the phase shift error for the total intensity profile
+  Estimate<double> I_error = scalar.get_error();
 
   Pulsar::Profile invariant;
   fit.get_standard()->invint( &invariant );
 
   scalar.set_spectrum ( fit.fourier_transform (&invariant) );
-  scalar.set_variance ( 2.0 );
+  scalar.set_variance ( 2.0 * scalar.get_variance() );
 
-  scalar.get_curvature (curvature);
-  covariance = inv(curvature);
+  // the phase shift error for the invariant profile
+  Estimate<double> S_error = scalar.get_error();
 
-  // the phase shift variance of the lorentz invariant scalar
-  double S_varphi = covariance[0][0];
-  
   cout << "\nLorentz Invariant TOA: "
-    "\n Relative error = "
-       << sqrt(S_varphi/I_varphi) << endl << endl;
+    "\n Relative error = " << S_error/I_error << endl << endl;
 }
