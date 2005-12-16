@@ -53,7 +53,7 @@ Pulsar::PolnProfileFitAnalysis::get_curvature (Matrix<8,8,double>& curvature)
   for (unsigned i=0; i<4; i++)
     mean_variance += fit->standard_variance[i] / 2.0;
 
-  mean_variance = 2.0;
+  // mean_variance = 2.0;
 
   curvature /= mean_variance;
 }
@@ -270,7 +270,7 @@ void Pulsar::PolnProfileFitAnalysis::set_fit (PolnProfileFit* f)
       double delR2_varphiJ_delSim = delR2_varphiJ_delS (delC_delSim);
 
       var_R2_varphiJ += delR2_varphiJ_delSre * delR2_varphiJ_delSre * var_S;
-      var_R2_varphiJ += delR2_varphiJ_delSre * delR2_varphiJ_delSre * var_S;
+      var_R2_varphiJ += delR2_varphiJ_delSim * delR2_varphiJ_delSim * var_S;
 
 #ifdef _DEBUG
       if (ip==3) {
@@ -353,8 +353,12 @@ void Pulsar::ScalarProfileFitAnalysis::set_fit (const PolnProfileFit* fit)
   set_spectrum( fit->standard_fourier->get_Profile(0) );
   set_max_harmonic( fit->model->get_num_input() );
 
-  mean_variance = fit->standard_variance[0];
-  mean_variance = 1.0;
+  mean_variance = 0.0;
+
+  for (unsigned i=0; i<4; i++)
+    mean_variance += fit->standard_variance[i] / 4.0;
+
+  // mean_variance = 1.0;
 }
 
 void Pulsar::ScalarProfileFitAnalysis::set_spectrum (const Profile* p)
@@ -402,8 +406,7 @@ Pulsar::ScalarProfileFitAnalysis::get_curvature (Matrix<2,2,double>& curvature)
   covariance = inv(curvature);
 }
 
-void
-Pulsar::ScalarProfileFitAnalysis::delC_delS
+void Pulsar::ScalarProfileFitAnalysis::delC_delS
 (
  Matrix<2,2,double>& delC_delSre,
  Matrix<2,2,double>& delC_delSim,
@@ -411,7 +414,7 @@ Pulsar::ScalarProfileFitAnalysis::delC_delS
  ) const
 {
   complex<double> delexp_delvarphi (0.0, -2.0 * M_PI * double(index+1));
-  complex<double> Stokes_I (amps[index+1]);
+  complex<double> Stokes_I (amps[index]);
 
   Matrix<2,2,double> delalpha_delSre;
   Matrix<2,2,double> delalpha_delSim;
@@ -431,7 +434,7 @@ Pulsar::ScalarProfileFitAnalysis::delC_delS
   
   for (unsigned ir=0; ir < 2; ir++) {
     
-    for (unsigned is=0; is < 8; is ++) {
+    for (unsigned is=0; is < 2; is ++) {
       
       delalpha_delSre[ir][is] = 
 	( delgradient_delS[ir] * conj(gradient[is]) +
@@ -453,4 +456,30 @@ Pulsar::ScalarProfileFitAnalysis::delC_delS
   delC_delSre = -covariance*delalpha_delSre*covariance;
   delC_delSim = -covariance*delalpha_delSim*covariance;
 
+}
+
+Estimate<double> Pulsar::ScalarProfileFitAnalysis::get_error () const
+{
+  Matrix<2,2,double> curvature;
+  const_cast<ScalarProfileFitAnalysis*>(this)->get_curvature (curvature);
+
+  // the variance of the real and imaginary parts of the Stokes parameter
+  double var_S = 0.5*mean_variance;
+
+  // the variance of the phase shift variance
+  double var_c_varphi = 0.0;
+
+  for (unsigned ih=0; ih < max_harmonic; ih++) {
+
+    Matrix<2,2,double> delC_delSre;
+    Matrix<2,2,double> delC_delSim;
+
+    delC_delS (delC_delSre, delC_delSim, ih);
+
+    var_c_varphi += delC_delSre[0][0]*delC_delSre[0][0] * var_S;
+    var_c_varphi += delC_delSim[0][0]*delC_delSim[0][0] * var_S;
+
+  }
+
+  return sqrt( Estimate<double> (covariance[0][0], var_c_varphi) );
 }
