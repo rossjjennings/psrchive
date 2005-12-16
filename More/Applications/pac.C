@@ -1,11 +1,11 @@
-#include "Pulsar/Integration.h"
-#include "Pulsar/BasicIntegration.h"
+#include "Pulsar/Archive.h"
+#include "Pulsar/PolnProfile.h"
+
 #include "Pulsar/Database.h"
 #include "Pulsar/PolnCalibrator.h"
-#include "Pulsar/PolnProfile.h"
 #include "Pulsar/FluxCalibrator.h"
+#include "Pulsar/IonosphereCalibrator.h"
 
-// Extensions this program understands
 #include "Pulsar/ProcHistory.h"
 
 #include "Calibration/Feed.h"
@@ -41,6 +41,7 @@ void usage ()
     "  -r filename            Use the specified receiver parameters file \n"
     "  -S                     Use the complete Reception model \n"
     "  -s                     Use the Polar Model \n"
+    "  -I                     Correct ionospheric Faraday rotation using IRI\n"
     "\n"
     "Rough Alignment options [not recommended]: \n"
     "  -B                     Fix the off-pulse baseline statistics \n"
@@ -49,7 +50,7 @@ void usage ()
     "Matching options: \n"
     "  -m [b|a]               Use only calibrator before|after observation\n"
     "  -c                     Do not try to match sky coordinates\n"
-    "  -I                     Do not try to match instruments\n"
+    "  -Z                     Do not try to match instruments\n"
     "  -T                     Do not try to match times\n"
     "  -F                     Do not try to match frequencies\n"
     "  -b                     Do not try to match bandwidths\n"
@@ -95,6 +96,10 @@ int main (int argc, char *argv[]) {
   // known feed transformation
   Calibration::Feed* feed = 0;
 
+  // model ionosphere
+  Pulsar::IonosphereCalibrator* ionosphere = 0;
+
+  // default calibrator type
   Pulsar::Calibrator::Type pcal_type = Pulsar::Calibrator::SingleAxis;
 
   // default searching criterion
@@ -142,7 +147,7 @@ int main (int argc, char *argv[]) {
       break;
 
     case 'i':
-      cout << "$Id: pac.C,v 1.67 2005/12/14 16:15:30 straten Exp $" << endl;
+      cout << "$Id: pac.C,v 1.68 2005/12/16 23:18:21 straten Exp $" << endl;
       return 0;
 
     case 'A':
@@ -175,6 +180,10 @@ int main (int argc, char *argv[]) {
 
     case 'G':
       Pulsar::PolnProfile::normalize_weight_by_absolute_gain = true;
+      break;
+
+    case 'I':
+      ionosphere = new Pulsar::IonosphereCalibrator;
       break;
 
     case 'M':
@@ -277,10 +286,6 @@ int main (int argc, char *argv[]) {
       criterion.check_coordinates = false;
       command += "-c ";
       break;
-    case 'I':
-      criterion.check_instrument = false;
-      command += "-I ";
-      break;
     case 'T':
       criterion.check_time = false;
       command += "-T ";
@@ -288,6 +293,10 @@ int main (int argc, char *argv[]) {
     case 'F':
       criterion.check_frequency = false;
       command += "-F ";
+      break;
+    case 'Z':
+      criterion.check_instrument = false;
+      command += "-I ";
       break;
 
     default:
@@ -439,6 +448,11 @@ int main (int argc, char *argv[]) {
 	arch->correct_instrument ();
       }
 
+      if (ionosphere) {
+	cerr << "pac: Correcting ionospheric Faraday rotation" << endl;
+	ionosphere->calibrate (arch);
+      }
+
       cout << "pac: Poln calibration complete" << endl;
 
       successful_polncal = true;
@@ -487,7 +501,7 @@ int main (int argc, char *argv[]) {
 	   << "\t" << error.get_message() << endl;
     }
 
-    // find first of "." turns ./cal/poo.cfb info .unload_ext WvS
+    // find first of "." turns "./cal/poo.cfb" into ".unload_ext" WvS
     //
     // int index = filenames[i].find_first_of(".", 0);
 
