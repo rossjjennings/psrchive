@@ -124,7 +124,7 @@ int main (int argc, char **argv)
       return 0;
       
     case 'i':
-      cout << "$Id: psradd.C,v 1.23 2005/12/14 17:06:34 straten Exp $" << endl;
+      cout << "$Id: psradd.C,v 1.24 2005/12/19 11:55:38 ateoh Exp $" << endl;
       return 0;
 
     case 'a':
@@ -505,6 +505,7 @@ int main (int argc, char **argv)
 	 << error << endl;
   }
 
+	total->update_model();
 
   if (!reset_total_next_load) try {
 
