@@ -8,6 +8,7 @@
 
 #include "Pulsar/IntegrationOrder.h"
 #include "Pulsar/Pointing.h"
+#include "Pulsar/FITSHdrExtension.h"
 
 #include "FITSError.h"
 
@@ -81,6 +82,14 @@ try {
     get<Pulsar::IntegrationOrder>()->set_Index(row-1,value);
   }
   
+  // Get the reference epoch from the primary header
+  const Pulsar::FITSHdrExtension* hdr_ext = get<Pulsar::FITSHdrExtension>();
+  
+  if (!hdr_ext) {
+    throw Error (InvalidParam, "FITSArchive::load_Integration",
+		 "No FITSHdrExtension found");
+  }
+  
   // Set the duration of the integration
   
   colnum = 0;
@@ -92,7 +101,7 @@ try {
 		 &duration, &initflag, &status);
   
   integ->set_duration (duration);
-  
+
   // Set the start time of the integration
   
   initflag = 0;
@@ -109,13 +118,13 @@ try {
 		     "fits_read_col OFFS_SUB");
 
 
-  MJD epoch = reference_epoch + time;
+  MJD epoch = hdr_ext->start_time + time;
 
   if (verbose == 3)
     cerr << "Pulsar::FITSArchive::load_Integration reference_epoch=" 
-	 << reference_epoch << "\n  offset=" << time << "s epoch=" << epoch
+	 << hdr_ext->start_time << "\n  offset=" << time << "s epoch=" << epoch
 	 << endl;
-
+  
   // Set a preliminary epoch to avoid problems loading the polyco
   integ->set_epoch (epoch);
 
@@ -131,7 +140,7 @@ try {
       // Set the toa epoch, correcting for phase offset, ensuring that the
       // new epoch of the integration is at the same phase as the archive
       // start time
-      Phase stt_phs = hdr_model->phase(reference_epoch);
+      Phase stt_phs = hdr_model->phase(hdr_ext->start_time);
       Phase off_phs = hdr_model->phase(epoch);
       Phase dphase  = off_phs - stt_phs;
       
@@ -142,7 +151,7 @@ try {
       if (verbose == 3)
       	cerr << "Pulsar::FITSArchive::load_Integration row=" << row <<
 	  "\n  PRED_PHS=" << extra_polyco.predicted_phase <<
-	  "\n  reference epoch=" << reference_epoch <<
+	  "\n  reference epoch=" << hdr_ext->start_time <<
 	  "\n  reference phase=" << stt_phs <<
 	  "\n      input phase=" << off_phs <<
 	  "\n     phase offset=" << dphase << " = " << dtime << "s" 

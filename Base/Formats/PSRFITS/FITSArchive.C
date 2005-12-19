@@ -76,6 +76,9 @@ Pulsar::FITSArchive::FITSArchive()
 {
   if (verbose == 3)
     cerr << "FITSArchive default construct" << endl;
+
+  add_extension(new FITSHdrExtension());
+
   init ();
 }
 
@@ -155,8 +158,6 @@ void Pulsar::FITSArchive::copy (const Archive& archive,
   if (verbose == 3)
     cerr << "FITSArchive::copy dynamic cast call" << endl;
 
-  reference_epoch = archive.start_time();
-  
   const FITSArchive* farchive = dynamic_cast<const FITSArchive*>(&archive);
   if (!farchive)
     return;
@@ -167,7 +168,6 @@ void Pulsar::FITSArchive::copy (const Archive& archive,
   chanbw = farchive->chanbw;
   scale_cross_products = farchive->scale_cross_products;
   conjugate_cross_products = farchive->conjugate_cross_products;
-  reference_epoch = farchive->reference_epoch;
 }
 
 //! Returns a pointer to a new copy-constructed FITSArchive instance
@@ -549,10 +549,10 @@ void Pulsar::FITSArchive::load_header (const char* filename)
   
   if (status != 0) {
     cerr << "FITSArchive::load_header WARNING no STT_*MJD" << endl;
-    hdr_ext->start_time = reference_epoch = 0.0;
+    hdr_ext->start_time = 0.0;
   }
   else  {
-    hdr_ext->start_time = reference_epoch = MJD ((int)day, (int)sec, frac);
+    hdr_ext->start_time = MJD ((int)day, (int)sec, frac);
     if (verbose == 3)
       cerr << "Got start time: " << hdr_ext->start_time.printall() << endl;
   }
@@ -725,19 +725,26 @@ void Pulsar::FITSArchive::load_header (const char* filename)
 
 void Pulsar::FITSArchive::P236_reference_epoch_correction ()
 {
+   FITSHdrExtension*  hdr_ext  = get<FITSHdrExtension>();
+
+   if (!hdr_ext) {
+     throw Error (InvalidParam, "FITSArchive::P236_reference_epoch_correction",
+		  "No FITSHdrExtension found");
+   }
+
   if (!model || get_type() != Signal::Pulsar)
     return;
 
-  MJD original_reference_epoch = reference_epoch;
-  Phase original_phase = model->phase(reference_epoch);
+  MJD original_reference_epoch = hdr_ext->start_time;
+  Phase original_phase = model->phase(hdr_ext->start_time);
 
-  reference_epoch = model->iphase( original_phase.Floor() );
+  hdr_ext->start_time = model->iphase( original_phase.Floor() );
 
   cerr << "Pulsar::FITSArchive::P236_reference_epoch_correction"
     "\n   original reference epoch=" << original_reference_epoch <<
     "\n                      phase=" << original_phase <<
-    "\n  corrected reference epoch=" << reference_epoch <<
-    "\n                      phase=" << model->phase(reference_epoch)
+    "\n  corrected reference epoch=" << hdr_ext->start_time <<
+    "\n                      phase=" << model->phase(hdr_ext->start_time)
 	 << endl;  
 }
 
@@ -832,17 +839,16 @@ try {
   string coord1, coord2;
 
   const FITSHdrExtension* hdr_ext = get<FITSHdrExtension>();
-
+  
   if (hdr_ext) {
-
+    
     if (verbose == 3)
       cerr << "Pulsar::FITSArchive::unload_file FITSHdrExtension" << endl;
-
+    
     unload (fptr, hdr_ext);
     hdr_ext->get_coord_string( get_coordinates(), coord1, coord2 );
-
   }
-
+  
   else {
 
     AnglePair radec = get_coordinates().getRaDec();
@@ -928,10 +934,16 @@ try {
     if (ext) 
       unload (fptr, ext);
   }
-
-  long day = (long)(reference_epoch.intday());
-  long sec = (long)(reference_epoch.get_secs());
-  double frac = reference_epoch.get_fracsec();
+  
+  long day    = 0;
+  long sec    = 0;
+  double frac = 0.0;
+ 
+  if (hdr_ext) {
+    day = (long)(hdr_ext->start_time.intday());
+    sec = (long)(hdr_ext->start_time.get_secs());
+    frac = hdr_ext->start_time.get_fracsec();
+  }
 
   fits_update_key (fptr, TLONG, "STT_IMJD", &day, comment, &status);
   fits_update_key (fptr, TLONG, "STT_SMJD", &sec, comment, &status);

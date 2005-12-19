@@ -6,6 +6,7 @@
 
 #include "Pulsar/IntegrationOrder.h"
 #include "Pulsar/Pointing.h"
+#include "Pulsar/FITSHdrExtension.h"
 
 #include "FITSError.h"
 #include "genutil.h"
@@ -74,7 +75,7 @@ void Pulsar::FITSArchive::unload_integration (int row,
     throw FITSError (status, "FITSArchive:unload_integration",
 		     "fits_write_col TSUBINT");
   
-  if (verbose == 3)
+  if (verbose== 3)
     cerr << "FITSArchive::unload_integration row=" << row
          << " TSUBINT = " << duration << " written" << endl;
   
@@ -93,9 +94,11 @@ void Pulsar::FITSArchive::unload_integration (int row,
 
   double time = 0.0;
 
-  if (duration != 0)
-    time = (integ->get_epoch () - reference_epoch).in_seconds();
-  
+  const FITSHdrExtension* hdr_ext = get<FITSHdrExtension>();
+
+  if (duration != 0 && hdr_ext)
+    time = (integ->get_epoch () - hdr_ext->start_time).in_seconds();
+
   fits_write_col (thefptr, TDOUBLE, colnum, row, 1, 1, &time, &status);
   
   if (status != 0)

@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/PSRFITS/Pulsar/FITSArchive.h,v $
-   $Revision: 1.31 $
-   $Date: 2005/12/09 16:41:07 $
-   $Author: straten $ */
+   $Revision: 1.32 $
+   $Date: 2005/12/19 07:37:34 $
+   $Author: ahotan $ */
 
 #ifndef __Pulsar_FITSArchive_h
 #define __Pulsar_FITSArchive_h
@@ -172,9 +172,6 @@ namespace Pulsar {
 
     // Complex conjugate cross coherence term
     bool conjugate_cross_products;
-
-    // Reference epoch
-    MJD reference_epoch;
 
     // Archive Extensions used by FITSArchive
     
