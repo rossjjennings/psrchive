@@ -50,6 +50,16 @@ Pulsar::FITSHdrExtension::~FITSHdrExtension ()
 {
 }
 
+void Pulsar::FITSHdrExtension::set_coord_mode (const string mode)
+{
+  if (mode == "J2000" || mode == "Gal" || mode == "Ecliptic" ||
+        mode == "AZEL" || mode == "HADEC") {
+    coordmode = mode;
+  }
+  else {
+    coordmode = "UNSET";
+  }
+}
 
 void Pulsar::FITSHdrExtension::get_coord_string (const sky_coord& coordinates,
 						 string& coord1,

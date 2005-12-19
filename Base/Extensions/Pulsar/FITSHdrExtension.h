@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/FITSHdrExtension.h,v $
-   $Revision: 1.5 $
-   $Date: 2005/12/09 16:41:06 $
-   $Author: straten $ */
+   $Revision: 1.6 $
+   $Date: 2005/12/19 07:33:28 $
+   $Author: ahotan $ */
 
 #ifndef __FITSHdrExtension_h
 #define __FITSHdrExtension_h
@@ -36,6 +36,8 @@ namespace Pulsar {
     void get_coord_string (const sky_coord& coordinates,
 			   string& coord1, string& coord2) const;
 
+    //! Set the coordinate mode string
+    void set_coord_mode (const string mode);
 
     //////////////////////////////////////////////////////////////////////
     
