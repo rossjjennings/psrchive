@@ -5,11 +5,13 @@ include_HEADERS = Cartesian.h Angle.h MJD.h CommandParser.h		\
 	PlotManager.h PlotVolume.h PlotEvent.h PlotState.h		\
 	DataManager.h DataSet.h DataPoint.h DataVector.h Poincare.h	\
 	datum.h xydatum.h smarthist.h datumcond.h kstest.h RealTimer.h	\
-	Ready.h ReferenceFit.h sky_coord.h \
+	Ready.h ReferenceFit.h sky_coord.h				\
 	PrimeFactoriser.h WindowArray.h StringTokenizer.h		\
 	Sortable.h Printable.h Header.h thread_utils.h GetPK.h		\
-	VectorInfo.h Plugin.h shell.h Cartesian.h Angle.h coord_parse.h \
-	coord.h anglevel.h obsjoin.h casts.h Horizon.h
+	VectorInfo.h Plugin.h shell.h Cartesian.h Angle.h coord_parse.h	\
+	coord.h anglevel.h obsjoin.h casts.h Horizon.h			\
+	JenetAnderson98.h JenetAnderson98A5.h ComplexBivariateNormal.h	\
+	Neville.h Romberg.h MidPoint.h Tensor.h
 
 libgenutilpp_la_SOURCES = CommandParser.C PlotEvent.C util_plus.C	\
 	PlotState.C datum.C smarthist.C datumcond.C kstest.C Ready.C	\
@@ -19,13 +21,22 @@ libgenutilpp_la_SOURCES = CommandParser.C PlotEvent.C util_plus.C	\
 	sla_MJD.C PlotManager.C PlotVolume.C DataManager.C		\
 	DataSet.C Poincare.C DataVector.C Plugin.C shell.C		\
 	coord_parse.c coord.c sla_coord.c psr2ar.c dual_parse_it.h	\
-	obsjoin.C Horizon.C
+	obsjoin.C Horizon.C JenetAnderson98.C JenetAnderson98A5.C	\
+	ComplexBivariateNormal.C
+
 
 if HAVE_SLA_FORTRAN
 
 # build the C wrappers to the Fortran SLALIB bindings
 include_HEADERS += slalib.h
 libgenutilpp_la_SOURCES += sla_wrap.c
+
+endif
+
+if HAVE_PGPLOT
+
+include_HEADERS += JenetAnderson98Plot.h
+libgenutilpp_la_SOURCES += JenetAnderson98Plot.C
 
 endif
 
@@ -41,10 +52,10 @@ xserve_summary_SOURCES		= xserve_summary.C
 stats_SOURCES                   = stats.C
 #loopy_SOURCES			= loopy.C
 
-TESTS = test_coord test_Cartesian test_MJD test_Angle test_ReferenceFit \
-	test_Header test_VectorInfo
+TESTS = test_coord test_Cartesian test_MJD test_ReferenceFit \
+	test_Header test_VectorInfo test_ja98 test_Romberg
 
-check_PROGRAMS = $(TESTS) test_CommandParser test_Sortable
+check_PROGRAMS = $(TESTS) test_CommandParser test_Sortable test_Angle
 
 test_Cartesian_SOURCES		= test_Cartesian.C
 test_MJD_SOURCES		= test_MJD.C
@@ -53,8 +64,11 @@ test_Angle_LDADD		= $(LDADD) @SLA_LIBS@
 test_ReferenceFit_SOURCES	= test_ReferenceFit.C
 test_Header_SOURCES		= test_Header.C
 test_VectorInfo_SOURCES		= test_VectorInfo.C 
-test_CommandParser_SOURCES      = test_CommandParser.C
 test_Sortable_SOURCES           = test_Sortable.C
+test_CommandParser_SOURCES      = test_CommandParser.C
+test_CommandParser_LDADD	= $(LDADD) @READLINE_LIBS@
+test_ja98_SOURCES		= test_ja98.C
+test_Romberg_SOURCES		= test_Romberg.C
 
 AM_CPPFLAGS = -D_REENTRANT=1
 
@@ -63,8 +77,9 @@ AM_CPPFLAGS = -D_REENTRANT=1
 # Dependencies should never be changed
 #
 
-INCLUDES = -I$(top_builddir) -I$(top_srcdir)/utils/units \
-	-I$(top_srcdir)/utils/genutil
+INCLUDES = -I$(top_builddir) \
+	-I$(top_srcdir)/utils/units -I$(top_builddir)/utils/units \
+	-I$(top_srcdir)/utils/genutil @PGPLOT_CFLAGS@
 
 LDADD = libgenutilpp.la ../genutil/libgenutil.la ../units/libunits.la
 
