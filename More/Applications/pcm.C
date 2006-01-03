@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pcm.C,v $
-   $Revision: 1.44 $
-   $Date: 2005/10/11 21:54:19 $
+   $Revision: 1.45 $
+   $Date: 2006/01/03 16:10:36 $
    $Author: straten $ */
 
 /*! \file pcm.C 
@@ -546,7 +546,10 @@ int main (int argc, char *argv[]) try {
     cerr << "pcm: constructing Calibration::Database from\n" 
             "     " << dbfile << endl;
 
-    Pulsar::Database dbase (dbfile);
+    Pulsar::Database database (dbfile);
+
+    cerr << "pcm: database constructed with " << database.size() 
+         << " entries" << endl;
 
     char buffer[256];
 
@@ -556,34 +559,33 @@ int main (int argc, char *argv[]) try {
          << mid.datestr (buffer, 256, "%Y-%m-%d-%H:%M:00") << endl;
 
     Pulsar::Database::Criterion criterion;
-    criterion = Pulsar::Database::get_default_criterion ();
-    criterion.entry = Pulsar::Database::Entry (*archive);
+    criterion = database.criterion (archive, Signal::PolnCal);
     criterion.entry.time = mid;
     criterion.minutes_apart = 0.5 * hours * 60.0;
 
     vector<Pulsar::Database::Entry> oncals;
-
-    criterion.entry.obsType = Signal::PolnCal;
-    dbase.all_matching (criterion, oncals);
+    database.all_matching (criterion, oncals);
 
     unsigned poln_cals = oncals.size();
 
     if (poln_cals == 0)  {
       cerr << "pcm: no PolnCal observations found" << endl;
       if (must_have_cals && !calfile)  {
-        cerr << "pcm: giving up" << endl;
+        cerr << "pcm: cannot continue" << endl;
         return -1;
       }
     }
 
     criterion.entry.obsType = Signal::FluxCalOn;
-    dbase.all_matching (criterion, oncals);
+    criterion.check_coordinates = false;
+    Pulsar::Database::Criterion::match_verbose = true;
+    database.all_matching (criterion, oncals);
 
     if (oncals.size() == poln_cals)
       cerr << "pcm: no FluxCalOn observations found" << endl;
 
     for (unsigned i = 0; i < oncals.size(); i++) {
-      string filename = dbase.get_filename( oncals[i] );
+      string filename = database.get_filename( oncals[i] );
       cerr << "pcm: adding " << oncals[i].filename << endl;
       cal_filenames.push_back (filename);
     }
