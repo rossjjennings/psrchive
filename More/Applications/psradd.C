@@ -14,7 +14,7 @@
 #include "dirutil.h"
 #include "string_utils.h"
 
-static const char* psradd_args = "ab:c:Ce:f:FG:hiI:LM:p:Pqr:sS:tT:vVZ:";
+static const char* psradd_args = "ab:c:Ce:f:FG:hiI:LM:O:p:Pqr:sS:tT:vVZ:";
 
 void usage () {
   cout <<
@@ -46,19 +46,20 @@ void usage () {
     " -e ext      Extension added to output filenames (default .it)\n"
     " -G sec      Tscrunch+unload when time between archives > 'sec' seconds\n"
     " -I sec      Tscrunch+unload when archive contains 'sec' seconds\n"
-    " -S sec      Tscrunch+unload when archive has this S/N\n"
+    " -O path     Path to which output files are written\n"
+    " -S s/n      Tscrunch+unload when archive has this S/N\n"
     "\n"
     "Note:\n"
     " AUTO ADD options, -I, -S and -G, are incompatible with -s and -f\n"
     "\n"
-    "See http://astronomy.swin.edu.au/pulsar/software/manuals/pam.html"
+    "See http://astronomy.swin.edu.au/pulsar/software/manuals/psradd.html"
        << endl;
 }
 
 
 
-int main (int argc, char **argv)
-{
+int main (int argc, char **argv) try {
+
   // do not make changes to file system when true
   bool testing = false;
 
@@ -100,7 +101,11 @@ int main (int argc, char **argv)
   // name of file containing list of Archive filenames
   char* metafile = NULL;
 
+  // extension added to auto-added output files
   string integrated_extension ("it");
+
+  // directory to which auto-added output files are written
+  string integrated_path;
 
   // name of the output file
   string newname;
@@ -124,7 +129,7 @@ int main (int argc, char **argv)
       return 0;
       
     case 'i':
-      cout << "$Id: psradd.C,v 1.24 2005/12/19 11:55:38 ateoh Exp $" << endl;
+      cout << "$Id: psradd.C,v 1.25 2006/01/03 16:02:55 straten Exp $" << endl;
       return 0;
 
     case 'a':
@@ -167,6 +172,10 @@ int main (int argc, char **argv)
 	return -1;
       }
       auto_add = true;
+      break;
+
+    case 'O':
+      integrated_path = optarg;
       break;
 
     case 'S':
@@ -335,8 +344,11 @@ int main (int argc, char **argv)
 
     if (correct_total) {
 
-      if (auto_add)
+      if (auto_add) {
 	newname = total->get_filename() + "." + integrated_extension;
+        if (!integrated_path.empty())
+          newname = integrated_path + "/" + basename (newname);
+      }
 
       if (log_results) {
 
@@ -505,7 +517,7 @@ int main (int argc, char **argv)
 	 << error << endl;
   }
 
-	total->update_model();
+  total->update_model();
 
   if (!reset_total_next_load) try {
 
@@ -535,5 +547,10 @@ int main (int argc, char **argv)
 
   return 0;
 }
+catch (Error& error) {
+  cerr << "psradd: Unhandled error" << error << endl;
+  return -1;
+}
+
 
 
