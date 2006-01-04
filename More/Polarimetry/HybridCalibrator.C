@@ -99,7 +99,7 @@ void Pulsar::HybridCalibrator::calculate_transformation ()
   // the SingleAxis interpretation of reference signal
   Calibration::SingleAxis pre_single_axis;
 
-  for (unsigned ichan=0; ichan<nchan; ++ichan) {
+  for (unsigned ichan=0; ichan<nchan; ++ichan) try {
 
     if (verbose)
       cerr << "Pulsar::HybridCalibrator::calculate_transformation"
@@ -168,6 +168,12 @@ void Pulsar::HybridCalibrator::calculate_transformation ()
     transformation[ichan] = result;
 
   }
+  catch (Error& error) {
+    cerr << "Pulsar::HybridCalibrator::calculate_transformation"
+          " error ichan=" << ichan << endl;
+    transformation[ichan] = 0;
+  }
+
 
   if (verbose)
     cerr << "Pulsar::HybridCalibrator::calculate_transformation exit" << endl;
