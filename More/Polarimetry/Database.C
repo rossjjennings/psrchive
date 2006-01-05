@@ -15,7 +15,9 @@
 #include "Pulsar/Backend.h"
 
 #include "Pulsar/Archive.h"
+#include "Pulsar/Profile.h"
 
+#include "ModifyRestore.h"
 #include "Error.h"
 
 #include "Stokes.h"
@@ -479,7 +481,9 @@ Pulsar::Database::Database (const string& _path,
   if (verbose)
     cerr << "Pulsar::Database " << filenames.size() 
          << " calibrator files found" << endl;
-  
+
+  ModifyRestore<bool> mod (Profile::no_amps, true);
+
   Reference::To<Pulsar::Archive> newArch;
   
   for (unsigned ifile=0; ifile<filenames.size(); ifile++) try {
