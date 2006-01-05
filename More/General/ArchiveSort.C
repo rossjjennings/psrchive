@@ -33,14 +33,25 @@ bool Pulsar::operator < (const ArchiveSort& a, const ArchiveSort& b)
 
 void Pulsar::ArchiveSort::sort (std::vector<std::string>& filenames)
 {
-  std::vector<ArchiveSort> entries (filenames.size());
+  std::vector<ArchiveSort> entries;
 
+  load (filenames, entries);
+
+  filenames.resize (entries.size());
+  
+  for (unsigned ifile = 0; ifile < filenames.size(); ifile++)
+    filenames[ifile] = entries[ifile].filename;
+}
+
+void Pulsar::ArchiveSort::load (const std::vector<std::string>& filenames,
+				std::vector<ArchiveSort>& entries)
+{
+  entries.resize (filenames.size());
   unsigned ientry = 0;
-  unsigned ifile = 0;
 
   ModifyRestore<bool> mod (Profile::no_amps, true);
 
-  for (ifile = 0; ifile < filenames.size(); ifile++) try {
+  for (unsigned ifile = 0; ifile < filenames.size(); ifile++) try {
 
     Reference::To<Archive> archive = Archive::load (filenames[ifile]);
     entries[ientry] = ArchiveSort (archive);
@@ -54,10 +65,4 @@ void Pulsar::ArchiveSort::sort (std::vector<std::string>& filenames)
 
   entries.resize (ientry);
   std::sort (entries.begin(), entries.end());
-
-  filenames.resize (ientry);
-  
-  for (ifile = 0; ifile < filenames.size(); ifile++)
-    filenames[ifile] = entries[ifile].filename;
-
 }

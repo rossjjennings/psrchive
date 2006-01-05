@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/ArchiveSort.h,v $
-   $Revision: 1.1 $
-   $Date: 2006/01/05 15:57:04 $
+   $Revision: 1.2 $
+   $Date: 2006/01/05 16:11:13 $
    $Author: straten $ */
 
 #ifndef __Pulsar_ArchiveSort_h
@@ -40,6 +40,10 @@ namespace Pulsar {
 
     //! Sort the files according to the rule of the comparison operator
     static void sort (std::vector<std::string>& filenames);
+
+    //! Load a vector of ArchiveSort instances and sort them
+    static void load (const std::vector<std::string>& filenames,
+		      std::vector<ArchiveSort>& entries);
 
   };
 
