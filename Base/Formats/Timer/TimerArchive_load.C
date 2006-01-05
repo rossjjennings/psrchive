@@ -156,7 +156,7 @@ void Pulsar::TimerArchive::subint_load (FILE* fptr)
       // update the mini header with the integration time of the sub_int
       // added by WvS 24 Sep, 1999
       if (verbose == 3)
-	cerr << "TimerArchive::subint_load - updating mini header version\n";
+        cerr << "TimerArchive::subint_load updating mini version" << endl;
       subint->mini.integration = hdr.sub_int_time;
       subint->mini.version = 1.1;
     }
@@ -258,7 +258,7 @@ void Pulsar::TimerArchive::subint_load (FILE* fptr)
     }
 
 
-    if (reverse_U) {
+    if (reverse_U && !Profile::no_amps) {
       if (verbose == 3)
 	cerr << "TimerArchive::subint_load reversing sign of ipol=2" 
 	     << endl;
@@ -266,7 +266,7 @@ void Pulsar::TimerArchive::subint_load (FILE* fptr)
 	*(subint->profiles[2][ichan]) *= -1.0;
     }
     
-    if (reverse_V) {
+    if (reverse_V && !Profile::no_amps) {
       if (verbose == 3)
 	cerr << "TimerArchive::subint_load reversing sign of ipol=3" 
 	     << endl;
@@ -281,9 +281,9 @@ void Pulsar::TimerArchive::subint_load (FILE* fptr)
   hdr.wts_and_bpass = 1;
 
   if (verbose == 3) 
-    fprintf(stderr, "TimerArchive::subint_load Read in %d sub_ints\n",
-	    get_nsubint());
-  
+    cerr << "TimerArchive::subint_load Read in " << get_nsubint()
+         << " sub-Integrations" << endl;
+
   // profile.wt correction - MCB
   // profile weights from the S2 set to zero during software coherent
   // dedispersion.  Here we fill in the weights with the integration
