@@ -94,7 +94,7 @@ void Pulsar::FITSHdrExtension::get_coord_string (const sky_coord& coordinates,
 
   }
 
-  cerr << "WARNING: FITSHdrExtension::get_coord_string COORD_MD ="
+  cerr << "WARNING: FITSHdrExtension::get_coord_string COORD_MD = "
        << coordmode << " not implimented" << endl;
 
 }
