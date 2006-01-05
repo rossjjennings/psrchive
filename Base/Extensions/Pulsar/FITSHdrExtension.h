@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/FITSHdrExtension.h,v $
-   $Revision: 1.6 $
-   $Date: 2005/12/19 07:33:28 $
+   $Revision: 1.7 $
+   $Date: 2006/01/05 01:46:39 $
    $Author: ahotan $ */
 
 #ifndef __FITSHdrExtension_h
@@ -38,6 +38,9 @@ namespace Pulsar {
 
     //! Set the coordinate mode string
     void set_coord_mode (const string mode);
+
+    //! Set the creation date string
+    void set_date_str (const string date);
 
     //////////////////////////////////////////////////////////////////////
     

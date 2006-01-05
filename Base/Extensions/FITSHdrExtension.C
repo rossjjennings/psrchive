@@ -61,6 +61,11 @@ void Pulsar::FITSHdrExtension::set_coord_mode (const string mode)
   }
 }
 
+void Pulsar::FITSHdrExtension::set_date_str (const string date)
+{
+  creation_date = date;
+}
+
 void Pulsar::FITSHdrExtension::get_coord_string (const sky_coord& coordinates,
 						 string& coord1,
 						 string& coord2) const
