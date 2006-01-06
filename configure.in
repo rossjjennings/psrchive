@@ -163,6 +163,7 @@ AC_CONFIG_FILES([utils/units/Makefile
 		psrchive/epn/Makefile
 		psrchive/timer/Makefile
 		psrchive/psrfits/Makefile
+                psrchive/ascii/Makefile
 		psrchive/Extension/Makefile
 		psrchive/Calibration/Makefile
 		psrchive/Calibration/iri2001/Makefile
