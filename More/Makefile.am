@@ -4,6 +4,7 @@ lib_LTLIBRARIES = libpsrchive.la
 nobase_include_HEADERS = model_profile.h \
 	Pulsar/AdaptiveSNR.h             Pulsar/PolarCalibrator.h \
 	Pulsar/Archive.h                 Pulsar/PolnCalibrator.h \
+	Pulsar/ArchiveMatch.h            Pulsar/ArchiveSort.h \
 	Pulsar/ArchiveProcessor.h        Pulsar/PolnProfile.h \
 	Pulsar/BaselineEstimator.h       Pulsar/PolnProfileFit.h \
 	Pulsar/DeltaRM.h                 Pulsar/DoPCalibrator.h \
@@ -15,7 +16,7 @@ nobase_include_HEADERS = model_profile.h \
 	Pulsar/CalibratorPlotter.h       Pulsar/ReceptionCalibratorPlotter.h \
 	Pulsar/CalibratorStokesInfo.h    Pulsar/ReferenceCalibrator.h \
 	Pulsar/CorrectionsCalibrator.h   Pulsar/SingleAxisCalibrator.h \
-	Pulsar/IonosphereCalibrator.h    Pulsar/ArchiveSort.h \
+	Pulsar/IonosphereCalibrator.h \
 	Pulsar/Database.h                Pulsar/Smooth.h \
 	Pulsar/ExampleArchive.h          Pulsar/SmoothMean.h \
 	Pulsar/FluxCalibrator.h          Pulsar/SmoothMedian.h \
@@ -52,6 +53,7 @@ libpsrchive_la_SOURCES = plugins.csh getopt.h Physical.h \
 	Archive_get_PA.C              PolnCalibratorInfo.C  \
 	Archive_load.C                PolnProfile.C  \
 	Archive_match.C               PolnProfileFit.C  \
+	ArchiveMatch.C                ArchiveSort.C \
         PolnProfileFitAnalysis.C      OffPulseCalibrator.C \
 	OnPulseThreshold.C            PolnProfileStats.C \
 	Archive_resize.C              Profile.C  \
@@ -96,7 +98,7 @@ libpsrchive_la_SOURCES = plugins.csh getopt.h Physical.h \
 	Integration_match.C           ArchiveTI.C \
 	IntegrationTI.C               ArchiveTI_import.C \
 	IterativeBaseline.C           ProfileWeightFunction.C \
-	IonosphereCalibrator.C        ArchiveSort.C \
+	IonosphereCalibrator.C \
 	PhaseGradShift.C              Profile_fftconv.C \
 	BaselineWindow.C              ChannelZapMedian.C \
 	ChannelWeight.C               ChannelZapModulation.C \
@@ -106,11 +108,11 @@ if !HAVE_GETOPT_LONG
 libpsrchive_la_SOURCES += getopt.c getopt1.c
 endif
 
-SUBDIRS                 = Calibration Extension timer epn
+SUBDIRS                 = Calibration Extension timer epn ascii
 
 libpsrchive_la_LIBADD   = Calibration/libCalibration.la \
 			Extension/libExtension.la \
-			timer/libtimer.la epn/libepn.la
+			timer/libtimer.la epn/libepn.la ascii/libascii.la
 
 if HAVE_CFITSIO
 SUBDIRS += psrfits
@@ -133,12 +135,13 @@ endif
 #
 # programs
 #
-bin_PROGRAMS = pac paz vap vip psredit psradd fadd pat pam pts \
-        fluxcal fix_coords test_Difference fix_hydra sesdiv \
+bin_PROGRAMS = psr_template pac paz vap vip psredit psradd fadd pat pam \
+        psrdiff fluxcal fix_coords test_Difference fix_hydra sesdiv \
         fix_3C353 archive_correct archive_denoise \
         fix_fluxcal archive_split psrconv pascii \
-				default_loader parInfo
+	default_loader parInfo
 
+psr_template_SOURCES		= psr_template.C
 archive_correct_SOURCES		= archive_correct.C
 archive_denoise_SOURCES		= archive_denoise.C
 archive_split_SOURCES		= archive_split.C
@@ -149,7 +152,6 @@ fix_coords_SOURCES		= fix_coords.C
 fix_fluxcal_SOURCES		= fix_fluxcal.C
 fix_hydra_SOURCES		= fix_hydra.C
 fluxcal_SOURCES			= fluxcal.C
-pts_SOURCES			= pts.C
 paz_SOURCES			= paz.C
 pac_SOURCES			= pac.C
 pam_SOURCES			= pam.C
@@ -162,8 +164,7 @@ vap_SOURCES			= vap.C
 vip_SOURCES			= vip.C
 psredit_SOURCES			= psredit.C
 parInfo_SOURCES                 = parInfo.C
-
-pts_LDADD			= $(LDADD) @PGPLOT_LIBS@
+psrdiff_SOURCES			= psrdiff.C
 
 TESTS = test_Receiver
 check_PROGRAMS = test_Archive test_denoise test_Difference $(TESTS)
@@ -274,6 +275,7 @@ INCLUDES = -I$(top_builddir)/utils/include -I$(top_builddir)/astro/include \
         -I$(top_srcdir)/psrchive/Calibration \
 	-I$(top_srcdir)/psrchive/Extension -I$(top_srcdir)/psrchive/timer \
 	-I$(top_srcdir)/psrchive/epn -I$(top_srcdir)/psrchive/psrfits \
+	-I$(top_srcdir)/psrchive/ascii \
 	@PGPLOT_CFLAGS@ @CFITSIO_CFLAGS@ @MPI_CFLAGS@
 
 LDADD = libpsrchive.la $(top_builddir)/astro/libpsrastro.la \
