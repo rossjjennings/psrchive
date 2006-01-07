@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/Attic/PolnProfileFitAnalysis.h,v $
-   $Revision: 1.8 $
-   $Date: 2005/12/16 23:31:49 $
+   $Revision: 1.9 $
+   $Date: 2006/01/07 00:05:27 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PolnProfileFitAnalysis_h
@@ -19,6 +19,12 @@ namespace Pulsar {
   class PolnProfileFitAnalysis {
 
   public:
+
+    //! Default constructor
+    PolnProfileFitAnalysis ();
+
+    //! When set, estimate the uncertainty in each attribute
+    void set_compute_error (bool flag = true);
 
     //! Set the PolnProfileFit algorithm to be analysed
     void set_fit (PolnProfileFit*);
@@ -92,6 +98,9 @@ namespace Pulsar {
     double mean_variance;
 
     double efac;
+
+    //! Compute the uncertainty of results
+    bool compute_error;
 
   };
 

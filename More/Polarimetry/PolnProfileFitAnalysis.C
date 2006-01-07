@@ -7,6 +7,17 @@
 
 using namespace std;
 
+Pulsar::PolnProfileFitAnalysis::PolnProfileFitAnalysis ()
+{
+  compute_error = true;
+}
+
+//! When set, estimate the uncertainty in each attribute
+void Pulsar::PolnProfileFitAnalysis::set_compute_error (bool flag)
+{
+  compute_error = flag;
+}
+
 void
 Pulsar::PolnProfileFitAnalysis::set_harmonic (unsigned index)
 {
@@ -231,6 +242,13 @@ void Pulsar::PolnProfileFitAnalysis::set_fit (PolnProfileFit* f)
 
   // the relative conditional phase shift variance
   double hatvar_varphiJ = hatvar_varphi * (1-R2_varphiJ);
+
+  if (!compute_error) {
+    multiple_correlation = sqrt(R2_varphiJ);
+    relative_error = sqrt(hatvar_varphi);
+    relative_conditional_error = sqrt(hatvar_varphiJ);
+    return;
+  }
 
   // the variance of the relative unconditional phase shift variance
   double var_hatvar_varphi = 0.0;
