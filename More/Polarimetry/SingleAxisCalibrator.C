@@ -66,7 +66,7 @@ Pulsar::SingleAxisCalibrator::Info::get_name (unsigned iclass) const
 {
   switch (iclass) {
   case 0:
-    return "\\fiG\\fn (\\fic\\fn\\d0\\u)";
+    return "\\fiG\\fr (\\fic\\fr\\d0\\u)";
   case 1:
     return "\\gg (%)";
   case 2:

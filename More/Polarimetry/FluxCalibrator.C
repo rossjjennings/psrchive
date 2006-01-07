@@ -456,9 +456,9 @@ namespace Pulsar {
     {
       switch (iclass) {
       case 0:
-	return "\\fiC\\d0\\u\\fn (Jy)";
+	return "\\fiC\\d0\\u\\fr (Jy)";
       case 1:
-	return "\\fiT\\dsys\\u\\fn (Jy)";
+	return "\\fiT\\dsys\\u\\fr (Jy)";
       default:
 	return "";
       }

@@ -26,7 +26,7 @@ unsigned Pulsar::SourceInfo::get_nclass () const
 //! Return the name of the specified class
 const char* Pulsar::SourceInfo::get_name (unsigned iclass) const
 {
-  static char label [64] = "\\fiS'\\b\\d\\fnk";
+  static char label [64] = "\\fiS'\\b\\d\\frk";
   static char* replace = strchr (label, 'k');
 
   if (!together)

@@ -44,12 +44,12 @@ const char* Pulsar::InstrumentInfo::get_name (unsigned iclass) const
   
   switch (iclass) {
   case 0:
-    return "\\fi\\ge\\dk\\u\\fn (deg.)";
+    return "\\fi\\ge\\dk\\u\\fr (deg.)";
   case 1: {
     if (fixed_orientation)
-      return "\\fi\\gh\\fn\\d1\\u (deg.)";
+      return "\\fi\\gh\\fr\\d1\\u (deg.)";
     else
-      return "\\fi\\gh\\dk\\u\\fn (deg.)";
+      return "\\fi\\gh\\dk\\u\\fr (deg.)";
   }
   default:
     return "";
