@@ -224,7 +224,8 @@ int main (int argc, char** argv)
     plotter.npanel = 5;
     plotter.between_panels = 0.08;
     cpgsvp (.25,.75,.15,.95);
-    cpgslw (2);
+    cpgslw (3);
+    cpgscf (2);
   }
 
   Pulsar::Plotter archplot;
