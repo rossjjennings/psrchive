@@ -1,4 +1,6 @@
 #include "Pulsar/Archive.h"
+#include "Pulsar/ArchiveMatch.h"
+
 #include "Pulsar/PolnProfile.h"
 
 #include "Pulsar/Database.h"
@@ -147,7 +149,7 @@ int main (int argc, char *argv[]) {
       break;
 
     case 'i':
-      cout << "$Id: pac.C,v 1.68 2005/12/16 23:18:21 straten Exp $" << endl;
+      cout << "$Id: pac.C,v 1.69 2006/01/07 00:05:13 straten Exp $" << endl;
       return 0;
 
     case 'A':
@@ -226,7 +228,7 @@ int main (int argc, char *argv[]) {
     }
 
     case 'o':
-      Pulsar::Archive::match_opposite_sideband = true;
+      Pulsar::ArchiveMatch::opposite_sideband = true;
       break;
 
     case 'p':
