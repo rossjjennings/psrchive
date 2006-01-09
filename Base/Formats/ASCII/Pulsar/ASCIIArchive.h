@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/ASCII/Pulsar/ASCIIArchive.h,v $
-   $Revision: 1.1 $
-   $Date: 2006/01/06 22:28:25 $
-   $Author: straten $ */
+   $Revision: 1.2 $
+   $Date: 2006/01/09 02:47:02 $
+   $Author: hknight $ */
 
 #ifndef __ASCIIArchive_h
 #define __ASCIIArchive_h
@@ -43,11 +43,11 @@ namespace Pulsar {
 
     //! Return a new extraction-constructed ASCIIArchive instance
     ASCIIArchive* extract (const vector<unsigned>& subints) const;
-    
-  protected:
 
     //! Load the ASCII header information from filename
     virtual void load_header (const char* filename);
+    
+  protected:
 
     //! Load the specified Integration from filename, returning new instance
     virtual Integration*
