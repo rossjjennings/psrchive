@@ -55,10 +55,11 @@ endif
 #
 # programs
 #
-check_PROGRAMS = test_copy test_Feed test_SingleAxis \
-	test_Parallactic test_ReceptionModel test_IRIonosphere
 
-TESTS = $(check_PROGRAMS)
+TESTS = test_copy test_Feed test_SingleAxis \
+	test_Parallactic test_ReceptionModel
+
+check_PROGRAMS = $(TESTS) test_IRIonosphere
 
 test_Feed_SOURCES		= test_Feed.C
 test_Parallactic_SOURCES	= test_Parallactic.C
