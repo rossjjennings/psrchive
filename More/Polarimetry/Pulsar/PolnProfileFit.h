@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PolnProfileFit.h,v $
-   $Revision: 1.14 $
-   $Date: 2005/12/09 16:41:07 $
+   $Revision: 1.15 $
+   $Date: 2006/01/10 23:35:30 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PolnProfileFit_h
@@ -23,6 +23,7 @@ namespace MEAL {
 
 namespace Calibration {
   class ReceptionModel;
+  class TemplateUncertainty;
 }
 
 namespace Pulsar {
@@ -68,10 +69,13 @@ namespace Pulsar {
     //! Set the transformation between the standard and observation
     void set_transformation (MEAL::Complex2* xform);
 
+    //! Get the transformation between the standard and the observation
+    MEAL::Complex2* get_transformation () const;
+
     //! Fit the specified observation to the standard
     void fit (const PolnProfile* observation);
 
-    //! Get the phase offset between the observation and the standard
+    //! Get the phase offset between the standard and the observation
     Estimate<double> get_phase () const;
 
     //! Set the phase offset between the observation and the standard
@@ -131,6 +135,9 @@ namespace Pulsar {
     //! The measurement equation used to model the fit
     Reference::To<Calibration::ReceptionModel> model;
 
+    //! Least-squares normalization includes variable template contribution
+    Reference::To<Calibration::TemplateUncertainty> uncertainty;
+
     //! The polynomial that describes linear phase in the Fourier domain
     Reference::To<MEAL::Polynomial> phase;
 
@@ -143,8 +150,8 @@ namespace Pulsar {
     //! The variance of the standard
     Stokes<float> standard_variance;
 
-    //! The power of the standard
-    double standard_power;
+    //! The total determinant of the standard
+    double standard_det;
 
     //! The reduced chi-squared after fitting
     double reduced_chisq;

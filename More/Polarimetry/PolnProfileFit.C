@@ -5,13 +5,15 @@
 #include "Pulsar/ExponentialBaseline.h"
 
 #include "Calibration/ReceptionModel.h"
+#include "Calibration/CoherencyMeasurementSet.h"
+#include "Calibration/TemplateUncertainty.h"
+
 #include "MEAL/Polynomial.h"
 #include "MEAL/Phase.h"
 
 #include "MEAL/ChainRule.h"
 #include "MEAL/Complex2Math.h"
 #include "MEAL/Complex2Constant.h"
-#include "Calibration/CoherencyMeasurementSet.h"
 
 #include "RealTimer.h"
 #include "Pauli.h"
@@ -67,6 +69,8 @@ void Pulsar::PolnProfileFit::init ()
 
   phase_xform = chain;
 
+  uncertainty = new Calibration::TemplateUncertainty;
+
   maximum_harmonic = n_harmonic = 0;
 
   choose_maximum_harmonic = false;
@@ -99,9 +103,6 @@ void Pulsar::PolnProfileFit::set_standard (const PolnProfile* _standard)
 
   standard_fourier = fourier_transform (standard);
   set_noise_mask ();
-
-  // don't include DC in sum
-  standard_power = standard_fourier->sumsq (1);
 
   // number of complex phase bins in Fourier domain
   unsigned std_harmonic = standard->get_nbin() / 2;
@@ -136,15 +137,23 @@ void Pulsar::PolnProfileFit::set_standard (const PolnProfile* _standard)
   if (emulate_scalar)
     npol = 1;
 
+  standard_det = 0;
+
   // initialize the model input states
   for (unsigned ibin=1; ibin<n_harmonic; ibin++) {
 
     Stokes< complex<double> > stokes;
+    Stokes<double> re;
+    Stokes<double> im;
 
     for (unsigned ipol=0; ipol<npol; ipol++) {
       const float* amps = standard_fourier->get_amps(ipol) + ibin*2;
       stokes[ipol] = complex<double>(amps[0], amps[1]);
+      re[ipol] = amps[0];
+      im[ipol] = amps[1];
     }
+
+    standard_det += det(re) + det(im);
 
     // each complex phase bin of the standard is treated as a known constant
     MEAL::Complex2Constant* jones;
@@ -163,7 +172,7 @@ void Pulsar::PolnProfileFit::set_standard (const PolnProfile* _standard)
   }
 
   if (Profile::verbose)
-    cerr << "Pulsar::PolnProfileFit::set_standard exit" << endl;
+    cerr << "Pulsar::PolnProfileFit::set_standard det=" << standard_det <<endl;
 
 }
 
@@ -225,9 +234,18 @@ void
 Pulsar::PolnProfileFit::set_transformation (MEAL::Complex2* xform)
 {
   transformation = xform;
+
+  uncertainty->set_transformation (xform);
+
   if (model)
     model->set_transformation (xform);
 }
+
+MEAL::Complex2* Pulsar::PolnProfileFit::get_transformation () const
+{
+  return transformation;
+}
+
 
 //! Fit the specified observation to the standard
 void Pulsar::PolnProfileFit::fit (const PolnProfile* observation) try
@@ -254,36 +272,31 @@ void Pulsar::PolnProfileFit::fit (const PolnProfile* observation) try
 
   set_phase (phase_guess);
 
-  Stokes<float> variance = get_variance (fourier);
+  uncertainty->set_observation_var( get_variance(fourier) );
 
-  // don't include DC in sum
-  double power = fourier->sumsq (1);
-  double gain = power / standard_power;
-
-  cerr << "FIX THE GAIN=" << gain << endl;
-  // The gain calculation needs to be re-considered
-  gain = 0.0;
+  model->delete_data ();
 
   unsigned npol = 4;
   if (emulate_scalar)
     npol = 1;
 
-  for (unsigned ipol=0; ipol<npol; ipol++) {
-    // the noise in the standard will contribute
-    // variance[ipol] += standard_variance[ipol];
-  }
-
-  model->delete_data ();
+  double observation_det = 0;
 
   // initialize the measurement sets
   for (unsigned ibin=1; ibin<n_harmonic; ibin++) {
 
     Stokes< complex<double> > stokes;
+    Stokes<double> re;
+    Stokes<double> im;
 
     for (unsigned ipol=0; ipol<npol; ipol++) {
       const float* amps = fourier->get_amps(ipol) + ibin*2;
+      re[ipol] = amps[0];
+      im[ipol] = amps[1];
       stokes[ipol] = complex<double>(amps[0], amps[1]);
     }
+
+    observation_det += det(re) + det(im);
 
 #ifdef _DEBUG
     cerr << "Pulsar::PolnProfileFit::fit ibin=" << ibin 
@@ -291,7 +304,7 @@ void Pulsar::PolnProfileFit::fit (const PolnProfile* observation) try
 #endif
 
     Calibration::CoherencyMeasurement measurement (ibin-1);
-    measurement.set_stokes (stokes, variance);
+    measurement.set_stokes (stokes, uncertainty);
 
     double phase_shift = -2.0 * M_PI * double(ibin);
 
@@ -302,6 +315,12 @@ void Pulsar::PolnProfileFit::fit (const PolnProfile* observation) try
     model->add_data( measurements );
 
   }
+
+  double Gain = sqrt(observation_det / standard_det);
+
+  // WARNING: this next line assumes that gain is the first free parameter
+  // of the Complex2 function passed in set_transformation
+  transformation->set_param (0, sqrt(Gain));
 
   RealTimer clock;
 
@@ -464,6 +483,8 @@ void Pulsar::PolnProfileFit::set_noise_mask () try
   }
 
   standard_variance = get_variance (standard_fourier);
+
+  uncertainty->set_template_var( standard_variance );
 
   // while we have the PSD ...
   if (choose_maximum_harmonic)
