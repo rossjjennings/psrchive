@@ -26,12 +26,12 @@ void dispersive_phases (const Pulsar::Integration* integration,
   double pfold = integration->get_folding_period();
   double centrefreq = integration->get_centre_frequency();
 
+  if (pfold==0 || dm==0)
+    return;
+
   for (unsigned ichan=0; ichan<nchan; ichan++) {
 
     phases[ichan] = 0.0;
-
-    if (pfold==0 || dm==0)
-      return;
 
     double freq = integration->get_centre_frequency (ichan);
 
@@ -52,7 +52,7 @@ void dispersive_phases (const Pulsar::Integration* integration,
   each of the profiles over all polarizations and frequencies.  If the
   dispersion measure and folding period have been previously set, the
   baseline phase is shifted according to the dispersion relation.
-  */
+*/
 void Pulsar::Integration::remove_baseline (float phase, float dc)
 try {
 
@@ -89,6 +89,8 @@ try {
 
   float phase = find_min_phase ();
 
+  //cerr << "Pulsar::Integration::baseline_stats phase=" << phase << endl;
+
   vector<float> phases;
   dispersive_phases (this, phases);
 
@@ -114,6 +116,9 @@ try {
     for (unsigned ichan=0; ichan<nchan; ++ichan) {
 
       if (get_weight(ichan) == 0) {
+        if (verbose)
+          cerr << "Pulsar::Integration::baseline_stats zero weight ichan="
+	       << ichan << endl;
         if (mean)
           (*mean)[ipol][ichan] = 0;
         if (variance)
@@ -121,6 +126,7 @@ try {
         continue;
       }
 
+      // cerr << "ichan=" << ichan << " phase=" << phases[ichan] << endl;
       float chanphase = phase + phases[ichan];
 
       if (mean) {
