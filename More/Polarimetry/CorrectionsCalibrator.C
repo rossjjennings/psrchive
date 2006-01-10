@@ -247,7 +247,7 @@ Pulsar::CorrectionsCalibrator::get_transformation (const Archive* archive,
  
     // check that the para_ang is equal
 
-    if (pointing &&Archive::verbose &&
+    if (pointing && Archive::verbose &&
 	!equal_pi( pointing->get_parallactic_angle(), pa ))
 	
       cerr << "Pulsar::CorrectionsCalibrator::get_transformation WARNING\n"

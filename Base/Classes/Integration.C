@@ -163,7 +163,7 @@ Pulsar::Profile* Pulsar::Integration::new_Profile ()
 }
 
 /*!
-  Copy the commonn information from another Integration
+  Copy the common information from another Integration
 */
 void Pulsar::Integration::copy (const Integration& subint,
 				int _npol, int _nchan)
