@@ -231,6 +231,12 @@ void Pulsar::PolnProfile::set_coherence (unsigned ibin,
 
 }
 
+void Pulsar::PolnProfile::rotate_phase (double phase)
+{
+  for (unsigned ipol=0; ipol < 4; ipol++)
+    profile[ipol]->rotate_phase (phase);
+}
+
 //
 //
 //
