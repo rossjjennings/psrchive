@@ -29,16 +29,25 @@ void usage ()
 
 int main (int argc, char** argv)
 {
+  Pulsar::Profile::default_duty_cycle = 0.10;
+
   // name of file containing list of Archive filenames
   char* metafile = NULL;
 
   // name of the archive containing the standard
   char* std_filename = NULL;
 
+  // write the difference to stdout
+  bool plot = false;
+
   char c;
-  while ((c = getopt(argc, argv, "hM:qs:vV")) != -1) 
+  while ((c = getopt(argc, argv, "dhM:qs:vV")) != -1) 
 
     switch (c)  {
+
+    case 'd':
+      plot = true;
+      break;
 
     case 'h':
       usage();
@@ -63,7 +72,6 @@ int main (int argc, char** argv)
     case 'V':
       Pulsar::Archive::set_verbosity (3);
       break;
-
 
     } 
 
@@ -94,9 +102,18 @@ int main (int argc, char** argv)
   unsigned std_nbin = std_archive->get_nbin();
 
   if (std_nsub > 1)
-    cerr << "psrdiff: warning! standard has more than one integration" << endl;
+    cerr << "psrdiff: warning! standard has more than one subint" << endl;
+
+  std_archive->convert_state (Signal::Stokes);
+  std_archive->remove_baseline ();
+
+  Pulsar::Integration* std_subint = std_archive->get_Integration(0);
+
+  vector< vector< double > > std_variance;
+  std_subint->baseline_stats (0, &std_variance);
 
   Pulsar::PolnProfileFit fit;
+  fit.choose_maximum_harmonic = true;
   fit.set_transformation( new MEAL::Polar );
 
   for (unsigned ifile=0; ifile < filenames.size(); ifile++) try {
@@ -127,22 +144,113 @@ int main (int argc, char** argv)
       continue;
     }
 
-    for (unsigned isub=0; isub < nsub; isub++) {
+    archive->convert_state (Signal::Stokes);
 
-      Pulsar::Integration* integration = archive->get_Integration(isub);
+    unsigned isub=0;
+
+    for (isub=0; isub < nsub; isub++) {
+
+      Pulsar::Integration* subint = archive->get_Integration(isub);
 
       for (unsigned ichan=0; ichan < nchan; ichan++) {
 
-	Pulsar::PolnProfile* profile;
-	profile = std_archive->get_Integration(isub)->new_PolnProfile(ichan);
+	if (std_subint->get_weight(ichan) == 0 ||
+	    subint->get_weight(ichan) == 0)
+	  continue;
 
-	fit.set_standard( profile );
-      
+	Reference::To<Pulsar::PolnProfile> std_profile;
+	std_profile = std_subint->new_PolnProfile (ichan);
+
+	Reference::To<Pulsar::PolnProfile> profile;
+	profile = subint->new_PolnProfile (ichan);
+
+	fit.set_standard (std_profile);
+        fit.fit (profile);
+  
+	Estimate<double> pulse_phase = fit.get_phase ();
+	Jones<double> transformation = fit.get_transformation()->evaluate();
+
+	cerr << "ichan=" << ichan << " shift=" << pulse_phase 
+	     << " xform=" << transformation << endl;
+
+	profile->rotate_phase (pulse_phase.get_value());
+	profile->transform (inv(transformation));
+
       }
-
 
     }
 
+    archive->remove_baseline ();
+
+    double total_chisq = 0.0;
+    unsigned count = 0;
+
+    for (isub=0; isub < nsub; isub++) {
+
+      Pulsar::Integration* subint = archive->get_Integration(isub);
+
+      vector< vector< double > > variance;
+      subint->baseline_stats (0, &variance);
+
+      for (unsigned ichan=0; ichan < nchan; ichan++) {
+
+	if (std_subint->get_weight(ichan) == 0 ||
+	    subint->get_weight(ichan) == 0)
+	  continue;
+
+	for (unsigned ipol=0; ipol < npol; ipol++) {
+
+	  double var = variance[ipol][ichan] + std_variance[ipol][ichan];
+
+	  float* std_amps = std_subint->get_Profile(ipol,ichan)->get_amps();
+	  float* amps = subint->get_Profile (ipol,ichan)->get_amps();
+
+	  double diff = 0;
+	  for (unsigned ibin = 0; ibin < nbin; ibin++) {
+	    double val = std_amps[ibin] - amps[ibin];
+	    diff += val * val;
+	  }
+
+	  double reduced_chisq = diff / (nbin * var);
+	  
+	  cout << "isub=" << isub << " ichan=" << ichan << " ipol=" << ipol
+	       << " var=" << var << " chisq=" << reduced_chisq << endl;
+
+	  total_chisq += reduced_chisq;
+	  count ++;
+
+	}
+
+
+	if (plot) {
+
+	  double rms = sqrt(variance[0][ichan]);
+
+	  for (unsigned ibin = 0; ibin < nbin; ibin++) {
+	    
+	    cout << ibin;
+	    
+	    for (unsigned ipol=0; ipol < npol; ipol++) {
+	      
+	      float* stds = std_subint->get_Profile(ipol,ichan)->get_amps();
+	      float* amps = subint->get_Profile (ipol,ichan) -> get_amps();
+	      
+	      cout << " " << amps[ibin] - stds[ibin];
+	      
+	    }
+	    
+	    cout << endl;
+	    
+	  }
+
+	}
+
+      }
+
+    }
+
+    cout << "avg. reduced chisq=" << total_chisq/count << endl;
+    
   }
   catch (Error& error) {
     cerr << "Error while handling '" << filenames[ifile] << "'" << endl
