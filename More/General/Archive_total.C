@@ -23,7 +23,7 @@ try {
 
   if (verbose == 3)
     cerr << "Pulsar::Archive::total adding " << get_nsubint()
-         << "Integration::total copies" << endl;
+         << " Integration::total copies" << endl;
 
   for (unsigned isub=0; isub < get_nsubint(); isub++)
     copy->manage( get_Integration(isub)->total() );
