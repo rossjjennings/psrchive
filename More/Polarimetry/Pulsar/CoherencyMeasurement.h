@@ -1,13 +1,14 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/CoherencyMeasurement.h,v $
-   $Revision: 1.2 $
-   $Date: 2005/12/09 16:41:06 $
+   $Revision: 1.3 $
+   $Date: 2006/01/10 23:35:41 $
    $Author: straten $ */
 
 #ifndef __Calibration_CoherencyMeasurement_H
 #define __Calibration_CoherencyMeasurement_H
 
+#include "Reference.h"
 #include "Estimate.h"
 #include "Stokes.h"
 #include "Jones.h"
@@ -17,9 +18,18 @@
 namespace Calibration {
 
   //! A coherency matrix measurement and its estimated error
+  /* Among other things, this class implements the interface of the
+     MEAL::WeightingScheme class used by MEAL::LevenbergMacquardt */
   class CoherencyMeasurement {
 
   public:
+
+    //! Estimates the uncertainty of a CoherencyMeasurement
+    class Uncertainty : public Reference::Able {
+    public:
+      //! Return the inverse of the variance of the specified polarization
+      virtual float get_inv_var (unsigned ipol) const = 0;
+    };
 
     //! Default constructor
     CoherencyMeasurement (unsigned input_index = 0);
@@ -36,6 +46,10 @@ namespace Calibration {
     //! Set the measured complex Stokes parameters
     void set_stokes (const Stokes< std::complex<double> >& stokes,
 		     const Stokes<double>& variance);
+
+    //! Set the measured complex Stokes parameters and the variance function
+    void set_stokes (const Stokes< std::complex<double> >& stokes, 
+		     const Uncertainty* var);
 
     //! Get the measured coherency matrix
     Jones<double> get_coherency () const;
@@ -62,6 +76,16 @@ namespace Calibration {
 
     //! The inverse of the variance in each Stokes parameter
     Stokes<float> inv_var;
+
+    //! The uncertainty of the measurement
+    const Uncertainty* uncertainty;
+
+    //! Get the inverse of the variance of the specified polarization
+    float get_inv_var (unsigned ipol) const {
+      if (uncertainty)
+	return uncertainty->get_inv_var(ipol);
+      return inv_var[ipol];
+    }
 
   };
 

@@ -5,6 +5,7 @@ using namespace std;
 
 Calibration::CoherencyMeasurement::CoherencyMeasurement (unsigned index)
 {
+  uncertainty = 0;
   input_index = index;
 }
 
@@ -43,6 +44,14 @@ void Calibration::CoherencyMeasurement::set_stokes
   rho = convert (stokes);
 }
 
+//! Set the measured complex Stokes parameters and the variance functions
+void Calibration::CoherencyMeasurement::set_stokes
+(const Stokes< complex<double> >& stokes, const Uncertainty* var)
+{
+  rho = convert (stokes);
+  uncertainty = var;
+}
+
 //! Get the measured coherency matrix
 Jones<double> Calibration::CoherencyMeasurement::get_coherency () const
 {
@@ -58,7 +67,7 @@ Calibration::CoherencyMeasurement::get_stokes () const
 
   for (unsigned ipol=0; ipol<4; ipol++) {
     stokes[ipol].val = temp[ipol];
-    stokes[ipol].var = 1.0/inv_var[ipol];
+    stokes[ipol].var = 1.0/get_inv_var(ipol);
   }
 
   return stokes;
@@ -66,7 +75,7 @@ Calibration::CoherencyMeasurement::get_stokes () const
 
 float Calibration::CoherencyMeasurement::get_variance (unsigned ipol) const
 {
-  return 1.0/inv_var[ipol];
+  return 1.0/get_inv_var(ipol);
 }
 
 //! Given a coherency matrix, return the difference
@@ -77,7 +86,7 @@ double Calibration::CoherencyMeasurement::get_weighted_norm
   double difference = 0.0;
 
   for (unsigned ipol=0; ipol<4; ipol++)
-    difference += norm(stokes[ipol]) * inv_var[ipol];
+    difference += norm(stokes[ipol]) * get_inv_var(ipol);
 
   return difference;
 }
@@ -89,7 +98,7 @@ Jones<double> Calibration::CoherencyMeasurement::get_weighted_conjugate
   Stokes< complex<double> > stokes = complex_coherency( matrix );
 
   for (unsigned ipol=0; ipol<4; ipol++)
-    stokes[ipol] = complex<double>(inv_var[ipol]) * conj(stokes[ipol]);
+    stokes[ipol] = complex<double>(get_inv_var(ipol)) * conj(stokes[ipol]);
 
   return convert (stokes);
 }
