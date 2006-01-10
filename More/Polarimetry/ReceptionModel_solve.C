@@ -171,32 +171,37 @@ void Calibration::ReceptionModel::solve_work (bool solve_verbose)
   if (verbose)
     cerr << "Calibration::ReceptionModel::solve chisq=" << best_chisq << endl;
 
-  unsigned not_better = 0;
+
+  float constrained = fixed_params - free_params;
   unsigned iterations = 0;
 
-  while (not_better < 3) {
+  for (iterations = 0; iterations < 50; iterations++) {
 
     float chisq = fit.iter (data, fake, *this);
-   
-    if (verbose)
-      cerr << "chisq=" << chisq << " lamda=" << fit.lamda << endl;
+    float reduced_chisq = chisq / constrained;
 
-    if (chisq < best_chisq)  {
+    if (verbose)
+      cerr << "chisq=" << chisq << " red_chisq=" << reduced_chisq
+	   << " lamda=" << fit.lamda << endl;
+
+    float delta_chisq = best_chisq - chisq;
+
+    if (chisq < best_chisq)
       best_chisq = chisq;
-      not_better = 0;
-    }
-    else
-      not_better ++;
- 
+
+    if (fit.lamda == 0.0 && delta_chisq < 1.0)
+      break;
+
+    if (reduced_chisq < 3.0)
+      fit.lamda = 0.0;
+
     if (exact_solution && chisq < convergence_threshold)
       break;
       
-    iterations ++;    
   }
  
-  float constrained = fixed_params - free_params;
   float reduced_chisq = best_chisq / constrained;
- 
+
   if (maximum_reduced && reduced_chisq > maximum_reduced) {
 
     for (iparm=0; iparm < get_nparam(); iparm++)
