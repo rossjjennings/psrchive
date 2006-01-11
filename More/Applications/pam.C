@@ -42,6 +42,7 @@ void usage()
     "  -V               Very verbose mode \n"
     "  -i               Show revision information \n"
     "  -m               Modify the original files on disk \n"
+    "  -M metafile      List of archive filenames in metafile \n"
     "  -a archive       Write new files using this archive class \n"
     "  -e extension     Write new files with this extension \n"
     "  -u path          Write files to this location \n"
@@ -101,9 +102,8 @@ void usage()
 int main (int argc, char *argv[]) try {
   
     bool verbose = false;
-  
-    vector<string> archives;
-
+    char* metafile = 0;
+ 
     string ulpath;
 
     bool save = false;
@@ -212,7 +212,7 @@ int main (int argc, char *argv[]) try {
 	{0, 0, 0, 0}
       };
     
-      c = getopt_long(argc, argv, "hqvVima:e:E:TFpIt:f:b:d:o:s:r:u:w:DSBLCx:R:",
+      c = getopt_long(argc, argv, "hqvViM:ma:e:E:TFpIt:f:b:d:o:s:r:u:w:DSBLCx:R:",
 		      long_options, &options_index);
     
       if (c == -1)
@@ -235,11 +235,14 @@ int main (int argc, char *argv[]) try {
 	Pulsar::Archive::set_verbosity(3);
 	break;
       case 'i':
-	cout << "$Id: pam.C,v 1.52 2005/03/16 06:58:43 straten Exp $" << endl;
+	cout << "$Id: pam.C,v 1.53 2006/01/11 20:28:26 straten Exp $" << endl;
 	return 0;
       case 'm':
 	save = true;
 	break;
+      case 'M':
+        metafile = optarg;
+        break;
       case 'L':
 	lin = true;
 	break;
@@ -525,11 +528,16 @@ int main (int argc, char *argv[]) try {
       }
     }
  
-    for (int ai=optind; ai<argc; ai++)
-      dirglob (&archives, argv[ai]);
-  
-    if (archives.empty()) {
-      cerr << "No archives were specified" << endl;
+   vector <string> filenames;
+
+    if (metafile)
+      stringfload (&filenames, metafile);
+    else
+      for (int ai=optind; ai<argc; ai++)
+        dirglob (&filenames, argv[ai]);
+ 
+    if (filenames.empty()) {
+      cerr << "No filenames were specified" << endl;
       exit(-1);
     } 
   
@@ -540,12 +548,12 @@ int main (int argc, char *argv[]) try {
 	   << endl;
     }
 
-    for (unsigned i = 0; i < archives.size(); i++) try {
+    for (unsigned i = 0; i < filenames.size(); i++) try {
       
       if (verbose)
-	cerr << "Loading " << archives[i] << endl;
+	cerr << "Loading " << filenames[i] << endl;
       
-      arch = Pulsar::Archive::load(archives[i]);
+      arch = Pulsar::Archive::load(filenames[i]);
 
       if (install_receiver) {
 
@@ -562,7 +570,7 @@ int main (int argc, char *argv[]) try {
 	Pulsar::Receiver* receiver = arch->get<Pulsar::Receiver>();
 
 	if (!receiver)
-	  cerr << "No Receiver Extension in " << archives[i] << endl;
+	  cerr << "No Receiver Extension in " << filenames[i] << endl;
 
 	else {
 
