@@ -93,7 +93,7 @@ void Calibration::ReceptionModel::calculate (Jones<double>& result,
 	   << current_xform << endl;
     
     top_calculate = false;
-    Complex2::calculate (&(output[current_xform]), result, grad);
+    result = output[current_xform].evaluate (grad);
     top_calculate = true;
 
   }
