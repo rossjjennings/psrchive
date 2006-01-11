@@ -451,7 +451,7 @@ void Pulsar::PolnProfile::invint (Profile* invint) const
   
   else if (state == Signal::Coherence)
     for (unsigned ibin = 0; ibin < nbin; ibin++)
-      invint->get_amps()[ibin] = abs( det(get_coherence(ibin)) );
+      invint->get_amps()[ibin] = 4.0 * abs( det(get_coherence(ibin)) );
 
   // remove the baseline
   *(invint) -= invint->mean( invint->find_min_phase() );
