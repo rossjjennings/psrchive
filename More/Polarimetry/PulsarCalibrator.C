@@ -1,6 +1,7 @@
 #include "Pulsar/PulsarCalibrator.h"
 #include "Pulsar/CorrectionsCalibrator.h"
 
+#include "Pulsar/ArchiveMatch.h"
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
 #include "Pulsar/PolnProfileFit.h"
@@ -79,19 +80,21 @@ void Pulsar::PulsarCalibrator::set_standard (const Archive* data)
 		 data->get_filename().c_str(),
 		 Signal::state_string(data->get_state()));
 
-  if (!data->get_instrument_corrected ())
-    throw Error (InvalidParam,
-		 "Pulsar::PulsarCalibrator::set_standard",
-		 "Pulsar::Archive='" + data->get_filename() + "'\n"
-		 "has not been corrected for instrumental configuration");
-		 
   if (!data->get_poln_calibrated ())
     throw Error (InvalidParam,
 		 "Pulsar::PulsarCalibrator::set_standard",
 		 "Pulsar::Archive='" + data->get_filename() + "'\n"
 		 "has not been calibrated");
 
-  calibrator = data->clone();
+  Reference::To<Archive> clone;
+
+  calibrator = clone = data->clone();
+
+  if (!data->get_instrument_corrected ()) {
+    cerr << "Pulsar::PulsarCalibrator::set_standard correcting instrument" 
+         << endl;
+    clone->correct_instrument ();
+  }
 
   unsigned nchan = calibrator->get_nchan();
 
@@ -103,7 +106,8 @@ void Pulsar::PulsarCalibrator::set_standard (const Archive* data)
 
   for (unsigned ichan=0; ichan<nchan; ichan++) {
 
-    cerr << "Pulsar::PulsarCalibrator::set_standard ichan=" << ichan << endl;
+    if (verbose)
+      cerr << "Pulsar::PulsarCalibrator::set_standard ichan=" << ichan << endl;
 
     if (integration->get_weight (ichan) == 0) {
       cerr << "Pulsar::PulsarCalibrator::set_standard ichan="
@@ -145,21 +149,21 @@ void Pulsar::PulsarCalibrator::add_observation (const Archive* data)
     throw Error (InvalidState, "Pulsar::PulsarCalibrator::add_observation",
 		 "no calibrator");
 
-  string reason;
-  if (!calibrator->standard_match (data, reason))
-    throw Error (InvalidParam, "Pulsar::PulsarCalibrator::add_observation",
-		 "'" + data->get_filename() + "' does not match "
-		 "'" + calibrator->get_filename() + reason);
+  ArchiveMatch match;
 
-  if (!calibrator->calibrator_match (data, reason))
+  match.set_check_standard (true);
+  match.set_check_calibrator (true);
+  match.set_check_nbin (false);
+
+  if (!match.match (calibrator, data))
     throw Error (InvalidParam, "Pulsar::PulsarCalibrator::add_observation",
-		 "mismatch between calibrator\n\t" 
-		 + calibrator->get_filename() +
-                 " and\n\t" + data->get_filename() + reason);
-		 
+                 "mismatch between calibrator\n\t"
+                 + calibrator->get_filename() +
+                 " and\n\t" + data->get_filename() + match.get_reason());
+
   if (data->get_poln_calibrated ())
     cerr << "Pulsar::PulsarCalibrator::add_observation warning:\n"
-      "  data has alreayd been calibrated" << endl;
+      "  data has already been calibrated" << endl;
 
   CorrectionsCalibrator correct;
 
