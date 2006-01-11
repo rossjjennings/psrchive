@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pcm.C,v $
-   $Revision: 1.45 $
-   $Date: 2006/01/03 16:10:36 $
+   $Revision: 1.46 $
+   $Date: 2006/01/11 17:30:55 $
    $Author: straten $ */
 
 /*! \file pcm.C 
@@ -95,6 +95,7 @@ void usage ()
     "MODE B: Fit single observations of known source \n"
     "\n"
     "  -S fname   filename of calibrated standard \n"
+    "  -H         allow software to choose the number of harmonics \n"
     "  -n nbin    set the number of harmonics to use as input states \n"
        << endl;
 }
@@ -260,11 +261,14 @@ bool verbose = false;
 //! The maximum number of bins to use
 unsigned maxbins = 16;
 
-//! The Stokes parameters to be inverted
-Pulsar::ReflectStokes reflections;
-
 //! Flag raised when the above value is set using -n
 bool maxbins_set = false;
+
+//! Flag raised when software may choose the maximum harmonic
+bool choose_maximum_harmonic = false;
+
+//! The Stokes parameters to be inverted
+Pulsar::ReflectStokes reflections;
 
 int main (int argc, char *argv[]) try {
 
@@ -312,7 +316,7 @@ int main (int argc, char *argv[]) try {
   bool publication_plots = false;
 
   int gotc = 0;
-  const char* args = "a:b:c:C:d:Df:ghM:m:N:n:OPp:qrsS:t:uvV:";
+  const char* args = "a:b:c:C:d:Df:gHhM:m:N:n:OPp:qrsS:t:uvV:";
   while ((gotc = getopt(argc, argv, args)) != -1) {
     switch (gotc) {
 
@@ -352,6 +356,10 @@ int main (int argc, char *argv[]) try {
       independent_gains = true;
       break;
       
+    case 'H':
+      choose_maximum_harmonic = true;
+      break;
+
     case 'm':
       if (optarg == Britton)
 	model_name = Pulsar::Calibrator::Britton;
@@ -834,9 +842,7 @@ int main (int argc, char *argv[]) try {
       if (archive->get_type() == Signal::Pulsar)
 	archive->correct_instrument ();
 
-      int index = filenames[i].find_first_of(".", 0);
-      string newname = filenames[i].substr(0, index);
-      newname += ".calib";
+      string newname = replace_extension (filenames[i], ".calib");
 
       if (verbose)
         cerr << "pcm: calibrated Archive name '" << newname << "'" << endl;
@@ -906,6 +912,7 @@ int mode_B (const char* standard_filename,
   if (maxbins_set)
     model.set_maximum_harmonic (maxbins);
 
+  model.set_choose_maximum_harmonic (choose_maximum_harmonic);
   model.set_return_mean_solution (false);
 
   Reference::To<Pulsar::Archive> standard;
@@ -943,24 +950,24 @@ int mode_B (const char* standard_filename,
     cout << "pcm: loaded archive: " << filenames[i] << endl;
 
     model.add_observation( archive );
-
-    string filename = filenames[i] + ".fits";
-    cerr << "pcm: unloading solution to " << filename << endl;
-
     solution = model.new_solution (archive_class);
+
+    string filename = replace_extension (filenames[i], ".pfit");
+    cerr << "pcm: unloading solution to " << filename << endl;
     solution->unload( filename );
 
+    cerr << "pcm: calibrating input archive" << endl;
+    model.calibrate( archive );
+    archive->correct_instrument ();
+
+    filename = replace_extension (filenames[i], ".calib");
+    cerr << "pcm: unloading calibrated archive to " << filename << endl;
+    archive->unload( filename );
+
     if (add_to_standard) {
-
-      model.calibrate( archive );
-
-      archive->correct_instrument ();
-
       archive->convert_state (Signal::Stokes);
       standard->append (archive);
-
       standard->tscrunch ();
-
     }
 
   }
