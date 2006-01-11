@@ -101,6 +101,7 @@ void Pulsar::PolnProfileFit::set_standard (const PolnProfile* _standard)
   if (!standard)
     return;
 
+  // fourier_transform returns the result as Stokes parameters
   standard_fourier = fourier_transform (standard);
   set_noise_mask ();
 
