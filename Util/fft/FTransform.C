@@ -10,10 +10,10 @@
 
 #ifdef HAVE_FFTW3
 #include "FFTW3_Transform.h"
-#endif
-
+#else
 #ifdef HAVE_FFTW
 #include "FFTW_Transform.h"
+#endif
 #endif
 
 #ifdef HAVE_IPP
@@ -75,10 +75,10 @@ static int initialise()
 
 #ifdef HAVE_FFTW3
   FTransform::FFTW3_Plan::Agent::enlist ();
-#endif
-
+#else
 #ifdef HAVE_FFTW
   FTransform::FFTW_Plan::Agent::enlist ();
+#endif
 #endif
 
 #ifdef HAVE_IPP
