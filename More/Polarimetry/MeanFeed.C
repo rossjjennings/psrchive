@@ -1,7 +1,7 @@
 #include "Calibration/MeanFeed.h"
 #include "Calibration/Feed.h"
 
-void Calibration::MeanFeed::update (MEAL::Complex2* model)
+void Calibration::MeanFeed::update (MEAL::Complex2* model) const
 {
   Feed* feed = dynamic_cast<Feed*>(model);
   if (!feed)
@@ -11,7 +11,7 @@ void Calibration::MeanFeed::update (MEAL::Complex2* model)
   update (feed);
 }
 
-void Calibration::MeanFeed::update (Feed* feed)
+void Calibration::MeanFeed::update (Feed* feed) const
 {
   for (unsigned i=0; i<2; i++) {
     feed->set_orientation (i, 0.5 * mean_orientation[i].get_Estimate());

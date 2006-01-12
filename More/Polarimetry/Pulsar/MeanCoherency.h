@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/MeanCoherency.h,v $
-   $Revision: 1.2 $
-   $Date: 2005/12/09 16:41:06 $
+   $Revision: 1.3 $
+   $Date: 2006/01/12 17:30:34 $
    $Author: straten $ */
 
 #ifndef __Calibration_MeanCoherency_H
@@ -23,7 +23,7 @@ namespace Calibration {
     void integrate (const MEAL::Complex2* model);
 
     //! Update the Model parameters with the current value of the mean
-    void update (MEAL::Complex2* model);
+    void update (MEAL::Complex2* model) const;
 
     //! Add the Stokes parameter Estimate to the running mean
     void integrate (const Stokes< Estimate<double> >& stokes);

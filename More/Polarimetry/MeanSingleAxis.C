@@ -3,7 +3,7 @@
 
 using namespace std;
 
-void Calibration::MeanSingleAxis::update (MEAL::Complex2* model)
+void Calibration::MeanSingleAxis::update (MEAL::Complex2* model) const
 {
   if (MEAL::Function::very_verbose)
     cerr << "Calibration::MeanSingleAxis::update (MEAL::Complex2*)" << endl;
@@ -16,7 +16,7 @@ void Calibration::MeanSingleAxis::update (MEAL::Complex2* model)
   update (single_axis);
 }
 
-void Calibration::MeanSingleAxis::update (SingleAxis* single_axis)
+void Calibration::MeanSingleAxis::update (SingleAxis* single_axis) const
 {
   if (MEAL::Function::very_verbose)
     cerr << "Calibration::MeanSingleAxis::update (SingleAxis*)"

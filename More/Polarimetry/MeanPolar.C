@@ -1,7 +1,7 @@
 #include "Calibration/MeanPolar.h"
 #include "MEAL/Polar.h"
 
-void Calibration::MeanPolar::update (MEAL::Complex2* model)
+void Calibration::MeanPolar::update (MEAL::Complex2* model) const
 {
   MEAL::Polar* polar = dynamic_cast<MEAL::Polar*>(model);
   if (!polar)
