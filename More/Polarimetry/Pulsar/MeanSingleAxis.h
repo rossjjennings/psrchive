@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/MeanSingleAxis.h,v $
-   $Revision: 1.3 $
-   $Date: 2006/01/12 17:30:34 $
+   $Revision: 1.4 $
+   $Date: 2006/01/12 23:10:25 $
    $Author: straten $ */
 
 #ifndef __Calibration_MeanSingleAxis_H
@@ -26,11 +26,17 @@ namespace Calibration {
     //! Update the Model parameters with the current mean
     void update (MEAL::Complex2* model) const;
 
+    //! Return the difference between the mean and the model
+    double chisq (const MEAL::Complex2* model) const;
+
     //! Add the SingleAxis model parameters to the running mean
     void integrate (const SingleAxis* model);
 
     //! Update the SingleAxis model parameters with the current mean
     void update (SingleAxis* model) const;
+
+    //! Return the difference between the mean and the SingleAxis
+    double chisq (const SingleAxis* single_axis) const;
 
   protected:
 

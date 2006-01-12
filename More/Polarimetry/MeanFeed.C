@@ -1,5 +1,6 @@
 #include "Calibration/MeanFeed.h"
 #include "Calibration/Feed.h"
+#include "EstimateStats.h"
 
 void Calibration::MeanFeed::update (MEAL::Complex2* model) const
 {
@@ -35,4 +36,29 @@ void Calibration::MeanFeed::integrate (const Feed* feed)
     mean_orientation[i] += 2.0 * feed->get_orientation (i);
     mean_ellipticity[i] += 2.0 * feed->get_ellipticity (i);
   }
+}
+
+double Calibration::MeanFeed::chisq (const MEAL::Complex2* model) const
+{
+  const Feed* feed = dynamic_cast<const Feed*>(model);
+  if (!feed)
+    throw Error (InvalidParam, "Calibration::MeanFeed::chisq",
+		 "Complex2 model is not a Feed");
+  
+  return chisq (feed);
+}
+
+double Calibration::MeanFeed::chisq (const Feed* feed) const
+{
+  double retval = 0.0;
+
+  for (unsigned i=0; i<2; i++) {
+    MeanRadian<double> otemp (2.0 * feed->get_orientation (i));
+    MeanRadian<double> etemp (2.0 * feed->get_ellipticity (i));
+
+    retval += ::chisq (mean_orientation[i], otemp);
+    retval += ::chisq (mean_ellipticity[i], etemp);
+  }
+
+  return 0.25 * retval;
 }

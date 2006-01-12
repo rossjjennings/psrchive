@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/MeanFeed.h,v $
-   $Revision: 1.3 $
-   $Date: 2006/01/12 17:30:34 $
+   $Revision: 1.4 $
+   $Date: 2006/01/12 23:10:25 $
    $Author: straten $ */
 
 #ifndef __Calibration_MeanFeed_H
@@ -26,11 +26,17 @@ namespace Calibration {
     //! Update the Model parameters with the current mean
     void update (MEAL::Complex2* model) const;
 
+    //! Return the difference between the mean and the model
+    double chisq (const MEAL::Complex2* model) const;
+
     //! Add the Model parameters to the running mean
     void integrate (const Feed* model);
 
     //! Update the Model parameters with the current mean
     void update (Feed* model) const;
+
+    //! Return the difference between the mean and the Feed
+    double chisq (const Feed* model) const;
 
   protected:
 
