@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/MeanInstrument.h,v $
-   $Revision: 1.2 $
-   $Date: 2005/12/09 16:41:06 $
+   $Revision: 1.3 $
+   $Date: 2006/01/12 17:34:21 $
    $Author: straten $ */
 
 #ifndef __Calibration_MeanInstrument_H
@@ -25,7 +25,10 @@ namespace Calibration {
     void integrate (const MEAL::Complex2* model);
 
     //! Update the Model parameters with the current value of the mean
-    void update (MEAL::Complex2* model);
+    void update (MEAL::Complex2* model) const;
+
+    //! Return a measure of the difference between the mean and model
+    double chisq (const MEAL::Complex2* model) const;
 
   protected:
 
