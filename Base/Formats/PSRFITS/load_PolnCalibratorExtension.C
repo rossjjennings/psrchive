@@ -96,15 +96,22 @@ void Pulsar::FITSArchive::load_PolnCalibratorExtension (fitsfile* fptr)
     cerr << "FITSArchive::load_PolnCalibratorExtension data read" << endl;
   
   int count = 0;
-  for (ichan = 0; ichan < pce->get_nchan(); ichan++) {
-    if (pce->get_valid(ichan))
+  for (ichan = 0; ichan < pce->get_nchan(); ichan++)
+    if (pce->get_valid(ichan)) {
+      bool valid = true;
       for (int j = 0; j < ncpar; j++) {
-	pce->get_transformation(ichan)->set_param(j,data.get()[count]);
+	if (!finite(data.get()[count]))
+	  valid = false;
+	else
+	  pce->get_transformation(ichan)->set_param(j,data.get()[count]);
 	count++;
       }
+      if (!valid)
+	pce->set_valid (ichan, false);
+    }
     else
       count += ncpar;
-  }
+
 
   assert (count == dimension);
 
@@ -122,12 +129,19 @@ void Pulsar::FITSArchive::load_PolnCalibratorExtension (fitsfile* fptr)
   
   count = 0;
   for (ichan = 0; ichan < pce->get_nchan(); ichan++) {
-    if (pce->get_valid(ichan))
+    if (pce->get_valid(ichan)) {
+      bool valid = true;
       for (int j = 0; j < ncpar; j++) {
 	float err = data.get()[count];
-	pce->get_transformation(ichan)->set_variance (j, err*err);
+	if (!finite(err))
+	  valid = false;
+	else
+	  pce->get_transformation(ichan)->set_variance (j,err*err);
 	count++;
       }
+      if (!valid)
+	pce->set_valid (ichan, false);
+    }
     else
       count += ncpar;
   }

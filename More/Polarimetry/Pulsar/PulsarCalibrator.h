@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PulsarCalibrator.h,v $
-   $Revision: 1.10 $
-   $Date: 2006/01/11 17:30:50 $
+   $Revision: 1.11 $
+   $Date: 2006/01/12 21:35:43 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PulsarCalibrator_H
@@ -16,6 +16,7 @@
 namespace Pulsar {
 
   class Archive;
+  class Integration;
   class PolnProfileFit;
   class ReferenceCalibrator;
 
@@ -91,8 +92,8 @@ namespace Pulsar {
     //! When true, calculate_transformation will return the mean solution
     bool mean_solution;
 
-    //! Count of the number of Integrations added
-    unsigned integrations_added;
+    //! Solve the measurement equation for the given channel
+    void solve (const Integration* data, unsigned ichan);
 
   };
 

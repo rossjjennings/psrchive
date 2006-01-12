@@ -17,7 +17,6 @@ Pulsar::PulsarCalibrator::PulsarCalibrator (Calibrator::Type model)
   maximum_harmonic = 0;
   choose_maximum_harmonic = false;
   mean_solution = true;
-  integrations_added = 0;
 }
 
 //! Constructor
@@ -109,34 +108,49 @@ void Pulsar::PulsarCalibrator::set_standard (const Archive* data)
     if (verbose)
       cerr << "Pulsar::PulsarCalibrator::set_standard ichan=" << ichan << endl;
 
+    transformation[ichan] = 0;
+    solution[ichan] = 0;
+    model[ichan] = 0;
+
     if (integration->get_weight (ichan) == 0) {
       cerr << "Pulsar::PulsarCalibrator::set_standard ichan="
 	   << ichan << " flagged invalid" << endl;
-      transformation[ichan] = 0;
-      solution[ichan] = 0;
-      model[ichan] = 0;
       continue;
     }
 
-    transformation[ichan] = new Calibration::Instrument;
-    solution[ichan] = new Calibration::MeanInstrument;
     model[ichan] = new PolnProfileFit;
 
-    if (maximum_harmonic)
-      model[ichan]->set_maximum_harmonic( maximum_harmonic );
-    else if (choose_maximum_harmonic)
+    if (choose_maximum_harmonic)
       model[ichan]->choose_maximum_harmonic = true;
+    else if (maximum_harmonic)
+      model[ichan]->set_maximum_harmonic( maximum_harmonic );
 
     model[ichan]->set_standard ( integration->new_PolnProfile (ichan) );
-    model[ichan]->set_transformation ( transformation[ichan] * &corrections );
 
   }
-
-  integrations_added = 0;
 
   if (verbose)
     cerr << "Pulsar::PulsarCalibrator::set_standard exit" << endl;
 
+}
+
+double chisq (const MEAL::Function* a, const MEAL::Function* b,
+	      unsigned start = 0)
+{
+  unsigned nparam = a->get_nparam();
+  if (nparam != b->get_nparam())
+    throw Error (InvalidParam, "chisq",
+		 "a.nparam=%u != b.nparam=%u", nparam, b->get_nparam());
+
+  double chisq = 0.0;
+  for (unsigned iparam=start; iparam<nparam; iparam++) {
+    double diff = a->get_param(iparam) - b->get_param(iparam);
+    double var = a->get_variance(iparam) + b->get_variance(iparam);
+    if (var != 0.0)
+      chisq += diff*diff/var;
+  }
+
+  return chisq/nparam;
 }
 
 //! Add the observation to the set of constraints
@@ -178,47 +192,112 @@ void Pulsar::PulsarCalibrator::add_observation (const Archive* data)
     jones = correct.get_transformation( data, isub );
     corrections.set_value( jones );
 
-    if (integrations_added)
-      update_solution ();
-
-    for (unsigned ichan=0; ichan<nchan; ichan++) try {
-
-      if (integration->get_weight (ichan) == 0) {
-	cerr << "Pulsar::PulsarCalibrator::add_observation ichan="
-	     << ichan << " flagged invalid" << endl;
-	continue;
-      }
-
-      if (!model[ichan]) {
-        cerr << "Pulsar::PulsarCalibrator::add_observation standard ichan="
-             << ichan << " flagged invalid" << endl;
-        continue;
-      }
-
-      cerr << "Pulsar::PulsarCalibrator::add_observation" << endl;
-      cerr << "  ichan=" << ichan << endl;
-
-      model[ichan]->fit( integration->new_PolnProfile (ichan) );
-
-      cerr << "  gain = " << transformation[ichan]->get_Estimate(0) << endl;
-      cerr << "  phase = " << model[ichan]->get_phase() << endl;
-
-      solution[ichan]->integrate( transformation[ichan] );
-
-      if (!integrations_added && ichan+1 < nchan && transformation[ichan+1])
-        transformation[ichan+1]->copy( transformation[ichan] );
-
-    }
-    catch (Error& error) {
-      cerr << "Pulsar::PulsarCalibrator::add_observation ichan="
-	   << ichan << " error" << error << endl;
-    }
-
-    integrations_added ++;
+    for (unsigned ichan=0; ichan<nchan; ichan++)
+      solve (integration, ichan);
 
   }
 
 }
+
+void Pulsar::PulsarCalibrator::solve (const Integration* data, unsigned ichan)
+{
+  if (!model[ichan]) {
+    if (verbose)
+      cerr << "Pulsar::PulsarCalibrator::solve standard ichan="
+	   << ichan << " flagged invalid" << endl;
+    return;
+  }
+
+  if (data->get_weight (ichan) == 0) {
+    if (verbose)
+      cerr << "Pulsar::PulsarCalibrator::solve ichan="
+	   << ichan << " flagged invalid" << endl;
+    transformation[ichan] = 0;
+    return;
+  }
+
+  float reduced_chisq = 0.0;
+
+  for (unsigned tries=0 ; tries < 2; tries ++) try {
+
+    if (!transformation[ichan]) {
+      transformation[ichan] = new Calibration::Instrument;
+      model[ichan]->set_transformation (transformation[ichan] * &corrections);
+    }
+
+    if (solution[ichan])
+      solution[ichan]->update( transformation[ichan] );
+    else if (ichan>0 && tries==0 && solution[ichan-1])
+      solution[ichan-1]->update( transformation[ichan] );
+
+    model[ichan]->fit( data->new_PolnProfile (ichan) );
+
+    unsigned iterations = model[ichan]->get_fit_iterations ();
+    unsigned nfree = model[ichan]->get_fit_nfree ();
+    float chisq = model[ichan]->get_fit_chisq ();
+
+    reduced_chisq = chisq / nfree;
+
+    if (reduced_chisq < 1.1)
+      break;
+
+    cerr << "Pulsar::PulsarCalibrator::solve ichan=" << ichan
+	 << " invalid reduced chisq=" << reduced_chisq << endl;
+
+    // try again with a fresh start
+    transformation[ichan] = 0;
+
+    if (!solution[ichan])
+      break;
+
+    solution[ichan] = 0;
+  }
+  catch (Error& error) {
+    cerr << "Pulsar::PulsarCalibrator::solve ichan="
+	 << ichan << " error" << error << endl;
+    transformation[ichan] = 0;
+    solution[ichan] = 0;
+  }
+
+  if (!transformation[ichan])
+    return;
+
+#ifdef _DEBUG
+  for (unsigned ip=0; ip < transformation[ichan]->get_nparam(); ip++)
+    cerr << "  " << ip << " " << transformation[ichan]->get_Estimate(ip)
+	 << endl;
+
+  cerr << "  chisq=" << reduced_chisq << " phase = " 
+       << model[ichan]->get_phase() << endl;
+#endif
+
+  if (solution[ichan]) {
+
+    Calibration::Instrument test;
+    solution[ichan]->update (&test);
+
+    float solution_chisq = chisq( &test, transformation[ichan], 1 );
+    if (solution_chisq > 3.0) {
+      cerr << "  BIG DIFFERENCE=" << solution_chisq << endl;
+      cerr << "    OLD\t\t\t\tNEW" << endl;
+
+      unsigned nparam = test.get_nparam();
+      for (unsigned ip=1; ip < nparam; ip++)
+	cerr << "  " << ip << " " << test.get_Estimate(ip)
+	     << "\t\t\t\t" << transformation[ichan]->get_Estimate(ip) << endl;
+
+      solution[ichan] = 0;
+    }
+
+  }
+
+  if (!solution[ichan])
+    solution[ichan] = new Calibration::MeanInstrument;  
+  
+  solution[ichan]->integrate( transformation[ichan] );
+  
+}
+
 
 //! Set the flag to return the mean solution or the last fit
 void Pulsar::PulsarCalibrator::set_return_mean_solution (bool return_mean)
@@ -229,9 +308,13 @@ void Pulsar::PulsarCalibrator::set_return_mean_solution (bool return_mean)
 void Pulsar::PulsarCalibrator::update_solution ()
 {
   unsigned nchan = model.size ();
-  for (unsigned ichan=0; ichan < nchan; ichan++)
-    if (model[ichan])
+  for (unsigned ichan=0; ichan < nchan; ichan++) {
+    if (solution[ichan]) {
+      if (!transformation[ichan])
+	transformation[ichan] = new Calibration::Instrument;
       solution[ichan]->update( transformation[ichan] );
+    }
+  }
 }
 
    
@@ -246,9 +329,5 @@ void Pulsar::PulsarCalibrator::calculate_transformation ()
   unsigned nchan = model.size();
 
   transformation.resize( nchan );
-
-  for (unsigned ichan=0; ichan<nchan; ichan++)
-    if (transformation[ichan])
-      solution[ichan]->update(transformation[ichan]);
-
+  update_solution ();
 }
