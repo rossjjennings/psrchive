@@ -8,11 +8,11 @@ using namespace std;
 
 // ///////////////////////////////////////////////////////////////////////////
 //
-// template specializations that enable the use of LevenbergMarquardt
+// template specializations that enable the use of MEAL::LevenbergMarquardt
 //
 // ///////////////////////////////////////////////////////////////////////////
 
-// template specialization of Numerical::lmcoff
+// template specialization of MEAL::lmcoff
 float lmcoff (// input
 	      Calibration::ReceptionModel& model,
 	      const Calibration::CoherencyMeasurement& obs,
@@ -37,7 +37,7 @@ float lmcoff (// input
 
 }
 
-// template specialization of Numerical::lmcoff
+// template specialization of MEAL::lmcoff
 float lmcoff (// input
 	      Calibration::ReceptionModel& model,
 	      const Calibration::CoherencyMeasurementSet& data,
@@ -64,9 +64,7 @@ float lmcoff (// input
 }
 
 /*! Uses the Levenberg-Marquardt algorithm of non-linear least-squares
-    minimization in order to find the best fit to the observed
-    polarizations.
-*/
+    minimization in order to find the best fit to the observations. */
 void Calibration::ReceptionModel::solve_work (bool solve_verbose)
 {
   if (verbose)
@@ -80,7 +78,6 @@ void Calibration::ReceptionModel::solve_work (bool solve_verbose)
     if (get_infit(iparm))
       free_params ++;
   }
-
 
   vector<bool> has_source (get_num_input(), false);
 
@@ -144,7 +141,6 @@ void Calibration::ReceptionModel::solve_work (bool solve_verbose)
 		     isource);
 
       }
-
     }
   }
 
@@ -160,9 +156,7 @@ void Calibration::ReceptionModel::solve_work (bool solve_verbose)
   if (verbose)
     cerr << "Calibration::ReceptionModel::solve compute initial fit" << endl;
 
-  float best_chisq = fit.init (data, fake, *this);
-
-  unsigned close_to_min = 0;
+  best_chisq = fit.init (data, fake, *this);
 
   fit.lamda = 1e-5;
   fit.lamda_increase_factor = 10;
@@ -171,16 +165,15 @@ void Calibration::ReceptionModel::solve_work (bool solve_verbose)
   if (verbose)
     cerr << "Calibration::ReceptionModel::solve chisq=" << best_chisq << endl;
 
+  nfree = fixed_params - free_params;
+
 // #define _DEBUG
 
-  float constrained = fixed_params - free_params;
-  unsigned iterations = 0;
-
-  for (iterations = 0; iterations < 50; iterations++) {
+  for (iterations = 0; iterations < maximum_iterations; iterations++) {
 
     float chisq = fit.iter (data, fake, *this);
-    float reduced_chisq = chisq / constrained;
     float delta_chisq = best_chisq - chisq;
+    float reduced_chisq = chisq / nfree;
 
 #ifndef _DEBUG
     if (verbose)
@@ -211,24 +204,29 @@ void Calibration::ReceptionModel::solve_work (bool solve_verbose)
       
   }
  
-  float reduced_chisq = best_chisq / constrained;
-
-  if (maximum_reduced && reduced_chisq > maximum_reduced) {
-
+  if (iterations >= maximum_iterations) {
     for (iparm=0; iparm < get_nparam(); iparm++)
       set_Estimate (iparm, 0.0);
-
     throw Error (InvalidState, "Calibration::ReceptionModel::solve",
-		 "bad solution reduced chisq=%f", reduced_chisq);
-
+		 "exceeded maximum number of iterations=%d",
+		 maximum_iterations);
   }
 
-  // if (verbose)
-  cerr << "Calibration::ReceptionModel::solve converged in " << iterations
-       << " iterations. chi_sq=" << best_chisq << "/(" << fixed_params
-       << "-" << free_params << "=" << constrained << ")=" 
-       << reduced_chisq << endl;
+  float reduced_chisq = best_chisq / nfree;
 
+  if (maximum_reduced && reduced_chisq > maximum_reduced) {
+    for (iparm=0; iparm < get_nparam(); iparm++)
+      set_Estimate (iparm, 0.0);
+    throw Error (InvalidState, "Calibration::ReceptionModel::solve",
+		 "bad solution reduced chisq=%f", reduced_chisq);
+  }
+
+  if (verbose)
+    cerr << "Calibration::ReceptionModel::solve converged in " << iterations
+	 << " iterations. chi_sq=" << best_chisq << "/(" << fixed_params
+	 << "-" << free_params << "=" << nfree << ")=" 
+	 << reduced_chisq << endl;
+  
   try {
     fit.result (*this, covariance);
   }
@@ -242,10 +240,8 @@ void Calibration::ReceptionModel::solve_work (bool solve_verbose)
   // each model parameter is given by eqn. 15.6.4 NR
 
   if (covariance.size() != get_nparam()) {
-
     for (iparm=0; iparm < get_nparam(); iparm++)
       set_Estimate (iparm, 0.0);
-
     throw Error (InvalidState, "Calibration::ReceptionModel::solve",
 		 "MEAL::LevenbergMarquardt<Jones<double>>::result returns"
 		 "\n\tcovariance matrix dimension=%d != nparam=%d",
@@ -256,9 +252,6 @@ void Calibration::ReceptionModel::solve_work (bool solve_verbose)
     if (verbose)
       cerr << "Calibration::ReceptionModel::solve variance[" << iparm << "]="
 	   << covariance[iparm][iparm] << endl;
-
-    // Bi Qing has uncovered an error in our estimation of parameter error
-    // most likely due to an error in Numerical Recipes
     set_variance (iparm, covariance[iparm][iparm]);
   }
 
