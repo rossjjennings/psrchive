@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Mean.h,v $
-   $Revision: 1.4 $
-   $Date: 2005/04/29 12:58:35 $
+   $Revision: 1.5 $
+   $Date: 2006/01/12 17:26:23 $
    $Author: straten $ */
 
 #ifndef __MEAL_Mean_H
@@ -25,7 +25,7 @@ namespace MEAL {
     virtual void integrate (const T* model) = 0;
 
     //! Update the model parameters with the current value of the mean
-    virtual void update (T* model) = 0;
+    virtual void update (T* model) const = 0;
 
   };
 
