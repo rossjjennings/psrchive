@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PolnProfileFit.h,v $
-   $Revision: 1.15 $
-   $Date: 2006/01/10 23:35:30 $
+   $Revision: 1.16 $
+   $Date: 2006/01/12 21:33:59 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PolnProfileFit_h
@@ -74,6 +74,15 @@ namespace Pulsar {
 
     //! Fit the specified observation to the standard
     void fit (const PolnProfile* observation);
+
+    //! The number of iterations in last call to fit method
+    unsigned get_fit_iterations () const;
+
+    //! The number of free parameters in last call to fit method
+    unsigned get_fit_nfree () const;
+
+    //! The chi-squared in last call to fit method
+    float get_fit_chisq () const;
 
     //! Get the phase offset between the standard and the observation
     Estimate<double> get_phase () const;

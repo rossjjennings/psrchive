@@ -12,13 +12,10 @@ Calibration::ReceptionModel::ReceptionModel ()
   // name = "ReceptionModel";
 
   // should be ok
-  maximum_iterations = 1000;
+  maximum_iterations = 50;
 
   // Relative \Delta\chi^2 considered significant
   convergence_threshold = 1e-2;
-
-  // Number of iterations to sit on minimum
-  stay_at_minimum = 2;
 
   // By default, do not cull solutions
   maximum_reduced = 0.0;
@@ -29,6 +26,10 @@ Calibration::ReceptionModel::ReceptionModel ()
   // Switch between ReceptionModel:: and MeasurementEquation::calculate
   top_calculate = false;
 
+  // set during solve
+  iterations = 0;
+  best_chisq = 0.0;
+  nfree = 0;
 }
 
 Calibration::ReceptionModel::~ReceptionModel ()
@@ -41,6 +42,23 @@ string Calibration::ReceptionModel::get_name () const
   return "ReceptionModel";
 }
 
+//! The number of iterations in last call to solve method
+unsigned Calibration::ReceptionModel::get_fit_iterations () const
+{
+  return iterations;
+}
+
+//! The chi-squared in last call to solve method
+float Calibration::ReceptionModel::get_fit_chisq () const
+{
+  return best_chisq;
+}
+
+//! The number of free parameters in last call to solve method
+unsigned Calibration::ReceptionModel::get_fit_nfree () const
+{
+  return nfree;
+}
 
 //! Additional input, \f$\rho_i,k\f$, where \f$i\f$=transformation_index
 void Calibration::ReceptionModel::add_to_output (unsigned index,

@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ReceptionModel.h,v $
-   $Revision: 1.2 $
-   $Date: 2005/08/18 12:10:42 $
+   $Revision: 1.3 $
+   $Date: 2006/01/12 21:33:59 $
    $Author: straten $ */
 
 #ifndef __ReceptionModel_H
@@ -87,6 +87,15 @@ namespace Calibration {
     //! Get the covariance matrix of the last fit
     void get_fit_covariance (std::vector< std::vector<double> >&) const;
 
+    //! The number of iterations in last call to solve method
+    unsigned get_fit_iterations () const;
+
+    //! The chi-squared in last call to solve method
+    float get_fit_chisq () const;
+
+    //! The number of free parameters in last call to solve method
+    unsigned get_fit_nfree () const;
+
     // ///////////////////////////////////////////////////////////////////
     //
     // OptimizedModel implementation
@@ -110,9 +119,6 @@ namespace Calibration {
     //! The maximum number of iterations in during fit
     unsigned maximum_iterations;
 
-    //! The number of interations to hold at the minimum
-    unsigned stay_at_minimum;
-
     //! The convergence threshold;
     float convergence_threshold;
 
@@ -121,6 +127,15 @@ namespace Calibration {
 
     //! Flag set when measurements have no experimental error (simulation)
     bool exact_solution;
+
+    //! The number of iterations in last call to solve method
+    unsigned iterations;
+
+    //! The best chi-squared in last call to solve method
+    float best_chisq;
+
+    //! The number of free parameters in last call to solve method
+    unsigned nfree;
 
     //! Ensure that idata <= get_ndata()
     void range_check (unsigned idata, const char* method) const;

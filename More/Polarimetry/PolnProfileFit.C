@@ -259,6 +259,13 @@ void Pulsar::PolnProfileFit::fit (const PolnProfile* observation) try
     throw Error (InvalidState, "Pulsar::PolnProfileFit::fit",
 		 "no transformation specified.  call set_transformation");
 
+  if (!observation)
+    throw Error (InvalidState, "Pulsar::PolnProfileFit::fit",
+		 "no observation supplied as argument");
+
+  // ensure that the PolnProfile class is cleaned up
+  Reference::To<const PolnProfile> obs = observation;
+
   unsigned obs_harmonic = observation->get_nbin() / 2;
 
   if (obs_harmonic < n_harmonic)
@@ -336,6 +343,24 @@ void Pulsar::PolnProfileFit::fit (const PolnProfile* observation) try
 }
 catch (Error& error) {
   throw error += "Pulsar::PolnProfileFit::fit";
+}
+
+//! The number of iterations in last call to solve method
+unsigned Pulsar::PolnProfileFit::get_fit_iterations () const
+{
+  return model->get_fit_iterations();
+}
+
+//! The chi-squared in last call to solve method
+float Pulsar::PolnProfileFit::get_fit_chisq () const
+{
+  return model->get_fit_chisq();
+}
+
+//! The number of free parameters in last call to solve method
+unsigned Pulsar::PolnProfileFit::get_fit_nfree () const
+{
+  return model->get_fit_nfree();
 }
 
 //! Get the phase offset between the observation and the standard
