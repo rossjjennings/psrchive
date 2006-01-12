@@ -7,7 +7,7 @@ COMMENT   Astrophysics Supplement Series v44/p363, v44/p371, v73/p359, v73/p365.
 COMMENT   Contact the NASA Science Office of Standards and Technology for the
 COMMENT   FITS Definition document #100 and other FITS information.
 COMMENT
-HDRVER  = '1.28            '   / Header version 
+HDRVER  = '1.29            '   / Header version 
 DATE    = '                '   / File creation date (YYYY-MM-DDThh:mm:ss UTC)
 OBSERVER= '                '   / Observer name(s)
 PROJID  = '                '   / Project name
@@ -109,7 +109,7 @@ TTYPE19 = 'CAL_FILE'           / Name of gain calibration file
 TFORM19 = '32A     '           / 32-char string
 TTYPE20 = 'RFI_MTHD'           / RFI excision method
 TFORM20 = '32A     '           / 32-char string
-TFORM21 = 'IFR_MTHD'           / Ionospheric Faraday rotation correction method
+TTYPE21 = 'IFR_MTHD'           / Ionospheric Faraday rotation correction method
 TFORM21 = '32A     '           / 32-char string
 END
 #
