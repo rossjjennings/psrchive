@@ -21,7 +21,6 @@ void Calibration::MeanInstrument::integrate (const MEAL::Complex2* model)
 
   single_axis.integrate (instrument->get_backend());
   feed.integrate (instrument->get_feed());
-
 }
 
 double Calibration::MeanInstrument::chisq (const MEAL::Complex2* model) const
@@ -31,18 +30,6 @@ double Calibration::MeanInstrument::chisq (const MEAL::Complex2* model) const
     throw Error (InvalidParam, "Calibration::MeanInstrument::chisq",
 		 "Complex2 model is not a Instrument");
 
-  Instrument test;
-  update (&test);
-
-  double chisq = 0.0;
-  unsigned nparam = test.get_nparam();
-
-  for (unsigned iparam=0; iparam<nparam; iparam++)
-    if (instrument->get_infit(nparam)) {
-      double diff = test.get_param(iparam) - instrument->get_param(iparam);
-      double var = test.get_variance(iparam)+instrument->get_variance(iparam);
-      chisq += diff*diff/var;
-    }
-
-  return chisq/nparam;
+  return 0.5 * ( single_axis.chisq (instrument->get_backend()) +
+		 feed.chisq (instrument->get_feed()) );
 }

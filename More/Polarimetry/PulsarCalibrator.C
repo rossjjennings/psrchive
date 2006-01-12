@@ -134,25 +134,6 @@ void Pulsar::PulsarCalibrator::set_standard (const Archive* data)
 
 }
 
-double chisq (const MEAL::Function* a, const MEAL::Function* b,
-	      unsigned start = 0)
-{
-  unsigned nparam = a->get_nparam();
-  if (nparam != b->get_nparam())
-    throw Error (InvalidParam, "chisq",
-		 "a.nparam=%u != b.nparam=%u", nparam, b->get_nparam());
-
-  double chisq = 0.0;
-  for (unsigned iparam=start; iparam<nparam; iparam++) {
-    double diff = a->get_param(iparam) - b->get_param(iparam);
-    double var = a->get_variance(iparam) + b->get_variance(iparam);
-    if (var != 0.0)
-      chisq += diff*diff/var;
-  }
-
-  return chisq/nparam;
-}
-
 //! Add the observation to the set of constraints
 void Pulsar::PulsarCalibrator::add_observation (const Archive* data)
 {
@@ -273,18 +254,19 @@ void Pulsar::PulsarCalibrator::solve (const Integration* data, unsigned ichan)
 
   if (solution[ichan]) {
 
-    Calibration::Instrument test;
-    solution[ichan]->update (&test);
+    float chisq = solution[ichan]->chisq(transformation[ichan]);
 
-    float solution_chisq = chisq( &test, transformation[ichan], 1 );
-    if (solution_chisq > 3.0) {
-      cerr << "  BIG DIFFERENCE=" << solution_chisq << endl;
+    if (chisq > 5.0) {
+      cerr << "  BIG DIFFERENCE=" << chisq << endl;
       cerr << "    OLD\t\t\t\tNEW" << endl;
+
+      Calibration::Instrument test;
+      solution[ichan]->update(&test);
 
       unsigned nparam = test.get_nparam();
       for (unsigned ip=1; ip < nparam; ip++)
 	cerr << "  " << ip << " " << test.get_Estimate(ip)
-	     << "\t\t\t\t" << transformation[ichan]->get_Estimate(ip) << endl;
+	     << "\t\t" << transformation[ichan]->get_Estimate(ip) << endl;
 
       solution[ichan] = 0;
     }
