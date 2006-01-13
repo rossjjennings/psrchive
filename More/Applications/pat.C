@@ -113,7 +113,6 @@ int main (int argc, char *argv[])
 
     case 'v':
       Pulsar::Archive::set_verbosity(2);
-      Pulsar::Profile::verbose = true;
       verbose = true;
       break;
 
@@ -132,7 +131,7 @@ int main (int argc, char *argv[])
       break;
 
     case 'i':
-      cout << "$Id: pat.C,v 1.42 2005/12/16 23:25:21 straten Exp $" << endl;
+      cout << "$Id: pat.C,v 1.43 2006/01/13 21:02:33 straten Exp $" << endl;
       return 0;
 
     case 'F':
@@ -299,10 +298,17 @@ int main (int argc, char *argv[])
 				      integration->get_folding_period(),
 				      arch->get_telescope_code());
 
+        if (arch->get_dedispersed())
+	  toa.set_frequency (arch->get_centre_frequency());
+
         string aux = basename( arch->get_filename() );
         toa.set_auxilliary_text (aux);
 
 	toa.unload(stdout);
+
+        if (verbose)
+          cerr << "pat: " << aux << " chisq=" 
+               << fit.get_fit_chisq()/fit.get_fit_nfree() << endl;
 
       }
       catch (Error& error) {
