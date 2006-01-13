@@ -178,6 +178,7 @@ void Pulsar::PulsarCalibrator::add_observation (const Archive* data)
 
   }
 
+  built = false;
 }
 
 void Pulsar::PulsarCalibrator::solve (const Integration* data, unsigned ichan)
@@ -217,6 +218,11 @@ void Pulsar::PulsarCalibrator::solve (const Integration* data, unsigned ichan)
     unsigned nfree = model[ichan]->get_fit_nfree ();
     float chisq = model[ichan]->get_fit_chisq ();
 
+    if (iterations > 10 && solution[ichan])  {
+      cerr << "LARGE ITERATIONS=" << iterations << endl;
+      solution[ichan] = 0;
+    }
+
     reduced_chisq = chisq / nfree;
 
     if (reduced_chisq < 1.1)
@@ -235,7 +241,7 @@ void Pulsar::PulsarCalibrator::solve (const Integration* data, unsigned ichan)
   }
   catch (Error& error) {
     cerr << "Pulsar::PulsarCalibrator::solve ichan="
-	 << ichan << " error" << error << endl;
+	 << ichan << " error " << error.get_message() << endl;
     transformation[ichan] = 0;
     solution[ichan] = 0;
   }
@@ -303,6 +309,7 @@ void Pulsar::PulsarCalibrator::update_solution ()
 //! Initialize the PolnCalibration::transformation attribute
 void Pulsar::PulsarCalibrator::calculate_transformation ()
 {
+  cerr << "Pulsar::PulsarCalibrator::calculate_transformation" << endl;
   // if the mean solution is not required, then the last
   // transformation calculated will be returned
   if (!mean_solution)
