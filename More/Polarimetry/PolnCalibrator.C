@@ -46,11 +46,13 @@ Pulsar::PolnCalibrator::PolnCalibrator (const Archive* archive)
 
   filenames.push_back( archive->get_filename() );
 
+  built = false;
 }
 
 //! Copy constructor
 Pulsar::PolnCalibrator::PolnCalibrator (const PolnCalibrator& calibrator)
 {
+  built = false;
 }
 
 //! Destructor
@@ -61,7 +63,7 @@ Pulsar::PolnCalibrator::~PolnCalibrator ()
 //! Set the number of frequency channels in the response array
 void Pulsar::PolnCalibrator::set_nchan (unsigned nchan)
 {
-  if (response.size() == nchan)
+  if (built && response.size() == nchan)
     return;
 
   build (nchan);
@@ -70,7 +72,7 @@ void Pulsar::PolnCalibrator::set_nchan (unsigned nchan)
 //! Get the number of frequency channels in the response array
 unsigned Pulsar::PolnCalibrator::get_nchan () const
 {
-  if (response.size() == 0)
+  if (!built || response.size() == 0)
     const_cast<PolnCalibrator*>(this)->build();
 
   return response.size ();
@@ -78,7 +80,7 @@ unsigned Pulsar::PolnCalibrator::get_nchan () const
 
 Jones<float> Pulsar::PolnCalibrator::get_response (unsigned ichan) const
 {
-  if (response.size() == 0)
+  if (!built || response.size() == 0)
     const_cast<PolnCalibrator*>(this)->build();
 
   if (ichan >= response.size())
@@ -221,7 +223,7 @@ void Pulsar::PolnCalibrator::build (unsigned nchan) try {
     cerr << "Pulsar::PolnCalibrator::build transformation size="
 	 << transformation.size() << " nchan=" << nchan << endl;
 
-  if (transformation.size() == 0) {
+  if (!built || transformation.size() == 0) {
     if (verbose) cerr << "Pulsar::PolnCalibrator::build"
                          " call calculate_transformation" << endl;
     const_cast<PolnCalibrator*>(this)->calculate_transformation();
@@ -448,6 +450,8 @@ void Pulsar::PolnCalibrator::build (unsigned nchan) try {
 
   }
 
+  cerr << "Pulsar::PolnCalibrator::build built" << endl;
+  built = true;
 }
 catch (Error& error) {
   throw error += "Pulsar::PolnCalibrator::build";

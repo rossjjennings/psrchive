@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PolnCalibrator.h,v $
-   $Revision: 1.35 $
-   $Date: 2005/12/09 16:41:07 $
+   $Revision: 1.36 $
+   $Date: 2006/01/13 21:02:31 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PolnCalibrator_H
@@ -160,11 +160,14 @@ namespace Pulsar {
     //! The FeedExtension of the Archive passed during construction
     Reference::To<const FeedExtension> feed;
 
+    //! Flag set when response has been built
+    bool built;
+
   private:
 
     //! Build the response array
     void build (unsigned nchan = 0);
-
+    
   };
 
 }
