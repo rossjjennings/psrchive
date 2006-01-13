@@ -16,6 +16,10 @@ void usage ()
     "  -i isub    select a single integration, from 0 to nsubint-1\n"
     "  -p phase   select a single phase, from 0.0 to 1.0 (overrides -b)\n"
     "  -r phase   rotate the profiles by phase before printing\n"
+    "  -F         Fscrunch first\n"
+    "  -T         Tscrunch first\n"
+    "  -P         Pscrunch first\n"
+    "  -C         Centre first\n"
     "\n"
     "Each row output by pascii contains:\n"
     "\n"
@@ -35,8 +39,13 @@ int main (int argc, char** argv)
   int cchan = -1;
   int csub  = -1;
 
+  bool do_fscr = false;
+  bool do_pscr = false;
+  bool do_tscr = false;
+  bool do_centre = false;
+
   char c;
-  while ((c = getopt(argc, argv, "b:c:i:p:r:hqvV")) != -1) 
+  while ((c = getopt(argc, argv, "b:c:CFi:p:Pr:hqpTvV")) != -1) 
 
     switch (c)  {
 
@@ -74,6 +83,19 @@ int main (int argc, char** argv)
       rot_phase = atof (optarg);
       break;
 
+    case 'F':
+      do_fscr = true;
+      break;
+    case 'T':
+      do_tscr = true;
+      break;
+    case 'P':
+      do_pscr = true;
+      break;
+    case 'C':
+      do_centre = true;
+      break;
+
     } 
 
 
@@ -85,6 +107,14 @@ int main (int argc, char** argv)
   Pulsar::Archive* archive = Pulsar::Archive::load( argv[optind] );
 
   archive->remove_baseline();
+  if( do_fscr )
+    archive->fscrunch();
+  if( do_tscr )
+    archive->tscrunch();
+  if( do_pscr )
+    archive->pscrunch();
+  if( do_centre )
+    archive->centre();
   if (rot_phase)
     archive->rotate_phase (rot_phase);
 
