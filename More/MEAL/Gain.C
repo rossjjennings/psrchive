@@ -1,11 +1,13 @@
 #include "MEAL/Gain.h"
+#include "MEAL/OneParameter.h"
 
 using namespace std;
 
-MEAL::Gain::Gain () : parameters (this, 1)
+MEAL::Gain::Gain ()
 {
-  set_param (0, 1.0);
-  parameters.set_param_name (0, "gain");
+  OneParameter* param = new OneParameter (this);
+  param->set_param_name ("gain");
+  param->set_param (1.0);
 }
 
 //! Return the name of the class

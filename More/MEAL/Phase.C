@@ -1,8 +1,10 @@
 #include "MEAL/Phase.h"
+#include "MEAL/OneParameter.h"
 
-MEAL::Phase::Phase () : parameters (this, 1)
+MEAL::Phase::Phase ()
 {
-  parameters.set_param_name (0, "phase");
+  OneParameter* param = new OneParameter (this);
+  param->set_param_name ("phase");
 }
 
 //! Return the name of the class
