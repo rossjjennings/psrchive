@@ -4,7 +4,7 @@ noinst_LTLIBRARIES = libunits.la
 libunits_la_SOURCES = Error.C HeapTracked.C ReferenceAble.C stringtok.C	     \
 	Function.C ParameterPolicy.C OneParameter.C Parameters.C	     \
 	ArgumentPolicy.C Argument.C Composite.C Projection.C		     \
-	UnivariatePolicy.C ForwardChanged.C				     \
+	UnivariatePolicy.C ForwardChanged.C CyclicParameter.C		     \
 	Scalar.C ScalarConstant.C ScalarValue.C ScalarParameter.C	     \
 	ScalarMath.C UnaryScalar.C ScalarRoot.C ScalarSine.C ScalarCosine.C  \
 	ScalarTangent.C ScalarHypSine.C ScalarHypCosine.C ScalarHypTangent.C \
@@ -48,6 +48,7 @@ nobase_include_HEADERS = Error.h HeapTracked.h ReferenceAble.h stringtok.h \
 	MEAL/Composite.h                 MEAL/Scalar.h \
 	MEAL/CongruenceTransformation.h  MEAL/ScalarHypCosine.h \
 	MEAL/Constant.h                  MEAL/ScalarHypSine.h \
+	MEAL/CyclicParameter.h \
 	MEAL/EvaluationPolicy.h          MEAL/ScalarHypTangent.h \
 	MEAL/Factory.h                   MEAL/ScalarInverseHypTangent.h \
 	MEAL/ForwardChanged.h            MEAL/ForwardResult.h \
