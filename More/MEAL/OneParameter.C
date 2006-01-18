@@ -39,7 +39,7 @@ MEAL::OneParameter::operator = (const OneParameter& np)
 
 
 //! Set the value of the specified parameter
-void MEAL::OneParameter::set_param (unsigned index, double value)
+void MEAL::OneParameter::set_param (double value)
 {
   if (param.val == value)
     return;

@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/OneParameter.h,v $
-   $Revision: 1.1 $
-   $Date: 2005/04/06 20:13:52 $
+   $Revision: 1.2 $
+   $Date: 2006/01/18 23:22:25 $
    $Author: straten $ */
 
 #ifndef __OneParameter_H
@@ -30,6 +30,51 @@ namespace MEAL {
 
     //! Clone operator
     OneParameter* clone (Function* context) const;
+
+    //! Return the name of the parameter
+    std::string get_param_name () const
+    {
+      return name;
+    }
+
+    //! Return the name of the parameter
+    void set_param_name (const std::string& _name)
+    {
+      name = _name;
+    }
+
+    //! Return the value of the parameter
+    double get_param () const
+    {
+      return param.val;
+    }
+
+    //! Set the value of the parameter
+    void set_param (double value);
+
+    //! Return the variance of the parameter
+    double get_variance () const
+    {
+      return param.var;
+    }
+
+    //! Set the variance of the parameter
+    void set_variance (double value)
+    {
+      param.var = value;
+    }
+
+    //! Return true if parameter is to be fitted
+    bool get_infit () const
+    {
+      return fit;
+    }
+
+    //! Set flag for parameter to be fitted
+    void set_infit (bool flag = true)
+    {
+      fit = flag;
+    }
 
     // ///////////////////////////////////////////////////////////////////
     //
@@ -65,7 +110,11 @@ namespace MEAL {
     }
 
     //! Set the value of the specified parameter
-    void set_param (unsigned index, double value);
+    void set_param (unsigned index, double value) 
+    {
+      range_check (index, "MEAL::OneParameter::set_param");
+      set_param (value);
+    }
 
     //! Return the variance of the specified parameter
     double get_variance (unsigned index) const
