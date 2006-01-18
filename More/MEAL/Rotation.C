@@ -7,7 +7,7 @@ using namespace std;
 void MEAL::Rotation::init ()
 {
   OneParameter* param = new OneParameter (this);
-  param->set_param_name (0, "rotation");
+  param->set_param_name ("rotation");
 }
 
 MEAL::Rotation::Rotation ()
@@ -40,6 +40,13 @@ void MEAL::Rotation::set_phi (double radians)
 double MEAL::Rotation::get_phi () const
 {
   return get_param (0);
+}
+
+void MEAL::Rotation::set_parameter_policy (OneParameter* policy)
+{
+  OneParameter* current = dynamic_cast<OneParameter*>(parameter_policy.get());
+  *policy = *current;
+  parameter_policy = policy;
 }
 
 //! Calculate the Jones matrix and its gradient

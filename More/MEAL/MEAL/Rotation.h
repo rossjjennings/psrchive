@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Rotation.h,v $
-   $Revision: 1.5 $
-   $Date: 2005/08/18 12:10:42 $
+   $Revision: 1.6 $
+   $Date: 2006/01/18 23:22:35 $
    $Author: straten $ */
 
 #ifndef __MEAL_Rotation_H
@@ -12,6 +12,8 @@
 #include "Vector.h"
 
 namespace MEAL {
+
+  class OneParameter;
 
   //! Represents a rotation (unitary, birefringent) transformation
   /*! This class represents the rotation, \f$\phi\f$, about an arbitrary
@@ -34,6 +36,9 @@ namespace MEAL {
 
     //! Get the rotation angle in radians
     double get_phi () const;
+
+    //! Set the parameter management policy
+    void set_parameter_policy (OneParameter* policy);
 
     // ///////////////////////////////////////////////////////////////////
     //
