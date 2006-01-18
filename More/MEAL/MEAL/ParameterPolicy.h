@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/ParameterPolicy.h,v $
-   $Revision: 1.2 $
-   $Date: 2005/12/12 13:35:02 $
+   $Revision: 1.3 $
+   $Date: 2006/01/18 23:22:30 $
    $Author: straten $ */
 
 #ifndef __MEAL_ParameterPolicy_H
@@ -24,6 +24,9 @@ namespace MEAL {
     const ParameterPolicy* get_parameter_policy (const Function*) const;
 
   public:
+
+    //! Install policy upon construction
+    static bool auto_install;
 
     //! Clone constructor
     virtual ParameterPolicy* clone (Function* new_context) const = 0;
