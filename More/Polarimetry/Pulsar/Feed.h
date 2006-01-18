@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/Feed.h,v $
-   $Revision: 1.3 $
-   $Date: 2005/12/09 16:41:06 $
+   $Revision: 1.4 $
+   $Date: 2006/01/18 23:24:53 $
    $Author: straten $ */
 
 #ifndef __Calibration_Feed_H
@@ -36,6 +36,9 @@ namespace Calibration {
 
     //! Destructor
     ~Feed ();
+
+    //! Enforce cyclical limits on parameters
+    void set_cyclic (bool flag = true);
 
     //! Get the orientation, \f$\theta\f$, of the specified receptor (radians)
     Estimate<double> get_orientation (unsigned ireceptor) const;

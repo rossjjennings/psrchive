@@ -3,7 +3,10 @@
 #include "MEAL/ProductRule.h"
 #include "MEAL/Complex2Constant.h"
 #include "MEAL/Rotation.h"
+#include "MEAL/CyclicParameter.h"
+
 #include "Pauli.h"
+#include "ModifyRestore.h"
 
 using namespace std;
 
@@ -78,6 +81,54 @@ Calibration::Feed& Calibration::Feed::operator = (const Feed& feed)
 
 Calibration::Feed::~Feed ()
 {
+}
+
+void Calibration::Feed::set_cyclic (bool flag)
+{
+  // disable automatic installation so that copy can be made
+  ModifyRestore<bool> (MEAL::ParameterPolicy::auto_install, false);
+
+  if (flag) {
+
+    MEAL::CyclicParameter* cyclic = 0;
+
+    for (unsigned ir=0; ir<2; ir++) {
+
+      cyclic = new MEAL::CyclicParameter (ellipticity[ir]);
+
+      cyclic->set_period (M_PI);
+      cyclic->set_upper_bound (M_PI/4);
+      cyclic->set_lower_bound (-M_PI/4);
+
+      ellipticity[ir]->set_parameter_policy (cyclic);
+
+      cyclic = new MEAL::CyclicParameter (orientation[ir]);
+
+      cyclic->set_period (M_PI);
+      cyclic->set_upper_bound (M_PI/2);
+      cyclic->set_lower_bound (-M_PI/2);
+
+      orientation[ir]->set_parameter_policy (cyclic);
+
+    }
+
+  }
+  else {
+
+    MEAL::OneParameter* noncyclic = 0;
+
+    for (unsigned ir=0; ir<2; ir++) {
+
+      noncyclic = new MEAL::OneParameter (ellipticity[ir]);
+      ellipticity[ir]->set_parameter_policy (noncyclic);
+
+      noncyclic = new MEAL::CyclicParameter (orientation[ir]);
+      orientation[ir]->set_parameter_policy (noncyclic);
+
+    }
+
+  }
+
 }
 
 //! Return the name of the class
