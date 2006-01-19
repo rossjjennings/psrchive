@@ -9,12 +9,13 @@
 #include "Pulsar/Profile.h"
 #include "tempo++.h"
 #include "Error.h"
+#include "SignalHandler.h"
 
 #include "genutil.h"
 #include "dirutil.h"
 #include "string_utils.h"
 
-static const char* psradd_args = "ab:c:Ce:f:FG:hiI:LM:O:p:Pqr:sS:tT:vVZ:";
+static const char* psradd_args = "ab:c:Ce:f:FG:hiI:LM:O:p:Pqr:sS:tT:uUvVZ:";
 
 void usage () {
   cout <<
@@ -129,7 +130,7 @@ int main (int argc, char **argv) try {
       return 0;
       
     case 'i':
-      cout << "$Id: psradd.C,v 1.25 2006/01/03 16:02:55 straten Exp $" << endl;
+      cout << "$Id: psradd.C,v 1.26 2006/01/19 15:49:37 hknight Exp $" << endl;
       return 0;
 
     case 'a':
@@ -220,6 +221,17 @@ int main (int argc, char **argv) try {
 
     case 'T':
       Tempo::set_system (optarg);
+      break;
+
+    case 'u':   
+      fprintf(stderr,"Will abort on Error creation\n");
+      Error::complete_abort = true;
+      SignalHandler::add_signal_to_abort_on(SIGSEGV);
+      SignalHandler::add_signal_to_abort_on(SIGFPE);
+      break;
+    case 'U':
+      fprintf(stderr,"Will print message on Error creation\n");
+      Error::verbose = true;
       break;
 
     case 'v':
@@ -517,7 +529,8 @@ int main (int argc, char **argv) try {
 	 << error << endl;
   }
 
-  total->update_model();
+  if( total->has_model() )
+    total->update_model();
 
   if (!reset_total_next_load) try {
 
