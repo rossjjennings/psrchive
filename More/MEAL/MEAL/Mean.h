@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Mean.h,v $
-   $Revision: 1.6 $
-   $Date: 2006/01/12 22:47:14 $
+   $Revision: 1.7 $
+   $Date: 2006/01/19 22:08:19 $
    $Author: straten $ */
 
 #ifndef __MEAL_Mean_H
@@ -28,7 +28,7 @@ namespace MEAL {
     virtual void update (T* model) const = 0;
 
     //! Return the normalized difference between the mean and model
-    virtual double chisq (T* model) const { return 0; }
+    virtual double chisq (const T* model) const { return 0; }
 
   };
 
