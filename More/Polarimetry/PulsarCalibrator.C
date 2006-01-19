@@ -174,8 +174,26 @@ void Pulsar::PulsarCalibrator::add_observation (const Archive* data)
     jones = correct.get_transformation( data, isub );
     corrections.set_value( jones );
 
-    for (unsigned ichan=0; ichan<nchan; ichan++)
+    cerr << "corrections=" << jones << endl;
+
+    // if 5% of the solutions diverge from the mean, clear the mean
+    unsigned clean_mean = nchan/20;
+    big_difference = 0;
+
+    for (unsigned ichan=0; ichan<nchan; ichan++) {
+
       solve (integration, ichan);
+
+      // the current mean is no longer providing a good first guess, clear it!
+      if (big_difference >= clean_mean) {
+	cerr << "Pulsar::PulsarCalibrator::add_observation"
+	  " clearing the current mean" << endl;
+	for (unsigned jchan=ichan+1; jchan<nchan; jchan++)
+	  solution[jchan] = 0;
+	big_difference = 0;
+      }
+
+    }
 
   }
 
@@ -272,18 +290,25 @@ void Pulsar::PulsarCalibrator::solve (const Integration* data, unsigned ichan)
     float chisq = solution[ichan]->chisq(transformation[ichan]);
 
     if (chisq > 5.0) {
-      cerr << "  BIG DIFFERENCE=" << chisq << endl;
-      cerr << "    OLD\t\t\t\tNEW" << endl;
 
-      Calibration::Instrument test;
-      solution[ichan]->update(&test);
+      if (verbose) {
 
-      unsigned nparam = test.get_nparam();
-      for (unsigned ip=1; ip < nparam; ip++)
-	cerr << "  " << ip << " " << test.get_Estimate(ip)
-	     << "\t\t" << transformation[ichan]->get_Estimate(ip) << endl;
+	cerr << "  BIG DIFFERENCE=" << chisq << endl;
+	cerr << "    OLD\t\t\t\tNEW" << endl;
+
+	Calibration::Instrument test;
+	solution[ichan]->update(&test);
+	
+	unsigned nparam = test.get_nparam();
+	for (unsigned ip=1; ip < nparam; ip++)
+	  cerr << "  " << ip << " " << test.get_Estimate(ip)
+	       << "\t\t" << transformation[ichan]->get_Estimate(ip) << endl;
+
+      }
 
       solution[ichan] = 0;
+      big_difference ++;
+
     }
 
   }

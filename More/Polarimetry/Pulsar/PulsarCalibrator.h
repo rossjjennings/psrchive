@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PulsarCalibrator.h,v $
-   $Revision: 1.12 $
-   $Date: 2006/01/19 22:18:59 $
+   $Revision: 1.13 $
+   $Date: 2006/01/19 23:45:24 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PulsarCalibrator_H
@@ -97,6 +97,11 @@ namespace Pulsar {
 
     //! Solve the measurement equation for the given channel
     void solve (const Integration* data, unsigned ichan);
+
+  private:
+
+    // used to communicate between solve and add_observation
+    unsigned big_difference;
 
   };
 
