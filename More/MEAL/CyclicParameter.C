@@ -1,5 +1,7 @@
 #include "MEAL/CyclicParameter.h"
 
+#define _DEBUG 0
+
 using namespace std;
 
 MEAL::CyclicParameter::CyclicParameter (Function* context)
@@ -78,27 +80,31 @@ void MEAL::CyclicParameter::set_param (double value)
 
 void MEAL::CyclicParameter::check (double value)
 {
-  cerr << "MEAL::CyclicParameter::check value=" << value << endl;
-
   if (value > upper_bound) {
+#ifdef _DEBUG
     cerr << "MEAL::CyclicParameter::check value=" << value 
 	 << " > upper=" << upper_bound << endl;
+#endif
     unsigned turns = unsigned((value-upper_bound)/period) + 1;
-    cerr << "MEAL::CyclicParameter::check turns=" << turns << endl;
     value -= turns * period;
-    cerr << "MEAL::CyclicParameter::check new value=" << value << endl;
+#ifdef _DEBUG
+    cerr << "MEAL::CyclicParameter::check turns=" << turns 
+	 << " new value=" << value << endl;
+#endif
   }
 
   if (value < lower_bound) {
+#ifdef _DEBUG
     cerr << "MEAL::CyclicParameter::check value=" << value 
 	 << " < lower=" << lower_bound << endl;
+#endif
     unsigned turns = unsigned((lower_bound-value)/period) + 1;
-    cerr << "MEAL::CyclicParameter::check turns=" << turns << endl;
     value += turns * period;
-    cerr << "MEAL::CyclicParameter::check new value=" << value << endl;
+#ifdef _DEBUG
+    cerr << "MEAL::CyclicParameter::check turns=" << turns 
+	 << " new value=" << value << endl;
+#endif
   }
-
-  cerr << "MEAL::CyclicParameter::check call OneParameter::set_param" << endl;
 
   OneParameter::set_param (value);
 }
@@ -116,13 +122,20 @@ void MEAL::CyclicParameter::check_elevation ()
 {
   double value = OneParameter::get_param ();
 
-  cerr << "MEAL::CyclicParameter::check_elevation value=" << value << endl;
   if (value > upper_bound) {
+#ifdef _DEBUG
+    cerr << "MEAL::CyclicParameter::check_elevation value=" << value 
+	 << " > upper=" << upper_bound << endl;
+#endif
     value = 0.5 * period - value;
     azimuth->set_param(azimuth->get_param() + 0.5 * azimuth->period);
     OneParameter::set_param (value);
   }
   if (value < lower_bound) {
+#ifdef _DEBUG
+    cerr << "MEAL::CyclicParameter::check_elevation value=" << value 
+	 << " < lower=" << lower_bound << endl;
+#endif
     value = -0.5 * period - value;
     azimuth->set_param(azimuth->get_param() + 0.5 * azimuth->period);
     OneParameter::set_param (value);
