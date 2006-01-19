@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/SingleAxis.h,v $
-   $Revision: 1.4 $
-   $Date: 2005/12/09 16:41:06 $
+   $Revision: 1.5 $
+   $Date: 2006/01/19 22:19:04 $
    $Author: straten $ */
 
 #ifndef __Calibration_SingleAxis_H
@@ -47,6 +47,8 @@ namespace Calibration {
     //! Destructor
     ~SingleAxis ();
 
+    //! Set cyclical bounds on the differential phase
+    void set_cyclic (bool flag = true);
 
     /** @name Free parameters
      *  These parameters may be varied during least-squares minimization

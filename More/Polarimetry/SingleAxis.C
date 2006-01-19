@@ -2,6 +2,7 @@
 #include "MEAL/Gain.h"
 #include "MEAL/Boost.h"
 #include "MEAL/Rotation.h"
+#include "MEAL/CyclicParameter.h"
 
 #include "Pauli.h"
 #include "Error.h"
@@ -123,6 +124,32 @@ Vector<3, double> Calibration::SingleAxis::get_axis () const
 {
   return boost->get_axis ();
 }
+
+void Calibration::SingleAxis::set_cyclic (bool flag)
+{
+  if (flag) {
+
+    // set up the cyclic boundary for orientation
+    MEAL::CyclicParameter* cyclic = 0;
+    cyclic = new MEAL::CyclicParameter (rotation);
+    rotation->set_parameter_policy (cyclic);
+
+    cyclic->set_period (M_PI);
+    cyclic->set_upper_bound (M_PI/2);
+    cyclic->set_lower_bound (-M_PI/2);
+    
+    
+  }
+  else {
+
+    MEAL::OneParameter* noncyclic = 0;
+    noncyclic = new MEAL::OneParameter (rotation);
+    rotation->set_parameter_policy (noncyclic);
+
+  }
+
+}
+
 
 /*! Given the output coherency products (and cross products) of the
   input linear calibrator, S=[I=1,Q=0,U=1,V=0], this method solves for

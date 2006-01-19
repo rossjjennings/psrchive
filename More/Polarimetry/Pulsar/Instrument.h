@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/Instrument.h,v $
-   $Revision: 1.3 $
-   $Date: 2005/12/09 16:41:06 $
+   $Revision: 1.4 $
+   $Date: 2006/01/19 22:19:04 $
    $Author: straten $ */
 
 #ifndef __CalibrationInstrument_H
@@ -45,6 +45,9 @@ namespace Calibration {
 
     //! Model the orientations of both receptors using the same value
     void equal_orientations ();
+
+    //! Set cyclical limits on the model parameters
+    void set_cyclic (bool flag = true);
 
     //! Get the instrumental gain, \f$ G \f$, in calibrator flux units
     Estimate<double> get_gain () const;

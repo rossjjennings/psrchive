@@ -153,6 +153,11 @@ void Calibration::Instrument::equal_orientations ()
   chain->set_constraint (2, orientations);
 }
 
+void Calibration::Instrument::set_cyclic (bool flag)
+{
+  feed->set_cyclic (flag);
+  backend->set_cyclic (flag);
+}
 
 Calibration::Feed* Calibration::Instrument::get_feed ()
 {
