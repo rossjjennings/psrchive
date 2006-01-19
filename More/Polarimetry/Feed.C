@@ -90,25 +90,30 @@ void Calibration::Feed::set_cyclic (bool flag)
 
   if (flag) {
 
-    MEAL::CyclicParameter* cyclic = 0;
 
     for (unsigned ir=0; ir<2; ir++) {
 
-      cyclic = new MEAL::CyclicParameter (ellipticity[ir]);
+      // set up the cyclic boundary for orientation
+      MEAL::CyclicParameter* o_cyclic = 0;
+      o_cyclic = new MEAL::CyclicParameter (orientation[ir]);
 
-      cyclic->set_period (M_PI);
-      cyclic->set_upper_bound (M_PI/4);
-      cyclic->set_lower_bound (-M_PI/4);
+      o_cyclic->set_period (M_PI);
+      o_cyclic->set_upper_bound (M_PI/2);
+      o_cyclic->set_lower_bound (-M_PI/2);
 
-      ellipticity[ir]->set_parameter_policy (cyclic);
+      orientation[ir]->set_parameter_policy (o_cyclic);
 
-      cyclic = new MEAL::CyclicParameter (orientation[ir]);
+      // set up the cyclic boundary for ellipticity
+      MEAL::CyclicParameter* e_cyclic = 0;
+      e_cyclic = new MEAL::CyclicParameter (ellipticity[ir]);
 
-      cyclic->set_period (M_PI);
-      cyclic->set_upper_bound (M_PI/2);
-      cyclic->set_lower_bound (-M_PI/2);
+      e_cyclic->set_period (M_PI);
+      e_cyclic->set_upper_bound (M_PI/4);
+      e_cyclic->set_lower_bound (-M_PI/4);
+      e_cyclic->set_azimuth (o_cyclic);
 
-      orientation[ir]->set_parameter_policy (cyclic);
+      ellipticity[ir]->set_parameter_policy (e_cyclic);
+
 
     }
 
