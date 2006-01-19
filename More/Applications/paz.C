@@ -11,9 +11,14 @@
 
 #include <unistd.h>
 
+// Extensions this program understands
+
+#include "Pulsar/ProcHistory.h"
+
 void usage ()
 {
-  cout << "A program for zapping RFI in Pulsar::Archives\n"
+  cout << "A program for zapping RFI in Pulsar::Archives. Changes\n"
+	"will be noted in the history of PSRFITS files.\n"
     "Usage: paz [options] filenames\n"
     "  -h               This help page\n"
     "  -v               Verbose mode\n"
@@ -109,6 +114,8 @@ int main (int argc, char *argv[]) {
 
   const char* args = "8C:dDe:E:hIik:mnp:P:rR:s:S:u:vVw:W:x:X:z:Z:";
 
+	string command = "paz";
+
   while ((gotc = getopt(argc, argv, args)) != -1) {
     switch (gotc) {
     case 'h':
@@ -123,23 +130,29 @@ int main (int argc, char *argv[]) {
       Pulsar::Archive::set_verbosity(3);
       break;
     case 'i':
-      cout << "$Id: paz.C,v 1.30 2005/12/14 16:15:30 straten Exp $" << endl;
+      cout << "$Id: paz.C,v 1.31 2006/01/19 03:18:44 ateoh Exp $" << endl;
       return 0;
 
     case 'm':
       write = true;
+			command += " -m";
       break;
 
     case 'I':
       zero_intersection = true;
+			command += " -I";
       break;
 
     case 'k':
       killfile = optarg;
       zero_channels = true;
+			command += " -k ";
+			command += optarg;
       break;
 
     case 'z':
+			command += " -z ";
+			command += optarg;
       key = strtok (optarg, whitespace);
       zero_channels = true;
       while (key) {
@@ -153,11 +166,14 @@ int main (int argc, char *argv[]) {
     case 'e':
       write = true;
       ext = optarg;
+			command += " -e ";
+			command += optarg;
       break;
 
     case '8':
       // The aim here is to zero every eight time bins starting from number 6
       eightBinZap = true;
+			command += " -8";
       break;
 
     case 'p':
@@ -169,6 +185,8 @@ int main (int argc, char *argv[]) {
 	  cerr << "Invalid parameter to option -Z" << endl;
 	  return (-1);
 	}
+			command += " -p ";
+			command += optarg;
 	break;
       }
     case 'Z':
@@ -185,9 +203,13 @@ int main (int argc, char *argv[]) {
 	for( unsigned i=first; i<=last; i++)
 	  chans_to_zap.push_back( i );
       }
+			command += " -Z ";
+			command += optarg;
       break;
 
     case 'x':
+			command += " -x ";
+			command += optarg;
       key = strtok (optarg, whitespace);
       nozap_subints = true;
       while (key) {
@@ -212,20 +234,25 @@ int main (int argc, char *argv[]) {
 	for( unsigned i=first; i<=last; i++)
 	  subs_nozap.push_back( i );
       }
+			command += " -X ";
+			command += optarg;
       break;
 
     case 'd':
       simple = true;
+			command += " -d";
       break;
 
     case 'n':
       if (!modulation_zapper)
 	modulation_zapper = new Pulsar::ChannelZapModulation;
+			command += " -n";
       break;
 
     case 'r':
       if (!median_zapper)
 	median_zapper = new Pulsar::ChannelZapMedian;
+			command += " -r";
       break;
 
     case 'R': {
@@ -235,6 +262,8 @@ int main (int argc, char *argv[]) {
 	median_zapper = new Pulsar::ChannelZapMedian;
 
       median_zapper->set_window_size ( window );
+			command += " -R ";
+			command += optarg;
       break;
     }
 
@@ -242,6 +271,8 @@ int main (int argc, char *argv[]) {
       ulpath = optarg;
       if (ulpath.substr(ulpath.length()-1,1) != "/")
 	ulpath += "/";
+			command += " -u ";
+			command += optarg;
       break;
 
     case 'E':
@@ -254,9 +285,13 @@ int main (int argc, char *argv[]) {
 	cerr << "Invalid parameter to option -e" << endl;
         return (-1);
       }
+			command += " -E ";
+			command += optarg;
       break;
 
     case 's':
+			command += " -s ";
+			command += optarg;
       key = strtok (optarg, whitespace);
       zap_subints = true;
       while (key) {
@@ -281,9 +316,13 @@ int main (int argc, char *argv[]) {
 	for( unsigned i=first; i<=last; i++)
 	  subs_to_zap.push_back( i );
       }
+			command += " -S ";
+			command += optarg;
       break;
 
     case 'w':
+			command += " -w ";
+			command += optarg;
       key = strtok (optarg, whitespace);
       zero_subints = true;
       while (key) {
@@ -309,6 +348,8 @@ int main (int argc, char *argv[]) {
 	for( unsigned i=first; i<=last; i++)
 	  subs_to_zap.push_back( i );
       }
+			command += " -W ";
+			command += optarg;
       break;
 
     case 'C':
@@ -317,6 +358,8 @@ int main (int argc, char *argv[]) {
 	cerr << "Invalid parameter to option -S" << endl;
         return (-1);
       }
+			command += " -C ";
+			command += optarg;
       break;
 
     case 'P':
@@ -339,6 +382,8 @@ int main (int argc, char *argv[]) {
 	cout << "Could not load given standard profile" << endl;
 	std_given = false;
       }
+			command += " -P ";
+			command += optarg;
       break;
 
     default:
@@ -551,6 +596,24 @@ int main (int argc, char *argv[]) {
     if (!write)
       continue;
     
+		/////////////////////////////////////////////////////////////////
+		// See if the archive contains a history that should be updated:
+
+		Pulsar::ProcHistory* fitsext = arch->get<Pulsar::ProcHistory>();
+
+		if (fitsext) {
+
+	  	if (command.length() > 80) {
+	    	cout << "WARNING: ProcHistory command string truncated to 80 chars" 
+			 << endl;
+	    	fitsext->set_command_str(command.substr(0, 80));
+	  	}
+	  	else {
+	    	fitsext->set_command_str(command);
+	  	}
+
+		}
+
     if (ext.empty()) {
       cout << "Unloading " << arch->get_filename() << " ..." << endl;
       arch->unload();
