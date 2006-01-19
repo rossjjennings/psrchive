@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PulsarCalibrator.h,v $
-   $Revision: 1.11 $
-   $Date: 2006/01/12 21:35:43 $
+   $Revision: 1.12 $
+   $Date: 2006/01/19 22:18:59 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PulsarCalibrator_H
@@ -65,6 +65,9 @@ namespace Pulsar {
     
     //! Initialize the PolnCalibration::transformation attribute
     virtual void calculate_transformation ();
+
+    //! Return a pointer to a newly constructed/initialized transformation
+    MEAL::Complex2* new_transformation () const;
 
     //! The calibration model as a function of frequency
     std::vector< Reference::To<PolnProfileFit> > model;

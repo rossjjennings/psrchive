@@ -8,6 +8,7 @@
 
 #include "Calibration/Instrument.h"
 #include "Calibration/MeanInstrument.h"
+
 #include "MEAL/Complex2Math.h"
 
 //! Constructor
@@ -181,6 +182,13 @@ void Pulsar::PulsarCalibrator::add_observation (const Archive* data)
   built = false;
 }
 
+MEAL::Complex2* Pulsar::PulsarCalibrator::new_transformation () const
+{
+  Calibration::Instrument* instrument = new Calibration::Instrument;
+  instrument->set_cyclic();
+  return instrument;
+}
+
 void Pulsar::PulsarCalibrator::solve (const Integration* data, unsigned ichan)
 {
   if (!model[ichan]) {
@@ -203,7 +211,7 @@ void Pulsar::PulsarCalibrator::solve (const Integration* data, unsigned ichan)
   for (unsigned tries=0 ; tries < 2; tries ++) try {
 
     if (!transformation[ichan]) {
-      transformation[ichan] = new Calibration::Instrument;
+      transformation[ichan] = new_transformation();
       model[ichan]->set_transformation (transformation[ichan] * &corrections);
     }
 
@@ -238,6 +246,7 @@ void Pulsar::PulsarCalibrator::solve (const Integration* data, unsigned ichan)
       break;
 
     solution[ichan] = 0;
+
   }
   catch (Error& error) {
     cerr << "Pulsar::PulsarCalibrator::solve ichan="
@@ -286,7 +295,6 @@ void Pulsar::PulsarCalibrator::solve (const Integration* data, unsigned ichan)
   
 }
 
-
 //! Set the flag to return the mean solution or the last fit
 void Pulsar::PulsarCalibrator::set_return_mean_solution (bool return_mean)
 {
@@ -299,7 +307,7 @@ void Pulsar::PulsarCalibrator::update_solution ()
   for (unsigned ichan=0; ichan < nchan; ichan++) {
     if (solution[ichan]) {
       if (!transformation[ichan])
-	transformation[ichan] = new Calibration::Instrument;
+	transformation[ichan] = new_transformation ();
       solution[ichan]->update( transformation[ichan] );
     }
   }
