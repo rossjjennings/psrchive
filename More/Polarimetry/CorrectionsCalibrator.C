@@ -61,10 +61,22 @@ bool Pulsar::CorrectionsCalibrator::needs_correction (const Archive* archive,
   // determine if it is necesary to correct for known receptor projections
   
   should_correct_receptors = 
-    receiver->get_orientation() != 0 || receiver->get_right_handed() != 0;
+    receiver->get_orientation() != 0 || !receiver->get_right_handed();
+
+  if (verbose)
+    cerr << "Pulsar::CorrectionsCalibrator::needs_correction"
+      "\n  orientation=" << receiver->get_orientation() <<
+      "\n  righthanded=" << receiver->get_right_handed() <<
+      "\n  -> should_correct_receptors=" << should_correct_receptors << endl;
 
   must_correct_feed =
     !receiver->get_feed_corrected() && should_correct_receptors;
+
+  if (verbose)
+    cerr << "Pulsar::CorrectionsCalibrator::needs_correction"
+      "\n  feed_corrected=" << receiver->get_feed_corrected() <<
+      "\n  should_correct_receptors=" << should_correct_receptors <<
+      "\n  -> must_correct_feed=" << must_correct_feed << endl;
 
   // return true if feed or platform needs correction
   return must_correct_feed || must_correct_platform;
@@ -141,7 +153,7 @@ Pulsar::CorrectionsCalibrator::get_feed_transformation (const Pointing* point,
   }
   else if (rcvr) {
     if (verbose)
-      cerr << "Pulsar::CorrectionsCalibrator::get_transformation\n"
+      cerr << "Pulsar::CorrectionsCalibrator::get_feed_transformation\n"
         "   using Receiver::tracking_angle="
            << rcvr->get_tracking_angle().getDegrees() << " deg" << endl;
     feed_rotation = rcvr->get_tracking_angle().getRadians();
@@ -180,7 +192,7 @@ Jones<double>
 Pulsar::CorrectionsCalibrator::get_transformation (const Archive* archive,
 						   unsigned isub)
 {
-  if (Archive::verbose == 3)
+  if (verbose)
     cerr << "Pulsar::CorrectionsCalibrator::get_transformation" << endl;
 
   // the identity matrix
@@ -220,13 +232,19 @@ Pulsar::CorrectionsCalibrator::get_transformation (const Archive* archive,
   Pauli::basis.set_basis( (Basis<double>::Type) receiver->get_basis() );
 
   if (must_correct_feed)  {
+    Jones<double> jones = receiver->get_transformation();
     if (verbose)
       cerr << "Pulsar::CorrectionsCalibrator::get_transformation"
-              " adding Receiver transformation" << endl;
-    xform *= receiver->get_transformation();
+	" adding receiver transformation\n  " << jones << endl;
+    xform *= jones;
   }
 
-  xform *= get_feed_transformation (pointing, receiver);
+  Jones<double> jones = get_feed_transformation (pointing, receiver);
+  if (verbose)
+    cerr << "Pulsar::CorrectionsCalibrator::get_transformation"
+      " adding feed transformation\n  " << jones << endl;
+
+  xform *= jones;
 
   if (must_correct_platform && should_correct_projection)
     throw Error (InvalidState, "Pulsar::CorrectionsCalibrator::calibrate",
@@ -255,6 +273,10 @@ Pulsar::CorrectionsCalibrator::get_transformation (const Archive* archive,
 	   << pointing->get_parallactic_angle().getDegrees() << "deg "
 	   << " != " << pa.getDegrees() << "deg calculated for MJD="
 	   << integration->get_epoch() << endl;
+    
+    if (verbose)
+      cerr << "Pulsar::CorrectionsCalibrator::get_transformation"
+	" adding vertical transformation\n  " << para.evaluate() << endl;
     
     xform *= para.evaluate();
      
