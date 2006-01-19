@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/OneParameter.h,v $
-   $Revision: 1.2 $
-   $Date: 2006/01/18 23:22:25 $
+   $Revision: 1.3 $
+   $Date: 2006/01/19 15:06:19 $
    $Author: straten $ */
 
 #ifndef __OneParameter_H
@@ -44,13 +44,13 @@ namespace MEAL {
     }
 
     //! Return the value of the parameter
-    double get_param () const
+    virtual double get_param () const
     {
       return param.val;
     }
 
     //! Set the value of the parameter
-    void set_param (double value);
+    virtual void set_param (double value);
 
     //! Return the variance of the parameter
     double get_variance () const
@@ -106,7 +106,7 @@ namespace MEAL {
     double get_param (unsigned index) const
     {
       range_check (index, "MEAL::OneParameter::get_param");
-      return param.val;
+      return get_param ();
     }
 
     //! Set the value of the specified parameter
