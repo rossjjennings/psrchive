@@ -1,14 +1,15 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/CyclicParameter.h,v $
-   $Revision: 1.1 $
-   $Date: 2006/01/18 23:22:14 $
+   $Revision: 1.2 $
+   $Date: 2006/01/19 15:06:04 $
    $Author: straten $ */
 
 #ifndef __CyclicParameter_H
 #define __CyclicParameter_H
 
 #include "MEAL/OneParameter.h"
+#include "Reference.h"
 
 namespace MEAL {
   
@@ -41,19 +42,28 @@ namespace MEAL {
     //! Set the period of the parameter value
     void set_period (double period);
 
+    //! Set the matching azimuth and behave like an elevation
+    void set_azimuth (CyclicParameter* azimuth);
+
     // ///////////////////////////////////////////////////////////////////
     //
-    // Function implementation
+    // OneParameter implementation
     //
     // ///////////////////////////////////////////////////////////////////
 
-    //! Set the value of the specified parameter
-    void set_param (unsigned index, double value);
+    //! Set the value of the parameter
+    void set_param (double value);
+
+    //! Get the value of the parameter
+    double get_param () const;
 
   protected:
 
     //! Ensure that the value is within the bounds
     void check (double value);
+
+    //! Check to see if elevation needs correction
+    void check_elevation ();
 
   private:
 
@@ -65,6 +75,9 @@ namespace MEAL {
 
     //! The period of the parameter value
     double period;
+
+    //! The matching azimuth parameter
+    Reference::To<CyclicParameter, false> azimuth;
 
   };
 
