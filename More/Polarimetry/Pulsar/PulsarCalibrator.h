@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PulsarCalibrator.h,v $
-   $Revision: 1.13 $
-   $Date: 2006/01/19 23:45:24 $
+   $Revision: 1.14 $
+   $Date: 2006/01/20 00:34:24 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PulsarCalibrator_H
@@ -12,6 +12,8 @@
 
 #include "MEAL/Complex2Value.h"
 #include "MEAL/Mean.h"
+
+#include <stdio.h>
 
 namespace Pulsar {
 
@@ -61,6 +63,9 @@ namespace Pulsar {
     //! Set the solution to the mean
     void update_solution ();
 
+    //! File to which arrival time estimates should be written
+    void set_tim_file (FILE* fptr) { tim_file = fptr; }
+
   protected:
     
     //! Initialize the PolnCalibration::transformation attribute
@@ -102,6 +107,12 @@ namespace Pulsar {
 
     // used to communicate between solve and add_observation
     unsigned big_difference;
+
+    //! File to which arrival time estimates should be written
+    FILE* tim_file;
+
+    //! Archive instance that is currently in use
+    const Archive* archive;
 
   };
 

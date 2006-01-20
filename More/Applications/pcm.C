@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pcm.C,v $
-   $Revision: 1.46 $
-   $Date: 2006/01/11 17:30:55 $
+   $Revision: 1.47 $
+   $Date: 2006/01/20 00:34:24 $
    $Author: straten $ */
 
 /*! \file pcm.C 
@@ -57,6 +57,7 @@
 #include <iostream>
 #include <algorithm>
 #include <unistd.h>
+#include <errno.h>
 
 static string Britton = "Britton";
 static string Hamaker = "Hamaker";
@@ -97,6 +98,7 @@ void usage ()
     "  -S fname   filename of calibrated standard \n"
     "  -H         allow software to choose the number of harmonics \n"
     "  -n nbin    set the number of harmonics to use as input states \n"
+    "  -T toa.tim filename to which arrival time estimates will be written \n"
        << endl;
 }
 
@@ -270,6 +272,9 @@ bool choose_maximum_harmonic = false;
 //! The Stokes parameters to be inverted
 Pulsar::ReflectStokes reflections;
 
+// Name of file to which arrival time estimates will be written
+char* tim_file = 0;
+
 int main (int argc, char *argv[]) try {
 
   Error::verbose = false;
@@ -316,7 +321,7 @@ int main (int argc, char *argv[]) try {
   bool publication_plots = false;
 
   int gotc = 0;
-  const char* args = "a:b:c:C:d:Df:gHhM:m:N:n:OPp:qrsS:t:uvV:";
+  const char* args = "a:b:c:C:d:Df:gHhM:m:N:n:OPp:qrsS:t:T:uvV:";
   while ((gotc = getopt(argc, argv, args)) != -1) {
     switch (gotc) {
 
@@ -425,6 +430,10 @@ int main (int argc, char *argv[]) try {
       break;
 
     }
+
+    case 'T':
+      tim_file = optarg;
+      break;
 
     case 'q':
       measure_cal_Q = false;
@@ -914,6 +923,16 @@ int mode_B (const char* standard_filename,
 
   model.set_choose_maximum_harmonic (choose_maximum_harmonic);
   model.set_return_mean_solution (false);
+
+  if (tim_file) {
+    FILE* fptr = fopen (tim_file, "w");
+    if (!fptr) {
+      fprintf (stderr, "pcm: could not open '%s': %s\n", tim_file,
+	       strerror(errno));
+      return -1;
+    }
+    model.set_tim_file (fptr);
+  }
 
   Reference::To<Pulsar::Archive> standard;
 

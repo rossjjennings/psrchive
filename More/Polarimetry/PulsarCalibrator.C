@@ -11,6 +11,9 @@
 
 #include "MEAL/Complex2Math.h"
 
+#include "genutil.h"
+#include "toa.h"
+
 //! Constructor
 Pulsar::PulsarCalibrator::PulsarCalibrator (Calibrator::Type model)
 {
@@ -18,11 +21,14 @@ Pulsar::PulsarCalibrator::PulsarCalibrator (Calibrator::Type model)
   maximum_harmonic = 0;
   choose_maximum_harmonic = false;
   mean_solution = true;
+  tim_file = 0;
 }
 
 //! Constructor
 Pulsar::PulsarCalibrator::~PulsarCalibrator ()
 {
+  if (tim_file)
+    fclose (tim_file);
 }
 
 //! Return the reference epoch of the calibration experiment
@@ -166,6 +172,9 @@ void Pulsar::PulsarCalibrator::add_observation (const Archive* data)
   unsigned nsub = data->get_nsubint ();
   unsigned nchan = data->get_nchan ();
 
+  if (tim_file)
+    archive = data;
+
   for (unsigned isub=0; isub<nsub; isub++) {
 
     const Integration* integration = data->get_Integration (isub);
@@ -173,8 +182,6 @@ void Pulsar::PulsarCalibrator::add_observation (const Archive* data)
     Jones<double> jones;
     jones = correct.get_transformation( data, isub );
     corrections.set_value( jones );
-
-    cerr << "corrections=" << jones << endl;
 
     // if 5% of the solutions diverge from the mean, clear the mean
     unsigned clean_mean = nchan/20;
@@ -184,7 +191,7 @@ void Pulsar::PulsarCalibrator::add_observation (const Archive* data)
 
       solve (integration, ichan);
 
-      // the current mean is no longer providing a good first guess, clear it!
+      // the current mean is no longer providing a good first guess; clear it!
       if (big_difference >= clean_mean) {
 	cerr << "Pulsar::PulsarCalibrator::add_observation"
 	  " clearing the current mean" << endl;
@@ -281,9 +288,34 @@ void Pulsar::PulsarCalibrator::solve (const Integration* data, unsigned ichan)
     cerr << "  " << ip << " " << transformation[ichan]->get_Estimate(ip)
 	 << endl;
 
-  cerr << "  chisq=" << reduced_chisq << " phase = " 
-       << model[ichan]->get_phase() << endl;
 #endif
+
+  if (tim_file) {
+
+    // produce a TOA!
+
+    Tempo::toa toa (Tempo::toa::Parkes);
+
+    double freq = data->get_centre_frequency (ichan);
+    toa.set_frequency (freq);
+
+    double period = data->get_folding_period();
+    Estimate<double> phase = model[ichan]->get_phase();
+
+    toa.set_arrival   (data->get_epoch() + phase.val * period);
+    toa.set_error     (sqrt(phase.var) * period * 1e6);
+
+    toa.set_telescope (archive->get_telescope_code());
+
+    string aux = basename (archive->get_filename());
+    toa.set_auxilliary_text (aux);
+
+    toa.unload (tim_file);
+
+    cerr << aux << " freq = " << freq << " chisq = " << reduced_chisq 
+	 << " phase = " << phase.val << " +/- " << phase.get_error() << endl;
+
+  }
 
   if (solution[ichan]) {
 
