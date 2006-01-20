@@ -130,10 +130,13 @@ void Pulsar::PolnCalibratorExtension::construct ()
          << response.size() << " type=" 
          << Calibrator::Type2str (get_type()) << endl;
 
+  nparam = 0;
+
   for (unsigned ichan=0; ichan<response.size(); ichan++)
     response[ichan] = new_transformation();
 
-  nparam = response[0]->get_nparam();
+  if (response.size())
+    nparam = response[0]->get_nparam();
 }
 
 
