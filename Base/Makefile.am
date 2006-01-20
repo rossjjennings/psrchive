@@ -135,7 +135,7 @@ endif
 #
 # programs
 #
-bin_PROGRAMS = psr_template pac paz vap vip psredit psradd fadd pat pam \
+bin_PROGRAMS = psr_template pac paz vap pcq vip psredit psradd fadd pat pam \
         psrdiff fluxcal fix_coords test_Difference fix_hydra sesdiv \
         fix_3C353 archive_correct archive_denoise \
         fix_fluxcal archive_split psrconv pascii \
@@ -162,6 +162,7 @@ psrconv_SOURCES			= psrconv.C
 sesdiv_SOURCES			= sesdiv.C
 vap_SOURCES			= vap.C
 vip_SOURCES			= vip.C
+pcq_SOURCES			= pcq.C
 psredit_SOURCES			= psredit.C
 parInfo_SOURCES                 = parInfo.C
 psrdiff_SOURCES			= psrdiff.C
