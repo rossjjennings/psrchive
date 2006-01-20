@@ -86,7 +86,7 @@ int main (int argc, char** argv)
   // verbosity flag
   bool verbose = false;
   char c;
-  while ((c = getopt(argc, argv, "2:a:c:CD:dfhi:MPr:pqvV")) != -1)  {
+  while ((c = getopt(argc, argv, "2:a:c:CD:dfhi:M:Pr:pqvV")) != -1)  {
 
     switch (c)  {
 
