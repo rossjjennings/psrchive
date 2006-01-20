@@ -1,5 +1,5 @@
 //
-// $Id: pav.C,v 1.105 2005/12/14 16:14:58 straten Exp $
+// $Id: pav.C,v 1.106 2006/01/20 09:24:50 hknight Exp $
 //
 // The Pulsar Archive Viewer
 //
@@ -124,6 +124,7 @@ void usage ()
     "                    6 -> Alien Glow\n"
     " --ystretch y   Stretch y-axis limits by this factor [1.0]\n"
     " --no_prof_axes Don't show the profile axes (for -D option only)\n"
+    " --hist         Plot '-D' as histogram [false]\n"
     "\n"
     "Archive::Extension options (file format specific):\n"
     " -o        Plot the original bandpass\n"
@@ -216,6 +217,7 @@ int main (int argc, char** argv)
   bool all_subints        = false;
   bool show_profile_axes  = true;
   float spectrum_gamma = 1.0;
+  bool do_histogram_plot  = false;
 
   Reference::To<Pulsar::Archive> std_arch;
   Reference::To<Pulsar::Profile> std_prof;
@@ -246,6 +248,7 @@ int main (int argc, char** argv)
   const int LONGITUDE_DEGREES = 1019;
   const int ERROR_BOX = 1020;
   const int PA_AND_HALF = 1021;
+  const int HIST = 1022;
 
   static struct option long_options[] = {
     { "convert_binphsperi", 1, 0, 200 },
@@ -271,6 +274,7 @@ int main (int argc, char** argv)
     { "spec",               0, 0, PROFILE_SPECTRUM},
     { "specgamma",          required_argument, 0, SPECTRUM_GAMMA},
     { "no_prof_axes",       no_argument, 0, NO_PROFILE_AXES},
+    { "hist",               no_argument,       0, HIST},
     { 0, 0, 0, 0 }
   };
     
@@ -351,7 +355,7 @@ int main (int argc, char** argv)
       plotter.set_subint( atoi (optarg) );
       break;
     case 'i':
-      cout << "$Id: pav.C,v 1.105 2005/12/14 16:14:58 straten Exp $" << endl;
+      cout << "$Id: pav.C,v 1.106 2006/01/20 09:24:50 hknight Exp $" << endl;
       return 0;
 
     case 'j':
@@ -669,9 +673,12 @@ int main (int argc, char** argv)
     case SPECTRUM_GAMMA:
       spectrum_gamma = atof(optarg);
       break;
-		case NO_PROFILE_AXES:
-			show_profile_axes = false;
-			break;
+    case NO_PROFILE_AXES:
+      show_profile_axes = false;
+      break;
+    case HIST:
+      plotter.set_do_histogram_plot( true );
+      break;
     default:
       cerr << "pav: unrecognized option" << endl;
       return -1; 
