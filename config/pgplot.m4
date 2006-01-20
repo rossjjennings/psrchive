@@ -62,6 +62,13 @@ AC_DEFUN([SWIN_LIB_PGPLOT],
                 have_pgplot=yes, have_pgplot=no)
   fi
 
+  if test $have_pgplot = no; then
+    PGPLOT_LIBS="$PGPLOT_LIBS $X_LIBS -lX11 -lpng"
+    LIBS="$ac_save_LIBS $PGPLOT_LIBS"
+    AC_TRY_LINK([#include <cpgplot.h>],[cpgopen(""); cpgend();],
+                have_pgplot=yes, have_pgplot=no)
+  fi
+
   AC_MSG_RESULT($have_pgplot)
 
   LIBS="$ac_save_LIBS"
