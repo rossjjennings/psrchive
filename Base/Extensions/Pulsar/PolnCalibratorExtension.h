@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/PolnCalibratorExtension.h,v $
-   $Revision: 1.16 $
-   $Date: 2005/12/09 16:41:06 $
+   $Revision: 1.17 $
+   $Date: 2006/01/20 20:50:09 $
    $Author: straten $ */
 
 #ifndef __PolnCalibratorExtension_h
@@ -50,6 +50,9 @@ namespace Pulsar {
     //! Set the weight of the specified channel
     void set_weight (unsigned ichan, float weight);
 
+    //! Get the number of parameters describing each transformation
+    unsigned get_nparam () const;
+
     //! Return true if the transformation for the specified channel is valid
     bool get_valid (unsigned ichan) const;
     void set_valid (unsigned ichan, bool valid);
@@ -66,6 +69,9 @@ namespace Pulsar {
 
     //! Return a new MEAL::Complex2 instance, based on type attribute
     MEAL::Complex2* new_transformation ();
+
+    //! The number of parameters that describe the transformation
+    unsigned nparam;
 
     //! Construct the response array according to the current attributes
     void construct ();

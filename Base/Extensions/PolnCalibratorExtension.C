@@ -9,6 +9,7 @@ Pulsar::PolnCalibratorExtension::PolnCalibratorExtension ()
   : CalibratorExtension ("PolnCalibratorExtension")
 {
   type = Calibrator::SingleAxis;
+  nparam = 0;
 }
 
 //! Copy constructor
@@ -29,6 +30,7 @@ Pulsar::PolnCalibratorExtension::operator=
 
   type = copy.get_type();
   epoch = copy.get_epoch();
+  nparam = copy.get_nparam();
 
   unsigned nchan = copy.get_nchan();
 
@@ -55,6 +57,7 @@ void Pulsar::PolnCalibratorExtension::set_type (Calibrator::Type _type)
     return;
 
   type = _type;
+  nparam = 0;
   construct ();
 }
 
@@ -97,6 +100,12 @@ void Pulsar::PolnCalibratorExtension::set_valid (unsigned ichan, bool valid)
     response[ichan] = new_transformation ();
 }
 
+unsigned Pulsar::PolnCalibratorExtension::get_nparam () const
+{
+  if (!nparam)
+    const_cast<PolnCalibratorExtension*>(this)->construct();
+  return nparam;
+}
 
 //! Get the transformation for the specified frequency channel
 ::MEAL::Complex2* 
@@ -124,6 +133,7 @@ void Pulsar::PolnCalibratorExtension::construct ()
   for (unsigned ichan=0; ichan<response.size(); ichan++)
     response[ichan] = new_transformation();
 
+  nparam = response[0]->get_nparam();
 }
 
 
