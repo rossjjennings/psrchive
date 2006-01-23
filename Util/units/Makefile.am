@@ -79,7 +79,7 @@ check_PROGRAMS = test_Error test_HeapTracked test_Reference		 \
 	test_TextInterface test_parse_indeces test_Estimate test_Vector	 \
 	test_Matrix test_Jacobi test_eigen test_Jones test_Quaternion	 \
 	test_Pauli test_Rotation test_ModifyRestore			 \
-	test_CyclicParameter
+	test_CyclicParameter test_Univariate
 
 TESTS = $(check_PROGRAMS)
 
@@ -112,6 +112,7 @@ test_parse_indeces_SOURCES	= test_parse_indeces.C
 test_Rotation_SOURCES		= test_Rotation.C
 test_ModifyRestore_SOURCES      = test_ModifyRestore.C
 test_CyclicParameter_SOURCES    = test_CyclicParameter.C
+test_Univariate_SOURCES		= test_Univariate.C
 
 lmfit_SOURCES 			= lmfit.C
 lmfit_LDADD			= libunits.la @PGPLOT_LIBS@
