@@ -20,6 +20,10 @@ void usage ()
     "  -T         Tscrunch first\n"
     "  -P         Pscrunch first\n"
     "  -C         Centre first\n"
+    "  -B b       Bscrunch by this factor first\n"
+    "  -x         Also print fraction polarisation\n"
+    "  -y         Also print fraction linear\n"
+    "  -z         Also print fraction circular\n"
     "\n"
     "Each row output by pascii contains:\n"
     "\n"
@@ -43,9 +47,13 @@ int main (int argc, char** argv)
   bool do_pscr = false;
   bool do_tscr = false;
   bool do_centre = false;
+  unsigned bscr = 1;
+  bool show_pol_frac = false;
+  bool show_lin_frac = false;
+  bool show_circ_frac = false;
 
   char c;
-  while ((c = getopt(argc, argv, "b:c:CFi:p:Pr:hqpTvV")) != -1) 
+  while ((c = getopt(argc, argv, "b:B:c:CFi:p:Pr:hpqTvVxyz")) != -1) 
 
     switch (c)  {
 
@@ -95,6 +103,18 @@ int main (int argc, char** argv)
     case 'C':
       do_centre = true;
       break;
+    case 'B':
+      bscr = atoi(optarg);
+      break;
+    case 'x':
+      show_pol_frac = true;
+      break;
+    case 'y':
+      show_lin_frac = true;
+      break;
+    case 'z':
+      show_circ_frac = true;
+      break;
 
     } 
 
@@ -115,8 +135,14 @@ int main (int argc, char** argv)
     archive->pscrunch();
   if( do_centre )
     archive->centre();
+  if( bscr > 1 )
+    archive->bscrunch( bscr );
   if (rot_phase)
     archive->rotate_phase (rot_phase);
+
+  if( archive->get_state() != Signal::Stokes && (show_pol_frac || show_lin_frac || show_circ_frac ) )
+    throw Error(InvalidState,"main()",
+		"archive->get_state() != Signal::Stokes && (show_frac_pol || show_frac_lin || show_frac_circ)");
 
   unsigned nsub = archive->get_nsubint();
   unsigned nchan = archive->get_nchan();
@@ -161,6 +187,20 @@ int main (int argc, char** argv)
 	cout << isub << " " << ichan << " " << ibin;
 	for (unsigned ipol=0; ipol < npol; ipol++)
 	  cout<<" "<< integration->get_Profile(ipol,ichan)->get_amps()[ibin];
+	if( show_pol_frac || show_lin_frac || show_circ_frac ){
+	  float stokesI = integration->get_Profile(0,ichan)->get_amps()[ibin];
+	  float stokesQ = integration->get_Profile(1,ichan)->get_amps()[ibin];
+	  float stokesU = integration->get_Profile(2,ichan)->get_amps()[ibin];
+	  float stokesV = integration->get_Profile(3,ichan)->get_amps()[ibin];
+
+	  float frac_lin  = sqrt(stokesQ*stokesQ + stokesU*stokesU)/stokesI;
+	  float frac_circ = fabs(stokesV)/stokesI;
+	  float frac_pol  = sqrt(stokesQ*stokesQ + stokesU*stokesU + stokesV*stokesV)/stokesI;
+
+	  if( show_pol_frac )  cout << " " << frac_pol;
+	  if( show_lin_frac )  cout << " " << frac_lin;
+	  if( show_circ_frac ) cout << " " << frac_circ;
+	}
 	cout << endl;
 
 	if (cbin > 0)
