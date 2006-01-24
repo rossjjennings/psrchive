@@ -216,6 +216,7 @@ psrqft_SOURCES			= psrqft.C
 plot_baseline_SOURCES		= plot_baseline.C
 pdmp_SOURCES                    = pdmp.C
 psrfi_SOURCES                   = psrfi.C
+tsys_SOURCES                   = tsys.C
 
 SimTiming_LDADD			= $(LDADD) @PGPLOT_LIBS@
 binphs_test_LDADD		= $(LDADD) @PGPLOT_LIBS@
@@ -235,6 +236,7 @@ psrqft_LDADD			= $(LDADD) @PGPLOT_LIBS@
 plot_baseline_LDADD		= $(LDADD) @PGPLOT_LIBS@
 pdmp_LDADD		        = $(LDADD) @PGPLOT_LIBS@
 psrfi_LDADD                     = $(LDADD) @PGPLOT_LIBS@
+tsys_LDADD                     = $(LDADD) @PGPLOT_LIBS@
 
 # future
 # psrsh_LDADD = -lreadline -ltermcap
