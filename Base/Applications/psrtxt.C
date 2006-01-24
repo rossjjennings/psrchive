@@ -2,6 +2,7 @@
 #include "Pulsar/Integration.h"
 #include "Pulsar/Profile.h"
 
+#include <stdlib.h>
 #include <unistd.h>
 
 void usage ()
@@ -21,9 +22,9 @@ void usage ()
     "  -P         Pscrunch first\n"
     "  -C         Centre first\n"
     "  -B b       Bscrunch by this factor first\n"
-    "  -x         Also print fraction polarisation\n"
-    "  -y         Also print fraction linear\n"
-    "  -z         Also print fraction circular\n"
+    "  -x         Convert to Stokes and also print fraction polarisation\n"
+    "  -y         Convert to Stokes and also print fraction linear\n"
+    "  -z         Convert to Stokes and also print fraction circular\n"
     "\n"
     "Each row output by pascii contains:\n"
     "\n"
@@ -33,8 +34,7 @@ void usage ()
        << endl;
 }
 
-int main (int argc, char** argv)
-{
+int main (int argc, char** argv){ try {
   bool phase_chosen = false;
   float phase = 0.0;
   float rot_phase = 0.0;
@@ -141,8 +141,7 @@ int main (int argc, char** argv)
     archive->rotate_phase (rot_phase);
 
   if( archive->get_state() != Signal::Stokes && (show_pol_frac || show_lin_frac || show_circ_frac ) )
-    throw Error(InvalidState,"main()",
-		"archive->get_state() != Signal::Stokes && (show_frac_pol || show_frac_lin || show_frac_circ)");
+    archive->convert_state(Signal::Stokes);
 
   unsigned nsub = archive->get_nsubint();
   unsigned nchan = archive->get_nchan();
@@ -218,7 +217,9 @@ int main (int argc, char** argv)
 
   }
 
-  return 0;
-
+} catch(Error& er){ cerr << er << endl; exit(-1);
 }
+  return 0;
+}
+
 
