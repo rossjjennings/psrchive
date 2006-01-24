@@ -1,5 +1,5 @@
 //
-// $Id: pav.C,v 1.106 2006/01/20 09:24:50 hknight Exp $
+// $Id: pav.C,v 1.107 2006/01/24 01:21:32 hknight Exp $
 //
 // The Pulsar Archive Viewer
 //
@@ -125,6 +125,7 @@ void usage ()
     " --ystretch y   Stretch y-axis limits by this factor [1.0]\n"
     " --no_prof_axes Don't show the profile axes (for -D option only)\n"
     " --hist         Plot '-D' as histogram [false]\n"
+    " --plot_qu      Plot Stokes Q and Stokes U in '-S' option instead of degree of linear\n"
     "\n"
     "Archive::Extension options (file format specific):\n"
     " -o        Plot the original bandpass\n"
@@ -218,6 +219,7 @@ int main (int argc, char** argv)
   bool show_profile_axes  = true;
   float spectrum_gamma = 1.0;
   bool do_histogram_plot  = false;
+  bool plot_qu            = false;
 
   Reference::To<Pulsar::Archive> std_arch;
   Reference::To<Pulsar::Profile> std_prof;
@@ -236,19 +238,20 @@ int main (int argc, char** argv)
   const char* args = 
     "AaBb:CcDdEeFf:GgH:hI:iJjK:k:LlM:mN:nO:oP:pQq:Rr:Ss:Tt:UuVvWwXx:Yy:Zz:";
 
-  const int TOTAL = 1010;
-  const int ALL_SUBINTS = 1011;
-  const int NBIN  = 1012;
-  const int FMAX  = 1013;
-  const int YSTRETCH = 1014;
+  const int TOTAL            = 1010;
+  const int ALL_SUBINTS      = 1011;
+  const int NBIN             = 1012;
+  const int FMAX             = 1013;
+  const int YSTRETCH         = 1014;
   const int PROFILE_SPECTRUM = 1015;
-  const int SPECTRUM_GAMMA = 1016;
-  const int NO_PROFILE_AXES = 1017;
-  const int AUTO_ZOOM = 1018;
-  const int LONGITUDE_DEGREES = 1019;
-  const int ERROR_BOX = 1020;
-  const int PA_AND_HALF = 1021;
-  const int HIST = 1022;
+  const int SPECTRUM_GAMMA   = 1016;
+  const int NO_PROFILE_AXES  = 1017;
+  const int AUTO_ZOOM        = 1018;
+  const int LONGITUDE_DEGREES= 1019;
+  const int ERROR_BOX        = 1020;
+  const int PA_AND_HALF      = 1021;
+  const int HIST             = 1022;
+  const int PLOT_QU          = 1023;
 
   static struct option long_options[] = {
     { "convert_binphsperi", 1, 0, 200 },
@@ -271,10 +274,11 @@ int main (int argc, char** argv)
     { "nbin",               required_argument, 0, NBIN},
     { "ystretch",           required_argument, 0, YSTRETCH},
     { "fmax",               required_argument, 0, FMAX},
-    { "spec",               0, 0, PROFILE_SPECTRUM},
+    { "spec",               0,                 0, PROFILE_SPECTRUM},
     { "specgamma",          required_argument, 0, SPECTRUM_GAMMA},
-    { "no_prof_axes",       no_argument, 0, NO_PROFILE_AXES},
+    { "no_prof_axes",       no_argument,       0, NO_PROFILE_AXES},
     { "hist",               no_argument,       0, HIST},
+    { "plot_qu",            no_argument,       0, PLOT_QU},
     { 0, 0, 0, 0 }
   };
     
@@ -355,7 +359,7 @@ int main (int argc, char** argv)
       plotter.set_subint( atoi (optarg) );
       break;
     case 'i':
-      cout << "$Id: pav.C,v 1.106 2006/01/20 09:24:50 hknight Exp $" << endl;
+      cout << "$Id: pav.C,v 1.107 2006/01/24 01:21:32 hknight Exp $" << endl;
       return 0;
 
     case 'j':
@@ -678,6 +682,9 @@ int main (int argc, char** argv)
       break;
     case HIST:
       plotter.set_do_histogram_plot( true );
+      break;
+    case PLOT_QU:
+      plot_qu = true;
       break;
     default:
       cerr << "pav: unrecognized option" << endl;
@@ -1035,7 +1042,7 @@ int main (int argc, char** argv)
 
       if (manchester) {
 	cpg_next();
-	plotter.Manchester (archive);
+	plotter.Manchester (archive, plot_qu);
       }
       if (degree) {
 	cpg_next();
