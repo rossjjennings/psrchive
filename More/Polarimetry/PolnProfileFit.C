@@ -275,6 +275,22 @@ void Pulsar::PolnProfileFit::fit (const PolnProfile* observation) try
 
   Reference::To<PolnProfile> fourier = fourier_transform (observation);
 
+  // if the FFT scales its output, rescale to compensate
+  if (fft::get_normalization() == fft::nfft && 
+      observation->get_nbin() != standard->get_nbin()) {
+
+    double scale = sqrt( double(standard->get_nbin()) /
+			 double(observation->get_nbin()) );
+
+    if (Profile::verbose)
+      cerr << "Pulsar::PolnProfileFit::fit template nbin="
+	   << standard->get_nbin() << " obs nbin=" 
+	   << observation->get_nbin() << " scale=" << scale << endl;
+
+    fourier->scale( scale );
+
+  }
+
   float phase_guess = ccf_max_phase (standard_fourier->get_Profile(0),
 				     fourier->get_Profile(0));
 
