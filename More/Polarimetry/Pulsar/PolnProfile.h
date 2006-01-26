@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PolnProfile.h,v $
-   $Revision: 1.26 $
-   $Date: 2006/01/10 23:35:19 $
+   $Revision: 1.27 $
+   $Date: 2006/01/26 18:02:37 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PolnProfile_h
@@ -84,6 +84,9 @@ namespace Pulsar {
 
     //! Returns the sum of all amplitudes squared
     double sumsq (int bin_start=0, int bin_end=0) const;
+
+    //! multiplies each bin of each profile by scale
+    void scale (double scale);
 
     //! Rotate the phase of each profile
     void rotate_phase (double turns);
