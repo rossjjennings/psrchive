@@ -131,7 +131,7 @@ int main (int argc, char *argv[])
       break;
 
     case 'i':
-      cout << "$Id: pat.C,v 1.43 2006/01/13 21:02:33 straten Exp $" << endl;
+      cout << "$Id: pat.C,v 1.44 2006/01/26 21:51:54 straten Exp $" << endl;
       return 0;
 
     case 'F':
@@ -298,17 +298,18 @@ int main (int argc, char *argv[])
 				      integration->get_folding_period(),
 				      arch->get_telescope_code());
 
+        string aux = basename( arch->get_filename() );
+        float chisq = fit.get_fit_chisq() / fit.get_fit_nfree();
+
+        if (verbose)
+          cerr << "pat: " << aux << " chisq=" << chisq << endl;
+
         if (arch->get_dedispersed())
 	  toa.set_frequency (arch->get_centre_frequency());
 
-        string aux = basename( arch->get_filename() );
         toa.set_auxilliary_text (aux);
 
 	toa.unload(stdout);
-
-        if (verbose)
-          cerr << "pat: " << aux << " chisq=" 
-               << fit.get_fit_chisq()/fit.get_fit_nfree() << endl;
 
       }
       catch (Error& error) {
@@ -481,11 +482,11 @@ void full_polarization_analysis (Pulsar::PolnProfileFit& fit)
   analysis.set_fit (&fit);
       
   cout << "\nFull Polarization TOA (matrix template matching): "
-    "\n Relative error = "
+    "\n MTM Relative error = "
        << analysis.get_relative_error () <<
     "\n Multiple correlation = "
        << analysis.get_multiple_correlation() << 
-    "\n Relative conditional error = "
+    "\n MTM Relative conditional error = "
        << analysis.get_relative_conditional_error () << endl;
   
   Pulsar::ScalarProfileFitAnalysis scalar;
@@ -504,5 +505,5 @@ void full_polarization_analysis (Pulsar::PolnProfileFit& fit)
   Estimate<double> S_error = scalar.get_error();
 
   cout << "\nLorentz Invariant TOA: "
-    "\n Relative error = " << S_error/I_error << endl << endl;
+    "\n Invariant relative error = " << S_error/I_error << endl << endl;
 }
