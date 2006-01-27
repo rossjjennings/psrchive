@@ -96,7 +96,7 @@ void* Calibration::ReceptionModel::solve_thread (void* instance)
     thiz -> solve_work ();
   }
   catch (Error& error)  {
-    cerr << "Pulsar::ReceptionCalibrator::solve_thread error" 
+    cerr << "Calibration::ReceptionModel::solve_thread error" 
          << error << endl;
   }
 
@@ -113,10 +113,11 @@ void* Calibration::ReceptionModel::solve_thread (void* instance)
 
   __unlock_mutex ();
 
-  if ( ithread == current_solve.size() )
-    throw Error (InvalidState, "Calibration::ReceptionModel::solve",
-		 "instance not found in list of currently active solutions!");
-  
+  if ( ithread == current_solve.size() )  {
+    cerr << "Calibration::ReceptionModel::solve_thread internal error" << endl;
+    abort();
+  }
+ 
   // signal completion to waiting solve method
   __cond_signal ();
 
