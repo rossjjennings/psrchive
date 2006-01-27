@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Basis.h,v $
-   $Revision: 1.7 $
-   $Date: 2005/08/18 12:10:42 $
+   $Revision: 1.8 $
+   $Date: 2006/01/27 19:10:30 $
    $Author: straten $ */
 
 #ifndef __Basis_H
@@ -24,6 +24,9 @@ public:
 
   //! set basis to circular or linear
   void set_basis (Type basis);
+
+  //! get the current basis
+  Type get_basis () const { return basis; }
 
   //! set basis to elliptical
   void set_basis (double orientation, double ellipticity);
