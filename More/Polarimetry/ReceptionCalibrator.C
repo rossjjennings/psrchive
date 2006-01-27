@@ -136,6 +136,9 @@ void Pulsar::ReceptionCalibrator::initial_observation (const Archive* data)
 
   model.resize (nchan);
 
+  Signal::Basis basis = calibrator->get_basis ();
+  Pauli::basis.set_basis( (Basis<double>::Type) basis);
+
   for (unsigned ichan=0; ichan<nchan; ichan++) {
 
     bool britton = model_type == Calibrator::Britton;
@@ -144,7 +147,7 @@ void Pulsar::ReceptionCalibrator::initial_observation (const Archive* data)
     model[ichan] -> set_feed_transformation (to_receptor);
     model[ichan] -> set_platform_transformation (to_feed);
 
-    if (measure_cal_Q)
+    if (measure_cal_Q || basis == Signal::Circular)
       model[ichan] -> fix_orientation ();
 
     model[ichan]->parallactic.set_source_coordinates(coordinates);
@@ -400,10 +403,10 @@ void Pulsar::ReceptionCalibrator::add_observation (const Archive* data)
     // the platform transformation "abscissa"
     Jones<double> feed = corrections.get_feed_transformation (data, isub);
 
-    cerr << "feed transformation=" << feed << endl;
+    Reference::To<MEAL::Argument::Value> platform_arg;
+    platform_arg = platform_axis.new_Value( feed );
 
-    MEAL::Argument::Value* platform_arg = platform_axis.new_Value( feed );
-    MEAL::Argument::Value* unique_arg = 0;
+    Reference::To<MEAL::Argument::Value> unique_arg;
 
     if (unique) {
 
@@ -670,6 +673,7 @@ try {
       try {
 
 	MEAL::Argument::Value* arg = model[ichan]->time.new_Value(epoch);
+
 	Calibration::CoherencyMeasurementSet measurements;
 	measurements.add_coordinate( arg );
 
