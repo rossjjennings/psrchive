@@ -10,6 +10,8 @@
 
 using namespace std;
 
+#define FEED_BOTH 0
+
 void Calibration::Feed::init ()
 {
   // name = "Feed";
@@ -34,12 +36,19 @@ void Calibration::Feed::init ()
     selection = new MEAL::Complex2Constant (select_jones);
     receptor->add_model (selection);
 
+#if FEED_BOTH
     // construct the elipticity matrix
     ellipticity[ir] = new MEAL::Rotation (Pauli::basis.get_basis_vector(1));
-    receptor->add_model (ellipticity[ir]);
-
     // construct the orientation matrix
     orientation[ir] = new MEAL::Rotation (Pauli::basis.get_basis_vector(2));
+#else
+    // construct the elipticity matrix
+    ellipticity[ir] = new MEAL::Rotation (Vector<3, double>::basis(1));
+    // construct the orientation matrix
+    orientation[ir] = new MEAL::Rotation (Vector<3, double>::basis(2));
+#endif
+
+    receptor->add_model (ellipticity[ir]);
     receptor->add_model (orientation[ir]);
 
     // add the receptor
@@ -57,10 +66,13 @@ Calibration::Feed::Feed ()
 {
   init ();
 
+#if FEED_BOTH
   for (unsigned i=0; i<2; i++)  {
     set_orientation (i, Pauli::basis.get_orientation());
     set_ellipticity (i, Pauli::basis.get_ellipticity());
   }
+#endif
+
 }
 
 Calibration::Feed::Feed (const Feed& feed)
