@@ -139,7 +139,8 @@ bin_PROGRAMS = psr_template pac paz vap pcq vip psredit psradd fadd pat pam \
         psrdiff fluxcal fix_coords test_Difference fix_hydra sesdiv \
         fix_3C353 archive_correct archive_denoise \
         fix_fluxcal archive_split psrconv pascii \
-	default_loader parInfo
+        default_loader parInfo paas
+
 
 psr_template_SOURCES		= psr_template.C
 archive_correct_SOURCES		= archive_correct.C
@@ -166,6 +167,7 @@ pcq_SOURCES			= pcq.C
 psredit_SOURCES			= psredit.C
 parInfo_SOURCES                 = parInfo.C
 psrdiff_SOURCES			= psrdiff.C
+paas_SOURCES			= paas.C
 
 TESTS = test_Receiver
 check_PROGRAMS = test_Archive test_denoise test_Difference $(TESTS)
