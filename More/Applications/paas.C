@@ -43,7 +43,7 @@ void usage ()
     "                   for concentration_1, height_1, centre_2 and height_2\n"
     "                   [Default: fit all parameters]\n"
     "  -W            Fit derivative of profile instead (i.e. weight by harm. num.)\n"
-    "  -t threshold  Delta_rms/rms fit convergence criterion [Default: 1e-5]\n"
+    "  -t threshold  Delta_rms/rms fit convergence criterion [Default: 1e-6]\n"
     "  -d device     Plot results on specified PGPLOT device\n"
     "  -D            Plot results on PGPLOT device /xs\n"
     "  -l            Plot with lines instead of steps\n"
@@ -471,7 +471,7 @@ int main (int argc, char** argv)
   string fit_flags;
   char c;
   int bscrunch = 1;
-  float threshold=1e-5;
+  float threshold=1e-6;
   char pgdev[1024];
   pgdev[0]='\0';
   char std_filename[1024];
