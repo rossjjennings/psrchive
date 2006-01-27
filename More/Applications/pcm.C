@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pcm.C,v $
-   $Revision: 1.47 $
-   $Date: 2006/01/20 00:34:24 $
+   $Revision: 1.48 $
+   $Date: 2006/01/27 03:42:09 $
    $Author: straten $ */
 
 /*! \file pcm.C 
@@ -147,13 +147,16 @@ void range_select (Pulsar::ReceptionCalibrator& model,
 {
   unsigned nbin = archive->get_nbin();
 
+  if (phmin > phmax)
+    phmax += 1.0;
+
   float increment = (phmax - phmin)/maxbins;
 
   unsigned last_bin = unsigned (phmax * nbin);
 
   for (float bin = phmin; bin<=phmax; bin += increment) {
 
-    unsigned ibin = unsigned (bin * nbin);
+    unsigned ibin = unsigned (bin * nbin) % nbin;
 
     if (ibin != last_bin)  {
       cerr << "pcm: adding phase bin " << ibin << endl;
@@ -595,7 +598,6 @@ int main (int argc, char *argv[]) try {
 
     criterion.entry.obsType = Signal::FluxCalOn;
     criterion.check_coordinates = false;
-    Pulsar::Database::Criterion::match_verbose = true;
     database.all_matching (criterion, oncals);
 
     if (oncals.size() == poln_cals)
@@ -687,6 +689,9 @@ int main (int argc, char *argv[]) try {
 	  range_select (model, archive, phmin, phmax, maxbins);
 
         cerr << "pcm: " << model.get_nstate_pulsar() << " states" << endl;
+        if ( model.get_nstate_pulsar() == 0 )
+          return -1;
+
       }
 
 
