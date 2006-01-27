@@ -152,7 +152,7 @@ ComponentModel::unload(const char *fname) const
       fputs(comment_it->second.c_str(), f);
     else if (icomp < components.size())
     {
-      fprintf(f, "%lg %lg %lg %s\n", 
+      fprintf(f, "%12lg %12lg %12lg %s\n", 
 	      components[icomp].get_centre().val/M_PI*0.5 + 0.5,
 	      components[icomp].get_concentration().val,
 	      components[icomp].get_height().val,
@@ -355,7 +355,7 @@ ComponentModel::fit(const Profile *profile, bool fit_derivative,
 
   printf("Results of fit:\n");
   for (icomp=0; icomp < components.size(); icomp++)
-    printf("Component %d: %lg %lg %lg %s\n",  icomp+1,
+    printf("Component %2d: %12lg %12lg %12lg %s\n",  icomp+1,
 	   components[icomp].get_centre().val/M_PI*0.5 + 0.5,
 	   components[icomp].get_concentration().val,
 	   components[icomp].get_height().val,
