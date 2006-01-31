@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Vector.h,v $
-   $Revision: 1.11 $
-   $Date: 2005/08/18 12:10:42 $
+   $Revision: 1.12 $
+   $Date: 2006/01/31 05:23:19 $
    $Author: straten $ */
 
 #ifndef __Vector_H
@@ -112,6 +112,12 @@ public:
   //! Return the basis vector
   static const Vector basis (unsigned i)
     { Vector v;  v[i] = 1.0; return v; }
+
+protected:
+
+  //! Used by the Stokes class
+  Vector (T x0, T x1, T x2, T x3)
+  { x[0] = x0; x[1] = x1; x[2] = x2; x[3] = x3; }
 
 };
 
