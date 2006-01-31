@@ -53,6 +53,7 @@ Pulsar::ReferenceCalibrator::ReferenceCalibrator (const Archive* archive)
   requested_nchan = calibrator->get_nchan();
 
   if (receiver) {
+    Pauli::basis.set_basis( (Basis<double>::Type) receiver->get_basis() );    
     Stokes<double> cal = receiver->get_reference_source ();
     if (verbose)
       cerr << "Pulsar::ReferenceCalibrator reference source " << cal << endl;
@@ -257,7 +258,7 @@ void Pulsar::ReferenceCalibrator::calculate_transformation ()
   vector<Estimate<double> > source (npol);
   vector<Estimate<double> > sky (npol);
 
-  for (unsigned ichan=0; ichan<nchan; ++ichan) {
+  for (unsigned ichan=0; ichan<nchan; ++ichan) try {
 
     if (verbose)
       cerr << "Pulsar::ReferenceCalibrator::calculate_transformation"
@@ -292,6 +293,11 @@ void Pulsar::ReferenceCalibrator::calculate_transformation ()
     // enable derived classes to store extra information
     extra (ichan, source, sky);
 
+  }
+  catch (Error& error) {
+    cerr << "Pulsar::ReferenceCalibrator::calculate_transformation error"
+      " ichan=" << ichan << " " << error.get_message();
+    transformation[ichan] = 0;
   }
 
   if (verbose)

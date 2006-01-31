@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PolnCalibrator.h,v $
-   $Revision: 1.36 $
-   $Date: 2006/01/13 21:02:31 $
+   $Revision: 1.37 $
+   $Date: 2006/01/31 05:22:49 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PolnCalibrator_H
@@ -142,6 +142,9 @@ namespace Pulsar {
     //! The array of transformation Model instances
     std::vector< Reference::To< MEAL::Complex2 > > transformation;
     
+    //! Set up to call calculate_transformation
+    void setup_transformation () const;
+
     //! Derived classes can create and fill the transformation array
     virtual void calculate_transformation ();
 

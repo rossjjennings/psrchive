@@ -1,7 +1,6 @@
 #include "Pulsar/PolnCalibrator.h"
-#include "Pulsar/CorrectionsCalibrator.h"
-
 #include "Pulsar/PolnCalibratorExtension.h"
+
 #include "Pulsar/Receiver.h"
 #include "Pulsar/FeedExtension.h"
 
@@ -106,7 +105,7 @@ const Pulsar::Receiver* Pulsar::PolnCalibrator::get_Receiver () const
 unsigned Pulsar::PolnCalibrator::get_transformation_nchan () const
 {
   if (transformation.size() == 0)
-    const_cast<PolnCalibrator*>(this)->calculate_transformation();
+    setup_transformation();
 
   if (verbose)
     cerr << "Pulsar::PolnCalibrator::get_transformation_nchan nchan="
@@ -119,7 +118,7 @@ unsigned Pulsar::PolnCalibrator::get_transformation_nchan () const
 bool Pulsar::PolnCalibrator::get_transformation_valid (unsigned ichan) const
 {
   if (transformation.size() == 0)
-    const_cast<PolnCalibrator*>(this)->calculate_transformation();
+    setup_transformation();
 
   if (ichan >= transformation.size())
     throw Error (InvalidParam,
@@ -133,7 +132,7 @@ bool Pulsar::PolnCalibrator::get_transformation_valid (unsigned ichan) const
 void Pulsar::PolnCalibrator::set_transformation_invalid (unsigned ichan)
 {
   if (transformation.size() == 0)
-    const_cast<PolnCalibrator*>(this)->calculate_transformation();
+    setup_transformation();
 
   if (ichan >= transformation.size())
     throw Error (InvalidParam,
@@ -149,7 +148,7 @@ const ::MEAL::Complex2*
 Pulsar::PolnCalibrator::get_transformation (unsigned ichan) const
 {
   if (transformation.size() == 0)
-    const_cast<PolnCalibrator*>(this)->calculate_transformation();
+    setup_transformation();
 
   if (ichan >= transformation.size())
     throw Error (InvalidParam, "Pulsar::PolnCalibrator::get_transformation",
@@ -163,13 +162,21 @@ MEAL::Complex2*
 Pulsar::PolnCalibrator::get_transformation (unsigned ichan)
 {
   if (transformation.size() == 0)
-    calculate_transformation();
+    setup_transformation();
 
   if (ichan >= transformation.size())
     throw Error (InvalidParam, "Pulsar::PolnCalibrator::get_transformation",
 		 "ichan=%d >= nchan=%d", ichan, transformation.size());
 
   return transformation[ichan];
+}
+
+void Pulsar::PolnCalibrator::setup_transformation () const
+{
+  if (receiver)
+    Pauli::basis.set_basis( (Basis<double>::Type) receiver->get_basis() );
+
+  const_cast<PolnCalibrator*>(this)->calculate_transformation();
 }
 
 //! Derived classes can create and fill the transformation array
@@ -195,28 +202,6 @@ void Pulsar::PolnCalibrator::calculate_transformation ()
       transformation[ichan] = 0;
 }
 
-// Return the positive definite square root of a Hermitian Quaternion
-template<typename T, QBasis B>
-const Quaternion<T,B> mysqrt (const Quaternion<T,B>& h, float phase)
-{
-  T root_det = sqrt( det(h) );
-  Quaternion<T,B> out;
-
-  if (h.s0<0) {
-    T scalar = -sqrt( -0.5 * (h.s0 - root_det) );
-    T norm = 0.5/scalar;
-    out = Quaternion<T,B> (h.s1*norm, scalar, h.s3*norm, h.s2*norm);
-    // out = Quaternion<T,B> (scalar, h.get_vector()/(2*scalar));
-  }
-  else {
-    T scalar = sqrt( 0.5 * (h.s0 + root_det) );
-    out = Quaternion<T,B> (scalar, h.get_vector() * 0.5/scalar);
-  }
-
-  // cerr << phase << " in=" << h << "\n\tout=" << out << endl;
-  return out;
-}
-
 void Pulsar::PolnCalibrator::build (unsigned nchan) try {
 
   if (verbose)
@@ -226,7 +211,7 @@ void Pulsar::PolnCalibrator::build (unsigned nchan) try {
   if (!built || transformation.size() == 0) {
     if (verbose) cerr << "Pulsar::PolnCalibrator::build"
                          " call calculate_transformation" << endl;
-    const_cast<PolnCalibrator*>(this)->calculate_transformation();
+    setup_transformation();
   }
 
   if (!nchan)
@@ -652,3 +637,4 @@ Pulsar::PolnCalibrator::Info* Pulsar::PolnCalibrator::get_Info () const
 {
   return PolnCalibrator::Info::create (this);
 }
+
