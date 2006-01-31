@@ -16,16 +16,16 @@ void random_gain (complex<T>& val)
   val = polar (mod, phi);
 }
 
+int main () try {
 
-int main () { try {
-
+  // MEAL::Function::verbose = true;
   srand (13);
-
-  // the model of the receiver
-  Calibration::SingleAxis model;
 
   // more complex solution
   Calibration::SingleAxisSolver solver;
+
+  // the model of the receiver
+  Calibration::SingleAxis model;
 
   // calibrator input
   Stokes<double> cal (1,0,1,0);
@@ -39,6 +39,16 @@ int main () { try {
        << endl;
 
   for (unsigned i=0; i<nloop; i++)  {
+
+    // switch basis for each test
+    if (i%2) {
+      Pauli::basis.set_basis(Basis<double>::Circular);
+      cal = Stokes<double> (1,1,0,0);
+    }
+    else {
+      Pauli::basis.set_basis(Basis<double>::Linear);
+      cal = Stokes<double> (1,0,1,0);
+    }
 
     // randomly generated Stokes parameters
     Stokes<double> source;
@@ -69,13 +79,17 @@ int main () { try {
     Jones<double> jones (gain_x, 0,
 			 0, gain_y);
 
-
     // calculate the  Stokes parameters of the transformed source
     Stokes<double> image = transform( source, jones );
 
     // test two different methods
-    
-    for (unsigned itest=0; itest < 2; itest++) {
+    unsigned istart = 0;
+
+    // ... unless the basis is circular, in which case only the new works
+    // if (Pauli::basis.get_basis() == Basis<double>::Circular)
+    // istart = 1;
+
+    for (unsigned itest=istart; itest < 2; itest++) {
 
       if (itest == 0) {
 	
@@ -84,10 +98,10 @@ int main () { try {
 	// calculate the transformed calibrator coherencies
 	Jones<double> coherencies = jones * convert(cal) * herm (jones);
 
-	cal_hi[0].val = 0.5 * coherencies.j00.real();
-	cal_hi[1].val = 0.5 * coherencies.j11.real();
-	cal_hi[2].val = 0.5 * coherencies.j10.real();
-	cal_hi[3].val = 0.5 * coherencies.j10.imag();
+	cal_hi[0].val = coherencies.j00.real();
+	cal_hi[1].val = coherencies.j11.real();
+	cal_hi[2].val = coherencies.j10.real();
+	cal_hi[3].val = coherencies.j10.imag();
 	
 	model.solve (cal_hi);
 
@@ -95,7 +109,7 @@ int main () { try {
 
       else {
 
-	// calculate the  Stokes parameters of the transformed source
+	// calculate the Stokes parameters of the transformed source
 	Stokes< Estimate<double> > cal_out = transform( cal, jones );
 
 	solver.set_input (cal);
@@ -104,7 +118,9 @@ int main () { try {
 
       }
 
-      // verify solution
+      if (fabs((model.get_gain().val - G)/G) > 1e-5)
+	cerr << "model.gain=" << model.get_gain().val
+	     << " != gain="<< G <<endl;
       
       if (fabs((model.get_diff_gain().val - beta)/beta) > 1e-5)
 	cerr << "model.boost=" << model.get_diff_gain().val 
@@ -113,10 +129,6 @@ int main () { try {
       if (fabs((model.get_diff_phase().val - phi)/phi) > 1e-5)
 	cerr << "model.phase=" << model.get_diff_phase().val 
 	     << " != phase="<< phi <<endl;
-      
-      if (fabs((model.get_gain().val - G)/G) > 1e-5)
-	cerr << "model.gain=" << model.get_gain().val
-	     << " != gain="<< G <<endl;
       
       // calibrate the image Stokes vector
       
@@ -151,12 +163,13 @@ int main () { try {
 
   }
 
+  cerr << "SingleAxis and SingleAxisSolver pass in Linear and Circular bases"
+       << endl;
+
+  return 0;
 }
 catch (Error& error) {
  cerr << error << endl;
  return -1;
-}
-
- return 0;
 }
 
