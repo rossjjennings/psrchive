@@ -88,7 +88,7 @@ void check (const char* name, const Estimate<double>& g)
   if (!finite (g.val))
     throw Error (InvalidParam, name, "Estimate value = %lf", g.val);
   if (!finite (g.var))
-    throw Error (InvalidParam, name, "Estimate variance = %lf", g.val);
+    throw Error (InvalidParam, name, "Estimate variance = %lf", g.var);
 }
 
 //! Set the instrumental gain, \f$ G \f$, in calibrator flux units
