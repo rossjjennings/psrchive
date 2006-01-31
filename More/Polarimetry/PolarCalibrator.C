@@ -29,15 +29,16 @@ Pulsar::PolarCalibrator::solve (const vector<Estimate<double> >& source,
     cerr << "Pulsar::PolarCalibrator::solve" << endl;
 
   // Convert the coherency vectors into Stokes parameters.  
-  Stokes< Estimate<double> > stokes_source = coherency( convert (source) );
-  Stokes< Estimate<double> > stokes_sky = coherency( convert (sky) );
+  Stokes< Estimate<double> > s_source = coherency( convert(source) );
+  Stokes< Estimate<double> > s_sky = coherency( convert (sky) );
 
-  stokes_source *= 2.0;
-  stokes_sky *= 2.0;
+  // Convert to the natural basis
+  Quaternion<Estimate<double>,Hermitian> q_source = natural( s_source );
+  Quaternion<Estimate<double>,Hermitian> q_sky = natural( s_sky );
 
   Reference::To<MEAL::Polar> polar = new MEAL::Polar;
 
-  polar->solve (stokes_source, stokes_sky);
+  polar->solve (q_source, q_sky);
 
   return polar.release();
 }

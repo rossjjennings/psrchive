@@ -1,15 +1,15 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/SingleAxisSolver.h,v $
-   $Revision: 1.3 $
-   $Date: 2005/12/09 16:41:06 $
+   $Revision: 1.4 $
+   $Date: 2006/01/31 05:22:37 $
    $Author: straten $ */
 
 #ifndef __Calibration_SingleAxisSolver_H
 #define __Calibration_SingleAxisSolver_H
 
+#include "Quaternion.h"
 #include "Stokes.h"
-#include "Vector.h"
 #include "Estimate.h"
 #include "MEAL/ScalarMath.h"
 
@@ -46,10 +46,10 @@ namespace Calibration {
   protected:
 
     //! The input Stokes parameters
-    Stokes<MEAL::ScalarMath> input;
+    Quaternion<MEAL::ScalarMath,Hermitian> input;
 
     //! The output Stokes parameters
-    Stokes<MEAL::ScalarMath> output;
+    Quaternion<MEAL::ScalarMath,Hermitian> output;
 
     //! The Axis about which the rotations take place
     Vector<3, MEAL::ScalarMath> axis;

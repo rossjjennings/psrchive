@@ -186,10 +186,10 @@ void Pulsar::PolnProfile::set_Stokes (unsigned ibin,
     throw Error (InvalidRange, "PolnProfile::set_Stokes",
 		 "ibin=%d >= nbin=%d", ibin, profile[0]->get_nbin());
 
-  profile[0]->get_amps()[ibin] = new_amps.s0;
-  profile[1]->get_amps()[ibin] = new_amps.s1;
-  profile[2]->get_amps()[ibin] = new_amps.s2;
-  profile[3]->get_amps()[ibin] = new_amps.s3;
+  profile[0]->get_amps()[ibin] = new_amps[0];
+  profile[1]->get_amps()[ibin] = new_amps[1];
+  profile[2]->get_amps()[ibin] = new_amps[2];
+  profile[3]->get_amps()[ibin] = new_amps[3];
 }
 
 //
@@ -453,7 +453,7 @@ void Pulsar::PolnProfile::invint (Profile* invint) const
 
   if (state == Signal::Stokes)
     for (unsigned ibin = 0; ibin < nbin; ibin++)
-      invint->get_amps()[ibin] = det( get_Stokes(ibin) );
+      invint->get_amps()[ibin] = get_Stokes(ibin).invariant ();
   
   else if (state == Signal::Coherence)
     for (unsigned ibin = 0; ibin < nbin; ibin++)

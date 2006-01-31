@@ -240,5 +240,5 @@ Stokes<double> Pulsar::Receiver::get_reference_source () const
   if (Archive::verbose == 3)
     cerr << "Pulsar::Receiver::get_reference_source cal=" << cal << endl;
 
-  return coherency (cal);
+  return standard (cal);
 }

@@ -154,7 +154,7 @@ void Pulsar::PolnProfileFit::set_standard (const PolnProfile* _standard)
       im[ipol] = amps[1];
     }
 
-    standard_det += det(re) + det(im);
+    standard_det += re.invariant() + im.invariant();
 
     // each complex phase bin of the standard is treated as a known constant
     MEAL::Complex2Constant* jones;
@@ -320,7 +320,7 @@ void Pulsar::PolnProfileFit::fit (const PolnProfile* observation) try
       stokes[ipol] = complex<double>(amps[0], amps[1]);
     }
 
-    observation_det += det(re) + det(im);
+    observation_det += re.invariant() + im.invariant();
 
 #ifdef _DEBUG
     cerr << "Pulsar::PolnProfileFit::fit ibin=" << ibin 

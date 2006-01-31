@@ -41,16 +41,16 @@ Stokes<float> Pulsar::Integration::get_Stokes (unsigned ichan,
   float ImPQ = S[3];
 
   if (get_basis() == Signal::Linear) {
-    S.s0 = PP + QQ;
-    S.s1 = PP - QQ;
-    S.s2 = 2.0 * RePQ;
-    S.s3 = 2.0 * ImPQ;
+    S[0] = PP + QQ;
+    S[1] = PP - QQ;
+    S[2] = 2.0 * RePQ;
+    S[3] = 2.0 * ImPQ;
   }
   else {
-    S.s0 = PP + QQ;
-    S.s3 = PP - QQ;
-    S.s1 = 2.0 * RePQ;
-    S.s2 = 2.0 * ImPQ;
+    S[0] = PP + QQ;
+    S[3] = PP - QQ;
+    S[1] = 2.0 * RePQ;
+    S[2] = 2.0 * ImPQ;
   }
 
   return S;

@@ -9,7 +9,7 @@ void MEAL::NormalizeStokes::init ()
   for (ipol=0; ipol<input.size(); ipol++)
     input[ipol] = *(new MEAL::ScalarParameter);
 
-  MEAL::ScalarMath invariant = sqrt( det(input) );
+  MEAL::ScalarMath invariant = sqrt( input.invariant() );
 
   for (ipol=0; ipol<output.size(); ipol++)
     output[ipol] = input[ipol] / invariant;
@@ -45,10 +45,9 @@ MEAL::NormalizeStokes::normalize (Stokes<Estimate<float> >& stokes)
 }
 
 //! Set the scale to be used during conversion
-void
-MEAL::NormalizeStokes::normalize (Stokes<Estimate<double> >& stokes)
+void MEAL::NormalizeStokes::normalize (Stokes<Estimate<double> >& stokes)
 {
-  Estimate<double> invariant = det(stokes);
+  Estimate<double> invariant = stokes.invariant();
 
   if ( invariant.val < stokes[0].var )
     throw Error (InvalidParam, "MEAL::NormalizeStokes::normalize",

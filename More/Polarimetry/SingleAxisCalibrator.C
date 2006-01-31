@@ -34,7 +34,6 @@ Pulsar::SingleAxisCalibrator::solve (const vector<Estimate<double> >& source,
 
   // Convert the coherency vectors into Stokes parameters.
   Stokes< Estimate<double> > stokes_source = coherency( convert (source) );
-  stokes_source *= 2.0;
 
   if (!solver)
     solver = new Calibration::SingleAxisSolver;

@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Polar.h,v $
-   $Revision: 1.3 $
-   $Date: 2004/11/22 19:26:04 $
+   $Revision: 1.4 $
+   $Date: 2006/01/31 05:22:37 $
    $Author: straten $ */
 
 #ifndef __MEAL_Polar_H
@@ -10,8 +10,8 @@
 
 #include "MEAL/ProductRule.h"
 #include "MEAL/Complex2.h"
+#include "Quaternion.h"
 #include "Estimate.h"
-#include "Stokes.h"
 
 namespace MEAL {
 

@@ -35,8 +35,11 @@ Calibration::SingleAxisSolver::set_input (const Stokes< Estimate<double> >& S)
   if (MEAL::Function::verbose)
     cerr << "Calibration::SingleAxis::set_input=" << S << endl;
 
+  // Convert to the natural basis
+  Quaternion<Estimate<double>,Hermitian> q = natural (S);
+
   for (unsigned ipol=0; ipol<S.size(); ipol++)
-    input[ipol].get_expression()->set_Estimate( 0, S[ipol] );
+    input[ipol].get_expression()->set_Estimate( 0, q[ipol] );
 }
 
 void
@@ -45,8 +48,10 @@ Calibration::SingleAxisSolver::set_output (const Stokes< Estimate<double> >& S)
   if (MEAL::Function::verbose)
     cerr << "Calibration::SingleAxis::set_output=" << S << endl;
 
+  Quaternion<Estimate<double>,Hermitian> q = natural (S);
+
   for (unsigned ipol=0; ipol<S.size(); ipol++)
-    output[ipol].get_expression()->set_Estimate( 0, S[ipol] );
+    output[ipol].get_expression()->set_Estimate( 0, q[ipol] );
 }
 
 //! Set the SingleAxis parameters with the current solution

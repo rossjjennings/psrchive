@@ -1,14 +1,15 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Pauli.h,v $
-   $Revision: 1.18 $
-   $Date: 2005/07/07 23:19:05 $
+   $Revision: 1.19 $
+   $Date: 2006/01/31 05:22:37 $
    $Author: straten $ */
 
 #ifndef __Pauli_H
 #define __Pauli_H
 
 #include "Jones.h"
+#include "Quaternion.h"
 #include "Stokes.h"
 #include "Basis.h"
 
@@ -41,8 +42,8 @@ const Jones<T> convert (const Quaternion<std::complex<T>,Unitary>& q)
 template<typename T>
 const Jones<T> convert (const Quaternion<T,Hermitian>& q)
 {
-  return Jones<T> ( std::complex<T>(q.s0+q.s1,0.0), std::complex<T>(q.s2,-q.s3),
-		    std::complex<T>(q.s2,q.s3), std::complex<T>(q.s0-q.s1,0.0) );
+  return Jones<T> (std::complex<T>(q.s0+q.s1,0.0), std::complex<T>(q.s2,-q.s3),
+		   std::complex<T>(q.s2,q.s3), std::complex<T>(q.s0-q.s1,0.0));
 }
 
 // convert Unitary Quaternion to Jones matrix
@@ -60,7 +61,7 @@ const Jones<T> convert (const Stokes< std::complex<T> >& stokes)
   Quaternion<std::complex<T>,Hermitian> q;
   q.set_scalar (stokes.get_scalar());
   q.set_vector (Pauli::basis.get_out(stokes.get_vector()));
-  return convert (q);
+  return convert (0.5*q);
 }
 
 // convert Stokes parameters to Jones matrix
@@ -69,7 +70,21 @@ const Jones<T> convert (const Stokes<T>& stokes)
 {
   Quaternion<T,Hermitian> q (stokes.get_scalar(),
                              Pauli::basis.get_out(stokes.get_vector()));
-  return convert (q);
+  return convert (0.5*q);
+}
+
+// convert Stokes parameters to natural basis
+template<typename T>
+const Quaternion<T,Hermitian> natural (const Stokes<T>& stokes)
+{
+  return Quaternion<T,Hermitian> 
+    (stokes.get_scalar(), Pauli::basis.get_out(stokes.get_vector()));
+}
+
+template<typename T>
+const Stokes<T> standard (const Quaternion<T,Hermitian>& q)
+{ 
+  return Stokes<T>( q.get_scalar(), Pauli::basis.get_in(q.get_vector()) );
 }
 
 // convert coherency vector to Jones matrix
@@ -147,7 +162,8 @@ const Stokes<T> real_coherency (const Quaternion<std::complex<T>,Hermitian>& q)
 template<typename T>
 const Stokes<T> coherency (const Quaternion<T,Hermitian>& q)
 { 
-  return Stokes<T>( q.get_scalar(), Pauli::basis.get_in(q.get_vector()) );
+  return Stokes<T>( T(2.0) * q.get_scalar(), 
+		    T(2.0) * Pauli::basis.get_in(q.get_vector()) );
 }
 
 // transform the Stokes parameters by the given Jones matrix
