@@ -27,10 +27,12 @@ Pulsar::PolnProfileFitAnalysis::set_harmonic (unsigned index)
   fit->model->set_input_index (index);
 }
 
-void
-Pulsar::PolnProfileFitAnalysis::get_curvature (Matrix<8,8,double>& curvature)
+/*!
+  Computes Equation 14 of van Straten (2006)
+*/
+void Pulsar::PolnProfileFitAnalysis::get_curvature (Matrix<8,8,double>& alpha)
 {
-  curvature = Matrix<8,8,double>();
+  alpha = Matrix<8,8,double>();
 
   for (unsigned ih=0; ih < fit->model->get_num_input(); ih++) {
 
@@ -51,7 +53,7 @@ Pulsar::PolnProfileFitAnalysis::get_curvature (Matrix<8,8,double>& curvature)
 
 	Jones<double> delrho_deleta_s = model_gradient[is+2];
 
-	curvature[ir][is]+=trace(delrho_deleta_r*herm(delrho_deleta_s)).real();
+	alpha[ir][is]+=trace(delrho_deleta_r*herm(delrho_deleta_s)).real();
       }
 
     }
@@ -60,13 +62,10 @@ Pulsar::PolnProfileFitAnalysis::get_curvature (Matrix<8,8,double>& curvature)
 
   mean_variance = 0.0;
 
-  // FACTOR OF TWO INCREASE IN VARIANCE - SEE OLD VERSION OF VAN STRATEN 2004
   for (unsigned i=0; i<4; i++)
-    mean_variance += fit->standard_variance[i] / 2.0;
+    mean_variance += fit->standard_variance[i] / 4.0;
 
-  // mean_variance = 2.0;
-
-  curvature /= mean_variance;
+  alpha *= 2.0/mean_variance;
 }
 
 void conformal_partition (const Matrix<8,8,double>& covariance,
