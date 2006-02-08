@@ -197,7 +197,7 @@ libpsrchive_la_SOURCES += ArchiveProcessor.C Plotter.C CalibratorPlotter.C  \
 
 bin_PROGRAMS += pacv pcvar pav pas psrwt psrsh pcm pvt paf psrqft \
 	binphs_test pcm_chooser rmfit psrband SimTiming bin_clean \
-	plot_baseline pdmp psrfi tsys spa
+	plot_baseline pdmp psrfi tsys spa psrchive_template
 
 SimTiming_SOURCES		= SimTiming.C
 binphs_test_SOURCES		= binphs_test.C
@@ -220,6 +220,7 @@ pdmp_SOURCES                    = pdmp.C
 psrfi_SOURCES                   = psrfi.C
 spa_SOURCES                     = spa.C
 tsys_SOURCES                    = tsys.C
+psrchive_template_SOURCES       = psrchive_template.C
 
 SimTiming_LDADD			= $(LDADD) @PGPLOT_LIBS@
 binphs_test_LDADD		= $(LDADD) @PGPLOT_LIBS@
@@ -241,6 +242,7 @@ pdmp_LDADD		        = $(LDADD) @PGPLOT_LIBS@
 psrfi_LDADD                     = $(LDADD) @PGPLOT_LIBS@
 spa_LDADD                       = $(LDADD) @PGPLOT_LIBS@
 tsys_LDADD                      = $(LDADD) @PGPLOT_LIBS@
+psrchive_template_LDADD         = $(LDADD) @PGPLOT_LIBS@
 
 # future
 # psrsh_LDADD = -lreadline -ltermcap
