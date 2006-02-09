@@ -464,7 +464,7 @@ ComponentModel::clear()
 
 int main (int argc, char** argv) 
 {
-  const char* args = "hb:r:w:c:fF:t:d:Dl:W";
+  const char* args = "hb:r:w:c:fF:t:d:Dl:Ws:";
   string model_filename_in, model_filename_out;
   bool fit=false;
   vector<string> new_components;
