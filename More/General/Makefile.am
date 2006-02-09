@@ -139,7 +139,7 @@ bin_PROGRAMS = psr_template pac paz vap pcq vip psredit psradd fadd pat pam \
         psrdiff fluxcal fix_coords test_Difference fix_hydra sesdiv \
         fix_3C353 archive_correct archive_denoise \
         fix_fluxcal archive_split psrconv pascii \
-        default_loader parInfo paas
+        default_loader parInfo 
 
 
 psr_template_SOURCES		= psr_template.C
@@ -167,7 +167,6 @@ pcq_SOURCES			= pcq.C
 psredit_SOURCES			= psredit.C
 parInfo_SOURCES                 = parInfo.C
 psrdiff_SOURCES			= psrdiff.C
-paas_SOURCES			= paas.C
 
 TESTS = test_Receiver
 check_PROGRAMS = test_Archive test_denoise test_Difference $(TESTS)
@@ -197,7 +196,7 @@ libpsrchive_la_SOURCES += ArchiveProcessor.C Plotter.C CalibratorPlotter.C  \
 
 bin_PROGRAMS += pacv pcvar pav pas psrwt psrsh pcm pvt paf psrqft \
 	binphs_test pcm_chooser rmfit psrband SimTiming bin_clean \
-	plot_baseline pdmp psrfi tsys spa psrchive_template
+	plot_baseline pdmp psrfi tsys spa psrchive_template aas pfixbaseline
 
 SimTiming_SOURCES		= SimTiming.C
 binphs_test_SOURCES		= binphs_test.C
@@ -220,6 +219,8 @@ pdmp_SOURCES                    = pdmp.C
 psrfi_SOURCES                   = psrfi.C
 spa_SOURCES                     = spa.C
 tsys_SOURCES                    = tsys.C
+paas_SOURCES			= paas.C
+pfixbaseline_SOURCES		= pfixbaseline.C
 psrchive_template_SOURCES       = psrchive_template.C
 
 SimTiming_LDADD			= $(LDADD) @PGPLOT_LIBS@
@@ -242,6 +243,8 @@ pdmp_LDADD		        = $(LDADD) @PGPLOT_LIBS@
 psrfi_LDADD                     = $(LDADD) @PGPLOT_LIBS@
 spa_LDADD                       = $(LDADD) @PGPLOT_LIBS@
 tsys_LDADD                      = $(LDADD) @PGPLOT_LIBS@
+paas_LDADD                      = $(LDADD) @PGPLOT_LIBS@
+pfixbaseline_LDADD                      = $(LDADD) @PGPLOT_LIBS@
 psrchive_template_LDADD         = $(LDADD) @PGPLOT_LIBS@
 
 # future
