@@ -50,6 +50,9 @@ using namespace Pulsar;
 // Initialise any parameters or states here
 void init();
 
+// Prints usage information
+void usage();
+
 // You shouldn't need to change this. This reads all the archive files that you
 // provide on the command line.
 vector<Reference::To<Pulsar::Archive> > get_archives(string filename,
@@ -66,6 +69,21 @@ void parseParameters(int argc, char **argv, string &plot_device);
 // on the PGPLOT window
 void goToProfileViewPort();
 
+// Parses a string to a number and checks if that value is a positive value
+// 
+// Given:
+//     optionName   The name of the option used over the command line. e.g. -ps
+//     numberString The input string accompanied with the option. e.g. -pr 20	
+//                  where 20 is the numberString
+//     value        The output value once the string has been parsed.
+void parseAndValidatePositiveDouble(string optionName, char * numberString, double &value);
+void parseAndValidatePositiveInt(string optionName, char * numberString, int &value);
+
+// Parses a string to a number
+// Returns the numerical value in "value"
+void parseAndValidateDouble(string optionName, char * numberString, double &value);
+void parseAndValidateInt(string optionName, char * numberString, int &value);
+
 
 ///////////////////////////
 /// Global variables
@@ -81,6 +99,11 @@ const float PLOT_CHAR_HEIGHT = 0.8;
 // Approx. number of ticks to be drawn on the profile
 const int NUM_VERT_PROFILE_TICKS = 4;
 
+const int NUMERIC_CHARS_LEN = 13;
+
+const	char NUMERIC_CHARS [NUMERIC_CHARS_LEN] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '-', 'e', '.'};
+
+
 void usage (bool verbose_usage)
 {
   cout << "Usage instructions: " << endl;
@@ -95,6 +118,22 @@ void init() {
   verbose = false;
 }
 
+// Parses the input flags and parameters provided over the command line.
+//
+// Adding a new input argument
+// ---------------------------
+// If you have created a new input e.g. -e <file extension>, then you 
+// will need to add a new input argument to the parseParameters function:
+// void parseParameters(int argc, char **argv, string &plot_device, string &extension) {
+// Then set this variable inside the function using the argv array.
+// You will need to then change the method definition above to be consistent
+// with this change.
+// Be sure to call parseParameters with the new variable:
+// string ext;
+// parseParameters(argc, argv, plot_device, ext);
+
+// If you wish to pass in numbers as arguments, you can use the 
+// parseAndValidate* methods provided (defined above)
 void parseParameters(int argc, char **argv, string &plot_device) {
 
   string optionArg;
@@ -125,7 +164,7 @@ void parseParameters(int argc, char **argv, string &plot_device) {
     
     // graph device
     else if (strcmp(argv[i], "-g") == 0) { 
-      i++;
+      i++; // jump to the next argument which is the plot device name
       
       plot_device = argv[i];
       
@@ -313,4 +352,87 @@ void goToProfileViewPort() {
   // Fill most of the window from x1 = 0.1 to x2 = 0.9 and y1 = 0.1 to y2 = 0.9
   // where these values range from 0 to 1
   cpgsvp(0.1, 0.9, 0.1, 0.9);
+}
+
+
+/////////////////////////////////////////////
+// Parsing and validating routines
+//
+
+bool isNumber(char * str) {
+	
+	for (int i = 0; str[i] != '\0'; i++) {
+		for (int j = 0; ; j++) {
+			if (str[i] == NUMERIC_CHARS[j]) {
+				break;
+			}
+			
+			// Reached the end which means it's not a number
+			if (j == NUMERIC_CHARS_LEN - 1) {
+				return false;
+			}
+		}
+	}
+	
+	return true;
+}
+
+void parseAndValidateDouble(string optionName, char * numberString, double &value) {
+
+	string str = numberString;
+
+	if (!isNumber(numberString)) {
+		cerr << endl << "Error: " << str << " is an invalid number for " << optionName << " option" << endl;
+		exit(1);
+	}
+			
+	value = atof(numberString);
+
+}
+
+void parseAndValidateInt(string optionName, char * numberString, int &value) {
+
+	string str = numberString;
+
+	if (!isNumber(numberString)) {
+		cerr << endl << "Error: " << str << " is an invalid number for " << optionName << " option" << endl;
+		exit(1);
+	}
+			
+	value = atoi(numberString);
+}
+
+void parseAndValidatePositiveDouble(string optionName, char * numberString, double &value) {
+
+	string str = numberString;
+
+	if (!isNumber(numberString)) {
+		cerr << endl << "Error: " << str << " is an invalid number for " << optionName << " option" << endl;
+		exit(1);
+	}
+			
+	value = atof(numberString);
+
+	if (value <= 0 ) {
+		cerr << endl << "Please provide a positive float for value: " << optionName << endl;
+		exit(1);
+	}
+
+}
+void parseAndValidatePositiveInt(string optionName, char * numberString, int &value) {
+
+	string str = numberString;
+
+	if (!isNumber(numberString)) {
+		cerr << endl << "Error: " << str << " is an invalid number for " << optionName << " option" << endl;
+		exit(1);
+	}
+			
+	value = atoi(numberString);
+
+	if (value <= 0 ) {
+		cerr << endl << "Please provide a positive int for value: " << optionName << endl;
+		exit(1);
+	}
+
 }
