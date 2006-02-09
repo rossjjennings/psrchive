@@ -238,7 +238,7 @@ int main (int argc, char** argv)
 
 
   if (filenames.size() == 0) {          
-    cerr << "pdmp: please specify filename[s]" << endl;
+    cerr << "psrchive_template: please specify filename[s]" << endl;
     return -1;
   }
   
