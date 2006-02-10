@@ -22,10 +22,7 @@
 #include "string_utils.h"
 #include "genutil.h"
 #include "slalib.h"
-
-#ifdef HAVE_CONFIG_H
-#include<config.h>
-#endif
+#include "getopt.h"
 
 using namespace std;
 using namespace Pulsar;
@@ -62,29 +59,9 @@ vector<Reference::To<Pulsar::Archive> > get_archives(string filename,
 // Plots the profile on PGPLOT
 void plotProfile(const Profile * profile, Pulsar::Plotter plotter);
 
-
-// Parses the various input argument flags e.g. -h -v etc.
-void parseParameters(int argc, char **argv, string &plot_device);
-
 // Sets the viewport to where the profile should be displayed
 // on the PGPLOT window
 void goToProfileViewPort();
-
-// Parses a string to a number and checks if that value is a positive value
-// 
-// Given:
-//     optionName   The name of the option used over the command line. e.g. -ps
-//     numberString The input string accompanied with the option. e.g. -pr 20	
-//                  where 20 is the numberString
-//     value        The output value once the string has been parsed.
-void parseAndValidatePositiveDouble(string optionName, char * numberString, double &value);
-void parseAndValidatePositiveInt(string optionName, char * numberString, int &value);
-
-// Parses a string to a number
-// Returns the numerical value in "value"
-void parseAndValidateDouble(string optionName, char * numberString, double &value);
-void parseAndValidateInt(string optionName, char * numberString, int &value);
-
 
 ///////////////////////////
 /// Global variables
@@ -100,12 +77,8 @@ const float PLOT_CHAR_HEIGHT = 0.8;
 // Approx. number of ticks to be drawn on the profile
 const int NUM_VERT_PROFILE_TICKS = 4;
 
-const int NUMERIC_CHARS_LEN = 13;
 
-const	char NUMERIC_CHARS [NUMERIC_CHARS_LEN] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '-', 'e', '.'};
-
-
-void usage (bool verbose_usage)
+void usage ()
 {
   cout << "Usage instructions: " << endl;
 
@@ -118,70 +91,6 @@ void init() {
   force = false;
   verbose = false;
 }
-
-// Parses the input flags and parameters provided over the command line.
-//
-// Adding a new input argument
-// ---------------------------
-// If you have created a new input e.g. -e <file extension>, then you 
-// will need to add a new input argument to the parseParameters function:
-// void parseParameters(int argc, char **argv, string &plot_device, string &extension) {
-// Then set this variable inside the function using the argv array.
-// You will need to then change the method definition above to be consistent
-// with this change.
-// Be sure to call parseParameters with the new variable:
-// string ext;
-// parseParameters(argc, argv, plot_device, ext);
-
-// If you wish to pass in numbers as arguments, you can use the 
-// parseAndValidate* methods provided (defined above)
-void parseParameters(int argc, char **argv, string &plot_device) {
-
-  string optionArg;
-  
-  // If no command line argument was provided, then print out usage
-  if (argc <= 1) {
-    usage(false);
-    exit(0);
-  }
-  
-  // Get command line options and arguments as necessary
-  for (int i = 1; i < argc; i++) {
-  
-    // help! 
-    if (strcmp(argv[i], "-h") == 0) {
-      usage(false);
-      exit(0);
-     }
-    else if (strcasecmp(argv[i], "--help") == 0) {
-      usage(true);
-      exit(0);
-     }
-    
-    // verbose
-    else if (strcmp(argv[i], "-v") == 0) {
-      verbose = true;
-    }
-    
-    // graph device
-    else if (strcmp(argv[i], "-g") == 0) { 
-      i++; // jump to the next argument which is the plot device name
-      
-      plot_device = argv[i];
-      
-      if (verbose) {
-        cout << "Using plot device " << plot_device << endl;
-      }
-    }
-    
-
-    else {
-      beginFilenamesIndex = i;
-      break;
-    }
-  }
-}
-
 
 void cpg_next ()
 {
@@ -199,11 +108,10 @@ int main (int argc, char** argv)
   RealTimer clock;
   double elapsed;
   
-	// Default plot device is /xs
-  string plot_device = "/xs";
+	// Default plot device
+  string plot_device = "?";
   
-  int lgraph;
-  string option;
+  char* metafile = NULL;
   
   vector<string> filenames;
 
@@ -212,30 +120,80 @@ int main (int argc, char** argv)
     
   Pulsar::Plotter plotter;
 
-  // Get the command line parameters
-  parseParameters(argc, argv, plot_device); 
 
+  // Get the command line parameters
+
+	const char* args = "ghv";
+	
+	const int HELP = 200;
+	const int VERBOSE = 201;
+	
+  static struct option long_options[] = {
+    { "help", no_argument, 0, HELP },		
+    { "verbose", no_argument, 0, VERBOSE },
+    { 0, 0, 0, 0 }
+  };
+	
+	int c = 0;
+	
+  while (1) {
+    int options_index = 0;
+    
+    c = getopt_long(argc, argv, args,
+		    long_options, &options_index);
+    
+    if (c == -1) 
+      break;
+    
+    switch (c) {
+    	case 'g':
+      	plot_device = optarg;
+				cout << "plot device = " << plot_device << endl;
+      	break;
+			
+			case 'h':
+				usage();
+				return 0;
+			
+			case 'v':
+				verbose = true;
+				break;
+				
+			case HELP:
+				usage();
+				return 0;
+			
+			case VERBOSE:
+				verbose = true;
+				break;
+				
+			default:
+				cerr << "psrchive_template: Unrecognized command\n";
+				return -1;
+		}
+	}
+		
+		
 	// Set this to 3 if you wish to see debugging statements
   Pulsar::Archive::verbose = 0;
 
+  if (metafile)
+    stringfload (&filenames, metafile);
+  else
+    for (int ai=optind; ai<argc; ai++)
+      dirglob (&filenames, argv[ai]);
+  
+  if (filenames.size() == 0) {          
+    cerr << "psrchive_template: please specify filename[s]" << endl;
+    return -1;
+  }
+  
 	// Open the plot device
   if (cpgopen(plot_device.c_str()) < 0) {
     cout << "Error: Could not open plot device" << endl;
     return -1;
   }
 
-  // Read in the files
-  for( unsigned i=beginFilenamesIndex; i<argc; i++){
-    filenames.push_back( argv[i] );
-    breakup_archives.push_back( false );
-  }
-
-
-  if (filenames.size() == 0) {          
-    cerr << "psrchive_template: please specify filename[s]" << endl;
-    return -1;
-  }
-  
   clock.start();
   
   cpgask(!force);
@@ -352,87 +310,4 @@ void goToProfileViewPort() {
   // Fill most of the window from x1 = 0.1 to x2 = 0.9 and y1 = 0.1 to y2 = 0.9
   // where these values range from 0 to 1
   cpgsvp(0.1, 0.9, 0.1, 0.9);
-}
-
-
-/////////////////////////////////////////////
-// Parsing and validating routines
-//
-
-bool isNumber(char * str) {
-	
-	for (int i = 0; str[i] != '\0'; i++) {
-		for (int j = 0; ; j++) {
-			if (str[i] == NUMERIC_CHARS[j]) {
-				break;
-			}
-			
-			// Reached the end which means it's not a number
-			if (j == NUMERIC_CHARS_LEN - 1) {
-				return false;
-			}
-		}
-	}
-	
-	return true;
-}
-
-void parseAndValidateDouble(string optionName, char * numberString, double &value) {
-
-	string str = numberString;
-
-	if (!isNumber(numberString)) {
-		cerr << endl << "Error: " << str << " is an invalid number for the " << optionName << " option" << endl;
-		exit(1);
-	}
-			
-	value = atof(numberString);
-
-}
-
-void parseAndValidateInt(string optionName, char * numberString, int &value) {
-
-	string str = numberString;
-
-	if (!isNumber(numberString)) {
-		cerr << endl << "Error: " << str << " is an invalid number for the " << optionName << " option" << endl;
-		exit(1);
-	}
-			
-	value = atoi(numberString);
-}
-
-void parseAndValidatePositiveDouble(string optionName, char * numberString, double &value) {
-
-	string str = numberString;
-
-	if (!isNumber(numberString)) {
-		cerr << endl << "Error: " << str << " is an invalid number for the " << optionName << " option" << endl;
-		exit(1);
-	}
-			
-	value = atof(numberString);
-
-	if (value <= 0 ) {
-		cerr << endl << "Please provide a positive float for value: " << optionName << endl;
-		exit(1);
-	}
-
-}
-void parseAndValidatePositiveInt(string optionName, char * numberString, int &value) {
-
-	string str = numberString;
-
-	if (!isNumber(numberString)) {
-		cerr << endl << "Error: " << str << " is an invalid number for the " << optionName << " option" << endl;
-		exit(1);
-	}
-			
-	value = atoi(numberString);
-
-	if (value <= 0 ) {
-		cerr << endl << "Please provide a positive int for value: " << optionName << endl;
-		exit(1);
-	}
-
 }
