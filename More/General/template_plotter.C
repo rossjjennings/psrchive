@@ -123,7 +123,9 @@ int main (int argc, char** argv)
 
   // Get the command line parameters
 
-	const char* args = "ghv";
+	// If you wish to add a new parameter, insert the flag in the string below.
+	// If this new flag requires an argument, make sure you put a : next to it.
+	const char* args = "g:hv";
 	
 	const int HELP = 200;
 	const int VERBOSE = 201;
@@ -148,7 +150,6 @@ int main (int argc, char** argv)
     switch (c) {
     	case 'g':
       	plot_device = optarg;
-				cout << "plot device = " << plot_device << endl;
       	break;
 			
 			case 'h':
@@ -172,7 +173,6 @@ int main (int argc, char** argv)
 				return -1;
 		}
 	}
-		
 		
 	// Set this to 3 if you wish to see debugging statements
   Pulsar::Archive::verbose = 0;
