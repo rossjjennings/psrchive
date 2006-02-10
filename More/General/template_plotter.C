@@ -279,6 +279,12 @@ int main (int argc, char** argv)
       // You can alter plotProfile to suit your needs whereas singleProfile will
       // stick to a specific output format on pgplot.
       
+			// Writing to disk
+			// ---------------
+			//
+			// To write a new archive file to disk after modifying, use the following:
+	  	// 	archive->unload(the_new);
+			// Where "the_new" is the new filename for the archive
     }
   }
   catch (Error& error) {
