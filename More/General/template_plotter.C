@@ -5,6 +5,7 @@
 #include <time.h>
 #include <sstream>
 #include <map>
+#include <unistd.h>
 
 #include "Pulsar/Plotter.h"
 #include "Reference.h"
@@ -36,7 +37,7 @@ using namespace Pulsar;
 // 
 // This is a template application, initially programmed for plotting
 // profiles. However, this can be changed to do anything you like
-// as long as you know how to call various library routines.
+// as long as you can make the calls to various library routines.
 //
 // Some annotations are provided to assist you in making these changes
 // but these can only help so much. Please let me know if you need
@@ -173,13 +174,6 @@ void parseParameters(int argc, char **argv, string &plot_device) {
       }
     }
     
-    // force - Don't prompt the user about anything
-    else if (strcmp(argv[i], "-f") == 0 || strcasecmp(argv[i], "--force") == 0) {
-      if (verbose) {
-        cout << "Setting force on" << endl;
-      }
-      force = true;  
-    }
 
     else {
       beginFilenamesIndex = i;
@@ -205,9 +199,7 @@ int main (int argc, char** argv)
   RealTimer clock;
   double elapsed;
   
-  float lineHeight = 0.16;
-  
-  char c, d;
+	// Default plot device is /xs
   string plot_device = "/xs";
   
   int lgraph;
@@ -223,8 +215,10 @@ int main (int argc, char** argv)
   // Get the command line parameters
   parseParameters(argc, argv, plot_device); 
 
+	// Set this to 3 if you wish to see debugging statements
   Pulsar::Archive::verbose = 0;
 
+	// Open the plot device
   if (cpgopen(plot_device.c_str()) < 0) {
     cout << "Error: Could not open plot device" << endl;
     return -1;
@@ -382,7 +376,7 @@ void parseAndValidateDouble(string optionName, char * numberString, double &valu
 	string str = numberString;
 
 	if (!isNumber(numberString)) {
-		cerr << endl << "Error: " << str << " is an invalid number for " << optionName << " option" << endl;
+		cerr << endl << "Error: " << str << " is an invalid number for the " << optionName << " option" << endl;
 		exit(1);
 	}
 			
@@ -395,7 +389,7 @@ void parseAndValidateInt(string optionName, char * numberString, int &value) {
 	string str = numberString;
 
 	if (!isNumber(numberString)) {
-		cerr << endl << "Error: " << str << " is an invalid number for " << optionName << " option" << endl;
+		cerr << endl << "Error: " << str << " is an invalid number for the " << optionName << " option" << endl;
 		exit(1);
 	}
 			
@@ -407,7 +401,7 @@ void parseAndValidatePositiveDouble(string optionName, char * numberString, doub
 	string str = numberString;
 
 	if (!isNumber(numberString)) {
-		cerr << endl << "Error: " << str << " is an invalid number for " << optionName << " option" << endl;
+		cerr << endl << "Error: " << str << " is an invalid number for the " << optionName << " option" << endl;
 		exit(1);
 	}
 			
@@ -424,7 +418,7 @@ void parseAndValidatePositiveInt(string optionName, char * numberString, int &va
 	string str = numberString;
 
 	if (!isNumber(numberString)) {
-		cerr << endl << "Error: " << str << " is an invalid number for " << optionName << " option" << endl;
+		cerr << endl << "Error: " << str << " is an invalid number for the " << optionName << " option" << endl;
 		exit(1);
 	}
 			
