@@ -48,7 +48,8 @@ void usage ()
     "  -D            Plot results on PGPLOT device /xs\n"
     "  -l            Plot with lines instead of steps\n"
     "  -b factor     Sum groups of \"factor\" adjacent bins before plotting results\n"
-    "  -s filename   Write analytic standard to given filename [Default: paas.std]\n";
+    "  -s filename   Write analytic standard to given filename [Default: paas.std]\n"
+    "  -i            interactively select components \n";
 
 }
 
@@ -464,7 +465,7 @@ ComponentModel::clear()
 
 int main (int argc, char** argv) 
 {
-  const char* args = "hb:r:w:c:fF:t:d:Dl:Ws:";
+  const char* args = "hb:r:w:c:fF:it:d:Dl:Ws:";
   string model_filename_in, model_filename_out;
   bool fit=false;
   vector<string> new_components;
@@ -478,6 +479,7 @@ int main (int argc, char** argv)
   strcpy(std_filename, "paas.std");
   bool fit_deriv=false;
   bool line_plot=false;
+  bool interactive = false;
 
   while ((c = getopt(argc, argv, args)) != -1)
     switch (c) {
@@ -522,6 +524,8 @@ int main (int argc, char** argv)
       strcpy(pgdev, optarg);
       break;
 
+    case 'i':
+      interactive = true;
     case 'D':
       strcpy(pgdev, "/xs");
       break;
@@ -538,6 +542,13 @@ int main (int argc, char** argv)
       cerr << "invalid param '" << c << "'" << endl;
     }
 
+  if (pgdev[0]!='\0')
+    {
+      cpgopen(pgdev);
+      cpgask(0);
+      cpgsvp(0.1, 0.9, 0.1, 0.9);
+    }
+  
   try
   {
     Reference::To<Pulsar::Archive> archive
@@ -547,9 +558,12 @@ int main (int argc, char** argv)
     archive->fscrunch();
     archive->tscrunch();
     archive->pscrunch();
-    archive->centre();
-    archive->remove_baseline();
+    if (archive->has_model())
+      archive->centre();
+    else
+      archive->centre_max_bin (); 
 
+    archive->remove_baseline();
 
     // make empty model
     ComponentModel model;
@@ -572,62 +586,149 @@ int main (int argc, char** argv)
 			  new_components[ic].c_str()+name_start);
     }
 
+    bool iterate = true;
 
-    // fit if specified
-    if (fit)
-    {
-      // set fit flags
-      model.set_infit(fit_flags.c_str());
-      // fit
-      model.fit(archive->get_Integration(0)->get_Profile(0,0),
-		fit_deriv, threshold);
-    }
-    // write out if specified
-    if (!model_filename_out.empty())
-      model.unload(model_filename_out.c_str());
+    while (iterate) {
 
-    // plot
-    if (pgdev[0]!='\0')
-    {
-      Reference::To<Pulsar::Archive> scrunched;
-      scrunched = archive->clone();
-      if (bscrunch > 1)
-	scrunched->bscrunch(bscrunch);
+      iterate = false;
+
+      // fit if specified
+      if (fit)
+	{
+	  // set fit flags
+	  model.set_infit(fit_flags.c_str());
+	  // fit
+	  model.fit(archive->get_Integration(0)->get_Profile(0,0),
+		    fit_deriv, threshold);
+	}
+
+      // write out if specified
+      if (!model_filename_out.empty())
+	model.unload(model_filename_out.c_str());
       
-      cpgopen(pgdev);
-      cpgsvp(0.1, 0.9, 0.1, 0.9);
-      Profile *prof = scrunched->get_Integration(0)->get_Profile(0,0);
-      float ymin = prof->min();
-      float ymax = prof->max();
-      float extra = 0.05*(ymax-ymin);
-      ymin -= extra;
-      ymax += extra;
-      cpgswin(0.0, 1.0, ymin, ymax);
-      cpgbox("bcnst", 0, 0, "bcnst", 0, 0);
-      cpglab("Pulse phase", "Intensity", "");
-      int i, npts=prof->get_nbin();
-      cpgsci(14);
-      for (ic=0; ic < model.get_ncomponents(); ic++)
-	model.plot(npts, true, ic);
-      vector<float> xvals(npts);
-      cpgsci(4);
-      for (i=0; i < npts; i++)
-	xvals[i] = i/((double)npts);
-      if (line_plot)
-	cpgline(npts, &xvals[0], prof->get_amps());
-      else
-	cpgbin(npts, &xvals[0], prof->get_amps(), 0);
-      cpgsci(2);
-      model.plot_difference(prof, line_plot);
-      cpgsci(1);
-      model.plot(npts, true);
-      cpgend();
+      // plot
+      if (pgdev[0]!='\0')
+	{
+	  Reference::To<Pulsar::Archive> scrunched;
+	  scrunched = archive->clone();
+	  if (bscrunch > 1)
+	    scrunched->bscrunch(bscrunch);
+
+	  cpgpage();
+
+	  Profile *prof = scrunched->get_Integration(0)->get_Profile(0,0);
+	  float ymin = prof->min();
+	  float ymax = prof->max();
+	  float extra = 0.05*(ymax-ymin);
+	  ymin -= extra;
+	  ymax += extra;
+	  cpgswin(0.0, 1.0, ymin, ymax);
+	  cpgbox("bcnst", 0, 0, "bcnst", 0, 0);
+	  cpglab("Pulse phase", "Intensity", "");
+	  int i, npts=prof->get_nbin();
+	  cpgsci(14);
+	  for (ic=0; ic < model.get_ncomponents(); ic++)
+	    model.plot(npts, true, ic);
+	  vector<float> xvals(npts);
+	  cpgsci(4);
+	  for (i=0; i < npts; i++)
+	    xvals[i] = i/((double)npts);
+	  if (line_plot)
+	    cpgline(npts, &xvals[0], prof->get_amps());
+	  else
+	    cpgbin(npts, &xvals[0], prof->get_amps(), 0);
+	  cpgsci(2);
+	  model.plot_difference(prof, line_plot);
+	  cpgsci(1);
+	  model.plot(npts, true);
+	}
+
+
+      while (interactive) {
+
+	iterate = true;
+	fit = false;
+
+	cerr << "Enter command ('h' for help)" << endl;
+
+	float curs_x=0, curs_y=0;
+	char key = ' ';
+	if (cpgband(6,0,0,0,&curs_x, &curs_y, &key) != 1 || key == 'q') {
+	  cerr << "Quitting ..." << endl;
+	  iterate = false;
+	  break;
+	}
+
+	if (key == 'h') {
+	  cerr << 
+	    "\n"
+	    "left click - add a component at cursor position\n"
+	    "f key      - fit current set of components\n"
+	    "q key      - quit\n"
+	    "\n"
+	    "After left click:\n"
+	    "   1) any key    - select width of new component, then \n"
+	    "   2) any key    - select height of new component \n"
+	    "\n"
+	    "   right click or <Escape> to abort addition of new component \n"
+	       << endl;
+	  continue;
+	}
+
+	if (key == 'f') {
+	  cerr << "Fitting components" << endl;
+	  fit = true;
+	  break;
+	}
+
+	if (key == 'a' || key == 65) {
+
+	  cerr << "Adding component centred at pulse phase " << curs_x << endl;
+	  double centre = curs_x;
+
+	  cerr << "Select width and hit any key" << endl;
+	  if (cpgband(4, 1, curs_x, curs_y, &curs_x, &curs_y, &key) != 1) {
+	    cerr << "paas: cpgband error" << endl;
+	    return -1;
+	  }
+
+	  // right click or escape to abort
+	  if (key == 88 || key == 27)
+	    continue;
+
+	  double width = fabs(centre - curs_x);
+
+	  cerr << "Select height and hit any key" << endl;
+	  if (cpgband(5,0,0,0,&curs_x, &curs_y, &key) != 1) {
+	    cerr << "paas: cpgband error" << endl;
+	    return -1;
+	  }
+
+	  // right click or escape to abort
+	  if (key == 88 || key == 27)
+	    continue;
+
+	  double height = curs_y;
+
+	  model.add_component (centre, 0.25/(width*width), height, "");
+
+	  break;
+
+	}
+
+	cerr << "Unrecognized command" << endl;
+
+      }
+
     }
+
 
     // write out standard
     model.evaluate(archive->get_Integration(0)->get_Profile(0,0)->get_amps(),
 		   archive->get_nbin());
+
     archive->unload(std_filename);
+
   } 
   catch (Error& error) {
     cerr << error << endl;
@@ -636,6 +737,9 @@ int main (int argc, char** argv)
     cerr << error << endl;
   }
   
+  if (pgdev[0]!='\0')
+    cpgend();
+
   return 0;
 }
 
