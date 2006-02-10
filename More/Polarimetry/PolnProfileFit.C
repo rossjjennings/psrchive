@@ -291,6 +291,9 @@ void Pulsar::PolnProfileFit::fit (const PolnProfile* observation) try
 
   }
 
+  unsigned nbin_std = standard->get_nbin();
+  unsigned nbin_obs = observation->get_nbin();
+
   float phase_guess = ccf_max_phase (standard_fourier->get_Profile(0),
 				     fourier->get_Profile(0));
 
@@ -351,6 +354,15 @@ void Pulsar::PolnProfileFit::fit (const PolnProfile* observation) try
   clock.start();
   model->solve_work ();
   clock.stop();
+
+
+  /* if template and observation have different numbers of bins, there
+     is an extra offset equal to the offset between the centres of bin
+     0 of each profile */
+  if (nbin_std != nbin_obs) {
+    double mismatch_shift = 0.5/nbin_std - 0.5/nbin_obs;
+    phase->set_param (1, phase->get_param(1) - mismatch_shift);
+  }
 
 #ifdef _DEBUG
   cerr << "Pulsar::PolnProfileFit::fit solved in " << clock << endl;
