@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/ExampleArchive.h,v $
-   $Revision: 1.5 $
-   $Date: 2005/12/09 16:41:07 $
+   $Revision: 1.6 $
+   $Date: 2006/02/12 16:28:42 $
    $Author: straten $ */
 
 #ifndef __ExampleArchive_h
@@ -61,25 +61,11 @@ namespace Pulsar {
     //! Unload the ExampleArchive (header and Integration data) to filename
     virtual void unload_file (const char* filename) const;
 
-    friend class Archive::Advocate<ExampleArchive>;
-
     //! Advocates the use of the ExampleArchive plugin
-    class Agent : public Archive::Advocate<ExampleArchive> {
+    class Agent;
 
-      public:
-
-        Agent () { } 
-
-        //! Advocate the use of TimerArchive to interpret filename
-        bool advocate (const char* filename);
-
-        //! Return the name of the TimerArchive plugin
-        string get_name () { return "ExampleArchive"; }
-    
-        //! Return description of this plugin
-        string get_description ();
-
-    };
+    //! Enable Advocate template class to access protected Agent class
+    friend class Archive::Advocate<ExampleArchive>;
 
   private:
 
@@ -88,6 +74,24 @@ namespace Pulsar {
 
   };
  
+
+  //! Advocates the use of the ExampleArchive plugin
+  class ExampleArchive::Agent : public Archive::Advocate<ExampleArchive> {
+    
+  public:
+    
+    Agent () { } 
+    
+    //! Advocate the use of ExampleArchive to interpret filename
+    bool advocate (const char* filename);
+    
+    //! Return the name of the ExampleArchive plugin
+    string get_name () { return "ExampleArchive"; }
+    
+    //! Return description of this plugin
+    string get_description ();
+    
+  };
 
 }
 
