@@ -19,7 +19,7 @@
 #include <unistd.h>
 
 // A command line tool for calibrating Pulsar::Archives
-const char* args = "A:BbcDd:e:fFGhiIM:m:n:op:Pqr:sSt:Tu:vVw";
+const char* args = "A:BbcDd:e:fFGhiIM:m:n:op:Pqr:sSt:Tu:vVwZ";
 
 void usage ()
 {
@@ -149,7 +149,7 @@ int main (int argc, char *argv[]) {
       break;
 
     case 'i':
-      cout << "$Id: pac.C,v 1.69 2006/01/07 00:05:13 straten Exp $" << endl;
+      cout << "$Id: pac.C,v 1.70 2006/02/13 15:25:15 straten Exp $" << endl;
       return 0;
 
     case 'A':
