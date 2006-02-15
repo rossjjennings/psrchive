@@ -13,7 +13,7 @@ void Pulsar::Archive::init ()
   if (verbose == 3)
     cerr << "Pulsar::Archive::init" << endl;
 
-  model_updated = false;
+  runtime_model = false;
 }
 
 Pulsar::Archive::Archive () 
@@ -249,6 +249,8 @@ void Pulsar::Archive::init_Integration (Integration* subint)
     subint->defaradayed_centre_frequency = get_centre_frequency();
     subint->defaradayed_rotation_measure = get_rotation_measure();
   }
+
+  subint->zero_phase_aligned = false;
 }
 
 /*!
@@ -625,19 +627,14 @@ void Pulsar::Archive::set_model (const polyco& new_model)
   model = new polyco (new_model);
 
   if (verbose == 3)
-    cerr << "Pulsar::Archive::set_model model set" << endl;
+    cerr << "Pulsar::Archive::set_model apply the new model" << endl;
 
-  if ( oldmodel && oldmodel->pollys.size() ) {
-    if (verbose == 3)
-      cerr << "Pulsar::Archive::set_model apply the new model" << endl;
-
-    // correct Integrations against the old model
-    for (unsigned isub = 0; isub < get_nsubint(); isub++)
-      apply_model (*oldmodel, get_Integration(isub));
-  }
+  // correct Integrations against the old model
+  for (unsigned isub = 0; isub < get_nsubint(); isub++)
+    apply_model (get_Integration(isub), oldmodel.ptr());
 
   // it may not be true the that supplied model was generated at runtime
-  model_updated = false; 
+  runtime_model = false; 
 }
 
 const polyco Pulsar::Archive::get_model () const
