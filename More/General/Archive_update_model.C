@@ -60,12 +60,16 @@ void Pulsar::Archive::update_model (unsigned nsubint)
   create_updated_model (!runtime_model);
 
   if (verbose == 3)
-    cerr << "Pulsar::Archive::update_model apply model" << endl;
+    cerr << "Pulsar::Archive::update_model checking first " 
+         << nsubint << " Integrations" << endl;
 
   // correct the old Integrations with the old model
   for (unsigned isub = 0; isub < nsubint; isub++)
-    if (!runtime_model || !get_Integration(isub)->zero_phase_aligned)
+    if (!get_Integration(isub)->zero_phase_aligned)  {
+      if (verbose == 3)
+        cerr << "Pulsar::Archive::update_model phasing isub=" << isub << endl;
       apply_model (get_Integration(isub), oldmodel.ptr());
+    }
   
   runtime_model = true;
 }
@@ -153,8 +157,9 @@ void Pulsar::Archive::update_model (const MJD& time, bool clear_model)
     model = new polyco;
 
   if ( model->i_nearest (time) == -1 ) {
+    if (verbose > 2)
+      cerr << "Pulsar::Archive::update_model no model for " << time << endl;
     // no match, create a new polyco for the specified time
-
     polyco part = predict.get_polyco (time, time);
     model->append (part);
   }
@@ -205,11 +210,14 @@ void Pulsar::Archive::apply_model (Integration* subint, const polyco* old)
     double shift_time = dphase.fracturns() * period;
     
     if (verbose == 3) {
+
+      Phase old_phase = (old) ? old->phase(subint_mjd) : 0;
+
       cerr << "Pulsar::Archive::apply_model"
 	   << "\n  old MJD " << subint_mjd;
 
       if (old)
-	cerr << "\n  old polyco phase " << old->phase(subint_mjd)
+	cerr << "\n  old polyco phase " << old_phase
 	     << "\n  old freq " << old->get_freq();
 
       cerr << "\n  new polyco phase " << phase
@@ -227,9 +235,10 @@ void Pulsar::Archive::apply_model (Integration* subint, const polyco* old)
 
     if (verbose == 3) {
       subint_mjd = subint -> get_epoch();
+      phase = model->phase(subint_mjd);
       cerr << "Pulsar::Archive::apply_model"
 	   << "\n  new MJD "   << subint_mjd
-	   << "\n  new phase " << model->phase(subint_mjd)
+	   << "\n  new phase " << phase
 	   << endl;
     }
   }

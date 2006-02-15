@@ -35,7 +35,8 @@ Pulsar::IntegrationManager::get_Integration (unsigned subint)
 		 "isubint=%u nsubint=%u", subint, get_nsubint());
 
   // ensure that the subints vector is as large as the number of subints
-  resize (get_nsubint(), false);
+  if (subints.size() != get_nsubint())
+    subints.resize (get_nsubint());
 
   // if the subint has not already been loaded, call the pure virtual
   // method, load_Integration, to load the requested sub-int.
