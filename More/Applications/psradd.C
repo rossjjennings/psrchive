@@ -15,7 +15,7 @@
 #include "dirutil.h"
 #include "string_utils.h"
 
-static const char* psradd_args = "ab:c:Ce:f:FG:hiI:LM:O:p:Pqr:sS:tT:uUvVZ:";
+static const char* psradd_args = "b:c:Ce:f:FG:hiI:LM:O:p:Pqr:sS:tT:uUvVZ:";
 
 void usage () {
   cout <<
@@ -28,7 +28,6 @@ void usage () {
     " -i          Show revision information\n"
     " -L          Log results in source.log\n"
     "\n"
-    " -a          Do not rephase data \n"
     " -b nbin     Scrunch to nbin bins after loading archives\n"
     " -c nchan    Scrunch to nchan frequency channels after loading archives\n"
     " -C          Check that ephemerides are equal\n"
@@ -130,12 +129,8 @@ int main (int argc, char **argv) try {
       return 0;
       
     case 'i':
-      cout << "$Id: psradd.C,v 1.26 2006/01/19 15:49:37 hknight Exp $" << endl;
+      cout << "$Id: psradd.C,v 1.27 2006/02/15 15:27:19 straten Exp $" << endl;
       return 0;
-
-    case 'a':
-      Pulsar::Archive::append_phase_zero = true;
-      break;
 
     case 'b':
       nbin = atoi (optarg);
@@ -528,9 +523,6 @@ int main (int argc, char **argv) try {
     cerr << "psradd: Error handling [" << filenames[ifile] << "]\n" 
 	 << error << endl;
   }
-
-  if( total->has_model() )
-    total->update_model();
 
   if (!reset_total_next_load) try {
 
