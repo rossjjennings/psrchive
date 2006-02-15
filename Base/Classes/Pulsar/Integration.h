@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Integration.h,v $
-   $Revision: 1.74 $
-   $Date: 2005/12/09 16:41:07 $
+   $Revision: 1.75 $
+   $Date: 2006/02/15 15:00:49 $
    $Author: straten $ */
 
 /*
@@ -507,6 +507,9 @@ namespace Pulsar {
     //! Record the centre frequency applied in defaraday
     double dedispersed_centre_frequency;
 
+    //! Leading edge of phase bin zero = polyco predicted phase zero
+    bool zero_phase_aligned;
+
   };
 
   /*! e.g. MyExtension* ext = integration->get<MyExtension>(); */
@@ -520,7 +523,7 @@ namespace Pulsar {
       const Extension* ext = get_extension (iext);
 
       if (verbose)
-	cerr << "Pulsar::Integration::get<Ext> name=" << ext->get_name() << endl;
+	cerr << "Pulsar::Integration::get<T> name=" << ext->get_name() << endl;
 
       extension = dynamic_cast<const ExtensionType*>( ext );
 
