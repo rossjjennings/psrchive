@@ -2,20 +2,6 @@
 #include <config.h>
 #endif
 
-#include <iostream>
-#include <vector>
-#include <algorithm>
-
-#include <assert.h>
-#include <math.h>
-#include <stdlib.h>
-
-#ifdef sun
-#include <ieeefp.h>
-#endif
-
-#include <fitsio.h>
-
 #include "psrephem.h"
 #include "ephio.h"
 
@@ -23,6 +9,21 @@
 #include "fitsutil.h"
 #include "coord.h"
 #include "genutil.h"
+
+#include <fitsio.h> 
+
+#include <iostream>
+#include <vector>
+#include <algorithm>
+
+#include <assert.h>
+#include <math.h>
+#include <stdlib.h>
+#include <string.h>
+
+#ifdef sun
+#include <ieeefp.h>
+#endif
 
 // utility function defined at the end of the file
 void datatype_match (int typecode, int ephind);
@@ -213,29 +214,31 @@ void psrephem::load (fitsfile* fptr, long row)
 	fits_read_col (fptr, TSTRING, icol+1, row, firstelem, onelement,
 		       &nul, &strval, &anynul, &status);
 
+        // strip off any leading spaces
+        char* start = strtok (strval, " \t\n");
+        if (!start)
+          anynul = true;
+
         if (anynul)
           break;
 
 	if (verbose)
-	  cerr << "psrephem::load string:'" << strval << "' in column "
+	  cerr << "psrephem::load string:'" << start << "' in column "
 	       << icol+1 << " (" << parmNames[ieph] << ")" << endl;
 
-	value_str[ieph] = strval;
+	value_str[ieph] = start;
 	break;
       }
 
     case 1:  // double
       {
-	#ifdef sun
-	double nul = FP_QNAN;
-	#else
-	// See: http://www.dbforums.com/archives/t317177.html
-	// The nan() function doesn't seem to exist for icc compiler
-	double nul = strtod("NAN(n-charsequence)", (char**) NULL);
-	#endif
-	
+	double nul = 0.0;
+
 	fits_read_col (fptr, TDOUBLE, icol+1, row, firstelem, onelement,
 		       &nul, value_double + ieph, &anynul, &status);
+
+        if (value_double[ieph] == 0.0 || !isfinite(value_double[ieph]))
+          anynul = true;
 
         if (anynul)
           break;
@@ -316,16 +319,13 @@ void psrephem::load (fitsfile* fptr, long row)
       }
     case 4:  // MJD
       {
-        #ifdef sun
-	double nul = FP_QNAN;
-	#else
-	// See: http://www.dbforums.com/archives/t317177.html
-	// The nan() function doesn't seem to exist for icc compiler
-	double nul = strtod("NAN(n-charsequence)", (char**) NULL);
-	#endif
+	double nul = 0.0;
 
 	fits_read_col (fptr, TDOUBLE, icol+1, row, firstelem, onelement,
 		       &nul, value_double + ieph, &anynul, &status);
+
+        if (value_double[ieph] == 0.0 || !isfinite(value_double[ieph]))
+          anynul = true;
 
         if (anynul)
           break;
@@ -352,6 +352,9 @@ void psrephem::load (fitsfile* fptr, long row)
 	int nul = -1;
 	fits_read_col (fptr, TINT, icol+1, row, firstelem, onelement,
 		       &nul, value_integer + ieph, &anynul, &status);
+
+        if (value_integer[ieph] == 0)
+          anynul = true;
 
         if (anynul)
           break;
