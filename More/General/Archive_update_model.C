@@ -19,7 +19,7 @@ void Pulsar::Archive::update_model()
   if (verbose == 3)
     cerr << "Pulsar::Archive::update_model" << endl;
 
-  model_updated = false;
+  runtime_model = false;
   update_model (get_nsubint());
 }
 
@@ -31,12 +31,17 @@ void Pulsar::Archive::update_model()
 /*!
   This method economizes on the number of times that the polyco is
   re-created and the Integrations are re-aligned to the model.
-  By setting the run-time attribute, model_updated, the
-  Integrations are flagged as no longer in need of correction.
 
-  If model_updated is false, then the first nsubint Integrations are
-  re-aligned using the difference between the old and new models.
-  (see Archive::apply_model)
+  By setting the Archive::runtime_model attribute, the polyco is
+  flagged as created by the currently available version of tempo and
+  its run-time configuration files.
+
+  By setting the Integration::zero_phase_aligned attribute, each
+  sub-integration is flagged as no longer in need of alignment.
+
+  If Archive::runtime_model or Integration::zero_phase_aligned is
+  false, then the Integration is re-aligned using the difference
+  between the old and new models.  (see Archive::apply_model)
 
   \param nsubint the number of Integrations to correct
 */
@@ -47,32 +52,29 @@ void Pulsar::Archive::update_model (unsigned nsubint)
 
   Reference::To<polyco> oldmodel;
 
-  if (!model_updated)
+  if (!runtime_model)
     // store the old model
     oldmodel = model;
 
   // if the model has not already been updated, create a completely new polyco
-  create_updated_model (!model_updated);
-
-  // if previously updated, no need to correct the old Integrations
-  if (model_updated || !oldmodel)
-    return;
+  create_updated_model (!runtime_model);
 
   if (verbose == 3)
     cerr << "Pulsar::Archive::update_model apply model" << endl;
 
   // correct the old Integrations with the old model
   for (unsigned isub = 0; isub < nsubint; isub++)
-    apply_model (*oldmodel, get_Integration(isub));
+    if (!runtime_model || !get_Integration(isub)->zero_phase_aligned)
+      apply_model (get_Integration(isub), oldmodel.ptr());
   
-  model_updated = true;
+  runtime_model = true;
 }
 
 // ///////////////////////////////////////////////////////////////////////
 //
 // Archive::create_updated_model
 //
-/*!  The polyco needs only describe the phase and period of every
+/*!  The polyco need only describe the phase and period of every
   Integration.  When the Integrations are separated by a large amount
   of time, the creation of a new polyco to completely span this time
   results in a huge polyco.dat and a huge waste of time.
@@ -82,19 +84,24 @@ void Pulsar::Archive::update_model (unsigned nsubint)
   in the current model, a single polynomial is created and appended to
   the current model.
 
-  \param clear_model delete the current model after copying its attributes */
+  \param clear_model delete the current model after copying its attributes
+*/
 void Pulsar::Archive::create_updated_model (bool clear_model)
 {
   if (get_type() != Signal::Pulsar)
     throw Error (InvalidState, "Pulsar::Archive::create_updated_model",
 		 "not a pulsar observation");
 
+  if (clear_model)
+    for (unsigned isub = 0; isub < get_nsubint(); isub++)
+      get_Integration(isub)->zero_phase_aligned = false;
+
   for (unsigned isub = 0; isub < get_nsubint(); isub++) {
 
     MJD time = get_Integration(isub)->get_epoch();
     update_model (time, clear_model);
 
-    // only clear the model on the first loop
+    // clear the model only on the first time around the loop
     clear_model = false;
 
   }
@@ -113,7 +120,7 @@ void Pulsar::Archive::update_model (const MJD& time, bool clear_model)
 		 "not a pulsar observation");
 
   if (verbose == 3) cerr << "Pulsar::Archive::update_model time=" << time 
-                    << " clear=" << clear_model << endl;
+			 << " clear=" << clear_model << endl;
 
   if (!ephemeris) {
     model = 0;
@@ -166,14 +173,15 @@ void Pulsar::Archive::update_model (const MJD& time, bool clear_model)
   \param old the old polyco used to describe subint
   \param subint pointer to the Integration to be aligned to the current model
 */
-void Pulsar::Archive::apply_model (const polyco& old, Integration* subint)
+void Pulsar::Archive::apply_model (Integration* subint, const polyco* old)
 {
   if ( !model )
     throw Error (InvalidState, "Pulsar::Archive::apply_model", "no polyco");
 
-  if ( model->get_telescope() != old.get_telescope() )
-    throw Error (InvalidState, "Pulsar::Archive::apply_model",
-		 "telescope mismatch");
+  if ( old && model->get_telescope() != old->get_telescope() ) {
+    cerr << "Pulsar::Archive::apply_model telescope mismatch" << endl;
+    old = 0;
+  }
 
   try {
 
@@ -182,8 +190,10 @@ void Pulsar::Archive::apply_model (const polyco& old, Integration* subint)
 
     // get the phase shift due to differing observing frequencies between
     // old and current polyco
-    Phase freq_shift_phase = 
-      model->phase (subint_mjd, old.get_freq()) - model->phase (subint_mjd);
+    Phase freq_shift_phase = 0;
+
+    if (old)
+      model->phase (subint_mjd, old->get_freq()) - model->phase (subint_mjd);
 
     // get the phase of the rising edge of bin zero
     Phase phase = model->phase (subint_mjd);
@@ -194,23 +204,27 @@ void Pulsar::Archive::apply_model (const polyco& old, Integration* subint)
     double period = model->period (subint_mjd);
     double shift_time = dphase.fracturns() * period;
     
-    if (verbose == 3)
+    if (verbose == 3) {
       cerr << "Pulsar::Archive::apply_model"
-	   << "\n  old MJD " << subint_mjd
-	   << "\n  old polyco phase " << old.phase(subint_mjd)
-	   << "\n  new polyco phase " << phase
-	
-	   << "\n  old freq " << old.get_freq()
+	   << "\n  old MJD " << subint_mjd;
+
+      if (old)
+	cerr << "\n  old polyco phase " << old->phase(subint_mjd)
+	     << "\n  old freq " << old->get_freq();
+
+      cerr << "\n  new polyco phase " << phase
 	   << "\n  new freq " << model->get_freq()
 	   << "\n  freq phase shift " << freq_shift_phase
 	
 	   << "\n  time shift " << shift_time/86400.0 << " days" 
            << "\n             " << shift_time << " seconds "
 	   << "\n  total phase shift " << dphase << endl; 
-    
+    }
+
     subint -> set_folding_period (period);  
     subint -> rotate (shift_time);
-    
+    subint -> zero_phase_aligned = true;
+
     if (verbose == 3) {
       subint_mjd = subint -> get_epoch();
       cerr << "Pulsar::Archive::apply_model"

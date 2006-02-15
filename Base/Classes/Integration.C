@@ -81,6 +81,7 @@ Pulsar::Integration::Integration ()
   defaradayed_centre_frequency = 0.0;
   dedispersed_dispersion_measure = 0.0;
   dedispersed_centre_frequency   = 0.0;
+  zero_phase_aligned = false;
 }
 
 Pulsar::Integration::Integration (const Integration& subint)
@@ -224,7 +225,7 @@ void Pulsar::Integration::copy (const Integration& subint,
   defaradayed_centre_frequency   = subint.defaradayed_centre_frequency;
   dedispersed_dispersion_measure = subint.dedispersed_dispersion_measure;
   dedispersed_centre_frequency   = subint.dedispersed_centre_frequency;
-
+  zero_phase_aligned = false;
 }
 
 Pulsar::Profile*
@@ -525,11 +526,15 @@ void Pulsar::Integration::rotate (double time)
   }
 }
 
-void Pulsar::Integration::rotate_phase (double phase)
-try {
+void Pulsar::Integration::rotate_phase (double phase) try {
+
+  // only Archive::apply_model guarantees preservation of polyco phase
+  zero_phase_aligned = false;
+
   for (unsigned ipol=0; ipol<get_npol(); ipol++)
     for (unsigned ichan=0; ichan<get_nchan(); ichan++)
       profiles[ipol][ichan] -> rotate_phase (phase);
+
 }
 catch (Error& error) {
   throw error += "Integration::rotate_phase";
