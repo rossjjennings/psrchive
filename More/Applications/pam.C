@@ -71,6 +71,7 @@ void usage()
     "The following options take floating point arguments \n"
     "  -d DM            Alter the header dispersion measure \n"
     "  -R RM            Correct for ISM faraday rotation \n"
+    "  --RR             Dedefaraday (i.e. undo -R option) \n"
     "  -s               Smear with this duty cycle \n"
     "  -r               Rotate profiles by this many turns \n" 
     "  -w               Reset profile weights to this value \n"
@@ -122,6 +123,7 @@ int main (int argc, char *argv[]) try {
     double dm = 0.0;
 
     bool defaraday = false;
+    bool dedefaraday = false;
     double rm = 0.0;
   
     bool reset_weights = false;
@@ -188,6 +190,7 @@ int main (int argc, char *argv[]) try {
     const int SITE = 1211;
     const int NAME = 1212;
     const int DD   = 1213;
+    const int RR   = 1214;
 
     while (1) {
 
@@ -209,6 +212,7 @@ int main (int argc, char *argv[]) try {
 	{"site",       1, 0, SITE},
 	{"name",       1, 0, NAME},
 	{"DD",no_argument,0,DD},
+	{"RR",no_argument,0,DD},
 	{0, 0, 0, 0}
       };
     
@@ -235,7 +239,7 @@ int main (int argc, char *argv[]) try {
 	Pulsar::Archive::set_verbosity(3);
 	break;
       case 'i':
-	cout << "$Id: pam.C,v 1.53 2006/01/11 20:28:26 straten Exp $" << endl;
+	cout << "$Id: pam.C,v 1.54 2006/02/16 06:26:51 hknight Exp $" << endl;
 	return 0;
       case 'm':
 	save = true;
@@ -523,6 +527,8 @@ int main (int argc, char *argv[]) try {
 
       case DD: dededisperse = true; break;
 	  
+      case RR: dedefaraday = true; break;
+
       default:
 	cout << "Unrecognised option" << endl;
       }
@@ -712,6 +718,16 @@ int main (int argc, char *argv[]) try {
 	arch->defaraday();
 	if (verbose)
 	  cout << "Archive corrected for a RM of " << rm << endl;
+      }
+
+      if( dedefaraday ) {
+	if( arch->get_faraday_corrected() ) {
+	  arch->set_rotation_measure (-arch->get_rotation_measure());
+	  arch->defaraday();
+	  arch->set_faraday_corrected( false );
+	}
+	if (verbose)
+	  cout << "Archive defaraday corrected for a RM of " << arch->get_rotation_measure() << endl;
       }
 
       if (stokesify) {
