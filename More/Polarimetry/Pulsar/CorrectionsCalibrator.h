@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/Attic/CorrectionsCalibrator.h,v $
-   $Revision: 1.5 $
-   $Date: 2005/12/08 03:04:02 $
+   $Revision: 1.6 $
+   $Date: 2006/02/16 22:58:49 $
    $Author: straten $ */
 
 #ifndef __Pulsar_CorrectionsCalibrator_H
@@ -24,6 +24,9 @@ namespace Pulsar {
 
     //! The ReceptionCalibrator class makes use of protected attributes
     friend class ReceptionCalibrator;
+
+    //! Trust Pointing parallactic angle more than computed value
+    static bool pointing_over_computed;
 
     //! Default constructor
     CorrectionsCalibrator ();

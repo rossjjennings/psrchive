@@ -7,6 +7,7 @@
 #include "Pulsar/PolnCalibrator.h"
 #include "Pulsar/FluxCalibrator.h"
 #include "Pulsar/IonosphereCalibrator.h"
+#include "Pulsar/CorrectionsCalibrator.h"
 
 #include "Pulsar/ProcHistory.h"
 
@@ -19,7 +20,7 @@
 #include <unistd.h>
 
 // A command line tool for calibrating Pulsar::Archives
-const char* args = "A:BbcDd:e:fFGhiIM:m:n:op:Pqr:sSt:Tu:vVwZ";
+const char* args = "A:BbcDd:e:fFGhiIM:m:n:Oop:Pqr:sSt:Tu:vVwZ";
 
 void usage ()
 {
@@ -61,6 +62,7 @@ void usage ()
     "Expert options: \n"
     "  -f                     Override flux calibration flag\n"
     "  -G                     Normalize profile weights by absolute gain \n"
+    "  -O                     Pointing parallactic angle overrides computed \n"
     "\n"
     "Input/Output options: \n"
     "  -M meta                Specify file of files\n"
@@ -149,7 +151,7 @@ int main (int argc, char *argv[]) {
       break;
 
     case 'i':
-      cout << "$Id: pac.C,v 1.70 2006/02/13 15:25:15 straten Exp $" << endl;
+      cout << "$Id: pac.C,v 1.71 2006/02/16 22:58:49 straten Exp $" << endl;
       return 0;
 
     case 'A':
@@ -226,6 +228,10 @@ int main (int argc, char *argv[]) {
 
       break;
     }
+
+    case 'O':
+      Pulsar::CorrectionsCalibrator::pointing_over_computed = true;
+      break;
 
     case 'o':
       Pulsar::ArchiveMatch::opposite_sideband = true;

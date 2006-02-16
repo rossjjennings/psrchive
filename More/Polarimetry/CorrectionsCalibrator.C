@@ -9,6 +9,8 @@
 #include "Calibration/Parallactic.h"
 #include "Pauli.h"
 
+bool Pulsar::CorrectionsCalibrator::pointing_over_computed = false;
+
 //! Default constructor
 Pulsar::CorrectionsCalibrator::CorrectionsCalibrator () {}
 
@@ -265,15 +267,26 @@ Pulsar::CorrectionsCalibrator::get_transformation (const Archive* archive,
  
     // check that the para_ang is equal
 
-    if (pointing && Archive::verbose &&
-	!equal_pi( pointing->get_parallactic_angle(), pa ))
-	
-      cerr << "Pulsar::CorrectionsCalibrator::get_transformation WARNING\n"
-	" Pointing parallactic_angle="
-	   << pointing->get_parallactic_angle().getDegrees() << "deg "
-	   << " != " << pa.getDegrees() << "deg calculated for MJD="
-	   << integration->get_epoch() << endl;
-    
+    if (pointing && !equal_pi( pointing->get_parallactic_angle(), pa ))  {
+
+      if (Archive::verbose)
+        cerr << "Pulsar::CorrectionsCalibrator::get_transformation WARNING\n"
+	  "  Pointing parallactic angle="
+	     << pointing->get_parallactic_angle().getDegrees() << "deg "
+	     << " != " << pa.getDegrees() << "deg calculated for MJD="
+	     << integration->get_epoch() << endl;
+  
+      if (pointing_over_computed)  {
+        if (Archive::verbose)
+          cerr << "  Using Pointing parallactic angle." << endl;
+        para.set_parallactic_angle 
+             (pointing->get_parallactic_angle().getRadians());
+      }
+      else if (Archive::verbose)
+        cerr << "  Using calculated parallactic angle." << endl;
+
+    }
+
     if (verbose)
       cerr << "Pulsar::CorrectionsCalibrator::get_transformation"
 	" adding vertical transformation\n  " << para.evaluate() << endl;
