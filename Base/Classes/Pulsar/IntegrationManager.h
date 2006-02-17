@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/IntegrationManager.h,v $
-   $Revision: 1.9 $
-   $Date: 2005/12/09 16:41:07 $
+   $Revision: 1.10 $
+   $Date: 2006/02/17 17:50:34 $
    $Author: straten $ */
 
 #ifndef __Pulsar_IntegrationManager_h
@@ -17,7 +17,6 @@ namespace Pulsar {
   //! Manages a vector of Integration instances
   /*! This pure virtual base class implements the storage and manipulation
     of a vector of Pulsar::Integration objects. */
-
   class IntegrationManager : public Container {
 
   public:
@@ -65,6 +64,12 @@ namespace Pulsar {
     /*! This attribute may be set only through IntegrationManager::resize */
     virtual unsigned get_nsubint () const = 0;
 
+    //! Provides access to protected and private methods of IntegrationManager
+    class Expert;
+
+    //! Provide access to the expert interface
+    Expert* expert ();
+
   protected:
 
     //! Set the number of sub-integrations
@@ -88,6 +93,9 @@ namespace Pulsar {
       Pulsar::IntegrationManager::get_Integration method
     */
     std::vector< Reference::To<Integration> > subints;
+
+    //! Expert interface
+    Reference::To<Expert> expert_interface;
 
   };
 

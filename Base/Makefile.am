@@ -1,7 +1,7 @@
 
 lib_LTLIBRARIES = libpsrchive.la
 
-nobase_include_HEADERS = model_profile.h \
+nobase_include_HEADERS = model_profile.h Pulsar/ArchiveExpert.h \
 	Pulsar/AdaptiveSNR.h             Pulsar/PolarCalibrator.h \
 	Pulsar/Archive.h                 Pulsar/PolnCalibrator.h \
 	Pulsar/ArchiveMatch.h            Pulsar/ArchiveSort.h \
@@ -16,7 +16,7 @@ nobase_include_HEADERS = model_profile.h \
 	Pulsar/CalibratorPlotter.h       Pulsar/ReceptionCalibratorPlotter.h \
 	Pulsar/CalibratorStokesInfo.h    Pulsar/ReferenceCalibrator.h \
 	Pulsar/CorrectionsCalibrator.h   Pulsar/SingleAxisCalibrator.h \
-	Pulsar/IonosphereCalibrator.h \
+	Pulsar/IonosphereCalibrator.h    Pulsar/IntegrationManagerExpert.h \
 	Pulsar/Database.h                Pulsar/Smooth.h \
 	Pulsar/ExampleArchive.h          Pulsar/SmoothMean.h \
 	Pulsar/FluxCalibrator.h          Pulsar/SmoothMedian.h \

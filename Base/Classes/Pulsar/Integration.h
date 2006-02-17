@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Integration.h,v $
-   $Revision: 1.75 $
-   $Date: 2006/02/15 15:00:49 $
+   $Revision: 1.76 $
+   $Date: 2006/02/17 17:50:34 $
    $Author: straten $ */
 
 /*
@@ -84,7 +84,8 @@ namespace Pulsar {
     float flux (int _poln = 0, float dc = 0.15);
     
     //! Get polarized flux
-    Estimate<float> get_poln_flux (int _type = 0,  int startbin = 0, int stopbin = 0);
+    Estimate<float> 
+    get_poln_flux (int _type = 0,  int startbin = 0, int stopbin = 0);
 
     //! Find the transitions between high and low states in total intensity
     void find_transitions (int& hi2lo, int& lo2hi, int& buffer) const;
@@ -96,11 +97,15 @@ namespace Pulsar {
     float find_max_phase () const;
 
     //! Returns the centre phase of the region with minimum total intensity
-    float find_min_phase (float dc = 0.15) const;
+    float find_min_phase (float dc = 0.10) const;
 
     //! Return the statistics of every profile baseline
     void baseline_stats (vector< vector< Estimate<double> > >* mean,
 			 vector< vector<double> >* variance = 0) const;
+
+    //! Return the statistics of every profile baseline
+    void baseline_stats (vector< vector< Estimate<double> > >& mean,
+			 vector< vector< Estimate<double> > >& variance) const;
 
     //! Returns the mean hi/lo and variance of the mean hi/lo of every profile
     virtual void cal_levels (vector< vector< Estimate<double> > >& hi,
@@ -420,10 +425,10 @@ namespace Pulsar {
     //! Call Profile::bsrunch on every profile
     virtual void bscrunch (unsigned nscrunch);
     
-    //! Rotate each profile by time (in seconds)
+    //! Rotate each profile by time (in seconds); updates the epoch attribute
     virtual void rotate (double time);
 
-    //! Rotate each profile by phase
+    //! Rotate each profile by phase; does not update the epoch attribute
     virtual void rotate_phase (double phase);
 
     //! Integrate profiles from neighbouring chans
@@ -501,10 +506,10 @@ namespace Pulsar {
     //! Record the centre frequency applied in defaraday
     double defaradayed_centre_frequency;
 
-    //! Record the rotation measure applied in defaraday
+    //! Record the dispersion measure applied in dedisperse
     double dedispersed_dispersion_measure;
 
-    //! Record the centre frequency applied in defaraday
+    //! Record the centre frequency applied in dedisperse
     double dedispersed_centre_frequency;
 
     //! Leading edge of phase bin zero = polyco predicted phase zero

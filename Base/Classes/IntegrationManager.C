@@ -1,4 +1,5 @@
 #include "Pulsar/IntegrationManager.h"
+#include "Pulsar/IntegrationManagerExpert.h"
 #include "Pulsar/Integration.h"
 #include "Error.h"
 
@@ -6,6 +7,8 @@ unsigned Pulsar::IntegrationManager::verbose = 1;
 
 Pulsar::IntegrationManager::IntegrationManager () 
 { 
+  expert_interface = new Expert (this);
+
   if (verbose == 3)
     cerr << "IntegrationManager null constructor" << endl;
 }
@@ -124,4 +127,10 @@ void Pulsar::IntegrationManager::resize (unsigned nsubint, bool instances)
 
   if (verbose == 3)
     cerr << "Pulsar::IntegrationManager::resize exit" << endl;
+}
+
+//! Provides access to the expert interface
+Pulsar::IntegrationManager::Expert* Pulsar::IntegrationManager::expert ()
+{
+  return expert_interface;
 }

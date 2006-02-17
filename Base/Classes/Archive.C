@@ -1,6 +1,7 @@
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
 #include "Pulsar/IntegrationOrder.h"
+#include "Pulsar/ArchiveExpert.h"
 #include "Pulsar/Profile.h"
 #include "Pulsar/Receiver.h"
 
@@ -13,6 +14,7 @@ void Pulsar::Archive::init ()
   if (verbose == 3)
     cerr << "Pulsar::Archive::init" << endl;
 
+  expert_interface = new Expert (this);
   runtime_model = false;
 }
 
