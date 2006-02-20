@@ -46,7 +46,8 @@ void Pulsar::Archive::update_model()
   \param nsubint the number of Integrations to correct
 */
 void Pulsar::Archive::update_model (unsigned nsubint)
-{
+try {
+
   if (verbose == 3)
     cerr << "Pulsar::Archive::update_model nsubint=" << nsubint << endl;
 
@@ -72,6 +73,9 @@ void Pulsar::Archive::update_model (unsigned nsubint)
     }
   
   runtime_model = true;
+}
+catch (Error& error) {
+  throw error += "Pulsar::Archive::update_model";
 }
 
 // ///////////////////////////////////////////////////////////////////////
