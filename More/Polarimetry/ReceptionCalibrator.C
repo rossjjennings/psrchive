@@ -95,6 +95,23 @@ void Pulsar::ReceptionCalibrator::initial_observation (const Archive* data)
       "  Pulse phase will vary as a function of frequency channel" << endl;
 
   calibrator = data->clone();
+
+  Signal::Basis basis = calibrator->get_basis ();
+  Pauli::basis.set_basis( (Basis<double>::Type) basis);
+
+  if (calibrator->get_basis() == Signal::Circular)  {
+    if (measure_cal_Q) {
+      cerr << "Pulsar::ReceptionCalibrator cannot measure CAL Q"
+              " in circular basis" << endl;
+      measure_cal_Q = false;
+    }
+    if (measure_cal_V) {
+      cerr << "Pulsar::ReceptionCalibrator cannot measure CAL V"
+              " in circular basis" << endl;
+      measure_cal_V = false;
+    }
+  }
+
   receiver = calibrator->get<Receiver>();
 
   MEAL::Complex2* to_receptor = 0;
@@ -136,9 +153,6 @@ void Pulsar::ReceptionCalibrator::initial_observation (const Archive* data)
 
   model.resize (nchan);
 
-  Signal::Basis basis = calibrator->get_basis ();
-  Pauli::basis.set_basis( (Basis<double>::Type) basis);
-
   for (unsigned ichan=0; ichan<nchan; ichan++) {
 
     bool britton = model_type == Calibrator::Britton;
@@ -147,7 +161,7 @@ void Pulsar::ReceptionCalibrator::initial_observation (const Archive* data)
     model[ichan] -> set_feed_transformation (to_receptor);
     model[ichan] -> set_platform_transformation (to_feed);
 
-    if (measure_cal_Q || basis == Signal::Circular)
+    if (measure_cal_Q)
       model[ichan] -> fix_orientation ();
 
     model[ichan]->parallactic.set_source_coordinates(coordinates);
@@ -567,6 +581,8 @@ try {
   
   assert (npol == 4);
 
+  Signal::Basis basis = calibrator->get_basis ();
+
   if (calibrator_estimate.source.size() == 0) {
 
     cerr << "Pulsar::ReceptionCalibrator::add_calibrator first cal" << endl;
@@ -577,6 +593,9 @@ try {
     // set the initial guess and fit flags
     Stokes<double> cal_state (1,0,.5,0);
 
+    if (basis == Signal::Circular)
+      cal_state = Stokes<double> (1,.5,0,0);
+
     for (unsigned ichan=0; ichan<nchan; ichan++) {
       
       calibrator_estimate.source[ichan]->set_stokes ( cal_state );
@@ -584,12 +603,17 @@ try {
       for (unsigned istokes=0; istokes<4; istokes++)
 	calibrator_estimate.source[ichan]->set_infit (istokes, false);
 
-      // Stokes U may vary
-      calibrator_estimate.source[ichan]->set_infit (2, true);
-
-      if (measure_cal_Q)
-	// Stokes Q of the calibrator may vary!
-	calibrator_estimate.source[ichan]->set_infit (1, true);
+      if (basis == Signal::Linear)  {
+        // degree of polarization (Stokes U) may vary
+        calibrator_estimate.source[ichan]->set_infit (2, true);
+        if (measure_cal_Q)
+	  // Stokes Q of the calibrator may vary!
+	  calibrator_estimate.source[ichan]->set_infit (1, true);
+      }
+      else {
+        // degree of polarization (Stokes Q) may vary
+        calibrator_estimate.source[ichan]->set_infit (1, true);
+      }
 
     }
 
@@ -612,7 +636,11 @@ try {
       
       flux_calibrator_estimate.source[ichan]->set_stokes ( flux_cal_state );
 
-      if (measure_cal_V) {
+      if (receiver && receiver->get_basis() == Signal::Circular) {
+	// Stokes V of Hydra may not vary
+	flux_calibrator_estimate.source[ichan]->set_infit (3, false);
+      }
+      else if (measure_cal_V) {
 	// Stokes V of Hydra may not vary
 	flux_calibrator_estimate.source[ichan]->set_infit (3, false);
 	
