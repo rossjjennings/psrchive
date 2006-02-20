@@ -25,6 +25,7 @@ nobase_include_HEADERS = model_profile.h Pulsar/ArchiveExpert.h \
 	Pulsar/FrequencyIntegrate.h      Pulsar/OnPulseThreshold.h \
 	Pulsar/OnPulseEstimator.h        Pulsar/PolnProfileStats.h \
 	Pulsar/HybridCalibrator.h        Pulsar/SyntheticProfile.h \
+	Pulsar/ScatteredPowerCorrection.h \
 	Pulsar/SyntheticPolnProfile.h    Pulsar/SimPolnTiming.h \
 	Pulsar/InstrumentInfo.h          Pulsar/SystemCalibrator.h \
 	Pulsar/Integration.h             Pulsar/Transposer.h \
@@ -102,7 +103,7 @@ libpsrchive_la_SOURCES = plugins.csh getopt.h Physical.h \
 	PhaseGradShift.C              Profile_fftconv.C \
 	BaselineWindow.C              ChannelZapMedian.C \
 	ChannelWeight.C               ChannelZapModulation.C \
-        SincInterpShift.C
+        SincInterpShift.C             ScatteredPowerCorrection.C
 
 if !HAVE_GETOPT_LONG
 libpsrchive_la_SOURCES += getopt.c getopt1.c
@@ -240,12 +241,13 @@ bin_clean_LDADD			= $(LDADD) @PGPLOT_LIBS@
 psrqft_LDADD			= $(LDADD) @PGPLOT_LIBS@
 plot_baseline_LDADD		= $(LDADD) @PGPLOT_LIBS@
 pdmp_LDADD		        = $(LDADD) @PGPLOT_LIBS@
-psrfi_LDADD                     = $(LDADD) @PGPLOT_LIBS@
-spa_LDADD                       = $(LDADD) @PGPLOT_LIBS@
-tsys_LDADD                      = $(LDADD) @PGPLOT_LIBS@
-paas_LDADD                      = $(LDADD) @PGPLOT_LIBS@
-pfixbaseline_LDADD                      = $(LDADD) @PGPLOT_LIBS@
-psrchive_template_LDADD         = $(LDADD) @PGPLOT_LIBS@
+psrfi_LDADD			= $(LDADD) @PGPLOT_LIBS@
+spa_LDADD			= $(LDADD) @PGPLOT_LIBS@
+tsys_LDADD			= $(LDADD) @PGPLOT_LIBS@
+paas_LDADD			= $(LDADD) @PGPLOT_LIBS@
+paf_LDADD			= $(LDADD) @PGPLOT_LIBS@
+pfixbaseline_LDADD		= $(LDADD) @PGPLOT_LIBS@
+psrchive_template_LDADD		= $(LDADD) @PGPLOT_LIBS@
 
 # future
 # psrsh_LDADD = -lreadline -ltermcap

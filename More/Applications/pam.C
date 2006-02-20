@@ -17,6 +17,7 @@
 #include "Pulsar/Backend.h"
 #include "Pulsar/BackendName.h"
 
+#include "Pulsar/ScatteredPowerCorrection.h"
 #include "Pulsar/IntegrationOrder.h"
 #include "Pulsar/PeriastronOrder.h"
 #include "Pulsar/BinaryPhaseOrder.h"
@@ -122,6 +123,8 @@ int main (int argc, char *argv[]) try {
     bool newdm = false;
     double dm = 0.0;
 
+    bool scattered_power_correction = false;
+
     bool defaraday = false;
     bool dedefaraday = false;
     double rm = 0.0;
@@ -191,6 +194,7 @@ int main (int argc, char *argv[]) try {
     const int NAME = 1212;
     const int DD   = 1213;
     const int RR   = 1214;
+    const int SPC  = 1215;
 
     while (1) {
 
@@ -213,6 +217,7 @@ int main (int argc, char *argv[]) try {
 	{"name",       1, 0, NAME},
 	{"DD",no_argument,0,DD},
 	{"RR",no_argument,0,DD},
+	{"spc",no_argument,0,SPC},
 	{0, 0, 0, 0}
       };
     
@@ -239,7 +244,7 @@ int main (int argc, char *argv[]) try {
 	Pulsar::Archive::set_verbosity(3);
 	break;
       case 'i':
-	cout << "$Id: pam.C,v 1.54 2006/02/16 06:26:51 hknight Exp $" << endl;
+	cout << "$Id: pam.C,v 1.55 2006/02/20 18:40:05 straten Exp $" << endl;
 	return 0;
       case 'm':
 	save = true;
@@ -529,6 +534,8 @@ int main (int argc, char *argv[]) try {
 	  
       case RR: dedefaraday = true; break;
 
+      case SPC: scattered_power_correction = true; break;
+
       default:
 	cout << "Unrecognised option" << endl;
       }
@@ -686,7 +693,18 @@ int main (int argc, char *argv[]) try {
 	double period = arch->get_Integration(0)->get_folding_period();
 	arch->rotate(period*rphase);
       }
-      
+
+      if (scattered_power_correction) {
+
+	Pulsar::ScatteredPowerCorrection spc;
+	if (arch->get_state() == Signal::Stokes)
+	  arch->convert_state(Signal::Coherence);
+
+	for (unsigned isub=0; isub < arch->get_nsubint(); isub++)
+	  spc.transform (arch->get_Integration(isub));
+
+      }
+
       if (newdm) {
 	arch->set_dispersion_measure(dm);
 	if (verbose)
