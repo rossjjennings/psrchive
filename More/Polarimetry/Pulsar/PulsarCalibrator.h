@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PulsarCalibrator.h,v $
-   $Revision: 1.14 $
-   $Date: 2006/01/20 00:34:24 $
+   $Revision: 1.15 $
+   $Date: 2006/02/20 20:38:34 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PulsarCalibrator_H
@@ -99,6 +99,9 @@ namespace Pulsar {
 
     //! When true, calculate_transformation will return the mean solution
     bool mean_solution;
+
+    //! Epoch of the solution
+    MJD epoch;
 
     //! Solve the measurement equation for the given channel
     void solve (const Integration* data, unsigned ichan);

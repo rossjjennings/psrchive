@@ -22,6 +22,7 @@ Pulsar::PulsarCalibrator::PulsarCalibrator (Calibrator::Type model)
   choose_maximum_harmonic = false;
   mean_solution = true;
   tim_file = 0;
+  archive = 0;
 }
 
 //! Constructor
@@ -38,7 +39,10 @@ MJD Pulsar::PulsarCalibrator::get_epoch () const
     throw Error (InvalidState, "Pulsar::PulsarCalibrator::get_epoch",
 		 "no calibrator");
 
-  return calibrator->start_time();
+  if (epoch != MJD::zero)
+    return epoch;
+  else
+    return calibrator->start_time();
 }
 
 //! Return Calibrator::Hamaker or Calibrator::Britton
@@ -171,6 +175,8 @@ void Pulsar::PulsarCalibrator::add_observation (const Archive* data)
 
   unsigned nsub = data->get_nsubint ();
   unsigned nchan = data->get_nchan ();
+
+  epoch = data->start_time ();
 
   if (tim_file)
     archive = data;
