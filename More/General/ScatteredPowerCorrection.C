@@ -39,7 +39,7 @@ void Pulsar::ScatteredPowerCorrection::transform (Integration* data)
     if (time_smear > time_resolution)
       throw Error (InvalidParam, "Pulsar::ScatteredPowerCorrection::transform",
 		   "smearing in ichan=%u = %lf > time resolution = %lf",
-		   ichan, smear, time_resolution);
+		   ichan, time_smear, time_resolution);
   }
 
 #if ESTIMATE_SNR
