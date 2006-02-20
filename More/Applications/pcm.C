@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pcm.C,v $
-   $Revision: 1.48 $
-   $Date: 2006/01/27 03:42:09 $
+   $Revision: 1.49 $
+   $Date: 2006/02/20 20:38:36 $
    $Author: straten $ */
 
 /*! \file pcm.C 
@@ -90,8 +90,8 @@ void usage ()
     "  -s         normalize Stokes parameters by invariant interval \n"
     "  -g         allow absolute gain to vary in Pulsar observations \n"
     "\n"
-    "  -q         assume that CAL Stokes Q = 0 \n"
-    "  -v         assume that CAL Stokes V = 0 \n"
+    "  -q         assume that CAL Stokes Q = 0 (linear feeds only)\n"
+    "  -v         assume that CAL Stokes V = 0 (linear feeds only)\n"
     "\n"
     "MODE B: Fit single observations of known source \n"
     "\n"
