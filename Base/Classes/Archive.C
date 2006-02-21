@@ -18,6 +18,13 @@ void Pulsar::Archive::init ()
   runtime_model = false;
 }
 
+//! Provide access to the expert interface
+Pulsar::Archive::Expert*
+Pulsar::Archive::expert ()
+{
+  return expert_interface; 
+}
+
 Pulsar::Archive::Archive () 
 { 
   if (verbose == 3)
