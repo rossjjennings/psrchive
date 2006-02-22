@@ -77,8 +77,6 @@ void Pulsar::Integration::add_extension (Extension* ext)
 
 Pulsar::Integration::Integration ()
 {
-  defaradayed_rotation_measure = 0.0;
-  defaradayed_centre_frequency = 0.0;
   dedispersed_dispersion_measure = 0.0;
   dedispersed_centre_frequency   = 0.0;
   zero_phase_aligned = false;
@@ -221,8 +219,6 @@ void Pulsar::Integration::copy (const Integration& subint,
   set_folding_period ( subint.get_folding_period() );
 
   archive = subint.archive;
-  defaradayed_rotation_measure   = subint.defaradayed_rotation_measure;
-  defaradayed_centre_frequency   = subint.defaradayed_centre_frequency;
   dedispersed_dispersion_measure = subint.dedispersed_dispersion_measure;
   dedispersed_centre_frequency   = subint.dedispersed_centre_frequency;
   zero_phase_aligned = false;

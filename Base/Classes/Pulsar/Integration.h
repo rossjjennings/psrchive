@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Integration.h,v $
-   $Revision: 1.76 $
-   $Date: 2006/02/17 17:50:34 $
+   $Revision: 1.77 $
+   $Date: 2006/02/22 16:47:57 $
    $Author: straten $ */
 
 /*
@@ -493,18 +493,12 @@ namespace Pulsar {
 
     //! Defaraday worker function
     void defaraday (unsigned ichan, unsigned kchan,
-                    double rm, double f0, const Jones<double>& r0 = 1);
+                    double rm, double f0);
 
   private:
 
     //! Converts between coherency products and Stokes parameters
     void poln_convert (Signal::State out_state);
-
-    //! Record the rotation measure applied in defaraday
-    double defaradayed_rotation_measure;
-
-    //! Record the centre frequency applied in defaraday
-    double defaradayed_centre_frequency;
 
     //! Record the dispersion measure applied in dedisperse
     double dedispersed_dispersion_measure;
