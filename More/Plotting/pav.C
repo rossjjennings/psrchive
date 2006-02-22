@@ -1,5 +1,5 @@
 //
-// $Id: pav.C,v 1.107 2006/01/24 01:21:32 hknight Exp $
+// $Id: pav.C,v 1.108 2006/02/22 16:48:13 straten Exp $
 //
 // The Pulsar Archive Viewer
 //
@@ -27,6 +27,7 @@
 #include "Pulsar/BinLngPeriOrder.h"
 #include "Pulsar/BinLngAscOrder.h"
 #include "Pulsar/FourierSNR.h"
+#include "Pulsar/FaradayRotation.h"
 
 #include "Error.h"
 #include "RealTimer.h"
@@ -55,6 +56,7 @@ void usage ()
     " -T        Tscrunch all Integrations\n"
     " -p        Add all polarisations together\n"
     " -Z        Smear profiles before plotting\n"
+    " --inf     Correct Faraday rotation to infinite frequency\n"
     " --nbin n  Bscrunch profiles to this many bins\n"
     " --spec    Replace each profile with its power spectrum\n"
     "\n"
@@ -220,6 +222,7 @@ int main (int argc, char** argv)
   float spectrum_gamma = 1.0;
   bool do_histogram_plot  = false;
   bool plot_qu            = false;
+  bool zero_wavelength    = false;
 
   Reference::To<Pulsar::Archive> std_arch;
   Reference::To<Pulsar::Profile> std_prof;
@@ -252,6 +255,7 @@ int main (int argc, char** argv)
   const int PA_AND_HALF      = 1021;
   const int HIST             = 1022;
   const int PLOT_QU          = 1023;
+  const int ZERO_WAVELENGTH  = 1024;
 
   static struct option long_options[] = {
     { "convert_binphsperi", 1, 0, 200 },
@@ -279,6 +283,7 @@ int main (int argc, char** argv)
     { "no_prof_axes",       no_argument,       0, NO_PROFILE_AXES},
     { "hist",               no_argument,       0, HIST},
     { "plot_qu",            no_argument,       0, PLOT_QU},
+    { "inf",                no_argument,       0, ZERO_WAVELENGTH},
     { 0, 0, 0, 0 }
   };
     
@@ -359,7 +364,7 @@ int main (int argc, char** argv)
       plotter.set_subint( atoi (optarg) );
       break;
     case 'i':
-      cout << "$Id: pav.C,v 1.107 2006/01/24 01:21:32 hknight Exp $" << endl;
+      cout << "$Id: pav.C,v 1.108 2006/02/22 16:48:13 straten Exp $" << endl;
       return 0;
 
     case 'j':
@@ -686,6 +691,10 @@ int main (int argc, char** argv)
     case PLOT_QU:
       plot_qu = true;
       break;
+    case ZERO_WAVELENGTH:
+      zero_wavelength = true;
+      break;
+
     default:
       cerr << "pav: unrecognized option" << endl;
       return -1; 
@@ -786,7 +795,21 @@ int main (int argc, char** argv)
       archive->add_extension(myio);
       myio->organise(archive, ronsub);
     }
-    
+
+    if (zero_wavelength) {
+
+      double RM = archive->get_rotation_measure();
+      if (RM == 0.0)
+	cerr << "pav: Archive RM=0; nothing to correct\n" << endl;
+      else {
+	Pulsar::FaradayRotation xform;
+	xform.set_rotation_measure( RM );
+	xform.set_reference_wavelength( 0 );
+	for (unsigned i=0; i < archive->get_nsubint(); i++)
+	  xform.execute(archive->get_Integration(i));
+      }
+    }
+
     if (fscrunch >= 0) {
       if (stopwatch)
 	clock.start();
