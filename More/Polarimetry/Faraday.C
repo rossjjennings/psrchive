@@ -1,11 +1,9 @@
 #include "Calibration/Faraday.h"
 #include "MEAL/OneParameter.h"
+#include "Physical.h"
 #include "Pauli.h"
 
 using namespace std;
-
-// speed of light in m/s
-static const double speed_of_light = 299792458;
 
 Calibration::Faraday::Faraday () 
 {
@@ -40,26 +38,26 @@ Estimate<double> Calibration::Faraday::get_rotation_measure () const
 //! Set the reference frequency in MHz
 void Calibration::Faraday::set_reference_frequency (double MHz)
 {
-  set_reference_wavelength( speed_of_light / (MHz * 1e6) );
+  set_reference_wavelength( Pulsar::speed_of_light / (MHz * 1e6) );
 }
 
 //! Get the reference frequency in MHz
 double Calibration::Faraday::get_reference_frequency () const
 {
-  return 1e-6 * speed_of_light / reference_wavelength;
+  return 1e-6 * Pulsar::speed_of_light / reference_wavelength;
 }
 
 
 //! Set the frequency in MHz
 void Calibration::Faraday::set_frequency (double MHz)
 {
-  set_wavelength( speed_of_light / (MHz * 1e6) );
+  set_wavelength( Pulsar::speed_of_light / (MHz * 1e6) );
 }
 
 //! Get the frequency in MHz
 double Calibration::Faraday::get_frequency () const
 {
-  return 1e-6 * speed_of_light / wavelength;
+  return 1e-6 * Pulsar::speed_of_light / wavelength;
 }
 
 //! Set the reference wavelength in metres
