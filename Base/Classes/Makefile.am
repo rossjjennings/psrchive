@@ -10,6 +10,7 @@ nobase_include_HEADERS = \
 	Pulsar/CalInfoExtension.h         Pulsar/Pointing.h  \
 	Pulsar/CalibratorExtension.h      Pulsar/PolnCalibratorExtension.h  \
 	Pulsar/CalibratorStokes.h         Pulsar/ProcHistory.h  \
+	Pulsar/DeFaraday.h \
 	Pulsar/DigitiserStatistics.h      Pulsar/Receiver.h  \
 	Pulsar/ExampleExtension.h         Pulsar/Telescope.h  \
 	Pulsar/FeedExtension.h \
@@ -28,6 +29,7 @@ libExtension_la_SOURCES = \
 	CalibratorExtension.C            PolnCalibratorExtension.C  \
 	CalibratorExtension_build.C      PolnCalibratorExtension_build.C  \
 	CalibratorStokes.C               ProcHistory.C  \
+	DeFaraday.C \
 	DigitiserStatistics.C            Receiver.C  \
 	ExampleExtension.C               Receiver_load.C  \
 	FeedExtension.C \
