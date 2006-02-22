@@ -241,26 +241,6 @@ Pulsar::Integration* Pulsar::Archive::load_Integration (unsigned isubint)
   return load_Integration (__load_filename.c_str(), isubint);
 }
 
-/*!
-  This method may be useful during load, as only the Archive base class
-  has access to the Integration::archive attribute.
-*/
-void Pulsar::Archive::init_Integration (Integration* subint)
-{
-  subint->archive = this;
-
-  if ( get_dedispersed() ) {
-    subint->dedispersed_centre_frequency = get_centre_frequency();
-    subint->dedispersed_dispersion_measure = get_dispersion_measure();
-  }
-
-  if ( get_faraday_corrected() ) {
-    subint->defaradayed_centre_frequency = get_centre_frequency();
-    subint->defaradayed_rotation_measure = get_rotation_measure();
-  }
-
-  subint->zero_phase_aligned = false;
-}
 
 /*!
   Useful wrapper for Archive::bscrunch
