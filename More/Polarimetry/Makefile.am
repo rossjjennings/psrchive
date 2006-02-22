@@ -76,7 +76,8 @@ test_ReceptionModel_LDADD	= $(LDADD) @SLA_LIBS@
 # Dependencies should never be changed
 #
 
-INCLUDES = -I$(top_builddir)/utils/include @PGPLOT_CFLAGS@ @SLA_CFLAGS@
+INCLUDES = -I$(top_builddir)/utils/include -I$(top_srcdir)/psrchive \
+	@PGPLOT_CFLAGS@ @SLA_CFLAGS@
 
 LDADD = libCalibration.la $(top_builddir)/utils/libpsrutils.la
 
