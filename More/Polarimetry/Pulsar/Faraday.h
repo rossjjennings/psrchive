@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/Faraday.h,v $
-   $Revision: 1.5 $
-   $Date: 2005/12/13 07:02:12 $
+   $Revision: 1.6 $
+   $Date: 2006/02/22 14:43:34 $
    $Author: straten $ */
 
 #ifndef __Calibration_Faraday_H
@@ -40,6 +40,16 @@ namespace Calibration {
     //! Get the frequency in MHz
     double get_frequency () const;
 
+    //! Set the reference wavelength in metres
+    void set_reference_wavelength (double metres);
+    //! Get the reference wavelength in metres
+    double get_reference_wavelength () const;
+
+    //! Set the wavelength in metres
+    void set_wavelength (double metres);
+    //! Get the wavelength in metres
+    double get_wavelength () const;
+
     //! Set the axis about which the rotation occurs
     void set_axis (const Vector<3, double>& axis);
 
@@ -51,11 +61,11 @@ namespace Calibration {
     //! The Rotation operation
     MEAL::Rotation rotation;
 
-    //! Reference frequency in MHz
-    double reference_frequency;
+    //! Reference wavelength in metres
+    double reference_wavelength;
 
-    //! Frequency in MHz
-    double frequency;
+    //! Wavelength in metres
+    double wavelength;
 
     // ///////////////////////////////////////////////////////////////////
     //

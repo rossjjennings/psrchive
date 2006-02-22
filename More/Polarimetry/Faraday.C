@@ -4,6 +4,9 @@
 
 using namespace std;
 
+// speed of light in m/s
+static const double speed_of_light = 299792458;
+
 Calibration::Faraday::Faraday () 
 {
   MEAL::OneParameter* parm = new MEAL::OneParameter (this);
@@ -11,8 +14,8 @@ Calibration::Faraday::Faraday ()
 
   rotation.set_axis (Pauli::basis.get_basis_vector(2));
 
-  reference_frequency = 0.0;
-  frequency = 0.0;
+  reference_wavelength = 0.0;
+  wavelength = 0.0;
 }
 
 //! Return the name of the class
@@ -37,34 +40,59 @@ Estimate<double> Calibration::Faraday::get_rotation_measure () const
 //! Set the reference frequency in MHz
 void Calibration::Faraday::set_reference_frequency (double MHz)
 {
-  if (reference_frequency == MHz)
-    return;
-
-  reference_frequency = MHz;
-  set_evaluation_changed ();
+  set_reference_wavelength( speed_of_light / (MHz * 1e6) );
 }
 
 //! Get the reference frequency in MHz
 double Calibration::Faraday::get_reference_frequency () const
 {
-  return reference_frequency;
+  return 1e-6 * speed_of_light / reference_wavelength;
 }
 
 
 //! Set the frequency in MHz
 void Calibration::Faraday::set_frequency (double MHz)
 {
-  if (frequency == MHz)
-    return;
-
-  frequency = MHz;
-  set_evaluation_changed ();
+  set_wavelength( speed_of_light / (MHz * 1e6) );
 }
 
 //! Get the frequency in MHz
 double Calibration::Faraday::get_frequency () const
 {
-  return frequency;
+  return 1e-6 * speed_of_light / wavelength;
+}
+
+//! Set the reference wavelength in metres
+void Calibration::Faraday::set_reference_wavelength (double metres)
+{
+  if (reference_wavelength == metres)
+    return;
+
+  reference_wavelength = metres;
+  set_evaluation_changed ();
+}
+
+//! Get the reference wavelength in metres
+double Calibration::Faraday::get_reference_wavelength () const
+{
+  return reference_wavelength;
+}
+
+
+//! Set the wavelength in metres
+void Calibration::Faraday::set_wavelength (double metres)
+{
+  if (wavelength == metres)
+    return;
+
+  wavelength = metres;
+  set_evaluation_changed ();
+}
+
+//! Get the wavelength in metres
+double Calibration::Faraday::get_wavelength () const
+{
+  return wavelength;
 }
 
 void Calibration::Faraday::set_axis (const Vector<3, double>& axis)
@@ -75,21 +103,12 @@ void Calibration::Faraday::set_axis (const Vector<3, double>& axis)
 
 double Calibration::Faraday::get_rotation () const
 {
-  // speed of light in m/s
-  double speed_of_light = 299792458;
-
-  double lambda_0 = 0;
-  if (reference_frequency != 0.0)
-    lambda_0 = speed_of_light / (reference_frequency * 1e6);
-
-  double lambda = 0;
-  if (frequency != 0.0)
-    lambda = speed_of_light / (frequency * 1e6);
-
   // The OneParameter policy stores the rotation measure
   double rotation_measure = get_param (0);
 
-  // Longer wavelength -> greater rotation
+  double lambda_0 = reference_wavelength;
+  double lambda = wavelength;
+
   return rotation_measure * (lambda*lambda - lambda_0*lambda_0);
 }
 
