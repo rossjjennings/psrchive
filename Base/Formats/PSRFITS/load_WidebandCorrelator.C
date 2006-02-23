@@ -73,7 +73,7 @@ void Pulsar::FITSArchive::load_WidebandCorrelator (fitsfile* fptr)
       */
       
       correct_P236_reference_epoch = true;
-      // if (verbose == 3)
+      if (verbose == 3)
         cerr << "Pulsar::FITSArchive::load_WidebandCorrelator\n"
 	  "  correcting reference epoch of P236 data with version " 
              << hdr_ext->hdrver << endl;
