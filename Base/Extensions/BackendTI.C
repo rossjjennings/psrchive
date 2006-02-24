@@ -15,7 +15,7 @@ void Pulsar::BackendTI::init ()
   }
   {
     Generator<Signal::Argument> gen;
-    add( gen.described ("arg", "Complex phase convention",
+    add( gen.described ("phase", "Phase convention of backend",
 			&Backend::get_argument,
 			&Backend::set_argument) );
   }
