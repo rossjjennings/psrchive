@@ -24,6 +24,7 @@
 #include "Pulsar/BinLngAscOrder.h"
 #include "Pulsar/BinLngPeriOrder.h"
 #include "Pulsar/Telescope.h"
+#include "Pulsar/fitsio_Backend.h"
 
 #include "FITSError.h"
 
@@ -911,6 +912,8 @@ try {
 	fits_update_key (fptr, TSTRING, "BACKEND", 
 			 const_cast<char*>(backend->get_name().c_str()),
 			 comment, &status);
+
+	psrfits_update_backend_phase (fptr, backend, &status);
 
       }
 

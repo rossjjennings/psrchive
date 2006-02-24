@@ -1,6 +1,8 @@
 #include "Pulsar/FITSArchive.h"
 #include "Pulsar/WidebandCorrelator.h"
 #include "Pulsar/FITSHdrExtension.h"
+#include "Pulsar/fitsio_Backend.h"
+
 #include "FITSError.h"
 #include "string_utils.h"
 
@@ -52,6 +54,9 @@ void Pulsar::FITSArchive::load_WidebandCorrelator (fitsfile* fptr)
     status = 0;
   }
 
+  psrfits_read_backend_phase (fptr, ext, &status);
+  status = 0;
+
   if (ext->get_name() == "WBCORR")  {
 
     FITSHdrExtension* hdr_ext = get<FITSHdrExtension>();
@@ -97,27 +102,35 @@ void Pulsar::FITSArchive::load_WidebandCorrelator (fitsfile* fptr)
       
     }
 
-    static char* bad_config = getenv ("WBCBADCFG");
-    static vector<string> bad_configs;
-    if (bad_config)  {
-      stringfload (&bad_configs, bad_config);
-      bad_config = 0; // load it only once
-      if (verbose==3 && bad_configs.size()) {
-        cerr << "WBCORR bad configurations:" << endl;
-        for (unsigned i=0; i < bad_configs.size(); i++)
-          cerr << bad_configs[i] << endl;
-      }
-    }
+    if (ext->get_argument() == (Signal::Argument) 0) {
 
-    if (find (bad_configs.begin(), bad_configs.end(), ext->configfile)
-		!= bad_configs.end())  {
-
-      conjugate_cross_products = true;
-
-      // if (verbose == 3)
+      if (verbose > 2)
         cerr << "Pulsar::FITSArchive::load_WidebandCorrelator\n"
-             "  correcting data with version=" << hdr_ext->hdrver
-             << " config=" << ext->configfile; // << endl;
+	  "  undefined BE_PHASE; checking " << ext->configfile; // << endl;
+
+      static char* conj_config = getenv ("WBCCONJCFG");
+      static vector<string> conj_configs;
+      if (conj_config)  {
+	stringfload (&conj_configs, conj_config);
+	conj_config = 0; // load it only once
+	if (verbose==3 && conj_configs.size()) {
+	  cerr << "WBCORR conj configurations:" << endl;
+	  for (unsigned i=0; i < conj_configs.size(); i++)
+	    cerr << conj_configs[i] << endl;
+	}
+      }
+      
+      if (find (conj_configs.begin(), conj_configs.end(), ext->configfile)
+	  != conj_configs.end())  {
+	
+	conjugate_cross_products = true;
+	
+	if (verbose > 1)
+	  cerr << "Pulsar::FITSArchive::load_WidebandCorrelator\n"
+	    "  correcting data with version=" << hdr_ext->hdrver
+	       << " config=" << ext->configfile << endl;
+	
+      }
 
     }
 

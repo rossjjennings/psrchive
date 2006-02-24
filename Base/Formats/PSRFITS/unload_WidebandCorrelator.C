@@ -1,5 +1,7 @@
 #include "Pulsar/FITSArchive.h"
 #include "Pulsar/WidebandCorrelator.h"
+#include "Pulsar/fitsio_Backend.h"
+
 #include "FITSError.h"
 
 void Pulsar::FITSArchive::unload (fitsfile* fptr,
@@ -17,7 +19,9 @@ void Pulsar::FITSArchive::unload (fitsfile* fptr,
   fits_update_key (fptr, TSTRING, "BECONFIG", 
 		   const_cast<char*>(ext->configfile.c_str()),
 		   comment, &status);
-  
+
+  psrfits_update_backend_phase (fptr, ext, &status);
+
   fits_update_key (fptr, TINT, "NRCVR",
 		   const_cast<int*>(&(ext->nrcvr)),
 		   comment, &status);
