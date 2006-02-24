@@ -1,5 +1,6 @@
 #include "Pulsar/ArchiveTI.h"
 #include "Pulsar/ReceiverTI.h"
+#include "Pulsar/BackendTI.h"
 
 #include "Pulsar/IntegrationTI.h"
 #include "Pulsar/PointingTI.h"
@@ -65,6 +66,9 @@ int main (int argc, char** argv) try {
 
   Pulsar::ReceiverTI receiver_tui;
   tui.import( "rcvr", &receiver_tui );
+
+  Pulsar::BackendTI backend_tui;
+  tui.import( "be", &backend_tui );
 
   Pulsar::IntegrationTI integration_tui;
   tui.import( "int", &integration_tui );
