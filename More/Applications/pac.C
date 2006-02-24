@@ -124,6 +124,10 @@ int main (int argc, char *argv[]) {
 
   unsigned char flip_sign = 0x00;
 
+  unsigned int index;
+  
+  string optarg_str;
+
   while ((gotc = getopt(argc, argv, args)) != -1) 
 
     switch (gotc) {
@@ -151,39 +155,72 @@ int main (int argc, char *argv[]) {
       break;
 
     case 'i':
-      cout << "$Id: pac.C,v 1.71 2006/02/16 22:58:49 straten Exp $" << endl;
+      cout << "$Id: pac.C,v 1.72 2006/02/24 02:35:32 ateoh Exp $" << endl;
       return 0;
 
     case 'A':
       model_file = optarg;
-      command += "-A ";
+      command += " -A ";
+
+      // Just take the filename, not the full path
+      optarg_str = optarg;
+      index = optarg_str.rfind("/", optarg_str.length()-2);
+
+      if (index == string::npos) {
+      	command += optarg_str;
+      }
+      
+      else {
+        // Larger than last index but doesn't matter. String class will 
+	// just take the rest of the string safely
+        command += optarg_str.substr(index+1, optarg_str.length()); 
+      }
       break;
 
     case 'B':
       pcal_type = Pulsar::Calibrator::OffPulse;
-      command += "-B ";
+      command += " -B";
       break;
 
     case 'D':
       pcal_type = Pulsar::Calibrator::DoP;
-      command += "-D ";
+      command += " -D";
       break;
 
     case 'd':
       cals_are_here = optarg;
       new_database = false;
+      command += " -d ";
+
+      // Just take the filename, not the full path
+      optarg_str = optarg;
+      index = optarg_str.rfind("/", optarg_str.length()-2);
+
+      if (index == string::npos) {
+      	command += optarg_str;
+      }
+      
+      else {
+        // Larger than last index but doesn't matter. String class will 
+	// just take the rest of the string safely
+        command += optarg_str.substr(index+1, optarg_str.length()); 
+      }
       break;
 
     case 'e':
       unload_ext = optarg;
+      command += " -e ";
+      command += optarg;
       break;
 
     case 'f':
       check_flags = false;
+      command += " -f";
       break;
 
     case 'G':
       Pulsar::PolnProfile::normalize_weight_by_absolute_gain = true;
+      command += " -g";
       break;
 
     case 'I':
@@ -203,6 +240,8 @@ int main (int argc, char *argv[]) {
 	cerr << "pac: unrecognized matching policy code" << endl;
 	return -1;
       }
+      command += " -m ";
+      command += optarg;
       break;
 
     case 'n': {
@@ -226,24 +265,45 @@ int main (int argc, char *argv[]) {
 
       }
 
+      command += " -n ";
+      command += optarg;
       break;
     }
 
     case 'O':
       Pulsar::CorrectionsCalibrator::pointing_over_computed = true;
+      command += " -O";
       break;
 
     case 'o':
       Pulsar::ArchiveMatch::opposite_sideband = true;
+      command += " -o";
       break;
 
     case 'p':
       cals_are_here = optarg;
+      command += " -p ";
+      
+      // Just take the filename, not the full path
+      optarg_str = optarg;
+      index = optarg_str.rfind("/", optarg_str.length()-2);
+      
+      if (index == string::npos) {
+      	cout << "No slash present\n";
+      	command += optarg_str;
+      }
+      
+      else {
+        // Larger than last index but doesn't matter. String class will 
+	// just take the rest of the string safely
+        command += optarg_str.substr(index+1, optarg_str.length()); 
+      }
+      
       break;
 
     case 'P':
       do_fluxcal = false;
-      command += "-P ";
+      command += " -P";
       break;
 
     case 'r':
@@ -259,16 +319,31 @@ int main (int argc, char *argv[]) {
 	"\n  ellipticity 1 = "
 	   << feed->get_ellipticity(1).get_value() * 180/M_PI << " deg"
 	   << endl;
+      command += " -r ";
+
+      // Just take the filename, not the full path
+      optarg_str = optarg;
+      index = optarg_str.rfind("/", optarg_str.length()-2);
+
+      if (index == string::npos) {
+      	command += optarg_str;
+      }
+      
+      else {
+        // Larger than last index but doesn't matter. String class will 
+	// just take the rest of the string safely
+        command += optarg_str.substr(index+1, optarg_str.length()); 
+      }
       break;
 
     case 's':
       pcal_type = Pulsar::Calibrator::Polar;
-      command += "-s ";
+      command += " -s";
       break;
 
     case 'S':
       pcal_type = Pulsar::Calibrator::Hybrid;
-      command += "-S ";
+      command += " -S";
       break;
 
     case 'u':
@@ -280,31 +355,34 @@ int main (int argc, char *argv[]) {
         exts.push_back(key);
         key = strtok (NULL, whitespace);
       }
+      command += " -u ";
+      command += optarg;
       break;
 
     case 'w':
       write_database_file = true;
+      command += " -w";
       break;
 
     case 'b':
       criterion.check_bandwidth = false;
-      command += "-b ";
+      command += " -b";
       break;
     case 'c':
       criterion.check_coordinates = false;
-      command += "-c ";
+      command += " -c";
       break;
     case 'T':
       criterion.check_time = false;
-      command += "-T ";
+      command += " -T";
       break;
     case 'F':
       criterion.check_frequency = false;
-      command += "-F ";
+      command += " -F";
       break;
     case 'Z':
       criterion.check_instrument = false;
-      command += "-I ";
+      command += " -Z";
       break;
 
     default:
