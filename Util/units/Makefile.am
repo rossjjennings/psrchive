@@ -29,7 +29,7 @@ nobase_include_HEADERS = Error.h HeapTracked.h ReferenceAble.h stringtok.h \
         Callback.h TextInterface.h Estimate.h Matrix.h Vector.h Jacobi.h \
         Quaternion.h Jones.h Pauli.h Basis.h Stokes.h Cloude.h  \
         tostring.h random.h EstimatePlotter.h complexPlotter.h linchi2.h \
-        complex_promote.h ModifyRestore.h EstimateStats.h \
+        complex_promote.h ModifyRestore.h EstimateStats.h Conventions.h \
 	MEAL/Agent.h                     MEAL/ParameterPolicy.h \
 	MEAL/Argument.h                  MEAL/Parameters.h \
 	MEAL/ArgumentPolicyAdapter.h     MEAL/Phase.h \
