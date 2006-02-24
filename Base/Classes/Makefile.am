@@ -18,9 +18,10 @@ nobase_include_HEADERS = \
 	Pulsar/FluxCalibratorExtension.h  Pulsar/WidebandCorrelator.h  \
 	Pulsar/ITRFExtension.h            Pulsar/dspReduction.h \
 	Pulsar/ReceiverTI.h               Pulsar/PointingTI.h \
-	Pulsar/PowerEstimator.h
+	Pulsar/BackendTI.h                Pulsar/PowerEstimator.h
 
-libExtension_la_SOURCES = Backend.C \
+libExtension_la_SOURCES = \
+	Backend.C                        BackendTI.C \
 	BackendName.C                    ObsExtension.C  \
 	BinLngAscOrder.C                 Parkes.C  \
 	BinLngPeriOrder.C                Passband.C  \
