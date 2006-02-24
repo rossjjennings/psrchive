@@ -1,6 +1,6 @@
 #include "MEAL/CyclicParameter.h"
 
-#define _DEBUG 0
+// #define _DEBUG 1
 
 using namespace std;
 
