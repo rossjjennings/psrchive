@@ -18,7 +18,7 @@
 void usage ()
 {
   cout << "A program for zapping RFI in Pulsar::Archives. Changes\n"
-	"will be noted in the history of PSRFITS files.\n"
+  "will be noted in the history of PSRFITS files.\n"
     "Usage: paz [options] filenames\n"
     "  -h               This help page\n"
     "  -v               Verbose mode\n"
@@ -114,7 +114,7 @@ int main (int argc, char *argv[]) {
 
   const char* args = "8C:dDe:E:hIik:mnp:P:rR:s:S:u:vVw:W:x:X:z:Z:";
 
-	string command = "paz";
+  string command = "paz";
 
   while ((gotc = getopt(argc, argv, args)) != -1) {
     switch (gotc) {
@@ -130,260 +130,260 @@ int main (int argc, char *argv[]) {
       Pulsar::Archive::set_verbosity(3);
       break;
     case 'i':
-      cout << "$Id: paz.C,v 1.31 2006/01/19 03:18:44 ateoh Exp $" << endl;
+      cout << "$Id: paz.C,v 1.32 2006/02/24 01:00:16 ateoh Exp $" << endl;
       return 0;
 
     case 'm':
       write = true;
-			command += " -m";
+      command += " -m";
       break;
 
     case 'I':
       zero_intersection = true;
-			command += " -I";
+      command += " -I";
       break;
 
     case 'k':
       killfile = optarg;
       zero_channels = true;
-			command += " -k ";
-			command += optarg;
+      command += " -k ";
+      command += optarg;
       break;
 
     case 'z':
-			command += " -z ";
-			command += optarg;
+      command += " -z ";
+      command += optarg;
       key = strtok (optarg, whitespace);
       zero_channels = true;
       while (key) {
-	if (sscanf(key, "%d", &placeholder) == 1) {
-	  chans_to_zap.push_back(placeholder);
-	}
-	key = strtok (NULL, whitespace);
+  if (sscanf(key, "%d", &placeholder) == 1) {
+    chans_to_zap.push_back(placeholder);
+  }
+  key = strtok (NULL, whitespace);
       }
       break;
 
     case 'e':
       write = true;
       ext = optarg;
-			command += " -e ";
-			command += optarg;
+      command += " -e ";
+      command += optarg;
       break;
 
     case '8':
       // The aim here is to zero every eight time bins starting from number 6
       eightBinZap = true;
-			command += " -8";
+      command += " -8";
       break;
 
     case 'p':
       {
       periodic_zap = true;
 
-	if (sscanf(optarg, "%d %d", &periodic_zap_period, 
-		   &periodic_zap_phase) != 2) {
-	  cerr << "Invalid parameter to option -Z" << endl;
-	  return (-1);
-	}
-			command += " -p ";
-			command += optarg;
-	break;
+  if (sscanf(optarg, "%d %d", &periodic_zap_period, 
+       &periodic_zap_phase) != 2) {
+    cerr << "Invalid parameter to option -Z" << endl;
+    return (-1);
+  }
+      command += " -p ";
+      command += optarg;
+  break;
       }
     case 'Z':
       {
-	unsigned first = 1;
-	unsigned last = 0;
+  unsigned first = 1;
+  unsigned last = 0;
 
-	zero_channels = true;
-	if (sscanf(optarg, "%d %d", &first, &last) != 2) {
-	  cerr << "Invalid parameter to option -Z" << endl;
-	  return (-1);
-	}
-	
-	for( unsigned i=first; i<=last; i++)
-	  chans_to_zap.push_back( i );
+  zero_channels = true;
+  if (sscanf(optarg, "%d %d", &first, &last) != 2) {
+    cerr << "Invalid parameter to option -Z" << endl;
+    return (-1);
+  }
+  
+  for( unsigned i=first; i<=last; i++)
+    chans_to_zap.push_back( i );
       }
-			command += " -Z ";
-			command += optarg;
+      command += " -Z ";
+      command += optarg;
       break;
 
     case 'x':
-			command += " -x ";
-			command += optarg;
+      command += " -x ";
+      command += optarg;
       key = strtok (optarg, whitespace);
       nozap_subints = true;
       while (key) {
-	if (sscanf(key, "%d", &placeholder) == 1) {
-	  subs_nozap.push_back(placeholder);
-	}
-	key = strtok (NULL, whitespace);
+  if (sscanf(key, "%d", &placeholder) == 1) {
+    subs_nozap.push_back(placeholder);
+  }
+  key = strtok (NULL, whitespace);
       }
       break;
 
     case 'X':
       {
-	unsigned first = 1;
-	unsigned last = 0;
+  unsigned first = 1;
+  unsigned last = 0;
 
-	nozap_subints = true;
-	if (sscanf(optarg, "%d %d", &first, &last) != 2) {
-	  cerr << "Invalid parameter to option -X" << endl;
-	  return (-1);
-	}
-	
-	for( unsigned i=first; i<=last; i++)
-	  subs_nozap.push_back( i );
+  nozap_subints = true;
+  if (sscanf(optarg, "%d %d", &first, &last) != 2) {
+    cerr << "Invalid parameter to option -X" << endl;
+    return (-1);
+  }
+  
+  for( unsigned i=first; i<=last; i++)
+    subs_nozap.push_back( i );
       }
-			command += " -X ";
-			command += optarg;
+      command += " -X ";
+      command += optarg;
       break;
 
     case 'd':
       simple = true;
-			command += " -d";
+      command += " -d";
       break;
 
     case 'n':
       if (!modulation_zapper)
-	modulation_zapper = new Pulsar::ChannelZapModulation;
-			command += " -n";
+  modulation_zapper = new Pulsar::ChannelZapModulation;
+      command += " -n";
       break;
 
     case 'r':
       if (!median_zapper)
-	median_zapper = new Pulsar::ChannelZapMedian;
-			command += " -r";
+  median_zapper = new Pulsar::ChannelZapMedian;
+      command += " -r";
       break;
 
     case 'R': {
       unsigned window = atoi (optarg);
       
       if (!median_zapper)
-	median_zapper = new Pulsar::ChannelZapMedian;
+  median_zapper = new Pulsar::ChannelZapMedian;
 
       median_zapper->set_window_size ( window );
-			command += " -R ";
-			command += optarg;
+      command += " -R ";
+      command += optarg;
       break;
     }
 
     case 'u':
       ulpath = optarg;
       if (ulpath.substr(ulpath.length()-1,1) != "/")
-	ulpath += "/";
-			command += " -u ";
-			command += optarg;
+  ulpath += "/";
+      command += " -u ";
+      command += optarg;
       break;
 
     case 'E':
       edge_zap = true;
       if (sscanf(optarg, "%f", &percent) != 1) {
-	cerr << "Invalid parameter to option -e" << endl;
+  cerr << "Invalid parameter to option -e" << endl;
         return (-1);
       }
       if (percent <= 0.0 || percent >= 100.0) {
-	cerr << "Invalid parameter to option -e" << endl;
+  cerr << "Invalid parameter to option -e" << endl;
         return (-1);
       }
-			command += " -E ";
-			command += optarg;
+      command += " -E ";
+      command += optarg;
       break;
 
     case 's':
-			command += " -s ";
-			command += optarg;
+      command += " -s ";
+      command += optarg;
       key = strtok (optarg, whitespace);
       zap_subints = true;
       while (key) {
-	if (sscanf(key, "%d", &placeholder) == 1) {
-	  subs_to_zap.push_back(placeholder);
-	}
-	key = strtok (NULL, whitespace);
+  if (sscanf(key, "%d", &placeholder) == 1) {
+    subs_to_zap.push_back(placeholder);
+  }
+  key = strtok (NULL, whitespace);
       }
       break;
 
     case 'S':
       {
-	unsigned first = 1;
-	unsigned last = 0;
+  unsigned first = 1;
+  unsigned last = 0;
 
-	zap_subints = true;
-	if (sscanf(optarg, "%d %d", &first, &last) != 2) {
-	  cerr << "Invalid parameter to option -S" << endl;
-	  return (-1);
-	}
-	
-	for( unsigned i=first; i<=last; i++)
-	  subs_to_zap.push_back( i );
+  zap_subints = true;
+  if (sscanf(optarg, "%d %d", &first, &last) != 2) {
+    cerr << "Invalid parameter to option -S" << endl;
+    return (-1);
+  }
+  
+  for( unsigned i=first; i<=last; i++)
+    subs_to_zap.push_back( i );
       }
-			command += " -S ";
-			command += optarg;
+      command += " -S ";
+      command += optarg;
       break;
 
     case 'w':
-			command += " -w ";
-			command += optarg;
+      command += " -w ";
+      command += optarg;
       key = strtok (optarg, whitespace);
       zero_subints = true;
       while (key) {
-	if (sscanf(key, "%d", &placeholder) == 1) {
-	  subs_to_zap.push_back(placeholder);
-	}
-	key = strtok (NULL, whitespace);
+  if (sscanf(key, "%d", &placeholder) == 1) {
+    subs_to_zap.push_back(placeholder);
+  }
+  key = strtok (NULL, whitespace);
       }
       break;
 
     case 'W':
       {
-	unsigned first = 1;
-	unsigned last = 0;
+  unsigned first = 1;
+  unsigned last = 0;
 
-	zero_subints = true;
+  zero_subints = true;
 
-	if (sscanf(optarg, "%d %d", &first, &last) != 2) {
-	  cerr << "Invalid parameter to option -W" << endl;
-	  return (-1);
-	}
+  if (sscanf(optarg, "%d %d", &first, &last) != 2) {
+    cerr << "Invalid parameter to option -W" << endl;
+    return (-1);
+  }
 
-	for( unsigned i=first; i<=last; i++)
-	  subs_to_zap.push_back( i );
+  for( unsigned i=first; i<=last; i++)
+    subs_to_zap.push_back( i );
       }
-			command += " -W ";
-			command += optarg;
+      command += " -W ";
+      command += optarg;
       break;
 
     case 'C':
       zap_ston = true;
       if (sscanf(optarg, "%lf", &ston_cutoff) != 1) {
-	cerr << "Invalid parameter to option -S" << endl;
+  cerr << "Invalid parameter to option -S" << endl;
         return (-1);
       }
-			command += " -C ";
-			command += optarg;
+      command += " -C ";
+      command += optarg;
       break;
 
     case 'P':
       try {
-	Reference::To<Pulsar::Archive> data = Pulsar::Archive::load(optarg);
-	data->pscrunch();
-	data->fscrunch();
-	data->tscrunch();
-	thestd = data->get_Profile(0,0,0);
-	std_given = true;
+  Reference::To<Pulsar::Archive> data = Pulsar::Archive::load(optarg);
+  data->pscrunch();
+  data->fscrunch();
+  data->tscrunch();
+  thestd = data->get_Profile(0,0,0);
+  std_given = true;
 
-	standard_snr.set_standard( thestd );
-	
-	Pulsar::Profile::snr_strategy.set (&standard_snr,
-					   &Pulsar::StandardSNR::get_snr);
+  standard_snr.set_standard( thestd );
+  
+  Pulsar::Profile::snr_strategy.set (&standard_snr,
+             &Pulsar::StandardSNR::get_snr);
 
       }
       catch (Error& error) {
-	cout << error << endl;
-	cout << "Could not load given standard profile" << endl;
-	std_given = false;
+  cout << error << endl;
+  cout << "Could not load given standard profile" << endl;
+  std_given = false;
       }
-			command += " -P ";
-			command += optarg;
+      command += " -P ";
+      command += optarg;
       break;
 
     default:
@@ -406,7 +406,7 @@ int main (int argc, char *argv[]) {
   
   if (!write)
     cout << "Changes will not be saved. Use -m or -e to write results to disk"
-	 << endl;
+   << endl;
   
   // Instantiate an RFIMitigation class
   
@@ -428,37 +428,37 @@ int main (int argc, char *argv[]) {
     {
       if (arch->get_nchan() == 1)
       {
-	printf("Warning! Periodic spike zapping on frequency-scrunched dedispersed data may\n");
-	printf("not be what you intended! (spikes will wash out)\n");
+  printf("Warning! Periodic spike zapping on frequency-scrunched dedispersed data may\n");
+  printf("not be what you intended! (spikes will wash out)\n");
       }
       for (unsigned pol = 0;pol < arch->get_npol();pol++) 
-	for (unsigned chan=0;chan < arch->get_nchan();chan++) 
-	  for (unsigned subint = 0;subint < arch->get_nsubint();subint++) 
-	    arch->get_Profile(subint,pol,chan)->zap_periodic_spikes
-	      (periodic_zap_period, periodic_zap_phase);
+  for (unsigned chan=0;chan < arch->get_nchan();chan++) 
+    for (unsigned subint = 0;subint < arch->get_nsubint();subint++) 
+      arch->get_Profile(subint,pol,chan)->zap_periodic_spikes
+        (periodic_zap_period, periodic_zap_phase);
     }
    
     if (eightBinZap) {  // To fix early wide-band correlator problem
 
       for (unsigned pol = 0;pol < arch->get_npol();pol++) {
-	for (unsigned chan=0;chan < arch->get_nchan();chan++) {
-	  for (unsigned subint = 0;subint < arch->get_nsubint();subint++) {
-	    Pulsar::Profile* prof = arch->get_Profile(subint,pol,chan);
-	    float* amps = prof->get_amps();
-	    for (unsigned i=5;i<arch->get_nbin();i+=8) {
-	      // Interpolate between previous and later point if possible
-	      if (i==arch->get_nbin()-1)
-		amps[i] = amps[i-1];
-	      else
-		{
-		  float amp1 = amps[i-1];
-		  float amp2 = amps[i+1];
-		  amps[i] = 0.5*(amp1+amp2);
-		}
-	    }
-	    prof->set_amps(amps);
-	  }
-	}
+  for (unsigned chan=0;chan < arch->get_nchan();chan++) {
+    for (unsigned subint = 0;subint < arch->get_nsubint();subint++) {
+      Pulsar::Profile* prof = arch->get_Profile(subint,pol,chan);
+      float* amps = prof->get_amps();
+      for (unsigned i=5;i<arch->get_nbin();i+=8) {
+        // Interpolate between previous and later point if possible
+        if (i==arch->get_nbin()-1)
+    amps[i] = amps[i-1];
+        else
+    {
+      float amp1 = amps[i-1];
+      float amp2 = amps[i+1];
+      amps[i] = 0.5*(amp1+amp2);
+    }
+      }
+      prof->set_amps(amps);
+    }
+  }
       }
     }
     
@@ -472,16 +472,16 @@ int main (int argc, char *argv[]) {
       bool ignore;
       
       for (unsigned i = 0; i < arch->get_nsubint(); i++) {
-	ignore = false;
-	for (unsigned j = 0; j < subs_to_zap.size(); j++)
-	  if (subs_to_zap[j] == i) {
-	    ignore = true;
-	    if (verbose)
-	      cout << "Zapping subint " << i << endl;
-	  }
-	if (!ignore) {
-	  subs_to_keep.push_back(i);
-	}
+  ignore = false;
+  for (unsigned j = 0; j < subs_to_zap.size(); j++)
+    if (subs_to_zap[j] == i) {
+      ignore = true;
+      if (verbose)
+        cout << "Zapping subint " << i << endl;
+    }
+  if (!ignore) {
+    subs_to_keep.push_back(i);
+  }
       }
       new_arch = arch->extract(subs_to_keep);
       string useful = arch->get_filename();
@@ -495,18 +495,18 @@ int main (int argc, char *argv[]) {
 
       vector<unsigned> subs_to_keep;
       bool keep;
-	
+  
       for (unsigned i = 0; i < arch->get_nsubint(); i++) {
-	keep = false;
-	for (unsigned j = 0; j < subs_nozap.size(); j++)
-	  if (subs_nozap[j] == i) {
-	    keep = true;
-	  }
-	if (keep) {
-	  subs_to_keep.push_back(i);
-	  if (verbose)
-	    cout << "Keeping subint " << i << endl;
-	}
+  keep = false;
+  for (unsigned j = 0; j < subs_nozap.size(); j++)
+    if (subs_nozap[j] == i) {
+      keep = true;
+    }
+  if (keep) {
+    subs_to_keep.push_back(i);
+    if (verbose)
+      cout << "Keeping subint " << i << endl;
+  }
       }
       new_arch = arch->extract(subs_to_keep);
       string useful = arch->get_filename();
@@ -537,45 +537,45 @@ int main (int argc, char *argv[]) {
       
     if (zero_channels) {
       if (!killfile.empty()) {
-	vector<int> some_chans;
-	char* useful = new char[4096];
-	FILE* fptr = fopen(killfile.c_str(), "r");
+  vector<int> some_chans;
+  char* useful = new char[4096];
+  FILE* fptr = fopen(killfile.c_str(), "r");
 
-	while (fgets(useful, 4096, fptr)) {
-	  key = strtok (useful, whitespace);
-	  while (key) {
-	    if (sscanf(key, "%d", &placeholder) == 1) {
-	      some_chans.push_back(placeholder);
-	    }
-	    key = strtok (NULL, whitespace);
-	  }
-	  for (unsigned x = 0; x < some_chans.size(); x++) {
-	    chans_to_zap.push_back(some_chans[x]);
-	  }
+  while (fgets(useful, 4096, fptr)) {
+    key = strtok (useful, whitespace);
+    while (key) {
+      if (sscanf(key, "%d", &placeholder) == 1) {
+        some_chans.push_back(placeholder);
+      }
+      key = strtok (NULL, whitespace);
+    }
+    for (unsigned x = 0; x < some_chans.size(); x++) {
+      chans_to_zap.push_back(some_chans[x]);
+    }
 
-	  some_chans.resize(0);
-	}
-	delete[] useful;
+    some_chans.resize(0);
+  }
+  delete[] useful;
       }
       vector<float> mask(nchan, 1.0);
       for (unsigned i = 0; i < chans_to_zap.size(); i++) {
-	mask[chans_to_zap[i]] = 0.0;
+  mask[chans_to_zap[i]] = 0.0;
       }
 
       if (zero_intersection)
-	zapper->zap_very_specific(arch,mask,subs_to_zap);
+  zapper->zap_very_specific(arch,mask,subs_to_zap);
       else
-	zapper->zap_specific(arch, mask);
+  zapper->zap_specific(arch, mask);
     }
     
     if (edge_zap) {
       float fraction = percent / 100.0;
       int buffer = int(float(nchan) * fraction);
-	
+  
       vector<float> mask(nchan, 0.0);
-	
+  
       for (int i = (0 + buffer); i <= (nchan - buffer); i++) {
-	mask[i] = 1.0;
+  mask[i] = 1.0;
       }
       zapper->zap_specific(arch, mask);
     }
@@ -584,35 +584,35 @@ int main (int argc, char *argv[]) {
       double theston = 0.0;
       arch->pscrunch();
       for (unsigned isub = 0; isub < arch->get_nsubint(); isub++) {
-	for (unsigned ichan = 0; ichan < arch->get_nchan(); ichan++) {
-	  theston = arch->get_Profile(isub,0,ichan)->snr();
-	  if (theston < ston_cutoff) {
-	    arch->get_Integration(isub)->set_weight(ichan, 0.0);
-	  } 
-	}
+  for (unsigned ichan = 0; ichan < arch->get_nchan(); ichan++) {
+    theston = arch->get_Profile(isub,0,ichan)->snr();
+    if (theston < ston_cutoff) {
+      arch->get_Integration(isub)->set_weight(ichan, 0.0);
+    } 
+  }
       }
     }
     
     if (!write)
       continue;
     
-		/////////////////////////////////////////////////////////////////
-		// See if the archive contains a history that should be updated:
+    /////////////////////////////////////////////////////////////////
+    // See if the archive contains a history that should be updated:
 
-		Pulsar::ProcHistory* fitsext = arch->get<Pulsar::ProcHistory>();
+    Pulsar::ProcHistory* fitsext = arch->get<Pulsar::ProcHistory>();
 
-		if (fitsext) {
+    if (fitsext) {
 
-	  	if (command.length() > 80) {
-	    	cout << "WARNING: ProcHistory command string truncated to 80 chars" 
-			 << endl;
-	    	fitsext->set_command_str(command.substr(0, 80));
-	  	}
-	  	else {
-	    	fitsext->set_command_str(command);
-	  	}
+      if (command.length() > 80) {
+        cout << "WARNING: ProcHistory command string truncated to 80 chars" 
+       << endl;
+        fitsext->set_command_str(command.substr(0, 80));
+      }
+      else {
+        fitsext->set_command_str(command);
+      }
 
-		}
+    }
 
     if (ext.empty()) {
       cout << "Unloading " << arch->get_filename() << " ..." << endl;
@@ -633,7 +633,7 @@ int main (int argc, char *argv[]) {
     cout << "Unloading " << the_new << " ..." << endl;
     arch->unload(the_new);
     cout << "New file " << the_new << " written to disk" << endl;
-	  
+    
   }
   catch (Error& error) {
     cerr << "paz: Error while handling " << archives[i] << error << endl;

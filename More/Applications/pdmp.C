@@ -1,5 +1,5 @@
 //
-// $Id: pdmp.C,v 1.5 2005/11/07 05:44:18 ateoh Exp $
+// $Id: pdmp.C,v 1.6 2006/02/24 01:00:16 ateoh Exp $
 //
 // Searches over trial DM and Period ranges and obtains the optimal 
 // DM and Period giving the highest S/N, plots SNR vs Period vs DM, 
@@ -1776,12 +1776,6 @@ double getDopplerFactor(const Archive * archive) {
 		printf("pdmp: getDopplerFactor: tmjdctr = %3.10g, radius = %3.10g, siteLatitude = %3.10g, siteLongitude = %3.10g, sphericalRadius = %3.10g\n" , 
 		0.5 * (end + start), erad, siteLatitude, siteLongitude, sphericalRadius);
 		
-		// unsigned nsub = copy->get_nsubint();
-// 		int centre_nsub = (int)ceil((double)nsub / 2) - 1;
-// 		Reference::To<Pulsar::Pointing> pointing = copy->get_Integration(centre_nsub)->get<Pulsar::Pointing>();
-// 		double tsid = pointing->get_local_sidereal_time();
-// 		printf("pdmp: using Pointing to get sidereal time at [(%d/2 - 1) = %d] = %3.15g\n", 
-// 		nsub, centre_nsub, tsid);
 	}
 	
 	/////////////////////////////////

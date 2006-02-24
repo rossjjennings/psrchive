@@ -15,6 +15,10 @@
 #include "dirutil.h"
 #include "string_utils.h"
 
+// Extensions this program understands
+
+#include "Pulsar/ProcHistory.h"
+
 static const char* psradd_args = "b:c:Ce:f:FG:hiI:LM:O:p:Pqr:sS:tT:uUvVZ:";
 
 void usage () {
@@ -121,6 +125,10 @@ int main (int argc, char **argv) try {
 
   int c;
 
+  // for writing into history
+  string command = "psradd";
+  
+  
   while ((c = getopt(argc, argv, psradd_args)) != -1)  {
     switch (c)  {
 
@@ -129,29 +137,48 @@ int main (int argc, char **argv) try {
       return 0;
       
     case 'i':
-      cout << "$Id: psradd.C,v 1.27 2006/02/15 15:27:19 straten Exp $" << endl;
+      cout << "$Id: psradd.C,v 1.28 2006/02/24 01:00:16 ateoh Exp $" << endl;
       return 0;
 
     case 'b':
       nbin = atoi (optarg);
+      
+      command += " -b ";
+      command += optarg;
+      
       break;
 
     case 'c':
       nchan = atoi(optarg);
+      
+      command += " -c ";
+      command += optarg;
+      
       break;
 
     case 'e':
       integrated_extension = optarg;
+      
+      command += " -e ";
+      command += optarg;
+      
       break;  
 
     case 'f':
       newname = optarg;
+      
+      command += " -f ";
+      command += optarg;
+      
       break;
 
     case 'F':
       Pulsar::Archive::append_chronological = false;
       Pulsar::Archive::append_must_match = false;
       check_has_data = false;
+      
+      command += " -F";
+      
       break;
 
     case 'G':
@@ -160,6 +187,10 @@ int main (int argc, char **argv) try {
 	return -1;
       }
       auto_add = true;
+      
+      command += " -G ";
+      command += optarg;
+      
       break;
 
     case 'I':
@@ -168,10 +199,14 @@ int main (int argc, char **argv) try {
 	return -1;
       }
       auto_add = true;
+      command += " -I ";
+      command += optarg;
       break;
 
     case 'O':
       integrated_path = optarg;
+      command += " -O ";
+      command += optarg;
       break;
 
     case 'S':
@@ -180,6 +215,8 @@ int main (int argc, char **argv) try {
 	return -1;
       }
       auto_add = true;
+      command += " -S ";
+      command += optarg;
       break;
 
     case 'L':
@@ -188,14 +225,19 @@ int main (int argc, char **argv) try {
 
     case 'M':
       metafile = optarg;
+      command += " -M ";
+      command += optarg;
       break;
 
     case 'p':
       parname = optarg;
+      command += " -p ";
+      command += optarg;
       break;
 
     case 'P':
       phase_align = true;
+      command += " -P";
       break;
 
     case 'q':
@@ -204,10 +246,13 @@ int main (int argc, char **argv) try {
 
     case 'r':
       centre_frequency = atof(optarg);
+      command += " -r ";
+      command += optarg;
       break;
 
     case 's':
       tscrunch_total = true;
+      command += " -s";
       break;
 
     case 't':
@@ -216,6 +261,8 @@ int main (int argc, char **argv) try {
 
     case 'T':
       Tempo::set_system (optarg);
+      command += " -T ";
+      command += optarg;
       break;
 
     case 'u':   
@@ -240,7 +287,12 @@ int main (int argc, char **argv) try {
       verbose = true;
       break;
 
-    case 'Z': required_archive_length = atof(optarg); break;
+    case 'Z': 
+      required_archive_length = atof(optarg); 
+      command += " -Z ";
+      command += optarg;
+
+      break;
 
     } 
   }
@@ -499,6 +551,25 @@ int main (int argc, char **argv) try {
       // tscrunch the archive
       total->tscrunch();
     }
+
+    /////////////////////////////////////////////////////////////////
+    // See if the archive contains a history that should be updated:
+
+    Pulsar::ProcHistory* fitsext = total->get<Pulsar::ProcHistory>();
+
+    if (fitsext) {
+
+      if (command.length() > 80) {
+        cout << "WARNING: ProcHistory command string truncated to 80 chars" 
+       << endl;
+        fitsext->set_command_str(command.substr(0, 80));
+      }
+      else {
+        fitsext->set_command_str(command);
+      }
+
+    }
+
 
     if (reset_total_next_load || reset_total_current) {
 
