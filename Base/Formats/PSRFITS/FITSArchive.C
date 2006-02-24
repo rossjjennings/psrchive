@@ -42,7 +42,6 @@ void Pulsar::FITSArchive::init ()
   chanbw = 0.0; 
 
   scale_cross_products = false;
-  conjugate_cross_products = false;
   correct_P236_reference_epoch = false;
 
   fcal_on_sources.push_back("Hydra");
@@ -168,7 +167,6 @@ void Pulsar::FITSArchive::copy (const Archive& archive,
   
   chanbw = farchive->chanbw;
   scale_cross_products = farchive->scale_cross_products;
-  conjugate_cross_products = farchive->conjugate_cross_products;
 }
 
 //! Returns a pointer to a new copy-constructed FITSArchive instance

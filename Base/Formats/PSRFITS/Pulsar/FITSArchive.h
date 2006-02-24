@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/PSRFITS/Pulsar/FITSArchive.h,v $
-   $Revision: 1.32 $
-   $Date: 2005/12/19 07:37:34 $
-   $Author: ahotan $ */
+   $Revision: 1.33 $
+   $Date: 2006/02/24 23:20:09 $
+   $Author: straten $ */
 
 #ifndef __Pulsar_FITSArchive_h
 #define __Pulsar_FITSArchive_h
@@ -169,9 +169,6 @@ namespace Pulsar {
     
     // Double cross coherence term
     bool scale_cross_products;
-
-    // Complex conjugate cross coherence term
-    bool conjugate_cross_products;
 
     // Archive Extensions used by FITSArchive
     

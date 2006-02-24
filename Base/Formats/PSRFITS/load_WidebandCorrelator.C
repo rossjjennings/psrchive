@@ -123,7 +123,7 @@ void Pulsar::FITSArchive::load_WidebandCorrelator (fitsfile* fptr)
       if (find (conj_configs.begin(), conj_configs.end(), ext->configfile)
 	  != conj_configs.end())  {
 	
-	conjugate_cross_products = true;
+	ext->set_argument( Signal::Conjugate );
 	
 	if (verbose > 1)
 	  cerr << "Pulsar::FITSArchive::load_WidebandCorrelator\n"

@@ -320,8 +320,6 @@ try {
 	  if (integ->get_state() == Signal::Coherence) {
 	    if (scale_cross_products && (a == 2 || a == 3))
 	      fltarray[j] *= 2;
-	    if (conjugate_cross_products && (a == 3))
-	      fltarray[j] *= -1;
 	  }
 	}
       
