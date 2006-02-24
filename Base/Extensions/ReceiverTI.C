@@ -30,14 +30,14 @@ void Pulsar::ReceiverTI::init ()
 
   {
     Generator<Signal::Basis> gen;
-    add( gen.described ("b", "Basis of receptors",
+    add( gen.described ("basis", "Basis of receptors",
 			&Receiver::get_basis,
 			&Receiver::set_basis) );
   }
 
   {
     Generator<Signal::Hand> gen;
-    add( gen.described ("h", "Hand of receptor basis",
+    add( gen.described ("hand", "Hand of receptor basis",
 			&Receiver::get_hand,
 			&Receiver::set_hand) );
   }
