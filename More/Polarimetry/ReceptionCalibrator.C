@@ -97,7 +97,7 @@ void Pulsar::ReceptionCalibrator::initial_observation (const Archive* data)
   calibrator = data->clone();
 
   Signal::Basis basis = calibrator->get_basis ();
-  Pauli::basis.set_basis( (Basis<double>::Type) basis);
+  Pauli::basis.set_basis(basis);
 
   if (calibrator->get_basis() == Signal::Circular)  {
     if (measure_cal_Q) {

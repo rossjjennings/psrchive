@@ -174,7 +174,7 @@ Pulsar::PolnCalibrator::get_transformation (unsigned ichan)
 void Pulsar::PolnCalibrator::setup_transformation () const
 {
   if (receiver)
-    Pauli::basis.set_basis( (Basis<double>::Type) receiver->get_basis() );
+    Pauli::basis.set_basis( receiver->get_basis() );
 
   const_cast<PolnCalibrator*>(this)->calculate_transformation();
 }

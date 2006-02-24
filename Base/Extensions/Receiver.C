@@ -204,7 +204,7 @@ Jones<double> Pulsar::Receiver::get_transformation () const
   if ( feed_corrected || get_orientation() == 0 )
     return xform;
 
-  Pauli::basis.set_basis( (Basis<double>::Type)get_basis() );
+  Pauli::basis.set_basis( get_basis() );
 
   if (Archive::verbose > 1)
     cerr << "Pulsar::Receiver::get_transformation basis="

@@ -53,7 +53,7 @@ Pulsar::ReferenceCalibrator::ReferenceCalibrator (const Archive* archive)
   requested_nchan = calibrator->get_nchan();
 
   if (receiver) {
-    Pauli::basis.set_basis( (Basis<double>::Type) receiver->get_basis() );    
+    Pauli::basis.set_basis( receiver->get_basis() );    
     Stokes<double> cal = receiver->get_reference_source ();
     if (verbose)
       cerr << "Pulsar::ReferenceCalibrator reference source " << cal << endl;

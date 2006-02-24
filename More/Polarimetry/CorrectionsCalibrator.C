@@ -184,7 +184,7 @@ Pulsar::CorrectionsCalibrator::get_feed_transformation (const Archive* arch,
     throw Error (InvalidState, "Pulsar::CorrectionsCalibrator",
 		 "no Receiver extension available");
 
-  Pauli::basis.set_basis( (Basis<double>::Type) receiver->get_basis() );
+  Pauli::basis.set_basis( receiver->get_basis() );
 
   return get_feed_transformation (pointing, receiver);
 }
@@ -231,7 +231,7 @@ Pulsar::CorrectionsCalibrator::get_transformation (const Archive* archive,
     return xform;
   }
 
-  Pauli::basis.set_basis( (Basis<double>::Type) receiver->get_basis() );
+  Pauli::basis.set_basis( receiver->get_basis() );
 
   if (must_correct_feed)  {
     Jones<double> jones = receiver->get_transformation();
