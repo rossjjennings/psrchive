@@ -57,7 +57,7 @@ int main ()
   }
 
   cerr << "Testing in circular basis" << endl;
-  Pauli::basis.set_basis (Basis<double>::Circular);
+  Pauli::basis.set_basis (Signal::Circular);
 
   for (unsigned i=0; i < 3; i++) {
     cerr << "Testing rotations about " << name[(i+2)%3] << " axis" << endl;

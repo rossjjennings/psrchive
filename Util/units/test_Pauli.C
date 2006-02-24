@@ -76,7 +76,6 @@ void test_matrix (const Jones<T>& j1, const Jones<T>& j2,
 
   test_polar (j1, tolerance);
   test_polar (j2, tolerance);
-
 }
 
 
