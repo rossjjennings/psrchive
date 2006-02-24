@@ -740,7 +740,8 @@ void Pulsar::FITSArchive::P236_reference_epoch_correction ()
 
   hdr_ext->start_time = model->iphase( original_phase.Floor() );
 
-  cerr << "Pulsar::FITSArchive::P236_reference_epoch_correction"
+  if(verbose == 3)
+    cerr << "Pulsar::FITSArchive::P236_reference_epoch_correction"
     "\n   original reference epoch=" << original_reference_epoch <<
     "\n                      phase=" << original_phase <<
     "\n  corrected reference epoch=" << hdr_ext->start_time <<
