@@ -60,18 +60,22 @@ void Pulsar::FITSArchive::unload (fitsfile* fptr,
     data.get()[count] = fits_nullfloat;
 
   count = 0;
-  for (int i = 0; i < nchan; i++)
-    if (pce->get_valid(i))
+  for (int ichan = 0; ichan < nchan; ichan++) {
+
+    if (pce->get_valid(ichan)) {
       for (int j = 0; j < ncpar; j++) {
-	data.get()[count] = pce->get_transformation(i)->get_param(j);
+	data.get()[count] = pce->get_transformation(ichan)->get_param(j);
 	count++;
       }
+    }
     else  {
       if (verbose == 3)
         cerr << "FITSArchive::unload PolnCalibratorExtension ichan="
-             << i << " flagged invalid" << endl;
+             << ichan << " flagged invalid" << endl;
       count += ncpar;
     }
+
+  }
 
   assert (count == dimension);
 
