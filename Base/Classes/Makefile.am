@@ -20,7 +20,7 @@ nobase_include_HEADERS = \
 	Pulsar/ReceiverTI.h               Pulsar/PointingTI.h \
 	Pulsar/PowerEstimator.h
 
-libExtension_la_SOURCES = \
+libExtension_la_SOURCES = Backend.C \
 	BackendName.C                    ObsExtension.C  \
 	BinLngAscOrder.C                 Parkes.C  \
 	BinLngPeriOrder.C                Passband.C  \

@@ -1,30 +1,55 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/Backend.h,v $
-   $Revision: 1.2 $
-   $Date: 2005/12/09 16:41:06 $
+   $Revision: 1.3 $
+   $Date: 2006/02/24 17:31:27 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Backend_h
 #define __Pulsar_Backend_h
 
 #include "Pulsar/Archive.h"
+#include "Conventions.h"
 
 namespace Pulsar {
   
   //! Stores information about the instrument backend
-  /*! This Archive::Extension is an abstract base for classes that
-    contain information specific to the backend instrument used for
-    the observation. */
+  /*! Derived classes must implement clone and get_name methods. */
   class Backend : public Archive::Extension {
 
   public:
     
     //! Default constructor
-    Backend (const char* name) : Extension (name) { }
+    Backend (const char* name);
+
+    //! Copy constructor
+    Backend (const Backend&);
+
+    //! Operator =
+    const Backend& operator= (const Backend&);
 
     //! Return the name of the Backend
     virtual string get_name () const = 0;
+
+    //! Get the hand of the backend
+    Signal::Hand get_hand () const;
+
+    //! Set the hand of the backend
+    void set_hand (Signal::Hand);
+
+    //! Get the argument of the backend
+    Signal::Argument get_argument () const;
+
+    //! Set the argument of the backend
+    void set_argument (Signal::Argument);
+
+  protected:
+
+    //! The bandend hand
+    Signal::Hand hand;
+
+    //! The backend argument
+    Signal::Argument argument;
 
   };
  
