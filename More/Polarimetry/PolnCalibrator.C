@@ -2,6 +2,7 @@
 #include "Pulsar/PolnCalibratorExtension.h"
 
 #include "Pulsar/Receiver.h"
+#include "Pulsar/Backend.h"
 #include "Pulsar/FeedExtension.h"
 
 #include "Pulsar/Archive.h"
@@ -460,6 +461,24 @@ void Pulsar::PolnCalibrator::calibration_setup (Archive* arch)
     build( arch->get_nchan() );
 }
 
+void Pulsar::PolnCalibrator::correct_backend (Archive* arch) try {
+
+  Backend* backend = arch->get<Backend>();
+
+  if (backend && backend->get_argument() == Signal::Conjugate) {
+
+    for (unsigned isub=0; isub < arch->get_nsubint(); isub++)
+      for (unsigned ichan=0; ichan < arch->get_nchan(); ichan++)
+	arch->get_Profile (isub, 3, ichan)->scale(-1);
+
+    backend->set_argument(Signal::Conventional);
+  }
+
+}
+catch (Error& error) {
+  throw error += "Pulsar::PolnCalibrator::correct_backend";
+}
+
 /*! Upon completion, the flux of the archive will be normalized with
   respect to the flux of the calibrator, such that a FluxCalibrator
   simply scales the archive by the calibrator flux. */
@@ -471,6 +490,8 @@ void Pulsar::PolnCalibrator::calibrate (Archive* arch) try {
   calibration_setup (arch);
 
   if (arch->get_npol() == 4) {
+
+    correct_backend (arch);
 
     if (verbose)
       cerr << "Pulsar::PolnCalibrator::calibrate Archive::transform" <<endl;
