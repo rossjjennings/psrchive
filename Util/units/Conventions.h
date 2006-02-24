@@ -1,12 +1,14 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Conventions.h,v $
-   $Revision: 1.1 $
-   $Date: 2006/02/24 17:08:42 $
+   $Revision: 1.2 $
+   $Date: 2006/02/24 22:13:15 $
    $Author: straten $ */
 
 #ifndef __Conventions_h
 #define __Conventions_h
+
+#include <iostream>
 
 namespace Signal {
 
@@ -18,6 +20,23 @@ namespace Signal {
 
   //! The complex phase of the basis
   enum Argument { Conjugate=-1, Conventional=1 };
+
+  // //////////////////////////////////////////////////////////////////////
+
+  //! Basis output operator
+  std::ostream& operator << (std::ostream&, Basis);
+  //! Basis input operator
+  std::istream& operator >> (std::istream&, Basis&);
+
+  //! Hand output operator
+  std::ostream& operator << (std::ostream&, Hand);
+  //! Hand input operator
+  std::istream& operator >> (std::istream&, Hand&);
+
+  //! Argument output operator
+  std::ostream& operator << (std::ostream&, Argument);
+  //! Argument input operator
+  std::istream& operator >> (std::istream&, Argument&);
 
 }
 
