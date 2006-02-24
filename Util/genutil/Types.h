@@ -1,13 +1,14 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Types.h,v $
-   $Revision: 1.18 $
-   $Date: 2005/04/13 08:06:31 $
-   $Author: sord $ */
+   $Revision: 1.19 $
+   $Date: 2006/02/24 17:09:23 $
+   $Author: straten $ */
 
 #ifndef __Types_h
 #define __Types_h
 
+#include "Conventions.h"
 #include <string>
 
 #include "psr_cpp.h"
@@ -28,9 +29,6 @@ namespace Signal {
     Space
   };
 
-
-  //! The basis in which the electric field is represented
-  enum Basis { Circular=0, Linear=1, Elliptical=2 };
 
   //! The scale in which units are measured
   enum Scale {
