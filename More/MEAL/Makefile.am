@@ -1,7 +1,8 @@
 
 noinst_LTLIBRARIES = libunits.la
 
-libunits_la_SOURCES = Error.C HeapTracked.C ReferenceAble.C stringtok.C	     \
+libunits_la_SOURCES = stringtok.C					     \
+	Conventions.C Error.C HeapTracked.C ReferenceAble.C		     \
 	Function.C ParameterPolicy.C OneParameter.C Parameters.C	     \
 	ArgumentPolicy.C Argument.C Composite.C Projection.C		     \
 	UnivariatePolicy.C ForwardChanged.C CyclicParameter.C		     \
@@ -75,17 +76,19 @@ nobase_include_HEADERS = Error.h HeapTracked.h ReferenceAble.h stringtok.h \
 
 bin_PROGRAMS = lmfit
 
-check_PROGRAMS = test_Error test_HeapTracked test_Reference		 \
-	test_circular_Reference test_Registry test_Functor test_Callback \
-	test_copy test_Axis test_Projection test_Composite test_Scalar	 \
-	test_Complex2Product test_Basis test_Stokes test_Polar		 \
-	test_TextInterface test_parse_indeces test_Estimate test_Vector	 \
-	test_Matrix test_Jacobi test_eigen test_Jones test_Quaternion	 \
-	test_Pauli test_Rotation test_ModifyRestore			 \
+check_PROGRAMS = test_Conventions test_Error				\
+	test_HeapTracked test_Reference test_circular_Reference		\
+	test_Registry test_Functor test_Callback			\
+	test_copy test_Axis test_Projection test_Composite test_Scalar	\
+	test_Complex2Product test_Basis test_Stokes test_Polar		\
+	test_TextInterface test_parse_indeces test_Estimate test_Vector	\
+	test_Matrix test_Jacobi test_eigen test_Jones test_Quaternion	\
+	test_Pauli test_Rotation test_ModifyRestore			\
 	test_CyclicParameter test_Univariate
 
 TESTS = $(check_PROGRAMS)
 
+test_Conventions_SOURCES        = test_Conventions.C
 test_Error_SOURCES		= test_Error.C
 test_HeapTracked_SOURCES	= test_HeapTracked.C
 test_Reference_SOURCES		= test_Reference.C
