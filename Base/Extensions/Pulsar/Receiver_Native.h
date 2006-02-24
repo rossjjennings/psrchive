@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/Receiver_Native.h,v $
-   $Revision: 1.2 $
-   $Date: 2005/12/09 16:41:06 $
+   $Revision: 1.3 $
+   $Date: 2006/02/24 22:13:36 $
    $Author: straten $ */
 
 #ifndef __Receiver_Native_h
@@ -28,6 +28,14 @@ namespace Pulsar {
     void set_basis (Signal::Basis _basis)
     { basis = _basis; }
     
+    //! Get the hand of the basis
+    Signal::Hand get_hand () const
+    { return hand; }
+    
+    //! Set true if the basis is right-handed
+    void set_hand (Signal::Hand h)
+    { hand = h; }
+    
     //! Get the orientation of the basis about the line of sight
     Angle get_orientation () const
     { return orientation; }
@@ -36,14 +44,6 @@ namespace Pulsar {
     void set_orientation (const Angle& angle)
     { orientation = angle; }
 
-    //! Return true if the basis is right-handed
-    bool get_right_handed () const
-    { return right_handed; }
-
-    //! Set true if the basis is right-handed
-    void set_right_handed (bool right = true)
-    { right_handed = right; }
-    
     //! Get the phase of the reference source
     Angle get_reference_source_phase () const
     { return reference_source_phase; }
@@ -60,8 +60,8 @@ namespace Pulsar {
     //! Basis of the feed receptors
     Signal::Basis basis;
     
-    //! Set true if the basis forms a right-handed coordinate system
-    bool right_handed;
+    //! The hand of the basis
+    Signal::Hand hand;
     
     //! The orientation of the basis about the line of sight
     Angle orientation;

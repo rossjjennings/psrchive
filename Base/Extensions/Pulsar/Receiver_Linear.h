@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/Receiver_Linear.h,v $
-   $Revision: 1.3 $
-   $Date: 2005/12/09 16:41:06 $
+   $Revision: 1.4 $
+   $Date: 2006/02/24 22:13:36 $
    $Author: straten $ */
 
 #ifndef __Receiver_Linear_h
@@ -23,11 +23,11 @@ namespace Pulsar {
     //! Get the basis of the feed receptors
     Signal::Basis get_basis () const;
     
+    //! Get the hand of the basis
+    Signal::Hand get_hand () const;
+    
     //! Get the orientation of the basis about the line of sight
     Angle get_orientation () const;
-    
-    //! Return true if the basis is right-handed
-    bool get_right_handed () const;
     
     //! Get the phase of the reference source
     Angle get_reference_source_phase () const;

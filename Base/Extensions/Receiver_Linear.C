@@ -12,6 +12,15 @@ Signal::Basis Pulsar::Receiver::Linear::get_basis () const
   return Signal::Linear;
 }
     
+//! Return true if the basis is right-handed
+Signal::Hand Pulsar::Receiver::Linear::get_hand () const
+{
+  if (y_offset)
+    return Signal::Left;
+  else
+    return Signal::Right;
+}
+    
 //! Get the orientation of the basis about the line of sight
 Angle Pulsar::Receiver::Linear::get_orientation () const
 {
@@ -20,12 +29,6 @@ Angle Pulsar::Receiver::Linear::get_orientation () const
     offset.setDegrees (-90);
 
   return x_offset + offset;
-}
-    
-//! Return true if the basis is right-handed
-bool Pulsar::Receiver::Linear::get_right_handed () const
-{
-  return !y_offset;
 }
     
 //! Get the phase of the reference source
@@ -44,8 +47,9 @@ void Pulsar::Receiver::Linear::copy (const State* state)
     throw Error (InvalidParam, "Pulsar::Receiver::Linear::copy",
 		 "input State::get_basis != Signal::Linear");
 
+  y_offset = state->get_hand() == Signal::Left;
+
   set_calibrator_offset( 0.5 * state->get_reference_source_phase() );
-  y_offset = !state->get_right_handed();
 
   Angle offset;
 
@@ -77,7 +81,7 @@ void Pulsar::Receiver::Linear::set_X_offset (const Angle& offset)
   to the product of:
   <OL>
   <LI> switching the X and Y probes (a 180 degree rotation about the U axis,
-  as done when the right_handed attribute is false)
+  as done when hand==Left)
   <LI> a -90 degree rotation about the line of sight (a 180 degree
   rotation about the V axis, as done when the orientation_Y_offset = -90
   </OL>

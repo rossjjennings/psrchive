@@ -148,9 +148,9 @@ void Pulsar::FITSArchive::load_Receiver (fitsfile* fptr)
   }
   else switch (hand) {
   case 1:
-    ext->set_right_handed ( true ); break;
+    ext->set_hand ( Signal::Right ); break;
   case -1:
-    ext->set_right_handed ( false ); break;
+    ext->set_hand ( Signal::Left ); break;
   default:
     throw Error (InvalidParam, "FITSArchive::load_Receiver",
 		 "FD_HAND=%d", hand);

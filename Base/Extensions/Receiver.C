@@ -98,9 +98,9 @@ void Pulsar::Receiver::set_orientation (const Angle& angle)
 
 /*! If this method is called, then any changes due to set_Y_offset
   will be reset. */
-void Pulsar::Receiver::set_right_handed (bool right)
+void Pulsar::Receiver::set_hand (Signal::Hand hand)
 {
-  get<Native>()->set_right_handed (right);
+  get<Native>()->set_hand (hand);
 }
 
 //! Set the phase of the reference source
@@ -184,7 +184,7 @@ bool Pulsar::Receiver::match (const Receiver* receiver, string& reason) const
 //! Return the handedness correction matrix
 Jones<double> Pulsar::Receiver::get_hand_transformation () const
 {
-  if ( feed_corrected || get_right_handed() )
+  if ( feed_corrected || get_hand() == Signal::Right )
     return 1.0;
 
   if (Archive::verbose > 1)

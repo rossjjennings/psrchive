@@ -3,14 +3,14 @@
 Pulsar::Receiver::Native::Native ()
 {
   basis = Signal::Linear;
-  right_handed = true;
+  hand = Signal::Right;
 }
 
 //! Copy the state from another
 void Pulsar::Receiver::Native::copy (const State* state)
 {
-  set_basis (state->get_basis());
+  set_basis(state->get_basis());
+  set_hand(state->get_hand());
   set_orientation (state->get_orientation());
-  set_right_handed (state->get_right_handed());
   set_reference_source_phase (state->get_reference_source_phase());
 }

@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/Receiver.h,v $
-   $Revision: 1.13 $
-   $Date: 2005/12/09 16:41:06 $
+   $Revision: 1.14 $
+   $Date: 2006/02/24 22:13:36 $
    $Author: straten $ */
 
 #ifndef __ReceiverExtension_h
@@ -86,10 +86,10 @@ namespace Pulsar {
     //! Set the orientation of the basis about the line of sight
     void set_orientation (const Angle& celestial_position_angle);
 
-    //! Return true if the basis is right-handed
-    bool get_right_handed () const { return state->get_right_handed(); }
-    //! Set true if the basis is right-handed
-    void set_right_handed (bool right = true);
+    //! Get the hand of the basis
+    Signal::Hand get_hand () const { return state->get_hand(); }
+    //! Set the hand of the basis
+    void set_hand (Signal::Hand);
  
     //! Get the phase of the reference source
     Angle get_reference_source_phase () const
@@ -173,11 +173,12 @@ namespace Pulsar {
       //! Get the basis of the feed receptors
       virtual Signal::Basis get_basis () const = 0;
 
+      //! Get the hand of the basis
+      virtual Signal::Hand get_hand () const = 0;
+
       //! Get the orientation of the basis about the line of sight
       virtual Angle get_orientation () const = 0;
 
-      //! Return true if the basis is right-handed
-      virtual bool get_right_handed () const = 0;
 
       //! Get the phase of the reference source
       virtual Angle get_reference_source_phase () const = 0;

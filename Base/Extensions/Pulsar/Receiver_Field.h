@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/Receiver_Field.h,v $
-   $Revision: 1.3 $
-   $Date: 2005/12/09 16:41:06 $
+   $Revision: 1.4 $
+   $Date: 2006/02/24 22:13:36 $
    $Author: straten $ */
 
 #ifndef __Receiver_Field_h
@@ -37,7 +37,7 @@ namespace Pulsar {
 
   protected:
     
-    //! Set true if the basis forms a right-handed coordinate system
+    //! Set true when set_field_orientation is called
     bool field_orientation;
 
   };

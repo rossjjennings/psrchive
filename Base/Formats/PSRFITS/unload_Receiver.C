@@ -32,9 +32,7 @@ void Pulsar::FITSArchive::unload (fitsfile* fptr, const Receiver* ext)
   temp = ext->get_field_orientation().getDegrees();
   fits_update_key (fptr, TFLOAT, "FD_SANG", &temp, comment, &status);
 
-  int hand = -1;
-  if (ext->get_right_handed())
-    hand = 1;
+  int hand = (int) ext->get_hand();
   fits_update_key (fptr, TINT, "FD_HAND", &hand, comment, &status);
 
   temp = ext->get_reference_source_phase().getDegrees();

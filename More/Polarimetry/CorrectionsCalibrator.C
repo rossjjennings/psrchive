@@ -63,12 +63,12 @@ bool Pulsar::CorrectionsCalibrator::needs_correction (const Archive* archive,
   // determine if it is necesary to correct for known receptor projections
   
   should_correct_receptors = 
-    receiver->get_orientation() != 0 || !receiver->get_right_handed();
+    receiver->get_orientation() != 0 || receiver->get_hand() != Signal::Right;
 
   if (verbose)
     cerr << "Pulsar::CorrectionsCalibrator::needs_correction"
       "\n  orientation=" << receiver->get_orientation() <<
-      "\n  righthanded=" << receiver->get_right_handed() <<
+      "\n  hand=" << receiver->get_hand() <<
       "\n  -> should_correct_receptors=" << should_correct_receptors << endl;
 
   must_correct_feed =

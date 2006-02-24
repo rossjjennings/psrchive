@@ -26,9 +26,20 @@ void Pulsar::ReceiverTI::init ()
 			&Receiver::get_platform_corrected,
 			&Receiver::set_platform_corrected) );
 
-    add( gen.described ("rh", "Receptors form a right-handed basis",
-			&Receiver::get_right_handed,
-			&Receiver::set_right_handed) );
+  }
+
+  {
+    Generator<Signal::Basis> gen;
+    add( gen.described ("b", "Basis of receptors",
+			&Receiver::get_basis,
+			&Receiver::set_basis) );
+  }
+
+  {
+    Generator<Signal::Hand> gen;
+    add( gen.described ("h", "Hand of receptor basis",
+			&Receiver::get_hand,
+			&Receiver::set_hand) );
   }
 
   {
