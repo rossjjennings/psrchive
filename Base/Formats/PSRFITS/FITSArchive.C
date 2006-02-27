@@ -24,9 +24,8 @@
 #include "Pulsar/BinLngAscOrder.h"
 #include "Pulsar/BinLngPeriOrder.h"
 #include "Pulsar/Telescope.h"
-#include "Pulsar/fitsio_Backend.h"
 
-#include "FITSError.h"
+#include "psrfitsio.h"
 
 #include "Telescope.h"
 #include "string_utils.h"
@@ -193,7 +192,7 @@ Pulsar::FITSArchive::extract (const vector<unsigned>& subints) const
 //! Read FITS header info from a file into a FITSArchive object.
 //
 
-void Pulsar::FITSArchive::load_header (const char* filename)
+void Pulsar::FITSArchive::load_header (const char* filename) try
 {
   int status = 0;
   char error[FLEN_ERRMSG];
@@ -706,6 +705,9 @@ void Pulsar::FITSArchive::load_header (const char* filename)
     cerr << "FITSArchive::load_header exit" << endl;
   
 }
+catch (Error& error) {
+  throw error += "FITSArchive::load_header";
+}
 
 //
 // End of load_header function
@@ -907,11 +909,9 @@ try {
 	  cerr << "FITSArchive::unload " << backend->get_extension_name()
 	       << " name=" << backend->get_name() << endl;
 
-	fits_update_key (fptr, TSTRING, "BACKEND", 
-			 const_cast<char*>(backend->get_name().c_str()),
-			 comment, &status);
-
-	psrfits_update_backend_phase (fptr, backend, &status);
+	psrfits_update_key (fptr, "BACKEND",  backend->get_name());
+	psrfits_update_key (fptr, "BE_PHASE", (int)backend->get_argument());
+	psrfits_update_key (fptr, "BE_HAND",  (int)backend->get_hand());
 
       }
 

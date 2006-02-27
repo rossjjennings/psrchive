@@ -1,36 +1,19 @@
 #include "Pulsar/FITSArchive.h"
 #include "Pulsar/WidebandCorrelator.h"
-#include "Pulsar/fitsio_Backend.h"
-
-#include "FITSError.h"
+#include "psrfitsio.h"
 
 void Pulsar::FITSArchive::unload (fitsfile* fptr,
 				  const WidebandCorrelator* ext)
-{
-  // status returned by FITSIO routines
-  int status = 0;
-  // no comment
-  char* comment = 0;
+try {
 
-  fits_update_key (fptr, TSTRING, "BACKEND", 
-		   const_cast<char*>(ext->get_name().c_str()),
-		   comment, &status);
-  
-  fits_update_key (fptr, TSTRING, "BECONFIG", 
-		   const_cast<char*>(ext->configfile.c_str()),
-		   comment, &status);
+  psrfits_update_key (fptr, "BACKEND",  ext->get_name());
+  psrfits_update_key (fptr, "BECONFIG", ext->configfile);
+  psrfits_update_key (fptr, "BE_PHASE", (int)ext->get_argument());
+  psrfits_update_key (fptr, "BE_HAND",  (int)ext->get_hand());
+  psrfits_update_key (fptr, "NRCVR",    ext->nrcvr);
+  psrfits_update_key (fptr, "TCYCLE",   ext->tcycle);
 
-  psrfits_update_backend_phase (fptr, ext, &status);
-
-  fits_update_key (fptr, TINT, "NRCVR",
-		   const_cast<int*>(&(ext->nrcvr)),
-		   comment, &status);
-
-  fits_update_key (fptr, TDOUBLE, "TCYCLE",
-		   const_cast<double*>(&(ext->tcycle)),
-		   comment, &status);
-
-  if (status)
-    throw FITSError (status, "Pulsar::FITSArchive::unload WidebandCorrelator");
-
+}
+catch (Error& error) {
+  throw error += "Pulsar::FITSArchive::unload WidebandCorrelator";
 }
