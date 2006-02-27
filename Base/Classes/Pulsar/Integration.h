@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Integration.h,v $
-   $Revision: 1.77 $
-   $Date: 2006/02/22 16:47:57 $
+   $Revision: 1.78 $
+   $Date: 2006/02/27 19:33:15 $
    $Author: straten $ */
 
 /*
@@ -124,7 +124,7 @@ namespace Pulsar {
 	       bool discard_bad = false) const;
     
     //! Remove the baseline from all profiles
-    virtual void remove_baseline (float phase = -1.0, float dc = 0.15);
+    void remove_baseline (float phase = -1.0, float dc = 0.15);
 
     //! Set the weight of each profile to its snr squared
     void snr_weight ();
@@ -133,10 +133,10 @@ namespace Pulsar {
     void uniform_weight (float new_weight = 1.0);
     
     //! Remove dispersion delays with respect to centre frequency
-    virtual void dedisperse ();
+    void dedisperse ();
 
     //! Remove Faraday rotation with respect to centre frequency
-    virtual void defaraday ();
+    void defaraday ();
 
     // //////////////////////////////////////////////////////////////////
     //
@@ -376,6 +376,12 @@ namespace Pulsar {
 
     //@}
 
+    //! Provides access to certain protected and private methods
+    class Expert;
+
+    //! Provide access to the expert interface
+    Expert* expert ();
+
   protected:
 
     // //////////////////////////////////////////////////////////////////
@@ -418,6 +424,10 @@ namespace Pulsar {
 
     //! Copy the profiles and attributes through set_ get_ methods
     virtual void copy (const Integration& subint, int npol=-1, int nchan=-1);
+
+    //! Swap the two specified profiles
+    void swap_profiles (unsigned ipol, unsigned ichan,
+			unsigned jpol, unsigned jchan);
 
     //! Call Profile::fold on every profile
     virtual void fold (unsigned nfold);
@@ -494,6 +504,9 @@ namespace Pulsar {
     //! Defaraday worker function
     void defaraday (unsigned ichan, unsigned kchan,
                     double rm, double f0);
+
+    //! Expert interface
+    Reference::To<Expert> expert_interface;
 
   private:
 

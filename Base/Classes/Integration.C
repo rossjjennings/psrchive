@@ -1,10 +1,10 @@
 
 #include "Pulsar/Archive.h"
-#include "Pulsar/Integration.h"
+#include "Pulsar/IntegrationExpert.h"
 #include "Pulsar/Profile.h"
+
 #include "Error.h"
 #include "typeutil.h"
-#include <assert.h>
 
 bool Pulsar::Integration::verbose = false;
 
@@ -80,6 +80,14 @@ Pulsar::Integration::Integration ()
   dedispersed_dispersion_measure = 0.0;
   dedispersed_centre_frequency   = 0.0;
   zero_phase_aligned = false;
+
+  expert_interface = new Expert (this);
+}
+
+//! Provide access to the expert interface
+Pulsar::Integration::Expert* Pulsar::Integration::expert ()
+{
+  return expert_interface; 
 }
 
 Pulsar::Integration::Integration (const Integration& subint)
@@ -417,9 +425,14 @@ catch (Error& error) {
   throw error += "Pulsar::Integration::get_state";
 }
 
-
-
-
+//! Swap the two specified profiles
+void Pulsar::Integration::swap_profiles (unsigned ipol, unsigned ichan,
+					 unsigned jpol, unsigned jchan)
+{
+  Reference::To<Profile> temp = profiles[ipol][ichan];
+  profiles[ipol][ichan] = profiles[jpol][jchan];
+  profiles[jpol][jchan] = temp;
+}
 
 void Pulsar::Integration::fold (unsigned nfold)
 {
