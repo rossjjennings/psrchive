@@ -21,8 +21,7 @@ libpsrfits_la_SOURCES = CalibratorExtensionIO.h FITSArchive.C \
 	unload_Pointing.C load_Pointing.C \
 	unload_Integration.C load_Integration.C \
 	delete_hdu.C update_history.C unload_integrations.C \
-	CalibratorExtensionIO.C FITSAgent.C \
-	fitsio_Backend.C Pulsar/fitsio_Backend.h
+	CalibratorExtensionIO.C FITSAgent.C
 
 check_PROGRAMS = test_template
 TESTS = $(check_PROGRAMS)
