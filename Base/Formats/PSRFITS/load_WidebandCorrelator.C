@@ -1,9 +1,7 @@
 #include "Pulsar/FITSArchive.h"
 #include "Pulsar/WidebandCorrelator.h"
 #include "Pulsar/FITSHdrExtension.h"
-#include "Pulsar/fitsio_Backend.h"
-
-#include "FITSError.h"
+#include "psrfitsio.h"
 #include "string_utils.h"
 
 void Pulsar::FITSArchive::load_WidebandCorrelator (fitsfile* fptr)
@@ -54,8 +52,12 @@ void Pulsar::FITSArchive::load_WidebandCorrelator (fitsfile* fptr)
     status = 0;
   }
 
-  psrfits_read_backend_phase (fptr, ext, &status);
-  status = 0;
+  int temp;
+  psrfits_read_key (fptr, "BE_PHASE", &temp, 0, verbose == 3);
+  ext->set_argument( (Signal::Argument) temp );
+
+  psrfits_read_key (fptr, "BE_HAND",  &temp, 1, verbose == 3);
+  ext->set_hand( (Signal::Hand) temp );
 
   if (ext->get_name() == "WBCORR")  {
 
