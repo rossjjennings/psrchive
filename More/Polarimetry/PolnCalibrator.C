@@ -6,7 +6,7 @@
 #include "Pulsar/FeedExtension.h"
 
 #include "Pulsar/Archive.h"
-#include "Pulsar/Integration.h"
+#include "Pulsar/IntegrationExpert.h"
 #include "Pulsar/Profile.h"
 
 #include "Pauli.h"
@@ -31,7 +31,7 @@ Pulsar::PolnCalibrator::PolnCalibrator (const Archive* archive)
     return;
 
   // store the calibrator archive
-  calibrator = archive;
+  set_calibrator (archive);
 
   // store the related Extension, if any
   poln_extension = archive->get<PolnCalibratorExtension>();
@@ -436,7 +436,9 @@ void Pulsar::PolnCalibrator::build (unsigned nchan) try {
 
   }
 
-  cerr << "Pulsar::PolnCalibrator::build built" << endl;
+  if (verbose)
+    cerr << "Pulsar::PolnCalibrator::build built" << endl;
+
   built = true;
 }
 catch (Error& error) {
@@ -444,35 +446,82 @@ catch (Error& error) {
 }
 
 
-void Pulsar::PolnCalibrator::calibration_setup (Archive* arch) 
+void Pulsar::PolnCalibrator::calibration_setup (Archive* arch) try
 {
-  if (!calibrator)
-    throw Error (InvalidState, "Pulsar::PolnCalibrator::calibrate",
-		 "no PolnCal Archive");
-
   string reason;
-  if (!calibrator->calibrator_match (arch, reason))
+  if (!get_calibrator()->calibrator_match (arch, reason))
     throw Error (InvalidParam, "Pulsar::PolnCalibrator::add_observation",
 		 "mismatch between calibrator\n\t" 
-		 + calibrator->get_filename() +
+		 + get_calibrator()->get_filename() +
                  " and\n\t" + arch->get_filename() + reason);
 
   if (response.size() != arch->get_nchan())
     build( arch->get_nchan() );
+}
+catch (Error& error) {
+  throw error += "Pulsar::PolnCalibrator::calibrate";
 }
 
 void Pulsar::PolnCalibrator::correct_backend (Archive* arch) try {
 
   Backend* backend = arch->get<Backend>();
 
-  if (backend && backend->get_argument() == Signal::Conjugate) {
+  if (!backend) 
+    return;
 
-    for (unsigned isub=0; isub < arch->get_nsubint(); isub++)
-      for (unsigned ichan=0; ichan < arch->get_nchan(); ichan++)
-	arch->get_Profile (isub, 3, ichan)->scale(-1);
+  Signal::State state = arch->get_state();
+  Signal::Basis basis = arch->get_basis();
+  unsigned npol = arch->get_npol();
 
-    backend->set_argument(Signal::Conventional);
+  if (npol < 2)
+    return;
+
+  bool swap01 = false;
+  bool flip[4] = { false, false, false, false };
+
+  if (npol == 4) {
+    if (backend->get_argument() == Signal::Conjugate)
+      if (state == Signal::Stokes && basis == Signal::Circular)
+	flip[2] = !flip[2];   // Flip Stokes U
+      else
+	flip[3] = !flip[3];   // Flip Stokes V or Im[AB]
+
+    if (backend->get_hand() == Signal::Left) {
+      if (state == Signal::Stokes && basis == Signal::Circular)
+	flip[2] = !flip[2];   // Flip Stokes U and ...
+      else if (state == Signal::Stokes && basis == Signal::Linear)
+	flip[1] = !flip[1];   // Flip Stokes Q and ...
+      flip[3] = !flip[3];     // Flip Stokes V or Im[AB]
+    }
   }
+
+  // If state == Coherence or PPQQ ...
+  if (backend->get_hand() == Signal::Left && state != Signal::Stokes)
+    swap01 = true;
+
+  bool flip_something = false;
+  for (unsigned ipol=0; ipol < npol; ipol++)
+    if (flip[ipol])
+      flip_something = true;
+
+  if (flip_something || swap01) {
+    for (unsigned isub=0; isub < arch->get_nsubint(); isub++) {
+      Integration* integration = arch->get_Integration(isub);
+      for (unsigned ichan=0; ichan < arch->get_nchan(); ichan++) {
+	
+	for (unsigned ipol=0; ipol < npol; ipol++)
+	  if (flip[ipol])
+	    integration->get_Profile(ipol, ichan)->scale(-1);
+	
+	if (swap01 == -1)
+	  integration->expert()->swap_profiles(0, ichan, 1, ichan);
+	
+      }
+    }
+  }
+
+  backend->set_argument (Signal::Conventional);
+  backend->set_hand (Signal::Right);
 
 }
 catch (Error& error) {

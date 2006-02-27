@@ -34,15 +34,14 @@ Pulsar::PulsarCalibrator::~PulsarCalibrator ()
 
 //! Return the reference epoch of the calibration experiment
 MJD Pulsar::PulsarCalibrator::get_epoch () const
-{
-  if (!calibrator) 
-    throw Error (InvalidState, "Pulsar::PulsarCalibrator::get_epoch",
-		 "no calibrator");
-
+try {
   if (epoch != MJD::zero)
     return epoch;
   else
-    return calibrator->start_time();
+    return get_calibrator()->start_time();
+}
+catch (Error& error) {
+  error += "Pulsar::PulsarCalibrator::get_epoch";
 }
 
 //! Return Calibrator::Hamaker or Calibrator::Britton
@@ -98,7 +97,7 @@ void Pulsar::PulsarCalibrator::set_standard (const Archive* data)
 
   Reference::To<Archive> clone;
 
-  calibrator = clone = data->clone();
+  set_calibrator( clone = data->clone() );
 
   if (!data->get_instrument_corrected ()) {
     cerr << "Pulsar::PulsarCalibrator::set_standard correcting instrument" 
@@ -106,13 +105,13 @@ void Pulsar::PulsarCalibrator::set_standard (const Archive* data)
     clone->correct_instrument ();
   }
 
-  unsigned nchan = calibrator->get_nchan();
+  unsigned nchan = clone->get_nchan();
 
   model.resize (nchan);
   transformation.resize (nchan);
   solution.resize (nchan);
 
-  const Integration* integration = calibrator->get_Integration (0);
+  const Integration* integration = clone->get_Integration (0);
 
   for (unsigned ichan=0; ichan<nchan; ichan++) {
 
@@ -146,14 +145,10 @@ void Pulsar::PulsarCalibrator::set_standard (const Archive* data)
 }
 
 //! Add the observation to the set of constraints
-void Pulsar::PulsarCalibrator::add_observation (const Archive* data)
+void Pulsar::PulsarCalibrator::add_observation (const Archive* data) try 
 {
   if (!data)
     return;
-
-  if (!calibrator)
-    throw Error (InvalidState, "Pulsar::PulsarCalibrator::add_observation",
-		 "no calibrator");
 
   ArchiveMatch match;
 
@@ -161,10 +156,10 @@ void Pulsar::PulsarCalibrator::add_observation (const Archive* data)
   match.set_check_calibrator (true);
   match.set_check_nbin (false);
 
-  if (!match.match (calibrator, data))
+  if (!match.match (get_calibrator(), data))
     throw Error (InvalidParam, "Pulsar::PulsarCalibrator::add_observation",
                  "mismatch between calibrator\n\t"
-                 + calibrator->get_filename() +
+                 + get_calibrator()->get_filename() +
                  " and\n\t" + data->get_filename() + match.get_reason());
 
   if (data->get_poln_calibrated ())
@@ -212,6 +207,10 @@ void Pulsar::PulsarCalibrator::add_observation (const Archive* data)
 
   built = false;
 }
+catch (Error& error) {
+  throw error += "Pulsar::PulsarCalibrator::add_observation";
+}
+
 
 MEAL::Complex2* Pulsar::PulsarCalibrator::new_transformation () const
 {

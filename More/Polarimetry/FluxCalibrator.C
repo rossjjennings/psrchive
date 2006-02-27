@@ -32,7 +32,7 @@ Pulsar::FluxCalibrator::FluxCalibrator (const Archive* archive)
   const FluxCalibratorExtension* fe = archive->get<FluxCalibratorExtension>();
   if (fe) {
     // store the calibrator archive
-    calibrator = archive;
+    set_calibrator( archive );
     extension = fe;
     filenames.push_back( archive->get_filename() );
 
@@ -103,31 +103,32 @@ void Pulsar::FluxCalibrator::add_observation (const Archive* archive)
 		 "is not a FluxCal");
 
   string reason;
-  if (calibrator && !(calibrator->calibrator_match (archive, reason) &&
-		      calibrator->processing_match (archive, reason)))
+  if (has_calibrator() &&
+      !(get_calibrator()->calibrator_match (archive, reason) &&
+	get_calibrator()->processing_match (archive, reason)))
     throw Error (InvalidParam, "Pulsar::FluxCalibrator::add_observation",
-		 "mismatch between\n\t" + calibrator->get_filename() +
+		 "mismatch between\n\t" + get_calibrator()->get_filename() +
                  " and\n\t" + archive->get_filename() + reason);
 
   unsigned nchan = archive->get_nchan ();
   string filename = archive->get_filename ();
   bool rename_calibrator = false;
 
-  if (!calibrator) {
+  if (!has_calibrator()) {
 
-    calibrator = archive;
+    set_calibrator(archive);
 
     mean_ratio_on.resize (nchan);
     mean_ratio_off.resize (nchan);
 
   }
-  else if (calibrator->get_type() != Signal::FluxCalOn &&
+  else if (get_calibrator()->get_type() != Signal::FluxCalOn &&
               archive->get_type() == Signal::FluxCalOn)  {
 
     // Keep the FPTM naming convention in which the
     // Pulsar::FluxCalibrator is named for the first on-source
     // observation
-    calibrator = archive;
+    set_calibrator(archive);
     rename_calibrator = true;
 
   }
@@ -199,7 +200,7 @@ void Pulsar::FluxCalibrator::set_database (const FluxCalibratorDatabase* d)
 //! Calibrate the flux in the given archive
 void Pulsar::FluxCalibrator::calibrate (Archive* arch)
 {
-  if (!calibrator)
+  if (!has_calibrator())
     throw Error (InvalidState, "Pulsar::FluxCalibrator::calibrate",
 		 "no FluxCal Archive");
 
@@ -208,10 +209,10 @@ void Pulsar::FluxCalibrator::calibrate (Archive* arch)
                  "Archive scale != ReferenceFluxDensity");
 
   string reason;
-  if (!calibrator->calibrator_match (arch, reason))
+  if (!get_calibrator()->calibrator_match (arch, reason))
     throw Error (InvalidParam, "Pulsar::FluxCalibrator::add_observation",
 		 "mismatch between calibrator\n\t" 
-		 + calibrator->get_filename() +
+		 + get_calibrator()->get_filename() +
                  " and\n\t" + arch->get_filename() + reason);
 
   create (arch->get_nchan());
@@ -225,11 +226,11 @@ void Pulsar::FluxCalibrator::calibrate (Archive* arch)
 
 void Pulsar::FluxCalibrator::create (unsigned required_nchan)
 {
-  if (!calibrator)
+  if (!has_calibrator())
     throw Error (InvalidState, "Pulsar::FluxCalibrator::create",
 		 "no FluxCal Archive");
 
-  unsigned nchan = calibrator->get_nchan ();
+  unsigned nchan = get_calibrator()->get_nchan ();
 
   if (!required_nchan)
     required_nchan = nchan;
@@ -345,11 +346,11 @@ try {
 
   if (verbose)
     cerr << "Pulsar::FluxCalibrator::calculate search for source=" 
-	 << calibrator->get_source() << endl;
+	 << get_calibrator()->get_source() << endl;
 
   FluxCalibratorDatabase::Entry entry;
-  entry = database->match (calibrator->get_source(),
-			   calibrator->get_centre_frequency());
+  entry = database->match (get_calibrator()->get_source(),
+			   get_calibrator()->get_centre_frequency());
 
   if (verbose)
     cerr << "Pulsar::FluxCalibrator::calculate found matching source=" 
@@ -360,7 +361,7 @@ try {
   cal_flux.resize (nchan);
   T_sys.resize (nchan);
 
-  const Integration* subint = calibrator->get_Integration(0);
+  const Integration* subint = get_calibrator()->get_Integration(0);
 
   unsigned good_channels = 0;
 
@@ -434,7 +435,7 @@ void Pulsar::FluxCalibrator::calibrate (Integration* subint)
 //! Get the number of frequency channels in the calibrator
 unsigned Pulsar::FluxCalibrator::get_nchan () const
 {
-  return calibrator->get_nchan();
+  return get_calibrator()->get_nchan();
 }
 
 

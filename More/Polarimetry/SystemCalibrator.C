@@ -13,7 +13,7 @@ Pulsar::SystemCalibrator::SystemCalibrator (Archive* archive)
   if (!archive)
     return;
 
-  calibrator = archive;
+  set_calibrator(archive);
   extension = archive->get<PolnCalibratorExtension>();
   calibrator_stokes = archive->get<CalibratorStokes>();
 }

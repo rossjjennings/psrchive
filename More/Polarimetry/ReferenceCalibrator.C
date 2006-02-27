@@ -1,7 +1,10 @@
 #include "Pulsar/ReferenceCalibrator.h"
+
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
+
 #include "Pulsar/Receiver.h"
+#include "Pulsar/Backend.h"
 
 #include "Pauli.h"
 #include "Error.h"
@@ -14,8 +17,48 @@ bool Pulsar::ReferenceCalibrator::smooth_bandpass = false;
 
 Pulsar::ReferenceCalibrator::~ReferenceCalibrator ()
 {
-  // destructors must be defined in .C file so that the Reference::To
-  // desctructor can delete forward declared objects
+}
+
+//! Filter access to the calibrator
+void Pulsar::ReferenceCalibrator::set_calibrator (const Archive* archive)
+{
+  if (verbose)
+    cerr << "Pulsar::ReferenceCalibrator::set_calibrator" << endl;
+
+  if ( !archive->type_is_cal() )
+    throw Error (InvalidParam, "Pulsar::ReferenceCalibrator::set_calibrator",
+		 "Archive='" + archive->get_filename() + "' is not a Cal");
+  
+  // Here the decision is made about full stokes or dual band observations.
+  Signal::State state = archive->get_state();
+
+  bool fullStokes = state == Signal::Stokes || state == Signal::Coherence;
+  bool calibratable = fullStokes || state == Signal::PPQQ;
+
+  if (!calibratable)
+    throw Error (InvalidParam, "Pulsar::ReferenceCalibrator::set_calibrator", 
+		 "Archive='" + archive->get_filename() + "'\n\t"
+		 "invalid state=" + State2string(state));
+
+  Archive* clone = 0;
+
+  if (fullStokes && state != Signal::Coherence) {
+    clone = archive->clone();
+    clone -> convert_state (Signal::Coherence);
+  }
+
+  const Backend* backend = archive->get<Backend>();
+  if (backend->get_hand() == Signal::Left ||
+      backend->get_argument() == Signal::Conjugate) {
+    if (!clone)
+      clone = archive->clone();
+    correct_backend (clone);
+  }
+
+  if (clone)
+    archive = clone;
+
+  PolnCalibrator::set_calibrator (archive);
 }
 
 Pulsar::ReferenceCalibrator::ReferenceCalibrator (const Archive* archive)
@@ -27,30 +70,8 @@ Pulsar::ReferenceCalibrator::ReferenceCalibrator (const Archive* archive)
   if (verbose)
     cerr << "Pulsar::ReferenceCalibrator" << endl;
 
-  if ( !archive->type_is_cal() )
-    throw Error (InvalidParam, "Pulsar::ReferenceCalibrator",
-		 "Pulsar::Archive='" + archive->get_filename() 
-		 + "' is not a Cal");
-  
-  // Here the decision is made about full stokes or dual band observations.
-  Signal::State state = archive->get_state();
-
-  bool fullStokes = state == Signal::Stokes || state == Signal::Coherence;
-
-  bool calibratable = fullStokes || state == Signal::PPQQ;
-
-  if (!calibratable)
-    throw Error (InvalidParam, "Pulsar::ReferenceCalibrator", 
-		 "Pulsar::Archive='" + archive->get_filename() + "'\n\t"
-		 "invalid state=" + State2string(state));
-
-  Archive* clone = archive->clone();
-  
-  if (fullStokes && state != Signal::Coherence)
-    clone->convert_state (Signal::Coherence);
-
-  calibrator = clone;
-  requested_nchan = calibrator->get_nchan();
+  set_calibrator (archive);
+  requested_nchan = get_calibrator()->get_nchan();
 
   if (receiver) {
     Pauli::basis.set_basis( receiver->get_basis() );    
@@ -232,7 +253,7 @@ void Pulsar::ReferenceCalibrator::get_levels
  vector<vector<Estimate<double> > >& cal_hi,
  vector<vector<Estimate<double> > >& cal_lo) const
 {
-  get_levels (calibrator, nchan, cal_hi, cal_lo);
+  get_levels (get_calibrator(), nchan, cal_hi, cal_lo);
 }
 
 
@@ -242,9 +263,9 @@ void Pulsar::ReferenceCalibrator::calculate_transformation ()
   vector<vector<Estimate<double> > > cal_hi;
   vector<vector<Estimate<double> > > cal_lo;
 
-  get_levels (calibrator, requested_nchan, cal_hi, cal_lo);
+  get_levels (get_calibrator(), requested_nchan, cal_hi, cal_lo);
 
-  unsigned npol = calibrator->get_npol();
+  unsigned npol = get_calibrator()->get_npol();
   unsigned nchan = requested_nchan;
 
   if (verbose) cerr << "Pulsar::ReferenceCalibrator::calculate_transformation"

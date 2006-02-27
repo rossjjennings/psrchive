@@ -94,12 +94,12 @@ void Pulsar::ReceptionCalibrator::initial_observation (const Archive* data)
     cerr << "Pulsar::ReceptionCalibrator WARNING archive not dedispersed\n"
       "  Pulse phase will vary as a function of frequency channel" << endl;
 
-  calibrator = data->clone();
+  set_calibrator( data->clone() );
 
-  Signal::Basis basis = calibrator->get_basis ();
+  Signal::Basis basis = get_calibrator()->get_basis ();
   Pauli::basis.set_basis(basis);
 
-  if (calibrator->get_basis() == Signal::Circular)  {
+  if (get_calibrator()->get_basis() == Signal::Circular)  {
     if (measure_cal_Q) {
       cerr << "Pulsar::ReceptionCalibrator cannot measure CAL Q"
               " in circular basis" << endl;
@@ -112,7 +112,7 @@ void Pulsar::ReceptionCalibrator::initial_observation (const Archive* data)
     }
   }
 
-  receiver = calibrator->get<Receiver>();
+  receiver = get_calibrator()->get<Receiver>();
 
   MEAL::Complex2* to_receptor = 0;
   if (receiver) {
@@ -147,9 +147,9 @@ void Pulsar::ReceptionCalibrator::initial_observation (const Archive* data)
   float latitude = corrections.telescope->get_latitude().getDegrees();
   float longitude = corrections.telescope->get_longitude().getDegrees();
 
-  sky_coord coordinates = calibrator->get_coordinates();
+  sky_coord coordinates = get_calibrator()->get_coordinates();
 
-  unsigned nchan = calibrator->get_nchan();
+  unsigned nchan = get_calibrator()->get_nchan();
 
   model.resize (nchan);
 
@@ -238,14 +238,14 @@ void Pulsar::ReceptionCalibrator::add_state (unsigned phase_bin)
 
   pulsar.push_back( SourceEstimate(phase_bin) );
 
-  if (calibrator)
+  if (has_calibrator())
     init_estimate( pulsar.back() );
 }
 
 void Pulsar::ReceptionCalibrator::init_estimate (SourceEstimate& estimate)
 {
-  unsigned nchan = calibrator->get_nchan ();
-  unsigned nbin = calibrator->get_nbin ();
+  unsigned nchan = get_calibrator()->get_nchan ();
+  unsigned nbin = get_calibrator()->get_nbin ();
 
   if (estimate.phase_bin >= nbin)
     throw Error (InvalidRange, "Pulsar::ReceptionCalibrator::init_estimate",
@@ -309,7 +309,7 @@ MJD Pulsar::ReceptionCalibrator::get_epoch () const
 //! Add the specified pulsar observation to the set of constraints
 void Pulsar::ReceptionCalibrator::add_calibrator (const Archive* data)
 {
-  if (!calibrator)
+  if (!has_calibrator())
     throw Error (InvalidState, "Pulsar::ReceptionCalibrator::add_calibrator",
 		 "No Archive containing pulsar data has yet been added");
 
@@ -338,7 +338,7 @@ void Pulsar::ReceptionCalibrator::add_calibrator (const Archive* data)
 		 "unknown StandardModel type");
 
 
-  polncal->set_nchan( calibrator->get_nchan() );
+  polncal->set_nchan( get_calibrator()->get_nchan() );
 
   add_calibrator (polncal);
 
@@ -359,17 +359,17 @@ void Pulsar::ReceptionCalibrator::add_observation (const Archive* data)
     return;
   }
 
-  if (!calibrator)
+  if (!has_calibrator())
     initial_observation (data);
 
   // use the CorrectionsCalibrator class to calculate the feed transformation
   CorrectionsCalibrator corrections;
 
   string reason;
-  if (!calibrator->mixable (data, reason))
+  if (!get_calibrator()->mixable (data, reason))
     throw Error (InvalidParam, "Pulsar::ReceptionCalibrator",
 		 "'" + data->get_filename() + "' does not match "
-		 "'" + calibrator->get_filename() + reason);
+		 "'" + get_calibrator()->get_filename() + reason);
 
   unsigned nsub = data->get_nsubint ();
   unsigned nchan = data->get_nchan ();
@@ -569,19 +569,19 @@ try {
                  "invalid source=" + Source2string(cal->get_type()));
 
   string reason;
-  if (!calibrator->calibrator_match (cal, reason))
+  if (!get_calibrator()->calibrator_match (cal, reason))
     throw Error (InvalidParam, "Pulsar::PulsarCalibrator::add_observation",
 		 "mismatch between calibrators\n\t" 
-		 + calibrator->get_filename() +
+		 + get_calibrator()->get_filename() +
                  " and\n\t" + cal->get_filename() + reason);
 
-  unsigned nchan = calibrator->get_nchan ();
+  unsigned nchan = get_calibrator()->get_nchan ();
   unsigned nsub = cal->get_nsubint();
   unsigned npol = cal->get_npol();
   
   assert (npol == 4);
 
-  Signal::Basis basis = calibrator->get_basis ();
+  Signal::Basis basis = get_calibrator()->get_basis ();
 
   if (calibrator_estimate.source.size() == 0) {
 
@@ -788,10 +788,10 @@ void Pulsar::ReceptionCalibrator::precalibrate (Archive* data)
     cerr << "Pulsar::ReceptionCalibrator::precalibrate" << endl;
 
   string reason;
-  if (!calibrator->calibrator_match (data, reason))
+  if (!get_calibrator()->calibrator_match (data, reason))
     throw Error (InvalidParam, "Pulsar::PulsarCalibrator::add_observation",
 		 "mismatch between calibrator\n\t" 
-		 + calibrator->get_filename() +
+		 + get_calibrator()->get_filename() +
                  " and\n\t" + data->get_filename() + reason);
 
   unsigned nsub = data->get_nsubint ();
@@ -1009,7 +1009,7 @@ void Pulsar::ReceptionCalibrator::check_ready (const char* method, bool unc)
     throw Error (InvalidState, method,
 		 "Model has been initialized. Cannot add data.");
 
-  if (unc && !calibrator)
+  if (unc && !has_calibrator())
     throw Error (InvalidState, method,
 		 "Initial observation required.");
 }

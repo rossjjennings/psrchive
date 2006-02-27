@@ -78,7 +78,7 @@ void Pulsar::ReceptionCalibratorPlotter::plot_constraints (unsigned ichan,
 
 void Pulsar::ReceptionCalibratorPlotter::plot_phase_constraints ()
 {
-  unsigned nbin = calibrator->calibrator->get_nbin();
+  unsigned nbin = calibrator->get_calibrator()->get_nbin();
 
   unsigned nstate = calibrator->pulsar.size();
 

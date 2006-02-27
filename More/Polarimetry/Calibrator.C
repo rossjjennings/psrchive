@@ -23,6 +23,25 @@ Pulsar::Calibrator::~Calibrator ()
 {
 }
 
+
+//! Provide derived classes with access to the calibrator
+bool Pulsar::Calibrator::has_calibrator () const
+{
+  return calibrator;
+}
+
+//! Provide derived classes with access to the calibrator
+const Pulsar::Archive* Pulsar::Calibrator::get_calibrator () const
+{
+  return calibrator;
+}
+
+//! Provide derived classes with access to the calibrator
+void Pulsar::Calibrator::set_calibrator (const Archive* archive)
+{
+  calibrator = archive;
+}
+
 //! Provide access to Integration::transform
 void Pulsar::Calibrator::calibrate (Integration* integration,
 				    const vector< Jones<float> >& response)

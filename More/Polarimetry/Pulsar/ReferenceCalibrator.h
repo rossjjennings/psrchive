@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ReferenceCalibrator.h,v $
-   $Revision: 1.5 $
-   $Date: 2005/12/09 16:41:07 $
+   $Revision: 1.6 $
+   $Date: 2006/02/27 19:33:25 $
    $Author: straten $ */
 
 #ifndef __Pulsar_ReferenceCalibrator_H
@@ -68,6 +68,9 @@ namespace Pulsar {
 
     //! The Stokes parameters of the reference source
     Stokes< Estimate<double> > reference_source;
+
+    //! Filter access to the calibrator
+    void set_calibrator (const Archive* archive);
 
     //! Flag raised when the reference_source attribute is set
     bool source_set;

@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/Attic/Calibrator.h,v $
-   $Revision: 1.25 $
-   $Date: 2005/12/09 16:41:07 $
+   $Revision: 1.26 $
+   $Date: 2006/02/27 19:33:25 $
    $Author: straten $ */
 
 #ifndef __Calibrator_H
@@ -153,14 +153,25 @@ namespace Pulsar {
     virtual void calibrate (Integration* integration,
 			    const Jones<float>& response);
 
-    //! Reference to the Pulsar::Archive from which this instance was created
-    Reference::To<const Archive> calibrator;
-
     //! The CalibratorExtension of the Archive passed during construction
     Reference::To<const CalibratorExtension> extension;
 
     //! Filenames of Pulsar::Archives from which instance was created
     std::vector<std::string> filenames;
+
+    //! Provide derived classes with access to the calibrator
+    const Archive* get_calibrator () const;
+
+    //! Provide derived classes with access to the calibrator
+    virtual void set_calibrator (const Archive* archive);
+
+    //! Return true if the calibrator attribute has been set
+    bool has_calibrator () const;
+
+  private:
+
+    //! Reference to the Pulsar::Archive from which this instance was created
+    Reference::To<const Archive> calibrator;
 
   };
 
