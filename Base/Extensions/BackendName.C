@@ -18,6 +18,7 @@ Pulsar::BackendName::BackendName (const BackendName& ext)
 const Pulsar::BackendName&
 Pulsar::BackendName::operator= (const BackendName& extension)
 {
+  Backend::operator = (extension);
   name = extension.name;
 
   return *this;

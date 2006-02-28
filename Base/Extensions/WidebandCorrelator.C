@@ -12,7 +12,7 @@ Pulsar::WidebandCorrelator::WidebandCorrelator ()
 
 //! Copy constructor
 Pulsar::WidebandCorrelator::WidebandCorrelator (const WidebandCorrelator& ext)
-  : Backend ("WidebandCorrelator")
+  : Backend (ext)
 {
   operator = (ext);
 }
@@ -21,6 +21,8 @@ Pulsar::WidebandCorrelator::WidebandCorrelator (const WidebandCorrelator& ext)
 const Pulsar::WidebandCorrelator&
 Pulsar::WidebandCorrelator::operator= (const WidebandCorrelator& extension)
 {
+  Backend::operator = (extension);
+
   name = extension.name;
   configfile = extension.configfile;
   nrcvr = extension.nrcvr;
