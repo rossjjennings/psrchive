@@ -471,6 +471,13 @@ void Pulsar::PolnCalibrator::correct_backend (Archive* arch) try {
 
   Signal::State state = arch->get_state();
   Signal::Basis basis = arch->get_basis();
+  Signal::Hand hand = backend->get_hand();
+  Signal::Argument argument = backend->get_argument();
+
+  if (verbose)
+    cerr << "Pulsar::PolnCalibrator::correct_backend basis=" << basis
+	 << " hand=" << hand << " phase=" << argument << endl;
+
   unsigned npol = arch->get_npol();
 
   if (npol < 2)
@@ -480,13 +487,13 @@ void Pulsar::PolnCalibrator::correct_backend (Archive* arch) try {
   bool flip[4] = { false, false, false, false };
 
   if (npol == 4) {
-    if (backend->get_argument() == Signal::Conjugate)
+    if (argument == Signal::Conjugate)
       if (state == Signal::Stokes && basis == Signal::Circular)
 	flip[2] = !flip[2];   // Flip Stokes U
       else
 	flip[3] = !flip[3];   // Flip Stokes V or Im[AB]
 
-    if (backend->get_hand() == Signal::Left) {
+    if (hand == Signal::Left) {
       if (state == Signal::Stokes && basis == Signal::Circular)
 	flip[2] = !flip[2];   // Flip Stokes U and ...
       else if (state == Signal::Stokes && basis == Signal::Linear)
@@ -496,13 +503,20 @@ void Pulsar::PolnCalibrator::correct_backend (Archive* arch) try {
   }
 
   // If state == Coherence or PPQQ ...
-  if (backend->get_hand() == Signal::Left && state != Signal::Stokes)
+  if (hand == Signal::Left && state != Signal::Stokes)
     swap01 = true;
 
   bool flip_something = false;
   for (unsigned ipol=0; ipol < npol; ipol++)
-    if (flip[ipol])
+    if (flip[ipol]) {
+      if (verbose)
+	cerr << "Pulsar::PolnCalibrator::correct_backend flip ipol=" << ipol
+	     << endl;
       flip_something = true;
+    }
+
+  if (swap01 && verbose)
+    cerr << "Pulsar::PolnCalibrator::correct_backend swap 0 and 1" << endl;
 
   if (flip_something || swap01) {
     for (unsigned isub=0; isub < arch->get_nsubint(); isub++) {
