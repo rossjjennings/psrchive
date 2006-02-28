@@ -25,6 +25,7 @@ void usage ()
     "  -x         Convert to Stokes and also print fraction polarisation\n"
     "  -y         Convert to Stokes and also print fraction linear\n"
     "  -z         Convert to Stokes and also print fraction circular\n"
+    "  -R         Don't remove baseline [do remove baseline]\n"
     "\n"
     "Each row output by pascii contains:\n"
     "\n"
@@ -51,9 +52,10 @@ int main (int argc, char** argv){ try {
   bool show_pol_frac = false;
   bool show_lin_frac = false;
   bool show_circ_frac = false;
+  bool remove_baseline = false;
 
   char c;
-  while ((c = getopt(argc, argv, "b:B:c:CFi:p:Pr:hpqTvVxyz")) != -1) 
+  while ((c = getopt(argc, argv, "b:B:c:CFi:p:Pr:RhpqTvVxyz")) != -1) 
 
     switch (c)  {
 
@@ -115,6 +117,9 @@ int main (int argc, char** argv){ try {
     case 'z':
       show_circ_frac = true;
       break;
+    case 'R':
+      remove_baseline = true;
+      break;
 
     } 
 
@@ -126,7 +131,8 @@ int main (int argc, char** argv){ try {
 
   Pulsar::Archive* archive = Pulsar::Archive::load( argv[optind] );
 
-  archive->remove_baseline();
+  if( remove_baseline )
+    archive->remove_baseline();
   if( do_fscr )
     archive->fscrunch();
   if( do_tscr )
