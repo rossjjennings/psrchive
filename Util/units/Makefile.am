@@ -1,7 +1,7 @@
 
 noinst_LTLIBRARIES = libunits.la
 
-libunits_la_SOURCES = stringtok.C					     \
+libunits_la_SOURCES = stringtok.C Configuration.C			     \
 	Conventions.C Error.C HeapTracked.C ReferenceAble.C		     \
 	Function.C ParameterPolicy.C OneParameter.C Parameters.C	     \
 	ArgumentPolicy.C Argument.C Composite.C Projection.C		     \
@@ -31,6 +31,7 @@ nobase_include_HEADERS = Error.h HeapTracked.h ReferenceAble.h stringtok.h \
         Quaternion.h Jones.h Pauli.h Basis.h Stokes.h Cloude.h  \
         tostring.h random.h EstimatePlotter.h complexPlotter.h linchi2.h \
         complex_promote.h ModifyRestore.h EstimateStats.h Conventions.h \
+	Configuration.h \
 	MEAL/Agent.h                     MEAL/ParameterPolicy.h \
 	MEAL/Argument.h                  MEAL/Parameters.h \
 	MEAL/ArgumentPolicyAdapter.h     MEAL/Phase.h \
@@ -76,7 +77,7 @@ nobase_include_HEADERS = Error.h HeapTracked.h ReferenceAble.h stringtok.h \
 
 bin_PROGRAMS = lmfit
 
-check_PROGRAMS = test_Conventions test_Error				\
+check_PROGRAMS = test_Conventions test_Error test_Configuration		\
 	test_HeapTracked test_Reference test_circular_Reference		\
 	test_Registry test_Functor test_Callback			\
 	test_copy test_Axis test_Projection test_Composite test_Scalar	\
@@ -88,8 +89,9 @@ check_PROGRAMS = test_Conventions test_Error				\
 
 TESTS = $(check_PROGRAMS)
 
-test_Conventions_SOURCES        = test_Conventions.C
+test_Conventions_SOURCES	= test_Conventions.C
 test_Error_SOURCES		= test_Error.C
+test_Configuration_SOURCES	= test_Configuration.C
 test_HeapTracked_SOURCES	= test_HeapTracked.C
 test_Reference_SOURCES		= test_Reference.C
 test_circular_Reference_SOURCES	= test_circular_Reference.C
