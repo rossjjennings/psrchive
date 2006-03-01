@@ -131,6 +131,8 @@ int main (int argc, char** argv){ try {
 
   Pulsar::Archive* archive = Pulsar::Archive::load( argv[optind] );
 
+  if( do_centre )
+    archive->centre();
   if( remove_baseline )
     archive->remove_baseline();
   if( do_fscr )
@@ -139,8 +141,6 @@ int main (int argc, char** argv){ try {
     archive->tscrunch();
   if( do_pscr )
     archive->pscrunch();
-  if( do_centre )
-    archive->centre();
   if( bscr > 1 )
     archive->bscrunch( bscr );
   if (rot_phase)
