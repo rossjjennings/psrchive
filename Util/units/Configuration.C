@@ -10,10 +10,15 @@ Configuration::Configuration (const char* filename)
   if (!filename)
     return;
 
-  std::ifstream input (filename);
-  if (!input)
-    throw Error (FailedSys, "Configuration::load", "ifstream (%s)", filename);
+  load (filename);
+}
 
+void Configuration::load (const std::string& filename)
+{
+  std::ifstream input (filename.c_str());
+  if (!input)
+    throw Error (FailedSys, "Configuration::load", "ifstream("+filename+")");
+  
   std::string line;
   
   while (!input.eof()) {
@@ -27,6 +32,10 @@ Configuration::Configuration (const char* filename)
     // parse the key
     std::string key = stringtok (line, " \t");
 
+#ifdef _DEBUG
+    std::cerr << "Configuration::load key=" << key << std::endl;
+#endif
+
     if (!line.length())
       continue;
 
@@ -36,8 +45,13 @@ Configuration::Configuration (const char* filename)
     if (equals != "=" || !line.length())
       continue;
 
+#ifdef _DEBUG
+    std::cerr << "Configuration::load value=" << line << std::endl;
+#endif
+
     entries.push_back( Entry(key,line) );
 
   }
  
 }
+
