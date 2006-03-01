@@ -2,18 +2,26 @@
 #include "Pulsar/CalibratorExtension.h"
 #include "Pulsar/Integration.h"
 #include "Pulsar/Archive.h"
+#include "Pulsar/Config.h"
 
-bool Pulsar::Calibrator::verbose = false;
+bool Pulsar::Calibrator::verbose
+= Pulsar::config.get<bool> ("Calibrator::verbose", false);
 
 /*! The size of the window used during median filtering is given by
    the number of frequency channels, nchan, multiplied by
    median_smoothing.  If set to zero, no smoothing is performed.  A
    sensible value is around 0.05. */
-float Pulsar::Calibrator::median_smoothing = 0.0;
+float Pulsar::Calibrator::median_smoothing
+= Pulsar::config.get<float> ("Calibrator::median_smoothing", 0.0);
 
 /*! The maximum number of channels over which a linear interpolation will be
   performed */
-float Pulsar::Calibrator::interpolating = 0.0;
+float Pulsar::Calibrator::interpolating 
+= Pulsar::config.get<float> ("Calibrator::interpolating", 0.0);
+
+float Pulsar::Calibrator::physical_det_threshold
+= Pulsar::config.get<float>("Calibrator::physical_det_threshold", 3.0);
+
 
 Pulsar::Calibrator::Calibrator ()
 {

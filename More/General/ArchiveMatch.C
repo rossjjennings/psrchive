@@ -1,18 +1,21 @@
 #include "Pulsar/ArchiveMatch.h"
 #include "Pulsar/Archive.h"
 #include "Pulsar/Receiver.h"
+#include "Pulsar/Config.h"
 
 #include "string_utils.h"  // for stringprintf
 
 /*!
   Maximum frequency difference in MHz
 */
-double Pulsar::ArchiveMatch::max_frequency_difference = 0.1;
+double Pulsar::ArchiveMatch::max_frequency_difference 
+= Pulsar::config.get<double>("max_frequency_difference", 0.1);
 
 /*!
   Allow observations with opposite sidebands to match
 */
-bool Pulsar::ArchiveMatch::opposite_sideband = false;
+bool Pulsar::ArchiveMatch::opposite_sideband
+= Pulsar::config.get<bool>("opposite_sideband", false);
 
 /*!
   Added between match report strings in reason attribute

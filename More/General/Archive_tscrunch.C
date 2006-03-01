@@ -2,9 +2,11 @@
 #include "Pulsar/Integration.h"
 #include "Pulsar/IntegrationOrder.h"
 #include "Pulsar/Profile.h"
+#include "Pulsar/Config.h"
 #include "Error.h"
 
-bool Pulsar::Archive::weight_by_duration = true;
+bool Pulsar::Archive::weight_by_duration
+= Pulsar::config.get<bool> ("weight_by_duration", true);
 
 /////////////////////////////////////////////////////////////////////////////
 //

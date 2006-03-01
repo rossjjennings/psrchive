@@ -38,7 +38,8 @@ nobase_include_HEADERS = model_profile.h Pulsar/ArchiveExpert.h \
 	Pulsar/ExtensionTI.h             Pulsar/BaselineWindow.h \
 	Pulsar/ReflectStokes.h           Pulsar/ChannelZapMedian.h \
 	Pulsar/ChannelWeight.h           Pulsar/ChannelZapModulation.h \
-        Pulsar/Container.h               Pulsar/Pulsar.h
+        Pulsar/Container.h               Pulsar/Pulsar.h \
+	Pulsar/Config.h
 
 libpsrchive_la_SOURCES = plugins.csh getopt.h Physical.h \
 	AdaptiveSNR.C                 Integration_new_PolnProfile.C  \
@@ -267,6 +268,8 @@ endif
 
 endif
 
+# Config.C must be the last source code in the list
+libpsrchive_la_SOURCES += Config.C
 
 ##############################################################################
 #

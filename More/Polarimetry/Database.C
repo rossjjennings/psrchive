@@ -1,4 +1,5 @@
 #include "Pulsar/Database.h"
+#include "Pulsar/Config.h"
 
 #include "Pulsar/SingleAxisCalibrator.h"
 #include "Pulsar/HybridCalibrator.h"
@@ -35,13 +36,16 @@
 bool Pulsar::Database::verbose = false;
 
 /*! By default, the long time scale is set to four weeks. */
-double Pulsar::Database::long_time_scale = 60.0 * 24.0 * 28.0;
+double Pulsar::Database::long_time_scale
+= Pulsar::config.get<double> ("Database::long_time_scale", 60.0 * 24 * 28);
 
 /*! By default, the short time scale is set to two hours. */
-double Pulsar::Database::short_time_scale = 120.0;
+double Pulsar::Database::short_time_scale
+= Pulsar::config.get<double> ("Database::short_time_scale", 120.0);
 
 /*! By default, the maximum angular separation is 5 degrees */
-double Pulsar::Database::max_angular_separation = 5.0;
+double Pulsar::Database::max_angular_separation
+= Pulsar::config.get<double> ("Database::max_angular_separation", 5.0);
 
 /*! This null parameter is intended only to improve code readability */
 const Pulsar::Archive* Pulsar::Database::any = 0;

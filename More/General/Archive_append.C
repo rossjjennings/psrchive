@@ -1,18 +1,23 @@
 #include <iostream>
 
+#include "Pulsar/Config.h"
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
 #include "Pulsar/IntegrationOrder.h"
 #include "Error.h"
 
-bool Pulsar::Archive::append_chronological = false;
+bool Pulsar::Archive::append_chronological 
+= Pulsar::config.get<bool>("append_chronological", false);
 
-bool Pulsar::Archive::append_must_match = true;
+bool Pulsar::Archive::append_must_match
+= Pulsar::config.get<bool>("append_must_match", true);
 
 /*!
   Maximum in seconds
 */
-double Pulsar::Archive::append_max_overlap = 30.0;
+double Pulsar::Archive::append_max_overlap
+= Pulsar::config.get<double>("append_max_overlap", 30.0);
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
