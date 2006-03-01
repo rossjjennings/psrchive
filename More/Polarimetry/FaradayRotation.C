@@ -2,6 +2,7 @@
 #include "Pulsar/Integration.h"
 #include "Pulsar/PolnProfile.h"
 #include "Pulsar/DeFaraday.h"
+#include "Pulsar/Archive.h"
 
 #include "Calibration/Faraday.h"
 
@@ -67,6 +68,19 @@ void Pulsar::FaradayRotation::transform (Integration* data) try
 }
 catch (Error& error) {
   throw error += "Pulsar::FaradayRotation::transform";
+}
+
+//! Execute the correction for an entire Pulsar::Archive
+void
+Pulsar::FaradayRotation::execute(Archive* arch)
+{
+  for( unsigned i=0; i<arch->get_nsubint(); i++)
+    execute( arch->get_Integration(i) );
+
+  // HSK 2 Feb 2006-- although the individual Integrations have the extension
+  // this is not useful to programs like vap when inquiring defaraday status
+  arch->set_rotation_measure( get_rotation_measure() );
+  arch->set_faraday_corrected( true );
 }
 
 void Pulsar::FaradayRotation::execute (Integration* data) try

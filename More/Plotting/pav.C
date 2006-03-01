@@ -1,5 +1,5 @@
 //
-// $Id: pav.C,v 1.108 2006/02/22 16:48:13 straten Exp $
+// $Id: pav.C,v 1.109 2006/03/01 23:36:49 hknight Exp $
 //
 // The Pulsar Archive Viewer
 //
@@ -364,7 +364,7 @@ int main (int argc, char** argv)
       plotter.set_subint( atoi (optarg) );
       break;
     case 'i':
-      cout << "$Id: pav.C,v 1.108 2006/02/22 16:48:13 straten Exp $" << endl;
+      cout << "$Id: pav.C,v 1.109 2006/03/01 23:36:49 hknight Exp $" << endl;
       return 0;
 
     case 'j':
@@ -805,14 +805,14 @@ int main (int argc, char** argv)
 	Pulsar::FaradayRotation xform;
 	xform.set_rotation_measure( RM );
 	xform.set_reference_wavelength( 0 );
-	for (unsigned i=0; i < archive->get_nsubint(); i++)
-	  xform.execute(archive->get_Integration(i));
+	xform.execute( archive );
       }
     }
 
     if (fscrunch >= 0) {
       if (stopwatch)
 	clock.start();
+
       archive -> fscrunch (fscrunch);
       if (stopwatch) {
 	clock.stop();

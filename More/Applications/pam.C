@@ -69,10 +69,11 @@ void usage()
     "  --binlngperi     Convert to binary longitude periastron order \n"
     "  --binlngasc      Convert to binary longitude asc node order \n"
     "\n"
-    "The following options take floating point arguments \n"
+    "The following options take floating point arguments but --RR doesn't \n"
     "  -d DM            Alter the header dispersion measure \n"
     "  -R RM            Correct for ISM faraday rotation \n"
     "  --RR             Dedefaraday (i.e. undo -R option) \n"
+    "  --RM RM          Install a new RM but don't defaraday \n"
     "  -s               Smear with this duty cycle \n"
     "  -r               Rotate profiles by this many turns \n" 
     "  -w               Reset profile weights to this value \n"
@@ -127,7 +128,7 @@ int main (int argc, char *argv[]) try {
 
     bool defaraday = false;
     bool dedefaraday = false;
-    double rm = 0.0;
+    double rm = 9.9e99;
   
     bool reset_weights = false;
     float new_weight = 1.0;
@@ -195,6 +196,7 @@ int main (int argc, char *argv[]) try {
     const int DD   = 1213;
     const int RR   = 1214;
     const int SPC  = 1215;
+    const int RM   = 1216;
 
     while (1) {
 
@@ -215,9 +217,10 @@ int main (int argc, char *argv[]) try {
 	{"reverse_freqs",no_argument,0,REVERSE_FREQS},
 	{"site",       1, 0, SITE},
 	{"name",       1, 0, NAME},
-	{"DD",no_argument,0,DD},
-	{"RR",no_argument,0,RR},
-	{"spc",no_argument,0,SPC},
+	{"DD",         no_argument,0,DD},
+	{"RR",         no_argument,0,RR},
+	{"RM",         required_argument,0,RM},
+	{"spc",        no_argument,0,SPC},
 	{0, 0, 0, 0}
       };
     
@@ -244,7 +247,7 @@ int main (int argc, char *argv[]) try {
 	Pulsar::Archive::set_verbosity(3);
 	break;
       case 'i':
-	cout << "$Id: pam.C,v 1.56 2006/02/28 01:27:19 hknight Exp $" << endl;
+	cout << "$Id: pam.C,v 1.57 2006/03/01 23:37:34 hknight Exp $" << endl;
 	return 0;
       case 'm':
 	save = true;
@@ -534,6 +537,8 @@ int main (int argc, char *argv[]) try {
 	  
       case RR: dedefaraday = true; break;
 
+      case RM: rm = atof(optarg); break;
+
       case SPC: scattered_power_correction = true; break;
 
       default:
@@ -731,11 +736,12 @@ int main (int argc, char *argv[]) try {
 		  arch->get_filename().c_str());
       }
 
-      if (defaraday) {
+      if (rm < 9.9e98 ) {
 	arch->set_rotation_measure (rm);
-	arch->defaraday();
+	if( defaraday )
+	  arch->defaraday();
 	if (verbose)
-	  cout << "Archive corrected for a RM of " << rm << endl;
+	  cout << "Archive now has a RM of " << rm << endl;
       }
 
       if( dedefaraday ) {

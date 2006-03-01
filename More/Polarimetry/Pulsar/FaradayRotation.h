@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/FaradayRotation.h,v $
-   $Revision: 1.1 $
-   $Date: 2006/02/22 16:47:51 $
-   $Author: straten $ */
+   $Revision: 1.2 $
+   $Date: 2006/03/01 23:35:04 $
+   $Author: hknight $ */
 
 #ifndef __Pulsar_FaradayRotation_h
 #define __Pulsar_FaradayRotation_h
@@ -14,6 +14,7 @@
 namespace Pulsar {
 
   class Integration;
+  class Archive;
 
   //! Corrects Faraday rotation in an Integration
   /*!  Rotates the polarization profiles in each frequency channel
@@ -60,6 +61,9 @@ namespace Pulsar {
 
     //! Execute the correction
     void execute (Integration*);
+
+    //! Execute the correction for an entire Pulsar::Archive
+    void execute (Archive*);
 
     //! Set the rotation due to a change in reference wavelength
     void set_delta (const Jones<double>& delta);
