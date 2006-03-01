@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/Attic/Calibrator.h,v $
-   $Revision: 1.26 $
-   $Date: 2006/02/27 19:33:25 $
+   $Revision: 1.27 $
+   $Date: 2006/03/01 22:25:29 $
    $Author: straten $ */
 
 #ifndef __Calibrator_H
@@ -70,6 +70,9 @@ namespace Pulsar {
 
     //! Fractional bandwidth over which interpolation will be performed
     static float interpolating;
+
+    //! Tolerance to non-physical values of the coherency matrix
+    static float physical_det_threshold;
 
     //! Default constructor
     Calibrator ();

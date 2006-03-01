@@ -5,6 +5,7 @@
 
 #include "Pulsar/Receiver.h"
 #include "Pulsar/Backend.h"
+#include "Pulsar/Config.h"
 
 #include "Pauli.h"
 #include "Error.h"
@@ -12,8 +13,8 @@
 #include "interpolate.h"
 #include "median_smooth.h"
 
-bool Pulsar::ReferenceCalibrator::smooth_bandpass = false;
-
+bool Pulsar::ReferenceCalibrator::smooth_bandpass
+= Pulsar::config.get<bool>("smooth_bandpass", false);
 
 Pulsar::ReferenceCalibrator::~ReferenceCalibrator ()
 {
@@ -293,13 +294,34 @@ void Pulsar::ReferenceCalibrator::calculate_transformation ()
     Estimate<double> cal_AA = source[0];
     Estimate<double> cal_BB = source[1];
 
+    bool bad = false;
+
     if (cal_AA.val <= 0 || cal_BB.val <= 0) {
       if (verbose)
 	cerr << "Pulsar::ReferenceCalibrator::calculate_transformation"
 	  " ichan=" << ichan << " bad levels" << endl;
+      bad = true;
+    }
+
+    if (physical_det_threshold > 0 && npol == 4) {
+
+      // Check that the determinant of the input is greater than zero
+      Estimate<double> det_rho = det( convert (source) ).real();
+
+      double threshold = - physical_det_threshold * det_rho.get_error();
+
+      if (det_rho.get_value() < threshold)  {
+	if (verbose)
+	  cerr << "Pulsar::ReferenceCalibrator::calculate_transformation"
+	    " ichan=" << ichan << " det(rho)=" << det_rho << " < 0" << endl;
+	bad = true;
+      }
+
+    }
+
+    if (bad) {
       baseline[ichan] = 0;
       transformation[ichan] = 0;
-
       // enable derived classes to initialize bad values
       extra (ichan, source, sky);
       continue;
@@ -317,7 +339,7 @@ void Pulsar::ReferenceCalibrator::calculate_transformation ()
   }
   catch (Error& error) {
     cerr << "Pulsar::ReferenceCalibrator::calculate_transformation error"
-      " ichan=" << ichan << " " << error.get_message();
+      " ichan=" << ichan << "\n  " << error.get_message() << endl;
     transformation[ichan] = 0;
   }
 
