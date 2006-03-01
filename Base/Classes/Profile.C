@@ -1,40 +1,51 @@
-#include <iostream>
-#include <string>
-
-#include <math.h>
-
 #include "Pulsar/Profile.h"
+#include "Pulsar/Config.h"
 #include "Physical.h"
 #include "Error.h"
 #include "spectra.h"
 #include "fftm.h"
 
+#include <iostream>
+#include <string>
+
+#include <math.h>
+
 /*! 
   Default fractional pulse phase window used to calculate statistics
   related to the baseline.
  */
-float Pulsar::Profile::default_duty_cycle = 0.15;
+float Pulsar::Profile::default_duty_cycle
+= Pulsar::config.get<float>("baseline_duty_cycle", 0.15);
+
 /*!
   Default to use new toa fit algorithm in shift
   */
-bool Pulsar::Profile::legacy = false;
+bool Pulsar::Profile::legacy
+= Pulsar::config.get<bool>("legacy_fftconv", false);
+
 /*!  
   When true, Profile methods will output debugging information on cerr
 */
-bool Pulsar::Profile::verbose = false;
+bool Pulsar::Profile::verbose
+= Pulsar::config.get<bool>("Profile::verbose", false);
+
 /*!
   Default fraction of maximum amplitude a 'spike' is defined to have ended at
 */
-float Pulsar::Profile::default_amplitude_dropoff = 0.2;
+float Pulsar::Profile::default_amplitude_dropoff
+= Pulsar::config.get<float>("default_amplitude_dropoff", 0.2);
+
 /*!
   Interpolate by this factor when using ZeroPadShift
 */
-unsigned Pulsar::Profile::ZPSF = 64;
+unsigned Pulsar::Profile::ZPSF
+= Pulsar::config.get<unsigned>("zero_pad_interpolate", 64);
 
 /*! 
   Do not allocate memory for the amps
 */
 bool Pulsar::Profile::no_amps = false;
+
 
 /////////////////////////////////////////////////////////////////////////////
 //

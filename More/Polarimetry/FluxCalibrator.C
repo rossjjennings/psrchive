@@ -4,6 +4,7 @@
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
 #include "Pulsar/Profile.h"
+#include "Pulsar/Config.h"
 
 #include "MEAL/ScalarMath.h"
 #include "MEAL/ScalarParameter.h"
@@ -15,7 +16,8 @@
 /*! When true, the FluxCalibrator constructor will first calibrate the
   the flux calibrator observations using the off-pulse polarization to
   compute the arbitrary polarimetric boost.  Not yet implemented.  */
-bool Pulsar::FluxCalibrator::self_calibrate = false;
+bool Pulsar::FluxCalibrator::self_calibrate
+= Pulsar::config.get<bool> ("FluxCalibrator::self_calibrate", false);
 
 /*! 
   If a Pulsar::Archive is provided, and if it contains a
