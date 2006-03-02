@@ -588,7 +588,7 @@ int runtest (Calibration::Parallactic& parallactic)
 	}
       }
       
-      float fracpoln = source[istate].abs_vect () / source[istate].s0;
+      float fracpoln = source[istate].abs_vect () / source[istate][0];
       
       if (fracpoln < min_fracpoln_fail)
 	min_fracpoln_fail = fracpoln;
