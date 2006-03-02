@@ -7,6 +7,7 @@
 #include "Pulsar/Backend.h"
 #include "Pulsar/Config.h"
 
+#include "MEAL/Invariant.h"
 #include "Pauli.h"
 #include "Error.h"
 
@@ -23,7 +24,7 @@ Pulsar::ReferenceCalibrator::~ReferenceCalibrator ()
 //! Filter access to the calibrator
 void Pulsar::ReferenceCalibrator::set_calibrator (const Archive* archive)
 {
-  if (verbose)
+  if (verbose > 2)
     cerr << "Pulsar::ReferenceCalibrator::set_calibrator" << endl;
 
   if ( !archive->type_is_cal() )
@@ -68,7 +69,7 @@ Pulsar::ReferenceCalibrator::ReferenceCalibrator (const Archive* archive)
   if (!archive)
     throw Error (InvalidState, "Pulsar::ReferenceCalibrator", "no Archive");
 
-  if (verbose)
+  if (verbose > 2)
     cerr << "Pulsar::ReferenceCalibrator" << endl;
 
   set_calibrator (archive);
@@ -77,7 +78,7 @@ Pulsar::ReferenceCalibrator::ReferenceCalibrator (const Archive* archive)
   if (receiver) {
     Pauli::basis.set_basis( receiver->get_basis() );    
     Stokes<double> cal = receiver->get_reference_source ();
-    if (verbose)
+    if (verbose > 2)
       cerr << "Pulsar::ReferenceCalibrator reference source " << cal << endl;
     set_reference_source (cal);
   }
@@ -132,7 +133,7 @@ void Pulsar::ReferenceCalibrator::get_levels
                  "Pulsar::ReferenceCalibrator::get_levels",
                  "no calibrator Integration");
 
-  if (verbose)
+  if (verbose > 2)
     cerr << "Pulsar::ReferenceCalibrator::get_levels Integration "
          << " required nchan=" << request_nchan << endl;
 
@@ -153,7 +154,7 @@ void Pulsar::ReferenceCalibrator::get_levels
 
     unsigned window = unsigned (integration->get_nchan() * median_smoothing);
 
-    if (verbose)
+    if (verbose > 2)
       cerr << "Pulsar::ReferenceCalibrator::get_levels median window = "
 	   << window << " channels" << endl;
 
@@ -204,7 +205,7 @@ void Pulsar::ReferenceCalibrator::get_levels
   unsigned npol = archive->get_npol();
   unsigned nchan = archive->get_nchan();
 
-  if (verbose)
+  if (verbose > 2)
     cerr << "Pulsar::ReferenceCalibrator::get_levels nsub=" << nsub 
 	 << " npol=" << npol << " nchan=" << nchan << endl;
 
@@ -269,8 +270,9 @@ void Pulsar::ReferenceCalibrator::calculate_transformation ()
   unsigned npol = get_calibrator()->get_npol();
   unsigned nchan = requested_nchan;
 
-  if (verbose) cerr << "Pulsar::ReferenceCalibrator::calculate_transformation"
-                       " npol=" << npol << " nchan=" << nchan << endl;
+  if (verbose > 2)
+    cerr << "Pulsar::ReferenceCalibrator::calculate_transformation"
+      " npol=" << npol << " nchan=" << nchan << endl;
 
   baseline.resize (nchan);
 
@@ -282,7 +284,7 @@ void Pulsar::ReferenceCalibrator::calculate_transformation ()
 
   for (unsigned ichan=0; ichan<nchan; ++ichan) try {
 
-    if (verbose)
+    if (verbose > 2)
       cerr << "Pulsar::ReferenceCalibrator::calculate_transformation"
 	" ichan=" << ichan << endl;
 
@@ -305,15 +307,35 @@ void Pulsar::ReferenceCalibrator::calculate_transformation ()
 
     if (physical_det_threshold > 0 && npol == 4) {
 
-      // Check that the determinant of the input is greater than zero
-      Estimate<double> det_rho = det( convert (source) ).real();
+      // this class correctly handles the propagation of error and bias
+      static MEAL::Invariant invariant;
 
-      double threshold = - physical_det_threshold * det_rho.get_error();
+      Stokes< Estimate<double> > stokes = coherency( convert(source) );
+      invariant.set_Stokes (stokes);
 
-      if (det_rho.get_value() < threshold)  {
+      Estimate<double> inv = invariant.get_invariant();
+      double bias = invariant.get_bias();
+
+      /*
+
+	data are considered bad if: inv - T*bias < -T*err
+	where:
+	inv = inv.get_value()
+	err = inv.get_error()
+	T   = physical_det_threshold
+
+      */
+
+      double cutoff = physical_det_threshold * (bias - inv.get_error());
+
+      if (inv.get_value() < cutoff)  {
 	if (verbose)
 	  cerr << "Pulsar::ReferenceCalibrator::calculate_transformation"
-	    " ichan=" << ichan << " det(rho)=" << det_rho << " < 0" << endl;
+	    " ichan=" << ichan << "\n  invariant=" << inv.get_value()
+	       << " < cutoff=" << cutoff << 
+	    " (threshold=" << physical_det_threshold 
+	       << " error=" << inv.get_error() 
+	       << " bias=" << bias << ")" << endl;
 	bad = true;
       }
 
@@ -322,7 +344,7 @@ void Pulsar::ReferenceCalibrator::calculate_transformation ()
     if (bad) {
       baseline[ichan] = 0;
       transformation[ichan] = 0;
-      // enable derived classes to initialize bad values
+      // derived classes may need to initialize bad values
       extra (ichan, source, sky);
       continue;
     }
@@ -343,7 +365,7 @@ void Pulsar::ReferenceCalibrator::calculate_transformation ()
     transformation[ichan] = 0;
   }
 
-  if (verbose)
+  if (verbose > 2)
     cerr << "Pulsar::ReferenceCalibrator::calculate_transformation exit"
 	 << endl;
 }
