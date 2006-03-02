@@ -16,14 +16,14 @@ Pulsar::IonosphereCalibrator::~IonosphereCalibrator () {}
 void Pulsar::IonosphereCalibrator::calibrate (Archive* archive)
 {
   if (!archive->get_nsubint()) {
-    if (Archive::Archive::verbose == 3)
+    if (verbose > 2)
       cerr << "Pulsar::IonosphereCalibrator no data to correct" << endl;
     return;
   }
 
   ProcHistory* history = archive->get<ProcHistory>();
   if ( history && history->get_ifr_mthd () != "NONE" ) {
-    if (Archive::Archive::verbose == 3)
+    if (verbose > 2)
       cerr << "Pulsar::IonosphereCalibrator already corrected with " 
 	   << history->get_ifr_mthd() << endl;
     return;

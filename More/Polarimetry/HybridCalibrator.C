@@ -77,7 +77,7 @@ void Pulsar::HybridCalibrator::calculate_transformation ()
 		 "reference input CalibratorStokes nchan=%d != %d",
 		 reference_input->get_nchan(), nchan);
   
-  if (verbose) cerr << "Pulsar::HybridCalibrator::calculate_transformation"
+  if (verbose > 2) cerr << "Pulsar::HybridCalibrator::calculate_transformation"
                        " nchan=" << nchan << endl;
 
   // the calibrator hi and lo levels from the PolnCal archive
@@ -101,12 +101,12 @@ void Pulsar::HybridCalibrator::calculate_transformation ()
 
   for (unsigned ichan=0; ichan<nchan; ++ichan) try {
 
-    if (verbose)
+    if (verbose > 2)
       cerr << "Pulsar::HybridCalibrator::calculate_transformation"
 	" ichan=" << ichan << endl;
 
     if (!reference_input->get_valid (ichan)) {
-      if (verbose)
+      if (verbose > 2)
 	cerr << "Pulsar::HybridCalibrator::calculate_transformation"
 	  " invalid reference input" << endl;
       transformation[ichan] = 0;
@@ -114,7 +114,7 @@ void Pulsar::HybridCalibrator::calculate_transformation ()
     }
 
     if (!precalibrator->get_transformation_valid (ichan)) {
-      if (verbose)
+      if (verbose > 2)
 	cerr << "Pulsar::HybridCalibrator::calculate_transformation"
 	  " invalid precalibrator" << endl;
       transformation[ichan] = 0;
@@ -175,7 +175,7 @@ void Pulsar::HybridCalibrator::calculate_transformation ()
   }
 
 
-  if (verbose)
+  if (verbose > 2)
     cerr << "Pulsar::HybridCalibrator::calculate_transformation exit" << endl;
 
 }

@@ -63,7 +63,7 @@ void Pulsar::ReceptionCalibrator::initial_observation (const Archive* data)
     throw Error (InvalidState, "ReceptionCalibrator::initial_observation",
 		 "no Archive");
 
-  if (verbose)
+  if (verbose > 2)
     cerr << "Pulsar::ReceptionCalibrator::initial_observation" << endl;
 
   if (data->get_type() != Signal::Pulsar)
@@ -225,7 +225,7 @@ void Pulsar::ReceptionCalibrator::add_state (unsigned phase_bin)
 {
   check_ready ("Pulsar::ReceptionCalibrator::add_state", false);
 
-  if (verbose)
+  if (verbose > 2)
     cerr << "Pulsar::ReceptionCalibrator::add_state phase bin=" 
 	 << phase_bin << endl;
 
@@ -317,7 +317,7 @@ void Pulsar::ReceptionCalibrator::add_calibrator (const Archive* data)
 
   if (model_type == Calibrator::Hamaker) {
 
-    if (verbose)
+    if (verbose > 2)
       cerr << "Pulsar::ReceptionCalibrator::add_calibrator"
 	" new PolarCalibrator" << endl;
     
@@ -326,7 +326,7 @@ void Pulsar::ReceptionCalibrator::add_calibrator (const Archive* data)
   }
   else if (model_type == Calibrator::Britton) {
 
-    if (verbose)
+    if (verbose > 2)
       cerr << "Pulsar::ReceptionCalibrator::add_calibrator"
 	" new SingleAxisCalibrator" << endl;
     
@@ -442,7 +442,7 @@ void Pulsar::ReceptionCalibrator::add_observation (const Archive* data)
     for (unsigned ichan=0; ichan<nchan; ichan++) try {
 
       if (integration->get_weight (ichan) == 0) {
-	if (verbose)
+	if (verbose > 2)
 	  cerr << "Pulsar::ReceptionCalibrator::add_observation ichan="
 	       << ichan << " flagged invalid" << endl;
 	continue;
@@ -551,7 +551,7 @@ try {
 
   check_ready ("Pulsar::ReceptionCalibrator::add_calibrator");
 
-  if (verbose)
+  if (verbose > 2)
     cerr << "Pulsar::ReceptionCalibrator::add_calibrator" << endl;
 
   const Archive* cal = p->get_Archive();
@@ -674,7 +674,7 @@ try {
     for (unsigned ichan=0; ichan<nchan; ichan++) {
 
       if (integration->get_weight (ichan) == 0) {
-	if (verbose)
+	if (verbose > 2)
 	  cerr << "Pulsar::ReceptionCalibrator::add_calibrator ichan="
 	       << ichan << " flagged invalid" << endl;
 	continue;
@@ -784,7 +784,7 @@ catch (Error& error) {
 //! Calibrate the polarization of the given archive
 void Pulsar::ReceptionCalibrator::precalibrate (Archive* data)
 {
-  if (verbose)
+  if (verbose > 2)
     cerr << "Pulsar::ReceptionCalibrator::precalibrate" << endl;
 
   string reason;
@@ -812,7 +812,7 @@ void Pulsar::ReceptionCalibrator::precalibrate (Archive* data)
 
       if (!model[ichan]->valid) {
 
-	if (verbose)
+	if (verbose > 2)
 	  cerr << "Pulsar::ReceptionCalibrator::precalibrate ichan=" << ichan 
 	       << " zero weight" << endl;
 
@@ -865,7 +865,7 @@ void Pulsar::ReceptionCalibrator::precalibrate (Archive* data)
       }
 
       if ( norm(det( response[ichan] )) < 1e-9 ) {
-        if (verbose)
+        if (verbose > 2)
           cerr << "Pulsar::ReceptionCalibrator::precalibrate ichan=" << ichan
                << " faulty response" << endl;
         integration->set_weight (ichan, 0.0);

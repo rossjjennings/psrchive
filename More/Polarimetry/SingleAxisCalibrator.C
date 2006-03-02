@@ -22,13 +22,13 @@ Pulsar::SingleAxisCalibrator::solve (const vector<Estimate<double> >& source,
   Reference::To<Calibration::SingleAxis> model = new Calibration::SingleAxis;
 
   if ( !source_set || source.size() != 4 ) {
-    if (verbose)
+    if (verbose > 2)
       cerr << "Pulsar::SingleAxisCalibrator::solve" << endl;
     model->solve (source);
     return model.release();
   }
 
-  if (verbose)
+  if (verbose > 2)
     cerr << "Pulsar::SingleAxisCalibrator::solve reference source=" 
          << reference_source << endl;
 

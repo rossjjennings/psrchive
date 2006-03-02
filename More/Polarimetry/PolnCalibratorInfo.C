@@ -5,7 +5,7 @@
 Pulsar::PolnCalibrator::Info* 
 Pulsar::PolnCalibrator::Info::create (const Pulsar::PolnCalibrator* calibrator)
 {
-  if (verbose)
+  if (verbose > 2)
     cerr << "Pulsar::PolnCalibrator::Info::create type="
 	 << Calibrator::Type2str ( calibrator->get_type() ) << endl;
 

@@ -92,7 +92,7 @@ void Pulsar::FluxCalibrator::add_observation (const Archive* archive)
     throw Error (InvalidParam, "Pulsar::FluxCalibrator::add_observation",
                  "invalid Pulsar::Archive pointer");
 
-  if (verbose)
+  if (verbose > 2)
     cerr << "Pulsar::FluxCalibrator::add_observation source name=" 
          << archive->get_source() << " type=" 
          << Signal::Source2string(archive->get_type()) << endl;
@@ -137,7 +137,7 @@ void Pulsar::FluxCalibrator::add_observation (const Archive* archive)
 
   if (archive->get_state () != Signal::Intensity) {
 
-    if (verbose)
+    if (verbose > 2)
       cerr << "Pulsar::FluxCalibrator::add_observation clone total intensity"
            << endl;
 
@@ -153,7 +153,7 @@ void Pulsar::FluxCalibrator::add_observation (const Archive* archive)
   vector<vector<Estimate<double> > > cal_hi;
   vector<vector<Estimate<double> > > cal_lo;
 
-  if (verbose) 
+  if (verbose > 2) 
     cerr << "Pulsar::FluxCalibrator call Integration::cal_levels" << endl;
 
   integration->cal_levels (cal_hi, cal_lo);
@@ -165,7 +165,7 @@ void Pulsar::FluxCalibrator::add_observation (const Archive* archive)
       continue;
 
     if (cal_lo[0][ichan].val == 0)  {
-      if (verbose)
+      if (verbose > 2)
         cerr << "Pulsar::FluxCalibrator::add_observation ichan=" << ichan
              << " division by zero" << endl;
       continue;
@@ -311,7 +311,7 @@ void Pulsar::FluxCalibrator::resize (unsigned required_nchan)
 
     unsigned nscrunch = nchan / required_nchan;
   
-    if (verbose)
+    if (verbose > 2)
         cerr << "Pulsar::FluxCalibrator::resize required nchan="
 	     << required_nchan << " < nchan=" << nchan 
 	     << " nscrunch=" << nscrunch << endl;
@@ -322,7 +322,7 @@ void Pulsar::FluxCalibrator::resize (unsigned required_nchan)
   }
   else {
 
-    if (verbose)
+    if (verbose > 2)
         cerr << "Pulsar::FluxCalibrator::resize required nchan="
              << required_nchan << " > nchan=" << nchan << endl;
 
@@ -341,12 +341,12 @@ void Pulsar::FluxCalibrator::calculate (vector<Estimate<double> >& on,
 try {
   
   if (!database) {
-    if (verbose)
+    if (verbose > 2)
       cerr << "Pulsar::FluxCalibrator::calculate using default database"<<endl;
     database = new FluxCalibratorDatabase;
   }
 
-  if (verbose)
+  if (verbose > 2)
     cerr << "Pulsar::FluxCalibrator::calculate search for source=" 
 	 << get_calibrator()->get_source() << endl;
 
@@ -354,7 +354,7 @@ try {
   entry = database->match (get_calibrator()->get_source(),
 			   get_calibrator()->get_centre_frequency());
 
-  if (verbose)
+  if (verbose > 2)
     cerr << "Pulsar::FluxCalibrator::calculate found matching source=" 
 	 << entry.source_name[0]<< endl;
 
@@ -385,7 +385,7 @@ try {
     double frequency = subint->get_centre_frequency(ichan);
     double source_mJy = entry.get_flux_mJy (frequency);
 
-    if (verbose)
+    if (verbose > 2)
       cerr << "Pulsar::FluxCalibrator::calculate channel=" << ichan << 
 	" freq=" << frequency << " flux=" << source_mJy << endl;
 
@@ -398,7 +398,7 @@ try {
     if (cal_flux[ichan].val < sqrt(cal_flux[ichan].var)
 	|| T_sys[ichan].val < sqrt(T_sys[ichan].var) ) {
       
-      if (verbose)
+      if (verbose > 2)
 	cerr << "Pulsar::FluxCalibrator channel=" << ichan  << ": low signal"
 	  "\n\t\tratio on=" << on[ichan] << " ratio off=" << off[ichan] <<
 	  "\n\t\tcal flux=" << cal_flux[ichan] <<

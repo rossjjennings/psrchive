@@ -4,8 +4,8 @@
 #include "Pulsar/Archive.h"
 #include "Pulsar/Config.h"
 
-bool Pulsar::Calibrator::verbose
-= Pulsar::config.get<bool> ("Calibrator::verbose", false);
+unsigned Pulsar::Calibrator::verbose
+= Pulsar::config.get<bool> ("Calibrator::verbose", 0);
 
 /*! The size of the window used during median filtering is given by
    the number of frequency channels, nchan, multiplied by
@@ -20,7 +20,7 @@ float Pulsar::Calibrator::interpolating
 = Pulsar::config.get<float> ("Calibrator::interpolating", 0.0);
 
 float Pulsar::Calibrator::physical_det_threshold
-= Pulsar::config.get<float>("Calibrator::physical_det_threshold", 3.0);
+= Pulsar::config.get<float>("Calibrator::physical_det_threshold", 4.0);
 
 
 Pulsar::Calibrator::Calibrator ()
@@ -100,13 +100,13 @@ MJD Pulsar::Calibrator::get_epoch () const
 Pulsar::Archive*
 Pulsar::Calibrator::new_solution (const string& archive_class) const
 {
-  if (verbose) cerr << "Pulsar::PolnCalibrator::new_solution"
-		 " create PolnCalibratorExtension" << endl;
+  if (verbose > 2) cerr << "Pulsar::PolnCalibrator::new_solution"
+		     " create PolnCalibratorExtension" << endl;
 
   Reference::To<CalibratorExtension> ext = new_Extension ();
 
-  if (verbose) cerr << "Pulsar::PolnCalibrator::new_solution"
-		 " create " << archive_class << endl;
+  if (verbose > 2) cerr << "Pulsar::PolnCalibrator::new_solution"
+		     " create " << archive_class << endl;
   
   Reference::To<Archive> output = Pulsar::Archive::new_Archive (archive_class);
   output -> copy (*calibrator);

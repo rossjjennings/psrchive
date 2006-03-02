@@ -179,11 +179,12 @@ int main (int argc, char** argv)
     case 'V':
       Pulsar::Archive::set_verbosity (3);
       Pulsar::CalibratorPlotter::verbose = true;
-      Pulsar::Calibrator::verbose = true;
+      Pulsar::Calibrator::verbose = 3;
       verbose = true;
       break;
     case 'v':
       Pulsar::Archive::set_verbosity (2);
+      Pulsar::Calibrator::verbose = 2;
       verbose = true;
       break;
     case 'q':

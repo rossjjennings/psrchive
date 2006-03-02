@@ -7,7 +7,7 @@ Pulsar::ReceptionCalibrator::get_CalibratorStokes () const
   if (calibrator_stokes)
     return calibrator_stokes;
 
-  if (verbose) cerr << "Pulsar::ReceptionCalibrator::get_CalibratorStokes"
+  if (verbose > 2) cerr << "Pulsar::ReceptionCalibrator::get_CalibratorStokes"
 		 " create CalibratorStokes Extension" << endl;
 
   unsigned nchan = get_transformation_nchan();

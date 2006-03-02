@@ -25,7 +25,7 @@ Pulsar::PolarCalibrator::solve (const vector<Estimate<double> >& source,
     throw Error (InvalidState, "Pulsar::PolarCalibrator::solve",
 		 "arbitrary reference source not yet implemented");
 
-  if (verbose)
+  if (verbose > 2)
     cerr << "Pulsar::PolarCalibrator::solve" << endl;
 
   // Convert the coherency vectors into Stokes parameters.  

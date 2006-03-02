@@ -108,7 +108,7 @@ unsigned Pulsar::PolnCalibrator::get_transformation_nchan () const
   if (transformation.size() == 0)
     setup_transformation();
 
-  if (verbose)
+  if (verbose > 2)
     cerr << "Pulsar::PolnCalibrator::get_transformation_nchan nchan="
          << transformation.size() << endl;
 
@@ -183,7 +183,7 @@ void Pulsar::PolnCalibrator::setup_transformation () const
 //! Derived classes can create and fill the transformation array
 void Pulsar::PolnCalibrator::calculate_transformation ()
 {
-  if (verbose)
+  if (verbose > 2)
     cerr << "Pulsar::PolnCalibrator::calculate_transformation" << endl;
 
   if (!poln_extension)
@@ -205,12 +205,12 @@ void Pulsar::PolnCalibrator::calculate_transformation ()
 
 void Pulsar::PolnCalibrator::build (unsigned nchan) try {
 
-  if (verbose)
+  if (verbose > 2)
     cerr << "Pulsar::PolnCalibrator::build transformation size="
 	 << transformation.size() << " nchan=" << nchan << endl;
 
   if (!built || transformation.size() == 0) {
-    if (verbose) cerr << "Pulsar::PolnCalibrator::build"
+    if (verbose > 2) cerr << "Pulsar::PolnCalibrator::build"
                          " call calculate_transformation" << endl;
     setup_transformation();
   }
@@ -218,7 +218,7 @@ void Pulsar::PolnCalibrator::build (unsigned nchan) try {
   if (!nchan)
     nchan = transformation.size();
 
-  if (verbose)
+  if (verbose > 2)
     cerr << "Pulsar::PolnCalibrator::build nchan=" << nchan 
 	 << " transformation.size=" << transformation.size() << endl;
 
@@ -236,7 +236,7 @@ void Pulsar::PolnCalibrator::build (unsigned nchan) try {
       for (unsigned iparam=0; iparam < nparam; iparam++)
         if ( !finite(transformation[ichan]->get_param(iparam)) ) {
 
-	  if (verbose)
+	  if (verbose > 2)
 	    cerr << "Pulsar::PolnCalibrator::build ichan=" << ichan
 		 << " " << transformation[ichan]->get_param_name(iparam)
 		 << " not finite" << endl;
@@ -249,7 +249,7 @@ void Pulsar::PolnCalibrator::build (unsigned nchan) try {
 
       if ( normdet < 1e-9 || !finite(normdet) ) {
 
-	if (verbose)
+	if (verbose > 2)
 	  cerr << "Pulsar::PolnCalibrator::build ichan=" << ichan <<
 	    " faulty response" << endl;
 
@@ -260,7 +260,7 @@ void Pulsar::PolnCalibrator::build (unsigned nchan) try {
 
         response[ichan] = transformation[ichan]->evaluate();
 
-        if (verbose)
+        if (verbose > 2)
           cerr << "Pulsar::PolnCalibrator::build ichan=" << ichan <<
             " response=\n" << response[ichan] << endl;
 
@@ -269,7 +269,7 @@ void Pulsar::PolnCalibrator::build (unsigned nchan) try {
     }
     else {
 
-      if (verbose) cerr << "Pulsar::PolnCalibrator::build ichan=" << ichan 
+      if (verbose > 2) cerr << "Pulsar::PolnCalibrator::build ichan=" << ichan 
                         << " no transformation" << endl;
 
       bad[ichan] = true;
@@ -285,7 +285,7 @@ void Pulsar::PolnCalibrator::build (unsigned nchan) try {
 
     unsigned window = unsigned (float(response.size()) * median_smoothing);
     
-    if (verbose)
+    if (verbose > 2)
       cerr << "Pulsar::PolnCalibrator::build median smoothing window = "
 	   << window << " channels" << endl;
 
@@ -306,7 +306,7 @@ void Pulsar::PolnCalibrator::build (unsigned nchan) try {
 
       unsigned ifind;
 	
-      if (verbose)
+      if (verbose > 2)
 	cerr << "Pulsar::PolnCalibrator::build interpolating ichan="
 	     << ichan << endl;
       
@@ -365,7 +365,7 @@ void Pulsar::PolnCalibrator::build (unsigned nchan) try {
 
   if (nchan > response.size()) {
 
-    if (verbose)
+    if (verbose > 2)
       cerr << "Pulsar::PolnCalibrator::build interpolating from nchan="
 	   << response.size() << " to " << nchan << endl;
     
@@ -405,7 +405,7 @@ void Pulsar::PolnCalibrator::build (unsigned nchan) try {
   // if known, add the feed transformation
   if (feed) {
     feed_xform = feed->get_transformation();
-    if (verbose)
+    if (verbose > 2)
       cerr << "Pulsar::PolnCalibrator::build known feed:\n"
            << feed_xform << endl;
   }
@@ -415,7 +415,7 @@ void Pulsar::PolnCalibrator::build (unsigned nchan) try {
   // if known, add the receiver transformation
   if (receiver) {
     rcvr_xform = receiver->get_transformation();
-    if (verbose)
+    if (verbose > 2)
       cerr << "Pulsar::PolnCalibrator::build known receiver:\n"
            << rcvr_xform << endl;
   }
@@ -436,7 +436,7 @@ void Pulsar::PolnCalibrator::build (unsigned nchan) try {
 
   }
 
-  if (verbose)
+  if (verbose > 2)
     cerr << "Pulsar::PolnCalibrator::build built" << endl;
 
   built = true;
@@ -474,7 +474,7 @@ void Pulsar::PolnCalibrator::correct_backend (Archive* arch) try {
   Signal::Hand hand = backend->get_hand();
   Signal::Argument argument = backend->get_argument();
 
-  if (verbose)
+  if (verbose > 2)
     cerr << "Pulsar::PolnCalibrator::correct_backend basis=" << basis
 	 << " hand=" << hand << " phase=" << argument << endl;
 
@@ -509,13 +509,13 @@ void Pulsar::PolnCalibrator::correct_backend (Archive* arch) try {
   bool flip_something = false;
   for (unsigned ipol=0; ipol < npol; ipol++)
     if (flip[ipol]) {
-      if (verbose)
+      if (verbose > 2)
 	cerr << "Pulsar::PolnCalibrator::correct_backend flip ipol=" << ipol
 	     << endl;
       flip_something = true;
     }
 
-  if (swap01 && verbose)
+  if (swap01 && verbose > 2)
     cerr << "Pulsar::PolnCalibrator::correct_backend swap 0 and 1" << endl;
 
   if (flip_something || swap01) {
@@ -547,7 +547,7 @@ catch (Error& error) {
   simply scales the archive by the calibrator flux. */
 void Pulsar::PolnCalibrator::calibrate (Archive* arch) try {
 
-  if (verbose)
+  if (verbose > 2)
     cerr << "Pulsar::PolnCalibrator::calibrate" << endl;
 
   calibration_setup (arch);
@@ -556,7 +556,7 @@ void Pulsar::PolnCalibrator::calibrate (Archive* arch) try {
 
     correct_backend (arch);
 
-    if (verbose)
+    if (verbose > 2)
       cerr << "Pulsar::PolnCalibrator::calibrate Archive::transform" <<endl;
 
     arch->transform (response);
@@ -576,7 +576,7 @@ void Pulsar::PolnCalibrator::calibrate (Archive* arch) try {
   }
   else if (arch->get_npol() == 1) {
 
-    if (Archive::verbose)
+    if (Archive::verbose > 2)
       cerr << "Pulsar::PolnCalibrator::calibrate WARNING"
 	" calibrating only absolute gain" << endl;
 
@@ -678,7 +678,7 @@ Estimate<float> Pulsar::PolnCalibrator::Info::get_param (unsigned ichan,
 							 unsigned iparam) const
 {
   if (! calibrator->get_transformation_valid(ichan) ) {
-    if (verbose) cerr << "Pulsar::PolnCalibrator::Info::get_param"
+    if (verbose > 2) cerr << "Pulsar::PolnCalibrator::Info::get_param"
 		   " invalid ichan=" << ichan << endl;
     return 0;
   }

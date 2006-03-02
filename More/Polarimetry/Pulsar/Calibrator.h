@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/Attic/Calibrator.h,v $
-   $Revision: 1.27 $
-   $Date: 2006/03/01 22:25:29 $
+   $Revision: 1.28 $
+   $Date: 2006/03/02 17:46:52 $
    $Author: straten $ */
 
 #ifndef __Calibrator_H
@@ -62,8 +62,8 @@ namespace Pulsar {
 
     //@}
 
-    //! Verbosity flag
-    static bool verbose;
+    //! Verbosity level
+    static unsigned verbose;
 
     //! Fractional bandwidth of the window used in median filter
     static float median_smoothing;

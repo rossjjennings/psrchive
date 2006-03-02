@@ -142,6 +142,7 @@ int main (int argc, char *argv[]) {
 
     case 'v':
       Pulsar::Archive::set_verbosity(2);
+      Pulsar::Calibrator::verbose = 2;
       Pulsar::Database::Criterion::match_verbose = true;
       verbose = true;
       break;
@@ -149,13 +150,13 @@ int main (int argc, char *argv[]) {
     case 'V':
       verbose = true;
       Pulsar::Database::verbose = true;
-      Pulsar::Calibrator::verbose = true;
       Pulsar::Database::Criterion::match_verbose = true;
       Pulsar::Archive::set_verbosity(3);
+      Pulsar::Calibrator::verbose = 3;
       break;
 
     case 'i':
-      cout << "$Id: pac.C,v 1.72 2006/02/24 02:35:32 ateoh Exp $" << endl;
+      cout << "$Id: pac.C,v 1.73 2006/03/02 17:46:52 straten Exp $" << endl;
       return 0;
 
     case 'A':

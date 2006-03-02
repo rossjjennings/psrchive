@@ -42,7 +42,7 @@ bool Pulsar::CorrectionsCalibrator::needs_correction (const Archive* archive,
 
   // ... or the angle tracked by the receiver is not zero
   if (pointing) {
-    if (verbose)
+    if (verbose > 2)
       cerr << "Pulsar::CorrectionsCalibrator::needs_correction\n"
 	"   Pointing::position_angle=" 
            << pointing->get_position_angle().getDegrees() << " deg" << endl;
@@ -65,7 +65,7 @@ bool Pulsar::CorrectionsCalibrator::needs_correction (const Archive* archive,
   should_correct_receptors = 
     receiver->get_orientation() != 0 || receiver->get_hand() != Signal::Right;
 
-  if (verbose)
+  if (verbose > 2)
     cerr << "Pulsar::CorrectionsCalibrator::needs_correction"
       "\n  orientation=" << receiver->get_orientation() <<
       "\n  hand=" << receiver->get_hand() <<
@@ -74,7 +74,7 @@ bool Pulsar::CorrectionsCalibrator::needs_correction (const Archive* archive,
   must_correct_feed =
     !receiver->get_feed_corrected() && should_correct_receptors;
 
-  if (verbose)
+  if (verbose > 2)
     cerr << "Pulsar::CorrectionsCalibrator::needs_correction"
       "\n  feed_corrected=" << receiver->get_feed_corrected() <<
       "\n  should_correct_receptors=" << should_correct_receptors <<
@@ -88,13 +88,13 @@ bool Pulsar::CorrectionsCalibrator::needs_correction (const Archive* archive,
 void Pulsar::CorrectionsCalibrator::calibrate (Archive* archive)
 {
   if (!archive->get_nsubint()) {
-    if (Archive::Archive::verbose == 3)
+    if (verbose > 2)
       cerr << "Pulsar::CorrectionsCalibrator no data to correct" << endl;
     return;
   }
 
   if (!needs_correction (archive)) {
-    if (Archive::Archive::verbose == 3)
+    if (verbose > 2)
       cerr << "Pulsar::CorrectionsCalibrator no corrections required" << endl;
     return;
   }
@@ -141,20 +141,20 @@ Jones<double>
 Pulsar::CorrectionsCalibrator::get_feed_transformation (const Pointing* point,
 							const Receiver* rcvr)
 {
-  if (Archive::verbose == 3)
+  if (verbose > 2)
     cerr << "Pulsar::CorrectionsCalibrator::get_feed_transformation" << endl;
 
   double feed_rotation = 0.0;
 
   if (point) {
-    if (verbose)
+    if (verbose > 2)
       cerr << "Pulsar::CorrectionsCalibrator::get_feed_transformation\n"
         "   using Pointing::feed_angle="
            << point->get_feed_angle().getDegrees() << " deg" << endl;
     feed_rotation = point->get_feed_angle().getRadians();
   }
   else if (rcvr) {
-    if (verbose)
+    if (verbose > 2)
       cerr << "Pulsar::CorrectionsCalibrator::get_feed_transformation\n"
         "   using Receiver::tracking_angle="
            << rcvr->get_tracking_angle().getDegrees() << " deg" << endl;
@@ -194,7 +194,7 @@ Jones<double>
 Pulsar::CorrectionsCalibrator::get_transformation (const Archive* archive,
 						   unsigned isub)
 {
-  if (verbose)
+  if (verbose > 2)
     cerr << "Pulsar::CorrectionsCalibrator::get_transformation" << endl;
 
   // the identity matrix
@@ -204,7 +204,7 @@ Pulsar::CorrectionsCalibrator::get_transformation (const Archive* archive,
 
   const Pointing* pointing = integration->get<Pointing>();
 
-  if (pointing && verbose)
+  if (pointing && verbose > 2)
     cerr << "Pulsar::CorrectionsCalibrator::get_transformation"
             " Archive has Pointing" << endl;
 
@@ -226,7 +226,7 @@ Pulsar::CorrectionsCalibrator::get_transformation (const Archive* archive,
   }
 
   if (!needs_correction( archive, pointing )) {
-    if (verbose)
+    if (verbose > 2)
       cerr << "Pulsar::CorrectionsCalibrator no corrections required" << endl;
     return xform;
   }
@@ -235,14 +235,14 @@ Pulsar::CorrectionsCalibrator::get_transformation (const Archive* archive,
 
   if (must_correct_feed)  {
     Jones<double> jones = receiver->get_transformation();
-    if (verbose)
+    if (verbose > 2)
       cerr << "Pulsar::CorrectionsCalibrator::get_transformation"
 	" adding receiver transformation\n  " << jones << endl;
     xform *= jones;
   }
 
   Jones<double> jones = get_feed_transformation (pointing, receiver);
-  if (verbose)
+  if (verbose > 2)
     cerr << "Pulsar::CorrectionsCalibrator::get_transformation"
       " adding feed transformation\n  " << jones << endl;
 
@@ -287,7 +287,7 @@ Pulsar::CorrectionsCalibrator::get_transformation (const Archive* archive,
 
     }
 
-    if (verbose)
+    if (verbose > 2)
       cerr << "Pulsar::CorrectionsCalibrator::get_transformation"
 	" adding vertical transformation\n  " << para.evaluate() << endl;
     

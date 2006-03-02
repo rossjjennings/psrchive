@@ -43,7 +43,7 @@ Pulsar::SystemCalibrator::get_CalibratorStokes () const
 Pulsar::Archive*
 Pulsar::SystemCalibrator::new_solution (const string& archive_class) const
 {
-  if (verbose) cerr << "Pulsar::SystemCalibrator::new_solution"
+  if (verbose > 2) cerr << "Pulsar::SystemCalibrator::new_solution"
 		 " create CalibratorStokes Extension" << endl;
 
   try {

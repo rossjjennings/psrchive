@@ -73,7 +73,7 @@ void Pulsar::PulsarCalibrator::set_standard (const Archive* data)
     throw Error (InvalidState, "PulsarCalibrator::set_standard",
 		 "no Archive");
 
-  if (verbose)
+  if (verbose > 2)
     cerr << "Pulsar::PulsarCalibrator::set_standard" << endl;
 
   if (data->get_type() != Signal::Pulsar)
@@ -115,7 +115,7 @@ void Pulsar::PulsarCalibrator::set_standard (const Archive* data)
 
   for (unsigned ichan=0; ichan<nchan; ichan++) {
 
-    if (verbose)
+    if (verbose > 2)
       cerr << "Pulsar::PulsarCalibrator::set_standard ichan=" << ichan << endl;
 
     transformation[ichan] = 0;
@@ -139,7 +139,7 @@ void Pulsar::PulsarCalibrator::set_standard (const Archive* data)
 
   }
 
-  if (verbose)
+  if (verbose > 2)
     cerr << "Pulsar::PulsarCalibrator::set_standard exit" << endl;
 
 }
@@ -222,14 +222,14 @@ MEAL::Complex2* Pulsar::PulsarCalibrator::new_transformation () const
 void Pulsar::PulsarCalibrator::solve (const Integration* data, unsigned ichan)
 {
   if (!model[ichan]) {
-    if (verbose)
+    if (verbose > 2)
       cerr << "Pulsar::PulsarCalibrator::solve standard ichan="
 	   << ichan << " flagged invalid" << endl;
     return;
   }
 
   if (data->get_weight (ichan) == 0) {
-    if (verbose)
+    if (verbose > 2)
       cerr << "Pulsar::PulsarCalibrator::solve ichan="
 	   << ichan << " flagged invalid" << endl;
     transformation[ichan] = 0;
@@ -328,7 +328,7 @@ void Pulsar::PulsarCalibrator::solve (const Integration* data, unsigned ichan)
 
     if (chisq > 5.0) {
 
-      if (verbose) {
+      if (verbose > 2) {
 
 	cerr << "  BIG DIFFERENCE=" << chisq << endl;
 	cerr << "    OLD\t\t\t\tNEW" << endl;
