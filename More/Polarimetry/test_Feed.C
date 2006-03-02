@@ -12,7 +12,7 @@ int main (int argc, char** argv) try {
 
   cerr << "linear=" << linear.evaluate() << endl;
 
-  Pauli::basis.set_basis (Basis<double>::Circular);
+  Pauli::basis.set_basis (Signal::Circular);
 
   cerr << "Instantiating Calibration::Feed (Signal::Circular)" << endl;
   Calibration::Feed circular;

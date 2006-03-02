@@ -42,11 +42,11 @@ int main () try {
 
     // switch basis for each test
     if (i%2) {
-      Pauli::basis.set_basis(Basis<double>::Circular);
+      Pauli::basis.set_basis (Signal::Circular);
       cal = Stokes<double> (1,1,0,0);
     }
     else {
-      Pauli::basis.set_basis(Basis<double>::Linear);
+      Pauli::basis.set_basis (Signal::Linear);
       cal = Stokes<double> (1,0,1,0);
     }
 
@@ -84,10 +84,6 @@ int main () try {
 
     // test two different methods
     unsigned istart = 0;
-
-    // ... unless the basis is circular, in which case only the new works
-    // if (Pauli::basis.get_basis() == Basis<double>::Circular)
-    // istart = 1;
 
     for (unsigned itest=istart; itest < 2; itest++) {
 
