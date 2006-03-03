@@ -1,0 +1,106 @@
+#include "Pulsar/SinglePlotter.h"
+#include "Pulsar/Archive.h"
+#include "Pulsar/Profile.h"
+
+#include <cpgplot.h>
+
+//! Derived classes must compute the minimum and maximum values (y-axis)
+void 
+Pulsar::SinglePlotter::minmax (const Archive* data, float& min, float& max)
+{
+  const Profile* profile = data->get_Profile (isubint, ipol, ichan);
+  min = profile->min();
+  max = profile->max();
+}
+
+//! Derived classes must draw in the current viewport
+void Pulsar::SinglePlotter::draw (const Archive* data)
+{
+  const Profile* profile = data->get_Profile (isubint, ipol, ichan);
+  
+  draw (profile);
+
+  if (data->get_type() != Signal::Pulsar)
+    draw_transitions (profile);
+}
+
+//! draw the profile in the current viewport and window
+void Pulsar::SinglePlotter::draw (const Profile* profile) const
+{
+  cpgline (profile->get_nbin(), &phases[0], profile->get_amps());
+}
+
+/*!  Plots the calibrator hi/lo levels using the transitions
+ determined by Profile::find_transitions.  Plots in the currently open
+ pgplot device using the current viewport and window.  */
+void Pulsar::SinglePlotter::draw_transitions (const Profile* profile) const
+{
+  int hightolow, lowtohigh, buffer;
+  profile->find_transitions (hightolow, lowtohigh, buffer);
+
+  double mean_hi, var_hi;
+  profile->stats (&mean_hi, &var_hi, 0,
+		  lowtohigh + buffer,
+		  hightolow - buffer);
+
+  double mean_lo, var_lo;
+  profile->stats (&mean_lo, &var_lo, 0,
+		  hightolow + buffer,
+		  lowtohigh - buffer);
+
+  int st_low = 0;
+  if (lowtohigh < hightolow)
+    st_low = 1;
+
+  double sigma_hi = sqrt(var_hi);
+  double sigma_lo = sqrt(var_lo);
+
+  float hip[3] = { mean_hi, mean_hi-sigma_hi, mean_hi+sigma_hi };
+  float lop[3] = { mean_lo, mean_lo-sigma_lo, mean_lo+sigma_lo };
+
+  int colour=0, line=0;
+
+  cpgqci(&colour);    
+  cpgqls(&line);
+
+  float nbin = profile->get_nbin();
+
+  float xp[2];
+  xp[st_low] = float(hightolow)/nbin;
+  xp[!st_low] = float(lowtohigh)/nbin;
+
+  int cp[2];
+  cp[st_low] = 3;
+  cp[!st_low] = 2;
+
+  float space = float(buffer)/nbin;
+
+  for (int i=0; i<3; i++) {
+
+    float yp[2];
+    yp[st_low] = hip[i];
+    yp[!st_low] = lop[i];
+
+    cpgsci (cp[0]);
+    cpgmove (xp[1]+space-1.0,yp[0]);
+    cpgdraw (xp[0]-space,yp[0]);
+
+    cpgsci (cp[1]);
+    cpgmove (xp[0]+space,yp[1]);
+    cpgdraw (xp[1]-space,yp[1]);
+
+    cpgsci (cp[0]);
+    cpgmove (xp[1]+space,yp[0]);
+    cpgdraw (xp[1]-space+1.0,yp[0]);
+
+    // draw the error bars dotted
+    cpgsls(2);
+
+  }
+
+  // restore the colour and line attributes
+  cpgsls(line);
+  cpgsci(colour);
+}
+
+
