@@ -7,9 +7,10 @@ noinst_LTLIBRARIES = libPlotter.la
 #
 if HAVE_PGPLOT
 
-nobase_include_HEADERS = Pulsar/ProfilePlotter.h Pulsar/SinglePlotter.h
+nobase_include_HEADERS = Pulsar/ProfilePlotter.h Pulsar/SinglePlotter.h \
+	Pulsar/PosAngPlotter.h
 
-libPlotter_la_SOURCES = ProfilePlotter.C SinglePlotter.C
+libPlotter_la_SOURCES = ProfilePlotter.C SinglePlotter.C PosAngPlotter.C
 
 bin_PROGRAMS = psrplot
 
