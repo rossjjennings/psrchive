@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Attic/ArchiveTI.h,v $
-   $Revision: 1.6 $
-   $Date: 2005/12/09 16:41:07 $
+   $Revision: 1.7 $
+   $Date: 2006/03/05 15:11:44 $
    $Author: straten $ */
 
 #ifndef __Pulsar_ArchiveTI_h
@@ -20,9 +20,6 @@ namespace Pulsar {
 
     //! Constructor
     ArchiveTI () { init(); }
-
-    //! Process a command
-    void process (const std::string& command);
 
     //! Import the TextInterface of an Extension class
     template<class Ext>
