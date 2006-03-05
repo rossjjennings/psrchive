@@ -7,6 +7,18 @@ using namespace std;
 
 bool TextInterface::label_elements = false;
 
+string TextInterface::Class::process (const string& command)
+{
+  string temp = command;
+  string param = stringtok (temp, "=");
+
+  if (!temp.length())
+    return param + "=" + get_value (param);
+
+  set_value (param, temp);
+  return "";
+}
+
 void TextInterface::parse_indeces (vector<unsigned>& index, string& name)
 {
   index.resize (0);
