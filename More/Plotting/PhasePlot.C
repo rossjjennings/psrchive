@@ -1,4 +1,5 @@
 #include "Pulsar/ProfilePlotter.h"
+#include "Pulsar/ProfilePlotterTI.h"
 
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
@@ -34,12 +35,21 @@ Pulsar::ProfilePlotter::~ProfilePlotter ()
 {
 }
 
-void Pulsar::ProfilePlotter::set_zoom (float _min_phase, float _max_phase)
+TextInterface::Class* Pulsar::ProfilePlotter::get_text_interface ()
+{
+  if (!text_interface)
+    text_interface = new ProfilePlotterTI (this);
+  return text_interface;
+}
+
+void Pulsar::ProfilePlotter::set_min_phase (float _min_phase)
 { 
   min_phase = _min_phase - floor (_min_phase);
+}
+
+void Pulsar::ProfilePlotter::set_max_phase (float _max_phase)
+{ 
   max_phase = _max_phase - floor (_max_phase);
-  if (max_phase <= min_phase)
-    max_phase += 1.0;
 }
 
 //! Set the sub-integration to plot (where applicable).
@@ -61,7 +71,7 @@ void Pulsar::ProfilePlotter::set_chan (unsigned _ichan)
 }
 
 //! Zoom in on the on-pulse region
-void Pulsar::ProfilePlotter::auto_zoom (const Archive* data, float buffer)
+void Pulsar::ProfilePlotter::auto_zoom_phase (const Archive* data, float buf)
 {
   const Profile* profile = data->get_Profile (isubint, ipol, ichan);
 
@@ -77,7 +87,7 @@ void Pulsar::ProfilePlotter::auto_zoom (const Archive* data, float buffer)
 
   cerr << "AUTO ZOOM phase rise=" << start << " fall=" << stop << endl;
 
-  float buf = (stop - start) * buffer;
+  buf = (stop - start) * buf;
   
   stop += buf;
   start -= buf;
@@ -88,7 +98,8 @@ void Pulsar::ProfilePlotter::auto_zoom (const Archive* data, float buffer)
   if (stop > 1)
     stop = 1;
 
-  set_zoom (start, stop);
+  set_min_phase (start);
+  set_max_phase (stop);
 }
 
 template<typename T> T sqr (T x) { return x*x; }

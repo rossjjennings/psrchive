@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PhasePlot.h,v $
-   $Revision: 1.1 $
-   $Date: 2006/03/03 23:23:36 $
+   $Revision: 1.2 $
+   $Date: 2006/03/05 21:07:34 $
    $Author: straten $ */
 
 #ifndef __Pulsar_ProfilePlotter_h
@@ -11,6 +11,10 @@
 #include "Reference.h"
 
 #include <vector>
+
+namespace TextInterface {
+  class Class;
+}
 
 namespace Pulsar {
 
@@ -69,35 +73,36 @@ namespace Pulsar {
     //! Draw the error box
     virtual void plot_error_box (const Archive* data);
 
+    //! Automatically zoom in on the on-pulse region
+    virtual void auto_zoom_phase (const Archive* data, float buffer);
+
     //! Set the sub-integration to plot (where applicable)
     void set_subint (unsigned isubint);
-    
-    //! Get the sub-integration that will be plotted (where applicable)
-    unsigned get_subint () {return isubint;}
+    unsigned get_subint () const {return isubint;}
     
     //! Set the polarization to plot (where applicable)
     void set_pol (unsigned ipol);
-    
-    //! Get the polarization that will be plotted (where applicable)
-    unsigned get_pol () {return ipol;}
+    unsigned get_pol () const {return ipol;}
     
     //! Set the frequency channel to plot (where applicable)
     void set_chan (unsigned ichan);
-    
-    //! Get the channel that will be plotted (where applicable)
-    unsigned get_chan () {return ichan;}
+    unsigned get_chan () const {return ichan;}
 
-    //! Zoom in on a pulse window.
-    void set_zoom (float min_phase, float max_phase);
-    
-    //! Automatically zoom in on the on-pulse region
-    void auto_zoom (const Archive* data, float buffer);
+    //! Set the minimum phase in plot
+    void set_min_phase (float min_phase);
+    float get_min_phase () const { return min_phase; }
 
-    //! Set the maximum fractional intensity in plot
-    void set_max_fraction (float max);
+    //! Set the maximum phase in plot
+    void set_max_phase (float max_phase);
+    float get_max_phase () const { return max_phase; }
 
-    //! Set the minimum fractional intensity in plot
-    void set_min_fraction (float min);
+    //! Set the fractional height of maximum 
+    void set_max_fraction (float max) { max_fraction = max; }
+    float get_max_fraction () const { return max_fraction; }
+
+    //! Set the fractional height of minimum
+    void set_min_fraction (float min) { min_fraction = min; }
+    float get_min_fraction () const { return min_fraction; }
 
     //! Set the label of the x-axis
     void set_abscissa (Abscissa);
@@ -109,7 +114,26 @@ namespace Pulsar {
     //! Print the axes around the plot area
     void set_plot_axes (bool _axes = true) { axes = _axes; }
     bool get_plot_axes () const { return axes; }
-        
+  
+    //! Enumerate the x axis
+    void set_x_enumerate (bool val = true) { x_enumerate = val; }
+    bool get_x_enumerate () const { return x_enumerate; }
+
+    //! Enumerate the y-axis
+    void set_y_enumerate (bool val = true) { y_enumerate = val; }
+    bool get_y_enumerate () const { return y_enumerate; }
+
+    //! Label the x-axis
+    void set_x_label (bool val = true) { x_label = val; }
+    bool get_x_label () const { return x_label; }
+
+    //! Label the y-axis
+    void set_y_label (bool val = true) { y_label = val; }
+    bool get_y_label () const { return y_label; }
+
+    //! Get the text interface to the attributes
+    TextInterface::Class* get_text_interface ();
+
   protected:
 
     unsigned isubint;
@@ -149,6 +173,8 @@ namespace Pulsar {
     bool plot_error;
 
     std::vector<float> phases;
+
+    Reference::To<TextInterface::Class> text_interface;
 
   };
 
