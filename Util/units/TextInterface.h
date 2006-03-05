@@ -462,6 +462,10 @@ namespace TextInterface {
   //! Convert a parameter name into a range of indeces
   void parse_indeces (std::vector<unsigned>& indeces, std::string& name);
 
+  //! Separate a list of comma-separated commands into a vector of strings
+  void separate (char* ptr, std::vector<std::string>& commands, bool& edit);
+  void separate (char* ptr, std::vector<std::string>& commands);
+
   //! Label elements in ElementGetSet<C,E>::get_value
   extern bool label_elements;
 
