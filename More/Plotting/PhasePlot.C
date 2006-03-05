@@ -173,12 +173,13 @@ void Pulsar::ProfilePlotter::plot (const Archive* data)
   float max = 0;
 
   minmax (data, min, max);
-  
-  min *= min_fraction;
-  max *= max_fraction;
+ 
+  float diff = max - min;
+  max = min + max_fraction * diff;
+  min = min + min_fraction * diff;
 
-  float diff = (max - min) * border;
-  cpgswin (min_phase, max_phase, min-diff, max+diff);
+  float space = (max - min) * border;
+  cpgswin (min_phase, max_phase, min-space, max+space);
 
   phases.resize (data->get_nbin());
   for (unsigned ibin = 0; ibin < phases.size(); ibin++)
@@ -209,7 +210,7 @@ void Pulsar::ProfilePlotter::plot (const Archive* data)
   min_phase *= scale;
   max_phase *= scale;
 
-  cpgswin (min_phase, max_phase, min-diff, max+diff);
+  cpgswin (min_phase, max_phase, min-space, max+space);
 
   char* enumerated = "bcnst";
   char* unenumerated = "bcst";
