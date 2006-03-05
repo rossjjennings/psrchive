@@ -2,46 +2,54 @@
 #include "Pulsar/Archive.h"
 #include "string_utils.h"
 
-//! Process a command
-void Pulsar::ArchiveTI::process (const std::string& command)
-{
-  string temp = command;
-
-  string param = stringtok (&temp, "=");
-
-  if (temp.length())
-    set_value (param, temp);
-  else
-    cout << " " << param << "=" << get_value (param);
-}
-
 void Pulsar::ArchiveTI::init ()
 {
-  {
-    Generator<unsigned> gen;
+  add( &Archive::get_nbin,    "nbin",  "Number of pulse phase bins" );
+  add( &Archive::get_nchan,   "nchan", "Number of frequency channels" );
+  add( &Archive::get_npol,    "npol",  "Number of polarizations" );
+  add( &Archive::get_nsubint, "nsub",  "Number of sub-integrations" );
 
-    add( gen.described ("nbin", "Number of pulse phase bins",
-			&Archive::get_nbin) );
+  add( &Archive::get_telescope_code,
+       &Archive::set_telescope_code,
+       "site", "Telescope tempo code" );
 
-    add( gen.described ("nchan", "Number of frequency channels",
-			&Archive::get_nchan) );
+  add( &Archive::get_source,
+       &Archive::set_source,
+       "name", "Name of the source" );
 
-    add( gen.described ("npol", "Number of polarizations",
-			&Archive::get_npol) );
+  add( &Archive::get_centre_frequency,
+       &Archive::set_centre_frequency,
+       "freq", "Centre frequency (MHz)" );
 
-    add( gen.described ("nsub", "Number of sub-integrations",
-			&Archive::get_nsubint) );
-  }
+  add( &Archive::get_bandwidth,
+       &Archive::set_bandwidth,
+       "bw", "Bandwidth (MHz)" );
 
-  {
-    Generator<char> gen;
+  add( &Archive::get_dispersion_measure,
+       &Archive::set_dispersion_measure,
+       "dm", "Dispersion measure (pc/cm^3)" );
 
-    add( gen.described ("site", "Telescope tempo code",
-			&Archive::get_telescope_code,
-			&Archive::set_telescope_code) );
-  }
+  add( &Archive::get_rotation_measure,
+       &Archive::set_rotation_measure,
+       "rm", "Rotation measure (rad/m^2)" );
+  
+  add( &Archive::get_dedispersed,
+       &Archive::set_dedispersed,    \
+       "dmc", "Dispersion corrected (boolean)");
+
+  add( &Archive::get_faraday_corrected,
+       &Archive::set_faraday_corrected,
+       "rmc", "Faraday Rotation corrected (boolean)" );
+
+  add( &Archive::get_poln_calibrated,
+       &Archive::set_poln_calibrated,
+       "polc", "Polarization calibrated (boolean)" );
 
 #if 0
+  //! Get the coordinates of the source
+  virtual sky_coord get_coordinates () const = 0;
+  //! Set the coordinates of the source
+  virtual void set_coordinates (const sky_coord& coordinates) = 0;
 
   //! Get the state of the profile data
   virtual Signal::State get_state () const = 0;
@@ -60,55 +68,5 @@ void Pulsar::ArchiveTI::init ()
 
 #endif
 
-  {
-    Generator<string> gen;
-
-    add( gen.described ("name", "Name of the source",
-			&Archive::get_source,
-			&Archive::set_source) );
-  }
-
-#if 0
-  //! Get the coordinates of the source
-  virtual sky_coord get_coordinates () const = 0;
-  //! Set the coordinates of the source
-  virtual void set_coordinates (const sky_coord& coordinates) = 0;
-#endif
-
-  {
-    Generator<double> gen;
-
-    add( gen.described ("freq", "Centre frequency (MHz)",
-			&Archive::get_centre_frequency,
-			&Archive::set_centre_frequency) );
-
-    add( gen.described ("bw", "Bandwidth (MHz)",
-			&Archive::get_bandwidth,
-			&Archive::set_bandwidth) );
-
-    add( gen.described ("dm", "Dispersion measure (pc/cm^3)",
-			&Archive::get_dispersion_measure,
-			&Archive::set_dispersion_measure) );
-
-    add( gen.described ("rm", "Rotation measure (rad/m^2)",
-			&Archive::get_rotation_measure,
-			&Archive::set_rotation_measure) );
-  }
-
-  {
-    Generator<bool> gen;
-
-    add( gen.described ("dmc", "Dispersion corrected (boolean)",
-			&Archive::get_dedispersed,
-			&Archive::set_dedispersed) );
-
-    add( gen.described ("rmc", "Faraday Rotation corrected (boolean)",
-			&Archive::get_faraday_corrected,
-			&Archive::set_faraday_corrected) );
-
-    add( gen.described ("polc", "Polarization calibrated (boolean)",
-			&Archive::get_poln_calibrated,
-			&Archive::set_poln_calibrated) );
-  }
 }
 

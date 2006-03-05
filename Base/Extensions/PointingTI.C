@@ -7,44 +7,36 @@ Pulsar::PointingTI::PointingTI ()
 
 void Pulsar::PointingTI::init ()
 {
-  {
-    Generator<double> gen;
-    add( gen.described ("lst", "Local sidereal time (seconds)",
-                        &Pointing::get_local_sidereal_time,
-                        &Pointing::set_local_sidereal_time) );
-  }
+  add( &Pointing::get_local_sidereal_time,
+       &Pointing::set_local_sidereal_time,
+       "lst", "Local sidereal time (seconds)" );
 
-  {
-    Generator<Angle> gen;
+  add( &Pointing::get_galactic_longitude,
+       &Pointing::set_galactic_longitude,
+       "gb", "Galactic longitude (deg)" );
 
-    add( gen.described ("gb", "Galactic longitude (deg)",
-                        &Pointing::get_galactic_longitude,
-                        &Pointing::set_galactic_longitude) );
+  add( &Pointing::get_galactic_latitude,
+       &Pointing::set_galactic_latitude,
+       "gl", "Galactic latitude (deg)" );
 
-    add( gen.described ("gl", "Galactic latitude (deg)",
-                        &Pointing::get_galactic_latitude,
-                        &Pointing::set_galactic_latitude) );
+  add( &Pointing::get_feed_angle,
+       &Pointing::set_feed_angle,
+       "fa", "Feed angle (deg)" );
 
-    add( gen.described ("fa", "Feed angle (deg)",
-                        &Pointing::get_feed_angle,
-                        &Pointing::set_feed_angle) );
+  add( &Pointing::get_position_angle,
+       &Pointing::set_position_angle,
+       "pa", "Position angle of the feed (deg)" );
 
-    add( gen.described ("pa", "Position angle of the feed (deg)",
-                        &Pointing::get_position_angle,
-                        &Pointing::set_position_angle) );
+  add( &Pointing::get_parallactic_angle,
+       &Pointing::set_parallactic_angle,
+       "va", "Vertical (parallactic) angle (deg)" );
 
-    add( gen.described ("va", "Vertical (parallactic) angle (deg)",
-                        &Pointing::get_parallactic_angle,
-                        &Pointing::set_parallactic_angle) );
+  add( &Pointing::get_telescope_azimuth,
+       &Pointing::set_telescope_azimuth, 
+       "az", "Telescope azimuth" );
 
-    add( gen.described ("az", "Telescope azimuth",
-			&Pointing::get_telescope_azimuth,
-			&Pointing::set_telescope_azimuth) );
-
-    add( gen.described ("zen", "Telescope zenith",
-                        &Pointing::get_telescope_zenith,
-                        &Pointing::set_telescope_zenith) );
-
-  }
+  add( &Pointing::get_telescope_zenith,
+       &Pointing::set_telescope_zenith,
+       "zen", "Telescope zenith" );
 }
 

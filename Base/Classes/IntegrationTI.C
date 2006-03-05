@@ -7,36 +7,20 @@ Pulsar::IntegrationTI::IntegrationTI ()
 
 void Pulsar::IntegrationTI::init ()
 {
-  {
-    Generator<unsigned> gen;
+  add( &Integration::get_nchan, "nchan", "Number of frequency channels" );
+  add( &Integration::get_npol,  "npol",  "Number of polarizations" );
+  add( &Integration::get_nbin,  "nbin",  "Number of pulse phase bins" );
 
-    add( gen.described ("nchan", "Number of frequency channels",
-                        &Integration::get_nchan) );
+  add( &Integration::get_epoch,
+       &Integration::set_epoch,
+       "mjd", "Epoch (MJD)" );
+ 
+  add( &Integration::get_duration,
+       &Integration::set_duration,
+       "duration", "Duration of integration (seconds)" );
 
-    add( gen.described ("npol", "Number of polarizations",
-                        &Integration::get_npol) );
-
-    add( gen.described ("nbin", "Number of pulse phase bins",
-			&Integration::get_nbin) );
-  }
-
-  {
-    Generator<MJD> gen;
-    add( gen.described ("mjd", "Epoch (MJD)",
-			&Integration::get_epoch,
-			&Integration::set_epoch) );
-  }
-
-  {
-    Generator<double> gen;
-    add( gen.described ("duration", "Duration of integration (seconds)",
-                        &Integration::get_duration,
-                        &Integration::set_duration) );
-
-    add( gen.described ("period", "Period at which data were folded (seconds)",
-                        &Integration::get_folding_period,
-                        &Integration::set_folding_period) );
-  }
-
+  add( &Integration::get_folding_period,
+       &Integration::set_folding_period, 
+       "period", "Period at which data were folded (seconds)" );
 }
 

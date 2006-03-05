@@ -7,17 +7,8 @@ Pulsar::BackendTI::BackendTI ()
 
 void Pulsar::BackendTI::init ()
 {
-  {
-    Generator<Signal::Hand> gen;
-    add( gen.described ("hand", "Hand of backend basis",
-			&Backend::get_hand,
-			&Backend::set_hand) );
-  }
-  {
-    Generator<Signal::Argument> gen;
-    add( gen.described ("phase", "Phase convention of backend",
-			&Backend::get_argument,
-			&Backend::set_argument) );
-  }
+  add( &Backend::get_argument,
+       &Backend::set_argument,
+       "phase", "Phase convention of backend" );
 }
 
