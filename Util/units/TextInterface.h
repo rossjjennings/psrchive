@@ -31,6 +31,9 @@ namespace TextInterface {
     //! Set the value of the attribute
     virtual void set_value (C* ptr, const std::string& value) = 0;
 
+    //! Set the description of the attribute
+    virtual void set_description (const std::string&) = 0;
+
   };
 
   //! Pointer to attribute get method, Type C::Get()
@@ -95,7 +98,10 @@ namespace TextInterface {
 
   };
 
-  //! AttributeGet and AttributeGetSet factory
+  //! AttributeGet and AttributeGetSet factories
+  /*! Use these factories whenever the get and set methods to not
+    match the patterns supplied by the corresponding factories of the
+    ClassGetSet class */
   template<class C, class Type>
   class Allocator {
 
@@ -137,6 +143,9 @@ namespace TextInterface {
   class Class : public Reference::Able {
 
   public:
+
+    //! Process a command
+    virtual std::string process (const std::string& command);
 
     //! Get the value of the attribute
     virtual std::string get_value (const std::string& name) const = 0;
@@ -194,8 +203,45 @@ namespace TextInterface {
 #ifdef _DEBUG
   std::cerr << "ClassGetSet::set_instance " << c << std::endl;
 #endif
-	instance = c; 
+	instance = c;
       }
+
+    //! Factory generates a new AttributeGet instance
+    template<typename T> 
+      void add (T(C::*get)()const,
+		const char* name, const char* description = 0)
+       {
+	 Generator<T> gen;
+	 Attribute<C>* getset = gen.named (name, get);
+	 if (description)
+	   getset->set_description (description);
+	 add (getset);
+      }
+
+    //! Factory generates a new AttributeGetSet instance with description
+    template<typename T>
+      void add (T(C::*get)()const, void(C::*set)(const T&),
+		const char* name, const char* description = 0)
+      {
+	Generator<T> gen;
+	Attribute<C>* getset = gen.named (name, get, set);
+	if (description)
+	  getset->set_description (description);
+	add (getset);
+      }
+
+    //! Factory generates a new AttributeGetSet instance with description
+    template<typename T>
+      void add (T(C::*get)()const, void(C::*set)(T),
+		const char* name, const char* description = 0)
+      {
+	Generator<T> gen;
+	Attribute<C>* getset = gen.named (name, get, set);
+	if (description)
+	  getset->set_description (description);
+	add (getset);
+      }
+
 
   protected:
 

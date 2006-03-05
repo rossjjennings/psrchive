@@ -53,8 +53,7 @@ class extensionTUI : public TextInterface::ClassGetSet<extension> {
 
 public:
   extensionTUI () {
-   Generator<std::string> generator;
-   add (generator.named("text", &extension::get_text, &extension::set_text));
+    add (&extension::get_text, &extension::set_text, "text");
   }
 
 };
@@ -75,8 +74,7 @@ class testerTUI : public TextInterface::CompositeGetSet<tester> {
 
 public:
   testerTUI () {
-   Generator<double> generator;
-   add (generator.described("value", "description", &tester::get_value));
+    add (&tester::get_value, "value", "description");
   }
 
 };
