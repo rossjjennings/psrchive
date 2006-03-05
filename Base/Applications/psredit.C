@@ -193,7 +193,8 @@ int main (int argc, char** argv) try {
     for (unsigned j = 0; j < commands.size(); j++)  {
       if (verbose)
         cerr << "psredit: processing command '" << commands[j] << "'" << endl;
-      tui.process (commands[j]);
+
+      cout << tui.process (commands[j]);
     }
 
     cout << endl;
