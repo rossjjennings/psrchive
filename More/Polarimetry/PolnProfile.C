@@ -508,8 +508,7 @@ void Pulsar::PolnProfile::get_polarized (Profile* polarized) const
   \pre The Profile baselines should have been removed; so as not to
   interfere with any baseline removal algorithms already applied
 
-  \post The linear Profile baseline will not have been removed; so as to
-  enable the application of specialized baseline removal algorithms
+  \post The bias due to noise in Q and U will have been removed
 
  */
 void Pulsar::PolnProfile::get_linear (Profile* linear) const
@@ -521,12 +520,22 @@ void Pulsar::PolnProfile::get_linear (Profile* linear) const
   const float *q = get_Profile(1)->get_amps();
   const float *u = get_Profile(2)->get_amps(); 
 
-  unsigned nbin = get_nbin();
+  unsigned ibin, nbin = get_nbin();
   
   linear->resize (nbin);
-  
-  for (unsigned ibin=0; ibin<nbin; ibin++)
-    linear->get_amps()[ibin] = sqrt (q[ibin]*q[ibin] + u[ibin]*u[ibin]);
+  float* amps = linear->get_amps();
+
+  for (ibin=0; ibin<nbin; ibin++)
+    amps[ibin] = q[ibin]*q[ibin] + u[ibin]*u[ibin];
+
+  float min_phase = linear->find_min_phase();
+  linear->offset(-linear->mean (min_phase));
+
+  for (ibin=0; ibin<nbin; ibin++)
+    if (amps[ibin] < 0.0)
+      amps[ibin] = 0.0;
+    else
+      amps[ibin] = sqrt(amps[ibin]);
 }
 
 void Pulsar::PolnProfile::get_PA (vector< Estimate<double> >& posang,
@@ -539,7 +548,6 @@ void Pulsar::PolnProfile::get_PA (vector< Estimate<double> >& posang,
   Profile linear;
   get_linear (&linear);
   float min_phase = linear.find_min_phase();
-  linear -= linear.mean (min_phase);
 
   double mean = 0;
   double var_Q = 0;
