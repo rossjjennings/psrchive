@@ -84,42 +84,9 @@ int main (int argc, char** argv) try {
   while ((gotc = getopt (argc, argv, "c:e:hHmvV")) != -1)
     switch (gotc) {
 
-    case 'c': {
-
-      const char* accept = ",[";
-      char* ptr = optarg;
-
-      while (ptr) {
-
-        // search for the first comma not enclosed in [ brackets ]
-        char* end = ptr;
-        while ( (end = strpbrk(end, accept)) != 0)
-          if (*end == '[')
-            end = strchr(end, ']');
-          else
-            break;
-
-        // null-terminate on the first naked comma
-        if (end)
-          *end = '\0';
-
-        if (verbose)
-          cerr << "psredit: parsed command '" << ptr << "'" << endl;
-        commands.push_back(ptr);
-
-        if (strchr(ptr,'='))
-          edit = true;
-
-        if (end)
-          ptr = end+1;
-        else
-          ptr = 0;
-
-      }
-
+    case 'c':
+      TextInterface::separate (optarg, commands, edit);
       break;
-
-    } // end case 'c'
 
     case 'e':
       save = true;
