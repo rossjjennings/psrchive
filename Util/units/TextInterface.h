@@ -207,20 +207,20 @@ namespace TextInterface {
       }
 
     //! Factory generates a new AttributeGet instance
-    template<typename T> 
-      void add (T(C::*get)()const,
+    template<class P, typename T> 
+      void add (T(P::*get)()const,
 		const char* name, const char* description = 0)
-       {
-	 Generator<T> gen;
-	 Attribute<C>* getset = gen.named (name, get);
-	 if (description)
-	   getset->set_description (description);
-	 add (getset);
+      {
+	Generator<T> gen;
+	Attribute<C>* getset = gen.named (name, get);
+	if (description)
+	  getset->set_description (description);
+	add (getset);
       }
 
     //! Factory generates a new AttributeGetSet instance with description
-    template<typename T>
-      void add (T(C::*get)()const, void(C::*set)(const T&),
+    template<class P, typename T>
+      void add (T(P::*get)()const, void(P::*set)(const T&),
 		const char* name, const char* description = 0)
       {
 	Generator<T> gen;
@@ -231,8 +231,8 @@ namespace TextInterface {
       }
 
     //! Factory generates a new AttributeGetSet instance with description
-    template<typename T>
-      void add (T(C::*get)()const, void(C::*set)(T),
+    template<class P, typename T>
+      void add (T(P::*get)()const, void(P::*set)(T),
 		const char* name, const char* description = 0)
       {
 	Generator<T> gen;
