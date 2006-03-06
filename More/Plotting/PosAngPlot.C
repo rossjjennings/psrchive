@@ -17,7 +17,7 @@ Pulsar::PosAngPlotter::PosAngPlotter()
   deg_min = -89.999;
   border = 0;
 
-  text_interface = new PosAngPlotterTI;
+  text_interface = new PosAngPlotterTI (this);
 }
 
 void Pulsar::PosAngPlotter::minmax (const Archive*, float& min, float& max)
