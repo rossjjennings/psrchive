@@ -1,5 +1,5 @@
 //
-// $Id: pav.C,v 1.109 2006/03/01 23:36:49 hknight Exp $
+// $Id: pav.C,v 1.110 2006/03/06 04:37:33 hknight Exp $
 //
 // The Pulsar Archive Viewer
 //
@@ -128,6 +128,7 @@ void usage ()
     " --no_prof_axes Don't show the profile axes (for -D option only)\n"
     " --hist         Plot '-D' as histogram [false]\n"
     " --plot_qu      Plot Stokes Q and Stokes U in '-S' option instead of degree of linear\n"
+    " --no_corner_labels Don't display corner labels in publication mode [do display]\n"
     "\n"
     "Archive::Extension options (file format specific):\n"
     " -o        Plot the original bandpass\n"
@@ -256,6 +257,7 @@ int main (int argc, char** argv)
   const int HIST             = 1022;
   const int PLOT_QU          = 1023;
   const int ZERO_WAVELENGTH  = 1024;
+  const int NO_CORNER_LABELS = 1025;
 
   static struct option long_options[] = {
     { "convert_binphsperi", 1, 0, 200 },
@@ -284,6 +286,7 @@ int main (int argc, char** argv)
     { "hist",               no_argument,       0, HIST},
     { "plot_qu",            no_argument,       0, PLOT_QU},
     { "inf",                no_argument,       0, ZERO_WAVELENGTH},
+    { "no_corner_labels",   no_argument,       0, NO_CORNER_LABELS},
     { 0, 0, 0, 0 }
   };
     
@@ -364,7 +367,7 @@ int main (int argc, char** argv)
       plotter.set_subint( atoi (optarg) );
       break;
     case 'i':
-      cout << "$Id: pav.C,v 1.109 2006/03/01 23:36:49 hknight Exp $" << endl;
+      cout << "$Id: pav.C,v 1.110 2006/03/06 04:37:33 hknight Exp $" << endl;
       return 0;
 
     case 'j':
@@ -693,6 +696,9 @@ int main (int argc, char** argv)
       break;
     case ZERO_WAVELENGTH:
       zero_wavelength = true;
+      break;
+    case NO_CORNER_LABELS:
+      plotter.set_display_corner_labels( false );
       break;
 
     default:
