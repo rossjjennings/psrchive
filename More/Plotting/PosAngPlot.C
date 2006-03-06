@@ -1,4 +1,5 @@
 #include "Pulsar/PosAngPlotter.h"
+#include "Pulsar/PosAngPlotterTI.h"
 
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
@@ -15,6 +16,8 @@ Pulsar::PosAngPlotter::PosAngPlotter()
   deg_max = 89.999;
   deg_min = -89.999;
   border = 0;
+
+  text_interface = new PosAngPlotterTI;
 }
 
 void Pulsar::PosAngPlotter::minmax (const Archive*, float& min, float& max)
