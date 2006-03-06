@@ -75,6 +75,7 @@ class testerTUI : public TextInterface::CompositeGetSet<tester> {
 public:
   testerTUI () {
     add (&tester::get_value, "value", "description");
+    add (&tester::get_value, "same",  "description");
   }
 
 };
@@ -94,6 +95,7 @@ public:
   childTUI () {
     import( testerTUI() );
     add (&child::get_c, "c", "child attribute");
+    remove ("same");
   }
 
 };
@@ -193,7 +195,7 @@ int main () try {
   cerr << "CompositeGetSet has " << nattribute << " attributes after import"
        << endl;
 
-  if (nattribute != 2) {
+  if (nattribute != 3) {
     cerr << "test_TextInterface ERROR!" << endl;
     return -1;
   }
@@ -234,7 +236,7 @@ int main () try {
   cerr << "CompositeGetSet<test_array> has " << nattribute 
        << " attributes after import" << endl;
 
-  if (nattribute != 2) {
+  if (nattribute != 3) {
     cerr << "test_TextInterface ERROR!" << endl;
     return -1;
   }
@@ -262,6 +264,21 @@ int main () try {
     cerr << "test_TextInterface ERROR! &(tester_array[2])=" 
 	 << &(Array.array[2]) << endl;
     return -1;
+  }
+
+  childTUI child_tui;
+  child ch;
+  child_tui.set_instance( &ch );
+
+  cerr << child_tui.get_value ("value") << endl;
+
+  try {
+    child_tui.get_value ("same");
+    cerr << "childTUI should have thrown an exception" << endl;
+    return -1;
+  }
+  catch (Error& error) {
+    cerr << "childTUI successfully removed 'same' attribute" << endl;
   }
 
   cerr << "test_TextInterface SUCCESS!" << endl;

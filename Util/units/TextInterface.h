@@ -6,6 +6,8 @@
 #include "tostring.h"
 #include "stringtok.h"
 
+#include <algorithm>
+
 // #define _DEBUG 1
 
 namespace TextInterface {
@@ -302,6 +304,13 @@ namespace TextInterface {
 
     //! Add a new attribute interface
     void add (Attribute<C>* att) { attributes.push_back (att); }
+
+    //! Remove the named attribute interface
+    void remove (const std::string& name)
+      {
+	Reference::To< Attribute<C> > a = find (name);
+	attributes.erase( std::find(attributes.begin(), attributes.end(), a) );
+      }
 
     //! Import the attribute interfaces from a parent text interface
     template<class P> 
