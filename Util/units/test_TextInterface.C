@@ -79,6 +79,25 @@ public:
 
 };
 
+class child : public tester {
+
+public:
+  void set_c (int _c) { c = _c; }
+  int get_c () const { return c; }
+protected:
+  int c;
+};
+
+class childTUI : public TextInterface::ClassGetSet<child> {
+
+public:
+  childTUI () {
+    import( testerTUI() );
+    add (&child::get_c, "c", "child attribute");
+  }
+
+};
+
 class extension_glue : public TextInterface::ComponentGetSet<tester,extension>
 {
 public:

@@ -16,14 +16,14 @@ namespace TextInterface {
 
   public:
     
+    //! Retun a newly constructed copy
+    virtual Attribute* clone () const = 0;
+
     //! Get the name of the attribute
     virtual std::string get_name () const = 0;
 
     //! Get the description of the attribute
     virtual std::string get_description () const = 0;
-
-    //! Return true if the name argument matches
-    virtual bool matches (const std::string& name) const;
 
     //! Get the value of the attribute
     virtual std::string get_value (const C* ptr) const = 0;
@@ -33,6 +33,53 @@ namespace TextInterface {
 
     //! Set the description of the attribute
     virtual void set_description (const std::string&) = 0;
+
+    //! Return true if the name argument matches
+    virtual bool matches (const std::string& name) const;
+
+  };
+
+  //! Proxy enable attribute interface from parent to be used by child
+  template<class C, class P>
+  class AttributeProxy : public Attribute<C> {
+
+  public:
+    
+    //! Construct from a pointer to parent class attribute interface
+    AttributeProxy (Attribute<P>* pa) { attribute = pa; }
+
+    //! Copy constructor
+    AttributeProxy (const AttributeProxy& copy)
+      { attribute = copy.attribute->clone(); }
+
+    //! Retun a newly constructed copy
+    Attribute<C>* clone () const
+      { return new AttributeProxy(*this); }
+
+    //! Get the name of the attribute
+    std::string get_name () const
+      { return attribute->get_name(); }
+
+    //! Get the description of the attribute
+    std::string get_description () const
+      { return attribute->get_description(); }
+
+    //! Get the value of the attribute
+    std::string get_value (const C* ptr) const 
+      { return attribute->get_value (ptr); }
+
+    //! Set the value of the attribute
+    void set_value (C* ptr, const std::string& value)
+      { attribute->set_value (ptr, value); }
+
+    //! Set the description of the attribute
+    void set_description (const std::string& description)
+      { attribute->set_description (description); }
+
+  protected:
+
+    //! The parent attribute interface
+    Reference::To< Attribute<P> > attribute;
 
   };
 
@@ -44,7 +91,14 @@ namespace TextInterface {
 
     //! Constructor
     AttributeGet (const std::string& _name, Get _get)
-      { name = _name; get_method = _get; }
+      { name = _name; get = _get; }
+
+    //! Copy constructor
+    AttributeGet (const AttributeGet& copy)
+      { name = copy.name; description = copy.description; get = copy.get; }
+
+    //! Return a clone
+    Attribute<C>* clone () const { return new AttributeGet(*this); }
 
     //! Get the name of the attribute
     std::string get_name () const { return name; }
@@ -57,7 +111,7 @@ namespace TextInterface {
 
     //! Get the value of the attribute
     std::string get_value (const C* ptr) const
-      { return tostring( (ptr->*get_method) () ); }
+      { return tostring( (ptr->*get) () ); }
 
     //! Set the value of the attribute
     void set_value (C* ptr, const std::string& value)
@@ -73,7 +127,7 @@ namespace TextInterface {
     std::string description;
 
     //! The get method
-    Get get_method;
+    Get get;
 
   };
 
@@ -85,16 +139,23 @@ namespace TextInterface {
 
     //! Constructor
     AttributeGetSet (const std::string& _name, Get _get, Set _set)
-      : AttributeGet<C,Type,Get> (_name, _get) { set_method = _set; }
+      : AttributeGet<C,Type,Get> (_name, _get) { set = _set; }
+
+    //! Copy constructor
+    AttributeGetSet (const AttributeGetSet& copy) 
+      : AttributeGet<C,Type,Get> (copy) { set = copy.set; }
+
+    //! Return a clone
+    Attribute<C>* clone () const { return new AttributeGetSet(*this); }
 
     //! Set the value of the attribute
     void set_value (C* ptr, const std::string& value)
-      { (ptr->*set_method) (fromstring<Type>(value)); }
+      { (ptr->*set) (fromstring<Type>(value)); }
 
   protected:
 
     //! The set method
-    Set set_method;
+    Set set;
 
   };
 
@@ -199,12 +260,9 @@ namespace TextInterface {
 
     //! Set the instance
     virtual void set_instance (C* c) 
-      {
-#ifdef _DEBUG
-  std::cerr << "ClassGetSet::set_instance " << c << std::endl;
-#endif
-	instance = c;
-      }
+      { instance = c; }
+
+  protected:
 
     //! Factory generates a new AttributeGet instance
     template<class P, typename T> 
@@ -242,11 +300,23 @@ namespace TextInterface {
 	add (getset);
       }
 
-
-  protected:
-
-    //! Add a new named class attribute interface
+    //! Add a new attribute interface
     void add (Attribute<C>* att) { attributes.push_back (att); }
+
+    //! Import the attribute interfaces from a parent text interface
+    template<class P> 
+      void import (const ClassGetSet<P>* parent)
+      {
+	for (unsigned i=0; i < parent->attributes.size(); i++)
+	  add( new AttributeProxy<C,P>(parent->attributes[i]->clone()) );
+      }
+
+    //! Import the attribute interfaces from a parent text interface
+    template<class P> 
+      void import (const ClassGetSet<P>& parent) { import (&parent); }
+
+    // allow different ClassGetSet types to see eachothers protected bit
+    template<class P> friend class ClassGetSet;
 
     //! The named class attribute interfaces
     std::vector< Reference::To< Attribute<C> > > attributes;
