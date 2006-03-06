@@ -40,8 +40,11 @@ void Pulsar::PosAngPlotter::draw (const Archive *data)
 
     for (unsigned ibin=0; ibin < phases.size(); ibin++)
       if (posang[ibin].get_variance() != 0)
-	cpgerr1 (6, phases[ibin], posang[ibin].get_value(),
-		 posang[ibin].get_error(), 1.0);
+	if (error_bars)
+	  cpgerr1 (6, phases[ibin], posang[ibin].get_value(),
+		   posang[ibin].get_error(), 1.0);
+	else
+	  cpgpt1 (phases[ibin], posang[ibin].get_value(), 17);
   
     offset += 180.0;
 
