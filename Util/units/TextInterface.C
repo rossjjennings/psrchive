@@ -19,30 +19,26 @@ string TextInterface::Class::process (const string& command)
   return "";
 }
 
-void TextInterface::parse_indeces (vector<unsigned>& index, string& name)
+void TextInterface::parse_indeces (vector<unsigned>& index,
+				   const string& name)
 {
   index.resize (0);
 
-  // look for the opening braces
-  if (name[0] != '[')
+  string::size_type length = name.length();
+
+  // look for the opening and closing braces
+  if (name.length() < 3 || name[0] != '[' || name[length-1] != ']')
     return;
 
 #ifdef _DEBUG
   cerr << "TextInterface::parse_indeces range started" << endl;
 #endif
 
-  // look for the closing braces
-  string::size_type pos = name.find("]:");
+  string range = name.substr (1,length-2);
 
-  if (pos == string::npos)
-    throw Error (InvalidParam, "TextInterface::parse_indeces",
-		 "no end of range in '" + name + "'");
-
-  string range = name.substr (1,pos-1);
-
-#ifdef _DEBUG
+  //#ifdef _DEBUG
   cerr << "TextInterface::parse_indeces range=" << range << endl;
-#endif
+  //#endif
 
   if (range.empty())
     throw Error (InvalidParam, "TextInterface::parse_indeces",
@@ -114,13 +110,6 @@ void TextInterface::parse_indeces (vector<unsigned>& index, string& name)
       throw Error (InvalidParam, "TextInterface::parse_indeces",
 		                 "invalid sub-range '" + sub + "'");
   }
-
-  // satisfied that the range is valid, remove it from the qualified name
-  name.erase (0, pos+2);
-
-#ifdef _DEBUG
-  cerr << "TextInterface::parse_indeces remaining name=" << name << endl;
-#endif
 
 }
 

@@ -39,22 +39,23 @@ namespace TextInterface {
 
   };
 
-  //! Proxy enable attribute interface from parent to be used by child
+  //! Proxy enables attribute interface from parent to be used by child
+  /*! In this template: C is a P */
   template<class C, class P>
-  class AttributeProxy : public Attribute<C> {
+  class IsAProxy : public Attribute<C> {
 
   public:
     
     //! Construct from a pointer to parent class attribute interface
-    AttributeProxy (Attribute<P>* pa) { attribute = pa; }
+    IsAProxy (Attribute<P>* pa) { attribute = pa->clone(); }
 
     //! Copy constructor
-    AttributeProxy (const AttributeProxy& copy)
+    IsAProxy (const IsAProxy& copy)
       { attribute = copy.attribute->clone(); }
 
     //! Retun a newly constructed copy
     Attribute<C>* clone () const
-      { return new AttributeProxy(*this); }
+      { return new IsAProxy(*this); }
 
     //! Get the name of the attribute
     std::string get_name () const
@@ -80,6 +81,131 @@ namespace TextInterface {
 
     //! The parent attribute interface
     Reference::To< Attribute<P> > attribute;
+
+  };
+
+  //! Proxy enables attribute interface of member to be used by class
+  /*! In this template: C has a M; Get is the method of C that returns M* */
+  template<class C, class M, class Get>
+  class HasAProxy : public Attribute<C> {
+
+  public:
+    
+    //! Construct from a pointer to parent class attribute interface
+    HasAProxy (const std::string& pre, Attribute<M>* pa, Get g)
+      { prefix = pre; attribute = pa->clone(); get = g; }
+
+    //! Copy constructor
+    HasAProxy (const HasAProxy& copy)
+      { attribute=copy.attribute->clone(); get=copy.get; prefix=copy.prefix; }
+
+    //! Set the prefix to be added before attribute name
+    
+    //! Retun a newly constructed copy
+    Attribute<C>* clone () const
+      { return new HasAProxy(*this); }
+
+    //! Get the name of the attribute
+    std::string get_name () const
+      { return prefix + ":" + attribute->get_name(); }
+
+    //! Get the description of the attribute
+    std::string get_description () const
+      { return attribute->get_description(); }
+
+    //! Get the value of the attribute
+    std::string get_value (const C* ptr) const 
+      { return attribute->get_value ((const_cast<C*>(ptr)->*get)()); }
+
+    //! Set the value of the attribute
+    void set_value (C* ptr, const std::string& value)
+      { attribute->set_value ((ptr->*get)(), value); }
+
+    //! Set the description of the attribute
+    void set_description (const std::string& description)
+      { attribute->set_description (description); }
+
+    //! Return true if the name argument matches
+    bool matches (const std::string& name) const;
+
+  protected:
+
+    //! The parent attribute interface
+    Reference::To< Attribute<M> > attribute;
+
+    //! Method of C that returns M*
+    Get get;
+
+    //! Prefix differentiates this interface from identical members (if any)
+    std::string prefix;
+
+  };
+
+  //! Proxy enables attribute interface of elements of a vector
+  /*! In this template: V is a vector of E; Get is the method of V
+    that returns E*; and Size is the method of V that returns the number
+    of elements */
+  template<class V, class E, class Get, class Size>
+  class VectorOfProxy : public Attribute<V> {
+
+  public:
+    
+    //! Construct from a pointer to parent class attribute interface
+    VectorOfProxy (const std::string& pre, Attribute<E>* pa, Get g, Size s)
+      { prefix = pre; attribute = pa->clone(); get = g; size = s; }
+
+    //! Copy constructor
+    VectorOfProxy (const VectorOfProxy& copy)
+      { attribute=copy.attribute->clone(); 
+	get=copy.get; size=copy.size; prefix=copy.prefix; }
+
+    //! Set the prefix to be added before attribute name
+    
+    //! Retun a newly constructed copy
+    Attribute<V>* clone () const
+      { return new VectorOfProxy(*this); }
+
+    //! Get the name of the attribute
+    std::string get_name () const
+      { return prefix + "*:" + attribute->get_name(); }
+
+    //! Get the description of the attribute
+    std::string get_description () const
+      { return attribute->get_description(); }
+
+    //! Get the value of the attribute
+    std::string get_value (const V* ptr) const;
+
+    //! Set the value of the attribute
+    void set_value (V* ptr, const std::string& value);
+
+    //! Set the description of the attribute
+    void set_description (const std::string& description)
+      { attribute->set_description (description); }
+
+    //! Return true if the name argument matches
+    bool matches (const std::string& name) const;
+
+  protected:
+
+    //! The parent attribute interface
+    Reference::To< Attribute<E> > attribute;
+
+    //! Method of V that returns E*
+    Get get;
+
+    //! Method of V that returns size of vector
+    Size size;
+
+    //! Prefix differentiates this interface from identical members (if any)
+    std::string prefix;
+
+    //! Range parsed from name during matches
+    std::string range;
+
+    //! Worker function parses indeces for get_value and set_value
+    std::string get_indeces (const V* ptr, std::vector<unsigned>& indeces,
+			     const std::string& param) const;
 
   };
 
@@ -162,7 +288,7 @@ namespace TextInterface {
   //! AttributeGet and AttributeGetSet factories
   /*! Use these factories whenever the get and set methods to not
     match the patterns supplied by the corresponding factories of the
-    ClassGetSet class */
+    TextInterface::To class */
   template<class C, class Type>
   class Allocator {
 
@@ -229,7 +355,7 @@ namespace TextInterface {
 
   //! Class text interface: an instance of C and a vector of Attribute<C>
   template<class C>
-  class ClassGetSet : public Class {
+  class To : public Class {
 
   public:
 
@@ -261,6 +387,52 @@ namespace TextInterface {
     //! Set the instance
     virtual void set_instance (C* c) 
       { instance = c; }
+
+    //! Import the attribute interfaces from a parent text interface
+    template<class P> 
+      void import (const To<P>* parent)
+      {
+	for (unsigned i=0; i < parent->attributes.size(); i++)
+	  add( new IsAProxy<C,P>(parent->attributes[i]) );
+      }
+
+    //! Import the attribute interfaces from a member text interface
+    template<class M> 
+      void import ( const std::string& name, 
+		    const To<M>* member, M*(C::*get)() )
+      {
+	for (unsigned i=0; i < member->attributes.size(); i++)
+	  add(new HasAProxy<C,M,M*(C::*)()>(name, member->attributes[i],get));
+      }
+
+    //! Import the attribute interfaces from a vector element text interface
+    template<class E>
+      void import ( const std::string& name,
+		    const To<E>* member, 
+		    E*(C::*get)(unsigned), unsigned(C::*size)()const )
+      {
+	for (unsigned i=0; i < member->attributes.size(); i++)
+	  add( new VectorOfProxy<C,E,E*(C::*)(unsigned),unsigned(C::*)()const>
+	       (name, member->attributes[i], get, size) );
+      }
+
+    //! Import the attribute interfaces from a parent text interface
+    template<class P> 
+      void import (const To<P>& parent)
+      { import (&parent); }
+
+    //! Import the attribute interfaces from a member text interface
+    template<class M> 
+      void import ( const std::string& name,
+		    const To<M>& member,
+		    M*(C::*get)() ) 
+      { import (name, &member, get); }
+
+    template<class E>
+      void import ( const std::string& name,
+		    const To<E>& element, 
+		    E*(C::*get)(unsigned), unsigned(C::*size)()const )
+      { import (name, &element, get, size); }
 
   protected:
 
@@ -317,20 +489,8 @@ namespace TextInterface {
 	    i++;
       }
 
-    //! Import the attribute interfaces from a parent text interface
-    template<class P> 
-      void import (const ClassGetSet<P>* parent)
-      {
-	for (unsigned i=0; i < parent->attributes.size(); i++)
-	  add( new AttributeProxy<C,P>(parent->attributes[i]->clone()) );
-      }
-
-    //! Import the attribute interfaces from a parent text interface
-    template<class P> 
-      void import (const ClassGetSet<P>& parent) { import (&parent); }
-
-    // allow different ClassGetSet types to see eachothers protected bit
-    template<class P> friend class ClassGetSet;
+    // allow different To types to see eachothers protected bit
+    template<class P> friend class To;
 
     //! The named class attribute interfaces
     std::vector< Reference::To< Attribute<C> > > attributes;
@@ -340,211 +500,8 @@ namespace TextInterface {
 
   };
 
-
-  //! Abstract base class of component text interface
-  /*! This class is used by the CompositeGetSet class in order to
-    incorporate component text interfaces. */
-  template<class C>
-  class Component : public Class {
-
-  public:
-
-    //! Get the name of the component
-    virtual std::string get_component_name () const = 0;
-
-    //! Return true if the name argument matches
-    virtual bool matches (const std::string& name) const;
-
-    //! Extract the component from the composite
-    virtual void extract (C* composite) = 0;
-
-  };
-
-  //! Abstract base class for incorporating a component text interface
-  /*! Derived classes need only define the extract_component method. */
-  template<class C,class P>
-  class ComponentGetSet : public Component<C> {
-
-  public:
-
-    //! Construct from name and component interface
-    ComponentGetSet (const std::string& n, ClassGetSet<P>* part) 
-      { name = n; component_interface = part; }
-
-    //! Get the name of the component
-    std::string get_component_name () const { return name; }
-
-    std::string get_value (const std::string& n) const
-      {
-#ifdef _DEBUG
-	std::cerr << "ComponenGetSet[" << name << "] get " << n << std::endl;
-#endif
-	return component_interface->get_value (n);
-      }
-
-    //! Set the value of the attribute
-    void set_value (const std::string& n, const std::string& value)
-      {
-#ifdef _DEBUG
-	std::cerr << "ComponenGetSet[" << name << "] set " << n << std::endl;
-#endif
-	component_interface->set_value (n, value);
-      }
-
-    unsigned get_nattribute () const
-      { return component_interface->get_nattribute(); }
-
-    std::string get_name (unsigned i) const
-      { return component_interface->get_name(i); }
-
-    std::string get_description (unsigned i) const
-      { return component_interface->get_description(i); }
-
-    //! Extract the component from the composite
-    void extract (C* composite)
-      {
-#ifdef _DEBUG
-	std::cerr << "ComponenGetSet[" << name << "] extract " << std::endl;
-#endif
-	component_interface->set_instance (extract_component (composite));
-      }
-
-  protected:
-
-    //! Return a pointer to the component
-    virtual P* extract_component (C*) = 0;
-
-    //! The interface with which this interfaces
-    Reference::To< ClassGetSet<P> > component_interface;
-
-    //! The component name
-    std::string name;
-
-  };
-
-  //! Composite text interface: a ClassGetSet with a vector of Component<C>
-  /*! When a class, C, is composed of other classes that define their
-   own text interface, it is useful to incorporate the component class
-   text interfaces into the composite class text interface. */
-  template<class C>
-  class CompositeGetSet : public ClassGetSet<C> {
-
-  public:
-
-    //! Get the value of the attribute
-    std::string get_value (const std::string& name) const;
- 
-    //! Set the value of the attribute
-    void set_value (const std::string& name, const std::string& value);
- 
-    //! Get the number of attributes
-    unsigned get_nattribute () const;
-
-    //! Get the name of the attribute
-    std::string get_name (unsigned i) const;
-
-    //! Get the description of the attribute
-    std::string get_description (unsigned i) const;
-
-    //! Set the instance
-    void set_instance (C* c);
-
-    //! Import a new component interface
-    void import (Component<C>* c) 
-    {
-      components.push_back(c);
-      if (this->instance) {
-#ifdef _DEBUG
-	std::cerr << "CompositeGetSet::import extract " 
-		  << this->instance.get() << std::endl;
-#endif
-	c->extract(this->instance);
-      }
-    }
-
-  protected:
-
-    //! If name is colon separated, extract component name and find it
-    Component<C>* find_component (std::string& name) const;
-
-    //! The named class attribute interfaces
-    std::vector< Reference::To< Component<C> > > components;
-
-    //! Return the index of the component for attribute index i
-    unsigned get_component_index (unsigned& i) const;
-
-  };
-
-  //! Abstract base class for applying a text interface to multiple elements
-  /*! Derived classes need only define the extract_element and get_nelement
-    methods. */
-  template<class C,class E>
-  class ElementGetSet : public Component<C> {
-
-  public:
-
-    //! Construct from name and component interface
-    ElementGetSet (const std::string& n, ClassGetSet<E>* part) 
-      { name = n; element_interface = part; }
-
-    //! Get the name of the component
-    std::string get_component_name () const { return name + "*"; }
-
-    //! Return true if the name argument matches
-    bool matches (const std::string& name) const;
-
-    //! Extract the component from the composite
-    void extract (C* c)
-      {
-#ifdef _DEBUG
-	std::cerr << "ElementGetSet::extract " << c << std::endl;
-#endif
-	composite = c;
-      }
-
-    //! Get the value(s) of the attribute
-    std::string get_value (const std::string& name) const;
-
-    //! Set the value(s) of the attribute
-    void set_value (const std::string& name, const std::string& value);
-
-    //! Get the number of attributes
-    unsigned get_nattribute () const
-      { return element_interface->get_nattribute(); }
-
-    //! Get the name of the attribute
-    std::string get_name (unsigned i) const
-      { return element_interface->get_name(i); }
-
-    //! Get the description of the attribute
-    std::string get_description (unsigned i) const
-      { return element_interface->get_description(i); }
-
-  protected:
-
-    //! Return a pointer to the element
-    virtual E* extract_element (C*, unsigned index) const = 0;
-
-    //! Return the number of elements
-    virtual unsigned get_nelement (C*) const = 0;
-
-    //! The interface with which this interfaces
-    Reference::To< ClassGetSet<E> > element_interface;
-
-    //! The instance from which elements should be extracted
-    Reference::To< C > composite;
-
-    //! The component name
-    std::string name;
-
-    // Helper function
-    std::string get_indeces (std::vector<unsigned>& indeces, 
-                             const std::string& name) const;
-
-  };
-
-  //! Convert a parameter name into a range of indeces
-  void parse_indeces (std::vector<unsigned>& indeces, std::string& name);
+  //! Parse a range of indeces from a string
+  void parse_indeces (std::vector<unsigned>& indeces, const std::string&);
 
   //! Separate a list of comma-separated commands into a vector of strings
   void separate (char* ptr, std::vector<std::string>& commands, bool& edit);
@@ -557,17 +514,17 @@ namespace TextInterface {
 
 template<class C>
 TextInterface::Attribute<C>* 
-TextInterface::ClassGetSet<C>::find (const std::string& param) const
+TextInterface::To<C>::find (const std::string& param) const
 {
 #ifdef _DEBUG
-  std::cerr << "ClassGetSet::find (" << param << ") size=" 
+  std::cerr << "To::find (" << param << ") size=" 
 	    << attributes.size() << endl;
 #endif
 
   for (unsigned i=0; i<attributes.size(); i++) {
     if (attributes[i]->matches (param)) {
 #ifdef _DEBUG
-      std::cerr << "ClassGetSet::find attribute[" << i << "]=" 
+      std::cerr << "To::find attribute[" << i << "]=" 
 		<< attributes[i]->get_name() << " matches" << std::endl;
 #endif
       return attributes[i];
@@ -579,132 +536,12 @@ TextInterface::ClassGetSet<C>::find (const std::string& param) const
 }
 
 
-template<class C>
-TextInterface::Component<C>* 
-TextInterface::CompositeGetSet<C>::find_component (std::string& comp) const
-{
-#ifdef _DEBUG
-  std::cerr << "CompositeGetSet::find_component " << comp << std::endl;
-#endif
-
-  std::string cname = stringtok (comp, ":[", false, false);
-  
-  if (!comp.length())
-    return 0;
-
-  if (comp[0] == ':')
-    comp.erase(0,1);
-
-#ifdef _DEBUG
-  std::cerr << "CompositeGetSet::find_component name=" << cname
-	    << " remainder=" << comp << " size=" << components.size() 
-	    << std::endl;
-#endif
-
-  for (unsigned i=0; i<components.size(); i++) {
-    if (components[i]->matches(cname)) {
-#ifdef _DEBUG
-      std::cerr << "CompositeGetSet::find_component  component[" << i << "]=" 
-		<< components[i]->get_component_name() <<  " matches"
-		<< std::endl;
-#endif
-      return components[i];
-    }
-  }
-
-  throw Error (InvalidParam, "TextInterface::Class<C>::find_component",
-	       "no component named " + cname);
-}
-
-template<class C>
-std::string 
-TextInterface::CompositeGetSet<C>::get_value (const std::string& param) const
-{
-  std::string temp = param;
-  Component<C>* component = find_component (temp);
-  if (component)
-    return component->get_value (temp);
-  else
-    return ClassGetSet<C>::get_value (param);
-}
-
-template<class C>
-void TextInterface::CompositeGetSet<C>::set_value (const std::string& param,
-						   const std::string& value)
-{
-  std::string temp = param;
-  Component<C>* component = find_component (temp);
-
-  if (component)
-    component->set_value (temp, value);
-  else
-    ClassGetSet<C>::set_value (param, value);
-}
-
-template<class C>
-unsigned TextInterface::CompositeGetSet<C>::get_nattribute () const
-{
-  unsigned nattribute = ClassGetSet<C>::get_nattribute ();
-  for (unsigned i=0; i<components.size(); i++)
-    nattribute += components[i]->get_nattribute ();
-  return nattribute;
-}
-
-template<class C>
-std::string 
-TextInterface::CompositeGetSet<C>::get_name (unsigned i) const
-{
-  if (i < ClassGetSet<C>::get_nattribute ())
-    return ClassGetSet<C>::get_name(i);
-
-  i -= ClassGetSet<C>::get_nattribute ();
-  unsigned j = get_component_index (i);
-  return components[j]->get_component_name() +":"+ components[j]->get_name(i);
-}
-
-template<class C>
-std::string 
-TextInterface::CompositeGetSet<C>::get_description (unsigned i) const
-{
-  if (i < ClassGetSet<C>::get_nattribute ())
-    return ClassGetSet<C>::get_description(i);
-
-  i -= ClassGetSet<C>::get_nattribute ();
-  return components[get_component_index (i)]->get_description(i);
-}
-
-template<class C>
-unsigned
-TextInterface::CompositeGetSet<C>::get_component_index (unsigned& i) const
-{
-  unsigned index = 0;
-  while (i >= components[index]->get_nattribute()) {
-    i -= components[index]->get_nattribute();
-    index ++;
-  }
-  return index;
-}
-
-template<class C>
-void TextInterface::CompositeGetSet<C>::set_instance (C* c)
-{
-#ifdef _DEBUG
-  std::cerr << "CompositeGetSet::set_instance " << c 
-	    << " size=" << components.size() << std::endl;
-#endif
-
-  ClassGetSet<C>::set_instance(c);
-
-  for (unsigned i=0; i<components.size(); i++)
-    components[i]->extract (c);
-}
-
-template<class C, class E>
+template<class V, class E, class G, class S> 
 std::string
-TextInterface::ElementGetSet<C,E>::get_value (const std::string& param) const
+TextInterface::VectorOfProxy<V,E,G,S>::get_value (const V* ptr) const
 {
   std::vector<unsigned> ind;
-  std::string sub_name = get_indeces (ind, param);
+  get_indeces (ptr, ind, range);
   std::ostringstream ost;
 
   for (unsigned i=0; i<ind.size(); i++) {
@@ -713,40 +550,38 @@ TextInterface::ElementGetSet<C,E>::get_value (const std::string& param) const
     if (label_elements && ind.size() > 1)
       ost << ind[i] << ")";  // label the elements
 
-    E* element = extract_element (this->composite, ind[i]);
+    E* element = (const_cast<V*>(ptr)->*get)(ind[i]);
 #ifdef _DEBUG
   std::cerr << "ElementGetSet[" << name << "]::get (" 
 	    << sub_name << ") element=" << element << std::endl;
 #endif
-    element_interface->set_instance (element);
-    ost << element_interface->get_value (sub_name);
+    ost << attribute->get_value (element);
   }
 
   return ost.str();
 }
 
-template<class C, class E>
-void TextInterface::ElementGetSet<C,E>::set_value (const std::string& param,
-						   const std::string& value)
+template<class V, class E, class G, class S>
+void TextInterface::VectorOfProxy<V,E,G,S>::set_value (V* ptr,
+						       const std::string& val)
 {
   std::vector<unsigned> ind;
-  std::string sub_name = get_indeces (ind, param);
+  get_indeces (ptr, ind, range);
 
   for (unsigned i=0; i<ind.size(); i++) {
-    E* element = extract_element (this->composite, ind[i]);
+    E* element = (ptr->*get)(ind[i]);
 #ifdef _DEBUG
-  std::cerr << "ElementGetSet[" << name << "]::set " 
-	    << sub_name << "=" << value << std::endl;
+    std::cerr << "ElementGetSet[" << name << "]::set " 
+	      << sub_name << "=" << value << std::endl;
 #endif
-    element_interface->set_instance (element);
-    element_interface->set_value (sub_name, value);
+    attribute->set_value (element, val);
   }
 }
 
-template<class C, class E>
-std::string
-TextInterface::ElementGetSet<C,E>::get_indeces (std::vector<unsigned>& indeces,
-						const std::string& param) const
+template<class V, class E, class G, class S>
+  std::string TextInterface::VectorOfProxy<V,E,G,S>
+  ::get_indeces (const V* ptr, std::vector<unsigned>& indeces,
+		 const std::string& param) const
 {
 #ifdef _DEBUG
   std::cerr << "ElementGetSet::get_indeces " << param << std::endl;
@@ -760,7 +595,7 @@ TextInterface::ElementGetSet<C,E>::get_indeces (std::vector<unsigned>& indeces,
     << " name=" << sub_name << std::endl;
 #endif
 
-  unsigned num = this->get_nelement(this->composite);
+  unsigned num = (ptr->*size)();
 
   if (indeces.size() == 0) {
 #ifdef _DEBUG
@@ -799,16 +634,36 @@ bool TextInterface::Attribute<C>::matches (const std::string& name) const
   return strcasecmp(name.c_str(), get_name().c_str()) == 0;
 }
 
-template<class C>
-bool TextInterface::Component<C>::matches (const std::string& name) const
+template<class C,class M,class Get>
+bool TextInterface::HasAProxy<C,M,Get>::matches (const std::string& name) const
 {
-  return strcasecmp(name.c_str(), get_component_name().c_str()) == 0;
+  unsigned length = prefix.length();
+  if ( strncasecmp(prefix.c_str(), name.c_str(), length) != 0 )
+    return false;
+
+  if ( name[length] != ':' )
+    return false;
+
+  return attribute->matches (name.substr(length+1));
 }
 
-template<class C,class E>
-bool TextInterface::ElementGetSet<C,E>::matches (const std::string& n) const
+template<class C,class M,class Get,class Size>
+ bool TextInterface::VectorOfProxy<C,M,Get,Size>::matches
+  (const std::string& name) const
 {
-  return strncasecmp(n.c_str(), name.c_str(), name.length()) == 0;
+  unsigned length = prefix.length();
+  if ( strncasecmp(prefix.c_str(), name.c_str(), length) != 0 )
+    return false;
+
+  std::string::size_type end = name.find (':', length);
+  if (end == std::string::npos)
+    return false;
+
+  // store the range string for later use in get|set_value
+  *(const_cast<std::string*>(&range)) = name.substr (length, end-length);
+
+  std::string remainder = name.substr(end+1);
+  return attribute->matches (remainder);
 }
 
 #endif

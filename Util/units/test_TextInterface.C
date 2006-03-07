@@ -49,7 +49,7 @@ protected:
 
 };
 
-class extensionTUI : public TextInterface::ClassGetSet<extension> {
+class extensionTUI : public TextInterface::To<extension> {
 
 public:
   extensionTUI () {
@@ -64,13 +64,14 @@ public:
   tester () { value = 0; }
   void set_value (double _value) { value = _value; }
   double get_value () const { return value; }
-  extension ext;
+  extension* get_extension() { return &ext; }
 protected:
+  extension ext;
   double value;
 };
 
 
-class testerTUI : public TextInterface::CompositeGetSet<tester> {
+class testerTUI : public TextInterface::To<tester> {
 
 public:
   testerTUI () {
@@ -89,7 +90,7 @@ protected:
   int c;
 };
 
-class childTUI : public TextInterface::ClassGetSet<child> {
+class childTUI : public TextInterface::To<child> {
 
 public:
   childTUI () {
@@ -100,40 +101,17 @@ public:
 
 };
 
-class extension_glue : public TextInterface::ComponentGetSet<tester,extension>
-{
-public:
-  extension_glue (extensionTUI* tui)
-    : TextInterface::ComponentGetSet<tester,extension> ("ext", tui) { }
-
-  extension* extract_component (tester* t) { return &(t->ext); }
-};
 
 class tester_array : public Reference::Able {
 
 public:
   tester_array (unsigned size) : array (size) { }
   vector<tester> array;
+
+  unsigned size () const { return array.size(); }
+  tester* element (unsigned i) { return &array[i]; }
 };
 
-class element_glue : public TextInterface::ElementGetSet<tester_array,tester>
-{
-public:
-  element_glue (const string& name, TextInterface::ClassGetSet<tester>* tui) 
-    : TextInterface::ElementGetSet<tester_array,tester> (name, tui) { }
-
-  tester* extract_element (tester_array* t, unsigned index) const
-  { 
-#ifdef _DEBUG
-    cerr << "element_glue::extract_element index=" << index 
-	 << " tester*=" << &(t->array[index]) << endl;
-#endif
-    return &(t->array[index]);
-  }
-  
-  unsigned get_nelement (tester_array* t) const
-  { return t->array.size(); }
-};
 
 int main () try {
 
@@ -178,7 +156,8 @@ int main () try {
   testerTUI getset;
   getset.set_instance (&Test);
 
-  cerr << "ClassGetSet::get_value=" << getset.get_value("value") << endl;
+  cerr << "TextInterface::To<>::get_value="
+       << getset.get_value("value") << endl;
 
   if (getset.get_value("value") != "3.456") {
     cerr << "test_TextInterface ERROR!" << endl;
@@ -187,13 +166,12 @@ int main () try {
 
   cerr << "testing import" << endl;
 
-  extensionTUI tui;
-  getset.import (new extension_glue (&tui));
+  getset.import ( "ext", extensionTUI(), &tester::get_extension );
 
   unsigned nattribute = getset.get_nattribute();
 
-  cerr << "CompositeGetSet has " << nattribute << " attributes after import"
-       << endl;
+  cerr << "TextInterface::To<> has " << nattribute
+       << " attributes after import" << endl;
 
   if (nattribute != 3) {
     cerr << "test_TextInterface ERROR!" << endl;
@@ -208,9 +186,9 @@ int main () try {
 
   getset.set_value ("ext:text", teststring);
 
-  cerr << Test.ext.get_text() << endl;
+  cerr << Test.get_extension()->get_text() << endl;
 
-  if (Test.ext.get_text() != teststring) {
+  if (Test.get_extension()->get_text() != teststring) {
     cerr << "test_TextInterface ERROR!" << endl;
     return -1;
   }
@@ -221,19 +199,21 @@ int main () try {
   }
 
   teststring = "test of TextInterface::import Element passed";
-  Test.ext.set_text (teststring);
+  Test.get_extension()->set_text (teststring);
 
   tester_array Array (5);
 
   Array.array[3] = Test;
 
-  TextInterface::CompositeGetSet<tester_array> array_getset;
+  TextInterface::To<tester_array> array_getset;
   array_getset.set_instance (&Array);
-  array_getset.import (new element_glue ("tester", &getset));
+  array_getset.import ( "tester", &getset, 
+			&tester_array::element,
+			&tester_array::size );
 
   nattribute = array_getset.get_nattribute();
 
-  cerr << "CompositeGetSet<test_array> has " << nattribute 
+  cerr << "TextInterface::To<test_array> has " << nattribute 
        << " attributes after import" << endl;
 
   if (nattribute != 3) {
@@ -256,9 +236,9 @@ int main () try {
 
   array_getset.set_value ("tester[2]:ext:text", teststring);
 
-  gotstring = Array.array[2].ext.get_text();
+  gotstring = Array.array[2].get_extension()->get_text();
 
-  cerr << "tester_array[2].ext.get_text=" << gotstring << endl;
+  cerr << "tester_array[2].get_extension()->get_text=" << gotstring << endl;
 
   if (gotstring != teststring) {
     cerr << "test_TextInterface ERROR! &(tester_array[2])=" 
