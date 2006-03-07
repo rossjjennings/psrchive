@@ -2,11 +2,6 @@
 
 Pulsar::ReceiverTI::ReceiverTI ()
 {
-  init ();
-}
-
-void Pulsar::ReceiverTI::init ()
-{ 
   add( &Receiver::get_tracking_angle,
        &Receiver::set_tracking_angle,
        "ta", "Tracking angle of feed" );

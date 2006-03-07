@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/Attic/PointingTI.h,v $
-   $Revision: 1.3 $
-   $Date: 2005/12/09 16:41:06 $
+   $Revision: 1.4 $
+   $Date: 2006/03/07 16:02:33 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PointingTI_h
@@ -14,17 +14,12 @@
 namespace Pulsar {
 
   //! Provides a text interface to get and set Pointing attributes
-  class PointingTI : public TextInterface::ClassGetSet<Pointing> {
+  class PointingTI : public TextInterface::To<Pointing> {
 
   public:
 
     //! Constructor
     PointingTI ();
-
-  private:
-
-    //! Constructor work
-    void init ();
 
   };
 

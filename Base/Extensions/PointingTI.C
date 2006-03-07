@@ -2,11 +2,6 @@
 
 Pulsar::PointingTI::PointingTI ()
 {
-  init ();
-}
-
-void Pulsar::PointingTI::init ()
-{
   add( &Pointing::get_local_sidereal_time,
        &Pointing::set_local_sidereal_time,
        "lst", "Local sidereal time (seconds)" );

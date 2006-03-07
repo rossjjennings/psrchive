@@ -1,50 +1,28 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Attic/ArchiveTI.h,v $
-   $Revision: 1.7 $
-   $Date: 2006/03/05 15:11:44 $
+   $Revision: 1.8 $
+   $Date: 2006/03/07 16:02:33 $
    $Author: straten $ */
 
 #ifndef __Pulsar_ArchiveTI_h
 #define __Pulsar_ArchiveTI_h
 
 #include "Pulsar/Archive.h"
-#include "Pulsar/ExtensionTI.h"
+#include "TextInterface.h"
 
 namespace Pulsar {
 
   //! Provides a text interface to get and set Archive attributes
-  class ArchiveTI : public TextInterface::CompositeGetSet<Archive> {
+  class ArchiveTI : public TextInterface::To<Archive> {
 
   public:
 
     //! Constructor
-    ArchiveTI () { init(); }
-
-    //! Import the TextInterface of an Extension class
-    template<class Ext>
-    void import (const std::string& name,
-		 TextInterface::ClassGetSet<Ext>* extension_tui);
-
-    //! Import the TextInterface of the Integration class
-    void import (const std::string& name,
-                 TextInterface::ClassGetSet<Integration>* integration_tui);
-
-  private:
-
-    //! Constructor work
-    void init ();
+    ArchiveTI ();
 
   };
 
-}
-
-template<class Ext>
-void Pulsar::ArchiveTI::import (const std::string& name,
-				 TextInterface::ClassGetSet<Ext>* tui)
-{
-  TextInterface::CompositeGetSet<Archive>::import 
-    ( new ExtensionTI<Archive,Ext>(name, tui) );
 }
 
 

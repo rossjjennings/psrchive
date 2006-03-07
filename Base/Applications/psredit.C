@@ -1,9 +1,4 @@
 #include "Pulsar/ArchiveTI.h"
-#include "Pulsar/ReceiverTI.h"
-#include "Pulsar/BackendTI.h"
-
-#include "Pulsar/IntegrationTI.h"
-#include "Pulsar/PointingTI.h"
 
 #include "dirutil.h"
 #include "string_utils.h"
@@ -51,6 +46,8 @@ string pad (unsigned length, string text)
   return text;
 }
 
+using namespace Pulsar;
+
 int main (int argc, char** argv) try {  
 
   // print in degrees
@@ -63,18 +60,6 @@ int main (int argc, char** argv) try {
   vector <string> commands;
 
   Pulsar::ArchiveTI tui;
-
-  Pulsar::ReceiverTI receiver_tui;
-  tui.import( "rcvr", &receiver_tui );
-
-  Pulsar::BackendTI backend_tui;
-  tui.import( "be", &backend_tui );
-
-  Pulsar::IntegrationTI integration_tui;
-  tui.import( "int", &integration_tui );
-
-  Pulsar::PointingTI pointing_tui;
-  integration_tui.import( "point", &pointing_tui );
 
   bool edit = false;
   bool save = false;

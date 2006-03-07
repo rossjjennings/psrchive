@@ -1,11 +1,7 @@
 #include "Pulsar/IntegrationTI.h"
+#include "Pulsar/PointingTI.h"
 
 Pulsar::IntegrationTI::IntegrationTI ()
-{
-  init ();
-}
-
-void Pulsar::IntegrationTI::init ()
 {
   add( &Integration::get_nchan, "nchan", "Number of frequency channels" );
   add( &Integration::get_npol,  "npol",  "Number of polarizations" );
@@ -22,5 +18,10 @@ void Pulsar::IntegrationTI::init ()
   add( &Integration::get_folding_period,
        &Integration::set_folding_period, 
        "period", "Period at which data were folded (seconds)" );
+
+  import( "point", Pulsar::PointingTI(),
+	  (Pointing*(Integration::*)()) &Integration::get<Pointing> );
+
+
 }
 

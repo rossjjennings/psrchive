@@ -1,8 +1,10 @@
 #include "Pulsar/ArchiveTI.h"
-#include "Pulsar/Archive.h"
-#include "string_utils.h"
 
-void Pulsar::ArchiveTI::init ()
+#include "Pulsar/ReceiverTI.h"
+#include "Pulsar/BackendTI.h"
+#include "Pulsar/IntegrationTI.h"
+
+Pulsar::ArchiveTI::ArchiveTI ()
 {
   add( &Archive::get_nbin,    "nbin",  "Number of pulse phase bins" );
   add( &Archive::get_nchan,   "nchan", "Number of frequency channels" );
@@ -67,6 +69,17 @@ void Pulsar::ArchiveTI::init ()
   virtual void set_type (Signal::Source type) = 0;
 
 #endif
+
+
+  import( "rcvr", Pulsar::ReceiverTI(), 
+	  (Receiver*(Archive::*)()) &Archive::get<Receiver>);
+
+  import( "be", Pulsar::BackendTI(),
+	  (Backend*(Archive::*)()) &Archive::get<Backend> );
+
+  import( "int", IntegrationTI(), 
+	  (Integration*(Archive::*)(unsigned)) &Archive::get_Integration,
+	  &Archive::get_nsubint );
 
 }
 

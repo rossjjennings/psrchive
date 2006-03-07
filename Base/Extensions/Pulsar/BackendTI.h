@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/Attic/BackendTI.h,v $
-   $Revision: 1.1 $
-   $Date: 2006/02/24 22:50:30 $
+   $Revision: 1.2 $
+   $Date: 2006/03/07 16:02:33 $
    $Author: straten $ */
 
 #ifndef __Pulsar_BackendTI_h
@@ -14,17 +14,12 @@
 namespace Pulsar {
 
   //! Provides a text interface to get and set Backend attributes
-  class BackendTI : public TextInterface::ClassGetSet<Backend> {
+  class BackendTI : public TextInterface::To<Backend> {
 
   public:
 
     //! Constructor
     BackendTI ();
-
-  private:
-
-    //! Constructor work
-    void init ();
 
   };
 

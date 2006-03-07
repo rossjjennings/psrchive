@@ -35,7 +35,7 @@ nobase_include_HEADERS = model_profile.h Pulsar/ArchiveExpert.h \
 	Pulsar/PhaseWeight.h             Pulsar/ArchiveTI.h \
 	Pulsar/PhaseWeightFunction.h     Pulsar/ProfileWeightFunction.h \
 	Pulsar/Plotter.h                 Pulsar/IntegrationTI.h \
-	Pulsar/ExtensionTI.h             Pulsar/BaselineWindow.h \
+	Pulsar/BaselineWindow.h \
 	Pulsar/ReflectStokes.h           Pulsar/ChannelZapMedian.h \
 	Pulsar/ChannelWeight.h           Pulsar/ChannelZapModulation.h \
         Pulsar/Container.h               Pulsar/Pulsar.h \
@@ -101,9 +101,8 @@ libpsrchive_la_SOURCES = plugins.csh getopt.h Physical.h \
 	Integration_get_Stokes.C      model_profile.C  \
 	Integration_invint.C          pafit_get_PA.C  \
 	Integration_match.C           ArchiveTI.C \
-	IntegrationTI.C               ArchiveTI_import.C \
+	IntegrationTI.C               IonosphereCalibrator.C \
 	IterativeBaseline.C           ProfileWeightFunction.C \
-	IonosphereCalibrator.C \
 	PhaseGradShift.C              Profile_fftconv.C \
 	BaselineWindow.C              ChannelZapMedian.C \
 	ChannelWeight.C               ChannelZapModulation.C \
