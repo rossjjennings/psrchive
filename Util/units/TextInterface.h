@@ -397,23 +397,25 @@ namespace TextInterface {
       }
 
     //! Import the attribute interfaces from a member text interface
-    template<class M> 
-      void import ( const std::string& name, 
-		    const To<M>* member, M*(C::*get)() )
+    /*! In this template, G should be of the type pointer to member function
+      of C that returns pointer to M */
+    template<class M, class G> 
+      void import ( const std::string& name, const To<M>* member, G get )
       {
 	for (unsigned i=0; i < member->attributes.size(); i++)
-	  add(new HasAProxy<C,M,M*(C::*)()>(name, member->attributes[i],get));
+	  add(new HasAProxy<C,M,G>(name, member->attributes[i],get));
       }
 
     //! Import the attribute interfaces from a vector element text interface
-    template<class E>
-      void import ( const std::string& name,
-		    const To<E>* member, 
-		    E*(C::*get)(unsigned), unsigned(C::*size)()const )
+    /*! In this template: G should be of the type pointer to member
+      function of C that returns pointer to the indexed element of type E,
+      S should be a pointer to the member function that returns the
+      number of elements of type E in C. */
+    template<class E, class G, class S>
+      void import ( const std::string& name, const To<E>* member, G g, S s)
       {
 	for (unsigned i=0; i < member->attributes.size(); i++)
-	  add( new VectorOfProxy<C,E,E*(C::*)(unsigned),unsigned(C::*)()const>
-	       (name, member->attributes[i], get, size) );
+	  add( new VectorOfProxy<C,E,G,S>(name, member->attributes[i], g, s) );
       }
 
     //! Import the attribute interfaces from a parent text interface
@@ -422,17 +424,13 @@ namespace TextInterface {
       { import (&parent); }
 
     //! Import the attribute interfaces from a member text interface
-    template<class M> 
-      void import ( const std::string& name,
-		    const To<M>& member,
-		    M*(C::*get)() ) 
+    template<class M, class G> 
+      void import ( const std::string& name, const To<M>& member, G get )
       { import (name, &member, get); }
 
-    template<class E>
-      void import ( const std::string& name,
-		    const To<E>& element, 
-		    E*(C::*get)(unsigned), unsigned(C::*size)()const )
-      { import (name, &element, get, size); }
+    template<class E, class G, class S>
+      void import ( const std::string& name, const To<E>& element, G g, S size)
+      { import (name, &element, g, size); }
 
   protected:
 
