@@ -7,13 +7,19 @@ noinst_LTLIBRARIES = libPlotter.la
 #
 if HAVE_PGPLOT
 
-nobase_include_HEADERS = Pulsar/PlotterFactory.h \
+nobase_include_HEADERS = Pulsar/PlotterFactory.h Pulsar/Graph.h \
+	Pulsar/PlotAxis.h Pulsar/PlotAxisTI.h \
+	Pulsar/PlotLabel.h Pulsar/PlotLabelTI.h \
+	Pulsar/PlotFrame.h Pulsar/PlotFrameTI.h \
 	Pulsar/ProfilePlotter.h Pulsar/ProfilePlotterTI.h \
+	Pulsar/FluxPlotter.h Pulsar/FluxPlotterTI.h \
 	Pulsar/SinglePlotter.h \
 	Pulsar/PosAngPlotter.h Pulsar/PosAngPlotterTI.h
 
 libPlotter_la_SOURCES = PlotterFactory.C \
+	PlotAxis.C PlotAxisTI.C PlotLabelTI.C PlotFrameTI.C \
 	ProfilePlotter.C ProfilePlotterTI.C \
+	FluxPlotter.C FluxPlotterTI.C \
 	SinglePlotter.C \
 	PosAngPlotter.C PosAngPlotterTI.C
 

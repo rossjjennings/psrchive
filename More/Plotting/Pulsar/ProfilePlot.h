@@ -1,34 +1,40 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/ProfilePlot.h,v $
-   $Revision: 1.1 $
-   $Date: 2006/03/03 23:23:36 $
+   $Revision: 1.2 $
+   $Date: 2006/03/07 23:13:23 $
    $Author: straten $ */
 
 #ifndef __Pulsar_SinglePlotter_h
 #define __Pulsar_SinglePlotter_h
 
-#include "Pulsar/ProfilePlotter.h"
+#include "Pulsar/FluxPlotter.h"
 
 namespace Pulsar {
 
-  class Profile;
-
   //! Plots a single pulse profile
+  class SinglePlotter : public FluxPlotter {
 
-  class SinglePlotter : public ProfilePlotter {
+    //! Default constructor
+    SinglePlotter ();
 
-    //! Derived classes must compute the minimum and maximum values (y-axis)
-    void minmax (const Archive*, float& min, float& max);
+    //! Load up the profiles
+    void get_profiles (const Archive* data);
 
+    //! Set the polarization to plot
+    void set_pol (unsigned ipol);
+    unsigned get_pol () const {return ipol;}
+    
     //! Derived classes must draw in the current viewport
     void draw (const Archive*);
 
-    //! draw the profile in the current viewport and window
-    void draw (const Profile* profile) const;
-
     //! draw the profile transitions in the current viewport and window
     void draw_transitions (const Profile* profile) const;
+
+  protected:
+
+    unsigned ipol;
+
 
   };
 

@@ -2,32 +2,27 @@
 #include "Pulsar/Archive.h"
 #include "Pulsar/Profile.h"
 
+#include "Physical.h"
+
 #include <cpgplot.h>
 
-//! Derived classes must compute the minimum and maximum values (y-axis)
-void 
-Pulsar::SinglePlotter::minmax (const Archive* data, float& min, float& max)
+Pulsar::SinglePlotter::SinglePlotter ()
 {
-  const Profile* profile = data->get_Profile (isubint, ipol, ichan);
-  min = profile->min();
-  max = profile->max();
+  ipol = 0;
+}
+
+void Pulsar::SinglePlotter::get_profiles (const Archive* data)
+{
+  profiles.push_back( data->get_Profile (isubint, ipol, ichan) );
 }
 
 //! Derived classes must draw in the current viewport
 void Pulsar::SinglePlotter::draw (const Archive* data)
 {
-  const Profile* profile = data->get_Profile (isubint, ipol, ichan);
-  
-  draw (profile);
+  FluxPlotter::draw (data);
 
   if (data->get_type() != Signal::Pulsar)
-    draw_transitions (profile);
-}
-
-//! draw the profile in the current viewport and window
-void Pulsar::SinglePlotter::draw (const Profile* profile) const
-{
-  cpgline (profile->get_nbin(), &phases[0], profile->get_amps());
+    draw_transitions (profiles[0]);
 }
 
 /*!  Plots the calibrator hi/lo levels using the transitions
