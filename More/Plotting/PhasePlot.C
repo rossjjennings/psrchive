@@ -28,9 +28,6 @@ TextInterface::Class* Pulsar::ProfilePlotter::get_text_interface ()
 
 void Pulsar::ProfilePlotter::set_yrange (float min, float max)
 {
-  if (min >= max)
-    throw Error (InvalidParam, "Pulsar::ProfilePlotter::set_yrange",
-		 "ymin=%f >= ymax=%f", min, max);
   y_min = min;
   y_max = max;
   yrange_set = true;
@@ -68,20 +65,11 @@ void Pulsar::ProfilePlotter::plot (const Archive* data)
     throw Error (InvalidState, "Pulsar::ProfilePlotter::plot",
 		 "range in y values not set after call to prepare");
 
-  float y_diff = y_max - y_min;
-  y_max = y_min + get_frame()->get_y_axis()->get_max_norm() * y_diff;
-  y_min = y_min + get_frame()->get_y_axis()->get_min_norm() * y_diff;
+  float x_min = 0.0;
+  float x_max = 1.0;
 
-  float x_max = get_frame()->get_x_axis()->get_max_norm();
-  float x_min = get_frame()->get_x_axis()->get_min_norm();
-
-  float y_space = (y_max - y_min) * get_frame()->get_y_axis()->get_buf_norm();
-  y_min -= y_space;
-  y_max += y_space;
-
-  float x_space = (x_max - x_min) * get_frame()->get_x_axis()->get_buf_norm();
-  x_min -= x_space;
-  x_max += x_space;
+  get_frame()->get_y_axis()->get_range (y_min, y_max);
+  get_frame()->get_x_axis()->get_range (x_min, x_max);
 
   cpgswin (x_min, x_max, y_min, y_max);
 
