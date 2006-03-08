@@ -9,6 +9,10 @@ Pulsar::PlotAxisTI::PlotAxisTI (PlotAxis* instance)
        &PlotAxis::set_label,
        "lab", "Label to be drawn on axis" );
 
+  add( &PlotAxis::get_alternate,
+       &PlotAxis::set_alternate,
+       "alt", "Permit alternate scale on opposite axis" );
+
   add( &PlotAxis::get_min_norm,
        &PlotAxis::set_min_norm,
        "fmin", "Normalized minimum value" );
