@@ -1,3 +1,5 @@
+#include <string>
+
 #include "Conventions.h"
 
 using namespace std;
