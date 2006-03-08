@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PlotFrame.h,v $
-   $Revision: 1.1 $
-   $Date: 2006/03/07 23:13:23 $
+   $Revision: 1.2 $
+   $Date: 2006/03/08 03:51:38 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PlotFrame_h
@@ -17,9 +17,6 @@ namespace Pulsar {
   class PlotFrame : public Reference::Able {
 
   public:
-
-    //! Default constructor
-    PlotFrame ();
 
     //! Get the x-axis
     PlotAxis* get_x_axis() { return &x_axis; }
