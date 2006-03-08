@@ -4,6 +4,9 @@
 
 Pulsar::PlotFrameTI::PlotFrameTI (PlotFrame* instance)
 {
+  if (instance)
+    set_instance (instance);
+
   import ( "x", PlotAxisTI(), &PlotFrame::get_x_axis );
   import ( "y", PlotAxisTI(), &PlotFrame::get_y_axis );
   import ( "lhi", PlotLabelTI(), &PlotFrame::get_label_over );
