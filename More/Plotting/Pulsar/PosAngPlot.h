@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PosAngPlot.h,v $
-   $Revision: 1.2 $
-   $Date: 2006/03/06 12:59:42 $
+   $Revision: 1.3 $
+   $Date: 2006/03/08 03:51:43 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PosAngPlotter_h
@@ -21,7 +21,7 @@ namespace Pulsar {
     PosAngPlotter ();
 
     //! return the minimum and maximum value in degrees
-    void minmax (const Archive*, float& min, float& max);
+    void prepare (const Archive*);
 
     //! draw the position angle as a function of pulse phase
     void draw (const Archive*);
@@ -36,13 +36,13 @@ namespace Pulsar {
     void set_threshold (float t) { threshold = t; }
     float get_threshold () const { return threshold; }
 
-    //! set the minimum position angle in degrees
-    void set_min (float degrees) { deg_min = degrees; }
-    float get_min () const { return deg_min; }
-
-    //! set the maximum position angle in degrees
-    void set_max (float degrees) { deg_max = degrees; }
-    float get_max () const { return deg_max; }
+    //! Set the sub-integration to plot (where applicable)
+    void set_subint (unsigned _isubint) { isubint = _isubint; }
+    unsigned get_subint () const { return isubint; }
+    
+    //! Set the frequency channel to plot (where applicable)
+    void set_chan (unsigned _ichan) { ichan = _ichan; }
+    unsigned get_chan () const { return ichan; }
 
   protected:
 
@@ -52,12 +52,8 @@ namespace Pulsar {
     //! Noise threshold
     float threshold;
 
-    //! Maximum degrees to plot
-    float deg_max;
-
-    //! Minimum degrees to plot
-    float deg_min;
-
+    unsigned ichan;
+    unsigned isubint;
   };
 
 }
