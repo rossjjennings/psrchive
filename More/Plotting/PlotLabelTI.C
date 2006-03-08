@@ -9,5 +9,11 @@ Pulsar::PlotLabelTI::PlotLabelTI (PlotLabel* instance)
        &PlotLabel::set_left,
        "l", "Left frame label" );
 
+  add( &PlotLabel::get_centre,
+       &PlotLabel::set_centre,
+       "c", "Centre frame label" );
 
+  add( &PlotLabel::get_right,
+       &PlotLabel::set_right,
+       "r", "Right frame label" );
 }
