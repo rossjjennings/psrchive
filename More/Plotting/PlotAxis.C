@@ -5,7 +5,36 @@ Pulsar::PlotAxis::PlotAxis ()
 {
   label = PlotLabel::unset;
   pgbox_opt = "BCNST";
+  alternate = false;
   min_norm = 0.0;
   max_norm = 1.0;
-  buf_norm = 0.05;
+  buf_norm = 0.0;
 }
+
+void Pulsar::PlotAxis::get_range (float& min, float& max) const
+{
+  float diff = max - min;
+  max = min + max_norm * diff;
+  min = min + min_norm * diff;
+
+  float space = (max - min) * buf_norm;
+  min -= space;
+  max += space;
+}
+
+//! Add to the options to be passed to pgbox for this axis
+void Pulsar::PlotAxis::add_pgbox_opt (char opt)
+{
+  std::string::size_type found = pgbox_opt.find(opt);
+  if (found == std::string::npos)
+    pgbox_opt += opt;
+}
+
+//! Remove from the options to be passed to pgbox for this axis
+void Pulsar::PlotAxis::rem_pgbox_opt (char opt)
+{
+  std::string::size_type found = pgbox_opt.find(opt);
+  if (found != std::string::npos)
+    pgbox_opt.erase (found, 1);
+}
+
