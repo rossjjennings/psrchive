@@ -7,7 +7,7 @@ Pulsar::ProfilePlotterTI::ProfilePlotterTI (ProfilePlotter* instance)
 
   add( &ProfilePlotter::get_scale,
        &ProfilePlotter::set_scale,
-       "scale", "Scale on phase axis (ms,deg,rad)" );
+       "scale", "Scale on phase axis (turn,deg,rad,ms)" );
 
   add( &ProfilePlotter::get_origin_norm,
        &ProfilePlotter::set_origin_norm,
