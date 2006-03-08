@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PlotLabel.h,v $
-   $Revision: 1.1 $
-   $Date: 2006/03/07 23:13:23 $
+   $Revision: 1.2 $
+   $Date: 2006/03/08 03:50:46 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PlotLabel_h
@@ -16,6 +16,12 @@ namespace Pulsar {
   class PlotLabel : public Reference::Able {
 
   public:
+
+    //! Default label string signifies not set by user
+    static std::string unset;
+
+    //! Default constructor
+    PlotLabel ();
 
     //! Set the label to be drawn to the left of the frame
     void set_left (const std::string& label) { left = label; }
