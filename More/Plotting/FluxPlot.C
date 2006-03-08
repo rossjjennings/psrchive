@@ -1,4 +1,4 @@
-#include "Pulsar/FluxPlotter.h"
+#include "Pulsar/FluxPlotterTI.h"
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
 #include "Pulsar/Profile.h"
@@ -12,6 +12,13 @@ Pulsar::FluxPlotter::FluxPlotter ()
   isubint = ichan = 0;
   plot_ebox = false;
   plot_histogram = false;
+}
+ 
+TextInterface::Class* Pulsar::FluxPlotter::get_text_interface ()
+{
+  if (!text_interface)
+    text_interface = new FluxPlotterTI (this);
+  return text_interface;
 }
 
 //! Derived classes must compute the minimum and maximum values (y-axis)
@@ -98,15 +105,13 @@ void Pulsar::FluxPlotter::auto_zoom_phase (const Profile* profile, float buf)
 template<typename T> T sqr (T x) { return x*x; }
 
 //! Return the label for the y-axis
-std::string Pulsar::FluxPlotter::get_flux_label (const Archive* data)
+std::string Pulsar::FluxPlotter::get_ylabel (const Archive* data)
 {
   if (data->get_scale() == Signal::Jansky)
     return "Flux Density (mJy)";
   else
     return "Relative Flux Units";
 }
-
-
 
 float Pulsar::FluxPlotter::get_phase_error (const Archive* data)
 {

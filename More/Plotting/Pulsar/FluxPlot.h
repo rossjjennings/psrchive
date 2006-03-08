@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/FluxPlot.h,v $
-   $Revision: 1.1 $
-   $Date: 2006/03/07 23:13:23 $
+   $Revision: 1.2 $
+   $Date: 2006/03/08 03:50:35 $
    $Author: straten $ */
 
 #ifndef __Pulsar_FluxPlotter_h
@@ -25,6 +25,9 @@ namespace Pulsar {
     //! Perform any preprocessing steps
     void prepare (const Archive*);
 
+    //! Get the default label for the y axis
+    std::string get_ylabel (const Archive*);
+
     //! Derived classes must provide the profiles
     virtual void get_profiles (const Archive*) = 0;
 
@@ -33,7 +36,6 @@ namespace Pulsar {
 
     //! Compute the error in flux
     virtual float get_flux_error (const Profile* data);
-    std::string get_flux_label (const Archive* data);
 
     //! Draw the error box
     virtual void plot_error_box (const Archive* data);
@@ -49,6 +51,10 @@ namespace Pulsar {
     void set_chan (unsigned _ichan) { ichan = _ichan; }
     unsigned get_chan () const { return ichan; }
 
+    //! Set the polarization to plot
+    void set_pol (unsigned _ipol) { ipol = _ipol; }
+    unsigned get_pol () const { return ipol; }
+
     //! Plot an error box on the baseline
     void set_plot_error_box (bool flag = true) { plot_ebox = flag; }
     bool get_plot_error_box () const { return plot_ebox; }
@@ -63,12 +69,17 @@ namespace Pulsar {
     //! draw the profile in the current viewport and window
     void draw (const Profile* profile) const;
 
+    //! Return the text interface
+    TextInterface::Class* get_text_interface ();
+
   protected:
 
     std::vector< Reference::To<const Profile> > profiles;
 
     unsigned isubint;
     unsigned ichan;
+    unsigned ipol;
+
     bool plot_ebox;
     bool plot_histogram;
 
