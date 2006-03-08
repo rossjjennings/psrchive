@@ -8,7 +8,7 @@ Pulsar::SinglePlotterTI::SinglePlotterTI (SinglePlotter* instance)
 
   import ( FluxPlotterTI() );
 
-  add( &SinglePlotter::get_pol,
-       &SinglePlotter::set_pol,
-       "pol", "Polarization to plot" );
+  add( &SinglePlotter::get_plot_cal_transitions,
+       &SinglePlotter::set_plot_cal_transitions,
+       "cal", "Plot cal transitions (when applicable)" );
 }

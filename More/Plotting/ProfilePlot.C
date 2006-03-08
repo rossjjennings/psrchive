@@ -6,6 +6,12 @@
 
 #include <cpgplot.h>
 
+Pulsar::SinglePlotter::SinglePlotter ()
+{
+  plot_cal_transitions = true;
+  text_interface = new SinglePlotterTI (this);
+}
+
 void Pulsar::SinglePlotter::get_profiles (const Archive* data)
 {
   profiles.push_back( data->get_Profile (isubint, ipol, ichan) );
@@ -16,7 +22,7 @@ void Pulsar::SinglePlotter::draw (const Archive* data)
 {
   FluxPlotter::draw (data);
 
-  if (data->get_type() != Signal::Pulsar)
+  if (plot_cal_transitions && data->get_type() != Signal::Pulsar)
     draw_transitions (profiles[0]);
 }
 
