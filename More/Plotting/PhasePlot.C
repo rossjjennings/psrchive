@@ -10,6 +10,8 @@ Pulsar::ProfilePlotter::ProfilePlotter ()
 {
   yrange_set = false;
   y_min = y_max = 0;
+
+  scale = Turns;
   origin_norm = 0;
 }
 
@@ -34,21 +36,22 @@ void Pulsar::ProfilePlotter::set_yrange (float min, float max)
   yrange_set = true;
 }
 
-static const char* label (Pulsar::ProfilePlotter::Scale scale)
+
+//! Get the default label for the x axis
+string Pulsar::ProfilePlotter::get_xlabel (const Archive*)
 {
   switch (scale) {
-  case Pulsar::ProfilePlotter::Milliseconds: "Time (ms)";
-  case Pulsar::ProfilePlotter::Degrees: return "Phase (deg.)";
-  case Pulsar::ProfilePlotter::Radians: return "Phase (rad.)";
-  default:
-    return "Pulse Phase";
+  case Turns: return "Pulse Phase";
+  case Degrees: return "Phase (deg.)";
+  case Radians: return "Phase (rad.)";
+  case Milliseconds: return "Time (ms)";
   }
 }
 
-void Pulsar::ProfilePlotter::set_scale (Scale s)
+//! Get the default label for the y axis
+string Pulsar::ProfilePlotter::get_ylabel (const Archive*)
 {
-  scale = s;
-  get_frame()->get_x_axis()->set_label( label(s) );
+  return "";
 }
 
 /*!
@@ -113,9 +116,16 @@ void Pulsar::ProfilePlotter::plot (const Archive* data)
   cpgbox( get_frame()->get_x_axis()->get_pgbox_opt().c_str(), 0.0, 0,
 	  get_frame()->get_y_axis()->get_pgbox_opt().c_str(), 0.0, 0 );
 
-  cpgmtxt ("L",2.5,.5,.5, get_frame()->get_y_axis()->get_label().c_str());
+  string ylabel = get_frame()->get_y_axis()->get_label();
+  if (ylabel == PlotLabel::unset)
+    ylabel = get_ylabel (data);
 
-  cpgmtxt ("B",2.5,.5,.5, get_frame()->get_x_axis()->get_label().c_str());
+  string xlabel = get_frame()->get_x_axis()->get_label();
+  if (xlabel == PlotLabel::unset)
+    xlabel = get_xlabel (data);
+
+  cpgmtxt ("L",2.5,.5,.5, ylabel.c_str());
+  cpgmtxt ("B",2.5,.5,.5, xlabel.c_str());
 
 }
 

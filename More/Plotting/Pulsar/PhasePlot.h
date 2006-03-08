@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PhasePlot.h,v $
-   $Revision: 1.3 $
-   $Date: 2006/03/07 23:13:23 $
+   $Revision: 1.4 $
+   $Date: 2006/03/08 03:51:18 $
    $Author: straten $ */
 
 #ifndef __Pulsar_ProfilePlotter_h
@@ -43,6 +43,12 @@ namespace Pulsar {
     //! Plot in the current viewport
     virtual void plot (const Archive*);
 
+    //! Get the default label for the x axis
+    virtual std::string get_xlabel (const Archive*);
+
+    //! Get the default label for the y axis
+    virtual std::string get_ylabel (const Archive*);
+
     //! Get the text interface to the attributes
     TextInterface::Class* get_text_interface ();
 
@@ -54,7 +60,7 @@ namespace Pulsar {
     virtual void draw (const Archive*) = 0;
 
     //! Set the scale on the phase axis
-    void set_scale (Scale s);
+    void set_scale (Scale s) { scale = s; }
     //! Get the scale on the phase axis
     Scale get_scale () const { return scale; }
 
@@ -93,8 +99,8 @@ namespace Pulsar {
 
   };
 
-  std::ostream& Pulsar::operator << (std::ostream& os, ProfilePlotter::Scale);
-  std::istream& Pulsar::operator >> (std::istream& is, ProfilePlotter::Scale&);
+  std::ostream& operator << (std::ostream& os, ProfilePlotter::Scale);
+  std::istream& operator >> (std::istream& is, ProfilePlotter::Scale&);
 
 }
 
