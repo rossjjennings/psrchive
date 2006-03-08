@@ -10,7 +10,7 @@ using namespace std;
 Pulsar::PlotFrame::PlotFrame ()
 {
   get_label_over()->set_centre("=file");
-  get_label_under()->set_left("=name.=freq MHz");
+  get_label_under()->set_left("=name,=freq MHz");
 }
 
 Pulsar::PlotFrame::~PlotFrame ()
@@ -38,7 +38,7 @@ void Pulsar::PlotFrame::decorate (const Archive* data, const string& label,
     return;
 
   vector<string> labels;
-  TextInterface::separate (label.c_str(), labels, '.');
+  TextInterface::separate (const_cast<char*>(label.c_str()), labels);
 
   float xl, yl;
   cpglen (5, "-", &xl, &yl);
