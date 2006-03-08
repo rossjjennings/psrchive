@@ -872,12 +872,9 @@ int psrephem::unload (string* outstr) const
   if (parmStatus == NULL)
     return 0;
 
-  static const int buflen = 80;
-  static char* buffer = NULL;
-  static string newline ("\n");
-
-  if (buffer == NULL)
-    buffer = new char [buflen];
+  const int buflen = 80;
+  char buffer[buflen];
+  string newline ("\n");
 
   char ephstr [EPH_STR_LEN];
   unsigned bytes_out = 0;
