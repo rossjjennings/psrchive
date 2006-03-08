@@ -127,6 +127,7 @@ void Pulsar::ProfilePlotter::plot (const Archive* data)
   cpgmtxt ("L",2.5,.5,.5, ylabel.c_str());
   cpgmtxt ("B",2.5,.5,.5, xlabel.c_str());
 
+  get_frame()->decorate(data);
 }
 
 

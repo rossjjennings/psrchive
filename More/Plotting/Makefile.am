@@ -18,7 +18,8 @@ nobase_include_HEADERS = Pulsar/PlotterFactory.h Pulsar/Graph.h \
 
 libPlotter_la_SOURCES = PlotterFactory.C \
 	PlotAxis.C PlotAxisTI.C \
-	PlotLabel.C PlotLabelTI.C PlotFrameTI.C \
+	PlotLabel.C PlotLabelTI.C \
+	PlotFrame.C PlotFrameTI.C \
 	ProfilePlotter.C ProfilePlotterTI.C \
 	FluxPlotter.C FluxPlotterTI.C \
 	SinglePlotter.C SinglePlotterTI.C \
