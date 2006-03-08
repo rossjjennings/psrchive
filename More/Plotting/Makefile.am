@@ -13,14 +13,15 @@ nobase_include_HEADERS = Pulsar/PlotterFactory.h Pulsar/Graph.h \
 	Pulsar/PlotFrame.h Pulsar/PlotFrameTI.h \
 	Pulsar/ProfilePlotter.h Pulsar/ProfilePlotterTI.h \
 	Pulsar/FluxPlotter.h Pulsar/FluxPlotterTI.h \
-	Pulsar/SinglePlotter.h \
+	Pulsar/SinglePlotter.h Pulsar/SinglePlotterTI.h \
 	Pulsar/PosAngPlotter.h Pulsar/PosAngPlotterTI.h
 
 libPlotter_la_SOURCES = PlotterFactory.C \
-	PlotAxis.C PlotAxisTI.C PlotLabelTI.C PlotFrameTI.C \
+	PlotAxis.C PlotAxisTI.C \
+	PlotLabel.C PlotLabelTI.C PlotFrameTI.C \
 	ProfilePlotter.C ProfilePlotterTI.C \
 	FluxPlotter.C FluxPlotterTI.C \
-	SinglePlotter.C \
+	SinglePlotter.C SinglePlotterTI.C \
 	PosAngPlotter.C PosAngPlotterTI.C
 
 bin_PROGRAMS = psrplot
