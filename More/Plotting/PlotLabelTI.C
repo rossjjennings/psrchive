@@ -7,13 +7,13 @@ Pulsar::PlotLabelTI::PlotLabelTI (PlotLabel* instance)
 
   add( &PlotLabel::get_left,
        &PlotLabel::set_left,
-       "l", "Left frame label" );
+       "l", "Top left frame label" );
 
   add( &PlotLabel::get_centre,
        &PlotLabel::set_centre,
-       "c", "Centre frame label" );
+       "c", "Top centre frame label" );
 
   add( &PlotLabel::get_right,
        &PlotLabel::set_right,
-       "r", "Right frame label" );
+       "r", "Top right frame label" );
 }
