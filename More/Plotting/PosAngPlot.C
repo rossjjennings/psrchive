@@ -11,19 +11,18 @@ Pulsar::PosAngPlotter::PosAngPlotter()
 {
   error_bars = true;
   threshold = 3.0;
+  isubint = 0;
+  ichan = 0;
 
-  // keep pgplot from drawing the 90
-  deg_max = 89.999;
-  deg_min = -89.999;
-  border = 0;
-
+  get_frame()->get_y_axis()->set_buf_norm(0);
   text_interface = new PosAngPlotterTI (this);
 }
 
-void Pulsar::PosAngPlotter::minmax (const Archive*, float& min, float& max)
+void Pulsar::PosAngPlotter::prepare (const Archive*)
 {
-  min = deg_min;
-  max = deg_max;
+  // keep pgplot from drawing the 90
+  float ninety = 89.999;
+  set_yrange (-ninety, ninety);
 }
 
 void Pulsar::PosAngPlotter::draw (const Archive *data)
