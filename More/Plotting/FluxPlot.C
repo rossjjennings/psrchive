@@ -12,6 +12,8 @@ Pulsar::FluxPlotter::FluxPlotter ()
   isubint = ichan = 0;
   plot_ebox = false;
   plot_histogram = false;
+
+  get_frame()->get_y_axis()->set_buf_norm(0.05);
 }
  
 TextInterface::Class* Pulsar::FluxPlotter::get_text_interface ()

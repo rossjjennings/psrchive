@@ -14,7 +14,6 @@ Pulsar::PosAngPlotter::PosAngPlotter()
   isubint = 0;
   ichan = 0;
 
-  get_frame()->get_y_axis()->set_buf_norm(0);
   text_interface = new PosAngPlotterTI (this);
 }
 
