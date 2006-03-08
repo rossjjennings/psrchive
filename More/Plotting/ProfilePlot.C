@@ -1,15 +1,10 @@
-#include "Pulsar/SinglePlotter.h"
+#include "Pulsar/SinglePlotterTI.h"
 #include "Pulsar/Archive.h"
 #include "Pulsar/Profile.h"
 
 #include "Physical.h"
 
 #include <cpgplot.h>
-
-Pulsar::SinglePlotter::SinglePlotter ()
-{
-  ipol = 0;
-}
 
 void Pulsar::SinglePlotter::get_profiles (const Archive* data)
 {
