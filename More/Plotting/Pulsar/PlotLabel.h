@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PlotLabel.h,v $
-   $Revision: 1.2 $
-   $Date: 2006/03/08 03:50:46 $
+   $Revision: 1.3 $
+   $Date: 2006/03/08 22:34:00 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PlotLabel_h
@@ -37,6 +37,9 @@ namespace Pulsar {
     void set_right (const std::string& label) { right = label; }
     //! Get the label to be drawn to the right of the frame
     std::string get_right () const { return right; }
+
+    //! Set all labels to the specified value
+    void set_all (const std::string& label) { left = right = centre = label; }
 
   protected:
 
