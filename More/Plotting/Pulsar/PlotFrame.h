@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PlotFrame.h,v $
-   $Revision: 1.3 $
-   $Date: 2006/03/08 12:47:18 $
+   $Revision: 1.4 $
+   $Date: 2006/03/08 22:33:51 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PlotFrame_h
@@ -35,14 +35,22 @@ namespace Pulsar {
     //! Get the x-axis
     PlotAxis* get_y_axis() { return &y_axis; }
 
-    //! Get the over-frame label
-    PlotLabel* get_label_over () { return &over; }
+    //! Get the above-frame label
+    PlotLabel* get_label_above () { return &above; }
 
-    //! Get the under-frame label
-    PlotLabel* get_label_under () { return &under; }
+    //! Get the below-frame label
+    PlotLabel* get_label_below () { return &below; }
 
     //! Decorate the frame
     virtual void decorate (const Archive*);
+
+    //! Set the offset between labels and frame (multiple of character height)
+    void set_label_offset (float offset) { label_offset = offset; }
+    float get_label_offset () const { return label_offset; }
+
+    //! Set the spacing between label rows (multiple of character height)
+    void set_label_spacing (float spacing) { label_spacing = spacing; }
+    float get_label_spacing () const { return label_spacing; }
 
     //! Get the text interface to the archive class
     ArchiveTI* get_interface (const Archive*);
@@ -51,10 +59,12 @@ namespace Pulsar {
 
     PlotAxis x_axis;
     PlotAxis y_axis;
-    PlotLabel over;
-    PlotLabel under;
+    PlotLabel above;
+    PlotLabel below;
+    float label_offset;
+    float label_spacing;
 
-    //! Plot the label; direction=+/-1 for over/under frame
+    //! Plot the label; direction=+/-1 for above/below frame
     void decorate (const Archive*, PlotLabel*, float direction);
     //! Plot the label; side=0/.5/1 for left/centre/right
     void decorate (const Archive*, const std::string& label, 

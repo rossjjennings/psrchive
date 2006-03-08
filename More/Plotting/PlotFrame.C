@@ -9,8 +9,10 @@ using namespace std;
 
 Pulsar::PlotFrame::PlotFrame ()
 {
-  get_label_over()->set_centre("=file");
-  get_label_under()->set_left("=name,=freq MHz");
+  get_label_above()->set_centre("=file");
+  get_label_below()->set_left("=name,=freq MHz");
+  label_spacing = 1.2;
+  label_offset = 0.5;
 }
 
 Pulsar::PlotFrame::~PlotFrame ()
@@ -19,8 +21,8 @@ Pulsar::PlotFrame::~PlotFrame ()
 
 void Pulsar::PlotFrame::decorate (const Archive* data)
 {
-  decorate (data, get_label_over(), +1.2);
-  decorate (data, get_label_under(), -1.2);
+  decorate (data, get_label_above(), +label_spacing);
+  decorate (data, get_label_below(), -label_spacing);
 }
 
 void Pulsar::PlotFrame::decorate (const Archive* data, 
@@ -40,17 +42,18 @@ void Pulsar::PlotFrame::decorate (const Archive* data, const string& label,
   vector<string> labels;
   TextInterface::separate (const_cast<char*>(label.c_str()), labels);
 
+  // get the length of a dash in normalized device coordinates
   float xl, yl;
   cpglen (5, "-", &xl, &yl);
   float offset = (side == 0) ? xl : -xl;
   
   float start = 0;
   if (direction > 0) {
-    start = 0.5 + (labels.size()-1) * direction;
+    start = label_offset + (labels.size()-1) * direction;
     direction *= -1;
   }
   else
-    start = direction - 0.5;
+    start = direction - label_offset;
 
   for (unsigned i=0; i < labels.size(); i++) {
     resolve_variables (data, labels[i]);
