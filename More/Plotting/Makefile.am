@@ -15,7 +15,8 @@ nobase_include_HEADERS = Pulsar/PlotterFactory.h Pulsar/Graph.h \
 	Pulsar/FluxPlotter.h Pulsar/FluxPlotterTI.h \
 	Pulsar/SinglePlotter.h Pulsar/SinglePlotterTI.h \
 	Pulsar/StokesPlotter.h Pulsar/StokesPlotterTI.h \
-	Pulsar/PosAngPlotter.h Pulsar/PosAngPlotterTI.h \
+	Pulsar/AnglePlotter.h Pulsar/AnglePlotterTI.h \
+	Pulsar/PosAngPlotter.h Pulsar/EllAngPlotter.h \
 	Pulsar/PhaseVsPlotter.h Pulsar/PhaseVsPlotterTI.h \
 	Pulsar/PhaseVsFrequency.h Pulsar/PhaseVsFrequencyTI.h \
 	Pulsar/PhaseVsTime.h Pulsar/PhaseVsTimeTI.h
@@ -28,7 +29,8 @@ libPlotter_la_SOURCES = PlotterFactory.C \
 	FluxPlotter.C FluxPlotterTI.C \
 	SinglePlotter.C SinglePlotterTI.C \
 	StokesPlotter.C StokesPlotterTI.C \
-	PosAngPlotter.C PosAngPlotterTI.C \
+	AnglePlotter.C AnglePlotterTI.C \
+	PosAngPlotter.C EllAngPlotter.C \
 	PhaseVsPlotter.C PhaseVsPlotterTI.C \
 	PhaseVsFrequency.C PhaseVsFrequencyTI.C \
 	PhaseVsTime.C PhaseVsTimeTI.C
