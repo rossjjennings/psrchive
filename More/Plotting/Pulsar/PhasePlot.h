@@ -1,14 +1,16 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PhasePlot.h,v $
-   $Revision: 1.5 $
-   $Date: 2006/03/09 22:29:53 $
+   $Revision: 1.6 $
+   $Date: 2006/03/09 23:03:41 $
    $Author: straten $ */
 
 #ifndef __Pulsar_ProfilePlotter_h
 #define __Pulsar_ProfilePlotter_h
 
 #include "Pulsar/Graph.h"
+#include "Pulsar/PlotFrame.h"
+
 #include <vector>
 
 namespace Pulsar {
