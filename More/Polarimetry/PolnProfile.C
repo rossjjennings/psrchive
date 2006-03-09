@@ -491,14 +491,24 @@ void Pulsar::PolnProfile::get_polarized (Profile* polarized) const
   const float *u = get_Profile(2)->get_amps(); 
   const float *v = get_Profile(3)->get_amps();
 
-  unsigned nbin = get_nbin();
+  unsigned ibin, nbin = get_nbin();
   
   polarized->resize (nbin);
-  
-  for (unsigned ibin=0; ibin<nbin; ibin++)
-    polarized->get_amps()[ibin] 
-      = sqrt (q[ibin]*q[ibin] + u[ibin]*u[ibin] + v[ibin]*v[ibin]);
+  float* amps = polarized->get_amps();
+
+  for (ibin=0; ibin<nbin; ibin++)
+    amps[ibin] = q[ibin]*q[ibin] + u[ibin]*u[ibin] + v[ibin]*v[ibin];
+
+  float min_phase = polarized->find_min_phase();
+  polarized->offset(-polarized->mean (min_phase));
+
+  for (ibin=0; ibin<nbin; ibin++)
+    if (amps[ibin] < 0.0)
+      amps[ibin] = 0.0;
+    else
+      amps[ibin] = sqrt(amps[ibin]);
 }
+
 
 /*!
 
