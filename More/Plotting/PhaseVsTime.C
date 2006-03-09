@@ -7,7 +7,7 @@ Pulsar::PhaseVsTime::PhaseVsTime ()
 {
   ichan = 0;
   ipol = 0;
-  text_interface = new PhaseVsTimeTI (this);
+  interface = new PhaseVsTimeTI (this);
 }
 
 void Pulsar::PhaseVsTime::prepare (const Archive* data)

@@ -6,7 +6,7 @@ Pulsar::PhaseVsFrequency::PhaseVsFrequency ()
 {
   isubint = 0;
   ipol = 0;
-  text_interface = new PhaseVsFrequencyTI (this);
+  interface = new PhaseVsFrequencyTI (this);
 }
 
 void Pulsar::PhaseVsFrequency::prepare (const Archive* data)

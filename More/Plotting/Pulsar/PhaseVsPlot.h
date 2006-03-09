@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PhaseVsPlot.h,v $
-   $Revision: 1.1 $
-   $Date: 2006/03/08 22:33:34 $
+   $Revision: 1.2 $
+   $Date: 2006/03/09 22:29:53 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PhaseVsPlotter_h
@@ -32,7 +32,7 @@ namespace Pulsar {
     void draw (const Archive*);
 
     //! Return the text interface
-    TextInterface::Class* get_text_interface ();
+    TextInterface::Class* get_interface ();
 
     //! Provide access to the z-axis
     PlotAxis* get_z_axis () { return &z_axis; }

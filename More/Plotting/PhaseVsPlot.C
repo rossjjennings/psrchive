@@ -19,11 +19,11 @@ Pulsar::PhaseVsPlotter::PhaseVsPlotter ()
   get_frame()->get_label_below()->set_all (PlotLabel::unset);
 }
  
-TextInterface::Class* Pulsar::PhaseVsPlotter::get_text_interface ()
+TextInterface::Class* Pulsar::PhaseVsPlotter::get_interface ()
 {
-  if (!text_interface)
-    text_interface = new PhaseVsPlotterTI (this);
-  return text_interface;
+  if (!interface)
+    interface = new PhaseVsPlotterTI (this);
+  return interface;
 }
 
 //! Derived classes must draw in the current viewport

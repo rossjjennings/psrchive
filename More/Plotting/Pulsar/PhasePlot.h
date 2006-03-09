@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PhasePlot.h,v $
-   $Revision: 1.4 $
-   $Date: 2006/03/08 03:51:18 $
+   $Revision: 1.5 $
+   $Date: 2006/03/09 22:29:53 $
    $Author: straten $ */
 
 #ifndef __Pulsar_ProfilePlotter_h
@@ -43,14 +43,17 @@ namespace Pulsar {
     //! Plot in the current viewport
     virtual void plot (const Archive*);
 
+    //! Get the text interface to the configuration attributes
+    TextInterface::Class* get_interface ();
+
+    //! Get the text interface to the frame attributes
+    TextInterface::Class* get_frame_interface ();
+
     //! Get the default label for the x axis
     virtual std::string get_xlabel (const Archive*);
 
     //! Get the default label for the y axis
     virtual std::string get_ylabel (const Archive*);
-
-    //! Get the text interface to the attributes
-    TextInterface::Class* get_text_interface ();
 
     //! Derived classes must prepare to draw
     /*! Derived classes must at least call set_yrange */
@@ -69,7 +72,13 @@ namespace Pulsar {
     //! Get the world-normalized coordinates of the origin on the phase axis
     float get_origin_norm () const { return origin_norm; }
 
+    //! Get the frame
+    PlotFrame* get_frame () { return &frame; }
+
   protected:
+
+    //! The plot frame
+    PlotFrame frame;
 
     //! Scale on the phase axis
     Scale scale;
@@ -78,7 +87,10 @@ namespace Pulsar {
     float origin_norm;
 
     //! The text interface
-    Reference::To<TextInterface::Class> text_interface;
+    Reference::To<TextInterface::Class> interface;
+
+    //! The text interface
+    Reference::To<TextInterface::Class> frame_interface;
 
     //! Phases can be used
     std::vector<float> phases;

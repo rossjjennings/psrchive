@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/FluxPlot.h,v $
-   $Revision: 1.3 $
-   $Date: 2006/03/09 15:51:01 $
+   $Revision: 1.4 $
+   $Date: 2006/03/09 22:29:53 $
    $Author: straten $ */
 
 #ifndef __Pulsar_FluxPlotter_h
@@ -70,7 +70,7 @@ namespace Pulsar {
     void draw (const Profile* profile) const;
 
     //! Return the text interface
-    TextInterface::Class* get_text_interface ();
+    TextInterface::Class* get_interface ();
 
   protected:
 

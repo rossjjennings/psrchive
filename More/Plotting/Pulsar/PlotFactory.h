@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PlotFactory.h,v $
-   $Revision: 1.1 $
-   $Date: 2006/03/05 21:07:29 $
+   $Revision: 1.2 $
+   $Date: 2006/03/09 22:29:53 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PlotterFactory_h
@@ -13,15 +13,15 @@
 
 namespace Pulsar {
 
-  class ProfilePlotter;
+  class Graph;
 
-  //! Provides a text interface to get and set ProfilePlotter attributes
+  //! Provides a text interface to get and set Graph attributes
   class PlotterFactory {
 
   public:
 
     //! Return a new instance of the named plotter
-    ProfilePlotter* construct (std::string name);
+    Graph* construct (std::string name);
 
     //! Return the number of plotters
     unsigned get_nplot () { return agents.size(); }
@@ -54,7 +54,7 @@ namespace Pulsar {
     Agent (std::string n, std::string d) : name (n), description (d) {}
 
     //! Return a new instance of Plotter class
-    virtual ProfilePlotter* construct () = 0;
+    virtual Graph* construct () = 0;
 
     //! Return the name of the Plotter class
     std::string get_name () { return name; }
@@ -79,7 +79,7 @@ namespace Pulsar {
       : Agent (_name, _description) {}
  
     //! Return a new instance of Plotter class
-    ProfilePlotter* construct () { return new P; }
+    Graph* construct () { return new P; }
 
   };
 

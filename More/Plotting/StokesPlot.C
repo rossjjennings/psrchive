@@ -12,7 +12,7 @@ Pulsar::StokesPlotter::StokesPlotter ()
   plot_values  = "IQUV";
   plot_colours = "1234";
   plot_lines   = "1111";
-  text_interface = new StokesPlotterTI (this);
+  interface = new StokesPlotterTI (this);
 }
 
 void Pulsar::StokesPlotter::get_profiles (const Archive* data)

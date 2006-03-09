@@ -16,7 +16,7 @@ Pulsar::AnglePlotter::AnglePlotter()
   isubint = 0;
   ichan = 0;
 
-  text_interface = new AnglePlotterTI (this);
+  interface = new AnglePlotterTI (this);
 }
 
 void Pulsar::AnglePlotter::prepare (const Archive*)

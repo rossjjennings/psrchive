@@ -16,11 +16,11 @@ Pulsar::FluxPlotter::FluxPlotter ()
   get_frame()->get_y_axis()->set_buf_norm(0.05);
 }
  
-TextInterface::Class* Pulsar::FluxPlotter::get_text_interface ()
+TextInterface::Class* Pulsar::FluxPlotter::get_interface ()
 {
-  if (!text_interface)
-    text_interface = new FluxPlotterTI (this);
-  return text_interface;
+  if (!interface)
+    interface = new FluxPlotterTI (this);
+  return interface;
 }
 
 //! Derived classes must compute the minimum and maximum values (y-axis)

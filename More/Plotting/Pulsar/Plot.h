@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/Plot.h,v $
-   $Revision: 1.1 $
-   $Date: 2006/03/07 23:13:23 $
+   $Revision: 1.2 $
+   $Date: 2006/03/09 22:29:53 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Graph_h
@@ -28,16 +28,11 @@ namespace Pulsar {
     //! Plot in the current viewport
     virtual void plot (const Archive*) = 0;
 
-    //! Get the text interface to the attributes
-    virtual TextInterface::Class* get_text_interface () = 0;
+    //! Get the text interface to the configuration attributes
+    virtual TextInterface::Class* get_interface () = 0;
 
-    //! Get the frame
-    PlotFrame* get_frame () { return &frame; }
-
-  protected:
-
-    //! The plot frame
-    PlotFrame frame;
+    //! Get the text interface to the frame attributes
+    virtual TextInterface::Class* get_frame_interface () = 0;
 
   };
 

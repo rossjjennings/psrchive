@@ -2,7 +2,7 @@
 #include "Error.h"
 
 //! Return a new instance of the named plotter
-Pulsar::ProfilePlotter* Pulsar::PlotterFactory::construct (std::string name)
+Pulsar::Graph* Pulsar::PlotterFactory::construct (std::string name)
 {
   for (unsigned i=0; i < agents.size(); i++)
     if (name == agents[i]->get_name())

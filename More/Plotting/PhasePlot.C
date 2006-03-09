@@ -1,5 +1,5 @@
-#include "Pulsar/ProfilePlotter.h"
 #include "Pulsar/ProfilePlotterTI.h"
+#include "Pulsar/PlotFrameTI.h"
 
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
@@ -19,11 +19,19 @@ Pulsar::ProfilePlotter::~ProfilePlotter ()
 {
 }
 
-TextInterface::Class* Pulsar::ProfilePlotter::get_text_interface ()
+TextInterface::Class* Pulsar::ProfilePlotter::get_interface ()
 {
-  if (!text_interface)
-    text_interface = new ProfilePlotterTI (this);
-  return text_interface;
+  if (!interface)
+    interface = new ProfilePlotterTI (this);
+  return interface;
+}
+
+//! Get the text interface to the frame attributes
+TextInterface::Class* Pulsar::ProfilePlotter::get_frame_interface ()
+{
+  if (!frame_interface)
+    frame_interface = new PlotFrameTI (get_frame());
+  return frame_interface;
 }
 
 void Pulsar::ProfilePlotter::set_yrange (float min, float max)
