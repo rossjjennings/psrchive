@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/StokesPlot.h,v $
-   $Revision: 1.1 $
-   $Date: 2006/03/09 15:51:06 $
+   $Revision: 1.2 $
+   $Date: 2006/03/09 20:35:57 $
    $Author: straten $ */
 
 #ifndef __Pulsar_StokesPlotter_h
@@ -24,9 +24,6 @@ namespace Pulsar {
 
     //! Load the profiles
     void get_profiles (const Archive* data);
-
-    //! Get the profile specified by code
-    const Profile* get_Profile (const PolnProfile* data, char code);
 
     //! Set the values to be plotted (one or more of I,Q,U,V,L,p)
     void set_plot_values (const std::string& plot) { plot_values = plot; }

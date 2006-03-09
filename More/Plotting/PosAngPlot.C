@@ -1,14 +1,11 @@
 #include "Pulsar/PosAngPlotter.h"
-
-#include "Pulsar/Archive.h"
-#include "Pulsar/Integration.h"
+#include "Pulsar/Polarization.h"
 #include "Pulsar/PolnProfile.h"
 
 void Pulsar::PosAngPlotter::get_angles (const Archive* data,
 					vector< Estimate<double> >& posang)
 {
-  const Integration* subint = data->get_Integration(isubint);
-  Reference::To<const PolnProfile> profile = subint->new_PolnProfile(ichan);
+  Reference::To<const PolnProfile> profile = new_Stokes (data,isubint,ichan);
   profile->get_orientation (posang, threshold);
 }
 

@@ -1,7 +1,5 @@
 #include "Pulsar/EllAngPlotter.h"
-
-#include "Pulsar/Archive.h"
-#include "Pulsar/Integration.h"
+#include "Pulsar/Polarization.h"
 #include "Pulsar/PolnProfile.h"
 
 Pulsar::EllAngPlotter::EllAngPlotter ()
@@ -10,11 +8,10 @@ Pulsar::EllAngPlotter::EllAngPlotter ()
 }
 
 void Pulsar::EllAngPlotter::get_angles (const Archive* data,
-					vector< Estimate<double> >& posang)
+					vector< Estimate<double> >& ell)
 {
-  const Integration* subint = data->get_Integration(isubint);
-  Reference::To<const PolnProfile> profile = subint->new_PolnProfile(ichan);
-  profile->get_ellipticity (posang, threshold);
+  Reference::To<const PolnProfile> profile = new_Stokes (data,isubint,ichan);
+  profile->get_ellipticity (ell, threshold);
 }
 
 //! Return the label for the y-axis
