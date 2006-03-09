@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/FluxPlot.h,v $
-   $Revision: 1.2 $
-   $Date: 2006/03/08 03:50:35 $
+   $Revision: 1.3 $
+   $Date: 2006/03/09 15:51:01 $
    $Author: straten $ */
 
 #ifndef __Pulsar_FluxPlotter_h
@@ -75,6 +75,8 @@ namespace Pulsar {
   protected:
 
     std::vector< Reference::To<const Profile> > profiles;
+    std::vector< int > plot_sci;
+    std::vector< int > plot_sls;
 
     unsigned isubint;
     unsigned ichan;

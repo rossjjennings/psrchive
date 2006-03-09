@@ -34,12 +34,18 @@ void Pulsar::FluxPlotter::prepare (const Archive* data)
     throw Error (InvalidState, "Pulsar::FluxPlotter::prepare",
 		 "Profiles array empty after call to get_profiles");
 
-  float min = profiles[0]->min();
-  float max = profiles[0]->max();
+  float x_min = 0.0;
+  float x_max = data->get_nbin();
+  get_frame()->get_x_axis()->get_range (x_min, x_max);
+  int i_min = (int) x_min;
+  int i_max = (int) x_max;
+
+  float min = profiles[0]->min(i_min, i_max);
+  float max = profiles[0]->max(i_min, i_max);
 
   for (unsigned iprof=1; iprof < profiles.size(); iprof++) {
-    float pmin = profiles[iprof]->min();
-    float pmax = profiles[iprof]->max();
+    float pmin = profiles[iprof]->min(i_min, i_max);
+    float pmax = profiles[iprof]->max(i_min, i_max);
     if (pmin < min)
       min = pmin;
     if (pmax > max)
@@ -54,7 +60,17 @@ void Pulsar::FluxPlotter::prepare (const Archive* data)
 void Pulsar::FluxPlotter::draw (const Archive* data)
 {
   for (unsigned iprof=0; iprof < profiles.size(); iprof++) {
-    cpgsci (iprof*2+1);
+
+    if (plot_sci.size() == profiles.size())
+      cpgsci (plot_sci[iprof]);
+    else
+      cpgsci (iprof);
+
+    if (plot_sls.size() == profiles.size())
+      cpgsls (plot_sls[iprof]);
+    else
+      cpgsls (iprof);
+
     draw (profiles[iprof]);
   }
 
