@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PlotFrame.h,v $
-   $Revision: 1.4 $
-   $Date: 2006/03/08 22:33:51 $
+   $Revision: 1.5 $
+   $Date: 2006/03/09 23:02:12 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PlotFrame_h
@@ -18,7 +18,7 @@ namespace Pulsar {
   class Archive;
   class ArchiveTI;
 
-  //! Plots the position angle of the linearly polarized radiation
+  //! Stores the properties of the plot frame
   class PlotFrame : public Reference::Able {
 
   public:
