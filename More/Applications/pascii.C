@@ -25,7 +25,7 @@ void usage ()
     "  -x         Convert to Stokes and also print fraction polarisation\n"
     "  -y         Convert to Stokes and also print fraction linear\n"
     "  -z         Convert to Stokes and also print fraction circular\n"
-    "  -R         Don't remove baseline [do remove baseline]\n"
+    "  -R         Remove baseline\n"
     "\n"
     "Each row output by pascii contains:\n"
     "\n"
