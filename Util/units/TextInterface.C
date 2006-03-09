@@ -113,37 +113,50 @@ void TextInterface::parse_indeces (vector<unsigned>& index,
 
 }
 
-void TextInterface::separate (char* ptr, vector<string>& commands)
+void TextInterface::separate (string s, vector<string>& c)
 {
   bool edit;
-  separate (ptr, commands, edit);
+  separate (s, c, edit);
 }
 
-void TextInterface::separate (char* ptr, vector<string>& commands, bool& edit)
+void TextInterface::separate (string s, std::vector<std::string>& c, char lim)
 {
-  while (ptr) {
+  bool edit;
+  separate (s, c, edit, lim);
+}
 
-    // search for the first comma not enclosed in [ brackets ]
-    char* end = ptr;
-    while ( (end = strpbrk(end, ",]")) != 0)
-      if (*end == '[')
-	end = strchr(end, ']');
+void TextInterface::separate (string s, vector<string>& c, bool& edit)
+{
+  separate (s, c, edit, ',');
+}
+
+void TextInterface::separate (string s, vector<string>& commands,
+			      bool& edit, char lim)
+{
+  string limiter;
+  limiter += lim;
+
+  while (s.length()) {
+
+    // search for the first instance of lim not enclosed in [ brackets ]
+    string::size_type end = 0;
+
+    while ( (end = s.find_first_of (limiter+"[", end) ) != string::npos )
+      if (s[end] == '[')
+	end = s.find (']', end);
       else
 	break;
     
-    // null-terminate on the first naked comma
-    if (end)
-      *end = '\0';
- 
-    if (strchr(ptr,'='))
+    // the first naked comma
+    string command = s.substr (0, end);
+
+    if (command.find('='))
       edit = true;
 
-    commands.push_back(ptr);
-    
-    if (end)
-      ptr = end+1;
-    else
-      ptr = 0;
+    commands.push_back (command);
+
+    end = s.find_first_not_of (limiter+" ", end);
+    s.erase (0, end);
     
   }
 }

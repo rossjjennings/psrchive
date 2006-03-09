@@ -261,6 +261,33 @@ int main () try {
     cerr << "childTUI successfully removed 'same' attribute" << endl;
   }
 
+  cerr << "testing TextInterface::separate" << endl;
+
+  bool edit = false;
+  vector<string> commands;
+  TextInterface::separate ("one=1, two,three, four=4", commands, edit);
+
+  if (commands.size() != 4) {
+    cerr << "TextInterface::separate yields vector with only "
+	 << commands.size() << " elements" << endl;
+    return -1;
+  }
+
+  if (commands[0] != "one=1") {
+    cerr << "TextInterface::separate fail cmds[0]=" << commands[0] << endl;
+    return -1;
+  }
+
+  if (commands[1] != "two") {
+    cerr << "TextInterface::separate fail cmds[0]=" << commands[0] << endl;
+    return -1;
+  }
+
+  if (commands[2] != "three") {
+    cerr << "TextInterface::separate fail cmds[0]=" << commands[0] << endl;
+    return -1;
+  }
+
   cerr << "test_TextInterface SUCCESS!" << endl;
   return 0;
 }

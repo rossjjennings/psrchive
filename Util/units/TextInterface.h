@@ -502,8 +502,11 @@ namespace TextInterface {
   void parse_indeces (std::vector<unsigned>& indeces, const std::string&);
 
   //! Separate a list of comma-separated commands into a vector of strings
-  void separate (char* ptr, std::vector<std::string>& commands, bool& edit);
-  void separate (char* ptr, std::vector<std::string>& commands);
+  void separate (std::string cmds, std::vector<std::string>&, bool& edit);
+  void separate (std::string cmds, std::vector<std::string>&, char lim);
+  void separate (std::string cmds, std::vector<std::string>&);
+  void separate (std::string cmds, std::vector<std::string>&,
+		 bool& edit, char lim);
 
   //! Label elements in ElementGetSet<C,E>::get_value
   extern bool label_elements;
@@ -635,7 +638,7 @@ bool TextInterface::Attribute<C>::matches (const std::string& name) const
 template<class C,class M,class Get>
 bool TextInterface::HasAProxy<C,M,Get>::matches (const std::string& name) const
 {
-  unsigned length = prefix.length();
+  std::string::size_type length = prefix.length();
   if ( strncasecmp(prefix.c_str(), name.c_str(), length) != 0 )
     return false;
 
@@ -649,7 +652,7 @@ template<class C,class M,class Get,class Size>
  bool TextInterface::VectorOfProxy<C,M,Get,Size>::matches
   (const std::string& name) const
 {
-  unsigned length = prefix.length();
+  std::string::size_type length = prefix.length();
   if ( strncasecmp(prefix.c_str(), name.c_str(), length) != 0 )
     return false;
 
