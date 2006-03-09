@@ -10,7 +10,7 @@ using namespace std;
 Pulsar::PlotFrame::PlotFrame ()
 {
   get_label_above()->set_centre("=file");
-  get_label_below()->set_left("=name,=freq MHz");
+  get_label_below()->set_left("=name.=freq MHz");
   label_spacing = 1.2;
   label_offset = 0.5;
 }
@@ -40,7 +40,7 @@ void Pulsar::PlotFrame::decorate (const Archive* data, const string& label,
     return;
 
   vector<string> labels;
-  TextInterface::separate (const_cast<char*>(label.c_str()), labels);
+  TextInterface::separate (label, labels, '.');
 
   // get the length of a dash in normalized device coordinates
   float xl, yl;
