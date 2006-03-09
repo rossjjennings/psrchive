@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PolnProfile.h,v $
-   $Revision: 1.27 $
-   $Date: 2006/01/26 18:02:37 $
+   $Revision: 1.28 $
+   $Date: 2006/03/09 17:14:28 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PolnProfile_h
@@ -109,8 +109,11 @@ namespace Pulsar {
     //! Return the total polarization profile
     void get_polarized (Profile* polarized) const;
 
-    //! Return the position angle and its estimated error for each pulse phase
-    void get_PA (vector< Estimate<double> >& PA, float threshold = 0.0) const;
+    //! Return the orientation and its estimated error for each pulse phase
+    void get_orientation (vector< Estimate<double> >& o, float sigma) const;
+
+    //! Return the ellipticity and its estimated error for each pulse phase
+    void get_ellipticity (vector< Estimate<double> >& e, float sigma) const;
 
   protected:
 
@@ -131,6 +134,12 @@ namespace Pulsar {
 
     //! Get the specifed profile (non-const version)
     Profile* get_profile (unsigned ipol);
+
+    //! Does the work for get_polarized and get_linear
+    void get_rss (Profile* rss, unsigned jpol, unsigned kpol) const;
+
+    //! Does some work for get_orientation and get_ellipticity
+    double get_variance (unsigned ipol, float phase) const;
 
   };
 

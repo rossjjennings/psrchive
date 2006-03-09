@@ -470,6 +470,7 @@ void Pulsar::PolnProfile::invint (Profile* invint) const
 }
 
 /*!
+  rss stands for root-sum-squared
 
   \pre The PolnProfile must contain Stokes parameters; so as to reduce the
   amount of behind the scenes cloning and state conversion
@@ -477,30 +478,33 @@ void Pulsar::PolnProfile::invint (Profile* invint) const
   \pre The Profile baselines should have been removed; so as not to
   interfere with any baseline removal algorithms already applied
 
-  \post The polarized Profile baseline will not have been removed; so as to
-  enable the application of specialized baseline removal algorithms
+  \post The polarization profiles from jpol to kpol inclusive are added
+
+  \post The bias due to noise is removed before the square root is taken
 
  */
-void Pulsar::PolnProfile::get_polarized (Profile* polarized) const
+void Pulsar::PolnProfile::get_rss (Profile* rss,
+				   unsigned jpol, unsigned kpol) const
 {
   if (state != Signal::Stokes)
-    throw Error (InvalidState, "Pulsar::PolnProfile::get_PA",
+    throw Error (InvalidState, "Pulsar::PolnProfile::get_sqrt_sumsq",
 		 "must first convert to Stokes parameters");
-
-  const float *q = get_Profile(1)->get_amps();
-  const float *u = get_Profile(2)->get_amps(); 
-  const float *v = get_Profile(3)->get_amps();
 
   unsigned ibin, nbin = get_nbin();
   
-  polarized->resize (nbin);
-  float* amps = polarized->get_amps();
+  rss->resize (nbin);
+  rss->zero ();
 
-  for (ibin=0; ibin<nbin; ibin++)
-    amps[ibin] = q[ibin]*q[ibin] + u[ibin]*u[ibin] + v[ibin]*v[ibin];
+  float* amps = rss->get_amps();
 
-  float min_phase = polarized->find_min_phase();
-  polarized->offset(-polarized->mean (min_phase));
+  for (unsigned ipol=jpol; ipol <= kpol; ipol++) {
+    const float *a = get_Profile(ipol)->get_amps();
+    for (ibin=0; ibin<nbin; ibin++)
+      amps[ibin] += a[ibin]*a[ibin];
+  }
+
+  float min_phase = rss->find_min_phase();
+  rss->offset(-rss->mean (min_phase));
 
   for (ibin=0; ibin<nbin; ibin++)
     if (amps[ibin] < 0.0)
@@ -509,86 +513,101 @@ void Pulsar::PolnProfile::get_polarized (Profile* polarized) const
       amps[ibin] = sqrt(amps[ibin]);
 }
 
+void Pulsar::PolnProfile::get_polarized (Profile* polarized) const
+try {
+  get_rss (polarized, 1,3);
+}
+catch (Error& error) {
+  throw error += "Pulsar::PolnProfile::get_polarized";
+}
+
+void Pulsar::PolnProfile::get_linear (Profile* linear) const
+try {
+  get_rss (linear, 1,2);
+}
+catch (Error& error) {
+  throw error += "Pulsar::PolnProfile::get_linear";
+}
 
 /*!
-
-  \pre The PolnProfile must contain Stokes parameters; so as to reduce the
-  amount of behind the scenes cloning and state conversion
-
-  \pre The Profile baselines should have been removed; so as not to
-  interfere with any baseline removal algorithms already applied
-
-  \post The bias due to noise in Q and U will have been removed
-
- */
-void Pulsar::PolnProfile::get_linear (Profile* linear) const
+  This worker function checks that the mean is less than the r.m.s.
+  and prints a warning if it appears that the baseline has not been removed 
+*/
+double Pulsar::PolnProfile::get_variance (unsigned ipol, float phase) const
 {
-  if (state != Signal::Stokes)
-    throw Error (InvalidState, "Pulsar::PolnProfile::get_PA",
-		 "must first convert to Stokes parameters");
-
-  const float *q = get_Profile(1)->get_amps();
-  const float *u = get_Profile(2)->get_amps(); 
-
-  unsigned ibin, nbin = get_nbin();
-  
-  linear->resize (nbin);
-  float* amps = linear->get_amps();
-
-  for (ibin=0; ibin<nbin; ibin++)
-    amps[ibin] = q[ibin]*q[ibin] + u[ibin]*u[ibin];
-
-  float min_phase = linear->find_min_phase();
-  linear->offset(-linear->mean (min_phase));
-
-  for (ibin=0; ibin<nbin; ibin++)
-    if (amps[ibin] < 0.0)
-      amps[ibin] = 0.0;
-    else
-      amps[ibin] = sqrt(amps[ibin]);
+  double mean = 0;
+  double var = 0;
+  get_Profile(ipol)->stats (phase, &mean, &var);
+  if (abs(mean) > sqrt(var))
+    cerr << "Pulsar::PolnProfile::get_variance WARNING off-pulse mean="
+	 << mean << " > rms=" << sqrt(var) << endl;
+  return var;
 }
 
-void Pulsar::PolnProfile::get_PA (vector< Estimate<double> >& posang,
-				  float threshold) const
+
+
+void Pulsar::PolnProfile::get_ellipticity (vector< Estimate<double> >& ell,
+					   float threshold) const
 {
   if (state != Signal::Stokes)
     throw Error (InvalidState, "Pulsar::PolnProfile::get_PA",
 		 "must first convert to Stokes parameters");
    
+  Profile polarized;
+  get_polarized (&polarized);
+  float min_phase = polarized.find_min_phase();
+
+  double var_q = get_variance (1, min_phase);
+  double var_u = get_variance (2, min_phase);
+  double var_v = get_variance (3, min_phase);
+
+  float sigma = sqrt (0.5*(var_q + var_u + var_v));
+
+  Profile linear;
+  get_linear (&linear);
+  double var_l = 0.5 * (var_q + var_u);
+
+  const float *l = linear.get_amps();
+  const float *v = get_Profile(3)->get_amps(); 
+
+  unsigned nbin = get_nbin();
+  ell.resize (nbin);
+
+  for (unsigned ibin=0; ibin<nbin; ibin++) {
+    if (!threshold || polarized.get_amps()[ibin] > threshold*sigma) {
+      Estimate<double> L (l[ibin], var_l);
+      Estimate<double> V (v[ibin], var_v);
+      ell[ibin] = 90.0/M_PI * atan2 (V, L);
+    }
+    else
+      ell[ibin] = 0.0;
+  }
+
+}
+
+void Pulsar::PolnProfile::get_orientation (vector< Estimate<double> >& posang,
+					   float threshold) const
+{
   Profile linear;
   get_linear (&linear);
   float min_phase = linear.find_min_phase();
 
-  double mean = 0;
-  double var_Q = 0;
-  get_Profile(1)->stats (min_phase, &mean, &var_Q);
-  if (abs(mean) > sqrt(var_Q))
-    cerr << "Pulsar::PolnProfile::get_PA WARNING off-pulse Q mean="
-	 << mean << " > rms=" << sqrt(var_Q) << endl;
+  double var_q = get_variance (1, min_phase);
+  double var_u = get_variance (2, min_phase);
 
-  double var_U = 0;
-  get_Profile(2)->stats (min_phase, &mean, &var_U);
-  if (abs(mean) > sqrt(var_U))
-    cerr << "Pulsar::PolnProfile::get_PA WARNING off-pulse U mean="
-	 << mean << " > rms=" << sqrt(var_U) << endl;
+  float sigma = sqrt (0.5*(var_q + var_u));
 
-  float sigma = sqrt (0.5*(var_Q + var_U));
-
-  unsigned nbin = get_nbin();
-
-  const float *q = get_Profile(1)->get_amps();
+  const float *q = get_Profile(1)->get_amps(); 
   const float *u = get_Profile(2)->get_amps(); 
 
+  unsigned nbin = get_nbin();
   posang.resize (nbin);
-
-  cerr << "var_Q=" << var_Q << " var_U=" << var_U << endl;
 
   for (unsigned ibin=0; ibin<nbin; ibin++) {
     if (!threshold || linear.get_amps()[ibin] > threshold*sigma) {
-      Estimate<double> U (u[ibin], var_U);
-      Estimate<double> Q (q[ibin], var_Q);
-
-      posang[ibin] = 90.0/M_PI * atan2 (U, Q);
+      Estimate<double> Q (q[ibin], var_q);
+      Estimate<double> U (u[ibin], var_u);
+      posang[ibin] = 90.0/M_PI * atan2 (U,Q);
     }
     else
       posang[ibin] = 0.0;
