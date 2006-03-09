@@ -25,6 +25,12 @@
 #include <ieeefp.h>
 #endif
 
+// For some strange reason, isfinite is getting undefed somehow
+#if defined(__APPLE__) && defined (__POWERPC__)
+#define isfinite(x) __isfinited(x)
+#endif
+
+
 // utility function defined at the end of the file
 void datatype_match (int typecode, int ephind);
 
