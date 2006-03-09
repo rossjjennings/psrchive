@@ -16,7 +16,8 @@ nobase_include_HEADERS = Pulsar/PlotterFactory.h Pulsar/Graph.h \
 	Pulsar/SinglePlotter.h Pulsar/SinglePlotterTI.h \
 	Pulsar/PosAngPlotter.h Pulsar/PosAngPlotterTI.h \
 	Pulsar/PhaseVsPlotter.h Pulsar/PhaseVsPlotterTI.h \
-	Pulsar/PhaseVsFrequency.h Pulsar/PhaseVsFrequencyTI.h 
+	Pulsar/PhaseVsFrequency.h Pulsar/PhaseVsFrequencyTI.h \
+	Pulsar/PhaseVsTime.h Pulsar/PhaseVsTimeTI.h
 
 libPlotter_la_SOURCES = PlotterFactory.C \
 	PlotAxis.C PlotAxisTI.C \
@@ -27,7 +28,8 @@ libPlotter_la_SOURCES = PlotterFactory.C \
 	SinglePlotter.C SinglePlotterTI.C \
 	PosAngPlotter.C PosAngPlotterTI.C \
 	PhaseVsPlotter.C PhaseVsPlotterTI.C \
-	PhaseVsFrequency.C PhaseVsFrequencyTI.C
+	PhaseVsFrequency.C PhaseVsFrequencyTI.C \
+	PhaseVsTime.C PhaseVsTimeTI.C
 
 bin_PROGRAMS = psrplot
 
@@ -41,7 +43,8 @@ endif
 #
 
 INCLUDES = -I$(top_builddir)/utils/include -I$(top_builddir)/astro/include \
-	-I$(top_srcdir)/psrchive @PGPLOT_CFLAGS@ @SLA_CFLAGS@
+	-I$(top_srcdir)/psrchive -I$(top_srcdir)/psrchive/Extension \
+	@PGPLOT_CFLAGS@ @SLA_CFLAGS@
 
 LDADD = libPlotter.la $(top_builddir)/psrchive/libpsrchive.la	\
 	$(top_builddir)/astro/libpsrastro.la			\
