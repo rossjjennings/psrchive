@@ -19,7 +19,7 @@ nobase_include_HEADERS = model_profile.h Pulsar/ArchiveExpert.h \
 	Pulsar/IonosphereCalibrator.h    Pulsar/IntegrationManagerExpert.h \
 	Pulsar/Database.h                Pulsar/Smooth.h \
 	Pulsar/ExampleArchive.h          Pulsar/SmoothMean.h \
-	Pulsar/FaradayRotation.h \
+	Pulsar/FaradayRotation.h         Pulsar/Polarization.h \
 	Pulsar/FluxCalibrator.h          Pulsar/SmoothMedian.h \
 	Pulsar/FluxCalibratorDatabase.h  Pulsar/SourceInfo.h \
 	Pulsar/FourierSNR.h              Pulsar/StandardSNR.h \
@@ -79,7 +79,7 @@ libpsrchive_la_SOURCES = plugins.csh getopt.h Physical.h \
 	Database.C                    RFIMitigation.C  \
 	DeltaRM.C                     DoPCalibrator.C \
 	ExampleArchive.C              ReceptionCalibrator.C  \
-	ExponentialBaseline.C \
+	ExponentialBaseline.C         Polarization.C \
 	FaradayRotation.C             FrequencyIntegrate.C \
 	FluxCalibrator.C              ReceptionCalibrator_get_Info.C  \
 	FluxCalibratorDatabase.C      ReceptionCalibrator_get_solution.C  \
