@@ -56,11 +56,11 @@ void Pulsar::DeltaRM::refine ()
 
   vector< Estimate<double> > posang0;
   profile = clone->new_PolnProfile(0);
-  profile->get_PA (posang0, 3.0);
+  profile->get_orientation (posang0, 3.0);
 
   vector< Estimate<double> > posang1;
   profile = clone->new_PolnProfile(1);
-  profile->get_PA (posang1, 3.0);
+  profile->get_orientation (posang1, 3.0);
 
   MeanRadian<double> mean_delta_PA;
 
