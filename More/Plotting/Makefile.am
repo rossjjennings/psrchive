@@ -7,7 +7,7 @@ noinst_LTLIBRARIES = libPlotter.la
 #
 if HAVE_PGPLOT
 
-nobase_include_HEADERS = Pulsar/PlotterFactory.h Pulsar/Graph.h \
+nobase_include_HEADERS = Pulsar/GraphFactory.h Pulsar/Graph.h \
 	Pulsar/PlotAxis.h Pulsar/PlotAxisTI.h \
 	Pulsar/PlotLabel.h Pulsar/PlotLabelTI.h \
 	Pulsar/PlotFrame.h Pulsar/PlotFrameTI.h \
@@ -26,7 +26,7 @@ nobase_include_HEADERS = Pulsar/PlotterFactory.h Pulsar/Graph.h \
 	Pulsar/StokesCylindrical.h Pulsar/StokesCylindricalTI.h \
 	Pulsar/StokesSpherical.h Pulsar/StokesSphericalTI.h
 
-libPlotter_la_SOURCES = PlotterFactory.C \
+libPlotter_la_SOURCES = GraphFactory.C \
 	PlotAxis.C PlotAxisTI.C \
 	PlotLabel.C PlotLabelTI.C \
 	PlotFrame.C PlotFrameTI.C \
