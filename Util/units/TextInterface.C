@@ -19,6 +19,27 @@ string TextInterface::Class::process (const string& command)
   return "";
 }
 
+/*! Parses text into key, range, and remainder
+  \retval true if key matches name
+*/
+bool TextInterface::match (const string& name, const string& text,
+			   string* range, string* remainder)
+{
+  string::size_type length = name.length();
+
+  if ( text.compare (0,length,name) != 0 )
+    return false;
+
+  string::size_type end = text.find (':', length);
+  if (end == string::npos)
+    return false;
+
+  // the range is everything between the end of the variable name and the colon
+  *range = text.substr (length, end-length);
+  // the remainder is everything following the colon
+  *remainder = text.substr (end+1);
+}
+
 void TextInterface::parse_indeces (vector<unsigned>& index,
 				   const string& name)
 {
@@ -119,7 +140,7 @@ void TextInterface::separate (string s, vector<string>& c)
   separate (s, c, edit);
 }
 
-void TextInterface::separate (string s, std::vector<std::string>& c, char lim)
+void TextInterface::separate (string s, vector<string>& c, char lim)
 {
   bool edit;
   separate (s, c, edit, lim);
