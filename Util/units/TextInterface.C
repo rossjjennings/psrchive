@@ -162,12 +162,15 @@ void TextInterface::separate (string s, vector<string>& commands,
     // search for the first instance of lim not enclosed in [ brackets ]
     string::size_type end = 0;
 
-    while ( (end = s.find_first_of (limiter+"[", end) ) != string::npos )
+    while ( (end = s.find_first_of (limiter+"[(", end) ) != string::npos ) {
       if (s[end] == '[')
 	end = s.find (']', end);
+      else if (s[end] == '(')
+	end = s.find (')', end);
       else
 	break;
-    
+    }
+
     // the first naked comma
     string command = s.substr (0, end);
 
