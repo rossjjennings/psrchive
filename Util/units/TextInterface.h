@@ -91,7 +91,7 @@ namespace TextInterface {
 
   public:
     
-    //! Construct from a pointer to parent class attribute interface
+    //! Construct from a pointer to member attribute interface
     HasAProxy (const std::string& pre, Attribute<M>* pa, Get g)
       { prefix = pre; attribute = pa->clone(); get = g; }
 
@@ -99,8 +99,6 @@ namespace TextInterface {
     HasAProxy (const HasAProxy& copy)
       { attribute=copy.attribute->clone(); get=copy.get; prefix=copy.prefix; }
 
-    //! Set the prefix to be added before attribute name
-    
     //! Retun a newly constructed copy
     Attribute<C>* clone () const
       { return new HasAProxy(*this); }
@@ -136,21 +134,21 @@ namespace TextInterface {
     //! Method of C that returns M*
     Get get;
 
-    //! Prefix differentiates this interface from identical members (if any)
+    //! The name of the M attribute within C
     std::string prefix;
 
   };
 
-  //! Proxy enables attribute interface of elements of a vector
+  //! Proxy enables attribute interface of elements in a vector
   /*! In this template: V is a vector of E; Get is the method of V
     that returns E*; and Size is the method of V that returns the number
-    of elements */
+    of elements in it */
   template<class V, class E, class Get, class Size>
   class VectorOfProxy : public Attribute<V> {
 
   public:
     
-    //! Construct from a pointer to parent class attribute interface
+    //! Construct from a pointer to element attribute interface
     VectorOfProxy (const std::string& pre, Attribute<E>* pa, Get g, Size s)
       { prefix = pre; attribute = pa->clone(); get = g; size = s; }
 
@@ -159,8 +157,6 @@ namespace TextInterface {
       { attribute=copy.attribute->clone(); 
 	get=copy.get; size=copy.size; prefix=copy.prefix; }
 
-    //! Set the prefix to be added before attribute name
-    
     //! Retun a newly constructed copy
     Attribute<V>* clone () const
       { return new VectorOfProxy(*this); }
@@ -197,15 +193,79 @@ namespace TextInterface {
     //! Method of V that returns size of vector
     Size size;
 
-    //! Prefix differentiates this interface from identical members (if any)
+    //! The name of the vector instance
     std::string prefix;
 
     //! Range parsed from name during matches
     std::string range;
 
     //! Worker function parses indeces for get_value and set_value
-    std::string get_indeces (const V* ptr, std::vector<unsigned>& indeces,
-			     const std::string& param) const;
+    void get_indeces (const V* ptr, std::vector<unsigned>& indeces,
+		      const std::string& param) const;
+
+  };
+
+
+  //! Proxy enables attribute interface of elements in a map
+  /*! In this template: M is a map of key K to element E; 
+    Get is the method of V that returns E* given K */
+  template<class M, class K, class E, class Get>
+  class MapOfProxy : public Attribute<M> {
+
+  public:
+    
+    //! Construct from a pointer to parent class attribute interface
+    MapOfProxy (const std::string& pre, Attribute<E>* pa, Get g)
+      { prefix = pre; attribute = pa->clone(); get = g; }
+
+    //! Copy constructor
+    MapOfProxy (const MapOfProxy& copy)
+      { prefix=copy.prefix; attribute=copy.attribute->clone(); get=copy.get;  }
+
+    //! Set the prefix to be added before attribute name
+    
+    //! Retun a newly constructed copy
+    Attribute<M>* clone () const
+      { return new MapOfProxy(*this); }
+
+    //! Get the name of the attribute
+    std::string get_name () const
+      { return prefix + "?:" + attribute->get_name(); }
+
+    //! Get the description of the attribute
+    std::string get_description () const
+      { return attribute->get_description(); }
+
+    //! Get the value of the attribute
+    std::string get_value (const M* ptr) const;
+
+    //! Set the value of the attribute
+    void set_value (M* ptr, const std::string& value);
+
+    //! Set the description of the attribute
+    void set_description (const std::string& description)
+      { attribute->set_description (description); }
+
+    //! Return true if the name argument matches
+    bool matches (const std::string& name) const;
+
+  protected:
+
+    //! The parent attribute interface
+    Reference::To< Attribute<E> > attribute;
+
+    //! Method of M that returns E*, given K
+    Get get;
+
+    //! The name of the map instance
+    std::string prefix;
+
+    //! Range parsed from name during matches
+    std::string range;
+
+    //! Worker function parses keys for get_value and set_value
+    void get_indeces (std::vector<K>& keys,
+		      const std::string& param) const;
 
   };
 
@@ -418,6 +478,17 @@ namespace TextInterface {
 	  add( new VectorOfProxy<C,E,G,S>(name, member->attributes[i], g, s) );
       }
 
+    //! Import the attribute interfaces from a map data text interface
+    /*! In this template: G should be of the type pointer to member
+      function of C that accepts key K and returns pointer to data element E. 
+    */
+    template<class K, class E, class G>
+      void import ( const std::string& name, K k, const To<E>* member, G g)
+      {
+	for (unsigned i=0; i < member->attributes.size(); i++)
+	  add( new MapOfProxy<C,K,E,G>(name, member->attributes[i], g) );
+      }
+
     //! Import the attribute interfaces from a parent text interface
     template<class P> 
       void import (const To<P>& parent)
@@ -432,6 +503,10 @@ namespace TextInterface {
       void import ( const std::string& name, const To<E>& element, G g, S size)
       { import (name, &element, g, size); }
 
+    template<class K, class E, class G>
+      void import ( const std::string& name, K k, const To<E>& element, G g)
+      { import (name, k, &element, g); }
+    
   protected:
 
     //! Factory generates a new AttributeGet instance
@@ -500,6 +575,10 @@ namespace TextInterface {
 
   //! Parse a range of indeces from a string
   void parse_indeces (std::vector<unsigned>& indeces, const std::string&);
+
+  //! Does the work for VectorOfProxy::matches and MapOfProxy::matches
+  bool match (const std::string& name, const std::string& text,
+	      std::string* range, std::string* remainder);
 
   //! Separate a list of comma-separated commands into a vector of strings
   void separate (std::string cmds, std::vector<std::string>&, bool& edit);
@@ -580,7 +659,7 @@ void TextInterface::VectorOfProxy<V,E,G,S>::set_value (V* ptr,
 }
 
 template<class V, class E, class G, class S>
-  std::string TextInterface::VectorOfProxy<V,E,G,S>
+void TextInterface::VectorOfProxy<V,E,G,S>
   ::get_indeces (const V* ptr, std::vector<unsigned>& indeces,
 		 const std::string& param) const
 {
@@ -622,8 +701,80 @@ template<class V, class E, class G, class S>
     std::cerr << endl;
 #endif
   }
+}
 
-  return sub_name;
+template<class C,class M,class Get,class Size>
+ bool TextInterface::VectorOfProxy<C,M,Get,Size>::matches
+  (const std::string& name) const
+{
+  std::string remainder;
+  if (!match (prefix, name, const_cast<std::string*>(&range), &remainder))
+    return false;
+
+  return attribute->matches (remainder);
+}
+
+
+
+template<class M, class K, class E, class G> 
+std::string
+TextInterface::MapOfProxy<M,K,E,G>::get_value (const M* ptr) const
+{
+  std::vector<K> ind;
+  get_indeces (ind, range);
+  std::ostringstream ost;
+
+  for (unsigned i=0; i<ind.size(); i++) {
+    // place a comma between elements
+    if (i)
+      ost << ",";
+    // label the elements
+    if (label_elements && ind.size() > 1)
+      ost << ind[i] << ")";
+
+    ost << attribute->get_value ((const_cast<M*>(ptr)->*get)(ind[i]));
+  }
+
+  return ost.str();
+}
+
+template<class M, class K, class E, class G>
+void TextInterface::MapOfProxy<M,K,E,G>::set_value (M* ptr,
+						    const std::string& val)
+{
+  std::vector<K> ind;
+  get_indeces (ind, range);
+
+  for (unsigned i=0; i<ind.size(); i++)
+    attribute->set_value ((ptr->*get)(ind[i]), val);
+}
+
+template<class M, class K, class E, class G>
+void
+TextInterface::MapOfProxy<M,K,E,G>::get_indeces (std::vector<K>& indeces,
+						 const std::string& par) const
+{
+#ifdef _DEBUG
+  std::cerr << "ElementGetSet::get_indeces " << par << std::endl;
+#endif
+
+  std::vector<std::string> sep;
+  separate (par, sep);
+
+  indeces.resize (sep.size());
+  for (unsigned i=0; i<sep.size(); i++)
+    indeces[i] = fromstring<K>(sep[i]);
+}
+
+template<class M, class K, class E, class G>
+ bool TextInterface::MapOfProxy<M,K,E,G>::matches
+  (const std::string& name) const
+{
+  std::string remainder;
+  if (!match (prefix, name, const_cast<std::string*>(&range), &remainder))
+    return false;
+
+  return attribute->matches (remainder);
 }
 
 
@@ -648,23 +799,5 @@ bool TextInterface::HasAProxy<C,M,Get>::matches (const std::string& name) const
   return attribute->matches (name.substr(length+1));
 }
 
-template<class C,class M,class Get,class Size>
- bool TextInterface::VectorOfProxy<C,M,Get,Size>::matches
-  (const std::string& name) const
-{
-  std::string::size_type length = prefix.length();
-  if ( strncasecmp(prefix.c_str(), name.c_str(), length) != 0 )
-    return false;
-
-  std::string::size_type end = name.find (':', length);
-  if (end == std::string::npos)
-    return false;
-
-  // store the range string for later use in get|set_value
-  *(const_cast<std::string*>(&range)) = name.substr (length, end-length);
-
-  std::string remainder = name.substr(end+1);
-  return attribute->matches (remainder);
-}
 
 #endif
