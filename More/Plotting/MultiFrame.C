@@ -10,5 +10,12 @@ Pulsar::MultiFrame::manage (const std::string& name, PlotFrame* frame)
 
 Pulsar::PlotFrameSize* Pulsar::MultiFrame::get_frame (const std::string& name)
 {
-  return frames[name];
+  std::map< std::string, Reference::To<PlotFrameSize> >::iterator frame;
+  frame = frames.find (name);
+
+  if (frame == frames.end())
+    throw Error (InvalidParam, "Pulsar::MultiFrame::get_frame",
+		 "no frame named '" + name + "'");
+
+  return frame->second;
 }
