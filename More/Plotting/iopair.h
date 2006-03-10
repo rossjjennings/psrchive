@@ -32,3 +32,12 @@ std::istream& operator >> (std::istream& is, std::pair<T,U>& vals)
 
   return is;
 }
+
+// Stretch min and max to normalized range
+template<typename T>
+void stretch (const std::pair<T,T>& norm, T& min, T& max)
+{
+  T diff = max - min;
+  max = min + norm.second * diff;
+  min = min + norm.first * diff;
+}
