@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/MultiFrame.h,v $
-   $Revision: 1.2 $
-   $Date: 2006/03/10 05:06:54 $
+   $Revision: 1.3 $
+   $Date: 2006/03/10 16:32:52 $
    $Author: straten $ */
 
 #ifndef __Pulsar_MultiFrame_h
@@ -14,7 +14,7 @@
 namespace Pulsar {
 
   //! Manages multiple plot frames
-  class MultiFrame : Reference::Able {
+  class MultiFrame : public Reference::Able {
 
   public:
 

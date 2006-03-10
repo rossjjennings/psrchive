@@ -12,7 +12,7 @@ nobase_include_HEADERS = Pulsar/PlotterFactory.h Pulsar/Graph.h \
 	Pulsar/PlotLabel.h Pulsar/PlotLabelTI.h \
 	Pulsar/PlotFrame.h Pulsar/PlotFrameTI.h \
 	Pulsar/PlotFrameSize.h Pulsar/PlotFrameSizeTI.h \
-	Pulsar/MultiFrame.h \
+	Pulsar/MultiFrame.h Pulsar/MultiFrameTI.h \
 	Pulsar/ProfilePlotter.h Pulsar/ProfilePlotterTI.h \
 	Pulsar/FluxPlotter.h Pulsar/FluxPlotterTI.h \
 	Pulsar/SinglePlotter.h Pulsar/SinglePlotterTI.h \
@@ -29,7 +29,7 @@ libPlotter_la_SOURCES = PlotterFactory.C \
 	PlotLabel.C PlotLabelTI.C \
 	PlotFrame.C PlotFrameTI.C \
 	PlotFrameSize.C PlotFrameSizeTI.C \
-	MultiFrame.C \
+	MultiFrame.C MultiFrameTI.C \
 	ProfilePlotter.C ProfilePlotterTI.C \
 	FluxPlotter.C FluxPlotterTI.C \
 	SinglePlotter.C SinglePlotterTI.C \
