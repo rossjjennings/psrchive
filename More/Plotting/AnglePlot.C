@@ -11,7 +11,7 @@ Pulsar::AnglePlotter::AnglePlotter()
 {
   error_bars = true;
   threshold = 3.0;
-  range = 180.0;
+  range = 0.0;
 
   isubint = 0;
   ichan = 0;
@@ -22,21 +22,38 @@ TextInterface::Class* Pulsar::AnglePlotter::get_interface ()
   return new AnglePlotterTI (this);
 }
 
-void Pulsar::AnglePlotter::prepare (const Archive*)
+void Pulsar::AnglePlotter::prepare (const Archive* data)
 {
-  // keep pgplot from drawing the 90 or 180 at the edge
-  float half = 0.5 * range - 0.0001;
-  set_yrange (-half, half);
+  get_angles (data);
+
+  if (angles.size() != data->get_nbin())
+    throw Error (InvalidState, "Pulsar::AnglePlotter::prepare",
+		 "angles vector size=%u != nbin=%u",
+		 angles.size(), data->get_nbin());
+
+  if (range) {
+    // keep pgplot from drawing the 90 or 180 at the edge
+    float half = 0.5 * range - 0.0001;
+    set_yrange (-half, half);
+    return;
+  }
+
+  unsigned i_min, i_max;
+  get_range_bin (data, i_min, i_max);
+
+  set_yrange( min_element (angles.begin()+i_min, angles.begin()+i_max)->val,
+	      max_element (angles.begin()+i_min, angles.begin()+i_max)->val );
 }
 
 void Pulsar::AnglePlotter::draw (const Archive *data)
 {
-  vector< Estimate<double> > angles;
-  get_angles (data, angles);
+  float offset = 0;
+  unsigned times = 1;
 
-  float offset = -range;
+  if (range)
+    offset = -range;
 
-  for (unsigned ioff=0; ioff < 3; ioff++) {
+  for (unsigned ioff=0; ioff < times; ioff++) {
 
     for (unsigned ibin=0; ibin < phases.size(); ibin++)
       if (angles[ibin].get_variance() != 0)

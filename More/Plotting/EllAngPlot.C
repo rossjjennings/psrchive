@@ -2,16 +2,10 @@
 #include "Pulsar/Polarization.h"
 #include "Pulsar/PolnProfile.h"
 
-Pulsar::EllAngPlotter::EllAngPlotter ()
-{
-  range = 90;
-}
-
-void Pulsar::EllAngPlotter::get_angles (const Archive* data,
-					vector< Estimate<double> >& ell)
+void Pulsar::EllAngPlotter::get_angles (const Archive* data)
 {
   Reference::To<const PolnProfile> profile = new_Stokes (data,isubint,ichan);
-  profile->get_ellipticity (ell, threshold);
+  profile->get_ellipticity (angles, threshold);
 }
 
 //! Return the label for the y-axis

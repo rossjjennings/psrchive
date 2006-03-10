@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/AnglePlot.h,v $
-   $Revision: 1.2 $
-   $Date: 2006/03/10 20:37:58 $
+   $Revision: 1.3 $
+   $Date: 2006/03/10 23:09:26 $
    $Author: straten $ */
 
 #ifndef __Pulsar_AnglePlotter_h
@@ -25,8 +25,7 @@ namespace Pulsar {
     TextInterface::Class* get_interface ();
 
     //! Derived types compute the angles to be plotted
-    virtual void get_angles (const Archive*,
-			     std::vector< Estimate<double> >& angles) = 0;
+    virtual void get_angles (const Archive*) = 0;
 
     //! return the minimum and maximum value in degrees
     void prepare (const Archive*);
@@ -66,6 +65,9 @@ namespace Pulsar {
 
     //! Range of values in degrees
     float range;
+
+    //! The angles
+    std::vector< Estimate<double> > angles;
 
     unsigned ichan;
     unsigned isubint;

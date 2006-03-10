@@ -2,11 +2,10 @@
 #include "Pulsar/Polarization.h"
 #include "Pulsar/PolnProfile.h"
 
-void Pulsar::PosAngPlotter::get_angles (const Archive* data,
-					vector< Estimate<double> >& posang)
+void Pulsar::PosAngPlotter::get_angles (const Archive* data)
 {
   Reference::To<const PolnProfile> profile = new_Stokes (data,isubint,ichan);
-  profile->get_orientation (posang, threshold);
+  profile->get_orientation (angles, threshold);
 }
 
 //! Return the label for the y-axis

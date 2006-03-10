@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/EllAngPlot.h,v $
-   $Revision: 1.1 $
-   $Date: 2006/03/09 17:59:30 $
+   $Revision: 1.2 $
+   $Date: 2006/03/10 23:09:26 $
    $Author: straten $ */
 
 #ifndef __Pulsar_EllAngPlotter_h
@@ -17,14 +17,11 @@ namespace Pulsar {
 
   public:
 
-    //! Default constructor
-    EllAngPlotter ();
-
     //! Return the default label for the y axis
     std::string get_ylabel (const Archive* data);
     
     //! Derived types compute the angles to be plotted
-    void get_angles (const Archive*, std::vector< Estimate<double> >&);
+    void get_angles (const Archive*);
 
   };
 

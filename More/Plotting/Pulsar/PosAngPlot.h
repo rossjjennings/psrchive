@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PosAngPlot.h,v $
-   $Revision: 1.4 $
-   $Date: 2006/03/09 17:59:26 $
+   $Revision: 1.5 $
+   $Date: 2006/03/10 23:09:26 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PosAngPlotter_h
@@ -21,7 +21,7 @@ namespace Pulsar {
     std::string get_ylabel (const Archive* data);
     
     //! Derived types compute the angles to be plotted
-    void get_angles (const Archive*, std::vector< Estimate<double> >&);
+    void get_angles (const Archive*);
 
   };
 
