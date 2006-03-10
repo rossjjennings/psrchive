@@ -65,6 +65,10 @@ public:
   void set_value (double _value) { value = _value; }
   double get_value () const { return value; }
   extension* get_extension() { return &ext; }
+
+  // test the map interface
+  extension* get_map (string& text) { return &ext; }
+
 protected:
   extension ext;
   double value;
@@ -287,6 +291,11 @@ int main () try {
     cerr << "TextInterface::separate fail cmds[0]=" << commands[0] << endl;
     return -1;
   }
+
+  cerr << "testing import of map interface" << endl;
+
+  getset.import ( "map", string(), extensionTUI(), &tester::get_map );
+
 
   cerr << "test_TextInterface SUCCESS!" << endl;
   return 0;
