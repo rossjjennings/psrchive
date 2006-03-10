@@ -36,6 +36,8 @@ void Pulsar::MultiProfile::plot (const Archive* data)
     frame->focus();
 
     // plot
+    plot->set_scale (get_scale());
+    plot->set_origin_norm (get_origin_norm());
     plot->plot(data);
 
     // restore the viewport

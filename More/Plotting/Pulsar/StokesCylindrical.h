@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/StokesCylindrical.h,v $
-   $Revision: 1.1 $
-   $Date: 2006/03/10 20:37:49 $
+   $Revision: 1.2 $
+   $Date: 2006/03/10 21:49:53 $
    $Author: straten $ */
 
 #ifndef __Pulsar_StokesCylindrical_h
@@ -55,8 +55,6 @@ namespace Pulsar {
     {
       plot->set_subint (isubint);
       plot->set_chan (ichan);
-      plot->set_scale (scale);
-      plot->set_origin_norm (origin_norm);
     }
 
   };
