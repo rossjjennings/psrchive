@@ -32,11 +32,8 @@ void Pulsar::FluxPlotter::prepare (const Archive* data)
     throw Error (InvalidState, "Pulsar::FluxPlotter::prepare",
 		 "Profiles array empty after call to get_profiles");
 
-  float x_min = 0.0;
-  float x_max = data->get_nbin();
-  get_frame()->get_x_axis()->get_range (x_min, x_max);
-  int i_min = (int) x_min;
-  int i_max = (int) x_max;
+  unsigned i_min, i_max;
+  get_range_bin (data, i_min, i_max);
 
   float min = profiles[0]->min(i_min, i_max);
   float max = profiles[0]->max(i_min, i_max);

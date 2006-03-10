@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PhasePlot.h,v $
-   $Revision: 1.8 $
-   $Date: 2006/03/10 20:37:58 $
+   $Revision: 1.9 $
+   $Date: 2006/03/10 23:09:31 $
    $Author: straten $ */
 
 #ifndef __Pulsar_ProfilePlotter_h
@@ -78,6 +78,9 @@ namespace Pulsar {
     PlotFrame* get_frame () { return frame; }
     //! Set the frame
     void set_frame (PlotFrame* f) { frame = f; }
+
+    //! Get the min and max phase bins corresponding to x_axis->get_range
+    void get_range_bin (const Archive*, unsigned& min, unsigned& max);
 
   protected:
 

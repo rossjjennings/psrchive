@@ -57,6 +57,16 @@ string Pulsar::ProfilePlotter::get_ylabel (const Archive*)
   return "";
 }
 
+void Pulsar::ProfilePlotter::get_range_bin (const Archive* data, 
+					    unsigned& min, unsigned& max)
+{
+  float x_min = 0.0;
+  float x_max = data->get_nbin();
+  get_frame()->get_x_axis()->get_range (x_min, x_max);
+  min = (unsigned) x_min;
+  max = (unsigned) x_max;
+}
+
 /*!
   Plots the profile in the currently open pgplot device, using the current
   viewport.  The profile may be rotated, scaled, and zoomed.
