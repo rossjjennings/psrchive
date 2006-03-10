@@ -297,7 +297,7 @@ namespace TextInterface {
 
     //! Get the value of the attribute
     std::string get_value (const C* ptr) const
-      { return tostring( (ptr->*get) () ); }
+      { if (!ptr) return ""; return tostring( (ptr->*get) () ); }
 
     //! Set the value of the attribute
     void set_value (C* ptr, const std::string& value)
@@ -421,9 +421,12 @@ namespace TextInterface {
 
     template<class Type> class Generator : public Allocator<C,Type> { };
 
+    //! Default constructor
+    To () { import_filter = false; }
+
     //! Get the value of the attribute
     std::string get_value (const std::string& name) const
-      { if (!instance) return "N/A"; 
+      { if (!instance) return "N/A";
         else return find(name)->get_value(instance); }
 
     //! Set the value of the attribute
@@ -442,7 +445,7 @@ namespace TextInterface {
       { return attributes[i]->get_description(); }
 
     //! Return a pointer to the named class attribute interface
-    Attribute<C>* find (const std::string& name) const;
+    Attribute<C>* find (const std::string& name, bool ex = true) const;
 
     //! Set the instance
     virtual void set_instance (C* c) 
@@ -453,7 +456,8 @@ namespace TextInterface {
       void import (const To<P>* parent)
       {
 	for (unsigned i=0; i < parent->attributes.size(); i++)
-	  add( new IsAProxy<C,P>(parent->attributes[i]) );
+	  if (!import_filter || !find(parent->attributes[i]->get_name(),false))
+	    add( new IsAProxy<C,P>(parent->attributes[i]) );
       }
 
     //! Import the attribute interfaces from a member text interface
@@ -463,7 +467,8 @@ namespace TextInterface {
       void import ( const std::string& name, const To<M>* member, G get )
       {
 	for (unsigned i=0; i < member->attributes.size(); i++)
-	  add(new HasAProxy<C,M,G>(name, member->attributes[i],get));
+	  if (!import_filter || !find(member->attributes[i]->get_name(),false))
+	    add(new HasAProxy<C,M,G>(name, member->attributes[i],get));
       }
 
     //! Import the attribute interfaces from a vector element text interface
@@ -475,7 +480,8 @@ namespace TextInterface {
       void import ( const std::string& name, const To<E>* member, G g, S s)
       {
 	for (unsigned i=0; i < member->attributes.size(); i++)
-	  add( new VectorOfProxy<C,E,G,S>(name, member->attributes[i], g, s) );
+	  if (!import_filter || !find(member->attributes[i]->get_name(),false))
+	    add(new VectorOfProxy<C,E,G,S>(name, member->attributes[i], g, s));
       }
 
     //! Import the attribute interfaces from a map data text interface
@@ -486,7 +492,8 @@ namespace TextInterface {
       void import ( const std::string& name, K k, const To<E>* member, G g)
       {
 	for (unsigned i=0; i < member->attributes.size(); i++)
-	  add( new MapOfProxy<C,K,E,G>(name, member->attributes[i], g) );
+	  if (!import_filter || !find(member->attributes[i]->get_name(),false))
+	    add( new MapOfProxy<C,K,E,G>(name, member->attributes[i], g) );
       }
 
     //! Import the attribute interfaces from a parent text interface
@@ -508,6 +515,9 @@ namespace TextInterface {
       { import (name, k, &element, g); }
     
   protected:
+
+    //! When set, import filters out duplicate attribute names
+    bool import_filter;
 
     //! Factory generates a new AttributeGet instance
     template<class P, typename T> 
@@ -594,7 +604,7 @@ namespace TextInterface {
 
 template<class C>
 TextInterface::Attribute<C>* 
-TextInterface::To<C>::find (const std::string& param) const
+TextInterface::To<C>::find (const std::string& param, bool throw_ex) const
 {
 #ifdef _DEBUG
   std::cerr << "To::find (" << param << ") size=" 
@@ -611,8 +621,11 @@ TextInterface::To<C>::find (const std::string& param) const
     }
   }
 
-  throw Error (InvalidParam, "TextInterface::Class<C>::find",
-	       "no attribute named " + param);
+  if (throw_ex)
+    throw Error (InvalidParam, "TextInterface::Class<C>::find",
+		 "no attribute named " + param);
+
+  return 0;
 }
 
 
@@ -732,7 +745,9 @@ TextInterface::MapOfProxy<M,K,E,G>::get_value (const M* ptr) const
     if (label_elements && ind.size() > 1)
       ost << ind[i] << ")";
 
-    ost << attribute->get_value ((const_cast<M*>(ptr)->*get)(ind[i]));
+    E* element = (const_cast<M*>(ptr)->*get) (ind[i]);
+    if (element)
+      ost << attribute->get_value (element);
   }
 
   return ost.str();
@@ -757,13 +772,17 @@ TextInterface::MapOfProxy<M,K,E,G>::get_indeces (std::vector<K>& indeces,
 #ifdef _DEBUG
   std::cerr << "ElementGetSet::get_indeces " << par << std::endl;
 #endif
+  std::string::size_type length = par.length();
+  if (par[0] != '[' || par[length-1] != ']')
+    return;
 
-  std::vector<std::string> sep;
-  separate (par, sep);
+  std::string range = par.substr (1, length-2);
+  std::vector<std::string> key_str;
+  separate (range, key_str);
 
-  indeces.resize (sep.size());
-  for (unsigned i=0; i<sep.size(); i++)
-    indeces[i] = fromstring<K>(sep[i]);
+  indeces.resize (key_str.size());
+  for (unsigned i=0; i<key_str.size(); i++)
+    indeces[i] = fromstring<K>(key_str[i]);
 }
 
 template<class M, class K, class E, class G>
