@@ -8,6 +8,8 @@
 
 Pulsar::ProfilePlotter::ProfilePlotter ()
 {
+  frame = new PlotFrame;
+
   yrange_set = false;
   y_min = y_max = 0;
 

@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PhasePlot.h,v $
-   $Revision: 1.6 $
-   $Date: 2006/03/09 23:03:41 $
+   $Revision: 1.7 $
+   $Date: 2006/03/10 05:07:04 $
    $Author: straten $ */
 
 #ifndef __Pulsar_ProfilePlotter_h
@@ -75,12 +75,14 @@ namespace Pulsar {
     float get_origin_norm () const { return origin_norm; }
 
     //! Get the frame
-    PlotFrame* get_frame () { return &frame; }
+    PlotFrame* get_frame () { return frame; }
+    //! Set the frame
+    void set_frame (PlotFrame* f) { frame = f; }
 
   protected:
 
     //! The plot frame
-    PlotFrame frame;
+    Reference::To<PlotFrame> frame;
 
     //! Scale on the phase axis
     Scale scale;
