@@ -1,13 +1,25 @@
 #include "Pulsar/MultiProfile.h"
-//#include "Pulsar/MultiProfileTI.h"
+#include "Pulsar/MultiFrameTI.h"
 
 #include <cpgplot.h>
 
+Pulsar::MultiProfile::MultiProfile ()
+{
+  frame_interface = new MultiFrameTI (&frames);
+}
+
 void Pulsar::MultiProfile::plot (const Archive* data)
 {
+  float x0, x1, y0, y1;
+  cpgqvp (0, &x0, &x1, &y0, &y1);
+
   std::map< std::string, Reference::To<ProfilePlotter> >::iterator ptr;
-  for (ptr = plotters.begin(); ptr != plotters.end(); ptr++)
+  for (ptr = plotters.begin(); ptr != plotters.end(); ptr++) {
+    ptr->second->get_frame()->focus();
     ptr->second->plot(data);
+    // restore the viewport
+    cpgsvp (x0,x1, y0,y1);
+  }
 }
 
 //! Manage a plotter
@@ -19,12 +31,11 @@ void Pulsar::MultiProfile::manage (const std::string& name,
 }
 
 //! Set the viewport of the named plotter
-void
-Pulsar::MultiProfile::set_viewport (const std::string& name,
-				    std::pair<float,float> bottom_left,
-				    std::pair<float,float> top_right)
+void Pulsar::MultiProfile::set_viewport (const std::string& name,
+					 std::pair<float,float> x_range,
+					 std::pair<float,float> y_range)
 {
   PlotFrameSize* frame = frames.get_frame(name);
-  frame->set_bottom_left( bottom_left );
-  frame->set_top_right( top_right );
+  frame->set_x_range( x_range );
+  frame->set_y_range( y_range );
 }
