@@ -3,6 +3,11 @@
 
 #include <cpgplot.h>
 
+Pulsar::MultiProfile::MultiProfile ()
+{
+  frames.set_shared_x_axis (get_frame()->get_x_axis());
+}
+
 TextInterface::Class* Pulsar::MultiProfile::get_frame_interface ()
 {
   return new MultiFrameTI (&frames);
@@ -15,12 +20,27 @@ void Pulsar::MultiProfile::plot (const Archive* data)
   float x0, x1, y0, y1;
   cpgqvp (0, &x0, &x1, &y0, &y1);
 
+  // the x-range
+  std::pair<float,float> x_range = get_frame()->get_x_axis()->get_range_norm();
+
   std::map< std::string, Reference::To<ProfilePlotter> >::iterator ptr;
   for (ptr = plotters.begin(); ptr != plotters.end(); ptr++) {
-    ptr->second->get_frame()->focus();
-    ptr->second->plot(data);
+
+    ProfilePlotter* plot = ptr->second;
+    PlotFrame* frame = plot->get_frame();
+
+    // ensure that all plots have the same x-axis range
+    frame->get_x_axis()->set_range_norm( x_range );
+
+    // set the viewport
+    frame->focus();
+
+    // plot
+    plot->plot(data);
+
     // restore the viewport
     cpgsvp (x0,x1, y0,y1);
+
   }
 }
 

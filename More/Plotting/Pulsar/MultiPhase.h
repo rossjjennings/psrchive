@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/MultiPhase.h,v $
-   $Revision: 1.3 $
-   $Date: 2006/03/10 20:37:58 $
+   $Revision: 1.4 $
+   $Date: 2006/03/10 21:32:18 $
    $Author: straten $ */
 
 #ifndef __Pulsar_MultiProfile_h
@@ -17,6 +17,9 @@ namespace Pulsar {
   class MultiProfile : public ProfilePlotter {
 
   public:
+
+    //! Default constructor
+    MultiProfile ();
 
     //! Get the text interface to the frame attributes
     TextInterface::Class* get_frame_interface ();
