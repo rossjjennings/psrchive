@@ -9,11 +9,11 @@ Pulsar::PlotFrameSizeTI::PlotFrameSizeTI (PlotFrameSize* instance)
 
   import ( PlotFrameTI() );
 
-  add( &PlotFrameSize::get_bottom_left,
-       &PlotFrameSize::set_bottom_left,
-       "bl", "Normalized coordinates of bottom left frame corner" );
+  add( &PlotFrameSize::get_x_range,
+       &PlotFrameSize::set_x_range,
+       "vpx", "Normalized coordinates of viewport x-axis" );
 
-  add( &PlotFrameSize::get_top_right,
-       &PlotFrameSize::set_top_right,
-       "tr", "Normalized coordinates of top right frame corner" );
+  add( &PlotFrameSize::get_y_range,
+       &PlotFrameSize::set_y_range,
+       "vpy", "Normalized coordinates of viewport y-axis" );
 }

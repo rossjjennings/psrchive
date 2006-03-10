@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/Attic/PlotFrameSize.h,v $
-   $Revision: 1.2 $
-   $Date: 2006/03/10 05:06:59 $
+   $Revision: 1.3 $
+   $Date: 2006/03/10 16:33:01 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PlotFrameSize_h
@@ -25,18 +25,21 @@ namespace Pulsar {
     //! Partial copy constructor
     PlotFrameSize (const PlotFrame*);
 
-    //! Set the normalized coordinate of the bottom left corner
-    void set_bottom_left (const std::pair<float,float>& c) { bottom_left=c; }
-    std::pair<float,float> get_bottom_left () const { return bottom_left; }
+    //! Focus the frame
+    void focus ();
+
+    //! Set the normalized coordinate of the viewport x axis
+    void set_x_range (const std::pair<float,float>& range) { x_range=range; }
+    std::pair<float,float> get_x_range () const { return x_range; }
  
-    //! Set the normalized coordinate of the top right corner
-    void set_top_right (const std::pair<float,float>& c) { top_right=c; }
-    std::pair<float,float> get_top_right () const { return top_right; }
+    //! Set the normalized coordinate of the viewport y axis
+    void set_y_range (const std::pair<float,float>& range) { y_range=range; }
+    std::pair<float,float> get_y_range () const { return y_range; }
 
   protected:
 
-    std::pair<float,float> bottom_left;
-    std::pair<float,float> top_right;
+    std::pair<float,float> x_range;
+    std::pair<float,float> y_range;
     
   };
 
