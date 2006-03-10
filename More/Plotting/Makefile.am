@@ -23,7 +23,8 @@ nobase_include_HEADERS = Pulsar/PlotterFactory.h Pulsar/Graph.h \
 	Pulsar/PhaseVsFrequency.h Pulsar/PhaseVsFrequencyTI.h \
 	Pulsar/PhaseVsTime.h Pulsar/PhaseVsTimeTI.h \
 	Pulsar/MultiProfile.h \
-	Pulsar/StokesCylindrical.h Pulsar/StokesCylindricalTI.h
+	Pulsar/StokesCylindrical.h Pulsar/StokesCylindricalTI.h \
+	Pulsar/StokesSpherical.h Pulsar/StokesSphericalTI.h
 
 libPlotter_la_SOURCES = PlotterFactory.C \
 	PlotAxis.C PlotAxisTI.C \
@@ -41,7 +42,8 @@ libPlotter_la_SOURCES = PlotterFactory.C \
 	PhaseVsFrequency.C PhaseVsFrequencyTI.C \
 	PhaseVsTime.C PhaseVsTimeTI.C \
 	MultiProfile.C \
-	StokesCylindrical.C StokesCylindricalTI.C 
+	StokesCylindrical.C StokesCylindricalTI.C \
+	StokesSpherical.C StokesSphericalTI.C 
 
 bin_PROGRAMS = psrplot
 
