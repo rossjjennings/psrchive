@@ -1,12 +1,12 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PlotFactory.h,v $
-   $Revision: 1.2 $
-   $Date: 2006/03/09 22:29:53 $
+   $Revision: 1.3 $
+   $Date: 2006/03/10 22:07:51 $
    $Author: straten $ */
 
-#ifndef __Pulsar_PlotterFactory_h
-#define __Pulsar_PlotterFactory_h
+#ifndef __Pulsar_GraphFactory_h
+#define __Pulsar_GraphFactory_h
 
 #include <string>
 #include <vector>
@@ -16,9 +16,12 @@ namespace Pulsar {
   class Graph;
 
   //! Provides a text interface to get and set Graph attributes
-  class PlotterFactory {
+  class GraphFactory {
 
   public:
+
+    //! Default constructor loads up all of the graph types
+    GraphFactory ();
 
     //! Return a new instance of the named plotter
     Graph* construct (std::string name);
@@ -47,19 +50,19 @@ namespace Pulsar {
 
   };
 
-  class PlotterFactory::Agent
+  class GraphFactory::Agent
   {
   public:
 
     Agent (std::string n, std::string d) : name (n), description (d) {}
 
-    //! Return a new instance of Plotter class
+    //! Return a new instance of Graph class
     virtual Graph* construct () = 0;
 
-    //! Return the name of the Plotter class
+    //! Return the name of the Graph class
     std::string get_name () { return name; }
 
-    //! Return a description of the Plotter class
+    //! Return a description of the Graph class
     std::string get_description () { return description; }
 
   protected:
@@ -69,8 +72,7 @@ namespace Pulsar {
 
   };
 
-  template<class P> class PlotterFactory::Advocate : public Agent
-
+  template<class P> class GraphFactory::Advocate : public Agent
   {  
   public:
 
@@ -78,7 +80,7 @@ namespace Pulsar {
     Advocate (std::string _name, std::string _description)
       : Agent (_name, _description) {}
  
-    //! Return a new instance of Plotter class
+    //! Return a new instance of Graph class
     Graph* construct () { return new P; }
 
   };
