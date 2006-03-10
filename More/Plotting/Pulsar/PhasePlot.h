@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PhasePlot.h,v $
-   $Revision: 1.7 $
-   $Date: 2006/03/10 05:07:04 $
+   $Revision: 1.8 $
+   $Date: 2006/03/10 20:37:58 $
    $Author: straten $ */
 
 #ifndef __Pulsar_ProfilePlotter_h
@@ -89,12 +89,6 @@ namespace Pulsar {
 
     //! Origin on the phase axis
     float origin_norm;
-
-    //! The text interface
-    Reference::To<TextInterface::Class> interface;
-
-    //! The text interface
-    Reference::To<TextInterface::Class> frame_interface;
 
     //! Phases can be used
     std::vector<float> phases;

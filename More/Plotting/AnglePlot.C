@@ -15,8 +15,11 @@ Pulsar::AnglePlotter::AnglePlotter()
 
   isubint = 0;
   ichan = 0;
+}
 
-  interface = new AnglePlotterTI (this);
+TextInterface::Class* Pulsar::AnglePlotter::get_interface ()
+{
+  return new AnglePlotterTI (this);
 }
 
 void Pulsar::AnglePlotter::prepare (const Archive*)

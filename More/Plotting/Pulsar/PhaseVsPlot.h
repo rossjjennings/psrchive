@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PhaseVsPlot.h,v $
-   $Revision: 1.2 $
-   $Date: 2006/03/09 22:29:53 $
+   $Revision: 1.3 $
+   $Date: 2006/03/10 20:37:58 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PhaseVsPlotter_h
@@ -22,6 +22,9 @@ namespace Pulsar {
     //! Default constructor
     PhaseVsPlotter ();
 
+    //! Get the text interface to the configuration attributes
+    TextInterface::Class* get_interface ();
+
     //! Derived classes must provide the number of rows
     virtual unsigned get_nrow (const Archive* data) = 0;
 
@@ -30,9 +33,6 @@ namespace Pulsar {
 
     //! Draw in the current viewport
     void draw (const Archive*);
-
-    //! Return the text interface
-    TextInterface::Class* get_interface ();
 
     //! Provide access to the z-axis
     PlotAxis* get_z_axis () { return &z_axis; }

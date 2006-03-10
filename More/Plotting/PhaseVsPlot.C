@@ -21,9 +21,7 @@ Pulsar::PhaseVsPlotter::PhaseVsPlotter ()
  
 TextInterface::Class* Pulsar::PhaseVsPlotter::get_interface ()
 {
-  if (!interface)
-    interface = new PhaseVsPlotterTI (this);
-  return interface;
+  return new PhaseVsPlotterTI (this);
 }
 
 //! Derived classes must draw in the current viewport

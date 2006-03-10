@@ -23,17 +23,13 @@ Pulsar::ProfilePlotter::~ProfilePlotter ()
 
 TextInterface::Class* Pulsar::ProfilePlotter::get_interface ()
 {
-  if (!interface)
-    interface = new ProfilePlotterTI (this);
-  return interface;
+  return new ProfilePlotterTI (this);
 }
 
 //! Get the text interface to the frame attributes
 TextInterface::Class* Pulsar::ProfilePlotter::get_frame_interface ()
 {
-  if (!frame_interface)
-    frame_interface = new PlotFrameTI (get_frame());
-  return frame_interface;
+  return new PlotFrameTI (get_frame());
 }
 
 void Pulsar::ProfilePlotter::set_yrange (float min, float max)

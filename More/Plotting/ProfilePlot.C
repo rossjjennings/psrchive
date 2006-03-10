@@ -9,7 +9,11 @@
 Pulsar::SinglePlotter::SinglePlotter ()
 {
   plot_cal_transitions = true;
-  interface = new SinglePlotterTI (this);
+}
+
+TextInterface::Class* Pulsar::SinglePlotter::get_interface ()
+{
+  return new SinglePlotterTI (this);
 }
 
 void Pulsar::SinglePlotter::get_profiles (const Archive* data)

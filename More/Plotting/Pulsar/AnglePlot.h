@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/AnglePlot.h,v $
-   $Revision: 1.1 $
-   $Date: 2006/03/09 18:10:46 $
+   $Revision: 1.2 $
+   $Date: 2006/03/10 20:37:58 $
    $Author: straten $ */
 
 #ifndef __Pulsar_AnglePlotter_h
@@ -20,6 +20,9 @@ namespace Pulsar {
 
     //! Default constructor
     AnglePlotter ();
+
+    //! Get the text interface to the configuration attributes
+    TextInterface::Class* get_interface ();
 
     //! Derived types compute the angles to be plotted
     virtual void get_angles (const Archive*,

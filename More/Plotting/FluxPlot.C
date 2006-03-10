@@ -18,9 +18,7 @@ Pulsar::FluxPlotter::FluxPlotter ()
  
 TextInterface::Class* Pulsar::FluxPlotter::get_interface ()
 {
-  if (!interface)
-    interface = new FluxPlotterTI (this);
-  return interface;
+  return new FluxPlotterTI (this);
 }
 
 //! Derived classes must compute the minimum and maximum values (y-axis)

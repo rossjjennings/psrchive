@@ -3,13 +3,15 @@
 
 #include <cpgplot.h>
 
-Pulsar::MultiProfile::MultiProfile ()
+TextInterface::Class* Pulsar::MultiProfile::get_frame_interface ()
 {
-  frame_interface = new MultiFrameTI (&frames);
+  return new MultiFrameTI (&frames);
 }
 
 void Pulsar::MultiProfile::plot (const Archive* data)
 {
+  prepare (data);
+
   float x0, x1, y0, y1;
   cpgqvp (0, &x0, &x1, &y0, &y1);
 
@@ -32,10 +34,10 @@ void Pulsar::MultiProfile::manage (const std::string& name,
 
 //! Set the viewport of the named plotter
 void Pulsar::MultiProfile::set_viewport (const std::string& name,
-					 std::pair<float,float> x_range,
-					 std::pair<float,float> y_range)
+					 float x0, float x1,
+					 float y0, float y1)
 {
   PlotFrameSize* frame = frames.get_frame(name);
-  frame->set_x_range( x_range );
-  frame->set_y_range( y_range );
+  frame->set_x_range( std::pair<float,float> (x0,x1) );
+  frame->set_y_range( std::pair<float,float> (y0,y1) );
 }

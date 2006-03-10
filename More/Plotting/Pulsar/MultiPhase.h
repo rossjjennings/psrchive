@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/MultiPhase.h,v $
-   $Revision: 1.2 $
-   $Date: 2006/03/10 16:33:01 $
+   $Revision: 1.3 $
+   $Date: 2006/03/10 20:37:58 $
    $Author: straten $ */
 
 #ifndef __Pulsar_MultiProfile_h
@@ -18,8 +18,8 @@ namespace Pulsar {
 
   public:
 
-    //! Default constructor
-    MultiProfile ();
+    //! Get the text interface to the frame attributes
+    TextInterface::Class* get_frame_interface ();
 
     //! Plot in the current viewport
     void plot (const Archive*);
@@ -28,9 +28,8 @@ namespace Pulsar {
     void manage (const std::string& name, ProfilePlotter* plot);
 
     //! Set the viewport of the named plotter
-    void set_viewport (const std::string& name,
-		       std::pair<float,float> x_range,
-		       std::pair<float,float> y_range);
+    void set_viewport (const std::string& name, 
+		       float x0, float x1, float y0, float y1);
 
   protected:
 
@@ -39,6 +38,8 @@ namespace Pulsar {
 
     //! The plotters
     std::map< std::string, Reference::To<ProfilePlotter> > plotters;
+
+    void draw (const Archive*) {}
 
   };
 

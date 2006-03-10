@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/ProfilePlot.h,v $
-   $Revision: 1.4 $
-   $Date: 2006/03/08 04:04:05 $
+   $Revision: 1.5 $
+   $Date: 2006/03/10 20:37:58 $
    $Author: straten $ */
 
 #ifndef __Pulsar_SinglePlotter_h
@@ -19,6 +19,9 @@ namespace Pulsar {
 
     //! Default constructor
     SinglePlotter ();
+
+    //! Get the text interface to the configuration attributes
+    TextInterface::Class* get_interface ();
 
     //! Load the profiles
     void get_profiles (const Archive* data);

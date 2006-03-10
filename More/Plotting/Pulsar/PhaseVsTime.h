@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PhaseVsTime.h,v $
-   $Revision: 1.1 $
-   $Date: 2006/03/09 04:55:25 $
+   $Revision: 1.2 $
+   $Date: 2006/03/10 20:37:58 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PhaseVsTime_h
@@ -19,6 +19,9 @@ namespace Pulsar {
 
     //! Default constructor
     PhaseVsTime ();
+
+    //! Get the text interface to the configuration attributes
+    TextInterface::Class* get_interface ();
 
     //! Set the minimum and maximum values on the y-axis
     void prepare (const Archive* data);
