@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PlotFrame.h,v $
-   $Revision: 1.5 $
-   $Date: 2006/03/09 23:02:12 $
+   $Revision: 1.6 $
+   $Date: 2006/03/10 16:33:12 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PlotFrame_h
@@ -43,6 +43,10 @@ namespace Pulsar {
 
     //! Decorate the frame
     virtual void decorate (const Archive*);
+
+    //! Focus the frame
+    /*! By default a frame exists in the current viewport */
+    virtual void focus () { }
 
     //! Set the offset between labels and frame (multiple of character height)
     void set_label_offset (float offset) { label_offset = offset; }
