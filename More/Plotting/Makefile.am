@@ -11,6 +11,8 @@ nobase_include_HEADERS = Pulsar/PlotterFactory.h Pulsar/Graph.h \
 	Pulsar/PlotAxis.h Pulsar/PlotAxisTI.h \
 	Pulsar/PlotLabel.h Pulsar/PlotLabelTI.h \
 	Pulsar/PlotFrame.h Pulsar/PlotFrameTI.h \
+	Pulsar/PlotFrameSize.h Pulsar/PlotFrameSizeTI.h \
+	Pulsar/MultiFrame.h \
 	Pulsar/ProfilePlotter.h Pulsar/ProfilePlotterTI.h \
 	Pulsar/FluxPlotter.h Pulsar/FluxPlotterTI.h \
 	Pulsar/SinglePlotter.h Pulsar/SinglePlotterTI.h \
@@ -19,12 +21,15 @@ nobase_include_HEADERS = Pulsar/PlotterFactory.h Pulsar/Graph.h \
 	Pulsar/PosAngPlotter.h Pulsar/EllAngPlotter.h \
 	Pulsar/PhaseVsPlotter.h Pulsar/PhaseVsPlotterTI.h \
 	Pulsar/PhaseVsFrequency.h Pulsar/PhaseVsFrequencyTI.h \
-	Pulsar/PhaseVsTime.h Pulsar/PhaseVsTimeTI.h
+	Pulsar/PhaseVsTime.h Pulsar/PhaseVsTimeTI.h \
+	Pulsar/MultiProfile.h
 
 libPlotter_la_SOURCES = PlotterFactory.C \
 	PlotAxis.C PlotAxisTI.C \
 	PlotLabel.C PlotLabelTI.C \
 	PlotFrame.C PlotFrameTI.C \
+	PlotFrameSize.C PlotFrameSizeTI.C \
+	MultiFrame.C \
 	ProfilePlotter.C ProfilePlotterTI.C \
 	FluxPlotter.C FluxPlotterTI.C \
 	SinglePlotter.C SinglePlotterTI.C \
@@ -33,7 +38,8 @@ libPlotter_la_SOURCES = PlotterFactory.C \
 	PosAngPlotter.C EllAngPlotter.C \
 	PhaseVsPlotter.C PhaseVsPlotterTI.C \
 	PhaseVsFrequency.C PhaseVsFrequencyTI.C \
-	PhaseVsTime.C PhaseVsTimeTI.C
+	PhaseVsTime.C PhaseVsTimeTI.C \
+	MultiProfile.C
 
 bin_PROGRAMS = psrplot
 
