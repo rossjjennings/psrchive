@@ -116,8 +116,7 @@ void Pulsar::FluxPlotter::auto_zoom_phase (const Profile* profile, float buf)
   if (stop > 1)
     stop = 1;
 
-  get_frame()->get_x_axis()->set_min_norm (start);
-  get_frame()->get_y_axis()->set_min_norm (stop);
+  get_frame()->get_x_axis()->set_range_norm (pair<float,float>(start,stop));
 }
 
 template<typename T> T sqr (T x) { return x*x; }
@@ -183,8 +182,9 @@ void Pulsar::FluxPlotter::plot_error_box (const Archive* data)
   float y_error = get_flux_error (profiles[0]);
   float x_error = get_phase_error (data);
 
-  float x_max = get_frame()->get_x_axis()->get_max_norm();
-  float x_min = get_frame()->get_x_axis()->get_min_norm();
+  pair<float,float> x_range = get_frame()->get_x_axis()->get_range_norm();
+  float x_min = x_range.first;
+  float x_max = x_range.second;
 
   float x1 = x_min + (x_max - x_min) * 0.05;
   float x2 = x1 + x_error;

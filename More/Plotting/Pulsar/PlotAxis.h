@@ -1,14 +1,16 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PlotAxis.h,v $
-   $Revision: 1.2 $
-   $Date: 2006/03/08 22:33:46 $
+   $Revision: 1.3 $
+   $Date: 2006/03/10 16:32:48 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PlotAxis_h
 #define __Pulsar_PlotAxis_h
 
 #include "Reference.h"
+
+#include <utility>
 
 namespace Pulsar {
 
@@ -33,15 +35,10 @@ namespace Pulsar {
     //! Get the world-normalized minimum value on the axis
     bool get_alternate () const { return alternate; }
 
-    //! Set the world-normalized minimum value on the axis
-    void set_min_norm (float f) { min_norm = f; }
-    //! Get the world-normalized minimum value on the axis
-    float get_min_norm () const { return min_norm; }
-
-    //! Set the world-normalized maximum value on the axis
-    void set_max_norm (float f) { max_norm = f; }
-    //! Get the world-normalized maximum value on the axis
-    float get_max_norm () const { return max_norm; }
+    //! Set the world-normalized range on the axis
+    void set_range_norm (const std::pair<float,float>& f) { range_norm = f; }
+    //! Get the world-normalized range on the axis
+    std::pair<float,float> get_range_norm () const { return range_norm; }
 
     //! Set the world-normalized buffer space on either side of the axis
     void set_buf_norm (float f) { buf_norm = f; }
@@ -64,12 +61,13 @@ namespace Pulsar {
     std::string label;
     std::string pgbox_opt;
     bool alternate;
-    float min_norm;
-    float max_norm;
+
+    std::pair<float,float> range_norm;
     float buf_norm;
 
   };
 
+  
 }
 
 #endif

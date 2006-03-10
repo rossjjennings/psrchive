@@ -1,4 +1,5 @@
 #include "Pulsar/PlotAxisTI.h"
+#include "iopair.h"
 
 Pulsar::PlotAxisTI::PlotAxisTI (PlotAxis* instance)
 {
@@ -9,13 +10,9 @@ Pulsar::PlotAxisTI::PlotAxisTI (PlotAxis* instance)
        &PlotAxis::set_label,
        "lab", "Label to be drawn on axis" );
 
-  add( &PlotAxis::get_min_norm,
-       &PlotAxis::set_min_norm,
-       "min", "Normalized minimum value" );
-
-  add( &PlotAxis::get_max_norm,
-       &PlotAxis::set_max_norm,
-       "max", "Normalized maximum value" );
+  add( &PlotAxis::get_range_norm,
+       &PlotAxis::set_range_norm,
+       "range", "Normalized value range" );
 
   add( &PlotAxis::get_buf_norm,
        &PlotAxis::set_buf_norm,

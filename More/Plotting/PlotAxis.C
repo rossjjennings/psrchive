@@ -1,21 +1,19 @@
 #include "Pulsar/PlotAxis.h"
 #include "Pulsar/PlotLabel.h"
+#include "iopair.h"
 
-Pulsar::PlotAxis::PlotAxis ()
+Pulsar::PlotAxis::PlotAxis () :
+  range_norm (0.0, 1.0)
 {
   label = PlotLabel::unset;
   pgbox_opt = "BCNST";
   alternate = false;
-  min_norm = 0.0;
-  max_norm = 1.0;
   buf_norm = 0.0;
 }
 
 void Pulsar::PlotAxis::get_range (float& min, float& max) const
 {
-  float diff = max - min;
-  max = min + max_norm * diff;
-  min = min + min_norm * diff;
+  stretch (range_norm, min, max);
 
   float space = (max - min) * buf_norm;
   min -= space;
