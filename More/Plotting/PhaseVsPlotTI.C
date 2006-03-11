@@ -14,6 +14,6 @@ Pulsar::PhaseVsPlotterTI::PhaseVsPlotterTI (PhaseVsPlotter* instance)
 
   remove( "z:lab" );
   remove( "z:alt" );
-  remove( "z:fbuf" );
+  remove( "z:buf" );
   remove( "z:opt" );
 }
