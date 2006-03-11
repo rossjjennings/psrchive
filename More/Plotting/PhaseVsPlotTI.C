@@ -1,6 +1,6 @@
 #include "Pulsar/PhaseVsPlotterTI.h"
 #include "Pulsar/ProfilePlotterTI.h"
-#include "Pulsar/PlotAxisTI.h"
+#include "Pulsar/PlotZoomTI.h"
 
 Pulsar::PhaseVsPlotterTI::PhaseVsPlotterTI (PhaseVsPlotter* instance)
 {
@@ -10,10 +10,6 @@ Pulsar::PhaseVsPlotterTI::PhaseVsPlotterTI (PhaseVsPlotter* instance)
   // import the interface of the base class
   import( ProfilePlotterTI() );
 
-  import( "z", PlotAxisTI(), &PhaseVsPlotter::get_z_axis );
+  import( "z", PlotZoomTI(), &PhaseVsPlotter::get_z_zoom );
 
-  remove( "z:lab" );
-  remove( "z:alt" );
-  remove( "z:buf" );
-  remove( "z:opt" );
 }

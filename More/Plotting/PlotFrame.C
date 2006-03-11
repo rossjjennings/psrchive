@@ -9,8 +9,18 @@ using namespace std;
 
 Pulsar::PlotFrame::PlotFrame ()
 {
+  x_zoom = new PlotZoom;
+  x_axis = new PlotAxis;
+
+  y_zoom = new PlotZoom;
+  y_axis = new PlotAxis;
+
+  above = new PlotLabel;
+  below = new PlotLabel;
+
   get_label_above()->set_centre("=file");
   get_label_below()->set_left("=name.=freq MHz");
+
   label_spacing = 1.2;
   label_offset = 0.5;
 }

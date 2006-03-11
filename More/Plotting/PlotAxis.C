@@ -2,22 +2,11 @@
 #include "Pulsar/PlotLabel.h"
 #include "iopair.h"
 
-Pulsar::PlotAxis::PlotAxis () :
-  range_norm (0.0, 1.0)
+Pulsar::PlotAxis::PlotAxis ()
 {
   label = PlotLabel::unset;
   pgbox_opt = "BCNST";
   alternate = false;
-  buf_norm = 0.0;
-}
-
-void Pulsar::PlotAxis::get_range (float& min, float& max) const
-{
-  stretch (range_norm, min, max);
-
-  float space = (max - min) * buf_norm;
-  min -= space;
-  max += space;
 }
 
 //! Add to the options to be passed to pgbox for this axis

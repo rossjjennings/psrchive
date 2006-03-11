@@ -1,13 +1,14 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PlotFrame.h,v $
-   $Revision: 1.6 $
-   $Date: 2006/03/10 16:33:12 $
+   $Revision: 1.7 $
+   $Date: 2006/03/11 03:35:17 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PlotFrame_h
 #define __Pulsar_PlotFrame_h
 
+#include "Pulsar/PlotZoom.h"
 #include "Pulsar/PlotAxis.h"
 #include "Pulsar/PlotLabel.h"
 
@@ -29,17 +30,27 @@ namespace Pulsar {
     //! Destructor
     ~PlotFrame ();
 
-    //! Get the x-axis
-    PlotAxis* get_x_axis() { return &x_axis; }
+    //! Get the x-zoom
+    PlotZoom* get_x_zoom() { return x_zoom; }
+    //! Set the x-zoom
+    void set_x_zoom (PlotZoom* zoom) { x_zoom = zoom; }
 
     //! Get the x-axis
-    PlotAxis* get_y_axis() { return &y_axis; }
+    PlotAxis* get_x_axis() { return x_axis; }
+
+    //! Get the x-zoom
+    PlotZoom* get_y_zoom() { return y_zoom; }
+    //! Set the y-zoom
+    void set_y_zoom (PlotZoom* zoom) { y_zoom = zoom; }
+
+    //! Get the x-axis
+    PlotAxis* get_y_axis() { return y_axis; }
 
     //! Get the above-frame label
-    PlotLabel* get_label_above () { return &above; }
+    PlotLabel* get_label_above () { return above; }
 
     //! Get the below-frame label
-    PlotLabel* get_label_below () { return &below; }
+    PlotLabel* get_label_below () { return below; }
 
     //! Decorate the frame
     virtual void decorate (const Archive*);
@@ -61,10 +72,15 @@ namespace Pulsar {
 
   protected:
 
-    PlotAxis x_axis;
-    PlotAxis y_axis;
-    PlotLabel above;
-    PlotLabel below;
+    Reference::To<PlotZoom> x_zoom;
+    Reference::To<PlotZoom> y_zoom;
+
+    Reference::To<PlotAxis> x_axis;
+    Reference::To<PlotAxis> y_axis;
+
+    Reference::To<PlotLabel> above;
+    Reference::To<PlotLabel> below;
+
     float label_offset;
     float label_spacing;
 

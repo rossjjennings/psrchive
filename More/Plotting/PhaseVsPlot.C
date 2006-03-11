@@ -31,11 +31,11 @@ void Pulsar::PhaseVsPlotter::draw (const Archive* archive)
 
   float x_min = 0.0;
   float x_max = 1.0;
-  get_frame()->get_x_axis()->get_range (x_min, x_max);
+  get_frame()->get_x_zoom()->get_range (x_min, x_max);
 
   float y_min = 0.0;
   float y_max = 1.0;
-  get_frame()->get_y_axis()->get_range (y_min, y_max);
+  get_frame()->get_y_zoom()->get_range (y_min, y_max);
 
   cpgswin (x_min, x_max, y_min, y_max);
 
@@ -62,9 +62,7 @@ void Pulsar::PhaseVsPlotter::draw (const Archive* archive)
   float min = * std::min_element (plotarray.begin(), plotarray.end());
   float max = * std::max_element (plotarray.begin(), plotarray.end());
   
-  cerr << "min=" << min << " max=" << max << endl;
-
-  get_z_axis()->get_range (min, max);
+  get_z_zoom()->get_range (min, max);
 
   cpgimag(&plotarray[0], nbin, nrow, 1, nbin, 1, nrow, min, max, trf);
 

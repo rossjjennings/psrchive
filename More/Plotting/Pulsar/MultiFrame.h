@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/MultiFrame.h,v $
-   $Revision: 1.4 $
-   $Date: 2006/03/10 21:32:18 $
+   $Revision: 1.5 $
+   $Date: 2006/03/11 03:35:17 $
    $Author: straten $ */
 
 #ifndef __Pulsar_MultiFrame_h
@@ -24,22 +24,22 @@ namespace Pulsar {
     //! Return a previously mapped plot frame
     PlotFrameSize* get_frame (const std::string& name);
 
-    //! Return the shared x-axis
-    PlotAxis* get_shared_x_axis() { return x_axis; }
-    bool has_shared_x_axis () { return x_axis; }
-    void set_shared_x_axis (PlotAxis* x) { x_axis = x; }
+    //! Return the shared x-zoom
+    PlotZoom* get_shared_x_zoom() { return x_zoom; }
+    bool has_shared_x_zoom () { return x_zoom; }
+    void set_shared_x_zoom (PlotZoom* x) { x_zoom = x; }
 
-    //! Return the shared y-axis
-    PlotAxis* get_shared_y_axis() { return y_axis; }
-    bool has_shared_y_axis () { return y_axis; }
-    void set_shared_y_axis (PlotAxis* y) { y_axis = y; }
+    //! Return the shared y-zoom
+    PlotZoom* get_shared_y_zoom() { return y_zoom; }
+    bool has_shared_y_zoom () { return y_zoom; }
+    void set_shared_y_zoom (PlotZoom* y) { y_zoom = y; }
 
   protected:
 
     std::map< std::string, Reference::To<PlotFrameSize> > frames;
 
-    Reference::To<PlotAxis> x_axis;
-    Reference::To<PlotAxis> y_axis;
+    Reference::To<PlotZoom> x_zoom;
+    Reference::To<PlotZoom> y_zoom;
 
   };
 

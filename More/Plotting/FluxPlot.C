@@ -13,7 +13,7 @@ Pulsar::FluxPlotter::FluxPlotter ()
   plot_ebox = false;
   plot_histogram = false;
 
-  get_frame()->get_y_axis()->set_buf_norm(0.05);
+  get_frame()->get_y_zoom()->set_buf_norm(0.05);
 }
  
 TextInterface::Class* Pulsar::FluxPlotter::get_interface ()
@@ -111,7 +111,7 @@ void Pulsar::FluxPlotter::auto_zoom_phase (const Profile* profile, float buf)
   if (stop > 1)
     stop = 1;
 
-  get_frame()->get_x_axis()->set_range_norm (pair<float,float>(start,stop));
+  get_frame()->get_x_zoom()->set_range_norm (start, stop);
 }
 
 template<typename T> T sqr (T x) { return x*x; }
@@ -177,7 +177,7 @@ void Pulsar::FluxPlotter::plot_error_box (const Archive* data)
   float y_error = get_flux_error (profiles[0]);
   float x_error = get_phase_error (data);
 
-  pair<float,float> x_range = get_frame()->get_x_axis()->get_range_norm();
+  pair<float,float> x_range = get_frame()->get_x_zoom()->get_range_norm();
   float x_min = x_range.first;
   float x_max = x_range.second;
 

@@ -5,7 +5,7 @@
 
 Pulsar::MultiProfile::MultiProfile ()
 {
-  frames.set_shared_x_axis (get_frame()->get_x_axis());
+  frames.set_shared_x_zoom (get_frame()->get_x_zoom());
 }
 
 TextInterface::Class* Pulsar::MultiProfile::get_frame_interface ()
@@ -20,17 +20,11 @@ void Pulsar::MultiProfile::plot (const Archive* data)
   float x0, x1, y0, y1;
   cpgqvp (0, &x0, &x1, &y0, &y1);
 
-  // the x-range
-  std::pair<float,float> x_range = get_frame()->get_x_axis()->get_range_norm();
-
   std::map< std::string, Reference::To<ProfilePlotter> >::iterator ptr;
   for (ptr = plotters.begin(); ptr != plotters.end(); ptr++) {
 
     ProfilePlotter* plot = ptr->second;
     PlotFrame* frame = plot->get_frame();
-
-    // ensure that all plots have the same x-axis range
-    frame->get_x_axis()->set_range_norm( x_range );
 
     // set the viewport
     frame->focus();
@@ -51,6 +45,8 @@ void Pulsar::MultiProfile::manage (const std::string& name,
 				   ProfilePlotter* plot)
 {
   plot->set_frame( frames.manage (name, plot->get_frame()) );
+  plot->get_frame()->set_x_zoom( get_frame()->get_x_zoom() );
+
   plotters[name] = plot;
 }
 

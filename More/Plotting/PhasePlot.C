@@ -62,7 +62,7 @@ void Pulsar::ProfilePlotter::get_range_bin (const Archive* data,
 {
   float x_min = 0.0;
   float x_max = data->get_nbin();
-  get_frame()->get_x_axis()->get_range (x_min, x_max);
+  get_frame()->get_x_zoom()->get_range (x_min, x_max);
   min = (unsigned) x_min;
   max = (unsigned) x_max;
 }
@@ -84,8 +84,8 @@ void Pulsar::ProfilePlotter::plot (const Archive* data)
   float x_min = 0.0;
   float x_max = 1.0;
 
-  get_frame()->get_y_axis()->get_range (y_min, y_max);
-  get_frame()->get_x_axis()->get_range (x_min, x_max);
+  get_frame()->get_y_zoom()->get_range (y_min, y_max);
+  get_frame()->get_x_zoom()->get_range (x_min, x_max);
 
   cpgswin (x_min, x_max, y_min, y_max);
 
