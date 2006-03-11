@@ -1,20 +1,20 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/MultiPhase.h,v $
-   $Revision: 1.4 $
-   $Date: 2006/03/10 21:32:18 $
+   $Revision: 1.5 $
+   $Date: 2006/03/11 21:56:54 $
    $Author: straten $ */
 
 #ifndef __Pulsar_MultiProfile_h
 #define __Pulsar_MultiProfile_h
 
-#include "Pulsar/ProfilePlotter.h"
+#include "Pulsar/PhasePlot.h"
 #include "Pulsar/MultiFrame.h"
 
 namespace Pulsar {
 
   //! Plots multiple viewports with pulse phase along the shared x-axis
-  class MultiProfile : public ProfilePlotter {
+  class MultiProfile : public PhasePlot {
 
   public:
 
@@ -28,7 +28,7 @@ namespace Pulsar {
     void plot (const Archive*);
 
     //! Manage a plotter
-    void manage (const std::string& name, ProfilePlotter* plot);
+    void manage (const std::string& name, PhasePlot* plot);
 
     //! Set the viewport of the named plotter
     void set_viewport (const std::string& name, 
@@ -40,7 +40,7 @@ namespace Pulsar {
     MultiFrame frames;
 
     //! The plotters
-    std::map< std::string, Reference::To<ProfilePlotter> > plotters;
+    std::map< std::string, Reference::To<PhasePlot> > plotters;
 
     void draw (const Archive*) {}
 

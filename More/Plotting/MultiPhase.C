@@ -20,10 +20,10 @@ void Pulsar::MultiProfile::plot (const Archive* data)
   float x0, x1, y0, y1;
   cpgqvp (0, &x0, &x1, &y0, &y1);
 
-  std::map< std::string, Reference::To<ProfilePlotter> >::iterator ptr;
+  std::map< std::string, Reference::To<PhasePlot> >::iterator ptr;
   for (ptr = plotters.begin(); ptr != plotters.end(); ptr++) {
 
-    ProfilePlotter* plot = ptr->second;
+    PhasePlot* plot = ptr->second;
     PlotFrame* frame = plot->get_frame();
 
     // set the viewport
@@ -42,7 +42,7 @@ void Pulsar::MultiProfile::plot (const Archive* data)
 
 //! Manage a plotter
 void Pulsar::MultiProfile::manage (const std::string& name,
-				   ProfilePlotter* plot)
+				   PhasePlot* plot)
 {
   plot->set_frame( frames.manage (name, plot->get_frame()) );
   plot->get_frame()->set_x_zoom( get_frame()->get_x_zoom() );

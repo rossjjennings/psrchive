@@ -1,12 +1,12 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PhasePlot.h,v $
-   $Revision: 1.10 $
-   $Date: 2006/03/11 21:51:48 $
+   $Revision: 1.11 $
+   $Date: 2006/03/11 21:56:54 $
    $Author: straten $ */
 
-#ifndef __Pulsar_ProfilePlotter_h
-#define __Pulsar_ProfilePlotter_h
+#ifndef __Pulsar_PhasePlot_h
+#define __Pulsar_PhasePlot_h
 
 #include "Pulsar/Plot.h"
 #include "Pulsar/PlotFrame.h"
@@ -16,20 +16,20 @@
 namespace Pulsar {
 
   //! Plots with pulse phase along the x-axis
-  /*! Children of the ProfilePlotter always:
+  /*! Children of the PhasePlot always:
     <UL>
     <LI> plot in the currently open viewport
     <LI> use the currently set line width
     <LI> use the currently set character height
     </UL>
-    That is, children of the ProfilePlotter class do not call
-    cpgsvp, cpgslw, or cpgsch.  Children of the ProfilePlotter class may:
+    That is, children of the PhasePlot class do not call
+    cpgsvp, cpgslw, or cpgsch.  Children of the PhasePlot class may:
     <UL>
     <LI> change the colour used within the plot frame
     <LI> change the line style within the plot frame
     </UL>
   */
-  class ProfilePlotter : public Plot {
+  class PhasePlot : public Plot {
 
   public:
 
@@ -37,10 +37,10 @@ namespace Pulsar {
     enum Scale { Turns, Degrees, Radians, Milliseconds };
 
     //! Default constructor
-    ProfilePlotter ();
+    PhasePlot ();
 
     //! Destructor
-    virtual ~ProfilePlotter ();
+    virtual ~PhasePlot ();
 
     //! Plot in the current viewport
     virtual void plot (const Archive*);
@@ -112,8 +112,8 @@ namespace Pulsar {
 
   };
 
-  std::ostream& operator << (std::ostream& os, ProfilePlotter::Scale);
-  std::istream& operator >> (std::istream& is, ProfilePlotter::Scale&);
+  std::ostream& operator << (std::ostream& os, PhasePlot::Scale);
+  std::istream& operator >> (std::istream& is, PhasePlot::Scale&);
 
 }
 

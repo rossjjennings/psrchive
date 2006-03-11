@@ -1,21 +1,21 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/FluxPlot.h,v $
-   $Revision: 1.4 $
-   $Date: 2006/03/09 22:29:53 $
+   $Revision: 1.5 $
+   $Date: 2006/03/11 21:56:54 $
    $Author: straten $ */
 
 #ifndef __Pulsar_FluxPlotter_h
 #define __Pulsar_FluxPlotter_h
 
-#include "Pulsar/ProfilePlotter.h"
+#include "Pulsar/PhasePlot.h"
 
 namespace Pulsar {
 
   class Profile;
 
   //! Plots flux profiles
-  class FluxPlotter : public ProfilePlotter {
+  class FluxPlotter : public PhasePlot {
 
   public:
 

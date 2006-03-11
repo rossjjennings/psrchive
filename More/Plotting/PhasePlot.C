@@ -1,4 +1,4 @@
-#include "Pulsar/ProfilePlotterTI.h"
+#include "Pulsar/PhasePlotTI.h"
 #include "Pulsar/PlotFrameTI.h"
 
 #include "Pulsar/Archive.h"
@@ -6,7 +6,7 @@
 
 #include <cpgplot.h>
 
-Pulsar::ProfilePlotter::ProfilePlotter ()
+Pulsar::PhasePlot::PhasePlot ()
 {
   frame = new PlotFrame;
 
@@ -17,22 +17,22 @@ Pulsar::ProfilePlotter::ProfilePlotter ()
   origin_norm = 0;
 }
 
-Pulsar::ProfilePlotter::~ProfilePlotter ()
+Pulsar::PhasePlot::~PhasePlot ()
 {
 }
 
-TextInterface::Class* Pulsar::ProfilePlotter::get_interface ()
+TextInterface::Class* Pulsar::PhasePlot::get_interface ()
 {
-  return new ProfilePlotterTI (this);
+  return new PhasePlotTI (this);
 }
 
 //! Get the text interface to the frame attributes
-TextInterface::Class* Pulsar::ProfilePlotter::get_frame_interface ()
+TextInterface::Class* Pulsar::PhasePlot::get_frame_interface ()
 {
   return new PlotFrameTI (get_frame());
 }
 
-void Pulsar::ProfilePlotter::set_yrange (float min, float max)
+void Pulsar::PhasePlot::set_yrange (float min, float max)
 {
   y_min = min;
   y_max = max;
@@ -41,7 +41,7 @@ void Pulsar::ProfilePlotter::set_yrange (float min, float max)
 
 
 //! Get the default label for the x axis
-string Pulsar::ProfilePlotter::get_xlabel (const Archive*)
+string Pulsar::PhasePlot::get_xlabel (const Archive*)
 {
   switch (scale) {
   case Turns: return "Pulse Phase";
@@ -52,12 +52,12 @@ string Pulsar::ProfilePlotter::get_xlabel (const Archive*)
 }
 
 //! Get the default label for the y axis
-string Pulsar::ProfilePlotter::get_ylabel (const Archive*)
+string Pulsar::PhasePlot::get_ylabel (const Archive*)
 {
   return "";
 }
 
-void Pulsar::ProfilePlotter::get_range_bin (const Archive* data, 
+void Pulsar::PhasePlot::get_range_bin (const Archive* data, 
 					    unsigned& min, unsigned& max)
 {
   float x_min = 0.0;
@@ -71,14 +71,14 @@ void Pulsar::ProfilePlotter::get_range_bin (const Archive* data,
   Plots the profile in the currently open pgplot device, using the current
   viewport.  The profile may be rotated, scaled, and zoomed.
 */
-void Pulsar::ProfilePlotter::plot (const Archive* data)
+void Pulsar::PhasePlot::plot (const Archive* data)
 {
   yrange_set = false;
 
   prepare (data);
 
   if (!yrange_set)
-    throw Error (InvalidState, "Pulsar::ProfilePlotter::plot",
+    throw Error (InvalidState, "Pulsar::PhasePlot::plot",
 		 "range in y values not set after call to prepare");
 
   float x_min = 0.0;
@@ -135,34 +135,34 @@ void Pulsar::ProfilePlotter::plot (const Archive* data)
 }
 
 
-ostream& Pulsar::operator << (ostream& os, ProfilePlotter::Scale scale)
+ostream& Pulsar::operator << (ostream& os, PhasePlot::Scale scale)
 {
   switch (scale) {
-  case ProfilePlotter::Turns:
+  case PhasePlot::Turns:
     return os << "turn";
-  case ProfilePlotter::Degrees:
+  case PhasePlot::Degrees:
     return os << "deg";
-  case ProfilePlotter::Radians:
+  case PhasePlot::Radians:
     return os << "rad";
-  case ProfilePlotter::Milliseconds:
+  case PhasePlot::Milliseconds:
     return os << "ms";
   }
 }
 
-istream& Pulsar::operator >> (istream& is, ProfilePlotter::Scale& scale)
+istream& Pulsar::operator >> (istream& is, PhasePlot::Scale& scale)
 {
   std::streampos pos = is.tellg();
   string unit;
   is >> unit;
 
   if (unit == "turn")
-    scale = ProfilePlotter::Turns;
+    scale = PhasePlot::Turns;
   else if (unit == "deg")
-    scale = ProfilePlotter::Degrees;
+    scale = PhasePlot::Degrees;
   else if (unit == "rad")
-    scale = ProfilePlotter::Radians;
+    scale = PhasePlot::Radians;
   else if (unit == "ms")
-    scale = ProfilePlotter::Milliseconds;
+    scale = PhasePlot::Milliseconds;
   else
     is.setstate(istream::failbit);
 

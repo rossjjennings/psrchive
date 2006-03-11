@@ -1,5 +1,5 @@
 #include "Pulsar/FluxPlotterTI.h"
-#include "Pulsar/ProfilePlotterTI.h"
+#include "Pulsar/PhasePlotTI.h"
 
 Pulsar::FluxPlotterTI::FluxPlotterTI (FluxPlotter* instance)
 {
@@ -18,7 +18,7 @@ Pulsar::FluxPlotterTI::FluxPlotterTI (FluxPlotter* instance)
        &FluxPlotter::set_pol,
        "pol", "Polarization to plot" );
 
-  import( ProfilePlotterTI() );
+  import( PhasePlotTI() );
 
   add( &FluxPlotter::get_plot_error_box,
        &FluxPlotter::set_plot_error_box,

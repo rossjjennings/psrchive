@@ -1,5 +1,5 @@
 #include "Pulsar/StokesCylindricalTI.h"
-#include "Pulsar/ProfilePlotterTI.h"
+#include "Pulsar/PhasePlotTI.h"
 #include "Pulsar/StokesPlotterTI.h"
 #include "Pulsar/AnglePlotterTI.h"
 
@@ -16,7 +16,7 @@ Pulsar::StokesCylindricalTI::StokesCylindricalTI (StokesCylindrical* instance)
        &StokesCylindrical::set_chan,
        "chan", "Frequency channel to plot" );
 
-  import ( ProfilePlotterTI() );
+  import ( PhasePlotTI() );
 
   // when this is set, import will filter out attributes with identical names
   import_filter = true;

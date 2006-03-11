@@ -27,7 +27,7 @@ TextInterface::Class* Pulsar::PhaseVsPlotter::get_interface ()
 //! Derived classes must draw in the current viewport
 void Pulsar::PhaseVsPlotter::draw (const Archive* archive)
 {
-  // Forget about what the ProfilePlotter base class knows about max and min
+  // Forget about what the PhasePlot base class knows about max and min
 
   float x_min = 0.0;
   float x_max = 1.0;

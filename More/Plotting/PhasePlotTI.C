@@ -1,15 +1,15 @@
-#include "Pulsar/ProfilePlotterTI.h"
+#include "Pulsar/PhasePlotTI.h"
 
-Pulsar::ProfilePlotterTI::ProfilePlotterTI (ProfilePlotter* instance)
+Pulsar::PhasePlotTI::PhasePlotTI (PhasePlot* instance)
 {
   if (instance)
     set_instance (instance);
 
-  add( &ProfilePlotter::get_scale,
-       &ProfilePlotter::set_scale,
+  add( &PhasePlot::get_scale,
+       &PhasePlot::set_scale,
        "scale", "Scale on phase axis (turn,deg,rad,ms)" );
 
-  add( &ProfilePlotter::get_origin_norm,
-       &ProfilePlotter::set_origin_norm,
+  add( &PhasePlot::get_origin_norm,
+       &PhasePlot::set_origin_norm,
        "origin", "Offset of origin on phase axis" );
 }
