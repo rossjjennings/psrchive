@@ -1,10 +1,10 @@
 #include "Pulsar/PlotFactory.h"
-#include "Pulsar/SinglePlotter.h"
-#include "Pulsar/StokesPlotter.h"
+#include "Pulsar/SinglePlot.h"
+#include "Pulsar/StokesPlot.h"
 #include "Pulsar/PhaseVsFrequency.h"
 #include "Pulsar/PhaseVsTime.h"
-#include "Pulsar/PosAngPlotter.h"
-#include "Pulsar/EllAngPlotter.h"
+#include "Pulsar/PosAngPlot.h"
+#include "Pulsar/EllAngPlot.h"
 #include "Pulsar/StokesCylindrical.h"
 #include "Pulsar/StokesSpherical.h"
 #include "Error.h"
@@ -12,10 +12,10 @@
 // Add plots here
 Pulsar::PlotFactory::PlotFactory ()
 {
-  add ( new PlotFactory::Advocate<SinglePlotter>
+  add ( new PlotFactory::Advocate<SinglePlot>
 	("flux", "Single plot of flux") );
 
-  add ( new PlotFactory::Advocate<StokesPlotter>
+  add ( new PlotFactory::Advocate<StokesPlot>
 	("stokes", "Stokes parameters") );
 
   add ( new PlotFactory::Advocate<PhaseVsFrequency>
@@ -24,10 +24,10 @@ Pulsar::PlotFactory::PlotFactory ()
   add ( new PlotFactory::Advocate<PhaseVsTime>
 	("time", "Phase vs. time image of flux") );
 
-  add ( new PlotFactory::Advocate<PosAngPlotter>
+  add ( new PlotFactory::Advocate<PosAngPlot>
 	("pa", "Position angle") );
 
-  add ( new PlotFactory::Advocate<EllAngPlotter>
+  add ( new PlotFactory::Advocate<EllAngPlot>
 	("ell", "Ellipticity angle") );
 
   add ( new PlotFactory::Advocate<StokesCylindrical>

@@ -1,5 +1,5 @@
 #include "Pulsar/PhaseVsFrequencyTI.h"
-#include "Pulsar/PhaseVsPlotterTI.h"
+#include "Pulsar/PhaseVsPlotTI.h"
 
 Pulsar::PhaseVsFrequencyTI::PhaseVsFrequencyTI (PhaseVsFrequency* instance)
 {
@@ -15,7 +15,7 @@ Pulsar::PhaseVsFrequencyTI::PhaseVsFrequencyTI (PhaseVsFrequency* instance)
        "pol", "Polarization to plot" );
 
   // import the interface of the base class
-  import( PhaseVsPlotterTI() );
+  import( PhaseVsPlotTI() );
 
 
 

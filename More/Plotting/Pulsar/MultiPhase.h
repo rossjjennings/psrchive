@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/MultiPhase.h,v $
-   $Revision: 1.5 $
-   $Date: 2006/03/11 21:56:54 $
+   $Revision: 1.6 $
+   $Date: 2006/03/11 22:14:46 $
    $Author: straten $ */
 
 #ifndef __Pulsar_MultiProfile_h

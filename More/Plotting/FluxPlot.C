@@ -1,4 +1,4 @@
-#include "Pulsar/FluxPlotterTI.h"
+#include "Pulsar/FluxPlotTI.h"
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
 #include "Pulsar/Profile.h"
@@ -7,7 +7,7 @@
 
 #include <cpgplot.h>
 
-Pulsar::FluxPlotter::FluxPlotter ()
+Pulsar::FluxPlot::FluxPlot ()
 {
   isubint = ichan = 0;
   plot_ebox = false;
@@ -16,20 +16,20 @@ Pulsar::FluxPlotter::FluxPlotter ()
   get_frame()->get_y_zoom()->set_buf_norm(0.05);
 }
  
-TextInterface::Class* Pulsar::FluxPlotter::get_interface ()
+TextInterface::Class* Pulsar::FluxPlot::get_interface ()
 {
-  return new FluxPlotterTI (this);
+  return new FluxPlotTI (this);
 }
 
 //! Derived classes must compute the minimum and maximum values (y-axis)
-void Pulsar::FluxPlotter::prepare (const Archive* data)
+void Pulsar::FluxPlot::prepare (const Archive* data)
 {
   profiles.clear();
 
   get_profiles (data);
 
   if (!profiles.size())
-    throw Error (InvalidState, "Pulsar::FluxPlotter::prepare",
+    throw Error (InvalidState, "Pulsar::FluxPlot::prepare",
 		 "Profiles array empty after call to get_profiles");
 
   unsigned i_min, i_max;
@@ -52,7 +52,7 @@ void Pulsar::FluxPlotter::prepare (const Archive* data)
 
 
 //! Derived classes must draw in the current viewport
-void Pulsar::FluxPlotter::draw (const Archive* data)
+void Pulsar::FluxPlot::draw (const Archive* data)
 {
   for (unsigned iprof=0; iprof < profiles.size(); iprof++) {
 
@@ -75,7 +75,7 @@ void Pulsar::FluxPlotter::draw (const Archive* data)
 }
 
 //! draw the profile in the current viewport and window
-void Pulsar::FluxPlotter::draw (const Profile* profile) const
+void Pulsar::FluxPlot::draw (const Profile* profile) const
 {
   if (plot_histogram)
     cpgbin (profile->get_nbin(), &phases[0], profile->get_amps(), true);
@@ -86,7 +86,7 @@ void Pulsar::FluxPlotter::draw (const Profile* profile) const
 
 
 //! Zoom in on the on-pulse region
-void Pulsar::FluxPlotter::auto_zoom_phase (const Profile* profile, float buf)
+void Pulsar::FluxPlot::auto_zoom_phase (const Profile* profile, float buf)
 {
   int rise, fall;
   profile->find_peak_edges (rise, fall);
@@ -117,7 +117,7 @@ void Pulsar::FluxPlotter::auto_zoom_phase (const Profile* profile, float buf)
 template<typename T> T sqr (T x) { return x*x; }
 
 //! Return the label for the y-axis
-std::string Pulsar::FluxPlotter::get_ylabel (const Archive* data)
+std::string Pulsar::FluxPlot::get_ylabel (const Archive* data)
 {
   if (data->get_scale() == Signal::Jansky)
     return "Flux Density (mJy)";
@@ -125,7 +125,7 @@ std::string Pulsar::FluxPlotter::get_ylabel (const Archive* data)
     return "Relative Flux Units";
 }
 
-float Pulsar::FluxPlotter::get_phase_error (const Archive* data)
+float Pulsar::FluxPlot::get_phase_error (const Archive* data)
 {
   double dm        = data->get_dispersion_measure();
   double freq      = data->get_centre_frequency();
@@ -158,7 +158,7 @@ float Pulsar::FluxPlotter::get_phase_error (const Archive* data)
   return x_error;
 }
 
-float Pulsar::FluxPlotter::get_flux_error (const Profile* profile)
+float Pulsar::FluxPlot::get_flux_error (const Profile* profile)
 {
   float min_phase = profile->find_min_phase();
   double var;
@@ -172,7 +172,7 @@ float Pulsar::FluxPlotter::get_flux_error (const Profile* profile)
 }
 
 
-void Pulsar::FluxPlotter::plot_error_box (const Archive* data)
+void Pulsar::FluxPlot::plot_error_box (const Archive* data)
 {
   float y_error = get_flux_error (profiles[0]);
   float x_error = get_phase_error (data);

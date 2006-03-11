@@ -1,15 +1,15 @@
-#include "Pulsar/EllAngPlotter.h"
+#include "Pulsar/EllAngPlot.h"
 #include "Pulsar/Polarization.h"
 #include "Pulsar/PolnProfile.h"
 
-void Pulsar::EllAngPlotter::get_angles (const Archive* data)
+void Pulsar::EllAngPlot::get_angles (const Archive* data)
 {
   Reference::To<const PolnProfile> profile = new_Stokes (data,isubint,ichan);
   profile->get_ellipticity (angles, threshold);
 }
 
 //! Return the label for the y-axis
-std::string Pulsar::EllAngPlotter::get_ylabel (const Archive* data)
+std::string Pulsar::EllAngPlot::get_ylabel (const Archive* data)
 {
   return "Ellipticity Angle (degrees)";
 }

@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/Attic/PlotFrameSize.h,v $
-   $Revision: 1.3 $
-   $Date: 2006/03/10 16:33:01 $
+   $Revision: 1.4 $
+   $Date: 2006/03/11 22:14:46 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PlotFrameSize_h

@@ -1,16 +1,16 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/StokesCylindrical.h,v $
-   $Revision: 1.2 $
-   $Date: 2006/03/10 21:49:53 $
+   $Revision: 1.3 $
+   $Date: 2006/03/11 22:14:46 $
    $Author: straten $ */
 
 #ifndef __Pulsar_StokesCylindrical_h
 #define __Pulsar_StokesCylindrical_h
 
 #include "Pulsar/MultiProfile.h"
-#include "Pulsar/StokesPlotter.h"
-#include "Pulsar/PosAngPlotter.h"
+#include "Pulsar/StokesPlot.h"
+#include "Pulsar/PosAngPlot.h"
 
 namespace Pulsar {
 
@@ -38,16 +38,16 @@ namespace Pulsar {
     void set_chan (unsigned _ichan) { ichan = _ichan; }
     unsigned get_chan () const { return ichan; }
 
-    //! Get the StokesPlotter
-    StokesPlotter* get_flux () { return &flux; }
+    //! Get the StokesPlot
+    StokesPlot* get_flux () { return &flux; }
 
-    //! Get the PosAngPlotter
-    PosAngPlotter* get_orientation () { return &orientation; }
+    //! Get the PosAngPlot
+    PosAngPlot* get_orientation () { return &orientation; }
 
   protected:
 
-    StokesPlotter flux;
-    PosAngPlotter orientation;
+    StokesPlot flux;
+    PosAngPlot orientation;
     unsigned isubint;
     unsigned ichan;
 

@@ -1,7 +1,7 @@
 #include "Pulsar/StokesSphericalTI.h"
 #include "Pulsar/PhasePlotTI.h"
-#include "Pulsar/StokesPlotterTI.h"
-#include "Pulsar/AnglePlotterTI.h"
+#include "Pulsar/StokesPlotTI.h"
+#include "Pulsar/AnglePlotTI.h"
 
 Pulsar::StokesSphericalTI::StokesSphericalTI (StokesSpherical* instance)
 {
@@ -21,7 +21,7 @@ Pulsar::StokesSphericalTI::StokesSphericalTI (StokesSpherical* instance)
   // when this is set, import will filter out attributes with identical names
   import_filter = true;
 
-  import ( "flux", StokesPlotterTI(), &StokesSpherical::get_flux );
-  import ( "pa",  AnglePlotterTI(), &StokesSpherical::get_orientation );
-  import ( "ell", AnglePlotterTI(), &StokesSpherical::get_ellipticity );
+  import ( "flux", StokesPlotTI(), &StokesSpherical::get_flux );
+  import ( "pa",  AnglePlotTI(), &StokesSpherical::get_orientation );
+  import ( "ell", AnglePlotTI(), &StokesSpherical::get_ellipticity );
 }

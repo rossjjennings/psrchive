@@ -1,4 +1,4 @@
-#include "Pulsar/StokesPlotterTI.h"
+#include "Pulsar/StokesPlotTI.h"
 #include "Pulsar/Polarization.h"
 #include "Pulsar/Archive.h"
 #include "Pulsar/PolnProfile.h"
@@ -7,31 +7,31 @@
 
 #include <cpgplot.h>
 
-Pulsar::StokesPlotter::StokesPlotter ()
+Pulsar::StokesPlot::StokesPlot ()
 {
   plot_values  = "IQUV";
   plot_colours = "1234";
   plot_lines   = "1111";
 }
 
-TextInterface::Class* Pulsar::StokesPlotter::get_interface ()
+TextInterface::Class* Pulsar::StokesPlot::get_interface ()
 {
-  return new StokesPlotterTI (this);
+  return new StokesPlotTI (this);
 }
 
-void Pulsar::StokesPlotter::get_profiles (const Archive* data)
+void Pulsar::StokesPlot::get_profiles (const Archive* data)
 {
   profiles.resize( plot_values.size() );
   plot_sci.resize( plot_values.size() );
   plot_sls.resize( plot_values.size() );
 
   if (plot_values.size() > plot_colours.size())
-    throw Error (InvalidState, "Pulsar::StokesPlotter::get_profiles",
+    throw Error (InvalidState, "Pulsar::StokesPlot::get_profiles",
 		 "Mismatch: %u plots and %u colours",
 		 plot_values.size(), plot_colours.size());
 
   if (plot_values.size() > plot_lines.size())
-    throw Error (InvalidState, "Pulsar::StokesPlotter::get_profiles",
+    throw Error (InvalidState, "Pulsar::StokesPlot::get_profiles",
 		 "Mismatch: %u plots and %u lines",
 		 plot_values.size(), plot_lines.size());
 

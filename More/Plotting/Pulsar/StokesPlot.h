@@ -1,26 +1,26 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/StokesPlot.h,v $
-   $Revision: 1.3 $
-   $Date: 2006/03/10 20:37:58 $
+   $Revision: 1.4 $
+   $Date: 2006/03/11 22:14:46 $
    $Author: straten $ */
 
-#ifndef __Pulsar_StokesPlotter_h
-#define __Pulsar_StokesPlotter_h
+#ifndef __Pulsar_StokesPlot_h
+#define __Pulsar_StokesPlot_h
 
-#include "Pulsar/FluxPlotter.h"
+#include "Pulsar/FluxPlot.h"
 
 namespace Pulsar {
 
   class PolnProfile;
 
   //! Plots a single pulse profile
-  class StokesPlotter : public FluxPlotter {
+  class StokesPlot : public FluxPlot {
 
   public:
 
     //! Default constructor
-    StokesPlotter ();
+    StokesPlot ();
 
     //! Get the text interface to the configuration attributes
     TextInterface::Class* get_interface ();

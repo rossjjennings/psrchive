@@ -1,4 +1,4 @@
-#include "Pulsar/PhaseVsPlotterTI.h"
+#include "Pulsar/PhaseVsPlotTI.h"
 #include "Pulsar/Archive.h"
 #include "Pulsar/Profile.h"
 
@@ -6,7 +6,7 @@
 
 #include <algorithm>
 
-Pulsar::PhaseVsPlotter::PhaseVsPlotter ()
+Pulsar::PhaseVsPlot::PhaseVsPlot ()
 {
   // default is to invert the axis tick marks
   get_frame()->get_x_axis()->set_pgbox_opt ("BCINTS");
@@ -19,13 +19,13 @@ Pulsar::PhaseVsPlotter::PhaseVsPlotter ()
   get_frame()->get_label_below()->set_all (PlotLabel::unset);
 }
  
-TextInterface::Class* Pulsar::PhaseVsPlotter::get_interface ()
+TextInterface::Class* Pulsar::PhaseVsPlot::get_interface ()
 {
-  return new PhaseVsPlotterTI (this);
+  return new PhaseVsPlotTI (this);
 }
 
 //! Derived classes must draw in the current viewport
-void Pulsar::PhaseVsPlotter::draw (const Archive* archive)
+void Pulsar::PhaseVsPlot::draw (const Archive* archive)
 {
   // Forget about what the PhasePlot base class knows about max and min
 

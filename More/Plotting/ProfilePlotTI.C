@@ -1,14 +1,14 @@
-#include "Pulsar/SinglePlotterTI.h"
-#include "Pulsar/FluxPlotterTI.h"
+#include "Pulsar/SinglePlotTI.h"
+#include "Pulsar/FluxPlotTI.h"
 
-Pulsar::SinglePlotterTI::SinglePlotterTI (SinglePlotter* instance)
+Pulsar::SinglePlotTI::SinglePlotTI (SinglePlot* instance)
 {
   if (instance)
     set_instance (instance);
 
-  import ( FluxPlotterTI() );
+  import ( FluxPlotTI() );
 
-  add( &SinglePlotter::get_plot_cal_transitions,
-       &SinglePlotter::set_plot_cal_transitions,
+  add( &SinglePlot::get_plot_cal_transitions,
+       &SinglePlot::set_plot_cal_transitions,
        "cal", "Plot cal transitions (when applicable)" );
 }

@@ -1,12 +1,12 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PhaseVsPlot.h,v $
-   $Revision: 1.5 $
-   $Date: 2006/03/11 21:56:54 $
+   $Revision: 1.6 $
+   $Date: 2006/03/11 22:14:46 $
    $Author: straten $ */
 
-#ifndef __Pulsar_PhaseVsPlotter_h
-#define __Pulsar_PhaseVsPlotter_h
+#ifndef __Pulsar_PhaseVsPlot_h
+#define __Pulsar_PhaseVsPlot_h
 
 #include "Pulsar/PhasePlot.h"
 
@@ -15,12 +15,12 @@ namespace Pulsar {
   class Profile;
 
   //! Plots images of something as a function of pulse phase vs something
-  class PhaseVsPlotter : public PhasePlot {
+  class PhaseVsPlot : public PhasePlot {
 
   public:
 
     //! Default constructor
-    PhaseVsPlotter ();
+    PhaseVsPlot ();
 
     //! Get the text interface to the configuration attributes
     TextInterface::Class* get_interface ();

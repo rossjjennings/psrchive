@@ -1,30 +1,30 @@
-#include "Pulsar/FluxPlotterTI.h"
+#include "Pulsar/FluxPlotTI.h"
 #include "Pulsar/PhasePlotTI.h"
 
-Pulsar::FluxPlotterTI::FluxPlotterTI (FluxPlotter* instance)
+Pulsar::FluxPlotTI::FluxPlotTI (FluxPlot* instance)
 {
   if (instance)
     set_instance (instance);
 
-  add( &FluxPlotter::get_subint,
-       &FluxPlotter::set_subint,
+  add( &FluxPlot::get_subint,
+       &FluxPlot::set_subint,
        "subint", "Sub-integration to plot" );
 
-  add( &FluxPlotter::get_chan,
-       &FluxPlotter::set_chan,
+  add( &FluxPlot::get_chan,
+       &FluxPlot::set_chan,
        "chan", "Frequency channel to plot" );
 
-  add( &FluxPlotter::get_pol,
-       &FluxPlotter::set_pol,
+  add( &FluxPlot::get_pol,
+       &FluxPlot::set_pol,
        "pol", "Polarization to plot" );
 
   import( PhasePlotTI() );
 
-  add( &FluxPlotter::get_plot_error_box,
-       &FluxPlotter::set_plot_error_box,
+  add( &FluxPlot::get_plot_error_box,
+       &FluxPlot::set_plot_error_box,
        "ebox", "Plot error box" );
 
-  add( &FluxPlotter::get_plot_histogram,
-       &FluxPlotter::set_plot_histogram,
+  add( &FluxPlot::get_plot_histogram,
+       &FluxPlot::set_plot_histogram,
        "hist", "Plot histogram style" );
 }

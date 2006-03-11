@@ -1,12 +1,12 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/AnglePlot.h,v $
-   $Revision: 1.4 $
-   $Date: 2006/03/11 21:56:54 $
+   $Revision: 1.5 $
+   $Date: 2006/03/11 22:14:46 $
    $Author: straten $ */
 
-#ifndef __Pulsar_AnglePlotter_h
-#define __Pulsar_AnglePlotter_h
+#ifndef __Pulsar_AnglePlot_h
+#define __Pulsar_AnglePlot_h
 
 #include "Pulsar/PhasePlot.h"
 #include "Estimate.h"
@@ -14,12 +14,12 @@
 namespace Pulsar {
 
   //! Plots the position angle of the linearly polarized radiation
-  class AnglePlotter : public PhasePlot {
+  class AnglePlot : public PhasePlot {
 
   public:
 
     //! Default constructor
-    AnglePlotter ();
+    AnglePlot ();
 
     //! Get the text interface to the configuration attributes
     TextInterface::Class* get_interface ();

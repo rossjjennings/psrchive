@@ -1,17 +1,17 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/StokesSpherical.h,v $
-   $Revision: 1.1 $
-   $Date: 2006/03/10 21:50:07 $
+   $Revision: 1.2 $
+   $Date: 2006/03/11 22:14:46 $
    $Author: straten $ */
 
 #ifndef __Pulsar_StokesSpherical_h
 #define __Pulsar_StokesSpherical_h
 
 #include "Pulsar/MultiProfile.h"
-#include "Pulsar/StokesPlotter.h"
-#include "Pulsar/PosAngPlotter.h"
-#include "Pulsar/EllAngPlotter.h"
+#include "Pulsar/StokesPlot.h"
+#include "Pulsar/PosAngPlot.h"
+#include "Pulsar/EllAngPlot.h"
 
 namespace Pulsar {
 
@@ -39,20 +39,20 @@ namespace Pulsar {
     void set_chan (unsigned _ichan) { ichan = _ichan; }
     unsigned get_chan () const { return ichan; }
 
-    //! Get the StokesPlotter
-    StokesPlotter* get_flux () { return &flux; }
+    //! Get the StokesPlot
+    StokesPlot* get_flux () { return &flux; }
 
-    //! Get the PosAngPlotter
-    PosAngPlotter* get_orientation () { return &orientation; }
+    //! Get the PosAngPlot
+    PosAngPlot* get_orientation () { return &orientation; }
 
-    //! Get the EllAngPlotter
-    EllAngPlotter* get_ellipticity () { return &ellipticity; }
+    //! Get the EllAngPlot
+    EllAngPlot* get_ellipticity () { return &ellipticity; }
 
   protected:
 
-    StokesPlotter flux;
-    PosAngPlotter orientation;
-    EllAngPlotter ellipticity;
+    StokesPlot flux;
+    PosAngPlot orientation;
+    EllAngPlot ellipticity;
     unsigned isubint;
     unsigned ichan;
 

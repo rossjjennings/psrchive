@@ -1,19 +1,19 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PhaseVsFrequency.h,v $
-   $Revision: 1.2 $
-   $Date: 2006/03/10 20:37:58 $
+   $Revision: 1.3 $
+   $Date: 2006/03/11 22:14:46 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PhaseVsFrequency_h
 #define __Pulsar_PhaseVsFrequency_h
 
-#include "Pulsar/PhaseVsPlotter.h"
+#include "Pulsar/PhaseVsPlot.h"
 
 namespace Pulsar {
 
   //! Plots images of something as a function of pulse phase vs something
-  class PhaseVsFrequency : public PhaseVsPlotter {
+  class PhaseVsFrequency : public PhaseVsPlot {
 
   public:
 

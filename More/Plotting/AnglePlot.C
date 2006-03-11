@@ -1,5 +1,5 @@
-#include "Pulsar/AnglePlotter.h"
-#include "Pulsar/AnglePlotterTI.h"
+#include "Pulsar/AnglePlot.h"
+#include "Pulsar/AnglePlotTI.h"
 
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
@@ -7,7 +7,7 @@
 
 #include <cpgplot.h>
 
-Pulsar::AnglePlotter::AnglePlotter()
+Pulsar::AnglePlot::AnglePlot()
 {
   error_bars = true;
   threshold = 3.0;
@@ -17,17 +17,17 @@ Pulsar::AnglePlotter::AnglePlotter()
   ichan = 0;
 }
 
-TextInterface::Class* Pulsar::AnglePlotter::get_interface ()
+TextInterface::Class* Pulsar::AnglePlot::get_interface ()
 {
-  return new AnglePlotterTI (this);
+  return new AnglePlotTI (this);
 }
 
-void Pulsar::AnglePlotter::prepare (const Archive* data)
+void Pulsar::AnglePlot::prepare (const Archive* data)
 {
   get_angles (data);
 
   if (angles.size() != data->get_nbin())
-    throw Error (InvalidState, "Pulsar::AnglePlotter::prepare",
+    throw Error (InvalidState, "Pulsar::AnglePlot::prepare",
 		 "angles vector size=%u != nbin=%u",
 		 angles.size(), data->get_nbin());
 
@@ -45,7 +45,7 @@ void Pulsar::AnglePlotter::prepare (const Archive* data)
 	      max_element (angles.begin()+i_min, angles.begin()+i_max)->val );
 }
 
-void Pulsar::AnglePlotter::draw (const Archive *data)
+void Pulsar::AnglePlot::draw (const Archive *data)
 {
   float offset = 0;
   unsigned times = 1;
@@ -81,7 +81,7 @@ void Pulsar::AnglePlotter::draw (const Archive *data)
 }
 
 //! Return the label for the y-axis
-std::string Pulsar::AnglePlotter::get_flux_label (const Archive* data)
+std::string Pulsar::AnglePlot::get_flux_label (const Archive* data)
 {
   return "P.A. (deg.)";
 }

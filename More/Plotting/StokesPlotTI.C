@@ -1,24 +1,24 @@
-#include "Pulsar/StokesPlotterTI.h"
-#include "Pulsar/FluxPlotterTI.h"
+#include "Pulsar/StokesPlotTI.h"
+#include "Pulsar/FluxPlotTI.h"
 
-Pulsar::StokesPlotterTI::StokesPlotterTI (StokesPlotter* instance)
+Pulsar::StokesPlotTI::StokesPlotTI (StokesPlot* instance)
 {
   if (instance)
     set_instance (instance);
 
-  import ( FluxPlotterTI() );
+  import ( FluxPlotTI() );
 
   remove ("pol");
 
-  add( &StokesPlotter::get_plot_values,
-       &StokesPlotter::set_plot_values,
+  add( &StokesPlot::get_plot_values,
+       &StokesPlot::set_plot_values,
        "val", "Values to be plotted (IQUVLp)" );
 
-  add( &StokesPlotter::get_plot_colours,
-       &StokesPlotter::set_plot_colours,
+  add( &StokesPlot::get_plot_colours,
+       &StokesPlot::set_plot_colours,
        "sci", "PGPLOT colour index for each value" );
 
-  add( &StokesPlotter::get_plot_lines,
-       &StokesPlotter::set_plot_lines,
+  add( &StokesPlot::get_plot_lines,
+       &StokesPlot::set_plot_lines,
        "sls", "PGPLOT line style for each value" );
 }

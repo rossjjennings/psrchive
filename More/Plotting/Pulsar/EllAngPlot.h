@@ -1,19 +1,19 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/EllAngPlot.h,v $
-   $Revision: 1.2 $
-   $Date: 2006/03/10 23:09:26 $
+   $Revision: 1.3 $
+   $Date: 2006/03/11 22:14:46 $
    $Author: straten $ */
 
-#ifndef __Pulsar_EllAngPlotter_h
-#define __Pulsar_EllAngPlotter_h
+#ifndef __Pulsar_EllAngPlot_h
+#define __Pulsar_EllAngPlot_h
 
-#include "Pulsar/AnglePlotter.h"
+#include "Pulsar/AnglePlot.h"
 
 namespace Pulsar {
 
   //! Plots the ellipticity angle of the polarized radiation
-  class EllAngPlotter : public AnglePlotter {
+  class EllAngPlot : public AnglePlot {
 
   public:
 

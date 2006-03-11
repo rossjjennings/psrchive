@@ -1,32 +1,32 @@
-#include "Pulsar/AnglePlotterTI.h"
+#include "Pulsar/AnglePlotTI.h"
 #include "Pulsar/PhasePlotTI.h"
 
-Pulsar::AnglePlotterTI::AnglePlotterTI (AnglePlotter* instance)
+Pulsar::AnglePlotTI::AnglePlotTI (AnglePlot* instance)
 {
   if (instance)
     set_instance (instance);
 
-  add( &AnglePlotter::get_subint,
-       &AnglePlotter::set_subint,
+  add( &AnglePlot::get_subint,
+       &AnglePlot::set_subint,
        "subint", "Sub-integration to plot" );
 
-  add( &AnglePlotter::get_chan,
-       &AnglePlotter::set_chan,
+  add( &AnglePlot::get_chan,
+       &AnglePlot::set_chan,
        "chan", "Frequency channel to plot" );
 
   // import the interface of the base class
   import( PhasePlotTI() );
 
-  add( &AnglePlotter::get_error_bars,
-       &AnglePlotter::set_error_bars,
+  add( &AnglePlot::get_error_bars,
+       &AnglePlot::set_error_bars,
        "ebar", "Plot estimated error bars" );
 
-  add( &AnglePlotter::get_threshold,
-       &AnglePlotter::set_threshold,
+  add( &AnglePlot::get_threshold,
+       &AnglePlot::set_threshold,
        "cut", "Plot only points with R > cut * sigma_R" );
 
-  add( &AnglePlotter::get_range,
-       &AnglePlotter::set_range,
+  add( &AnglePlot::get_range,
+       &AnglePlot::set_range,
        "range", "Range of angles in plot (degrees)" );
 
 }
