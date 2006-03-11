@@ -1,5 +1,5 @@
 
-noinst_LTLIBRARIES = libPlotter.la
+noinst_LTLIBRARIES = libPlot.la
 
 ##############################################################################
 #
@@ -15,19 +15,19 @@ nobase_include_HEADERS = Pulsar/Plot.h Pulsar/PlotFactory.h \
 	Pulsar/PlotFrameSize.h Pulsar/PlotFrameSizeTI.h \
 	Pulsar/MultiFrame.h Pulsar/MultiFrameTI.h \
 	Pulsar/PhasePlot.h Pulsar/PhasePlotTI.h \
-	Pulsar/FluxPlotter.h Pulsar/FluxPlotterTI.h \
-	Pulsar/SinglePlotter.h Pulsar/SinglePlotterTI.h \
-	Pulsar/StokesPlotter.h Pulsar/StokesPlotterTI.h \
-	Pulsar/AnglePlotter.h Pulsar/AnglePlotterTI.h \
-	Pulsar/PosAngPlotter.h Pulsar/EllAngPlotter.h \
-	Pulsar/PhaseVsPlotter.h Pulsar/PhaseVsPlotterTI.h \
+	Pulsar/FluxPlot.h Pulsar/FluxPlotTI.h \
+	Pulsar/SinglePlot.h Pulsar/SinglePlotTI.h \
+	Pulsar/StokesPlot.h Pulsar/StokesPlotTI.h \
+	Pulsar/AnglePlot.h Pulsar/AnglePlotTI.h \
+	Pulsar/PosAngPlot.h Pulsar/EllAngPlot.h \
+	Pulsar/PhaseVsPlot.h Pulsar/PhaseVsPlotTI.h \
 	Pulsar/PhaseVsFrequency.h Pulsar/PhaseVsFrequencyTI.h \
 	Pulsar/PhaseVsTime.h Pulsar/PhaseVsTimeTI.h \
 	Pulsar/MultiProfile.h \
 	Pulsar/StokesCylindrical.h Pulsar/StokesCylindricalTI.h \
 	Pulsar/StokesSpherical.h Pulsar/StokesSphericalTI.h
 
-libPlotter_la_SOURCES = PlotFactory.C \
+libPlot_la_SOURCES = PlotFactory.C \
 	PlotZoom.C PlotZoomTI.C \
 	PlotAxis.C PlotAxisTI.C \
 	PlotLabel.C PlotLabelTI.C \
@@ -35,12 +35,12 @@ libPlotter_la_SOURCES = PlotFactory.C \
 	PlotFrameSize.C PlotFrameSizeTI.C \
 	MultiFrame.C MultiFrameTI.C \
 	PhasePlot.C PhasePlotTI.C \
-	FluxPlotter.C FluxPlotterTI.C \
-	SinglePlotter.C SinglePlotterTI.C \
-	StokesPlotter.C StokesPlotterTI.C \
-	AnglePlotter.C AnglePlotterTI.C \
-	PosAngPlotter.C EllAngPlotter.C \
-	PhaseVsPlotter.C PhaseVsPlotterTI.C \
+	FluxPlot.C FluxPlotTI.C \
+	SinglePlot.C SinglePlotTI.C \
+	StokesPlot.C StokesPlotTI.C \
+	AnglePlot.C AnglePlotTI.C \
+	PosAngPlot.C EllAngPlot.C \
+	PhaseVsPlot.C PhaseVsPlotTI.C \
 	PhaseVsFrequency.C PhaseVsFrequencyTI.C \
 	PhaseVsTime.C PhaseVsTimeTI.C \
 	MultiProfile.C \
@@ -62,6 +62,6 @@ INCLUDES = -I$(top_builddir)/utils/include -I$(top_builddir)/astro/include \
 	-I$(top_srcdir)/psrchive -I$(top_srcdir)/psrchive/Extension \
 	@PGPLOT_CFLAGS@ @SLA_CFLAGS@
 
-LDADD = libPlotter.la $(top_builddir)/psrchive/libpsrchive.la	\
+LDADD = libPlot.la $(top_builddir)/psrchive/libpsrchive.la	\
 	$(top_builddir)/astro/libpsrastro.la			\
 	$(top_builddir)/utils/libpsrutils.la @PGPLOT_LIBS@
