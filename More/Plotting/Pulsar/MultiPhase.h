@@ -1,12 +1,12 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/MultiPhase.h,v $
-   $Revision: 1.6 $
-   $Date: 2006/03/11 22:14:46 $
+   $Revision: 1.7 $
+   $Date: 2006/03/11 22:33:50 $
    $Author: straten $ */
 
-#ifndef __Pulsar_MultiProfile_h
-#define __Pulsar_MultiProfile_h
+#ifndef __Pulsar_MultiPhase_h
+#define __Pulsar_MultiPhase_h
 
 #include "Pulsar/PhasePlot.h"
 #include "Pulsar/MultiFrame.h"
@@ -14,12 +14,12 @@
 namespace Pulsar {
 
   //! Plots multiple viewports with pulse phase along the shared x-axis
-  class MultiProfile : public PhasePlot {
+  class MultiPhase : public PhasePlot {
 
   public:
 
     //! Default constructor
-    MultiProfile ();
+    MultiPhase ();
 
     //! Get the text interface to the frame attributes
     TextInterface::Class* get_frame_interface ();

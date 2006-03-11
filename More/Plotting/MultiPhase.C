@@ -1,19 +1,19 @@
-#include "Pulsar/MultiProfile.h"
+#include "Pulsar/MultiPhase.h"
 #include "Pulsar/MultiFrameTI.h"
 
 #include <cpgplot.h>
 
-Pulsar::MultiProfile::MultiProfile ()
+Pulsar::MultiPhase::MultiPhase ()
 {
   frames.set_shared_x_zoom (get_frame()->get_x_zoom());
 }
 
-TextInterface::Class* Pulsar::MultiProfile::get_frame_interface ()
+TextInterface::Class* Pulsar::MultiPhase::get_frame_interface ()
 {
   return new MultiFrameTI (&frames);
 }
 
-void Pulsar::MultiProfile::plot (const Archive* data)
+void Pulsar::MultiPhase::plot (const Archive* data)
 {
   prepare (data);
 
@@ -41,7 +41,7 @@ void Pulsar::MultiProfile::plot (const Archive* data)
 }
 
 //! Manage a plotter
-void Pulsar::MultiProfile::manage (const std::string& name,
+void Pulsar::MultiPhase::manage (const std::string& name,
 				   PhasePlot* plot)
 {
   plot->set_frame( frames.manage (name, plot->get_frame()) );
@@ -51,7 +51,7 @@ void Pulsar::MultiProfile::manage (const std::string& name,
 }
 
 //! Set the viewport of the named plotter
-void Pulsar::MultiProfile::set_viewport (const std::string& name,
+void Pulsar::MultiPhase::set_viewport (const std::string& name,
 					 float x0, float x1,
 					 float y0, float y1)
 {

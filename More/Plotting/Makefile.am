@@ -23,7 +23,7 @@ nobase_include_HEADERS = Pulsar/Plot.h Pulsar/PlotFactory.h \
 	Pulsar/PhaseVsPlot.h Pulsar/PhaseVsPlotTI.h \
 	Pulsar/PhaseVsFrequency.h Pulsar/PhaseVsFrequencyTI.h \
 	Pulsar/PhaseVsTime.h Pulsar/PhaseVsTimeTI.h \
-	Pulsar/MultiProfile.h \
+	Pulsar/MultiPhase.h \
 	Pulsar/StokesCylindrical.h Pulsar/StokesCylindricalTI.h \
 	Pulsar/StokesSpherical.h Pulsar/StokesSphericalTI.h
 
@@ -43,7 +43,7 @@ libPlot_la_SOURCES = PlotFactory.C \
 	PhaseVsPlot.C PhaseVsPlotTI.C \
 	PhaseVsFrequency.C PhaseVsFrequencyTI.C \
 	PhaseVsTime.C PhaseVsTimeTI.C \
-	MultiProfile.C \
+	MultiPhase.C \
 	StokesCylindrical.C StokesCylindricalTI.C \
 	StokesSpherical.C StokesSphericalTI.C 
 

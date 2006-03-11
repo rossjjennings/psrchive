@@ -1,14 +1,14 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/StokesCylindrical.h,v $
-   $Revision: 1.3 $
-   $Date: 2006/03/11 22:14:46 $
+   $Revision: 1.4 $
+   $Date: 2006/03/11 22:33:50 $
    $Author: straten $ */
 
 #ifndef __Pulsar_StokesCylindrical_h
 #define __Pulsar_StokesCylindrical_h
 
-#include "Pulsar/MultiProfile.h"
+#include "Pulsar/MultiPhase.h"
 #include "Pulsar/StokesPlot.h"
 #include "Pulsar/PosAngPlot.h"
 
@@ -17,7 +17,7 @@ namespace Pulsar {
   class PolnProfile;
 
   //! Plots a single pulse profile
-  class StokesCylindrical : public MultiProfile {
+  class StokesCylindrical : public MultiPhase {
 
   public:
 
