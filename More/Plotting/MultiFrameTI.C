@@ -15,5 +15,5 @@ Pulsar::MultiFrameTI::MultiFrameTI (MultiFrame* instance)
 
   import_filter = true;
 
-  import ( "frame", std::string(), PlotFrameSizeTI(), &MultiFrame::get_frame );
+  import ( "", std::string(), PlotFrameSizeTI(), &MultiFrame::get_frame );
 }
