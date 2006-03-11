@@ -1,14 +1,14 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PhasePlot.h,v $
-   $Revision: 1.9 $
-   $Date: 2006/03/10 23:09:31 $
+   $Revision: 1.10 $
+   $Date: 2006/03/11 21:51:48 $
    $Author: straten $ */
 
 #ifndef __Pulsar_ProfilePlotter_h
 #define __Pulsar_ProfilePlotter_h
 
-#include "Pulsar/Graph.h"
+#include "Pulsar/Plot.h"
 #include "Pulsar/PlotFrame.h"
 
 #include <vector>
@@ -29,7 +29,7 @@ namespace Pulsar {
     <LI> change the line style within the plot frame
     </UL>
   */
-  class ProfilePlotter : public Graph {
+  class ProfilePlotter : public Plot {
 
   public:
 

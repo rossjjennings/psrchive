@@ -1,38 +1,38 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PlotFactory.h,v $
-   $Revision: 1.3 $
-   $Date: 2006/03/10 22:07:51 $
+   $Revision: 1.4 $
+   $Date: 2006/03/11 21:51:48 $
    $Author: straten $ */
 
-#ifndef __Pulsar_GraphFactory_h
-#define __Pulsar_GraphFactory_h
+#ifndef __Pulsar_PlotFactory_h
+#define __Pulsar_PlotFactory_h
 
 #include <string>
 #include <vector>
 
 namespace Pulsar {
 
-  class Graph;
+  class Plot;
 
-  //! Provides a text interface to get and set Graph attributes
-  class GraphFactory {
+  //! Provides a text interface to get and set Plot attributes
+  class PlotFactory {
 
   public:
 
-    //! Default constructor loads up all of the graph types
-    GraphFactory ();
+    //! Default constructor loads up all of the plot types
+    PlotFactory ();
 
-    //! Return a new instance of the named plotter
-    Graph* construct (std::string name);
+    //! Return a new instance of the named plot
+    Plot* construct (std::string name);
 
-    //! Return the number of plotters
+    //! Return the number of plots
     unsigned get_nplot () { return agents.size(); }
 
-    //! Return the name of the ith plotter
+    //! Return the name of the ith plot
     std::string get_name (unsigned i);
 
-    //! Return the name of the ith plotter
+    //! Return the name of the ith plot
     std::string get_description (unsigned i);
 
   protected:
@@ -45,24 +45,24 @@ namespace Pulsar {
 
     template<class P> class Advocate;
 
-    //! Add a plotter
+    //! Add a plot
     void add (Agent* agent) { agents.push_back(agent); }
 
   };
 
-  class GraphFactory::Agent
+  class PlotFactory::Agent
   {
   public:
 
     Agent (std::string n, std::string d) : name (n), description (d) {}
 
-    //! Return a new instance of Graph class
-    virtual Graph* construct () = 0;
+    //! Return a new instance of Plot class
+    virtual Plot* construct () = 0;
 
-    //! Return the name of the Graph class
+    //! Return the name of the Plot class
     std::string get_name () { return name; }
 
-    //! Return a description of the Graph class
+    //! Return a description of the Plot class
     std::string get_description () { return description; }
 
   protected:
@@ -72,7 +72,7 @@ namespace Pulsar {
 
   };
 
-  template<class P> class GraphFactory::Advocate : public Agent
+  template<class P> class PlotFactory::Advocate : public Agent
   {  
   public:
 
@@ -80,8 +80,8 @@ namespace Pulsar {
     Advocate (std::string _name, std::string _description)
       : Agent (_name, _description) {}
  
-    //! Return a new instance of Graph class
-    Graph* construct () { return new P; }
+    //! Return a new instance of Plot class
+    Plot* construct () { return new P; }
 
   };
 

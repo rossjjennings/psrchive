@@ -1,12 +1,12 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/Plot.h,v $
-   $Revision: 1.3 $
-   $Date: 2006/03/09 23:02:02 $
+   $Revision: 1.4 $
+   $Date: 2006/03/11 21:51:48 $
    $Author: straten $ */
 
-#ifndef __Pulsar_Graph_h
-#define __Pulsar_Graph_h
+#ifndef __Pulsar_Plot_h
+#define __Pulsar_Plot_h
 
 #include "Reference.h"
 
@@ -19,7 +19,7 @@ namespace Pulsar {
   class Archive;
 
   //! Pure virtual base class of all plotters
-  class Graph : public Reference::Able {
+  class Plot : public Reference::Able {
 
   public:
 

@@ -1,4 +1,4 @@
-#include "Pulsar/GraphFactory.h"
+#include "Pulsar/PlotFactory.h"
 #include "Pulsar/SinglePlotter.h"
 #include "Pulsar/StokesPlotter.h"
 #include "Pulsar/PhaseVsFrequency.h"
@@ -10,52 +10,52 @@
 #include "Error.h"
 
 // Add plots here
-Pulsar::GraphFactory::GraphFactory ()
+Pulsar::PlotFactory::PlotFactory ()
 {
-  add ( new GraphFactory::Advocate<SinglePlotter>
+  add ( new PlotFactory::Advocate<SinglePlotter>
 	("flux", "Single plot of flux") );
 
-  add ( new GraphFactory::Advocate<StokesPlotter>
+  add ( new PlotFactory::Advocate<StokesPlotter>
 	("stokes", "Stokes parameters") );
 
-  add ( new GraphFactory::Advocate<PhaseVsFrequency>
+  add ( new PlotFactory::Advocate<PhaseVsFrequency>
 	("freq", "Phase vs. frequency image of flux") );
 
-  add ( new GraphFactory::Advocate<PhaseVsTime>
+  add ( new PlotFactory::Advocate<PhaseVsTime>
 	("time", "Phase vs. time image of flux") );
 
-  add ( new GraphFactory::Advocate<PosAngPlotter>
+  add ( new PlotFactory::Advocate<PosAngPlotter>
 	("pa", "Position angle") );
 
-  add ( new GraphFactory::Advocate<EllAngPlotter>
+  add ( new PlotFactory::Advocate<EllAngPlotter>
 	("ell", "Ellipticity angle") );
 
-  add ( new GraphFactory::Advocate<StokesCylindrical>
+  add ( new PlotFactory::Advocate<StokesCylindrical>
 	("Scyl", "Stokes; vector in cylindrical") );
 
-  add ( new GraphFactory::Advocate<StokesSpherical>
+  add ( new PlotFactory::Advocate<StokesSpherical>
 	("Ssph", "Stokes; vector in spherical") );
 }
 
 //! Return a new instance of the named plotter
-Pulsar::Graph* Pulsar::GraphFactory::construct (std::string name)
+Pulsar::Plot* Pulsar::PlotFactory::construct (std::string name)
 {
   for (unsigned i=0; i < agents.size(); i++)
     if (name == agents[i]->get_name())
       return agents[i]->construct();
 
-  throw Error (InvalidParam, "Pulsar::GraphFactory::construct",
-	       "no Graph named " + name);
+  throw Error (InvalidParam, "Pulsar::PlotFactory::construct",
+	       "no Plot named " + name);
 }
     
 //! Return the name of the ith agent
-std::string Pulsar::GraphFactory::get_name (unsigned i)
+std::string Pulsar::PlotFactory::get_name (unsigned i)
 {
   return agents[i]->get_name();
 }
 
 //! Return the name of the ith agent
-std::string Pulsar::GraphFactory::get_description (unsigned i)
+std::string Pulsar::PlotFactory::get_description (unsigned i)
 {
   return agents[i]->get_description();
 }
