@@ -59,12 +59,12 @@ void Pulsar::FluxPlotter::draw (const Archive* data)
     if (plot_sci.size() == profiles.size())
       cpgsci (plot_sci[iprof]);
     else
-      cpgsci (iprof);
+      cpgsci (iprof+1);
 
     if (plot_sls.size() == profiles.size())
       cpgsls (plot_sls[iprof]);
     else
-      cpgsls (iprof);
+      cpgsls (iprof+1);
 
     draw (profiles[iprof]);
   }
