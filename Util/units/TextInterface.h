@@ -773,10 +773,17 @@ TextInterface::MapOfProxy<M,K,E,G>::get_indeces (std::vector<K>& indeces,
   std::cerr << "ElementGetSet::get_indeces " << par << std::endl;
 #endif
   std::string::size_type length = par.length();
-  if (par[0] != '[' || par[length-1] != ']')
+
+  std::string range = par;
+
+  if (prefix.length()) {
+    if (par[0] != '[' || par[length-1] != ']')
+      return;
+    range = par.substr (1, length-2);
+  }
+  else if (par == "?")
     return;
 
-  std::string range = par.substr (1, length-2);
   std::vector<std::string> key_str;
   separate (range, key_str);
 
