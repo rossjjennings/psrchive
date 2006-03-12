@@ -6,3 +6,4 @@
 moc_%.C: %.h
 	@QT_MOC@ $< -o $@
 
+CLEANFILES = $(MOC_SOURCES)

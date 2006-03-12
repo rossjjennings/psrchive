@@ -5,8 +5,9 @@ include_HEADERS = qt_value.h qt_double.h qtools.h qt_Angle.h qt_MJD.h
 
 libqtutil_la_SOURCES = qt_value.C qt_double.C qtools.C qt_Angle.C qt_MJD.C
 
-nodist_libqtutil_la_SOURCES = moc_qt_value.C moc_qt_double.C moc_qt_Angle.C \
-	moc_qt_MJD.C
+MOC_SOURCES = moc_qt_value.C moc_qt_double.C moc_qt_Angle.C moc_qt_MJD.C
+
+nodist_libqtutil_la_SOURCES = $(MOC_SOURCES)
 
 check_PROGRAMS = qt_double_test qt_Angle_test qt_MJD_test
 
