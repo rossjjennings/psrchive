@@ -9,13 +9,21 @@ bool TextInterface::label_elements = false;
 
 string TextInterface::Class::process (const string& command)
 {
-  string temp = command;
-  string param = stringtok (temp, "=");
+  string::size_type set = command.find('=');
 
-  if (!temp.length())
-    return param + "=" + get_value (param);
+  // if no equals sign is present, assume that command is get key
+  if (set == string::npos)
+    return command + "=" + get_value (command);
 
-  set_value (param, temp);
+  // string before the equals sign
+  string before = command.substr (0,set);
+  // string after the equals sign
+  string after = command.substr (set+1);
+
+  // remove any white space from the key
+  string param = stringtok (before, " \t");
+
+  set_value (param, after);
   return "";
 }
 
