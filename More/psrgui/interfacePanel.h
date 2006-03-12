@@ -8,7 +8,7 @@
 #include "qlineedit.h"
 #include "qstring.h"
 
-#include <vector.h>
+#include <vector>
 
 namespace Pulsar {
 
@@ -22,7 +22,7 @@ namespace Pulsar {
 
       protected:
 
-        vector<QLineEdit*> parameters;
+	std::vector<QLineEdit*> parameters;
 	TextInterface::Class* ti;
 
       protected slots:
