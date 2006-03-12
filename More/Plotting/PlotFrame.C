@@ -49,8 +49,12 @@ void Pulsar::PlotFrame::decorate (const Archive* data, const string& label,
   if (label == PlotLabel::unset)
     return;
 
+  //cerr << "Separating " << label << endl;
+
   vector<string> labels;
   TextInterface::separate (label, labels, '.');
+
+  //cerr << "separated!" << endl;
 
   // get the length of a dash in normalized device coordinates
   float xl, yl;
@@ -66,10 +70,19 @@ void Pulsar::PlotFrame::decorate (const Archive* data, const string& label,
     start = direction - label_offset;
 
   for (unsigned i=0; i < labels.size(); i++) {
+
+    //cerr << "resolve[" << i << "]='" << labels[i] << "'" << endl;
+
     resolve_variables (data, labels[i]);
+
+    //cerr << "label[" << i << "]='" << labels[i] << "'" << endl;
+
     cpgmtxt ("T", start, side+offset, side, labels[i].c_str());
     start += direction;
   }
+
+  //cerr << "labelled!" << endl;
+  
 }
 
 void Pulsar::PlotFrame::resolve_variables (const Archive* data, string& label)
@@ -90,7 +103,7 @@ void Pulsar::PlotFrame::resolve_variables (const Archive* data, string& label)
     string::size_type length = string::npos;
 
     // find the end of the variable name
-    string::size_type end = label.find(' ');
+    string::size_type end = label.find_first_of (" \t", start);
 
     if (end != string::npos) {
       length = end - start;
@@ -99,7 +112,12 @@ void Pulsar::PlotFrame::resolve_variables (const Archive* data, string& label)
 
     // the variable name
     string name = label.substr (start, length);
+
+    // cerr <<"before="<< before <<" after="<< after <<" name="<< name <<endl;
+
     string value = get_interface(data)->get_value(name);
+
+    // cerr << "value=" << value << endl;
 
     label = before + value + after;
 
