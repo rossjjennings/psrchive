@@ -24,7 +24,6 @@ INCLUDES = -I$(top_builddir)/utils/include -I$(top_builddir)/astro/include \
         -I$(top_srcdir)/psrchive/Plotter @PGPLOT_CFLAGS@ @QT_CXXFLAGS@
 
 LDADD = libpsrgui.la $(top_builddir)/psrchive/Plotter/libPlot.la \
-         $(top_builddir)/psrchive/Plotter/libPlotter.la \
         ../libpsrchive.la $(top_builddir)/astro/libpsrastro.la \
         $(top_builddir)/utils/libpsrutils.la \
         @QT_LIBS@ @PGPLOT_LIBS@
