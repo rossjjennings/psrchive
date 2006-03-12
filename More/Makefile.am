@@ -131,6 +131,10 @@ SUBDIRS += GUI
 endif
 endif
 
+if HAVE_PGPLOT
+SUBDIRS += Plotter
+endif
+
 if HAVE_QTDRIV
 SUBDIRS += rhythm
 endif

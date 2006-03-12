@@ -165,6 +165,7 @@ AC_CONFIG_FILES([utils/units/Makefile
 		psrchive/psrfits/Makefile
                 psrchive/ascii/Makefile
 		psrchive/Extension/Makefile
+		psrchive/Plotter/Makefile
 		psrchive/Calibration/Makefile
 		psrchive/Calibration/iri2001/Makefile
                 psrchive/GUI/Makefile
