@@ -106,3 +106,27 @@ int stringload (vector<string>* lines, FILE* fptr)
   }
   return 0;
 }
+
+#include <fstream>
+#include "Error.h"
+
+void loadlines (const std::string& filename, std::vector<std::string>& lines)
+{
+  std::ifstream input (filename.c_str());
+  if (!input)
+    throw Error (FailedSys, "loadlines", "ifstream (" + filename + ")");
+
+  std::string line;\
+
+  while (!input.eof()) {
+
+    std::getline (input, line);
+    line = stringtok (&line, "#\n", false);  // get rid of comments
+
+    if (!line.length())
+      continue;
+
+    lines.push_back (line);
+
+  }
+}

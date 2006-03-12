@@ -1,7 +1,7 @@
 //-*-C++-*-
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Attic/string_utils.h,v $
-   $Revision: 1.33 $
-   $Date: 2004/10/14 11:56:45 $
+   $Revision: 1.34 $
+   $Date: 2006/03/12 16:36:38 $
    $Author: straten $ */
 
 #ifndef __STRING_UTILS_H
@@ -82,6 +82,12 @@ ssize_t stringload (string* str, FILE* fptr, size_t nbytes=0);
 // ///////////////////////////////////////////////////////////
 int stringfload (vector<string>* lines, const char* filename);
 int stringload (vector<string>* lines, FILE* fptr);
+
+// ///////////////////////////////////////////////////////////
+// fills a vector of string with the lines form file.  
+// A line is delimited by \n or commented by #.
+// ///////////////////////////////////////////////////////////
+void loadlines (const std::string& filename, std::vector<std::string>& lines);
 
 // ///////////////////////////////////////////////////////////
 // returns the first sub-string of 'instr' delimited by
