@@ -1,6 +1,6 @@
 #include "Pulsar/PhaseVsPlotTI.h"
 #include "Pulsar/PhasePlotTI.h"
-#include "Pulsar/PlotZoomTI.h"
+#include "Pulsar/PlotScaleTI.h"
 
 Pulsar::PhaseVsPlotTI::PhaseVsPlotTI (PhaseVsPlot* instance)
 {
@@ -10,6 +10,6 @@ Pulsar::PhaseVsPlotTI::PhaseVsPlotTI (PhaseVsPlot* instance)
   // import the interface of the base class
   import( PhasePlotTI() );
 
-  import( "z", PlotZoomTI(), &PhaseVsPlot::get_z_zoom );
+  import( "z", PlotScaleTI(), &PhaseVsPlot::get_z_scale );
 
 }

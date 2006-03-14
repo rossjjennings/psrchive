@@ -1,14 +1,14 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PlotFrame.h,v $
-   $Revision: 1.8 $
-   $Date: 2006/03/11 22:14:46 $
+   $Revision: 1.9 $
+   $Date: 2006/03/14 16:13:55 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PlotFrame_h
 #define __Pulsar_PlotFrame_h
 
-#include "Pulsar/PlotZoom.h"
+#include "Pulsar/PlotScale.h"
 #include "Pulsar/PlotAxis.h"
 #include "Pulsar/PlotLabel.h"
 
@@ -30,18 +30,18 @@ namespace Pulsar {
     //! Destructor
     ~PlotFrame ();
 
-    //! Get the x-zoom
-    PlotZoom* get_x_zoom() { return x_zoom; }
-    //! Set the x-zoom
-    void set_x_zoom (PlotZoom* zoom) { x_zoom = zoom; }
+    //! Get the x-scale
+    PlotScale* get_x_scale() { return x_scale; }
+    //! Set the x-scale
+    void set_x_scale (PlotScale* scale) { x_scale = scale; }
 
     //! Get the x-axis
     PlotAxis* get_x_axis() { return x_axis; }
 
-    //! Get the x-zoom
-    PlotZoom* get_y_zoom() { return y_zoom; }
-    //! Set the y-zoom
-    void set_y_zoom (PlotZoom* zoom) { y_zoom = zoom; }
+    //! Get the x-scale
+    PlotScale* get_y_scale() { return y_scale; }
+    //! Set the y-scale
+    void set_y_scale (PlotScale* scale) { y_scale = scale; }
 
     //! Get the x-axis
     PlotAxis* get_y_axis() { return y_axis; }
@@ -72,8 +72,8 @@ namespace Pulsar {
 
   protected:
 
-    Reference::To<PlotZoom> x_zoom;
-    Reference::To<PlotZoom> y_zoom;
+    Reference::To<PlotScale> x_scale;
+    Reference::To<PlotScale> y_scale;
 
     Reference::To<PlotAxis> x_axis;
     Reference::To<PlotAxis> y_axis;

@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PhaseVsPlot.h,v $
-   $Revision: 1.6 $
-   $Date: 2006/03/11 22:14:46 $
+   $Revision: 1.7 $
+   $Date: 2006/03/14 16:13:55 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PhaseVsPlot_h
@@ -34,12 +34,12 @@ namespace Pulsar {
     //! Draw in the current viewport
     void draw (const Archive*);
 
-    //! Provide access to the z-zoom
-    PlotZoom* get_z_zoom () { return &z_zoom; }
+    //! Provide access to the z-scale
+    PlotScale* get_z_scale () { return &z_scale; }
 
   protected:
 
-    PlotZoom z_zoom;
+    PlotScale z_scale;
 
   };
 

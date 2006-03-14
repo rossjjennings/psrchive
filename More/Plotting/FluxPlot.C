@@ -14,7 +14,7 @@ Pulsar::FluxPlot::FluxPlot ()
   plot_ebox = false;
   plot_histogram = false;
 
-  get_frame()->get_y_zoom()->set_buf_norm(0.05);
+  get_frame()->get_y_scale()->set_buf_norm(0.05);
 }
  
 TextInterface::Class* Pulsar::FluxPlot::get_interface ()
@@ -86,8 +86,8 @@ void Pulsar::FluxPlot::draw (const Profile* profile) const
 
 
 
-//! Zoom in on the on-pulse region
-void Pulsar::FluxPlot::auto_zoom_phase (const Profile* profile, float buf)
+//! Scale in on the on-pulse region
+void Pulsar::FluxPlot::auto_scale_phase (const Profile* profile, float buf)
 {
   int rise, fall;
   profile->find_peak_edges (rise, fall);
@@ -112,7 +112,7 @@ void Pulsar::FluxPlot::auto_zoom_phase (const Profile* profile, float buf)
   if (stop > 1)
     stop = 1;
 
-  get_frame()->get_x_zoom()->set_range_norm (start, stop);
+  get_frame()->get_x_scale()->set_range_norm (start, stop);
 }
 
 template<typename T> T sqr (T x) { return x*x; }
@@ -178,7 +178,7 @@ void Pulsar::FluxPlot::plot_error_box (const Archive* data)
   float y_error = get_flux_error (profiles[0]);
   float x_error = get_phase_error (data);
 
-  pair<float,float> x_range = get_frame()->get_x_zoom()->get_range_norm();
+  pair<float,float> x_range = get_frame()->get_x_scale()->get_range_norm();
   float x_min = x_range.first;
   float x_max = x_range.second;
 

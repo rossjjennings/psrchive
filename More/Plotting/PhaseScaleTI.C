@@ -1,5 +1,5 @@
 #include "Pulsar/PhaseScaleTI.h"
-#include "Pulsar/PlotZoomTI.h"
+#include "Pulsar/PlotScaleTI.h"
 
 Pulsar::PhaseScaleTI::PhaseScaleTI (PhaseScale* instance)
 {

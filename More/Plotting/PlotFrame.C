@@ -9,10 +9,10 @@ using namespace std;
 
 Pulsar::PlotFrame::PlotFrame ()
 {
-  x_zoom = new PlotZoom;
+  x_scale = new PlotScale;
   x_axis = new PlotAxis;
 
-  y_zoom = new PlotZoom;
+  y_scale = new PlotScale;
   y_axis = new PlotAxis;
 
   above = new PlotLabel;

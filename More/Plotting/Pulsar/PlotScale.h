@@ -1,12 +1,12 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PlotScale.h,v $
-   $Revision: 1.2 $
-   $Date: 2006/03/11 22:14:46 $
+   $Revision: 1.3 $
+   $Date: 2006/03/14 16:13:55 $
    $Author: straten $ */
 
-#ifndef __Pulsar_PlotZoom_h
-#define __Pulsar_PlotZoom_h
+#ifndef __Pulsar_PlotScale_h
+#define __Pulsar_PlotScale_h
 
 #include "Reference.h"
 
@@ -15,12 +15,12 @@
 namespace Pulsar {
 
   //! Plots the position angle of the linearly polarized radiation
-  class PlotZoom : public Reference::Able {
+  class PlotScale : public Reference::Able {
 
   public:
 
     //! Default constructor
-    PlotZoom ();
+    PlotScale ();
 
     //! Rescale min and max according to current attribute settings
     void get_range (float& min, float& max) const;

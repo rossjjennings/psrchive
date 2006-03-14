@@ -40,8 +40,8 @@ void Pulsar::MultiPlot::manage (const std::string& name, Plot* plot)
 {
   plot->set_frame( frames.manage (name, plot->get_frame()) );
 
-  if (frames.has_shared_x_zoom())
-    plot->get_frame()->set_x_zoom( frames.get_shared_x_zoom() );
+  if (frames.has_shared_x_scale())
+    plot->get_frame()->set_x_scale( frames.get_shared_x_scale() );
 
   plots[name] = plot;
 }

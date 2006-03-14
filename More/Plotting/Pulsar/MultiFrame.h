@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/MultiFrame.h,v $
-   $Revision: 1.6 $
-   $Date: 2006/03/11 22:14:46 $
+   $Revision: 1.7 $
+   $Date: 2006/03/14 16:13:55 $
    $Author: straten $ */
 
 #ifndef __Pulsar_MultiFrame_h
@@ -24,22 +24,22 @@ namespace Pulsar {
     //! Return a previously mapped plot frame
     PlotFrameSize* get_frame (const std::string& name);
 
-    //! Return the shared x-zoom
-    PlotZoom* get_shared_x_zoom() { return x_zoom; }
-    bool has_shared_x_zoom () { return x_zoom; }
-    void set_shared_x_zoom (PlotZoom* x) { x_zoom = x; }
+    //! Return the shared x-scale
+    PlotScale* get_shared_x_scale() { return x_scale; }
+    bool has_shared_x_scale () { return x_scale; }
+    void set_shared_x_scale (PlotScale* x) { x_scale = x; }
 
-    //! Return the shared y-zoom
-    PlotZoom* get_shared_y_zoom() { return y_zoom; }
-    bool has_shared_y_zoom () { return y_zoom; }
-    void set_shared_y_zoom (PlotZoom* y) { y_zoom = y; }
+    //! Return the shared y-scale
+    PlotScale* get_shared_y_scale() { return y_scale; }
+    bool has_shared_y_scale () { return y_scale; }
+    void set_shared_y_scale (PlotScale* y) { y_scale = y; }
 
   protected:
 
     std::map< std::string, Reference::To<PlotFrameSize> > frames;
 
-    Reference::To<PlotZoom> x_zoom;
-    Reference::To<PlotZoom> y_zoom;
+    Reference::To<PlotScale> x_scale;
+    Reference::To<PlotScale> y_scale;
 
   };
 

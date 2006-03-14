@@ -1,5 +1,5 @@
 #include "Pulsar/PlotFrameTI.h"
-#include "Pulsar/PlotZoomTI.h"
+#include "Pulsar/PlotScaleTI.h"
 #include "Pulsar/PlotAxisTI.h"
 #include "Pulsar/PlotLabelTI.h"
 
@@ -8,8 +8,8 @@ Pulsar::PlotFrameTI::PlotFrameTI (PlotFrame* instance)
   if (instance)
     set_instance (instance);
 
-  import ( "x", PlotZoomTI(), &PlotFrame::get_x_zoom );
-  import ( "y", PlotZoomTI(), &PlotFrame::get_y_zoom );
+  import ( "x", PlotScaleTI(), &PlotFrame::get_x_scale );
+  import ( "y", PlotScaleTI(), &PlotFrame::get_y_scale );
 
   import ( "x", PlotAxisTI(), &PlotFrame::get_x_axis );
   import ( "y", PlotAxisTI(), &PlotFrame::get_y_axis );

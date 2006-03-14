@@ -8,7 +8,7 @@
 
 Pulsar::PhasePlot::PhasePlot ()
 {
-  get_frame()->set_x_zoom( new PhaseScale );
+  get_frame()->set_x_scale( new PhaseScale );
 
   yrange_set = false;
   y_min = y_max = 0;
@@ -48,14 +48,14 @@ void Pulsar::PhasePlot::get_range_bin (const Archive* data,
 {
   float x_min = 0.0;
   float x_max = data->get_nbin();
-  get_frame()->get_x_zoom()->get_range (x_min, x_max);
+  get_frame()->get_x_scale()->get_range (x_min, x_max);
   min = (unsigned) x_min;
   max = (unsigned) x_max;
 }
 
 /*!
   Plots the profile in the currently open pgplot device, using the current
-  viewport.  The profile may be rotated, scaled, and zoomed.
+  viewport.  The profile may be rotated, scaled, and scaleed.
 */
 void Pulsar::PhasePlot::plot (const Archive* data)
 {
@@ -70,8 +70,8 @@ void Pulsar::PhasePlot::plot (const Archive* data)
   float x_min = 0.0;
   float x_max = 1.0;
 
-  get_frame()->get_y_zoom()->get_range (y_min, y_max);
-  get_frame()->get_x_zoom()->get_range (x_min, x_max);
+  get_frame()->get_y_scale()->get_range (y_min, y_max);
+  get_frame()->get_x_scale()->get_range (x_min, x_max);
 
   cpgswin (x_min, x_max, y_min, y_max);
 
@@ -123,7 +123,7 @@ void Pulsar::PhasePlot::plot (const Archive* data)
 //! Get the scale
 Pulsar::PhaseScale* Pulsar::PhasePlot::get_scale ()
 {
-  PhaseScale* scale = dynamic_cast<PhaseScale*>( get_frame()->get_x_zoom() );
+  PhaseScale* scale = dynamic_cast<PhaseScale*>( get_frame()->get_x_scale() );
   if (!scale)
     throw Error (InvalidState, "Pulsar::PhasePlot::get_scale",
 		 "x scale is not a PhaseScale");

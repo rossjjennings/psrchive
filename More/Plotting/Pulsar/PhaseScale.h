@@ -1,19 +1,19 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PhaseScale.h,v $
-   $Revision: 1.1 $
-   $Date: 2006/03/14 16:08:19 $
+   $Revision: 1.2 $
+   $Date: 2006/03/14 16:13:55 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PhaseScale_h
 #define __Pulsar_PhaseScale_h
 
-#include "Pulsar/PlotZoom.h"
+#include "Pulsar/PlotScale.h"
 
 namespace Pulsar {
 
   //! Plots the position angle of the linearly polarized radiation
-  class PhaseScale : public PlotZoom {
+  class PhaseScale : public PlotScale {
 
   public:
 

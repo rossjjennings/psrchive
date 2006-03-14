@@ -1,16 +1,16 @@
-#include "Pulsar/PlotZoomTI.h"
+#include "Pulsar/PlotScaleTI.h"
 #include "iopair.h"
 
-Pulsar::PlotZoomTI::PlotZoomTI (PlotZoom* instance)
+Pulsar::PlotScaleTI::PlotScaleTI (PlotScale* instance)
 {
   if (instance)
     set_instance (instance);
 
-  add( &PlotZoom::get_range_norm,
-       &PlotZoom::set_range_norm,
+  add( &PlotScale::get_range_norm,
+       &PlotScale::set_range_norm,
        "range", "Normalized value range" );
 
-  add( &PlotZoom::get_buf_norm,
-       &PlotZoom::set_buf_norm,
+  add( &PlotScale::get_buf_norm,
+       &PlotScale::set_buf_norm,
        "buf", "Normalized buffer space" );
 }

@@ -8,7 +8,7 @@ noinst_LTLIBRARIES = libPlot.la
 if HAVE_PGPLOT
 
 nobase_include_HEADERS = Pulsar/Plot.h Pulsar/PlotFactory.h \
-	Pulsar/PlotZoom.h Pulsar/PlotZoomTI.h \
+	Pulsar/PlotScale.h Pulsar/PlotScaleTI.h \
         Pulsar/PhaseScale.h Pulsar/PhaseScaleTI.h \
 	Pulsar/PlotAxis.h Pulsar/PlotAxisTI.h \
 	Pulsar/PlotLabel.h Pulsar/PlotLabelTI.h \
@@ -30,7 +30,7 @@ nobase_include_HEADERS = Pulsar/Plot.h Pulsar/PlotFactory.h \
 	Pulsar/StokesSpherical.h Pulsar/StokesSphericalTI.h
 
 libPlot_la_SOURCES = Plot.C PlotFactory.C \
-	PlotZoom.C PlotZoomTI.C \
+	PlotScale.C PlotScaleTI.C \
 	PhaseScale.C PhaseScaleTI.C \
 	PlotAxis.C PlotAxisTI.C \
 	PlotLabel.C PlotLabelTI.C \
