@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PhaseScale.h,v $
-   $Revision: 1.2 $
-   $Date: 2006/03/14 16:13:55 $
+   $Revision: 1.3 $
+   $Date: 2006/03/14 16:50:41 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PhaseScale_h
@@ -18,18 +18,18 @@ namespace Pulsar {
   public:
 
     //! The units on the phase axis
-    enum Scale { Turns, Degrees, Radians, Milliseconds };
+    enum Units { Turns, Degrees, Radians, Milliseconds };
 
     //! Default constructor
     PhaseScale ();
 
-    //! Get a description of the scale
+    //! Get a description of the units
     std::string get_label ();
 
-    //! Set the scale on the phase axis
-    void set_scale (Scale s) { scale = s; }
-    //! Get the scale on the phase axis
-    Scale get_scale () const { return scale; }
+    //! Set the units on the phase axis
+    void set_units (Units s) { units = s; }
+    //! Get the units on the phase axis
+    Units get_units () const { return units; }
 
     //! Set the world-normalized coordinates of the origin on the phase axis
     void set_origin_norm (float f) { origin_norm = f; }
@@ -38,8 +38,8 @@ namespace Pulsar {
 
   protected:
 
-    //! Scale on the phase axis
-    Scale scale;
+    //! Units on the phase axis
+    Units units;
 
     //! Origin on the phase axis
     float origin_norm;
@@ -47,8 +47,8 @@ namespace Pulsar {
 
   };
 
-  std::ostream& operator << (std::ostream& os, PhaseScale::Scale);
-  std::istream& operator >> (std::istream& is, PhaseScale::Scale&);
+  std::ostream& operator << (std::ostream& os, PhaseScale::Units);
+  std::istream& operator >> (std::istream& is, PhaseScale::Units&);
 
 }
 

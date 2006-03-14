@@ -86,13 +86,13 @@ void Pulsar::PhasePlot::plot (const Archive* data)
 
   float x_scale = 1.0;
 
-  if (get_scale()->get_scale() == PhaseScale::Milliseconds)
+  if (get_scale()->get_units() == PhaseScale::Milliseconds)
     x_scale = data->get_Integration(0)->get_folding_period() * 1e3;
 
-  else if (get_scale()->get_scale() == PhaseScale::Radians)
+  else if (get_scale()->get_units() == PhaseScale::Radians)
     x_scale = 2.0 * M_PI;
 
-  else if (get_scale()->get_scale() == PhaseScale::Degrees)
+  else if (get_scale()->get_units() == PhaseScale::Degrees)
     x_scale = 180.0;
 
   x_min += get_scale()->get_origin_norm();
