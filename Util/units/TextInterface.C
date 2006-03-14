@@ -35,7 +35,7 @@ bool TextInterface::match (const string& name, const string& text,
 {
   string::size_type length = name.length();
 
-  if ( text.compare (0,length,name) != 0 )
+  if ( length && text.compare (0, length, name) != 0 )
     return false;
 
   string::size_type end = text.find (':', length);
@@ -48,20 +48,16 @@ bool TextInterface::match (const string& name, const string& text,
   // the remainder is everything following the colon
   *remainder = text.substr (end+1);
 
-  // check that the range is valid
-  length = range->length();
-
-  // a map may have no range
+  // a map may have no name
   if (!length)
     return true;
 
-  if (length == 1) {
-    if ((*range)[0] == '?')
-      return true;
-    if ((*range)[0] == '*')
-      return true;
-  }
+  // the range may be a wildcard
+  if ((*range) == "*" || (*range) == "?")
+    return true;
 
+  // the range must be enclosed in square brackets
+  length = range->length();
   if ((*range)[0] == '[' && (*range)[length-1] == ']')
     return true;
 
