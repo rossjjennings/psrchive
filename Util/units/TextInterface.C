@@ -44,8 +44,28 @@ bool TextInterface::match (const string& name, const string& text,
 
   // the range is everything between the end of the variable name and the colon
   *range = text.substr (length, end-length);
+
   // the remainder is everything following the colon
   *remainder = text.substr (end+1);
+
+  // check that the range is valid
+  length = range->length();
+
+  // a map may have no range
+  if (!length)
+    return true;
+
+  if (length == 1) {
+    if ((*range)[0] == '?')
+      return true;
+    if ((*range)[0] == '*')
+      return true;
+  }
+
+  if ((*range)[0] == '[' && (*range)[length-1] == ']')
+    return true;
+
+  return false;
 }
 
 void TextInterface::parse_indeces (vector<unsigned>& index,
