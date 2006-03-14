@@ -29,6 +29,27 @@ Pulsar::PlotFrame::~PlotFrame ()
 {
 }
 
+void Pulsar::PlotFrame::draw_axes ()
+{
+  cpgbox( get_x_axis()->get_pgbox_opt().c_str(), 0.0, 0,
+	  get_y_axis()->get_pgbox_opt().c_str(), 0.0, 0 );
+}
+
+void Pulsar::PlotFrame::label_axes (const string& default_x,
+				    const string& default_y)
+{
+  string xlabel = get_x_axis()->get_label();
+  if (xlabel == PlotLabel::unset)
+    xlabel = default_x;
+
+  string ylabel = get_y_axis()->get_label();
+  if (ylabel == PlotLabel::unset)
+    ylabel = default_y;
+
+  cpgmtxt ("L",2.5,.5,.5, ylabel.c_str());
+  cpgmtxt ("B",2.5,.5,.5, xlabel.c_str());
+}
+
 void Pulsar::PlotFrame::decorate (const Archive* data)
 {
   decorate (data, get_label_above(), +label_spacing);

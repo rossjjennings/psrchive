@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PlotFrame.h,v $
-   $Revision: 1.9 $
-   $Date: 2006/03/14 16:13:55 $
+   $Revision: 1.10 $
+   $Date: 2006/03/14 22:09:33 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PlotFrame_h
@@ -52,13 +52,6 @@ namespace Pulsar {
     //! Get the below-frame label
     PlotLabel* get_label_below () { return below; }
 
-    //! Decorate the frame
-    virtual void decorate (const Archive*);
-
-    //! Focus the frame
-    /*! By default a frame exists in the current viewport */
-    virtual void focus () { }
-
     //! Set the offset between labels and frame (multiple of character height)
     void set_label_offset (float offset) { label_offset = offset; }
     float get_label_offset () const { return label_offset; }
@@ -66,6 +59,20 @@ namespace Pulsar {
     //! Set the spacing between label rows (multiple of character height)
     void set_label_spacing (float spacing) { label_spacing = spacing; }
     float get_label_spacing () const { return label_spacing; }
+
+    //! Draw the axes of the frame
+    virtual void draw_axes ();
+
+    //! Label the axes os the frame
+    virtual void label_axes (const std::string& default_x,
+			     const std::string& default_y);
+
+    //! Decorate the frame
+    virtual void decorate (const Archive*);
+
+    //! Focus the frame
+    /*! By default a frame exists in the current viewport */
+    virtual void focus () { }
 
     //! Get the text interface to the archive class
     ArchiveTI* get_interface (const Archive*);
