@@ -803,20 +803,18 @@ template<class M, class K, class E, class G>
   return attribute->matches (remainder);
 }
 
-
-#include <string.h>
-
 template<class C>
 bool TextInterface::Attribute<C>::matches (const std::string& name) const
 {
-  return strcasecmp(name.c_str(), get_name().c_str()) == 0;
+  return name == get_name();
 }
 
 template<class C,class M,class Get>
 bool TextInterface::HasAProxy<C,M,Get>::matches (const std::string& name) const
 {
   std::string::size_type length = prefix.length();
-  if ( strncasecmp(prefix.c_str(), name.c_str(), length) != 0 )
+
+  if ( name.compare (0,length,prefix) != 0 )
     return false;
 
   if ( name[length] != ':' )
