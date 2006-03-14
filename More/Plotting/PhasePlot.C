@@ -1,5 +1,5 @@
 #include "Pulsar/PhasePlotTI.h"
-#include "Pulsar/PlotFrameTI.h"
+#include "Pulsar/PlotFrame.h"
 
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
@@ -8,13 +8,10 @@
 
 Pulsar::PhasePlot::PhasePlot ()
 {
-  frame = new PlotFrame;
+  get_frame()->set_x_zoom( new PhaseScale );
 
   yrange_set = false;
   y_min = y_max = 0;
-
-  scale = Turns;
-  origin_norm = 0;
 }
 
 Pulsar::PhasePlot::~PhasePlot ()
@@ -24,12 +21,6 @@ Pulsar::PhasePlot::~PhasePlot ()
 TextInterface::Class* Pulsar::PhasePlot::get_interface ()
 {
   return new PhasePlotTI (this);
-}
-
-//! Get the text interface to the frame attributes
-TextInterface::Class* Pulsar::PhasePlot::get_frame_interface ()
-{
-  return new PlotFrameTI (get_frame());
 }
 
 void Pulsar::PhasePlot::set_yrange (float min, float max)
@@ -43,12 +34,7 @@ void Pulsar::PhasePlot::set_yrange (float min, float max)
 //! Get the default label for the x axis
 string Pulsar::PhasePlot::get_xlabel (const Archive*)
 {
-  switch (scale) {
-  case Turns: return "Pulse Phase";
-  case Degrees: return "Phase (deg.)";
-  case Radians: return "Phase (rad.)";
-  case Milliseconds: return "Time (ms)";
-  }
+  return get_scale()->get_label();
 }
 
 //! Get the default label for the y axis
@@ -58,7 +44,7 @@ string Pulsar::PhasePlot::get_ylabel (const Archive*)
 }
 
 void Pulsar::PhasePlot::get_range_bin (const Archive* data, 
-					    unsigned& min, unsigned& max)
+				       unsigned& min, unsigned& max)
 {
   float x_min = 0.0;
   float x_max = data->get_nbin();
@@ -100,17 +86,17 @@ void Pulsar::PhasePlot::plot (const Archive* data)
 
   float x_scale = 1.0;
 
-  if (scale == Milliseconds)
+  if (get_scale()->get_scale() == PhaseScale::Milliseconds)
     x_scale = data->get_Integration(0)->get_folding_period() * 1e3;
 
-  else if (scale == Radians)
+  else if (get_scale()->get_scale() == PhaseScale::Radians)
     x_scale = 2.0 * M_PI;
 
-  else if (scale == Degrees)
+  else if (get_scale()->get_scale() == PhaseScale::Degrees)
     x_scale = 180.0;
 
-  x_min += origin_norm;
-  x_max += origin_norm;
+  x_min += get_scale()->get_origin_norm();
+  x_max += get_scale()->get_origin_norm();
 
   x_min *= x_scale;
   x_max *= x_scale;
@@ -134,37 +120,12 @@ void Pulsar::PhasePlot::plot (const Archive* data)
   get_frame()->decorate(data);
 }
 
-
-ostream& Pulsar::operator << (ostream& os, PhasePlot::Scale scale)
+//! Get the scale
+Pulsar::PhaseScale* Pulsar::PhasePlot::get_scale ()
 {
-  switch (scale) {
-  case PhasePlot::Turns:
-    return os << "turn";
-  case PhasePlot::Degrees:
-    return os << "deg";
-  case PhasePlot::Radians:
-    return os << "rad";
-  case PhasePlot::Milliseconds:
-    return os << "ms";
-  }
-}
-
-istream& Pulsar::operator >> (istream& is, PhasePlot::Scale& scale)
-{
-  std::streampos pos = is.tellg();
-  string unit;
-  is >> unit;
-
-  if (unit == "turn")
-    scale = PhasePlot::Turns;
-  else if (unit == "deg")
-    scale = PhasePlot::Degrees;
-  else if (unit == "rad")
-    scale = PhasePlot::Radians;
-  else if (unit == "ms")
-    scale = PhasePlot::Milliseconds;
-  else
-    is.setstate(istream::failbit);
-
-  return is;
+  PhaseScale* scale = dynamic_cast<PhaseScale*>( get_frame()->get_x_zoom() );
+  if (!scale)
+    throw Error (InvalidState, "Pulsar::PhasePlot::get_scale",
+		 "x scale is not a PhaseScale");
+  return scale;
 }
