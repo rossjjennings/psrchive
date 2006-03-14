@@ -2,7 +2,6 @@
 #include "Pulsar/PlotFrame.h"
 
 #include "Pulsar/Archive.h"
-#include "Pulsar/Integration.h"
 
 #include <cpgplot.h>
 
@@ -43,16 +42,6 @@ string Pulsar::PhasePlot::get_ylabel (const Archive*)
   return "";
 }
 
-void Pulsar::PhasePlot::get_range_bin (const Archive* data, 
-				       unsigned& min, unsigned& max)
-{
-  float x_min = 0.0;
-  float x_max = data->get_nbin();
-  get_frame()->get_x_scale()->get_range (x_min, x_max);
-  min = (unsigned) x_min;
-  max = (unsigned) x_max;
-}
-
 /*!
   Plots the profile in the currently open pgplot device, using the current
   viewport.  The profile may be rotated, scaled, and scaleed.
@@ -84,38 +73,13 @@ void Pulsar::PhasePlot::plot (const Archive* data)
   cpgsls (1);
   cpgsci (1);
 
-  float x_scale = 1.0;
-
-  if (get_scale()->get_units() == PhaseScale::Milliseconds)
-    x_scale = data->get_Integration(0)->get_folding_period() * 1e3;
-
-  else if (get_scale()->get_units() == PhaseScale::Radians)
-    x_scale = 2.0 * M_PI;
-
-  else if (get_scale()->get_units() == PhaseScale::Degrees)
-    x_scale = 180.0;
-
-  x_min += get_scale()->get_origin_norm();
-  x_max += get_scale()->get_origin_norm();
-
-  x_min *= x_scale;
-  x_max *= x_scale;
+  get_scale()->get_range_units (data, x_min, x_max);
 
   cpgswin (x_min, x_max, y_min, y_max);
 
-  cpgbox( get_frame()->get_x_axis()->get_pgbox_opt().c_str(), 0.0, 0,
-	  get_frame()->get_y_axis()->get_pgbox_opt().c_str(), 0.0, 0 );
+  get_frame()->draw_axes();
 
-  string ylabel = get_frame()->get_y_axis()->get_label();
-  if (ylabel == PlotLabel::unset)
-    ylabel = get_ylabel (data);
-
-  string xlabel = get_frame()->get_x_axis()->get_label();
-  if (xlabel == PlotLabel::unset)
-    xlabel = get_xlabel (data);
-
-  cpgmtxt ("L",2.5,.5,.5, ylabel.c_str());
-  cpgmtxt ("B",2.5,.5,.5, xlabel.c_str());
+  get_frame()->label_axes( get_xlabel (data), get_ylabel (data) );
 
   get_frame()->decorate(data);
 }

@@ -39,7 +39,7 @@ void Pulsar::AnglePlot::prepare (const Archive* data)
   }
 
   unsigned i_min, i_max;
-  get_range_bin (data, i_min, i_max);
+  get_scale()->get_range_bin (data, i_min, i_max);
 
   set_yrange( min_element(angles.begin()+i_min, angles.begin()+i_max)->val,
 	      max_element(angles.begin()+i_min, angles.begin()+i_max)->val );

@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PhasePlot.h,v $
-   $Revision: 1.13 $
-   $Date: 2006/03/14 16:08:15 $
+   $Revision: 1.14 $
+   $Date: 2006/03/14 22:09:27 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PhasePlot_h
@@ -60,9 +60,6 @@ namespace Pulsar {
 
     //! Get the scale
     PhaseScale* get_scale ();
-
-    //! Get the min and max phase bins corresponding to x_axis->get_range
-    void get_range_bin (const Archive*, unsigned& min, unsigned& max);
 
   protected:
 

@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PhaseScale.h,v $
-   $Revision: 1.3 $
-   $Date: 2006/03/14 16:50:41 $
+   $Revision: 1.4 $
+   $Date: 2006/03/14 22:09:27 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PhaseScale_h
@@ -11,6 +11,8 @@
 #include "Pulsar/PlotScale.h"
 
 namespace Pulsar {
+
+  class Archive;
 
   //! Plots the position angle of the linearly polarized radiation
   class PhaseScale : public PlotScale {
@@ -25,6 +27,12 @@ namespace Pulsar {
 
     //! Get a description of the units
     std::string get_label ();
+
+    //! Return the min and max as the phase bin index
+    void get_range_bin (const Archive*, unsigned& min, unsigned& max);
+
+    //! Return the min and max in the current units
+    void get_range_units (const Archive*, float& min, float& max);
 
     //! Set the units on the phase axis
     void set_units (Units s) { units = s; }
@@ -43,7 +51,6 @@ namespace Pulsar {
 
     //! Origin on the phase axis
     float origin_norm;
-
 
   };
 

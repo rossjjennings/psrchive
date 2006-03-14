@@ -1,9 +1,46 @@
 #include "Pulsar/PhaseScale.h"
+#include "Pulsar/Archive.h"
+#include "Pulsar/Integration.h"
 
 Pulsar::PhaseScale::PhaseScale ()
 {
   units = Turns;
   origin_norm = 0;
+}
+
+void Pulsar::PhaseScale::get_range_bin (const Archive* data, 
+					unsigned& min, unsigned& max)
+{
+  float x_min = 0.0;
+  float x_max = data->get_nbin();
+  get_range (x_min, x_max);
+  min = (unsigned) x_min;
+  max = (unsigned) x_max;
+}
+
+void Pulsar::PhaseScale::get_range_units (const Archive* data,
+					  float& min, float& max)
+{
+  min = 0;
+  max = 1.0;
+  get_range (min, max);
+
+  float scale = 1.0;
+
+  if (units == Milliseconds)
+    scale = data->get_Integration(0)->get_folding_period() * 1e3;
+
+  else if (units == Radians)
+    scale = 2.0 * M_PI;
+
+  else if (units == Degrees)
+    scale = 180.0;
+
+  min += origin_norm;
+  max += origin_norm;
+
+  min *= scale;
+  max *= scale;
 }
 
 //! Get the default label for the x axis

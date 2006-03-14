@@ -34,7 +34,7 @@ void Pulsar::FluxPlot::prepare (const Archive* data)
 		 "Profiles array empty after call to get_profiles");
 
   unsigned i_min, i_max;
-  get_range_bin (data, i_min, i_max);
+  get_scale()->get_range_bin (data, i_min, i_max);
 
   float min = profiles[0]->min(i_min, i_max);
   float max = profiles[0]->max(i_min, i_max);
