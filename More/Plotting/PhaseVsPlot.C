@@ -1,4 +1,5 @@
 #include "Pulsar/PhaseVsPlotTI.h"
+#include "Pulsar/PlotFrame.h"
 #include "Pulsar/Archive.h"
 #include "Pulsar/Profile.h"
 

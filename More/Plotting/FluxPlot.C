@@ -1,4 +1,5 @@
 #include "Pulsar/FluxPlotTI.h"
+#include "Pulsar/PlotFrame.h"
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
 #include "Pulsar/Profile.h"
