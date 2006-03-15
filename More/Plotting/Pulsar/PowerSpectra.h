@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PowerSpectra.h,v $
-   $Revision: 1.1 $
-   $Date: 2006/03/15 12:29:45 $
+   $Revision: 1.2 $
+   $Date: 2006/03/15 13:11:38 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PowerSpectra_h
@@ -35,10 +35,6 @@ namespace Pulsar {
     void set_subint (unsigned _isubint) { isubint = _isubint; }
     unsigned get_subint () const { return isubint; }
     
-    //! Set the frequency channel to plot (where applicable)
-    void set_chan (unsigned _ichan) { ichan = _ichan; }
-    unsigned get_chan () const { return ichan; }
-
     //! Set the polarization to plot
     void set_pol (unsigned _ipol) { ipol = _ipol; }
     unsigned get_pol () const { return ipol; }
@@ -59,7 +55,6 @@ namespace Pulsar {
     std::vector< int > plot_sls;
 
     unsigned isubint;
-    unsigned ichan;
     unsigned ipol;
 
     bool plot_lines;

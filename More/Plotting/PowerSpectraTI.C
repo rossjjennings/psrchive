@@ -9,10 +9,6 @@ Pulsar::PowerSpectraTI::PowerSpectraTI (PowerSpectra* instance)
        &PowerSpectra::set_subint,
        "subint", "Sub-integration to plot" );
 
-  add( &PowerSpectra::get_chan,
-       &PowerSpectra::set_chan,
-       "chan", "Frequency channel to plot" );
-
   add( &PowerSpectra::get_pol,
        &PowerSpectra::set_pol,
        "pol", "Polarization to plot" );
