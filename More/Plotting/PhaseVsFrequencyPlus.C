@@ -25,6 +25,7 @@ Pulsar::PhaseVsFrequencyPlus::PhaseVsFrequencyPlus ()
   manage ("flux", &flux);
   set_viewport ( "flux", 0,.7, .7,1);
 
+  // flux plotter shares the x axis
   flux.get_frame()->set_x_scale (get_frame()->get_x_scale());
 
   // tell the flux plotter to integrate over all frequencies
@@ -47,6 +48,12 @@ Pulsar::PhaseVsFrequencyPlus::PhaseVsFrequencyPlus ()
 
   manage ("psd", &psd);
   set_viewport ( "psd", .7,1, 0,.7);
+
+  // spectrum plotter shares the y axis on its x axis
+  psd.get_frame()->set_x_scale (get_frame()->get_y_scale());
+
+  // tell the spectrum plotter to sum over all phase bins
+  psd.set_bin (PlotIndex (0, true));
 
   // remove the x enumeration
   psd.get_frame()->get_x_axis()->rem_pgbox_opt('N');
