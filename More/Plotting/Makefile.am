@@ -16,7 +16,9 @@ nobase_include_HEADERS = Pulsar/Plot.h Pulsar/PlotFactory.h \
 	Pulsar/PlotFrame.h Pulsar/PlotFrameTI.h \
 	Pulsar/PlotFrameSize.h Pulsar/PlotFrameSizeTI.h \
 	Pulsar/MultiFrame.h Pulsar/MultiFrameTI.h \
-	Pulsar/SimplePlot.h \
+	Pulsar/SimplePlot.h Pulsar/FrequencyPlot.h \
+	Pulsar/PowerSpectra.h Pulsar/PowerSpectraTI.h \
+	Pulsar/SpectrumPlot.h \
 	Pulsar/PhasePlot.h Pulsar/PhasePlotTI.h \
 	Pulsar/FluxPlot.h Pulsar/FluxPlotTI.h \
 	Pulsar/ProfilePlot.h Pulsar/ProfilePlotTI.h \
@@ -40,7 +42,9 @@ libPlot_la_SOURCES = Plot.C PlotFactory.C \
 	PlotFrame.C PlotFrameTI.C \
 	PlotFrameSize.C PlotFrameSizeTI.C \
 	MultiFrame.C MultiFrameTI.C \
-	SimplePlot.C \
+	SimplePlot.C FrequencyPlot.C \
+	PowerSpectra.C PowerSpectraTI.C \
+	SpectrumPlot.C \
 	PhasePlot.C PhasePlotTI.C \
 	FluxPlot.C FluxPlotTI.C \
 	ProfilePlot.C ProfilePlotTI.C \
