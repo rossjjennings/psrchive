@@ -1,6 +1,8 @@
 #include "Pulsar/Plot.h"
 #include "Pulsar/PlotFrameTI.h"
 
+bool Pulsar::Plot::verbose = false;
+
 Pulsar::Plot::Plot ()
 {
   frame = new PlotFrame;
