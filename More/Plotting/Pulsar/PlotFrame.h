@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PlotFrame.h,v $
-   $Revision: 1.10 $
-   $Date: 2006/03/14 22:09:33 $
+   $Revision: 1.11 $
+   $Date: 2006/03/15 11:44:34 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PlotFrame_h
@@ -61,7 +61,7 @@ namespace Pulsar {
     float get_label_spacing () const { return label_spacing; }
 
     //! Draw the axes of the frame
-    virtual void draw_axes ();
+    virtual void draw_axes (const Archive*);
 
     //! Label the axes os the frame
     virtual void label_axes (const std::string& default_x,
@@ -72,7 +72,7 @@ namespace Pulsar {
 
     //! Focus the frame
     /*! By default a frame exists in the current viewport */
-    virtual void focus () { }
+    virtual void focus (const Archive*);
 
     //! Get the text interface to the archive class
     ArchiveTI* get_interface (const Archive*);
