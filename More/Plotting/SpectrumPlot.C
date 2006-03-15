@@ -10,10 +10,14 @@ void Pulsar::SpectrumPlot::get_spectra (const Archive* data)
   spectra.resize(1);
   spectra[0].resize(nchan);
 
-  for (unsigned ichan=0; ichan<nchan; ichan++)
-    if (data->get_Profile (isubint, ipol, ichan) -> get_weight() == 0.0)
+  for (unsigned ichan=0; ichan<nchan; ichan++) {
+    Reference::To<const Profile> profile;
+    profile = get_Profile (data, isubint, ipol, ichan);
+    if (profile -> get_weight() == 0.0)
       spectra[0][ichan] = 0.0;
+    else if (ibin.get_integrate())
+      spectra[0][ichan] = profile->sum();
     else
-      spectra[0][ichan] = data->get_Profile (isubint, ipol, ichan) -> sum();
+      spectra[0][ichan] = profile->get_amps()[ibin.get_value()];
+  }
 }
-

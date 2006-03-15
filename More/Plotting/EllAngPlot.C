@@ -4,7 +4,7 @@
 
 void Pulsar::EllAngPlot::get_angles (const Archive* data)
 {
-  Reference::To<const PolnProfile> profile = new_Stokes (data,isubint,ichan);
+  Reference::To<const PolnProfile> profile = get_Stokes (data,isubint,ichan);
   profile->get_ellipticity (angles, threshold);
 }
 

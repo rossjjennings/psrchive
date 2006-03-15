@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PhaseVsFrequencyPlus.h,v $
-   $Revision: 1.2 $
-   $Date: 2006/03/15 16:34:54 $
+   $Revision: 1.3 $
+   $Date: 2006/03/15 19:59:27 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PhaseVsFrequencyPlus_h
@@ -32,12 +32,12 @@ namespace Pulsar {
     void prepare (const Archive*);
 
     //! Set the sub-integration to plot (where applicable)
-    void set_subint (unsigned _isubint) { isubint = _isubint; }
-    unsigned get_subint () const { return isubint; }
+    void set_subint (const PlotIndex& _isubint) { isubint = _isubint; }
+    PlotIndex get_subint () const { return isubint; }
     
     //! Set the polarization to plot
-    void set_pol (unsigned _ipol) { ipol = _ipol; }
-    unsigned get_pol () const { return ipol; }
+    void set_pol (const PlotIndex& _ipol) { ipol = _ipol; }
+    PlotIndex get_pol () const { return ipol; }
 
     PhaseVsFrequency* get_freq () { return &freq; }
     ProfilePlot* get_flux () { return &flux; }
@@ -51,8 +51,8 @@ namespace Pulsar {
     ProfilePlot flux;
     SpectrumPlot psd;
 
-    unsigned isubint;
-    unsigned ipol;
+    PlotIndex isubint;
+    PlotIndex ipol;
 
     template<class T> void prepare (T* plot)
     {

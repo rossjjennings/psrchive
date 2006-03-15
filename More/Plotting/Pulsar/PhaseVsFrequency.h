@@ -1,14 +1,15 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PhaseVsFrequency.h,v $
-   $Revision: 1.3 $
-   $Date: 2006/03/11 22:14:46 $
+   $Revision: 1.4 $
+   $Date: 2006/03/15 19:59:27 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PhaseVsFrequency_h
 #define __Pulsar_PhaseVsFrequency_h
 
 #include "Pulsar/PhaseVsPlot.h"
+#include "Pulsar/PlotIndex.h"
 
 namespace Pulsar {
 
@@ -36,17 +37,17 @@ namespace Pulsar {
     const Profile* get_Profile (const Archive* data, unsigned row);
 
     //! Set the sub-integration to plot (where applicable)
-    void set_subint (unsigned _isubint) { isubint = _isubint; }
-    unsigned get_subint () const { return isubint; }
+    void set_subint (const PlotIndex& _isubint) { isubint = _isubint; }
+    PlotIndex get_subint () const { return isubint; }
     
     //! Set the polarization to plot
-    void set_pol (unsigned _ipol) { ipol = _ipol; }
-    unsigned get_pol () const { return ipol; }
+    void set_pol (const PlotIndex& _ipol) { ipol = _ipol; }
+    PlotIndex get_pol () const { return ipol; }
 
   protected:
 
-    unsigned isubint;
-    unsigned ipol;
+    PlotIndex isubint;
+    PlotIndex ipol;
 
   };
 

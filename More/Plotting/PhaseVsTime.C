@@ -71,5 +71,5 @@ unsigned Pulsar::PhaseVsTime::get_nrow (const Archive* data)
 const Pulsar::Profile*
 Pulsar::PhaseVsTime::get_Profile (const Archive* data, unsigned isubint)
 {
-  return data->get_Profile (isubint, ipol, ichan);
+  return Pulsar::get_Profile (data, isubint, ipol, ichan);
 }
