@@ -20,6 +20,12 @@ Pulsar::PlotFrame* Pulsar::Plot::get_frame ()
   return frame;
 }
 
+//! Get the frame
+const Pulsar::PlotFrame* Pulsar::Plot::get_frame () const
+{
+  return frame;
+}
+
 //! Set the frame
 void Pulsar::Plot::set_frame (PlotFrame* f)
 {

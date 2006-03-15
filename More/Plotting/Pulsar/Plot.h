@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/Plot.h,v $
-   $Revision: 1.7 $
-   $Date: 2006/03/15 11:38:55 $
+   $Revision: 1.8 $
+   $Date: 2006/03/15 16:35:04 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Plot_h
@@ -40,6 +40,9 @@ namespace Pulsar {
 
     //! Get the frame
     virtual PlotFrame* get_frame ();
+
+    //! Get the frame
+    virtual const PlotFrame* get_frame () const;
 
     //! Set the frame
     virtual void set_frame (PlotFrame*);
