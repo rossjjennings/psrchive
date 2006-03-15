@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/Attic/PlotFrameSize.h,v $
-   $Revision: 1.4 $
-   $Date: 2006/03/11 22:14:46 $
+   $Revision: 1.5 $
+   $Date: 2006/03/15 11:39:00 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PlotFrameSize_h
@@ -26,7 +26,7 @@ namespace Pulsar {
     PlotFrameSize (const PlotFrame*);
 
     //! Focus the frame
-    void focus ();
+    void focus (const Archive*);
 
     //! Set the normalized coordinate of the viewport x axis
     void set_x_range (const std::pair<float,float>& range) { x_range=range; }
