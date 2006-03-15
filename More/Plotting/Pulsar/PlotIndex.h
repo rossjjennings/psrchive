@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/Attic/PlotIndex.h,v $
-   $Revision: 1.1 $
-   $Date: 2006/03/15 17:59:32 $
+   $Revision: 1.2 $
+   $Date: 2006/03/15 20:06:44 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PlotIndex_h
@@ -12,7 +12,7 @@
 
 namespace Pulsar {
 
-  //!
+  //! Combines an index value and integrate flag
   class PlotIndex {
 
   public:

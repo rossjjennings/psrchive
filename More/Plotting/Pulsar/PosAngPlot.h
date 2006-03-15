@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PosAngPlot.h,v $
-   $Revision: 1.6 $
-   $Date: 2006/03/11 22:14:46 $
+   $Revision: 1.7 $
+   $Date: 2006/03/15 20:06:44 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PosAngPlot_h
@@ -20,7 +20,7 @@ namespace Pulsar {
     //! Return the default label for the y axis
     std::string get_ylabel (const Archive* data);
     
-    //! Derived types compute the angles to be plotted
+    //! Compute position angles and store in AnglePlot::angles
     void get_angles (const Archive*);
 
   };

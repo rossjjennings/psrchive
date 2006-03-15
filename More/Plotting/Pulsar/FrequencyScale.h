@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/FrequencyScale.h,v $
-   $Revision: 1.1 $
-   $Date: 2006/03/15 11:39:11 $
+   $Revision: 1.2 $
+   $Date: 2006/03/15 20:06:44 $
    $Author: straten $ */
 
 #ifndef __Pulsar_FrequencyScale_h
@@ -14,7 +14,7 @@ namespace Pulsar {
 
   class Archive;
 
-  //! Plots the position angle of the linearly polarized radiation
+  //! Represents an axis with radio frequency ordinate
   class FrequencyScale : public PlotScale {
 
   public:

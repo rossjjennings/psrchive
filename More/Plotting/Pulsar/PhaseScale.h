@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PhaseScale.h,v $
-   $Revision: 1.5 $
-   $Date: 2006/03/15 11:39:06 $
+   $Revision: 1.6 $
+   $Date: 2006/03/15 20:06:44 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PhaseScale_h
@@ -14,7 +14,7 @@ namespace Pulsar {
 
   class Archive;
 
-  //! Plots the position angle of the linearly polarized radiation
+  //! Reperesents an axis with pulse phase ordinate
   class PhaseScale : public PlotScale {
 
   public:

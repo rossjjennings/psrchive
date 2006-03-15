@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PlotLabel.h,v $
-   $Revision: 1.4 $
-   $Date: 2006/03/11 22:14:46 $
+   $Revision: 1.5 $
+   $Date: 2006/03/15 20:06:44 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PlotLabel_h
@@ -12,7 +12,7 @@
 
 namespace Pulsar {
 
-  //! Plots the position angle of the linearly polarized radiation
+  //! Stores three labels: left, centre, and right
   class PlotLabel : public Reference::Able {
 
   public:

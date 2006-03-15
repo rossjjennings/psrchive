@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/AnglePlot.h,v $
-   $Revision: 1.6 $
-   $Date: 2006/03/15 19:59:27 $
+   $Revision: 1.7 $
+   $Date: 2006/03/15 20:06:44 $
    $Author: straten $ */
 
 #ifndef __Pulsar_AnglePlot_h
@@ -15,7 +15,7 @@
 
 namespace Pulsar {
 
-  //! Plots the position angle of the linearly polarized radiation
+  //! Plots an angle and its error as a function of pulse phase
   class AnglePlot : public PhasePlot {
 
   public:
@@ -32,7 +32,7 @@ namespace Pulsar {
     //! return the minimum and maximum value in degrees
     void prepare (const Archive*);
 
-    //! draw the position angle as a function of pulse phase
+    //! draw the angle as a function of pulse phase
     void draw (const Archive*);
 
     std::string get_flux_label (const Archive* data);

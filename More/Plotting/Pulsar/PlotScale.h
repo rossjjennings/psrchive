@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PlotScale.h,v $
-   $Revision: 1.4 $
-   $Date: 2006/03/15 11:39:06 $
+   $Revision: 1.5 $
+   $Date: 2006/03/15 20:06:44 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PlotScale_h
@@ -16,7 +16,7 @@ namespace Pulsar {
 
   class Archive;
 
-  //! Plots the position angle of the linearly polarized radiation
+  //! The scale on an axis
   class PlotScale : public Reference::Able {
 
   public:
