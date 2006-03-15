@@ -18,11 +18,7 @@ void Pulsar::FrequencyScale::get_range (const Archive* data,
 void Pulsar::FrequencyScale::get_range (const Archive* data, 
 					unsigned& min, unsigned& max) const
 {
-  const_cast<FrequencyScale*>(this)->set_minmax (0, data->get_nchan());
-  float x_min, x_max;
-  PlotScale::get_range (data, x_min, x_max);
-  min = (unsigned) x_min;
-  max = (unsigned) x_max;
+  PlotScale::get_range (data->get_nchan(), min, max);
 }
 
 std::string Pulsar::FrequencyScale::get_label ()
