@@ -10,11 +10,13 @@ if HAVE_PGPLOT
 nobase_include_HEADERS = Pulsar/Plot.h Pulsar/PlotFactory.h \
 	Pulsar/PlotScale.h Pulsar/PlotScaleTI.h \
         Pulsar/PhaseScale.h Pulsar/PhaseScaleTI.h \
+	Pulsar/FrequencyScale.h \
 	Pulsar/PlotAxis.h Pulsar/PlotAxisTI.h \
 	Pulsar/PlotLabel.h Pulsar/PlotLabelTI.h \
 	Pulsar/PlotFrame.h Pulsar/PlotFrameTI.h \
 	Pulsar/PlotFrameSize.h Pulsar/PlotFrameSizeTI.h \
 	Pulsar/MultiFrame.h Pulsar/MultiFrameTI.h \
+	Pulsar/SimplePlot.h \
 	Pulsar/PhasePlot.h Pulsar/PhasePlotTI.h \
 	Pulsar/FluxPlot.h Pulsar/FluxPlotTI.h \
 	Pulsar/ProfilePlot.h Pulsar/ProfilePlotTI.h \
@@ -32,11 +34,13 @@ nobase_include_HEADERS = Pulsar/Plot.h Pulsar/PlotFactory.h \
 libPlot_la_SOURCES = Plot.C PlotFactory.C \
 	PlotScale.C PlotScaleTI.C \
 	PhaseScale.C PhaseScaleTI.C \
+	FrequencyScale.C \
 	PlotAxis.C PlotAxisTI.C \
 	PlotLabel.C PlotLabelTI.C \
 	PlotFrame.C PlotFrameTI.C \
 	PlotFrameSize.C PlotFrameSizeTI.C \
 	MultiFrame.C MultiFrameTI.C \
+	SimplePlot.C \
 	PhasePlot.C PhasePlotTI.C \
 	FluxPlot.C FluxPlotTI.C \
 	ProfilePlot.C ProfilePlotTI.C \
