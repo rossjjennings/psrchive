@@ -9,6 +9,8 @@
 
 Pulsar::PhaseVsPlot::PhaseVsPlot ()
 {
+  colour_map.set_name( pgplot::ColourMap::Heat );
+
   // default is to invert the axis tick marks
   get_frame()->get_x_axis()->set_pgbox_opt ("BCINTS");
 
@@ -29,6 +31,8 @@ TextInterface::Class* Pulsar::PhaseVsPlot::get_interface ()
 //! Derived classes must draw in the current viewport
 void Pulsar::PhaseVsPlot::draw (const Archive* data)
 {
+  colour_map.apply ();
+
   // Forget about the actual max and min, and draw in normalized coordinates
 
   float x_min = 0.0;

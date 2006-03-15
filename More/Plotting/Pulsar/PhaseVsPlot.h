@@ -1,14 +1,15 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PhaseVsPlot.h,v $
-   $Revision: 1.7 $
-   $Date: 2006/03/14 16:13:55 $
+   $Revision: 1.8 $
+   $Date: 2006/03/15 22:27:58 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PhaseVsPlot_h
 #define __Pulsar_PhaseVsPlot_h
 
 #include "Pulsar/PhasePlot.h"
+#include "ColourMap.h"
 
 namespace Pulsar {
 
@@ -37,9 +38,14 @@ namespace Pulsar {
     //! Provide access to the z-scale
     PlotScale* get_z_scale () { return &z_scale; }
 
+    //! Provide access to the colour map
+    pgplot::ColourMap* get_colour_map () { return &colour_map; }
+
   protected:
 
     PlotScale z_scale;
+
+    pgplot::ColourMap colour_map;
 
   };
 

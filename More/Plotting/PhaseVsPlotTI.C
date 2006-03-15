@@ -12,4 +12,6 @@ Pulsar::PhaseVsPlotTI::PhaseVsPlotTI (PhaseVsPlot* instance)
 
   import( "z", PlotScaleTI(), &PhaseVsPlot::get_z_scale );
 
+  import("cmap", pgplot::ColourMap::Interface(), &PhaseVsPlot::get_colour_map);
+
 }
