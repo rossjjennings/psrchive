@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/FluxPlot.h,v $
-   $Revision: 1.7 $
-   $Date: 2006/03/14 16:13:55 $
+   $Revision: 1.8 $
+   $Date: 2006/03/15 11:38:50 $
    $Author: straten $ */
 
 #ifndef __Pulsar_FluxPlot_h
@@ -67,7 +67,7 @@ namespace Pulsar {
     void draw (const Archive*);
 
     //! draw the profile in the current viewport and window
-    void draw (const Profile* profile) const;
+    void draw (const Profile*) const;
 
     //! Return the text interface
     TextInterface::Class* get_interface ();
@@ -84,6 +84,9 @@ namespace Pulsar {
 
     bool plot_ebox;
     bool plot_histogram;
+
+  private:
+    std::vector<float> phases;
 
   };
 
