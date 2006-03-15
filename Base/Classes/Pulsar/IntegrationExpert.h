@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/IntegrationExpert.h,v $
-   $Revision: 1.1 $
-   $Date: 2006/02/27 19:44:38 $
+   $Revision: 1.2 $
+   $Date: 2006/03/15 17:39:08 $
    $Author: straten $ */
 
 #ifndef __Pulsar_IntegrationExpert_h
@@ -43,6 +43,14 @@ namespace Pulsar {
     //! Set the dimensions of the data container
     void resize (unsigned npol=0, unsigned nchan=0, unsigned nbin=0)
     { instance->resize (npol, nchan, nbin); }
+
+    //! Integrate profiles from neighbouring chans
+    void fscrunch (unsigned nscrunch = 0)
+    { instance->fscrunch (nscrunch); }
+
+    //! Integrate profiles from single polarizations into one total intensity
+    void pscrunch ()
+    { instance->pscrunch (); }
 
     //! Swap the two specified Profiles
     void swap_profiles (unsigned ipol, unsigned ichan,
