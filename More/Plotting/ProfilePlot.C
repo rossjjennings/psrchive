@@ -19,7 +19,7 @@ TextInterface::Class* Pulsar::ProfilePlot::get_interface ()
 
 void Pulsar::ProfilePlot::get_profiles (const Archive* data)
 {
-  profiles.push_back( data->get_Profile (isubint, ipol, ichan) );
+  profiles.push_back( get_Profile (data, isubint, ipol, ichan) );
 }
 
 //! Derived classes must draw in the current viewport
