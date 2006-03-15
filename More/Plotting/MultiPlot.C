@@ -23,9 +23,6 @@ void Pulsar::MultiPlot::plot (const Archive* data)
     // prepare the plot
     prepare (plot);
 
-    // set the viewport
-    plot->get_frame()->focus();
-
     // plot
     plot->plot(data);
 
