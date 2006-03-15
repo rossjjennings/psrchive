@@ -7,6 +7,7 @@
 #include "Pulsar/EllAngPlot.h"
 #include "Pulsar/StokesCylindrical.h"
 #include "Pulsar/StokesSpherical.h"
+#include "Pulsar/SpectrumPlot.h"
 #include "Error.h"
 
 // Add plots here
@@ -35,6 +36,9 @@ Pulsar::PlotFactory::PlotFactory ()
 
   add ( new PlotFactory::Advocate<StokesSpherical>
 	("Ssph", "Stokes; vector in spherical") );
+
+  add ( new PlotFactory::Advocate<SpectrumPlot>
+	("psd", "Total power spectrum") );
 }
 
 //! Return a new instance of the named plotter
