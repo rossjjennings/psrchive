@@ -26,26 +26,23 @@ void Pulsar::PhaseScale::get_range (const Archive* data,
   max *= scale;
 }
 
-void Pulsar::PhaseScale::get_range_bin (const Archive* data, 
-					unsigned& min, unsigned& max) const
+void Pulsar::PhaseScale::get_range (const Archive* data, 
+				    unsigned& min, unsigned& max) const
 {
-  float x_min, x_max;
-  PlotScale::get_range (data, x_min, x_max);
-  min = (unsigned) (x_min * data->get_nbin());
-  max = (unsigned) (x_max * data->get_nbin());
+  PlotScale::get_range (data->get_nbin(), min, max);
 }
 
 
-void Pulsar::PhaseScale::get_x_axis (const Archive* data,
-				     std::vector<float>& x_axis) const
+void Pulsar::PhaseScale::get_ordinates (const Archive* data,
+					std::vector<float>& axis) const
 {
-  x_axis.resize (data->get_nbin());
+  axis.resize (data->get_nbin());
 
   float scale = get_scale (data);
 
-  for (unsigned ibin = 0; ibin < x_axis.size(); ibin++) {
-    x_axis[ibin] = scale * (origin_norm + (float(ibin) + 0.5) / x_axis.size());
-    // cerr << "x[" << ibin << "]=" << x_axis[ibin] << endl;
+  for (unsigned ibin = 0; ibin < axis.size(); ibin++) {
+    axis[ibin] = scale * (origin_norm + (float(ibin) + 0.5) / axis.size());
+    // cerr << "x[" << ibin << "]=" << axis[ibin] << endl;
   }
 }
 
