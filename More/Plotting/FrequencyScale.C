@@ -25,6 +25,10 @@ void Pulsar::FrequencyScale::get_range (const Archive* data,
   max = (unsigned) x_max;
 }
 
+std::string Pulsar::FrequencyScale::get_label ()
+{
+  return "Frequency (MHz)";
+}
 
 void Pulsar::FrequencyScale::get_ordinates (const Archive* data,
 					    std::vector<float>& x_axis) const
