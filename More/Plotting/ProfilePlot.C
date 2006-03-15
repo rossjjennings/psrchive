@@ -1,4 +1,4 @@
-#include "Pulsar/SinglePlotTI.h"
+#include "Pulsar/ProfilePlotTI.h"
 #include "Pulsar/Archive.h"
 #include "Pulsar/Profile.h"
 
@@ -6,23 +6,23 @@
 
 #include <cpgplot.h>
 
-Pulsar::SinglePlot::SinglePlot ()
+Pulsar::ProfilePlot::ProfilePlot ()
 {
   plot_cal_transitions = true;
 }
 
-TextInterface::Class* Pulsar::SinglePlot::get_interface ()
+TextInterface::Class* Pulsar::ProfilePlot::get_interface ()
 {
-  return new SinglePlotTI (this);
+  return new ProfilePlotTI (this);
 }
 
-void Pulsar::SinglePlot::get_profiles (const Archive* data)
+void Pulsar::ProfilePlot::get_profiles (const Archive* data)
 {
   profiles.push_back( data->get_Profile (isubint, ipol, ichan) );
 }
 
 //! Derived classes must draw in the current viewport
-void Pulsar::SinglePlot::draw (const Archive* data)
+void Pulsar::ProfilePlot::draw (const Archive* data)
 {
   FluxPlot::draw (data);
 
@@ -33,7 +33,7 @@ void Pulsar::SinglePlot::draw (const Archive* data)
 /*!  Plots the calibrator hi/lo levels using the transitions
  determined by Profile::find_transitions.  Plots in the currently open
  pgplot device using the current viewport and window.  */
-void Pulsar::SinglePlot::draw_transitions (const Profile* profile) const
+void Pulsar::ProfilePlot::draw_transitions (const Profile* profile) const
 {
   int hightolow, lowtohigh, buffer;
   profile->find_transitions (hightolow, lowtohigh, buffer);

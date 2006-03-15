@@ -1,5 +1,5 @@
 #include "Pulsar/PlotFactory.h"
-#include "Pulsar/SinglePlot.h"
+#include "Pulsar/ProfilePlot.h"
 #include "Pulsar/StokesPlot.h"
 #include "Pulsar/PhaseVsFrequency.h"
 #include "Pulsar/PhaseVsTime.h"
@@ -12,7 +12,7 @@
 // Add plots here
 Pulsar::PlotFactory::PlotFactory ()
 {
-  add ( new PlotFactory::Advocate<SinglePlot>
+  add ( new PlotFactory::Advocate<ProfilePlot>
 	("flux", "Single plot of flux") );
 
   add ( new PlotFactory::Advocate<StokesPlot>

@@ -17,7 +17,7 @@ nobase_include_HEADERS = Pulsar/Plot.h Pulsar/PlotFactory.h \
 	Pulsar/MultiFrame.h Pulsar/MultiFrameTI.h \
 	Pulsar/PhasePlot.h Pulsar/PhasePlotTI.h \
 	Pulsar/FluxPlot.h Pulsar/FluxPlotTI.h \
-	Pulsar/SinglePlot.h Pulsar/SinglePlotTI.h \
+	Pulsar/ProfilePlot.h Pulsar/ProfilePlotTI.h \
 	Pulsar/StokesPlot.h Pulsar/StokesPlotTI.h \
 	Pulsar/AnglePlot.h Pulsar/AnglePlotTI.h \
 	Pulsar/PosAngPlot.h Pulsar/EllAngPlot.h \
@@ -39,7 +39,7 @@ libPlot_la_SOURCES = Plot.C PlotFactory.C \
 	MultiFrame.C MultiFrameTI.C \
 	PhasePlot.C PhasePlotTI.C \
 	FluxPlot.C FluxPlotTI.C \
-	SinglePlot.C SinglePlotTI.C \
+	ProfilePlot.C ProfilePlotTI.C \
 	StokesPlot.C StokesPlotTI.C \
 	AnglePlot.C AnglePlotTI.C \
 	PosAngPlot.C EllAngPlot.C \

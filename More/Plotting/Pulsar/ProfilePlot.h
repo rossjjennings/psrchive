@@ -1,24 +1,24 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/ProfilePlot.h,v $
-   $Revision: 1.6 $
-   $Date: 2006/03/11 22:14:46 $
+   $Revision: 1.7 $
+   $Date: 2006/03/15 01:10:39 $
    $Author: straten $ */
 
-#ifndef __Pulsar_SinglePlot_h
-#define __Pulsar_SinglePlot_h
+#ifndef __Pulsar_ProfilePlot_h
+#define __Pulsar_ProfilePlot_h
 
 #include "Pulsar/FluxPlot.h"
 
 namespace Pulsar {
 
   //! Plots a single pulse profile
-  class SinglePlot : public FluxPlot {
+  class ProfilePlot : public FluxPlot {
 
   public:
 
     //! Default constructor
-    SinglePlot ();
+    ProfilePlot ();
 
     //! Get the text interface to the configuration attributes
     TextInterface::Class* get_interface ();
