@@ -48,13 +48,15 @@ void Pulsar::FluxPlot::prepare (const Archive* data)
       max = pmax;
   }
 
-  set_yrange (min, max);
+  get_frame()->get_y_scale()->set_minmax (min, max);
 }
 
 
 //! Derived classes must draw in the current viewport
 void Pulsar::FluxPlot::draw (const Archive* data)
 {
+  get_scale()->get_x_axis (data, phases);
+
   for (unsigned iprof=0; iprof < profiles.size(); iprof++) {
 
     if (plot_sci.size() == profiles.size())
@@ -83,8 +85,6 @@ void Pulsar::FluxPlot::draw (const Profile* profile) const
   else
     cpgline (profile->get_nbin(), &phases[0], profile->get_amps());
 }
-
-
 
 //! Scale in on the on-pulse region
 void Pulsar::FluxPlot::auto_scale_phase (const Profile* profile, float buf)

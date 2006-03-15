@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PlotScale.h,v $
-   $Revision: 1.3 $
-   $Date: 2006/03/14 16:13:55 $
+   $Revision: 1.4 $
+   $Date: 2006/03/15 11:39:06 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PlotScale_h
@@ -14,6 +14,8 @@
 
 namespace Pulsar {
 
+  class Archive;
+
   //! Plots the position angle of the linearly polarized radiation
   class PlotScale : public Reference::Able {
 
@@ -22,8 +24,11 @@ namespace Pulsar {
     //! Default constructor
     PlotScale ();
 
+    //! Set the minimum and maximum value in the data
+    virtual void set_minmax (float min, float max);
+
     //! Rescale min and max according to current attribute settings
-    void get_range (float& min, float& max) const;
+    virtual void get_range (const Archive*, float& min, float& max) const;
 
     //! Set the world-normalized range on the axis
     void set_range_norm (const std::pair<float,float>& f) { range_norm = f; }
@@ -42,6 +47,8 @@ namespace Pulsar {
 
   protected:
 
+    float minval;
+    float maxval;
     std::pair<float,float> range_norm;
     float buf_norm;
 

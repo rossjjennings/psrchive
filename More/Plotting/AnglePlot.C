@@ -31,22 +31,31 @@ void Pulsar::AnglePlot::prepare (const Archive* data)
 		 "angles vector size=%u != nbin=%u",
 		 angles.size(), data->get_nbin());
 
+  float min = 0;
+  float max = 0;
+
   if (range) {
     // keep pgplot from drawing the 90 or 180 at the edge
     float half = 0.5 * range - 0.0001;
-    set_yrange (-half, half);
-    return;
+    min = -half;
+    max = half;
+  }
+  else {
+    unsigned i_min, i_max;
+    get_scale()->get_range_bin (data, i_min, i_max);
+
+    min = min_element(angles.begin()+i_min, angles.begin()+i_max)->val;
+    max = max_element(angles.begin()+i_min, angles.begin()+i_max)->val;
   }
 
-  unsigned i_min, i_max;
-  get_scale()->get_range_bin (data, i_min, i_max);
-
-  set_yrange( min_element(angles.begin()+i_min, angles.begin()+i_max)->val,
-	      max_element(angles.begin()+i_min, angles.begin()+i_max)->val );
+  get_frame()->get_y_scale()->set_minmax (min, max);
 }
 
 void Pulsar::AnglePlot::draw (const Archive *data)
 {
+  std::vector<float> phases;
+  get_scale()->get_x_axis (data, phases);
+
   float offset = 0;
   unsigned times = 1;
 

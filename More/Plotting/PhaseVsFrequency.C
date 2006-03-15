@@ -1,9 +1,12 @@
 #include "Pulsar/PhaseVsFrequencyTI.h"
+#include "Pulsar/FrequencyScale.h"
 #include "Pulsar/Archive.h"
 #include "Pulsar/Profile.h"
 
 Pulsar::PhaseVsFrequency::PhaseVsFrequency ()
 {
+  get_frame()->set_y_scale( new FrequencyScale );
+
   isubint = 0;
   ipol = 0;
 }
@@ -15,10 +18,6 @@ TextInterface::Class* Pulsar::PhaseVsFrequency::get_interface ()
 
 void Pulsar::PhaseVsFrequency::prepare (const Archive* data)
 {
-  float bw  = data -> get_bandwidth();
-  float cf  = data -> get_centre_frequency();
-
-  set_yrange (cf-0.5*bw, cf+0.5*bw);
 }
 
 std::string Pulsar::PhaseVsFrequency::get_ylabel (const Archive* data)

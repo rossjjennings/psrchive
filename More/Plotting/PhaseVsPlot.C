@@ -1,5 +1,4 @@
 #include "Pulsar/PhaseVsPlotTI.h"
-#include "Pulsar/PlotFrame.h"
 #include "Pulsar/Archive.h"
 #include "Pulsar/Profile.h"
 
@@ -11,6 +10,7 @@ Pulsar::PhaseVsPlot::PhaseVsPlot ()
 {
   // default is to invert the axis tick marks
   get_frame()->get_x_axis()->set_pgbox_opt ("BCINTS");
+
   get_frame()->get_y_axis()->set_pgbox_opt ("BINTS");
   get_frame()->get_y_axis()->set_alternate (true);
 
@@ -26,27 +26,29 @@ TextInterface::Class* Pulsar::PhaseVsPlot::get_interface ()
 }
 
 //! Derived classes must draw in the current viewport
-void Pulsar::PhaseVsPlot::draw (const Archive* archive)
+void Pulsar::PhaseVsPlot::draw (const Archive* data)
 {
-  // Forget about what the PhasePlot base class knows about max and min
+  // Forget about the actual max and min, and draw in normalized coordinates
 
   float x_min = 0.0;
   float x_max = 1.0;
-  get_frame()->get_x_scale()->get_range (x_min, x_max);
+  get_frame()->get_x_scale()->PlotScale::set_minmax (x_min, x_max);
+  get_frame()->get_x_scale()->PlotScale::get_range (data, x_min, x_max);
 
   float y_min = 0.0;
   float y_max = 1.0;
-  get_frame()->get_y_scale()->get_range (y_min, y_max);
+  get_frame()->get_y_scale()->PlotScale::set_minmax (y_min, y_max);
+  get_frame()->get_y_scale()->PlotScale::get_range (data, y_min, y_max);
 
   cpgswin (x_min, x_max, y_min, y_max);
 
   // Fill the image data
-  unsigned nbin = archive->get_nbin();
-  unsigned nrow = get_nrow (archive);
+  unsigned nbin = data->get_nbin();
+  unsigned nrow = get_nrow (data);
 
   vector<float> plotarray (nbin * nrow);
   for (unsigned irow = 0; irow < nrow; irow++) {
-    vector<float> amps  = get_Profile (archive, irow) -> get_weighted_amps();
+    vector<float> amps  = get_Profile (data, irow) -> get_weighted_amps();
     for (int ibin=0; ibin<nbin; ibin++)
       plotarray[irow*nbin + ibin] = amps[ibin];
   }
@@ -63,7 +65,7 @@ void Pulsar::PhaseVsPlot::draw (const Archive* archive)
   float min = * std::min_element (plotarray.begin(), plotarray.end());
   float max = * std::max_element (plotarray.begin(), plotarray.end());
   
-  get_z_scale()->get_range (min, max);
+  get_z_scale()->get_range (data, min, max);
 
   cpgimag(&plotarray[0], nbin, nrow, 1, nbin, 1, nrow, min, max, trf);
 
