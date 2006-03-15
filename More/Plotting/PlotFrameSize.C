@@ -11,7 +11,7 @@ Pulsar::PlotFrameSize::PlotFrameSize ()
 Pulsar::PlotFrameSize::PlotFrameSize (const PlotFrame* frame)
   : PlotFrame(*frame), x_range (0,1), y_range (0,1) {}
 
-void Pulsar::PlotFrameSize::focus ()
+void Pulsar::PlotFrameSize::focus (const Archive* data)
 {
   float x0, x1, y0, y1;
   cpgqvp (0, &x0, &x1, &y0, &y1);
@@ -20,4 +20,6 @@ void Pulsar::PlotFrameSize::focus ()
   stretch (y_range, y0, y1);
 
   cpgsvp (x0, x1, y0, y1);
+
+  PlotFrame::focus (data);
 }

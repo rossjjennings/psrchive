@@ -29,8 +29,22 @@ Pulsar::PlotFrame::~PlotFrame ()
 {
 }
 
-void Pulsar::PlotFrame::draw_axes ()
+void Pulsar::PlotFrame::focus (const Archive* data)
 {
+  float x_min, x_max;
+  get_x_scale()->get_range (data, x_min, x_max);
+
+  float y_min, y_max;
+  get_y_scale()->get_range (data, y_min, y_max);
+
+  cpgswin (x_min, x_max, y_min, y_max);
+}
+
+void Pulsar::PlotFrame::draw_axes (const Archive* data)
+{
+  cpgsls (1);
+  cpgsci (1);
+
   cpgbox( get_x_axis()->get_pgbox_opt().c_str(), 0.0, 0,
 	  get_y_axis()->get_pgbox_opt().c_str(), 0.0, 0 );
 }
@@ -38,6 +52,9 @@ void Pulsar::PlotFrame::draw_axes ()
 void Pulsar::PlotFrame::label_axes (const string& default_x,
 				    const string& default_y)
 {
+  cpgsls (1);
+  cpgsci (1);
+
   string xlabel = get_x_axis()->get_label();
   if (xlabel == PlotLabel::unset)
     xlabel = default_x;
@@ -52,6 +69,9 @@ void Pulsar::PlotFrame::label_axes (const string& default_x,
 
 void Pulsar::PlotFrame::decorate (const Archive* data)
 {
+  cpgsls (1);
+  cpgsci (1);
+
   decorate (data, get_label_above(), +label_spacing);
   decorate (data, get_label_below(), -label_spacing);
 }
@@ -70,12 +90,8 @@ void Pulsar::PlotFrame::decorate (const Archive* data, const string& label,
   if (label == PlotLabel::unset)
     return;
 
-  //cerr << "Separating " << label << endl;
-
   vector<string> labels;
   TextInterface::separate (label, labels, '.');
-
-  //cerr << "separated!" << endl;
 
   // get the length of a dash in normalized device coordinates
   float xl, yl;
@@ -92,18 +108,13 @@ void Pulsar::PlotFrame::decorate (const Archive* data, const string& label,
 
   for (unsigned i=0; i < labels.size(); i++) {
 
-    //cerr << "resolve[" << i << "]='" << labels[i] << "'" << endl;
-
     resolve_variables (data, labels[i]);
-
-    //cerr << "label[" << i << "]='" << labels[i] << "'" << endl;
 
     cpgmtxt ("T", start, side+offset, side, labels[i].c_str());
     start += direction;
+
   }
 
-  //cerr << "labelled!" << endl;
-  
 }
 
 void Pulsar::PlotFrame::resolve_variables (const Archive* data, string& label)
