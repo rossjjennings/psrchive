@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PowerSpectra.h,v $
-   $Revision: 1.2 $
-   $Date: 2006/03/15 13:11:38 $
+   $Revision: 1.3 $
+   $Date: 2006/03/15 16:35:17 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PowerSpectra_h
@@ -39,6 +39,16 @@ namespace Pulsar {
     void set_pol (unsigned _ipol) { ipol = _ipol; }
     unsigned get_pol () const { return ipol; }
 
+    //! Set the median filter window size
+    void set_median_window (unsigned window) { median_window = window; }
+    //! Get the median window size
+    unsigned get_median_window () const { return median_window; }
+
+    //! Set draw lines flag
+    void set_draw_lines (bool flag) { draw_lines = flag; }
+    //! Get draw lines flag
+    bool get_draw_lines () const { return draw_lines; }
+
     //! Draw the spectra
     void draw (const Archive*);
 
@@ -57,7 +67,8 @@ namespace Pulsar {
     unsigned isubint;
     unsigned ipol;
 
-    bool plot_lines;
+    unsigned median_window;
+    bool draw_lines;
 
   private:
 
