@@ -7,10 +7,11 @@
 #include "Physical.h"
 
 #include <cpgplot.h>
+#include <values.h>
 
 Pulsar::PowerSpectra::PowerSpectra ()
 {
-  isubint = ichan = ipol = 0;
+  isubint = ipol = 0;
   plot_lines = true;
 
   get_frame()->get_y_scale()->set_buf_norm(0.05);
@@ -35,19 +36,19 @@ void Pulsar::PowerSpectra::prepare (const Archive* data)
   unsigned i_min, i_max;
   get_scale()->get_range (data, i_min, i_max);
 
-  float min = *min_element (spectra[0].begin()+i_min, 
-			    spectra[0].begin()+i_max);
-  float max = *max_element (spectra[0].begin()+i_min, 
-			    spectra[0].begin()+i_max);
+  float min = MAXFLOAT;
+  float max = 0;
 
-  for (unsigned iprof=1; iprof < spectra.size(); iprof++) {
+  for (unsigned iprof=0; iprof < spectra.size(); iprof++) 
+    for (unsigned ichan=0; ichan < spectra[iprof].size(); ichan++)
+      if (spectra[iprof][ichan] != 0) {
+	min = std::min( min, spectra[iprof][ichan] );
+	max = std::max( max, spectra[iprof][ichan] );
+      }
 
-    min = std::min( min, *min_element (spectra[iprof].begin()+i_min, 
-				       spectra[iprof].begin()+i_max) );
-    max = std::max( max, *max_element (spectra[iprof].begin()+i_min, 
-				       spectra[iprof].begin()+i_max) );
-
-  }
+  if (verbose)
+    cerr << "Pulsar::PowerSpectra::prepare"
+      " min=" << min << " max=" << max << endl;
 
   get_frame()->get_y_scale()->set_minmax (min, max);
 }
@@ -56,7 +57,11 @@ void Pulsar::PowerSpectra::prepare (const Archive* data)
 //! Derived classes must draw in the current viewport
 void Pulsar::PowerSpectra::draw (const Archive* data)
 {
+  cerr << "draw" << endl;
+
   get_scale()->get_ordinates (data, frequencies);
+
+  cerr << "loop" << endl;
 
   for (unsigned iprof=0; iprof < spectra.size(); iprof++) {
 
