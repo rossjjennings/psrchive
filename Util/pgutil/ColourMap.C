@@ -7,33 +7,37 @@ pgplot::ColourMap::ColourMap ()
   name = GreyScale;
   contrast = 1.0;
   brightness = 0.5;
+  logarithmic = false;
 }
 
 //! Set the contrast (0 to 1; normally 1)
 void pgplot::ColourMap::set_contrast (float _contrast)
 {
-  if (contrast == _contrast)
-    return;
-
   contrast = _contrast;
-  set_name (name);
 }
 
 
 //! Set the brightness (0 to 1; normally 5)
 void pgplot::ColourMap::set_brightness (float _brightness)
 {
-  if (brightness == _brightness)
-    return;
-
   brightness = _brightness;
-  set_name (name);
 }
 
 
 //! Set the colour map name
-void pgplot::ColourMap::set_name (Name name)
+void pgplot::ColourMap::set_name (Name _name)
 {
+  name = _name;
+}
+
+void pgplot::ColourMap::apply ()
+{
+  int itf = 0;
+  if (logarithmic)
+    itf = 1;
+
+  cpgsitf (itf);
+
   switch (name) {
     
   case GreyScale: {
@@ -137,4 +141,88 @@ void pgplot::ColourMap::set_name (Name name)
   }
   
   } // end switch (name)
+}
+
+pgplot::ColourMap::Interface::Interface (ColourMap* instance)
+{
+  if (instance)
+    set_instance (instance);
+
+  add( &ColourMap::get_name,
+       &ColourMap::set_name,
+       "map", "Name of colour map" );
+
+  add( &ColourMap::get_brightness,
+       &ColourMap::set_brightness,
+       "bri", "Brightness" );
+
+  add( &ColourMap::get_contrast,
+       &ColourMap::set_contrast,
+       "con", "Contrast" );
+
+  add( &ColourMap::get_logarithmic,
+       &ColourMap::set_logarithmic,
+       "log", "Use logarithmic transfer function" );
+
+}
+
+std::ostream& pgplot::operator << (std::ostream& os, ColourMap::Name name)
+{
+  switch (name) {
+  case ColourMap::GreyScale:
+    return os << "grey";
+  case ColourMap::Inverse:
+    return os << "inv";
+  case ColourMap::Heat:
+    return os << "heat";
+  case ColourMap::Cold:
+    return os << "cold";
+  case ColourMap::Plasma:
+    return os << "plasma";
+  case ColourMap::Forest:
+    return os << "forest";
+  case ColourMap::AlienGlow:
+    return os << "alien";
+  case ColourMap::Test:
+    return os << "test";
+  }
+}
+
+std::istream& pgplot::operator >> (std::istream& is, ColourMap::Name& name)
+{
+  std::streampos pos = is.tellg();
+  std::string unit;
+  is >> unit;
+
+  if (unit == "grey")
+    name = ColourMap::GreyScale;
+  else if (unit == "inv")
+    name = ColourMap::Inverse;
+  else if (unit == "heat")
+    name = ColourMap::Heat;
+  else if (unit == "cold")
+    name = ColourMap::Cold;
+  else if (unit == "plasma")
+    name = ColourMap::Plasma;
+  else if (unit == "forest")
+    name = ColourMap::Forest;
+  else if (unit == "alien")
+    name = ColourMap::AlienGlow;
+  else if (unit == "test")
+    name = ColourMap::Test;
+
+  else {
+
+    // replace the text and try to parse a number
+    is.seekg (pos);
+
+    int code = -1;
+    is >> code;
+
+    if (!is.fail())
+      name = (ColourMap::Name) code;
+
+  }
+
+  return is;
 }
