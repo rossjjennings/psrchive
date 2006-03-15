@@ -8,6 +8,7 @@ noinst_LTLIBRARIES = libPlot.la
 if HAVE_PGPLOT
 
 nobase_include_HEADERS = Pulsar/Plot.h Pulsar/PlotFactory.h \
+	Pulsar/PlotIndex.h \
 	Pulsar/PlotScale.h Pulsar/PlotScaleTI.h \
         Pulsar/PhaseScale.h Pulsar/PhaseScaleTI.h \
 	Pulsar/FrequencyScale.h \
@@ -35,6 +36,7 @@ nobase_include_HEADERS = Pulsar/Plot.h Pulsar/PlotFactory.h \
 	Pulsar/PhaseVsFrequencyPlus.h Pulsar/PhaseVsFrequencyPlusTI.h
 
 libPlot_la_SOURCES = Plot.C PlotFactory.C \
+	PlotIndex.C \
 	PlotScale.C PlotScaleTI.C \
 	PhaseScale.C PhaseScaleTI.C \
 	FrequencyScale.C \
