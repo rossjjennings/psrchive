@@ -1,14 +1,15 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/FluxPlot.h,v $
-   $Revision: 1.8 $
-   $Date: 2006/03/15 11:38:50 $
+   $Revision: 1.9 $
+   $Date: 2006/03/15 17:59:46 $
    $Author: straten $ */
 
 #ifndef __Pulsar_FluxPlot_h
 #define __Pulsar_FluxPlot_h
 
 #include "Pulsar/PhasePlot.h"
+#include "Pulsar/PlotIndex.h"
 
 namespace Pulsar {
 
@@ -44,16 +45,16 @@ namespace Pulsar {
     virtual void auto_scale_phase (const Profile* data, float buffer);
 
     //! Set the sub-integration to plot (where applicable)
-    void set_subint (unsigned _isubint) { isubint = _isubint; }
-    unsigned get_subint () const { return isubint; }
+    void set_subint (PlotIndex _isubint) { isubint = _isubint; }
+    PlotIndex get_subint () const { return isubint; }
     
     //! Set the frequency channel to plot (where applicable)
-    void set_chan (unsigned _ichan) { ichan = _ichan; }
-    unsigned get_chan () const { return ichan; }
+    void set_chan (PlotIndex _ichan) { ichan = _ichan; }
+    PlotIndex get_chan () const { return ichan; }
 
     //! Set the polarization to plot
-    void set_pol (unsigned _ipol) { ipol = _ipol; }
-    unsigned get_pol () const { return ipol; }
+    void set_pol (PlotIndex _ipol) { ipol = _ipol; }
+    PlotIndex get_pol () const { return ipol; }
 
     //! Plot an error box on the baseline
     void set_plot_error_box (bool flag = true) { plot_ebox = flag; }
@@ -78,9 +79,9 @@ namespace Pulsar {
     std::vector< int > plot_sci;
     std::vector< int > plot_sls;
 
-    unsigned isubint;
-    unsigned ichan;
-    unsigned ipol;
+    PlotIndex isubint;
+    PlotIndex ichan;
+    PlotIndex ipol;
 
     bool plot_ebox;
     bool plot_histogram;
