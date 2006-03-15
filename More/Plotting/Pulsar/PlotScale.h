@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PlotScale.h,v $
-   $Revision: 1.5 $
-   $Date: 2006/03/15 20:06:44 $
+   $Revision: 1.6 $
+   $Date: 2006/03/15 20:50:45 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PlotScale_h
@@ -27,8 +27,11 @@ namespace Pulsar {
     //! Set the minimum and maximum value in the data
     virtual void set_minmax (float min, float max);
 
-    //! Rescale min and max according to current attribute settings
+    //! Return min and max scaled according to range_norm and buf_norm
     virtual void get_range (const Archive*, float& min, float& max) const;
+
+    //! Return 0 < imin and imax < n, scaled according to range_norm
+    virtual void get_range (unsigned n, unsigned& imin, unsigned& imax) const;
 
     //! Set the world-normalized range on the axis
     void set_range_norm (const std::pair<float,float>& f) { range_norm = f; }
@@ -43,7 +46,6 @@ namespace Pulsar {
     void set_buf_norm (float f) { buf_norm = f; }
     //! Get the world-normalized buffer space on either side of the axis
     float get_buf_norm () const { return buf_norm; }
-
 
   protected:
 
