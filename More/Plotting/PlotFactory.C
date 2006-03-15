@@ -2,6 +2,7 @@
 #include "Pulsar/ProfilePlot.h"
 #include "Pulsar/StokesPlot.h"
 #include "Pulsar/PhaseVsFrequency.h"
+#include "Pulsar/PhaseVsFrequencyPlus.h"
 #include "Pulsar/PhaseVsTime.h"
 #include "Pulsar/PosAngPlot.h"
 #include "Pulsar/EllAngPlot.h"
@@ -21,6 +22,9 @@ Pulsar::PlotFactory::PlotFactory ()
 
   add ( new PlotFactory::Advocate<PhaseVsFrequency>
 	("freq", "Phase vs. frequency image of flux") );
+
+  add ( new PlotFactory::Advocate<PhaseVsFrequencyPlus>
+	("freq+", "freq + integrated profile and spectrum") );
 
   add ( new PlotFactory::Advocate<PhaseVsTime>
 	("time", "Phase vs. time image of flux") );
