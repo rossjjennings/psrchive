@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/SimplePlot.h,v $
-   $Revision: 1.1 $
-   $Date: 2006/03/15 11:38:40 $
+   $Revision: 1.2 $
+   $Date: 2006/03/15 13:11:48 $
    $Author: straten $ */
 
 #ifndef __Pulsar_SimplePlot_h
@@ -13,6 +13,19 @@
 namespace Pulsar {
 
   //! Plots a single plot
+  /*! Children of SimplePlot always:
+    <UL>
+    <LI> plot in the currently open viewport
+    <LI> use the currently set line width
+    <LI> use the currently set character height
+    </UL>
+    That is, children of the SimplePlot class do not call
+    cpgsvp, cpgslw, or cpgsch.  Children of SimplePlot class may:
+    <UL>
+    <LI> change the colour used within the plot frame
+    <LI> change the line style within the plot frame
+    </UL>
+  */
   class SimplePlot : public Plot {
 
   public:

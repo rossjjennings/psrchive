@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PhasePlot.h,v $
-   $Revision: 1.15 $
-   $Date: 2006/03/15 11:38:35 $
+   $Revision: 1.16 $
+   $Date: 2006/03/15 13:11:48 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PhasePlot_h
@@ -16,19 +16,6 @@
 namespace Pulsar {
 
   //! Simple plots with pulse phase along the x-axis
-  /*! Children of the PhasePlot always:
-    <UL>
-    <LI> plot in the currently open viewport
-    <LI> use the currently set line width
-    <LI> use the currently set character height
-    </UL>
-    That is, children of the PhasePlot class do not call
-    cpgsvp, cpgslw, or cpgsch.  Children of the PhasePlot class may:
-    <UL>
-    <LI> change the colour used within the plot frame
-    <LI> change the line style within the plot frame
-    </UL>
-  */
   class PhasePlot : public SimplePlot {
 
   public:
