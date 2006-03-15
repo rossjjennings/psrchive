@@ -1,4 +1,4 @@
-#include "Pulsar/PlotFrame.h"
+#include "Pulsar/Plot.h"
 #include "Pulsar/ArchiveTI.h"
 
 #include <cpgplot.h>
@@ -37,6 +37,10 @@ void Pulsar::PlotFrame::focus (const Archive* data)
   float y_min, y_max;
   get_y_scale()->get_range (data, y_min, y_max);
 
+  if (Plot::verbose)
+    cerr << "Pulsar::PlotFrame::focus xmin=" << x_min << " xmax=" << x_max
+	 << " ymin=" << y_min << " ymax=" << y_max << endl;
+
   cpgswin (x_min, x_max, y_min, y_max);
 }
 
@@ -44,6 +48,11 @@ void Pulsar::PlotFrame::draw_axes (const Archive* data)
 {
   cpgsls (1);
   cpgsci (1);
+
+  if (Plot::verbose)
+    cerr << "Pulsar::PlotFrame::draw_axes"
+      " xopt='" << get_x_axis()->get_pgbox_opt() << "'"
+      " yopt='" << get_y_axis()->get_pgbox_opt() << "'" << endl;
 
   cpgbox( get_x_axis()->get_pgbox_opt().c_str(), 0.0, 0,
 	  get_y_axis()->get_pgbox_opt().c_str(), 0.0, 0 );
