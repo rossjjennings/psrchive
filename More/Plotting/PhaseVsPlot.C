@@ -4,6 +4,7 @@
 
 #include <cpgplot.h>
 
+#include <values.h>
 #include <algorithm>
 
 Pulsar::PhaseVsPlot::PhaseVsPlot ()
@@ -46,11 +47,30 @@ void Pulsar::PhaseVsPlot::draw (const Archive* data)
   unsigned nbin = data->get_nbin();
   unsigned nrow = get_nrow (data);
 
+  unsigned min_bin, max_bin;
+  get_frame()->get_x_scale()->get_range (nbin, min_bin, max_bin);
+
+  unsigned min_row, max_row;
+  get_frame()->get_y_scale()->get_range (nrow, min_row, max_row);
+
+  float min = MAXFLOAT;
+  float max = MINFLOAT;
+
   vector<float> plotarray (nbin * nrow);
   for (unsigned irow = 0; irow < nrow; irow++) {
     vector<float> amps  = get_Profile (data, irow) -> get_weighted_amps();
-    for (int ibin=0; ibin<nbin; ibin++)
+    for (unsigned ibin=0; ibin<nbin; ibin++)
       plotarray[irow*nbin + ibin] = amps[ibin];
+
+    if (irow < min_row || irow >= max_row)
+      continue;
+
+    min = std::min (min, *std::min_element (amps.begin()+min_bin,
+					    amps.begin()+max_bin) );
+
+    max = std::max (max, *std::max_element (amps.begin()+min_bin,
+					    amps.begin()+max_bin) );
+
   }
 
   // X = TR(0) + TR(1)*I + TR(2)*J
@@ -62,9 +82,8 @@ void Pulsar::PhaseVsPlot::draw (const Archive* data)
   float trf[6] = { -0.5*x_res, x_res, 0.0,
 		   -0.5*y_res, 0.0, y_res };
 
-  float min = * std::min_element (plotarray.begin(), plotarray.end());
-  float max = * std::max_element (plotarray.begin(), plotarray.end());
   
+  get_z_scale()->set_minmax (min, max);
   get_z_scale()->get_range (data, min, max);
 
   cpgimag(&plotarray[0], nbin, nrow, 1, nbin, 1, nrow, min, max, trf);
@@ -76,7 +95,5 @@ void Pulsar::PhaseVsPlot::draw (const Archive* data)
     cpgbox (" ", 0.0, 0, "CMIST", 0.0, 0);
     cpgmtxt("R", 2.6, 0.5, 0.5, "Index");
   }
-  else
-    get_frame()->get_y_axis()->add_pgbox_opt('C');
 
 }
