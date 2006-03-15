@@ -34,7 +34,7 @@ void Pulsar::FluxPlot::prepare (const Archive* data)
 		 "Profiles array empty after call to get_profiles");
 
   unsigned i_min, i_max;
-  get_scale()->get_range_bin (data, i_min, i_max);
+  get_scale()->get_range(data, i_min, i_max);
 
   float min = profiles[0]->min(i_min, i_max);
   float max = profiles[0]->max(i_min, i_max);
@@ -55,7 +55,7 @@ void Pulsar::FluxPlot::prepare (const Archive* data)
 //! Derived classes must draw in the current viewport
 void Pulsar::FluxPlot::draw (const Archive* data)
 {
-  get_scale()->get_x_axis (data, phases);
+  get_scale()->get_ordinates (data, phases);
 
   for (unsigned iprof=0; iprof < profiles.size(); iprof++) {
 

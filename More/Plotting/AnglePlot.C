@@ -42,7 +42,7 @@ void Pulsar::AnglePlot::prepare (const Archive* data)
   }
   else {
     unsigned i_min, i_max;
-    get_scale()->get_range_bin (data, i_min, i_max);
+    get_scale()->get_range (data, i_min, i_max);
 
     min = min_element(angles.begin()+i_min, angles.begin()+i_max)->val;
     max = max_element(angles.begin()+i_min, angles.begin()+i_max)->val;
@@ -54,7 +54,7 @@ void Pulsar::AnglePlot::prepare (const Archive* data)
 void Pulsar::AnglePlot::draw (const Archive *data)
 {
   std::vector<float> phases;
-  get_scale()->get_x_axis (data, phases);
+  get_scale()->get_ordinates (data, phases);
 
   float offset = 0;
   unsigned times = 1;
