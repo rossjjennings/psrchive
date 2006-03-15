@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/FrequencyPlot.h,v $
-   $Revision: 1.1 $
-   $Date: 2006/03/15 12:29:20 $
+   $Revision: 1.2 $
+   $Date: 2006/03/15 13:11:43 $
    $Author: straten $ */
 
 #ifndef __Pulsar_FrequencyPlot_h
@@ -22,9 +22,6 @@ namespace Pulsar {
 
     //! Default constructor
     FrequencyPlot ();
-
-    //! Get the text interface to the configuration attributes
-    TextInterface::Class* get_interface ();
 
     //! Get the default label for the x axis
     std::string get_xlabel (const Archive*);
