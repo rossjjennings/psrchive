@@ -1,6 +1,6 @@
 #include "Pulsar/PhaseVsFrequencyPlusTI.h"
 #include "Pulsar/PhaseVsFrequencyTI.h"
-#include "Pulsar/PowerSpectraTI.h"
+#include "Pulsar/SpectrumPlotTI.h"
 #include "Pulsar/ProfilePlotTI.h"
 #include "Pulsar/PhaseScaleTI.h"
 
@@ -25,5 +25,5 @@ Pulsar::PhaseVsFrequencyPlusTI::PhaseVsFrequencyPlusTI
 
   import ( "freq", PhaseVsFrequencyTI(), &PhaseVsFrequencyPlus::get_freq );
   import ( "flux", ProfilePlotTI(),      &PhaseVsFrequencyPlus::get_flux );
-  import ( "psd",  PowerSpectraTI(),     &PhaseVsFrequencyPlus::get_psd );
+  import ( "psd",  SpectrumPlotTI(),     &PhaseVsFrequencyPlus::get_psd );
 }
