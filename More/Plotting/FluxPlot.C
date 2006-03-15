@@ -10,7 +10,7 @@
 
 Pulsar::FluxPlot::FluxPlot ()
 {
-  isubint = ichan = 0;
+  isubint = ichan = ipol = 0;
   plot_ebox = false;
   plot_histogram = false;
 
