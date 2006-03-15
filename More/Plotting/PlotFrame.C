@@ -23,6 +23,8 @@ Pulsar::PlotFrame::PlotFrame ()
 
   label_spacing = 1.2;
   label_offset = 0.5;
+
+  transpose = false;
 }
 
 Pulsar::PlotFrame::~PlotFrame ()
@@ -32,10 +34,10 @@ Pulsar::PlotFrame::~PlotFrame ()
 void Pulsar::PlotFrame::focus (const Archive* data)
 {
   float x_min, x_max;
-  get_x_scale()->get_range (data, x_min, x_max);
+  get_x_scale(true)->get_range (data, x_min, x_max);
 
   float y_min, y_max;
-  get_y_scale()->get_range (data, y_min, y_max);
+  get_y_scale(true)->get_range (data, y_min, y_max);
 
   if (Plot::verbose)
     cerr << "Pulsar::PlotFrame::focus xmin=" << x_min << " xmax=" << x_max
@@ -51,11 +53,11 @@ void Pulsar::PlotFrame::draw_axes (const Archive* data)
 
   if (Plot::verbose)
     cerr << "Pulsar::PlotFrame::draw_axes"
-      " xopt='" << get_x_axis()->get_pgbox_opt() << "'"
-      " yopt='" << get_y_axis()->get_pgbox_opt() << "'" << endl;
+      " xopt='" << get_x_axis(true)->get_pgbox_opt() << "'"
+      " yopt='" << get_y_axis(true)->get_pgbox_opt() << "'" << endl;
 
-  cpgbox( get_x_axis()->get_pgbox_opt().c_str(), 0.0, 0,
-	  get_y_axis()->get_pgbox_opt().c_str(), 0.0, 0 );
+  cpgbox( get_x_axis(true)->get_pgbox_opt().c_str(), 0.0, 0,
+	  get_y_axis(true)->get_pgbox_opt().c_str(), 0.0, 0 );
 }
 
 void Pulsar::PlotFrame::label_axes (const string& default_x,
@@ -71,6 +73,9 @@ void Pulsar::PlotFrame::label_axes (const string& default_x,
   string ylabel = get_y_axis()->get_label();
   if (ylabel == PlotLabel::unset)
     ylabel = default_y;
+
+  if (transpose)
+    swap (xlabel, ylabel);
 
   cpgmtxt ("L",2.5,.5,.5, ylabel.c_str());
   cpgmtxt ("B",2.5,.5,.5, xlabel.c_str());
@@ -174,3 +179,50 @@ Pulsar::ArchiveTI* Pulsar::PlotFrame::get_interface (const Archive* data)
   return archive_interface;
 }
 
+//! Get the x-scale
+Pulsar::PlotScale* Pulsar::PlotFrame::get_x_scale (bool allow_transpose)
+{ 
+  if (allow_transpose && transpose)
+    return y_scale;
+  else
+    return x_scale;
+}
+
+//! Set the x-scale
+void Pulsar::PlotFrame::set_x_scale (PlotScale* scale)
+{
+  x_scale = scale;
+}
+
+//! Get the x-axis
+Pulsar::PlotAxis* Pulsar::PlotFrame::get_x_axis (bool allow_transpose)
+{
+  if (allow_transpose && transpose)
+    return y_axis;
+  else
+    return x_axis;
+}
+
+//! Get the x-scale
+Pulsar::PlotScale* Pulsar::PlotFrame::get_y_scale (bool allow_transpose)
+{ 
+  if (allow_transpose && transpose)
+    return x_scale;
+  else
+    return y_scale;
+}
+
+//! Set the y-scale
+void Pulsar::PlotFrame::set_y_scale (PlotScale* scale)
+{
+  y_scale = scale;
+}
+
+//! Get the x-axis
+Pulsar::PlotAxis* Pulsar::PlotFrame::get_y_axis(bool allow_transpose)
+{
+  if (allow_transpose && transpose)
+    return x_axis;
+  else
+    return y_axis;
+}

@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PlotFrame.h,v $
-   $Revision: 1.11 $
-   $Date: 2006/03/15 11:44:34 $
+   $Revision: 1.12 $
+   $Date: 2006/03/15 16:35:12 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PlotFrame_h
@@ -31,20 +31,20 @@ namespace Pulsar {
     ~PlotFrame ();
 
     //! Get the x-scale
-    PlotScale* get_x_scale() { return x_scale; }
+    PlotScale* get_x_scale (bool allow_transpose = false);
     //! Set the x-scale
-    void set_x_scale (PlotScale* scale) { x_scale = scale; }
+    void set_x_scale (PlotScale* scale);
 
     //! Get the x-axis
-    PlotAxis* get_x_axis() { return x_axis; }
+    PlotAxis* get_x_axis (bool allow_transpose = false);
 
     //! Get the x-scale
-    PlotScale* get_y_scale() { return y_scale; }
+    PlotScale* get_y_scale (bool allow_transpose = false);
     //! Set the y-scale
-    void set_y_scale (PlotScale* scale) { y_scale = scale; }
+    void set_y_scale (PlotScale* scale);
 
     //! Get the x-axis
-    PlotAxis* get_y_axis() { return y_axis; }
+    PlotAxis* get_y_axis (bool allow_transpose = false);
 
     //! Get the above-frame label
     PlotLabel* get_label_above () { return above; }
@@ -60,6 +60,10 @@ namespace Pulsar {
     void set_label_spacing (float spacing) { label_spacing = spacing; }
     float get_label_spacing () const { return label_spacing; }
 
+    //! transpose the x and y axes
+    void set_transpose (bool flag = true) { transpose = flag; }
+    bool get_transpose () const { return transpose; }
+ 
     //! Draw the axes of the frame
     virtual void draw_axes (const Archive*);
 
@@ -90,6 +94,7 @@ namespace Pulsar {
 
     float label_offset;
     float label_spacing;
+    bool  transpose;
 
     //! Plot the label; direction=+/-1 for above/below frame
     void decorate (const Archive*, PlotLabel*, float direction);
