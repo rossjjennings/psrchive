@@ -1,5 +1,5 @@
 //
-// $Id: pav.C,v 1.110 2006/03/06 04:37:33 hknight Exp $
+// $Id: pav.C,v 1.111 2006/03/16 06:29:12 hknight Exp $
 //
 // The Pulsar Archive Viewer
 //
@@ -37,6 +37,9 @@
 #include "genutil.h"
 
 using namespace std;
+
+vector<Reference::To<Pulsar::Archive> >
+get_archives(string filename, bool breakup_freq);
 
 void usage ()
 {
@@ -129,6 +132,7 @@ void usage ()
     " --hist         Plot '-D' as histogram [false]\n"
     " --plot_qu      Plot Stokes Q and Stokes U in '-S' option instead of degree of linear\n"
     " --no_corner_labels Don't display corner labels in publication mode [do display]\n"
+    " --chans arch   Treat each frequency-channel of 'arch' as a separatea archive\n"
     "\n"
     "Archive::Extension options (file format specific):\n"
     " -o        Plot the original bandpass\n"
@@ -237,6 +241,9 @@ int main (int argc, char** argv)
   
   Pulsar::FourierSNR fourier_snr;
 
+  vector<string> filenames;
+  vector<int> breakup_freq;
+
   int c = 0;
   
   const char* args = 
@@ -258,6 +265,7 @@ int main (int argc, char** argv)
   const int PLOT_QU          = 1023;
   const int ZERO_WAVELENGTH  = 1024;
   const int NO_CORNER_LABELS = 1025;
+  const int CHANS            = 1026;
 
   static struct option long_options[] = {
     { "convert_binphsperi", 1, 0, 200 },
@@ -287,6 +295,7 @@ int main (int argc, char** argv)
     { "plot_qu",            no_argument,       0, PLOT_QU},
     { "inf",                no_argument,       0, ZERO_WAVELENGTH},
     { "no_corner_labels",   no_argument,       0, NO_CORNER_LABELS},
+    { "chans",              required_argument, 0, CHANS},
     { 0, 0, 0, 0 }
   };
     
@@ -367,7 +376,7 @@ int main (int argc, char** argv)
       plotter.set_subint( atoi (optarg) );
       break;
     case 'i':
-      cout << "$Id: pav.C,v 1.110 2006/03/06 04:37:33 hknight Exp $" << endl;
+      cout << "$Id: pav.C,v 1.111 2006/03/16 06:29:12 hknight Exp $" << endl;
       return 0;
 
     case 'j':
@@ -624,7 +633,7 @@ int main (int argc, char** argv)
 
       if (strcasecmp (optarg, "fourier") == 0)
 	Pulsar::Profile::snr_strategy.set (&fourier_snr,
-					  &Pulsar::FourierSNR::get_snr);
+					   &Pulsar::FourierSNR::get_snr);
       
       else if (strcasecmp (optarg, "fortran") == 0)
 	Pulsar::Profile::snr_strategy.set (&Pulsar::snr_fortran);
@@ -700,21 +709,32 @@ int main (int argc, char** argv)
     case NO_CORNER_LABELS:
       plotter.set_display_corner_labels( false );
       break;
+    case CHANS:
+      filenames.push_back( optarg );
+      breakup_freq.push_back( true );
+      break;
 
     default:
       cerr << "pav: unrecognized option" << endl;
       return -1; 
     }
   }
- 
-  vector<string> filenames;
   
-  if (metafile)
-    stringfload (&filenames, metafile);
-  else
-    for (int ai=optind; ai<argc; ai++)
-      dirglob (&filenames, argv[ai]);
-  
+  {
+    vector<string> fnames;
+
+    if (metafile)
+      stringfload (&fnames, metafile);
+    else
+      for (int ai=optind; ai<argc; ai++)
+	dirglob (&fnames, argv[ai]);
+
+    for( unsigned i=0; i<fnames.size(); i++){
+      filenames.push_back( fnames[i] );
+      breakup_freq.push_back( false );
+    }
+  }  
+
   if (filenames.size() == 0) {          
     cerr << "pav: please specify filename[s]" << endl;
     return -1;
@@ -743,442 +763,446 @@ int main (int argc, char** argv)
 
   for (unsigned ifile = 0; ifile < filenames.size(); ifile++) try {
 
-    Reference::To<Pulsar::Archive> archive;
-    archive = Pulsar::Archive::load (filenames[ifile]);
+    vector<Reference::To<Pulsar::Archive> > archives = 
+      get_archives( filenames[ifile], breakup_freq[ifile] );
 
-    if (plotter.get_plot_error_box())
-      plotter.compute_x_error (archive);
+    for( unsigned iarch=0; iarch<archives.size(); iarch++){
+      Reference::To<Pulsar::Archive> archive = archives[iarch];
 
-    unsigned nsubint = 1;
-    if (all_subints)
-      nsubint = archive->get_nsubint();
-
-    if (plot_total_archive) {
-      for(unsigned ichan=0; ichan<archive->get_nchan(); ichan++)
-	fprintf(stderr,"%d\t%f\n",
-		ichan,archive->get_Integration(0)->get_weight(ichan));
+      if (plotter.get_plot_error_box())
+	plotter.compute_x_error (archive);
       
-      Reference::To<Pulsar::Archive> total(archive->total());
-      total->centre();
-      plotter.singleProfile(total);
-      exit(0);
-    }
-
-    if (centre) {
-      archive->centre();
-    }
-    
-    if (dedisperse) {
-      if (stopwatch)
-	clock.start();
-      archive -> dedisperse();
-      if (stopwatch) {
-	clock.stop();
-	cerr << "dedispersion toook " << clock << endl;
-      }
-    }
-    
-    if (cbppo) {
-      Pulsar::IntegrationOrder* myio = new Pulsar::PeriastronOrder();
-      archive->add_extension(myio); 
-      myio->organise(archive, ronsub);
-    }
-    
-    if (cbpao) {
-      Pulsar::IntegrationOrder* myio = new Pulsar::BinaryPhaseOrder();
-      archive->add_extension(myio);
-      myio->organise(archive, ronsub);
-    }
-    
-    if (cblpo) {
-      Pulsar::IntegrationOrder* myio = new Pulsar::BinLngPeriOrder();
-      archive->add_extension(myio);
-      myio->organise(archive, ronsub);
-    }
-    
-    if (cblao) {
-      Pulsar::IntegrationOrder* myio = new Pulsar::BinLngAscOrder();
-      archive->add_extension(myio);
-      myio->organise(archive, ronsub);
-    }
-
-    if (zero_wavelength) {
-
-      double RM = archive->get_rotation_measure();
-      if (RM == 0.0)
-	cerr << "pav: Archive RM=0; nothing to correct\n" << endl;
-      else {
-	Pulsar::FaradayRotation xform;
-	xform.set_rotation_measure( RM );
-	xform.set_reference_wavelength( 0 );
-	xform.execute( archive );
-      }
-    }
-
-    if (fscrunch >= 0) {
-      if (stopwatch)
-	clock.start();
-
-      archive -> fscrunch (fscrunch);
-      if (stopwatch) {
-	clock.stop();
-	cerr << "fscrunch took " << clock << endl;
-      }
-    }
-    
-    if (tscrunch >= 0) {
-      if (stopwatch)
-	clock.start();
-      archive -> tscrunch (tscrunch);
-      if (stopwatch) {
-	clock.stop();
-	cerr << "tscrunch took " << clock << endl;
-      }
-    }
-    
-    if (pscrunch > 0) {
-      if (stopwatch)
-	clock.start();
-      archive -> pscrunch ();
-      if (stopwatch) {
-	clock.stop();
-	cerr << "pscrunch took " << clock.elapsedString () << endl;
-      }
-    }
-    
-    if( nbin_requested > 0 ) {
-      bscrunch = -1;
-      if (stopwatch)
-	clock.start();
-      archive -> bscrunch_to_nbin (nbin_requested);
-      if (stopwatch) {
-	clock.stop();
-	cerr << "bscrunch took " << clock << endl;
-      }
+      unsigned nsubint = 1;
+      if (all_subints)
+	nsubint = archive->get_nsubint();
       
-    }
+      if (plot_total_archive) {
+	for(unsigned ichan=0; ichan<archive->get_nchan(); ichan++)
+	  fprintf(stderr,"%d\t%f\n",
+		  ichan,archive->get_Integration(0)->get_weight(ichan));
+      
+	Reference::To<Pulsar::Archive> total(archive->total());
+	total->centre();
+	plotter.singleProfile(total);
+	exit(0);
+      }
+
+      if (centre) {
+	archive->centre();
+      }
     
-    if (bscrunch > 0) {
-      if (stopwatch)
-	clock.start();
-      archive -> bscrunch (bscrunch);
-      if (stopwatch) {
-	clock.stop();
-	cerr << "bscrunch took " << clock << endl;
+      if (dedisperse) {
+	if (stopwatch)
+	  clock.start();
+	archive -> dedisperse();
+	if (stopwatch) {
+	  clock.stop();
+	  cerr << "dedispersion toook " << clock << endl;
+	}
       }
-    }
     
-    if (profile_spectrum){
-      if (stopwatch)
-	clock.start();
-      archive -> get_profile_power_spectra(spectrum_gamma);
-      if (stopwatch) {
-	clock.stop();
-	cerr << "--spec took " << clock << endl;
+      if (cbppo) {
+	Pulsar::IntegrationOrder* myio = new Pulsar::PeriastronOrder();
+	archive->add_extension(myio); 
+	myio->organise(archive, ronsub);
       }
-    }
-
-    string archive_filename = archive->get_filename();
-
-    for (unsigned isub = 0; isub < nsubint; isub++) {
-
-      if (all_subints) {
-	plotter.set_subint (isub);
-
-	archive->set_filename( archive_filename +
-			       " subint " + make_string(isub) );
+    
+      if (cbpao) {
+	Pulsar::IntegrationOrder* myio = new Pulsar::BinaryPhaseOrder();
+	archive->add_extension(myio);
+	myio->organise(archive, ronsub);
+      }
+    
+      if (cblpo) {
+	Pulsar::IntegrationOrder* myio = new Pulsar::BinLngPeriOrder();
+	archive->add_extension(myio);
+	myio->organise(archive, ronsub);
+      }
+    
+      if (cblao) {
+	Pulsar::IntegrationOrder* myio = new Pulsar::BinLngAscOrder();
+	archive->add_extension(myio);
+	myio->organise(archive, ronsub);
       }
 
-      if (auto_zoom)
-	plotter.auto_zoom (archive, auto_zoom_buffer);
+      if (zero_wavelength) {
 
-      if (mask) {
-	Reference::To<Pulsar::Profile> prof =
-	  archive->get_Profile(plotter.get_subint(),
-			       plotter.get_pol(),
-			       plotter.get_chan());
+	double RM = archive->get_rotation_measure();
+	if (RM == 0.0)
+	  cerr << "pav: Archive RM=0; nothing to correct\n" << endl;
+	else {
+	  Pulsar::FaradayRotation xform;
+	  xform.set_rotation_measure( RM );
+	  xform.set_reference_wavelength( 0 );
+	  xform.execute( archive );
+	}
+      }
+
+      if (fscrunch >= 0) {
+	if (stopwatch)
+	  clock.start();
+
+	archive -> fscrunch (fscrunch);
+	if (stopwatch) {
+	  clock.stop();
+	  cerr << "fscrunch took " << clock << endl;
+	}
+      }
+    
+      if (tscrunch >= 0) {
+	if (stopwatch)
+	  clock.start();
+	archive -> tscrunch (tscrunch);
+	if (stopwatch) {
+	  clock.stop();
+	  cerr << "tscrunch took " << clock << endl;
+	}
+      }
+    
+      if (pscrunch > 0) {
+	if (stopwatch)
+	  clock.start();
+	archive -> pscrunch ();
+	if (stopwatch) {
+	  clock.stop();
+	  cerr << "pscrunch took " << clock.elapsedString () << endl;
+	}
+      }
+    
+      if( nbin_requested > 0 ) {
+	bscrunch = -1;
+	if (stopwatch)
+	  clock.start();
+	archive -> bscrunch_to_nbin (nbin_requested);
+	if (stopwatch) {
+	  clock.stop();
+	  cerr << "bscrunch took " << clock << endl;
+	}
       
-	float minphs = prof->find_min_phase();
-	*prof -= (prof->mean(minphs));
+      }
+    
+      if (bscrunch > 0) {
+	if (stopwatch)
+	  clock.start();
+	archive -> bscrunch (bscrunch);
+	if (stopwatch) {
+	  clock.stop();
+	  cerr << "bscrunch took " << clock << endl;
+	}
+      }
+    
+      if (profile_spectrum){
+	if (stopwatch)
+	  clock.start();
+	archive -> get_profile_power_spectra(spectrum_gamma);
+	if (stopwatch) {
+	  clock.stop();
+	  cerr << "--spec took " << clock << endl;
+	}
+      }
 
-	plotter.singleProfile(archive);
-      
-	vector<unsigned> mask = prof->get_mask();
-      
-	float level = (prof->max()) / 2.0;
+      string archive_filename = archive->get_filename();
 
-	cpgsci(3);
+      for (unsigned isub = 0; isub < nsubint; isub++) {
 
-	for (unsigned i = 0; i < archive->get_nbin(); i++) {
-	  cpgpt1(float(i)/archive->get_nbin(), mask[i]*level, 2);
+	if (all_subints) {
+	  plotter.set_subint (isub);
+
+	  archive->set_filename( archive_filename +
+				 " subint " + make_string(isub) );
 	}
 
-	cpgsci(1);
-      }
-    
-      if (mdiff) {
-	if (std_prof) {
-	  cpg_next();
-	  double scale, shift;
-	  Pulsar::Profile* mdp = 
+	if (auto_zoom)
+	  plotter.auto_zoom (archive, auto_zoom_buffer);
+
+	if (mask) {
+	  Reference::To<Pulsar::Profile> prof =
 	    archive->get_Profile(plotter.get_subint(),
-				 plotter.get_pol(),plotter.get_chan())->
-	    morphological_difference(*std_prof, scale, shift);
-	  plotter.plot (mdp);
-	  delete mdp;
-	}
-      }      
-    
-      if (pa_spectrum) {
-	cpg_next();
-	plotter.pa_vs_frequency(archive, the_phase);
-      }
-
-      if (stacked) {
-	cpg_next();
-	plotter.line_phase_subints(archive);
-      }
-
-      if (baseline_spectrum) {
-	cpg_next();
-	plotter.baseline_spectrum(archive);
-      }
-
-      if (pa_scatter) {
-	cpg_next();
-	plotter.pa_scatter(archive);
-      }
-
-      if (bandpass) {
-	cpg_next();
-	plotter.bandpass(archive);
-      }
-    
-      if (psas) {
-	cpg_next();
-	plotter.total_spectrum(archive);
-      }
-
-      if (calinfo) {
-	cpg_next();
-	plotter.cal_plot(archive);
-      }
-
-      if (width) {
-	// This routine still needs some work...
-
-	Reference::To<Pulsar::Archive> copy = archive->total();
-	copy->remove_baseline();
+				 plotter.get_pol(),
+				 plotter.get_chan());
       
-	float maxbin = float(copy->get_Profile(0,0,0)->find_max_bin());
+	  float minphs = prof->find_min_phase();
+	  *prof -= (prof->mean(minphs));
 
-	float error = 0.0;
-	float nbin  = float(copy->get_nbin());
-	float width = copy->get_Profile(0,0,0)->width(error,10.0,0.6);
-	width /= 2.0;
-
-	float period = copy->get_Integration(0)->get_folding_period();
-	period *= 1000.0;
-
-	cpg_next();
-	cpgsvp(0.1, 0.9, 0.3, 0.9);
-	plotter.single_period(copy);
+	  plotter.singleProfile(archive);
       
-	float risephs = (maxbin - nbin*width)/nbin;
-	float fallphs = (maxbin + nbin*width)/nbin;
+	  vector<unsigned> mask = prof->get_mask();
       
-	if (risephs > 1.0)
-	  risephs -= 1.0;
-	if (risephs < 0.0)
-	  risephs += 1.0;
-	if (fallphs > 1.0)
-	  fallphs -= 1.0;
-	if (fallphs < 0.0)
-	  fallphs += 1.0;
-      
-	float riseedge = risephs * period;
-	float falledge = fallphs * period;
-	cerr << falledge << ", " << riseedge << endl;
-	float x1 = 0.0;
-	float x2 = 0.0;
-	float y1 = 0.0;
-	float y2 = 0.0;
-      
-	cpgqwin(&x1, &x2, &y1, &y2);
-	cpgsci(2);
-	cpgmove(riseedge, y1);
-	cpgdraw(riseedge, y2);
-	cpgmove(falledge, y1);
-	cpgdraw(falledge, y2);
-	cpgsch(2.0);
-      
-	char useful[256];
-	sprintf(useful, "10 percent pulse width = %.3f ms", 
-		width * 2.0 * period * 1000.0);
-      
-	cpgmtxt("B", 4, 0.5, 0.5, useful);
-	cpgsch(1.0);
-	cpgsci(1);
-	cpgmtxt("T", 1, 0.5, 0.5, (copy->get_source()).c_str());
-      }
+	  float level = (prof->max()) / 2.0;
 
-      if (PA) {
-	cpg_next();
-	plotter.pa_err(archive);
-      }
+	  cpgsci(3);
 
-      if (snrplot) {
-	cpg_next();
-	plotter.snrSpectrum(archive);
-      }  
-    
-      if (calplot) {
-	cpg_next();
-	plotter.instrument_phase(archive, !zoomed);
-      }
-    
-      if (subint_plot) {
-	cpg_next();
-	plotter.phase_subints (archive);
-      }
-    
-      if (hat) {
-	//cpg_next();
-	//plotter.plot (archive -> get_Profile(0,0,0));
-	//sleep(2);
-	//cpgeras();
-
-	double freq = archive->get_centre_frequency ();
-	double bw = archive->get_bandwidth() / 32;
-	double dm = archive->get_dispersion_measure ();
-	double delay = Pulsar::dispersion_delay (dm, freq, freq+bw);
-	double period = archive->get_Integration(0)->get_folding_period();
-	double duty_cycle = fabs(delay/period);
-
-	cerr << "bw=" << bw << " freq=" << freq << " dm=" << dm << endl;
-	cerr << "delay=" << delay << " period=" << period << endl;
-	cerr << "duty cycle=" << duty_cycle << endl;
-	archive -> get_Profile(0,0,0) -> smear(duty_cycle);
-	//plotter.plot (archive -> get_Profile(0,0,0));
-      }
-    
-      if (display) {
-	cpg_next();
-	
-	plotter.set_axes(show_profile_axes);
-	plotter.singleProfile (archive);
-      }
-
-      if (manchester) {
-	cpg_next();
-	plotter.Manchester (archive, plot_qu);
-      }
-      if (degree) {
-	cpg_next();
-	plotter.Manchester_degree (archive);
-      } 
-      if (normalised_m) {
-	cpg_next();
-	plotter.Manchester_normalised (archive);
-      }
-      if (spherical) {
-	cpg_next();
-	plotter.spherical (archive);
-      }
-
-      if (phase_fourier) {
-	cpg_next();
-	cpgsvp (0.2, 0.9, 0.15, 0.9);
-	plotter.fourier (archive);
-      }
-
-      if (periodplot) {
-	cpg_next();
-	cpgsvp (0.1,.95,0.1,.7);
-	plotter.single_period (archive);
-      }
-    
-      if (dynam) {
-	cpg_next();
-	plotter.simple_ds(archive);
-      }
-    
-      if (greyfreq) {
-	cpg_next();
-	plotter.phase_frequency (archive);
-      }
-
-      if (orig_passband) {
-
-	const Pulsar::Passband* passband = 0;
-
-	for (unsigned iext=0; iext < archive->get_nextension(); iext++) {
-
-	  const Pulsar::Archive::Extension* extension;
-	  extension = archive->get_extension (iext);
-
-	  passband = dynamic_cast<const Pulsar::Passband*> (extension);
-
-	  if (passband)
-	    break;
-	}
-
-	if (!passband) {
-	  cerr << "pav: Archive does not contain the Passband Extension" 
-	       << endl;
-	  continue;
-	}
-
-	unsigned npol = passband->get_npol ();
-
-	vector<vector<float> > pband (npol);
-	vector<int> color (npol);
-	vector<int> symbol (npol, 1);
-    
-	for (unsigned ip=0; ip<npol; ip++) {
-	  color[ip] = ip + 2;
-	  pband[ip] = passband->get_passband (ip);
-	}
-    
-	unsigned nchan = passband->get_nchan ();
-	float* xaxis = new float[nchan];
-	for (unsigned int i = 0; i < nchan; i++) {
-	  xaxis[i] = i;
-	}
-      
-	cpg_next();
-	cpgsubp(1, npol);
-      
-	float min = 0;
-	float max = 0;
-      
-	float tempmin = 0;
-	float tempmax = 0;
-      
-	char* tempstr = new char[128];
-
-	for (unsigned ip=0; ip<npol; ip++) {
-	  min = max = tempmin = tempmax = 0;
-	  minmaxval(nchan, &(pband[ip].front()), &tempmin, &tempmax);
-	  if (tempmin < min)
-	    min = tempmin;
-	  if (tempmax > max)
-	    max = tempmax;
-	  for (unsigned j=0; j<nchan; j++) {
-	    pband[ip][j] -= min;
+	  for (unsigned i = 0; i < archive->get_nbin(); i++) {
+	    cpgpt1(float(i)/archive->get_nbin(), mask[i]*level, 2);
 	  }
-	  max -= min;
-	  cpgpanl(1,ip+1);
+
 	  cpgsci(1);
-	  cpgswin(0, nchan, 0, max);
-	  cpgbox("ABCNT", 0.0, 0, "ABCNT", 0.0, 0);
-	  sprintf(tempstr, "Original Bandpass: Polarisation %d", ip);
-	  cpglab("Channel Number", "Level", tempstr);
-	  cpgsci(color[ip]);
-	  cpgline(nchan, xaxis, &(pband[ip].front()));
+	}
+    
+	if (mdiff) {
+	  if (std_prof) {
+	    cpg_next();
+	    double scale, shift;
+	    Pulsar::Profile* mdp = 
+	      archive->get_Profile(plotter.get_subint(),
+				   plotter.get_pol(),plotter.get_chan())->
+	      morphological_difference(*std_prof, scale, shift);
+	    plotter.plot (mdp);
+	    delete mdp;
+	  }
+	}      
+    
+	if (pa_spectrum) {
+	  cpg_next();
+	  plotter.pa_vs_frequency(archive, the_phase);
 	}
 
-	delete[] tempstr;
+	if (stacked) {
+	  cpg_next();
+	  plotter.line_phase_subints(archive);
+	}
+
+	if (baseline_spectrum) {
+	  cpg_next();
+	  plotter.baseline_spectrum(archive);
+	}
+
+	if (pa_scatter) {
+	  cpg_next();
+	  plotter.pa_scatter(archive);
+	}
+
+	if (bandpass) {
+	  cpg_next();
+	  plotter.bandpass(archive);
+	}
+    
+	if (psas) {
+	  cpg_next();
+	  plotter.total_spectrum(archive);
+	}
+
+	if (calinfo) {
+	  cpg_next();
+	  plotter.cal_plot(archive);
+	}
+
+	if (width) {
+	  // This routine still needs some work...
+
+	  Reference::To<Pulsar::Archive> copy = archive->total();
+	  copy->remove_baseline();
+      
+	  float maxbin = float(copy->get_Profile(0,0,0)->find_max_bin());
+
+	  float error = 0.0;
+	  float nbin  = float(copy->get_nbin());
+	  float width = copy->get_Profile(0,0,0)->width(error,10.0,0.6);
+	  width /= 2.0;
+
+	  float period = copy->get_Integration(0)->get_folding_period();
+	  period *= 1000.0;
+
+	  cpg_next();
+	  cpgsvp(0.1, 0.9, 0.3, 0.9);
+	  plotter.single_period(copy);
+      
+	  float risephs = (maxbin - nbin*width)/nbin;
+	  float fallphs = (maxbin + nbin*width)/nbin;
+      
+	  if (risephs > 1.0)
+	    risephs -= 1.0;
+	  if (risephs < 0.0)
+	    risephs += 1.0;
+	  if (fallphs > 1.0)
+	    fallphs -= 1.0;
+	  if (fallphs < 0.0)
+	    fallphs += 1.0;
+      
+	  float riseedge = risephs * period;
+	  float falledge = fallphs * period;
+	  cerr << falledge << ", " << riseedge << endl;
+	  float x1 = 0.0;
+	  float x2 = 0.0;
+	  float y1 = 0.0;
+	  float y2 = 0.0;
+      
+	  cpgqwin(&x1, &x2, &y1, &y2);
+	  cpgsci(2);
+	  cpgmove(riseedge, y1);
+	  cpgdraw(riseedge, y2);
+	  cpgmove(falledge, y1);
+	  cpgdraw(falledge, y2);
+	  cpgsch(2.0);
+      
+	  char useful[256];
+	  sprintf(useful, "10 percent pulse width = %.3f ms", 
+		  width * 2.0 * period * 1000.0);
+      
+	  cpgmtxt("B", 4, 0.5, 0.5, useful);
+	  cpgsch(1.0);
+	  cpgsci(1);
+	  cpgmtxt("T", 1, 0.5, 0.5, (copy->get_source()).c_str());
+	}
+
+	if (PA) {
+	  cpg_next();
+	  plotter.pa_err(archive);
+	}
+
+	if (snrplot) {
+	  cpg_next();
+	  plotter.snrSpectrum(archive);
+	}  
+    
+	if (calplot) {
+	  cpg_next();
+	  plotter.instrument_phase(archive, !zoomed);
+	}
+    
+	if (subint_plot) {
+	  cpg_next();
+	  plotter.phase_subints (archive);
+	}
+    
+	if (hat) {
+	  //cpg_next();
+	  //plotter.plot (archive -> get_Profile(0,0,0));
+	  //sleep(2);
+	  //cpgeras();
+
+	  double freq = archive->get_centre_frequency ();
+	  double bw = archive->get_bandwidth() / 32;
+	  double dm = archive->get_dispersion_measure ();
+	  double delay = Pulsar::dispersion_delay (dm, freq, freq+bw);
+	  double period = archive->get_Integration(0)->get_folding_period();
+	  double duty_cycle = fabs(delay/period);
+
+	  cerr << "bw=" << bw << " freq=" << freq << " dm=" << dm << endl;
+	  cerr << "delay=" << delay << " period=" << period << endl;
+	  cerr << "duty cycle=" << duty_cycle << endl;
+	  archive -> get_Profile(0,0,0) -> smear(duty_cycle);
+	  //plotter.plot (archive -> get_Profile(0,0,0));
+	}
+    
+	if (display) {
+	  cpg_next();
+	
+	  plotter.set_axes(show_profile_axes);
+	  plotter.singleProfile (archive);
+	}
+
+	if (manchester) {
+	  cpg_next();
+	  plotter.Manchester (archive, plot_qu);
+	}
+	if (degree) {
+	  cpg_next();
+	  plotter.Manchester_degree (archive);
+	} 
+	if (normalised_m) {
+	  cpg_next();
+	  plotter.Manchester_normalised (archive);
+	}
+	if (spherical) {
+	  cpg_next();
+	  plotter.spherical (archive);
+	}
+
+	if (phase_fourier) {
+	  cpg_next();
+	  cpgsvp (0.2, 0.9, 0.15, 0.9);
+	  plotter.fourier (archive);
+	}
+
+	if (periodplot) {
+	  cpg_next();
+	  cpgsvp (0.1,.95,0.1,.7);
+	  plotter.single_period (archive);
+	}
+    
+	if (dynam) {
+	  cpg_next();
+	  plotter.simple_ds(archive);
+	}
+    
+	if (greyfreq) {
+	  cpg_next();
+	  plotter.phase_frequency (archive);
+	}
+
+	if (orig_passband) {
+
+	  const Pulsar::Passband* passband = 0;
+
+	  for (unsigned iext=0; iext < archive->get_nextension(); iext++) {
+
+	    const Pulsar::Archive::Extension* extension;
+	    extension = archive->get_extension (iext);
+
+	    passband = dynamic_cast<const Pulsar::Passband*> (extension);
+
+	    if (passband)
+	      break;
+	  }
+
+	  if (!passband) {
+	    cerr << "pav: Archive does not contain the Passband Extension" 
+		 << endl;
+	    continue;
+	  }
+
+	  unsigned npol = passband->get_npol ();
+
+	  vector<vector<float> > pband (npol);
+	  vector<int> color (npol);
+	  vector<int> symbol (npol, 1);
+    
+	  for (unsigned ip=0; ip<npol; ip++) {
+	    color[ip] = ip + 2;
+	    pband[ip] = passband->get_passband (ip);
+	  }
+    
+	  unsigned nchan = passband->get_nchan ();
+	  float* xaxis = new float[nchan];
+	  for (unsigned int i = 0; i < nchan; i++) {
+	    xaxis[i] = i;
+	  }
+      
+	  cpg_next();
+	  cpgsubp(1, npol);
+      
+	  float min = 0;
+	  float max = 0;
+      
+	  float tempmin = 0;
+	  float tempmax = 0;
+      
+	  char* tempstr = new char[128];
+
+	  for (unsigned ip=0; ip<npol; ip++) {
+	    min = max = tempmin = tempmax = 0;
+	    minmaxval(nchan, &(pband[ip].front()), &tempmin, &tempmax);
+	    if (tempmin < min)
+	      min = tempmin;
+	    if (tempmax > max)
+	      max = tempmax;
+	    for (unsigned j=0; j<nchan; j++) {
+	      pband[ip][j] -= min;
+	    }
+	    max -= min;
+	    cpgpanl(1,ip+1);
+	    cpgsci(1);
+	    cpgswin(0, nchan, 0, max);
+	    cpgbox("ABCNT", 0.0, 0, "ABCNT", 0.0, 0);
+	    sprintf(tempstr, "Original Bandpass: Polarisation %d", ip);
+	    cpglab("Channel Number", "Level", tempstr);
+	    cpgsci(color[ip]);
+	    cpgline(nchan, xaxis, &(pband[ip].front()));
+	  }
+
+	  delete[] tempstr;
+	}
       }
     }
 
@@ -1194,4 +1218,31 @@ int main (int argc, char** argv)
   cpgend();
   
   return 0;
+}
+
+vector<Reference::To<Pulsar::Archive> >
+get_archives(string filename, bool breakup_freq)
+{
+  vector<Reference::To<Pulsar::Archive> > archives;
+
+  Reference::To<Pulsar::Archive> ar = Pulsar::Archive::load(filename);
+
+  if( !breakup_freq ){
+    archives.push_back( ar );
+    return archives;
+  }
+
+  for( unsigned ichan=0; ichan<ar->get_nchan(); ichan++){
+    Reference::To<Pulsar::Archive> chan = ar->clone();
+    
+    chan->uniform_weight( 0.0 );
+
+    for( unsigned iint=0; iint<chan->get_nsubint(); iint++)
+      chan->get_Integration(iint)->set_weight(ichan, 1.0 );
+
+    archives.push_back( chan );
+    chan->set_filename( ar->get_filename() + "_channel_" + make_string(ichan) );
+  }
+
+  return archives;
 }
