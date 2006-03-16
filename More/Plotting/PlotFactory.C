@@ -2,13 +2,15 @@
 #include "Pulsar/ProfilePlot.h"
 #include "Pulsar/StokesPlot.h"
 #include "Pulsar/PhaseVsFrequency.h"
-#include "Pulsar/PhaseVsFrequencyPlus.h"
 #include "Pulsar/PhaseVsTime.h"
 #include "Pulsar/PosAngPlot.h"
 #include "Pulsar/EllAngPlot.h"
 #include "Pulsar/StokesCylindrical.h"
 #include "Pulsar/StokesSpherical.h"
 #include "Pulsar/SpectrumPlot.h"
+#include "Pulsar/PhaseVsFrequencyPlus.h"
+#include "Pulsar/Poincare.h"
+
 #include "Error.h"
 
 // Add plots here
@@ -40,6 +42,9 @@ Pulsar::PlotFactory::PlotFactory ()
 
   add ( new PlotFactory::Advocate<StokesSpherical>
 	("Ssph", "Stokes; vector in spherical") );
+
+  add ( new PlotFactory::Advocate<Poincare>
+	("p3d", "Stokes vector in Poincare space") );
 
   add ( new PlotFactory::Advocate<SpectrumPlot>
 	("psd", "Total power spectrum") );
