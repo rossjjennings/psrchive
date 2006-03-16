@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.57)
-AC_INIT([PSRCHIVE],[4.0],[psrchive@astro.swin.edu.au])
+AC_INIT([PSRCHIVE],[5.0],[psrchive@astro.swin.edu.au])
 
 AC_CONFIG_AUX_DIR([config])
 AC_CONFIG_SRCDIR([utils/Makefile.am])
