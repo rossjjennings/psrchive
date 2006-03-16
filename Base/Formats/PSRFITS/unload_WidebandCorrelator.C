@@ -9,7 +9,7 @@ try {
   psrfits_update_key (fptr, "BACKEND",  ext->get_name());
   psrfits_update_key (fptr, "BECONFIG", ext->configfile);
   psrfits_update_key (fptr, "BE_PHASE", (int)ext->get_argument());
-  psrfits_update_key (fptr, "BE_HAND",  (int)ext->get_hand());
+  // psrfits_update_key (fptr, "BE_HAND",  (int)ext->get_hand());
   psrfits_update_key (fptr, "NRCVR",    ext->nrcvr);
   psrfits_update_key (fptr, "TCYCLE",   ext->tcycle);
 

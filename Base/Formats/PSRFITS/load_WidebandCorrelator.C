@@ -33,8 +33,8 @@ void Pulsar::FITSArchive::load_WidebandCorrelator (fitsfile* fptr)
     psrfits_read_key (fptr, "BE_PHASE", &temp, 0, verbose == 3);
     ext->set_argument( (Signal::Argument) temp );
     
-    psrfits_read_key (fptr, "BE_HAND",  &temp, 1, verbose == 3);
-    ext->set_hand( (Signal::Hand) temp );
+    // psrfits_read_key (fptr, "BE_HAND",  &temp, 1, verbose == 3);
+    // ext->set_hand( (Signal::Hand) temp );
   }
 
   if (verbose == 3)
