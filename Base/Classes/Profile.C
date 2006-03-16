@@ -258,9 +258,6 @@ void Pulsar::Profile::dedisperse (double dm, double ref_freq, double pfold)
 //
 void Pulsar::Profile::zero()
 {
-  if (verbose)
-    cerr << "Pulsar::Profile::zero" << endl;
-  
   weight = 0;
   for (unsigned ibin = 0; ibin < nbin; ibin++)
     amps[ibin] = 0;
