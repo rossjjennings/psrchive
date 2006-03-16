@@ -19,8 +19,9 @@ float Pulsar::Calibrator::median_smoothing
 float Pulsar::Calibrator::interpolating 
 = Pulsar::config.get<float> ("Calibrator::interpolating", 0.0);
 
+/*! Although a very sensible constraint, this option is disabled by default */
 float Pulsar::Calibrator::physical_det_threshold
-= Pulsar::config.get<float>("Calibrator::physical_det_threshold", 4.0);
+= Pulsar::config.get<float>("Calibrator::physical_det_threshold", 0.0);
 
 
 Pulsar::Calibrator::Calibrator ()
