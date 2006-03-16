@@ -1,14 +1,14 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PlotScale.h,v $
-   $Revision: 1.6 $
-   $Date: 2006/03/15 20:50:45 $
+   $Revision: 1.7 $
+   $Date: 2006/03/16 17:07:17 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PlotScale_h
 #define __Pulsar_PlotScale_h
 
-#include "Reference.h"
+#include "TextInterface.h"
 
 #include <utility>
 
@@ -23,6 +23,12 @@ namespace Pulsar {
 
     //! Default constructor
     PlotScale ();
+
+    //! Text interface to the PlotScale class
+    class Interface : public TextInterface::To<PlotScale> {
+    public:
+      Interface (PlotScale* = 0);
+    };
 
     //! Set the minimum and maximum value in the data
     virtual void set_minmax (float min, float max);

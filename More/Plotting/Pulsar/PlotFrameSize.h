@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/Attic/PlotFrameSize.h,v $
-   $Revision: 1.5 $
-   $Date: 2006/03/15 11:39:00 $
+   $Revision: 1.6 $
+   $Date: 2006/03/16 17:07:17 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PlotFrameSize_h
@@ -24,6 +24,12 @@ namespace Pulsar {
 
     //! Partial copy constructor
     PlotFrameSize (const PlotFrame*);
+
+    //! Text interface to the PlotFrameSize class
+    class Interface : public TextInterface::To<PlotFrameSize> {
+    public:
+      Interface (PlotFrameSize* = 0);
+    };
 
     //! Focus the frame
     void focus (const Archive*);

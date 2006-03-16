@@ -1,7 +1,7 @@
-#include "Pulsar/PlotScaleTI.h"
+#include "Pulsar/PlotScale.h"
 #include "iopair.h"
 
-Pulsar::PlotScaleTI::PlotScaleTI (PlotScale* instance)
+Pulsar::PlotScale::Interface::Interface (PlotScale* instance)
 {
   if (instance)
     set_instance (instance);

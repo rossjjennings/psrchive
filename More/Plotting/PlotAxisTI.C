@@ -1,6 +1,6 @@
-#include "Pulsar/PlotAxisTI.h"
+#include "Pulsar/PlotAxis.h"
 
-Pulsar::PlotAxisTI::PlotAxisTI (PlotAxis* instance)
+Pulsar::PlotAxis::Interface::Interface (PlotAxis* instance)
 {
   if (instance)
     set_instance (instance);

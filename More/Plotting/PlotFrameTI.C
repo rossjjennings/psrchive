@@ -1,21 +1,21 @@
-#include "Pulsar/PlotFrameTI.h"
-#include "Pulsar/PlotScaleTI.h"
-#include "Pulsar/PlotAxisTI.h"
-#include "Pulsar/PlotLabelTI.h"
+#include "Pulsar/PlotFrame.h"
+#include "Pulsar/PlotScale.h"
+#include "Pulsar/PlotAxis.h"
+#include "Pulsar/PlotLabel.h"
 
-Pulsar::PlotFrameTI::PlotFrameTI (PlotFrame* instance)
+Pulsar::PlotFrame::Interface::Interface (PlotFrame* instance)
 {
   if (instance)
     set_instance (instance);
 
-  import ( "x", PlotScaleTI(), &PlotFrame::get_x_scale );
-  import ( "y", PlotScaleTI(), &PlotFrame::get_y_scale );
+  import ( "x", PlotScale::Interface(), &PlotFrame::get_x_scale );
+  import ( "y", PlotScale::Interface(), &PlotFrame::get_y_scale );
 
-  import ( "x", PlotAxisTI(), &PlotFrame::get_x_axis );
-  import ( "y", PlotAxisTI(), &PlotFrame::get_y_axis );
+  import ( "x", PlotAxis::Interface(), &PlotFrame::get_x_axis );
+  import ( "y", PlotAxis::Interface(), &PlotFrame::get_y_axis );
 
-  import ( "above", PlotLabelTI(), &PlotFrame::get_label_above );
-  import ( "below", PlotLabelTI(), &PlotFrame::get_label_below );
+  import ( "above", PlotLabel::Interface(), &PlotFrame::get_label_above );
+  import ( "below", PlotLabel::Interface(), &PlotFrame::get_label_below );
 
   add( &PlotFrame::get_label_offset,
        &PlotFrame::set_label_offset,

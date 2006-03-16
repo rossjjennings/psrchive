@@ -1,14 +1,14 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PlotAxis.h,v $
-   $Revision: 1.6 $
-   $Date: 2006/03/15 20:06:44 $
+   $Revision: 1.7 $
+   $Date: 2006/03/16 17:07:17 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PlotAxis_h
 #define __Pulsar_PlotAxis_h
 
-#include "Reference.h"
+#include "TextInterface.h"
 
 namespace Pulsar {
 
@@ -19,6 +19,12 @@ namespace Pulsar {
 
     //! Default constructor
     PlotAxis ();
+
+    //! Text interface to the PlotAxis class
+    class Interface : public TextInterface::To<PlotAxis> {
+    public:
+      Interface (PlotAxis* = 0);
+    };
 
     //! Set the label to be drawn on the axis
     void set_label (const std::string& _label) { label = _label; }

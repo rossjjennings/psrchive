@@ -1,10 +1,10 @@
-#include "Pulsar/PhaseVsFrequencyPlusTI.h"
-#include "Pulsar/PhaseVsFrequencyTI.h"
-#include "Pulsar/SpectrumPlotTI.h"
-#include "Pulsar/ProfilePlotTI.h"
-#include "Pulsar/PhaseScaleTI.h"
+#include "Pulsar/PhaseVsFrequencyPlus.h"
+#include "Pulsar/PhaseVsFrequency.h"
+#include "Pulsar/SpectrumPlot.h"
+#include "Pulsar/ProfilePlot.h"
+#include "Pulsar/PhaseScale.h"
 
-Pulsar::PhaseVsFrequencyPlusTI::PhaseVsFrequencyPlusTI
+Pulsar::PhaseVsFrequencyPlus::Interface::Interface
 (PhaseVsFrequencyPlus* instance)
 {
   if (instance)
@@ -18,12 +18,12 @@ Pulsar::PhaseVsFrequencyPlusTI::PhaseVsFrequencyPlusTI
        &PhaseVsFrequencyPlus::set_pol,
        "pol", "Polarization to plot" );
 
-  import( "x", PhaseScaleTI(), &PhaseVsFrequencyPlus::get_scale );
+  import( "x", PhaseScale::Interface(), &PhaseVsFrequencyPlus::get_scale );
 
   // when this is set, import will filter out attributes with identical names
   import_filter = true;
 
-  import ( "freq", PhaseVsFrequencyTI(), &PhaseVsFrequencyPlus::get_freq );
-  import ( "flux", ProfilePlotTI(),      &PhaseVsFrequencyPlus::get_flux );
-  import ( "psd",  SpectrumPlotTI(),     &PhaseVsFrequencyPlus::get_psd );
+  import ( "freq", PhaseVsFrequency::Interface(), &PhaseVsFrequencyPlus::get_freq );
+  import ( "flux", ProfilePlot::Interface(),      &PhaseVsFrequencyPlus::get_flux );
+  import ( "psd",  SpectrumPlot::Interface(),     &PhaseVsFrequencyPlus::get_psd );
 }

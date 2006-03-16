@@ -1,4 +1,4 @@
-#include "Pulsar/PhaseVsFrequencyTI.h"
+#include "Pulsar/PhaseVsFrequency.h"
 #include "Pulsar/FrequencyScale.h"
 #include "Pulsar/Archive.h"
 #include "Pulsar/Profile.h"
@@ -13,7 +13,7 @@ Pulsar::PhaseVsFrequency::PhaseVsFrequency ()
 
 TextInterface::Class* Pulsar::PhaseVsFrequency::get_interface ()
 {
-  return new PhaseVsFrequencyTI (this);
+  return new Interface (this);
 }
 
 void Pulsar::PhaseVsFrequency::prepare (const Archive* data)

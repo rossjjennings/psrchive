@@ -1,6 +1,6 @@
-#include "Pulsar/PlotLabelTI.h"
+#include "Pulsar/PlotLabel.h"
 
-Pulsar::PlotLabelTI::PlotLabelTI (PlotLabel* instance)
+Pulsar::PlotLabel::Interface::Interface (PlotLabel* instance)
 {
   if (instance)
     set_instance (instance);

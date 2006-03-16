@@ -1,4 +1,4 @@
-#include "Pulsar/ProfilePlotTI.h"
+#include "Pulsar/ProfilePlot.h"
 
 #include "Pulsar/Archive.h"
 #include "Pulsar/Profile.h"
@@ -14,7 +14,7 @@ Pulsar::ProfilePlot::ProfilePlot ()
 
 TextInterface::Class* Pulsar::ProfilePlot::get_interface ()
 {
-  return new ProfilePlotTI (this);
+  return new Interface (this);
 }
 
 void Pulsar::ProfilePlot::get_profiles (const Archive* data)

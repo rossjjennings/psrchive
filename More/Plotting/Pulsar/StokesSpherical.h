@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/StokesSpherical.h,v $
-   $Revision: 1.4 $
-   $Date: 2006/03/15 19:59:27 $
+   $Revision: 1.5 $
+   $Date: 2006/03/16 17:07:17 $
    $Author: straten $ */
 
 #ifndef __Pulsar_StokesSpherical_h
@@ -27,6 +27,12 @@ namespace Pulsar {
 
     //! Get the text interface to the configuration attributes
     TextInterface::Class* get_interface ();
+
+    //! Text interface to the StokesSpherical class
+    class Interface : public TextInterface::To<StokesSpherical> {
+    public:
+      Interface (StokesSpherical* = 0);
+    };
 
     //! Ensure that frames are properly initialized
     void prepare (const Archive*);

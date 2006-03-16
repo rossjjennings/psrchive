@@ -1,4 +1,4 @@
-#include "Pulsar/StokesCylindricalTI.h"
+#include "Pulsar/StokesCylindrical.h"
 #include "Pulsar/Profile.h"
 
 Pulsar::StokesCylindrical::StokesCylindrical ()
@@ -30,7 +30,7 @@ Pulsar::StokesCylindrical::StokesCylindrical ()
     //! Get the text interface to the configuration attributes
 TextInterface::Class* Pulsar::StokesCylindrical::get_interface ()
 {
-  return new StokesCylindricalTI (this);
+  return new Interface (this);
 }
 
 void Pulsar::StokesCylindrical::prepare (const Archive*)

@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PhaseScale.h,v $
-   $Revision: 1.7 $
-   $Date: 2006/03/15 20:50:35 $
+   $Revision: 1.8 $
+   $Date: 2006/03/16 17:07:17 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PhaseScale_h
@@ -24,6 +24,12 @@ namespace Pulsar {
 
     //! Default constructor
     PhaseScale ();
+
+    //! Text interface to the PhaseScale class
+    class Interface : public TextInterface::To<PhaseScale> {
+    public:
+      Interface (PhaseScale* = 0);
+    };
 
     //! Disable set_minmax
     void set_minmax (float min, float max);

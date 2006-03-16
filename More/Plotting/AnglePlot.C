@@ -1,5 +1,5 @@
 #include "Pulsar/AnglePlot.h"
-#include "Pulsar/AnglePlotTI.h"
+#include "Pulsar/AnglePlot.h"
 
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
@@ -19,7 +19,7 @@ Pulsar::AnglePlot::AnglePlot()
 
 TextInterface::Class* Pulsar::AnglePlot::get_interface ()
 {
-  return new AnglePlotTI (this);
+  return new Interface (this);
 }
 
 void Pulsar::AnglePlot::prepare (const Archive* data)

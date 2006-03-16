@@ -1,18 +1,15 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/Plot.h,v $
-   $Revision: 1.8 $
-   $Date: 2006/03/15 16:35:04 $
+   $Revision: 1.9 $
+   $Date: 2006/03/16 17:07:17 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Plot_h
 #define __Pulsar_Plot_h
 
 #include "Pulsar/PlotFrame.h"
-
-namespace TextInterface {
-  class Class;
-}
+#include "TextInterface.h"
 
 namespace Pulsar {
 

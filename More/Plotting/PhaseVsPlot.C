@@ -1,4 +1,4 @@
-#include "Pulsar/PhaseVsPlotTI.h"
+#include "Pulsar/PhaseVsPlot.h"
 #include "Pulsar/Archive.h"
 #include "Pulsar/Profile.h"
 
@@ -25,7 +25,7 @@ Pulsar::PhaseVsPlot::PhaseVsPlot ()
  
 TextInterface::Class* Pulsar::PhaseVsPlot::get_interface ()
 {
-  return new PhaseVsPlotTI (this);
+  return new Interface (this);
 }
 
 //! Derived classes must draw in the current viewport

@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PlotFrame.h,v $
-   $Revision: 1.12 $
-   $Date: 2006/03/15 16:35:12 $
+   $Revision: 1.13 $
+   $Date: 2006/03/16 17:07:17 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PlotFrame_h
@@ -29,6 +29,12 @@ namespace Pulsar {
 
     //! Destructor
     ~PlotFrame ();
+
+    //! Text interface to the PlotFrame class
+    class Interface : public TextInterface::To<PlotFrame> {
+    public:
+      Interface (PlotFrame* = 0);
+    };
 
     //! Get the x-scale
     PlotScale* get_x_scale (bool allow_transpose = false);

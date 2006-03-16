@@ -1,12 +1,12 @@
-#include "Pulsar/ProfilePlotTI.h"
-#include "Pulsar/FluxPlotTI.h"
+#include "Pulsar/ProfilePlot.h"
+#include "Pulsar/FluxPlot.h"
 
-Pulsar::ProfilePlotTI::ProfilePlotTI (ProfilePlot* instance)
+Pulsar::ProfilePlot::Interface::Interface (ProfilePlot* instance)
 {
   if (instance)
     set_instance (instance);
 
-  import ( FluxPlotTI() );
+  import ( FluxPlot::Interface() );
 
   add( &ProfilePlot::get_plot_cal_transitions,
        &ProfilePlot::set_plot_cal_transitions,

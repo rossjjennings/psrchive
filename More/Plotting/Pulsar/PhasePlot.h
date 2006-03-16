@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PhasePlot.h,v $
-   $Revision: 1.16 $
-   $Date: 2006/03/15 13:11:48 $
+   $Revision: 1.17 $
+   $Date: 2006/03/16 17:07:17 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PhasePlot_h
@@ -25,6 +25,12 @@ namespace Pulsar {
 
     //! Get the text interface to the configuration attributes
     TextInterface::Class* get_interface ();
+
+    //! Text interface to the PhasePlot class
+    class Interface : public TextInterface::To<PhasePlot> {
+    public:
+      Interface (PhasePlot* = 0);
+    };
 
     //! Get the default label for the x axis
     std::string get_xlabel (const Archive*);

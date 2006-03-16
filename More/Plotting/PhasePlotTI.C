@@ -1,10 +1,10 @@
-#include "Pulsar/PhasePlotTI.h"
-#include "Pulsar/PhaseScaleTI.h"
+#include "Pulsar/PhasePlot.h"
+#include "Pulsar/PhaseScale.h"
 
-Pulsar::PhasePlotTI::PhasePlotTI (PhasePlot* instance)
+Pulsar::PhasePlot::Interface::Interface (PhasePlot* instance)
 {
   if (instance)
     set_instance (instance);
 
-  import ( "x", PhaseScaleTI(), &PhasePlot::get_scale );
+  import ( "x", PhaseScale::Interface(), &PhasePlot::get_scale );
 }

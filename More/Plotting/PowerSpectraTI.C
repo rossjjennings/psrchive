@@ -1,6 +1,6 @@
-#include "Pulsar/PowerSpectraTI.h"
+#include "Pulsar/PowerSpectra.h"
 
-Pulsar::PowerSpectraTI::PowerSpectraTI (PowerSpectra* instance)
+Pulsar::PowerSpectra::Interface::Interface (PowerSpectra* instance)
 {
   if (instance)
     set_instance (instance);

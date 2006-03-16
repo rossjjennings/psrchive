@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PowerSpectra.h,v $
-   $Revision: 1.4 $
-   $Date: 2006/03/15 19:59:27 $
+   $Revision: 1.5 $
+   $Date: 2006/03/16 17:07:17 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PowerSpectra_h
@@ -22,6 +22,15 @@ namespace Pulsar {
 
     //! Default constructor
     PowerSpectra ();
+
+    //! Return the text interface
+    TextInterface::Class* get_interface ();
+
+    //! Text interface to the PowerSpectra class
+    class Interface : public TextInterface::To<PowerSpectra> {
+    public:
+      Interface (PowerSpectra* = 0);
+    };
 
     //! Perform any preprocessing steps
     void prepare (const Archive*);
@@ -55,9 +64,6 @@ namespace Pulsar {
 
     //! Draw the spectrum
     void draw (const std::vector<float>&) const;
-
-    //! Return the text interface
-    TextInterface::Class* get_interface ();
 
   protected:
 

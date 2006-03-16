@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PhaseVsPlot.h,v $
-   $Revision: 1.8 $
-   $Date: 2006/03/15 22:27:58 $
+   $Revision: 1.9 $
+   $Date: 2006/03/16 17:07:17 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PhaseVsPlot_h
@@ -25,6 +25,12 @@ namespace Pulsar {
 
     //! Get the text interface to the configuration attributes
     TextInterface::Class* get_interface ();
+
+    //! Text interface to the PhaseVsPlot class
+    class Interface : public TextInterface::To<PhaseVsPlot> {
+    public:
+      Interface (PhaseVsPlot* = 0);
+    };
 
     //! Derived classes must provide the number of rows
     virtual unsigned get_nrow (const Archive* data) = 0;

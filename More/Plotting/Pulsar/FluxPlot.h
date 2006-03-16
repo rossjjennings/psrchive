@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/FluxPlot.h,v $
-   $Revision: 1.9 $
-   $Date: 2006/03/15 17:59:46 $
+   $Revision: 1.10 $
+   $Date: 2006/03/16 17:07:17 $
    $Author: straten $ */
 
 #ifndef __Pulsar_FluxPlot_h
@@ -22,6 +22,15 @@ namespace Pulsar {
 
     //! Default constructor
     FluxPlot ();
+
+    //! Return the text interface
+    TextInterface::Class* get_interface ();
+
+    //! Text interface to the FluxPlot class
+    class Interface : public TextInterface::To<FluxPlot> {
+    public:
+      Interface (FluxPlot* = 0);
+    };
 
     //! Perform any preprocessing steps
     void prepare (const Archive*);
@@ -69,9 +78,6 @@ namespace Pulsar {
 
     //! draw the profile in the current viewport and window
     void draw (const Profile*) const;
-
-    //! Return the text interface
-    TextInterface::Class* get_interface ();
 
   protected:
 

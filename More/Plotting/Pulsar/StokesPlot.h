@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/StokesPlot.h,v $
-   $Revision: 1.4 $
-   $Date: 2006/03/11 22:14:46 $
+   $Revision: 1.5 $
+   $Date: 2006/03/16 17:07:17 $
    $Author: straten $ */
 
 #ifndef __Pulsar_StokesPlot_h
@@ -24,6 +24,12 @@ namespace Pulsar {
 
     //! Get the text interface to the configuration attributes
     TextInterface::Class* get_interface ();
+
+    //! Text interface to the StokesPlot class
+    class Interface : public TextInterface::To<StokesPlot> {
+    public:
+      Interface (StokesPlot* = 0);
+    };
 
     //! Load the profiles
     void get_profiles (const Archive* data);

@@ -1,4 +1,4 @@
-#include "Pulsar/PowerSpectraTI.h"
+#include "Pulsar/PowerSpectra.h"
 #include "Pulsar/PlotFrame.h"
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
@@ -21,7 +21,7 @@ Pulsar::PowerSpectra::PowerSpectra ()
  
 TextInterface::Class* Pulsar::PowerSpectra::get_interface ()
 {
-  return new PowerSpectraTI (this);
+  return new Interface (this);
 }
 
 //! Derived classes must compute the minimum and maximum values (y-axis)

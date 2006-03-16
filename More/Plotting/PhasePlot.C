@@ -1,4 +1,4 @@
-#include "Pulsar/PhasePlotTI.h"
+#include "Pulsar/PhasePlot.h"
 
 Pulsar::PhasePlot::PhasePlot ()
 {
@@ -7,7 +7,7 @@ Pulsar::PhasePlot::PhasePlot ()
 
 TextInterface::Class* Pulsar::PhasePlot::get_interface ()
 {
-  return new PhasePlotTI (this);
+  return new Interface (this);
 }
 
 //! Get the default label for the x axis

@@ -1,13 +1,13 @@
-#include "Pulsar/PlotFrameSizeTI.h"
-#include "Pulsar/PlotFrameTI.h"
+#include "Pulsar/PlotFrameSize.h"
+#include "Pulsar/PlotFrame.h"
 #include "iopair.h"
 
-Pulsar::PlotFrameSizeTI::PlotFrameSizeTI (PlotFrameSize* instance)
+Pulsar::PlotFrameSize::Interface::Interface (PlotFrameSize* instance)
 {
   if (instance)
     set_instance (instance);
 
-  import ( PlotFrameTI() );
+  import ( PlotFrame::Interface() );
 
   add( &PlotFrameSize::get_x_range,
        &PlotFrameSize::set_x_range,

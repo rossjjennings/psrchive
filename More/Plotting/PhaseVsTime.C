@@ -1,4 +1,4 @@
-#include "Pulsar/PhaseVsTimeTI.h"
+#include "Pulsar/PhaseVsTime.h"
 #include "Pulsar/Archive.h"
 #include "Pulsar/IntegrationOrder.h"
 #include "Pulsar/Profile.h"
@@ -11,7 +11,7 @@ Pulsar::PhaseVsTime::PhaseVsTime ()
 
 TextInterface::Class* Pulsar::PhaseVsTime::get_interface ()
 {
-  return new PhaseVsTimeTI (this);
+  return new Interface (this);
 }
 
 void Pulsar::PhaseVsTime::prepare (const Archive* data)

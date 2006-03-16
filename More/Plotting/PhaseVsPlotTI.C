@@ -1,16 +1,16 @@
-#include "Pulsar/PhaseVsPlotTI.h"
-#include "Pulsar/PhasePlotTI.h"
-#include "Pulsar/PlotScaleTI.h"
+#include "Pulsar/PhaseVsPlot.h"
+#include "Pulsar/PhasePlot.h"
+#include "Pulsar/PlotScale.h"
 
-Pulsar::PhaseVsPlotTI::PhaseVsPlotTI (PhaseVsPlot* instance)
+Pulsar::PhaseVsPlot::Interface::Interface (PhaseVsPlot* instance)
 {
   if (instance)
     set_instance (instance);
 
   // import the interface of the base class
-  import( PhasePlotTI() );
+  import( PhasePlot::Interface() );
 
-  import( "z", PlotScaleTI(), &PhaseVsPlot::get_z_scale );
+  import( "z", PlotScale::Interface(), &PhaseVsPlot::get_z_scale );
 
   import("cmap", pgplot::ColourMap::Interface(), &PhaseVsPlot::get_colour_map);
 

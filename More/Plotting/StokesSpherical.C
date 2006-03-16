@@ -1,4 +1,4 @@
-#include "Pulsar/StokesSphericalTI.h"
+#include "Pulsar/StokesSpherical.h"
 #include "Pulsar/Profile.h"
 
 Pulsar::StokesSpherical::StokesSpherical ()
@@ -43,7 +43,7 @@ Pulsar::StokesSpherical::StokesSpherical ()
     //! Get the text interface to the configuration attributes
 TextInterface::Class* Pulsar::StokesSpherical::get_interface ()
 {
-  return new StokesSphericalTI (this);
+  return new Interface (this);
 }
 
 void Pulsar::StokesSpherical::prepare (const Archive*)

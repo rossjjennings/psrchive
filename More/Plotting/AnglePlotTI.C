@@ -1,7 +1,7 @@
-#include "Pulsar/AnglePlotTI.h"
-#include "Pulsar/PhasePlotTI.h"
+#include "Pulsar/AnglePlot.h"
+#include "Pulsar/PhasePlot.h"
 
-Pulsar::AnglePlotTI::AnglePlotTI (AnglePlot* instance)
+Pulsar::AnglePlot::Interface::Interface (AnglePlot* instance)
 {
   if (instance)
     set_instance (instance);
@@ -15,7 +15,7 @@ Pulsar::AnglePlotTI::AnglePlotTI (AnglePlot* instance)
        "chan", "Frequency channel to plot" );
 
   // import the interface of the base class
-  import( PhasePlotTI() );
+  import( PhasePlot::Interface() );
 
   add( &AnglePlot::get_error_bars,
        &AnglePlot::set_error_bars,

@@ -1,7 +1,7 @@
-#include "Pulsar/FluxPlotTI.h"
-#include "Pulsar/PhasePlotTI.h"
+#include "Pulsar/FluxPlot.h"
+#include "Pulsar/PhasePlot.h"
 
-Pulsar::FluxPlotTI::FluxPlotTI (FluxPlot* instance)
+Pulsar::FluxPlot::Interface::Interface (FluxPlot* instance)
 {
   if (instance)
     set_instance (instance);
@@ -18,7 +18,7 @@ Pulsar::FluxPlotTI::FluxPlotTI (FluxPlot* instance)
        &FluxPlot::set_pol,
        "pol", "Polarization to plot" );
 
-  import( PhasePlotTI() );
+  import( PhasePlot::Interface() );
 
   add( &FluxPlot::get_plot_error_box,
        &FluxPlot::set_plot_error_box,

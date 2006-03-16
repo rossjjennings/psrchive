@@ -1,11 +1,11 @@
 #include "Pulsar/MultiPlot.h"
-#include "Pulsar/MultiFrameTI.h"
+#include "Pulsar/MultiFrame.h"
 
 #include <cpgplot.h>
 
 TextInterface::Class* Pulsar::MultiPlot::get_frame_interface ()
 {
-  return new MultiFrameTI (&frames);
+  return new MultiFrame::Interface (&frames);
 }
 
 void Pulsar::MultiPlot::plot (const Archive* data)

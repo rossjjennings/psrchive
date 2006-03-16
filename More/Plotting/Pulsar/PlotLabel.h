@@ -1,14 +1,14 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PlotLabel.h,v $
-   $Revision: 1.5 $
-   $Date: 2006/03/15 20:06:44 $
+   $Revision: 1.6 $
+   $Date: 2006/03/16 17:07:17 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PlotLabel_h
 #define __Pulsar_PlotLabel_h
 
-#include "Reference.h"
+#include "TextInterface.h"
 
 namespace Pulsar {
 
@@ -22,6 +22,12 @@ namespace Pulsar {
 
     //! Default constructor
     PlotLabel ();
+
+    //! Text interface to the PlotLabel class
+    class Interface : public TextInterface::To<PlotLabel> {
+    public:
+      Interface (PlotLabel* = 0);
+    };
 
     //! Set the label to be drawn to the left of the frame
     void set_left (const std::string& label) { left = label; }

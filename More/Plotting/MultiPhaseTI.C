@@ -1,10 +1,10 @@
-#include "Pulsar/MultiPhaseTI.h"
-#include "Pulsar/PhaseScaleTI.h"
+#include "Pulsar/MultiPhase.h"
+#include "Pulsar/PhaseScale.h"
 
-Pulsar::MultiPhaseTI::MultiPhaseTI (MultiPhase* instance)
+Pulsar::MultiPhase::Interface::Interface (MultiPhase* instance)
 {
   if (instance)
     set_instance (instance);
 
-  import( "x", PhaseScaleTI(), &MultiPhase::get_scale );
+  import( "x", PhaseScale::Interface(), &MultiPhase::get_scale );
 }

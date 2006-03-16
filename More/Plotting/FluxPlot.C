@@ -1,4 +1,4 @@
-#include "Pulsar/FluxPlotTI.h"
+#include "Pulsar/FluxPlot.h"
 #include "Pulsar/PlotFrame.h"
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
@@ -19,7 +19,7 @@ Pulsar::FluxPlot::FluxPlot ()
  
 TextInterface::Class* Pulsar::FluxPlot::get_interface ()
 {
-  return new FluxPlotTI (this);
+  return new Interface (this);
 }
 
 //! Derived classes must compute the minimum and maximum values (y-axis)

@@ -1,4 +1,4 @@
-#include "Pulsar/StokesPlotTI.h"
+#include "Pulsar/StokesPlot.h"
 #include "Pulsar/Polarization.h"
 #include "Pulsar/Archive.h"
 #include "Pulsar/PolnProfile.h"
@@ -16,7 +16,7 @@ Pulsar::StokesPlot::StokesPlot ()
 
 TextInterface::Class* Pulsar::StokesPlot::get_interface ()
 {
-  return new StokesPlotTI (this);
+  return new Interface (this);
 }
 
 void Pulsar::StokesPlot::get_profiles (const Archive* data)

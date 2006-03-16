@@ -1,9 +1,9 @@
-#include "Pulsar/StokesCylindricalTI.h"
-#include "Pulsar/MultiPhaseTI.h"
-#include "Pulsar/StokesPlotTI.h"
-#include "Pulsar/AnglePlotTI.h"
+#include "Pulsar/StokesCylindrical.h"
+#include "Pulsar/MultiPhase.h"
+#include "Pulsar/StokesPlot.h"
+#include "Pulsar/AnglePlot.h"
 
-Pulsar::StokesCylindricalTI::StokesCylindricalTI (StokesCylindrical* instance)
+Pulsar::StokesCylindrical::Interface::Interface (StokesCylindrical* instance)
 {
   if (instance)
     set_instance (instance);
@@ -16,11 +16,11 @@ Pulsar::StokesCylindricalTI::StokesCylindricalTI (StokesCylindrical* instance)
        &StokesCylindrical::set_chan,
        "chan", "Frequency channel to plot" );
 
-  import ( MultiPhaseTI() );
+  import ( MultiPhase::Interface() );
 
   // when this is set, import will filter out attributes with identical names
   import_filter = true;
 
-  import ( "flux", StokesPlotTI(), &StokesCylindrical::get_flux );
-  import ( "pa", AnglePlotTI(), &StokesCylindrical::get_orientation );
+  import ( "flux", StokesPlot::Interface(), &StokesCylindrical::get_flux );
+  import ( "pa", AnglePlot::Interface(), &StokesCylindrical::get_orientation );
 }

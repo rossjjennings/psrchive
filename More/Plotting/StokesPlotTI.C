@@ -1,12 +1,12 @@
-#include "Pulsar/StokesPlotTI.h"
-#include "Pulsar/FluxPlotTI.h"
+#include "Pulsar/StokesPlot.h"
+#include "Pulsar/FluxPlot.h"
 
-Pulsar::StokesPlotTI::StokesPlotTI (StokesPlot* instance)
+Pulsar::StokesPlot::Interface::Interface (StokesPlot* instance)
 {
   if (instance)
     set_instance (instance);
 
-  import ( FluxPlotTI() );
+  import ( FluxPlot::Interface() );
 
   remove ("pol");
 

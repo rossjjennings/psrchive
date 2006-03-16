@@ -1,7 +1,7 @@
-#include "Pulsar/SpectrumPlotTI.h"
-#include "Pulsar/PowerSpectraTI.h"
+#include "Pulsar/SpectrumPlot.h"
+#include "Pulsar/PowerSpectra.h"
 
-Pulsar::SpectrumPlotTI::SpectrumPlotTI (SpectrumPlot* instance)
+Pulsar::SpectrumPlot::Interface::Interface (SpectrumPlot* instance)
 {
   if (instance)
     set_instance (instance);
@@ -10,5 +10,5 @@ Pulsar::SpectrumPlotTI::SpectrumPlotTI (SpectrumPlot* instance)
        &SpectrumPlot::set_bin,
        "bin", "Phase bin to plot" );
 
-  import( PowerSpectraTI() );
+  import( PowerSpectra::Interface() );
 }

@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/ProfilePlot.h,v $
-   $Revision: 1.7 $
-   $Date: 2006/03/15 01:10:39 $
+   $Revision: 1.8 $
+   $Date: 2006/03/16 17:07:17 $
    $Author: straten $ */
 
 #ifndef __Pulsar_ProfilePlot_h
@@ -22,6 +22,12 @@ namespace Pulsar {
 
     //! Get the text interface to the configuration attributes
     TextInterface::Class* get_interface ();
+
+    //! Text interface to the ProfilePlot class
+    class Interface : public TextInterface::To<ProfilePlot> {
+    public:
+      Interface (ProfilePlot* = 0);
+    };
 
     //! Load the profiles
     void get_profiles (const Archive* data);

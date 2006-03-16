@@ -1,4 +1,4 @@
-#include "Pulsar/PhaseVsFrequencyPlusTI.h"
+#include "Pulsar/PhaseVsFrequencyPlus.h"
 #include "Pulsar/Profile.h"
 
 Pulsar::PhaseVsFrequencyPlus::PhaseVsFrequencyPlus ()
@@ -75,7 +75,7 @@ Pulsar::PhaseVsFrequencyPlus::PhaseVsFrequencyPlus ()
 //! Get the text interface to the configuration attributes
 TextInterface::Class* Pulsar::PhaseVsFrequencyPlus::get_interface ()
 {
-  return new PhaseVsFrequencyPlusTI (this);
+  return new Interface (this);
 }
 
 void Pulsar::PhaseVsFrequencyPlus::prepare (const Archive*)

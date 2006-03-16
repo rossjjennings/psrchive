@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/MultiPhase.h,v $
-   $Revision: 1.8 $
-   $Date: 2006/03/14 16:08:57 $
+   $Revision: 1.9 $
+   $Date: 2006/03/16 17:07:17 $
    $Author: straten $ */
 
 #ifndef __Pulsar_MultiPhase_h
@@ -20,6 +20,16 @@ namespace Pulsar {
 
     //! Default constructor
     MultiPhase ();
+
+    //! Text interface to the MultiPhase class
+    class Interface : public TextInterface::To<MultiPhase> {
+    public:
+      Interface (MultiPhase* = 0);
+    };
+
+    //! Get the text interface to the configuration attributes
+    TextInterface::Class* get_interface ()
+    { return new Interface (this); }
 
     //! Manage a plot
     void manage (const std::string& name, Plot* plot);

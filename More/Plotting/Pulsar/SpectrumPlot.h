@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/SpectrumPlot.h,v $
-   $Revision: 1.2 $
-   $Date: 2006/03/15 19:59:27 $
+   $Revision: 1.3 $
+   $Date: 2006/03/16 17:07:17 $
    $Author: straten $ */
 
 #ifndef __Pulsar_SpectrumPlot_h
@@ -16,6 +16,16 @@ namespace Pulsar {
   class SpectrumPlot : public PowerSpectra {
 
   public:
+
+    //! Text interface to the SpectrumPlot class
+    class Interface : public TextInterface::To<SpectrumPlot> {
+    public:
+      Interface (SpectrumPlot* = 0);
+    };
+
+    //! Get the text interface to the configuration attributes
+    TextInterface::Class* get_interface ()
+    { return new Interface (this); }
 
     //! Load the spectra
     void get_spectra (const Archive* data);

@@ -1,5 +1,5 @@
 #include "Pulsar/Plot.h"
-#include "Pulsar/PlotFrameTI.h"
+#include "Pulsar/PlotFrame.h"
 
 bool Pulsar::Plot::verbose = false;
 
@@ -11,7 +11,7 @@ Pulsar::Plot::Plot ()
 //! Get the text interface to the frame attributes
 TextInterface::Class* Pulsar::Plot::get_frame_interface ()
 {
-  return new PlotFrameTI (get_frame());
+  return new PlotFrame::Interface (get_frame());
 }
 
 //! Get the frame

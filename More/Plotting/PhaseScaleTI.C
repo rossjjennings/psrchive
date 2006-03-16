@@ -1,7 +1,7 @@
-#include "Pulsar/PhaseScaleTI.h"
-#include "Pulsar/PlotScaleTI.h"
+#include "Pulsar/PhaseScale.h"
+#include "Pulsar/PlotScale.h"
 
-Pulsar::PhaseScaleTI::PhaseScaleTI (PhaseScale* instance)
+Pulsar::PhaseScale::Interface::Interface (PhaseScale* instance)
 {
   if (instance)
     set_instance (instance);

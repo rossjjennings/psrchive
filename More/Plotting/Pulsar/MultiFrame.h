@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/MultiFrame.h,v $
-   $Revision: 1.7 $
-   $Date: 2006/03/14 16:13:55 $
+   $Revision: 1.8 $
+   $Date: 2006/03/16 17:07:17 $
    $Author: straten $ */
 
 #ifndef __Pulsar_MultiFrame_h
@@ -17,6 +17,12 @@ namespace Pulsar {
   class MultiFrame : public Reference::Able {
 
   public:
+
+    //! Text interface to the MultiFrame class
+    class Interface : public TextInterface::To<MultiFrame> {
+    public:
+      Interface (MultiFrame* = 0);
+    };
 
     //! Construct a new PlotFrameSize from the given PlotFrame and map it
     PlotFrameSize* manage (const std::string& name, PlotFrame*);
