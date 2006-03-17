@@ -1,3 +1,9 @@
+/***************************************************************************
+ *
+ *   Copyright (C) 2003 by Aidan Hotan
+ *   Licensed under the Academic Free License version 2.1
+ *
+ ***************************************************************************/
 #include "Pulsar/PeriastronOrder.h"
 #include "Pulsar/Calculator.h"
 

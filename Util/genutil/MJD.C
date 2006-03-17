@@ -1,3 +1,9 @@
+/***************************************************************************
+ *
+ *   Copyright (C) 1998 by Matthew Britton
+ *   Licensed under the Academic Free License version 2.1
+ *
+ ***************************************************************************/
 #include "MJD.h"
 #include "Error.h"
 

@@ -1,3 +1,9 @@
+/***************************************************************************
+ *
+ *   Copyright (C) 2004 by straten Willem van Straten
+ *   Licensed under the Academic Free License version 2.1
+ *
+ ***************************************************************************/
 #include "epnio.h"
 #include <string.h>
 #include <stdlib.h>

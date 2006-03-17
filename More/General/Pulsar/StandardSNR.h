@@ -1,9 +1,15 @@
 //-*-C++-*-
+/***************************************************************************
+ *
+ *   Copyright (C) 2004 by Willem van Straten
+ *   Licensed under the Academic Free License version 2.1
+ *
+ ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/StandardSNR.h,v $
-   $Revision: 1.3 $
-   $Date: 2004/08/09 04:22:17 $
-   $Author: ahotan $ */
+   $Revision: 1.4 $
+   $Date: 2006/03/17 13:34:52 $
+   $Author: straten $ */
 
 #ifndef __Pulsar_StandardSNR_h
 #define __Pulsar_StandardSNR_h

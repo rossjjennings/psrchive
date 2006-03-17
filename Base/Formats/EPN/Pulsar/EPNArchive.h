@@ -1,8 +1,14 @@
 //-*-C++-*-
+/***************************************************************************
+ *
+ *   Copyright (C) 2004 by Willem van Straten
+ *   Licensed under the Academic Free License version 2.1
+ *
+ ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/EPN/Pulsar/EPNArchive.h,v $
-   $Revision: 1.8 $
-   $Date: 2005/12/09 16:41:07 $
+   $Revision: 1.9 $
+   $Date: 2006/03/17 13:34:52 $
    $Author: straten $ */
 
 #ifndef __EPN_Archive_h

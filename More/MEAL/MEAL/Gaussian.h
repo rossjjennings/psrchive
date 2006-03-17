@@ -1,8 +1,14 @@
 //-*-C++-*-
+/***************************************************************************
+ *
+ *   Copyright (C) 2004 by Willem van Straten
+ *   Licensed under the Academic Free License version 2.1
+ *
+ ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Gaussian.h,v $
-   $Revision: 1.5 $
-   $Date: 2005/07/07 23:18:49 $
+   $Revision: 1.6 $
+   $Date: 2006/03/17 13:35:25 $
    $Author: straten $ */
 
 #ifndef __Gaussian_H

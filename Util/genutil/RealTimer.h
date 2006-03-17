@@ -1,7 +1,13 @@
+/***************************************************************************
+ *
+ *   Copyright (C) 2003 by Haydon Knight
+ *   Licensed under the Academic Free License version 2.1
+ *
+ ***************************************************************************/
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/RealTimer.h,v $
-   $Revision: 1.2 $
-   $Date: 2004/04/08 04:30:27 $
-   $Author: hknight $ */
+   $Revision: 1.3 $
+   $Date: 2006/03/17 13:35:07 $
+   $Author: straten $ */
 
 #ifndef __RealTimer_H
 #define __RealTimer_H

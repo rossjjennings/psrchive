@@ -1,3 +1,9 @@
+/***************************************************************************
+ *
+ *   Copyright (C) 2006 by Albert Teoh
+ *   Licensed under the Academic Free License version 2.1
+ *
+ ***************************************************************************/
 #include <iostream>
 #include <fstream>
 #include <unistd.h>

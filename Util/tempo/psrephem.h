@@ -1,9 +1,15 @@
 //-*-C++-*-
+/***************************************************************************
+ *
+ *   Copyright (C) 1999 by Willem van Straten
+ *   Licensed under the Academic Free License version 2.1
+ *
+ ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/psrephem.h,v $
-   $Revision: 1.33 $
-   $Date: 2005/10/31 07:16:20 $
-   $Author: ateoh $ */
+   $Revision: 1.34 $
+   $Date: 2006/03/17 13:34:31 $
+   $Author: straten $ */
 
 #ifndef __PSREPHEM_H
 #define __PSREPHEM_H

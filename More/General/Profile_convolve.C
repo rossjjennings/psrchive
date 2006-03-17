@@ -1,3 +1,9 @@
+/***************************************************************************
+ *
+ *   Copyright (C) 2002 by Aidan Hotan
+ *   Licensed under the Academic Free License version 2.1
+ *
+ ***************************************************************************/
 #include "Pulsar/Profile.h"
 #include "Error.h"
 #include "fftm.h"

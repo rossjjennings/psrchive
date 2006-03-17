@@ -1,3 +1,9 @@
+/***************************************************************************
+ *
+ *   Copyright (C) 2003 by Aidan Hotan
+ *   Licensed under the Academic Free License version 2.1
+ *
+ ***************************************************************************/
 #include <algorithm>
 #include <exception>
 #include <stdexcept>
@@ -247,7 +253,7 @@ int main (int argc, char *argv[]) try {
 	Pulsar::Archive::set_verbosity(3);
 	break;
       case 'i':
-	cout << "$Id: pam.C,v 1.57 2006/03/01 23:37:34 hknight Exp $" << endl;
+	cout << "$Id: pam.C,v 1.58 2006/03/17 13:34:41 straten Exp $" << endl;
 	return 0;
       case 'm':
 	save = true;

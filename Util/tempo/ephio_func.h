@@ -1,8 +1,14 @@
+/***************************************************************************
+ *
+ *   Copyright (C) 2000 by Willem van Straten
+ *   Licensed under the Academic Free License version 2.1
+ *
+ ***************************************************************************/
 /* ADVICE!:  Do not include this file directly.  Instead, #include "ephio.h"
 
    $Source: /cvsroot/psrchive/psrchive/Util/tempo/ephio_func.h,v $
-   $Revision: 1.1 $
-   $Date: 2000/01/06 01:22:34 $
+   $Revision: 1.2 $
+   $Date: 2006/03/17 13:34:31 $
    $Author: straten $ */
 
 #ifndef __EPHIO_FUNC_H

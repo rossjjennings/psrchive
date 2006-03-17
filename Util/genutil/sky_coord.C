@@ -1,3 +1,9 @@
+/***************************************************************************
+ *
+ *   Copyright (C) 1999 by Russell Edwards
+ *   Licensed under the Academic Free License version 2.1
+ *
+ ***************************************************************************/
 #include <stdio.h>
 #include <math.h>
 

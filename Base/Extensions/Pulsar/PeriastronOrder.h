@@ -1,9 +1,15 @@
 //-*-C++-*-
+/***************************************************************************
+ *
+ *   Copyright (C) 2003 by Aidan Hotan
+ *   Licensed under the Academic Free License version 2.1
+ *
+ ***************************************************************************/
                                                                                 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/PeriastronOrder.h,v $
-   $Revision: 1.2 $
-   $Date: 2003/12/30 04:34:09 $
-   $Author: ahotan $ */
+   $Revision: 1.3 $
+   $Date: 2006/03/17 13:34:45 $
+   $Author: straten $ */
                                                                                 
 #ifndef __PeriastronOrder_h
 #define __PeriastronOrder_h

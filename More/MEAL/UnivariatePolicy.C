@@ -1,3 +1,9 @@
+/***************************************************************************
+ *
+ *   Copyright (C) 2005 by Willem van Straten
+ *   Licensed under the Academic Free License version 2.1
+ *
+ ***************************************************************************/
 #include "MEAL/UnivariatePolicy.h"
 #include "MEAL/Axis.h"
 #include "MEAL/Function.h"

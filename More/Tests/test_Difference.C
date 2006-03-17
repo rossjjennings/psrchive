@@ -1,3 +1,9 @@
+/***************************************************************************
+ *
+ *   Copyright (C) 2003 by Stephen Ord
+ *   Licensed under the Academic Free License version 2.1
+ *
+ ***************************************************************************/
 #include "Pulsar/Archive.h"
 #include "Pulsar/Profile.h"
 #include "Pulsar/Integration.h"

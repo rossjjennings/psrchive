@@ -1,3 +1,9 @@
+/***************************************************************************
+ *
+ *   Copyright (C) 2005 by straten Willem van Straten
+ *   Licensed under the Academic Free License version 2.1
+ *
+ ***************************************************************************/
 #include "iri2rm.h"
 #include <stdio.h>
 

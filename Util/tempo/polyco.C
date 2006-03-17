@@ -1,3 +1,9 @@
+/***************************************************************************
+ *
+ *   Copyright (C) 1998 by Russell Edwards
+ *   Licensed under the Academic Free License version 2.1
+ *
+ ***************************************************************************/
 #include "poly.h"
 #include "string_utils.h"
 #include "Error.h"

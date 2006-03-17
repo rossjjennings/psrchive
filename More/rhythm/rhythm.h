@@ -1,9 +1,15 @@
 //-*-C++-*-
+/***************************************************************************
+ *
+ *   Copyright (C) 1999 by Willem van Straten
+ *   Licensed under the Academic Free License version 2.1
+ *
+ ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/rhythm/rhythm.h,v $
-   $Revision: 1.50 $
-   $Date: 2005/04/27 10:34:11 $
-   $Author: ahotan $ */
+   $Revision: 1.51 $
+   $Date: 2006/03/17 13:34:53 $
+   $Author: straten $ */
 
 // //////////////////////////////////////////////////////////////////////////
 //

@@ -1,6 +1,12 @@
+/***************************************************************************
+ *
+ *   Copyright (C) 1999 by Willem van Straten
+ *   Licensed under the Academic Free License version 2.1
+ *
+ ***************************************************************************/
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/ierf.h,v $
-   $Revision: 1.2 $
-   $Date: 1999/11/02 09:18:11 $
+   $Revision: 1.3 $
+   $Date: 2006/03/17 13:34:59 $
    $Author: straten $ */
 
 #ifndef __IERF_H

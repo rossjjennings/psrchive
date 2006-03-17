@@ -1,3 +1,9 @@
+/***************************************************************************
+ *
+ *   Copyright (C) 1999 by Russell Edwards
+ *   Licensed under the Academic Free License version 2.1
+ *
+ ***************************************************************************/
 // redwards 17 Mar 99 -- Time for a definitive C++ suite of
 // angle and sky coordinate functions
 

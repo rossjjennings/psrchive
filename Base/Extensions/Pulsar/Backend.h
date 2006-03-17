@@ -1,8 +1,14 @@
 //-*-C++-*-
+/***************************************************************************
+ *
+ *   Copyright (C) 2004 by Willem van Straten
+ *   Licensed under the Academic Free License version 2.1
+ *
+ ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/Backend.h,v $
-   $Revision: 1.3 $
-   $Date: 2006/02/24 17:31:27 $
+   $Revision: 1.4 $
+   $Date: 2006/03/17 13:34:45 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Backend_h

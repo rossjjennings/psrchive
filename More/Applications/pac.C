@@ -1,3 +1,9 @@
+/***************************************************************************
+ *
+ *   Copyright (C) 2003 by Willem van Straten
+ *   Licensed under the Academic Free License version 2.1
+ *
+ ***************************************************************************/
 #include "Pulsar/Archive.h"
 #include "Pulsar/ArchiveMatch.h"
 
@@ -156,7 +162,7 @@ int main (int argc, char *argv[]) {
       break;
 
     case 'i':
-      cout << "$Id: pac.C,v 1.73 2006/03/02 17:46:52 straten Exp $" << endl;
+      cout << "$Id: pac.C,v 1.74 2006/03/17 13:34:40 straten Exp $" << endl;
       return 0;
 
     case 'A':

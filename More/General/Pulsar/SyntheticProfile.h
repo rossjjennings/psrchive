@@ -1,3 +1,9 @@
+/***************************************************************************
+ *
+ *   Copyright (C) 2004 by Aidan Hotan
+ *   Licensed under the Academic Free License version 2.1
+ *
+ ***************************************************************************/
 #ifndef __Synthetic_Profile_h
 #define __Synthetic_Profile_h
 

@@ -1,7 +1,13 @@
+/***************************************************************************
+ *
+ *   Copyright (C) 1999 by Willem van Straten
+ *   Licensed under the Academic Free License version 2.1
+ *
+ ***************************************************************************/
 /* $Source: /cvsroot/psrchive/psrchive/Util/qtutil/qt_Angle.h,v $
-   $Revision: 1.7 $
-   $Date: 2005/03/03 05:47:42 $
-   $Author: sord $ */
+   $Revision: 1.8 $
+   $Date: 2006/03/17 13:35:19 $
+   $Author: straten $ */
 
 #ifndef __QT_Angle_H
 #define __QT_Angle_H

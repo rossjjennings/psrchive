@@ -1,9 +1,15 @@
 //-*-C++-*-
+/***************************************************************************
+ *
+ *   Copyright (C) 2002 by Willem van Straten
+ *   Licensed under the Academic Free License version 2.1
+ *
+ ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Profile.h,v $
-   $Revision: 1.91 $
-   $Date: 2006/03/17 00:41:07 $
-   $Author: hknight $ */
+   $Revision: 1.92 $
+   $Date: 2006/03/17 13:34:51 $
+   $Author: straten $ */
 
 #ifndef __Pulsar_Profile_h
 #define __Pulsar_Profile_h

@@ -1,5 +1,11 @@
+/***************************************************************************
+ *
+ *   Copyright (C) 2002 by Aidan Hotan
+ *   Licensed under the Academic Free License version 2.1
+ *
+ ***************************************************************************/
 //
-// $Id: pav.C,v 1.111 2006/03/16 06:29:12 hknight Exp $
+// $Id: pav.C,v 1.112 2006/03/17 13:34:41 straten Exp $
 //
 // The Pulsar Archive Viewer
 //
@@ -376,7 +382,7 @@ int main (int argc, char** argv)
       plotter.set_subint( atoi (optarg) );
       break;
     case 'i':
-      cout << "$Id: pav.C,v 1.111 2006/03/16 06:29:12 hknight Exp $" << endl;
+      cout << "$Id: pav.C,v 1.112 2006/03/17 13:34:41 straten Exp $" << endl;
       return 0;
 
     case 'j':

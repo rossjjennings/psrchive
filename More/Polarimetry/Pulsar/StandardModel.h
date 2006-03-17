@@ -1,8 +1,14 @@
 //-*-C++-*-
+/***************************************************************************
+ *
+ *   Copyright (C) 2005 by Willem van Straten
+ *   Licensed under the Academic Free License version 2.1
+ *
+ ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/StandardModel.h,v $
-   $Revision: 1.1 $
-   $Date: 2005/04/20 07:43:13 $
+   $Revision: 1.2 $
+   $Date: 2006/03/17 13:34:44 $
    $Author: straten $ */
 
 #ifndef __Calibration_StandardModel_H

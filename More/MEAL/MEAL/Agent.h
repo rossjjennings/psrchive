@@ -1,8 +1,14 @@
 //-*-C++-*-
+/***************************************************************************
+ *
+ *   Copyright (C) 2004 by Willem van Straten
+ *   Licensed under the Academic Free License version 2.1
+ *
+ ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Agent.h,v $
-   $Revision: 1.4 $
-   $Date: 2004/11/23 17:12:24 $
+   $Revision: 1.5 $
+   $Date: 2006/03/17 13:35:25 $
    $Author: straten $ */
 
 #ifndef __MEAL_Agent_H

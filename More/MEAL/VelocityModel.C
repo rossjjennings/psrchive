@@ -1,3 +1,9 @@
+/***************************************************************************
+ *
+ *   Copyright (C) 2005 by Stephen Ord
+ *   Licensed under the Academic Free License version 2.1
+ *
+ ***************************************************************************/
 
 #include "MEAL/VelocityModel.h"
 #include <math.h>

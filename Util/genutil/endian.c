@@ -1,3 +1,9 @@
+/***************************************************************************
+ *
+ *   Copyright (C) 1998 by straten Willem van Straten
+ *   Licensed under the Academic Free License version 2.1
+ *
+ ***************************************************************************/
 /* various endian modification functions for the tid PC control program
  *
  * NOTE: for general use the macros in endian.h are probably the best

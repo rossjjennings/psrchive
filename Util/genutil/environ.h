@@ -1,7 +1,13 @@
+/***************************************************************************
+ *
+ *   Copyright (C) 1999 by Willem van Straten
+ *   Licensed under the Academic Free License version 2.1
+ *
+ ***************************************************************************/
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Attic/environ.h,v $
-   $Revision: 1.12 $
-   $Date: 2005/04/19 09:39:10 $
-   $Author: ahotan $ */
+   $Revision: 1.13 $
+   $Date: 2006/03/17 13:34:57 $
+   $Author: straten $ */
 
 /*
  * When sending packets back and forth between different architectures,

@@ -1,3 +1,9 @@
+/***************************************************************************
+ *
+ *   Copyright (C) 2000 by Willem van Straten
+ *   Licensed under the Academic Free License version 2.1
+ *
+ ***************************************************************************/
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/wait.h>

@@ -1,8 +1,14 @@
 //-*-C++-*-
+/***************************************************************************
+ *
+ *   Copyright (C) 2006 by Willem van Straten
+ *   Licensed under the Academic Free License version 2.1
+ *
+ ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/ArchiveExpert.h,v $
-   $Revision: 1.1 $
-   $Date: 2006/02/20 14:48:35 $
+   $Revision: 1.2 $
+   $Date: 2006/03/17 13:34:50 $
    $Author: straten $ */
 
 #ifndef __Pulsar_ArchiveExpert_h

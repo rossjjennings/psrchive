@@ -1,8 +1,14 @@
 //-*-C++-*-
+/***************************************************************************
+ *
+ *   Copyright (C) 2005 by Willem van Straten
+ *   Licensed under the Academic Free License version 2.1
+ *
+ ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/FunctionPolicy.h,v $
-   $Revision: 1.1 $
-   $Date: 2005/04/06 20:02:45 $
+   $Revision: 1.2 $
+   $Date: 2006/03/17 13:35:25 $
    $Author: straten $ */
 
 #ifndef __MEAL_FunctionPolicy_H

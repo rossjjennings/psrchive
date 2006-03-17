@@ -1,3 +1,9 @@
+/***************************************************************************
+ *
+ *   Copyright (C) 2003 by Willem van Straten
+ *   Licensed under the Academic Free License version 2.1
+ *
+ ***************************************************************************/
 #include "Pulsar/TimerArchive.h"
 #include "Pulsar/TimerIntegration.h"
 #include "Pulsar/Telescope.h"
@@ -390,7 +396,7 @@ Signal::State Pulsar::TimerArchive::get_state () const
   // from band.h, version 1
   /* (T) 0=I,1=AA BB,2=AA,AB,BA,BB, 3=AA, 4=BB   */
 
-  // Matthew Britton added the poln_storage_type =
+  // Willem van Straten added the poln_storage_type =
   // [IQ|XY]_POLN_STORAGE variable to distinguish between coherence
   // products and stokes parameters states
 

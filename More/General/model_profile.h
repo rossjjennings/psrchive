@@ -1,8 +1,14 @@
 //-*-C++-*-
+/***************************************************************************
+ *
+ *   Copyright (C) 2002 by Willem van Straten
+ *   Licensed under the Academic Free License version 2.1
+ *
+ ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/model_profile.h,v $
-   $Revision: 1.5 $
-   $Date: 2005/09/09 23:49:45 $
+   $Revision: 1.6 $
+   $Date: 2006/03/17 13:34:40 $
    $Author: straten $ */
 
 #ifndef __model_profile_h

@@ -1,9 +1,15 @@
 //-*-C++-*-
+/***************************************************************************
+ *
+ *   Copyright (C) 1999 by Willem van Straten
+ *   Licensed under the Academic Free License version 2.1
+ *
+ ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/toa.h,v $
-   $Revision: 1.20 $
-   $Date: 2005/06/11 18:39:21 $
-   $Author: redwards $ */
+   $Revision: 1.21 $
+   $Date: 2006/03/17 13:34:34 $
+   $Author: straten $ */
 
 #ifndef __TOA_H
 #define __TOA_H

@@ -1,9 +1,15 @@
 //-*-C++-*-
+/***************************************************************************
+ *
+ *   Copyright (C) 2004 by Willem van Straten
+ *   Licensed under the Academic Free License version 2.1
+ *
+ ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/FluxCalibratorExtension.h,v $
-   $Revision: 1.4 $
-   $Date: 2005/06/12 00:01:11 $
-   $Author: redwards $ */
+   $Revision: 1.5 $
+   $Date: 2006/03/17 13:34:45 $
+   $Author: straten $ */
 
 #ifndef __FluxCalibratorExtension_h
 #define __FluxCalibratorExtension_h

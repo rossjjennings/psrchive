@@ -1,8 +1,14 @@
 //-*-C++-*-
+/***************************************************************************
+ *
+ *   Copyright (C) 2002 by Willem van Straten
+ *   Licensed under the Academic Free License version 2.1
+ *
+ ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Types.h,v $
-   $Revision: 1.19 $
-   $Date: 2006/02/24 17:09:23 $
+   $Revision: 1.20 $
+   $Date: 2006/03/17 13:34:55 $
    $Author: straten $ */
 
 #ifndef __Types_h

@@ -1,3 +1,9 @@
+/***************************************************************************
+ *
+ *   Copyright (C) 1998 by Russell Edwards
+ *   Licensed under the Academic Free License version 2.1
+ *
+ ***************************************************************************/
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif

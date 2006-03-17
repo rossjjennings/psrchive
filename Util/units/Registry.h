@@ -1,8 +1,14 @@
 //-*-C++-*-
+/***************************************************************************
+ *
+ *   Copyright (C) 2004 by Willem van Straten
+ *   Licensed under the Academic Free License version 2.1
+ *
+ ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Registry.h,v $
-   $Revision: 1.2 $
-   $Date: 2004/11/23 17:12:24 $
+   $Revision: 1.3 $
+   $Date: 2006/03/17 13:35:22 $
    $Author: straten $ */
 
 #ifndef __Registry_h

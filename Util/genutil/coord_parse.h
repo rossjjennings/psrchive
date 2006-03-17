@@ -1,6 +1,12 @@
+/***************************************************************************
+ *
+ *   Copyright (C) 2004 by Willem van Straten
+ *   Licensed under the Academic Free License version 2.1
+ *
+ ***************************************************************************/
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/coord_parse.h,v $
-   $Revision: 1.3 $
-   $Date: 2004/12/22 10:53:26 $
+   $Revision: 1.4 $
+   $Date: 2006/03/17 13:35:07 $
    $Author: straten $ */
 
 #ifndef __COORD_PARSE_H

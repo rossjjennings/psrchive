@@ -1,3 +1,9 @@
+/***************************************************************************
+ *
+ *   Copyright (C) 1998 by redwards Russell Edwards
+ *   Licensed under the Academic Free License version 2.1
+ *
+ ***************************************************************************/
 /* keys2fort.c -- redwards 1/12/97
  *
  * program to parse a keyword definition file and produce Fortran

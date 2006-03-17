@@ -1,8 +1,14 @@
 //-*-C++-*-
+/***************************************************************************
+ *
+ *   Copyright (C) 2004 by Willem van Straten
+ *   Licensed under the Academic Free License version 2.1
+ *
+ ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/ScalarConstant.h,v $
-   $Revision: 1.5 $
-   $Date: 2005/04/24 01:28:07 $
+   $Revision: 1.6 $
+   $Date: 2006/03/17 13:35:26 $
    $Author: straten $ */
 
 #ifndef __ScalarConstant_H

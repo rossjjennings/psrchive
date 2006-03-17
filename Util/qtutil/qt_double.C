@@ -1,3 +1,9 @@
+/***************************************************************************
+ *
+ *   Copyright (C) 1999 by Willem van Straten
+ *   Licensed under the Academic Free License version 2.1
+ *
+ ***************************************************************************/
 #include <stdio.h>
 #include <iostream>
 #include "qt_double.h"

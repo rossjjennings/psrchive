@@ -1,8 +1,14 @@
 //-*-C++-*-
+/***************************************************************************
+ *
+ *   Copyright (C) 2004 by Willem van Straten
+ *   Licensed under the Academic Free License version 2.1
+ *
+ ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/SingleAxisSolver.h,v $
-   $Revision: 1.4 $
-   $Date: 2006/01/31 05:22:37 $
+   $Revision: 1.5 $
+   $Date: 2006/03/17 13:34:44 $
    $Author: straten $ */
 
 #ifndef __Calibration_SingleAxisSolver_H

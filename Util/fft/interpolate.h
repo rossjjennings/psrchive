@@ -1,8 +1,14 @@
 //-*-C++-*-
+/***************************************************************************
+ *
+ *   Copyright (C) 2001 by Willem van Straten
+ *   Licensed under the Academic Free License version 2.1
+ *
+ ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/fft/interpolate.h,v $
-   $Revision: 1.9 $
-   $Date: 2005/01/28 06:27:08 $
+   $Revision: 1.10 $
+   $Date: 2006/03/17 13:35:16 $
    $Author: straten $*/
 
 #ifndef __fft_interpolate_h

@@ -1,3 +1,9 @@
+/***************************************************************************
+ *
+ *   Copyright (C) 2006 by Willem van Straten
+ *   Licensed under the Academic Free License version 2.1
+ *
+ ***************************************************************************/
 /*
   This program tests that:
   1) the argument to a Univariate<> derived class is handled proplery

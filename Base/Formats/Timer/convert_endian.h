@@ -1,6 +1,12 @@
+/***************************************************************************
+ *
+ *   Copyright (C) 1999 by Willem van Straten
+ *   Licensed under the Academic Free License version 2.1
+ *
+ ***************************************************************************/
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/Timer/convert_endian.h,v $
-   $Revision: 1.5 $
-   $Date: 2000/04/17 01:44:01 $
+   $Revision: 1.6 $
+   $Date: 2006/03/17 13:34:54 $
    $Author: straten $ */
 
 #ifndef __CONVERT_ENDIAN_H

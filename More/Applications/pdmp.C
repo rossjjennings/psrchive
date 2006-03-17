@@ -1,5 +1,11 @@
+/***************************************************************************
+ *
+ *   Copyright (C) 2005 by Albert Teoh
+ *   Licensed under the Academic Free License version 2.1
+ *
+ ***************************************************************************/
 //
-// $Id: pdmp.C,v 1.6 2006/02/24 01:00:16 ateoh Exp $
+// $Id: pdmp.C,v 1.7 2006/03/17 13:34:41 straten Exp $
 //
 // Searches over trial DM and Period ranges and obtains the optimal 
 // DM and Period giving the highest S/N, plots SNR vs Period vs DM, 

@@ -1,9 +1,15 @@
 //-*-C++-*-
+/***************************************************************************
+ *
+ *   Copyright (C) 2004 by Aidan Hotan
+ *   Licensed under the Academic Free License version 2.1
+ *
+ ***************************************************************************/
                                                                                 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/BinLngPeriOrder.h,v $
-   $Revision: 1.1 $
-   $Date: 2004/01/02 00:11:18 $
-   $Author: ahotan $ */
+   $Revision: 1.2 $
+   $Date: 2006/03/17 13:34:45 $
+   $Author: straten $ */
                                                                                 
 #ifndef __BinLngPeriOrder_h
 #define __BinLngPeriOrder_h

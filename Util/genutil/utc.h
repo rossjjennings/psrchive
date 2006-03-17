@@ -1,6 +1,12 @@
+/***************************************************************************
+ *
+ *   Copyright (C) 1998 by Willem van Straten
+ *   Licensed under the Academic Free License version 2.1
+ *
+ ***************************************************************************/
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/utc.h,v $
-   $Revision: 1.4 $
-   $Date: 1999/11/02 08:55:48 $
+   $Revision: 1.5 $
+   $Date: 2006/03/17 13:35:03 $
    $Author: straten $ */
 
 /* ************************************************************************

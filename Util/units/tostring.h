@@ -1,7 +1,13 @@
 //-*-C++-*-
+/***************************************************************************
+ *
+ *   Copyright (C) 2004 by Willem van Straten
+ *   Licensed under the Academic Free License version 2.1
+ *
+ ***************************************************************************/
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/tostring.h,v $
-   $Revision: 1.5 $
-   $Date: 2004/12/16 16:45:33 $
+   $Revision: 1.6 $
+   $Date: 2006/03/17 13:35:25 $
    $Author: straten $ */
 
 #ifndef __TOSTRING_H

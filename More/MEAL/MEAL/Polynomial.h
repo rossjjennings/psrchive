@@ -1,9 +1,15 @@
 //-*-C++-*-
+/***************************************************************************
+ *
+ *   Copyright (C) 2004 by Willem van Straten
+ *   Licensed under the Academic Free License version 2.1
+ *
+ ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Polynomial.h,v $
-   $Revision: 1.6 $
-   $Date: 2006/02/14 01:15:40 $
-   $Author: redwards $ */
+   $Revision: 1.7 $
+   $Date: 2006/03/17 13:35:26 $
+   $Author: straten $ */
 
 #ifndef __Polynomial_H
 #define __Polynomial_H

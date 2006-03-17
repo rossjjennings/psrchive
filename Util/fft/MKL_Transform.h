@@ -1,4 +1,10 @@
 //-*-C++-*-
+/***************************************************************************
+ *
+ *   Copyright (C) 2005 by Haydon Knight
+ *   Licensed under the Academic Free License version 2.1
+ *
+ ***************************************************************************/
 
 #ifndef _utils_psrfft_MKL_Transform_h_
 #define _utils_psrfft_MKL_Transform_h_

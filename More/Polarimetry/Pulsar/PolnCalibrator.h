@@ -1,8 +1,14 @@
 //-*-C++-*-
+/***************************************************************************
+ *
+ *   Copyright (C) 2003 by Willem van Straten
+ *   Licensed under the Academic Free License version 2.1
+ *
+ ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PolnCalibrator.h,v $
-   $Revision: 1.38 $
-   $Date: 2006/02/24 23:33:03 $
+   $Revision: 1.39 $
+   $Date: 2006/03/17 13:34:51 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PolnCalibrator_H

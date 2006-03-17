@@ -1,8 +1,14 @@
 //-*-C++-*-
+/***************************************************************************
+ *
+ *   Copyright (C) 2006 by Willem van Straten
+ *   Licensed under the Academic Free License version 2.1
+ *
+ ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/Attic/ArchiveMatch.h,v $
-   $Revision: 1.1 $
-   $Date: 2006/01/06 22:24:11 $
+   $Revision: 1.2 $
+   $Date: 2006/03/17 13:34:50 $
    $Author: straten $ */
 
 #ifndef __Pulsar_ArchiveMatch_h

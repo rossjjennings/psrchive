@@ -1,6 +1,12 @@
+/***************************************************************************
+ *
+ *   Copyright (C) 1999 by Willem van Straten
+ *   Licensed under the Academic Free License version 2.1
+ *
+ ***************************************************************************/
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/Timer/timer.h,v $
-   $Revision: 1.16 $
-   $Date: 2004/09/06 09:05:50 $
+   $Revision: 1.17 $
+   $Date: 2006/03/17 13:34:54 $
    $Author: straten $ */
 
 /* include file for the main timer structure                            */

@@ -1,4 +1,10 @@
 //-*-C++-*-
+/***************************************************************************
+ *
+ *   Copyright (C) 2005 by Haydon Knight
+ *   Licensed under the Academic Free License version 2.1
+ *
+ ***************************************************************************/
 
 #ifndef __FTransform_h_
 #define __FTransform_h_

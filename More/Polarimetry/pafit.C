@@ -1,3 +1,9 @@
+/***************************************************************************
+ *
+ *   Copyright (C) 2004 by Willem van Straten
+ *   Licensed under the Academic Free License version 2.1
+ *
+ ***************************************************************************/
 #include "Calibration/ReceptionModel.h"
 #include "Calibration/CoherencyMeasurementSet.h"
 #include "Calibration/MeanCoherency.h"

@@ -1,3 +1,9 @@
+/***************************************************************************
+ *
+ *   Copyright (C) 2006 by Russell Edwards
+ *   Licensed under the Academic Free License version 2.1
+ *
+ ***************************************************************************/
 #include "MEAL/VonMises.h"
 #include "MEAL/InverseRule.h"
 #include "MEAL/ScalarBesselI0.h"

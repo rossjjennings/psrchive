@@ -1,9 +1,15 @@
 //-*-C++-*-
+/***************************************************************************
+ *
+ *   Copyright (C) 2004 by Willem van Straten
+ *   Licensed under the Academic Free License version 2.1
+ *
+ ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/ReferenceAble.h,v $
-   $Revision: 1.3 $
-   $Date: 2005/09/05 02:30:20 $
-   $Author: hknight $ */
+   $Revision: 1.4 $
+   $Date: 2006/03/17 13:35:22 $
+   $Author: straten $ */
 
 #ifndef __ReferenceAble_h
 #define __ReferenceAble_h

@@ -1,3 +1,9 @@
+/***************************************************************************
+ *
+ *   Copyright (C) 2001 by Willem van Straten
+ *   Licensed under the Academic Free License version 2.1
+ *
+ ***************************************************************************/
 // /////////////////////////////////////////////////////////////////////
 //
 // Given a pulsar ephemeris, update its parameters to a new epoch

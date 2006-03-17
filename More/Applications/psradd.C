@@ -1,3 +1,9 @@
+/***************************************************************************
+ *
+ *   Copyright (C) 2002 by Willem van Straten
+ *   Licensed under the Academic Free License version 2.1
+ *
+ ***************************************************************************/
 #include <iostream>
 #include <algorithm>
 
@@ -137,7 +143,7 @@ int main (int argc, char **argv) try {
       return 0;
       
     case 'i':
-      cout << "$Id: psradd.C,v 1.28 2006/02/24 01:00:16 ateoh Exp $" << endl;
+      cout << "$Id: psradd.C,v 1.29 2006/03/17 13:34:42 straten Exp $" << endl;
       return 0;
 
     case 'b':

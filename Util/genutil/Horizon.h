@@ -1,8 +1,14 @@
 //-*-C++-*-
+/***************************************************************************
+ *
+ *   Copyright (C) 2005 by Willem van Straten
+ *   Licensed under the Academic Free License version 2.1
+ *
+ ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Horizon.h,v $
-   $Revision: 1.2 $
-   $Date: 2005/12/14 16:16:18 $
+   $Revision: 1.3 $
+   $Date: 2006/03/17 13:35:05 $
    $Author: straten $ */
 
 #ifndef __Horizon_H

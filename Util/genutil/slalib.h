@@ -1,6 +1,12 @@
+/***************************************************************************
+ *
+ *   Copyright (C) 2005 by Willem van Straten
+ *   Licensed under the Academic Free License version 2.1
+ *
+ ***************************************************************************/
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Attic/slalib.h,v $
-   $Revision: 1.1 $
-   $Date: 2005/01/26 11:10:18 $
+   $Revision: 1.2 $
+   $Date: 2006/03/17 13:35:08 $
    $Author: straten $ */
 
 #ifndef __SLA_DECL_H

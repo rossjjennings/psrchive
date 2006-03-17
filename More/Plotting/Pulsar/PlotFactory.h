@@ -1,8 +1,14 @@
 //-*-C++-*-
+/***************************************************************************
+ *
+ *   Copyright (C) 2006 by Willem van Straten
+ *   Licensed under the Academic Free License version 2.1
+ *
+ ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PlotFactory.h,v $
-   $Revision: 1.5 $
-   $Date: 2006/03/11 22:14:46 $
+   $Revision: 1.6 $
+   $Date: 2006/03/17 13:34:49 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PlotFactory_h

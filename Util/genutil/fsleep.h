@@ -1,6 +1,12 @@
+/***************************************************************************
+ *
+ *   Copyright (C) 2001 by Willem van Straten
+ *   Licensed under the Academic Free License version 2.1
+ *
+ ***************************************************************************/
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/fsleep.h,v $
-   $Revision: 1.1 $
-   $Date: 2001/02/15 04:09:14 $
+   $Revision: 1.2 $
+   $Date: 2006/03/17 13:34:58 $
    $Author: straten $ */
 
 #ifndef __FSLEEP_H

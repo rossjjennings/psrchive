@@ -1,8 +1,14 @@
 //-*-C++-*-
+/***************************************************************************
+ *
+ *   Copyright (C) 1999 by Willem van Straten
+ *   Licensed under the Academic Free License version 2.1
+ *
+ ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/residual.h,v $
-   $Revision: 1.12 $
-   $Date: 2005/02/08 09:24:10 $
+   $Revision: 1.13 $
+   $Date: 2006/03/17 13:34:33 $
    $Author: straten $ */
 
 #ifndef __RESIDUAL_H

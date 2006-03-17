@@ -1,3 +1,9 @@
+/***************************************************************************
+ *
+ *   Copyright (C) 2005 by Willem van Straten
+ *   Licensed under the Academic Free License version 2.1
+ *
+ ***************************************************************************/
 #include "Pulsar/FrequencyIntegrate.h"
 #include "Pulsar/Integration.h"
 #include "Pulsar/Profile.h"

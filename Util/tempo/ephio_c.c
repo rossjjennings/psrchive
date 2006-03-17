@@ -1,3 +1,9 @@
+/***************************************************************************
+ *
+ *   Copyright (C) 1998 by redwards Russell Edwards
+ *   Licensed under the Academic Free License version 2.1
+ *
+ ***************************************************************************/
 /* This file defines C wrappers to the fortran rd_eph and wr_eph. */
 
 #ifdef HAVE_CONFIG_H

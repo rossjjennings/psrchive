@@ -1,8 +1,14 @@
 //-*-C++-*-
+/***************************************************************************
+ *
+ *   Copyright (C) 2003 by Willem van Straten
+ *   Licensed under the Academic Free License version 2.1
+ *
+ ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Vector.h,v $
-   $Revision: 1.12 $
-   $Date: 2006/01/31 05:23:19 $
+   $Revision: 1.13 $
+   $Date: 2006/03/17 13:35:23 $
    $Author: straten $ */
 
 #ifndef __Vector_H

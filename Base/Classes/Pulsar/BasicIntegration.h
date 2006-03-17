@@ -1,8 +1,14 @@
 //-*-C++-*-
+/***************************************************************************
+ *
+ *   Copyright (C) 2002 by Willem van Straten
+ *   Licensed under the Academic Free License version 2.1
+ *
+ ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/BasicIntegration.h,v $
-   $Revision: 1.7 $
-   $Date: 2004/07/16 07:29:05 $
+   $Revision: 1.8 $
+   $Date: 2006/03/17 13:34:50 $
    $Author: straten $ */
 
 #ifndef __BasicIntegration_h

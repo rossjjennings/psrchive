@@ -1,7 +1,13 @@
+/***************************************************************************
+ *
+ *   Copyright (C) 1999 by Willem van Straten
+ *   Licensed under the Academic Free License version 2.1
+ *
+ ***************************************************************************/
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/machine_endian.h,v $
-   $Revision: 1.7 $
-   $Date: 2004/08/31 06:42:58 $
-   $Author: redwards $ */
+   $Revision: 1.8 $
+   $Date: 2006/03/17 13:34:59 $
+   $Author: straten $ */
 
 #ifndef __M_ENDIAN_H
 #define __M_ENDIAN_H

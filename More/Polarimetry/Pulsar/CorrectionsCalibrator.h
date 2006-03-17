@@ -1,8 +1,14 @@
 //-*-C++-*-
+/***************************************************************************
+ *
+ *   Copyright (C) 2004 by Willem van Straten
+ *   Licensed under the Academic Free License version 2.1
+ *
+ ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/Attic/CorrectionsCalibrator.h,v $
-   $Revision: 1.6 $
-   $Date: 2006/02/16 22:58:49 $
+   $Revision: 1.7 $
+   $Date: 2006/03/17 13:34:50 $
    $Author: straten $ */
 
 #ifndef __Pulsar_CorrectionsCalibrator_H

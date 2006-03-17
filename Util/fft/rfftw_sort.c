@@ -1,3 +1,9 @@
+/***************************************************************************
+ *
+ *   Copyright (C) 2001 by straten Willem van Straten
+ *   Licensed under the Academic Free License version 2.1
+ *
+ ***************************************************************************/
 /*! This function takes the "halfcomplex" spectrum, as produced by rfftw_one:
 
    r0, r1, r2, ..., rn/2, i(n+1)/2-1, ..., i2, i1

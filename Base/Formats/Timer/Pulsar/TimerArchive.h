@@ -1,8 +1,14 @@
 //-*-C++-*-
+/***************************************************************************
+ *
+ *   Copyright (C) 2003 by Willem van Straten
+ *   Licensed under the Academic Free License version 2.1
+ *
+ ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/Timer/Pulsar/TimerArchive.h,v $
-   $Revision: 1.16 $
-   $Date: 2005/12/09 16:41:07 $
+   $Revision: 1.17 $
+   $Date: 2006/03/17 13:34:55 $
    $Author: straten $ */
 
 #ifndef __Timer_Archive_h

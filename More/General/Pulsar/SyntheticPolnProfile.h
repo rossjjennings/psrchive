@@ -1,8 +1,14 @@
 //-*-C++-*-
+/***************************************************************************
+ *
+ *   Copyright (C) 2005 by Willem van Straten
+ *   Licensed under the Academic Free License version 2.1
+ *
+ ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/SyntheticPolnProfile.h,v $
-   $Revision: 1.1 $
-   $Date: 2005/07/16 20:22:15 $
+   $Revision: 1.2 $
+   $Date: 2006/03/17 13:34:52 $
    $Author: straten $ */
 
 #ifndef __Pulsar_SyntheticPolnProfile_h

@@ -1,9 +1,15 @@
 //-*-C++-*-
+/***************************************************************************
+ *
+ *   Copyright (C) 1999 by Willem van Straten
+ *   Licensed under the Academic Free License version 2.1
+ *
+ ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/polyco.h,v $
-   $Revision: 1.28 $
-   $Date: 2005/10/24 01:33:38 $
-   $Author: hknight $ */
+   $Revision: 1.29 $
+   $Date: 2006/03/17 13:34:31 $
+   $Author: straten $ */
 
 #ifndef __POLY_H
 #define __POLY_H

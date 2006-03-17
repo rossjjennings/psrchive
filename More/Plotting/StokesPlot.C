@@ -1,3 +1,9 @@
+/***************************************************************************
+ *
+ *   Copyright (C) 2006 by Willem van Straten
+ *   Licensed under the Academic Free License version 2.1
+ *
+ ***************************************************************************/
 #include "Pulsar/StokesPlot.h"
 #include "Pulsar/Polarization.h"
 #include "Pulsar/Archive.h"

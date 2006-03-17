@@ -1,3 +1,9 @@
+/***************************************************************************
+ *
+ *   Copyright (C) 2005 by Russell Edwards
+ *   Licensed under the Academic Free License version 2.1
+ *
+ ***************************************************************************/
 #include <algorithm>
 #include <math.h>
 #include "Pulsar/Profile.h"

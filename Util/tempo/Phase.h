@@ -1,3 +1,9 @@
+/***************************************************************************
+ *
+ *   Copyright (C) 1999 by Willem van Straten
+ *   Licensed under the Academic Free License version 2.1
+ *
+ ***************************************************************************/
 #ifndef __POLYCO_PHASE_H
 #define __POLYCO_PHASE_H
 

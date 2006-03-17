@@ -1,8 +1,14 @@
 //-*-C++-*-
+/***************************************************************************
+ *
+ *   Copyright (C) 2001 by Willem van Straten
+ *   Licensed under the Academic Free License version 2.1
+ *
+ ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/pgutil/Plot3D.h,v $
-   $Revision: 1.3 $
-   $Date: 2001/08/21 15:37:19 $
+   $Revision: 1.4 $
+   $Date: 2006/03/17 13:35:10 $
    $Author: straten $*/
 
 #ifndef __CurvePlotter2D3_H

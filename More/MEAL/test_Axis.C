@@ -1,3 +1,9 @@
+/***************************************************************************
+ *
+ *   Copyright (C) 2004 by Willem van Straten
+ *   Licensed under the Academic Free License version 2.1
+ *
+ ***************************************************************************/
 #include "MEAL/Axis.h"
 #include "MEAL/Polynomial.h"
 #include "MEAL/RotatingVectorModel.h"

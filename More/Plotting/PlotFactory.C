@@ -1,3 +1,9 @@
+/***************************************************************************
+ *
+ *   Copyright (C) 2006 by Willem van Straten
+ *   Licensed under the Academic Free License version 2.1
+ *
+ ***************************************************************************/
 #include "Pulsar/PlotFactory.h"
 #include "Pulsar/ProfilePlot.h"
 #include "Pulsar/StokesPlot.h"

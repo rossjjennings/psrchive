@@ -1,8 +1,14 @@
 //-*-C++-*-
+/***************************************************************************
+ *
+ *   Copyright (C) 2000 by Willem van Straten
+ *   Licensed under the Academic Free License version 2.1
+ *
+ ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Cartesian.h,v $
-   $Revision: 1.9 $
-   $Date: 2004/11/30 16:31:06 $
+   $Revision: 1.10 $
+   $Date: 2006/03/17 13:35:04 $
    $Author: straten $ */
 
 #ifndef __CARTESIAN_H

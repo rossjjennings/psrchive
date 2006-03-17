@@ -1,8 +1,14 @@
 //-*-C++-*-
+/***************************************************************************
+ *
+ *   Copyright (C) 2005 by Willem van Straten
+ *   Licensed under the Academic Free License version 2.1
+ *
+ ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/Receiver_Linear.h,v $
-   $Revision: 1.4 $
-   $Date: 2006/02/24 22:13:36 $
+   $Revision: 1.5 $
+   $Date: 2006/03/17 13:34:45 $
    $Author: straten $ */
 
 #ifndef __Receiver_Linear_h

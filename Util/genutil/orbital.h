@@ -1,6 +1,12 @@
+/***************************************************************************
+ *
+ *   Copyright (C) 1999 by Willem van Straten
+ *   Licensed under the Academic Free License version 2.1
+ *
+ ***************************************************************************/
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/orbital.h,v $
-   $Revision: 1.2 $
-   $Date: 2001/02/12 01:56:45 $
+   $Revision: 1.3 $
+   $Date: 2006/03/17 13:35:00 $
    $Author: straten $ */
 
 #ifndef __ORBITAL_H

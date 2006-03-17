@@ -1,9 +1,15 @@
 //-*-C++-*-
+/***************************************************************************
+ *
+ *   Copyright (C) 2002 by Aidan Hotan
+ *   Licensed under the Academic Free License version 2.1
+ *
+ ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/BasicArchive.h,v $
-   $Revision: 1.32 $
-   $Date: 2005/10/25 04:44:35 $
-   $Author: ateoh $ */
+   $Revision: 1.33 $
+   $Date: 2006/03/17 13:34:50 $
+   $Author: straten $ */
 
 #ifndef __BasicArchive_h
 #define __BasicArchive_h

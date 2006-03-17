@@ -1,3 +1,9 @@
+/***************************************************************************
+ *
+ *   Copyright (C) 2003 by Aidan Hotan
+ *   Licensed under the Academic Free License version 2.1
+ *
+ ***************************************************************************/
 // A simple command line tool for zapping RFI
 
 #include "Pulsar/RFIMitigation.h"
@@ -130,7 +136,7 @@ int main (int argc, char *argv[]) {
       Pulsar::Archive::set_verbosity(3);
       break;
     case 'i':
-      cout << "$Id: paz.C,v 1.32 2006/02/24 01:00:16 ateoh Exp $" << endl;
+      cout << "$Id: paz.C,v 1.33 2006/03/17 13:34:41 straten Exp $" << endl;
       return 0;
 
     case 'm':

@@ -1,9 +1,15 @@
 //-*-C++-*-
+/***************************************************************************
+ *
+ *   Copyright (C) 2004 by Willem van Straten
+ *   Licensed under the Academic Free License version 2.1
+ *
+ ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/StandardCandles.h,v $
-   $Revision: 1.4 $
-   $Date: 2005/03/03 03:28:31 $
-   $Author: hknight $ */
+   $Revision: 1.5 $
+   $Date: 2006/03/17 13:34:50 $
+   $Author: straten $ */
 
 #ifndef __Pulsar_FluxCalibratorDatabase_h
 #define __Pulsar_FluxCalibratorDatabase_h

@@ -1,6 +1,12 @@
+/***************************************************************************
+ *
+ *   Copyright (C) 1999 by Willem van Straten
+ *   Licensed under the Academic Free License version 2.1
+ *
+ ***************************************************************************/
 /* $Source: /cvsroot/psrchive/psrchive/Util/qtutil/qt_MJD.h,v $
-   $Revision: 1.3 $
-   $Date: 1999/12/23 02:05:48 $
+   $Revision: 1.4 $
+   $Date: 2006/03/17 13:35:19 $
    $Author: straten $ */
 
 #ifndef __QT_MJD_H

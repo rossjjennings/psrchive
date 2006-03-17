@@ -1,3 +1,9 @@
+/***************************************************************************
+ *
+ *   Copyright (C) 2003 by Aidan Hotan
+ *   Licensed under the Academic Free License version 2.1
+ *
+ ***************************************************************************/
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
 #include "Pulsar/Profile.h"
@@ -131,7 +137,7 @@ int main (int argc, char *argv[])
       break;
 
     case 'i':
-      cout << "$Id: pat.C,v 1.44 2006/01/26 21:51:54 straten Exp $" << endl;
+      cout << "$Id: pat.C,v 1.45 2006/03/17 13:34:41 straten Exp $" << endl;
       return 0;
 
     case 'F':

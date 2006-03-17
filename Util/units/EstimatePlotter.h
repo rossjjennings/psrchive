@@ -1,8 +1,14 @@
 //-*-C++-*-
+/***************************************************************************
+ *
+ *   Copyright (C) 2003 by Willem van Straten
+ *   Licensed under the Academic Free License version 2.1
+ *
+ ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/EstimatePlotter.h,v $
-   $Revision: 1.11 $
-   $Date: 2004/11/23 10:54:27 $
+   $Revision: 1.12 $
+   $Date: 2006/03/17 13:35:20 $
    $Author: straten $ */
 
 #ifndef __EstimatePlotter_h

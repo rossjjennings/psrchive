@@ -1,8 +1,14 @@
 //-*-C++-*-
+/***************************************************************************
+ *
+ *   Copyright (C) 2006 by Willem van Straten
+ *   Licensed under the Academic Free License version 2.1
+ *
+ ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/TemplateUncertainty.h,v $
-   $Revision: 1.1 $
-   $Date: 2006/01/10 23:35:50 $
+   $Revision: 1.2 $
+   $Date: 2006/03/17 13:34:44 $
    $Author: straten $ */
 
 #ifndef __Calibration_TemplateUncertainty_H

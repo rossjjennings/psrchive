@@ -1,8 +1,14 @@
 //-*-C++-*-
+/***************************************************************************
+ *
+ *   Copyright (C) 2002 by Willem van Straten
+ *   Licensed under the Academic Free License version 2.1
+ *
+ ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Physical.h,v $
-   $Revision: 1.3 $
-   $Date: 2005/12/14 16:14:48 $
+   $Revision: 1.4 $
+   $Date: 2006/03/17 13:34:37 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Physical_h

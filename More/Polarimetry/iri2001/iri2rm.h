@@ -1,6 +1,12 @@
+/***************************************************************************
+ *
+ *   Copyright (C) 2005 by Willem van Straten
+ *   Licensed under the Academic Free License version 2.1
+ *
+ ***************************************************************************/
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/iri2001/iri2rm.h,v $
-   $Revision: 1.1 $
-   $Date: 2005/12/14 16:16:32 $
+   $Revision: 1.2 $
+   $Date: 2006/03/17 13:34:44 $
    $Author: straten $ */
 
 #ifdef HAVE_CONFIG_H

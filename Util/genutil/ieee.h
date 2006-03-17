@@ -1,6 +1,12 @@
+/***************************************************************************
+ *
+ *   Copyright (C) 1999 by Willem van Straten
+ *   Licensed under the Academic Free License version 2.1
+ *
+ ***************************************************************************/
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/ieee.h,v $
-   $Revision: 1.2 $
-   $Date: 1999/11/02 09:00:47 $
+   $Revision: 1.3 $
+   $Date: 2006/03/17 13:34:59 $
    $Author: straten $ */
 
 #ifndef IEEE_H

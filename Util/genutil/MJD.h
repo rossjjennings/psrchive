@@ -1,8 +1,14 @@
 //-*-C++-*-
+/***************************************************************************
+ *
+ *   Copyright (C) 1998 by Matthew Britton
+ *   Licensed under the Academic Free License version 2.1
+ *
+ ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/MJD.h,v $
-   $Revision: 1.23 $
-   $Date: 2005/01/26 12:07:28 $
+   $Revision: 1.24 $
+   $Date: 2006/03/17 13:35:05 $
    $Author: straten $ */
 
 #ifndef __GENUTIL_MJD_H

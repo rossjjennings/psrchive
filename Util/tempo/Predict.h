@@ -1,8 +1,14 @@
 //-*-C++-*-
+/***************************************************************************
+ *
+ *   Copyright (C) 2004 by Willem van Straten
+ *   Licensed under the Academic Free License version 2.1
+ *
+ ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/Predict.h,v $
-   $Revision: 1.3 $
-   $Date: 2004/11/01 09:54:56 $
+   $Revision: 1.4 $
+   $Date: 2006/03/17 13:34:33 $
    $Author: straten $ */
 
 #ifndef __Tempo_Predict_h

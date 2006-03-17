@@ -1,3 +1,9 @@
+/***************************************************************************
+ *
+ *   Copyright (C) 2003 by Na Wang
+ *   Licensed under the Academic Free License version 2.1
+ *
+ ***************************************************************************/
 //
 // $Id: pas.C, v 1.00 2003/05/05 nwang 
 //
@@ -81,7 +87,7 @@ int main (int argc, char** argv)
       return 0;
 
     case 'i':
-      cout << "$Id: pas.C,v 1.19 2004/12/31 19:35:19 straten Exp $" << endl;
+      cout << "$Id: pas.C,v 1.20 2006/03/17 13:34:41 straten Exp $" << endl;
       return 0;
 
     case 'r':

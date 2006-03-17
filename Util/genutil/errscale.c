@@ -1,3 +1,9 @@
+/***************************************************************************
+ *
+ *   Copyright (C) 2003 by straten Willem van Straten
+ *   Licensed under the Academic Free License version 2.1
+ *
+ ***************************************************************************/
 /* @(#)errscale.c	3.2 6/17/93 */
 #include <string.h>
 #include <stdio.h>

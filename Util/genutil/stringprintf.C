@@ -1,3 +1,9 @@
+/***************************************************************************
+ *
+ *   Copyright (C) 2000 by Russell Edwards
+ *   Licensed under the Academic Free License version 2.1
+ *
+ ***************************************************************************/
 #include <stdio.h>
 #include <string>
 #include <stdarg.h>
