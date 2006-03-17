@@ -1,4 +1,10 @@
 //-*-C++-*-
+/***************************************************************************
+ *
+ *   Copyright (C) 2006 by Haydon Knight
+ *   Licensed under the Academic Free License version 2.1
+ *
+ ***************************************************************************/
 
 #ifndef __Pulsar_Archive_utils_h_
 #define __Pulsar_Archive_utils_h_
