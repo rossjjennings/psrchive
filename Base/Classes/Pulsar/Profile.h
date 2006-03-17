@@ -1,9 +1,9 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Profile.h,v $
-   $Revision: 1.90 $
-   $Date: 2005/12/14 16:17:31 $
-   $Author: straten $ */
+   $Revision: 1.91 $
+   $Date: 2006/03/17 00:41:07 $
+   $Author: hknight $ */
 
 #ifndef __Pulsar_Profile_h
 #define __Pulsar_Profile_h
@@ -178,15 +178,6 @@ namespace Pulsar {
     
     //! Replace profile with its power spectrum
     void get_power_spectrum(float gamma=1.0);
-
-    //! Sum the flux in the specified bins
-    float sum_flux(int rise, int fall,
-		   float min_phase = -1.0, float dc=default_duty_cycle) const;
-    /*! Finding the bin numbers at which the flux falls below a threshold, 
-      and sum the flux in those bins */
-    //! Assumes profile is delta function
-    float sum_flux(float dropoff=default_amplitude_dropoff,
-		   float min_phase = -1.0, float dc=default_duty_cycle) const;
 
     //! Returns the bin number with the maximum amplitude
     int find_max_bin (int bin_start=0, int bin_end=0) const;
