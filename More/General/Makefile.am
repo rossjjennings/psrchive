@@ -2,6 +2,7 @@
 lib_LTLIBRARIES = libpsrchive.la
 
 nobase_include_HEADERS = model_profile.h Pulsar/ArchiveExpert.h \
+	Pulsar/Algorithm.h               Pulsar/Container.h \
 	Pulsar/AdaptiveSNR.h             Pulsar/PolarCalibrator.h \
 	Pulsar/Archive.h                 Pulsar/PolnCalibrator.h \
 	Pulsar/ArchiveMatch.h            Pulsar/ArchiveSort.h \
@@ -17,6 +18,7 @@ nobase_include_HEADERS = model_profile.h Pulsar/ArchiveExpert.h \
 	Pulsar/CalibratorStokesInfo.h    Pulsar/ReferenceCalibrator.h \
 	Pulsar/CorrectionsCalibrator.h   Pulsar/SingleAxisCalibrator.h \
 	Pulsar/IonosphereCalibrator.h    Pulsar/IntegrationManagerExpert.h \
+	Pulsar/IntegrationExpert.h       Pulsar/Transformation.h \
 	Pulsar/Database.h                Pulsar/Smooth.h \
 	Pulsar/ExampleArchive.h          Pulsar/SmoothMean.h \
 	Pulsar/FaradayRotation.h         Pulsar/Polarization.h \
@@ -35,10 +37,9 @@ nobase_include_HEADERS = model_profile.h Pulsar/ArchiveExpert.h \
 	Pulsar/PhaseWeight.h             Pulsar/ArchiveTI.h \
 	Pulsar/PhaseWeightFunction.h     Pulsar/ProfileWeightFunction.h \
 	Pulsar/Plotter.h                 Pulsar/IntegrationTI.h \
-	Pulsar/BaselineWindow.h \
+	Pulsar/BaselineWindow.h          Pulsar/Pulsar.h \
 	Pulsar/ReflectStokes.h           Pulsar/ChannelZapMedian.h \
 	Pulsar/ChannelWeight.h           Pulsar/ChannelZapModulation.h \
-        Pulsar/Container.h               Pulsar/Pulsar.h \
 	Pulsar/Config.h                  Pulsar/Profile_utils.h
 
 libpsrchive_la_SOURCES = plugins.csh getopt.h Physical.h \

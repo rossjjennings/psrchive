@@ -12,7 +12,7 @@ libunits_la_SOURCES = stringtok.C Configuration.C			     \
 	ScalarAbsolute.C ScalarExponential.C ScalarLogarithm.C		     \
 	ScalarInverseHypTangent.C BinaryScalar.C ScalarInverseTangent2.C     \
 	ScalarPower.C ScalarArgument.C					     \
-        ScalarBesselI0 VonMises.C ScaledVonMises.C ScaledVonMisesDeriv.C     \
+        VonMises.C ScaledVonMises.C ScaledVonMisesDeriv.C     \
 	Polynomial.C Gaussian.C Complex2Value.C Complex2.C Complex2Math.C    \
 	Complex2Constant.C Gain.C Phase.C Boost.C			     \
 	Rotation.C Polar.C Coherency.C PhysicalCoherency.C		     \

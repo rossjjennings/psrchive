@@ -7,14 +7,14 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/AdaptiveSNR.h,v $
-   $Revision: 1.5 $
-   $Date: 2006/03/17 13:34:50 $
+   $Revision: 1.6 $
+   $Date: 2006/03/17 16:48:18 $
    $Author: straten $ */
 
 #ifndef __Pulsar_AdaptiveSNR_h
 #define __Pulsar_AdaptiveSNR_h
 
-#include "Algorithm.h"
+#include "Pulsar/Algorithm.h"
 
 namespace Pulsar {
 

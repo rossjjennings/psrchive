@@ -7,7 +7,7 @@ noinst_LTLIBRARIES = libPlot.la
 #
 if HAVE_PGPLOT
 
-nobase_include_HEADERS = 
+nobase_include_HEADERS = iopair.h \
 	Pulsar/Plot.h Pulsar/PlotFactory.h Pulsar/PlotIndex.h		\
 	Pulsar/PlotScale.h Pulsar/PhaseScale.h Pulsar/FrequencyScale.h	\
 	Pulsar/PlotAxis.h Pulsar/PlotLabel.h				\
