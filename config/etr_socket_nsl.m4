@@ -57,7 +57,7 @@ ac_cv_socket_libs, [
 
         if test x"$ac_cv_socket_libs" = "xno"
         then
-                AC_MSG_ERROR([Cannot find socket libraries])
+                AC_MSG_WARN([Cannot find socket libraries])
         elif test x"$ac_cv_socket_libs" = "x-lc"
         then
                 SOCKET_LIBS=""
