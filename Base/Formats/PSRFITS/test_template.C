@@ -8,12 +8,13 @@
 #include <string>
 
 #include <fitsio.h>
-
+#include "genutil.h"
 #include "FITSError.h"
 
 using namespace std;
 
-void test_template (const char* template_file, bool verbose = true);
+void test_template (const char* template_file, bool populate = true, 
+		    bool verbose = true);
 void parse_template (const char* template_file, bool verbose = true);
 
 int main (int argc, char** argv) try {
@@ -33,7 +34,7 @@ int main (int argc, char** argv) try {
 
   cerr << "Creating " << nloops << " files from template" << endl;
   for (unsigned iloop=0; iloop<nloops; iloop++)
-    test_template (filename.c_str(), false);
+    test_template (filename.c_str(), true, false);
 
   cerr << "Test passed" << endl;
   return 0;
@@ -120,7 +121,7 @@ void parse_template (const char* template_file, bool verbose)
 }
 
 
-void test_template (const char* template_file, bool verbose)
+void test_template (const char* template_file, bool populate, bool verbose)
 {
   char* filename = "!test_template.psrfits";
 
@@ -139,6 +140,72 @@ void test_template (const char* template_file, bool verbose)
   if (status)
     throw FITSError (status, "test_template",
 		     "fits_execute_template (%s)", template_file);
+
+  if (populate)
+  {
+    fits_movabs_hdu (fptr, 1, 0, &status);
+    if (status)
+      throw FITSError (status, "test_template",
+		       "fits_moveabs_hdu");
+    // populate some tables
+    fits_movnam_hdu (fptr, BINARY_TBL, "SUBINT", 0, &status);
+    if (status != 0)
+      throw FITSError (status, "test_template", "fits_movnam_hdu SUBINT");
+    int npol = 2, nbin=3, nchan=4;
+    int16 data[] = {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24};
+    int colnum = 0;
+    fits_get_colnum (fptr, CASEINSEN, "DATA", &colnum, &status);
+    if (status != 0)
+      throw FITSError (status, "test_template", "fits_get_colnum DATA");
+    fits_modify_vector_len (fptr, colnum, nchan*npol*nbin, &status);
+    if (status != 0)
+      throw FITSError (status, "test_template", "fits_modify_vector_len DATA");
+    fits_write_col (fptr, TSHORT, colnum, 1, 1, npol*nbin*nchan, 
+		    data, &status);
+    if (status != 0)
+      throw FITSError (status, "test_template", "fits_write_col DATA");
+    fits_write_col (fptr, TSHORT, colnum, 2, 1, npol*nbin*nchan, 
+		    data, &status);
+    if (status != 0)
+      throw FITSError (status, "test_template", "fits_write_col DATA");
+    fits_write_col (fptr, TSHORT, colnum, 3, 1, npol*nbin*nchan, 
+		    data, &status); // 3 subints
+    if (status != 0)
+      throw FITSError (status, "test_template", "fits_write_col DATA");
+
+#if 0
+    // and a tempo2 predictor bit of text
+    char *predictor="ChebyModelSet 1 segments\n"
+      "ChebyModel BEGIN\n"
+      "PSRNAME J1906+0746\n"
+      "SITENAME pks\n"
+      "TIME_RANGE 52999.73100000000000000000000000021 52999.77100000000000000000000000024\n"
+      "FREQ_RANGE 600 700\n"
+      "DISPERSION_CONSTANT -6272008.470365761865252891275788158\n"
+      "NCOEFF_TIME 4\n"
+      "NCOEFF_FREQ 3\n"
+      "COEFFS 277860797.9339920026837258594028233 -5.220161217568439556184814296811367e-07 3.007171084412236395612484491876061e-08\n"
+      "COEFFS 23987.68472248130594267099310411194 6.495268167732337239776991618520845e-07 -3.741726696168595133440611759046334e-08\n"
+      "COEFFS 0.0008448324536128677846111604043291928 -1.715585520448988683531246072839005e-08 9.882946101307895601123045482021159e-10\n"
+      "COEFFS -1.488687694655296405712529028194112e-05 -3.397481491206875835762687894958933e-10 1.957116344031319920601399137776413e-11\n"
+      "ChebyModel END\n";
+    fits_movnam_hdu (fptr, BINARY_TBL, "T2PRDCT", 0, &status);
+    
+    if (status != 0)
+      throw FITSError (status, "test_template", 
+		       "fits_movnam_hdu T2PRDCT");
+    fits_get_colnum (fptr, CASEINSEN, "DATA", &colnum, &status);
+    if (status != 0)
+      throw FITSError (status, "test_template", "fits_get_colnum DATA");
+    fits_modify_vector_len (fptr, colnum, strlen(predictor), &status);
+    if (status != 0)
+      throw FITSError (status, "test_template", "fits_modify_vector_len DATA");
+    fits_write_col (fptr, TSTRING, colnum, 1, 1, strlen(predictor), 
+		    &predictor, &status);  
+    if (status != 0)
+      throw FITSError (status, "test_template", "fits_write_col DATA");
+#endif
+  }
 
   fits_close_file (fptr, &status);
   if (status)
