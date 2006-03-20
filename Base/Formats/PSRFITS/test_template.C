@@ -173,7 +173,7 @@ void test_template (const char* template_file, bool populate, bool verbose)
     if (status != 0)
       throw FITSError (status, "test_template", "fits_write_col DATA");
 
-#if 0
+#if 1
     // and a tempo2 predictor bit of text
     char *predictor="ChebyModelSet 1 segments\n"
       "ChebyModel BEGIN\n"
