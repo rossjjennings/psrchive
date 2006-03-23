@@ -8,11 +8,7 @@
 #include "Pulsar/Integration.h"
 #include "Pulsar/IntegrationOrder.h"
 #include "Pulsar/Profile.h"
-#include "Pulsar/Config.h"
 #include "Error.h"
-
-bool Pulsar::Archive::weight_by_duration
-= Pulsar::config.get<bool> ("weight_by_duration", true);
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -270,9 +266,6 @@ double Pulsar::Archive::weighted_frequency (unsigned ichan,
       //if (verbose == 3)
       //cerr << "Pulsar::Archive::weighted_frequency [" << isubint << "]"
       //  " freq=" << freq << " wt=" << weight << endl;
-
-      if (weight_by_duration)
-	weight *= get_Integration (isubint) -> get_duration();
       
       freqsum += freq * weight;
       weightsum += weight;
