@@ -62,8 +62,13 @@ Pulsar::ProcHistory::row& Pulsar::ProcHistory::get_last ()
   return rows.back();
 }
 
-void Pulsar::ProcHistory::set_command_str(string str)
+void Pulsar::ProcHistory::set_command_str (string str)
 {
+  if (str.length() > 80) {
+    cerr << "ProcHistory::set_command_str WARNING truncated to 80 chars" 
+	 << endl;
+    str = str.substr(0, 80);
+  }
   command_str = str;
 }
 
