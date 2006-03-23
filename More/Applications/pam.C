@@ -30,6 +30,7 @@
 #include "Pulsar/BinLngAscOrder.h"
 #include "Pulsar/BinLngPeriOrder.h"
 #include "Pulsar/Receiver.h"
+#include "Pulsar/FaradayRotation.h"
 
 #include "dirutil.h"
 #include "genutil.h"
@@ -80,6 +81,7 @@ void usage()
     "  -R RM            Correct for ISM faraday rotation \n"
     "  --RR             Dedefaraday (i.e. undo -R option) \n"
     "  --RM RM          Install a new RM but don't defaraday \n"
+    "  --inf            Use infinite frequency as reference when defaradaying\n"
     "  -s               Smear with this duty cycle \n"
     "  -r               Rotate profiles by this many turns \n" 
     "  -w               Reset profile weights to this value \n"
@@ -188,6 +190,7 @@ int main (int argc, char *argv[]) try {
     bool reverse_freqs = false;
     string site;
     string name;
+    bool defaraday_to_infinity = false;
 
     Reference::To<Pulsar::IntegrationOrder> myio;
     Reference::To<Pulsar::Receiver> install_receiver;
@@ -203,6 +206,7 @@ int main (int argc, char *argv[]) try {
     const int RR   = 1214;
     const int SPC  = 1215;
     const int RM   = 1216;
+    const int INF  = 1217;
 
     while (1) {
 
@@ -227,6 +231,7 @@ int main (int argc, char *argv[]) try {
 	{"RR",         no_argument,0,RR},
 	{"RM",         required_argument,0,RM},
 	{"spc",        no_argument,0,SPC},
+	{"inf",        no_argument,0,INF},
 	{0, 0, 0, 0}
       };
     
@@ -253,7 +258,7 @@ int main (int argc, char *argv[]) try {
 	Pulsar::Archive::set_verbosity(3);
 	break;
       case 'i':
-	cout << "$Id: pam.C,v 1.58 2006/03/17 13:34:41 straten Exp $" << endl;
+	cout << "$Id: pam.C,v 1.59 2006/03/23 06:42:45 hknight Exp $" << endl;
 	return 0;
       case 'm':
 	save = true;
@@ -545,6 +550,8 @@ int main (int argc, char *argv[]) try {
 
       case RM: rm = atof(optarg); break;
 
+      case INF: defaraday_to_infinity = true; break;
+
       case SPC: scattered_power_correction = true; break;
 
       default:
@@ -744,8 +751,13 @@ int main (int argc, char *argv[]) try {
 
       if (rm < 9.9e98 ) {
 	arch->set_rotation_measure (rm);
-	if( defaraday )
-	  arch->defaraday();
+	if( defaraday ){
+	  Pulsar::FaradayRotation xform;
+	  xform.set_rotation_measure( rm );
+	  if( defaraday_to_infinity )
+	    xform.set_reference_wavelength( 0.0 );
+	  xform.execute( arch );
+	}
 	if (verbose)
 	  cout << "Archive now has a RM of " << rm << endl;
       }
