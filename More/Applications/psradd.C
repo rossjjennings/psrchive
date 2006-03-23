@@ -13,6 +13,11 @@
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
 #include "Pulsar/Profile.h"
+#include "Pulsar/ProcHistory.h"
+
+#include "Pulsar/DurationWeight.h"
+#include "Pulsar/Config.h"
+
 #include "tempo++.h"
 #include "Error.h"
 #include "SignalHandler.h"
@@ -21,11 +26,9 @@
 #include "dirutil.h"
 #include "string_utils.h"
 
-// Extensions this program understands
+bool weight_by_duration = Pulsar::config.get<bool>("weight_by_duration",false);
 
-#include "Pulsar/ProcHistory.h"
-
-static const char* psradd_args = "b:c:Ce:f:FG:hiI:LM:O:p:Pqr:sS:tT:uUvVZ:";
+static const char* psradd_args = "b:c:Ce:f:FG:hiI:LM:O:p:Pqr:sS:tT:uUvVwZ:";
 
 void usage () {
   cout <<
@@ -50,6 +53,7 @@ void usage () {
     " -s          Tscrunch result after each new file (nice on RAM)\n"
     " -t          Make no changes to file system (testing mode)\n"
     " -T tempo    System call to tempo\n"
+    " -w          Weight each sub-integration by its duration \n"
     " -Z time     Only add archives that are time (+/- 0.5) seconds long\n"
     "\n"
     "AUTO ADD options:\n"
@@ -129,12 +133,10 @@ int main (int argc, char **argv) try {
   // Only add in archives if their length matches this time
   float required_archive_length = -1.0;
 
-  int c;
-
   // for writing into history
   string command = "psradd";
   
-  
+  int c;  
   while ((c = getopt(argc, argv, psradd_args)) != -1)  {
     switch (c)  {
 
@@ -143,7 +145,8 @@ int main (int argc, char **argv) try {
       return 0;
       
     case 'i':
-      cout << "$Id: psradd.C,v 1.29 2006/03/17 13:34:42 straten Exp $" << endl;
+      cout << "$Id: psradd.C,v 1.30 2006/03/23 21:18:33 straten Exp $" 
+	   << endl;
       return 0;
 
     case 'b':
@@ -271,14 +274,14 @@ int main (int argc, char **argv) try {
       command += optarg;
       break;
 
-    case 'u':   
-      fprintf(stderr,"Will abort on Error creation\n");
+    case 'u':
+      cerr << "Will abort on Error creation" << endl;
       Error::complete_abort = true;
       SignalHandler::add_signal_to_abort_on(SIGSEGV);
       SignalHandler::add_signal_to_abort_on(SIGFPE);
       break;
     case 'U':
-      fprintf(stderr,"Will print message on Error creation\n");
+      cerr << "Will print message on Error creation" << endl;
       Error::verbose = true;
       break;
 
@@ -291,6 +294,10 @@ int main (int argc, char **argv) try {
       Pulsar::Archive::set_verbosity (3);
       vverbose = true;
       verbose = true;
+      break;
+
+    case 'w':
+      weight_by_duration = true;
       break;
 
     case 'Z': 
@@ -364,6 +371,10 @@ int main (int argc, char **argv) try {
   FILE* log_file = 0;
   string log_filename;
 
+  Reference::To<Pulsar::Weight> weight;
+  if (weight_by_duration)
+    weight = new Pulsar::DurationWeight;
+
   for (unsigned ifile=0; ifile < filenames.size(); ifile++) try {
 
     if (verbose) 
@@ -385,15 +396,18 @@ int main (int argc, char **argv) try {
     if (required_archive_length > 0
 	&& fabs(archive->integration_length()-required_archive_length) > 0.5)
       {
-	fprintf(stderr,"psradd: archive [%s] not %f seconds long- it was %f seconds long\n",
-		filenames[ifile].c_str(), required_archive_length,
-		archive->integration_length());
+	cerr << "psradd: archive [" <<filenames[ifile] << "] not "
+	     << required_archive_length << " seconds long- it was "
+	     << archive->integration_length() << " seconds long" << endl;
 	continue;
       }
 
     if( centre_frequency > 0.0 
 	&& fabs(archive->get_centre_frequency()-centre_frequency) > 0.0001 )
       continue;
+
+    if (weight)
+      weight->weight (archive);
 
     if (nbin)
       archive->bscrunch_to_nbin (nbin);
@@ -563,19 +577,8 @@ int main (int argc, char **argv) try {
 
     Pulsar::ProcHistory* fitsext = total->get<Pulsar::ProcHistory>();
 
-    if (fitsext) {
-
-      if (command.length() > 80) {
-        cout << "WARNING: ProcHistory command string truncated to 80 chars" 
-       << endl;
-        fitsext->set_command_str(command.substr(0, 80));
-      }
-      else {
-        fitsext->set_command_str(command);
-      }
-
-    }
-
+    if (fitsext)
+      fitsext->set_command_str(command);
 
     if (reset_total_next_load || reset_total_current) {
 
