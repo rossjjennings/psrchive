@@ -41,7 +41,13 @@ void Pulsar::StokesPlot::get_profiles (const Archive* data)
 		 "Mismatch: %u plots and %u lines",
 		 plot_values.size(), plot_lines.size());
 
+  if (verbose)
+    cerr << "Pulsar::StokesPlot::get_profiles calling get_Stokes" << endl;
+
   Reference::To<const PolnProfile> profile = get_Stokes (data, isubint, ichan);
+
+  if (verbose)
+    cerr << "Pulsar::StokesPlot::get_profiles filling vector" << endl;
 
   for (unsigned ipol=0; ipol < profiles.size(); ipol++) {
     profiles[ipol] = new_Profile (profile, plot_values[ipol]);
