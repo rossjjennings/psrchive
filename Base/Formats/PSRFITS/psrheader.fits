@@ -7,7 +7,7 @@ COMMENT   Astrophysics Supplement Series v44/p363, v44/p371, v73/p359, v73/p365.
 COMMENT   Contact the NASA Science Office of Standards and Technology for the
 COMMENT   FITS Definition document #100 and other FITS information.
 COMMENT
-HDRVER  = '1.31            '   / Header version 
+HDRVER  = '2.1             '   / Header version 
 DATE    = '                '   / File creation date (YYYY-MM-DDThh:mm:ss UTC)
 OBSERVER= '                '   / Observer name(s)
 PROJID  = '                '   / Project name
@@ -23,7 +23,7 @@ FD_XYPH = *                    / [deg] Phase of A^* B for injected cal (E)
 BACKEND = '                '   / Backend ID
 BECONFIG= '                '   / Backend configuration file name
 BE_PHASE= *                    / 0/+1/-1 BE cross-phase:0 unknown,+/-1 std/rev
-TCYCLE  = *                    / [s] Correlator cycle time (D)
+TCYCLE  = *                    / [s] On-line cycle time (D)
 NRCVR   = *                    / Number of receiver channels (I)
 OBS_MODE= '                '   / (PSR, CAL, SEARCH)
 SRC_NAME= '                '   / Source or scan ID 
@@ -236,6 +236,13 @@ END
 #
 ###############################################################################
 #
+# Note: This table has entries which should be sufficient for real-time folding 
+# of pulsar data. Additional parameters can be added to the table in off-line 
+# processing if necessary. Examples are: additional pulse frequency derivatives 
+# (Fn), additional DM derivatives (DMn), additional planets (T0_n, PB_n, A1_n, 
+# OM_n, ECC_n), additional glitches (GLEP_n, GLPH_n, GLF0_n, GLF1_n, GLF0D_n)
+# and additional FITWAVE coefficients (WAVES_n, WAVEC_n).
+#
 XTENSION= BINTABLE             / ***** Pulsar ephemeris history *****
 BITPIX  =                    8 / N/A
 NAXIS   =                    2 / 2-dimensional binary table
@@ -243,7 +250,7 @@ NAXIS1  =                    * / width of table in bytes
 NAXIS2  =                    * / number of rows in table
 PCOUNT  =                    0 / size of special data area
 GCOUNT  =                    1 / one data group (required keyword)
-TFIELDS =                  101 / number of fields per row
+TFIELDS =                  104 / number of fields per row
 #
 EXTNAME = PSREPHEM             / name of this binary table extension
 #
@@ -530,6 +537,15 @@ TUNIT#  = kpc                  / Units of field
 TTYPE#  = D_OP                 / Distance for orbital parallax 
 TFORM#  = 1D                   / Double
 TUNIT#  = kpc                  / Units of field
+TTYPE#  = WAVE_FREQ            / Fundamental FITWAVE frequency
+TFORM#  = 1D                   / Double
+TUNIT#  = Hz                   / Units of field
+TTYPE#  = WAVES_1              / FITWAVE sine component amplitude
+TFORM#  = 1D                   / Double
+TUNIT#  = s                    / Units of field
+TTYPE#  = WAVEC_1              / FITWAVE cosine component amplitude
+TFORM#  = 1D                   / Double
+TUNIT#  = s                    / Units of field
 END
 #
 ###############################################################################
@@ -594,9 +610,9 @@ PCOUNT  =                    0 / size of special data area
 GCOUNT  =                    1 / one data group (required keyword)
 TFIELDS =                    1 / Number of fields per row
 #
-EXTNAME = T2PREDICTOR          / name of this binary table extension
+EXTNAME = T2PREDICT            / name of this binary table extension
 #
-TTYPE#  = PREDICTOR            / Whole text file is stored verbatim
+TTYPE#  = PREDICT              / Whole text file is stored verbatim
 TFORM#  = A 
 END
 #
@@ -613,12 +629,12 @@ NAXIS1  =                    * / width of table in bytes
 NAXIS2  =                    1 / number of rows in table
 PCOUNT  =                    0 / size of special data area
 GCOUNT  =                    1 / one data group (required keyword)
-TFIELDS =                    3 / Number of fields per row
+TFIELDS =                    6 / Number of fields per row
 #
 EXTNAME = FLUX_CAL             / name of this binary table extension
 CAL_MTHD=                      / Flux cal method
 SCALFILE=                      / Cal file(s) used to derive flux-cal data
-NCHAN   =                    * / Nr of channels in flux cal file
+NCHAN   =                    * / Nr of frequency channels
 EPOCH   =                      / [MJD] Epoch of calibration obs
 #
 TTYPE#  = DAT_FREQ             / Centre frequency for each channel
@@ -626,17 +642,21 @@ TFORM#  = E                    / NCHAN floats
 TUNIT#  = MHz                  / Units of field
 TTYPE#  = DAT_WTS              / Weights for each channel
 TFORM#  = E                    / NCHAN floats
-TTYPE#  = S_SYS                / System equivalent flux density
-TFORM#  = E                    / NCHAN floats
+TTYPE#  = S_SYS                / System equiv. flux density for each rcvr chan.
+TDIM#   = (*,*)                / Dimensions (NCHAN,NRCVR)
+TFORM#  = E                    / NCHAN*NRCVR floats
 TUNIT#  = Jy        
 TTYPE#  = S_SYSERR             / Est. error of system equiv. flux density
-TFORM#  = E                    / NCHAN floats
+TDIM#   = (*,*)                / Dimensions (NCHAN,NRCVR)
+TFORM#  = E                    / NCHAN*NRCVR floats
 TUNIT#  = Jy        
-TTYPE#  = S_CAL                / Calibrator flux density
-TFORM#  = E                    / NCHAN floats
+TTYPE#  = S_CAL                / Calibrator flux density for each rcvr channel
+TDIM#   = (*,*)                / Dimensions (NCHAN,NRCVR)
+TFORM#  = E                    / NCHAN*NRCVR floats
 TUNIT#  = Jy        
 TTYPE#  = S_CALERR             / Estimated error of calibrator flux density
-TFORM#  = E                    / NCHAN floats
+TDIM#   = (*,*)                / Dimensions (NCHAN,NRCVR)
+TFORM#  = E                    / NCHAN*NRCVR floats
 TUNIT#  = Jy      
 END
 #
@@ -660,12 +680,10 @@ NCHAN   =                    * / Nr of channels in flux cal file
 #
 TTYPE#  = DAT_WTS              / Weights for each channel
 TFORM#  = E                    / NCHAN floats
-TTYPE#  = DATA                 / Stokes (Q,U,V) of calibrator
+TTYPE#  = DATA                 / Stokes (Q,U,V) of calibrator rel. to Cal I
 TFORM#  = E                    / 3*NCHAN floats
-TUNIT#  = C_0                  / Calibrator flux density
 TTYPE#  = DATAERR              / Estimated error of Stokes (Q,U,V)
 TFORM#  = E                    / 3*NCHAN floats
-TUNIT#  = C_0                  / Calibrator flux 
 END
 #
 ###############################################################################
