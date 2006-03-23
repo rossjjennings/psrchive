@@ -19,6 +19,9 @@ const Pulsar::Profile*
 Pulsar::get_Profile (const Archive* data,
 		     PlotIndex subint, PlotIndex pol, PlotIndex chan)
 {
+  if (!data)
+    throw Error (InvalidParam, "Pulsar::get_Profile", "no Archive");
+
   Reference::To<const Archive> archive = data;
   Reference::To<Archive> archive_clone;
 
@@ -102,6 +105,9 @@ Pulsar::get_Stokes (const Archive* data, PlotIndex subint, PlotIndex chan)
     profile_clone->convert_state(Signal::Stokes);
     profile = profile_clone;
   }
+
+  // ensure that profile_clone doesn't destroy instance as it goes out of scope
+  profile_clone = 0;
 
   return profile.release();
 }
