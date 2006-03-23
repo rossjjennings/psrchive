@@ -40,7 +40,9 @@ nobase_include_HEADERS = model_profile.h Pulsar/ArchiveExpert.h \
 	Pulsar/BaselineWindow.h          Pulsar/Pulsar.h \
 	Pulsar/ReflectStokes.h           Pulsar/ChannelZapMedian.h \
 	Pulsar/ChannelWeight.h           Pulsar/ChannelZapModulation.h \
-	Pulsar/Config.h                  Pulsar/Profile_utils.h
+	Pulsar/Config.h                  Pulsar/Profile_utils.h \
+	Pulsar/Weight.h                  Pulsar/IntegrationWeight.h \
+	Pulsar/DurationWeight.h
 
 libpsrchive_la_SOURCES = plugins.csh getopt.h Physical.h \
 	AdaptiveSNR.C                 Integration_new_PolnProfile.C  \
@@ -106,9 +108,9 @@ libpsrchive_la_SOURCES = plugins.csh getopt.h Physical.h \
 	IterativeBaseline.C           ProfileWeightFunction.C \
 	PhaseGradShift.C              Profile_fftconv.C \
 	BaselineWindow.C              ChannelZapMedian.C \
-	ChannelWeight.C               ChannelZapModulation.C \
+	Weight.C                      ChannelZapModulation.C \
         SincInterpShift.C             ScatteredPowerCorrection.C \
-	Profile_utils.C
+	Profile_utils.C               DurationWeight.C
 
 if !HAVE_GETOPT_LONG
 libpsrchive_la_SOURCES += getopt.c getopt1.c
