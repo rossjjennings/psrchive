@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/StandardCandles.h,v $
-   $Revision: 1.5 $
-   $Date: 2006/03/17 13:34:50 $
+   $Revision: 1.6 $
+   $Date: 2006/03/24 20:43:04 $
    $Author: straten $ */
 
 #ifndef __Pulsar_FluxCalibratorDatabase_h
@@ -17,13 +17,11 @@
 #include <string>
 #include <vector>
 
-#include "ReferenceAble.h"
-#include "psr_cpp.h"
+#include "Pulsar/FluxCalibrator.h"
 
 namespace Pulsar {
 
-  //! Pulsar Calibrator Observation Database
-  class FluxCalibratorDatabase : public Reference::Able {
+  class FluxCalibrator::Database : public Reference::Able {
 
   public:
 
@@ -34,13 +32,13 @@ namespace Pulsar {
     static std::string default_filename;
 
     //! Default construct from default_filename
-    FluxCalibratorDatabase ();
+    Database ();
     
     //! Construct from the specified filename
-    FluxCalibratorDatabase (const std::string& filename);
+    Database (const std::string& filename);
     
     //! Destructor
-    ~FluxCalibratorDatabase ();
+    ~Database ();
     
     //! Write a text file representing the database
     void unload (const std::string& filename);
@@ -80,7 +78,7 @@ namespace Pulsar {
       double spectral_index;
 
       //! Stores coefficients
-      vector<double> spectral_coeffs;
+      std::vector<double> spectral_coeffs;
 
       //! Null constructor
       Entry () { init(); }

@@ -5,6 +5,8 @@
  *
  ***************************************************************************/
 #include "Pulsar/FluxCalibratorDatabase.h"
+#include "Pulsar/Config.h"
+
 #include "Error.h"
 #include "string_utils.h"
 
@@ -14,21 +16,31 @@
 #include <math.h>
 #include <ctype.h>
 
-bool Pulsar::FluxCalibratorDatabase::verbose = false;
+bool Pulsar::FluxCalibrator::Database::verbose = false;
+
+static std::string get_default ()
+{
+  char* psrhome = getenv ("PSRHOME");
+
+  if (psrhome)
+    return psrhome + std::string ("/runtime/psrchive/fluxcal.cfg");
+  else
+    return "fluxcal.cfg";
+}
 
 std::string
-Pulsar::FluxCalibratorDatabase::default_filename = getenv ("PSRHOME") 
-  + std::string ("/runtime/psrchive/fluxcal.cfg");
+Pulsar::FluxCalibrator::Database::default_filename 
+= Pulsar::config.get<std::string> ("fluxcal::database", get_default());
 
 // //////////////////////////////////////////////////////////////////////
 //
-// Pulsar::FluxCalibratorDatabase::Entry
+// Pulsar::FluxCalibrator::Database::Entry
 //
 // filename type posn MJD bandwidth cfrequency nchan instrument
 //
 
 //! Initialise all variables
-void Pulsar::FluxCalibratorDatabase::Entry::init ()
+void Pulsar::FluxCalibrator::Database::Entry::init ()
 {
   reference_frequency = 0.0;
   reference_flux = 0.0;
@@ -36,13 +48,13 @@ void Pulsar::FluxCalibratorDatabase::Entry::init ()
 }
 
 //! Destructor
-Pulsar::FluxCalibratorDatabase::Entry::~Entry ()
+Pulsar::FluxCalibrator::Database::Entry::~Entry ()
 {
   
 }
 
 // load from ascii string
-void Pulsar::FluxCalibratorDatabase::Entry::load (const string& str) 
+void Pulsar::FluxCalibrator::Database::Entry::load (const string& str) 
 {
   string temp = str;
 
@@ -52,7 +64,7 @@ void Pulsar::FluxCalibratorDatabase::Entry::load (const string& str)
     vector<string> words = stringdecimate(temp," \t");
 
     if( words.size() < 3 )
-      throw Error(InvalidState,"Pulsar::FluxCalibratorDatabase::Entry::load",
+      throw Error(InvalidState,"Pulsar::FluxCalibrator::Database::Entry::load",
 		  "Couldn't parse spectral coefficients as line '%s' didn't have enough words in it",
 		  str.c_str());
 
@@ -71,12 +83,12 @@ void Pulsar::FluxCalibratorDatabase::Entry::load (const string& str)
 		  &spectral_index);
 
   if (s != 3)
-    throw Error (FailedSys, "Pulsar::FluxCalibratorDatabase::Entry::load",
+    throw Error (FailedSys, "Pulsar::FluxCalibrator::Database::Entry::load",
                  "sscanf(%s) != 3", str.c_str());
 }
 
 // unload to a string
-void Pulsar::FluxCalibratorDatabase::Entry::unload (string& str)
+void Pulsar::FluxCalibrator::Database::Entry::unload (string& str)
 {
   if( !spectral_coeffs.empty() ){
     str = '&' + source_name[0];
@@ -103,7 +115,7 @@ bool close_enough (string A, string B)
 }
 
 //! return true if the source name matches
-bool Pulsar::FluxCalibratorDatabase::Entry::matches (const string& name) const
+bool Pulsar::FluxCalibrator::Database::Entry::matches (const string& name) const
 {
   for (unsigned iname=0; iname < source_name.size(); iname ++)
     if (close_enough(source_name[iname], name))
@@ -112,14 +124,14 @@ bool Pulsar::FluxCalibratorDatabase::Entry::matches (const string& name) const
   return false;
 }
 
-double Pulsar::FluxCalibratorDatabase::Entry::get_flux_mJy (double MHz)
+double Pulsar::FluxCalibrator::Database::Entry::get_flux_mJy (double MHz)
 {
   if( !spectral_coeffs.empty() ){
     double ret = spectral_coeffs[0];
     double log_freq = log(MHz)/log(10.0);
 
     if( verbose )
-      fprintf(stderr,"Pulsar::FluxCalibratorDatabase::Entry::get_flux_mJy Got f=%f MHz and log(f)=%f and ret=%f\n",
+      fprintf(stderr,"Pulsar::FluxCalibrator::Database::Entry::get_flux_mJy Got f=%f MHz and log(f)=%f and ret=%f\n",
 	      MHz, log_freq, ret);
 
     for( unsigned i=1; i<spectral_coeffs.size(); i++)
@@ -131,33 +143,33 @@ double Pulsar::FluxCalibratorDatabase::Entry::get_flux_mJy (double MHz)
   return pow (MHz/reference_frequency, -spectral_index) * reference_flux * 1e3;
 }
 
-Pulsar::FluxCalibratorDatabase::FluxCalibratorDatabase ()
+Pulsar::FluxCalibrator::Database::Database ()
 {
   if (verbose)
-    cerr << "Pulsar::FluxCalibratorDatabase load " << default_filename << endl;
+    cerr << "Pulsar::FluxCalibrator::Database load " << default_filename << endl;
 
   load (default_filename);
 }
 
-Pulsar::FluxCalibratorDatabase::~FluxCalibratorDatabase ()
+Pulsar::FluxCalibrator::Database::~Database ()
 {
 }
 
-Pulsar::FluxCalibratorDatabase::FluxCalibratorDatabase (const std::string& f)
+Pulsar::FluxCalibrator::Database::Database (const std::string& f)
 {
   if (verbose)
-    cerr << "Pulsar::FluxCalibratorDatabase load " << f << endl;
+    cerr << "Pulsar::FluxCalibrator::Database load " << f << endl;
 
   load (f);
 }
 
 //! Loads an entire database from a file
-void Pulsar::FluxCalibratorDatabase::load (const std::string& filename)
+void Pulsar::FluxCalibrator::Database::load (const std::string& filename)
 {
 
   std::ifstream input (filename.c_str());
   if (!input)
-    throw Error (FailedSys, "Pulsar::FluxCalibratorDatabase::load",
+    throw Error (FailedSys, "Pulsar::FluxCalibrator::Database::load",
 		 "ifstream (" + filename + ")");
 
   string line;
@@ -172,12 +184,12 @@ void Pulsar::FluxCalibratorDatabase::load (const std::string& filename)
       continue;
 
     if (verbose)
-      cerr << "Pulsar::FluxCalibratorDatabase::load '"<< line << "'" << endl;
+      cerr << "Pulsar::FluxCalibrator::Database::load '"<< line << "'" << endl;
 
     if (line.substr(0,3) == "aka") {
 
       if (entries.size() == 0)
-	throw Error (InvalidState, "Pulsar::FluxCalibratorDatabase::load",
+	throw Error (InvalidState, "Pulsar::FluxCalibrator::Database::load",
 		     "cannot add aliases before entries");
 
       // take off the aka
@@ -186,7 +198,7 @@ void Pulsar::FluxCalibratorDatabase::load (const std::string& filename)
       name = stringtok (&line, " \t\n");
 
       if (verbose)
-	cerr << "Pulsar::FluxCalibratorDatabase::load alias: " 
+	cerr << "Pulsar::FluxCalibrator::Database::load alias: " 
 	     << entries.back().source_name[0] << " = " << name << endl;
 
       entries.back().source_name.push_back (name);
@@ -196,7 +208,7 @@ void Pulsar::FluxCalibratorDatabase::load (const std::string& filename)
       entries.push_back( Entry(line) );
 
       if (verbose)
-	cerr << "Pulsar::FluxCalibratorDatabase::load added: " 
+	cerr << "Pulsar::FluxCalibrator::Database::load added: " 
 	     << entries.back().source_name[0] << endl;
 
     }
@@ -206,11 +218,11 @@ void Pulsar::FluxCalibratorDatabase::load (const std::string& filename)
 }
 
 //! Unloads entire database to file
-void Pulsar::FluxCalibratorDatabase::unload (const std::string& filename)
+void Pulsar::FluxCalibrator::Database::unload (const std::string& filename)
 {
   FILE* fptr = fopen (filename.c_str(), "w");
   if (!fptr)
-    throw Error (FailedSys, "Pulsar::FluxCalibratorDatabase::unload" 
+    throw Error (FailedSys, "Pulsar::FluxCalibrator::Database::unload" 
 		 "fopen (" + filename + ")");
   
   string out;
@@ -221,8 +233,8 @@ void Pulsar::FluxCalibratorDatabase::unload (const std::string& filename)
   fclose (fptr);
 }
 
-Pulsar::FluxCalibratorDatabase::Entry
-Pulsar::FluxCalibratorDatabase::match (const string& source, double MHz) const
+Pulsar::FluxCalibrator::Database::Entry
+Pulsar::FluxCalibrator::Database::match (const string& source, double MHz) const
 {
   Entry best_match;
   Entry candidate;
@@ -241,7 +253,7 @@ Pulsar::FluxCalibratorDatabase::match (const string& source, double MHz) const
   }
 
   if (best_match.reference_frequency == 0)
-    throw Error (InvalidParam, "Pulsar::FluxCalibratorDatabase::match",
+    throw Error (InvalidParam, "Pulsar::FluxCalibrator::Database::match",
 		 "No match for source=" + source);
 
   return best_match;
