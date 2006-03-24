@@ -4,9 +4,11 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-#include <iostream>
 
 #include "Pulsar/ArchiveProcessor.h"
+#include <iostream>
+
+using namespace std;
 
 int main (int argc, char** argv)
 {
