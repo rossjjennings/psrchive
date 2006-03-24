@@ -24,6 +24,9 @@ class CommandParser : public Reference::Able {
   //! the prompt shown to the user
   std::string prompt;
 
+  //! Pure virtual base class of interface to parser methods
+  class Method;
+
   //! null constructor
   CommandParser ();
 
@@ -70,9 +73,6 @@ class CommandParser : public Reference::Able {
     { add_command (method, command, help, detailed_help, shortcut); }
 
  private:
-
-  //! Pure virtual base class of interface to parser methods
-  class Method;
 
   //! Available commands
   std::vector<Method*> commands;
