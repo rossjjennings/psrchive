@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 2002 by Willem van Straten
+ *   Copyright (C) 2002, 2006 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -13,12 +13,12 @@ CommandParser::CommandParser()
 {
   quit = false;
   verbose = false;
-  current_command = 0;
+  // current_command = 0;
 }
 
 static const char* whitespace = " \t\n";
 
-string CommandParser::parse (const char* commandargs)
+string CommandParser::parse (const string& commandargs)
 {
   if (debug)
   cerr << "CommandParser::parse '" << commandargs << "'" << endl;
@@ -35,21 +35,19 @@ string CommandParser::parse (const char* commandargs)
 }
 
 
-string CommandParser::parse (const char* cmd, const char* args)
+string CommandParser::parse (const string& cmd, const string& args)
 {
   string command = cmd;
   string arguments = args;
 
   if (debug)
-  cerr << "CommandParser::parse '"<< command <<"' '"<< arguments <<"'"<<endl;
-
+    cerr << "CommandParser::parse '"<< command <<"' '"<< arguments <<"'"<<endl;
 
   if (command.empty())
     return prompt;
 
   if (debug)
-  cerr << "CommandParser::parse command not empty"<<endl;
-
+    cerr << "CommandParser::parse command not empty" << endl;
 
   // //////////////////////////////////////////////////////////////////////
   //
@@ -61,7 +59,7 @@ string CommandParser::parse (const char* cmd, const char* args)
   }
 
   if (debug)
-  cerr << "CommandParser::parse command not quit"<<endl;
+    cerr << "CommandParser::parse command not quit" << endl;
 
 
   if (command == "verbose") {
@@ -73,30 +71,31 @@ string CommandParser::parse (const char* cmd, const char* args)
   }
 
   if (debug)
-  cerr << "CommandParser::parse command not verbose"<<endl;
+    cerr << "CommandParser::parse command not verbose" << endl;
 
 
   if (command == "help")
     return help (arguments);
 
   if (debug)
-    cerr << "CommandParser::parse command not help"<<endl;
+    cerr << "CommandParser::parse command not help" << endl;
 
+  bool shortcut = command.length() == 1;
 
   for (unsigned icmd=0; icmd < commands.size(); icmd++)
-    if (command == commands[icmd]->command) {
 
-      current_command = icmd;
+    if ( (shortcut && command[0] == commands[icmd]->shortcut)
+	 || command == commands[icmd]->command) {
+
+      // current_command = icmd;
 
       if (debug)
-	cerr << "CommandParser::parse execute " << command <<endl;
-
+	cerr << "CommandParser::parse execute " << command << endl;
 
       string reply = commands[icmd]->execute (arguments);
 
       if (debug)
 	cerr << "CommandParser::parse execute returns '" << reply <<"'"<<endl;
-
 
       if (reply.empty())
 	return prompt;
@@ -107,11 +106,12 @@ string CommandParser::parse (const char* cmd, const char* args)
   return "invalid command: " + command + "\n" + prompt;
 }
 
-
+/*
 string CommandParser::usage ()
 {
   return "usage: " + commands[current_command]->detail;
 }
+*/
 
 string CommandParser::help (const string& command)
 {

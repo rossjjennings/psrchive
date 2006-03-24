@@ -4,18 +4,21 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-#include <iostream>
 
 #include "CommandParser.h"
+
+#include <iostream>
+
+using namespace std;
 
 class parent : public CommandParser {
 
 public:
   parent () {
     prompt = "parent> ";
-    add_command (&parent::testing, "test", "this is a test command parser");
-    add_command (&parent::trying, "try",  "type the commands listed");
-    add_command (&parent::erring, "error","or type a command not listed");
+    add_command (&parent::testing, 'T', "test", "test of command parser");
+    add_command (&parent::trying,  "nothing",   "type the commands listed");
+    add_command (&parent::erring,  "error",     "or one not listed");
   }
 
   string testing (const string& args) { return "testing"; }
