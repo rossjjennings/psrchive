@@ -6,7 +6,9 @@
  ***************************************************************************/
 #include "Pulsar/FITSArchive.h"
 #include "Pulsar/FluxCalibratorExtension.h"
+
 #include "CalibratorExtensionIO.h"
+#include "psrfitsio.h"
 
 void Pulsar::FITSArchive::unload (fitsfile* fptr, 
 				  const FluxCalibratorExtension* fce)
@@ -35,33 +37,37 @@ void Pulsar::FITSArchive::unload (fitsfile* fptr,
                      "Pulsar::FITSArchive::unload FluxCalibratorExtension", 
 		     "fits_insert_rows FLUX_CAL");
 
-  char* comment = 0;
+  // Write the number of receptors (receiver channels)
+  psrfits_update_key (fptr, "NRCVR", (int)fce->get_nreceptor());
 
-  char* cal_mthd = "";
-
-  // Write CAL_MTHD
-  fits_update_key (fptr, TSTRING, "CAL_MTHD", cal_mthd, comment, &status);
-
+  // Write the standard lot (NCHAN, EPOCH, DAT_FREQ, DAT_WTS)
   Pulsar::unload (fptr, fce);
 
-  vector< Estimate<double> > temp (fce->get_nchan());
-  unsigned ichan = 0;
+  unsigned nchan = fce->get_nchan();
+  unsigned nreceptor = fce->get_nreceptor();
+
+  unsigned dimension = nchan * nreceptor;
+
+  vector< Estimate<double> > temp (dimension);
 
   try {
 
-    for (ichan=0; ichan < fce->get_nchan(); ichan++)
-      temp[ichan] = fce->get_T_sys (ichan);
-    unload_Estimates (fptr, temp, "T_SYS");
+    unsigned ichan = 0;
+    unsigned ireceptor = 0;
 
-    for (ichan=0; ichan < fce->get_nchan(); ichan++)
-      temp[ichan] = fce->get_cal_flux (ichan);
-    unload_Estimates(fptr, temp, "T_CAL");
+    for (ichan=0; ichan < nchan; ichan++)
+      for (ireceptor=0; ireceptor < nreceptor; ireceptor++)
+	temp[ichan + nchan*ireceptor] = fce->get_S_sys (ichan, ireceptor);
+    unload_Estimates (fptr, temp, "S_SYS");
+
+    for (ichan=0; ichan < nchan; ichan++)
+      for (ireceptor=0; ireceptor < nreceptor; ireceptor++)
+	temp[ichan + nchan*ireceptor] = fce->get_S_cal (ichan, ireceptor);
+    unload_Estimates(fptr, temp, "S_CAL");
 
   }
   catch (Error& error) {
     throw error += "Pulsar::FITSArchive::unload FluxCalibratorExtension";
   }
 
-  if (verbose == 3)
-    cerr << "Pulsar::FITSArchive::unload FluxCalibratorExtension exiting" << endl; 
 }

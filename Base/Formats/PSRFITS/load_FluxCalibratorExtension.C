@@ -7,9 +7,7 @@
 #include "Pulsar/FITSArchive.h"
 #include "Pulsar/FluxCalibratorExtension.h"
 #include "CalibratorExtensionIO.h"
-
-#include <stdlib.h>
-#include <assert.h>
+#include "psrfitsio.h"
 
 void Pulsar::FITSArchive::load_FluxCalibratorExtension (fitsfile* fptr)
 {
@@ -35,37 +33,12 @@ void Pulsar::FITSArchive::load_FluxCalibratorExtension (fitsfile* fptr)
 
   Reference::To<FluxCalibratorExtension> fce = new FluxCalibratorExtension;
 
-  char* comment = 0;
-
-  // Get CAL_MTHD
-  
-  char* cal_mthd = new char[80];
-
-  fits_read_key (fptr, TSTRING, "CAL_MTHD", cal_mthd, comment, &status);  
-  if (!status && verbose == 3)
-    cerr << "FITSArchive::load_FluxCalibratorExtension method=" 
-	 << cal_mthd << endl;
-
-  fits_read_key (fptr, TSTRING, "SCALFILE", cal_mthd, comment, &status);  
-  if (!status && verbose == 3)
-    cerr << "FITSArchive::load_FluxCalibratorExtension scalfile=" 
-	 << cal_mthd << endl;
-
-  delete[] cal_mthd;
-
-  status = 0;
-
-  // Get NCH_FLUX
+  // Get NCH_FLUX (backward compatibility)
   int nch_flux = 0;
-  fits_read_key (fptr, TINT, "NCH_FLUX", &nch_flux, comment, &status);
+  psrfits_read_key (fptr, "NCH_FLUX", &nch_flux, 0, verbose == 3);
   
-  if (status == 0) {
-    if (verbose == 3)
-      cerr << "FITSArchive::load_FluxCalibratorExtension"
-              " NCH_FLUX=" << nch_flux << endl;
-    if (nch_flux >= 0)
-      fce->set_nchan(nch_flux);
-  }
+  if (nch_flux >= 0)
+    fce->set_nchan(nch_flux);
 
   Pulsar::load (fptr, fce);
 
@@ -76,18 +49,46 @@ void Pulsar::FITSArchive::load_FluxCalibratorExtension (fitsfile* fptr)
       return;
   }
 
-  vector< Estimate<double> > temp (fce->get_nchan());
-  unsigned ichan = 0;
+  // Get NRCVR
+  int nrcvr = 0;
+  psrfits_read_key (fptr, "NRCVR", &nrcvr, 1, verbose == 3);
+  fce->set_nreceptor (nrcvr);
+
+  unsigned nchan = fce->get_nchan();
+  unsigned nreceptor = fce->get_nreceptor();
+
+  unsigned dimension = nchan * nreceptor;
+
+  vector< Estimate<double> > temp (dimension);
 
   try {
 
-    load_Estimates (fptr, temp, "T_SYS");
-    for (ichan=0; ichan < fce->get_nchan(); ichan++)
-      fce->set_T_sys (ichan, temp[ichan]);
+    unsigned ichan = 0;
+    unsigned ireceptor = 0;
 
-    load_Estimates (fptr, temp, "T_CAL");
-    for (ichan=0; ichan < fce->get_nchan(); ichan++)
-      fce->set_cal_flux (ichan, temp[ichan]);
+    try {
+      // backward compatibility
+      load_Estimates (fptr, temp, "T_SYS");
+    }
+    catch (Error&) {
+      load_Estimates (fptr, temp, "S_SYS");
+    }
+
+    for (ichan=0; ichan < nchan; ichan++)
+      for (ireceptor=0; ireceptor < nreceptor; ireceptor++)
+	fce->set_S_sys (ichan, ireceptor, temp[ichan + nchan*ireceptor]);
+
+    try {
+      // backward compatibility
+      load_Estimates (fptr, temp, "T_CAL");
+    }
+    catch (Error&) {
+      load_Estimates (fptr, temp, "S_CAL");
+    }
+
+    for (ichan=0; ichan < nchan; ichan++)
+      for (ireceptor=0; ireceptor < nreceptor; ireceptor++)
+	fce->set_S_cal (ichan, ireceptor, temp[ichan + nchan*ireceptor]);
 
   }
   catch (Error& error) {

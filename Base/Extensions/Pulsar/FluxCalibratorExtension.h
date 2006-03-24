@@ -7,15 +7,14 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/FluxCalibratorExtension.h,v $
-   $Revision: 1.5 $
-   $Date: 2006/03/17 13:34:45 $
+   $Revision: 1.6 $
+   $Date: 2006/03/24 20:43:29 $
    $Author: straten $ */
 
 #ifndef __FluxCalibratorExtension_h
 #define __FluxCalibratorExtension_h
 
 #include "Pulsar/CalibratorExtension.h"
-
 
 namespace Pulsar {
 
@@ -51,23 +50,32 @@ namespace Pulsar {
     //! Set the number of frequency channels
     void set_nchan (unsigned nchan);
 
-    //! Set the system temperature of the specified channel
-    void set_T_sys (unsigned ichan, const Estimate<double>& T_sys);
-    //! Get the system temperature of the specified channel
-    Estimate<double> get_T_sys (unsigned ichan) const;
+    //! Set the number of receptors
+    void set_nreceptor (unsigned nreceptor);
 
-    //! Set the calibrator flux of the specified channel
-    void set_cal_flux (unsigned ichan, const Estimate<double>& cal_flux);
-    //! Get the calibrator flux of the specified channel
-    Estimate<double> get_cal_flux (unsigned ichan) const;
+    //! Get the number of receptors
+    unsigned get_nreceptor () const;
+
+    //! Set the system equivalent flux density of the specified channel
+    void set_S_sys (unsigned chan, unsigned receptor, const Estimate<double>&);
+    //! Get the system equivalent flux density of the specified channel
+    Estimate<double> get_S_sys (unsigned chan, unsigned receptor) const;
+
+    //! Set the calibrator flux density of the specified channel
+    void set_S_cal (unsigned chan, unsigned receptor, const Estimate<double>&);
+    //! Get the calibrator flux density of the specified channel
+    Estimate<double> get_S_cal (unsigned chan, unsigned receptor) const;
 
   protected:
 
-    //! Calibrator flux in mJy as a function of frequency
-    vector< Estimate<double> > cal_flux;
+    //! System equivalent flux density in each receptor and frequency channel
+    /*! in mJy */
+    std::vector< std::vector< Estimate<double> > > S_sys;
 
-    //! Temperature of system (+ sky) in mJy as a function of frequency
-    vector< Estimate<double> > T_sys;
+    //! Calibrator flux density in each receptor and frequency channel
+    /*! in mJy */
+    std::vector< std::vector< Estimate<double> > > S_cal;
+
 
   };
  

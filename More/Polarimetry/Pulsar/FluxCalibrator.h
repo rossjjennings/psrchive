@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/FluxCalibrator.h,v $
-   $Revision: 1.24 $
-   $Date: 2006/03/17 13:34:50 $
+   $Revision: 1.25 $
+   $Date: 2006/03/24 20:43:29 $
    $Author: straten $ */
 
 #ifndef __Pulsar_FluxCalibrator_H
@@ -19,17 +19,17 @@
 namespace Pulsar {
 
   class Integration;
-  class FluxCalibratorDatabase;
 
   //! Calibrates flux using standard candles and artificial sources
   class FluxCalibrator : public Calibrator {
     
-    friend class FluxCalibratorInfo;
-
   public:
-    
-    //! Self-calibrate flux calibrator archives before computing hi/lo ratios
-    static bool self_calibrate;
+
+    //! Database of standard candles used for flux calibration
+    class Database;
+
+    //! Provides information about the flux calibrator to plotting classes
+    class Info;
 
     //! Default constructor
     FluxCalibrator (const Archive* archive = 0);
@@ -56,13 +56,16 @@ namespace Pulsar {
     void add_observation (const Archive* archive);
 
     //! Set the database containing flux calibrator information
-    void set_database (const FluxCalibratorDatabase* database);
+    void set_database (const Database* database);
 
     //! Calibrate the flux in the given archive
     void calibrate (Archive* archive);
 
     //! Get the number of frequency channels in the calibrator
     unsigned get_nchan () const;
+
+    //! Get the number of receptors in the calibrator
+    unsigned get_nreceptor () const;
 
     //! Return true if the flux scale for the specified channel is valid
     bool get_valid (unsigned ch) const;
@@ -75,40 +78,60 @@ namespace Pulsar {
     friend class FluxCalibratorExtension;
 
     //! Flux calibrator database
-    Reference::To<const FluxCalibratorDatabase> database;
-
-    //! Calibrator flux in mJy as a function of frequency
-    std::vector< Estimate<double> > cal_flux;
-
-    //! Temperature of system (+ sky) in mJy as a function of frequency
-    std::vector< Estimate<double> > T_sys;
-
-    //! Ratio of cal hi/lo on source
-    std::vector<Estimate<double> > ratio_on;
-
-    //! Ratio of cal hi/lo off source
-    std::vector<Estimate<double> > ratio_off;
+    Reference::To<const Database> database;
 
     //! Create the cal_flux spectrum at the requested resolution
     void create (unsigned nchan = 0);
 
-    //! Resize the T_sys and cal_flux vector
-    void resize (unsigned required_nchan);
-
     //! Calculate the ratio_on and ratio_off
     void calculate ();
-
-    //! Compute cal_flux and T_sys, given the hi/lo ratios on and off source
-    void calculate (std::vector<Estimate<double> >& on,
-		    std::vector<Estimate<double> >& off);
 
     //! Calibrate a single sub-integration
     void calibrate (Integration* subint);
 
-  private:
+    class Data;
 
-    std::vector<MeanEstimate<double> > mean_ratio_on;
-    std::vector<MeanEstimate<double> > mean_ratio_off;
+    //! Flux calibrator data for each frequency channel
+    std::vector< Data > data;
+
+    //! Resize the data vector
+    void resize (unsigned nchan, unsigned nreceptor);
+
+    //! The absolute gain used to calibrate the archive data
+    std::vector< float > gain;
+
+    //! Resize the gain vector
+    void resize (unsigned required_nchan);
+
+  public:
+
+    //! FluxCalibrator parameter communication
+    class Info : public Calibrator::Info {
+    
+    public:
+      //! Constructor
+      Info (const FluxCalibrator* cal) { instance = cal; }
+ 
+      //! Return the number of parameter classes
+      unsigned get_nclass () const { return 2; }
+    
+      //! Return the name of the specified class
+      const char* get_name (unsigned iclass) const;
+    
+      //! Return the number of parameters in the specified class
+      unsigned get_nparam (unsigned iclass) const;
+      
+      //! Return the estimate of the specified parameter
+      Estimate<float> get_param (unsigned ichan, unsigned iclass,
+				 unsigned iparam) const;
+
+    protected:
+    
+      Reference::To<const FluxCalibrator> instance;
+      
+    };
+
+  private:
 
     //! Set true after call to calculate
     bool calculated;
@@ -121,6 +144,9 @@ namespace Pulsar {
 
     //! Initialize attributes
     void init ();
+
+    //! Set up the data array with standard candle flux density
+    void setup ();
 
   };
 

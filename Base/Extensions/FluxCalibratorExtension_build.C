@@ -5,6 +5,7 @@
  *
  ***************************************************************************/
 #include "Pulsar/FluxCalibratorExtension.h"
+#include "Pulsar/FluxCalibratorData.h"
 #include "Pulsar/FluxCalibrator.h"
 
 //! Construct from a FluxCalibrator instance
@@ -23,8 +24,11 @@ Pulsar::FluxCalibratorExtension::FluxCalibratorExtension
 
     CalibratorExtension::build (calibrator);
 
-    cal_flux = calibrator->cal_flux;
-    T_sys = calibrator->T_sys;
+    unsigned nchan = calibrator->get_nchan();
+    set_nchan (nchan);
+
+    for (unsigned ichan=0; ichan < nchan; ichan++)
+      calibrator->data[ichan].get (S_sys[ichan], S_cal[ichan]);
 
   }
   catch (Error& error) {

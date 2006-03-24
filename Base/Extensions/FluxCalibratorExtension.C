@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 2004 by Willem van Straten
+ *   Copyright (C) 2004, 2006 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -30,8 +30,8 @@ Pulsar::FluxCalibratorExtension::operator= (const FluxCalibratorExtension& fc)
     return *this;
 
   CalibratorExtension::operator= (fc);
-  cal_flux = fc.cal_flux;
-  T_sys = fc.T_sys;
+  S_cal = fc.S_cal;
+  S_sys = fc.S_sys;
 
   return *this;
 }
@@ -42,38 +42,60 @@ Pulsar::FluxCalibratorExtension::~FluxCalibratorExtension ()
 }
 
 //! Set the number of frequency channels
-void Pulsar::FluxCalibratorExtension::set_nchan (unsigned _nchan)
+void Pulsar::FluxCalibratorExtension::set_nchan (unsigned nchan)
 {
-  CalibratorExtension::set_nchan( _nchan );
+  CalibratorExtension::set_nchan( nchan );
 
-  cal_flux.resize( _nchan );
-  T_sys.resize( _nchan );
+  S_cal.resize( nchan );
+  S_sys.resize( nchan );
+}
+
+//! Set the number of frequency channels
+void Pulsar::FluxCalibratorExtension::set_nreceptor (unsigned nreceptor)
+{
+  if (nreceptor == 0)
+    throw Error (InvalidParam,"Pulsar::FluxCalibratorExtension::set_nreceptor",
+		 "cannot set nreceptor to 0");
+
+  for (unsigned ichan=0; ichan < S_cal.size(); ichan++) {
+    S_cal[ichan].resize( nreceptor );
+    S_sys[ichan].resize( nreceptor );
+  }
+}
+
+unsigned Pulsar::FluxCalibratorExtension::get_nreceptor () const
+{
+  if (S_cal.size())
+    return S_cal[0].size();
+  return 0;
 }
 
 using namespace Pulsar;
 
-void FluxCalibratorExtension::set_T_sys (unsigned ichan,
-					 const Estimate<double>& _T_sys)
+void FluxCalibratorExtension::set_S_sys (unsigned ichan, unsigned ireceptor,
+					 const Estimate<double>& _S_sys)
 {
-  range_check (ichan, "Pulsar::FluxCalibratorExtension::set_T_sys");
-  T_sys[ichan] = _T_sys;
+  range_check (ichan, "Pulsar::FluxCalibratorExtension::set_S_sys");
+  S_sys[ichan][ireceptor] = _S_sys;
 }
 
-Estimate<double> FluxCalibratorExtension::get_T_sys (unsigned ichan) const
+Estimate<double> 
+FluxCalibratorExtension::get_S_sys (unsigned ichan, unsigned ireceptor) const
 {
-  range_check (ichan, "Pulsar::FluxCalibratorExtension::get_T_sys");
-  return T_sys[ichan];
+  range_check (ichan, "Pulsar::FluxCalibratorExtension::get_S_sys");
+  return S_sys[ichan][ireceptor];
 }
 
-void FluxCalibratorExtension::set_cal_flux (unsigned ichan,
-					    const Estimate<double>& _cal_flux)
+void FluxCalibratorExtension::set_S_cal (unsigned ichan, unsigned ireceptor,
+					 const Estimate<double>& _S_cal)
 {
-  range_check (ichan, "Pulsar::FluxCalibratorExtension::set_cal_flux");
-  cal_flux[ichan] = _cal_flux;
+  range_check (ichan, "Pulsar::FluxCalibratorExtension::set_S_cal");
+  S_cal[ichan][ireceptor] = _S_cal;
 }
 
-Estimate<double> FluxCalibratorExtension::get_cal_flux (unsigned ichan) const
+Estimate<double>
+FluxCalibratorExtension::get_S_cal (unsigned ichan, unsigned ireceptor) const
 {
-  range_check (ichan, "Pulsar::FluxCalibratorExtension::get_cal_flux");
-  return cal_flux[ichan];
+  range_check (ichan, "Pulsar::FluxCalibratorExtension::get_S_cal");
+  return S_cal[ichan][ireceptor];
 }
