@@ -84,6 +84,7 @@ libpsrchive_la_SOURCES = plugins.csh getopt.h Physical.h \
 	ExampleArchive.C              ReceptionCalibrator.C  \
 	ExponentialBaseline.C         Polarization.C \
 	FaradayRotation.C             FrequencyIntegrate.C \
+	FluxCalibratorData.C \
 	FluxCalibrator.C              ReceptionCalibrator_get_Info.C  \
 	FluxCalibratorDatabase.C      ReceptionCalibrator_get_solution.C  \
 	FourierSNR.C                  ReferenceCalibrator.C  \
