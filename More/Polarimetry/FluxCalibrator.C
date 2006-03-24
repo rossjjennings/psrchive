@@ -15,6 +15,7 @@
 
 #include "Error.h"
 #include "interpolate.h"
+#include <assert.h>
 
 /*! 
   If a Pulsar::Archive is provided, and if it contains a
