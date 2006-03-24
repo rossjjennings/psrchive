@@ -12,6 +12,8 @@
 
 #include "Pulsar/Database.h"
 #include "Pulsar/Archive.h"
+#include "Pulsar/Config.h"
+
 #include "string_utils.h"
 #include "dirutil.h"
 
@@ -41,7 +43,7 @@ void usage ()
     "  -i minutes   maximum number of minutes between archives in same set\n"
     "\n"
     "By default, standard candle information is read from \n" 
-       << Pulsar::FluxCalibratorDatabase::default_filename << "\n"
+       << Pulsar::FluxCalibrator::Database::default_filename << "\n"
     "and the maximum interval between archives in the same\n"
     "flux calibrator set is " << interval/60 << " minutes.  See also:\n"
     "\n"
@@ -77,10 +79,12 @@ catch (Error& error) {
 
 int main (int argc, char** argv) try {
 
-  bool offpulse_calibrator = false;
-  bool self_calibrate = false;
+  bool self_calibrate
+    = Pulsar::config.get<bool> ("fluxcal::self_calibrate", false);
 
-  Pulsar::FluxCalibratorDatabase* standards = 0;
+  bool offpulse_calibrator = false;
+
+  Pulsar::FluxCalibrator::Database* standards = 0;
   string database_filename;
 
   char c;
@@ -115,7 +119,7 @@ int main (int argc, char** argv) try {
       break;
 
     case 'c':
-      standards = new Pulsar::FluxCalibratorDatabase (optarg);
+      standards = new Pulsar::FluxCalibrator::Database (optarg);
       cerr << "fluxcal: standard candles loaded from " << optarg << endl;
       break;
 
