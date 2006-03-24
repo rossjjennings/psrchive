@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/Attic/Calibrator.h,v $
-   $Revision: 1.29 $
-   $Date: 2006/03/17 13:34:50 $
+   $Revision: 1.30 $
+   $Date: 2006/03/24 20:43:18 $
    $Author: straten $ */
 
 #ifndef __Calibrator_H
@@ -138,7 +138,7 @@ namespace Pulsar {
 
       //! Return the colour index
       virtual int get_colour_index (unsigned iclass, unsigned iparam) const
-      { return 1; }
+      { return iparam + 1; }
 
       //! Return the graph marker
       virtual int get_graph_marker (unsigned iclass, unsigned iparam) const
