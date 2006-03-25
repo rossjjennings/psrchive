@@ -4,13 +4,16 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-#include <stdio.h>
-#include <math.h>
 
 #include "timer++.h"
 #include "string_utils.h"
 #include "convert_endian.h"
 #include "Error.h"
+
+#include <stdio.h>
+#include <math.h>
+
+using namespace std;
 
 std::string Timer::reason;
 bool   Timer::verbose = false;

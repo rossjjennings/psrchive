@@ -4,6 +4,12 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+#include "toa.h"
+#include "string_utils.h"
+#include "polyco.h"
+#include "coord.h"
+#include "Error.h"
+
 #include <iostream>
 #include <algorithm>
 
@@ -11,11 +17,8 @@
 #include <sys/types.h>
 #include <time.h>
 
-#include "string_utils.h"
-#include "polyco.h"
-#include "toa.h"
-#include "coord.h"
-#include "Error.h"
+
+using namespace std;
 
 const float Tempo::toa::UNSET = -999.0;
 

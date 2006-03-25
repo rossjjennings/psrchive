@@ -16,6 +16,8 @@
 #include <math.h>
 #include <ctype.h>
 
+using namespace std;
+
 bool Pulsar::FluxCalibrator::Database::verbose = false;
 
 static std::string get_default ()

@@ -18,6 +18,8 @@
 #include <sys/wait.h>
 #include <errno.h>
 
+using namespace std;
+
 string polyco::anyPsr;
 bool   polyco::verbose = false;
 bool   polyco::debug = false;

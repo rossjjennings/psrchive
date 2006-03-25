@@ -5,7 +5,9 @@
  *
  ***************************************************************************/
 #include <sys/types.h>
+
 #include "string_utils.h"
+using namespace std;
 
 string stringtok (string* instr, const string& delimiters,
 		  bool skip_leading, bool strip_leading_remain)

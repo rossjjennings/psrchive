@@ -5,6 +5,7 @@
  *
  ***************************************************************************/
 #include "string_utils.h"
+using namespace std;
 
 // simple function returns the time in a user-friendly string
 string time_string (double seconds)
