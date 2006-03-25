@@ -4,18 +4,27 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+#include "string_utils.h"
+#include "Error.h"
 #include "environ.h"
 
-#include <string>
-#include <vector>
 #include <algorithm>
 
 #include <ctype.h>
-#include <stdio.h>
 #include <stdlib.h>
 
-#include "Error.h"
-#include "string_utils.h"
+using namespace std;
+
+string pad (unsigned length, string text, bool right)
+{
+  while (text.length() < length)
+    if (right)
+      text += " ";
+    else
+      text = " " + text;
+
+  return text;
+}
 
 string& chop(string& ss){
   if( ss.size()!=0 )
