@@ -45,13 +45,6 @@ const char* vector_help =
 "Output values will be separated by a comma.  If a range is not specified,\n"
 "all values will be output.  Note that range indeces begin at zero.\n";
 
-string pad (unsigned length, string text)
-{
-  while (text.length() < length)
-    text += " ";
-  return text;
-}
-
 using namespace Pulsar;
 
 int main (int argc, char** argv) try {  
