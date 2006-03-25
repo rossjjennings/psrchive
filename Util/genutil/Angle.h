@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Angle.h,v $
-   $Revision: 1.18 $
-   $Date: 2006/03/17 13:35:04 $
+   $Revision: 1.19 $
+   $Date: 2006/03/25 12:27:23 $
    $Author: straten $ */
 
 // redwards 17 Mar 99 -- Time for a definitive C++ suite of
@@ -45,6 +45,8 @@ class Angle
   Angle (const Angle& a)  
     {init(); radians=a.radians;wrap_point=a.wrap_point;}
   Angle (const double& rad = 0);
+
+  virtual ~Angle ();
 
   void setWrapPoint(double wp){wrap_point=wp; wrap();}
   double getWrapPoint() {return wrap_point;}
