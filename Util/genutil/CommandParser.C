@@ -7,6 +7,8 @@
 #include "CommandParser.h"
 #include "string_utils.h"
 
+using namespace std;
+
 bool CommandParser::debug = false;
 
 CommandParser::CommandParser()
@@ -14,6 +16,12 @@ CommandParser::CommandParser()
   quit = false;
   verbose = false;
   // current_command = 0;
+}
+
+CommandParser::~CommandParser()
+{
+  for (unsigned icmd=0; icmd < commands.size(); icmd++)
+    delete commands[icmd];
 }
 
 static const char* whitespace = " \t\n";
@@ -115,15 +123,25 @@ string CommandParser::usage ()
 
 string CommandParser::help (const string& command)
 {
+  unsigned icmd = 0;
+
   if (command.empty()) {
     string help_str = "Available commands:\n\n";
 
-    for (unsigned icmd=0; icmd < commands.size(); icmd++)
-      help_str += commands[icmd]->command + "\t " + commands[icmd]->help + "\n";
+    unsigned maxlen = 0;
+    for (icmd=0; icmd < commands.size(); icmd++)
+      if (commands[icmd]->command.length() > maxlen)
+	maxlen = commands[icmd]->command.length();
 
-    help_str += 
-      "\nquit \t quit program\n"
-      "verbose\t toggle verbosity\n\n"
+    maxlen += 3;
+
+    for (icmd=0; icmd < commands.size(); icmd++)
+      help_str += pad(maxlen, commands[icmd]->command) + commands[icmd]->help
+	+ "\n";
+
+    help_str += "\n" 
+      + pad(maxlen, "quit")    + "quit program\n"
+      + pad(maxlen, "verbose") + "toggle verbosity\n\n"
       "Type \"help command\" to get detailed help on each command\n";
 
     return help_str + "\n" + prompt;
@@ -137,9 +155,9 @@ string CommandParser::help (const string& command)
   if (command == "verbose")
     return "verbose makes the program more verbose\n" + prompt;
 
-  for (unsigned icmd=0; icmd < commands.size(); icmd++)
+  for (icmd=0; icmd < commands.size(); icmd++)
     if (command == commands[icmd]->command) {
-      string help_str = command +"\t "+ commands[icmd]->help +"\n\n";
+      string help_str = command +": "+ commands[icmd]->help +"\n\n";
       if (commands[icmd]->detail.empty())
 	return help_str + "\t no detailed help available\n" + prompt;
       else
@@ -149,4 +167,19 @@ string CommandParser::help (const string& command)
   return "invalid command: " + command + "\n" + prompt;
 }
 
+void CommandParser::add_command (Method* command)
+{
+  for (unsigned icmd=0; icmd < commands.size(); icmd++) {
 
+    if (command->command == commands[icmd]->command)
+      throw Error (InvalidParam, "CommandParser::add_command",
+		   "command name='" + command->command + "' already taken");
+
+    if (command->shortcut && command->shortcut == commands[icmd]->shortcut)
+      throw Error (InvalidParam, "CommandParser::add_command",
+		   "command shortcut=%c already taken", command->shortcut);
+
+  }
+
+  commands.push_back (command);
+}

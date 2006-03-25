@@ -31,7 +31,7 @@ class CommandParser : public Reference::Able {
   CommandParser ();
 
   //! destructor
-  virtual ~CommandParser () {}
+  ~CommandParser ();
 
   //! Initialize GNU readline and enable command completion
   void initialize_readline (const char*);
@@ -71,6 +71,9 @@ class CommandParser : public Reference::Able {
 		      const std::string& help,
 		      const std::string& detailed_help = "")
     { add_command (method, command, help, detailed_help, shortcut); }
+
+  //! Add Method instance
+  void add_command (Method*);
 
  private:
 
@@ -157,18 +160,11 @@ void CommandParser::add_command (std::string (P::*method) (const std::string&),
     throw Error (InvalidState, "CommandParser::add_command",
 		 "instance/method mis-match");
 
-  for (unsigned icmd=0; icmd < commands.size(); icmd++)
-    if (cmd == commands[icmd]->command) {
-      std::string error ("CommandParser::add_command command key taken");
-      std::cerr << error << std::endl;
-      throw error;
-    }
-  
   if (debug)
     std::cerr << "CommandParser::add_command new Command<P>" << std::endl;
 
-  commands.push_back ( new Command<P> (instance, method,
-				       cmd, help, detailed_help, shortcut));
+  add_command (new Command<P> 
+	       (instance, method, cmd, help, detailed_help, shortcut));
 }
 
 
