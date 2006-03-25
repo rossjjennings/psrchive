@@ -423,23 +423,22 @@ string psrephem::par_lookup (const char* name, int use_cwd)
 
 string psrephem::psrname() const
 {
-  if (parmStatus[EPH_PSRJ]==1) {
+  if (parmStatus[EPH_PSRJ]==1)
     return value_str[EPH_PSRJ];
-	}
-  else if (parmStatus[EPH_PSRB]==1) {		
+
+  else if (parmStatus[EPH_PSRB]==1)		
     return value_str[EPH_PSRB];
-	}
-  
-  throw Error(InvalidParam, "psrephem::psrname",
-	      "Error determining pulsar name");
+ 
+  return "unknown";
 }
+
 
 double psrephem::get_dm() const
 {
-	// Removed tempo11 check because it's now possible
-	// to obtain dm for pre-tempo11 ephemeris files
-//  if (tempo11 && parmStatus[EPH_DM])
-	if (parmStatus[EPH_DM])
+  // Removed tempo11 check because it's now possible
+  // to obtain dm for pre-tempo11 ephemeris files
+  //  if (tempo11 && parmStatus[EPH_DM])
+  if (parmStatus[EPH_DM])
     return value_double[EPH_DM];
 
   return 0;
