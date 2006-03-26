@@ -5,14 +5,14 @@
  *
  ***************************************************************************/
 
-#include "Pulsar/ArchiveProcessor.h"
+#include "Pulsar/Interpreter.h"
 #include <iostream>
 
 using namespace std;
 
 int main (int argc, char** argv)
 {
-  Pulsar::ArchiveProcessor processor (argc, argv);
+  Pulsar::Interpreter processor (argc, argv);
 
   cout << processor.prompt;
 
