@@ -44,7 +44,11 @@ void Pulsar::Archive::append (const Archive* arch)
     operator=( *arch );
     return;
   }
-  
+
+  if (arch == this)
+    throw Error (InvalidParam, "Pulsar::Archive::append",
+		 "cannot append archive to self");
+
   // Account for custom Integration ordering:
   
   IntegrationOrder* order_this = get<IntegrationOrder>();
