@@ -44,13 +44,10 @@ int main (int argc, char** argv)
   cerr << "Creating child instance" << endl;
   child processor;
 
-  cout << processor.prompt;
+  processor.initialize_readline ("test");
 
-  while (!processor.quit)  {
-    string command;
-    getline (cin, command);
-    cout << processor.parse (command);
-  }
+  while (!processor.quit)
+    cout << processor.parse( processor.readline() );
 
   return 0;
 }
