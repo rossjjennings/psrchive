@@ -17,7 +17,8 @@
 namespace Pulsar {
   
   class Archive;
-  
+  class ArchiveTI;
+
   //! Enables interactive operation on Archive instances
   /*!  
 
@@ -90,20 +91,23 @@ namespace Pulsar {
     //! pop the top of the stack
     std::string pop (const std::string& args);
 
-    //! add the current top of the stack to the map
-    std::string add (const std::string& args);
+    //! set the name of the current archive
+    std::string set (const std::string& args);
 
-    //! replace the top of the stack with the named archive from the map
+    //! get the named archive
     std::string get (const std::string& args);
 
     //! remove the named archive from the map
     std::string remove (const std::string& args);
 
-    //! clone an archive in the stack
+    //! clone the current archive
     std::string clone (const std::string& args);
 
-    //! extract part of an archive in the stack
+    //! extract part of the current archive
     std::string extract (const std::string& args);
+
+    //! edit the current archive
+    std::string edit (const std::string& args);
 
     //! append one archive to another
     std::string append (const std::string& args);
@@ -148,6 +152,9 @@ namespace Pulsar {
 
     //! the Archive map
     std::map< std::string, Reference::To<Archive> > theMap;
+
+    //! the Archive text interface
+    Reference::To<ArchiveTI> interface;
 
     //! operate on data "in place", otherwise make a copy
     bool inplace;
