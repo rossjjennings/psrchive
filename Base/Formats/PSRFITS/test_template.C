@@ -191,21 +191,21 @@ void test_template (const char* template_file, bool populate, bool verbose)
       "COEFFS 0.0008448324536128677846111604043291928 -1.715585520448988683531246072839005e-08 9.882946101307895601123045482021159e-10\n"
       "COEFFS -1.488687694655296405712529028194112e-05 -3.397481491206875835762687894958933e-10 1.957116344031319920601399137776413e-11\n"
       "ChebyModel END\n";
-    fits_movnam_hdu (fptr, BINARY_TBL, "T2PREDICTOR", 0, &status);
+    fits_movnam_hdu (fptr, BINARY_TBL, "T2PREDICT", 0, &status);
     
     if (status != 0) 
       throw FITSError (status, "test_template", 
-		       "fits_movnam_hdu T2PREDICTOR");
-    fits_get_colnum (fptr, CASEINSEN, "PREDICTOR", &colnum, &status);
+		       "fits_movnam_hdu T2PREDICT");
+    fits_get_colnum (fptr, CASEINSEN, "PREDICT", &colnum, &status);
     if (status != 0)
-      throw FITSError (status, "test_template", "fits_get_colnum PREDICTOR");
+      throw FITSError (status, "test_template", "fits_get_colnum PREDICT");
     fits_modify_vector_len (fptr, colnum, strlen(predictor), &status);
     if (status != 0)
-      throw FITSError (status, "test_template", "fits_modify_vector_len PREDICTOR"); 
+      throw FITSError (status, "test_template", "fits_modify_vector_len PREDICT"); 
     fits_write_col (fptr, TSTRING, colnum, 1, 1, 1, 
 		    &predictor, &status);  
     if (status != 0)
-      throw FITSError (status, "test_template", "fits_write_col PREDICTOR");
+      throw FITSError (status, "test_template", "fits_write_col PREDICT");
 #endif
   }
 
