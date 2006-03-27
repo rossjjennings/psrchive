@@ -57,11 +57,8 @@ string CommandParser::parse (const string& commandargs)
 }
 
 
-string CommandParser::parse (const string& cmd, const string& args)
+string CommandParser::parse (const string& command, const string& arguments)
 {
-  string command = cmd;
-  string arguments = args;
-
   if (debug)
     cerr << "CommandParser::parse '"<< command <<"' '"<< arguments <<"'"<<endl;
 
@@ -96,15 +93,15 @@ string CommandParser::parse (const string& cmd, const string& args)
     cerr << "CommandParser::parse command not verbose" << endl;
 
 
-  if (command == "help")
+  if (command == "help" || command == "?")
     return help (arguments);
 
   if (debug)
     cerr << "CommandParser::parse command not help" << endl;
 
   bool shortcut = command.length() == 1;
-
-  for (unsigned icmd=0; icmd < commands.size(); icmd++)
+  unsigned icmd = 0;
+  for (icmd=0; icmd < commands.size(); icmd++)
 
     if ( (shortcut && command[0] == commands[icmd]->shortcut)
 	 || command == commands[icmd]->command) {
@@ -125,15 +122,41 @@ string CommandParser::parse (const string& cmd, const string& args)
 	return reply + "\n";
     }
 
-  return "invalid command: " + command + "\n";
-}
+  // special case: command may be a string of shortcut keys
 
-/*
-string CommandParser::usage ()
-{
-  return "usage: " + commands[current_command]->detail;
+  unsigned length = command.length();
+  unsigned ikey = 0;
+
+  for (ikey=0; ikey < length; ikey++) {
+    for (icmd=0; icmd < commands.size(); icmd++)
+      if (command[ikey] == commands[icmd]->shortcut)
+	break;
+    if (icmd == commands.size())
+      break;
+  }
+
+  if (ikey != length)
+    return "invalid command: " + command + "\n";
+
+  // otherwise, every character in the command is a shortcut key
+
+  string total_reply;
+
+  for (ikey=0; ikey < length; ikey++)
+    for (icmd=0; icmd < commands.size(); icmd++)
+      if (command[ikey] == commands[icmd]->shortcut) {
+
+	// only the last command gets the arguments
+	string args = (ikey == length-1) ? arguments : "";
+	string reply = commands[icmd]->execute (args);
+
+	if (!reply.empty())
+	  total_reply += reply + "\n";
+
+      }
+
+  return total_reply;
 }
-*/
 
 string CommandParser::help (const string& command)
 {
