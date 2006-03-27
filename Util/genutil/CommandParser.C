@@ -7,6 +7,10 @@
 #include "CommandParser.h"
 #include "string_utils.h"
 
+#ifdef HAVE_READLINE
+#include <readline/readline.h>
+#endif
+
 using namespace std;
 
 bool CommandParser::debug = false;
@@ -15,7 +19,6 @@ CommandParser::CommandParser()
 {
   quit = false;
   verbose = false;
-  // current_command = 0;
 }
 
 CommandParser::~CommandParser()
@@ -23,6 +26,23 @@ CommandParser::~CommandParser()
   for (unsigned icmd=0; icmd < commands.size(); icmd++)
     delete commands[icmd];
 }
+
+string CommandParser::readline ()
+{
+  string command;
+
+#ifdef HAVE_READLINE
+  char* cmd = readline (prompt.c_str());
+  command = cmd;
+  free (cmd);
+#else
+  cout << prompt;
+  getline (cin, command);
+#endif
+
+  return command;
+}
+
 
 static const char* whitespace = " \t\n";
 
@@ -52,7 +72,7 @@ string CommandParser::parse (const string& cmd, const string& args)
     cerr << "CommandParser::parse '"<< command <<"' '"<< arguments <<"'"<<endl;
 
   if (command.empty())
-    return prompt;
+    return "";
 
   if (debug)
     cerr << "CommandParser::parse command not empty" << endl;
@@ -73,9 +93,9 @@ string CommandParser::parse (const string& cmd, const string& args)
   if (command == "verbose") {
     verbose = !verbose;
     if (verbose)
-      return "verbosity enabled\n" + prompt;
+      return "verbosity enabled\n";
     else
-      return prompt;
+      return "";
   }
 
   if (debug)
@@ -106,12 +126,12 @@ string CommandParser::parse (const string& cmd, const string& args)
 	cerr << "CommandParser::parse execute returns '" << reply <<"'"<<endl;
 
       if (reply.empty())
-	return prompt;
+	return "";
       else
-	return reply + "\n" + prompt;
+	return reply + "\n";
     }
 
-  return "invalid command: " + command + "\n" + prompt;
+  return "invalid command: " + command + "\n";
 }
 
 /*
@@ -144,27 +164,27 @@ string CommandParser::help (const string& command)
       + pad(maxlen, "verbose") + "toggle verbosity\n\n"
       "Type \"help command\" to get detailed help on each command\n";
 
-    return help_str + "\n" + prompt;
+    return help_str + "\n";
   }
 
   // a command was specified
 
   if (command == "quit")
-    return "quit|exit exits the program\n" + prompt;
+    return "quit|exit exits the program\n";
 
   if (command == "verbose")
-    return "verbose makes the program more verbose\n" + prompt;
+    return "verbose makes the program more verbose\n";
 
   for (icmd=0; icmd < commands.size(); icmd++)
     if (command == commands[icmd]->command) {
       string help_str = command +": "+ commands[icmd]->help +"\n\n";
       if (commands[icmd]->detail.empty())
-	return help_str + "\t no detailed help available\n" + prompt;
+	return help_str + "\t no detailed help available\n";
       else
-	return help_str + commands[icmd]->detail + "\n" + prompt;
+	return help_str + commands[icmd]->detail + "\n";
     }
       
-  return "invalid command: " + command + "\n" + prompt;
+  return "invalid command: " + command + "\n";
 }
 
 void CommandParser::add_command (Method* command)

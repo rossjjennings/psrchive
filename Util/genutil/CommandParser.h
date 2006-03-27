@@ -36,6 +36,9 @@ class CommandParser : public Reference::Able {
   //! Initialize GNU readline and enable command completion
   void initialize_readline (const char*);
 
+  //! Print the prompt and read a line of text from the input device
+  std::string readline ();
+
   //! return a help string
   std::string help (const std::string& command);
 

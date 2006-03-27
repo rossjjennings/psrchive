@@ -6,7 +6,6 @@
  ***************************************************************************/
 
 #include "Pulsar/Interpreter.h"
-#include <iostream>
 
 using namespace std;
 
@@ -14,13 +13,8 @@ int main (int argc, char** argv)
 {
   Pulsar::Interpreter processor (argc, argv);
 
-  cout << processor.prompt;
-
-  while (!processor.quit)  {
-    string command;
-    getline (cin, command);
-    cout << processor.parse (command);
-  }
+  while (!processor.quit)
+    cout << processor.parse( processor.readline() );
 
   return 0;
 }
