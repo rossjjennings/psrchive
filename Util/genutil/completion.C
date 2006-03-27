@@ -4,13 +4,35 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #include "CommandParser.h"
-#include "config.h"
 
 #ifdef HAVE_READLINE
+#include <stdio.h>
 #include <readline/readline.h>
 #include <readline/history.h>
 #endif
+
+using namespace std;
+
+string CommandParser::readline ()
+{
+  string command;
+
+#ifdef HAVE_READLINE
+  char* cmd = ::readline (prompt.c_str());
+  command = cmd;
+  free (cmd);
+#else
+  cout << prompt;
+  getline (cin, command);
+#endif
+
+  return command;
+}
 
 static const CommandParser* parser = 0;
 
