@@ -11,6 +11,7 @@
 #include "Error.h"
 #include "tostring.h"
 #include "stringtok.h"
+#include "separate.h"
 
 // #define _DEBUG 1
 
@@ -595,13 +596,6 @@ namespace TextInterface {
   //! Does the work for VectorOfProxy::matches and MapOfProxy::matches
   bool match (const std::string& name, const std::string& text,
 	      std::string* range, std::string* remainder);
-
-  //! Separate a list of comma-separated commands into a vector of strings
-  void separate (std::string cmds, std::vector<std::string>&, bool& edit);
-  void separate (std::string cmds, std::vector<std::string>&, char lim);
-  void separate (std::string cmds, std::vector<std::string>&);
-  void separate (std::string cmds, std::vector<std::string>&,
-		 bool& edit, char lim);
 
   //! Label elements in ElementGetSet<C,E>::get_value
   extern bool label_elements;
