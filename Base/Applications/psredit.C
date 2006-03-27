@@ -69,7 +69,7 @@ int main (int argc, char** argv) try {
     switch (gotc) {
 
     case 'c':
-      TextInterface::separate (optarg, commands, edit);
+      separate (optarg, commands, edit);
       break;
 
     case 'e':

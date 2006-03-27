@@ -111,7 +111,7 @@ void Pulsar::PlotFrame::decorate (const Archive* data, const string& label,
     return;
 
   vector<string> labels;
-  TextInterface::separate (label, labels, '.');
+  separate (label, labels, '.');
 
   // get the length of a dash in normalized device coordinates
   float xl, yl;

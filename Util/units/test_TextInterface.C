@@ -275,31 +275,31 @@ int main () try {
 
   bool edit = false;
   vector<string> commands;
-  TextInterface::separate ("one=1, two,three, four=(4,5)", commands, edit);
+  separate ("one=1, two,three, four=(4,5)", commands, edit);
 
   if (commands.size() != 4) {
-    cerr << "TextInterface::separate yields vector with only "
+    cerr << "separate yields vector with only "
 	 << commands.size() << " elements" << endl;
     return -1;
   }
 
   if (commands[0] != "one=1") {
-    cerr << "TextInterface::separate fail cmds[0]=" << commands[0] << endl;
+    cerr << "separate fail cmds[0]=" << commands[0] << endl;
     return -1;
   }
 
   if (commands[1] != "two") {
-    cerr << "TextInterface::separate fail cmds[1]=" << commands[1] << endl;
+    cerr << "separate fail cmds[1]=" << commands[1] << endl;
     return -1;
   }
 
   if (commands[2] != "three") {
-    cerr << "TextInterface::separate fail cmds[2]=" << commands[2] << endl;
+    cerr << "separate fail cmds[2]=" << commands[2] << endl;
     return -1;
   }
 
   if (commands[3] != "four=(4,5)") {
-    cerr << "TextInterface::separate fail cmds[3]=" << commands[3] << endl;
+    cerr << "separate fail cmds[3]=" << commands[3] << endl;
     return -1;
   }
 
