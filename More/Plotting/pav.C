@@ -5,7 +5,7 @@
  *
  ***************************************************************************/
 //
-// $Id: pav.C,v 1.112 2006/03/17 13:34:41 straten Exp $
+// $Id: pav.C,v 1.113 2006/03/27 05:04:09 hknight Exp $
 //
 // The Pulsar Archive Viewer
 //
@@ -43,6 +43,14 @@
 #include "genutil.h"
 
 using namespace std;
+
+typedef struct {
+  string side;
+  float disp;
+  float coord;
+  float fjust;
+  string text;
+} cpgmtxt_inputs;
 
 vector<Reference::To<Pulsar::Archive> >
 get_archives(string filename, bool breakup_freq);
@@ -138,7 +146,8 @@ void usage ()
     " --hist         Plot '-D' as histogram [false]\n"
     " --plot_qu      Plot Stokes Q and Stokes U in '-S' option instead of degree of linear\n"
     " --no_corner_labels Don't display corner labels in publication mode [do display]\n"
-    " --chans arch   Treat each frequency-channel of 'arch' as a separatea archive\n"
+    " --chans arch   Treat each frequency-channel of 'arch' as a separate archive\n"
+    " --cpgmtxt \"side disp, coord, fjust text\" Call cpgmtxt with these args\n"
     "\n"
     "Archive::Extension options (file format specific):\n"
     " -o        Plot the original bandpass\n"
@@ -250,6 +259,8 @@ int main (int argc, char** argv)
   vector<string> filenames;
   vector<int> breakup_freq;
 
+  vector<cpgmtxt_inputs> cpgmtxts;
+
   int c = 0;
   
   const char* args = 
@@ -272,6 +283,7 @@ int main (int argc, char** argv)
   const int ZERO_WAVELENGTH  = 1024;
   const int NO_CORNER_LABELS = 1025;
   const int CHANS            = 1026;
+  const int CPGMTXT          = 1027;
 
   static struct option long_options[] = {
     { "convert_binphsperi", 1, 0, 200 },
@@ -302,9 +314,10 @@ int main (int argc, char** argv)
     { "inf",                no_argument,       0, ZERO_WAVELENGTH},
     { "no_corner_labels",   no_argument,       0, NO_CORNER_LABELS},
     { "chans",              required_argument, 0, CHANS},
+    { "cpgmtxt",            required_argument, 0, CPGMTXT},
     { 0, 0, 0, 0 }
   };
-    
+
   while (1) {
     int options_index = 0;
     
@@ -382,7 +395,7 @@ int main (int argc, char** argv)
       plotter.set_subint( atoi (optarg) );
       break;
     case 'i':
-      cout << "$Id: pav.C,v 1.112 2006/03/17 13:34:41 straten Exp $" << endl;
+      cout << "$Id: pav.C,v 1.113 2006/03/27 05:04:09 hknight Exp $" << endl;
       return 0;
 
     case 'j':
@@ -720,12 +733,26 @@ int main (int argc, char** argv)
       breakup_freq.push_back( true );
       break;
 
+    case CPGMTXT:
+      {
+	vector<string> words = stringdecimate(optarg," \t");
+	cpgmtxt_inputs dummy;
+	cpgmtxts.push_back( dummy );
+
+	cpgmtxts.back().side = words[0];
+	cpgmtxts.back().disp = atof(words[1].c_str());
+	cpgmtxts.back().coord = atof(words[2].c_str());
+	cpgmtxts.back().fjust = atof(words[3].c_str());
+	cpgmtxts.back().text = words[4];
+	break;
+      }
+
     default:
       cerr << "pav: unrecognized option" << endl;
       return -1; 
     }
   }
-  
+
   {
     vector<string> fnames;
 
@@ -768,7 +795,6 @@ int main (int argc, char** argv)
   cerr << "pav: reading " << filenames.size() << " files" << endl;
 
   for (unsigned ifile = 0; ifile < filenames.size(); ifile++) try {
-
     vector<Reference::To<Pulsar::Archive> > archives = 
       get_archives( filenames[ifile], breakup_freq[ifile] );
 
@@ -832,7 +858,6 @@ int main (int argc, char** argv)
       }
 
       if (zero_wavelength) {
-
 	double RM = archive->get_rotation_measure();
 	if (RM == 0.0)
 	  cerr << "pav: Archive RM=0; nothing to correct\n" << endl;
@@ -910,7 +935,6 @@ int main (int argc, char** argv)
       string archive_filename = archive->get_filename();
 
       for (unsigned isub = 0; isub < nsubint; isub++) {
-
 	if (all_subints) {
 	  plotter.set_subint (isub);
 
@@ -1093,14 +1117,28 @@ int main (int argc, char** argv)
     
 	if (display) {
 	  cpg_next();
-	
 	  plotter.set_axes(show_profile_axes);
+
 	  plotter.singleProfile (archive);
+	  cpgsch(1.3);
+	  for( unsigned i=0; i<cpgmtxts.size(); i++)
+	    cpgmtxt( cpgmtxts[i].side.c_str(),
+		     cpgmtxts[i].disp,
+		     cpgmtxts[i].coord,
+		     cpgmtxts[i].fjust,
+		     cpgmtxts[i].text.c_str());
 	}
 
 	if (manchester) {
 	  cpg_next();
 	  plotter.Manchester (archive, plot_qu);
+	  cpgsch(1.3);
+	  for( unsigned i=0; i<cpgmtxts.size(); i++)
+	    cpgmtxt( cpgmtxts[i].side.c_str(),
+		     cpgmtxts[i].disp,
+		     cpgmtxts[i].coord,
+		     cpgmtxts[i].fjust,
+		     cpgmtxts[i].text.c_str());
 	}
 	if (degree) {
 	  cpg_next();
