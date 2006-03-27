@@ -19,12 +19,10 @@
 
 void Pulsar::Interpreter::init()
 {
-  initialize_readline ("psrsh");
-
-  inplace = false;
   clobber = true;
+  inplace = false;
   stopwatch = false;
-  reply = true;
+  reply = false;
   
   prompt = "psrsh> ";
   
@@ -36,7 +34,7 @@ void Pulsar::Interpreter::init()
   add_command 
     ( &Interpreter::load,
       "load", "load archive from file",
-      "usage: load <filename> [name]\n"
+      "usage: load [name] <filename>\n"
       "  string filename   name of the file to be read \n"
       "  string name       if specified, assign name to archive\n" );
   
@@ -45,11 +43,7 @@ void Pulsar::Interpreter::init()
       "unload", "unload archive or set unload options",
       "usage: unload [name] <filename> \n"
       "  string filename   name of the file to be written \n"
-      "  string name       if specified, unload the named archive \n"
-      "or: unload extension <ext> \n"
-      "  string ext        extension added to filename when unloading \n"
-      "or: unload path <dir> \n"
-      "  string dir        path to which archives are unloaded \n");
+      "  string name       if specified, unload the named archive \n" );
   
   add_command
     ( &Interpreter::push,
@@ -84,19 +78,16 @@ void Pulsar::Interpreter::init()
   add_command
     ( &Interpreter::clone,
       "clone", "duplicate an archive",
-      "usage: clone [from] <name> \n"
-      "  string from       name of archive to be cloned \n"
-      "                    if not specified, clone current archive \n"
-      "  string name       name to be given to clone \n" );
+      "usage: clone <name> \n"
+      "  string name       name of archive to be cloned \n"
+      "                    if not specified, clone current archive \n" );
 
   add_command
     ( &Interpreter::extract,
       "extract", "duplicate part of an archive",
-      "usage: extract [from] [to] <subints> \n"
-      "  string from       name of archive from which to extract \n"
+      "usage: extract [name] <subints> \n"
+      "  string name       name of archive from which to extract \n"
       "                    if not specified, current archive is used \n"
-      "  string to         name to be given to extracted copy \n"
-      "                    if not specified, copy will become current \n"
       "  unsigned subints  range[s] of subints to be extracted \n" );
   
   add_command
@@ -108,78 +99,68 @@ void Pulsar::Interpreter::init()
   add_command
     ( &Interpreter::append,
       "append", "append data from one archive to another",
-      "usage: append [onto] <other> \n"
-      "  string onto       name of archive to which other will be appended \n"
-      "  string other      name of archive to be appended \n" );
+      "usage: append <name> \n"
+      "  string name       name of archive to be appended \n" );
   
   add_command 
     ( &Interpreter::fscrunch, 'F',
       "fscrunch", "integrate archive in frequency",
-      "usage: fscrunch [name] [chans] \n"
-      "  string name       name of archive to be fscrunched \n"
-      "                    if not specified, current archive is used \n"
+      "usage: fscrunch [chans] \n"
       "  unsigned chans    number of desired frequency channels \n"
       "                    if not specified, fscrunch all (chans=1)\n" );
   
   add_command 
     ( &Interpreter::tscrunch, 'T',
       "tscrunch", "integrate archive in time",
-      "usage: tscrunch [name] [subints] \n"
-      "  string name       name of archive to be tscrunched \n"
-      "                    if not specified, current archive is used \n"
+      "usage: tscrunch [subints] \n"
       "  unsigned subints  number of desired sub-integrations \n"
       "                    if not specified, tscrunch all (subints=1)\n" );
 
   add_command 
     ( &Interpreter::pscrunch, 'p',
-      "pscrunch", "integrate archive in polarisation",
-      "usage: pscrunch [name] \n"
-      "  string name       name of archive to be tscrunched \n"
-      "                    if not specified, current archive is used \n" );
+      "pscrunch", "integrate archive to produce total intensity",
+      "usage: pscrunch \n" );
   
   add_command
     ( &Interpreter::bscrunch, 'B',
       "bscrunch", "integrate archive in phase bins",
-      "usage: bscrunch [name] bins \n"
-      "  string name       name of archive to be tscrunched \n"
-      "                    if not specified, current archive is used \n"
+      "usage: bscrunch bins \n"
       "  unsigned bins     number of desired phase bins\n" );
 
   add_command 
-    (&Interpreter::centre, 'C',
-     "centre", "centre all profiles in an archive",
-     "centre <string>   centre stack archive\n");
+    ( &Interpreter::centre, 'C',
+      "centre", "centre profiles using the polyco",
+      "usage: centre \n" );
 
   add_command 
-    (&Interpreter::dedisperse, 'D',
-     "dedisp", "dedisperse all profiles in an archive",
-     "dedisp <string>   dedisperse stack archive\n");
+    ( &Interpreter::dedisperse, 'D',
+      "dedisperse", "dedisperse all profiles in an archive",
+      "usage: dedisperse \n" );
 
   add_command 
-    (&Interpreter::defaraday, 'R',
-     "defaraday", "apply faraday rotation correction",
-     "usage: defaraday [name]\n"
-     "  string name    name of archive to correct" );
+    ( &Interpreter::defaraday, 'R',
+      "defaraday", "apply faraday rotation correction",
+      "usage: defaraday \n" );
 
   add_command 
-    (&Interpreter::correct_instrument,
-     "pac", "apply parallactic angle corrections",
-     "pac <string>   apply parallactc angle corrections to a stack item\n");
+    ( &Interpreter::correct_instrument,
+      "pac", "apply parallactic angle correction",
+      "usage: pac \n");
 
   add_command 
-    (&Interpreter::scattered_power_correct,
-     "spc", "apply scattered power corrections",
-     "spc <string>   apply scattered power corrections to a stack item\n");
+    ( &Interpreter::scattered_power_correct,
+      "spc", "apply scattered power correction",
+      "usage: spc \n");
 
   add_command 
-    (&Interpreter::screen_dump,
-     "screendump", "display raw data points",
-     "screendump <string>   write out the raw data: polns in columns\n");
+    ( &Interpreter::screen_dump,
+      "screendump", "display raw data points",
+      "usage: screendump \n");
   
   add_command 
-    (&Interpreter::toggle_clobber,
-     "clobber", "toggle overwrite permission",
-     "clobber   set whether or not you can clobber stack items\n");
+    ( &Interpreter::toggle_clobber,
+      "clobber", "toggle overwrite permission",
+      "usage: clobber \n");
 
 }
 
@@ -191,9 +172,6 @@ Pulsar::Interpreter::Interpreter()
 //! construct from command line arguments
 Pulsar::Interpreter::Interpreter (int &argc, char** &argv)
 {
-  for (int i=0; i<argc; i++)
-    cerr << "args[" << i << "]=" << argv[i] << endl;
-
   init ();
 }
 
@@ -203,16 +181,15 @@ Pulsar::Interpreter::~Interpreter ()
 
 }
 
+bool Pulsar::Interpreter::fault () const
+{
+  return status == Fail;
+}
+
 string Pulsar::Interpreter::get_report (const string& args)
 {
-  string ok;
-  
-  if (reply)
-    ok = "ok";
-  
   Pulsar::Archive::agent_report ();
-  
-  return ok;
+  return response (Good);
 }
 
 /*!
@@ -238,7 +215,7 @@ string Pulsar::Interpreter::response (Status s, const string& text)
   status = s;
 
   if (!reply)
-    return "";
+    return text;
 
   string out;
 
@@ -288,11 +265,9 @@ void Pulsar::Interpreter::setmap (const string& name, Archive* data)
 
 Pulsar::Archive* Pulsar::Interpreter::getmap (const string& name, bool ex)
 {
-  cerr << "Pulsar::Interpreter::get '" << name << "'" << endl;
   map< string, Reference::To<Archive> >::iterator entry = theMap.find (name);
 
   if (entry == theMap.end()) {
-    cerr << "Pulsar::Interpreter::get '" << name << "' not found" << endl;
     // not found
     if (!ex) 
       return 0;
@@ -387,20 +362,15 @@ string Pulsar::Interpreter::clone (const string& args)
 try { 
   vector<string> arguments = setup (args);
 
-  if (!arguments.size() || arguments.size() > 2)
-    return response (Fail, "clone: please specify one or two names");
+  if (!arguments.size() > 1)
+    return response (Fail, "clone: please specify only one name");
 
-  string name = arguments[0];
+  if (arguments.size() == 1)
+    set( getmap(arguments[0])->clone() );
+  else
+    set( get()->clone() );
 
-  /* if two names are specified, get the name of the first argument
-     and name the clone with the second argument.  otherwise, clone
-     the current top of the stack */
-  if (arguments.size() == 2) {
-    set( getmap(name) );
-    name = arguments[1];
-  }
-
-  setmap( name, get()->clone() );
+  return response (Good);
 }
 catch (Error& error) {
   return response (Fail, "clone: " + error.get_message());
@@ -411,9 +381,7 @@ try {
   vector<string> arguments = setup (args);
 
   if (!arguments.size())
-    return response (Fail, "extract: please specify one or two names");
-
-  unsigned range = 0;
+    return response (Fail, help("extract"));
 
   /*
     if the first argument is a valid map name, then start with this archive;
@@ -421,35 +389,18 @@ try {
   */
 
   Reference::To<Archive> archive = getmap (arguments[0], false);
-  string from_name;
-  if (archive) {
+
+  unsigned range = 0;
+
+  if (archive)
     range ++;
-    from_name = arguments[0];
-  }
-  else {
+  else
     archive = get();
-    from_name = "_top";
-  }
 
-  if (!archive)
-    return response (Fail, "extract: no data");
-
-  /*
-    if the first/next argument does not parse into a range, then assume
-    that it is the name to be given to the result
-  */
-
-  string into_name;
   vector<unsigned> indeces;
-  TextInterface::parse_indeces (indeces, arguments[range]);
-
-  if (!indeces.size()) {
-    into_name = arguments[range];
-    range++;
-  }
 
   /*
-    parse the remaining options as though they were indeces
+    parse the (remaining) options as though they were indeces
   */
   for (unsigned i = range; i < arguments.size(); i++)
     TextInterface::parse_indeces (indeces, arguments[i]);
@@ -459,23 +410,7 @@ try {
   */
   set( archive -> extract(indeces) );
 
-  /*
-    if into_name is set, then name the result
-  */
-  if (into_name.length())
-    setmap( into_name, get() );
-  else
-    into_name = "_top";
-
-  /*
-    report
-  */
-  string ok = "extract: subint(s) ";
-  for (unsigned k = range; k < arguments.size(); k++)
-    ok += arguments[k] + " ";
-  ok += "from " + from_name + " into " + into_name;
-
-  return response (Good, ok);
+  return response (Good);
 }
 catch (Error& error) {
   return response (Fail, "extract: " + error.get_message());
@@ -502,27 +437,15 @@ try {
 catch (Error& error) {
   return response (Fail, "append: " + error.get_message());
 }
+
 string Pulsar::Interpreter::append (const string& args)
 try { 
   vector<string> arguments = setup (args);
 
-  if (!arguments.size() || arguments.size() > 2)
-    return response (Fail, "append: please specify one or two names");
+  if (!arguments.size() != 1)
+    return response (Fail, "append: please specify one name");
 
-  string name = arguments[0];
-
-  /* if two names are specified, get the first argument and append the
-     second argument.  otherwise, append the first argument the
-     current top of the stack */
-  if (arguments.size() == 2) {
-    cerr << "Pulsar::Interpreter::append to '" << name << "'" << endl;
-    set( getmap (name) );
-    name = arguments[1];
-  }
-
-  cerr << "Pulsar::Interpreter::append other '" << name << "'" << endl;
-  Archive::set_verbosity(3);
-  get()->append( getmap(name) );
+  get()->append( getmap(arguments[0]) );
 
   return response (Good);
 }
@@ -535,12 +458,12 @@ try {
   vector<string> arguments = setup (args);
   
   if (!arguments.size() || arguments.size() > 2)
-    return response (Fail, "load: please specify filename [name]");
-
-  set( Archive::load(arguments[0]) );
+    return response (Fail, help("load"));
 
   if (arguments.size() == 2)
-    setmap( arguments[1], get() );
+    setmap( arguments[0], Archive::load(arguments[1]) );
+  else
+    set( Archive::load(arguments[0]) );
 
   return response (Good);
 }
@@ -552,73 +475,18 @@ string Pulsar::Interpreter::unload (const string& args)
 try {
   vector<string> arguments = setup (args);
   
-  if (arguments.size() == 2 && arguments[0] == "extension") {
-    unload_extension = arguments[1];
-    return response (Good);
-  }
-  if (arguments.size() == 2 && arguments[0] == "path") {
-    unload_path = arguments[1];
-    return response (Good);
-  }
-  if (!arguments.size() || arguments.size() > 2)
-    return response (Fail, "unload: please specify [name] filename");
-  
-  string name = arguments[0];
+  if (arguments.size() || arguments.size() > 2)
+    return response (Fail, help("unload"));
 
-  /* if two names are specified, get the name of the first argument
-     and unload to the second argument.  otherwise, write the current
-     top of the stack to the first argument */
-
-  if (arguments.size() == 2) {
-    set( getmap (name) );
-    name = arguments[1];
-  }
-
-  string newname;
-	
-  if (!unload_path.empty()) {
-    newname = unload_path;
-    newname += "/";
-  }
-
-  newname += name;
-  newname += unload_extension;
-
-  get()->unload(newname);
+  if (arguments.size() == 2)
+    getmap( arguments[0] )->unload( arguments[1] );
+  else
+    get()->unload( arguments[0] );
 
   return response (Good);
 }
 catch (Error& error) {
   return response (Fail, "unload: " + error.get_message());
-}
-
-unsigned Pulsar::Interpreter::setup_get (const std::string& args)
-{
-  vector<string> arguments = setup (args);
-
-  if (!arguments.size())
-    return 0;
-
-  unsigned retval = 0;
-
-  if (arguments.size() == 1) {
-    // the only argument could be either a map name or the unsigned integer
-    if (sscanf(arguments[0].c_str(), "%u", &retval) == 1)
-      return retval;
-  }
-  
-  else if (arguments.size() == 2) {
-    // the second argument must be an unsigned integer
-    if (sscanf(arguments[1].c_str(), "%u", &retval) != 1)
-      throw Error (InvalidParam, "Pulsar::Interpreter::setup_get",
-		   "failed to parse '" + arguments[1] + "' as unsigned");
-  }
-
-  else
-    throw Error (InvalidParam, "Pulsar::Interpreter::setup_get",
-		 "invalid arguments: '" + args + "'");
-
-  set( getmap (arguments[0]) );
 }
 
 // //////////////////////////////////////////////////////////////////////
@@ -627,7 +495,7 @@ unsigned Pulsar::Interpreter::setup_get (const std::string& args)
 //
 string Pulsar::Interpreter::fscrunch (const string& args)
 try {
-  unsigned scrunch_to = setup_get (args);
+  unsigned scrunch_to = setup<unsigned> (args, 0);
   
   if (scrunch_to)
     get() -> fscrunch_to_nchan (scrunch_to);
@@ -647,7 +515,7 @@ catch (Error& error) {
 //
 string Pulsar::Interpreter::tscrunch (const string& args)
 try {
-  unsigned scrunch_to = setup_get (args);
+  unsigned scrunch_to = setup<unsigned> (args, 0);
   
   if (scrunch_to)
     get() -> tscrunch_to_nsub (scrunch_to);
@@ -666,9 +534,7 @@ catch (Error& error) {
 //
 string Pulsar::Interpreter::pscrunch (const string& args)
 try {
-  unsigned scrunch_to = setup_get (args);
-  
-  if (scrunch_to)
+  if (args.length())
     return response (Fail, "pscr: accepts no arguments");
 
   get() -> pscrunch();
@@ -681,10 +547,10 @@ catch (Error& error) {
 
 string Pulsar::Interpreter::bscrunch (const string& args)
 try {
-  unsigned scrunch_to = setup_get (args);
+  unsigned scrunch_to = setup<unsigned> (args);
   
   if (!scrunch_to)
-    return response (Fail, "bscr: requires a valid number of bins");
+    return response (Fail, "bscr: invalid number of bins");
 
   get() -> bscrunch_to_nbin (scrunch_to);
   return response (Good);
@@ -696,7 +562,7 @@ catch (Error& error) {
 string Pulsar::Interpreter::centre (const string& args)
 try {
   if (args.length())
-    set( getmap (args) );
+    return response (Fail, "centre: accepts no arguments");
   get()->centre();
   return response (Good);
 }
@@ -712,12 +578,13 @@ catch (Error& error) {
 string Pulsar::Interpreter::dedisperse (const string& args)
 try {
   if (args.length())
-    set( getmap (args) );
+    return response (Fail, "dedisp: accepts no arguments");
 
   if (get()->get_dedispersed())
     return response (Warn, "dedisp: already dedispersed");
 
   get()->dedisperse();
+
   return response (Good);
 }
 catch (Error& error) {
@@ -727,12 +594,13 @@ catch (Error& error) {
 string Pulsar::Interpreter::correct_instrument (const string& args)
 try {
   if (args.length())
-    set( getmap (args) );
+    return response (Fail, "pac: accepts no arguments");
 
   if (get()->get_instrument_corrected())
     return response (Warn, "pac: already corrected");
 
   get()->correct_instrument();
+
   return response (Good);
 }
 catch (Error& error) {
@@ -747,16 +615,17 @@ catch (Error& error) {
 string Pulsar::Interpreter::defaraday (const string& args)
 try {
   if (args.length())
-    set( getmap (args) );
+    return response (Fail, "defaraday: accepts no arguments");
 
   if (get()->get_faraday_corrected())
-    return response (Warn, "frc: already corrected");
+    return response (Warn, "defaraday: already corrected");
 
   get()->defaraday();
+
   return response (Good);
 }
 catch (Error& error) {
-  return response (Fail, "frc: " + error.get_message());
+  return response (Fail, "defaraday: " + error.get_message());
 }
 
 // //////////////////////////////////////////////////////////////////////
@@ -767,7 +636,7 @@ catch (Error& error) {
 string Pulsar::Interpreter::scattered_power_correct (const string& args)
 try {
   if (args.length())
-    set( getmap (args) );
+    return response (Fail, "spc: accepts no arguments");
 
   Archive* arch = get();
   if (arch->get_state() == Signal::Stokes)
@@ -790,16 +659,15 @@ catch (Error& error) {
 
 string Pulsar::Interpreter::toggle_clobber (const string& args)
 {
-  string ok;
-  
   clobber = !clobber;
   
-  if (reply) {
-    if (clobber) ok = "Clobber set to true";
-    if (!clobber) ok = "Clobber set to false";
-  }
-  
-  return ok;
+  if (!reply)
+    return "";
+
+  if (clobber)
+    return "will clobber named archives";
+  else
+    return "will not clobber named archives";
 }
 
 // //////////////////////////////////////////////////////////////////////

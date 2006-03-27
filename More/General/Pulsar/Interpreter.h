@@ -76,6 +76,12 @@ namespace Pulsar {
     //! get the status after the last command
     Status get_status () const;
 
+    //! return true if get_status == Fail
+    bool fault () const;
+
+    //! set to false to disable the 'ok' reply
+    void set_reply (bool f) { reply = f; }
+
     //! get plugin information
     std::string get_report (const std::string& args);
     
@@ -183,11 +189,11 @@ namespace Pulsar {
     //! All methods should return via the response methods
     std::string response (Status status, const std::string& text = "");
 
-    //! Parses arguments as an optional map name and unsinged integer
-    unsigned setup_get (const std::string& args);
-
     //! Parses arguments as a single instance of T
     template<typename T> T setup (const std::string& args);
+
+    //! Parses arguments as an optional single instance of T
+    template<typename T> T setup (const std::string& args, T default_value);
 
     void Tokenise (const std::string& str, std::vector<std::string>& tokens, 
 		   const std::string& delimiters = " ");
@@ -209,6 +215,19 @@ T Pulsar::Interpreter::setup (const std::string& args)
 		 "invalid number of parameters");
   
   return fromstring<T> (arguments[0]);
+}
+
+template<typename T>
+T Pulsar::Interpreter::setup (const std::string& args, T default_value)
+{
+  std::vector<std::string> arguments = setup (args);
+  if (arguments.size() > 1)
+    throw Error (InvalidParam, "Pulsar::Interpreter::setup",
+		 "invalid number of parameters");
+  if (arguments.size())
+    return fromstring<T> (arguments[0]);
+  else
+    return default_value;
 }
 
 #endif
