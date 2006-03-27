@@ -12,8 +12,7 @@ using namespace TextInterface;
 static unsigned tests = 0;
 static unsigned maxsize = 500;
 
-void runtest (const string& temp, const string& remainder,
-              const int* output)
+void runtest (const string& input, const int* output)
 {
   tests ++;
 
@@ -28,18 +27,11 @@ void runtest (const string& temp, const string& remainder,
   }
 
   vector<unsigned> indeces;
-  string input = temp;
   parse_indeces (indeces, input);
 
-  if (input != remainder) {
-    cerr << "test " << tests 
-         << ": remainder=" << input << " != " << remainder << endl;
-    exit(-1);
-  }
-
   if (indeces.size() != size) {
-    cerr << "test " << tests
-         << ": size=" << indeces.size() << " != " << size << endl;
+    cerr << "test " << tests << " input='" << input << "'"
+      " size=" << indeces.size() << " != " << size << endl;
     exit(-1);
   }
 
@@ -56,17 +48,8 @@ void runtest (const string& temp, const string& remainder,
 int main ()
 {
   try {
-    int result[] = {-1};
-    runtest ("variable", "variable", result);
-  }
-  catch (Error& error) {
-    cerr << "Caught unexpected exception: " << error.get_message() << endl;
-    return -1;
-  }
-
-  try {
     int result[] = {3,-1};
-    runtest ("[3]:", "", result);
+    runtest ("[3]", result);
   }
   catch (Error& error) {
     cerr << "Caught unexpected exception: " << error.get_message() << endl;
@@ -75,7 +58,7 @@ int main ()
 
   try {
     int result[] = {3,5,-1};
-    runtest ("[3,5]:remainder", "remainder", result);
+    runtest ("[3,5]", result);
   }
   catch (Error& error) {
     cerr << "Caught unexpected exception: " << error.get_message() << endl;
@@ -84,7 +67,7 @@ int main ()
 
   try {
     int result[] = {3,4,5,6,-1};
-    runtest ("[3-6]:text[6]:sub", "text[6]:sub", result);
+    runtest ("[3-6]", result);
   }
   catch (Error& error) {
     cerr << "Caught unexpected exception: " << error.get_message() << endl;
@@ -93,7 +76,7 @@ int main ()
 
   try {
     int result[] = {0,8,9,10,11,3,4,5,6,-1};
-    runtest ("[0,8-11,3-6]:text:sub", "text:sub", result);
+    runtest ("[0,8-11,3-6]", result);
   }
   catch (Error& error) {
     cerr << "Caught unexpected exception: " << error.get_message() << endl;
@@ -102,7 +85,7 @@ int main ()
 
   try {
     int result[] = {-1};
-    runtest ("[0,8-11,-6]:", "", result);
+    runtest ("variable", result);
     cerr << "Failed to throw exception on bad input" << endl;
     return -1;
   }
@@ -112,7 +95,7 @@ int main ()
 
   try {
     int result[] = {-1};
-    runtest ("[0,,6]:", "", result);
+    runtest ("[0,8-11,-6]", result);
     cerr << "Failed to throw exception on bad input" << endl;
     return -1;
   }
@@ -122,7 +105,7 @@ int main ()
 
   try {
     int result[] = {-1};
-    runtest ("[6-]:", "", result);
+    runtest ("[0,,6]", result);
     cerr << "Failed to throw exception on bad input" << endl;
     return -1;
   }
@@ -132,7 +115,7 @@ int main ()
 
   try {
     int result[] = {-1};
-    runtest ("[6--8]:", "", result);
+    runtest ("[6-]", result);
     cerr << "Failed to throw exception on bad input" << endl;
     return -1;
   }
@@ -142,7 +125,7 @@ int main ()
 
   try {
     int result[] = {-1};
-    runtest ("[8-5]:", "", result);
+    runtest ("[6--8]", result);
     cerr << "Failed to throw exception on bad input" << endl;
     return -1;
   }
@@ -152,7 +135,17 @@ int main ()
 
   try {
     int result[] = {-1};
-    runtest ("[]:", "", result);
+    runtest ("[8-5]", result);
+    cerr << "Failed to throw exception on bad input" << endl;
+    return -1;
+  }
+  catch (Error& error) {
+    cerr << "Caught expected exception: " << error.get_message() << endl;
+  }
+
+  try {
+    int result[] = {-1};
+    runtest ("[]", result);
     cerr << "Failed to throw exception on bad input" << endl;
     return -1;
   }
@@ -162,7 +155,7 @@ int main ()
 
   try {
     int result[] = {-1}; 
-    runtest ("[-6-8]:", "", result);
+    runtest ("[-6-8]", result);
     cerr << "Failed to throw exception on bad input" << endl;
     return -1;
   }
@@ -172,17 +165,7 @@ int main ()
 
   try {
     int result[] = {-1}; 
-    runtest ("[1-4,6to8]:", "", result);
-    cerr << "Failed to throw exception on bad input" << endl;
-    return -1;
-  }
-  catch (Error& error) {
-    cerr << "Caught expected exception: " << error.get_message() << endl;
-  }
-
-  try {
-    int result[] = {-1};
-    runtest ("[1-4]", "", result);
+    runtest ("[1-4,6to8]", result);
     cerr << "Failed to throw exception on bad input" << endl;
     return -1;
   }
