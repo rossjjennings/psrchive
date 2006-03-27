@@ -15,7 +15,7 @@
 #include "Pulsar/Profile.h"
 #include "Pulsar/ProcHistory.h"
 
-#include "Pulsar/DurationWeight.h"
+#include "Pulsar/Interpreter.h"
 #include "Pulsar/Config.h"
 
 #include "tempo++.h"
@@ -25,10 +25,11 @@
 #include "genutil.h"
 #include "dirutil.h"
 #include "string_utils.h"
+#include "separate.h"
 
 bool weight_by_duration = Pulsar::config.get<bool>("weight_by_duration",false);
 
-static const char* psradd_args = "b:c:Ce:f:FG:hiI:LM:O:p:Pqr:sS:tT:uUvVwZ:";
+static const char* psradd_args = "b:c:Ce:f:FG:hiI:j:J:LM:O:p:Pqr:sS:tT:uUvVZ:";
 
 void usage () {
   cout <<
@@ -41,6 +42,8 @@ void usage () {
     " -i          Show revision information\n"
     " -L          Log results in source.log\n"
     "\n"
+    " -j j1[,jN]  preprocessing job[s]\n"
+    " -J jobs     multiple preprocessing jobs in 'jobs' file \n"
     " -b nbin     Scrunch to nbin bins after loading archives\n"
     " -c nchan    Scrunch to nchan frequency channels after loading archives\n"
     " -C          Check that ephemerides are equal\n"
@@ -53,7 +56,6 @@ void usage () {
     " -s          Tscrunch result after each new file (nice on RAM)\n"
     " -t          Make no changes to file system (testing mode)\n"
     " -T tempo    System call to tempo\n"
-    " -w          Weight each sub-integration by its duration \n"
     " -Z time     Only add archives that are time (+/- 0.5) seconds long\n"
     "\n"
     "AUTO ADD options:\n"
@@ -136,6 +138,9 @@ int main (int argc, char **argv) try {
   // for writing into history
   string command = "psradd";
   
+  // Preprocessing jobs
+  vector<string> jobs;
+
   int c;  
   while ((c = getopt(argc, argv, psradd_args)) != -1)  {
     switch (c)  {
@@ -145,7 +150,7 @@ int main (int argc, char **argv) try {
       return 0;
       
     case 'i':
-      cout << "$Id: psradd.C,v 1.30 2006/03/23 21:18:33 straten Exp $" 
+      cout << "$Id: psradd.C,v 1.31 2006/03/27 21:44:48 straten Exp $" 
 	   << endl;
       return 0;
 
@@ -210,6 +215,14 @@ int main (int argc, char **argv) try {
       auto_add = true;
       command += " -I ";
       command += optarg;
+      break;
+
+    case 'j':
+      separate (optarg, jobs);
+      break;
+      
+    case 'J':
+      loadlines (optarg, jobs);
       break;
 
     case 'O':
@@ -296,10 +309,6 @@ int main (int argc, char **argv) try {
       verbose = true;
       break;
 
-    case 'w':
-      weight_by_duration = true;
-      break;
-
     case 'Z': 
       required_archive_length = atof(optarg); 
       command += " -Z ";
@@ -371,9 +380,7 @@ int main (int argc, char **argv) try {
   FILE* log_file = 0;
   string log_filename;
 
-  Reference::To<Pulsar::Weight> weight;
-  if (weight_by_duration)
-    weight = new Pulsar::DurationWeight;
+  Pulsar::Interpreter preprocessor;
 
   for (unsigned ifile=0; ifile < filenames.size(); ifile++) try {
 
@@ -406,8 +413,12 @@ int main (int argc, char **argv) try {
 	&& fabs(archive->get_centre_frequency()-centre_frequency) > 0.0001 )
       continue;
 
-    if (weight)
-      weight->weight (archive);
+    if (jobs.size()) {
+      if (verbose)
+	cerr << "psrplot: preprocessing " << filenames[ifile] << endl;
+      preprocessor.set(archive);
+      preprocessor.script(jobs);
+    }
 
     if (nbin)
       archive->bscrunch_to_nbin (nbin);
