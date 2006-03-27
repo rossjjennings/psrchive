@@ -247,7 +247,7 @@ pcm_LDADD			= $(LDADD) @PGPLOT_LIBS@ -lpthread
 pcm_chooser_LDADD		= $(LDADD) @PGPLOT_LIBS@
 pcvar_LDADD			= $(LDADD) @PGPLOT_LIBS@
 psrband_LDADD			= $(LDADD) @PGPLOT_LIBS@
-psrsh_LDADD			= $(LDADD) @PGPLOT_LIBS@
+psrsh_LDADD			= $(LDADD) @PGPLOT_LIBS@ @READLINE_LIBS@
 psrwt_LDADD			= $(LDADD) @PGPLOT_LIBS@
 pvt_LDADD			= $(LDADD) @PGPLOT_LIBS@
 rmfit_LDADD			= $(LDADD) @PGPLOT_LIBS@
@@ -262,9 +262,6 @@ paas_LDADD			= $(LDADD) @PGPLOT_LIBS@
 paf_LDADD			= $(LDADD) @PGPLOT_LIBS@
 pfixbaseline_LDADD		= $(LDADD) @PGPLOT_LIBS@
 psrchive_template_LDADD		= $(LDADD) @PGPLOT_LIBS@
-
-# future
-# psrsh_LDADD = -lreadline -ltermcap
 
 if HAVE_CFITSIO
 
