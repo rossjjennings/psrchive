@@ -39,6 +39,12 @@ class CommandParser : public Reference::Able {
   //! Print the prompt and read a line of text from the input device
   std::string readline ();
 
+  //! Process a script
+  virtual void script (const std::string& filename);
+
+  //! A fault condition causes the script method to throw an exception
+  virtual bool fault () const { return false; }
+
   //! return a help string
   std::string help (const std::string& command);
 
@@ -53,8 +59,6 @@ class CommandParser : public Reference::Able {
 
   //! verbose operation enabled by "verbose"
   bool verbose;
-
-  // std::string usage ();
 
  protected:
 
