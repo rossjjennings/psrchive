@@ -7,9 +7,7 @@
 #include "CommandParser.h"
 #include "string_utils.h"
 
-#ifdef HAVE_READLINE
-#include <readline/readline.h>
-#endif
+#include <fstream>
 
 using namespace std;
 
@@ -27,29 +25,25 @@ CommandParser::~CommandParser()
     delete commands[icmd];
 }
 
-string CommandParser::readline ()
+void CommandParser::script (const string& filename)
 {
-  string command;
+  vector<string> lines;
+  loadlines (filename, lines);
 
-#ifdef HAVE_READLINE
-  char* cmd = readline (prompt.c_str());
-  command = cmd;
-  free (cmd);
-#else
-  cout << prompt;
-  getline (cin, command);
-#endif
-
-  return command;
+  for (unsigned i=0; i<lines.size(); i++) {
+    string response = parse( lines[i] );
+    if (fault())
+      throw Error (InvalidState, "CommandParser::script", response);
+    cout << response;
+  }
 }
-
 
 static const char* whitespace = " \t\n";
 
 string CommandParser::parse (const string& commandargs)
 {
   if (debug)
-  cerr << "CommandParser::parse '" << commandargs << "'" << endl;
+    cerr << "CommandParser::parse '" << commandargs << "'" << endl;
 
 
   string cmdargs = commandargs;
