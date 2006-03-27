@@ -27,11 +27,15 @@ CommandParser::~CommandParser()
 
 void CommandParser::script (const string& filename)
 {
-  vector<string> lines;
-  loadlines (filename, lines);
+  vector<string> cmds;
+  loadlines (filename, cmds);
+  script (cmds);
+}
 
-  for (unsigned i=0; i<lines.size(); i++) {
-    string response = parse( lines[i] );
+void CommandParser::script (const vector<string>& cmds)
+{
+  for (unsigned i=0; i<cmds.size(); i++) {
+    string response = parse( cmds[i] );
     if (fault())
       throw Error (InvalidState, "CommandParser::script", response);
     cout << response;

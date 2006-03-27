@@ -42,6 +42,9 @@ class CommandParser : public Reference::Able {
   //! Process a script
   virtual void script (const std::string& filename);
 
+  //! Process a vector of commands
+  virtual void script (const std::vector<std::string>& commands);
+
   //! A fault condition causes the script method to throw an exception
   virtual bool fault () const { return false; }
 
