@@ -83,6 +83,7 @@ FFT_CFLAGS="$MKL_CFLAGS $FFTW_CFLAGS $FFTW3_CFLAGS $IPP_CFLAGS"
 #
 SWIN_LIB_CFITSIO
 SWIN_LIB_MPI
+SWIN_LIB_READLINE
 
 #
 # Checks for graphics libraries
@@ -168,6 +169,7 @@ AC_CONFIG_FILES([utils/units/Makefile
 		psrchive/Plotter/Makefile
 		psrchive/Calibration/Makefile
 		psrchive/Calibration/iri2001/Makefile
+		psrchive/psrgui/Makefile
                 psrchive/GUI/Makefile
 		psrchive/rhythm/Makefile
 		psrchive/Makefile
