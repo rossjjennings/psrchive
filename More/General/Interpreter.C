@@ -78,7 +78,7 @@ void Pulsar::Interpreter::init()
   add_command
     ( &Interpreter::clone,
       "clone", "duplicate an archive",
-      "usage: clone <name> \n"
+      "usage: clone [name] \n"
       "  string name       name of archive to be cloned \n"
       "                    if not specified, clone current archive \n" );
 
@@ -91,16 +91,16 @@ void Pulsar::Interpreter::init()
       "  unsigned subints  range[s] of subints to be extracted \n" );
   
   add_command
-    ( &Interpreter::edit,
-      "edit", "edit archive parameters",
-      "usage: edit <command> ...\n"
-      "  string command    any edit command as understood by psredit \n" );
-  
-  add_command
     ( &Interpreter::append,
       "append", "append data from one archive to another",
       "usage: append <name> \n"
       "  string name       name of archive to be appended \n" );
+  
+  add_command
+    ( &Interpreter::edit, 'e',
+      "edit", "edit archive parameters",
+      "usage: edit <command> ...\n"
+      "  string command    any edit command as understood by psredit \n" );
   
   add_command 
     ( &Interpreter::fscrunch, 'F',
@@ -277,6 +277,41 @@ Pulsar::Archive* Pulsar::Interpreter::getmap (const string& name, bool ex)
   return entry->second;
 }
 
+string Pulsar::Interpreter::load (const string& args)
+try {
+  vector<string> arguments = setup (args);
+  
+  if (!arguments.size() || arguments.size() > 2)
+    return response (Fail, help("load"));
+
+  if (arguments.size() == 2)
+    setmap( arguments[0], Archive::load(arguments[1]) );
+  else
+    set( Archive::load(arguments[0]) );
+
+  return response (Good);
+}
+catch (Error& error) {
+  return response (Fail, "load: " + error.get_message());
+}
+
+string Pulsar::Interpreter::unload (const string& args)
+try {
+  vector<string> arguments = setup (args);
+  
+  if (arguments.size() || arguments.size() > 2)
+    return response (Fail, help("unload"));
+
+  if (arguments.size() == 2)
+    getmap( arguments[0] )->unload( arguments[1] );
+  else
+    get()->unload( arguments[0] );
+
+  return response (Good);
+}
+catch (Error& error) {
+  return response (Fail, "unload: " + error.get_message());
+}
 
 //! push a clone of the current stack top onto the stack
 string Pulsar::Interpreter::push (const string& args)
@@ -435,7 +470,7 @@ try {
   return retval;
 }
 catch (Error& error) {
-  return response (Fail, "append: " + error.get_message());
+  return response (Fail, "edit: " + error.get_message());
 }
 
 string Pulsar::Interpreter::append (const string& args)
@@ -453,41 +488,6 @@ catch (Error& error) {
   return response (Fail, "append: " + error.get_message());
 }
 
-string Pulsar::Interpreter::load (const string& args)
-try {
-  vector<string> arguments = setup (args);
-  
-  if (!arguments.size() || arguments.size() > 2)
-    return response (Fail, help("load"));
-
-  if (arguments.size() == 2)
-    setmap( arguments[0], Archive::load(arguments[1]) );
-  else
-    set( Archive::load(arguments[0]) );
-
-  return response (Good);
-}
-catch (Error& error) {
-  return response (Fail, "load: " + error.get_message());
-}
-
-string Pulsar::Interpreter::unload (const string& args)
-try {
-  vector<string> arguments = setup (args);
-  
-  if (arguments.size() || arguments.size() > 2)
-    return response (Fail, help("unload"));
-
-  if (arguments.size() == 2)
-    getmap( arguments[0] )->unload( arguments[1] );
-  else
-    get()->unload( arguments[0] );
-
-  return response (Good);
-}
-catch (Error& error) {
-  return response (Fail, "unload: " + error.get_message());
-}
 
 // //////////////////////////////////////////////////////////////////////
 //
