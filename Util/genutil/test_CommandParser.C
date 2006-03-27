@@ -21,7 +21,7 @@ public:
     add_command (&parent::erring,  "error",     "or one not listed");
   }
 
-  string testing (const string& args) { return "testing"; }
+  string testing (const string& args) { return "testing " + args; }
   string trying (const string& args) { return ""; }
   string erring (const string& args) { return "no error here"; }
 
