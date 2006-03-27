@@ -8,17 +8,19 @@
 #include "TextInterface.h"
 
 #include "Pulsar/Archive.h"
-#include "Pulsar/Transposer.h"
+#include "Pulsar/ArchiveTI.h"
+
 #include "Pulsar/ScatteredPowerCorrection.h"
+#include "Pulsar/Transposer.h"
 
 #include "string_utils.h"
 #include "tostring.h"
 #include "Error.h"
 
-
-   
 void Pulsar::Interpreter::init()
 {
+  initialize_readline ("psrsh");
+
   inplace = false;
   clobber = true;
   stopwatch = false;
@@ -62,14 +64,14 @@ void Pulsar::Interpreter::init()
       "usage: pop \n" );
   
   add_command
-    ( &Interpreter::add,
-      "add", "assign name to current archive",
-      "usage: add <name> \n"
+    ( &Interpreter::set,
+      "set", "set name of current archive",
+      "usage: set <name> \n"
       "  string name       name to give to current archive \n");
   
   add_command
     ( &Interpreter::get,
-      "get", "set current archive to named archive",
+      "get", "get named archive",
       "usage: get <name> \n"
       "  string name       name of archive to become current \n");
   
@@ -96,6 +98,12 @@ void Pulsar::Interpreter::init()
       "  string to         name to be given to extracted copy \n"
       "                    if not specified, copy will become current \n"
       "  unsigned subints  range[s] of subints to be extracted \n" );
+  
+  add_command
+    ( &Interpreter::edit,
+      "edit", "edit archive parameters",
+      "usage: edit <command> ...\n"
+      "  string command    any edit command as understood by psredit \n" );
   
   add_command
     ( &Interpreter::append,
@@ -183,6 +191,9 @@ Pulsar::Interpreter::Interpreter()
 //! construct from command line arguments
 Pulsar::Interpreter::Interpreter (int &argc, char** &argv)
 {
+  for (int i=0; i<argc; i++)
+    cerr << "args[" << i << "]=" << argv[i] << endl;
+
   init ();
 }
 
@@ -322,19 +333,19 @@ string Pulsar::Interpreter::pop (const string& args)
   return response (Good);
 }
 
-string Pulsar::Interpreter::add (const string& args)
+string Pulsar::Interpreter::set (const string& args)
 try {
   vector<string> arguments = setup (args);
 
   if (arguments.size() != 1)
-    return response (Fail, "add: please specify one name");
+    return response (Fail, "set: please specify one name");
 
   setmap( arguments[0], get() );
 
   return response (Good);
 }
 catch (Error& error) {
-  return response (Fail, "add: " + error.get_message());
+  return response (Fail, "set: " + error.get_message());
 }
 
 string Pulsar::Interpreter::get (const string& args)
@@ -470,6 +481,27 @@ catch (Error& error) {
   return response (Fail, "extract: " + error.get_message());
 }
 
+string Pulsar::Interpreter::edit (const string& args)
+try { 
+  vector<string> arguments = setup (args);
+
+  if (!arguments.size())
+    return response (Fail, "edit: please specify at least one editor command");
+
+  if (!interface)
+    interface = new ArchiveTI;
+
+  interface->set_instance (get());
+
+  string retval;
+  for (unsigned icmd=0; icmd < arguments.size(); icmd++)
+    retval += interface->process (arguments[icmd]);
+
+  return retval;
+}
+catch (Error& error) {
+  return response (Fail, "append: " + error.get_message());
+}
 string Pulsar::Interpreter::append (const string& args)
 try { 
   vector<string> arguments = setup (args);
