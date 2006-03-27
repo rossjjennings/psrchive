@@ -169,7 +169,6 @@ AC_CONFIG_FILES([utils/units/Makefile
 		psrchive/Plotter/Makefile
 		psrchive/Calibration/Makefile
 		psrchive/Calibration/iri2001/Makefile
-		psrchive/psrgui/Makefile
                 psrchive/GUI/Makefile
 		psrchive/rhythm/Makefile
 		psrchive/Makefile
