@@ -32,43 +32,50 @@ unsigned MEAL::Composite::get_nparam () const
 //! Return the name of the specified parameter
 string MEAL::Composite::get_param_name (unsigned index) const
 {
-  return get_Function(index)->get_param_name (index);
+  const Function* function = get_Function (index);
+  return function->get_param_name (index);
 }
 
 //! Return the value of the specified parameter
 double MEAL::Composite::get_param (unsigned index) const
 {
-  return get_Function(index)->get_param (index);
+  const Function* function = get_Function (index);
+  return function->get_param (index);
 }
 
 //! Set the value of the specified parameter
 void MEAL::Composite::set_param (unsigned index, double value)
 {
-  get_Function(index)->set_param (index, value);
+  Function* function = get_Function (index);
+  function->set_param (index, value);
 }
 
 //! Return the variance of the specified parameter
 double MEAL::Composite::get_variance (unsigned index) const
 {
-  return get_Function(index)->get_variance (index);
+  const Function* function = get_Function (index);
+  return function->get_variance (index);
 }
 
 //! Set the variance of the specified parameter
 void MEAL::Composite::set_variance (unsigned index, double variance)
 {
-  get_Function(index)->set_variance (index, variance);
+  Function* function = get_Function (index);
+  function->set_variance (index, variance);
 }
 
 //! Return true if parameter at index is to be fitted
 bool MEAL::Composite::get_infit (unsigned index) const
 {
-  return get_Function(index)->get_infit (index);
+  const Function* function = get_Function (index);
+  return function->get_infit (index);
 }
 
 //! Set flag for parameter at index to be fitted
 void MEAL::Composite::set_infit (unsigned index, bool flag)
 {
-  get_Function(index)->set_infit (index, flag);
+  Function* function = get_Function (index);
+  function->set_infit (index, flag);
 }
 
 
@@ -148,7 +155,8 @@ void MEAL::Composite::map (Projection* modelmap, bool signal_changes)
     model->changed.connect (this, &Composite::attribute_changed);
 
     if (!already_mapped) {
-      if (Function::very_verbose) cerr << class_name() + "map new Projection" << endl;
+      if (Function::very_verbose)
+	cerr << class_name() + "map new Projection" << endl;
       maps.push_back (modelmap);
       modelmap->meta = this;
     }
@@ -174,7 +182,7 @@ void MEAL::Composite::map (Projection* modelmap, bool signal_changes)
 
 //! Map the Function indeces
 void MEAL::Composite::add_component (Function* model,
-                                     std::vector<unsigned>& imap)
+                                     vector<unsigned>& imap)
 {
   if (!model)
     return;
