@@ -5,25 +5,21 @@
  *
  ***************************************************************************/
 #include "Pulsar/ArchiveSort.h"
-#include "Pulsar/Archive.h"
-#include "Pulsar/Integration.h"
-#include "Pulsar/Profile.h"
-
-#include "ModifyRestore.h"
+#include "Error.h"
 
 #include <algorithm>
+using namespace std;
 
-Pulsar::ArchiveSort::ArchiveSort (const Archive* archive)
+Pulsar::ArchiveSort::ArchiveSort ()
 {
-  if (!archive) {
-    centre_frequency = 0.0;
-    return;
-  }
+  centre_frequency = 0.0;
+}
 
-  filename         = archive->get_filename();
-  source           = archive->get_source();
-  centre_frequency = archive->get_centre_frequency();
-  epoch            = archive->get_Integration(0)->get_epoch();
+Pulsar::ArchiveSort::ArchiveSort (istream& input)
+{
+  input >> filename >> source >> centre_frequency >> epoch;
+  if (input.fail())
+    throw Error (InvalidState, "Pulsar::ArchiveSort", "error on stream");
 }
 
 bool Pulsar::operator < (const ArchiveSort& a, const ArchiveSort& b)
@@ -37,38 +33,22 @@ bool Pulsar::operator < (const ArchiveSort& a, const ArchiveSort& b)
   return false;
 }
 
-void Pulsar::ArchiveSort::sort (std::vector<std::string>& filenames)
-{
-  std::vector<ArchiveSort> entries;
 
-  load (filenames, entries);
+void Pulsar::ArchiveSort::load (istream& input, vector<ArchiveSort>& entries)
+try {
 
-  filenames.resize (entries.size());
-  
-  for (unsigned ifile = 0; ifile < filenames.size(); ifile++)
-    filenames[ifile] = entries[ifile].filename;
+  string filename, name, freq, mjd;
+  input >> filename >> name >> freq >> mjd;
+
+  if (filename != "FILENAME" && filename != "filename")
+    throw Error (InvalidState, "Pulsar::ArchiveSort::load",
+		 "input is not the output of vap?");
+
+  while (!input.eof())
+    entries.push_back( ArchiveSort(input) );
+
+  sort (entries.begin(), entries.end());
 }
-
-void Pulsar::ArchiveSort::load (const std::vector<std::string>& filenames,
-				std::vector<ArchiveSort>& entries)
-{
-  entries.resize (filenames.size());
-  unsigned ientry = 0;
-
-  ModifyRestore<bool> mod (Profile::no_amps, true);
-
-  for (unsigned ifile = 0; ifile < filenames.size(); ifile++) try {
-
-    Reference::To<Archive> archive = Archive::load (filenames[ifile]);
-    entries[ientry] = ArchiveSort (archive);
-    ientry ++;
-
-  }
-  catch (Error& error) {
-    cerr << "Pulsar::ArchiveSort::sort could not load '" << filenames[ifile]
-	 << "' " << error.get_message() << endl;
-  }
-
-  entries.resize (ientry);
-  std::sort (entries.begin(), entries.end());
+catch (Error& error) {
+  cerr << "Pulsar::ArchiveSort::load " << error.get_message() << endl;
 }
