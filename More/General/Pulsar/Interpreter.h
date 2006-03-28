@@ -205,9 +205,6 @@ namespace Pulsar {
     //! Parses arguments as an optional single instance of T
     template<typename T> T setup (const std::string& args, T default_value);
 
-    void Tokenise (const std::string& str, std::vector<std::string>& tokens, 
-		   const std::string& delimiters = " ");
-
     //! Calculates S/N in the fourier domain
     FourierSNR fourier_snr;
     //! Calculates S/N using a standard profile as reference
