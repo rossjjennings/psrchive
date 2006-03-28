@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 2004 by Willem van Straten
+ *   Copyright (C) 2004, 2006 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -269,38 +269,6 @@ int main () try {
   }
   catch (Error& error) {
     cerr << "childTUI successfully removed 'same' attribute" << endl;
-  }
-
-  cerr << "testing TextInterface::separate" << endl;
-
-  bool edit = false;
-  vector<string> commands;
-  separate ("one=1, two,three, four=(4,5)", commands, edit);
-
-  if (commands.size() != 4) {
-    cerr << "separate yields vector with only "
-	 << commands.size() << " elements" << endl;
-    return -1;
-  }
-
-  if (commands[0] != "one=1") {
-    cerr << "separate fail cmds[0]=" << commands[0] << endl;
-    return -1;
-  }
-
-  if (commands[1] != "two") {
-    cerr << "separate fail cmds[1]=" << commands[1] << endl;
-    return -1;
-  }
-
-  if (commands[2] != "three") {
-    cerr << "separate fail cmds[2]=" << commands[2] << endl;
-    return -1;
-  }
-
-  if (commands[3] != "four=(4,5)") {
-    cerr << "separate fail cmds[3]=" << commands[3] << endl;
-    return -1;
   }
 
   cerr << "testing import of map interface" << endl;

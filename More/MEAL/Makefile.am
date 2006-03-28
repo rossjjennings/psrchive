@@ -80,7 +80,7 @@ bin_PROGRAMS = lmfit
 
 check_PROGRAMS = test_Conventions test_Error test_Configuration		\
 	test_HeapTracked test_Reference test_circular_Reference		\
-	test_Registry test_Functor test_Callback			\
+	test_Registry test_Functor test_Callback test_separate		\
 	test_copy test_Axis test_Projection test_Composite test_Scalar	\
 	test_Complex2Product test_Basis test_Stokes test_Polar		\
 	test_TextInterface test_parse_indeces test_Estimate test_Vector	\
@@ -99,6 +99,7 @@ test_circular_Reference_SOURCES	= test_circular_Reference.C
 test_Registry_SOURCES		= test_Registry.C
 test_Functor_SOURCES		= test_Functor.C
 test_Callback_SOURCES		= test_Callback.C
+test_separate_SOURCES		= test_separate.C
 test_copy_SOURCES		= test_copy.C
 test_Estimate_SOURCES		= test_Estimate.C
 test_Vector_SOURCES		= test_Vector.C
