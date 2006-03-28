@@ -8,9 +8,14 @@
 #include "TextInterface.h"
 
 #include "Pulsar/Archive.h"
+#include "Pulsar/Integration.h"
+#include "Pulsar/Profile.h"
+
 #include "Pulsar/ArchiveTI.h"
 
 #include "Pulsar/ScatteredPowerCorrection.h"
+#include "Pulsar/DurationWeight.h"
+#include "Pulsar/SNRWeight.h"
 #include "Pulsar/Transposer.h"
 
 #include "string_utils.h"
@@ -141,6 +146,22 @@ void Pulsar::Interpreter::init()
     ( &Interpreter::defaraday, 'R',
       "defaraday", "apply faraday rotation correction",
       "usage: defaraday \n" );
+
+  add_command 
+    ( &Interpreter::snr,
+      "snr", "select the S/N method",
+      "usage: snr <fourier|fortran|adaptive|std name> \n"
+      "  fourier           in the fourier domain \n"
+      "  fortran           use a Fortran function \n"
+      "  adaptive          use an adaptive baseline algorithm \n"
+      "  std name          use the named archive as a standard \n");
+
+  add_command 
+    ( &Interpreter::weight, 'w',
+      "weight", "weight each profile using the specified scheme",
+      "usage: weight <time|snr> \n"
+      "  time              weight each sub-integration by its duration \n"
+      "  snr               weight each profile by its S/N \n");
 
   add_command 
     ( &Interpreter::correct_instrument,
@@ -299,7 +320,7 @@ string Pulsar::Interpreter::unload (const string& args)
 try {
   vector<string> arguments = setup (args);
   
-  if (arguments.size() || arguments.size() > 2)
+  if (!arguments.size() || arguments.size() > 2)
     return response (Fail, help("unload"));
 
   if (arguments.size() == 2)
@@ -609,9 +630,6 @@ catch (Error& error) {
 
 // //////////////////////////////////////////////////////////////////////
 //
-// frc <string>
-//
-
 string Pulsar::Interpreter::defaraday (const string& args)
 try {
   if (args.length())
@@ -630,9 +648,6 @@ catch (Error& error) {
 
 // //////////////////////////////////////////////////////////////////////
 //
-// spc <string>
-//
-
 string Pulsar::Interpreter::scattered_power_correct (const string& args)
 try {
   if (args.length())
@@ -650,6 +665,64 @@ try {
 }
 catch (Error& error) {
   return response (Fail, "spc: " + error.get_message());
+}
+
+// //////////////////////////////////////////////////////////////////////
+//
+string Pulsar::Interpreter::weight (const string& args)
+try { 
+  vector<string> arguments = setup (args);
+
+  if (!arguments.size())
+    return response (Fail, "weight: please specify weighting scheme");
+
+  Reference::To<Weight> weight;
+  if (arguments.size() == 1 && arguments[0] == "time")
+    weight = new DurationWeight;
+
+  else if (arguments.size() == 1 && arguments[0] == "snr")
+    weight = new SNRWeight;
+
+  else
+    return response (Fail, help("weight"));
+
+  weight->weight( get() );
+
+  return response (Good);
+}
+catch (Error& error) {
+  return response (Fail, "weight: " + error.get_message());
+}
+
+// //////////////////////////////////////////////////////////////////////
+//
+string Pulsar::Interpreter::snr (const string& args)
+try { 
+  vector<string> arguments = setup (args);
+
+  if (!arguments.size())
+    return response (Fail, "weight: please specify weighting scheme");
+
+  if (arguments.size() == 1 && arguments[0] == "fourier")
+    Profile::snr_strategy.set (&fourier_snr, &FourierSNR::get_snr);
+      
+  else if (arguments.size() == 1 && arguments[0] == "fortran")
+    Profile::snr_strategy.set (&snr_fortran);
+      
+  else if (arguments.size() == 1 && arguments[0] == "adaptive")
+    Profile::snr_strategy.set (&adaptive_snr, &AdaptiveSNR::get_snr);
+
+  else if (arguments.size() == 2 && arguments[0] == "std") {
+    Profile::snr_strategy.set (&standard_snr, &StandardSNR::get_snr);
+    standard_snr.set_standard( getmap(arguments[1])->get_Profile (0,0,0) );
+  }
+  else
+    return response (Fail, help("snr"));
+
+  return response (Good);
+}
+catch (Error& error) {
+  return response (Fail, "snr: " + error.get_message());
 }
 
 // //////////////////////////////////////////////////////////////////////
