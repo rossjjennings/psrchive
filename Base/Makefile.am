@@ -43,7 +43,7 @@ nobase_include_HEADERS = model_profile.h Pulsar/ArchiveExpert.h \
 	Pulsar/ChannelWeight.h           Pulsar/ChannelZapModulation.h \
 	Pulsar/Config.h                  Pulsar/Profile_utils.h \
 	Pulsar/Weight.h                  Pulsar/IntegrationWeight.h \
-	Pulsar/DurationWeight.h
+	Pulsar/DurationWeight.h          Pulsar/SNRWeight.h
 
 libpsrchive_la_SOURCES = plugins.csh getopt.h Physical.h \
 	AdaptiveSNR.C                 Integration_new_PolnProfile.C  \
@@ -107,7 +107,7 @@ libpsrchive_la_SOURCES = plugins.csh getopt.h Physical.h \
 	Integration_invint.C          pafit_get_PA.C  \
 	Integration_match.C           ArchiveTI.C \
 	IntegrationTI.C               IonosphereCalibrator.C \
-	Interpreter.C \
+	Interpreter.C                 SNRWeight.C \
 	IterativeBaseline.C           ProfileWeightFunction.C \
 	PhaseGradShift.C              Profile_fftconv.C \
 	BaselineWindow.C              ChannelZapMedian.C \
