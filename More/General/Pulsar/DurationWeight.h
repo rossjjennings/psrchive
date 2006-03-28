@@ -1,14 +1,14 @@
 //-*-C++-*-
 /***************************************************************************
  *
- *   Copyright (C) 2005 by Willem van Straten
+ *   Copyright (C) 2006 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/DurationWeight.h,v $
-   $Revision: 1.1 $
-   $Date: 2006/03/23 21:18:50 $
+   $Revision: 1.2 $
+   $Date: 2006/03/28 02:48:41 $
    $Author: straten $ */
 
 #ifndef _Pulsar_DurationWeight_H
