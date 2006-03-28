@@ -150,7 +150,7 @@ int main (int argc, char **argv) try {
       return 0;
       
     case 'i':
-      cout << "$Id: psradd.C,v 1.31 2006/03/27 21:44:48 straten Exp $" 
+      cout << "$Id: psradd.C,v 1.32 2006/03/28 03:38:43 straten Exp $" 
 	   << endl;
       return 0;
 
@@ -218,7 +218,7 @@ int main (int argc, char **argv) try {
       break;
 
     case 'j':
-      separate (optarg, jobs);
+      separate (optarg, jobs, ",");
       break;
       
     case 'J':

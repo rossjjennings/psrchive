@@ -6,53 +6,39 @@
  ***************************************************************************/
 
 #include "separate.h"
+
 using namespace std;
 
-void separate (string s, vector<string>& c)
+void separate (string s, vector<string>& commands, const string& delimiters)
 {
-  bool edit;
-  separate (s, c, edit);
-}
-
-void separate (string s, vector<string>& c, char lim)
-{
-  bool edit;
-  separate (s, c, edit, lim);
-}
-
-void separate (string s, vector<string>& c, bool& edit)
-{
-  separate (s, c, edit, ',');
-}
-
-void separate (string s, vector<string>& commands, bool& edit, char lim)
-{
-  string limiter;
-  limiter += lim;
+  string opener = delimiters + "[('\"";
 
   while (s.length()) {
 
     // search for the first instance of lim not enclosed in [ brackets ]
     string::size_type end = 0;
 
-    while ( (end = s.find_first_of (limiter+"[(", end) ) != string::npos ) {
+    while ( (end = s.find_first_of (opener, end) ) != string::npos ) {
+
       if (s[end] == '[')
-	end = s.find (']', end);
+	end = s.find (']', end+1);
       else if (s[end] == '(')
-	end = s.find (')', end);
+	end = s.find (')', end+1);
+      else if (s[end] == '"')
+	end = s.find ('"', end+1);
+      else if (s[end] == '\'')
+	end = s.find ('\'', end+1);
       else
 	break;
+
     }
 
-    // the first naked comma
+    // the first naked delimiter
     string command = s.substr (0, end);
-
-    if (command.find('='))
-      edit = true;
 
     commands.push_back (command);
 
-    end = s.find_first_not_of (limiter+" ", end);
+    end = s.find_first_not_of (delimiters, end);
     s.erase (0, end);
     
   }

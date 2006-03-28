@@ -60,7 +60,6 @@ int main (int argc, char** argv) try {
 
   Pulsar::ArchiveTI tui;
 
-  bool edit = false;
   bool save = false;
   string save_ext;
 
@@ -69,7 +68,7 @@ int main (int argc, char** argv) try {
     switch (gotc) {
 
     case 'c':
-      separate (optarg, commands, edit);
+      separate (optarg, commands, ",");
       break;
 
     case 'e':
@@ -122,6 +121,11 @@ int main (int argc, char** argv) try {
       cerr << "Unknown command line option" << endl;
       return -1;
     }
+
+  bool edit = false;
+  for (unsigned j = 0; j < commands.size(); j++)
+    if (commands[j].find('=') != string::npos)
+      edit = true;
 
   if (edit && !save) {
     cout << "psredit: changes will not be saved."

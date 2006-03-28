@@ -6,8 +6,8 @@
  *
  ***************************************************************************/
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/separate.h,v $
-   $Revision: 1.1 $
-   $Date: 2006/03/27 21:38:17 $
+   $Revision: 1.2 $
+   $Date: 2006/03/28 03:38:43 $
    $Author: straten $ */
 
 #ifndef __UTILS_UNITS_SEPARATE_H
@@ -17,10 +17,8 @@
 #include <string>
 
 //! Separate a list of comma-separated commands into a vector of strings
-void separate (std::string cmds, std::vector<std::string>&, bool& edit);
-void separate (std::string cmds, std::vector<std::string>&, char lim);
-void separate (std::string cmds, std::vector<std::string>&);
-void separate (std::string cmds, std::vector<std::string>&, bool& e, char lim);
+void separate (std::string text, std::vector<std::string>& list,
+	       const std::string& delimiters = " \t\n");
 
 #endif
 

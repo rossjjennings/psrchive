@@ -770,7 +770,7 @@ TextInterface::MapOfProxy<M,K,E,G>::get_indeces (std::vector<K>& indeces,
 						 const std::string& par) const
 {
 #ifdef _DEBUG
-  std::cerr << "ElementGetSet::get_indeces " << par << std::endl;
+  std::cerr << "MapOfProxy::get_indeces " << par << std::endl;
 #endif
   std::string::size_type length = par.length();
 
@@ -785,7 +785,7 @@ TextInterface::MapOfProxy<M,K,E,G>::get_indeces (std::vector<K>& indeces,
     return;
 
   std::vector<std::string> key_str;
-  separate (range, key_str);
+  separate (range, key_str, ", ");
 
   indeces.resize (key_str.size());
   for (unsigned i=0; i<key_str.size(); i++)
