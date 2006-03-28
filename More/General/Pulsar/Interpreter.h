@@ -7,6 +7,10 @@
 #ifndef __Archive_Processor_h
 #define __Archive_Processor_h
 
+#include "Pulsar/FourierSNR.h"
+#include "Pulsar/StandardSNR.h"
+#include "Pulsar/AdaptiveSNR.h"
+
 #include "CommandParser.h"
 #include "tostring.h"
 #include "Reference.h"
@@ -139,6 +143,12 @@ namespace Pulsar {
     //! correct for faraday rotation
     std::string defaraday (const std::string& args);
 
+    //! set the method used to calculate the S/N
+    std::string snr (const std::string& args);
+
+    //! weight each profile according to the named scheme
+    std::string weight (const std::string& args);
+
     //! correct for parallactic angle effects
     std::string correct_instrument (const std::string& args);
     
@@ -197,7 +207,14 @@ namespace Pulsar {
 
     void Tokenise (const std::string& str, std::vector<std::string>& tokens, 
 		   const std::string& delimiters = " ");
-    
+
+    //! Calculates S/N in the fourier domain
+    FourierSNR fourier_snr;
+    //! Calculates S/N using a standard profile as reference
+    StandardSNR standard_snr;
+    //! Calculates S/N using an adaptive baseline finder
+    AdaptiveSNR adaptive_snr;
+
   private:
     
     void init ();
