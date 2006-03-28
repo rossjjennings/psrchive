@@ -73,8 +73,6 @@ bool TextInterface::match (const string& name, const string& text,
 void TextInterface::parse_indeces (vector<unsigned>& index,
 				   const string& name)
 {
-  index.resize (0);
-
   string::size_type length = name.length();
 
   // look for the opening and closing braces
