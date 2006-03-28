@@ -12,7 +12,7 @@
 //! Default constructor
 Pulsar::SNRWeight::SNRWeight ()
 {
-  threshold = 3.0;
+  threshold = 0.0;
 }
 
 //! Set integration weights
@@ -27,6 +27,9 @@ void Pulsar::SNRWeight::weight (Integration* integration)
       continue;
 
     float snr = integration->get_Profile(0,ichan)->snr ();
+
+    if (threshold && snr < threshold)
+      snr = 0;
 
     integration->set_weight (ichan, snr*snr);
 
