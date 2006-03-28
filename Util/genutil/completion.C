@@ -23,7 +23,11 @@ string CommandParser::readline ()
   string command;
 
 #ifdef HAVE_READLINE
-  char* cmd = ::readline (prompt.c_str());
+  char* cmd = 0;
+  while (cmd == 0)
+    cmd = ::readline (prompt.c_str());
+
+  add_history (cmd);
   command = cmd;
   free (cmd);
 #else
