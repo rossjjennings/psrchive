@@ -7,126 +7,12 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Archive.h,v $
-   $Revision: 1.146 $
-   $Date: 2006/03/23 21:18:14 $
+   $Revision: 1.147 $
+   $Date: 2006/03/29 22:48:53 $
    $Author: straten $ */
-
-/*! \mainpage 
- 
-  \section Introduction
- 
-  The PSRCHIVE Library implements a set of base classes (in C++) that 
-  may be used in the storage, manipulation, and analysis of the 
-  observational data commonly used in pulsar experiments.
-  The base classes implement a minimal set of general, flexible
-  routines.
- 
-  \section profiles Pulse Profiles
- 
-  The basic quantity observed in most pulsar experiments is the pulse
-  profile: a one-dimensional array of some measured quantity as a
-  function of pulse phase.  This is represented by the Pulsar::Profile
-  class.  The Pulsar::Integration class contains a two-dimensional
-  array of Pulsar::Profile objects, each integrated over the same time
-  interval.  The Pulsar::Profile objects are usually organized as a
-  function of polarimetric measure and observing frequency, though
-  other measured states are possible.  The Pulsar::Archive class
-  implements a one-dimensional array of Pulsar::Integration objects,
-  each with similar observational parameters and each in "pulse phase"
-  with eachother.
-
-  \section minimal Minimal Interface
-
-  The Pulsar::Profile class implements a minimal set of operations
-  required to manipulate a pulsar profile in the phase domain.  These
-  include, but are not limited to:
-  <UL>
-  <LI> operator += - adds offset to each bin of the profile </LI>
-  <LI> operator *= - multiplies each bin of the profile by scale </LI>
-  <LI> rotate - rotates the profile in phase </LI>
-  <LI> bscrunch - integrates neighbouring phase bins in profile </LI>
-  <LI> fold - integrates neighbouring sections of the profile </LI>
-  </UL>
-
-  As well, a basic set of routines are included that may be used to
-  calculate statistics, find minima and maxima, find the shift between
-  the profile and a standard, etc..  Combinations of these functions
-  can be used to perform basic tasks.  For instance, baseline removal
-  is simply and transparently implemented as:
-
-  <pre> profile -= mean (find_min_phase()); </pre> 
-
-  The Pulsar::Integration class implements a minimal set of operations
-  required to manipulate a set of Pulsar::Profile objects in the
-  polarization and frequency domains.  In addition to simple nested
-  calls of the above functions, these include:
-  <UL>
-  <LI> dedisperse - rotates all profiles to remove dispersion delays 
-  between channels </LI>
-  <LI> defaraday - transforms all profiles to remove faraday rotation
-  between channels </LI>
-  <LI> fscrunch - integrates profiles from neighbouring channels </LI>
-  <LI> pscrunch - integrates profiles from two polarizations into 
-  one total intensity </LI>
-  <LI> invint - forms the polarimetric invariant interval from 
-  Stokes (I,Q,U,V) </LI>
-  <LI> transform - performs a polarimetric transformation </LI>
-  </UL>
-
-  The Pulsar::Archive virtual base class is the interface that will be
-  used in most applications.  In addition to providing interfaces to
-  all of the above functions, the Pulsar::Archive class implements:
-  <UL>
-  <LI> tscrunch - integrates profiles from neighbouring Integrations </LI>
-  <LI> append - copies (or transfers) the Integrations from one Archive
-  to another </LI>
-  <LI> set_ephemeris - installs a new ephemeris and polyco </LI>
-  <LI> set_polyco - installs a new polynomial and aligns all profiles
-  to it </LI>
-  </UL>
-
-  For a complete list of the methods defined in each of these base classes,
-  please see the <a href="annotated.html">Compound List</a>.
-
-  \section format Archive File Formats
-
-  The Pulsar::Archive virtual base class specifies only the minimal
-  set of information required in order to implement basic data
-  reduction algorithms.  Although it specifies the interface to set
-  and get the values of various attributes and load and unload data
-  from file, no storage or I/O capability is implemented by
-  Pulsar::Archive.  These methods, especially those related to file
-  I/O, must be implemented by classes that inherit the Pulsar::Archive
-  base class.
-
-  Most observatories and research groups use unique file formats and
-  associate different pieces of information with their observations.
-  The derived classes must therefore implement the storage and
-  modification of this auxilliary information.  This is done using
-  the Archive::Extension classes.
-
-  In general, applications need not know anything about the specific
-  archive file format with which they are dealing.  New Pulsar::Archive
-  instances may be created and loaded from file by calling the static
-  Pulsar::Archive::load factory.
-
-  \subsection plugin File Format Plugins
-
-  Classes that inherit Pulsar::Archive and implement the I/O routines
-  for a specific archive file format are loaded as plugins.  Plugins
-  are registered for use in applications by inheriting the Advocate 
-  template base class and defining the pure virtual methods of the 
-  Agent base class.
-
- */
 
 #ifndef __Pulsar_Archive_h
 #define __Pulsar_Archive_h
-
-#include <vector>
-#include <string>
-
-#include <stdio.h>
 
 #include "IntegrationManager.h"
 #include "polyco.h"
@@ -187,10 +73,10 @@ namespace Pulsar {
     //@{
 
     //! Factory returns a null-constructed instance of the named class
-    static Archive* new_Archive (const string& class_name);
+    static Archive* new_Archive (const std::string& class_name);
 
     //! Factory returns a new instance loaded from filename
-    static Archive* load (const string& name);
+    static Archive* load (const std::string& name);
 
     //@}
 
@@ -204,16 +90,16 @@ namespace Pulsar {
     void unload (const char* filename = 0);
 
     //! Convenience interface to Archive::unload (const char*)
-    void unload (const string& filename) { unload (filename.c_str()); }
+    void unload (const std::string& filename) { unload (filename.c_str()); }
 
     //! Get the name of the file to which the archive will be unloaded
-    string get_filename () const { return unload_filename; }
+    std::string get_filename () const { return unload_filename; }
 
     //! Set the filename of the Archive
     /*! The filename is the name of the file to which the archive will be 
       written on the next call to Archive::unload, if no arguments are given
       to the Archive::unload method. */
-    void set_filename (const string& filename) { unload_filename = filename; }
+    void set_filename (const std::string& filename) { unload_filename = filename; }
 
     //! Update the current archive, saving current Integration data
     void update ();
@@ -241,7 +127,7 @@ namespace Pulsar {
     void copy (const Archive& archive);
 
     //! Copy all base class attributes, Extensions, and selected Integrations
-    virtual void copy (const Archive& archive, const vector<unsigned>& ints);
+    virtual void copy (const Archive& archive, const std::vector<unsigned>& ints);
 
     //! Return a new copy constructed instance equal to this
     /*! This pure virtual method must be implemented by derived classes */
@@ -249,7 +135,7 @@ namespace Pulsar {
 
     //! Return a new extraction constructed instance equal to this
     /*! This pure virtual method must be implemented by derived classes */
-    virtual Archive* extract (const vector<unsigned>& subints) const = 0;
+    virtual Archive* extract (const std::vector<unsigned>& subints) const = 0;
 
     //! Return pointer to a new fscrunched, tscrunched and pscrunched clone
     Archive* total () const;
@@ -321,9 +207,9 @@ namespace Pulsar {
     virtual void set_type (Signal::Source type) = 0;
 
     //! Get the source name
-    virtual string get_source () const = 0;
+    virtual std::string get_source () const = 0;
     //! Set the source name
-    virtual void set_source (const string& source) = 0;
+    virtual void set_source (const std::string& source) = 0;
 
     //! Get the coordinates of the source
     virtual sky_coord get_coordinates () const = 0;
@@ -372,10 +258,10 @@ namespace Pulsar {
 		virtual void set_file_number(int file_number) = 0;
 				
 		//! Get tape label for raw data (FB only)
-		virtual string get_tape_label() const = 0;
+		virtual std::string get_tape_label() const = 0;
 		
 		//! Set tape label for raw data (FB only)
-		virtual void set_tape_label(string tape_label) = 0;
+		virtual void set_tape_label(std::string tape_label) = 0;
 
     //@}
 
@@ -502,21 +388,21 @@ namespace Pulsar {
     virtual void defaraday ();
     
     //! Get mean PA and error in the mean with a phase region
-    void get_PA (vector <Estimate<float> > &pas, float _startphase, float _stopphase);
+    void get_PA (std::vector <Estimate<float> > &pas, float _startphase, float _stopphase);
  
     //! Fit Profiles to the standard and return toas
-    virtual void toas (vector<Tempo::toa>& toas, const Archive* std,
-		       string arguments = "",
+    virtual void toas (std::vector<Tempo::toa>& toas, const Archive* std,
+		       std::string arguments = "",
 		       Tempo::toa::Format fmt = Tempo::toa::Parkes) const;
     
     //! Perform the transformation on each polarimetric profile
     virtual void transform (const Jones<float>& transformation);
 
     //! Perform frequency response on each polarimetric profile
-    virtual void transform (const vector< Jones<float> >& response);
+    virtual void transform (const std::vector< Jones<float> >& response);
 
     //! Perform the time and frequency response on each polarimetric profile
-    virtual void transform (const vector< vector< Jones<float> > >& response);
+    virtual void transform (const std::vector< std::vector< Jones<float> > >& response);
 
     //! Transform Stokes I,Q,U,V into the polarimetric invariant interval
     virtual void invint ();
@@ -534,16 +420,16 @@ namespace Pulsar {
     virtual void uniform_weight (float new_weight = 1.0);
 
     //! Test if arch matches (enough for a pulsar - standard match)
-    virtual bool standard_match (const Archive* arch, string& reason) const;
+    virtual bool standard_match (const Archive* arch, std::string& reason) const;
 
     //! Test if arch matches (enough for a pulsar - calibrator match)
-    virtual bool calibrator_match (const Archive* arch, string& reason) const;
+    virtual bool calibrator_match (const Archive* arch, std::string& reason) const;
 
     //! Test if arch matches (enough for a pulsar - pulsar match)
-    virtual bool processing_match (const Archive* arch, string& reason) const;
+    virtual bool processing_match (const Archive* arch, std::string& reason) const;
 
     //! Test if arch is mixable (enough for append)
-    virtual bool mixable (const Archive* arch, string& reason) const;
+    virtual bool mixable (const Archive* arch, std::string& reason) const;
 
     //! Computes the weighted channel frequency over an Integration interval.
     double weighted_frequency (unsigned ichan,
@@ -593,7 +479,7 @@ namespace Pulsar {
 
     //! A dsp::Transformation into an Archive must be able to call this
     //! This calls Signal::valid_state() to see if the state is consistent with the ndim, npol
-    virtual bool state_is_valid (string& reason) const;
+    virtual bool state_is_valid (std::string& reason) const;
 
     //! Replaces each profile with its power spectrum
     virtual void get_profile_power_spectra(float gamma=1.0);
@@ -630,12 +516,12 @@ namespace Pulsar {
       virtual Extension* clone () const = 0;
 
       //! Return the name of the Extension
-      string get_extension_name () const;
+      std::string get_extension_name () const;
 
     protected:
 
       //! Extension name - useful when debugging
-      string extension_name;
+      std::string extension_name;
 
     };
 
@@ -675,8 +561,8 @@ namespace Pulsar {
 
     //! Return the revision number of the Archive base class definition
     /*! This string is automatically generated by CVS.  Do not edit. */
-    static string get_revision ()
-    { return get_revision("$Revision: 1.146 $"); }
+    static std::string get_revision ()
+    { return get_revision("$Revision: 1.147 $"); }
 
     //! Report on the status of the plugins
     static void agent_report ();
@@ -726,7 +612,7 @@ namespace Pulsar {
     friend class BinLngAscOrder;   
 
     //! Parses the revision number out of the CVS Revision string
-    static string get_revision (const char* revision);
+    static std::string get_revision (const char* revision);
  
     // //////////////////////////////////////////////////////////////////
     //
@@ -755,7 +641,7 @@ namespace Pulsar {
     //@}
 
     //! Name of file to which the archive will be written on call to unload()
-    string unload_filename;
+    std::string unload_filename;
 
     // //////////////////////////////////////////////////////////////////
     //
@@ -814,7 +700,7 @@ namespace Pulsar {
   private:
 
     //! The Extensions added to this Archive instance
-    vector< Reference::To<Extension> > extension;
+    std::vector< Reference::To<Extension> > extension;
 
     //! This flag may be raised only by Archive::update_model.
     /*!
@@ -829,7 +715,7 @@ namespace Pulsar {
       Archive::set_filename, the base class must keep track of the
       original file in order to read unloaded information from this
       file when it is required. */
-    string __load_filename;
+    std::string __load_filename;
 
     //! Load a new instance of the specified integration from __load_filename
     Integration* load_Integration (unsigned isubint);
@@ -853,25 +739,25 @@ namespace Pulsar {
       virtual bool advocate (const char* filename) = 0;
       
       //! Return the name of the derived class
-      virtual string get_name () = 0;
+      virtual std::string get_name () = 0;
 
       //! Return a description of the derived class
-      virtual string get_description () = 0;
+      virtual std::string get_description () = 0;
 
       //! Return the revision of the Archive base class definition
-      virtual string get_revision () = 0;
+      virtual std::string get_revision () = 0;
 
       //! Return a null-constructed instance of the derived class
       virtual Archive* new_Archive () = 0;
 
       //! Return the name of the plugins directory
-      static string get_plugin_path (const char* shell_variable = "CVSHOME");
+      static std::string get_plugin_path (const char* shell_variable);
 
       //! Report to cerr on the status of the Registry (and plugins)
       static void report ();
 
       //! Print the list of agents to the FILE I/O stream
-      static void print_list (FILE* out);
+      static std::string get_list ();
 
     protected:
 
@@ -882,7 +768,7 @@ namespace Pulsar {
       friend class Registry::Entry<Agent>;
 
       //! The path from which plugin code will be loaded
-      static string plugin_path;
+      static std::string plugin_path;
 
       //! Declare friends with Archive so Archive::load can access registry
       friend class Archive;
@@ -925,8 +811,8 @@ namespace Pulsar {
 
       //! Return the revision number of the Archive base class definition
       /*! This string is automatically generated by CVS.  Do not edit. */
-      string get_revision () 
-      { return Archive::get_revision ("$Revision: 1.146 $"); }
+      std::string get_revision () 
+      { return Archive::get_revision ("$Revision: 1.147 $"); }
 
       // ensure that the Advocate is linked into static binaries
       static void ensure_linkage () { entry.get(); }
