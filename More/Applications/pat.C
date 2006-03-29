@@ -4,10 +4,10 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+#include "Pulsar/psrchive.h"
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
 #include "Pulsar/Profile.h"
-#include "getopt.h"
 
 #include "Pulsar/PolnProfile.h"
 #include "Pulsar/PolnProfileFit.h"
@@ -23,6 +23,7 @@
 #include "Error.h"
 #include "dirutil.h"
 #include "genutil.h"
+#include "getopt.h"
 
 #include <math.h>
 #include <string.h>
@@ -72,7 +73,8 @@ void usage ()
     "                   Available formats: parkes tempo2, itoa, princeton \n"
     "                   For tempo2, <flags> include i = display instrument \n"
     "                                               r = display receiver   \n"
-    "See http://astronomy.swin.edu.au/pulsar/software/manuals/pat.html"
+    "\n"
+    "See "PSRCHIVE_HTTP"/manuals/pat for more details\n"
        << endl;
 }
 
@@ -137,7 +139,7 @@ int main (int argc, char *argv[])
       break;
 
     case 'i':
-      cout << "$Id: pat.C,v 1.45 2006/03/17 13:34:41 straten Exp $" << endl;
+      cout << "$Id: pat.C,v 1.46 2006/03/29 22:42:19 straten Exp $" << endl;
       return 0;
 
     case 'F':

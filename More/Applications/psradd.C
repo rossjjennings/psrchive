@@ -4,12 +4,7 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-#include <iostream>
-#include <algorithm>
-
-#include <unistd.h>
-#include <math.h>
-
+#include "Pulsar/psrchive.h"
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
 #include "Pulsar/Profile.h"
@@ -26,6 +21,12 @@
 #include "dirutil.h"
 #include "string_utils.h"
 #include "separate.h"
+
+#include <iostream>
+#include <algorithm>
+
+#include <unistd.h>
+#include <math.h>
 
 bool weight_by_duration = Pulsar::config.get<bool>("weight_by_duration",false);
 
@@ -68,7 +69,7 @@ void usage () {
     "Note:\n"
     " AUTO ADD options, -I, -S and -G, are incompatible with -s and -f\n"
     "\n"
-    "See http://astronomy.swin.edu.au/pulsar/software/manuals/psradd.html"
+    "See "PSRCHIVE_HTTP"/manuals/psradd for more details\n"
        << endl;
 }
 
@@ -150,7 +151,7 @@ int main (int argc, char **argv) try {
       return 0;
       
     case 'i':
-      cout << "$Id: psradd.C,v 1.32 2006/03/28 03:38:43 straten Exp $" 
+      cout << "$Id: psradd.C,v 1.33 2006/03/29 22:42:19 straten Exp $" 
 	   << endl;
       return 0;
 

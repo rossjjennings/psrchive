@@ -6,6 +6,7 @@
  ***************************************************************************/
 // A simple command line tool for zapping RFI
 
+#include "Pulsar/psrchive.h"
 #include "Pulsar/RFIMitigation.h"
 #include "Pulsar/ChannelZapModulation.h"
 #include "Pulsar/ChannelZapMedian.h"
@@ -65,7 +66,7 @@ void usage ()
     "The cutoff S/N value used with -C is largely arbitrary. You will\n"  
     "need to experiment to find the best value for your archives\n"       
     "\n"
-    "See http://astronomy.swin.edu.au/pulsar/software/manuals/paz.html\n"
+    "See "PSRCHIVE_HTTP"/manuals/paz for more details\n"
        << endl;
 }
 
@@ -136,7 +137,7 @@ int main (int argc, char *argv[]) {
       Pulsar::Archive::set_verbosity(3);
       break;
     case 'i':
-      cout << "$Id: paz.C,v 1.33 2006/03/17 13:34:41 straten Exp $" << endl;
+      cout << "$Id: paz.C,v 1.34 2006/03/29 22:42:19 straten Exp $" << endl;
       return 0;
 
     case 'm':

@@ -4,6 +4,34 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+#include "Pulsar/psrchive.h"
+#include "Pulsar/Archive.h"
+#include "Pulsar/Integration.h"
+#include "Pulsar/Profile.h"
+
+// Extensions this program understands
+
+#include "Pulsar/ProcHistory.h"
+#include "Pulsar/Backend.h"
+#include "Pulsar/BackendName.h"
+
+#include "Pulsar/IntegrationOrder.h"
+#include "Pulsar/PeriastronOrder.h"
+#include "Pulsar/BinaryPhaseOrder.h"
+#include "Pulsar/BinLngAscOrder.h"
+#include "Pulsar/BinLngPeriOrder.h"
+#include "Pulsar/Receiver.h"
+
+#include "Pulsar/ScatteredPowerCorrection.h"
+#include "Pulsar/FaradayRotation.h"
+
+#include "dirutil.h"
+#include "genutil.h"
+#include "string_utils.h"
+#include "Error.h"
+
+
+#include "getopt.h"
 #include <algorithm>
 #include <exception>
 #include <stdexcept>
@@ -15,31 +43,6 @@
 #include <libgen.h>
 #include <time.h>
 
-#include "Pulsar/Archive.h"
-#include "Pulsar/Integration.h"
-#include "Pulsar/Profile.h"
-#include "getopt.h"
-
-#include "Pulsar/Backend.h"
-#include "Pulsar/BackendName.h"
-
-#include "Pulsar/ScatteredPowerCorrection.h"
-#include "Pulsar/IntegrationOrder.h"
-#include "Pulsar/PeriastronOrder.h"
-#include "Pulsar/BinaryPhaseOrder.h"
-#include "Pulsar/BinLngAscOrder.h"
-#include "Pulsar/BinLngPeriOrder.h"
-#include "Pulsar/Receiver.h"
-#include "Pulsar/FaradayRotation.h"
-
-#include "dirutil.h"
-#include "genutil.h"
-#include "string_utils.h"
-#include "Error.h"
-
-// Extensions this program understands
-
-#include "Pulsar/ProcHistory.h"
 
 void usage()
 {
@@ -102,7 +105,7 @@ void usage()
     "  --site site      Correct 'site' of telescope (One letter tempo code- GBT=1, PKS=7 etc)\n"
     "  --name name      Change source name\n"
     "\n"
-    "See http://astronomy.swin.edu.au/pulsar/software/manuals/pam.html"
+    "See "PSRCHIVE_HTTP"/manuals/pam for more details\n"
        << endl;
 
   return;
@@ -258,7 +261,7 @@ int main (int argc, char *argv[]) try {
 	Pulsar::Archive::set_verbosity(3);
 	break;
       case 'i':
-	cout << "$Id: pam.C,v 1.59 2006/03/23 06:42:45 hknight Exp $" << endl;
+	cout << "$Id: pam.C,v 1.60 2006/03/29 22:42:19 straten Exp $" << endl;
 	return 0;
       case 'm':
 	save = true;

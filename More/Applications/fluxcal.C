@@ -4,6 +4,7 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+#include "Pulsar/psrchive.h"
 #include "Pulsar/FluxCalibratorDatabase.h"
 #include "Pulsar/FluxCalibrator.h"
 
@@ -45,9 +46,9 @@ void usage ()
     "By default, standard candle information is read from \n" 
        << Pulsar::FluxCalibrator::Database::default_filename << "\n"
     "and the maximum interval between archives in the same\n"
-    "flux calibrator set is " << interval/60 << " minutes.  See also:\n"
+    "flux calibrator set is " << interval/60 << " minutes.\n"
     "\n"
-    "http://astronomy.swin.edu.au/pulsar/software/manuals/fluxcal.html\n"
+    "See "PSRCHIVE_HTTP"/manuals/fluxcal for more details\n"
        << endl;
 }
 

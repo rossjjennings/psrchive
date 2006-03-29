@@ -4,6 +4,7 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+#include "Pulsar/psrchive.h"
 #include "Pulsar/Archive.h"
 #include "Pulsar/ArchiveMatch.h"
 
@@ -75,7 +76,7 @@ void usage ()
     "  -e extension           Use this extension when unloading results \n"
     "  -n [q|u|v]             Flip the sign of Stokes Q, U, or V \n"
     "\n"
-    "See http://astronomy.swin.edu.au/pulsar/software/manuals/pac.html"
+    "See "PSRCHIVE_HTTP"/manuals/pac for more details\n"
        << endl;
 }
 
@@ -162,7 +163,7 @@ int main (int argc, char *argv[]) {
       break;
 
     case 'i':
-      cout << "$Id: pac.C,v 1.74 2006/03/17 13:34:40 straten Exp $" << endl;
+      cout << "$Id: pac.C,v 1.75 2006/03/29 22:42:18 straten Exp $" << endl;
       return 0;
 
     case 'A':

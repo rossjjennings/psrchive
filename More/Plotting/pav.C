@@ -5,7 +5,7 @@
  *
  ***************************************************************************/
 //
-// $Id: pav.C,v 1.113 2006/03/27 05:04:09 hknight Exp $
+// $Id: pav.C,v 1.114 2006/03/29 22:42:19 straten Exp $
 //
 // The Pulsar Archive Viewer
 //
@@ -13,14 +13,7 @@
 // in Pulsar::Archive objects
 //
 
- 
-#include <iostream>
-#include <unistd.h>
-#include <cpgplot.h>
-
-#include "Reference.h"
-
-#include "getopt.h"
+#include "Pulsar/psrchive.h"
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
 #include "Pulsar/Profile.h"
@@ -41,6 +34,11 @@
 #include "dirutil.h"
 #include "string_utils.h"
 #include "genutil.h"
+#include "getopt.h"
+
+#include <iostream>
+#include <unistd.h>
+#include <cpgplot.h>
 
 using namespace std;
 
@@ -160,7 +158,8 @@ void usage ()
     " -V               Very verbose output \n"
     " -w               Use stopwatch (for benchmarking)\n\n"
     " --extra          Plot each subint in this archive [syn: all]\n"
-    "See http://astronomy.swin.edu.au/pulsar/software/manuals/pav.html"
+    "\n"
+    "See "PSRCHIVE_HTTP"/manuals/pav for more details\n"
        << endl;
 }
 
@@ -395,7 +394,7 @@ int main (int argc, char** argv)
       plotter.set_subint( atoi (optarg) );
       break;
     case 'i':
-      cout << "$Id: pav.C,v 1.113 2006/03/27 05:04:09 hknight Exp $" << endl;
+      cout << "$Id: pav.C,v 1.114 2006/03/29 22:42:19 straten Exp $" << endl;
       return 0;
 
     case 'j':
