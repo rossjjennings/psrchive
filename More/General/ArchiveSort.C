@@ -40,7 +40,7 @@ bool Pulsar::operator < (const ArchiveSort& a, const ArchiveSort& b)
 }
 
 
-void Pulsar::ArchiveSort::load (istream& input, vector<ArchiveSort>& entries)
+void Pulsar::ArchiveSort::load (istream& input, list<ArchiveSort>& entries)
 try {
 
   string filename, name, freq, mjd;

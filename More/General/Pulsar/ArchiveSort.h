@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/ArchiveSort.h,v $
-   $Revision: 1.4 $
-   $Date: 2006/03/28 21:37:14 $
+   $Revision: 1.5 $
+   $Date: 2006/03/29 04:20:52 $
    $Author: straten $ */
 
 #ifndef __Pulsar_ArchiveSort_h
@@ -16,7 +16,7 @@
 
 #include "MJD.h"
 
-#include <vector>
+#include <list>
 #include <iostream>
 
 namespace Pulsar {
@@ -49,8 +49,8 @@ namespace Pulsar {
     //! Comparison operator
     friend bool operator < (const ArchiveSort& a, const ArchiveSort& b);
 
-    //! Load a vector of ArchiveSort instances and sort them
-    static void load (std::istream& input, std::vector<ArchiveSort>& entries);
+    //! Load a list of ArchiveSort instances and sort them
+    static void load (std::istream& input, std::list<ArchiveSort>& entries);
 
   };
 
