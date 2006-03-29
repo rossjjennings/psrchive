@@ -33,7 +33,7 @@ nobase_include_HEADERS = model_profile.h Pulsar/ArchiveExpert.h \
 	Pulsar/InstrumentInfo.h          Pulsar/SystemCalibrator.h \
 	Pulsar/Integration.h             Pulsar/Transposer.h \
 	Pulsar/IntegrationManager.h      Pulsar/Utilities.h \
-	Pulsar/Interpreter.h \
+	Pulsar/Interpreter.h             Pulsar/psrchive.h \
 	Pulsar/IterativeBaseline.h       Pulsar/OffPulseCalibrator.h \
 	Pulsar/PhaseWeight.h             Pulsar/ArchiveTI.h \
 	Pulsar/PhaseWeightFunction.h     Pulsar/ProfileWeightFunction.h \
