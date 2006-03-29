@@ -71,7 +71,7 @@ void Pulsar::FITSArchive::load_WidebandCorrelator (fitsfile* fptr)
     throw Error (InvalidParam, "FITSArchive::load_WidebandCorrelator",
 		 "could not parse header version from " + hdr_ext->hdrver);
   
-  if (major = 1 && minor < 10)  {
+  if (major == 1 && minor < 10)  {
     
     /*
       Prior to header version 1.10, the WBCORR backend at Parkes did
@@ -86,7 +86,7 @@ void Pulsar::FITSArchive::load_WidebandCorrelator (fitsfile* fptr)
     
   }
   
-  if (major = 1 && minor < 14 && minor > 9)  {
+  if (major == 1 && minor < 14 && minor > 9)  {
     
     /*
       Prior to header version 1.14, the WBCORR backend at Parkes
