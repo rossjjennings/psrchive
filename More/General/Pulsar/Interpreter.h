@@ -149,6 +149,9 @@ namespace Pulsar {
     //! weight each profile according to the named scheme
     std::string weight (const std::string& args);
 
+    //! scale each profile by the specified value
+    std::string scale (const std::string& args);
+
     //! correct for parallactic angle effects
     std::string correct_instrument (const std::string& args);
     

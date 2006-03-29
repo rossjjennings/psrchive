@@ -164,6 +164,12 @@ void Pulsar::Interpreter::init()
       "  snr               weight each profile by its S/N \n");
 
   add_command 
+    ( &Interpreter::scale, 's',
+      "scale", "scale each profile by the specified value",
+      "usage: scale <factor> \n"
+      "  float factor      value by which all data will be scaled \n" );
+
+  add_command 
     ( &Interpreter::correct_instrument,
       "pac", "apply parallactic angle correction",
       "usage: pac \n");
@@ -692,6 +698,29 @@ try {
 }
 catch (Error& error) {
   return response (Fail, "weight: " + error.get_message());
+}
+
+// //////////////////////////////////////////////////////////////////////
+//
+string Pulsar::Interpreter::scale (const string& args)
+try {
+  float factor = setup<float> (args);
+  
+  Archive* archive = get();
+
+  unsigned nsub = archive->get_nsubint();
+  unsigned nchan = archive->get_nchan();
+  unsigned npol = archive->get_npol();
+
+  for (unsigned isub=0; isub < nsub; isub++)
+    for (unsigned ipol=0; ipol < npol; ipol++)
+      for (unsigned ichan=0; ichan < nchan; ichan++)
+	archive->get_Profile (isub, ipol, ichan)->scale(factor);
+
+  return response (Good);
+}
+catch (Error& error) {
+  return response (Fail, "scale: " + error.get_message());
 }
 
 // //////////////////////////////////////////////////////////////////////
