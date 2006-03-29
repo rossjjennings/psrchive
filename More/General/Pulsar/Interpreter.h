@@ -23,33 +23,32 @@ namespace Pulsar {
   class Archive;
   class ArchiveTI;
 
-  //! Enables interactive operation on Archive instances
-  /*!  
-
-    The Interpreter class parses text strings into commands with
-    arguments that are performed on a Pulsar::Archive instance
+  //! Pulsar data processing command language interpreter
+  /*!
+    The Interpreter class is a command language interpreter that
+    provides access to PSRCHIVE data processing algorithms.
     
-    The Interpreter has both a stack and a map of Pulsar::Archive
-    instances.  Archives in the stack provide a convenient history
-    mechanism, and Archives in the map are referenced by a
-    (single-word) name that is associated with the Archive when it is
-    created.
+    The Interpreter maintains a stack and a named list (map) of
+    Pulsar::Archive instances.  Archives in the stack provide a
+    convenient history mechanism, and Archives in the map are
+    referenced by name, a single keyword.
 
-    Any operation affects the top of the stack.  The contents of both
-    the stack and the map can be modified by adding Archives from
+    All operations perform on the top of the stack.  The only
+    exceptions to this rule are the load and unload methods, which may
+    operate directly on named archives in the map. The contents of
+    both the stack and the map can be modified by adding Archives from
     file, copying Archives or subsets of Archives from other Archives
     in memory and finally by deleting Archives from memory. At any
     stage, the top of the stack or any of the Archives in the map can
-    be saved to disk. Archives in the map are referenced by a single
-    word name, given to them on creation.
+    be saved to disk.
 
-    Commands that generate new data (like load, clone and extract) may
-    be given two arguments, the first being the source name (either a
-    file on disk or an archive in memory) the second being the name to
-    give the new archive in memory.  If no map name is provided
-    
+    Commands that create copies of existing data (push, clone and
+    extract) can accept the name of an Archive in the map as the first
+    argument.  The append command requires the name of the Archive in
+    the map that is to be appended to the top of the stack.  In all
+    cases, the result of the operation affects the top of the stack.
+
   */
-    
   class Interpreter : public CommandParser {
     
   public:
