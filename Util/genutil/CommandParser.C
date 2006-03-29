@@ -110,7 +110,7 @@ string CommandParser::parse (const string& command, const string& arguments)
     if ( (shortcut && command[0] == commands[icmd]->shortcut)
 	 || command == commands[icmd]->command) {
 
-      // current_command = icmd;
+      current_command = commands[icmd]->command;
 
       if (debug)
 	cerr << "CommandParser::parse execute " << command << endl;
@@ -149,6 +149,8 @@ string CommandParser::parse (const string& command, const string& arguments)
   for (ikey=0; ikey < length; ikey++)
     for (icmd=0; icmd < commands.size(); icmd++)
       if (command[ikey] == commands[icmd]->shortcut) {
+
+	current_command = commands[icmd]->command;
 
 	// only the last command gets the arguments
 	string args = (ikey == length-1) ? arguments : "";

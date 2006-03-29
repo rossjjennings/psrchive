@@ -33,10 +33,10 @@ class CommandParser : public Reference::Able {
   //! destructor
   ~CommandParser ();
 
-  //! Initialize GNU readline and enable command completion
+  //! Initialize GNU readline command editor, enabling completion and history
   void initialize_readline (const char*);
 
-  //! Print the prompt and read a line of text from the input device
+  //! Print the prompt and read a line of text from the terminal
   std::string readline ();
 
   //! Process a script
@@ -85,13 +85,16 @@ class CommandParser : public Reference::Able {
   //! Add Method instance
   void add_command (Method*);
 
+  //! Get the name of the current command
+  std::string get_command () const { return current_command; }
+
  private:
 
   //! Available commands
   std::vector<Method*> commands;
 
-  //! the command index, used by usage()
-  // unsigned current_command;
+  //! the current command
+  std::string current_command;
 
   // readline interface
   static char** completion (const char *text, int start, int end);
