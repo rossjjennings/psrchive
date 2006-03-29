@@ -41,21 +41,20 @@ void Pulsar::Interpreter::init()
       "load", "load archive from file",
       "usage: load [name] <filename>\n"
       "  string filename   name of the file to be read \n"
-      "  string name       if specified, assign name to archive\n" );
+      "  string name       load the archive to name \n" );
   
   add_command 
     ( &Interpreter::unload,
       "unload", "unload archive or set unload options",
-      "usage: unload [name] <filename> \n"
+      "usage: unload [name] [filename] \n"
       "  string filename   name of the file to be written \n"
-      "  string name       if specified, unload the named archive \n" );
+      "  string name       unload the named archive \n" );
   
   add_command
     ( &Interpreter::push,
       "push", "push archive onto stack",
       "usage: push [name] \n"
-      "  string name       name of archive to push \n"
-      "                    if not specified, push clone of current archive\n");
+      "  string name       name of archive to push \n" );
   
   add_command
     ( &Interpreter::pop,
@@ -84,15 +83,13 @@ void Pulsar::Interpreter::init()
     ( &Interpreter::clone,
       "clone", "duplicate an archive",
       "usage: clone [name] \n"
-      "  string name       name of archive to be cloned \n"
-      "                    if not specified, clone current archive \n" );
+      "  string name       name of archive to be cloned \n" );
 
   add_command
     ( &Interpreter::extract,
       "extract", "duplicate part of an archive",
       "usage: extract [name] <subints> \n"
       "  string name       name of archive from which to extract \n"
-      "                    if not specified, current archive is used \n"
       "  unsigned subints  range[s] of subints to be extracted \n" );
   
   add_command
@@ -326,13 +323,15 @@ string Pulsar::Interpreter::unload (const string& args)
 try {
   vector<string> arguments = setup (args);
   
-  if (!arguments.size() || arguments.size() > 2)
-    return response (Fail, help("unload"));
+  if (arguments.size() > 2)
+    return response (Fail, "invalid number of arguments");
 
   if (arguments.size() == 2)
     getmap( arguments[0] )->unload( arguments[1] );
-  else
+  else if (arguments.size() == 1)
     get()->unload( arguments[0] );
+  else
+    get()->unload();
 
   return response (Good);
 }
