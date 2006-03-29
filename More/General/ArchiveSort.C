@@ -7,7 +7,6 @@
 #include "Pulsar/ArchiveSort.h"
 #include "Error.h"
 
-#include <algorithm>
 using namespace std;
 
 Pulsar::ArchiveSort::ArchiveSort ()
@@ -24,12 +23,19 @@ Pulsar::ArchiveSort::ArchiveSort (istream& input)
 
 bool Pulsar::operator < (const ArchiveSort& a, const ArchiveSort& b)
 {
-  if (a.source < b.source)
+  if (a.source < b.source) {
+    // cerr << a.source << " < " << b.source << endl;
     return true;
-  if (a.centre_frequency < b.centre_frequency)
+  }
+  if (a.centre_frequency < b.centre_frequency) {
+    // cerr << a.centre_frequency << " < " << b.centre_frequency << endl;
     return true;
-  if (a.epoch < b.epoch)
+  }
+  if (a.epoch < b.epoch) {
+    // cerr << a.epoch << " < " << b.epoch << endl;
     return true;
+  }
+  // cerr << "not less than" << endl;
   return false;
 }
 
@@ -40,14 +46,15 @@ try {
   string filename, name, freq, mjd;
   input >> filename >> name >> freq >> mjd;
 
-  if (filename != "FILENAME" && filename != "filename")
+  if (filename != "FILE" && filename != "file")
     throw Error (InvalidState, "Pulsar::ArchiveSort::load",
 		 "input is not the output of vap?");
 
-  while (!input.eof())
-    entries.push_back( ArchiveSort(input) );
+  while (!input.eof()) {
+    ArchiveSort entry (input);
+    entries.push_back( entry );
+  }
 
-  sort (entries.begin(), entries.end());
 }
 catch (Error& error) {
   cerr << "Pulsar::ArchiveSort::load " << error.get_message() << endl;
