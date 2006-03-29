@@ -152,6 +152,12 @@ namespace Pulsar {
     //! scale each profile by the specified value
     std::string scale (const std::string& args);
 
+    //! offset each profile by the specified value
+    std::string offset (const std::string& args);
+
+    //! rotate each profile by the specified value
+    std::string rotate (const std::string& args);
+
     //! correct for parallactic angle effects
     std::string correct_instrument (const std::string& args);
     
