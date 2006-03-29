@@ -25,8 +25,7 @@ void Pulsar::Archive::init ()
 }
 
 //! Provide access to the expert interface
-Pulsar::Archive::Expert*
-Pulsar::Archive::expert ()
+Pulsar::Archive::Expert* Pulsar::Archive::expert ()
 {
   return expert_interface; 
 }
@@ -91,7 +90,7 @@ void Pulsar::Archive::agent_report ()
 
 void Pulsar::Archive::agent_list ()
 {
-  Agent::print_list (stdout);
+  cout << Agent::get_list () << endl;
 }
 
 template<class T> void clean_dangling (vector<T>& data)

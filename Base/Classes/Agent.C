@@ -5,6 +5,7 @@
  *
  ***************************************************************************/
 #include "Pulsar/Archive.h"
+#include "string_utils.h"
 
 #define _PSRCHIVE_STATIC 1
 
@@ -33,9 +34,7 @@ void Pulsar::Archive::Agent::report ()
     cerr << "Archive::Agent::report " << registry.size() 
 	 << " Registered Agents:" << endl;
   
-  print_list (stdout);
-
-  cerr << endl;
+  cout << get_list () << endl;
 
 #ifndef _PSRCHIVE_STATIC
   plugin_report ();
@@ -43,11 +42,27 @@ void Pulsar::Archive::Agent::report ()
 
 }
 
-void Pulsar::Archive::Agent::print_list (FILE* out)
+string Pulsar::Archive::Agent::get_list ()
 {
-  for (unsigned agent=0; agent<registry.size(); agent++)
-    fprintf (out, "%16s   %s\n", registry[agent]->get_name().c_str(),
-	     registry[agent]->get_description().c_str() );
+  unsigned maxlen = 0;
+  unsigned agent = 0;
+
+  for (agent=0; agent<registry.size(); agent++)
+    if (registry[agent]->get_name().length() > maxlen)
+      maxlen = registry[agent]->get_name().length();
+
+  maxlen += 3;
+
+  string out;
+  for (agent=0; agent<registry.size(); agent++) {
+    if (agent)
+      out += "\n";
+    out += 
+      pad(maxlen, registry[agent]->get_name()) 
+      + registry[agent]->get_description();
+  }
+
+  return out;
 }
 
 // reports on the status of the plugins
