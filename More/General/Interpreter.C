@@ -260,7 +260,7 @@ string Pulsar::Interpreter::response (Status s, const string& text)
   if (!text.length())
     return out;
 
-  return out + " " + text;
+  return out + " " + get_command() + ": " + text;
 }
 
 void Pulsar::Interpreter::set (Archive* data)
@@ -319,7 +319,7 @@ try {
   return response (Good);
 }
 catch (Error& error) {
-  return response (Fail, "load: " + error.get_message());
+  return response (Fail, error.get_message());
 }
 
 string Pulsar::Interpreter::unload (const string& args)
@@ -337,7 +337,7 @@ try {
   return response (Good);
 }
 catch (Error& error) {
-  return response (Fail, "unload: " + error.get_message());
+  return response (Fail, error.get_message());
 }
 
 //! push a clone of the current stack top onto the stack
@@ -346,7 +346,7 @@ try {
   vector<string> arguments = setup (args);
 
   if (arguments.size() > 1)
-    return response (Fail, "push: please specify only one name");
+    return response (Fail, "please specify only one name");
 
   if (arguments.size())
     theStack.push ( getmap(arguments[0]) );
@@ -356,7 +356,7 @@ try {
   return response (Good);
 }
 catch (Error& error) {
-  return response (Fail, "push: " + error.get_message());
+  return response (Fail, error.get_message());
 }
 
 
@@ -364,7 +364,7 @@ catch (Error& error) {
 string Pulsar::Interpreter::pop (const string& args)
 {
   if (theStack.empty())
-    return response (Warn, "pop: currently at bottom");
+    return response (Warn, "currently at bottom");
 
   theStack.pop();
   return response (Good);
@@ -375,14 +375,14 @@ try {
   vector<string> arguments = setup (args);
 
   if (arguments.size() != 1)
-    return response (Fail, "set: please specify one name");
+    return response (Fail, "please specify one name");
 
   setmap( arguments[0], get() );
 
   return response (Good);
 }
 catch (Error& error) {
-  return response (Fail, "set: " + error.get_message());
+  return response (Fail, error.get_message());
 }
 
 string Pulsar::Interpreter::get (const string& args)
@@ -390,14 +390,14 @@ try {
   vector<string> arguments = setup (args);
 
   if (arguments.size() != 1)
-    return response (Fail, "get: please specify one name");
+    return response (Fail, "please specify one name");
 
   set( getmap(arguments[0]) );
 
   return response (Good);
 }
 catch (Error& error) {
-  return response (Fail, "get: " + error.get_message());
+  return response (Fail, error.get_message());
 }
 
 
@@ -406,7 +406,7 @@ string Pulsar::Interpreter::remove (const string& args)
   vector<string> arguments = setup (args);
 
   if (arguments.size() != 1)
-    return response (Fail, "remove: please specify one name");
+    return response (Fail, "please specify one name");
 
   string name = arguments[0];
   map< string, Reference::To<Archive> >::iterator entry = theMap.find (name);
@@ -425,7 +425,7 @@ try {
   vector<string> arguments = setup (args);
 
   if (!arguments.size() > 1)
-    return response (Fail, "clone: please specify only one name");
+    return response (Fail, "please specify only one name");
 
   if (arguments.size() == 1)
     set( getmap(arguments[0])->clone() );
@@ -435,7 +435,7 @@ try {
   return response (Good);
 }
 catch (Error& error) {
-  return response (Fail, "clone: " + error.get_message());
+  return response (Fail, error.get_message());
 }
 
 string Pulsar::Interpreter::extract (const string& args)
@@ -475,7 +475,7 @@ try {
   return response (Good);
 }
 catch (Error& error) {
-  return response (Fail, "extract: " + error.get_message());
+  return response (Fail, error.get_message());
 }
 
 string Pulsar::Interpreter::edit (const string& args)
@@ -483,7 +483,7 @@ try {
   vector<string> arguments = setup (args);
 
   if (!arguments.size())
-    return response (Fail, "edit: please specify at least one editor command");
+    return response (Fail, "please specify at least one editor command");
 
   if (!interface)
     interface = new ArchiveTI;
@@ -497,7 +497,7 @@ try {
   return retval;
 }
 catch (Error& error) {
-  return response (Fail, "edit: " + error.get_message());
+  return response (Fail, error.get_message());
 }
 
 string Pulsar::Interpreter::append (const string& args)
@@ -505,14 +505,14 @@ try {
   vector<string> arguments = setup (args);
 
   if (!arguments.size() != 1)
-    return response (Fail, "append: please specify one name");
+    return response (Fail, "please specify one name");
 
   get()->append( getmap(arguments[0]) );
 
   return response (Good);
 }
 catch (Error& error) {
-  return response (Fail, "append: " + error.get_message());
+  return response (Fail, error.get_message());
 }
 
 
@@ -533,7 +533,7 @@ try {
 
 }
 catch (Error& error) {
-  return response (Fail, "fscrunch: " + error.get_message());
+  return response (Fail, error.get_message());
 }
 
 // //////////////////////////////////////////////////////////////////////
@@ -552,7 +552,7 @@ try {
   return response (Good);
 }
 catch (Error& error) {
-  return response (Fail, "tscr: " + error.get_message());
+  return response (Fail, error.get_message());
 }
 
 // //////////////////////////////////////////////////////////////////////
@@ -562,14 +562,14 @@ catch (Error& error) {
 string Pulsar::Interpreter::pscrunch (const string& args)
 try {
   if (args.length())
-    return response (Fail, "pscr: accepts no arguments");
+    return response (Fail, "accepts no arguments");
 
   get() -> pscrunch();
 
   return response (Good);
 }
 catch (Error& error) {
-  return response (Fail, "pscr: " + error.get_message());
+  return response (Fail, error.get_message());
 }
 
 string Pulsar::Interpreter::bscrunch (const string& args)
@@ -577,24 +577,24 @@ try {
   unsigned scrunch_to = setup<unsigned> (args);
   
   if (!scrunch_to)
-    return response (Fail, "bscr: invalid number of bins");
+    return response (Fail, "invalid number of bins");
 
   get() -> bscrunch_to_nbin (scrunch_to);
   return response (Good);
 }
 catch (Error& error) {
-  return response (Fail, "bscr: " + error.get_message());
+  return response (Fail, error.get_message());
 }
 
 string Pulsar::Interpreter::centre (const string& args)
 try {
   if (args.length())
-    return response (Fail, "centre: accepts no arguments");
+    return response (Fail, "accepts no arguments");
   get()->centre();
   return response (Good);
 }
 catch (Error& error) {
-  return response (Fail, "centre: " + error.get_message());
+  return response (Fail, error.get_message());
 }
 
 // //////////////////////////////////////////////////////////////////////
@@ -605,33 +605,33 @@ catch (Error& error) {
 string Pulsar::Interpreter::dedisperse (const string& args)
 try {
   if (args.length())
-    return response (Fail, "dedisp: accepts no arguments");
+    return response (Fail, "accepts no arguments");
 
   if (get()->get_dedispersed())
-    return response (Warn, "dedisp: already dedispersed");
+    return response (Warn, "already dedispersed");
 
   get()->dedisperse();
 
   return response (Good);
 }
 catch (Error& error) {
-  return response (Fail, "dedisp: " + error.get_message());
+  return response (Fail, error.get_message());
 }
 
 string Pulsar::Interpreter::correct_instrument (const string& args)
 try {
   if (args.length())
-    return response (Fail, "pac: accepts no arguments");
+    return response (Fail, "accepts no arguments");
 
   if (get()->get_instrument_corrected())
-    return response (Warn, "pac: already corrected");
+    return response (Warn, "already corrected");
 
   get()->correct_instrument();
 
   return response (Good);
 }
 catch (Error& error) {
-  return response (Fail, "pac: " + error.get_message());
+  return response (Fail, error.get_message());
 }
 
 // //////////////////////////////////////////////////////////////////////
@@ -639,17 +639,17 @@ catch (Error& error) {
 string Pulsar::Interpreter::defaraday (const string& args)
 try {
   if (args.length())
-    return response (Fail, "defaraday: accepts no arguments");
+    return response (Fail, "accepts no arguments");
 
   if (get()->get_faraday_corrected())
-    return response (Warn, "defaraday: already corrected");
+    return response (Warn, "already corrected");
 
   get()->defaraday();
 
   return response (Good);
 }
 catch (Error& error) {
-  return response (Fail, "defaraday: " + error.get_message());
+  return response (Fail, error.get_message());
 }
 
 // //////////////////////////////////////////////////////////////////////
@@ -657,7 +657,7 @@ catch (Error& error) {
 string Pulsar::Interpreter::scattered_power_correct (const string& args)
 try {
   if (args.length())
-    return response (Fail, "spc: accepts no arguments");
+    return response (Fail, "accepts no arguments");
 
   Archive* arch = get();
   if (arch->get_state() == Signal::Stokes)
@@ -670,7 +670,7 @@ try {
   return response (Good);
 }
 catch (Error& error) {
-  return response (Fail, "spc: " + error.get_message());
+  return response (Fail, error.get_message());
 }
 
 // //////////////////////////////////////////////////////////////////////
@@ -680,7 +680,7 @@ try {
   vector<string> arguments = setup (args);
 
   if (!arguments.size())
-    return response (Fail, "weight: please specify weighting scheme");
+    return response (Fail, "please specify weighting scheme");
 
   Reference::To<Weight> weight;
   if (arguments.size() == 1 && arguments[0] == "time")
@@ -690,14 +690,14 @@ try {
     weight = new SNRWeight;
 
   else
-    return response (Fail, help("weight"));
+    return response (Fail, "unrecognized weighting scheme '" + args + "'");
 
   weight->weight( get() );
 
   return response (Good);
 }
 catch (Error& error) {
-  return response (Fail, "weight: " + error.get_message());
+  return response (Fail, error.get_message());
 }
 
 // //////////////////////////////////////////////////////////////////////
@@ -720,7 +720,7 @@ try {
   return response (Good);
 }
 catch (Error& error) {
-  return response (Fail, "scale: " + error.get_message());
+  return response (Fail, error.get_message());
 }
 
 // //////////////////////////////////////////////////////////////////////
@@ -730,7 +730,7 @@ try {
   vector<string> arguments = setup (args);
 
   if (!arguments.size())
-    return response (Fail, "weight: please specify weighting scheme");
+    return response (Fail, "please specify weighting scheme");
 
   if (arguments.size() == 1 && arguments[0] == "fourier")
     Profile::snr_strategy.set (&fourier_snr, &FourierSNR::get_snr);
@@ -746,12 +746,12 @@ try {
     standard_snr.set_standard( getmap(arguments[1])->get_Profile (0,0,0) );
   }
   else
-    return response (Fail, help("snr"));
+    return response (Fail, "unrecognized S/N method '" + args + "'");
 
   return response (Good);
 }
 catch (Error& error) {
-  return response (Fail, "snr: " + error.get_message());
+  return response (Fail, error.get_message());
 }
 
 // //////////////////////////////////////////////////////////////////////
