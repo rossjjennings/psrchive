@@ -360,8 +360,16 @@ void Pulsar::ReceptionCalibrator::add_observation (const Archive* data)
   if (!data)
     return;
 
-  if (data->get_type() == Signal::PolnCal) {
+  Signal::Source type = data->get_type();
+
+  if (type == Signal::PolnCal || type == Signal::FluxCalOn) {
     add_calibrator (data);
+    return;
+  }
+
+  if (type != Signal::Pulsar) {
+    cerr << "Pulsar::ReceptionCalibrator::add_observation WARNING\n"
+      "  ignoring '" << data->get_filename() << "'" << endl;
     return;
   }
 
@@ -699,10 +707,7 @@ try {
 
       // convert to Stokes parameters
       Stokes< Estimate<double> > cal_stokes = coherency( convert (cal) );
-      cal_stokes *= 2.0;
-
       Stokes< Estimate<double> > fcal_stokes = coherency( convert (fcal) );
-      fcal_stokes *= 2.0;
 
       try {
 
@@ -759,6 +764,7 @@ try {
       }
 
       cal_stokes = transform( cal_stokes, correct );
+
       calibrator_estimate.source_guess[ichan].integrate (cal_stokes);
 
     }
@@ -1001,7 +1007,7 @@ void Pulsar::ReceptionCalibrator::initialize ()
 
     // sanity check
     double I = calibrator_estimate.source[ichan]->get_stokes()[0].get_value();
-    if (fabs(I-1.0) > 1e-4)
+    if (fabs(I-1.0) > 1e-5)
       throw Error (InvalidState, "Pulsar::ReceptionCalibrator::initialize",
 		   "Reference flux[%d]=%lf != 1", ichan, I);
 
