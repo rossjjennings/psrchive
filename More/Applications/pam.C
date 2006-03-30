@@ -88,8 +88,9 @@ void usage()
     "  -s               Smear with this duty cycle \n"
     "  -r               Rotate profiles by this many turns \n" 
     "  -w               Reset profile weights to this value \n"
+    "  --mult fac       Multiply amplitudes by 'fac'\n"
     "\n"
-    "The following options override archive paramaters \n"
+    "The following options override archive parameters \n"
     "  --receiver file  Install the Receiver described in the text file \n"
     "  -L               Set feed basis to Linear \n"
     "  -C               Set feed basis to Circular \n"
@@ -194,6 +195,7 @@ int main (int argc, char *argv[]) try {
     string site;
     string name;
     bool defaraday_to_infinity = false;
+    float mult = -1.0;
 
     Reference::To<Pulsar::IntegrationOrder> myio;
     Reference::To<Pulsar::Receiver> install_receiver;
@@ -210,6 +212,7 @@ int main (int argc, char *argv[]) try {
     const int SPC  = 1215;
     const int RM   = 1216;
     const int INF  = 1217;
+    const int MULT = 1218;
 
     while (1) {
 
@@ -235,6 +238,7 @@ int main (int argc, char *argv[]) try {
 	{"RM",         required_argument,0,RM},
 	{"spc",        no_argument,0,SPC},
 	{"inf",        no_argument,0,INF},
+	{"mult",       required_argument,0,MULT},
 	{0, 0, 0, 0}
       };
     
@@ -261,7 +265,7 @@ int main (int argc, char *argv[]) try {
 	Pulsar::Archive::set_verbosity(3);
 	break;
       case 'i':
-	cout << "$Id: pam.C,v 1.60 2006/03/29 22:42:19 straten Exp $" << endl;
+	cout << "$Id: pam.C,v 1.61 2006/03/30 23:11:56 hknight Exp $" << endl;
 	return 0;
       case 'm':
 	save = true;
@@ -556,6 +560,8 @@ int main (int argc, char *argv[]) try {
       case INF: defaraday_to_infinity = true; break;
 
       case SPC: scattered_power_correction = true; break;
+	
+      case MULT: mult = atof(optarg); break;
 
       default:
 	cout << "Unrecognised option" << endl;
@@ -588,6 +594,13 @@ int main (int argc, char *argv[]) try {
 	cerr << "Loading " << filenames[i] << endl;
       
       arch = Pulsar::Archive::load(filenames[i]);
+
+      if( mult > 0.0 ){
+	for( unsigned isub=0; isub<arch->get_nsubint();isub++)
+	  for( unsigned ichan=0; ichan<arch->get_nchan();ichan++)
+	    for( unsigned ipol=0; ipol<arch->get_npol();ipol++)
+	      arch->get_Profile(isub,ipol,ichan)->scale( mult );
+      }
 
       if (install_receiver) {
 
@@ -752,19 +765,6 @@ int main (int argc, char *argv[]) try {
 		  arch->get_filename().c_str());
       }
 
-      if (rm < 9.9e98 ) {
-	arch->set_rotation_measure (rm);
-	if( defaraday ){
-	  Pulsar::FaradayRotation xform;
-	  xform.set_rotation_measure( rm );
-	  if( defaraday_to_infinity )
-	    xform.set_reference_wavelength( 0.0 );
-	  xform.execute( arch );
-	}
-	if (verbose)
-	  cout << "Archive now has a RM of " << rm << endl;
-      }
-
       if( dedefaraday ) {
 	if( arch->get_faraday_corrected() ) {
 	  arch->set_rotation_measure (-arch->get_rotation_measure());
@@ -867,6 +867,19 @@ int main (int argc, char *argv[]) try {
 	if (verbose)
 	  cout << arch->get_filename() << " invinted" << endl;
       }
+
+      if (rm < 9.9e98 ) {
+	arch->set_rotation_measure (rm);
+	if( defaraday ){
+	  Pulsar::FaradayRotation xform;
+	  xform.set_rotation_measure( rm );
+	  if( defaraday_to_infinity )
+	    xform.set_reference_wavelength( 0.0 );
+	  xform.execute( arch );
+	  if (verbose)
+	    cout << "Archive now has a RM of " << arch->get_rotation_measure() << endl;
+	}
+      }
       
       if (fscr) {
 	if (new_nchn > 0) {
@@ -887,7 +900,7 @@ int main (int argc, char *argv[]) try {
 	    cout << arch->get_filename() << " fscrunched" << endl;
 	}
       }
-      
+
       if (bscr) {
 	if (new_nbin > 0) {
 	  arch->bscrunch_to_nbin(new_nbin);
