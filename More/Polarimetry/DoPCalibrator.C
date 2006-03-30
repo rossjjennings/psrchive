@@ -39,7 +39,6 @@ void Pulsar::DoPCalibrator::extra (unsigned ichan,
     
   // Convert the coherency vector into Stokes parameters.
   Stokes< Estimate<double> > obs_cal = coherency( convert (source) );
-  obs_cal *= 2.0;
 
   // Evaluate
   Jones<double> response = transformation[ichan] -> evaluate ();
