@@ -7,34 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pcm.C,v $
-   $Revision: 1.50 $
-   $Date: 2006/03/17 13:34:41 $
+   $Revision: 1.51 $
+   $Date: 2006/03/30 20:54:56 $
    $Author: straten $ */
-
-/*! \file pcm.C 
-    \brief (Pulsar) Polarimetric Calibration Modelling (Package)
-
-    This program may be used to model the polarimetric response of observatory
-    instrumentation using two different techniques.
-
-    In Mode A, multiple observations of
-    <UL>
-    <LI> a single pulsar at multiple parallactic angles,
-    <LI> the amplitude modulated linear noise diode, and
-    <LI> an unpolarized flux calibrator, such as Hydra A,
-    </UL>
-    are used to model the reception of all three signals as described
-    in van Straten (2004).
-
-    In Mode B, single observations of
-    <UL>
-    <LI> a calibrated pulsar with high signal-to-noise ratio,
-    <LI> the same pulsar, uncalibrated, and
-    <LI> the amplitude modulated linear noise diode
-    </UL>
-    are used to model the instrumental response.
-
-*/
 
 #include "Pulsar/ReceptionCalibrator.h"
 #include "Pulsar/PulsarCalibrator.h"
@@ -105,6 +80,8 @@ void usage ()
     "  -H         allow software to choose the number of harmonics \n"
     "  -n nbin    set the number of harmonics to use as input states \n"
     "  -T toa.tim filename to which arrival time estimates will be written \n"
+    "\n"
+    "See "PSRCHIVE_HTTP"/manuals/pcm for more details\n"
        << endl;
 }
 
