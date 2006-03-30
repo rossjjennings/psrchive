@@ -7,10 +7,11 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pcm.C,v $
-   $Revision: 1.51 $
-   $Date: 2006/03/30 20:54:56 $
+   $Revision: 1.52 $
+   $Date: 2006/03/30 21:00:22 $
    $Author: straten $ */
 
+#include "Pulsar/psrchive.h"
 #include "Pulsar/ReceptionCalibrator.h"
 #include "Pulsar/PulsarCalibrator.h"
 #include "Pulsar/Database.h"
