@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/PhysicalCoherency.h,v $
-   $Revision: 1.2 $
-   $Date: 2006/03/17 13:35:26 $
+   $Revision: 1.3 $
+   $Date: 2006/03/30 17:20:54 $
    $Author: straten $ */
 
 #ifndef __MEAL_PhysicalCoherency_H
@@ -19,7 +19,14 @@
 namespace MEAL {
 
   //! A coherency matrix with determinant greater than zero
-  /*! This class enforces the det(rho) > 0 restriction. */
+  /*! This class enforces the det(rho) > 0 restriction by
+   parameterizing the four degress of freedom as: 
+   <ol>
+   <li> log(Inv), where inv is the Stokes invariant interval
+   <li> Stokes Q
+   <li> Stokes U
+   <li> Stokes V
+  */
   class PhysicalCoherency : public Coherency {
 
   public:

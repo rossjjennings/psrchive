@@ -15,7 +15,7 @@ MEAL::PhysicalCoherency::PhysicalCoherency ()
 {
   Parameters* parameters = new Parameters (this, 4);
 
-  parameters->set_param_name (0, "log(I-p)");
+  parameters->set_param_name (0, "log_Inv");
   parameters->set_param_name (1, "StokesQ");
   parameters->set_param_name (2, "StokesU");
   parameters->set_param_name (3, "StokesV");
@@ -38,10 +38,14 @@ void MEAL::PhysicalCoherency::calculate (Jones<double>& result,
   for (unsigned i=1; i<4; i++)
     stokes[i] = get_param (i);
 
-  double unpolarized_flux = exp(get_param(0));
-  double polarized_flux = stokes.abs_vect();
+  // b = param[0] = log(invariant)
+  double invariant = exp(get_param(0));
 
-  stokes[0] = polarized_flux + unpolarized_flux;
+  // I = sqrt (p^2 + invariant)
+  stokes[0] = sqrt( stokes.sqr_vect() + invariant );
+
+  // 1/I
+  double one_over_I = 1.0/stokes[0];
 
   result = convert(stokes);
 
@@ -49,15 +53,25 @@ void MEAL::PhysicalCoherency::calculate (Jones<double>& result,
 
     grad->resize (4);
 
+    // drho/dI
     Stokes<double> unpol (1,0,0,0);
-    Jones<double> identity = convert (unpol);
+    Jones<double> drho_dI = convert (unpol);
 
-    (*grad)[0] = unpolarized_flux * identity;
+    // dI/db
+    double dI_db = 0.5 * invariant * one_over_I;
+
+    // drho/db = drho/dI * dI/db
+    (*grad)[0] = drho_dI * dI_db;
 
     for (unsigned i=1; i<4; i++) {
+
       Stokes<double> param;
       param[i] = 1.0;
-      (*grad)[i] = convert (param) + stokes[i]/polarized_flux * identity;
+      (*grad)[i] = convert (param);
+
+      // drho/dSi += drho/dI * dI/dSi
+      (*grad)[i] += drho_dI * stokes[i] * one_over_I;
+
     }
 
   }
@@ -77,23 +91,30 @@ void MEAL::PhysicalCoherency::calculate (Jones<double>& result,
 //! Set the Stokes parameters of the model
 void MEAL::PhysicalCoherency::set_stokes (const Stokes<double>& stokes)
 {
+  double invariant = stokes.invariant();
+
+  if (invariant < 0)
+    throw Error (InvalidParam, "MEAL::PhysicalCoherency::set_stokes",
+		 "invariant = %lf < 0", invariant);
+
+  set_param (0, log(invariant));
+
   for (unsigned i=1; i<4; i++)
     set_param (i, stokes[i]);
-
-  set_param (0, log(stokes[0]-stokes.abs_vect()));
 }
 
 //! Set the Stokes parameters of the model
 void MEAL::PhysicalCoherency::set_stokes (const Stokes<Estimate<double> >& s)
 {
-  for (unsigned i=1; i<4; i++) {
-    set_param (i, s[i].val);
-    set_variance (i, s[i].var);
-  }
+  Estimate<double> invariant = s.invariant();
+  if (invariant.val < 0)
+    throw Error (InvalidParam, "MEAL::PhysicalCoherency::set_stokes",
+		 "invariant = %lf < 0", invariant.val);
 
-  Estimate<double> log_unpol = log (s[0]-s.abs_vect());
-  set_param (0, log_unpol.val);
-  set_variance (0, log_unpol.var);
+  set_Estimate (0, log(invariant));
+
+  for (unsigned i=1; i<4; i++)
+    set_Estimate (i, s[i]);
 }
 
 //! Set the Stokes parameters of the model
@@ -103,7 +124,7 @@ Stokes< Estimate<double> > MEAL::PhysicalCoherency::get_stokes () const
   for (unsigned i=1; i<4; i++)
     stokes[i] = get_Estimate (i);
 
-  stokes[0] = stokes.abs_vect() + exp(get_Estimate(0));
+  stokes[0] = sqrt( stokes.sqr_vect() + exp(get_Estimate(0)) );
 
   return stokes;
 }
