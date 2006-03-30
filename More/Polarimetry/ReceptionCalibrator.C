@@ -995,11 +995,19 @@ void Pulsar::ReceptionCalibrator::initialize ()
     pulsar[istate].update_source ();
 
   MJD epoch = 0.5 * (end_epoch + start_epoch);
-  cerr << "Pulsar::ReceptionCalibrator::solve reference epoch: " << epoch << endl;
+  cerr << "Pulsar::ReceptionCalibrator::solve epoch=" << epoch << endl;
 
   for (unsigned ichan=0; ichan<model.size(); ichan++) {
+
+    // sanity check
+    double I = calibrator_estimate.source[ichan]->get_stokes()[0].get_value();
+    if (fabs(I-1.0) > 1e-4)
+      throw Error (InvalidState, "Pulsar::ReceptionCalibrator::initialize",
+		   "Reference flux[%d]=%lf != 1", ichan, I);
+
     model[ichan]->convert.set_reference_epoch ( epoch );
     model[ichan]->update ();
+
   }
 
   is_initialized = true;
