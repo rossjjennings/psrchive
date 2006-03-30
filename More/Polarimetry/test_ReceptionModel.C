@@ -4,17 +4,13 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-#include <iostream>
-#include <algorithm>
-#include <unistd.h>
-
 #include "Calibration/ReceptionModel.h"
 #include "Calibration/Parallactic.h"
 #include "MEAL/Axis.h"
 
 #include "Calibration/CoherencyMeasurementSet.h"
 #include "Calibration/MeanCoherency.h"
-#include "MEAL/Coherency.h"
+#include "MEAL/PhysicalCoherency.h"
 
 #include "Calibration/SingleAxis.h"
 #include "Calibration/Instrument.h"
@@ -27,6 +23,10 @@
 #include "sky_coord.h"
 #include "Pauli.h"
 
+#include <iostream>
+#include <algorithm>
+#include <unistd.h>
+
 // the maximum value of sin, cos, sinh, and cosh 
 // used when generating random receiver and polynomials
 float difficulty = 0.2;
@@ -35,7 +35,7 @@ float difficulty = 0.2;
 float max_poln = 0.8;
 
 // tolerance to error
-float error_tolerance = 1;
+float error_tolerance = 2.0;
 
 // minimum parallactic angle
 float ha_min = -5;
@@ -336,7 +336,7 @@ int runtest (Calibration::Parallactic& parallactic)
   //
 
   // the model for each of the source states
-  vector< MEAL::Coherency > source_model (nstates);
+  vector< MEAL::Coherency* > source_model (nstates);
 
   // the best guess for each of the source states
   vector< Calibration::MeanCoherency > source_guess (nstates);
@@ -381,7 +381,7 @@ int runtest (Calibration::Parallactic& parallactic)
 
     if (vverbose)
       cerr << "construct MEAL::Coherency calibrator instance" << endl;
-    MEAL::Coherency* state = new MEAL::Coherency;
+    MEAL::Coherency* state = new MEAL::PhysicalCoherency;
 
     state->set_stokes (calibrator);
 
@@ -403,15 +403,17 @@ int runtest (Calibration::Parallactic& parallactic)
 
   for (unsigned istate = 0; istate < nstates; istate++) {
 
+    source_model[istate] = new MEAL::PhysicalCoherency;
+
     // update the best first guess
-    source_guess[istate].update (&(source_model[istate]));
+    source_guess[istate].update (source_model[istate]);
 
     if (vverbose)
       cerr << "source[" << istate << "] guess="
-	   << source_model[istate].get_stokes() << endl;
+	   << source_model[istate]->get_stokes() << endl;
 
     // add to the model
-    model.add_input (&(source_model[istate]));
+    model.add_input (source_model[istate]);
 
   }
 
@@ -505,7 +507,7 @@ int runtest (Calibration::Parallactic& parallactic)
   // solve the model!
   //
 
-  model.set_fit_convergence_threshold (variance, true);
+  model.set_fit_convergence_threshold (variance*variance, true);
 
   try {
     if (verbose)
@@ -517,7 +519,7 @@ int runtest (Calibration::Parallactic& parallactic)
     return -1;
   }
 
-  float limit = error_tolerance * variance;
+  float limit = error_tolerance * error_tolerance * variance;
  
   if (verbose)
     cerr << "runtest call compare" << endl;
@@ -526,14 +528,13 @@ int runtest (Calibration::Parallactic& parallactic)
   if (compare (system->evaluate(), receiver, max_norm) < 0)
     return -1;
 
-
   if (vverbose) {
     for (unsigned istate=0; istate<nstates; istate++)
       cerr << "source["<<istate<<"] = " << source[istate]
 	   << "\ninitial guess[" << istate << "] = " 
 	   << source_guess[istate].get_mean()
 	   << "\nguess source[" << istate << "] = " 
-	   << source_model[istate].evaluate() << endl;
+	   << source_model[istate]->evaluate() << endl;
   }
 
     
@@ -547,7 +548,7 @@ int runtest (Calibration::Parallactic& parallactic)
 
   for (unsigned istate=0; istate<nstates; istate++) {
 
-    Stokes<double> state = coherency( source_model[istate].evaluate() );
+    Stokes<double> state = coherency( source_model[istate]->evaluate() );
     
     if (vverbose)
       cerr << "runtest check state=" << istate << endl
@@ -560,40 +561,38 @@ int runtest (Calibration::Parallactic& parallactic)
     
     if (diff > max_norm) {
       
-      if (vverbose) {
-	cerr << "\n\nmodel source[" << istate << "]=" << state << " != "
-	     << "\ninput source[" << istate << "]=" << source[istate] 
-	     << " norm=" << diff << " > max_norm=" << max_norm <<  endl;
-      }
-      
-      if (vverbose) {
+      cerr << "\n\nmodel source[" << istate << "]=" << state << " != "
+	   << "\ninput source[" << istate << "]=" << source[istate] 
+	   << " norm=" << diff << " > max_norm=" << max_norm <<  endl;
+
+      if (verbose) {
 
 	model.set_input_index (istate);
   
 	for (unsigned iobs=0; iobs<nobs; iobs++) {
-
+	  
 	  Calibration::CoherencyMeasurementSet& meas = source_obs[iobs];
-
+	  
 	  for (unsigned imeas=0; imeas<meas.size(); imeas++) {
-
+	    
 	    if (meas[imeas].get_input_index() == istate) {
-
+	      
 	      meas.set_coordinates ();
-
+	      
 	      vector< Jones<double> > grad;
 	      Stokes<double> observed_source;
-
+	      
 	      observed_source = coherency( model.evaluate (&grad) );
-
+	      
 	      cerr << "obsout["<<iobs<<"]=" << observed_source
 		   << "\n obsin["<<iobs<<"]=" 
 		   << meas[imeas].get_stokes() << endl;
-
+	      
 	    }
-	  }
-	}
-      }
-      
+	  } // for each measurement
+	} // for each observation
+      } // if verbose
+          
       float fracpoln = source[istate].abs_vect () / source[istate][0];
       
       if (fracpoln < min_fracpoln_fail)
@@ -720,21 +719,16 @@ int main (int argc, char** argv)
       if (vverbose)
 	cerr << "runtest " << i << endl;
 
-      if ( runtest (parallactic) < 0)
+      if (runtest (parallactic) < 0)
 	errors ++;
-      
+
       int finished = (i*100)/nloop;
-      
-      if (finished != reported_finished || errors != reported_errors) {
+
+      if ((finished != reported_finished) || (errors != reported_errors)) {
 
 	cerr << "Finished: " << finished << "% -- errors: " << errors << 
-	  " (" << float((errors*1000)/(i+1))/10.0 << "%)";
+	  " (" << float((errors*1000)/(i+1))/10.0 << "%)" << endl;
 
-	// if (errors)
-	// cerr << "  min frac poln fail=" << min_fracpoln_fail;
-
-	cerr << "     \r";
-	
 	reported_finished = finished;
 	reported_errors = errors;
       }
@@ -742,9 +736,16 @@ int main (int argc, char** argv)
       hamaker = !hamaker;
     }
 
-    if (errors)
+    if (errors) {
+      float percent = ((errors*1000)/nloop)/10.0;
+
       cerr << "Failed " << errors << " out of " << nloop << " times" 
-	" (" << float((errors*1000)/(nloop))/10.0 << "%)" << endl;
+	" (" << percent << "%)" << endl;
+
+      if (percent > 5)
+	return -1;
+    }
+
   }
   catch (Error& error) {
     cerr << "Error " << error << endl;
