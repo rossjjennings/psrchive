@@ -83,8 +83,6 @@ void Pulsar::Integration::add_extension (Extension* ext)
 
 Pulsar::Integration::Integration ()
 {
-  dedispersed_dispersion_measure = 0.0;
-  dedispersed_centre_frequency   = 0.0;
   zero_phase_aligned = false;
 
   expert_interface = new Expert (this);
@@ -233,8 +231,6 @@ void Pulsar::Integration::copy (const Integration& subint,
   set_folding_period ( subint.get_folding_period() );
 
   archive = subint.archive;
-  dedispersed_dispersion_measure = subint.dedispersed_dispersion_measure;
-  dedispersed_centre_frequency   = subint.dedispersed_centre_frequency;
   zero_phase_aligned = false;
 }
 

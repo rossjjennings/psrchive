@@ -9,6 +9,7 @@
 
 // Integration Extension classes used to store state information
 #include "Pulsar/DeFaraday.h"
+#include "Pulsar/Dedisperse.h"
 
 /*!
   This method may be useful during load, as only the Archive base class
@@ -19,8 +20,10 @@ void Pulsar::Archive::init_Integration (Integration* subint)
   subint->archive = this;
 
   if ( get_dedispersed() ) {
-    subint->dedispersed_centre_frequency = get_centre_frequency();
-    subint->dedispersed_dispersion_measure = get_dispersion_measure();
+    Dedisperse* corrected = new Dedisperse;
+    corrected->set_reference_frequency( get_centre_frequency() );
+    corrected->set_dispersion_measure( get_dispersion_measure() );
+    subint->add_extension( corrected );
   }
 
   if ( get_faraday_corrected() ) {

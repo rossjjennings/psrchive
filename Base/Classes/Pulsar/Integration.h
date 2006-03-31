@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Integration.h,v $
-   $Revision: 1.79 $
-   $Date: 2006/03/17 13:34:51 $
+   $Revision: 1.80 $
+   $Date: 2006/03/31 20:42:16 $
    $Author: straten $ */
 
 /*
@@ -505,7 +505,7 @@ namespace Pulsar {
 
     //! Dedispersion worker function
     void dedisperse (unsigned ichan, unsigned kchan,
-                     double dm, double f0, double t0 = 0);
+                     double dm, double f0);
 
     //! Defaraday worker function
     void defaraday (unsigned ichan, unsigned kchan,
@@ -518,12 +518,6 @@ namespace Pulsar {
 
     //! Converts between coherency products and Stokes parameters
     void poln_convert (Signal::State out_state);
-
-    //! Record the dispersion measure applied in dedisperse
-    double dedispersed_dispersion_measure;
-
-    //! Record the centre frequency applied in dedisperse
-    double dedispersed_centre_frequency;
 
     //! Leading edge of phase bin zero = polyco predicted phase zero
     bool zero_phase_aligned;
