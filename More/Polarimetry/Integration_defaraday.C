@@ -40,7 +40,7 @@ try {
   // ensure that delta is equal to the identity matrix
   xform.set_delta( 1.0 );
 
-  xform.execute (this, ichan, kchan);
+  xform.range (this, ichan, kchan);
 
 }
 catch (Error& error) {
