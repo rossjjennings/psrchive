@@ -7,19 +7,19 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/DeFaraday.h,v $
-   $Revision: 1.2 $
-   $Date: 2006/03/17 13:34:45 $
+   $Revision: 1.3 $
+   $Date: 2006/03/31 22:19:35 $
    $Author: straten $ */
 
 #ifndef __Pulsar_DeFaraday_h
 #define __Pulsar_DeFaraday_h
 
-#include "Pulsar/Integration.h"
+#include "Pulsar/ColdPlasmaHistory.h"
 
 namespace Pulsar {
   
   //! Stores parameters used to correct Faraday rotation in each Integration
-  class DeFaraday : public Pulsar::Integration::Extension {
+  class DeFaraday : public ColdPlasmaHistory {
     
   public:
     
@@ -32,34 +32,16 @@ namespace Pulsar {
     //! Assignment operator
     const DeFaraday& operator= (const DeFaraday& extension);
     
-    //! Destructor
-    ~DeFaraday ();
-
     //! Clone method
     DeFaraday* clone () const { return new DeFaraday( *this ); }
 
     //! Set the rotation measure
-    void set_rotation_measure (double rotation_measure);
+    void set_rotation_measure (double rotation_measure)
+    { set_measure (rotation_measure); }
+
     //! Get the rotation measure
-    double get_rotation_measure () const;
-
-    //! Set the reference wavelength in metres
-    void set_reference_wavelength (double metres);
-    //! Get the reference wavelength
-    double get_reference_wavelength () const;
-
-    //! Set the reference frequency in MHz
-    void set_reference_frequency (double MHz);
-    //! Get the reference frequency
-    double get_reference_frequency () const;
-
-  protected:
-
-    //! The rotation measure
-    double rotation_measure;
-
-    //! The reference wavelength in metres
-    double reference_wavelength;
+    double get_rotation_measure () const
+    { return get_measure (); }
 
   };
   
