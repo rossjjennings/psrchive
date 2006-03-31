@@ -29,8 +29,7 @@ catch (Error& error) {
    \param kchan one greater than the last channel to be defaradayd
    \param rm the rotation measure
    \param f0 the reference frequency
-   \param r0 transformation to be applied in addition to faraday rotation */
-
+*/
 void Pulsar::Integration::defaraday (unsigned ichan, unsigned kchan,
                                      double rm, double f0)
 try {
