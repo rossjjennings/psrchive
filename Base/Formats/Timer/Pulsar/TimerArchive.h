@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/Timer/Pulsar/TimerArchive.h,v $
-   $Revision: 1.17 $
-   $Date: 2006/03/17 13:34:55 $
+   $Revision: 1.18 $
+   $Date: 2006/03/31 17:16:41 $
    $Author: straten $ */
 
 #ifndef __Timer_Archive_h
@@ -18,6 +18,8 @@
 #include "timer.h"
 
 namespace Pulsar {
+
+  class TapeInfo;
 
   //! Reads and writes the timer archive file format
   class TimerArchive : public Archive {
@@ -139,18 +141,6 @@ namespace Pulsar {
     //! Set the status of the poln calibrated flag
     virtual void set_poln_calibrated (bool done = true);
 
-		//! Get file number for raw data (FB only)
-		virtual int get_file_number() const ;
-
-		//! Set file number for raw data (FB only)
-		virtual void set_file_number(int file_number);
-				
-		//! Get tape label for raw data (FB only)
-		virtual string get_tape_label() const;
-		
-		//! Set tape label for raw data (FB only)
-		virtual void set_tape_label(string tape_label);
-
     //! Returns the Hydra observation type, given the coordinates
     int hydra_obstype ();
 
@@ -271,6 +261,12 @@ namespace Pulsar {
 
     //! Pack the Receiver extension
     void pack (const Receiver* receiver);
+
+    //! Unpack the TapeInfo extension
+    void unpack (TapeInfo* tape);
+
+    //! Pack the TapeInfo extension
+    void pack (const TapeInfo* tape);
 
   };
 

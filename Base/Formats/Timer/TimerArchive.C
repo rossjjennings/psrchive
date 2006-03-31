@@ -564,34 +564,6 @@ void Pulsar::TimerArchive::set_calibrated (int code, bool done)
     hdr.calibrated &= ~code;
 }
 
-//! Get file number for raw data (FB only)
-int Pulsar::TimerArchive::get_file_number() const 
-{
-	return hdr.file_number;
-}
-
-//! Set file number for raw data (FB only)
-void Pulsar::TimerArchive::set_file_number(int file_number) 
-{
-	hdr.file_number = file_number;
-}
-
-//! Get tape label for raw data (FB only)
-string Pulsar::TimerArchive::get_tape_label()  const 
-{
-	string temp(hdr.tape_label);	
-	return temp;
-}
-
-
-//! Set tape label for raw data (FB only)
-void Pulsar::TimerArchive::set_tape_label(string tape_label) 
-{
-	strcpy(hdr.tape_label, tape_label.c_str());
-}
-
-
-
 void Pulsar::TimerArchive::correct_Integrations () try {
 
   if( get_nsubint()==0 )

@@ -7,6 +7,7 @@
 #include "Pulsar/TimerArchive.h"
 #include "Pulsar/Telescope.h"
 #include "Pulsar/Receiver.h"
+#include "Pulsar/TapeInfo.h"
 #include "Pulsar/BackendName.h"
 
 void Pulsar::TimerArchive::unpack_extensions ()
@@ -19,6 +20,9 @@ void Pulsar::TimerArchive::unpack_extensions ()
 
   Telescope* telescope = getadd<Telescope>();
   telescope->set_coordinates (get_telescope_code());
+
+  TapeInfo* tape = getadd<TapeInfo>();
+  unpack (tape);
 
   if (verbose == 3)
     cerr << "Pulsar::TimerArchive::unpack_extensions set Backend" << endl;
@@ -51,6 +55,11 @@ void Pulsar::TimerArchive::pack_extensions () const
   else if (verbose == 3)
     cerr << "Pulsar::TimerArchive::pack_extensions no Receiver" << endl;
 
+  const TapeInfo* tape = get<TapeInfo>();
+  if (tape)
+    const_cast<TimerArchive*>(this)->pack (tape);
+  else if (verbose == 3)
+    cerr << "Pulsar::TimerArchive::pack_extensions no TapeInfo" << endl;
 
   // nothing done with Telescope Extension for now
 
@@ -71,3 +80,14 @@ void Pulsar::TimerArchive::pack_extensions () const
 
 }
 
+void Pulsar::TimerArchive::unpack (TapeInfo* tape)
+{
+  tape->set_tape_label (hdr.tape_label);
+  tape->set_file_number (hdr.file_number);
+}
+
+void Pulsar::TimerArchive::pack (const TapeInfo* tape)
+{
+  strncpy (hdr.tape_label, tape->get_tape_label().c_str(), TLABEL_STRLEN);
+  hdr.file_number = tape->get_file_number();
+}
