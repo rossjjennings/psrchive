@@ -84,7 +84,6 @@ void usage()
     "  -R RM            Correct for ISM faraday rotation \n"
     "  --RR             Dedefaraday (i.e. undo -R option) \n"
     "  --RM RM          Install a new RM but don't defaraday \n"
-    "  --inf            Use infinite frequency as reference when defaradaying\n"
     "  -s               Smear with this duty cycle \n"
     "  -r               Rotate profiles by this many turns \n" 
     "  -w               Reset profile weights to this value \n"
@@ -194,7 +193,6 @@ int main (int argc, char *argv[]) try {
     bool reverse_freqs = false;
     string site;
     string name;
-    bool defaraday_to_infinity = false;
     float mult = -1.0;
 
     Reference::To<Pulsar::IntegrationOrder> myio;
@@ -237,7 +235,6 @@ int main (int argc, char *argv[]) try {
 	{"RR",         no_argument,0,RR},
 	{"RM",         required_argument,0,RM},
 	{"spc",        no_argument,0,SPC},
-	{"inf",        no_argument,0,INF},
 	{"mult",       required_argument,0,MULT},
 	{0, 0, 0, 0}
       };
@@ -265,7 +262,7 @@ int main (int argc, char *argv[]) try {
 	Pulsar::Archive::set_verbosity(3);
 	break;
       case 'i':
-	cout << "$Id: pam.C,v 1.61 2006/03/30 23:11:56 hknight Exp $" << endl;
+	cout << "$Id: pam.C,v 1.62 2006/03/31 13:28:55 straten Exp $" << endl;
 	return 0;
       case 'm':
 	save = true;
@@ -556,8 +553,6 @@ int main (int argc, char *argv[]) try {
       case RR: dedefaraday = true; break;
 
       case RM: rm = atof(optarg); break;
-
-      case INF: defaraday_to_infinity = true; break;
 
       case SPC: scattered_power_correction = true; break;
 	
@@ -873,8 +868,6 @@ int main (int argc, char *argv[]) try {
 	if( defaraday ){
 	  Pulsar::FaradayRotation xform;
 	  xform.set_rotation_measure( rm );
-	  if( defaraday_to_infinity )
-	    xform.set_reference_wavelength( 0.0 );
 	  xform.execute( arch );
 	  if (verbose)
 	    cout << "Archive now has a RM of " << arch->get_rotation_measure() << endl;
