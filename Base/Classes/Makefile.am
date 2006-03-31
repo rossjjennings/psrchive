@@ -13,7 +13,7 @@ nobase_include_HEADERS = \
 	Pulsar/DeFaraday.h \
 	Pulsar/DigitiserStatistics.h      Pulsar/Receiver.h  \
 	Pulsar/ExampleExtension.h         Pulsar/Telescope.h  \
-	Pulsar/FeedExtension.h \
+	Pulsar/FeedExtension.h            Pulsar/TapeInfo.h \
 	Pulsar/FITSHdrExtension.h         Pulsar/TwoBitStats.h  \
 	Pulsar/FluxCalibratorExtension.h  Pulsar/WidebandCorrelator.h  \
 	Pulsar/ITRFExtension.h            Pulsar/dspReduction.h \
@@ -33,7 +33,7 @@ libExtension_la_SOURCES = \
 	DeFaraday.C \
 	DigitiserStatistics.C            Receiver.C  \
 	ExampleExtension.C               Receiver_load.C  \
-	FeedExtension.C \
+	FeedExtension.C                  TapeInfo.C \
 	FITSHdrExtension.C               Telescope.C  \
 	FluxCalibratorExtension.C        TwoBitStats.C  \
 	FluxCalibratorExtension_build.C  WidebandCorrelator.C  \
