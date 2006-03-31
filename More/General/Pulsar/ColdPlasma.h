@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/ColdPlasma.h,v $
-   $Revision: 1.2 $
-   $Date: 2006/03/31 22:57:35 $
+   $Revision: 1.3 $
+   $Date: 2006/03/31 23:01:57 $
    $Author: straten $ */
 
 #ifndef __Pulsar_ColdPlasma_h
@@ -169,7 +169,7 @@ template<class C, class History>
 void Pulsar::ColdPlasma<C,History>::execute (Integration* data) try
 {
   double measure = get_measure();
-  History* corrected = data->get<History>();
+  History* corrected = data->template get<History>();
  
   if ( corrected ) {
 
