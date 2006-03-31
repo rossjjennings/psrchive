@@ -17,6 +17,8 @@ nobase_include_HEADERS = model_profile.h Pulsar/ArchiveExpert.h \
 	Pulsar/CalibratorPlotter.h       Pulsar/ReceptionCalibratorPlotter.h \
 	Pulsar/CalibratorStokesInfo.h    Pulsar/ReferenceCalibrator.h \
 	Pulsar/CorrectionsCalibrator.h   Pulsar/SingleAxisCalibrator.h \
+	Pulsar/ColdPlasma.h              Pulsar/Dispersion.h \
+	Pulsar/DispersionDelay.h \
 	Pulsar/IonosphereCalibrator.h    Pulsar/IntegrationManagerExpert.h \
 	Pulsar/IntegrationExpert.h       Pulsar/Transformation.h \
 	Pulsar/Database.h                Pulsar/Smooth.h \
@@ -80,6 +82,8 @@ libpsrchive_la_SOURCES = plugins.csh getopt.h Physical.h \
 	Calibrator.C                  Profile_stats.C  \
 	CalibratorStokesInfo.C        Profile_toa.C  \
 	CorrectionsCalibrator.C       PulsarCalibrator.C  \
+	ColdPlasma.C                  Dispersion.C \
+	DispersionDelay.C \
 	Database.C                    RFIMitigation.C  \
 	DeltaRM.C                     DoPCalibrator.C \
 	ExampleArchive.C              ReceptionCalibrator.C  \
