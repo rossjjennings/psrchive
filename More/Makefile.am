@@ -82,8 +82,7 @@ libpsrchive_la_SOURCES = plugins.csh getopt.h Physical.h \
 	Calibrator.C                  Profile_stats.C  \
 	CalibratorStokesInfo.C        Profile_toa.C  \
 	CorrectionsCalibrator.C       PulsarCalibrator.C  \
-	ColdPlasma.C                  Dispersion.C \
-	DispersionDelay.C \
+	Dispersion.C                  DispersionDelay.C \
 	Database.C                    RFIMitigation.C  \
 	DeltaRM.C                     DoPCalibrator.C \
 	ExampleArchive.C              ReceptionCalibrator.C  \

@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/Dispersion.h,v $
-   $Revision: 1.1 $
-   $Date: 2006/03/31 20:34:01 $
+   $Revision: 1.2 $
+   $Date: 2006/03/31 22:57:35 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Dispersion_h
@@ -16,6 +16,7 @@
 
 #include "Pulsar/ColdPlasma.h"
 #include "Pulsar/DispersionDelay.h"
+#include "Pulsar/Dedisperse.h"
 
 namespace Pulsar {
 
@@ -25,45 +26,32 @@ namespace Pulsar {
 
     \post All profiles will be phase-aligned to the reference frequency
   */
-  class Dispersion : public ColdPlasma {
+  class Dispersion : public ColdPlasma<DispersionDelay,Dedisperse> {
 
   public:
 
     //! Default constructor
     Dispersion ();
 
-    //! Set up internal variables before execution
-    void setup (Integration*);
+    //! Return the dispersion measure
+    double correction_measure (Integration*);
 
-    //! Execute the correction
-    void execute (Integration*);
+    //! Return zero delay
+    double get_identity () { return 0; }
 
-    //! Execute the correction for an entire Pulsar::Archive
+    //! Phase rotate each profile by the correction
+    void apply (Integration*, unsigned channel);
+
+    //! Set the dedispersion attributes in the Archive
     void execute (Archive*);
 
-    //! Set the reference wavelength in metres
-    void set_reference_wavelength (double metres);
-
     //! Set the dispersion measure
-    void set_dispersion_measure (double dispersion_measure);
+    void set_dispersion_measure (double dispersion_measure)
+    { set_measure (dispersion_measure); }
+      
     //! Get the dispersion measure
-    double get_dispersion_measure () const;
-
-    //! Set the dispersion due to a change in reference wavelength
-    void set_delta (const double delta);
-    //! Get the dispersion due to a change in reference wavelength
-    double get_delta () const;
-
-    //! Execute the correction on the selected range
-    void execute (Integration*, unsigned ichan, unsigned jchan);
-
-  protected:
-
-    //! The dispersion due to a change in reference wavelength
-    double delta;
-
-    //! The dispersion delay calculator
-    DispersionDelay dispersion;
+    double get_dispersion_measure () const
+    { return get_measure (); }
 
   };
 

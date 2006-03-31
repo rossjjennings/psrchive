@@ -7,15 +7,17 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/FaradayRotation.h,v $
-   $Revision: 1.4 $
-   $Date: 2006/03/31 20:42:28 $
+   $Revision: 1.5 $
+   $Date: 2006/03/31 22:57:35 $
    $Author: straten $ */
 
 #ifndef __Pulsar_FaradayRotation_h
 #define __Pulsar_FaradayRotation_h
 
 #include "Pulsar/ColdPlasma.h"
+
 #include "Calibration/Faraday.h"
+#include "Pulsar/DeFaraday.h"
 
 namespace Pulsar {
 
@@ -30,45 +32,32 @@ namespace Pulsar {
     \post All profiles will have a position angle aligned to the
           reference frequency
   */
-  class FaradayRotation : public ColdPlasma {
+  class FaradayRotation : public ColdPlasma<Calibration::Faraday,DeFaraday> {
 
   public:
 
     //! Default constructor
     FaradayRotation ();
 
-    //! Set up internal variables before execution
-    void setup (Integration*);
+    //! Return the rotation measure
+    double correction_measure (Integration*);
 
-    //! Execute the correction
-    void execute (Integration*);
+    //! Return the identity matrix
+    Jones<double> get_identity () { return 1; }
 
-    //! Execute the correction for an entire Pulsar::Archive
+    //! Faraday rotate each profile by the correction
+    void apply (Integration*, unsigned channel);
+
+    //! Set the Faraday rotation correction attributes in the Archive
     void execute (Archive*);
 
-    //! Set the reference wavelength in metres
-    void set_reference_wavelength (double metres);
-
     //! Set the rotation measure
-    void set_rotation_measure (double rotation_measure);
+    void set_rotation_measure (double rotation_measure)
+    { set_measure (rotation_measure); }
+      
     //! Get the rotation measure
-    double get_rotation_measure () const;
-
-    //! Set the rotation due to a change in reference wavelength
-    void set_delta (const Jones<double>& delta);
-    //! Get the rotation due to a change in reference wavelength
-    Jones<double> get_delta () const;
-
-    //! Execute the correction on the selected range
-    void execute (Integration*, unsigned ichan, unsigned jchan);
-
-  protected:
-
-    //! The Faraday rotation transformation
-    Calibration::Faraday faraday;
-
-    //! The rotation due to a change in reference wavelength
-    Jones<double> delta;
+    double get_rotation_measure () const
+    { return get_measure (); }
 
   };
 
