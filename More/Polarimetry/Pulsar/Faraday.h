@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/Faraday.h,v $
-   $Revision: 1.7 $
-   $Date: 2006/03/17 13:34:44 $
+   $Revision: 1.8 $
+   $Date: 2006/03/31 22:57:42 $
    $Author: straten $ */
 
 #ifndef __Calibration_Faraday_H
@@ -24,7 +24,7 @@ namespace Calibration {
   class Faraday : public MEAL::Complex2 {
 
   public:
-
+ 
     //! Default constructor
     Faraday ();
 
@@ -61,6 +61,13 @@ namespace Calibration {
 
     //! Get the Faraday rotation angle
     double get_rotation () const;
+
+    //! enable use with the ColdPlasma template
+    typedef Jones<double> Return;
+    //! Set the rotation measure
+    void set_measure (double rotation_measure);
+    //! Get the rotation measure
+    double get_measure () const;
 
   protected:
 

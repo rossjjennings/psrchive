@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/DispersionDelay.h,v $
-   $Revision: 1.1 $
-   $Date: 2006/03/31 20:34:28 $
+   $Revision: 1.2 $
+   $Date: 2006/03/31 22:57:42 $
    $Author: straten $ */
 
 #ifndef __Pulsar_DispersionDelay_H
@@ -62,7 +62,14 @@ namespace Pulsar {
     double get_wavelength () const;
 
     //! Get the dispersion delay
-    double get_delay () const;
+    double evaluate () const;
+
+    //! enable use with the ColdPlasma template
+    typedef double Return;
+    //! Set the dispersion measure
+    void set_measure (double dispersion_measure);
+    //! Get the dispersion measure
+    double get_measure () const;
 
   protected:
 

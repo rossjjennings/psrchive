@@ -29,6 +29,17 @@ double Pulsar::DispersionDelay::get_dispersion_measure () const
   return dispersion_measure;
 }
 
+/*! This alias enables use of this class with the ColdPlasma template */
+void Pulsar::DispersionDelay::set_measure (const double dm)
+{
+  dispersion_measure = dm;
+}
+
+/*! This alias enables use of this class with the ColdPlasma template */
+double Pulsar::DispersionDelay::get_measure () const
+{
+  return dispersion_measure;
+}
 
 //! Set the reference frequency in MHz
 void Pulsar::DispersionDelay::set_reference_frequency (double MHz)
@@ -80,7 +91,7 @@ double Pulsar::DispersionDelay::get_wavelength () const
   return wavelength;
 }
 
-double Pulsar::DispersionDelay::get_delay () const
+double Pulsar::DispersionDelay::evaluate () const
 {
   // wavelength is expressed in light microseconds ...
   double lus_0 = reference_wavelength * 1e6 / speed_of_light;

@@ -40,6 +40,17 @@ Estimate<double> Calibration::Faraday::get_rotation_measure () const
   return get_Estimate (0);
 }
 
+/*! This alias enables use of this class with the ColdPlasma template */
+void Calibration::Faraday::set_measure (double rm)
+{
+  set_param (0, rm);
+}
+
+/*! This alias enables use of this class with the ColdPlasma template */
+double Calibration::Faraday::get_measure () const
+{
+  return get_param (0);
+}
 
 //! Set the reference frequency in MHz
 void Calibration::Faraday::set_reference_frequency (double MHz)
