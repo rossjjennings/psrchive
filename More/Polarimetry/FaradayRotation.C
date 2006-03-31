@@ -5,12 +5,11 @@
  *
  ***************************************************************************/
 #include "Pulsar/FaradayRotation.h"
+#include "Pulsar/DeFaraday.h"
+
+#include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
 #include "Pulsar/PolnProfile.h"
-#include "Pulsar/DeFaraday.h"
-#include "Pulsar/Archive.h"
-
-#include "Calibration/Faraday.h"
 
 Pulsar::FaradayRotation::FaradayRotation ()
 {
@@ -20,7 +19,7 @@ Pulsar::FaradayRotation::FaradayRotation ()
 void Pulsar::FaradayRotation::setup (Integration* data)
 {
   set_rotation_measure( data->get_rotation_measure() );
-  set_reference_frequency( data->get_centre_frequency() );
+  ColdPlasma::setup (data);
 }
  
 void Pulsar::FaradayRotation::set_rotation_measure (double rotation_measure)
@@ -33,26 +32,11 @@ double Pulsar::FaradayRotation::get_rotation_measure () const
   return faraday.get_rotation_measure().get_value();
 }
 
-void Pulsar::FaradayRotation::set_reference_frequency (double MHz)
-{
-  faraday.set_reference_frequency( MHz );
-}
-
-double Pulsar::FaradayRotation::get_reference_frequency () const
-{
-  return faraday.get_reference_frequency ();
-}
-
 //! Set the reference wavelength in metres
 void Pulsar::FaradayRotation::set_reference_wavelength (double metres)
 {
   faraday.set_reference_wavelength( metres );
-}
-
-//! Get the reference wavelength
-double Pulsar::FaradayRotation::get_reference_wavelength () const
-{
-  return faraday.get_reference_wavelength ();
+  ColdPlasma::set_reference_wavelength( metres );
 }
 
 //! Set the rotation due to a change in reference wavelength
@@ -67,24 +51,10 @@ Jones<double> Pulsar::FaradayRotation::get_delta () const
   return delta;
 }
 
-void Pulsar::FaradayRotation::transform (Integration* data) try
-{
-  setup (data);
-  execute (data);
-}
-catch (Error& error) {
-  throw error += "Pulsar::FaradayRotation::transform";
-}
-
 //! Execute the correction for an entire Pulsar::Archive
-void
-Pulsar::FaradayRotation::execute(Archive* arch)
+void Pulsar::FaradayRotation::execute (Archive* arch)
 {
-  for( unsigned i=0; i<arch->get_nsubint(); i++)
-    execute( arch->get_Integration(i) );
-
-  // HSK 2 Feb 2006-- although the individual Integrations have the extension
-  // this is not useful to programs like vap when inquiring defaraday status
+  ColdPlasma::execute (arch);
   arch->set_rotation_measure( get_rotation_measure() );
   arch->set_faraday_corrected( true );
 }
@@ -92,8 +62,6 @@ Pulsar::FaradayRotation::execute(Archive* arch)
 void Pulsar::FaradayRotation::execute (Integration* data) try
 {
   double rotation_measure = get_rotation_measure();
-  double reference_wavelength = get_reference_wavelength();
-
   DeFaraday* corrected = data->get<DeFaraday>();
  
   if ( corrected ) {
@@ -101,7 +69,7 @@ void Pulsar::FaradayRotation::execute (Integration* data) try
     double rm = corrected->get_rotation_measure();
     double lambda = corrected->get_reference_wavelength();
 
-    if (rm == rotation_measure && lambda == reference_wavelength) {
+    if (rm == rotation_measure && lambda == get_reference_wavelength()) {
       if (Integration::verbose)
 	cerr << "Pulsar::FaradayRotation::execute data are corrected" << endl;
       return;
@@ -142,7 +110,7 @@ catch (Error& error) {
 }
 
 
-/*! This worker methdo corrects Faraday rotation without asking many
+/*! This worker method corrects Faraday rotation without asking many
   questions.
 
    \param ichan the first channel to be corrected
