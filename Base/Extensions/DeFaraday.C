@@ -9,7 +9,7 @@
 
 //! Default constructor
 Pulsar::DeFaraday::DeFaraday ()
-  : Extension ("Example")
+  : Extension ("DeFaraday")
 {
   rotation_measure = 0.0;
   reference_wavelength = 0.0;
@@ -17,7 +17,7 @@ Pulsar::DeFaraday::DeFaraday ()
 
 //! Copy constructor
 Pulsar::DeFaraday::DeFaraday (const DeFaraday& extension)
-  : Extension ("Example")
+  : Extension ("DeFaraday")
 {
   operator=(extension);
 }
