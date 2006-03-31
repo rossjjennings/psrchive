@@ -533,7 +533,7 @@ void Pulsar::PolnCalibrator::correct_backend (Archive* arch) try {
 	  if (flip[ipol])
 	    integration->get_Profile(ipol, ichan)->scale(-1);
 	
-	if (swap01 == -1)
+	if (swap01)
 	  integration->expert()->swap_profiles(0, ichan, 1, ichan);
 	
       }
