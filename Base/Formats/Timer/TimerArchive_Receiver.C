@@ -24,7 +24,7 @@ bool is_valid_string (const char* str, unsigned length)
 
 void Pulsar::TimerArchive::unpack (Receiver* receiver)
 {
-  if (verbose == 3)
+  if (verbose > 2)
     cerr << "Pulsar::TimerArchive::unpack Receiver" << endl;
 
   if (hdr.banda.polar == 0)
@@ -58,7 +58,7 @@ void Pulsar::TimerArchive::unpack (Receiver* receiver)
 
   Angle angle;
 
-  if (verbose == 3)
+  if (verbose > 2)
     cerr << "Pulsar::TimerArchive::unpack Receiver feed_offset="
 	 << hdr.banda.feed_offset << endl;
 
@@ -66,7 +66,7 @@ void Pulsar::TimerArchive::unpack (Receiver* receiver)
   receiver->set_tracking_angle (angle);
 
   if (hdr.rcvr_id[0] == '\0')  {
-    if (verbose)
+    if (verbose > 1)
       cerr << "Pulsar::TimerArchive::unpack Receiver "
 	"name not specified." << endl;
     return;
@@ -75,14 +75,14 @@ void Pulsar::TimerArchive::unpack (Receiver* receiver)
   // check that the receiver is a null-terminated string
   if (!is_valid_string( hdr.rcvr_id, RCVR_ID_STRLEN )) {
 
-    if (verbose)
+    if (verbose > 1)
       cerr << "Pulsar::TimerArchive::unpack Receiver name corrupted." << endl;
 
     hdr.rcvr_id[0] = '\0';
     return;
   }
 
-  if (verbose == 3)
+  if (verbose > 2)
     cerr << "Pulsar::TimerArchive::unpack Receiver name="
 	 << hdr.rcvr_id << endl;
 
@@ -108,7 +108,7 @@ void Pulsar::TimerArchive::unpack (Receiver* receiver)
   // correct the Version -2 parameters
   if (supplement->version > -2) {
 
-    if (verbose == 3)
+    if (verbose > 2)
       cerr << "Pulsar::TimerArchive::unpack Receiver no supplement" << endl;
 
     supplement->X_offset = 0.0;
@@ -134,40 +134,40 @@ void Pulsar::TimerArchive::unpack (Receiver* receiver)
       throw Error (InvalidState, "Pulsar::TimerArchive::unpack",
                    "Receiver basis is Circular and calibrator_offset=%g",
                    supplement->calibrator_offset);
-    if (verbose == 3)
+    if (verbose  > 2)
       cerr << "Pulsar::TimerArchive::unpack Receiver exit circular" << endl;
     return;
   }
 
-  if (verbose == 3)
+  if (verbose > 2)
     cerr << "Pulsar::TimerArchive::unpack Receiver X_offset="
          << supplement->X_offset << endl;
 
   angle.setDegrees (supplement->X_offset);
   receiver->set_X_offset (angle);
 
-  if (verbose == 3)
+  if (verbose > 2)
     cerr << "Pulsar::TimerArchive::unpack Receiver Y_offset="
 	 << supplement->Y_offset << endl;
 
   angle.setDegrees (supplement->Y_offset);
   receiver->set_Y_offset (angle);
 
-  if (verbose == 3)
+  if (verbose > 2)
     cerr << "Pulsar::TimerArchive::unpack Receiver calibrator_offset="
 	 << supplement->calibrator_offset << endl;
 
   angle.setDegrees (supplement->calibrator_offset);
   receiver->set_calibrator_offset (angle);
 
-  if (verbose == 3)
+  if (verbose > 2)
     cerr << "Pulsar::TimerArchive::unpack Receiver exit linear" << endl;
 
 }
 
 void Pulsar::TimerArchive::pack (const Receiver* receiver)
 {
-  if (verbose == 3)
+  if (verbose > 2)
     cerr << "Pulsar::TimerArchive::pack Receiver" << endl;
 
   if (verbose && receiver->get_name().length() >= RCVR_ID_STRLEN)
@@ -227,7 +227,7 @@ void Pulsar::TimerArchive::pack (const Receiver* receiver)
       = receiver->get_calibrator_offset().getDegrees ();
   }
 
-  if (verbose == 3)
+  if (verbose > 2)
     cerr << "Pulsar::TimerArchive::pack Receiver\n\t"
       "X_offset=" << supplement->X_offset << "deg\n\t"
       "Y_offset=" << supplement->Y_offset << "deg\n\t"
