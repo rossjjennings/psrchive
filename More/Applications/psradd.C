@@ -11,7 +11,6 @@
 #include "Pulsar/ProcHistory.h"
 
 #include "Pulsar/Interpreter.h"
-#include "Pulsar/Config.h"
 
 #include "tempo++.h"
 #include "Error.h"
@@ -28,9 +27,7 @@
 #include <unistd.h>
 #include <math.h>
 
-bool weight_by_duration = Pulsar::config.get<bool>("weight_by_duration",false);
-
-static const char* psradd_args = "b:c:Ce:f:FG:hiI:j:J:LM:O:p:Pqr:sS:tT:uUvVZ:";
+static const char* psradd_args = "b:c:C:e:f:FG:hiI:j:J:LM:O:p:Pqr:sS:tT:uUvVZ:";
 
 void usage () {
   cout <<
@@ -43,13 +40,10 @@ void usage () {
     " -i          Show revision information\n"
     " -L          Log results in source.log\n"
     "\n"
-    " -j j1[,jN]  preprocessing job[s]\n"
-    " -J jobs     multiple preprocessing jobs in 'jobs' file \n"
-    " -b nbin     Scrunch to nbin bins after loading archives\n"
-    " -c nchan    Scrunch to nchan frequency channels after loading archives\n"
-    " -C          Check that ephemerides are equal\n"
     " -f fname    Output result to 'fname'\n"
     " -F          Force append despite mismatch of header parameters\n"
+    " -j j1[,jN]  preprocessing job[s]\n"
+    " -J jobs     multiple preprocessing jobs in 'jobs' file \n"
     " -M meta     Filename with list of files\n"
     " -p fname    Load new ephemeris from 'fname'\n"
     " -P          Phase align archive with total before adding\n"
@@ -61,18 +55,20 @@ void usage () {
     "\n"
     "AUTO ADD options:\n"
     " -e ext      Extension added to output filenames (default .it)\n"
+    " -C turns    Tscrunch+unload when CAL phase changes by >= turns\n"
     " -G sec      Tscrunch+unload when time between archives > 'sec' seconds\n"
     " -I sec      Tscrunch+unload when archive contains 'sec' seconds\n"
     " -O path     Path to which output files are written\n"
     " -S s/n      Tscrunch+unload when archive has this S/N\n"
     "\n"
-    "Note:\n"
-    " AUTO ADD options, -I, -S and -G, are incompatible with -s and -f\n"
+    "Note: AUTO ADD options, -C, -I, -S and -G, are incompatible with -f\n"
     "\n"
     "See "PSRCHIVE_HTTP"/manuals/psradd for more details\n"
        << endl;
 }
 
+// returns the phase of the mid-point of the on cal hi
+float mid_hi (Pulsar::Archive* archive);
 
 
 int main (int argc, char **argv) try {
@@ -95,9 +91,6 @@ int main (int argc, char **argv) try {
   // if specified, fscrunch each archive to nchan
   int nchan = 0;
 
-  // tscrunch+unload when certain limiting conditions are met
-  bool auto_add = false; 
-
   // ensure that archive has data before adding
   bool check_has_data = true;
 
@@ -107,6 +100,9 @@ int main (int argc, char **argv) try {
   // phase align each archive before appending to total
   bool phase_align = false;
 
+  // tscrunch+unload when certain limiting conditions are met
+  bool auto_add = false; 
+
   // auto_add features:
   // maximum amount of data (in seconds) to integrate into one archive
   float integrate = 0.0;
@@ -114,6 +110,9 @@ int main (int argc, char **argv) try {
   float max_ston = 0.0;
   // maximum interval (in seconds) across which integration should occur
   float interval = 0.0;
+  // maximum amount by which cal phase can differ
+  float cal_phase_diff = 0.0;
+
 
   // name of file containing list of Archive filenames
   char* metafile = NULL;
@@ -151,7 +150,7 @@ int main (int argc, char **argv) try {
       return 0;
       
     case 'i':
-      cout << "$Id: psradd.C,v 1.33 2006/03/29 22:42:19 straten Exp $" 
+      cout << "$Id: psradd.C,v 1.34 2006/04/01 13:49:29 straten Exp $" 
 	   << endl;
       return 0;
 
@@ -169,6 +168,17 @@ int main (int argc, char **argv) try {
       command += " -c ";
       command += optarg;
       
+      break;
+
+    case 'C':
+      if (sscanf (optarg, "%f", &cal_phase_diff) != 1) {
+	cerr << "psradd error parsing '"<< optarg <<"'"
+	  " as max CAL phase change" << endl;
+	return -1;
+      }
+      auto_add = true;
+      command += " -C ";
+      command += optarg;
       break;
 
     case 'e':
@@ -359,15 +369,11 @@ int main (int argc, char **argv) try {
 
   if (metafile)
     stringfload (&filenames, metafile);
-  else
+  else {
     for (int ai=optind; ai<argc; ai++)
       dirglob (&filenames, argv[ai]);
-
-  // sort the list of filenames by their MJD
-  // sort_by_MJD (filenames);
-
-  // for now, sort by filename
-  sort (filenames.begin(), filenames.end());
+    sort (filenames.begin(), filenames.end());
+  }
 
   // the individual archive
   Reference::To<Pulsar::Archive> archive;
@@ -503,7 +509,39 @@ int main (int argc, char **argv) try {
       }
     }
 
+    if( cal_phase_diff ) {
+
+      // ///////////////////////////////////////////////////////////////
+      //
+      // auto_add -C: check that the calibrator observations are aligned
+
+      if (!archive->type_is_cal()) {
+	cerr << "psradd: Auto add - not a CAL" << endl;
+	continue;
+      }
+
+      total->tscrunch();
+      archive->tscrunch();
+
+      float midhi0 = mid_hi (total);
+      float midhi1 = mid_hi (archive);
+
+      float diff = fabs( midhi1 - midhi0 );
+
+      if (verbose)
+	cerr << "psradd: Auto add - CAL phase diff = " << diff << endl;
+
+      if ( diff > cal_phase_diff ) {
+	if (verbose)
+	  cerr << "psradd: diff=" << diff << " greater than max diff=" 
+	       << cal_phase_diff << endl;
+	reset_total_current = true;
+      }
+
+    }
+
     if (!reset_total_current) {
+
       if (verbose)
 	cerr << "psradd: appending archive to total" << endl;
 
@@ -650,4 +688,16 @@ catch (Error& error) {
 }
 
 
+float mid_hi (Pulsar::Archive* archive)
+{
+  unsigned nbin = archive->get_nbin();
+
+  int hi2lo, lo2hi, buffer;
+  archive->find_transitions (hi2lo, lo2hi, buffer);
+      
+  if (hi2lo < lo2hi)
+    hi2lo += nbin;
+
+  return float (hi2lo + lo2hi) / (2.0 * nbin);
+}
 
