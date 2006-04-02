@@ -41,7 +41,7 @@ xserve_summary_SOURCES		= xserve_summary.C
 stats_SOURCES                   = stats.C
 #loopy_SOURCES			= loopy.C
 
-TESTS = test_coord test_Cartesian test_MJD test_Angle test_ReferenceFit \
+TESTS = test_coord test_Cartesian test_MJD test_ReferenceFit \
 	test_Header test_VectorInfo
 
 check_PROGRAMS = $(TESTS) test_CommandParser test_Sortable
