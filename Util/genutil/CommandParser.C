@@ -17,6 +17,7 @@ CommandParser::CommandParser()
 {
   quit = false;
   verbose = false;
+  fault = false;
 }
 
 CommandParser::~CommandParser()
@@ -34,11 +35,12 @@ void CommandParser::script (const string& filename)
 
 void CommandParser::script (const vector<string>& cmds)
 {
+  fault = false;
   for (unsigned i=0; i<cmds.size(); i++) {
     string response = parse( cmds[i] );
-    if (fault())
+    if (fault)
       throw Error (InvalidState, "CommandParser::script", response);
-    cout << response;
+    cerr << response;
   }
 }
 
@@ -55,7 +57,6 @@ string CommandParser::parse (const string& commandargs)
 
   if (debug)
   cerr << "CommandParser::parse '"<< command <<"' '"<< cmdargs <<"'"<<endl;
-
 
   return parse (command, cmdargs);
 }
@@ -95,7 +96,6 @@ string CommandParser::parse (const string& command, const string& arguments)
 
   if (debug)
     cerr << "CommandParser::parse command not verbose" << endl;
-
 
   if (command == "help" || command == "?")
     return help (arguments);
@@ -139,8 +139,10 @@ string CommandParser::parse (const string& command, const string& arguments)
       break;
   }
 
-  if (ikey != length)
+  if (ikey != length)  {
+    fault = true;
     return "invalid command: " + command + "\n";
+  }
 
   // otherwise, every character in the command is a shortcut key
 

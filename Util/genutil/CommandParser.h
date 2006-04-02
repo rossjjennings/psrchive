@@ -45,9 +45,6 @@ class CommandParser : public Reference::Able {
   //! Process a vector of commands
   virtual void script (const std::vector<std::string>& commands);
 
-  //! A fault condition causes the script method to throw an exception
-  virtual bool fault () const { return false; }
-
   //! return a help string
   std::string help (const std::string& command);
 
@@ -64,6 +61,9 @@ class CommandParser : public Reference::Able {
   bool verbose;
 
  protected:
+
+  //! Flag raised whenever a parsing error or other fault occurs
+  bool fault;
 
   //! Derived classes add commands to the list using this method
   template <class Parser>
