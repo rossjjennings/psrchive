@@ -80,9 +80,6 @@ namespace Pulsar {
     //! get the status after the last command
     Status get_status () const;
 
-    //! return true if get_status == Fail
-    bool fault () const;
-
     //! set to false to disable the 'ok' reply
     void set_reply (bool f) { reply = f; }
 

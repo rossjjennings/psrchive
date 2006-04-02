@@ -24,8 +24,9 @@
 
 void Pulsar::Interpreter::init()
 {
-  clobber = true;
-  inplace = false;
+  clobber = true;  // names in map can be reassigned
+  inplace = true;  // operations affect current top of stack
+
   stopwatch = false;
   reply = false;
   
@@ -225,11 +226,6 @@ Pulsar::Interpreter::~Interpreter ()
 
 }
 
-bool Pulsar::Interpreter::fault () const
-{
-  return status == Fail;
-}
-
 string Pulsar::Interpreter::get_report (const string& args)
 {
   Pulsar::Archive::agent_report ();
@@ -257,6 +253,9 @@ vector<string> Pulsar::Interpreter::setup (const string& text)
 string Pulsar::Interpreter::response (Status s, const string& text)
 {
   status = s;
+
+  if (status == Fail)
+   fault = true;
 
   if (!reply)
     return text;
@@ -785,6 +784,7 @@ try {
       fluxcals = new FluxCalibrator::Database;
 
     Archive* data = get();
+
     sky_coord coord = data->get_coordinates ();
     string name = data->get_source ();
 
@@ -794,8 +794,15 @@ try {
       return response (Fail, "name="+name+" coord="+coord.getHMSDMS()+
 		       " type unknown");
 
+    string name_change;
+
+    if (name != data->get_source ()) {
+      name_change = " and name " + data->get_source() + " -> " + name;
+      data->set_source (name);
+    }
+
     data->set_type (type);
-    return response (Good);
+    return response (Good, Signal::Source2string(type) + name_change);
   }
 
   return response (Fail, "unrecognized fix '"+args+"'");
