@@ -283,7 +283,7 @@ Signal::Source
 Pulsar::FluxCalibrator::Database::guess (string& name, sky_coord& p) const
 {
   double closest = 0.0;
-  name = "unknown";
+  Entry match;
 
   for (unsigned i=0; i<entries.size(); i++) {
 
@@ -291,20 +291,23 @@ Pulsar::FluxCalibrator::Database::guess (string& name, sky_coord& p) const
 
     if (closest == 0.0 || separation < closest) {
       closest = separation;
-      name = entries[i].source_name[0];
+      match = entries[i];
     }
 
   }
 
-  if (name == "unknown")
+  if (match.reference_frequency == 0 || closest > off_radius)
     return Signal::Unknown;
 
-  if (closest <= on_radius)
+  // a suitable match has been found
+
+  // if the source name does not match, replace it with best match name
+  if (!match.matches(name))
+    name = match.source_name[0];
+
+  if (closest > on_radius)
+    return Signal::FluxCalOff;
+  else
     return Signal::FluxCalOn;
 
-  if (closest <= off_radius)
-    return Signal::FluxCalOff;
-
-  name = "unknown";
-  return Signal::Unknown;
 }
