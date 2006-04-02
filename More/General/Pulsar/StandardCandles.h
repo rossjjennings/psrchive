@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/StandardCandles.h,v $
-   $Revision: 1.6 $
-   $Date: 2006/03/24 20:43:04 $
+   $Revision: 1.7 $
+   $Date: 2006/04/02 14:37:09 $
    $Author: straten $ */
 
 #ifndef __Pulsar_FluxCalibratorDatabase_h
@@ -18,6 +18,8 @@
 #include <vector>
 
 #include "Pulsar/FluxCalibrator.h"
+#include "sky_coord.h"
+#include "Types.h"
 
 namespace Pulsar {
 
@@ -30,6 +32,12 @@ namespace Pulsar {
 
     //! Default location of flux calibrator information
     static std::string default_filename;
+
+    //! Radius (in degrees) within which a pointing is considered FluxCalOn
+    static float on_radius;
+
+    //! Radius (in degrees) within which a pointing is considered FluxCalOff
+    static float off_radius;
 
     //! Default construct from default_filename
     Database ();
@@ -67,6 +75,9 @@ namespace Pulsar {
       
       //! Name of the flux calibrator source
       std::vector<std::string> source_name;
+
+      //! Coordinates of the flux calibrator
+      sky_coord position;
 
       //! Reference frequency in MHz
       double reference_frequency;
@@ -110,6 +121,9 @@ namespace Pulsar {
 
     //! Returns the best match, given the source name and centre frequency
     Entry match (const std::string& source, double MHz) const;
+
+    //! Returns a best guess of the Source type
+    Signal::Source guess (std::string& name, sky_coord& pos) const;
 
   protected:
     

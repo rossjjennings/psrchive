@@ -34,6 +34,12 @@ std::string
 Pulsar::FluxCalibrator::Database::default_filename 
 = Pulsar::config.get<std::string> ("fluxcal::database", get_default());
 
+float Pulsar::FluxCalibrator::Database::on_radius
+= Pulsar::config.get<float> ("fluxcal:on_radius", 0.25);
+
+float Pulsar::FluxCalibrator::Database::off_radius
+= Pulsar::config.get<float> ("fluxcal:off_radius", 2.5);
+
 // //////////////////////////////////////////////////////////////////////
 //
 // Pulsar::FluxCalibrator::Database::Entry
@@ -58,26 +64,39 @@ Pulsar::FluxCalibrator::Database::Entry::~Entry ()
 // load from ascii string
 void Pulsar::FluxCalibrator::Database::Entry::load (const string& str) 
 {
+  const string whitespace = " \t\n";
+
   string temp = str;
 
   if( h_frontchomp(temp,'&') ){
     // Load-mode type II
     // log(S) = a_0 + a_1*log(f) + a_2*(log(f))^2 + a_3*(log(f))^4 + ...
-    vector<string> words = stringdecimate(temp," \t");
+    vector<string> words = stringdecimate(temp, whitespace);
 
-    if( words.size() < 3 )
+    if( words.size() < 5 )
       throw Error(InvalidState,"Pulsar::FluxCalibrator::Database::Entry::load",
 		  "Couldn't parse spectral coefficients as line '%s' didn't have enough words in it",
 		  str.c_str());
 
     source_name.push_back( words[0] );
 
-    for( unsigned i=1; i<words.size(); i++)
+    string coordstr = words[1] + " " + words[2];
+    position = sky_coord (coordstr.c_str());
+
+    for( unsigned i=3; i<words.size(); i++)
       spectral_coeffs.push_back( convert_string<double>(words[i]) );
     return;
   }
 
-  source_name.push_back( stringtok (&temp, " \t\n") );
+  // /////////////////////////////////////////////////////////////////
+  // NAME
+  source_name.push_back( stringtok (&temp, whitespace) );
+
+  // /////////////////////////////////////////////////////////////////
+  // RA DEC
+  string coordstr = stringtok (&temp, whitespace);
+  coordstr += " " + stringtok (&temp, whitespace);
+  position = sky_coord (coordstr.c_str());
 
   int s = sscanf (temp.c_str(), "%lf %lf %lf",
 		  &reference_frequency,
@@ -239,18 +258,17 @@ Pulsar::FluxCalibrator::Database::Entry
 Pulsar::FluxCalibrator::Database::match (const string& source, double MHz) const
 {
   Entry best_match;
-  Entry candidate;
 
   for (unsigned ie=0; ie<entries.size(); ie++) {
     if (entries[ie].matches(source)) {
-      // Added this next "if" to ensure that a match is returned
-      // even if there is only one appropriate entry. AWH 28/2/05
       if (best_match.reference_frequency == 0)
 	best_match = entries[ie];
-      double diff = fabs(candidate.reference_frequency - MHz);
-      double best_diff = fabs(best_match.reference_frequency - MHz);
-      if (diff < best_diff)
-	best_match = entries[ie];
+      else {
+	double diff = fabs(entries[ie].reference_frequency - MHz);
+	double best_diff = fabs(best_match.reference_frequency - MHz);
+	if (diff < best_diff)
+	  best_match = entries[ie];
+      }
     }
   }
 
@@ -259,4 +277,34 @@ Pulsar::FluxCalibrator::Database::match (const string& source, double MHz) const
 		 "No match for source=" + source);
 
   return best_match;
+}
+
+Signal::Source
+Pulsar::FluxCalibrator::Database::guess (string& name, sky_coord& p) const
+{
+  double closest = 0.0;
+  name = "unknown";
+
+  for (unsigned i=0; i<entries.size(); i++) {
+
+    double separation = entries[i].position.angularSeparation(p).getDegrees();
+
+    if (closest == 0.0 || separation < closest) {
+      closest = separation;
+      name = entries[i].source_name[0];
+    }
+
+  }
+
+  if (name == "unknown")
+    return Signal::Unknown;
+
+  if (closest <= on_radius)
+    return Signal::FluxCalOn;
+
+  if (closest <= off_radius)
+    return Signal::FluxCalOff;
+
+  name = "unknown";
+  return Signal::Unknown;
 }
