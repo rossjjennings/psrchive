@@ -179,6 +179,14 @@ void Pulsar::Interpreter::init()
       "  double turns      phase turns by which all data will be rotated \n" );
 
   add_command 
+    ( &Interpreter::fix, 'f',
+      "fix", "fix each profile by the specified value",
+      "usage: fix <something> \n"
+      "  string something  thing to be fixed \n"
+      "things that can be fixed: \n"
+      "  'fluxcal'         fix the Archive::Type (FluxCalOn or Off) \n" );
+
+  add_command 
     ( &Interpreter::correct_instrument,
       "pac", "apply parallactic angle correction",
       "usage: pac \n");
@@ -767,6 +775,35 @@ try {
 catch (Error& error) {
   return response (Fail, error.get_message());
 }
+
+// //////////////////////////////////////////////////////////////////////
+//
+string Pulsar::Interpreter::fix (const string& args)
+try { 
+  if (args == "fluxcal") {
+    if (!fluxcals)
+      fluxcals = new FluxCalibrator::Database;
+
+    Archive* data = get();
+    sky_coord coord = data->get_coordinates ();
+    string name = data->get_source ();
+
+    Signal::Source type = fluxcals->guess (name, coord);
+
+    if (type == Signal::Unknown)
+      return response (Fail, "name="+name+" coord="+coord.getHMSDMS()+
+		       " type unknown");
+
+    data->set_type (type);
+    return response (Good);
+  }
+
+  return response (Fail, "unrecognized fix '"+args+"'");
+}
+catch (Error& error) {
+  return response (Fail, error.get_message());
+}
+
 
 // //////////////////////////////////////////////////////////////////////
 //

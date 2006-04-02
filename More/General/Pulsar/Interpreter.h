@@ -10,6 +10,7 @@
 #include "Pulsar/FourierSNR.h"
 #include "Pulsar/StandardSNR.h"
 #include "Pulsar/AdaptiveSNR.h"
+#include "Pulsar/FluxCalibratorDatabase.h"
 
 #include "CommandParser.h"
 #include "tostring.h"
@@ -157,6 +158,9 @@ namespace Pulsar {
     //! rotate each profile by the specified value
     std::string rotate (const std::string& args);
 
+    //! fix archive based on arguments
+    std::string fix (const std::string& args);
+
     //! correct for parallactic angle effects
     std::string correct_instrument (const std::string& args);
     
@@ -219,6 +223,9 @@ namespace Pulsar {
     StandardSNR standard_snr;
     //! Calculates S/N using an adaptive baseline finder
     AdaptiveSNR adaptive_snr;
+
+    //! Used to fix flux calibrator observations
+    Reference::To<FluxCalibrator::Database> fluxcals;
 
   private:
     
