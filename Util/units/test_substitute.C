@@ -41,6 +41,14 @@ int main ()
     return -1;
   }
 
+  input = "no substitution";
+
+  output = substitute (input, &test);
+  if (output != input) {
+    cerr << "substitute 3 failed;\noutput=" << output << endl;
+    return -1;
+  }
+
   cerr << "substitute function passes all tests" << endl;
 
   return 0;
