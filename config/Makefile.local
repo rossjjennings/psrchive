@@ -2,6 +2,9 @@
 intermediate-install:
 	$(MAKE) prefix=.. install-data
 
+intermediate-install2:
+	$(MAKE) prefix=. install-data
+
 libs: intermediate-libs install-libLTLIBRARIES
 
 intermediate-libs:
