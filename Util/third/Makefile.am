@@ -1,14 +1,11 @@
 
-noinst_LTLIBRARIES = libthird.la
+lib_LTLIBRARIES = libpsrthird.la
 
-libthird_la_SOURCES = \
+libpsrthird_la_SOURCES = \
 	parsifal/evalkern.c parsifal/evalwrap.c parsifal/evalkern.h
 
 include_HEADERS = parsifal/evaldefs.h
 
-#############################################################################
-#
-# Dependencies should never be changed
-#
+all: intermediate-install2
 
-LDADD = libthird.la
+include $(top_srcdir)/config/Makefile.local
