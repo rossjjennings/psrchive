@@ -37,7 +37,7 @@ void Pulsar::Archive::tscrunch (unsigned nscrunch)
     return;
   }
 
-  if (verbose > 1)  {
+  if (has_model() && verbose > 1)  {
     bool all_zero = true;
     for (unsigned isub=0; isub < nsub; isub++)
       if (!get_Integration(isub)->zero_phase_aligned)
