@@ -110,7 +110,8 @@ void Pulsar::Interpreter::init()
 
   add_command
     ( &Interpreter::test, 't',
-      "usage: test <expr> \n",
+      "test", "test a boolean expression",
+      "usage: test <expr> \n"
       "  string expr       a boolean expression \n" );
   
   add_command 
