@@ -150,7 +150,7 @@ int main (int argc, char **argv) try {
       return 0;
       
     case 'i':
-      cout << "$Id: psradd.C,v 1.34 2006/04/01 13:49:29 straten Exp $" 
+      cout << "$Id: psradd.C,v 1.35 2006/04/03 18:46:17 straten Exp $" 
 	   << endl;
       return 0;
 
@@ -212,7 +212,6 @@ int main (int argc, char **argv) try {
 	return -1;
       }
       auto_add = true;
-      
       command += " -G ";
       command += optarg;
       
@@ -330,23 +329,18 @@ int main (int argc, char **argv) try {
     } 
   }
 
-  if (!metafile && optind >= argc) {
-    cerr << "psradd requires a list of archive filenames as parameters.\n";
-    return -1;
-  }
-
   if (!auto_add && !newname.length()) {
     cerr << "psradd requires a new filename on the command line (use -f)\n";
     return -1;
   }
 
-  if (auto_add && tscrunch_total) {
-    cerr << "psradd cannot both AUTO ADD (-i or -g) and scrunch (-S)\n";
+  if (auto_add && interval && tscrunch_total) {
+    cerr << "psradd cannot combine AUTO ADD -G with tscrunch -s\n";
     return -1;
   }
 
   if (auto_add && newname.length())
-    cerr << "psradd ignores -f when AUTO ADD features, -g or -i, are used\n";
+    cerr << "psradd ignores -f when AUTO ADD features are used\n";
 
 
   psrephem neweph;
@@ -373,6 +367,11 @@ int main (int argc, char **argv) try {
     for (int ai=optind; ai<argc; ai++)
       dirglob (&filenames, argv[ai]);
     sort (filenames.begin(), filenames.end());
+  }
+
+  if (!filenames.size()) {
+    cerr << "psradd requires a list of archive filenames as parameters.\n";
+    return -1;
   }
 
   // the individual archive
@@ -420,18 +419,28 @@ int main (int argc, char **argv) try {
 	&& fabs(archive->get_centre_frequency()-centre_frequency) > 0.0001 )
       continue;
 
-    if (jobs.size()) {
-      if (verbose)
-	cerr << "psrplot: preprocessing " << filenames[ifile] << endl;
-      preprocessor.set(archive);
-      preprocessor.script(jobs);
+    try {
+
+      if (jobs.size()) {
+	if (verbose)
+	  cerr << "psradd: preprocessing " << filenames[ifile] << endl;
+	preprocessor.set(archive);
+	preprocessor.script(jobs);
+      }
+
+      if (nbin)
+	archive->bscrunch_to_nbin (nbin);
+
+      if( nchan )
+	archive->fscrunch_to_nchan (nchan);
+
     }
-
-    if (nbin)
-      archive->bscrunch_to_nbin (nbin);
-
-    if( nchan )
-      archive->fscrunch_to_nchan (nchan);
+    catch (Error& error) {
+      cerr << "psradd: preprocessing error\n"
+	"  " << error.get_message() << "\n"
+	"  on " << filenames[ifile] << endl;
+      continue;
+    }
 
     if (reset_total_next_load) {
       if (verbose) cerr << "psradd: Setting total" << endl;
@@ -469,13 +478,24 @@ int main (int argc, char **argv) try {
       if (verbose)
 	cerr << "psradd: New filename: '" << newname << "'" << endl;
 
-      if (!parname.empty()) {
+      if (!parname.empty()) try {
 
         if (verbose)
           cerr << "psradd: Installing new ephemeris" << endl;
 
 	total->set_ephemeris (neweph);
 
+      }
+      catch (Error& error) {
+	cerr << "psradd: Error installing ephemeris\n"
+	  "  " << error.get_message() << "\n"
+	  "  in " << total->get_filename() << endl;
+
+	if (!auto_add)
+	  return -1;
+
+	reset_total_next_load = true;
+	continue;
       }
 
       correct_total = false;
