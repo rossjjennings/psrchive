@@ -1,5 +1,5 @@
 
-SUBDIRS	= utils astro psrchive
+SUBDIRS	= third utils astro psrchive
 
 bin_SCRIPTS = psrchive_cflags psrchive_ldflags
 
