@@ -188,13 +188,15 @@ psrdiff_SOURCES			= psrdiff.C
 
 TESTS = test_Receiver test_Interpreter
 
-check_PROGRAMS = test_Archive test_denoise test_Difference $(TESTS)
+check_PROGRAMS = test_Archive test_denoise test_Difference \
+	test_ReceptionCalibrator $(TESTS)
 
 test_Interpreter_SOURCES	= test_Interpreter.C
 test_Receiver_SOURCES		= test_Receiver.C
 test_Archive_SOURCES		= test_Archive.C
 test_denoise_SOURCES		= test_denoise.C
 test_Difference_SOURCES		= test_Difference.C
+test_ReceptionCalibrator_SOURCES= test_ReceptionCalibrator.C
 
 # ######################################################################
 #
@@ -303,15 +305,18 @@ export:
 # Dependencies should never be changed
 #
 
-INCLUDES = -I$(top_builddir)/utils/include -I$(top_builddir)/astro/include \
-        -I$(top_srcdir)/psrchive/Calibration \
+INCLUDES = -I$(top_builddir)/third/include				  \
+	-I$(top_builddir)/utils/include					  \
+	-I$(top_builddir)/astro/include					  \
+        -I$(top_srcdir)/psrchive/Calibration				  \
 	-I$(top_srcdir)/psrchive/Extension -I$(top_srcdir)/psrchive/timer \
-	-I$(top_srcdir)/psrchive/epn -I$(top_srcdir)/psrchive/psrfits \
-	-I$(top_srcdir)/psrchive/ascii \
+	-I$(top_srcdir)/psrchive/epn -I$(top_srcdir)/psrchive/psrfits	  \
+	-I$(top_srcdir)/psrchive/ascii					  \
 	@PGPLOT_CFLAGS@ @CFITSIO_CFLAGS@ @MPI_CFLAGS@
 
 LDADD = libpsrchive.la $(top_builddir)/astro/libpsrastro.la \
-        $(top_builddir)/utils/libpsrutils.la
+        $(top_builddir)/utils/libpsrutils.la \
+	$(top_builddir)/third/libpsrthird.la
 
 libpsrchive_la_LIBADD += @FFT_LIBS@ @CFITSIO_LIBS@ @SLA_LIBS@ @FLIBS@
 

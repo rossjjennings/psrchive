@@ -116,6 +116,9 @@ namespace Pulsar {
     //! edit the current archive
     std::string edit (const std::string& args);
 
+    //! test a boolean expression
+    std::string test (const std::string& args);
+
     //! append one archive to another
     std::string append (const std::string& args);
 

@@ -68,4 +68,5 @@ INCLUDES = -I$(top_builddir)/utils/include -I$(top_builddir)/astro/include \
 
 LDADD = libPlot.la $(top_builddir)/psrchive/libpsrchive.la	\
 	$(top_builddir)/astro/libpsrastro.la			\
-	$(top_builddir)/utils/libpsrutils.la @PGPLOT_LIBS@
+	$(top_builddir)/utils/libpsrutils.la			\
+	$(top_builddir)/third/libpsrthird.la @PGPLOT_LIBS@

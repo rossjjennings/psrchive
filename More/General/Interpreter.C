@@ -22,6 +22,9 @@
 #include "tostring.h"
 #include "Error.h"
 
+// evaluateExpression from Parsifal Software
+#include "evaldefs.h"
+
 void Pulsar::Interpreter::init()
 {
   clobber = true;  // names in map can be reassigned
@@ -104,6 +107,11 @@ void Pulsar::Interpreter::init()
       "edit", "edit archive parameters",
       "usage: edit <command> ...\n"
       "  string command    any edit command as understood by psredit \n" );
+
+  add_command
+    ( &Interpreter::test, 't',
+      "usage: test <expr> \n",
+      "  string expr       a boolean expression \n" );
   
   add_command 
     ( &Interpreter::fscrunch, 'F',
@@ -517,6 +525,42 @@ try {
 catch (Error& error) {
   return response (Fail, error.get_message());
 }
+
+string Pulsar::Interpreter::test (const string& args)
+try { 
+
+  string result = "result";
+  string expression = result + " = (" + args + ")";
+
+  // Call parser function from Parsifal Software
+  int errorFlag = evaluateExpression (const_cast<char*>(expression.c_str()));
+
+  if (errorFlag)
+    throw Error (InvalidParam, "Pulsar::Interpreter::test",
+		 "%s at line %d, column %d\n",
+		 errorRecord.message, errorRecord.line, errorRecord.column);
+
+  double value = -1;
+  for (unsigned i = 0; i < nVariables; i++)
+    if (variable[i].name == result)
+      value = variable[i].value;
+
+  if (value == 1)
+    return "1";
+
+  if (value != 0)
+    return response (Fail, "expression does not evaluate to a boolean value");
+
+  // value == 0
+  // test will cause a script to stop if the expression evaluates to false
+  fault = true;
+  return "0";
+
+}
+catch (Error& error) {
+  return response (Fail, error.get_message());
+}
+
 
 string Pulsar::Interpreter::append (const string& args)
 try { 
