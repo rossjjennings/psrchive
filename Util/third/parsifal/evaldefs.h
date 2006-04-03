@@ -1,6 +1,10 @@
 #ifndef EVALDEFS_H
 #define EVALDEFS_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /*****************************************************************
 
  EVALDEFS.H
@@ -88,5 +92,9 @@ extern ErrorRecord errorRecord;
 /* Symbol table */
 extern VariableDescriptor variable[];
 extern int nVariables;
+
+#ifdef __cplusplus  
+}
+#endif
 
 #endif
