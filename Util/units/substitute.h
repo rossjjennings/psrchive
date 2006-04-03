@@ -6,8 +6,8 @@
  *
  ***************************************************************************/
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/substitute.h,v $
-   $Revision: 1.1 $
-   $Date: 2006/04/03 16:56:29 $
+   $Revision: 1.2 $
+   $Date: 2006/04/03 17:11:19 $
    $Author: straten $ */
 
 #ifndef __UTILS_UNITS_SUBSTITUTE_H
@@ -32,6 +32,8 @@ find_first_if (const std::string& text, Pred pred, std::string::size_type pos)
     return iter - text.begin();
 }
 
+namespace mystd {
+
 //! Returns !Pred(T)
 template<class Pred, class T>
 class negate {
@@ -42,11 +44,14 @@ protected:
   Pred pred;
 };
 
+}
+
 //! Return first character in text such that pred(c) is false
 template<class P> std::string::size_type 
 find_first_not_if (const std::string& text, P pred, std::string::size_type pos)
 {
-  return find_first_if (text, negate<P,std::string::value_type>(pred), pos);
+  mystd::negate<P,std::string::value_type> not_pred (pred);
+  return find_first_if (text, not_pred, pos);
 }
 
 template<class T>
