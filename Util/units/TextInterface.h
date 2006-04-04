@@ -276,8 +276,8 @@ namespace TextInterface {
 
   };
 
-  //! Pointer to attribute get method, Type C::Get()
-  template<class C, class Type, class Get>
+  //! Pointer to attribute get method, C::Get(), that returns some type
+  template<class C, class Get>
   class AttributeGet : public Attribute<C> {
 
   public:
@@ -324,19 +324,67 @@ namespace TextInterface {
 
   };
 
+  //! Pointer to a Unary Function that receives C* and returns some type
+  template<class C, class Unary>
+  class UnaryGet : public Attribute<C> {
+
+  public:
+
+    //! Constructor
+    UnaryGet (const std::string& _name, Unary _get)
+      : get (_get) { name = _name; }
+    
+    //! Copy constructor
+    UnaryGet (const UnaryGet& copy)
+      : get (copy.get) { name = copy.name; description = copy.description; }
+
+    //! Return a clone
+    Attribute<C>* clone () const { return new UnaryGet(*this); }
+
+    //! Get the name of the attribute
+    std::string get_name () const { return name; }
+
+    //! Get the description of the attribute
+    std::string get_description () const { return description; }
+
+    //! Get the description of the attribute
+    void set_description (const std::string& d) { description = d; }
+
+    //! Get the value of the attribute
+    std::string get_value (const C* ptr) const
+      { if (!ptr) return ""; return tostring( get(ptr) ); }
+
+    //! Set the value of the attribute
+    void set_value (C* ptr, const std::string& value)
+      { throw Error (InvalidState, "UnaryGet::set_value", 
+		     name + " cannot be set"); }
+
+  protected:
+
+    //! The name of the attribute
+    std::string name;
+
+    //! The description of the attribute
+    std::string description;
+
+    //! The get function object (functor)
+    Unary get;
+
+  };
+
   //! Pointers to attribute get and set methods, Type C::Get() and C::Set(Type)
   template<class C, class Type, class Get, class Set>
-  class AttributeGetSet : public AttributeGet<C, Type, Get> {
+  class AttributeGetSet : public AttributeGet<C, Get> {
 
   public:
 
     //! Constructor
     AttributeGetSet (const std::string& _name, Get _get, Set _set)
-      : AttributeGet<C,Type,Get> (_name, _get) { set = _set; }
+      : AttributeGet<C,Get> (_name, _get) { set = _set; }
 
     //! Copy constructor
     AttributeGetSet (const AttributeGetSet& copy) 
-      : AttributeGet<C,Type,Get> (copy) { set = copy.set; }
+      : AttributeGet<C,Get> (copy) { set = copy.set; }
 
     //! Return a clone
     Attribute<C>* clone () const { return new AttributeGetSet(*this); }
@@ -363,9 +411,9 @@ namespace TextInterface {
 
     //! Generate a new AttributeGet instance
     template<class Get>
-      AttributeGet<C,Type,Get>* 
+      AttributeGet<C,Get>* 
       named (const std::string& n, Get g)
-      { return new AttributeGet<C,Type,Get> (n, g); }
+      { return new AttributeGet<C,Get> (n, g); }
     
     //! Generate a new AttributeGetSet instance
     template<class Get, class Set>
@@ -375,10 +423,10 @@ namespace TextInterface {
     
     //! Generate a new AttributeGet instance with description
     template<class Get>
-      AttributeGet<C,Type,Get>* 
+      AttributeGet<C,Get>* 
       described (const std::string& n, const std::string& d, Get g)
       {
-	AttributeGet<C,Type,Get>* get = named (n,g);
+	AttributeGet<C,Get>* get = named (n,g);
 	get->set_description (d); return get;
       }
 
@@ -560,6 +608,17 @@ namespace TextInterface {
 	if (description)
 	  getset->set_description (description);
 	add (getset);
+      }
+
+
+    //! Add adaptable unary function object template
+    template<class U>
+      void add (U get, const char* name, const char* description = 0)
+      {
+	Attribute<C>* fget = new UnaryGet<C,U> (name, get);
+	if (description)
+	  fget->set_description (description);
+	add (fget);
       }
 
     //! Add a new attribute interface

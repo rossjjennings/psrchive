@@ -5,6 +5,7 @@
  *
  ***************************************************************************/
 #include "TextInterface.h"
+#include "Functor.h"
 
 #include <iostream>
 using namespace std;
@@ -89,6 +90,16 @@ public:
     add (&tester::get_value, "same",  "description");
   }
 
+};
+
+class testerETUI : public testerTUI {
+
+public:
+  testerETUI () {
+    add (Functor<double(const tester*)>(this, &testerETUI::mine), 
+	 "mine", "my description");
+  }
+  double mine (const tester* t) { return t->get_value() * 2; }
 };
 
 class child : public tester {
