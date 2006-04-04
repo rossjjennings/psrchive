@@ -24,19 +24,13 @@ catch (Error& error) {
 
 Pulsar::Profile* Pulsar::fourier_transform (const Profile* input) try
 {
-  // copy the input
-  Reference::To<Profile> fourier = new Profile (*input);
+  Reference::To<Profile> fourier = new Profile (input->get_nbin() + 2);
 
-  unsigned nbin = input->get_nbin();
-
-  auto_ptr<float> amps( new float[nbin+2] );
-
-  fft::frc1d (nbin, amps.get(), input->get_amps());
-  fourier->set_amps (amps.get());
+  fft::frc1d (input->get_nbin(), fourier->get_amps(), input->get_amps());
 
   // if the FFT scales its output, rescale to compensate
   if (fft::get_normalization() == fft::nfft)
-    fourier->scale( 1.0 / sqrt(double(nbin)) );
+    fourier->scale( 1.0 / sqrt(double(input->get_nbin())) );
 
   return fourier.release();
 }
@@ -67,6 +61,11 @@ void Pulsar::detect (Profile* data) try
   }
 
   data->resize(nbin);
+
+  if (data->get_amps() != amps)
+    throw Error (InvalidState, "Pulsar::detect (Profile)",
+		 "Profile::resize does not preserve amps array");
+
 }
 catch (Error& error) {
   throw error += "Pulsar::detect (Profile)";
