@@ -6,8 +6,8 @@
  *
  ***************************************************************************/
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/substitute.h,v $
-   $Revision: 1.2 $
-   $Date: 2006/04/03 17:11:19 $
+   $Revision: 1.3 $
+   $Date: 2006/04/04 11:50:17 $
    $Author: straten $ */
 
 #ifndef __UTILS_UNITS_SUBSTITUTE_H
@@ -17,8 +17,12 @@
 #include <algorithm>
 #include <ctype.h>
 
-//! Return true if c may belong to a valid C variable name
-inline bool iscvar (char c) { return isalnum(c) || c == '_'; }
+//! Return true if c may belong to a valid TextInterface variable name
+inline bool isvar (char c) 
+{
+  static std::string valid = "_[,-]:";
+  return isalnum(c) || valid.find(c) != std::string::npos;
+}
 
 //! Return first character in text such that pred(c) is true
 template<class Pred> std::string::size_type 
@@ -56,7 +60,7 @@ find_first_not_if (const std::string& text, P pred, std::string::size_type pos)
 
 template<class T>
 std::string substitute (const std::string& text, const T* resolver,
-			char substitution = '$')
+			char substitution = '$', bool(*pred)(char) = isvar)
 {
   std::string remain = text;
   std::string result;
@@ -72,7 +76,7 @@ std::string substitute (const std::string& text, const T* resolver,
     start ++;
 
     // find the end of the variable name
-    std::string::size_type end = find_first_not_if (remain, iscvar, start);
+    std::string::size_type end = find_first_not_if (remain, pred, start);
 
     // length to end of variable name
     std::string::size_type length = std::string::npos;
