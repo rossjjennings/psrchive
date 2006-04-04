@@ -5,13 +5,11 @@
  *
  ***************************************************************************/
 #include "Pulsar/Interpreter.h"
-#include "TextInterface.h"
+#include "Pulsar/InterpreterVariables.h"
 
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
 #include "Pulsar/Profile.h"
-
-#include "Pulsar/ArchiveTI.h"
 
 #include "Pulsar/ScatteredPowerCorrection.h"
 #include "Pulsar/DurationWeight.h"
@@ -113,7 +111,13 @@ void Pulsar::Interpreter::init()
     ( &Interpreter::test, 't',
       "test", "test a boolean expression",
       "usage: test <expr> \n"
-      "  string expr       a boolean expression \n" );
+      "  string expr       a boolean expression \n"
+      "The boolean expression may contain any of the recognized variable \n"
+      "names preceded by a $ sign; e.g. \n"
+      "\n"
+      "  test $snr > 10 \n"
+      "\n"
+      "For a full list of variable names, type \"test help\" \n" );
   
   add_command 
     ( &Interpreter::fscrunch, 'F',
@@ -509,7 +513,7 @@ catch (Error& error) {
 void Pulsar::Interpreter::initialize_interface()
 {
   if (!interface)
-    interface = new ArchiveTI;
+    interface = new Variables;
   interface->set_instance (get());
 }
 
@@ -560,7 +564,7 @@ try {
     return response (Good);
 
   if (value != 0)
-    return response (Fail, "expression does not evaluate to a boolean value");
+    return response (Fail, "non-boolean result="+tostring(value));
 
   // value == 0
   return response (Fail, "assertion '"+args+"' failed");
