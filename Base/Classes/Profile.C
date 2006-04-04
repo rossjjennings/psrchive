@@ -76,7 +76,9 @@ void Pulsar::Profile::init()
   state  = Signal::None;
   weight = 1.0;
   centrefreq = -1.0;
+
   amps = NULL;
+  amps_size = 0;
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -106,21 +108,22 @@ Pulsar::Profile::~Profile ()
 //
 void Pulsar::Profile::resize (unsigned _nbin)
 {
-  if (nbin == _nbin)
+  nbin = _nbin;
+
+  if (amps_size >= nbin && nbin != 0)
     return;
 
-  if (amps != NULL) delete [] amps; amps = NULL;
-
-  nbin = _nbin;
+  if (amps) delete [] amps; amps = NULL;
+  amps_size = 0;
 
   if (nbin == 0)
     return;
 
-  if (!no_amps)
-  {
+  if (!no_amps) {
     amps = new float [nbin];
     if (!amps)
       throw Error (BadAllocation, "Pulsar::Profile::resize");
+    amps_size = nbin;
   }
 }
 

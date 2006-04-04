@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Profile.h,v $
-   $Revision: 1.92 $
-   $Date: 2006/03/17 13:34:51 $
+   $Revision: 1.93 $
+   $Date: 2006/04/04 21:15:00 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Profile_h
@@ -314,6 +314,9 @@ namespace Pulsar {
 
     //! amplitudes at each pulse phase
     float *amps;
+
+    //! size of the amps array (always >= nbin)
+    unsigned amps_size;
 
     //! centre frequency of profile (in MHz)
     double centrefreq;
