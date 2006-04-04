@@ -19,6 +19,7 @@
 #include "Pulsar/Transposer.h"
 
 #include "string_utils.h"
+#include "substitute.h"
 #include "tostring.h"
 #include "Error.h"
 
@@ -505,6 +506,13 @@ catch (Error& error) {
   return response (Fail, error.get_message());
 }
 
+void Pulsar::Interpreter::initialize_interface()
+{
+  if (!interface)
+    interface = new ArchiveTI;
+  interface->set_instance (get());
+}
+
 string Pulsar::Interpreter::edit (const string& args)
 try { 
   vector<string> arguments = setup (args);
@@ -512,10 +520,7 @@ try {
   if (!arguments.size())
     return response (Fail, "please specify at least one editor command");
 
-  if (!interface)
-    interface = new ArchiveTI;
-
-  interface->set_instance (get());
+  initialize_interface();
 
   string retval;
   for (unsigned icmd=0; icmd < arguments.size(); icmd++)
@@ -530,16 +535,21 @@ catch (Error& error) {
 string Pulsar::Interpreter::test (const string& args)
 try { 
 
+  // replace variable names with values
+  initialize_interface();
+  string test = substitute (args, interface.get());
+
   string result = "result";
-  string expression = result + " = (" + args + ")";
+  string expression = result + " = (" + test + ")";
 
   // Call parser function from Parsifal Software
   int errorFlag = evaluateExpression (const_cast<char*>(expression.c_str()));
 
   if (errorFlag)
     throw Error (InvalidParam, "Pulsar::Interpreter::test",
-		 "%s at line %d, column %d\n",
-		 errorRecord.message, errorRecord.line, errorRecord.column);
+		 "%s in expression\n\n  %s\n  %s",
+		 errorRecord.message, test.c_str(), 
+		 pad (errorRecord.column-10, "^", false).c_str());
 
   double value = -1;
   for (unsigned i = 0; i < nVariables; i++)
@@ -547,15 +557,13 @@ try {
       value = variable[i].value;
 
   if (value == 1)
-    return "1";
+    return response (Good);
 
   if (value != 0)
     return response (Fail, "expression does not evaluate to a boolean value");
 
   // value == 0
-  // test will cause a script to stop if the expression evaluates to false
-  fault = true;
-  return "0";
+  return response (Fail, "assertion '"+args+"' failed");
 
 }
 catch (Error& error) {
