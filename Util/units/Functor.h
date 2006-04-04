@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Functor.h,v $
-   $Revision: 1.3 $
-   $Date: 2006/03/17 13:35:20 $
+   $Revision: 1.4 $
+   $Date: 2006/04/04 20:00:10 $
    $Author: straten $ */
 
 #ifndef __Swinburne_Functor_h
@@ -48,6 +48,7 @@ class Functor;
 // ///////////////////////////////////////////////////////////////////////////
 
 //! Template specialization of generators (functions with no arguments)
+/*! This class satisfies the STL definition of an Adaptable Generator */
 template< typename R, typename T1, typename T2 > 
 class Functor< R (), T1, T2 >
 {
@@ -60,7 +61,7 @@ class Functor< R (), T1, T2 >
   //
 
   //! Generator function call
-  R operator() () { return functor->call(); }
+  R operator() () const { return functor->call(); }
 
   //! Construct from a class instance and generator method
   template<class C, typename M> Functor (C* instance, M method)
@@ -86,10 +87,10 @@ class Functor< R (), T1, T2 >
   class Base : public Reference::Able {
   public:  
     //! The function call
-    virtual R call () = 0;
+    virtual R call () const = 0;
 
     //! Return true if valid (able to be called)
-    virtual bool is_valid () = 0;
+    virtual bool is_valid () const = 0;
   };
   
   //! Implementation calls generator function F
@@ -101,11 +102,11 @@ class Functor< R (), T1, T2 >
       { function = _function; }
     
     //! Call the function
-    R call ()
+    R call () const
       { return R( (*function) () ); }
       
     //! Return true if valid (able to be called)
-    bool is_valid () { return function != 0; }
+    bool is_valid () const { return function != 0; }
 
   protected:
     
@@ -123,15 +124,15 @@ class Functor< R (), T1, T2 >
       { instance = _instance; method = _method; }
     
     //! Call the method through the class instance
-    R call ()
+    R call () const
       { return R( (instance->*method) () ); }
       
     //! Return true if the instance and method match
-    bool matches (const C* _instance, M _method)
+    bool matches (const C* _instance, M _method) const
       { return (instance && instance == _instance && method == _method); }
     
     //! Return true if valid (able to be called)
-    bool is_valid () { return instance && method != 0; }
+    bool is_valid () const { return instance && method != 0; }
 
   protected:
     
@@ -157,6 +158,7 @@ class Functor< R (), T1, T2 >
 // ///////////////////////////////////////////////////////////////////////////
 
 //! Template specialization of unary functions
+/*! This class satisfies the STL definition of an Adaptable Unary Function */
 template< typename R, typename T1, typename T2 > 
 class Functor< R (T1), T2 >
 {
@@ -170,7 +172,7 @@ class Functor< R (T1), T2 >
   //
 
   //! Unary function call
-  R operator() (const T1& p1) { return functor->call(p1); }
+  R operator() (const T1& p1) const { return functor->call(p1); }
 
   //! Construct from a class instance and unary method
   template<class C, typename M> Functor (C* instance, M method)
@@ -196,10 +198,10 @@ class Functor< R (T1), T2 >
   class Base : public Reference::Able {
   public:  
     //! The function call
-    virtual R call (const T1& p1) = 0;
+    virtual R call (const T1& p1) const = 0;
 
     //! Return true if valid (able to be called)
-    virtual bool is_valid () = 0;
+    virtual bool is_valid () const = 0;
   };
   
   //! Implementation calls unary function F
@@ -211,11 +213,11 @@ class Functor< R (T1), T2 >
       { function = _function; }
     
     //! Call the function
-    R call (const T1& p1)
-      { return R( (*function) (p1) ); }
+    R call (const T1& p1) const
+      { return static_cast<R>( (*function)(p1) ); }
       
     //! Return true if valid (able to be called)
-    bool is_valid () { return function != 0; }
+    bool is_valid () const { return function != 0; }
 
   protected:
     
@@ -233,15 +235,15 @@ class Functor< R (T1), T2 >
       { instance = _instance; method = _method; }
     
     //! Call the method through the class instance
-    R call (const T1& p1) try
+    R call (const T1& p1) const try
     { return R( (instance->*method) (p1) ); }
     catch (Error& error) { throw error += "Functor<R(T)>::Method::call"; }
 
     //! Return true if valid (able to be called)
-    bool is_valid () { return instance && method != 0; }
+    bool is_valid () const { return instance && method != 0; }
 
     //! Return true if the instance and method match
-    bool matches (const C* _instance, M _method)
+    bool matches (const C* _instance, M _method) const
       { return (instance && instance == _instance && method == _method); }
 
   protected:
@@ -269,6 +271,7 @@ class Functor< R (T1), T2 >
 // ///////////////////////////////////////////////////////////////////////////
 
 //! Template specialization of binary functions
+/*! This class satisfies the STL definition of an Adaptable Binary Function */
 template< typename R, typename T1, typename T2 > 
 class Functor< R (T1, T2) >
 {
@@ -283,7 +286,8 @@ class Functor< R (T1, T2) >
   //
 
   //! Binary function call
-  R operator() (const T1& p1, const T2& p2) { return functor->call(p1,p2); }
+  R operator() (const T1& p1, const T2& p2) const 
+    { return functor->call(p1,p2); }
   
   //! Construct from a class instance and binary method
   template<class C, typename M> Functor (C* instance, M method)
@@ -309,10 +313,10 @@ class Functor< R (T1, T2) >
   class Base : public Reference::Able {
   public:  
     //! The function call
-    virtual R call (const T1& p1, const T2& p2) = 0;
+    virtual R call (const T1& p1, const T2& p2) const = 0;
 
     //! Return true if valid (able to be called)
-    virtual bool is_valid () = 0;
+    virtual bool is_valid () const = 0;
   };
   
   //! Implementation calls binary function F
@@ -324,11 +328,11 @@ class Functor< R (T1, T2) >
       { function = _function; }
     
     //! Call the function
-    R call (const T1& p1, const T2& p2)
+    R call (const T1& p1, const T2& p2) const
       { return R( (*function) (p1, p2) ); }
       
     //! Return true if valid (able to be called)
-    bool is_valid () { return function != 0; }
+    bool is_valid () const { return function != 0; }
 
   protected:
     
@@ -346,14 +350,14 @@ class Functor< R (T1, T2) >
       { instance = _instance; method = _method; }
     
     //! Call the method through the class instance
-    R call (const T1& p1, const T2& p2)
+    R call (const T1& p1, const T2& p2) const
       { return R( (instance->*method) (p1, p2) ); }
       
     //! Return true if valid (able to be called)
-    bool is_valid () { return instance && method != 0; }
+    bool is_valid () const { return instance && method != 0; }
 
     //! Return true if the instance and method match
-    bool matches (const C* _instance, M _method)
+    bool matches (const C* _instance, M _method) const
       { return (instance && instance == _instance && method == _method); }
     
   protected:
