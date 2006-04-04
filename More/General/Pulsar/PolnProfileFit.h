@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/Attic/PolnProfileFit.h,v $
-   $Revision: 1.17 $
-   $Date: 2006/03/17 13:34:51 $
+   $Revision: 1.18 $
+   $Date: 2006/04/04 21:14:31 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PolnProfileFit_h
@@ -100,12 +100,6 @@ namespace Pulsar {
     Tempo::toa get_toa (const PolnProfile* observation,
 			const MJD& mjd, double period, char nsite);
 
-    //! Return the Fourier Transform of the Profile
-    Profile* fourier_transform (const Profile* input) const;
-
-    //! Return the Fourier Transform of the PolnProfile
-    PolnProfile* fourier_transform (const PolnProfile* input) const;
-    
     //! Return the PSD of the Fourier Transform of the PolnProfile
     PolnProfile* fourier_psd (const PolnProfile* fourier) const;
     

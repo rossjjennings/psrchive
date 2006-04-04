@@ -7,6 +7,7 @@
 #include "Pulsar/PolnProfileFit.h"
 #include "Pulsar/PolnProfile.h"
 #include "Pulsar/Profile.h"
+#include "Pulsar/Fourier.h"
 
 #include "Pulsar/ExponentialBaseline.h"
 
@@ -107,8 +108,11 @@ void Pulsar::PolnProfileFit::set_standard (const PolnProfile* _standard)
   if (!standard)
     return;
 
-  // fourier_transform returns the result as Stokes parameters
-  standard_fourier = fourier_transform (standard);
+  Reference::To<PolnProfile> fourier = fourier_transform (standard);
+  fourier->convert_state (Signal::Stokes);
+
+  standard_fourier = fourier;
+
   set_noise_mask ();
 
   // number of complex phase bins in Fourier domain
@@ -280,22 +284,7 @@ void Pulsar::PolnProfileFit::fit (const PolnProfile* observation) try
 		 obs_harmonic, n_harmonic);
 
   Reference::To<PolnProfile> fourier = fourier_transform (observation);
-
-  // if the FFT scales its output, rescale to compensate
-  if (fft::get_normalization() == fft::nfft && 
-      observation->get_nbin() != standard->get_nbin()) {
-
-    double scale = sqrt( double(standard->get_nbin()) /
-			 double(observation->get_nbin()) );
-
-    if (Profile::verbose)
-      cerr << "Pulsar::PolnProfileFit::fit template nbin="
-	   << standard->get_nbin() << " obs nbin=" 
-	   << observation->get_nbin() << " scale=" << scale << endl;
-
-    fourier->scale( scale );
-
-  }
+  fourier->convert_state (Signal::Stokes);
 
   unsigned nbin_std = standard->get_nbin();
   unsigned nbin_obs = observation->get_nbin();
@@ -440,78 +429,12 @@ catch (Error& error) {
 Pulsar::PolnProfile* 
 Pulsar::PolnProfileFit::fourier_psd (const PolnProfile* fourier) const try
 {
-  Reference::To<PolnProfile> psd;
-
-  psd = new PolnProfile (fourier->get_basis(), fourier->get_state(),
-			 new Profile, new Profile,
-			 new Profile, new Profile);
-
-  unsigned nbin = fourier->get_nbin()/2;
-  psd->resize( nbin );
-
-  unsigned npol = 4;
-  for (unsigned ipol=0; ipol<npol; ipol++)  {
-    const float* in = fourier->get_Profile(ipol)->get_amps();
-    float* out = psd->get_Profile(ipol)->get_amps();
-
-    for (unsigned ibin=0; ibin < nbin; ibin++) {
-      float re = in[ibin*2];
-      float im = in[ibin*2+1];
-      out[ibin] = re*re + im*im;
-    }
-  }
-
+  Reference::To<PolnProfile> psd = fourier->clone();
+  detect (psd);
   return psd.release();
 }
 catch (Error& error) {
   throw error += "Pulsar::PolnProfileFit::fourier_psd";
-}
-   
-Pulsar::PolnProfile* 
-Pulsar::PolnProfileFit::fourier_transform (const PolnProfile* input) const try
-{
-  Reference::To<PolnProfile> fourier;
-
-  fourier = new PolnProfile (input->get_basis(), input->get_state(),
-			     new Profile, new Profile,
-			     new Profile, new Profile);
-
-  unsigned nbin = input->get_nbin();
-  fourier->resize( nbin );
-
-  unsigned npol = 4;
-  auto_ptr<float> amps( new float[nbin+2] );
-
-  for (unsigned ipol=0; ipol<npol; ipol++)  {
-    fft::frc1d (nbin, amps.get(), input->get_amps(ipol));
-    fourier->set_amps(ipol, amps.get());
-  }
-
-  fourier->convert_state (Signal::Stokes);
-
-  return fourier.release();
-}
-catch (Error& error) {
-  throw error += "Pulsar::PolnProfileFit::fourier_transform";
-}
-
-Pulsar::Profile* 
-Pulsar::PolnProfileFit::fourier_transform (const Profile* input) const try
-{
-  // copy the input
-  Reference::To<Profile> fourier = new Profile (*input);
-
-  unsigned nbin = input->get_nbin();
-
-  auto_ptr<float> amps( new float[nbin+2] );
-
-  fft::frc1d (nbin, amps.get(), input->get_amps());
-  fourier->set_amps (amps.get());
-
-  return fourier.release();
-}
-catch (Error& error) {
-  throw error += "Pulsar::PolnProfileFit::fourier_transform";
 }
 
 void Pulsar::PolnProfileFit::set_noise_mask () try

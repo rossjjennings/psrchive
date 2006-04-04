@@ -4,12 +4,12 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-#include <math.h>
 
 #include "Pulsar/FourierSNR.h"
 #include "Pulsar/Profile.h"
+#include "Pulsar/Fourier.h"
 
-#include "fftm.h"
+#include <math.h>
 
 Pulsar::FourierSNR::FourierSNR ()
 {
@@ -29,10 +29,11 @@ void Pulsar::FourierSNR::set_baseline_extent (float extent)
 //! Return the signal to noise ratio
 float Pulsar::FourierSNR::get_snr (const Profile* profile)
 {
-  unsigned nbin = profile->get_nbin();
-  float* amps = new float [nbin + 2];
+  Reference::To<Profile> fourier = fourier_transform (profile);
+  detect (fourier);
 
-  fft::frc1d (nbin, amps, profile->get_amps());
+  unsigned nbin = fourier->get_nbin();
+  float* amps = fourier->get_amps();
 
   // note that DC and nyquist terms are thrown out in the following loop
   unsigned noise_start = unsigned (nbin * (1.0 - baseline_extent));
@@ -42,9 +43,9 @@ float Pulsar::FourierSNR::get_snr (const Profile* profile)
   double total_power = 0.0;
   double noise_power = 0.0;
 
-  for (unsigned ibin=2; ibin < nbin; ibin+=2) {
+  for (unsigned ibin=1; ibin < nbin; ibin++) {
 
-    double amp = sqrt( amps[ibin]*amps[ibin] + amps[ibin+1]*amps[ibin+1] );
+    double amp = sqrt( amps[ibin] );
     total_power += amp;
     total_count ++;
 
@@ -54,8 +55,6 @@ float Pulsar::FourierSNR::get_snr (const Profile* profile)
     }
 
   }
-
-  delete amps;
 
   double mean_noise = noise_power/noise_count;
 

@@ -9,6 +9,7 @@
 #include "Pulsar/Integration.h"
 #include "Pulsar/Profile.h"
 
+#include "Pulsar/Fourier.h"
 #include "Pulsar/PolnProfile.h"
 #include "Pulsar/PolnProfileFit.h"
 #include "Pulsar/PolnProfileFitAnalysis.h"
@@ -139,7 +140,7 @@ int main (int argc, char *argv[])
       break;
 
     case 'i':
-      cout << "$Id: pat.C,v 1.46 2006/03/29 22:42:19 straten Exp $" << endl;
+      cout << "$Id: pat.C,v 1.47 2006/04/04 21:14:31 straten Exp $" << endl;
       return 0;
 
     case 'F':
@@ -506,7 +507,7 @@ void full_polarization_analysis (Pulsar::PolnProfileFit& fit)
   Pulsar::Profile invariant;
   fit.get_standard()->invint( &invariant );
 
-  scalar.set_spectrum ( fit.fourier_transform (&invariant) );
+  scalar.set_spectrum ( fourier_transform (&invariant) );
   scalar.set_variance ( 2.0 * scalar.get_variance() );
 
   // the phase shift error for the invariant profile
