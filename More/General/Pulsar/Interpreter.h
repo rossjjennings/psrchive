@@ -184,6 +184,9 @@ namespace Pulsar {
     //! the Archive text interface
     Reference::To<ArchiveTI> interface;
 
+    //! initialize the interface attribute
+    void initialize_interface();
+
     //! operate on data "in place", otherwise make a copy
     bool inplace;
     
