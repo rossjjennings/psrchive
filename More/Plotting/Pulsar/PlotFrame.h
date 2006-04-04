@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PlotFrame.h,v $
-   $Revision: 1.14 $
-   $Date: 2006/03/17 13:34:49 $
+   $Revision: 1.15 $
+   $Date: 2006/04/04 21:15:05 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PlotFrame_h
@@ -113,8 +113,6 @@ namespace Pulsar {
     //! Plot the label; side=0/.5/1 for left/centre/right
     void decorate (const Archive*, const std::string& label, 
 		   float side, float direction);
-    //! Replace any '=name' with 'value'
-    void resolve_variables (const Archive* data, std::string& label);
 
   private:
 

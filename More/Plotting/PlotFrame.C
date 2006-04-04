@@ -6,6 +6,7 @@
  ***************************************************************************/
 #include "Pulsar/Plot.h"
 #include "Pulsar/ArchiveTI.h"
+#include "substitute.h"
 
 #include <cpgplot.h>
 
@@ -128,52 +129,13 @@ void Pulsar::PlotFrame::decorate (const Archive* data, const string& label,
 
   for (unsigned i=0; i < labels.size(); i++) {
 
-    resolve_variables (data, labels[i]);
+    substitute (labels[i], get_interface(data), '=');
 
     cpgmtxt ("T", start, side+offset, side, labels[i].c_str());
     start += direction;
 
   }
 
-}
-
-void Pulsar::PlotFrame::resolve_variables (const Archive* data, string& label)
-{
-  string::size_type start;
-
-  while ( (start = label.find('=')) != string::npos ) {
-
-    // string preceding the variable substitution
-    string before = label.substr (0, start);
-    // string following the variable name
-    string after;
-
-    // ignore the = sign
-    start ++;
-
-    // length to end of variable name
-    string::size_type length = string::npos;
-
-    // find the end of the variable name
-    string::size_type end = label.find_first_of (" \t", start);
-
-    if (end != string::npos) {
-      length = end - start;
-      after = label.substr (end);
-    }
-
-    // the variable name
-    string name = label.substr (start, length);
-
-    // cerr <<"before="<< before <<" after="<< after <<" name="<< name <<endl;
-
-    string value = get_interface(data)->get_value(name);
-
-    // cerr << "value=" << value << endl;
-
-    label = before + value + after;
-
-  }
 }
 
 //! Get the text interface to the archive class
