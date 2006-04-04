@@ -26,11 +26,11 @@ int main ()
 
   tester test;
 
-  string input = " some \t text $with a couple of $subst1_tutions:in it";
+  string input = "\t text $with a couple of $subst1_tutions[0-3,5]:in it";
 
   string output = substitute (input, &test);
 
-  if (output != " some \t text WITH a couple of SUBST1_TUTIONS:in it" ) {
+  if (output != "\t text WITH a couple of SUBST1_TUTIONS[0-3,5]:IN it" ) {
     cerr << "substitute 1 failed;\noutput=" << output << endl;
     return -1;
   }
