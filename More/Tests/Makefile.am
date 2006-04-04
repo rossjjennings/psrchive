@@ -18,7 +18,7 @@ nobase_include_HEADERS = model_profile.h Pulsar/ArchiveExpert.h \
 	Pulsar/CalibratorStokesInfo.h    Pulsar/ReferenceCalibrator.h \
 	Pulsar/CorrectionsCalibrator.h   Pulsar/SingleAxisCalibrator.h \
 	Pulsar/ColdPlasma.h              Pulsar/Dispersion.h \
-	Pulsar/DispersionDelay.h \
+	Pulsar/DispersionDelay.h         Pulsar/Fourier.h \
 	Pulsar/IonosphereCalibrator.h    Pulsar/IntegrationManagerExpert.h \
 	Pulsar/IntegrationExpert.h       Pulsar/Transformation.h \
 	Pulsar/Database.h                Pulsar/Smooth.h \
@@ -28,7 +28,8 @@ nobase_include_HEADERS = model_profile.h Pulsar/ArchiveExpert.h \
 	Pulsar/FluxCalibratorDatabase.h  Pulsar/SourceInfo.h \
 	Pulsar/FourierSNR.h              Pulsar/StandardSNR.h \
 	Pulsar/FrequencyIntegrate.h      Pulsar/OnPulseThreshold.h \
-	Pulsar/OnPulseEstimator.h        Pulsar/PolnProfileStats.h \
+	Pulsar/NoiseStatistics.h         Pulsar/OnPulseEstimator.h \
+	Pulsar/PolnProfileStats.h        Pulsar/InterpreterVariables.h \
 	Pulsar/HybridCalibrator.h        Pulsar/SyntheticProfile.h \
 	Pulsar/ScatteredPowerCorrection.h \
 	Pulsar/SyntheticPolnProfile.h    Pulsar/SimPolnTiming.h \
@@ -60,7 +61,7 @@ libpsrchive_la_SOURCES = plugins.csh getopt.h Physical.h \
 	Archive_fappend.C             PolarCalibrator.C  \
 	Archive_find.C                PolnCalibrator.C  \
 	Archive_get_PA.C              PolnCalibratorInfo.C  \
-	Archive_init_Integration.C \
+	Archive_init_Integration.C    InterpreterVariables.C \
 	Archive_load.C                PolnProfile.C  \
 	Archive_match.C               PolnProfileFit.C  \
 	ArchiveMatch.C                ArchiveSort.C \
@@ -88,10 +89,11 @@ libpsrchive_la_SOURCES = plugins.csh getopt.h Physical.h \
 	ExampleArchive.C              ReceptionCalibrator.C  \
 	ExponentialBaseline.C         Polarization.C \
 	FaradayRotation.C             FrequencyIntegrate.C \
-	FluxCalibratorData.C \
+	FluxCalibratorData.C          Fourier.C \
 	FluxCalibrator.C              ReceptionCalibrator_get_Info.C  \
 	FluxCalibratorDatabase.C      ReceptionCalibrator_get_solution.C  \
-	FourierSNR.C                  ReferenceCalibrator.C  \
+	FourierSNR.C                  NoiseStatistics.C \
+	ReferenceCalibrator.C  \
 	HybridCalibrator.C            SingleAxisCalibrator.C  \
 	InstrumentInfo.C              Smooth.C  \
 	Integration.C                 SmoothMean.C  \
