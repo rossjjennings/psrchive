@@ -5,21 +5,23 @@
  *
  ***************************************************************************/
 
+#include "fftm.h"
+#include "spectra.h"
+#include "Error.h"
+
 #include <iostream>
 using namespace std;
 
 #include <stdio.h>
 #include <math.h>
 
-#include "fftm.h"
-#include "spectra.h"
 
 void runtest (int ndat);
 
-int main (int argc, char** argv)
-{
-  fprintf (stderr, "Test of normalization factors with %s\n", fft::id);
+int main (int argc, char** argv) try {
 
+  cerr << "Test of normalization factors with " <<  fft::id << endl;
+  
   // from 16kpt
   int ndat = 16 * 1024;
 
@@ -29,6 +31,10 @@ int main (int argc, char** argv)
   }
 
   cerr << "All normalization tests passed" << endl;
+}
+catch (Error& error) {
+  cerr << "test_normalization error " << error << endl;
+  return -1;
 }
 
 static long idum = -1;
@@ -50,12 +56,10 @@ void runtest (int ndat)
 
   int ntrans = ndat/2;
 
-#if 0
   fprintf (stderr, "Forward R->C FFT:%d\n", ntrans);
   fft::frc1d (ndat, fft1, data);
 
   runtest2 (ntrans, power(ndat+1,data), fft1);
-#endif
 
   fprintf (stderr, "Forward C->C FFT:%d\n", ntrans);
   fft::fcc1d (ntrans, fft1, data);
