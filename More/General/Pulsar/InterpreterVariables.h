@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/Attic/InterpreterVariables.h,v $
-   $Revision: 1.1 $
-   $Date: 2006/04/04 21:14:45 $
+   $Revision: 1.2 $
+   $Date: 2006/04/06 22:07:06 $
    $Author: straten $ */
 
 #ifndef __Pulsar_InterpreterVariables_h
@@ -32,6 +32,9 @@ namespace Pulsar {
 
     //! Get the Fourier-noise-to-noise ratio
     double get_nfnr (const Archive*) const;
+
+    //! Get the number of cal transitions
+    unsigned get_cal_ntrans (const Archive*) const;
 
   };
 
