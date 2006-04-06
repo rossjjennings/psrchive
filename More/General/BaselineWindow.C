@@ -22,9 +22,16 @@ void nbinify (int& istart, int& iend, int nbin);
 Pulsar::BaselineWindow::BaselineWindow ()
 {
   duty_cycle = 0.15;
+
   bin_start = bin_end = 0;
+
   range_specified = false;
+
   find_max = false;
+
+  find_mean = false;
+
+  mean = 0;
 }
 
 //! Retrieve the PhaseWeight
@@ -75,6 +82,12 @@ void Pulsar::BaselineWindow::set_find_maximum ()
   find_max = true;
 }
 
+void Pulsar::BaselineWindow::set_find_mean (float _mean)
+{
+  find_mean = true;
+  mean = _mean;
+}
+
 //! Set the start and end bins of the search
 void Pulsar::BaselineWindow::set_range (int start, int end)
 {
@@ -83,6 +96,10 @@ void Pulsar::BaselineWindow::set_range (int start, int end)
   range_specified = true;
 }
 
+float Pulsar::BaselineWindow::find_phase (const std::vector<float>& amps)
+{
+  return find_phase (amps.size(), &amps[0]);
+}
 
 //! Return the phase at which minimum or maximum mean is found
 float Pulsar::BaselineWindow::find_phase (unsigned nbin, const float* amps)
@@ -134,7 +151,13 @@ float Pulsar::BaselineWindow::find_phase (unsigned nbin, const float* amps)
     stop = bin_end - (2*boxwidth+1);
   
   double found_val = sum;
-  
+
+  // The sum to be found if find_mean is true
+  double find_sum = (right - left) * mean;
+
+  if (find_mean)
+    found_val = fabs(found_val - find_sum);
+
 #ifdef _DEBUG
   cerr << "Pulsar::BaselineWindow::find_phase search stop=" << stop 
        << " found_val=" << found_val << endl;
@@ -150,6 +173,16 @@ float Pulsar::BaselineWindow::find_phase (unsigned nbin, const float* amps)
 
     left++;
     right++;
+
+    if ( find_mean ) {
+      double diff = fabs( sum - find_sum );
+      if ( diff < found_val ) {
+	found_val = diff;
+	found_bin = left + boxwidth;
+      }
+      continue;
+    }
+
 
     if ( (find_max && sum > found_val) || (!find_max && sum < found_val) ) {
 

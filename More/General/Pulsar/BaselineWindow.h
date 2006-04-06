@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/BaselineWindow.h,v $
-   $Revision: 1.6 $
-   $Date: 2006/03/17 13:34:50 $
+   $Revision: 1.7 $
+   $Date: 2006/04/06 22:07:00 $
    $Author: straten $ */
 
 #ifndef __Pulsar_BaselineWindow_h
@@ -40,11 +40,17 @@ namespace Pulsar {
     //! Set to find the maximum mean
     void set_find_maximum ();
 
+    //! Set to find the mean closest to the specified value
+    void set_find_mean (float mean);
+
     //! Set the start and end bins of the search
     void set_range (int bin_start, int bin_end);
 
     //! Get the phase at the centre of the window
     void get_phase () const;
+
+    //! Return the phase at which minimum or maximum mean is found
+    float find_phase (const std::vector<float>& amps);
 
     //! Return the phase at which minimum or maximum mean is found
     float find_phase (unsigned nbin, const float* amps);
@@ -59,6 +65,12 @@ namespace Pulsar {
 
     //! Set true when algorithm finds max
     bool find_max;
+
+    //! Set true when algorithm finds mean
+    bool find_mean;
+
+    //! Mean value to be found
+    float mean;
 
     //! The first bin in the selected range
     int bin_start;
