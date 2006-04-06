@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/fft/interpolate.h,v $
-   $Revision: 1.10 $
-   $Date: 2006/03/17 13:35:16 $
+   $Revision: 1.11 $
+   $Date: 2006/04/06 14:29:01 $
    $Author: straten $*/
 
 #ifndef __fft_interpolate_h
@@ -65,13 +65,16 @@ namespace fft {
 
       fft::bcc1d (out.size(), (float*)&(dom1[0]), (float*)&(dom2[0]));
 
-      // this factor may need to be carefully chosen, depending
-      // on how the FFT routines operate
-      float factor = 1.0/in.size();
+      float scalefac = 1.0;
+
+      if (fft::get_normalization() == fft::nfft)
+        scalefac = 1.0 / float(in.size());
+      else
+        scalefac = float(out.size()) / float(in.size());
 
       for (ipt=0; ipt < out.size(); ipt++)
 	datum_traits.element (out[ipt], idim) = 
-	  datum_traits.element_traits.from_complex (dom1[ipt]*factor);
+	  datum_traits.element_traits.from_complex (dom1[ipt]*scalefac);
 
     } // end for each dimension
 
