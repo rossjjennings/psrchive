@@ -10,7 +10,7 @@
 #include "Pulsar/FourierSNR.h"
 #include "Pulsar/StandardSNR.h"
 #include "Pulsar/AdaptiveSNR.h"
-#include "Pulsar/SquareWaveSNR.h"
+#include "Pulsar/SquareWave.h"
 #include "Pulsar/FluxCalibratorDatabase.h"
 
 #include "CommandParser.h"
@@ -231,7 +231,7 @@ namespace Pulsar {
     //! Calculates S/N using an adaptive baseline finder
     AdaptiveSNR adaptive_snr;
     //! Calculates S/N using (on-off)/rms
-    SquareWaveSNR cal_snr;
+    SquareWave cal_snr;
 
     //! Used to fix flux calibrator observations
     Reference::To<FluxCalibrator::Database> fluxcals;

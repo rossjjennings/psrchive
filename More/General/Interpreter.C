@@ -892,7 +892,7 @@ try {
     Profile::snr_strategy.set (&adaptive_snr, &AdaptiveSNR::get_snr);
 
   if (arguments.size() == 1 && arguments[0] == "cal")
-    Profile::snr_strategy.set (&cal_snr, &SquareWaveSNR::get_snr);
+    Profile::snr_strategy.set (&cal_snr, &SquareWave::get_snr);
 
   else if (arguments.size() == 2 && arguments[0] == "std") {
     Profile::snr_strategy.set (&standard_snr, &StandardSNR::get_snr);

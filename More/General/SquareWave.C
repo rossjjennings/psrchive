@@ -5,11 +5,11 @@
  *
  ***************************************************************************/
 
-#include "Pulsar/SquareWaveSNR.h"
+#include "Pulsar/SquareWave.h"
 #include "Pulsar/Profile.h"
 
 //! Return the signal to noise ratio
-float Pulsar::SquareWaveSNR::get_snr (const Profile* profile)
+float Pulsar::SquareWave::get_snr (const Profile* profile)
 {
   int hightolow, lowtohigh, buffer;
   profile->find_transitions (hightolow, lowtohigh, buffer);
