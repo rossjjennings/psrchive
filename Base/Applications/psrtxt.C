@@ -31,6 +31,7 @@ void usage ()
     "  -x         Convert to Stokes and also print fraction polarisation\n"
     "  -y         Convert to Stokes and also print fraction linear\n"
     "  -z         Convert to Stokes and also print fraction circular\n"
+    "  -Z         Convert to Stokes and also print position angle\n"
     "  -R         Remove baseline\n"
     "\n"
     "Each row output by pascii contains:\n"
@@ -42,6 +43,9 @@ void usage ()
 }
 
 int main (int argc, char** argv){ try {
+  //  Error::verbose = true;
+  //  Error::complete_abort = true;
+
   bool phase_chosen = false;
   float phase = 0.0;
   float rot_phase = 0.0;
@@ -58,10 +62,11 @@ int main (int argc, char** argv){ try {
   bool show_pol_frac = false;
   bool show_lin_frac = false;
   bool show_circ_frac = false;
+  bool show_pa = false;
   bool remove_baseline = false;
 
   char c;
-  while ((c = getopt(argc, argv, "b:B:c:CFi:p:Pr:RhpqTvVxyz")) != -1) 
+  while ((c = getopt(argc, argv, "b:B:c:CFi:p:Pr:RhpqTvVxyzZ")) != -1) 
 
     switch (c)  {
 
@@ -123,6 +128,9 @@ int main (int argc, char** argv){ try {
     case 'z':
       show_circ_frac = true;
       break;
+    case 'Z':
+      show_pa = true;
+      break;
     case 'R':
       remove_baseline = true;
       break;
@@ -152,7 +160,7 @@ int main (int argc, char** argv){ try {
   if (rot_phase)
     archive->rotate_phase (rot_phase);
 
-  if( archive->get_state() != Signal::Stokes && (show_pol_frac || show_lin_frac || show_circ_frac ) )
+  if( archive->get_state() != Signal::Stokes && (show_pol_frac || show_lin_frac || show_circ_frac || show_pa ) )
     archive->convert_state(Signal::Stokes);
 
   unsigned nsub = archive->get_nsubint();
@@ -189,7 +197,13 @@ int main (int argc, char** argv){ try {
 
       if (cchan > 0)
 	ichan = cchan;
-
+      
+      vector<double> pas(nbin);
+      if( show_pa ){
+	vector<double> phases;
+	vector<double> errors;
+	integration->get_PA (phases,pas,errors,-999.9);
+      }
       for (unsigned ibin=0; ibin < nbin; ibin++) {
 
 	if (cbin > 0)
@@ -198,7 +212,8 @@ int main (int argc, char** argv){ try {
 	cout << isub << " " << ichan << " " << ibin;
 	for (unsigned ipol=0; ipol < npol; ipol++)
 	  cout<<" "<< integration->get_Profile(ipol,ichan)->get_amps()[ibin];
-	if( show_pol_frac || show_lin_frac || show_circ_frac ){
+
+	if( show_pol_frac || show_lin_frac || show_circ_frac || show_pa ){
 	  float stokesI = integration->get_Profile(0,ichan)->get_amps()[ibin];
 	  float stokesQ = integration->get_Profile(1,ichan)->get_amps()[ibin];
 	  float stokesU = integration->get_Profile(2,ichan)->get_amps()[ibin];
@@ -211,6 +226,7 @@ int main (int argc, char** argv){ try {
 	  if( show_pol_frac )  cout << " " << frac_pol;
 	  if( show_lin_frac )  cout << " " << frac_lin;
 	  if( show_circ_frac ) cout << " " << frac_circ;
+	  if( show_pa )        cout << " " << pas[ibin];
 	}
 	cout << endl;
 
@@ -230,8 +246,9 @@ int main (int argc, char** argv){ try {
   }
 
 } catch(Error& er){ cerr << er << endl; exit(-1);
+} catch( ... ){ cerr << "Unknown exception caught!" << endl;
 }
-  return 0;
+ return 0;
 }
 
 
