@@ -1,7 +1,7 @@
 
 noinst_LTLIBRARIES = libunits.la
 
-libunits_la_SOURCES = stringtok.C separate.C Configuration.C		     \
+libunits_la_SOURCES = stringtok.C separate.C pad.C Configuration.C	     \
 	Conventions.C Error.C HeapTracked.C ReferenceAble.C		     \
 	Function.C ParameterPolicy.C OneParameter.C Parameters.C	     \
 	ArgumentPolicy.C Argument.C Composite.C Projection.C		     \
@@ -27,7 +27,7 @@ libunits_la_SOURCES = stringtok.C separate.C Configuration.C		     \
 nodist_include_HEADERS = PromoteTraits.h
 
 nobase_include_HEADERS = Error.h HeapTracked.h Traits.h			 \
-	stringtok.h separate.h substitute.h				 \
+	stringtok.h separate.h substitute.h pad.h			 \
 	ReferenceAble.h Reference.h ReferenceTo.h			 \
 	Registry.h Functor.h Callback.h TextInterface.h			 \
 	Estimate.h Matrix.h Vector.h Jacobi.h				 \
