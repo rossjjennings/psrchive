@@ -15,17 +15,6 @@
 
 using namespace std;
 
-string pad (unsigned length, string text, bool right)
-{
-  while (text.length() < length)
-    if (right)
-      text += " ";
-    else
-      text = " " + text;
-
-  return text;
-}
-
 string& chop(string& ss){
   if( ss.size()!=0 )
     ss.resize(ss.size()-1);

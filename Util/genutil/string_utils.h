@@ -6,8 +6,8 @@
  *
  ***************************************************************************/
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Attic/string_utils.h,v $
-   $Revision: 1.36 $
-   $Date: 2006/03/25 12:07:10 $
+   $Revision: 1.37 $
+   $Date: 2006/04/06 19:14:48 $
    $Author: straten $ */
 
 #ifndef __STRING_UTILS_H
@@ -23,8 +23,7 @@
 #include <string>
 #include <vector>
 
-// Pad text with spaces up to length, to the right or left of the original
-std::string pad (unsigned length, std::string text, bool right = true);
+#include "pad.h"
 
 // These return the input std::string
 std::string& chop(std::string& ss);
