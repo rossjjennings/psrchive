@@ -31,7 +31,7 @@ nobase_include_HEADERS = model_profile.h Pulsar/ArchiveExpert.h \
 	Pulsar/NoiseStatistics.h         Pulsar/OnPulseEstimator.h \
 	Pulsar/PolnProfileStats.h        Pulsar/InterpreterVariables.h \
 	Pulsar/HybridCalibrator.h        Pulsar/SyntheticProfile.h \
-	Pulsar/ScatteredPowerCorrection.h \
+	Pulsar/SquareWaveSNR.h           Pulsar/ScatteredPowerCorrection.h \
 	Pulsar/SyntheticPolnProfile.h    Pulsar/SimPolnTiming.h \
 	Pulsar/InstrumentInfo.h          Pulsar/SystemCalibrator.h \
 	Pulsar/Integration.h             Pulsar/Transposer.h \
@@ -93,7 +93,7 @@ libpsrchive_la_SOURCES = plugins.csh getopt.h Physical.h \
 	FluxCalibrator.C              ReceptionCalibrator_get_Info.C  \
 	FluxCalibratorDatabase.C      ReceptionCalibrator_get_solution.C  \
 	FourierSNR.C                  NoiseStatistics.C \
-	ReferenceCalibrator.C  \
+	ReferenceCalibrator.C         SquareWaveSNR.C \
 	HybridCalibrator.C            SingleAxisCalibrator.C  \
 	InstrumentInfo.C              Smooth.C  \
 	Integration.C                 SmoothMean.C  \
