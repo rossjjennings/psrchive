@@ -108,7 +108,7 @@ void Pulsar::Interpreter::init()
       "  string command    any edit command as understood by psredit \n" );
 
   add_command
-    ( &Interpreter::test, 't',
+    ( &Interpreter::test,
       "test", "test a boolean expression",
       "usage: test <expr> \n"
       "  string expr       a boolean expression \n"
@@ -541,6 +541,10 @@ try {
 
   // replace variable names with values
   initialize_interface();
+
+  if (args == "help")
+    return interface->help (true);
+
   string test = substitute (args, interface.get());
 
   string result = "result";
@@ -886,6 +890,9 @@ try {
       
   else if (arguments.size() == 1 && arguments[0] == "adaptive")
     Profile::snr_strategy.set (&adaptive_snr, &AdaptiveSNR::get_snr);
+
+  if (arguments.size() == 1 && arguments[0] == "cal")
+    Profile::snr_strategy.set (&cal_snr, &SquareWaveSNR::get_snr);
 
   else if (arguments.size() == 2 && arguments[0] == "std") {
     Profile::snr_strategy.set (&standard_snr, &StandardSNR::get_snr);
