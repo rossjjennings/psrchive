@@ -336,3 +336,4 @@ namespace FTransform {
     last_ ## TYPE = plan = Agent::my_agent.get_plan (nx, ny, #TYPE);
 
 #endif
+

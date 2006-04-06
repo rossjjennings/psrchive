@@ -18,7 +18,7 @@ void runtest (int ndat);
 
 int main (int argc, char** argv)
 {
-  fprintf (stderr, "Test of normalization factors...\n");
+  fprintf (stderr, "Test of normalization factors with %s\n", fft::id);
 
   // from 16kpt
   int ndat = 16 * 1024;
@@ -50,10 +50,12 @@ void runtest (int ndat)
 
   int ntrans = ndat/2;
 
+#if 0
   fprintf (stderr, "Forward R->C FFT:%d\n", ntrans);
   fft::frc1d (ndat, fft1, data);
 
   runtest2 (ntrans, power(ndat+1,data), fft1);
+#endif
 
   fprintf (stderr, "Forward C->C FFT:%d\n", ntrans);
   fft::fcc1d (ntrans, fft1, data);
@@ -76,7 +78,8 @@ double power (unsigned ndat, float* data)
 double diff (unsigned ndat, float* in, float* out)
 {
   double c = 0.0;
-  double scale = (fft::get_normalization() == fft::nfft) ? ndat/2 : 1;
+  double scale = fft::get_scale (fft::forward, fft::complex, ndat/2)
+                *fft::get_scale (fft::backward, fft::complex, ndat/2);
 
   cerr << "scale=" << scale << endl;
 
@@ -88,11 +91,11 @@ double diff (unsigned ndat, float* in, float* out)
   return c / ndat / scale;
 }
 
-void test (const char* name, double got, double expect)
+void test (int num, double got, double expect)
 {
-  fprintf (stderr, "POWER fft%s/in=%lf - expect %lf\n", name, got, expect);
+  fprintf (stderr, "POWER fft%d/in=%lf - expect %lf\n", num, got, expect);
   if ( fabs(got-expect)/expect > 1e-4 ) {
-    fprintf (stderr, "normalization test %s failed\n", name);
+    fprintf (stderr, "normalization test %d failed\n", num);
     exit (-1);
   }
 }
@@ -116,13 +119,13 @@ void runtest2 (int ntrans, double powerin, float* fft1, float* data)
   double expect1 = 1;
   double expect2 = 1;
 
-  if (fft::get_normalization() == fft::nfft) {
-    expect2 = double(ntrans)*double(ntrans);
-    expect1 = ntrans;
-  }
+  expect1 = fft::get_scale (fft::forward, fft::complex, ntrans);
+  expect2 = expect1*fft::get_scale (fft::backward, fft::complex, ntrans);
+  expect1 *= expect1; // dealing with power
+  expect2 *= expect2;
 
-  test ("1", power(ntrans*2, fft1) / powerin, expect1);
-  test ("2", power(ntrans*2, fft2) / powerin, expect2);
+  test (1, power(ntrans*2, fft1) / powerin, expect1);
+  test (2, power(ntrans*2, fft2) / powerin, expect2);
 
   // Now try taking a sub-band...  although the power should be
   // divided evenly into each channel, perform the test for each
@@ -148,13 +151,12 @@ void runtest2 (int ntrans, double powerin, float* fft1, float* data)
 
     double factor2 = powerout/powerin;
 
-    expect1 = double(ntrans)*double(bdat);
-    expect2 = double(ntrans)/double(bdat);
+    expect1 = fft::get_scale (fft::forward, fft::complex, ntrans);
+    expect2 = expect1*fft::get_scale (fft::backward, fft::complex, bdat);
+    expect1 *= expect1; // dealing with power
+    expect2 *= expect2;
 
-    fprintf (stderr, "%d X %d = %lf\n", ntrans, bdat, expect1);
-    fprintf (stderr, "%d / %d = %lf\n", ntrans, bdat, expect2);
-
-    test ("3", powerout / powerin, expect1);
+    test (j+3, powerout / powerin, expect2);
 
   }
 
