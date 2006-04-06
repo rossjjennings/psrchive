@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Integration.h,v $
-   $Revision: 1.80 $
-   $Date: 2006/03/31 20:42:16 $
-   $Author: straten $ */
+   $Revision: 1.81 $
+   $Date: 2006/04/06 03:57:38 $
+   $Author: hknight $ */
 
 /*
   
@@ -303,6 +303,9 @@ namespace Pulsar {
     void get_Stokes (vector< Stokes<float> >& S, unsigned iother,
 		     Signal::Dimension abscissa = Signal::Phase ) const;
 
+    //! get PA as a function of phase
+    virtual void get_PA (vector<double> &phases, vector<double> &angles,
+			 vector<double> &errors, float _threshold=2.5);
 
     // //////////////////////////////////////////////////////////////////
     //
@@ -481,10 +484,6 @@ namespace Pulsar {
 
     //! Perform frequency response on each polarimetric profile
     void transform (const vector< Jones<float> >& response);
-
-    //! get PA as a function of phase
-    virtual void get_PA (vector<double> &phases, vector<double> &angles,
-			 vector<double> &errors, float _threshold=2.5);
 
     //! Convert polarimetric data to the specified state
     virtual void convert_state (Signal::State state);
