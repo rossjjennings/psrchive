@@ -26,11 +26,11 @@ Pulsar::Profile* Pulsar::fourier_transform (const Profile* input) try
 {
   Reference::To<Profile> fourier = new Profile (input->get_nbin() + 2);
 
+  // cerr << "Pulsar::fourier_transform with " << fft::id << endl;
+
   fft::frc1d (input->get_nbin(), fourier->get_amps(), input->get_amps());
 
-  // if the FFT scales its output, rescale to compensate
-  if (fft::get_normalization() == fft::nfft)
-    fourier->scale( 1.0 / sqrt(double(input->get_nbin())) );
+  fourier->scale( 1.0 / sqrt(double(input->get_nbin())) );
 
   return fourier.release();
 }
