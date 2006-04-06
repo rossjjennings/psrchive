@@ -449,6 +449,9 @@ namespace TextInterface {
     //! Process a command
     virtual std::string process (const std::string& command);
 
+    //! Return the list of available attributes
+    std::string help (bool show_default_values = false);
+
     //! Get the value of the attribute
     virtual std::string get_value (const std::string& name) const = 0;
 
@@ -740,6 +743,10 @@ void TextInterface::VectorOfProxy<V,E,G,S>
 #endif
 
   std::string sub_name = param;
+
+  if (sub_name == "*")
+    return;
+
   parse_indeces (indeces, sub_name);
 
 #ifdef _DEBUG

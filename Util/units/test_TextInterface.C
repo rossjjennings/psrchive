@@ -286,6 +286,7 @@ int main () try {
 
   getset.import ( "map", string(), extensionTUI(), &tester::get_map );
 
+  cerr << getset.help(true) << endl;
 
   cerr << "test_TextInterface SUCCESS!" << endl;
   return 0;

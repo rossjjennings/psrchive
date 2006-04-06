@@ -6,6 +6,7 @@
  ***************************************************************************/
 #include "TextInterface.h"
 #include "stringtok.h"
+#include "pad.h"
 
 #include <stdio.h>
 
@@ -31,6 +32,46 @@ string TextInterface::Class::process (const string& command)
 
   set_value (param, after);
   return "";
+}
+
+string TextInterface::Class::help (bool default_value)
+{
+  unsigned i = 0;
+
+  string name_label = "Attribute Name";
+  string description_label = "Description";
+  string value_label = (default_value) ? "Value" : "";
+
+  unsigned max_namelen = name_label.length();
+  unsigned max_descriptionlen = description_label.length();
+
+  // find the maximum string length of the name and description
+  for (i=0; i<get_nattribute(); i++) {
+    if (get_name(i).length() > max_namelen)
+      max_namelen = get_name(i).length();
+    if (get_description(i).length() > max_descriptionlen)
+      max_descriptionlen = get_description(i).length();
+  }
+
+  max_namelen += 3;
+  max_descriptionlen += 3;
+
+  // repeat the dash an appropriate number of times
+  string sep (max_namelen + max_descriptionlen + value_label.length(), '-');
+
+  // make a nice header
+  string help_str =
+    pad(max_namelen, name_label) + 
+    pad(max_descriptionlen, description_label) + value_label + "\n" +
+    sep + "\n";
+
+  for (i=0; i<get_nattribute(); i++)
+    help_str += 
+      pad(max_namelen, get_name(i)) + 
+      pad(max_descriptionlen, get_description(i)) +
+      ((default_value) ? (get_value(get_name(i)) + "\n") : "\n");
+
+  return help_str;
 }
 
 /*! Parses text into key, range, and remainder
