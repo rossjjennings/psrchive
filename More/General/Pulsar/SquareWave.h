@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/SquareWave.h,v $
-   $Revision: 1.1 $
-   $Date: 2006/04/06 16:21:58 $
+   $Revision: 1.2 $
+   $Date: 2006/04/06 16:24:32 $
    $Author: straten $ */
 
 #ifndef __Pulsar_SquareWaveSNR_h
@@ -20,7 +20,7 @@ namespace Pulsar {
 
   class Profile;
 
-  //! Calculates the signal-to-noise ratio using a BaselineEstimator
+  //! Calculates the signal-to-noise ratio using (on-off)/rms
   class SquareWaveSNR : public Algorithm {
 
   public:
