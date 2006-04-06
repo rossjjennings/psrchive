@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Matrix.h,v $
-   $Revision: 1.14 $
-   $Date: 2006/03/17 13:35:21 $
+   $Revision: 1.15 $
+   $Date: 2006/04/06 19:13:41 $
    $Author: straten $ */
 
 #ifndef __Matrix_H
@@ -51,6 +51,18 @@ const Vector<Rows,U> operator * (const Matrix<Rows,Columns,T>& m,
   Vector<Rows,U> r;
   for (unsigned i=0; i<Rows; i++)
     r[i] = Vector<Columns,U>(m[i]) * b;
+  return r;
+}
+
+//! Vector transpose multiplication
+template<unsigned Rows, unsigned Columns, typename T, typename U>
+const Vector<Columns,U> operator * (const Vector<Rows,U>& b,
+				    const Matrix<Rows,Columns,T>& m)
+{
+  Vector<Columns,U> r;
+  for (unsigned j=0; j<Columns; j++)
+    for (unsigned i=0; i<Rows; i++)
+      r[j] += m[i][j] * b[i];
   return r;
 }
 
@@ -106,9 +118,9 @@ void GaussJordan (Matrix<Rows,C1,T>& a, Matrix<Rows,C2,U>& b)
     
     if (irow != icol) {
       for (j=0; j<Rows; j++)
-	swap (a[irow][j], a[icol][j]);
+	std::swap (a[irow][j], a[icol][j]);
       for (j=0; j<C2; j++)
-	swap (b[irow][j], b[icol][j]);
+	std::swap (b[irow][j], b[icol][j]);
     }
 
     //cerr << "2" << endl;
@@ -149,7 +161,7 @@ void GaussJordan (Matrix<Rows,C1,T>& a, Matrix<Rows,C2,U>& b)
   for (i=Rows; i>0; i--) {
     if (indxr[i-1] != indxc[i-1])
       for (j=0; j<Rows; j++)
-	swap(a[j][indxr[i-1]],a[j][indxc[i-1]]);
+	std::swap(a[j][indxr[i-1]],a[j][indxc[i-1]]);
   }
   
    //cerr << "7" << endl;
