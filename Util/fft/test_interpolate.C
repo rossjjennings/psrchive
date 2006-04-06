@@ -1,27 +1,79 @@
 /***************************************************************************
  *
- *   Copyright (C) 2004 by Willem van Straten
+ *   Copyright (C) 2006 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "interpolate.h"
+#include "spectra.h"
 
-int main () try {
+#include <iostream>
+using namespace std;
 
-  std::vector< std::complex<float> > C_in (128);
-  std::vector< std::complex<float> > C_out (256);
+void meanvar (double& mean, double& var, vector<float>& data)
+{
+  mean = 0.0;
+  var = 0.0;
+
+  for (unsigned i=0; i<data.size(); i++) {
+    mean += data[i];
+    var += data[i] * data[i];
+  }
+  
+  mean /= data.size();
+  var /= data.size();
+  var -= mean*mean;
+}
+
+int main (int argc, char** argv)
+{
+  cerr << "Test of Fourier interpolation with " << fft::id << endl;
+
+  // from 8kpt
+  int ndat = 8 * 1024;
+  cerr << "Generating " << ndat << " random numbers" << endl;
+
+  long idum = -1;
+  gasdev (&idum);
+
+  vector<float> data (ndat);
+  for (int idat=0; idat<ndat; idat++)
+    data[idat] = gasdev (&idum);
+
+  double mean_0 = 0.0;
+  double var_0 = 0.0;
+  meanvar (mean_0, var_0, data);
+
+  int ntests = 4;
+  unsigned bigger = 2;
+
+  for (int j=0; j<ntests; j++) {
+
+    vector<float> into (bigger*ndat);
+
+    cerr << "Interpolating into " << into.size() << endl;
+    fft::interpolate (into, data);
+
+    double mean = 0.0;
+    double var = 0.0;
+    meanvar (mean, var, into);
+
+    if ( fabs(mean-mean_0) > 1e-6 || fabs(var-var_0) > 1e-6 ) {
+      cerr << "Input Mean=" << mean_0 << " Variance=" << var_0 << endl;
+      cerr << "Output Mean=" << mean << " Variance=" << var << endl;
+      return -1;
+    }
+
+    bigger *= 4;
+
+  }
+
+  vector< complex<float> > C_in (128);
+  vector< complex<float> > C_out (256);
 
   fft::interpolate (C_out, C_in);
 
-  std::vector< double > R_in (128);
-  std::vector< double > R_out (256);
+  cerr << "fft::interpolate: all tests passed" << endl;
 
-  fft::interpolate (R_out, R_in);
-
-  return 0;
-
-}
-catch (Error& error) {
-  std::cerr << error << std::endl;
-  return -1;
 }
