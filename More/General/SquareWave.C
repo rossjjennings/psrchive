@@ -54,6 +54,42 @@ Pulsar::Profile* differentiate (const Pulsar::Profile* profile, unsigned off=1)
   return difference.release();
 }
 
+// find the transitions
+void find_transitions (unsigned nbin, float* amps, vector<unsigned>& t,
+		       float cutoff)
+{
+  for (unsigned ibin=0; ibin<nbin; ibin++) {
+
+    bool passover = false;
+    unsigned stbin = 0;
+
+    if ( (cutoff > 0 && amps[ibin] > cutoff) || 
+	 (cutoff < 0 && amps[ibin] < cutoff) ) {
+      stbin = ibin;
+      passover = true;
+    }
+
+    if (passover) {
+      // try to avoid counting the same transition twice by searching
+      // for three samples in a row with difference less than cutoff
+      unsigned count = 0;
+      while ( ibin < nbin ) {
+	if (fabs(amps[ibin]) < fabs(cutoff))
+	  count ++;
+	else
+	  count = 0;
+	if (count > 2)
+	  break;
+	ibin++;
+      }
+
+      t.push_back ((stbin+ibin-3)/2);
+    }
+    
+  }
+
+}
+
 void Pulsar::SquareWave::get_transitions (const Profile* profile,
 					  vector<unsigned>& up,
 					  vector<unsigned>& down)
@@ -78,6 +114,7 @@ void Pulsar::SquareWave::get_transitions (const Profile* profile,
   // find the phase window in which the mean is closest to zero
   BaselineWindow window;
   window.set_find_mean (0.0);
+  window.set_duty_cycle (0.2);
   float zero = window.find_phase (nbin, amps);
 
   // get the noise statistics of the zero mean region
@@ -93,37 +130,9 @@ void Pulsar::SquareWave::get_transitions (const Profile* profile,
 
   float cutoff = threshold * rms;
 
-  // find the transitions
-  for (unsigned ibin=0; ibin<nbin; ibin++) {
+  find_transitions (nbin, amps, up, cutoff);
+  find_transitions (nbin, amps, down, -cutoff);
 
-    bool passover = false;
-
-    if (amps[ibin] > cutoff) {
-      up.push_back(ibin);
-      passover = true;
-    }
-
-    else if (amps[ibin] < -cutoff) {
-      down.push_back(ibin);
-      passover = true;
-    }
-
-    if (passover) {
-      // try to avoid counting the same transition twice by searching
-      // for three samples in a row with difference less than cutoff
-      unsigned count = 0;
-      while ( ibin < nbin ) {
-	if (fabs(amps[ibin]) < cutoff)
-	  count ++;
-	else
-	  count = 0;
-	if (count > 2)
-	  break;
-	ibin++;
-      }
-    }
-
-  }
 }
 
 unsigned Pulsar::SquareWave::count_transitions (const Profile* profile)
