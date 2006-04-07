@@ -7,6 +7,8 @@
 #include "Pulsar/ReceptionCalibrator.h"
 
 #include "Pulsar/PolnCalibratorExtension.h"
+#include "Pulsar/CalibratorStokes.h"
+
 #include "Pulsar/CorrectionsCalibrator.h"
 #include "Pulsar/SingleAxisCalibrator.h"
 #include "Pulsar/PolarCalibrator.h"
@@ -221,11 +223,17 @@ void Pulsar::ReceptionCalibrator::load_calibrators ()
 
   cerr << "Setting " << nchan << " channel receiver" << endl;
   try {
-    for (unsigned ichan=0; ichan<nchan; ichan+=1)
+    for (unsigned ichan=0; ichan<nchan; ichan++)
       model[ichan]->update ();
   }
   catch (Error& error) {
     throw error += "Pulsar::ReceptionCalibrator::load_calibrators";
+  }
+
+  if (previous && previous->get_nchan() == nchan) {
+    cerr << "Setting to previous solution" << endl;
+    for (unsigned ichan=0; ichan<nchan; ichan++)
+      model[ichan]->set_backend (previous->get_transformation(ichan));
   }
 
 }
@@ -377,7 +385,8 @@ void Pulsar::ReceptionCalibrator::add_observation (const Archive* data)
     if (ext->get_type() == get_type()) {
       cerr << "Pulsar::ReceptionCalibrator::add_observation previous solution"
 	   << endl;
-      previous = ext;
+      previous = new PolnCalibrator (data);
+      previous_cal = data->get<CalibratorStokes>();
     }
     return;
   }
@@ -770,7 +779,10 @@ try {
 
       Jones< Estimate<double> > correct;
 
-      correct = p->get_response(ichan);
+      if (previous)
+	correct = previous->get_response(ichan);
+      else
+	correct = p->get_response(ichan);
 
       if (flux_calibrator) {
 
@@ -780,7 +792,6 @@ try {
       }
 
       cal_stokes = transform( cal_stokes, correct );
-
       calibrator_estimate.source_guess[ichan].integrate (cal_stokes);
 
     }
@@ -1010,7 +1021,15 @@ void Pulsar::ReceptionCalibrator::initialize ()
     "  Parallactic angle ranges from " << PA_min <<
     " to " << PA_max << " degrees" << endl;
 
-  calibrator_estimate.update_source();
+  if (previous_cal) {
+    for (unsigned ichan=0; ichan<model.size(); ichan++)
+      calibrator_estimate.source[ichan]
+	-> set_stokes( (Stokes< Estimate<double> >)
+		       previous_cal->get_stokes (ichan) );
+  }
+  else
+    calibrator_estimate.update_source();
+
   flux_calibrator_estimate.update_source();
  
   for (unsigned istate=0; istate<pulsar.size(); istate++)
@@ -1028,7 +1047,9 @@ void Pulsar::ReceptionCalibrator::initialize ()
 		   "Reference flux[%d]=%lf != 1", ichan, I);
 
     model[ichan]->convert.set_reference_epoch ( epoch );
-    model[ichan]->update ();
+
+    if (!previous)
+      model[ichan]->update ();
 
   }
 

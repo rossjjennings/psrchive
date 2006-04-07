@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ReceptionCalibrator.h,v $
-   $Revision: 1.69 $
-   $Date: 2006/04/07 23:22:07 $
+   $Revision: 1.70 $
+   $Date: 2006/04/07 23:57:22 $
    $Author: straten $ */
 
 #ifndef __Pulsar_ReceptionCalibrator_H
@@ -158,7 +158,8 @@ namespace Pulsar {
     std::vector< Reference::To<Calibration::StandardModel> > model;
 
     //! A previous solution, if availabe
-    Reference::To<const PolnCalibratorExtension> previous;
+    Reference::To<const PolnCalibrator> previous;
+    Reference::To<const CalibratorStokes> previous_cal;
 
     //! The model specified on construction
     Calibrator::Type model_type;
