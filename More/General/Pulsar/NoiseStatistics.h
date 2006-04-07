@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/NoiseStatistics.h,v $
-   $Revision: 1.1 $
-   $Date: 2006/04/04 21:14:54 $
+   $Revision: 1.2 $
+   $Date: 2006/04/07 11:15:11 $
    $Author: straten $ */
 
 #ifndef __Pulsar_NoiseStatistics_h
@@ -29,15 +29,18 @@ namespace Pulsar {
     NoiseStatistics ();
 
     //! Set the fractional number of high frequencies used to calculate noise
-    void set_baseline_extent (float width);
+    void set_baseline_fourier (float width);
+
+    //! Set the fractional number of phase bins used to calculate noise
+    void set_baseline_time (float width);
 
     //! Return the noise to Fourier noise ratio
     float get_nfnr (const Profile* profile);
 
   protected:
 
-    //! The fractional number of high frequencies used to calculate noise
-    float baseline_extent;
+    float baseline_fourier;
+    float baseline_time;
 
   };
 

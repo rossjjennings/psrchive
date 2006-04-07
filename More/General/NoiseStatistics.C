@@ -13,17 +13,28 @@
 
 Pulsar::NoiseStatistics::NoiseStatistics ()
 {
-  baseline_extent = 0.45;
+  baseline_fourier = 0.45;
+  baseline_time = Profile::default_duty_cycle;
 }
 
 //! Set the fractional number of high frequencies used to calculate noise
-void Pulsar::NoiseStatistics::set_baseline_extent (float extent)
+void Pulsar::NoiseStatistics::set_baseline_fourier (float extent)
 {
   if (extent < 0 || extent > 1.0)
-    throw Error (InvalidParam, "Pulsar::NoiseStatistics::set_baseline_extent",
+    throw Error (InvalidParam, "Pulsar::NoiseStatistics::set_baseline_fourier",
 		 "invalid extent = %f", extent);
 
-  baseline_extent = extent;
+  baseline_fourier = extent;
+}
+
+//! Set the fractional number of high frequencies used to calculate noise
+void Pulsar::NoiseStatistics::set_baseline_time (float extent)
+{
+  if (extent < 0 || extent > 1.0)
+    throw Error (InvalidParam, "Pulsar::NoiseStatistics::set_baseline_time",
+		 "invalid extent = %f", extent);
+
+  baseline_time = extent;
 }
 
 //! Return the noise to Fourier noise ratio
@@ -36,7 +47,7 @@ float Pulsar::NoiseStatistics::get_nfnr (const Profile* profile)
   float* amps = fourier->get_amps();
 
   // note that DC and nyquist terms are thrown out in the following loop
-  unsigned start = unsigned (nbin * (1.0 - baseline_extent));
+  unsigned start = unsigned (nbin * (1.0 - baseline_fourier));
 
   unsigned count = 0;
   double total = 0.0;
@@ -51,10 +62,10 @@ float Pulsar::NoiseStatistics::get_nfnr (const Profile* profile)
 
   double f_var = total/count;
 
-  float phase = profile->find_min_phase ();
+  float phase = profile->find_min_phase (baseline_time);
 
   double t_var = 0;
-  profile->stats (phase, 0, &t_var);
+  profile->stats (phase, 0, &t_var, 0, baseline_time);
 
   double nfnr = sqrt(t_var/f_var);
 
