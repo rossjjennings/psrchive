@@ -35,6 +35,8 @@ double Pulsar::Interpreter::Variables::get_nfnr (const Archive* archive) const
 {
   Reference::To<Archive> total = archive->total();
   NoiseStatistics noise;
+  if (archive->type_is_cal())
+    noise.set_baseline_time (0.4);
   return noise.get_nfnr(total->get_Profile(0,0,0));
 }
 
