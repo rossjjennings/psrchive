@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ReceptionCalibrator.h,v $
-   $Revision: 1.68 $
-   $Date: 2006/03/17 13:34:51 $
+   $Revision: 1.69 $
+   $Date: 2006/04/07 23:22:07 $
    $Author: straten $ */
 
 #ifndef __Pulsar_ReceptionCalibrator_H
@@ -79,6 +79,9 @@ namespace Pulsar {
     
     //! Construct with optional first pulsar archive
     ReceptionCalibrator (Calibrator::Type model, const Archive* archive = 0);
+
+    //! Descructor
+    ~ReceptionCalibrator ();
 
     //! Return the reference epoch of the calibration experiment
     MJD get_epoch () const;
@@ -153,6 +156,9 @@ namespace Pulsar {
 
     //! The calibration model as a function of frequency
     std::vector< Reference::To<Calibration::StandardModel> > model;
+
+    //! A previous solution, if availabe
+    Reference::To<const PolnCalibratorExtension> previous;
 
     //! The model specified on construction
     Calibrator::Type model_type;

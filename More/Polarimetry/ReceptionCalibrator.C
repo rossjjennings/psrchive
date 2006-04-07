@@ -6,6 +6,7 @@
  ***************************************************************************/
 #include "Pulsar/ReceptionCalibrator.h"
 
+#include "Pulsar/PolnCalibratorExtension.h"
 #include "Pulsar/CorrectionsCalibrator.h"
 #include "Pulsar/SingleAxisCalibrator.h"
 #include "Pulsar/PolarCalibrator.h"
@@ -54,6 +55,10 @@ Pulsar::ReceptionCalibrator::ReceptionCalibrator (Calibrator::Type type,
 
   if (archive)
     initial_observation (archive);
+}
+
+Pulsar::ReceptionCalibrator::~ReceptionCalibrator()
+{
 }
 
 void Pulsar::ReceptionCalibrator::set_calibrators (const vector<string>& n)
@@ -364,6 +369,16 @@ void Pulsar::ReceptionCalibrator::add_observation (const Archive* data)
 
   if (type == Signal::PolnCal || type == Signal::FluxCalOn) {
     add_calibrator (data);
+    return;
+  }
+
+  if (type == Signal::Calibrator) {
+    const PolnCalibratorExtension* ext = data->get<PolnCalibratorExtension>();
+    if (ext->get_type() == get_type()) {
+      cerr << "Pulsar::ReceptionCalibrator::add_observation previous solution"
+	   << endl;
+      previous = ext;
+    }
     return;
   }
 
@@ -754,6 +769,7 @@ try {
       }
 
       Jones< Estimate<double> > correct;
+
       correct = p->get_response(ichan);
 
       if (flux_calibrator) {
