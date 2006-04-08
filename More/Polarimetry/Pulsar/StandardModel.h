@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/StandardModel.h,v $
-   $Revision: 1.2 $
-   $Date: 2006/03/17 13:34:44 $
+   $Revision: 1.3 $
+   $Date: 2006/04/08 00:01:43 $
    $Author: straten $ */
 
 #ifndef __Calibration_StandardModel_H
@@ -77,6 +77,9 @@ namespace Calibration {
 
     //! Get the measurement equation solver
     Calibration::ReceptionModel* get_equation ();
+
+    //! Set the signal path experienced by the pulsar
+    void set_transformation (const MEAL::Complex2*);
 
     //! Get the signal path experienced by the pulsar
     const MEAL::Complex2* get_transformation () const;

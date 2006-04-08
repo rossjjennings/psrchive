@@ -217,6 +217,23 @@ void Calibration::StandardModel::update ()
 }
 
 void 
+Calibration::StandardModel::set_transformation (const MEAL::Complex2* xform)
+{
+  if (polar) {
+    const MEAL::Polar* polar_solution;
+    polar_solution = dynamic_cast<const MEAL::Polar*>( xform );
+    if (polar_solution)
+      polar->copy( polar_solution );
+  }
+
+  if (physical) {
+    const Instrument* instrument = dynamic_cast<const Instrument*>( xform );
+    if (instrument)
+      physical->copy( instrument );
+  }
+}
+
+void 
 Calibration::StandardModel::integrate_calibrator (const MEAL::Complex2* xform,
 						  bool flux_calibrator)
 {
