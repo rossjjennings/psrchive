@@ -233,7 +233,7 @@ void Pulsar::ReceptionCalibrator::load_calibrators ()
   if (previous && previous->get_nchan() == nchan) {
     cerr << "Setting to previous solution" << endl;
     for (unsigned ichan=0; ichan<nchan; ichan++)
-      model[ichan]->set_backend (previous->get_transformation(ichan));
+      model[ichan]->set_transformation (previous->get_transformation(ichan));
   }
 
 }
