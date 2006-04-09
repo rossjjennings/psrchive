@@ -8,6 +8,11 @@
 #include "JenetAnderson98.h"
 #include "ierf.h"
 #include <math.h>
+ 
+JenetAnderson98::JenetAnderson98 ()
+{
+  hi = lo = A = 0;
+}
 
 /*! From JA98, Table 1 */
 const double JenetAnderson98::optimal_threshold = 0.9674;

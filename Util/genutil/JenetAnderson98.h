@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/JenetAnderson98.h,v $
-   $Revision: 1.1 $
-   $Date: 2006/04/09 14:43:19 $
+   $Revision: 1.2 $
+   $Date: 2006/04/09 14:56:16 $
    $Author: straten $ */
 
 #ifndef __Jenet_Anderson_98
@@ -30,13 +30,13 @@ class JenetAnderson98 {
   void set_sigma_n (double sigma_n);
 
   //! Get the optimal high voltage output levels, JA98 Eq.40
-  double get_hi () const;
+  double get_hi () const { return hi; }
 
   //! Get the optimal low voltage output levels, JA98 Eq.41
-  double get_lo () const;
+  double get_lo () const { return lo; }
 
   //! Get the slope of digitized vs undigitized correlation, JA98 Eq.43
-  double get_A () const;
+  double get_A () const { return A; }
 
  protected:
 
