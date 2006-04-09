@@ -9,6 +9,8 @@
 #include "Pulsar/Profile.h"
 #include "Physical.h"
 
+#include "JenetAnderson98.h"
+
 #define ESTIMATE_SNR 0
 
 //! Default constructor
@@ -48,37 +50,32 @@ void Pulsar::ScatteredPowerCorrection::transform (Integration* data)
 		   ichan, time_smear, time_resolution);
   }
 
-#if ESTIMATE_SNR
-  vector< vector< Estimate<double> > > mean;
-  data->baseline_stats (&mean);
-#endif
+  JenetAnderson98 ja98;
 
   for (unsigned ipol = 0; ipol < npol; ipol++) {
 
-#if ESTIMATE_SNR
-    double total_system = 0.0;
-    for (unsigned ichan = 0; ichan < nchan; ichan++) {
+    double mean_power = 0.0;
+    unsigned ichan = 0;
 
+    for (ichan = 0; ichan < nchan; ichan++) {
+
+      // scattered power correction requires all channels
       if (data->get_weight(ichan) == 0.0)
-	continue;
-
-      if (mean[ipol][ichan].get_value() < mean[ipol][ichan].get_error())
 	throw Error (InvalidParam,
 		     "Pulsar::ScatteredPowerCorrection::transform",
-		     "profile baseline has already been removed"
-		     " in ipol=%u ichan=%u", ipol, ichan);
+		     "ichan=%u has zero weight", ipol, ichan);
 
-      total_system += mean[ipol][ichan].get_value();
+      mean_power += data->get_Profile(ipol,ichan)->sum();
 
     }
 
-    cerr << "total system = " << total_system << endl;
-#endif
+    mean_power /= nbin;
+
+    cerr << "mean power = " << mean_power << endl;
 
     for (unsigned ibin = 0; ibin < nbin; ibin++) {
 
-      unsigned ichan = 0;
-      double total_power = 0.0;
+      double power = 0.0;
       
       for (ichan = 0; ichan < nchan; ichan++) {
 
@@ -89,14 +86,20 @@ void Pulsar::ScatteredPowerCorrection::transform (Integration* data)
 		       "ichan=%u has zero weight", ipol, ichan);
 
 
-	total_power += data->get_Profile(ipol,ichan)->get_amps()[ibin];
+	power += data->get_Profile(ipol,ichan)->get_amps()[ibin];
 
       }
 
-      // Table 2 of JA98
-      double A = 0.8808;
+      double sigma_n = power / mean_power;
 
-      double scattered_power = total_power * (1-A) / nchan;
+      ja98.set_sigma_n( power / mean_power );
+
+      // Table 2 of JA98
+      double A = ja98.get_A();
+
+      cerr << "sigma_n=" << sigma_n << " A=" << A << " <A>=0.8808" << endl;
+
+      double scattered_power = power * (1-A) / nchan;
 
       for (ichan = 0; ichan < nchan; ichan++)
 	data->get_Profile(ipol,ichan)->get_amps()[ibin] -= scattered_power;
