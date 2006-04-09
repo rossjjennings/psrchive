@@ -71,7 +71,7 @@ void Pulsar::ScatteredPowerCorrection::transform (Integration* data)
 
     mean_power /= nbin;
 
-    cerr << "mean power = " << mean_power << endl;
+    // cerr << "mean power = " << mean_power << endl;
 
     for (unsigned ibin = 0; ibin < nbin; ibin++) {
 
@@ -92,12 +92,14 @@ void Pulsar::ScatteredPowerCorrection::transform (Integration* data)
 
       double sigma_n = power / mean_power;
 
+#if 0
       ja98.set_sigma_n( power / mean_power );
-
-      // Table 2 of JA98
       double A = ja98.get_A();
-
-      cerr << "sigma_n=" << sigma_n << " A=" << A << " <A>=0.8808" << endl;
+      //cerr << "sigma_n=" << sigma_n << " A=" << A << " <A>=0.8808" << endl;
+#else
+      // Table 2 of JA98
+      double A = 0.8808;
+#endif
 
       double scattered_power = power * (1-A) / nchan;
 
