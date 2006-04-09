@@ -5,11 +5,12 @@ include_HEADERS = Cartesian.h Angle.h MJD.h CommandParser.h		\
 	PlotManager.h PlotVolume.h PlotEvent.h PlotState.h		\
 	DataManager.h DataSet.h DataPoint.h DataVector.h Poincare.h	\
 	datum.h xydatum.h smarthist.h datumcond.h kstest.h RealTimer.h	\
-	Ready.h ReferenceFit.h sky_coord.h \
+	Ready.h ReferenceFit.h sky_coord.h				\
 	PrimeFactoriser.h WindowArray.h StringTokenizer.h		\
 	Sortable.h Printable.h Header.h thread_utils.h GetPK.h		\
-	VectorInfo.h Plugin.h shell.h Cartesian.h Angle.h coord_parse.h \
-	coord.h anglevel.h obsjoin.h casts.h Horizon.h
+	VectorInfo.h Plugin.h shell.h Cartesian.h Angle.h coord_parse.h	\
+	coord.h anglevel.h obsjoin.h casts.h Horizon.h			\
+	JenetAnderson98.h
 
 libgenutilpp_la_SOURCES = CommandParser.C PlotEvent.C util_plus.C	\
 	PlotState.C datum.C smarthist.C datumcond.C kstest.C Ready.C	\
@@ -19,7 +20,7 @@ libgenutilpp_la_SOURCES = CommandParser.C PlotEvent.C util_plus.C	\
 	sla_MJD.C PlotManager.C PlotVolume.C DataManager.C		\
 	DataSet.C Poincare.C DataVector.C Plugin.C shell.C		\
 	coord_parse.c coord.c sla_coord.c psr2ar.c dual_parse_it.h	\
-	obsjoin.C Horizon.C
+	obsjoin.C Horizon.C JenetAnderson98.C
 
 if HAVE_SLA_FORTRAN
 
@@ -44,7 +45,7 @@ stats_SOURCES                   = stats.C
 TESTS = test_coord test_Cartesian test_MJD test_ReferenceFit \
 	test_Header test_VectorInfo
 
-check_PROGRAMS = $(TESTS) test_CommandParser test_Sortable
+check_PROGRAMS = $(TESTS) test_CommandParser test_Sortable test_Angle
 
 test_Cartesian_SOURCES		= test_Cartesian.C
 test_MJD_SOURCES		= test_MJD.C
