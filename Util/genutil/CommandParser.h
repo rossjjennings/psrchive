@@ -88,6 +88,9 @@ class CommandParser : public Reference::Able {
   //! Get the name of the current command
   std::string get_command () const { return current_command; }
 
+  //! Get the help string of the current command
+  std::string usage () { return help(current_command); }
+
  private:
 
   //! Available commands
