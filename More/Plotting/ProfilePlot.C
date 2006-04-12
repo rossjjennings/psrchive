@@ -9,8 +9,6 @@
 #include "Pulsar/Archive.h"
 #include "Pulsar/Profile.h"
 
-#include "Physical.h"
-
 #include <cpgplot.h>
 
 Pulsar::ProfilePlot::ProfilePlot ()
