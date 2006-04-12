@@ -42,10 +42,16 @@ void Pulsar::ProfileVectorPlotter::minmax (PlotFrame* frame) const
   frame->get_y_scale()->set_minmax (min, max);
 }
 
-void Pulsar::ProfileVectorPlotter::draw () const
+void Pulsar::ProfileVectorPlotter::draw ()
 {
   for (unsigned iprof=0; iprof < profiles.size(); iprof++) {
 
+    if (x.size() != profiles[iprof]->get_nbin()) {
+      x.resize(profiles[iprof]->get_nbin());
+      for (unsigned i=0; i<x.size(); i++)
+	x[i] = i;
+    }
+	       
     if (plot_sci.size() == profiles.size())
       cpgsci (plot_sci[iprof]);
     else
