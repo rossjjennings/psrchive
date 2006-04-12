@@ -25,7 +25,7 @@ TextInterface::Class* Pulsar::ProfilePlot::get_interface ()
 
 void Pulsar::ProfilePlot::get_profiles (const Archive* data)
 {
-  profiles.push_back( get_Profile (data, isubint, ipol, ichan) );
+  plotter.profiles.push_back( get_Profile (data, isubint, ipol, ichan) );
 }
 
 //! Derived classes must draw in the current viewport
@@ -34,7 +34,7 @@ void Pulsar::ProfilePlot::draw (const Archive* data)
   FluxPlot::draw (data);
 
   if (plot_cal_transitions && data->get_type() != Signal::Pulsar)
-    draw_transitions (profiles[0]);
+    draw_transitions (plotter.profiles[0]);
 }
 
 /*!  Plots the calibrator hi/lo levels using the transitions

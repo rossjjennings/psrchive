@@ -20,7 +20,7 @@ nobase_include_HEADERS = iopair.h \
 	Pulsar/PhaseVsFrequency.h Pulsar/PhaseVsFrequencyPlus.h		\
 	Pulsar/MultiPlot.h Pulsar/MultiPhase.h				\
 	Pulsar/StokesCylindrical.h Pulsar/StokesSpherical.h \
-	Pulsar/Poincare.h
+	Pulsar/Poincare.h Pulsar/ProfileVectorPlotter.h
 
 libPlot_la_SOURCES = Plot.C PlotFactory.C \
 	PlotIndex.C \
@@ -49,7 +49,7 @@ libPlot_la_SOURCES = Plot.C PlotFactory.C \
 	StokesCylindrical.C StokesCylindricalTI.C \
 	StokesSpherical.C StokesSphericalTI.C \
 	PhaseVsFrequencyPlus.C PhaseVsFrequencyPlusTI.C \
-	Poincare.C PoincareTI.C
+	Poincare.C PoincareTI.C ProfileVectorPlotter.C
 
 bin_PROGRAMS = psrplot
 

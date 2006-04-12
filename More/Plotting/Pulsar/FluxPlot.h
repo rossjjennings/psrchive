@@ -7,14 +7,15 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/FluxPlot.h,v $
-   $Revision: 1.11 $
-   $Date: 2006/03/17 13:34:49 $
+   $Revision: 1.12 $
+   $Date: 2006/04/12 15:15:40 $
    $Author: straten $ */
 
 #ifndef __Pulsar_FluxPlot_h
 #define __Pulsar_FluxPlot_h
 
 #include "Pulsar/PhasePlot.h"
+#include "Pulsar/ProfileVectorPlotter.h"
 #include "Pulsar/PlotIndex.h"
 
 namespace Pulsar {
@@ -76,30 +77,21 @@ namespace Pulsar {
     bool get_plot_error_box () const { return plot_ebox; }
 
     //! Plot an error box on the baseline
-    void set_plot_histogram (bool flag = true) { plot_histogram = flag; }
-    bool get_plot_histogram () const { return plot_histogram; }
+    void set_plot_histogram (bool f = true) { plotter.plot_histogram = f; }
+    bool get_plot_histogram () const { return plotter.plot_histogram; }
 
-    //! Derived classes must draw in the current viewport
+    //! Draw the profiles in the currently open window
     void draw (const Archive*);
-
-    //! draw the profile in the current viewport and window
-    void draw (const Profile*) const;
 
   protected:
 
-    std::vector< Reference::To<const Profile> > profiles;
-    std::vector< int > plot_sci;
-    std::vector< int > plot_sls;
+    ProfileVectorPlotter plotter;
 
     PlotIndex isubint;
     PlotIndex ichan;
     PlotIndex ipol;
 
     bool plot_ebox;
-    bool plot_histogram;
-
-  private:
-    std::vector<float> phases;
 
   };
 

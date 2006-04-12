@@ -18,7 +18,6 @@ Pulsar::FluxPlot::FluxPlot ()
 {
   isubint = ichan = ipol = 0;
   plot_ebox = false;
-  plot_histogram = false;
 
   get_frame()->get_y_scale()->set_buf_norm(0.05);
 }
@@ -28,69 +27,32 @@ TextInterface::Class* Pulsar::FluxPlot::get_interface ()
   return new Interface (this);
 }
 
-//! Derived classes must compute the minimum and maximum values (y-axis)
+/*! The ProfileVectorPlotter class computes the minimum and maximum values
+  to be plotted */
 void Pulsar::FluxPlot::prepare (const Archive* data)
 {
-  profiles.clear();
+  plotter.profiles.clear();
 
+  // derived classes fill the plotter.profiles attribute
   get_profiles (data);
 
-  if (!profiles.size())
-    throw Error (InvalidState, "Pulsar::FluxPlot::prepare",
-		 "Profiles array empty after call to get_profiles");
-
-  unsigned i_min, i_max;
-  get_scale()->get_range(data, i_min, i_max);
-
-  float min = profiles[0]->min(i_min, i_max);
-  float max = profiles[0]->max(i_min, i_max);
-
-  for (unsigned iprof=1; iprof < profiles.size(); iprof++) {
-    float pmin = profiles[iprof]->min(i_min, i_max);
-    float pmax = profiles[iprof]->max(i_min, i_max);
-    if (pmin < min)
-      min = pmin;
-    if (pmax > max)
-      max = pmax;
-  }
-
-  get_frame()->get_y_scale()->set_minmax (min, max);
+  plotter.minmax (get_frame());
 }
 
 
-//! Derived classes must draw in the current viewport
+/*! The ProfileVectorPlotter class draws the profile */
 void Pulsar::FluxPlot::draw (const Archive* data)
 {
-  get_scale()->get_ordinates (data, phases);
+  // PhaseScale::get_ordinates fills the x-axis with turns/deg/milliseconds ...
+  get_scale()->get_ordinates (data, plotter.x);
 
-  for (unsigned iprof=0; iprof < profiles.size(); iprof++) {
-
-    if (plot_sci.size() == profiles.size())
-      cpgsci (plot_sci[iprof]);
-    else
-      cpgsci (iprof+1);
-
-    if (plot_sls.size() == profiles.size())
-      cpgsls (plot_sls[iprof]);
-    else
-      cpgsls (iprof+1);
-
-    draw (profiles[iprof]);
-  }
+  plotter.draw ();
 
   cpgsci (1);
   if (plot_ebox)
     plot_error_box (data);
 }
 
-//! draw the profile in the current viewport and window
-void Pulsar::FluxPlot::draw (const Profile* profile) const
-{
-  if (plot_histogram)
-    cpgbin (profile->get_nbin(), &phases[0], profile->get_amps(), true);
-  else
-    cpgline (profile->get_nbin(), &phases[0], profile->get_amps());
-}
 
 //! Scale in on the on-pulse region
 void Pulsar::FluxPlot::auto_scale_phase (const Profile* profile, float buf)
@@ -181,7 +143,7 @@ float Pulsar::FluxPlot::get_flux_error (const Profile* profile)
 
 void Pulsar::FluxPlot::plot_error_box (const Archive* data)
 {
-  float y_error = get_flux_error (profiles[0]);
+  float y_error = get_flux_error (plotter.profiles[0]);
   float x_error = get_phase_error (data);
 
   pair<float,float> x_range = get_frame()->get_x_scale()->get_range_norm();

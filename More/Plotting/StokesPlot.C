@@ -27,9 +27,9 @@ TextInterface::Class* Pulsar::StokesPlot::get_interface ()
 
 void Pulsar::StokesPlot::get_profiles (const Archive* data)
 {
-  profiles.resize( plot_values.size() );
-  plot_sci.resize( plot_values.size() );
-  plot_sls.resize( plot_values.size() );
+  plotter.profiles.resize( plot_values.size() );
+  plotter.plot_sci.resize( plot_values.size() );
+  plotter.plot_sls.resize( plot_values.size() );
 
   if (plot_values.size() > plot_colours.size())
     throw Error (InvalidState, "Pulsar::StokesPlot::get_profiles",
@@ -49,10 +49,10 @@ void Pulsar::StokesPlot::get_profiles (const Archive* data)
   if (verbose)
     cerr << "Pulsar::StokesPlot::get_profiles filling vector" << endl;
 
-  for (unsigned ipol=0; ipol < profiles.size(); ipol++) {
-    profiles[ipol] = new_Profile (profile, plot_values[ipol]);
-    plot_sci[ipol] = plot_colours[ipol] - '0';
-    plot_sls[ipol] = plot_lines[ipol] - '0';
+  for (unsigned ipol=0; ipol < plotter.profiles.size(); ipol++) {
+    plotter.profiles[ipol] = new_Profile (profile, plot_values[ipol]);
+    plotter.plot_sci[ipol] = plot_colours[ipol] - '0';
+    plotter.plot_sls[ipol] = plot_lines[ipol] - '0';
   }
 }
 
