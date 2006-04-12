@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PlotFactory.h,v $
-   $Revision: 1.6 $
-   $Date: 2006/03/17 13:34:49 $
+   $Revision: 1.7 $
+   $Date: 2006/04/12 19:29:50 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PlotFactory_h
@@ -41,6 +41,9 @@ namespace Pulsar {
     //! Return the name of the ith plot
     std::string get_description (unsigned i);
 
+    //! Return a descriptive list of the available plots
+    std::string help();
+
   protected:
 
     class Agent;
@@ -60,7 +63,8 @@ namespace Pulsar {
   {
   public:
 
-    Agent (std::string n, std::string d) : name (n), description (d) {}
+    Agent (char c, std::string n, std::string d)
+      : shortcut(c), name (n), description (d) {}
 
     //! Return a new instance of Plot class
     virtual Plot* construct () = 0;
@@ -68,11 +72,15 @@ namespace Pulsar {
     //! Return the name of the Plot class
     std::string get_name () { return name; }
 
+    //! Return the shortcut name of the Plot class
+    char get_shortcut () { return shortcut; }
+
     //! Return a description of the Plot class
     std::string get_description () { return description; }
 
   protected:
 
+    char shortcut;
     std::string name;
     std::string description;
 
@@ -84,7 +92,11 @@ namespace Pulsar {
 
     //! Construct with name and description
     Advocate (std::string _name, std::string _description)
-      : Agent (_name, _description) {}
+      : Agent (' ', _name, _description) {}
+ 
+    //! Construct with shortcut, name and description
+    Advocate (char shortcut, std::string _name, std::string _description)
+      : Agent (shortcut, _name, _description) {}
  
     //! Return a new instance of Plot class
     Plot* construct () { return new P; }
