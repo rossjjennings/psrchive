@@ -42,14 +42,23 @@ Pulsar::new_Profile (const PolnProfile* data, char code)
     return data->get_Profile(3);
 
   case 'L': {
+    // total linearly polarized flux
     profile = new Profile;
     data->get_linear(profile);
     return profile.release();
   }
 
   case 'p': {
+    // total polarized flux
     profile = new Profile;
     data->get_polarized(profile);
+    return profile.release();
+  }
+
+  case 'S': {
+    // polarimetric invariant flux
+    profile = new Profile;
+    data->invint(profile);
     return profile.release();
   }
 
