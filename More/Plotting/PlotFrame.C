@@ -129,7 +129,7 @@ void Pulsar::PlotFrame::decorate (const Archive* data, const string& label,
 
   for (unsigned i=0; i < labels.size(); i++) {
 
-    substitute (labels[i], get_interface(data), '=');
+    labels[i] = substitute (labels[i], get_interface(data), '=');
 
     cpgmtxt ("T", start, side+offset, side, labels[i].c_str());
     start += direction;
