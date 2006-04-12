@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Profile.h,v $
-   $Revision: 1.93 $
-   $Date: 2006/04/04 21:15:00 $
+   $Revision: 1.94 $
+   $Date: 2006/04/12 19:41:27 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Profile_h
@@ -100,6 +100,9 @@ namespace Pulsar {
 
     //! calculates the weighted sum/difference
     virtual const Profile& average (const Profile* profile, double sign);
+
+    //! add profile to this
+    virtual void sum (const Profile* profile);
 
     //! calculates the difference of profile and another profile after
     /*! normalising their flux */

@@ -219,6 +219,18 @@ void Pulsar::Profile::scale (double factor)
     amps[i] *= factor;
 }
 
+void Pulsar::Profile::sum (const Profile* profile)
+{
+  if (nbin != profile->get_nbin())
+    throw Error (InvalidParam, "Pulsar::Profile::sum",
+		 "nbin=%u != other nbin=%u", nbin, profile->get_nbin());
+
+  const float* pamps = profile->get_amps();
+  
+  for (unsigned i=0;i<nbin;i++)
+    amps[i] += pamps[i];
+}
+
 vector<float> Pulsar::Profile::get_weighted_amps () const
 {
   vector<float> wamps;
