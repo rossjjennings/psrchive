@@ -7,7 +7,7 @@ noinst_LTLIBRARIES = libPlot.la
 #
 if HAVE_PGPLOT
 
-nobase_include_HEADERS = iopair.h \
+nobase_include_HEADERS = iopair.h					\
 	Pulsar/Plot.h Pulsar/PlotFactory.h Pulsar/PlotIndex.h		\
 	Pulsar/PlotScale.h Pulsar/PhaseScale.h Pulsar/FrequencyScale.h	\
 	Pulsar/PlotAxis.h Pulsar/PlotLabel.h				\
@@ -19,7 +19,8 @@ nobase_include_HEADERS = iopair.h \
 	Pulsar/PhaseVsPlot.h Pulsar/PhaseVsTime.h			\
 	Pulsar/PhaseVsFrequency.h Pulsar/PhaseVsFrequencyPlus.h		\
 	Pulsar/MultiPlot.h Pulsar/MultiPhase.h				\
-	Pulsar/StokesCylindrical.h Pulsar/StokesSpherical.h \
+	Pulsar/StokesCylindrical.h Pulsar/StokesSpherical.h		\
+	Pulsar/FluctPlot.h Pulsar/StokesFluctPlot.h			\
 	Pulsar/Poincare.h Pulsar/ProfileVectorPlotter.h
 
 libPlot_la_SOURCES = Plot.C PlotFactory.C \
@@ -49,6 +50,8 @@ libPlot_la_SOURCES = Plot.C PlotFactory.C \
 	StokesCylindrical.C StokesCylindricalTI.C \
 	StokesSpherical.C StokesSphericalTI.C \
 	PhaseVsFrequencyPlus.C PhaseVsFrequencyPlusTI.C \
+	FluctPlot.C FluctPlotTI.C \
+	StokesFluctPlot.C StokesFluctPlotTI.C \
 	Poincare.C PoincareTI.C ProfileVectorPlotter.C
 
 bin_PROGRAMS = psrplot
