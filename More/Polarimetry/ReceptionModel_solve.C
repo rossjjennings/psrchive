@@ -173,7 +173,7 @@ void Calibration::ReceptionModel::solve_work (bool solve_verbose)
 
   nfree = fixed_params - free_params;
 
-  // #define _DEBUG
+// #define _DEBUG
 
   for (iterations = 0; iterations < maximum_iterations; iterations++) {
 
@@ -210,7 +210,7 @@ void Calibration::ReceptionModel::solve_work (bool solve_verbose)
       break;
     }
 
-    if (delta_chisq > 0 && delta_chisq < 30) {
+    if (delta_chisq >= -0.001*best_chisq && delta_chisq < 10) {
 #ifdef _DEBUG
       cerr << "fit close" << endl; 
 #endif     
