@@ -219,16 +219,29 @@ void Pulsar::Profile::scale (double factor)
     amps[i] *= factor;
 }
 
-void Pulsar::Profile::sum (const Profile* profile)
+void sumdiff (Pulsar::Profile* thiz, const Pulsar::Profile* that, float factor)
 {
-  if (nbin != profile->get_nbin())
-    throw Error (InvalidParam, "Pulsar::Profile::sum",
-		 "nbin=%u != other nbin=%u", nbin, profile->get_nbin());
+  unsigned nbin = thiz->get_nbin();
 
-  const float* pamps = profile->get_amps();
+  if (nbin != that->get_nbin())
+    throw Error (InvalidParam, "Pulsar::Profile::sumdiff",
+		 "nbin=%u != other nbin=%u", nbin, that->get_nbin());
+
+  float* amps = thiz->get_amps();
+  const float* pamps = that->get_amps();
   
   for (unsigned i=0;i<nbin;i++)
-    amps[i] += pamps[i];
+    amps[i] += factor * pamps[i];
+}
+
+void Pulsar::Profile::sum (const Profile* that)
+{
+  sumdiff (this, that, 1);
+}
+
+void Pulsar::Profile::diff (const Profile* that)
+{
+  sumdiff (this, that, -1);
 }
 
 vector<float> Pulsar::Profile::get_weighted_amps () const
@@ -317,7 +330,8 @@ void Pulsar::Profile::absolute ()
 void Pulsar::Profile::logarithm (double base, double threshold)
 {
   if (verbose)
-    cerr << "Pulsar::Profile::logarithm" << endl;
+    cerr << "Pulsar::Profile::logarithm base=" << base 
+	 << " threshold=" << threshold << endl;
   
   float log_threshold = log(threshold)/log(base);
 
@@ -552,10 +566,6 @@ double Pulsar::Profile::sum (int istart, int iend) const
     cerr << "Pulsar::Profile::sum" << endl;
 
   nbinify (istart, iend, nbin);
-
-  if( verbose )
-    fprintf(stderr,"Pulsar::Profile::sum() got istart=%d iend=%d\n",
-	    istart,iend);
 
   double tot = 0;
   

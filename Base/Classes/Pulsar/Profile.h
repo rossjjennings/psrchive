@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Profile.h,v $
-   $Revision: 1.94 $
-   $Date: 2006/04/12 19:41:27 $
+   $Revision: 1.95 $
+   $Date: 2006/04/14 19:32:40 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Profile_h
@@ -103,6 +103,9 @@ namespace Pulsar {
 
     //! add profile to this
     virtual void sum (const Profile* profile);
+
+    //! subtract profile from this
+    virtual void diff (const Profile* profile);
 
     //! calculates the difference of profile and another profile after
     /*! normalising their flux */
