@@ -105,7 +105,7 @@ void Pulsar::FluxCalibrator::Database::Entry::load (const string& str)
 
   if (s != 3)
     throw Error (FailedSys, "Pulsar::FluxCalibrator::Database::Entry::load",
-                 "sscanf(%s) != 3", str.c_str());
+                 "could not parse three doubles from '"+temp+"'");
 }
 
 // unload to a string
