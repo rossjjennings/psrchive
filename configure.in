@@ -85,6 +85,14 @@ SWIN_LIB_CFITSIO
 SWIN_LIB_MPI
 SWIN_LIB_READLINE
 
+if test x"$enable_lean" == xyes; then
+
+AM_CONDITIONAL(HAVE_PGPLOT, [test 1 = 0])
+AM_CONDITIONAL(HAVE_QT, [test 1 = 0])
+AM_CONDITIONAL(HAVE_QTDRIV, [test 1 = 0])
+
+else
+
 #
 # Checks for graphics libraries
 #
@@ -92,13 +100,27 @@ SWIN_LIB_PGPLOT
 BNV_HAVE_QT
 SWIN_LIB_QTDRIV
 
+fi
+
 # 
 # For developers: ensure that the config directory m4 macros are parsed
 #
 ACLOCAL="$ACLOCAL -I config"
+
+#
 # For developers: preserve file modification times
+#
 INSTALL_DATA="${INSTALL} -m 644 -p"
 install_sh="CPPROG='cp -p' ${install_sh}"
+
+#
+# For developers: provide the ability to compile a lean version of the code
+#
+
+AC_ARG_WITH([lean], AC_HELP_STRING([--enable-lean],
+				   [compile a lean version of the library]))
+
+AM_CONDITIONAL(MAKE_LEAN, [test x"$enable_lean" == xyes])
 
 #
 # Checks for header files.
@@ -178,3 +200,11 @@ AC_CONFIG_FILES([third/Makefile
 
 AC_OUTPUT
 
+if test x"$enable_lean" == xyes; then
+   echo "********************************************"
+   echo "A lean version of PSRCHIVE will be compiled."
+   echo "This means that the polarimetric calibration"
+   echo "software, related error analysis routines,"
+   echo "and graphical interfaces will be unavailable."
+   echo "********************************************"
+fi
