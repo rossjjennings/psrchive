@@ -91,6 +91,28 @@ void Pulsar::PolnProfile::resize (unsigned nbin)
 //
 //
 //
+void Pulsar::PolnProfile::sum (const PolnProfile* that)
+{
+  for (unsigned ipol=0; ipol < 4; ipol++)
+    this->profile[ipol]->sum( that->profile[ipol] );
+}
+
+
+//
+//
+//
+void Pulsar::PolnProfile::diff (const PolnProfile* that)
+{
+  for (unsigned ipol=0; ipol < 4; ipol++)
+    this->profile[ipol]->diff( that->profile[ipol] );
+}
+
+
+
+
+//
+//
+//
 unsigned Pulsar::PolnProfile::get_nbin () const
 {
   return profile[0]->get_nbin();

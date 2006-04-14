@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/Attic/PolnProfile.h,v $
-   $Revision: 1.29 $
-   $Date: 2006/03/17 13:34:51 $
+   $Revision: 1.30 $
+   $Date: 2006/04/14 19:32:31 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PolnProfile_h
@@ -66,6 +66,12 @@ namespace Pulsar {
 
     //! Set the amplitudes of the specified polarization
     void set_amps (unsigned ipol, float* amps);
+
+    //! Add that to this
+    void sum (const PolnProfile* that);
+
+    //! Subtract that from this
+    void diff (const PolnProfile* that);
 
     //! Get the Basis of the poln profile
     Signal::Basis get_basis () const { return basis; }
