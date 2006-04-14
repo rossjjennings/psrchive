@@ -147,6 +147,7 @@ AC_CHECK_FUNCS([alarm floor ftruncate getcwd gethostbyaddr gethostbyname gethost
 
 AM_CONFIG_HEADER([config.h])
 AC_CONFIG_FILES([third/Makefile
+		third/parsifal/Makefile
 		utils/units/Makefile
 		utils/psrfft/Makefile
 		utils/genutil/Makefile
