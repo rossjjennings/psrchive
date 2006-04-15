@@ -1,14 +1,11 @@
 
 intermediate-install:
-	$(MAKE) prefix=.. install-data
-
-intermediate-install2:
-	$(MAKE) prefix=. install-data
-
-libs: intermediate-libs install-libLTLIBRARIES
+	$(MAKE) RECURSIVE_TARGETS=install-data-recursive prefix=.. install-data
 
 intermediate-libs:
 	AM_MAKEFLAGS="$(AM_MAKEFLAGS) PROGRAMS= HEADERS=" $(MAKE) all-recursive
+
+libs: intermediate-libs intermediate-install install-libLTLIBRARIES
 
 include: install-data
 
