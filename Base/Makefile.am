@@ -1,134 +1,327 @@
 
 lib_LTLIBRARIES = libpsrchive.la
 
-nobase_include_HEADERS = model_profile.h Pulsar/ArchiveExpert.h \
-	Pulsar/Algorithm.h               Pulsar/Container.h \
-	Pulsar/AdaptiveSNR.h             Pulsar/PolarCalibrator.h \
-	Pulsar/Archive.h                 Pulsar/PolnCalibrator.h \
-	Pulsar/ArchiveMatch.h            Pulsar/ArchiveSort.h \
-	Pulsar/ArchiveProcessor.h        Pulsar/PolnProfile.h \
-	Pulsar/BaselineEstimator.h       Pulsar/PolnProfileFit.h \
-	Pulsar/DeltaRM.h                 Pulsar/DoPCalibrator.h \
-	Pulsar/ExponentialBaseline.h     Pulsar/PolnProfileFitAnalysis.h \
-	Pulsar/GaussianBaseline.h        Pulsar/Profile.h \
-	Pulsar/BasicArchive.h            Pulsar/PulsarCalibrator.h \
-	Pulsar/BasicIntegration.h        Pulsar/RFIMitigation.h \
-	Pulsar/Calibrator.h              Pulsar/ReceptionCalibrator.h \
-	Pulsar/CalibratorPlotter.h       Pulsar/ReceptionCalibratorPlotter.h \
-	Pulsar/CalibratorStokesInfo.h    Pulsar/ReferenceCalibrator.h \
-	Pulsar/CorrectionsCalibrator.h   Pulsar/SingleAxisCalibrator.h \
-	Pulsar/ColdPlasma.h              Pulsar/Dispersion.h \
-	Pulsar/DispersionDelay.h         Pulsar/Fourier.h \
-	Pulsar/IonosphereCalibrator.h    Pulsar/IntegrationManagerExpert.h \
-	Pulsar/IntegrationExpert.h       Pulsar/Transformation.h \
-	Pulsar/Database.h                Pulsar/Smooth.h \
-	Pulsar/ExampleArchive.h          Pulsar/SmoothMean.h \
-	Pulsar/FaradayRotation.h         Pulsar/Polarization.h \
-	Pulsar/FluxCalibrator.h          Pulsar/SmoothMedian.h \
-	Pulsar/FluxCalibratorDatabase.h  Pulsar/SourceInfo.h \
-	Pulsar/FourierSNR.h              Pulsar/StandardSNR.h \
-	Pulsar/FrequencyIntegrate.h      Pulsar/OnPulseThreshold.h \
-	Pulsar/NoiseStatistics.h         Pulsar/OnPulseEstimator.h \
-	Pulsar/PolnProfileStats.h        Pulsar/InterpreterVariables.h \
-	Pulsar/HybridCalibrator.h        Pulsar/SyntheticProfile.h \
-	Pulsar/SquareWave.h              Pulsar/ScatteredPowerCorrection.h \
-	Pulsar/SyntheticPolnProfile.h    Pulsar/SimPolnTiming.h \
-	Pulsar/InstrumentInfo.h          Pulsar/SystemCalibrator.h \
-	Pulsar/Integration.h             Pulsar/Transposer.h \
-	Pulsar/IntegrationManager.h      Pulsar/Utilities.h \
-	Pulsar/Interpreter.h             Pulsar/psrchive.h \
-	Pulsar/IterativeBaseline.h       Pulsar/OffPulseCalibrator.h \
-	Pulsar/PhaseWeight.h             Pulsar/ArchiveTI.h \
-	Pulsar/PhaseWeightFunction.h     Pulsar/ProfileWeightFunction.h \
-	Pulsar/Plotter.h                 Pulsar/IntegrationTI.h \
-	Pulsar/BaselineWindow.h          Pulsar/Pulsar.h \
-	Pulsar/ReflectStokes.h           Pulsar/ChannelZapMedian.h \
-	Pulsar/ChannelWeight.h           Pulsar/ChannelZapModulation.h \
-	Pulsar/Config.h                  Pulsar/Profile_utils.h \
-	Pulsar/Weight.h                  Pulsar/IntegrationWeight.h \
-	Pulsar/DurationWeight.h          Pulsar/SNRWeight.h
+nobase_include_HEADERS = model_profile.h	\
+	Pulsar/ArchiveExpert.h			\
+	Pulsar/Algorithm.h			\
+	Pulsar/Container.h			\
+	Pulsar/AdaptiveSNR.h			\
+	Pulsar/Archive.h			\
+	Pulsar/ArchiveMatch.h			\
+	Pulsar/ArchiveSort.h			\
+	Pulsar/ArchiveProcessor.h		\
+	Pulsar/PolnProfile.h			\
+	Pulsar/BaselineEstimator.h		\
+	Pulsar/DeltaRM.h			\
+	Pulsar/ExponentialBaseline.h		\
+	Pulsar/GaussianBaseline.h		\
+	Pulsar/Profile.h			\
+	Pulsar/BasicArchive.h			\
+	Pulsar/BasicIntegration.h		\
+	Pulsar/RFIMitigation.h			\
+	Pulsar/ColdPlasma.h			\
+	Pulsar/Dispersion.h			\
+	Pulsar/DispersionDelay.h		\
+	Pulsar/Fourier.h			\
+	Pulsar/IntegrationManagerExpert.h	\
+	Pulsar/IntegrationExpert.h		\
+	Pulsar/Transformation.h			\
+	Pulsar/Smooth.h				\
+	Pulsar/ExampleArchive.h			\
+	Pulsar/SmoothMean.h			\
+	Pulsar/Polarization.h			\
+	Pulsar/SmoothMedian.h			\
+	Pulsar/FourierSNR.h			\
+	Pulsar/StandardSNR.h			\
+	Pulsar/OnPulseThreshold.h		\
+	Pulsar/NoiseStatistics.h		\
+	Pulsar/OnPulseEstimator.h		\
+	Pulsar/PolnProfileStats.h		\
+	Pulsar/InterpreterVariables.h		\
+	Pulsar/SquareWave.h			\
+	Pulsar/ScatteredPowerCorrection.h	\
+	Pulsar/Integration.h			\
+	Pulsar/Transposer.h			\
+	Pulsar/IntegrationManager.h		\
+	Pulsar/Utilities.h			\
+	Pulsar/Interpreter.h			\
+	Pulsar/psrchive.h			\
+	Pulsar/IterativeBaseline.h		\
+	Pulsar/PhaseWeight.h			\
+	Pulsar/ArchiveTI.h			\
+	Pulsar/PhaseWeightFunction.h		\
+	Pulsar/ProfileWeightFunction.h		\
+	Pulsar/Plotter.h			\
+	Pulsar/IntegrationTI.h			\
+	Pulsar/BaselineWindow.h			\
+	Pulsar/Pulsar.h				\
+	Pulsar/ReflectStokes.h			\
+	Pulsar/ChannelZapMedian.h		\
+	Pulsar/ChannelWeight.h			\
+	Pulsar/ChannelZapModulation.h		\
+	Pulsar/Config.h				\
+	Pulsar/Profile_utils.h			\
+	Pulsar/Weight.h				\
+	Pulsar/IntegrationWeight.h		\
+	Pulsar/DurationWeight.h			\
+	Pulsar/SNRWeight.h
 
-libpsrchive_la_SOURCES = plugins.csh getopt.h Physical.h \
-	AdaptiveSNR.C                 Integration_new_PolnProfile.C  \
-	Agent.C                       Integration_remove_baseline.C  \
-	Agent_static.C                Integration_resize.C  \
-	Archive.C                     Integration_toas.C  \
-	Archive_append.C              Integration_total.C  \
-	Archive_convert_state.C       Integration_transform.C  \
-	Archive_copy.C                Integration_weighted_frequency.C  \
-	Archive_correct_instrument.C  PhaseWeight.C  \
-	Archive_denoise_method.C      Physical.C  \
-	Archive_fappend.C             PolarCalibrator.C  \
-	Archive_find.C                PolnCalibrator.C  \
-	Archive_get_PA.C              PolnCalibratorInfo.C  \
-	Archive_init_Integration.C    InterpreterVariables.C \
-	Archive_load.C                PolnProfile.C  \
-	Archive_match.C               PolnProfileFit.C  \
-	ArchiveMatch.C                ArchiveSort.C \
-        PolnProfileFitAnalysis.C      OffPulseCalibrator.C \
-	OnPulseThreshold.C            PolnProfileStats.C \
-	Archive_resize.C              Profile.C  \
-	Archive_split_method.C        Profile_average.C  \
-	Archive_toas.C                Profile_basic_shift.C  \
-	Archive_total.C               Profile_convolve.C  \
-	Archive_transform.C           Profile_denoise.C  \
-	Profile_find_minmax_phase.C   ReflectStokes.C \
-	Archive_tscrunch.C            Profile_find_peak_edges.C  \
-	Archive_unload.C              Profile_find_transitions.C  \
-	Archive_update_model.C        Profile_flux.C  \
-	Archive_verbose.C             Profile_rotate.C  \
-	GaussianBaseline.C            Profile_shift.C  \
-	BasicArchive.C                Profile_snr.C  \
-	BasicIntegration.C            Profile_snr_fortran.C  \
-	Calibrator.C                  Profile_stats.C  \
-	CalibratorStokesInfo.C        Profile_toa.C  \
-	CorrectionsCalibrator.C       PulsarCalibrator.C  \
-	Dispersion.C                  DispersionDelay.C \
-	Database.C                    RFIMitigation.C  \
-	DeltaRM.C                     DoPCalibrator.C \
-	ExampleArchive.C              ReceptionCalibrator.C  \
-	ExponentialBaseline.C         Polarization.C \
-	FaradayRotation.C             FrequencyIntegrate.C \
-	FluxCalibratorData.C          Fourier.C \
-	FluxCalibrator.C              ReceptionCalibrator_get_Info.C  \
-	FluxCalibratorDatabase.C      ReceptionCalibrator_get_solution.C  \
-	FourierSNR.C                  NoiseStatistics.C \
-	ReferenceCalibrator.C         SquareWave.C \
-	HybridCalibrator.C            SingleAxisCalibrator.C  \
-	InstrumentInfo.C              Smooth.C  \
-	Integration.C                 SmoothMean.C  \
-	IntegrationManager.C          SmoothMedian.C  \
-	Integration_cal_levels.C      SourceInfo.C  \
-	Integration_convert_state.C   StandardSNR.C  \
-	Integration_dedisperse.C      SyntheticProfile.C  \
-	SyntheticPolnProfile.C        SimPolnTiming.C \
-	Integration_defaraday.C       SystemCalibrator.C  \
-	Integration_fappend.C         Transposer.C  \
-	Integration_find.C            Utilities.C  \
-	Integration_flux.C            choose.C  \
-	Integration_fscrunch.C        GaussianShift.C \
-	Integration_get_PA.C          ZeroPadShift.C \
-	Integration_get_Stokes.C      model_profile.C  \
-	Integration_invint.C          pafit_get_PA.C  \
-	Integration_match.C           ArchiveTI.C \
-	IntegrationTI.C               IonosphereCalibrator.C \
-	Interpreter.C                 SNRWeight.C \
-	IterativeBaseline.C           ProfileWeightFunction.C \
-	PhaseGradShift.C              Profile_fftconv.C \
-	BaselineWindow.C              ChannelZapMedian.C \
-	Weight.C                      ChannelZapModulation.C \
-        SincInterpShift.C             ScatteredPowerCorrection.C \
-	Profile_utils.C               DurationWeight.C
+libpsrchive_la_SOURCES =			\
+	AdaptiveSNR.C				\
+	Agent.C					\
+	Agent_static.C				\
+	Archive_append.C			\
+	Archive.C				\
+	Archive_convert_state.C			\
+	Archive_copy.C				\
+	Archive_denoise_method.C		\
+	Archive_fappend.C			\
+	Archive_find.C				\
+	Archive_get_PA.C			\
+	Archive_init_Integration.C		\
+	Archive_load.C				\
+	Archive_match.C				\
+	ArchiveMatch.C				\
+	Archive_resize.C			\
+	ArchiveSort.C				\
+	Archive_split_method.C			\
+	ArchiveTI.C				\
+	Archive_toas.C				\
+	Archive_transform.C			\
+	Archive_unload.C			\
+	Archive_update_model.C			\
+	Archive_verbose.C			\
+	BaselineWindow.C			\
+	BasicArchive.C				\
+	BasicIntegration.C			\
+	ChannelZapMedian.C			\
+	ChannelZapModulation.C			\
+	choose.C				\
+	DeltaRM.C				\
+	Dispersion.C				\
+	DispersionDelay.C			\
+	DurationWeight.C			\
+	ExampleArchive.C			\
+	ExponentialBaseline.C			\
+	Fourier.C				\
+	FourierSNR.C				\
+	GaussianBaseline.C			\
+	getopt.h				\
+	Integration.C				\
+	Integration_cal_levels.C		\
+	Integration_convert_state.C		\
+	Integration_dedisperse.C		\
+	Integration_fappend.C			\
+	Integration_find.C			\
+	Integration_get_PA.C			\
+	Integration_get_Stokes.C		\
+	Integration_invint.C			\
+	IntegrationManager.C			\
+	Integration_match.C			\
+	Integration_new_PolnProfile.C		\
+	Integration_remove_baseline.C		\
+	Integration_resize.C			\
+	IntegrationTI.C				\
+	Integration_toas.C			\
+	Integration_total.C			\
+	Integration_transform.C			\
+	Integration_weighted_frequency.C	\
+	Interpreter.C				\
+	InterpreterVariables.C			\
+	IterativeBaseline.C			\
+	model_profile.C				\
+	NoiseStatistics.C			\
+	OnPulseThreshold.C			\
+	pafit_get_PA.C				\
+	PhaseGradShift.C			\
+	PhaseWeight.C				\
+	Physical.C				\
+	Physical.h				\
+	plugins.csh				\
+	Polarization.C				\
+	PolnProfile.C				\
+	PolnProfileStats.C			\
+	Profile_average.C			\
+	Profile.C				\
+	Profile_convolve.C			\
+	Profile_denoise.C			\
+	Profile_fftconv.C			\
+	Profile_find_minmax_phase.C		\
+	Profile_find_peak_edges.C		\
+	Profile_find_transitions.C		\
+	Profile_flux.C				\
+	Profile_rotate.C			\
+	Profile_shift.C				\
+	Profile_snr.C				\
+	Profile_snr_fortran.C			\
+	Profile_stats.C				\
+	Profile_toa.C				\
+	Profile_utils.C				\
+	ProfileWeightFunction.C			\
+	ReflectStokes.C				\
+	RFIMitigation.C				\
+	ScatteredPowerCorrection.C		\
+	SincInterpShift.C			\
+	Smooth.C				\
+	SmoothMean.C				\
+	SmoothMedian.C				\
+	SNRWeight.C				\
+	SquareWave.C				\
+	StandardSNR.C				\
+	Transposer.C				\
+	Utilities.C				\
+	Weight.C				\
+	ZeroPadShift.C
 
 if !HAVE_GETOPT_LONG
 libpsrchive_la_SOURCES += getopt.c getopt1.c
 endif
 
-SUBDIRS                 = Calibration Extension timer epn ascii
+SUBDIRS = Extension timer epn ascii
 
-libpsrchive_la_LIBADD   = Calibration/libCalibration.la \
-			Extension/libExtension.la \
+libpsrchive_la_LIBADD = Extension/libExtension.la			  \
 			timer/libtimer.la epn/libepn.la ascii/libascii.la
+
+# ######################################################################
+#
+# programs
+#
+bin_PROGRAMS = psredit psrconv vip psr_template \
+	fix_coords fix_fluxcal fix_hydra fix_3C353 \
+	sesdiv parInfo default_loader archive_correct 
+
+psredit_SOURCES			= psredit.C
+psrconv_SOURCES			= psrconv.C
+vip_SOURCES			= vip.C
+psr_template_SOURCES		= psr_template.C
+fix_coords_SOURCES		= fix_coords.C
+fix_fluxcal_SOURCES		= fix_fluxcal.C
+fix_hydra_SOURCES		= fix_hydra.C
+fix_3C353_SOURCES		= fix_3C353.C
+sesdiv_SOURCES			= sesdiv.C
+parInfo_SOURCES                 = parInfo.C
+default_loader_SOURCES		= default_loader.C
+archive_correct_SOURCES		= archive_correct.C
+
+# ######################################################################
+#
+# The following codes make use of MEAL
+#
+
+if !MAKE_LEAN
+
+nobase_include_HEADERS +=			\
+	Pulsar/Calibrator.h			\
+	Pulsar/CalibratorPlotter.h		\
+	Pulsar/CalibratorStokesInfo.h		\
+	Pulsar/CorrectionsCalibrator.h		\
+	Pulsar/Database.h			\
+	Pulsar/DoPCalibrator.h			\
+	Pulsar/FaradayRotation.h		\
+	Pulsar/FluxCalibratorDatabase.h		\
+	Pulsar/FluxCalibrator.h			\
+	Pulsar/FrequencyIntegrate.h		\
+	Pulsar/HybridCalibrator.h		\
+	Pulsar/InstrumentInfo.h			\
+	Pulsar/IonosphereCalibrator.h		\
+	Pulsar/OffPulseCalibrator.h		\
+	Pulsar/PolarCalibrator.h		\
+	Pulsar/PolnCalibrator.h			\
+	Pulsar/PolnProfileFitAnalysis.h		\
+	Pulsar/PulsarCalibrator.h		\
+	Pulsar/ReceptionCalibrator.h		\
+	Pulsar/ReceptionCalibratorPlotter.h	\
+	Pulsar/ReferenceCalibrator.h		\
+	Pulsar/SimPolnTiming.h			\
+	Pulsar/SingleAxisCalibrator.h		\
+	Pulsar/SourceInfo.h			\
+	Pulsar/SyntheticPolnProfile.h		\
+	Pulsar/SyntheticProfile.h		\
+	Pulsar/SystemCalibrator.h
+
+libpsrchive_la_SOURCES +=			\
+	Archive_fscrunch.C			\
+	Archive_centre_max_bin.C		\
+	Archive_defaraday.C			\
+	Archive_find_best_period.C		\
+	Archive_get_poln_flux.C			\
+	Archive_invint.C			\
+	Archive_remove_baseline.C		\
+	Archive_rms_baseline.C			\
+	Archive_tscrunch.C Archive_total.C	\
+	Integration_flux.C			\
+	Integration_fscrunch.C			\
+	Archive_correct_instrument.C		\
+	Calibrator.C				\
+	CalibratorStokesInfo.C			\
+	CorrectionsCalibrator.C			\
+	Database.C				\
+	DoPCalibrator.C				\
+	FaradayRotation.C			\
+	FluxCalibrator.C			\
+	FluxCalibratorDatabase.C		\
+	FluxCalibratorData.C			\
+	FrequencyIntegrate.C			\
+	GaussianShift.C				\
+	HybridCalibrator.C			\
+	InstrumentInfo.C			\
+	Integration_defaraday.C			\
+	IonosphereCalibrator.C			\
+	OffPulseCalibrator.C			\
+	PolarCalibrator.C			\
+	PolnCalibrator.C			\
+	PolnCalibratorInfo.C			\
+	PolnCalibratorExt.C			\
+	PolnProfileFit.C			\
+        PolnProfileFitAnalysis.C		\
+	Profile_basic_shift.C			\
+	PulsarCalibrator.C			\
+	Receiver_get_transformation.C		\
+	Receiver_load.C				\
+	ReceptionCalibrator.C			\
+	ReceptionCalibrator_get_Info.C		\
+	ReceptionCalibrator_get_solution.C	\
+	ReferenceCalibrator.C			\
+	SimPolnTiming.C				\
+	SingleAxisCalibrator.C			\
+	SourceInfo.C				\
+	SyntheticProfile.C			\
+	SyntheticPolnProfile.C			\
+	SystemCalibrator.C 
+
+SUBDIRS += Calibration
+
+libpsrchive_la_LIBADD += Calibration/libCalibration.la
+
+bin_PROGRAMS += vap pam psrsh psradd pascii paz pac pat pcq fluxcal	\
+	fadd psrdiff archive_denoise archive_split
+
+vap_SOURCES			= vap.C
+pam_SOURCES			= pam.C
+psrsh_SOURCES			= psrsh.C
+psradd_SOURCES			= psradd.C
+pascii_SOURCES			= pascii.C
+paz_SOURCES			= paz.C
+pac_SOURCES			= pac.C
+pat_SOURCES			= pat.C
+pcq_SOURCES			= pcq.C
+fluxcal_SOURCES			= fluxcal.C
+fadd_SOURCES			= fadd.C
+psrdiff_SOURCES			= psrdiff.C
+archive_denoise_SOURCES		= archive_denoise.C
+archive_split_SOURCES		= archive_split.C
+
+TESTS = test_Receiver test_Interpreter
+
+check_PROGRAMS = test_Archive test_denoise test_Difference $(TESTS)
+
+test_Interpreter_SOURCES	= test_Interpreter.C
+test_Receiver_SOURCES		= test_Receiver.C
+test_Archive_SOURCES		= test_Archive.C
+test_denoise_SOURCES		= test_denoise.C
+test_Difference_SOURCES		= test_Difference.C
+
+endif
 
 if HAVE_CFITSIO
 SUBDIRS += psrfits
@@ -153,53 +346,6 @@ endif
 
 # ######################################################################
 #
-# programs
-#
-bin_PROGRAMS = psr_template pac paz vap pcq vip psredit psradd fadd pat pam \
-        psrdiff fluxcal fix_coords test_Difference fix_hydra sesdiv \
-        fix_3C353 archive_correct archive_denoise \
-        fix_fluxcal archive_split psrconv pascii \
-        default_loader parInfo 
-
-
-psr_template_SOURCES		= psr_template.C
-archive_correct_SOURCES		= archive_correct.C
-archive_denoise_SOURCES		= archive_denoise.C
-archive_split_SOURCES		= archive_split.C
-default_loader_SOURCES		= default_loader.C
-fadd_SOURCES			= fadd.C
-fix_3C353_SOURCES		= fix_3C353.C
-fix_coords_SOURCES		= fix_coords.C
-fix_fluxcal_SOURCES		= fix_fluxcal.C
-fix_hydra_SOURCES		= fix_hydra.C
-fluxcal_SOURCES			= fluxcal.C
-paz_SOURCES			= paz.C
-pac_SOURCES			= pac.C
-pam_SOURCES			= pam.C
-pascii_SOURCES			= pascii.C
-pat_SOURCES			= pat.C
-psradd_SOURCES			= psradd.C
-psrconv_SOURCES			= psrconv.C
-sesdiv_SOURCES			= sesdiv.C
-vap_SOURCES			= vap.C
-vip_SOURCES			= vip.C
-pcq_SOURCES			= pcq.C
-psredit_SOURCES			= psredit.C
-parInfo_SOURCES                 = parInfo.C
-psrdiff_SOURCES			= psrdiff.C
-
-TESTS = test_Receiver test_Interpreter
-
-check_PROGRAMS = test_Archive test_denoise test_Difference $(TESTS)
-
-test_Interpreter_SOURCES	= test_Interpreter.C
-test_Receiver_SOURCES		= test_Receiver.C
-test_Archive_SOURCES		= test_Archive.C
-test_denoise_SOURCES		= test_denoise.C
-test_Difference_SOURCES		= test_Difference.C
-
-# ######################################################################
-#
 # PGPLOT specific code
 #
 if HAVE_PGPLOT
@@ -214,9 +360,7 @@ libpsrchive_la_SOURCES += ArchiveProcessor.C Plotter.C CalibratorPlotter.C  \
 	Plotter_phase_frequency.C      Plotter_phase_time.C \
 	Plotter_draw_colour_map.C
 
-# Plotter_pseudo_vector_correlation.C
-
-bin_PROGRAMS += pacv pcvar pav pas psrwt psrsh pcm pvt paf psrqft \
+bin_PROGRAMS += pacv pcvar pav pas psrwt pcm pvt paf psrqft \
 	binphs_test pcm_chooser rmfit psrband SimTiming bin_clean \
 	plot_baseline pdmp psrfi tsys spa psrchive_template paas pfixbaseline
 
@@ -229,7 +373,6 @@ pcm_SOURCES			= pcm.C
 pcm_chooser_SOURCES		= pcm_chooser.C
 pcvar_SOURCES			= pcvar.C
 psrband_SOURCES			= psrband.C
-psrsh_SOURCES			= psrsh.C
 psrwt_SOURCES			= psrwt.C
 pvt_SOURCES			= pvt.C
 rmfit_SOURCES			= rmfit.C
@@ -278,9 +421,10 @@ pad_SOURCES 			= pad.C
 plot_acf_SOURCES		= plot_acf.C
 pad_LDADD 			= $(LDADD) @PGPLOT_LIBS@
 plot_acf_LDADD			= $(LDADD) @PGPLOT_LIBS@
-endif
 
-endif
+endif #CFITSIO
+
+endif #PGPLOT
 
 # Config.C must be the last source code in the list
 libpsrchive_la_SOURCES += Config.C
@@ -321,4 +465,3 @@ LDADD = libpsrchive.la $(top_builddir)/astro/libpsrastro.la \
 libpsrchive_la_LIBADD += @FFT_LIBS@ @CFITSIO_LIBS@ @SLA_LIBS@ @FLIBS@
 
 include $(top_srcdir)/config/Makefile.local
-
