@@ -42,6 +42,10 @@ void Pulsar::FITSArchive::unload (fitsfile* fptr,
     if (pce->get_valid(i))
       ncpar = pce->get_transformation(i)->get_nparam(); 
 
+  if (ncpar == 0)
+    throw Error (InvalidState, "FITSArchive::unload PolnCalibratorExtension",
+		 "number of model parameters == 0");
+
   if (verbose == 3)
     cerr << "FITSArchive::unload PolnCalibratorExtension nchan=" 
 	 << nchan <<  " nparam=" << ncpar << endl;
