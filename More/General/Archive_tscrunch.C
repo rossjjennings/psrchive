@@ -10,9 +10,10 @@
 #include "Pulsar/Profile.h"
 #include "Error.h"
 
+
 /////////////////////////////////////////////////////////////////////////////
 //
-// Pulsar::Integration::fscrunch
+// Pulsar::Integration::tscrunch
 //
 /*!
   \param nscrunch number of neighbouring Integrations to add. 
@@ -290,4 +291,21 @@ double Pulsar::Archive::weighted_frequency (unsigned ichan,
   // Nearest kHz
   result = 1e-3 * double( int(result*1e3) );
   return result;
+}
+
+/////////////////////////////////////////////////////////////////////////////
+//
+/*!
+  Useful wrapper for Archive::tscrunch
+*/
+void Pulsar::Archive::tscrunch_to_nsub (unsigned new_nsub)
+{
+  if (new_nsub <= 0)
+    throw Error (InvalidParam, "Pulsar::Archive::tscrunch_to_nsub",
+		 "Invalid nsub request");
+  else if (get_nsubint() < new_nsub)
+    throw Error (InvalidParam, "Pulsar::Archive::tscrunch_to_nsub",
+		 "Archive has too few subints");
+  else
+    tscrunch(get_nsubint() / new_nsub);
 }
