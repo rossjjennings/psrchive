@@ -201,12 +201,7 @@ void Pulsar::PolnCalibrator::calculate_transformation ()
   transformation.resize (nchan);
 
   for (unsigned ichan=0; ichan < nchan; ichan++)
-    if ( poln_extension->get_valid(ichan) )
-      transformation[ichan] = 
-	const_cast<MEAL::Complex2*>
-	(poln_extension->get_transformation(ichan));
-    else
-      transformation[ichan] = 0;
+    transformation[ichan] = new_transformation (poln_extension, ichan);
 }
 
 void Pulsar::PolnCalibrator::build (unsigned nchan) try {
