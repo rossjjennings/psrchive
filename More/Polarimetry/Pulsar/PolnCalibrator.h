@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PolnCalibrator.h,v $
-   $Revision: 1.39 $
-   $Date: 2006/03/17 13:34:51 $
+   $Revision: 1.40 $
+   $Date: 2006/04/16 13:27:07 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PolnCalibrator_H
@@ -181,6 +181,15 @@ namespace Pulsar {
     void build (unsigned nchan = 0);
     
   };
+
+  //! Create a new transformation instance described by the extension
+  MEAL::Complex2*
+  new_transformation (const PolnCalibratorExtension*, unsigned ichan);
+
+  //! Create a new transformation instance described by the type
+  MEAL::Complex2* new_transformation( Calibrator::Type type );
+
+
 
 }
 
