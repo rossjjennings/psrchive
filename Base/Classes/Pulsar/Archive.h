@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Archive.h,v $
-   $Revision: 1.148 $
-   $Date: 2006/03/31 17:16:40 $
+   $Revision: 1.149 $
+   $Date: 2006/04/16 13:27:32 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Archive_h
@@ -292,13 +292,13 @@ namespace Pulsar {
     //@{
 
     //! Install the given ephemeris and call update_model
-    virtual void set_ephemeris (const psrephem& ephemeris, bool update = true);
+    void set_ephemeris (const psrephem& ephemeris, bool update = true);
 
     //! Return a copy of the current archive ephemeris
     const psrephem get_ephemeris() const;
 
     //! Install the given polyco and shift profiles to align
-    virtual void set_model (const polyco& model);
+    void set_model (const polyco& model);
 
     //! Return a copy of the current archive polyco
     const polyco get_model() const;
@@ -307,7 +307,7 @@ namespace Pulsar {
     bool has_model() const { return model; }
 
     //! Create a new polyco and align the Integrations to the new model
-    virtual void update_model ();
+    void update_model ();
 
     //@}
 
@@ -318,28 +318,28 @@ namespace Pulsar {
     // //////////////////////////////////////////////////////////////////
 
     //! Integrate pulse profiles in phase
-    virtual void bscrunch (unsigned nscrunch);
+    void bscrunch (unsigned nscrunch);
 
     //! Integrate neighbouring sections of the pulse profiles
-    virtual void fold (unsigned nfold);
+    void fold (unsigned nfold);
 
     //! Integrate profiles in polarization
-    virtual void pscrunch();
+    void pscrunch();
 
     //! Integrate profiles in frequency
-    virtual void fscrunch (unsigned nscrunch=0);
+    void fscrunch (unsigned nscrunch=0);
 
     //! Integrate profiles in time
-    virtual void tscrunch (unsigned nscrunch=0);
+    void tscrunch (unsigned nscrunch=0);
 
     //! Phase rotate each profile by time seconds
-    virtual void rotate (double time);
+    void rotate (double time);
 
     //! Rotate each profile by phase
-    virtual void rotate_phase (double phase);
+    void rotate_phase (double phase);
 
     //! Append the Integrations from the specifed archive
-    virtual void append (const Archive* archive);
+    void append (const Archive* archive);
 
     //! Append frequency channels from another Archive
     /*!  This method is intended only for use with instruments with a
@@ -347,77 +347,77 @@ namespace Pulsar {
     void fappend (Pulsar::Archive* arch, bool ignore_time_mismatch = false);
 
     //! denoise archive
-    virtual void denoise (int denoise_fraction=8);
+    void denoise (int denoise_fraction=8);
     //! split archive into subbands
-    virtual void split (int split_fraction=8);
+    void split (int split_fraction=8);
 
     //! Phase rotate pulsar Integrations so that pulse phase zero is centred
-    virtual void centre ();
+    void centre ();
 
     //! Phase rotate pulsar Integrations so centre the maximum amplitude
-    virtual void centre_max_bin (); 
+    void centre_max_bin (); 
 
     //! Convert data to the specified state
-    virtual void convert_state (Signal::State state);
-
-    //! Correct known instrumental effects
-    virtual void correct_instrument ();
-
-    //! Return true if known instrumental effects have been corrected
-    virtual bool get_instrument_corrected () const;
+    void convert_state (Signal::State state);
 
     //! Convenience interface to Receiver::get_basis
-    virtual Signal::Basis get_basis () const;
+    Signal::Basis get_basis () const;
 
     //! Rotate the Profiles to remove dispersion delays b/w chans
-    virtual void dedisperse ();
+    void dedisperse ();
 
     //! Correct the Faraday rotation of Q into U
-    virtual void defaraday ();
+    void defaraday ();
     
+    //! Correct known instrumental effects
+    void correct_instrument ();
+
+    //! Return true if known instrumental effects have been corrected
+    bool get_instrument_corrected () const;
+
     //! Get mean PA and error in the mean with a phase region
     void get_PA (std::vector <Estimate<float> > &pas, float _startphase, float _stopphase);
  
     //! Fit Profiles to the standard and return toas
-    virtual void toas (std::vector<Tempo::toa>& toas, const Archive* std,
+    void toas (std::vector<Tempo::toa>& toas, const Archive* std,
 		       std::string arguments = "",
 		       Tempo::toa::Format fmt = Tempo::toa::Parkes) const;
     
     //! Perform the transformation on each polarimetric profile
-    virtual void transform (const Jones<float>& transformation);
+    void transform (const Jones<float>& transformation);
 
     //! Perform frequency response on each polarimetric profile
-    virtual void transform (const std::vector< Jones<float> >& response);
+    void transform (const std::vector< Jones<float> >& response);
 
     //! Perform the time and frequency response on each polarimetric profile
-    virtual void transform (const std::vector< std::vector< Jones<float> > >& response);
+    void transform (const std::vector< std::vector< Jones<float> > >& response);
 
     //! Transform Stokes I,Q,U,V into the polarimetric invariant interval
-    virtual void invint ();
+    void invint ();
  
     //! Return polarization flux in first integration, 0 == total, 1 == linear, 2==circular 
-    virtual Estimate<float>  get_poln_flux (int _type);
+    Estimate<float>  get_poln_flux (int _type);
   
     //! Remove the baseline from all profiles
-    virtual void remove_baseline (float phase = -1.0, float dc = 0.15);
+    void remove_baseline (float phase = -1.0, float dc = 0.15);
 
     //! Set the weight of each profile to its snr squared
-    virtual void snr_weight ();
+    void snr_weight ();
 
     //! Set the weight of each profile to the given number
-    virtual void uniform_weight (float new_weight = 1.0);
+    void uniform_weight (float new_weight = 1.0);
 
     //! Test if arch matches (enough for a pulsar - standard match)
-    virtual bool standard_match (const Archive* arch, std::string& reason) const;
+    bool standard_match (const Archive* arch, std::string& reason) const;
 
     //! Test if arch matches (enough for a pulsar - calibrator match)
-    virtual bool calibrator_match (const Archive* arch, std::string& reason) const;
+    bool calibrator_match (const Archive* arch, std::string& reason) const;
 
     //! Test if arch matches (enough for a pulsar - pulsar match)
-    virtual bool processing_match (const Archive* arch, std::string& reason) const;
+    bool processing_match (const Archive* arch, std::string& reason) const;
 
     //! Test if arch is mixable (enough for append)
-    virtual bool mixable (const Archive* arch, std::string& reason) const;
+    bool mixable (const Archive* arch, std::string& reason) const;
 
     //! Computes the weighted channel frequency over an Integration interval.
     double weighted_frequency (unsigned ichan,
@@ -467,10 +467,10 @@ namespace Pulsar {
 
     //! A dsp::Transformation into an Archive must be able to call this
     //! This calls Signal::valid_state() to see if the state is consistent with the ndim, npol
-    virtual bool state_is_valid (std::string& reason) const;
+    bool state_is_valid (std::string& reason) const;
 
     //! Replaces each profile with its power spectrum
-    virtual void get_profile_power_spectra(float gamma=1.0);
+    void get_profile_power_spectra(float gamma=1.0);
 
 
     // //////////////////////////////////////////////////////////////////
@@ -550,7 +550,7 @@ namespace Pulsar {
     //! Return the revision number of the Archive base class definition
     /*! This string is automatically generated by CVS.  Do not edit. */
     static std::string get_revision ()
-    { return get_revision("$Revision: 1.148 $"); }
+    { return get_revision("$Revision: 1.149 $"); }
 
     //! Report on the status of the plugins
     static void agent_report ();
@@ -800,7 +800,7 @@ namespace Pulsar {
       //! Return the revision number of the Archive base class definition
       /*! This string is automatically generated by CVS.  Do not edit. */
       std::string get_revision () 
-      { return Archive::get_revision ("$Revision: 1.148 $"); }
+      { return Archive::get_revision ("$Revision: 1.149 $"); }
 
       // ensure that the Advocate is linked into static binaries
       static void ensure_linkage () { entry.get(); }

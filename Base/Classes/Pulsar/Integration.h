@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Integration.h,v $
-   $Revision: 1.81 $
-   $Date: 2006/04/06 03:57:38 $
-   $Author: hknight $ */
+   $Revision: 1.82 $
+   $Date: 2006/04/16 13:27:32 $
+   $Author: straten $ */
 
 /*
   
@@ -77,14 +77,14 @@ namespace Pulsar {
     MJD get_end_time () const;
 
     //! Get the Profile centre frequency attribute of the given channel
-    virtual double get_centre_frequency (unsigned ichan) const;
+    double get_centre_frequency (unsigned ichan) const;
     //! Set the Profile centre frequency attributes of the given channel
-    virtual void set_centre_frequency (unsigned ichan, double frequency);
+    void set_centre_frequency (unsigned ichan, double frequency);
 
     //! Get the Profile weight attribute of the given channel
-    virtual float get_weight (unsigned ichan) const;
+    float get_weight (unsigned ichan) const;
     //! Set the Profile weight attributes of the given channel
-    virtual void set_weight (unsigned ichan, float weight);
+    void set_weight (unsigned ichan, float weight);
 
     //! Get flux
     float flux (int _poln = 0, float dc = 0.15);
@@ -114,7 +114,7 @@ namespace Pulsar {
 			 vector< vector< Estimate<double> > >& variance) const;
 
     //! Returns the mean hi/lo and variance of the mean hi/lo of every profile
-    virtual void cal_levels (vector< vector< Estimate<double> > >& hi,
+    void cal_levels (vector< vector< Estimate<double> > >& hi,
 			     vector< vector< Estimate<double> > >& lo) const;
 
     void find_psr_levels (vector<vector<double> >& mean_high,
@@ -246,28 +246,28 @@ namespace Pulsar {
     //@{
 
     //! Get the centre frequency (in MHz)
-    virtual double get_centre_frequency() const;
+    double get_centre_frequency() const;
     
     //! Get the bandwidth (in MHz)
-    virtual double get_bandwidth() const;
+    double get_bandwidth() const;
 
     //! Get the dispersion measure (in \f${\rm pc\, cm}^{-3}\f$)
-    virtual double get_dispersion_measure () const;
+    double get_dispersion_measure () const;
     
     //! Inter-channel dispersion delay has been removed
-    virtual bool get_dedispersed () const;
+    bool get_dedispersed () const;
 
     //! Get the rotation measure (in \f${\rm rad\, m}^{-2}\f$)
-    virtual double get_rotation_measure () const;
+    double get_rotation_measure () const;
 
     //! Data has been corrected for ISM faraday rotation
-    virtual bool get_faraday_corrected () const;
+    bool get_faraday_corrected () const;
 
     //! Get the feed configuration of the receiver
-    virtual Signal::Basis get_basis () const;
+    Signal::Basis get_basis () const;
 
     //! Get the polarimetric state of the profiles
-    virtual Signal::State get_state () const;
+    Signal::State get_state () const;
 
     //@}
 
@@ -304,7 +304,7 @@ namespace Pulsar {
 		     Signal::Dimension abscissa = Signal::Phase ) const;
 
     //! get PA as a function of phase
-    virtual void get_PA (vector<double> &phases, vector<double> &angles,
+    void get_PA (vector<double> &phases, vector<double> &angles,
 			 vector<double> &errors, float _threshold=2.5);
 
     // //////////////////////////////////////////////////////////////////
@@ -439,25 +439,25 @@ namespace Pulsar {
 			unsigned jpol, unsigned jchan);
 
     //! Call Profile::fold on every profile
-    virtual void fold (unsigned nfold);
+    void fold (unsigned nfold);
 
     //! Call Profile::bsrunch on every profile
-    virtual void bscrunch (unsigned nscrunch);
+    void bscrunch (unsigned nscrunch);
     
     //! Rotate each profile by time (in seconds); updates the epoch attribute
-    virtual void rotate (double time);
+    void rotate (double time);
 
     //! Rotate each profile by phase; does not update the epoch attribute
-    virtual void rotate_phase (double phase);
+    void rotate_phase (double phase);
 
     //! Integrate profiles from neighbouring chans
-    virtual void fscrunch (unsigned nscrunch = 0);
+    void fscrunch (unsigned nscrunch = 0);
 
     //! Integrate profiles from single polarizations into one total intensity
-    virtual void pscrunch ();
+    void pscrunch ();
     
     //! Replaces each profile with its power spectrum
-    virtual void get_profile_power_spectra(float gamma=1.0);
+    void get_profile_power_spectra(float gamma=1.0);
     
 
     //! operator +=
@@ -477,7 +477,7 @@ namespace Pulsar {
     void fappend (Pulsar::Integration* integ, bool ignore_time_mismatch = false);
 
     //! Transform from Stokes (I,Q,U,V) to the polarimetric invariant interval
-    virtual void invint ();
+    void invint ();
     
     //! Perform the congruence transformation on each polarimetric profile
     void transform (const Jones<float>& response);
@@ -486,7 +486,7 @@ namespace Pulsar {
     void transform (const vector< Jones<float> >& response);
 
     //! Convert polarimetric data to the specified state
-    virtual void convert_state (Signal::State state);
+    void convert_state (Signal::State state);
 
     //! All new Profile instances are created through this method
     virtual Profile* new_Profile ();
