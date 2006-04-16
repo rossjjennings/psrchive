@@ -278,50 +278,6 @@ void Pulsar::Archive::bscrunch (unsigned nscrunch)
   set_nbin (get_Integration(0)->get_nbin());
 }
 
-/*!
-  Simply calls Integration::fscrunch for each Integration
-  \param nscrunch the number of frequency channels to add together
- */
-void Pulsar::Archive::fscrunch (unsigned nscrunch)
-{
-  if (get_nsubint() == 0)
-    return;
-
-  for (unsigned isub=0; isub < get_nsubint(); isub++)
-    get_Integration(isub) -> fscrunch (nscrunch);
-
-  set_nchan (get_Integration(0)->get_nchan());
-}
-
-/*!
-  Useful wrapper for Archive::fscrunch
-*/
-void Pulsar::Archive::fscrunch_to_nchan (unsigned new_chan)
-{
-  if (get_nchan() % new_chan != 0)
-    throw Error (InvalidParam, "Pulsar::Archive::fscrunch_to_nchan",
-		 "Invalid nchan request");
-  else if (get_nchan() < new_chan)
-    throw Error (InvalidParam, "Pulsar::Archive::fscrunch_to_nchan",
-		 "Archive has too few channels");
-  else
-    fscrunch(get_nchan() / new_chan);
-}
-
-/*!
-  Useful wrapper for Archive::tscrunch
-*/
-void Pulsar::Archive::tscrunch_to_nsub (unsigned new_nsub)
-{
-  if (new_nsub <= 0)
-    throw Error (InvalidParam, "Pulsar::Archive::tscrunch_to_nsub",
-		 "Invalid nsub request");
-  else if (get_nsubint() < new_nsub)
-    throw Error (InvalidParam, "Pulsar::Archive::tscrunch_to_nsub",
-		 "Archive has too few subints");
-  else
-    tscrunch(get_nsubint() / new_nsub);
-}
 
 /*!
   Simply calls Integration::pscrunch for each Integration
@@ -338,21 +294,6 @@ void Pulsar::Archive::pscrunch()
   set_state( Signal::Intensity );
 }
 
-/*! Rotate pulsar Integrations so that the bin of largest amplitude
-    is centred */
-void Pulsar::Archive::centre_max_bin ()
-{
-  Reference::To<Pulsar::Archive> arch = total();
-  double p = arch->get_Integration(0)->get_folding_period();
-
-  int bnum = arch->get_Profile(0,0,0)->find_max_bin();
-  bnum -= get_nbin()/2;
-
-  float frac = float(bnum)/float(get_nbin());
-  double extra_time = frac * p;
-
-  rotate(extra_time); 
-}
 
 /*!
   Uses the polyco model, as well as the centre frequency and mid-time of
@@ -403,95 +344,6 @@ void Pulsar::Archive::fold (unsigned nfold)
   set_nbin (get_Integration(0)->get_nbin());
 }
 
-
-void Pulsar::Archive::invint () try {
-
-  if (get_nsubint() == 0)
-    return;
-  
-  remove_baseline();
-  
-  for (unsigned isub=0; isub < get_nsubint(); isub++)
-    get_Integration(isub) -> invint ();
-  
-  set_state( Signal::Invariant );
-  set_npol(1);
-}
-catch (Error& error) {
-  throw error += "Pulsar::Archive::invint";
-}
-
-Estimate<float> Pulsar::Archive::get_poln_flux (int _type)
-{  
-  return (get_Integration(0) -> get_poln_flux (_type,0,0)); 
-}
-
-
-/*!
-  If phase is not specified, this method calls
-  Archive::find_min_phase to find the phase at which the mean in a
-  region of the total intensity (as returned by Archive::total)
-  reaches a minimum.  This phase is then used to remove the baseline from
-  each of the Integrations.
-  */
-void Pulsar::Archive::remove_baseline (float phase, float dc) try {
-  
-  if (phase < 0.0)
-    phase = find_min_phase (dc);
-  
-  for (unsigned isub=0; isub < get_nsubint(); isub++)
-    get_Integration(isub) -> remove_baseline (phase, dc);
-  
-}
-catch (Error& error) {
-  throw error += "Pulsar::Archive::remove_baseline";
-}
-
-double Pulsar::Archive::find_best_period (){
-
-  // Firstly determine the MIDtime
-  MJD midtime = (get_Integration(get_nsubint()-1)->get_epoch()+
-		 get_Integration(0)->get_epoch())/2.0;
-
-  // Now get the centre folding period
-  double centre_period = get_Integration(0)->get_folding_period();
-
-  // loop over trial periods and remember best snr & p
-  float best_snr;
-  double best_period;
-
-  best_snr = 0.0;
-  best_period = centre_period;
-  
-  // Period limits
-  MJD t_on_2 = midtime-get_Integration(0)->get_epoch();
-  double p_l = centre_period - 0.5 * pow(centre_period,2.0)/
-    t_on_2.in_seconds();
-  double p_u = centre_period + 0.5 * pow(centre_period,2.0)/
-    t_on_2.in_seconds();
-
-  double dt = t_on_2.in_seconds();
-  double dp = pow(centre_period,2.0)/dt/(double)(get_nbin()/2);
-
-  Reference::To<Archive> scrunched_copy = clone(); 
-  // make sure appropriate scrunching
-  scrunched_copy->fscrunch(0);
-  scrunched_copy->pscrunch();
-  // Find out geometric mean rms of all sub_ints baseline
-  float rms = scrunched_copy->rms_baseline(0.4);
-  for (double trial_p = p_l;trial_p<p_u;trial_p+=dp){
-    Reference::To<Archive> acopy = scrunched_copy->clone();
-    acopy->new_folding_period(trial_p);
-    acopy->tscrunch(0);
-    float trial_snr = acopy->get_Profile(0,0,0)->snr_fortran(rms);
-    if (trial_snr>best_snr){
-      best_period = trial_p;
-      best_snr = trial_snr;
-    }
-  }
-  return(best_period);
-}
-
 void Pulsar::Archive::rotate (double time)
 {
   for (unsigned isub=0; isub < get_nsubint(); isub++)
@@ -524,30 +376,6 @@ catch (Error& error) {
   throw error += "Pulsar::Archive::dedisperse";
 }
 
-/*!
-  The defaraday method corrects the Faraday rotation between
-  each frequency channel and that of the reference frequency
-  defined by get_centre_frequency.
-
-  \pre The Archive must contain full polarimetric data
-  \pre The noise contribution to Stokes Q and U should have been removed.
-*/
-void Pulsar::Archive::defaraday ()
-{
-  if (get_nsubint() == 0)
-    return;
-
-  if (!get_poln_calibrated() && verbose)
-    cerr << "Pulsar::Archive::defaraday WARNING data not calibrated" << endl;
-
-  if (!get_instrument_corrected() && verbose)
-    cerr << "Pulsar::Archive::defaraday WARNING feed not corrected" << endl;
-
-  for (unsigned i = 0; i < get_nsubint(); i++)
-    get_Integration(i)->defaraday ();
-  
-  set_faraday_corrected (true);
-}
 
 /*! \param new_ephemeris the ephemeris to be installed
     \param update create a new polyco for the new ephemeris
@@ -721,28 +549,6 @@ void Pulsar::Archive::new_folding_period(double trial_p){
       get_Integration(i)->rotate(-dseconds);
     }
     // Doesn't work with   acopy->set_folding_period(trial_p);
-}
-
-/*!
-  Returns the geometric mean of the rms of the baseline
-  for the 0,0th profile in each Integration. MB Feb 2004.
-  */
-
-float Pulsar::Archive::rms_baseline (float baseline_width)
-{
-  if (get_nsubint() == 0)
-    return 0.0;
-  double sum_rms_sq;
-  sum_rms_sq = 0.0;
-  // find the mean and the r.m.s. of the baseline
-  double min_avg, min_var;
-  for (unsigned isub=0; isub < get_nsubint(); isub++){
-    get_Profile(isub,0,0)->stats (
-      get_Profile(isub,0,0)->find_min_phase(baseline_width), &min_avg, &min_var
-    );
-    sum_rms_sq += min_var;
-  }
-  return (float) sqrt(sum_rms_sq)/ sqrt((float) get_nsubint());
 }
 
 bool Pulsar::range_checking_enabled = true;
