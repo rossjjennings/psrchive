@@ -7,7 +7,6 @@
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
 #include "Pulsar/Profile.h"
-#include "Pulsar/Calibrator.h"
 #include "psrephem.h"
 #include "polyco.h"
 #include "tempo++.h"
@@ -24,9 +23,6 @@ void Pulsar::Archive::set_verbosity (unsigned level)
   Tempo::verbose    = (level >= 3);
   psrephem::verbose = (level >= 3);
   polyco::verbose   = (level >= 3);
-
-  // level 2
-  Calibrator::verbose = level;
 
   // all levels
   Archive::verbose = level;
