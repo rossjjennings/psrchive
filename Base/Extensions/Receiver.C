@@ -10,7 +10,6 @@
 #include "Pulsar/Receiver_Field.h"
 #include "Pulsar/Receiver_Linear.h"
 
-#include "MEAL/Rotation.h"
 #include "Pauli.h"
 
 /*! If the current state is not of the specified StateType, a new state
@@ -200,33 +199,6 @@ Jones<double> Pulsar::Receiver::get_hand_transformation () const
   complex<double> i (0,1);
   return Jones<double> (0, i,
                         i, 0);
-}
-
-//! Return the feed correction matrix
-Jones<double> Pulsar::Receiver::get_transformation () const
-{
-  Jones<double> xform = get_hand_transformation ();
-
-  if ( feed_corrected || get_orientation() == 0 )
-    return xform;
-
-  Pauli::basis.set_basis( get_basis() );
-
-  if (Archive::verbose > 1)
-    cerr << "Pulsar::Receiver::get_transformation basis="
-         << Signal::basis_string(get_basis()) << " orientation="
-         << get_orientation().getDegrees() << " deg" << endl;
-
-  // rotate the basis about the Stokes V axis
-  MEAL::Rotation rotation ( Pauli::basis.get_basis_vector(2) );
-
-  // the sign of this rotation may depend on handedness
-  rotation.set_phi ( get_orientation().getRadians() );
-
-  xform *= rotation.evaluate();
-
-  return xform;
-
 }
 
 Stokes<double> Pulsar::Receiver::get_reference_source () const

@@ -7,14 +7,13 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/PolnCalibratorExtension.h,v $
-   $Revision: 1.18 $
-   $Date: 2006/03/17 13:34:45 $
+   $Revision: 1.19 $
+   $Date: 2006/04/16 13:27:26 $
    $Author: straten $ */
 
 #ifndef __PolnCalibratorExtension_h
 #define __PolnCalibratorExtension_h
 
-#include "MEAL/Complex2.h"
 #include "Pulsar/CalibratorExtension.h"
 
 namespace Pulsar {
@@ -63,18 +62,17 @@ namespace Pulsar {
     bool get_valid (unsigned ichan) const;
     void set_valid (unsigned ichan, bool valid);
 
+    class Transformation;
+
     //! Get the transformation for the specified frequency channel
-    MEAL::Complex2* get_transformation (unsigned c);
+    Transformation* get_transformation (unsigned c);
     //! Get the transformation for the specified frequency channel
-    const MEAL::Complex2* get_transformation (unsigned c) const;
+    const Transformation* get_transformation (unsigned c) const;
 
   protected:
 
     //! The instrumental response as a function of frequency
-    vector< Reference::To<MEAL::Complex2> > response;
-
-    //! Return a new MEAL::Complex2 instance, based on type attribute
-    MEAL::Complex2* new_transformation ();
+    vector<Transformation> response;
 
     //! The number of parameters that describe the transformation
     unsigned nparam;
@@ -84,6 +82,45 @@ namespace Pulsar {
 
   };
  
+  //! Intermediate storage of MEAL::Complex parameters 
+  class PolnCalibratorExtension::Transformation {
+
+  public:
+
+    //! Default constructor
+    Transformation ();
+
+    //! Get the number of model parameters
+    unsigned get_nparam() const;
+    //! Set the number of model parameters
+    void set_nparam (unsigned);
+
+    //! Get the value of the specified model parameter
+    double get_param (unsigned) const;
+    //! Set the value of the specified model parameter
+    void set_param (unsigned, double);
+
+    //! Get the variance of the specified model parameter
+    double get_variance (unsigned) const;
+    //! Set the variance of the specified model parameter
+    void set_variance (unsigned, double);
+
+    //! Get the value and variance of the specified model parameter
+    Estimate<double> get_Estimate (unsigned) const;
+    //! Set the value and variance of the specified model parameter
+    void set_Estimate (unsigned, const Estimate<double>&);
+
+    //! Get the model validity flag
+    bool get_valid () const;
+    //! Set the model validity flag
+    void set_valid (bool);
+
+  protected:
+
+    std::vector< Estimate<double> > params;
+    bool valid;
+
+  };
 
 }
 

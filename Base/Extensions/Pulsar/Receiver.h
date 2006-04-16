@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/Receiver.h,v $
-   $Revision: 1.15 $
-   $Date: 2006/03/17 13:34:45 $
+   $Revision: 1.16 $
+   $Date: 2006/04/16 13:27:26 $
    $Author: straten $ */
 
 #ifndef __ReceiverExtension_h
@@ -49,7 +49,7 @@ namespace Pulsar {
     Receiver* clone () const { return new Receiver(*this); }
 
     //! Parses the value of a Receiver attribute from a string
-    virtual void parse (string text);
+    void parse (string text);
 
     //! Different modes of feed rotational tracking
     enum Tracking {

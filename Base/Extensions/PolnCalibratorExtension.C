@@ -6,16 +6,12 @@
  ***************************************************************************/
 #include "Pulsar/PolnCalibratorExtension.h"
 
-#include "Calibration/SingleAxis.h"
-#include "Calibration/Instrument.h"
-#include "MEAL/Polar.h"
-
 //! Default constructor
 Pulsar::PolnCalibratorExtension::PolnCalibratorExtension ()
   : CalibratorExtension ("PolnCalibratorExtension")
 {
   type = Calibrator::SingleAxis;
-  nparam = 0;
+  nparam = 3;
 }
 
 //! Copy constructor
@@ -39,14 +35,10 @@ Pulsar::PolnCalibratorExtension::operator=
   nparam = copy.get_nparam();
 
   unsigned nchan = copy.get_nchan();
-
   set_nchan (nchan);
 
   for (unsigned ichan = 0; ichan < nchan; ichan++)
-    if ( copy.get_valid(ichan) )
-      response[ichan]->copy(copy.response[ichan]);
-    else
-      set_valid (ichan, false);
+    response[ichan] = copy.response[ichan];
 
   return *this;
 }
@@ -63,8 +55,16 @@ void Pulsar::PolnCalibratorExtension::set_type (Calibrator::Type _type)
     return;
 
   type = _type;
-  nparam = 0;
-  construct ();
+
+  switch (type) {
+  case Calibrator::SingleAxis:
+    nparam = 3; break;
+  case Calibrator::Polar:
+    nparam = 6; break;
+  case Calibrator::Hamaker:
+  case Calibrator::Britton:
+    nparam = 7; break;
+  }
 }
 
 
@@ -72,10 +72,6 @@ void Pulsar::PolnCalibratorExtension::set_type (Calibrator::Type _type)
 void Pulsar::PolnCalibratorExtension::set_nchan (unsigned _nchan)
 {
   CalibratorExtension::set_nchan( _nchan );
-
-  if (response.size() == _nchan)
-    return;
-
   response.resize( _nchan );
   construct ();
 }
@@ -91,42 +87,38 @@ void Pulsar::PolnCalibratorExtension::set_weight (unsigned ichan, float weight)
 bool Pulsar::PolnCalibratorExtension::get_valid (unsigned ichan) const
 {
   range_check (ichan, "Pulsar::PolnCalibratorExtension::get_valid");
-  return response[ichan];
+  return response[ichan].get_valid();
 }
 
 void Pulsar::PolnCalibratorExtension::set_valid (unsigned ichan, bool valid)
 {
   range_check (ichan, "Pulsar::PolnCalibratorExtension::set_valid");
 
-  if (!valid) {
-    response[ichan] = 0;
+  if (!valid)
     weight[ichan] = 0;
-  }
-  else if (!response[ichan])
-    response[ichan] = new_transformation ();
+
+  response[ichan].set_valid (valid);
 }
 
 unsigned Pulsar::PolnCalibratorExtension::get_nparam () const
 {
-  if (!nparam)
-    const_cast<PolnCalibratorExtension*>(this)->construct();
   return nparam;
 }
 
 //! Get the transformation for the specified frequency channel
-::MEAL::Complex2* 
+Pulsar::PolnCalibratorExtension::Transformation* 
 Pulsar::PolnCalibratorExtension::get_transformation (unsigned ichan)
 {
   range_check (ichan, "Pulsar::PolnCalibratorExtension::get_transformation");
-  return response[ichan];
+  return &response[ichan];
 }
 
 //! Get the transformation for the specified frequency channel
-const ::MEAL::Complex2*
+const Pulsar::PolnCalibratorExtension::Transformation*
 Pulsar::PolnCalibratorExtension::get_transformation (unsigned ichan) const
 {
   range_check (ichan, "Pulsar::PolnCalibratorExtension::get_transformation");
-  return response[ichan];
+  return &response[ichan];
 }
 
 void Pulsar::PolnCalibratorExtension::construct ()
@@ -136,33 +128,8 @@ void Pulsar::PolnCalibratorExtension::construct ()
          << response.size() << " type=" 
          << Calibrator::Type2str (get_type()) << endl;
 
-  nparam = 0;
-
   for (unsigned ichan=0; ichan<response.size(); ichan++)
-    response[ichan] = new_transformation();
-
-  if (response.size())
-    nparam = response[0]->get_nparam();
-}
-
-
-//! Return a new MEAL::Complex2 instance, based on type attribute
-MEAL::Complex2* Pulsar::PolnCalibratorExtension::new_transformation ()
-{
-  switch (type) {
-  case Calibrator::SingleAxis:
-    return new Calibration::SingleAxis;
-  case Calibrator::Polar:
-    return new MEAL::Polar;
-  case Calibrator::Hamaker:
-    return new MEAL::Polar;
-  case Calibrator::Britton:
-    return new Calibration::Instrument;
-  default:
-    throw Error (InvalidState,
-		 "Pulsar::PolnCalibratorExtension::new_transformation",
-		 "unrecognized Calibrator::Type = %d", (int) type);
-  }
+    response[ichan].set_nparam (nparam);
 }
 
 
@@ -205,3 +172,67 @@ Pulsar::Calibrator::Type Pulsar::Calibrator::str2Type (const char* s)
   return (Type) -1;
 }
 
+using namespace Pulsar;
+
+PolnCalibratorExtension::Transformation::Transformation ()
+{
+  valid = true;
+}
+
+unsigned
+PolnCalibratorExtension::Transformation::get_nparam() const
+{
+  return params.size();
+}
+
+void PolnCalibratorExtension::Transformation::set_nparam (unsigned s)
+{
+  params.resize(s);
+}
+
+double 
+PolnCalibratorExtension::Transformation::get_param (unsigned i) const
+{
+  return params[i].get_value();
+}
+
+void PolnCalibratorExtension::Transformation::set_param 
+(unsigned i, double value)
+{
+  params[i].set_value(value);
+}
+
+double
+PolnCalibratorExtension::Transformation::get_variance (unsigned i) 
+const
+{
+  return params[i].get_variance();
+}
+
+void PolnCalibratorExtension::Transformation::set_variance
+(unsigned i, double var)
+{
+  params[i].set_variance(var);
+}
+
+Estimate<double>
+PolnCalibratorExtension::Transformation::get_Estimate (unsigned i) const
+{
+  return params[i];
+}
+
+void PolnCalibratorExtension::Transformation::set_Estimate
+(unsigned i, const Estimate<double>& e)
+{
+  params[i] = e;
+}
+
+bool PolnCalibratorExtension::Transformation::get_valid () const
+{
+  return valid;
+}
+
+void PolnCalibratorExtension::Transformation::set_valid (bool flag)
+{
+  valid = flag;
+}

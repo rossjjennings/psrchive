@@ -29,12 +29,12 @@ libExtension_la_SOURCES = \
 	BinaryPhaseOrder.C               PeriastronOrder.C  \
 	CalInfoExtension.C               Pointing.C  \
 	CalibratorExtension.C            PolnCalibratorExtension.C  \
-	CalibratorExtension_build.C      PolnCalibratorExtension_build.C  \
+	CalibratorExtension_build.C       \
 	CalibratorStokes.C               ProcHistory.C  \
 	ColdPlasmaHistory.C \
 	Dedisperse.C                     DeFaraday.C \
 	DigitiserStatistics.C            Receiver.C  \
-	ExampleExtension.C               Receiver_load.C  \
+	ExampleExtension.C  \
 	FeedExtension.C                  TapeInfo.C \
 	FITSHdrExtension.C               Telescope.C  \
 	FluxCalibratorExtension.C        TwoBitStats.C  \
