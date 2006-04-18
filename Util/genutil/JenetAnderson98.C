@@ -93,7 +93,7 @@ void JenetAnderson98::set_threshold (double t)
   var_Phi = mean_Phi * (1.0 - mean_Phi);
 }
 
-double gammln(double xx)
+static double gammln(double xx)
 {
   /* Numerical Recipes */
   static double cof [6]= { 76.18009172947146, -86.50532032941677,
@@ -114,7 +114,7 @@ double gammln(double xx)
 }
 
 // returns ln(n!)
-double factln(int n) {
+static double factln(int n) {
   return gammln (n+1.0);
 }
 
