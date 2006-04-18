@@ -9,8 +9,7 @@ using namespace std;
 
 JenetAnderson98::Plot::Plot ()
 {
-  theory_max = 0.0;
-  theory_min = 0.01;
+  show_min = 0.01;
 
   show_cutoff_sigma = true;
   plot_only_cut = false;
@@ -35,7 +34,7 @@ void JenetAnderson98::Plot::calculate_theory ()
 
   unsigned nsample = twobit->get_nsample();
 
-  if (!nsample < 4)
+  if (nsample < 4)
     throw Error (InvalidState, "JenetAnderson98::Plot::calculate_theory",
 		 "invalid nsample=%u", nsample);
 
@@ -58,9 +57,8 @@ double sum (const vector<float>& x)
 
 void normalize (vector<float>& hist)
 {
-  assert (hist.size() != 0);
-
   double the_sum = sum (hist);
+  assert( the_sum != 0 );
   for (unsigned i=0; i<hist.size(); i++)
     hist[i] /= the_sum;
 }
@@ -71,25 +69,10 @@ unsigned first_greater (Iterator start, Iterator end, T val)
   for (Iterator i = start; i != end; i++)
     if (*i > val)
       return i - start;
+
   return end - start;
 }
 
-void cpgpt (std::vector<float>& vals, int type)
-{
-  for (unsigned i=0; i<vals.size(); i++) {
-    float ind = i;
-    float val = vals[i];
-    cpgpt (1, &ind, &val, type);
-  }
-}
-
-void cpgline (std::vector<float>& y)
-{
-  std::vector<float> x (y.size());
-  for (unsigned i=0; i<y.size(); i++)
-    x[i] = i;
-  cpgline (y.size(), &x[0], &y[0]);
-}
 
 void JenetAnderson98::Plot::adjust_limits (const vector<float>& hist)
 {
@@ -98,20 +81,26 @@ void JenetAnderson98::Plot::adjust_limits (const vector<float>& hist)
   if (plot_entire_range)
     return;
 
-  float cut = theory_max * theory_min;
+  float cut = ymax * show_min;
 
-  imin = first_greater (hist.begin()+imin, hist.end(), cut);
-  imax = first_greater (hist.rbegin()+imax, hist.rend(), cut);
+  imin = min ( imin, first_greater (hist.begin(), hist.end(), cut) );
+  imax = min ( imax, first_greater (hist.rbegin(), hist.rend(), cut) );
 }
 
 void JenetAnderson98::Plot::init_limits ()
 {
-  imin = imax = 0;
+  imin = twobit->get_nsample();
+  imax = imin;
   ymax = 0;
 }
 
-void JenetAnderson98::Plot::plot ()
-{
+//! Set the interface to the data
+void JenetAnderson98::Plot::set_interface (const Interface* data)
+{ 
+  twobit = data;
+  if (!twobit)
+    return;
+
   init_limits ();
   calculate_theory ();
   adjust_limits (theory_dist);
@@ -132,23 +121,62 @@ void JenetAnderson98::Plot::plot ()
   imax = nsamp - imax;
 
   ymax *= 1.05;
-  cpgswin (float(imin)/nsamp, float(imax)/nsamp, ymax*theory_min, ymax);
+}
 
-  cpgsci (1);
-  cpgsls (1);
-  cpgbox  ("bcnst",0.0,0,"bcnvst",0.0,0);
+float JenetAnderson98::Plot::get_xmin() const
+{
+  return float(imin) / twobit->get_nsample();
+}
 
-  cpgswin (imin, imax, ymax*theory_min, ymax);
+float JenetAnderson98::Plot::get_xmax() const
+{
+  return float(imax) / twobit->get_nsample();
+}
 
-  for (unsigned iplot=0; iplot < ndig; iplot++) {
+float JenetAnderson98::Plot::get_ymin() const
+{
+  return ymax * show_min;
+}
 
-    twobit->get_histogram (hist, iplot);
+float JenetAnderson98::Plot::get_ymax() const
+{
+  return ymax;
+}
 
-    cpgsci (iplot + 2);
+void cpgpt (std::vector<float>& vals, int type)
+{
+  for (unsigned i=0; i<vals.size(); i++) {
+    float ind = i;
+    float val = vals[i];
+    cpgpt (1, &ind, &val, type);
+  }
+}
+
+void cpgline (std::vector<float>& y)
+{
+  std::vector<float> x (y.size());
+  for (unsigned i=0; i<y.size(); i++)
+    x[i] = i;
+  cpgline (y.size(), &x[0], &y[0]);
+}
+
+void JenetAnderson98::Plot::plot ()
+{
+  cpgswin (imin, imax, get_ymin(), get_ymax());
+
+  unsigned ndig = twobit->get_ndig();
+  vector<float> hist;
+
+  for (unsigned idig=0; idig < ndig; idig++) {
+
+    twobit->get_histogram (hist, idig);
+    normalize (hist);
+
+    cpgsci (idig + 2);
     cpgpt (hist, 2);
 
 #if 0    
-    float fractone = data->get_histogram_mean (idig[iplot]);
+    float fractone = data->get_histogram_mean (idig[idig]);
     cpgsls (4);
     cpgmove (fractone*float(nsample), 0.0);
     cpgdraw (fractone*float(nsample), midheight);

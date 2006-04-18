@@ -1,8 +1,8 @@
 //-*-C++-*-
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/JenetAnderson98Plot.h,v $
-   $Revision: 1.2 $
-   $Date: 2006/04/18 20:48:36 $
+   $Revision: 1.3 $
+   $Date: 2006/04/18 21:53:01 $
    $Author: straten $ */
 
 #ifndef __JenetAnderson98_Plot_h
@@ -38,7 +38,13 @@ public:
   class Interface;
   
   //! Set the interface to the data
-  void set_interface (const Interface* data) { twobit = data; }
+  void set_interface (const Interface* data);
+
+  //! Get the limits of the data to be plotted
+  float get_xmin() const;
+  float get_xmax() const;
+  float get_ymin() const;
+  float get_ymax() const;
 
   //! Plot the measured and theoretical distributions
   void plot ();
@@ -51,11 +57,8 @@ protected:
   //! Theoretical probability distribution
   std::vector<float> theory_dist;
   
-  //! Maximum value of theoretical distribution
-  float theory_max;
-
   //! Minimum value to be plotted
-  float theory_min;
+  float show_min;
 
   //! Interface to measurements to be plotted
   Reference::To<const Interface> twobit;
