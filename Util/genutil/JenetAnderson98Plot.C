@@ -2,7 +2,7 @@
 
 #include <iostream>
 #include <algorithm>
-
+#include <assert.h>
 #include <cpgplot.h>
 
 using namespace std;
