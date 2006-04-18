@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/IntegrationManager.h,v $
-   $Revision: 1.11 $
-   $Date: 2006/03/17 13:34:51 $
-   $Author: straten $ */
+   $Revision: 1.12 $
+   $Date: 2006/04/18 07:48:25 $
+   $Author: hknight $ */
 
 #ifndef __Pulsar_IntegrationManager_h
 #define __Pulsar_IntegrationManager_h
@@ -77,6 +77,8 @@ namespace Pulsar {
     Expert* expert ();
 
   protected:
+
+    friend class TimeSortedOrder;
 
     //! Set the number of sub-integrations
     /*! Called by IntegrationManager methods to update child attribute */
