@@ -14,7 +14,7 @@ const double JenetAnderson98::optimal_threshold = 0.9674;
 
 JenetAnderson98::JenetAnderson98 ()
 {
-  threshold = optimal_threshold;
+  set_threshold( optimal_threshold );
   hi = lo = A = 0;
 }
 
@@ -72,21 +72,28 @@ void JenetAnderson98::set_alpha (double alpha, double Phi)
   A = num / ( M_PI * ((lo*lo-hi*hi)*Phi + hi*hi) );
 }
 
+/*! Determines the mean fraction of samples that lay within the
+    thresholds, -t and +t, where t = threshold * sigma.  
+    This is equivalent to:
+    <ol>
+    <li> Eq.45 (with x4 = -x2 = t [Eq.38])
+    <li> Eq.A2 (with xh = -xl = t)
+    <li> the expectation value of the binomial distribution, Eq.A6
+    (cf. http://mathworld.wolfram.com/BinomialDistribution.html, Eqn. 12)
+    </ol>
+
+    The variance of Phi is the variance of the binomial distribution, Eq.A6.
+    (cf. http://mathworld.wolfram.com/BinomialDistribution.html, Eqn. 17)
+
+*/
 void JenetAnderson98::set_threshold (double t)
 {
   threshold = t;
+  mean_Phi = erf (threshold / sqrt(2.0));
+  var_Phi = mean_Phi * (1.0 - mean_Phi);
 }
 
-/*! Returns the mean fraction of samples that lay within the
-    thresholds, x2 and x4, where x4 = -x2 = t (Eq.38).  Apply
-    t=threshold*sigma to either Eq.45 or Eq.A2 (with -xl = xh = t) to
-    get the same result. */
-float JenetAnderson98::get_mean_Phi () const
-{
-  return erf (threshold / sqrt(2.0));
-}
-
-float gammln(float xx)
+double gammln(double xx)
 {
   /* Numerical Recipes */
   static double cof [6]= { 76.18009172947146, -86.50532032941677,
@@ -107,7 +114,7 @@ float gammln(float xx)
 }
 
 // returns ln(n!)
-float factln(int n) {
+double factln(int n) {
   return gammln (n+1.0);
 }
 
@@ -121,7 +128,7 @@ void JenetAnderson98::get_prob_Phi (unsigned L, vector<float>& prob_Phi)
 {
   prob_Phi.resize (L);
 
-  float lnLfact = factln (L);
+  double lnLfact = factln (L);
 
   double mean_Phi = get_mean_Phi ();
 

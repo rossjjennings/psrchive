@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/JenetAnderson98.h,v $
-   $Revision: 1.3 $
-   $Date: 2006/04/18 14:26:10 $
+   $Revision: 1.4 $
+   $Date: 2006/04/18 20:48:32 $
    $Author: straten $ */
 
 #ifndef __Jenet_Anderson_98
@@ -42,12 +42,19 @@ class JenetAnderson98 {
 
   //! Set the sampling threshold
   void set_threshold (double t);
+  double get_threshold () const { return threshold; }
 
   //! Get the expectation value of Phi, JA98 Eq.A2
-  float get_mean_Phi () const;
+  double get_mean_Phi () const { return mean_Phi; }
+
+  //! Get the variance of Phi
+  double get_var_Phi () const { return var_Phi; }
 
   //! Get the probability distribution of Phi, JA98 Eq.A6
   void get_prob_Phi (unsigned L, std::vector<float>& prob_Phi);
+
+  //! Plots measured and theoretical probability distributions
+  class Plot;
 
  protected:
 
@@ -60,7 +67,8 @@ class JenetAnderson98 {
   double lo;
   double hi;
   double A;
-  double Phi;
+  double mean_Phi;
+  double var_Phi;
 
 };
 
