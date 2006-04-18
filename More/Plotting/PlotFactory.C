@@ -17,6 +17,7 @@
 #include "Pulsar/SpectrumPlot.h"
 #include "Pulsar/PhaseVsFrequencyPlus.h"
 #include "Pulsar/StokesFluctPlot.h"
+#include "Pulsar/TwoBitPlot.h"
 #include "Pulsar/Poincare.h"
 
 #include "Error.h"
@@ -60,6 +61,9 @@ Pulsar::PlotFactory::PlotFactory ()
 
   add ( new PlotFactory::Advocate<SpectrumPlot>
 	('b', "psd", "Total power spectrum (bandpass)") );
+
+  add ( new PlotFactory::Advocate<TwoBitPlot>
+	('2', "2bit", "Two-bit distribution") );
 }
 
 //! Return a new instance of the named plotter
