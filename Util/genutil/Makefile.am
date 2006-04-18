@@ -30,6 +30,13 @@ libgenutilpp_la_SOURCES += sla_wrap.c
 
 endif
 
+if HAVE_PGPLOT
+
+include_HEADERS += JenetAnderson98Plot.h
+libgenutilpp_la_SOURCES += JenetAnderson98Plot.C
+
+endif
+
 bin_PROGRAMS = getMJD tranScan stats bshead search_summary xserve_summary
 
 # broken: loopy.C timeconvert.c
