@@ -8,6 +8,7 @@
 #include "Reference.h"
 
 #include "Pulsar/TwoBitStats.h"
+#include "JenetAnderson98.h"
 
 //! Default constructor
 Pulsar::TwoBitStats::TwoBitStats ()
@@ -16,7 +17,7 @@ Pulsar::TwoBitStats::TwoBitStats ()
   nsample = 0;
   ndig = 0;
 
-  threshold = 0.0;
+  threshold = JenetAnderson98::optimal_threshold;
   cutoff_sigma = 0.0;
 }
 
