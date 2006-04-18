@@ -9,13 +9,14 @@
 #include "ierf.h"
 #include <math.h>
  
-JenetAnderson98::JenetAnderson98 ()
-{
-  hi = lo = A = 0;
-}
-
 /*! From JA98, Table 1 */
 const double JenetAnderson98::optimal_threshold = 0.9674;
+
+JenetAnderson98::JenetAnderson98 ()
+{
+  threshold = optimal_threshold;
+  hi = lo = A = 0;
+}
 
 /*!  Given the fraction of digitized samples in the low voltage state,
   this method returns the optimal values for low and high output
@@ -31,7 +32,7 @@ const double JenetAnderson98::optimal_threshold = 0.9674;
 /*! This method inverts Eq.45 of JA98.
 
     Phi is the left-hand side of Eq.44, the fraction of samples
-    between x2 and x4; the inverse error function of Phi = alpha.
+    between x2 and x4; alpha is the inverse error function of Phi.
 */
 void JenetAnderson98::set_Phi (double Phi)
 {
@@ -45,7 +46,7 @@ static double root2 = sqrt(2.0);
   optimal threshold. */
 void JenetAnderson98::set_sigma_n (double sigma_n)
 {
-  set_alpha (optimal_threshold / (root2*sigma_n), 0.0);
+  set_alpha (threshold / (root2*sigma_n), 0.0);
 }
 
 /*! \f$ \alpha= t/(\sqrt{2}\sigma)\f$ is the term in brackets on the
@@ -69,4 +70,68 @@ void JenetAnderson98::set_alpha (double alpha, double Phi)
   double halfrootnum = lo*(1-expon) + hi*expon;
   double num = 2.0 * halfrootnum * halfrootnum;
   A = num / ( M_PI * ((lo*lo-hi*hi)*Phi + hi*hi) );
+}
+
+void JenetAnderson98::set_threshold (double t)
+{
+  threshold = t;
+}
+
+/*! Returns the mean fraction of samples that lay within the
+    thresholds, x2 and x4, where x4 = -x2 = t (Eq.38).  Apply
+    t=threshold*sigma to either Eq.45 or Eq.A2 (with -xl = xh = t) to
+    get the same result. */
+float JenetAnderson98::get_mean_Phi () const
+{
+  return erf (threshold / sqrt(2.0));
+}
+
+float gammln(float xx)
+{
+  /* Numerical Recipes */
+  static double cof [6]= { 76.18009172947146, -86.50532032941677,
+			   24.01409824083091, -1.231739572450155,
+			   0.1208650973866179e-2, -0.5395239384953e-5 };
+  double x, y, tmp, ser;
+  int j;
+
+  y = x = xx;
+  tmp = x + 5.5;
+  tmp -= (x+0.5) * log(tmp);
+  ser = 1.000000000190015;
+  for (j=0; j<=5; j++) {
+    y++;
+    ser += cof[j]/y;
+  }
+  return -tmp + log(2.5066282746310005 * ser/x);
+}
+
+// returns ln(n!)
+float factln(int n) {
+  return gammln (n+1.0);
+}
+
+using namespace std;
+
+/*!
+  \param L is the number of points used to measure Phi
+  \retval prob_Phi[i] will contain the probability of Phi = i/L
+*/
+void JenetAnderson98::get_prob_Phi (unsigned L, vector<float>& prob_Phi)
+{
+  prob_Phi.resize (L);
+
+  float lnLfact = factln (L);
+
+  double mean_Phi = get_mean_Phi ();
+
+  for (unsigned nlo=0; nlo<L; nlo++) {
+
+    double Phi = double(nlo) / double(L);
+
+    prob_Phi[nlo]  = exp( lnLfact - factln(nlo) - factln(L-nlo) +
+			  L * ( log(pow (mean_Phi, Phi)) +
+				log(pow (1.0-mean_Phi, 1.0-Phi)) ) );
+
+  }
 }

@@ -7,12 +7,14 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/JenetAnderson98.h,v $
-   $Revision: 1.2 $
-   $Date: 2006/04/09 14:56:16 $
+   $Revision: 1.3 $
+   $Date: 2006/04/18 14:26:10 $
    $Author: straten $ */
 
 #ifndef __Jenet_Anderson_98
 #define __Jenet_Anderson_98
+
+#include <vector>
 
 class JenetAnderson98 {
 
@@ -38,14 +40,27 @@ class JenetAnderson98 {
   //! Get the slope of digitized vs undigitized correlation, JA98 Eq.43
   double get_A () const { return A; }
 
+  //! Set the sampling threshold
+  void set_threshold (double t);
+
+  //! Get the expectation value of Phi, JA98 Eq.A2
+  float get_mean_Phi () const;
+
+  //! Get the probability distribution of Phi, JA98 Eq.A6
+  void get_prob_Phi (unsigned L, std::vector<float>& prob_Phi);
+
  protected:
 
   //! Set the inverse width of the gaussian, sort of
   void set_alpha (double alpha, double Phi);
 
+  //! The sampling threshold
+  double threshold;
+
   double lo;
   double hi;
   double A;
+  double Phi;
 
 };
 
