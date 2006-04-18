@@ -9,10 +9,11 @@
 #ifndef __FTransform_h_
 #define __FTransform_h_
 
-#include "Reference.h"
-
 #include <string>
 #include <vector>
+
+#include "Reference.h"
+#include "psr_cpp.h"
 
 /*!
 
@@ -42,7 +43,7 @@ namespace FTransform {
   std::string get_library ();
   
   //! Set the library to the specified name
-  void set_library (const std::string& name);
+  void set_library (string name);
 
   //! Clears out the memory associated with the plans
   void clean_plans();
@@ -126,7 +127,7 @@ namespace FTransform {
     //! Get the number of available libraries
     static unsigned get_num_libraries () { return libraries.size(); }
 
-  protected:
+    //  protected:
 
     //! Install this as the current library
     void install ();
@@ -134,12 +135,12 @@ namespace FTransform {
     //! Add a pointer to this instance to the libraries attribute
     void add ();
 
-  private:
+    //  private:
 
     //! List of all libraries
     static std::vector< Reference::To<Agent> > libraries;
 
-    friend void set_library (const std::string& name);
+    //    friend void set_library (const std::string& name);
     friend void clean_plans();
 
   };

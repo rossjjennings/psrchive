@@ -14,6 +14,7 @@
 #include "MKL_Transform.h"
 #endif
 
+/*
 #ifdef HAVE_FFTW3
 #include "FFTW3_Transform.h"
 #else
@@ -21,6 +22,7 @@
 #include "FFTW_Transform.h"
 #endif
 #endif
+*/
 
 #ifdef HAVE_IPP
 #include "IPP_Transform.h"
@@ -79,6 +81,7 @@ static int initialise()
   FTransform::MKL_Plan::Agent::enlist ();
 #endif
 
+  /*
 #ifdef HAVE_FFTW3
   FTransform::FFTW3_Plan::Agent::enlist ();
 #else
@@ -86,6 +89,8 @@ static int initialise()
   FTransform::FFTW_Plan::Agent::enlist ();
 #endif
 #endif
+  */
+
 
 #ifdef HAVE_IPP
   FTransform::IPP_Plan::Agent::enlist ();
@@ -147,7 +152,7 @@ void FTransform::clean_plans()
 }
 
 //! Choose to use a different library
-void FTransform::set_library (const string& name)
+void FTransform::set_library (string name)
 {
   for (unsigned ilib=0; ilib<FTransform::Agent::libraries.size(); ilib++){
     if (FTransform::Agent::libraries[ilib]->name == name){

@@ -19,7 +19,8 @@ nobase_include_HEADERS = \
 	Pulsar/FluxCalibratorExtension.h  Pulsar/WidebandCorrelator.h  \
 	Pulsar/ITRFExtension.h            Pulsar/dspReduction.h \
 	Pulsar/ReceiverTI.h               Pulsar/PointingTI.h \
-	Pulsar/BackendTI.h                Pulsar/PowerEstimator.h
+	Pulsar/BackendTI.h                Pulsar/PowerEstimator.h \
+	Pulsar/TimeSortedOrder.h
 
 libExtension_la_SOURCES = \
 	Backend.C                        BackendTI.C \
@@ -44,7 +45,7 @@ libExtension_la_SOURCES = \
 	PointingTI.C                     Receiver_Native.C \
 	Receiver_Field.C                 Receiver_Linear.C \
 	Pulsar/Receiver_Field.h          Pulsar/Receiver_Linear.h \
-	Pulsar/Receiver_Native.h
+	Pulsar/Receiver_Native.h	 TimeSortedOrder.C
 
 #############################################################################
 #

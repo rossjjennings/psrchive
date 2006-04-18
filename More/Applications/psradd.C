@@ -9,6 +9,7 @@
 #include "Pulsar/Integration.h"
 #include "Pulsar/Profile.h"
 #include "Pulsar/ProcHistory.h"
+#include "Pulsar/TimeSortedOrder.h"
 
 #include "Pulsar/Interpreter.h"
 
@@ -28,6 +29,8 @@
 #include <math.h>
 
 static const char* psradd_args = "b:c:C:e:f:FG:hiI:j:J:LM:O:p:Pqr:sS:tT:uUvVZ:";
+
+void reorder(Reference::To<Pulsar::Archive> arch);
 
 void usage () {
   cout <<
@@ -150,7 +153,7 @@ int main (int argc, char **argv) try {
       return 0;
       
     case 'i':
-      cout << "$Id: psradd.C,v 1.35 2006/04/03 18:46:17 straten Exp $" 
+      cout << "$Id: psradd.C,v 1.36 2006/04/18 06:27:15 hknight Exp $" 
 	   << endl;
       return 0;
 
@@ -363,11 +366,11 @@ int main (int argc, char **argv) try {
 
   if (metafile)
     stringfload (&filenames, metafile);
-  else {
+  else
     for (int ai=optind; ai<argc; ai++)
       dirglob (&filenames, argv[ai]);
-    sort (filenames.begin(), filenames.end());
-  }
+
+  sort(filenames.begin(),filenames.end());
 
   if (!filenames.size()) {
     cerr << "psradd requires a list of archive filenames as parameters.\n";
@@ -658,9 +661,11 @@ int main (int argc, char **argv) try {
 
       total->tscrunch();
 
-      if (!testing)
+      if (!testing){
+	reorder( total );
 	total->unload (newname);
-      
+      }      
+
       if (reset_total_current) {
 	if (verbose)
 	  cerr << "psradd: Auto add - reset total to current" << endl;
@@ -686,8 +691,10 @@ int main (int argc, char **argv) try {
     if (verbose)
       cerr << "psradd: Unloading archive: '" << newname << "'" << endl;
     
-    if (!testing)
+    if (!testing){
+      reorder( total );
       total->unload (newname);
+    }
 
   }
   catch (Error& error) {
@@ -721,3 +728,10 @@ float mid_hi (Pulsar::Archive* archive)
   return float (hi2lo + lo2hi) / (2.0 * nbin);
 }
 
+void
+reorder(Reference::To<Pulsar::Archive> arch)
+{
+  Reference::To<Pulsar::TimeSortedOrder> tso = new Pulsar::TimeSortedOrder;
+  arch->add_extension(tso);
+  tso->organise(arch,0);
+}
