@@ -262,7 +262,7 @@ int main (int argc, char *argv[]) try {
 	Pulsar::Archive::set_verbosity(3);
 	break;
       case 'i':
-	cout << "$Id: pam.C,v 1.62 2006/03/31 13:28:55 straten Exp $" << endl;
+	cout << "$Id: pam.C,v 1.63 2006/04/19 15:08:43 straten Exp $" << endl;
 	return 0;
       case 'm':
 	save = true;
@@ -729,8 +729,7 @@ int main (int argc, char *argv[]) try {
 	if (arch->get_state() == Signal::Stokes)
 	  arch->convert_state(Signal::Coherence);
 
-	for (unsigned isub=0; isub < arch->get_nsubint(); isub++)
-	  spc.transform (arch->get_Integration(isub));
+	spc.correct (arch);
 
       }
 

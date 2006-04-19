@@ -743,8 +743,7 @@ try {
     arch->convert_state(Signal::Coherence);
   
   Pulsar::ScatteredPowerCorrection spc;
-  for (unsigned isub=0; isub < arch->get_nsubint(); isub++)
-    spc.transform (arch->get_Integration(isub));
+  spc.correct (arch);
 
   return response (Good);
 }
