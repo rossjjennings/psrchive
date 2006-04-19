@@ -10,9 +10,6 @@
 #include "Pulsar/Profile.h"
 
 #include "Physical.h"
-#include "templates.h"
-
-#define ESTIMATE_SNR 0
 
 //! Default constructor
 Pulsar::ScatteredPowerCorrection::ScatteredPowerCorrection ()
@@ -34,14 +31,12 @@ void Pulsar::ScatteredPowerCorrection::correct (Archive* data)
     thresholds.resize( ndig );
 
     for (unsigned idig=0; idig < ndig; idig ++) {
-      vector<float> hist = tbs->get_histogram (idig);
-      double mean = histomean (hist);
-      ja98.set_mean_Phi( mean );
+
+      ja98.set_mean_Phi( tbs->get_mean_Phi(idig) );
       thresholds[idig] = ja98.get_threshold();
 
       if (Archive::verbose > 2)
-	cerr << "  mean=" << mean << " t[" << idig << "]=" << thresholds[idig]
-	     << endl;
+	cerr << "  t[" << idig << "]=" << thresholds[idig] << endl;
     }
 
   }
