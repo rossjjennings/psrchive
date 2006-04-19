@@ -7,16 +7,14 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/NormalizeStokes.h,v $
-   $Revision: 1.4 $
-   $Date: 2006/03/17 13:35:25 $
+   $Revision: 1.5 $
+   $Date: 2006/04/19 19:52:14 $
    $Author: straten $ */
 
 #ifndef __MEAL_NormalizeStokes_h
 #define __MEAL_NormalizeStokes_h
 
-#include "Stokes.h"
-#include "Estimate.h"
-#include "ScalarMath.h"
+#include "MEAL/Invariant.h"
 
 namespace MEAL {
 
@@ -25,8 +23,7 @@ namespace MEAL {
   //! Normalize Stokes parameters by the invariant interval
   /*! This class properly handles the propagation of errors during
     normalization. */
-
-  class NormalizeStokes : Reference::Able {
+  class NormalizeStokes : public Reference::Able {
 
   public:
 
@@ -50,8 +47,8 @@ namespace MEAL {
 
   protected:
 
-    //! The input Stokes parameters
-    Stokes<ScalarMath> input;
+    //! Calculates the invariant interval and its bias
+    Reference::To<Invariant> invariant;
 
     //! The output Stokes parameters
     Stokes<ScalarMath> output;
