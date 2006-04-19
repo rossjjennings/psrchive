@@ -9,12 +9,14 @@
 #include "Pulsar/Profile.h"
 #include "Physical.h"
 
-#include "JenetAnderson98.h"
-
 #define ESTIMATE_SNR 0
 
 //! Default constructor
 Pulsar::ScatteredPowerCorrection::ScatteredPowerCorrection ()
+{
+}
+
+void Pulsar::ScatteredPowerCorrection::correct (Archive* data)
 {
 }
 
@@ -49,8 +51,6 @@ void Pulsar::ScatteredPowerCorrection::transform (Integration* data)
 		   "smearing in ichan=%u = %lf > time resolution = %lf",
 		   ichan, time_smear, time_resolution);
   }
-
-  JenetAnderson98 ja98;
 
   for (unsigned ipol = 0; ipol < npol; ipol++) {
 
