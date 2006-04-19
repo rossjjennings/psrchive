@@ -153,7 +153,7 @@ int main (int argc, char **argv) try {
       return 0;
       
     case 'i':
-      cout << "$Id: psradd.C,v 1.36 2006/04/18 06:27:15 hknight Exp $" 
+      cout << "$Id: psradd.C,v 1.37 2006/04/19 16:56:48 straten Exp $" 
 	   << endl;
       return 0;
 
@@ -662,7 +662,7 @@ int main (int argc, char **argv) try {
       total->tscrunch();
 
       if (!testing){
-	reorder( total );
+	// reorder( total );
 	total->unload (newname);
       }      
 
@@ -692,7 +692,7 @@ int main (int argc, char **argv) try {
       cerr << "psradd: Unloading archive: '" << newname << "'" << endl;
     
     if (!testing){
-      reorder( total );
+      // reorder( total );
       total->unload (newname);
     }
 
