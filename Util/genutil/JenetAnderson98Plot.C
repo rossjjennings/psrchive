@@ -1,9 +1,10 @@
 #include "JenetAnderson98Plot.h"
+#include "templates.h"
+
+#include <cpgplot.h>
 
 #include <iostream>
 #include <algorithm>
-#include <assert.h>
-#include <cpgplot.h>
 
 using namespace std;
 
@@ -47,22 +48,6 @@ void JenetAnderson98::Plot::calculate_theory ()
   theory.get_prob_Phi( nsample, theory_dist );
 }
 
-double sum (const vector<float>& x)
-{
-  double the_sum = 0.0;
-  for (unsigned i=0; i<x.size(); i++)
-    the_sum += x[i];
-  return the_sum;
-}
-
-void normalize (vector<float>& hist)
-{
-  double the_sum = sum (hist);
-  assert( the_sum != 0 );
-  for (unsigned i=0; i<hist.size(); i++)
-    hist[i] /= the_sum;
-}
-
 template<class Iterator, class T>
 unsigned first_greater (Iterator start, Iterator end, T val)
 {
@@ -72,7 +57,6 @@ unsigned first_greater (Iterator start, Iterator end, T val)
 
   return end - start;
 }
-
 
 void JenetAnderson98::Plot::adjust_limits (const vector<float>& hist)
 {
