@@ -9,6 +9,7 @@
 
 #include "Pulsar/TwoBitStats.h"
 #include "JenetAnderson98.h"
+#include "templates.h"
 
 //! Default constructor
 Pulsar::TwoBitStats::TwoBitStats ()
@@ -117,6 +118,30 @@ void Pulsar::TwoBitStats::range_check (unsigned idig, const char* method) const
     throw Error (InvalidRange, method, "idig=%d >= ndig=%d", idig, ndig);
 }
 
+double Pulsar::TwoBitStats::get_mean_Phi (unsigned idig) const
+{
+  range_check (idig, "Pulsar::TwoBitStats::get_mean_Phi");
+  return histomean (histogram[idig]);
+}
 
+double Pulsar::TwoBitStats::get_distortion (unsigned idig) const
+{
+  vector<float> theory;
 
+  JenetAnderson98 ja98;
 
+  ja98.set_mean_Phi( get_mean_Phi(idig) );
+  ja98.get_prob_Phi ( get_nsample(), theory );
+
+  double nweights = sum (histogram[idig]);
+  
+  double distortion = 0.0;
+
+  for (unsigned isamp=0; isamp < nsample; isamp++) {
+    double normval = histogram[idig][isamp] / nweights;
+    double offmodel = normval - theory[isamp];
+    distortion += offmodel * offmodel;
+  }
+
+  return distortion;
+}

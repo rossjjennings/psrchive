@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/TwoBitStats.h,v $
-   $Revision: 1.3 $
-   $Date: 2006/03/17 13:34:45 $
+   $Revision: 1.4 $
+   $Date: 2006/04/19 16:05:25 $
    $Author: straten $ */
 
 #ifndef __TwoBitStats_h
@@ -70,6 +70,12 @@ namespace Pulsar {
 
     //! Set all histogram data to zero
     void zero ();
+
+    //! Get the mean fraction of low voltage states
+    double get_mean_Phi (unsigned idig) const;
+
+    //! Get the difference between the measured and theoretical distributions
+    double get_distortion (unsigned idig) const;
 
   protected:
 
