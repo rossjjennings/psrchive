@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Stokes.h,v $
-   $Revision: 1.17 $
-   $Date: 2006/03/17 13:35:23 $
+   $Revision: 1.18 $
+   $Date: 2006/04/19 19:52:19 $
    $Author: straten $ */
 
 #ifndef __Stokes_H
@@ -25,7 +25,11 @@ class Stokes : public Vector<4,T>
   
   Stokes (T a=0.0, T b=0.0, T c=0.0, T d=0.0) : Vector<4,T> (a,b,c,d) {}
 
-  //! Construct from a scalar and vector
+  //! Construct from a 4-vector
+  template<typename U>
+  Stokes (const Vector<4,U>& v) : Vector<4,T> (v[0], v[1], v[2], v[3]) {}
+
+  //! Construct from a scalar and 3-vector
   template<typename U>
   Stokes (T s, const Vector<3,U>& v) : Vector<4,T> (s, v[0], v[1], v[2]) {}
 
