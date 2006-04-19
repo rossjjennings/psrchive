@@ -23,7 +23,7 @@ void scrunch (std::vector<T>& vals, unsigned factor, bool integrate = true)
 
 // returns the mean "bin" of a histogram
 template <class T>
-double histomean (std::vector<T>& vals)
+double histomean (const std::vector<T>& vals)
 {
   double valcount = 0.0;
   double totcount = 0.0;
