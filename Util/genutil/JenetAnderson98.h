@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/JenetAnderson98.h,v $
-   $Revision: 1.5 $
-   $Date: 2006/04/19 13:09:19 $
+   $Revision: 1.6 $
+   $Date: 2006/04/19 15:13:08 $
    $Author: straten $ */
 
 #ifndef __Jenet_Anderson_98
@@ -62,7 +62,7 @@ class JenetAnderson98 {
   double get_A () const { return A; }
 
   //! Set the sampling threshold
-  void set_threshold (double t);
+  void set_threshold (double t = optimal_threshold);
   double get_threshold () const { return threshold; }
 
   //! Get the expectation value of Phi, JA98 Eq.A2
