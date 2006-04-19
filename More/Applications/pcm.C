@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pcm.C,v $
-   $Revision: 1.52 $
-   $Date: 2006/03/30 21:00:22 $
+   $Revision: 1.53 $
+   $Date: 2006/04/19 21:30:39 $
    $Author: straten $ */
 
 #include "Pulsar/psrchive.h"
@@ -282,8 +282,7 @@ int main (int argc, char *argv[]) try {
   char* binfile = NULL;
 
   // number of hours over which CALs will be found from Database
-  float hours = 24.0;
-
+  float hours = 12.0;
 
   //! The pulse phase window to use
   float phmin, phmax;
