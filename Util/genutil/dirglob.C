@@ -11,6 +11,7 @@
 #include <glob.h>
 #include <string.h>
 
+#include "Error.h"
 #include "dirutil.h"
 
 bool is_glob_argument (const char* text)
@@ -36,13 +37,11 @@ void dirglob (vector<string>* filenames, const char* text)
 
   int ret = glob (text, GLOB_NOSORT, NULL, &rglob);
   if (ret != 0 
-#if !defined(__FreeBSD__) && !defined(__MACH__)
+#ifdef GLOB_NOMATCH
       && ret != GLOB_NOMATCH
 #endif
               )  {
-    string error ("dirglob: error calling glob");
-    cerr << error << endl;
-    throw (error);
+    throw Error (FailedSys, "dirglob", "error calling glob");
   }
 
   size_t ifile=0;
