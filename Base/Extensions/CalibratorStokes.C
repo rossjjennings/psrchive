@@ -70,11 +70,6 @@ void Pulsar::CalibratorStokes::set_stokes (unsigned ichan,
 {
   range_check (ichan, "Pulsar::CalibratorStokes::set_stokes");
 
-  for (unsigned ipol=1; ipol < 4; ipol++)
-    if (s[ipol].val > 1.0)
-      throw Error (InvalidParam, "Pulsar::CalibratorStokes::set_stokes",
-		   "ichan=%d stokes[ipol=%d]=%f>1.0",ichan,ipol, s[ipol].val);
-
   stokes[ichan] = s;
   stokes[ichan][0] = 1.0;
 }
