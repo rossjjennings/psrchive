@@ -7,6 +7,7 @@
 #include "Pulsar/InterpreterVariables.h"
 #include "Functor.h"
 
+#include "Pulsar/TwoBitStats.h"
 #include "Pulsar/NoiseStatistics.h"
 #include "Pulsar/SquareWave.h"
 #include "Pulsar/Profile.h"
@@ -19,8 +20,11 @@ Pulsar::Interpreter::Variables::Variables ()
   add( Functor<double(const Archive*)> (this, &Variables::get_nfnr),
        "nfnr", "Total noise-to-Fourier-noise ratio" );
 
-  add( Functor<double(const Archive*)> (this, &Variables::get_cal_ntrans),
+  add( Functor<unsigned(const Archive*)> (this, &Variables::get_cal_ntrans),
        "ncal", "Count the number of CAL transitions" );
+
+  add( Functor<double(const Archive*)> (this, &Variables::get_2bit_dist),
+       "2bitd", "Estimate the 2-bit distortion" );
 }
 
 //! Get the signal-to-noise ratio
@@ -49,3 +53,17 @@ Pulsar::Interpreter::Variables::get_cal_ntrans (const Archive* archive) const
   return wave.count_transitions (total->get_Profile(0,0,0));
 }
 
+//! Get the two bit distortion (or distance from theory)
+double
+Pulsar::Interpreter::Variables::get_2bit_dist (const Archive* archive) const
+{
+  const TwoBitStats* tbs = archive->get<TwoBitStats>();
+  if (!tbs)
+    return 0;
+
+  double distortion = 0.0;
+  unsigned ndig=tbs->get_ndig();
+  for (unsigned idig=0; idig < ndig; idig++)
+    distortion += tbs->get_distortion(idig);
+  return distortion;
+}

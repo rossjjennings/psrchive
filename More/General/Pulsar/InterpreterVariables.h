@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/Attic/InterpreterVariables.h,v $
-   $Revision: 1.2 $
-   $Date: 2006/04/06 22:07:06 $
+   $Revision: 1.3 $
+   $Date: 2006/04/19 16:05:16 $
    $Author: straten $ */
 
 #ifndef __Pulsar_InterpreterVariables_h
@@ -35,6 +35,9 @@ namespace Pulsar {
 
     //! Get the number of cal transitions
     unsigned get_cal_ntrans (const Archive*) const;
+
+    //! Get the predicted level of 2-bit distortion
+    double get_2bit_dist (const Archive* archive) const;
 
   };
 
