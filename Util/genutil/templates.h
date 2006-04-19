@@ -5,31 +5,35 @@
  *
  ***************************************************************************/
 #include <vector>
-#include "psr_cpp.h"
+#include <assert.h>
 
-template <class Klass>
-void scrunch (vector<Klass>& vals, int factor, bool integrate = true)
+template <class T>
+void scrunch (std::vector<T>& vals, unsigned factor, bool integrate = true)
 {
-  typename vector<Klass>::iterator into = vals.begin();
+  typename std::vector<T>::iterator into = vals.begin();
+  typename std::vector<T>::iterator val;
 
-  for (typename vector<Klass>::iterator val = vals.begin(); val != vals.end(); into++) {
+  for (val = vals.begin(); val != vals.end(); into++) {
     *into = *val; val++;
-    for (int fi=1; fi<factor && val != vals.end(); (val++, fi++))
+    for (unsigned fi=1; fi<factor && val != vals.end(); (val++, fi++))
       *into += *val;
   }
   vals.resize (vals.size()/factor);
 }
 
 // returns the mean "bin" of a histogram
-template <class Klass>
-double histomean (vector<Klass>& vals)
+template <class T>
+double histomean (std::vector<T>& vals)
 {
   double valcount = 0.0;
   double totcount = 0.0;
 
   double total = (double) vals.size();
   double bin = 0.0;
-  for (typename vector<Klass>::iterator val = vals.begin(); val != vals.end(); val++) {
+
+  typename std::vector<T>::iterator val;
+
+  for (val = vals.begin(); val != vals.end(); val++) {
     valcount += *val * bin;
     totcount += *val * total;
 
@@ -38,32 +42,22 @@ double histomean (vector<Klass>& vals)
   return valcount/totcount;
 }
 
-// //////////////////////////////////////////////////////////////////////////
-// renew
-//   Much like realloc in C, will resize an array while retaining original
-//   information (up to the length of the new array).
-//
-// Willem van Straten, August 2000
-//
+// return the sum of all elements in a vector
 template <class T>
-void renew (T* &ptr, unsigned neu_size, unsigned old_size)
+double sum (const std::vector<T>& x)
 {
-  if (old_size == neu_size)
-    return;
+  double the_sum = 0.0;
+  for (unsigned i=0; i<x.size(); i++)
+    the_sum += x[i];
+  return the_sum;
+}
 
-  if (neu_size == 0 && ptr != NULL) {
-    delete [] ptr;  ptr = NULL;
-  }
-
-  T* nptr = new T [neu_size];
-  assert (nptr != NULL);
-
-  if (ptr) {
-    unsigned cpt = min (neu_size, old_size);
-    for (unsigned ipt = 0; ipt < cpt; ipt++)
-      nptr[ipt] = ptr[ipt];
-    delete [] ptr;
-  }
-
-  ptr = nptr;
+// normalize each element of a vector by the sum of all elements in it
+template <class T>
+void normalize (std::vector<T>& x)
+{
+  double the_sum = sum (x);
+  assert( the_sum != 0 );
+  for (unsigned i=0; i<x.size(); i++)
+    x[i] /= the_sum;
 }
