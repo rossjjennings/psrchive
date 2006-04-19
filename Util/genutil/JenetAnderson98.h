@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/JenetAnderson98.h,v $
-   $Revision: 1.4 $
-   $Date: 2006/04/18 20:48:32 $
+   $Revision: 1.5 $
+   $Date: 2006/04/19 13:09:19 $
    $Author: straten $ */
 
 #ifndef __Jenet_Anderson_98
@@ -16,6 +16,27 @@
 
 #include <vector>
 
+//! Statistics of two-bit quantization and artifact correction parameters
+/*!  Given either the fraction of digitized samples in the low voltage
+  state, \f$\Phi\f$, or the instantaneous power normalized by the mean
+  power, \f$\sigma_n=\sigma/\langle\sigma\rangle\f$, this class
+  computes
+  <ol>
+  <li> the output levels that minimize signal distortion 
+       (dynamic level setting), and
+  <li> the fractional quantization noise (scattered power correction).
+
+  \param Phi fraction of low voltage state samples, or
+  \param sigma_n normalized power
+
+  \retval lo the optimal low voltage output level
+  \retval hi the optimal hi voltage output level
+  \retval A the fractional quantization noise
+
+  Furthermore, given the sampling threshold, \f$t\f$, this class
+  computes the mean, variance, and probability distribution of
+  \f$\Phi\f$.
+*/
 class JenetAnderson98 {
 
  public:
@@ -46,6 +67,8 @@ class JenetAnderson98 {
 
   //! Get the expectation value of Phi, JA98 Eq.A2
   double get_mean_Phi () const { return mean_Phi; }
+  //! Set the expectation value of Phi
+  void set_mean_Phi (double mean_Phi);
 
   //! Get the variance of Phi
   double get_var_Phi () const { return var_Phi; }

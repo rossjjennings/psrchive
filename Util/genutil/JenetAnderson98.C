@@ -18,16 +18,6 @@ JenetAnderson98::JenetAnderson98 ()
   hi = lo = A = 0;
 }
 
-/*!  Given the fraction of digitized samples in the low voltage state,
-  this method returns the optimal values for low and high output
-  voltage states, as well as the fractional scattered power
-
-  \param p_in fraction of low voltage state samples
-  \retval lo the low voltage output state
-  \retval hi the hi voltage output state
-  \retval A the fractional scattered power
-*/
-
 //! Set the fraction of samples in the low voltage state
 /*! This method inverts Eq.45 of JA98.
 
@@ -72,24 +62,35 @@ void JenetAnderson98::set_alpha (double alpha, double Phi)
   A = num / ( M_PI * ((lo*lo-hi*hi)*Phi + hi*hi) );
 }
 
-/*! Determines the mean fraction of samples that lay within the
-    thresholds, -t and +t, where t = threshold * sigma.  
+/*! Given the sampling threshold, t, this method computes the mean
+    fraction of samples that lay within the thresholds, -t and +t,
+    where t = threshold * sigma.
     This is equivalent to:
     <ol>
-    <li> Eq.45 (with x4 = -x2 = t [Eq.38])
-    <li> Eq.A2 (with xh = -xl = t)
+    <li> Eq.45 (with x4 = -x2 = t [Eq.38]);
+    <li> Eq.A2 (with xh = -xl = t); or
     <li> the expectation value of the binomial distribution, Eq.A6
     (cf. http://mathworld.wolfram.com/BinomialDistribution.html, Eqn. 12)
     </ol>
 
     The variance of Phi is the variance of the binomial distribution, Eq.A6.
     (cf. http://mathworld.wolfram.com/BinomialDistribution.html, Eqn. 17)
-
 */
 void JenetAnderson98::set_threshold (double t)
 {
   threshold = t;
   mean_Phi = erf (threshold / sqrt(2.0));
+  var_Phi = mean_Phi * (1.0 - mean_Phi);
+}
+
+/*! Given the mean fraction of samples that lay within the
+    thresholds, -t and +t, this method computes the threshold, where
+    threshold = t/sigma.
+*/
+void JenetAnderson98::set_mean_Phi (double Phi)
+{
+  threshold = ierf (Phi) * sqrt(2.0);
+  mean_Phi = Phi;
   var_Phi = mean_Phi * (1.0 - mean_Phi);
 }
 
