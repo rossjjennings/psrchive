@@ -31,7 +31,7 @@ double histomean (const std::vector<T>& vals)
   double total = (double) vals.size();
   double bin = 0.0;
 
-  typename std::vector<T>::iterator val;
+  typename std::vector<T>::const_iterator val;
 
   for (val = vals.begin(); val != vals.end(); val++) {
     valcount += *val * bin;
