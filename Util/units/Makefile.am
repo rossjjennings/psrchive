@@ -209,7 +209,7 @@ bin_PROGRAMS = lmfit
 check_PROGRAMS = test_Conventions test_Error test_Configuration		\
 	test_HeapTracked test_Reference test_circular_Reference		\
 	test_Registry test_Functor test_Callback test_separate		\
-	test_substitute \
+	test_substitute test_Invariant \
 	test_copy test_Axis test_Projection test_Composite test_Scalar	\
 	test_Complex2Product test_Basis test_Stokes test_Polar		\
 	test_TextInterface test_parse_indeces test_Estimate test_Vector	\
@@ -253,6 +253,7 @@ test_Rotation_SOURCES		= test_Rotation.C
 test_ModifyRestore_SOURCES      = test_ModifyRestore.C
 test_CyclicParameter_SOURCES    = test_CyclicParameter.C
 test_Univariate_SOURCES		= test_Univariate.C
+test_Invariant_SOURCES		= test_Invariant.C
 
 lmfit_SOURCES 			= lmfit.C
 lmfit_LDADD			= libunits.la @PGPLOT_LIBS@
