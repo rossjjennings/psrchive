@@ -11,9 +11,11 @@
 void MEAL::Invariant::init ()
 {
   for (unsigned ipol=0; ipol<input.size(); ipol++)
-    input[ipol] = *(new MEAL::ScalarParameter);
+    input[ipol] = *(new ScalarParameter);
 
   result = input.invariant();
+
+  bias = *(new ScalarParameter);
 }
 
 MEAL::Invariant::Invariant ()
@@ -45,13 +47,15 @@ void MEAL::Invariant::set_Stokes (const Stokes<Estimate<float> >& stokes)
 
 void MEAL::Invariant::set_Stokes (const Stokes<Estimate<double> >& stokes)
 {
-  bias = stokes[0].get_variance();
+  double the_bias = stokes[0].get_variance();
 
   for (unsigned ipol=0; ipol<stokes.size(); ipol++) {
     input[ipol].get_expression()->set_Estimate( 0, stokes[ipol] );
     if (ipol)
-      bias -= stokes[ipol].get_variance();
+      the_bias -= stokes[ipol].get_variance();
   }
+
+  bias.get_expression()->set_Estimate( 0, the_bias );
 }
 
 //! Get the invariant interval
@@ -63,6 +67,11 @@ Estimate<double> MEAL::Invariant::get_invariant () const
 //! Get the estimated bias due to measurement error
 double MEAL::Invariant::get_bias () const
 {
-  return bias;
+  return bias.get_Estimate().get_value();
+}
+
+MEAL::ScalarMath MEAL::Invariant::get_correct_result () const
+{
+  return result - bias;
 }
 

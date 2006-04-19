@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Invariant.h,v $
-   $Revision: 1.2 $
-   $Date: 2006/03/17 13:35:25 $
+   $Revision: 1.3 $
+   $Date: 2006/04/19 19:52:05 $
    $Author: straten $ */
 
 #ifndef __MEAL_Invariant_h
@@ -25,7 +25,7 @@ namespace MEAL {
   //! Computes the invariant interval
   /*! This class properly handles the propagation of errors */
 
-  class Invariant : Reference::Able {
+  class Invariant : public Reference::Able {
 
   public:
 
@@ -53,16 +53,22 @@ namespace MEAL {
     //! Get the estimated bias due to measurement error
     double get_bias () const;
 
+    //! Get the bias-corrected estimate
+    ScalarMath get_correct_result () const;
+
+    //! Get the input Stokes parameters
+    Stokes<ScalarMath> get_input () const { return input; }
+
   protected:
 
     //! The input Stokes parameters
     Stokes<ScalarMath> input;
 
+    //! The bias due to measurment error
+    ScalarMath bias;
+
     //! The invariant interval, I^2 - Q^2 - U^2 - V^2
     ScalarMath result;
-
-    //! The bias due to measurement error
-    double bias;
 
   private:
 
