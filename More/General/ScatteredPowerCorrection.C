@@ -5,9 +5,12 @@
  *
  ***************************************************************************/
 #include "Pulsar/ScatteredPowerCorrection.h"
+#include "Pulsar/TwoBitStats.h"
 #include "Pulsar/Integration.h"
 #include "Pulsar/Profile.h"
+
 #include "Physical.h"
+#include "templates.h"
 
 #define ESTIMATE_SNR 0
 
@@ -18,6 +21,37 @@ Pulsar::ScatteredPowerCorrection::ScatteredPowerCorrection ()
 
 void Pulsar::ScatteredPowerCorrection::correct (Archive* data)
 {
+  TwoBitStats* tbs = data->get<TwoBitStats>();
+
+  if (tbs && tbs->get_ndig() <= 2) {
+
+    if (Archive::verbose > 2)
+      cerr << "Pulsar::ScatteredPowerCorrection::correct estimate thresholds"
+	   << endl;
+
+    unsigned ndig = tbs->get_ndig();
+
+    thresholds.resize( ndig );
+
+    for (unsigned idig=0; idig < ndig; idig ++) {
+      vector<float> hist = tbs->get_histogram (idig);
+      double mean = histomean (hist);
+      ja98.set_mean_Phi( mean );
+      thresholds[idig] = ja98.get_threshold();
+
+      if (Archive::verbose > 2)
+	cerr << "  mean=" << mean << " t[" << idig << "]=" << thresholds[idig]
+	     << endl;
+    }
+
+  }
+  else {
+    thresholds.resize(0);
+    ja98.set_threshold();
+  }
+
+  for (unsigned isub=0; isub < data->get_nsubint(); isub++)
+    transform (data->get_Integration(isub));
 }
 
 void Pulsar::ScatteredPowerCorrection::transform (Integration* data)
@@ -52,10 +86,15 @@ void Pulsar::ScatteredPowerCorrection::transform (Integration* data)
 		   ichan, time_smear, time_resolution);
   }
 
+  double maxdiff = 0.0;
+
   for (unsigned ipol = 0; ipol < npol; ipol++) {
 
     double mean_power = 0.0;
     unsigned ichan = 0;
+
+    if (thresholds.size() == npol)
+      ja98.set_threshold( thresholds[ipol] );
 
     for (ichan = 0; ichan < nchan; ichan++) {
 
@@ -92,15 +131,16 @@ void Pulsar::ScatteredPowerCorrection::transform (Integration* data)
 
       double sigma_n = power / mean_power;
 
-#if 0
       ja98.set_sigma_n( power / mean_power );
       double A = ja98.get_A();
-      //cerr << "sigma_n=" << sigma_n << " A=" << A << " <A>=0.8808" << endl;
-#else
-      // Table 2 of JA98
-      double A = 0.8808;
-#endif
 
+
+      // compare the estimated value of A with the theoretical value
+      double A_theory = 0.8808;
+      double diff = fabs(2*(A_theory-A)/(A_theory+A));
+      maxdiff = max (diff, maxdiff);
+
+      // compute the quantization noise power in each channel
       double scattered_power = power * (1-A) / nchan;
 
       for (ichan = 0; ichan < nchan; ichan++)
@@ -111,4 +151,5 @@ void Pulsar::ScatteredPowerCorrection::transform (Integration* data)
 
   }
 
+  // cerr << "maxdiff=" << maxdiff << endl;
 }

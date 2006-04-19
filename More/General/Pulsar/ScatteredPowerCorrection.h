@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/ScatteredPowerCorrection.h,v $
-   $Revision: 1.3 $
-   $Date: 2006/04/19 13:13:51 $
+   $Revision: 1.4 $
+   $Date: 2006/04/19 15:08:37 $
    $Author: straten $ */
 
 #ifndef __Pulsar_ScatteredPowerCorrection_h
@@ -42,6 +42,9 @@ namespace Pulsar {
 
     //! Theoretical treatment of quantization effects
     JenetAnderson98 ja98;
+
+    //! The estimated thresholds at record time
+    std::vector<float> thresholds;
 
   };
 
