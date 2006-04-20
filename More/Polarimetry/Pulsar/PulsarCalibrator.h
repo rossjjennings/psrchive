@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PulsarCalibrator.h,v $
-   $Revision: 1.16 $
-   $Date: 2006/03/17 13:34:51 $
+   $Revision: 1.17 $
+   $Date: 2006/04/20 15:11:59 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PulsarCalibrator_H
@@ -56,6 +56,9 @@ namespace Pulsar {
 
     //! Allow software to choose the maximum harmonic
     void set_choose_maximum_harmonic (bool flag = true);
+
+    //! Ignore fluctuations in pulsar flux
+    void set_normalize_gain (bool flag = true);
 
     //! Set the standard to which pulsar profiles will be fit
     void set_standard (const Archive* data);
@@ -105,6 +108,9 @@ namespace Pulsar {
 
     //! When true, calculate_transformation will return the mean solution
     bool mean_solution;
+
+    //! When true, set the gain to unity after the best fit has been found
+    bool normalize_gain;
 
     //! Epoch of the solution
     MJD epoch;
