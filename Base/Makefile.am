@@ -313,13 +313,14 @@ archive_split_SOURCES		= archive_split.C
 
 TESTS = test_Receiver test_Interpreter
 
-check_PROGRAMS = test_Archive test_denoise test_Difference $(TESTS)
+check_PROGRAMS = test_Archive test_denoise test_Difference mtm_unique $(TESTS)
 
 test_Interpreter_SOURCES	= test_Interpreter.C
 test_Receiver_SOURCES		= test_Receiver.C
 test_Archive_SOURCES		= test_Archive.C
 test_denoise_SOURCES		= test_denoise.C
 test_Difference_SOURCES		= test_Difference.C
+mtm_unique_SOURCES		= mtm_unique.C
 
 endif
 
