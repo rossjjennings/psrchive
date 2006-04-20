@@ -410,8 +410,6 @@ Tempo::toa Pulsar::PolnProfileFit::get_toa (const PolnProfile* observation,
   
   Estimate<double> pulse_phase = get_phase();
 
-  cerr << "pulse_phase=" << pulse_phase << endl;
-
   Tempo::toa retval (Tempo::toa::Parkes);
 
   retval.set_frequency (observation->get_Profile(0)->get_centre_frequency());
@@ -502,9 +500,6 @@ catch (Error& error) {
   throw error += "Pulsar::PolnProfileFit::get_variance";
 }
 
-
-
-
 double Pulsar::PolnProfileFit::get_variance (const Profile* input) const try
 {
   unsigned nbin = input->get_nbin()/2;
@@ -524,7 +519,7 @@ double Pulsar::PolnProfileFit::get_variance (const Profile* input) const try
       float re = amps[ibin*2];
       float im = amps[ibin*2+1];
       total += re*re + im*im;
-      count ++;
+      count += 2;
     }
 
   // The variance of the spectrum (with zero mean) is the mean of the PSD
