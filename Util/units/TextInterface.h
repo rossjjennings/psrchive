@@ -878,12 +878,14 @@ bool TextInterface::Attribute<C>::matches (const std::string& name) const
   return name == get_name();
 }
 
+#include <string.h>
+
 template<class C,class M,class Get>
 bool TextInterface::HasAProxy<C,M,Get>::matches (const std::string& name) const
 {
   std::string::size_type length = prefix.length();
 
-  if ( name.compare (0,length,prefix) != 0 )
+  if ( strncmp (name.c_str(), prefix.c_str(), length) != 0 )
     return false;
 
   if ( name[length] != ':' )

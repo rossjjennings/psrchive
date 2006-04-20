@@ -9,6 +9,7 @@
 #include "pad.h"
 
 #include <stdio.h>
+#include <string.h>
 
 using namespace std;
 
@@ -82,7 +83,7 @@ bool TextInterface::match (const string& name, const string& text,
 {
   string::size_type length = name.length();
 
-  if ( length && text.compare (0, length, name) != 0 )
+  if ( length && strncmp (text.c_str(), name.c_str(), length) != 0 )
     return false;
 
   string::size_type end = text.find (':', length);
