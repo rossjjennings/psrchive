@@ -105,6 +105,7 @@ nobase_include_HEADERS = \
         MEAL/ProductRule.h \
         MEAL/ProjectGradient.h \
         MEAL/Projection.h \
+	MEAL/RandomPolar.h \
         MEAL/RotatingVectorModel.h \
         MEAL/Rotation.h \
         MEAL/RuleMath.h \
@@ -175,6 +176,7 @@ libunits_la_SOURCES += \
         Polynomial.C \
         PositionAngles.C \
         Projection.C \
+	RandomPolar.C \
         RotatingVectorModel.C \
         Rotation.C \
         ScalarAbsolute.C \
