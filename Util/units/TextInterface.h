@@ -54,7 +54,7 @@ namespace TextInterface {
   public:
     
     //! Construct from a pointer to parent class attribute interface
-    IsAProxy (Attribute<P>* pa) { attribute = pa->clone(); }
+    IsAProxy (const Attribute<P>* pa) { attribute = pa->clone(); }
 
     //! Copy constructor
     IsAProxy (const IsAProxy& copy)
@@ -99,7 +99,7 @@ namespace TextInterface {
   public:
     
     //! Construct from a pointer to member attribute interface
-    HasAProxy (const std::string& pre, Attribute<M>* pa, Get g)
+    HasAProxy (const std::string& pre, const Attribute<M>* pa, Get g)
       { prefix = pre; attribute = pa->clone(); get = g; }
 
     //! Copy constructor
@@ -156,8 +156,8 @@ namespace TextInterface {
   public:
     
     //! Construct from a pointer to element attribute interface
-    VectorOfProxy (const std::string& pre, Attribute<E>* pa, Get g, Size s)
-      { prefix = pre; attribute = pa->clone(); get = g; size = s; }
+    VectorOfProxy (const std::string& pre, const Attribute<E>* a, Get g, Size s)
+      { prefix = pre; attribute = a->clone(); get = g; size = s; }
 
     //! Copy constructor
     VectorOfProxy (const VectorOfProxy& copy)
@@ -222,7 +222,7 @@ namespace TextInterface {
   public:
     
     //! Construct from a pointer to parent class attribute interface
-    MapOfProxy (const std::string& pre, Attribute<E>* pa, Get g)
+    MapOfProxy (const std::string& pre, const Attribute<E>* pa, Get g)
       { prefix = pre; attribute = pa->clone(); get = g; }
 
     //! Copy constructor
@@ -513,9 +513,9 @@ namespace TextInterface {
     template<class P> 
       void import (const To<P>* parent)
       {
-	for (unsigned i=0; i < parent->attributes.size(); i++)
-	  if (!import_filter || !find(parent->attributes[i]->get_name(),false))
-	    add( new IsAProxy<C,P>(parent->attributes[i]) );
+	for (unsigned i=0; i < parent->size(); i++)
+	  if (!import_filter || !find(parent->get(i)->get_name(),false))
+	    add( new IsAProxy<C,P>(parent->get(i)) );
       }
 
     //! Import the attribute interfaces from a member text interface
@@ -524,9 +524,9 @@ namespace TextInterface {
     template<class M, class G> 
       void import ( const std::string& name, const To<M>* member, G get )
       {
-	for (unsigned i=0; i < member->attributes.size(); i++)
-	  if (!import_filter || !find(member->attributes[i]->get_name(),false))
-	    add(new HasAProxy<C,M,G>(name, member->attributes[i],get));
+	for (unsigned i=0; i < member->size(); i++)
+	  if (!import_filter || !find(member->get(i)->get_name(),false))
+	    add(new HasAProxy<C,M,G>(name, member->get(i),get));
       }
 
     //! Import the attribute interfaces from a vector element text interface
@@ -537,9 +537,9 @@ namespace TextInterface {
     template<class E, class G, class S>
       void import ( const std::string& name, const To<E>* member, G g, S s)
       {
-	for (unsigned i=0; i < member->attributes.size(); i++)
-	  if (!import_filter || !find(member->attributes[i]->get_name(),false))
-	    add(new VectorOfProxy<C,E,G,S>(name, member->attributes[i], g, s));
+	for (unsigned i=0; i < member->size(); i++)
+	  if (!import_filter || !find(member->get(i)->get_name(),false))
+	    add(new VectorOfProxy<C,E,G,S>(name, member->get(i), g, s));
       }
 
     //! Import the attribute interfaces from a map data text interface
@@ -549,9 +549,9 @@ namespace TextInterface {
     template<class K, class E, class G>
       void import ( const std::string& name, K k, const To<E>* member, G g)
       {
-	for (unsigned i=0; i < member->attributes.size(); i++)
-	  if (!import_filter || !find(member->attributes[i]->get_name(),false))
-	    add( new MapOfProxy<C,K,E,G>(name, member->attributes[i], g) );
+	for (unsigned i=0; i < member->size(); i++)
+	  if (!import_filter || !find(member->get(i)->get_name(),false))
+	    add( new MapOfProxy<C,K,E,G>(name, member->get(i), g) );
       }
 
     //! Import the attribute interfaces from a parent text interface
@@ -571,7 +571,13 @@ namespace TextInterface {
     template<class K, class E, class G>
       void import ( const std::string& name, K k, const To<E>& element, G g)
       { import (name, k, &element, g); }
-    
+
+    //! Return the number of attributes
+    unsigned size () const { return attributes.size(); }
+
+    //! Provide access to the attributes
+    const Attribute<C>* get (unsigned i) const { return attributes[i]; }
+
   protected:
 
     //! When set, import filters out duplicate attribute names
@@ -640,9 +646,6 @@ namespace TextInterface {
 	  else 
 	    i++;
       }
-
-    // allow different To types to see eachothers protected bit
-    template<class P> friend class To;
 
     //! The named class attribute interfaces
     std::vector< Reference::To< Attribute<C> > > attributes;
