@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pcm.C,v $
-   $Revision: 1.53 $
-   $Date: 2006/04/19 21:30:39 $
+   $Revision: 1.54 $
+   $Date: 2006/04/20 15:12:05 $
    $Author: straten $ */
 
 #include "Pulsar/psrchive.h"
@@ -80,6 +80,7 @@ void usage ()
     "  -S fname   filename of calibrated standard \n"
     "  -H         allow software to choose the number of harmonics \n"
     "  -n nbin    set the number of harmonics to use as input states \n"
+    "  -I         preserve invariant interval (normalize gain) \n"
     "  -T toa.tim filename to which arrival time estimates will be written \n"
     "\n"
     "See "PSRCHIVE_HTTP"/manuals/pcm for more details\n"
@@ -256,6 +257,9 @@ bool maxbins_set = false;
 //! Flag raised when software may choose the maximum harmonic
 bool choose_maximum_harmonic = false;
 
+//! Mode B: Ignore fluctuations in pulsar gain
+bool normalize_gain = false;
+
 //! The Stokes parameters to be inverted
 Pulsar::ReflectStokes reflections;
 
@@ -307,7 +311,7 @@ int main (int argc, char *argv[]) try {
   bool publication_plots = false;
 
   int gotc = 0;
-  const char* args = "a:b:c:C:d:Df:gHhM:m:N:n:OPp:qrsS:t:T:uvV:";
+  const char* args = "a:b:c:C:d:Df:gHhIM:m:N:n:OPp:qrsS:t:T:uvV:";
   while ((gotc = getopt(argc, argv, args)) != -1) {
     switch (gotc) {
 
@@ -349,6 +353,10 @@ int main (int argc, char *argv[]) try {
       
     case 'H':
       choose_maximum_harmonic = true;
+      break;
+
+    case 'I':
+      normalize_gain = true;
       break;
 
     case 'm':
@@ -688,9 +696,9 @@ int main (int argc, char *argv[]) try {
 	model.precalibrate (archive);
 
 	if (verbose)
-	  cerr << "pcm: fscrunch, correct, and add to total" << endl;
+	  cerr << "pcm: correct and add to total" << endl;
 
-        archive->fscrunch ();
+        // archive->fscrunch ();
         archive->correct_instrument ();
 
 	if (!total)
@@ -739,6 +747,8 @@ int main (int argc, char *argv[]) try {
     cpgask(1);
     cpgslw(2);
     cpgsvp (.1,.9, .1,.9);
+
+    total->fscrunch();
 
     cerr << "pcm: plotting uncalibrated pulsar total stokes" << endl;
     Pulsar::Plotter profile;
@@ -851,9 +861,9 @@ int main (int argc, char *argv[]) try {
       if (archive->get_type() == Signal::Pulsar)  {
 
         if (verbose)
-          cerr << "pcm: fscrunch and add to calibrated total" << endl;
+          cerr << "pcm: correct and add to calibrated total" << endl;
 
-        archive->fscrunch ();
+        // archive->fscrunch ();
         archive->correct_instrument ();
 
         if (!total)
@@ -884,6 +894,8 @@ int main (int argc, char *argv[]) try {
     cpgslw(2);
     cpgsvp (.1,.9, .1,.9);
 
+    total->fscrunch();
+
     cerr << "pcm: plotting calibrated pulsar total stokes" << endl;
     Pulsar::Plotter profile;
     profile.spherical (total);
@@ -911,6 +923,7 @@ int mode_B (const char* standard_filename,
 
   model.set_choose_maximum_harmonic (choose_maximum_harmonic);
   model.set_return_mean_solution (false);
+  model.set_normalize_gain (normalize_gain);
 
   if (tim_file) {
     FILE* fptr = fopen (tim_file, "w");
