@@ -153,7 +153,7 @@ int main (int argc, char **argv) try {
       return 0;
       
     case 'i':
-      cout << "$Id: psradd.C,v 1.37 2006/04/19 16:56:48 straten Exp $" 
+      cout << "$Id: psradd.C,v 1.38 2006/04/20 05:36:41 hknight Exp $" 
 	   << endl;
       return 0;
 
@@ -662,7 +662,7 @@ int main (int argc, char **argv) try {
       total->tscrunch();
 
       if (!testing){
-	// reorder( total );
+	reorder( total );
 	total->unload (newname);
       }      
 
@@ -692,7 +692,7 @@ int main (int argc, char **argv) try {
       cerr << "psradd: Unloading archive: '" << newname << "'" << endl;
     
     if (!testing){
-      // reorder( total );
+      reorder( total );
       total->unload (newname);
     }
 
@@ -732,6 +732,5 @@ void
 reorder(Reference::To<Pulsar::Archive> arch)
 {
   Reference::To<Pulsar::TimeSortedOrder> tso = new Pulsar::TimeSortedOrder;
-  arch->add_extension(tso);
   tso->organise(arch,0);
 }
