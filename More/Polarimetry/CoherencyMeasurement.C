@@ -11,6 +11,7 @@ using namespace std;
 
 Calibration::CoherencyMeasurement::CoherencyMeasurement (unsigned index)
 {
+  nconstraint = 0;
   uncertainty = 0;
   input_index = index;
 }
@@ -21,10 +22,16 @@ void Calibration::CoherencyMeasurement::set_input_index (unsigned index)
   input_index = index;
 }
 
-//! Set the index of the input to which the measurement corresponds
+//! Get the index of the input to which the measurement corresponds
 unsigned Calibration::CoherencyMeasurement::get_input_index () const
 {
   return input_index;
+}
+
+//! Get the number of constraints provided by this measurement
+unsigned Calibration::CoherencyMeasurement::get_nconstraint () const
+{
+  return nconstraint;
 }
 
 //! Set the measured Stokes parameters
@@ -38,6 +45,8 @@ void Calibration::CoherencyMeasurement::set_stokes
   }
 
   rho = convert (temp);
+  // 4 Stokes
+  nconstraint = 4;
 }
 
 //! Set the measured complex Stokes parameters
@@ -48,14 +57,18 @@ void Calibration::CoherencyMeasurement::set_stokes
     inv_var[ipol] = 1.0/variance[ipol];
 
   rho = convert (stokes);
+  // 4 Stokes, Re and Im
+  nconstraint = 8;
 }
 
 //! Set the measured complex Stokes parameters and the variance functions
 void Calibration::CoherencyMeasurement::set_stokes
 (const Stokes< complex<double> >& stokes, const Uncertainty* var)
 {
-  rho = convert (stokes);
   uncertainty = var;
+  rho = convert (stokes);
+  // 4 Stokes, Re and Im
+  nconstraint = 8;
 }
 
 //! Get the measured coherency matrix

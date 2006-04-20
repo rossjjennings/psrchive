@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/CoherencyMeasurement.h,v $
-   $Revision: 1.4 $
-   $Date: 2006/03/17 13:34:44 $
+   $Revision: 1.5 $
+   $Date: 2006/04/20 22:13:29 $
    $Author: straten $ */
 
 #ifndef __Calibration_CoherencyMeasurement_H
@@ -57,6 +57,9 @@ namespace Calibration {
     void set_stokes (const Stokes< std::complex<double> >& stokes, 
 		     const Uncertainty* var);
 
+    //! Get the number of constraints provided by this measurement
+    unsigned get_nconstraint () const;
+
     //! Get the measured coherency matrix
     Jones<double> get_coherency () const;
 
@@ -76,6 +79,9 @@ namespace Calibration {
 
     //! Index of the input to which the measurement corresponds
     unsigned input_index;
+
+    //! The number of constraints provided by this measurement
+    unsigned nconstraint;
 
     //! The coherency matrix measurement
     Jones<double> rho;

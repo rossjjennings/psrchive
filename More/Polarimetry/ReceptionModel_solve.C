@@ -92,9 +92,6 @@ void Calibration::ReceptionModel::solve_work (bool solve_verbose)
 
   unsigned fixed_params = 0;
   for (unsigned idat=0; idat < data.size(); idat++) {
-    
-    // count the number of constraints provided by each CoherencyMeasurement
-    fixed_params += data[idat].size() * 4;
        
     // ensure that each source_index is valid and flag the input states
     // that have at least one measurement to constrain them
@@ -108,6 +105,10 @@ void Calibration::ReceptionModel::solve_work (bool solve_verbose)
 		     source_index, get_num_input());
       
       has_source[source_index] = true;
+
+      // count the number of constraints provided by each CoherencyMeasurement
+      fixed_params += data[idat][isource].get_nconstraint ();
+
     }
   }
   
