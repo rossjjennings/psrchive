@@ -73,6 +73,11 @@ void Pulsar::PulsarCalibrator::set_choose_maximum_harmonic (bool flag)
   choose_maximum_harmonic = flag;
 }
 
+void Pulsar::PulsarCalibrator::set_normalize_gain (bool flag)
+{
+  normalize_gain = flag;
+}
+
 void Pulsar::PulsarCalibrator::set_standard (const Archive* data)
 {
   if (!data)
@@ -269,7 +274,7 @@ void Pulsar::PulsarCalibrator::solve (const Integration* data, unsigned ichan)
 
     reduced_chisq = chisq / nfree;
 
-    if (reduced_chisq < 1.1)
+    if (reduced_chisq < 2.0)
       break;
 
     cerr << "Pulsar::PulsarCalibrator::solve ichan=" << ichan
@@ -357,8 +362,17 @@ void Pulsar::PulsarCalibrator::solve (const Integration* data, unsigned ichan)
   }
 
   if (!solution[ichan])
-    solution[ichan] = new Calibration::MeanInstrument;  
-  
+    solution[ichan] = new Calibration::MeanInstrument;
+
+  if (normalize_gain) {
+    Calibration::Instrument* inst;
+    inst = dynamic_cast<Calibration::Instrument*>(transformation[ichan].get());
+    if (!inst)
+      throw Error (InvalidState, "Pulsar::PulsarCalibrator::solve",
+		   "transformation[%d] is not an Instrument", ichan);
+    inst->set_gain(1.0);
+  }
+
   solution[ichan]->integrate( transformation[ichan] );
   
 }
