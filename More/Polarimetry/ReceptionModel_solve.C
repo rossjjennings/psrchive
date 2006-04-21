@@ -174,12 +174,14 @@ void Calibration::ReceptionModel::solve_work (bool solve_verbose)
 
   nfree = fixed_params - free_params;
 
+  float last_lamda = 0.0;
+
   for (iterations = 0; iterations < maximum_iterations; iterations++) {
 
     float chisq = fit.iter (data, fake, *this);
 
     if (exact_solution) {
-      if (debug)
+      if (fit_debug)
 	cerr << "chisq=" << chisq << " convergence="
 	     << convergence_threshold << endl;
 
@@ -189,10 +191,10 @@ void Calibration::ReceptionModel::solve_work (bool solve_verbose)
 	continue;
     }
 
-    float delta_chisq = best_chisq - chisq;
+    float delta_chisq = chisq - best_chisq;
     float reduced_chisq = chisq / nfree;
 
-    if (verbose || debug)
+    if (verbose || fit_debug)
       cerr << "chisq=" << chisq << " delta_chisq=" << delta_chisq
            << " reduced_chisq=" << reduced_chisq
 	   << " lamda=" << fit.lamda << endl;
@@ -200,22 +202,31 @@ void Calibration::ReceptionModel::solve_work (bool solve_verbose)
     if (chisq < best_chisq)
       best_chisq = chisq;
 
-    if (fit.lamda == 0.0 && delta_chisq < 1.0)  {
-      if (debug)
+    if (fit.lamda == 0.0 && fabs(delta_chisq) < 1.0 && delta_chisq <= 0)  {
+      if (fit_debug)
 	cerr << "fit good" << endl;
       break;
     }
 
-    if (delta_chisq >= -0.001*best_chisq && delta_chisq < 10) {
-      if (debug)
-	cerr << "fit close" << endl; 
+    if (fit.lamda == 0.0 && delta_chisq > 0) {
+      if (fit_debug)
+	cerr << "maybe not so good" << endl;
+      fit.lamda = last_lamda;
+    }
+
+    if (delta_chisq <= 0 && fabs(delta_chisq) < 10) {
+      if (fit_debug)
+	cerr << "fit close" << endl;
+      if (fit.lamda != 0)
+	last_lamda = fit.lamda;
       fit.lamda = 0.0;
     }
 
-      
   }
  
   if (iterations >= maximum_iterations) {
+    if (fit_debug)
+      cerr << "maximum iterations exceeded" << endl;
     for (iparm=0; iparm < get_nparam(); iparm++)
       set_Estimate (iparm, 0.0);
     throw Error (InvalidState, "Calibration::ReceptionModel::solve",
