@@ -12,6 +12,7 @@
 #include "Pulsar/PolnProfile.h"
 
 #include <cpgplot.h>
+#include <algorithm>
 
 Pulsar::AnglePlot::AnglePlot()
 {
