@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Integration.h,v $
-   $Revision: 1.82 $
-   $Date: 2006/04/16 13:27:32 $
+   $Revision: 1.83 $
+   $Date: 2006/04/21 04:20:09 $
    $Author: straten $ */
 
 /*
@@ -430,6 +430,7 @@ namespace Pulsar {
     friend class BinLngAscOrder;
     friend class Calibrator;
     friend class Plotter;
+    friend class Expert;
 
     //! Copy the profiles and attributes through set_ get_ methods
     virtual void copy (const Integration& subint, int npol=-1, int nchan=-1);
