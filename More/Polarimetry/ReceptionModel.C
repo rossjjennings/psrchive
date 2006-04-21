@@ -38,7 +38,7 @@ Calibration::ReceptionModel::ReceptionModel ()
   nfree = 0;
 
   // used during solve
-  debug = false;
+  fit_debug = false;
 }
 
 Calibration::ReceptionModel::~ReceptionModel ()

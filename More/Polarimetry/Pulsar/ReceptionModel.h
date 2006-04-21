@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ReceptionModel.h,v $
-   $Revision: 1.5 $
-   $Date: 2006/04/21 04:33:03 $
+   $Revision: 1.6 $
+   $Date: 2006/04/21 15:22:47 $
    $Author: straten $ */
 
 #ifndef __ReceptionModel_H
@@ -73,9 +73,6 @@ namespace Calibration {
     //! Wait for all of the solve threads to return
     static void solve_wait ();
 
-    //! Set the verbosity during solve
-    void set_debug (bool flag = true) { debug = flag; }
-
     //! Solve the measurement equations by least squares minimization
     void solve ();
 
@@ -92,6 +89,9 @@ namespace Calibration {
 
     //! Set the reduced chi-squared above which the fit is considered bad
     void set_fit_maximum_reduced (float maximum_reduced_chi_squared);
+
+    //! Set the verbosity during solve
+    void set_fit_debug (bool flag = true) { fit_debug = flag; }
 
     //! Get the covariance matrix of the last fit
     void get_fit_covariance (std::vector< std::vector<double> >&) const;
@@ -146,8 +146,8 @@ namespace Calibration {
     //! The number of free parameters in last call to solve method
     unsigned nfree;
 
-    //! The debug mode
-    bool debug;
+    //! The fit debug mode
+    bool fit_debug;
 
     //! Ensure that idata <= get_ndata()
     void range_check (unsigned idata, const char* method) const;
