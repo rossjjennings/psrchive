@@ -23,19 +23,13 @@
 #include <algorithm>
 
 #include <assert.h>
-#include <math.h>
+
 #include <stdlib.h>
 #include <string.h>
 
 #ifdef sun
 #include <ieeefp.h>
 #endif
-
-// For some strange reason, isfinite is getting undefed somehow
-#if defined(__APPLE__) && defined (__POWERPC__)
-#define isfinite(x) __isfinited(x)
-#endif
-
 
 // utility function defined at the end of the file
 void datatype_match (int typecode, int ephind);
@@ -249,7 +243,7 @@ void psrephem::load (fitsfile* fptr, long row)
 	fits_read_col (fptr, TDOUBLE, icol+1, row, firstelem, onelement,
 		       &nul, value_double + ieph, &anynul, &status);
 
-        if (value_double[ieph] == 0.0 || !isfinite(value_double[ieph]))
+        if (value_double[ieph] == 0.0 || !finite(value_double[ieph]))
           anynul = true;
 
         if (anynul)
@@ -336,7 +330,7 @@ void psrephem::load (fitsfile* fptr, long row)
 	fits_read_col (fptr, TDOUBLE, icol+1, row, firstelem, onelement,
 		       &nul, value_double + ieph, &anynul, &status);
 
-        if (value_double[ieph] == 0.0 || !isfinite(value_double[ieph]))
+        if (value_double[ieph] == 0.0 || !finite(value_double[ieph]))
           anynul = true;
 
         if (anynul)
