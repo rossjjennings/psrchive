@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PolnProfileFit.h,v $
-   $Revision: 1.19 $
-   $Date: 2006/04/21 04:33:03 $
+   $Revision: 1.20 $
+   $Date: 2006/04/21 15:28:57 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PolnProfileFit_h
@@ -79,7 +79,7 @@ namespace Pulsar {
     MEAL::Complex2* get_transformation () const;
 
     //! Set the debug mode in the ReceptionModel
-    void set_debug (bool flag = true);
+    void set_fit_debug (bool flag = true);
 
     //! Fit the specified observation to the standard
     void fit (const PolnProfile* observation);
@@ -167,6 +167,9 @@ namespace Pulsar {
 
     //! The reduced chi-squared after fitting
     double reduced_chisq;
+
+    //! The fit debug flag
+    bool fit_debug;
 
     //! Construtor helper
     void init ();

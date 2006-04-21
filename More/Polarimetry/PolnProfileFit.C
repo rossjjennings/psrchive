@@ -82,7 +82,7 @@ void Pulsar::PolnProfileFit::init ()
 
   choose_maximum_harmonic = false;
   emulate_scalar = false;
-
+  fit_debug = false;
 }
 
 void Pulsar::PolnProfileFit::set_maximum_harmonic (unsigned max)
@@ -138,6 +138,7 @@ void Pulsar::PolnProfileFit::set_standard (const PolnProfile* _standard)
 
 
   model = new Calibration::ReceptionModel;
+  model->set_fit_debug( fit_debug );
 
   // initialize the model transformation
   model->add_transformation ();
@@ -257,9 +258,11 @@ MEAL::Complex2* Pulsar::PolnProfileFit::get_transformation () const
   return transformation;
 }
 
-void Pulsar::PolnProfileFit::set_debug (bool flag)
+void Pulsar::PolnProfileFit::set_fit_debug (bool flag)
 {
-  model->set_debug(flag);
+  fit_debug = flag;
+  if (model)
+    model->set_fit_debug(flag);
 }
 
 //! Fit the specified observation to the standard
