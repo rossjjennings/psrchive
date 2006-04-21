@@ -11,6 +11,9 @@
 
 #include <cpgplot.h>
 
+#include <algorithm>
+#include <math.h>
+
 Pulsar::Poincare::Poincare ()
 {
   longitude = 45;
@@ -35,7 +38,8 @@ void Pulsar::Poincare::plot (const Archive* data)
     float max_amp = *max_element (amps+i_min, amps+i_max);
     float min_amp = *min_element (amps+i_min, amps+i_max);
 
-    max_amp = std::max( fabs(min_amp), max_amp );
+    float abs_min = fabs( min_amp );
+    max_amp = std::max( abs_min, max_amp );
     max = std::max (max_amp, max);
   }
 
