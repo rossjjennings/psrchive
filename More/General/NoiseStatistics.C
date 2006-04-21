@@ -53,7 +53,7 @@ float Pulsar::NoiseStatistics::get_nfnr (const Profile* profile)
   double total = 0.0;
 
   for (unsigned ibin=start; ibin < nbin; ibin++) {
-    if (!isfinite(amps[ibin]))
+    if (!finite(amps[ibin]))
       throw Error (InvalidState, "Pulsar::NoiseStatistics::get_nfnr",
 		   "amps[%d] = %f", ibin, amps[ibin]);
     total += amps[ibin];
