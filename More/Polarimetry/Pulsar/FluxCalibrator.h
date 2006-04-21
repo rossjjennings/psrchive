@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/FluxCalibrator.h,v $
-   $Revision: 1.25 $
-   $Date: 2006/03/24 20:43:29 $
+   $Revision: 1.26 $
+   $Date: 2006/04/21 04:35:42 $
    $Author: straten $ */
 
 #ifndef __Pulsar_FluxCalibrator_H
@@ -76,6 +76,7 @@ namespace Pulsar {
   protected:
 
     friend class FluxCalibratorExtension;
+    friend class Info;
 
     //! Flux calibrator database
     Reference::To<const Database> database;
