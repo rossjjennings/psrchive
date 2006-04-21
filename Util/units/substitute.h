@@ -6,8 +6,8 @@
  *
  ***************************************************************************/
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/substitute.h,v $
-   $Revision: 1.3 $
-   $Date: 2006/04/04 11:50:17 $
+   $Revision: 1.4 $
+   $Date: 2006/04/21 04:21:03 $
    $Author: straten $ */
 
 #ifndef __UTILS_UNITS_SUBSTITUTE_H
@@ -94,7 +94,7 @@ std::string substitute (const std::string& text, const T* resolver,
     if (end != std::string::npos)
       remain = remain.substr (end);
     else
-      remain.clear();
+      remain.erase();
 
   }
 
