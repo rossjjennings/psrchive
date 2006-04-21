@@ -36,6 +36,9 @@ Calibration::ReceptionModel::ReceptionModel ()
   iterations = 0;
   best_chisq = 0.0;
   nfree = 0;
+
+  // used during solve
+  debug = false;
 }
 
 Calibration::ReceptionModel::~ReceptionModel ()

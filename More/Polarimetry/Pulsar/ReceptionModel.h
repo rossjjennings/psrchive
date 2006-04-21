@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ReceptionModel.h,v $
-   $Revision: 1.4 $
-   $Date: 2006/03/17 13:34:44 $
+   $Revision: 1.5 $
+   $Date: 2006/04/21 04:33:03 $
    $Author: straten $ */
 
 #ifndef __ReceptionModel_H
@@ -72,6 +72,9 @@ namespace Calibration {
 
     //! Wait for all of the solve threads to return
     static void solve_wait ();
+
+    //! Set the verbosity during solve
+    void set_debug (bool flag = true) { debug = flag; }
 
     //! Solve the measurement equations by least squares minimization
     void solve ();
@@ -142,6 +145,9 @@ namespace Calibration {
 
     //! The number of free parameters in last call to solve method
     unsigned nfree;
+
+    //! The debug mode
+    bool debug;
 
     //! Ensure that idata <= get_ndata()
     void range_check (unsigned idata, const char* method) const;

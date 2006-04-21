@@ -257,6 +257,10 @@ MEAL::Complex2* Pulsar::PolnProfileFit::get_transformation () const
   return transformation;
 }
 
+void Pulsar::PolnProfileFit::set_debug (bool flag)
+{
+  model->set_debug(flag);
+}
 
 //! Fit the specified observation to the standard
 void Pulsar::PolnProfileFit::fit (const PolnProfile* observation) try

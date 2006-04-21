@@ -174,17 +174,15 @@ void Calibration::ReceptionModel::solve_work (bool solve_verbose)
 
   nfree = fixed_params - free_params;
 
-// #define _DEBUG
-
   for (iterations = 0; iterations < maximum_iterations; iterations++) {
 
     float chisq = fit.iter (data, fake, *this);
 
     if (exact_solution) {
-#ifdef _DEBUG
-      cerr << "chisq=" << chisq << " convergence="
-	   << convergence_threshold << endl;
-#endif
+      if (debug)
+	cerr << "chisq=" << chisq << " convergence="
+	     << convergence_threshold << endl;
+
       if (chisq < convergence_threshold)
 	break;
       else
@@ -194,9 +192,7 @@ void Calibration::ReceptionModel::solve_work (bool solve_verbose)
     float delta_chisq = best_chisq - chisq;
     float reduced_chisq = chisq / nfree;
 
-#ifndef _DEBUG
-    if (verbose)
-#endif
+    if (verbose || debug)
       cerr << "chisq=" << chisq << " delta_chisq=" << delta_chisq
            << " reduced_chisq=" << reduced_chisq
 	   << " lamda=" << fit.lamda << endl;
@@ -205,16 +201,14 @@ void Calibration::ReceptionModel::solve_work (bool solve_verbose)
       best_chisq = chisq;
 
     if (fit.lamda == 0.0 && delta_chisq < 1.0)  {
-#ifdef _DEBUG
-      cerr << "fit good" << endl;
-#endif
+      if (debug)
+	cerr << "fit good" << endl;
       break;
     }
 
     if (delta_chisq >= -0.001*best_chisq && delta_chisq < 10) {
-#ifdef _DEBUG
-      cerr << "fit close" << endl; 
-#endif     
+      if (debug)
+	cerr << "fit close" << endl; 
       fit.lamda = 0.0;
     }
 

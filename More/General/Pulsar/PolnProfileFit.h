@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/Attic/PolnProfileFit.h,v $
-   $Revision: 1.18 $
-   $Date: 2006/04/04 21:14:31 $
+   $Revision: 1.19 $
+   $Date: 2006/04/21 04:33:03 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PolnProfileFit_h
@@ -77,6 +77,9 @@ namespace Pulsar {
 
     //! Get the transformation between the standard and the observation
     MEAL::Complex2* get_transformation () const;
+
+    //! Set the debug mode in the ReceptionModel
+    void set_debug (bool flag = true);
 
     //! Fit the specified observation to the standard
     void fit (const PolnProfile* observation);
