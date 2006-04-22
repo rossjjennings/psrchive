@@ -5,11 +5,13 @@
  *
  ***************************************************************************/
 #include "Configuration.h"
+#include "Error.h"
+
 #include <iostream>
 
 using namespace std;
 
-int main () {
+int main () try {
 
   Configuration config ("test.cfg");
 
@@ -31,3 +33,8 @@ int main () {
 
   return 0;
 }
+catch (Error& error) {
+  cerr << error << endl;
+  return -1;
+}
+
