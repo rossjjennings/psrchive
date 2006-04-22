@@ -73,7 +73,7 @@ AM_CPPFLAGS = -D_REENTRANT=1
 #
 
 INCLUDES = -I$(top_builddir) -I$(top_srcdir)/utils/units \
-	-I$(top_srcdir)/utils/genutil
+	-I$(top_srcdir)/utils/genutil @PGPLOT_CFLAGS@
 
 LDADD = libgenutilpp.la ../genutil/libgenutil.la ../units/libunits.la
 
