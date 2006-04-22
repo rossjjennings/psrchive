@@ -218,6 +218,7 @@ nobase_include_HEADERS +=			\
 	Pulsar/Database.h			\
 	Pulsar/DoPCalibrator.h			\
 	Pulsar/FaradayRotation.h		\
+	Pulsar/FluxCalibratorData.h		\
 	Pulsar/FluxCalibratorDatabase.h		\
 	Pulsar/FluxCalibrator.h			\
 	Pulsar/FrequencyIntegrate.h		\
@@ -227,6 +228,7 @@ nobase_include_HEADERS +=			\
 	Pulsar/OffPulseCalibrator.h		\
 	Pulsar/PolarCalibrator.h		\
 	Pulsar/PolnCalibrator.h			\
+	Pulsar/PolnProfileFit.h			\
 	Pulsar/PolnProfileFitAnalysis.h		\
 	Pulsar/PulsarCalibrator.h		\
 	Pulsar/ReceptionCalibrator.h		\
