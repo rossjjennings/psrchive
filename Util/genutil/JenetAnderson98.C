@@ -6,8 +6,10 @@
  ***************************************************************************/
 
 #include "JenetAnderson98.h"
+#include "Brent.h"
+#include "Functor.h"
 #include "ierf.h"
-#include <math.h>
+
  
 /*! From JA98, Table 1 */
 const double JenetAnderson98::optimal_threshold = 0.9674;
@@ -142,4 +144,59 @@ void JenetAnderson98::get_prob_Phi (unsigned L, vector<float>& prob_Phi)
 				log(pow (1.0-mean_Phi, 1.0-Phi)) ) );
 
   }
+}
+
+double JenetAnderson98::A4 (double Phi)
+{
+  set_Phi (Phi);
+
+  double lo = get_lo();
+  double hi = get_hi();
+
+  return lo*lo*mean_Phi + hi*hi*(1-mean_Phi);
+}
+
+/* Uses the van Wijngaarden-Dekker-Brent method to invert Eq.A4 of JA98 */
+double JenetAnderson98::invert_A4 (double sigma_hat)
+{
+  Functor< double(double) > a4 (this, &JenetAnderson98::A4);
+  return Brent (a4, 0.01, 0.99, 1e-5, sigma_hat);
+}
+
+double JenetAnderson98::Probability::evaluate (unsigned idig, double Phi,
+					       double* dprob_dPhi)
+{
+  unsigned nsamp = get_nsample();
+
+  if (last_hist.size() != nsamp || last_idig != idig) {
+    get_histogram (last_hist, idig);
+    last_idig = idig;
+  }
+
+  if (Phi < 0 || Phi > 1)
+    throw Error (InvalidParam, "JenetAnderson98::Probability::evaluate",
+		 "invalid Phi = %lf", Phi);
+
+  unsigned bin1 = (unsigned) (Phi * nsamp);
+  if (bin1 >= nsamp)
+    bin1 = nsamp - 1;
+  unsigned bin2 = bin1 +1;
+  if (bin2 >= nsamp)
+    bin2 = nsamp - 1;
+
+  double p1 = last_hist[bin1];
+  double p2 = last_hist[bin2];
+
+  if (bin2 == bin1)
+    bin2 ++;
+
+  double Phi1 = double(bin1) / nsamp;
+  double Phi2 = double(bin2) / nsamp;
+
+  double slope = (p2 - p1) / (Phi2 - Phi1);
+
+  if (dprob_dPhi)
+    *dprob_dPhi = slope;
+
+  return p1 + slope * (Phi - Phi1);
 }

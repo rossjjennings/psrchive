@@ -7,13 +7,14 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/JenetAnderson98.h,v $
-   $Revision: 1.6 $
-   $Date: 2006/04/19 15:13:08 $
+   $Revision: 1.7 $
+   $Date: 2006/04/23 15:04:19 $
    $Author: straten $ */
 
 #ifndef __Jenet_Anderson_98
 #define __Jenet_Anderson_98
 
+#include "Reference.h"
 #include <vector>
 
 //! Statistics of two-bit quantization and artifact correction parameters
@@ -37,7 +38,7 @@
   computes the mean, variance, and probability distribution of
   \f$\Phi\f$.
 */
-class JenetAnderson98 {
+class JenetAnderson98 : public Reference::Able {
 
  public:
 
@@ -73,8 +74,23 @@ class JenetAnderson98 {
   //! Get the variance of Phi
   double get_var_Phi () const { return var_Phi; }
 
-  //! Get the probability distribution of Phi, JA98 Eq.A6
+  //! Get the theoretical probability distribution of Phi, JA98 Eq.A6
   void get_prob_Phi (unsigned L, std::vector<float>& prob_Phi);
+
+  //! Given Phi, return the digitized power
+  double A4 (double Phi);
+
+  //! Given the digitized power, return Phi
+  double invert_A4 (double sigma_hat);
+
+  //! Interface to a measured probability distribution of Phi
+  class Probability;
+
+  //! Set the measured probability distribution of Phi
+  void set_measured_prob_Phi (const Probability* data) { measured = data; }
+
+  //! Set the measured probability distribution of Phi
+  const Probability* get_measured_prob_Phi () const { return measured; }
 
   //! Plots measured and theoretical probability distributions
   class Plot;
@@ -87,11 +103,43 @@ class JenetAnderson98 {
   //! The sampling threshold
   double threshold;
 
+  //! The interface to a measured probability distribution of Phi
+  Reference::To<const Probability> measured;
+
   double lo;
   double hi;
   double A;
   double mean_Phi;
   double var_Phi;
+
+};
+
+//! Interface to the measured distributions of Phi
+class JenetAnderson98::Probability : public Reference::Able  {
+  
+public:
+  
+  //! Get the number of samples in each histogram
+  virtual unsigned get_nsample() const = 0;
+  
+  //! Get the sampling threshold as a fraction of the noise power
+  virtual float get_threshold () const = 0;
+  
+  //! Get the cut off power for impulsive interference excision
+  virtual float get_cutoff_sigma () const = 0;
+  
+  //! Get the number of digitizers
+  virtual unsigned get_ndig () const = 0;
+
+  //! Get the specified histogram
+  virtual void get_histogram (std::vector<float>& h, unsigned dig) const = 0;
+
+  //! Evaluate the probability of Phi for the specified digitizer
+  double evaluate (unsigned idig, double Phi, double* dprob_dPhi = 0);
+
+private:
+  unsigned last_idig;
+  std::vector<float> last_hist;
 
 };
 
