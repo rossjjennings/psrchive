@@ -34,11 +34,11 @@ void Pulsar::TwoBitPlot::draw (const Archive* data)
   plot.plot ();
 }
 
-class TwoBitInterface : public JenetAnderson98::Plot::Interface {
+class TwoBitProbability : public JenetAnderson98::Probability {
   
 public:
   
-  TwoBitInterface (const Pulsar::Archive* archive)
+  TwoBitProbability (const Pulsar::Archive* archive)
   { tbs = archive->get<Pulsar::TwoBitStats>(); }
 
   //! Get the number of samples in each histogram
@@ -70,7 +70,7 @@ protected:
 /*!  */
 void Pulsar::TwoBitPlot::prepare (const Archive* data)
 {
-  plot.set_interface( new TwoBitInterface(data) );
+  plot.set_interface( new TwoBitProbability(data) );
   get_frame()->get_x_scale()->set_minmax (plot.get_xmin(), plot.get_xmax());
   get_frame()->get_y_scale()->set_minmax (plot.get_ymin(), plot.get_ymax());
 }
