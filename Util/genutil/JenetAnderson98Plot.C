@@ -29,17 +29,13 @@ string JenetAnderson98::Plot::get_ylabel () const
 
 void JenetAnderson98::Plot::calculate_theory ()
 {
-  if (!twobit)
-    throw Error (InvalidState, "JenetAnderson98::Plot::calculate_theory",
-		 "no measurement interface installed");
-
-  unsigned nsample = twobit->get_nsample();
+  unsigned nsample = theory.get_measured_prob_Phi()->get_nsample();
 
   if (nsample < 4)
     throw Error (InvalidState, "JenetAnderson98::Plot::calculate_theory",
 		 "invalid nsample=%u", nsample);
 
-  float threshold = twobit->get_threshold();
+  float threshold = theory.get_measured_prob_Phi()->get_threshold();
 
   if (theory_dist.size() == nsample && theory.get_threshold() == threshold)
     return;
@@ -73,33 +69,34 @@ void JenetAnderson98::Plot::adjust_limits (const vector<float>& hist)
 
 void JenetAnderson98::Plot::init_limits ()
 {
-  imin = twobit->get_nsample();
+  imin = theory.get_measured_prob_Phi()->get_nsample();
   imax = imin;
   ymax = 0;
 }
 
 //! Set the interface to the data
-void JenetAnderson98::Plot::set_interface (const Interface* data)
+void JenetAnderson98::Plot::set_interface (const Probability* data)
 { 
-  twobit = data;
-  if (!twobit)
+  if (!data)
     return;
+
+  theory.set_measured_prob_Phi (data);
 
   init_limits ();
   calculate_theory ();
   adjust_limits (theory_dist);
 
-  unsigned ndig = twobit->get_ndig();
+  unsigned ndig = theory.get_measured_prob_Phi()->get_ndig();
 
   vector<float> hist;
 
   for (unsigned idig=0; idig < ndig; idig++) {
-    twobit->get_histogram (hist, idig);
+    theory.get_measured_prob_Phi()->get_histogram (hist, idig);
     normalize (hist);
     adjust_limits (hist);
   }
 
-  unsigned nsamp = twobit->get_nsample();
+  unsigned nsamp = theory.get_measured_prob_Phi()->get_nsample();
 
   // imax current counts the number of samples in from the end
   imax = nsamp - imax;
@@ -109,12 +106,12 @@ void JenetAnderson98::Plot::set_interface (const Interface* data)
 
 float JenetAnderson98::Plot::get_xmin() const
 {
-  return float(imin) / twobit->get_nsample();
+  return float(imin) / theory.get_measured_prob_Phi()->get_nsample();
 }
 
 float JenetAnderson98::Plot::get_xmax() const
 {
-  return float(imax) / twobit->get_nsample();
+  return float(imax) / theory.get_measured_prob_Phi()->get_nsample();
 }
 
 float JenetAnderson98::Plot::get_ymin() const
@@ -148,12 +145,12 @@ void JenetAnderson98::Plot::plot ()
 {
   cpgswin (imin, imax, get_ymin(), get_ymax());
 
-  unsigned ndig = twobit->get_ndig();
+  unsigned ndig = theory.get_measured_prob_Phi()->get_ndig();
   vector<float> hist;
 
   for (unsigned idig=0; idig < ndig; idig++) {
 
-    twobit->get_histogram (hist, idig);
+    theory.get_measured_prob_Phi()->get_histogram (hist, idig);
     normalize (hist);
 
     cpgsci (idig + 2);
@@ -174,8 +171,8 @@ void JenetAnderson98::Plot::plot ()
 
 #if 0
   float hp_min, hp_max;
-  unsigned n_min = twobit->get_nmin ();
-  unsigned n_max = twobit->get_nmax ();
+  unsigned n_min = theory.get_measured_prob_Phi()->get_nmin ();
+  unsigned n_max = theory.get_measured_prob_Phi()->get_nmax ();
 
   if (plot_only_cut)  {
     hp_min = n_min - 10;
