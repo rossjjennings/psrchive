@@ -129,14 +129,19 @@ void Pulsar::ScatteredPowerCorrection::transform (Integration* data)
       ja98.set_sigma_n( power / mean_power );
       double A = ja98.get_A();
 
+      // new way
+      cerr << "power=" << power << endl;
+      double Phi = ja98.invert_A4 ( power / nchan );
+      cerr << "Phi=" << Phi << endl;
+      ja98.set_Phi (Phi);
+      double A2 = ja98.get_A();
 
       // compare the estimated value of A with the theoretical value
-      double A_theory = 0.8808;
-      double diff = fabs(2*(A_theory-A)/(A_theory+A));
+      double diff = fabs(2*(A2-A)/(A2+A));
       maxdiff = max (diff, maxdiff);
 
       // compute the quantization noise power in each channel
-      double scattered_power = power * (1-A) / nchan;
+      double scattered_power = power * (1-A2) / nchan;
 
       for (ichan = 0; ichan < nchan; ichan++)
 	data->get_Profile(ipol,ichan)->get_amps()[ibin] -= scattered_power;
@@ -146,5 +151,5 @@ void Pulsar::ScatteredPowerCorrection::transform (Integration* data)
 
   }
 
-  // cerr << "maxdiff=" << maxdiff << endl;
+  cerr << "maxdiff=" << maxdiff << endl;
 }
