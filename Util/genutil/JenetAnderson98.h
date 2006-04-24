@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/JenetAnderson98.h,v $
-   $Revision: 1.7 $
-   $Date: 2006/04/23 15:04:19 $
+   $Revision: 1.8 $
+   $Date: 2006/04/24 12:45:19 $
    $Author: straten $ */
 
 #ifndef __Jenet_Anderson_98
@@ -87,10 +87,10 @@ class JenetAnderson98 : public Reference::Able {
   class Probability;
 
   //! Set the measured probability distribution of Phi
-  void set_measured_prob_Phi (const Probability* data) { measured = data; }
+  void set_measured_prob_Phi (const Probability* data);
 
   //! Set the measured probability distribution of Phi
-  const Probability* get_measured_prob_Phi () const { return measured; }
+  const Probability* get_measured_prob_Phi () const;
 
   //! Plots measured and theoretical probability distributions
   class Plot;

@@ -163,6 +163,17 @@ double JenetAnderson98::invert_A4 (double sigma_hat)
   return Brent (a4, 0.01, 0.99, 1e-5, sigma_hat);
 }
 
+void JenetAnderson98::set_measured_prob_Phi (const Probability* data)
+{
+  measured = data;
+}
+
+const JenetAnderson98::Probability*
+JenetAnderson98::get_measured_prob_Phi () const
+{
+  return measured;
+}
+
 double JenetAnderson98::Probability::evaluate (unsigned idig, double Phi,
 					       double* dprob_dPhi)
 {
