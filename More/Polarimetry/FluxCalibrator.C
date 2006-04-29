@@ -15,6 +15,8 @@
 
 #include "Error.h"
 #include "interpolate.h"
+#include "templates.h"
+
 #include <assert.h>
 
 /*! 
@@ -68,7 +70,8 @@ double Pulsar::FluxCalibrator::meanTsys ()
   MeanEstimate<double> mean;
 
   for (unsigned i = 0; i < data.size(); i++)
-    mean += data[i].get_S_sys ();
+    if (get_valid(i))
+      mean += data[i].get_S_sys ();
   
   return mean.get_Estimate().val;
 }
@@ -273,31 +276,16 @@ void Pulsar::FluxCalibrator::create (unsigned required_nchan)
 
   gain.resize (nchan);
 
-  for (unsigned ichan=0; ichan<nchan; ++ichan)
+  for (unsigned ichan=0; ichan<nchan; ++ichan) try {
     gain[ichan] = data[ichan].get_S_cal().get_value();
+  }
+  catch (Error& error) {
+    gain[ichan] = 0;
+  }
 
   resize (required_nchan);
 
   calculated = true;
-}
-
-template <typename T>
-void scrunch (vector<T>& vals, unsigned factor)
-{
-  typename vector<T>::iterator into = vals.begin();
-  typename vector<T>::iterator val = vals.begin();
-
-  for (; val != vals.end(); into++) {
-    *into = *val; val++;
-    for (unsigned fi=1; fi<factor && val != vals.end(); (val++, fi++))
-      *into += *val;
-  }
-
-  unsigned new_size = vals.size()/factor;
-  if (vals.size() % factor)
-    new_size ++;
-
-  vals.resize (new_size);
 }
 
 void Pulsar::FluxCalibrator::resize (unsigned nchan, unsigned nreceptor)
@@ -379,7 +367,7 @@ void Pulsar::FluxCalibrator::setup () try {
 
     data[ichan].set_S_std (source_mJy);
     
-  }  // end for each chan
+  }
 
 }
 catch (Error& error) {
