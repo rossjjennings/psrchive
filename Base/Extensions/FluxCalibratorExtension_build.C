@@ -19,7 +19,7 @@ Pulsar::FluxCalibratorExtension::FluxCalibratorExtension
 
   try {
 
-    if (Archive::verbose == 3)
+    if (Archive::verbose > 2)
       cerr << "Pulsar::FluxCalibratorExtension(FluxCalibrator*)" << endl;
 
     CalibratorExtension::build (calibrator);
@@ -27,9 +27,14 @@ Pulsar::FluxCalibratorExtension::FluxCalibratorExtension
     unsigned nchan = calibrator->get_nchan();
     set_nchan (nchan);
 
-    for (unsigned ichan=0; ichan < nchan; ichan++)
+    for (unsigned ichan=0; ichan < nchan; ichan++) try {
       calibrator->data[ichan].get (S_sys[ichan], S_cal[ichan]);
-
+    }
+    catch (Error& error) {
+      if (Archive::verbose > 2)
+        cerr << "Pulsar::FluxCalibratorExtension constructor ichan=" << ichan
+             << "\n\t" << error.get_message() << endl;
+    }
   }
   catch (Error& error) {
     throw error += "Pulsar::FluxCalibratorExtension (FluxCalibrator*)";
