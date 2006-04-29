@@ -9,6 +9,9 @@
 #include "MEAL/ScalarParameter.h"
 #include "MEAL/ScalarConstant.h"
 
+#include <iostream>
+using namespace std;
+
 Pulsar::FluxCalibrator::Data::Data ()
 {
   calculated = false;
@@ -27,10 +30,15 @@ Pulsar::FluxCalibrator::Data::Data ( const std::vector< Estimate<double> >& s,
 void 
 Pulsar::FluxCalibrator::Data::get ( std::vector< Estimate<double> >& s,
 				    std::vector< Estimate<double> >& c ) const
-{
+try {
   calculate();
   s = S_sys;
   c = S_cal;
+}
+catch (Error& error) {
+  s = S_sys;
+  c = S_cal;
+  throw error += "Pulsar::FluxCalibrator::Data::get";
 }
 
 //! Set the number of receptors
@@ -140,7 +148,10 @@ void Pulsar::FluxCalibrator::Data::compute ()
   static MEAL::ScalarMath flux_cal = unity/(unity/ratio_on - unity/ratio_off);
   static MEAL::ScalarMath flux_sys = flux_cal / ratio_off;
 
-  unsigned nreceptor = get_nreceptor();
+  unsigned ir, nreceptor = get_nreceptor();
+
+  for (ir=0; ir<nreceptor; ir++)
+    S_cal[ir] = S_sys[ir] = 0;
 
   if (mean_ratio_on.size() != nreceptor)
     throw Error (InvalidState, "Pulsar::FluxCalibrator::Data::calculate",
@@ -155,7 +166,7 @@ void Pulsar::FluxCalibrator::Data::compute ()
 
   valid = true;
 
-  for (unsigned ir=0; ir<nreceptor; ir++) {
+  for (ir=0; ir<nreceptor; ir++) {
 
     Estimate<double> on  = mean_ratio_on[ir].get_Estimate();
     Estimate<double> off = mean_ratio_off[ir].get_Estimate();
@@ -183,3 +194,10 @@ void Pulsar::FluxCalibrator::Data::compute ()
   }  // end for each receptor
 
 }
+
+void Pulsar::FluxCalibrator::Data::calculate () const 
+{
+  if (!calculated)
+    const_cast<Data*>(this)->compute();
+}
+
