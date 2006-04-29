@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/FluxCalibratorData.h,v $
-   $Revision: 1.1 $
-   $Date: 2006/03/24 20:43:09 $
+   $Revision: 1.2 $
+   $Date: 2006/04/29 06:39:05 $
    $Author: straten $ */
 
 #ifndef __Pulsar_FluxCalibratorData_H
@@ -94,10 +94,8 @@ namespace Pulsar {
     std::vector< MeanEstimate<double> > mean_ratio_off;
     
     //! Calculate S_cal and S_sys based on ratio_on and ratio_off
-    void calculate () const {
-      if (!calculated) const_cast<Data*>(this)->compute();
-    }
-    
+    void calculate () const;
+
     //! The actual calculator
     void compute ();
     
