@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/JenetAnderson98.h,v $
-   $Revision: 1.8 $
-   $Date: 2006/04/24 12:45:19 $
+   $Revision: 1.9 $
+   $Date: 2006/04/30 04:47:16 $
    $Author: straten $ */
 
 #ifndef __Jenet_Anderson_98
@@ -64,6 +64,7 @@ class JenetAnderson98 : public Reference::Able {
 
   //! Set the sampling threshold
   void set_threshold (double t = optimal_threshold);
+  //! Get the sampling threshold
   double get_threshold () const { return threshold; }
 
   //! Get the expectation value of Phi, JA98 Eq.A2
@@ -83,8 +84,20 @@ class JenetAnderson98 : public Reference::Able {
   //! Given the digitized power, return Phi
   double invert_A4 (double sigma_hat);
 
+  //! Given <Phi>, return the digitized power
+  double A14 (double mean_Phi);
+
+  //! Given the digitized power, return <Phi>
+  double invert_A14 (double sigma_hat);
+
   //! Interface to a measured probability distribution of Phi
   class Probability;
+
+  //! Plots measured and theoretical probability distributions
+  class Plot;
+
+  //! Efficiently computes Equation A5 and its derivative wrt <Phi>
+  class EquationA5;
 
   //! Set the measured probability distribution of Phi
   void set_measured_prob_Phi (const Probability* data);
@@ -92,8 +105,6 @@ class JenetAnderson98 : public Reference::Able {
   //! Set the measured probability distribution of Phi
   const Probability* get_measured_prob_Phi () const;
 
-  //! Plots measured and theoretical probability distributions
-  class Plot;
 
  protected:
 
