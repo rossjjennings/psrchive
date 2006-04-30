@@ -10,9 +10,6 @@
 // defined in JenetAnderson98.C
 double ln_fact (unsigned n);
 
-#include <iostream>
-using namespace std;
-
 void JenetAnderson98::EquationA5::set_nsamp (unsigned L)
 {
   if (losq.size() == L)
@@ -67,8 +64,6 @@ double JenetAnderson98::EquationA5::evaluate (double mean_Phi)
 					log(pow (1.0-mean_Phi, 1.0-Phi)) ) );
 
       double dP_dmean_Phi = P * ( nlo/mean_Phi - (L-nlo)/(1.0-mean_Phi) );
-
-      cerr << nlo << " f=" << f << " P=" << P << " res=" << f*P << endl;
 
       double term = f * P;
 
