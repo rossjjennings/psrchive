@@ -6,14 +6,12 @@
  ***************************************************************************/
 
 #include "JenetAnderson98A5.h"
-#include "Brent.h"
-#include "Functor.h"
+
+// defined in JenetAnderson98.C
+double ln_fact (unsigned n);
 
 #include <iostream>
 using namespace std;
-
-// defined in JenetAnderson.C
-double ln_fact (unsigned n);
 
 void JenetAnderson98::EquationA5::set_nsamp (unsigned L)
 {
@@ -40,6 +38,8 @@ void JenetAnderson98::EquationA5::set_nsamp (unsigned L)
 
 }
 
+static double default_mean_Phi = 0.666656;
+
 //! Return the digitized power, given <Phi>
 double JenetAnderson98::EquationA5::evaluate (double mean_Phi)
 {
@@ -52,21 +52,36 @@ double JenetAnderson98::EquationA5::evaluate (double mean_Phi)
   double result = 0;
   dA5_dmean_Phi = 0;
 
-  for (unsigned nlo=1; nlo<L; nlo++) {
+  unsigned nlo_start = (unsigned) (default_mean_Phi * L);
+  int increment = 1;
 
-    double f = mean_Phi * losq[nlo] + (1-mean_Phi) * hisq[nlo];
-    double df_dmean_Phi = losq[nlo] - hisq[nlo];
+  for (unsigned dir=0; dir < 2; dir++) {
 
-    double Phi = double(nlo) / double(L);
-    double P = exp( fact[nlo] +
-			      L * ( log(pow (mean_Phi, Phi)) +
-				    log(pow (1.0-mean_Phi, 1.0-Phi)) ) );
+    for (unsigned nlo=nlo_start; nlo>1 && nlo<L; nlo += increment) {
 
-    double dP_dmean_Phi = P * ( nlo/mean_Phi - (L-nlo)/(1.0-mean_Phi) );
+      double f = mean_Phi * losq[nlo] + (1-mean_Phi) * hisq[nlo];
+      double df_dmean_Phi = losq[nlo] - hisq[nlo];
 
-    result += f * P;
+      double Phi = double(nlo) / double(L);
+      double P = exp( fact[nlo] + L * ( log(pow (mean_Phi, Phi)) +
+					log(pow (1.0-mean_Phi, 1.0-Phi)) ) );
 
-    dA5_dmean_Phi += dP_dmean_Phi * f + P * df_dmean_Phi;
+      double dP_dmean_Phi = P * ( nlo/mean_Phi - (L-nlo)/(1.0-mean_Phi) );
+
+      cerr << nlo << " f=" << f << " P=" << P << " res=" << f*P << endl;
+
+      double term = f * P;
+
+      result += term;
+      dA5_dmean_Phi += dP_dmean_Phi * f + P * df_dmean_Phi;
+
+      if (term*term < 1e-30)
+	break;
+
+    }
+
+    nlo_start --;
+    increment = -1;
 
   }
 
@@ -76,7 +91,7 @@ double JenetAnderson98::EquationA5::evaluate (double mean_Phi)
 /*! Inverts equation A5 using the Newton-Raphson method */
 double JenetAnderson98::EquationA5::invert (double sigma_hat)
 {
-  double guess = 0.666656;
+  double guess = default_mean_Phi;
 
   for (unsigned i=0; i<50; i++) {
     double dx = (evaluate(guess) - sigma_hat) / dA5_dmean_Phi;
