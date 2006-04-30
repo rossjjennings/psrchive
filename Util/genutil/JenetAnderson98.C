@@ -117,7 +117,7 @@ static double gammln(double xx)
 }
 
 // returns ln(n!)
-static double factln(int n) {
+double ln_fact (unsigned n) {
   return gammln (n+1.0);
 }
 
@@ -131,7 +131,7 @@ void JenetAnderson98::get_prob_Phi (unsigned L, vector<float>& prob_Phi)
 {
   prob_Phi.resize (L);
 
-  double lnLfact = factln (L);
+  double lnLfact = ln_fact (L);
 
   double mean_Phi = get_mean_Phi ();
 
@@ -139,7 +139,7 @@ void JenetAnderson98::get_prob_Phi (unsigned L, vector<float>& prob_Phi)
 
     double Phi = double(nlo) / double(L);
 
-    prob_Phi[nlo]  = exp( lnLfact - factln(nlo) - factln(L-nlo) +
+    prob_Phi[nlo]  = exp( lnLfact - ln_fact(nlo) - ln_fact(L-nlo) +
 			  L * ( log(pow (mean_Phi, Phi)) +
 				log(pow (1.0-mean_Phi, 1.0-Phi)) ) );
 
@@ -156,12 +156,26 @@ double JenetAnderson98::A4 (double Phi)
   return lo*lo*mean_Phi + hi*hi*(1-mean_Phi);
 }
 
-/* Uses the van Wijngaarden-Dekker-Brent method to invert Eq.A4 of JA98 */
+/*! Uses the van Wijngaarden-Dekker-Brent method to invert Eq.A4 of JA98 */
 double JenetAnderson98::invert_A4 (double sigma_hat)
 {
   Functor< double(double) > a4 (this, &JenetAnderson98::A4);
-  return Brent (a4, 0.01, 0.99, 1e-5, sigma_hat);
+  return Brent (a4, 0.01, 0.99, 1e-10, sigma_hat);
 }
+
+double JenetAnderson98::A14 (double Phi)
+{
+  set_mean_Phi (Phi);
+  return A4 (Phi);
+}
+
+/*! Uses the van Wijngaarden-Dekker-Brent method to invert Eq.A14 of JA98 */
+double JenetAnderson98::invert_A14 (double sigma_hat)
+{
+  Functor< double(double) > a14 (this, &JenetAnderson98::A14);
+  return Brent (a14, 0.01, 0.99, 1e-10, sigma_hat);
+}
+
 
 void JenetAnderson98::set_measured_prob_Phi (const Probability* data)
 {
