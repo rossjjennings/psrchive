@@ -7,15 +7,15 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/ScatteredPowerCorrection.h,v $
-   $Revision: 1.4 $
-   $Date: 2006/04/19 15:08:37 $
+   $Revision: 1.5 $
+   $Date: 2006/04/30 05:03:31 $
    $Author: straten $ */
 
 #ifndef __Pulsar_ScatteredPowerCorrection_h
 #define __Pulsar_ScatteredPowerCorrection_h
 
 #include "Pulsar/Transformation.h"
-#include "JenetAnderson98.h"
+#include "JenetAnderson98A5.h"
 
 namespace Pulsar {
 
@@ -42,6 +42,9 @@ namespace Pulsar {
 
     //! Theoretical treatment of quantization effects
     JenetAnderson98 ja98;
+
+    //! Inverts equation A5 of Jenet & Anderson 98
+    JenetAnderson98::EquationA5 ja98_a5;
 
     //! The estimated thresholds at record time
     std::vector<float> thresholds;
