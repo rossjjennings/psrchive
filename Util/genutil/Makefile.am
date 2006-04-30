@@ -10,7 +10,7 @@ include_HEADERS = Cartesian.h Angle.h MJD.h CommandParser.h		\
 	Sortable.h Printable.h Header.h thread_utils.h GetPK.h		\
 	VectorInfo.h Plugin.h shell.h Cartesian.h Angle.h coord_parse.h	\
 	coord.h anglevel.h obsjoin.h casts.h Horizon.h			\
-	JenetAnderson98.h
+	JenetAnderson98.h JenetAnderson98A5.h
 
 libgenutilpp_la_SOURCES = CommandParser.C PlotEvent.C util_plus.C	\
 	PlotState.C datum.C smarthist.C datumcond.C kstest.C Ready.C	\
@@ -20,7 +20,7 @@ libgenutilpp_la_SOURCES = CommandParser.C PlotEvent.C util_plus.C	\
 	sla_MJD.C PlotManager.C PlotVolume.C DataManager.C		\
 	DataSet.C Poincare.C DataVector.C Plugin.C shell.C		\
 	coord_parse.c coord.c sla_coord.c psr2ar.c dual_parse_it.h	\
-	obsjoin.C Horizon.C JenetAnderson98.C
+	obsjoin.C Horizon.C JenetAnderson98.C JenetAnderson98A5.C
 
 if HAVE_SLA_FORTRAN
 
@@ -50,7 +50,7 @@ stats_SOURCES                   = stats.C
 #loopy_SOURCES			= loopy.C
 
 TESTS = test_coord test_Cartesian test_MJD test_ReferenceFit \
-	test_Header test_VectorInfo
+	test_Header test_VectorInfo test_ja98
 
 check_PROGRAMS = $(TESTS) test_CommandParser test_Sortable test_Angle
 
@@ -64,6 +64,7 @@ test_VectorInfo_SOURCES		= test_VectorInfo.C
 test_Sortable_SOURCES           = test_Sortable.C
 test_CommandParser_SOURCES      = test_CommandParser.C
 test_CommandParser_LDADD	= $(LDADD) @READLINE_LIBS@
+test_ja98_SOURCES		= test_ja98.C
 
 AM_CPPFLAGS = -D_REENTRANT=1
 
