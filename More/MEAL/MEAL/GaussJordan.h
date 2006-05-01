@@ -5,6 +5,7 @@
  *
  ***************************************************************************/
 #include <vector>
+#include <algorithm>
 
 #include "Error.h"
 
@@ -82,8 +83,8 @@ void MEAL::GaussJordan (std::vector<std::vector<T> >& a, std::vector<std::vector
 		   "Singular Matrix.  irow=%d nrow=%d", irow, nrow);
 
     if (irow != icol) {
-      for (j=0; j<nrow; j++) swap (a[irow][j], a[icol][j]);
-      for (j=0; j<ncol; j++) swap (b[irow][j], b[icol][j]);
+      for (j=0; j<nrow; j++) std::swap (a[irow][j], a[icol][j]);
+      for (j=0; j<ncol; j++) std::swap (b[irow][j], b[icol][j]);
     }
 
     indxr[i]=irow;
@@ -115,7 +116,7 @@ void MEAL::GaussJordan (std::vector<std::vector<T> >& a, std::vector<std::vector
   for (i=nrow-1; i>=0; i--)
     if (indxr[i] != indxc[i])
       for (j=0; j<nrow; j++)
-	swap(a[j][indxr[i]],a[j][indxc[i]]);
+	std::swap(a[j][indxr[i]],a[j][indxc[i]]);
 
   
 }
