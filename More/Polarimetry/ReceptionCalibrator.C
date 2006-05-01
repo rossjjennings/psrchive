@@ -1043,8 +1043,8 @@ void Pulsar::ReceptionCalibrator::initialize ()
     // sanity check
     double I = calibrator_estimate.source[ichan]->get_stokes()[0].get_value();
     if (fabs(I-1.0) > 1e-5)
-      throw Error (InvalidState, "Pulsar::ReceptionCalibrator::initialize",
-		   "Reference flux[%d]=%lf != 1", ichan, I);
+      cerr << "Pulsar::ReceptionCalibrator::solve warning ichan=" << ichan
+           << " reference flux=" << I << " != 1" << endl;
 
     model[ichan]->convert.set_reference_epoch ( epoch );
 
