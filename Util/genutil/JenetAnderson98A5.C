@@ -6,6 +6,7 @@
  ***************************************************************************/
 
 #include "JenetAnderson98A5.h"
+#include <math.h>
 
 // defined in JenetAnderson98.C
 double ln_fact (unsigned n);
