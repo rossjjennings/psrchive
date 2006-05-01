@@ -15,7 +15,7 @@ AC_DEFUN([SWIN_LIB_SLA],
   LIBS="$ac_save_LIBS $SLA_LIBS"
   CFLAGS="$ac_save_CFLAGS $SLA_CFLAGS"
 
-  AC_TRY_LINK([#include<slalib.h>;],
+  AC_TRY_LINK([#include<slalib.h>],
               [double gmst = slaGmst(0);],
               [have_sla="yes: C"], [have_sla=no])
   
