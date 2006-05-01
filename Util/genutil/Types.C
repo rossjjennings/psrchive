@@ -227,6 +227,10 @@ const string Signal::State2string (State state)
     return "NthPower";
   case Invariant:
     return "Invariant";
+  case PP_State:
+    return "PP";
+  case QQ_State:
+    return "QQ";
   default:
     return "Invalid";
   }
@@ -309,8 +313,10 @@ Signal::State Signal::string2State(string ss){
     return Coherence;
   else if(ss=="Stokes")
     return Stokes;
-  else if(ss=="Invariant")
-    return Invariant;
+  else if(ss=="PP")
+    return PP_State;
+  else if(ss=="QQ")
+    return QQ_State;
   
   throw Error(InvalidState,"string2State()",
 	      "Unknown state- '%s'",ss.c_str());
@@ -329,7 +335,8 @@ unsigned Signal::State2npol(State s){
     return 1;
   if( s==NthPower )
     return 1;
-
+  if( s==PP_State || s==QQ_State )
+    return 1;
 
   throw Error(InvalidState,"Signal::State2npol()",
 	      "State unknown!");
@@ -377,6 +384,13 @@ bool Signal::valid_state(Signal::State state,unsigned ndim,unsigned npol, string
       reason = "state=" + string(state_string(state)) + " and ndim*npol!=4";
       return false;
     }
+    break;
+  case Signal::PP_State:
+  case Signal::QQ_State:
+    if( npol != 1 || ndim != 1 ) {
+      reason = "state=" + string(state_string(state)) + " and (ndim or npol) is not 1";
+      return false;
+    }	
     break;
 
   default:

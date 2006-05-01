@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Types.h,v $
-   $Revision: 1.20 $
-   $Date: 2006/03/17 13:34:55 $
-   $Author: straten $ */
+   $Revision: 1.21 $
+   $Date: 2006/05/01 06:44:38 $
+   $Author: hknight $ */
 
 #ifndef __Types_h
 #define __Types_h
@@ -88,8 +88,12 @@ namespace Signal {
     Stokes,
     //! Stokes invariant interval
     Invariant,
-    //! Other  (e.g. just PP)
-    Other
+    //! Other
+    Other,
+    //! Just PP
+    PP_State,
+    //! Just QQ
+    QQ_State
   };
   
   //! States of different polarization dimensions
