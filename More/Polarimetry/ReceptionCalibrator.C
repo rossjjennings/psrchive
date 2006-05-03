@@ -48,6 +48,7 @@ Pulsar::ReceptionCalibrator::ReceptionCalibrator (Calibrator::Type type,
 
   normalize_by_invariant = false;
   independent_gains = false;
+
   check_pointing = false;
   physical_coherency = false;
 
@@ -990,9 +991,15 @@ void Pulsar::ReceptionCalibrator::solve (int only_ichan)
       cerr << " flagged invalid" << endl;
       continue;
     }
-    cerr << endl;
+    
+    if (Calibrator::verbose)
+      model[ichan]->get_equation()->set_fit_debug();
 
     model[ichan]->get_equation()->solve ();
+
+    cerr << " reduced chisq=" <<
+      model[ichan]->get_equation()->get_fit_chisq() /
+      model[ichan]->get_equation()->get_fit_nfree() << endl;
 
     if (only_ichan >= 0)
       break;
