@@ -490,7 +490,7 @@ void Pulsar::Integration::pscrunch()
       throw Error (InvalidState, "Integration::pscrunch", "npol < 2");
 
     for (unsigned ichan=0; ichan < get_nchan(); ichan++)
-      *(profiles[0][ichan]) += *(profiles[1][ichan]);
+      profiles[0][ichan] -> sum (profiles[1][ichan]);
 
   }
 
