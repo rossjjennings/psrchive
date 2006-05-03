@@ -830,9 +830,34 @@ try {
   double frac = 0.0;
  
   if (hdr_ext) {
-    day = (long)(hdr_ext->start_time.intday());
-    sec = (long)(hdr_ext->start_time.get_secs());
-    frac = hdr_ext->start_time.get_fracsec();
+
+    MJD hdr_epoch = hdr_ext->start_time;
+
+    if (model) {
+
+      unsigned jsubint = 0;
+      for (; jsubint < get_nsubint(); jsubint++)
+	if (get_Integration(jsubint)->get_duration() != 0.0)
+	  break;
+
+      if (jsubint < get_nsubint()) {
+
+	const Integration* integ = get_Integration(jsubint);
+
+	Phase stt_phs = model->phase(integ->get_epoch());
+	Phase off_phs = model->phase(hdr_epoch);
+	Phase dphase  = off_phs - stt_phs;
+      
+	double dtime = dphase.fracturns() * integ->get_folding_period();
+	hdr_epoch -= dtime;
+
+      }
+
+    }
+
+    day = (long)(hdr_epoch.intday());
+    sec = (long)(hdr_epoch.get_secs());
+    frac = hdr_epoch.get_fracsec();
   }
 
   fits_update_key (fptr, TLONG, "STT_IMJD", &day, comment, &status);
