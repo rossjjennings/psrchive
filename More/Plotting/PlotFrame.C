@@ -25,8 +25,8 @@ Pulsar::PlotFrame::PlotFrame ()
   above = new PlotLabel;
   below = new PlotLabel;
 
-  get_label_above()->set_centre("=file");
-  get_label_below()->set_left("=name.=freq MHz");
+  get_label_above()->set_centre("$file");
+  get_label_below()->set_left("$name.$freq MHz");
 
   label_spacing = 1.2;
   label_offset = 0.5;
@@ -129,7 +129,7 @@ void Pulsar::PlotFrame::decorate (const Archive* data, const string& label,
 
   for (unsigned i=0; i < labels.size(); i++) {
 
-    labels[i] = substitute (labels[i], get_interface(data), '=');
+    labels[i] = substitute (labels[i], get_interface(data));
 
     cpgmtxt ("T", start, side+offset, side, labels[i].c_str());
     start += direction;
