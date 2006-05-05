@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/StokesFluctPlot.h,v $
-   $Revision: 1.1 $
-   $Date: 2006/04/12 19:25:39 $
+   $Revision: 1.2 $
+   $Date: 2006/05/05 05:55:36 $
    $Author: straten $ */
 
 #ifndef __Pulsar_StokesFluctPlot_h
@@ -44,9 +44,19 @@ namespace Pulsar {
     void set_plot_values (const std::string& plot) { plot_values = plot; }
     std::string get_plot_values () const { return plot_values; }
 
+    //! Set the colour for each value plotted
+    void set_plot_colours (const std::string& plot) { plot_colours = plot; }
+    std::string get_plot_colours () const { return plot_colours; }
+ 
+    //! Set the line style for each value plotted
+    void set_plot_lines (const std::string& plot) { plot_lines = plot; }
+    std::string get_plot_lines () const { return plot_lines; }
+ 
   protected:
-
+ 
     std::string plot_values;
+    std::string plot_colours;
+    std::string plot_lines;
 
   };
 

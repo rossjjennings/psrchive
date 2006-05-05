@@ -12,6 +12,8 @@
 Pulsar::StokesFluctPlot::StokesFluctPlot ()
 {
   plot_values  = "Ip";
+  plot_colours = "123";
+  plot_lines   = "111";
 }
 
 TextInterface::Class* Pulsar::StokesFluctPlot::get_interface ()
@@ -65,6 +67,18 @@ Pulsar::Profile* new_Fluct (const Pulsar::PolnProfile* data, char code)
 void Pulsar::StokesFluctPlot::get_profiles (const Archive* data)
 {
   plotter.profiles.resize( plot_values.size() );
+  plotter.plot_sci.resize( plot_values.size() );
+  plotter.plot_sls.resize( plot_values.size() );
+ 
+  if (plot_values.size() > plot_colours.size())
+    throw Error (InvalidState, "Pulsar::StokesPlot::get_profiles",
+                 "Mismatch: %u plots and %u colours",
+                 plot_values.size(), plot_colours.size());
+ 
+  if (plot_values.size() > plot_lines.size())
+    throw Error (InvalidState, "Pulsar::StokesPlot::get_profiles",
+                 "Mismatch: %u plots and %u lines",
+                 plot_values.size(), plot_lines.size());
 
   if (verbose)
     cerr << "Pulsar::StokesFluctPlot::get_profiles calling get_Stokes" << endl;
@@ -95,6 +109,8 @@ void Pulsar::StokesFluctPlot::get_profiles (const Archive* data)
 
     prof->logarithm();
     plotter.profiles[ipol] = prof;
-
+    plotter.plot_sci[ipol] = plot_colours[ipol] - '0';
+    plotter.plot_sls[ipol] = plot_lines[ipol] - '0';
   }
 }
+

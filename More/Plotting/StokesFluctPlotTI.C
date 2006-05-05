@@ -19,4 +19,13 @@ Pulsar::StokesFluctPlot::Interface::Interface (StokesFluctPlot* instance)
   add( &StokesFluctPlot::get_plot_values,
        &StokesFluctPlot::set_plot_values,
        "val", "Values to be plotted (IQUVLpS)" );
+
+  add( &StokesFluctPlot::get_plot_colours,
+       &StokesFluctPlot::set_plot_colours,
+       "sci", "PGPLOT colour index for each value" );
+ 
+  add( &StokesFluctPlot::get_plot_lines,
+       &StokesFluctPlot::set_plot_lines,
+       "sls", "PGPLOT line style for each value" );
+
 }
