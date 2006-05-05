@@ -570,8 +570,8 @@ Pulsar::ReceptionCalibrator::add_data
     model[ichan]->get_equation()->set_transformation_index
       (model[ichan]->get_pulsar_path());
 
-    correct = inv( model[ichan]->get_transformation()->evaluate() );
-    
+    correct = inv( model[ichan]->get_pulsar_transformation()->evaluate() );
+
     stokes = transform( stokes, correct );
     
     estimate.source_guess[ichan].integrate( stokes );
@@ -991,7 +991,7 @@ void Pulsar::ReceptionCalibrator::solve (int only_ichan)
       cerr << " flagged invalid" << endl;
       continue;
     }
-    
+
     if (Calibrator::verbose)
       model[ichan]->get_equation()->set_fit_debug();
 
