@@ -8,15 +8,19 @@
 #include <assert.h>
 
 template <class T>
-void scrunch (std::vector<T>& vals, unsigned factor, bool integrate = true)
+void scrunch (std::vector<T>& vals, unsigned factor, bool mean = true)
 {
   typename std::vector<T>::iterator into = vals.begin();
   typename std::vector<T>::iterator val;
 
+  unsigned fi = 0;
+
   for (val = vals.begin(); val != vals.end(); into++) {
     *into = *val; val++;
-    for (unsigned fi=1; fi<factor && val != vals.end(); (val++, fi++))
+    for (fi=1; fi<factor && val != vals.end(); (val++, fi++))
       *into += *val;
+    if (mean)
+      *into /= fi;
   }
   vals.resize (vals.size()/factor);
 }
