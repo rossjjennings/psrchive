@@ -176,6 +176,9 @@ void Calibration::ReceptionModel::solve_work (bool solve_verbose)
 
   float last_lamda = 0.0;
 
+  unsigned stick_to_steepest_decent = 0;
+  unsigned patience = 5;
+
   for (iterations = 0; iterations < maximum_iterations; iterations++) {
 
     float chisq = fit.iter (data, fake, *this);
@@ -209,18 +212,55 @@ void Calibration::ReceptionModel::solve_work (bool solve_verbose)
     }
 
     if (fit.lamda == 0.0 && delta_chisq > 0) {
+
       if (fit_debug)
 	cerr << "maybe not so good" << endl;
       fit.lamda = last_lamda;
+
+      // count when Newton's method seems to be doing very poorly
+      if (delta_chisq > 100)
+	stick_to_steepest_decent ++;
+
     }
 
     if (delta_chisq <= 0 && fabs(delta_chisq) < 10) {
+
       if (fit_debug)
 	cerr << "fit close" << endl;
-      if (fit.lamda != 0)
-	last_lamda = fit.lamda;
-      fit.lamda = 0.0;
+
+      if (stick_to_steepest_decent >= 3) {
+
+	if (iterations >= maximum_iterations/2 &&
+	    fabs(delta_chisq)/best_chisq < 1e-3) {
+
+	  if (fit_debug)
+	    cerr << "small change in late stages.  patience="
+		 << patience << endl;
+
+	  patience --;
+
+	  if (!patience) {
+	    if (fit_debug)
+	      cerr << "no more patience" << endl;
+	    break;
+	  }
+
+	}
+
+	if (fit_debug)
+	  cerr << "remain patient!" << endl;
+
+      }
+      else {
+	if (fit_debug)
+	  cerr << "go for it!" << endl;
+	if (fit.lamda != 0)
+	  last_lamda = fit.lamda;
+	fit.lamda = 0.0;
+      }
+
     }
+
 
   }
  
