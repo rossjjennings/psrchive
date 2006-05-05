@@ -311,7 +311,7 @@ void Pulsar::FluxCalibrator::resize (unsigned required_nchan)
 	     << required_nchan << " < nchan=" << nchan 
 	     << " nscrunch=" << nscrunch << endl;
 
-    scrunch (gain, nscrunch);
+    scrunch (gain, nscrunch, true);
 
   }
   else {
