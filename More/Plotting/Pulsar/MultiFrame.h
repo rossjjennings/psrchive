@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/MultiFrame.h,v $
-   $Revision: 1.9 $
-   $Date: 2006/03/17 13:34:49 $
+   $Revision: 1.10 $
+   $Date: 2006/05/05 02:12:51 $
    $Author: straten $ */
 
 #ifndef __Pulsar_MultiFrame_h
@@ -46,12 +46,32 @@ namespace Pulsar {
     bool has_shared_y_scale () { return y_scale; }
     void set_shared_y_scale (PlotScale* y) { y_scale = y; }
 
+    //! Set the character height
+    void set_character_height (float height);
+    float get_character_height () const { return character_height; }
+
+    //! Set the character font
+    void set_character_font (int font);
+    int get_character_font () const { return character_font; }
+
+    //! Set the line width
+    void set_line_width (int width);
+    int get_line_width () const { return line_width; }
+
+    //! Set publication quality character height and font and line width
+    void set_publication_quality (bool flag = true);
+    bool get_publication_quality () const { return false; }
+
   protected:
 
     std::map< std::string, Reference::To<PlotFrameSize> > frames;
 
     Reference::To<PlotScale> x_scale;
     Reference::To<PlotScale> y_scale;
+
+    float character_height;
+    int character_font;
+    int line_width;
 
   };
 
