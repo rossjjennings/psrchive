@@ -22,6 +22,10 @@ Pulsar::PlotFrame::PlotFrame ()
   y_scale = new PlotScale;
   y_axis = new PlotAxis;
 
+  character_height = 1.0;
+  character_font = 1;
+  line_width = 1;
+
   above = new PlotLabel;
   below = new PlotLabel;
 
@@ -51,6 +55,10 @@ void Pulsar::PlotFrame::focus (const Archive* data)
 	 << " ymin=" << y_min << " ymax=" << y_max << endl;
 
   cpgswin (x_min, x_max, y_min, y_max);
+
+  cpgsch (character_height);
+  cpgscf (character_font);
+  cpgslw (line_width);
 }
 
 void Pulsar::PlotFrame::draw_axes (const Archive* data)
@@ -193,4 +201,20 @@ Pulsar::PlotAxis* Pulsar::PlotFrame::get_y_axis(bool allow_transpose)
     return x_axis;
   else
     return y_axis;
+}
+
+void Pulsar::PlotFrame::set_publication_quality (bool flag)
+{
+  if (flag) {
+    set_character_height (1.5);
+    set_character_font (2);
+    set_line_width (3);
+    get_label_above()->set_centre(PlotLabel::unset);
+  }
+  else {
+    set_character_height (1);
+    set_character_font (1);
+    set_line_width (1);
+    get_label_above()->set_centre("$file");
+  }
 }

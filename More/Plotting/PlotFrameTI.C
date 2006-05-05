@@ -20,6 +20,22 @@ Pulsar::PlotFrame::Interface::Interface (PlotFrame* instance)
   import ( "x", PlotAxis::Interface(), &PlotFrame::get_x_axis );
   import ( "y", PlotAxis::Interface(), &PlotFrame::get_y_axis );
 
+  add( &PlotFrame::get_character_height,
+       &PlotFrame::set_character_height,
+       "ch", "Character height" );
+
+  add( &PlotFrame::get_character_font,
+       &PlotFrame::set_character_font,
+       "cf", "Character font" );
+
+  add( &PlotFrame::get_line_width,
+       &PlotFrame::set_line_width,
+       "lw", "Line width" );
+
+  add( &PlotFrame::get_publication_quality,
+       &PlotFrame::set_publication_quality,
+       "pub", "Publication quality" );
+
   import ( "above", PlotLabel::Interface(), &PlotFrame::get_label_above );
   import ( "below", PlotLabel::Interface(), &PlotFrame::get_label_below );
 
