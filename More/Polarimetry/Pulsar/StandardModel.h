@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/StandardModel.h,v $
-   $Revision: 1.3 $
-   $Date: 2006/04/08 00:01:43 $
+   $Revision: 1.4 $
+   $Date: 2006/05/05 02:12:46 $
    $Author: straten $ */
 
 #ifndef __Calibration_StandardModel_H
@@ -81,11 +81,14 @@ namespace Calibration {
     //! Set the signal path experienced by the pulsar
     void set_transformation (const MEAL::Complex2*);
 
-    //! Get the signal path experienced by the pulsar
+    //! Get the instrumental transformation
     const MEAL::Complex2* get_transformation () const;
 
-    //! Get the signal path experienced by the pulsar
+    //! Get the instrumental transformation
     MEAL::Complex2* get_transformation ();
+
+    //! Get the full signal path experienced by the pulsar
+    const MEAL::Complex2* get_pulsar_transformation () const;
 
     //! The parallactic angle rotation
     Calibration::Parallactic parallactic;

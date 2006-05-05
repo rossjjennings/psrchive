@@ -82,6 +82,12 @@ Calibration::StandardModel::get_transformation () const
   return 0;
 }
 
+const MEAL::Complex2*
+Calibration::StandardModel::get_pulsar_transformation () const
+{
+  return pulsar_path;
+}
+
 MEAL::Complex2*
 Calibration::StandardModel::get_transformation ()
 {
