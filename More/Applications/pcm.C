@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pcm.C,v $
-   $Revision: 1.54 $
-   $Date: 2006/04/20 15:12:05 $
+   $Revision: 1.55 $
+   $Date: 2006/05/05 02:12:36 $
    $Author: straten $ */
 
 #include "Pulsar/psrchive.h"
@@ -453,9 +453,8 @@ int main (int argc, char *argv[]) try {
       if (level > 2) 
         Calibration::ReceptionModel::verbose = true;
 
-      if (level > 1)
-        Pulsar::Calibrator::verbose = true;
 
+      Pulsar::Calibrator::verbose = level;
       Pulsar::Archive::set_verbosity (level);
 
       break;

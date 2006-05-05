@@ -305,7 +305,7 @@ void Pulsar::ReferenceCalibrator::calculate_transformation ()
     bool bad = false;
 
     if (cal_AA.val <= 0 || cal_BB.val <= 0) {
-      if (verbose)
+      if (verbose > 2)
 	cerr << "Pulsar::ReferenceCalibrator::calculate_transformation"
 	  " ichan=" << ichan << " bad levels" << endl;
       bad = true;
