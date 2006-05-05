@@ -68,8 +68,11 @@ void Pulsar::FITSArchive::update_history()
     history->get_last().fa_corr = receiver->get_feed_corrected();
   }
 
-  if (get_poln_calibrated())
+  if (get_poln_calibrated()) {
+    if (history->get_cal_mthd() == "NONE")
+      history->set_cal_mthd("Other");
     history->get_last().cal_mthd = history->get_cal_mthd();
+  }
   else
     history->get_last().cal_mthd = "NONE";
 
