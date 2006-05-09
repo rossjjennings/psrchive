@@ -330,16 +330,17 @@ SUBDIRS += psrfits
 libpsrchive_la_LIBADD += psrfits/libpsrfits.la
 endif
 
+if HAVE_PGPLOT
+SUBDIRS += Plotter
+libpsrchive_la_LIBADD += Plotter/libPlot.la
+endif
+
 SUBDIRS += .
 
 if HAVE_QT
 if HAVE_PGPLOT
 SUBDIRS += GUI
 endif
-endif
-
-if HAVE_PGPLOT
-SUBDIRS += Plotter
 endif
 
 if HAVE_QTDRIV
@@ -455,6 +456,7 @@ INCLUDES = -I$(top_builddir)/third/include				  \
 	-I$(top_builddir)/utils/include					  \
 	-I$(top_builddir)/astro/include					  \
         -I$(top_srcdir)/psrchive/Calibration				  \
+        -I$(top_srcdir)/psrchive/Plotter				  \
 	-I$(top_srcdir)/psrchive/Extension -I$(top_srcdir)/psrchive/timer \
 	-I$(top_srcdir)/psrchive/epn -I$(top_srcdir)/psrchive/psrfits	  \
 	-I$(top_srcdir)/psrchive/ascii					  \
