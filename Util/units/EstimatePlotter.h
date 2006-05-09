@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/EstimatePlotter.h,v $
-   $Revision: 1.12 $
-   $Date: 2006/03/17 13:35:20 $
+   $Revision: 1.13 $
+   $Date: 2006/05/09 04:49:15 $
    $Author: straten $ */
 
 #ifndef __EstimatePlotter_h
@@ -53,6 +53,11 @@ class EstimatePlotter {
 
   //! Set the world coordinates of the viewport with some buffer space
   void set_world (float x1, float x2, float y1, float y2);
+
+  //! Get the minimum y value in plot
+  float get_y_min () const { return y_min; }
+  //! Get the maximum y value in plot
+  float get_y_max () const { return y_max; }
 
   //! Set the viewport to that when separate_viewports was called
   void restore_viewport ();
