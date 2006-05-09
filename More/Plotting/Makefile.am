@@ -22,7 +22,7 @@ nobase_include_HEADERS = iopair.h					\
 	Pulsar/StokesCylindrical.h Pulsar/StokesSpherical.h		\
 	Pulsar/FluctPlot.h Pulsar/StokesFluctPlot.h			\
 	Pulsar/Poincare.h Pulsar/ProfileVectorPlotter.h			\
-	Pulsar/TwoBitPlot.h
+	Pulsar/TwoBitPlot.h Pulsar/CalibratorSpectrum.h
 
 libPlot_la_SOURCES = Plot.C PlotFactory.C \
 	PlotIndex.C \
@@ -54,7 +54,9 @@ libPlot_la_SOURCES = Plot.C PlotFactory.C \
 	FluctPlot.C FluctPlotTI.C \
 	StokesFluctPlot.C StokesFluctPlotTI.C \
 	TwoBitPlot.C TwoBitPlotTI.C \
-	Poincare.C PoincareTI.C ProfileVectorPlotter.C
+	Poincare.C PoincareTI.C \
+	ProfileVectorPlotter.C \
+	CalibratorSpectrum.C CalibratorSpectrumTI.C
 
 bin_PROGRAMS = psrplot
 

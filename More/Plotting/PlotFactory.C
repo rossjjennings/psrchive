@@ -19,6 +19,7 @@
 #include "Pulsar/StokesFluctPlot.h"
 #include "Pulsar/TwoBitPlot.h"
 #include "Pulsar/Poincare.h"
+#include "Pulsar/CalibratorSpectrum.h"
 
 #include "Error.h"
 #include "pad.h"
@@ -64,6 +65,9 @@ Pulsar::PlotFactory::PlotFactory ()
 
   add ( new PlotFactory::Advocate<TwoBitPlot>
 	('2', "2bit", "Two-bit distribution") );
+
+  add ( new PlotFactory::Advocate<CalibratorSpectrum>
+	('C', "cal", "Calibrator Spectrum") );
 }
 
 //! Return a new instance of the named plotter
