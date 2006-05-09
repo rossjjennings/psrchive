@@ -19,11 +19,11 @@
 #include "Pulsar/CalibratorPlotter.h"
 #include "Pulsar/CalibratorStokes.h"
 #include "Pulsar/CalibratorStokesInfo.h"
+#include "Pulsar/CalibratorSpectrum.h"
 
 #include "Pulsar/Profile.h"
 #include "Pulsar/Integration.h"
 #include "Pulsar/Archive.h"
-#include "Pulsar/Plotter.h"
 
 #include "string_utils.h"
 #include "dirutil.h"
@@ -235,7 +235,7 @@ int main (int argc, char** argv)
     cpgscf (2);
   }
 
-  Pulsar::Plotter archplot;
+  Pulsar::CalibratorSpectrum archplot;
 
   for (unsigned ifile=0; ifile<filenames.size(); ifile++) try {
 
@@ -343,7 +343,14 @@ int main (int argc, char** argv)
     if (verbose)
       cerr << "pacv: Plotting Uncalibrated Spectrum" << endl;
     cpgpage ();
-    archplot.calibrator_spectrum (input);
+    archplot.plot (input);
+
+    if (verbose)
+      cerr << "pacv: Plotting Total and Polarized Calibrator Flux" << endl;
+    cpgpage ();
+    archplot.set_plot_Ip (true);
+    archplot.plot (input);
+    archplot.set_plot_Ip (false);
 
     if (verbose)
       cerr << "pacv: Constructing PolnCalibrator" << endl;
@@ -371,7 +378,7 @@ int main (int argc, char** argv)
     cpgpage ();
 
     input->convert_state (Signal::Stokes);
-    archplot.calibrator_spectrum (input);
+    archplot.plot (input);
 
     if (dop_calibrator)
       continue;
