@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/EstimatePlotter.h,v $
-   $Revision: 1.13 $
-   $Date: 2006/05/09 04:49:15 $
+   $Revision: 1.14 $
+   $Date: 2006/05/10 01:31:28 $
    $Author: straten $ */
 
 #ifndef __EstimatePlotter_h
@@ -29,6 +29,9 @@ class EstimatePlotter {
 
   //! Clear all data
   void clear ();
+
+  //! Set the viewport and/or world coordinates before plotting
+  void set_control_viewport (bool flag);
 
   //! Set the border used when setting the world coordinates of the viewport
   void set_border (float fraction_x, float fraction_y);
@@ -84,6 +87,9 @@ class EstimatePlotter {
 	       const std::vector<float>& yerr);
 
  protected:
+
+  //! Set the viewport and/or world coordinates before plotting
+  bool control_viewport;
 
   //! Borders
   float x_border, y_border;

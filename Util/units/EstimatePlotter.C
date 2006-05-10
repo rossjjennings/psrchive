@@ -22,6 +22,7 @@ EstimatePlotter::EstimatePlotter ()
 
   xrange_set = yrange_set = false;
   viewports_set = false;
+  control_viewport = true;
 }
 
 //! Set the border used when setting the world coordinates of the viewport
@@ -29,6 +30,11 @@ void EstimatePlotter::set_border (float fraction_x, float fraction_y)
 {
   x_border = fraction_x;
   y_border = fraction_y;
+}
+
+void EstimatePlotter::set_control_viewport (bool flag)
+{
+  control_viewport = flag;
 }
 
 void EstimatePlotter::set_xrange (float xmin, float xmax)
@@ -243,14 +249,18 @@ unsigned EstimatePlotter::plot (unsigned index)
     throw Error (InvalidRange, "EstimatePlotter::plot",
 		 "iplot=%d >= nplot=%d", index, xval.size());
 
-  if (!viewports_set) {
-    // cerr << "set_world xmin=" << x_min << " xmax=" << x_max 
-         // << " ymin=" << y_min << " ymax=" << y_max << endl;
-    set_world (x_min, x_max, y_min, y_max);
-  }
-  else {
-    // cerr << "set_viewport" << endl;
-    set_viewport (index);
+  if (control_viewport) {
+
+    if (!viewports_set) {
+      // cerr << "set_world xmin=" << x_min << " xmax=" << x_max 
+      // << " ymin=" << y_min << " ymax=" << y_max << endl;
+      set_world (x_min, x_max, y_min, y_max);
+    }
+    else {
+      // cerr << "set_viewport" << endl;
+      set_viewport (index);
+    }
+
   }
 
   unsigned npt = xval[index].size();
