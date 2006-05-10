@@ -21,6 +21,8 @@ Pulsar::CalibratorSpectrum::CalibratorSpectrum ()
   plot_Ip = false;
 
   get_frame()->get_y_scale()->set_buf_norm(0.05);
+
+  plotter.set_control_viewport (false);
 }
  
 TextInterface::Class* Pulsar::CalibratorSpectrum::get_interface ()
@@ -62,6 +64,11 @@ void Pulsar::CalibratorSpectrum::prepare (const Archive* data)
       for (ipt=0; ipt<npt; ipt++)
 	hi[ipol][ipt] -= lo[ipol][ipt];
 
+  if (plot_low)
+    for (ipol=0; ipol<npol; ipol++)
+      for (ipt=0; ipt<npt; ipt++)
+	hi[ipol][ipt] = lo[ipol][ipt];
+
   if (plot_Ip) {
     for (ipt=0; ipt<npt; ipt++) {
       if (hi[0][ipt].get_variance() != 0)
@@ -78,12 +85,8 @@ void Pulsar::CalibratorSpectrum::prepare (const Archive* data)
   plotter.clear ();
   plotter.set_xrange (cfreq-0.5*bw, cfreq+0.5*bw);
 
-  if (plot_low)
-    for (ipol=0; ipol<npol; ipol++)
-      plotter.add_plot (lo[ipol]);
-  else
-    for (ipol=0; ipol<npol; ipol++)
-      plotter.add_plot (hi[ipol]);
+  for (ipol=0; ipol<npol; ipol++)
+    plotter.add_plot (hi[ipol]);
 
   get_frame()->get_y_scale()->set_minmax (plotter.get_y_min(), 
 					  plotter.get_y_max());
@@ -108,9 +111,11 @@ void Pulsar::CalibratorSpectrum::draw (const Archive* data)
 //! Return the label for the y-axis
 std::string Pulsar::CalibratorSpectrum::get_ylabel (const Archive* data)
 {
-  if (data->get_scale() == Signal::Jansky)
-    return "Flux Density (mJy)";
-  else
-    return "Relative Flux Units";
+  if (plot_low)
+    return "Off-Pulse Flux";
+  else if (plot_total)
+    return "On-Pulse Flux";
+  else 
+    return "Calibrator Flux";
 }
 
