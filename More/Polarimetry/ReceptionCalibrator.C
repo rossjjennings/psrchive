@@ -798,7 +798,7 @@ try {
     }
   }
 
-  if (p->get_transformation_nchan() == nchan)  {
+  if (p->get_nchan() == nchan)  {
 
     assert (model.size() == nchan);
 

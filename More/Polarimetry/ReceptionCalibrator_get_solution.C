@@ -16,7 +16,7 @@ Pulsar::ReceptionCalibrator::get_CalibratorStokes () const
   if (verbose > 2) cerr << "Pulsar::ReceptionCalibrator::get_CalibratorStokes"
 		 " create CalibratorStokes Extension" << endl;
 
-  unsigned nchan = get_transformation_nchan();
+  unsigned nchan = get_nchan();
 
   if (nchan != calibrator_estimate.source.size())
     throw Error (InvalidState,

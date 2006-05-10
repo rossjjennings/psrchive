@@ -12,7 +12,7 @@ Pulsar::InstrumentInfo::InstrumentInfo (const PolnCalibrator* calibrator) :
 {
   fixed_orientation = false;
 
-  unsigned nchan = calibrator->get_transformation_nchan ();
+  unsigned nchan = calibrator->get_nchan ();
   
   // find the first valid transformation
   const MEAL::Complex2* xform = 0;

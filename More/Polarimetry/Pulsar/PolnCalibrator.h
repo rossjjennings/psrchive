@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PolnCalibrator.h,v $
-   $Revision: 1.40 $
-   $Date: 2006/04/16 13:27:07 $
+   $Revision: 1.41 $
+   $Date: 2006/05/10 01:31:23 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PolnCalibrator_H
@@ -49,9 +49,9 @@ namespace Pulsar {
     //
 
     //! Set the number of frequency channels in the response array
-    virtual void set_nchan (unsigned nchan);
+    virtual void set_response_nchan (unsigned nchan);
     //! Get the number of frequency channels in the response array
-    virtual unsigned get_nchan () const;
+    virtual unsigned get_response_nchan () const;
 
     //! Return the system response for the specified channel
     virtual Jones<float> get_response (unsigned ichan) const;
@@ -67,9 +67,6 @@ namespace Pulsar {
     //
     // useful for unloading
     //
-
-    //! Get the number of frequency channels in the transformation array
-    unsigned get_transformation_nchan () const;
 
     //! Return true if the transformation for the specified channel is valid
     bool get_transformation_valid (unsigned ch) const;
@@ -97,6 +94,9 @@ namespace Pulsar {
 
     //! Return the Calibrator::Type of derived class
     virtual Type get_type () const;
+
+    //! Get the number of frequency channels in the calibrator
+    virtual unsigned get_nchan () const;
 
     //! Return a new PolnCalibratorExtension
     CalibratorExtension* new_Extension () const;

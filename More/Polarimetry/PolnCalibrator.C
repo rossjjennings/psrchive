@@ -67,7 +67,7 @@ Pulsar::PolnCalibrator::~PolnCalibrator ()
 }
 
 //! Set the number of frequency channels in the response array
-void Pulsar::PolnCalibrator::set_nchan (unsigned nchan)
+void Pulsar::PolnCalibrator::set_response_nchan (unsigned nchan)
 {
   if (built && response.size() == nchan)
     return;
@@ -76,7 +76,7 @@ void Pulsar::PolnCalibrator::set_nchan (unsigned nchan)
 }
 
 //! Get the number of frequency channels in the response array
-unsigned Pulsar::PolnCalibrator::get_nchan () const
+unsigned Pulsar::PolnCalibrator::get_response_nchan () const
 {
   if (!built || response.size() == 0)
     const_cast<PolnCalibrator*>(this)->build();
@@ -108,14 +108,14 @@ const Pulsar::Receiver* Pulsar::PolnCalibrator::get_Receiver () const
   return receiver;
 }
 
-//! Get the number of frequency channels in the transformation array
-unsigned Pulsar::PolnCalibrator::get_transformation_nchan () const
+//! Get the number of frequency channels in the calibrator
+unsigned Pulsar::PolnCalibrator::get_nchan () const
 {
   if (transformation.size() == 0)
     setup_transformation();
 
   if (verbose > 2)
-    cerr << "Pulsar::PolnCalibrator::get_transformation_nchan nchan="
+    cerr << "Pulsar::PolnCalibrator::get_nchan nchan="
          << transformation.size() << endl;
 
   return transformation.size();
@@ -226,6 +226,8 @@ void Pulsar::PolnCalibrator::build (unsigned nchan) try {
   response.resize( transformation.size() );
 
   vector<bool> bad ( transformation.size(), false );
+  unsigned bad_count = 0;
+
   unsigned ichan=0;
 
   for (ichan=0; ichan < response.size(); ichan++)  {
@@ -277,10 +279,18 @@ void Pulsar::PolnCalibrator::build (unsigned nchan) try {
 
     }
 
-    if (bad[ichan])
+    if (bad[ichan]) {
       response[ichan] = 0.0;
+      bad_count ++;
+    }
 
   }
+
+  /* If there are bad channels and the solution must be interpolated to
+     a higher number of frequency channels, then the solution must be 
+     patched up */
+
+  bool need_patching = bad_count && nchan > response.size();
 
   if (median_smoothing)  {
 
@@ -298,7 +308,11 @@ void Pulsar::PolnCalibrator::build (unsigned nchan) try {
 		 "median smoothing of Jones matrices not yet implemented");
 
   }
-  else if (interpolating) {
+  else if (interpolating || need_patching) {
+
+    if (!interpolating)
+      cerr << "Pulsar::PolnCalibrator::build patch up"
+	" before interpolation in Fourier domain" << endl;
 
     for (ichan = 0; ichan < response.size(); ichan++) {
 
@@ -387,7 +401,16 @@ void Pulsar::PolnCalibrator::build (unsigned nchan) try {
     vector< Jones<float> > out_response (nchan);
     fft::interpolate (out_response, response);
     
+    unsigned factor = nchan / response.size();
+
     for (ichan=0; ichan<nchan; ichan++) {
+
+      unsigned orig_ichan = ichan / factor;
+      if (orig_ichan >= response.size() || bad[orig_ichan]) {
+	out_response[ichan] = 0;
+	continue;
+      }
+
       polar (determinant, hermitian, unitary, out_response[ichan]);
       unitary = sqrt(unitary);
       if (unitary[0] < 0.05)  {
@@ -395,6 +418,7 @@ void Pulsar::PolnCalibrator::build (unsigned nchan) try {
         polar (determinant, hermitian, unitary, backup[iback]);
       }
       out_response[ichan] = determinant * (hermitian * unitary);
+
     }
 
     response = out_response;
@@ -639,7 +663,7 @@ Pulsar::PolnCalibrator::Info::Info (const PolnCalibrator* cal)
 
   calibrator = cal;
   
-  unsigned nchan = cal->get_transformation_nchan ();
+  unsigned nchan = cal->get_nchan ();
 
   // find the first valid transformation
   const MEAL::Complex2* xform = 0;
