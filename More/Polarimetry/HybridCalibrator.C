@@ -13,6 +13,12 @@
 #include "Calibration/SingleAxis.h"
 #include "Pauli.h"
 
+Pulsar::HybridCalibrator::HybridCalibrator (const Archive* data)
+{
+  set_precalibrator( new Pulsar::PolnCalibrator (data) );
+  set_reference_input( data->get<CalibratorStokes>() );
+}
+
 Pulsar::HybridCalibrator::HybridCalibrator (PolnCalibrator* _calibrator)
 {
   set_precalibrator (_calibrator);
@@ -29,8 +35,14 @@ Pulsar::Calibrator::Type Pulsar::HybridCalibrator::get_type () const
   return Hybrid;
 }
 
+MJD Pulsar::HybridCalibrator::get_epoch () const
+{
+  return reference_observation->get_epoch();
+}
+
 //! Set the Stokes parameters of the reference signal
-void Pulsar::HybridCalibrator::set_reference_input (CalibratorStokes* input)
+void
+Pulsar::HybridCalibrator::set_reference_input (const CalibratorStokes* input)
 {
   reference_input = input;
 }
@@ -75,7 +87,7 @@ void Pulsar::HybridCalibrator::calculate_transformation ()
 		 "Pulsar::HybridCalibrator::calculate_transformation",
 		 "no reference observation ReferenceCalibrator");
 
-  unsigned nchan = precalibrator->get_transformation_nchan();
+  unsigned nchan = precalibrator->get_nchan();
 
   if (reference_input->get_nchan() != nchan)
     throw Error (InvalidState,
@@ -174,8 +186,9 @@ void Pulsar::HybridCalibrator::calculate_transformation ()
 
   }
   catch (Error& error) {
-    cerr << "Pulsar::HybridCalibrator::calculate_transformation"
-          " error ichan=" << ichan << endl;
+    if (verbose > 1)
+      cerr << "Pulsar::HybridCalibrator::calculate_transformation"
+	" error ichan=" << ichan << " " << error.get_message() << endl;
     transformation[ichan] = 0;
   }
 

@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/HybridCalibrator.h,v $
-   $Revision: 1.6 $
-   $Date: 2006/03/17 13:34:51 $
+   $Revision: 1.7 $
+   $Date: 2006/05/10 01:31:01 $
    $Author: straten $ */
 
 #ifndef __HybridCalibrator_H
@@ -33,14 +33,20 @@ namespace Pulsar {
     //! Construct from another PolnCalibrator instance
     HybridCalibrator (PolnCalibrator* precalibrator = 0);
 
+    //! Construct from a solution with both extensions
+    HybridCalibrator (const Archive* data);
+
     //! Destructor
     ~HybridCalibrator ();
 
     //! Return Calibrator::Hybrid
     Type get_type () const;
 
+    //! Return the reference epoch of the calibration experiment
+    MJD get_epoch () const;
+
     //! Set the Stokes parameters of the reference signal
-    void set_reference_input (CalibratorStokes* reference);
+    void set_reference_input (const CalibratorStokes* reference);
 
     //! Set the ReferenceCalibrator data from which to derive a SingleAxis
     void set_reference_observation (ReferenceCalibrator* observation);
@@ -54,7 +60,7 @@ namespace Pulsar {
     void calculate_transformation ();
 
     //! The Stokes parameters of the input reference signal
-    Reference::To<CalibratorStokes> reference_input;
+    Reference::To<const CalibratorStokes> reference_input;
 
     //! The Stokes parameters of the observed reference signal
     Reference::To<ReferenceCalibrator> reference_observation;
