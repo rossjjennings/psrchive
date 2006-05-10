@@ -9,6 +9,7 @@
 #include "Pulsar/FluxCalibrator.h"
 #include "Pulsar/SingleAxisCalibrator.h"
 #include "Pulsar/PolarCalibrator.h"
+#include "Pulsar/HybridCalibrator.h"
 #include "Pulsar/DoPCalibrator.h"
 
 #include "Pulsar/PolnCalibratorExtension.h"
@@ -47,6 +48,7 @@ void usage ()
     " -f           treat all archives as members of a fluxcal observation\n"
     " -p           use the polar model\n"
     " -P           produce publication-quality plots\n"
+    " -S pcm.out   combine each calibrator with the pcm solution\n"
     " -r feed.txt  set the feed transformation [not used]\n"
     " -2 m or d    multiply or divide cross products by factor of two\n"
        << endl;
@@ -87,12 +89,16 @@ int main (int argc, char** argv)
   // known feed transformation
   Calibration::Feed* feed = 0;
 
+  // Hybrid transformation
+  Reference::To<Pulsar::HybridCalibrator> hybrid;
+
   string device = "?";
 
   // verbosity flag
   bool verbose = false;
   char c;
-  while ((c = getopt(argc, argv, "2:a:c:CD:dfhi:M:Pr:pqvV")) != -1)  {
+
+  while ((c = getopt(argc, argv, "2:a:c:CD:dfhi:M:Pr:S:pqvV")) != -1)  {
 
     switch (c)  {
 
@@ -166,6 +172,12 @@ int main (int argc, char** argv)
     case 'p':
       single_axis = false;
       break;
+
+    case 'S': {
+      Reference::To<Pulsar::Archive> data = Pulsar::Archive::load(optarg);
+      hybrid = new Pulsar::HybridCalibrator (data);
+      break;
+    }
 
     case 'r':
       feed = new Calibration::Feed;
@@ -350,12 +362,32 @@ int main (int argc, char** argv)
     cpgpage ();
     archplot.set_plot_Ip (true);
     archplot.plot (input);
+
+    if (verbose)
+      cerr << "pacv: Plotting Off-Pulse Total and Polarized Flux" << endl;
+    cpgpage ();
+    archplot.set_plot_low (true);    
+    archplot.plot (input);
+    archplot.set_plot_low (false);    
+
+    if (verbose)
+      cerr << "pacv: Plotting On-Pulse Total and Polarized Flux" << endl;
+    cpgpage ();
+    archplot.set_plot_total (true);    
+    archplot.plot (input);
+    archplot.set_plot_total (false);    
+
     archplot.set_plot_Ip (false);
 
     if (verbose)
       cerr << "pacv: Constructing PolnCalibrator" << endl;
 
-    if (dop_calibrator)
+    if (hybrid) {
+      hybrid -> set_reference_observation 
+	( new Pulsar::SingleAxisCalibrator (input) );
+      calibrator = hybrid;
+    }
+    else if (dop_calibrator)
       calibrator = new Pulsar::DoPCalibrator (input);
     else if (single_axis)
       calibrator = new Pulsar::SingleAxisCalibrator (input);
@@ -379,6 +411,13 @@ int main (int argc, char** argv)
 
     input->convert_state (Signal::Stokes);
     archplot.plot (input);
+
+    if (verbose)
+      cerr << "pacv: Plotting Off-Pulse Total and Polarized Flux" << endl;
+    cpgpage ();
+    archplot.set_plot_low (true);    
+    archplot.plot (input);
+    archplot.set_plot_low (false);    
 
     if (dop_calibrator)
       continue;
