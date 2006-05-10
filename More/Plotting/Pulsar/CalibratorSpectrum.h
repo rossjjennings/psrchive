@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/CalibratorSpectrum.h,v $
-   $Revision: 1.1 $
-   $Date: 2006/05/09 04:47:52 $
+   $Revision: 1.2 $
+   $Date: 2006/05/10 01:31:20 $
    $Author: straten $ */
 
 #ifndef __Pulsar_CalibratorSpectrum_h
@@ -49,6 +49,14 @@ namespace Pulsar {
     //! Plot the total and polarized intensities
     void set_plot_Ip (bool flag = true) { plot_Ip = flag; }
     bool get_plot_Ip () const { return plot_Ip; }
+
+    //! Plot the total and polarized intensities
+    void set_plot_total (bool flag = true) { plot_total = flag; }
+    bool get_plot_total () const { return plot_total; }
+
+    //! Plot the total and polarized intensities
+    void set_plot_low (bool flag = true) { plot_low = flag; }
+    bool get_plot_low () const { return plot_low; }
 
     //! Prepare to plot
     void prepare (const Archive*);
