@@ -7,7 +7,7 @@
 #include "Pulsar/ReferenceCalibrator.h"
 
 #include "Pulsar/Archive.h"
-#include "Pulsar/Integration.h"
+#include "Pulsar/IntegrationExpert.h"
 
 #include "Pulsar/Receiver.h"
 #include "Pulsar/Backend.h"
@@ -120,7 +120,7 @@ void Pulsar::ReferenceCalibrator::set_nchan (unsigned nchan)
   // ensure that the transformation matrix is re-computed
   transformation.resize (0);
 
-  PolnCalibrator::set_nchan (nchan);
+  PolnCalibrator::set_response_nchan (nchan);
 }
 
 /*!
@@ -133,7 +133,7 @@ void Pulsar::ReferenceCalibrator::get_levels
 (const Integration* integration, unsigned request_nchan,
  vector<vector<Estimate<double> > >& cal_hi,
  vector<vector<Estimate<double> > >& cal_lo)
-{
+try {
   if (!integration)
     throw Error (InvalidState,
                  "Pulsar::ReferenceCalibrator::get_levels",
@@ -143,12 +143,20 @@ void Pulsar::ReferenceCalibrator::get_levels
     cerr << "Pulsar::ReferenceCalibrator::get_levels Integration "
          << " required nchan=" << request_nchan << endl;
 
+  unsigned nchan = integration->get_nchan();
+
+  Reference::To<Integration> clone;
+
+  if (nchan > request_nchan) {
+    clone = integration->clone();
+    clone->expert()->fscrunch( nchan/request_nchan );
+    nchan = clone->get_nchan();
+    integration = clone;
+  }
+ 
   integration->cal_levels (cal_hi, cal_lo);
 
-  unsigned nchan = integration->get_nchan();
-  unsigned npol = integration->get_npol();
-
-  unsigned ipol = 0;
+  unsigned ipol, npol = integration->get_npol();
 
   for (unsigned ichan=0; ichan<nchan; ichan++)
     if (integration->get_weight (ichan) == 0)  {
@@ -183,16 +191,25 @@ void Pulsar::ReferenceCalibrator::get_levels
   vector<vector<Estimate<double> > > lo (npol);
  
   for (ipol=0; ipol < npol; ipol++) {
+
     lo[ipol].resize (request_nchan);
-    fft::interpolate (lo[ipol], cal_lo[ipol]);
-    
     hi[ipol].resize (request_nchan);
+
+    if (verbose > 2)
+      cerr << "Pulsar::ReferenceCalibrator::get_levels interpolate from "
+	   << cal_lo[ipol].size() << " to " << lo[ipol].size() << endl;
+
+    fft::interpolate (lo[ipol], cal_lo[ipol]);
     fft::interpolate (hi[ipol], cal_hi[ipol]);
+
   }
 
   cal_lo = lo;
   cal_hi = hi;
 
+}
+catch (Error& error) {
+  throw error += "Pulsar::ReferenceCalibrator::get_levels";
 }
 
 /*! This method takes care of averaging the calibrator levels from multiple
