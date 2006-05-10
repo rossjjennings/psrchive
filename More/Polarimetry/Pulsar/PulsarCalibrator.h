@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PulsarCalibrator.h,v $
-   $Revision: 1.17 $
-   $Date: 2006/04/20 15:11:59 $
+   $Revision: 1.18 $
+   $Date: 2006/05/10 01:31:10 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PulsarCalibrator_H
@@ -128,6 +128,9 @@ namespace Pulsar {
 
     //! Archive instance that is currently in use
     const Archive* archive;
+
+    //! Build the arrays
+    void build (unsigned nchan);
 
   };
 
