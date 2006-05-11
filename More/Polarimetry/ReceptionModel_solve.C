@@ -183,6 +183,9 @@ void Calibration::ReceptionModel::solve_work (bool solve_verbose)
 
     float chisq = fit.iter (data, fake, *this);
 
+    if (fit_debug)
+      cerr << "ITERATION: " << iterations << endl;
+
     if (exact_solution) {
       if (fit_debug)
 	cerr << "chisq=" << chisq << " convergence="
@@ -218,8 +221,7 @@ void Calibration::ReceptionModel::solve_work (bool solve_verbose)
       fit.lamda = last_lamda;
 
       // count when Newton's method seems to be doing very poorly
-      if (delta_chisq > 100)
-	stick_to_steepest_decent ++;
+      stick_to_steepest_decent ++;
 
     }
 
@@ -228,7 +230,7 @@ void Calibration::ReceptionModel::solve_work (bool solve_verbose)
       if (fit_debug)
 	cerr << "fit close" << endl;
 
-      if (stick_to_steepest_decent >= 3) {
+      if (stick_to_steepest_decent >= 5) {
 
 	if (iterations >= maximum_iterations/2 &&
 	    fabs(delta_chisq)/best_chisq < 1e-3) {
