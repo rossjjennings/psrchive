@@ -838,7 +838,9 @@ void Pulsar::ReceptionCalibrator::precalibrate (Archive* data)
   unsigned nchan = data->get_nchan ();
 
   // sanity check
-  assert (nchan == model.size());
+  if (nchan != model.size())
+    throw Error (InvalidState, "Pulsar::ReceptionCalibrator::precalibrate",
+                 "model size=%u != data nchan=%u", model.size(), nchan);
 
   vector< Jones<float> > response (nchan);
 
