@@ -365,7 +365,8 @@ libpsrchive_la_SOURCES += ArchiveProcessor.C Plotter.C CalibratorPlotter.C  \
 
 bin_PROGRAMS += pacv pcvar pav pas psrwt pcm pvt paf psrqft \
 	binphs_test pcm_chooser rmfit psrband SimTiming bin_clean \
-	plot_baseline pdmp psrfi tsys spa psrchive_template paas pfixbaseline
+	plot_baseline pdmp psrfi tsys spa psrchive_template paas \
+	pfixbaseline pcmdiff
 
 SimTiming_SOURCES		= SimTiming.C
 binphs_test_SOURCES		= binphs_test.C
@@ -390,6 +391,7 @@ tsys_SOURCES                    = tsys.C
 paas_SOURCES			= paas.C
 pfixbaseline_SOURCES		= pfixbaseline.C
 psrchive_template_SOURCES       = psrchive_template.C
+pcmdiff_SOURCES			= pcmdiff.C
 
 SimTiming_LDADD			= $(LDADD) @PGPLOT_LIBS@
 binphs_test_LDADD		= $(LDADD) @PGPLOT_LIBS@
@@ -415,6 +417,7 @@ paas_LDADD			= $(LDADD) @PGPLOT_LIBS@
 paf_LDADD			= $(LDADD) @PGPLOT_LIBS@
 pfixbaseline_LDADD		= $(LDADD) @PGPLOT_LIBS@
 psrchive_template_LDADD		= $(LDADD) @PGPLOT_LIBS@
+pcmdiff_LDADD			= $(LDADD) @PGPLOT_LIBS@
 
 if HAVE_CFITSIO
 
