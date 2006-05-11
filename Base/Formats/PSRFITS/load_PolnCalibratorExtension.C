@@ -136,17 +136,36 @@ void Pulsar::FITSArchive::load_PolnCalibratorExtension (fitsfile* fptr)
   count = 0;
   for (ichan = 0; ichan < pce->get_nchan(); ichan++) {
     if (pce->get_valid(ichan)) {
+
       bool valid = true;
+      int zeroes = 0;
+
       for (int j = 0; j < ncpar; j++) {
+
 	float err = data.get()[count];
+
 	if (!finite(err))
 	  valid = false;
 	else
 	  pce->get_transformation(ichan)->set_variance (j,err*err);
-	count++;
+
+	if (err == 0)
+	  zeroes++;
+
+	count++;	
       }
+
+      if (zeroes == ncpar) {
+	if (verbose > 1)
+	  cerr << "Pulsar::FITSArchive::load_PolnCalibratorExtension WARNING\n"
+	    "  ichan=" << ichan << " flagged invalid: "
+	    "zero error in all parameters" << endl;
+	valid = false;
+      }
+
       if (!valid)
 	pce->set_valid (ichan, false);
+
     }
     else
       count += ncpar;
