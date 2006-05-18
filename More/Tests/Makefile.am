@@ -363,7 +363,7 @@ libpsrchive_la_SOURCES += ArchiveProcessor.C Plotter.C CalibratorPlotter.C  \
 	Plotter_phase_frequency.C      Plotter_phase_time.C \
 	Plotter_draw_colour_map.C
 
-bin_PROGRAMS += pacv pcvar pav pas psrwt pcm pvt paf psrqft \
+bin_PROGRAMS += psrplot pacv pcvar pav pas psrwt pcm pvt paf psrqft \
 	binphs_test pcm_chooser rmfit psrband SimTiming bin_clean \
 	plot_baseline pdmp psrfi tsys spa psrchive_template paas \
 	pfixbaseline pcmdiff
@@ -377,6 +377,7 @@ pcm_SOURCES			= pcm.C
 pcm_chooser_SOURCES		= pcm_chooser.C
 pcvar_SOURCES			= pcvar.C
 psrband_SOURCES			= psrband.C
+psrplot_SOURCES			= psrplot.C
 psrwt_SOURCES			= psrwt.C
 pvt_SOURCES			= pvt.C
 rmfit_SOURCES			= rmfit.C
@@ -402,6 +403,7 @@ pcm_LDADD			= $(LDADD) @PGPLOT_LIBS@ -lpthread
 pcm_chooser_LDADD		= $(LDADD) @PGPLOT_LIBS@
 pcvar_LDADD			= $(LDADD) @PGPLOT_LIBS@
 psrband_LDADD			= $(LDADD) @PGPLOT_LIBS@
+psrplot_LDADD			= $(LDADD) @PGPLOT_LIBS@
 psrsh_LDADD			= $(LDADD) @PGPLOT_LIBS@ @READLINE_LIBS@
 psrwt_LDADD			= $(LDADD) @PGPLOT_LIBS@
 pvt_LDADD			= $(LDADD) @PGPLOT_LIBS@

@@ -58,10 +58,6 @@ libPlot_la_SOURCES = Plot.C PlotFactory.C \
 	ProfileVectorPlotter.C \
 	CalibratorSpectrum.C CalibratorSpectrumTI.C
 
-bin_PROGRAMS = psrplot
-
-psrplot_SOURCES = psrplot.C
-
 endif
 
 #############################################################################
@@ -73,7 +69,3 @@ INCLUDES = -I$(top_builddir)/utils/include -I$(top_builddir)/astro/include \
 	-I$(top_srcdir)/psrchive -I$(top_srcdir)/psrchive/Extension \
 	@PGPLOT_CFLAGS@ @SLA_CFLAGS@
 
-LDADD = libPlot.la $(top_builddir)/psrchive/libpsrchive.la	\
-	$(top_builddir)/astro/libpsrastro.la			\
-	$(top_builddir)/utils/libpsrutils.la			\
-	$(top_builddir)/third/libpsrthird.la @PGPLOT_LIBS@
