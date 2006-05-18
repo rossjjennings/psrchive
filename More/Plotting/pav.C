@@ -5,7 +5,7 @@
  *
  ***************************************************************************/
 //
-// $Id: pav.C,v 1.114 2006/03/29 22:42:19 straten Exp $
+// $Id: pav.C,v 1.115 2006/05/18 01:42:28 hknight Exp $
 //
 // The Pulsar Archive Viewer
 //
@@ -43,12 +43,25 @@
 using namespace std;
 
 typedef struct {
+  int plot_number;
   string side;
   float disp;
   float coord;
   float fjust;
   string text;
 } cpgmtxt_inputs;
+
+typedef struct {
+  int plot_number;
+  float x1;
+  float y1;
+  float x2;
+  float y2;
+} cpgarro_inputs;
+
+void
+do_extras(vector<cpgmtxt_inputs> cpgmtxts,vector<cpgarro_inputs> cpgarros,
+	  int plot_number);
 
 vector<Reference::To<Pulsar::Archive> >
 get_archives(string filename, bool breakup_freq);
@@ -146,6 +159,9 @@ void usage ()
     " --no_corner_labels Don't display corner labels in publication mode [do display]\n"
     " --chans arch   Treat each frequency-channel of 'arch' as a separate archive\n"
     " --cpgmtxt \"side disp, coord, fjust text\" Call cpgmtxt with these args\n"
+    " --cpgmtxt \"n side disp, coord, fjust text\" Call cpgmtxt just for plot 'n' with these args\n"
+    " --cpgarro \"x1 y1 x2 y2\" Call cpgarro with these args\n"
+    " --cpgarro \"n x1 y1 x2 y2\" Call cpgarro just for plot 'n' with these args\n"
     "\n"
     "Archive::Extension options (file format specific):\n"
     " -o        Plot the original bandpass\n"
@@ -259,6 +275,7 @@ int main (int argc, char** argv)
   vector<int> breakup_freq;
 
   vector<cpgmtxt_inputs> cpgmtxts;
+  vector<cpgarro_inputs> cpgarros;
 
   int c = 0;
   
@@ -283,6 +300,7 @@ int main (int argc, char** argv)
   const int NO_CORNER_LABELS = 1025;
   const int CHANS            = 1026;
   const int CPGMTXT          = 1027;
+  const int CPGARRO          = 1028;
 
   static struct option long_options[] = {
     { "convert_binphsperi", 1, 0, 200 },
@@ -314,6 +332,7 @@ int main (int argc, char** argv)
     { "no_corner_labels",   no_argument,       0, NO_CORNER_LABELS},
     { "chans",              required_argument, 0, CHANS},
     { "cpgmtxt",            required_argument, 0, CPGMTXT},
+    { "cpgarro",            required_argument, 0, CPGARRO},
     { 0, 0, 0, 0 }
   };
 
@@ -394,7 +413,7 @@ int main (int argc, char** argv)
       plotter.set_subint( atoi (optarg) );
       break;
     case 'i':
-      cout << "$Id: pav.C,v 1.114 2006/03/29 22:42:19 straten Exp $" << endl;
+      cout << "$Id: pav.C,v 1.115 2006/05/18 01:42:28 hknight Exp $" << endl;
       return 0;
 
     case 'j':
@@ -738,11 +757,37 @@ int main (int argc, char** argv)
 	cpgmtxt_inputs dummy;
 	cpgmtxts.push_back( dummy );
 
+	cpgmtxts.back().plot_number = -1;
+
+	if( words.size()== 6 ){
+	  cpgmtxts.back().plot_number = atoi(words[0].c_str());
+	  words = vector<string>(words.begin()+1,words.end());
+	}
+
 	cpgmtxts.back().side = words[0];
 	cpgmtxts.back().disp = atof(words[1].c_str());
 	cpgmtxts.back().coord = atof(words[2].c_str());
 	cpgmtxts.back().fjust = atof(words[3].c_str());
 	cpgmtxts.back().text = words[4];
+	break;
+      }
+
+    case CPGARRO:
+      {
+	vector<string> words = stringdecimate(optarg," \t");
+	cpgarro_inputs dummy;
+	cpgarros.push_back( dummy );
+	cpgarros.back().plot_number = -1;
+
+	if( words.size()== 5 ){
+	  cpgarros.back().plot_number = atoi(words[0].c_str());
+	  words = vector<string>(words.begin()+1,words.end());
+	}
+
+	cpgarros.back().x1 = atof(words[0].c_str());
+	cpgarros.back().y1 = atof(words[1].c_str());
+	cpgarros.back().x2 = atof(words[2].c_str());
+	cpgarros.back().y2 = atof(words[3].c_str());
 	break;
       }
 
@@ -793,12 +838,16 @@ int main (int argc, char** argv)
 
   cerr << "pav: reading " << filenames.size() << " files" << endl;
 
+  int plot_number = -1;
+
   for (unsigned ifile = 0; ifile < filenames.size(); ifile++) try {
     vector<Reference::To<Pulsar::Archive> > archives = 
       get_archives( filenames[ifile], breakup_freq[ifile] );
 
     for( unsigned iarch=0; iarch<archives.size(); iarch++){
       Reference::To<Pulsar::Archive> archive = archives[iarch];
+
+      plot_number++;
 
       if (plotter.get_plot_error_box())
 	plotter.compute_x_error (archive);
@@ -1120,24 +1169,14 @@ int main (int argc, char** argv)
 
 	  plotter.singleProfile (archive);
 	  cpgsch(1.3);
-	  for( unsigned i=0; i<cpgmtxts.size(); i++)
-	    cpgmtxt( cpgmtxts[i].side.c_str(),
-		     cpgmtxts[i].disp,
-		     cpgmtxts[i].coord,
-		     cpgmtxts[i].fjust,
-		     cpgmtxts[i].text.c_str());
+	  do_extras(cpgmtxts,cpgarros,plot_number);
 	}
 
 	if (manchester) {
 	  cpg_next();
 	  plotter.Manchester (archive, plot_qu);
 	  cpgsch(1.3);
-	  for( unsigned i=0; i<cpgmtxts.size(); i++)
-	    cpgmtxt( cpgmtxts[i].side.c_str(),
-		     cpgmtxts[i].disp,
-		     cpgmtxts[i].coord,
-		     cpgmtxts[i].fjust,
-		     cpgmtxts[i].text.c_str());
+	  do_extras(cpgmtxts,cpgarros,plot_number);
 	}
 	if (degree) {
 	  cpg_next();
@@ -1288,4 +1327,20 @@ get_archives(string filename, bool breakup_freq)
   }
 
   return archives;
+}
+
+void
+do_extras(vector<cpgmtxt_inputs> cpgmtxts,vector<cpgarro_inputs> cpgarros,
+	  int plot_number)
+{
+  for( unsigned i=0; i<cpgmtxts.size(); i++)
+    if( cpgmtxts[i].plot_number < 0 || cpgmtxts[i].plot_number == plot_number )
+      cpgmtxt( cpgmtxts[i].side.c_str(),
+	       cpgmtxts[i].disp,
+	       cpgmtxts[i].coord,
+	       cpgmtxts[i].fjust,
+	       cpgmtxts[i].text.c_str());
+  for( unsigned i=0; i<cpgarros.size(); i++)
+    if( cpgarros[i].plot_number < 0 || cpgarros[i].plot_number == plot_number )
+      cpgarro( cpgarros[i].x1, cpgarros[i].y1, cpgarros[i].x2, cpgarros[i].y2);
 }
