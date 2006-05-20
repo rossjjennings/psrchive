@@ -25,3 +25,6 @@ void quickplot (const std::vector<T>& vals)
     cpgdraw (ipt, vals[ipt]);
 
 }
+
+void quickimage (unsigned xdim, const std::vector<float>& vals);
+
