@@ -47,3 +47,16 @@ void stretch (const std::pair<T,T>& norm, T& min, T& max)
   max = min + norm.second * diff;
   min = min + norm.first * diff;
 }
+
+template<typename T, typename U>
+bool compair1 (const std::pair<T,U>& a, const std::pair<T,U>& b)
+{
+  return a.first < b.first;
+}
+
+template<typename T, typename U>
+bool compair2 (const std::pair<T,U>& a, const std::pair<T,U>& b)
+{
+  return a.second < b.second;
+}
+
