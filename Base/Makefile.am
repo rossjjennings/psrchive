@@ -143,6 +143,7 @@ libpsrchive_la_SOURCES =			\
 	PolnProfileStats.C			\
 	Profile_average.C			\
 	Profile.C				\
+	Plotter_Manchester.C      		\
 	Profile_convolve.C			\
 	Profile_denoise.C			\
 	Profile_fftconv.C			\
@@ -188,7 +189,7 @@ libpsrchive_la_LIBADD = Extension/libExtension.la			  \
 #
 bin_PROGRAMS = psredit psrconv vip psr_template \
 	fix_coords fix_fluxcal fix_hydra fix_3C353 \
-	sesdiv parInfo default_loader archive_correct 
+	sesdiv parInfo default_loader archive_correct peb
 
 psredit_SOURCES			= psredit.C
 psrconv_SOURCES			= psrconv.C
@@ -202,6 +203,7 @@ sesdiv_SOURCES			= sesdiv.C
 parInfo_SOURCES                 = parInfo.C
 default_loader_SOURCES		= default_loader.C
 archive_correct_SOURCES		= archive_correct.C
+peb_SOURCES	         	= peb.C
 
 # ######################################################################
 #
