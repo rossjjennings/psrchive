@@ -54,9 +54,14 @@ void Pulsar::Telescope::set_coordinates (char tempo_isite)
   float lat, lon;
 
   int ret = telescope_coords (tempo_isite, &lat, &lon, &elevation);
-  if (ret < 0)
-    throw Error (FailedCall, "Pulsar::Telescope::set_coordinates",
-		 "tempo code=%c", tempo_isite);
+  if (ret < 0){
+    latitude.setDegrees( 0.0 );
+    longitude.setDegrees( 0.0 );
+    fprintf(stderr,"Hacked coords because failed to understand telescope site\n");
+
+    //    throw Error (FailedCall, "Pulsar::Telescope::set_coordinates",
+    //	 "tempo code=%c", tempo_isite);
+  }
 
   latitude.setDegrees( lat );
   longitude.setDegrees( lon );
