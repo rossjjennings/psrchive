@@ -5,7 +5,7 @@
  *
  ***************************************************************************/
 //
-// $Id: pav.C,v 1.115 2006/05/18 01:42:28 hknight Exp $
+// $Id: pav.C,v 1.116 2006/05/22 09:27:18 hknight Exp $
 //
 // The Pulsar Archive Viewer
 //
@@ -13,6 +13,7 @@
 // in Pulsar::Archive objects
 //
 
+#include "Pulsar/Dispersion.h"
 #include "Pulsar/psrchive.h"
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
@@ -413,7 +414,7 @@ int main (int argc, char** argv)
       plotter.set_subint( atoi (optarg) );
       break;
     case 'i':
-      cout << "$Id: pav.C,v 1.115 2006/05/18 01:42:28 hknight Exp $" << endl;
+      cout << "$Id: pav.C,v 1.116 2006/05/22 09:27:18 hknight Exp $" << endl;
       return 0;
 
     case 'j':
@@ -874,7 +875,16 @@ int main (int argc, char** argv)
       if (dedisperse) {
 	if (stopwatch)
 	  clock.start();
-	archive -> dedisperse();
+
+	Reference::To<Pulsar::Dispersion> xform = new Pulsar::Dispersion;
+	//	if( zero_wavelength )
+	//xform->set_reference_wavelength( 0.0 );
+	//else
+	  xform->set_reference_frequency( archive->get_centre_frequency() );
+	xform->set_dispersion_measure( archive->get_dispersion_measure() );
+	xform->set_delta( 0.0 );
+	xform->execute( archive );
+	
 	if (stopwatch) {
 	  clock.stop();
 	  cerr << "dedispersion toook " << clock << endl;
