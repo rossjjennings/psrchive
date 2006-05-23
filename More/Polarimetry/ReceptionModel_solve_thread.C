@@ -241,9 +241,20 @@ void Calibration::ReceptionModel::solve_wait (ReceptionModel* to_solve)
 {
 }
 
+void Calibration::ReceptionModel::solve_wait ()
+{
+}
+
 void Calibration::ReceptionModel::solve ()
 {
   solve_work ();
+}
+
+void Calibration::ReceptionModel::set_nsolve (unsigned nthread)
+{                 
+  if (nthread > 1)
+    cerr << "Calibration::ReceptionModel::set_nsolve threads unavailable"
+         << endl;
 }
 
 #endif
