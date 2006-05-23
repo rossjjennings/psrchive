@@ -29,9 +29,12 @@ AC_DEFUN([SWIN_LIB_PTHREAD],
   LIBS="$ac_save_LIBS $PTHREAD_LIBS"
   CFLAGS="$ac_save_CFLAGS $PTHREAD_CFLAGS"
 
-  AC_TRY_LINK([#include <pthread.h>],
-              [pthread_create(0,0,0,0); pthread_exit(0);],
-              have_pthread=yes, have_pthread=no)
+  AC_RUN_IFELSE([AC_LANG_PROGRAM([[#include <pthread.h>
+		void* test_thread (void* s) { pthread_exit(s); }]],
+		[[pthread_t id;
+		pthread_create (&id, 0, test_thread, 0);
+		pthread_cancel (id);]])],
+		have_pthread=yes, have_pthread=no)
 
   AC_MSG_RESULT($have_pthread)
 
