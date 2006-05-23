@@ -4,9 +4,12 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #include "Calibration/ReceptionModel.h"
 
-#include <pthread.h>
 #include <errno.h>
 
 using namespace std;
@@ -16,6 +19,10 @@ static Calibration::ReceptionModel* null = 0;
 
 //! By default, only one thread is used
 static vector<Calibration::ReceptionModel*> current_solve (1, null);
+
+#if HAVE_PTHREAD
+
+#include <pthread.h>
 
 //! condition by which exiting threads signal that they have finished
 static pthread_cond_t  __lcond = PTHREAD_COND_INITIALIZER;
@@ -31,7 +38,6 @@ static void __lock_mutex ()
 		 "pthread_mutex_lock");
 }
 
-
 static void __unlock_mutex ()
 {
   errno = pthread_mutex_unlock(&__lmutex);
@@ -39,7 +45,6 @@ static void __unlock_mutex ()
     throw Error (FailedSys, "Calibration::ReceptionModel::solve",
 		 "pthread_mutex_unlock");
 }
-
 
 static void __cond_wait ()
 {
@@ -228,4 +233,18 @@ void Calibration::ReceptionModel::solve ()
     throw Error (FailedSys, "Calibration::ReceptionModel::solve",
 		 "pthread_create");
 }
+
+#else // ! HAVE_PTHREAD
+
+//! Set the number of instances that may be solved simultaneously
+void Calibration::ReceptionModel::solve_wait (ReceptionModel* to_solve)
+{
+}
+
+void Calibration::ReceptionModel::solve ()
+{
+  solve_work ();
+}
+
+#endif
 
