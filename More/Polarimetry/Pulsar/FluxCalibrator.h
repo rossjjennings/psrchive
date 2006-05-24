@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/FluxCalibrator.h,v $
-   $Revision: 1.26 $
-   $Date: 2006/04/21 04:35:42 $
-   $Author: straten $ */
+   $Revision: 1.27 $
+   $Date: 2006/05/24 07:23:13 $
+   $Author: hknight $ */
 
 #ifndef __Pulsar_FluxCalibrator_H
 #define __Pulsar_FluxCalibrator_H
@@ -28,8 +28,31 @@ namespace Pulsar {
     //! Database of standard candles used for flux calibration
     class Database;
 
-    //! Provides information about the flux calibrator to plotting classes
-    class Info;
+    //! FluxCalibrator parameter communication
+    class Info : public Calibrator::Info {
+      
+    public:
+      //! Constructor
+      Info (const FluxCalibrator* cal) { instance = cal; }
+ 
+      //! Return the number of parameter classes
+      unsigned get_nclass () const { return 2; }
+    
+      //! Return the name of the specified class
+      const char* get_name (unsigned iclass) const;
+    
+      //! Return the number of parameters in the specified class
+      unsigned get_nparam (unsigned iclass) const;
+      
+      //! Return the estimate of the specified parameter
+      Estimate<float> get_param (unsigned ichan, unsigned iclass,
+				 unsigned iparam) const;
+
+    protected:
+    
+      Reference::To<const FluxCalibrator> instance;
+      
+    };
 
     //! Default constructor
     FluxCalibrator (const Archive* archive = 0);
@@ -41,7 +64,7 @@ namespace Pulsar {
     Type get_type () const;
 
     //! Return the FluxCalibrator information
-    Info* get_Info () const;
+    FluxCalibrator::Info* get_Info () const;
     
     //! Return a new FluxCalibratorExtension
     CalibratorExtension* new_Extension () const;
@@ -103,34 +126,6 @@ namespace Pulsar {
 
     //! Resize the gain vector
     void resize (unsigned required_nchan);
-
-  public:
-
-    //! FluxCalibrator parameter communication
-    class Info : public Calibrator::Info {
-    
-    public:
-      //! Constructor
-      Info (const FluxCalibrator* cal) { instance = cal; }
- 
-      //! Return the number of parameter classes
-      unsigned get_nclass () const { return 2; }
-    
-      //! Return the name of the specified class
-      const char* get_name (unsigned iclass) const;
-    
-      //! Return the number of parameters in the specified class
-      unsigned get_nparam (unsigned iclass) const;
-      
-      //! Return the estimate of the specified parameter
-      Estimate<float> get_param (unsigned ichan, unsigned iclass,
-				 unsigned iparam) const;
-
-    protected:
-    
-      Reference::To<const FluxCalibrator> instance;
-      
-    };
 
   private:
 
