@@ -5,7 +5,7 @@
  *
  ***************************************************************************/
 //
-// $Id: pav.C,v 1.118 2006/05/24 06:04:14 hknight Exp $
+// $Id: pav.C,v 1.119 2006/05/24 06:38:43 hknight Exp $
 //
 // The Pulsar Archive Viewer
 //
@@ -417,7 +417,7 @@ int main (int argc, char** argv)
       plotter.set_subint( atoi (optarg) );
       break;
     case 'i':
-      cout << "$Id: pav.C,v 1.118 2006/05/24 06:04:14 hknight Exp $" << endl;
+      cout << "$Id: pav.C,v 1.119 2006/05/24 06:38:43 hknight Exp $" << endl;
       return 0;
 
     case 'j':
@@ -823,10 +823,9 @@ int main (int argc, char** argv)
 
   open_plot_device(plot_device);
 
-  // Check the plot device being used begins with "x"
-  if (plot_device.find("x", 0) != string::npos) {
+  if( h_chomp(plot_device,"/xs") || h_chomp(plot_device,"/XSERVE") ||
+      h_chomp(plot_device,"/XS") || h_chomp(plot_device,"/xserve") )
     plotter.set_dark(true); 
-  }
   
   cpgask(1);
   
@@ -1371,5 +1370,7 @@ open_plot_device(string& plot_device)
   int length = 4095;
 
   cpgqinf("DEV/TYPE",value, &length);
+  //  fprintf(stderr,"first up got plot_device='%s'\n",plot_device.c_str());
   plot_device = string(value,value+length);
+  //  fprintf(stderr,"now got plot_device='%s'\n",plot_device.c_str());
 }
