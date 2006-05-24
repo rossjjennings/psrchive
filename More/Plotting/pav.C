@@ -5,7 +5,7 @@
  *
  ***************************************************************************/
 //
-// $Id: pav.C,v 1.117 2006/05/24 03:54:08 hknight Exp $
+// $Id: pav.C,v 1.118 2006/05/24 06:04:14 hknight Exp $
 //
 // The Pulsar Archive Viewer
 //
@@ -59,6 +59,9 @@ typedef struct {
   float x2;
   float y2;
 } cpgarro_inputs;
+
+void
+open_plot_device(string& plot_device);
 
 void
 do_extras(vector<cpgmtxt_inputs> cpgmtxts,vector<cpgarro_inputs> cpgarros,
@@ -414,7 +417,7 @@ int main (int argc, char** argv)
       plotter.set_subint( atoi (optarg) );
       break;
     case 'i':
-      cout << "$Id: pav.C,v 1.117 2006/05/24 03:54:08 hknight Exp $" << endl;
+      cout << "$Id: pav.C,v 1.118 2006/05/24 06:04:14 hknight Exp $" << endl;
       return 0;
 
     case 'j':
@@ -818,10 +821,7 @@ int main (int argc, char** argv)
     return -1;
   }
 
-  if (cpgopen(plot_device.c_str()) < 0) {
-    cout << "Error: Could not open plot device" << endl;
-    return -1;
-  }
+  open_plot_device(plot_device);
 
   // Check the plot device being used begins with "x"
   if (plot_device.find("x", 0) != string::npos) {
@@ -1357,4 +1357,19 @@ do_extras(vector<cpgmtxt_inputs> cpgmtxts,vector<cpgarro_inputs> cpgarros,
   for( unsigned i=0; i<cpgarros.size(); i++)
     if( cpgarros[i].plot_number < 0 || cpgarros[i].plot_number == plot_number )
       cpgarro( cpgarros[i].x1, cpgarros[i].y1, cpgarros[i].x2, cpgarros[i].y2);
+}
+
+void
+open_plot_device(string& plot_device)
+{
+  if (cpgopen(plot_device.c_str()) < 0) {
+    cerr << "Error: Could not open plot device" << endl;
+    exit(-1);
+  }
+
+  char value[4096];
+  int length = 4095;
+
+  cpgqinf("DEV/TYPE",value, &length);
+  plot_device = string(value,value+length);
 }
