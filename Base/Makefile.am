@@ -143,7 +143,6 @@ libpsrchive_la_SOURCES =			\
 	PolnProfileStats.C			\
 	Profile_average.C			\
 	Profile.C				\
-	Plotter_Manchester.C      		\
 	Profile_convolve.C			\
 	Profile_denoise.C			\
 	Profile_fftconv.C			\
@@ -363,7 +362,7 @@ libpsrchive_la_SOURCES += ArchiveProcessor.C Plotter.C CalibratorPlotter.C  \
 	Plotter_draw_transitions.C     Plotter_simple_ds.C  \
 	Plotter_phase_fourier.C        Plotter_spherical.C  \
 	Plotter_phase_frequency.C      Plotter_phase_time.C \
-	Plotter_draw_colour_map.C
+	Plotter_draw_colour_map.C      Plotter_Manchester.C      		
 
 bin_PROGRAMS += psrplot pacv pcvar pav pas psrwt pcm pvt paf psrqft \
 	binphs_test pcm_chooser rmfit psrband SimTiming bin_clean \
