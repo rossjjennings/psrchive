@@ -39,6 +39,16 @@ AC_DEFUN([SWIN_LIB_SLA],
         fi
         break
       fi
+      AC_TRY_LINK([extern "C" double $sla_trial(double *);],
+                  [double gmst = $sla_trial(0);],
+                  [have_sla="yes: fortran"$sla_underscore], [have_sla=no])
+      if test "$have_sla" != no; then
+        sla_def="name"
+        if test x"$sla_underscore" != x; then
+          sla_def="$sla_def ## $sla_underscore"
+        fi
+        break
+      fi
       sla_underscore="$sla_underscore"_
     done
 
