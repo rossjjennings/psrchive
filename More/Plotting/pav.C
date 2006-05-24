@@ -5,7 +5,7 @@
  *
  ***************************************************************************/
 //
-// $Id: pav.C,v 1.116 2006/05/22 09:27:18 hknight Exp $
+// $Id: pav.C,v 1.117 2006/05/24 03:54:08 hknight Exp $
 //
 // The Pulsar Archive Viewer
 //
@@ -414,7 +414,7 @@ int main (int argc, char** argv)
       plotter.set_subint( atoi (optarg) );
       break;
     case 'i':
-      cout << "$Id: pav.C,v 1.116 2006/05/22 09:27:18 hknight Exp $" << endl;
+      cout << "$Id: pav.C,v 1.117 2006/05/24 03:54:08 hknight Exp $" << endl;
       return 0;
 
     case 'j':
@@ -1184,7 +1184,11 @@ int main (int argc, char** argv)
 
 	if (manchester) {
 	  cpg_next();
+	  plotter.set_svp( true );
+	  plotter.set_axes( true );
 	  plotter.Manchester (archive, plot_qu);
+	  plotter.set_svp( false );
+	  plotter.set_axes( false );
 	  cpgsch(1.3);
 	  do_extras(cpgmtxts,cpgarros,plot_number);
 	}
