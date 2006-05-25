@@ -93,7 +93,7 @@ int dmserr2rad ( char * instr, char * inerr, double * radval)
 	     nfound;
     char    * ptr ;
     double secs ;
-    extern double errscale();
+    extern double errscale(char*,char*);
 
     if ((nfound = sscanf (instr, "%d%*c%2d%*c%lf", &id, &im, &secs)) > 1)
       {

@@ -176,6 +176,8 @@ int FTransform::inplace_frc1d (unsigned ndat, float* srcdest)
 
   frc1d(ndat,pdest,srcdest);
   memcpy(srcdest,pdest,(ndat+2)*sizeof(float));
+
+  return 0;
 }
 
 //! Inplace wrapper-function- performs a memcpy after FFTing
@@ -189,6 +191,8 @@ int FTransform::inplace_fcc1d (unsigned ndat, float* srcdest)
 
   fcc1d(ndat,pdest,srcdest);
   memcpy(srcdest,pdest,ndat*2*sizeof(float));
+
+  return 0;
 }
 
 //! Inplace wrapper-function- performs a memcpy after FFTing
@@ -202,6 +206,8 @@ int FTransform::inplace_bcc1d (unsigned ndat, float* srcdest)
 
   bcc1d(ndat,pdest,srcdest);
   memcpy(srcdest,pdest,ndat*2*sizeof(float));
+
+  return 0;
 }
 
 //! Inplace wrapper-function- performs a memcpy after FFTing
@@ -215,5 +221,7 @@ int FTransform::inplace_bcr1d (unsigned ndat, float* srcdest)
 
   bcr1d(ndat,pdest,srcdest);
   memcpy(srcdest,pdest,ndat*2*sizeof(float));
+
+  return 0;
 }
 

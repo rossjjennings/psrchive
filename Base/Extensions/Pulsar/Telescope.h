@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/Telescope.h,v $
-   $Revision: 1.3 $
-   $Date: 2006/03/17 13:34:45 $
-   $Author: straten $ */
+   $Revision: 1.4 $
+   $Date: 2006/05/25 03:33:01 $
+   $Author: hknight $ */
 
 #ifndef __Telescope_Extension_h
 #define __Telescope_Extension_h
@@ -76,22 +76,22 @@ namespace Pulsar {
     };
 
     //! Get the name of the observatory and/or primary reflector
-    const string get_name() const { return name; }
+    string get_name() const { return name; }
     //! Set the name of the observatory and/or primary reflector
     void set_name (string _name) { name = _name; }
 
     //! Get the latitude of the antenna
-    const Angle get_latitude() const { return latitude; }
+    Angle get_latitude() const { return latitude; }
     //! Set the latitude of the antenna
     void set_latitude (const Angle& _latitude) { latitude = _latitude; }
 
     //! Get the longitude of the antenna
-    const Angle get_longitude() const { return longitude; }
+    Angle get_longitude() const { return longitude; }
     //! Set the longitude of the antenna
     void set_longitude (const Angle& _longitude) { longitude = _longitude; }
 
     //! Get the elevation of the antenna in metres
-    const float get_elevation() const { return elevation; }
+    float get_elevation() const { return elevation; }
     //! Set the elevation of the antenna in metres
     void set_elevation (float _elevation) { elevation = _elevation; }
 
@@ -99,17 +99,17 @@ namespace Pulsar {
     void set_coordinates (char tempo_isite);
 
     //! Get the type of primary reflector mount
-    const Mount get_mount() const { return mount; }
+    Mount get_mount() const { return mount; }
     //! Set the type of primary reflector mount
     void set_mount (Mount _mount) { mount = _mount; }
 
     //! Get the type of primary reflector
-    const Reflector get_primary() const { return primary; }
+    Reflector get_primary() const { return primary; }
     //! Set the type of primary reflector
     void set_primary (Reflector _primary) { primary = _primary; }
 
     //! Get the type of focus
-    const Focus get_focus() const { return focus; }
+    Focus get_focus() const { return focus; }
     //! Set the type of focus
     void set_focus (Focus _focus) { focus = _focus; }
 
