@@ -40,7 +40,7 @@ AC_DEFUN([SWIN_LIB_PGPLOT],
   AC_MSG_CHECKING([for PGPLOT installation])
 
   PGPLOT_CFLAGS="-I$PGPLOT_DIR"
-  PGPLOT_LIBS="-L$PGPLOT_DIR -lcpgplot -lpgplot $FLIBS"
+  PGPLOT_LIBS="-L$PGPLOT_DIR $FLIBS"
 
   # "yes" is not a specification
   if test x"$with_pgplot_extra" != xyes; then
@@ -64,6 +64,14 @@ AC_DEFUN([SWIN_LIB_PGPLOT],
 
   if test $have_pgplot = no; then
     PGPLOT_LIBS="$PGPLOT_LIBS $X_LIBS -lX11 -lpng"
+    LIBS="$ac_save_LIBS $PGPLOT_LIBS"
+    AC_TRY_LINK([#include <cpgplot.h>],[cpgopen(""); cpgend();],
+                have_pgplot=yes, have_pgplot=no)
+  fi
+
+  if test $have_pgplot = no; then
+# Blade libs
+    PGPLOT_LIBS="$PGPLOT_LIBS -L/usr/X11R6/lib -lX11 -lcpgplot -lpgplot -lpng"
     LIBS="$ac_save_LIBS $PGPLOT_LIBS"
     AC_TRY_LINK([#include <cpgplot.h>],[cpgopen(""); cpgend();],
                 have_pgplot=yes, have_pgplot=no)
