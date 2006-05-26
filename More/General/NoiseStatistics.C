@@ -11,6 +11,10 @@
 
 #include <math.h>
 
+#if defined(sun)
+#include <ieeefp.h>
+#endif
+
 Pulsar::NoiseStatistics::NoiseStatistics ()
 {
   baseline_fourier = 0.45;
