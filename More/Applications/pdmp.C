@@ -5,7 +5,7 @@
  *
  ***************************************************************************/
 //
-// $Id: pdmp.C,v 1.7 2006/03/17 13:34:41 straten Exp $
+// $Id: pdmp.C,v 1.8 2006/05/28 04:28:08 hknight Exp $
 //
 // Searches over trial DM and Period ranges and obtains the optimal 
 // DM and Period giving the highest S/N, plots SNR vs Period vs DM, 
@@ -985,7 +985,7 @@ void solve_and_plot(const Archive* archive, double dmOffset, double dmStep, doub
 			if (verbose)	{
 				printf( "\nrefP topo = %3.10g, Set P = %3.15g dP = %3.15g\n", 
 					refP_us, currP, currP - refP_us, snr);
-				printf( "refDM = %3.10g, Set DM = %3.15g dDM = %3.15g, SNR = %3.10g\n\n", 
+				printf( "refDM = %3.10g, Set DM = %3.15g dDM = %3.15g, S/N = %3.10g\n\n", 
 					refDM, currDM, currDM - refDM, snr);
 			}
 			
@@ -993,7 +993,7 @@ void solve_and_plot(const Archive* archive, double dmOffset, double dmStep, doub
 			if (snr > bestSNR) {
 
 				if (verbose) {
-					fprintf(stderr, "Better SNR found: Old snr = %3.15g, New snr = %3.15g, Best DM = %3.15g and period = %3.15g \n", bestSNR, snr, currDM, newFoldingPeriod * MILLISEC);
+					fprintf(stderr, "Better S/N found: Old snr = %3.15g, New snr = %3.15g, Best DM = %3.15g and period = %3.15g \n", bestSNR, snr, currDM, newFoldingPeriod * MILLISEC);
 				}
 
 				bestSNR = snr;
@@ -1061,7 +1061,7 @@ void solve_and_plot(const Archive* archive, double dmOffset, double dmStep, doub
 		-0.5*periodStep_us - periodHalfRange_us, periodStep_us, 0.0, minDM - 0.5*dmStep , 0.0,  dmStep);
 
 		printf("minx = %3.10g, maxx = %3.10g, miny = %3.10g, maxy = %3.10g, rows = %d, cols = %d\n", minP, maxP, minDM, maxDM, dmBins, periodBins);
-		cout << "number of SNRs = " << SNRs.size() << endl;
+		cout << "number of S/Ns = " << SNRs.size() << endl;
 	}
 	
 	drawBestValuesCrossHair( archive,
@@ -2201,7 +2201,7 @@ void printResults(const Archive * archive) {
 
 	// Print out the results on the console
 	if (!silent) {
-		cout << "\n\nBest SNR = " << bestSNR << endl;
+		cout << "\n\nBest S/N = " << bestSNR << endl;
 		
 		printf("Ref BC Period (ms) = %3.15g  Ref TC Period (ms) =  %3.10g  Ref DM = %3.10g\n", 
 						bcPeriod_s * MILLISEC,	getPeriod(copy) * MILLISEC, getDM(copy)); 
