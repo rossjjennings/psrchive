@@ -87,6 +87,7 @@ c     First, say we don't yet know any parameters
 
 c     Loop over lines
       lineNum = 0
+
       do while (.true.)
          lineNum = lineNum + 1
          read(un, '(a80)', end=10)buffer ! read a line
@@ -162,6 +163,7 @@ c     Is it a comment line?
          if (toklen.le.0) goto 62 ! Error...
       end if
       call upcase(tok)
+
 c     We now should have a key. Find it in the list
       if (strmatch("NAME",tok)) then ! NAME is a special case!
          isOldEphem = 1
@@ -177,14 +179,22 @@ c     We now should have a key. Find it in the list
          keypos = keypos + 1
       end do
       keypos = keypos - 1
-      if (found .or. isAlias(tok,keypos, convert)) then
+
+      if (found) then
          found = .true.
          if (keypos .gt. -1) parmStatus(keypos) = 0 ! set this shortly
+      else 
+         if (isAlias(tok,keypos, convert)) then
+            found = .true.
+            if (keypos .gt. -1) parmStatus(keypos) = 0 ! set this shortly
+         end if
       end if
+
       if (found) then 
 c     We now know the key index. 
          call citem(buffer, ll, tokpos, tok, toklen)
          if (toklen.le.0) goto 60 ! Error...
+
          if (tok(1:1).eq.'#')  then ! Comment. ignore the line
             parmStatus(keypos) = 0
          else
@@ -204,6 +214,7 @@ c     PSRJ or PSRB, and don't include any prefix letter in the value
             else
                value_str(keypos) = tok(1:toklen) ! save ASCII format
             end if
+
 c     Now, store the value in the way specified in parmTypes (see keys.dat)
             if (parmTypes(keypos) .eq. 1) then
                read(tok,*,err=63)value_double(keypos)
