@@ -372,7 +372,10 @@ string psrephem::par_lookup (const char* name, int use_cwd)
 
   static string host = getenv("HOST");
   if( host.substr(0,4)!="cpsr" && host.substr(0,6)!="gbcpsr" ){
-    filename = psrcat_cmd + psr_name;
+    string nobj = psr_name;
+    frontchomp(nobj,"J");
+    frontchomp(nobj,"B");
+    filename = psrcat_cmd + psr_name + " | perl -i -p -e 'if(/PSRJ/){s/(.*\\s)J/\\1/}' > " + nobj + ".eph";
     catalogue = "psrcat";
   }
 
