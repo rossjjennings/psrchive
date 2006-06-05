@@ -289,6 +289,7 @@ string psrephem::par_lookup (const char* name, int use_cwd)
   // bug in the Sun C4.2 compiler
   char* tempo_cfg = "/tempo.cfg";
   char* psrinfo_cmd = "psrinfo -e ";
+  char* psrcat_cmd = "psrcat -e ";
 
   if (use_cwd) {
     vector <string> exts = extensions ();
@@ -365,11 +366,18 @@ string psrephem::par_lookup (const char* name, int use_cwd)
   }
   
   /* Create name.eph in local directory */ 
-
+  
   filename = psrinfo_cmd + psr_name;
+  string catalogue = "psrinfo";
+
+  static string host = getenv("HOST");
+  if( host.substr(0,4)!="cpsr" && host.substr(0,6)!="gbcpsr" ){
+    filename = psrcat_cmd + psr_name;
+    catalogue = "psrcat";
+  }
 
   if (verbose)
-    cerr << "psrephem:: Creating ephemeris by psrinfo -e " << psr_name <<endl;
+    cerr << "psrephem:: Creating ephemeris by " << catalogue << " -e " << psr_name <<endl;
 
   // start with a clean working directory
   removedir (get_directory().c_str());
@@ -401,8 +409,8 @@ string psrephem::par_lookup (const char* name, int use_cwd)
   dirglob (&filenames, get_directory() + "/*.eph");
 
   if (filenames.size() != 1)
-    throw Error (InvalidState, "psrephem", "psrinfo created %d files",
-		 filenames.size());
+    throw Error (InvalidState, "psrephem", "%s created %d files",
+		 catalogue.c_str(),filenames.size());
 
   filename = filenames[0];
 
@@ -412,10 +420,9 @@ string psrephem::par_lookup (const char* name, int use_cwd)
     return filename;
   }
 
-  if (verbose) {
-    fprintf (stderr, "psrephem:: Cannot find %s after call to psrinfo.\n", 
-	     filename.c_str());
-  }
+  if (verbose)
+    fprintf (stderr, "psrephem:: Cannot find %s after call to %s.\n", 
+	     filename.c_str(),catalogue.c_str());
 
   filename.erase();
   return filename;
