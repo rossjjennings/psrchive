@@ -44,7 +44,7 @@ void usage ()
     "  -Z \"a b\"         Zero weight chans between a & b inclusive\n"
     "  -x \"a b c ...\"   Delete all sub-integrations except these\n"
     "  -X \"a b\"         Delete all sub-ints except a to b inclusive\n"
-    "  -E percent       Zero weight this much of the band edges\n"
+    "  -E percent       Zero weight this much of each band edge\n"
     "  -s \"a b c ...\"   Delete these sub-integrations\n"
     "  -S \"a b\"         Delete sub-ints between a & b inclusive\n"
     "  -w \"a b c ...\"   Zero weight these sub-integrations\n"
@@ -137,7 +137,7 @@ int main (int argc, char *argv[]) {
       Pulsar::Archive::set_verbosity(3);
       break;
     case 'i':
-      cout << "$Id: paz.C,v 1.34 2006/03/29 22:42:19 straten Exp $" << endl;
+      cout << "$Id: paz.C,v 1.35 2006/06/16 02:04:07 redwards Exp $" << endl;
       return 0;
 
     case 'm':
