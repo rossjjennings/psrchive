@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PolnCalibrator.h,v $
-   $Revision: 1.41 $
-   $Date: 2006/05/10 01:31:23 $
+   $Revision: 1.42 $
+   $Date: 2006/06/22 15:42:30 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PolnCalibrator_H
@@ -62,6 +62,11 @@ namespace Pulsar {
     //! Return the Receiver
     const Receiver* get_Receiver () const;
 
+    //! Return true if the backend transformation needs to be corrected
+    bool must_correct_backend (const Archive* arch) const;
+
+    //! Correct the backend transformation
+    void correct_backend (Archive* arch) const;
 
     // ///////////////////////////////////////////////////////////////////
     //
@@ -88,9 +93,6 @@ namespace Pulsar {
 
     //! Calibrate the polarization of the given archive
     virtual void calibrate (Archive* archive);
-
-    //! Correct the backend transformation
-    void correct_backend (Archive* arch);
 
     //! Return the Calibrator::Type of derived class
     virtual Type get_type () const;

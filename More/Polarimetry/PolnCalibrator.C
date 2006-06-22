@@ -487,7 +487,20 @@ catch (Error& error) {
   throw error += "Pulsar::PolnCalibrator::calibrate";
 }
 
-void Pulsar::PolnCalibrator::correct_backend (Archive* arch) try {
+bool Pulsar::PolnCalibrator::must_correct_backend (const Archive* arch) const
+{
+  const Backend* backend = arch->get<Backend>();
+
+  if (!backend) 
+    return false;
+
+  Signal::Hand hand = backend->get_hand();
+  Signal::Argument argument = backend->get_argument();
+
+  return argument == Signal::Conjugate || hand == Signal::Left;
+}
+
+void Pulsar::PolnCalibrator::correct_backend (Archive* arch) const try {
 
   Backend* backend = arch->get<Backend>();
 
