@@ -173,7 +173,8 @@ void Pulsar::Archive::tscrunch (unsigned nscrunch)
     mjd /= double (count);
     
     result->set_duration (duration);
-    
+    result->set_epoch (mjd);
+
     if (get_type() == Signal::Pulsar) {
       
       // ensure that the polyco includes the new integration time
