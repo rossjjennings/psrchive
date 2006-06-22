@@ -22,6 +22,7 @@
 #include "Pulsar/Backend.h"
 
 #include "Pulsar/Archive.h"
+#include "Pulsar/Integration.h"
 #include "Pulsar/Profile.h"
 
 #include "ModifyRestore.h"
@@ -85,12 +86,12 @@ Pulsar::Database::Entry::Entry (const Pulsar::Archive& arch)
 
   const Pulsar::Backend* backend = arch.get<Backend>();
   if (!backend)
-    throw Error (InvalidState, "Pulsar::Database::Entry",
+    throw Error (InvalidParam, "Pulsar::Database::Entry",
 		 "Archive has no Backend Extension");
 
   const Pulsar::Receiver* receiver_ext = arch.get<Receiver>();
   if (!receiver_ext)
-    throw Error (InvalidState, "Pulsar::Database::Entry",
+    throw Error (InvalidParam, "Pulsar::Database::Entry",
 		 "Archive has no Receiver Extension");
 
   if (obsType == Signal::Calibrator) {
@@ -106,8 +107,21 @@ Pulsar::Database::Entry::Entry (const Pulsar::Archive& arch)
     time = ext->get_epoch();
 
   }
-  else
-    time = ( arch.start_time() + arch.end_time() ) / 2.0;
+  else {
+
+    unsigned nsubint = arch.get_nsubint();
+
+    if (nsubint == 0)
+      throw Error (InvalidParam, "Pulsar::Database::Entry",
+		   "Archive has no Integrations");
+
+    // assign the tscrunched epoch to the observation
+    MJD epoch;
+    for (unsigned isub=0; isub < nsubint; isub++)
+      epoch += arch.get_Integration(isub)->get_epoch();
+    time = epoch / double(nsubint);
+
+  }
 
   position = arch.get_coordinates();
   bandwidth = arch.get_bandwidth();
