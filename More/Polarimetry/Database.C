@@ -82,6 +82,8 @@ void Pulsar::Database::Entry::init ()
 //! Construct from a Pulsar::Archive
 Pulsar::Database::Entry::Entry (const Pulsar::Archive& arch)
 {
+  init ();
+
   obsType = arch.get_type();
 
   const Pulsar::Backend* backend = arch.get<Backend>();
@@ -119,6 +121,7 @@ Pulsar::Database::Entry::Entry (const Pulsar::Archive& arch)
     MJD epoch;
     for (unsigned isub=0; isub < nsubint; isub++)
       epoch += arch.get_Integration(isub)->get_epoch();
+
     time = epoch / double(nsubint);
 
   }
