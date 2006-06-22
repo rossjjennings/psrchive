@@ -35,8 +35,7 @@
 
 /*! The Archive passed to this constructor will be used to supply the first
   guess for each pulse phase bin used to constrain the fit. */
-Pulsar::ReceptionCalibrator::ReceptionCalibrator (Calibrator::Type type,
-						  const Archive* archive)
+Pulsar::ReceptionCalibrator::ReceptionCalibrator (Calibrator::Type type)
 {
   model_type = type;
 
@@ -55,9 +54,6 @@ Pulsar::ReceptionCalibrator::ReceptionCalibrator (Calibrator::Type type,
   unique = 0;
 
   PA_min = PA_max = 0.0;
-
-  if (archive)
-    initial_observation (archive);
 }
 
 Pulsar::ReceptionCalibrator::~ReceptionCalibrator()
@@ -146,7 +142,7 @@ void Pulsar::ReceptionCalibrator::initial_observation (const Archive* data)
 
     unique = new MEAL::VectorRule<MEAL::Complex2>;
     unique_axis.signal.connect (unique,
-			      &MEAL::VectorRule<MEAL::Complex2>::set_index);
+				&MEAL::VectorRule<MEAL::Complex2>::set_index);
 
     MEAL::ProductRule<MEAL::Complex2>* product;
     product = new MEAL::ProductRule<MEAL::Complex2>;
@@ -192,6 +188,7 @@ void Pulsar::ReceptionCalibrator::initial_observation (const Archive* data)
 
   start_epoch = end_epoch = data->start_time ();
 
+  // use the channel zero Parallactic instance to initialize PA_max & PA_min
   model[0]->parallactic.set_epoch (start_epoch);
   PA_max = PA_min = model[0]->parallactic.get_parallactic_angle ();
 
@@ -398,6 +395,13 @@ void Pulsar::ReceptionCalibrator::add_observation (const Archive* data)
     return;
   }
 
+  Reference::To<Archive> clone;
+  if ( must_correct_backend (data) ) {
+    clone = data->clone();
+    data = clone;
+    correct_backend (clone);
+  }
+    
   if (!has_calibrator())
     initial_observation (data);
 
@@ -609,7 +613,7 @@ try {
 
   string reason;
   if (!get_calibrator()->calibrator_match (cal, reason))
-    throw Error (InvalidParam, "Pulsar::PulsarCalibrator::add_observation",
+    throw Error (InvalidParam, "Pulsar::PulsarCalibrator::add_calibrator",
 		 "mismatch between calibrators\n\t" 
 		 + get_calibrator()->get_filename() +
                  " and\n\t" + cal->get_filename() + reason);
@@ -829,7 +833,7 @@ void Pulsar::ReceptionCalibrator::precalibrate (Archive* data)
 
   string reason;
   if (!get_calibrator()->calibrator_match (data, reason))
-    throw Error (InvalidParam, "Pulsar::PulsarCalibrator::add_observation",
+    throw Error (InvalidParam, "Pulsar::PulsarCalibrator::precalibrate",
 		 "mismatch between calibrator\n\t" 
 		 + get_calibrator()->get_filename() +
                  " and\n\t" + data->get_filename() + reason);
