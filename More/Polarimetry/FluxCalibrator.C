@@ -242,6 +242,9 @@ void Pulsar::FluxCalibrator::calibrate (Archive* arch)
 		 + get_calibrator()->get_filename() +
                  " and\n\t" + arch->get_filename() + reason);
 
+  if (verbose > 2)
+    cerr << "Pulsar::FluxCalibrator::calibrate call create" << endl;
+
   create (arch->get_nchan());
 
   for (unsigned isub=0; isub < arch->get_nsubint(); isub++)
@@ -261,6 +264,10 @@ void Pulsar::FluxCalibrator::create (unsigned required_nchan)
 
   if (!required_nchan)
     required_nchan = nchan;
+
+  if (verbose > 2)
+    cerr << "Pulsar::FluxCalibrator::create nchan=" << nchan 
+	 << " required nchan=" << required_nchan << endl;
 
   if (calculated && gain.size() == required_nchan)
     return;
