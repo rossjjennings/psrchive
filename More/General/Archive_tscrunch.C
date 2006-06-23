@@ -173,7 +173,6 @@ void Pulsar::Archive::tscrunch (unsigned nscrunch)
     mjd /= double (count);
     
     result->set_duration (duration);
-    result->set_epoch (mjd);
 
     if (get_type() == Signal::Pulsar) {
       
@@ -198,7 +197,6 @@ void Pulsar::Archive::tscrunch (unsigned nscrunch)
 	// Subtract one period times phase difference from mjd      
 	mjd -= dphase.fracturns() * first_period;
 	
-	result->set_epoch (mjd);
 	result->set_folding_period (model->period(mjd));
 	
 	// The original code did not include the number of 
@@ -206,7 +204,9 @@ void Pulsar::Archive::tscrunch (unsigned nscrunch)
       }
       
     }
-    
+
+    result->set_epoch (mjd);
+
     for (unsigned iext = 0; iext < result->get_nextension(); iext++) {
       Integration::Extension* ext = result->get_extension(iext);
       ext->update (result);
