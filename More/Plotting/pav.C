@@ -5,7 +5,7 @@
  *
  ***************************************************************************/
 //
-// $Id: pav.C,v 1.120 2006/05/24 07:08:08 hknight Exp $
+// $Id: pav.C,v 1.121 2006/06/23 03:58:30 hknight Exp $
 //
 // The Pulsar Archive Viewer
 //
@@ -166,6 +166,7 @@ void usage ()
     " --cpgmtxt \"n side disp, coord, fjust text\" Call cpgmtxt just for plot 'n' with these args\n"
     " --cpgarro \"x1 y1 x2 y2\" Call cpgarro with these args\n"
     " --cpgarro \"n x1 y1 x2 y2\" Call cpgarro just for plot 'n' with these args\n"
+    " --doub         Plot two profiles\n"
     "\n"
     "Archive::Extension options (file format specific):\n"
     " -o        Plot the original bandpass\n"
@@ -262,6 +263,7 @@ int main (int argc, char** argv)
   bool do_histogram_plot  = false;
   bool plot_qu            = false;
   bool zero_wavelength    = false;
+  bool double_profile     = false;
 
   Reference::To<Pulsar::Archive> std_arch;
   Reference::To<Pulsar::Profile> std_prof;
@@ -305,6 +307,7 @@ int main (int argc, char** argv)
   const int CHANS            = 1026;
   const int CPGMTXT          = 1027;
   const int CPGARRO          = 1028;
+  const int DOUB             = 1029;
 
   static struct option long_options[] = {
     { "convert_binphsperi", 1, 0, 200 },
@@ -337,6 +340,8 @@ int main (int argc, char** argv)
     { "chans",              required_argument, 0, CHANS},
     { "cpgmtxt",            required_argument, 0, CPGMTXT},
     { "cpgarro",            required_argument, 0, CPGARRO},
+    { "doub",               no_argument,       0, DOUB},
+    { "double",             no_argument,       0, DOUB},
     { 0, 0, 0, 0 }
   };
 
@@ -417,7 +422,7 @@ int main (int argc, char** argv)
       plotter.set_subint( atoi (optarg) );
       break;
     case 'i':
-      cout << "$Id: pav.C,v 1.120 2006/05/24 07:08:08 hknight Exp $" << endl;
+      cout << "$Id: pav.C,v 1.121 2006/06/23 03:58:30 hknight Exp $" << endl;
       return 0;
 
     case 'j':
@@ -794,6 +799,8 @@ int main (int argc, char** argv)
 	cpgarros.back().y2 = atof(words[3].c_str());
 	break;
       }
+
+    case DOUB: plotter.set_double_profile( true ); break;
 
     default:
       cerr << "pav: unrecognized option" << endl;
