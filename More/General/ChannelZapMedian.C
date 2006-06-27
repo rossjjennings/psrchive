@@ -55,6 +55,8 @@ void Pulsar::ChannelZapMedian::weight (Integration* integration)
   unsigned round = 1;
   unsigned total_zapped = 0;
 
+  ostringstream oss;
+
   while (zapped)  {
 
     float cutoff = cutoff_threshold * cutoff_threshold * variance;
@@ -82,6 +84,8 @@ void Pulsar::ChannelZapMedian::weight (Integration* integration)
       }
 
       if (mask[ichan]) {
+        oss << ichan << " ";
+
         variance -= spectrum[ichan]/nchan;
         total_zapped ++;
         zapped = true;
@@ -93,6 +97,8 @@ void Pulsar::ChannelZapMedian::weight (Integration* integration)
 
   cerr << "Pulsar::ChannelZapMedian::weight zapped " << total_zapped
        << " channels" << endl;
+
+  cout << "Equivalent paz cmd: paz -z \"" << oss.str() << "\"" << endl;
 
   for (ichan=0; ichan < nchan; ichan++)
     if (mask[ichan])
