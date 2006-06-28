@@ -370,8 +370,7 @@ string psrephem::par_lookup (const char* name, int use_cwd)
   filename = psrinfo_cmd + psr_name;
   string catalogue = "psrinfo";
 
-  static string host = getenv("HOST");
-  if( host.substr(0,4)!="cpsr" && host.substr(0,6)!="gbcpsr" ){
+  if( get_host().substr(0,4)!="cpsr" && get_host().substr(0,6)!="gbcpsr" ){
     string nobj = psr_name;
     frontchomp(nobj,"J");
     frontchomp(nobj,"B");
