@@ -40,7 +40,7 @@ AC_DEFUN([SWIN_LIB_PGPLOT],
   AC_MSG_CHECKING([for PGPLOT installation])
 
   PGPLOT_CFLAGS="-I$PGPLOT_DIR"
-  PGPLOT_LIBS="-L$PGPLOT_DIR $FLIBS"
+  PGPLOT_LIBS="-L$PGPLOT_DIR -lcpgplot -lpgplot $FLIBS"
 
   # "yes" is not a specification
   if test x"$with_pgplot_extra" != xyes; then
