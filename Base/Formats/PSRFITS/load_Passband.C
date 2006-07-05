@@ -61,7 +61,14 @@ void Pulsar::FITSArchive::load_Passband (fitsfile* fptr)
   if (verbose == 3)
     cerr << "FITSArchive::load_Passband BANDPASS NCH_ORIG=" << nch_orig
          << " BP_NPOL=" << npol << endl;
-
+  
+  if (npol <= 0 || nch_orig <= 0) {
+    if (verbose == 3) {
+      cerr << "FITSArchive::load_Passband Extension invalid" << endl; 
+    }
+    return;
+  }
+  
   Reference::To<Passband> bandpass = new Passband;
   bandpass->resize (nch_orig, npol);
   
