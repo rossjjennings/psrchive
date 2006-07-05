@@ -41,7 +41,7 @@ void Pulsar::FITSArchive::unload (fitsfile* fptr, const Passband* bandpass)
   fits_update_key (fptr, TINT, "NCH_ORIG", &nch_orig, comment, &status);
 
   int npol = bandpass->get_npol();
-  fits_update_key (fptr, TINT, "BP_NPOL", &nch_orig, comment, &status);
+  fits_update_key (fptr, TINT, "BP_NPOL", &npol, comment, &status);
 
   if (status != 0)
     throw FITSError (status, "FITSArchive::bandpass::unload", 
