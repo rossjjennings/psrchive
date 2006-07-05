@@ -6,8 +6,8 @@
  *
  ***************************************************************************/
 
-#ifndef __Pulsar_Archive_utils_h_
-#define __Pulsar_Archive_utils_h_
+#ifndef __Pulsar_Profile_utils_h_
+#define __Pulsar_Profile_utils_h_
 
 #include "Pulsar/Profile.h"
 
