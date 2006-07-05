@@ -61,6 +61,7 @@ nobase_include_HEADERS = model_profile.h	\
 	Pulsar/ChannelZapModulation.h		\
 	Pulsar/Config.h				\
 	Pulsar/Profile_utils.h			\
+	Pulsar/Archive_utils.h			\
 	Pulsar/Weight.h				\
 	Pulsar/IntegrationWeight.h		\
 	Pulsar/DurationWeight.h			\
@@ -90,6 +91,7 @@ libpsrchive_la_SOURCES =			\
 	Archive_transform.C			\
 	Archive_unload.C			\
 	Archive_update_model.C			\
+	Archive_utils.C				\
 	Archive_verbose.C			\
 	BaselineWindow.C			\
 	BasicArchive.C				\
