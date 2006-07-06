@@ -5,7 +5,7 @@
  *
  ***************************************************************************/
 //
-// $Id: pav.C,v 1.121 2006/06/23 03:58:30 hknight Exp $
+// $Id: pav.C,v 1.122 2006/07/06 04:31:41 hknight Exp $
 //
 // The Pulsar Archive Viewer
 //
@@ -133,6 +133,7 @@ void usage ()
     " -S        Plot Stokes parameters in the Manchester style\n"
     " -X        Plot cal amplitude and phase vs frequency channel\n"
     " -Y        Plot colour map of sub-integrations against pulse phase\n"
+    " --YY      Plot colour map of sub-integrations against pulse phase with yaxis as time\n"
     " -R        Plot stacked sub-integration profiles\n"
     " -L        Find the width of the pulse profile\n"
     " -j        Display a simple dynamic spectrum image\n"
@@ -236,6 +237,7 @@ int main (int argc, char** argv)
   bool centre             = false;
   bool periodplot         = false;
   bool subint_plot        = false;
+  bool subints_yaxis_time = false;
   bool calplot            = false;
   bool snrplot            = false;
   bool PA                 = false;
@@ -308,6 +310,7 @@ int main (int argc, char** argv)
   const int CPGMTXT          = 1027;
   const int CPGARRO          = 1028;
   const int DOUB             = 1029;
+  const int YY               = 1030;
 
   static struct option long_options[] = {
     { "convert_binphsperi", 1, 0, 200 },
@@ -342,6 +345,7 @@ int main (int argc, char** argv)
     { "cpgarro",            required_argument, 0, CPGARRO},
     { "doub",               no_argument,       0, DOUB},
     { "double",             no_argument,       0, DOUB},
+    { "YY",                 no_argument,       0, YY},
     { 0, 0, 0, 0 }
   };
 
@@ -422,7 +426,7 @@ int main (int argc, char** argv)
       plotter.set_subint( atoi (optarg) );
       break;
     case 'i':
-      cout << "$Id: pav.C,v 1.121 2006/06/23 03:58:30 hknight Exp $" << endl;
+      cout << "$Id: pav.C,v 1.122 2006/07/06 04:31:41 hknight Exp $" << endl;
       return 0;
 
     case 'j':
@@ -551,6 +555,11 @@ int main (int argc, char** argv)
 
     case 'Y':
       subint_plot = true;
+      break;
+
+    case YY:
+      subint_plot = true;
+      subints_yaxis_time = true;
       break;
 
     case 'z': {
@@ -1157,7 +1166,7 @@ int main (int argc, char** argv)
     
 	if (subint_plot) {
 	  cpg_next();
-	  plotter.phase_subints (archive);
+	  plotter.phase_subints (archive,subints_yaxis_time);
 	}
     
 	if (hat) {
