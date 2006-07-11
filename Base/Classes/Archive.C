@@ -534,21 +534,4 @@ void Pulsar::Archive::get_profile_power_spectra (float gamma)
   set_nbin (get_Integration(0)->get_nbin());
 }
 
-
-// Rotates subints as if a new period was being used.
-// Intended for use with non-polyco data.
-void Pulsar::Archive::new_folding_period(double trial_p){
-    MJD mt = (get_Integration(get_nsubint()-1)->get_epoch()+
-		 get_Integration(0)->get_epoch())/2.0;
-    double cp = get_Integration((int)((float)get_nsubint()/2))->get_folding_period();
-    for (int i=0;i<(int)get_nsubint();i++){
-      MJD dMJD = mt-get_Integration(i)->get_epoch();
-      double dseconds = dMJD.in_seconds() * (1.0/cp-1.0/trial_p)*cp;
-			if (verbose == 3)
-				printf("Rotating integration %d by %3.10g seconds\n", i, -dseconds);
-      get_Integration(i)->rotate(-dseconds);
-    }
-    // Doesn't work with   acopy->set_folding_period(trial_p);
-}
-
 bool Pulsar::range_checking_enabled = true;
