@@ -5,7 +5,7 @@
  *
  ***************************************************************************/
 //
-// $Id: pdmp.C,v 1.8 2006/05/28 04:28:08 hknight Exp $
+// $Id: pdmp.C,v 1.9 2006/07/11 04:44:40 hknight Exp $
 //
 // Searches over trial DM and Period ranges and obtains the optimal 
 // DM and Period giving the highest S/N, plots SNR vs Period vs DM, 
@@ -807,7 +807,7 @@ int main (int argc, char** argv)
 			// the archive will be fscrunched by the following method
 			plotPhaseTime(phaseTimeCopy, plotter);			
 
-			phaseFreqCopy->new_folding_period((bestPeriod_bc_us / (double)MICROSEC)*dopplerFactor);
+			counter_drift( phaseFreqCopy, (bestPeriod_bc_us / (double)MICROSEC)*dopplerFactor );
 			// the archive will be tscrunched by the following method
 			plotPhaseFreq(phaseFreqCopy, plotter);			
 
@@ -976,7 +976,7 @@ void solve_and_plot(const Archive* archive, double dmOffset, double dmStep, doub
 			double newFoldingPeriod = currP/(double)MICROSEC;
 			
 			// Make sure the new folding period is topocentric
-			periodLoopCopy->new_folding_period(newFoldingPeriod);
+			counter_drift(periodLoopCopy, newFoldingPeriod);
 			
 			periodLoopCopy->tscrunch();
 			
