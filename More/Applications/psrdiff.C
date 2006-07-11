@@ -12,8 +12,12 @@
 #include "Pulsar/PolnProfile.h"
 #include "MEAL/Polar.h"
 
+#include "Pulsar/StokesPlot.h"
+
 #include "string_utils.h"
 #include "dirutil.h"
+
+#include <cpgplot.h>
 
 #include <unistd.h>
 
@@ -22,8 +26,9 @@ void usage ()
   cerr << 
     "psrdiff - measure the difference between two pulse profiles \n"
     "\n"
-    "psr_template [options] filename[s]\n"
+    "psrdiff [options] filename[s]\n"
     "options:\n"
+    " -d               StokesPlot result\n"
     " -h               Help page \n"
     " -M metafile      Specify list of archive filenames in metafile \n"
     " -q               Quiet mode \n"
@@ -45,11 +50,27 @@ int main (int argc, char** argv)
 
   // write the difference to stdout
   bool plot = false;
+  float plot_when = 0;
+
+  // the frequency channel at which to start
+  unsigned ichan_start = 0;
+
+  float bfac = 1.0;
+
+  bool verbose = false;
 
   char c;
-  while ((c = getopt(argc, argv, "dhM:qs:vV")) != -1) 
+  while ((c = getopt(argc, argv, "b:c:dhi:M:qs:vV")) != -1) 
 
     switch (c)  {
+
+    case 'b':
+      bfac = atof(optarg);
+      break;
+
+    case 'c':
+      plot_when = atof(optarg);
+      break;
 
     case 'd':
       plot = true;
@@ -58,6 +79,10 @@ int main (int argc, char** argv)
     case 'h':
       usage();
       return 0;
+
+    case 'i':
+      ichan_start = atoi(optarg);
+      break;
 
     case 'M':
       metafile = optarg;
@@ -72,6 +97,7 @@ int main (int argc, char** argv)
       break;
 
     case 'v':
+      verbose = true;
       Pulsar::Archive::set_verbosity (2);
       break;
 
@@ -91,12 +117,12 @@ int main (int argc, char** argv)
       dirglob (&filenames, argv[ai]);
 
   if (filenames.empty()) {
-    cout << "psr_template: please specify filename[s]" << endl;
+    cout << "psrdiff: please specify filename[s]" << endl;
     return -1;
   } 
 
   if (!std_filename) {
-    cout << "psr_template: please specify standard (-s std.ar)" << endl;
+    cout << "psrdiff: please specify standard (-s std.ar)" << endl;
     return -1;
   } 
 
@@ -120,7 +146,20 @@ int main (int argc, char** argv)
 
   Pulsar::PolnProfileFit fit;
   fit.choose_maximum_harmonic = true;
-  fit.set_transformation( new MEAL::Polar );
+  fit.set_fit_debug();
+
+  MEAL::Polar* polar = new MEAL::Polar;
+  polar->set_cyclic();
+
+  fit.set_transformation( polar );
+
+  Pulsar::StokesPlot splot;
+
+  if (plot || plot_when) {
+    cpgopen ("?");
+    cpgsvp (0.1, 0.9, 0.15, 0.9);
+    cpgask (1);
+  }
 
   for (unsigned ifile=0; ifile < filenames.size(); ifile++) try {
 
@@ -151,6 +190,7 @@ int main (int argc, char** argv)
     }
 
     archive->convert_state (Signal::Stokes);
+    archive->remove_baseline ();
 
     unsigned isub=0;
 
@@ -158,7 +198,7 @@ int main (int argc, char** argv)
 
       Pulsar::Integration* subint = archive->get_Integration(isub);
 
-      for (unsigned ichan=0; ichan < nchan; ichan++) {
+      for (unsigned ichan=ichan_start; ichan < nchan; ichan++) try {
 
 	if (std_subint->get_weight(ichan) == 0 ||
 	    subint->get_weight(ichan) == 0)
@@ -169,24 +209,57 @@ int main (int argc, char** argv)
 
 	Reference::To<Pulsar::PolnProfile> profile;
 	profile = subint->new_PolnProfile (ichan);
+	
+	// polar->set_rotationEuler (0, M_PI/2);
 
 	fit.set_standard (std_profile);
         fit.fit (profile);
   
-	Estimate<double> pulse_phase = fit.get_phase ();
-	Jones<double> transformation = fit.get_transformation()->evaluate();
+	unsigned nfree = fit.get_fit_nfree ();
+	float chisq = fit.get_fit_chisq ();
 
-	cerr << "ichan=" << ichan << " shift=" << pulse_phase 
-	     << " xform=" << transformation << endl;
+	float reduced_chisq = chisq / nfree;
+
+	cerr << ichan << " REDUCED CHISQ=" << reduced_chisq << endl;
+
+	bool plot_this = (plot || (plot_when && reduced_chisq > plot_when));
+
+	Estimate<double> pulse_phase = fit.get_phase ();
+
+	MEAL::Complex2* xform = fit.get_transformation();
+	for (unsigned i=0; i<xform->get_nparam(); i++)
+	  cerr << i << ":" << xform->get_param_name(i) << "=" 
+	       << xform->get_Estimate(i) << endl;
+
+	xform->set_param(1,xform->get_param(1)*bfac);
+
+	Jones<double> transformation = xform->evaluate();
+	
+	cerr << "ichan=" << ichan << " shift=" << pulse_phase << endl;
 
 	profile->rotate_phase (pulse_phase.get_value());
 	profile->transform (inv(transformation));
 
+	if (plot_this) {
+
+	  profile->diff(std_profile);
+
+	  Pulsar::Profile::rotate_in_phase_domain = false;
+	  profile->rotate_phase (.5);
+
+	  cpgpage();
+	  splot.set_subint (isub);
+	  splot.set_chan (ichan);
+	  splot.plot(archive);
+
+	}
+
+      }
+      catch (Error& error) {
+	cerr << error << endl;
       }
 
     }
-
-    archive->remove_baseline ();
 
     double total_chisq = 0.0;
     unsigned count = 0;
@@ -228,28 +301,6 @@ int main (int argc, char** argv)
 	}
 
 
-	if (plot) {
-
-	  double rms = sqrt(variance[0][ichan]);
-
-	  for (unsigned ibin = 0; ibin < nbin; ibin++) {
-	    
-	    cout << ibin;
-	    
-	    for (unsigned ipol=0; ipol < npol; ipol++) {
-	      
-	      float* stds = std_subint->get_Profile(ipol,ichan)->get_amps();
-	      float* amps = subint->get_Profile (ipol,ichan) -> get_amps();
-	      
-	      cout << " " << amps[ibin] - stds[ibin];
-	      
-	    }
-	    
-	    cout << endl;
-	    
-	  }
-
-	}
 
       }
 
@@ -262,6 +313,9 @@ int main (int argc, char** argv)
     cerr << "Error while handling '" << filenames[ifile] << "'" << endl
 	 << error.get_message() << endl;
   }
+
+  if (plot || plot_when)
+    cpgend();
 
   return 0;
 
