@@ -5,7 +5,7 @@
  *
  ***************************************************************************/
 //
-// $Id: pdmp.C,v 1.9 2006/07/11 04:44:40 hknight Exp $
+// $Id: pdmp.C,v 1.10 2006/07/11 05:43:41 hknight Exp $
 //
 // Searches over trial DM and Period ranges and obtains the optimal 
 // DM and Period giving the highest S/N, plots SNR vs Period vs DM, 
@@ -22,6 +22,7 @@
 
 #include "Reference.h"
 
+#include "Pulsar/Archive_utils.h"
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
 #include "Pulsar/Profile.h"
