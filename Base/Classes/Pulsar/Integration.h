@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Integration.h,v $
-   $Revision: 1.83 $
-   $Date: 2006/04/21 04:20:09 $
-   $Author: straten $ */
+   $Revision: 1.84 $
+   $Date: 2006/07/11 04:43:00 $
+   $Author: hknight $ */
 
 /*
   
@@ -391,6 +391,9 @@ namespace Pulsar {
     //! Provide access to the expert interface
     Expert* expert ();
 
+    //! Rotate each profile by time (in seconds); updates the epoch attribute
+    void rotate (double time);
+
   protected:
 
     // //////////////////////////////////////////////////////////////////
@@ -445,9 +448,6 @@ namespace Pulsar {
     //! Call Profile::bsrunch on every profile
     void bscrunch (unsigned nscrunch);
     
-    //! Rotate each profile by time (in seconds); updates the epoch attribute
-    void rotate (double time);
-
     //! Rotate each profile by phase; does not update the epoch attribute
     void rotate_phase (double phase);
 
