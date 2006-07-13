@@ -299,7 +299,7 @@ SUBDIRS += Calibration
 libpsrchive_la_LIBADD += Calibration/libCalibration.la
 
 bin_PROGRAMS += vap pam psrsh psradd pascii paz pac pat pcq fluxcal	\
-	fadd psrdiff archive_denoise archive_split
+	fadd archive_denoise archive_split
 
 vap_SOURCES			= vap.C
 pam_SOURCES			= pam.C
@@ -313,7 +313,6 @@ pat_SOURCES			= pat.C
 pcq_SOURCES			= pcq.C
 fluxcal_SOURCES			= fluxcal.C
 fadd_SOURCES			= fadd.C
-psrdiff_SOURCES			= psrdiff.C
 archive_denoise_SOURCES		= archive_denoise.C
 archive_split_SOURCES		= archive_split.C
 
@@ -357,20 +356,20 @@ endif
 #
 if HAVE_PGPLOT
 
-libpsrchive_la_SOURCES += ArchiveProcessor.C Plotter.C CalibratorPlotter.C  \
-	ReceptionCalibratorPlotter.C   plotJones.C\
-	Plotter_Mercator.C             Plotter_phase_subints.C  \
-	Plotter_baseline_spectrum.C    Plotter_plot.C  \
-	Plotter_calibrator_spectrum.C  Plotter_set_colour_map.C  \
-	Plotter_draw_transitions.C     Plotter_simple_ds.C  \
-	Plotter_phase_fourier.C        Plotter_spherical.C  \
-	Plotter_phase_frequency.C      Plotter_phase_time.C \
-	Plotter_draw_colour_map.C      Plotter_Manchester.C      		
+libpsrchive_la_SOURCES += ArchiveProcessor.C Plotter.C CalibratorPlotter.C \
+	ReceptionCalibratorPlotter.C   plotJones.C			   \
+	Plotter_Mercator.C             Plotter_phase_subints.C		   \
+	Plotter_baseline_spectrum.C    Plotter_plot.C			   \
+	Plotter_calibrator_spectrum.C  Plotter_set_colour_map.C		   \
+	Plotter_draw_transitions.C     Plotter_simple_ds.C		   \
+	Plotter_phase_fourier.C        Plotter_spherical.C		   \
+	Plotter_phase_frequency.C      Plotter_phase_time.C		   \
+	Plotter_draw_colour_map.C      Plotter_Manchester.C
 
 bin_PROGRAMS += psrplot pacv pcvar pav pas psrwt pcm pvt paf psrqft \
 	binphs_test pcm_chooser rmfit psrband SimTiming bin_clean \
 	plot_baseline pdmp psrfi tsys spa psrchive_template paas \
-	pfixbaseline pcmdiff psrds
+	pfixbaseline pcmdiff psrds psrdiff
 
 SimTiming_SOURCES		= SimTiming.C
 binphs_test_SOURCES		= binphs_test.C
@@ -398,6 +397,7 @@ pfixbaseline_SOURCES		= pfixbaseline.C
 psrchive_template_SOURCES       = psrchive_template.C
 pcmdiff_SOURCES			= pcmdiff.C
 psrds_SOURCES			= psrds.C
+psrdiff_SOURCES                 = psrdiff.C
 
 SimTiming_LDADD			= $(LDADD) @PGPLOT_LIBS@
 binphs_test_LDADD		= $(LDADD) @PGPLOT_LIBS@
@@ -425,6 +425,7 @@ pfixbaseline_LDADD		= $(LDADD) @PGPLOT_LIBS@
 psrchive_template_LDADD		= $(LDADD) @PGPLOT_LIBS@
 pcmdiff_LDADD			= $(LDADD) @PGPLOT_LIBS@
 psrds_LDADD			= $(LDADD) @PGPLOT_LIBS@
+psrdiff_LDADD                   = $(LDADD) @PGPLOT_LIBS@
 
 if HAVE_CFITSIO
 
