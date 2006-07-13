@@ -29,6 +29,7 @@ Pulsar::DeltaRM::~DeltaRM ()
 void Pulsar::DeltaRM::set_data (Archive* archive)
 {
   data = archive;
+  data->defaraday();
 }
 
 void get_PA (Pulsar::Integration *data, unsigned ichan,
