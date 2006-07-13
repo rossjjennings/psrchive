@@ -8,6 +8,8 @@
 #include "MEAL/Gain.h"
 #include "MEAL/Boost.h"
 #include "MEAL/Rotation.h"
+#include "MEAL/CyclicParameter.h"
+#include "ModifyRestore.h"
 
 #include "Pauli.h"
 
@@ -135,6 +137,35 @@ void MEAL::Polar::set_rotationEuler (unsigned i, const Estimate<double>& phi_i)
   rotation[i]->set_Estimate (0, phi_i);
 }
 
+void MEAL::Polar::set_cyclic (bool flag)
+{
+  // disable automatic installation so that copy can be made
+  ModifyRestore<bool> (ParameterPolicy::auto_install, false);
+
+  if (flag) {
+
+    for (unsigned ir=0; ir<3; ir++) {
+
+      // set up the cyclic boundary for orientation
+      CyclicParameter* o_cyclic = new CyclicParameter (rotation[ir]);
+
+      o_cyclic->set_period (M_PI);
+      o_cyclic->set_upper_bound (M_PI/2);
+      o_cyclic->set_lower_bound (-M_PI/2);
+
+      rotation[ir]->set_parameter_policy (o_cyclic);
+
+    }
+
+  }
+  else {
+
+    for (unsigned ir=0; ir<3; ir++)
+      rotation[ir]->set_parameter_policy( new OneParameter (rotation[ir]) );
+
+  }
+
+}
 
 /*! Given the measured Stokes parameters of the linear calibrator
   noise diode, \f$ S_{\rm cal}=(I=1,Q=0,U=1,V=0)\f$, and the

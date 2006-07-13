@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Polar.h,v $
-   $Revision: 1.5 $
-   $Date: 2006/03/17 13:35:26 $
+   $Revision: 1.6 $
+   $Date: 2006/07/13 14:55:55 $
    $Author: straten $ */
 
 #ifndef __MEAL_Polar_H
@@ -43,6 +43,9 @@ namespace MEAL {
 
     //! Destructor
     ~Polar ();
+
+    //! Cyclically wrap rotation angles
+    void set_cyclic (bool flag = true);
 
     //! Get the instrumental gain, \f$ G \f$, in calibrator voltage units
     Estimate<double> get_gain () const;
