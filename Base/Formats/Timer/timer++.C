@@ -123,8 +123,12 @@ int Timer::load (FILE* fptr, struct timer* hdr, bool big_endian)
     timer_fromLittleEndian (hdr);
 
   // sanity check and return -1 on error
-  if (! is_timer (*hdr) )
+  string why_not;
+  if (! is_timer (*hdr, &why_not) )  {
+    if (verbose)
+      cerr << "Timer::load not a timer header\n  " << why_not << endl;
     return -1;
+  }
   
   if (verbose) cerr << "Timer::load correct header" << endl;
 
