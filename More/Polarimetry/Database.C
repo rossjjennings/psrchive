@@ -234,13 +234,29 @@ bool Pulsar::operator == (const Database::Entry& a, const Database::Entry& b)
 
 bool Pulsar::operator < (const Database::Entry& a, const Database::Entry& b)
 { 
-  return
-    a.instrument < b.instrument ||
-    a.receiver < b.receiver ||
-    a.frequency < b.frequency ||
-    a.bandwidth < b.bandwidth ||
-    a.time < b.time; 
+  if (a.instrument < b.instrument)
+    return true;
+  else if (a.instrument > b.instrument) 
+    return false;
+
+  if (a.receiver < b.receiver)
+    return true;
+  else if (a.receiver > b.receiver) 
+    return false;
+
+  if (a.frequency < b.frequency)
+    return true;
+  else if (a.frequency > b.frequency) 
+    return false;
+
+  if (a.bandwidth < b.bandwidth)
+    return true; 
+  else if (a.bandwidth > b.bandwidth)
+    return false;
+
+  return a.time < b.time;
 }
+
 
 bool Pulsar::Database::Criterion::match_verbose = false;
 
