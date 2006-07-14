@@ -219,8 +219,7 @@ void Pulsar::Database::Entry::unload (string& retval)
   retval += " " + instrument + " " + receiver;
 }
 
-bool Pulsar::operator == (const Database::Entry& a, 
-		          const Database::Entry& b)
+bool Pulsar::operator == (const Database::Entry& a, const Database::Entry& b)
 {
   return
     a.obsType == b.obsType &&
@@ -231,6 +230,16 @@ bool Pulsar::operator == (const Database::Entry& a,
     a.receiver == b.receiver &&
     fabs( (a.time - b.time).in_seconds() ) < 10.0 &&
     a.position.angularSeparation(b.position).getDegrees() < 0.1;
+}
+
+bool Pulsar::operator < (const Database::Entry& a, const Database::Entry& b)
+{ 
+  return
+    a.instrument < b.instrument ||
+    a.receiver < b.receiver ||
+    a.frequency < b.frequency ||
+    a.bandwidth < b.bandwidth ||
+    a.time < b.time; 
 }
 
 bool Pulsar::Database::Criterion::match_verbose = false;
