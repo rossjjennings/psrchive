@@ -612,10 +612,7 @@ void Pulsar::Database::load (const string& dbase_filename)
   entries.resize (0);
   Entry entry;
 
-  for (unsigned ie=0; ie<count; ie++) try {
-
-    if (!fgets (temp, 4096, fptr))
-      throw Error (FailedCall, "Pulsar::Database::load", "fgets");
+  while (fgets (temp, 4096, fptr)) try {
 
     if (verbose)
       cerr << "Pulsar::Database::load '"<< temp << "'" << endl;
