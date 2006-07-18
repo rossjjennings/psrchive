@@ -31,7 +31,8 @@ namespace FTransform {
     //! Agent class
     class Agent : public PlanAgent<MKL_Plan> {
     public:
-      Agent () : PlanAgent<MKL_Plan> ("MKL", nfft) { }
+      Agent ();
+      virtual ~Agent();
       MKL_Plan* new_plan (unsigned nfft, const std::string& call);
     };
 

@@ -34,6 +34,9 @@ using namespace std;
 
 bool FTransform::optimize = false;
 
+// The whole Agent kababble doesn't work!
+vector<Reference::To<FTransform::Plan> > FTransform::plans_for_clean_plans = vector<Reference::To<FTransform::Plan> >();
+
 // ////////////////////////////////////////////////////////////////////
 //
 // Global variables for one-dimensional FFT library interface
@@ -104,24 +107,6 @@ static int initialised = initialise();
 static FTransform::norm_type current_norm  = FTransform::normal;
 static FTransform::Agent*    current_agent = 0;
 
-void FTransform::Agent::install ()
-{
-  FTransform::frc1d = this->frc1d;
-  FTransform::fcc1d = this->fcc1d;
-  FTransform::bcc1d = this->bcc1d;
-  FTransform::bcr1d = this->bcr1d;
-
-  current_norm = this->norm;
-  current_agent = this;
-}
-
-void FTransform::Agent::add ()
-{ 
-  libraries.push_back (this);
-  if (!FTransform::fcc1d)
-    install ();
-}
-
 //! Returns currently selected library
 string FTransform::get_library()
 {
@@ -139,6 +124,10 @@ void FTransform::clean_plans()
 {
   for (unsigned ilib=0; ilib < FTransform::Agent::libraries.size(); ilib++)
     FTransform::Agent::libraries[ilib]->clean_plans ();
+
+  for( unsigned iplan=0; iplan<plans_for_clean_plans.size(); iplan++)
+    delete plans_for_clean_plans[iplan].ptr();
+  plans_for_clean_plans.resize(0);
 
   last_frc1d = 0;
   last_fcc1d = 0;
@@ -225,3 +214,37 @@ int FTransform::inplace_bcr1d (unsigned ndat, float* srcdest)
   return 0;
 }
 
+FTransform::Plan::Plan()
+  : Reference::Able()
+{
+  plans_for_clean_plans.push_back( this );
+}
+
+FTransform::Plan::~Plan(){}
+
+FTransform::Agent::Agent()
+  : Reference::Able()
+{
+}
+
+FTransform::Agent::~Agent(){}
+
+void
+FTransform::Agent::install ()
+{
+  FTransform::frc1d = this->frc1d;
+  FTransform::fcc1d = this->fcc1d;
+  FTransform::bcc1d = this->bcc1d;
+  FTransform::bcr1d = this->bcr1d;
+
+  current_norm = this->norm;
+  current_agent = this;
+}
+
+void
+FTransform::Agent::add ()
+{ 
+  libraries.push_back (this);
+  if (!FTransform::fcc1d)
+    install ();
+}

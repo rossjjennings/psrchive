@@ -11,6 +11,7 @@
 #if HAVE_MKL
 
 #include "MKL_Transform.h"
+#include "genutil.h"
 
 #include <string>
 #include <stdio.h>
@@ -35,13 +36,17 @@ FTransform::MKL_Plan::~MKL_Plan()
 }
 
 FTransform::MKL_Plan::MKL_Plan (unsigned nfft, const string& fft_call)
+  : Plan()
 {
 #ifdef _DEBUG
   cerr << "FTransform::MKL_Plan nfft=" << nfft
        << " call='" << fft_call << "'" << endl;
 #endif
 
-  mkl_plan = new float[nfft*4];
+  if( fft_call == "frc1d" )
+    mkl_plan = new float[2*nfft+10];
+  else
+    mkl_plan = new float[nfft*4];
   assert( mkl_plan != 0 );
 
   int signed_ndat = nfft;
@@ -69,7 +74,8 @@ int FTransform::MKL_Plan::frc1d (unsigned nfft, float* dest, const float* src)
   int isign = -1;
   int signed_nfft = nfft;
 
-  memcpy (dest, src, nfft*sizeof(float));
+  if( dest != src )
+    memcpy (dest, src, nfft*sizeof(float));
   scfft1d_(dest, &signed_nfft, &isign, plan->mkl_plan);
 
   return 0;
@@ -119,5 +125,12 @@ int FTransform::MKL_Plan::bcr1d (unsigned nfft, float* dest, const float* src)
 
   return 0;
 }
+
+FTransform::MKL_Plan::Agent::Agent () : 
+  PlanAgent<MKL_Plan> ("MKL", nfft) 
+{ 
+}
+
+FTransform::MKL_Plan::Agent::~Agent (){}
 
 #endif

@@ -84,7 +84,8 @@ namespace FTransform {
   class Plan : public Reference::Able {
   public:
 
-    virtual ~Plan () { }
+    Plan();
+    virtual ~Plan ();
 
     bool optimized;
     std::string call;
@@ -97,10 +98,17 @@ namespace FTransform {
   extern Plan* last_bcc1d;
   extern Plan* last_bcr1d;
 
+  // The whole Agent kababble doesn't work!
+  extern std::vector<Reference::To<Plan> > plans_for_clean_plans;
+
   //! Base class of one-dimensional FFT agents
   class Agent : public Reference::Able {
 
   public:
+
+    Agent();
+
+    virtual ~Agent();
 
     //! Name of the transform library
     std::string name;
@@ -158,7 +166,7 @@ namespace FTransform {
     PlanT* get_plan (unsigned ndat, const std::string& call);
 
     //! Clean up the plans for this library
-    void clean_plans () { plans.resize (0); }
+    void clean_plans ();
 
     //! Add an instance of this class to the Agent::libraries attribute
     static void enlist ();
@@ -172,6 +180,15 @@ namespace FTransform {
     std::vector< Reference::To<PlanT> > plans;
 
   };
+
+  //! Clean up the plans for this library
+  template<class PlanT>
+  void
+  PlanAgent<PlanT>::clean_plans ()
+  {
+    plans.resize (0);
+  }
+
 
   template<class PlanT> typename PlanT::Agent PlanAgent<PlanT>::my_agent;
 
