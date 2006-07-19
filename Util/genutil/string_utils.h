@@ -6,9 +6,9 @@
  *
  ***************************************************************************/
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Attic/string_utils.h,v $
-   $Revision: 1.37 $
-   $Date: 2006/04/06 19:14:48 $
-   $Author: straten $ */
+   $Revision: 1.38 $
+   $Date: 2006/07/19 02:05:42 $
+   $Author: hknight $ */
 
 #ifndef __STRING_UTILS_H
 #define __STRING_UTILS_H
@@ -24,6 +24,11 @@
 #include <vector>
 
 #include "pad.h"
+
+//! Makes the string lowercase
+std::string lowercase(std::string s);
+//! Makes the string uppercase
+std::string uppercase(std::string s);
 
 // These return the input std::string
 std::string& chop(std::string& ss);
