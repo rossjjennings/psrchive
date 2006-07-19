@@ -38,6 +38,9 @@ FTransform::MKL_Plan::~MKL_Plan()
 FTransform::MKL_Plan::MKL_Plan (unsigned nfft, const string& fft_call)
   : Plan()
 {
+  fprintf(stderr,"In MKL_Plan constructor(%d,%s)\n",
+	  nfft, fft_call.c_str());
+
 #ifdef _DEBUG
   cerr << "FTransform::MKL_Plan nfft=" << nfft
        << " call='" << fft_call << "'" << endl;
@@ -67,7 +70,14 @@ FTransform::MKL_Plan::MKL_Plan (unsigned nfft, const string& fft_call)
 
 int FTransform::MKL_Plan::frc1d (unsigned nfft, float* dest, const float* src)
 {
-  FT_SETUP (MKL_Plan, frc1d);
+  //  fprintf(stderr,"In FTransform::MKL_Plan::frc1d(%d)\n",nfft);
+  //  fprintf(stderr,"yo1.0 last_frc1d=%p\n",last_frc1d);
+  //FT_SETUP (MKL_Plan, frc1d);
+  MKL_Plan* plan = dynamic_cast<MKL_Plan*>( last_frc1d );
+  if (!plan || plan->ndat != nfft || plan->call != "frc1d")
+    last_frc1d = plan = Agent::my_agent.get_plan (nfft, "frc1d");
+
+  //  fprintf(stderr,"In FTransform::MKL_Plan::frc1d(%d) with plan=%p\n",nfft,plan);
 
   ///////////////////////////////////////
   // Do the transform
@@ -76,6 +86,7 @@ int FTransform::MKL_Plan::frc1d (unsigned nfft, float* dest, const float* src)
 
   if( dest != src )
     memcpy (dest, src, nfft*sizeof(float));
+
   scfft1d_(dest, &signed_nfft, &isign, plan->mkl_plan);
 
   return 0;

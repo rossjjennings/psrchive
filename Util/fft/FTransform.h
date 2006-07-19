@@ -207,12 +207,13 @@ namespace FTransform {
   template<class PlanT> PlanT* 
   PlanAgent<PlanT>::get_plan (unsigned ndat, const std::string& cl)
   {
-    for (unsigned iplan=0; iplan<plans.size(); iplan++)
-      if (plans[iplan]->ndat == ndat && plans[iplan]->call == cl)
-	return plans[iplan];
+    //    for (unsigned iplan=0; iplan<plans.size(); iplan++)
+    //if (plans[iplan]->ndat == ndat && plans[iplan]->call == cl)
+    //return plans[iplan];
     
-    plans.push_back( new PlanT (ndat, cl) );
-    return plans.back();
+    //    plans.push_back( new PlanT (ndat, cl) );
+    //return plans.back();
+    return new PlanT (ndat, cl);
   }
 
   template<class PlanT>
