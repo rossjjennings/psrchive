@@ -6,13 +6,10 @@
  ***************************************************************************/
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
 #include <vector>
 
 #include <qhbox.h>
 #include <qpushbutton.h>
-
-#include <cpgplot.h>
 
 #include "qpgplot.h"
 

@@ -8,6 +8,9 @@
 #include "Error.h"
 #include "minmax.h"
 
+#include <cpgplot.h>
+#include <cmath>
+
 wrapper::wrapper () {  
   x = 0.0;
   y = 0.0;
@@ -528,7 +531,7 @@ void toaPlot::autobin (int nbins)
       xvals[i] /= bincount[i];
       yvals[i] /= bincount[i];
       binerrors[i] = sqrt(1.0 / bincount[i]);
-      wted_sum_sq += pow(yvals[i],2.0)/pow(binerrors[i],2.0);
+      wted_sum_sq += pow(yvals[i],float(2.0))/pow(binerrors[i],float(2.0));
       sum_wts += 1.0/(binerrors[i]*binerrors[i]);
       cpgpt1  (xvals[i],yvals[i],17);
       cpgerr1 (6,xvals[i],yvals[i],binerrors[i],1.0);
