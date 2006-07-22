@@ -74,7 +74,7 @@ SWIN_LIB_IPP
 # Check that at least one FFT library is available
 #
 if test x"$have_fftw" = xno -a x"$have_fftw3" = xno -a x"$have_mkl" = xno; then
-  AC_MSG_ERROR([No FFTW-2, FFTW-3, nor MKL FFT libraries were found])
+  AC_MSG_ERROR([Neither FFTW-2, FFTW-3, nor MKL FFT libraries were found])
 fi
 
 AC_SUBST(FFT_LIBS)
@@ -204,11 +204,41 @@ AC_CONFIG_FILES([third/Makefile
 
 AC_OUTPUT
 
+echo
+echo
+
 if test x"$enable_lean" == xyes; then
+
    echo "********************************************"
    echo "A lean version of PSRCHIVE will be compiled."
    echo "This means that the polarimetric calibration"
    echo "software, related error analysis routines,"
    echo "and graphical interfaces will be unavailable."
    echo "********************************************"
+
+else
+
+if test x"$have_cfitsio" != xyes; then
+   echo "The CFITSIO library was not found:"
+   echo "  PSRCHIVE applications will not be able to load PSRFITS files."
 fi
+
+if test x"$have_pgplot" != xyes; then
+   echo "The PGPLOT library was not found:"
+   echo "  PSRCHIVE applications will not be able to plot."
+fi
+
+if test x"$have_qt" != xyes; then
+   echo "The Qt library was not found:"
+   echo "  PSRCHIVE graphical user interfaces will not be compiled."
+fi
+
+if test x"$have_qtdriv" != xyes; then
+   echo "The qtdriv device handler is not installed:"
+   echo "  rhythm will not be compiled."
+fi
+
+fi
+
+echo
+echo
