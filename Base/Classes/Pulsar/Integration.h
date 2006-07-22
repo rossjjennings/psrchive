@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Integration.h,v $
-   $Revision: 1.84 $
-   $Date: 2006/07/11 04:43:00 $
+   $Revision: 1.85 $
+   $Date: 2006/07/22 12:18:22 $
    $Author: hknight $ */
 
 /*
@@ -394,6 +394,9 @@ namespace Pulsar {
     //! Rotate each profile by time (in seconds); updates the epoch attribute
     void rotate (double time);
 
+    //! Rotate each profile by phase; does not update the epoch attribute
+    void rotate_phase (double phase);
+
   protected:
 
     // //////////////////////////////////////////////////////////////////
@@ -448,9 +451,6 @@ namespace Pulsar {
     //! Call Profile::bsrunch on every profile
     void bscrunch (unsigned nscrunch);
     
-    //! Rotate each profile by phase; does not update the epoch attribute
-    void rotate_phase (double phase);
-
     //! Integrate profiles from neighbouring chans
     void fscrunch (unsigned nscrunch = 0);
 
