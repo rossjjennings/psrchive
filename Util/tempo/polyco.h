@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/polyco.h,v $
-   $Revision: 1.29 $
-   $Date: 2006/03/17 13:34:31 $
-   $Author: straten $ */
+   $Revision: 1.30 $
+   $Date: 2006/07/22 12:18:00 $
+   $Author: hknight $ */
 
 #ifndef __POLY_H
 #define __POLY_H
@@ -98,6 +98,12 @@ public:
 
   //! Hack constructor for making a search-data polyco
   polynomial(MJD _reftime, float _dm, double _f0, int _telescope=7);
+
+  //! Constructor for soft_swin/baseband/realsearch/CandidateGenerator.C
+  polynomial (std::string _psrname,std::string _date,std::string _utc,
+	      MJD _reftime, double _f0,
+	      char _telescope, double _freq,
+	      float _dm, std::vector<double> _coefs);
 
   //! destructor
   ~polynomial() {}

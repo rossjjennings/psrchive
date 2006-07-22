@@ -813,7 +813,6 @@ int polyco::i_nearest (const MJD &t, const string& in_psr) const
   // return if the time is within the range of the matched polynomial
   if ( (t > pollys[imin].start_time()) && (t < pollys[imin].end_time()) )
     return imin;
-
 #else
   // TEMPO sometimes leaves holes between its polynomials.
   // Let's just be happy if it is within the range of the polyco
@@ -880,6 +879,29 @@ int operator != (const polyco & p1, const polyco & p2){
   return(1);
 }
 
+//! Constructor for soft_swin/baseband/realsearch/CandidateGenerator.C
+polynomial::polynomial (std::string _psrname,std::string _date,std::string _utc,
+			MJD _reftime, double _f0,
+			char _telescope, double _freq,
+			float _dm, std::vector<double> _coefs)
+{  
+  psrname = _psrname;
+  date = _date;
+  utc = _utc;
+  reftime = _reftime;
+  f0 = _f0;
+  telescope = _telescope;
+  freq = _freq;
+  binary = false;
+  binph = 0.0;
+  binfreq = 10.0;
+  dm = _dm;
+  nspan_mins = 960;
+  tempov11 = true;
+  doppler_shift = 0.0;
+  log_rms_resid = log10f(1.0);
+  coefs = _coefs;
+}
 
 
 
