@@ -303,10 +303,12 @@ void Pulsar::Archive::tscrunch_to_nsub (unsigned new_nsub)
 {
   if (new_nsub <= 0)
     throw Error (InvalidParam, "Pulsar::Archive::tscrunch_to_nsub",
-		 "Invalid nsub request");
+		 "Invalid nsub request (new_nsub=%d nsub=%d)",
+		 new_nsub,get_nsubint());
   else if (get_nsubint() < new_nsub)
     throw Error (InvalidParam, "Pulsar::Archive::tscrunch_to_nsub",
-		 "Archive has too few subints");
+		 "Archive has too few subints (new_nsub=%d nsub=%d)",
+		 new_nsub,get_nsubint());
   else
     tscrunch(get_nsubint() / new_nsub);
 }
