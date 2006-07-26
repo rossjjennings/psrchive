@@ -38,8 +38,8 @@ int file_exists (const char* filename)
 {
   struct stat statistics;
   if (stat (filename, &statistics) < 0) {
-    fprintf (stderr, "file_exists() error stat (%s)", filename);
-    perror ("");
+    //    fprintf (stderr, "file_exists() error stat (%s)", filename);
+    //perror ("");
     return 0;
   }
   return 1;
