@@ -447,16 +447,16 @@ void Pulsar::EPNArchive::load_header (const char* filename)
 
 double MHz_scale (const char* units)
 {
-  if (strstr(units, "GHz"))
+  if (strcasecmp (units, "GHz"))
     return 1e3;
-  if (strstr(units, "MHz"))
+  if (strcasecmp (units, "MHz"))
     return 1.0;
-  if (strstr(units, "kHz"))
+  if (strcasecmp (units, "kHz"))
     return 1e-3;
-  if (strstr(units, "Hz"))
+  if (strcasecmp (units, "Hz"))
     return 1e-6;
   
-  return 0.0;
+  throw Error (InvalidParam, "MHz_scale", "unrecognized units '%s'", units);
 }
 
 Pulsar::Integration*
