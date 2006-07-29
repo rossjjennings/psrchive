@@ -12,6 +12,7 @@
 
 #include "FFTW3_Transform.h"
 #include "Error.h"
+#include "environ.h"
 
 using namespace std;
 
@@ -21,7 +22,7 @@ using namespace std;
 
    *********************************************************************** */
 
-FTransform::FFTW3_Plan::FFTW3_Plan (unsigned nfft, const string& fft_call)
+FTransform::FFTW3_Plan::FFTW3_Plan (size_t nfft, const string& fft_call)
 {
 #ifdef _DEBUG
   cerr << "FTransform::FFTW3_Plan nfft=" << nfft
@@ -42,6 +43,11 @@ FTransform::FFTW3_Plan::FFTW3_Plan (unsigned nfft, const string& fft_call)
 
   fftwf_complex* in = new fftwf_complex[nfft];
   fftwf_complex* out = new fftwf_complex[nfft];
+
+  if( !in || !out )
+    throw Error(InvalidState,"FTransform::FFTW3_Plan::FFTW3_Plan ()",
+		"Failed to allocate array of size "UI64"\n",
+		uint64(nfft));
 
   if( fft_call == "frc1d" )
     plan = fftwf_plan_dft_r2c_1d (nfft, (float*)in, out, flags);
@@ -64,7 +70,7 @@ FTransform::FFTW3_Plan::~FFTW3_Plan()
     fftwf_destroy_plan ((fftwf_plan)plan);
 }
 
-int FTransform::FFTW3_Plan::frc1d (unsigned nfft,
+int FTransform::FFTW3_Plan::frc1d (size_t nfft,
 				   float* dest, const float* src)
 {
   FT_SETUP (FFTW3_Plan, frc1d);
@@ -75,7 +81,7 @@ int FTransform::FFTW3_Plan::frc1d (unsigned nfft,
   return 0;
 }
 
-int FTransform::FFTW3_Plan::fcc1d (unsigned nfft,
+int FTransform::FFTW3_Plan::fcc1d (size_t nfft,
 				   float* dest, const float* src)
 {
   FT_SETUP (FFTW3_Plan, fcc1d);
@@ -86,7 +92,7 @@ int FTransform::FFTW3_Plan::fcc1d (unsigned nfft,
   return 0;
 }
 
-int FTransform::FFTW3_Plan::bcc1d (unsigned nfft,
+int FTransform::FFTW3_Plan::bcc1d (size_t nfft,
 				   float* dest, const float* src)
 {
   FT_SETUP (FFTW3_Plan, bcc1d);
@@ -97,7 +103,7 @@ int FTransform::FFTW3_Plan::bcc1d (unsigned nfft,
   return 0;
 }
 
-int FTransform::FFTW3_Plan::bcr1d (unsigned nfft,
+int FTransform::FFTW3_Plan::bcr1d (size_t nfft,
 				   float* dest, const float* src)
 {
   FT_SETUP (FFTW3_Plan, bcr1d);
@@ -116,7 +122,7 @@ int FTransform::FFTW3_Plan::bcr1d (unsigned nfft,
    *********************************************************************** */
 
 
-FTransform::FFTW3_Plan2::FFTW3_Plan2 (unsigned n_x, unsigned n_y,
+FTransform::FFTW3_Plan2::FFTW3_Plan2 (size_t n_x, size_t n_y,
 				      const std::string& fft_call)
 {
   int direction_flags = 0;
@@ -149,7 +155,7 @@ FTransform::FFTW3_Plan2::~FFTW3_Plan2 ()
   fftwf_destroy_plan ((fftwf_plan)plan);
 }
 
-void FTransform::FFTW3_Plan2::fcc2d (unsigned nx, unsigned ny,
+void FTransform::FFTW3_Plan2::fcc2d (size_t nx, size_t ny,
 				     float* dest, const float* src)
 {
   FT_SETUP2 (FFTW3_Plan2, fcc2d);
@@ -159,7 +165,7 @@ void FTransform::FFTW3_Plan2::fcc2d (unsigned nx, unsigned ny,
 }
 
 
-void FTransform::FFTW3_Plan2::bcc2d (unsigned nx, unsigned ny,
+void FTransform::FFTW3_Plan2::bcc2d (size_t nx, size_t ny,
 				     float* dest, const float* src)
 {
   FT_SETUP2 (FFTW3_Plan2, bcc2d);

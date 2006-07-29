@@ -57,8 +57,9 @@ namespace FTransform {
   //////////////////////////////////////////////////////////////////// */
 
   //! Pointer to one-dimensional FFT
-  /*! Arguments are: (unsigned ndat, float* dest, const float* src) */
-  typedef int (*fft_call) (unsigned, float*, const float*);
+  //! A size_t is a 32/64 bit unsigned integer on 32/64 bit machines
+  /*! Arguments are: (size_t ndat, float* dest, const float* src) */
+  typedef int (*fft_call) (size_t, float*, const float*);
 
   //! Pointer to the forward real-to-complex FFT
   extern fft_call frc1d;
@@ -71,13 +72,13 @@ namespace FTransform {
   extern fft_call bcr1d;
 
   //! Inplace wrapper-function- performs a memcpy after FFTing
-  int inplace_frc1d(unsigned ndat, float* srcdest);
+  int inplace_frc1d(size_t ndat, float* srcdest);
   //! Inplace wrapper-function- performs a memcpy after FFTing
-  int inplace_fcc1d(unsigned ndat, float* srcdest);
+  int inplace_fcc1d(size_t ndat, float* srcdest);
   //! Inplace wrapper-function- performs a memcpy after FFTing
-  int inplace_bcc1d(unsigned ndat, float* srcdest);
+  int inplace_bcc1d(size_t ndat, float* srcdest);
   //! Inplace wrapper-function- performs a memcpy after FFTing
-  int inplace_bcr1d(unsigned ndat, float* srcdest);
+  int inplace_bcr1d(size_t ndat, float* srcdest);
 
 
   //! Base class of two-dimensional Fast Fourier Transforms
@@ -89,7 +90,7 @@ namespace FTransform {
 
     bool optimized;
     std::string call;
-    unsigned ndat;
+    size_t ndat;
 
   };
 
@@ -163,7 +164,7 @@ namespace FTransform {
     PlanAgent (const std::string& name, norm_type norm);
 
     //! Return an appropriate plan from this library
-    PlanT* get_plan (unsigned ndat, const std::string& call);
+    PlanT* get_plan (size_t ndat, const std::string& call);
 
     //! Clean up the plans for this library
     void clean_plans ();
@@ -205,7 +206,7 @@ namespace FTransform {
   }
 
   template<class PlanT> PlanT* 
-  PlanAgent<PlanT>::get_plan (unsigned ndat, const std::string& cl)
+  PlanAgent<PlanT>::get_plan (size_t ndat, const std::string& cl)
   {
     //    for (unsigned iplan=0; iplan<plans.size(); iplan++)
     //if (plans[iplan]->ndat == ndat && plans[iplan]->call == cl)
@@ -231,7 +232,7 @@ namespace FTransform {
   //////////////////////////////////////////////////////////////////// */
 
   //! Pointer to two-dimensional FFT
-  typedef void (*fft2_call)(unsigned, unsigned, float*, const float*);
+  typedef void (*fft2_call)(size_t, size_t, float*, const float*);
 
   extern fft2_call fcc2d;
   extern fft2_call bcc2d;
@@ -244,8 +245,8 @@ namespace FTransform {
 
     bool optimized;
     std::string call;
-    unsigned nx;
-    unsigned ny;
+    size_t nx;
+    size_t ny;
 
   };
 
@@ -284,7 +285,7 @@ namespace FTransform {
     PlanAgent2 (const std::string& name, norm_type norm);
 
     //! Return an appropriate plan from this library
-    PlanT* get_plan (unsigned nx, unsigned ny, const std::string& call);
+    PlanT* get_plan (size_t nx, size_t ny, const std::string& call);
 
     //! An instance of the agent for use by children
     static typename PlanT::Agent my_agent;
@@ -327,7 +328,7 @@ namespace FTransform {
   }
 
   template<class PlanT> PlanT* 
-  PlanAgent2<PlanT>::get_plan (unsigned nx, unsigned ny, const std::string& cl)
+  PlanAgent2<PlanT>::get_plan (size_t nx, size_t ny, const std::string& cl)
   {
     for (unsigned iplan=0; iplan<plans.size(); iplan++)
       if (plans[iplan]->nx == nx && plans[iplan]->ny == ny &&

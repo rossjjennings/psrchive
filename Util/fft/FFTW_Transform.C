@@ -41,7 +41,7 @@ FTransform::FFTW_Plan::~FFTW_Plan()
 
 }
 
-FTransform::FFTW_Plan::FFTW_Plan (unsigned nfft, const string& fft_call)
+FTransform::FFTW_Plan::FFTW_Plan (size_t nfft, const string& fft_call)
 {
 #ifdef _DEBUG
   cerr << "FTransform::FFTW_Plan nfft=" << nfft
@@ -74,7 +74,7 @@ FTransform::FFTW_Plan::FFTW_Plan (unsigned nfft, const string& fft_call)
   optimized = optimize;
 }
 
-int FTransform::FFTW_Plan::frc1d (unsigned nfft,
+int FTransform::FFTW_Plan::frc1d (size_t nfft,
 				  float* dest, const float* src)
 {
   FT_SETUP (FFTW_Plan, frc1d);
@@ -86,7 +86,7 @@ int FTransform::FFTW_Plan::frc1d (unsigned nfft,
   return 0;
 }
 
-int FTransform::FFTW_Plan::fcc1d (unsigned nfft,
+int FTransform::FFTW_Plan::fcc1d (size_t nfft,
 				  float* dest, const float* src)
 {
   FT_SETUP (FFTW_Plan, fcc1d);
@@ -97,7 +97,7 @@ int FTransform::FFTW_Plan::fcc1d (unsigned nfft,
   return 0;
 }
 
-int FTransform::FFTW_Plan::bcc1d(unsigned ndat, float* dest, const float* src)
+int FTransform::FFTW_Plan::bcc1d(size_t ndat, float* dest, const float* src)
 {
   FT_SETUP (FFTW_Plan, bcc1d);
 
@@ -107,7 +107,7 @@ int FTransform::FFTW_Plan::bcc1d(unsigned ndat, float* dest, const float* src)
   return 0;
 }
 
-int FTransform::FFTW_Plan::bcr1d (unsigned ndat, float* dest, const float* src)
+int FTransform::FFTW_Plan::bcr1d (size_t ndat, float* dest, const float* src)
 {
   FT_SETUP (FFTW_Plan, bcr1d);
 
@@ -128,7 +128,7 @@ int FTransform::FFTW_Plan::bcr1d (unsigned ndat, float* dest, const float* src)
    *********************************************************************** */
 
 
-FTransform::FFTW_Plan2::FFTW_Plan2 (unsigned n_x, unsigned n_y,
+FTransform::FFTW_Plan2::FFTW_Plan2 (size_t n_x, size_t n_y,
 				    const std::string& fft_call)
 {
   fftw_direction direction_flags;
@@ -155,7 +155,7 @@ FTransform::FFTW_Plan2::~FFTW_Plan2 ()
   fftwnd_destroy_plan ((fftwnd_plan)plan);
 }
 
-void FTransform::FFTW_Plan2::fcc2d (unsigned nx, unsigned ny,
+void FTransform::FFTW_Plan2::fcc2d (size_t nx, size_t ny,
 				    float* dest, const float* src)
 {
   FT_SETUP2 (FFTW_Plan2, fcc2d);
@@ -165,7 +165,7 @@ void FTransform::FFTW_Plan2::fcc2d (unsigned nx, unsigned ny,
 }
 
 
-void FTransform::FFTW_Plan2::bcc2d (unsigned nx, unsigned ny,
+void FTransform::FFTW_Plan2::bcc2d (size_t nx, size_t ny,
 				     float* dest, const float* src)
 {
   FT_SETUP2 (FFTW_Plan2, bcc2d);

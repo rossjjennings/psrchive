@@ -155,7 +155,7 @@ void FTransform::set_library (const string& name)
 }
 
 //! Inplace wrapper-function- performs a memcpy after FFTing
-int FTransform::inplace_frc1d (unsigned ndat, float* srcdest)
+int FTransform::inplace_frc1d (size_t ndat, float* srcdest)
 {
   static vector<float> dest;
   if( dest.size() != ndat+2 )
@@ -170,7 +170,7 @@ int FTransform::inplace_frc1d (unsigned ndat, float* srcdest)
 }
 
 //! Inplace wrapper-function- performs a memcpy after FFTing
-int FTransform::inplace_fcc1d (unsigned ndat, float* srcdest)
+int FTransform::inplace_fcc1d (size_t ndat, float* srcdest)
 {
   static vector<float> dest;
   if( dest.size() != ndat*2 )
@@ -185,7 +185,7 @@ int FTransform::inplace_fcc1d (unsigned ndat, float* srcdest)
 }
 
 //! Inplace wrapper-function- performs a memcpy after FFTing
-int FTransform::inplace_bcc1d (unsigned ndat, float* srcdest)
+int FTransform::inplace_bcc1d (size_t ndat, float* srcdest)
 {
   static vector<float> dest;
   if( dest.size() != ndat*2 )
@@ -200,7 +200,7 @@ int FTransform::inplace_bcc1d (unsigned ndat, float* srcdest)
 }
 
 //! Inplace wrapper-function- performs a memcpy after FFTing
-int FTransform::inplace_bcr1d (unsigned ndat, float* srcdest)
+int FTransform::inplace_bcr1d (size_t ndat, float* srcdest)
 {
   static vector<float> dest;
   if( dest.size() != ndat*2 )

@@ -35,7 +35,7 @@ FTransform::MKL_Plan::~MKL_Plan()
     delete [] mkl_plan;
 }
 
-FTransform::MKL_Plan::MKL_Plan (unsigned nfft, const string& fft_call)
+FTransform::MKL_Plan::MKL_Plan (size_t nfft, const string& fft_call)
   : Plan()
 {
   fprintf(stderr,"In MKL_Plan constructor(%d,%s)\n",
@@ -54,6 +54,11 @@ FTransform::MKL_Plan::MKL_Plan (unsigned nfft, const string& fft_call)
 
   int signed_ndat = nfft;
 
+  if( int64(uint64(nfft)) != signed_ndat )
+    throw Error(InvalidState,"FTransform::MKL_Plan::MKL_Plan()",
+		"Could not convert nfft="UI64" to an integer",
+		uint64(nfft));
+
   int isign = 0;
   if( fft_call == "frc1d" )
     scfft1d_(mkl_plan, &signed_ndat, &isign, mkl_plan);
@@ -68,7 +73,7 @@ FTransform::MKL_Plan::MKL_Plan (unsigned nfft, const string& fft_call)
 
 }
 
-int FTransform::MKL_Plan::frc1d (unsigned nfft, float* dest, const float* src)
+int FTransform::MKL_Plan::frc1d (size_t nfft, float* dest, const float* src)
 {
   //  fprintf(stderr,"In FTransform::MKL_Plan::frc1d(%d)\n",nfft);
   //  fprintf(stderr,"yo1.0 last_frc1d=%p\n",last_frc1d);
@@ -84,6 +89,11 @@ int FTransform::MKL_Plan::frc1d (unsigned nfft, float* dest, const float* src)
   int isign = -1;
   int signed_nfft = nfft;
 
+  if( int64(uint64(nfft)) != signed_nfft )
+    throw Error(InvalidState,"FTransform::MKL_Plan::frc1d()",
+		"Could not convert nfft="UI64" to an integer",
+		uint64(nfft));
+
   if( dest != src )
     memcpy (dest, src, nfft*sizeof(float));
 
@@ -92,7 +102,7 @@ int FTransform::MKL_Plan::frc1d (unsigned nfft, float* dest, const float* src)
   return 0;
 }
 
-int FTransform::MKL_Plan::fcc1d (unsigned nfft, float* dest, const float* src)
+int FTransform::MKL_Plan::fcc1d (size_t nfft, float* dest, const float* src)
 {
   FT_SETUP (MKL_Plan, fcc1d);
 
@@ -101,13 +111,18 @@ int FTransform::MKL_Plan::fcc1d (unsigned nfft, float* dest, const float* src)
   int isign = -1;
   int signed_nfft = nfft;
 
+  if( int64(uint64(nfft)) != signed_nfft )
+    throw Error(InvalidState,"FTransform::MKL_Plan::fcc1d()",
+		"Could not convert nfft="UI64" to an integer",
+		uint64(nfft));
+
   memcpy (dest, src, nfft*2*sizeof(float));
   cfft1d_(dest, &signed_nfft, &isign, plan->mkl_plan);
 
   return 0;
 }
 
-int FTransform::MKL_Plan::bcc1d (unsigned nfft, float* dest, const float* src)
+int FTransform::MKL_Plan::bcc1d (size_t nfft, float* dest, const float* src)
 {
   FT_SETUP (MKL_Plan, bcc1d);
 
@@ -116,13 +131,18 @@ int FTransform::MKL_Plan::bcc1d (unsigned nfft, float* dest, const float* src)
   int isign = 1;
   int signed_nfft = nfft;
 
+  if( int64(uint64(nfft)) != signed_nfft )
+    throw Error(InvalidState,"FTransform::MKL_Plan::bcc1d()",
+		"Could not convert nfft="UI64" to an integer",
+		uint64(nfft));
+
   memcpy (dest, src, nfft*2*sizeof(float));
   cfft1d_(dest, &signed_nfft, &isign, plan->mkl_plan);
 
   return 0;
 }
 
-int FTransform::MKL_Plan::bcr1d (unsigned nfft, float* dest, const float* src)
+int FTransform::MKL_Plan::bcr1d (size_t nfft, float* dest, const float* src)
 {
   FT_SETUP (MKL_Plan, bcr1d);
 
@@ -130,6 +150,11 @@ int FTransform::MKL_Plan::bcr1d (unsigned nfft, float* dest, const float* src)
   // Do the transform
   int isign = -1;
   int signed_nfft = nfft;
+
+  if( int64(uint64(nfft)) != signed_nfft )
+    throw Error(InvalidState,"FTransform::MKL_Plan::bcr1d()",
+		"Could not convert nfft="UI64" to an integer",
+		uint64(nfft));
 
   memcpy (dest, src, nfft*sizeof(float));
   csfft1d_(dest, &signed_nfft, &isign, plan->mkl_plan);
