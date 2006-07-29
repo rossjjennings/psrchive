@@ -21,6 +21,7 @@
 #include "Pulsar/BinLngAscOrder.h"
 #include "Pulsar/BinLngPeriOrder.h"
 #include "Pulsar/Receiver.h"
+#include "Pulsar/Archive_utils.h"
 
 #include "Pulsar/ScatteredPowerCorrection.h"
 #include "Pulsar/FaradayRotation.h"
@@ -88,6 +89,7 @@ void usage()
     "  -r               Rotate profiles by this many turns \n" 
     "  -w               Reset profile weights to this value \n"
     "  --mult fac       Multiply amplitudes by 'fac'\n"
+    "  --period period  Install a new folding period\n"
     "\n"
     "The following options override archive parameters \n"
     "  --receiver file  Install the Receiver described in the text file \n"
@@ -194,6 +196,7 @@ int main (int argc, char *argv[]) try {
     string site;
     string name;
     float mult = -1.0;
+    double new_folding_period = -1.0;
 
     Reference::To<Pulsar::IntegrationOrder> myio;
     Reference::To<Pulsar::Receiver> install_receiver;
@@ -211,6 +214,7 @@ int main (int argc, char *argv[]) try {
     const int RM   = 1216;
     const int INF  = 1217;
     const int MULT = 1218;
+    const int PERIOD=1219;
 
     while (1) {
 
@@ -231,11 +235,12 @@ int main (int argc, char *argv[]) try {
 	{"reverse_freqs",no_argument,0,REVERSE_FREQS},
 	{"site",       1, 0, SITE},
 	{"name",       1, 0, NAME},
-	{"DD",         no_argument,0,DD},
-	{"RR",         no_argument,0,RR},
+	{"DD",         no_argument,      0,DD},
+	{"RR",         no_argument,      0,RR},
 	{"RM",         required_argument,0,RM},
-	{"spc",        no_argument,0,SPC},
+	{"spc",        no_argument,      0,SPC},
 	{"mult",       required_argument,0,MULT},
+	{"period",     required_argument,0,PERIOD},
 	{0, 0, 0, 0}
       };
     
@@ -262,7 +267,7 @@ int main (int argc, char *argv[]) try {
 	Pulsar::Archive::set_verbosity(3);
 	break;
       case 'i':
-	cout << "$Id: pam.C,v 1.63 2006/04/19 15:08:43 straten Exp $" << endl;
+	cout << "$Id: pam.C,v 1.64 2006/07/29 04:06:53 hknight Exp $" << endl;
 	return 0;
       case 'm':
 	save = true;
@@ -558,6 +563,8 @@ int main (int argc, char *argv[]) try {
 	
       case MULT: mult = atof(optarg); break;
 
+      case PERIOD: new_folding_period = convert_string<double>(optarg); break;
+
       default:
 	cout << "Unrecognised option" << endl;
       }
@@ -597,25 +604,27 @@ int main (int argc, char *argv[]) try {
 	      arch->get_Profile(isub,ipol,ichan)->scale( mult );
       }
 
-      if (install_receiver) {
+      if( new_folding_period > 0.0 ){
+	for( unsigned isub=0; isub<arch->get_nsubint();isub++){
+	  Pulsar::counter_drift( arch, new_folding_period, 0.0);
+	  arch->get_Integration(isub)->set_folding_period( new_folding_period );
+	}
+      }
 
+      if (install_receiver) {
 	if (verbose)
 	  cerr << "pam: Installing receiver: " << install_receiver->get_name()
 	       << " in archive" << endl;
 
 	arch->add_extension (install_receiver);
-
       }
 
       if (lin || circ) {
-
 	Pulsar::Receiver* receiver = arch->get<Pulsar::Receiver>();
 
 	if (!receiver)
 	  cerr << "No Receiver Extension in " << filenames[i] << endl;
-
 	else {
-
 	  if (lin) {
 	    receiver->set_basis (Signal::Linear);
 	    cout << "Feed basis set to Linear" << endl;
@@ -625,9 +634,7 @@ int main (int argc, char *argv[]) try {
 	    receiver->set_basis (Signal::Circular);
 	    cout << "Feed basis set to Circular" << endl;
 	  }
-
 	}
-
       }
 
       if (new_cfreq) {
