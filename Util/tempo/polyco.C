@@ -781,8 +781,15 @@ int polyco::i_nearest (const MJD &t, const string& in_psr) const
   float min_dist = FLT_MAX;
   int imin = -1;
 
+  string nobj_in_psr = in_psr;
+  frontchomp(nobj_in_psr,"B");
+  frontchomp(nobj_in_psr,"J");
+
   for (unsigned ipolly=0; ipolly<pollys.size(); ipolly ++)  {
-    if (in_psr==anyPsr || pollys[ipolly].psrname==in_psr) {      
+    if( verbose )
+      fprintf(stderr,"i_nearest(): ipolly=%d in_psr='%s' pollys[ipolly].psrname='%s'\n",
+	      ipolly, in_psr.c_str(), pollys[ipolly].get_psrname().c_str());
+    if (in_psr==anyPsr || pollys[ipolly].psrname==in_psr || pollys[ipolly].psrname==nobj_in_psr ) {      
       float dist = fabs ( (pollys[ipolly].reftime - t).in_minutes() );
       if( verbose )
 	fprintf(stderr,"ipolly=%d dist=%f min_dist=%f\n",
@@ -834,8 +841,12 @@ int polyco::i_nearest (const Phase& phase, const string& in_psr) const
   float min_dist = FLT_MAX;
   int imin = -1;
 
+  string nobj_in_psr = in_psr;
+  frontchomp(nobj_in_psr,"B");
+  frontchomp(nobj_in_psr,"J");
+
   for (unsigned ipolly=0; ipolly<pollys.size(); ipolly ++)  {
-    if (in_psr==anyPsr || pollys[ipolly].psrname==in_psr) {      
+    if (in_psr==anyPsr || pollys[ipolly].psrname==in_psr || pollys[ipolly].psrname==nobj_in_psr ) {      
       float dist = fabs ( (pollys[ipolly].ref_phase - phase).in_turns() );
       if (dist < min_dist) {
 	imin = ipolly;
