@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/polyco.h,v $
-   $Revision: 1.30 $
-   $Date: 2006/07/22 12:18:00 $
+   $Revision: 1.31 $
+   $Date: 2006/08/01 05:30:38 $
    $Author: hknight $ */
 
 #ifndef __POLY_H
@@ -83,13 +83,14 @@ protected:
   //! log of the r.m.s residual between polynomial and model
   double log_rms_resid;
 
-  //! polynomial coefficients
-  std::vector<double> coefs;
-
   //! intializes all values to null
   void init();
 
 public:
+
+  //! polynomial coefficients
+  std::vector<double> coefs;
+
   //! null constructor
   polynomial() { init(); }
 
