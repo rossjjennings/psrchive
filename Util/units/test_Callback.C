@@ -52,10 +52,17 @@ template <class Type> class mysig : public Callback<Type>
     int get_value () { return 4; }
 };
 
+void test_function (int arg)
+{
+  cerr << "test function " << arg << endl;
+}
+
 int main (int argc, char** argv)
 {
   // the callback sender
   Callback<int> signal;
+
+  signal.connect (&test_function);
 
   // a test of Callback inheritance
   mysig<double> child_signal;
@@ -88,7 +95,7 @@ int main (int argc, char** argv)
   signal.connect (*dr, &testmore::echo);
 
   cerr << "Sending callback 3" << endl;
-  signal.send (3);
+  signal (3);
 
   // after sending the signal, the values of a and b should have
   // been modified, and echo should have printed its message twice
@@ -103,7 +110,7 @@ int main (int argc, char** argv)
   signal.disconnect (sr, &testmore::echo);
 
   cerr << "Sending callback 4" << endl << endl;
-  signal.send (4);
+  signal (4);
 
   // reconnect c
   signal.connect (c, &testmore::echo);
@@ -111,7 +118,7 @@ int main (int argc, char** argv)
   delete dr;
 
   cerr << "Sending callback 5" << endl;
-  signal.send (5);
+  signal (5);
   cerr << "value of a:" << a.getval() << endl;
   cerr << "value of b:" << b.getval() << endl << endl;
 
@@ -130,7 +137,7 @@ int main (int argc, char** argv)
   cerr << "Sending callback 800" << endl;
 
   try {
-    signal.send (800);
+    signal (800);
   }
   catch (Error& error) {
     cerr << "Caught expected exception" << endl;
