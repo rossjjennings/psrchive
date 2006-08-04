@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Callback.h,v $
-   $Revision: 1.3 $
-   $Date: 2006/03/17 13:35:20 $
+   $Revision: 1.4 $
+   $Date: 2006/08/04 13:54:56 $
    $Author: straten $ */
 
 /* *************************************************************************
@@ -39,7 +39,10 @@ public:
     
   //! Destructor
   virtual ~Callback () { }
-    
+
+  //! Operator interface to send method
+  void operator () (const Type& data) { send (data); }
+
   //! Call all registered methods, passing data as the argument
   void send (const Type& data)
   {
@@ -64,7 +67,21 @@ public:
   {
     change (instance, method, false);
   }
+
+   //! Add an function to be called during send
+  template<typename Function>
+  void connect (Function function)
+  {
+    change (function, true);
+  }
   
+  //! Remove function
+  template<typename Function>
+  void disconnect (Function function)
+  {
+    change (function, false);
+  }
+
   template<class Class, typename Method>
   void connect (Reference::To<Class>& ref, Method method)
   {
@@ -107,6 +124,36 @@ protected:
     
     if (add) {
       receiver = new ReceiverBase (instance, method);
+      recipients.push_back (receiver);
+    }
+    
+  }
+
+  template<typename Function>
+  void change (Function function, bool add)
+  {
+    if (!function)
+      return;
+    
+    typedef typename Functor<void(Type)>::template
+      Function<Function> ReceiverBase;
+    
+    ReceiverBase* receiver = 0;
+    
+    for (unsigned i=0; i < recipients.size(); i++) {
+      
+      receiver = dynamic_cast<ReceiverBase*>(recipients[i].ptr());
+      
+      if (receiver && receiver -> matches (function)) {
+	if (!add)
+	  recipients.erase(recipients.begin()+i);
+	return;
+      }
+      
+    }
+    
+    if (add) {
+      receiver = new ReceiverBase (function);
       recipients.push_back (receiver);
     }
     
