@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Functor.h,v $
-   $Revision: 1.4 $
-   $Date: 2006/04/04 20:00:10 $
+   $Revision: 1.5 $
+   $Date: 2006/08/04 13:55:00 $
    $Author: straten $ */
 
 #ifndef __Swinburne_Functor_h
@@ -105,6 +105,10 @@ class Functor< R (), T1, T2 >
     R call () const
       { return R( (*function) () ); }
       
+    //! Return true if the function matches
+    bool matches (F _function) const
+      { return (function == _function); }
+
     //! Return true if valid (able to be called)
     bool is_valid () const { return function != 0; }
 
@@ -216,6 +220,10 @@ class Functor< R (T1), T2 >
     R call (const T1& p1) const
       { return static_cast<R>( (*function)(p1) ); }
       
+    //! Return true if the function matches
+    bool matches (F _function) const
+      { return (function == _function); }
+
     //! Return true if valid (able to be called)
     bool is_valid () const { return function != 0; }
 
@@ -331,6 +339,10 @@ class Functor< R (T1, T2) >
     R call (const T1& p1, const T2& p2) const
       { return R( (*function) (p1, p2) ); }
       
+    //! Return true if the function matches
+    bool matches (F _function) const
+      { return (function == _function); }
+
     //! Return true if valid (able to be called)
     bool is_valid () const { return function != 0; }
 
