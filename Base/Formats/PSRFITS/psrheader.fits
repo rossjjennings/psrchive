@@ -7,7 +7,7 @@ COMMENT   Astrophysics Supplement Series v44/p363, v44/p371, v73/p359, v73/p365.
 COMMENT   Contact the NASA Science Office of Standards and Technology for the
 COMMENT   FITS Definition document #100 and other FITS information.
 COMMENT
-HDRVER  = '2.2             '   / Header version 
+HDRVER  = '2.3             '   / Header version 
 DATE    = '                '   / File creation date (YYYY-MM-DDThh:mm:ss UTC)
 OBSERVER= '                '   / Observer name(s)
 PROJID  = '                '   / Project name
@@ -129,7 +129,7 @@ TFIELDS =                    1 / Number of fields per row
 #
 DIG_MODE= '                '   / Digitiser mode
 NDIGR   = *                    / Number of digitised channels (I)
-NLEV    = *                    / Number of digitiser levels
+NPAR    = *                    / Number of digitiser parameters
 NCYCSUB = *                    / Number of correlator cycles per subint
 DIGLEV  = '                '   / Digitiser level-setting mode (AUTO, FIX)
 EXTNAME = DIG_STAT             / Name of this binary table extension
@@ -139,7 +139,7 @@ TFORM#  = E                    / NDIGR floats
 TUNIT#  = db                   / Units of field
 TTYPE#  = DATA                 / Digitiser statistics
 TDIM#   = (*,*,*)              / Data table dimensions (NLEV,NDIGR,NCYCSUB)
-TFORM#  = E                    / NLEV*NDIGR*NCYCSUB floats
+TFORM#  = E                    / NPAR*NDIGR*NCYCSUB floats
 END
 #
 ###############################################################################
