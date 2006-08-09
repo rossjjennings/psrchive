@@ -28,9 +28,9 @@ void unload (fitsfile* fptr, const Pulsar::DigitiserStatistics::row* drow)
   fits_update_key (fptr, TINT, "NDIGR", 
 		   (int*)&(drow->ndigr), comment, &status);
   
-  // Write NLEV
+  // Write NPAR
   
-  fits_update_key (fptr, TINT, "NLEV", 
+  fits_update_key (fptr, TINT, "NPAR", 
 		   (int*)&(drow->nlev), comment, &status);
   
   // Write NCYCSUB
@@ -51,6 +51,7 @@ void unload (fitsfile* fptr, const Pulsar::DigitiserStatistics::row* drow)
   fits_get_colnum (fptr, CASEINSEN, "DATA", &colnum, &status); 
   fits_modify_vector_len (fptr, colnum, drow->data.size(), 
 			  &status);
+  printf("%d %d %d\n", (int)colnum, (int)row, (int)drow->data.size());
   fits_write_col (fptr, TFLOAT, colnum, row, 1, 
 		  drow->data.size(), 
 		  (float*)&(drow->data[0]), &status);

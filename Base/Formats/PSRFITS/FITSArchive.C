@@ -229,7 +229,11 @@ void Pulsar::FITSArchive::load_header (const char* filename) try
   dfault = hdr_ext->hdrver;
   psrfits_read_key (fptr, "HDRVER", &tempstr, dfault, verbose == 3);
   hdr_ext->hdrver = tempstr;
-  
+  if (sscanf (hdr_ext->hdrver.c_str(), "%d.%d", 
+	      &hdr_ext->major_version, &hdr_ext->minor_version) != 2)
+    throw Error (InvalidParam, "FITSARchive::load_header",
+		 "could not parse header version from " + hdr_ext->hdrver);
+ 
   if (verbose == 3)
     cerr << "Got: Version " << tempstr << endl;
   

@@ -6,9 +6,11 @@
  ***************************************************************************/
 #include "Pulsar/FITSArchive.h"
 #include "Pulsar/DigitiserStatistics.h"
+#include "Pulsar/FITSHdrExtension.h"
 #include "FITSError.h"
 
-void load (fitsfile* fptr, Pulsar::DigitiserStatistics::row* drow)
+void load (fitsfile* fptr, Pulsar::DigitiserStatistics::row* drow,
+	   Pulsar::FITSHdrExtension* hdr_ext)
 {
   int status = 0;
   int row = drow->index;
@@ -41,11 +43,21 @@ void load (fitsfile* fptr, Pulsar::DigitiserStatistics::row* drow)
   fits_read_key (fptr, TINT, "NDIGR", 
 		 &(drow->ndigr), comment, &status);
   
-  // Get NLEV
   
-  fits_read_key (fptr, TINT, "NLEV", 
-		 &(drow->nlev), comment, &status);
+  // Get NPAR (called NLEV prior to version 2.3)
+  char nparkeyname[8];
+  strcpy(nparkeyname,
+	 (hdr_ext->major_version < 2 ||
+	  (hdr_ext->major_version == 2 && hdr_ext->minor_version < 3)
+	  ? "NLEV" : "NPAR"));
+  fits_read_key (fptr, TINT, nparkeyname, 
+ 		 &(drow->nlev), comment, &status);
+  if (status != 0)
+    throw FITSError (status, "FITSArchive::load_digistat", 
+		     nparkeyname);
   
+  printf("NLEVx %d\n", (int)drow->nlev);
+
   // Get NCYCSUB
   
   fits_read_key (fptr, TINT, "NCYCSUB", 
@@ -111,10 +123,11 @@ void Pulsar::FITSArchive::load_DigitiserStatistics (fitsfile* fptr)
 
   (dstats->rows).resize(numrows);
   
+  FITSHdrExtension* hdr_ext = getadd<FITSHdrExtension>();
   for (int i = 0; i < numrows; i++) {
     dstats->rows[i] = DigitiserStatistics::row();
     dstats->rows[i].index = i+1;
-    ::load( fptr, &(dstats->rows[i]) );
+    ::load( fptr, &(dstats->rows[i]), hdr_ext );
   }
   
   add_extension (dstats);
