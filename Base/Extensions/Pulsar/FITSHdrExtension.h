@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/FITSHdrExtension.h,v $
-   $Revision: 1.8 $
-   $Date: 2006/03/17 13:34:45 $
-   $Author: straten $ */
+   $Revision: 1.9 $
+   $Date: 2006/08/09 02:07:23 $
+   $Author: redwards $ */
 
 #ifndef __FITSHdrExtension_h
 #define __FITSHdrExtension_h
@@ -55,7 +55,9 @@ namespace Pulsar {
     
     //! Pulsar FITS header version information
     string hdrver;
-    
+    int major_version;
+    int minor_version;
+
     //! File creation date
     string creation_date;
 
