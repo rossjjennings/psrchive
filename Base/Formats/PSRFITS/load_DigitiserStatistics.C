@@ -56,8 +56,6 @@ void load (fitsfile* fptr, Pulsar::DigitiserStatistics::row* drow,
     throw FITSError (status, "FITSArchive::load_digistat", 
 		     nparkeyname);
   
-  printf("NLEVx %d\n", (int)drow->nlev);
-
   // Get NCYCSUB
   
   fits_read_key (fptr, TINT, "NCYCSUB", 
