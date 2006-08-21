@@ -33,6 +33,18 @@ Pulsar::PolnProfileFitAnalysis::set_harmonic (unsigned index)
   fit->model->set_input_index (index);
 }
 
+//! Given a coherency matrix, return the weighted conjugate matrix
+Jones<double> weight (const Jones<double>& rho, const Stokes<float>& s)
+{
+  Stokes< complex<double> > stokes = complex_coherency( rho );
+
+  for (unsigned ipol=0; ipol<4; ipol++)
+    stokes[ipol] /= s[ipol];
+
+  return convert (stokes);
+}
+
+
 /*!
   Computes Equation 14 of van Straten (2006)
 */
@@ -53,25 +65,20 @@ void Pulsar::PolnProfileFitAnalysis::get_curvature (Matrix<8,8,double>& alpha)
 
     for (unsigned ir=0; ir < 8; ir++) {
 
-      Jones<double> delrho_deleta_r = model_gradient[ir+2];    
+      Jones<double> delrho_deleta_r = weight (model_gradient[ir+2],
+					      fit->standard_variance);    
 
       for (unsigned is=0; is < 8; is ++) {
 
 	Jones<double> delrho_deleta_s = model_gradient[is+2];
 
-	alpha[ir][is]+=trace(delrho_deleta_r*herm(delrho_deleta_s)).real();
+	alpha[ir][is]+=2*trace(delrho_deleta_r*herm(delrho_deleta_s)).real();
       }
 
     }
 
   }
 
-  mean_variance = 0.0;
-
-  for (unsigned i=0; i<4; i++)
-    mean_variance += fit->standard_variance[i] / 4.0;
-
-  alpha *= 2.0/mean_variance;
 }
 
 void conformal_partition (const Matrix<8,8,double>& covariance,
@@ -93,7 +100,7 @@ void conformal_partition (const Matrix<8,8,double>& covariance,
 
 #if OUTPUT_COVARIANCE
     unsigned m = i + 3;
-    fprintf (stderr, "%12s", fit->model->get_param_name(m).c_str());
+    fprintf (stderr, "%12s", "unknown");
     fprintf (stderr, "%12.3g", C_varphiJ[i]);
 #endif
 
@@ -190,8 +197,8 @@ void Pulsar::PolnProfileFitAnalysis::delC_delS
     
   }
 
-  delalpha_delSre /= mean_variance;
-  delalpha_delSim /= mean_variance;
+  delalpha_delSre /= fit->standard_variance[k];
+  delalpha_delSim /= fit->standard_variance[k];
   
   delC_delSre = -covariance * delalpha_delSre * covariance;
   delC_delSim = -covariance * delalpha_delSim * covariance;
@@ -218,6 +225,8 @@ void Pulsar::PolnProfileFitAnalysis::set_fit (PolnProfileFit* f)
 
   // partition the covariance matrix
   conformal_partition (covariance, c_varphi, C_varphiJ, C_JJ);
+
+  cerr << "c_varphi = " << c_varphi << endl;
 
   // calculate the inverse of the Jones parameter covariance matrix
   inv_C_JJ = inv(C_JJ);
@@ -284,7 +293,7 @@ void Pulsar::PolnProfileFitAnalysis::set_fit (PolnProfileFit* f)
       delC_delS (delC_delSre, delC_delSim, ip);
 
       // the variance of the real and imaginary parts of the Stokes parameters
-      double var_S = 0.5*mean_variance;
+      double var_S = 0.5*fit->standard_variance[ip];
 
       var_c_varphi += delC_delSre[0][0]*delC_delSre[0][0] * var_S;
       var_c_varphi += delC_delSim[0][0]*delC_delSim[0][0] * var_S;
@@ -376,12 +385,7 @@ void Pulsar::ScalarProfileFitAnalysis::set_fit (const PolnProfileFit* fit)
   set_spectrum( fit->standard_fourier->get_Profile(0) );
   set_max_harmonic( fit->model->get_num_input() );
 
-  mean_variance = 0.0;
-
-  for (unsigned i=0; i<4; i++)
-    mean_variance += fit->standard_variance[i] / 4.0;
-
-  // mean_variance = 1.0;
+  variance = fit->standard_variance[0];
 }
 
 void Pulsar::ScalarProfileFitAnalysis::set_spectrum (const Profile* p)
@@ -397,7 +401,7 @@ void Pulsar::ScalarProfileFitAnalysis::set_max_harmonic (unsigned n)
 
 void Pulsar::ScalarProfileFitAnalysis::set_variance (double v)
 {
-  mean_variance = v;
+  variance = v;
 }
 
 
@@ -424,7 +428,7 @@ Pulsar::ScalarProfileFitAnalysis::get_curvature (Matrix<2,2,double>& curvature)
     
   }
 
-  curvature /= mean_variance;
+  curvature /= variance;
 
   covariance = inv(curvature);
 }
@@ -473,8 +477,8 @@ void Pulsar::ScalarProfileFitAnalysis::delC_delS
 
   }
 
-  delalpha_delSre /= mean_variance;
-  delalpha_delSim /= mean_variance;
+  delalpha_delSre /= variance;
+  delalpha_delSim /= variance;
 
   delC_delSre = -covariance*delalpha_delSre*covariance;
   delC_delSim = -covariance*delalpha_delSim*covariance;
@@ -487,7 +491,7 @@ Estimate<double> Pulsar::ScalarProfileFitAnalysis::get_error () const
   const_cast<ScalarProfileFitAnalysis*>(this)->get_curvature (curvature);
 
   // the variance of the real and imaginary parts of the Stokes parameter
-  double var_S = 0.5*mean_variance;
+  double var_S = 0.5*variance;
 
   // the variance of the phase shift variance
   double var_c_varphi = 0.0;

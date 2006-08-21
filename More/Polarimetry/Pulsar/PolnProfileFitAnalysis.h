@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PolnProfileFitAnalysis.h,v $
-   $Revision: 1.10 $
-   $Date: 2006/03/17 13:34:51 $
+   $Revision: 1.11 $
+   $Date: 2006/08/21 09:30:43 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PolnProfileFitAnalysis_h
@@ -101,8 +101,6 @@ namespace Pulsar {
     //! the multiple correlation squared
     double R2_varphiJ;
 
-    double mean_variance;
-
     double efac;
 
     //! Compute the uncertainty of results
@@ -129,7 +127,7 @@ namespace Pulsar {
     void set_variance (double v);
 
     //! Get the variance of the fluctuation spectrum
-    double get_variance () const { return mean_variance; }
+    double get_variance () const { return variance; }
 
     //! Get the estimated phase shift error for the fluctuation spectrum
     Estimate<double> get_error () const;
@@ -154,7 +152,7 @@ namespace Pulsar {
     unsigned max_harmonic;
 
     Matrix<2,2,double> covariance;
-    double mean_variance;
+    double variance;
   };
 
 }
