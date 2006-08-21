@@ -7,14 +7,15 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/Attic/PolnProfileFitAnalysis.h,v $
-   $Revision: 1.11 $
-   $Date: 2006/08/21 09:30:43 $
+   $Revision: 1.12 $
+   $Date: 2006/08/21 12:36:44 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PolnProfileFitAnalysis_h
 #define __Pulsar_PolnProfileFitAnalysis_h
 
 #include "Pulsar/PolnProfileFit.h"
+#include "MEAL/Complex2.h"
 #include "Jones.h"
 
 #include <vector>
@@ -34,6 +35,9 @@ namespace Pulsar {
 
     //! Set the PolnProfileFit algorithm to be analysed
     void set_fit (PolnProfileFit*);
+
+    //! Set the transformation to be used to find the optimal basis
+    void set_basis (MEAL::Complex2* basis);
 
     //! Get the relative arrival time error
     Estimate<double> get_relative_error () const;
@@ -58,8 +62,11 @@ namespace Pulsar {
     //! The PolnProfileFit algorithm to be analysed
     Reference::To<PolnProfileFit> fit;
 
-    //! The partial derivative of the model gradient wrt Re[S_k]
-    Jones<double> delgradient_delS (unsigned index, unsigned k) const;
+    //! The transformation to be used to find the optimal basis
+    Reference::To<MEAL::Complex2> basis;
+
+    //! The partial derivative of the model gradient wrt K
+    Jones<double> delgradient_delK (unsigned i, const Jones<double>& K) const;
 
     //! The partial derivative of the multiple correlation squared wrt S_k
     double delR2_varphiJ_delS (Matrix<8,8,double>& delC_delS);
@@ -67,6 +74,15 @@ namespace Pulsar {
     //! The partial derivative of the covariance matrix wrt Re[S_k] and Im[S_k]
     void delC_delS( Matrix<8,8,double>& delC_delSre,
 		    Matrix<8,8,double>& delC_delSim, unsigned k ) const;
+
+    //! The partial derivative of rho wrt basis parameter
+    Jones<double> delrho_delB (unsigned b) const;
+
+    //! The partial derivative of noise wrt basis parameter
+    Stokes<float> delnoise_delB (unsigned b) const;
+
+    //! The partial derivative of the curvature matrix wrt basis parameter
+    Matrix<8,8,double> delalpha_delB (unsigned b) const;
 
     //! Get the curvature matrix
     void get_curvature (Matrix<8,8,double>& curvature);
@@ -82,6 +98,9 @@ namespace Pulsar {
 
     Jones<double> phase_result;
     std::vector< Jones<double> > phase_gradient;
+
+    Jones<double> basis_result;
+    std::vector< Jones<double> > basis_gradient;
 
     //! the covariance matrix
     Matrix<8,8,double> covariance;
