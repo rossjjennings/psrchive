@@ -4,10 +4,13 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #include "Pulsar/PolnProfileFitAnalysis.h"
 #include "Pulsar/PolnProfile.h"
 
 #include "Calibration/ReceptionModel.h"
+#include "Calibration/TemplateUncertainty.h"
+#include "MEAL/ProductRule.h"
 
 #include "Pauli.h"
 
@@ -16,6 +19,7 @@ using namespace std;
 Pulsar::PolnProfileFitAnalysis::PolnProfileFitAnalysis ()
 {
   compute_error = true;
+  basis_insertion = 0;
 }
 
 //! When set, estimate the uncertainty in each attribute
@@ -34,16 +38,15 @@ Pulsar::PolnProfileFitAnalysis::set_harmonic (unsigned index)
 }
 
 //! Given a coherency matrix, return the weighted conjugate matrix
-Jones<double> weight (const Jones<double>& rho, const Stokes<float>& s,
-		      bool divide = true)
+Jones<double> weight (const Jones<double>& rho, const Stokes<double>& s)
 {
   Stokes< complex<double> > stokes = complex_coherency( rho );
 
   for (unsigned ipol=0; ipol<4; ipol++)
-    if (divide)
-      stokes[ipol] /= s[ipol];
-    else
-      stokes[ipol] *= s[ipol];
+    stokes[ipol] *= s[ipol];
+
+  //cerr << "weight=" << s << endl;
+  //cerr << "result=" << stokes << endl;
 
   return convert (stokes);
 }
@@ -69,8 +72,8 @@ void Pulsar::PolnProfileFitAnalysis::get_curvature (Matrix<8,8,double>& alpha)
 
     for (unsigned ir=0; ir < 8; ir++) {
 
-      Jones<double> delrho_deleta_r = weight (model_gradient[ir+2],
-					      fit->standard_variance);    
+      Jones<double> delrho_deleta_r =
+	fit->uncertainty->get_normalized (model_gradient[ir+2]);    
 
       for (unsigned is=0; is < 8; is ++) {
 
@@ -205,9 +208,9 @@ void Pulsar::PolnProfileFitAnalysis::delC_delS
     
   }
 
-  delalpha_delSre /= fit->standard_variance[k];
-  delalpha_delSim /= fit->standard_variance[k];
-  
+  delalpha_delSre *= fit->uncertainty->get_inv_var(k);
+  delalpha_delSim *= fit->uncertainty->get_inv_var(k);
+
   delC_delSre = -covariance * delalpha_delSre * covariance;
   delC_delSim = -covariance * delalpha_delSim * covariance;
 }
@@ -215,15 +218,27 @@ void Pulsar::PolnProfileFitAnalysis::delC_delS
 Jones<double>
 Pulsar::PolnProfileFitAnalysis::delrho_delB (unsigned b) const
 {
-  // when actually fitting, model_result will not suffice
-  return basis_result * model_result * herm(basis_gradient[b])
-    + basis_gradient[b] * model_result * herm(basis_result);
+  Jones<double> rho = fit->model->get_input()->evaluate();
+
+#if 0
+
+  cerr << "rho=" << rho << endl;
+  cerr << "mod=" << model_result << endl;
+  cerr << "basis=" << basis_result << endl;
+  cerr << "bgrad[" << b << "]=" << basis_gradient[b] << endl;
+
+#endif
+
+  return basis_result * rho * herm(basis_gradient[b])
+    + basis_gradient[b] * rho * herm(basis_result);
 }
 
 //! Return weighted partial derivatives of variances wrt basis parameter
-Stokes<float> Pulsar::PolnProfileFitAnalysis::delnoise_delB (unsigned b) const
+Stokes<double> Pulsar::PolnProfileFitAnalysis::delnoise_delB (unsigned b) const
 {
-  Jones<double> N = convert (fit->standard_variance);
+  Stokes<double> var = fit->uncertainty->get_variance();
+
+  Jones<double> N = convert (var);
 
   Jones<double> delN_delB = basis_result * N * herm(basis_gradient[b])
     + basis_gradient[b] * N * herm(basis_result);
@@ -231,6 +246,7 @@ Stokes<float> Pulsar::PolnProfileFitAnalysis::delnoise_delB (unsigned b) const
   Stokes<double> stokes = coherency( delN_delB );
 
 #if 0
+
   cerr << "var=" << fit->standard_variance << endl;
   cerr << "N=" << N << endl;
 
@@ -240,10 +256,11 @@ Stokes<float> Pulsar::PolnProfileFitAnalysis::delnoise_delB (unsigned b) const
   cerr << "delN_delB=" << delN_delB << endl;
 
   cerr << "stokes=" << stokes << endl;
+
 #endif
 
   for (unsigned ipol=0; ipol<4; ipol++)
-    stokes[ipol] /= fit->standard_variance[ipol];
+    stokes[ipol] /= var[ipol];
 
   return stokes;
 }
@@ -253,22 +270,30 @@ Pulsar::PolnProfileFitAnalysis::delalpha_delB (unsigned b) const
 {
   Matrix<8,8,double> delalpha_delB;
 
-  Stokes<float> delN_delB = delnoise_delB(b);
+  Stokes<double> delN_delB = delnoise_delB(b);
+
+  Jones<double> delR_delB = delrho_delB(b);
 
   // over all rows
   for (unsigned ir=0; ir < 8; ir++) {
 
-    Jones<double> delrho_deleta_r = weight( model_gradient[ir+2],
-					    fit->standard_variance );    
+    Jones<double> delrho_deleta_r
+      = fit->uncertainty->get_normalized( model_gradient[ir+2] );
 
     Jones<double> del2rho_deleta_r
-      = weight( delgradient_delK(ir, delrho_delB(b)), fit->standard_variance )
-      - weight( delrho_deleta_r, delN_delB, false );
-    
+      = fit->uncertainty->get_normalized( delgradient_delK(ir, delR_delB) );
+
+    Jones<double> correction = weight( delrho_deleta_r, delN_delB );
+
+    //cerr << "del2rho_deleta_r=" << del2rho_deleta_r << endl;
+    //cerr << "correction=" << correction << endl;
+
+    del2rho_deleta_r -= weight( delrho_deleta_r, delN_delB );
+
     // over all columns
     for (unsigned is=0; is < 8; is ++) {
 	  
-      Jones<double> del2rho_deleta_s = delgradient_delK(is, delrho_delB(b));
+      Jones<double> del2rho_deleta_s = delgradient_delK(is, delR_delB);
       Jones<double> delrho_deleta_s = model_gradient[is+2];
 	  
       delalpha_delB[ir][is] = 2.0 *
@@ -290,6 +315,9 @@ void Pulsar::PolnProfileFitAnalysis::set_fit (PolnProfileFit* f)
   if (!fit)
     return;
 
+  if (basis)
+    insert_basis ();
+
   Matrix<8,8,double> curvature;
 
   // calculate the curvature matrix
@@ -303,8 +331,6 @@ void Pulsar::PolnProfileFitAnalysis::set_fit (PolnProfileFit* f)
 
   // partition the covariance matrix
   conformal_partition (covariance, c_varphi, C_varphiJ, C_JJ);
-
-  cerr << "c_varphi = " << c_varphi << endl;
 
   // calculate the inverse of the Jones parameter covariance matrix
   inv_C_JJ = inv(C_JJ);
@@ -354,14 +380,6 @@ void Pulsar::PolnProfileFitAnalysis::set_fit (PolnProfileFit* f)
   // the variance of the phase shift variance
   double var_c_varphi = 0.0;
 
-  // the partial derivatives of the curvature matrix wrt basis parameters
-  vector< Matrix<8,8,double> > delalpha_delbasis;
-
-  if (basis) {
-    basis_result = basis->evaluate (&basis_gradient);
-    delalpha_delbasis.resize (basis_gradient.size());
-  }
-
   for (unsigned ih=0; ih < fit->model->get_num_input(); ih++) {
 
     set_harmonic (ih);
@@ -369,11 +387,6 @@ void Pulsar::PolnProfileFitAnalysis::set_fit (PolnProfileFit* f)
     model_result = fit->model->evaluate (&model_gradient);
     xform_result = fit->transformation->evaluate (&xform_gradient);
     phase_result = fit->phase_xform->evaluate (&phase_gradient);
-
-    // over all basis parameters
-    if (basis)
-      for (unsigned ib=0; ib < basis->get_nparam(); ib++)
-	delalpha_delbasis[ib] += delalpha_delB (ib);
 
     // over all four stokes parameters
     for (unsigned ip=0; ip < 4; ip++) {
@@ -384,7 +397,7 @@ void Pulsar::PolnProfileFitAnalysis::set_fit (PolnProfileFit* f)
       delC_delS (delC_delSre, delC_delSim, ip);
 
       // the variance of the real and imaginary parts of the Stokes parameters
-      double var_S = 0.5*fit->standard_variance[ip];
+      double var_S = 0.5/fit->uncertainty->get_inv_var(ip);
 
       var_c_varphi += delC_delSre[0][0]*delC_delSre[0][0] * var_S;
       var_c_varphi += delC_delSim[0][0]*delC_delSim[0][0] * var_S;
@@ -444,17 +457,61 @@ void Pulsar::PolnProfileFitAnalysis::set_fit (PolnProfileFit* f)
   Estimate<double> hatvarJ (hatvar_varphiJ, var_hatvar_varphiJ);
   relative_conditional_error = sqrt(hatvarJ);
 
-  if (basis)
-    for (unsigned ib=0; ib < basis->get_nparam(); ib++) {
-      
-      // calculate the partial derivative of the covariance matrix wrt basis
-      Matrix<8,8,double> delC_delB;
-      delC_delB = -covariance * delalpha_delbasis[ib] * covariance;
-      
-      cerr << "delvar_delB[" << ib << "]= " << delC_delB[0][0] << endl;
-      
-    }
+}
 
+//! Get the variance of varphi and its gradient with respect to basis
+double 
+Pulsar::PolnProfileFitAnalysis::get_var_varphi (std::vector<double>& grad)
+{
+  Matrix<8,8,double> curvature;
+
+  for (unsigned i=0; i<basis->get_nparam(); i++)
+    cerr << "basis[" << i << "]=" << basis->get_param(i) << endl;
+
+  basis_insertion->set_value( basis->evaluate() );
+
+  // calculate the curvature matrix
+  get_curvature (curvature);
+
+  // calculate the covariance matrix
+  covariance = inv(curvature);
+
+  // the partial derivatives of the curvature matrix wrt basis parameters
+  vector< Matrix<8,8,double> > delalpha_delbasis;
+
+  basis_result = basis->evaluate (&basis_gradient);
+  delalpha_delbasis.resize (basis_gradient.size());
+
+  for (unsigned ih=0; ih < fit->model->get_num_input(); ih++) {
+
+    set_harmonic (ih);
+
+    model_result = fit->model->evaluate (&model_gradient);
+    xform_result = fit->transformation->evaluate (&xform_gradient);
+    phase_result = fit->phase_xform->evaluate (&phase_gradient);
+
+    // over all basis parameters
+    for (unsigned ib=0; ib < basis->get_nparam(); ib++)
+      delalpha_delbasis[ib] += delalpha_delB (ib);
+
+  }
+
+  grad.resize( basis->get_nparam() );
+
+  for (unsigned ib=0; ib < basis->get_nparam(); ib++) {
+
+    // calculate the partial derivative of the covariance matrix wrt basis
+    Matrix<8,8,double> delC_delB;
+    delC_delB = -covariance * delalpha_delbasis[ib] * covariance;
+
+    grad[ib] = delC_delB[0][0];
+    cerr << "delvar_delB[" << ib << "]= " << delC_delB[0][0] << endl;
+      
+  }
+
+  cerr << "c_varphi = " << covariance[0][0] << endl;
+
+  return covariance[0][0];
 }
 
 Estimate<double>
@@ -480,8 +537,30 @@ Pulsar::PolnProfileFitAnalysis::get_relative_conditional_error () const
 void Pulsar::PolnProfileFitAnalysis::set_basis (MEAL::Complex2* _basis)
 {
   basis = _basis;
+
+  if (fit)
+    insert_basis();
 }
 
+void Pulsar::PolnProfileFitAnalysis::insert_basis ()
+{
+  if (basis_insertion)
+    return;
+
+  if (!fit || !basis)
+    return;
+
+  basis_insertion = new MEAL::Complex2Value;
+  basis_insertion -> set_value( basis->evaluate() );
+
+  MEAL::Complex2* xform = fit->get_transformation();
+
+  MEAL::ProductRule<MEAL::Complex2>* p = new MEAL::ProductRule<MEAL::Complex2>;
+  *p *= xform;
+  *p *= basis_insertion;
+
+  fit->set_transformation ( p );
+}
 
 // /////////////////////////////////////////////////////////////////////
 //

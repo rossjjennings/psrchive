@@ -7,15 +7,15 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PolnProfileFitAnalysis.h,v $
-   $Revision: 1.12 $
-   $Date: 2006/08/21 12:36:44 $
+   $Revision: 1.13 $
+   $Date: 2006/08/21 22:14:32 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PolnProfileFitAnalysis_h
 #define __Pulsar_PolnProfileFitAnalysis_h
 
 #include "Pulsar/PolnProfileFit.h"
-#include "MEAL/Complex2.h"
+#include "MEAL/Complex2Value.h"
 #include "Jones.h"
 
 #include <vector>
@@ -37,7 +37,7 @@ namespace Pulsar {
     void set_fit (PolnProfileFit*);
 
     //! Set the transformation to be used to find the optimal basis
-    void set_basis (MEAL::Complex2* basis);
+    void set_basis (MEAL::Complex2*);
 
     //! Get the relative arrival time error
     Estimate<double> get_relative_error () const;
@@ -47,6 +47,9 @@ namespace Pulsar {
 
     //! Get the relative conditional arrival time error
     Estimate<double> get_relative_conditional_error () const;
+
+    //! Get the variance of varphi and its gradient with respect to basis
+    double get_var_varphi (std::vector<double>& var_varphi_grad);
 
   protected:
 
@@ -65,6 +68,12 @@ namespace Pulsar {
     //! The transformation to be used to find the optimal basis
     Reference::To<MEAL::Complex2> basis;
 
+    //! The means of inserting the basis transformation into the MTM model
+    MEAL::Complex2Value* basis_insertion;
+
+    //! Insert the basis transformation into the MTM model
+    void insert_basis ();
+
     //! The partial derivative of the model gradient wrt K
     Jones<double> delgradient_delK (unsigned i, const Jones<double>& K) const;
 
@@ -79,7 +88,7 @@ namespace Pulsar {
     Jones<double> delrho_delB (unsigned b) const;
 
     //! The partial derivative of noise wrt basis parameter
-    Stokes<float> delnoise_delB (unsigned b) const;
+    Stokes<double> delnoise_delB (unsigned b) const;
 
     //! The partial derivative of the curvature matrix wrt basis parameter
     Matrix<8,8,double> delalpha_delB (unsigned b) const;
