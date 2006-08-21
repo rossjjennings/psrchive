@@ -5,6 +5,7 @@
  *
  ***************************************************************************/
 #include "MEAL/ProductRule.h"
+#include "MEAL/Complex2Value.h"
 #include "MEAL/Rotation.h"
 #include "MEAL/Boost.h"
 
@@ -114,6 +115,20 @@ int main (int argc, char** argv)
   // has been modified to emit the MEAL::changed signal, which is now
   // connected to Composite::set_changed (true).
   //
+
+  if (!meta.get_changed()) {
+    cerr << "FAIL: ProductRule<Complex2>::get_changed = false" << endl;
+    return -1;
+  }
+
+  cerr << "Construct MEAL::Complex2Value" << endl;
+  Test< MEAL::Complex2Value > Cvalue;
+
+  meta *= &Cvalue;
+
+  meta.evaluate ();
+
+  Cvalue.set_value ( rotation.evaluate() );
 
   if (!meta.get_changed()) {
     cerr << "FAIL: ProductRule<Complex2>::get_changed = false" << endl;
