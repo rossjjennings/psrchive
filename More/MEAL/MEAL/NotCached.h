@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/NotCached.h,v $
-   $Revision: 1.2 $
-   $Date: 2006/03/17 13:35:25 $
+   $Revision: 1.3 $
+   $Date: 2006/08/21 17:00:28 $
    $Author: straten $ */
 
 #ifndef __NotCached_H
@@ -31,7 +31,12 @@ namespace MEAL {
 
     //! Implement the evaluate method of the Function
     Result evaluate (std::vector<Result>* grad) const
-    { Result r; calculate (r, grad); return r; }
+    { 
+      Result r; 
+      calculate (r, grad);
+      this->get_context()->set_evaluation_changed (false);
+      return r;
+    }
 
   };
 
