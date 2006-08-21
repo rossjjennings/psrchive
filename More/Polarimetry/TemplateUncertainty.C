@@ -16,7 +16,7 @@ Calibration::TemplateUncertainty::TemplateUncertainty ()
 }
 
 //! Return the inverse of the variance of the specified polarization
-float Calibration::TemplateUncertainty::get_inv_var (unsigned ipol) const
+double Calibration::TemplateUncertainty::get_inv_var (unsigned ipol) const
 {
   if (!built)
     const_cast<TemplateUncertainty*>(this)->build();

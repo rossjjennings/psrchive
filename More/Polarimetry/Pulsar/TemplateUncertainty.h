@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/TemplateUncertainty.h,v $
-   $Revision: 1.2 $
-   $Date: 2006/03/17 13:34:44 $
+   $Revision: 1.3 $
+   $Date: 2006/08/21 22:14:41 $
    $Author: straten $ */
 
 #ifndef __Calibration_TemplateUncertainty_H
@@ -28,7 +28,7 @@ namespace Calibration {
     TemplateUncertainty ();
 
     //! Return the inverse of the variance of the specified polarization
-    float get_inv_var (unsigned ipol) const;
+    double get_inv_var (unsigned ipol) const;
     
     //! Set the uncertainty of the observation
     void set_observation_var (const Stokes<double>& var);
@@ -51,7 +51,7 @@ namespace Calibration {
     Reference::To<MEAL::Complex2> transformation;
 
     //! The inverse of the combined variance
-    Stokes<float> inv_var;
+    Stokes<double> inv_var;
 
     //! Flag set when inv_var attribute is up-to-date
     bool built;
