@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/CoherencyMeasurement.h,v $
-   $Revision: 1.5 $
-   $Date: 2006/04/20 22:13:29 $
+   $Revision: 1.6 $
+   $Date: 2006/08/21 22:14:37 $
    $Author: straten $ */
 
 #ifndef __Calibration_CoherencyMeasurement_H
@@ -33,8 +33,16 @@ namespace Calibration {
     //! Estimates the uncertainty of a CoherencyMeasurement
     class Uncertainty : public Reference::Able {
     public:
+
       //! Return the inverse of the variance of the specified polarization
-      virtual float get_inv_var (unsigned ipol) const = 0;
+      virtual double get_inv_var (unsigned ipol) const = 0;
+
+      //! Return the variance-normalized coherency matrix
+      virtual Jones<double> get_normalized (const Jones<double>& input) const;
+
+      //! Return the variances of the Stokes parameters
+      virtual Stokes<double> get_variance () const;
+
     };
 
     //! Default constructor
@@ -67,7 +75,7 @@ namespace Calibration {
     Stokes< Estimate<double> > get_stokes () const;
 
     //! Get the variance of the specified polarization
-    float get_variance (unsigned ipol) const;
+    double get_variance (unsigned ipol) const;
 
     //! Given a coherency matrix, return the weighted norm
     double get_weighted_norm (const Jones<double>& matrix) const;
@@ -87,13 +95,13 @@ namespace Calibration {
     Jones<double> rho;
 
     //! The inverse of the variance in each Stokes parameter
-    Stokes<float> inv_var;
+    Stokes<double> inv_var;
 
     //! The uncertainty of the measurement
     const Uncertainty* uncertainty;
 
     //! Get the inverse of the variance of the specified polarization
-    float get_inv_var (unsigned ipol) const {
+    double get_inv_var (unsigned ipol) const {
       if (uncertainty)
 	return uncertainty->get_inv_var(ipol);
       return inv_var[ipol];

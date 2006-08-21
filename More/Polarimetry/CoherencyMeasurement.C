@@ -92,7 +92,7 @@ Calibration::CoherencyMeasurement::get_stokes () const
   return stokes;
 }
 
-float Calibration::CoherencyMeasurement::get_variance (unsigned ipol) const
+double Calibration::CoherencyMeasurement::get_variance (unsigned ipol) const
 {
   return 1.0/get_inv_var(ipol);
 }
@@ -122,3 +122,25 @@ Jones<double> Calibration::CoherencyMeasurement::get_weighted_conjugate
   return convert (stokes);
 }
 
+Jones<double> 
+Calibration::CoherencyMeasurement::Uncertainty::get_normalized
+(const Jones<double>& input) const
+{
+  Stokes< complex<double> > stokes = complex_coherency( input );
+
+  for (unsigned ipol=0; ipol<4; ipol++)
+    stokes[ipol] = complex<double>(get_inv_var(ipol)) * stokes[ipol];
+
+  return convert (stokes);
+}
+
+Stokes<double> 
+Calibration::CoherencyMeasurement::Uncertainty::get_variance () const
+{
+  Stokes<double> stokes;
+
+  for (unsigned ipol=0; ipol<4; ipol++)
+    stokes[ipol] = 1.0 / get_inv_var(ipol);
+
+  return stokes;
+}
