@@ -7,14 +7,17 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/TemplateUncertainty.h,v $
-   $Revision: 1.3 $
-   $Date: 2006/08/21 22:14:41 $
+   $Revision: 1.4 $
+   $Date: 2006/08/22 22:05:38 $
    $Author: straten $ */
 
 #ifndef __Calibration_TemplateUncertainty_H
 #define __Calibration_TemplateUncertainty_H
 
 #include "Calibration/CoherencyMeasurement.h"
+
+#include "MEAL/ScalarValue.h"
+#include "MEAL/ScalarMath.h"
 #include "MEAL/Complex2.h"
 
 namespace Calibration {
@@ -49,6 +52,15 @@ namespace Calibration {
 
     //! The transformation from template to observation
     Reference::To<MEAL::Complex2> transformation;
+
+    //! The Jones matrix of the transformation
+    Jones<MEAL::ScalarValue> xform;
+
+    //! The input Stokes parameter variances
+    Stokes<MEAL::ScalarMath> input;
+
+    //! The output Stokes parameter variances
+    Stokes<MEAL::ScalarMath> output;
 
     //! The inverse of the combined variance
     Stokes<double> inv_var;
