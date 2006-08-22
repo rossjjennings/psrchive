@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PolnProfileFitAnalysis.h,v $
-   $Revision: 1.13 $
-   $Date: 2006/08/21 22:14:32 $
+   $Revision: 1.14 $
+   $Date: 2006/08/22 22:05:33 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PolnProfileFitAnalysis_h
@@ -51,6 +51,9 @@ namespace Pulsar {
     //! Get the variance of varphi and its gradient with respect to basis
     double get_var_varphi (std::vector<double>& var_varphi_grad);
 
+    //! Get the multiple correlation and its gradient with respect to basis
+    double get_Rmult (std::vector<double>& grad);
+
   protected:
 
     //! The relative arrival time error
@@ -74,8 +77,8 @@ namespace Pulsar {
     //! Insert the basis transformation into the MTM model
     void insert_basis ();
 
-    //! The partial derivative of the model gradient wrt K
-    Jones<double> delgradient_delK (unsigned i, const Jones<double>& K) const;
+    //! The partial derivative of K with respect to free parameter, eta
+    Jones<double> del_deleta (unsigned i, const Jones<double>& K) const;
 
     //! The partial derivative of the multiple correlation squared wrt S_k
     double delR2_varphiJ_delS (Matrix<8,8,double>& delC_delS);
@@ -90,8 +93,14 @@ namespace Pulsar {
     //! The partial derivative of noise wrt basis parameter
     Stokes<double> delnoise_delB (unsigned b) const;
 
+    //! The partial derivative of noise wrt free parameter
+    Stokes<double> delnoise_deleta (unsigned i) const;
+
     //! The partial derivative of the curvature matrix wrt basis parameter
     Matrix<8,8,double> delalpha_delB (unsigned b) const;
+
+    //! The partial derivative of the curvature matrix wrt basis parameters
+    void delalpha_delB (std::vector< Matrix<8,8,double> >&);
 
     //! Get the curvature matrix
     void get_curvature (Matrix<8,8,double>& curvature);
