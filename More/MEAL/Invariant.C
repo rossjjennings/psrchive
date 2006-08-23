@@ -5,17 +5,15 @@
  *
  ***************************************************************************/
 #include "MEAL/Invariant.h"
-#include "MEAL/ScalarParameter.h"
 #include "MEAL/ScalarMath.h"
 
 void MEAL::Invariant::init ()
 {
-  for (unsigned ipol=0; ipol<input.size(); ipol++)
-    input[ipol] = *(new ScalarParameter);
+  input = Vector< 4, Estimate<double> > ();
 
   result = input.invariant();
 
-  bias = *(new ScalarParameter);
+  bias = Estimate<double>();
 }
 
 MEAL::Invariant::Invariant ()
