@@ -9,7 +9,7 @@
 
 using namespace std;
 
-#include <complex>
+#include "complex_public.h"
 
 int main (int argc, char** argv) try {
 
@@ -17,6 +17,18 @@ int main (int argc, char** argv) try {
   std::complex<MEAL::ScalarMath> z (-5.6, 7.8);
 
   std::complex<MEAL::ScalarMath> product = w * z;
+
+  unsigned nparam_real = pub(product).real.get_expression()->get_nparam();
+  unsigned nparam_imag = pub(product).imag.get_expression()->get_nparam();
+
+  if (nparam_real != 0) {
+    cerr << "real nparam = " << nparam_real << " != 0" << endl;
+    return -1;
+  }
+  if (nparam_imag != 0) {
+    cerr << "imag nparam = " << nparam_imag << " != 0" << endl;
+    return -1;
+  }
 
   Estimate<double> x (4.6, 0.09);
   Estimate<double> y (-0.5, 0.01);
@@ -202,7 +214,11 @@ int main (int argc, char** argv) try {
     throw Error (InvalidState, "Scalar invariant interval not working",
                  "(U/inv).var=%lf != expected=%lf", inv.var, var_U);
 
-  cerr << endl; 
+  cerr << 
+    "Invariant interval computation passes test\n\n"
+    "All tests passed.\n" 
+       << endl; 
+
   return 0;
 
 } catch (Error& error) {
