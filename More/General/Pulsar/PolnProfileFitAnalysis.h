@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/Attic/PolnProfileFitAnalysis.h,v $
-   $Revision: 1.14 $
-   $Date: 2006/08/22 22:05:33 $
+   $Revision: 1.15 $
+   $Date: 2006/08/23 22:02:51 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PolnProfileFitAnalysis_h
@@ -16,7 +16,7 @@
 
 #include "Pulsar/PolnProfileFit.h"
 #include "MEAL/Complex2Value.h"
-#include "Jones.h"
+#include "MEAL/StokesError.h"
 
 #include <vector>
 
@@ -91,13 +91,14 @@ namespace Pulsar {
     Jones<double> delrho_delB (unsigned b) const;
 
     //! The partial derivative of noise wrt basis parameter
-    Stokes<double> delnoise_delB (unsigned b) const;
+    Stokes<double> delnoise_delB (unsigned b);
 
-    //! The partial derivative of noise wrt free parameter
-    Stokes<double> delnoise_deleta (unsigned i) const;
+    //! Worker method for partial derivative of noise
+    Stokes<double> delnoise
+    (const Jones<double>& xform, const Jones<double>& xform_grad);
 
     //! The partial derivative of the curvature matrix wrt basis parameter
-    Matrix<8,8,double> delalpha_delB (unsigned b) const;
+    Matrix<8,8,double> delalpha_delB (unsigned ib);
 
     //! The partial derivative of the curvature matrix wrt basis parameters
     void delalpha_delB (std::vector< Matrix<8,8,double> >&);
@@ -119,6 +120,9 @@ namespace Pulsar {
 
     Jones<double> basis_result;
     std::vector< Jones<double> > basis_gradient;
+
+    //! Propagation of uncertainty through the congruence tranformation
+    MEAL::StokesError error;
 
     //! the covariance matrix
     Matrix<8,8,double> covariance;
@@ -142,6 +146,12 @@ namespace Pulsar {
 
     //! Compute the uncertainty of results
     bool compute_error;
+    
+  private:
+
+    std::vector< Stokes<double> > delN_delB;
+    std::vector< Jones<double> > delR_delB;
+    std::vector< Stokes<double> > delN_deleta;
 
   };
 
