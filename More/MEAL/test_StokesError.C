@@ -25,7 +25,7 @@ int main ()
   test.get_variance (output);
 
   if (input != output) {
-    cerr << "FAIL!\n"
+    cerr << "FAIL! identity\n"
       "input = " << input << "\n"
       "output= " << output << endl;
     return -1;
@@ -42,13 +42,41 @@ int main ()
   Stokes<double> expect (1,2,.6,.5);
 
   if (expect != output) {
-    cerr << "FAIL!\n"
+    cerr << "FAIL! simple rotation\n"
       "expect = " << expect << "\n"
       "output= " << output << endl;
     return -1;
   }
 
   cerr << "simple rotation test passed" << endl;
+
+  J = 0;
+  test.set_transformation_gradient (J);
+  test.get_variance_gradient (output);
+
+  expect = 0;
+  if (expect != output) {
+    cerr << "FAIL! null gradient\n"
+      "expect = " << expect << "\n"
+      "output= " << output << endl;
+    return -1;
+  }
+
+  cerr << "simple null gradient test passed" << endl;
+
+  vector< Jones<double> > grad;
+  rotation.evaluate(&grad);
+  test.set_transformation_gradient (grad[0]);
+  test.get_variance_gradient (output);
+
+  if (output[2] == 0 || output[3] == 0) {
+    cerr << "FAIL! non-zero gradient\n"
+      "gradient = " << grad[0] << "\n"
+      "output= " << output << endl;
+    return -1;
+  }
+
+  cerr << "simple non-zero gradient test passed" << endl;
 
   cerr << "testing that this was not a huge waste of time" << endl;
 
