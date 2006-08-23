@@ -7,6 +7,7 @@ include_HEADERS = \
         Cloude.h \
         complexPlotter.h \
         complex_promote.h \
+	complex_public.h \
         Configuration.h \
         Conventions.h \
         Error.h \
