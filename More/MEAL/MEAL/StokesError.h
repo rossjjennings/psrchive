@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/StokesError.h,v $
-   $Revision: 1.1 $
-   $Date: 2006/08/22 22:00:20 $
+   $Revision: 1.2 $
+   $Date: 2006/08/23 15:29:42 $
    $Author: straten $ */
 
 #ifndef __MEAL_StokesError_H
@@ -40,16 +40,35 @@ namespace MEAL {
     //! Get the variances of the output Stokes parameters
     void get_variance (Stokes<double>&);
 
-  protected:
 
-    //! The Jones matrix of the transformation
-    Jones<MEAL::ScalarValue> xform;
+    //! Set the transformation gradient component
+    void set_transformation_gradient (const Jones<double>&);
+
+    //! Get the variances of the output Stokes parameters gradient component
+    void get_variance_gradient (Stokes<double>&);
+
+  protected:
 
     //! The input Stokes parameter variances
     Stokes<MEAL::ScalarMath> input;
 
+    //! The Jones matrix of the transformation
+    Jones<MEAL::ScalarValue> xform;
+
     //! The output Stokes parameter variances
     Stokes<MEAL::ScalarMath> output;
+
+    //! The gradient of Stokes parameter variances is built only when needed
+    bool gradient_built;
+
+    void build_gradient ();
+
+    //! The Jones matrix of the transformation gradient component
+    Jones<MEAL::ScalarValue> xform_grad;
+
+    //! The output Stokes parameter variances gradient component
+    Stokes<MEAL::ScalarMath> output_grad;
+
 
   };
 
