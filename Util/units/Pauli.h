@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Pauli.h,v $
-   $Revision: 1.20 $
-   $Date: 2006/03/17 13:35:22 $
+   $Revision: 1.21 $
+   $Date: 2006/08/23 21:59:43 $
    $Author: straten $ */
 
 #ifndef __Pauli_H
@@ -226,6 +226,21 @@ template<typename T, typename U, QBasis A, QBasis B>
 const Jones<T> operator * (const Quaternion<T,A>& q, const Quaternion<U,B>& u)
 {
   return convert(q) * convert(u);
+}
+
+// return the Mueller matrix corresponding to the given Jones matrix
+template<typename T>
+Matrix<4,4,T> Mueller (const Jones<T>& J)
+{
+  Matrix<4,4,T> result;
+
+  for (unsigned row=0; row < 4; row++) {
+    Stokes<T> basis;
+    basis[row] = 1.0;
+    result[row] = coherency(herm(J) * convert(basis) * J);
+  }
+
+  return result;
 }
 
 #endif
