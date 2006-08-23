@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/TemplateUncertainty.h,v $
-   $Revision: 1.4 $
-   $Date: 2006/08/22 22:05:38 $
+   $Revision: 1.5 $
+   $Date: 2006/08/23 22:02:56 $
    $Author: straten $ */
 
 #ifndef __Calibration_TemplateUncertainty_H
@@ -16,8 +16,7 @@
 
 #include "Calibration/CoherencyMeasurement.h"
 
-#include "MEAL/ScalarValue.h"
-#include "MEAL/ScalarMath.h"
+#include "MEAL/StokesError.h"
 #include "MEAL/Complex2.h"
 
 namespace Calibration {
@@ -42,25 +41,19 @@ namespace Calibration {
     //! Set the transformation from template to observation
     void set_transformation (const MEAL::Complex2* transformation);
 
+    //! Get the Stokes uncertainty estimator
+    MEAL::StokesError* get_StokesError () { return &template_variance; }
+
   protected:
 
     //! The variance of the observed Stokes parameters
     Stokes<double> observation_variance;
 
     //! The variance of the template Stokes parameters
-    Stokes< Estimate<double> > template_variance;
+    MEAL::StokesError template_variance;
 
     //! The transformation from template to observation
     Reference::To<MEAL::Complex2> transformation;
-
-    //! The Jones matrix of the transformation
-    Jones<MEAL::ScalarValue> xform;
-
-    //! The input Stokes parameter variances
-    Stokes<MEAL::ScalarMath> input;
-
-    //! The output Stokes parameter variances
-    Stokes<MEAL::ScalarMath> output;
 
     //! The inverse of the combined variance
     Stokes<double> inv_var;
