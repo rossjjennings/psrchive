@@ -6,28 +6,9 @@
  ***************************************************************************/
 
 #include "MEAL/StokesError.h"
+
 #include "Pauli.h"
-
-#include <iostream>
-
-template<class T>
-class public_complex {
-public:
-  T real;
-  T imag;
-};
-
-template<class T>
-public_complex<T>* pub (std::complex<T>& c)
-{
-  return reinterpret_cast<public_complex<T>*>( &c );
-}
-
-template<class T>
-const public_complex<T>* pub (const std::complex<T>& c)
-{
-  return reinterpret_cast<const public_complex<T>*>( &c );
-}
+#include "complex_public.h"
 
 //! Default constructor
 MEAL::StokesError::StokesError ()
@@ -36,11 +17,18 @@ MEAL::StokesError::StokesError ()
 
   for (unsigned i=0; i<2; i++)
     for (unsigned j=0; j<2; j++) {
-      pub(J(i,j))->real = pub(xform(i,j))->real;
-      pub(J(i,j))->imag = pub(xform(i,j))->imag;
+      pub(J(i,j)).real = pub(xform(i,j)).real;
+      pub(J(i,j)).imag = pub(xform(i,j)).imag;
     }
 
+  input = Vector< 4, Estimate<double> > ();
+
   output = transform (input, J);
+
+  for (unsigned i=0; i<4; i++)
+    if (output[i].get_expression()->get_nparam() != 4)
+      throw Error (InvalidState, "MEAL::StokesError ctor",
+		   "output Stokes parameters have more than 4 dof");
 }
 
 //! Set the variances of the input Stokes parameters
@@ -59,8 +47,8 @@ void MEAL::StokesError::set_transformation (const Jones<double>& J)
 {
   for (unsigned i=0; i<2; i++)
     for (unsigned j=0; j<2; j++) {
-      pub(xform(i,j))->real.set_value( pub(J(i,j))->real );
-      pub(xform(i,j))->imag.set_value( pub(J(i,j))->imag );
+      pub(xform(i,j)).real.set_value( pub(J(i,j)).real );
+      pub(xform(i,j)).imag.set_value( pub(J(i,j)).imag );
     }
 }
 
