@@ -6,104 +6,62 @@
  ***************************************************************************/
 
 #include "MEAL/StokesError.h"
-#include "Pauli.h"
-
-#include "complex_public.h"
-
-void copy (Jones<MEAL::ScalarMath>& to, Jones<MEAL::ScalarValue>& from)
-{
-  for (unsigned i=0; i<2; i++) {
-    for (unsigned j=0; j<2; j++) {
-      pub(to(i,j)).real = pub(from(i,j)).real;
-      pub(to(i,j)).imag = pub(from(i,j)).imag;
-    }
-  }
-}
 
 //! Default constructor
 MEAL::StokesError::StokesError ()
 {
-  Jones<MEAL::ScalarMath> J;
-  copy (J, xform);
-
-  input = Vector< 4, Estimate<double> > ();
-
-  output = transform (input, J);
-
-  for (unsigned i=0; i<4; i++)
-    if (output[i].get_expression()->get_nparam() != 4)
-      throw Error (InvalidState, "MEAL::StokesError ctor",
-		   "output Stokes parameter has more than 4 dof");
-
-  gradient_built = false;
-}
-
-void MEAL::StokesError::build_gradient ()
-{
-  if (gradient_built)
-    return;
-
-  Jones<MEAL::ScalarMath> J;
-  copy (J, xform);
-
-  Jones<MEAL::ScalarMath> J_grad;
-  copy (J_grad, xform_grad);
-
-  Jones<MEAL::ScalarMath> rho = convert(input);
-
-  output_grad = coherency ( J_grad * rho * herm(J) + J * rho * herm(J_grad) );
-
-  for (unsigned i=0; i<4; i++)
-    if (output_grad[i].get_expression()->get_nparam() != 4)
-      throw Error (InvalidState, "MEAL::StokesError ctor",
-		   "output Stokes parameters gradient has more than 4 dof");
+  built = true;
 }
 
 //! Set the variances of the input Stokes parameters
 void MEAL::StokesError::set_variance (const Stokes<double>& var)
 {
-  Estimate<double> v;
-
-  for (unsigned ipol=0; ipol < 4; ipol++) {
-    v.var = var[ipol];
-    input[ipol].get_expression()->set_Estimate( 0, v );
-  }
-}
-
-
-void copy (Jones<MEAL::ScalarValue>& to, const Jones<double>& from)
-{
-  for (unsigned i=0; i<2; i++) {
-    for (unsigned j=0; j<2; j++) {
-      pub(to(i,j)).real.set_value( pub(from(i,j)).real );
-      pub(to(i,j)).imag.set_value( pub(from(i,j)).imag );
-    }
-  }
+  input = var;
 }
 
 //! Set the transformation from template to observation
 void MEAL::StokesError::set_transformation (const Jones<double>& J)
 {
-  copy (xform, J);
+  jones = J;
+  xform = Mueller (J);
+  built = false;
 }
 
 //! Get the variances of the output Stokes parameters
-void MEAL::StokesError::get_variance (Stokes<double>& var)
+Stokes<double> MEAL::StokesError::get_variance () const
 {
-  for (unsigned ipol=0; ipol< 4; ipol++)
-    var[ipol] = output[ipol].get_Estimate().get_variance();
+  Matrix<4,4,double> squared;
+
+  for (unsigned i=0; i<4; i++)
+    for (unsigned j=0; j<4; j++)
+      squared[i][j] = xform[i][j] * xform[i][j];
+
+  return squared * input;
 }
 
 //! Set the transformation gradient component
 void MEAL::StokesError::set_transformation_gradient (const Jones<double>& grad)
 {
-  copy (xform_grad, grad);
+  jones_grad = grad;
+  built = false;
 }
 
 //! Get the variances of the output Stokes parameters gradient component
-void MEAL::StokesError::get_variance_gradient (Stokes<double>& var_grad)
+Stokes<double> MEAL::StokesError::get_variance_gradient () const
 {
-  build_gradient ();
-  for (unsigned ipol=0; ipol< 4; ipol++)
-    var_grad[ipol] = output_grad[ipol].get_Estimate().get_variance();
+  if (!built)
+    const_cast<StokesError*>(this)->build();
+
+  return del * input;
+}
+
+void MEAL::StokesError::build ()
+{
+  Matrix<4,4,double> xform_grad = Mueller (jones, jones_grad);
+
+  for (unsigned i=0; i<4; i++)
+    for (unsigned j=0; j<4; j++)
+      del[i][j] = 2.0 * xform[i][j] * xform_grad[i][j];
+
+  built = true;
 }

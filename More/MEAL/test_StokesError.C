@@ -21,8 +21,7 @@ int main ()
   Stokes<double> input (1,2,.5,.6);
   test.set_variance (input);
 
-  Stokes<double> output;
-  test.get_variance (output);
+  Stokes<double> output = test.get_variance ();
 
   if (input != output) {
     cerr << "FAIL! identity\n"
@@ -37,7 +36,7 @@ int main ()
   rotation.set_param (0, M_PI/4);
 
   test.set_transformation (rotation.evaluate());
-  test.get_variance (output);
+  output = test.get_variance ();
 
   Stokes<double> expect (1,2,.6,.5);
 
@@ -52,7 +51,7 @@ int main ()
 
   J = 0;
   test.set_transformation_gradient (J);
-  test.get_variance_gradient (output);
+  output = test.get_variance_gradient ();
 
   expect = 0;
   if (expect != output) {
@@ -65,9 +64,14 @@ int main ()
   cerr << "simple null gradient test passed" << endl;
 
   vector< Jones<double> > grad;
-  rotation.evaluate(&grad);
+
+  Stokes<double> input2 (3.63323e-08,3.41734e-08,3.57376e-08,3.55304e-08);
+
+  test.set_variance (input2);
+  test.set_transformation( rotation.evaluate(&grad) );
+
   test.set_transformation_gradient (grad[0]);
-  test.get_variance_gradient (output);
+  output = test.get_variance_gradient ();
 
   if (output[2] == 0 || output[3] == 0) {
     cerr << "FAIL! non-zero gradient\n"
@@ -78,41 +82,34 @@ int main ()
 
   cerr << "simple non-zero gradient test passed" << endl;
 
-  cerr << "testing that this was not a huge waste of time" << endl;
+  double delta_phi = 1e-3;
 
-  MEAL::RandomPolar random;
+  test.set_transformation( rotation.evaluate() );
+  output = test.get_variance ();
 
-  for (unsigned i=0; i < 1000; i++) {
+  rotation.set_param(0, rotation.get_param(0) + delta_phi);
+  test.set_transformation( rotation.evaluate() );
 
-    MEAL::Polar polar;
-    random.get (&polar);
+  Stokes<double> output2 = test.get_variance ();
+  Stokes<double> diff = output2 - output;
 
-    J = polar.evaluate();
-    test.set_transformation (J);
+  rotation.set_param(0, rotation.get_param(0) - 0.5*delta_phi);
+  test.set_transformation( rotation.evaluate(&grad) );
+  test.set_transformation_gradient (grad[0]);
 
-    test.get_variance (output);
+  expect = delta_phi * test.get_variance_gradient ();
 
-    // ... is it a simple matter of propagating the error, sigma ??
+  double ndiff = norm(diff - expect) / norm(diff);
 
-    Stokes<double> temp;
-    for (unsigned i=0; i<4; i++)
-      temp[i] = sqrt(input[i]);
-
-    Stokes<double> expect = transform (input, J);
-
-    for (unsigned i=0; i<4; i++)
-      expect[i] *= expect[i];
-
-    if (expect == output) {
-      cerr << "INTERESTING!\n"
-	"expect = " << expect << "\n"
-	"output= " << output << endl;
-      return -1;
-    }
-
+  if (ndiff > 1e-6) {
+    cerr << "FAIL! differential gradient test\n"
+      "expect = " << expect << "\n"
+      "diff = " << diff << endl;
+    return -1;
   }
 
-  cerr << "time apparently not wasted" << endl;
+  cerr << "differential gradient test passed" << endl;
 
+  cerr << "all tests passed" << endl;
   return 0;
 }
