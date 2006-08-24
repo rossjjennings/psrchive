@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Pauli.h,v $
-   $Revision: 1.21 $
-   $Date: 2006/08/23 21:59:43 $
+   $Revision: 1.22 $
+   $Date: 2006/08/24 22:00:39 $
    $Author: straten $ */
 
 #ifndef __Pauli_H
@@ -238,6 +238,22 @@ Matrix<4,4,T> Mueller (const Jones<T>& J)
     Stokes<T> basis;
     basis[row] = 1.0;
     result[row] = coherency(herm(J) * convert(basis) * J);
+  }
+
+  return result;
+}
+
+// return the Mueller matrix derivative Jones matrix
+template<typename T>
+Matrix<4,4,T> Mueller (const Jones<T>& J, const Jones<T>& Jgrad)
+{
+  Matrix<4,4,T> result;
+
+  for (unsigned row=0; row < 4; row++) {
+    Stokes<T> basis;
+    basis[row] = 1.0;
+    Jones<T> rho = convert(basis);
+    result[row] = coherency(herm(Jgrad) * rho * J + herm(J) * rho * Jgrad);
   }
 
   return result;
