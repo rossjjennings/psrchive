@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PolnProfileFitAnalysis.h,v $
-   $Revision: 1.15 $
-   $Date: 2006/08/23 22:02:51 $
+   $Revision: 1.16 $
+   $Date: 2006/08/24 21:57:49 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PolnProfileFitAnalysis_h
@@ -149,9 +149,11 @@ namespace Pulsar {
     
   private:
 
+    void initialize();
+
     std::vector< Stokes<double> > delN_delB;
     std::vector< Jones<double> > delR_delB;
-    std::vector< Stokes<double> > delN_deleta;
+    std::vector< Stokes<double> > delN_delJ;
 
   };
 
