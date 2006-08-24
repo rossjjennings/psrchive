@@ -63,8 +63,7 @@ void Calibration::TemplateUncertainty::build ()
 {
   template_variance.set_transformation( transformation->evaluate() );
 
-  Stokes<double> var;
-  template_variance.get_variance( var );
+  Stokes<double> var = template_variance.get_variance();
 
   for (unsigned ipol=0; ipol < 4; ipol++)
     inv_var[ipol] = 1.0 / (observation_variance[ipol] + var[ipol]);
