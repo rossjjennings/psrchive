@@ -6,8 +6,8 @@
  *
  ***************************************************************************/
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Attic/string_utils.h,v $
-   $Revision: 1.38 $
-   $Date: 2006/07/19 02:05:42 $
+   $Revision: 1.39 $
+   $Date: 2006/08/25 06:34:29 $
    $Author: hknight $ */
 
 #ifndef __STRING_UTILS_H
@@ -172,6 +172,25 @@ std::string form_string(T input, int precision){
   std::ostringstream ost;
   ost << std::setprecision( precision ) << input;
   return ost.str();
+}
+
+// This is designed to take an integer as input
+// Makes 1234567 -> "1,234,567"
+template<class T>
+std::string
+comma_string(T input)
+{
+  std::string in = form_string(input);
+  vector<char> vout;
+  for( unsigned i=0; i<in.size(); i++){
+    unsigned index = in.size()-1-i;
+    vout.push_back( in[index] );
+    if( i % 3 == 2 )
+      vout.push_back(',');
+  }
+  invert(vout);
+
+  return string( &*vout.begin(), &*vout.end());
 }
 
 /* Doesn't work for pointers!  (Stupid linux compiler) */
