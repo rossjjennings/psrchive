@@ -267,7 +267,7 @@ int main (int argc, char *argv[]) try {
 	Pulsar::Archive::set_verbosity(3);
 	break;
       case 'i':
-	cout << "$Id: pam.C,v 1.64 2006/07/29 04:06:53 hknight Exp $" << endl;
+	cout << "$Id: pam.C,v 1.65 2006/08/25 06:37:08 hknight Exp $" << endl;
 	return 0;
       case 'm':
 	save = true;
@@ -605,10 +605,9 @@ int main (int argc, char *argv[]) try {
       }
 
       if( new_folding_period > 0.0 ){
-	for( unsigned isub=0; isub<arch->get_nsubint();isub++){
-	  Pulsar::counter_drift( arch, new_folding_period, 0.0);
+	Pulsar::counter_drift( arch, new_folding_period, 0.0);
+	for( unsigned isub=0; isub<arch->get_nsubint();isub++)
 	  arch->get_Integration(isub)->set_folding_period( new_folding_period );
-	}
       }
 
       if (install_receiver) {
