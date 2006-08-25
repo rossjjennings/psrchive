@@ -690,6 +690,99 @@ void Pulsar::PolnProfileFitAnalysis::insert_basis ()
   fit->set_transformation ( p );
 }
 
+
+
+
+//! Given a coherency matrix, return the weighted conjugate matrix
+Jones<double> inv_weight (const Jones<double>& rho, const Stokes<double>& s)
+{
+  Stokes< complex<double> > stokes = complex_coherency( rho );
+
+  for (unsigned ipol=0; ipol<4; ipol++)
+    stokes[ipol] /= s[ipol];
+
+  //cerr << "weight=" << s << endl;
+  //cerr << "result=" << stokes << endl;
+
+  return convert (stokes);
+}
+
+
+
+
+
+
+
+
+double Pulsar::PolnProfileFitAnalysis::get_cond_var (vector<double>& grad)
+{
+  for (unsigned ir=0; ir < xform_gradient.size(); ir++)
+    cerr << "basis[" << ir << "]=" << fit->transformation->get_param(ir) << endl;
+
+  xform_result = fit->transformation->evaluate (&xform_gradient);
+
+  error.set_transformation (xform_result);
+  Stokes<double> variance = error.get_variance();
+
+  double var = 0.0;
+  grad = vector<double> (xform_gradient.size(), 0.0);
+
+  for (unsigned ih=0; ih < fit->model->get_num_input(); ih++) {
+
+    set_harmonic (ih);
+    model_result = fit->model->evaluate (&model_gradient);
+
+    Stokes< complex<double> > S = complex_coherency(model_result);
+
+    for (unsigned ipol=0; ipol<4; ipol++)
+      var += norm(S[ipol])/variance[ipol];
+
+    for (unsigned ir=0; ir < xform_gradient.size(); ir++) {
+
+      error.set_transformation_gradient (xform_gradient[ir]);
+      Stokes<double> variance_gradient = error.get_variance_gradient();
+
+      Stokes< complex<double> > Sg = complex_coherency(model_gradient[ir+3]);
+
+      for (unsigned ipol=0; ipol<4; ipol++) {
+
+	double n1 = 2 * (conj(S[ipol])*Sg[ipol]).real();
+	double n2 = norm(S[ipol]) * variance_gradient[ipol] / variance[ipol];
+
+#if 0
+	cerr << ir << " " << ipol << ":\n"
+	  "n1=" << n1 << "\n"
+	  "n2=" << n2 << endl;
+#endif
+
+	grad[ir] += (n1 - n2) / variance[ipol];
+
+      }
+
+    }
+
+  }
+  
+  for (unsigned ir=0; ir < xform_gradient.size(); ir++)
+    cerr << "grad[" << ir << "]=" << grad[ir] << endl;
+
+  return var;
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // /////////////////////////////////////////////////////////////////////
 //
 // the same for scalar template matching

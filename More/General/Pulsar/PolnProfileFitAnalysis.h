@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/Attic/PolnProfileFitAnalysis.h,v $
-   $Revision: 1.16 $
-   $Date: 2006/08/24 21:57:49 $
+   $Revision: 1.17 $
+   $Date: 2006/08/25 04:39:01 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PolnProfileFitAnalysis_h
@@ -53,6 +53,9 @@ namespace Pulsar {
 
     //! Get the multiple correlation and its gradient with respect to basis
     double get_Rmult (std::vector<double>& grad);
+
+    //! Get the conditional variance of varphi and its gradient wrt transform
+    double get_cond_var (std::vector<double>& grad);
 
   protected:
 
