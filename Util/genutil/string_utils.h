@@ -6,9 +6,9 @@
  *
  ***************************************************************************/
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Attic/string_utils.h,v $
-   $Revision: 1.39 $
-   $Date: 2006/08/25 06:34:29 $
-   $Author: hknight $ */
+   $Revision: 1.40 $
+   $Date: 2006/08/26 15:16:39 $
+   $Author: straten $ */
 
 #ifndef __STRING_UTILS_H
 #define __STRING_UTILS_H
@@ -174,6 +174,7 @@ std::string form_string(T input, int precision){
   return ost.str();
 }
 
+// forward declaration of template method defined
 // This is designed to take an integer as input
 // Makes 1234567 -> "1,234,567"
 template<class T>
@@ -181,16 +182,15 @@ std::string
 comma_string(T input)
 {
   std::string in = form_string(input);
-  vector<char> vout;
+  std::string out;
   for( unsigned i=0; i<in.size(); i++){
     unsigned index = in.size()-1-i;
-    vout.push_back( in[index] );
+    out.push_back( in[index] );
     if( i % 3 == 2 )
-      vout.push_back(',');
+      out.push_back( ',' );
   }
-  invert(vout);
 
-  return string( &*vout.begin(), &*vout.end());
+  return std::string( out.rend(), out.rbegin() );
 }
 
 /* Doesn't work for pointers!  (Stupid linux compiler) */
