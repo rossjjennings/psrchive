@@ -10,6 +10,30 @@
 
 using namespace std;
 
+class Test {
+
+public:
+
+  Test ();
+
+  void testgrad (unsigned i);
+
+  double evaluate (unsigned i, double* grad);
+
+protected:
+
+  vector< Jones<double> > Jgrad;
+  Jones<double> J;
+
+  Vector< 4, complex<double> > input;
+  Vector< 4, double > variance;
+
+  MEAL::Polar polar;
+
+  unsigned tests;
+  unsigned errors;
+};
+
 int main ()
 {
   MEAL::StokesError test;
@@ -110,6 +134,138 @@ int main ()
 
   cerr << "differential gradient test passed" << endl;
 
+  Test t;
+
   cerr << "all tests passed" << endl;
   return 0;
+}
+
+Test::Test ()
+{
+  cerr << "Testing del against small delta" << endl;
+
+  MEAL::RandomPolar random;
+
+  tests = 0;
+  errors = 0;
+
+  for (unsigned i=0; i < 1000; i++) {
+
+    random.get (&polar);
+
+    J = polar.evaluate( &Jgrad );
+
+    random_vector (input, 10.0);
+
+    random_vector (variance, 0.6);
+    for (unsigned i=0; i<4; i++)
+      variance[i] *= variance[i];
+
+    for (unsigned ig=0; ig < Jgrad.size(); ig++)
+      testgrad (ig);
+
+  }
+
+  double failure_rate = double(errors)/double(tests)*100.0;
+
+  cerr << "Failed " << errors << " out of " << tests << " times ("
+       << failure_rate << "%)" << endl;
+
+  if (failure_rate > 10)
+    exit (-1);
+}
+
+void Test::testgrad (unsigned ig)
+{
+  double grad = 0;
+  double val = evaluate (ig, &grad);
+
+  // cerr << "grad[" << ig << "]=" << grad << endl;
+
+  double param = polar.get_param(ig);
+
+  double step = 1e-14 * param;
+  double expect_diff = step * grad;
+
+  polar.set_param (ig, param - 0.5*step);
+  J = polar.evaluate (&Jgrad);
+  double grad1;
+  double val1 = evaluate (ig, &grad1);
+
+  polar.set_param (ig, param + 0.5*step);
+  J = polar.evaluate (&Jgrad);
+  double grad2;
+  double val2 = evaluate (ig, &grad2);
+
+  polar.set_param (ig, param);
+  J = polar.evaluate (&Jgrad);
+
+  double curv = grad2-grad1;
+
+  expect_diff += 0.5 * curv * step * step;
+
+  double diff = val2 - val1;
+
+  if ( fabs((diff - expect_diff)/diff) > 1e-2 &&
+       fabs((diff - expect_diff)/curv) > 1 ) {
+
+#if 0
+    cerr << "val=" << val << " grad=" << grad << endl;
+    cerr << "1: val=" << val1 << " grad=" << grad1 << endl;
+    cerr << "2: val=" << val2 << " grad=" << grad2 << endl;
+    
+    cerr << "diff=" << val2-val1 << " expected=" << expect_diff << endl;
+    cerr << "curv=" << curv << endl;
+#endif
+
+    errors ++;
+  }
+
+  tests ++;
+}
+
+double Test::evaluate (unsigned ig, double* grad)
+{
+  MEAL::StokesError test;
+  test.set_variance (variance);
+  test.set_transformation (J);
+  test.set_transformation_gradient (Jgrad[ig]);
+
+  Stokes<double> var = test.get_variance();
+  Stokes<double> vargrad = test.get_variance_gradient();
+
+
+  Stokes< complex<double> > S (input);
+  Jones<double> rho = convert (S);
+
+  Jones<double> rhop = J * rho * herm(J);
+  Jones<double> delrhop = Jgrad[ig]* rho * herm(J) + J * rho * herm(Jgrad[ig]);
+
+  S = complex_coherency (rhop);
+  Stokes< complex<double> > Sgrad = complex_coherency (delrhop);
+
+  double result = 0;
+  double result_grad = 0;
+
+  for (unsigned i=0; i < 4; i++) {
+
+#if 1
+
+    result += norm(S[i]) / var[i];
+    result_grad += 
+      (2*(conj(S[i])*Sgrad[i]).real() - norm(S[i])*vargrad[i]/var[i]) / var[i];
+
+#else
+
+    // a simpler test; does not involve the variance
+    result += norm(S[i]);
+    result_grad += 2*(conj(S[i])*Sgrad[i]).real();
+
+#endif
+
+  }
+
+  *grad = result_grad;
+  return result;
+
 }
