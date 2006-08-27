@@ -6,9 +6,9 @@
  *
  ***************************************************************************/
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Attic/string_utils.h,v $
-   $Revision: 1.40 $
-   $Date: 2006/08/26 15:16:39 $
-   $Author: straten $ */
+   $Revision: 1.41 $
+   $Date: 2006/08/27 12:14:04 $
+   $Author: hknight $ */
 
 #ifndef __STRING_UTILS_H
 #define __STRING_UTILS_H
@@ -182,15 +182,22 @@ std::string
 comma_string(T input)
 {
   std::string in = form_string(input);
-  std::string out;
+
+  std::vector<char> vout;
   for( unsigned i=0; i<in.size(); i++){
     unsigned index = in.size()-1-i;
-    out.push_back( in[index] );
-    if( i % 3 == 2 )
-      out.push_back( ',' );
+    vout.push_back( in[index] );
+    if( i % 3 == 2 && i != in.size()-1 )
+      vout.push_back( ',' );
   }
 
-  return std::string( out.rend(), out.rbegin() );
+  std::string out;
+  for( unsigned i=0; i<vout.size(); i++){
+    unsigned index = in.size()-1-i;
+    out.push_back( vout[index] );
+  }
+
+  return out;
 }
 
 /* Doesn't work for pointers!  (Stupid linux compiler) */
