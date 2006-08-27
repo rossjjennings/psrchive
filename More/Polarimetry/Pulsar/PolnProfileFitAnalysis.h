@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PolnProfileFitAnalysis.h,v $
-   $Revision: 1.17 $
-   $Date: 2006/08/25 04:39:01 $
+   $Revision: 1.18 $
+   $Date: 2006/08/27 08:04:29 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PolnProfileFitAnalysis_h
@@ -27,6 +27,9 @@ namespace Pulsar {
 
   public:
 
+    //! Verbosity flag
+    bool verbose;
+
     //! Default constructor
     PolnProfileFitAnalysis ();
 
@@ -35,6 +38,9 @@ namespace Pulsar {
 
     //! Set the PolnProfileFit algorithm to be analysed
     void set_fit (PolnProfileFit*);
+
+    //! Set the PolnProfileFit algorithm to be used for the scalar method
+    void set_scalar_fit (PolnProfileFit* fit) { scalar_fit = fit; }
 
     //! Set the transformation to be used to find the optimal basis
     void set_basis (MEAL::Complex2*);
@@ -70,6 +76,12 @@ namespace Pulsar {
 
     //! The PolnProfileFit algorithm to be analysed
     Reference::To<PolnProfileFit> fit;
+
+    //! The PolnProfileFit algorithm to be used for the scalar
+    Reference::To<PolnProfileFit> scalar_fit;
+
+    //! The transformation to built into the MTM algorithm
+    Reference::To<MEAL::Complex2> xform;
 
     //! The transformation to be used to find the optimal basis
     Reference::To<MEAL::Complex2> basis;
@@ -155,7 +167,6 @@ namespace Pulsar {
     void initialize();
 
     std::vector< Stokes<double> > delN_delB;
-    std::vector< Jones<double> > delR_delB;
     std::vector< Stokes<double> > delN_delJ;
 
   };
