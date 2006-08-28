@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PolnProfileFitAnalysis.h,v $
-   $Revision: 1.18 $
-   $Date: 2006/08/27 08:04:29 $
+   $Revision: 1.19 $
+   $Date: 2006/08/28 21:59:07 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PolnProfileFitAnalysis_h
@@ -39,8 +39,8 @@ namespace Pulsar {
     //! Set the PolnProfileFit algorithm to be analysed
     void set_fit (PolnProfileFit*);
 
-    //! Set the PolnProfileFit algorithm to be used for the scalar method
-    void set_scalar_fit (PolnProfileFit* fit) { scalar_fit = fit; }
+    //! Optimize the template for timing
+    void optimize ();
 
     //! Set the transformation to be used to find the optimal basis
     void set_basis (MEAL::Complex2*);
@@ -55,7 +55,10 @@ namespace Pulsar {
     Estimate<double> get_relative_conditional_error () const;
 
     //! Get the variance of varphi and its gradient with respect to basis
-    double get_var_varphi (std::vector<double>& var_varphi_grad);
+    double get_c_varphi (std::vector<double>* c_varphi_grad = 0);
+
+    //! Get the uncertainty in the variance of varphi
+    double get_c_varphi_error () const;
 
     //! Get the multiple correlation and its gradient with respect to basis
     double get_Rmult (std::vector<double>& grad);
@@ -77,10 +80,7 @@ namespace Pulsar {
     //! The PolnProfileFit algorithm to be analysed
     Reference::To<PolnProfileFit> fit;
 
-    //! The PolnProfileFit algorithm to be used for the scalar
-    Reference::To<PolnProfileFit> scalar_fit;
-
-    //! The transformation to built into the MTM algorithm
+    //! The transformation built into the MTM algorithm
     Reference::To<MEAL::Complex2> xform;
 
     //! The transformation to be used to find the optimal basis
@@ -101,6 +101,9 @@ namespace Pulsar {
     //! The partial derivative of the covariance matrix wrt Re[S_k] and Im[S_k]
     void delC_delS( Matrix<8,8,double>& delC_delSre,
 		    Matrix<8,8,double>& delC_delSim, unsigned k ) const;
+
+    //! The partial derivative of rho wrt Stokes parameter
+    Jones<double> delrho_delS (unsigned k) const;
 
     //! The partial derivative of rho wrt basis parameter
     Jones<double> delrho_delB (unsigned b) const;
@@ -168,6 +171,9 @@ namespace Pulsar {
 
     std::vector< Stokes<double> > delN_delB;
     std::vector< Stokes<double> > delN_delJ;
+
+    double var_c_varphi;
+    void var_c_varphi_add ();
 
   };
 

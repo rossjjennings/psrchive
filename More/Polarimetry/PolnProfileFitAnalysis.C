@@ -171,6 +171,73 @@ void conformal_partition (const Matrix<8,8,double>& covariance,
 
 }
 
+
+
+Jones<double> 
+Pulsar::PolnProfileFitAnalysis::del_deleta (unsigned i,
+					    const Jones<double>& K) const
+{
+  if (i == 0)
+    return xform_result * K * herm(xform_result) * phase_gradient[2];
+
+  i --;
+
+  return ( xform_gradient[i] * K * herm(xform_result) +
+	   xform_result * K * herm(xform_gradient[i]) ) * phase_result;
+}
+
+Jones<double> Pulsar::PolnProfileFitAnalysis::delrho_delS (unsigned k) const
+{
+  Stokes<double> q;
+  q[k] = 1.0;
+  return convert(q);
+}
+
+void Pulsar::PolnProfileFitAnalysis::delC_delS
+( Matrix<8,8,double>& delC_delSre,
+  Matrix<8,8,double>& delC_delSim, unsigned k ) const
+{
+  Matrix<8,8,double> delalpha_delSre;
+  Matrix<8,8,double> delalpha_delSim;
+
+  // over all rows
+  for (unsigned ir=0; ir < 8; ir++) {
+	
+    Jones<double> del2rho_deleta_r = del_deleta (ir, delrho_delS(k));
+    Jones<double> delrho_deleta_r = model_gradient[ir+2];    
+
+    // over all columns
+    for (unsigned is=0; is <= ir; is ++) {
+	  
+      Jones<double> del2rho_deleta_s = del_deleta (is, delrho_delS(k));
+      Jones<double> delrho_deleta_s = model_gradient[is+2];
+	  
+      delalpha_delSre[ir][is] = 2.0 *
+	trace( del2rho_deleta_r * herm(delrho_deleta_s) +
+	       delrho_deleta_r  * herm(del2rho_deleta_s) ).real();
+
+      complex<double> i (0,1);
+
+      delalpha_delSim[ir][is] = 2.0 *
+	trace( i*del2rho_deleta_r * herm(delrho_deleta_s) +
+	       delrho_deleta_r    * herm(i*del2rho_deleta_s) ).real();
+
+      if (is != ir) {
+	delalpha_delSre[is][ir] = delalpha_delSre[ir][is];
+	delalpha_delSim[is][ir] = delalpha_delSim[ir][is];
+      }
+
+    }
+    
+  }
+
+  delalpha_delSre *= fit->uncertainty->get_inv_var(k);
+  delalpha_delSim *= fit->uncertainty->get_inv_var(k);
+
+  delC_delSre = -covariance * delalpha_delSre * covariance;
+  delC_delSim = -covariance * delalpha_delSim * covariance;
+}
+
 /*! Return the partial derivative of the multiple correlation squared with
   respect to the real or imaginary component of a Stokes parameter */
 
@@ -191,66 +258,6 @@ Pulsar::PolnProfileFitAnalysis::delR2_varphiJ_delS
 	   - C_varphiJ * (inv_C_JJ * delC_JJ_delS * inv_C_JJ * C_varphiJ) 
 	   + C_varphiJ * (inv_C_JJ * delC_varphiJ_delS)
 	   - R2_varphiJ * delc_varphi_delS ) / c_varphi;
-}
-
-Jones<double> 
-Pulsar::PolnProfileFitAnalysis::del_deleta (unsigned i,
-					    const Jones<double>& K) const
-{
-  if (i == 0)
-    return xform_result * K * herm(xform_result) * phase_gradient[2];
-
-  i --;
-
-  return ( xform_gradient[i] * K * herm(xform_result) +
-	   xform_result * K * herm(xform_gradient[i]) ) * phase_result;
-}
-
-Jones<double> delrho_delS (unsigned k)
-{
-  Stokes<double> q;
-  q[k] = 1.0;
-  return convert (q);
-}
-
-void Pulsar::PolnProfileFitAnalysis::delC_delS
-( Matrix<8,8,double>& delC_delSre,
-  Matrix<8,8,double>& delC_delSim, unsigned k ) const
-{
-  Matrix<8,8,double> delalpha_delSre;
-  Matrix<8,8,double> delalpha_delSim;
-
-  // over all rows
-  for (unsigned ir=0; ir < 8; ir++) {
-	
-    Jones<double> del2rho_deleta_r = del_deleta (ir, delrho_delS(k));
-    Jones<double> delrho_deleta_r = model_gradient[ir+2];    
-
-    // over all columns
-    for (unsigned is=0; is < 8; is ++) {
-	  
-      Jones<double> del2rho_deleta_s = del_deleta (is, delrho_delS(k));
-      Jones<double> delrho_deleta_s = model_gradient[is+2];
-	  
-      delalpha_delSre[ir][is] = 2.0 *
-	trace( del2rho_deleta_r * herm(delrho_deleta_s) +
-	       delrho_deleta_r  * herm(del2rho_deleta_s) ).real();
-
-      complex<double> i (0,1);
-
-      delalpha_delSim[ir][is] = 2.0 *
-	trace( i*del2rho_deleta_r * herm(delrho_deleta_s) +
-	       delrho_deleta_r    * herm(i*del2rho_deleta_s) ).real();
-
-    }
-    
-  }
-
-  delalpha_delSre *= fit->uncertainty->get_inv_var(k);
-  delalpha_delSim *= fit->uncertainty->get_inv_var(k);
-
-  delC_delSre = -covariance * delalpha_delSre * covariance;
-  delC_delSim = -covariance * delalpha_delSim * covariance;
 }
 
 Jones<double>
@@ -298,6 +305,71 @@ Stokes<double> Pulsar::PolnProfileFitAnalysis::delnoise
 Stokes<double> Pulsar::PolnProfileFitAnalysis::delnoise_delB (unsigned b)
 {
   return delnoise (basis_result, basis_gradient[b]);
+
+#if 0
+  Stokes<double> var = error.get_variance ();
+  Stokes<double> var_grad = error.get_variance_gradient ();
+
+  double param = basis->get_param(b);
+
+  double step = 1e-14 * param;
+  Stokes<double> expect_diff = step * var_grad;
+
+  basis->set_param (b, param - 0.5*step);
+
+  vector< Jones<double> > Jgrad;
+  Jones<double> J = basis->evaluate (&Jgrad);
+
+  error.set_transformation (J);
+  error.set_transformation_gradient (Jgrad[b]);
+
+  Stokes<double> var1 = error.get_variance ();
+  Stokes<double> var1_grad = error.get_variance_gradient ();
+
+  basis->set_param (b, param + 0.5*step);
+  J = basis->evaluate (&Jgrad);
+
+  error.set_transformation (J);
+  error.set_transformation_gradient (Jgrad[b]);
+
+  Stokes<double> var2 = error.get_variance ();
+  Stokes<double> var2_grad = error.get_variance_gradient ();
+
+  basis->set_param (b, param);
+
+  Stokes<double> diff = var2 - var1;
+  Stokes<double> curv = var2_grad - var1_grad;
+
+  static unsigned errors = 0;
+  static unsigned tests = 0;
+
+  for (unsigned i=0; i < 4; i++) {
+
+    double expect = expect_diff[i] + 0.5 * curv[i] * step * step;
+
+    tests ++;
+
+    if ( fabs((diff[i] - expect)/diff[i]) > 1e-2 &&
+	 fabs((diff[i] - expect)/curv[i]) > 1 ) {
+
+      errors ++;
+
+#if 1
+      cerr << "val=" << var << " grad=" << var_grad << endl;
+      cerr << "1: val=" << var1 << " grad=" << var1_grad << endl;
+      cerr << "2: val=" << var2 << " grad=" << var2_grad << endl;
+      
+      cerr << "diff["<<i<<"]=" << diff[i] << " expected=" << expect << endl;
+      cerr << "curv=" << curv << " errors=" << errors 
+	   << " tests=" << tests << endl;
+#endif
+      
+    }
+
+  }
+
+#endif
+
 }
 
 Matrix<8,8,double>
@@ -327,11 +399,13 @@ Pulsar::PolnProfileFitAnalysis::delalpha_delB (unsigned ib)
       double r2 = 0.0;
 
       for (unsigned i=0; i < 4; i++) {
+
 	double iv = fit->uncertainty->get_inv_var(i);
 	double dv = delN_delB[ib][i];
 
 	r2 += (d2r[i]*conj(ds[i]) + dr[i]*conj(d2s[i])).real() * iv
 	  - (dr[i]*conj(ds[i])).real() * iv * dv;
+
       }
 
       delalpha_delB[ir][is] = r2;
@@ -360,6 +434,8 @@ void Pulsar::PolnProfileFitAnalysis::initialize ()
       delN_delB[i] = delnoise_delB (i);
     }
   }
+  else
+    basis_result = 1;
 
   xform_result = xform->evaluate (&xform_gradient);
 
@@ -382,6 +458,8 @@ void Pulsar::PolnProfileFitAnalysis::delalpha_delB
 
   initialize ();
 
+  var_c_varphi = 0;
+
   for (unsigned ih=0; ih < fit->model->get_num_input(); ih++) {
 
     unsigned bih = fit->model->get_num_input() - ih - 1;
@@ -394,7 +472,10 @@ void Pulsar::PolnProfileFitAnalysis::delalpha_delB
     for (unsigned ib=0; ib < basis->get_nparam(); ib++)
       delalpha_delbasis[ib] += delalpha_delB (ib);
 
+    var_c_varphi_add();
+
   }
+
 
 #if 0
   for (unsigned ib=0; ib < basis->get_nparam(); ib++)
@@ -410,11 +491,7 @@ void Pulsar::PolnProfileFitAnalysis::set_fit (PolnProfileFit* f)
 
   if (!fit)
     return;
-
-  if (basis)
-    for (unsigned i=0; i<basis->get_nparam(); i++)
-      cerr << "basis[" << i << "]=" << basis->get_param(i) << endl;
-
+    
   error.set_variance (f->standard_variance);
   xform = fit->get_transformation();
 
@@ -448,12 +525,7 @@ void Pulsar::PolnProfileFitAnalysis::set_fit (PolnProfileFit* f)
   // /////////////////////////////////////////////////////////////////////
 
   ScalarProfileFitAnalysis scalar;
-  if (scalar_fit) {
-    cerr << "Set to the scalar" << endl;
-    scalar.set_fit (scalar_fit);
-  }
-  else
-    scalar.set_fit (fit);
+  scalar.set_fit (fit);
 
   Matrix<2,2,double> I_curvature;
   scalar.get_curvature (I_curvature);
@@ -486,7 +558,7 @@ void Pulsar::PolnProfileFitAnalysis::set_fit (PolnProfileFit* f)
   double var_hatvar_varphiJ = 0.0;
 
   // the variance of the phase shift variance
-  double var_c_varphi = 0.0;
+  var_c_varphi = 0.0;
 
   for (unsigned ih=0; ih < fit->model->get_num_input(); ih++) {
 
@@ -504,10 +576,10 @@ void Pulsar::PolnProfileFitAnalysis::set_fit (PolnProfileFit* f)
       delC_delS (delC_delSre, delC_delSim, ip);
 
       // the variance of the real and imaginary parts of the Stokes parameters
-      double var_S = 0.5/fit->uncertainty->get_inv_var(ip);
+      double var_S = 0.5*fit->standard_variance[ip];
 
-      var_c_varphi += delC_delSre[0][0]*delC_delSre[0][0] * var_S;
-      var_c_varphi += delC_delSim[0][0]*delC_delSim[0][0] * var_S;
+      var_c_varphi += ( delC_delSre[0][0]*delC_delSre[0][0] +
+			delC_delSim[0][0]*delC_delSim[0][0] ) * var_S;
 
       double delR2_varphiJ_delSre = delR2_varphiJ_delS (delC_delSre);
       double delR2_varphiJ_delSim = delR2_varphiJ_delS (delC_delSim);
@@ -628,18 +700,38 @@ double Pulsar::PolnProfileFitAnalysis::get_Rmult (std::vector<double>& grad)
   return R2_varphiJ;
 }
 
+double Pulsar::PolnProfileFitAnalysis::get_c_varphi_error () const
+{
+  return sqrt(var_c_varphi);
+}
+
+void Pulsar::PolnProfileFitAnalysis::var_c_varphi_add ()
+{
+  // over all four stokes parameters
+  for (unsigned ip=0; ip < 4; ip++) {
+
+    // calculate the partial derivative of the covariance matrix wrt S_ip
+    Matrix<8,8,double> delC_delSre;
+    Matrix<8,8,double> delC_delSim;
+    delC_delS (delC_delSre, delC_delSim, ip);
+
+    // the variance of the real and imaginary parts of the Stokes parameters
+    double var_S = 0.5*fit->standard_variance[ip];
+    
+    var_c_varphi += ( delC_delSre[0][0]*delC_delSre[0][0] + 
+		      delC_delSim[0][0]*delC_delSim[0][0] ) * var_S;
+  }
+}
 
 //! Get the variance of varphi and its gradient with respect to basis
 double 
-Pulsar::PolnProfileFitAnalysis::get_var_varphi (std::vector<double>& grad)
+Pulsar::PolnProfileFitAnalysis::get_c_varphi (std::vector<double>* grad)
 {
   //if (verbose)
-    for (unsigned i=0; i<basis->get_nparam(); i++)
-      cerr << "basis[" << i << "]=" << basis->get_param(i) << endl;
-
-  // calculate the partial derivatives of the curvature wrt basis
-  vector< Matrix<8,8,double> > delalpha_delbasis;
-  delalpha_delB (delalpha_delbasis);
+  cerr << "boost:";
+  for (unsigned i=1; i<4; i++)
+    cerr << " " << basis->get_param(i);
+  cerr << endl;
 
   // calculate the curvature matrix
   Matrix<8,8,double> curvature;
@@ -648,18 +740,16 @@ Pulsar::PolnProfileFitAnalysis::get_var_varphi (std::vector<double>& grad)
   // calculate the covariance matrix
   covariance = inv(curvature);
 
-  grad.resize( basis->get_nparam() );
-
   double c_varphi = covariance[0][0];
 
-  static double scale = 0;
+  if (!grad)
+    return c_varphi;
 
-  if (scale == 0) {
-    scale = pow (10.0, -floor(log(c_varphi)/log(10.0)));
-    cerr << "scale=" << scale << endl;
-  }
+  // calculate the partial derivatives of the curvature wrt basis
+  vector< Matrix<8,8,double> > delalpha_delbasis;
+  delalpha_delB (delalpha_delbasis);
 
-  c_varphi *= scale;
+  grad->resize( basis->get_nparam() );
 
   double size = 0;
 
@@ -669,16 +759,17 @@ Pulsar::PolnProfileFitAnalysis::get_var_varphi (std::vector<double>& grad)
     Matrix<8,8,double> delC_delB;
     delC_delB = -covariance * delalpha_delbasis[ib] * covariance;
 
-    grad[ib] = scale * delC_delB[0][0];
+    (*grad)[ib] = delC_delB[0][0];
     
-    cerr << "delvar_delB[" << ib << "]= " << grad[ib] << endl;
+    if (verbose)
+      cerr << "delvar_delB[" << ib << "]= " << (*grad)[ib] << endl;
 
     if (ib)
-      size += grad[ib] * grad[ib];
+      size += (*grad)[ib] * (*grad)[ib];
   }
 
   cerr << "c_varphi = " << c_varphi << " grad=" << sqrt(size) 
-       << " grad[0]=" << grad[0] << endl;
+       << " grad[0]=" << (*grad)[0] << endl;
 
   return c_varphi;
 }
@@ -718,8 +809,6 @@ void Pulsar::PolnProfileFitAnalysis::insert_basis ()
 
   if (!fit || !basis)
     return;
-
-  cerr << "Inserting basis transformation" << endl;
 
   basis_insertion = new MEAL::Complex2Value;
   basis_insertion -> set_value( basis->evaluate() );
