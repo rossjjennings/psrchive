@@ -6,8 +6,8 @@
  *
  ***************************************************************************/
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Attic/string_utils.h,v $
-   $Revision: 1.41 $
-   $Date: 2006/08/27 12:14:04 $
+   $Revision: 1.42 $
+   $Date: 2006/08/28 02:44:39 $
    $Author: hknight $ */
 
 #ifndef __STRING_UTILS_H
@@ -187,7 +187,7 @@ comma_string(T input)
   for( unsigned i=0; i<in.size(); i++){
     unsigned index = in.size()-1-i;
     vout.push_back( in[index] );
-    if( i % 3 == 2 && i != in.size()-1 )
+    if( i % 3 == 2 )
       vout.push_back( ',' );
   }
 
@@ -196,6 +196,8 @@ comma_string(T input)
     unsigned index = in.size()-1-i;
     out.push_back( vout[index] );
   }
+
+  frontchomp( out, ',' );
 
   return out;
 }
