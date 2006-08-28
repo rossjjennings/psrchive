@@ -315,51 +315,17 @@ Pulsar::PolnProfileFitAnalysis::delalpha_delB (unsigned ib)
   // over all rows
   for (unsigned ir=0; ir < 8; ir++) {
 
-    Jones<double> delrho_deleta_r
-      = fit->uncertainty->get_normalized( model_gradient[ir+2] );
+    Stokes<complex<double> > dr=complex_coherency(model_gradient[ir+2]);
+    Stokes<complex<double> > d2r=complex_coherency(del_deleta(ir,delR_delB));
 
-    Jones<double> del2rho_deleta_r
-      = fit->uncertainty->get_normalized( del_deleta(ir, delR_delB) );
-
-#if 1
-    Jones<double> correction = weight( delrho_deleta_r, delN_delB[ib] );
-
-    //cerr << "del2rho_deleta["<<ir<<"]=" << del2rho_deleta_r << endl;
-    //cerr << "         correction=" << correction << endl;
-    del2rho_deleta_r -= correction;
-    //cerr << "             result=" << del2rho_deleta_r << endl;
-#endif
-
-#ifdef CORRECT_CURVATURE
-    if (ir > 0) {
-      //cerr << "delrho_deleta_r=" << delrho_deleta_r << endl;
-      //cerr << "correction=" << delN_delJ[ir-1] << endl;
-      delrho_deleta_r -= weight( rho, delN_delJ[ir-1] );
-    }
-#endif
-
-    // over all columns
+    // over all columns up to and including the diagonal
     for (unsigned is=0; is <= ir; is ++) {
 	  
-      Jones<double> del2rho_deleta_s = del_deleta(is, delR_delB);
-      Jones<double> delrho_deleta_s = model_gradient[is+2];
-
-      Jones<double> one = del2rho_deleta_r * herm(delrho_deleta_s);
-      Jones<double> two = delrho_deleta_r  * herm(del2rho_deleta_s);
-
-      // cerr << "one=" << one << endl << "two=" << two << endl;
-
-      delalpha_delB[ir][is] = 2.0 * trace( one + two ).real();
-
-#if DOUBLE_CHECK_TWO_DIFFERENT_DESCRIPTIONS
-
-      Stokes< complex<double> > dr = complex_coherency(model_gradient[ir+2]);
-      Stokes< complex<double> > ds = complex_coherency(model_gradient[is+2]);
-
-      Stokes< complex<double> > d2r = complex_coherency(del_deleta(ir, delR_delB));
-      Stokes< complex<double> > d2s = complex_coherency(del_deleta(is, delR_delB));
+      Stokes<complex<double> > ds=complex_coherency(model_gradient[is+2]);
+      Stokes<complex<double> > d2s=complex_coherency(del_deleta(is,delR_delB));
 
       double r2 = 0.0;
+
       for (unsigned i=0; i < 4; i++) {
 	double iv = fit->uncertainty->get_inv_var(i);
 	double dv = delN_delB[ib][i];
@@ -368,11 +334,7 @@ Pulsar::PolnProfileFitAnalysis::delalpha_delB (unsigned ib)
 	  - (dr[i]*conj(ds[i])).real() * iv * dv;
       }
 
-      // cerr << "one=" << delalpha_delB[ir][is] << " two=" << r2 << endl;
-
       delalpha_delB[ir][is] = r2;
-#endif
-
 
       if (ir != is)
 	delalpha_delB[is][ir] = delalpha_delB[ir][is];
@@ -390,6 +352,7 @@ void Pulsar::PolnProfileFitAnalysis::initialize ()
 {
   if (basis) {
     basis_result = basis->evaluate (&basis_gradient);
+    basis_insertion->set_value( basis_result );
 
     delN_delB.resize (basis_gradient.size());
     for (unsigned i=0; i<delN_delB.size(); i++) {
@@ -674,8 +637,6 @@ Pulsar::PolnProfileFitAnalysis::get_var_varphi (std::vector<double>& grad)
     for (unsigned i=0; i<basis->get_nparam(); i++)
       cerr << "basis[" << i << "]=" << basis->get_param(i) << endl;
 
-  basis_insertion->set_value( basis->evaluate() );
-
   // calculate the partial derivatives of the curvature wrt basis
   vector< Matrix<8,8,double> > delalpha_delbasis;
   delalpha_delB (delalpha_delbasis);
@@ -716,7 +677,8 @@ Pulsar::PolnProfileFitAnalysis::get_var_varphi (std::vector<double>& grad)
       size += grad[ib] * grad[ib];
   }
 
-  cerr << "c_varphi = " << c_varphi << " grad=" << sqrt(size) << endl;
+  cerr << "c_varphi = " << c_varphi << " grad=" << sqrt(size) 
+       << " grad[0]=" << grad[0] << endl;
 
   return c_varphi;
 }
@@ -872,7 +834,8 @@ double Pulsar::PolnProfileFitAnalysis::get_cond_var (vector<double>& grad)
   var *= scale;
 
   // if (verbose)
-    cerr << "cond_var=" << var << " grad=" << size << endl;
+    cerr << "cond_var=" << var << " grad=" << size 
+	 << " grad[0]=" << grad[0] << endl;
 
   return var;
 
