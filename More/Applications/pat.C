@@ -14,6 +14,7 @@
 #include "Pulsar/PolnProfileFit.h"
 #include "Pulsar/PolnProfileFitAnalysis.h"
 #include "MEAL/Polar.h"
+#include "MEAL/parse.h"
 
 #include "Pulsar/ObsExtension.h"
 #include "Pulsar/Backend.h"
@@ -80,10 +81,9 @@ void usage ()
 }
 
 // defined at the end of this file
-void full_polarization_analysis (Pulsar::PolnProfileFit& fit);
+void full_polarization_analysis (Pulsar::PolnProfileFit& fit, bool optimize);
 
-int main (int argc, char *argv[])
-{
+int main (int argc, char *argv[]) try {
   
   bool verbose = false;
   bool std_given = false;
@@ -110,7 +110,9 @@ int main (int argc, char *argv[])
   int gotc = 0;
 
   Pulsar::PolnProfileFit fit;
-  while ((gotc = getopt(argc, argv, "a:A:cDf:Fg:hin:pPqS:s:tTvV:")) != -1) {
+  bool optimize_mtm = false;
+
+  while ((gotc = getopt(argc, argv, "a:A:cDf:Fg:hin:opPqS:s:tTvV:")) != -1) {
     switch (gotc) {
     case 'h':
       usage ();
@@ -140,7 +142,7 @@ int main (int argc, char *argv[])
       break;
 
     case 'i':
-      cout << "$Id: pat.C,v 1.47 2006/04/04 21:14:31 straten Exp $" << endl;
+      cout << "$Id: pat.C,v 1.48 2006/08/28 21:59:12 straten Exp $" << endl;
       return 0;
 
     case 'F':
@@ -160,6 +162,10 @@ int main (int argc, char *argv[])
       gaussFile = optarg;
       break;
 
+    case 'o':
+      optimize_mtm = true;
+      break;
+      
     case 'P':
       full_poln_analysis = true;
     case 'p':
@@ -258,18 +264,18 @@ int main (int argc, char *argv[])
       cerr << "pat: using full polarization" << endl;
       fit.set_standard( stdarch->get_Integration(0)->new_PolnProfile(0) );
       fit.set_transformation( new MEAL::Polar );
-      
+
     }
     else
       stdarch->convert_state(Signal::Intensity);
 
-    if (full_poln_analysis) {
+    if (full_poln_analysis || optimize_mtm) {
 
       // for the invariant interval analysis
       stdarch->remove_baseline();
 
       cerr << "pat: performing full polarization analysis" << endl;
-      full_polarization_analysis (fit);
+      full_polarization_analysis (fit, optimize_mtm);
 
     }
 
@@ -313,12 +319,16 @@ int main (int argc, char *argv[])
         if (verbose)
           cerr << "pat: " << aux << " chisq=" << chisq << endl;
 
-        if (arch->get_dedispersed())
-	  toa.set_frequency (arch->get_centre_frequency());
+	if (chisq < 2.0) {
 
-        toa.set_auxilliary_text (aux);
+	  if (arch->get_dedispersed())
+	    toa.set_frequency (arch->get_centre_frequency());
+	  
+	  toa.set_auxilliary_text (aux);
+	  
+	  toa.unload(stdout);
 
-	toa.unload(stdout);
+	}
 
       }
       catch (Error& error) {
@@ -417,6 +427,10 @@ int main (int argc, char *argv[])
   return 0;
 
 }
+catch (Error& error) {
+  cerr << error << endl;
+  return -1;
+}
 
 
 void loadGaussian(string file,  Reference::To<Pulsar::Archive> &stdarch,  Reference::To<Pulsar::Archive> arch)
@@ -485,9 +499,29 @@ void loadGaussian(string file,  Reference::To<Pulsar::Archive> &stdarch,  Refere
   firstTime=false;
 }
 
-void full_polarization_analysis (Pulsar::PolnProfileFit& fit)
+void full_polarization_analysis (Pulsar::PolnProfileFit& fit, bool optimize)
 {
   Pulsar::PolnProfileFitAnalysis analysis;
+  analysis.set_fit (&fit);
+      
+  cout << "\nFull Polarization TOA (matrix template matching): "
+    "\n MTM Relative error = "
+       << analysis.get_relative_error () <<
+    "\n Multiple correlation = "
+       << analysis.get_multiple_correlation() << 
+    "\n MTM Relative conditional error = "
+       << analysis.get_relative_conditional_error () << endl;
+  
+  if (optimize) {
+
+    cerr << "\nInserting basis transformation" << endl;
+    analysis.set_basis (new MEAL::Polar);
+
+    cerr << "Optimizing the template" << endl;
+    analysis.optimize ();
+
+  }
+
   analysis.set_fit (&fit);
       
   cout << "\nFull Polarization TOA (matrix template matching): "
