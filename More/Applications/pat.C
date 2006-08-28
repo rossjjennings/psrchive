@@ -14,7 +14,6 @@
 #include "Pulsar/PolnProfileFit.h"
 #include "Pulsar/PolnProfileFitAnalysis.h"
 #include "MEAL/Polar.h"
-#include "MEAL/parse.h"
 
 #include "Pulsar/ObsExtension.h"
 #include "Pulsar/Backend.h"
@@ -80,8 +79,10 @@ void usage ()
        << endl;
 }
 
+using namespace Pulsar;
+
 // defined at the end of this file
-void full_polarization_analysis (Pulsar::PolnProfileFit& fit, bool optimize);
+void mtm_analysis (PolnProfileFitAnalysis&, PolnProfileFit& fit, bool optimal);
 
 int main (int argc, char *argv[]) try {
   
@@ -103,13 +104,15 @@ int main (int argc, char *argv[]) try {
   vector<string> stdprofiles;
   vector<Tempo::toa> toas;
 
-  Reference::To<Pulsar::Archive> arch;
-  Reference::To<Pulsar::Archive> stdarch;
-  Reference::To<Pulsar::Profile> prof;
+  Reference::To<Archive> arch;
+  Reference::To<Archive> stdarch;
+  Reference::To<Profile> prof;
 
   int gotc = 0;
 
-  Pulsar::PolnProfileFit fit;
+  PolnProfileFitAnalysis analysis;
+  PolnProfileFit fit;
+
   bool optimize_mtm = false;
 
   while ((gotc = getopt(argc, argv, "a:A:cDf:Fg:hin:opPqS:s:tTvV:")) != -1) {
@@ -119,17 +122,17 @@ int main (int argc, char *argv[]) try {
       return 0;
 
     case 'q':
-      Pulsar::Archive::set_verbosity(0);
+      Archive::set_verbosity(0);
       break;
 
     case 'v':
-      Pulsar::Archive::set_verbosity(2);
+      Archive::set_verbosity(2);
       verbose = true;
       break;
 
     case 'V':
       verbose = true;
-      Pulsar::Archive::set_verbosity(3);
+      Archive::set_verbosity(3);
       MEAL::Function::verbose = true;
       break;
 
@@ -142,7 +145,7 @@ int main (int argc, char *argv[]) try {
       break;
 
     case 'i':
-      cout << "$Id: pat.C,v 1.48 2006/08/28 21:59:12 straten Exp $" << endl;
+      cout << "$Id: pat.C,v 1.49 2006/08/28 22:23:06 straten Exp $" << endl;
       return 0;
 
     case 'F':
@@ -192,19 +195,19 @@ int main (int argc, char *argv[]) try {
     case 'A':
 
       if (strcasecmp (optarg, "PGS") == 0)
-	Pulsar::Profile::shift_strategy.set(&Pulsar::PhaseGradShift);
+	Profile::shift_strategy.set(&PhaseGradShift);
       
       else if (strcasecmp (optarg, "GIS") == 0)
-	Pulsar::Profile::shift_strategy.set(&Pulsar::GaussianShift);
+	Profile::shift_strategy.set(&GaussianShift);
       
       else if (strcasecmp (optarg, "PIS") == 0)
-	Pulsar::Profile::shift_strategy.set(&Pulsar::ParIntShift);
+	Profile::shift_strategy.set(&ParIntShift);
 
       else if (strcasecmp (optarg, "ZPS") == 0)
-	Pulsar::Profile::shift_strategy.set(&Pulsar::ZeroPadShift);
+	Profile::shift_strategy.set(&ZeroPadShift);
       
       else if (strcasecmp (optarg, "SIS") == 0)
-	Pulsar::Profile::shift_strategy.set(&Pulsar::SincInterpShift);
+	Profile::shift_strategy.set(&SincInterpShift);
       
       else
 	cerr << "pat: unrecognized shift method '" << optarg << "'" << endl;
@@ -212,8 +215,8 @@ int main (int argc, char *argv[]) try {
       break;
 
     case 'S':
-      Pulsar::Profile::shift_strategy.set(&Pulsar::SincInterpShift);      
-      Pulsar::Profile::SIS_zap_period = atoi(optarg);
+      Profile::shift_strategy.set(&SincInterpShift);      
+      Profile::SIS_zap_period = atoi(optarg);
       break;
 
     case 's':
@@ -245,14 +248,13 @@ int main (int argc, char *argv[]) try {
     return -1;
   }
 
-  Reference::To<const Pulsar::PolnProfile> poln_profile;
-
+  Reference::To<PolnProfile> poln_profile;
 
   if (!std_multiple && !gaussian) try {
 
     // If only using one standard profile ...
 
-    stdarch = Pulsar::Archive::load(std);
+    stdarch = Archive::load(std);
     stdarch->fscrunch();
     stdarch->tscrunch();
     
@@ -275,7 +277,7 @@ int main (int argc, char *argv[]) try {
       stdarch->remove_baseline();
 
       cerr << "pat: performing full polarization analysis" << endl;
-      full_polarization_analysis (fit, optimize_mtm);
+      mtm_analysis (analysis, fit, optimize_mtm);
 
     }
 
@@ -296,7 +298,7 @@ int main (int argc, char *argv[]) try {
       if (verbose)
 	cerr << "Loading " << archives[i] << endl;
       
-      arch = Pulsar::Archive::load(archives[i]);
+      arch = Archive::load(archives[i]);
       if (i==0 && gaussian)
 	loadGaussian(gaussFile, stdarch, arch);
       if (fscrunch)
@@ -305,13 +307,31 @@ int main (int argc, char *argv[]) try {
 	arch->tscrunch();
       if (full_poln) try {
 
-	Pulsar::Integration* integration = arch->get_Integration(0);
+	Integration* integration = arch->get_Integration(0);
 	poln_profile = integration->new_PolnProfile(0);
 
 	Tempo::toa toa = fit.get_toa (poln_profile,
 				      integration->get_epoch(),
 				      integration->get_folding_period(),
 				      arch->get_telescope_code());
+
+	if (optimize_mtm) {
+
+	  Jones<double> xform = fit.get_transformation()->evaluate();
+	  Jones<double> basis = analysis.get_basis()->evaluate();
+
+	  poln_profile->transform( basis * inv(xform) );
+
+	  analysis.use_basis (true);
+
+	  Tempo::toa toa = fit.get_toa (poln_profile,
+					integration->get_epoch(),
+					integration->get_folding_period(),
+					arch->get_telescope_code());
+
+	  analysis.use_basis (false);
+
+	}
 
         string aux = basename( arch->get_filename() );
         float chisq = fit.get_fit_chisq() / fit.get_fit_nfree();
@@ -346,14 +366,14 @@ int main (int argc, char *argv[]) try {
 	  unsigned j;
 	  for (j = 0;j < stdprofiles.size();j++)	    
 	    {
-	      stdarch = Pulsar::Archive::load(stdprofiles[j]);	      
+	      stdarch = Archive::load(stdprofiles[j]);	      
 	      if (j==0 || fabs(stdarch->get_centre_frequency() - freq)<minDiff)
 		{
 		  minDiff = fabs(stdarch->get_centre_frequency()-freq);
 		  jDiff   = j;
 		}
 	    }
-	  stdarch = Pulsar::Archive::load(stdprofiles[jDiff]);
+	  stdarch = Archive::load(stdprofiles[jDiff]);
 	  stdarch->fscrunch();
 	  stdarch->tscrunch();
 	
@@ -387,22 +407,22 @@ int main (int argc, char *argv[]) try {
 	    args = archives[i];
 
 	    if (outFormatFlags.find("i")!=string::npos) {
-	      Pulsar::Backend* backend;
-	      backend = arch->get<Pulsar::Backend>();
+	      Backend* backend;
+	      backend = arch->get<Backend>();
 	      if (backend)
 		args += string(" -i ") + backend->get_name();
 	    }
 
 	    if (outFormatFlags.find("r")!=string::npos) {
-	      Pulsar::Receiver* receiver = arch->get<Pulsar::Receiver>();
+	      Receiver* receiver = arch->get<Receiver>();
 	      if (receiver)
 		args += string(" -i ") + receiver->get_name();
 	    }
 
 	    if (outFormatFlags.find("o")!=string::npos) /* Include observer info. */
 	      {
-		const Pulsar::ObsExtension* ext = 0;
-		ext = arch->get<Pulsar::ObsExtension>();
+		const ObsExtension* ext = 0;
+		ext = arch->get<ObsExtension>();
 		if (!ext) {
 		  args += " -o N/A";
 		}
@@ -433,7 +453,7 @@ catch (Error& error) {
 }
 
 
-void loadGaussian(string file,  Reference::To<Pulsar::Archive> &stdarch,  Reference::To<Pulsar::Archive> arch)
+void loadGaussian(string file,  Reference::To<Archive> &stdarch,  Reference::To<Archive> arch)
 {
   ifstream fin(file.c_str());
   string psr,str;
@@ -478,7 +498,7 @@ void loadGaussian(string file,  Reference::To<Pulsar::Archive> &stdarch,  Refere
   stdarch->pscrunch();
   
   // Now replace profile with Gaussian components
-  Reference::To<Pulsar::Profile> prof;
+  Reference::To<Profile> prof;
   float *amps;
   double x,y;
   unsigned int i,j;
@@ -499,9 +519,10 @@ void loadGaussian(string file,  Reference::To<Pulsar::Archive> &stdarch,  Refere
   firstTime=false;
 }
 
-void full_polarization_analysis (Pulsar::PolnProfileFit& fit, bool optimize)
+void mtm_analysis (PolnProfileFitAnalysis& analysis,
+		   PolnProfileFit& fit,
+		   bool optimize)
 {
-  Pulsar::PolnProfileFitAnalysis analysis;
   analysis.set_fit (&fit);
       
   cout << "\nFull Polarization TOA (matrix template matching): "
@@ -532,13 +553,15 @@ void full_polarization_analysis (Pulsar::PolnProfileFit& fit, bool optimize)
     "\n MTM Relative conditional error = "
        << analysis.get_relative_conditional_error () << endl;
   
-  Pulsar::ScalarProfileFitAnalysis scalar;
+  analysis.use_basis (false);
+
+  ScalarProfileFitAnalysis scalar;
   scalar.set_fit (&fit);
 
   // the phase shift error for the total intensity profile
   Estimate<double> I_error = scalar.get_error();
 
-  Pulsar::Profile invariant;
+  Profile invariant;
   fit.get_standard()->invint( &invariant );
 
   scalar.set_spectrum ( fourier_transform (&invariant) );
