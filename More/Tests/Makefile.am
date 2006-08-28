@@ -292,7 +292,8 @@ libpsrchive_la_SOURCES +=			\
 	SourceInfo.C				\
 	SyntheticProfile.C			\
 	SyntheticPolnProfile.C			\
-	SystemCalibrator.C 
+	SystemCalibrator.C 			\
+	MTM_optimize.C dfpmin.c lnsrch.c nrutil.c
 
 SUBDIRS += Calibration
 
@@ -310,7 +311,9 @@ pascii_SOURCES			= pascii.C
 paz_SOURCES			= paz.C
 pac_SOURCES			= pac.C
 pat_SOURCES			= pat.C
+
 mtm_SOURCES			= mtm.C
+
 pcq_SOURCES			= pcq.C
 fluxcal_SOURCES			= fluxcal.C
 fadd_SOURCES			= fadd.C
