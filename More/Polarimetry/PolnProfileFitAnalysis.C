@@ -820,7 +820,20 @@ void Pulsar::PolnProfileFitAnalysis::insert_basis ()
   fit->set_transformation ( p );
 }
 
+    //! Get the transformation into the optimal basis
+MEAL::Complex2* Pulsar::PolnProfileFitAnalysis::get_basis ()
+{
+  return basis;
+}
 
+//! Use or don't use the optimal transformation
+void Pulsar::PolnProfileFitAnalysis::use_basis (bool use)
+{
+  if (use)
+    basis_insertion -> set_value( basis->evaluate() );
+  else
+    basis_insertion -> set_value( Jones<double>::identity() );
+}
 
 
 //! Given a coherency matrix, return the weighted conjugate matrix

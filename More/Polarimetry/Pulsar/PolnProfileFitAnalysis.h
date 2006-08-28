@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PolnProfileFitAnalysis.h,v $
-   $Revision: 1.19 $
-   $Date: 2006/08/28 21:59:07 $
+   $Revision: 1.20 $
+   $Date: 2006/08/28 22:23:01 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PolnProfileFitAnalysis_h
@@ -44,6 +44,12 @@ namespace Pulsar {
 
     //! Set the transformation to be used to find the optimal basis
     void set_basis (MEAL::Complex2*);
+
+    //! Get the transformation into the optimal basis
+    MEAL::Complex2* get_basis ();
+
+    //! Use or don't use the optimal transformation
+    void use_basis (bool);
 
     //! Get the relative arrival time error
     Estimate<double> get_relative_error () const;
