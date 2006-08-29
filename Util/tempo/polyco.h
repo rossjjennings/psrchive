@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/polyco.h,v $
-   $Revision: 1.31 $
-   $Date: 2006/08/01 05:30:38 $
+   $Revision: 1.32 $
+   $Date: 2006/08/29 00:54:29 $
    $Author: hknight $ */
 
 #ifndef __POLY_H
@@ -50,9 +50,6 @@ protected:
   //! The epoch to which the polynomial is referenced
   MJD reftime;
 
-  //! Reference rotation frequency, F0 (Hz)
-  double f0;
-
   //! TEMPO telescope id code
   char telescope;
 
@@ -87,6 +84,9 @@ protected:
   void init();
 
 public:
+
+  //! Reference rotation frequency, F0 (Hz)
+  double f0;
 
   //! polynomial coefficients
   std::vector<double> coefs;
