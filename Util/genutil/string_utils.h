@@ -6,8 +6,8 @@
  *
  ***************************************************************************/
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Attic/string_utils.h,v $
-   $Revision: 1.42 $
-   $Date: 2006/08/28 02:44:39 $
+   $Revision: 1.43 $
+   $Date: 2006/08/29 02:31:15 $
    $Author: hknight $ */
 
 #ifndef __STRING_UTILS_H
@@ -193,7 +193,7 @@ comma_string(T input)
 
   std::string out;
   for( unsigned i=0; i<vout.size(); i++){
-    unsigned index = in.size()-1-i;
+    unsigned index = vout.size()-1-i;
     out.push_back( vout[index] );
   }
 
