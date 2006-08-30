@@ -208,15 +208,17 @@ void Pulsar::PolnProfileFit::choose_max_harmonic (const PolnProfile* psd)
     S_variance += standard_variance[ipol];
   }
 
+  double cutoff_sigma = 3.0;
+
   for (ipol=0; ipol<2; ipol++) {
 
     const float* amps = psd->get_amps(ipol);
     if (ipol)
       amps = &(S[0]);
 
-    double threshold = standard_variance[ipol] * 3.0;
+    double threshold = standard_variance[ipol] * cutoff_sigma * cutoff_sigma;
     if (ipol)
-      threshold = S_variance * 3.0;
+      threshold = S_variance * cutoff_sigma * cutoff_sigma;
 
     unsigned count = 0;
 
@@ -520,6 +522,7 @@ double Pulsar::PolnProfileFit::get_variance (const Profile* input) const try
 	 << " harmonics" << endl;
 
   const float* amps = input->get_amps();
+
   unsigned count = 0;
   double total = 0;
 
@@ -530,6 +533,7 @@ double Pulsar::PolnProfileFit::get_variance (const Profile* input) const try
       total += re*re + im*im;
       count += 2;
     }
+
 
   // The variance of the spectrum (with zero mean) is the mean of the PSD
   return total / count;
