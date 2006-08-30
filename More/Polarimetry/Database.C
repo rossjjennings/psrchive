@@ -1038,7 +1038,8 @@ Pulsar::Database::generateHybridCalibrator (ReferenceCalibrator* arcal,
 
     hybrid = new Pulsar::HybridCalibrator (polncal);
 
-    hybrid->set_reference_input (calstokes);
+    if (calstokes)
+      hybrid->set_reference_input (calstokes);
     hybrid->set_reference_observation (arcal);
 
   }

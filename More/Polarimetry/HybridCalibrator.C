@@ -78,9 +78,8 @@ void Pulsar::HybridCalibrator::calculate_transformation ()
 		 "no precalibrator PolnCalibrator");
 
   if (!reference_input)
-    throw Error (InvalidState,
-		 "Pulsar::HybridCalibrator::calculate_transformation",
-		 "no reference input CalibratorStokes");
+    cerr << "Pulsar::HybridCalibrator::calculate_transformation\n"
+            "  WARNING: no reference source input Stokes parameters" << endl;
 
   if (!reference_observation)
     throw Error (InvalidState,
@@ -89,7 +88,7 @@ void Pulsar::HybridCalibrator::calculate_transformation ()
 
   unsigned nchan = precalibrator->get_nchan();
 
-  if (reference_input->get_nchan() != nchan)
+  if (reference_input && reference_input->get_nchan() != nchan)
     throw Error (InvalidState,
 		 "Pulsar::HybridCalibrator::calculate_transformation",
 		 "reference input CalibratorStokes nchan=%d != %d",
@@ -123,7 +122,7 @@ void Pulsar::HybridCalibrator::calculate_transformation ()
       cerr << "Pulsar::HybridCalibrator::calculate_transformation"
 	" ichan=" << ichan << endl;
 
-    if (!reference_input->get_valid (ichan)) {
+    if (reference_input && !reference_input->get_valid (ichan)) {
       if (verbose > 2)
 	cerr << "Pulsar::HybridCalibrator::calculate_transformation"
 	  " invalid reference input" << endl;
@@ -148,8 +147,15 @@ void Pulsar::HybridCalibrator::calculate_transformation ()
     // get the Stokes parameters of the reference source observation
     Stokes< Estimate<double> > output_stokes = coherency (convert (cal));
 
+    /* The following line provides a basis-independent representation of a
+     reference source that illuminates both receptors equally and in phase. */
+    Quaternion<double,Hermitian> ideal (1,0,1,0);
+
+    Stokes< Estimate<double> > cal_stokes = standard (ideal);
+
     // get the Stokes parameters of the reference source input
-    Stokes< Estimate<double> > cal_stokes = reference_input->get_stokes(ichan);
+    if (reference_input)
+      cal_stokes = reference_input->get_stokes(ichan);
 
     // get the precalibrator transformation
     Jones< Estimate<double> > response;
