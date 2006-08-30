@@ -116,7 +116,7 @@ int main (int argc, char *argv[]) try {
 
   bool optimize_mtm = false;
 
-  while ((gotc = getopt(argc, argv, "a:A:cDf:Fg:hin:opPqS:s:tTvV:")) != -1) {
+  while ((gotc = getopt(argc, argv, "a:A:cDf:Fg:hin:opPqS:s:tTvV")) != -1) {
     switch (gotc) {
     case 'h':
       usage ();
@@ -146,7 +146,7 @@ int main (int argc, char *argv[]) try {
       break;
 
     case 'i':
-      cout << "$Id: pat.C,v 1.51 2006/08/30 13:01:33 straten Exp $" << endl;
+      cout << "$Id: pat.C,v 1.52 2006/08/30 15:37:44 straten Exp $" << endl;
       return 0;
 
     case 'F':
