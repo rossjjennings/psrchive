@@ -458,8 +458,6 @@ void Pulsar::PolnProfileFitAnalysis::delalpha_delB
 
   initialize ();
 
-  var_c_varphi = 0;
-
   for (unsigned ih=0; ih < fit->model->get_num_input(); ih++) {
 
     unsigned bih = fit->model->get_num_input() - ih - 1;
@@ -471,8 +469,6 @@ void Pulsar::PolnProfileFitAnalysis::delalpha_delB
     // over all basis parameters
     for (unsigned ib=0; ib < basis->get_nparam(); ib++)
       delalpha_delbasis[ib] += delalpha_delB (ib);
-
-    var_c_varphi_add();
 
   }
 
