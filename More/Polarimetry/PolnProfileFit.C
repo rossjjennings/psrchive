@@ -110,6 +110,8 @@ void Pulsar::PolnProfileFit::set_standard (const PolnProfile* _standard)
 
   Reference::To<PolnProfile> fourier = fourier_transform (standard);
   fourier->convert_state (Signal::Stokes);
+  // Drop the Nyquist bin
+  fourier->resize( standard->get_nbin() );
 
   standard_fourier = fourier;
 
