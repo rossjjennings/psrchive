@@ -145,7 +145,7 @@ int main (int argc, char *argv[]) try {
       break;
 
     case 'i':
-      cout << "$Id: pat.C,v 1.49 2006/08/28 22:23:06 straten Exp $" << endl;
+      cout << "$Id: pat.C,v 1.50 2006/08/30 12:42:36 straten Exp $" << endl;
       return 0;
 
     case 'F':
@@ -324,11 +324,18 @@ int main (int argc, char *argv[]) try {
 
 	  analysis.use_basis (true);
 
-	  Tempo::toa toa = fit.get_toa (poln_profile,
-					integration->get_epoch(),
-					integration->get_folding_period(),
-					arch->get_telescope_code());
+          MEAL::Polar backup;
+          backup.copy( fit.get_transformation() );
 
+          MEAL::Polar identity;
+          fit.get_transformation()->copy( &identity );
+
+	  toa = fit.get_toa (poln_profile,
+				integration->get_epoch(),
+				integration->get_folding_period(),
+				arch->get_telescope_code());
+
+          fit.get_transformation()->copy( &backup );
 	  analysis.use_basis (false);
 
 	}
