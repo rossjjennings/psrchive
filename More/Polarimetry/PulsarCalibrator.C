@@ -306,11 +306,6 @@ void Pulsar::PulsarCalibrator::solve (const Integration* data, unsigned ichan)
     unsigned nfree = model[mchan]->get_fit_nfree ();
     float chisq = model[mchan]->get_fit_chisq ();
 
-    if (iterations > 10 && solution[ichan])  {
-      cerr << "LARGE ITERATIONS=" << iterations << endl;
-      solution[ichan] = 0;
-    }
-
     reduced_chisq = chisq / nfree;
 
     string out;
