@@ -82,7 +82,8 @@ void usage ()
 using namespace Pulsar;
 
 // defined at the end of this file
-void mtm_analysis (PolnProfileFitAnalysis&, PolnProfileFit& fit, bool optimal);
+void mtm_analysis (PolnProfileFitAnalysis&, PolnProfileFit&,
+		   const std::string& name, bool optimal);
 
 int main (int argc, char *argv[]) try {
   
@@ -145,7 +146,7 @@ int main (int argc, char *argv[]) try {
       break;
 
     case 'i':
-      cout << "$Id: pat.C,v 1.50 2006/08/30 12:42:36 straten Exp $" << endl;
+      cout << "$Id: pat.C,v 1.51 2006/08/30 13:01:33 straten Exp $" << endl;
       return 0;
 
     case 'F':
@@ -277,7 +278,7 @@ int main (int argc, char *argv[]) try {
       stdarch->remove_baseline();
 
       cerr << "pat: performing full polarization analysis" << endl;
-      mtm_analysis (analysis, fit, optimize_mtm);
+      mtm_analysis (analysis, fit, stdarch->get_source(), optimize_mtm);
 
     }
 
@@ -526,21 +527,24 @@ void loadGaussian(string file,  Reference::To<Archive> &stdarch,  Reference::To<
   firstTime=false;
 }
 
+// defined in astro/psrephem/tex.C
+string tex_double (double val, double err);
+
+string tex (Estimate<double>& e)
+{
+  return tex_double (e.get_value(), e.get_error());
+}
+
 void mtm_analysis (PolnProfileFitAnalysis& analysis,
 		   PolnProfileFit& fit,
+		   const std::string& name,
 		   bool optimize)
 {
   analysis.set_fit (&fit);
-      
-  cout << "\nFull Polarization TOA (matrix template matching): "
-    "\n MTM Relative error = "
-       << analysis.get_relative_error () <<
-    "\n Multiple correlation = "
-       << analysis.get_multiple_correlation() << 
-    "\n MTM Relative conditional error = "
-       << analysis.get_relative_conditional_error () << endl;
-  
+
   if (optimize) {
+
+    Estimate<double> sigma_0 = analysis.get_relative_error ();
 
     cerr << "\nInserting basis transformation" << endl;
     analysis.set_basis (new MEAL::Polar);
@@ -548,10 +552,17 @@ void mtm_analysis (PolnProfileFitAnalysis& analysis,
     cerr << "Optimizing the template" << endl;
     analysis.optimize ();
 
+    analysis.set_fit (&fit);
+
+    Estimate<double> sigma = analysis.get_relative_error ();
+
+    cout << name << " " << tex(sigma_0) << " " << tex(sigma) << endl;
+
+    analysis.use_basis (false);
+
+    return;
   }
 
-  analysis.set_fit (&fit);
-      
   cout << "\nFull Polarization TOA (matrix template matching): "
     "\n MTM Relative error = "
        << analysis.get_relative_error () <<
@@ -560,9 +571,7 @@ void mtm_analysis (PolnProfileFitAnalysis& analysis,
     "\n MTM Relative conditional error = "
        << analysis.get_relative_conditional_error () << endl;
   
-  analysis.use_basis (false);
-
-  ScalarProfileFitAnalysis scalar;
+    ScalarProfileFitAnalysis scalar;
   scalar.set_fit (&fit);
 
   // the phase shift error for the total intensity profile
