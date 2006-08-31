@@ -53,15 +53,15 @@ void Pulsar::Archive::update_model()
 */
 void Pulsar::Archive::update_model (unsigned nsubint)
 try {
-
   if (verbose == 3)
-    cerr << "Pulsar::Archive::update_model nsubint=" << nsubint << endl;
+    cerr << "\n\n\nPulsar::Archive::update_model nsubint=" << nsubint << endl;
 
   Reference::To<polyco> oldmodel;
 
-  if (!runtime_model)
+  if( !runtime_model ){
     // store the old model
     oldmodel = model;
+  }
 
   // if the model has not already been updated, create a completely new polyco
   create_updated_model (!runtime_model);
@@ -71,13 +71,14 @@ try {
          << nsubint << " Integrations" << endl;
 
   // correct the old Integrations with the old model
-  for (unsigned isub = 0; isub < nsubint; isub++)
+  for (unsigned isub = 0; isub < nsubint; isub++){
     if (!get_Integration(isub)->zero_phase_aligned)  {
       if (verbose == 3)
         cerr << "Pulsar::Archive::update_model phasing isub=" << isub << endl;
       apply_model (get_Integration(isub), oldmodel.ptr());
     }
-  
+  }
+
   runtime_model = true;
 }
 catch (Error& error) {
@@ -136,10 +137,8 @@ void Pulsar::Archive::update_model (const MJD& time, bool clear_model)
   if (verbose == 3) cerr << "Pulsar::Archive::update_model time=" << time 
 			 << " clear=" << clear_model << endl;
 
-  if (!ephemeris) {
-    model = 0;
+  if (!ephemeris)
     return;
-  }
 
   static Tempo::Predict predict;
 
@@ -250,11 +249,13 @@ void Pulsar::Archive::apply_model (Integration* subint, const polyco* old)
 	   << "\n  new MJD "   << subint_mjd
 	   << "\n  new phase " << phase
 	   << endl;
+
     }
   }
   catch (Error& err) {
     throw err += "Pulsar::Archive::apply_model";
   }
+
 }
 
 // ///////////////////////////////////////////////////////////////////////
