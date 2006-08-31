@@ -35,7 +35,7 @@ double Pulsar::Archive::append_max_overlap
 void Pulsar::Archive::append (const Archive* arch)
 {
   if (verbose == 3)
-    cerr << "Pulsar::Archive::append entered\n";
+    cerr << "\n\nPulsar::Archive::append entered with nsub=" << get_nsubint() << "\n";
 
   if (arch->get_nsubint() == 0)
     return;
@@ -150,6 +150,9 @@ void Pulsar::Archive::append (const Archive* arch)
       return;
     }
   }
+
+  if( has_model() && !ephemeris.ptr() )
+    return;
 
   if (verbose == 3)
     cerr << "Pulsar::Archive::append update polyco" << endl;
