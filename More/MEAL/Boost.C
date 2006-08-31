@@ -153,8 +153,6 @@ void MEAL::Boost::calculate_Gibbs (Jones<double>& result,
 
   // calculate the Boost component
   double norm_Gibbs = Gibbs * Gibbs;
-  
-  double sinh_beta = sqrt (norm_Gibbs);
   double cosh_beta = sqrt (1.0 + norm_Gibbs);
 
   // the Boost quaternion
