@@ -20,6 +20,8 @@ Pulsar::PolnProfileFitAnalysis::PolnProfileFitAnalysis ()
 {
   compute_error = true;
   basis_insertion = 0;
+  max_boost = 0.0;
+  max_harmonic = 0;
   verbose = false;
 }
 
@@ -63,7 +65,11 @@ void Pulsar::PolnProfileFitAnalysis::get_curvature (Matrix<8,8,double>& alpha)
 
   initialize();
 
-  for (unsigned ih=0; ih < fit->model->get_num_input(); ih++) {
+  unsigned nharmonic = fit->model->get_num_input();
+  if (max_harmonic && max_harmonic < nharmonic)
+    nharmonic = max_harmonic;
+
+  for (unsigned ih=0; ih < nharmonic; ih++) {
 
     set_harmonic (ih);
     model_result = fit->model->evaluate (&model_gradient);
@@ -458,9 +464,13 @@ void Pulsar::PolnProfileFitAnalysis::delalpha_delB
 
   initialize ();
 
-  for (unsigned ih=0; ih < fit->model->get_num_input(); ih++) {
+  unsigned nharmonic = fit->model->get_num_input();
+  if (max_harmonic && max_harmonic < nharmonic)
+    nharmonic = max_harmonic;
 
-    unsigned bih = fit->model->get_num_input() - ih - 1;
+  for (unsigned ih=0; ih < nharmonic; ih++) {
+
+    unsigned bih = nharmonic - ih - 1;
     set_harmonic (bih);
 
     model_result = fit->model->evaluate (&model_gradient);
@@ -523,6 +533,9 @@ void Pulsar::PolnProfileFitAnalysis::set_fit (PolnProfileFit* f)
   ScalarProfileFitAnalysis scalar;
   scalar.set_fit (fit);
 
+  if (max_harmonic && max_harmonic < fit->model->get_num_input())
+    scalar.set_max_harmonic( max_harmonic );
+
   Matrix<2,2,double> I_curvature;
   scalar.get_curvature (I_curvature);
 
@@ -530,7 +543,7 @@ void Pulsar::PolnProfileFitAnalysis::set_fit (PolnProfileFit* f)
 
   //cerr << "I_curv=\n" << I_curvature << endl;
   //cerr << "I_cov=\n" << I_covariance << endl;
-    
+  
   // the relative unconditional phase shift variance
   double hatvar_varphi = covariance[0][0] / I_covariance[0][0];
 
@@ -556,7 +569,11 @@ void Pulsar::PolnProfileFitAnalysis::set_fit (PolnProfileFit* f)
   // the variance of the phase shift variance
   var_c_varphi = 0.0;
 
-  for (unsigned ih=0; ih < fit->model->get_num_input(); ih++) {
+  unsigned nharmonic = fit->model->get_num_input();
+  if (max_harmonic && max_harmonic < nharmonic)
+    nharmonic = max_harmonic;
+
+  for (unsigned ih=0; ih < nharmonic; ih++) {
 
     set_harmonic (ih);
 

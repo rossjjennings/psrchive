@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PolnProfileFitAnalysis.h,v $
-   $Revision: 1.20 $
-   $Date: 2006/08/28 22:23:01 $
+   $Revision: 1.21 $
+   $Date: 2006/09/01 20:56:39 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PolnProfileFitAnalysis_h
@@ -38,6 +38,12 @@ namespace Pulsar {
 
     //! Set the PolnProfileFit algorithm to be analysed
     void set_fit (PolnProfileFit*);
+
+    //! Set the maximum boost parameter allowed in the optimal basis
+    void set_optimal_boost_max (double max);
+
+    //! Set the maximum harmonic used when optimizing
+    void set_optimal_harmonic_max (unsigned max);
 
     //! Optimize the template for timing
     void optimize ();
@@ -88,6 +94,12 @@ namespace Pulsar {
 
     //! The transformation built into the MTM algorithm
     Reference::To<MEAL::Complex2> xform;
+
+    //! The maximum allowed boost in the optimal basis
+    double max_boost;
+
+    //! The maximum harmonic used when computing the optimal basis
+    unsigned max_harmonic;
 
     //! The transformation to be used to find the optimal basis
     Reference::To<MEAL::Complex2> basis;
