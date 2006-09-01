@@ -48,6 +48,7 @@ void usage ()
     " -w width  width of off-pulse baseline used in S/N calculations\n"
     " -c sigma  cut-off sigma used in adaptive S/N method \n"
     " -p phs    phase centre of off-pulse baseline (implies -G)\n"
+    " -r        reset weights (ie. ignore zero weights)\n"
     "\n"
     "Output options:\n"
     " -b scr    add scr phase bins together \n"
@@ -83,6 +84,7 @@ int main (int argc, char** argv)
   double snr_threshold = 10.0;
 
   bool snr_chosen = false;
+  bool reset_weights = false;
 
   Pulsar::FourierSNR fourier_snr;
   Pulsar::StandardSNR standard_snr;
@@ -96,7 +98,7 @@ int main (int argc, char** argv)
   Pulsar::Smooth* smooth = 0;
 
   int c = 0;
-  const char* args = "b:c:DdFGhm:M:o:Pp:TUs:S:vVw:";
+  const char* args = "b:c:DdFGhm:M:o:Pp:rTUs:S:vVw:";
 
   while ((c = getopt(argc, argv, args)) != -1)
     switch (c) {
@@ -210,6 +212,10 @@ int main (int argc, char** argv)
       normal = false;
       break;
 
+    case 'r':
+      reset_weights = true;
+      break;
+
     case 's':
       snr_threshold = atof (optarg);
       break;
@@ -312,16 +318,24 @@ int main (int argc, char** argv)
     }
 
     copy = archive->clone();
-    copy -> uniform_weight ();
+
+    if (reset_weights)
+      copy -> uniform_weight ();
+
     copy -> pscrunch();
 
-    for (unsigned isub=0; isub < copy->get_nsubint(); isub++)
+    for (unsigned isub=0; isub < copy->get_nsubint(); isub++) {
+
+      Pulsar::Integration* subint = copy->get_Integration (isub);
+
       for (unsigned ichan=0; ichan < copy->get_nchan(); ichan++) {
+
+        if (subint->get_weight(ichan) == 0.0)
+          continue;
 
 	if (channel_standard)
 	  standard_snr.set_standard( standard->get_Profile (0,0,ichan) );
 
-	Pulsar::Integration* subint = copy->get_Integration (isub);
 	Pulsar::Profile* profile = subint->get_Profile (0,ichan);
 
 	float snr = profile->snr ();
@@ -412,12 +426,14 @@ int main (int argc, char** argv)
 	if (!normal)
 	  continue;
 	
-	if (snr < snr_threshold)
+	if (snr_threshold && snr < snr_threshold)
 	  snr = 0.0;
 
 	for (unsigned ipol=0; ipol < archive->get_npol(); ipol++)
 	  archive->get_Profile (isub,ipol,ichan)->set_weight(snr*snr);
       }
+
+    }
 
     if (bscrunch > 0)
       archive -> bscrunch (bscrunch);
