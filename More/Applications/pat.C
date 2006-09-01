@@ -81,6 +81,8 @@ void usage ()
 
 using namespace Pulsar;
 
+static bool sensitivity_curve = true;
+
 // defined at the end of this file
 void mtm_analysis (PolnProfileFitAnalysis&, PolnProfileFit&,
 		   const std::string& name, bool optimal);
@@ -115,8 +117,9 @@ int main (int argc, char *argv[]) try {
   PolnProfileFit fit;
 
   bool optimize_mtm = false;
+  float chisq_max = 2.0;
 
-  while ((gotc = getopt(argc, argv, "a:A:cDf:Fg:hin:opPqS:s:tTvV")) != -1) {
+  while ((gotc = getopt(argc, argv, "a:A:b:cDf:Fg:hin:oO:pPqS:s:tTvVx:")) != -1) {
     switch (gotc) {
     case 'h':
       usage ();
@@ -137,6 +140,10 @@ int main (int argc, char *argv[]) try {
       MEAL::Function::verbose = true;
       break;
 
+    case 'b':
+      analysis.set_optimal_boost_max (atof(optarg));
+      break;
+
     case 'c':
       fit.choose_maximum_harmonic = true;
       break;
@@ -146,7 +153,7 @@ int main (int argc, char *argv[]) try {
       break;
 
     case 'i':
-      cout << "$Id: pat.C,v 1.52 2006/08/30 15:37:44 straten Exp $" << endl;
+      cout << "$Id: pat.C,v 1.53 2006/09/01 20:56:41 straten Exp $" << endl;
       return 0;
 
     case 'F':
@@ -169,7 +176,11 @@ int main (int argc, char *argv[]) try {
     case 'o':
       optimize_mtm = true;
       break;
-      
+
+    case 'O':
+      analysis.set_optimal_harmonic_max( atoi(optarg) );
+      break;
+
     case 'P':
       full_poln_analysis = true;
     case 'p':
@@ -231,6 +242,15 @@ int main (int argc, char *argv[]) try {
 	if (string(optarg).find(" ")!=string::npos) outFormatFlags = string(optarg).substr(string(optarg).find(" "));
 	break;
       }
+
+    case 'x':
+      chisq_max = atof(optarg);
+      if (chisq_max == 0.0)
+        cerr << "pat: disabling reduced chisq cutoff" << endl;
+      else
+        cerr << "pat: omitting TOAs with reduced chisq > " << chisq_max << endl;
+      break;
+
     default:
       cout << "Unrecognised option " << gotc << endl;
     }
@@ -267,6 +287,7 @@ int main (int argc, char *argv[]) try {
       cerr << "pat: using full polarization" << endl;
       fit.set_standard( stdarch->get_Integration(0)->new_PolnProfile(0) );
       fit.set_transformation( new MEAL::Polar );
+      cerr << "pat: last harmonic = " << fit.get_nharmonic() << endl;
 
     }
     else
@@ -331,13 +352,24 @@ int main (int argc, char *argv[]) try {
           MEAL::Polar identity;
           fit.get_transformation()->copy( &identity );
 
+          bool fail = false;
+
+          try {
 	  toa = fit.get_toa (poln_profile,
 				integration->get_epoch(),
 				integration->get_folding_period(),
 				arch->get_telescope_code());
+          }
+          catch (Error& error) {
+            cerr << "pat: optimized fit failed" << endl;
+            fail = true;
+          }
 
           fit.get_transformation()->copy( &backup );
-	  analysis.use_basis (false);
+          analysis.use_basis (false);
+
+          if (fail)
+            continue;
 
 	}
 
@@ -347,7 +379,7 @@ int main (int argc, char *argv[]) try {
         if (verbose)
           cerr << "pat: " << aux << " chisq=" << chisq << endl;
 
-	if (chisq < 2.0) {
+	if (chisq_max == 0.0 || chisq < chisq_max) {
 
 	  if (arch->get_dedispersed())
 	    toa.set_frequency (arch->get_centre_frequency());
@@ -361,6 +393,8 @@ int main (int argc, char *argv[]) try {
       }
       catch (Error& error) {
 	cerr << "pat: Error while fitting " << error << endl;
+        MEAL::Polar identity;
+        fit.get_transformation()->copy( &identity );
       }
       else {
 
@@ -552,11 +586,21 @@ void mtm_analysis (PolnProfileFitAnalysis& analysis,
     cerr << "Optimizing the template" << endl;
     analysis.optimize ();
 
-    analysis.set_fit (&fit);
+    if (sensitivity_curve)  {
 
-    Estimate<double> sigma = analysis.get_relative_error ();
+      for (unsigned i=1; i < fit.get_nharmonic(); i++)  {
+        analysis.set_optimal_harmonic_max(i);
+        analysis.set_fit (&fit);
+        Estimate<double> sigma = analysis.get_relative_error ();
+        cout << i << " " << sigma.val << " " << sigma.get_error() << endl;
+      }
 
-    cout << name << " " << tex(sigma_0) << " " << tex(sigma) << endl;
+    }
+    else  {
+      analysis.set_fit (&fit);
+      Estimate<double> sigma = analysis.get_relative_error ();
+      cout << name << " " << tex(sigma_0) << " " << tex(sigma) << endl;
+    }
 
     analysis.use_basis (false);
 
