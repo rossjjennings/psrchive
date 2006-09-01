@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/Attic/PolnProfileFit.h,v $
-   $Revision: 1.20 $
-   $Date: 2006/04/21 15:28:57 $
+   $Revision: 1.21 $
+   $Date: 2006/09/01 20:56:40 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PolnProfileFit_h
@@ -48,6 +48,9 @@ namespace Pulsar {
     
   public:
 
+    //! Verbosity flag
+    static bool verbose;
+
     //! Default constructor
     PolnProfileFit ();
 
@@ -83,6 +86,9 @@ namespace Pulsar {
 
     //! Fit the specified observation to the standard
     void fit (const PolnProfile* observation);
+
+    //! Get the number of harmonics to be included
+    unsigned get_nharmonic () const { return n_harmonic; }
 
     //! The number of iterations in last call to fit method
     unsigned get_fit_iterations () const;

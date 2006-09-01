@@ -34,6 +34,7 @@
 
 #include <memory>
 
+bool Pulsar::PolnProfileFit::verbose = false;
 
 //! Default constructor
 Pulsar::PolnProfileFit::PolnProfileFit ()
@@ -121,18 +122,18 @@ void Pulsar::PolnProfileFit::set_standard (const PolnProfile* _standard)
   unsigned std_harmonic = standard->get_nbin() / 2;
 
   if (choose_maximum_harmonic) {
-    if (Profile::verbose)
+    if (verbose)
       cerr << "Pulsar::PolnProfileFit::set_standard chose "
 	   << n_harmonic << " harmonics" << endl;
   }
   else if (maximum_harmonic && maximum_harmonic < std_harmonic) {
-    if (Profile::verbose)
+    if (verbose)
       cerr << "Pulsar::PolnProfileFit::set_standard using " << maximum_harmonic
 	   << " out of " << std_harmonic << " harmonics" << endl;
     n_harmonic = maximum_harmonic;
   }
   else {
-    if (Profile::verbose)
+    if (verbose)
       cerr << "Pulsar::PolnProfileFit::set_standard using all "
 	   << std_harmonic << " harmonics" << endl;
     n_harmonic = std_harmonic;
@@ -185,7 +186,7 @@ void Pulsar::PolnProfileFit::set_standard (const PolnProfile* _standard)
 
   }
 
-  if (Profile::verbose)
+  if (verbose)
     cerr << "Pulsar::PolnProfileFit::set_standard det=" << standard_det <<endl;
 
 }
@@ -370,9 +371,8 @@ void Pulsar::PolnProfileFit::fit (const PolnProfile* observation) try
     phase->set_param (1, phase->get_param(1) - mismatch_shift);
   }
 
-#ifdef _DEBUG
-  cerr << "Pulsar::PolnProfileFit::fit solved in " << clock << endl;
-#endif
+  cerr << "Pulsar::PolnProfileFit::fit solved in " << clock << "."
+          " redchisq=" << get_fit_chisq() / get_fit_nfree() << endl;
 
 }
 catch (Error& error) {
@@ -463,7 +463,7 @@ void Pulsar::PolnProfileFit::set_noise_mask () try
     finder.set_Profile( input_psd->get_Profile(ipol) );
     finder.get_weight( mask );
 
-    if (Profile::verbose)
+    if (verbose)
       cerr << "Pulsar::PolnProfileFit::set_noise_mask ipol=" << ipol
 	   << " mask count=" << mask.get_weight_sum() << endl;
 
@@ -499,7 +499,7 @@ Pulsar::PolnProfileFit::get_variance (const PolnProfile* input) const try
     // The variance of the spectrum (with zero mean) is the mean of the PSD
     variance[ipol] = get_variance ( input->get_Profile(ipol) );
 
-    if (Profile::verbose)
+    if (verbose)
       cerr << "Pulsar::PolnProfileFit::get_variance ipol=" << ipol 
 	   << " sigma=" << sqrt(variance[ipol]) << endl;
 
@@ -516,7 +516,7 @@ double Pulsar::PolnProfileFit::get_variance (const Profile* input) const try
   unsigned nbin = input->get_nbin()/2;
   unsigned mbin = std::min(nbin, noise_mask.get_nbin());
 
-  if (Profile::verbose)
+  if (verbose)
     cerr << "Pulsar::PolnProfileFit::get_variance noise mask uses "
 	 << noise_mask.get_weight_sum() << " out of " << noise_mask.get_nbin()
 	 << " harmonics" << endl;
