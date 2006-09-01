@@ -902,7 +902,7 @@ Pulsar::Database::generatePolnCalibrator (Archive* arch, Calibrator::Type m)
   
   Entry entry;
 
-  try {
+  if (m != Pulsar::Calibrator::Britton) try {
     if (verbose)
       cerr << "Pulsar::Database::generatePolnCalibrator search for " 
 	"Signal::PolnCal match" << endl;
@@ -940,6 +940,11 @@ Pulsar::Database::generatePolnCalibrator (Archive* arch, Calibrator::Type m)
     FeedExtension* feed_ext = polcalarch->getadd<FeedExtension>();
     feed_ext -> set_transformation ( feed->evaluate() );
   }
+
+  if (entry.obsType == Signal::Calibrator)
+    cerr << "CAL OF TYPE " <<  Calibrator::Type2str (entry.calType) << endl;
+  else
+    cerr << "FILE OF TYPE " << Signal::Source2string (entry.obsType);
 
   if (entry.obsType == Signal::Calibrator)
     // if a solved model, return the solution

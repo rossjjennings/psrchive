@@ -27,7 +27,7 @@
 #include <unistd.h>
 
 // A command line tool for calibrating Pulsar::Archives
-const char* args = "A:BbcDd:e:fFGhiIM:m:n:Oop:Pqr:sSt:Tu:vVwZ";
+const char* args = "A:BbCcDd:e:fFGhiIM:m:n:Oop:Pqr:sSt:Tu:vVwZ";
 
 void usage ()
 {
@@ -163,7 +163,7 @@ int main (int argc, char *argv[]) {
       break;
 
     case 'i':
-      cout << "$Id: pac.C,v 1.75 2006/03/29 22:42:18 straten Exp $" << endl;
+      cout << "$Id: pac.C,v 1.76 2006/09/01 20:56:38 straten Exp $" << endl;
       return 0;
 
     case 'A':
@@ -188,6 +188,11 @@ int main (int argc, char *argv[]) {
     case 'B':
       pcal_type = Pulsar::Calibrator::OffPulse;
       command += " -B";
+      break;
+
+    case 'C':
+      pcal_type = Pulsar::Calibrator::Britton;
+      command += " -C";
       break;
 
     case 'D':
