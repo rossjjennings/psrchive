@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PolnProfileFitAnalysis.h,v $
-   $Revision: 1.21 $
-   $Date: 2006/09/01 20:56:39 $
+   $Revision: 1.22 $
+   $Date: 2006/09/02 13:45:30 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PolnProfileFitAnalysis_h
@@ -68,6 +68,9 @@ namespace Pulsar {
 
     //! Get the variance of varphi and its gradient with respect to basis
     double get_c_varphi (std::vector<double>* c_varphi_grad = 0);
+
+    //! Get the variance of varphi and its gradient with respect to basis
+    double get_C_varphi (std::vector<double>* c_varphi_grad = 0);
 
     //! Get the uncertainty in the variance of varphi
     double get_c_varphi_error () const;
@@ -137,10 +140,12 @@ namespace Pulsar {
     Matrix<8,8,double> delalpha_delB (unsigned ib);
 
     //! The partial derivative of the curvature matrix wrt basis parameters
-    void delalpha_delB (std::vector< Matrix<8,8,double> >&);
+    void get_delalpha_delB (std::vector< Matrix<8,8,double> >&);
+    void add_delalpha_delB (std::vector< Matrix<8,8,double> >&);
 
     //! Get the curvature matrix
     void get_curvature (Matrix<8,8,double>& curvature);
+    void add_curvature (Matrix<8,8,double>& curvature);
 
     //! Set the model up to evaluate the specified harmonic
     void set_harmonic (unsigned index);
@@ -192,6 +197,9 @@ namespace Pulsar {
 
     double var_c_varphi;
     void var_c_varphi_add ();
+
+    std::vector< double > weights;
+    void compute_weights (unsigned nharmonic);
 
   };
 
