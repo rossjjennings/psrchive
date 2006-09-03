@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PolnProfileFit.h,v $
-   $Revision: 1.21 $
-   $Date: 2006/09/01 20:56:40 $
+   $Revision: 1.22 $
+   $Date: 2006/09/03 15:12:27 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PolnProfileFit_h
@@ -87,6 +87,9 @@ namespace Pulsar {
     //! Fit the specified observation to the standard
     void fit (const PolnProfile* observation);
 
+    //! Get the last significant harmonic of the last fit observation
+    unsigned get_nharmonic_obs () const { return n_harmonic_obs; }
+
     //! Get the number of harmonics to be included
     unsigned get_nharmonic () const { return n_harmonic; }
 
@@ -137,6 +140,9 @@ namespace Pulsar {
 
     //! The number of harmonics in the fit
     unsigned n_harmonic;
+
+    //! The last significant harmonic of the last fit observation
+    unsigned n_harmonic_obs;
 
     //! The standard to which observations will be fit
     Reference::To<const PolnProfile> standard;

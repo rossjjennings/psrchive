@@ -265,8 +265,8 @@ void Pulsar::PolnProfileFit::fit (const PolnProfile* observation) try
 
   // calculate the power spectral density of the input
   Reference::To<PolnProfile> psd = fourier_psd (fourier);
-  unsigned last = get_last_significant (psd, var);
-  cerr << "Pulsar::PolnProfileFit::fit last harmonic = " << last << endl;
+  n_harmonic_obs = get_last_significant (psd, var);
+  //cerr << "Pulsar::PolnProfileFit::fit last harmonic = " << last << endl;
 
   model->delete_data ();
 
