@@ -82,6 +82,7 @@ void usage ()
 using namespace Pulsar;
 
 static bool sensitivity_curve = true;
+static vector<unsigned> histo;
 
 // defined at the end of this file
 void mtm_analysis (PolnProfileFitAnalysis&, PolnProfileFit&,
@@ -153,7 +154,7 @@ int main (int argc, char *argv[]) try {
       break;
 
     case 'i':
-      cout << "$Id: pat.C,v 1.54 2006/09/03 00:09:16 straten Exp $" << endl;
+      cout << "$Id: pat.C,v 1.55 2006/09/03 15:12:29 straten Exp $" << endl;
       return 0;
 
     case 'F':
@@ -313,6 +314,10 @@ int main (int argc, char *argv[]) try {
   // Give format information for Tempo2 output 
   if (strcasecmp(outFormat.c_str(),"tempo2")==0)
     cout << "FORMAT 1" << endl;
+
+  // optimization: remember the last successful MTM fit
+  MEAL::Polar backup;
+
   for (unsigned i = 0; i < archives.size(); i++) {
     
     try {
@@ -327,50 +332,40 @@ int main (int argc, char *argv[]) try {
 	arch->fscrunch();
       if (tscrunch)
 	arch->tscrunch();
+
       if (full_poln) try {
 
 	Integration* integration = arch->get_Integration(0);
 	poln_profile = integration->new_PolnProfile(0);
+
+        fit.get_transformation()->copy( &backup );
+
+        if (optimize_mtm)
+          analysis.use_basis (false);
 
 	Tempo::toa toa = fit.get_toa (poln_profile,
 				      integration->get_epoch(),
 				      integration->get_folding_period(),
 				      arch->get_telescope_code());
 
+        backup.copy( fit.get_transformation() );
+
 	if (optimize_mtm) {
 
 	  Jones<double> xform = fit.get_transformation()->evaluate();
 
 	  analysis.use_basis (true);
-	  analysis.optimize ();
 
 	  Jones<double> basis = analysis.get_basis()->evaluate();
 	  poln_profile->transform( basis * inv(xform) );
 
-          MEAL::Polar backup;
-          backup.copy( fit.get_transformation() );
-
           MEAL::Polar identity;
           fit.get_transformation()->copy( &identity );
 
-          bool fail = false;
-
-          try {
 	  toa = fit.get_toa (poln_profile,
-				integration->get_epoch(),
-				integration->get_folding_period(),
-				arch->get_telescope_code());
-          }
-          catch (Error& error) {
-            cerr << "pat: optimized fit failed" << endl;
-            fail = true;
-          }
-
-          fit.get_transformation()->copy( &backup );
-          analysis.use_basis (false);
-
-          if (fail)
-            continue;
+			       integration->get_epoch(),
+			       integration->get_folding_period(),
+			       arch->get_telescope_code());
 
 	}
 
@@ -389,13 +384,14 @@ int main (int argc, char *argv[]) try {
 	  
 	  toa.unload(stdout);
 
+          if (sensitivity_curve)
+            histo[fit.get_nharmonic_obs()] ++;
+
 	}
 
       }
       catch (Error& error) {
-	cerr << "pat: Error while fitting " << error << endl;
-        MEAL::Polar identity;
-        fit.get_transformation()->copy( &identity );
+	cerr << "pat: Error MTM " << arch->get_filename() << endl;
       }
       else {
 
@@ -487,6 +483,11 @@ int main (int argc, char *argv[]) try {
   }
 
   fflush(stdout);
+
+  if (sensitivity_curve)
+    cerr << "pat: expected ratio = " 
+         << analysis.get_expected_relative_error(histo) << endl;
+
   return 0;
 
 }
@@ -587,21 +588,12 @@ void mtm_analysis (PolnProfileFitAnalysis& analysis,
     cerr << "Optimizing the template" << endl;
     analysis.optimize ();
 
-    if (sensitivity_curve)  {
+    if (sensitivity_curve)
+      histo.resize( fit.get_nharmonic() );
 
-      for (unsigned i=1; i < fit.get_nharmonic(); i++)  {
-        analysis.set_optimal_harmonic_max(i);
-        analysis.set_fit (&fit);
-        Estimate<double> sigma = analysis.get_relative_error ();
-        cout << i << " " << sigma.val << " " << sigma.get_error() << endl;
-      }
-
-    }
-    else  {
-      analysis.set_fit (&fit);
-      Estimate<double> sigma = analysis.get_relative_error ();
-      cout << name << " " << tex(sigma_0) << " " << tex(sigma) << endl;
-    }
+    analysis.set_fit (&fit);
+    Estimate<double> sigma = analysis.get_relative_error ();
+    cout << name << " " << tex(sigma_0) << " " << tex(sigma) << endl;
 
     analysis.use_basis (false);
 
