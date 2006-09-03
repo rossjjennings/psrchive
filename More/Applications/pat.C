@@ -153,7 +153,7 @@ int main (int argc, char *argv[]) try {
       break;
 
     case 'i':
-      cout << "$Id: pat.C,v 1.53 2006/09/01 20:56:41 straten Exp $" << endl;
+      cout << "$Id: pat.C,v 1.54 2006/09/03 00:09:16 straten Exp $" << endl;
       return 0;
 
     case 'F':
@@ -340,11 +340,12 @@ int main (int argc, char *argv[]) try {
 	if (optimize_mtm) {
 
 	  Jones<double> xform = fit.get_transformation()->evaluate();
-	  Jones<double> basis = analysis.get_basis()->evaluate();
-
-	  poln_profile->transform( basis * inv(xform) );
 
 	  analysis.use_basis (true);
+	  analysis.optimize ();
+
+	  Jones<double> basis = analysis.get_basis()->evaluate();
+	  poln_profile->transform( basis * inv(xform) );
 
           MEAL::Polar backup;
           backup.copy( fit.get_transformation() );
