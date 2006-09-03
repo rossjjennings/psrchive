@@ -131,6 +131,7 @@ libpsrchive_la_SOURCES =			\
 	Interpreter.C				\
 	InterpreterVariables.C			\
 	IterativeBaseline.C			\
+	LastSignificant.C			\
 	model_profile.C				\
 	NoiseStatistics.C			\
 	OnPulseThreshold.C			\

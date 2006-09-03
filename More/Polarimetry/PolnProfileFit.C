@@ -34,6 +34,9 @@
 
 #include <memory>
 
+unsigned get_last_significant (const Pulsar::PolnProfile* psd,
+			       const Stokes<double>& var);
+
 bool Pulsar::PolnProfileFit::verbose = false;
 
 //! Default constructor
@@ -194,56 +197,7 @@ void Pulsar::PolnProfileFit::set_standard (const PolnProfile* _standard)
 //! Choose the maximum_harmonic for the given standard
 void Pulsar::PolnProfileFit::choose_max_harmonic (const PolnProfile* psd)
 {
-  n_harmonic = psd->get_nbin();
-
-  unsigned max_harmonic = 0;
-  unsigned ipol, npol = 4;
-
-  vector<float> S (n_harmonic, 0);
-  double S_variance = 0;
-
-  for (ipol=1; ipol<npol; ipol++)  {
-    const float* amps = psd->get_amps(ipol);
-    for (unsigned ibin=1; ibin<n_harmonic; ibin++)
-      S[ibin] += amps[ibin];
-    S_variance += standard_variance[ipol];
-  }
-
-  double cutoff_sigma = 3.0;
-
-  for (ipol=0; ipol<2; ipol++) {
-
-    const float* amps = psd->get_amps(ipol);
-    if (ipol)
-      amps = &(S[0]);
-
-    double threshold = standard_variance[ipol] * cutoff_sigma * cutoff_sigma;
-    if (ipol)
-      threshold = S_variance * cutoff_sigma * cutoff_sigma;
-
-    unsigned count = 0;
-
-    // cerr << "THRESHOLD=" << threshold  << endl;
-
-    for (unsigned ibin=1; ibin<n_harmonic; ibin++) {
-
-      if (amps[ibin] > threshold)
-	count ++;
-      else
-	count = 0;
-
-      // cerr << count << " " << ibin << " " << amps[ibin]  <<endl;
-
-      if (count > 2 && ibin > max_harmonic)
-	max_harmonic = ibin;
-
-    }
-    
-    // cerr << "max_harmonic = " << max_harmonic << endl;
-
-  }
-
-  n_harmonic = max_harmonic;
+  n_harmonic = get_last_significant (psd, standard_variance);
 }
 
 //! Set the transformation between the standard and observation
@@ -306,7 +260,13 @@ void Pulsar::PolnProfileFit::fit (const PolnProfile* observation) try
 
   set_phase (phase_guess);
 
-  uncertainty->set_observation_var( get_variance(fourier) );
+  Stokes<double> var = get_variance( fourier );
+  uncertainty->set_observation_var( var );
+
+  // calculate the power spectral density of the input
+  Reference::To<PolnProfile> psd = fourier_psd (fourier);
+  unsigned last = get_last_significant (psd, var);
+  cerr << "Pulsar::PolnProfileFit::fit last harmonic = " << last << endl;
 
   model->delete_data ();
 
