@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/TemplateUncertainty.h,v $
-   $Revision: 1.5 $
-   $Date: 2006/08/23 22:02:56 $
+   $Revision: 1.6 $
+   $Date: 2006/09/03 00:09:28 $
    $Author: straten $ */
 
 #ifndef __Calibration_TemplateUncertainty_H
@@ -37,6 +37,9 @@ namespace Calibration {
 
     //! Set the uncertainty of the template
     void set_template_var (const Stokes<double>& var);
+
+    //! Get the sum of the template and observation variance
+    Stokes<double> get_input_var () const;
 
     //! Set the transformation from template to observation
     void set_transformation (const MEAL::Complex2* transformation);

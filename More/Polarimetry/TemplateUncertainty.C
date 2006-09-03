@@ -40,6 +40,11 @@ Calibration::TemplateUncertainty::set_template_var (const Stokes<double>& v)
   built = false;
 }
 
+Stokes<double> Calibration::TemplateUncertainty::get_input_var () const
+{
+  return observation_variance + template_variance.get_input_variance();
+}
+
 //! Set the transformation from template to observation
 void
 Calibration::TemplateUncertainty::set_transformation (const MEAL::Complex2* x)
@@ -68,10 +73,9 @@ void Calibration::TemplateUncertainty::build ()
   for (unsigned ipol=0; ipol < 4; ipol++)
     inv_var[ipol] = 1.0 / (observation_variance[ipol] + var[ipol]);
 
-#ifdef _DEBUG
+#if 0
   std::cerr << "Calibration::TemplateUncertainty::build"
-	    << "\n  temp_var=" << template_variance[0].var
-	    << "\n  tran_var=" << var[0].var
+	    << "\n  tran_var=" << var
 	    << "\n  obs_var=" << observation_variance[0] 
 	    << "\n  inv_var=" << inv_var << std::endl;
 #endif
