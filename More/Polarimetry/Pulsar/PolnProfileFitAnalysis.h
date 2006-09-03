@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PolnProfileFitAnalysis.h,v $
-   $Revision: 1.22 $
-   $Date: 2006/09/02 13:45:30 $
+   $Revision: 1.23 $
+   $Date: 2006/09/03 15:12:28 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PolnProfileFitAnalysis_h
@@ -71,6 +71,9 @@ namespace Pulsar {
 
     //! Get the variance of varphi and its gradient with respect to basis
     double get_C_varphi (std::vector<double>* c_varphi_grad = 0);
+
+    //! Get the expected relative conditional error given a histogram
+    double get_expected_relative_error (std::vector<unsigned>& histogram);
 
     //! Get the uncertainty in the variance of varphi
     double get_c_varphi_error () const;
@@ -199,6 +202,8 @@ namespace Pulsar {
     void var_c_varphi_add ();
 
     std::vector< double > weights;
+    std::vector< double > store_covariance;
+
     void compute_weights (unsigned nharmonic);
 
   };

@@ -13,6 +13,7 @@
 #include "MEAL/ProductRule.h"
 
 #include "Pauli.h"
+#include <assert.h>
 
 using namespace std;
 
@@ -31,8 +32,7 @@ void Pulsar::PolnProfileFitAnalysis::set_compute_error (bool flag)
   compute_error = flag;
 }
 
-void
-Pulsar::PolnProfileFitAnalysis::set_harmonic (unsigned index)
+void Pulsar::PolnProfileFitAnalysis::set_harmonic (unsigned index)
 {
   double phase_shift = -2.0 * M_PI * double(index+1);
 
@@ -53,8 +53,6 @@ Jones<double> weight (const Jones<double>& rho, const Stokes<double>& s)
 
   return convert (stokes);
 }
-
-// #define CORRECT_CURVATURE 1
 
 /*!
   Computes Equation 14 of van Straten (2006)
@@ -81,40 +79,20 @@ void Pulsar::PolnProfileFitAnalysis::get_curvature (Matrix<8,8,double>& alpha)
 
 void Pulsar::PolnProfileFitAnalysis::add_curvature (Matrix<8,8,double>& alpha)
 {
-#ifdef CORRECT_CURVATURE
-  Jones<double> rho = fit->model->get_input()->evaluate();
-  rho = fit->uncertainty->get_normalized (rho);
-#endif
-
 #ifdef _DEBUG
   for (unsigned ig=0; ig < model_gradient.size(); ig++)
     cerr << "g[" << fit->model->get_param_name(ig) << "]=\t"
 	 << model_gradient[ig] << endl;
 #endif
 
+  assert( model_gradient.size() == 10 );
+
   for (unsigned ir=0; ir < 8; ir++) {
       
     Jones<double> delrho_deleta_r =
       fit->uncertainty->get_normalized (model_gradient[ir+2]);    
     
-#ifdef CORRECT_CURVATURE
-    if (ir > 0 && delN_delJ.size() != 0) {
-      Jones<double> correction = weight( rho, delN_delJ[ir-1] );
-      
-#if 0
-      cerr <<
-	"curv["<<ir<<"]: delR=" << delrho_deleta_r << "\n"
-	"         corr=" << correction << "\n"
-	"         grad=" << model_gradient[ir+2] << "\n"
-	"         delN=" << delN_delJ[ir-1]
-	       << endl;
-#endif
-      
-      delrho_deleta_r -= correction;
-    }
-#endif
-    
-    for (unsigned is=0; is < 8; is ++) {
+    for (unsigned is=0; is <= ir; is ++) {
       
       Jones<double> delrho_deleta_s = model_gradient[is+2];
       
@@ -132,7 +110,8 @@ void Pulsar::PolnProfileFitAnalysis::add_curvature (Matrix<8,8,double>& alpha)
 #endif
       
       alpha[ir][is] += one;
-      
+      if (ir != is)
+        alpha[is][ir] += one;
     }
     
   }
@@ -497,6 +476,8 @@ void Pulsar::PolnProfileFitAnalysis::get_delalpha_delB
 void Pulsar::PolnProfileFitAnalysis::add_delalpha_delB
 (vector< Matrix<8,8,double> >& delalpha_delbasis)
 {
+  assert(delalpha_delbasis.size() == basis->get_nparam());
+
   // over all basis parameters
   for (unsigned ib=0; ib < basis->get_nparam(); ib++)
     delalpha_delbasis[ib] += delalpha_delB (ib);
@@ -808,6 +789,7 @@ void Pulsar::PolnProfileFitAnalysis::compute_weights (unsigned nharmonic)
   scalar.set_fit (fit);
 
   weights.resize( nharmonic );
+  store_covariance.resize( nharmonic );
 
   for (unsigned i=0; i<nharmonic; i++) try {
 
@@ -820,6 +802,9 @@ void Pulsar::PolnProfileFitAnalysis::compute_weights (unsigned nharmonic)
 
     weights[i] = 1.0 / I_covariance[0][0];
 
+    if (I_covariance[0][0] <= 0)
+      weights[i] = 0.0;
+
     cerr << "weights[" << i << "]=" << weights[i] << endl;
   }
   catch (Error& error) {
@@ -827,6 +812,31 @@ void Pulsar::PolnProfileFitAnalysis::compute_weights (unsigned nharmonic)
   }
   
 
+}
+
+double Pulsar::PolnProfileFitAnalysis::get_expected_relative_error 
+(std::vector<unsigned>& histogram)
+{
+  double M_tot = 0.0;
+  double I_tot = 0.0;
+  unsigned total = 0;
+
+  unsigned npts = histogram.size() -1;
+  if (npts > weights.size())
+    npts = weights.size();
+
+  for (unsigned i=0; i < npts; i++) {
+    if (weights[i] == 0)
+      continue;
+    unsigned count = histogram[i+1];
+    double I_var = 1.0/weights[i];
+    I_tot += count * I_var;
+    double M_var = store_covariance[i];
+    M_tot += count * M_var;
+    cerr << i+1 << " " << count << " " << sqrt(M_var/I_var) << endl;
+  }
+
+  return sqrt (M_tot/I_tot);
 }
 
 //! Get the variance of varphi and its gradient with respect to basis
@@ -839,11 +849,13 @@ Pulsar::PolnProfileFitAnalysis::get_C_varphi (std::vector<double>* grad)
     cerr << " " << basis->get_param(i);
   cerr << endl;
 
+  unsigned nparam = basis->get_nparam();
+
   // calculate the curvature matrix
   Matrix<8,8,double> curvature;
 
   // the partial derivatives of the curvature matrix wrt basis parameters
-  vector< Matrix<8,8,double> > delalpha_delbasis (basis->get_nparam());
+  vector< Matrix<8,8,double> > delalpha_delbasis (nparam);
 
   initialize();
 
@@ -856,8 +868,12 @@ Pulsar::PolnProfileFitAnalysis::get_C_varphi (std::vector<double>* grad)
 
   double C_varphi = 0;
 
-  if (grad)
-    *grad = vector<double> (basis->get_nparam(), 0.0);
+  if (grad)  {
+    *grad = vector<double> (nparam, 0.0);
+    assert(grad->size() == nparam);
+  }
+
+  unsigned min_harmonic = 1;
 
   for (unsigned ih=0; ih < nharmonic; ih++) {
 
@@ -867,8 +883,20 @@ Pulsar::PolnProfileFitAnalysis::get_C_varphi (std::vector<double>* grad)
 
     add_curvature (curvature);
 
+    store_covariance[ih] = 0;
+
+    if (ih < min_harmonic)
+      continue;
+
     // calculate the covariance matrix
     covariance = inv(curvature);
+
+    if ( covariance[0][0] <= 0 )  {
+      cerr << "minimum harmonic = " << ih + 1 << endl;
+      min_harmonic = ih + 1;
+    }
+
+    store_covariance[ih] = covariance[0][0];
 
     C_varphi += weights[ih] * covariance[0][0];
 
@@ -877,7 +905,7 @@ Pulsar::PolnProfileFitAnalysis::get_C_varphi (std::vector<double>* grad)
 
     add_delalpha_delB (delalpha_delbasis);
 
-    for (unsigned ib=0; ib < basis->get_nparam(); ib++) {
+    for (unsigned ib=0; ib < nparam; ib++) {
 
       // calculate the partial derivative of the covariance matrix wrt basis
       Matrix<8,8,double> delC_delB;
@@ -889,11 +917,14 @@ Pulsar::PolnProfileFitAnalysis::get_C_varphi (std::vector<double>* grad)
 
   }
 
+  if (C_varphi == 0)
+    throw Error (InvalidState, "get_C", "Insufficient signal-to-noise ratio");
+
   if (!grad)
     return C_varphi;
 
   double size=0;
-  for (unsigned ib=0; ib < basis->get_nparam(); ib++)
+  for (unsigned ib=0; ib < nparam; ib++)
     size += (*grad)[ib] * (*grad)[ib];
 
   cerr << "c_varphi = " << C_varphi << " grad=" << sqrt(size) 
