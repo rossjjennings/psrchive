@@ -19,6 +19,12 @@ void MEAL::StokesError::set_variance (const Stokes<double>& var)
   input = var;
 }
 
+//! Set the variances of the input Stokes parameters
+Stokes<double> MEAL::StokesError::get_input_variance () const
+{
+  return input;
+}
+
 //! Set the transformation from template to observation
 void MEAL::StokesError::set_transformation (const Jones<double>& J)
 {

@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/StokesError.h,v $
-   $Revision: 1.3 $
-   $Date: 2006/08/24 22:00:50 $
+   $Revision: 1.4 $
+   $Date: 2006/09/03 00:10:40 $
    $Author: straten $ */
 
 #ifndef __MEAL_StokesError_H
@@ -41,6 +41,9 @@ namespace MEAL {
 
     //! Get the variances of the output Stokes parameters gradient component
     Stokes<double> get_variance_gradient () const;
+
+    //! Get the input variance (not transformed)
+    Stokes<double> get_input_variance () const;
 
   protected:
 
