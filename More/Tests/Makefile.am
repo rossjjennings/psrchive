@@ -300,8 +300,8 @@ SUBDIRS += Calibration
 
 libpsrchive_la_LIBADD += Calibration/libCalibration.la
 
-bin_PROGRAMS += vap pam psrsh psradd pascii paz pac pat mtm pcq fluxcal	\
-	fadd archive_denoise archive_split
+bin_PROGRAMS += vap pam psrsh psradd pascii paz pac pat pcq fluxcal	\
+	fadd archive_denoise archive_split mtm mtm_unique
 
 vap_SOURCES			= vap.C
 pam_SOURCES			= pam.C
@@ -314,6 +314,7 @@ pac_SOURCES			= pac.C
 pat_SOURCES			= pat.C
 
 mtm_SOURCES			= mtm.C
+mtm_unique_SOURCES		= mtm_unique.C
 
 pcq_SOURCES			= pcq.C
 fluxcal_SOURCES			= fluxcal.C
