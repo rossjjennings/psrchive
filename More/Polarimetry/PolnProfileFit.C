@@ -266,7 +266,10 @@ void Pulsar::PolnProfileFit::fit (const PolnProfile* observation) try
   // calculate the power spectral density of the input
   Reference::To<PolnProfile> psd = fourier_psd (fourier);
   n_harmonic_obs = get_last_significant (psd, var);
-  //cerr << "Pulsar::PolnProfileFit::fit last harmonic = " << last << endl;
+
+  if (verbose)
+    cerr << "Pulsar::PolnProfileFit::fit last harmonic = "
+	 << n_harmonic_obs << endl;
 
   model->delete_data ();
 
@@ -331,8 +334,9 @@ void Pulsar::PolnProfileFit::fit (const PolnProfile* observation) try
     phase->set_param (1, phase->get_param(1) - mismatch_shift);
   }
 
-  cerr << "Pulsar::PolnProfileFit::fit solved in " << clock << "."
-          " redchisq=" << get_fit_chisq() / get_fit_nfree() << endl;
+  if (verbose)
+    cerr << "Pulsar::PolnProfileFit::fit solved in " << clock << "."
+      " chisq=" << get_fit_chisq() / get_fit_nfree() << endl;
 
 }
 catch (Error& error) {
