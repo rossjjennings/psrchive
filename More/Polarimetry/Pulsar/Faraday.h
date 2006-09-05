@@ -7,14 +7,14 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/Faraday.h,v $
-   $Revision: 1.8 $
-   $Date: 2006/03/31 22:57:42 $
+   $Revision: 1.9 $
+   $Date: 2006/09/05 22:53:23 $
    $Author: straten $ */
 
 #ifndef __Calibration_Faraday_H
 #define __Calibration_Faraday_H
 
-#include "MEAL/Rotation.h"
+#include "MEAL/Rotation1.h"
 
 namespace Calibration {
 
@@ -72,7 +72,7 @@ namespace Calibration {
   protected:
 
     //! The Rotation operation
-    MEAL::Rotation rotation;
+    MEAL::Rotation1 rotation;
 
     //! Reference wavelength in metres
     double reference_wavelength;

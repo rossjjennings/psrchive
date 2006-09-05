@@ -110,7 +110,7 @@ void Calibration::StandardModel::build ()
   if (differential_phase_order) {
 
     MEAL::Complex2* operation;
-    operation = new MEAL::Rotation(Vector<3, double>::basis(0));
+    operation = new MEAL::Rotation1 (Vector<3, double>::basis(0));
 
     MEAL::Polynomial* poly;
     poly = new MEAL::Polynomial (differential_phase_order+1);

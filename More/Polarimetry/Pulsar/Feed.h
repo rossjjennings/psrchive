@@ -7,15 +7,15 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/Feed.h,v $
-   $Revision: 1.5 $
-   $Date: 2006/03/17 13:34:44 $
+   $Revision: 1.6 $
+   $Date: 2006/09/05 22:53:23 $
    $Author: straten $ */
 
 #ifndef __Calibration_Feed_H
 #define __Calibration_Feed_H
 
 #include "MEAL/SumRule.h"
-#include "MEAL/Rotation.h"
+#include "MEAL/Rotation1.h"
 
 #include "Estimate.h"
 
@@ -76,10 +76,10 @@ namespace Calibration {
   protected:
 
     //! The receptor orientation tranformations
-    Reference::To<MEAL::Rotation> orientation[2];
+    Reference::To<MEAL::Rotation1> orientation[2];
 
     //! The receptor ellipticity tranformations
-    Reference::To<MEAL::Rotation> ellipticity[2];
+    Reference::To<MEAL::Rotation1> ellipticity[2];
 
   private:
     

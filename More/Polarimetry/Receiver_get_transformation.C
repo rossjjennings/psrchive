@@ -6,7 +6,7 @@
  ***************************************************************************/
 
 #include "Pulsar/Receiver.h"
-#include "MEAL/Rotation.h"
+#include "MEAL/Rotation1.h"
 #include "Pauli.h"
 
 //! Return the feed correction matrix
@@ -25,7 +25,7 @@ Jones<double> Pulsar::Receiver::get_transformation () const
          << get_orientation().getDegrees() << " deg" << endl;
 
   // rotate the basis about the Stokes V axis
-  MEAL::Rotation rotation ( Pauli::basis.get_basis_vector(2) );
+  MEAL::Rotation1 rotation ( Pauli::basis.get_basis_vector(2) );
 
   // the sign of this rotation may depend on handedness
   rotation.set_phi ( get_orientation().getRadians() );

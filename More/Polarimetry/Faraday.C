@@ -11,12 +11,12 @@
 
 using namespace std;
 
-Calibration::Faraday::Faraday () 
+Calibration::Faraday::Faraday () :
+  rotation (Pauli::basis.get_basis_vector(2))
 {
   MEAL::OneParameter* parm = new MEAL::OneParameter (this);
   parm->set_param_name (0, "RM");
 
-  rotation.set_axis (Pauli::basis.get_basis_vector(2));
 
   reference_wavelength = 0.0;
   wavelength = 0.0;
@@ -144,7 +144,7 @@ void Calibration::Faraday::calculate (Jones<double>& result,
     throw Error (InvalidState, "Calibration::Faraday::calculate",
                  "gradient.size=%d != 1", grad->size());
 
-  double dphi_dRM = rotation.get_phi() / get_param(0);
+  double dphi_dRM = rotation.get_phi().get_value() / get_param(0);
 
   (*grad)[0] *= dphi_dRM;
 }

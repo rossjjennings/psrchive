@@ -14,7 +14,7 @@
 
 //! Default constructor
 Calibration::Parallactic::Parallactic ()
-  : Rotation (Pauli::basis.get_basis_vector(2))
+  : Rotation1 (Pauli::basis.get_basis_vector(2))
 {
   // the rotation angle is not a free parameter
   set_infit (0, false);
@@ -111,7 +111,7 @@ void Calibration::Parallactic::set_parallactic_angle (double para)
 
 double Calibration::Parallactic::get_parallactic_angle () const
 {
-  return get_phi();
+  return get_phi().get_value();
 }
 
 void Calibration::Parallactic::reset ()

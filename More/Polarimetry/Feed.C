@@ -8,7 +8,7 @@
 
 #include "MEAL/ProductRule.h"
 #include "MEAL/Complex2Constant.h"
-#include "MEAL/Rotation.h"
+#include "MEAL/Rotation1.h"
 #include "MEAL/CyclicParameter.h"
 
 #include "Pauli.h"
@@ -44,14 +44,14 @@ void Calibration::Feed::init ()
 
 #if FEED_BOTH
     // construct the elipticity matrix
-    ellipticity[ir] = new MEAL::Rotation (Pauli::basis.get_basis_vector(1));
+    ellipticity[ir] = new MEAL::Rotation1 (Pauli::basis.get_basis_vector(1));
     // construct the orientation matrix
-    orientation[ir] = new MEAL::Rotation (Pauli::basis.get_basis_vector(2));
+    orientation[ir] = new MEAL::Rotation1 (Pauli::basis.get_basis_vector(2));
 #else
     // construct the elipticity matrix
-    ellipticity[ir] = new MEAL::Rotation (Vector<3, double>::basis(1));
+    ellipticity[ir] = new MEAL::Rotation1 (Vector<3, double>::basis(1));
     // construct the orientation matrix
-    orientation[ir] = new MEAL::Rotation (Vector<3, double>::basis(2));
+    orientation[ir] = new MEAL::Rotation1 (Vector<3, double>::basis(2));
 #endif
 
     receptor->add_model (ellipticity[ir]);

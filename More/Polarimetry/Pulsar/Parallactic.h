@@ -7,14 +7,14 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/Parallactic.h,v $
-   $Revision: 1.3 $
-   $Date: 2006/03/17 13:34:44 $
+   $Revision: 1.4 $
+   $Date: 2006/09/05 22:53:23 $
    $Author: straten $ */
 
 #ifndef __Calibration_Parallactic_H
 #define __Calibration_Parallactic_H
 
-#include "MEAL/Rotation.h"
+#include "MEAL/Rotation1.h"
 #include "MJD.h"
 
 class sky_coord;
@@ -55,7 +55,7 @@ namespace Calibration {
     rotation about the Stokes V axis by -VA.
   */
 
-  class Parallactic : public MEAL::Rotation {
+  class Parallactic : public MEAL::Rotation1 {
 
   public:
 
