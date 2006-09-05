@@ -149,7 +149,6 @@ int main (int argc, char** argv)
   fit.set_fit_debug();
 
   MEAL::Polar* polar = new MEAL::Polar;
-  polar->set_cyclic();
 
   fit.set_transformation( polar );
 
