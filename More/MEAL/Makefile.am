@@ -65,6 +65,7 @@ nobase_include_HEADERS = \
         MEAL/BinaryRule.h \
         MEAL/BinaryScalar.h \
         MEAL/Boost.h \
+	MEAL/Boost1.h \
         MEAL/Cached.h \
         MEAL/CalculatePolicy.h \
         MEAL/ChainRule.h \
@@ -110,6 +111,7 @@ nobase_include_HEADERS = \
 	MEAL/RandomPolar.h \
         MEAL/RotatingVectorModel.h \
         MEAL/Rotation.h \
+	MEAL/Rotation1.h \
         MEAL/RuleMath.h \
         MEAL/ScalarAbsolute.h \
         MEAL/ScalarArgument.h \
@@ -149,6 +151,7 @@ libunits_la_SOURCES += \
         ArgumentPolicy.C \
         BinaryScalar.C \
         Boost.C \
+	Boost1.C \
         Coherency.C \
         Complex2.C \
         Complex2Constant.C \
@@ -182,6 +185,7 @@ libunits_la_SOURCES += \
 	RandomPolar.C \
         RotatingVectorModel.C \
         Rotation.C \
+	Rotation1.C \
         ScalarAbsolute.C \
         ScalarArgument.C \
         Scalar.C \
