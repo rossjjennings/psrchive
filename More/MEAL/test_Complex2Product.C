@@ -6,8 +6,8 @@
  ***************************************************************************/
 #include "MEAL/ProductRule.h"
 #include "MEAL/Complex2Value.h"
-#include "MEAL/Rotation.h"
-#include "MEAL/Boost.h"
+#include "MEAL/Rotation1.h"
+#include "MEAL/Boost1.h"
 
 using namespace std;
 
@@ -30,7 +30,7 @@ int main (int argc, char** argv)
 
   Test< MEAL::ProductRule<MEAL::Complex2> > meta;
 
-  Test< MEAL::Rotation > rotation (Vector<3,double>::basis(0));
+  Test< MEAL::Rotation1 > rotation (Vector<3,double>::basis(0));
 
   meta.add_model (&rotation);
   if (!meta.get_changed()) {
@@ -39,7 +39,7 @@ int main (int argc, char** argv)
     return -1;
   }
 
-  Test< MEAL::Boost > boost (Vector<3,double>::basis(2));
+  Test< MEAL::Boost1 > boost (Vector<3,double>::basis(2));
 
   meta.add_model (&boost);
 

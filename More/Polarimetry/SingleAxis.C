@@ -6,8 +6,8 @@
  ***************************************************************************/
 #include "Calibration/SingleAxis.h"
 #include "MEAL/Gain.h"
-#include "MEAL/Boost.h"
-#include "MEAL/Rotation.h"
+#include "MEAL/Boost1.h"
+#include "MEAL/Rotation1.h"
 #include "MEAL/CyclicParameter.h"
 
 #include "Pauli.h"
@@ -26,9 +26,9 @@ void Calibration::SingleAxis::init ()
   // Note, these objects will be destroyed during Reference::To destructor
   gain     = new MEAL::Gain;
   // gain->name = "SingleAxis::Gain";
-  boost    = new MEAL::Boost    (Vector<3, double>::basis(0));
+  boost    = new MEAL::Boost1    (Vector<3, double>::basis(0));
   // boost->set_param_name ("SingleAxis::boost");
-  rotation = new MEAL::Rotation (Vector<3, double>::basis(0));
+  rotation = new MEAL::Rotation1 (Vector<3, double>::basis(0));
   // rotation->name = "SingleAxis::Rotation";
 
   add_model (gain);

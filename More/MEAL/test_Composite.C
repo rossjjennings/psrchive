@@ -5,8 +5,8 @@
  *
  ***************************************************************************/
 #include "MEAL/Composite.h"
-#include "MEAL/Rotation.h"
-#include "MEAL/Boost.h"
+#include "MEAL/Rotation1.h"
+#include "MEAL/Boost1.h"
 
 using namespace std;
 
@@ -27,18 +27,18 @@ public:
 
 void CompositeTest::runtest ()
 {
-  Rotation rotation (Vector<3,double>::basis(0));
-  Boost boost (Vector<3,double>::basis(2));
+  Rotation1 rotation (Vector<3,double>::basis(0));
+  Boost1 boost (Vector<3,double>::basis(2));
 
   CompositeTest m1;
   CompositeTest m2;
 
-  Project<Rotation> m1r (&rotation);
-  Project<Rotation> m2r (&rotation);
+  Project<Rotation1> m1r (&rotation);
+  Project<Rotation1> m2r (&rotation);
 
   Project<CompositeTest> m1m (&m2);
 
-  Project<Boost> m2b (&boost);
+  Project<Boost1> m2b (&boost);
 
   cerr << "********************* m1 map rotation" << endl;
   m1.composite.map (m1r);

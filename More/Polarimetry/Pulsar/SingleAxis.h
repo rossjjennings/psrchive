@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/SingleAxis.h,v $
-   $Revision: 1.6 $
-   $Date: 2006/03/17 13:34:44 $
+   $Revision: 1.7 $
+   $Date: 2006/09/05 22:52:57 $
    $Author: straten $ */
 
 #ifndef __Calibration_SingleAxis_H
@@ -22,8 +22,8 @@
 
 namespace MEAL {
   class Gain;
-  class Boost;
-  class Rotation;
+  class Boost1;
+  class Rotation1;
 }
 
 namespace Calibration {
@@ -113,10 +113,10 @@ namespace Calibration {
     Reference::To<MEAL::Gain> gain;
 
     //! Boost Complex2
-    Reference::To<MEAL::Boost> boost;
+    Reference::To<MEAL::Boost1> boost;
 
     //! Rotation Complex2
-    Reference::To<MEAL::Rotation> rotation;
+    Reference::To<MEAL::Rotation1> rotation;
 
   private:
 
