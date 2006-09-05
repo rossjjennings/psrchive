@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PolnProfileFitAnalysis.h,v $
-   $Revision: 1.23 $
-   $Date: 2006/09/03 15:12:28 $
+   $Revision: 1.24 $
+   $Date: 2006/09/05 15:05:18 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PolnProfileFitAnalysis_h
@@ -152,6 +152,9 @@ namespace Pulsar {
 
     //! Set the model up to evaluate the specified harmonic
     void set_harmonic (unsigned index);
+
+    //! Evaluate the model and phase (and gradients) of the specified harmonic
+    void evaluate (unsigned index);
 
     Jones<double> model_result;
     std::vector< Jones<double> > model_gradient;

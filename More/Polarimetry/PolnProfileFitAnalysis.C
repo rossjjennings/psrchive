@@ -40,6 +40,36 @@ void Pulsar::PolnProfileFitAnalysis::set_harmonic (unsigned index)
   fit->model->set_input_index (index);
 }
 
+void Pulsar::PolnProfileFitAnalysis::evaluate (unsigned index)
+{
+  set_harmonic (index);
+
+  static vector< Jones<double> > temp_gradient;
+  model_result = fit->model->evaluate (&temp_gradient);
+  phase_result = fit->phase_xform->evaluate (&phase_gradient);
+
+  assert( temp_gradient.size() == 10 );
+
+  model_gradient.resize(8);
+
+  unsigned J_start = 0;
+
+  if (fit->model->get_param_name(0) == "phase") {
+    model_gradient[0] = temp_gradient[2];
+    J_start = 3;
+  }
+  else if (fit->model->get_param_name(7) == "phase") {
+    model_gradient[0] = temp_gradient[9];
+    J_start = 0;
+  }
+  else
+    throw Error (InvalidState, "Pulsar::PolnProfileFitAnalysis::evaluate",
+		 "model parameters in unknown order");
+
+  for (unsigned j=0; j < 7; j++)
+    model_gradient[j+1] = temp_gradient[j+J_start];
+}
+
 //! Given a coherency matrix, return the weighted conjugate matrix
 Jones<double> weight (const Jones<double>& rho, const Stokes<double>& s)
 {
@@ -69,9 +99,7 @@ void Pulsar::PolnProfileFitAnalysis::get_curvature (Matrix<8,8,double>& alpha)
 
   for (unsigned ih=0; ih < nharmonic; ih++) {
 
-    set_harmonic (ih);
-    model_result = fit->model->evaluate (&model_gradient);
-
+    evaluate (ih);
     add_curvature (alpha);
 
   }
@@ -79,28 +107,20 @@ void Pulsar::PolnProfileFitAnalysis::get_curvature (Matrix<8,8,double>& alpha)
 
 void Pulsar::PolnProfileFitAnalysis::add_curvature (Matrix<8,8,double>& alpha)
 {
-#ifdef _DEBUG
-  for (unsigned ig=0; ig < model_gradient.size(); ig++)
-    cerr << "g[" << fit->model->get_param_name(ig) << "]=\t"
-	 << model_gradient[ig] << endl;
-#endif
-
-  assert( model_gradient.size() == 10 );
-
   for (unsigned ir=0; ir < 8; ir++) {
-      
+
     Jones<double> delrho_deleta_r =
-      fit->uncertainty->get_normalized (model_gradient[ir+2]);    
+      fit->uncertainty->get_normalized (model_gradient[ir]);    
     
     for (unsigned is=0; is <= ir; is ++) {
       
-      Jones<double> delrho_deleta_s = model_gradient[is+2];
+      Jones<double> delrho_deleta_s = model_gradient[is];
       
       double one = 2*trace(delrho_deleta_r*herm(delrho_deleta_s)).real();
       
 #if DOUBLE_CHECK_TWO_DIFFERENT_DESCRIPTIONS
-      Stokes< complex<double> > dr = complex_coherency(model_gradient[ir+2]);
-      Stokes< complex<double> > ds = complex_coherency(model_gradient[is+2]);
+      Stokes< complex<double> > dr = complex_coherency(model_gradient[ir]);
+      Stokes< complex<double> > ds = complex_coherency(model_gradient[is]);
       
       double two = 0.0;
       for (unsigned i=0; i < 4; i++)
@@ -194,13 +214,13 @@ void Pulsar::PolnProfileFitAnalysis::delC_delS
   for (unsigned ir=0; ir < 8; ir++) {
 	
     Jones<double> del2rho_deleta_r = del_deleta (ir, delrho_delS(k));
-    Jones<double> delrho_deleta_r = model_gradient[ir+2];    
+    Jones<double> delrho_deleta_r = model_gradient[ir];    
 
     // over all columns
     for (unsigned is=0; is <= ir; is ++) {
 	  
       Jones<double> del2rho_deleta_s = del_deleta (is, delrho_delS(k));
-      Jones<double> delrho_deleta_s = model_gradient[is+2];
+      Jones<double> delrho_deleta_s = model_gradient[is];
 	  
       delalpha_delSre[ir][is] = 2.0 *
 	trace( del2rho_deleta_r * herm(delrho_deleta_s) +
@@ -377,13 +397,13 @@ Pulsar::PolnProfileFitAnalysis::delalpha_delB (unsigned ib)
   // over all rows
   for (unsigned ir=0; ir < 8; ir++) {
 
-    Stokes<complex<double> > dr=complex_coherency(model_gradient[ir+2]);
+    Stokes<complex<double> > dr=complex_coherency(model_gradient[ir]);
     Stokes<complex<double> > d2r=complex_coherency(del_deleta(ir,delR_delB));
 
     // over all columns up to and including the diagonal
     for (unsigned is=0; is <= ir; is ++) {
 	  
-      Stokes<complex<double> > ds=complex_coherency(model_gradient[is+2]);
+      Stokes<complex<double> > ds=complex_coherency(model_gradient[is]);
       Stokes<complex<double> > d2s=complex_coherency(del_deleta(is,delR_delB));
 
       double r2 = 0.0;
@@ -455,10 +475,7 @@ void Pulsar::PolnProfileFitAnalysis::get_delalpha_delB
   for (unsigned ih=0; ih < nharmonic; ih++) {
 
     unsigned bih = nharmonic - ih - 1;
-    set_harmonic (bih);
-
-    model_result = fit->model->evaluate (&model_gradient);
-    phase_result = fit->phase_xform->evaluate (&phase_gradient);
+    evaluate (bih);
 
     // over all basis parameters
     add_delalpha_delB (delalpha_delbasis);
@@ -491,7 +508,7 @@ void Pulsar::PolnProfileFitAnalysis::set_fit (PolnProfileFit* f)
   if (!fit)
     return;
     
-  error.set_variance (f->standard_variance);
+  error.set_variance (fit->standard_variance);
   xform = fit->get_transformation();
 
   if (basis)
@@ -568,10 +585,7 @@ void Pulsar::PolnProfileFitAnalysis::set_fit (PolnProfileFit* f)
 
   for (unsigned ih=0; ih < nharmonic; ih++) {
 
-    set_harmonic (ih);
-
-    model_result = fit->model->evaluate (&model_gradient);
-    phase_result = fit->phase_xform->evaluate (&phase_gradient);
+    evaluate (ih);
 
     // over all four stokes parameters
     for (unsigned ip=0; ip < 4; ip++) {
@@ -733,22 +747,32 @@ void Pulsar::PolnProfileFitAnalysis::var_c_varphi_add ()
 double 
 Pulsar::PolnProfileFitAnalysis::get_c_varphi (std::vector<double>* grad)
 {
-  //if (verbose)
-  cerr << "boost:";
-  for (unsigned i=1; i<4; i++)
-    cerr << " " << basis->get_param(i);
-  cerr << endl;
+  if (basis) {
+    //if (verbose)
+    cerr << "boost:";
+    for (unsigned i=1; i<4; i++)
+      cerr << " " << basis->get_param(i);
+    cerr << endl;
+  }
 
   // calculate the curvature matrix
   Matrix<8,8,double> curvature;
   get_curvature (curvature);
 
-  // calculate the covariance matrix
-  covariance = inv(curvature);
+  try {
+
+    // calculate the covariance matrix
+    covariance = inv(curvature);
+
+  }
+  catch (Error& e) {
+    cerr << "Pulsar::PolnProfileFitAnalysis::get_c_varphi error inv(curv)\n"
+	 << e << "\ncurv=\n" << curvature << endl;
+  }
 
   double c_varphi = covariance[0][0];
 
-  if (!grad)
+  if (!grad || !basis)
     return c_varphi;
 
   // calculate the partial derivatives of the curvature wrt basis
@@ -877,9 +901,7 @@ Pulsar::PolnProfileFitAnalysis::get_C_varphi (std::vector<double>* grad)
 
   for (unsigned ih=0; ih < nharmonic; ih++) {
 
-    set_harmonic (ih);
-    model_result = fit->model->evaluate (&model_gradient);
-    phase_result = fit->phase_xform->evaluate (&phase_gradient);
+    evaluate (ih);
 
     add_curvature (curvature);
 
@@ -1037,8 +1059,7 @@ double Pulsar::PolnProfileFitAnalysis::get_cond_var (vector<double>& grad)
 
     unsigned bih = fit->model->get_num_input() - ih -1;
 
-    set_harmonic (bih);
-    model_result = fit->model->evaluate (&model_gradient);
+    evaluate (bih);
 
     Stokes< complex<double> > S = complex_coherency(model_result);
 
@@ -1057,7 +1078,7 @@ double Pulsar::PolnProfileFitAnalysis::get_cond_var (vector<double>& grad)
       error.set_transformation_gradient (xform_gradient[ir]);
       Stokes<double> variance_gradient = error.get_variance_gradient();
 
-      Stokes< complex<double> > Sg = complex_coherency(model_gradient[ir+3]);
+      Stokes< complex<double> > Sg = complex_coherency(model_gradient[ir+1]);
 
       // cerr << "Sg[" << ir << "]=" << Sg << endl;
 
