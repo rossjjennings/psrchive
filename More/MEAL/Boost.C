@@ -5,22 +5,17 @@
  *
  ***************************************************************************/
 #include "MEAL/Boost.h"
+#include "MEAL/Parameters.h"
 #include "Pauli.h"
 
 using namespace std;
 
-MEAL::Boost::Boost () : parameters (this, 3)
+MEAL::Boost::Boost ()
 {
-  parameters.set_param_name (0, "b_1");
-  parameters.set_param_name (1, "b_2");
-  parameters.set_param_name (2, "b_3");
-}
-
-MEAL::Boost::Boost (const Vector<3, double>& _axis) 
-  : parameters (this, 1)
-{
-  parameters.set_param_name (0, "boost");
-  set_axis (_axis);
+  Parameters* params = new Parameters (this, 3);
+  params->set_param_name (0, "b_1");
+  params->set_param_name (1, "b_2");
+  params->set_param_name (2, "b_3");
 }
 
 //! Return the name of the class
@@ -29,120 +24,33 @@ string MEAL::Boost::get_name () const
   return "Boost";
 }
 
-
-void MEAL::Boost::set_axis (const Vector<3, double>& _axis)
-{
-  double norm = _axis * _axis;
-  axis = _axis / sqrt(norm);
-
-  parameters.resize (1);
-}
-
 //! Get the unit-vector along which the boost occurs
-Vector<3, double> MEAL::Boost::get_axis (double* beta) const
+Vector<3, double> MEAL::Boost::get_axis () const
 {
-  if (get_nparam() == 1) {
-    if (beta)
-      *beta = get_param(0);
-    return axis;
-  }
-  else {
+  Vector<3, double> Gibbs;
+  for (unsigned i=0; i<3; i++)
+    Gibbs[i] = get_param(i);
+  double mod = sqrt (Gibbs * Gibbs);
 
-    Vector<3, double> Gibbs;
-    for (unsigned i=0; i<3; i++)
-      Gibbs[i] = get_param(i);
-    double mod = sqrt (Gibbs * Gibbs);
+  if (mod != 0.0)
+    Gibbs /= mod;
 
-    if (mod != 0.0)
-      Gibbs /= mod;
-
-    // the modulus of the Gibbs vector = sinh(beta)
-    if (beta)
-      *beta = asinh (mod);
-
-    return Gibbs;
-  }
-}
-
-void MEAL::Boost::set_beta (double beta)
-{
-  if (get_nparam() == 1)
-    set_param (0, beta);
- 
-  else {
-
-    Vector<3, double> Gibbs = get_axis();
-    Gibbs *= sinh (beta);
-
-    for (unsigned i=0; i<3; i++)
-      set_param (i, Gibbs[i]);
-
-  }
+  return Gibbs;
 }
 
 double MEAL::Boost::get_beta () const
 {
-  double beta;
-  get_axis (&beta);
-  return beta;
-}
-
-
-void MEAL::Boost::free_axis ()
-{
-  if (get_nparam() == 3)
-    return;
-
-  double beta = get_param (0);
-  Vector<3, double> Gibbs = axis * sinh(beta);
-
-  parameters.resize (3);
+  Vector<3, double> Gibbs;
   for (unsigned i=0; i<3; i++)
-    set_param (i, Gibbs[i]);
+    Gibbs[i] = get_param(i);
+  double mod = sqrt (Gibbs * Gibbs);
+
+  return asinh (mod);
 }
 
 //! Calculate the Jones matrix and its gradient
 void MEAL::Boost::calculate (Jones<double>& result,
-				    vector<Jones<double> >* grad)
-{
-  if (get_nparam() == 1)
-    calculate_beta (result, grad);
-  else
-    calculate_Gibbs (result, grad);
-}
-
-//! Return the Jones matrix and its gradient
-void MEAL::Boost::calculate_beta (Jones<double>& result,
-				  vector<Jones<double> >* grad)
-{
-  double beta = get_param(0);
-
-  if (verbose)
-    cerr << "MEAL::Boost::calculate axis=" << axis 
-	 << " beta=" << beta << endl;
-
-  double sinh_beta = sinh (beta);
-  double cosh_beta = cosh (beta);
-
-  if (grad) {
-    Quaternion<double, Hermitian> dboost_dbeta (sinh_beta, cosh_beta*axis);
-    (*grad)[0] = convert (dboost_dbeta);
-
-    if (verbose) {
-      cerr << "MEAL::Boost::calculate gradient" << endl;
-      cerr << "   " << (*grad)[0] << endl;
-    }
-  }
-
-  Quaternion<double, Hermitian> boost (cosh_beta, sinh_beta*axis);
-
-  result = convert (boost);
-}
-
-
-
-void MEAL::Boost::calculate_Gibbs (Jones<double>& result, 
-				   vector<Jones<double> >* grad)
+			     vector<Jones<double> >* grad)
 {
   Vector<3, double> Gibbs;
   for (unsigned i=0; i<3; i++)
@@ -158,33 +66,34 @@ void MEAL::Boost::calculate_Gibbs (Jones<double>& result,
   // the Boost quaternion
   Quaternion<double, Hermitian> boost (cosh_beta, Gibbs);
 
-  if (grad) {
-    // build the partial derivatives with respect to boost Gibbs-vector
-    double temp = 1.0 / cosh_beta;
+  result = convert (boost);
 
-    for (unsigned i=0; i<3; i++) {
-      
-      // partial derivative of Boost[0]=cosh(beta) wrt Boost[i+1]=boost[i]
-      double dcosh_beta_dGibbsi = Gibbs[i] * temp;
-      
-      Quaternion<double, Hermitian> dboost_dGibbsi;
-      dboost_dGibbsi[0] = dcosh_beta_dGibbsi;
-      dboost_dGibbsi[i+1] = 1.0;
+  if (!grad)
+    return;
 
-      // set the partial derivative wrt this parameter
-      (*grad)[i] = convert (dboost_dGibbsi);
-
-    }
-
-    if (verbose) {
-      cerr << "MEAL::Boost::calculate gradient" << endl;
-      for (unsigned i=0; i<3; i++)
-	cerr << "   " << (*grad)[i] << endl;
-    }
-
+  // build the partial derivatives with respect to boost Gibbs-vector
+  double inv_cosh_beta = 1.0 / cosh_beta;
+  
+  for (unsigned i=0; i<3; i++) {
+    
+    // partial derivative of Boost[0]=cosh(beta) wrt Boost[i+1]=boost[i]
+    double dcosh_beta_dGibbsi = Gibbs[i] * inv_cosh_beta;
+    
+    Quaternion<double, Hermitian> dboost_dGibbsi;
+    dboost_dGibbsi[0] = dcosh_beta_dGibbsi;
+    dboost_dGibbsi[i+1] = 1.0;
+    
+    // set the partial derivative wrt this parameter
+    (*grad)[i] = convert (dboost_dGibbsi);
+    
+  }
+  
+  if (verbose) {
+    cerr << "MEAL::Boost::calculate gradient" << endl;
+    for (unsigned i=0; i<3; i++)
+      cerr << "   " << (*grad)[i] << endl;
   }
 
-  result = convert (boost);
 }
 
 
