@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Rotation.h,v $
-   $Revision: 1.7 $
-   $Date: 2006/03/17 13:35:26 $
+   $Revision: 1.8 $
+   $Date: 2006/09/05 22:53:07 $
    $Author: straten $ */
 
 #ifndef __MEAL_Rotation_H
@@ -22,8 +22,9 @@ namespace MEAL {
   class OneParameter;
 
   //! Represents a rotation (unitary, birefringent) transformation
-  /*! This class represents the rotation, \f$\phi\f$, about an arbitrary
-    axix, \f$\hat n\f$. */
+  /*! This class represents a rotation through angle, \f$\phi\f$,
+    about a free axis, \f$\hat n\f$.  The three free parameters are
+    the imaginary components of the rotation quaternion. */
   class Rotation : public Complex2 {
 
   public:
@@ -31,20 +32,14 @@ namespace MEAL {
     //! Default constructor
     Rotation ();
 
-    //! Construct for the specified axis
-    Rotation (const Vector<3,double>& axis);
+    //! Get the unit-vector along which the rotation occurs
+    Vector<3, double> get_axis () const;
 
-    //! Set the axis about which the rotation occurs
-    void set_axis (const Vector<3,double>& axis);
-
-    //! Set the rotation angle in radians
-    void set_phi (double radians);
-
-    //! Get the rotation angle in radians
+    //! Get the rotation angle, phi
     double get_phi () const;
 
-    //! Set the parameter management policy
-    void set_parameter_policy (OneParameter* policy);
+    //! Get the three free parameters as a vector
+    Vector<3, double> get_vector () const;
 
     // ///////////////////////////////////////////////////////////////////
     //
@@ -59,11 +54,6 @@ namespace MEAL {
 
     //! Calculate the Jones matrix and its gradient
     void calculate (Jones<double>& result, std::vector<Jones<double> >*);
-
-    //! The axis along which the rotation occurs
-    Vector<3,double> axis;
-
-    void init ();
 
   };
 

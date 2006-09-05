@@ -1,89 +1,108 @@
 /***************************************************************************
  *
- *   Copyright (C) 2004 by Willem van Straten
+ *   Copyright (C) 2006 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
 #include "MEAL/Rotation.h"
-#include "MEAL/OneParameter.h"
+#include "MEAL/Parameters.h"
 #include "Pauli.h"
 
 using namespace std;
 
-void MEAL::Rotation::init ()
-{
-  OneParameter* param = new OneParameter (this);
-  param->set_param_name ("rotation");
-}
-
 MEAL::Rotation::Rotation ()
 {
-  init ();
-  axis = Vector<3,double> (1,0,0);
-}
-
-MEAL::Rotation::Rotation (const Vector<3,double>& _axis) 
-{
-  init ();
-  axis = _axis;
+  Parameters* params = new Parameters (this, 3);
+  params->set_param_name (0, "r_1");
+  params->set_param_name (1, "r_2");
+  params->set_param_name (2, "r_3");
 }
 
 //! Return the name of the class
-std::string MEAL::Rotation::get_name () const
+string MEAL::Rotation::get_name () const
 {
   return "Rotation";
 }
 
-
-void MEAL::Rotation::set_phi (double radians)
+Vector<3, double> MEAL::Rotation::get_vector () const
 {
-  if (verbose)
-    cerr << "MEAL::Rotation::set_phi " << radians << endl;
+  Vector<3, double> vect;
+  for (unsigned i=0; i<3; i++)
+    vect[i] = get_param(i);
+  return vect;
+}
 
-  set_param (0, radians);
+//! Get the unit-vector along which the rotation occurs
+Vector<3, double> MEAL::Rotation::get_axis () const
+{
+  Vector<3, double> vect = get_vector();
+  double mod = sqrt (vect * vect);
+  if (mod != 0.0)
+    vect /= mod;
+
+  return vect;
 }
 
 double MEAL::Rotation::get_phi () const
 {
-  return get_param (0);
-}
-
-void MEAL::Rotation::set_parameter_policy (OneParameter* policy)
-{
-  OneParameter* current = dynamic_cast<OneParameter*>(parameter_policy.get());
-  *policy = *current;
-  parameter_policy = policy;
+  Vector<3, double> vect = get_vector();
+  return sqrt (vect * vect);
 }
 
 //! Calculate the Jones matrix and its gradient
 void MEAL::Rotation::calculate (Jones<double>& result,
-				std::vector<Jones<double> >* grad)
+				vector<Jones<double> >* grad)
 {
-  double phi = get_param(0);
+  Vector<3, double> vect = get_vector();
 
   if (verbose)
-    cerr << "MEAL::Rotation::calculate axis=" << axis 
-	 << " phi=" << phi << endl;
+    cerr << "MEAL::Rotation::calculate vect=" << vect << endl;
 
-  double sin_phi = sin (phi);
-  double cos_phi = cos (phi);
+  // calculate the Rotation component
+  double phi = sqrt (vect * vect);
 
-  if (grad) {
-    Quaternion<double, Unitary> drotation_dphi (-sin_phi, cos_phi*axis);
+  double cos_phi = cos(phi);
+  double sinc_phi = 1.0;
+  double dsinc_phi = 0.0;
 
-    (*grad)[0] = convert (drotation_dphi);
-
-    if (verbose)
-      cerr << "MEAL::Rotation::calculate gradient" << endl
-	   << "   " << (*grad)[0] << endl;
+  if (phi != 0) {
+    sinc_phi = sin(phi)/phi;
+    dsinc_phi = (cos_phi - sinc_phi)/phi;
   }
 
-  Quaternion<double, Unitary> rotation (cos_phi, sin_phi*axis);
+  // the Rotation quaternion
+  Quaternion<double, Unitary> rotation (cos_phi, sinc_phi * vect);
   result = convert (rotation);
+
+  if (!grad)
+    return;
+
+  // build the partial derivatives with respect to rotation vect-vector
+  for (unsigned i=0; i<3; i++) {
+    
+    // partial derivative of Rotation[0]=cos(phi) wrt Rotation[i+1]=vect[i]
+    double dcos_phi_dvecti = - vect[i] * sinc_phi;
+    
+    double dphi_dvecti = 1.0;
+    if (phi != 0)
+      dphi_dvecti = vect[i] / phi;
+
+    Vector<3, double> dvect = dsinc_phi * dphi_dvecti * vect;
+
+    Quaternion<double, Unitary> drotation_dvecti (dcos_phi_dvecti, dvect);
+    drotation_dvecti[i+1] += sinc_phi;
+    
+    // set the partial derivative wrt this parameter
+    (*grad)[i] = convert (drotation_dvecti);
+    
+  }
+  
+  if (verbose) {
+    cerr << "MEAL::Rotation::calculate gradient" << endl;
+    for (unsigned i=0; i<3; i++)
+      cerr << "   " << (*grad)[i] << endl;
+  }
+
 }
 
-void MEAL::Rotation::set_axis (const Vector<3,double>& _axis)
-{
-  axis = _axis;
-}
 
