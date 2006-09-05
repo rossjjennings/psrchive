@@ -19,7 +19,7 @@ MEAL::RandomPolar::RandomPolar()
   min_gain = 0.25;
   max_gain = 4.0;
 
-  max_abs_rotation = M_PI;
+  max_abs_rotation = 1.0;
   max_abs_boost = 0.5;
 }
 

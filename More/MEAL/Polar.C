@@ -37,14 +37,8 @@ void MEAL::Polar::init ()
   add_model (boost);
   // boost->name = "Polar::Boost";
 
-  for (unsigned i=0; i<3; i++) {
-
-    rotation[i] = new MEAL::Rotation(Vector<3,double>::basis(i));
-    // rotation[i]->name = "Polar::Rotation " + std::string(1, char('0' + i));
-
-    add_model (rotation[i]);
-
-  }
+  rotation = new MEAL::Rotation;
+  add_model (rotation);
 
 #ifdef _DEBUG
   cerr << "MEAL::Polar::init exit" << endl;
@@ -93,8 +87,7 @@ MEAL::Polar::operator = (const Polar& polar)
 
   *gain = *(polar.gain);
   *boost = *(polar.boost);
-  for (unsigned i=0; i<3; i++)
-    *(rotation[i]) = *(polar.rotation[i]);
+  *rotation = *(polar.rotation);
 
   return *this;
 }
@@ -119,7 +112,7 @@ Estimate<double> MEAL::Polar::get_boostGibbs (unsigned i) const
 
 Estimate<double> MEAL::Polar::get_rotationEuler (unsigned i) const
 {
-  return rotation[i]->get_Estimate (0);
+  return rotation->get_Estimate (i);
 }
 
 void MEAL::Polar::set_gain (const Estimate<double>& g)
@@ -134,38 +127,9 @@ void MEAL::Polar::set_boostGibbs (unsigned i, const Estimate<double>& b)
    
 void MEAL::Polar::set_rotationEuler (unsigned i, const Estimate<double>& phi_i)
 {
-  rotation[i]->set_Estimate (0, phi_i);
+  rotation->set_Estimate (i, phi_i);
 }
 
-void MEAL::Polar::set_cyclic (bool flag)
-{
-  // disable automatic installation so that copy can be made
-  ModifyRestore<bool> (ParameterPolicy::auto_install, false);
-
-  if (flag) {
-
-    for (unsigned ir=0; ir<3; ir++) {
-
-      // set up the cyclic boundary for orientation
-      CyclicParameter* o_cyclic = new CyclicParameter (rotation[ir]);
-
-      o_cyclic->set_period (M_PI);
-      o_cyclic->set_upper_bound (M_PI/2);
-      o_cyclic->set_lower_bound (-M_PI/2);
-
-      rotation[ir]->set_parameter_policy (o_cyclic);
-
-    }
-
-  }
-  else {
-
-    for (unsigned ir=0; ir<3; ir++)
-      rotation[ir]->set_parameter_policy( new OneParameter (rotation[ir]) );
-
-  }
-
-}
 
 /*! Given the measured Stokes parameters of the linear calibrator
   noise diode, \f$ S_{\rm cal}=(I=1,Q=0,U=1,V=0)\f$, and the
