@@ -65,6 +65,6 @@ Matrix<4,4,double> MEAL::StokesCovariance::get_covariance_gradient () const
 
 void MEAL::StokesCovariance::build ()
 {
-  Matrix<4,4,double> xform_grad = Mueller (jones, jones_grad);
+  xform_grad = Mueller (jones, jones_grad);
   built = true;
 }
