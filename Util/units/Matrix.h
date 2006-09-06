@@ -7,14 +7,12 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Matrix.h,v $
-   $Revision: 1.16 $
-   $Date: 2006/09/06 00:36:01 $
+   $Revision: 1.17 $
+   $Date: 2006/09/06 03:15:08 $
    $Author: straten $ */
 
 #ifndef __Matrix_H
 #define __Matrix_H
-
-#include <iostream>
 
 #include "Vector.h"
 #include "Error.h"
@@ -28,16 +26,13 @@ public:
   //! Null constructor
   Matrix () { for (unsigned i=0; i<Rows; i++) this->x[i] = 0; }
 
-  //! Construct from another Matrix<U> instance
-  template<typename U> Matrix (const Matrix<Rows, Columns, U>& s)
-  { operator=(s); }
-
   //! Construct from another Vector of Vector<U> instance
   template<typename U> Matrix (const Vector< Rows, Vector<Columns,U> >& s)
   { operator=(s); }
 
   //! Set this instance equal to another Matrix<U> instance
-  template<typename U> Matrix& operator = (const Matrix<Rows,Columns,U>& s)
+  template<typename U> Matrix& operator = 
+    (const Vector< Rows,Vector<Columns,U> >& s)
   { for (unsigned i=0; i<Rows; i++) this->x[i] = s.x[i]; return *this; }
   
   //! Negation
