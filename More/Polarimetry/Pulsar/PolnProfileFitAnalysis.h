@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PolnProfileFitAnalysis.h,v $
-   $Revision: 1.24 $
-   $Date: 2006/09/05 15:05:18 $
+   $Revision: 1.25 $
+   $Date: 2006/09/06 04:46:24 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PolnProfileFitAnalysis_h
@@ -17,6 +17,7 @@
 #include "Pulsar/PolnProfileFit.h"
 #include "MEAL/Complex2Value.h"
 #include "MEAL/StokesError.h"
+#include "MEAL/StokesCovariance.h"
 
 #include <vector>
 
@@ -135,6 +136,9 @@ namespace Pulsar {
     //! The partial derivative of noise wrt basis parameter
     Stokes<double> delnoise_delB (unsigned b);
 
+    //! The partial derivative of covariance wrt basis parameter
+    Matrix<4,4,double> get_delXi_delB (unsigned b);
+
     //! Worker method for partial derivative of noise
     Stokes<double> delnoise
     (const Jones<double>& xform, const Jones<double>& xform_grad);
@@ -171,6 +175,9 @@ namespace Pulsar {
     //! Propagation of uncertainty through the congruence tranformation
     MEAL::StokesError error;
 
+    //! Propagation of Stokes parameter covariances through congruence xform
+    MEAL::StokesCovariance stokes_covariance;
+
     //! the covariance matrix
     Matrix<8,8,double> covariance;
 
@@ -198,8 +205,8 @@ namespace Pulsar {
 
     void initialize();
 
-    std::vector< Stokes<double> > delN_delB;
-    std::vector< Stokes<double> > delN_delJ;
+    Matrix<4,4,double> Xi;
+    std::vector< Matrix<4,4,double> > delXi_delB;
 
     double var_c_varphi;
     void var_c_varphi_add ();
