@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Matrix.h,v $
-   $Revision: 1.15 $
-   $Date: 2006/04/06 19:13:41 $
+   $Revision: 1.16 $
+   $Date: 2006/09/06 00:36:01 $
    $Author: straten $ */
 
 #ifndef __Matrix_H
@@ -30,6 +30,10 @@ public:
 
   //! Construct from another Matrix<U> instance
   template<typename U> Matrix (const Matrix<Rows, Columns, U>& s)
+  { operator=(s); }
+
+  //! Construct from another Vector of Vector<U> instance
+  template<typename U> Matrix (const Vector< Rows, Vector<Columns,U> >& s)
   { operator=(s); }
 
   //! Set this instance equal to another Matrix<U> instance
