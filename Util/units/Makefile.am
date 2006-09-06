@@ -135,6 +135,7 @@ nobase_include_HEADERS = \
         MEAL/ScalarValue.h \
         MEAL/ScaledVonMisesDeriv.h \
         MEAL/ScaledVonMises.h \
+	MEAL/StokesCovariance.h \
 	MEAL/StokesError.h \
         MEAL/SumRule.h \
         MEAL/Tracer.h \
@@ -207,6 +208,7 @@ libunits_la_SOURCES += \
         ScalarValue.C \
         ScaledVonMises.C \
         ScaledVonMisesDeriv.C \
+	StokesCovariance.C \
 	StokesError.C \
         Tracer.C \
         UnaryScalar.C \
@@ -265,7 +267,7 @@ test_ModifyRestore_SOURCES      = test_ModifyRestore.C
 test_CyclicParameter_SOURCES    = test_CyclicParameter.C
 test_Univariate_SOURCES		= test_Univariate.C
 test_Invariant_SOURCES		= test_Invariant.C
-test_StokesError_SOURCES	= test_StokesError.C
+test_StokesError_SOURCES	= test_StokesError.C 
 test_Mueller_SOURCES		= test_Mueller.C
 
 lmfit_SOURCES 			= lmfit.C
