@@ -154,7 +154,7 @@ int main (int argc, char *argv[]) try {
       break;
 
     case 'i':
-      cout << "$Id: pat.C,v 1.55 2006/09/03 15:12:29 straten Exp $" << endl;
+      cout << "$Id: pat.C,v 1.56 2006/09/06 04:46:31 straten Exp $" << endl;
       return 0;
 
     case 'F':
@@ -484,7 +484,7 @@ int main (int argc, char *argv[]) try {
 
   fflush(stdout);
 
-  if (sensitivity_curve)
+  if (sensitivity_curve && (full_poln_analysis || optimize_mtm))
     cerr << "pat: expected ratio = " 
          << analysis.get_expected_relative_error(histo) << endl;
 
