@@ -141,8 +141,10 @@ int main (int argc, char *argv[]) try {
 
     bool defaraday = false;
     bool dedefaraday = false;
-    double rm = 9.9e99;
-  
+
+    bool newrm = false;
+    double rm = 0.0;
+
     bool reset_weights = false;
     float new_weight = 1.0;
 
@@ -267,7 +269,7 @@ int main (int argc, char *argv[]) try {
 	Pulsar::Archive::set_verbosity(3);
 	break;
       case 'i':
-	cout << "$Id: pam.C,v 1.65 2006/08/25 06:37:08 hknight Exp $" << endl;
+	cout << "$Id: pam.C,v 1.66 2006/09/07 11:49:06 straten Exp $" << endl;
 	return 0;
       case 'm':
 	save = true;
@@ -364,11 +366,12 @@ int main (int argc, char *argv[]) try {
 	command += " -D ";
 	break;
       case 'R':
-	defaraday = true;
 	if (sscanf(optarg, "%lf", &rm) != 1) {
 	  cout << "That is not a valid rotation measure" << endl;
 	  return -1;
 	}
+	newrm = true;
+	defaraday = true;
 	command += " -R ";
 	command += optarg;
 	break;
@@ -557,7 +560,7 @@ int main (int argc, char *argv[]) try {
 	  
       case RR: dedefaraday = true; break;
 
-      case RM: rm = atof(optarg); break;
+      case RM: rm = atof(optarg); newrm = true; break;
 
       case SPC: scattered_power_correction = true; break;
 	
@@ -868,17 +871,18 @@ int main (int argc, char *argv[]) try {
 	  cout << arch->get_filename() << " invinted" << endl;
       }
 
-      if (rm < 9.9e98 ) {
+      if (newrm) {
 	arch->set_rotation_measure (rm);
-	if( defaraday ){
-	  Pulsar::FaradayRotation xform;
-	  xform.set_rotation_measure( rm );
-	  xform.execute( arch );
-	  if (verbose)
-	    cout << "Archive now has a RM of " << arch->get_rotation_measure() << endl;
-	}
+	if (verbose)
+	  cout << arch->get_filename() << " RM set to " << rm << endl;
       }
-      
+
+      if (defaraday) {
+	arch->defaraday();
+	if (verbose)
+	  cout << arch->get_filename() << " defaradayed" <<endl;
+      }
+
       if (fscr) {
 	if (new_nchn > 0) {
 	  arch->fscrunch_to_nchan(new_nchn);
