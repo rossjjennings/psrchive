@@ -487,6 +487,11 @@ catch (Error& error) {
   throw error += "Pulsar::PolnCalibrator::calibrate";
 }
 
+bool must_correct_lsb (const Pulsar::Backend* be, const Pulsar::Archive* ar)
+{
+  return !be->get_downconversion_corrected() && ar->get_bandwidth() < 0;
+}
+
 bool Pulsar::PolnCalibrator::must_correct_backend (const Archive* arch) const
 {
   const Backend* backend = arch->get<Backend>();
@@ -496,8 +501,9 @@ bool Pulsar::PolnCalibrator::must_correct_backend (const Archive* arch) const
 
   Signal::Hand hand = backend->get_hand();
   Signal::Argument argument = backend->get_argument();
+  bool correct_lsb = must_correct_lsb (backend, arch);
 
-  return argument == Signal::Conjugate || hand == Signal::Left;
+  return argument == Signal::Conjugate || hand == Signal::Left || correct_lsb;
 }
 
 void Pulsar::PolnCalibrator::correct_backend (Archive* arch) const try {
@@ -512,9 +518,22 @@ void Pulsar::PolnCalibrator::correct_backend (Archive* arch) const try {
   Signal::Hand hand = backend->get_hand();
   Signal::Argument argument = backend->get_argument();
 
+  bool correct_lsb = must_correct_lsb (backend, arch);
+
   if (verbose > 2)
     cerr << "Pulsar::PolnCalibrator::correct_backend basis=" << basis
-	 << " hand=" << hand << " phase=" << argument << endl;
+	 << " hand=" << hand << " phase=" << argument
+	 << " lsb=" << correct_lsb << endl;
+
+  /* complex conjugation due to lower sideband downconversion and
+     backend convention have the same effect; the following lines
+     effect an exclusive or operation. */
+  if (correct_lsb) {
+    if (argument == Signal::Conjugate)
+      argument = Signal::Conventional;
+    else
+      argument = Signal::Conjugate;
+  }
 
   unsigned npol = arch->get_npol();
 
@@ -575,6 +594,8 @@ void Pulsar::PolnCalibrator::correct_backend (Archive* arch) const try {
   backend->set_argument (Signal::Conventional);
   backend->set_hand (Signal::Right);
 
+  if (correct_lsb)
+    backend->set_downconversion_corrected ();
 }
 catch (Error& error) {
   throw error += "Pulsar::PolnCalibrator::correct_backend";
