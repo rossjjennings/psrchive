@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/Backend.h,v $
-   $Revision: 1.4 $
-   $Date: 2006/03/17 13:34:45 $
+   $Revision: 1.5 $
+   $Date: 2006/09/07 15:50:28 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Backend_h
@@ -49,6 +49,12 @@ namespace Pulsar {
     //! Set the argument of the backend
     void set_argument (Signal::Argument);
 
+    //! True if backend has compensated for lower sideband downconversion
+    bool get_downconversion_corrected () const;
+
+    //! True if backend has compensated for lower sideband downconversion
+    void set_downconversion_corrected (bool corrected = true);
+
   protected:
 
     //! The bandend hand
@@ -56,6 +62,9 @@ namespace Pulsar {
 
     //! The backend argument
     Signal::Argument argument;
+
+    //! True if backend has compensated for lower sideband downconversion
+    bool downconversion_corrected;
 
   };
  

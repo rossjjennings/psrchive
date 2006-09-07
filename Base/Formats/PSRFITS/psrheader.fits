@@ -7,7 +7,7 @@ COMMENT   Astrophysics Supplement Series v44/p363, v44/p371, v73/p359, v73/p365.
 COMMENT   Contact the NASA Science Office of Standards and Technology for the
 COMMENT   FITS Definition document #100 and other FITS information.
 COMMENT
-HDRVER  = '2.3             '   / Header version 
+HDRVER  = '2.4             '   / Header version 
 DATE    = '                '   / File creation date (YYYY-MM-DDThh:mm:ss UTC)
 OBSERVER= '                '   / Observer name(s)
 PROJID  = '                '   / Project name
@@ -23,6 +23,7 @@ FD_XYPH = *                    / [deg] Phase of A^* B for injected cal (E)
 BACKEND = '                '   / Backend ID
 BECONFIG= '                '   / Backend configuration file name
 BE_PHASE= *                    / 0/+1/-1 BE cross-phase:0 unknown,+/-1 std/rev
+BE_DCC  = *                    / 0/1 BE downconversion conjugation corrected
 TCYCLE  = *                    / [s] On-line cycle time (D)
 NRCVR   = *                    / Number of receiver channels (I)
 OBS_MODE= '                '   / (PSR, CAL, SEARCH)

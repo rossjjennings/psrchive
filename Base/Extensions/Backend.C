@@ -11,6 +11,7 @@ Pulsar::Backend::Backend (const char* name) : Extension (name)
 {
   hand = Signal::Right;
   argument = Signal::Conventional;
+  downconversion_corrected = false;
 }
 
 //! Copy constructor
@@ -24,6 +25,7 @@ const Pulsar::Backend& Pulsar::Backend::operator= (const Backend& backend)
 {
   hand = backend.hand;
   argument = backend.argument;
+  downconversion_corrected = backend.downconversion_corrected;
   return *this;
 }
 
@@ -49,4 +51,16 @@ Signal::Argument Pulsar::Backend::get_argument () const
 void Pulsar::Backend::set_argument (Signal::Argument a)
 {
   argument = a;
+}
+
+//! Return true if backend has compensated for lower sideband downconversion
+bool Pulsar::Backend::get_downconversion_corrected () const
+{
+  return downconversion_corrected;
+}
+
+//! Set true if backend has compensated for lower sideband downconversion
+void Pulsar::Backend::set_downconversion_corrected (bool c)
+{
+  downconversion_corrected = c;
 }
