@@ -8,7 +8,9 @@
 #include "Pulsar/WidebandCorrelator.h"
 #include "Pulsar/FITSHdrExtension.h"
 #include "psrfitsio.h"
+
 #include "string_utils.h"
+#include "RegularExpression.h"
 
 void Pulsar::FITSArchive::load_WidebandCorrelator (fitsfile* fptr)
 {
@@ -112,17 +114,27 @@ void Pulsar::FITSArchive::load_WidebandCorrelator (fitsfile* fptr)
     static char* conj_config = getenv ("WBCCONJCFG");
     static vector<string> conj_configs;
     if (conj_config)  {
+
+      if (verbose > 1)
+	cerr << "Pulsar::FITSArchive::load_WidebandCorrelator\n"
+	  "  loading " << conj_config << endl;
+
       stringfload (&conj_configs, conj_config);
       conj_config = 0; // load it only once
-      if (verbose==3 && conj_configs.size()) {
+      if (verbose > 2 && conj_configs.size()) {
 	cerr << "WBCORR conj configurations:" << endl;
 	for (unsigned i=0; i < conj_configs.size(); i++)
 	  cerr << conj_configs[i] << endl;
       }
+
     }
-    
-    if (find (conj_configs.begin(), conj_configs.end(), ext->configfile)
-	!= conj_configs.end())  {
+
+    static RegularExpression conj_grep ("wb.*_c");
+
+    bool in_list = find (conj_configs.begin(), conj_configs.end(),
+			 ext->configfile) != conj_configs.end();
+
+    if (conj_grep.get_match(ext->configfile) || in_list)  {
       
       ext->set_argument( Signal::Conjugate );
       
