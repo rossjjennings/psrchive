@@ -66,18 +66,20 @@ void Pulsar::AnglePlot::draw (const Archive *data)
   float offset = 0;
   unsigned times = 1;
 
-  if (range)
+  if (range) {
     offset = -range;
+    times = 3;
+  }
 
   for (unsigned ioff=0; ioff < times; ioff++) {
 
     for (unsigned ibin=0; ibin < phases.size(); ibin++)
       if (angles[ibin].get_variance() != 0)
 	if (error_bars)
-	  cpgerr1 (6, phases[ibin], angles[ibin].get_value(),
+	  cpgerr1 (6, phases[ibin], angles[ibin].get_value() + offset,
 		   angles[ibin].get_error(), 1.0);
 	else
-	  cpgpt1 (phases[ibin], angles[ibin].get_value(), 17);
+	  cpgpt1 (phases[ibin], angles[ibin].get_value() + offset, 17);
   
     offset += range;
 
