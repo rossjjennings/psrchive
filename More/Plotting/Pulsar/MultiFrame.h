@@ -7,20 +7,21 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/MultiFrame.h,v $
-   $Revision: 1.10 $
-   $Date: 2006/05/05 02:12:51 $
+   $Revision: 1.11 $
+   $Date: 2006/09/08 07:32:10 $
    $Author: straten $ */
 
 #ifndef __Pulsar_MultiFrame_h
 #define __Pulsar_MultiFrame_h
 
+#include "Pulsar/PlotAttributes.h"
 #include "Pulsar/PlotFrameSize.h"
 #include <map>
 
 namespace Pulsar {
 
   //! Manages multiple plot frames
-  class MultiFrame : public Reference::Able {
+  class MultiFrame : public PlotAttributes {
 
   public:
 
@@ -48,19 +49,15 @@ namespace Pulsar {
 
     //! Set the character height
     void set_character_height (float height);
-    float get_character_height () const { return character_height; }
 
     //! Set the character font
     void set_character_font (int font);
-    int get_character_font () const { return character_font; }
 
     //! Set the line width
     void set_line_width (int width);
-    int get_line_width () const { return line_width; }
-
+ 
     //! Set publication quality character height and font and line width
     void set_publication_quality (bool flag = true);
-    bool get_publication_quality () const { return false; }
 
   protected:
 
@@ -68,10 +65,6 @@ namespace Pulsar {
 
     Reference::To<PlotScale> x_scale;
     Reference::To<PlotScale> y_scale;
-
-    float character_height;
-    int character_font;
-    int line_width;
 
   };
 

@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/MultiPlot.h,v $
-   $Revision: 1.2 $
-   $Date: 2006/03/17 13:34:49 $
+   $Revision: 1.3 $
+   $Date: 2006/09/08 07:32:10 $
    $Author: straten $ */
 
 #ifndef __Pulsar_MultiPlot_h
@@ -23,6 +23,9 @@ namespace Pulsar {
   class MultiPlot : public Plot {
 
   public:
+
+    //! Default constructor
+    MultiPlot ();
 
     //! Get the text interface to the frame attributes
     TextInterface::Class* get_frame_interface ();

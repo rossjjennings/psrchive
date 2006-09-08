@@ -9,6 +9,11 @@
 
 #include <cpgplot.h>
 
+Pulsar::MultiPlot::MultiPlot ()
+{
+  set_attributes( &frames );
+}
+
 TextInterface::Class* Pulsar::MultiPlot::get_frame_interface ()
 {
   return new MultiFrame::Interface (&frames);
