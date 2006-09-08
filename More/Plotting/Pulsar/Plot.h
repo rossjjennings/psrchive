@@ -7,15 +7,15 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/Plot.h,v $
-   $Revision: 1.10 $
-   $Date: 2006/03/17 13:34:49 $
+   $Revision: 1.11 $
+   $Date: 2006/09/08 07:32:04 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Plot_h
 #define __Pulsar_Plot_h
 
+#include "Pulsar/PlotAttributes.h"
 #include "Pulsar/PlotFrame.h"
-#include "TextInterface.h"
 
 namespace Pulsar {
 
@@ -41,6 +41,15 @@ namespace Pulsar {
     //! Get the text interface to the frame attributes
     virtual TextInterface::Class* get_frame_interface ();
 
+    //! Get the attributes
+    virtual PlotAttributes* get_attributes ();
+
+    //! Get the attributes
+    virtual const PlotAttributes* get_attributes () const;
+
+    //! Set the attributes
+    virtual void set_attributes (PlotAttributes*);
+
     //! Get the frame
     virtual PlotFrame* get_frame ();
 
@@ -51,6 +60,9 @@ namespace Pulsar {
     virtual void set_frame (PlotFrame*);
 
   protected:
+
+    //! The plot attributes
+    Reference::To<PlotAttributes> attributes;
 
     //! The plot frame
     Reference::To<PlotFrame> frame;

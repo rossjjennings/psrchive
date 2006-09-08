@@ -10,7 +10,7 @@ if HAVE_PGPLOT
 nobase_include_HEADERS = iopair.h					\
 	Pulsar/Plot.h Pulsar/PlotFactory.h Pulsar/PlotIndex.h		\
 	Pulsar/PlotScale.h Pulsar/PhaseScale.h Pulsar/FrequencyScale.h	\
-	Pulsar/PlotAxis.h Pulsar/PlotLabel.h				\
+	Pulsar/PlotAxis.h Pulsar/PlotLabel.h Pulsar/PlotAttributes.h	\
 	Pulsar/PlotFrame.h Pulsar/PlotFrameSize.h Pulsar/MultiFrame.h	\
 	Pulsar/SimplePlot.h Pulsar/FrequencyPlot.h Pulsar/PhasePlot.h	\
 	Pulsar/PowerSpectra.h Pulsar/SpectrumPlot.h			\
@@ -31,6 +31,7 @@ libPlot_la_SOURCES = Plot.C PlotFactory.C \
 	FrequencyScale.C \
 	PlotAxis.C PlotAxisTI.C \
 	PlotLabel.C PlotLabelTI.C \
+	PlotAttributes.C PlotAttributesTI.C \
 	PlotFrame.C PlotFrameTI.C \
 	PlotFrameSize.C PlotFrameSizeTI.C \
 	MultiFrame.C MultiFrameTI.C \

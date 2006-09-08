@@ -20,6 +20,24 @@ TextInterface::Class* Pulsar::Plot::get_frame_interface ()
   return new PlotFrame::Interface (get_frame());
 }
 
+//! Get the attributes
+Pulsar::PlotAttributes* Pulsar::Plot::get_attributes ()
+{
+  return attributes;
+}
+
+//! Get the attributes
+const Pulsar::PlotAttributes* Pulsar::Plot::get_attributes () const
+{
+  return attributes;
+}
+
+//! Set the attributes
+void Pulsar::Plot::set_attributes (PlotAttributes* a)
+{
+  attributes = a;
+}
+
 //! Get the frame
 Pulsar::PlotFrame* Pulsar::Plot::get_frame ()
 {
@@ -36,5 +54,6 @@ const Pulsar::PlotFrame* Pulsar::Plot::get_frame () const
 void Pulsar::Plot::set_frame (PlotFrame* f)
 {
   frame = f;
+  attributes = f;
 }
 
