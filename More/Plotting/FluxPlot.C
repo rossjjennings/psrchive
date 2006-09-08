@@ -69,16 +69,15 @@ void Pulsar::FluxPlot::auto_scale_phase (const Profile* profile, float buf)
 
   cerr << "AUTO ZOOM phase rise=" << start << " fall=" << stop << endl;
 
+  if (start > stop)
+    stop += 1.0;
+
   buf = (stop - start) * buf;
   
   stop += buf;
   start -= buf;
 
-  if (start < 0)
-    start = 0;
-
-  if (stop > 1)
-    stop = 1;
+  cerr << "AUTO ZOOM fixed rise=" << start << " fall=" << stop << endl;
 
   get_frame()->get_x_scale()->set_range_norm (start, stop);
 }
@@ -146,12 +145,15 @@ void Pulsar::FluxPlot::plot_error_box (const Archive* data)
   float y_error = get_flux_error (plotter.profiles[0]);
   float x_error = get_phase_error (data);
 
-  pair<float,float> x_range = get_frame()->get_x_scale()->get_range_norm();
-  float x_min = x_range.first;
-  float x_max = x_range.second;
+  float x_min = 0;
+  float x_max = 0;
+
+  get_scale()->get_range (data, x_min, x_max);
+
+  float xscale = get_scale()->get_scale (data);
 
   float x1 = x_min + (x_max - x_min) * 0.05;
-  float x2 = x1 + x_error;
+  float x2 = x1 + x_error * xscale;
   float y1 = 10 * y_error;
   float y2 = y1 + 4.0 * y_error;
 
