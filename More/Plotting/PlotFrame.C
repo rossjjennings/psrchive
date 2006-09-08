@@ -205,16 +205,10 @@ Pulsar::PlotAxis* Pulsar::PlotFrame::get_y_axis(bool allow_transpose)
 
 void Pulsar::PlotFrame::set_publication_quality (bool flag)
 {
-  if (flag) {
-    set_character_height (1.5);
-    set_character_font (2);
-    set_line_width (3);
+  PlotAttributes::set_publication_quality (flag);
+
+  if (flag)
     get_label_above()->set_centre(PlotLabel::unset);
-  }
-  else {
-    set_character_height (1);
-    set_character_font (1);
-    set_line_width (1);
+  else
     get_label_above()->set_centre("$file");
-  }
 }

@@ -7,13 +7,14 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PlotFrame.h,v $
-   $Revision: 1.16 $
-   $Date: 2006/05/05 02:12:57 $
+   $Revision: 1.17 $
+   $Date: 2006/09/08 07:32:15 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PlotFrame_h
 #define __Pulsar_PlotFrame_h
 
+#include "Pulsar/PlotAttributes.h"
 #include "Pulsar/PlotScale.h"
 #include "Pulsar/PlotAxis.h"
 #include "Pulsar/PlotLabel.h"
@@ -26,7 +27,7 @@ namespace Pulsar {
   class ArchiveTI;
 
   //! Stores the properties of the plot frame
-  class PlotFrame : public Reference::Able {
+  class PlotFrame : public PlotAttributes {
 
   public:
 
@@ -58,21 +59,8 @@ namespace Pulsar {
     //! Get the x-axis
     PlotAxis* get_y_axis (bool allow_transpose = false);
 
-    //! Set the character height
-    void set_character_height (float height) { character_height = height; }
-    float get_character_height () const { return character_height; }
-
-    //! Set the character font
-    void set_character_font (int font) { character_font = font; }
-    int get_character_font () const { return character_font; }
-
-    //! Set the line width
-    void set_line_width (int width) { line_width = width; }
-    int get_line_width () const { return line_width; }
-
     //! Set publication quality character height and font and line width
-    virtual void set_publication_quality (bool flag = true);
-    bool get_publication_quality () const { return false; }
+    void set_publication_quality (bool flag = true);
 
     //! Get the above-frame label
     PlotLabel* get_label_above () { return above; }
@@ -116,10 +104,6 @@ namespace Pulsar {
 
     Reference::To<PlotAxis> x_axis;
     Reference::To<PlotAxis> y_axis;
-
-    float character_height;
-    int character_font;
-    int line_width;
 
     Reference::To<PlotLabel> above;
     Reference::To<PlotLabel> below;
