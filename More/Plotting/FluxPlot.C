@@ -78,6 +78,12 @@ void Pulsar::FluxPlot::auto_scale_phase (const Profile* profile, float buf)
   stop += buf;
   start -= buf;
 
+  if (start < 0)
+    start = 0;
+
+  if (stop > 1)
+    stop = 1;
+
   cerr << "AUTO ZOOM fixed rise=" << start << " fall=" << stop << endl;
 
   get_frame()->get_x_scale()->set_range_norm (start, stop);
