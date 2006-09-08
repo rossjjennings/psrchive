@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/FluxPlot.h,v $
-   $Revision: 1.12 $
-   $Date: 2006/04/12 15:15:40 $
+   $Revision: 1.13 $
+   $Date: 2006/09/08 07:31:58 $
    $Author: straten $ */
 
 #ifndef __Pulsar_FluxPlot_h
@@ -80,6 +80,12 @@ namespace Pulsar {
     void set_plot_histogram (bool f = true) { plotter.plot_histogram = f; }
     bool get_plot_histogram () const { return plotter.plot_histogram; }
 
+    //! Set the original number of frequency channels
+    /*! This attribute is used in the get_phase_error method to determine
+      the dispersion smearing across each channel */
+    void set_original_nchan (unsigned nchan) { original_nchan = nchan; }
+    unsigned get_original_nchan () const { return original_nchan; }
+
     //! Draw the profiles in the currently open window
     void draw (const Archive*);
 
@@ -93,6 +99,7 @@ namespace Pulsar {
 
     bool plot_ebox;
 
+    unsigned original_nchan;
   };
 
 }

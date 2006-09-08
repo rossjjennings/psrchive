@@ -17,6 +17,7 @@
 Pulsar::FluxPlot::FluxPlot ()
 {
   isubint = ichan = ipol = 0;
+  original_nchan = 0;
   plot_ebox = false;
 
   get_frame()->get_y_scale()->set_buf_norm(0.05);
@@ -98,6 +99,10 @@ float Pulsar::FluxPlot::get_phase_error (const Archive* data)
   double dm        = data->get_dispersion_measure();
   double freq      = data->get_centre_frequency();
   double chan_bw   = data->get_bandwidth() / data->get_nchan();
+
+  if (original_nchan)
+    chan_bw = data->get_bandwidth() / original_nchan;
+
   double period    = data->get_Integration(0)->get_folding_period();
 
   cerr << "Frequency = " << freq << endl;
@@ -121,7 +126,7 @@ float Pulsar::FluxPlot::get_phase_error (const Archive* data)
   cerr << "TOTAL resolution = " << time_res*1e3 << " ms" << endl;
   
   float x_error = time_res / period;
-  cerr << "Phase error = " << x_error << endl;
+  cerr << "Phase error = " << x_error << " turns" << endl;
 
   return x_error;
 }
