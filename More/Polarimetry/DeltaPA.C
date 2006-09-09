@@ -55,6 +55,10 @@ Pulsar::DeltaPA::get (const PolnProfile* p0, const PolnProfile* p1) const
 
     }
 
+  double one = cos_delta_PA*cos_delta_PA + sin_delta_PA*sin_delta_PA;
+  cos_delta_PA /= one;
+  sin_delta_PA /= one;
+
   double var_delta_PA = 0.0;
 
   for (unsigned ibin=0; ibin<nbin; ibin++)
