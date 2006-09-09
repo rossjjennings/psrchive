@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/Attic/PolnProfile.h,v $
-   $Revision: 1.30 $
-   $Date: 2006/04/14 19:32:31 $
+   $Revision: 1.31 $
+   $Date: 2006/09/09 16:30:52 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PolnProfile_h
@@ -127,6 +127,9 @@ namespace Pulsar {
     //! Return the ellipticity and its estimated error for each pulse phase
     void get_ellipticity (vector< Estimate<double> >& e, float sigma) const;
 
+    //! Does some work for get_orientation and get_ellipticity
+    double get_variance (unsigned ipol, float phase) const;
+
   protected:
 
     //! The basis in which the radiation is measured
@@ -149,9 +152,6 @@ namespace Pulsar {
 
     //! Does the work for get_polarized and get_linear
     void get_rss (Profile* rss, unsigned jpol, unsigned kpol) const;
-
-    //! Does some work for get_orientation and get_ellipticity
-    double get_variance (unsigned ipol, float phase) const;
 
   };
 
