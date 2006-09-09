@@ -12,6 +12,7 @@ nobase_include_HEADERS = model_profile.h	\
 	Pulsar/ArchiveProcessor.h		\
 	Pulsar/PolnProfile.h			\
 	Pulsar/BaselineEstimator.h		\
+	Pulsar/DeltaPA.h			\
 	Pulsar/DeltaRM.h			\
 	Pulsar/ExponentialBaseline.h		\
 	Pulsar/GaussianBaseline.h		\
@@ -99,6 +100,7 @@ libpsrchive_la_SOURCES =			\
 	ChannelZapMedian.C			\
 	ChannelZapModulation.C			\
 	choose.C				\
+	DeltaPA.C				\
 	DeltaRM.C				\
 	Dispersion.C				\
 	DispersionDelay.C			\
@@ -326,8 +328,8 @@ TESTS = test_Receiver test_Interpreter
 
 check_PROGRAMS = test_Archive test_denoise test_Difference $(TESTS)
 
-test_Interpreter_SOURCES	= test_Interpreter.C
 test_Receiver_SOURCES		= test_Receiver.C
+test_Interpreter_SOURCES	= test_Interpreter.C
 test_Archive_SOURCES		= test_Archive.C
 test_denoise_SOURCES		= test_denoise.C
 test_Difference_SOURCES		= test_Difference.C
