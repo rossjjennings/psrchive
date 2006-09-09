@@ -22,7 +22,7 @@ P^\prime_k = Q^\prime_k + i U^\prime_k = L^\prime_k \exp i2\Psi^\prime_k
 \end{equation}
 the same in the other profile.  To find the mean value of $\Delta\Psi$,
 \begin{equation}
-\langle\Delta\Psi\rangle = {1\over N}\sum_{k=1}^N \Psi^\prime_k - \Psi_k
+\bar\Psi = {1\over N}\sum_{k=1}^N \Psi^\prime_k - \Psi_k
 \end{equation}
 use the cross-correlation
 \begin{equation}
@@ -31,16 +31,16 @@ Z = \sum_{k=1}^N P^*_k P^\prime_k
 \end{equation}
 such that
 \begin{equation}
-\langle\Delta\Psi\rangle
+\bar\Psi
 ={1\over2}\tan^{-1}\left({\imag[Z]\over\real[Z]}\right).
 \end{equation}
 The variance of this estimate
 \begin{equation}
-{\rm var}(\langle\Delta\Psi\rangle) = \sum_{k=1}^N 
-{\partial\langle\Delta\Psi\rangle\over\partial Q_k} \sigma_Q^2 +
-{\partial\langle\Delta\Psi\rangle\over\partial U_k} \sigma_U^2 +
-{\partial\langle\Delta\Psi\rangle\over\partial Q^\prime_k} \sigma_Q^{\prime2} +
-{\partial\langle\Delta\Psi\rangle\over\partial U^\prime_k} \sigma_U^{\prime2}.
+\sigma_{\bar\Psi}^2 = \sum_{k=1}^N 
+\left({\partial\bar\Psi\over\partial Q_k}\right)^2 \sigma_Q^2 +
+\left({\partial\bar\Psi\over\partial U_k}\right)^2 \sigma_U^2 +
+\left({\partial\bar\Psi\over\partial Q^\prime_k}\right)^2 \sigma_Q^{\prime2} +
+\left({\partial\bar\Psi\over\partial U^\prime_k}\right)^2 \sigma_U^{\prime2}.
 \end{equation}
 To compute the partial derivatives, let
 \begin{equation}
@@ -55,21 +55,21 @@ T = {S\over C},
 \end{equation}
 so that
 \begin{equation}
-{\partial\langle\Delta\Psi\rangle\over\partial Q_k} 
+{\partial\bar\Psi\over\partial Q_k} 
 = {1\over1+T^2} \left( {U^\prime_k \over C} - {S Q^\prime_k\over C^2} \right)
 = { C U^\prime_k - S Q^\prime_k \over C^2 + S^2 }
 \end{equation}
 Similarly
 \begin{equation}
-{\partial\langle\Delta\Psi\rangle\over\partial U_k} 
+{\partial\bar\Psi\over\partial U_k} 
 = { -C Q^\prime_k - S U^\prime_k \over C^2 + S^2 }
 \end{equation}
 \begin{equation}
-{\partial\langle\Delta\Psi\rangle\over\partial Q^\prime_k} 
+{\partial\bar\Psi\over\partial Q^\prime_k} 
 = { -C U_k - S Q_k \over C^2 + S^2 }
 \end{equation}
 \begin{equation}
-{\partial\langle\Delta\Psi\rangle\over\partial U^\prime_k} 
+{\partial\bar\Psi\over\partial U^\prime_k} 
 = { C Q_k - S U_k \over C^2 + S^2 }
 \end{equation}
 
