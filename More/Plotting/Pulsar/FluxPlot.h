@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/FluxPlot.h,v $
-   $Revision: 1.13 $
-   $Date: 2006/09/08 07:31:58 $
+   $Revision: 1.14 $
+   $Date: 2006/09/10 13:55:09 $
    $Author: straten $ */
 
 #ifndef __Pulsar_FluxPlot_h
@@ -72,6 +72,10 @@ namespace Pulsar {
     void set_pol (PlotIndex _ipol) { ipol = _ipol; }
     PlotIndex get_pol () const { return ipol; }
 
+    //! Automatically zoom in on the on-pulse region
+    void set_auto_zoom (float zoom) { auto_zoom = zoom; }
+    float get_auto_zoom () const { return auto_zoom; }
+
     //! Plot an error box on the baseline
     void set_plot_error_box (bool flag = true) { plot_ebox = flag; }
     bool get_plot_error_box () const { return plot_ebox; }
@@ -98,6 +102,7 @@ namespace Pulsar {
     PlotIndex ipol;
 
     bool plot_ebox;
+    float auto_zoom;
 
     unsigned original_nchan;
   };

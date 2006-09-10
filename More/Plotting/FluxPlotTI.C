@@ -26,6 +26,10 @@ Pulsar::FluxPlot::Interface::Interface (FluxPlot* instance)
 
   import( PhasePlot::Interface() );
 
+  add( &FluxPlot::get_auto_zoom,
+       &FluxPlot::set_auto_zoom,
+       "zoom", "Auto zoom on on-pulse" );
+
   add( &FluxPlot::get_plot_error_box,
        &FluxPlot::set_plot_error_box,
        "ebox", "Plot error box" );

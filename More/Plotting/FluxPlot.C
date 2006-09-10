@@ -17,6 +17,7 @@
 Pulsar::FluxPlot::FluxPlot ()
 {
   isubint = ichan = ipol = 0;
+  auto_zoom = 0;
   original_nchan = 0;
   plot_ebox = false;
 
@@ -36,6 +37,9 @@ void Pulsar::FluxPlot::prepare (const Archive* data)
 
   // derived classes fill the plotter.profiles attribute
   get_profiles (data);
+
+  if (auto_zoom)
+    auto_scale_phase (plotter.profiles[0], auto_zoom);
 
   plotter.minmax (get_frame());
 }
