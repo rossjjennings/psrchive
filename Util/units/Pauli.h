@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Pauli.h,v $
-   $Revision: 1.22 $
-   $Date: 2006/08/24 22:00:39 $
+   $Revision: 1.23 $
+   $Date: 2006/09/12 08:03:30 $
    $Author: straten $ */
 
 #ifndef __Pauli_H
@@ -185,6 +185,14 @@ const Stokes< std::complex<T> >
 transform (const Stokes< std::complex<T> >& input, const Jones<U>& jones)
 {
   return complex_coherency (jones * convert(input) * herm(jones));
+}
+
+// transform the coherency matrix by the given Mueller matrix
+template<typename T, typename U>
+Jones<T> transform (const Matrix<4,4,U>& M, const Jones<T>& rho)
+{
+  Stokes< std::complex<T> > s = M * complex_coherency(rho);
+  return convert(s);
 }
 
 // convert Jones matrix to Hermitian and Unitary Quaternion
