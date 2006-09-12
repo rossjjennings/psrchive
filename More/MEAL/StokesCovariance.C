@@ -33,6 +33,14 @@ void MEAL::StokesCovariance::set_transformation (const Jones<double>& J)
   built = false;
 }
 
+//! Set the transformation from template to observation
+void MEAL::StokesCovariance::set_transformation (const Matrix<4,4,double>& M)
+{
+  jones = 0;
+  xform = M;
+  built = true;
+}
+
 //! Get the variances of the output Stokes parameters
 Matrix<4,4,double> MEAL::StokesCovariance::get_covariance () const
 {
@@ -48,6 +56,15 @@ MEAL::StokesCovariance::set_transformation_gradient (const Jones<double>& grad)
 {
   jones_grad = grad;
   built = false;
+}
+
+//! Set the transformation gradient component
+void MEAL::StokesCovariance::set_transformation_gradient 
+(const Matrix<4,4,double>& grad)
+{
+  jones_grad = 0;
+  xform_grad = grad;
+  built = true;
 }
 
 //! Get the variances of the output Stokes parameters gradient component

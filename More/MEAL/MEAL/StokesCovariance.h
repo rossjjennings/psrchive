@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/StokesCovariance.h,v $
-   $Revision: 1.1 $
-   $Date: 2006/09/06 00:34:01 $
+   $Revision: 1.2 $
+   $Date: 2006/09/12 08:03:50 $
    $Author: straten $ */
 
 #ifndef __MEAL_StokesCovariance_H
@@ -33,11 +33,17 @@ namespace MEAL {
     //! Set the transformation
     void set_transformation (const Jones<double>&);
 
+    //! Set the transformation
+    void set_transformation (const Matrix<4,4,double>&);
+
     //! Get the variances of the output Stokes parameters
     Matrix<4,4,double> get_covariance () const;
 
     //! Set the transformation gradient component
     void set_transformation_gradient (const Jones<double>&);
+
+    //! Set the transformation gradient component
+    void set_transformation_gradient (const Matrix<4,4,double>&);
 
     //! Get the variances of the output Stokes parameters gradient component
     Matrix<4,4,double> get_covariance_gradient () const;
