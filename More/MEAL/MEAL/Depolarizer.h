@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Depolarizer.h,v $
-   $Revision: 1.1 $
-   $Date: 2006/09/12 08:03:13 $
+   $Revision: 1.2 $
+   $Date: 2006/09/12 08:09:13 $
    $Author: straten $ */
 
 #ifndef __MEAL_Depolarizer_H
@@ -19,9 +19,7 @@
 
 namespace MEAL {
 
-  //! Represents a boost (Hermitian, dichroic) transformation
-  /*! This class represents the boost, \f$\beta\f$, along an arbitrary
-    axix, \f$\hat m\f$. */
+  //! Represents a pure depolarizer transformation
   class Depolarizer : public Real4 {
 
   public:
