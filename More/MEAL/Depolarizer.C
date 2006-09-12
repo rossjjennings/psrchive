@@ -6,6 +6,7 @@
  ***************************************************************************/
 #include "MEAL/Depolarizer.h"
 #include "MEAL/Parameters.h"
+#include <assert.h>
 
 using namespace std;
 
