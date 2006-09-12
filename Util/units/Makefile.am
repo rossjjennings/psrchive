@@ -78,6 +78,7 @@ nobase_include_HEADERS = \
         MEAL/CongruenceTransformation.h \
         MEAL/Constant.h \
         MEAL/CyclicParameter.h \
+	MEAL/Depolarizer.h \
         MEAL/EvaluationPolicy.h \
         MEAL/Factory.h \
         MEAL/ForwardChanged.h \
@@ -92,6 +93,7 @@ nobase_include_HEADERS = \
         MEAL/InverseRule.h \
         MEAL/LevenbergMarquardt.h \
         MEAL/Mean.h \
+	MEAL/MuellerTransformation.h \
         MEAL/NegationRule.h \
         MEAL/NoParameters.h \
         MEAL/NormalizeStokes.h \
@@ -109,6 +111,8 @@ nobase_include_HEADERS = \
         MEAL/ProjectGradient.h \
         MEAL/Projection.h \
 	MEAL/RandomPolar.h \
+	MEAL/Real4.h \
+	MEAL/Real4Value.h \
         MEAL/RotatingVectorModel.h \
         MEAL/Rotation.h \
 	MEAL/Rotation1.h \
@@ -161,6 +165,7 @@ libunits_la_SOURCES += \
         Composite.C \
         CongruenceTransformation.C \
         CyclicParameter.C \
+	Depolarizer.C \
         ForwardChanged.C \
         Function.C \
         Function_load.C \
@@ -173,6 +178,7 @@ libunits_la_SOURCES += \
         Invariant.C \
         linchi2.C \
         MatrixTest.h \
+	MuellerTransformation.C \
         NormalizeStokes.C \
         OneParameter.C \
         ParameterPolicy.C \
@@ -184,6 +190,8 @@ libunits_la_SOURCES += \
         PositionAngles.C \
         Projection.C \
 	RandomPolar.C \
+	Real4.C \
+	Real4Value.C \
         RotatingVectorModel.C \
         Rotation.C \
 	Rotation1.C \
