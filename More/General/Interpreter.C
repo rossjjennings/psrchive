@@ -146,8 +146,9 @@ void Pulsar::Interpreter::init()
 
   add_command 
     ( &Interpreter::centre, 'C',
-      "centre", "centre profiles using the polyco",
-      "usage: centre \n" );
+      "centre", "centre profiles using polyco or max",
+      "usage: centre <max> \n"
+      "  max               centre on the peak in total intensity \n" );
 
   add_command 
     ( &Interpreter::dedisperse, 'D',
@@ -667,9 +668,15 @@ catch (Error& error) {
 
 string Pulsar::Interpreter::centre (const string& args)
 try {
-  if (args.length())
-    return response (Fail, "accepts no arguments");
-  get()->centre();
+  vector<string> arguments = setup (args);
+
+  if (arguments.size() == 1 && arguments[0] == "max")
+    get()->centre_max_bin();
+  else if (arguments.size() == 0)
+    get()->centre();
+  else
+    return response (Fail, "unrecognized argument '" + args + "'");
+
   return response (Good);
 }
 catch (Error& error) {
