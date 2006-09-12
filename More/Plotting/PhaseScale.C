@@ -62,7 +62,7 @@ float Pulsar::PhaseScale::get_scale (const Archive* data) const
     return 2.0 * M_PI;
 
   else if (units == Degrees)
-    return 180.0;
+    return 360.0;
 
   else
     return 1.0;
