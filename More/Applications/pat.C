@@ -13,7 +13,9 @@
 #include "Pulsar/PolnProfile.h"
 #include "Pulsar/PolnProfileFit.h"
 #include "Pulsar/PolnProfileFitAnalysis.h"
+
 #include "MEAL/Polar.h"
+#include "MEAL/Depolarizer.h"
 
 #include "Pulsar/ObsExtension.h"
 #include "Pulsar/Backend.h"
@@ -154,7 +156,7 @@ int main (int argc, char *argv[]) try {
       break;
 
     case 'i':
-      cout << "$Id: pat.C,v 1.56 2006/09/06 04:46:31 straten Exp $" << endl;
+      cout << "$Id: pat.C,v 1.57 2006/09/12 08:05:52 straten Exp $" << endl;
       return 0;
 
     case 'F':
@@ -356,7 +358,7 @@ int main (int argc, char *argv[]) try {
 
 	  analysis.use_basis (true);
 
-	  Jones<double> basis = analysis.get_basis()->evaluate();
+	  Jones<double> basis = analysis.get_Jbasis()->evaluate();
 	  poln_profile->transform( basis * inv(xform) );
 
           MEAL::Polar identity;
@@ -484,9 +486,11 @@ int main (int argc, char *argv[]) try {
 
   fflush(stdout);
 
-  if (sensitivity_curve && (full_poln_analysis || optimize_mtm))
+#if 0
+  if (histo.size())
     cerr << "pat: expected ratio = " 
          << analysis.get_expected_relative_error(histo) << endl;
+#endif
 
   return 0;
 
@@ -578,12 +582,17 @@ void mtm_analysis (PolnProfileFitAnalysis& analysis,
 {
   analysis.set_fit (&fit);
 
-  if (optimize) {
+  if (optimize) try {
 
     Estimate<double> sigma_0 = analysis.get_relative_error ();
 
     cerr << "\nInserting basis transformation" << endl;
+
+#if 0
     analysis.set_basis (new MEAL::Polar);
+#else
+    analysis.set_basis (new MEAL::Depolarizer);
+#endif
 
     cerr << "Optimizing the template" << endl;
     analysis.optimize ();
@@ -592,12 +601,12 @@ void mtm_analysis (PolnProfileFitAnalysis& analysis,
       histo.resize( fit.get_nharmonic() );
 
     analysis.set_fit (&fit);
-    Estimate<double> sigma = analysis.get_relative_error ();
-    cout << name << " " << tex(sigma_0) << " " << tex(sigma) << endl;
 
     analysis.use_basis (false);
 
-    return;
+  }
+  catch (Error& e) {
+    cerr << e << endl;
   }
 
   cout << "\nFull Polarization TOA (matrix template matching): "
@@ -608,7 +617,7 @@ void mtm_analysis (PolnProfileFitAnalysis& analysis,
     "\n MTM Relative conditional error = "
        << analysis.get_relative_conditional_error () << endl;
   
-    ScalarProfileFitAnalysis scalar;
+  ScalarProfileFitAnalysis scalar;
   scalar.set_fit (&fit);
 
   // the phase shift error for the total intensity profile

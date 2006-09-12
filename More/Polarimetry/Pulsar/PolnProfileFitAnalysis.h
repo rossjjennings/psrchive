@@ -7,17 +7,20 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PolnProfileFitAnalysis.h,v $
-   $Revision: 1.25 $
-   $Date: 2006/09/06 04:46:24 $
+   $Revision: 1.26 $
+   $Date: 2006/09/12 08:05:52 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PolnProfileFitAnalysis_h
 #define __Pulsar_PolnProfileFitAnalysis_h
 
 #include "Pulsar/PolnProfileFit.h"
-#include "MEAL/Complex2Value.h"
 #include "MEAL/StokesError.h"
 #include "MEAL/StokesCovariance.h"
+
+#include "MEAL/MuellerTransformation.h"
+#include "MEAL/Complex2Value.h"
+#include "MEAL/Real4Value.h"
 
 #include <vector>
 
@@ -53,10 +56,25 @@ namespace Pulsar {
     void set_basis (MEAL::Complex2*);
 
     //! Get the transformation into the optimal basis
-    MEAL::Complex2* get_basis ();
+    MEAL::Complex2* get_Jbasis ();
+
+    //! Return true when using Jones basis
+    bool has_Jbasis() const { return Jbasis; }
+
+    //! Set the transformation to be used to find the optimal basis
+    void set_basis (MEAL::Real4*);
+
+    //! Get the transformation into the optimal basis
+    MEAL::Real4* get_Mbasis ();
+
+    //! Return true when using Mueller basis
+    bool has_Mbasis() const { return Mbasis; }
 
     //! Use or don't use the optimal transformation
     void use_basis (bool);
+
+    //! Return the number of free parameters in the basis
+    unsigned get_basis_nparam () const;
 
     //! Get the relative arrival time error
     Estimate<double> get_relative_error () const;
@@ -109,10 +127,10 @@ namespace Pulsar {
     unsigned max_harmonic;
 
     //! The transformation to be used to find the optimal basis
-    Reference::To<MEAL::Complex2> basis;
+    Reference::To<MEAL::Complex2> Jbasis;
 
     //! The means of inserting the basis transformation into the MTM model
-    MEAL::Complex2Value* basis_insertion;
+    Reference::To<MEAL::Complex2Value> Jbasis_insertion;
 
     //! Insert the basis transformation into the MTM model
     void insert_basis ();
@@ -133,15 +151,8 @@ namespace Pulsar {
     //! The partial derivative of rho wrt basis parameter
     Jones<double> delrho_delB (unsigned b) const;
 
-    //! The partial derivative of noise wrt basis parameter
-    Stokes<double> delnoise_delB (unsigned b);
-
     //! The partial derivative of covariance wrt basis parameter
     Matrix<4,4,double> get_delXi_delB (unsigned b);
-
-    //! Worker method for partial derivative of noise
-    Stokes<double> delnoise
-    (const Jones<double>& xform, const Jones<double>& xform_grad);
 
     //! The partial derivative of the curvature matrix wrt basis parameter
     Matrix<8,8,double> delalpha_delB (unsigned ib);
@@ -169,8 +180,8 @@ namespace Pulsar {
     Jones<double> phase_result;
     std::vector< Jones<double> > phase_gradient;
 
-    Jones<double> basis_result;
-    std::vector< Jones<double> > basis_gradient;
+    Jones<double> Jbasis_result;
+    std::vector< Jones<double> > Jbasis_gradient;
 
     //! Propagation of uncertainty through the congruence tranformation
     MEAL::StokesError error;
@@ -200,6 +211,18 @@ namespace Pulsar {
 
     //! Compute the uncertainty of results
     bool compute_error;
+
+    //! The transformation to be used to find the optimal basis
+    Reference::To<MEAL::Real4> Mbasis;
+
+    //! The means of inserting the basis transformation into the MTM model
+    Reference::To<MEAL::Real4Value> Mbasis_insertion;
+
+    Matrix<4,4,double> Mbasis_result;
+    std::vector< Matrix<4,4,double> > Mbasis_gradient;
+
+    //! The original inputs
+    std::vector< Reference::To<MEAL::Complex2> > inputs;
     
   private:
 
