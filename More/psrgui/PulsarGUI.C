@@ -58,34 +58,20 @@ Pulsar::PulsarGUI::PulsarGUI(QApplication* qa, QString& filename)
   // Construct available plot styles
   static PlotFactory factory;
 
-  plotItem* Button1 = new plotItem(psrButtons, factory.construct("flux"),
-				   "Flux Profile", 
-				   "Plots the total intensity amplitudes "
-				   "as a function of pulse phase.");
+  // Store the pointers in case they come in handy
+  vector<plotItem*> pointers;
   
-  plotItem* Button2 = new plotItem(psrButtons, factory.construct("stokes"),
-				   "Stokes Profile", 
-				   "Plots the total intensity, total linear "
-				   "and total circular pulse profiles as a "
-				   "function of phase, on the same axes.");
-
-  plotItem* Button3 = new plotItem(psrButtons, factory.construct("freq"),
-				   "Frequency vs Phase", 
-				   "Plots an image of intensity in each "
-				   "frequency band as a function of pulse "
-				   "phase.");
-
-  plotItem* Button4 = new plotItem(psrButtons, factory.construct("time"),
-				   "Time vs Phase", 
-				   "Plots an image of intensity in each "
-				   "sub-integration as a function of "
-				   "pulse phase.");
+  for (unsigned i = 0; i < factory.get_nplot(); i++) {
+    
+    pointers.push_back(new plotItem(psrButtons, factory.construct(factory.get_name(i)),
+				    factory.get_description(i), factory.get_description(i)));
+  }
   psrButtons->adjustSize();
-
+  
   // Allow the user to open a pgplot window and draw the active plot
   QPushButton* launcher = new QPushButton("Draw Plot", layout);
   QObject::connect(launcher, SIGNAL(clicked()), this, SLOT(plotGraph()));
-
+  
   // Load a file if a name was given on the command line
   if (filename.isEmpty()) {
     arch = 0;
@@ -157,13 +143,21 @@ void Pulsar::PulsarGUI::confGraph()
 
 void Pulsar::PulsarGUI::plotGraph()
 {
-  plotItem* pi = 0;
-  pi = dynamic_cast<plotItem*> (psrButtons->selected());
-
-  if (pi) {
-    cpgopen("/xs");
-    cpgsvp(0.1,0.9,0.1,0.9);
-    pi->getPlot()->plot(arch);
-    cpgclos();
+  try {
+    plotItem* pi = 0;
+    pi = dynamic_cast<plotItem*> (psrButtons->selected());
+    
+    if (pi) {
+      cpgopen("/xs");
+      cpgsvp(0.1,0.9,0.1,0.9);
+      pi->getPlot()->plot(arch);
+      cpgclos();
+    }
+  }
+  catch (Error& error) {
+    QErrorMessage* em = new QErrorMessage(this);
+    QString useful = "Failed to construct plot: ";
+    useful += (error.get_message()).c_str();
+    em->message(useful);
   }
 }
