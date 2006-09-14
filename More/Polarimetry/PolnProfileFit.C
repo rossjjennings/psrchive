@@ -201,8 +201,7 @@ void Pulsar::PolnProfileFit::choose_max_harmonic (const PolnProfile* psd)
 }
 
 //! Set the transformation between the standard and observation
-void 
-Pulsar::PolnProfileFit::set_transformation (MEAL::Complex2* xform)
+void Pulsar::PolnProfileFit::set_transformation (MEAL::Complex2* xform)
 {
   transformation = xform;
 
@@ -261,7 +260,7 @@ void Pulsar::PolnProfileFit::fit (const PolnProfile* observation) try
   set_phase (phase_guess);
 
   Stokes<double> var = get_variance( fourier );
-  uncertainty->set_observation_var( var );
+  uncertainty->set_variance ( var );
 
   // calculate the power spectral density of the input
   Reference::To<PolnProfile> psd = fourier_psd (fourier);
@@ -328,7 +327,6 @@ void Pulsar::PolnProfileFit::fit (const PolnProfile* observation) try
   clock.start();
   model->solve_work ();
   clock.stop();
-
 
   /* if template and observation have different numbers of bins, there
      is an extra offset equal to the offset between the centres of bin
@@ -447,7 +445,7 @@ void Pulsar::PolnProfileFit::set_noise_mask () try
 
   standard_variance = get_variance (standard_fourier);
 
-  uncertainty->set_template_var( standard_variance );
+  uncertainty->set_template_variance (standard_variance);
 
   // while we have the PSD ...
   if (choose_maximum_harmonic)

@@ -150,6 +150,7 @@ void Calibration::ReceptionModel::add_data (CoherencyMeasurementSet& datum)
 		   "source_index=%d >= nsource=%d",
 		   datum[imeas].get_input_index(), get_num_input());
 
+#if 0
     for (unsigned ipol=0; ipol<4; ipol++)
       if (datum[imeas].get_variance(ipol) <= 0.0) {
 	Error error (InvalidParam, "Calibration::ReceptionModel::add_data");
@@ -160,6 +161,7 @@ void Calibration::ReceptionModel::add_data (CoherencyMeasurementSet& datum)
           error << "\nstokes=" << datum[imeas].get_stokes();
         throw error;
       }
+#endif
 
   }
 

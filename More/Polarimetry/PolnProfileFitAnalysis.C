@@ -239,8 +239,8 @@ void Pulsar::PolnProfileFitAnalysis::delC_delS
     
   }
 
-  delalpha_delSre *= fit->uncertainty->get_inv_var(k);
-  delalpha_delSim *= fit->uncertainty->get_inv_var(k);
+  delalpha_delSre /= fit->uncertainty->get_variance(k);
+  delalpha_delSim /= fit->uncertainty->get_variance(k);
 
   delC_delSre = -covariance * delalpha_delSre * covariance;
   delC_delSim = -covariance * delalpha_delSim * covariance;
@@ -744,6 +744,8 @@ Pulsar::PolnProfileFitAnalysis::get_c_varphi (std::vector<double>* grad)
   get_delalpha_delB (delalpha_delbasis);
 
   grad->resize( nparam );
+
+  assert( delalpha_delbasis.size() == nparam );
 
   double size = 0;
 
