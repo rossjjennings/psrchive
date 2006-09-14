@@ -84,9 +84,6 @@ void usage ()
 
 using namespace Pulsar;
 
-static bool sensitivity_curve = true;
-static vector<unsigned> histo;
-
 // defined at the end of this file
 void mtm_analysis (PolnProfileFitAnalysis&, PolnProfileFit&,
 		   const std::string& name, bool optimal);
@@ -157,7 +154,7 @@ int main (int argc, char *argv[]) try {
       break;
 
     case 'i':
-      cout << "$Id: pat.C,v 1.60 2006/09/14 04:37:57 straten Exp $" << endl;
+      cout << "$Id: pat.C,v 1.61 2006/09/14 12:45:03 straten Exp $" << endl;
       return 0;
 
     case 'F':
@@ -393,9 +390,6 @@ int main (int argc, char *argv[]) try {
 	  
 	  toa.unload(stdout);
 
-          if (sensitivity_curve)
-            histo[fit.get_nharmonic_obs()] ++;
-
 	}
 
       }
@@ -492,13 +486,6 @@ int main (int argc, char *argv[]) try {
   }
 
   fflush(stdout);
-
-#if 0
-  if (histo.size())
-    cerr << "pat: expected ratio = " 
-         << analysis.get_expected_relative_error(histo) << endl;
-#endif
-
   return 0;
 
 }
@@ -610,9 +597,6 @@ void mtm_analysis (PolnProfileFitAnalysis& analysis,
     cerr << "Optimizing the template" << endl;
     analysis.optimize ();
 
-    if (sensitivity_curve)
-      histo.resize( fit.get_nharmonic() );
-
     analysis.set_fit (&fit);
 
     Estimate<double> sigma = analysis.get_relative_error ();
@@ -627,6 +611,7 @@ void mtm_analysis (PolnProfileFitAnalysis& analysis,
     analysis.use_basis (false);
 
     return;
+
   }
   catch (Error& e) {
     cerr << e << endl;
