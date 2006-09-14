@@ -157,7 +157,7 @@ int main (int argc, char *argv[]) try {
       break;
 
     case 'i':
-      cout << "$Id: pat.C,v 1.59 2006/09/14 04:14:29 straten Exp $" << endl;
+      cout << "$Id: pat.C,v 1.60 2006/09/14 04:37:57 straten Exp $" << endl;
       return 0;
 
     case 'F':
@@ -626,6 +626,7 @@ void mtm_analysis (PolnProfileFitAnalysis& analysis,
 
     analysis.use_basis (false);
 
+    return;
   }
   catch (Error& e) {
     cerr << e << endl;
