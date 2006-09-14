@@ -7,14 +7,14 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/TemplateUncertainty.h,v $
-   $Revision: 1.6 $
-   $Date: 2006/09/03 00:09:28 $
+   $Revision: 1.7 $
+   $Date: 2006/09/14 14:07:32 $
    $Author: straten $ */
 
 #ifndef __Calibration_TemplateUncertainty_H
 #define __Calibration_TemplateUncertainty_H
 
-#include "Calibration/CoherencyMeasurement.h"
+#include "Calibration/ObservationUncertainty.h"
 
 #include "MEAL/StokesError.h"
 #include "MEAL/Complex2.h"
@@ -22,30 +22,33 @@
 namespace Calibration {
 
   //! Combines the uncertainty of the template and the observation
-  class TemplateUncertainty : public CoherencyMeasurement::Uncertainty {
+  class TemplateUncertainty : public ObservationUncertainty {
 
   public:
 
     //! Default constructor
     TemplateUncertainty ();
 
-    //! Return the inverse of the variance of the specified polarization
-    double get_inv_var (unsigned ipol) const;
-    
     //! Set the uncertainty of the observation
-    void set_observation_var (const Stokes<double>& var);
+    void set_variance (const Stokes<double>& var);
 
     //! Set the uncertainty of the template
-    void set_template_var (const Stokes<double>& var);
-
-    //! Get the sum of the template and observation variance
-    Stokes<double> get_input_var () const;
+    void set_template_variance (const Stokes<double>& var);
 
     //! Set the transformation from template to observation
     void set_transformation (const MEAL::Complex2* transformation);
 
+    //! Given a coherency matrix, return the weighted norm
+    double get_weighted_norm (const Jones<double>&) const;
+    
+    //! Given a coherency matrix, return the weighted conjugate matrix
+    Jones<double> get_weighted_conjugate (const Jones<double>&) const;
+
     //! Get the Stokes uncertainty estimator
     MEAL::StokesError* get_StokesError () { return &template_variance; }
+
+    //! Get the total variance in the specified Stokes parameter
+    double get_variance (unsigned ipol) const;
 
   protected:
 
@@ -57,9 +60,6 @@ namespace Calibration {
 
     //! The transformation from template to observation
     Reference::To<MEAL::Complex2> transformation;
-
-    //! The inverse of the combined variance
-    Stokes<double> inv_var;
 
     //! Flag set when inv_var attribute is up-to-date
     bool built;

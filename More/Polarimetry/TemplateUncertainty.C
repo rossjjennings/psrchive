@@ -15,34 +15,29 @@ Calibration::TemplateUncertainty::TemplateUncertainty ()
   built = false;
 }
 
-//! Return the inverse of the variance of the specified polarization
-double Calibration::TemplateUncertainty::get_inv_var (unsigned ipol) const
-{
-  if (!built)
-    const_cast<TemplateUncertainty*>(this)->build();
 
-  return inv_var [ipol];
-}
-    
 //! Set the uncertainty of the observation
 void
-Calibration::TemplateUncertainty::set_observation_var (const Stokes<double>& v)
+Calibration::TemplateUncertainty::set_variance (const Stokes<double>& v)
 {
   observation_variance = v;
   built = false;
 }
 
 //! Set the uncertainty of the template
-void
-Calibration::TemplateUncertainty::set_template_var (const Stokes<double>& v)
+void Calibration::TemplateUncertainty::set_template_variance
+(const Stokes<double>& v)
 {
   template_variance.set_variance (v);
   built = false;
 }
 
-Stokes<double> Calibration::TemplateUncertainty::get_input_var () const
+//! Get the total variance in the specified Stokes parameter
+double Calibration::TemplateUncertainty::get_variance (unsigned ipol) const
 {
-  return observation_variance + template_variance.get_input_variance();
+  if (!built)
+    const_cast<TemplateUncertainty*>(this)->build();
+  return 1.0/inv_variance[ipol];
 }
 
 //! Set the transformation from template to observation
@@ -58,6 +53,26 @@ Calibration::TemplateUncertainty::set_transformation (const MEAL::Complex2* x)
   built = false;
 }
 
+//! Given a coherency matrix, return the difference
+double Calibration::TemplateUncertainty::get_weighted_norm
+(const Jones<double>& matrix) const
+{
+  if (!built)
+    const_cast<TemplateUncertainty*>(this)->build();
+
+  return ObservationUncertainty::get_weighted_norm (matrix);
+}
+
+//! Given a coherency matrix, return the weighted conjugate matrix
+Jones<double> Calibration::TemplateUncertainty::get_weighted_conjugate
+(const Jones<double>& matrix) const
+{
+  if (!built)
+    const_cast<TemplateUncertainty*>(this)->build();
+
+  return ObservationUncertainty::get_weighted_conjugate (matrix);
+}
+
 void Calibration::TemplateUncertainty::changed (MEAL::Function::Attribute a)
 {
   if (a == MEAL::Function::Evaluation)
@@ -71,7 +86,7 @@ void Calibration::TemplateUncertainty::build ()
   Stokes<double> var = template_variance.get_variance();
 
   for (unsigned ipol=0; ipol < 4; ipol++)
-    inv_var[ipol] = 1.0 / (observation_variance[ipol] + var[ipol]);
+    inv_variance[ipol] = 1.0 / (observation_variance[ipol] + var[ipol]);
 
 #if 0
   std::cerr << "Calibration::TemplateUncertainty::build"
