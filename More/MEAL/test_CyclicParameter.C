@@ -5,14 +5,15 @@
  *
  ***************************************************************************/
 #include "MEAL/CyclicParameter.h"
-#include "MEAL/Rotation.h"
+#include "MEAL/Rotation1.h"
 
 #include <iostream>
 using namespace std;
 
 int main () {
 
-  MEAL::Rotation* orientation = new MEAL::Rotation;
+  MEAL::Rotation1* orientation;
+  orientation = new MEAL::Rotation1 (Vector<3,double>::basis(2));
 
   // set up the cyclic boundary for orientation
   MEAL::CyclicParameter* o_cyclic = 0;
@@ -24,7 +25,8 @@ int main () {
   
   orientation->set_parameter_policy (o_cyclic);
   
-  MEAL::Rotation* ellipticity = new MEAL::Rotation;
+  MEAL::Rotation1* ellipticity;
+  ellipticity = new MEAL::Rotation1 (Vector<3,double>::basis(1));
 
   // set up the cyclic boundary for ellipticity
   MEAL::CyclicParameter* e_cyclic = 0;

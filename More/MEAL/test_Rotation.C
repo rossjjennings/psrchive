@@ -4,7 +4,7 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-#include "MEAL/Rotation.h"
+#include "MEAL/Rotation1.h"
 #include "Pauli.h"
 
 #include <iostream>
@@ -14,9 +14,7 @@ static char* name = "QUV";
 
 void test_Rotation (double theta, double phi, unsigned axis, unsigned perm=0)
 {
-  MEAL::Rotation rotation;
-
-  rotation.set_axis (Vector<3,float>::basis(axis));
+  MEAL::Rotation1 rotation (Vector<3,float>::basis(axis));
   rotation.set_param (0, phi);
 
   Jones<double> xform = rotation.evaluate();
