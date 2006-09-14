@@ -15,7 +15,7 @@ void usage()
 {
   cerr <<
     "rmrot - output change in position angle across observed band\n"
-    "  Usage: rmrot [-d DM] [-b BW] [-f FREQ] [-n NCHAN] -t\n"
+    "  Usage: rmrot [options]\n"
     "\n"
     "   -r RM      rotation measure in rad/m^2\n"
     "   -b BW      bandwidth in MHz\n"
@@ -40,8 +40,10 @@ int main(int argc, char ** argv)
   double centrefreq = 430;
   double bw = 1;
 
+  unsigned nchan = 1;
+
   int c;
-  while ((c = getopt(argc, argv, "hb:f:r:qv")) != -1)
+  while ((c = getopt(argc, argv, "hb:f:n:r:qv")) != -1)
     switch (c) {
 
     case 'b':
@@ -54,6 +56,10 @@ int main(int argc, char ** argv)
 
     case 'f':
       centrefreq = atof (optarg);
+      break;
+
+    case 'n':
+      nchan = atoi (optarg);
       break;
 
     case 'h':
@@ -103,7 +109,20 @@ int main(int argc, char ** argv)
   else
     cout << delta_PA*360.0 << endl;
 
-  return 0;
+  if (nchan < 2)
+    return 0;
+
+  kernel.set_rotation_measure (1.0);
+
+  kernel.set_frequency (centrefreq + 0.5*bw/nchan);
+  pa_hi = kernel.get_rotation ();
+
+  kernel.set_frequency (centrefreq - 0.5*bw/nchan);
+  pa_lo = kernel.get_rotation ();
+
+  delta_PA = fabs(pa_hi - pa_lo);
+  cout << "\nWith " << nchan << " frequency channels:\n"
+      "maximum RM:    " << M_PI/delta_PA << endl;
 
 }
 catch (...) {
