@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/Attic/PolnProfileFit.h,v $
-   $Revision: 1.22 $
-   $Date: 2006/09/03 15:12:27 $
+   $Revision: 1.23 $
+   $Date: 2006/09/14 18:10:40 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PolnProfileFit_h
@@ -80,6 +80,12 @@ namespace Pulsar {
 
     //! Get the transformation between the standard and the observation
     MEAL::Complex2* get_transformation () const;
+
+    //! Set the error propagation policy
+    void set_uncertainty (Calibration::TemplateUncertainty*);
+
+    //! Get the error propagation policy
+    Calibration::TemplateUncertainty* get_uncertainty ();
 
     //! Set the debug mode in the ReceptionModel
     void set_fit_debug (bool flag = true);

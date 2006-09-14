@@ -205,7 +205,8 @@ void Pulsar::PolnProfileFit::set_transformation (MEAL::Complex2* xform)
 {
   transformation = xform;
 
-  uncertainty->set_transformation (xform);
+  if (uncertainty)
+    uncertainty->set_transformation (xform);
 
   if (model)
     model->set_transformation (xform);
@@ -214,6 +215,22 @@ void Pulsar::PolnProfileFit::set_transformation (MEAL::Complex2* xform)
 MEAL::Complex2* Pulsar::PolnProfileFit::get_transformation () const
 {
   return transformation;
+}
+
+//! Set the error propagation policy
+void Pulsar::PolnProfileFit::set_uncertainty
+(Calibration::TemplateUncertainty* policy)
+{
+  uncertainty = policy;
+
+  if (uncertainty && transformation)
+    uncertainty->set_transformation (transformation);
+}
+
+//! Get the error propagation policy
+Calibration::TemplateUncertainty* Pulsar::PolnProfileFit::get_uncertainty ()
+{
+  return uncertainty;
 }
 
 void Pulsar::PolnProfileFit::set_fit_debug (bool flag)
@@ -260,7 +277,9 @@ void Pulsar::PolnProfileFit::fit (const PolnProfile* observation) try
   set_phase (phase_guess);
 
   Stokes<double> var = get_variance( fourier );
-  uncertainty->set_variance ( var );
+
+  uncertainty->set_variance (var);
+  uncertainty->set_template_variance (standard_variance);
 
   // calculate the power spectral density of the input
   Reference::To<PolnProfile> psd = fourier_psd (fourier);
@@ -444,7 +463,6 @@ void Pulsar::PolnProfileFit::set_noise_mask () try
   }
 
   standard_variance = get_variance (standard_fourier);
-
   uncertainty->set_template_variance (standard_variance);
 
   // while we have the PSD ...
