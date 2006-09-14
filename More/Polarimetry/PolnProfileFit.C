@@ -313,7 +313,11 @@ void Pulsar::PolnProfileFit::fit (const PolnProfile* observation) try
 
   }
 
-  double Gain = sqrt(observation_det / standard_det);
+  double Gain = 1.0;
+
+  // with optimized template matching, the determinant could be anything
+  if (observation_det > 0)
+    Gain = sqrt(observation_det / standard_det);
 
   // WARNING: this next line assumes that gain is the first free parameter
   // of the Complex2 function passed in set_transformation
@@ -381,6 +385,9 @@ Tempo::toa Pulsar::PolnProfileFit::get_toa (const PolnProfile* observation,
 					    const MJD& mjd, 
 					    double period, char nsite) try 
 {
+  if (verbose)
+    cerr << "Pulsar::PolnProfileFit::get_toa" << endl;
+
   fit (observation);
   
   Estimate<double> pulse_phase = get_phase();
