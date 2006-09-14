@@ -14,7 +14,8 @@ nobase_include_HEADERS = Calibration/CoherencyMeasurement.h \
 	Calibration/SingleAxis.h Calibration/SingleAxisPolynomial.h \
 	Calibration/SingleAxisSolver.h Calibration/StandardModel.h \
 	Calibration/ObservationUncertainty.h \
-	Calibration/TemplateUncertainty.h
+	Calibration/TemplateUncertainty.h \
+	Calibration/TotalCovariance.h
 
 libCalibration_la_SOURCES = SingleAxis.C Feed.C Instrument.C		   \
 	SingleAxisPolynomial.C Parallactic.C Faraday.C IRIonosphere.C	   \
@@ -23,7 +24,7 @@ libCalibration_la_SOURCES = SingleAxis.C Feed.C Instrument.C		   \
 	CoherencyMeasurement.C CoherencyMeasurementSet.C ConvertMJD.C	   \
 	SingleAxisSolver.C Simulation.C StandardModel.C Feed_load.C	   \
 	Polar_solve.C ReceptionModel_solve.C ReceptionModel_solve_thread.C \
-	ObservationUncertainty.C TemplateUncertainty.C
+	ObservationUncertainty.C TemplateUncertainty.C TotalCovariance.C
 
 SUBDIRS = iri2001
 
