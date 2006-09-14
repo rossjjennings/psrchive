@@ -5,9 +5,10 @@
  *
  ***************************************************************************/
 #include "Calibration/TemplateUncertainty.h"
+#include "MEAL/StokesError.h"
 
 #include <iostream>
-
+using namespace std;
 
 //! Default constructor
 Calibration::TemplateUncertainty::TemplateUncertainty ()
@@ -28,16 +29,8 @@ Calibration::TemplateUncertainty::set_variance (const Stokes<double>& v)
 void Calibration::TemplateUncertainty::set_template_variance
 (const Stokes<double>& v)
 {
-  template_variance.set_variance (v);
+  template_variance = v;
   built = false;
-}
-
-//! Get the total variance in the specified Stokes parameter
-double Calibration::TemplateUncertainty::get_variance (unsigned ipol) const
-{
-  if (!built)
-    const_cast<TemplateUncertainty*>(this)->build();
-  return 1.0/inv_variance[ipol];
 }
 
 //! Set the transformation from template to observation
@@ -51,6 +44,15 @@ Calibration::TemplateUncertainty::set_transformation (const MEAL::Complex2* x)
   transformation->changed.connect (this, &TemplateUncertainty::changed);
 
   built = false;
+}
+
+//! Get the total variance in the specified Stokes parameter
+double Calibration::TemplateUncertainty::get_variance (unsigned ipol) const
+{
+  if (!built)
+    const_cast<TemplateUncertainty*>(this)->build();
+
+  return 1.0/inv_variance[ipol];
 }
 
 //! Given a coherency matrix, return the difference
@@ -81,9 +83,12 @@ void Calibration::TemplateUncertainty::changed (MEAL::Function::Attribute a)
 
 void Calibration::TemplateUncertainty::build ()
 {
-  template_variance.set_transformation( transformation->evaluate() );
+  MEAL::StokesError compute;
 
-  Stokes<double> var = template_variance.get_variance();
+  compute.set_variance( template_variance );
+  compute.set_transformation( transformation->evaluate() );
+
+  Stokes<double> var = compute.get_variance();
 
   for (unsigned ipol=0; ipol < 4; ipol++)
     inv_variance[ipol] = 1.0 / (observation_variance[ipol] + var[ipol]);
@@ -91,8 +96,8 @@ void Calibration::TemplateUncertainty::build ()
 #if 0
   std::cerr << "Calibration::TemplateUncertainty::build"
 	    << "\n  tran_var=" << var
-	    << "\n  obs_var=" << observation_variance[0] 
-	    << "\n  inv_var=" << inv_var << std::endl;
+	    << "\n  obs_var=" << observation_variance
+	    << "\n  inv_var=" << inv_variance << std::endl;
 #endif
 
   built = true;
