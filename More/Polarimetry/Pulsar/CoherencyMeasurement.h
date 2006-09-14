@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/CoherencyMeasurement.h,v $
-   $Revision: 1.6 $
-   $Date: 2006/08/21 22:14:37 $
+   $Revision: 1.7 $
+   $Date: 2006/09/14 14:07:22 $
    $Author: straten $ */
 
 #ifndef __Calibration_CoherencyMeasurement_H
@@ -30,20 +30,8 @@ namespace Calibration {
 
   public:
 
-    //! Estimates the uncertainty of a CoherencyMeasurement
-    class Uncertainty : public Reference::Able {
-    public:
-
-      //! Return the inverse of the variance of the specified polarization
-      virtual double get_inv_var (unsigned ipol) const = 0;
-
-      //! Return the variance-normalized coherency matrix
-      virtual Jones<double> get_normalized (const Jones<double>& input) const;
-
-      //! Return the variances of the Stokes parameters
-      virtual Stokes<double> get_variance () const;
-
-    };
+    //! Base class of error propagation handlers
+    class Uncertainty;
 
     //! Default constructor
     CoherencyMeasurement (unsigned input_index = 0);
@@ -74,9 +62,6 @@ namespace Calibration {
     //! Get the measured Stokes parameters
     Stokes< Estimate<double> > get_stokes () const;
 
-    //! Get the variance of the specified polarization
-    double get_variance (unsigned ipol) const;
-
     //! Given a coherency matrix, return the weighted norm
     double get_weighted_norm (const Jones<double>& matrix) const;
 
@@ -94,21 +79,27 @@ namespace Calibration {
     //! The coherency matrix measurement
     Jones<double> rho;
 
-    //! The inverse of the variance in each Stokes parameter
-    Stokes<double> inv_var;
+    //! The variance (if given)
+    Stokes<double> variance;
 
     //! The uncertainty of the measurement
     const Uncertainty* uncertainty;
 
-    //! Get the inverse of the variance of the specified polarization
-    double get_inv_var (unsigned ipol) const {
-      if (uncertainty)
-	return uncertainty->get_inv_var(ipol);
-      return inv_var[ipol];
-    }
-
   };
 
+  //! Estimates the uncertainty of a CoherencyMeasurement
+  class CoherencyMeasurement::Uncertainty : public Reference::Able {
+  public:
+
+    //! Given a coherency matrix, return the weighted norm
+    virtual double get_weighted_norm (const Jones<double>&) const = 0;
+    
+    //! Given a coherency matrix, return the weighted conjugate matrix
+    virtual Jones<double> get_weighted_conjugate (const Jones<double>&)const=0;
+    
+  };
 }
+
+
 
 #endif

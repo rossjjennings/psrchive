@@ -5,6 +5,7 @@
  *
  ***************************************************************************/
 #include "Calibration/CoherencyMeasurement.h"
+#include "Calibration/ObservationUncertainty.h"
 #include "Pauli.h"
 
 using namespace std;
@@ -38,25 +39,44 @@ unsigned Calibration::CoherencyMeasurement::get_nconstraint () const
 void Calibration::CoherencyMeasurement::set_stokes
 (const Stokes< Estimate<double> >& stokes)
 {
-  Stokes<double> temp;
+  Stokes<double> val;
+
   for (unsigned ipol=0; ipol<4; ipol++) {
-    temp[ipol]    = stokes[ipol].val;
-    inv_var[ipol] = 1.0/stokes[ipol].var;
+    val[ipol] = stokes[ipol].val;
+    variance[ipol] = stokes[ipol].var;
   }
 
-  rho = convert (temp);
+  rho = convert (val);
+  uncertainty = new ObservationUncertainty (variance);
+
   // 4 Stokes
   nconstraint = 4;
 }
 
+//! Get the measured Stokes parameters
+Stokes< Estimate<double> > 
+Calibration::CoherencyMeasurement::get_stokes () const
+{
+  Stokes< Estimate<double> > result;
+  Stokes< double > val = coherency (rho);
+
+  for (unsigned ipol=0; ipol<4; ipol++) {
+    result[ipol].val = val[ipol];
+    result[ipol].var = variance[ipol];
+  }
+
+  return result;
+}
+
 //! Set the measured complex Stokes parameters
 void Calibration::CoherencyMeasurement::set_stokes
-(const Stokes< complex<double> >& stokes, const Stokes<double>& variance)
+(const Stokes< complex<double> >& stokes, const Stokes<double>& var)
 {
-  for (unsigned ipol=0; ipol<4; ipol++)
-    inv_var[ipol] = 1.0/variance[ipol];
-
   rho = convert (stokes);
+  variance = var;
+
+  uncertainty = new ObservationUncertainty (variance);
+
   // 4 Stokes, Re and Im
   nconstraint = 8;
 }
@@ -66,7 +86,10 @@ void Calibration::CoherencyMeasurement::set_stokes
 (const Stokes< complex<double> >& stokes, const Uncertainty* var)
 {
   uncertainty = var;
+
   rho = convert (stokes);
+  variance = 0;
+
   // 4 Stokes, Re and Im
   nconstraint = 8;
 }
@@ -77,70 +100,17 @@ Jones<double> Calibration::CoherencyMeasurement::get_coherency () const
   return rho;
 }
 
-//! Set the measured Stokes parameters
-Stokes< Estimate<double> >
-Calibration::CoherencyMeasurement::get_stokes () const
-{
-  Stokes<double> temp = coherency( rho );
-  Stokes< Estimate<double> > stokes;
-
-  for (unsigned ipol=0; ipol<4; ipol++) {
-    stokes[ipol].val = temp[ipol];
-    stokes[ipol].var = 1.0/get_inv_var(ipol);
-  }
-
-  return stokes;
-}
-
-double Calibration::CoherencyMeasurement::get_variance (unsigned ipol) const
-{
-  return 1.0/get_inv_var(ipol);
-}
-
 //! Given a coherency matrix, return the difference
 double Calibration::CoherencyMeasurement::get_weighted_norm
 (const Jones<double>& matrix) const
 {
-  Stokes< complex<double> > stokes = complex_coherency( matrix );
-  double difference = 0.0;
-
-  for (unsigned ipol=0; ipol<4; ipol++)
-    difference += norm(stokes[ipol]) * get_inv_var(ipol);
-
-  return difference;
+  return uncertainty->get_weighted_norm (matrix);
 }
 
 //! Given a coherency matrix, return the weighted conjugate matrix
 Jones<double> Calibration::CoherencyMeasurement::get_weighted_conjugate
 (const Jones<double>& matrix) const
 {
-  Stokes< complex<double> > stokes = complex_coherency( matrix );
-
-  for (unsigned ipol=0; ipol<4; ipol++)
-    stokes[ipol] = complex<double>(get_inv_var(ipol)) * conj(stokes[ipol]);
-
-  return convert (stokes);
+  return uncertainty->get_weighted_conjugate (matrix);
 }
 
-Jones<double> 
-Calibration::CoherencyMeasurement::Uncertainty::get_normalized
-(const Jones<double>& input) const
-{
-  Stokes< complex<double> > stokes = complex_coherency( input );
-
-  for (unsigned ipol=0; ipol<4; ipol++)
-    stokes[ipol] = complex<double>(get_inv_var(ipol)) * stokes[ipol];
-
-  return convert (stokes);
-}
-
-Stokes<double> 
-Calibration::CoherencyMeasurement::Uncertainty::get_variance () const
-{
-  Stokes<double> stokes;
-
-  for (unsigned ipol=0; ipol<4; ipol++)
-    stokes[ipol] = 1.0 / get_inv_var(ipol);
-
-  return stokes;
-}
