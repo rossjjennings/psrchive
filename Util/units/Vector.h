@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Vector.h,v $
-   $Revision: 1.14 $
-   $Date: 2006/09/14 15:11:35 $
+   $Revision: 1.15 $
+   $Date: 2006/09/14 16:19:18 $
    $Author: straten $ */
 
 #ifndef __Vector_H
@@ -173,7 +173,7 @@ template<unsigned N, typename T>
 Vector<N,T> real (const Vector< N, std::complex<T> >& input)
 {
   Vector<N,T> result;
-  for (unsigned i=1; i < N; i++)
+  for (unsigned i=0; i < N; i++)
     result[i] = input[i].real();
   return result;
 }
@@ -182,7 +182,7 @@ template<unsigned N, typename T>
 Vector<N,T> imag (const Vector< N, std::complex<T> >& input)
 {
   Vector<N,T> result;
-  for (unsigned i=1; i < N; i++)
+  for (unsigned i=0; i < N; i++)
     result[i] = input[i].imag();
   return result;
 }
@@ -191,7 +191,7 @@ template<unsigned N, typename T>
 Vector<N, std::complex<T> > conj (const Vector< N, std::complex<T> >& input)
 {
   Vector< N, std::complex<T> > result;
-  for (unsigned i=1; i < N; i++)
+  for (unsigned i=0; i < N; i++)
     result[i] = std::conj(input[i]);
   return result;
 }
