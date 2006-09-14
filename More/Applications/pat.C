@@ -26,13 +26,14 @@
 #include "Error.h"
 #include "dirutil.h"
 #include "genutil.h"
-#include "getopt.h"
-
-#include <math.h>
-#include <string.h>
+#include "tostring.h"
 
 #include <fstream>
 #include <iostream>
+
+#include <math.h>
+#include <string.h>
+#include <unistd.h>
 
 void loadGaussian(string file,  
 		  Reference::To<Pulsar::Archive> &stdarch,  
@@ -156,7 +157,7 @@ int main (int argc, char *argv[]) try {
       break;
 
     case 'i':
-      cout << "$Id: pat.C,v 1.58 2006/09/14 03:47:36 straten Exp $" << endl;
+      cout << "$Id: pat.C,v 1.59 2006/09/14 04:14:29 straten Exp $" << endl;
       return 0;
 
     case 'F':
@@ -573,12 +574,17 @@ void loadGaussian(string file,  Reference::To<Archive> &stdarch,  Reference::To<
   firstTime=false;
 }
 
-// defined in astro/psrephem/tex.C
-string tex_double (double val, double err);
 
 string tex (Estimate<double>& e)
 {
-  return tex_double (e.get_value(), e.get_error());
+  double scale = pow (10.0, -floor(log(e.get_error())/log(10.0)));
+  unsigned error = (unsigned) rint(e.get_error()*scale);
+  if (error == 10)
+    error = 1;
+
+  double value = rint(e.get_value()*scale)/scale;
+
+  return tostring (value) + "(" + tostring(error) + ")";
 }
 
 void mtm_analysis (PolnProfileFitAnalysis& analysis,
@@ -612,7 +618,9 @@ void mtm_analysis (PolnProfileFitAnalysis& analysis,
     Estimate<double> sigma = analysis.get_relative_error ();
     Estimate<double> Rmult = analysis.get_multiple_correlation ();
 
-    cerr << "NAME \t STD_SIGMA \t STD_RMULT \t OPT_SIGMA \t OPT_RMULT" << endl;
+    cerr << "NAME    \t STD_SIGMA \t STD_RMULT \t OPT_SIGMA \t OPT_RMULT" 
+	 << endl;
+
     cout << name << " \t " << tex(sigma_0) << " \t " << tex(Rmult_0)
 	 << " \t " << tex(sigma) << " \t " << tex(Rmult) << endl;
 
