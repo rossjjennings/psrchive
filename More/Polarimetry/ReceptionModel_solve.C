@@ -79,8 +79,10 @@ void Calibration::ReceptionModel::solve_work (bool solve_verbose)
   unsigned free_params = 0;
   unsigned iparm=0;  
   for (iparm=0; iparm < get_nparam(); iparm++) {
-    if (verbose) cerr << iparm  << " " << get_param(iparm) 
-				<< " " << get_infit(iparm) << endl;
+    if (verbose) cerr << iparm  
+		      << " " << get_param_name(iparm)
+		      << " " << get_param(iparm) 
+		      << " " << get_infit(iparm) << endl;
     if (get_infit(iparm))
       free_params ++;
   }
