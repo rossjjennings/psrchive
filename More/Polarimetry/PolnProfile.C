@@ -320,6 +320,20 @@ void Pulsar::PolnProfile::transform (const Jones<double>& response)
 //
 //
 //
+void Pulsar::PolnProfile::transform (const Matrix<4,4,double>& response)
+{
+  if (Profile::verbose)
+    cerr << "Pulsar::PolnProfile::transform response=\n" << response << endl;
+
+  unsigned nbin = get_Profile(0)->get_nbin();
+
+  for (unsigned ibin = 0; ibin < nbin; ibin++)
+    set_Stokes (ibin, response * get_Stokes(ibin));
+}
+
+//
+//
+//
 double Pulsar::PolnProfile::sum (int bin_start, int bin_end) const
 {
   double sum = 0;

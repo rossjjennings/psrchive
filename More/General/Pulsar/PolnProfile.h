@@ -7,16 +7,18 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/Attic/PolnProfile.h,v $
-   $Revision: 1.31 $
-   $Date: 2006/09/09 16:30:52 $
+   $Revision: 1.32 $
+   $Date: 2006/09/14 03:47:30 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PolnProfile_h
 #define __Pulsar_PolnProfile_h
 
 #include "Pulsar/Profile.h"
+
 #include "Stokes.h"
 #include "Jones.h"
+#include "Matrix.h"
 
 namespace Pulsar {
 
@@ -105,6 +107,9 @@ namespace Pulsar {
 
     //! Perform the congruence transformation on each bin of the profile
     void transform (const Jones<double>& response);
+
+    //! Perform the Mueller transformation on each bin of the profile
+    void transform (const Matrix<4,4,double>& response);
 
     //! Convert to the specified state
     void convert_state (Signal::State output_state);
