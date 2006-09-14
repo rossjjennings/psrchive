@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Vector.h,v $
-   $Revision: 1.13 $
-   $Date: 2006/03/17 13:35:23 $
+   $Revision: 1.14 $
+   $Date: 2006/09/14 15:11:35 $
    $Author: straten $ */
 
 #ifndef __Vector_H
@@ -167,6 +167,35 @@ T norm(const Vector<N, T> &v)
 {
   return sqrt(normsq(v));
 }
+
+
+template<unsigned N, typename T>
+Vector<N,T> real (const Vector< N, std::complex<T> >& input)
+{
+  Vector<N,T> result;
+  for (unsigned i=1; i < N; i++)
+    result[i] = input[i].real();
+  return result;
+}
+
+template<unsigned N, typename T>
+Vector<N,T> imag (const Vector< N, std::complex<T> >& input)
+{
+  Vector<N,T> result;
+  for (unsigned i=1; i < N; i++)
+    result[i] = input[i].imag();
+  return result;
+}
+
+template<unsigned N, typename T>
+Vector<N, std::complex<T> > conj (const Vector< N, std::complex<T> >& input)
+{
+  Vector< N, std::complex<T> > result;
+  for (unsigned i=1; i < N; i++)
+    result[i] = std::conj(input[i]);
+  return result;
+}
+
 
 //! Useful for quickly printing the components
 template<unsigned N, typename T>
