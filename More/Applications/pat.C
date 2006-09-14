@@ -156,7 +156,7 @@ int main (int argc, char *argv[]) try {
       break;
 
     case 'i':
-      cout << "$Id: pat.C,v 1.57 2006/09/12 08:05:52 straten Exp $" << endl;
+      cout << "$Id: pat.C,v 1.58 2006/09/14 03:47:36 straten Exp $" << endl;
       return 0;
 
     case 'F':
@@ -358,16 +358,22 @@ int main (int argc, char *argv[]) try {
 
 	  analysis.use_basis (true);
 
-	  Jones<double> basis = analysis.get_Jbasis()->evaluate();
-	  poln_profile->transform( basis * inv(xform) );
+	  if (analysis.has_Jbasis()) {
+	    Jones<double> basis = analysis.get_Jbasis()->evaluate();
+	    poln_profile->transform( basis * inv(xform) );
+	  }
+	  else {
+	    Matrix<4,4,double> basis = analysis.get_Mbasis()->evaluate();
+	    poln_profile->transform( basis * Mueller(inv(xform)) );
+	  }
 
           MEAL::Polar identity;
           fit.get_transformation()->copy( &identity );
 
 	  toa = fit.get_toa (poln_profile,
-			       integration->get_epoch(),
-			       integration->get_folding_period(),
-			       arch->get_telescope_code());
+			     integration->get_epoch(),
+			     integration->get_folding_period(),
+			     arch->get_telescope_code());
 
 	}
 
@@ -585,6 +591,7 @@ void mtm_analysis (PolnProfileFitAnalysis& analysis,
   if (optimize) try {
 
     Estimate<double> sigma_0 = analysis.get_relative_error ();
+    Estimate<double> Rmult_0 = analysis.get_multiple_correlation ();
 
     cerr << "\nInserting basis transformation" << endl;
 
@@ -601,6 +608,13 @@ void mtm_analysis (PolnProfileFitAnalysis& analysis,
       histo.resize( fit.get_nharmonic() );
 
     analysis.set_fit (&fit);
+
+    Estimate<double> sigma = analysis.get_relative_error ();
+    Estimate<double> Rmult = analysis.get_multiple_correlation ();
+
+    cerr << "NAME \t STD_SIGMA \t STD_RMULT \t OPT_SIGMA \t OPT_RMULT" << endl;
+    cout << name << " \t " << tex(sigma_0) << " \t " << tex(Rmult_0)
+	 << " \t " << tex(sigma) << " \t " << tex(Rmult) << endl;
 
     analysis.use_basis (false);
 
