@@ -4,9 +4,10 @@
 \newcommand{\real}{{\rm Re}}
 \newcommand{\imag}{{\rm Im}}
 
+\title{Least-Squares Estimation of Faraday Rotation Measure}
+
 \begin{document}
 
-\section{Least-Squares Estimation of Faraday Rotation Measure}
 
 Let $Q^\prime_{jk}$ and $U^\prime_{jk}$ represent the measured values
 of Stokes Q and U in the $j$th of $N$ phase bins and the $k$th of $M$
@@ -42,7 +43,7 @@ where $L^{\prime2}_{jk} = Q^{\prime2}_{jk} + U^{\prime2}_{jk}$ and
  \over L^{\prime4}_{jk} }.
 \end{equation}
 
-The model must describe the normalized Stokes Q and U in each phase
+The model describes the normalized Stokes Q and U in each phase
 bin as a function of wavelength,
 \begin{equation}
 Q_j(\lambda_k) = \cos 2(\Psi_j + RM \lambda^2_k)
@@ -51,7 +52,7 @@ U_j(\lambda_k) = \sin 2(\Psi_j + RM \lambda^2_k)
 \end{equation}
 where $\Psi_j$ is the {\it a priori} unknown position angle of the $j$th
 phase bin at infinite frequency.  The best-fit model will minimize the
-objective merit function:
+objective merit function
 \begin{equation}
 \chi^2 = \sum_{j=1}^N \sum_{k=1}^M \left[
 {\left(\hat{Q}_{jk} - Q_j(\lambda_k)\right)^2 \over \hat{\sigma}^2_{Q_{jk}}} +
