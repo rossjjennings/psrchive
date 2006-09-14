@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Pauli.h,v $
-   $Revision: 1.23 $
-   $Date: 2006/09/12 08:03:30 $
+   $Revision: 1.24 $
+   $Date: 2006/09/14 15:00:26 $
    $Author: straten $ */
 
 #ifndef __Pauli_H
@@ -266,5 +266,25 @@ Matrix<4,4,T> Mueller (const Jones<T>& J, const Jones<T>& Jgrad)
 
   return result;
 }
+
+template<typename T>
+Stokes<T> real (const Stokes< std::complex<T> >& S)
+{
+  return Stokes<T>(S[0].real(), S[1].real(), S[2].real(), S[3].real());
+}
+
+template<typename T>
+Stokes<T> imag (const Stokes< std::complex<T> >& S)
+{
+  return Stokes<T>(S[0].imag(), S[1].imag(), S[2].imag(), S[3].imag());
+}
+
+template<typename T>
+Stokes< std::complex<T> > conj (const Stokes< std::complex<T> >& S)
+{
+  return Stokes< std::complex<T> > (std::conj(S[0]), std::conj(S[1]), 
+				    std::conj(S[2]), std::conj(S[3]));
+}
+
 
 #endif
