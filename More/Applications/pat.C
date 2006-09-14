@@ -139,6 +139,7 @@ int main (int argc, char *argv[]) try {
       verbose = true;
       Archive::set_verbosity(3);
       MEAL::Function::verbose = true;
+      Pulsar::PolnProfileFit::verbose = true;
       break;
 
     case 'b':
@@ -154,7 +155,7 @@ int main (int argc, char *argv[]) try {
       break;
 
     case 'i':
-      cout << "$Id: pat.C,v 1.61 2006/09/14 12:45:03 straten Exp $" << endl;
+      cout << "$Id: pat.C,v 1.62 2006/09/14 18:10:52 straten Exp $" << endl;
       return 0;
 
     case 'F':
