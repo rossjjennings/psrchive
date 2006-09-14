@@ -9,26 +9,14 @@
 #include "Pulsar/PolnProfile.h"
 
 #include "Calibration/ReceptionModel.h"
-#include "Calibration/TemplateUncertainty.h"
+#include "Calibration/TotalCovariance.h"
+
 #include "MEAL/ProductRule.h"
 
 #include "Pauli.h"
 #include <assert.h>
 
 // #define _DEBUG 1
-
-template<typename T>
-Stokes<T> real (const Stokes< complex<T> >& S)
-{
-  return Stokes<T>(S[0].real(), S[1].real(), S[2].real(), S[3].real());
-}
-
-template<typename T>
-Stokes<T> imag (const Stokes< complex<T> >& S)
-{
-  return Stokes<T>(S[0].imag(), S[1].imag(), S[2].imag(), S[3].imag());
-}
-
 
 using namespace std;
 
@@ -841,6 +829,8 @@ Pulsar::PolnProfileFitAnalysis::get_C_varphi (std::vector<double>* grad)
       cerr << " " << Jbasis->get_param(i);
     cerr << endl;
   }
+  else
+    cerr << "BASIS=\n" << Mbasis->evaluate() << endl;
 
   // calculate the curvature matrix
   Matrix<8,8,double> curvature;
@@ -992,12 +982,19 @@ void Pulsar::PolnProfileFitAnalysis::use_basis (bool use)
       Jbasis_insertion -> set_value( Jones<double>::identity() );
   }
   else if (Mbasis) {
-    if (use)
+    if (use) {
       Mbasis_insertion -> set_value( Mbasis->evaluate() );
+#if 1
+      Calibration::TotalCovariance* covar = new Calibration::TotalCovariance;
+      covar->set_optimizing_transformation( Mbasis->evaluate() );
+      fit->set_uncertainty( covar );
+#endif
+    }
     else {
       Matrix<4,4,double> I;
       matrix_identity(I);
       Mbasis_insertion -> set_value( I );
+      fit->set_uncertainty( new Calibration::TemplateUncertainty );
     }
   }
 }
