@@ -32,7 +32,7 @@ int main ()
       cerr << "inner1=" << inner1 << endl
 	   << "inner2=" << inner2 << endl
 	   << "diff=" << diff << endl;
-      return 0;
+      return -1;
     }
 
   }
