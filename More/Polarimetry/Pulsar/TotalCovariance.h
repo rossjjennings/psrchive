@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/TotalCovariance.h,v $
-   $Revision: 1.1 $
-   $Date: 2006/09/14 15:18:36 $
+   $Revision: 1.2 $
+   $Date: 2006/09/15 20:44:41 $
    $Author: straten $ */
 
 #ifndef __Calibration_TotalCovariance_H
@@ -24,7 +24,13 @@ namespace Calibration {
 
   public:
 
-    //! Set the optimizing transformation
+    //! Default constructor
+    TotalCovariance ();
+
+    //! Set the covariances of the observed Stokes parameters
+    void set_covariance (const Matrix<4,4,double>& opt);
+
+    //! Set the optimizing transformation applied to the template
     void set_optimizing_transformation (const Matrix<4,4,double>& opt);
 
     //! Given a coherency matrix, return the weighted norm
@@ -33,10 +39,12 @@ namespace Calibration {
     //! Given a coherency matrix, return the weighted conjugate matrix
     Jones<double> get_weighted_conjugate (const Jones<double>&) const;
 
-    //! Get the total variance in the specified Stokes parameter
-    double get_variance (unsigned ipol) const;
-
   protected:
+
+    //! The covariances of the observed Stokes parameters
+    Matrix<4,4,double> observation_covariance;
+
+    bool observation_covariance_set;
 
     //! The inverse of the total covariance matrix
     Matrix<4,4,double> inv_covar;

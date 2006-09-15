@@ -10,6 +10,20 @@
 #include <iostream>
 using namespace std;
 
+Calibration::TotalCovariance::TotalCovariance ()
+{
+  observation_covariance_set = false;
+}
+
+//! Set the uncertainty of the observation
+void Calibration::TotalCovariance::set_covariance 
+(const Matrix<4,4,double>& covar)
+{
+  observation_covariance = covar;
+  observation_covariance_set = true;
+  built = false;
+}
+
 //! Set the optimizing transformation
 void Calibration::TotalCovariance::set_optimizing_transformation 
 (const Matrix<4,4,double>& opt)
@@ -18,13 +32,6 @@ void Calibration::TotalCovariance::set_optimizing_transformation
   built = false;
 }
 
-//! Get the total variance in the specified Stokes parameter
-double Calibration::TotalCovariance::get_variance (unsigned ipol) const
-{
-  if (!built)
-    const_cast<TotalCovariance*>(this)->build();
-  return 1.0/inv_covar[ipol][ipol];
-}
 
 //! Given a coherency matrix, return the difference
 double Calibration::TotalCovariance::get_weighted_norm
@@ -60,10 +67,14 @@ void Calibration::TotalCovariance::build ()
 
   Matrix<4,4,double> covar = compute.get_covariance();
 
-  compute.set_variance (observation_variance);
-  compute.set_transformation (optimizer);
-
-  covar += compute.get_covariance();
+  if (observation_covariance_set) {
+    covar += observation_covariance;
+  }
+  else {
+    compute.set_variance (observation_variance);
+    compute.set_transformation (optimizer);
+    covar += compute.get_covariance();
+  }
 
   inv_covar = inv (covar);
   built = true;

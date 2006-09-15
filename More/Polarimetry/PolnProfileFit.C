@@ -13,7 +13,7 @@
 
 #include "Calibration/ReceptionModel.h"
 #include "Calibration/CoherencyMeasurementSet.h"
-#include "Calibration/TemplateUncertainty.h"
+#include "Calibration/TotalCovariance.h"
 
 #include "MEAL/Polynomial.h"
 #include "MEAL/Phase.h"
@@ -276,18 +276,25 @@ void Pulsar::PolnProfileFit::fit (const PolnProfile* observation) try
 
   set_phase (phase_guess);
 
-  Stokes<double> var = get_variance( fourier );
-
-  uncertainty->set_variance (var);
   uncertainty->set_template_variance (standard_variance);
 
-  // calculate the power spectral density of the input
-  Reference::To<PolnProfile> psd = fourier_psd (fourier);
-  n_harmonic_obs = get_last_significant (psd, var);
+  Calibration::TotalCovariance* total;
+  total = dynamic_cast<Calibration::TotalCovariance*> (uncertainty.get());
 
-  if (verbose)
-    cerr << "Pulsar::PolnProfileFit::fit last harmonic = "
-	 << n_harmonic_obs << endl;
+  if (total)
+    total->set_covariance (get_covariance( fourier ));
+  else {
+    Stokes<double> var = get_variance( fourier );
+    uncertainty->set_variance (var);
+
+    // calculate the power spectral density of the input
+    Reference::To<PolnProfile> psd = fourier_psd (fourier);
+    n_harmonic_obs = get_last_significant (psd, var);
+    
+    if (verbose)
+      cerr << "Pulsar::PolnProfileFit::fit last harmonic = "
+	   << n_harmonic_obs << endl;
+  }
 
   model->delete_data ();
 
@@ -489,7 +496,6 @@ Pulsar::PolnProfileFit::get_variance (const PolnProfile* input) const try
     if (verbose)
       cerr << "Pulsar::PolnProfileFit::get_variance ipol=" << ipol 
 	   << " sigma=" << sqrt(variance[ipol]) << endl;
-
   }
 
   return variance;
@@ -530,7 +536,62 @@ catch (Error& error) {
   throw error += "Pulsar::PolnProfileFit::get_variance";
 }
 
+Matrix<4,4,double> 
+Pulsar::PolnProfileFit::get_covariance (const PolnProfile* input) const try
+{
+  Matrix<4,4,double> covariance;
 
+  unsigned npol = 4;
+
+  for (unsigned ipol=0; ipol<npol; ipol++)
+    for (unsigned jpol=ipol; jpol < npol; jpol++)
+      covariance[ipol][jpol] = covariance[jpol][ipol] =
+	get_covariance( input->get_Profile(ipol),
+			input->get_Profile(jpol) ).real() / 2.0;
+
+  //                                                      ^^^^^
+  // divide by two because re and im are treated as unique measurements
+
+  if (verbose)
+    cerr << "Pulsar::PolnProfileFit::get_covariance\n" << covariance << endl;
+
+  return covariance;
+}
+catch (Error& error) {
+  throw error += "Pulsar::PolnProfileFit::get_covariance";
+}
+
+complex<double> Pulsar::PolnProfileFit::get_covariance (const Profile* p1,
+							const Profile* p2)
+  const try
+{
+  unsigned nbin = p1->get_nbin()/2;
+  unsigned mbin = std::min(nbin, noise_mask.get_nbin());
+
+  if (verbose)
+    cerr << "Pulsar::PolnProfileFit::get_variance noise mask uses "
+	 << noise_mask.get_weight_sum() << " out of " << noise_mask.get_nbin()
+	 << " harmonics" << endl;
+
+  const complex<float>* amps1 = (complex<float>*) p1->get_amps();
+  const complex<float>* amps2 = (complex<float>*) p2->get_amps();
+
+  unsigned count = 0;
+  complex<double> total = 0;
+
+  for (unsigned ibin = 0; ibin < nbin; ibin++)
+    if (ibin > mbin || noise_mask[ibin]) {
+      total += amps1[ibin] * conj(amps2[ibin]);
+      count ++;
+    }
+
+
+  // The variance of the spectrum (with zero mean) is the mean of the PSD
+  return total / complex<double>(count);
+}
+catch (Error& error) {
+  throw error += "Pulsar::PolnProfileFit::get_covariance";
+}
 
 float Pulsar::PolnProfileFit::ccf_max_phase (const Profile* std,
 					     const Profile* obs) const try

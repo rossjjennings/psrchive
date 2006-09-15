@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/Attic/PolnProfileFit.h,v $
-   $Revision: 1.23 $
-   $Date: 2006/09/14 18:10:40 $
+   $Revision: 1.24 $
+   $Date: 2006/09/15 20:44:41 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PolnProfileFit_h
@@ -124,8 +124,13 @@ namespace Pulsar {
     //! Return the variance of the fluctuation power
     double get_variance (const Profile* fourier) const;
 
+    //! Return the covariance of two power spectral densities
+    std::complex<double> get_covariance (const Profile*, const Profile*) const;
+
     //! Return the variance in each of the four Stokes parameters
     Stokes<float> get_variance (const PolnProfile* fourier) const;
+
+    Matrix<4,4,double> get_covariance (const PolnProfile* fourier) const;
 
     //! Return the phase shift based on the cross correlation function
     float ccf_max_phase (const Profile* std, const Profile* obs) const;
