@@ -24,7 +24,7 @@ int main ()
     Jones<double> J2 = convert(S2);
 
     double inner1 = (S1 * conj(S2)).real();
-    double inner2 = trace(J1*herm(J2)).real();
+    double inner2 = 2 * trace(J1*herm(J2)).real();
 
     double diff = fabs( (inner1 - inner2)/inner1 );
 
@@ -36,6 +36,8 @@ int main ()
     }
 
   }
+
+  cerr << "inner product pass: Stokes parameters and Jones matrices" << endl;
 
   return 0;
 }
