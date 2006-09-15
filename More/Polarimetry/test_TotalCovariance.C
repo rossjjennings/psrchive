@@ -53,7 +53,7 @@ int main ()
   total_covar.set_optimizing_transformation( M );
 
   Stokes<double> test_var (1,2,.5,.6);
-  total_covar.set_variance (test_var);
+  total_covar.set_template_variance (test_var);
 
   for (unsigned ipol=0; ipol<4; ipol++)
     if (fabs(test_var[ipol] - total_covar.get_variance(ipol)) > 1e-12) {
@@ -93,7 +93,8 @@ int main ()
   Vector< 4, complex<double> > input2;
   Vector< 4, double > variance;
 
-  for (unsigned i=0; i < 1000; i++) {
+  unsigned trials = 1000;
+  for (unsigned i=0; i < trials; i++) {
 
     // simulate a Lorentz transformation
     random.get (&polar);
@@ -116,6 +117,8 @@ int main ()
     for (unsigned i=0; i<4; i++)
       variance[i] *= variance[i];
 
+    total_covar.set_template_variance (variance);
+
     // compute the covariance matrix
     MEAL::StokesCovariance compute;
     compute.set_variance (variance);
@@ -136,7 +139,7 @@ int main ()
     double scalar1 = r1 * (inv_covar * r2) + i1 * (inv_covar * i2);
 
     double diff = fabs( (scalar0 - scalar1)/scalar0 );
-    if (diff > 1e-12) {
+    if (diff > 1e-10) {
       cerr << "method 0 and 1 differ" << endl
 	   << "scalar0=" << scalar0 << endl
 	   << "scalar1=" << scalar1 << endl
@@ -164,7 +167,7 @@ int main ()
     double scalar2 = 2.0 * traits.to_real (wJ1 * J2);
 
     diff = fabs( (scalar0 - scalar2)/scalar0 );
-    if (diff > 1e-12) {
+    if (diff > 1e-10) {
       cerr << "method 0 and 2 differ" << endl
 	   << "scalar0=" << scalar0 << endl
 	   << "scalar2=" << scalar2 << endl
@@ -178,6 +181,9 @@ int main ()
       return -1;
     }
   }
+
+  cerr << "three inner product formulas tested on " << trials 
+       << " random vector pairs" << endl;
 
   return 0;
 }
