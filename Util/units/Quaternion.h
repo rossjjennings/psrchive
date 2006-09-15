@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Quaternion.h,v $
-   $Revision: 1.29 $
-   $Date: 2006/03/17 13:35:22 $
+   $Revision: 1.30 $
+   $Date: 2006/09/15 02:46:36 $
    $Author: straten $ */
 
 #ifndef __Quaternion_H
@@ -209,7 +209,11 @@ std::complex<T> ci (const T& real)
 
 //! Return the conjugate of a real number
 template<typename T>
-T conj (const T& x) { return x; };
+T myconj (const T& x) { return x; };
+
+//! Return the conjugate of a complex number
+template<typename T>
+std::complex<T> myconj (const std::complex<T>& z) { return std::conj(z); };
 
 //! Multiplication of two Biquaternions in the Hermitian basis
 template<typename T, typename U>
@@ -260,7 +264,7 @@ template<typename T>
 Quaternion<T,Hermitian> conj (const Quaternion<T,Hermitian>& j)
 {
   return Quaternion<T,Hermitian>
-    (conj(j.s0), conj(j.s1), conj(j.s2), -conj(j.s3));
+    (myconj(j.s0), myconj(j.s1), myconj(j.s2), -myconj(j.s3));
 }
 
 //! Returns the complex conjugate of a Unitary Quaternion
@@ -268,7 +272,7 @@ template<typename T>
 Quaternion<T,Unitary> conj (const Quaternion<T,Unitary>& j)
 { 
   return Quaternion<T,Unitary>
-    (conj(j.s0), -conj(j.s1), -conj(j.s2), conj(j.s3));
+    (myconj(j.s0), -myconj(j.s1), -myconj(j.s2), myconj(j.s3));
 }
 
 
@@ -277,7 +281,7 @@ template<typename T>
 Quaternion<T, Hermitian> herm (const Quaternion<T,Hermitian>& j)
 {
   return Quaternion<T,Hermitian>
-    (conj(j.s0), conj(j.s1), conj(j.s2), conj(j.s3));
+    (myconj(j.s0), myconj(j.s1), myconj(j.s2), myconj(j.s3));
 }
 
 
@@ -286,7 +290,7 @@ template<typename T>
 Quaternion<T, Unitary> herm (const Quaternion<T,Unitary>& j)
 {
   return Quaternion<T,Unitary>
-    (conj(j.s0), -conj(j.s1), -conj(j.s2), -conj(j.s3));
+    (myconj(j.s0), -myconj(j.s1), -myconj(j.s2), -myconj(j.s3));
 }
 
 
