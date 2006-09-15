@@ -108,19 +108,16 @@ void Pulsar::PolnProfileFitAnalysis::add_curvature (Matrix<8,8,double>& alpha)
   for (unsigned ir=0; ir < 8; ir++) {
 
     Stokes< complex<double> > dr = complex_coherency(model_gradient[ir]);
-    Stokes<double> Re_dr = real (dr);
-    Stokes<double> Im_dr = imag (dr);
 
     for (unsigned is=0; is <= ir; is ++) {
       
       Stokes< complex<double> > ds = complex_coherency(model_gradient[is]);
-      Stokes<double> Re_ds = real (ds);
-      Stokes<double> Im_ds = imag (ds);
 
-      alpha[ir][is] += Re_dr * (Xi * Re_ds) + Im_dr * (Xi * Im_ds);
+      alpha[ir][is] += (dr * Xi * conj(ds)).real();
 
       if (ir != is)
         alpha[is][ir] = alpha[ir][is];
+
     }
     
   }
@@ -199,27 +196,27 @@ void Pulsar::PolnProfileFitAnalysis::delC_delS
   Matrix<8,8,double> delalpha_delSre;
   Matrix<8,8,double> delalpha_delSim;
 
+  Jones<double> delR_delS = delrho_delS(k);
+
   // over all rows
   for (unsigned ir=0; ir < 8; ir++) {
-	
-    Jones<double> del2rho_deleta_r = del_deleta (ir, delrho_delS(k));
-    Jones<double> delrho_deleta_r = model_gradient[ir];    
 
-    // over all columns
+    Stokes<complex<double> > dr=complex_coherency(model_gradient[ir]);
+    Stokes<complex<double> > d2r=complex_coherency(del_deleta(ir,delR_delS));
+
+    // over all columns up to and including the diagonal
     for (unsigned is=0; is <= ir; is ++) {
 	  
-      Jones<double> del2rho_deleta_s = del_deleta (is, delrho_delS(k));
-      Jones<double> delrho_deleta_s = model_gradient[is];
-	  
-      delalpha_delSre[ir][is] = 2.0 *
-	trace( del2rho_deleta_r * herm(delrho_deleta_s) +
-	       delrho_deleta_r  * herm(del2rho_deleta_s) ).real();
+      Stokes<complex<double> > ds=complex_coherency(model_gradient[is]);
+      Stokes<complex<double> > d2s=complex_coherency(del_deleta(is,delR_delS));
+
+      delalpha_delSre[ir][is] = ( d2r*Xi*conj(ds) + dr*Xi*conj(d2s) ).real();
 
       complex<double> i (0,1);
+      d2r *= i;
+      d2s *= i;
 
-      delalpha_delSim[ir][is] = 2.0 *
-	trace( i*del2rho_deleta_r * herm(delrho_deleta_s) +
-	       delrho_deleta_r    * herm(i*del2rho_deleta_s) ).real();
+      delalpha_delSim[ir][is] = ( d2r*Xi*conj(ds) + dr*Xi*conj(d2s) ).real();
 
       if (is != ir) {
 	delalpha_delSre[is][ir] = delalpha_delSre[ir][is];
@@ -229,9 +226,6 @@ void Pulsar::PolnProfileFitAnalysis::delC_delS
     }
     
   }
-
-  delalpha_delSre /= fit->uncertainty->get_variance(k);
-  delalpha_delSim /= fit->uncertainty->get_variance(k);
 
   delC_delSre = -covariance * delalpha_delSre * covariance;
   delC_delSim = -covariance * delalpha_delSim * covariance;
@@ -302,39 +296,23 @@ Pulsar::PolnProfileFitAnalysis::delalpha_delB (unsigned ib)
 {
   Matrix<8,8,double> delalpha_delB;
 
-#ifdef CORRECT_CURVATURE
-  Jones<double> rho = fit->model->get_input()->evaluate();
-  rho = fit->uncertainty->get_normalized (rho);
-#endif
- 
   Jones<double> delR_delB = delrho_delB(ib);
 
   // over all rows
   for (unsigned ir=0; ir < 8; ir++) {
 
     Stokes<complex<double> > dr=complex_coherency(model_gradient[ir]);
-    Stokes<double> Re_dr = real(dr);
-    Stokes<double> Im_dr = imag(dr);
-
     Stokes<complex<double> > d2r=complex_coherency(del_deleta(ir,delR_delB));
-    Stokes<double> Re_d2r = real(d2r);
-    Stokes<double> Im_d2r = imag(d2r);
 
     // over all columns up to and including the diagonal
     for (unsigned is=0; is <= ir; is ++) {
 	  
       Stokes<complex<double> > ds=complex_coherency(model_gradient[is]);
-      Stokes<double> Re_ds = real(ds);
-      Stokes<double> Im_ds = imag(ds);
-
       Stokes<complex<double> > d2s=complex_coherency(del_deleta(is,delR_delB));
-      Stokes<double> Re_d2s = real(d2s);
-      Stokes<double> Im_d2s = imag(d2s);
 
-      double r= Re_d2r*Xi*Re_ds + Re_dr*delXi_delB[ib]*Re_ds + Re_dr*Xi*Re_d2s;
-      double s= Im_d2r*Xi*Im_ds + Im_dr*delXi_delB[ib]*Im_ds + Im_dr*Xi*Im_d2s;
-
-      delalpha_delB[ir][is] = r + s;
+      delalpha_delB[ir][is] = (  d2r*Xi*conj(ds)
+				 + dr*delXi_delB[ib]*conj(ds)
+				 + dr*Xi*conj(d2s)  ).real();
 
       if (ir != is)
 	delalpha_delB[is][ir] = delalpha_delB[ir][is];
@@ -926,10 +904,12 @@ void Pulsar::PolnProfileFitAnalysis::output_C_varphi (const char* filename)
   unsigned nharmonic = weights.size();
 
   for (unsigned ih=0; ih < nharmonic; ih++) {
+    cerr << "ih=" << ih << endl;
     set_optimal_harmonic_max (ih);
     build (false);
-    Estimate<double> sigma = get_relative_error ();
-    output << ih << "\t" << sigma.val << "\t" << sigma.get_error() << endl;
+    output << ih
+	   << "\t" << relative_error.get_value() 
+	   << "\t" << relative_error.get_error() << endl;
   }
 }
 
@@ -961,6 +941,7 @@ Pulsar::PolnProfileFitAnalysis::get_relative_conditional_error () const
 //! Set the transformation to be used to find the optimal basis
 void Pulsar::PolnProfileFitAnalysis::set_basis (MEAL::Complex2* _basis)
 {
+  built = false;
   Jbasis = _basis;
 
   if (fit)
@@ -1022,6 +1003,7 @@ void Pulsar::PolnProfileFitAnalysis::use_basis (bool use)
 //! Set the transformation to be used to find the optimal basis
 void Pulsar::PolnProfileFitAnalysis::set_basis (MEAL::Real4* M)
 {
+  built = false;
   Mbasis = M;
 
   if (inputs.size() != fit->model->get_num_input()) {
