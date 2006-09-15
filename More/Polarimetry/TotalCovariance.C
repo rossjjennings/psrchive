@@ -14,7 +14,8 @@ using namespace std;
 void Calibration::TotalCovariance::set_optimizing_transformation 
 (const Matrix<4,4,double>& opt)
 {
- optimizer = opt;
+  optimizer = opt;
+  built = false;
 }
 
 //! Get the total variance in the specified Stokes parameter
