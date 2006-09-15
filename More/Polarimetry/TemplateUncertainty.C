@@ -46,14 +46,6 @@ Calibration::TemplateUncertainty::set_transformation (const MEAL::Complex2* x)
   built = false;
 }
 
-//! Get the total variance in the specified Stokes parameter
-double Calibration::TemplateUncertainty::get_variance (unsigned ipol) const
-{
-  if (!built)
-    const_cast<TemplateUncertainty*>(this)->build();
-
-  return 1.0/inv_variance[ipol];
-}
 
 //! Given a coherency matrix, return the difference
 double Calibration::TemplateUncertainty::get_weighted_norm

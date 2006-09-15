@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/TemplateUncertainty.h,v $
-   $Revision: 1.8 $
-   $Date: 2006/09/14 18:11:12 $
+   $Revision: 1.9 $
+   $Date: 2006/09/15 20:44:59 $
    $Author: straten $ */
 
 #ifndef __Calibration_TemplateUncertainty_H
@@ -41,9 +41,6 @@ namespace Calibration {
     
     //! Given a coherency matrix, return the weighted conjugate matrix
     virtual Jones<double> get_weighted_conjugate (const Jones<double>&) const;
-
-    //! Get the total variance in the specified Stokes parameter
-    virtual double get_variance (unsigned ipol) const;
 
   protected:
 
