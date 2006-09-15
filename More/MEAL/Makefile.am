@@ -236,7 +236,7 @@ check_PROGRAMS = test_Conventions test_Error test_Configuration		\
 	test_Matrix test_Jacobi test_eigen test_Jones test_Quaternion	\
 	test_Pauli test_Rotation test_ModifyRestore			\
 	test_CyclicParameter test_Univariate test_StokesError \
-	test_Mueller test_StokesCovariance
+	test_Mueller test_StokesCovariance test_inner_product
 
 TESTS = $(check_PROGRAMS)
 
@@ -278,6 +278,7 @@ test_Invariant_SOURCES		= test_Invariant.C
 test_StokesError_SOURCES	= test_StokesError.C 
 test_Mueller_SOURCES		= test_Mueller.C
 test_StokesCovariance_SOURCES	= test_StokesCovariance.C 
+test_inner_product_SOURCES	= test_inner_product.C 
 
 lmfit_SOURCES 			= lmfit.C
 lmfit_LDADD			= libunits.la @PGPLOT_LIBS@
