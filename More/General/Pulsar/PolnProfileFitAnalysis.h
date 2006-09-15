@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/Attic/PolnProfileFitAnalysis.h,v $
-   $Revision: 1.26 $
-   $Date: 2006/09/12 08:05:52 $
+   $Revision: 1.27 $
+   $Date: 2006/09/15 16:43:20 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PolnProfileFitAnalysis_h
@@ -103,6 +103,9 @@ namespace Pulsar {
     //! Get the conditional variance of varphi and its gradient wrt transform
     double get_cond_var (std::vector<double>& grad);
 
+    //! Write the terms in C_varhpi out to file
+    void output_C_varphi (const char* filename);
+
   protected:
 
     //! The relative arrival time error
@@ -113,6 +116,12 @@ namespace Pulsar {
 
     //! The multiple correlation between phase shift and Jones parameters
     Estimate<double> multiple_correlation;
+
+    //! Flag set true when all three of the above values have been computed
+    bool built;
+
+    //! Computes the above three numbers
+    void build (bool only_relative_error = false);
 
     //! The PolnProfileFit algorithm to be analysed
     Reference::To<PolnProfileFit> fit;
@@ -230,9 +239,6 @@ namespace Pulsar {
 
     Matrix<4,4,double> Xi;
     std::vector< Matrix<4,4,double> > delXi_delB;
-
-    double var_c_varphi;
-    void var_c_varphi_add ();
 
     std::vector< double > weights;
     std::vector< double > store_covariance;
