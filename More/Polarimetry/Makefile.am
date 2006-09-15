@@ -58,7 +58,7 @@ endif
 # programs
 #
 
-TESTS = test_copy test_Feed test_SingleAxis \
+TESTS = test_copy test_Feed test_SingleAxis test_TotalCovariance \
 	test_Parallactic test_ReceptionModel
 
 check_PROGRAMS = $(TESTS) test_IRIonosphere
@@ -67,6 +67,8 @@ test_Feed_SOURCES		= test_Feed.C
 test_Parallactic_SOURCES	= test_Parallactic.C
 test_ReceptionModel_SOURCES	= test_ReceptionModel.C
 test_SingleAxis_SOURCES		= test_SingleAxis.C
+test_TotalCovariance_SOURCES	= test_TotalCovariance.C
+
 test_copy_SOURCES		= test_copy.C
 test_IRIonosphere_SOURCES	= test_IRIonosphere.C
 
