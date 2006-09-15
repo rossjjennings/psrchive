@@ -155,7 +155,7 @@ int main (int argc, char *argv[]) try {
       break;
 
     case 'i':
-      cout << "$Id: pat.C,v 1.62 2006/09/14 18:10:52 straten Exp $" << endl;
+      cout << "$Id: pat.C,v 1.63 2006/09/15 16:43:33 straten Exp $" << endl;
       return 0;
 
     case 'F':
@@ -586,6 +586,7 @@ void mtm_analysis (PolnProfileFitAnalysis& analysis,
 
     Estimate<double> sigma_0 = analysis.get_relative_error ();
     Estimate<double> Rmult_0 = analysis.get_multiple_correlation ();
+    analysis.output_C_varphi ("mtm.pat");
 
     cerr << "\nInserting basis transformation" << endl;
 
@@ -602,6 +603,7 @@ void mtm_analysis (PolnProfileFitAnalysis& analysis,
 
     Estimate<double> sigma = analysis.get_relative_error ();
     Estimate<double> Rmult = analysis.get_multiple_correlation ();
+    analysis.output_C_varphi ("omtm.pat");
 
     cerr << "NAME    \t STD_SIGMA \t STD_RMULT \t OPT_SIGMA \t OPT_RMULT" 
 	 << endl;
