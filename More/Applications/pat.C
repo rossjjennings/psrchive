@@ -155,7 +155,7 @@ int main (int argc, char *argv[]) try {
       break;
 
     case 'i':
-      cout << "$Id: pat.C,v 1.63 2006/09/15 16:43:33 straten Exp $" << endl;
+      cout << "$Id: pat.C,v 1.64 2006/09/15 20:44:53 straten Exp $" << endl;
       return 0;
 
     case 'F':
@@ -363,7 +363,8 @@ int main (int argc, char *argv[]) try {
 	  }
 	  else {
 	    Matrix<4,4,double> basis = analysis.get_Mbasis()->evaluate();
-	    poln_profile->transform( basis * Mueller(inv(xform)) );
+	    Matrix<4,4,double> best = Mueller( inv(xform) );
+	    poln_profile->transform( basis * best );
 	  }
 
           MEAL::Polar identity;
@@ -586,24 +587,20 @@ void mtm_analysis (PolnProfileFitAnalysis& analysis,
 
     Estimate<double> sigma_0 = analysis.get_relative_error ();
     Estimate<double> Rmult_0 = analysis.get_multiple_correlation ();
-    analysis.output_C_varphi ("mtm.pat");
-
-    cerr << "\nInserting basis transformation" << endl;
 
 #if 0
+    cerr << "\npat: Inserting Polar transformation" << endl;
     analysis.set_basis (new MEAL::Polar);
 #else
+    cerr << "\npat: Inserting Depolarizer transformation" << endl;
     analysis.set_basis (new MEAL::Depolarizer);
 #endif
 
-    cerr << "Optimizing the template" << endl;
+    cerr << "pat: Optimizing the template" << endl;
     analysis.optimize ();
-
-    analysis.set_fit (&fit);
 
     Estimate<double> sigma = analysis.get_relative_error ();
     Estimate<double> Rmult = analysis.get_multiple_correlation ();
-    analysis.output_C_varphi ("omtm.pat");
 
     cerr << "NAME    \t STD_SIGMA \t STD_RMULT \t OPT_SIGMA \t OPT_RMULT" 
 	 << endl;
