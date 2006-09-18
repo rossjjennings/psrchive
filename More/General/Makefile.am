@@ -135,6 +135,7 @@ libpsrchive_la_SOURCES =			\
 	IterativeBaseline.C			\
 	LastSignificant.C			\
 	model_profile.C				\
+	mtm_analysis.C				\
 	NoiseStatistics.C			\
 	OnPulseThreshold.C			\
 	pafit_get_PA.C				\

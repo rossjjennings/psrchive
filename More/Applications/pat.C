@@ -9,13 +9,11 @@
 #include "Pulsar/Integration.h"
 #include "Pulsar/Profile.h"
 
-#include "Pulsar/Fourier.h"
 #include "Pulsar/PolnProfile.h"
 #include "Pulsar/PolnProfileFit.h"
 #include "Pulsar/PolnProfileFitAnalysis.h"
 
 #include "MEAL/Polar.h"
-#include "MEAL/Depolarizer.h"
 
 #include "Pulsar/ObsExtension.h"
 #include "Pulsar/Backend.h"
@@ -26,7 +24,6 @@
 #include "Error.h"
 #include "dirutil.h"
 #include "genutil.h"
-#include "tostring.h"
 
 #include <fstream>
 #include <iostream>
@@ -84,7 +81,7 @@ void usage ()
 
 using namespace Pulsar;
 
-// defined at the end of this file
+// defined in mtm_analysis.C
 void mtm_analysis (PolnProfileFitAnalysis&, PolnProfileFit&,
 		   const std::string& name, bool optimal);
 
@@ -155,7 +152,7 @@ int main (int argc, char *argv[]) try {
       break;
 
     case 'i':
-      cout << "$Id: pat.C,v 1.64 2006/09/15 20:44:53 straten Exp $" << endl;
+      cout << "$Id: pat.C,v 1.65 2006/09/18 13:25:01 straten Exp $" << endl;
       return 0;
 
     case 'F':
@@ -564,82 +561,3 @@ void loadGaussian(string file,  Reference::To<Archive> &stdarch,  Reference::To<
 }
 
 
-string tex (Estimate<double>& e)
-{
-  double scale = pow (10.0, -floor(log(e.get_error())/log(10.0)));
-  unsigned error = (unsigned) rint(e.get_error()*scale);
-  if (error == 10)
-    error = 1;
-
-  double value = rint(e.get_value()*scale)/scale;
-
-  return tostring (value) + "(" + tostring(error) + ")";
-}
-
-void mtm_analysis (PolnProfileFitAnalysis& analysis,
-		   PolnProfileFit& fit,
-		   const std::string& name,
-		   bool optimize)
-{
-  analysis.set_fit (&fit);
-
-  if (optimize) try {
-
-    Estimate<double> sigma_0 = analysis.get_relative_error ();
-    Estimate<double> Rmult_0 = analysis.get_multiple_correlation ();
-
-#if 0
-    cerr << "\npat: Inserting Polar transformation" << endl;
-    analysis.set_basis (new MEAL::Polar);
-#else
-    cerr << "\npat: Inserting Depolarizer transformation" << endl;
-    analysis.set_basis (new MEAL::Depolarizer);
-#endif
-
-    cerr << "pat: Optimizing the template" << endl;
-    analysis.optimize ();
-
-    Estimate<double> sigma = analysis.get_relative_error ();
-    Estimate<double> Rmult = analysis.get_multiple_correlation ();
-
-    cerr << "NAME    \t STD_SIGMA \t STD_RMULT \t OPT_SIGMA \t OPT_RMULT" 
-	 << endl;
-
-    cout << name << " \t " << tex(sigma_0) << " \t " << tex(Rmult_0)
-	 << " \t " << tex(sigma) << " \t " << tex(Rmult) << endl;
-
-    analysis.use_basis (false);
-
-    return;
-
-  }
-  catch (Error& e) {
-    cerr << e << endl;
-  }
-
-  cout << "\nFull Polarization TOA (matrix template matching): "
-    "\n MTM Relative error = "
-       << analysis.get_relative_error () <<
-    "\n Multiple correlation = "
-       << analysis.get_multiple_correlation() << 
-    "\n MTM Relative conditional error = "
-       << analysis.get_relative_conditional_error () << endl;
-  
-  ScalarProfileFitAnalysis scalar;
-  scalar.set_fit (&fit);
-
-  // the phase shift error for the total intensity profile
-  Estimate<double> I_error = scalar.get_error();
-
-  Profile invariant;
-  fit.get_standard()->invint( &invariant );
-
-  scalar.set_spectrum ( fourier_transform (&invariant) );
-  scalar.set_variance ( 2.0 * scalar.get_variance() );
-
-  // the phase shift error for the invariant profile
-  Estimate<double> S_error = scalar.get_error();
-
-  cout << "\nLorentz Invariant TOA: "
-    "\n Invariant relative error = " << S_error/I_error << endl << endl;
-}
