@@ -529,6 +529,9 @@ void Pulsar::PolnCalibrator::correct_backend (Archive* arch) const try {
      backend convention have the same effect; the following lines
      effect an exclusive or operation. */
   if (correct_lsb) {
+    if (verbose)
+      cerr << "Pulsar::PolnCalibrator::correct_backend down conversion" 
+	   << endl;
     if (argument == Signal::Conjugate)
       argument = Signal::Conventional;
     else
@@ -544,13 +547,19 @@ void Pulsar::PolnCalibrator::correct_backend (Archive* arch) const try {
   bool flip[4] = { false, false, false, false };
 
   if (npol == 4) {
-    if (argument == Signal::Conjugate)
+    if (argument == Signal::Conjugate) {
+      if (verbose)
+	cerr << "Pulsar::PolnCalibrator::correct_backend phase convention"
+	     << endl;
       if (state == Signal::Stokes && basis == Signal::Circular)
 	flip[2] = !flip[2];   // Flip Stokes U
       else
 	flip[3] = !flip[3];   // Flip Stokes V or Im[AB]
+    }
 
     if (hand == Signal::Left) {
+      if (verbose)
+	cerr << "Pulsar::PolnCalibrator::correct_backend hand" << endl;
       if (state == Signal::Stokes && basis == Signal::Circular)
 	flip[2] = !flip[2];   // Flip Stokes U and ...
       else if (state == Signal::Stokes && basis == Signal::Linear)
@@ -635,7 +644,7 @@ void Pulsar::PolnCalibrator::calibrate (Archive* arch) try {
   }
   else if (arch->get_npol() == 1) {
 
-    if (Archive::verbose > 2)
+    if (Archive::verbose)
       cerr << "Pulsar::PolnCalibrator::calibrate WARNING"
 	" calibrating only absolute gain" << endl;
 
