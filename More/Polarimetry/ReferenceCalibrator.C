@@ -55,9 +55,7 @@ void Pulsar::ReferenceCalibrator::set_calibrator (const Archive* archive)
     clone -> convert_state (Signal::Coherence);
   }
 
-  const Backend* backend = archive->get<Backend>();
-  if (backend->get_hand() == Signal::Left ||
-      backend->get_argument() == Signal::Conjugate) {
+  if (must_correct_backend(archive)) {
     if (!clone)
       clone = archive->clone();
     correct_backend (clone);
