@@ -86,6 +86,7 @@ void Pulsar::PolnProfileFit::init ()
 
   choose_maximum_harmonic = false;
   emulate_scalar = false;
+  separate_fits = false;
   fit_debug = false;
 }
 
@@ -233,6 +234,11 @@ Calibration::TemplateUncertainty* Pulsar::PolnProfileFit::get_uncertainty ()
   return uncertainty;
 }
 
+void Pulsar::PolnProfileFit::set_separate_fits (bool flag)
+{
+  separate_fits = flag;
+}
+
 void Pulsar::PolnProfileFit::set_fit_debug (bool flag)
 {
   fit_debug = flag;
@@ -351,7 +357,25 @@ void Pulsar::PolnProfileFit::fit (const PolnProfile* observation) try
   RealTimer clock;
 
   clock.start();
+
+  if (separate_fits) {
+
+    // first fit only for the transformation
+    phase->set_infit (1, false);
+    for (unsigned i=0; i<transformation->get_nparam(); i++)
+      transformation->set_infit (i, true);
+
+    model->solve_work ();
+
+    // then fit only for the phase
+    phase->set_infit (1, true);
+    for (unsigned i=0; i<transformation->get_nparam(); i++)
+      transformation->set_infit (i, false);
+
+  }
+
   model->solve_work ();
+
   clock.stop();
 
   /* if template and observation have different numbers of bins, there

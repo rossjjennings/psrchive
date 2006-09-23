@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/Attic/PolnProfileFit.h,v $
-   $Revision: 1.24 $
-   $Date: 2006/09/15 20:44:41 $
+   $Revision: 1.25 $
+   $Date: 2006/09/23 08:57:28 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PolnProfileFit_h
@@ -87,6 +87,9 @@ namespace Pulsar {
     //! Get the error propagation policy
     Calibration::TemplateUncertainty* get_uncertainty ();
 
+    //! Set the separate fits mode
+    void set_separate_fits (bool flag = true);
+
     //! Set the debug mode in the ReceptionModel
     void set_fit_debug (bool flag = true);
 
@@ -132,6 +135,8 @@ namespace Pulsar {
 
     Matrix<4,4,double> get_covariance (const PolnProfile* fourier) const;
 
+    //! Get the measured variances of the template Stokes parameters
+    Stokes<double> get_standard_variance () const { return standard_variance; }
     //! Return the phase shift based on the cross correlation function
     float ccf_max_phase (const Profile* std, const Profile* obs) const;
 
@@ -190,6 +195,9 @@ namespace Pulsar {
 
     //! The reduced chi-squared after fitting
     double reduced_chisq;
+
+    //! When set, perform separate fits for transformation and phase shift
+    bool separate_fits;
 
     //! The fit debug flag
     bool fit_debug;
