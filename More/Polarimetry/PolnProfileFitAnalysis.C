@@ -913,6 +913,18 @@ void Pulsar::PolnProfileFitAnalysis::output_C_varphi (const char* filename)
   }
 }
 
+//! Get the correlation coefficients
+Matrix<8,8,double> Pulsar::PolnProfileFitAnalysis::get_correlation () const
+{
+  Matrix<8,8,double> C;
+  for (unsigned i=0; i<8; i++)
+    for (unsigned j=0; j<=i; j++)
+      C[i][j] = C[j][i] = covariance[i][j] /
+	sqrt (covariance[i][i]*covariance[j][j]);
+
+  return C;
+}
+
 Estimate<double>
 Pulsar::PolnProfileFitAnalysis::get_relative_error () const
 {

@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PolnProfileFitAnalysis.h,v $
-   $Revision: 1.27 $
-   $Date: 2006/09/15 16:43:20 $
+   $Revision: 1.28 $
+   $Date: 2006/09/23 08:57:34 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PolnProfileFitAnalysis_h
@@ -102,6 +102,9 @@ namespace Pulsar {
 
     //! Get the conditional variance of varphi and its gradient wrt transform
     double get_cond_var (std::vector<double>& grad);
+
+    //! Get the correlation coefficients
+    Matrix<8,8,double> get_correlation () const;
 
     //! Write the terms in C_varhpi out to file
     void output_C_varphi (const char* filename);
