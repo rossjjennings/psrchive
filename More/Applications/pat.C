@@ -11,7 +11,6 @@
 
 #include "Pulsar/PolnProfile.h"
 #include "Pulsar/PolnProfileFit.h"
-#include "Pulsar/PolnProfileFitAnalysis.h"
 
 #include "MEAL/Polar.h"
 
@@ -51,15 +50,17 @@ void usage ()
     "\n"
     "Fitting options:\n"
     "  -a stdfiles      Automatically select standard from specified group\n"
-    "  -c               Choose the maximum harmonic \n"
     "  -D               Denoise standard \n"
     "  -g datafile      Gaussian model fitting \n"
-    "  -n harmonics     Use up to the specified number of harmonics\n"
-    "  -p               Perform full polarimetric fit in Fourier domain \n"
-    "  -P               Print a report on the polarimetric standard \n"
     "  -s stdfile       Location of standard profile \n"
     "  -S period        Zap harmonics due to periodic spikes in profile \n"
     "                   (use of this option implies SIS) \n"
+    "\n"
+    "Matrix template matching options: \n"
+    "  -c               Choose the maximum harmonic \n"
+    "  -n harmonics     Use up to the specified number of harmonics\n"
+    "  -p               Enable matrix template matching \n"
+    "  -P               Perform two separate fits: 1) xform; 2) phase \n"
     "\n"
     "Algorithm Selection:\n"
     "  -A name          Select shift algorithm [default: PGS] \n"
@@ -81,10 +82,6 @@ void usage ()
 
 using namespace Pulsar;
 
-// defined in mtm_analysis.C
-void mtm_analysis (PolnProfileFitAnalysis&, PolnProfileFit&,
-		   const std::string& name, bool optimal);
-
 int main (int argc, char *argv[]) try {
   
   bool verbose = false;
@@ -92,7 +89,6 @@ int main (int argc, char *argv[]) try {
   bool std_multiple = false;
   bool gaussian = false;
   bool full_poln = false;
-  bool full_poln_analysis = false;
 
   bool fscrunch = false;
   bool tscrunch = false;
@@ -111,80 +107,12 @@ int main (int argc, char *argv[]) try {
 
   int gotc = 0;
 
-  PolnProfileFitAnalysis analysis;
   PolnProfileFit fit;
 
-  bool optimize_mtm = false;
   float chisq_max = 2.0;
 
-  while ((gotc = getopt(argc, argv, "a:A:b:cDf:Fg:hin:oO:pPqS:s:tTvVx:")) != -1) {
+  while ((gotc = getopt(argc, argv, "a:A:cDf:Fg:hin:pPqS:s:tTvVx:")) != -1) {
     switch (gotc) {
-    case 'h':
-      usage ();
-      return 0;
-
-    case 'q':
-      Archive::set_verbosity(0);
-      break;
-
-    case 'v':
-      Archive::set_verbosity(2);
-      verbose = true;
-      break;
-
-    case 'V':
-      verbose = true;
-      Archive::set_verbosity(3);
-      MEAL::Function::verbose = true;
-      Pulsar::PolnProfileFit::verbose = true;
-      break;
-
-    case 'b':
-      analysis.set_optimal_boost_max (atof(optarg));
-      break;
-
-    case 'c':
-      fit.choose_maximum_harmonic = true;
-      break;
-
-    case 'D':
-      denoise = true;
-      break;
-
-    case 'i':
-      cout << "$Id: pat.C,v 1.65 2006/09/18 13:25:01 straten Exp $" << endl;
-      return 0;
-
-    case 'F':
-      fscrunch = true;
-      break;
-
-    case 'n':
-      fit.set_maximum_harmonic( atoi(optarg) );
-      break;
-
-    case 'T':
-      tscrunch = true;
-      break;
-
-    case 'g':
-      gaussian  = true;
-      gaussFile = optarg;
-      break;
-
-    case 'o':
-      optimize_mtm = true;
-      break;
-
-    case 'O':
-      analysis.set_optimal_harmonic_max( atoi(optarg) );
-      break;
-
-    case 'P':
-      full_poln_analysis = true;
-    case 'p':
-      full_poln = true;
-      break;
 
     case 'a':
       std_given     = true;
@@ -225,6 +153,54 @@ int main (int argc, char *argv[]) try {
 
       break;
 
+    case 'c':
+      fit.choose_maximum_harmonic = true;
+      break;
+
+    case 'D':
+      denoise = true;
+      break;
+
+    case 'F':
+      fscrunch = true;
+      break;
+
+    case 'f':
+      {
+	/* Set the output format */
+	outFormat = string(optarg).substr(0,string(optarg).find(" "));
+	if (string(optarg).find(" ")!=string::npos)
+	  outFormatFlags = string(optarg).substr(string(optarg).find(" "));
+	break;
+      }
+
+    case 'g':
+      gaussian  = true;
+      gaussFile = optarg;
+      break;
+
+    case 'h':
+      usage ();
+      return 0;
+
+    case 'i':
+      cout << "$Id: pat.C,v 1.66 2006/09/23 08:57:45 straten Exp $" << endl;
+      return 0;
+
+    case 'n':
+      fit.set_maximum_harmonic( atoi(optarg) );
+      break;
+
+    case 'P':
+      fit.set_separate_fits();
+    case 'p':
+      full_poln = true;
+      break;
+
+    case 'q':
+      Archive::set_verbosity(0);
+      break;
+
     case 'S':
       Profile::shift_strategy.set(&SincInterpShift);      
       Profile::SIS_zap_period = atoi(optarg);
@@ -235,12 +211,21 @@ int main (int argc, char *argv[]) try {
       std = optarg;
       break;
 
-    case 'f':
-      {
-	outFormat = string(optarg).substr(0,string(optarg).find(" "));  /* Set the output format */
-	if (string(optarg).find(" ")!=string::npos) outFormatFlags = string(optarg).substr(string(optarg).find(" "));
-	break;
-      }
+    case 'T':
+      tscrunch = true;
+      break;
+
+    case 'v':
+      Archive::set_verbosity(2);
+      verbose = true;
+      break;
+
+    case 'V':
+      verbose = true;
+      Archive::set_verbosity(3);
+      MEAL::Function::verbose = true;
+      Pulsar::PolnProfileFit::verbose = true;
+      break;
 
     case 'x':
       chisq_max = atof(optarg);
@@ -258,7 +243,7 @@ int main (int argc, char *argv[]) try {
   for (int ai=optind; ai<argc; ai++)
     dirglob (&archives, argv[ai]);
   
-  if (!full_poln_analysis && archives.empty()) {
+  if (archives.empty()) {
     cerr << "No archives were specified" << endl;
     return -1;
   } 
@@ -291,16 +276,6 @@ int main (int argc, char *argv[]) try {
     }
     else
       stdarch->convert_state(Signal::Intensity);
-
-    if (full_poln_analysis || optimize_mtm) {
-
-      // for the invariant interval analysis
-      stdarch->remove_baseline();
-
-      cerr << "pat: performing full polarization analysis" << endl;
-      mtm_analysis (analysis, fit, stdarch->get_source(), optimize_mtm);
-
-    }
 
   }
   catch (Error& error) {
@@ -338,41 +313,12 @@ int main (int argc, char *argv[]) try {
 
         fit.get_transformation()->copy( &backup );
 
-        if (optimize_mtm)
-          analysis.use_basis (false);
-
 	Tempo::toa toa = fit.get_toa (poln_profile,
 				      integration->get_epoch(),
 				      integration->get_folding_period(),
 				      arch->get_telescope_code());
 
         backup.copy( fit.get_transformation() );
-
-	if (optimize_mtm) {
-
-	  Jones<double> xform = fit.get_transformation()->evaluate();
-
-	  analysis.use_basis (true);
-
-	  if (analysis.has_Jbasis()) {
-	    Jones<double> basis = analysis.get_Jbasis()->evaluate();
-	    poln_profile->transform( basis * inv(xform) );
-	  }
-	  else {
-	    Matrix<4,4,double> basis = analysis.get_Mbasis()->evaluate();
-	    Matrix<4,4,double> best = Mueller( inv(xform) );
-	    poln_profile->transform( basis * best );
-	  }
-
-          MEAL::Polar identity;
-          fit.get_transformation()->copy( &identity );
-
-	  toa = fit.get_toa (poln_profile,
-			     integration->get_epoch(),
-			     integration->get_folding_period(),
-			     arch->get_telescope_code());
-
-	}
 
         string aux = basename( arch->get_filename() );
         float chisq = fit.get_fit_chisq() / fit.get_fit_nfree();
