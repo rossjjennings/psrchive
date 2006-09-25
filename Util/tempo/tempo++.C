@@ -7,6 +7,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
 
 #include <sys/types.h>
@@ -266,9 +267,15 @@ void Tempo::tempo (const string& arguments, const string& input)
     // else an error occured
     if (err < 0)
       errstr = strerror (err);
+    else if (WIFSIGNALED(err))
+      errstr = stringprintf ("\n\tTempo terminated by signal %s", 
+			     strsignal(WTERMSIG(err)));
+    else if (WIFEXITED(err))
+      errstr = stringprintf ("\n\tTempo returned error code %i",
+			     WEXITSTATUS(err));
     else
-      errstr = stringprintf ("\n\tTempo returns err code %i", WIFEXITED(err));
-    
+      errstr = "\n\tTempo failed for an unknown reason";
+
     fsleep (5e-4);
     retries --; 
   }
