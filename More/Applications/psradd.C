@@ -28,43 +28,43 @@
 #include <unistd.h>
 #include <math.h>
 
-static const char* psradd_args = "b:c:C:e:f:FG:hiI:j:J:LM:O:p:Pqr:sS:tT:uUvVZ:";
+static const char* psradd_args = "b:c:C:E:e:f:FG:hiI:j:J:LM:O:p:Pqr:sS:tT:uUvVZ:";
 
 void reorder(Reference::To<Pulsar::Archive> arch);
 
 void usage () {
   cout <<
-    "A program for adding Pulsar::Archives together\n"
-    "USAGE: psradd [" << psradd_args << "] filenames\n"
-    " -h          This help page\n"
-    " -q          Quiet mode (suppress warnings)\n"
-    " -v          Verbose mode (informational)\n"
-    " -V          Very verbose mode (debugging)\n"
-    " -i          Show revision information\n"
-    " -L          Log results in source.log\n"
+    "A program for adding Pulsar::Archives together \n"
+    "USAGE: psradd [" << psradd_args << "] filenames \n"
+    " -h          This help page \n"
+    " -i          Show revision information \n"
+    " -q          Quiet mode (suppress warnings) \n"
+    " -v          Verbose mode (informational) \n"
+    " -V          Very verbose mode (debugging) \n"
     "\n"
-    " -f fname    Output result to 'fname'\n"
-    " -F          Force append despite mismatch of header parameters\n"
-    " -j j1[,jN]  preprocessing job[s]\n"
+    " -E f.eph    Load and install new ephemeris from f.eph \n"
+    " -f fname    Output result to 'fname' \n"
+    " -F          Force append despite mismatch of header parameters \n"
+    " -j j1[,jN]  preprocessing job[s] \n"
     " -J jobs     multiple preprocessing jobs in 'jobs' file \n"
-    " -M meta     Filename with list of files\n"
-    " -p fname    Load new ephemeris from 'fname'\n"
-    " -P          Phase align archive with total before adding\n"
-    " -r freq     Add archive only if it has this centre frequency\n"
-    " -s          Tscrunch result after each new file (nice on RAM)\n"
-    " -t          Make no changes to file system (testing mode)\n"
-    " -T tempo    System call to tempo\n"
-    " -Z time     Only add archives that are time (+/- 0.5) seconds long\n"
+    " -L          Log results in source.log \n"
+    " -M meta     Filename with list of files \n"
+    " -P          Phase align archive with total before adding \n"
+    " -r freq     Add archive only if it has this centre frequency \n"
+    " -s          Tscrunch result after each new file (nice on RAM) \n"
+    " -t          Make no changes to file system (testing mode) \n"
+    " -T tempo    System call to tempo \n"
+    " -Z time     Only add archives that are time (+/- 0.5) seconds long \n"
     "\n"
     "AUTO ADD options:\n"
-    " -e ext      Extension added to output filenames (default .it)\n"
-    " -C turns    Tscrunch+unload when CAL phase changes by >= turns\n"
-    " -G sec      Tscrunch+unload when time between archives > 'sec' seconds\n"
-    " -I sec      Tscrunch+unload when archive contains 'sec' seconds\n"
-    " -O path     Path to which output files are written\n"
-    " -S s/n      Tscrunch+unload when archive has this S/N\n"
+    " -e ext      Extension added to output filenames (default .it) \n"
+    " -C turns    Tscrunch+unload when CAL phase changes by >= turns \n"
+    " -G sec      Tscrunch+unload when time to next archive > 'sec' seconds \n"
+    " -I sec      Tscrunch+unload when archive contains 'sec' seconds \n"
+    " -O path     Path to which output files are written \n"
+    " -S s/n      Tscrunch+unload when archive has this S/N \n"
     "\n"
-    "Note: AUTO ADD options, -C, -I, -S and -G, are incompatible with -f\n"
+    "Note: AUTO ADD options (-C, -G, -I, and -S) are incompatible with -f \n"
     "\n"
     "See "PSRCHIVE_HTTP"/manuals/psradd for more details\n"
        << endl;
@@ -153,7 +153,7 @@ int main (int argc, char **argv) try {
       return 0;
       
     case 'i':
-      cout << "$Id: psradd.C,v 1.38 2006/04/20 05:36:41 hknight Exp $" 
+      cout << "$Id: psradd.C,v 1.39 2006/09/26 16:33:59 straten Exp $" 
 	   << endl;
       return 0;
 
@@ -191,6 +191,13 @@ int main (int argc, char **argv) try {
       command += optarg;
       
       break;  
+
+    case 'E':
+    case 'p':
+      parname = optarg;
+      command += " -p ";
+      command += optarg;
+      break;
 
     case 'f':
       newname = optarg;
@@ -261,12 +268,6 @@ int main (int argc, char **argv) try {
     case 'M':
       metafile = optarg;
       command += " -M ";
-      command += optarg;
-      break;
-
-    case 'p':
-      parname = optarg;
-      command += " -p ";
       command += optarg;
       break;
 
