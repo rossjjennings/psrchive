@@ -6,9 +6,8 @@
  ***************************************************************************/
 #include <stdio.h>
 
-#include "Reference.h"
-
 #include "RealTimer.h"
+using namespace std;
 
 const char* RealTimer::timeString (double time) 
 {

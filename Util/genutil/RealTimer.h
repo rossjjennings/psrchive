@@ -5,8 +5,8 @@
  *
  ***************************************************************************/
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/RealTimer.h,v $
-   $Revision: 1.3 $
-   $Date: 2006/03/17 13:35:07 $
+   $Revision: 1.4 $
+   $Date: 2006/09/27 21:32:16 $
    $Author: straten $ */
 
 #ifndef __RealTimer_H
@@ -16,7 +16,6 @@
 #include <sys/time.h>
 
 #include "Reference.h"
-#include "psr_cpp.h"
 
 class RealTimer : public Reference::Able {
  public:
@@ -52,7 +51,7 @@ class RealTimer : public Reference::Able {
   double total_elapsed;   // cummulative sum over the life of this instance
 };
 
-ostream& operator<< (ostream& ostr, const RealTimer& clock);
+std::ostream& operator<< (std::ostream& ostr, const RealTimer& clock);
 
 #endif
 

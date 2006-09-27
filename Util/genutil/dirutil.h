@@ -9,41 +9,40 @@
 
 #include <vector>
 #include <string>
-#include "psr_cpp.h"
 
 // in dirwith.C
-const string dirwith (double size, const vector<string>& disks,
-		      const string& path=string(),
+const std::string dirwith (double size, const std::vector<std::string>& disks,
+		      const std::string& path=std::string(),
 		      double usage_limit = 0.0,
 		      double leave_free = 0.0);
 
 // in dirlist.C
-int dirlist (vector<string>* files, const char* path, bool all=false,
+int dirlist (std::vector<std::string>* files, const char* path, bool all=false,
 	     const char* pattern=NULL);
-int dirlist (vector<string>* files, const string& path, bool all=false,
+int dirlist (std::vector<std::string>* files, const std::string& path, bool all=false,
 	     const char* pattern=NULL);
-int dirlist (vector<string>* files, const vector<string>& paths,
+int dirlist (std::vector<std::string>* files, const std::vector<std::string>& paths,
 	     bool all=false, const char* pattern=NULL);
 
 // in dirtree.C
-int dirtree (vector<string>* files, const char* path,
+int dirtree (std::vector<std::string>* files, const char* path,
 	     const char* pattern=NULL);
-int dirtree (vector<string>* files, const vector<string>& paths,
+int dirtree (std::vector<std::string>* files, const std::vector<std::string>& paths,
 	     const char* pattern=NULL);
 
 // in dirglob.C
 bool is_glob_argument (const char* text);
-bool is_glob_argument (const string& text);
+bool is_glob_argument (const std::string& text);
 
-void dirglob (vector<string>* filenames, const char* text);
-void dirglob (vector<string>* filenames, const string& text);
+void dirglob (std::vector<std::string>* filenames, const char* text);
+void dirglob (std::vector<std::string>* filenames, const std::string& text);
 
 // in dirglobtree.C
 // recursively follows directories
-void dirglobtree (vector<string>* filenames, 
-		  const string& root, const vector<string>& patterns);
+void dirglobtree (std::vector<std::string>* filenames, 
+		  const std::string& root, const std::vector<std::string>& patterns);
 
-void dirglobtree (vector<string>* filenames, 
-		  const string& root, const string& pattern);
+void dirglobtree (std::vector<std::string>* filenames, 
+		  const std::string& root, const std::string& pattern);
 
 #endif

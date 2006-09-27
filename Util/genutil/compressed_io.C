@@ -4,12 +4,15 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
+#include "compressed_io.h"
+#include "machine_endian.h"
+#include "environ.h"
+
 #include <iostream>
 #include <algorithm>
 
-#include "machine_endian.h"
-#include "compressed_io.h"
-#include "environ.h"
+using namespace std;
 
 int fwrite_compressed (FILE* fptr, const vector<float>& vals)
 {

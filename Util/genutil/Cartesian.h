@@ -7,15 +7,14 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Cartesian.h,v $
-   $Revision: 1.10 $
-   $Date: 2006/03/17 13:35:04 $
+   $Revision: 1.11 $
+   $Date: 2006/09/27 21:32:16 $
    $Author: straten $ */
 
 #ifndef __CARTESIAN_H
 #define __CARTESIAN_H
 
 #include <iostream>
-#include <math.h>
 #include "Angle.h"
 
 class Cartesian
@@ -116,6 +115,6 @@ class Cartesian
 
 };
 
-ostream& operator<< (ostream& ostr, const Cartesian&);
+std::ostream& operator<< (std::ostream& ostr, const Cartesian&);
 
 #endif // __CARTESIAN_H

@@ -7,17 +7,15 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Types.h,v $
-   $Revision: 1.21 $
-   $Date: 2006/05/01 06:44:38 $
-   $Author: hknight $ */
+   $Revision: 1.22 $
+   $Date: 2006/09/27 21:32:16 $
+   $Author: straten $ */
 
 #ifndef __Types_h
 #define __Types_h
 
 #include "Conventions.h"
 #include <string>
-
-#include "psr_cpp.h"
 
 namespace Signal {
 
@@ -123,23 +121,23 @@ namespace Signal {
   const char* state_string (State state);
   const char* basis_string (Basis basis);
 
-  const string Source2string (Source source);
-  const string State2string (State state);
-  const string Basis2string (Basis basis);
-  const string Scale2string (Scale scale);
+  const std::string Source2string (Source source);
+  const std::string State2string (State state);
+  const std::string Basis2string (Basis basis);
+  const std::string Scale2string (Scale scale);
 
   //! Returns how many polarisations the State most likely is
   //! This function is for when a user specifies a desired output state and you need to convert to an npol
   //! Try and not use this function when you actually have data
   unsigned State2npol(State state);
 
-  Basis string2Basis(string ss);
-  Source string2Source(string ss);
-  State string2State(string ss);
-  Scale string2Scale(string ss);
+  Basis string2Basis(std::string ss);
+  Source string2Source(std::string ss);
+  State string2State(std::string ss);
+  Scale string2Scale(std::string ss);
 
   //! Tells you if your state is consistent with your npol and ndim
-  bool valid_state(State state,unsigned ndim,unsigned npol, string& reason);
+  bool valid_state(State state,unsigned ndim,unsigned npol, std::string& reason);
   
 }
 

@@ -73,17 +73,17 @@ int operator != (const Cartesian& cart1, const Cartesian& cart2)
 Cartesian min (const Cartesian& cart1, const Cartesian& cart2)
 {
   // cerr << "Cartesian min" << endl;
-  return Cartesian ( min(cart1.x, cart2.x),
-		     min(cart1.y, cart2.y),
-		     min(cart1.z, cart2.z) );
+  return Cartesian ( std::min(cart1.x, cart2.x),
+		     std::min(cart1.y, cart2.y),
+		     std::min(cart1.z, cart2.z) );
 }
 
 Cartesian max (const Cartesian& cart1, const Cartesian& cart2)
 {
   // cerr << "Cartesian max" << endl;
-  return Cartesian ( max(cart1.x, cart2.x),
-		     max(cart1.y, cart2.y),
-		     max(cart1.z, cart2.z) );
+  return Cartesian ( std::max(cart1.x, cart2.x),
+		     std::max(cart1.y, cart2.y),
+		     std::max(cart1.z, cart2.z) );
 }
 
 
@@ -135,7 +135,7 @@ Angle Cartesian::angularSeparation (const Cartesian& c1, const Cartesian& c2)
   return Angle (acos( (c1 * c2) / (c1.mod() * c2.mod()) ));
 }
 
-ostream& operator << (ostream& ostr, const Cartesian& coord) {
+std::ostream& operator << (std::ostream& ostr, const Cartesian& coord) {
   return ostr << "(" << coord.x << ", " << coord.y << ", " << coord.z << ")";
 }
 
@@ -143,9 +143,9 @@ ostream& operator << (ostream& ostr, const Cartesian& coord) {
 void diagonalize (Cartesian& bottom_left, Cartesian& upper_right)
 {
   if (bottom_left.x > upper_right.x)
-    swap (upper_right.x, bottom_left.x);
+    std::swap (upper_right.x, bottom_left.x);
   if (bottom_left.y > upper_right.y)
-    swap (upper_right.y, bottom_left.y);
+    std::swap (upper_right.y, bottom_left.y);
   if (bottom_left.z > upper_right.z)
-    swap (upper_right.z, bottom_left.z);
+    std::swap (upper_right.z, bottom_left.z);
 }

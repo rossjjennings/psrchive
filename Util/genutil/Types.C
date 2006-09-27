@@ -4,9 +4,11 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-#include "Error.h"
 
 #include "Types.h"
+#include "Error.h"
+
+using namespace std;
 
 //! Given Basis and State, returns the default Component code of ipol
 Signal::Component 

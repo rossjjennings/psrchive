@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Angle.h,v $
-   $Revision: 1.20 $
-   $Date: 2006/03/25 12:31:58 $
+   $Revision: 1.21 $
+   $Date: 2006/09/27 21:32:16 $
    $Author: straten $ */
 
 // redwards 17 Mar 99 -- Time for a definitive C++ suite of
@@ -19,8 +19,6 @@
 
 #include <string>
 #include <iostream>
-#include <math.h>
-#include "psr_cpp.h"
 
 static const double MilliSecin12Hours = 4.32e7;
 
@@ -59,14 +57,14 @@ class Angle
 
   int     setHMS (const char *);
   char*   getHMS (char* str, int places=3) const;
-  string  getHMS (int places = 3) const;
+  std::string  getHMS (int places = 3) const;
 
   void setDMS (int degrees, int minutes, double seconds);
   void getDMS (int& degrees, int& minutes, double& seconds) const;
 
   int     setDMS (const char *);
   char*   getDMS (char* str, int places=3) const;
-  string  getDMS (int places = 3) const;
+  std::string  getDMS (int places = 3) const;
 
   // ms is given in milliseconds of an hour
   void  setRadMS(long int ms)
@@ -155,14 +153,14 @@ class AnglePair
   // HMS and DMS in separate strings
   int    setHMSDMS (const char *, const char *);
   void   getHMSDMS (char* s1, char* s2, int places1=3, int places2=2) const;
-  string getHMSDMS (int places1 = 3, int places2 = 2) const;
+  std::string getHMSDMS (int places1 = 3, int places2 = 2) const;
 
   void   setDegrees (double, double);
   void   getDegrees (double *, double *) const;
-  string getDegrees () const;
+  std::string getDegrees () const;
   void   setRadians (double, double);
   void   getRadians (double *, double *) const;
-  string getRadians () const;
+  std::string getRadians () const;
 
   Angle angularSeparation (const AnglePair& other) const;
 
@@ -182,7 +180,7 @@ class AnglePair
   friend int operator == (const AnglePair &, const AnglePair &);
   friend int operator != (const AnglePair &, const AnglePair &);
 
-  friend ostream& operator<< (ostream&, const AnglePair&);
+  friend std::ostream& operator<< (std::ostream&, const AnglePair&);
 };
 
 

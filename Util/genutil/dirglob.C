@@ -4,15 +4,16 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
+#include "dirutil.h"
+#include "Error.h"
+
 #include <iostream>
-#include <vector>
-#include <string>
 
 #include <glob.h>
 #include <string.h>
 
-#include "Error.h"
-#include "dirutil.h"
+using namespace std;
 
 bool is_glob_argument (const char* text)
 {

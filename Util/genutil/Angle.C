@@ -11,10 +11,7 @@
 #include "Cartesian.h"
 #include "coord_parse.h"
 
-#include <string>
-#include <stdio.h>
 #include <math.h>
-#include <iostream>
 #include <limits.h>
 #include <float.h>
 
@@ -54,7 +51,7 @@ char * Angle::getHMS(char *str, int places) const
 }
 
 static char angle_str [100];
-string Angle::getHMS (int places) const
+std::string Angle::getHMS (int places) const
 {
   ra2str (angle_str, 100, radians, places);
   return angle_str;
@@ -115,7 +112,7 @@ char * Angle::getDMS(char *str,int places) const
   return str;
 }
 
-string Angle::getDMS(int places) const
+std::string Angle::getDMS(int places) const
 {
   dec2str2 (angle_str, 100, radians, places);
   return angle_str;
@@ -273,7 +270,7 @@ int operator != (const Angle &a1, const Angle &a2){
 
 
 
-ostream& operator << (ostream& os, const Angle& angle)
+std::ostream& operator << (std::ostream& os, const Angle& angle)
 {
   switch (Angle::default_type) {
   case Angle::Radians:
@@ -286,13 +283,13 @@ ostream& operator << (ostream& os, const Angle& angle)
   }
 }
 
-istream& operator >> (istream& is, Angle& angle)
+std::istream& operator >> (std::istream& is, Angle& angle)
 {
   double value;
   is >> value;
   std::streampos pos = is.tellg();
 
-  string unit;
+  std::string unit;
   is >> unit;
   if (unit == "deg")
     angle.setDegrees (value);
@@ -335,8 +332,8 @@ AnglePair::AnglePair(const double d1, const double d2){
 AnglePair::AnglePair (const char *astr)
 { 
   if (str2coord (&angle1.radians, &angle2.radians, astr) < 0) {
-    string error ("AnglePair::AnglePair str2coord failure");
-    cerr << error;
+    std::string error ("AnglePair::AnglePair str2coord failure");
+    std::cerr << error;
     throw error;
   }
 }
@@ -359,7 +356,7 @@ void AnglePair::getHMSDMS(char *s1, char *s2, int places1, int places2) const
   s2 = angle2.getDMS(s2,places2);
 }
 
-string
+std::string
 AnglePair::getHMSDMS(int places1, int places2) const
 { 
   return angle1.getHMS(places1) + ' ' + angle2.getDMS(places2);
@@ -379,11 +376,11 @@ AnglePair::getDegrees(double *d1, double *d2) const
   *d2 = angle2.getDegrees();
 }
 
-string AnglePair::getDegrees() const
+std::string AnglePair::getDegrees() const
 {
   sprintf (angle_str, "(%8.4f,%8.4f)",
 	   angle1.getDegrees(), angle2.getDegrees());
-  return string (angle_str);
+  return std::string (angle_str);
 }
 
 void 
@@ -400,11 +397,11 @@ AnglePair:: getRadians(double *r1, double *r2) const
   *r2 = angle2.getradians();
 }
 
-string AnglePair::getRadians() const
+std::string AnglePair::getRadians() const
 {
   sprintf(angle_str,
 	  "(%8.4f,%8.4f)", angle1.getradians(),angle2.getradians());
-  return string (angle_str);
+  return std::string (angle_str);
 }
 
 void
@@ -453,7 +450,7 @@ AnglePair::operator= (const AnglePair & a)
   return *this;
 }
 
-ostream& operator<< (ostream & os, const AnglePair & pair)
+std::ostream& operator<< (std::ostream & os, const AnglePair & pair)
 {
   return os << "(" << pair.angle1 
 	    << "," << pair.angle2 << ")";
