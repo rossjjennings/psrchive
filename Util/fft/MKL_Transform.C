@@ -11,7 +11,7 @@
 #if HAVE_MKL
 
 #include "MKL_Transform.h"
-#include "genutil.h"
+#include "environ.h"
 
 #include <string>
 #include <stdio.h>
