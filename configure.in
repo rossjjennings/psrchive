@@ -136,28 +136,27 @@ AM_CONFIG_HEADER([config.h])
 AC_CONFIG_FILES([third/Makefile
 		third/parsifal/Makefile
 		utils/units/Makefile
-		utils/psrfft/Makefile
+		utils/fft/Makefile
 		utils/genutil/Makefile
-		utils/genutil++/Makefile
 		utils/pgutil/Makefile
-		utils/plot2d/Makefile
 		utils/qtutil/Makefile
 		utils/fitsutil/Makefile
-		utils/mpiutil/Makefile
+		utils/meal/Makefile
 		utils/Makefile
-		astro/polyco/Makefile
-		astro/psrephem/Makefile
-		astro/psrmath/Makefile
-		astro/tempo++/Makefile
-		astro/Makefile
-		psrchive/epn/Makefile
-		psrchive/timer/Makefile
-		psrchive/psrfits/Makefile
-                psrchive/ascii/Makefile
-		psrchive/Extension/Makefile
-		psrchive/Plotter/Makefile
-		psrchive/Calibration/Makefile
-		psrchive/Calibration/iri2001/Makefile
+		tempo/polyco/Makefile
+		tempo/psrephem/Makefile
+		tempo/tempo++/Makefile
+		tempo/Makefile
+		psrchive/File/EPN/Makefile
+		psrchive/File/Timer/Makefile
+		psrchive/File/PSRFITS/Makefile
+                psrchive/File/ASCII/Makefile
+		psrchive/File/Extension/Makefile
+		psrchive/File/Makefile
+		psrchive/General/Makefile
+		psrchive/Plotting/Makefile
+		psrchive/Polarimetry/Makefile
+		psrchive/Polarimetry/iri2001/Makefile
                 psrchive/GUI/Makefile
 		psrchive/rhythm/Makefile
 		psrchive/Makefile
