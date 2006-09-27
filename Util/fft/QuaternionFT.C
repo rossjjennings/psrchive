@@ -6,7 +6,7 @@
  ***************************************************************************/
 #include "QuaternionFT.h"
 
-#include "fftm.h"
+#include "FTransform.h"
 
 using namespace std;
 
@@ -202,12 +202,12 @@ void QuaternionFT::fft (unsigned npts, const float* input, float* output)
   float* H_b = new float [npts * 2];
 
   if (sign < 0) {
-    fft::fcc1d (npts, H_a, h_a);
-    fft::fcc1d (npts, H_b, h_b);
+    FTransform::fcc1d (npts, H_a, h_a);
+    FTransform::fcc1d (npts, H_b, h_b);
   }
   else {
-    fft::bcc1d (npts, H_a, h_a);
-    fft::bcc1d (npts, H_b, h_b);
+    FTransform::bcc1d (npts, H_a, h_a);
+    FTransform::bcc1d (npts, H_b, h_b);
   }
 
   Quaternion<float> result;
