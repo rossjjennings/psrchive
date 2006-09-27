@@ -32,7 +32,6 @@
 #include <dirent.h>
 
 #include "environ.h"
-#include "genutil.h"
 
 int file_exists (const char* filename)
 {
