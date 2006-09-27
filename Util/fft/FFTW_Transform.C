@@ -12,7 +12,7 @@
 
 #include "FFTW_Transform.h"
 #include "Error.h"
-#include "psrfft.h"
+#include "rfftw_sort.h"
 
 #include <rfftw.h>
 #include <assert.h>
