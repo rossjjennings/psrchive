@@ -7,7 +7,6 @@
 #include "MJD.h"
 #include "Error.h"
 
-#include "machine_endian.h"
 #include "ieee.h"
 
 #include <iostream>
