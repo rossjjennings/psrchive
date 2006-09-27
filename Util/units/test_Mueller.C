@@ -1,6 +1,3 @@
-#include "MEAL/Polar.h"
-#include "MEAL/RandomPolar.h"
-
 #include "Pauli.h"
 
 #include <iostream>
@@ -9,14 +6,10 @@ using namespace std;
 
 int main ()
 {
-  MEAL::RandomPolar random;
-
   for (unsigned i=0; i < 1000; i++) {
 
-    MEAL::Polar polar;
-    random.get (&polar);
-
-    Jones<double> J = polar.evaluate();
+    Jones<double> J;
+    random_vector (J, 10.0);
 
     Stokes<double> input;
 
