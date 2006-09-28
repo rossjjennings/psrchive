@@ -10,7 +10,6 @@ libascii_la_SOURCES = ASCIIArchive.C
 # Dependencies should never be changed
 #
 
-INCLUDES = -I$(top_builddir)/utils/include -I$(top_builddir)/astro/include \
-        -I$(top_srcdir)/psrchive 
+INCLUDES = -I$(top_builddir)/utils/include -I$(top_srcdir)/psrchive/File
 
 
