@@ -25,9 +25,10 @@ libtimer_la_SOURCES = BasebandArchive.C ScintArchive.C TimerArchive.C \
 # Dependencies should never be changed
 #
 
-INCLUDES = -I$(top_builddir)/utils/include -I$(top_builddir)/astro/include \
-        -I$(top_srcdir)/psrchive -I$(top_srcdir)/psrchive/Calibration \
-	-I$(top_srcdir)/psrchive/Extension
+INCLUDES = -I$(top_builddir)/utils/include \
+	-I$(top_srcdir)/psrchive/File \
+	-I$(top_srcdir)/psrchive/File/Extension \
+	-I$(top_srcdir)/psrchive/Polarimetry
 
 check_PROGRAMS = baseband_header_size timer_size
 TESTS = $(check_PROGRAMS)
