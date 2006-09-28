@@ -7,7 +7,9 @@
 #include "Pulsar/FITSArchive.h"
 #include "Pulsar/Passband.h"
 #include "FITSError.h"
-#include "genutil.h"
+#include "templates.h"
+
+using namespace std;
 
 void Pulsar::FITSArchive::unload (fitsfile* fptr, const Passband* bandpass)
 {
@@ -57,7 +59,7 @@ void Pulsar::FITSArchive::unload (fitsfile* fptr, const Passband* bandpass)
   // Calculate the quantities
   
   for (int i = 0; i < npol; i++) {
-    minmaxval(nch_orig, &(bandpass->get_passband(i))[0], &min, &max);
+    minmaxval(bandpass->get_passband(i), min, max);
     data_offsets[i] = 0.5 * (max + min);
     data_scales[i] = (max - min) / max_int;
   }

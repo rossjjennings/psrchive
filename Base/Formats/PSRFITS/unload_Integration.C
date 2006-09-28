@@ -4,7 +4,6 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-#include <float.h>
 
 #include "Pulsar/FITSArchive.h"
 #include "Pulsar/Integration.h"
@@ -15,7 +14,11 @@
 #include "Pulsar/FITSHdrExtension.h"
 
 #include "FITSError.h"
-#include "genutil.h"
+#include "templates.h"
+
+#include <float.h>
+
+using namespace std;
 
 // ////////////////////////////////////////////////////////////////////
 // ////////////////////////////////////////////////////////////////////
@@ -201,7 +204,7 @@ void Pulsar::FITSArchive::unload_integration (int row,
 
   const Profile *p = 0;
 
-  int16* temparray2 = new int16 [nbin];
+  vector<int16> temparray2 (nbin);
 
   float min = 0.0;
   float max = 0.0;
@@ -221,9 +224,9 @@ void Pulsar::FITSArchive::unload_integration (int row,
     for(unsigned b = 0; b < nchan; b++) {
       
       p = integ->get_Profile(a,b);
-      float* temparray1 = new float[nbin];
+      vector<float> temparray1 (nbin);
       for(unsigned j = 0; j < get_nbin(); j++)
-	temparray1[j] = (p->get_amps())[j];
+	temparray1[j] = p->get_amps()[j];
       
       if (verbose == 3) {
 	cerr << "FITSArchive::unload_integration got profile" << endl;
@@ -231,7 +234,7 @@ void Pulsar::FITSArchive::unload_integration (int row,
 	cerr << "npol  = " << a << endl;
       }
 
-      minmaxval(nbin, temparray1, &min, &max);
+      minmaxval(temparray1, min, max);
 
       if (save_signed)
 	offset = 0.5 * (max + min);
@@ -320,7 +323,7 @@ void Pulsar::FITSArchive::unload_integration (int row,
 			 "fits_get_colnum DATA");
 
       fits_write_col (thefptr, TSHORT, colnum, row, counter2, nbin, 
-		      temparray2, &status);
+		      &(temparray2[0]), &status);
 
       if (status != 0)
 	throw FITSError (status, "FITSArchive:unload_integration",
@@ -331,11 +334,9 @@ void Pulsar::FITSArchive::unload_integration (int row,
       if (verbose == 3)
 	cerr << "FITSArchive:unload_integration looping" << endl;
       
-      delete[] temparray1;
     }	  
   }
   
-  delete[] temparray2;
   
   if (verbose == 3)
     cerr << "FITSArchive::unload_integration finished" << endl;
