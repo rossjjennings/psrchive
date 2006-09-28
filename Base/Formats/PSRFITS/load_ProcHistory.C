@@ -10,6 +10,8 @@
 
 #include "FITSError.h"
 
+using namespace std;
+
 void load (fitsfile* fptr, Pulsar::ProcHistory::row* hrow)
 {
   int row = hrow->index;
@@ -401,18 +403,7 @@ void Pulsar::FITSArchive::load_ProcHistory (fitsfile* fptr)
   for (int i = 0; i < numrows; i++) {
     history->rows[i] = ProcHistory::row();
     history->rows[i].index = i+1;
-    
-    // Preliminary guess at the SCALE keyword to help when
-    // using older files
-    
-    if (find(fcal_off_sources.begin(), fcal_off_sources.end(), 
-	     get_source()) != fcal_off_sources.end())
-      history->rows[i].scale = Signal::ReferenceFluxDensity;
-    
-    if (find(fcal_on_sources.begin(), fcal_on_sources.end(), 
-	     get_source()) != fcal_on_sources.end())
-      history->rows[i].scale = Signal::ReferenceFluxDensity; 
-    
+
     ::load( fptr, &(history->rows[i]) );
   }
 
