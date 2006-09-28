@@ -12,6 +12,8 @@
 #include "string_utils.h"
 #include "coord.h"
 
+using namespace std;
+
 Pulsar::Pointing::Pointing () : Extension ("Pointing")
 {
 }

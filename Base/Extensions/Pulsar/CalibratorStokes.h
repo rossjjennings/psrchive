@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/CalibratorStokes.h,v $
-   $Revision: 1.3 $
-   $Date: 2006/03/17 13:34:45 $
+   $Revision: 1.4 $
+   $Date: 2006/09/28 16:24:52 $
    $Author: straten $ */
 
 #ifndef __CalibratorStokes_h
@@ -61,7 +61,7 @@ namespace Pulsar {
 
     //! The Stokes parameters for each frequency channel
     /*! Stokes I is used to represent data validity */
-    vector< Stokes< Estimate<float> > > stokes;
+    std::vector< Stokes< Estimate<float> > > stokes;
 
     //! Ensure that ichan <= get_nchan
     void range_check (unsigned ichan, const char* method) const;

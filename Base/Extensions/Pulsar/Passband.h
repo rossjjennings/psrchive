@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/Passband.h,v $
-   $Revision: 1.4 $
-   $Date: 2006/03/17 13:34:45 $
+   $Revision: 1.5 $
+   $Date: 2006/09/28 16:24:52 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Passband_h
@@ -52,10 +52,12 @@ namespace Pulsar {
     void resize (unsigned nchan, unsigned npol, unsigned nband=1);
 
     //! Get the specified passband
-    const vector<float>& get_passband (unsigned ipol, unsigned iband=0) const;
+    const std::vector<float>&
+    get_passband (unsigned ipol, unsigned iband=0) const;
 
     //! Set the specified passband
-    void set_passband (const vector<float>&, unsigned ipol, unsigned iband=0);
+    void set_passband (const std::vector<float>&,
+                       unsigned ipol, unsigned iband=0);
 
     //! Set the specified passband
     void set_passband (const float* data, unsigned ipol, unsigned iband=0);
@@ -80,7 +82,7 @@ namespace Pulsar {
     //! Average passbands
     /*! The passbands are organized in ipol major order, I think.
       band0,pol0 band0,pol2 ... bandN,polM band1,pol0 ... */
-    vector< vector<float> > passband;
+    std::vector< std::vector<float> > passband;
 
     //! Throw an exception if ipol or iband are out of range
     void range_check (unsigned ipol, unsigned iband, const char* method) const;

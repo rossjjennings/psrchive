@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/Receiver.h,v $
-   $Revision: 1.16 $
-   $Date: 2006/04/16 13:27:26 $
+   $Revision: 1.17 $
+   $Date: 2006/09/28 16:24:52 $
    $Author: straten $ */
 
 #ifndef __ReceiverExtension_h
@@ -28,10 +28,10 @@ namespace Pulsar {
   public:
     
     //! Construct a new Receiver instance from a file
-    static Receiver* load (const string& filename);
+    static Receiver* load (const std::string& filename);
 
     //! Construct a new Receiver instance from a string
-    static Receiver* new_Receiver (const string& text);
+    static Receiver* new_Receiver (const std::string& text);
 
     //! Default constructor
     Receiver ();
@@ -49,7 +49,7 @@ namespace Pulsar {
     Receiver* clone () const { return new Receiver(*this); }
 
     //! Parses the value of a Receiver attribute from a string
-    void parse (string text);
+    void parse (std::string text);
 
     //! Different modes of feed rotational tracking
     enum Tracking {
@@ -72,9 +72,9 @@ namespace Pulsar {
     void set_tracking_angle (const Angle& angle) { tracking_angle = angle; }
 
     //! Get the name of the receiver
-    const string get_name () const { return name; }
+    const std::string get_name () const { return name; }
     //! Set the name of the receiver
-    void set_name (const string& _name) { name = _name; }
+    void set_name (const std::string& _name) { name = _name; }
 
     //! Get the basis of the feed receptors
     Signal::Basis get_basis () const { return state->get_basis(); }
@@ -161,10 +161,10 @@ namespace Pulsar {
     void set_atten_b (float atten) { atten_b = atten; }
 
     //! Return true if the receiver configurations match
-    bool match (const Receiver* receiver, string& reason) const;
+    bool match (const Receiver* receiver, std::string& reason) const;
 
     //! Return a string that describes the tracking mode
-    string get_tracking_mode_string() const;
+    std::string get_tracking_mode_string() const;
 
     //! Return the feed correction matrix
     Jones<double> get_transformation () const;
@@ -203,7 +203,7 @@ namespace Pulsar {
     template<class StateType> StateType* get() const;
 
     //! Name of the receiver
-    string name;
+    std::string name;
 
     //! State of the receiver
     Reference::To<State> state;

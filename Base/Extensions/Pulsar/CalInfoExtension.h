@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/CalInfoExtension.h,v $
-   $Revision: 1.4 $
-   $Date: 2006/03/17 13:34:45 $
+   $Revision: 1.5 $
+   $Date: 2006/09/28 16:24:52 $
    $Author: straten $ */
 
 #ifndef __CalInfoExtension_h
@@ -45,7 +45,7 @@ namespace Pulsar {
     //////////////////////////////////////////////////////////////////////
     
     //! Cal mode (As defined by the ATNF TCS: OFF, SYNC, EXT1, EXT2)
-    string cal_mode;
+    std::string cal_mode;
     
     //! Calibrator frequency
     double cal_frequency;

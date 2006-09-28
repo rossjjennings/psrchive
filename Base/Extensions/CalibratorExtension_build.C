@@ -8,6 +8,8 @@
 #include "Pulsar/Calibrator.h"
 #include "Pulsar/Integration.h"
 
+using namespace std;
+
 //! Construct from a Calibrator instance
 void Pulsar::CalibratorExtension::build (const Calibrator* calibrator)
 {

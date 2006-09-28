@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/FITSHdrExtension.h,v $
-   $Revision: 1.9 $
-   $Date: 2006/08/09 02:07:23 $
-   $Author: redwards $ */
+   $Revision: 1.10 $
+   $Date: 2006/09/28 16:24:52 $
+   $Author: straten $ */
 
 #ifndef __FITSHdrExtension_h
 #define __FITSHdrExtension_h
@@ -40,13 +40,13 @@ namespace Pulsar {
 
     //! Return two strings based on coordmode attribute
     void get_coord_string (const sky_coord& coordinates,
-			   string& coord1, string& coord2) const;
+			   std::string& coord1, std::string& coord2) const;
 
     //! Set the coordinate mode string
-    void set_coord_mode (const string mode);
+    void set_coord_mode (const std::string mode);
 
     //! Set the creation date string
-    void set_date_str (const string date);
+    void set_date_str (const std::string date);
 
     //////////////////////////////////////////////////////////////////////
     
@@ -54,24 +54,24 @@ namespace Pulsar {
     MJD start_time;
     
     //! Pulsar FITS header version information
-    string hdrver;
+    std::string hdrver;
     int major_version;
     int minor_version;
 
     //! File creation date
-    string creation_date;
+    std::string creation_date;
 
     //! Coordinate mode (J2000, Gal, Ecliptic, AZEL, HADEC)
-    string coordmode;
+    std::string coordmode;
     
     //! Track mode (TRACK, SCANGC, SCANLAT)
-    string trk_mode;
+    std::string trk_mode;
 
     //! Start UT date (YYYY-MM-DD)
-    string stt_date;
+    std::string stt_date;
 
     //! Start UT (hh:mm:ss)
-    string stt_time;
+    std::string stt_time;
 
     //! Start LST
     double stt_lst;

@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/CalibratorExtension.h,v $
-   $Revision: 1.8 $
-   $Date: 2006/03/17 13:34:45 $
+   $Revision: 1.9 $
+   $Date: 2006/09/28 16:24:52 $
    $Author: straten $ */
 
 #ifndef __CalibratorExtension_h
@@ -79,10 +79,10 @@ namespace Pulsar {
     MJD epoch;
 
     //! The weight of each channel
-    vector<float> weight;
+    std::vector<float> weight;
 
     //! The centre frequency of each channel
-    vector<double> centre_frequency;
+    std::vector<double> centre_frequency;
 
     //! Ensure that ichan < get_nchan
     void range_check (unsigned ichan, const char* method) const;

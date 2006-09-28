@@ -37,12 +37,12 @@ Pulsar::IntegrationOrder::~IntegrationOrder ()
 {
 }
 
-string Pulsar::IntegrationOrder::get_IndexState () const
+std::string Pulsar::IntegrationOrder::get_IndexState () const
 {
   return IndexState;
 }
 
-string Pulsar::IntegrationOrder::get_Unit () const
+std::string Pulsar::IntegrationOrder::get_Unit () const
 {
   return Unit;
 }

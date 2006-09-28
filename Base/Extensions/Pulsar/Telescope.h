@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/Telescope.h,v $
-   $Revision: 1.4 $
-   $Date: 2006/05/25 03:33:01 $
-   $Author: hknight $ */
+   $Revision: 1.5 $
+   $Date: 2006/09/28 16:24:52 $
+   $Author: straten $ */
 
 #ifndef __Telescope_Extension_h
 #define __Telescope_Extension_h
@@ -76,9 +76,9 @@ namespace Pulsar {
     };
 
     //! Get the name of the observatory and/or primary reflector
-    string get_name() const { return name; }
+    std::string get_name() const { return name; }
     //! Set the name of the observatory and/or primary reflector
-    void set_name (string _name) { name = _name; }
+    void set_name (const std::string& _name) { name = _name; }
 
     //! Get the latitude of the antenna
     Angle get_latitude() const { return latitude; }
@@ -116,7 +116,7 @@ namespace Pulsar {
   protected:
 
     //! Name of the observatory and/or primary reflector
-    string name;
+    std::string name;
 
     //! Latitude of the antenna
     Angle latitude;

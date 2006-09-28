@@ -6,6 +6,8 @@
  ***************************************************************************/
 #include "Pulsar/Passband.h"
 
+using namespace std;
+
 //! Default constructor
 Pulsar::Passband::Passband ()
   : Extension ("Passband")

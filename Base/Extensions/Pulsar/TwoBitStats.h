@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/TwoBitStats.h,v $
-   $Revision: 1.4 $
-   $Date: 2006/04/19 16:05:25 $
+   $Revision: 1.5 $
+   $Date: 2006/09/28 16:24:52 $
    $Author: straten $ */
 
 #ifndef __TwoBitStats_h
@@ -63,10 +63,10 @@ namespace Pulsar {
     float get_cutoff_sigma () const { return cutoff_sigma; }
 
     //! Get the specified histogram
-    const vector<float>& get_histogram (unsigned idig) const;
+    const std::vector<float>& get_histogram (unsigned idig) const;
 
     //! Set the specified histogram
-    void set_histogram (const vector<float>&, unsigned idig);
+    void set_histogram (const std::vector<float>&, unsigned idig);
 
     //! Set all histogram data to zero
     void zero ();
@@ -92,7 +92,7 @@ namespace Pulsar {
     float cutoff_sigma;
 
     //! Low-voltage state count histograms
-    vector< vector<float> > histogram;
+    std::vector< std::vector<float> > histogram;
 
     //! Throw an exception if idig out of range
     void range_check (unsigned idig, const char* method) const;

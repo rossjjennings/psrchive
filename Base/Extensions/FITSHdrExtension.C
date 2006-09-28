@@ -7,6 +7,8 @@
 #include "Pulsar/FITSHdrExtension.h"
 #include "string_utils.h"
 
+using namespace std;
+
 //! Default constructor
 Pulsar::FITSHdrExtension::FITSHdrExtension ()
   : Extension ("FITSHdrExtension")

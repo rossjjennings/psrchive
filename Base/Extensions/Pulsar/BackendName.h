@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/Attic/BackendName.h,v $
-   $Revision: 1.2 $
-   $Date: 2006/03/17 13:34:45 $
+   $Revision: 1.3 $
+   $Date: 2006/09/28 16:24:52 $
    $Author: straten $ */
 
 #ifndef __Pulsar_BackendName_h
@@ -53,15 +53,15 @@ namespace Pulsar {
     //////////////////////////////////////////////////////////////////////
     
     //! Get the name of the Backend
-    string get_name () const { return name; }
+    std::string get_name () const { return name; }
 
     //! Set the name of the backend
-    void set_name (const string& _name) { name = _name; }
+    void set_name (const std::string& _name) { name = _name; }
 
   protected:
 
     //! The name of the backend
-    string name;
+    std::string name;
 
 
   };

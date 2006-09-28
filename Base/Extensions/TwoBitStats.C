@@ -11,6 +11,8 @@
 #include "JenetAnderson98.h"
 #include "templates.h"
 
+using namespace std;
+
 //! Default constructor
 Pulsar::TwoBitStats::TwoBitStats ()
   : Extension ("TwoBitStats")

@@ -8,6 +8,8 @@
 #include "Pulsar/FluxCalibratorData.h"
 #include "Pulsar/FluxCalibrator.h"
 
+using namespace std;
+
 //! Construct from a FluxCalibrator instance
 Pulsar::FluxCalibratorExtension::FluxCalibratorExtension
 (const FluxCalibrator* calibrator) 

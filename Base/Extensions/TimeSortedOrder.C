@@ -4,20 +4,17 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-#include <vector>
-#include <string>
-#include <algorithm>
-#include <string>
-#include <utility>
-
-#include "MJD.h"
 
 #include "Pulsar/TimeSortedOrder.h"
-#include "Pulsar/Calculator.h"
+
+//#include <algorithm>
+//#include <utility>
+
+using namespace std;
 
 //! Default constructor
 Pulsar::TimeSortedOrder::TimeSortedOrder ()
-  : IntegrationOrder ("BINPHSASC")
+  : IntegrationOrder ("TimeSortedOrder")
 {
   IndexState = "Time Sorted";
   Unit = "time";

@@ -48,9 +48,9 @@ namespace Pulsar {
       int index;
       
       // Information in the row
-      string date_pro;
-      string proc_cmd;
-      string pol_type;
+      std::string date_pro;
+      std::string proc_cmd;
+      std::string pol_type;
       int npol;
       int nbin;
       int nbin_prd;
@@ -62,11 +62,11 @@ namespace Pulsar {
       int fa_corr;
       int rm_corr;
       int dedisp;
-      string sc_mthd;
-      string cal_mthd;
-      string cal_file;
-      string rfi_mthd;
-      string ifr_mthd;
+      std::string sc_mthd;
+      std::string cal_mthd;
+      std::string cal_file;
+      std::string rfi_mthd;
+      std::string ifr_mthd;
       Signal::Scale scale;
 
       //Destructor
@@ -78,29 +78,29 @@ namespace Pulsar {
     };
     
     // The storage array
-    vector<row> rows;
+    std::vector<row> rows;
     
-    string command_str;
-    string the_cal_mthd;
-    string the_sc_mthd;
-    string the_cal_file;
-    string the_rfi_mthd;
-    string the_ifr_mthd;
+    std::string command_str;
+    std::string the_cal_mthd;
+    std::string the_sc_mthd;
+    std::string the_cal_file;
+    std::string the_rfi_mthd;
+    std::string the_ifr_mthd;
 
     ProcHistory::row& get_last ();
 
-    void   set_command_str (string str);
-    string get_command_str ();
-    void   set_cal_mthd (string str);
-    string get_cal_mthd ();
-    void   set_sc_mthd (string str);
-    string get_sc_mthd ();
-    void   set_cal_file (string str);
-    string get_cal_file ();
-    void   set_rfi_mthd (string str);
-    string get_rfi_mthd ();
-    void   set_ifr_mthd (string str);
-    string get_ifr_mthd ();
+    void   set_command_str (std::string str);
+    std::string get_command_str ();
+    void   set_cal_mthd (std::string str);
+    std::string get_cal_mthd ();
+    void   set_sc_mthd (std::string str);
+    std::string get_sc_mthd ();
+    void   set_cal_file (std::string str);
+    std::string get_cal_file ();
+    void   set_rfi_mthd (std::string str);
+    std::string get_rfi_mthd ();
+    void   set_ifr_mthd (std::string str);
+    std::string get_ifr_mthd ();
 
     void   add_blank_row ();
     

@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/PolnCalibratorExtension.h,v $
-   $Revision: 1.19 $
-   $Date: 2006/04/16 13:27:26 $
+   $Revision: 1.20 $
+   $Date: 2006/09/28 16:24:52 $
    $Author: straten $ */
 
 #ifndef __PolnCalibratorExtension_h
@@ -72,7 +72,7 @@ namespace Pulsar {
   protected:
 
     //! The instrumental response as a function of frequency
-    vector<Transformation> response;
+    std::vector<Transformation> response;
 
     //! The number of parameters that describe the transformation
     unsigned nparam;

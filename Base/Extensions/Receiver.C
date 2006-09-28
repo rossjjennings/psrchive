@@ -12,6 +12,8 @@
 
 #include "Pauli.h"
 
+using namespace std;
+
 /*! If the current state is not of the specified StateType, a new state
   will be created, copied, and installed */
 template<class StateType>
@@ -165,7 +167,7 @@ Angle Pulsar::Receiver::get_calibrator_offset () const
   return get<Linear>()->get_calibrator_offset ();
 }
 
-static std::string match_indent = "\n\t";
+static string match_indent = "\n\t";
 
 bool Pulsar::Receiver::match (const Receiver* receiver, string& reason) const
 {

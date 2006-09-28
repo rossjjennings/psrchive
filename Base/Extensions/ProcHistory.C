@@ -6,11 +6,9 @@
  *
  ***************************************************************************/
 
-#include <string.h>
-#include <math.h>
-#include <stdlib.h>
-
 #include "Pulsar/ProcHistory.h"
+
+using namespace std;
 
 // //////////////////////////////////////////////////
 // ProcHistory methods

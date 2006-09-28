@@ -5,6 +5,7 @@
  *
  ***************************************************************************/
 #include "Pulsar/dspReduction.h"
+using namespace std;
 
 //! Default constructor
 Pulsar::dspReduction::dspReduction ()

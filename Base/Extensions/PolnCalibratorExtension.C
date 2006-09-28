@@ -5,6 +5,7 @@
  *
  ***************************************************************************/
 #include "Pulsar/PolnCalibratorExtension.h"
+using namespace std;
 
 //! Default constructor
 Pulsar::PolnCalibratorExtension::PolnCalibratorExtension ()

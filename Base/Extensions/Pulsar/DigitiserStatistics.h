@@ -47,13 +47,13 @@ namespace Pulsar {
 
       int index;
       
-      string dig_mode;
+      std::string dig_mode;
       int ndigr;
       int nlev;
       int ncycsub;
-      string diglev;
+      std::string diglev;
       
-      vector<float> data;
+      std::vector<float> data;
       
     private:
       
@@ -61,7 +61,7 @@ namespace Pulsar {
       
     };
 
-    vector<row> rows;
+    std::vector<row> rows;
     
     DigitiserStatistics::row& get_row (unsigned i);
     DigitiserStatistics::row& get_last ();

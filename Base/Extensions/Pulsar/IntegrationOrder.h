@@ -7,8 +7,8 @@
  ***************************************************************************/
                                                                                 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/IntegrationOrder.h,v $
-   $Revision: 1.8 $
-   $Date: 2006/03/17 13:34:45 $
+   $Revision: 1.9 $
+   $Date: 2006/09/28 16:24:52 $
    $Author: straten $ */
                                                                                 
 #ifndef __IntegrationOrder_h
@@ -46,10 +46,10 @@ namespace Pulsar {
     virtual IntegrationOrder* clone () const = 0;
     
     //! Return a string describing the type of indexing used
-    string get_IndexState () const;
+    std::string get_IndexState () const;
     
     //! Return a string describing the units of this state
-    string get_Unit () const;
+    std::string get_Unit () const;
 
     //! Return the size of the index array
     unsigned size() const;
@@ -78,13 +78,13 @@ namespace Pulsar {
   protected:
 
     //! An index state identifier string
-    string IndexState;
+    std::string IndexState;
 
     //! The units (if any) of this state
-    string Unit;
+    std::string Unit;
     
     //! Storage for the actual Integration indices
-    vector<double> indices;                                                    
+    std::vector<double> indices;                                                    
 
   };                                                                            
                                                                                 

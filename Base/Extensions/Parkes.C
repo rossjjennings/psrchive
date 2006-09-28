@@ -8,6 +8,8 @@
 #include "Pulsar/Archive.h"
 #include "Pulsar/Receiver.h"
 
+using namespace std;
+
 //! Initialize the Receiver Extension with Parkes Multibeam attributes
 void Pulsar::Parkes::Multibeam (Receiver* receiver)
 {

@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/dspReduction.h,v $
-   $Revision: 1.8 $
-   $Date: 2006/03/17 13:34:45 $
+   $Revision: 1.9 $
+   $Date: 2006/09/28 16:24:52 $
    $Author: straten $ */
 
 #ifndef __dspReduction_h
@@ -48,16 +48,16 @@ namespace Pulsar {
     //////////////////////////////////////////////////////////////////////
     
     //! Get the name of the backend
-    string get_name () const { return recorder_name; }
+    std::string get_name () const { return recorder_name; }
     
     //! Set the name of the backend
-    void set_name (const string& name) { recorder_name = name; }
+    void set_name (const std::string& name) { recorder_name = name; }
 
     //! Get the software information
-    string get_software () const { return software; }
+    std::string get_software () const { return software; }
 
     //! Set the software information
-    void set_software (const string& soft) { software = soft; }
+    void set_software (const std::string& soft) { software = soft; }
 
     /** @name dsp::Input parameters
      *  These parameters describe the state of the dsp::Input from which the
@@ -177,10 +177,10 @@ namespace Pulsar {
   protected:
 
     //! The name of the baseband recorder
-    string recorder_name;
+    std::string recorder_name;
 
     //! The software information
-    string software;
+    std::string software;
 
     /** @name dsp::Input parameters
      *  These parameters describe the state of the dsp::Input from which the

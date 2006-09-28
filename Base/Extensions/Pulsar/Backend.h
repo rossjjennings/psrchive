@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/Backend.h,v $
-   $Revision: 1.5 $
-   $Date: 2006/09/07 15:50:28 $
+   $Revision: 1.6 $
+   $Date: 2006/09/28 16:24:52 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Backend_h
@@ -35,7 +35,7 @@ namespace Pulsar {
     const Backend& operator= (const Backend&);
 
     //! Return the name of the Backend
-    virtual string get_name () const = 0;
+    virtual std::string get_name () const = 0;
 
     //! Get the hand of the backend
     Signal::Hand get_hand () const;
