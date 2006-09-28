@@ -9,6 +9,7 @@
 #include "string_utils.h"
 #include "convert_endian.h"
 #include "Error.h"
+#include "tostring.h"
 
 #include <stdio.h>
 #include <math.h>
@@ -73,33 +74,35 @@ int Timer::fload (const char* fname, struct timer* hdr, bool big_endian)
 
 bool Timer::is_timer (const struct timer& hdr, std::string* reason) 
 {
+  const string invalid = "Timer::is_timer invalid ";
+
   if (hdr.nbin < 1) {
     if (reason)
-      *reason = stringprintf ("Timer::is_timer invalid nbin=%d", hdr.nbin);
+      *reason = invalid + "nbin=" + tostring(hdr.nbin);
     return false;
   }
 
   if (hdr.mjd < 2000 || hdr.mjd > 500000) {
     if (reason)
-      *reason = stringprintf ("Timer::is_timer invalid MJD=%d", hdr.mjd);
+      *reason = invalid + "MJD=" + tostring(hdr.mjd);
     return false;
   }
 
   if (hdr.nsub_int < 0) {
     if (reason)
-      *reason = stringprintf ("Timer::is_timer invalid nsub_int=%d", hdr.nsub_int);
+      *reason = invalid + "nsub_int=" + tostring(hdr.nsub_int);
     return false;
   }
 
   if (hdr.nsub_band < 0) {
     if (reason)
-      *reason = stringprintf ("Timer::is_timer invalid nsub_band=%d", hdr.nsub_band);
+      *reason = invalid + "nsub_band=" + tostring(hdr.nsub_band);
     return false;
   }
 
   if (hdr.obstype < 0 || hdr.obstype > 40) {
     if (reason)
-      *reason = stringprintf ("Timer::is_timer invalid obstype=%d", hdr.obstype);
+      *reason = invalid + "obstype=" + tostring(hdr.obstype);
     return false;
   }
 
@@ -250,8 +253,8 @@ bool Timer::mixable (const timer& hdr1, const timer& hdr2,
     return false;
   }
   if (hdr1.nbin != hdr2.nbin) {
-    reason = stringprintf ("Archives have different numbers of bins (%d!=%d)",
-	  hdr1.nbin, hdr2.nbin);
+    reason = "Archives have different numbers of bins (" 
+             + tostring(hdr1.nbin) + "!=" + tostring(hdr2.nbin) + ")";
     return false;
   }
 
