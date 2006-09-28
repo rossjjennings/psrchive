@@ -1,16 +1,13 @@
 /***************************************************************************
  *
- *   Copyright (C) 2003 by straten Willem van Straten
+ *   Copyright (C) 1993 by Paul Harrison
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-/* @(#)angleconv.c	3.2 6/17/93 */
+
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
-#include "astronomical.h"
-
- /*  Paul Harrison - Jodrell Bank*/
 
 int dms2rad ( char * instr, double * radval)
 {
@@ -44,7 +41,7 @@ int dms2rad ( char * instr, double * radval)
 	    if (--nfound)
 		*radval += secs / 3600;
 	}
-	*radval *= isign * PI / 180;
+	*radval *= isign * M_PI / 180;
 	return 1;                           /* conversion succeeded */
     }
     else
@@ -105,7 +102,7 @@ int dmserr2rad ( char * instr, char * inerr, double * radval)
 	}
 	if(nfound <=2)
 	  {
-	    *radval *=  PI / 180.0 / pow(60.0, (double)(nfound-1));
+	    *radval *=  M_PI / 180.0 / pow(60.0, (double)(nfound-1));
 	  }
 	else
 	  {
@@ -113,7 +110,7 @@ int dmserr2rad ( char * instr, char * inerr, double * radval)
 	    ptr=strtok(NULL," :");
 	    ptr=strtok(NULL," :");
 	    *radval *= errscale(ptr,inerr);
-	    *radval *= PI / 180.0 / 3600.0;
+	    *radval *= M_PI / 180.0 / 3600.0;
 	  }
       }
     else
@@ -128,7 +125,7 @@ int dmserr2rad ( char * instr, char * inerr, double * radval)
 void rad2dms ( double * radval, char * sign, int * deg,
 	      int * min, double * sec)
 {
-  double radt = * radval / PI * 180.0;
+  double radt = * radval / M_PI * 180.0;
 
   *sign = (radt < 0.0) ?  '-' : '+';
   radt = fabs(radt);
@@ -167,7 +164,7 @@ void makejname( double * ra, double * raerr, double * dec, double * decerr, char
   sprintf(name+1,"%02d%02d",deg,min);
   rad2dms(dec, &isign, &deg, &min, &sec);
   sprintf(name+5,"%c%02d%02d",isign,deg,min);
-  if(*decerr > 0.0 && (*decerr / PI * 180.0 * 60) > 1.0 ) /* truncate */
+  if(*decerr > 0.0 && (*decerr / M_PI * 180.0 * 60) > 1.0 ) /* truncate */
     fprintf(stderr,"Recommend renaming to %s\n",name);						       /* name if necessary */
     /*    name[8]='\0'; */
     name[10]='\0';
