@@ -10,6 +10,8 @@
 
 #include "epnio.h"
 
+using namespace std;
+
 void Pulsar::EPNArchive::init ()
 {
   current_record = 0;
@@ -346,33 +348,6 @@ void Pulsar::EPNArchive::set_dedispersed (bool done)
 {
 
 }
-
-//! Get file number for raw data (FB only)
-int Pulsar::EPNArchive::get_file_number() const 
-{
-	return -1;
-}
-
-//! Set file number for raw data (FB only)
-void Pulsar::EPNArchive::set_file_number(int file_number) 
-{
-	
-}
-
-//! Get tape label for raw data (FB only)
-string Pulsar::EPNArchive::get_tape_label()  const 
-{
-	return "";
-}
-
-
-//! Set tape label for raw data (FB only)
-void Pulsar::EPNArchive::set_tape_label(string tape_label) 
-{
-	
-}
-
-
 
 //
 //

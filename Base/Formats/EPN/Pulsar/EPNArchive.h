@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/EPN/Pulsar/EPNArchive.h,v $
-   $Revision: 1.9 $
-   $Date: 2006/03/17 13:34:52 $
+   $Revision: 1.10 $
+   $Date: 2006/09/28 18:19:53 $
    $Author: straten $ */
 
 #ifndef __EPN_Archive_h
@@ -40,10 +40,10 @@ namespace Pulsar {
     EPNArchive (const Archive& archive);
 
     //! Base extraction constructor
-    EPNArchive (const Archive& archive, const vector<unsigned>& subint);
+    EPNArchive (const Archive& archive, const std::vector<unsigned>& subint);
 
     //! Copy all of the class attributes and the selected Integration data
-    void copy (const Archive& archive, const vector<unsigned>& subints);
+    void copy (const Archive& archive, const std::vector<unsigned>& subints);
 
     // //////////////////////////////////////////////////////////////////
     //
@@ -54,7 +54,7 @@ namespace Pulsar {
     EPNArchive* clone () const;
 
     //! Return a pointer to a new extraction constructed instance equal to this
-    EPNArchive* extract (const vector<unsigned>& subints) const;
+    EPNArchive* extract (const std::vector<unsigned>& subints) const;
 
     //! Get the tempo code of the telescope used
     char get_telescope_code () const;
@@ -77,9 +77,9 @@ namespace Pulsar {
     void set_type (Signal::Source type);
 
     //! Get the source name
-    string get_source () const;
+    std::string get_source () const;
     //! Set the source name
-    void set_source (const string& source);
+    void set_source (const std::string& source);
 
     //! Get the coordinates of the source
     sky_coord get_coordinates () const;
@@ -137,18 +137,6 @@ namespace Pulsar {
     //! Set the status of the poln calibrated flag
     void set_poln_calibrated (bool done = true);
 
-		//! Get file number for raw data (FB only)
-		int get_file_number() const;
-
-		//! Set file number for raw data (FB only)
-		void set_file_number(int file_number);
-				
-		//! Get tape label for raw data (FB only)
-		string get_tape_label() const;
-		
-		//! Set tape label for raw data (FB only)
-		void set_tape_label(string tape_label);
-
   protected:
 
     friend class Archive::Advocate<EPNArchive>;
@@ -165,10 +153,10 @@ namespace Pulsar {
         bool advocate (const char* filename);
 
         //! Return the name of the EPNArchive plugin
-        string get_name () { return "EPN"; }
+        std::string get_name () { return "EPN"; }
 
         //! Return description of this plugin
-        string get_description ();
+        std::string get_description ();
 
     }; 
 
