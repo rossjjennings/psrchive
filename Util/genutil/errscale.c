@@ -1,26 +1,24 @@
 /***************************************************************************
  *
- *   Copyright (C) 2003 by straten Willem van Straten
+ *   Copyright (C) 1993 by Paul Harrison
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-/* @(#)errscale.c	3.2 6/17/93 */
+
 #include <string.h>
 #include <stdio.h>
 #include <ctype.h>
 #include <math.h>
-/*
-Paul Harrison
-*/
+
 double errscale(char * valstr, char * errstr)
 {
   double temp=1;
   int i=0;
-
-				/* test for the cases where the error */
-				/* represents the absolute value i.e. */
-				/* if negative or if there is a */
-				/* decimal point in string */
+  
+  /* test for the cases where the error */
+  /* represents the absolute value i.e. */
+  /* if negative or if there is a */
+  /* decimal point in string */
 
   if (errstr[0] == '-' || strchr(errstr,'.')!=NULL) return 1.0;
     
