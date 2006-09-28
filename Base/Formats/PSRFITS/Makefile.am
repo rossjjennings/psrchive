@@ -33,9 +33,9 @@ test_template_SOURCES = test_template.C
 # Dependencies should never be changed
 #
 
-INCLUDES = -I$(top_builddir)/utils/include -I$(top_builddir)/astro/include \
-        -I$(top_srcdir)/psrchive -I$(top_srcdir)/psrchive/Calibration \
-	-I$(top_srcdir)/psrchive/Extension @CFITSIO_CFLAGS@ @MPI_CFLAGS@
+INCLUDES = -I$(top_builddir)/utils/include -I$(top_srcdir)/psrchive/File \
+	-I$(top_srcdir)/psrchive/Polarimetry \
+	-I$(top_srcdir)/psrchive/File/Extension @CFITSIO_CFLAGS@ @MPI_CFLAGS@
 
 LDADD = libpsrfits.la $(top_builddir)/utils/libpsrutils.la @CFITSIO_LIBS@
 
