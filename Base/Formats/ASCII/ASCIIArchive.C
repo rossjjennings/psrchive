@@ -9,6 +9,7 @@
 #include "Pulsar/Profile.h"
 
 #include <fstream>
+using namespace std;
 
 void Pulsar::ASCIIArchive::init ()
 {
