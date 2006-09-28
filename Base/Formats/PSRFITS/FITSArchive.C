@@ -37,6 +37,8 @@
 #include "string_utils.h"
 #include "ephio.h"
 
+using namespace std;
+
 //! null constructor
 // //////////////////////////
 // //////////////////////////
@@ -48,30 +50,6 @@ void Pulsar::FITSArchive::init ()
 
   scale_cross_products = false;
   correct_P236_reference_epoch = false;
-
-  fcal_on_sources.push_back("Hydra");
-  fcal_on_sources.push_back("HYDRA_O");
-  fcal_on_sources.push_back("VIRGO_O");
-  fcal_on_sources.push_back("3C353_O");
-  fcal_on_sources.push_back("0918-1205_H");
-  fcal_on_sources.push_back("J0918-1205");
-  
-  fcal_off_sources.push_back("Hydra_N");
-  fcal_off_sources.push_back("Hydra_S");
-  fcal_off_sources.push_back("HYDRA_N");
-  fcal_off_sources.push_back("HYDRA_S");
-  fcal_off_sources.push_back("VIRGO_N");
-  fcal_off_sources.push_back("VIRGO_S");
-  fcal_off_sources.push_back("3C353_N");
-  fcal_off_sources.push_back("3C353_S");
-  fcal_off_sources.push_back("0918-1105_N");
-  fcal_off_sources.push_back("0918-1305_S");
-  fcal_off_sources.push_back("0918-1005_N");
-  fcal_off_sources.push_back("0918-1405_S"); 
-  fcal_off_sources.push_back("J0918-1105");
-  fcal_off_sources.push_back("J0918-1305");
-  fcal_off_sources.push_back("J0918-1005");
-  fcal_off_sources.push_back("J0918-1405");
 }
 
 //
@@ -323,30 +301,8 @@ void Pulsar::FITSArchive::load_header (const char* filename) try
     if (verbose == 3)
       cerr << "FITSArchive::load_header using Signal::Pulsar" << endl;
   }
-  else if (obs_mode == "CAL" || obs_mode == "LEVCAL") {
-    
-    if (find(fcal_on_sources.begin(), fcal_on_sources.end(), 
-	     get_source()) != fcal_on_sources.end()) {
-      set_type ( Signal::FluxCalOn );
-      if (verbose == 3)
-	cerr << "FITSArchive::load_header using Signal::FluxCalOn" << endl;
-    }
-    
-    else if (find(fcal_off_sources.begin(), fcal_off_sources.end(), 
-		  get_source()) != fcal_off_sources.end()) {
-      set_type ( Signal::FluxCalOff );
-      if (verbose == 3)
-	cerr << "FITSArchive::load_header using Signal::FluxCalOff" << endl;
-    }
-    
-    else {
-      set_type ( Signal::PolnCal );
-      if (verbose == 3)
-	cerr << "FITSArchive::load_header using Signal::PolnCal" << endl;
-    }
-
-   }
-
+  else if (obs_mode == "CAL" || obs_mode == "LEVCAL")
+    set_type ( Signal::PolnCal );
   else if (obs_mode == "FOF")
     set_type ( Signal::FluxCalOff );
   else if (obs_mode == "FON")
