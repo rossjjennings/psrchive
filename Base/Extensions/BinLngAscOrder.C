@@ -5,7 +5,9 @@
  *
  ***************************************************************************/
 #include "Pulsar/BinLngAscOrder.h"
-#include "Pulsar/Calculator.h"
+#include "psrephem_orbital.h"
+
+using namespace std;
 
 //! Default constructor
 Pulsar::BinLngAscOrder::BinLngAscOrder ()

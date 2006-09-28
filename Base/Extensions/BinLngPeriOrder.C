@@ -5,7 +5,9 @@
  *
  ***************************************************************************/
 #include "Pulsar/BinLngPeriOrder.h"
-#include "Pulsar/Calculator.h"
+#include "psrephem_orbital.h"
+
+using namespace std;
 
 //! Default constructor
 Pulsar::BinLngPeriOrder::BinLngPeriOrder ()
