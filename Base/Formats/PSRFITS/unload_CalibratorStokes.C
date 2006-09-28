@@ -15,6 +15,8 @@
 #include <ieeefp.h>
 #endif
 
+using namespace std;
+
 void Pulsar::FITSArchive::unload (fitsfile* fptr, 
 				  const CalibratorStokes* stokes)
 {

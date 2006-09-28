@@ -10,6 +10,8 @@
 #include "CalibratorExtensionIO.h"
 #include "psrfitsio.h"
 
+using namespace std;
+
 void Pulsar::FITSArchive::unload (fitsfile* fptr, 
 				  const FluxCalibratorExtension* fce)
 {

@@ -12,6 +12,8 @@
 #include "string_utils.h"
 #include "RegularExpression.h"
 
+using namespace std;
+
 void Pulsar::FITSArchive::load_WidebandCorrelator (fitsfile* fptr)
 {
   if (verbose == 3)

@@ -10,6 +10,8 @@
 #include <ieeefp.h>
 #endif
 
+using namespace std;
+
 void Pulsar::load (fitsfile* fptr, CalibratorExtension* ext)
 {
   int status = 0;

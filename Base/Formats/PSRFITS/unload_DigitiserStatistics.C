@@ -8,6 +8,8 @@
 #include "Pulsar/DigitiserStatistics.h"
 #include "FITSError.h"
 
+using namespace std;
+
 void unload (fitsfile* fptr, const Pulsar::DigitiserStatistics::row* drow)
 {
   int row = drow->index;

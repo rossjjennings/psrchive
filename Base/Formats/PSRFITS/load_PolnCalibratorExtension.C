@@ -11,6 +11,8 @@
 #include <stdlib.h>
 #include <assert.h>
 
+using namespace std;
+
 void Pulsar::FITSArchive::load_PolnCalibratorExtension (fitsfile* fptr)
 {
   int status = 0;

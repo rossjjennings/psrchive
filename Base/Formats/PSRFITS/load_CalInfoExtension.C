@@ -8,6 +8,8 @@
 #include "Pulsar/CalInfoExtension.h"
 #include "FITSError.h"
 
+using namespace std;
+
 void Pulsar::FITSArchive::load_CalInfoExtension (fitsfile* fptr)
 {
   // status returned by FITSIO routines

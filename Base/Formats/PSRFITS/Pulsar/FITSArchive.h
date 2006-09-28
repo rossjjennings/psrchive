@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/PSRFITS/Pulsar/FITSArchive.h,v $
-   $Revision: 1.34 $
-   $Date: 2006/03/17 13:34:53 $
+   $Revision: 1.35 $
+   $Date: 2006/09/28 19:13:15 $
    $Author: straten $ */
 
 #ifndef __Pulsar_FITSArchive_h
@@ -72,10 +72,10 @@ namespace Pulsar {
     FITSArchive (const Archive& archive);
 
     //! Base extraction constructor
-    FITSArchive (const Archive& archive, const vector<unsigned>& subints);
+    FITSArchive (const Archive& archive, const std::vector<unsigned>& subints);
 
     //! Copy all of the class attributes and the selected Integration data
-    void copy (const Archive& archive, const vector<unsigned>& subints);
+    void copy (const Archive& archive, const std::vector<unsigned>& subints);
 
     // //////////////////////////////////////////////////////////////////
     //
@@ -86,7 +86,7 @@ namespace Pulsar {
     FITSArchive* clone () const;
 
     //! Return a pointer to a new extraction constructed instance equal to this
-    FITSArchive* extract (const vector<unsigned>& subints) const;
+    FITSArchive* extract (const std::vector<unsigned>& subints) const;
 
     // //////////////////////////////////////////////////////////////////
     //
@@ -151,10 +151,10 @@ namespace Pulsar {
       bool advocate (const char* filename);
       
       //! Return the name of the FITSArchive plugin
-      string get_name () { return "PSRFITS"; }
+      std::string get_name () { return "PSRFITS"; }
       
       //! Return description of this plugin
-      string get_description ();
+      std::string get_description ();
       
     };
     
@@ -219,11 +219,9 @@ namespace Pulsar {
     // Correct the reference epoch in WBC data taken during commissioning
     bool correct_P236_reference_epoch;
 
-   int truthval (bool) const;
+    int truthval (bool) const;
     void init ();
 
-    vector<string> fcal_on_sources;
-    vector<string> fcal_off_sources;
   };
 
 }

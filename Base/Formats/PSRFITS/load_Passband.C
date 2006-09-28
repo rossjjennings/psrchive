@@ -8,6 +8,8 @@
 #include "Pulsar/Passband.h"
 #include "FITSError.h"
 
+using namespace std;
+
 void Pulsar::FITSArchive::load_Passband (fitsfile* fptr)
 {
   int status = 0;

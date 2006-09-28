@@ -9,6 +9,8 @@
 #include "CalibratorExtensionIO.h"
 #include "psrfitsio.h"
 
+using namespace std;
+
 void Pulsar::FITSArchive::load_FluxCalibratorExtension (fitsfile* fptr)
 {
   int status = 0;

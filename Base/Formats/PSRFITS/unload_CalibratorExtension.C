@@ -6,6 +6,8 @@
  ***************************************************************************/
 #include "CalibratorExtensionIO.h"
 
+using namespace std;
+
 void Pulsar::unload (fitsfile* fptr, const CalibratorExtension* ext)
 {
   if (Archive::verbose == 3)

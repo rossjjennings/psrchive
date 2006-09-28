@@ -15,6 +15,8 @@
 #include <ieeefp.h>
 #endif
 
+using namespace std;
+
 void Pulsar::FITSArchive::load_CalibratorStokes (fitsfile* fptr)
 {
   int status = 0;

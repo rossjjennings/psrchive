@@ -8,6 +8,8 @@
 #include "Pulsar/Receiver.h"
 #include "FITSError.h"
 
+using namespace std;
+
 void Pulsar::FITSArchive::load_Receiver (fitsfile* fptr)
 {
   // status returned by FITSIO routines

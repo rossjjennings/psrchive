@@ -7,6 +7,8 @@
 #include "Pulsar/FITSArchive.h"
 #include "FITSError.h"
 
+using namespace std;
+
 /*!
   \param ffptr reference to the PSRFITS file to be modified
   \param hdu_name name of the HDU to remove from ffptr

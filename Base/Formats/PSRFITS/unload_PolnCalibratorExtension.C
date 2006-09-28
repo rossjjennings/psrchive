@@ -10,6 +10,8 @@
 
 #include <assert.h>
 
+using namespace std;
+
 void Pulsar::FITSArchive::unload (fitsfile* fptr, 
 				  const PolnCalibratorExtension* pce)
 {

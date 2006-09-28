@@ -11,6 +11,8 @@
 
 #include "string_utils.h"
 
+using namespace std;
+
 void Pulsar::FITSArchive::update_history()
 {
   ProcHistory* history = get<ProcHistory>();

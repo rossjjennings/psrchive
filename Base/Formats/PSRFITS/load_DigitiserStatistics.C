@@ -9,6 +9,8 @@
 #include "Pulsar/FITSHdrExtension.h"
 #include "FITSError.h"
 
+using namespace std;
+
 void load (fitsfile* fptr, Pulsar::DigitiserStatistics::row* drow,
 	   Pulsar::FITSHdrExtension* hdr_ext)
 {

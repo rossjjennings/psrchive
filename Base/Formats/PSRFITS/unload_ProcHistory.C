@@ -8,6 +8,8 @@
 #include "Pulsar/ProcHistory.h"
 #include "FITSError.h"
 
+using namespace std;
+
 void unload (fitsfile* fptr, const Pulsar::ProcHistory::row* hrow)
 {
   if (!hrow)

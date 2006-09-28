@@ -6,6 +6,8 @@
  ***************************************************************************/
 #include "Pulsar/FITSArchive.h"
 
+using namespace std;
+
 string Pulsar::FITSArchive::Agent::get_description ()
 {
   return "PSRFITS version 1.4";

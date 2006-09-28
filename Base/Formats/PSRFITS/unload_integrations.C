@@ -8,6 +8,8 @@
 #include "Pulsar/IntegrationOrder.h"
 #include "FITSError.h"
 
+using namespace std;
+
 void Pulsar::FITSArchive::unload_integrations (fitsfile* ffptr) const
 {
   int status = 0;

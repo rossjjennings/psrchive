@@ -8,6 +8,8 @@
 #include "Pulsar/ITRFExtension.h"
 #include "FITSError.h"
 
+using namespace std;
+
 void Pulsar::FITSArchive::load_ITRFExtension (fitsfile* fptr)
 {
   // status returned by FITSIO routines

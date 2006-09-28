@@ -8,6 +8,8 @@
 #include "Pulsar/Pointing.h"
 #include "FITSError.h"
 
+using namespace std;
+
 /*!
   \pre The current HDU is the SUBINT HDU
 */

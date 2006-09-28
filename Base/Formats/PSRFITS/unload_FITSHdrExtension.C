@@ -8,6 +8,8 @@
 #include "Pulsar/FITSHdrExtension.h"
 #include "FITSError.h"
 
+using namespace std;
+
 void Pulsar::FITSArchive::unload (fitsfile* fptr, const FITSHdrExtension* ext)
 {
   // status returned by FITSIO routines

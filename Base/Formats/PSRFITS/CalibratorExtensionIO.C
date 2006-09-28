@@ -6,6 +6,8 @@
  ***************************************************************************/
 #include "CalibratorExtensionIO.h"
 
+using namespace std;
+
 void Pulsar::load_Estimates (fitsfile* fptr, vector< Estimate<double> >& data,
 			     char* column_name)
 {

@@ -18,6 +18,8 @@
 
 #include "FITSError.h"
 
+using namespace std;
+
 // //////////////////////////////////////////////////////////////////
 
 //! A function to read a single integration from a FITS file on disk.
