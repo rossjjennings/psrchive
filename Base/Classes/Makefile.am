@@ -52,5 +52,6 @@ libExtension_la_SOURCES = \
 # Dependencies should never be changed
 #
 
-INCLUDES = -I$(top_builddir)/utils/include -I$(top_builddir)/astro/include \
-	-I$(top_srcdir)/psrchive -I$(top_srcdir)/psrchive/Calibration
+INCLUDES = -I$(top_builddir)/utils/include -I$(top_srcdir)/psrchive/File \
+	-I$(top_srcdir)/psrchive/Polarimetry
+
