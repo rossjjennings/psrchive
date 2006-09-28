@@ -10,6 +10,8 @@
 #include "Pulsar/Profile.h"
 #include "mini++.h"
 
+using namespace std;
+
 //! Null constructor simply intializes defaults
 void Pulsar::TimerIntegration::init()
 {

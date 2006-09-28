@@ -13,6 +13,8 @@
 #include "compressed_io.h"
 #include "timer++.h"
 
+using namespace std;
+
 //
 //
 //

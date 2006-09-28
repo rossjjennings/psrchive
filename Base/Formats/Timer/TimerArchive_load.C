@@ -14,6 +14,7 @@
 #include "mini++.h"
 #include "coord.h"
 
+using namespace std;
 
 /*****************************************************************************/
 void Pulsar::TimerArchive::load_header (const char* filename)

@@ -10,6 +10,8 @@
 
 #include "convert_endian.h"
 
+using namespace std;
+
 //! unload the subint to file
 void Pulsar::TimerIntegration::unload (FILE* fptr) const
 {

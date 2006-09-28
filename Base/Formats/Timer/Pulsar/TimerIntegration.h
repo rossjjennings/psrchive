@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/Timer/Pulsar/TimerIntegration.h,v $
-   $Revision: 1.5 $
-   $Date: 2006/03/17 13:34:55 $
+   $Revision: 1.6 $
+   $Date: 2006/09/28 16:58:43 $
    $Author: straten $ */
 
 /*
@@ -104,13 +104,13 @@ namespace Pulsar {
     unsigned nbin;
 
     //! weight of each channel/poln
-    vector<float> wts;
+    std::vector<float> wts;
 
     //! median of average bandpass
-    vector< vector<float> > med;
+    std::vector< std::vector<float> > med;
 
     //! bandpass averaged over bins
-    vector< vector<float> > bpass;
+    std::vector< std::vector<float> > bpass;
 
     //! Set the number of pulsar phase bins
     /*! Called by Integration methods to update sub-class attribute */

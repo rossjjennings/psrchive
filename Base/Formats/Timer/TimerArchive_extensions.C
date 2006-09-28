@@ -10,6 +10,8 @@
 #include "Pulsar/TapeInfo.h"
 #include "Pulsar/BackendName.h"
 
+using namespace std;
+
 void Pulsar::TimerArchive::unpack_extensions ()
 {
   if (verbose == 3)

@@ -16,6 +16,8 @@
 #include <ieeefp.h>
 #endif
 
+using namespace std;
+
 int Pulsar::TimerProfile_poln (Signal::Component state)
 {
   switch (state) {

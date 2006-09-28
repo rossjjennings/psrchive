@@ -13,6 +13,8 @@
 #include <memory>
 #include <assert.h>
 
+using namespace std;
+
 /* assumes that all profiles have equal nbins */
 void unpackprofiles (vector<vector<Reference::To<Pulsar::Profile> > >& profs,
 		     int npol, int nsub, int nbin,

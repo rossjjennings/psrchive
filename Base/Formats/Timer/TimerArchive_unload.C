@@ -18,6 +18,8 @@
 #include "mini++.h"
 #include "coord.h"
 
+using namespace std;
+
 /*****************************************************************************/
 void Pulsar::TimerArchive::unload_file (const char* filename) const 
 try {

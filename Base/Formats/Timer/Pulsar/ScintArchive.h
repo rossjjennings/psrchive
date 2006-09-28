@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/Timer/Pulsar/ScintArchive.h,v $
-   $Revision: 1.3 $
-   $Date: 2006/03/17 13:34:55 $
+   $Revision: 1.4 $
+   $Date: 2006/09/28 16:58:42 $
    $Author: straten $ */
 
 #ifndef __Scint_Archive_h
@@ -41,16 +41,16 @@ namespace Pulsar {
     const ScintArchive& operator = (const ScintArchive& archive);
     
     //! Base extraction constructor
-    ScintArchive (const Archive& archive, const vector<unsigned>& subint);
+    ScintArchive (const Archive& archive, const std::vector<unsigned>& subint);
 
     //! Copy all of the class attributes and the selected Integration data
-    void copy (const Archive& archive, const vector<unsigned>& subints);
+    void copy (const Archive& archive, const std::vector<unsigned>& subints);
 
     //! Return a pointer to a new copy constructed instance equal to this
     virtual ScintArchive* clone () const;
 
     //! Return a pointer to a new extraction constructed instance equal to this
-    virtual ScintArchive* extract (const vector<unsigned>& subints) const;
+    virtual ScintArchive* extract (const std::vector<unsigned>& subints) const;
 
     // //////////////////////////////////////////////////////////////////
     //
@@ -58,7 +58,7 @@ namespace Pulsar {
     //
 
     //! Return a reference to the bandpass in the given channel
-    const vector<float>& get_passband (unsigned channel) const;
+    const std::vector<float>& get_passband (unsigned channel) const;
 
     bool takes (const ScintArchive* archive) const;
 
@@ -66,7 +66,7 @@ namespace Pulsar {
 
   protected:
 
-    vector< vector<float> > spectra;
+    std::vector< std::vector<float> > spectra;
 
     friend class Archive::Advocate<ScintArchive>;
 
@@ -82,10 +82,10 @@ namespace Pulsar {
         bool advocate (const char* filename);
 
         //! Return the name of the ScintArchive plugin
-        string get_name () { return "Scint"; }
+        std::string get_name () { return "Scint"; }
 
         //! Return description of this plugin
-        string get_description ();
+        std::string get_description ();
 
     };
 

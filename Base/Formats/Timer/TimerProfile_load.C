@@ -13,6 +13,8 @@
 
 #include <stdio.h>
 
+using namespace std;
+
 /*!
   \pre The Profile must have been resized before calling this function
 */

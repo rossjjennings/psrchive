@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/Timer/Pulsar/TimerArchive.h,v $
-   $Revision: 1.18 $
-   $Date: 2006/03/31 17:16:41 $
+   $Revision: 1.19 $
+   $Date: 2006/09/28 16:58:42 $
    $Author: straten $ */
 
 #ifndef __Timer_Archive_h
@@ -44,10 +44,10 @@ namespace Pulsar {
     TimerArchive (const Archive& archive);
 
     //! Base extraction constructor
-    TimerArchive (const Archive& archive, const vector<unsigned>& subint);
+    TimerArchive (const Archive& archive, const std::vector<unsigned>& subint);
 
     //! Copy all of the class attributes and the selected Integration data
-    void copy (const Archive& archive, const vector<unsigned>& subints);
+    void copy (const Archive& archive, const std::vector<unsigned>& subints);
 
     // //////////////////////////////////////////////////////////////////
     //
@@ -58,7 +58,7 @@ namespace Pulsar {
     TimerArchive* clone () const;
 
     //! Return a pointer to a new extraction constructed instance equal to this
-    TimerArchive* extract (const vector<unsigned>& subints) const;
+    TimerArchive* extract (const std::vector<unsigned>& subints) const;
 
     //! Get the tempo code of the telescope used
     virtual char get_telescope_code () const;
@@ -81,9 +81,9 @@ namespace Pulsar {
     virtual void set_type (Signal::Source type);
 
     //! Get the source name
-    virtual string get_source () const;
+    virtual std::string get_source () const;
     //! Set the source name
-    virtual void set_source (const string& source);
+    virtual void set_source (const std::string& source);
 
     //! Get the coordinates of the source
     virtual sky_coord get_coordinates () const;
@@ -163,10 +163,10 @@ namespace Pulsar {
         bool advocate (const char* filename);
 
         //! Return the name of the TimerArchive plugin
-        string get_name () { return "Timer"; }
+        std::string get_name () { return "Timer"; }
 
         //! Return description of this plugin
-        string get_description ();
+        std::string get_description ();
 
     }; 
 

@@ -10,6 +10,8 @@
 
 #include "timer_supp.h"
 
+using namespace std;
+
 // return true if all characters up to the null terminator are alphanumeric
 bool is_valid_string (const char* str, unsigned length)
 {

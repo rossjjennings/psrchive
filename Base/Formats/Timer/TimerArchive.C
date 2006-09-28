@@ -16,6 +16,8 @@
 
 #include <unistd.h>
 
+using namespace std;
+
 //! files are big endian by default
 bool Pulsar::TimerArchive::big_endian = true;
 

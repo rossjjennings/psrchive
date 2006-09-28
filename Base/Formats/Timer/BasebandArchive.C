@@ -12,6 +12,7 @@
 #include "compressed_io.h"
 #include "timer++.h"
 
+using namespace std;
 
 void init (baseband_header& bhdr)
 {

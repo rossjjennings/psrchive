@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/Timer/Pulsar/BasebandArchive.h,v $
-   $Revision: 1.15 $
-   $Date: 2006/03/17 13:34:55 $
+   $Revision: 1.16 $
+   $Date: 2006/09/28 16:58:42 $
    $Author: straten $ */
 
 #ifndef __Baseband_Archive_h
@@ -44,16 +44,16 @@ namespace Pulsar {
     BasebandArchive (const Archive& archive);
 
     //! Base extraction constructor
-    BasebandArchive (const Archive& archive, const vector<unsigned>& subint);
+    BasebandArchive (const Archive& archive, const std::vector<unsigned>& subint);
 
     //! Copy all of the class attributes and the selected Integration data
-    void copy (const Archive& archive, const vector<unsigned>& subints);
+    void copy (const Archive& archive, const std::vector<unsigned>& subints);
 
     //! Return a pointer to a new copy constructed instance equal to this
     virtual BasebandArchive* clone () const;
 
     //! Return a pointer to a new extraction constructed instance equal to this
-    virtual BasebandArchive* extract (const vector<unsigned>& subints) const;
+    virtual BasebandArchive* extract (const std::vector<unsigned>& subints) const;
 
     // //////////////////////////////////////////////////////////////////
     //
@@ -63,12 +63,12 @@ namespace Pulsar {
     //! Return the number of passbands
     int get_npassband () const { return bhdr.pband_channels; };
     //! Return a reference to the bandpass in the given channel
-    const vector<float>& get_passband (unsigned channel) const;
+    const std::vector<float>& get_passband (unsigned channel) const;
 
     //! Return the number of analog channels
     int get_nhistogram () const { return bhdr.analog_channels; };
     //! Return a reference to the digitization histogram in the given channel
-    const vector<float>& get_histogram (unsigned channel) const;
+    const std::vector<float>& get_histogram (unsigned channel) const;
 
     //! Set the hanning smoothing factor
     void set_hanning_smoothing_factor (int factor);
@@ -105,10 +105,10 @@ namespace Pulsar {
         bool advocate (const char* filename);
 
         //! Return the name of the BasebandArchive plugin
-        string get_name () { return "Baseband"; }
+        std::string get_name () { return "Baseband"; }
 
         //! Return description of this plugin
-        string get_description ();
+        std::string get_description ();
 
     };
 

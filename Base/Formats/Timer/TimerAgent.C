@@ -7,6 +7,8 @@
 #include "Pulsar/TimerArchive.h"
 #include "timer++.h"
 
+using namespace std;
+
 string Pulsar::TimerArchive::Agent::get_description ()
 {
   return "TIMER Archive version 12.3";
