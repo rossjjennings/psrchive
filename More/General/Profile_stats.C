@@ -103,82 +103,19 @@ void Pulsar::Profile::stats (float phase,
   stats (mean, variance, varmean, start_bin, stop_bin);
 }
 
-vector<unsigned> Pulsar::Profile::get_mask () const
+/////////////////////////////////////////////////////////////////////////////
+//
+// Pulsar::Profile::mean
+//
+/*! 
+  \param phase centre of region
+  \param duty_cycle width of region
+  \return mean of region
+*/
+double Pulsar::Profile::mean (float phase, float duty_cycle) const
 {
-  Reference::To<Pulsar::Profile> copy = clone();
+  double result; 
+  stats (phase, &result, 0, 0, duty_cycle);
+  return result;
+} 
 
-  // Remove the baseline
-  float minphs = copy->find_min_phase();
-  *copy -= (copy->mean(minphs));
-
-  double mean    = 0.0;
-  double var     = 0.0;
-  double varmean = 0.0;
-
-  // Find the RMS of the baseline
-  copy->stats(minphs, &mean, &var, &varmean);
-  
-  double blrms = sqrt(var);
-
-  vector<unsigned> mask;
-
-  for (unsigned i = 0; i < get_nbin(); i++) {
-    if (get_amps()[i] > 3.0*blrms) {
-      mask.push_back(1);
-    }
-    else {
-      mask.push_back(0);
-    }
-  }
-
-  // Zap extraneous points
-  
-  for (unsigned i = 0; i < mask.size(); i++) {
-    if (mask[i] == 1) {
-      if (i == 0) {
-	if (mask[1] == 0 && mask[get_nbin()-1] == 0)
-	  mask[i] = 0;
-      }
-      else if (i == get_nbin()-1) {
-	if (mask[0] == 0 && mask[get_nbin()-2] == 0)
-	  mask[i] = 0;
-      }
-      else if (mask[i-1] == 0 && mask[i+1] == 0)
-	mask[i] = 0;
-    }
-  }
-  
-  // Fill in gaps
-  
-  for (unsigned i = 0; i < mask.size(); i++) {
-    if (mask[i] == 0) {
-      if (i == 0) {
-	if (mask[1] == 1 && mask[get_nbin()-1] == 1)
-	  mask[i] = 1;
-      }
-      else if (i == get_nbin()-1) {
-	if (mask[0] == 1 && mask[get_nbin()-2] == 1)
-	  mask[i] = 1;
-      }
-      else if (mask[i-1] == 1 && mask[i+1] == 1)
-	mask[i] = 1;
-    }
-  }
-  
-  float pc = 5.0;
-
-  for (unsigned i = 0; i < mask.size(); i++) {
-    int  total = 0;
-    for (unsigned j = 0; j < float(get_nbin())*pc/100.0; j++) {
-      int start  = (i - j/2);
-      int curr   = (start+j) % get_nbin();
-      if (curr < 0)
-	curr += get_nbin();
-      total += mask[curr];
-      if (total >= 2)
-	mask[i] = 1;
-    }
-  }
-
-  return mask;
-}
