@@ -4,9 +4,10 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-#include <stdio.h>
-#include <iostream>
+
 #include "qt_Angle.h"
+#include <iostream>
+using namespace std;
 
 qt_Angle::qt_Angle (bool with_error, QWidget *parent, const char *name) :
   qt_value (with_error, parent, name)

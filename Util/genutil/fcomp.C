@@ -4,15 +4,16 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
+#include "fcomp.h"
+#include "machine_endian.h"
+
+#include <iostream>
 #include <stdio.h>
 #include <assert.h>
-#include <iostream>
-
-#include "psr_cpp.h"
-
-#include "machine_endian.h"
-#include "fcomp.h"
 #include <math.h>
+
+using namespace std;
 
 // for some strange reason, isnan is getting undefed somehow
 #if defined(__APPLE__) && defined (__POWERPC__)

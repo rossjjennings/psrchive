@@ -10,6 +10,8 @@
 #include <iostream>
 #include <dlfcn.h>
 
+using namespace std;
+
 bool Registry::Plugin::verbose = false;
 
 void Registry::Plugin::load (const char* path)

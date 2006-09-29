@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Plugin.h,v $
-   $Revision: 1.3 $
-   $Date: 2006/03/17 13:35:06 $
+   $Revision: 1.4 $
+   $Date: 2006/09/29 14:13:06 $
    $Author: straten $ */
 
 #ifndef __Plugin_h
@@ -16,8 +16,6 @@
 
 #include <vector>
 #include <string>
-
-#include "psr_cpp.h"
 
 namespace Registry {
 
@@ -37,13 +35,13 @@ namespace Registry {
     void load (const char* path);
 
     //! Convenience interface
-    void load (const string& path) { load (path.c_str()); }
+    void load (const std::string& path) { load (path.c_str()); }
 
     //! List of successfully loaded DSOs
-    vector<string> ok;
+    std::vector<std::string> ok;
 
     //! List of unsuccessfully loaded DSOs
-    vector<string> fail;
+    std::vector<std::string> fail;
 
   };
 

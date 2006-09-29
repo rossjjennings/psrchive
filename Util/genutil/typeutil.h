@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/typeutil.h,v $
-   $Revision: 1.4 $
-   $Date: 2006/03/17 13:35:03 $
+   $Revision: 1.5 $
+   $Date: 2006/09/29 14:13:06 $
    $Author: straten $ */
 
 #ifndef __typeutil_h
@@ -18,7 +18,7 @@
 #include <typeinfo>
 
 template<class T>
-unsigned find (const vector< Reference::To<T> >& array, const T* instance)
+unsigned find (const std::vector< Reference::To<T> >& array, const T* instance)
 {
   unsigned index;
 

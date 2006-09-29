@@ -14,6 +14,8 @@
 
 #include <slalib.h>
 
+using namespace std;
+
 // redwards 10Aug99 function to compute angular separation of a pair
 // of spherical coordinates
 
