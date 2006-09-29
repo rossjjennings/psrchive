@@ -14,7 +14,7 @@ libpsrchive_la_LIBADD = General/libGeneral.la
 
 if !MAKE_LEAN
 
-SUBDIRS += Polarimetry
+SUBDIRS += MEAL Polarimetry
 
 libpsrchive_la_LIBADD += Polarimetry/libPolarimetry.la
 
@@ -23,7 +23,7 @@ SUBDIRS += Plotting
 libpsrchive_la_LIBADD += Plotter/libPlotting.la
 endif
 
-SUBDIRS += .
+SUBDIRS += . Applications
 
 if HAVE_QT
 if HAVE_PGPLOT

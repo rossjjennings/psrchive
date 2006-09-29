@@ -23,11 +23,6 @@ if HAVE_QT
   libpsrutils_la_LIBADD += qtutil/libqtutil.la
 endif
 
-if !MAKE_LEAN
-  SUBDIRS += meal
-  libpsrutils_la_LIBADD += meal/libmeal.la
-endif
-
 all: intermediate-install
 
 include $(top_srcdir)/config/Makefile.local

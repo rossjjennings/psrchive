@@ -1,23 +1,23 @@
 
-noinst_LTLIBRARIES = libCalibration.la
+noinst_LTLIBRARIES = libPolarimetry.la
 
-nobase_include_HEADERS = Calibration/CoherencyMeasurement.h \
-	Calibration/CoherencyMeasurementSet.h Calibration/ConvertMJD.h \
-	Calibration/Faraday.h Calibration/IRIonosphere.h \
-	Calibration/Feed.h Calibration/Instrument.h \
-	Calibration/MeanCoherency.h Calibration/MeanFeed.h \
-	Calibration/MeanInstrument.h Calibration/MeanPolar.h \
-	Calibration/MeanSingleAxis.h Calibration/MeasurementEquation.h \
-	Calibration/Parallactic.h Calibration/ReceptionModel.h \
-	Calibration/ReceptionModelAxisPlotter.h \
-	Calibration/ReceptionModelPlotter.h Calibration/Simulation.h \
-	Calibration/SingleAxis.h Calibration/SingleAxisPolynomial.h \
-	Calibration/SingleAxisSolver.h Calibration/StandardModel.h \
-	Calibration/ObservationUncertainty.h \
-	Calibration/TemplateUncertainty.h \
-	Calibration/TotalCovariance.h
+nobase_include_HEADERS = Pulsar/CoherencyMeasurement.h \
+	Pulsar/CoherencyMeasurementSet.h Pulsar/ConvertMJD.h \
+	Pulsar/Faraday.h Pulsar/IRIonosphere.h \
+	Pulsar/Feed.h Pulsar/Instrument.h \
+	Pulsar/MeanCoherency.h Pulsar/MeanFeed.h \
+	Pulsar/MeanInstrument.h Pulsar/MeanPolar.h \
+	Pulsar/MeanSingleAxis.h Pulsar/MeasurementEquation.h \
+	Pulsar/Parallactic.h Pulsar/ReceptionModel.h \
+	Pulsar/ReceptionModelAxisPlotter.h \
+	Pulsar/ReceptionModelPlotter.h Pulsar/Simulation.h \
+	Pulsar/SingleAxis.h Pulsar/SingleAxisPolynomial.h \
+	Pulsar/SingleAxisSolver.h Pulsar/StandardModel.h \
+	Pulsar/ObservationUncertainty.h \
+	Pulsar/TemplateUncertainty.h \
+	Pulsar/TotalCovariance.h
 
-libCalibration_la_SOURCES = SingleAxis.C Feed.C Instrument.C		   \
+libPolarimetry_la_SOURCES = SingleAxis.C Feed.C Instrument.C		   \
 	SingleAxisPolynomial.C Parallactic.C Faraday.C IRIonosphere.C	   \
 	MeanCoherency.C MeanPolar.C MeanSingleAxis.C MeanFeed.C		   \
 	MeanInstrument.C MeasurementEquation.C ReceptionModel.C		   \
@@ -28,12 +28,11 @@ libCalibration_la_SOURCES = SingleAxis.C Feed.C Instrument.C		   \
 
 SUBDIRS = iri2001
 
-libCalibration_la_LIBADD = iri2001/libiri.la
+libPolarimetry_la_LIBADD = iri2001/libiri.la
 
-bin_PROGRAMS = jones_entropy rmrot
+bin_PROGRAMS = rmrot
 
-jones_entropy_SOURCES	= jones_entropy.C
-rmrot_SOURCES		= rmrot.C
+rmrot_SOURCES = rmrot.C
 
 ##############################################################################
 #
@@ -41,12 +40,9 @@ rmrot_SOURCES		= rmrot.C
 #
 if HAVE_PGPLOT
 
-libCalibration_la_SOURCES += ReceptionModelPlotter.C
+libPolarimetry_la_SOURCES += ReceptionModelPlotter.C
 
-bin_PROGRAMS += calsim pafit
-
-calsim_SOURCES		= calsim.C
-calsim_LDADD		= $(LDADD) @PGPLOT_LIBS@
+bin_PROGRAMS += pafit
 
 pafit_SOURCES		= pafit.C 
 pafit_LDADD		= $(LDADD) @PGPLOT_LIBS@ @SLA_LIBS@
@@ -83,5 +79,6 @@ test_ReceptionModel_LDADD	= $(LDADD) @SLA_LIBS@
 INCLUDES = -I$(top_builddir)/utils/include -I$(top_srcdir)/psrchive \
 	@PGPLOT_CFLAGS@ @SLA_CFLAGS@
 
-LDADD = libCalibration.la $(top_builddir)/utils/libpsrutils.la
+LDADD = libPolarimetry.la $(top_builddir)/More/MEAL/libmeal.la \
+	$(top_builddir)/utils/libpsrutils.la
 

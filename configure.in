@@ -2,7 +2,7 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ(2.57)
-AC_INIT([PSRCHIVE],[5.1],[psrchive@astro.swin.edu.au])
+AC_INIT([PSRCHIVE],[6.0],[psrchive@sourceforge.net])
 
 AC_CONFIG_AUX_DIR([config])
 AC_CONFIG_SRCDIR([utils/Makefile.am])
@@ -141,24 +141,26 @@ AC_CONFIG_FILES([third/Makefile
 		utils/pgutil/Makefile
 		utils/qtutil/Makefile
 		utils/fitsutil/Makefile
-		utils/meal/Makefile
 		utils/tempo/Makefile
 		utils/Makefile
-		Core/Extensions/Makefile
+		Core/Makefile
 		Core/Bases/Makefile
+		Core/Extensions/Makefile
 		Core/Formats/Makefile
 		Core/Formats/EPN/Makefile
 		Core/Formats/Timer/Makefile
 		Core/Formats/PSRFITS/Makefile
                 Core/Formats/ASCII/Makefile
 		Core/Applications/Makefile
-		psrchive/General/Makefile
-		psrchive/Plotting/Makefile
-		psrchive/Polarimetry/Makefile
-		psrchive/Polarimetry/iri2001/Makefile
-                psrchive/GUI/Makefile
-		psrchive/rhythm/Makefile
-		psrchive/Makefile
+		More/General/Makefile
+		More/Plotting/Makefile
+		More/MEAL/Makefile
+		More/Polarimetry/Makefile
+		More/Polarimetry/iri2001/Makefile
+                More/GUI/Makefile
+		More/rhythm/Makefile
+		More/Applications/Makefile
+		More/Makefile
 		Makefile])
 
 AC_OUTPUT

@@ -220,5 +220,5 @@ doc: MEAL.pdf
 
 INCLUDES = -I. -I$(top_builddir)/utils/units @PGPLOT_CFLAGS@
 
-LDADD = libmeal.la ../units/libunits.la @PGPLOT_LIBS@
+LDADD = libmeal.la $(top_builddir)/utils/units/libunits.la @PGPLOT_LIBS@
 

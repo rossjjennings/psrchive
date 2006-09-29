@@ -90,5 +90,5 @@ libExtensions_la_SOURCES = \
 #
 
 INCLUDES = -I$(top_builddir)/utils/include -I$(top_srcdir)/Core/Bases \
-	-I$(top_srcdir)/psrchive/Polarimetry
+	-I$(top_srcdir)/More/Polarimetry
 

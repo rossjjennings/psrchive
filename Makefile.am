@@ -1,11 +1,11 @@
 
-SUBDIRS	= third utils Core psrchive
+SUBDIRS	= third utils Core More
 
 bin_SCRIPTS = psrchive_cflags psrchive_ldflags
 
 psrchive_ldflags: Makefile
 	@echo "#!/bin/csh" > psrchive_ldflags
-	@echo "echo -L${prefix}/lib -lpsrchive -lpsrutils \
+	@echo "echo -L${prefix}/lib -lpsrmore -lpsrcore -lpsrutils \
 		${LDFLAGS} @FFT_LIBS@ @SLA_LIBS@ @CFITSIO_LIBS@ @MPI_LIBS@ \
 		@PGPLOT_LIBS@ @QT_LIBS@" > psrchive_ldflags
 	@chmod a+x psrchive_ldflags
