@@ -11,6 +11,8 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+using namespace std;
+
 void usage ()
 {
   cerr << 
@@ -22,17 +24,6 @@ void usage ()
     "  -c ichan   select a single frequency channel, from 0 to nchan-1\n"
     "  -i isub    select a single integration, from 0 to nsubint-1\n"
     "  -p phase   select a single phase, from 0.0 to 1.0 (overrides -b)\n"
-    "  -r phase   rotate the profiles by phase before printing\n"
-    "  -F         Fscrunch first\n"
-    "  -T         Tscrunch first\n"
-    "  -P         Pscrunch first\n"
-    "  -C         Centre first\n"
-    "  -B b       Bscrunch by this factor first\n"
-    "  -x         Convert to Stokes and also print fraction polarisation\n"
-    "  -y         Convert to Stokes and also print fraction linear\n"
-    "  -z         Convert to Stokes and also print fraction circular\n"
-    "  -Z         Convert to Stokes and also print position angle\n"
-    "  -R         Remove baseline\n"
     "\n"
     "Each row output by pascii contains:\n"
     "\n"
@@ -42,9 +33,7 @@ void usage ()
        << endl;
 }
 
-int main (int argc, char** argv){ try {
-  //  Error::verbose = true;
-  //  Error::complete_abort = true;
+int main (int argc, char** argv) try {
 
   bool phase_chosen = false;
   float phase = 0.0;
@@ -54,19 +43,8 @@ int main (int argc, char** argv){ try {
   int cchan = -1;
   int csub  = -1;
 
-  bool do_fscr = false;
-  bool do_pscr = false;
-  bool do_tscr = false;
-  bool do_centre = false;
-  unsigned bscr = 1;
-  bool show_pol_frac = false;
-  bool show_lin_frac = false;
-  bool show_circ_frac = false;
-  bool show_pa = false;
-  bool remove_baseline = false;
-
   char c;
-  while ((c = getopt(argc, argv, "b:B:c:CFi:p:Pr:RhpqTvVxyzZ")) != -1) 
+  while ((c = getopt(argc, argv, "b:c:i:p:hqvV")) != -1) 
 
     switch (c)  {
 
@@ -100,41 +78,6 @@ int main (int argc, char** argv){ try {
       phase = atof (optarg);
       break;
 
-    case 'r':
-      rot_phase = atof (optarg);
-      break;
-
-    case 'F':
-      do_fscr = true;
-      break;
-    case 'T':
-      do_tscr = true;
-      break;
-    case 'P':
-      do_pscr = true;
-      break;
-    case 'C':
-      do_centre = true;
-      break;
-    case 'B':
-      bscr = atoi(optarg);
-      break;
-    case 'x':
-      show_pol_frac = true;
-      break;
-    case 'y':
-      show_lin_frac = true;
-      break;
-    case 'z':
-      show_circ_frac = true;
-      break;
-    case 'Z':
-      show_pa = true;
-      break;
-    case 'R':
-      remove_baseline = true;
-      break;
-
     } 
 
 
@@ -144,24 +87,6 @@ int main (int argc, char** argv){ try {
   }
 
   Pulsar::Archive* archive = Pulsar::Archive::load( argv[optind] );
-
-  if( do_centre )
-    archive->centre();
-  if( remove_baseline )
-    archive->remove_baseline();
-  if( do_fscr )
-    archive->fscrunch();
-  if( do_tscr )
-    archive->tscrunch();
-  if( do_pscr )
-    archive->pscrunch();
-  if( bscr > 1 )
-    archive->bscrunch( bscr );
-  if (rot_phase)
-    archive->rotate_phase (rot_phase);
-
-  if( archive->get_state() != Signal::Stokes && (show_pol_frac || show_lin_frac || show_circ_frac || show_pa ) )
-    archive->convert_state(Signal::Stokes);
 
   unsigned nsub = archive->get_nsubint();
   unsigned nchan = archive->get_nchan();
@@ -198,12 +123,6 @@ int main (int argc, char** argv){ try {
       if (cchan > 0)
 	ichan = cchan;
       
-      vector<double> pas(nbin);
-      if( show_pa ){
-	vector<double> phases;
-	vector<double> errors;
-	integration->get_PA (phases,pas,errors,-999.9);
-      }
       for (unsigned ibin=0; ibin < nbin; ibin++) {
 
 	if (cbin > 0)
@@ -212,22 +131,6 @@ int main (int argc, char** argv){ try {
 	cout << isub << " " << ichan << " " << ibin;
 	for (unsigned ipol=0; ipol < npol; ipol++)
 	  cout<<" "<< integration->get_Profile(ipol,ichan)->get_amps()[ibin];
-
-	if( show_pol_frac || show_lin_frac || show_circ_frac || show_pa ){
-	  float stokesI = integration->get_Profile(0,ichan)->get_amps()[ibin];
-	  float stokesQ = integration->get_Profile(1,ichan)->get_amps()[ibin];
-	  float stokesU = integration->get_Profile(2,ichan)->get_amps()[ibin];
-	  float stokesV = integration->get_Profile(3,ichan)->get_amps()[ibin];
-
-	  float frac_lin  = sqrt(stokesQ*stokesQ + stokesU*stokesU)/stokesI;
-	  float frac_circ = fabs(stokesV)/stokesI;
-	  float frac_pol  = sqrt(stokesQ*stokesQ + stokesU*stokesU + stokesV*stokesV)/stokesI;
-
-	  if( show_pol_frac )  cout << " " << frac_pol;
-	  if( show_lin_frac )  cout << " " << frac_lin;
-	  if( show_circ_frac ) cout << " " << frac_circ;
-	  if( show_pa )        cout << " " << pas[ibin];
-	}
 	cout << endl;
 
 	if (cbin > 0)
@@ -245,10 +148,12 @@ int main (int argc, char** argv){ try {
 
   }
 
-} catch(Error& er){ cerr << er << endl; exit(-1);
-} catch( ... ){ cerr << "Unknown exception caught!" << endl;
-}
- return 0;
-}
+  return 0;
 
+}
+catch (Error& er)
+{
+  cerr << "psrtxt: " << er << endl;
+  return -1;
+}
 
