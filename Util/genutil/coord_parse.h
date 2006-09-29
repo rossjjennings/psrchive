@@ -5,8 +5,8 @@
  *
  ***************************************************************************/
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/coord_parse.h,v $
-   $Revision: 1.4 $
-   $Date: 2006/03/17 13:35:07 $
+   $Revision: 1.5 $
+   $Date: 2006/09/29 14:12:55 $
    $Author: straten $ */
 
 #ifndef __COORD_PARSE_H
@@ -32,6 +32,9 @@ extern "C" {
 
   int ra2str (char* rastr, unsigned rastrlen, double ra, unsigned places);
   int dec2str2 (char* decstr, unsigned decstrlen, double dec, unsigned places);
+
+  /* defined in angleconv.c */
+  char* crad2dmse (double pos, double err, int ra, char * name);
 
 #ifdef __cplusplus
 	   }
