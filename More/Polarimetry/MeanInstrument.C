@@ -4,8 +4,8 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-#include "Calibration/MeanInstrument.h"
-#include "Calibration/Instrument.h"
+#include "Pulsar/MeanInstrument.h"
+#include "Pulsar/Instrument.h"
 
 void Calibration::MeanInstrument::update (MEAL::Complex2* model) const
 {

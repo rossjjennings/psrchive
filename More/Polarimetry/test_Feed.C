@@ -4,7 +4,7 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-#include "Calibration/Feed.h"
+#include "Pulsar/Feed.h"
 #include "Pauli.h"
 
 using namespace std;

@@ -7,14 +7,14 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ReceptionModel.h,v $
-   $Revision: 1.6 $
-   $Date: 2006/04/21 15:22:47 $
+   $Revision: 1.7 $
+   $Date: 2006/09/29 22:13:10 $
    $Author: straten $ */
 
 #ifndef __ReceptionModel_H
 #define __ReceptionModel_H
 
-#include "Calibration/MeasurementEquation.h"
+#include "Pulsar/MeasurementEquation.h"
 #include "MEAL/SumRule.h"
 #include "Estimate.h"
 

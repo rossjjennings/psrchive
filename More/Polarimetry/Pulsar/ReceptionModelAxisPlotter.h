@@ -7,14 +7,14 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ReceptionModelAxisPlotter.h,v $
-   $Revision: 1.5 $
-   $Date: 2006/03/17 13:34:44 $
+   $Revision: 1.6 $
+   $Date: 2006/09/29 22:13:10 $
    $Author: straten $ */
 
 #ifndef __Calibration_ReceptionModelAxisPlotter_H
 #define __Calibration_ReceptionModelAxisPlotter_H
 
-#include "Calibration/ReceptionModelPlotter.h"
+#include "Pulsar/ReceptionModelPlotter.h"
 #include "MEAL/Axis.h"
 #include "Pauli.h"
 

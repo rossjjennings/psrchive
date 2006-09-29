@@ -4,7 +4,7 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-#include "Calibration/ObservationUncertainty.h"
+#include "Pulsar/ObservationUncertainty.h"
 #include "Pauli.h"
 
 using namespace std;

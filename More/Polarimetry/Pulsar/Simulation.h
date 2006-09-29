@@ -7,14 +7,14 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/Simulation.h,v $
-   $Revision: 1.2 $
-   $Date: 2006/03/17 13:34:44 $
+   $Revision: 1.3 $
+   $Date: 2006/09/29 22:13:10 $
    $Author: straten $ */
 
 #ifndef __Calibration_Simulation_H
 #define __Calibration_Simulation_H
 
-#include "Calibration/Instrument.h"
+#include "Pulsar/Instrument.h"
 #include "Stokes.h"
 
 namespace Calibration {

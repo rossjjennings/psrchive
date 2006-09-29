@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/FaradayRotation.h,v $
-   $Revision: 1.5 $
-   $Date: 2006/03/31 22:57:35 $
+   $Revision: 1.6 $
+   $Date: 2006/09/29 22:13:10 $
    $Author: straten $ */
 
 #ifndef __Pulsar_FaradayRotation_h
@@ -16,7 +16,7 @@
 
 #include "Pulsar/ColdPlasma.h"
 
-#include "Calibration/Faraday.h"
+#include "Pulsar/Faraday.h"
 #include "Pulsar/DeFaraday.h"
 
 namespace Pulsar {

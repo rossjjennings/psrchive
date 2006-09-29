@@ -4,10 +4,10 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-#include "Calibration/ReceptionModelPlotter.h"
-#include "Calibration/CoherencyMeasurementSet.h"
-#include "Calibration/ReceptionModel.h"
-#include "Calibration/Parallactic.h"
+#include "Pulsar/ReceptionModelPlotter.h"
+#include "Pulsar/CoherencyMeasurementSet.h"
+#include "Pulsar/ReceptionModel.h"
+#include "Pulsar/Parallactic.h"
 
 #include "EstimatePlotter.h"
 #include "Pauli.h"

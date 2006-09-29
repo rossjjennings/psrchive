@@ -4,8 +4,8 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-#include "Calibration/MeanSingleAxis.h"
-#include "Calibration/SingleAxis.h"
+#include "Pulsar/MeanSingleAxis.h"
+#include "Pulsar/SingleAxis.h"
 #include "EstimateStats.h"
 
 using namespace std;

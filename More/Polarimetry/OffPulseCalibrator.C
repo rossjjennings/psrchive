@@ -10,7 +10,7 @@
 #include "Pulsar/Integration.h"
 #include "Pulsar/Profile.h"
 
-#include "Calibration/SingleAxis.h"
+#include "Pulsar/SingleAxis.h"
 #include "tostring.h"
 #include <stdio.h>
 #include <assert.h>

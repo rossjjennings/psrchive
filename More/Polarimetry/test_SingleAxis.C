@@ -4,8 +4,8 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-#include "Calibration/SingleAxis.h"
-#include "Calibration/SingleAxisSolver.h"
+#include "Pulsar/SingleAxis.h"
+#include "Pulsar/SingleAxisSolver.h"
 #include "Pauli.h"
 
 using namespace std;

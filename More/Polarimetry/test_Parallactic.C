@@ -4,8 +4,10 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-#include "Calibration/Parallactic.h"
+#include "Pulsar/Parallactic.h"
 #include "sky_coord.h"
+
+using namespace std;
 
 int main (int argc, char** argv) try {
   

@@ -4,7 +4,7 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-#include "Calibration/Faraday.h"
+#include "Pulsar/Faraday.h"
 #include "MEAL/OneParameter.h"
 #include "Physical.h"
 #include "Pauli.h"

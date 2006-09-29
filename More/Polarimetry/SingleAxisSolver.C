@@ -4,8 +4,8 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-#include "Calibration/SingleAxisSolver.h"
-#include "Calibration/SingleAxis.h"
+#include "Pulsar/SingleAxisSolver.h"
+#include "Pulsar/SingleAxis.h"
 #include "MEAL/ScalarMath.h"
 #include "MEAL/ScalarParameter.h"
 

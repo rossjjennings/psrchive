@@ -4,8 +4,8 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-#include "Calibration/ReceptionModel.h"
-#include "Calibration/CoherencyMeasurementSet.h"
+#include "Pulsar/ReceptionModel.h"
+#include "Pulsar/CoherencyMeasurementSet.h"
 #include "MEAL/LevenbergMarquardt.h"
 
 #include <iostream>

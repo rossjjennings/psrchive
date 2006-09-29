@@ -4,7 +4,7 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-#include "Calibration/TotalCovariance.h"
+#include "Pulsar/TotalCovariance.h"
 #include "MEAL/StokesCovariance.h"
 
 #include <iostream>

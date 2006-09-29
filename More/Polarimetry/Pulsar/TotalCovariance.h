@@ -7,14 +7,14 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/TotalCovariance.h,v $
-   $Revision: 1.2 $
-   $Date: 2006/09/15 20:44:41 $
+   $Revision: 1.3 $
+   $Date: 2006/09/29 22:13:10 $
    $Author: straten $ */
 
 #ifndef __Calibration_TotalCovariance_H
 #define __Calibration_TotalCovariance_H
 
-#include "Calibration/TemplateUncertainty.h"
+#include "Pulsar/TemplateUncertainty.h"
 #include "Matrix.h"
 
 namespace Calibration {

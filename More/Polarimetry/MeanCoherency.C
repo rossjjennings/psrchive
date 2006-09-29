@@ -4,7 +4,7 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-#include "Calibration/MeanCoherency.h"
+#include "Pulsar/MeanCoherency.h"
 #include "MEAL/Coherency.h"
 
 void Calibration::MeanCoherency::update (MEAL::Complex2* model) const

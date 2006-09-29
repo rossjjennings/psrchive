@@ -4,7 +4,7 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-#include "Calibration/CoherencyMeasurementSet.h"
+#include "Pulsar/CoherencyMeasurementSet.h"
 
 Calibration::CoherencyMeasurementSet::CoherencyMeasurementSet (unsigned index)
 {

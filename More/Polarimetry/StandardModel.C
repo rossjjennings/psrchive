@@ -4,9 +4,9 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-#include "Calibration/StandardModel.h"
-#include "Calibration/SingleAxis.h"
-#include "Calibration/Feed.h"
+#include "Pulsar/StandardModel.h"
+#include "Pulsar/SingleAxis.h"
+#include "Pulsar/Feed.h"
 
 #include "MEAL/Polynomial.h"
 

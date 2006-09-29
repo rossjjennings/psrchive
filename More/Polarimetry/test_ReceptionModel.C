@@ -4,20 +4,20 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-#include "Calibration/ReceptionModel.h"
-#include "Calibration/Parallactic.h"
+#include "Pulsar/ReceptionModel.h"
+#include "Pulsar/Parallactic.h"
 #include "MEAL/Axis.h"
 
-#include "Calibration/CoherencyMeasurementSet.h"
-#include "Calibration/MeanCoherency.h"
+#include "Pulsar/CoherencyMeasurementSet.h"
+#include "Pulsar/MeanCoherency.h"
 #include "MEAL/PhysicalCoherency.h"
 
-#include "Calibration/SingleAxis.h"
-#include "Calibration/Instrument.h"
+#include "Pulsar/SingleAxis.h"
+#include "Pulsar/Instrument.h"
 #include "MEAL/Polar.h"
 #include "MEAL/Gain.h"
 
-#include "Calibration/SingleAxisPolynomial.h"
+#include "Pulsar/SingleAxisPolynomial.h"
 #include "MEAL/Complex2Constant.h"
 
 #include "sky_coord.h"
@@ -26,6 +26,8 @@
 #include <iostream>
 #include <algorithm>
 #include <unistd.h>
+
+using namespace std;
 
 // the maximum value of sin, cos, sinh, and cosh 
 // used when generating random receiver and polynomials

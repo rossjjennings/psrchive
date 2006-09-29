@@ -7,14 +7,14 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/TemplateUncertainty.h,v $
-   $Revision: 1.9 $
-   $Date: 2006/09/15 20:44:59 $
+   $Revision: 1.10 $
+   $Date: 2006/09/29 22:13:10 $
    $Author: straten $ */
 
 #ifndef __Calibration_TemplateUncertainty_H
 #define __Calibration_TemplateUncertainty_H
 
-#include "Calibration/ObservationUncertainty.h"
+#include "Pulsar/ObservationUncertainty.h"
 #include "MEAL/Complex2.h"
 
 namespace Calibration {

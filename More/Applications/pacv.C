@@ -15,7 +15,7 @@
 #include "Pulsar/PolnCalibratorExtension.h"
 #include "Pulsar/FluxCalibratorExtension.h"
 
-#include "Calibration/Feed.h"
+#include "Pulsar/Feed.h"
 
 #include "Pulsar/CalibratorPlotter.h"
 #include "Pulsar/CalibratorStokes.h"

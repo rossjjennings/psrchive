@@ -18,7 +18,7 @@
 
 #include "Pulsar/ProcHistory.h"
 
-#include "Calibration/Feed.h"
+#include "Pulsar/Feed.h"
 
 #include "Error.h"
 #include "dirutil.h"
@@ -163,7 +163,7 @@ int main (int argc, char *argv[]) {
       break;
 
     case 'i':
-      cout << "$Id: pac.C,v 1.76 2006/09/01 20:56:38 straten Exp $" << endl;
+      cout << "$Id: pac.C,v 1.77 2006/09/29 22:13:10 straten Exp $" << endl;
       return 0;
 
     case 'A':

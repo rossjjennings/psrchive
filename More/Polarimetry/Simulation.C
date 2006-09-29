@@ -5,8 +5,8 @@
  *
  ***************************************************************************/
 
-#include "Calibration/Simulation.h"
-#include "Calibration/SingleAxis.h"
+#include "Pulsar/Simulation.h"
+#include "Pulsar/SingleAxis.h"
 
 #include "Pauli.h"
 

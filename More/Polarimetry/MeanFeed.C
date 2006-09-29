@@ -4,8 +4,8 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-#include "Calibration/MeanFeed.h"
-#include "Calibration/Feed.h"
+#include "Pulsar/MeanFeed.h"
+#include "Pulsar/Feed.h"
 #include "EstimateStats.h"
 
 void Calibration::MeanFeed::update (MEAL::Complex2* model) const

@@ -7,21 +7,21 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/StandardModel.h,v $
-   $Revision: 1.4 $
-   $Date: 2006/05/05 02:12:46 $
+   $Revision: 1.5 $
+   $Date: 2006/09/29 22:13:10 $
    $Author: straten $ */
 
 #ifndef __Calibration_StandardModel_H
 #define __Calibration_StandardModel_H
 
 // Reception Model and its management
-#include "Calibration/ReceptionModel.h"
+#include "Pulsar/ReceptionModel.h"
 
-#include "Calibration/MeanPolar.h"
-#include "Calibration/MeanSingleAxis.h"
-#include "Calibration/Instrument.h"
-#include "Calibration/Parallactic.h"
-#include "Calibration/ConvertMJD.h"
+#include "Pulsar/MeanPolar.h"
+#include "Pulsar/MeanSingleAxis.h"
+#include "Pulsar/Instrument.h"
+#include "Pulsar/Parallactic.h"
+#include "Pulsar/ConvertMJD.h"
 
 #include "MEAL/Polar.h"
 #include "MEAL/Axis.h"

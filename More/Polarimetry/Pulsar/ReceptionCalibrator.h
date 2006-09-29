@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ReceptionCalibrator.h,v $
-   $Revision: 1.71 $
-   $Date: 2006/06/22 15:42:39 $
+   $Revision: 1.72 $
+   $Date: 2006/09/29 22:13:10 $
    $Author: straten $ */
 
 #ifndef __Pulsar_ReceptionCalibrator_H
@@ -18,9 +18,9 @@
 #include "Pulsar/ReflectStokes.h"
 
 // Parameterizations of the instrument and source
-#include "Calibration/StandardModel.h"
-#include "Calibration/MeanCoherency.h"
-#include "Calibration/CoherencyMeasurementSet.h"
+#include "Pulsar/StandardModel.h"
+#include "Pulsar/MeanCoherency.h"
+#include "Pulsar/CoherencyMeasurementSet.h"
 
 #include "MEAL/NormalizeStokes.h"
 #include "MEAL/Coherency.h"

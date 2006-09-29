@@ -8,7 +8,7 @@
 #include "Pulsar/ReceptionCalibrator.h"
 #include "Pulsar/Archive.h"
 
-#include "Calibration/ReceptionModelAxisPlotter.h"
+#include "Pulsar/ReceptionModelAxisPlotter.h"
 
 #include <cpgplot.h>
 

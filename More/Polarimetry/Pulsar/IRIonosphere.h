@@ -7,14 +7,14 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/IRIonosphere.h,v $
-   $Revision: 1.3 $
-   $Date: 2006/03/17 13:34:44 $
+   $Revision: 1.4 $
+   $Date: 2006/09/29 22:13:10 $
    $Author: straten $ */
 
 #ifndef __Calibration_IRIonosphere_H
 #define __Calibration_IRIonosphere_H
 
-#include "Calibration/Faraday.h"
+#include "Pulsar/Faraday.h"
 #include "Horizon.h"
 
 namespace Calibration {

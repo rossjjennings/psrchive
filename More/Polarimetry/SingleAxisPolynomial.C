@@ -4,8 +4,8 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-#include "Calibration/SingleAxisPolynomial.h"
-#include "Calibration/SingleAxis.h"
+#include "Pulsar/SingleAxisPolynomial.h"
+#include "Pulsar/SingleAxis.h"
 #include "MEAL/Polynomial.h"
 #include "MEAL/Axis.h"
 #include "random.h"

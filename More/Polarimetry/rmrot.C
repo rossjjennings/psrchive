@@ -7,7 +7,7 @@
 #include <iostream>
 #include <unistd.h>
 
-#include "Calibration/Faraday.h"
+#include "Pulsar/Faraday.h"
 
 using namespace std;
 

@@ -11,9 +11,9 @@
 
 #include "Pulsar/ExponentialBaseline.h"
 
-#include "Calibration/ReceptionModel.h"
-#include "Calibration/CoherencyMeasurementSet.h"
-#include "Calibration/TotalCovariance.h"
+#include "Pulsar/ReceptionModel.h"
+#include "Pulsar/CoherencyMeasurementSet.h"
+#include "Pulsar/TotalCovariance.h"
 
 #include "MEAL/Polynomial.h"
 #include "MEAL/Phase.h"

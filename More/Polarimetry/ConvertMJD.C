@@ -4,7 +4,7 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-#include "Calibration/ConvertMJD.h"
+#include "Pulsar/ConvertMJD.h"
 
 //! Default constructor
 Calibration::ConvertMJD::ConvertMJD ()

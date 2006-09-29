@@ -4,7 +4,7 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-#include "Calibration/MeasurementEquation.h"
+#include "Pulsar/MeasurementEquation.h"
 
 using namespace std;
 

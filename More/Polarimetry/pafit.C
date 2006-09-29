@@ -4,15 +4,15 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-#include "Calibration/ReceptionModel.h"
-#include "Calibration/CoherencyMeasurementSet.h"
-#include "Calibration/MeanCoherency.h"
-#include "Calibration/Instrument.h"
-#include "Calibration/Parallactic.h"
+#include "Pulsar/ReceptionModel.h"
+#include "Pulsar/CoherencyMeasurementSet.h"
+#include "Pulsar/MeanCoherency.h"
+#include "Pulsar/Instrument.h"
+#include "Pulsar/Parallactic.h"
 #include "MEAL/Coherency.h"
 #include "MEAL/Axis.h"
 
-#include "Calibration/ReceptionModelAxisPlotter.h"
+#include "Pulsar/ReceptionModelAxisPlotter.h"
 
 #include <cpgplot.h>
 

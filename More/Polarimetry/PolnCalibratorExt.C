@@ -7,8 +7,8 @@
 #include "Pulsar/PolnCalibratorExtension.h"
 #include "Pulsar/PolnCalibrator.h"
 
-#include "Calibration/SingleAxis.h"
-#include "Calibration/Instrument.h"
+#include "Pulsar/SingleAxis.h"
+#include "Pulsar/Instrument.h"
 #include "MEAL/Polar.h"
 
 template<class T, class F>

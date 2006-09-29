@@ -17,8 +17,8 @@
  */
 
 
-#include "Calibration/SingleAxisPolynomial.h"
-#include "Calibration/Feed.h"
+#include "Pulsar/SingleAxisPolynomial.h"
+#include "Pulsar/Feed.h"
 #include "MEAL/Polar.h"
 #include "MEAL/Polynomial.h"
 

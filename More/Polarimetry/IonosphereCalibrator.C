@@ -11,7 +11,7 @@
 #include "Pulsar/Telescope.h"
 #include "Pulsar/ProcHistory.h"
 
-#include "Calibration/IRIonosphere.h"
+#include "Pulsar/IRIonosphere.h"
 
 //! Default constructor
 Pulsar::IonosphereCalibrator::IonosphereCalibrator () {}

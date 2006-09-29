@@ -4,7 +4,7 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-#include "Calibration/MeanPolar.h"
+#include "Pulsar/MeanPolar.h"
 #include "MEAL/Polar.h"
 
 void Calibration::MeanPolar::update (MEAL::Complex2* model) const

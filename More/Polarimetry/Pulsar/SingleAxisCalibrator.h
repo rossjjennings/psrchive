@@ -7,16 +7,16 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/SingleAxisCalibrator.h,v $
-   $Revision: 1.18 $
-   $Date: 2006/03/17 13:34:51 $
+   $Revision: 1.19 $
+   $Date: 2006/09/29 22:13:10 $
    $Author: straten $ */
 
 #ifndef __Pulsar_SingleAxisCalibrator_H
 #define __Pulsar_SingleAxisCalibrator_H
 
 #include "Pulsar/ReferenceCalibrator.h"
-#include "Calibration/SingleAxis.h"
-#include "Calibration/SingleAxisSolver.h"
+#include "Pulsar/SingleAxis.h"
+#include "Pulsar/SingleAxisSolver.h"
 
 namespace Pulsar {
 

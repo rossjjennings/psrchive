@@ -4,7 +4,7 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-#include "Calibration/SingleAxis.h"
+#include "Pulsar/SingleAxis.h"
 #include "MEAL/Gain.h"
 #include "MEAL/Boost1.h"
 #include "MEAL/Rotation1.h"

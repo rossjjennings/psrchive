@@ -9,8 +9,8 @@
 #include "Pulsar/CalibratorStokes.h"
 #include "Pulsar/Receiver.h"
 
-#include "Calibration/SingleAxisSolver.h"
-#include "Calibration/SingleAxis.h"
+#include "Pulsar/SingleAxisSolver.h"
+#include "Pulsar/SingleAxis.h"
 #include "Pauli.h"
 
 Pulsar::HybridCalibrator::HybridCalibrator (const Archive* data)

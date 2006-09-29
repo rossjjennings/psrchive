@@ -4,7 +4,7 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-#include "Calibration/IRIonosphere.h"
+#include "Pulsar/IRIonosphere.h"
 
 #include <iostream>
 using namespace std;

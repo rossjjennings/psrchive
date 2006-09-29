@@ -4,7 +4,7 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-#include "Calibration/TemplateUncertainty.h"
+#include "Pulsar/TemplateUncertainty.h"
 #include "MEAL/StokesError.h"
 
 #include <iostream>

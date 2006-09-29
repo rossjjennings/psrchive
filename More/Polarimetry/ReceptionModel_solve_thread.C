@@ -8,7 +8,7 @@
 #include <config.h>
 #endif
 
-#include "Calibration/ReceptionModel.h"
+#include "Pulsar/ReceptionModel.h"
 
 #include <errno.h>
 

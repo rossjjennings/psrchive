@@ -4,9 +4,9 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-#include "Calibration/Instrument.h"
-#include "Calibration/SingleAxis.h"
-#include "Calibration/Feed.h"
+#include "Pulsar/Instrument.h"
+#include "Pulsar/SingleAxis.h"
+#include "Pulsar/Feed.h"
 
 #include "Pauli.h"
 #include "Error.h"

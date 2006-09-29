@@ -4,13 +4,14 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-#include "Calibration/Parallactic.h"
+#include "Pulsar/Parallactic.h"
 #include "Pauli.h"
 #include "sky_coord.h"
 
 #include <limits.h>
 #include <slalib.h>
 
+using namespace std;
 
 //! Default constructor
 Calibration::Parallactic::Parallactic ()

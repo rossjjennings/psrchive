@@ -7,15 +7,15 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/MeanInstrument.h,v $
-   $Revision: 1.4 $
-   $Date: 2006/03/17 13:34:44 $
+   $Revision: 1.5 $
+   $Date: 2006/09/29 22:13:10 $
    $Author: straten $ */
 
 #ifndef __Calibration_MeanInstrument_H
 #define __Calibration_MeanInstrument_H
 
-#include "Calibration/MeanSingleAxis.h"
-#include "Calibration/MeanFeed.h"
+#include "Pulsar/MeanSingleAxis.h"
+#include "Pulsar/MeanFeed.h"
 
 namespace Calibration {
 

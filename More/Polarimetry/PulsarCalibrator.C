@@ -12,8 +12,8 @@
 #include "Pulsar/Integration.h"
 #include "Pulsar/PolnProfileFit.h"
 
-#include "Calibration/Instrument.h"
-#include "Calibration/MeanInstrument.h"
+#include "Pulsar/Instrument.h"
+#include "Pulsar/MeanInstrument.h"
 
 #include "MEAL/Complex2Math.h"
 
