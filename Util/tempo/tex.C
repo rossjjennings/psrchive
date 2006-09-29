@@ -15,17 +15,14 @@
 
 #include "psrephem.h"
 #include "ephio.h"
+#include "coord_parse.h"
+#include "tostring.h"
 
-#include <vector>
 #include <math.h>
 #include <iostream>
 #include <assert.h>
 
-extern "C" {
-  // routines from the psrinfo library used here
-  char* crad2dmse (double pos, double err, int ra, char * name);
-  char* eoutchop2 (double val, double err, char * fmt, char * outstr );
-}
+using namespace std;
 
 #define sqr(x) ((x)*(x))
 
@@ -88,40 +85,30 @@ static string nodata = " \\nodata ";
 
 string tex_double (double val, double err)
 {
-  if (!buf) {
-    buf = new char[bufsz];
-    assert (buf != 0);
-  }
-
-  if (psrephem::verbose)
-    cerr << "tex_double (" << val << "," << err << ")" << endl;
-
   if (val == 0.0)
     return nodata;
 
-  else if (err <=0.0) {
-    sprintf (buf, "%.6f", val);
-    return string (buf);
+  if (err <= 0.0)
+    return tostring (val);
+
+  double scale = pow (10.0, -floor(log(err)/log(10.0)));
+  unsigned error = (unsigned) rint(err*scale);
+  if (error == 10)
+    error = 1;
+
+  double value = rint(val*scale)/scale;
+
+  string retval = tostring (value);
+
+  string::size_type exp = retval.find('e');
+  string exponent;
+
+  if (exp != string::npos) {
+    retval = retval.substr(0,exp);
+    exponent = "$\\times 10^{" + retval.substr(exp+1) + "}$";
   }
 
-  string ret;
-  
-  eoutchop2 (val, err, "%30f", buf);
-  
-  char* s = strtok(buf, " ");
-  char* e = strchr(s, 'E');
-  
-  if (e!=NULL)
-    *e = '\0';
-
-  ret = s;
-  s = strtok(NULL, " \n");
-  ret += "(" + string(s) + ")";
-    
-  if (e!=NULL)
-    ret += "$\\times 10^{" + string(e+1) + "}$";
-  
-  return ret;
+  return retval + "(" + tostring(error) + ")" + exponent;
 }
 
 // replaces a character with a string
