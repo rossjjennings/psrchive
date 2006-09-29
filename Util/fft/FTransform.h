@@ -102,6 +102,8 @@ namespace FTransform {
   // The whole Agent kababble doesn't work!
   extern std::vector<Reference::To<Plan> > plans_for_clean_plans;
 
+  void shift (unsigned npts, float* arr, double shift);
+
   //! Base class of one-dimensional FFT agents
   class Agent : public Reference::Able {
 

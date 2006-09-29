@@ -7,7 +7,7 @@ include_HEADERS = interpolate.h median_smooth.h \
 
 libpsrfft_la_SOURCES = \
         FTransform.C IPP_Transform.C MKL_Transform.C FFTW3_Transform.C \
-	FFTW_Transform.C QuaternionFT.C
+	FFTW_Transform.C QuaternionFT.C shift.C
 
 TESTS = test_normalization test_interpolate test_real_complex \
 	test_QuaternionFT test_rfftw_sort
@@ -30,7 +30,7 @@ INCLUDES = -I$(top_builddir) -I$(top_srcdir)/utils/units \
 	-I$(top_srcdir)/utils/genutil -I$(top_builddir)/utils/units \
 	@FFT_CFLAGS@
 
-LDADD = libpsrfft.la ../units/libunits.la @FFT_LIBS@ 
+LDADD = libpsrfft.la $(top_builddir)/utils/units/libunits.la @FFT_LIBS@ 
 
 libpsrfft_la_LIBADD = @FFT_LIBS@
 
