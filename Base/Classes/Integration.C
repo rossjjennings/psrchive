@@ -12,6 +12,8 @@
 #include "Error.h"
 #include "typeutil.h"
 
+using namespace std;
+
 bool Pulsar::Integration::verbose = false;
 
 //! Return the number of extensions available
@@ -104,41 +106,6 @@ Pulsar::Integration& Pulsar::Integration::operator= (const Integration& subint)
 {
   copy (subint);
   return *this;
-}
-
-/*! Users of this method should be aware that it does not keep
-  full track of all the parameters of an Integration. It is
-  designed to be used for low level arithmetic style addition
-  only, not fully consistent combination. The supplied tscrunch
-  routines should be used for such purposes. */
-void Pulsar::Integration::operator+= (const Integration& subint)
-{
-  float total_weight = 0.0;
-  
-  for (unsigned i = 0; i < subint.get_nchan(); i++) {
-    total_weight += subint.get_weight(i);
-  }
-  
-  if (total_weight <= 0.0)
-    return;
-  
-  string reason;
-  
-  if (!mixable(&subint, reason))
-    throw Error(InvalidParam, "Integration operator +=",
-		reason);
-  
-  for (unsigned i = 0; i < get_nchan(); i++) {
-    for (unsigned j = 0; j < get_npol(); j++) {
-      *(get_Profile(j,i)) += *(subint.get_Profile(j,i));
-    } 
-  }
-  
-  double total = get_duration() + subint.get_duration();
-  
-  set_duration(total);
-  
-  return;
 }
 
 void Pulsar::Integration::zero ()
@@ -498,59 +465,6 @@ void Pulsar::Integration::pscrunch()
 
 } 
 
-void Pulsar::Integration::get_profile_power_spectra(float gamma)
-{
-  if (get_npol()<1 || get_nchan()<1)
-    return;
-
-  if (verbose)
-    cerr << "Integration::get_profile_power_spectra" << endl;
-
-  try {
-    for (unsigned ipol=0; ipol<get_npol(); ipol++)
-      for (unsigned ichan=0; ichan<get_nchan(); ichan++)
-	profiles[ipol][ichan] -> get_power_spectrum(gamma);
-
-    set_nbin ( profiles[0][0] -> get_nbin() );
-  }
-  catch (Error& error) {
-    throw error += "Integration::get_profile_power_spectra()";
-  }
-}
-
-  
-
-void Pulsar::Integration::rotate (double time)
-{
-  double pfold = get_folding_period ();
-
-  if (pfold <= 0.0)
-    throw Error (InvalidParam, "Integration::rotate",
-		 "folding period=%lf", pfold);
-
-  try {
-    rotate_phase (time/pfold);
-    set_epoch (get_epoch() + time);
-  }
-  catch (Error& error) {
-    throw error += "Integration::rotate";
-  }
-}
-
-void Pulsar::Integration::rotate_phase (double phase) try {
-
-  // only Archive::apply_model guarantees preservation of polyco phase
-  zero_phase_aligned = false;
-
-  for (unsigned ipol=0; ipol<get_npol(); ipol++)
-    for (unsigned ichan=0; ichan<get_nchan(); ichan++)
-      profiles[ipol][ichan] -> rotate_phase (phase);
-
-}
-catch (Error& error) {
-  throw error += "Integration::rotate_phase";
-}
-
 MJD Pulsar::Integration::get_start_time () const
 {
   return get_epoch() - .5 * get_duration(); 
@@ -567,3 +481,4 @@ void Pulsar::Integration::uniform_weight (float new_weight)
     for (unsigned ichan=0; ichan < get_nchan(); ichan++)
       profiles[ipol][ichan] -> set_weight (new_weight);
 }
+
