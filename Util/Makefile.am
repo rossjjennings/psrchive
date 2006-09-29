@@ -1,25 +1,21 @@
 
-SUBDIRS                 = units genutil genutil++ psrfft
+SUBDIRS                 = units genutil fft
 
 lib_LTLIBRARIES         = libpsrutils.la
 libpsrutils_la_SOURCES  =
-libpsrutils_la_LIBADD   = units/libunits.la psrfft/libpsrfft.la \
-			genutil/libgenutil.la genutil++/libgenutilpp.la \
-			@FLIBS@
+libpsrutils_la_LIBADD   = units/libunits.la fft/libpsrfft.la \
+			genutil/libgenutil.la tempo/libtempo.la @FLIBS@
 
 if HAVE_CFITSIO
   SUBDIRS += fitsutil
   libpsrutils_la_LIBADD += fitsutil/libfitsutil.la
 endif
 
-if HAVE_MPI
-  SUBDIRS += mpiutil
-  libpsrutils_la_LIBADD += mpiutil/libmpiutil.la
-endif
+SUBDIRS += tempo
 
 if HAVE_PGPLOT
-  SUBDIRS += pgutil plot2d
-  libpsrutils_la_LIBADD += pgutil/libpgutil.la plot2d/libplot2d.la
+  SUBDIRS += pgutil
+  libpsrutils_la_LIBADD += pgutil/libpgutil.la
 endif
 
 if HAVE_QT
@@ -27,6 +23,10 @@ if HAVE_QT
   libpsrutils_la_LIBADD += qtutil/libqtutil.la
 endif
 
+if !MAKE_LEAN
+  SUBDIRS += meal
+  libpsrutils_la_LIBADD += meal/libmeal.la
+endif
 
 all: intermediate-install
 
