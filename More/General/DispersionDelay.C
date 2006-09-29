@@ -4,6 +4,7 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+using namespace std;
 
 #include "Pulsar/DispersionDelay.h"
 #include "Physical.h"

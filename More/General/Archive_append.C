@@ -12,6 +12,8 @@
 #include "Pulsar/IntegrationOrder.h"
 #include "Error.h"
 
+using namespace std;
+
 bool Pulsar::Archive::append_chronological 
 = Pulsar::config.get<bool>("append_chronological", false);
 

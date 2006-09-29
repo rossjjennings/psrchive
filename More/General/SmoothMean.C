@@ -7,7 +7,7 @@
 #include "Pulsar/SmoothMean.h"
 
 #include <iostream>
-#include "psr_cpp.h"
+using namespace std;
 
 /*! This method smooths the profile by setting each amplitude equal to
   the mean calculated over the region centred at that point and with

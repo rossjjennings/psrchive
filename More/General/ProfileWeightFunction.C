@@ -4,6 +4,7 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+using namespace std;
 #include "Pulsar/ProfileWeightFunction.h"
 #include "Pulsar/PhaseWeight.h"
 #include "Pulsar/Profile.h"

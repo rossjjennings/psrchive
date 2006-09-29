@@ -11,6 +11,8 @@
 #include "Pulsar/PhaseWeight.h"
 #include "Pulsar/Profile.h"
 
+using namespace std;
+
 //! Default constructor
 Pulsar::AdaptiveSNR::AdaptiveSNR ()
 {

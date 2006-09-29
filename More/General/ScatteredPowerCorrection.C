@@ -4,6 +4,7 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+using namespace std;
 #include "Pulsar/ScatteredPowerCorrection.h"
 #include "Pulsar/TwoBitStats.h"
 #include "Pulsar/Integration.h"

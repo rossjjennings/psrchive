@@ -4,6 +4,7 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+using namespace std;
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
 
@@ -22,9 +23,6 @@ void Pulsar::Archive::defaraday ()
 
   if (!get_poln_calibrated() && verbose)
     cerr << "Pulsar::Archive::defaraday WARNING data not calibrated" << endl;
-
-  if (!get_instrument_corrected() && verbose)
-    cerr << "Pulsar::Archive::defaraday WARNING feed not corrected" << endl;
 
   for (unsigned i = 0; i < get_nsubint(); i++)
     get_Integration(i)->defaraday ();

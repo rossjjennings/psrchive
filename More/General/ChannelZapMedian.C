@@ -4,6 +4,7 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+using namespace std;
 #include "Pulsar/ChannelZapMedian.h"
 #include "Pulsar/Integration.h"
 #include "Pulsar/Profile.h"

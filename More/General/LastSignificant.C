@@ -4,6 +4,7 @@ unsigned get_last_significant (const Pulsar::PolnProfile* psd,
 			       const Stokes<double>& var)
 {
   unsigned n_harmonic = psd->get_nbin();
+using namespace std;
 
   unsigned max_harmonic = 0;
   unsigned ipol, npol = 4;

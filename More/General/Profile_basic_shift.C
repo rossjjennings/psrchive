@@ -4,6 +4,7 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+using namespace std;
 #include <math.h>
 
 #include "Pulsar/Profile.h"
@@ -202,3 +203,4 @@ Pulsar::ParIntShift (const Profile& std, const Profile& obs)
 
   return Estimate<double> (F,var);
 }
+

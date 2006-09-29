@@ -4,6 +4,7 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+using namespace std;
 #include "Pulsar/Profile.h"
 
 /*! This use of the Functor template implements the Strategy design

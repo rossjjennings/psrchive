@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/PolnProfile.h,v $
-   $Revision: 1.32 $
-   $Date: 2006/09/14 03:47:30 $
+   $Revision: 1.33 $
+   $Date: 2006/09/29 22:19:50 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PolnProfile_h
@@ -127,10 +127,10 @@ namespace Pulsar {
     void get_polarized (Profile* polarized) const;
 
     //! Return the orientation and its estimated error for each pulse phase
-    void get_orientation (vector< Estimate<double> >& o, float sigma) const;
+    void get_orientation (std::vector< Estimate<double> >&, float sigma) const;
 
     //! Return the ellipticity and its estimated error for each pulse phase
-    void get_ellipticity (vector< Estimate<double> >& e, float sigma) const;
+    void get_ellipticity (std::vector< Estimate<double> >&, float sigma) const;
 
     //! Does some work for get_orientation and get_ellipticity
     double get_variance (unsigned ipol, float phase) const;

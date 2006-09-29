@@ -5,6 +5,7 @@
  *
  ***************************************************************************/
 #include "Pulsar/Profile.h"
+#include "Physical.h"
 
 using namespace std;
 
