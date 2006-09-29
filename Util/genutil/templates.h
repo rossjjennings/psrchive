@@ -65,3 +65,19 @@ void normalize (std::vector<T>& x)
   for (unsigned i=0; i<x.size(); i++)
     x[i] /= the_sum;
 }
+
+template <class T>
+void minmaxval (const std::vector<T>& vals, T& min, T& max, bool follow = false)
+{
+  if (!follow)
+    max = min = vals[0];
+
+  typename std::vector<T>::const_iterator val;
+  for (val = vals.begin(); val != vals.end(); val++) {
+    if (*val > max)
+      max = *val;
+    if (*val < min)
+      min = *val;
+  }
+}
+
