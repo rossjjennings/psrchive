@@ -1,4 +1,4 @@
-#include "Calibration/TotalCovariance.h"
+#include "Pulsar/TotalCovariance.h"
 #include "MEAL/StokesCovariance.h"
 
 #include "MEAL/Polar.h"
@@ -44,45 +44,6 @@ int main ()
   Calibration::TotalCovariance total_covar;
   total_covar.set_transformation (&polar);
 
-  // test the identity
-  Jones<double> J = 1;
-
-  Matrix<4,4,double> M = Mueller(J);
-  cerr << "M=\n" << M << endl;
-
-  total_covar.set_optimizing_transformation( M );
-
-  Stokes<double> test_var (1,2,.5,.6);
-  total_covar.set_template_variance (test_var);
-
-  for (unsigned ipol=0; ipol<4; ipol++)
-    if (fabs(test_var[ipol] - total_covar.get_variance(ipol)) > 1e-12) {
-      cerr << "ipol=" << ipol << " var=" << total_covar.get_variance(ipol)
-	   << " expect=" << test_var[ipol] << endl;
-      return -1;
-    }
-
-  cerr << "simple identity test passed" << endl;
-
-  MEAL::Rotation rotation;
-  rotation.set_param (0, M_PI/4);
-
-  M = Mueller(rotation.evaluate());
-
-  total_covar.set_optimizing_transformation (M);
-  cerr << "M=\n" << M << endl;
-
-  Stokes<double> expect (1,2,.6,.5);
-
-  for (unsigned ipol=0; ipol<4; ipol++)
-    if (fabs(expect[ipol] - total_covar.get_variance(ipol)) > 1e-12) {
-      cerr << "ipol=" << ipol << " var=" << total_covar.get_variance(ipol)
-	   << " expect=" << expect[ipol] << endl;
-      return -1;
-    }
-
-  cerr << "simple rotation test passed" << endl;
-
   MEAL::RandomPolar random;
 
   unsigned tests = 0;
@@ -98,9 +59,11 @@ int main ()
 
     // simulate a Lorentz transformation
     random.get (&polar);
-    J = polar.evaluate();
+    Jones<double> J = polar.evaluate();
 
     // simulate a depolarizer
+    Matrix<4,4,double> M;
+
     random_matrix (M, 10.0);
     for (unsigned i=1; i<4; i++)
       M[0][i] = 0.0;
