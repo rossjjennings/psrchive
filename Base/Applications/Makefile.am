@@ -12,6 +12,6 @@ INCLUDES = \
 	-I$(top_builddir)/Core/include \
 	-I$(top_builddir)/utils/include
 
-LDADD = $(top_builddir)/Core/libCore.la \
+LDADD = $(top_builddir)/Core/libpsrcore.la \
 	$(top_builddir)/utils/libpsrutils.la
 
