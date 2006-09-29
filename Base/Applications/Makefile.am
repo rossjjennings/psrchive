@@ -8,10 +8,10 @@ vip_SOURCES			= vip.C
 
 #############################################################################
 
-INCLUDES = -I$(top_builddir)/utils/include \
-	-I$(top_srcdir)/psrchive/File/Base \
-	-I$(top_srcdir)/psrchive/File/Extension
+INCLUDES = \
+	-I$(top_builddir)/Core/include \
+	-I$(top_builddir)/utils/include
 
-LDADD = $(top_builddir)/psrchive/File/libFile.la \
+LDADD = $(top_builddir)/Core/libCore.la \
 	$(top_builddir)/utils/libpsrutils.la
 

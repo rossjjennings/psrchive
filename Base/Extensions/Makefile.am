@@ -1,5 +1,5 @@
 
-noinst_LTLIBRARIES = libExtension.la
+noinst_LTLIBRARIES = libExtensions.la
 
 nobase_include_HEADERS = \
         Pulsar/Backend.h \
@@ -42,7 +42,7 @@ nobase_include_HEADERS = \
         Pulsar/TwoBitStats.h \
         Pulsar/WidebandCorrelator.h
 
-libExtension_la_SOURCES = \
+libExtensions_la_SOURCES = \
         Backend.C \
         BackendName.C \
         BackendTI.C \
@@ -89,6 +89,6 @@ libExtension_la_SOURCES = \
 # Dependencies should never be changed
 #
 
-INCLUDES = -I$(top_builddir)/utils/include -I$(top_srcdir)/psrchive/File/Base \
+INCLUDES = -I$(top_builddir)/utils/include -I$(top_srcdir)/Core/Bases \
 	-I$(top_srcdir)/psrchive/Polarimetry
 
