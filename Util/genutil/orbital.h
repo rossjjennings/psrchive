@@ -5,8 +5,8 @@
  *
  ***************************************************************************/
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/orbital.h,v $
-   $Revision: 1.3 $
-   $Date: 2006/03/17 13:35:00 $
+   $Revision: 1.4 $
+   $Date: 2006/09/29 14:12:57 $
    $Author: straten $ */
 
 #ifndef __ORBITAL_H
@@ -17,7 +17,7 @@ extern "C" {
 #endif
 
   /* Solves Kepler's equation using the Newton-Raphson method */
-  double eccentric_anomoly (double mean_anomoly, double eccentricity);
+  double eccentric_anomaly (double mean_anomaly, double eccentricity);
 
   /* Solves mass function for the companion mass */
   double companion_mass (double mass_function, double sini, double m1);
