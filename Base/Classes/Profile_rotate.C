@@ -10,10 +10,12 @@
 //
 
 #include "Pulsar/Profile.h"
-#include "spectra.h"
+#include "FTransform.h"
 
 #include <memory>
 #include <math.h>
+
+using namespace std;
 
 bool Pulsar::Profile::rotate_in_phase_domain = false;
 
@@ -41,9 +43,7 @@ void Pulsar::Profile::rotate_phase (double phase)
   phase -= floor (phase);
 
   if (!rotate_in_phase_domain) {
-    if ( fft_shift (nbin, amps, phase*double(nbin)) !=0 )
-      throw Error (FailedCall, "Pulsar::Profile::rotate",
-		   "fft_shift(%lf) failure", phase);
+    FTransform::shift (nbin, amps, phase*double(nbin));
   }
   else {
 
