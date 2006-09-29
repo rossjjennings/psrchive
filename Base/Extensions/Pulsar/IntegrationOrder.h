@@ -7,8 +7,8 @@
  ***************************************************************************/
                                                                                 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/IntegrationOrder.h,v $
-   $Revision: 1.9 $
-   $Date: 2006/09/28 16:24:52 $
+   $Revision: 1.10 $
+   $Date: 2006/09/29 14:39:16 $
    $Author: straten $ */
                                                                                 
 #ifndef __IntegrationOrder_h
@@ -74,7 +74,7 @@ namespace Pulsar {
     /*! Scrunch together this many consecutive Integrations in an Archive 
       with this IntegrationOrder */
     virtual void combine (Archive*, unsigned) = 0;
-    
+
   protected:
 
     //! An index state identifier string

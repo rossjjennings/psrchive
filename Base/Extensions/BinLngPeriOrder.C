@@ -5,6 +5,7 @@
  *
  ***************************************************************************/
 #include "Pulsar/BinLngPeriOrder.h"
+#include "Pulsar/IntegrationExpert.h"
 #include "psrephem_orbital.h"
 
 using namespace std;
@@ -126,7 +127,7 @@ void Pulsar::BinLngPeriOrder::organise (Archive* arch, unsigned newsub)
 	  first = false;
 	}
 	else {
-	  *(arch->get_Integration(i)) += *(copy->get_Integration(j));
+	  arch->get_Integration(i)->expert()->combine(copy->get_Integration(j));
 	  indices[i] += lngs[j];
 	  used[j] = true;
 	  tally += 1;
@@ -166,7 +167,7 @@ void Pulsar::BinLngPeriOrder::combine (Archive* arch, unsigned nscr)
     for (unsigned j = 1; j < nscr; j++) {
       if (count >= copy->get_nsubint())
 	return;
-      *(arch->get_Integration(i)) += *(copy->get_Integration(count));
+      arch->get_Integration(i)->expert()->combine(copy->get_Integration(count));
       
       count++;
     }

@@ -7,15 +7,13 @@
  ***************************************************************************/
                                                                                 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/BinLngAscOrder.h,v $
-   $Revision: 1.2 $
-   $Date: 2006/03/17 13:34:45 $
+   $Revision: 1.3 $
+   $Date: 2006/09/29 14:39:16 $
    $Author: straten $ */
                                                                                 
 #ifndef __BinLngAscOrder_h
 #define __BinLngAscOrder_h
                                                                                 
-#include "Pulsar/Archive.h"
-#include "Pulsar/Integration.h"
 #include "Pulsar/IntegrationOrder.h"
                                                                             
 namespace Pulsar {
