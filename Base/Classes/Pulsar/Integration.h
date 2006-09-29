@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Integration.h,v $
-   $Revision: 1.85 $
-   $Date: 2006/07/22 12:18:22 $
-   $Author: hknight $ */
+   $Revision: 1.86 $
+   $Date: 2006/09/29 14:44:04 $
+   $Author: straten $ */
 
 /*
   
@@ -67,9 +67,6 @@ namespace Pulsar {
     //! Zero all the profiles, keeping all else the same
     void zero ();
 
-    //! Test if integ is mixable (enough for combination with +=)
-    virtual bool mixable (const Integration* integ, string& reason) const;
-
     //! Get the MJD at the start of the integration (convenience interface)
     MJD get_start_time () const;
 
@@ -106,26 +103,26 @@ namespace Pulsar {
     float find_min_phase (float dc = 0.10) const;
 
     //! Return the statistics of every profile baseline
-    void baseline_stats (vector< vector< Estimate<double> > >* mean,
-			 vector< vector<double> >* variance = 0) const;
+    void baseline_stats (std::vector< std::vector< Estimate<double> > >* mean,
+			 std::vector< std::vector<double> >* variance = 0) const;
 
     //! Return the statistics of every profile baseline
-    void baseline_stats (vector< vector< Estimate<double> > >& mean,
-			 vector< vector< Estimate<double> > >& variance) const;
+    void baseline_stats (std::vector< std::vector< Estimate<double> > >& mean,
+			 std::vector< std::vector< Estimate<double> > >& variance) const;
 
     //! Returns the mean hi/lo and variance of the mean hi/lo of every profile
-    void cal_levels (vector< vector< Estimate<double> > >& hi,
-			     vector< vector< Estimate<double> > >& lo) const;
+    void cal_levels (std::vector< std::vector< Estimate<double> > >& hi,
+                     std::vector< std::vector< Estimate<double> > >& lo) const;
 
-    void find_psr_levels (vector<vector<double> >& mean_high,
-			  vector<vector<double> >& mean_low) const;
+    void find_psr_levels (std::vector<std::vector<double> >& mean_high,
+			  std::vector<std::vector<double> >& mean_low) const;
 
     //! Computes the weighted centre frequency of an interval of sub-chans.
     double weighted_frequency (unsigned ch_start=0, unsigned ch_end=0) const;
     
     //! Return a vector of tempo++ toa objects
-    void toas (vector<Tempo::toa>& toas, const Integration& std_subint,
-	       char nsite, string arguments = "", 
+    void toas (std::vector<Tempo::toa>& toas, const Integration& std_subint,
+	       char nsite, std::string arguments = "", 
 	       Tempo::toa::Format fmt = Tempo::toa::Parkes,
 	       bool discard_bad = false) const;
     
@@ -300,12 +297,8 @@ namespace Pulsar {
     Stokes<float> get_Stokes (unsigned ichan, unsigned ibin) const;
 
     //! Returns a vector of Stokes parameters along the specified dimension
-    void get_Stokes (vector< Stokes<float> >& S, unsigned iother,
+    void get_Stokes (std::vector< Stokes<float> >& S, unsigned iother,
 		     Signal::Dimension abscissa = Signal::Phase ) const;
-
-    //! get PA as a function of phase
-    void get_PA (vector<double> &phases, vector<double> &angles,
-			 vector<double> &errors, float _threshold=2.5);
 
     // //////////////////////////////////////////////////////////////////
     //
@@ -344,12 +337,12 @@ namespace Pulsar {
       virtual void update (const Integration* subint) { }
 
       //! Return the name of the Extension
-      string get_name () const;
+      std::string get_name () const;
       
     protected:
       
       //! Extension name - useful when debugging
-      string name;
+      std::string name;
       
       //! Provide Extension derived classes with access to parent Archive
       const Archive* get_parent (const Integration* subint) const;
@@ -391,12 +384,6 @@ namespace Pulsar {
     //! Provide access to the expert interface
     Expert* expert ();
 
-    //! Rotate each profile by time (in seconds); updates the epoch attribute
-    void rotate (double time);
-
-    //! Rotate each profile by phase; does not update the epoch attribute
-    void rotate_phase (double phase);
-
   protected:
 
     // //////////////////////////////////////////////////////////////////
@@ -430,13 +417,14 @@ namespace Pulsar {
 
     friend class Archive;
     friend class Extension;
-    friend class BinaryPhaseOrder;
-    friend class PeriastronOrder;
-    friend class BinLngPeriOrder;
-    friend class BinLngAscOrder;
     friend class Calibrator;
-    friend class Plotter;
     friend class Expert;
+
+    //! Combine from into this
+    void combine (const Integration* from);
+
+    //! Test if integration may be combined with this
+    bool mixable (const Integration* integ, std::string& reason) const;
 
     //! Copy the profiles and attributes through set_ get_ methods
     virtual void copy (const Integration& subint, int npol=-1, int nchan=-1);
@@ -444,6 +432,12 @@ namespace Pulsar {
     //! Swap the two specified profiles
     void swap_profiles (unsigned ipol, unsigned ichan,
 			unsigned jpol, unsigned jchan);
+
+    //! Rotate each profile by time (in seconds); updates the epoch attribute
+    void rotate (double time);
+
+    //! Rotate each profile by phase; does not update the epoch attribute
+    void rotate_phase (double phase);
 
     //! Call Profile::fold on every profile
     void fold (unsigned nfold);
@@ -457,26 +451,6 @@ namespace Pulsar {
     //! Integrate profiles from single polarizations into one total intensity
     void pscrunch ();
     
-    //! Replaces each profile with its power spectrum
-    void get_profile_power_spectra(float gamma=1.0);
-    
-
-    //! operator +=
-    /*! This operator is provided for experimental purposes and should
-      not be used lightly. If the time spans of the two combined
-      subints are not contiguous, several parameters in the result are
-      no longer meaningful. Also, there is no way of knowing whether
-      the profiles are aligned in phase. Developers who use this
-      operator should perform the necessary rotations at the archive
-      level (where the polyco resides) before summing the data in the
-      Integrations. */
-    void operator += (const Integration& subint);
-    
-    //! Append frequency channels from another Integration
-    /*!  Note that this is dangerous and only intended for use with instruments 
-      whose band is split into adjoining segments (like cpsr2) */
-    void fappend (Pulsar::Integration* integ, bool ignore_time_mismatch = false);
-
     //! Transform from Stokes (I,Q,U,V) to the polarimetric invariant interval
     void invint ();
     
@@ -484,7 +458,7 @@ namespace Pulsar {
     void transform (const Jones<float>& response);
 
     //! Perform frequency response on each polarimetric profile
-    void transform (const vector< Jones<float> >& response);
+    void transform (const std::vector< Jones<float> >& response);
 
     //! Convert polarimetric data to the specified state
     void convert_state (Signal::State state);
@@ -493,10 +467,10 @@ namespace Pulsar {
     virtual Profile* new_Profile ();
 
     //! The Extensions added to this Integration instance
-    vector< Reference::To<Extension> > extension;
+    std::vector< Reference::To<Extension> > extension;
 
     //! Data: npol by nchan profiles
-    vector< vector< Reference::To<Profile> > > profiles;
+    std::vector< std::vector< Reference::To<Profile> > > profiles;
 
     //! The Archive that manages this integration
     Reference::To<const Archive, false> archive;
@@ -535,7 +509,8 @@ namespace Pulsar {
       const Extension* ext = get_extension (iext);
 
       if (verbose)
-	cerr << "Pulsar::Integration::get<T> name=" << ext->get_name() << endl;
+	std::cerr << "Pulsar::Integration::get<T> name=" << ext->get_name() 
+                  << std::endl;
 
       extension = dynamic_cast<const ExtensionType*>( ext );
 
