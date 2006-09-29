@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/IntegrationExpert.h,v $
-   $Revision: 1.3 $
-   $Date: 2006/03/17 13:34:51 $
+   $Revision: 1.4 $
+   $Date: 2006/09/29 14:43:04 $
    $Author: straten $ */
 
 #ifndef __Pulsar_IntegrationExpert_h
@@ -50,6 +50,14 @@ namespace Pulsar {
     void resize (unsigned npol=0, unsigned nchan=0, unsigned nbin=0)
     { instance->resize (npol, nchan, nbin); }
 
+    //! Rotate each profile by time (in seconds); updates the epoch attribute
+    void rotate (double time)
+    { instance->rotate (time); }
+
+    //! Rotate each profile by phase; does not update the epoch attribute
+    void rotate_phase (double phase)
+    { instance->rotate_phase (phase); }
+
     //! Integrate profiles from neighbouring chans
     void fscrunch (unsigned nscrunch = 0)
     { instance->fscrunch (nscrunch); }
@@ -62,6 +70,10 @@ namespace Pulsar {
     void swap_profiles (unsigned ipol, unsigned ichan,
 			unsigned jpol, unsigned jchan)
     { instance->swap_profiles (ipol, ichan, jpol, jchan); }
+
+    //! Combine the data from 'from' into 'this'
+    void combine (const Integration* from)
+    { instance->combine (from); }
 
   private:
 
