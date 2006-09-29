@@ -4,10 +4,13 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-#include <math.h>
 
 #include "Pulsar/StandardSNR.h"
 #include "Pulsar/Profile.h"
+#include "morphological_difference.h"
+
+#include <math.h>
+using namespace std;
 
 void Pulsar::StandardSNR::set_standard (const Profile* profile)
 {
@@ -57,7 +60,7 @@ float Pulsar::StandardSNR::get_morph_snr (const Profile* profile)
   double scale = 0.0;
 
   Reference::To<Pulsar::Profile> diff = 
-    pcopy->morphological_difference(*scopy, scale, shift);
+    morphological_difference(pcopy, scopy, scale, shift);
 
   pcopy->rotate_phase (shift);
 

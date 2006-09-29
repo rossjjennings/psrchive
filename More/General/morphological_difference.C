@@ -1,66 +1,18 @@
 /***************************************************************************
  *
- *   Copyright (C) 2002 by Willem van Straten
+ *   Copyright (C) 2003 by Aidan Hotan
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+#include "morphological_difference.h"
 #include "Pulsar/Profile.h"
 #include "Error.h"
 
-/////////////////////////////////////////////////////////////////////////////
-//
-// Pulsar::Profile::average
-//
-/*!
-  A series of additions using this operator preserves the relationship:
-
-  \f$ \bar{x} = \sum_{i=1}^N W(x_i) x_i / W(\bar{x}) \f$
-
-  where \f$ W(x_i) \f$ is the weight assigned to \f$ x_i \f$ and
-
-  \f$ W(\bar{x}) = \sum_{i=1}^N W(x_i) \f$
-*/
-const Pulsar::Profile& Pulsar::Profile::average (const Profile* profile, 
-						 double sign)
-{
-  if (nbin != profile->get_nbin())
-    throw Error (InvalidRange, "Pulsar::Profile::average",
-		 "nbin=%d != profile.nbin=%d", nbin, profile->get_nbin());
-
-  try {
-
-    // check if the addition will result in some undefined state
-    if (state != profile->get_state())
-      state = Signal::None;
-    
-    float* amps1 = amps;
-    const float* amps2 = profile->get_amps();
-    
-    double weight1 = weight;
-    double weight2 = profile->get_weight();
-    
-    weight = weight1 + weight2;
-    
-    double norm = 0.0;
-    if (weight != 0)
-      norm = 1.0 / weight;
-    
-    for (unsigned ibin=0; ibin<nbin; ibin++) {
-      *amps1 = norm * ( double(*amps1)*weight1 + sign*double(*amps2)*weight2 );
-      amps1 ++; amps2 ++;
-    }
-
-  }
-  catch (Error& error) {
-    throw error += "Profile::average";
-  }
-
-  return *this;
-}
+using namespace std;
 
 /////////////////////////////////////////////////////////////////////////////
 //
-// Pulsar::Profile::morphological_difference
+// Pulsar::morphological_difference
 //
 /*!
   This function is designed to be used for detecting morphological
@@ -68,17 +20,17 @@ const Pulsar::Profile& Pulsar::Profile::average (const Profile* profile,
   individual profiles involved.
 */
 
-Pulsar::Profile*
-Pulsar::Profile::morphological_difference (const Profile& profile,
-					   double& scale, double& shift,
-					   float phs1, float phs2)
+Pulsar::Profile* 
+Pulsar::morphological_difference (const Profile* p1, const Profile* p2,
+                                  double& scale, double& shift,
+                                  float phs1, float phs2)
 {
-  if (get_nbin() != profile.get_nbin())
+  if (p1->get_nbin() != p2->get_nbin())
     throw Error (InvalidRange, "Pulsar::Profile::morphological_difference",
 		 "nbin mismatch");
 
-  Reference::To<Pulsar::Profile> temp1 = clone();
-  Reference::To<Pulsar::Profile> temp2 = profile.clone();
+  Reference::To<Pulsar::Profile> temp1 = p1->clone();
+  Reference::To<Pulsar::Profile> temp2 = p2->clone();
   
   // First it is essential to align the profiles in phase, so that our
   // subtraction occurs between the equivalent bins in both profiles.
@@ -96,11 +48,11 @@ Pulsar::Profile::morphological_difference (const Profile& profile,
     ephase = sqrt(Ephase.var);
   }
   catch (Error& error) {
-    cerr << "Pulsar::Profile::morphological_difference FFT shift failed" 
+    cerr << "Pulsar::difference FFT shift failed" 
 	 << endl;
     cerr << "  Trying simple cross correlation instead..." << endl;
     
-    Reference::To<Pulsar::Profile> ptr = clone();
+    Reference::To<Pulsar::Profile> ptr = p1->clone();
     
     *ptr -= ptr->mean(ptr->find_min_phase(0.15));
     ptr->correlate(temp2);
@@ -128,11 +80,11 @@ Pulsar::Profile::morphological_difference (const Profile& profile,
   // This section scales the total flux under the profile to
   // be the same as under the standard
   
-  float t2sum = temp2->sum(int(phs1*(profile.get_nbin())),
-			   int(phs2*(profile.get_nbin())));
+  float t2sum = temp2->sum(int(phs1*(p2->get_nbin())),
+			   int(phs2*(p2->get_nbin())));
   
-  float ratio = t2sum / temp1->sum(int(phs1*(profile.get_nbin())),
-				   int(phs2*(profile.get_nbin())));
+  float ratio = t2sum / temp1->sum(int(phs1*(p2->get_nbin())),
+				   int(phs2*(p2->get_nbin())));
   
   *temp1 *= ratio;
 
@@ -148,8 +100,8 @@ Pulsar::Profile::morphological_difference (const Profile& profile,
   // more susceptible to variations in intrinsic brightness
   // but perhaps more physically meaningful?
   
-  float phs1 = temp1->find_min_phase();
-  float phs2 = temp2->find_min_phase();
+  phs1 = temp1->find_min_phase();
+  phs2 = temp2->find_min_phase();
   
   double mean    = 0.0;
   double var     = 0.0;
