@@ -142,17 +142,16 @@ AC_CONFIG_FILES([third/Makefile
 		utils/qtutil/Makefile
 		utils/fitsutil/Makefile
 		utils/meal/Makefile
+		utils/tempo/Makefile
 		utils/Makefile
-		tempo/polyco/Makefile
-		tempo/psrephem/Makefile
-		tempo/tempo++/Makefile
-		tempo/Makefile
-		psrchive/File/EPN/Makefile
-		psrchive/File/Timer/Makefile
-		psrchive/File/PSRFITS/Makefile
-                psrchive/File/ASCII/Makefile
-		psrchive/File/Extension/Makefile
-		psrchive/File/Makefile
+		Core/Extensions/Makefile
+		Core/Bases/Makefile
+		Core/Formats/Makefile
+		Core/Formats/EPN/Makefile
+		Core/Formats/Timer/Makefile
+		Core/Formats/PSRFITS/Makefile
+                Core/Formats/ASCII/Makefile
+		Core/Applications/Makefile
 		psrchive/General/Makefile
 		psrchive/Plotting/Makefile
 		psrchive/Polarimetry/Makefile
