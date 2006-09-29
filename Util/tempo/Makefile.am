@@ -1,23 +1,26 @@
 
-noinst_LTLIBRARIES = libpsrephem.la
+noinst_LTLIBRARIES = libtempo.la
 
-include_HEADERS = psrephem.h ephio_func.h MatchingEphemeris.h
+include_HEADERS = psrephem.h ephio_func.h psrephem_orbital.h \
+	polyco.h Phase.h toa.h residual.h resio.h tempo++.h Predict.h
 
 nodist_include_HEADERS = ephio.h
 
-libpsrephem_la_SOURCES = keys.dat ephio_c.c ephio.f \
-	psrephem.C set_epoch.C tex.C derived.C MatchingEphemeris.C
+libtempo_la_SOURCES = keys.dat ephio_c.c ephio.f \
+	psrephem.C set_epoch.C tex.C derived.C psrephem_orbital.C \
+	getlun.f length.f posparse.f strmatch.f upcase.f zeropad.f \
+	polyco.C Phase.C toa.C residual.C resio.f tempo++.C Predict.C
 
-nodist_libpsrephem_la_SOURCES = ephio_def.c
+nodist_libtempo_la_SOURCES = ephio_def.c
 
-bin_PROGRAMS = keys2c keys2fort ephaux ephepo ephtex
+bin_PROGRAMS = keys2c keys2fort ephepo ephtex
+check_PROGRAMS = test_ephio test_polyco_io test_Phase
 
-ephaux_SOURCES	= ephaux.C
-ephaux_LDADD	= $(LDADD) @SLA_LIBS@
+ephepo_SOURCES = ephepo.C
+ephtex_SOURCES = ephtex.C
+test_polyco_io_SOURCES = test_polyco_io.C
+test_Phase_SOURCES = test_Phase.C
 
-ephepo_SOURCES	= ephepo.C
-
-ephtex_SOURCES	= ephtex.C
 ephtex_LDADD	= $(LDADD) @SLA_LIBS@
 
 # ######################################################################
@@ -26,12 +29,14 @@ ephtex_LDADD	= $(LDADD) @SLA_LIBS@
 #
 if HAVE_CFITSIO
 
-libpsrephem_la_SOURCES += fitsio.C
+libtempo_la_SOURCES += fitsio_psrephem.C fitsio_polyco.C
 
-check_PROGRAMS = test_psrephem_fitsio test_ephio
+check_PROGRAMS += test_psrephem_fitsio test_polyco_fitsio
 
 test_psrephem_fitsio_SOURCES = test_psrephem_fitsio.C
+test_polyco_fitsio_SOURCES = test_polyco_fitsio.C
 test_psrephem_fitsio_LDADD = $(LDADD) @CFITSIO_LIBS@
+test_polyco_fitsio_LDADD = $(LDADD) @CFITSIO_LIBS@
 
 endif
 
@@ -60,8 +65,11 @@ keys2c_LDADD =
 # Dependencies should never be changed
 #
 
-INCLUDES = -I. -I$(top_builddir)/utils/include \
+INCLUDES = -I. -I$(top_builddir) -I$(top_srcdir)/utils/units \
+        -I$(top_srcdir)/utils/genutil -I$(top_srcdir)/utils/fitsutil \
 	@CFITSIO_CFLAGS@ @MPI_CFLAGS@ @SLA_CFLAGS@
 
-LDADD = libpsrephem.la $(top_builddir)/utils/libpsrutils.la @FLIBS@
+LDADD = libtempo.la $(top_builddir)/utils/genutil/libgenutil.la \
+	$(top_builddir)/utils/units/libunits.la \
+	$(top_builddir)/utils/fitsutil/libfitsutil.la @FLIBS@
 
