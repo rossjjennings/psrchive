@@ -1,6 +1,6 @@
 
-lib_LTLIBRARIES = libFormats.la
-libFormats_la_SOURCES  =
+noinst_LTLIBRARIES = libFormats.la
+libFormats_la_SOURCES = Agent_static.C
 
 SUBDIRS = Timer EPN ASCII
 
@@ -11,7 +11,20 @@ SUBDIRS += PSRFITS
 libFormats_la_LIBADD += PSRFITS/libpsrfits.la
 endif
 
-all: intermediate-install
+SUBDIRS += .
 
 include $(top_srcdir)/config/Makefile.local
+
+#############################################################################
+#
+# Dependencies should never be changed
+#
+
+INCLUDES = -I$(top_builddir)/utils/include \
+	-I$(top_srcdir)/Core/Bases \
+	-I$(top_srcdir)/Core/Extensions \
+	-I$(top_srcdir)/Core/Formats/Timer \
+	-I$(top_srcdir)/Core/Formats/EPN \
+	-I$(top_srcdir)/Core/Formats/ASCII \
+	-I$(top_srcdir)/Core/Formats/PSRFITS
 

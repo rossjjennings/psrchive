@@ -1,5 +1,5 @@
 
-noinst_LTLIBRARIES = libBase.la
+noinst_LTLIBRARIES = libBases.la
 
 nobase_include_HEADERS = \
         Pulsar/ArchiveExpert.h \
@@ -18,10 +18,9 @@ nobase_include_HEADERS = \
         Pulsar/Profile.h \
         Pulsar/Pulsar.h
 
-libBase_la_SOURCES = \
+libBases_la_SOURCES = \
         Agent.C \
         Agent_plugin.C \
-        Agent_static.C \
         Archive.C \
         Archive_copy.C \
         Archive_init_Integration.C \
@@ -49,9 +48,5 @@ libBase_la_SOURCES = \
 #
 
 INCLUDES = -I$(top_builddir)/utils/include \
-	-I$(top_srcdir)/psrchive/File/Extension \
-	-I$(top_srcdir)/psrchive/File/Timer \
-	-I$(top_srcdir)/psrchive/File/PSRFITS \
-	-I$(top_srcdir)/psrchive/File/EPN \
-	-I$(top_srcdir)/psrchive/File/ASCII
+	-I$(top_srcdir)/Core/Extensions
 
