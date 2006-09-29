@@ -7,6 +7,8 @@
 #ifndef __DIRUTILS_H
 #define __DIRUTILS_H
 
+#ifdef __cplusplus
+
 #include <vector>
 #include <string>
 
@@ -44,5 +46,17 @@ void dirglobtree (std::vector<std::string>* filenames,
 
 void dirglobtree (std::vector<std::string>* filenames, 
 		  const std::string& root, const std::string& pattern);
+
+extern "C" {
+#endif /* #ifdef __cplusplus */
+
+  /* recursively constructs a new directory named 'path' */
+  int makedir   (const char* path);
+  /* resursively removes an existing directory named 'path' */
+  int removedir (const char* path);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
