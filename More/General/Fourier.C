@@ -4,11 +4,12 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+using namespace std;
 
 #include "Pulsar/Fourier.h"
 #include "Pulsar/PolnProfile.h"
 #include "Pulsar/Profile.h"
-#include "fftm.h"
+#include "FTransform.h"
 
 Pulsar::PolnProfile* Pulsar::fourier_transform (const PolnProfile* input) try
 {
@@ -26,9 +27,7 @@ Pulsar::Profile* Pulsar::fourier_transform (const Profile* input) try
 {
   Reference::To<Profile> fourier = new Profile (input->get_nbin() + 2);
 
-  // cerr << "Pulsar::fourier_transform with " << fft::id << endl;
-
-  fft::frc1d (input->get_nbin(), fourier->get_amps(), input->get_amps());
+  FTransform::frc1d (input->get_nbin(), fourier->get_amps(), input->get_amps());
 
   fourier->scale( 1.0 / sqrt(double(input->get_nbin())) );
 

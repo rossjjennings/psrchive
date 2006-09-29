@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/fft/interpolate.h,v $
-   $Revision: 1.11 $
-   $Date: 2006/04/06 14:29:01 $
+   $Revision: 1.12 $
+   $Date: 2006/09/29 22:14:54 $
    $Author: straten $*/
 
 #ifndef __fft_interpolate_h
@@ -16,7 +16,7 @@
 
 #include "Traits.h"
 #include "Error.h"
-#include "fftm.h"
+#include "FTransform.h"
 
 #include <vector>
 
@@ -51,7 +51,7 @@ namespace fft {
       for (ipt=0; ipt < in.size(); ipt++)
 	dom1[ipt] = datum_traits.element (in[ipt], idim);
 
-      fft::fcc1d (in.size(), (float*)&(dom2[0]), (float*)&(dom1[0]));
+      FTransform::fcc1d (in.size(), (float*)&(dom2[0]), (float*)&(dom1[0]));
 
       // shift the negative frequencies
       unsigned npt2 = in.size()/2;
@@ -63,11 +63,11 @@ namespace fft {
       for (ipt=npt2; ipt<end; ipt++)
 	dom2[ipt] = 0;
 
-      fft::bcc1d (out.size(), (float*)&(dom1[0]), (float*)&(dom2[0]));
+      FTransform::bcc1d (out.size(), (float*)&(dom1[0]), (float*)&(dom2[0]));
 
       float scalefac = 1.0;
 
-      if (fft::get_normalization() == fft::nfft)
+      if (FTransform::get_norm() == FTransform::nfft)
         scalefac = 1.0 / float(in.size());
       else
         scalefac = float(out.size()) / float(in.size());

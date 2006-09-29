@@ -4,10 +4,11 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+using namespace std;
 #include <algorithm>
 #include <math.h>
 #include "Pulsar/Profile.h"
-#include "fftm.h"
+#include "FTransform.h"
 
 // redwards --- code for finding the phase shift w.r.t. a template profile,
 // using sinc interpolation of the cross correlation function
@@ -239,8 +240,8 @@ Pulsar::SincInterpShift (const Profile& std, const Profile& obs)
   const std::complex<float> zero(0.0, 0.0); 
   float *ccf = new float [nbin];
 
-  fft::frc1d (nbin_obs, (float*)obs_spec, obs.get_amps());
-  fft::frc1d (nbin_std, (float*)std_spec, std.get_amps());
+  FTransform::frc1d (nbin_obs, (float*)obs_spec, obs.get_amps());
+  FTransform::frc1d (nbin_std, (float*)std_spec, std.get_amps());
 
   // Zap harmonics of periodic spikes if necessary
   int nadd = nby2-1; //keep track of how many coefficients are used
@@ -261,7 +262,7 @@ Pulsar::SincInterpShift (const Profile& std, const Profile& obs)
   ccf_spec[0] = zero; // ignore DC components
   ccf_spec[nby2] = zero; // Ignore Nyquist, it has no phase information
   
-  fft::bcr1d (nbin, ccf, (float*)ccf_spec);
+  FTransform::bcr1d (nbin, ccf, (float*)ccf_spec);
 
 //   fprintf(stderr, "ccf[0] = %g\n", ccf[0]);
 

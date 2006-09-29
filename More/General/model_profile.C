@@ -4,6 +4,7 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+using namespace std;
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
@@ -13,7 +14,7 @@
 #include <assert.h>
 #include <math.h>
 
-#include "fftm.h"
+#include "FTransform.h"
 #include "model_profile.h"
 
 using namespace std;
@@ -86,8 +87,8 @@ int Pulsar::model_profile (int npts, int narrays,
     assert (fft_std[i]!=0 && fft_prf[i]!=0 && 
 	    xcorr_amps[i]!=0 && xcorr_phases[i]!=0);
 
-    fft::frc1d (npts, fft_std[i], std[i]);
-    fft::frc1d (npts, fft_prf[i], prf[i]);
+    FTransform::frc1d (npts, fft_std[i], std[i]);
+    FTransform::frc1d (npts, fft_prf[i], prf[i]);
 
     // zap the Nyquist value
     fft_std[i][1] = fft_prf[i][1] = 0.0;

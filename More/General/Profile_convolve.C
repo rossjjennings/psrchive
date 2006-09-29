@@ -4,9 +4,10 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+using namespace std;
 #include "Pulsar/Profile.h"
 #include "Error.h"
-#include "fftm.h"
+#include "FTransform.h"
 
 #include <memory>
 
@@ -55,8 +56,8 @@ void Pulsar::Profile::fft_convolve (const Profile* p1)
   auto_ptr<float> temp2( new float[bins+2] );
   auto_ptr<float> resultant( new float[bins+2] );
 
-  fft::frc1d (bins, temp1.get(), get_amps());
-  fft::frc1d (bins, temp2.get(), p1->get_amps());
+  FTransform::frc1d (bins, temp1.get(), get_amps());
+  FTransform::frc1d (bins, temp2.get(), p1->get_amps());
 
   // cast the float* arrays to complex<float>*
   complex<float>* c1 = (complex<float>*) temp1.get();
@@ -75,7 +76,7 @@ void Pulsar::Profile::fft_convolve (const Profile* p1)
 
   solution.resize(bins);
 
-  fft::bcr1d (bins, &(solution[0]), resultant.get());
+  FTransform::bcr1d (bins, &(solution[0]), resultant.get());
 
   // Return the profile
 
