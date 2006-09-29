@@ -13,6 +13,7 @@ include_HEADERS = \
         environ.h \
         fcomp.h \
         fsleep.h \
+	Horizon.h \
         ieee.h \
         ierf.h \
         JenetAnderson98A5.h \
@@ -52,6 +53,7 @@ libgenutil_la_SOURCES = \
         errscale.c \
         fcomp.C \
         fsleep.c \
+	Horizon.C \
         ieee.c \
         ierf.c \
         JenetAnderson98A5.C \
