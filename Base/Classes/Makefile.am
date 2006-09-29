@@ -1,57 +1,57 @@
 
-noinst_LTLIBRARIES = libExtension.la
+noinst_LTLIBRARIES = libBase.la
 
 nobase_include_HEADERS = \
-	Pulsar/Backend.h                  Pulsar/IntegrationOrder.h  \
-	Pulsar/BackendName.h              Pulsar/ObsExtension.h  \
-	Pulsar/BinLngAscOrder.h           Pulsar/Parkes.h  \
-	Pulsar/BinLngPeriOrder.h          Pulsar/Passband.h  \
-	Pulsar/BinaryPhaseOrder.h         Pulsar/PeriastronOrder.h  \
-	Pulsar/CalInfoExtension.h         Pulsar/Pointing.h  \
-	Pulsar/CalibratorExtension.h      Pulsar/PolnCalibratorExtension.h  \
-	Pulsar/CalibratorStokes.h         Pulsar/ProcHistory.h  \
-	Pulsar/ColdPlasmaHistory.h \
-	Pulsar/Dedisperse.h               Pulsar/DeFaraday.h \
-	Pulsar/DigitiserStatistics.h      Pulsar/Receiver.h  \
-	Pulsar/ExampleExtension.h         Pulsar/Telescope.h  \
-	Pulsar/FeedExtension.h            Pulsar/TapeInfo.h \
-	Pulsar/FITSHdrExtension.h         Pulsar/TwoBitStats.h  \
-	Pulsar/FluxCalibratorExtension.h  Pulsar/WidebandCorrelator.h  \
-	Pulsar/ITRFExtension.h            Pulsar/dspReduction.h \
-	Pulsar/ReceiverTI.h               Pulsar/PointingTI.h \
-	Pulsar/BackendTI.h                Pulsar/PowerEstimator.h \
-	Pulsar/TimeSortedOrder.h
+        Pulsar/ArchiveExpert.h \
+        Pulsar/Archive.h \
+        Pulsar/ArchiveTI.h \
+        Pulsar/BasicArchive.h \
+        Pulsar/BasicIntegration.h \
+        Pulsar/Config.h \
+        Pulsar/Container.h \
+        Pulsar/ExampleArchive.h \
+        Pulsar/IntegrationExpert.h \
+        Pulsar/Integration.h \
+        Pulsar/IntegrationManagerExpert.h \
+        Pulsar/IntegrationManager.h \
+        Pulsar/IntegrationTI.h \
+        Pulsar/Profile.h \
+        Pulsar/Pulsar.h
 
-libExtension_la_SOURCES = \
-	Backend.C                        BackendTI.C \
-	BackendName.C                    ObsExtension.C  \
-	BinLngAscOrder.C                 Parkes.C  \
-	BinLngPeriOrder.C                Passband.C  \
-	BinaryPhaseOrder.C               PeriastronOrder.C  \
-	CalInfoExtension.C               Pointing.C  \
-	CalibratorExtension.C            PolnCalibratorExtension.C  \
-	CalibratorExtension_build.C       \
-	CalibratorStokes.C               ProcHistory.C  \
-	ColdPlasmaHistory.C \
-	Dedisperse.C                     DeFaraday.C \
-	DigitiserStatistics.C            Receiver.C  \
-	ExampleExtension.C  \
-	FeedExtension.C                  TapeInfo.C \
-	FITSHdrExtension.C               Telescope.C  \
-	FluxCalibratorExtension.C        TwoBitStats.C  \
-	FluxCalibratorExtension_build.C  WidebandCorrelator.C  \
-	ITRFExtension.C                  dspReduction.C  \
-	IntegrationOrder.C               ReceiverTI.C  \
-	PointingTI.C                     Receiver_Native.C \
-	Receiver_Field.C                 Receiver_Linear.C \
-	Pulsar/Receiver_Field.h          Pulsar/Receiver_Linear.h \
-	Pulsar/Receiver_Native.h	 TimeSortedOrder.C
+libBase_la_SOURCES = \
+        Agent.C \
+        Agent_plugin.C \
+        Agent_static.C \
+        Archive.C \
+        Archive_copy.C \
+        Archive_init_Integration.C \
+        Archive_load.C \
+        Archive_resize.C \
+        ArchiveTI.C \
+        Archive_unload.C \
+        Archive_verbose.C \
+        BasicArchive.C \
+        BasicIntegration.C \
+        Config.C \
+        ExampleArchive.C \
+        Integration.C \
+        Integration_combine.C \
+        IntegrationManager.C \
+        Integration_mixable.C \
+        Integration_resize.C \
+        IntegrationTI.C \
+        Profile_average.C \
+        Profile.C
 
 #############################################################################
 #
 # Dependencies should never be changed
 #
 
-INCLUDES = -I$(top_builddir)/utils/include -I$(top_srcdir)/psrchive/File \
-	-I$(top_srcdir)/psrchive/Polarimetry
+INCLUDES = -I$(top_builddir)/utils/include \
+	-I$(top_srcdir)/psrchive/File/Extension \
+	-I$(top_srcdir)/psrchive/File/Timer \
+	-I$(top_srcdir)/psrchive/File/PSRFITS \
+	-I$(top_srcdir)/psrchive/File/EPN \
+	-I$(top_srcdir)/psrchive/File/ASCII
 
