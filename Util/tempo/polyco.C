@@ -4,7 +4,7 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-#include "poly.h"
+#include "polyco.h"
 #include "string_utils.h"
 #include "Error.h"
 
