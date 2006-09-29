@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/psrephem.h,v $
-   $Revision: 1.34 $
-   $Date: 2006/03/17 13:34:31 $
+   $Revision: 1.35 $
+   $Date: 2006/09/29 14:22:54 $
    $Author: straten $ */
 
 #ifndef __PSREPHEM_H
@@ -36,19 +36,19 @@ class psrephem : public Reference::Able
  public:
 
   // this string needs to be long enough to hold the above-defined MACRO
-  static vector<string> extensions();
+  static std::vector<std::string> extensions();
 
   // makes tex_descriptor return short_tex_descriptor
   static bool short_tex;
 
   int*    parmStatus;
-  string* value_str;
+  std::string* value_str;
   double* value_double;
   int*    value_integer;
   double* error_double;
 
   bool   tempo11;
-  string nontempo11;
+  std::string nontempo11;
 
   psrephem() { init (); };
   virtual ~psrephem();
@@ -63,26 +63,26 @@ class psrephem : public Reference::Able
   void zero ();
 
   int create (const char* psr_name, int use_cwd=0);
-  int create (const string& psr_name, int use_cwd=0)
+  int create (const std::string& psr_name, int use_cwd=0)
     { return create (psr_name.c_str(), use_cwd); }
 
   int load   (const char* filename);
-  int load   (const string& filename) { return load (filename.c_str()); }
+  int load   (const std::string& filename) { return load (filename.c_str()); }
 
   int unload (const char* filename) const;
-  int unload (const string& fname) const { return unload (fname.c_str()); }
+  int unload (const std::string& fname) const { return unload (fname.c_str()); }
 
   int load   (FILE* instream, size_t bytes);
   int unload (FILE* outstream) const;
 
-  int load   (string* str);
-  int unload (string* str) const;
+  int load   (std::string* str);
+  int unload (std::string* str) const;
 
 #ifdef HAVE_CFITSIO
   void load   (fitsfile* fptr, long row=0);
   void unload (fitsfile* fptr, long row=0) const;
 
-  void fits_map (fitsfile* fptr, vector<int>& ephind, int& maxstrlen) const;
+  void fits_map (fitsfile* fptr, std::vector<int>& ephind, int& maxstrlen) const;
 #endif
 
   // set fitting attributes
@@ -96,14 +96,14 @@ class psrephem : public Reference::Able
   void   efac (float efac);
 
   // return the value
-  string get_string  (int ephind);
+  std::string get_string  (int ephind);
   double get_double  (int ephind);
   MJD    get_MJD     (int ephind);
   Angle  get_Angle   (int ephind);
   int    get_integer (int ephind);
 
   // set value
-  void set_string  (int ephind, const string&);
+  void set_string  (int ephind, const std::string&);
   void set_double  (int ephind, double );
   void set_MJD     (int ephind, const MJD&);
   void set_Angle   (int ephind, const Angle&);
@@ -113,7 +113,7 @@ class psrephem : public Reference::Able
   double p_err() const;
 
   // return some values
-  string psrname() const;
+  std::string psrname() const;
   friend bool operator == (const psrephem &, const psrephem &);
   friend bool operator != (const psrephem &, const psrephem &);
 
@@ -214,11 +214,11 @@ class psrephem : public Reference::Able
   // -lpsrinfo
 
   // returns a block of LaTeX formatted text suitable for use in tables
-  string tex () const;
+  std::string tex () const;
   // returns the LaTeX formatted pulsar name
-  string tex_name () const;
+  std::string tex_name () const;
   // returns the a LaTeX formatted string for the parameter at ephind
-  string tex_val (int ephind, double fac=1.0, unsigned precision=1) const;
+  std::string tex_val (int ephind, double fac=1.0, unsigned precision=1) const;
 
   // returns a LateX formatted string suitable for labelling the parameter
   static const char* tex_descriptor (int ephind);
@@ -227,21 +227,21 @@ class psrephem : public Reference::Able
   static const char* short_tex_descriptor (int ephind);
 
   // returns a block of LaTeX formatted text suitable for use in tables
-  static string tex (vector<psrephem>& vals, bool dots=false);
+  static std::string tex (std::vector<psrephem>& vals, bool dots=false);
 
   // returns the directory path in which psrinfo will be run
-  string get_directory ();
+  std::string get_directory ();
 
-  string par_lookup (const char* name, int use_cwd);
+  std::string par_lookup (const char* name, int use_cwd);
   static char* tempo_pardir;
   static int   verbose;
 
 	// this is specifically for the older style ephemeris file
 	// inserts the ephemeris values into the val_str, val_double,
 	// and val_int depending on the type of each ephemeris value.
-	void read_old_ephem_str(vector<string> lines, 
+	void read_old_ephem_str(std::vector<std::string> lines, 
 	                                int *pstatus,
-                                  string *val_str, 
+                                  std::string *val_str, 
 																	double *val_double, 
 																	int *val_int);
 
@@ -257,7 +257,7 @@ class psrephem : public Reference::Able
 
 };
 
-ostream& operator<< (ostream& ostr, const psrephem& eph);
+std::ostream& operator<< (std::ostream& ostr, const psrephem& eph);
 
 #endif
 

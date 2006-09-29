@@ -7,26 +7,25 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/tempo++.h,v $
-   $Revision: 1.16 $
-   $Date: 2006/03/17 13:34:33 $
+   $Revision: 1.17 $
+   $Date: 2006/09/29 14:22:54 $
    $Author: straten $ */
 
 #ifndef __TEMPO_PP_H
 #define __TEMPO_PP_H
 
-#include <vector>
-
-#include "MJD.h"
-#include "poly.h"
+#include "polyco.h"
 #include "psrephem.h"
 #include "toa.h"
+
+#include <vector>
 
 namespace Tempo {
   
   // set the system call used to run tempo
   void   set_system (const char* system_call);
   // get the system call used to run tempo
-  string get_system ();
+  std::string get_system ();
 
   // get the tempo version
   float  get_version ();
@@ -34,10 +33,10 @@ namespace Tempo {
   // set the directory in which tempo system calls will be made
   void   set_directory (const char* directory);
   // get the directory in which tempo system calls will be made
-  string get_directory ();
+  std::string get_directory ();
 
   // get the name of the file used to lock the tempo directory
-  string get_lockfile ();
+  std::string get_lockfile ();
 
   // lock the tempo working directory
   void lock ();
@@ -45,33 +44,33 @@ namespace Tempo {
   void unlock ();
 
   // convenience overloads
-  void   set_system (const string& system_call);
-  void   set_directory (const string& directory);
+  void   set_system (const std::string& system_call);
+  void   set_directory (const std::string& directory);
 
   // verbosity flag of functions working in the Tempo namespace
   extern bool verbose;
   extern bool debug;
 
   // extension added to temporary Model filenames when working
-  extern string extension;
+  extern std::string extension;
 
   // default value passed to predict functions
   extern MJD unspecified;
 
   // base directory in which tempo will work
-  extern string tmpdir;
+  extern std::string tmpdir;
 
   // file to which tempo stderr output will be redirected
-  extern string stderr_filename;
+  extern std::string stderr_filename;
 
   // file to which tempo ephemeris files are written
-  extern string ephem_filename;
+  extern std::string ephem_filename;
 
   //! Run tempo using the given arguments and input
   /*! tempo is run with a working directory given by
     Tempo::get_directory, so input files should be written here and
     output files (created by tempo) can be found here. */
-  void tempo (const string& arguments, const string& input);
+  void tempo (const std::string& arguments, const std::string& input);
 
   // given a tempo ephemeris, generate toas over the range of MJD given
   // with characteristics specififed by rms and error.
@@ -81,13 +80,13 @@ namespace Tempo {
   //   interval   - separation between points in minutes
   //   rms        - gaussian noise specified in microseconds
   //   error      - width of normal distribution of errors (not implemented)
-  void fake (vector<toa>& toas, const psrephem& model,
+  void fake (std::vector<toa>& toas, const psrephem& model,
 	     const MJD& start, const MJD& end, double interval,
 	     float rms = 0.0, float error = 0.0, float lst_range = 8.0);
 
   // given pulsar parameters and times of arrival, calls TEMPO to determine
   // the residual TOA.
-  void fit (const psrephem& model, vector<toa>& toas,
+  void fit (const psrephem& model, std::vector<toa>& toas,
 	    psrephem* postfit = NULL, bool track=false,
 	    Tempo::toa::State min_state = Tempo::toa::Normal);
   
@@ -105,17 +104,6 @@ namespace Tempo {
   polyco span (const polyco& first_poly, const polyco& second_poly,
 	       const psrephem& pephem);
   
-  // //////////////////////////////////////////////////////////////////////
-  // Calculates the Lomb-Scargle periodogram from a set of residuals.
-  // The code is written as a template in order that an array of any class
-  // type that may be cast to a residual may be passed.
-  template <class resType>
-    void periodogram (vector<float>& frequency, vector<float>& power,
-		      const vector<resType>& data,
-		      float oversampling = 1.0, float overnyquist = 1.0);
-
-#include "periodogram_impl.h"
-
 }
 
 #endif

@@ -14,7 +14,6 @@
 #include "FITSError.h"
 #include "fitsutil.h"
 #include "coord.h"
-#include "genutil.h"
 
 #include <fitsio.h> 
 
@@ -23,13 +22,14 @@
 #include <algorithm>
 
 #include <assert.h>
-
 #include <stdlib.h>
 #include <string.h>
 
 #ifdef sun
 #include <ieeefp.h>
 #endif
+
+using namespace std;
 
 // utility function defined at the end of the file
 void datatype_match (int typecode, int ephind);

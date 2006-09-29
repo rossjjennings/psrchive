@@ -5,6 +5,12 @@
  *
  ***************************************************************************/
 
+#include "tempo++.h"
+#include "Error.h"
+#include "dirutil.h"
+#include "string_utils.h"
+#include "fsleep.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -20,12 +26,7 @@
 #include <wait.h>
 #endif
 
-
-#include "tempo++.h"
-#include "Error.h"
-#include "genutil.h"
-#include "string_utils.h"
-#include "fsleep.h"
+using namespace std;
 
 // //////////////////////////////////////////////////////////////////////
 // members of the Tempo namespace

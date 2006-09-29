@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/Predict.h,v $
-   $Revision: 1.4 $
-   $Date: 2006/03/17 13:34:33 $
+   $Revision: 1.5 $
+   $Date: 2006/09/29 14:22:54 $
    $Author: straten $ */
 
 #ifndef __Tempo_Predict_h
@@ -16,6 +16,7 @@
 
 #include "psrephem.h"
 #include "polyco.h"
+
 namespace Tempo {
 
   //! Uses tempo orediction mode to produce polynomial ephemerides (polyco)
@@ -79,7 +80,7 @@ namespace Tempo {
     psrephem parameters;
 
     //! The pulsar name
-    string psrname;
+    std::string psrname;
 
     //! Verify the time spanned by polynomial ephemerides
     bool verify;

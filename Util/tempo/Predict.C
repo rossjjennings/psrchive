@@ -8,14 +8,15 @@
 
 #include "tempo++.h"
 #include "psrephem.h"
-#include "poly.h"
+#include "polyco.h"
 
 #include "Error.h"
 #include "string_utils.h"
-#include "genutil.h"
 
 #include <unistd.h>
 #include <ctype.h>
+
+using namespace std;
 
 Tempo::Predict::Predict ()
 {

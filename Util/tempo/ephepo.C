@@ -10,11 +10,13 @@
 //
 // /////////////////////////////////////////////////////////////////////
 
+#include "psrephem.h"
+#include "Error.h"
+
 #include <iostream>
 #include <unistd.h>
 
-#include "psrephem.h"
-#include "Error.h"
+using namespace std;
 
 void usage()
 {

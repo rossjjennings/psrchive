@@ -4,6 +4,11 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+#include "ephio.h"
+#include "psrephem.h"
+#include "string_utils.h"
+#include "dirutil.h"
+
 #include <unistd.h>
 #include <string.h>
 #include <stdio.h>
@@ -13,12 +18,7 @@
 #include <assert.h>
 
 #include <iostream>
-
-#include "ephio.h"
-#include "psrephem.h"
-#include "string_utils.h"
-#include "genutil.h"
-#include "dirutil.h"
+using namespace std;
 
 psrephem::~psrephem(){ destroy(); }
 
@@ -370,6 +370,8 @@ string psrephem::par_lookup (const char* name, int use_cwd)
   filename = psrinfo_cmd + psr_name;
   string catalogue = "psrinfo";
 
+#if 0
+  This issue should be resolved external to the library
   if( get_host().substr(0,4)!="cpsr" && get_host().substr(0,6)!="gbcpsr" ){
     string nobj = psr_name;
     frontchomp(nobj,"J");
@@ -377,6 +379,7 @@ string psrephem::par_lookup (const char* name, int use_cwd)
     filename = psrcat_cmd + psr_name + " | perl -i -p -e 'if(/PSRJ/){s/(.*\\s)J/\\1/}' > " + nobj + ".eph";
     catalogue = "psrcat";
   }
+#endif
 
   if (verbose)
     cerr << "psrephem:: Creating ephemeris by " << catalogue << " -e " << psr_name <<endl;

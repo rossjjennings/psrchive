@@ -12,6 +12,8 @@
 #include <slalib.h>
 #include <math.h>
 
+using namespace std;
+
 #define sqr(x) (x*x)
 #define cube(x) (x*x*x)
 

@@ -13,10 +13,11 @@
 
 #include <fitsio.h>
 
-#include "poly.h"
-#include "genutil.h"
+#include "polyco.h"
 #include "fitsutil.h"
 #include "FITSError.h"
+
+using namespace std;
 
 // #define DEBUG 1
 
@@ -197,8 +198,8 @@ void polynomial::load (fitsfile* fptr, long row)
   fits_get_colnum (fptr, CASEINSEN, "COEFF", &colnum, &status);
   fits_get_coltype (fptr, colnum, &typecode, &repeat, &width, &status);  
   if (repeat < ncoef)
-    throw_str ("polynomial::load COEFF"
-	       " vector repeat count=%ld < NCOEF=%d", repeat, ncoef);
+    throw FITSError (status, "polynomial::load COEFF",
+	             " vector repeat count=%ld < NCOEF=%d", repeat, ncoef);
 
   coefs.resize (ncoef);
 

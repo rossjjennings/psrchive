@@ -4,10 +4,13 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
+#include "psrephem.h"
+
 #include <iostream>
 #include <unistd.h>
 
-#include "psrephem.h"
+using namespace std;
 
 int main (int argc, char** argv)
 {

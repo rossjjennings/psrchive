@@ -7,7 +7,7 @@
 #include <iostream>
 #include <unistd.h>
 
-#include "poly.h"
+#include "polyco.h"
 #include "Error.h"
 
 using namespace std;

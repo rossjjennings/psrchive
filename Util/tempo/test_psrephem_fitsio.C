@@ -16,6 +16,8 @@
 #include "ephio.h"
 #include "Error.h"
 
+using namespace std;
+
 int main (int argc, char** argv)
 {
   bool verbose = false;
