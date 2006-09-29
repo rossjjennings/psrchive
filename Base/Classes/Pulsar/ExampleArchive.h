@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/ExampleArchive.h,v $
-   $Revision: 1.7 $
-   $Date: 2006/03/17 13:34:50 $
+   $Revision: 1.8 $
+   $Date: 2006/09/29 14:45:33 $
    $Author: straten $ */
 
 #ifndef __ExampleArchive_h
@@ -44,16 +44,16 @@ namespace Pulsar {
     ExampleArchive (const Archive& archive);
 
     //! Base extraction constructor
-    ExampleArchive (const Archive& archive, const vector<unsigned>& subint);
+    ExampleArchive (const Archive&, const std::vector<unsigned>& subint);
 
     //! Copy all of the class attributes and the selected Integration data
-    void copy (const Archive& archive, const vector<unsigned>& subints);
+    void copy (const Archive& archive, const std::vector<unsigned>& subints);
 
     //! Return a new copy-constructed ExampleArchive instance
     ExampleArchive* clone () const;
 
     //! Return a new extraction-constructed ExampleArchive instance
-    ExampleArchive* extract (const vector<unsigned>& subints) const;
+    ExampleArchive* extract (const std::vector<unsigned>& subints) const;
     
   protected:
 
@@ -92,10 +92,10 @@ namespace Pulsar {
     bool advocate (const char* filename);
     
     //! Return the name of the ExampleArchive plugin
-    string get_name () { return "ExampleArchive"; }
+    std::string get_name () { return "ExampleArchive"; }
     
     //! Return description of this plugin
-    string get_description ();
+    std::string get_description ();
     
   };
 

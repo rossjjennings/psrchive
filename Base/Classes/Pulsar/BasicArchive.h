@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/BasicArchive.h,v $
-   $Revision: 1.34 $
-   $Date: 2006/03/31 17:16:40 $
+   $Revision: 1.35 $
+   $Date: 2006/09/29 14:45:33 $
    $Author: straten $ */
 
 #ifndef __BasicArchive_h
@@ -41,7 +41,7 @@ namespace Pulsar {
 
     //! copy constructor, with option to select only some integrations
     BasicArchive (const BasicArchive& archive,
-		  const vector<unsigned>& selected_subints);
+		  const std::vector<unsigned>& selected_subints);
 
     //! copy constructor
     const BasicArchive& operator = (const BasicArchive& archive);
@@ -75,9 +75,9 @@ namespace Pulsar {
     virtual void set_type (Signal::Source type);
 
     //! Get the source name
-    virtual string get_source () const;
+    virtual std::string get_source () const;
     //! Set the source name
-    virtual void set_source (const string& source);
+    virtual void set_source (const std::string& source);
 
     //! Get the coordinates of the source
     virtual sky_coord get_coordinates () const;
@@ -174,7 +174,7 @@ namespace Pulsar {
     Signal::Source type;
 
     //! The source name
-    string source;
+    std::string source;
 
     //! The coordinates of the source
     sky_coord coordinates;

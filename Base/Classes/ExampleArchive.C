@@ -8,6 +8,8 @@
 #include "Pulsar/BasicIntegration.h"
 #include "Pulsar/Profile.h"
 
+using namespace std;
+
 void Pulsar::ExampleArchive::init ()
 {
   // initialize the ExampleArchive attributes

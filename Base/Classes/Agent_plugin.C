@@ -7,6 +7,8 @@
 #include "Pulsar/BasicArchive.h"
 #include "Plugin.h"
 
+using namespace std;
+
 // the plugins loader
 static Registry::Plugin plugins;
 

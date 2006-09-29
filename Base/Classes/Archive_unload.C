@@ -11,6 +11,8 @@
 #include <unistd.h>
 #include <sys/stat.h>
 
+using namespace std;
+
 mode_t getumask(void) {
   mode_t mask = umask(0);
   umask(mask);

@@ -8,6 +8,8 @@
 #include "Pulsar/Integration.h"
 #include "Pulsar/IntegrationOrder.h"
 
+using namespace std;
+
 /*!
   If any current dimension is greater than that requested, the Profiles
   will be deleted and the dimension resized.  If any current dimension is

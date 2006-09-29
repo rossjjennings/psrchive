@@ -9,6 +9,8 @@
 #include "Pulsar/Integration.h"
 #include "Error.h"
 
+using namespace std;
+
 unsigned Pulsar::IntegrationManager::verbose = 1;
 
 Pulsar::IntegrationManager::IntegrationManager () 

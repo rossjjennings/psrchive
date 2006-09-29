@@ -8,6 +8,8 @@
 #include "Pulsar/Integration.h"
 #include "Pulsar/IntegrationOrder.h"
 
+using namespace std;
+
 void Pulsar::Archive::copy (const Archive& archive)
 {
   if (verbose == 3)

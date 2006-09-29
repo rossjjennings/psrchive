@@ -6,6 +6,8 @@
  ***************************************************************************/
 #include "Pulsar/Integration.h"
 
+using namespace std;
+
 /*!
   Maximum frequency difference in MHz
 */

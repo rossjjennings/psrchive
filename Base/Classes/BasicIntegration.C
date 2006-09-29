@@ -6,6 +6,8 @@
  ***************************************************************************/
 #include "Pulsar/BasicIntegration.h"
 
+using namespace std;
+
 /* not much to say really */
 void Pulsar::BasicIntegration::init ()
 {

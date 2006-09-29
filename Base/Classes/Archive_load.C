@@ -7,6 +7,8 @@
 #include "Pulsar/Archive.h"
 #include "Error.h"
 
+using namespace std;
+
 /* Dynamic constructor returns a pointer to a new instance of one of the
    Archive derived classes.   Derived classes must be registered using
    an Archive::Agent.

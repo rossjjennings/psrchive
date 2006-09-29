@@ -7,6 +7,8 @@
 #include "Pulsar/Archive.h"
 #include "string_utils.h"
 
+using namespace std;
+
 #define _PSRCHIVE_STATIC 1
 
 string Pulsar::Archive::Agent::plugin_path;

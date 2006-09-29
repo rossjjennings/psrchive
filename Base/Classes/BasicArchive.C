@@ -8,6 +8,8 @@
 #include "Pulsar/BasicIntegration.h"
 #include "Error.h"
 
+using namespace std;
+
 void Pulsar::BasicArchive::ensure_linkage ()
 {
 }
