@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Integration.h,v $
-   $Revision: 1.86 $
-   $Date: 2006/09/29 14:44:04 $
+   $Revision: 1.87 $
+   $Date: 2006/09/29 22:14:53 $
    $Author: straten $ */
 
 /*
@@ -83,13 +83,6 @@ namespace Pulsar {
     //! Set the Profile weight attributes of the given channel
     void set_weight (unsigned ichan, float weight);
 
-    //! Get flux
-    float flux (int _poln = 0, float dc = 0.15);
-    
-    //! Get polarized flux
-    Estimate<float> 
-    get_poln_flux (int _type = 0,  int startbin = 0, int stopbin = 0);
-
     //! Find the transitions between high and low states in total intensity
     void find_transitions (int& hi2lo, int& lo2hi, int& buffer) const;
 
@@ -129,9 +122,6 @@ namespace Pulsar {
     //! Remove the baseline from all profiles
     void remove_baseline (float phase = -1.0, float dc = 0.15);
 
-    //! Set the weight of each profile to its snr squared
-    void snr_weight ();
-    
     //! Set the weight of each profile to the given number
     void uniform_weight (float new_weight = 1.0);
     
