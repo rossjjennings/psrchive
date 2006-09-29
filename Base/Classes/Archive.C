@@ -8,12 +8,13 @@
 #include "Pulsar/Integration.h"
 #include "Pulsar/IntegrationOrder.h"
 #include "Pulsar/ArchiveExpert.h"
-#include "Pulsar/Profile.h"
 #include "Pulsar/Receiver.h"
 
 #include "Types.h"
 #include "Error.h"
 #include "typeutil.h"
+
+using namespace std;
 
 void Pulsar::Archive::init ()
 {
@@ -247,189 +248,6 @@ Pulsar::Integration* Pulsar::Archive::load_Integration (unsigned isubint)
 }
 
 
-/*!
-  Useful wrapper for Archive::bscrunch
-*/
-void Pulsar::Archive::bscrunch_to_nbin (unsigned new_nbin)
-{
-  if (new_nbin <= 0)
-    throw Error (InvalidParam, "Pulsar::Archive::bscrunch_to_nbin",
-		 "Invalid nbin request");
-  else if (get_nbin() < new_nbin)
-    throw Error (InvalidParam, "Pulsar::Archive::bscrunch_to_nbin",
-		 "Archive has too few bins (%d) to bscrunch to %d bins",
-		 get_nbin(), new_nbin);
-  else
-    bscrunch(get_nbin() / new_nbin);
-}
-
-/*!
-  Simply calls Integration::bscrunch for each Integration
-  \param nscrunch the number of phase bins to add together
-  */
-void Pulsar::Archive::bscrunch (unsigned nscrunch)
-{
-  if (get_nsubint() == 0)
-    return;
-
-  for (unsigned isub=0; isub < get_nsubint(); isub++)
-    get_Integration(isub) -> bscrunch (nscrunch);
-
-  set_nbin (get_Integration(0)->get_nbin());
-}
-
-
-/*!
-  Simply calls Integration::pscrunch for each Integration
-*/
-void Pulsar::Archive::pscrunch()
-{
-  if (get_nsubint() == 0)
-    return;
-
-  for (unsigned isub=0; isub < get_nsubint(); isub++)
-    get_Integration(isub) -> pscrunch ();
-
-  set_npol( 1 );
-  set_state( Signal::Intensity );
-}
-
-
-/*!
-  Uses the polyco model, as well as the centre frequency and mid-time of
-  each Integration to determine the predicted pulse phase.
- */
-void Pulsar::Archive::centre ()
-{
-  // this function doesn't work for things without polycos
-  if (get_type () != Signal::Pulsar)
-    return;
-
-  if (!model)
-    throw Error (InvalidState, "Pulsar::Archive::centre",
-		 "Pulsar observation with no polyco");
-
-  Phase half_turn (0.5);
-
-  for (unsigned isub=0; isub < get_nsubint(); isub++)  {
-
-    Integration* subint = get_Integration(isub);
-
-    // Rotate according to polyco prediction
-    Phase phase = model->phase (subint -> get_epoch(),
-				subint -> get_centre_frequency());
-
-    if (verbose == 3)
-      cerr << "Pulsar::Archive::center phase=" << phase << endl;
-
-    double fracturns = (half_turn - phase).fracturns();
-    subint -> rotate ( fracturns * subint -> get_folding_period() );
-  }
-}
-
-
-
-
-/*!
-  \param nfold the number of sections to integrate
-*/
-void Pulsar::Archive::fold (unsigned nfold)
-{
-  if (get_nsubint() == 0)
-    return;
-
-  for (unsigned isub=0; isub < get_nsubint(); isub++)
-    get_Integration(isub) -> fold (nfold);
-
-  set_nbin (get_Integration(0)->get_nbin());
-}
-
-void Pulsar::Archive::rotate (double time)
-{
-  for (unsigned isub=0; isub < get_nsubint(); isub++)
-    get_Integration(isub) -> rotate (time);
-}
-
-void Pulsar::Archive::rotate_phase (double phase)
-{
-  for (unsigned isub=0; isub < get_nsubint(); isub++)
-    get_Integration(isub) -> rotate_phase (phase);
-}
-
-/*!  
-  The dedisperse method removes the dispersive delay between
-  each frequency channel and that of the reference frequency
-  defined by get_centre_frequency.
-*/
-void Pulsar::Archive::dedisperse () try {
-
-  if (get_nsubint() == 0)
-    return;
-
-  for (unsigned isub=0; isub < get_nsubint(); isub++)
-    get_Integration(isub) -> dedisperse ();
-
-  set_dedispersed (true);
-
-}
-catch (Error& error) {
-  throw error += "Pulsar::Archive::dedisperse";
-}
-
-
-/*! \param new_ephemeris the ephemeris to be installed
-    \param update create a new polyco for the new ephemeris
- */
-void Pulsar::Archive::set_ephemeris (const psrephem& new_ephemeris, bool update)
-{
-  if (verbose == 3)
-    cerr << "Pulsar::Archive::set_ephemeris" << endl;
-
-  ephemeris = new psrephem (new_ephemeris);
-
-  if (get_source() != ephemeris->psrname()) {
-
-    // a CAL observation shouldn't have an ephemeris
-    // no need for the removed test
-
-    string temp1 = get_source();
-    string temp2 = ephemeris->psrname();
-
-    bool change = false;
-
-    if (temp1.length() > temp2.length())
-      change = temp1.substr(1,temp1.length()) != temp2;
-    else   
-      change = temp2.substr(1,temp2.length()) != temp1;
-
-    if (change) {
-      if (verbose == 3)
-        cerr << "Archive::set_ephemeris Informative Notice:\n" 
-             << "   Source name will be updated to match new ephemeris\n"
-             << "   New name: " << temp2 << endl;
-      set_source(temp2);
-    }
-  }
-
-  if (get_dispersion_measure() != ephemeris->get_dm()) {
-    if (verbose == 3)
-      cerr << "Archive::set_ephemeris Informative Notice:\n" 
-	   << "   Dispersion measure will be updated to match new ephemeris\n"
-	   << "   Old DM = " << get_dispersion_measure() << endl
-	   << "   New DM = " << ephemeris->get_dm() << endl;
-    set_dispersion_measure(ephemeris->get_dm());
-  }
-
-  if (update)  {
-    if (verbose == 3)
-      cerr << "Pulsar::Archive::set_ephemeris update polyco" << endl;
-    update_model ();
-  }
-
-  if (verbose == 3)
-    cerr << "Pulsar::Archive::set_ephemeris exit" << endl;
-}
-
 const psrephem Pulsar::Archive::get_ephemeris () const
 {
   if (!ephemeris)
@@ -438,38 +256,12 @@ const psrephem Pulsar::Archive::get_ephemeris () const
   return *ephemeris;
 }
 
-void Pulsar::Archive::set_model (const polyco& new_model)
-{
-  if (!good_model (new_model))
-    throw Error (InvalidParam, "Pulsar::Archive::set_model",
-		 "supplied model does not span Integrations");
-
-  // swap the old with the new
-  Reference::To<polyco> oldmodel = model;
-  model = new polyco (new_model);
-
-  if (verbose == 3)
-    cerr << "Pulsar::Archive::set_model apply the new model" << endl;
-
-  // correct Integrations against the old model
-  for (unsigned isub = 0; isub < get_nsubint(); isub++)
-    apply_model (get_Integration(isub), oldmodel.ptr());
-
-  // it may not be true the that supplied model was generated at runtime
-  runtime_model = false; 
-}
-
 const polyco Pulsar::Archive::get_model () const
 {
   if (!model)
     throw Error (InvalidState, "Pulsar::Archive::get_model", "no model");
 		 
   return *model;
-}
-
-void Pulsar::Archive::snr_weight ()
-{
-  throw Error (InvalidState, "Pulsar::Archive::snr_weight", "not implemented");
 }
 
 MJD Pulsar::Archive::start_time() const
@@ -510,7 +302,6 @@ bool Pulsar::Archive::type_is_cal () const
     get_type() == Signal::FluxCalOff;
 }
 
-
 void Pulsar::Archive::uniform_weight (float new_weight)
 {
   for (unsigned isub=0; isub < get_nsubint(); isub++)
@@ -522,16 +313,5 @@ bool Pulsar::Archive::state_is_valid(string& reason) const{
   return Signal::valid_state(get_state(),1,get_npol(),reason);
 }
 
- 
-void Pulsar::Archive::get_profile_power_spectra (float gamma)
-{
-  if (get_nsubint() == 0)
-    return;
-
-  for (unsigned isub=0; isub < get_nsubint(); isub++)
-    get_Integration(isub) -> get_profile_power_spectra (gamma);
-
-  set_nbin (get_Integration(0)->get_nbin());
-}
-
 bool Pulsar::range_checking_enabled = true;
+

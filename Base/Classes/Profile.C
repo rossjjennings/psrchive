@@ -8,13 +8,14 @@
 #include "Pulsar/Config.h"
 #include "Physical.h"
 #include "Error.h"
-#include "spectra.h"
-#include "fftm.h"
+#include "FTransform.h"
 
 #include <iostream>
 #include <string>
 
 #include <math.h>
+
+using namespace std;
 
 /*! 
   Default fractional pulse phase window used to calculate statistics
@@ -260,34 +261,6 @@ vector<float> Pulsar::Profile::get_weighted_amps () const
 
 /////////////////////////////////////////////////////////////////////////////
 //
-// Pulsar::Profile::dedisperse
-//
-/*!
-  A convenience interface to Profile::rotate_phase.  
-  Rotates the profile in order
-  to remove the dispersion delay with respect to a reference frequency.
-  \param dm the dispersion measure (in \f${\rm pc\, cm}^{-3}\f$)
-  \param ref_freq the reference frequency (in MHz)
-  \param pfold the folding periond (in seconds)
-*/
-void Pulsar::Profile::dedisperse (double dm, double ref_freq, double pfold)
-{
-  if (verbose)
-    cerr << "Pulsar::Profile::dedisperse dm=" << dm << " pfold=" << pfold 
-	 << " ref_freq=" << ref_freq << endl;
-
-  double delay = dispersion_delay (dm, ref_freq, centrefreq);
-
-  if (verbose)
-    cerr << "Pulsar::Profile::dedisperse delay="
-	 << delay*1e3 << " ms" << endl;
-
-  rotate_phase (delay / pfold);
-
-}
-
-/////////////////////////////////////////////////////////////////////////////
-//
 // Pulsar::Profile::zero
 //
 void Pulsar::Profile::zero()
@@ -433,45 +406,6 @@ void Pulsar::Profile::halvebins (unsigned nhalve)
   }
 }
 
-void Pulsar::Profile::get_power_spectrum(float gamma) { try
-{
-  if (verbose) {
-    cerr << "Pulsar::Profile::get_power_spectrum()" << endl;
-  }
-     
-  unsigned nby2 = nbin/2;
-  float *spec = new float [nbin+2];
-
-  fft::frc1d(nbin, spec, amps);
-
-  // form powers .. save nyquist for end
-//   float nyquist = amps[1];
-  amps[0] = 0.0; // zap DC component spec[0]*spec[0];
-
-  unsigned i, j=2;
-  for (i=1; i <= nby2; i++)
-  {
-    amps[i] = spec[j]*spec[j];
-    j++;
-    amps[i] += spec[j]*spec[j];
-    j++;
-    if (gamma!=1.0)
-      amps[i] = pow(amps[i], gamma);
-  }
-
-//   amps[nby2] = 0.0;
-
-  nbin = nby2+1;
-  delete [] spec;
-}
-
-catch (Error& error) {
-  throw error += "Pulsar::Profile::get_power_spectrum";
-}
-} // end function
-
-
-
 /////////////////////////////////////////////////////////////////////////////
 //
 // minmax - worker function for Pulsar::Profile::<bin_>[min|max]
@@ -613,147 +547,3 @@ double Pulsar::Profile::sumsq (int istart, int iend) const
   return tot;
 }
 
-/////////////////////////////////////////////////////////////////////////////
-//
-// Pulsar::Profile::get_ascii
-//
-string Pulsar::Profile::get_ascii (int bin_start, int bin_end) const
-{
-  if (bin_start > bin_end)
-    throw Error(InvalidParam, "Pulsar::Profile::get_ascii",
-		"Start bin is greater than end bin");
-  
-  unsigned start = 0;
-  unsigned end   = get_nbin();
-  
-  if (bin_end > 0 && bin_end < int(get_nbin() - 1))
-    end = unsigned(bin_end);
-  
-  if (bin_start > 0 && bin_start < int(get_nbin() - 1))
-    start = unsigned(bin_start);
-  
-  string result;
-  
-  char* temp = new char[128];
-  
-  for (unsigned ibin=start; ibin < end; ibin++) {
-    sprintf(temp, "%f", get_amps()[ibin]);
-    result += temp;
-    result += "\n";
-  }
-
-  delete[] temp;
-  
-  return result;
-}
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// Pulsar::Profile::mean
-//
-/*! 
-  \param phase centre of region
-  \param duty_cycle width of region
-  \return mean of region
-*/
-double Pulsar::Profile::mean (float phase, float duty_cycle) const
-{
-  double result;
-  stats (phase, &result, 0, 0, duty_cycle);
-  return result;
-}
-
-
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// Pulsar::Profile::find_spike_edges
-//
-/*! Works out where the instantaneous flux drops to \param pc percent of
-the flux in \param spike_bin.  This routine is designed for use of single
-pulses where the duty cycle and hence integrated flux is low.
- */
-void Pulsar::Profile::find_spike_edges(int& rise, int& fall, float pc,
-				       int spike_bin) const
-{
-  if( spike_bin < 0 )
-    spike_bin = find_max_bin();
-
-  int _nbin = get_nbin();
-
-  if( spike_bin < int(0) || spike_bin >= _nbin )
-    throw Error(InvalidParam,"Pulsar::Profile::find_spike_edges()",
-		"spike_bin=%d not a valid bin- must be in range [0,%d)",
-		spike_bin, _nbin);
-
-  const float* amps = get_amps();
-
-  float mean_level = mean(find_min_phase());
-  float relative_amp = amps[spike_bin] - mean_level;
-  float threshold = pc*relative_amp + mean_level;
-
-  bool found_spike_edge = false;
-
-  /////////////////////////////////////////////////
-  // Find where spike begins
-  for( int irise=spike_bin-1; irise>spike_bin-_nbin; irise--){
-    int jrise = irise;
-    if( jrise < 0 )
-      jrise += _nbin;
-
-    if( amps[jrise] < threshold ){
-      found_spike_edge = true;
-      rise = jrise+1;
-      break;
-    }
-  }
-
-  if( !found_spike_edge )
-    throw Error(InvalidState,"Pulsar::Profile::find_spike_edges()",
-		"Could not find spike edge for rise dropoff to %f of %f = %f.  Minimum=%f maximum=%f",
-		pc, amps[spike_bin], threshold,
-		min(), max());
-
-  found_spike_edge = false;
-
-  /////////////////////////////////////////////////
-  // Find where spike ends
-  for( int ifall=spike_bin+1; ifall<spike_bin+_nbin; ifall++){
-    int jfall = ifall;
-    if( jfall > _nbin )
-      jfall -= _nbin;
-
-    if( amps[jfall] < threshold ){
-      found_spike_edge = true;
-      fall = jfall;
-      break;
-    }
-  }
-
-  if( !found_spike_edge )
-    throw Error(InvalidState,"Pulsar::Profile::find_spike_edges()",
-		"Could not find spike edge for fall dropoff to %f of %f = %f.  Minimum=%f maximum=%f",
-		pc, amps[spike_bin], threshold,
-		min(), max());
-}
-
-/////////////////////////////////////////////////////////////////////////////
-//
-// Pulsar::Profile::zap_periodic_spikes
-/*! Interpolate over peaks of 1-bin wide modulation feature.
-
-  period and phase are both measured in bins 
-*/
-void Pulsar::Profile::zap_periodic_spikes(int period, int phase)
-{
-  int i, iprev, inext;
-  int nbin = get_nbin();
-
-  for (i=phase; i < nbin; i+=period)
-  {
-    iprev = (i > 0 ? i-1 : nbin);
-    inext = (i < nbin-1 ? i+1 : 0);
-    amps[i] = 0.5*(amps[iprev]+amps[inext]);
-  }
-}
- 
