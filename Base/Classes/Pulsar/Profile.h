@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Profile.h,v $
-   $Revision: 1.95 $
-   $Date: 2006/04/14 19:32:40 $
+   $Revision: 1.96 $
+   $Date: 2006/09/29 14:44:57 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Profile_h
@@ -90,29 +90,23 @@ namespace Pulsar {
     virtual Profile* clone () const;
 
     //! sets profile equal to another profile
-    virtual const Profile& operator = (const Profile& profile);
+    const Profile& operator = (const Profile& profile);
 
     //! calculates weighted average of profile and another profile
-    virtual const Profile& operator += (const Profile& profile);
+    const Profile& operator += (const Profile& profile);
 
     //! calculates weighted average difference of profile and another profile
-    virtual const Profile& operator -= (const Profile& profile);
+    const Profile& operator -= (const Profile& profile);
 
     //! calculates the weighted sum/difference
-    virtual const Profile& average (const Profile* profile, double sign);
+    const Profile& average (const Profile* profile, double sign);
 
     //! add profile to this
-    virtual void sum (const Profile* profile);
+    void sum (const Profile* profile);
 
     //! subtract profile from this
-    virtual void diff (const Profile* profile);
+    void diff (const Profile* profile);
 
-    //! calculates the difference of profile and another profile after
-    /*! normalising their flux */
-    virtual Profile* morphological_difference (const Profile& profile,
-					       double& scale, double& shift,
-					       float phs1 = 0, float phs2 = 1.0);
-    
     //! adds offset to each bin of the profile
     const Profile& operator += (float offset);
 
@@ -123,25 +117,25 @@ namespace Pulsar {
     const Profile& operator *= (float scale);
 
     //! multiplies each bin of the profile by scale
-    virtual void scale (double scale);
+    void scale (double scale);
 
     //! offsets each bin of the profile by offset
-    virtual void offset (double offset);
+    void offset (double offset);
 
     //! rotates the profile by phase (in turns)
-    virtual void rotate_phase (double phase);
+    void rotate_phase (double phase);
 
     //! set all amplitudes to zero
-    virtual void zero ();
+    void zero ();
   
     //! calculate the signed sqrt of the absolute value of each bin 
-    virtual void square_root ();
+    void square_root ();
 
     //! calculare the absolute value of each phase bin
-    virtual void absolute ();
+    void absolute ();
 
     //! calculate the logarithm of each bin with value greater than threshold
-    virtual void logarithm (double base = 10.0, double threshold = 0.0);
+    void logarithm (double base = 10.0, double threshold = 0.0);
 
     //! Returns the maximum amplitude
     float max  (int bin_start=0, int bin_end=0) const;
@@ -155,7 +149,7 @@ namespace Pulsar {
     //! Returns the sum of the absolute value
     double sumfabs (int bin_start=0, int bin_end=0) const;
     //! Returns a string with an ASCII representation of the amplitudes
-    string get_ascii (int bin_start=0, int bin_end=0) const;
+    std::string get_ascii (int bin_start=0, int bin_end=0) const;
 
     //! Calculates the mean, variance, and variance of the mean
     void stats (double* mean, double* variance = 0, double* varmean = 0,
@@ -227,7 +221,7 @@ namespace Pulsar {
 
     //! fit to the standard and return a Tempo::toa object
     Tempo::toa toa (const Profile& std, const MJD& mjd, 
-		    double period, char nsite, string arguments = "",
+		    double period, char nsite, std::string arguments = "",
 		    Tempo::toa::Format fmt = Tempo::toa::Parkes) const;
 
     //! get the number of bins
@@ -235,27 +229,22 @@ namespace Pulsar {
       through Profile::resize */
     unsigned get_nbin () const { return nbin; }
 
-    /*! returns a vector of floats representing which bins in the
-      profile are "on pulse", indicated by the presence of a '1', 
-      or "off pulse", indicated by the presence of a '0' */
-    vector<unsigned> get_mask () const;
-
     //! returns a pointer to the start of the array of amplitudes
     const float* get_amps () const { return amps; }
     float* get_amps () { return amps; }
     
     /*! returns a vector representation of the array of amplitudes,
      with all zero-weighted points cleaned out */
-    vector<float> get_weighted_amps () const;
+    std::vector<float> get_weighted_amps () const;
     
     //! set the amplitudes array equal to the contents of the data array
     template <typename T> void set_amps (const T* data);
 
     //! set the amplitudes array equal to the contents of the data array
-    template <typename T> void set_amps (const vector<T>& data);
+    template <typename T> void set_amps (const std::vector<T>& data);
 
     //! set the amplitudes array equal to the contents of the data array
-    template <typename T> void get_amps (vector<T>& data) const;
+    template <typename T> void get_amps (std::vector<T>& data) const;
 
     //! get the centre frequency (in MHz)
     double get_centre_frequency () const { return centrefreq; }
@@ -285,16 +274,16 @@ namespace Pulsar {
     void smear(float duty_cycle);
 
     //! integrate neighbouring phase bins in profile
-    virtual void bscrunch (unsigned nscrunch);
+    void bscrunch (unsigned nscrunch);
 
     //! integrate neighbouring sections of the profile
-    virtual void fold (unsigned nfold);
+    void fold (unsigned nfold);
 
     //! resize the data area
     virtual void resize (unsigned nbin);
 
     //! halves the number of bins like bscrunch(2^nhalve)
-    virtual void halvebins (unsigned nhalve);
+    void halvebins (unsigned nhalve);
     
     //! returns a smoothed profile by whacking spectral components - takes fraction of spectrum to keep (8 == 1/8th)
     Pulsar::Profile * denoise(int fraction=8);
@@ -373,7 +362,7 @@ void Pulsar::Profile::set_amps (const T* data)
   \param data vector of amps
 */
 template <typename T>
-void Pulsar::Profile::set_amps (const vector<T>& data)
+void Pulsar::Profile::set_amps (const std::vector<T>& data)
 {
   resize (data.size());
   for (unsigned ibin=0; ibin<nbin; ibin++)
@@ -384,7 +373,7 @@ void Pulsar::Profile::set_amps (const vector<T>& data)
   \param data vector of amps
 */
 template <typename T>
-void Pulsar::Profile::get_amps (vector<T>& data) const
+void Pulsar::Profile::get_amps (std::vector<T>& data) const
 {
   data.resize (nbin);
   for (unsigned ibin=0; ibin<nbin; ibin++)
