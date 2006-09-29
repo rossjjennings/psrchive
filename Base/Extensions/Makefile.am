@@ -2,56 +2,93 @@
 noinst_LTLIBRARIES = libExtension.la
 
 nobase_include_HEADERS = \
-	Pulsar/Backend.h                  Pulsar/IntegrationOrder.h  \
-	Pulsar/BackendName.h              Pulsar/ObsExtension.h  \
-	Pulsar/BinLngAscOrder.h           Pulsar/Parkes.h  \
-	Pulsar/BinLngPeriOrder.h          Pulsar/Passband.h  \
-	Pulsar/BinaryPhaseOrder.h         Pulsar/PeriastronOrder.h  \
-	Pulsar/CalInfoExtension.h         Pulsar/Pointing.h  \
-	Pulsar/CalibratorExtension.h      Pulsar/PolnCalibratorExtension.h  \
-	Pulsar/CalibratorStokes.h         Pulsar/ProcHistory.h  \
-	Pulsar/ColdPlasmaHistory.h \
-	Pulsar/Dedisperse.h               Pulsar/DeFaraday.h \
-	Pulsar/DigitiserStatistics.h      Pulsar/Receiver.h  \
-	Pulsar/ExampleExtension.h         Pulsar/Telescope.h  \
-	Pulsar/FeedExtension.h            Pulsar/TapeInfo.h \
-	Pulsar/FITSHdrExtension.h         Pulsar/TwoBitStats.h  \
-	Pulsar/FluxCalibratorExtension.h  Pulsar/WidebandCorrelator.h  \
-	Pulsar/ITRFExtension.h            Pulsar/dspReduction.h \
-	Pulsar/ReceiverTI.h               Pulsar/PointingTI.h \
-	Pulsar/BackendTI.h                Pulsar/PowerEstimator.h \
-	Pulsar/TimeSortedOrder.h
+        Pulsar/Backend.h \
+        Pulsar/BackendName.h \
+        Pulsar/BackendTI.h \
+        Pulsar/BinaryPhaseOrder.h \
+        Pulsar/BinLngAscOrder.h \
+        Pulsar/BinLngPeriOrder.h \
+        Pulsar/CalibratorExtension.h \
+        Pulsar/CalibratorStokes.h \
+        Pulsar/CalInfoExtension.h \
+        Pulsar/ColdPlasmaHistory.h \
+        Pulsar/Dedisperse.h \
+        Pulsar/DeFaraday.h \
+        Pulsar/DigitiserStatistics.h \
+        Pulsar/dspReduction.h \
+        Pulsar/ExampleExtension.h \
+        Pulsar/FeedExtension.h \
+        Pulsar/FITSHdrExtension.h \
+        Pulsar/FluxCalibratorExtension.h \
+        Pulsar/IntegrationOrder.h \
+        Pulsar/ITRFExtension.h \
+        Pulsar/ObsExtension.h \
+        Pulsar/Parkes.h \
+        Pulsar/Passband.h \
+        Pulsar/PeriastronOrder.h \
+        Pulsar/Pointing.h \
+        Pulsar/PointingTI.h \
+        Pulsar/PolnCalibratorExtension.h \
+        Pulsar/PowerEstimator.h \
+        Pulsar/ProcHistory.h \
+        Pulsar/Receiver_Field.h \
+        Pulsar/Receiver.h \
+        Pulsar/Receiver_Linear.h \
+        Pulsar/Receiver_Native.h \
+        Pulsar/ReceiverTI.h \
+        Pulsar/TapeInfo.h \
+        Pulsar/Telescope.h \
+        Pulsar/TimeSortedOrder.h \
+        Pulsar/TwoBitStats.h \
+        Pulsar/WidebandCorrelator.h
 
 libExtension_la_SOURCES = \
-	Backend.C                        BackendTI.C \
-	BackendName.C                    ObsExtension.C  \
-	BinLngAscOrder.C                 Parkes.C  \
-	BinLngPeriOrder.C                Passband.C  \
-	BinaryPhaseOrder.C               PeriastronOrder.C  \
-	CalInfoExtension.C               Pointing.C  \
-	CalibratorExtension.C            PolnCalibratorExtension.C  \
-	CalibratorExtension_build.C       \
-	CalibratorStokes.C               ProcHistory.C  \
-	ColdPlasmaHistory.C \
-	Dedisperse.C                     DeFaraday.C \
-	DigitiserStatistics.C            Receiver.C  \
-	ExampleExtension.C  \
-	FeedExtension.C                  TapeInfo.C \
-	FITSHdrExtension.C               Telescope.C  \
-	FluxCalibratorExtension.C        TwoBitStats.C  \
-	FluxCalibratorExtension_build.C  WidebandCorrelator.C  \
-	ITRFExtension.C                  dspReduction.C  \
-	IntegrationOrder.C               ReceiverTI.C  \
-	PointingTI.C                     Receiver_Native.C \
-	Receiver_Field.C                 Receiver_Linear.C \
-	Pulsar/Receiver_Field.h          Pulsar/Receiver_Linear.h \
-	Pulsar/Receiver_Native.h	 TimeSortedOrder.C
+        Backend.C \
+        BackendName.C \
+        BackendTI.C \
+        BinaryPhaseOrder.C \
+        BinLngAscOrder.C \
+        BinLngPeriOrder.C \
+        CalibratorExtension_build.C \
+        CalibratorExtension.C \
+        CalibratorStokes.C \
+        CalInfoExtension.C \
+        ColdPlasmaHistory.C \
+        Dedisperse.C \
+        DeFaraday.C \
+        DigitiserStatistics.C \
+        dspReduction.C \
+        ExampleExtension.C \
+        FeedExtension.C \
+        FITSHdrExtension.C \
+        FluxCalibratorExtension_build.C \
+        FluxCalibratorExtension.C \
+        IntegrationOrder.C \
+        ITRFExtension.C \
+        ObsExtension.C \
+        Parkes.C \
+        Passband.C \
+        PeriastronOrder.C \
+        Pointing.C \
+        PointingTI.C \
+        PolnCalibratorExtension.C \
+        ProcHistory.C \
+        Receiver.C \
+        Receiver_Field.C \
+        Receiver_Linear.C \
+        Receiver_Native.C \
+        ReceiverTI.C \
+        TapeInfo.C \
+        Telescope.C \
+        TimeSortedOrder.C \
+        TwoBitStats.C \
+        WidebandCorrelator.C
 
 #############################################################################
 #
 # Dependencies should never be changed
 #
 
-INCLUDES = -I$(top_builddir)/utils/include -I$(top_srcdir)/psrchive/File \
+INCLUDES = -I$(top_builddir)/utils/include -I$(top_srcdir)/psrchive/File/Base \
 	-I$(top_srcdir)/psrchive/Polarimetry
 
