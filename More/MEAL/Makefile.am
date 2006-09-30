@@ -1,5 +1,5 @@
 
-noinst_LTLIBRARIES = libmeal.la
+noinst_LTLIBRARIES = libMEAL.la
 
 nobase_include_HEADERS = \
         MEAL/Agent.h \
@@ -96,7 +96,7 @@ nobase_include_HEADERS = \
         MEAL/VelocityModel.h \
         MEAL/VonMises.h
 
-libmeal_la_SOURCES = \
+libMEAL_la_SOURCES = \
         Argument.C \
         ArgumentPolicy.C \
         BinaryScalar.C \
@@ -220,5 +220,5 @@ doc: MEAL.pdf
 
 INCLUDES = -I. -I$(top_builddir)/utils/units @PGPLOT_CFLAGS@
 
-LDADD = libmeal.la $(top_builddir)/utils/units/libunits.la @PGPLOT_LIBS@
+LDADD = libMEAL.la $(top_builddir)/utils/units/libunits.la @PGPLOT_LIBS@
 

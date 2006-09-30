@@ -1,5 +1,5 @@
 
-lib_LTLIBRARIES = libpsrchive.la
+lib_LTLIBRARIES = libGeneral.la
 
 nobase_include_HEADERS = \
         model_profile.h \
@@ -40,7 +40,6 @@ nobase_include_HEADERS = \
         Pulsar/PolnProfileStats.h \
         Pulsar/Profile_utils.h \
         Pulsar/ProfileWeightFunction.h \
-        Pulsar/psrchive.h \
         Pulsar/RFIMitigation.h \
         Pulsar/ScatteredPowerCorrection.h \
         Pulsar/SimPolnTiming.h \
@@ -59,7 +58,7 @@ nobase_include_HEADERS = \
         Pulsar/Weight.h
 
 
-libpsrchive_la_SOURCES = \
+libGeneral_la_SOURCES = \
         AdaptiveSNR.C \
         Archive_append.C \
         Archive_bscrunch.C \

@@ -1,11 +1,10 @@
 
-lib_LTLIBRARIES = libpsrchive.la
+lib_LTLIBRARIES = libpsrmore.la
 
-libpsrchive_la_SOURCES =
+libpsrmore_la_SOURCES =
 
 SUBDIRS = General
-
-libpsrchive_la_LIBADD = General/libGeneral.la
+libpsrmore_la_LIBADD = General/libGeneral.la
 
 # ######################################################################
 #
@@ -13,14 +12,14 @@ libpsrchive_la_LIBADD = General/libGeneral.la
 #
 
 if !MAKE_LEAN
-
 SUBDIRS += MEAL Polarimetry
-
-libpsrchive_la_LIBADD += Polarimetry/libPolarimetry.la
+libpsrmore_la_LIBADD += MEAL/libMEAL.la
+libpsrmore_la_LIBADD += Polarimetry/libPolarimetry.la
+endif #
 
 if HAVE_PGPLOT
 SUBDIRS += Plotting
-libpsrchive_la_LIBADD += Plotter/libPlotting.la
+libpsrmore_la_LIBADD += Plotting/libPlotting.la
 endif
 
 SUBDIRS += . Applications
@@ -35,8 +34,7 @@ if HAVE_QTDRIV
 SUBDIRS += rhythm
 endif
 
-endif # !MAKE_LEAN
-
-all: intermediate-install
+all-am: intermediate-install
 
 include $(top_srcdir)/config/Makefile.local
+

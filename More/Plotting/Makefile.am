@@ -1,5 +1,5 @@
 
-noinst_LTLIBRARIES = libPlot.la
+noinst_LTLIBRARIES = libPlotting.la
 
 ##############################################################################
 #
@@ -24,7 +24,7 @@ nobase_include_HEADERS = iopair.h					\
 	Pulsar/Poincare.h Pulsar/ProfileVectorPlotter.h			\
 	Pulsar/TwoBitPlot.h Pulsar/CalibratorSpectrum.h
 
-libPlot_la_SOURCES = Plot.C PlotFactory.C \
+libPlotting_la_SOURCES = Plot.C PlotFactory.C \
 	PlotIndex.C \
 	PlotScale.C PlotScaleTI.C \
 	PhaseScale.C PhaseScaleTI.C \
@@ -66,7 +66,7 @@ endif
 # Dependencies should never be changed
 #
 
-INCLUDES = -I$(top_builddir)/utils/include -I$(top_builddir)/astro/include \
-	-I$(top_srcdir)/psrchive -I$(top_srcdir)/psrchive/Extension \
+INCLUDES = -I$(top_builddir)/utils/include -I$(top_builddir)/Core/include \
+	-I$(top_srcdir)/More/General -I$(top_srcdir)/More/Polarimetry \
 	@PGPLOT_CFLAGS@ @SLA_CFLAGS@
 
