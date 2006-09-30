@@ -7,12 +7,14 @@
 #include "Pulsar/Poincare.h"
 #include "Pulsar/PolnProfile.h"
 
-#include "CurvePlotter2D3.h"
+#include "Plot3D.h"
 
 #include <cpgplot.h>
 
 #include <algorithm>
 #include <math.h>
+
+using namespace std;
 
 Pulsar::Poincare::Poincare ()
 {
@@ -48,7 +50,7 @@ void Pulsar::Poincare::plot (const Archive* data)
   cpgpap (0.0, 1.0);
   cpgswin (-max,max,-max,max);
 
-  Plot2D::CurvePlotter3 volume;
+  pgplot::Plot3D volume;
   Cartesian origin (0,0,0);
   Cartesian x0 (max,0,0);
   Cartesian y0 (0,max,0);

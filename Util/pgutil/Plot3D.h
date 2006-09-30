@@ -7,34 +7,27 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/pgutil/Plot3D.h,v $
-   $Revision: 1.4 $
-   $Date: 2006/03/17 13:35:10 $
+   $Revision: 1.5 $
+   $Date: 2006/09/30 04:23:16 $
    $Author: straten $*/
 
 #ifndef __CurvePlotter2D3_H
 #define __CurvePlotter2D3_H
 
+#include "Cartesian.h"
 #include <vector>
 
-#include "PlotVolume2D.h"
-#include "DataManager.h"
-
-namespace Plot2D {
+namespace pgplot {
   
-  class CurvePlotter3 : public DataManager, public Plot2D::Volume
-  {    
+  class Plot3D {    
+
   public:
-    
-    CurvePlotter3() { init(); }
-    virtual ~CurvePlotter3() {}
-    
-    // override virtual method of PlotVolume2D base class
-    void painter();
-    // need this in order to get world coordinates set by DataSets
-    void rangeUpdate ();
 
-    void drawPlot (DataSet* plot);
-
+    static bool verbose;
+    
+    Plot3D() { init(); }
+    virtual ~Plot3D() {}
+    
     // primitives
     void move (const Cartesian& pt);
     void draw (const Cartesian& pt);
@@ -43,7 +36,7 @@ namespace Plot2D {
 
     void arrow (const Cartesian& from, const Cartesian& to);
 
-    void poly (const vector<Cartesian>& pts);
+    void poly (const std::vector<Cartesian>& pts);
 
     // make hatching run parallel to pp
     void set_hatch (const Cartesian& hp);
@@ -65,3 +58,4 @@ namespace Plot2D {
 }
 
 #endif
+
