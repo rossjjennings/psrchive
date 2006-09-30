@@ -14,6 +14,8 @@
 
 #include <cpgplot.h>
 
+using namespace std;
+
 Pulsar::FluxPlot::FluxPlot ()
 {
   isubint = ichan = ipol = 0;

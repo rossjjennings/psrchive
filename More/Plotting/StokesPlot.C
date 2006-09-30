@@ -9,6 +9,8 @@
 #include "Pulsar/Archive.h"
 #include "Pulsar/PolnProfile.h"
 
+using namespace std;
+
 Pulsar::StokesPlot::StokesPlot ()
 {
   plot_values  = "IQUV";

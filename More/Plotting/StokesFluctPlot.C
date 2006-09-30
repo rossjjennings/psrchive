@@ -9,6 +9,8 @@
 #include "Pulsar/Polarization.h"
 #include "Pulsar/Fourier.h"
 
+using namespace std;
+
 Pulsar::StokesFluctPlot::StokesFluctPlot ()
 {
   plot_values  = "Ip";

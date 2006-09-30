@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/ColdPlasma.h,v $
-   $Revision: 1.3 $
-   $Date: 2006/03/31 23:01:57 $
+   $Revision: 1.4 $
+   $Date: 2006/09/30 04:23:24 $
    $Author: straten $ */
 
 #ifndef __Pulsar_ColdPlasma_h
@@ -178,7 +178,7 @@ void Pulsar::ColdPlasma<C,History>::execute (Integration* data) try
 
     if (corrected_measure == measure && lambda == get_reference_wavelength()) {
       if (Integration::verbose)
-	cerr << "Pulsar::"+name+"::execute data are corrected" << endl;
+	std::cerr << "Pulsar::"+name+"::execute data are corrected"<<std::endl;
       return;
     }
 
@@ -194,9 +194,9 @@ void Pulsar::ColdPlasma<C,History>::execute (Integration* data) try
     delta = get_identity();
 
   if (Integration::verbose)
-    cerr << "Pulsar::"+name+"::execute"
+    std::cerr << "Pulsar::"+name+"::execute"
       " effective "+val+"=" << get_measure() <<
-      " reference wavelength=" << get_reference_wavelength() << endl;
+      " reference wavelength=" << get_reference_wavelength() << std::endl;
 
   range (data, 0, data->get_nchan());
 
@@ -234,9 +234,9 @@ void Pulsar::ColdPlasma<C,H>::range (Integration* data,
 {
 
   if (Integration::verbose)
-    cerr << "Pulsar::"+name+"::range "+val+"=" << get_measure()
+    std::cerr << "Pulsar::"+name+"::range "+val+"=" << get_measure()
 	 << " lambda_0=" << get_reference_wavelength() << " m" 
-         << " delta=" << delta << endl;
+         << " delta=" << delta << std::endl;
 
   if (get_measure() == 0 && delta == get_identity())
     return;

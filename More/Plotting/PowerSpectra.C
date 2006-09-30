@@ -16,6 +16,8 @@
 #include <cpgplot.h>
 #include <values.h>
 
+using namespace std;
+
 Pulsar::PowerSpectra::PowerSpectra ()
 {
   isubint = ipol = 0;

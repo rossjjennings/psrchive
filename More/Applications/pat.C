@@ -31,6 +31,8 @@
 #include <string.h>
 #include <unistd.h>
 
+using namespace std;
+
 void loadGaussian(string file,  
 		  Reference::To<Pulsar::Archive> &stdarch,  
 		  Reference::To<Pulsar::Archive> arch);
@@ -184,7 +186,7 @@ int main (int argc, char *argv[]) try {
       return 0;
 
     case 'i':
-      cout << "$Id: pat.C,v 1.66 2006/09/23 08:57:45 straten Exp $" << endl;
+      cout << "$Id: pat.C,v 1.67 2006/09/30 04:23:24 straten Exp $" << endl;
       return 0;
 
     case 'n':

@@ -13,6 +13,8 @@
 #include <cpgplot.h>
 #include <assert.h>
 
+using namespace std;
+
 Pulsar::CalibratorSpectrum::CalibratorSpectrum ()
 {
   isubint = 0;

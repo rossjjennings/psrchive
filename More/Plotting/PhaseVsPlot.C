@@ -13,6 +13,8 @@
 #include <values.h>
 #include <algorithm>
 
+using namespace std;
+
 Pulsar::PhaseVsPlot::PhaseVsPlot ()
 {
   colour_map.set_name( pgplot::ColourMap::Heat );

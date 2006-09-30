@@ -29,6 +29,8 @@
 #include <unistd.h>
 #include <math.h>
 
+using namespace std;
+
 void plot_it(Reference::To<Pulsar::Archive>, Reference::To<Pulsar::Archive>, int, int, int, int, char *, char *, bool, float, float);
 void coef (float *, float *, int, int, double *, int *, double *, bool);
 void cross_correlation(Reference::To<Pulsar::Profile>, Reference::To<Pulsar::Profile>, double *, int *, double *, bool);
@@ -89,7 +91,7 @@ int main (int argc, char** argv)
       return 0;
 
     case 'i':
-      cout << "$Id: pas.C,v 1.21 2006/03/29 22:42:19 straten Exp $" << endl;
+      cout << "$Id: pas.C,v 1.22 2006/09/30 04:23:24 straten Exp $" << endl;
       return 0;
 
     case 'r':
