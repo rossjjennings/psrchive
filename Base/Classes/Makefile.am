@@ -2,6 +2,7 @@
 noinst_LTLIBRARIES = libBases.la
 
 nobase_include_HEADERS = \
+	Pulsar/psrchive.h \
         Pulsar/ArchiveExpert.h \
         Pulsar/Archive.h \
         Pulsar/ArchiveTI.h \
