@@ -17,8 +17,8 @@
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
 #include "Pulsar/Profile.h"
+#include "FTransform.h"
 #include "Error.h"
-
 #include "dirutil.h"
 #include "string_utils.h"
 #include "MEAL/ScaledVonMises.h"
@@ -28,10 +28,10 @@
 #include "MEAL/SumRule.h"
 #include "cpgplot.h"
 #include <map>
-#include "fftm.h"
 
 using namespace MEAL;
 using namespace Pulsar;
+using namespace std;
 
 void usage ()
 {
@@ -280,13 +280,13 @@ ComponentModel::fit(const Profile *profile, bool fit_derivative,
      //       data_in[i] = sin(i/((double)nbin) * 2.0 * M_PI * 2.0);
     vector<complex<float> > spec(nbin/2+2);
     /// fft::frc1d(nbin, (float*)&spec[0], &data_in[0]); // FFT
-      fft::frc1d(nbin, (float*)&spec[0], profile->get_amps()); // FFT
+      FTransform::frc1d(nbin, (float*)&spec[0], profile->get_amps()); // FFT
     int ic, nc=nbin/2+1;
     float scale = 1.0/nbin;
     for (ic=0; ic < nc; ic++)
       spec[ic] *= complex<float>(0.0f, ic) // scale by i*frequency
 	* scale; // correction for DFT normalisation
-    fft::bcr1d(nbin, &data[0], (float*)&spec[0]); // IFFT
+    FTransform::bcr1d(nbin, &data[0], (float*)&spec[0]); // IFFT
     //     for (i=0; i < nbin; i++)
     //    printf("%f %f\n", data[i], data_in[i]);
     //  exit(1);
