@@ -11,7 +11,7 @@
 #include "Pulsar/StandardSNR.h"
 #include "Pulsar/AdaptiveSNR.h"
 #include "Pulsar/SquareWave.h"
-#include "Pulsar/FluxCalibratorDatabase.h"
+#include "Pulsar/StandardCandles.h"
 
 #include "CommandParser.h"
 #include "tostring.h"
@@ -234,7 +234,7 @@ namespace Pulsar {
     SquareWave cal_snr;
 
     //! Used to fix flux calibrator observations
-    Reference::To<FluxCalibrator::Database> fluxcals;
+    Reference::To<StandardCandles> fluxcals;
 
   private:
     

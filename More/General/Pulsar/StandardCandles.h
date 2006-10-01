@@ -7,23 +7,23 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/StandardCandles.h,v $
-   $Revision: 1.7 $
-   $Date: 2006/04/02 14:37:09 $
+   $Revision: 1.8 $
+   $Date: 2006/10/01 12:12:57 $
    $Author: straten $ */
 
-#ifndef __Pulsar_FluxCalibratorDatabase_h
-#define __Pulsar_FluxCalibratorDatabase_h
+#ifndef __Pulsar_StandardCandles_h
+#define __Pulsar_StandardCandles_h
+
+#include "Reference.h"
+#include "sky_coord.h"
+#include "Types.h"
 
 #include <string>
 #include <vector>
 
-#include "Pulsar/FluxCalibrator.h"
-#include "sky_coord.h"
-#include "Types.h"
-
 namespace Pulsar {
 
-  class FluxCalibrator::Database : public Reference::Able {
+  class StandardCandles : public Reference::Able {
 
   public:
 
@@ -40,13 +40,13 @@ namespace Pulsar {
     static float off_radius;
 
     //! Default construct from default_filename
-    Database ();
+    StandardCandles ();
     
     //! Construct from the specified filename
-    Database (const std::string& filename);
+    StandardCandles (const std::string& filename);
     
     //! Destructor
-    ~Database ();
+    ~StandardCandles ();
     
     //! Write a text file representing the database
     void unload (const std::string& filename);
@@ -58,7 +58,7 @@ namespace Pulsar {
     unsigned size () const { return entries.size(); }
  
 
-    //! Flux Calibration Database Entry
+    //! Standard Candle Database Entry
     /*! Entries have two modes of storage:
       
     I.  reference_frequency, reference_flux, spectral_index

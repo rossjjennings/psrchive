@@ -849,7 +849,7 @@ string Pulsar::Interpreter::fix (const string& args)
 try { 
   if (args == "fluxcal") {
     if (!fluxcals)
-      fluxcals = new FluxCalibrator::Database;
+      fluxcals = new StandardCandles;
 
     Archive* data = get();
 
