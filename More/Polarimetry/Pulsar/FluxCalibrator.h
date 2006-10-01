@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/FluxCalibrator.h,v $
-   $Revision: 1.27 $
-   $Date: 2006/05/24 07:23:13 $
-   $Author: hknight $ */
+   $Revision: 1.28 $
+   $Date: 2006/10/01 13:40:32 $
+   $Author: straten $ */
 
 #ifndef __Pulsar_FluxCalibrator_H
 #define __Pulsar_FluxCalibrator_H
@@ -19,14 +19,12 @@
 namespace Pulsar {
 
   class Integration;
+  class StandardCandles;
 
   //! Calibrates flux using standard candles and artificial sources
   class FluxCalibrator : public Calibrator {
     
   public:
-
-    //! Database of standard candles used for flux calibration
-    class Database;
 
     //! FluxCalibrator parameter communication
     class Info : public Calibrator::Info {
@@ -79,7 +77,7 @@ namespace Pulsar {
     void add_observation (const Archive* archive);
 
     //! Set the database containing flux calibrator information
-    void set_database (const Database* database);
+    void set_database (const StandardCandles* database);
 
     //! Calibrate the flux in the given archive
     void calibrate (Archive* archive);
@@ -102,7 +100,7 @@ namespace Pulsar {
     friend class Info;
 
     //! Flux calibrator database
-    Reference::To<const Database> database;
+    Reference::To<const StandardCandles> database;
 
     //! Create the cal_flux spectrum at the requested resolution
     void create (unsigned nchan = 0);

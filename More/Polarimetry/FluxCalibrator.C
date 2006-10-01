@@ -6,8 +6,8 @@
  ***************************************************************************/
 #include "Pulsar/FluxCalibrator.h"
 #include "Pulsar/FluxCalibratorData.h"
-#include "Pulsar/FluxCalibratorDatabase.h"
 #include "Pulsar/FluxCalibratorExtension.h"
+#include "Pulsar/StandardCandles.h"
 
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
@@ -18,6 +18,8 @@
 #include "templates.h"
 
 #include <assert.h>
+
+using namespace std;
 
 /*! 
   If a Pulsar::Archive is provided, and if it contains a
@@ -219,7 +221,7 @@ void Pulsar::FluxCalibrator::add_observation (const Archive* archive)
 }
 
 //! Set the database containing flux calibrator information
-void Pulsar::FluxCalibrator::set_database (const Database* d)
+void Pulsar::FluxCalibrator::set_database (const StandardCandles* d)
 {
   database = d;
 }
@@ -344,14 +346,14 @@ void Pulsar::FluxCalibrator::setup () try {
   if (!database) {
     if (verbose > 2)
       cerr << "Pulsar::FluxCalibrator::calculate using default database"<<endl;
-    database = new FluxCalibrator::Database;
+    database = new StandardCandles;
   }
 
   if (verbose > 2)
     cerr << "Pulsar::FluxCalibrator::calculate search for source=" 
 	 << get_calibrator()->get_source() << endl;
 
-  FluxCalibrator::Database::Entry entry;
+  StandardCandles::Entry entry;
   entry = database->match (get_calibrator()->get_source(),
 			   get_calibrator()->get_centre_frequency());
 
