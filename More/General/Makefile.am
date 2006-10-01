@@ -49,6 +49,7 @@ nobase_include_HEADERS = \
         Pulsar/SNRWeight.h \
         Pulsar/SourceInfo.h \
         Pulsar/SquareWave.h \
+	Pulsar/StandardCandles.h \
         Pulsar/StandardSNR.h \
         Pulsar/SyntheticPolnProfile.h \
         Pulsar/SyntheticProfile.h \
@@ -96,7 +97,6 @@ libGeneral_la_SOURCES = \
         FourierSNR.C \
         FrequencyIntegrate.C \
         GaussianBaseline.C \
-        GaussianShift.C \
         Integration_cal_levels.C \
         Integration_convert_state.C \
         Integration_dedisperse.C \
@@ -111,12 +111,13 @@ libGeneral_la_SOURCES = \
         Integration_total.C \
         Integration_transform.C \
         Integration_weighted_frequency.C \
+	Interpreter.C \
+	InterpreterVariables.C \
         IterativeBaseline.C \
         LastSignificant.C \
         model_profile.C \
 	morphological_difference.C \
         NoiseStatistics.C \
-        PhaseGradShift.C \
         PhaseWeight.C \
         Profile_convolve.C \
         Profile_dedisperse.C \
@@ -135,25 +136,22 @@ libGeneral_la_SOURCES = \
         ProfileWeightFunction.C \
         RFIMitigation.C \
         ScatteredPowerCorrection.C \
-        SincInterpShift.C \
         Smooth.C \
         SmoothMean.C \
         SmoothMedian.C \
         SNRWeight.C \
         SquareWave.C \
+        StandardCandles.C \
         StandardSNR.C \
         Transposer.C \
-        Weight.C \
-        ZeroPadShift.C
+        Weight.C
 
 #############################################################################
 #
 # Dependencies should never be changed
 #
 
-INCLUDES = \
-	-I$(top_builddir)/utils/include \
-	-I$(top_builddir)/Core/include
+INCLUDES = -I$(top_builddir)/include
 
 include $(top_srcdir)/config/Makefile.local
 
