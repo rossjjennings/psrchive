@@ -21,18 +21,15 @@
 #include "Pulsar/BinLngAscOrder.h"
 #include "Pulsar/BinLngPeriOrder.h"
 #include "Pulsar/Receiver.h"
-#include "Pulsar/Archive_utils.h"
 
 #include "Pulsar/ScatteredPowerCorrection.h"
 #include "Pulsar/FaradayRotation.h"
+#include "Pulsar/counter_drift.h"
 
 #include "dirutil.h"
-#include "genutil.h"
 #include "string_utils.h"
 #include "Error.h"
 
-
-#include "getopt.h"
 #include <algorithm>
 #include <exception>
 #include <stdexcept>
@@ -43,7 +40,9 @@
 #include <unistd.h>
 #include <libgen.h>
 #include <time.h>
+#include <getopt.h>
 
+using namespace std;
 
 void usage()
 {
@@ -269,7 +268,7 @@ int main (int argc, char *argv[]) try {
 	Pulsar::Archive::set_verbosity(3);
 	break;
       case 'i':
-	cout << "$Id: pam.C,v 1.66 2006/09/07 11:49:06 straten Exp $" << endl;
+	cout << "$Id: pam.C,v 1.67 2006/10/01 13:40:16 straten Exp $" << endl;
 	return 0;
       case 'm':
 	save = true;
@@ -418,7 +417,11 @@ int main (int argc, char *argv[]) try {
 	flipsb = true;
 	break;
       case 'x' :
-	dual_parse(optarg,subint_extract_start,subint_extract_end,"x");
+	if (scanf(optarg, "%d %d", 
+		  subint_extract_start, subint_extract_end) !=2 ) {
+	  cout << "That is not a valid subint range" << endl;
+	  return -1;
+	}
 	subint_extract_end++;
 	break;
       case 200:
