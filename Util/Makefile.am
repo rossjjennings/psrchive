@@ -1,9 +1,9 @@
 
-SUBDIRS                 = units genutil fft
+SUBDIRS                 = third units genutil fft
 
 lib_LTLIBRARIES         = libpsrutils.la
 libpsrutils_la_SOURCES  =
-libpsrutils_la_LIBADD   = units/libunits.la fft/libpsrfft.la \
+libpsrutils_la_LIBADD   = third/libthird.la units/libunits.la fft/libpsrfft.la \
 			genutil/libgenutil.la tempo/libtempo.la @FLIBS@
 
 if HAVE_CFITSIO

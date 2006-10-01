@@ -133,8 +133,9 @@ AM_CONDITIONAL(MAKE_LEAN, [test x"$enable_lean" == xyes])
 SWIN_FUNC_GETOPT_LONG
 
 AM_CONFIG_HEADER([config.h])
-AC_CONFIG_FILES([third/Makefile
-		third/parsifal/Makefile
+AC_CONFIG_FILES([utils/Makefile
+		utils/third/Makefile
+		utils/third/parsifal/Makefile
 		utils/units/Makefile
 		utils/fft/Makefile
 		utils/genutil/Makefile
@@ -142,7 +143,6 @@ AC_CONFIG_FILES([third/Makefile
 		utils/qtutil/Makefile
 		utils/fitsutil/Makefile
 		utils/tempo/Makefile
-		utils/Makefile
 		Core/Makefile
 		Core/Bases/Makefile
 		Core/Extensions/Makefile

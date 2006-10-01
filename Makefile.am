@@ -1,5 +1,5 @@
 
-SUBDIRS	= third utils Core More
+SUBDIRS	= utils Core More
 
 bin_SCRIPTS = psrchive_cflags psrchive_ldflags
 
