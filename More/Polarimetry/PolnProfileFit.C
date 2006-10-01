@@ -24,7 +24,7 @@
 
 #include "RealTimer.h"
 #include "Pauli.h"
-#include "fftm.h"
+#include "FTransform.h"
 
 // #define _DEBUG 1
 
@@ -33,6 +33,8 @@
 #endif
 
 #include <memory>
+
+using namespace std;
 
 unsigned get_last_significant (const Pulsar::PolnProfile* psd,
 			       const Stokes<double>& var);
@@ -647,7 +649,7 @@ float Pulsar::PolnProfileFit::ccf_max_phase (const Profile* std,
   auto_ptr<float> delete_ccf (ccf);
 
   nbin /= 2;
-  fft::bcc1d (nbin, ccf, cpsd);
+  FTransform::bcc1d (nbin, ccf, cpsd);
 
   // find the maximum modulus
   float max = 0;
