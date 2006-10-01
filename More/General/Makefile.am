@@ -1,5 +1,5 @@
 
-lib_LTLIBRARIES = libGeneral.la
+noinst_LTLIBRARIES = libGeneral.la
 
 nobase_include_HEADERS = \
         model_profile.h \
@@ -13,9 +13,10 @@ nobase_include_HEADERS = \
         Pulsar/ChannelWeight.h \
         Pulsar/ChannelZapMedian.h \
         Pulsar/ChannelZapModulation.h \
-        Pulsar/ColdPlasma.h* \
+        Pulsar/ColdPlasma.h \
+	Pulsar/counter_drift.h \
         Pulsar/DispersionDelay.h \
-        Pulsar/Dispersion.h* \
+        Pulsar/Dispersion.h \
         Pulsar/DurationWeight.h \
         Pulsar/ExponentialBaseline.h \
         Pulsar/Fourier.h \
@@ -32,7 +33,6 @@ nobase_include_HEADERS = \
         Pulsar/OnPulseThreshold.h \
         Pulsar/PhaseWeightFunction.h \
         Pulsar/PhaseWeight.h \
-        Pulsar/Plotter.h \
         Pulsar/Polarization.h \
         Pulsar/PolnProfileFitAnalysis.h \
         Pulsar/PolnProfileFit.h \
@@ -60,6 +60,7 @@ nobase_include_HEADERS = \
 
 
 libGeneral_la_SOURCES = \
+	counter_drift.C \
         AdaptiveSNR.C \
         Archive_append.C \
         Archive_bscrunch.C \
