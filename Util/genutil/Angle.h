@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Angle.h,v $
-   $Revision: 1.21 $
-   $Date: 2006/09/27 21:32:16 $
+   $Revision: 1.22 $
+   $Date: 2006/10/01 12:13:03 $
    $Author: straten $ */
 
 // redwards 17 Mar 99 -- Time for a definitive C++ suite of
@@ -19,6 +19,7 @@
 
 #include <string>
 #include <iostream>
+#include <math.h>
 
 static const double MilliSecin12Hours = 4.32e7;
 
