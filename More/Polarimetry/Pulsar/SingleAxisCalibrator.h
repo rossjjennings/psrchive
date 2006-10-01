@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/SingleAxisCalibrator.h,v $
-   $Revision: 1.19 $
-   $Date: 2006/09/29 22:13:10 $
+   $Revision: 1.20 $
+   $Date: 2006/10/01 13:41:06 $
    $Author: straten $ */
 
 #ifndef __Pulsar_SingleAxisCalibrator_H
@@ -69,11 +69,11 @@ namespace Pulsar {
     // ///////////////////////////////////////////////////////////////////
 
     //! Return a new Calibration::SingleAxis instance
-    ::MEAL::Complex2* solve (const vector<Estimate<double> >& hi,
-				    const vector<Estimate<double> >& lo);
+    MEAL::Complex2* solve (const std::vector<Estimate<double> >& hi,
+			   const std::vector<Estimate<double> >& lo);
 
     //! Optimization for SingleAxis solve
-    Reference::To< ::Calibration::SingleAxisSolver > solver;
+    Reference::To< Calibration::SingleAxisSolver > solver;
 
   };
 

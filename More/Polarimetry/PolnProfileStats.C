@@ -10,6 +10,8 @@
 #include "Pulsar/OnPulseThreshold.h"
 #include "Pulsar/BaselineEstimator.h"
 
+using namespace std;
+
 //! Default constructor
 Pulsar::PolnProfileStats::PolnProfileStats (const PolnProfile* _profile)
 {

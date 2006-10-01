@@ -10,6 +10,8 @@
 #include "Pulsar/Archive.h"
 #include "Pulsar/Config.h"
 
+using namespace std;
+
 unsigned Pulsar::Calibrator::verbose
 = Pulsar::config.get<bool> ("Calibrator::verbose", 0);
 

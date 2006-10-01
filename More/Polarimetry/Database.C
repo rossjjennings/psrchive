@@ -33,12 +33,13 @@
 #include "MJD.h"
 #include "sky_coord.h"
 
-#include "genutil.h"
 #include "dirutil.h"
 #include "string_utils.h"
 
 #include <unistd.h> 
 #include <errno.h>
+
+using namespace std;
 
 bool Pulsar::Database::verbose = false;
 

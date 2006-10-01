@@ -13,6 +13,8 @@
 
 #include <assert.h>
 
+using namespace std;
+
 Pulsar::DoPCalibrator::DoPCalibrator (const Archive* archive) 
   : SingleAxisCalibrator (archive)
 {

@@ -7,6 +7,8 @@
 #include "Pulsar/PolarCalibrator.h"
 #include "Pauli.h"
 
+using namespace std;
+
 //! Construct from an single PolnCal Pulsar::Archive
 Pulsar::PolarCalibrator::PolarCalibrator (const Archive* archive) 
   : ReferenceCalibrator (archive)

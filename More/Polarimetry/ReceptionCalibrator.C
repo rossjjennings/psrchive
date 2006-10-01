@@ -33,6 +33,8 @@
 #include <algorithm>
 #include <assert.h>
 
+using namespace std;
+
 /*! The Archive passed to this constructor will be used to supply the first
   guess for each pulse phase bin used to constrain the fit. */
 Pulsar::ReceptionCalibrator::ReceptionCalibrator (Calibrator::Type type)

@@ -6,6 +6,8 @@
  ***************************************************************************/
 #include "Pulsar/InstrumentInfo.h"
 
+using namespace std;
+
 //! Constructor
 Pulsar::InstrumentInfo::InstrumentInfo (const PolnCalibrator* calibrator) :
   SingleAxisCalibrator::Info (calibrator)

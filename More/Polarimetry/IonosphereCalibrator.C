@@ -13,6 +13,8 @@
 
 #include "Pulsar/IRIonosphere.h"
 
+using namespace std;
+
 //! Default constructor
 Pulsar::IonosphereCalibrator::IonosphereCalibrator () {}
 

@@ -8,6 +8,8 @@
 #include "Pulsar/PolarCalibrator.h"
 #include "Pulsar/InstrumentInfo.h"
 
+using namespace std;
+
 Pulsar::PolnCalibrator::Info* 
 Pulsar::PolnCalibrator::Info::create (const Pulsar::PolnCalibrator* calibrator)
 {

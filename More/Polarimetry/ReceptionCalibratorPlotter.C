@@ -12,6 +12,8 @@
 
 #include <cpgplot.h>
 
+using namespace std;
+
 Pulsar::ReceptionCalibratorPlotter::ReceptionCalibratorPlotter
 (ReceptionCalibrator* cal)
 {

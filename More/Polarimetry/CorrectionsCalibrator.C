@@ -15,6 +15,8 @@
 #include "Pulsar/Parallactic.h"
 #include "Pauli.h"
 
+using namespace std;
+
 bool Pulsar::CorrectionsCalibrator::pointing_over_computed = false;
 
 //! Default constructor

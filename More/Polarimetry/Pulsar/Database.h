@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/Database.h,v $
-   $Revision: 1.11 $
-   $Date: 2006/07/14 19:58:17 $
+   $Revision: 1.12 $
+   $Date: 2006/10/01 13:41:06 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Database_h
@@ -84,19 +84,19 @@ namespace Pulsar {
     Database ();
     
     //! Construct a database from archives in a directory
-    Database (const string& path, const vector<string>& extensions);
+    Database (const std::string& path, const std::vector<std::string>& extensions);
     
     //! Construct a database from a pre-built ascii file
-    Database (const string& filename);
+    Database (const std::string& filename);
     
     //! Destructor.
     ~Database ();
     
     //! Write a text file representing the database to disk for storage.
-    void unload (const string& dbase_filename);
+    void unload (const std::string& dbase_filename);
 
     //! Read a text file summary and construct a database
-    void load (const string& dbase_filename);
+    void load (const std::string& dbase_filename);
     
     //! Add the given Archive to the database
     void add (const Pulsar::Archive* archive);
@@ -114,7 +114,7 @@ namespace Pulsar {
     void set_feed (MEAL::Complex2* xform) { feed = xform; }
 
     //! Returns the full path to the database summary file
-    string get_path () const;
+    std::string get_path () const;
     
     //! Returns the number of entries in the database
     unsigned size () const { return entries.size(); }
@@ -133,15 +133,15 @@ namespace Pulsar {
       double           bandwidth;    // Bandwidth of observation
       double           frequency;    // Centre frequency of observation
       unsigned         nchan;        // Number of channels across bandwidth
-      string           instrument;   // name of backend
-      string           receiver;     // name of receiver
-      string           filename;     // relative path of file
+      std::string      instrument;   // name of backend
+      std::string      receiver;     // name of receiver
+      std::string      filename;     // relative path of file
       
       //! Null constructor
       Entry () { init(); }
       //! Construct from an ASCII string
       explicit Entry (const char* txt) { load(txt); }
-      explicit Entry (string& str) { load(str); }
+      explicit Entry (std::string& str) { load(str); }
       //! Construct from a Pulsar::Archive
       Entry (const Archive& arch);
       //! Destructor
@@ -149,9 +149,9 @@ namespace Pulsar {
       
       // load from ascii string
       void load (const char* str);
-      void load (string& str) { load(str.c_str()); }
+      void load (std::string& str) { load(str.c_str()); }
       // unload ascii string
-      void unload (string& str);
+      void unload (std::string& str);
       
       friend bool operator < (const Entry& a, const Entry& b);
 
@@ -211,7 +211,7 @@ namespace Pulsar {
     Entry best_match (const Criterion&) const;
 
     //! Fills a vector with Entry instances that match the given Criterion
-    void all_matching (const Criterion&, vector<Entry>& matches) const;
+    void all_matching (const Criterion&, std::vector<Entry>& matches) const;
     
     //! Return the Criterion for the specified Pulsar::Archive
     Criterion criterion (const Pulsar::Archive* arch,
@@ -222,15 +222,15 @@ namespace Pulsar {
 			 Calibrator::Type calType) const;
 
     //! Returns the full pathname of the Entry filename
-    string get_filename (const Entry&) const;
+    std::string get_filename (const Entry&) const;
     
     //! Add the given entry to the database
     void add (Pulsar::Database::Entry& entry);
 
   protected:
     
-    vector<Entry> entries;   // list of entries in the database
-    string path;
+    std::vector<Entry> entries;   // list of entries in the database
+    std::string path;
     
     //! Return a pointer to a new FluxCalibrator for the given archive
     FluxCalibrator* rawFluxCalibrator (Archive* a);

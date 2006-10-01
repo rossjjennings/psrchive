@@ -11,6 +11,8 @@
 #include "Pulsar/Instrument.h"
 #include "MEAL/Polar.h"
 
+using namespace std;
+
 template<class T, class F>
 void copy (T* to, const F* from)
 {

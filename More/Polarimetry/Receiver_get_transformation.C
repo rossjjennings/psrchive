@@ -9,6 +9,8 @@
 #include "MEAL/Rotation1.h"
 #include "Pauli.h"
 
+using namespace std;
+
 //! Return the feed correction matrix
 Jones<double> Pulsar::Receiver::get_transformation () const
 {

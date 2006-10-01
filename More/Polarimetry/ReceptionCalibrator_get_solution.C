@@ -7,6 +7,8 @@
 #include "Pulsar/ReceptionCalibrator.h"
 #include "Pulsar/CalibratorStokes.h"
 
+using namespace std;
+
 Pulsar::CalibratorStokes*
 Pulsar::ReceptionCalibrator::get_CalibratorStokes () const
 {

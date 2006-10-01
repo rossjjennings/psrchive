@@ -8,6 +8,8 @@
 #include "Pulsar/Archive.h"
 #include "Pulsar/Profile.h"
 
+using namespace std;
+
 #define Stokes_Q 0x01
 #define Stokes_U 0x02
 #define Stokes_V 0x04

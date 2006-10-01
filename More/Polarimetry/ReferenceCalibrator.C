@@ -20,6 +20,8 @@
 #include "interpolate.h"
 #include "median_smooth.h"
 
+using namespace std;
+
 bool Pulsar::ReferenceCalibrator::smooth_bandpass
 = Pulsar::config.get<bool>("smooth_bandpass", false);
 

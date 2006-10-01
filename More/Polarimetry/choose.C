@@ -8,6 +8,8 @@
 #include "Pulsar/Integration.h"
 #include "Stokes.h"
 
+using namespace std;
+
 void choose (vector<unsigned>& bins, Pulsar::Archive* archive)
 {
   if (bins.size() == 0)

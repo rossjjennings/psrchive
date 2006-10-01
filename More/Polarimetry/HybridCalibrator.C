@@ -13,6 +13,8 @@
 #include "Pulsar/SingleAxis.h"
 #include "Pauli.h"
 
+using namespace std;
+
 Pulsar::HybridCalibrator::HybridCalibrator (const Archive* data)
 {
   set_precalibrator( new Pulsar::PolnCalibrator (data) );

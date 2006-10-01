@@ -9,6 +9,8 @@
 #include "Pulsar/CalibratorStokes.h"
 #include "Pulsar/Archive.h"
 
+using namespace std;
+
 /*! 
   If a Pulsar::Archive is provided, and if it contains a
   SystemCalibratorExtension, then the constructed instance can be

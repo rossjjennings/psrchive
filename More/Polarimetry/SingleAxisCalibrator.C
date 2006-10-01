@@ -8,6 +8,8 @@
 #include "Pauli.h"
 #include "Estimate.h"
 
+using namespace std;
+
 //! Construct from an single PolnCal Pulsar::Archive
 Pulsar::SingleAxisCalibrator::SingleAxisCalibrator (const Archive* archive) 
   : ReferenceCalibrator (archive)

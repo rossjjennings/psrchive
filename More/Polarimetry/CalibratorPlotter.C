@@ -12,6 +12,8 @@
 
 #include <cpgplot.h>
 
+using namespace std;
+
 bool Pulsar::CalibratorPlotter::verbose = false;
 
 Pulsar::CalibratorPlotter::CalibratorPlotter ()

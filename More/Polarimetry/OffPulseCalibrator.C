@@ -15,6 +15,8 @@
 #include <stdio.h>
 #include <assert.h>
 
+using namespace std;
+
 Pulsar::OffPulseCalibrator::OffPulseCalibrator (const Archive* archive) 
   : SingleAxisCalibrator (archive)
 {

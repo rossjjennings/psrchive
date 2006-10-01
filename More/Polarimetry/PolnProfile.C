@@ -13,6 +13,8 @@
 #include <ieeefp.h>
 #endif
 
+using namespace std;
+
 /*! When transforming Profile objects, the absolute gain of the
   transformation may artificially inflate the weight of the Profile
   and incorrectly skew mean results. */
