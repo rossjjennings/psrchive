@@ -152,15 +152,16 @@ AC_CONFIG_FILES([utils/Makefile
 		Core/Formats/PSRFITS/Makefile
                 Core/Formats/ASCII/Makefile
 		Core/Applications/Makefile
+		More/Makefile
 		More/General/Makefile
 		More/Plotting/Makefile
 		More/MEAL/Makefile
+		More/Timing/Makefile
 		More/Polarimetry/Makefile
 		More/Polarimetry/iri2001/Makefile
                 More/GUI/Makefile
 		More/rhythm/Makefile
 		More/Applications/Makefile
-		More/Makefile
 		Makefile])
 
 AC_OUTPUT
