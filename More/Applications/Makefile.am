@@ -1,11 +1,11 @@
 
-bin_PROGRAMS = pat paz pdmp psradd psrdiff psrsh psrwt
+bin_PROGRAMS = paas pam pas pat paz pdmp psradd psrdiff psrsh psrwt
 
-# paas_SOURCES = paas.C
-# paas_LDADD = $(LDADD) @PGPLOT_LIBS@
-# pam_SOURCES = pam.C
-# pas_SOURCES = pas.C
-# pascii_SOURCES = pascii.C
+paas_SOURCES = paas.C
+paas_LDADD = $(LDADD) @PGPLOT_LIBS@
+pam_SOURCES = pam.C
+pas_SOURCES = pas.C
+pascii_SOURCES = pascii.C
 pat_SOURCES = pat.C
 paz_SOURCES = paz.C
 pdmp_SOURCES = pdmp.C
