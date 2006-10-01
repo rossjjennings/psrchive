@@ -67,6 +67,8 @@ endif
 #
 
 INCLUDES = -I$(top_builddir)/include \
-	-I$(top_srcdir)/More/General -I$(top_srcdir)/More/Polarimetry \
+	-I$(top_srcdir)/More/General \
+	-I$(top_srcdir)/More/MEAL \
+	-I$(top_srcdir)/More/Polarimetry \
 	@PGPLOT_CFLAGS@ @SLA_CFLAGS@
 
