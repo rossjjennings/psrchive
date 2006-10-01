@@ -17,8 +17,9 @@
 
 #include "MEAL/Complex2Math.h"
 
-#include "genutil.h"
 #include "toa.h"
+
+using namespace std;
 
 //! Constructor
 Pulsar::PulsarCalibrator::PulsarCalibrator (Calibrator::Type model)
@@ -109,11 +110,12 @@ void Pulsar::PulsarCalibrator::set_standard (const Archive* data)
   Reference::To<Archive> clone;
 
   set_calibrator( clone = data->clone() );
-
-  if (!data->get_instrument_corrected ()) {
+  
+  CorrectionsCalibrator correct;
+  if (correct.needs_correction(data)) {
     cerr << "Pulsar::PulsarCalibrator::set_standard correcting instrument" 
          << endl;
-    clone->correct_instrument ();
+    correct.calibrate( clone );
   }
 
   if (clone->get_nchan () > 1)
@@ -360,7 +362,7 @@ void Pulsar::PulsarCalibrator::solve (const Integration* data, unsigned ichan)
 
     toa.set_telescope (archive->get_telescope_code());
 
-    string aux = basename (archive->get_filename());
+    string aux = basename (archive->get_filename().c_str());
     toa.set_auxilliary_text (aux);
 
     toa.unload (tim_file);
