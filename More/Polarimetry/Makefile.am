@@ -51,15 +51,73 @@ nobase_include_HEADERS = \
         Pulsar/TemplateUncertainty.h \
         Pulsar/TotalCovariance.h
 
-libPolarimetry_la_SOURCES = SingleAxis.C Feed.C Instrument.C		   \
-	SingleAxisPolynomial.C Parallactic.C Faraday.C IRIonosphere.C	   \
-	MeanCoherency.C MeanPolar.C MeanSingleAxis.C MeanFeed.C		   \
-	MeanInstrument.C MeasurementEquation.C ReceptionModel.C		   \
-	CoherencyMeasurement.C CoherencyMeasurementSet.C ConvertMJD.C	   \
-	SingleAxisSolver.C Simulation.C StandardModel.C Feed_load.C	   \
-	Polar_solve.C ReceptionModel_solve.C ReceptionModel_solve_thread.C \
-	ObservationUncertainty.C TemplateUncertainty.C TotalCovariance.C   \
-	Integration_defaraday.C
+libPolarimetry_la_SOURCES = \
+        Calibrator.C \
+        CalibratorPlotter.C \
+        CalibratorStokesInfo.C \
+        choose.C \
+        CoherencyMeasurement.C \
+        CoherencyMeasurementSet.C \
+        ConvertMJD.C \
+        CorrectionsCalibrator.C \
+        Database.C \
+        DeltaPA.C \
+        DeltaRM.C \
+        DoPCalibrator.C \
+        Faraday.C \
+        FaradayRotation.C \
+        Feed.C \
+        Feed_load.C \
+        FluxCalibrator.C \
+        FluxCalibratorData.C \
+        HybridCalibrator.C \
+        Instrument.C \
+        InstrumentInfo.C \
+        Integration_defaraday.C \
+        IonosphereCalibrator.C \
+        IRIonosphere.C \
+        MeanCoherency.C \
+        MeanFeed.C \
+        MeanInstrument.C \
+        MeanPolar.C \
+        MeanSingleAxis.C \
+        MeasurementEquation.C \
+        ObservationUncertainty.C \
+        OffPulseCalibrator.C \
+        Parallactic.C \
+        PolarCalibrator.C \
+        Polarization.C \
+        Polar_solve.C \
+        PolnCalibrator.C \
+        PolnCalibratorExt.C \
+        PolnCalibratorInfo.C \
+        PolnProfile.C \
+        PolnProfileFitAnalysis.C \
+        PolnProfileFit.C \
+        PolnProfileStats.C \
+        PulsarCalibrator.C \
+        Receiver_get_transformation.C \
+        Receiver_load.C \
+        ReceptionCalibrator.C \
+        ReceptionCalibrator_get_Info.C \
+        ReceptionCalibrator_get_solution.C \
+        ReceptionCalibratorPlotter.C \
+        ReceptionModel.C \
+        ReceptionModelPlotter.C \
+        ReceptionModel_solve.C \
+        ReceptionModel_solve_thread.C \
+        ReferenceCalibrator.C \
+        ReflectStokes.C \
+        Simulation.C \
+        SingleAxis.C \
+        SingleAxisCalibrator.C \
+        SingleAxisPolynomial.C \
+        SingleAxisSolver.C \
+        SourceInfo.C \
+        StandardModel.C \
+        SystemCalibrator.C \
+        TemplateUncertainty.C \
+        TotalCovariance.C
 
 SUBDIRS = iri2001
 
@@ -112,7 +170,9 @@ test_ReceptionModel_LDADD	= $(LDADD) @SLA_LIBS@
 #
 
 INCLUDES = -I$(top_builddir)/include \
-	-I$(top_srcdir)/More/General @PGPLOT_CFLAGS@ @SLA_CFLAGS@
+	-I$(top_srcdir)/More/General \
+	-I$(top_srcdir)/More/MEAL \
+	@PGPLOT_CFLAGS@ @SLA_CFLAGS@
 
 LDADD = libPolarimetry.la $(top_builddir)/More/MEAL/libMEAL.la \
 	$(top_builddir)/utils/libpsrutils.la
