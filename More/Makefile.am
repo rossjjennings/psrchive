@@ -34,7 +34,7 @@ if HAVE_QTDRIV
 SUBDIRS += rhythm
 endif
 
-all-am: intermediate-install
+all-local: intermediate-install
 
 include $(top_srcdir)/config/Makefile.local
 

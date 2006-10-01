@@ -8,7 +8,7 @@ libpsrcore_la_LIBADD = \
 	Extensions/libExtensions.la \
 	Formats/libFormats.la
 
-all-am: intermediate-install
+all-local: intermediate-install
 
 include $(top_srcdir)/config/Makefile.local
 
