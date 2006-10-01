@@ -15,11 +15,11 @@
 #include "Pulsar/psrchive.h"
 #include "Pulsar/Archive.h"
 #include "Pulsar/Profile.h"
-#include "Pulsar/Plotter.h"
 #include "Pulsar/Integration.h"
+#include "Pulsar/ProfilePlot.h"
+
 #include "Error.h"
 
-#include "spectra.h"
 #include "dirutil.h"
 #include "string_utils.h"
 
@@ -57,6 +57,15 @@ void usage ()
        << endl;
 }
 
+uint64 power_of_two (uint64 number)
+{
+  uint64 twos = 1;
+  while (twos < number)
+    twos *= 2;
+  if (twos != number)
+    return 0;
+  return 1;
+}
 
 int main (int argc, char** argv) 
 {
@@ -91,7 +100,7 @@ int main (int argc, char** argv)
       return 0;
 
     case 'i':
-      cout << "$Id: pas.C,v 1.22 2006/09/30 04:23:24 straten Exp $" << endl;
+      cout << "$Id: pas.C,v 1.23 2006/10/01 14:16:24 straten Exp $" << endl;
       return 0;
 
     case 'r':
@@ -500,8 +509,8 @@ void plot_it(Reference::To<Pulsar::Archive> refarch, Reference::To<Pulsar::Archi
   //draw the profiles
   cpgsls (1);
 
-  Pulsar::Plotter plotter;
-  plotter.set_zoom (xmin, xmax);
+  Pulsar::ProfilePlot plotter;
+  plotter.get_frame()->get_x_scale()->set_range_norm (xmin, xmax);
 
   if(refflag == true) {
     cpgsci (ci_ref);
