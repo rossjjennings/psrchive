@@ -60,6 +60,17 @@ void Pulsar::FluxPlot::draw (const Archive* data)
     plot_error_box (data);
 }
 
+/*! The ProfileVectorPlotter class draws the profile */
+void Pulsar::FluxPlot::plot (const Profile* data)
+{
+  plotter.profiles.clear();
+  plotter.profiles.push_back (data);
+  plotter.minmax (get_frame());
+
+  get_frame()->focus (0);
+  get_scale()->get_ordinates (0, plotter.x);
+  plotter.draw (data);
+}
 
 //! Scale in on the on-pulse region
 void Pulsar::FluxPlot::auto_scale_phase (const Profile* profile, float buf)
