@@ -1,0 +1,16 @@
+#! /bin/sh
+
+# This script makes a symbollic link from $2 to $PWD/$1, creating the
+# path to $2 if needed
+#
+# Willem van Straten
+# 1 October 2006
+
+if test -f $2; then exit 0; fi
+
+# This sed command emulates the dirname command.
+dstdir=`echo "$2" | sed -e 's,/*$,,;s,[^/]*$,,;s,/*$,,;s,^$,.,'`
+
+if test ! -d $dstdir; then mkdir -p $dstdir; fi
+
+ln -s $PWD/$1 $2
