@@ -204,11 +204,6 @@ void Pulsar::Interpreter::init()
       "  'fluxcal'         fix the Archive::Type (FluxCalOn or Off) \n" );
 
   add_command 
-    ( &Interpreter::correct_instrument,
-      "pac", "apply parallactic angle correction",
-      "usage: pac \n");
-
-  add_command 
     ( &Interpreter::scattered_power_correct,
       "spc", "apply scattered power correction",
       "usage: spc \n");
@@ -698,22 +693,6 @@ try {
     return response (Warn, "already dedispersed");
 
   get()->dedisperse();
-
-  return response (Good);
-}
-catch (Error& error) {
-  return response (Fail, error.get_message());
-}
-
-string Pulsar::Interpreter::correct_instrument (const string& args)
-try {
-  if (args.length())
-    return response (Fail, "accepts no arguments");
-
-  if (get()->get_instrument_corrected())
-    return response (Warn, "already corrected");
-
-  get()->correct_instrument();
 
   return response (Good);
 }
