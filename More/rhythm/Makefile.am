@@ -13,8 +13,7 @@ include $(top_srcdir)/config/Makefile.Qt
 # Dependencies should never be changed
 #
 
-INCLUDES = -I$(top_builddir)/utils/include -I$(top_builddir)/astro/include \
-	-I$(top_srcdir)/psrchive @QTDRIV_CFLAGS@
+INCLUDES = -I$(top_builddir)/include @QTDRIV_CFLAGS@
 
 LDADD = ../libpsrchive.la $(top_builddir)/astro/libpsrastro.la \
 	$(top_builddir)/utils/libpsrutils.la @QTDRIV_LIBS@

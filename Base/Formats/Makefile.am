@@ -20,7 +20,7 @@ include $(top_srcdir)/config/Makefile.local
 # Dependencies should never be changed
 #
 
-INCLUDES = -I$(top_builddir)/utils/include \
+INCLUDES = -I$(top_builddir)/include \
 	-I$(top_srcdir)/Core/Bases \
 	-I$(top_srcdir)/Core/Extensions \
 	-I$(top_srcdir)/Core/Formats/Timer \

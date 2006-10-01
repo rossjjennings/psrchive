@@ -111,7 +111,7 @@ test_ReceptionModel_LDADD	= $(LDADD) @SLA_LIBS@
 # Dependencies should never be changed
 #
 
-INCLUDES = -I$(top_builddir)/utils/include -I$(top_srcdir)/Core/include \
+INCLUDES = -I$(top_builddir)/include \
 	-I$(top_srcdir)/More/General @PGPLOT_CFLAGS@ @SLA_CFLAGS@
 
 LDADD = libPolarimetry.la $(top_builddir)/More/MEAL/libMEAL.la \

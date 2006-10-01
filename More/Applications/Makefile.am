@@ -19,10 +19,7 @@ psrwt_SOURCES = psrwt.C
 # Dependencies should never be changed
 #
 
-INCLUDES = \
-	-I$(top_builddir)/utils/include \
-	-I$(top_builddir)/Core/include \
-	-I$(top_builddir)/More/include \
+INCLUDES = -I$(top_builddir)/include \
 	@PGPLOT_CFLAGS@ @CFITSIO_CFLAGS@ @MPI_CFLAGS@
 
 LDADD = $(top_builddir)/More/libpsrmore.la \

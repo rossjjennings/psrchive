@@ -89,6 +89,6 @@ libExtensions_la_SOURCES = \
 # Dependencies should never be changed
 #
 
-INCLUDES = -I$(top_builddir)/utils/include -I$(top_srcdir)/Core/Bases \
+INCLUDES = -I$(top_builddir)/include -I$(top_srcdir)/Core/Bases \
 	-I$(top_srcdir)/More/Polarimetry
 

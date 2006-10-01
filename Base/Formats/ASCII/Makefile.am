@@ -10,5 +10,5 @@ libascii_la_SOURCES = ASCIIArchive.C
 # Dependencies should never be changed
 #
 
-INCLUDES = -I$(top_builddir)/utils/include -I$(top_srcdir)/Core/Bases
+INCLUDES = -I$(top_builddir)/include -I$(top_srcdir)/Core/Bases
 

@@ -8,9 +8,7 @@ vip_SOURCES			= vip.C
 
 #############################################################################
 
-INCLUDES = \
-	-I$(top_builddir)/Core/include \
-	-I$(top_builddir)/utils/include
+INCLUDES = -I$(top_builddir)/include
 
 LDADD = $(top_builddir)/Core/libpsrcore.la \
 	$(top_builddir)/utils/libpsrutils.la
