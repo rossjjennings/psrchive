@@ -1,10 +1,12 @@
 
+SUBDIRS =
+
 lib_LTLIBRARIES = libpsrmore.la
-
 libpsrmore_la_SOURCES =
+libpsrmore_la_LIBADD =
 
-SUBDIRS = General
-libpsrmore_la_LIBADD = General/libGeneral.la
+SUBDIRS += General
+libpsrmore_la_LIBADD += General/libGeneral.la
 
 # ######################################################################
 #
@@ -12,8 +14,13 @@ libpsrmore_la_LIBADD = General/libGeneral.la
 #
 
 if !MAKE_LEAN
-SUBDIRS += MEAL Polarimetry
+SUBDIRS += MEAL
 libpsrmore_la_LIBADD += MEAL/libMEAL.la
+
+SUBDIRS += Timing
+libpsrmore_la_LIBADD += Timing/libTiming.la
+
+SUBDIRS += Polarimetry
 libpsrmore_la_LIBADD += Polarimetry/libPolarimetry.la
 endif #
 
