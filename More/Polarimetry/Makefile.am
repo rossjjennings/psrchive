@@ -14,9 +14,8 @@ nobase_include_HEADERS = \
         Pulsar/DeltaRM.h \
         Pulsar/DoPCalibrator.h \
         Pulsar/Faraday.h \
-        Pulsar/FaradayRotation.h* \
+        Pulsar/FaradayRotation.h \
         Pulsar/Feed.h \
-        Pulsar/FluxCalibratorDatabase.h \
         Pulsar/FluxCalibratorData.h \
         Pulsar/FluxCalibrator.h \
         Pulsar/HybridCalibrator.h \
