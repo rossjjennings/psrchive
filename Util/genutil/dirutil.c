@@ -44,7 +44,7 @@ int file_exists (const char* filename)
   return 1;
 }
 
-int file_mod_time (const char* filename)
+time_t file_mod_time (const char* filename)
 {
   struct stat statistics;
   if (stat (filename, &statistics) < 0) {

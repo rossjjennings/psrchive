@@ -11,6 +11,7 @@
 
 #include <vector>
 #include <string>
+#include <sys/types.h>
 
 // in dirwith.C
 const std::string dirwith (double size, const std::vector<std::string>& disks,
@@ -54,6 +55,9 @@ extern "C" {
   int makedir   (const char* path);
   /* resursively removes an existing directory named 'path' */
   int removedir (const char* path);
+
+  /* returns the file modification time */
+  time_t file_mod_time (const char* filename);
 
 #ifdef __cplusplus
 }
