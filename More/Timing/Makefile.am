@@ -5,6 +5,7 @@ nobase_include_HEADERS =
 
 libTiming_la_SOURCES = \
 	GaussianShift.C \
+	ParIntShift.C \
 	PhaseGradShift.C \
 	SincInterpShift.C \
 	ZeroPadShift.C
