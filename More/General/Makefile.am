@@ -4,6 +4,8 @@ noinst_LTLIBRARIES = libGeneral.la
 nobase_include_HEADERS = \
         model_profile.h \
         morphological_difference.h \
+	Pulsar/counter_drift.h \
+	Pulsar/denoise.h \
         Pulsar/AdaptiveSNR.h \
         Pulsar/Algorithm.h \
         Pulsar/ArchiveMatch.h \
@@ -14,7 +16,6 @@ nobase_include_HEADERS = \
         Pulsar/ChannelZapMedian.h \
         Pulsar/ChannelZapModulation.h \
         Pulsar/ColdPlasma.h \
-	Pulsar/counter_drift.h \
         Pulsar/DispersionDelay.h \
         Pulsar/Dispersion.h \
         Pulsar/DurationWeight.h \
@@ -58,9 +59,11 @@ nobase_include_HEADERS = \
         Pulsar/Utilities.h \
         Pulsar/Weight.h
 
-
 libGeneral_la_SOURCES = \
 	counter_drift.C \
+	denoise.C \
+        model_profile.C \
+	morphological_difference.C \
         AdaptiveSNR.C \
         Archive_append.C \
         Archive_bscrunch.C \
@@ -116,8 +119,6 @@ libGeneral_la_SOURCES = \
 	InterpreterVariables.C \
         IterativeBaseline.C \
         LastSignificant.C \
-        model_profile.C \
-	morphological_difference.C \
         NoiseStatistics.C \
         PhaseWeight.C \
         Profile_convolve.C \
