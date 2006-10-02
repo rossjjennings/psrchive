@@ -12,7 +12,7 @@
 
 #include "timer++.h"
 #include "mini++.h"
-#include "coord.h"
+#include "Horizon.h"
 
 using namespace std;
 
@@ -247,20 +247,26 @@ void Pulsar::TimerArchive::subint_load (FILE* fptr)
 
     if (baseband && telescope) {
 
-      // Correct the LST for baseband systems
-      float longitude = telescope->get_longitude().getDegrees();
-      double lst_in_hours = Mini::get_MJD (subint->mini).LST (longitude);
-      subint->mini.lst_start = lst_in_hours / 24.0; // lst in days
- 
       // Correct the direction and parallactic angles
       if (verbose == 3)
-	cerr << "TimerArchive::subint_load correcting parallactic angle\n";
+        cerr << "TimerArchive::subint_load correcting parallactic angle\n";
 
-      az_zen_para (hdr.ra, hdr.dec,
-		   lst_in_hours, telescope->get_latitude().getDegrees(),
-		   &subint->mini.tel_az,
-		   &subint->mini.tel_zen,
-		   &subint->mini.para_angle);
+      Horizon horizon;
+
+      sky_coord coord( hdr.ra, hdr.dec );
+      horizon.set_source_coordinates( coord );
+      horizon.set_epoch( subint->get_epoch() );
+      horizon.set_observatory_latitude(telescope->get_latitude().getRadians());
+      horizon.set_observatory_longitude(telescope->get_longitude().getRadians());
+    
+      // Correct the LST for baseband systems - LST in hours
+      subint->mini.lst_start = horizon.get_local_sidereal_time()*12.0/M_PI;
+ 
+      double rad2deg = 180.0/M_PI;
+      subint->mini.tel_az = horizon.get_azimuth() * rad2deg;
+      subint->mini.tel_zen = horizon.get_zenith() * rad2deg;
+      subint->mini.para_angle = horizon.get_parallactic_angle() * rad2deg;
+
 
     }
 
