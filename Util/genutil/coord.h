@@ -5,8 +5,8 @@
  *
  ***************************************************************************/
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/coord.h,v $
-   $Revision: 1.9 $
-   $Date: 2006/03/17 13:35:07 $
+   $Revision: 1.10 $
+   $Date: 2006/10/02 13:38:26 $
    $Author: straten $ */
 
 #ifndef __COORD_H
@@ -72,17 +72,7 @@ int telescope_coords (char telescope, float* latitude,
         returns ITRF X, Y, X  coordinates (in metres) about the
         geocentre for a telescope given by its tempo code
    ******************************************************************** */
-int telescope_xyz (char telescope, double* x_, 
-		      double* y_, double* z_);
-
-/* ********************************************************************
-   az_zen_para -
-        converts J2000 ra and dec (in radians), lst (in hours),
-	and latitude (in degrees) to telescope azimuth and zenith
-	angles and parallactic angle (in degrees)
-   ******************************************************************** */
-int az_zen_para (double ra, double dec, float lst, float latitude,
-          float * tel_az, float * tel_zen, float * para_angle);
+int telescope_xyz (char telescope, double* x, double* y, double* z);
 
 #ifdef __cplusplus
 	   }

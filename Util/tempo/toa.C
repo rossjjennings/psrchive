@@ -7,7 +7,6 @@
 #include "toa.h"
 #include "string_utils.h"
 #include "polyco.h"
-#include "coord.h"
 #include "Error.h"
 
 #include <iostream>
@@ -17,23 +16,9 @@
 #include <sys/types.h>
 #include <time.h>
 
-
 using namespace std;
 
 const float Tempo::toa::UNSET = -999.0;
-
-void Tempo::toa::get_az_zen_para (double ra, double dec,
-				  float& az, float& zen, float& para) const
-{
-  float latitude=0, longitude=0;
-    
-  if (telescope_coords (telescope, &latitude, &longitude, NULL) < 0)
-    cerr << "Tempo::toa::az_zen_para: error getting coords for telecope " 
-	 << telescope << endl;
-
-  az_zen_para (ra, dec, arrival.LST(longitude), latitude,
-	       &az, &zen, &para);
-}
 
 Tempo::toa::toa (char* datastr)
 {

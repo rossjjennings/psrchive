@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/toa.h,v $
-   $Revision: 1.21 $
-   $Date: 2006/03/17 13:34:34 $
+   $Revision: 1.22 $
+   $Date: 2006/10/02 13:38:26 $
    $Author: straten $ */
 
 #ifndef __TOA_H
@@ -154,9 +154,6 @@ namespace Tempo {
     float  get_error     () const { return error; };
     char   get_telescope () const { return telescope; };
     std::string get_auxilliary_text () const { return auxinfo; };
-
-    void get_az_zen_para (double ra, double dec,
-			  float& az, float& zen, float& para) const;
 
     double shift (const polyco & poly) const;
 
