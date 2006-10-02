@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Profile.h,v $
-   $Revision: 1.96 $
-   $Date: 2006/09/29 14:44:57 $
+   $Revision: 1.97 $
+   $Date: 2006/10/02 19:35:44 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Profile_h
@@ -56,9 +56,6 @@ namespace Pulsar {
 
     //! fraction of total power used to find peak
     static float peak_edge_threshold;
-
-    //! Invoke legacy toa algorithm in shift
-    static bool legacy;
 
     //! Default fraction of maximum amplitude a 'spike' is defined to have ended at
     static float default_amplitude_dropoff;

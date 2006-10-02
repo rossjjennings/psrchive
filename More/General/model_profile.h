@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/model_profile.h,v $
-   $Revision: 1.6 $
-   $Date: 2006/03/17 13:34:40 $
+   $Revision: 1.7 $
+   $Date: 2006/10/02 19:35:44 $
    $Author: straten $ */
 
 #ifndef __model_profile_h
@@ -26,11 +26,8 @@ namespace Pulsar {
                      double * shift, double * sigma_shift, double * chisq,
                      int verbose);
 
-  int legacy_fftconv (int nbin, const float *_prof, const float *_std, 
-                      double * _shift, double *_eshift,
-                      float *_snrfft, float *_esnrfft);
-
   extern int max_harmonic;
+
 }
 
 #endif

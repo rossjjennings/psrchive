@@ -24,12 +24,6 @@ using namespace std;
 float Pulsar::Profile::default_duty_cycle
 = Pulsar::config.get<float>("baseline_duty_cycle", 0.15);
 
-/*!
-  Default to use new toa fit algorithm in shift
-  */
-bool Pulsar::Profile::legacy
-= Pulsar::config.get<bool>("legacy_fftconv", false);
-
 /*!  
   When true, Profile methods will output debugging information on cerr
 */

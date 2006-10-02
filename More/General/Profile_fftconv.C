@@ -16,17 +16,12 @@ void Pulsar::Profile::fftconv (const Profile& std,
   double dshift, sigma_dshift;
   double chisq;
   
-  int ret=0;
-
-  if (!Profile::legacy)
-    ret = model_profile (nbin, 1, &amps, &(std.amps), &scale, &sigma_scale, 
+  int ret = model_profile (nbin, 1, &amps, &(std.amps), &scale, &sigma_scale, 
 			   &dshift, &sigma_dshift, &chisq, verbose);
-  else
-    ret = legacy_fftconv (nbin, &amps[0], &(std.amps[0]),
-			  &dshift, &sigma_dshift, &snrfft, &esnrfft);
   
   if (ret != 0)
     throw Error (FailedCall, "Profile::fftconv", "model_profile failed");
+
   if (verbose) cerr << "Profile::fftconv"
 		 " shift=" << dshift << " bins,"
 		 " error=" << sigma_dshift <<
@@ -39,9 +34,8 @@ void Pulsar::Profile::fftconv (const Profile& std,
   shift = dshift;
 
   eshift = sigma_dshift;
-  if (!Pulsar::Profile::legacy) {
-    snrfft = 2 * sqrt( float(nbin) ) * scale / rms;
-    
-    esnrfft = snrfft * eshift / scale;
-  }
+  snrfft = 2 * sqrt( float(nbin) ) * scale / rms;
+  esnrfft = snrfft * eshift / scale;
+
 }
+

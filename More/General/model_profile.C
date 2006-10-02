@@ -22,36 +22,9 @@ using namespace std;
 #define SQR(x) ((x)*(x))
 
 #define F77_fccf F77_FUNC(fccf,FCCF)
-#define F77_fftconv F77_FUNC(fftconv,FFTCONV)
 
 extern "C" {
   void F77_fccf (float *, float *, float *);
-  void F77_fftconv (int *,float *, float *, float *, 
-		    float *, float *, float *);
-}
-
-int Pulsar::legacy_fftconv(int npts, const float * prf, const float * std, 
-                           double * shift, double *eshift, 
-                           float * snrfft, float * esnrfft) 
-{
-  // This introduced to investigate the behaviour of the
-  // pat-model_profile toa routines By invocation of the legacy
-  // fftconv routine - sorry for the kludge WvS - this can come out
-  // when testing is complete -- steveo
-
-  float real_shift = 0, real_err = 0 ; // Required for fftconv ..darned real4..
-  int number = npts;
-
-  F77_fftconv (&number,const_cast<float*>(prf),
-                       const_cast<float*>(std),
-               &real_shift,&real_err,snrfft,esnrfft);
-
-  if (real_shift != 0) {
-   *shift = (double) real_shift;
-   *eshift = (double) real_err;
-   return (0);
-  }
-  return -1;
 }
 
 int Pulsar::max_harmonic = 0;
