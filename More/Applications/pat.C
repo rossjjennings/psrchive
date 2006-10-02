@@ -8,6 +8,7 @@
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
 #include "Pulsar/Profile.h"
+#include "Pulsar/denoise.h"
 
 #include "Pulsar/PolnProfile.h"
 #include "Pulsar/PolnProfileFit.h"
@@ -22,7 +23,6 @@
 #include "toa.h"
 #include "Error.h"
 #include "dirutil.h"
-#include "genutil.h"
 
 #include <fstream>
 #include <iostream>
@@ -186,7 +186,7 @@ int main (int argc, char *argv[]) try {
       return 0;
 
     case 'i':
-      cout << "$Id: pat.C,v 1.67 2006/09/30 04:23:24 straten Exp $" << endl;
+      cout << "$Id: pat.C,v 1.68 2006/10/02 19:35:50 straten Exp $" << endl;
       return 0;
 
     case 'n':
@@ -266,7 +266,7 @@ int main (int argc, char *argv[]) try {
     stdarch->tscrunch();
     
     if (denoise)
-      stdarch->denoise();
+      Pulsar::denoise(stdarch);
     
     if (full_poln) {
       
@@ -322,7 +322,7 @@ int main (int argc, char *argv[]) try {
 
         backup.copy( fit.get_transformation() );
 
-        string aux = basename( arch->get_filename() );
+        string aux = basename( arch->get_filename().c_str() );
         float chisq = fit.get_fit_chisq() / fit.get_fit_nfree();
 
         if (verbose)
@@ -367,7 +367,7 @@ int main (int argc, char *argv[]) try {
 	  stdarch->tscrunch();
 	
           if (denoise)
-            stdarch->denoise();
+            Pulsar::denoise(stdarch);
 	
   
 	  if (full_poln) {
