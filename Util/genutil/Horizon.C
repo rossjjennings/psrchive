@@ -60,6 +60,13 @@ MJD Horizon::get_epoch () const
   return epoch;
 }
 
+//! Get the LST in radians
+double Horizon::get_local_sidereal_time () const
+{
+  build ();
+  return lst;
+}
+
 //! Get the hour_angle in radians
 double Horizon::get_hour_angle () const
 {
