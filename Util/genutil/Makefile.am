@@ -65,7 +65,6 @@ libgenutil_la_SOURCES = \
         RealTimer.C \
         RegularExpression.C \
         sky_coord.C \
-        sla_coord.c \
         sla_MJD.C \
         sla_sky_coord.C \
         sla_wrap.c \
