@@ -4,14 +4,16 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-#include <math.h>
-
 #include "Pulsar/Profile.h"
-#include "Pulsar/Calculator.h"
-#include "Error.h"
-#include "Estimate.h"
 
 #include "MEAL/GaussJordan.h"
+#include "Error.h"
+#include "Estimate.h"
+#include "templates.h"
+
+#include <math.h>
+
+using namespace std;
 
 Estimate<double>
 Pulsar::ParIntShift (const Profile& std, const Profile& obs)
@@ -186,7 +188,7 @@ Pulsar::ParIntShift (const Profile& std, const Profile& obs)
   }
 
   // We divide by 6.0 in an unjustified manner...
-  float errfit = Pulsar::SampleStdDev(diff) / D;
+  float errfit = sqrt(variance(diff)) / D;
   errfit /= 6.0;
 
   // The real error is assumed to be the combination of two effects:
