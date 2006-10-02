@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/fft/median_smooth.h,v $
-   $Revision: 1.3 $
-   $Date: 2006/03/17 13:35:16 $
+   $Revision: 1.4 $
+   $Date: 2006/10/02 20:18:22 $
    $Author: straten $*/
 
 #ifndef __fft_smooth_h
@@ -19,8 +19,6 @@
 #include <iostream>
 
 namespace fft {
-
-  extern bool verbose;
 
   template <class T> 
   void median_smooth (std::vector<T>& data, unsigned ndim, unsigned wsize) {
@@ -61,10 +59,6 @@ namespace fft {
     std::vector<T> result (data.size());
 
     unsigned truncated = 0;
-
-    if (verbose)
-      std::cerr << "fft::median_filter window=" << wsize 
-		<< "/" << data.size() << std::endl;
 
     // deal with leading edge
     for (ipt=0; ipt < middle; ipt++) {
