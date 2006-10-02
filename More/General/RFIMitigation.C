@@ -4,8 +4,13 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-using namespace std;
+
 #include "Pulsar/RFIMitigation.h"
+#include "Pulsar/Archive.h"
+#include "Pulsar/Integration.h"
+#include "Pulsar/Profile.h"
+
+using namespace std;
 
 // Destructor
 Pulsar::RFIMitigation::~RFIMitigation () {
