@@ -11,7 +11,9 @@ pas_LDADD = $(LDADD) @PGPLOT_LIBS@
 
 pascii_SOURCES = pascii.C
 pat_SOURCES = pat.C
-paz_SOURCES = paz.C
+
+paz_SOURCES = paz.C zap_periodic_spikes.C
+
 pdmp_SOURCES = pdmp.C
 psradd_SOURCES = psradd.C
 psrdiff_SOURCES = psrdiff.C

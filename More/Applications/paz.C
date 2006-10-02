@@ -12,15 +12,15 @@
 #include "Pulsar/ChannelZapMedian.h"
 #include "Pulsar/StandardSNR.h"
 #include "Pulsar/Integration.h"
+#include "Pulsar/Profile.h"
+#include "Pulsar/ProcHistory.h"
 
 #include "Error.h"
 #include "dirutil.h"
 
 #include <unistd.h>
 
-// Extensions this program understands
-
-#include "Pulsar/ProcHistory.h"
+using namespace std;
 
 void usage ()
 {
@@ -69,6 +69,8 @@ void usage ()
     "See "PSRCHIVE_HTTP"/manuals/paz for more details\n"
        << endl;
 }
+
+void zap_periodic_spikes(Pulsar::Profile* profile, int period, int phase);
 
 int main (int argc, char *argv[]) {
   
@@ -137,7 +139,7 @@ int main (int argc, char *argv[]) {
       Pulsar::Archive::set_verbosity(3);
       break;
     case 'i':
-      cout << "$Id: paz.C,v 1.35 2006/06/16 02:04:07 redwards Exp $" << endl;
+      cout << "$Id: paz.C,v 1.36 2006/10/02 20:18:11 straten Exp $" << endl;
       return 0;
 
     case 'm':
@@ -441,8 +443,7 @@ int main (int argc, char *argv[]) {
       for (unsigned pol = 0;pol < arch->get_npol();pol++) 
   for (unsigned chan=0;chan < arch->get_nchan();chan++) 
     for (unsigned subint = 0;subint < arch->get_nsubint();subint++) 
-      arch->get_Profile(subint,pol,chan)->zap_periodic_spikes
-        (periodic_zap_period, periodic_zap_phase);
+      zap_periodic_spikes(arch->get_Profile(subint,pol,chan),periodic_zap_period, periodic_zap_phase);
     }
    
     if (eightBinZap) {  // To fix early wide-band correlator problem
