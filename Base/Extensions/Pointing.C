@@ -8,9 +8,9 @@
 
 #include "Pulsar/Archive.h"
 #include "Pulsar/Telescope.h"
+#include "Horizon.h"
 
 #include "string_utils.h"
-#include "coord.h"
 
 using namespace std;
 
@@ -219,32 +219,21 @@ void Pulsar::Pointing::update (const Integration* subint)
           << endl;
 
 
-  double latitude = telescope->get_latitude().getDegrees();
-  double longitude = telescope->get_longitude().getDegrees();
-  double lst = subint->get_epoch().LST(longitude);
-    
-  // correct the Pointing azimuth, zenith, and parallactic angles
-  float azimuth=0, zenith=0, parallactic=0;
-  if (az_zen_para (get_right_ascension().getRadians(),
-		   get_declination().getRadians(), lst, latitude,
-		   &azimuth, &zenith, &parallactic) < 0)
-    throw (FailedCall, "Pulsar::Pointing::update", "az_zen_para");
+  Horizon horizon;
 
-  set_local_sidereal_time (lst * 3600.0);
-  Angle angle;
+  sky_coord coord( get_right_ascension(), get_declination() );
+  horizon.set_source_coordinates( coord );
+  horizon.set_observatory_latitude( telescope->get_latitude().getRadians() );
+  horizon.set_observatory_longitude( telescope->get_longitude().getRadians() );
+  horizon.set_epoch( subint->get_epoch() );
 
-  angle.setDegrees( parallactic );
-  set_parallactic_angle( angle );
+  double rad2sec = 3600.0*12.0/M_PI;
+  set_local_sidereal_time( horizon.get_local_sidereal_time()*rad2sec );
+  set_telescope_azimuth( horizon.get_azimuth() );
+  set_telescope_zenith( horizon.get_zenith() );
+  set_parallactic_angle( horizon.get_parallactic_angle() );
 
-  angle += get_feed_angle();
-  set_position_angle (angle);
-
-  angle.setDegrees( azimuth );
-  set_telescope_azimuth( angle );
-
-  angle.setDegrees( zenith );
-  set_telescope_zenith( angle );
-
+  set_position_angle( get_feed_angle() + get_parallactic_angle() );
 
   if (Integration::verbose)
     cerr << "Pulsar::Pointing::update after:\n"  

@@ -7,11 +7,11 @@
 #include "Pulsar/TimerArchive.h"
 #include "Pulsar/TimerIntegration.h"
 #include "Pulsar/Telescope.h"
+#include "Horizon.h"
 
 #include "Error.h"
 
 #include "timer++.h"
-#include "coord.h"
 #include "string_utils.h"
 
 #include <unistd.h>
@@ -594,24 +594,20 @@ void Pulsar::TimerArchive::correct_Integrations () try {
 
     if (telescope) {
 
+      Horizon horizon;
+
+      horizon.set_epoch( subint->get_epoch() );
+      horizon.set_source_coordinates(get_coordinates());
+      horizon.set_observatory_latitude(telescope->get_latitude().getRadians());
+      horizon.set_observatory_longitude(telescope->get_longitude().getRadians());
+
       // correct the mini header LST
-      subint->mini.lst_start = 
-        subint->get_epoch().LST (telescope->get_longitude().getDegrees());
+      subint->mini.lst_start = horizon.get_local_sidereal_time() * 12.0/M_PI;
 
-      // correct the mini header azimuth, zenith, and parallactic angles
-      float azimuth=0, zenith=0, parallactic=0;
-      if (az_zen_para (get_coordinates().ra().getRadians(),
-		       get_coordinates().dec().getRadians(),
-		       subint->mini.lst_start,
-		       telescope->get_latitude().getDegrees(),
-		       &azimuth, &zenith, &parallactic) < 0)
-    
-        throw Error (FailedCall, "Pulsar::TimerArchive::correct_Integrations",
-		     "az_zen_para failed");
-
-      subint->mini.tel_az = azimuth;
-      subint->mini.tel_zen = zenith;
-      subint->mini.para_angle = parallactic;
+      double rad2deg = 180.0/M_PI;
+      subint->mini.tel_az = horizon.get_azimuth() * rad2deg;
+      subint->mini.tel_zen = horizon.get_zenith() * rad2deg;
+      subint->mini.para_angle = horizon.get_parallactic_angle() * rad2deg;
 
     }
 
