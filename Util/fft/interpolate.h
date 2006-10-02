@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/fft/interpolate.h,v $
-   $Revision: 1.12 $
-   $Date: 2006/09/29 22:14:54 $
+   $Revision: 1.13 $
+   $Date: 2006/10/02 19:36:22 $
    $Author: straten $*/
 
 #ifndef __fft_interpolate_h
@@ -21,8 +21,6 @@
 #include <vector>
 
 namespace fft {
-
-  extern bool verbose;
 
   template <class T>
   void interpolate (std::vector<T>& out, const std::vector<T>& in) {
@@ -38,10 +36,6 @@ namespace fft {
     DatumTraits<T> datum_traits;
 
     unsigned ndim = datum_traits.ndim();
-    
-    if (verbose)
-      std::cerr << "fft::interpolate " << ndim << " dimensions from "
-	        << in.size() << " to " << out.size() << std::endl;
     
     unsigned ipt;
 
