@@ -27,13 +27,13 @@ void scrunch (std::vector<T>& vals, unsigned factor, bool mean = true)
 
 // returns the mean "bin" of a histogram
 template <class T>
-double histomean (const std::vector<T>& vals)
+T histomean (const std::vector<T>& vals)
 {
-  double valcount = 0.0;
-  double totcount = 0.0;
+  T valcount = 0.0;
+  T totcount = 0.0;
 
-  double total = (double) vals.size();
-  double bin = 0.0;
+  T total = vals.size();
+  T bin = 0.0;
 
   typename std::vector<T>::const_iterator val;
 
@@ -46,21 +46,45 @@ double histomean (const std::vector<T>& vals)
   return valcount/totcount;
 }
 
+template <class T>
+T sqr (const T& x)
+{
+  return x * x;
+}
+
 // return the sum of all elements in a vector
 template <class T>
-double sum (const std::vector<T>& x)
+T sum (const std::vector<T>& x)
 {
-  double the_sum = 0.0;
+  T the_sum = 0.0;
   for (unsigned i=0; i<x.size(); i++)
     the_sum += x[i];
   return the_sum;
+}
+
+template <class T>
+T mean (const std::vector<T>& x)
+{
+  return sum(x)/x.size();
+}
+
+template <class T>
+T variance (const std::vector<T>& x)
+{
+  T the_mean = mean(x);
+  T var = 0.0;
+  
+  for (unsigned i = 0; i < x.size(); i++)
+    var += sqr(x[i] - the_mean);
+  
+  return var / T(x.size() - 1);
 }
 
 // normalize each element of a vector by the sum of all elements in it
 template <class T>
 void normalize (std::vector<T>& x)
 {
-  double the_sum = sum (x);
+  T the_sum = sum (x);
   assert( the_sum != 0 );
   for (unsigned i=0; i<x.size(); i++)
     x[i] /= the_sum;
