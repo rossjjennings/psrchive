@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Profile.h,v $
-   $Revision: 1.97 $
-   $Date: 2006/10/02 19:35:44 $
+   $Revision: 1.98 $
+   $Date: 2006/10/02 20:18:05 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Profile_h
@@ -56,14 +56,6 @@ namespace Pulsar {
 
     //! fraction of total power used to find peak
     static float peak_edge_threshold;
-
-    //! Default fraction of maximum amplitude a 'spike' is defined to have ended at
-    static float default_amplitude_dropoff;
-
-    static unsigned ZPSF;
-
-    //! Fundamental period of spike sequence in profile, zap in SincInterpShift
-    static unsigned SIS_zap_period;
 
     //! When true, no memory is allocated for amps
     static bool no_amps;
@@ -145,8 +137,6 @@ namespace Pulsar {
     double sumsq (int bin_start=0, int bin_end=0) const;
     //! Returns the sum of the absolute value
     double sumfabs (int bin_start=0, int bin_end=0) const;
-    //! Returns a string with an ASCII representation of the amplitudes
-    std::string get_ascii (int bin_start=0, int bin_end=0) const;
 
     //! Calculates the mean, variance, and variance of the mean
     void stats (double* mean, double* variance = 0, double* varmean = 0,
@@ -171,17 +161,6 @@ namespace Pulsar {
     //! Find the bin numbers at which the cumulative power crosses thresholds
     void find_peak_edges (int& rise, int& fall, bool choose = true) const;
     
-    //! Find the bin numbers at which the flux falls below a threshold
-    void find_spike_edges(int& rise, int& fall, 
-			  float pc = default_amplitude_dropoff,
-			  int spike_bin = -1) const;
-
-    //! Interpolate over peaks of 1-bin wide modulation feature
-    void zap_periodic_spikes(int period, int phase);
-    
-    //! Replace profile with its power spectrum
-    void get_power_spectrum(float gamma=1.0);
-
     //! Returns the bin number with the maximum amplitude
     int find_max_bin (int bin_start=0, int bin_end=0) const;
     //! Returns the bin number with the minimum amplitude
@@ -192,20 +171,6 @@ namespace Pulsar {
 
     //! Returns the signal to noise ratio of the profile
     float snr () const;
-
-    //! Returns snr based upon baseline rms and width convolved with a boxcar
-    float snr_fortran(float rms);
-    //! Returns integrated flux divided by the number of bins == mean flux
-    float flux(float _baseline_fraction = Profile::default_duty_cycle,
-	       float min_phase = -1.0);
-    /*! Returns flux as above - but uses peak edges to find the profile 
-      region (and an abs value sum) ONLY HI SNR profiles applicable */
-    float flux_hi_snr(float _baseline_fraction = Profile::default_duty_cycle);
-    /*! Returns the width of the pulse profile, at the percentage
-      of the peak given by pc, where the baseline is calculated
-      using a duty cycle dc */
-    float width(float& error, float pc,
-		float dc = Profile::default_duty_cycle) const;
     
     //! Rotates the profile to remove dispersion delay
     void dedisperse (double dm, double ref_freq, double pfold);
@@ -282,10 +247,6 @@ namespace Pulsar {
     //! halves the number of bins like bscrunch(2^nhalve)
     void halvebins (unsigned nhalve);
     
-    //! returns a smoothed profile by whacking spectral components - takes fraction of spectrum to keep (8 == 1/8th)
-    Pulsar::Profile * denoise(int fraction=8);
-    void denoise_inplace(int fraction=8);
-
     //! interface to model_profile used by Profile::shift
     void fftconv (const Profile& std, double& shift, float& eshift,
                   float& snrfft, float& esnrfft) const;

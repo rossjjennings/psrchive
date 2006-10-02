@@ -30,18 +30,6 @@ float Pulsar::Profile::default_duty_cycle
 bool Pulsar::Profile::verbose
 = Pulsar::config.get<bool>("Profile::verbose", false);
 
-/*!
-  Default fraction of maximum amplitude a 'spike' is defined to have ended at
-*/
-float Pulsar::Profile::default_amplitude_dropoff
-= Pulsar::config.get<float>("default_amplitude_dropoff", 0.2);
-
-/*!
-  Interpolate by this factor when using ZeroPadShift
-*/
-unsigned Pulsar::Profile::ZPSF
-= Pulsar::config.get<unsigned>("zero_pad_interpolate", 64);
-
 /*! 
   Do not allocate memory for the amps
 */
