@@ -98,10 +98,10 @@ double Horizon::get_zenith () const
 void Horizon::do_build ()
 {
   // MJD::LST receives longitude in degrees and returns LST in hours
-  double lst = epoch.LST (longitude * 180/M_PI);
+  lst = epoch.LST (longitude * 180/M_PI) * M_PI/12.0;
 
   // compute hour angle in radians
-  hour_angle = lst * M_PI/12.0 - right_ascension;
+  hour_angle = lst - right_ascension;
 
   double ignore;
   slaAltaz (hour_angle, declination, latitude, 

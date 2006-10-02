@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Horizon.h,v $
-   $Revision: 1.3 $
-   $Date: 2006/03/17 13:35:05 $
+   $Revision: 1.4 $
+   $Date: 2006/10/02 13:39:26 $
    $Author: straten $ */
 
 #ifndef __Horizon_H
@@ -40,6 +40,9 @@ public:
   //! Set the epoch in Modified Julian Days
   void set_epoch (const MJD& epoch);
   MJD get_epoch () const;
+
+  //! Get the LST in radians
+  double get_local_sidereal_time () const;
 
   //! Get the hour_angle in radians
   double get_hour_angle () const;
@@ -84,6 +87,9 @@ protected:
 
   //! Recomputes the following values
   void do_build ();
+
+  //! The LST in radians
+  double lst;
 
   //! The hour angle in radians
   double hour_angle;
