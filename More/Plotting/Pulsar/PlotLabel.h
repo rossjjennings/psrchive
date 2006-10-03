@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PlotLabel.h,v $
-   $Revision: 1.7 $
-   $Date: 2006/03/17 13:34:49 $
+   $Revision: 1.8 $
+   $Date: 2006/10/03 19:08:10 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PlotLabel_h
@@ -17,6 +17,9 @@
 #include "TextInterface.h"
 
 namespace Pulsar {
+
+  class Archive;
+  class ArchiveTI;
 
   //! Stores three labels: left, centre, and right
   class PlotLabel : public Reference::Able {
@@ -28,6 +31,9 @@ namespace Pulsar {
 
     //! Default constructor
     PlotLabel ();
+
+    //! Destructor
+    virtual ~PlotLabel ();
 
     //! Text interface to the PlotLabel class
     class Interface : public TextInterface::To<PlotLabel> {
@@ -50,15 +56,40 @@ namespace Pulsar {
     //! Get the label to be drawn to the right of the frame
     std::string get_right () const { return right; }
 
+    //! Set the offset between label and frame (multiple of character height)
+    void set_offset (float _offset) { offset = _offset; }
+    float get_offset () const { return offset; }
+
+    //! Set the spacing between label rows (multiple of character height)
+    void set_spacing (float _spacing) { spacing = _spacing; }
+    float get_spacing () const { return spacing; }
+
     //! Set all labels to the specified value
     void set_all (const std::string& label) { left = right = centre = label; }
+
+    //! Plot the label
+    virtual void plot (const Archive*);
 
   protected:
 
     std::string left;
     std::string right;
     std::string centre;
+    float offset;
+    float spacing;
 
+    //! Plot the label; side=0/.5/1 for left/centre/right
+    void plot (const Archive*, const std::string& label, float side);
+
+    //! Plot a single row of the label
+    void row (const std::string&, unsigned irow, unsigned nrow, float side);
+
+    //! Get the text interface to the archive class
+    ArchiveTI* get_interface (const Archive*);
+
+  private:
+
+    Reference::To<ArchiveTI> archive_interface;
   };
 
 }
