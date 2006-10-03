@@ -6,10 +6,12 @@
  ***************************************************************************/
 #include "toaPlot.h"
 #include "Error.h"
-#include "minmax.h"
+#include "templates.h"
 
 #include <cpgplot.h>
 #include <cmath>
+
+using namespace std;
 
 wrapper::wrapper () {  
   x = 0.0;
@@ -556,16 +558,16 @@ void toaPlot::autoscale ()
 {
   if (data.empty()) return;
   
-  float* xpts = new float[data.size()];
-  float* ypts = new float[data.size()];
+  vector<float> xpts (data.size());
+  vector<float> ypts (data.size());
   
   for (unsigned i = 0; i < data.size(); i++) {
     xpts[i] = float(data[i].x);
     ypts[i] = float(data[i].y);
   }
   
-  findminmax(xpts, xpts+data.size(), xmin, xmax);
-  findminmax(ypts, ypts+data.size(), ymin, ymax);
+  minmaxval(xpts, xmin, xmax);
+  minmaxval(ypts, ymin, ymax);
   
   float xdiff = xmax - xmin;
   float ydiff = ymax - ymin;
@@ -578,9 +580,6 @@ void toaPlot::autoscale ()
   
   ymax += fabs(ydiff * 0.2);
   
-  delete[] xpts;
-  delete[] ypts;
-
   clearScreen();
   drawPlot();
 }

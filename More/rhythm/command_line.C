@@ -4,14 +4,16 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+#include "rhythm.h"
+#include "qt_editParams.h"
+
 #include <qstylefactory.h>
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 
-#include "qt_editParams.h"
-#include "rhythm.h"
+using namespace std;
 
 static char* cl_args = "ahp:s:t:vV";
 

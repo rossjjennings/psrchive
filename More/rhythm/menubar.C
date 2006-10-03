@@ -4,7 +4,10 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-#include <iostream>
+#include "rhythm.h"
+#include "qt_fileParams.h"
+#include "qt_editParams.h"
+#include "tempo++.h"
 
 #include <qapplication.h>
 #include <qpopupmenu.h> 
@@ -12,10 +15,11 @@
 #include <qmessagebox.h>
 #include <qfiledialog.h>
 
-#include "qt_fileParams.h"
-#include "qt_editParams.h"
-#include "rhythm.h"
-#include "tempo++.h"
+#include <cpgplot.h>
+
+#include <iostream>
+
+using namespace std;
 
 void Rhythm::menubarConstruct ()
 {

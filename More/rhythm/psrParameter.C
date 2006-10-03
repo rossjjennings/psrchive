@@ -8,6 +8,8 @@
 #include "string_utils.h"
 #include "ephio.h"
 
+using namespace std;
+
 // //////////////////////////////////////////////////////////////////////////
 // qt_psrParameter static variables
 

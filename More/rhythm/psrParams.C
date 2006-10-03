@@ -4,16 +4,18 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+#include "psrParams.h"
+#include "psrParameter.h"
+#include "psrephem.h"
+#include "ephio.h"
+#include "string_utils.h"
+
 #include <fstream>
 
 #include <sys/types.h>
 #include <sys/stat.h>
 
-#include "psrParameter.h"
-#include "psrParams.h"
-#include "psrephem.h"
-#include "ephio.h"
-#include "string_utils.h"
+using namespace std;
 
 // //////////////////////////////////////////////////////////////////////////
 //

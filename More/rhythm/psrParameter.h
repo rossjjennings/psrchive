@@ -73,14 +73,14 @@ class psrParameter
   void setFit (bool fit) { infit = fit && fitable(); };
 
   // return the value
-  string getString ();
+  std::string getString ();
   double getDouble ();
   MJD    getMJD    ();
   Angle  getAngle  ();
   int    getInteger();
 
   // set value
-  void setString (const string&);
+  void setString (const std::string&);
   void setDouble (double );
   void setMJD    (const MJD&);
   void setAngle  (const Angle&);
@@ -111,15 +111,15 @@ class psrParameter
 class psrString : public psrParameter
 {
  public:
-  psrString (int ephind, const string& val, bool in_fit=false) :
+  psrString (int ephind, const std::string& val, bool in_fit=false) :
     psrParameter (ephind, false, in_fit),
     value (val)  { };
 
-  string getString () { return value; };
-  void   setString (const string& str) { value = str; };
+  std::string getString () { return value; };
+  void   setString (const std::string& str) { value = str; };
 
  protected:
-  string value;
+  std::string value;
 };
 
 // //////////////////////////////////////////////////////////////////////////
