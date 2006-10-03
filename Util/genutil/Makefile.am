@@ -18,7 +18,6 @@ include_HEADERS = \
         ierf.h \
         JenetAnderson98A5.h \
         JenetAnderson98.h \
-        JenetAnderson98Plot.h \
         machine_endian.h \
         MJD.h \
         orbital.h \
@@ -27,7 +26,6 @@ include_HEADERS = \
         RealTimer.h \
         RegularExpression.h \
         sky_coord.h \
-        slalib.h \
         string_utils.h \
         Telescope.h \
         templates.h \
@@ -58,7 +56,6 @@ libgenutil_la_SOURCES = \
         ierf.c \
         JenetAnderson98A5.C \
         JenetAnderson98.C \
-        JenetAnderson98Plot.C \
         MJD.C \
         Physical.C \
         Plugin.C \
@@ -67,13 +64,13 @@ libgenutil_la_SOURCES = \
         sky_coord.C \
         sla_MJD.C \
         sla_sky_coord.C \
-        sla_wrap.c \
 	smooth.f \
         stringload.C \
         stringprintf.C \
         stringtok.C \
         string_utils.C \
         Telescope.C \
+	time_string.C \
         Types.C \
         utc.c
 
