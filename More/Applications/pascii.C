@@ -7,6 +7,7 @@
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
 #include "Pulsar/Profile.h"
+#include "Pulsar/PolnProfile.h"
 
 #include <stdlib.h>
 #include <unistd.h>
@@ -200,11 +201,12 @@ int main (int argc, char** argv){ try {
       if (cchan > 0)
 	ichan = cchan;
       
-      vector<double> pas(nbin);
+      vector< Estimate<double> > PAs;
       if( show_pa ){
-	vector<double> phases;
-	vector<double> errors;
-	integration->get_PA (phases,pas,errors,-999.9);
+	vector< Estimate<double> > PAs;
+	Reference::To<Pulsar::PolnProfile> profile;
+	profile = integration->new_PolnProfile(ichan);
+        profile->get_orientation (PAs, 3.0);
       }
       for (unsigned ibin=0; ibin < nbin; ibin++) {
 
@@ -228,7 +230,7 @@ int main (int argc, char** argv){ try {
 	  if( show_pol_frac )  cout << " " << frac_pol;
 	  if( show_lin_frac )  cout << " " << frac_lin;
 	  if( show_circ_frac ) cout << " " << frac_circ;
-	  if( show_pa )        cout << " " << pas[ibin];
+	  if( show_pa )        cout << " " << PAs[ibin].get_value();
 	}
 	cout << endl;
 
