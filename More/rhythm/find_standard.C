@@ -4,13 +4,13 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-#include "Pulsar/Utilities.h"
+#include "find_standard.h"
 
 //
 // Function to select a standard profile from a loaded list
 //
 Pulsar::Profile* Pulsar::find_standard (const Pulsar::Archive* data, 
-					const vector<Pulsar::Profile*> cans) {
+					const vector<Profile*>& cans) {
   int selected = -1;
   float diff = 1e6;
 
@@ -35,8 +35,8 @@ Pulsar::Profile* Pulsar::find_standard (const Pulsar::Archive* data,
 //
 // Function to select a standard profile from a set of filenames
 //
-Pulsar::Profile* Pulsar::find_standard (const Pulsar::Archive* data, 
-					string path) {
+Pulsar::Profile* Pulsar::find_standard (const Archive* data, 
+					const string& path) {
   
   // Store the current working directory
   char* directory = new char[1024];
@@ -58,10 +58,10 @@ Pulsar::Profile* Pulsar::find_standard (const Pulsar::Archive* data,
     }
   }
   
-  Reference::To <Pulsar::Archive> candidate = 0;
+  Reference::To <Archive> candidate = 0;
   
   for (unsigned i = 0; i < the_stds.size(); i++) {
-    candidate = Pulsar::Archive::load("./" + the_stds[i]);
+    candidate = Archive::load("./" + the_stds[i]);
     candidate -> centre();
     if ((data -> get_source()) != (candidate -> get_source())) {
       candidate = 0;
