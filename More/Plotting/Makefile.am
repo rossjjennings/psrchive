@@ -22,7 +22,8 @@ nobase_include_HEADERS = iopair.h					\
 	Pulsar/StokesCylindrical.h Pulsar/StokesSpherical.h		\
 	Pulsar/FluctPlot.h Pulsar/StokesFluctPlot.h			\
 	Pulsar/Poincare.h Pulsar/ProfileVectorPlotter.h			\
-	Pulsar/TwoBitPlot.h Pulsar/CalibratorSpectrum.h
+	Pulsar/TwoBitPlot.h Pulsar/CalibratorSpectrum.h \
+	Pulsar/InfoLabel.h
 
 libPlotting_la_SOURCES = Plot.C PlotFactory.C \
 	PlotIndex.C \
@@ -30,7 +31,7 @@ libPlotting_la_SOURCES = Plot.C PlotFactory.C \
 	PhaseScale.C PhaseScaleTI.C \
 	FrequencyScale.C \
 	PlotAxis.C PlotAxisTI.C \
-	PlotLabel.C PlotLabelTI.C \
+	PlotLabel.C PlotLabelTI.C InfoLabel.C \
 	PlotAttributes.C PlotAttributesTI.C \
 	PlotFrame.C PlotFrameTI.C \
 	PlotFrameSize.C PlotFrameSizeTI.C \
