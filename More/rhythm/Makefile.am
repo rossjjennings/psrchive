@@ -4,7 +4,7 @@ bin_PROGRAMS = rhythm
 rhythm_SOURCES = rhythm.C menubar.C toolbar.C command_line.C \
 	Options.C toaPlot.C Options.h rhythm.h toaPlot.h pulsar.xpm \
 	psrParams.C psrParams.h psrParameter.C psrParameter.h \
-	qt_psrParameter.C qt_psrephem.C \
+	find_standard.C qt_psrParameter.C qt_psrephem.C \
 	qt_editParams.C qt_toglParams.C qt_fileParams.C 
 
 nodist_rhythm_SOURCES = moc_rhythm.C moc_Options.C moc_toaPlot.C \
@@ -18,9 +18,9 @@ nodist_rhythm_SOURCES = moc_rhythm.C moc_Options.C moc_toaPlot.C \
 
 INCLUDES = -I$(top_builddir)/include @QTDRIV_CFLAGS@
 
-LDADD = ../libpsrchive.la $(top_builddir)/astro/libpsrastro.la \
-	$(top_builddir)/utils/libpsrutils.la @QTDRIV_LIBS@
+LDADD = $(top_builddir)/More/libpsrmore.la \
+        $(top_builddir)/Core/libpsrcore.la \
+        $(top_builddir)/utils/libpsrutils.la @QTDRIV_LIBS@
 
 include $(top_srcdir)/config/Makefile.Qt
-include $(top_srcdir)/config/Makefile.include
 
