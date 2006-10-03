@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/rhythm/rhythm.h,v $
-   $Revision: 1.51 $
-   $Date: 2006/03/17 13:34:53 $
+   $Revision: 1.52 $
+   $Date: 2006/10/03 07:09:40 $
    $Author: straten $ */
 
 // //////////////////////////////////////////////////////////////////////////
@@ -53,13 +53,10 @@
 
 #include "Options.h"
 
-#include "Pulsar/Plotter.h"
 #include "Pulsar/Archive.h"
 #include "Pulsar/Profile.h"
-#include "Pulsar/Calculator.h"
 
 #include "Pulsar/StandardSNR.h"
-#include "Pulsar/Utilities.h"
 
 class qt_editParams;
 
@@ -159,7 +156,7 @@ class Rhythm : public QMainWindow
   QListView* lister;
 
   // The file from which they were read
-  string toa_filename;
+  std::string toa_filename;
   
   void load_toas (const char* fname);
   void add_toas  (std::vector<Tempo::toa>);
@@ -200,7 +197,7 @@ class Rhythm : public QMainWindow
   QPushButton* colour;
   QPushButton* dotify;
 
-  string dataPath;
+  std::string dataPath;
 
   int mode;
   

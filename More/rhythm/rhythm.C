@@ -4,6 +4,11 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
+#include "rhythm.h"
+#include "tempo++.h"
+#include "qt_editParams.h"
+
 #include <iostream>
 #include <stdlib.h>
 
@@ -18,10 +23,7 @@
 
 // #define _DEBUG 1
 
-#include "qt_editParams.h"
-
-#include "rhythm.h"
-#include "tempo++.h"
+#include <cpgplot.h>
 
 #ifdef _DEBUG
 bool Rhythm::verbose = true;
@@ -31,6 +33,7 @@ bool Rhythm::verbose = false;
 bool Rhythm::vverbose = false;
 #endif
 
+using namespace std;
 
 // /////////////////////////////////////////////////////////////////////
 // Main procedure

@@ -60,7 +60,7 @@ class qt_editParams : public QWidget
   void print();
   void closeWin();
 
-  void save (string filename);
+  void save (std::string filename);
 
   // Edit Menu Callbacks
   void forward();          // go forward to newer parameter set
@@ -87,7 +87,7 @@ class qt_editParams : public QWidget
   psrephem data;
 
   // history of parameter sets as the user loads and modifies
-  vector<psrParams> data_history;
+  std::vector<psrParams> data_history;
   int current;
 
   void menubarConstruct();   // constructs the menubar
