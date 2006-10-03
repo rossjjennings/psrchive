@@ -25,7 +25,7 @@ Pulsar::PhaseVsPlot::PhaseVsPlot ()
   get_frame()->get_y_axis()->set_pgbox_opt ("BINTS");
   get_frame()->get_y_axis()->set_alternate (true);
 
-  get_frame()->set_label_offset (1.0);
+  get_frame()->get_label_above()->set_offset (1.0);
 
   // ensure that no labels are printed inside the frame
   get_frame()->get_label_below()->set_all (PlotLabel::unset);

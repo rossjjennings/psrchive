@@ -25,11 +25,4 @@ Pulsar::PlotFrame::Interface::Interface (PlotFrame* instance)
   import ( "above", PlotLabel::Interface(), &PlotFrame::get_label_above );
   import ( "below", PlotLabel::Interface(), &PlotFrame::get_label_below );
 
-  add( &PlotFrame::get_label_offset,
-       &PlotFrame::set_label_offset,
-       "laboff", "Character height between label and frame" );
-
-  add( &PlotFrame::get_label_spacing,
-       &PlotFrame::set_label_spacing,
-       "labsep", "Character height between label rows" );
 }
