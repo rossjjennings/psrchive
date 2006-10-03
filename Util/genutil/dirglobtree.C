@@ -4,12 +4,13 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+#include "dirutil.h"
+
 #include <dirent.h>
 #include <sys/types.h>
 #include <stdio.h>
 
-#include "dirutil.h"
-#include "genutil.h"
+using namespace std;
 
 void dirglobtree (vector<string>* filenames, 
 		  const string& root, const string& pattern)

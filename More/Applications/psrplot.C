@@ -19,6 +19,7 @@
 #include <unistd.h>
 
 using namespace Pulsar;
+using namespace std;
 
 // Available plots
 static PlotFactory factory;
