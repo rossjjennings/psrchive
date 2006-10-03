@@ -1,5 +1,5 @@
 
-bin_PROGRAMS = paas pam pas pat paz pdmp psradd psrdiff psrsh psrwt
+bin_PROGRAMS = paas pam pas pascii pat paz psradd psrdiff psrsh psrwt
 
 paas_SOURCES = paas.C
 paas_LDADD = $(LDADD) @PGPLOT_LIBS@
@@ -14,9 +14,11 @@ pat_SOURCES = pat.C
 
 paz_SOURCES = paz.C zap_periodic_spikes.C
 
-pdmp_SOURCES = pdmp.C
 psradd_SOURCES = psradd.C
+
 psrdiff_SOURCES = psrdiff.C
+psrdiff_LDADD = $(LDADD) @PGPLOT_LIBS@
+
 psrsh_SOURCES = psrsh.C
 psrwt_SOURCES = psrwt.C
 
