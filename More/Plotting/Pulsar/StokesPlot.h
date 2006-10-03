@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/StokesPlot.h,v $
-   $Revision: 1.6 $
-   $Date: 2006/03/17 13:34:50 $
+   $Revision: 1.7 $
+   $Date: 2006/10/03 21:10:03 $
    $Author: straten $ */
 
 #ifndef __Pulsar_StokesPlot_h
@@ -17,8 +17,6 @@
 #include "Pulsar/FluxPlot.h"
 
 namespace Pulsar {
-
-  class PolnProfile;
 
   //! Plots a single pulse profile
   class StokesPlot : public FluxPlot {
