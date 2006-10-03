@@ -68,6 +68,7 @@ libgenutil_la_SOURCES = \
         sla_MJD.C \
         sla_sky_coord.C \
         sla_wrap.c \
+	smooth.f \
         stringload.C \
         stringprintf.C \
         stringtok.C \
