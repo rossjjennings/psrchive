@@ -23,12 +23,16 @@ namespace Pulsar {
 
   /*! Fourier domain zero-pad interpolation */
   Estimate<double> ZeroPadShift (const Profile& std, const Profile& ephase);
+  extern unsigned ZPSF;
 
   /*! Fourier domain phase gradient fit */
   Estimate<double> PhaseGradShift (const Profile& std, const Profile& ephase); 
 
   /*! Phase shift by sinc interpolation of CCF */
   Estimate<double> SincInterpShift (const Profile& std, const Profile& ephase);
+
+  //! Fundamental period of spike sequence in profile, zap in SincInterpShift
+  extern unsigned SIS_zap_period;
 
 }
 
