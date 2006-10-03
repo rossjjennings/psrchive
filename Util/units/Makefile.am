@@ -131,3 +131,6 @@ INCLUDES = @PGPLOT_CFLAGS@
 
 LDADD = libunits.la
 
+
+include $(top_srcdir)/config/Makefile.include
+

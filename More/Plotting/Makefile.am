@@ -72,3 +72,5 @@ INCLUDES = -I$(top_builddir)/include \
 	-I$(top_srcdir)/More/Polarimetry \
 	@PGPLOT_CFLAGS@ @SLA_CFLAGS@
 
+include $(top_srcdir)/config/Makefile.include
+

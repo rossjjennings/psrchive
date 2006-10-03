@@ -14,3 +14,6 @@ INCLUDES = -I$(top_srcdir)/utils/units @CFITSIO_CFLAGS@
 
 libfitsutil_la_LIBADD = @CFITSIO_LIBS@
 
+
+include $(top_srcdir)/config/Makefile.include
+

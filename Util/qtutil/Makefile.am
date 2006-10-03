@@ -28,3 +28,6 @@ INCLUDES = -I$(top_srcdir)/utils/genutil -I$(top_srcdir)/utils/genutil++ \
 LDADD = libqtutil.la ../genutil++/libgenutilpp.la ../genutil/libgenutil.la \
 	../units/libunits.la @QT_LIBS@ 
 
+
+include $(top_srcdir)/config/Makefile.include
+

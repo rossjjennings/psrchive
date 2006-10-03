@@ -177,3 +177,5 @@ INCLUDES = -I$(top_builddir)/include \
 LDADD = libPolarimetry.la $(top_builddir)/More/MEAL/libMEAL.la \
 	$(top_builddir)/utils/libpsrutils.la
 
+include $(top_srcdir)/config/Makefile.include
+

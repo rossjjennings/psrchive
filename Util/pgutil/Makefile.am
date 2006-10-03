@@ -13,3 +13,6 @@ libpgutil_la_SOURCES = ColourMap.C quickimage.C Plot3D.C
 INCLUDES = -I$(top_builddir) -I$(top_srcdir)/utils/units \
 	-I$(top_srcdir)/utils/genutil @PGPLOT_CFLAGS@
 
+
+include $(top_srcdir)/config/Makefile.include
+

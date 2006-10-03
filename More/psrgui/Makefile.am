@@ -27,3 +27,5 @@ LDADD = libpsrgui.la $(top_builddir)/More/libpsrmore.la \
         $(top_builddir)/utils/libpsrutils.la \
         @QT_LIBS@ @PGPLOT_LIBS@
 
+include $(top_srcdir)/config/Makefile.include
+

@@ -8,3 +8,6 @@ check_PROGRAMS = test_iri
 LDADD = libiri.la
 
 libiri_la_LIBADD = @SLA_LIBS@ @FLIBS@
+
+include $(top_srcdir)/config/Makefile.include
+

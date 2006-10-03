@@ -121,3 +121,6 @@ LDADD = libgenutil.la ../units/libunits.la
 
 libgenutil_la_LIBADD = @SLA_LIBS@
 
+
+include $(top_srcdir)/config/Makefile.include
+

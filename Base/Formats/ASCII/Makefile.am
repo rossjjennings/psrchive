@@ -12,3 +12,6 @@ libascii_la_SOURCES = ASCIIArchive.C
 
 INCLUDES = -I$(top_builddir)/include -I$(top_srcdir)/Core/Bases
 
+
+include $(top_srcdir)/config/Makefile.include
+

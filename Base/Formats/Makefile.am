@@ -13,8 +13,6 @@ endif
 
 SUBDIRS += .
 
-include $(top_srcdir)/config/Makefile.local
-
 #############################################################################
 #
 # Dependencies should never be changed
@@ -27,4 +25,6 @@ INCLUDES = -I$(top_builddir)/include \
 	-I$(top_srcdir)/Core/Formats/EPN \
 	-I$(top_srcdir)/Core/Formats/ASCII \
 	-I$(top_srcdir)/Core/Formats/PSRFITS
+
+include $(top_srcdir)/config/Makefile.local
 

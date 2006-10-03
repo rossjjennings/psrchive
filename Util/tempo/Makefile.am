@@ -73,3 +73,6 @@ LDADD = libtempo.la $(top_builddir)/utils/genutil/libgenutil.la \
 	$(top_builddir)/utils/units/libunits.la \
 	$(top_builddir)/utils/fitsutil/libfitsutil.la @FLIBS@
 
+
+include $(top_srcdir)/config/Makefile.include
+

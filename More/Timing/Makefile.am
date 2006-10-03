@@ -19,3 +19,5 @@ INCLUDES = -I$(top_builddir)/include \
 	-I$(top_srcdir)/More/General \
 	-I$(top_srcdir)/More/MEAL
 
+include $(top_srcdir)/config/Makefile.include
+

@@ -34,5 +34,5 @@ LDADD = $(top_builddir)/More/libpsrmore.la \
 	$(top_builddir)/Core/libpsrcore.la \
         $(top_builddir)/utils/libpsrutils.la
 
-include $(top_srcdir)/config/Makefile.local
+include $(top_srcdir)/config/Makefile.include
 

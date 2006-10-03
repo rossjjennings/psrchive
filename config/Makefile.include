@@ -1,0 +1,10 @@
+
+all-local: headers-temp
+
+HEADERS_TEMP=$(addprefix $(top_builddir)/include/, $(HEADERS))
+
+headers-temp: $(HEADERS_TEMP)
+
+$(HEADERS_TEMP) : $(top_builddir)/include/% : ./%
+	$(top_srcdir)/config/install-intermediate $< $@
+

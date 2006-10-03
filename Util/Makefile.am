@@ -23,7 +23,5 @@ if HAVE_QT
   libpsrutils_la_LIBADD += qtutil/libqtutil.la
 endif
 
-all-local: intermediate-install
-
 include $(top_srcdir)/config/Makefile.local
 

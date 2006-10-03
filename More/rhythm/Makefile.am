@@ -17,3 +17,6 @@ INCLUDES = -I$(top_builddir)/include @QTDRIV_CFLAGS@
 
 LDADD = ../libpsrchive.la $(top_builddir)/astro/libpsrastro.la \
 	$(top_builddir)/utils/libpsrutils.la @QTDRIV_LIBS@
+
+include $(top_srcdir)/config/Makefile.include
+

@@ -92,3 +92,6 @@ libExtensions_la_SOURCES = \
 INCLUDES = -I$(top_builddir)/include -I$(top_srcdir)/Core/Bases \
 	-I$(top_srcdir)/More/Polarimetry
 
+
+include $(top_srcdir)/config/Makefile.include
+

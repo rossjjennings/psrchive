@@ -1,7 +1,4 @@
 
-intermediate-install:
-	$(MAKE) RECURSIVE_TARGETS=install-data-recursive INSTALL_DATA=$$PWD/$(top_srcdir)/config/install-intermediate prefix=$$PWD/$(top_builddir) install-data
-
 intermediate-libs:
 	AM_MAKEFLAGS="$(AM_MAKEFLAGS) PROGRAMS= HEADERS=" $(MAKE) all-recursive
 
