@@ -34,6 +34,7 @@
 #include <iostream>
 #include <unistd.h>
 
+using namespace std;
 
 void usage ()
 {
@@ -53,8 +54,6 @@ void usage ()
     " -2 m or d    multiply or divide cross products by factor of two\n"
        << endl;
 }
-
-void plotJones (Pulsar::PolnCalibrator* calibrator, unsigned interpolate);
 
 int main (int argc, char** argv) 
 {
@@ -81,8 +80,6 @@ int main (int argc, char** argv)
 
   bool plot_calibrator_stokes = false;
 
-  unsigned test_interpolation = 0;
-
   //
   float cross_scale_factor = 1.0;
 
@@ -98,7 +95,7 @@ int main (int argc, char** argv)
   bool verbose = false;
   char c;
 
-  while ((c = getopt(argc, argv, "2:a:c:CD:dfhi:M:Pr:S:pqvV")) != -1)  {
+  while ((c = getopt(argc, argv, "2:a:c:CD:dfhM:Pr:S:pqvV")) != -1)  {
 
     switch (c)  {
 
@@ -155,10 +152,6 @@ int main (int argc, char** argv)
 
     case 'f':
       fluxcal = new Pulsar::FluxCalibrator;
-      break;
-
-    case 'i':
-      test_interpolation = atoi(optarg);
       break;
 
     case 'M':
@@ -296,9 +289,6 @@ int main (int argc, char** argv)
 	plotter.plot (calibrator);
 
         calibrator_stokes = 0;
-
-	if (test_interpolation)
-	  plotJones (calibrator,test_interpolation);
 
       }
       else
