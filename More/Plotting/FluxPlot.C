@@ -61,7 +61,7 @@ void Pulsar::FluxPlot::draw (const Archive* data)
 }
 
 /*! The ProfileVectorPlotter class draws the profile */
-void Pulsar::FluxPlot::plot (const Profile* data)
+void Pulsar::FluxPlot::plot_profile (const Profile* data)
 {
   plotter.profiles.clear();
   plotter.profiles.push_back (data);

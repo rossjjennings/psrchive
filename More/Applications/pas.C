@@ -100,7 +100,7 @@ int main (int argc, char** argv)
       return 0;
 
     case 'i':
-      cout << "$Id: pas.C,v 1.23 2006/10/01 14:16:24 straten Exp $" << endl;
+      cout << "$Id: pas.C,v 1.24 2006/10/03 04:29:28 straten Exp $" << endl;
       return 0;
 
     case 'r':
@@ -514,10 +514,10 @@ void plot_it(Reference::To<Pulsar::Archive> refarch, Reference::To<Pulsar::Archi
 
   if(refflag == true) {
     cpgsci (ci_ref);
-    plotter.plot( refarch->get_Profile(0, 0, 0) );
+    plotter.plot_profile( refarch->get_Profile(0, 0, 0) );
   }
   cpgsci (ci_std);
-  plotter.plot( stdarch->get_Profile(0, 0, 0) );
+  plotter.plot_profile( stdarch->get_Profile(0, 0, 0) );
 }
 
 

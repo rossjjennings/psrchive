@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/FluxPlot.h,v $
-   $Revision: 1.15 $
-   $Date: 2006/10/02 19:36:01 $
+   $Revision: 1.16 $
+   $Date: 2006/10/03 04:29:28 $
    $Author: straten $ */
 
 #ifndef __Pulsar_FluxPlot_h
@@ -94,7 +94,7 @@ namespace Pulsar {
     void draw (const Archive*);
 
     //! Draw a profile in the currently open window
-    void plot (const Profile*);
+    void plot_profile (const Profile*);
 
   protected:
 
