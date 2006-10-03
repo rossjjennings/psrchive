@@ -7,7 +7,6 @@
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
 #include "Pulsar/Profile.h"
-#include "Pulsar/Plotter.h"
 
 #include "Pulsar/FourierSNR.h"
 #include "Pulsar/StandardSNR.h"
@@ -25,10 +24,14 @@
 #include "dirutil.h"
 #include "string_utils.h"
 
+#if 0
 #include <cpgplot.h>
+#endif
 
 #include <iostream>
 #include <unistd.h>
+
+using namespace std;
 
 void usage ()
 {
@@ -287,12 +290,14 @@ int main (int argc, char** argv)
     return 0;
   }
 
+#if 0
   if (display) {
     cpgbeg (0, "?", 0, 0);
     cpgask(1);
     cpgsvp (0.1, 0.9, 0.05, 0.85);
     cpgsch (1.0);
   }
+#endif
 
   Reference::To<Pulsar::Archive> archive, copy;
 
@@ -397,7 +402,8 @@ int main (int argc, char** argv)
 	  cout.flush();
 
 	}
-	
+
+#if 0
 	if (display) { // && snr == 0) {
 
 	  Pulsar::Plotter plotter;
@@ -422,7 +428,8 @@ int main (int argc, char** argv)
 	  plotter.fourier(copy);
 
 	}
-	
+#endif
+
 	if (!normal)
 	  continue;
 	
@@ -457,10 +464,12 @@ int main (int argc, char** argv)
   catch (string& error) {
     cerr << error << endl;
   }
-  
+ 
+#if 0 
   if (display)
     cpgend();
-  
+#endif
+
   return 0;
 }
 
