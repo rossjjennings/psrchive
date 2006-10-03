@@ -9,7 +9,8 @@ nodist_include_HEADERS = ephio.h
 libtempo_la_SOURCES = keys.dat ephio_c.c ephio.f \
 	psrephem.C set_epoch.C tex.C derived.C psrephem_orbital.C \
 	getlun.f length.f posparse.f strmatch.f upcase.f zeropad.f \
-	polyco.C Phase.C toa.C residual.C resio.f tempo++.C Predict.C
+	polyco.C Phase.C toa.C residual.C resio.f \
+	tempo++.C Predict.C fit.C
 
 nodist_libtempo_la_SOURCES = ephio_def.c
 
