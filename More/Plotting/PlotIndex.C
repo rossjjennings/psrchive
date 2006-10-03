@@ -22,21 +22,10 @@ Pulsar::get_Profile (const Archive* data,
   if (!data)
     throw Error (InvalidParam, "Pulsar::get_Profile", "no Archive");
 
-  Reference::To<const Archive> archive = data;
-  Reference::To<Archive> archive_clone;
-
-  if (subint.get_integrate()) {
-    Reference::To<Archive> archive_clone = archive->clone();
-    archive_clone->tscrunch();
-    archive = archive_clone;
-  }
-
   Reference::To<const Integration> integration;
-  integration = archive->get_Integration(subint.get_value());
+  integration = get_Integration( data, subint );
 
   Reference::To<Integration> integration_clone;
-  if (archive_clone)
-    integration_clone = archive_clone->get_Integration(subint.get_value());
 
   if (pol.get_integrate()) {
     if (!integration_clone)
@@ -58,19 +47,17 @@ Pulsar::get_Profile (const Archive* data,
   // ensure that no one destroys the profile when they go out of scope
   integration = 0;
   integration_clone = 0;
-  archive = 0;
-  archive_clone = 0;
 
   return profile.release();
 }
 
-
-//! Return a newly constructed PolnProfile with state == Stokes
-const Pulsar::PolnProfile* 
-Pulsar::get_Stokes (const Archive* data, PlotIndex subint, PlotIndex chan)
+const Pulsar::Integration* 
+Pulsar::get_Integration (const Archive* data, PlotIndex subint)
 {
+  if (!data)
+    throw Error (InvalidParam, "Pulsar::get_Integration", "no Archive");
+
   Reference::To<const Archive> archive = data;
-  Reference::To<Archive> archive_clone;
 
   if (subint.get_integrate()) {
     Reference::To<Archive> archive_clone = archive->clone();
@@ -81,13 +68,23 @@ Pulsar::get_Stokes (const Archive* data, PlotIndex subint, PlotIndex chan)
   Reference::To<const Integration> integration;
   integration = archive->get_Integration(subint.get_value());
 
+  // ensure that no one destroys the profile when they go out of scope
+  archive = 0;
+
+  return integration.release();
+}
+
+//! Return a newly constructed PolnProfile with state == Stokes
+const Pulsar::PolnProfile* 
+Pulsar::get_Stokes (const Archive* data, PlotIndex subint, PlotIndex chan)
+{
+  Reference::To<const Integration> integration;
+  integration = get_Integration( data, subint );
+
   Reference::To<Integration> integration_clone;
-  if (archive_clone)
-    integration_clone = archive_clone->get_Integration(subint.get_value());
 
   if (chan.get_integrate()) {
-    if (!integration_clone)
-      integration_clone = integration->clone();
+    integration_clone = integration->clone();
     integration_clone->expert()->fscrunch();
     integration = integration_clone;
   }
