@@ -164,9 +164,8 @@ void Pulsar::Interpreter::init()
   add_command 
     ( &Interpreter::snr,
       "snr", "select the S/N method",
-      "usage: snr <fourier|fortran|adaptive|std name> \n"
+      "usage: snr <fourier|adaptive|std name> \n"
       "  fourier           in the fourier domain \n"
-      "  fortran           use a Fortran function \n"
       "  adaptive          use an adaptive baseline algorithm \n"
       "  std name          use the named archive as a standard \n");
 
@@ -870,9 +869,6 @@ try {
 
   if (arguments.size() == 1 && arguments[0] == "fourier")
     Profile::snr_strategy.set (&fourier_snr, &FourierSNR::get_snr);
-      
-  else if (arguments.size() == 1 && arguments[0] == "fortran")
-    Profile::snr_strategy.set (&snr_fortran);
       
   else if (arguments.size() == 1 && arguments[0] == "adaptive")
     Profile::snr_strategy.set (&adaptive_snr, &AdaptiveSNR::get_snr);

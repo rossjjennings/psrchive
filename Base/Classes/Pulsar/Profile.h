@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Profile.h,v $
-   $Revision: 1.99 $
-   $Date: 2006/10/03 04:29:26 $
+   $Revision: 1.100 $
+   $Date: 2006/10/03 06:50:32 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Profile_h
@@ -284,9 +284,6 @@ namespace Pulsar {
 
   //! Default implementation of Profile::snr method
   double snr_phase (const Profile* profile);
-
-  //! Alternative implementation uses a fortran routine
-  float snr_fortran (const Profile* profile);
 
 }
 

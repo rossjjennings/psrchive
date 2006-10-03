@@ -47,7 +47,7 @@ void usage ()
     " -s s/n    S/N threshold (weight zero below) default:10\n"
     " -S std    calculate S/N using a standard pulsar archive\n"
     " -m method calculate S/N using the named method: \n"
-    "           fourier, fortran, or adaptive \n"
+    "           fourier, adaptive \n"
     " -w width  width of off-pulse baseline used in S/N calculations\n"
     " -c sigma  cut-off sigma used in adaptive S/N method \n"
     " -p phs    phase centre of off-pulse baseline (implies -G)\n"
@@ -146,9 +146,6 @@ int main (int argc, char** argv)
       if (strcasecmp (optarg, "fourier") == 0)
 	Pulsar::Profile::snr_strategy.set (&fourier_snr,
 					   &Pulsar::FourierSNR::get_snr);
-      
-      else if (strcasecmp (optarg, "fortran") == 0)
-	Pulsar::Profile::snr_strategy.set (&Pulsar::snr_fortran);
       
       else if (strcasecmp (optarg, "adaptive") == 0)
 	Pulsar::Profile::snr_strategy.set (&adaptive_snr,
