@@ -131,10 +131,8 @@ libGeneral_la_SOURCES = \
         Profile_rotate.C \
         Profile_shift.C \
         Profile_snr.C \
-        Profile_snr_fortran.C \
         Profile_stats.C \
         Profile_toa.C \
-        Profile_utils.C \
         ProfileWeightFunction.C \
         RFIMitigation.C \
         ScatteredPowerCorrection.C \
