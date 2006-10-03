@@ -4,8 +4,9 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-using namespace std;
 #include "Pulsar/Profile.h"
+#include "Pulsar/shift_methods.h"
+using namespace std;
 
 /*! This use of the Functor template implements the Strategy design
  pattern (ghjv94 p.315) for calculating the shift between an
