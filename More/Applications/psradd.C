@@ -15,9 +15,7 @@
 
 #include "tempo++.h"
 #include "Error.h"
-#include "SignalHandler.h"
 
-#include "genutil.h"
 #include "dirutil.h"
 #include "string_utils.h"
 #include "separate.h"
@@ -28,7 +26,9 @@
 #include <unistd.h>
 #include <math.h>
 
-static const char* psradd_args = "b:c:C:E:e:f:FG:hiI:j:J:LM:O:p:Pqr:sS:tT:uUvVZ:";
+using namespace std;
+
+static const char* psradd_args = "b:c:C:E:e:f:FG:hiI:j:J:LM:O:p:Pqr:sS:tT:UvVZ:";
 
 void reorder(Reference::To<Pulsar::Archive> arch);
 
@@ -153,7 +153,7 @@ int main (int argc, char **argv) try {
       return 0;
       
     case 'i':
-      cout << "$Id: psradd.C,v 1.39 2006/09/26 16:33:59 straten Exp $" 
+      cout << "$Id: psradd.C,v 1.40 2006/10/03 04:29:30 straten Exp $" 
 	   << endl;
       return 0;
 
@@ -301,12 +301,6 @@ int main (int argc, char **argv) try {
       command += optarg;
       break;
 
-    case 'u':
-      cerr << "Will abort on Error creation" << endl;
-      Error::complete_abort = true;
-      SignalHandler::add_signal_to_abort_on(SIGSEGV);
-      SignalHandler::add_signal_to_abort_on(SIGFPE);
-      break;
     case 'U':
       cerr << "Will print message on Error creation" << endl;
       Error::verbose = true;
@@ -457,7 +451,7 @@ int main (int argc, char **argv) try {
       if (auto_add) {
 	newname = total->get_filename() + "." + integrated_extension;
         if (!integrated_path.empty())
-          newname = integrated_path + "/" + basename (newname);
+          newname = integrated_path + "/" + basename (newname.c_str());
       }
 
       if (log_results) {

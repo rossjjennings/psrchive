@@ -21,6 +21,8 @@
 
 #include <unistd.h>
 
+using namespace std;
+
 void usage ()
 {
   cerr << 
