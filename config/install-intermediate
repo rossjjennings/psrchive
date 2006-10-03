@@ -10,5 +10,5 @@ dstdir=`echo "$2" | sed -e 's,/*$,,;s,[^/]*$,,;s,/*$,,;s,^$,.,'`
 
 if test ! -d $dstdir; then mkdir -p $dstdir; fi
 
-cp -p $1 $2
+cp $1 $2
 
