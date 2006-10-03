@@ -4,18 +4,19 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-using namespace std;
-#include <algorithm>
-#include <math.h>
+#include "Pulsar/shift_methods.h"
 #include "Pulsar/Profile.h"
 #include "FTransform.h"
+
+#include <algorithm>
+#include <math.h>
+
+using namespace std;
 
 // redwards --- code for finding the phase shift w.r.t. a template profile,
 // using sinc interpolation of the cross correlation function
 
-unsigned Pulsar::Profile::SIS_zap_period = 0;
-
-
+unsigned Pulsar::SIS_zap_period = 0;
 
 static float
 sinc_interp(float *f, double x, int n)
@@ -245,9 +246,9 @@ Pulsar::SincInterpShift (const Profile& std, const Profile& obs)
 
   // Zap harmonics of periodic spikes if necessary
   int nadd = nby2-1; //keep track of how many coefficients are used
-  if (Pulsar::Profile::SIS_zap_period > 1)
+  if (SIS_zap_period > 1)
   {
-    int freq = nbin / Pulsar::Profile::SIS_zap_period;
+    int freq = nbin / SIS_zap_period;
     for (i=freq; i < nby2; i+=freq)
     {
       obs_spec[i] = zero;

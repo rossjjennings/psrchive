@@ -4,13 +4,15 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-using namespace std;
+#include "Pulsar/shift_methods.h"
 #include "Pulsar/Profile.h"
 
 #include "MEAL/LevenbergMarquardt.h"
 #include "MEAL/Gaussian.h"
 #include "MEAL/Polynomial.h"
 #include "MEAL/Axis.h"
+
+using namespace std;
 
 void wrap (int& binval, int nbin) {
   if (binval < 0)

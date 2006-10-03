@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Profile.h,v $
-   $Revision: 1.98 $
-   $Date: 2006/10/02 20:18:05 $
+   $Revision: 1.99 $
+   $Date: 2006/10/03 04:29:26 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Profile_h
@@ -287,21 +287,6 @@ namespace Pulsar {
 
   //! Alternative implementation uses a fortran routine
   float snr_fortran (const Profile* profile);
-
-  /*! Parabolic interpolation in the time domain */
-  Estimate<double> ParIntShift (const Profile& std, const Profile& ephase);
-
-  /*! Gaussian interpolation in the time domain */
-  Estimate<double> GaussianShift (const Profile& std, const Profile& ephase);
-
-  /*! Fourier domain zero-pad interpolation */
-  Estimate<double> ZeroPadShift (const Profile& std, const Profile& ephase);
-
-  /*! Fourier domain phase gradient fit */
-  Estimate<double> PhaseGradShift (const Profile& std, const Profile& ephase);
-
-  /*! Phase shift by sinc interpolation of CCF */
-  Estimate<double> SincInterpShift (const Profile& std, const Profile& ephase);
 
 }
 

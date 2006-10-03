@@ -4,9 +4,18 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-using namespace std;
+#include "Pulsar/shift_methods.h"
 #include "Pulsar/Profile.h"
+#include "Pulsar/Config.h"
 #include "interpolate.h"
+
+using namespace std;
+
+/*!
+  Interpolate by this factor when using ZeroPadShift
+*/
+unsigned Pulsar::ZPSF
+= Pulsar::config.get<unsigned>("zero_pad_interpolate", 64);
 
 /* This algorithm uses zero padding in the fourier domain to
    interpolate the cross correlation function in the time domain. The
@@ -39,7 +48,7 @@ Pulsar::ZeroPadShift (const Profile& std, const Profile& obs)
   
   vector< Estimate<float> > interpolated;
   
-  interpolated.resize(correlation.size() * Pulsar::Profile::ZPSF);
+  interpolated.resize(correlation.size() * Pulsar::ZPSF);
   
   // Perform the zero-pad interpolation
   
@@ -53,7 +62,7 @@ Pulsar::ZeroPadShift (const Profile& std, const Profile& obs)
   for (unsigned i = 0; i < interpolated.size(); i++) {
     if (interpolated[i].val > maxval) {
       maxval = interpolated[i].val;
-      maxloc = float(i) / Pulsar::Profile::ZPSF;
+      maxloc = float(i) / Pulsar::ZPSF;
     }
   }
   

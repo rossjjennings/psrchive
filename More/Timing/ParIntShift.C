@@ -4,6 +4,7 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+#include "Pulsar/shift_methods.h"
 #include "Pulsar/Profile.h"
 
 #include "MEAL/GaussJordan.h"

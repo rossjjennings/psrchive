@@ -15,5 +15,7 @@ libTiming_la_SOURCES = \
 # Dependencies should never be changed
 #
 
-INCLUDES = -I$(top_builddir)/include -I$(top_srcdir)/More/MEAL
+INCLUDES = -I$(top_builddir)/include \
+	-I$(top_srcdir)/More/General \
+	-I$(top_srcdir)/More/MEAL
 

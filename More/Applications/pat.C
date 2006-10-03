@@ -9,6 +9,7 @@
 #include "Pulsar/Integration.h"
 #include "Pulsar/Profile.h"
 #include "Pulsar/denoise.h"
+#include "Pulsar/shift_methods.h"
 
 #include "Pulsar/PolnProfile.h"
 #include "Pulsar/PolnProfileFit.h"
@@ -186,7 +187,7 @@ int main (int argc, char *argv[]) try {
       return 0;
 
     case 'i':
-      cout << "$Id: pat.C,v 1.68 2006/10/02 19:35:50 straten Exp $" << endl;
+      cout << "$Id: pat.C,v 1.69 2006/10/03 04:29:26 straten Exp $" << endl;
       return 0;
 
     case 'n':
@@ -205,7 +206,7 @@ int main (int argc, char *argv[]) try {
 
     case 'S':
       Profile::shift_strategy.set(&SincInterpShift);      
-      Profile::SIS_zap_period = atoi(optarg);
+      Pulsar::SIS_zap_period = atoi(optarg);
       break;
 
     case 's':

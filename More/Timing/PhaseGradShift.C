@@ -4,8 +4,10 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-using namespace std;
+#include "Pulsar/shift_methods.h"
 #include "Pulsar/Profile.h"
+
+using namespace std;
 
 Estimate<double> 
 Pulsar::PhaseGradShift (const Profile& std, const Profile& obs)

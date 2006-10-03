@@ -6,6 +6,7 @@ nobase_include_HEADERS = \
         morphological_difference.h \
 	Pulsar/counter_drift.h \
 	Pulsar/denoise.h \
+	Pulsar/shift_methods.h \
         Pulsar/AdaptiveSNR.h \
         Pulsar/Algorithm.h \
         Pulsar/ArchiveMatch.h \

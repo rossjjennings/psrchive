@@ -5,6 +5,7 @@
  *
  ***************************************************************************/
 #include "morphological_difference.h"
+#include "Pulsar/shift_methods.h"
 #include "Pulsar/Profile.h"
 #include "Error.h"
 
