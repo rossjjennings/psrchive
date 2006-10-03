@@ -4,9 +4,6 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-#include <stdio.h>
-#include <stdlib.h>
-#include <sys/wait.h>
 
 #include "tempo++.h"
 #include "toa.h"
@@ -14,6 +11,12 @@
 #include "resio.h"
 #include "psrephem.h"
 #include "Error.h"
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/wait.h>
+
+using namespace std;
 
 // ////////////////////////////////////////////////////////////////////////
 // Tempo::fit
