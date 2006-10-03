@@ -4,12 +4,13 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-#include <iostream>
 
 #include "qt_fileParams.h"
 
 #include "psrephem.h"
-#include "psr_cpp.h"
+#include <iostream>
+
+using namespace std;
 
 bool qt_fileParams::verbose = false;
 

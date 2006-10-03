@@ -22,7 +22,6 @@
 #include "qt_toglParams.h"
 #include "qt_fileParams.h"
 #include "qtools.h"
-#include "psr_cpp.h"
 
 #include <qapplication.h>
 #include <qlayout.h>
@@ -33,6 +32,8 @@
 
 #include <iostream>
 #include <vector>
+
+using namespace std;
 
 // //////////////////////////////////////////////////////////////////////////
 //

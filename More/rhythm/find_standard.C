@@ -5,6 +5,10 @@
  *
  ***************************************************************************/
 #include "find_standard.h"
+#include "Pulsar/Archive.h"
+#include "Pulsar/Profile.h"
+
+using namespace std;
 
 //
 // Function to select a standard profile from a loaded list

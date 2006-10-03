@@ -5,16 +5,19 @@
  *
  ***************************************************************************/
 
+#include "qt_psrephem.h"
+#include "qt_psrParameter.h"
+
 #include "psrephem.h"
 #include "ephio.h"
 #include "psrParams.h"
 
-#include "qt_psrephem.h"
-#include "qt_psrParameter.h"
 #include "qtools.h"
 
 #include <qvbox.h>
 #include <iostream>
+
+using namespace std;
 
 // //////////////////////////////////////////////////////////////////////////
 //
