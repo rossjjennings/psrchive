@@ -6,13 +6,17 @@
  ***************************************************************************/
 
 #include "rhythm.h"
-#include "tempo++.h"
 #include "qt_editParams.h"
+#include "find_standard.h"
 
-#include <iostream>
-#include <stdlib.h>
+#include "Pulsar/Integration.h"
+#include "Pulsar/Telescope.h"
 
-#include <algorithm>
+#include "Pulsar/ProfilePlot.h"
+#include "Pulsar/InfoLabel.h"
+
+#include "tempo++.h"
+#include "Horizon.h"
 
 #include <qmainwindow.h>
 #include <qmessagebox.h> 
@@ -25,6 +29,13 @@
 
 #include <cpgplot.h>
 
+#include <algorithm>
+#include <iostream>
+
+#include <stdlib.h>
+
+using namespace std;
+
 #ifdef _DEBUG
 bool Rhythm::verbose = true;
 bool Rhythm::vverbose = true;
@@ -32,8 +43,6 @@ bool Rhythm::vverbose = true;
 bool Rhythm::verbose = false;
 bool Rhythm::vverbose = false;
 #endif
-
-using namespace std;
 
 // /////////////////////////////////////////////////////////////////////
 // Main procedure
@@ -530,10 +539,12 @@ void Rhythm::plot_current ()
     data->pscrunch();
     data->centre();
     cpgsvp (0.1,0.9,0.1,0.9);
-    Pulsar::Plotter plotter;
+    
+    Pulsar::ProfilePlot plotter;
     plotter.set_subint(sub);
     plotter.set_chan(chn);
-    plotter.singleProfile(data);
+    new Pulsar::InfoLabel(&plotter);
+    plotter.plot(data);
   }
   catch (Error& error) {
     footer->setText("Error processing archives on disk!");
@@ -1037,9 +1048,9 @@ std::vector<double> Rhythm::give_me_data (toaPlot::AxisQuantity q)
     
   case toaPlot::ParallacticAngle:
     if (fitpopup->hasdata()) {
-      psrephem myeph;
-      fitpopup -> get_psrephem (myeph);
+
       for ( unsigned i = 0; i < toas.size(); i++ ) {
+
 	progress.setProgress( i );
 	myapp->processEvents();
 	
@@ -1059,47 +1070,46 @@ std::vector<double> Rhythm::give_me_data (toaPlot::AxisQuantity q)
 	// Extract the time
 	MJD mjd(toas[i].resid.mjd);
 	
-	// Extract the coordinates
-	sky_coord crd;
-
 	toas[i].unload(useful);
 	
-	if (sscanf(useful+1, "%s ", filename) != 1) {
+	if (sscanf(useful+1, "%s ", filename) != 1)
 	  throw Error(FailedCall, "No archive-derived info available");
-	}
-	else {
-	  if (verbose)
-	    cerr << "Attempting to load archive '" << filename << "'" << endl;
-	  
-	  string useful2 = dataPath + "/";
-	  useful2 += filename;
-	  try {	  
-	    Reference::To<Pulsar::Archive> data = 
-	      Pulsar::Archive::load(useful2);
-	    crd = data->get_coordinates();
-	  }
-	  catch (Error& error) {
-	    footer->setText("Error processing archives on disk!");
-	    if (verbose)
-	      cerr << error << endl;
-	    retval.resize(0);
-	    break;
-	  }
-	}
-	
-	// Extract the lat and lon
-	char telid = myeph.value_str[EPH_TZRSITE][0];
-	
-	float lat = 0.0;
-	float lon = 0.0;
-	float ele = 0.0;
 
-	telescope_coords(telid, &lat, &lon, &ele);
-	
-	double answer = Pulsar::parallactic_angle(crd, mjd, lat, lon);
+	if (verbose)
+	  cerr << "Attempting to load archive '" << filename << "'" << endl;
+	  
+	string useful2 = dataPath + "/";
+	useful2 += filename;
+
+	double answer = Tempo::toa::UNSET;
+
+	try {
+
+	  Reference::To<Pulsar::Archive> data = Pulsar::Archive::load(useful2);
+	  Pulsar::Telescope* telescope = data->get<Pulsar::Telescope>();
+	  if (!telescope)
+	    cerr << "" << endl;
+
+	  Horizon horizon;
+
+	  horizon.set_epoch( mjd );
+	  horizon.set_source_coordinates( data->get_coordinates() );
+	  horizon.set_observatory_latitude
+	    ( telescope->get_latitude().getRadians() );
+	  horizon.set_observatory_longitude
+	    ( telescope->get_longitude().getRadians() );
+
+	  answer = horizon.get_parallactic_angle() * 180/M_PI;
+
+	}
+	catch (Error& error) {
+	  if (verbose)
+	    cerr << error << endl;
+	}
 
 	retval.push_back(answer);
 	toas[i].set_pa(answer);
+
       }
       progress.setProgress( toas.size() );
     }
