@@ -7,30 +7,31 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pcm.C,v $
-   $Revision: 1.55 $
-   $Date: 2006/05/05 02:12:36 $
+   $Revision: 1.56 $
+   $Date: 2006/10/03 21:09:41 $
    $Author: straten $ */
+
+#ifdef HAVE_CONFIG_H
+#include<config.h>
+#endif
 
 #include "Pulsar/psrchive.h"
 #include "Pulsar/ReceptionCalibrator.h"
 #include "Pulsar/PulsarCalibrator.h"
+#include "Pulsar/CorrectionsCalibrator.h"
 #include "Pulsar/Database.h"
 
 #include "Pulsar/ReceptionCalibratorPlotter.h"
 #include "Pulsar/SourceInfo.h"
 
-#include "Pulsar/Plotter.h"
 #include "Pulsar/Archive.h"
 #include "Pulsar/ReflectStokes.h"
+#include "Pulsar/StokesSpherical.h"
 
 #include "RealTimer.h"
 #include "Error.h"
 #include "dirutil.h"
 #include "string_utils.h"
-
-#ifdef HAVE_CONFIG_H
-#include<config.h>
-#endif
 
 #if HAVE_PGPLOT
 #include <cpgplot.h>
@@ -40,6 +41,8 @@
 #include <algorithm>
 #include <unistd.h>
 #include <errno.h>
+
+using namespace std;
 
 static string Britton = "Britton";
 static string Hamaker = "Hamaker";
@@ -110,8 +113,8 @@ void auto_select (Pulsar::ReceptionCalibrator& model,
   cpgsvp (.1,.9, .1,.9);
 
   cerr << "pcm: plotting chosen phase bins" << endl;
-  Pulsar::Plotter profile;
-  profile.spherical (archive);
+  Pulsar::StokesSpherical plot;
+  plot.plot (archive);
 
   cpgswin (0,1,0,1);
   cpgsls (2);
@@ -697,8 +700,8 @@ int main (int argc, char *argv[]) try {
 	if (verbose)
 	  cerr << "pcm: correct and add to total" << endl;
 
-        // archive->fscrunch ();
-        archive->correct_instrument ();
+	Pulsar::CorrectionsCalibrator correct;
+	correct.calibrate(archive);
 
 	if (!total)
 	  total = archive;
@@ -750,8 +753,8 @@ int main (int argc, char *argv[]) try {
     total->fscrunch();
 
     cerr << "pcm: plotting uncalibrated pulsar total stokes" << endl;
-    Pulsar::Plotter profile;
-    profile.spherical (total);
+    Pulsar::StokesSpherical plot;
+    plot.plot (total);
 
     cpgend();
 
@@ -845,8 +848,10 @@ int main (int argc, char *argv[]) try {
       
       model.precalibrate( archive );
 
-      if (archive->get_type() == Signal::Pulsar)
-	archive->correct_instrument ();
+      if (archive->get_type() == Signal::Pulsar) {
+	Pulsar::CorrectionsCalibrator correct;
+	correct.calibrate(archive);
+      }
 
       string newname = replace_extension (filenames[i], ".calib");
 
@@ -862,8 +867,8 @@ int main (int argc, char *argv[]) try {
         if (verbose)
           cerr << "pcm: correct and add to calibrated total" << endl;
 
-        // archive->fscrunch ();
-        archive->correct_instrument ();
+	Pulsar::CorrectionsCalibrator correct;
+	correct.calibrate(archive);
 
         if (!total)
           total = archive;
@@ -896,8 +901,8 @@ int main (int argc, char *argv[]) try {
     total->fscrunch();
 
     cerr << "pcm: plotting calibrated pulsar total stokes" << endl;
-    Pulsar::Plotter profile;
-    profile.spherical (total);
+    Pulsar::StokesSpherical plot;
+    plot.plot (total);
 
     cpgend ();
   }
@@ -977,7 +982,8 @@ int mode_B (const char* standard_filename,
 
     cerr << "pcm: calibrating input archive" << endl;
     model.calibrate( archive );
-    archive->correct_instrument ();
+    Pulsar::CorrectionsCalibrator correct;
+    correct.calibrate(archive);
 
     filename = replace_extension (filenames[i], ".calib");
     cerr << "pcm: unloading calibrated archive to " << filename << endl;

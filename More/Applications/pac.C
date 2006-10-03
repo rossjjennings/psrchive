@@ -26,6 +26,8 @@
 
 #include <unistd.h>
 
+using namespace std;
+
 // A command line tool for calibrating Pulsar::Archives
 const char* args = "A:BbCcDd:e:fFGhiIM:m:n:Oop:Pqr:sSt:Tu:vVwZ";
 
@@ -163,7 +165,7 @@ int main (int argc, char *argv[]) {
       break;
 
     case 'i':
-      cout << "$Id: pac.C,v 1.77 2006/09/29 22:13:10 straten Exp $" << endl;
+      cout << "$Id: pac.C,v 1.78 2006/10/03 21:09:41 straten Exp $" << endl;
       return 0;
 
     case 'A':
@@ -542,9 +544,10 @@ int main (int argc, char *argv[]) {
 
       if (arch->get_npol() == 4) {
 	if (verbose)
-	  cerr << "pac: Correcting platform" << endl;
+	  cerr << "pac: Correcting platform, if necessary" << endl;
 
-	arch->correct_instrument ();
+	Pulsar::CorrectionsCalibrator correct;
+	correct.calibrate(arch);
       }
 
       if (ionosphere) {
