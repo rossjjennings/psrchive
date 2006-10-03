@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PlotFrame.h,v $
-   $Revision: 1.17 $
-   $Date: 2006/09/08 07:32:15 $
+   $Revision: 1.18 $
+   $Date: 2006/10/03 19:07:59 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PlotFrame_h
@@ -24,7 +24,6 @@
 namespace Pulsar {
 
   class Archive;
-  class ArchiveTI;
 
   //! Stores the properties of the plot frame
   class PlotFrame : public PlotAttributes {
@@ -64,17 +63,13 @@ namespace Pulsar {
 
     //! Get the above-frame label
     PlotLabel* get_label_above () { return above; }
+    //! Get the above-frame label
+    void set_label_above (PlotLabel*);
 
     //! Get the below-frame label
     PlotLabel* get_label_below () { return below; }
-
-    //! Set the offset between labels and frame (multiple of character height)
-    void set_label_offset (float offset) { label_offset = offset; }
-    float get_label_offset () const { return label_offset; }
-
-    //! Set the spacing between label rows (multiple of character height)
-    void set_label_spacing (float spacing) { label_spacing = spacing; }
-    float get_label_spacing () const { return label_spacing; }
+    //! Get the below-frame label
+    void set_label_below (PlotLabel*);
 
     //! transpose the x and y axes
     void set_transpose (bool flag = true) { transpose = flag; }
@@ -94,9 +89,6 @@ namespace Pulsar {
     /*! By default a frame exists in the current viewport */
     virtual void focus (const Archive*);
 
-    //! Get the text interface to the archive class
-    ArchiveTI* get_interface (const Archive*);
-
   protected:
 
     Reference::To<PlotScale> x_scale;
@@ -108,19 +100,7 @@ namespace Pulsar {
     Reference::To<PlotLabel> above;
     Reference::To<PlotLabel> below;
 
-    float label_offset;
-    float label_spacing;
     bool  transpose;
-
-    //! Plot the label; direction=+/-1 for above/below frame
-    void decorate (const Archive*, PlotLabel*, float direction);
-    //! Plot the label; side=0/.5/1 for left/centre/right
-    void decorate (const Archive*, const std::string& label, 
-		   float side, float direction);
-
-  private:
-
-    Reference::To<ArchiveTI> archive_interface;
 
   };
 

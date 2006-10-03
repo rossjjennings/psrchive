@@ -5,12 +5,8 @@
  *
  ***************************************************************************/
 #include "Pulsar/Plot.h"
-#include "Pulsar/ArchiveTI.h"
-#include "substitute.h"
 
 #include <cpgplot.h>
-
-#include <vector>
 
 using namespace std;
 
@@ -31,9 +27,7 @@ Pulsar::PlotFrame::PlotFrame ()
 
   get_label_above()->set_centre("$file");
   get_label_below()->set_left("$name.$freq MHz");
-
-  label_spacing = 1.2;
-  label_offset = 0.5;
+  get_label_below()->set_spacing( -get_label_below()->get_spacing() );
 
   transpose = false;
 }
@@ -101,58 +95,8 @@ void Pulsar::PlotFrame::decorate (const Archive* data)
   cpgsls (1);
   cpgsci (1);
 
-  decorate (data, get_label_above(), +label_spacing);
-  decorate (data, get_label_below(), -label_spacing);
-}
-
-void Pulsar::PlotFrame::decorate (const Archive* data, 
-				  PlotLabel* label, float direction)
-{
-  decorate (data, label->get_left(),   0.0, direction);
-  decorate (data, label->get_centre(), 0.5, direction);
-  decorate (data, label->get_right(),  1.0, direction);
-}
-
-void Pulsar::PlotFrame::decorate (const Archive* data, const string& label,
-				  float side, float direction)
-{
-  if (label == PlotLabel::unset)
-    return;
-
-  vector<string> labels;
-  separate (label, labels, ".");
-
-  // get the length of a dash in normalized device coordinates
-  float xl, yl;
-  cpglen (5, "-", &xl, &yl);
-  float offset = (side == 0) ? xl : -xl;
-  
-  float start = 0;
-  if (direction > 0) {
-    start = label_offset + (labels.size()-1) * direction;
-    direction *= -1;
-  }
-  else
-    start = direction - label_offset;
-
-  for (unsigned i=0; i < labels.size(); i++) {
-
-    labels[i] = substitute (labels[i], get_interface(data));
-
-    cpgmtxt ("T", start, side+offset, side, labels[i].c_str());
-    start += direction;
-
-  }
-
-}
-
-//! Get the text interface to the archive class
-Pulsar::ArchiveTI* Pulsar::PlotFrame::get_interface (const Archive* data)
-{
-  if (!archive_interface)
-    archive_interface = new ArchiveTI;
-  archive_interface->set_instance( const_cast<Archive*>(data) );
-  return archive_interface;
+  get_label_above()->plot(data);
+  get_label_below()->plot(data);
 }
 
 //! Get the x-scale
@@ -202,6 +146,17 @@ Pulsar::PlotAxis* Pulsar::PlotFrame::get_y_axis(bool allow_transpose)
   else
     return y_axis;
 }
+
+void Pulsar::PlotFrame::set_label_above (PlotLabel* label)
+{
+  above = label;
+}
+
+void Pulsar::PlotFrame::set_label_below (PlotLabel* label)
+{
+  below = label;
+}
+
 
 void Pulsar::PlotFrame::set_publication_quality (bool flag)
 {
