@@ -11,6 +11,8 @@
 
 using namespace std;
 
+bool pgplot::Plot3D::verbose = false;
+
 void pgplot::Plot3D::where (float& x, float& y, const Cartesian& pt)
 {
   x = pt * vx_axis;
