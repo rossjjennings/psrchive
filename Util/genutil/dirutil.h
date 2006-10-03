@@ -59,6 +59,10 @@ extern "C" {
   /* returns the file modification time */
   time_t file_mod_time (const char* filename);
 
+  /* returns true if the file is a directory */
+  int file_is_directory (const char* filename);
+
+
 #ifdef __cplusplus
 }
 #endif
