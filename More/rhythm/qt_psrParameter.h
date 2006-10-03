@@ -47,13 +47,13 @@ class qt_psrParameter : public QHBox, public psrParameter
   virtual Angle  getAngle  () const { return Angle(); };
   virtual MJD    getMJD    () const { return MJD(); };
   virtual double getDouble () const { return 0.0; };
-  virtual string getString () const { return string(); };
+  virtual std::string getString () const { return std::string(); };
   virtual double getError  () const { return 0.0; };
 
   virtual void setAngle  (const Angle&) { };
   virtual void setMJD    (const MJD&) { };
   virtual void setDouble (double) { };
-  virtual void setString (const string&) { };
+  virtual void setString (const std::string&) { };
   virtual void setError  (double) { };
 
   void setValue (psrParameter* eph);
