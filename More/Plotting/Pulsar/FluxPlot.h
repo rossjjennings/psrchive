@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/FluxPlot.h,v $
-   $Revision: 1.17 $
-   $Date: 2006/10/03 19:08:20 $
+   $Revision: 1.18 $
+   $Date: 2006/10/03 21:09:58 $
    $Author: straten $ */
 
 #ifndef __Pulsar_FluxPlot_h
@@ -29,6 +29,9 @@ namespace Pulsar {
 
     //! Default constructor
     FluxPlot ();
+
+    //! Destructor
+    ~FluxPlot ();
 
     //! Return the text interface
     TextInterface::Class* get_interface ();

@@ -25,7 +25,11 @@ Pulsar::FluxPlot::FluxPlot ()
 
   get_frame()->get_y_scale()->set_buf_norm(0.05);
 }
- 
+
+Pulsar::FluxPlot::~FluxPlot ()
+{
+}
+
 TextInterface::Class* Pulsar::FluxPlot::get_interface ()
 {
   return new Interface (this);
