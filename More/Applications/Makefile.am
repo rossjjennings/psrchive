@@ -1,5 +1,9 @@
 
-bin_PROGRAMS = paas pam pas pascii pat paz psradd psrdiff psrsh psrwt
+bin_PROGRAMS = psrplot paas pam pas pascii pat paz psradd psrdiff psrsh psrwt \
+	fluxcal pac pacv pcm
+
+psrplot_SOURCES = psrplot.C
+psrplot_LDADD = $(LDADD) @PGPLOT_LIBS@
 
 paas_SOURCES = paas.C
 paas_LDADD = $(LDADD) @PGPLOT_LIBS@
@@ -23,6 +27,16 @@ psrsh_SOURCES = psrsh.C
 psrsh_LDADD = $(LDADD) @READLINE_LIBS@
 
 psrwt_SOURCES = psrwt.C
+
+fluxcal_SOURCES = fluxcal.C
+
+pac_SOURCES = pac.C
+
+pacv_SOURCES = pacv.C
+pacv_LDADD = $(LDADD) @PGPLOT_LIBS@
+
+pcm_SOURCES = pcm.C
+pcm_LDADD = $(LDADD) @PGPLOT_LIBS@
 
 #############################################################################
 #
