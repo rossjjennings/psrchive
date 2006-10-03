@@ -159,7 +159,6 @@ AC_CONFIG_FILES([utils/Makefile
 		More/Timing/Makefile
 		More/Polarimetry/Makefile
 		More/Polarimetry/iri2001/Makefile
-                More/GUI/Makefile
 		More/rhythm/Makefile
 		More/Applications/Makefile
 		Makefile])

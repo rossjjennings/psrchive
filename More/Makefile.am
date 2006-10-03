@@ -31,12 +31,6 @@ endif
 
 SUBDIRS += . Applications
 
-if HAVE_QT
-if HAVE_PGPLOT
-SUBDIRS += GUI
-endif
-endif
-
 if HAVE_QTDRIV
 SUBDIRS += rhythm
 endif
