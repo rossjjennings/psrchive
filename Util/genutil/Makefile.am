@@ -45,6 +45,7 @@ libgenutil_la_SOURCES = \
         coord.c \
         coord_parse.c \
         dirglob.C \
+	dirglobtree.C \
         dirutil.c \
         eccentric_anomaly.c \
         endian.c \
@@ -61,6 +62,7 @@ libgenutil_la_SOURCES = \
         Plugin.C \
         RealTimer.C \
         RegularExpression.C \
+	replace_extension.C \
         sky_coord.C \
         sla_MJD.C \
         sla_sky_coord.C \
