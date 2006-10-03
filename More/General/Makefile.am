@@ -57,7 +57,6 @@ nobase_include_HEADERS = \
         Pulsar/SyntheticProfile.h \
         Pulsar/Transformation.h \
         Pulsar/Transposer.h \
-        Pulsar/Utilities.h \
         Pulsar/Weight.h
 
 libGeneral_la_SOURCES = \
