@@ -20,6 +20,8 @@ psrdiff_SOURCES = psrdiff.C
 psrdiff_LDADD = $(LDADD) @PGPLOT_LIBS@
 
 psrsh_SOURCES = psrsh.C
+psrsh_LDADD = $(LDADD) @READLINE_LIBS@
+
 psrwt_SOURCES = psrwt.C
 
 #############################################################################
