@@ -5,8 +5,8 @@
  *
  ***************************************************************************/
 #include "Pulsar/psrchive.h"
-#include "Pulsar/FluxCalibratorDatabase.h"
 #include "Pulsar/FluxCalibrator.h"
+#include "Pulsar/StandardCandles.h"
 
 #include "Pulsar/SingleAxisCalibrator.h"
 #include "Pulsar/OffPulseCalibrator.h"
@@ -21,6 +21,8 @@
 #include <unistd.h>
 #include <iostream>
 #include <algorithm>
+
+using namespace std;
 
 // class name of the processed calibrator archive
 static string archive_class = "PSRFITS";
@@ -44,7 +46,7 @@ void usage ()
     "  -i minutes   maximum number of minutes between archives in same set\n"
     "\n"
     "By default, standard candle information is read from \n" 
-       << Pulsar::FluxCalibrator::Database::default_filename << "\n"
+       << Pulsar::StandardCandles::default_filename << "\n"
     "and the maximum interval between archives in the same\n"
     "flux calibrator set is " << interval/60 << " minutes.\n"
     "\n"
@@ -85,7 +87,7 @@ int main (int argc, char** argv) try {
 
   bool offpulse_calibrator = false;
 
-  Pulsar::FluxCalibrator::Database* standards = 0;
+  Pulsar::StandardCandles* standards = 0;
   string database_filename;
 
   char c;
@@ -120,7 +122,7 @@ int main (int argc, char** argv) try {
       break;
 
     case 'c':
-      standards = new Pulsar::FluxCalibrator::Database (optarg);
+      standards = new Pulsar::StandardCandles (optarg);
       cerr << "fluxcal: standard candles loaded from " << optarg << endl;
       break;
 
