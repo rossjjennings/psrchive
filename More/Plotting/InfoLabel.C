@@ -5,14 +5,28 @@
  *
  ***************************************************************************/
 #include "Pulsar/InfoLabel.h"
+#include "Pulsar/FluxPlot.h"
+
 #include "Pulsar/Archive.h"
 #include "Pulsar/Integration.h"
 #include "Pulsar/Profile.h"
+
 #include "string_utils.h"
 
-#include <cpgplot.h>
-
 using namespace std;
+
+//! Default constructor
+Pulsar::InfoLabel::InfoLabel (FluxPlot* _flux)
+{
+  if (_flux)
+    _flux->get_frame()->set_label_above(this);
+  flux = _flux;
+}
+
+//! Destructor
+Pulsar::InfoLabel::~InfoLabel ()
+{
+}
 
 const char* wavelen_str (double freq);
 const char* weight_str (float weight);
@@ -22,7 +36,7 @@ void Pulsar::InfoLabel::plot (const Archive* data)
   bool calibrated = data -> get_scale() == Signal::Jansky;
 
   // short term solution ...
-  const Profile* profile = data->get_Profile(0,0,0);
+  const Profile* profile = flux->get_plotter()->profiles[0];
 
   float snr = profile -> snr();
   
@@ -52,8 +66,11 @@ void Pulsar::InfoLabel::plot (const Archive* data)
   }
   
   string third_line = data -> get_source();
-  
-  double seconds_int = data -> get_Integration (0) -> get_duration();
+
+  Reference::To<const Integration> subint;
+  subint = get_Integration (data, flux->get_subint());
+
+  double seconds_int = subint -> get_duration();
   
   third_line += "  (" + time_string(seconds_int) + ")";
 
