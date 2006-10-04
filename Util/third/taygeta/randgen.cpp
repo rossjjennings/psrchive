@@ -8,7 +8,7 @@ static const char rcsid[] = "@(#)randgen.c++	1.5 14:38:16 7/25/94   EFC";
 
 #include <randgen.hpp>
 
-ostream* RandomGenerator::ostr = &cerr;
+std::ostream* RandomGenerator::ostr = &std::cerr;
 
 
 // everything else is either inline or pure virtual

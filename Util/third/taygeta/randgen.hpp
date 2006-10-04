@@ -10,7 +10,7 @@
 #ifndef RANDGEN_HPP_
 #define RANDGEN_HPP_ 1.5
 
-#include <iostream.h>
+#include <iostream>
 #include <limits.h>
 
 #ifndef Real
@@ -20,7 +20,7 @@
 class RandomGenerator
 {
 	protected:
-	  static ostream* ostr;		  // where error messages go
+	  static std::ostream* ostr;		  // where error messages go
 	  RandomGenerator() {}
         public:
 	  virtual ~RandomGenerator() {}
@@ -31,7 +31,7 @@ class RandomGenerator
 
           // attach the output stream for error messages,
           // (cerr is used if this is not ever used)
-          static void attach(ostream& os)       { ostr = &os; }
+          static void attach(std::ostream& os)       { ostr = &os; }
 };
 
 inline unsigned long int RandomGenerator::rani()
