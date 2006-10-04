@@ -66,14 +66,11 @@ keys2c_LDADD =
 # Dependencies should never be changed
 #
 
-INCLUDES = -I. -I$(top_builddir) -I$(top_srcdir)/utils/units \
-        -I$(top_srcdir)/utils/genutil -I$(top_srcdir)/utils/fitsutil \
-	@CFITSIO_CFLAGS@ @MPI_CFLAGS@ @SLA_CFLAGS@
+INCLUDES = -I$(top_builddir)/include @CFITSIO_CFLAGS@ @SLA_CFLAGS@
 
 LDADD = libtempo.la $(top_builddir)/utils/genutil/libgenutil.la \
 	$(top_builddir)/utils/units/libunits.la \
 	$(top_builddir)/utils/fitsutil/libfitsutil.la @FLIBS@
-
 
 include $(top_srcdir)/config/Makefile.include
 

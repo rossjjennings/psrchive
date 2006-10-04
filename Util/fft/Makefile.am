@@ -26,9 +26,7 @@ test_QuaternionFT_SOURCES	= test_QuaternionFT.C
 # Dependencies should never be changed
 #
 
-INCLUDES = -I$(top_builddir) -I$(top_srcdir)/utils/units \
-	-I$(top_srcdir)/utils/genutil -I$(top_builddir)/utils/units \
-	@FFT_CFLAGS@
+INCLUDES = -I$(top_builddir) -I$(top_builddir)/include @FFT_CFLAGS@
 
 LDADD = libpsrfft.la $(top_builddir)/utils/units/libunits.la @FFT_LIBS@ 
 

@@ -93,7 +93,7 @@ endif
 
 bin_PROGRAMS = getMJD
 
-getMJD_SOURCES			= getMJD.C
+getMJD_SOURCES = getMJD.C
 
 TESTS = test_coord test_Cartesian test_MJD test_ja98 test_endian
 
@@ -112,14 +112,11 @@ test_ja98_SOURCES		= test_ja98.C
 # Dependencies should never be changed
 #
 
-INCLUDES = -I$(top_builddir) \
-	-I$(top_srcdir)/utils/units -I$(top_builddir)/utils/units \
-	-I$(top_srcdir)/utils/genutil @PGPLOT_CFLAGS@
+INCLUDES = -I$(top_builddir) -I$(top_builddir)/include @PGPLOT_CFLAGS@
 
-LDADD = libgenutil.la ../units/libunits.la
+LDADD = libgenutil.la $(top_builddir)/utils/units/libunits.la
 
 libgenutil_la_LIBADD = @SLA_LIBS@
-
 
 include $(top_srcdir)/config/Makefile.include
 

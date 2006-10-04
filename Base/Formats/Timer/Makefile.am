@@ -26,7 +26,6 @@ libtimer_la_SOURCES = BasebandArchive.C ScintArchive.C TimerArchive.C \
 #
 
 INCLUDES = -I$(top_builddir)/include \
-	-I$(top_srcdir)/Core/Bases -I$(top_srcdir)/Core/Extensions \
 	-I$(top_srcdir)/psrchive/Polarimetry
 
 check_PROGRAMS = baseband_header_size timer_size

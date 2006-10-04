@@ -19,8 +19,6 @@ SUBDIRS += .
 #
 
 INCLUDES = -I$(top_builddir)/include \
-	-I$(top_srcdir)/Core/Bases \
-	-I$(top_srcdir)/Core/Extensions \
 	-I$(top_srcdir)/Core/Formats/Timer \
 	-I$(top_srcdir)/Core/Formats/EPN \
 	-I$(top_srcdir)/Core/Formats/ASCII \

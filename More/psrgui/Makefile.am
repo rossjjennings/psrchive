@@ -19,8 +19,7 @@ include $(top_srcdir)/config/Makefile.Qt
 # Dependencies should never be changed
 #
 
-INCLUDES = -I$(top_builddir)/include \
-        -I$(top_srcdir)/More/Plotter @PGPLOT_CFLAGS@ @QT_CXXFLAGS@
+INCLUDES = -I$(top_builddir)/include @PGPLOT_CFLAGS@ @QT_CXXFLAGS@
 
 LDADD = libpsrgui.la $(top_builddir)/More/libpsrmore.la \
         ../libpsrchive.la $(top_builddir)/astro/libpsrastro.la \
