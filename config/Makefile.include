@@ -4,5 +4,6 @@ HEADERS_TEMP = $(addprefix $(top_builddir)/include/, $(HEADERS))
 all-local: $(HEADERS_TEMP)
 
 $(HEADERS_TEMP) : $(top_builddir)/include/% : %
-	$(top_srcdir)/config/install-intermediate $< $@
+	@$(top_srcdir)/config/install-intermediate $< $@
 
+CLEANFILES = $(HEADERS_TEMP)
