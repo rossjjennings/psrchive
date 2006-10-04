@@ -218,9 +218,8 @@ doc: MEAL.pdf
 # Dependencies should never be changed
 #
 
-INCLUDES = -I. -I$(top_builddir)/utils/units @PGPLOT_CFLAGS@
+INCLUDES = -I$(top_builddir)/include @PGPLOT_CFLAGS@
 
 LDADD = libMEAL.la $(top_builddir)/utils/units/libunits.la @PGPLOT_LIBS@
 
 include $(top_srcdir)/config/Makefile.include
-

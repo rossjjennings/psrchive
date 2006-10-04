@@ -26,12 +26,11 @@ test_QuaternionFT_SOURCES	= test_QuaternionFT.C
 # Dependencies should never be changed
 #
 
-INCLUDES = -I$(top_builddir) -I$(top_builddir)/include @FFT_CFLAGS@
+INCLUDES = -I$(top_builddir)/include @FFT_CFLAGS@
 
 LDADD = libpsrfft.la $(top_builddir)/utils/units/libunits.la @FFT_LIBS@ 
 
 libpsrfft_la_LIBADD = @FFT_LIBS@
-
 
 include $(top_srcdir)/config/Makefile.include
 

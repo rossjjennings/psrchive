@@ -112,7 +112,7 @@ test_ja98_SOURCES		= test_ja98.C
 # Dependencies should never be changed
 #
 
-INCLUDES = -I$(top_builddir) -I$(top_builddir)/include @PGPLOT_CFLAGS@
+INCLUDES = -I$(top_builddir)/include @PGPLOT_CFLAGS@
 
 LDADD = libgenutil.la $(top_builddir)/utils/units/libunits.la
 
