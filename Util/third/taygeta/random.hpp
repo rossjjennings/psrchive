@@ -101,7 +101,7 @@ class Normal : public RandomGeneratorBase
 	  Normal() : z2(0.0), use_z2(1) {}
 	  Normal(const long useed) : z2(0.0), use_z2(1) { seed(useed); }
 	 ~Normal() {}
-	  Real number(const Real a,const Real b);
+	  Real number(const Real a=0,const Real b=1);
 	  void fresh() { use_z2 = 0; }
 };
 
