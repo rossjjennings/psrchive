@@ -1,0 +1,11 @@
+The code in this directory was downloaded from
+
+http://www.taygeta.com/random.xml
+
+Everett (Skip) Carter Taygeta Scientific Inc.
+1340 Munras Ave., Suite 314 Monterey, CA. 93940
+http://www.taygeta.com/
+
+Minor changes were made to random.cpp, which would not
+compile without the ErrorStream class defined in erstream.hpp
+
