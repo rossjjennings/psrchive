@@ -8,12 +8,25 @@
 #include "Error.h"
 
 #include <iostream>
+#include <stdlib.h>
 
 using namespace std;
 
 int main () try {
 
-  Configuration config ("test.cfg");
+  string filename = "test.cfg";
+
+  /*
+    automake sets the environment variable 'srcdir' before calling
+    this program during 'make check'.  This is useful when the build
+    directory is not the source directory.
+  */
+
+  char* srcdir = getenv ("srcdir");
+  if (srcdir)
+    filename = srcdir + ("/" + filename);
+
+  Configuration config (filename.c_str());
 
   double f1 = config.get<double>("F1", 5.0);
 
