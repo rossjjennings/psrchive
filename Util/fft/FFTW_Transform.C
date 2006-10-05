@@ -41,10 +41,10 @@ FTransform::FFTW_Plan::~FFTW_Plan()
 
 }
 
-FTransform::FFTW_Plan::FFTW_Plan (size_t nfft, const string& fft_call)
+FTransform::FFTW_Plan::FFTW_Plan (size_t n_fft, const string& fft_call)
 {
 #ifdef _DEBUG
-  cerr << "FTransform::FFTW_Plan nfft=" << nfft
+  cerr << "FTransform::FFTW_Plan nfft=" << n_fft
        << " call='" << fft_call << "'" << endl;
 #endif
 
@@ -62,20 +62,19 @@ FTransform::FFTW_Plan::FFTW_Plan (size_t nfft, const string& fft_call)
     flags = FFTW_MEASURE;
 
   if (fft_call == "frc1d" || fft_call == "bcr1d") {
-    plan = rfftw_create_plan (ndat, wdir, flags);
+    plan = rfftw_create_plan (n_fft, wdir, flags);
     tmp = new float[ndat+2];
     assert( tmp != 0 );
   }
   else
-    plan = fftw_create_plan (ndat, wdir, flags);
+    plan = fftw_create_plan (n_fft, wdir, flags);
 
-  ndat = nfft;
-  call = fft_call;
-  optimized = optimize;
+  this->nfft = n_fft;
+  this->call = fft_call;
+  this->optimized = optimize;
 }
 
-int FTransform::FFTW_Plan::frc1d (size_t nfft,
-				  float* dest, const float* src)
+int FTransform::FFTW_Plan::frc1d (size_t nfft, float* dest, const float* src)
 {
   FT_SETUP (FFTW_Plan, frc1d);
 
@@ -86,8 +85,7 @@ int FTransform::FFTW_Plan::frc1d (size_t nfft,
   return 0;
 }
 
-int FTransform::FFTW_Plan::fcc1d (size_t nfft,
-				  float* dest, const float* src)
+int FTransform::FFTW_Plan::fcc1d (size_t nfft, float* dest, const float* src)
 {
   FT_SETUP (FFTW_Plan, fcc1d);
 
@@ -97,7 +95,7 @@ int FTransform::FFTW_Plan::fcc1d (size_t nfft,
   return 0;
 }
 
-int FTransform::FFTW_Plan::bcc1d(size_t ndat, float* dest, const float* src)
+int FTransform::FFTW_Plan::bcc1d (size_t ndat, float* dest, const float* src)
 {
   FT_SETUP (FFTW_Plan, bcc1d);
 

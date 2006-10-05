@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/fft/interpolate.h,v $
-   $Revision: 1.13 $
-   $Date: 2006/10/02 19:36:22 $
+   $Revision: 1.14 $
+   $Date: 2006/10/05 14:59:10 $
    $Author: straten $*/
 
 #ifndef __fft_interpolate_h
@@ -61,7 +61,7 @@ namespace fft {
 
       float scalefac = 1.0;
 
-      if (FTransform::get_norm() == FTransform::nfft)
+      if (FTransform::get_norm() == FTransform::unnormalized)
         scalefac = 1.0 / float(in.size());
       else
         scalefac = float(out.size()) / float(in.size());

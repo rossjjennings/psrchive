@@ -16,21 +16,23 @@
 
 using namespace std;
 
+#define _DEBUG 1
+
 /* ***********************************************************************
 
    One-dimensional interface
 
    *********************************************************************** */
 
-FTransform::FFTW3_Plan::FFTW3_Plan (size_t nfft, const string& fft_call)
+FTransform::FFTW3_Plan::FFTW3_Plan (size_t n_fft, const string& fft_call)
 {
 #ifdef _DEBUG
-  cerr << "FTransform::FFTW3_Plan nfft=" << nfft
+  cerr << "FTransform::FFTW3_Plan nfft=" << n_fft
        << " call='" << fft_call << "'" << endl;
 #endif
 
   int direction_flags = 0;
-  if( fft_call == "frc1d" || fft_call == "fcc1d" )
+  if( fft_call == "fcc1d" )
     direction_flags |= FFTW_FORWARD;
   else
     direction_flags |= FFTW_BACKWARD;
@@ -41,23 +43,33 @@ FTransform::FFTW3_Plan::FFTW3_Plan (size_t nfft, const string& fft_call)
   else
     flags |= FFTW_ESTIMATE;
 
-  fftwf_complex* in = new fftwf_complex[nfft];
-  fftwf_complex* out = new fftwf_complex[nfft];
+  int floats_req = n_fft;
+  if( fft_call == "fcc1d" || fft_call == "bcc1d" )
+    floats_req *= 2;
+  else
+    floats_req += 2;
+
+  float* in = new float[floats_req];
+  float* out = new float[floats_req];
 
   if( !in || !out )
-    throw Error(InvalidState,"FTransform::FFTW3_Plan::FFTW3_Plan ()",
+    throw Error(InvalidState, "FTransform::FFTW3_Plan::FFTW3_Plan",
 		"Failed to allocate array of size "UI64"\n",
-		uint64(nfft));
+		uint64(n_fft));
 
-  if( fft_call == "frc1d" )
-    plan = fftwf_plan_dft_r2c_1d (nfft, (float*)in, out, flags);
-  else if( fft_call == "bcr1d" )
-    plan = fftwf_plan_dft_c2r_1d (nfft, in, (float*)out, flags);
-  else
-    plan = fftwf_plan_dft_1d (nfft, in, out, direction_flags, flags);
+  if( fft_call == "frc1d" ) {
+    plan = fftwf_plan_dft_r2c_1d (n_fft, in, (fftwf_complex*)out, flags);
+  }
+  else if( fft_call == "bcr1d" ) {
+    plan = fftwf_plan_dft_c2r_1d (n_fft, (fftwf_complex*)in, out, flags);
+  }
+  else {
+    plan = fftwf_plan_dft_1d (n_fft, (fftwf_complex*)in, (fftwf_complex*)out,
+			      direction_flags, flags);
+  }
 
-  ndat = nfft;
-  call = fft_call;
+  this->nfft = n_fft;
+  this->call = fft_call;
   optimized = optimize;
 
   delete [] in;

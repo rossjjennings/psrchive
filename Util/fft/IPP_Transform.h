@@ -32,7 +32,7 @@ namespace FTransform {
     //! Agent class
     class Agent : public PlanAgent<IPP_Plan> {
     public:
-      Agent () : PlanAgent<IPP_Plan> ("IPP", nfft) { }
+      Agent () : PlanAgent<IPP_Plan> ("IPP", unnormalized) { }
       IPP_Plan* new_plan (size_t nfft, const std::string& call);
     };
 

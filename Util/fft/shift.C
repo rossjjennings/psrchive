@@ -40,7 +40,7 @@ void FTransform::shift (unsigned npts, float* arr, double shift)
   FTransform::bcc1d(npts, &(cmplx_arr[0]), &(fft_cmplx_arr[0]));
 
   float norm = 1.0;
-  if (FTransform::get_norm() == FTransform::nfft)
+  if (FTransform::get_norm() == FTransform::unnormalized)
     norm = 1.0 / (float) npts;
 
   for (unsigned i=0; i<npts; ++i)

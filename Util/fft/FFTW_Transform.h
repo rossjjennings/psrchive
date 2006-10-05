@@ -31,7 +31,7 @@ namespace FTransform {
     //! Agent class
     class Agent : public PlanAgent<FFTW_Plan> {
     public:
-      Agent () : PlanAgent<FFTW_Plan> ("FFTW", nfft) { }
+      Agent () : PlanAgent<FFTW_Plan> ("FFTW", unnormalized) { }
       FFTW_Plan* new_plan (size_t nfft, const std::string& call);
     };
 
@@ -57,7 +57,7 @@ namespace FTransform {
 
     class Agent : public PlanAgent2<FFTW_Plan2> {
     public:
-      Agent () : PlanAgent2<FFTW_Plan2> ("FFTW", nfft) { }
+      Agent () : PlanAgent2<FFTW_Plan2> ("FFTW", unnormalized) { }
       FFTW_Plan2* new_plan (size_t nx, size_t ny, const std::string& call);
     };
 

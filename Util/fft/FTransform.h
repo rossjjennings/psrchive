@@ -26,17 +26,26 @@ bcr1d = backward complex->real 1D
 fcc2d = forward complex->complex 2D
 bcc2d = backward complex->complex 2D
 
-Call transforms as FUNC(ndat,dest,src);
+Call transforms as FUNC(nfft,dest,src);
 
 */
 
 namespace FTransform {
 
-  //! The normalization conventions
-  enum norm_type { normal, nfft };
+  //! The normalization convention
+  enum normalization { normalized, unnormalized };
+
+  //! The FFT direction
+  enum direction { forward, backward };
+
+  //! The FFT type
+  enum type { real, analytic };
 
   //! Returns the normalization convention of the currently selected library
-  norm_type get_norm ();
+  normalization get_norm ();
+
+  //! Returns the scale factor associated with the FFT operation
+  double get_scale (direction d, type t, size_t nfft);
 
   //! Returns the name of the currently selected library
   std::string get_library ();
@@ -58,7 +67,7 @@ namespace FTransform {
 
   //! Pointer to one-dimensional FFT
   //! A size_t is a 32/64 bit unsigned integer on 32/64 bit machines
-  /*! Arguments are: (size_t ndat, float* dest, const float* src) */
+  /*! Arguments are: (size_t nfft, float* dest, const float* src) */
   typedef int (*fft_call) (size_t, float*, const float*);
 
   //! Pointer to the forward real-to-complex FFT
@@ -68,17 +77,17 @@ namespace FTransform {
   //! Pointer to the backward complex-to-complex FFT
   extern fft_call bcc1d;
   //! Pointer to the backward complex-to-real FFT
-  /*! Data must be hermitian; ndat floats are output */
+  /*! Data must be hermitian; nfft floats are output */
   extern fft_call bcr1d;
 
   //! Inplace wrapper-function- performs a memcpy after FFTing
-  int inplace_frc1d(size_t ndat, float* srcdest);
+  int inplace_frc1d(size_t nfft, float* srcdest);
   //! Inplace wrapper-function- performs a memcpy after FFTing
-  int inplace_fcc1d(size_t ndat, float* srcdest);
+  int inplace_fcc1d(size_t nfft, float* srcdest);
   //! Inplace wrapper-function- performs a memcpy after FFTing
-  int inplace_bcc1d(size_t ndat, float* srcdest);
+  int inplace_bcc1d(size_t nfft, float* srcdest);
   //! Inplace wrapper-function- performs a memcpy after FFTing
-  int inplace_bcr1d(size_t ndat, float* srcdest);
+  int inplace_bcr1d(size_t nfft, float* srcdest);
 
 
   //! Base class of two-dimensional Fast Fourier Transforms
@@ -90,7 +99,7 @@ namespace FTransform {
 
     bool optimized;
     std::string call;
-    size_t ndat;
+    size_t nfft;
 
   };
 
@@ -98,9 +107,6 @@ namespace FTransform {
   extern Plan* last_fcc1d;
   extern Plan* last_bcc1d;
   extern Plan* last_bcr1d;
-
-  // The whole Agent kababble doesn't work!
-  extern std::vector<Reference::To<Plan> > plans_for_clean_plans;
 
   void shift (unsigned npts, float* arr, double shift);
 
@@ -129,7 +135,7 @@ namespace FTransform {
     fft_call bcr1d;
 
     //! The normalization type
-    norm_type norm;
+    normalization norm;
 
     //! Clean up the plans for this library
     virtual void clean_plans () = 0;
@@ -163,10 +169,10 @@ namespace FTransform {
   public:
 
     //! Default constructor
-    PlanAgent (const std::string& name, norm_type norm);
+    PlanAgent (const std::string& name, normalization norm);
 
     //! Return an appropriate plan from this library
-    PlanT* get_plan (size_t ndat, const std::string& call);
+    PlanT* get_plan (size_t nfft, const std::string& call);
 
     //! Clean up the plans for this library
     void clean_plans ();
@@ -189,6 +195,8 @@ namespace FTransform {
   void
   PlanAgent<PlanT>::clean_plans ()
   {
+    for( unsigned iplan=0; iplan<plans.size(); iplan++)
+      delete plans[iplan].ptr();
     plans.resize (0);
   }
 
@@ -196,7 +204,7 @@ namespace FTransform {
   template<class PlanT> typename PlanT::Agent PlanAgent<PlanT>::my_agent;
 
   template<class PlanT>
-  PlanAgent<PlanT>::PlanAgent (const std::string& _name, norm_type _norm)
+  PlanAgent<PlanT>::PlanAgent (const std::string& _name, normalization _norm)
   {
     name = _name;
     norm = _norm;
@@ -208,15 +216,14 @@ namespace FTransform {
   }
 
   template<class PlanT> PlanT* 
-  PlanAgent<PlanT>::get_plan (size_t ndat, const std::string& cl)
+  PlanAgent<PlanT>::get_plan (size_t nfft, const std::string& cl)
   {
-    //    for (unsigned iplan=0; iplan<plans.size(); iplan++)
-    //if (plans[iplan]->ndat == ndat && plans[iplan]->call == cl)
-    //return plans[iplan];
+    for (unsigned iplan=0; iplan<plans.size(); iplan++)
+      if (plans[iplan]->nfft == nfft && plans[iplan]->call == cl)
+	return plans[iplan];
     
-    //    plans.push_back( new PlanT (ndat, cl) );
-    //return plans.back();
-    return new PlanT (ndat, cl);
+    plans.push_back( new PlanT (nfft, cl) );
+    return plans.back();
   }
 
   template<class PlanT>
@@ -270,7 +277,7 @@ namespace FTransform {
     fft2_call bcc2d;
 
     //! The normalization type
-    norm_type norm;
+    normalization norm;
 
     //! List of all libraries
     static std::vector< Reference::To<Agent2> > libraries;
@@ -284,7 +291,7 @@ namespace FTransform {
   public:
 
     //! Default constructor
-    PlanAgent2 (const std::string& name, norm_type norm);
+    PlanAgent2 (const std::string& name, normalization norm);
 
     //! Return an appropriate plan from this library
     PlanT* get_plan (size_t nx, size_t ny, const std::string& call);
@@ -309,7 +316,7 @@ namespace FTransform {
   template<class PlanT> unsigned PlanAgent2<PlanT>::instances = 0;
 
   template<class PlanT>
-  PlanAgent2<PlanT>::PlanAgent2 (const std::string& _name, norm_type _norm)
+  PlanAgent2<PlanT>::PlanAgent2 (const std::string& _name, normalization _norm)
   {
     name = _name;
     norm = _norm;
@@ -348,7 +355,7 @@ namespace FTransform {
 //! DEVELOPERS: Use of this macro greatly decreases the margin for error
 #define FT_SETUP(PLAN,TYPE) \
   PLAN* plan = dynamic_cast<PLAN*>( last_ ## TYPE ); \
-  if (!plan || plan->ndat != nfft || plan->call != #TYPE) \
+  if (!plan || plan->nfft != nfft || plan->call != #TYPE) \
     last_ ## TYPE = plan = Agent::my_agent.get_plan (nfft, #TYPE)
 
 #define FT_SETUP2(PLAN,TYPE) \

@@ -16,10 +16,10 @@
 
 #ifdef HAVE_FFTW3
 #include "FFTW3_Transform.h"
-#else
+#endif
+
 #ifdef HAVE_FFTW
 #include "FFTW_Transform.h"
-#endif
 #endif
 
 #ifdef HAVE_IPP
@@ -29,13 +29,11 @@
 #include "Error.h"
 
 #include <stdlib.h>
+#include <math.h>
 
 using namespace std;
 
 bool FTransform::optimize = false;
-
-// The whole Agent kababble doesn't work!
-vector<Reference::To<FTransform::Plan> > FTransform::plans_for_clean_plans = vector<Reference::To<FTransform::Plan> >();
 
 // ////////////////////////////////////////////////////////////////////
 //
@@ -84,10 +82,10 @@ static int initialise()
 
 #ifdef HAVE_FFTW3
   FTransform::FFTW3_Plan::Agent::enlist ();
-#else
+#endif
+
 #ifdef HAVE_FFTW
   FTransform::FFTW_Plan::Agent::enlist ();
-#endif
 #endif
 
 #ifdef HAVE_IPP
@@ -104,8 +102,8 @@ static int initialise()
 
 static int initialised = initialise();
 
-static FTransform::norm_type current_norm  = FTransform::normal;
-static FTransform::Agent*    current_agent = 0;
+static FTransform::normalization current_norm = FTransform::unnormalized;
+static FTransform::Agent* current_agent = 0;
 
 //! Returns currently selected library
 string FTransform::get_library()
@@ -114,9 +112,31 @@ string FTransform::get_library()
 }
 
 //! Returns currently selected normalization
-FTransform::norm_type FTransform::get_norm()
+FTransform::normalization FTransform::get_norm()
 {
   return current_norm;
+}
+
+// ////////////////////////////////////////////////////////////////////////
+//!
+double FTransform::get_scale (direction d, type t, size_t ntrans)
+{
+  double dim = 1.0;
+  if (t != analytic)
+    dim = 0.5;
+
+  if (get_norm() == unnormalized)
+    return sqrt(double(ntrans)*dim);
+
+  if (get_norm() == normalized) {
+    if (d == forward)
+      return sqrt(double(ntrans)*dim);
+    else
+      return 1.0/sqrt(double(ntrans)*dim);
+  }
+
+  throw Error (InvalidState, "FTransform::get_scale",
+	       "unsupported normalization for " + get_library());
 }
 
 //! Clears out the memory associated with the plans
@@ -124,10 +144,6 @@ void FTransform::clean_plans()
 {
   for (unsigned ilib=0; ilib < FTransform::Agent::libraries.size(); ilib++)
     FTransform::Agent::libraries[ilib]->clean_plans ();
-
-  for( unsigned iplan=0; iplan<plans_for_clean_plans.size(); iplan++)
-    delete plans_for_clean_plans[iplan].ptr();
-  plans_for_clean_plans.resize(0);
 
   last_frc1d = 0;
   last_fcc1d = 0;
@@ -215,19 +231,20 @@ int FTransform::inplace_bcr1d (size_t ndat, float* srcdest)
 }
 
 FTransform::Plan::Plan()
-  : Reference::Able()
 {
-  plans_for_clean_plans.push_back( this );
 }
 
-FTransform::Plan::~Plan(){}
+FTransform::Plan::~Plan()
+{
+}
 
 FTransform::Agent::Agent()
-  : Reference::Able()
 {
 }
 
-FTransform::Agent::~Agent(){}
+FTransform::Agent::~Agent()
+{
+}
 
 void
 FTransform::Agent::install ()
