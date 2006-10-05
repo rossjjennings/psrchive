@@ -4,6 +4,7 @@ noinst_LTLIBRARIES = libgenutil.la
 include_HEADERS = \
         Angle.h \
         Brent.h \
+	BoxMuller.h \
         Cartesian.h \
         CommandParser.h \
         compressed_io.h \
@@ -37,6 +38,7 @@ include_HEADERS = \
 libgenutil_la_SOURCES = \
         Angle.C \
         angleconv.c \
+	BoxMuller.C \
         Cartesian.C \
         CommandParser.C \
         companion_mass.c \
