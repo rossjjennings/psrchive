@@ -38,9 +38,6 @@ FTransform::MKL_Plan::~MKL_Plan()
 FTransform::MKL_Plan::MKL_Plan (size_t n_fft, const string& fft_call)
   : Plan()
 {
-  fprintf(stderr,"In MKL_Plan constructor(%d,%s)\n",
-	  n_fft, fft_call.c_str());
-
 #ifdef _DEBUG
   cerr << "FTransform::MKL_Plan nfft=" << n_fft
        << " call='" << fft_call << "'" << endl;
@@ -55,7 +52,7 @@ FTransform::MKL_Plan::MKL_Plan (size_t n_fft, const string& fft_call)
   int signed_ndat = n_fft;
 
   if( int64(uint64(n_fft)) != signed_ndat )
-    throw Error(InvalidState,"FTransform::MKL_Plan::MKL_Plan()",
+    throw Error(InvalidState,"FTransform::MKL_Plan::MKL_Plan",
 		"Could not convert nfft="UI64" to an integer",
 		uint64(n_fft));
 
@@ -83,7 +80,7 @@ int FTransform::MKL_Plan::frc1d (size_t nfft, float* dest, const float* src)
   int signed_nfft = nfft;
 
   if( int64(uint64(nfft)) != signed_nfft )
-    throw Error(InvalidState,"FTransform::MKL_Plan::frc1d()",
+    throw Error(InvalidState,"FTransform::MKL_Plan::frc1d",
 		"Could not convert nfft="UI64" to an integer",
 		uint64(nfft));
 
@@ -105,7 +102,7 @@ int FTransform::MKL_Plan::fcc1d (size_t nfft, float* dest, const float* src)
   int signed_nfft = nfft;
 
   if( int64(uint64(nfft)) != signed_nfft )
-    throw Error(InvalidState,"FTransform::MKL_Plan::fcc1d()",
+    throw Error(InvalidState,"FTransform::MKL_Plan::fcc1d",
 		"Could not convert nfft="UI64" to an integer",
 		uint64(nfft));
 
@@ -125,7 +122,7 @@ int FTransform::MKL_Plan::bcc1d (size_t nfft, float* dest, const float* src)
   int signed_nfft = nfft;
 
   if( int64(uint64(nfft)) != signed_nfft )
-    throw Error(InvalidState,"FTransform::MKL_Plan::bcc1d()",
+    throw Error(InvalidState,"FTransform::MKL_Plan::bcc1d",
 		"Could not convert nfft="UI64" to an integer",
 		uint64(nfft));
 
@@ -145,11 +142,11 @@ int FTransform::MKL_Plan::bcr1d (size_t nfft, float* dest, const float* src)
   int signed_nfft = nfft;
 
   if( int64(uint64(nfft)) != signed_nfft )
-    throw Error(InvalidState,"FTransform::MKL_Plan::bcr1d()",
+    throw Error(InvalidState,"FTransform::MKL_Plan::bcr1d",
 		"Could not convert nfft="UI64" to an integer",
 		uint64(nfft));
 
-  memcpy (dest, src, nfft*sizeof(float));
+  memcpy (dest, src, (nfft+2)*sizeof(float));
   csfft1d_(dest, &signed_nfft, &isign, plan->mkl_plan);
 
   return 0;
