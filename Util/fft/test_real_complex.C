@@ -4,11 +4,11 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+#include "FTransform.h"
+#include "BoxMuller.h"
+
 #include <stdio.h>
 #include <math.h>
-
-#include "fftm.h"
-#include "spectra.h"
 
 int main (int argc, char** argv)
 {
@@ -24,16 +24,18 @@ int main (int argc, char** argv)
   float dc_value = 3.0;
 
   fprintf (stderr, "Generating %d random numbers\n", ndat);
-  gasdev (&idum);
+
+  BoxMuller gasdev;
+
   for (idat=0; idat<ndat; idat++)
-    copy[idat] = data[idat] = dc_value + gasdev (&idum);
+    copy[idat] = data[idat] = dc_value + gasdev ();
 
   // ensure that DC and Nyquist are properly set by frc1d
   fft1[0] = fft1[ndat] = 0.0;   // should be set to other than zero
   fft1[1] = fft1[ndat+1] = 3.0; // should be set to zero
 
   fprintf (stderr, "Forward R->C FFT:%d\n", ndat);
-  fft::frc1d (ndat, fft1, data);
+  FTransform::frc1d (ndat, fft1, data);
 
   for (unsigned j=0; j < ndat; j++)
     if (copy[j] != data[j])  {
@@ -64,10 +66,10 @@ int main (int argc, char** argv)
   fprintf (stderr, "Ny=%f,%f\n", fft1[ndat],fft1[ndat+1]);
 
   fprintf (stderr, "Backward C->R FFT:%d\n", ndat);
-  fft::bcr1d (ndat, back, fft1);
+  FTransform::bcr1d (ndat, back, fft1);
 
   for (idat=0; idat<ndat; idat++) {
-    if (fft::get_normalization() == fft::nfft)
+    if (FTransform::get_norm() == FTransform::unnormalized)
       back[idat] /= ndat;
     float residual = (back[idat]-data[idat])/data[idat];
     if (fabs(residual) > 5e-4) {

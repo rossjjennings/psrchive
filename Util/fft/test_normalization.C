@@ -5,22 +5,22 @@
  *
  ***************************************************************************/
 
-#include "fftm.h"
-#include "spectra.h"
+#include "FTransform.h"
+#include "BoxMuller.h"
 #include "Error.h"
 
 #include <iostream>
-using namespace std;
-
 #include <stdio.h>
 #include <math.h>
 
+using namespace std;
 
 void runtest (int ndat);
 
 int main (int argc, char** argv) try {
 
-  cerr << "Test of normalization factors with " <<  fft::id << endl;
+  cerr << "Test of normalization factors with "
+       << FTransform::get_library() << endl;
   
   // from 16kpt
   int ndat = 16 * 1024;
@@ -37,8 +37,6 @@ catch (Error& error) {
   return -1;
 }
 
-static long idum = -1;
-
 double power (unsigned ndat, float* data);
 
 void runtest2 (int ntrans, double powerin, float* fft1, float* data = 0);
@@ -49,20 +47,20 @@ void runtest (int ndat)
   float* fft1 = new float [ndat + 2];
 
   fprintf (stderr, "Generating %d random numbers\n", ndat);
-  gasdev (&idum);
+  BoxMuller gasdev;
 
   for (int idat=0; idat<ndat; idat++)
-    data[idat] = gasdev (&idum);
+    data[idat] = gasdev();
 
   int ntrans = ndat/2;
 
   fprintf (stderr, "Forward R->C FFT:%d\n", ntrans);
-  fft::frc1d (ndat, fft1, data);
+  FTransform::frc1d (ndat, fft1, data);
 
-  runtest2 (ntrans, power(ndat+1,data), fft1);
+  runtest2 (ntrans, power(ndat,data), fft1);
 
   fprintf (stderr, "Forward C->C FFT:%d\n", ntrans);
-  fft::fcc1d (ntrans, fft1, data);
+  FTransform::fcc1d (ntrans, fft1, data);
 
   runtest2 (ntrans, power(ndat,data), fft1, data);
 }
@@ -79,11 +77,13 @@ double power (unsigned ndat, float* data)
   return p - mean*mean;
 }
 
+using namespace FTransform;
+
 double diff (unsigned ndat, float* in, float* out)
 {
   double c = 0.0;
-  double scale = fft::get_scale (fft::forward, fft::complex, ndat/2)
-                *fft::get_scale (fft::backward, fft::complex, ndat/2);
+  double scale = get_scale (forward, analytic, ndat/2)
+                *get_scale (backward, analytic, ndat/2);
 
   cerr << "scale=" << scale << endl;
 
@@ -109,7 +109,7 @@ void runtest2 (int ntrans, double powerin, float* fft1, float* data)
   float* fft2 = new float [ntrans*2];
 
   fprintf (stderr, "Backward C->C FFT:%d\n", ntrans);
-  fft::bcc1d (ntrans, fft2, fft1);
+  bcc1d (ntrans, fft2, fft1);
 
   if (data) {
     double d = diff (ntrans*2, data, fft2);
@@ -123,8 +123,8 @@ void runtest2 (int ntrans, double powerin, float* fft1, float* data)
   double expect1 = 1;
   double expect2 = 1;
 
-  expect1 = fft::get_scale (fft::forward, fft::complex, ntrans);
-  expect2 = expect1*fft::get_scale (fft::backward, fft::complex, ntrans);
+  expect1 = get_scale (forward, analytic, ntrans);
+  expect2 = expect1*get_scale (backward, analytic, ntrans);
   expect1 *= expect1; // dealing with power
   expect2 *= expect2;
 
@@ -147,7 +147,7 @@ void runtest2 (int ntrans, double powerin, float* fft1, float* data)
     double powerout = 0.0;
     for (int ichan=0; ichan<nchan[j]; ichan++) {
 
-      fft::bcc1d (bdat, fft2, fft1+ichan*bdat*2);
+      bcc1d (bdat, fft2, fft1+ichan*bdat*2);
       // find the average multiplicative factor
       double chan_power = power (bdat*2, fft2);
       powerout += chan_power;
@@ -155,8 +155,8 @@ void runtest2 (int ntrans, double powerin, float* fft1, float* data)
 
     double factor2 = powerout/powerin;
 
-    expect1 = fft::get_scale (fft::forward, fft::complex, ntrans);
-    expect2 = expect1*fft::get_scale (fft::backward, fft::complex, bdat);
+    expect1 = get_scale (forward, analytic, ntrans);
+    expect2 = expect1*get_scale (backward, analytic, bdat);
     expect1 *= expect1; // dealing with power
     expect2 *= expect2;
 

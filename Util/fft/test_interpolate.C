@@ -6,9 +6,9 @@
  ***************************************************************************/
 
 #include "interpolate.h"
-#include "spectra.h"
-
+#include "BoxMuller.h"
 #include <iostream>
+
 using namespace std;
 
 void meanvar (double& mean, double& var, vector<float>& data)
@@ -28,18 +28,18 @@ void meanvar (double& mean, double& var, vector<float>& data)
 
 int main (int argc, char** argv)
 {
-  cerr << "Test of Fourier interpolation with " << fft::id << endl;
+  cerr << "Test of Fourier interpolation with " 
+       << FTransform::get_library() << endl;
 
   // from 8kpt
   int ndat = 8 * 1024;
   cerr << "Generating " << ndat << " random numbers" << endl;
 
-  long idum = -1;
-  gasdev (&idum);
+  BoxMuller gasdev;
 
   vector<float> data (ndat);
   for (int idat=0; idat<ndat; idat++)
-    data[idat] = gasdev (&idum);
+    data[idat] = gasdev();
 
   double mean_0 = 0.0;
   double var_0 = 0.0;
@@ -59,7 +59,7 @@ int main (int argc, char** argv)
     double var = 0.0;
     meanvar (mean, var, into);
 
-    if ( fabs(mean-mean_0) > 1e-6 || fabs(var-var_0) > 1e-6 ) {
+    if ( fabs(mean-mean_0) > 1e-6 || fabs(var-var_0) > 1e-5 ) {
       cerr << "Input Mean=" << mean_0 << " Variance=" << var_0 << endl;
       cerr << "Output Mean=" << mean << " Variance=" << var << endl;
       return -1;
