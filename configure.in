@@ -136,6 +136,7 @@ AM_CONFIG_HEADER([config.h])
 AC_CONFIG_FILES([utils/Makefile
 		utils/third/Makefile
 		utils/third/parsifal/Makefile
+		utils/third/taygeta/Makefile
 		utils/units/Makefile
 		utils/fft/Makefile
 		utils/genutil/Makefile
