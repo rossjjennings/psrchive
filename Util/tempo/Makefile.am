@@ -68,9 +68,9 @@ keys2c_LDADD =
 
 INCLUDES = -I$(top_builddir)/include @CFITSIO_CFLAGS@ @SLA_CFLAGS@
 
-LDADD = libtempo.la $(top_builddir)/utils/genutil/libgenutil.la \
-	$(top_builddir)/utils/units/libunits.la \
-	$(top_builddir)/utils/fitsutil/libfitsutil.la @FLIBS@
+LDADD = libtempo.la $(top_builddir)/Util/genutil/libgenutil.la \
+	$(top_builddir)/Util/units/libunits.la \
+	$(top_builddir)/Util/fitsutil/libfitsutil.la @FLIBS@
 
 include $(top_srcdir)/config/Makefile.include
 

@@ -116,7 +116,7 @@ test_ja98_SOURCES		= test_ja98.C
 
 INCLUDES = -I$(top_builddir)/include @PGPLOT_CFLAGS@
 
-LDADD = libgenutil.la $(top_builddir)/utils/units/libunits.la
+LDADD = libgenutil.la $(top_builddir)/Util/units/libunits.la
 
 libgenutil_la_LIBADD = @SLA_LIBS@
 

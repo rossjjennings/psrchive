@@ -28,9 +28,9 @@ test_QuaternionFT_SOURCES	= test_QuaternionFT.C
 INCLUDES = @FFT_CFLAGS@
 
 LDADD = libpsrfft.la \
-	$(top_builddir)/utils/genutil/libgenutil.la \
-	$(top_builddir)/utils/units/libunits.la \
-	$(top_builddir)/utils/third/libthird.la \
+	$(top_builddir)/Util/genutil/libgenutil.la \
+	$(top_builddir)/Util/units/libunits.la \
+	$(top_builddir)/Util/third/libthird.la \
 	@FFT_LIBS@ 
 
 libpsrfft_la_LIBADD = @FFT_LIBS@

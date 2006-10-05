@@ -5,7 +5,7 @@ AC_PREREQ(2.57)
 AC_INIT([PSRCHIVE],[6.0],[psrchive@sourceforge.net])
 
 AC_CONFIG_AUX_DIR([config])
-AC_CONFIG_SRCDIR([utils/Makefile.am])
+AC_CONFIG_SRCDIR([Util/Makefile.am])
 
 AC_ARG_VAR([PSRHOME],[Standard pulsar home directory])
 AC_ARG_VAR([LOGIN_ARCH],[Architecture-dependent sub-directory of PSRHOME])
@@ -133,17 +133,17 @@ AM_CONDITIONAL(MAKE_LEAN, [test x"$enable_lean" == xyes])
 SWIN_FUNC_GETOPT_LONG
 
 AM_CONFIG_HEADER([config.h])
-AC_CONFIG_FILES([utils/Makefile
-		utils/third/Makefile
-		utils/third/parsifal/Makefile
-		utils/third/taygeta/Makefile
-		utils/units/Makefile
-		utils/fft/Makefile
-		utils/genutil/Makefile
-		utils/pgutil/Makefile
-		utils/qtutil/Makefile
-		utils/fitsutil/Makefile
-		utils/tempo/Makefile
+AC_CONFIG_FILES([Util/Makefile
+		Util/third/Makefile
+		Util/third/parsifal/Makefile
+		Util/third/taygeta/Makefile
+		Util/units/Makefile
+		Util/fft/Makefile
+		Util/genutil/Makefile
+		Util/pgutil/Makefile
+		Util/qtutil/Makefile
+		Util/fitsutil/Makefile
+		Util/tempo/Makefile
 		Core/Makefile
 		Core/Bases/Makefile
 		Core/Extensions/Makefile

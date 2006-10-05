@@ -172,7 +172,7 @@ test_ReceptionModel_LDADD	= $(LDADD) @SLA_LIBS@
 INCLUDES = -I$(top_builddir)/include @PGPLOT_CFLAGS@ @SLA_CFLAGS@
 
 LDADD = libPolarimetry.la $(top_builddir)/More/MEAL/libMEAL.la \
-	$(top_builddir)/utils/libpsrutils.la
+	$(top_builddir)/Util/libpsrutil.la
 
 include $(top_srcdir)/config/Makefile.include
 

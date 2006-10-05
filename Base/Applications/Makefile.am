@@ -11,5 +11,5 @@ vip_SOURCES			= vip.C
 INCLUDES = -I$(top_builddir)/include
 
 LDADD = $(top_builddir)/Core/libpsrcore.la \
-	$(top_builddir)/utils/libpsrutils.la
+	$(top_builddir)/Util/libpsrutil.la
 

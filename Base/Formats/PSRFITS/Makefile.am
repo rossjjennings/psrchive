@@ -36,5 +36,5 @@ test_template_SOURCES = test_template.C
 INCLUDES = -I$(top_builddir)/include \
 	-I$(top_srcdir)/More/Polarimetry @CFITSIO_CFLAGS@ @MPI_CFLAGS@
 
-LDADD = libpsrfits.la $(top_builddir)/utils/libpsrutils.la @CFITSIO_LIBS@
+LDADD = libpsrfits.la $(top_builddir)/Util/libpsrutil.la @CFITSIO_LIBS@
 

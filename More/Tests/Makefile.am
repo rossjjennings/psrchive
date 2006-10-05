@@ -474,7 +474,7 @@ export:
 #
 
 INCLUDES = -I$(top_builddir)/third/include				  \
-	-I$(top_builddir)/utils/include					  \
+	-I$(top_builddir)/Util/include					  \
 	-I$(top_builddir)/astro/include					  \
         -I$(top_srcdir)/psrchive/Calibration				  \
         -I$(top_srcdir)/psrchive/Plotter				  \
@@ -484,7 +484,7 @@ INCLUDES = -I$(top_builddir)/third/include				  \
 	@PGPLOT_CFLAGS@ @CFITSIO_CFLAGS@ @MPI_CFLAGS@
 
 LDADD = libpsrchive.la $(top_builddir)/astro/libpsrastro.la \
-        $(top_builddir)/utils/libpsrutils.la \
+        $(top_builddir)/Util/libpsrutil.la \
 	$(top_builddir)/third/libpsrthird.la
 
 libpsrchive_la_LIBADD += @FFT_LIBS@ @CFITSIO_LIBS@ @SLA_LIBS@ @FLIBS@
