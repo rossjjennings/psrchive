@@ -19,15 +19,27 @@ void runtest (int ndat);
 
 int main (int argc, char** argv) try {
 
-  cerr << "Test of normalization factors with "
-       << FTransform::get_library() << endl;
-  
-  // from 16kpt
-  int ndat = 16 * 1024;
+  unsigned nlib = FTransform::Agent::get_num_libraries ();
 
-  for (unsigned i=0; i < 3; i++) {
-    runtest (ndat);
-    ndat *= 4;
+  for (unsigned ilib=0; ilib < nlib; ilib++) {
+
+    string name = FTransform::Agent::get_library_name (ilib);
+
+    FTransform::set_library (name);
+ 
+    cerr << "Test of normalization factors with "
+	 << FTransform::get_library() << endl;
+  
+    // from 16kpt
+    int ndat = 16 * 1024;
+    
+    for (unsigned i=0; i < 3; i++) {
+      runtest (ndat);
+      ndat *= 4;
+    }
+
+    FTransform::clean_plans ();
+
   }
 
   cerr << "All normalization tests passed" << endl;
