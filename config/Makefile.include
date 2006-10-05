@@ -7,3 +7,5 @@ $(HEADERS_TEMP) : $(top_builddir)/include/% : %
 	@$(top_srcdir)/config/install-intermediate $< $@
 
 CLEANFILES = $(HEADERS_TEMP)
+
+AM_CPPFLAGS = -I$(top_builddir)/include
