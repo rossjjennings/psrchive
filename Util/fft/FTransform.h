@@ -141,7 +141,12 @@ namespace FTransform {
     virtual void clean_plans () = 0;
 
     //! Get the number of available libraries
-    static unsigned get_num_libraries () { return libraries.size(); }
+    static unsigned get_num_libraries ()
+    { return libraries.size(); }
+
+    //! Get the number of available libraries
+    static std::string get_library_name (unsigned i) 
+    { return libraries[i]->name; }
 
   protected:
 
