@@ -66,7 +66,7 @@ void runtest (int ndat)
 
   int ntrans = ndat/2;
 
-  fprintf (stderr, "Forward R->C FFT:%d\n", ntrans);
+  fprintf (stderr, "Forward R->C FFT:%d\n", ndat);
   FTransform::frc1d (ndat, fft1, data);
 
   runtest2 (ntrans, power(ndat,data), fft1);
