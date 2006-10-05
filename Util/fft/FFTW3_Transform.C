@@ -16,8 +16,6 @@
 
 using namespace std;
 
-#define _DEBUG 1
-
 /* ***********************************************************************
 
    One-dimensional interface
