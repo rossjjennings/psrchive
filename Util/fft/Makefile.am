@@ -6,11 +6,11 @@ include_HEADERS = interpolate.h median_smooth.h \
 	   FFTW_Transform.h QuaternionFT.h
 
 libpsrfft_la_SOURCES = \
-        FTransform.C IPP_Transform.C MKL_Transform.C FFTW3_Transform.C \
+	FTransform.C IPP_Transform.C MKL_Transform.C FFTW3_Transform.C \
 	FFTW_Transform.C QuaternionFT.C shift.C fccf.f ffft.f
 
 TESTS = test_normalization test_interpolate test_real_complex \
-	test_QuaternionFT test_rfftw_sort
+	test_QuaternionFT
 
 check_PROGRAMS = $(TESTS)
 
@@ -18,7 +18,6 @@ test_normalization_SOURCES	= test_normalization.C
 test_interpolate_SOURCES	= test_interpolate.C
 test_interpolate_LDADD		= $(LDADD) ../units/libunits.la
 test_real_complex_SOURCES	= test_real_complex.C
-test_rfftw_sort_SOURCES		= test_rfftw_sort.C
 test_QuaternionFT_SOURCES	= test_QuaternionFT.C
 
 #############################################################################
@@ -26,9 +25,13 @@ test_QuaternionFT_SOURCES	= test_QuaternionFT.C
 # Dependencies should never be changed
 #
 
-INCLUDES = -I$(top_builddir)/include @FFT_CFLAGS@
+INCLUDES = @FFT_CFLAGS@
 
-LDADD = libpsrfft.la $(top_builddir)/utils/units/libunits.la @FFT_LIBS@ 
+LDADD = libpsrfft.la \
+	$(top_builddir)/utils/genutil/libgenutil.la \
+	$(top_builddir)/utils/units/libunits.la \
+	$(top_builddir)/utils/third/libthird.la \
+	@FFT_LIBS@ 
 
 libpsrfft_la_LIBADD = @FFT_LIBS@
 
