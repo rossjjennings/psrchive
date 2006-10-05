@@ -29,10 +29,10 @@ FTransform::IPP_Plan::~IPP_Plan()
 }
 
 
-FTransform::IPP_Plan::IPP_Plan (size_t nfft, const string& fft_call)
+FTransform::IPP_Plan::IPP_Plan (size_t n_fft, const string& fft_call)
 {
 #ifdef _DEBUG
-  cerr << "FTransform::IPP_Plan nfft=" << nfft
+  cerr << "FTransform::IPP_Plan nfft=" << n_fft
        << " call='" << fft_call << "'" << endl;
 #endif
 
@@ -41,13 +41,13 @@ FTransform::IPP_Plan::IPP_Plan (size_t nfft, const string& fft_call)
 
   {
     unsigned doubling = 1;
-    while( doubling < nfft ){
+    while( doubling < n_fft ){
       order++;
       doubling *= 2;
     }
-    if( doubling != nfft )
+    if( doubling != n_fft )
       throw Error (InvalidState, "FTransform::IPP_Plan",
-		   "nfft=%d is not a power of 2", nfft);
+		   "nfft=%d is not a power of 2", n_fft);
   }    
 
   if( fft_call == "frc1d" || fft_call == "bcr1d" ) {
@@ -62,13 +62,13 @@ FTransform::IPP_Plan::IPP_Plan (size_t nfft, const string& fft_call)
     ippsFFTGetBufSize_C_32fc( (IppsFFTSpec_C_32fc*)Spec, &pSize );
   }
 
-  if( nfft == 131072 ) 
+  if( n_fft == 131072 ) 
     // KLUDGE!
     pBuffer = new Ipp8u[2*pSize];
   else
     pBuffer = new Ipp8u[pSize];
 
-  ndat = nfft;
+  nfft = n_fft;
   call = fft_call;
   optimized = false;
 

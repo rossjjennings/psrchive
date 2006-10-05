@@ -63,7 +63,7 @@ FTransform::FFTW_Plan::FFTW_Plan (size_t n_fft, const string& fft_call)
 
   if (fft_call == "frc1d" || fft_call == "bcr1d") {
     plan = rfftw_create_plan (n_fft, wdir, flags);
-    tmp = new float[ndat+2];
+    tmp = new float[n_fft+2];
     assert( tmp != 0 );
   }
   else
@@ -95,7 +95,7 @@ int FTransform::FFTW_Plan::fcc1d (size_t nfft, float* dest, const float* src)
   return 0;
 }
 
-int FTransform::FFTW_Plan::bcc1d (size_t ndat, float* dest, const float* src)
+int FTransform::FFTW_Plan::bcc1d (size_t nfft, float* dest, const float* src)
 {
   FT_SETUP (FFTW_Plan, bcc1d);
 
@@ -105,7 +105,7 @@ int FTransform::FFTW_Plan::bcc1d (size_t ndat, float* dest, const float* src)
   return 0;
 }
 
-int FTransform::FFTW_Plan::bcr1d (size_t ndat, float* dest, const float* src)
+int FTransform::FFTW_Plan::bcr1d (size_t nfft, float* dest, const float* src)
 {
   FT_SETUP (FFTW_Plan, bcr1d);
 
