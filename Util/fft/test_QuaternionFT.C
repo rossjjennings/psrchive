@@ -12,6 +12,7 @@ using namespace std;
 int main ()
 {
   // QuaternionFT::verbose = true;
+  bool verbose = false;
 
   unsigned npts = 256;
   unsigned nloops = unsigned (1e3);
@@ -63,8 +64,9 @@ int main ()
     for (unsigned ipt=0; ipt < npts; ipt++) {
       float diff = norm (out1[ipt] - out2[ipt]) / norm(out1[ipt]);
       if (diff > 2e-6) {
-        cerr << "Unequal output[" << ipt << "]: fast=" << out1[ipt] 
-	     << " slow=" << out2[ipt] << " diff=" << diff << endl;
+	if (verbose)
+	  cerr << "Unequal output[" << ipt << "]: fast=" << out1[ipt] 
+	       << " slow=" << out2[ipt] << " diff=" << diff << endl;
 	errors ++;
       }
     }
@@ -72,9 +74,11 @@ int main ()
 
   }
 
-  if (errors)
+  if (errors) {
     cerr << errors << " errors. (" << (float(errors)*1e3)/(10.0*npts*nloops)
 	 << "%)" << endl;
+    return -1;
+  }
 
   return 0;
 }
