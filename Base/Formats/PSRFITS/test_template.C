@@ -4,12 +4,13 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-#include <iostream>
-#include <string>
+#include "FITSError.h"
+#include "environ.h"
 
 #include <fitsio.h>
-#include "genutil.h"
-#include "FITSError.h"
+
+#include <iostream>
+#include <string>
 
 using namespace std;
 
