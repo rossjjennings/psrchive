@@ -1,5 +1,5 @@
 
-SUBDIRS                 = third units genutil fft
+SUBDIRS                 = units third genutil fft
 
 lib_LTLIBRARIES         = libpsrutils.la
 libpsrutils_la_SOURCES  =
