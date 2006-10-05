@@ -35,29 +35,29 @@ FTransform::MKL_Plan::~MKL_Plan()
     delete [] mkl_plan;
 }
 
-FTransform::MKL_Plan::MKL_Plan (size_t nfft, const string& fft_call)
+FTransform::MKL_Plan::MKL_Plan (size_t n_fft, const string& fft_call)
   : Plan()
 {
   fprintf(stderr,"In MKL_Plan constructor(%d,%s)\n",
-	  nfft, fft_call.c_str());
+	  n_fft, fft_call.c_str());
 
 #ifdef _DEBUG
-  cerr << "FTransform::MKL_Plan nfft=" << nfft
+  cerr << "FTransform::MKL_Plan nfft=" << n_fft
        << " call='" << fft_call << "'" << endl;
 #endif
 
   if( fft_call == "frc1d" )
-    mkl_plan = new float[2*nfft+10];
+    mkl_plan = new float[2*n_fft+10];
   else
-    mkl_plan = new float[nfft*4];
+    mkl_plan = new float[n_fft*4];
   assert( mkl_plan != 0 );
 
-  int signed_ndat = nfft;
+  int signed_ndat = n_fft;
 
-  if( int64(uint64(nfft)) != signed_ndat )
+  if( int64(uint64(n_fft)) != signed_ndat )
     throw Error(InvalidState,"FTransform::MKL_Plan::MKL_Plan()",
 		"Could not convert nfft="UI64" to an integer",
-		uint64(nfft));
+		uint64(n_fft));
 
   int isign = 0;
   if( fft_call == "frc1d" )
@@ -67,7 +67,7 @@ FTransform::MKL_Plan::MKL_Plan (size_t nfft, const string& fft_call)
   else
     cfft1d_(mkl_plan, &signed_ndat, &isign, mkl_plan);
 
-  ndat = nfft;
+  nfft = n_fft;
   call = fft_call;
   optimized = false;
 
@@ -75,14 +75,7 @@ FTransform::MKL_Plan::MKL_Plan (size_t nfft, const string& fft_call)
 
 int FTransform::MKL_Plan::frc1d (size_t nfft, float* dest, const float* src)
 {
-  //  fprintf(stderr,"In FTransform::MKL_Plan::frc1d(%d)\n",nfft);
-  //  fprintf(stderr,"yo1.0 last_frc1d=%p\n",last_frc1d);
-  //FT_SETUP (MKL_Plan, frc1d);
-  MKL_Plan* plan = dynamic_cast<MKL_Plan*>( last_frc1d );
-  if (!plan || plan->ndat != nfft || plan->call != "frc1d")
-    last_frc1d = plan = Agent::my_agent.get_plan (nfft, "frc1d");
-
-  //  fprintf(stderr,"In FTransform::MKL_Plan::frc1d(%d) with plan=%p\n",nfft,plan);
+  FT_SETUP (MKL_Plan, frc1d);
 
   ///////////////////////////////////////
   // Do the transform
@@ -163,7 +156,7 @@ int FTransform::MKL_Plan::bcr1d (size_t nfft, float* dest, const float* src)
 }
 
 FTransform::MKL_Plan::Agent::Agent () : 
-  PlanAgent<MKL_Plan> ("MKL", nfft) 
+  PlanAgent<MKL_Plan> ("MKL", normalized) 
 { 
 }
 
