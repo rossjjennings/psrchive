@@ -18,7 +18,7 @@ int main (int argc, char** argv)
   float* data = new float [ndat];
   float* copy = new float [ndat];
   float* fft1 = new float [ndat+2];
-  float* back = new float [ndat];
+  float* back = new float [ndat+2];
 
   long idum = -1;
   float dc_value = 3.0;
@@ -72,7 +72,7 @@ int main (int argc, char** argv)
     if (FTransform::get_norm() == FTransform::unnormalized)
       back[idat] /= ndat;
     float residual = (back[idat]-data[idat])/data[idat];
-    if (fabs(residual) > 5e-4) {
+    if (fabs(residual) > 1e-4) {
       fprintf (stderr, "idat=%d data=%f back=%f diff=%g\n", 
                idat, back[idat], data[idat], residual);
       return -1;
@@ -81,3 +81,4 @@ int main (int argc, char** argv)
 
   return 0;
 }
+
