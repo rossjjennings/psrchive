@@ -1,12 +1,14 @@
 // r250test.cpp
 
-#include <iostream.h>
+#include <iostream>
 
 #include <r250.hpp>
-#include <rndlcg.hpp>
+//#include <rndlcg.hpp>
 
 #define TEST1
 // #define TEST2
+
+using namespace std;
 
 int main()
 {
@@ -20,7 +22,13 @@ int main()
 
 	cout << "final value is " << val << '\t';
 
-	cout << "(should be 267771767)\n";
+	long int expect = 267771767;
+
+	if (val != expect) {
+	  cout << "error: should be 267771767\n";
+	  return -1;
+	}
+
 #endif
 
 #ifdef TEST2                 // prints out two columns for a scatter plot
