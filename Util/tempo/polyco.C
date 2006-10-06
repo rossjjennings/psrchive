@@ -5,7 +5,7 @@
  *
  ***************************************************************************/
 #include "polyco.h"
-#include "string_utils.h"
+#include "strutil.h"
 #include "Error.h"
 
 #include <stdio.h> 
@@ -782,8 +782,8 @@ int polyco::i_nearest (const MJD &t, const string& in_psr) const
   int imin = -1;
 
   string nobj_in_psr = in_psr;
-  frontchomp(nobj_in_psr,"B");
-  frontchomp(nobj_in_psr,"J");
+  if (nobj_in_psr[0]=='B' || nobj_in_psr[0]=='J')
+    nobj_in_psr.erase (0,1);
 
   for (unsigned ipolly=0; ipolly<pollys.size(); ipolly ++)  {
     if( verbose )
@@ -842,8 +842,8 @@ int polyco::i_nearest (const Phase& phase, const string& in_psr) const
   int imin = -1;
 
   string nobj_in_psr = in_psr;
-  frontchomp(nobj_in_psr,"B");
-  frontchomp(nobj_in_psr,"J");
+  if (nobj_in_psr[0]=='B' || nobj_in_psr[0]=='J')
+    nobj_in_psr.erase (0,1);
 
   for (unsigned ipolly=0; ipolly<pollys.size(); ipolly ++)  {
     if (in_psr==anyPsr || pollys[ipolly].psrname==in_psr || pollys[ipolly].psrname==nobj_in_psr ) {      
