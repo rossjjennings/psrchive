@@ -59,9 +59,21 @@ int main (int argc, char** argv)
     double var = 0.0;
     meanvar (mean, var, into);
 
-    if ( fabs(mean-mean_0) > 1e-6 || fabs(var-var_0) > 1e-5 ) {
-      cerr << "Input Mean=" << mean_0 << " Variance=" << var_0 << endl;
-      cerr << "Output Mean=" << mean << " Variance=" << var << endl;
+    double diff = fabs(mean-mean_0);
+    double tol = 1e-6;
+
+    if ( diff > tol ) {
+      cerr << "Mean:  input=" << mean_0 << " output=" << mean 
+           << " diff=" << diff << " tol=" << tol << endl;
+      return -1;
+    }
+
+    diff = fabs(var-var_0);
+    tol = 5e-5;
+
+    if ( diff > tol ) {
+      cerr << "Variance:  input=" << var_0 << " output=" <<  var
+           << " diff=" << diff << " tol=" << tol << endl;
       return -1;
     }
 

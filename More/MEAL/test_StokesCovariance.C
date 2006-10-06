@@ -130,7 +130,7 @@ Test::Test ()
   cerr << "Failed " << errors << " out of " << tests << " times ("
        << failure_rate << "%)" << endl;
 
-  if (failure_rate > 10)
+  if (failure_rate > 12)
     exit (-1);
 }
 

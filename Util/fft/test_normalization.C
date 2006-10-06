@@ -110,7 +110,10 @@ double diff (unsigned ndat, float* in, float* out)
 void test (int num, double got, double expect)
 {
   fprintf (stderr, "POWER fft%d/in=%lf - expect %lf\n", num, got, expect);
-  if ( fabs(got-expect)/expect > 1e-4 ) {
+  double diff = fabs(got-expect)/expect;
+  double tol = 5e-4;
+  if ( diff > tol ) {
+    cerr << "%diff = " << diff << "  (tol = " << tol << ")" << endl;
     fprintf (stderr, "normalization test %d failed\n", num);
     exit (-1);
   }
