@@ -8,7 +8,7 @@
 #include "Pulsar/Config.h"
 
 #include "Error.h"
-#include "string_utils.h"
+#include "strutil.h"
 
 #include <fstream>
 #include <algorithm>
@@ -68,7 +68,10 @@ void Pulsar::StandardCandles::Entry::load (const string& str)
 
   string temp = str;
 
-  if( h_frontchomp(temp,'&') ){
+  if( temp[0] == '&'){
+
+    temp.erase(0,1);
+
     // Load-mode type II
     // log(S) = a_0 + a_1*log(f) + a_2*(log(f))^2 + a_3*(log(f))^4 + ...
     vector<string> words = stringdecimate(temp, whitespace);
@@ -84,7 +87,7 @@ void Pulsar::StandardCandles::Entry::load (const string& str)
     position = sky_coord (coordstr.c_str());
 
     for( unsigned i=3; i<words.size(); i++)
-      spectral_coeffs.push_back( convert_string<double>(words[i]) );
+      spectral_coeffs.push_back( fromstring<double>(words[i]) );
     return;
   }
 
@@ -115,7 +118,7 @@ void Pulsar::StandardCandles::Entry::unload (string& str)
     str = '&' + source_name[0];
 
     for( unsigned i=0; i<spectral_coeffs.size(); i++)
-      str += ' ' + make_string(spectral_coeffs[i],6);
+      str += stringprintf (" %.*lf", 6, spectral_coeffs[i]);
   }
   else
     str = source_name[0] + stringprintf (" %lf %lf %lf",
