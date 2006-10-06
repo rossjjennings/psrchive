@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Profile.h,v $
-   $Revision: 1.100 $
-   $Date: 2006/10/03 06:50:32 $
+   $Revision: 1.101 $
+   $Date: 2006/10/06 21:05:50 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Profile_h

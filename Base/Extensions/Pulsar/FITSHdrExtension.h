@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/FITSHdrExtension.h,v $
-   $Revision: 1.10 $
-   $Date: 2006/09/28 16:24:52 $
+   $Revision: 1.11 $
+   $Date: 2006/10/06 21:05:50 $
    $Author: straten $ */
 
 #ifndef __FITSHdrExtension_h

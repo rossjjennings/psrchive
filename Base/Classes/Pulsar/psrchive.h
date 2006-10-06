@@ -8,8 +8,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/psrchive.h,v $
-   $Revision: 1.1 $
-   $Date: 2006/03/29 22:09:12 $
+   $Revision: 1.2 $
+   $Date: 2006/10/06 21:05:50 $
    $Author: straten $ */
 
 #ifndef __Pulsar_psrchive_h

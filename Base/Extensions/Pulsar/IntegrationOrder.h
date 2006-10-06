@@ -7,8 +7,8 @@
  ***************************************************************************/
                                                                                 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/IntegrationOrder.h,v $
-   $Revision: 1.10 $
-   $Date: 2006/09/29 14:39:16 $
+   $Revision: 1.11 $
+   $Date: 2006/10/06 21:05:50 $
    $Author: straten $ */
                                                                                 
 #ifndef __IntegrationOrder_h

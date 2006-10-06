@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/BasicIntegration.h,v $
-   $Revision: 1.8 $
-   $Date: 2006/03/17 13:34:50 $
+   $Revision: 1.9 $
+   $Date: 2006/10/06 21:05:49 $
    $Author: straten $ */
 
 #ifndef __BasicIntegration_h

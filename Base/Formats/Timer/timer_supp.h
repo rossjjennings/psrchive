@@ -5,8 +5,8 @@
  *
  ***************************************************************************/
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/Timer/timer_supp.h,v $
-   $Revision: 1.2 $
-   $Date: 2006/03/17 13:34:55 $
+   $Revision: 1.3 $
+   $Date: 2006/10/06 21:05:50 $
    $Author: straten $ */
 
 #ifndef __TIMER_SUPP_H

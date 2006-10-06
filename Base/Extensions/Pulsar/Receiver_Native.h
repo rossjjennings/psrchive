@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/Receiver_Native.h,v $
-   $Revision: 1.4 $
-   $Date: 2006/03/17 13:34:45 $
+   $Revision: 1.5 $
+   $Date: 2006/10/06 21:05:50 $
    $Author: straten $ */
 
 #ifndef __Receiver_Native_h

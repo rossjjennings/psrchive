@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/Timer/Pulsar/TimerIntegration.h,v $
-   $Revision: 1.6 $
-   $Date: 2006/09/28 16:58:43 $
+   $Revision: 1.7 $
+   $Date: 2006/10/06 21:05:50 $
    $Author: straten $ */
 
 /*

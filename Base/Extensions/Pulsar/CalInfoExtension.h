@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Extensions/Pulsar/CalInfoExtension.h,v $
-   $Revision: 1.5 $
-   $Date: 2006/09/28 16:24:52 $
+   $Revision: 1.6 $
+   $Date: 2006/10/06 21:05:50 $
    $Author: straten $ */
 
 #ifndef __CalInfoExtension_h
