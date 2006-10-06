@@ -9,7 +9,7 @@
 using namespace std;
 
 // a simple command for replacing the extension on a filename
-string replace_extension (string filename, const string& ext)
+string replace_extension (const string& filename, const string& ext)
 {
   if (!(ext.length() && filename.length()))
     return filename;
@@ -18,12 +18,12 @@ string replace_extension (string filename, const string& ext)
   if (index == string::npos)
     index = filename.length();
 
-  filename = filename.substr(0, index);
+  string retval = filename.substr(0, index);
 
   if (ext[0] != '.')
-    filename += ".";
+    retval += ".";
 
-  filename += ext;
+  retval += ext;
 
-  return filename;
+  return retval;
 }
