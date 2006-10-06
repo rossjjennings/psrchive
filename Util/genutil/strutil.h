@@ -1,0 +1,120 @@
+//-*-C++-*-
+/***************************************************************************
+ *
+ *   Copyright (C) 1999 by Willem van Straten
+ *   Licensed under the Academic Free License version 2.1
+ *
+ ***************************************************************************/
+/* $Source: /cvsroot/psrchive/psrchive/Util/genutil/strutil.h,v $
+   $Revision: 1.1 $
+   $Date: 2006/10/06 21:13:14 $
+   $Author: straten $ */
+
+#ifndef __STRING_UTILS_H
+#define __STRING_UTILS_H
+
+#include <sys/types.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+#include <iostream>
+#include <iomanip>
+#include <sstream>
+#include <string>
+#include <vector>
+
+#include "pad.h"
+#include "tostring.h"
+
+//! Makes the string lowercase
+std::string lowercase (std::string s);
+//! Makes the string uppercase
+std::string uppercase (std::string s);
+
+// returns the filename without its path
+std::string basename (const std::string& filename);
+// returns the path preceding a filename
+std::string pathname (const std::string& filename);
+//! a simple command for replacing the extension on a filename
+std::string replace_extension (const std::string& filename, 
+			       const std::string& extension);
+
+//! a simple command for returning a user friendly time std::string
+std::string time_string (double seconds);
+
+std::vector<std::string>
+stringdecimate(const std::string& wordstr, std::string delimiters);
+
+//! removes all instances of c from input
+std::string remove_all (std::string input, char c);
+
+// ///////////////////////////////////////////////////////////
+// reads up to 'nbytes' (or to eof) from 'istr', adding them 
+// to 'str'.  returns number of bytes read or -1 on error
+// ///////////////////////////////////////////////////////////
+ssize_t 
+stringload (std::string* str, std::istream &istr, std::streamsize nbytes=0);
+
+// ///////////////////////////////////////////////////////////
+// reads up to 'nbytes' (or to eof) from 'fptr', adding them 
+// to 'str'.  returns number bytes read or -1 on error
+// ///////////////////////////////////////////////////////////
+ssize_t 
+stringload (std::string* str, FILE* fptr, size_t nbytes=0);
+
+// ///////////////////////////////////////////////////////////
+// fills a vector of std::string with the first word from each line
+// in the file.  A line is delimited by \n or commented by #.
+// ///////////////////////////////////////////////////////////
+int stringfload (std::vector<std::string>* lines, const char* filename);
+int stringload (std::vector<std::string>* lines, FILE* fptr);
+
+// ///////////////////////////////////////////////////////////
+// fills a vector of std::string with the lines form file.  
+// A line is delimited by \n or commented by #.
+// ///////////////////////////////////////////////////////////
+void loadlines (const std::string& filename, std::vector<std::string>& lines);
+
+// ///////////////////////////////////////////////////////////
+// returns the first sub-std::string of 'instr' delimited by
+// characters in 'delimiters'.  the substd::string and any leading
+// delimiter characters are removed from 'instr'
+// ///////////////////////////////////////////////////////////
+std::string stringtok (std::string * instr, const std::string & delimiters,
+		       bool skip_leading_delimiters = true,
+		       bool strip_leading_delimiters_from_remainder = true);
+
+inline
+std::string stringtok (std::string* instr, char delimiter,
+		       bool skip_leading_delimiters = true,
+		       bool strip_leading_delimiters_from_remainder = true)
+{ return stringtok (instr, std::string(1, delimiter),
+		    skip_leading_delimiters,
+		    strip_leading_delimiters_from_remainder); }
+
+// ///////////////////////////////////////////////////////////
+// returns the first sub-string of 'instr' delimited by
+// 'delimiter'.
+// ///////////////////////////////////////////////////////////
+std::string subdlim (const std::string& instr, const std::string& delimiter);
+
+inline std::string subdlim (const std::string& instr, char* delimiters)
+{ return subdlim (instr, std::string(delimiters)); }
+
+inline std::string subdlim (const std::string& instr, char delimiter)
+{ return subdlim (instr, std::string(1, delimiter)); }
+
+// ///////////////////////////////////////////////////////////
+int stringlen (double val, unsigned precision = 15);
+
+inline int stringlen (int val, unsigned precision = 0)
+{ return stringlen (double(val), precision); }
+
+inline int stringlen (float val, unsigned precision = 6)
+{ return stringlen (double(val), precision); }
+
+std::string stringprintf(char *fmt ...);
+
+
+#endif
+
