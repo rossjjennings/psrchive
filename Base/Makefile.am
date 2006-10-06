@@ -1,10 +1,10 @@
 
-SUBDIRS = Bases Extensions Formats . Applications
+SUBDIRS = Classes Extensions Formats . Applications
 
-lib_LTLIBRARIES = libpsrcore.la
-libpsrcore_la_SOURCES  =
-libpsrcore_la_LIBADD = \
-	Bases/libBases.la \
+lib_LTLIBRARIES = libpsrbase.la
+libpsrbase_la_SOURCES  =
+libpsrbase_la_LIBADD = \
+	Classes/libClasses.la \
 	Extensions/libExtensions.la \
 	Formats/libFormats.la
 

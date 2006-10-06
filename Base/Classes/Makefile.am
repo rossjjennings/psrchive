@@ -1,5 +1,5 @@
 
-noinst_LTLIBRARIES = libBases.la
+noinst_LTLIBRARIES = libClasses.la
 
 nobase_include_HEADERS = \
 	Pulsar/psrchive.h \
@@ -19,7 +19,7 @@ nobase_include_HEADERS = \
         Pulsar/Profile.h \
         Pulsar/Pulsar.h
 
-libBases_la_SOURCES = \
+libClasses_la_SOURCES = \
         Agent.C \
         Agent_plugin.C \
         Archive.C \
@@ -48,7 +48,7 @@ libBases_la_SOURCES = \
 # Dependencies should never be changed
 #
 
-INCLUDES = -I$(top_builddir)/include -I$(top_srcdir)/Core/Extensions
+INCLUDES = -I$(top_builddir)/include -I$(top_srcdir)/Base/Extensions
 
 include $(top_srcdir)/config/Makefile.include
 
