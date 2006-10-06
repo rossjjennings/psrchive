@@ -14,8 +14,6 @@
 
 #include <vector>
 
-#define _C 299792458
-
 namespace MEAL {
   
   class VelocityModel : public Univariate<Scalar> {
