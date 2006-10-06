@@ -44,6 +44,13 @@ int main ()
     return -1;
   }
 
+  Stokes<float> S_back = coherency (J_test);
+  if (S_back != S_test) {
+    cerr << "error: back=" << S_back 
+	 << "   !=  test=" << S_test << endl;
+    return -1;
+  }
+
   Pauli::basis.set_basis( Signal::Circular );
 
   J_test = convert(S_test);
