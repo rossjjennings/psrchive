@@ -53,7 +53,6 @@ nobase_include_HEADERS = \
 
 libPolarimetry_la_SOURCES = \
         Calibrator.C \
-        CalibratorPlotter.C \
         CalibratorStokesInfo.C \
         choose.C \
         CoherencyMeasurement.C \
@@ -101,9 +100,7 @@ libPolarimetry_la_SOURCES = \
         ReceptionCalibrator.C \
         ReceptionCalibrator_get_Info.C \
         ReceptionCalibrator_get_solution.C \
-        ReceptionCalibratorPlotter.C \
         ReceptionModel.C \
-        ReceptionModelPlotter.C \
         ReceptionModel_solve.C \
         ReceptionModel_solve_thread.C \
         ReferenceCalibrator.C \
@@ -133,7 +130,10 @@ rmrot_SOURCES = rmrot.C
 #
 if HAVE_PGPLOT
 
-libPolarimetry_la_SOURCES += ReceptionModelPlotter.C
+libPolarimetry_la_SOURCES += \
+	CalibratorPlotter.C \
+	ReceptionCalibratorPlotter.C \
+	ReceptionModelPlotter.C
 
 bin_PROGRAMS += pafit
 
