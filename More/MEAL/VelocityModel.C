@@ -150,11 +150,12 @@ void MEAL::VelocityModel::calculate_velocities (double theta, double& theta_vel,
     double v1,v2,v3,v4;
 
     bool verbose = false;
-
     // Not sure which to use at the moment needs checking Oct 05
 
+    double speed_of_light = 299792458;  // m/s
+
     // v1 = (2*M_PI*a*_C)/sin(inclination); // <<<<< added sin(inc) as a is (x/c) sin(inc)
-    v1 = (2*M_PI*a*_C); // <<<<< added sin(inc) as a is (x/c) sin(inc)
+    v1 = (2*M_PI*a*speed_of_light); // <<<<< added sin(inc) as a is (x/c) sin(inc)
     v2 = (1-(ecc*ecc));
     v2 = sqrt(v2);
     v2 = v2*pb;
