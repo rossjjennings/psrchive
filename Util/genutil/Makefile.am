@@ -27,7 +27,7 @@ include_HEADERS = \
         RealTimer.h \
         RegularExpression.h \
         sky_coord.h \
-        string_utils.h \
+        strutil.h \
         Telescope.h \
         templates.h \
         Types.h \
@@ -72,7 +72,7 @@ libgenutil_la_SOURCES = \
         stringload.C \
         stringprintf.C \
         stringtok.C \
-        string_utils.C \
+        strutil.C \
         Telescope.C \
 	time_string.C \
         Types.C \
