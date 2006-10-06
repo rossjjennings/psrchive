@@ -39,7 +39,9 @@ test_polyco_fitsio_SOURCES = test_polyco_fitsio.C
 test_psrephem_fitsio_LDADD = $(LDFITS)
 test_polyco_fitsio_LDADD = $(LDFITS)
 
-LDFITS = $(top_builddir)/Util/fitsutil/libfitsutil.la $(LDADD) @CFITSIO_LIBS@
+LDFITS = libtempo.la $(top_builddir)/Util/fitsutil/libfitsutil.la \
+	$(top_builddir)/Util/genutil/libgenutil.la \
+	$(top_builddir)/Util/units/libunits.la @CFITSIO_LIBS@ @FLIBS@
 
 endif
 
