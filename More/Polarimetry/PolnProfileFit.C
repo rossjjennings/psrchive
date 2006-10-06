@@ -28,10 +28,6 @@
 
 // #define _DEBUG 1
 
-#ifdef _DEBUG
-#include <cpgplot.h>
-#endif
-
 #include <memory>
 
 using namespace std;
