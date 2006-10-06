@@ -144,15 +144,15 @@ AC_CONFIG_FILES([Util/Makefile
 		Util/qtutil/Makefile
 		Util/fitsutil/Makefile
 		Util/tempo/Makefile
-		Core/Makefile
-		Core/Bases/Makefile
-		Core/Extensions/Makefile
-		Core/Formats/Makefile
-		Core/Formats/EPN/Makefile
-		Core/Formats/Timer/Makefile
-		Core/Formats/PSRFITS/Makefile
-                Core/Formats/ASCII/Makefile
-		Core/Applications/Makefile
+		Base/Makefile
+		Base/Classes/Makefile
+		Base/Extensions/Makefile
+		Base/Formats/Makefile
+		Base/Formats/EPN/Makefile
+		Base/Formats/Timer/Makefile
+		Base/Formats/PSRFITS/Makefile
+                Base/Formats/ASCII/Makefile
+		Base/Applications/Makefile
 		More/Makefile
 		More/General/Makefile
 		More/Plotting/Makefile

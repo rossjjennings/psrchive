@@ -10,6 +10,6 @@ vip_SOURCES			= vip.C
 
 INCLUDES = -I$(top_builddir)/include
 
-LDADD = $(top_builddir)/Core/libpsrcore.la \
+LDADD = $(top_builddir)/Base/libpsrbase.la \
 	$(top_builddir)/Util/libpsrutil.la
 

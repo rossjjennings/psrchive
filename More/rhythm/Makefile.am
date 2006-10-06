@@ -19,7 +19,7 @@ nodist_rhythm_SOURCES = moc_rhythm.C moc_Options.C moc_toaPlot.C \
 INCLUDES = -I$(top_builddir)/include @QTDRIV_CFLAGS@
 
 LDADD = $(top_builddir)/More/libpsrmore.la \
-        $(top_builddir)/Core/libpsrcore.la \
+        $(top_builddir)/Base/libpsrbase.la \
         $(top_builddir)/Util/libpsrutil.la @QTDRIV_LIBS@
 
 include $(top_srcdir)/config/Makefile.Qt
