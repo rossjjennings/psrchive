@@ -24,6 +24,7 @@
 #include "toa.h"
 #include "Error.h"
 #include "dirutil.h"
+#include "strutil.h"
 
 #include <fstream>
 #include <iostream>
@@ -31,7 +32,6 @@
 #include <math.h>
 #include <string.h>
 #include <unistd.h>
-#include <libgen.h>
 
 using namespace std;
 
@@ -188,7 +188,7 @@ int main (int argc, char *argv[]) try {
       return 0;
 
     case 'i':
-      cout << "$Id: pat.C,v 1.70 2006/10/06 18:43:48 straten Exp $" << endl;
+      cout << "$Id: pat.C,v 1.71 2006/10/06 21:37:49 straten Exp $" << endl;
       return 0;
 
     case 'n':
@@ -324,7 +324,7 @@ int main (int argc, char *argv[]) try {
 
         backup.copy( fit.get_transformation() );
 
-        string aux = basename( arch->get_filename().c_str() );
+        string aux = basename( arch->get_filename() );
         float chisq = fit.get_fit_chisq() / fit.get_fit_nfree();
 
         if (verbose)

@@ -17,7 +17,7 @@
 #include "Error.h"
 
 #include "dirutil.h"
-#include "string_utils.h"
+#include "strutil.h"
 #include "separate.h"
 
 #include <iostream>
@@ -25,7 +25,6 @@
 
 #include <unistd.h>
 #include <math.h>
-#include <libgen.h>
 
 using namespace std;
 
@@ -154,7 +153,7 @@ int main (int argc, char **argv) try {
       return 0;
       
     case 'i':
-      cout << "$Id: psradd.C,v 1.41 2006/10/06 18:43:48 straten Exp $" 
+      cout << "$Id: psradd.C,v 1.42 2006/10/06 21:37:49 straten Exp $" 
 	   << endl;
       return 0;
 
@@ -452,7 +451,7 @@ int main (int argc, char **argv) try {
       if (auto_add) {
 	newname = total->get_filename() + "." + integrated_extension;
         if (!integrated_path.empty())
-          newname = integrated_path + "/" + basename (newname.c_str());
+          newname = integrated_path + "/" + basename (newname);
       }
 
       if (log_results) {

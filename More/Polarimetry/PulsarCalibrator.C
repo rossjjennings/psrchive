@@ -18,8 +18,7 @@
 #include "MEAL/Complex2Math.h"
 
 #include "toa.h"
-
-#include <libgen.h>
+#include "strutil.h"
 
 using namespace std;
 
@@ -364,7 +363,7 @@ void Pulsar::PulsarCalibrator::solve (const Integration* data, unsigned ichan)
 
     toa.set_telescope (archive->get_telescope_code());
 
-    string aux = basename (archive->get_filename().c_str());
+    string aux = basename (archive->get_filename());
     toa.set_auxilliary_text (aux);
 
     toa.unload (tim_file);
