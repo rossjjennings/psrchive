@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/model_profile.h,v $
-   $Revision: 1.7 $
-   $Date: 2006/10/02 19:35:44 $
+   $Revision: 1.8 $
+   $Date: 2006/10/06 21:13:53 $
    $Author: straten $ */
 
 #ifndef __model_profile_h

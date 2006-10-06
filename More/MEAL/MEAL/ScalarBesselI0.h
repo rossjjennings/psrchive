@@ -6,8 +6,8 @@
  *
  ***************************************************************************/
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/ScalarBesselI0.h,v $
-   $Revision: 1.2 $
-   $Date: 2006/03/17 13:35:26 $
+   $Revision: 1.3 $
+   $Date: 2006/10/06 21:13:54 $
    $Author $ */
 #ifndef __MEAL_ScalarBesselI0_H
 #define __MEAL_ScalarBesselI0_H

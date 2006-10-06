@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Jones.h,v $
-   $Revision: 1.27 $
-   $Date: 2006/03/17 13:35:21 $
+   $Revision: 1.28 $
+   $Date: 2006/10/06 21:13:55 $
    $Author: straten $ */
 
 #ifndef __Jones_H

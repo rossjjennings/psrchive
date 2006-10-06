@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/Plot.h,v $
-   $Revision: 1.11 $
-   $Date: 2006/09/08 07:32:04 $
+   $Revision: 1.12 $
+   $Date: 2006/10/06 21:13:54 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Plot_h

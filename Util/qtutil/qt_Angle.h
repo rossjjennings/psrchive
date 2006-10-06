@@ -5,8 +5,8 @@
  *
  ***************************************************************************/
 /* $Source: /cvsroot/psrchive/psrchive/Util/qtutil/qt_Angle.h,v $
-   $Revision: 1.8 $
-   $Date: 2006/03/17 13:35:19 $
+   $Revision: 1.9 $
+   $Date: 2006/10/06 21:13:54 $
    $Author: straten $ */
 
 #ifndef __QT_Angle_H

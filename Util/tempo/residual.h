@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/residual.h,v $
-   $Revision: 1.13 $
-   $Date: 2006/03/17 13:34:33 $
+   $Revision: 1.14 $
+   $Date: 2006/10/06 21:13:55 $
    $Author: straten $ */
 
 #ifndef __RESIDUAL_H

@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/MJD.h,v $
-   $Revision: 1.24 $
-   $Date: 2006/03/17 13:35:05 $
+   $Revision: 1.25 $
+   $Date: 2006/10/06 21:13:54 $
    $Author: straten $ */
 
 #ifndef __GENUTIL_MJD_H

@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/NormalizeStokes.h,v $
-   $Revision: 1.5 $
-   $Date: 2006/04/19 19:52:14 $
+   $Revision: 1.6 $
+   $Date: 2006/10/06 21:13:53 $
    $Author: straten $ */
 
 #ifndef __MEAL_NormalizeStokes_h

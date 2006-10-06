@@ -6,8 +6,8 @@
  *
  ***************************************************************************/
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/tostring.h,v $
-   $Revision: 1.6 $
-   $Date: 2006/03/17 13:35:25 $
+   $Revision: 1.7 $
+   $Date: 2006/10/06 21:13:55 $
    $Author: straten $ */
 
 #ifndef __TOSTRING_H

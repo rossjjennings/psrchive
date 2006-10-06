@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/Matrix.h,v $
-   $Revision: 1.17 $
-   $Date: 2006/09/06 03:15:08 $
+   $Revision: 1.18 $
+   $Date: 2006/10/06 21:13:55 $
    $Author: straten $ */
 
 #ifndef __Matrix_H

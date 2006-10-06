@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/ReceptionCalibrator.h,v $
-   $Revision: 1.72 $
-   $Date: 2006/09/29 22:13:10 $
+   $Revision: 1.73 $
+   $Date: 2006/10/06 21:13:54 $
    $Author: straten $ */
 
 #ifndef __Pulsar_ReceptionCalibrator_H

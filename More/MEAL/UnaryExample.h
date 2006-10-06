@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/UnaryExample.h,v $
-   $Revision: 1.4 $
-   $Date: 2006/03/17 13:35:23 $
+   $Revision: 1.5 $
+   $Date: 2006/10/06 21:13:53 $
    $Author: straten $ */
 
 #ifndef __MEAL_UnaryExample_H

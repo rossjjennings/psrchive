@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/EstimateStats.h,v $
-   $Revision: 1.2 $
-   $Date: 2006/03/17 13:35:20 $
+   $Revision: 1.3 $
+   $Date: 2006/10/06 21:13:55 $
    $Author: straten $ */
 
 #ifndef __EstimateStats_h

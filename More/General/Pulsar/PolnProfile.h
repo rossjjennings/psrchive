@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/Attic/PolnProfile.h,v $
-   $Revision: 1.33 $
-   $Date: 2006/09/29 22:19:50 $
+   $Revision: 1.34 $
+   $Date: 2006/10/06 21:13:53 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PolnProfile_h

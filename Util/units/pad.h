@@ -6,8 +6,8 @@
  *
  ***************************************************************************/
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/pad.h,v $
-   $Revision: 1.1 $
-   $Date: 2006/04/06 19:13:59 $
+   $Revision: 1.2 $
+   $Date: 2006/10/06 21:13:55 $
    $Author: straten $ */
 
 #ifndef __UTILS_UNITS_PAD_H

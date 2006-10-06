@@ -5,8 +5,8 @@
  *
  ***************************************************************************/
 /* $Source: /cvsroot/psrchive/psrchive/Util/qtutil/qt_MJD.h,v $
-   $Revision: 1.4 $
-   $Date: 2006/03/17 13:35:19 $
+   $Revision: 1.5 $
+   $Date: 2006/10/06 21:13:55 $
    $Author: straten $ */
 
 #ifndef __QT_MJD_H

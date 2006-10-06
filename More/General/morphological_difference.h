@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/morphological_difference.h,v $
-   $Revision: 1.1 $
-   $Date: 2006/10/01 12:15:26 $
+   $Revision: 1.2 $
+   $Date: 2006/10/06 21:13:53 $
    $Author: straten $ */
 
 #ifndef __morphological_difference_h

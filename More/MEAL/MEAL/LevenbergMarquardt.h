@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/LevenbergMarquardt.h,v $
-   $Revision: 1.9 $
-   $Date: 2006/03/17 13:35:25 $
+   $Revision: 1.10 $
+   $Date: 2006/10/06 21:13:53 $
    $Author: straten $ */
 
 #ifndef __Levenberg_Marquardt_h
@@ -517,8 +517,8 @@ template <class Grad>
 template <class Mt>
 void 
 MEAL::LevenbergMarquardt<Grad>::result (Mt& model,
-					     std::vector<std::vector<double> >& covar,
-					     std::vector<std::vector<double> >& curve)
+					std::vector<std::vector<double> >& covar,
+					std::vector<std::vector<double> >& curve)
 {
   if (verbose > 2)
     std::cerr << "MEAL::LevenbergMarquardt<Grad>::result" << std::endl;

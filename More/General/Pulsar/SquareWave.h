@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/SquareWave.h,v $
-   $Revision: 1.4 $
-   $Date: 2006/04/06 22:07:13 $
+   $Revision: 1.5 $
+   $Date: 2006/10/06 21:13:53 $
    $Author: straten $ */
 
 #ifndef __Pulsar_SquareWave_h

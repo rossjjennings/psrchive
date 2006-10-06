@@ -5,8 +5,8 @@
  *
  ***************************************************************************/
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/ieee.h,v $
-   $Revision: 1.3 $
-   $Date: 2006/03/17 13:34:59 $
+   $Revision: 1.4 $
+   $Date: 2006/10/06 21:13:54 $
    $Author: straten $ */
 
 #ifndef IEEE_H

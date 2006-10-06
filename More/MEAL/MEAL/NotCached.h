@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/NotCached.h,v $
-   $Revision: 1.3 $
-   $Date: 2006/08/21 17:00:28 $
+   $Revision: 1.4 $
+   $Date: 2006/10/06 21:13:53 $
    $Author: straten $ */
 
 #ifndef __NotCached_H

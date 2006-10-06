@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/Fourier.h,v $
-   $Revision: 1.1 $
-   $Date: 2006/04/04 14:43:36 $
+   $Revision: 1.2 $
+   $Date: 2006/10/06 21:13:53 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Fourier_h

@@ -6,8 +6,8 @@
  *
  ***************************************************************************/
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/separate.h,v $
-   $Revision: 1.2 $
-   $Date: 2006/03/28 03:38:43 $
+   $Revision: 1.3 $
+   $Date: 2006/10/06 21:13:55 $
    $Author: straten $ */
 
 #ifndef __UTILS_UNITS_SEPARATE_H

@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/Real4.h,v $
-   $Revision: 1.1 $
-   $Date: 2006/09/12 08:03:40 $
+   $Revision: 1.2 $
+   $Date: 2006/10/06 21:13:54 $
    $Author: straten $ */
 
 #ifndef __MEAL_Real4_H

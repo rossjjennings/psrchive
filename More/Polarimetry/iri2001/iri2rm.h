@@ -5,8 +5,8 @@
  *
  ***************************************************************************/
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/iri2001/iri2rm.h,v $
-   $Revision: 1.2 $
-   $Date: 2006/03/17 13:34:44 $
+   $Revision: 1.3 $
+   $Date: 2006/10/06 21:13:54 $
    $Author: straten $ */
 
 #ifdef HAVE_CONFIG_H

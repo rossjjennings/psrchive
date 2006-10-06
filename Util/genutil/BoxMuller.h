@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/BoxMuller.h,v $
-   $Revision: 1.1 $
-   $Date: 2006/10/05 14:39:19 $
+   $Revision: 1.2 $
+   $Date: 2006/10/06 21:13:54 $
    $Author: straten $ */
 
 #ifndef __BoxMuller_h

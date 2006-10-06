@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/fft/interpolate.h,v $
-   $Revision: 1.14 $
-   $Date: 2006/10/05 14:59:10 $
+   $Revision: 1.15 $
+   $Date: 2006/10/06 21:13:54 $
    $Author: straten $*/
 
 #ifndef __fft_interpolate_h

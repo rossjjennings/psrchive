@@ -7,9 +7,9 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/tempo/polyco.h,v $
-   $Revision: 1.32 $
-   $Date: 2006/08/29 00:54:29 $
-   $Author: hknight $ */
+   $Revision: 1.33 $
+   $Date: 2006/10/06 21:13:55 $
+   $Author: straten $ */
 
 #ifndef __POLY_H
 #define __POLY_H

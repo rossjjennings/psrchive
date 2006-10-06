@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/typeutil.h,v $
-   $Revision: 1.5 $
-   $Date: 2006/09/29 14:13:06 $
+   $Revision: 1.6 $
+   $Date: 2006/10/06 21:13:54 $
    $Author: straten $ */
 
 #ifndef __typeutil_h

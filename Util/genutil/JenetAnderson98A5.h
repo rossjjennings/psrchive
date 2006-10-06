@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/JenetAnderson98A5.h,v $
-   $Revision: 1.1 $
-   $Date: 2006/04/30 02:24:35 $
+   $Revision: 1.2 $
+   $Date: 2006/10/06 21:13:54 $
    $Author: straten $ */
 
 #ifndef __Jenet_Anderson_98_A5

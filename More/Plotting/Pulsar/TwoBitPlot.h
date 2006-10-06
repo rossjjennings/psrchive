@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/TwoBitPlot.h,v $
-   $Revision: 1.1 $
-   $Date: 2006/04/18 21:55:22 $
+   $Revision: 1.2 $
+   $Date: 2006/10/06 21:13:54 $
    $Author: straten $ */
 
 #ifndef __Pulsar_TwoBitPlot_h

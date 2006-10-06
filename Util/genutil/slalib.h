@@ -5,8 +5,8 @@
  *
  ***************************************************************************/
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Attic/slalib.h,v $
-   $Revision: 1.2 $
-   $Date: 2006/03/17 13:35:08 $
+   $Revision: 1.3 $
+   $Date: 2006/10/06 21:13:54 $
    $Author: straten $ */
 
 #ifndef __SLA_DECL_H

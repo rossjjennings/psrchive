@@ -7,8 +7,8 @@
 /* ADVICE!:  Do not include this file directly.  Instead, #include "ephio.h"
 
    $Source: /cvsroot/psrchive/psrchive/Util/tempo/ephio_func.h,v $
-   $Revision: 1.2 $
-   $Date: 2006/03/17 13:34:31 $
+   $Revision: 1.3 $
+   $Date: 2006/10/06 21:13:55 $
    $Author: straten $ */
 
 #ifndef __EPHIO_FUNC_H

@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Polarimetry/Pulsar/Parallactic.h,v $
-   $Revision: 1.4 $
-   $Date: 2006/09/05 22:53:23 $
+   $Revision: 1.5 $
+   $Date: 2006/10/06 21:13:54 $
    $Author: straten $ */
 
 #ifndef __Calibration_Parallactic_H

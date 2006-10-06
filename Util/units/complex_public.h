@@ -6,8 +6,8 @@
  *
  ***************************************************************************/
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/complex_public.h,v $
-   $Revision: 1.1 $
-   $Date: 2006/08/23 13:58:59 $
+   $Revision: 1.2 $
+   $Date: 2006/10/06 21:13:55 $
    $Author: straten $ */
 
 #ifndef __complex_public

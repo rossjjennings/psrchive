@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/RandomPolar.h,v $
-   $Revision: 1.1 $
-   $Date: 2006/04/20 22:09:28 $
+   $Revision: 1.2 $
+   $Date: 2006/10/06 21:13:54 $
    $Author: straten $ */
 
 #ifndef __MEAL_RandomPolar_H

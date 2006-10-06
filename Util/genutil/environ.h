@@ -5,8 +5,8 @@
  *
  ***************************************************************************/
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Attic/environ.h,v $
-   $Revision: 1.13 $
-   $Date: 2006/03/17 13:34:57 $
+   $Revision: 1.14 $
+   $Date: 2006/10/06 21:13:54 $
    $Author: straten $ */
 
 /*

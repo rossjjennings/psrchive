@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/StokesError.h,v $
-   $Revision: 1.4 $
-   $Date: 2006/09/03 00:10:40 $
+   $Revision: 1.5 $
+   $Date: 2006/10/06 21:13:54 $
    $Author: straten $ */
 
 #ifndef __MEAL_StokesError_H

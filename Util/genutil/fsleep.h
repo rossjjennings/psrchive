@@ -5,8 +5,8 @@
  *
  ***************************************************************************/
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/fsleep.h,v $
-   $Revision: 1.2 $
-   $Date: 2006/03/17 13:34:58 $
+   $Revision: 1.3 $
+   $Date: 2006/10/06 21:13:54 $
    $Author: straten $ */
 
 #ifndef __FSLEEP_H

@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/fft/median_smooth.h,v $
-   $Revision: 1.4 $
-   $Date: 2006/10/02 20:18:22 $
+   $Revision: 1.5 $
+   $Date: 2006/10/06 21:13:54 $
    $Author: straten $*/
 
 #ifndef __fft_smooth_h

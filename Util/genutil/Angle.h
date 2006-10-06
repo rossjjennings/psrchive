@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/Angle.h,v $
-   $Revision: 1.22 $
-   $Date: 2006/10/01 12:13:03 $
+   $Revision: 1.23 $
+   $Date: 2006/10/06 21:13:54 $
    $Author: straten $ */
 
 // redwards 17 Mar 99 -- Time for a definitive C++ suite of

@@ -6,8 +6,8 @@
  *
  ***************************************************************************/
 /* $Source: /cvsroot/psrchive/psrchive/Util/units/substitute.h,v $
-   $Revision: 1.4 $
-   $Date: 2006/04/21 04:21:03 $
+   $Revision: 1.5 $
+   $Date: 2006/10/06 21:13:55 $
    $Author: straten $ */
 
 #ifndef __UTILS_UNITS_SUBSTITUTE_H

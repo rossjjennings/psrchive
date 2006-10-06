@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/General/Pulsar/NoiseStatistics.h,v $
-   $Revision: 1.2 $
-   $Date: 2006/04/07 11:15:11 $
+   $Revision: 1.3 $
+   $Date: 2006/10/06 21:13:53 $
    $Author: straten $ */
 
 #ifndef __Pulsar_NoiseStatistics_h

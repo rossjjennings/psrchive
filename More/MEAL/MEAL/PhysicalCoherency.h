@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/MEAL/MEAL/PhysicalCoherency.h,v $
-   $Revision: 1.3 $
-   $Date: 2006/03/30 17:20:54 $
+   $Revision: 1.4 $
+   $Date: 2006/10/06 21:13:54 $
    $Author: straten $ */
 
 #ifndef __MEAL_PhysicalCoherency_H

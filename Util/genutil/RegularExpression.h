@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/RegularExpression.h,v $
-   $Revision: 1.1 $
-   $Date: 2006/09/07 13:33:00 $
+   $Revision: 1.2 $
+   $Date: 2006/10/06 21:13:54 $
    $Author: straten $ */
 
 #ifndef __RegularExpression_h
