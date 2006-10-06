@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pcm.C,v $
-   $Revision: 1.56 $
-   $Date: 2006/10/03 21:09:41 $
+   $Revision: 1.57 $
+   $Date: 2006/10/06 18:43:37 $
    $Author: straten $ */
 
 #ifdef HAVE_CONFIG_H
@@ -21,12 +21,10 @@
 #include "Pulsar/CorrectionsCalibrator.h"
 #include "Pulsar/Database.h"
 
-#include "Pulsar/ReceptionCalibratorPlotter.h"
 #include "Pulsar/SourceInfo.h"
 
 #include "Pulsar/Archive.h"
 #include "Pulsar/ReflectStokes.h"
-#include "Pulsar/StokesSpherical.h"
 
 #include "RealTimer.h"
 #include "Error.h"
@@ -34,6 +32,8 @@
 #include "string_utils.h"
 
 #if HAVE_PGPLOT
+#include "Pulsar/ReceptionCalibratorPlotter.h"
+#include "Pulsar/StokesSpherical.h"
 #include <cpgplot.h>
 #endif
 
@@ -724,10 +724,10 @@ int main (int argc, char *argv[]) try {
     total->unload ("first.ar");
   }
 
+#if HAVE_PGPLOT
+
   Pulsar::ReceptionCalibratorPlotter plotter (&model);
   plotter.use_colour = !publication_plots;
-
-#if HAVE_PGPLOT
 
   if (display && only_ichan < 0) {
 
