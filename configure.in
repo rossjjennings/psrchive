@@ -132,6 +132,11 @@ AM_CONDITIONAL(MAKE_LEAN, [test x"$enable_lean" == xyes])
 #
 SWIN_FUNC_GETOPT_LONG
 
+#
+# Checks for header files.
+#
+AC_CHECK_HEADERS([values.h])
+
 AM_CONFIG_HEADER([config.h])
 AC_CONFIG_FILES([Util/Makefile
 		Util/third/Makefile
