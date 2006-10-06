@@ -6,7 +6,7 @@
  ***************************************************************************/
 
 #include "timer++.h"
-#include "string_utils.h"
+#include "strutil.h"
 #include "convert_endian.h"
 #include "Error.h"
 #include "tostring.h"

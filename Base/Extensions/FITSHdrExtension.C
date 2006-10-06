@@ -5,7 +5,7 @@
  *
  ***************************************************************************/
 #include "Pulsar/FITSHdrExtension.h"
-#include "string_utils.h"
+#include "strutil.h"
 
 using namespace std;
 

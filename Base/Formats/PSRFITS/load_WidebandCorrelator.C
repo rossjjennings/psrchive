@@ -9,7 +9,7 @@
 #include "Pulsar/FITSHdrExtension.h"
 #include "psrfitsio.h"
 
-#include "string_utils.h"
+#include "strutil.h"
 #include "RegularExpression.h"
 
 using namespace std;

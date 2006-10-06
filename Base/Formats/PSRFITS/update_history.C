@@ -9,7 +9,7 @@
 #include "Pulsar/ProcHistory.h"
 #include "Pulsar/Receiver.h"
 
-#include "string_utils.h"
+#include "strutil.h"
 
 using namespace std;
 
@@ -26,7 +26,7 @@ void Pulsar::FITSArchive::update_history()
   time_t timeval = time(0);
   string timestr = ctime (&timeval);
 
-  history->get_last().date_pro = chop(timestr);
+  history->get_last().date_pro = remove_all(timestr,'\n');
   
   history->get_last().proc_cmd = history->get_command_str();
   
