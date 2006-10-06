@@ -36,8 +36,10 @@ check_PROGRAMS += test_psrephem_fitsio test_polyco_fitsio
 
 test_psrephem_fitsio_SOURCES = test_psrephem_fitsio.C
 test_polyco_fitsio_SOURCES = test_polyco_fitsio.C
-test_psrephem_fitsio_LDADD = $(LDADD) @CFITSIO_LIBS@
-test_polyco_fitsio_LDADD = $(LDADD) @CFITSIO_LIBS@
+test_psrephem_fitsio_LDADD = $(LDFITS)
+test_polyco_fitsio_LDADD = $(LDFITS)
+
+LDFITS = $(top_builddir)/Util/fitsutil/libfitsutil.la $(LDADD) @CFITSIO_LIBS@
 
 endif
 
@@ -69,8 +71,7 @@ keys2c_LDADD =
 INCLUDES = -I$(top_builddir)/include @CFITSIO_CFLAGS@ @SLA_CFLAGS@
 
 LDADD = libtempo.la $(top_builddir)/Util/genutil/libgenutil.la \
-	$(top_builddir)/Util/units/libunits.la \
-	$(top_builddir)/Util/fitsutil/libfitsutil.la @FLIBS@
+	$(top_builddir)/Util/units/libunits.la @FLIBS@
 
 include $(top_srcdir)/config/Makefile.include
 
