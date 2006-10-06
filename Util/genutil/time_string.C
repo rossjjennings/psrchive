@@ -4,7 +4,7 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-#include "string_utils.h"
+#include "strutil.h"
 using namespace std;
 
 // simple function returns the time in a user-friendly string

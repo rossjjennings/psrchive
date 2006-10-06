@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 2000 by straten Willem van Straten
+ *   Copyright (C) 2000 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
