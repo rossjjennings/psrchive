@@ -27,7 +27,7 @@
 #include "Pulsar/counter_drift.h"
 
 #include "dirutil.h"
-#include "string_utils.h"
+#include "strutil.h"
 #include "Error.h"
 
 #include <algorithm>
@@ -268,7 +268,7 @@ int main (int argc, char *argv[]) try {
 	Pulsar::Archive::set_verbosity(3);
 	break;
       case 'i':
-	cout << "$Id: pam.C,v 1.67 2006/10/01 13:40:16 straten Exp $" << endl;
+	cout << "$Id: pam.C,v 1.68 2006/10/06 21:37:47 straten Exp $" << endl;
 	return 0;
       case 'm':
 	save = true;
@@ -569,7 +569,7 @@ int main (int argc, char *argv[]) try {
 	
       case MULT: mult = atof(optarg); break;
 
-      case PERIOD: new_folding_period = convert_string<double>(optarg); break;
+      case PERIOD: new_folding_period = fromstring<double>(optarg); break;
 
       default:
 	cout << "Unrecognised option" << endl;
