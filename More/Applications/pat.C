@@ -31,6 +31,7 @@
 #include <math.h>
 #include <string.h>
 #include <unistd.h>
+#include <libgen.h>
 
 using namespace std;
 
@@ -187,7 +188,7 @@ int main (int argc, char *argv[]) try {
       return 0;
 
     case 'i':
-      cout << "$Id: pat.C,v 1.69 2006/10/03 04:29:26 straten Exp $" << endl;
+      cout << "$Id: pat.C,v 1.70 2006/10/06 18:43:48 straten Exp $" << endl;
       return 0;
 
     case 'n':

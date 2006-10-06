@@ -25,6 +25,7 @@
 
 #include <unistd.h>
 #include <math.h>
+#include <libgen.h>
 
 using namespace std;
 
@@ -153,7 +154,7 @@ int main (int argc, char **argv) try {
       return 0;
       
     case 'i':
-      cout << "$Id: psradd.C,v 1.40 2006/10/03 04:29:30 straten Exp $" 
+      cout << "$Id: psradd.C,v 1.41 2006/10/06 18:43:48 straten Exp $" 
 	   << endl;
       return 0;
 
