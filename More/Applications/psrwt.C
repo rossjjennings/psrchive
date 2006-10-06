@@ -22,7 +22,7 @@
 #include "RealTimer.h"
 
 #include "dirutil.h"
-#include "string_utils.h"
+#include "strutil.h"
 
 #if 0
 #include <cpgplot.h>

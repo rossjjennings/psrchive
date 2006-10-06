@@ -5,7 +5,7 @@
  *
  ***************************************************************************/
 //
-// $Id: pdmp.C,v 1.10 2006/07/11 05:43:41 hknight Exp $
+// $Id: pdmp.C,v 1.11 2006/10/06 21:41:57 straten Exp $
 //
 // Searches over trial DM and Period ranges and obtains the optimal 
 // DM and Period giving the highest S/N, plots SNR vs Period vs DM, 
@@ -34,7 +34,7 @@
 #include "RealTimer.h"
 
 #include "dirutil.h"
-#include "string_utils.h"
+#include "strutil.h"
 #include "genutil.h"
 #include "slalib.h"
 

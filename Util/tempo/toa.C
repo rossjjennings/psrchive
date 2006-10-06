@@ -5,7 +5,7 @@
  *
  ***************************************************************************/
 #include "toa.h"
-#include "string_utils.h"
+#include "strutil.h"
 #include "polyco.h"
 #include "Error.h"
 

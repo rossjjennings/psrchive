@@ -5,7 +5,7 @@
  *
  ***************************************************************************/
 #include "psrParameter.h"
-#include "string_utils.h"
+#include "strutil.h"
 #include "ephio.h"
 
 using namespace std;

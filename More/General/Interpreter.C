@@ -17,7 +17,7 @@ using namespace std;
 #include "Pulsar/SNRWeight.h"
 #include "Pulsar/Transposer.h"
 
-#include "string_utils.h"
+#include "strutil.h"
 #include "substitute.h"
 #include "tostring.h"
 #include "Error.h"

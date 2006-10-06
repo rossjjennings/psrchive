@@ -15,7 +15,7 @@
 #include "Pulsar/Archive.h"
 #include "Pulsar/Config.h"
 
-#include "string_utils.h"
+#include "strutil.h"
 #include "dirutil.h"
 
 #include <unistd.h>

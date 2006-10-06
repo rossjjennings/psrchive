@@ -6,7 +6,7 @@
  ***************************************************************************/
 #include <sys/types.h>
 
-#include "string_utils.h"
+#include "strutil.h"
 using namespace std;
 
 string stringtok (string* instr, const string& delimiters,

@@ -11,7 +11,7 @@
 #include "polyco.h"
 
 #include "Error.h"
-#include "string_utils.h"
+#include "strutil.h"
 
 #include <unistd.h>
 #include <ctype.h>

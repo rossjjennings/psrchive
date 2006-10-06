@@ -21,7 +21,7 @@
 #include "Error.h"
 
 #include "dirutil.h"
-#include "string_utils.h"
+#include "strutil.h"
 
 #include <cpgplot.h>
 
@@ -100,7 +100,7 @@ int main (int argc, char** argv)
       return 0;
 
     case 'i':
-      cout << "$Id: pas.C,v 1.24 2006/10/03 04:29:28 straten Exp $" << endl;
+      cout << "$Id: pas.C,v 1.25 2006/10/06 21:41:57 straten Exp $" << endl;
       return 0;
 
     case 'r':

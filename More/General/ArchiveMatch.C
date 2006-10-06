@@ -10,7 +10,7 @@ using namespace std;
 #include "Pulsar/Receiver.h"
 #include "Pulsar/Config.h"
 
-#include "string_utils.h"  // for stringprintf
+#include "strutil.h"  // for stringprintf
 
 /*!
   Maximum frequency difference in MHz

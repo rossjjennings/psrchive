@@ -20,7 +20,7 @@
 #include "FTransform.h"
 #include "Error.h"
 #include "dirutil.h"
-#include "string_utils.h"
+#include "strutil.h"
 #include "MEAL/ScaledVonMises.h"
 #include "MEAL/ScaledVonMisesDeriv.h"
 #include "MEAL/Axis.h"

@@ -22,7 +22,7 @@
 
 #include "Error.h"
 #include "dirutil.h"
-#include "string_utils.h"
+#include "strutil.h"
 
 #include <unistd.h>
 
@@ -165,7 +165,7 @@ int main (int argc, char *argv[]) {
       break;
 
     case 'i':
-      cout << "$Id: pac.C,v 1.78 2006/10/03 21:09:41 straten Exp $" << endl;
+      cout << "$Id: pac.C,v 1.79 2006/10/06 21:41:57 straten Exp $" << endl;
       return 0;
 
     case 'A':

@@ -11,7 +11,7 @@
 #include "Pulsar/Interpreter.h"
 
 #include "TextInterface.h"
-#include "string_utils.h"
+#include "strutil.h"
 #include "dirutil.h"
 
 #include <cpgplot.h>

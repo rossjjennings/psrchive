@@ -9,7 +9,7 @@ using namespace std;
 #include "Pulsar/Integration.h"
 #include "Pulsar/Profile.h"
 
-#include "string_utils.h"
+#include "strutil.h"
 #include "dirutil.h"
 
 #include <unistd.h>

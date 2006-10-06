@@ -8,7 +8,7 @@
 #include "tempo++.h"
 #include "Error.h"
 #include "dirutil.h"
-#include "string_utils.h"
+#include "strutil.h"
 #include "fsleep.h"
 
 #include <stdio.h>

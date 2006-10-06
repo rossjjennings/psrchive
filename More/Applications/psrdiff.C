@@ -14,7 +14,7 @@
 
 #include "Pulsar/StokesPlot.h"
 
-#include "string_utils.h"
+#include "strutil.h"
 #include "dirutil.h"
 
 #include <cpgplot.h>

@@ -5,7 +5,7 @@
  *
  ***************************************************************************/
 //
-// $Id: pav.C,v 1.122 2006/07/06 04:31:41 hknight Exp $
+// $Id: pav.C,v 1.123 2006/10/06 21:41:57 straten Exp $
 //
 // The Pulsar Archive Viewer
 //
@@ -33,7 +33,7 @@
 #include "RealTimer.h"
 
 #include "dirutil.h"
-#include "string_utils.h"
+#include "strutil.h"
 #include "genutil.h"
 #include "getopt.h"
 
@@ -426,7 +426,7 @@ int main (int argc, char** argv)
       plotter.set_subint( atoi (optarg) );
       break;
     case 'i':
-      cout << "$Id: pav.C,v 1.122 2006/07/06 04:31:41 hknight Exp $" << endl;
+      cout << "$Id: pav.C,v 1.123 2006/10/06 21:41:57 straten Exp $" << endl;
       return 0;
 
     case 'j':

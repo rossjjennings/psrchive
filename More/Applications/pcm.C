@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Applications/pcm.C,v $
-   $Revision: 1.57 $
-   $Date: 2006/10/06 18:43:37 $
+   $Revision: 1.58 $
+   $Date: 2006/10/06 21:41:57 $
    $Author: straten $ */
 
 #ifdef HAVE_CONFIG_H
@@ -29,7 +29,7 @@
 #include "RealTimer.h"
 #include "Error.h"
 #include "dirutil.h"
-#include "string_utils.h"
+#include "strutil.h"
 
 #if HAVE_PGPLOT
 #include "Pulsar/ReceptionCalibratorPlotter.h"

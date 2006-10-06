@@ -6,7 +6,7 @@
  ***************************************************************************/
 #include "ephio.h"
 #include "psrephem.h"
-#include "string_utils.h"
+#include "strutil.h"
 #include "dirutil.h"
 
 #include <unistd.h>

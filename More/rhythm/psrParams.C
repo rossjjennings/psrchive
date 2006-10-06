@@ -8,7 +8,7 @@
 #include "psrParameter.h"
 #include "psrephem.h"
 #include "ephio.h"
-#include "string_utils.h"
+#include "strutil.h"
 
 #include <fstream>
 

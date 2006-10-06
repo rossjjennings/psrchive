@@ -26,7 +26,7 @@ using namespace std;
 #include "RealTimer.h"
 
 #include "dirutil.h"
-#include "string_utils.h"
+#include "strutil.h"
 #include "genutil.h"
 #include "slalib.h"
 #include "getopt.h"

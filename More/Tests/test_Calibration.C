@@ -8,7 +8,7 @@
 #include <algorithm>
 
 #include "Database.h"
-#include "string_utils.h"
+#include "strutil.h"
 
 void usage ()
 {
