@@ -4,13 +4,20 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #include "sky_coord.h"
 #include "coord.h"
 
 #include <iostream>
 #include <stdio.h>
 #include <string.h>
-//#include <values.h>
+
+#if HAVE_VALUES_H
+#include <values.h>
+#endif
 
 #include <slalib.h>
 
