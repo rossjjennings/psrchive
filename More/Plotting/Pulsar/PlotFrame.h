@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PlotFrame.h,v $
-   $Revision: 1.19 $
-   $Date: 2006/10/06 21:13:54 $
+   $Revision: 1.20 $
+   $Date: 2006/10/07 13:50:19 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PlotFrame_h
@@ -36,7 +36,7 @@ namespace Pulsar {
     //! Destructor
     ~PlotFrame ();
 
-    //! Text interface to the PlotFrame class
+    // Text interface to the PlotFrame class
     class Interface : public TextInterface::To<PlotFrame> {
     public:
       Interface (PlotFrame* = 0);

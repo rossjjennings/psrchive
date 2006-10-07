@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/StokesPlot.h,v $
-   $Revision: 1.8 $
-   $Date: 2006/10/06 21:13:54 $
+   $Revision: 1.9 $
+   $Date: 2006/10/07 13:50:19 $
    $Author: straten $ */
 
 #ifndef __Pulsar_StokesPlot_h
@@ -29,7 +29,7 @@ namespace Pulsar {
     //! Get the text interface to the configuration attributes
     TextInterface::Class* get_interface ();
 
-    //! Text interface to the StokesPlot class
+    // Text interface to the StokesPlot class
     class Interface : public TextInterface::To<StokesPlot> {
     public:
       Interface (StokesPlot* = 0);

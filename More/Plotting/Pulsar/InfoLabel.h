@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/InfoLabel.h,v $
-   $Revision: 1.3 $
-   $Date: 2006/10/06 21:13:54 $
+   $Revision: 1.4 $
+   $Date: 2006/10/07 13:50:19 $
    $Author: straten $ */
 
 #ifndef __Pulsar_InfoLabel_h
@@ -38,7 +38,7 @@ namespace Pulsar {
 
   protected:
 
-    //! The FluxPlot instance for which this is plotting a label
+    // The FluxPlot instance for which this is plotting a label
     Reference::To<const FluxPlot> flux;
 
   };

@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/AnglePlot.h,v $
-   $Revision: 1.10 $
-   $Date: 2006/10/06 21:13:54 $
+   $Revision: 1.11 $
+   $Date: 2006/10/07 13:50:19 $
    $Author: straten $ */
 
 #ifndef __Pulsar_AnglePlot_h
@@ -32,7 +32,7 @@ namespace Pulsar {
     //! Get the text interface to the configuration attributes
     TextInterface::Class* get_interface ();
 
-    //! Text interface to the AnglePlot class
+    // Text interface to the AnglePlot class
     class Interface : public TextInterface::To<AnglePlot> {
     public:
       Interface (AnglePlot* = 0);

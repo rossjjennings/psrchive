@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/MultiFrame.h,v $
-   $Revision: 1.12 $
-   $Date: 2006/10/06 21:13:54 $
+   $Revision: 1.13 $
+   $Date: 2006/10/07 13:50:19 $
    $Author: straten $ */
 
 #ifndef __Pulsar_MultiFrame_h
@@ -25,7 +25,7 @@ namespace Pulsar {
 
   public:
 
-    //! Text interface to the MultiFrame class
+    // Text interface to the MultiFrame class
     class Interface : public TextInterface::To<MultiFrame> {
     public:
       Interface (MultiFrame* = 0);

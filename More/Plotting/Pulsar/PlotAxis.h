@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PlotAxis.h,v $
-   $Revision: 1.9 $
-   $Date: 2006/10/06 21:13:54 $
+   $Revision: 1.10 $
+   $Date: 2006/10/07 13:50:19 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PlotAxis_h
@@ -26,7 +26,7 @@ namespace Pulsar {
     //! Default constructor
     PlotAxis ();
 
-    //! Text interface to the PlotAxis class
+    // Text interface to the PlotAxis class
     class Interface : public TextInterface::To<PlotAxis> {
     public:
       Interface (PlotAxis* = 0);

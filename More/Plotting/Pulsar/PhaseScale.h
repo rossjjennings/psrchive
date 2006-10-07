@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PhaseScale.h,v $
-   $Revision: 1.10 $
-   $Date: 2006/10/06 21:13:54 $
+   $Revision: 1.11 $
+   $Date: 2006/10/07 13:50:19 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PhaseScale_h
@@ -31,7 +31,7 @@ namespace Pulsar {
     //! Default constructor
     PhaseScale ();
 
-    //! Text interface to the PhaseScale class
+    // Text interface to the PhaseScale class
     class Interface : public TextInterface::To<PhaseScale> {
     public:
       Interface (PhaseScale* = 0);

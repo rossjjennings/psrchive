@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/Attic/PlotFrameSize.h,v $
-   $Revision: 1.8 $
-   $Date: 2006/10/06 21:13:54 $
+   $Revision: 1.9 $
+   $Date: 2006/10/07 13:50:19 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PlotFrameSize_h
@@ -31,7 +31,7 @@ namespace Pulsar {
     //! Partial copy constructor
     PlotFrameSize (const PlotFrame*);
 
-    //! Text interface to the PlotFrameSize class
+    // Text interface to the PlotFrameSize class
     class Interface : public TextInterface::To<PlotFrameSize> {
     public:
       Interface (PlotFrameSize* = 0);

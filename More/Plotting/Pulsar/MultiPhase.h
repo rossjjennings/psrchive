@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/MultiPhase.h,v $
-   $Revision: 1.11 $
-   $Date: 2006/10/06 21:13:54 $
+   $Revision: 1.12 $
+   $Date: 2006/10/07 13:50:19 $
    $Author: straten $ */
 
 #ifndef __Pulsar_MultiPhase_h
@@ -27,7 +27,7 @@ namespace Pulsar {
     //! Default constructor
     MultiPhase ();
 
-    //! Text interface to the MultiPhase class
+    // Text interface to the MultiPhase class
     class Interface : public TextInterface::To<MultiPhase> {
     public:
       Interface (MultiPhase* = 0);

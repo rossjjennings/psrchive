@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/Poincare.h,v $
-   $Revision: 1.3 $
-   $Date: 2006/10/06 21:13:54 $
+   $Revision: 1.4 $
+   $Date: 2006/10/07 13:50:19 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Poincare_h
@@ -31,7 +31,7 @@ namespace Pulsar {
     //! Plot in the current viewport
     void plot (const Archive*);
 
-    //! Text interface to the Poincare class
+    // Text interface to the Poincare class
     class Interface : public TextInterface::To<Poincare> {
     public:
       Interface (Poincare* = 0);

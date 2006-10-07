@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/More/Plotting/Pulsar/PowerSpectra.h,v $
-   $Revision: 1.7 $
-   $Date: 2006/10/06 21:13:54 $
+   $Revision: 1.8 $
+   $Date: 2006/10/07 13:50:19 $
    $Author: straten $ */
 
 #ifndef __Pulsar_PowerSpectra_h
@@ -32,7 +32,7 @@ namespace Pulsar {
     //! Return the text interface
     TextInterface::Class* get_interface ();
 
-    //! Text interface to the PowerSpectra class
+    // Text interface to the PowerSpectra class
     class Interface : public TextInterface::To<PowerSpectra> {
     public:
       Interface (PowerSpectra* = 0);
