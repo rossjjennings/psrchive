@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/Timer/Pulsar/ScintArchive.h,v $
-   $Revision: 1.5 $
-   $Date: 2006/10/06 21:05:50 $
+   $Revision: 1.6 $
+   $Date: 2006/10/07 13:49:52 $
    $Author: straten $ */
 
 #ifndef __Scint_Archive_h
@@ -70,7 +70,7 @@ namespace Pulsar {
 
     friend class Archive::Advocate<ScintArchive>;
 
-    //! Advocates the use of the ScintArchive plugin
+    // Advocates the use of the ScintArchive plugin
     class Agent : public Archive::Advocate<ScintArchive> {
 
       public:

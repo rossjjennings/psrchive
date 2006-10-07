@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/Timer/Pulsar/TimerArchive.h,v $
-   $Revision: 1.20 $
-   $Date: 2006/10/06 21:05:50 $
+   $Revision: 1.21 $
+   $Date: 2006/10/07 13:49:52 $
    $Author: straten $ */
 
 #ifndef __Timer_Archive_h
@@ -151,7 +151,7 @@ namespace Pulsar {
 
     friend class Archive::Advocate<TimerArchive>;
 
-    //! Advocates the use of the TimerArchive plugin
+    // Advocates the use of the TimerArchive plugin
     class Agent : public Archive::Advocate<TimerArchive> {
     
       public:

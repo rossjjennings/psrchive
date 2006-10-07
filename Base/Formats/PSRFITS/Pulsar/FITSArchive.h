@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/PSRFITS/Pulsar/FITSArchive.h,v $
-   $Revision: 1.36 $
-   $Date: 2006/10/06 21:05:50 $
+   $Revision: 1.37 $
+   $Date: 2006/10/07 13:49:52 $
    $Author: straten $ */
 
 #ifndef __Pulsar_FITSArchive_h
@@ -139,7 +139,7 @@ namespace Pulsar {
     
     friend class Archive::Advocate<FITSArchive>;
     
-    //! Advocates the use of the FITSArchive plugin
+    // Advocates the use of the FITSArchive plugin
     class Agent : public Archive::Advocate<FITSArchive> {
       
     public:

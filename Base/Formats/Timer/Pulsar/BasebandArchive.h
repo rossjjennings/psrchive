@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/Timer/Pulsar/BasebandArchive.h,v $
-   $Revision: 1.17 $
-   $Date: 2006/10/06 21:05:50 $
+   $Revision: 1.18 $
+   $Date: 2006/10/07 13:49:52 $
    $Author: straten $ */
 
 #ifndef __Baseband_Archive_h
@@ -93,7 +93,7 @@ namespace Pulsar {
 
     friend class Archive::Advocate<BasebandArchive>;
 
-    //! Advocates the use of the BasebandArchive plugin
+    // Advocates the use of the BasebandArchive plugin
     class Agent : public Archive::Advocate<BasebandArchive> {
 
       public:

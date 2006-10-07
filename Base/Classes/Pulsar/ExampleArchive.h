@@ -7,8 +7,8 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/ExampleArchive.h,v $
-   $Revision: 1.9 $
-   $Date: 2006/10/06 21:05:49 $
+   $Revision: 1.10 $
+   $Date: 2006/10/07 13:49:52 $
    $Author: straten $ */
 
 #ifndef __ExampleArchive_h
@@ -67,7 +67,7 @@ namespace Pulsar {
     //! Unload the ExampleArchive (header and Integration data) to filename
     virtual void unload_file (const char* filename) const;
 
-    //! Advocates the use of the ExampleArchive plugin
+    // Advocates the use of the ExampleArchive plugin
     class Agent;
 
     //! Enable Advocate template class to access protected Agent class
@@ -81,7 +81,7 @@ namespace Pulsar {
   };
  
 
-  //! Advocates the use of the ExampleArchive plugin
+  // Advocates the use of the ExampleArchive plugin
   class ExampleArchive::Agent : public Archive::Advocate<ExampleArchive> {
     
   public:
