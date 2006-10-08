@@ -206,10 +206,6 @@ namespace TextInterface {
     //! Range parsed from name during matches
     std::string range;
 
-    //! Worker function parses indeces for get_value and set_value
-    void get_indeces (const V* ptr, std::vector<unsigned>& indeces,
-		      const std::string& param) const;
-
   };
 
 
@@ -324,6 +320,67 @@ namespace TextInterface {
 
   };
 
+
+  //! Pointer to attribute get method, C::Get(index), that returns some type
+  /*! In this template: C is a class with a vector of elements of
+    unspecified type; Get is the method of C that returns E; and Size
+    is the method of C that returns the number of elements in the vector. */
+  template<class C, class Get, class Size>
+  class ElementGet : public Attribute<C> {
+
+  public:
+
+    //! Constructor
+    ElementGet (const std::string& _name, Get _get, Size _size)
+      { name = _name; get = _get; size = _size; }
+
+    //! Copy constructor
+    ElementGet (const ElementGet& copy)
+      { name = copy.name; description = copy.description; 
+	get = copy.get; size = copy.size; }
+
+    //! Return a clone
+    Attribute<C>* clone () const { return new ElementGet(*this); }
+
+    //! Get the name of the attribute
+    std::string get_name () const { return name + "*"; }
+
+    //! Get the description of the attribute
+    std::string get_description () const { return description; }
+
+    //! Get the description of the attribute
+    void set_description (const std::string& d) { description = d; }
+
+    //! Get the value of the attribute
+    std::string get_value (const C* ptr) const;
+
+    //! Set the value of the attribute
+    void set_value (C* ptr, const std::string& value)
+      { throw Error (InvalidState, "ElementGet::set_value", 
+		     name + " cannot be set"); }
+
+    //! Return true if the name argument matches
+    bool matches (const std::string& name) const;
+
+  protected:
+
+    //! The name of the attribute
+    std::string name;
+
+    //! The description of the attribute
+    std::string description;
+
+    //! The get method
+    Get get;
+
+    //! The size method
+    Size size;
+
+    //! Range parsed from name during matches
+    std::string range;
+
+  };
+
   //! Pointer to a Unary Function that receives C* and returns some type
   template<class C, class Unary>
   class UnaryGet : public Attribute<C> {
@@ -400,10 +457,37 @@ namespace TextInterface {
 
   };
 
-  //! AttributeGet and AttributeGetSet factories
-  /*! Use these factories whenever the get and set methods to not
-    match the patterns supplied by the corresponding factories of the
-    TextInterface::To class */
+  //! Pointers to attribute get and set methods, Type C::Get() and C::Set(Type)
+  template<class C, class Type, class Get, class Set, class Size>
+    class ElementGetSet : public ElementGet<C, Get, Size> {
+
+  public:
+
+    //! Constructor
+    ElementGetSet (const std::string& _name, Get _get, Set _set, Size _size)
+      : ElementGet<C,Get,Size> (_name, _get, _size) { set = _set; }
+
+    //! Copy constructor
+    ElementGetSet (const ElementGetSet& copy) 
+      : ElementGet<C,Get,Size> (copy) { set = copy.set; }
+
+    //! Return a clone
+    Attribute<C>* clone () const { return new ElementGetSet(*this); }
+
+    //! Set the value of the attribute
+    void set_value (C* ptr, const std::string& value);
+
+  protected:
+
+    //! The set method
+    Set set;
+
+  };
+
+  //! AttributeGet and AttributeGetSet factory
+  /*! Use this generator function object whenever the get and set
+    methods to not match the patterns supplied by the add template
+    methods of the TextInterface::To class */
   template<class C, class Type>
   class Allocator {
 
@@ -412,30 +496,72 @@ namespace TextInterface {
     //! Generate a new AttributeGet instance
     template<class Get>
       AttributeGet<C,Get>* 
-      named (const std::string& n, Get g)
+      operator () (const std::string& n, Get g)
       { return new AttributeGet<C,Get> (n, g); }
     
     //! Generate a new AttributeGetSet instance
     template<class Get, class Set>
       AttributeGetSet<C,Type,Get,Set>* 
-      named (const std::string& n, Get g, Set s)
+      operator () (const std::string& n, Get g, Set s)
       { return new AttributeGetSet<C,Type,Get,Set> (n, g, s); }
     
     //! Generate a new AttributeGet instance with description
     template<class Get>
       AttributeGet<C,Get>* 
-      described (const std::string& n, const std::string& d, Get g)
+      operator () (const std::string& n, const std::string& d, Get g)
       {
-	AttributeGet<C,Get>* get = named (n,g);
+	AttributeGet<C,Get>* get = operator () (n,g);
 	get->set_description (d); return get;
       }
 
     //! Generate a new AttributeGetSet instance with description
     template<class Get, class Set>
       AttributeGetSet<C,Type,Get,Set>* 
-      described (const std::string& n, const std::string& d, Get g, Set s)
+      operator () (const std::string& n, const std::string& d, Get g, Set s)
       {
-	AttributeGetSet<C,Type,Get,Set>* get = named (n,g,s);
+	AttributeGetSet<C,Type,Get,Set>* get = operator () (n,g,s);
+	get->set_description (d); return get;
+      }
+
+  };
+
+  //! ElementGet and ElementGetSet factory
+  /*! Use this generator function object whenever the get and set
+    methods to not match the patterns supplied by the add template
+    methods of the TextInterface::To class */
+  template<class C, class Type>
+  class VAllocator {
+
+  public:
+
+    //! Generate a new ElementGet instance
+    template<class Get, class Size>
+      ElementGet<C,Get,Size>* 
+      operator () (const std::string& n, Get g, Size z)
+      { return new ElementGet<C,Get,Size> (n, g, z); }
+    
+    //! Generate a new ElementGetSet instance
+    template<class Get, class Set, class Size>
+      ElementGetSet<C,Type,Get,Set,Size>* 
+      operator () (const std::string& n, Get g, Set s, Size z)
+      { return new ElementGetSet<C,Type,Get,Set,Size> (n, g, s, z); }
+    
+    //! Generate a new ElementGet instance with description
+    template<class Get, class Size>
+      ElementGet<C,Get,Size>* 
+      operator () (const std::string& n, const std::string& d, Get g, Size z)
+      {
+	ElementGet<C,Get,Size>* get = operator () (n,g,z);
+	get->set_description (d); return get;
+      }
+
+    //! Generate a new ElementGetSet instance with description
+    template<class Get, class Set, class Size>
+      ElementGetSet<C,Type,Get,Set,Size>* 
+      operator () (const std::string& n, const std::string& d,
+		   Get g, Set s, Size z)
+      {
+	ElementGetSet<C,Type,Get,Set,Size>* get = operator () (n,g,s,z);
 	get->set_description (d); return get;
       }
 
@@ -448,6 +574,9 @@ namespace TextInterface {
 
     //! Process a command
     virtual std::string process (const std::string& command);
+
+    //! Set the indentation that precedes the output of a call to process
+    void set_indentation (const std::string& indent) { indentation = indent; }
 
     //! Return the list of available attributes
     std::string help (bool show_default_values = false);
@@ -468,6 +597,11 @@ namespace TextInterface {
     //! Get the description of the attribute
     virtual std::string get_description (unsigned) const = 0;
 
+  protected:
+
+    //! The indentation that precedes the output of a call to process
+    std::string indentation;
+
   };
 
 
@@ -478,6 +612,8 @@ namespace TextInterface {
   public:
 
     template<class Type> class Generator : public Allocator<C,Type> { };
+
+    template<class Type> class VGenerator : public VAllocator<C,Type> { };
 
     //! Default constructor
     To () { import_filter = false; }
@@ -589,7 +725,7 @@ namespace TextInterface {
 		const char* name, const char* description = 0)
       {
 	Generator<T> gen;
-	Attribute<C>* getset = gen.named (name, get);
+	Attribute<C>* getset = gen (name, get);
 	if (description)
 	  getset->set_description (description);
 	add (getset);
@@ -601,7 +737,7 @@ namespace TextInterface {
 		const char* name, const char* description = 0)
       {
 	Generator<T> gen;
-	Attribute<C>* getset = gen.named (name, get, set);
+	Attribute<C>* getset = gen (name, get, set);
 	if (description)
 	  getset->set_description (description);
 	add (getset);
@@ -613,7 +749,7 @@ namespace TextInterface {
 		const char* name, const char* description = 0)
       {
 	Generator<T> gen;
-	Attribute<C>* getset = gen.named (name, get, set);
+	Attribute<C>* getset = gen (name, get, set);
 	if (description)
 	  getset->set_description (description);
 	add (getset);
@@ -656,11 +792,12 @@ namespace TextInterface {
   };
 
   //! Parse a range of indeces from a string
-  void parse_indeces (std::vector<unsigned>& indeces, const std::string&);
+  void parse_indeces (std::vector<unsigned>& indeces, const std::string&,
+		      unsigned size);
 
   //! Does the work for VectorOfProxy::matches and MapOfProxy::matches
   bool match (const std::string& name, const std::string& text,
-	      std::string* range, std::string* remainder);
+	      std::string* range, std::string* remainder = 0);
 
   //! Label elements in ElementGetSet<C,E>::get_value
   extern bool label_elements;
@@ -693,13 +830,12 @@ TextInterface::To<C>::find (const std::string& param, bool throw_ex) const
   return 0;
 }
 
-
 template<class V, class E, class G, class S> 
 std::string
 TextInterface::VectorOfProxy<V,E,G,S>::get_value (const V* ptr) const
 {
   std::vector<unsigned> ind;
-  get_indeces (ptr, ind, range);
+  parse_indeces (ind, range, (ptr->*size)());
   std::ostringstream ost;
 
   for (unsigned i=0; i<ind.size(); i++) {
@@ -710,7 +846,7 @@ TextInterface::VectorOfProxy<V,E,G,S>::get_value (const V* ptr) const
 
     E* element = (const_cast<V*>(ptr)->*get)(ind[i]);
 #ifdef _DEBUG
-  std::cerr << "ElementGetSet[" << name << "]::get (" 
+  std::cerr << "VectorOfProxy[" << prefix << "]::get (" 
 	    << sub_name << ") element=" << element << std::endl;
 #endif
     ost << attribute->get_value (element);
@@ -724,7 +860,7 @@ void TextInterface::VectorOfProxy<V,E,G,S>::set_value (V* ptr,
 						       const std::string& val)
 {
   std::vector<unsigned> ind;
-  get_indeces (ptr, ind, range);
+  parse_indeces (ind, range, (ptr->*size)());
 
   for (unsigned i=0; i<ind.size(); i++) {
     E* element = (ptr->*get)(ind[i]);
@@ -736,54 +872,6 @@ void TextInterface::VectorOfProxy<V,E,G,S>::set_value (V* ptr,
   }
 }
 
-template<class V, class E, class G, class S>
-void TextInterface::VectorOfProxy<V,E,G,S>
-  ::get_indeces (const V* ptr, std::vector<unsigned>& indeces,
-		 const std::string& param) const
-{
-#ifdef _DEBUG
-  std::cerr << "ElementGetSet::get_indeces " << param << std::endl;
-#endif
-
-  std::string sub_name = param;
-
-  if (sub_name == "*")
-    return;
-
-  parse_indeces (indeces, sub_name);
-
-#ifdef _DEBUG
-  std::cerr << "ElementGetSet::get_indeces size=" << indeces.size()
-    << " name=" << sub_name << std::endl;
-#endif
-
-  unsigned num = (ptr->*size)();
-
-  if (indeces.size() == 0) {
-#ifdef _DEBUG
-    std::cerr << "ElementGetSet::get_indeces select all" << std::endl;
-#endif
-    indeces.resize (num);
-    for (unsigned i=0; i<num; i++)
-      indeces[i] = i;
-  }
-  else {
-#ifdef _DEBUG
-    std::cerr << "ElementGetSet::get_indeces select";
-#endif
-    for (unsigned i=0; i < indeces.size(); i++) {
-#ifdef _DEBUG
-      std::cerr << " " << indeces[i];
-#endif
-      if (indeces[i] >= num)
-	throw Error (InvalidRange, "TextInterface::ElementGetSet::get_indeces",
-		     "%d >= %d", indeces[i], num);
-    }
-#ifdef _DEBUG
-    std::cerr << endl;
-#endif
-  }
-}
 
 template<class C,class M,class Get,class Size>
  bool TextInterface::VectorOfProxy<C,M,Get,Size>::matches
@@ -892,6 +980,47 @@ bool TextInterface::HasAProxy<C,M,Get>::matches (const std::string& name) const
     return false;
 
   return attribute->matches (name.substr(length+1));
+}
+
+template<class C,class Get,class Size>
+ bool TextInterface::ElementGet<C,Get,Size>::matches
+  (const std::string& var) const
+{
+  if (!match (name, var, const_cast<std::string*>(&range)))
+    return false;
+
+  return true;
+}
+
+template<class C, class G, class S> 
+std::string
+TextInterface::ElementGet<C,G,S>::get_value (const C* ptr) const
+{
+  std::vector<unsigned> ind;
+  parse_indeces (ind, range, (ptr->*(size))());
+  std::ostringstream ost;
+
+  for (unsigned i=0; i<ind.size(); i++) {
+    if (i)
+      ost << ",";  // place a comma between elements
+    if (label_elements && ind.size() > 1)
+      ost << ind[i] << ")";  // label the elements
+
+    ost << (ptr->*get)(ind[i]);
+  }
+
+  return ost.str();
+}
+
+template<class C, class T, class G, class S, class Z>
+void TextInterface::ElementGetSet<C,T,G,S,Z>::set_value (C* ptr,
+							 const std::string& v)
+{
+  std::vector<unsigned> ind;
+  parse_indeces (ind, this->range, (ptr->*(this->size))());
+
+  for (unsigned i=0; i<ind.size(); i++)
+    (ptr->*set)(ind[i], fromstring<T>(v));
 }
 
 
