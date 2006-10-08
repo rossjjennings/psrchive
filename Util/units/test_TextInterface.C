@@ -16,38 +16,23 @@ public:
 
   extension () 
   {
-#ifdef _DEBUG
-    cerr << "extension::this=" << this << endl;
-#endif
     text = "tui import failure";
   }
   extension (const extension& ext) 
   {
-#ifdef _DEBUG
-    cerr << "copy extension::this=" << this << endl;
-#endif
     text = ext.text;
   }
   ~extension () 
   {
-#ifdef _DEBUG
-    cerr << "~extension::this=" << this << endl;
-#endif
   }
 
   void set_text (const std::string& _text) 
   {
-#ifdef _DEBUG
-    cerr << "extension::set_text this=" << this << " text=" << _text << endl;
-#endif
     text = _text;
   }
 
   std::string get_text () const
   {
-#ifdef _DEBUG
-    cerr << "extension::get_text this=" << this << endl;
-#endif
     return text;
   }
 
@@ -76,9 +61,15 @@ public:
   // test the map interface
   extension* get_map (string& text) { return &ext; }
 
+  // test the element get/set interface
+  void set_element (unsigned i, double _value) { element[i] = _value; }
+  double get_element (unsigned i) const { return element[i]; }
+  unsigned get_nelement () const { return 5; }
+
 protected:
   extension ext;
   double value;
+  double element [5];
 };
 
 
@@ -88,6 +79,13 @@ public:
   testerTUI () {
     add (&tester::get_value, "value", "description");
     add (&tester::get_value, "same",  "description");
+
+    VGenerator<double> generator;
+    add( generator("element", "an array of elements",
+		   &tester::get_element,
+		   &tester::set_element,
+		   &tester::get_nelement) );
+
   }
 
 };
@@ -141,7 +139,7 @@ int main () try {
   TextInterface::Allocator<tester,double> allocate;
 
   TextInterface::Attribute<tester>* interface;
-  interface = allocate.named ("value", &tester::get_value, &tester::set_value);
+  interface = allocate ("value", &tester::get_value, &tester::set_value);
 
   interface->set_value (&Test, "3.456");
 
@@ -153,7 +151,7 @@ int main () try {
   }
 
   TextInterface::Attribute<tester>* read_only;
-  read_only = allocate.named ("value", &tester::get_value);
+  read_only = allocate ("value", &tester::get_value);
 
   cerr << "AttributeGet::get_value=" << read_only->get_value(&Test) << endl;
 
@@ -185,6 +183,29 @@ int main () try {
     return -1;
   }
 
+  // test ElementGetSet all elements in the vector
+  getset.set_value("element", "5.67");
+  for (unsigned i=0; i<Test.get_nelement(); i++) {
+    cerr << "Test.get_element(" << i << ")=" << Test.get_element(i) << endl;
+    if (Test.get_element(i) != 5.67) {
+      cerr << "test_TextInterface ERROR!" << endl;
+      return -1;
+    }
+  }
+
+  getset.set_value("element[3]", "4.32");
+  for (unsigned i=0; i<Test.get_nelement(); i++) {
+    cerr << "Test.get_element(" << i << ")=" << Test.get_element(i) << endl;
+    if (i == 3 && Test.get_element(i) != 4.32) {
+      cerr << "test_TextInterface ERROR!" << endl;
+      return -1;
+    }
+    if (i != 3 && Test.get_element(i) != 5.67) {
+      cerr << "test_TextInterface ERROR!" << endl;
+      return -1;
+    }
+  }
+
   cerr << "testing import" << endl;
 
   getset.import ( "ext", extensionTUI(), &tester::get_extension );
@@ -194,7 +215,7 @@ int main () try {
   cerr << "TextInterface::To<> has " << nattribute
        << " attributes after import" << endl;
 
-  if (nattribute != 3) {
+  if (nattribute != 4) {
     cerr << "test_TextInterface ERROR!" << endl;
     return -1;
   }
@@ -237,7 +258,7 @@ int main () try {
   cerr << "TextInterface::To<test_array> has " << nattribute 
        << " attributes after import" << endl;
 
-  if (nattribute != 3) {
+  if (nattribute != 4) {
     cerr << "test_TextInterface ERROR!" << endl;
     return -1;
   }
