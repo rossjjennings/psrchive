@@ -493,7 +493,8 @@ try {
     parse the (remaining) options as though they were indeces
   */
   for (unsigned i = range; i < arguments.size(); i++)
-    TextInterface::parse_indeces (indeces, arguments[i]);
+    TextInterface::parse_indeces (indeces, arguments[i], 
+				  archive->get_nsubint());
 
   /*
     extract the sub-integrations
