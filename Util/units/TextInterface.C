@@ -21,7 +21,7 @@ string TextInterface::Class::process (const string& command)
 
   // if no equals sign is present, assume that command is get key
   if (set == string::npos)
-    return command + "=" + get_value (command);
+    return indentation + command + "=" + get_value (command);
 
   // string before the equals sign
   string before = command.substr (0,set);
@@ -87,14 +87,19 @@ bool TextInterface::match (const string& name, const string& text,
     return false;
 
   string::size_type end = text.find (':', length);
-  if (end == string::npos)
-    return false;
+  if (end == string::npos) {
+    if (remainder)
+      return false;
+    else
+      end = text.length();
+  }
 
   // the range is everything between the end of the variable name and the colon
   *range = text.substr (length, end-length);
 
   // the remainder is everything following the colon
-  *remainder = text.substr (end+1);
+  if (remainder)
+    *remainder = text.substr (end+1);
 
   // a map may have no name
   if (!length)
@@ -104,17 +109,44 @@ bool TextInterface::match (const string& name, const string& text,
   if ((*range) == "*" || (*range) == "?")
     return true;
 
-  // the range must be enclosed in square brackets
   length = range->length();
+
+  // a range may be empty ...
+  if (!length)
+    return true;
+
+  // .. or must be enclosed in square brackets
   if ((*range)[0] == '[' && (*range)[length-1] == ']')
     return true;
 
   return false;
 }
 
-void TextInterface::parse_indeces (vector<unsigned>& index,
-				   const string& name)
+void check_range (int i, int n, const char* name)
 {
+  if (i < 0)
+    throw Error (InvalidRange, "TextInterface::parse_indeces",
+		 "%s=%d < 0", name, i);
+
+  if (i >= n)
+    throw Error (InvalidRange, "TextInterface::parse_indeces",
+		 "%s=%d >= size=%d", name, i, n);
+}
+
+void TextInterface::parse_indeces (vector<unsigned>& index,
+				   const string& name,
+				   unsigned size)
+{
+  if (name == "*")
+    return;
+
+  if (name == "") {
+    index.resize (size);
+    for (unsigned i=0; i<size; i++)
+      index[i] = i;
+    return;
+  }
+
   string::size_type length = name.length();
 
   // look for the opening and closing braces
@@ -145,7 +177,7 @@ void TextInterface::parse_indeces (vector<unsigned>& index,
 
     if (range[0]==',')
       range.erase(0,1);
-
+    
     int start, end;
     char c;
 
@@ -162,20 +194,31 @@ void TextInterface::parse_indeces (vector<unsigned>& index,
 	   << " end=" << end << endl;
 #endif
 
-      if (start < 0)
-        throw Error (InvalidRange, "TextInterface::parse_indeces",
-                     "start=%d < 0", start);
-
-      if (end < 0)
-        throw Error (InvalidRange, "TextInterface::parse_indeces",
-                     "end index=%d < 0", end);
+      check_range (start, size, "start");
+      check_range (end, size, "end");
 
       if (end < start)
         throw Error (InvalidRange, "TextInterface::parse_indeces",
                      "end=%d < start=%d", end, start);
 
-
       for (int i=start; i <= end; i++)
+	index.push_back (i);
+
+    }
+
+    else if (scanned == 2)  {
+
+      if (c != '-')
+        throw Error (InvalidParam, "TextInterface::parse_indeces",
+                     "invalid sub-range '" + range + "'");
+
+#ifdef _DEBUG
+      cerr << "TextInterface::parse_indeces index=" << start << endl;
+#endif
+
+      check_range (start, size, "start");
+
+      for (int i=start; i < size; i++)
 	index.push_back (i);
 
     }
@@ -186,9 +229,7 @@ void TextInterface::parse_indeces (vector<unsigned>& index,
       cerr << "TextInterface::parse_indeces index=" << start << endl;
 #endif
 
-      if (start < 0)
-        throw Error (InvalidRange, "TextInterface::parse_indeces",
-                     "index=%d < 0", start);
+      check_range (start, size, "start");
 
       index.push_back (start);
 
