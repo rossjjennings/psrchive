@@ -62,6 +62,9 @@ int main (int argc, char** argv) try {
 
   Pulsar::ArchiveTI tui;
 
+  // so that a space precedes each parameter processed
+  tui.set_indentation (" ");
+
   bool save = false;
   string save_ext;
 
