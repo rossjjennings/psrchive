@@ -87,7 +87,7 @@ string remove_all (string input, char c)
   unsigned i=0;
   while (i<input.size())
     if (input[i] == c)
-      input.erase(i);
+      input.erase(i,1);
     else
       i ++;
 }
