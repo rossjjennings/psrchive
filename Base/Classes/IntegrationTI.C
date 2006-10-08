@@ -25,6 +25,17 @@ Pulsar::IntegrationTI::IntegrationTI ()
        &Integration::set_folding_period, 
        "period", "Period at which data were folded (seconds)" );
 
+  VGenerator<double> generator;
+  add(generator( "freq", "Centre frequency of each channel (MHz)",
+		 /* WvS - not sure why the compiler doesn't know the
+		    type of the pointer to the get_centre_frequency
+		    method, but this cast is necessary for now.
+		 */
+		 (double(Integration::*)(unsigned)const)
+		 &Integration::get_centre_frequency,
+		 &Integration::set_centre_frequency,
+		 &Integration::get_nchan ));
+
   import( "point", Pulsar::PointingTI(),
 	  (Pointing*(Integration::*)()) &Integration::get<Pointing> );
 
