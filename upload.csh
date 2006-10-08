@@ -9,5 +9,5 @@ tar cvf doc.tar *
 gzip -f doc.tar
 
 scp doc.tar.gz $SFUSER@shell.sourceforge.net:
-ssh $SFUSER@shell.sourceforge.net 'cd psrchive/htdocs/classes/psrchive && tar zxvf ~/doc.tar.gz'
+ssh $SFUSER@shell.sourceforge.net 'cd psrchive/htdocs/classes/psrchive && rm -rf * && tar zxvf ~/doc.tar.gz'
 
