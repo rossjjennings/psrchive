@@ -65,7 +65,7 @@ void Pulsar::PlotLabel::row (const string& label,
   if (spacing > 0)
     start = offset + (nrow-irow-1) * spacing;
   else
-    start = spacing - offset;
+    start = (irow+1) * spacing - offset;
 
   cpgmtxt ("T", start, side, side, label.c_str());
 }
