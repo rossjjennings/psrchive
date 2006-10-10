@@ -6,7 +6,7 @@ if ( "$1" == "" ) then
   exit -1
 endif
 
-set programs = "psredit psrtxt psrconv vip pam pascii pat paz psradd psrsh psrwt fluxcal pac pcm psrplot pas psrdiff pacv"
+set programs = "vap pav psredit psrtxt psrconv vip pam pascii pat paz psradd psrsh psrwt fluxcal pac pcm psrplot pas psrdiff pacv"
 
 foreach prog ( $programs )
 
