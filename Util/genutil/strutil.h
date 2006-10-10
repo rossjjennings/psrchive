@@ -6,8 +6,8 @@
  *
  ***************************************************************************/
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/strutil.h,v $
-   $Revision: 1.1 $
-   $Date: 2006/10/06 21:13:14 $
+   $Revision: 1.2 $
+   $Date: 2006/10/10 18:48:12 $
    $Author: straten $ */
 
 #ifndef __STRING_UTILS_H
@@ -93,26 +93,8 @@ std::string stringtok (std::string* instr, char delimiter,
 		    strip_leading_delimiters_from_remainder); }
 
 // ///////////////////////////////////////////////////////////
-// returns the first sub-string of 'instr' delimited by
-// 'delimiter'.
+// like sprintf, but returns a string
 // ///////////////////////////////////////////////////////////
-std::string subdlim (const std::string& instr, const std::string& delimiter);
-
-inline std::string subdlim (const std::string& instr, char* delimiters)
-{ return subdlim (instr, std::string(delimiters)); }
-
-inline std::string subdlim (const std::string& instr, char delimiter)
-{ return subdlim (instr, std::string(1, delimiter)); }
-
-// ///////////////////////////////////////////////////////////
-int stringlen (double val, unsigned precision = 15);
-
-inline int stringlen (int val, unsigned precision = 0)
-{ return stringlen (double(val), precision); }
-
-inline int stringlen (float val, unsigned precision = 6)
-{ return stringlen (double(val), precision); }
-
 std::string stringprintf(char *fmt ...);
 
 
