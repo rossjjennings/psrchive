@@ -12,7 +12,6 @@
 
 #include "FFTW_Transform.h"
 #include "Error.h"
-#include "rfftw_sort.h"
 
 #include <rfftw.h>
 #include <assert.h>
@@ -30,7 +29,7 @@ FTransform::FFTW_Plan::~FFTW_Plan()
   if (plan) {
 
     if ( call == "frc1d" || call == "brc1d" )
-      rfftw_destroy_plan ((rfftw_plan) plan);
+      rfftwnd_destroy_plan ((rfftwnd_plan) plan);
 
     else
       fftw_destroy_plan ((fftw_plan) plan);
@@ -62,7 +61,8 @@ FTransform::FFTW_Plan::FFTW_Plan (size_t n_fft, const string& fft_call)
     flags = FFTW_MEASURE;
 
   if (fft_call == "frc1d" || fft_call == "bcr1d") {
-    plan = rfftw_create_plan (n_fft, wdir, flags);
+    int int_nfft = n_fft;
+    plan = rfftwnd_create_plan (1, &int_nfft, wdir, flags);
     tmp = new float[n_fft+2];
     assert( tmp != 0 );
   }
@@ -78,9 +78,8 @@ int FTransform::FFTW_Plan::frc1d (size_t nfft, float* dest, const float* src)
 {
   FT_SETUP (FFTW_Plan, frc1d);
 
-  rfftw_one ((rfftw_plan)(plan->plan), 
-	     (fftw_real*)src, (fftw_real*)plan->tmp);
-  rfftw_sort (nfft, plan->tmp, dest);
+  rfftwnd_one_real_to_complex ((rfftwnd_plan)(plan->plan),
+			       (fftw_real*)src, (fftw_complex*)dest);
 
   return 0;
 }
@@ -109,11 +108,8 @@ int FTransform::FFTW_Plan::bcr1d (size_t nfft, float* dest, const float* src)
 {
   FT_SETUP (FFTW_Plan, bcr1d);
 
-  throw Error (InvalidState, "FTransform::FFTW_Plan::fftw_bcr1d",
-	       "not implemented");
-
-  rfftw_one ((rfftw_plan)(plan->plan),
-	     (fftw_real*)src, (fftw_real*)plan->tmp);
+  rfftwnd_one_complex_to_real ((rfftwnd_plan)(plan->plan), 
+			       (fftw_complex*)src, (fftw_real*)dest);
 
   return 0;
 }

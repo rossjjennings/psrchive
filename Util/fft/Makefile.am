@@ -7,7 +7,7 @@ include_HEADERS = interpolate.h median_smooth.h \
 
 libpsrfft_la_SOURCES = \
 	FTransform.C IPP_Transform.C MKL_Transform.C FFTW3_Transform.C \
-	FFTW_Transform.C QuaternionFT.C shift.C rfftw_sort.c fccf.f ffft.f
+	FFTW_Transform.C QuaternionFT.C shift.C fccf.f ffft.f
 
 TESTS = test_normalization test_interpolate test_real_complex \
 	test_QuaternionFT
