@@ -90,30 +90,5 @@ string remove_all (string input, char c)
       input.erase(i,1);
     else
       i ++;
-}
-
-// Returns one line per element of return vector
-vector<string> stringlines(const string& str)
-{
-  vector<string> lines;
-
-  if( str.size()==0 )
-    return lines;
-  
-  char* cptr = (char*)&*str.begin();
-  char* dend = cptr + str.size();
-  char* start = cptr;
-
-  while( cptr!=dend ){
-    if( *cptr=='\n' ){
-      lines.push_back( string(start,cptr) );
-      start = cptr+1;
-    }
-    cptr++;
-  }
-
-  if( start!=dend )
-    lines.push_back( string(start,dend) );
-
-  return lines;
+  return input;
 }
