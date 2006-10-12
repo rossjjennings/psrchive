@@ -1,0 +1,65 @@
+/***************************************************************************
+ *
+ *   Copyright (C) 2006 by Willem van Straten
+ *   Licensed under the Academic Free License version 2.1
+ *
+ ***************************************************************************/
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
+#include "FTransformAgent.h"
+
+#ifdef HAVE_MKL
+#include "MKL_Transform.h"
+#endif
+
+#ifdef HAVE_FFTW3
+#include "FFTW3_Transform.h"
+#endif
+
+#ifdef HAVE_FFTW
+#include "FFTW_Transform.h"
+#endif
+
+#ifdef HAVE_IPP
+#include "IPP_Transform.h"
+#endif
+
+using namespace std;
+
+vector< Reference::To<FTransform::Agent> > FTransform::Agent::libraries;
+
+// ////////////////////////////////////////////////////////////////////
+//
+// Internal implementation initialization 
+//
+// ////////////////////////////////////////////////////////////////////
+
+static int initialise()
+{
+#ifdef HAVE_MKL
+  FTransform::MKL::Agent::enlist ();
+#endif
+
+#ifdef HAVE_FFTW3
+  FTransform::FFTW3::Agent::enlist ();
+#endif
+
+#ifdef HAVE_FFTW
+  FTransform::FFTW::Agent::enlist ();
+#endif
+
+#ifdef HAVE_IPP
+  FTransform::IPP::Agent::enlist ();
+#endif
+
+  if (FTransform::Agent::get_num_libraries() == 0) {
+    cerr << "\nFTransform: ERROR No FFT libraries installed!\n\n";
+    exit(-1);
+  }
+
+  return 0;
+}
+
+static int initialised = initialise();
