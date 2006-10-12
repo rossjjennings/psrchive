@@ -13,7 +13,7 @@
 
 namespace FTransform {
 
-  //! Base class of one-dimensional Fast Fourier Transforms
+  //! Abstract base class of one-dimensional Fast Fourier Transforms
   class Plan : public Reference::Able {
   public:
 
@@ -32,13 +32,19 @@ namespace FTransform {
     //! Backward complex-to-complex FFT
     virtual void bcc1d (size_t nfft, float* into, const float* from) = 0;
 
+    //! Return true if the plan matches the arguments
+    bool matches (size_t n, type t)
+    { return nfft == n && call == t; }
+
+  protected:
+
     bool optimized;
     type call;
     size_t nfft;
 
   };
 
-  //! Base class of two-dimensional Fast Fourier Transforms
+  //! Abstract base class of two-dimensional Fast Fourier Transforms
   class Plan2 : public Reference::Able {
   public:
 
@@ -50,6 +56,12 @@ namespace FTransform {
     //! Backward complex-to-complex FFT
     virtual void bcc2d (size_t x, size_t y, float* into, const float* from)= 0;
 
+    //! Return true if the plan matches the arguments
+    bool matches (size_t x, size_t y, type t)
+    { return nx == x && ny == y && call == t; }
+
+  protected:
+
     bool optimized;
     type call;
     size_t nx;
@@ -57,6 +69,19 @@ namespace FTransform {
 
   };
 
+  //! Base class for libraries that do not implement two-dimensional FFT
+  class NotImplemented : public Plan2 {
+
+  public:
+
+    NotImplemented (const char* name)
+    { throw Error (InvalidState, "FTransform::NotImplemented",
+		   "two-dimensional FFT not implemented by %s", name); }
+
+    void fcc2d (size_t nx, size_t ny, float* dest, const float* src) {}
+    void bcc2d (size_t nx, size_t ny, float* dest, const float* src) {}
+
+  };
 
 }
 
