@@ -41,14 +41,17 @@ namespace FTransform {
     static unsigned get_num_libraries ()
     { return libraries.size(); }
 
-    //! Get the number of available libraries
+    //! Get the name of the ith available library
     static std::string get_library_name (unsigned i) 
     { return libraries[i]->name; }
 
-  protected:
+    //! Set the current library by name
+    static void set_library (const std::string& name);
 
-    //! Install this as the current library
-    void install ();
+    //! The currently installed agent
+    static Reference::To<Agent> current;
+
+  protected:
 
     //! Add a pointer to this instance to the libraries attribute
     void add ();
@@ -117,7 +120,7 @@ namespace FTransform {
   PlanAgent<Library>::get_plan (size_t nfft, type t)
   {
     for (unsigned iplan=0; iplan<plans.size(); iplan++)
-      if (plans[iplan]->nfft == nfft && plans[iplan]->call == t)
+      if (plans[iplan]->matches (nfft, t))
 	return plans[iplan];
     
     plans.push_back( new typename Library::Plan (nfft, t) );
@@ -129,8 +132,7 @@ namespace FTransform {
   PlanAgent<Library>::get_plan2 (size_t nx, size_t ny, type t)
   {
     for (unsigned iplan=0; iplan<plans.size(); iplan++)
-      if (plans2[iplan]->nx == nx && plans2[iplan]->ny == ny &&
-	  plans2[iplan]->call == t)
+      if (plans2[iplan]->matches (nx, ny, t))
 	return plans2[iplan];
     
     plans2.push_back( new typename Library::Plan2 (nx, ny, t) );

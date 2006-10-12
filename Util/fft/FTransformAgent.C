@@ -28,8 +28,6 @@
 
 using namespace std;
 
-vector< Reference::To<FTransform::Agent> > FTransform::Agent::libraries;
-
 // ////////////////////////////////////////////////////////////////////
 //
 // Internal implementation initialization 
@@ -62,4 +60,43 @@ static int initialise()
   return 0;
 }
 
+void FTransform::Agent::add ()
+{ 
+  libraries.push_back (this);
+  if (!current)
+    current = this;
+}
+
+//! Choose to use a different library
+void FTransform::Agent::set_library (const string& name)
+{
+  for (unsigned ilib=0; ilib<libraries.size(); ilib++){
+    if (libraries[ilib]->name == name){
+      current = libraries[ilib];
+      return;
+    }
+  }
+
+  string s;
+
+  for (unsigned ilib=0; ilib<get_num_libraries(); ilib++)
+    s += "'" + libraries[ilib]->name + "' ";
+    
+  throw Error (InvalidState, "FTransform::Agent::set_library",
+	       "Library '" + name + "' is not in valid libraries: " + s);
+}
+
+FTransform::Agent::Agent()
+{
+}
+
+FTransform::Agent::~Agent()
+{
+}
+
+Reference::To<FTransform::Agent> FTransform::Agent::current;
+
+vector< Reference::To<FTransform::Agent> > FTransform::Agent::libraries;
+
 static int initialised = initialise();
+
