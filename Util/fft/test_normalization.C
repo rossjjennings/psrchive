@@ -19,11 +19,11 @@ void runtest (int ndat);
 
 int main (int argc, char** argv) try {
 
-  unsigned nlib = FTransform::Agent::get_num_libraries ();
+  unsigned nlib = FTransform::get_num_libraries ();
 
   for (unsigned ilib=0; ilib < nlib; ilib++) {
 
-    string name = FTransform::Agent::get_library_name (ilib);
+    string name = FTransform::get_library_name (ilib);
 
     FTransform::set_library (name);
  
@@ -94,8 +94,7 @@ using namespace FTransform;
 double diff (unsigned ndat, float* in, float* out)
 {
   double c = 0.0;
-  double scale = get_scale (forward, analytic, ndat/2)
-                *get_scale (backward, analytic, ndat/2);
+  double scale = get_scale (ndat/2, fcc) * get_scale (ndat/2, bcc);
 
   cerr << "scale=" << scale << endl;
 
@@ -138,8 +137,8 @@ void runtest2 (int ntrans, double powerin, float* fft1, float* data)
   double expect1 = 1;
   double expect2 = 1;
 
-  expect1 = get_scale (forward, analytic, ntrans);
-  expect2 = expect1*get_scale (backward, analytic, ntrans);
+  expect1 = get_scale (ntrans, fcc);
+  expect2 = expect1*get_scale (ntrans, bcc);
   expect1 *= expect1; // dealing with power
   expect2 *= expect2;
 
@@ -170,8 +169,8 @@ void runtest2 (int ntrans, double powerin, float* fft1, float* data)
 
     double factor2 = powerout/powerin;
 
-    expect1 = get_scale (forward, analytic, ntrans);
-    expect2 = expect1*get_scale (backward, analytic, bdat);
+    expect1 = get_scale (ntrans, fcc);
+    expect2 = expect1*get_scale (bdat, bcc);
     expect1 *= expect1; // dealing with power
     expect2 *= expect2;
 

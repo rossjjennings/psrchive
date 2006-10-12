@@ -1,74 +1,68 @@
 //-*-C++-*-
 /***************************************************************************
  *
- *   Copyright (C) 2005 by Haydon Knight
+ *   Copyright (C) 2006 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
 
-#ifndef _utils_psrfft_FFTW3_Transform_h_
-#define _utils_psrfft_FFTW3_Transform_h_
+#ifndef _Utils_fft_FFTW3_Transform_h_
+#define _Utils_fft_FFTW3_Transform_h_
 
-#include "FTransform.h"
-
-#include <fftw3.h>
+#include "FTransformAgent.h"
 
 namespace FTransform {
 
-  class FFTW3_Plan : public Plan {
+  class FFTW3 {
 
   public:
 
-    //! Constructor
-    FFTW3_Plan (size_t nfft, const std::string& call);
+    class Plan : public FTransform::Plan {
 
-    //! Destructor
-    ~FFTW3_Plan ();
+    public:
 
-    static int fcc1d (size_t nfft, float* dest, const float* src);
-    static int bcc1d (size_t nfft, float* dest, const float* src);
-    static int frc1d (size_t nfft, float* dest, const float* src);
-    static int bcr1d (size_t nfft, float* dest, const float* src);
+      //! Constructor
+      Plan (size_t nfft, type t);
+      
+      //! Destructor
+      ~Plan ();
+      
+      void fcc1d (size_t nfft, float* dest, const float* src);
+      void bcc1d (size_t nfft, float* dest, const float* src);
+      void frc1d (size_t nfft, float* dest, const float* src);
+      void bcr1d (size_t nfft, float* dest, const float* src);
+      
+    protected:
+      
+      void* plan;
+      
+    };
+
+
+    class Plan2 : public FTransform::Plan2 {
+
+    public:
+
+      //! Constructor
+      Plan2 (size_t nx, size_t ny, type t);
+
+      //! Destructor
+      ~Plan2 ();
+
+      void fcc2d (size_t nx, size_t ny, float* , const float*);
+      void bcc2d (size_t nx, size_t ny, float* , const float*);
+
+    protected:
+
+      void* plan;
+
+    };
 
     //! Agent class
-    class Agent : public PlanAgent<FFTW3_Plan> {
+    class Agent : public PlanAgent<FFTW3> {
     public:
-      Agent () : PlanAgent<FFTW3_Plan> ("FFTW3", unnormalized) { }
-      FFTW3_Plan* new_plan (size_t nfft, const std::string& call);
+      Agent () : PlanAgent<FFTW3> ("FFTW3", unnormalized) { }
     };
-
-  protected:
-
-    void* plan;
-
-  };
-
-
-  class FFTW3_Plan2 : public Plan2 {
-
-  public:
-
-    //! Constructor
-    FFTW3_Plan2 (size_t nx, size_t ny, const std::string& call);
-
-    //! Destructor
-    ~FFTW3_Plan2 ();
-
-    static void fcc2d (size_t nx, size_t ny, float* , const float* );
-    static void bcc2d (size_t nx, size_t ny, float* , const float* );
-
-    class Agent : public PlanAgent2<FFTW3_Plan2> {
-    public:
-      Agent () : PlanAgent2<FFTW3_Plan2> ("FFTW3", unnormalized) { }
-
-      FFTW3_Plan2*
-      new_plan (size_t nx, size_t ny, const std::string& call);
-    };
-
-  protected:
-
-    void* plan;
-
 
   };
 

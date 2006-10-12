@@ -1,6 +1,6 @@
 /***************************************************************************
  *
- *   Copyright (C) 2005 by Haydon Knight
+ *   Copyright (C) 2006 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -16,23 +16,24 @@
 using namespace std;
 
 
-FTransform::IPP_Plan::~IPP_Plan()
+FTransform::IPP::Plan::~Plan()
 {
   if( pBuffer )
     delete [] pBuffer;
   if( Spec ){
-    if( call == "frc1d" || call == "bcr1d" )
+    if( call & real )
       ippsFFTFree_R_32f( (IppsFFTSpec_R_32f*)Spec );
     else
       ippsFFTFree_C_32fc( (IppsFFTSpec_C_32fc*)Spec );
   }
+  // cerr << "IPP::Plan destroyed" << endl;
 }
 
 
-FTransform::IPP_Plan::IPP_Plan (size_t n_fft, const string& fft_call)
+FTransform::IPP::Plan::Plan (size_t n_fft, type t)
 {
 #ifdef _DEBUG
-  cerr << "FTransform::IPP_Plan nfft=" << n_fft
+  cerr << "FTransform::IPP::Plan nfft=" << n_fft
        << " call='" << fft_call << "'" << endl;
 #endif
 
@@ -46,11 +47,11 @@ FTransform::IPP_Plan::IPP_Plan (size_t n_fft, const string& fft_call)
       doubling *= 2;
     }
     if( doubling != n_fft )
-      throw Error (InvalidState, "FTransform::IPP_Plan",
+      throw Error (InvalidState, "FTransform::IPP::Plan",
 		   "nfft=%d is not a power of 2", n_fft);
   }    
 
-  if( fft_call == "frc1d" || fft_call == "bcr1d" ) {
+  if( t & real ) {
     IppStatus ret = ippsFFTInitAlloc_R_32f( (IppsFFTSpec_R_32f**)&Spec, order,
 					    IPP_FFT_NODIV_BY_ANY,
 					    ippAlgHintFast );
@@ -69,58 +70,33 @@ FTransform::IPP_Plan::IPP_Plan (size_t n_fft, const string& fft_call)
     pBuffer = new Ipp8u[pSize];
 
   nfft = n_fft;
-  call = fft_call;
+  call = t;
   optimized = false;
 
 }
 
-int FTransform::IPP_Plan::frc1d (size_t nfft, float* dest, const float* src)
+void FTransform::IPP::Plan::frc1d (size_t nfft, float* dest, const float* src)
 {
-  FT_SETUP (IPP_Plan, frc1d);
-
-  ///////////////////////////////////////
-  // Do the transform
   ippsFFTFwd_RToCCS_32f( (const Ipp32f*)src, (Ipp32f*)dest,
-			 (const IppsFFTSpec_R_32f*)plan->Spec,
-			 plan->pBuffer );
-  return 0;
+			 (const IppsFFTSpec_R_32f*)Spec, pBuffer );
 }
 
-int FTransform::IPP_Plan::fcc1d (size_t nfft, float* dest, const float* src)
+void FTransform::IPP::Plan::fcc1d (size_t nfft, float* dest, const float* src)
 {
-  FT_SETUP (IPP_Plan, fcc1d);
-
-  ///////////////////////////////////////
-  // Do the transform
   ippsFFTFwd_CToC_32fc( (const Ipp32fc*)src, (Ipp32fc*)dest,
-			(const IppsFFTSpec_C_32fc*)plan->Spec,
-			plan->pBuffer );
-  return 0;
+			(const IppsFFTSpec_C_32fc*)Spec, pBuffer );
 }
 
-int FTransform::IPP_Plan::bcc1d (size_t nfft, float* dest, const float* src)
+void FTransform::IPP::Plan::bcc1d (size_t nfft, float* dest, const float* src)
 {
-  FT_SETUP (IPP_Plan, bcc1d);
-
-  ///////////////////////////////////////
-  // Do the transform
   ippsFFTInv_CToC_32fc( (const Ipp32fc*)src, (Ipp32fc*)dest,
-			(const IppsFFTSpec_C_32fc*)plan->Spec,
-			plan->pBuffer );
-
-  return 0;
+			(const IppsFFTSpec_C_32fc*)Spec, pBuffer );
 }
 
-int FTransform::IPP_Plan::bcr1d (size_t nfft, float* dest, const float* src)
+void FTransform::IPP::Plan::bcr1d (size_t nfft, float* dest, const float* src)
 {
-  FT_SETUP (IPP_Plan, bcr1d);
-
-  ///////////////////////////////////////
-  // Do the transform
   ippsFFTInv_CCSToR_32f( (const Ipp32f*)src, (Ipp32f*)dest,
-			 (const IppsFFTSpec_R_32f*)plan->Spec,
-			 plan->pBuffer );
-  return 0;
+			 (const IppsFFTSpec_R_32f*)Spec, pBuffer );
 }
 
 #endif

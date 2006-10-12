@@ -1,47 +1,52 @@
 //-*-C++-*-
 /***************************************************************************
  *
- *   Copyright (C) 2005 by Haydon Knight
+ *   Copyright (C) 2006 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
 
-#ifndef _utils_psrfft_MKL_Transform_h_
-#define _utils_psrfft_MKL_Transform_h_
+#ifndef _Utils_fft_MKL_Transform_h_
+#define _Utils_fft_MKL_Transform_h_
 
-#include "FTransform.h"
+#include "FTransformAgent.h"
 
 namespace FTransform {
 
-  class MKL_Plan : public Plan {
+  class MKL {
 
   public:
 
-    //! Constructor
-    MKL_Plan (size_t nfft, const std::string& _fft_call);
+    class Plan : public FTransform::Plan {
 
-    //! Destructor
-    ~MKL_Plan ();
-
-    static int fcc1d (size_t nfft, float* dest, const float* src);
-    static int bcc1d (size_t nfft, float* dest, const float* src);
-    static int frc1d (size_t nfft, float* dest, const float* src);
-    static int bcr1d (size_t nfft, float* dest, const float* src);
-
-    //! Agent class
-    class Agent : public PlanAgent<MKL_Plan> {
     public:
-      Agent ();
-      virtual ~Agent();
-      MKL_Plan* new_plan (size_t nfft, const std::string& call);
+
+      Plan (size_t nfft, type t);
+      ~Plan ();
+
+      void fcc1d (size_t nfft, float* dest, const float* src);
+      void bcc1d (size_t nfft, float* dest, const float* src);
+      void frc1d (size_t nfft, float* dest, const float* src);
+      void bcr1d (size_t nfft, float* dest, const float* src);
+
+    protected:
+
+      float* mkl_plan;
+
     };
 
-  protected:
+    //! Not implemented
+    class Plan2 : public NotImplemented {
+    public:
+      Plan2 (size_t nx, size_t ny, type t) : NotImplemented ("MKL") {}
+    };
 
-    float* mkl_plan;
+    class Agent : public PlanAgent<MKL> {
+    public:
+      Agent () : PlanAgent<MKL> ("MKL", normalized) { }
+    };
 
   };
-
 
 }
 

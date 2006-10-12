@@ -1,7 +1,7 @@
 //-*-C++-*-
 /***************************************************************************
  *
- *   Copyright (C) 2005 by Haydon Knight
+ *   Copyright (C) 2006 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
@@ -9,39 +9,47 @@
 #ifndef _IPP_Transform_h_
 #define _IPP_Transform_h_
 
-#include "FTransform.h"
+#include "FTransformAgent.h"
 #include <ipps.h>
 
 namespace FTransform {
 
-  class IPP_Plan : public Plan {
+  class IPP {
 
   public:
 
-    //! Constructor
-    IPP_Plan (size_t nfft, const std::string& _fft_call);
+    class Plan : public FTransform::Plan {
 
-    //! Destructor
-    ~IPP_Plan ();
-
-    static int fcc1d (size_t nfft, float* dest, const float* src);
-    static int bcc1d (size_t nfft, float* dest, const float* src);
-    static int frc1d (size_t nfft, float* dest, const float* src);
-    static int bcr1d (size_t nfft, float* dest, const float* src);
-
-    //! Agent class
-    class Agent : public PlanAgent<IPP_Plan> {
     public:
-      Agent () : PlanAgent<IPP_Plan> ("IPP", unnormalized) { }
-      IPP_Plan* new_plan (size_t nfft, const std::string& call);
+
+      Plan (size_t nfft, type t);
+      ~Plan ();
+
+      void fcc1d (size_t nfft, float* dest, const float* src);
+      void bcc1d (size_t nfft, float* dest, const float* src);
+      void frc1d (size_t nfft, float* dest, const float* src);
+      void bcr1d (size_t nfft, float* dest, const float* src);
+
+    protected:
+    
+      Ipp8u* pBuffer;
+      void* Spec;
+
     };
 
-  protected:
-
-    Ipp8u* pBuffer;
-    void* Spec;
+    //! Not implemented
+    class Plan2 : public NotImplemented {
+    public:    
+      Plan2 (size_t nx, size_t ny, type t) : NotImplemented ("IPP") {}
+    };
+  
+    class Agent : public PlanAgent<IPP> {
+    public:
+      Agent () : PlanAgent<IPP> ("IPP", unnormalized) { }
+    };
 
   };
+
 }
 
 #endif

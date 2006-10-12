@@ -1,9 +1,10 @@
 /***************************************************************************
  *
- *   Copyright (C) 2005 by Haydon Knight
+ *   Copyright (C) 2006 by Willem van Straten
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
@@ -12,7 +13,9 @@
 
 #include "FFTW3_Transform.h"
 #include "Error.h"
-#include "environ.h"
+#include "tostring.h"
+
+#include <fftw3.h>
 
 using namespace std;
 
@@ -22,15 +25,15 @@ using namespace std;
 
    *********************************************************************** */
 
-FTransform::FFTW3_Plan::FFTW3_Plan (size_t n_fft, const string& fft_call)
+FTransform::FFTW3::Plan::Plan (size_t n_fft, type t)
 {
 #ifdef _DEBUG
-  cerr << "FTransform::FFTW3_Plan nfft=" << n_fft
+  cerr << "FTransform::FFTW3::Plan nfft=" << n_fft
        << " call='" << fft_call << "'" << endl;
 #endif
 
   int direction_flags = 0;
-  if( fft_call == "fcc1d" )
+  if( t & forward )
     direction_flags |= FFTW_FORWARD;
   else
     direction_flags |= FFTW_BACKWARD;
@@ -42,7 +45,7 @@ FTransform::FFTW3_Plan::FFTW3_Plan (size_t n_fft, const string& fft_call)
     flags |= FFTW_ESTIMATE;
 
   int floats_req = n_fft;
-  if( fft_call == "fcc1d" || fft_call == "bcc1d" )
+  if( t & analytic )
     floats_req *= 2;
   else
     floats_req += 2;
@@ -51,14 +54,13 @@ FTransform::FFTW3_Plan::FFTW3_Plan (size_t n_fft, const string& fft_call)
   float* out = new float[floats_req];
 
   if( !in || !out )
-    throw Error(InvalidState, "FTransform::FFTW3_Plan::FFTW3_Plan",
-		"Failed to allocate array of size "UI64"\n",
-		uint64(n_fft));
+    throw Error(InvalidState, "FTransform::FFTW3::Plan::FFTW3::Plan",
+		"Failed to allocate array of size " + tostring(n_fft));
 
-  if( fft_call == "frc1d" ) {
+  if( t == frc ) {
     plan = fftwf_plan_dft_r2c_1d (n_fft, in, (fftwf_complex*)out, flags);
   }
-  else if( fft_call == "bcr1d" ) {
+  else if( t == bcr ) {
     plan = fftwf_plan_dft_c2r_1d (n_fft, (fftwf_complex*)in, out, flags);
   }
   else {
@@ -67,60 +69,44 @@ FTransform::FFTW3_Plan::FFTW3_Plan (size_t n_fft, const string& fft_call)
   }
 
   this->nfft = n_fft;
-  this->call = fft_call;
+  this->call = t;
   optimized = optimize;
 
   delete [] in;
   delete [] out;
 }
 
-FTransform::FFTW3_Plan::~FFTW3_Plan()
+FTransform::FFTW3::Plan::~Plan()
 {
   if (plan)
     fftwf_destroy_plan ((fftwf_plan)plan);
 }
 
-int FTransform::FFTW3_Plan::frc1d (size_t nfft,
-				   float* dest, const float* src)
+void FTransform::FFTW3::Plan::frc1d (size_t nfft,
+				     float* dest, const float* src)
 {
-  FT_SETUP (FFTW3_Plan, frc1d);
-
-  fftwf_execute_dft_r2c ((fftwf_plan)(plan->plan),
+  fftwf_execute_dft_r2c ((fftwf_plan)plan,
 			 (float*)src, (fftwf_complex*)dest);
-
-  return 0;
 }
 
-int FTransform::FFTW3_Plan::fcc1d (size_t nfft,
-				   float* dest, const float* src)
+void FTransform::FFTW3::Plan::fcc1d (size_t nfft,
+				     float* dest, const float* src)
 {
-  FT_SETUP (FFTW3_Plan, fcc1d);
-
-  fftwf_execute_dft ((fftwf_plan)(plan->plan),
+  fftwf_execute_dft ((fftwf_plan)plan,
 		     (fftwf_complex*) src, (fftwf_complex*) dest);
-
-  return 0;
 }
 
-int FTransform::FFTW3_Plan::bcc1d (size_t nfft,
-				   float* dest, const float* src)
+void FTransform::FFTW3::Plan::bcc1d (size_t nfft,
+				     float* dest, const float* src)
 {
-  FT_SETUP (FFTW3_Plan, bcc1d);
-
-  fftwf_execute_dft ((fftwf_plan)(plan->plan), 
+  fftwf_execute_dft ((fftwf_plan)plan, 
 		     (fftwf_complex*) src, (fftwf_complex*) dest);
-
-  return 0;
 }
 
-int FTransform::FFTW3_Plan::bcr1d (size_t nfft,
-				   float* dest, const float* src)
+void FTransform::FFTW3::Plan::bcr1d (size_t nfft,
+				     float* dest, const float* src)
 {
-  FT_SETUP (FFTW3_Plan, bcr1d);
-
-  fftwf_execute_dft_c2r ((fftwf_plan)(plan->plan), (fftwf_complex*)src, dest);
-
-  return 0;
+  fftwf_execute_dft_c2r ((fftwf_plan)plan, (fftwf_complex*)src, dest);
 }
 
 
@@ -132,11 +118,10 @@ int FTransform::FFTW3_Plan::bcr1d (size_t nfft,
    *********************************************************************** */
 
 
-FTransform::FFTW3_Plan2::FFTW3_Plan2 (size_t n_x, size_t n_y,
-				      const std::string& fft_call)
+FTransform::FFTW3::Plan2::Plan2 (size_t n_x, size_t n_y, type t)
 {
   int direction_flags = 0;
-  if( fft_call == "fcc2d" )
+  if( t & forward )
     direction_flags |= FFTW_FORWARD;
   else
     direction_flags |= FFTW_BACKWARD;
@@ -153,34 +138,30 @@ FTransform::FFTW3_Plan2::FFTW3_Plan2 (size_t n_x, size_t n_y,
   plan = fftwf_plan_dft_2d (n_x, n_y, in, out, direction_flags, flags);
   nx = n_x;
   ny = n_y;
-  call = fft_call;
+  call = t;
   optimized = optimize;
 
   delete [] in;
   delete [] out;
 }
 
-FTransform::FFTW3_Plan2::~FFTW3_Plan2 ()
+FTransform::FFTW3::Plan2::~Plan2 ()
 {
   fftwf_destroy_plan ((fftwf_plan)plan);
 }
 
-void FTransform::FFTW3_Plan2::fcc2d (size_t nx, size_t ny,
+void FTransform::FFTW3::Plan2::fcc2d (size_t nx, size_t ny,
 				     float* dest, const float* src)
 {
-  FT_SETUP2 (FFTW3_Plan2, fcc2d);
-
-  fftwf_execute_dft ((fftwf_plan)(plan->plan),
+  fftwf_execute_dft ((fftwf_plan)plan,
 		     (fftwf_complex*)src, (fftwf_complex*)dest);
 }
 
 
-void FTransform::FFTW3_Plan2::bcc2d (size_t nx, size_t ny,
+void FTransform::FFTW3::Plan2::bcc2d (size_t nx, size_t ny,
 				     float* dest, const float* src)
 {
-  FT_SETUP2 (FFTW3_Plan2, bcc2d);
-
-  fftwf_execute_dft ((fftwf_plan)(plan->plan),
+  fftwf_execute_dft ((fftwf_plan)plan,
 		     (fftwf_complex*)src, (fftwf_complex*)dest);
 }
 

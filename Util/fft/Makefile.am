@@ -5,15 +5,16 @@ include_HEADERS = interpolate.h median_smooth.h \
 	   FTransform.h IPP_Transform.h MKL_Transform.h FFTW3_Transform.h \
 	   FFTW_Transform.h QuaternionFT.h
 
-libpsrfft_la_SOURCES = \
+libpsrfft_la_SOURCES = FTransformAgent.C FTransformAgent.h FTransformPlan.h \
 	FTransform.C IPP_Transform.C MKL_Transform.C FFTW3_Transform.C \
 	FFTW_Transform.C QuaternionFT.C shift.C fccf.f ffft.f
 
-TESTS = test_normalization test_interpolate test_real_complex \
+TESTS = test_enum test_normalization test_interpolate test_real_complex \
 	test_QuaternionFT
 
 check_PROGRAMS = $(TESTS)
 
+test_enum_SOURCES		= test_enum.C
 test_normalization_SOURCES	= test_normalization.C
 test_interpolate_SOURCES	= test_interpolate.C
 test_interpolate_LDADD		= $(LDADD) ../units/libunits.la
