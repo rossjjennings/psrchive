@@ -65,7 +65,11 @@ LDFLAGS="-L$PSRHOME/packages/$LOGIN_ARCH/lib $LDFLAGS"
 # Checks for essential libraries
 #
 AC_CHECK_LIB([m], [sin])
-SWIN_LIB_SLA([],AC_MSG_ERROR([Cannot continue without SLALIB]))
+SWIN_LIB_SLA([],AC_MSG_ERROR([SLALIB Positional Astronomy Library not found.
+
+Please see http://psrchive.sourceforge.net/third/slalib
+
+]))
 SWIN_LIB_FFTW
 SWIN_LIB_MKL
 SWIN_LIB_IPP
