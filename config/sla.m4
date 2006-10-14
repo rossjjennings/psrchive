@@ -24,7 +24,7 @@ AC_DEFUN([SWIN_LIB_SLA],
     SLA_CFLAGS=""
 
     if test -f "$HOME/star/lib/libsla.a"; then
-      SLA_LIBS="-L $HOME/star/lib -lsla $FLIBS"
+      SLA_LIBS="-L$HOME/star/lib -lsla $FLIBS"
     else
       SLA_LIBS="-lsla $FLIBS"
     fi
