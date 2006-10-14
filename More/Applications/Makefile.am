@@ -23,7 +23,7 @@ pac_SOURCES = pac.C
 
 # Note that pcm uses PGPLOT only if it is available
 pcm_SOURCES = pcm.C
-pcm_LDADD = $(LDADD) @PGPLOT_LIBS@
+pcm_LDADD = $(LDADD) @PGPLOT_LIBS@ @PTHREAD_LIBS@
 
 # ######################################################################
 #
