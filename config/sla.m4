@@ -20,8 +20,15 @@ AC_DEFUN([SWIN_LIB_SLA],
               [have_sla="yes: C"], [have_sla=no])
   
   if test "$have_sla" = no; then
+
     SLA_CFLAGS=""
-    SLA_LIBS="-lsla $FLIBS"
+
+    if test -f "$HOME/star/lib/libsla.a"; then
+      SLA_LIBS="-L $HOME/star/lib -lsla $FLIBS"
+    else
+      SLA_LIBS="-lsla $FLIBS"
+    fi
+
     LIBS="$ac_save_LIBS $SLA_LIBS"
 
     sla_underscore=""
