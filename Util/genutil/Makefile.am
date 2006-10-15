@@ -104,7 +104,6 @@ check_PROGRAMS = $(TESTS) test_CommandParser test_Angle
 test_Cartesian_SOURCES		= test_Cartesian.C
 test_MJD_SOURCES		= test_MJD.C
 test_Angle_SOURCES		= test_Angle.C
-test_Angle_LDADD		= $(LDADD) @SLA_LIBS@
 test_CommandParser_SOURCES      = test_CommandParser.C
 test_CommandParser_LDADD	= $(LDADD) @READLINE_LIBS@
 test_ja98_SOURCES		= test_ja98.C
