@@ -5,8 +5,8 @@
  *
  ***************************************************************************/
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/sky_coord.h,v $
-   $Revision: 1.9 $
-   $Date: 2006/10/06 21:13:54 $
+   $Revision: 1.10 $
+   $Date: 2006/10/15 23:33:03 $
    $Author: straten $ */
 
 #ifndef __SKY_COORD_H
@@ -25,10 +25,9 @@ class sky_coord  : public AnglePair
 
    sky_coord (const char* astr);
    sky_coord (const sky_coord & co);
-   // sky_coord & operator= (const sky_coord & co);
 
-   // as long as sky_coord is empty, why not simply accept AnglePair?
    sky_coord (const AnglePair & co);
+
    sky_coord& operator= (const AnglePair & co)
      { AnglePair::operator=(co); return *this; }
 
@@ -57,5 +56,8 @@ class sky_coord  : public AnglePair
    void init ();
 
 };
+
+//! construct from right ascension and declination
+sky_coord hmsdms (const std::string& ra, const std::string& dec);
 
 #endif //SKY_COORD_H

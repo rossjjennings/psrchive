@@ -57,38 +57,11 @@ const sky_coord& sky_coord::setJRaDecMS(long int ra, long int dec)
   return *this;
 }
 
-#if 0
-void sky_coord::print (FILE* out) const
+//! construct from right ascension and declination
+sky_coord hmsdms (const std::string& ra, const std::string& dec)
 {
-  double hours   = JRa * 12.0 / M_PI;
-  double degrees = JDec* 180.0 / M_PI;
-
-  int rah, ram, ras;
-  int ded, dem, des;
-
-  rah = int (hours);
-  hours -= double (rah);
-  if (hours < 0.0)
-    hours = - hours;
-  hours *= 60.0;
-  ram = int (hours);
-  hours -= double (ram);
-  hours *= 60.0;
-  ras = int (hours);
-  hours -= double (ras);
-  printf ("JRA:  %02d:%02d:%02d%4.3lf   ", rah, ram, ras, hours);
-
-  ded = int (degrees);
-  degrees -= double (ded);
-  if (degrees < 0.0)
-    degrees = - degrees;
-  degrees *= 60.0;
-  dem  = int (degrees);
-  degrees -= double (dem);
-  degrees *= 60.0;
-  des  = int (degrees);
-  printf ("JDEC:  %02d:%02d:%02d%4.3lf\n", ded, dem, des, degrees);
+  sky_coord r;
+  r.setHMSDMS (ra.c_str(), dec.c_str());
+  return r;
 }
-#endif
-
 
