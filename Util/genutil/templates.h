@@ -4,6 +4,10 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
+
+#ifndef _Util_genutil_templates_h
+#define _Util_genutil_templates_h
+
 #include <vector>
 #include <assert.h>
 
@@ -90,18 +94,57 @@ void normalize (std::vector<T>& x)
     x[i] /= the_sum;
 }
 
-template <class T>
-void minmaxval (const std::vector<T>& vals, T& min, T& max, bool follow = false)
+//! Returns the maximum and minimum values on [i1, i2)
+template <class T, class I>
+void minmax (const I& it1, const I& it2, T& min, T& max, bool follow = false)
 {
   if (!follow)
-    max = min = vals[0];
+    max = min = *it1;
 
-  typename std::vector<T>::const_iterator val;
-  for (val = vals.begin(); val != vals.end(); val++) {
-    if (*val > max)
-      max = *val;
-    if (*val < min)
-      min = *val;
+  for (I it=it1; it != it2; it++) {
+    if (*it > max)
+      max = *it;
+    if (*it < min)
+      min = *it;
+    it ++;
   }
 }
 
+//! Returns the maximum and minimum values found in container c
+template <class T, class C>
+void minmaxval (const C& c, T& min, T& max, bool follow = false)
+{
+  minmax (c.begin(), c.end(), min, max, follow);
+}
+
+//! Returns true if element x is inside container c
+template <class T, class C>
+bool found (const T& x, const C& c)
+{
+  return std::find (c.begin(), c.end(), x) != c.end();
+}
+
+//! Returns the index of element x inside container c
+template<class T, class C>
+int index (const T& x, const C& c)
+{
+  typename C::const_iterator f = std::find (c.begin(), c.end(), x);
+  if (f == c.end())
+    return -1;
+
+  return f - c.begin();
+}
+
+//! Removes the first instance of element x from container c
+template<class T, class C>
+bool remove (const T& x, C& c)
+{
+  typename C::iterator f = std::find (c.begin(), c.end(), x);
+  if (f != c.end()) {
+    c.erase(f);
+    return true;
+  }
+  return false;
+}
+
+#endif
