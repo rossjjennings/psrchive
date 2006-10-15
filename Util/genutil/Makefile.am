@@ -13,6 +13,7 @@ include_HEADERS = \
         dirutil.h \
         environ.h \
         fcomp.h \
+	format_it.h \
         fsleep.h \
 	Horizon.h \
         ieee.h \
@@ -53,6 +54,8 @@ libgenutil_la_SOURCES = \
         endian.c \
         errscale.c \
         fcomp.C \
+	filesize.c \
+	format_it.C \
         fsleep.c \
 	Horizon.C \
         ieee.c \
