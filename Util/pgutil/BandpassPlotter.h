@@ -7,14 +7,14 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Util/pgutil/BandpassPlotter.h,v $
-   $Revision: 1.1 $
-   $Date: 2006/10/15 20:14:11 $
+   $Revision: 1.2 $
+   $Date: 2006/10/15 23:33:16 $
    $Author: straten $*/
 
 #ifndef __fft_BandpassPlotter_h
 #define __fft_BandpassPlotter_h
 
-#include "genutil.h"
+#include "templates.h"
 #include <cpgplot.h>
 #include <algorithm>
 
@@ -33,10 +33,10 @@ namespace fft {
 
     //! Plot the dynamic spectrum using the given information
     template<class T>
-    void plot (vector< vector<T> >& data, double timespan, Info* info) const;
+    void plot (std::vector< std::vector<T> >& data, double timespan, Info* info) const;
 
     //! Perform some operation on the bandpass before plotting
-    virtual void preprocess (vector<float>& bandpass) const { }
+    virtual void preprocess (std::vector<float>& bandpass) const { }
 
     //! Maximum value in plots
     float user_max;
@@ -57,9 +57,9 @@ void fft::BandpassPlotter<Data,Info>::plot (Data* data, Info* info) const
   float min = 0;
   float max = 0;
   for (ipol=0; ipol<npol; ipol++) {
-    vector<float> pband = data->get_passband (ipol);
+    std::vector<float> pband = data->get_passband (ipol);
     this->preprocess (pband);
-    minmaxval (pband.size(), &(pband[0]), &min, &max, ipol);
+    minmaxval (pband, min, max, ipol);
   }
   
   if (user_max)
@@ -77,7 +77,7 @@ void fft::BandpassPlotter<Data,Info>::plot (Data* data, Info* info) const
   cpglab("Frequency (MHz)", "Linear Scale", "Original Bandpass");
   
   for (unsigned ipol=0; ipol<npol; ipol++) {
-    vector<float> pband = data->get_passband (ipol);
+    std::vector<float> pband = data->get_passband (ipol);
     this->preprocess (pband);
     
     nchan = pband.size();
@@ -99,13 +99,13 @@ void fft::BandpassPlotter<Data,Info>::plot (Data* data, Info* info) const
 
 template<class Data, class Info>
 template<class T>
-void fft::BandpassPlotter<Data,Info>::plot (vector< vector<T> >& data,
+void fft::BandpassPlotter<Data,Info>::plot (std::vector< std::vector<T> >& data,
 					    double timespan, Info* info) const
 {
   unsigned ntime = data.size();
   unsigned nchan = data[0].size();
 
-  vector<float> plotarray (ntime * nchan);
+  std::vector<float> plotarray (ntime * nchan);
 
   float min = 0;
   float max = 0;
@@ -115,11 +115,11 @@ void fft::BandpassPlotter<Data,Info>::plot (vector< vector<T> >& data,
   unsigned ignore_ichan = (unsigned) (ignore_fraction * nchan);
 
   for (unsigned itime=0; itime<ntime; itime++) {
-    vector<float>& pband = data[itime];
+    std::vector<float>& pband = data[itime];
     this->preprocess (pband);
 
-    minmaxval (pband.size()-ignore_ichan*2, &(pband[ignore_ichan]),
-	       &min, &max, itime);
+    minmax (pband.begin()+ignore_ichan, pband.end()-ignore_ichan,
+            min, max, itime);
 
     for (unsigned ichan=0; ichan<nchan; ichan++)
       plotarray[ichan+jchan] = pband[ichan];
@@ -127,11 +127,11 @@ void fft::BandpassPlotter<Data,Info>::plot (vector< vector<T> >& data,
     jchan += nchan;
   }
 
-  cerr << "min=" << min << " max=" << max << endl;
+  std::cerr << "min=" << min << " max=" << max << std::endl;
   float diff = max - min;
   min -= .1 * diff;
   max += .1 * diff;
-  cerr << "min=" << min << " max=" << max << endl;
+  std::cerr << "min=" << min << " max=" << max << std::endl;
 
   
   if (user_max)
