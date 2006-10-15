@@ -2,7 +2,7 @@
 intermediate-libs:
 	AM_MAKEFLAGS="$(AM_MAKEFLAGS) PROGRAMS= HEADERS=" $(MAKE) all-recursive
 
-libs: intermediate-libs intermediate-install install-libLTLIBRARIES
+libs: intermediate-libs install-libLTLIBRARIES
 
 include: install-data
 
