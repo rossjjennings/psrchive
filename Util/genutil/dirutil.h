@@ -11,13 +11,12 @@
 
 #include <vector>
 #include <string>
-#include <sys/types.h>
 
 // in dirwith.C
 const std::string dirwith (double size, const std::vector<std::string>& disks,
-		      const std::string& path=std::string(),
-		      double usage_limit = 0.0,
-		      double leave_free = 0.0);
+			   const std::string& path=std::string(),
+			   double usage_limit = 0.0,
+			   double leave_free = 0.0);
 
 // in dirlist.C
 int dirlist (std::vector<std::string>* files, const char* path, bool all=false,
@@ -51,6 +50,9 @@ void dirglobtree (std::vector<std::string>* filenames,
 extern "C" {
 #endif /* #ifdef __cplusplus */
 
+#include "environ.h"
+#include <sys/types.h>
+
   /* recursively constructs a new directory named 'path' */
   int makedir   (const char* path);
   /* resursively removes an existing directory named 'path' */
@@ -59,9 +61,14 @@ extern "C" {
   /* returns the file modification time */
   time_t file_mod_time (const char* filename);
 
+  /* returns true if the file exists */
+  int file_exists (const char* filename);
+
   /* returns true if the file is a directory */
   int file_is_directory (const char* filename);
 
+  /* returns the file size in bytes */
+  uint64 filesize (const char* filename);
 
 #ifdef __cplusplus
 }
