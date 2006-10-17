@@ -24,8 +24,11 @@ mode_t getumask(void) {
   to a temporary file before renaming the archive to the requested
   output file name.  The temporary file will be written using a unique
   filename in the same path as the requested output file. */
-void Pulsar::Archive::unload (const char* filename)
+void Pulsar::Archive::unload (const char* filename) const
 {
+  // run all verifications
+  verify ();
+
   string unload_to_filename = unload_filename;
   if (filename)
     unload_to_filename = filename;
@@ -73,6 +76,6 @@ void Pulsar::Archive::unload (const char* filename)
          << unload_to_filename << ", " << temp << ")" << endl;
   }
 
-  unload_filename = unload_to_filename;
-  __load_filename = unload_to_filename;
+  const_cast<Archive*>(this)->unload_filename = unload_to_filename;
+  const_cast<Archive*>(this)->__load_filename = unload_to_filename;
 }
