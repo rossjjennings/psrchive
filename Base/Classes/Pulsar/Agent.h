@@ -7,16 +7,15 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Agent.h,v $
-   $Revision: 1.1 $
-   $Date: 2006/10/17 14:54:25 $
+   $Revision: 1.2 $
+   $Date: 2006/10/17 23:04:32 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Agent_h
 #define __Pulsar_Agent_h
 
 #include "Pulsar/Archive.h"
-
-#ifndef SWIG
+#include "Registry.h"
 
 namespace Pulsar {
 
@@ -120,8 +119,6 @@ namespace Pulsar {
     Registry::List<Archive::Agent>::Enter<typename Plugin::Agent> 
     Archive::Advocate<Plugin>::entry;
 #endif
-
-#endif // ! defined SWIG
 
 }
 
