@@ -7,14 +7,14 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Archive.h,v $
-   $Revision: 1.157 $
-   $Date: 2006/10/17 14:59:10 $
+   $Revision: 1.158 $
+   $Date: 2006/10/17 23:04:36 $
    $Author: straten $ */
 
 #ifndef __Pulsar_Archive_h
 #define __Pulsar_Archive_h
 
-#define PULSAR_ARCHIVE_REVISION "$Revision: 1.157 $"
+#define PULSAR_ARCHIVE_REVISION "$Revision: 1.158 $"
 
 #include "IntegrationManager.h"
 #include "polyco.h"
@@ -22,7 +22,6 @@
 #include "sky_coord.h"
 #include "Estimate.h"
 
-#include "Registry.h"
 #include "Types.h"
 
 #include "toa.h"
@@ -89,10 +88,11 @@ namespace Pulsar {
     //@{
 
     //! Write the archive to filename
-    void unload (const char* filename = 0);
+    void unload (const char* filename = 0) const;
 
     //! Convenience interface to Archive::unload (const char*)
-    void unload (const std::string& filename) { unload (filename.c_str()); }
+    void unload (const std::string& filename) const
+    { unload (filename.c_str()); }
 
     //! Get the name of the file to which the archive will be unloaded
     std::string get_filename () const { return unload_filename; }
@@ -530,17 +530,8 @@ namespace Pulsar {
     //! Set the verbosity level (0 to 3)
     static void set_verbosity (unsigned level);
 
-    //! Pure abstract base class of verifications performed during unload
-    class Verification;
-
-    //! The Verification operations performed on all Archive instances
-    static std::vector< Reference::To<Verification> > verify;
-
-    //! Pure abstract base class of corrections performed during load
-    class Correction;
-
-    //! The Correction operations performed on all Archive instances
-    static std::vector< Reference::To<Correction> > correct;
+    //! Sanity checks such as verification and correction
+    class Check;
 
     // //////////////////////////////////////////////////////////////////
     //
@@ -687,7 +678,11 @@ namespace Pulsar {
     //! Set all values to null
     void init ();
 
-#ifndef SWIG
+    //! Perform all known correction operations listed in Check::registry
+    void correct ();
+
+    //! Perform all known verification operations listed in Check::registry
+    void verify () const;
 
     // Advocates the use of an Archive derived class
     class Agent;
@@ -696,8 +691,6 @@ namespace Pulsar {
 
     // Advocates the use of Plugin
     template<class Plugin> class Advocate;
-
-#endif
 
   };
 
