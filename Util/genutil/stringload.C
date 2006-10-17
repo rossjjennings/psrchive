@@ -82,17 +82,17 @@ ssize_t stringload (string* str, istream &istr, streamsize nbytes)
 // in the file.  A line is delimited by \n or commented by #.
 // //////////////////////////////////////////////////////////////////
 
-int stringfload (vector<string>* lines, const char* filename)
+int stringfload (vector<string>* lines, const string& filename)
 {
-   FILE* fptr = fopen (filename, "r");
-   if (fptr == NULL) {
-     fprintf (stderr, "stringload:: Could not open %s", filename);
-     perror ("");
-     return -1;
-   }
-   int ret = stringload (lines, fptr);
-   fclose (fptr);
-   return ret;
+  FILE* fptr = fopen (filename.c_str(), "r");
+  if (fptr == NULL) {
+    fprintf (stderr, "stringload:: Could not open %s", filename.c_str());
+    perror ("");
+    return -1;
+  }
+  int ret = stringload (lines, fptr);
+  fclose (fptr);
+  return ret;
 }
 
 int stringload (vector<string>* lines, FILE* fptr)

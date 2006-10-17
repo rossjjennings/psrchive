@@ -6,8 +6,8 @@
  *
  ***************************************************************************/
 /* $Source: /cvsroot/psrchive/psrchive/Util/genutil/strutil.h,v $
-   $Revision: 1.2 $
-   $Date: 2006/10/10 18:48:12 $
+   $Revision: 1.3 $
+   $Date: 2006/10/17 23:04:49 $
    $Author: straten $ */
 
 #ifndef __STRING_UTILS_H
@@ -66,7 +66,7 @@ stringload (std::string* str, FILE* fptr, size_t nbytes=0);
 // fills a vector of std::string with the first word from each line
 // in the file.  A line is delimited by \n or commented by #.
 // ///////////////////////////////////////////////////////////
-int stringfload (std::vector<std::string>* lines, const char* filename);
+int stringfload (std::vector<std::string>* lines, const std::string& filename);
 int stringload (std::vector<std::string>* lines, FILE* fptr);
 
 // ///////////////////////////////////////////////////////////
