@@ -156,6 +156,7 @@ AC_CONFIG_FILES([Util/Makefile
 		Base/Makefile
 		Base/Classes/Makefile
 		Base/Extensions/Makefile
+		Base/Checks/Makefile
 		Base/Formats/Makefile
 		Base/Formats/EPN/Makefile
 		Base/Formats/Timer/Makefile
