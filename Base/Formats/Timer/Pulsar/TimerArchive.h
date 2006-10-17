@@ -7,14 +7,15 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/Timer/Pulsar/TimerArchive.h,v $
-   $Revision: 1.21 $
-   $Date: 2006/10/07 13:49:52 $
+   $Revision: 1.22 $
+   $Date: 2006/10/17 14:59:21 $
    $Author: straten $ */
 
 #ifndef __Timer_Archive_h
 #define __Timer_Archive_h
 
 #include "Pulsar/Archive.h"
+#include "Pulsar/Agent.h"
 #include "timer.h"
 
 namespace Pulsar {

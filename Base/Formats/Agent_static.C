@@ -4,53 +4,55 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-#include "Pulsar/Archive.h"
+#include "Pulsar/Agent.h"
 
 #ifdef HAVE_CONFIG_H
 #include<config.h>
 #endif
 
-Registry::List<Pulsar::Archive::Agent> Pulsar::Archive::Agent::registry;
+using namespace Pulsar;
+
+Registry::List<Archive::Agent> Archive::Agent::registry;
 
 template<class Type>
-Registry::List<Pulsar::Archive::Agent>::Enter<typename Type::Agent>
-Pulsar::Archive::Advocate<Type>::entry;
+Registry::List<Archive::Agent>::Enter<typename Type::Agent>
+Archive::Advocate<Type>::entry;
 
 #include "Pulsar/TimerArchive.h"
 
 template
-Registry::List<Pulsar::Archive::Agent>::Enter<Pulsar::TimerArchive::Agent>
-Pulsar::Archive::Advocate<Pulsar::TimerArchive>::entry;
+Registry::List<Archive::Agent>::Enter<TimerArchive::Agent>
+Archive::Advocate<TimerArchive>::entry;
 
 #include "Pulsar/BasebandArchive.h"
 
 template
-Registry::List<Pulsar::Archive::Agent>::Enter<Pulsar::BasebandArchive::Agent>
-Pulsar::Archive::Advocate<Pulsar::BasebandArchive>::entry;
+Registry::List<Archive::Agent>::Enter<BasebandArchive::Agent>
+Archive::Advocate<BasebandArchive>::entry;
 
 #include "Pulsar/EPNArchive.h"
 
 template
-Registry::List<Pulsar::Archive::Agent>::Enter<Pulsar::EPNArchive::Agent>
-Pulsar::Archive::Advocate<Pulsar::EPNArchive>::entry;
+Registry::List<Archive::Agent>::Enter<EPNArchive::Agent>
+Archive::Advocate<EPNArchive>::entry;
 
 #ifdef HAVE_CFITSIO
 
 #include "Pulsar/FITSArchive.h"
 
 template
-Registry::List<Pulsar::Archive::Agent>::Enter<Pulsar::FITSArchive::Agent>
-Pulsar::Archive::Advocate<Pulsar::FITSArchive>::entry;
+Registry::List<Archive::Agent>::Enter<FITSArchive::Agent>
+Archive::Advocate<FITSArchive>::entry;
 
 #endif
 
 #include "Pulsar/ASCIIArchive.h"
 
 template
-Registry::List<Pulsar::Archive::Agent>::Enter<Pulsar::ASCIIArchive::Agent>
-Pulsar::Archive::Advocate<Pulsar::ASCIIArchive>::entry;
+Registry::List<Archive::Agent>::Enter<ASCIIArchive::Agent>
+Archive::Advocate<ASCIIArchive>::entry;
 
-void Pulsar::Archive::Agent::static_load ()
+void Archive::Agent::static_load ()
 {
 
 }

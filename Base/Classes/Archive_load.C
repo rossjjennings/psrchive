@@ -4,7 +4,7 @@
  *   Licensed under the Academic Free License version 2.1
  *
  ***************************************************************************/
-#include "Pulsar/Archive.h"
+#include "Pulsar/Agent.h"
 #include "Error.h"
 
 using namespace std;

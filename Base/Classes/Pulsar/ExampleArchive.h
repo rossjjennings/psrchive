@@ -7,14 +7,15 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/ExampleArchive.h,v $
-   $Revision: 1.10 $
-   $Date: 2006/10/07 13:49:52 $
+   $Revision: 1.11 $
+   $Date: 2006/10/17 14:59:21 $
    $Author: straten $ */
 
 #ifndef __ExampleArchive_h
 #define __ExampleArchive_h
 
 #include "Pulsar/BasicArchive.h"
+#include "Pulsar/Agent.h"
 
 namespace Pulsar {
 

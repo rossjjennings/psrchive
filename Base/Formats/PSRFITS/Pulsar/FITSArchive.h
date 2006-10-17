@@ -7,22 +7,17 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/PSRFITS/Pulsar/FITSArchive.h,v $
-   $Revision: 1.37 $
-   $Date: 2006/10/07 13:49:52 $
+   $Revision: 1.38 $
+   $Date: 2006/10/17 14:59:21 $
    $Author: straten $ */
 
 #ifndef __Pulsar_FITSArchive_h
 #define __Pulsar_FITSArchive_h
 
-#include <memory>
-#include <fitsio.h>
-
-#include <algorithm>
-
-#define PSRFITS 1
 #include "Pulsar/BasicArchive.h"
+#include "Pulsar/Agent.h"
 
-#include "MJD.h"
+#include <fitsio.h>
 
 namespace Pulsar {
 

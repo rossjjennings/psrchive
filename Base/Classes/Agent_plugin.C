@@ -5,6 +5,7 @@
  *
  ***************************************************************************/
 #include "Pulsar/BasicArchive.h"
+#include "Pulsar/Agent.h"
 #include "Plugin.h"
 
 using namespace std;

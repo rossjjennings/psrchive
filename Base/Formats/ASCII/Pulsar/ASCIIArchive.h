@@ -7,14 +7,15 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/ASCII/Pulsar/ASCIIArchive.h,v $
-   $Revision: 1.5 $
-   $Date: 2006/10/06 21:05:50 $
+   $Revision: 1.6 $
+   $Date: 2006/10/17 14:59:21 $
    $Author: straten $ */
 
 #ifndef __ASCIIArchive_h
 #define __ASCIIArchive_h
 
 #include "Pulsar/BasicArchive.h"
+#include "Pulsar/Agent.h"
 
 namespace Pulsar {
 

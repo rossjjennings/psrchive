@@ -7,14 +7,15 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Formats/EPN/Pulsar/EPNArchive.h,v $
-   $Revision: 1.12 $
-   $Date: 2006/10/07 13:49:52 $
+   $Revision: 1.13 $
+   $Date: 2006/10/17 14:59:21 $
    $Author: straten $ */
 
 #ifndef __EPN_Archive_h
 #define __EPN_Archive_h
 
 #include "Pulsar/Archive.h"
+#include "Pulsar/Agent.h"
 #include "epnio.h"
 
 namespace Pulsar {
