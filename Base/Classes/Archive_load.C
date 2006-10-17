@@ -56,6 +56,9 @@ Pulsar::Archive* Pulsar::Archive::load (const string& filename)
       archive -> load_header (filename.c_str());
       archive -> set_filename (filename);
 
+      // perform all checks
+      archive->correct();
+
       return archive.release();
 
     }
