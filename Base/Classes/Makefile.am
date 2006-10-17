@@ -3,6 +3,7 @@ noinst_LTLIBRARIES = libClasses.la
 
 nobase_include_HEADERS = \
 	Pulsar/psrchive.h \
+	Pulsar/Agent.h \
         Pulsar/ArchiveExpert.h \
         Pulsar/Archive.h \
         Pulsar/ArchiveTI.h \
@@ -10,6 +11,7 @@ nobase_include_HEADERS = \
         Pulsar/BasicIntegration.h \
         Pulsar/Config.h \
         Pulsar/Container.h \
+	Pulsar/Correction.h \
         Pulsar/ExampleArchive.h \
         Pulsar/IntegrationExpert.h \
         Pulsar/Integration.h \
@@ -17,7 +19,8 @@ nobase_include_HEADERS = \
         Pulsar/IntegrationManager.h \
         Pulsar/IntegrationTI.h \
         Pulsar/Profile.h \
-        Pulsar/Pulsar.h
+        Pulsar/Pulsar.h \
+	Pulsar/Verification.h
 
 libClasses_la_SOURCES = \
         Agent.C \
