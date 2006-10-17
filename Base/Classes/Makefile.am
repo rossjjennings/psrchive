@@ -9,6 +9,7 @@ nobase_include_HEADERS = \
         Pulsar/ArchiveTI.h \
         Pulsar/BasicArchive.h \
         Pulsar/BasicIntegration.h \
+	Pulsar/Check.h \
         Pulsar/Config.h \
         Pulsar/Container.h \
 	Pulsar/Correction.h \
@@ -26,10 +27,12 @@ libClasses_la_SOURCES = \
         Agent.C \
         Agent_plugin.C \
         Archive.C \
+	Archive_correct.C \
         Archive_copy.C \
         Archive_init_Integration.C \
         Archive_load.C \
         Archive_resize.C \
+	Archive_verify.C \
         ArchiveTI.C \
         Archive_unload.C \
         Archive_verbose.C \
