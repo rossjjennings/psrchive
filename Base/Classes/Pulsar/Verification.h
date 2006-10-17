@@ -7,26 +7,28 @@
  ***************************************************************************/
 
 /* $Source: /cvsroot/psrchive/psrchive/Base/Classes/Pulsar/Verification.h,v $
-   $Revision: 1.1 $
-   $Date: 2006/10/17 14:55:11 $
+   $Revision: 1.2 $
+   $Date: 2006/10/17 23:04:45 $
    $Author: straten $ */
 
 #ifndef __Pulsar_ArchiveVerification_h
 #define __Pulsar_ArchiveVerification_h
 
-#include "Pulsar/Archive.h"
+#include "Pulsar/Check.h"
 
 namespace Pulsar {
 
-  /*! Verification classes define sanity checks that are performed
-    before an Archive instance is written to disk. */
-  class Archive::Verification : public Reference::Able {
+  /*! Pure abstract base class of sanity checks performed before an
+    Archive instance is written to disk. */
+  class Verification : public Archive::Check {
 
   public:
     
     //! Check the Archive and throw an exception on error
-    void check (Archive*) const throw Error = 0;
+    virtual void apply (const Archive*) = 0;
 
   };
 
 }
+
+#endif
