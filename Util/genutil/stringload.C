@@ -85,11 +85,9 @@ ssize_t stringload (string* str, istream &istr, streamsize nbytes)
 int stringfload (vector<string>* lines, const string& filename)
 {
   FILE* fptr = fopen (filename.c_str(), "r");
-  if (fptr == NULL) {
-    fprintf (stderr, "stringload:: Could not open %s", filename.c_str());
-    perror ("");
+  if (fptr == NULL)
     return -1;
-  }
+
   int ret = stringload (lines, fptr);
   fclose (fptr);
   return ret;
