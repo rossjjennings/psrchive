@@ -157,8 +157,10 @@ void Pulsar::Database::Entry::load (const char* str)
   // type
   string typestr = stringtok (&line, whitespace);
 
-  obsType = Signal::string2Source(typestr);
-  if (obsType == Signal::Unknown) {
+  try {
+    obsType = Signal::string2Source(typestr);
+  }
+  catch (Error& e) {
     obsType = Signal::Calibrator;
     calType = Calibrator::str2Type (typestr.c_str());
   }
