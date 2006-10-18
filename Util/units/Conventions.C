@@ -28,11 +28,11 @@ istream& Signal::operator >> (istream& is, Basis& basis)
   string unit;
   is >> unit;
 
-  if (unit == "lin")
+  if (unit == "lin" || unit == "Linear")
     basis = Linear;
-  else if (unit == "cir" || unit == "circ")
+  else if (unit == "cir" || unit == "circ" || unit == "Circular")
     basis = Circular;
-  else if (unit == "ell")
+  else if (unit == "ell" || unit == "Elliptical")
     basis = Elliptical;
   else {
 
