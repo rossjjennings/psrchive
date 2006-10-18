@@ -48,9 +48,8 @@ time_t file_mod_time (const char* filename)
 {
   struct stat statistics;
   if (stat (filename, &statistics) < 0) {
-    fprintf (stderr, "ftime() error stat (%s)",
-	     filename);
-    perror ("");
+    // fprintf (stderr, "ftime error stat (%s)", filename);
+    // perror ("");
     return 0;
   }
   return statistics.st_mtime;
@@ -60,9 +59,8 @@ int file_is_directory (const char* filename)
 {
   struct stat statistics;
   if (stat (filename, &statistics) < 0) {
-    fprintf (stderr, "file_is_directory error stat (%s)",
-	     filename);
-    perror ("");
+    // fprintf (stderr, "file_is_directory error stat (%s)", filename);
+    // perror ("");
     return 0;
   }
   return S_ISDIR(statistics.st_mode);
